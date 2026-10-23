@@ -1675,3 +1675,7 @@ Owner: "stuttering … usually smooth exploring, and once I start getting target
   and an off-hand orb had a random element (an icicle wand with a flame orb). A pack may now name its own weapon
   (`itemName`), a caster off hand takes the pack's element, and eleven classes' packs were changed so no weapon name
   and no focus kind repeats inside a class. `tests/C/starter-kits.test.mjs` checks what the player reads.
+
+## 2026-10-23 — one account with every games.radgh.com game (owner: "TV accounts should be linked. I'd like to use my TV account for the other games - same password, different saves")
+- **A** Thousandvale accounts sign in on every other game with their Thousandvale password — rgs-api reads this database's `accounts` (id, username, pass_hash, email, admin, claimed) through a read-only column grant, checks the password live, never copies it (`~/claude/rads-game-server/docs/API.md` "One account for every game").
+- **A** `server/rgs-link.mjs` (env `RGS_API`): a username that isn't a Thousandvale account but is a games.radgh.com account signs in here; its account is claimed with the stored "password" `rgs:<user id>` (js/sim/accounts.js `RGS_PASS`), so every later check asks games.radgh.com; its password change / reset says to use games.radgh.com/account/. A name being claimed must be free there too. `login {ticket}`: "Continue as <name>" on the title's Log in tab when the browser is signed in on games.radgh.com (`shared/rgs-account.js`). Tests: `tests/A/rgs-link.test.js`.

@@ -43,7 +43,7 @@ export function createGateway(opts) {
     verifyHuman = null, humanSiteKey = null, guestsPerIpPerHour = 20, guestsPerHour = 0,   // 0 = no realm-wide cap
     unlimitedIps = ['127.0.0.1', '::1', '::ffff:127.0.0.1', 'worker'], filterText = t => t,
     starterProvince = null, events = null, clockDayMs = 2 * 3600000, directorOpts = {},
-    hasher = null, mailer = null, chatFilter = null, ipSalt = 'thousandvale', chatOpts = {}, guildOpts = {}, callboardOpts = {},
+    hasher = null, mailer = null, rgs = null, chatFilter = null, ipSalt = 'thousandvale', chatOpts = {}, guildOpts = {}, callboardOpts = {},
     mailSweepMs = 60000, chargeTimeoutMs = 5000, classNames = null,
     charLimit = null, nameReserveMs = 86400000, motd = null, env = null, serverName = null, changelog = null,      // owner feedback 9: X6 the character limit + how long a deleted name is kept; X1 the message of the day; which server this is
     kitsFor = null, feedbackSink = null, feedbackOpts = {},      // play-test 5: C's kitsFor(classId) (T5); the JSONL sink + limits (T19)
@@ -719,7 +719,7 @@ export function createGateway(opts) {
   }
 
   // ---- M3 services ----
-  const accounts = createAccounts({ store, hasher, mailer, verifyHuman, wallNow, log, filter: chatFilter, sendAll, kickChar, counters, trustIps: unlimitedIps, charLimit: CHAR_LIMIT });
+  const accounts = createAccounts({ store, hasher, mailer, rgs, verifyHuman, wallNow, log, filter: chatFilter, sendAll, kickChar, counters, trustIps: unlimitedIps, charLimit: CHAR_LIMIT });
   const friends = createFriends({ store, presence, gwByChar, log, wallNow, onList: (c, ids) => pushSocial(c, { friends: ids }) });
   const guilds = createGuilds({ store, presence, gwByChar, wallNow, filter: chatFilter, charge, log, counters, opts: guildOpts });
   // feedback #107: chat link snapshots the provinces made (an item, achievement or trophy the speaker holds), by id

@@ -606,6 +606,10 @@ Chibi 2 gear is skinned into the body's own two meshes (no draw call per item), 
 sword" is answered by building the body with and without it — which also means the number is never stale.
 Cost: one extra body build per measurement (about 20–40 ms); thumbnails render one at a time and are cached.
 
+## Accounts (optional sign-in on games.radgh.com)
+
+`shared/rgs-account.js` + `shared/rgs-signin.js`: one account for every game (Thousandvale accounts included), a sign-in box with a QR code a phone can approve, a top-bar account button, and `account.ticket(game)` to tell a game's own server who is playing. Never make sign-in required. Full API and examples: `shared/RGS-ACCOUNT.md`.
+
 ## The home page is data
 
 `index.html` is drawn by `js/home.js` from `data/experiments.json` — one row per card (group, title, href,

@@ -14,7 +14,7 @@
 // followed from one day to the next, and the address itself is never saved. That is the cookie-free kind of counting that
 // needs no consent banner; if Google Analytics replaces it (js/client/tally.js has the hook), a banner WILL be needed.
 // Read it all with tools/insights-report.mjs.
-import { mkdirSync, appendFileSync, writeFileSync, readFileSync, renameSync } from 'node:fs';
+import { mkdirSync, appendFileSync, writeFileSync, readFileSync, renameSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { createHash, randomBytes } from 'node:crypto';
 
@@ -75,3 +75,19 @@ export function createInsights(dir, { now = () => Date.now(), build = 'dev' } = 
   const timer = setInterval(flush, 30000); timer.unref?.();
   return { report, handle, count, flush, folder, get today() { roll(); return counts; } };
 }
+
+// ---- reading it back (the report tools and the admin feed, server/rgs.mjs) ----
+/** The room reports of the last `days` days from an insights folder, oldest first. */
+export function readInsightLines(folder, days = 30, now = Date.now()) {
+  if (!existsSync(folder)) return [];
+  const since = new Date(now - days * 864e5).toISOString();
+  return readdirSync(folder).filter(f => /^\d{4}-\d{2}\.jsonl$/.test(f)).sort()
+    .flatMap(f => readFileSync(join(folder, f), 'utf8').split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch { return null; } })).filter(r => r && r.at >= since);
+}
+/** The last `days` daily page-count files, oldest first. */
+export function readCounts(folder, days = 30) {
+  if (!existsSync(folder)) return [];
+  return readdirSync(folder).filter(f => /^counts-\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort().slice(-days).map(f => { try { return JSON.parse(readFileSync(join(folder, f), 'utf8')); } catch { return null; } }).filter(Boolean);
+}
+/** Lower bound of the Wilson score interval (z = 1.645, 90%) on the share of thumbs up. 0 with no ratings. */
+export const wilson = (up, n) => { if (!n) return 0; const z = 1.645, p = up / n; return (p + z * z / (2 * n) - z * Math.sqrt((p * (1 - p) + z * z / (4 * n)) / n)) / (1 + z * z / n); };

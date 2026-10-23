@@ -2,7 +2,7 @@
 //   { kind: 'bug'|'idea', text, name?, debug: {…}, shot?: 'data:image/jpeg;base64,…' }
 // Saved as <data>/feedback/<id>.json (+ <id>.jpg) — one file each, never overwritten. Read them with
 // tools/feedback-report.mjs. Limits: 1.5 MB a request, 12 reports an hour per address, text 4000 characters.
-import { mkdirSync, writeFileSync, readdirSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 export const FEEDBACK = Object.freeze({ MAX_BYTES: 1.5 * 1024 * 1024, PER_HOUR: 12, TEXT: 4000, DEBUG: 24000 });
@@ -32,4 +32,21 @@ export function createFeedback(dir, { now = () => Date.now(), build = 'dev' } = 
     });
   }
   return { handle, folder };
+}
+
+/** Every report in a feedback folder, oldest first (tools/feedback-report.mjs and the admin feed, server/rgs.mjs). */
+export function listReports(folder) {
+  if (!existsSync(folder)) return [];
+  return readdirSync(folder).filter(f => /^\d+\.json$/.test(f)).map(f => { try { return JSON.parse(readFileSync(join(folder, f), 'utf8')); } catch { return null; } }).filter(Boolean).sort((a, b) => a.id - b.id);
+}
+/** Set reports' state (done / declined / new) and an optional note. -> how many were changed. */
+export function markReports(folder, ids, state, note = '', { now = () => Date.now(), log = null } = {}) {
+  let changed = 0;
+  for (const id of ids) {
+    const f = join(folder, `${Number(id)}.json`);
+    let r; try { r = JSON.parse(readFileSync(f, 'utf8')); } catch { log?.(`#${id}: no such report`); continue; }
+    r.state = state; if (note) r.note = note; r.markedAt = new Date(now()).toISOString();
+    writeFileSync(f, JSON.stringify(r, null, 1)); changed++; log?.(`#${id} -> ${state}`);
+  }
+  return changed;
 }

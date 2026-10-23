@@ -9,7 +9,7 @@ import { avatarOf, portrait } from './avatars.js';
 import { PRESETS } from './look-tidy.js';
 import { h } from './gamehud.js';
 
-export function createEditor({ look, races, raceNames, onChange, onClose }) {
+export function createEditor({ look, races, raceNames, onChange, onClose, account = null }) {
   const el = h('div', 'modal editor');
   let cur = { race: look.race, seed: look.seed, v: 1, ...(look.custom ? { custom: look.custom } : {}) };
   let custom = customFrom(avatarOf(cur)) || { body: {} };
@@ -45,7 +45,8 @@ export function createEditor({ look, races, raceNames, onChange, onClose }) {
         <div class="ed-row"><span>Skin</span><div class="sws">${sw(PALETTES.skin, custom.body?.skin || '', 'skin')}</div></div>
         ${BODY_PICKS.map(p => `<div class="ed-row"><span>${p.label}</span>${stepper(`data-pick="${p.key}"`, p.names?.[custom.body?.[p.key] ?? p.ids[0]] || nice('', custom.body?.[p.key] ?? p.ids[0]), p.ids, custom.body?.[p.key] ?? p.ids[0], id => p.names?.[id] || nice('', id))}</div>`).join('')}
         ${BODY_DIALS.map(d => `<label class="ed-row"><span>${d.label}</span><input type="range" min="${d.min}" max="${d.max}" step="0.01" value="${custom.body?.[d.key] ?? (d.min + d.max) / 2}" data-dial="${d.key}"></label>`).join('')}
-      </div></div>`;
+      </div>${account ? '<div class="ed-acct"><span>Keep your look, coins and costumes on every device:</span></div>' : ''}</div>`;
+    if (account) el.querySelector('.ed-acct').append(account);     // accounts (2026-10-23): the same element every redraw
   }
   el.addEventListener('click', e => {
     const t = e.target;

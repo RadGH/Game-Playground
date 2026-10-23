@@ -90,6 +90,13 @@ triangle counts small (instanced meshes for anything repeated); no scrolling box
 view behind it in Chromium — let the whole `ui` scroll instead); every tap target ≥ 44 px; colour is never the only
 cue (seat shapes, labels).
 
+## Shared kits
+
+A family of games shares one pure rules kit (imported by sim.js AND view.js) and one browser-only drawing kit:
+golf (`golf-kit.js`, `golf-putt.js`, `golf-view.js`, `golf.css`), bosses (`boss-kit.js`, `boss-kit-view.js`,
+`boss-kit.css`) and fishing (`fish-kit.js` rules + reel fight, `fish-species.js` the one fish table with Halloween names,
+`fish-view.js` fish / bobber / rod / line meshes, `fish.css`). A new game of that kind starts from its kit.
+
 ## Seasons (reskins and holiday games)
 
 `js/shared/seasons.js` is the one table of holidays (Halloween = October 1-31; the host's Holidays option can force one

@@ -262,6 +262,39 @@ and logs no errors).
 Files: `server/{main.mjs,hub.js,room.js,static.js}`, `js/net/{protocol.js,pack.js}` (pure, shared by both sides),
 `js/client/{net.js,online.js,online-ui.js}`, `css/online.css`, `ops/`, `tools/{publish-knockabout.sh,insights-report.mjs,feedback-report.mjs}`.
 
+## Accounts (2026-10-23)
+
+Optional games.radgh.com sign-in (Thousandvale accounts work as they are). Guests play exactly as before.
+
+- **For players.** "Sign in" is under the title buttons and at the bottom of the builder (for this device's first
+  player). It opens the shared sign-in box (`shared/rgs-signin.js`: QR code to approve from a phone, username +
+  password, or a new account). Only shown when the page came from a Knockabout server (`net.js` `serverAvailable`) —
+  GitHub Pages has nowhere to keep the save.
+- **What is saved on the account:** this device's FIRST player's fighter (slot 0: name + look), so the same fighter turns
+  up on any phone or PC you sign in on. Other local players, CPUs and everyone when signed out keep their looks in this
+  browser (`look.js` `loadSlot`/`saveSlot`; `setAccountSlot` switches slot 0 to the account). Online rooms need nothing
+  new: the page already sends its players' looks.
+- **How** (`js/client/account.js` + `server/accounts.js`): every call is `POST <root>/account` with a fresh one-time
+  ticket from `account.ticket('knockabout')` — `{ ticket, guest? }` to sign in, `{ ticket, save: { name, look } }` to
+  save (the builder's changes, 1.2 s after the last one). The server swaps the ticket for the user with
+  `POST <RGS_API>/auth/redeem` (Tumblefair's `server/rgs.mjs` `createRedeemer`) and never uses an id from the browser;
+  a bad ticket is a 401 and the page carries on as a guest with a small message.
+- **Profile key:** `acct:<user id>` in `<data>/profiles.json` (written every 5 s and on shutdown). First sign-in: if the
+  account has no fighter, the guest fighter becomes the account's (note `moved`); if it has one, that one is used and
+  the guest fighter is left alone (note `kept`). The guest copy stays in the browser (it is only a look, nothing that
+  could be counted twice), so signing out brings it back; a browser with no guest fighter gets a fresh random one.
+- **The admin feed** (Tumblefair's `server/rgs.mjs` `createAdminFeed`, `ratingKey: 'arena'`): `GET /internal/admin/feed`
+  and `POST /internal/admin/action { action: 'report', ids, state, note }`, the same shapes as Tumblefair's (see its
+  README); ratings are per arena. Off (404) unless `RGS_ADMIN_SECRET` is set; header `x-rgs-admin` must match (403).
+  `tools/feedback-report.mjs --mark` now uses the same `markReports`.
+- **Env vars:** `RGS_API` (default `https://games.radgh.com/api`; droplet and VM dev unit `http://127.0.0.1:8600/api`)
+  and `RGS_ADMIN_SECRET`. Dev unit: `~/.config/systemd/user/knockabout-dev.service.d/rgs.conf` (local, not in git);
+  droplet: `EnvironmentFile=-/etc/knockabout/env`. The publish script copies `prototypes/tumblefair/server/rgs.mjs` too.
+- Tests: `tests/accounts.test.js` (save rules with a pretend redeem; a real server process for the admin feed's lock,
+  the report action and `/account` against a pretend rgs-api) and `tests/accounts.spec.js` (Playwright against the dev
+  server + the VM's real rgs-api: the title button, a guest reaching the lobby, a second browser getting the same
+  fighter, signing out).
+
 ## Not done yet (client)
 
 * Grabbing is shown by the hand being where the sim puts it and a spark, but there is no special "held" hand pose or

@@ -5,6 +5,8 @@
 //   --data <dir>     where profiles.json lives (default: .data/ beside this game)
 // GET /status (JSON) and /healthz for the publish script. WebSocket at /ws. POST /feedback (the ! button), POST /tally
 // (round 7: cookie-free page counts, server/insights.mjs).
+// Accounts + the admin feed (2026-10-23, server/rgs.mjs): env RGS_API (where tickets are redeemed, default
+// https://games.radgh.com/api) and RGS_ADMIN_SECRET (switches on GET /internal/admin/feed + POST /internal/admin/action).
 import http from 'node:http';
 import { randomBytes } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs';
@@ -16,6 +18,7 @@ import { createHub } from '../js/sim/hub.js';
 import { createProfiles } from '../js/sim/profiles.js';
 import { createFeedback } from './feedback.mjs';
 import { createInsights } from './insights.mjs';
+import { createRedeemer, createAdminFeed } from './rgs.mjs';
 import { MAX_FRAME, TICK_MS } from '../js/shared/protocol.js';
 import { cleanLook } from '../../thousandvale/js/sim/looks.js';
 
@@ -32,7 +35,9 @@ let initial = {}; try { initial = JSON.parse(readFileSync(profileFile, 'utf8'));
 const profiles = createProfiles({ initial, cosmetics: data.cosmetics, cleanLook, randomToken: () => randomBytes(18).toString('base64url'),
   persist: all => { const tmp = profileFile + '.tmp'; writeFileSync(tmp, JSON.stringify(all)); renameSync(tmp, profileFile); } });
 const insights = createInsights(dataDir, { build });      // round 7: ratings, plays, votes + cookie-free page counts (tools/insights-report.mjs)
-const hub = createHub({ data, profiles, build, log: (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d)), report: (kind, d) => insights.report(kind, d) });
+const log = (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d));
+const redeem = createRedeemer({ game: 'tumblefair', log });
+const hub = createHub({ data, profiles, build, log, report: (kind, d) => insights.report(kind, d), redeem });
 
 const feedback = createFeedback(dataDir, { build });
 // The visitor's address: behind a proxy on this machine (Caddy on the games.radgh.com droplet sends X-Forwarded-For; the old
@@ -45,10 +50,13 @@ const ipOf = req => {
 };
 const serveStatic = createStaticHandler(publicDir ? resolve(publicDir) : PLAY, { allowAll: !!publicDir });
 const started = Date.now();
+let TITLES = {}; import('../js/games/metas.js').then(m => { TITLES = Object.fromEntries(Object.entries(m.GAMES).map(([id, g]) => [id, g.meta.title])); }).catch(() => {});
+const admin = createAdminFeed({ game: 'tumblefair', build, dataDir, started, online: () => hub.status(), ratingKey: 'game', names: () => TITLES });
 const server = http.createServer((req, res) => {
   const path = req.url.split('?')[0];
   if (path === '/healthz') { res.writeHead(200, { 'Content-Type': 'text/plain' }); res.end('ok'); return; }
   if (path === '/status') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify({ server: 'tumblefair', build, uptime: Math.round((Date.now() - started) / 1000), ...hub.status() })); return; }
+  if (path.startsWith('/internal/') && admin.handle(req, res, path)) return;
   if (path === '/feedback' && req.method === 'POST') { feedback.handle(req, ipOf(req), (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); }); return; }
   if (path === '/tally' && req.method === 'POST') { insights.handle(req, ipOf(req), req.headers['user-agent'], code => { res.writeHead(code); res.end(); }); return; }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); res.end(); return; }

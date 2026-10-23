@@ -211,3 +211,9 @@ body[data-screen=match] #screen { pointer-events: none; }
   .btn.huge { font-size: 24px; padding: 10px 30px; } .press { display: none; }
   .tp-btns { transform: scale(.82); transform-origin: right bottom; }
 }
+
+/* accounts (2026-10-23): the optional games.radgh.com sign-in (shared/rgs-signin.css styles the button itself) */
+.title-wrap .acct-slot { margin-top: 14px; pointer-events: auto; }
+.acct-slot[hidden] { display: none; }
+.b-acct { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; opacity: .9; }
+.b-acct > span { flex: 1 1 160px; }

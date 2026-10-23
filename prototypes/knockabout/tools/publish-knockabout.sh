@@ -10,10 +10,10 @@ set -euo pipefail
 GAME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; PLAY="$(cd "$GAME/../.." && pwd)"; cd "$PLAY"
 REF="${1:-HEAD}"; SHA="$(git rev-parse --verify "$REF^{commit}")"; SHORT="${SHA:0:10}"
 BASE="$HOME/.local/share/knockabout"; PORT=8470
-# exactly what server/static.js ALLOWs, plus the server's own imports (Tumblefair's feedback + insights modules)
+# exactly what server/static.js ALLOWs, plus the server's own imports (Tumblefair's feedback, insights and rgs modules)
 ALLOW=(prototypes/knockabout prototypes/tumblefair/js/client/look-tidy.js prototypes/tumblefair/js/client/qr.js prototypes/tumblefair/data/cosmetics.json
   prototypes/thousandvale/js shared avatar-3d avatar-2d vendor/three vendor/cannon-es vendor/qrcode-generator sfx assets
-  prototypes/tumblefair/server/feedback.mjs prototypes/tumblefair/server/insights.mjs)
+  prototypes/tumblefair/server/feedback.mjs prototypes/tumblefair/server/insights.mjs prototypes/tumblefair/server/rgs.mjs)
 NOT_PUBLIC=(prototypes/knockabout/server prototypes/knockabout/ops prototypes/knockabout/tests prototypes/knockabout/tools prototypes/knockabout/docs
   prototypes/knockabout/package.json prototypes/knockabout/package-lock.json prototypes/tumblefair/server prototypes/thousandvale/js/sim prototypes/thousandvale/js/net)
 echo "== publishing $SHORT ($(git log -1 --format=%s "$SHA"))"

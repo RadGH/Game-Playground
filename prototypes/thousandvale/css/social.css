@@ -247,3 +247,7 @@ small.count { display: block; text-align: right; color: var(--ink-faint); font-s
   .title-foot { left: 16px; }
   .party-menu, .invite-pop, .guild-pop { right: 8px; left: 8px; width: auto; }
 }
+/* 2026-10-23: "Continue as <name>" when this browser is signed in on games.radgh.com (js/client/account.js) */
+.rgs-continue { margin: 0 0 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.12); }
+.rgs-continue .primary { width: 100%; }
+.rgs-continue .tiny { margin: 6px 0 0; }

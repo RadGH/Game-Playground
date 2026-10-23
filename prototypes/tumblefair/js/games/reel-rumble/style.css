@@ -1,0 +1,3 @@
+@import url('../fish.css');
+/* Reel Rumble: the shared fishing HUD (tension meter, catch card) on top of the golf pill, banner and power meter. */
+.game-reel-rumble .gp-pill b { color: #0d6aa8; }

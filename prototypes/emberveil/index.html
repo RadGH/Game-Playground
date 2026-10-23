@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="../../shared/rewards.css">
 <link rel="stylesheet" href="skillcheck.css">
+<link rel="stylesheet" href="cloud.css">
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/", "onnxruntime-web": "../../vendor/onnxruntime-web/ort.min.mjs" } }</script>
 </head>
 <body>
@@ -49,6 +50,8 @@
           <button id="btn-new" class="primary ornate" data-tip="Start a fresh run and pick a party of four">New game</button>
           <button id="btn-continue" class="ornate" data-tip="Pick up the saved run in this browser">Continue</button>
         </div>
+        <!-- 2026-10-23: optional games.radgh.com account + cloud saves (js/cloud.js) -->
+        <div class="row cloud-row" id="title-account"></div>
         <details class="howto" id="howto-title"><summary>How to play</summary><div class="howto-body" data-howto></div></details>
         <p class="tiny credits">Every class is a chibi character with its own gear parts. Beasts use the creature bodies. Talk comes from the Lingo engine, voices from the Formant synth. Save any hero to the character library.</p>
       </div>
@@ -127,6 +130,7 @@
     <button class="ornate" data-menu="howto" data-tip="What the buttons do, in plain words">How to play</button>
     <button class="ornate" data-menu="quit" data-tip="Save and go back to the playground index">Back to playground</button>
   </div>
+  <div class="row cloud-row" id="menu-account"></div>
   <details class="menu-section" id="menu-settings" open>
     <summary>Settings</summary>
     <div class="settings-body">

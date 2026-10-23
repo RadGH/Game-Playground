@@ -24,6 +24,7 @@ import { renderMeter, METER_CSS } from '../../../meters/js/meter-ui.js';
 import { Assets } from '../../../assets/js/assets.js';
 import { VEHICLES, SUPPLY_KINDS } from './game.js';
 import { makeRng } from './rng.js';
+import { installCloud, mountAccount } from './cloud.js';
 import { resolveCrossing, crossingChoices, payRetry, RETRY_COST } from './explore.js';
 import { NODE_INFO } from './ui.js';
 import { SPEEDS, SPEED_TIPS, PACE, GAP_EVENTS, normalizeSpeed, paceFactor, timeScale as paceTimeScale, paceMs, extraGap } from './pace.js';
@@ -58,7 +59,11 @@ function showScreen(id) { for (const s of document.querySelectorAll('.screen')) 
 // ------------------------------------------------------------------ title
 $('btn-new').onclick = () => { game = new Game(DATA); setupHire(); showScreen('hire'); };
 $('btn-continue').onclick = () => { const g = Game.load(DATA); if (!g) return toast('No save'); game = g; startWorld(true); };
-$('btn-continue').disabled = !Game.hasSave(); if ($('btn-continue').disabled) $('btn-continue').title = 'No saved run in this browser yet';
+function refreshContinue() { const has = Game.hasSave(); $('btn-continue').disabled = !has; $('btn-continue').title = has ? '' : 'No saved run in this browser yet'; }
+refreshContinue();
+// 2026-10-23: optional account + cloud saves. A download only lands on the title / hire screens (js/cloud.js).
+const cloud = installCloud({ onRestore: () => { refreshContinue(); if (document.body.dataset.screen !== 'world') toast('Loaded your saved run from your account'); } });
+mountAccount($('title-account'));
 
 // ------------------------------------------------------------------ hire
 let chosen = [];
@@ -130,6 +135,7 @@ const menu = initMenu($('menu-dialog'), {
   newGame: () => { if (busy) { toast('Wait for the scene to finish'); return true; } if (game && !confirm('Abandon this run and hire a new party?')) return true; game = new Game(DATA); setupHire(); showScreen('hire'); },
   quit: () => { if (busy) { toast('Wait for the scene to finish'); return true; } if (game) game.save(); location.href = '../../index.html'; },
 });
+mountAccount($('menu-account'), { beforeSignIn: () => menu.close() });
 $('btn-menu').onclick = () => menu.open();
 $('text-speed').onchange = () => { textSpeed = +$('text-speed').value || 1; };
 for (const b of document.querySelectorAll('.tabs button')) b.onclick = () => { hideTip(); for (const x of document.querySelectorAll('.tabs button')) x.classList.toggle('on', x === b); for (const t of document.querySelectorAll('.tab')) t.hidden = t.id !== 'tab-' + b.dataset.tab; if (b.dataset.tab === 'meter' && game) renderMeterTab(); };
@@ -1531,7 +1537,7 @@ addEventListener('resize', () => { clearTimeout(mapResizeT); mapResizeT = setTim
 
 setupUI();   // tooltips everywhere, gold corner flourishes on every .framed box, title-screen embers, how-to-play text
 
-window.emberveil = { menu, conversations, assets, restScene, crossingNode, doCrossing, resolveCrossing, crossingChoices, NODE_INFO, placeBubble, get game() { return game; }, get stage() { return stage; }, get talk() { return talk; }, get effectsRenderer() { return stage?.fx?.constructor?.name || null; }, library, lingo, DATA, LOOKS, ELOOKS, enemyLook, bodyOf, companionLook, get busy() { return busy; }, get speakCount() { return speakCount; }, get rewardPopups() { return rewardPopups; }, set rewardPopups(v) { rewardPopups = !!v; }, showRewardsFor, fight, afterCombat, enterNode, addChosen, renderSide, renderMeterTab, renderPartyTab, renderMap, renderJournal, waitForChoice, sayScene, showCheck, recordNamedKill, isSceneText, classes: classes.classes,
+window.emberveil = { menu, cloud, conversations, assets, restScene, crossingNode, doCrossing, resolveCrossing, crossingChoices, NODE_INFO, placeBubble, get game() { return game; }, get stage() { return stage; }, get talk() { return talk; }, get effectsRenderer() { return stage?.fx?.constructor?.name || null; }, library, lingo, DATA, LOOKS, ELOOKS, enemyLook, bodyOf, companionLook, get busy() { return busy; }, get speakCount() { return speakCount; }, get rewardPopups() { return rewardPopups; }, set rewardPopups(v) { rewardPopups = !!v; }, showRewardsFor, fight, afterCombat, enterNode, addChosen, renderSide, renderMeterTab, renderPartyTab, renderMap, renderJournal, waitForChoice, sayScene, showCheck, recordNamedKill, isSceneText, classes: classes.classes,
   // round 21
   narrate, logScroll, setCombatSpeed, get combatSpeed() { return combatSpeed; }, get inFight() { return inFight; }, openTownPanel, closeTownPanel, town, townActions, manageParty, woundedReminder,
   // round 22

@@ -9,10 +9,13 @@
 // GET /healthz ("ok") and GET /status (JSON with build) for the publish script. WebSocket at /ws. POST /feedback (the !
 // button: Tumblefair's server/feedback.mjs), POST /tally (cookie-free counts: Tumblefair's server/insights.mjs). The
 // rooms' ratings, plays and votes go to the same insights log (tools/insights-report.mjs reads it).
+// Accounts (2026-10-23): POST /account (server/accounts.js — a signed-in player's fighter, <data>/profiles.json) and the
+// admin feed GET /internal/admin/feed + POST /internal/admin/action (Tumblefair's server/rgs.mjs). Env vars: RGS_API
+// (where tickets are redeemed, default https://games.radgh.com/api) and RGS_ADMIN_SECRET (switches the admin feed on).
 import http from 'node:http';
 import https from 'node:https';
 import { randomBytes } from 'node:crypto';
-import { readFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, writeFileSync, renameSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 import { WebSocketServer } from 'ws';
@@ -20,6 +23,8 @@ import { createStaticHandler } from './static.js';
 import { createHub } from './hub.js';
 import { createFeedback } from '../../tumblefair/server/feedback.mjs';
 import { createInsights } from '../../tumblefair/server/insights.mjs';
+import { createRedeemer, createAdminFeed } from '../../tumblefair/server/rgs.mjs';
+import { createAccounts } from './accounts.js';
 import * as sim from '../js/sim/match.js';
 import { MAX_FRAME, STEP_HZ } from '../js/net/protocol.js';
 
@@ -33,6 +38,11 @@ mkdirSync(dataDir, { recursive: true });
 const log = (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d));
 const insights = createInsights(dataDir, { build });
 const feedback = createFeedback(dataDir, { build });
+const profileFile = join(dataDir, 'profiles.json');
+let initialProfiles = {}; try { initialProfiles = JSON.parse(readFileSync(profileFile, 'utf8')); } catch { /* first run */ }
+const accounts = createAccounts({ redeem: createRedeemer({ game: 'knockabout', log }), initial: initialProfiles, log,
+  persist: all => { const tmp = profileFile + '.tmp'; writeFileSync(tmp, JSON.stringify(all)); renameSync(tmp, profileFile); } });
+setInterval(() => accounts.flush(), 5000).unref();
 const hub = createHub({ sim, build, log, report: (kind, d) => insights.report(kind, d), randomToken: () => randomBytes(18).toString('base64url') });
 
 // The visitor's address: behind a proxy on this machine (Caddy on the droplet sends X-Forwarded-For) every peer is
@@ -45,6 +55,8 @@ const ipOf = req => {
 };
 const serveStatic = createStaticHandler(publicDir ? resolve(publicDir) : PLAY, { allowAll: !!publicDir });
 const started = Date.now();
+let ARENA_NAMES = {}; try { ARENA_NAMES = Object.fromEntries(JSON.parse(readFileSync(join(GAME, 'data/arenas.json'), 'utf8')).arenas.map(a => [a.id, a.name])); } catch { /* names optional */ }
+const admin = createAdminFeed({ game: 'knockabout', build, dataDir, started, online: () => hub.status(), ratingKey: 'arena', names: ARENA_NAMES });
 const cpu0 = process.cpuUsage();
 function onRequest(req, res) {
   const path = req.url.split('?')[0];
@@ -55,6 +67,8 @@ function onRequest(req, res) {
     res.end(JSON.stringify({ server: 'knockabout', build, uptime: Math.round(up), cpuPct: Math.round((c.user + c.system) / 1e4 / Math.max(1, up) * 10) / 10, rssMB: Math.round(process.memoryUsage().rss / 1048576), ...hub.status() }));
     return;
   }
+  if (path.startsWith('/internal/') && admin.handle(req, res, path)) return;
+  if (path === '/account' && req.method === 'POST') { accounts.http(req, res); return; }
   if (path === '/feedback' && req.method === 'POST') { feedback.handle(req, ipOf(req), (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); }); return; }
   if (path === '/tally' && req.method === 'POST') { insights.handle(req, ipOf(req), req.headers['user-agent'], code => { res.writeHead(code); res.end(); }); return; }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); res.end(); return; }
@@ -99,5 +113,5 @@ if (httpsPort) {
 const STEP_MS = 1000 / STEP_HZ;
 let last = performance.now(), owed = 0;
 setInterval(() => { const t = performance.now(); owed = Math.min(owed + (t - last), STEP_MS * 5); last = t; while (owed >= STEP_MS) { owed -= STEP_MS; hub.step(); } }, 4);
-const bye = () => { try { insights.flush(); } catch { /* disk */ } process.exit(0); };
+const bye = () => { try { accounts.flush(); } catch { /* disk */ } try { insights.flush(); } catch { /* disk */ } process.exit(0); };
 process.on('SIGTERM', bye); process.on('SIGINT', bye);

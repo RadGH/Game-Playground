@@ -36,6 +36,7 @@
 // SIGTERM / SIGINT: tell everyone, save everyone, exit.
 
 import { mailerFromEnv } from './mail.mjs';
+import { rgsLinkFromEnv } from './rgs-link.mjs';
 import http from 'node:http';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -131,7 +132,7 @@ export async function startServer(o) {
   const common = {
     runSeed: runSeedFrom(),      // round 11 (World, live #6): a restart rolls new dice (js/sim/province.js runSeed)
     store, build: o.build, classes, classNames: loadClassNames(), now, log, verifyHuman, humanSiteKey, directorOpts: o.director,
-    hasher: { hashPassword, verifyPassword }, mailer: mailerFromEnv(process.env, { log }), chatFilter, ipSalt: process.env.TV_IP_SALT || 'thousandvale-' + env,
+    hasher: { hashPassword, verifyPassword }, mailer: mailerFromEnv(process.env, { log }), rgs: rgsLinkFromEnv(process.env, { log }), chatFilter, ipSalt: process.env.TV_IP_SALT || 'thousandvale-' + env,
     // public: nobody skips the per-address limits but the addresses named with --unlimited-ip
     unlimitedIps: [...(publicMode ? ['worker'] : ['127.0.0.1', '::1', '::ffff:127.0.0.1', 'worker']), ...(o.unlimitedIp || [])],
     guestsPerIpPerHour: o.guestsPerIpHour ?? 20,

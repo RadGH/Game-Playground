@@ -1339,3 +1339,24 @@ exactly the number the event reports at the moment it reports it; replaying real
 of the round before the replay and the true end after it. `tests/effects.test.js`: the
 `legendary:critical_armorpen` probe casts four times instead of three — heroes no longer swing at a
 random target, so the probe's own casts have to land on an armour-stripped enemy.
+
+## Accounts and cloud saves (2026-10-23)
+
+Signing in is optional: a guest's game is exactly what it was. The title card and the game menu each carry the shared
+games.radgh.com account button (`shared/rgs-signin.js` — a QR code to sign in with your phone, or a username and
+password; Thousandvale accounts work, with their own Emberveil saves) and one status line. Pressing "Sign in" in the
+game menu closes the menu first, because a modal `<dialog>` would sit on top of the sign-in box.
+
+`js/cloud.js` wires `shared/rgs-cloudsave.js` with game id `emberveil2` and one slot: `SAVE_KEY`
+(`playground:emberveil:save:v1`, now exported from js/game.js). `Game.onSaved` (called by `save()` after a successful
+write) triggers `saveSoon()`. Not synced: the UI prefs, sound and language-debug settings (device settings) and the
+shared character library (`playground:library:v1`, which belongs to the whole playground, not this game).
+
+Emberveil has ONE save slot and a run writes it after every fight and rest, so a download only lands on the title or
+hiring screen (Continue lights up and a toast says so). During a run, a newer save on the account waits (status
+"waiting") and comes down the next time the title screen opens. When both copies changed, a framed dialog asks which
+run to keep. `window.emberveil.cloud` is the handle, for tests.
+
+Tests: `tests/cloud-saves.spec.js` (real dev API on :8600, skipped when it is down) — guest sends nothing, a save
+reaches the account, a fresh browser on the same account continues the same party, a newer account save waits during
+a run and lands on the title.

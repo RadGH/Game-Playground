@@ -9,7 +9,7 @@
 // The face comes from the seed (tidied the way Tumblefair tidies it, so a random face is a friendly one), the editor's
 // face/body choices are laid over it, then every costume slot in `wear` is laid over that. A preset (from
 // tumblefair/data/cosmetics.json) just FILLS every slot of `wear`; after that any one piece can be changed on its own.
-// Looks are kept per local player slot (P1..P8) in localStorage.
+// Looks are kept per local player slot (P1..P8) in localStorage — slot 0 on the account when signed in (see below).
 import { randomAvatar, makeRng } from '../../../../avatar-2d/js/random.js';
 import { partIds, PARTS } from '../../../../avatar-2d/js/parts/index.js';
 import { randomChibi2 } from '../../../../avatar-3d/js/chibi2-races.js';
@@ -105,9 +105,22 @@ export function randomLook(rand = Math.random) {
 }
 
 // ---- per-slot storage (P1..P8) --------------------------------------------------------------------------------------
+// Accounts (2026-10-23): when this browser is signed in to games.radgh.com, slot 0 (this device's first player) is the
+// ACCOUNT's fighter instead of the browser's: js/client/account.js calls setAccountSlot(profile, save) and every save
+// of slot 0 goes to the server too. Signed out (setAccountSlot(null)) slot 0 is the browser's guest fighter again.
 const KEY = 'knockabout.slot.';
-export function loadSlot(i) {
+let acct = null;           // { data: { name, look } | null, save(data) }
+export function setAccountSlot(data, save = null) { acct = save ? { data: data && data.look ? data : null, save } : null; }
+export const accountSlotOn = () => !!acct;
+export function loadGuestSlot(i) {
   try { const s = JSON.parse(localStorage.getItem(KEY + i) || 'null'); if (s && s.look && typeof s.look === 'object') return s; } catch { /* private window */ }
   return null;
 }
-export function saveSlot(i, data) { try { localStorage.setItem(KEY + i, JSON.stringify(data)); } catch { /* storage blocked: the look lasts this visit */ } }
+export function loadSlot(i) {
+  if (i === 0 && acct) return acct.data;
+  return loadGuestSlot(i);
+}
+export function saveSlot(i, data) {
+  if (i === 0 && acct) { acct.data = data; acct.save(data); return; }
+  try { localStorage.setItem(KEY + i, JSON.stringify(data)); } catch { /* storage blocked: the look lasts this visit */ }
+}

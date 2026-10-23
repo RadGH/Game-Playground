@@ -66,7 +66,15 @@ export function createLimiter(now) {
   };
 }
 
-export function createAccounts({ store, hasher = null, mailer = null, verifyHuman = null, wallNow, log = () => {}, filter = null, sendAll = () => {}, kickChar = () => {}, counters = {}, trustIps = [], charLimit = 20 }) {
+/**
+ * Accounts made on another games.radgh.com game (server/rgs-link.mjs, 2026-10-23). Their stored "password" is this
+ * marker plus the games.radgh.com user id: the real password lives there and every check asks it.
+ */
+export const RGS_PASS = 'rgs:';
+const isRgs = h => typeof h === 'string' && h.startsWith(RGS_PASS);
+const RGS_PASSWORD_MSG = 'This account signs in with its games.radgh.com password. Change or reset it at games.radgh.com/account/.';
+
+export function createAccounts({ store, hasher = null, mailer = null, rgs = null, verifyHuman = null, wallNow, log = () => {}, filter = null, sendAll = () => {}, kickChar = () => {}, counters = {}, trustIps = [], charLimit = 20 }) {
   const limiter = createLimiter(wallNow);
   const L = LOGIN_LIMITS;
   const resetLog = [];             // { at, username, email, code, until } for the admin page (last 50)
@@ -80,6 +88,47 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
   const human = (s, m) => (verifyHuman ? Promise.resolve(m.human ? verifyHuman(m.human, s.ip) : false).catch(() => false) : Promise.resolve(true));
   const ipKey = s => 'ip:' + (s.ip || '?');
   const limited = s => !trustIps.includes(s.ip);
+  /** Is `pass` right for this login? A games.radgh.com account is asked there; any other one is checked here. */
+  async function passOk(username, pass, info) {
+    if (!info || !info.passHash) return false;
+    if (!isRgs(info.passHash)) return hasher.verifyPassword(pass, info.passHash);
+    if (!rgs) return false;
+    const r = await rgs.verify(username, pass);
+    return !!r && RGS_PASS + r.id === info.passHash;
+  }
+  /** The Thousandvale account of a games.radgh.com user that was made elsewhere (made now if it's the first time). */
+  async function rgsAccount(r) {
+    if (!r || r.linkedHere || !cleanUsername(r.username)) return null;
+    const had = await store.loginInfo(r.username);
+    if (had) return had.passHash === RGS_PASS + r.id ? had : null;      // that name here is somebody else's account
+    if (!store.createGuest) return null;
+    const { account, token } = await store.createGuest(null);
+    if (token && store.revokeToken) await store.revokeToken(token).catch(() => {});
+    const c = await store.claimAccount(account, { username: r.username, passHash: RGS_PASS + r.id, email: null });
+    if (c.err) { log('games.radgh.com account not linked', { why: c.err }); return null; }
+    log('games.radgh.com account linked', { account });
+    return store.loginInfo(r.username);
+  }
+  /** No Thousandvale account by that name: is it a games.radgh.com account? Then make its Thousandvale account. */
+  async function fromRgs(username, pass) {
+    if (!rgs) return null;
+    let r;
+    try { r = await rgs.verify(username, pass); } catch (err) { log('games.radgh.com check failed', err && err.message); return null; }
+    return rgsAccount(r);
+  }
+  /**
+   * Signed in on games.radgh.com already (the page holds a one-time ticket from it): which account here is that?
+   * A Thousandvale account that signed in there is linked by name (the API keeps the name in step); any other one is
+   * its `rgs:<id>` account.
+   */
+  async function fromTicket(ticket) {
+    if (!rgs || !rgs.redeem) return null;
+    const u = await rgs.redeem(String(ticket));
+    if (!u) return null;
+    if (!u.linkedHere) return rgsAccount(u);
+    const info = await store.loginInfo(u.username);
+    return info && !isRgs(info.passHash) ? info : null;
+  }
 
   /** Sign this socket in (login or a reset). */
   function signedIn(s, account, token, username, admin = false) {
@@ -109,6 +158,11 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
         s.busyAccount = true;
         try {
           if (!(await human(s, m))) { counters.humanFails = (counters.humanFails || 0) + 1; return fail(s, op, 'human'); }
+          if (rgs) {                     // one name is one person on every games.radgh.com game
+            let free;
+            try { free = await rgs.nameFree(username); } catch (err) { log('games.radgh.com name check failed', err && err.message); return fail(s, op, 'state', 'Claiming is not working right now. Try again in a minute.'); }
+            if (!free) return fail(s, op, 'user', 'That username is taken.');
+          }
           const passHash = await hasher.hashPassword(pass);
           const r = await store.claimAccount(s.account, { username, passHash, email: email || null });
           if (r.err) return fail(s, op, r.err === 'taken' ? 'user' : r.err, r.err === 'taken' ? 'That username is taken.' : r.err === 'claimed' ? 'This account is already claimed.' : 'No such account.');
@@ -120,14 +174,27 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
       }
       case 'login': {
         if (s.state !== 'anon') return 'order';
+        if (m.ticket != null) {                       // "Continue as …": signed in on games.radgh.com already
+          if (limited(s) && limiter.over(ipKey(s), L.ipFails, L.ipWindowMs)) return fail(s, op, 'tooManyLogins');
+          s.state = 'busy';
+          try {
+            const info = await fromTicket(m.ticket);
+            if (!info) { limiter.hit(ipKey(s)); s.state = 'anon'; return fail(s, op, 'auth', 'That games.radgh.com sign-in did not work. Sign in with your username and password instead.'); }
+            if (info.banned > wallNow()) { s.state = 'anon'; s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
+            const token = await store.newToken(info.account, 'session');
+            const a = await store.accountInfo(info.account);
+            return signedIn(s, info.account, token, a ? a.username : null, !!(a && a.admin));
+          } catch (err) { s.state = 'anon'; log('ticket login failed', err && err.message); return fail(s, op, 'auth', 'Signing in is not working right now.'); }
+        }
         const username = cleanUsername(m.user);
         const uKey = 'user:' + String(username || m.user || '').toLowerCase();
         if (limited(s) && (limiter.over(ipKey(s), L.ipFails, L.ipWindowMs) || limiter.over(uKey, L.userFails, L.userWindowMs))) return fail(s, op, 'tooManyLogins');
         if (!username || typeof m.pass !== 'string') { limiter.hit(ipKey(s)); return fail(s, op, 'auth', 'Wrong username or password.'); }
         s.state = 'busy';
         try {
-          const info = await store.loginInfo(username);
-          const ok = !!(info && info.passHash) && await hasher.verifyPassword(m.pass, info.passHash);
+          let info = await store.loginInfo(username);
+          if (!info) info = await fromRgs(username, m.pass);
+          const ok = await passOk(username, m.pass, info);
           if (!ok) { limiter.hit(ipKey(s)); limiter.hit(uKey); s.state = 'anon'; return fail(s, op, 'auth', 'Wrong username or password.'); }
           if (info.banned > wallNow()) { s.state = 'anon'; s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
           limiter.clear(uKey);
@@ -167,6 +234,7 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
         const uKey = 'user:' + String(s.username || '').toLowerCase();
         if (limiter.over(uKey, L.userFails, L.userWindowMs)) return fail(s, op, 'tooManyLogins');
         const info = s.username ? await store.loginInfo(s.username) : null;
+        if (info && isRgs(info.passHash)) return fail(s, op, 'state', RGS_PASSWORD_MSG);
         if (!info || info.account !== s.account || !(await hasher.verifyPassword(String(m.old || ''), info.passHash))) { limiter.hit(uKey); return fail(s, op, 'auth', 'Your current password is not right.'); }
         await store.setPassword(s.account, await hasher.hashPassword(pass), s.token);
         return reply(s, op, { ok: true });
@@ -182,6 +250,7 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
         const username = cleanUsername(m.user);
         const info = username ? await store.loginInfo(username) : null;
         if (!info) return reply(s, op, said);                      // never say whether a username exists
+        if (isRgs(info.passHash)) return reply(s, op, { ok: true, msg: RGS_PASSWORD_MSG });
         const code = randomHex(4).toUpperCase();
         const until = wallNow() + L.resetMs;
         await store.setReset(info.account, sha256Hex('reset:' + code), until);
@@ -237,8 +306,9 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
         if (!username || typeof m.pass !== 'string') { limiter.hit(ipKey(s)); return fail(s, op, 'auth', 'Wrong username or password.'); }
         s.state = 'busy';
         try {
-          const info = await store.loginInfo(username);
-          const ok = !!(info && info.passHash) && await hasher.verifyPassword(m.pass, info.passHash);
+          let info = await store.loginInfo(username);
+          if (!info) info = await fromRgs(username, m.pass);
+          const ok = await passOk(username, m.pass, info);
           s.state = 'anon';
           if (!ok) { limiter.hit(ipKey(s)); limiter.hit(uKey); return fail(s, op, 'auth', 'Wrong username or password.'); }
           if (info.banned > wallNow()) { s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }

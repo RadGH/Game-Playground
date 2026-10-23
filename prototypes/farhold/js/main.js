@@ -37,6 +37,7 @@ import { createWarp } from './warp.js';
 import { generateGalaxy } from '../../../universe/js/galaxy.js';
 import { createSaves, snapshot, restore, playtimeText, saveCarriesWorld } from './save.js';
 import { runTitle } from './newgame.js';
+import { installCloud, mountAccount, setPlaying } from './cloud.js';
 import { pointsFor } from './perks.js';
 // ---- The Territory expansion (see EXPANSION.md): who holds the ground, and what it asks of you
 import { createStandings, ranked as rankedFactions, createIntroducer } from './factions.js';
@@ -210,7 +211,12 @@ const state = { ready: false, running: false, paused: false, elapsed: 0, frames:
 const V_TAP = 0.28;
 /** The V key in flight: when it went down, and whether it has swung the camera yet. */
 let vKey = null;
-const saves = createSaves();
+/**
+ * 2026-10-23 — OPTIONAL CLOUD SAVES. Signed in to games.radgh.com, every write and delete is copied to the account
+ * a few seconds later (js/cloud.js, shared/rgs-cloudsave.js). Signed out, nothing changes.
+ */
+const cloud = installCloud();
+const saves = createSaves({ onChange: () => cloud.saveSoon() });
 
 /**
  * R16 — THE SETTINGS PANEL IS BUILT ONCE, AT BOOT, NOT INSIDE `begin`.
@@ -332,7 +338,12 @@ async function boot() {
     cropData, raidData, goodsData, classbuildData, mercData };
 
   status('');
+  // the account button + cloud status line, on the title menu and in the pause menu
+  mountAccount($('boot-account'));
+  mountAccount($('pause-account'));
   const choice = await runTitle({ classData, classLooks, skillData, items, bestiary, balance, saves, params, settings, status, classbuildData });
+  // from here a download from the account waits for the title screen rather than pulling saves out from under the run
+  setPlaying(true);
   await begin({ ...data, status, settings, choice, save: choice.save || null }).catch(err => {
     status('failed: ' + err.message);
     const start = $('boot-start');

@@ -18,6 +18,8 @@ import { createSounds } from './sounds.js';
 import { installFeedback } from './feedback.js';
 import { SEATS, cleanCode, CODE_LENGTH, RATE_REASONS } from '../shared/protocol.js';
 import { tally, deviceKind } from './tally.js';
+import { account } from '../../../../shared/rgs-account.js';          // games.radgh.com accounts (2026-10-23): optional
+import { openSignIn, accountButton } from '../../../../shared/rgs-signin.js';
 import { GAMES, gameIds } from '../games/metas.js';     // meta only: the rules stay on the server
 
 const $ = s => document.querySelector(s);
@@ -31,7 +33,8 @@ const stage = createStage($('#view'));
 const controls = createControls($('#controls'));
 const lineup = createLineup(stage);
 const sfx = createSounds();
-const net = connect();
+// A signed-in player hands the server a one-time ticket in every hello (so a reconnect is still them); guests send none.
+const net = connect({ getTicket: async () => (await account.user()) ? account.ticket('tumblefair') : null });
 const BOARDS = Object.fromEntries(await Promise.all(['fairground', 'pier'].map(async id => [id, await (await fetch(new URL(`../../data/boards/${id}.json`, import.meta.url))).json()])));
 window.tumblefair = { S, net, stage, lineup, controls, GAMES };
 // game-eye (~/claude/game-eye, 2026-10-23): a small summary of what is going on, so Claude can play along and read the
@@ -55,6 +58,29 @@ function setSeason(id) {
 setSeason(seasonByDate());
 const fb = installFeedback({ stage, net, getS: () => S });            // for tests and the console; fb.open() = the form (round 7: "Tell us more")
 tally('page_view', { device: deviceKind(), invite: !!q.get('code'), display: q.get('display') === '1' });
+
+// ------------------------------------------------------------------ accounts (2026-10-23)
+// Signing in is optional and never in the way: the title, the ☰ menu and the look editor carry a "Sign in" button.
+// Signed in, the server keeps this player's character, coins and costumes on the ACCOUNT (any phone or PC); signed out
+// it is the device's guest character, as before. The in-game name stays whatever the player typed.
+const ACCT = { game: 'tumblefair', gameName: 'Tumblefair' };
+async function syncAccount(u) {
+  const want = u?.id || null, have = net.account?.id || null;
+  if (want === have || net.status !== 'online') return;            // not online yet: the next hello carries the ticket
+  const ticket = u ? await account.ticket('tumblefair') : null;
+  if (u && !ticket) { toast("Couldn't reach your account just now — playing as a guest.", 'bad'); return; }
+  net.signIn(ticket);
+}
+const acctTitle = accountButton({ ...ACCT, onChange: syncAccount });     // one element each, re-placed on every redraw
+const acctEditor = accountButton(ACCT);
+const ACCT_NOTE = {
+  moved: 'Signed in. Your character, coins and costumes are saved to your account now.',
+  kept: 'Signed in. Your account already had a character, so that one is in use. This device\'s guest character is kept for when you sign out.',
+  failed: "Couldn't check your sign-in just now — playing as a guest.",
+};
+net.on('acct', m => { if (ACCT_NOTE[m.note]) toast(ACCT_NOTE[m.note], m.note === 'failed' ? 'bad' : ''); if (!m.account && S.wasSigned) { toast('Signed out — back to this device\'s guest character.'); } S.wasSigned = !!m.account; });
+net.on('welcome', m => { if (ACCT_NOTE[m.note]) toast(ACCT_NOTE[m.note], m.note === 'failed' ? 'bad' : ''); S.wasSigned = !!m.account; });
+window.tumblefairAccount = { account, openSignIn: () => openSignIn(ACCT), net: () => net.account };
 
 // ------------------------------------------------------------------ helpers
 const members = () => S.room?.members || [];
@@ -105,9 +131,11 @@ function showTitle() {
       <input type="hidden" id="code" value="${code}"><input type="checkbox" id="as-display" hidden ${S.asDisplay ? 'checked' : ''}>
       <button class="btn big primary" data-act="join">Join the game</button>
       <button class="btn small ghost" data-act="home">Back to the main menu</button>
+      <div class="acct-slot"><span>Optional: sign in to keep your character on every device</span></div>
       <p class="err">${esc(S.err)}</p>
     </div>
     <p class="foot">2–4 players · everyone plays on their own phone · <span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>`);
+    placeAcct();
     return;
   }
   setScreen('title', `
@@ -120,11 +148,14 @@ function showTitle() {
       <div class="join-row"><input id="code" maxlength="${CODE_LENGTH}" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${code}"><button class="btn big" data-act="join">Join</button></div>
       <input type="checkbox" id="as-display" hidden ${S.asDisplay ? 'checked' : ''}>
       <button class="btn small ghost watch-btn" data-act="watch">👀 Just watch a game (TV or sitting out)</button>
+      <div class="acct-slot"><span>Optional: sign in to keep your coins and costumes on every device</span></div>
       <p class="err">${esc(S.err)}</p>
     </div>
     <p class="foot">2–4 players · everyone joins on their own phone · <span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>
-    <p class="foot privacy">No cookies, no ads. We count plays anonymously to make the fair better.</p>`);
+    <p class="foot privacy">No ads, and no cookies unless you sign in. We count plays anonymously to make the fair better.</p>`);
+  placeAcct();
 }
+function placeAcct() { screen.querySelector('.acct-slot')?.append(acctTitle); }
 function saveName() { const n = $('#name')?.value.trim(); if (n && n !== S.me?.name) net.send({ t: 'profile', name: n }); }
 
 // ------------------------------------------------------------------ lobby
@@ -457,7 +488,7 @@ addEventListener('pointerdown', () => sfx.unlock(), { once: true });
 function closeModal() { const wasEditor = S.modal?.editor; S.modal?.onClose?.(); S.modal?.el.remove(); S.modal = null; if (wasEditor) { document.body.classList.remove('editing'); lineup.focus(null); safeFor(S.safeKind || 'title'); } }
 function openEditor() {
   closeModal();
-  const ed = createEditor({ look: S.me.look, races: RACES, raceNames: RACE_NAMES, onChange: look => net.send({ t: 'profile', look }), onClose: closeModal });
+  const ed = createEditor({ look: S.me.look, races: RACES, raceNames: RACE_NAMES, onChange: look => net.send({ t: 'profile', look }), onClose: closeModal, account: acctEditor });
   document.body.append(ed.el); S.modal = ed; ed.editor = true;
   document.body.classList.add('editing'); lineup.focus(S.room ? S.room.you : 0); safeFor('editor');
 }
@@ -597,6 +628,7 @@ function openMenu() {
     <button class="btn big primary" data-m="close">Back to ${playing ? 'the game' : inRoom ? 'the lobby' : 'the fair'}</button>
     ${inRoom ? '<button class="btn big" data-m="qr">Invite people (QR code)</button>' : ''}
     <button class="btn big" data-m="fb">Report a bug or idea</button>
+    ${account.known ? `<button class="btn big" data-m="signout">Sign out (${esc(account.known.username || account.known.name || 'account')})</button>` : '<button class="btn big" data-m="signin">Sign in (optional)</button>'}
     <button class="btn big danger" data-m="home">${inRoom ? 'Leave to the main menu' : 'Main menu'}</button></div>`;
   el.addEventListener('click', e => {
     if (e.target === el) { closeModal(); return; }
@@ -605,6 +637,8 @@ function openMenu() {
     if (m === 'close') closeModal();
     else if (m === 'qr') { closeModal(); showBigQr(); }
     else if (m === 'fb') { closeModal(); fb.open({ kind: 'idea' }); }
+    else if (m === 'signin') { closeModal(); openSignIn(ACCT); }
+    else if (m === 'signout') { closeModal(); account.signOut(); }
     else if (m === 'home') {
       const b = e.target.closest('[data-m]');
       if (inRoom && playing && !b.classList.contains('sure')) { b.classList.add('sure'); b.textContent = 'Tap again to leave this game'; return; }

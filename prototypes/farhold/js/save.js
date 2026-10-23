@@ -34,7 +34,8 @@ function writeAll(all) {
   }
 }
 
-export function createSaves() {
+/** `onChange` (optional) runs after a write or a delete — js/cloud.js uses it to copy the saves to the account. */
+export function createSaves({ onChange = null } = {}) {
   return {
     available() {
       try { localStorage.setItem('farhold.probe', '1'); localStorage.removeItem('farhold.probe'); return true; }
@@ -68,6 +69,7 @@ export function createSaves() {
       for (const id of ids.slice(MAX_SLOTS)) delete all[id];
       if (!writeAll(all)) return null;
       try { localStorage.setItem(LAST, snapshot.id); } catch { /* ignore */ }
+      try { onChange?.(); } catch { /* never let the cloud stop a save */ }
       return snapshot.id;
     },
 
@@ -75,6 +77,7 @@ export function createSaves() {
       const all = readAll();
       delete all[id];
       writeAll(all);
+      try { onChange?.(); } catch { /* ignore */ }
     },
 
     /** The save this browser was last playing, for a Continue button. */

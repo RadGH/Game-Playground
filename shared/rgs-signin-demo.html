@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account sign-in demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- The shared games.radgh.com sign-in (shared/rgs-account.js + rgs-signin.js), on its own. See shared/RGS-ACCOUNT.md.
+       Off games.radgh.com it talks to <this host>:8600/api, or localStorage['rgs.api'] if set. -->
+  <div class="topbar"><b>Account sign-in demo</b><span class="spacer"></span><span id="slot"></span></div>
+  <main class="main">
+    <p>Signing in is optional in every game. This page shows the shared sign-in box and account button.</p>
+    <p>Server: <code id="api"></code></p>
+    <p><button type="button" id="open">Open the sign-in box</button> <button type="button" id="ticket">Get a game ticket</button></p>
+    <pre id="out">signed out</pre>
+  </main>
+  <script type="module">
+    import { account } from './rgs-account.js';
+    import { openSignIn, accountButton } from './rgs-signin.js';
+    const out = document.getElementById('out');
+    document.getElementById('api').textContent = account.api;
+    document.getElementById('slot').append(accountButton({ game: 'demo', gameName: 'the sign-in demo', onChange: u => { out.textContent = u ? JSON.stringify(u, null, 2) : 'signed out'; } }));
+    document.getElementById('open').onclick = async () => { const u = await openSignIn({ game: 'demo', gameName: 'the sign-in demo' }); window.lastResult = u; };
+    document.getElementById('ticket').onclick = async () => { out.textContent = 'ticket: ' + (await account.ticket('demo')); };
+    window.rgs = { account, openSignIn };
+  </script>
+</body>
+</html>

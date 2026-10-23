@@ -693,3 +693,25 @@ that would not exist for another seven hundred lines, and the default opening is
 crate logs — so every custom character made the ordinary way had died on boot since R17. Every spec
 we had opened the builder and none of them ever pressed Start. Picked talents were also never saved,
 and a refused row on the new counter explained itself only in a tooltip.
+
+## Accounts and cloud saves (2026-10-23)
+
+Signing in is optional: a guest's game is exactly what it was. The title menu and the pause menu (Esc) each carry the
+shared games.radgh.com account button (`shared/rgs-signin.js` — a QR code to sign in with your phone, or a username
+and password; Thousandvale accounts work, with their own Farhold saves) and one status line ("Saves kept in your
+account · saved 2 min ago" / "Sign in to keep your saves in your account").
+
+`js/cloud.js` wires `shared/rgs-cloudsave.js` with game id `farhold`. What travels: `farhold.saves.v1` (every slot),
+`farhold.lastSave` (what Continue loads), `farhold.blueprints.v1` (build layouts kept across worlds) and every
+`farhold.seen.*` key (discovered regions, one key per world — synced as one prefix group). Settings, key bindings, the
+log filter and the terrain cache stay on the device. `createSaves({ onChange })` calls `saveSoon()` after every write
+and delete.
+
+Restoring only happens on the title screen: the saves land in localStorage and `farhold:saves-changed` makes
+js/newgame.js redraw Continue and the Load list in place. Once a run has started (`setPlaying(true)` in main.js),
+newer saves on the account wait — the status line says so — and come down the next time the title opens (pause menu →
+Main menu). When both copies changed, `.fh-cloud-ask` asks which to keep; nothing is replaced while it is up.
+
+Tests: `tests/cloud-saves.spec.js` (real dev API on :8600, skipped when it is down) — guest sends nothing, a save
+reaches the account, a fresh browser on the same account gets it and Continue loads it, a device with different saves
+is asked.

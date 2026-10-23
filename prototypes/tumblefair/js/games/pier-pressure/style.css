@@ -1,0 +1,67 @@
+/* Pier Pressure — the end of a sunny fairground pier: bunting across a blue sky, plank boards with each player's chip,
+   one lane of sea each (lighter at the top, deep blue below) where silhouettes rise to the bobbers, and one huge
+   button under it all. Halloween: a night pier with orange bunting. */
+.game-pier-pressure { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 8px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 14px) calc(var(--sl) + 10px);
+  background: linear-gradient(#bfe8ff, #8fd3f4); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-pier-pressure > * { flex: none; }
+.pp-top { display: flex; gap: 12px; align-items: center; justify-content: center; width: 100%; padding: 0 96px 0 8px; }
+.pp-title { font: 900 24px/1.1 var(--font); color: #ff6a3d; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.pp-pier { position: relative; width: min(100%, 720px); border: 5px solid var(--ink); border-radius: 20px; overflow: hidden; box-shadow: 0 6px 0 var(--ink); background: #2a7ab8; }
+.pp-sky { position: relative; height: 34px; background: linear-gradient(#7cc9ef, #c7ecfb); }
+.pp-bunting { position: absolute; inset: 4px 0 auto 0; height: 18px; background: conic-gradient(from 135deg at 50% 0, #ff5f5f 0 90deg, transparent 0) 0 0 / 28px 18px repeat-x, conic-gradient(from 135deg at 50% 0, #ffd23f 0 90deg, transparent 0) 14px 0 / 28px 18px repeat-x; opacity: .95; }
+.pp-deck { display: flex; background: repeating-linear-gradient(90deg, #c98a4a 0 36px, #b07a3e 36px 38px); border-top: 4px solid var(--ink); border-bottom: 4px solid var(--ink); }
+.pp-seat { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; padding: 5px 2px; gap: 2px; }
+.pp-seat .chip { max-width: 100%; padding-right: 8px; } .pp-seat .chip .nm { max-width: 6.5em; overflow: hidden; text-overflow: ellipsis; }
+.pp-seat .sc { font-style: normal; background: #fff3c4; border-radius: 8px; padding: 0 7px; }
+.pp-seat .chip.lead { background: var(--sun); } .pp-seat .chip.me { box-shadow: 0 0 0 3px #fff; }
+.pp-cpu { font: 900 10px/1 var(--font); color: #fff; background: var(--ink); border-radius: 999px; padding: 2px 6px; }
+.pp-sea { display: flex; height: clamp(220px, 44dvh, 420px); background: linear-gradient(#5fc0e8, #2a7ab8 45%, #12406e); }
+.pp-lane { position: relative; flex: 1 1 0; min-width: 0; border-left: 2px dashed rgba(255, 255, 255, .25); overflow: hidden; }
+.pp-lane:first-child { border-left: 0; }
+.pp-lane::before { content: ''; position: absolute; left: 0; right: 0; top: 18%; height: 6px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 16px, transparent 16px 30px); animation: pp-wave 3s linear infinite; }
+@keyframes pp-wave { to { background-position: 30px 0; } }
+.pp-line { position: absolute; left: 50%; top: 0; height: 20%; width: 2px; background: rgba(255, 255, 255, .9); transform: translateX(-50%); }
+.pp-bob { position: absolute; left: 50%; top: calc(20% - 10px); width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--ink); background: linear-gradient(var(--seat) 50%, #fff 50%); z-index: 3; }
+.pp-bang { position: absolute; left: 50%; top: calc(20% - 52px); transform: translateX(-50%); font: 900 36px/1 var(--font); color: var(--sun); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; z-index: 5; animation: pp-bang .25s ease-in-out infinite alternate; }
+@keyframes pp-bang { to { transform: translateX(-50%) scale(1.25); } }
+.pp-shape { position: absolute; width: min(82%, 120px); display: block; z-index: 2; transform-origin: 50% 50%; }
+.pp-shape svg { width: 100%; display: block; overflow: visible; fill: rgba(6, 30, 52, .62); stroke: rgba(6, 30, 52, .62); }
+.pp-shape[data-kind=junk] svg { width: 62%; margin: 0 auto; }
+.pp-shape.wig .pp-tail { animation: pp-tail .18s ease-in-out infinite alternate; transform-origin: 10px 20px; }
+@keyframes pp-tail { to { transform: scaleY(.55); } }
+.pp-tangle { position: absolute; left: 50%; top: 52%; transform: translateX(-50%); font: 900 26px/1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; z-index: 5; }
+.pp-tangle:empty { display: none; }
+.pp-lane.tug .pp-tangle { animation: pp-tug .2s ease-out; } @keyframes pp-tug { 0% { scale: 1.4; } }
+.pp-lane.cast .pp-bob { animation: pp-plop .4s ease-out; } @keyframes pp-plop { 0% { translate: 0 -60px; scale: .6; } }
+.pp-say { position: absolute; left: 50%; top: 6%; transform: translateX(-50%); white-space: nowrap; font: 900 clamp(13px, 3.4vw, 20px)/1 var(--font); color: #fff; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; opacity: 0; z-index: 6; pointer-events: none; }
+.pp-say.pop { animation: pp-say 1s ease-out; }
+.pp-say.spook, .pp-say.miss, .pp-say.snag { color: #ff9a9a; } .pp-say.dodge, .pp-say.free { color: #8ff07a; } .pp-say.early { color: #d8ecff; }
+@keyframes pp-say { 0% { opacity: 1; transform: translate(-50%, 8px) scale(1.2); } 70% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
+.pp-pop { position: absolute; left: 50%; top: 20%; transform: translateX(-50%); display: grid; justify-items: center; gap: 2px; opacity: 0; z-index: 7; pointer-events: none; }
+.pp-pop i { display: block; width: calc(70px * (.6 + var(--len, .5))); }
+.pp-pop i svg { width: 100%; display: block; fill: var(--c); stroke: var(--ink); stroke-width: 3; }
+.pp-pop b { font: 900 clamp(11px, 2.8vw, 15px)/1.1 var(--font); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; white-space: nowrap; }
+.pp-pop em { font: 900 22px/1 var(--font); font-style: normal; color: var(--sun); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; }
+.pp-pop.go { animation: pp-jump 1.1s ease-out; }
+@keyframes pp-jump { 0% { opacity: 1; transform: translate(-50%, 120px) rotate(-30deg); } 40% { opacity: 1; transform: translate(-50%, -10px) rotate(10deg); } 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -6px); } }
+.pp-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 76px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; z-index: 9; }
+.pp-count:empty { display: none; }
+.pp-btn { width: min(100%, 520px); height: clamp(84px, 15dvh, 130px); border-radius: 28px; border-width: 5px; background: #3ecf5a; color: #fff; box-shadow: 0 7px 0 var(--ink);
+  font: 900 38px/1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; display: grid; place-items: center; align-content: center; touch-action: none; -webkit-tap-highlight-color: transparent; }
+.pp-btn small { font-size: 13px; font-weight: 800; -webkit-text-stroke: 0; color: #fff; letter-spacing: .3px; }
+.pp-btn.go { background: #ff8a1a; } .pp-btn.wait { background: #6a8aa8; } .pp-btn.tangle { background: #b866ff; }
+.pp-btn.hit { animation: pp-press .16s ease-out; }
+@keyframes pp-press { 0% { transform: translateY(5px); box-shadow: 0 2px 0 var(--ink); } 100% { transform: none; } }
+.pp-note { margin: 0; text-align: center; font: 900 18px/1.2 var(--font); color: var(--ink); }
+.pp-note:empty { display: none; }
+.game-pier-pressure.watching .pp-btn { display: none; }
+.game-pier-pressure.watching .pp-pier { width: min(100%, 1280px); } .game-pier-pressure.watching .pp-sea { height: calc(100dvh - 230px); }
+@media (max-height: 520px) { .pp-sea { height: 46dvh; min-height: 150px; } .pp-btn { height: 64px; font-size: 26px; } .pp-btn small { display: none; } }
+/* Halloween: a night pier */
+.game-pier-pressure.season-halloween { background: linear-gradient(#241a3d, #140f26 70%, #1d1430); }
+.season-halloween .pp-title { color: #ff8a1a; }
+.season-halloween .pp-sky { background: radial-gradient(14px 14px at 85% 50%, #fff3c8 60%, transparent 62%), linear-gradient(#2a1a4a, #4a3478); }
+.season-halloween .pp-bunting { background: conic-gradient(from 135deg at 50% 0, #ff8a1a 0 90deg, transparent 0) 0 0 / 28px 18px repeat-x, conic-gradient(from 135deg at 50% 0, #7a3cc8 0 90deg, transparent 0) 14px 0 / 28px 18px repeat-x; }
+.season-halloween .pp-sea { background: linear-gradient(#4a3a8a, #2a1f5a 45%, #140f30); }
+.season-halloween .pp-note { color: #fff; }

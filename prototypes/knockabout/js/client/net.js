@@ -14,7 +14,7 @@ import { PROTOCOL } from '../net/protocol.js';
 // per TAB (sessionStorage): two tabs are two devices, a refresh is the same one
 const TOKEN_KEY = 'knockabout.token';
 const store = { get: k => { try { return sessionStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch { /* private mode */ } } };
-const apiRoot = () => (typeof window !== 'undefined' && window.KNOCKABOUT_API) ? String(window.KNOCKABOUT_API).replace(/\/$/, '') + '/' : new URL('../../../../', import.meta.url).href;
+export const apiRoot = () => (typeof window !== 'undefined' && window.KNOCKABOUT_API) ? String(window.KNOCKABOUT_API).replace(/\/$/, '') + '/' : new URL('../../../../', import.meta.url).href;
 
 let avail = null;
 export function serverAvailable() {

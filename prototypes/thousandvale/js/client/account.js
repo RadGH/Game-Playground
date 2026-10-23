@@ -60,7 +60,7 @@ export function guestMovedText(r) {
 }
 
 /** @param o.guestKey  { get(), clear() } the guest key this browser held before a sign-in (main.js sets it aside) */
-export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onToken = null, onPick, onLoggedOut, onTitleStep = null, guestKey = null, onGuest = null }) {
+export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onTicket = null, onToken = null, onPick, onLoggedOut, onTitleStep = null, guestKey = null, onGuest = null }) {
   const net = () => getNet();
   const T = {
     tabNew: $('tab-new'), tabLogin: $('tab-login'), newForm: $('login'), signin: $('signin'), user: $('signin-user'), pass: $('signin-pass'),
@@ -93,6 +93,26 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onToken 
       T.note.textContent = err.why ? ACCOUNT_WHY[err.why] || err.message : err.message || 'Could not log in.';
     } finally { T.go.disabled = false; T.go.textContent = 'Log in'; }
   });
+  // 2026-10-23: one account for every game on games.radgh.com. When this browser is signed in there already, "Continue
+  // as <name>" signs in here with a one-time ticket (server: js/sim/accounts.js `login {ticket}`). The shared client
+  // is loaded only when it is there, and any failure just leaves the normal form.
+  if (onTicket && $('rgs-continue')) {
+    import('../../../../shared/rgs-account.js').then(async ({ account }) => {
+      const u = await account.user().catch(() => null);
+      if (!u) return;
+      $('rgs-name').textContent = u.name; $('rgs-continue').hidden = false;
+      $('rgs-go').onclick = async () => {
+        $('rgs-go').disabled = true; T.note.textContent = '';
+        try {
+          const ticket = await account.ticket('thousandvale');
+          if (!ticket) throw new Error('You are signed out of games.radgh.com now. Sign in with your username and password.');
+          const chars = await onTicket(ticket);
+          showChars(chars, net()?.username || u.name); front();
+        } catch (err) { T.note.textContent = err.message || 'Could not sign in.'; }
+        finally { $('rgs-go').disabled = false; }
+      };
+    }).catch(() => {});
+  }
   T.forgot.onclick = () => { T.reset.hidden = !T.reset.hidden; if (!T.reset.hidden) drawReset(); };
   // owner 2026-10-15: "Can we add a create account link to the log in page?" An account is a guest that is claimed at
   // once: `onGuest` connects this browser's guest (its characters come along, if it has any — a browser logged in to

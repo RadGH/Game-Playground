@@ -2819,6 +2819,151 @@ export const GAMES = Object.freeze({
    "card": "card-long-drive",
    "css": true
   }
+ },
+ "reel-rumble": {
+  "meta": {
+   "id": "reel-rumble",
+   "title": "Reel Rumble",
+   "blurb": "Cast, hook and reel in the biggest fish in the lake!",
+   "how": [
+    "Aim with the stick. Hold A and let go to cast.",
+    "Bobber plunges? Press A to hook it!",
+    "HOLD A to reel, LET GO before the line snaps.",
+    "Bigger fish fight harder and score more."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 75,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Cast / Reel"
+   },
+   "move": {
+    "speed": 0.01,
+    "accel": 40
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 6.6,
+    "wall": false
+   },
+   "pitch": 50,
+   "card": "card-reel-rumble",
+   "css": true
+  }
+ },
+ "pier-pressure": {
+  "meta": {
+   "id": "pier-pressure",
+   "title": "Pier Pressure",
+   "blurb": "Hook the fish, dodge the junk, and land the most before the whistle!",
+   "how": [
+    "Tap to cast. A fish nibbles, then BITES: tap then!",
+    "Tap too soon and it swims off.",
+    "Junk floating up? Tap before it reaches your hook!",
+    "Snagged? Tap tap tap to untangle."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 62,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "card": "card-pier-pressure",
+   "css": true
+  }
+ },
+ "net-gains": {
+  "meta": {
+   "id": "net-gains",
+   "title": "Net Gains",
+   "blurb": "Stretch a net with your teammate and scoop up the most fish!",
+   "how": [
+    "You and a teammate hold one net. Walk it through the fish!",
+    "Too close or too far apart and the net does not catch.",
+    "Touch your dock with a full net to bank the fish.",
+    "A splashes: fish dart away from you."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action",
+    "coop"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Splash"
+   },
+   "move": {
+    "speed": 4.6,
+    "accel": 12,
+    "carryMul": 0.72,
+    "stunDrag": 1.6
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 10.5,
+    "hd": 7,
+    "wall": true
+   },
+   "pitch": 56,
+   "card": "card-net-gains",
+   "css": true
+  }
+ },
+ "glimmer-ice": {
+  "meta": {
+   "id": "glimmer-ice",
+   "title": "Glimmer Ice",
+   "blurb": "Fish through the ice for glowing fish before the holes freeze over!",
+   "how": [
+    "Stand at an open hole and press A to drop your line.",
+    "Fish only glimmer now and then: watch where they are!",
+    "Bite? Press A to pull it up!",
+    "Holes freeze over: B chips the ice open again."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Line",
+    "b": "Chip"
+   },
+   "move": {
+    "speed": 4.3,
+    "accel": 6,
+    "stunDrag": 0.8
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 8.2,
+    "wall": true
+   },
+   "pitch": 58,
+   "card": "card-glimmer-ice",
+   "css": true
+  }
  }
 });
 export const gameIds = () => Object.keys(GAMES);

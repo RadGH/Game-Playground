@@ -1,0 +1,100 @@
+/* games.radgh.com sign-in box + account button (shared/rgs-signin.js). Everything is scoped under .rgs-signin or
+   .rgs-acct so it never touches a game's own styles, and it brings its own colours so it reads on any game. */
+.rgs-signin, .rgs-acct {
+  --rgs-bg: #17181d; --rgs-panel: #20232b; --rgs-field: #2a2d36; --rgs-text: #ece9e2; --rgs-muted: #a7a39a;
+  --rgs-accent: #e3a24a; --rgs-ink: #1a1408; --rgs-line: #363a45; --rgs-bad: #ff8a80; --rgs-ok: #7bd88f;
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--rgs-text);
+  -webkit-text-size-adjust: 100%;
+}
+.rgs-signin *, .rgs-acct * { box-sizing: border-box; }
+
+/* ---------- the box ---------- */
+.rgs-signin {
+  position: fixed; inset: 0; z-index: 2147483000; display: flex; align-items: center; justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+  background: rgba(6, 7, 10, .72); pointer-events: auto; overflow-y: auto; overscroll-behavior: contain;
+}
+.rgs-card {
+  width: min(760px, 100%); margin: auto; background: var(--rgs-bg); border: 1px solid var(--rgs-line);
+  border-radius: 14px; padding: 20px 22px; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); text-align: left;
+}
+.rgs-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.rgs-head h2 { margin: 0; font-size: 22px; font-weight: 700; color: var(--rgs-text); }
+.rgs-lead { margin: 6px 0 16px; color: var(--rgs-muted); font-size: 14px; }
+.rgs-cols { display: grid; grid-template-columns: 1fr 240px; gap: 22px; align-items: start; }
+.rgs-forms, .rgs-qr { min-width: 0; }
+
+.rgs-signin button { font: inherit; cursor: pointer; border-radius: 10px; min-height: 44px; }
+.rgs-signin button:disabled { opacity: .6; cursor: default; }
+.rgs-signin button:focus-visible, .rgs-signin input:focus-visible, .rgs-signin a:focus-visible,
+.rgs-signin .pad-focus { outline: 3px solid var(--rgs-accent); outline-offset: 2px; }
+.rgs-x { background: none; border: 0; color: var(--rgs-muted); font-size: 28px; line-height: 1; width: 44px; padding: 0; }
+.rgs-x:hover { color: var(--rgs-text); }
+
+.rgs-tabs { display: flex; gap: 6px; margin-bottom: 12px; background: var(--rgs-panel); padding: 4px; border-radius: 12px; }
+.rgs-tab { flex: 1; background: none; border: 0; color: var(--rgs-muted); font-weight: 600; padding: 6px 10px; }
+.rgs-tab[aria-pressed="true"] { background: var(--rgs-field); color: var(--rgs-text); }
+
+.rgs-form { display: flex; flex-direction: column; gap: 10px; }
+.rgs-form[hidden] { display: none; }
+.rgs-field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--rgs-muted); }
+.rgs-field input {
+  font: inherit; font-size: 16px; /* 16px keeps phones from zooming in */ color: var(--rgs-text);
+  background: var(--rgs-field); border: 1px solid var(--rgs-line); border-radius: 10px; padding: 10px 12px; min-height: 46px; width: 100%;
+}
+.rgs-hint { margin: -6px 0 0; font-size: 12px; color: var(--rgs-muted); }
+.rgs-hint.rgs-bad { color: var(--rgs-bad); }
+.rgs-hint.rgs-good { color: var(--rgs-ok); }
+.rgs-primary { background: var(--rgs-accent); color: var(--rgs-ink); border: 0; font-weight: 700; padding: 10px 18px; margin-top: 4px; }
+.rgs-primary:hover { filter: brightness(1.08); }
+.rgs-error { margin: 0 0 8px; min-height: 0; color: var(--rgs-bad); font-size: 14px; }
+.rgs-error:empty { display: none; }
+
+.rgs-qr { background: var(--rgs-panel); border: 1px solid var(--rgs-line); border-radius: 12px; padding: 14px; text-align: center; }
+.rgs-qr h3 { margin: 0 0 10px; font-size: 15px; font-weight: 600; color: var(--rgs-text); text-transform: none; letter-spacing: 0; }
+.rgs-qr-img { width: 100%; max-width: 200px; aspect-ratio: 1; margin: 0 auto; background: #fff; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.rgs-qr-img svg { display: block; width: 100%; height: 100%; }
+.rgs-qr-wait { color: #555; font-size: 14px; }
+.rgs-check-line { margin: 10px 0 0; font-size: 13px; color: var(--rgs-muted); }
+.rgs-check { color: var(--rgs-accent); font-size: 18px; letter-spacing: .12em; font-family: ui-monospace, Consolas, monospace; }
+.rgs-qr-state { margin: 6px 0 0; font-size: 13px; color: var(--rgs-muted); }
+.rgs-qr-state:empty { display: none; }
+.rgs-link { background: none; border: 0; color: var(--rgs-accent); text-decoration: underline; padding: 4px 8px; }
+
+.rgs-note { margin: 16px 0 0; font-size: 13px; color: var(--rgs-muted); }
+.rgs-foot { display: flex; justify-content: flex-end; margin-top: 12px; }
+.rgs-later { background: none; border: 1px solid var(--rgs-line); color: var(--rgs-text); padding: 8px 22px; }
+.rgs-later:hover { border-color: var(--rgs-accent); }
+
+@media (max-width: 640px) {
+  .rgs-signin { align-items: flex-start; }
+  .rgs-card { padding: 16px; border-radius: 12px; }
+  .rgs-cols { grid-template-columns: 1fr; gap: 16px; }
+  .rgs-qr-img { max-width: 180px; }
+  .rgs-foot .rgs-later { width: 100%; }
+}
+
+/* ---------- the account button ---------- */
+.rgs-acct { position: relative; display: inline-block; font-size: 14px; }
+.rgs-acct-btn {
+  font: inherit; color: var(--rgs-text); background: var(--rgs-panel); border: 1px solid var(--rgs-line);
+  border-radius: 999px; padding: 6px 14px; min-height: 36px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+  max-width: 220px;
+}
+.rgs-acct-btn:hover, .rgs-acct-btn:focus-visible { border-color: var(--rgs-accent); }
+.rgs-dot { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--rgs-accent); color: var(--rgs-ink);
+  display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+.rgs-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rgs-caret { color: var(--rgs-muted); font-size: 11px; }
+.rgs-acct-menu {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 2147482000; min-width: 190px; background: var(--rgs-bg);
+  border: 1px solid var(--rgs-line); border-radius: 12px; padding: 6px; box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+}
+.rgs-acct-menu[hidden] { display: none; }
+.rgs-acct-who { margin: 4px 10px 6px; color: var(--rgs-muted); font-size: 12px; }
+.rgs-acct-item {
+  display: block; width: 100%; text-align: left; font: inherit; color: var(--rgs-text); background: none; border: 0;
+  border-radius: 8px; padding: 10px; min-height: 40px; text-decoration: none; cursor: pointer;
+}
+.rgs-acct-item:hover, .rgs-acct-item:focus-visible { background: var(--rgs-field); }

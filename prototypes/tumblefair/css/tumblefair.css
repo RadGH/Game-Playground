@@ -343,3 +343,9 @@ body[data-phase=game] .qr-btn { right: calc(var(--sr) + 76px); }
 .mcard b { font: 900 34px/1 var(--font); } .mcard small { font-size: 11px; font-weight: 800; color: #47606a; }
 .mcard.mystery { background: repeating-linear-gradient(45deg, #6b4bd6 0 8px, #5a3cc0 8px 16px); color: #fff; } .mcard.mystery small { color: #e8ddff; }
 .mcard:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+
+/* accounts (2026-10-23): the optional games.radgh.com sign-in on the title and in the look editor (shared/rgs-signin.css styles the button itself) */
+.acct-slot { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 12px; color: inherit; opacity: .85; }
+.acct-slot > span { flex: 1 1 160px; }
+.ed-acct { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(0, 0, 0, .2); font-size: 12px; }
+.ed-acct > span { flex: 1 1 160px; }

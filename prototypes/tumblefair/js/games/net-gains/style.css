@@ -1,0 +1,7 @@
+@import url('../fish.css');
+/* Net Gains: tags over the docks ("BANK"), over each net (fish + points inside) and over a CPU deckhand. */
+.tag.ng-bank { background: var(--sun); color: var(--ink); text-shadow: none; font-size: 13px; font-weight: 900; padding: 0 8px; }
+.tag.ng-net { background: rgba(255, 248, 231, .95); color: var(--ink); text-shadow: none; font-size: 13px; font-weight: 900; padding: 0 8px; }
+.tag.ng-net.empty { display: none !important; }
+.tag.ng-net.full { background: var(--sun); animation: fk-shake .2s linear infinite; }
+.tag.ng-deck { background: #e8ecf4; color: var(--ink); text-shadow: none; font-size: 12px; }

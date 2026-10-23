@@ -1,0 +1,6 @@
+/* Emberveil 2 — the account button, the cloud-save line and the "which run" question (js/cloud.js). */
+.cloud-row { justify-content: center; align-items: center; gap: 6px 12px; flex-wrap: wrap; margin: 4px 0 10px; }
+.cloud-status { color: var(--muted, #b9a88f); }
+#menu-account { margin-top: 12px; }
+dialog.cloud-ask { max-width: min(460px, calc(100vw - 32px)); }
+dialog.cloud-ask p { margin: 8px 0 14px; }

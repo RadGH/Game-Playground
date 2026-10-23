@@ -368,6 +368,7 @@ export async function runTitle({
       if (finished) return;
       finished = true;
       window.removeEventListener('keydown', onKey, true);
+      window.removeEventListener('farhold:saves-changed', onCloudSaves);
       stopPreview();
       // R23 — the preview's WebGL context goes before `begin()` makes the game's own
       disposeFigure();
@@ -398,6 +399,16 @@ export async function runTitle({
       show(at === 'boot-world' ? 'boot-character' : 'boot-menu');
     }
     window.addEventListener('keydown', onKey, true);
+
+    /**
+     * 2026-10-23 — saves came down from the games.radgh.com account (js/cloud.js). They are already in localStorage;
+     * all the title has to do is draw them: Continue, and the Load list if it is the screen showing.
+     */
+    function onCloudSaves() {
+      refreshMenu();
+      if (!$('boot-load-screen')?.classList.contains('hidden')) drawSaves();
+    }
+    window.addEventListener('farhold:saves-changed', onCloudSaves);
 
     // ------------------------------------------------------------ menu buttons
     refreshMenu();

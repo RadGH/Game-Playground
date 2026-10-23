@@ -1,0 +1,12 @@
+/* Farhold — the account button, the cloud-save line and the "which saves" question (js/cloud.js). */
+.cloud-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; margin: 14px auto 0; max-width: 560px; }
+.cloud-status { font-size: 12px; color: #9fb0c8; }
+.pause-card .cloud-row { margin: 12px auto 4px; }
+
+.fh-cloud-ask { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px; background: rgba(3, 5, 10, 0.72); }
+.fh-cloud-card { width: min(460px, 100%); background: #0d1424; border: 1px solid #2b3a55; border-radius: 10px; padding: 18px 20px; text-align: left; box-shadow: 0 12px 40px #000a; }
+.fh-cloud-card h2 { margin: 0 0 8px; font-size: 18px; color: #7fd8ff; font-weight: 600; }
+.fh-cloud-card p { margin: 0 0 14px; color: #c9d3e2; }
+.fh-cloud-choices { display: grid; gap: 8px; }
+.fh-cloud-choices button { display: grid; gap: 2px; text-align: left; padding: 10px 12px; }
+.fh-cloud-choices small { font-size: 12px; opacity: 0.75; }

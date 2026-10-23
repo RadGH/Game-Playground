@@ -13,7 +13,8 @@ import { createTouch, isTouch } from './touch.js';
 import { createSounds } from './sounds.js';
 import { installFeedback, esc } from './feedback.js';
 import { RATE_REASONS, rateArena, voteArena, tally } from './report.js';
-import { loadLookData, avatarOf, randomLook, loadSlot, saveSlot, wearOf } from './look.js';
+import { loadLookData, avatarOf, randomLook, loadSlot, saveSlot, loadGuestSlot, wearOf } from './look.js';
+import { installAccount } from './account.js';
 import { openBuilder } from './builder.js';
 import { createLocalSession } from './local.js';
 import { loadSim, simKind } from './sim.js';
@@ -53,6 +54,22 @@ const portrait = look => { try { return svgPortrait(avatarOf(look)); } catch { r
 const arenaById = id => S.arenas.find(a => a.id === id) || S.arenas[0];
 const modeById = id => S.modes.find(m => m.id === id) || S.modes[0] || { id, name: id };
 
+// ---- accounts (2026-10-23, js/client/account.js): optional sign-in; signed in, this device's first player is the account's fighter
+const isSlot0 = p => p && !p.cpu && !p.remote && (p.saveSlot ?? p.slot) === 0;
+const acct = installAccount({
+  toast: t => hud.toast(esc(t)),
+  onProfile: data => {
+    const p = S.players.find(isSlot0); if (!p) return;
+    let d = data || loadGuestSlot(0);
+    if (!d) { d = { look: randomLook(), name: NAMES[p.slot % NAMES.length] }; saveSlot(0, d); }    // signed out on a device that never had its own fighter
+    p.look = d.look; if (d.name) p.name = d.name;
+    if (S.builder) return;                                   // the builder is open on someone: the lobby redraws when it closes
+    if (S.screen === 'lobby') drawLobby();
+    else if (S.screen === 'room') { if (p.mine) S.online?.lookChanged(p); online.draw(); }
+  },
+});
+window.knockaboutAccount = acct;
+
 // ---- players -------------------------------------------------------------------------------------------------------
 function addPlayer(dev, { cpu = false } = {}) {
   const slot = freeSlot(); if (slot < 0) return null;
@@ -81,6 +98,7 @@ async function showTitle() {
   nav.attach(screenEl, { keep: false });
   screenEl.querySelector('[data-play]').onclick = () => toLobby();
   screenEl.querySelector('[data-how]').onclick = () => showHow();
+  screenEl.querySelector('.title-wrap').append(acct.button('title'));      // "Sign in" (optional), only where a Knockabout server is
   online?.decorateTitle(screenEl);      // "Host online" / "Join with code" / "Find a game", only when a server answers
   startDemo();
 }
@@ -190,7 +208,7 @@ function openLook(p) {
   if (!p || S.builder) return;
   sounds('open');
   view.frameAll = false; screenEl.classList.add('dim'); screenEl.innerHTML = '';     // emptied, not just hidden: a stale layer over the canvas blanks WebGL on phones
-  S.builder = openBuilder({ player: p, view, nav, sounds, root: document.body,
+  S.builder = openBuilder({ player: p, view, nav, sounds, root: document.body, account: isSlot0(p) ? acct.button('builder') : null,
     onChange: ({ look, name }) => { p.look = look; if (name) p.name = name; if (!p.cpu && !p.remote) saveSlot(p.saveSlot ?? p.slot, { look, name: p.name }); if (p.mine) S.online?.lookChanged(p); },
     onClose: () => { S.builder = null; screenEl.classList.remove('dim'); view.lookAt([0, 3, 12], [0, 1, 0]); if (S.screen === 'lobby') drawLobby(); else if (S.screen === 'room') online.draw(); },
   });

@@ -14,7 +14,7 @@ import { esc } from './feedback.js';
 const FACE_ONLY = FACE_SLOTS.filter(s => !['accessory', 'extras', 'ears'].includes(s.slot));
 const niceFace = (slot, id) => PART_NAMES[slot]?.[id] || partName(slot, id);
 
-export function openBuilder({ player, view, nav, root, onChange, onClose, sounds }) {
+export function openBuilder({ player, view, nav, root, onChange, onClose, sounds, account = null }) {
   let look = JSON.parse(JSON.stringify(player.look)), tab = 'costume', model = null, closed = false, rebuild = 0, name = player.name;
   const el = document.createElement('div'); el.className = 'builder'; root.append(el);
   const sheet = document.createElement('div'); sheet.className = 'panel bsheet'; el.append(sheet);
@@ -43,7 +43,9 @@ export function openBuilder({ player, view, nav, root, onChange, onClose, sounds
       <div class="b-head" style="--seat:${player.color}"><i class="b-dot"></i><input class="b-name" maxlength="14" value="${esc(name)}" aria-label="Name" data-nav="1"><button class="btn small" data-random="1">Surprise me</button><button class="btn small primary" data-back="1" data-done="1">Done</button></div>
       <div class="tabs"><button class="tab${tab === 'costume' ? ' on' : ''}" data-tab="costume">Costume</button><button class="tab${tab === 'face' ? ' on' : ''}" data-tab="face">Face &amp; body</button></div>
       <div class="b-body">${tab === 'costume' ? costume : face}</div>
-      <p class="note hint">${player.dev && player.dev !== 'touch' && player.dev !== 'mouse' ? 'Move with the stick / d-pad, A to pick, B when done.' : 'Tap a piece to change it.'}</p>`;
+      <p class="note hint">${player.dev && player.dev !== 'touch' && player.dev !== 'mouse' ? 'Move with the stick / d-pad, A to pick, B when done.' : 'Tap a piece to change it.'}</p>
+      ${account ? '<div class="b-acct"><span>Optional: sign in to keep this fighter on every device</span></div>' : ''}`;
+    if (account) sheet.querySelector('.b-acct').append(account);      // accounts (2026-10-23): the same element every redraw
     nav.attach(sheet);
   }
   const step = (list, now, d) => list[(Math.max(0, list.indexOf(now)) + d + list.length) % list.length];

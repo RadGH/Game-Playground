@@ -324,7 +324,7 @@ const mail = createMail({ net: () => S.net, hud, bag, me, inTown: () => S.room?.
 const market = createMarket({ net: () => S.net, hud, bag, me });
 const callboard = createCallboard({ net: () => S.net, hud, me });
 const account = createAccount({ net: () => S.net, hud, me, guestKey: { get: () => { try { return localStorage.getItem(tokenKey() + '.guest'); } catch { return null; } }, clear: () => { try { localStorage.removeItem(tokenKey() + '.guest'); } catch {} } }, netOpts: () => ({ mode: netMode(), url: q.get('server') || undefined, build: q.get('build') || 'dev' }),
-  onLogin: (user, pass) => loginFromTitle(user, pass), onToken: token => loginWithToken(token), onGuest: name => guestForAccount(name), onPick: ch => enterWorld(ch), onLoggedOut: () => backToTitle(), onTitleStep: step => titleStep(step) });
+  onLogin: (user, pass) => loginFromTitle(user, pass), onTicket: ticket => loginFromTitle(null, null, ticket), onToken: token => loginWithToken(token), onGuest: name => guestForAccount(name), onPick: ch => enterWorld(ch), onLoggedOut: () => backToTitle(), onTitleStep: step => titleStep(step) });
 const help = createHelp();
 loadZoneNames();
 const ui = createUiSuite({ net: () => S.net, hud, room: () => S.room, actors, objects, worldUi, social, chat, panels: { friends: friends.panel, guild: guild.panel, mail: mail.panel, market: market.panel, callboard: callboard.panel },
@@ -561,12 +561,12 @@ function startNet({ login = null, guestName = null } = {}) {
 }
 function dropNet() { if (S.net) { S.net.close(); S.net = null; } }
 /** Title "Log in": a fresh connection signed in with a username (this browser's guest key is set aside, not lost). */
-async function loginFromTitle(user, pass) {
+async function loginFromTitle(user, pass, ticket = null) {
   const toks = TOKENS(), old = toks.get();
-  if (S.net && S.net.claimed && S.net.username && S.net.username.toLowerCase() === user.toLowerCase()) return S.net.chars;
+  if (!ticket && S.net && S.net.claimed && S.net.username && S.net.username.toLowerCase() === user.toLowerCase()) return S.net.chars;
   if (old && !(S.net && S.net.claimed)) { try { localStorage.setItem(tokenKey() + '.guest', old); } catch {} }
   dropNet(); toks.set(null);
-  const net = startNet({ login: { user, pass } });
+  const net = startNet({ login: ticket ? { ticket } : { user, pass } });
   return new Promise((res, rej) => {
     const off = net.on('accountR', r => { if (r.op === 'login' && !r.ok) { off(); dropNet(); if (old) toks.set(old); rej(Object.assign(new Error(r.msg || 'Wrong username or password.'), { why: r.why })); } });
     const t = setTimeout(() => { off(); rej(new Error('The server did not answer.')); }, 15000);

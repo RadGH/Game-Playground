@@ -68,7 +68,7 @@ export function connect(opts = {}) {
         if (m.clock) net.realmClock = { epoch: m.clock.epoch, dayMs: m.clock.dayMs, skew: Date.now() - m.clock.now };
         const tok = tokenStore.get();
         if (tok) sendJ(s, { t: 'auth', token: tok });
-        else if (opts.login && !loginTried) { loginTried = true; sendJ(s, { t: 'account', op: 'login', user: opts.login.user, pass: opts.login.pass }); }
+        else if (opts.login && !loginTried) { loginTried = true; sendJ(s, opts.login.ticket ? { t: 'account', op: 'login', ticket: opts.login.ticket } : { t: 'account', op: 'login', user: opts.login.user, pass: opts.login.pass }); }
         else sendGuest(s);
         return;
       }

@@ -8,6 +8,7 @@
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
+import { markReports } from '../server/feedback.mjs';
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : d; };
 // --dir <data dir>: another server's data folder (the games.radgh.com droplet keeps it in /var/lib/tumblefair)
 const env = arg('env', 'stable'), dir = arg('dir', null) ? join(arg('dir', null), 'feedback') : join(homedir(), '.local/share/tumblefair', env, 'feedback');
@@ -15,8 +16,7 @@ if (!existsSync(dir)) { console.log(`no reports yet (${dir})`); process.exit(0);
 const all = readdirSync(dir).filter(f => f.endsWith('.json')).map(f => JSON.parse(readFileSync(join(dir, f), 'utf8'))).sort((a, b) => a.id - b.id);
 const mark = arg('mark', null);
 if (mark) {
-  const state = arg('state', 'done'), note = arg('note', '');
-  for (const id of mark.split(',').map(Number)) { const r = all.find(x => x.id === id); if (!r) { console.log(`#${id}: no such report`); continue; } r.state = state; if (note) r.note = note; r.markedAt = new Date().toISOString(); writeFileSync(join(dir, `${id}.json`), JSON.stringify(r, null, 1)); console.log(`#${id} -> ${state}`); }
+  markReports(dir, mark.split(',').map(Number), arg('state', 'done'), arg('note', ''), { log: console.log });
   process.exit(0);
 }
 const want = arg('state', 'new'), list = all.filter(r => want === 'all' || r.state === want);

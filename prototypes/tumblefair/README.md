@@ -114,7 +114,7 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
 
 ## Minigames
 
-81 games (12 of them Halloween-only, see "Holidays"). Golf (2026-10-23) added 4 — Putt Party, Long Drive, Chip-In Challenge and Halloween's Haunted Hole — with shared ball physics in `js/games/golf-kit.js` (a small same-input-same-output 2D rolling model: friction, wall/bumper/ball bounces, ramps, slope patches, windmill paddles, cup capture under a speed, aim help), the putting match flow in `js/games/golf-putt.js`, and the putting view + HUD in `js/games/golf-view.js` / `golf.css`. Round 8 (2026-10-22) added 20: six boss fights in the spirit of Dragon's Weak Spot (Golem Smash, Kraken Cove, Sky Serpent, Goblin King's Crown, and Halloween's Pumpkin Knight and Witch's Tower — shared helpers in `js/games/boss-kit*.js`), seven arena games (Hilltop Hold, Thin Ice, Pillow Fight, Firefly Catch, Spotlight Dance, and Halloween's Bat Swarm and Skeleton Stack) and seven tap games (Odd One Out, Crow Count, Higher or Lower, Shape Sorter, Number Climb, and Halloween's Potion Mixer and Mummy Wrap; `tools/build-fa-icons.mjs` copies in the Font Awesome Pro icons they use). Round 5 (2026-10-22) added 12 (Tiptoe Tiger, Hay Bale Scramble, Fizzpop Pass, Bumper Bash, Sheep Shuffle, Mole Mallet, Rope Rumble, Lantern Leap, Jellybean Jar, Quick Draw, Pin the Tail, Size Up — Size Up draws 153 Font Awesome Pro icons, copied in by `tools/build-size-up-icons.mjs`). Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
+85 games (12 of them Halloween-only, see "Holidays"). Fishing (2026-10-23) added 4 — Reel Rumble, Pier Pressure, Net Gains and Glimmer Ice (see "Fishing" below). Golf (2026-10-23) added 4 — Putt Party, Long Drive, Chip-In Challenge and Halloween's Haunted Hole — with shared ball physics in `js/games/golf-kit.js` (a small same-input-same-output 2D rolling model: friction, wall/bumper/ball bounces, ramps, slope patches, windmill paddles, cup capture under a speed, aim help), the putting match flow in `js/games/golf-putt.js`, and the putting view + HUD in `js/games/golf-view.js` / `golf.css`. Round 8 (2026-10-22) added 20: six boss fights in the spirit of Dragon's Weak Spot (Golem Smash, Kraken Cove, Sky Serpent, Goblin King's Crown, and Halloween's Pumpkin Knight and Witch's Tower — shared helpers in `js/games/boss-kit*.js`), seven arena games (Hilltop Hold, Thin Ice, Pillow Fight, Firefly Catch, Spotlight Dance, and Halloween's Bat Swarm and Skeleton Stack) and seven tap games (Odd One Out, Crow Count, Higher or Lower, Shape Sorter, Number Climb, and Halloween's Potion Mixer and Mummy Wrap; `tools/build-fa-icons.mjs` copies in the Font Awesome Pro icons they use). Round 5 (2026-10-22) added 12 (Tiptoe Tiger, Hay Bale Scramble, Fizzpop Pass, Bumper Bash, Sheep Shuffle, Mole Mallet, Rope Rumble, Lantern Leap, Jellybean Jar, Quick Draw, Pin the Tail, Size Up — Size Up draws 153 Font Awesome Pro icons, copied in by `tools/build-size-up-icons.mjs`). Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
 brawler, Fling Ring — toss-out, Ring-a-Ding Rumble — boxing, Costume Catwalk — dress-up runway) and every unbuilt game
 of the design document's 30-game list. Several were tuned against perfect bots (Kitchen Catastrophe targets, Castle
 Defense waves, Dragon's Weak Spot): ease them after a real play-test if they feel hard. Round 5 (2026-10-22) eased those three by about one step
@@ -218,6 +218,10 @@ a second set).
 | `long-drive` | screen | golf (2026-10-23). Everyone tees off side by side at once, 3 drives each. Two taps: stop the POWER bar (it swings up and back), then stop the ACCURACY needle in the middle (early hooks left, late slices right, a mishit loses distance); ◀ ▶ aim 2° a step to play the wind (a flag by the tees + an arrow and mph on screen; the SAME wind for everyone on drive 1/2/3, stronger later and on hard). Rough either side does not count, trees past it, a pond on the right at the long end; your best drive that finishes on the fairway is your score (yards). The meters run on the phone and only `swing { p, a, aim }` is sent, so lag never moves them; the server works out the flight. A wide screen looks across the fairway, an upright phone down it; balls fly in an arc with a trail and leave a pin with the yards. Easy = slower meters, light wind. Solo: target flags bronze 200 / silver 250 / gold 290 |
 | `chip-in` | arena | golf (2026-10-23). A practice green with a painted target (bullseye 50, rings 25 / 10 / 5), the cup in the middle (roll it in = CHIP-IN 100) and two buckets at the back (land it straight in = BUCKET 75). Everyone chips from their own mat at once, 5 shots each: stick aims (aim help toward the flag or a bucket), hold A charges the carry while a landing ring + dotted arc show where it will come down; the ball flies in an arc with its shadow racing to a ring on the grass, then checks and rolls; where it stops scores. Resting balls are solid, so you can knock a rival's ball off the target (their points are already banked). Hard = smaller rings, a little landing scatter, firmer green; easy = bigger rings, none. Ties go to more shots taken; solo = medals 90 / 180 / 300 |
 | `haunted-hole` | arena | **Halloween, Oct only** (golf, 2026-10-23, `meta.season`). Putt Party's rules on a moonlit graveyard course (iron fence, big moon, the shared dusk dressing): Tombstone Row (round-topped smiling lavender tombstones as bumpers, and a friendly sheet ghost drifting across the green that says "Boo!" and puffs any rolling ball it touches off its line, par 3), Pumpkin Tunnel (a hedge across the green; putt into the giant jack-o'-lantern's glowing grin and the ball pops out of a little pumpkin by the cup — or go the long way round, par 2), Coffin Cup (the cup sits in a coffin whose lid creaks, then swings shut for a moment, again and again: shut = no cup and the lid knocks you back; open 2.6/2.1/1.6 s by difficulty, par 3). Fewest strokes wins; same ties and solo medals as Putt Party |
+| `reel-rumble` | arena | fishing (2026-10-23). Everyone fishes one lake from their own peg on a dock. Stick aims, hold A charges the cast (the golf power swing; a ring + dotted arc show where the bobber lands, 2.2-9.6 m out), let go to cast. Fish are shadows under the water — a bigger shadow is a bigger fish and the big ones keep to the far water (a long cast biases the species pick toward fighters; a Moonscale's shadow glints gold). A free fish near a resting bobber may swim over, nibble (the bobber twitches) and BITE (it plunges): press A inside the window (1.15/0.85/0.6 s by difficulty) to hook it; A before a bite reels the bobber back in. The fight is the kit's reel model: HOLD A to wind in (the line tightens), LET GO to ease it (the fish swims off a little); full tension = SNAP, too far out = it got away; the fish surges now and then (pulls ~2x — let go) and tires on a tight line. A tension meter with a red zone and a distance bar float by you. Points by species (Tiddler 1 … Old Gilbert 20; boots and weed 0, never snap); ties by catches then kilos. Halloween: a purple moonlit lake and the fish's Halloween names (looks only). Solo: medals 8 / 18 / 30 |
+| `pier-pressure` | screen | fishing (2026-10-23). One lane of sea per player off a fairground pier and ONE big button. Tap to CAST, then read the silhouette that swims up: a FISH nibbles (twitches — tapping now scares it off) then BITES with a plunge and "!" — tap then (window 0.9/0.65/0.48 s); JUNK (boot, kettle, weed — drawn as their own shapes) must be dodged by tapping BEFORE it reaches the hook, or it snags and you tap tap tap to untangle (4/6/8 taps). Three fish in a row without a slip get +1 each. Timing is Apple Bobbing's: each lane's visitor is a script on the game clock sent in the state, the phone draws it on its own clock and sends `tap { t }`, the server judges at t (not in the future, not older than 0.7 s). Space / Enter / a controller's A work too. Halloween: a night pier, orange bunting, Halloween names. Solo: you race Skipper Pebble, a CPU fisher in the next lane (reaction, fooled-by-a-twitch and dodge odds by difficulty) |
+| `net-gains` | arena | fishing (2026-10-23), teams. Red + green against blue + pink (seats 0 + 2 vs 1 + 3, like the lobby's teams), wading in a lagoon with one net per team strung between its two holders; a team of one gets a CPU deckhand (Finn / Marlo) who keeps a net's width (3.4 m) to your side. Fish touching the mesh are scooped — only while the net is stretched 1.4-5.6 m (bunched or pulled tight = red and slack, catches nothing). 8 fish fill a net, 5 make it heavy (you wade slower); nothing counts until either holder touches your own dock. A = splash: fish within ~3 m dart away (herd them in, or out of the other net). At 35 s left Old Gilbert (20) cruises in and only a net stretched 3.6 m+ holds him. Fish flee harder and swim faster on hard. Team mates share the score and the place. Solo: you + Finn, medals 45 / 90 / 140 |
+| `glimmer-ice` | arena | fishing (2026-10-23). A frozen pond at night under the northern lights with 8-11 holes. Fish swim under the ice and are only visible when they GLIMMER — each on its own fixed schedule (0.65-1.25 s every 2.6-5.8 s by difficulty; Aurora Chars glow longer) and only glimmering fish are sent to phones at all. A at an open hole drops your line (you sit, frozen in place); a fish that swims near may come, nibble and bite: A again inside the window to pull it up; A with no bite pulls the line up. Every hole freezes over (sealed in 24/17/12 s from open); a sealed hole cannot be fished and one that seals with your line in freezes it in. B chips the ice of the hole you stand at (-0.36 a chip). Slippery ice (low accel). Your nearest hole gets a ring: green = fish here, blue = chip first. Halloween: purple night and Halloween names. Solo: medals 8 / 16 / 26 |
 
 Known gap: a phone that reconnects mid-drawing sees a blank canvas (its strokes are kept on the server and appear in the gallery).
 
@@ -360,6 +364,26 @@ Twelve reports from the live server, all fixed:
   jack-o'-lantern over the whole head, plus a witch's hat, a candy-corn hat, a toadstool cap, a bedsheet ghost and the
   monster's flat-top with neck bolts; the pumpkin and ghost have 2D portraits too.
 
+## Fishing (2026-10-23)
+
+Four fishing minigames that play differently: **Reel Rumble** (arena, aim + timed cast, hook on the bite, a reel
+tension fight), **Pier Pressure** (screen, one button: read fish vs junk silhouettes, ignore nibbles, hook the bite,
+dodge or untangle junk; solo vs CPU Skipper Pebble), **Net Gains** (arena, teams: a net between two holders, CPU
+deckhand for a team of one, bank at your dock, Old Gilbert needs a wide net) and **Glimmer Ice** (arena: fish only
+visible when they glimmer, holes freeze over, B chips ice). Shared pieces:
+- `js/games/fish-species.js` — THE fish table (16 species incl. 3 junk), each with an original name, a Halloween name
+  (`hw`), the waters it lives in (`lake` / `pier` / `lagoon` / `ice`), weight, points, fight, speed, size, colours, glow.
+- `js/games/fish-kit.js` — pure rules: weighted species pick (with a "long cast finds fighters" bias), weights, cast
+  landing + arc, the golf power swing (`charge`), the reel fight (`LINE` per difficulty, `startReel` / `stepReel` →
+  snap / land / free, surges, tiring, junk that cannot snap), `botHolds`, `wander` / `steerTo` for fish shadows, `groupBy`.
+- `js/games/fish-view.js` — browser-only 3D bits: a cartoon fish (or boot / kettle / weed) per species, bobber, a rod on
+  the hand bone with a tip, a sagging line. `js/games/fish.css` (imports golf.css) — tension meter, catch card, medals.
+- Halloween reskins (looks + names only) on Reel Rumble, Pier Pressure and Glimmer Ice; all three are in
+  `tests/halloween-reskins.test.js`. Lobby difficulty changes bite windows, line strength, freeze speed, how shy fish are.
+- Tests: `tests/{reel-rumble,pier-pressure,net-gains,glimmer-ice}.test.js` (full bot games 1-4 players, a good bot beats
+  a sloppy one at every difficulty, determinism, small state); `tests/helpers.js` has a `pier-pressure` UI bot.
+- Card art: Codex (`assets/art/card-{reel-rumble,pier-pressure,net-gains,glimmer-ice}.webp`).
+
 ## Round 9 (2026-10-23): live reports #13-#18 + Claude's play-test
 
 - **The invite code survives a tab switch (#13):** a lobby keeps a phone that dropped for five minutes
@@ -382,6 +406,47 @@ Twelve reports from the live server, all fixed:
 - **Claude's play-test:** the guest lobby's see-through "Waiting for the host" bar sat over the Teams button (the bar
   is solid now and only the host's Start button stays stuck to the bottom), and the board's top bar ran under the
   ☰ button (it stops 92 px from the edge now).
+
+## Accounts (2026-10-23)
+
+The owner: "sign in optional. QR code to sign in using your phone on all games … I'd like to use my TV account for the
+other games — same password, different saves." One games.radgh.com account works in every game (Thousandvale usernames
+and passwords included); each game keeps its own save on it.
+
+- **For players.** "Sign in" sits on the title screen, in the ☰ menu and at the bottom of the look editor. It opens the
+  shared sign-in box (`shared/rgs-signin.js`: a QR code to approve from a phone that is already signed in, username +
+  password, or make an account). It is optional — guests play exactly as before. Signed in, your character, coins and
+  costumes are kept on the account, so the same ones turn up on any phone or PC you sign in on. Your in-game name stays
+  whatever you typed; the account name only shows on the account button.
+- **How the server learns who you are.** The page asks rgs-api for a one-time **ticket** (`account.ticket('tumblefair')`,
+  shared/rgs-account.js) and sends it in `hello` (every connect, so a reconnect is still you) or in `account { ticket }`
+  (signing in without reconnecting; `account {}` signs out). `js/sim/hub.js` hands it to `redeem` —
+  `server/rgs.mjs` `createRedeemer`, which calls `POST <RGS_API>/auth/redeem` (works once, lasts 2 minutes, must be a
+  ticket made for this game). Only that answer is believed; a user id from a browser is never used. While a ticket is
+  being redeemed, that socket's other messages wait in a short queue. If redeem fails (bad ticket, API down) the player
+  carries on as the guest, it is logged (`account.redeem_failed`) and the page says so in a small message.
+- **Profile keys** (`js/sim/profiles.js`, `<data>/profiles.json`): a guest is keyed by its random token (the one in the
+  browser's localStorage, as before); an account by **`acct:<user id>`**. `profiles.guest(token)` refuses any `acct:` key, so a
+  browser can never name one. First sign-in on a device: if the account has no profile yet, the guest profile
+  **becomes** the account's (moved, not copied — no coins counted twice; note `moved`); if it has one, the account's is
+  used and the guest profile is left alone (note `kept`, and the page says so). Signing out goes back to the device's
+  guest profile — a fresh one if it was moved. Signing in while in a room keeps your seat and moves it onto the account
+  (the match's coins go to the account). Server answers: `welcome`/`acct` carry `account: { id, name, username } | null`,
+  `note`, and the device's guest `token` (omitted when it became the account's).
+- **The admin feed** for games.radgh.com/admin/ (`server/rgs.mjs` `createAdminFeed`, also used by Knockabout):
+  `GET /internal/admin/feed` -> `{ game, build, uptime_s, online: { rooms, players }, reports (newest 300, no addresses),
+  ratings (per minigame: up, down, plays, score, offered, picked, reasons), insights (30-day totals), counts (day by
+  day + totals) }`; `POST /internal/admin/action { action: 'report', ids, state: 'done'|'declined'|'new', note }` ->
+  `{ ok, changed }` — the same as `tools/feedback-report.mjs --mark` (both use `markReports` in `server/feedback.mjs`).
+  Off (404) unless `RGS_ADMIN_SECRET` is set; the request needs header `x-rgs-admin: <secret>` (constant-time compare,
+  403 otherwise).
+- **Env vars:** `RGS_API` (default `https://games.radgh.com/api`; the droplet and the VM dev unit use
+  `http://127.0.0.1:8600/api`) and `RGS_ADMIN_SECRET`. The dev unit gets them from a local drop-in,
+  `~/.config/systemd/user/tumblefair-dev.service.d/rgs.conf` (not in git); the droplet unit reads
+  `EnvironmentFile=-/etc/tumblefair/env`.
+- Tests: `tests/accounts.test.js` (redeem against a pretend rgs-api, the move / keep rules, signing in and out on one
+  socket and in a room, the admin feed's lock and the report action) and `tests/accounts.spec.js` (Playwright against the
+  dev server + the VM's real rgs-api: the button shows, a guest can host, sign-up / out / in swaps the character).
 
 ## What worked / what didn't
 
@@ -416,8 +481,7 @@ From the design document, deliberately left for a later round:
 - **Host settings in the lobby:** choosing the minigame pool (the server already accepts `opt pool`), vote shortlist
   size and difficulty are not on the lobby screen yet; only mode, rounds and teams are.
 - **Accessibility options:** low motion, adjustable timers, larger text.
-- **Accounts:** a player is a token in that browser's storage; a new phone or a cleared browser starts fresh (coins
-  and costumes included). No account linking yet.
+- ~~Accounts~~ — built 2026-10-23, see "Accounts (2026-10-23)".
 - **Bots** to fill empty seats for one- or two-player groups.
 - **More boards** (one starter board), seasonal costumes, achievements.
 - Tuning after real play: Cannonball Catch's difficulty, Meteor Dash's pace, ticket and coin amounts.

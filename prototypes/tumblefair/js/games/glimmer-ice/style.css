@@ -1,0 +1,11 @@
+@import url('../fish.css');
+/* Glimmer Ice: the "!" over a hole with a bite, and a cold-blue pill. */
+.tag.gi-bang { background: var(--sun); color: var(--ink); text-shadow: none; font: 900 22px/1.1 var(--font); padding: 0 10px; animation: fk-shake .12s linear infinite; }
+.tag.gi-bang.off { display: none !important; }
+.game-glimmer-ice .gp-pill b { color: #2a6ab8; }
+/* the northern lights over the top of the screen (pointer-events none: it never eats a tap) */
+.game-glimmer-ice .gi-sky { position: absolute; left: 0; right: 0; top: 0; height: 26%; pointer-events: none; opacity: .55; mix-blend-mode: screen;
+  background: radial-gradient(60% 70% at 25% 0%, rgba(110, 255, 180, .55), transparent 70%), radial-gradient(50% 60% at 70% 0%, rgba(190, 120, 255, .5), transparent 70%), radial-gradient(40% 50% at 50% 10%, rgba(110, 220, 255, .35), transparent 70%);
+  animation: gi-aurora 9s ease-in-out infinite alternate; }
+@keyframes gi-aurora { to { background-position: 12% 0, -10% 0, 4% 0; opacity: .8; } }
+.game-glimmer-ice.season-halloween .gi-sky { opacity: .35; }

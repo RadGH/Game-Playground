@@ -58,6 +58,23 @@ export function createView(ctx) {
   const arrow = mesh(keep(new THREE.ConeGeometry(0.32, 0.6, 4).rotateX(Math.PI)), std('#ffd23f', { emissive: new THREE.Color('#ffb000'), emissiveIntensity: 0.6 }), 0, 2.2, 0, mark);
   markRing.renderOrder = 3;
 
+  // ---- rubblings (round 9): little clay-orange rocks on stubby feet (not grey: they must stand out from the golem and the boulders) with two white eyes, one group each, kept by id
+  const rubGeo = keep(new THREE.DodecahedronGeometry(RULES.addR, 0)), footGeo = keep(new THREE.BoxGeometry(0.16, 0.12, 0.22)), rubEyeGeo = keep(new THREE.SphereGeometry(0.1, 8, 6));
+  const rubMat = std('#e0985a', { flatShading: true }), rubSleep = std('#a8784f', { flatShading: true }), rubEye = std('#ffffff', { emissive: new THREE.Color('#ffe9a8'), emissiveIntensity: 0.5 });
+  const rubs = new Map();
+  function rubbling(id, x, z) {
+    const g = new THREE.Group(); g.position.set(x, 0, z); group.add(g);
+    const body = mesh(rubGeo, rubMat, 0, RULES.addR + 0.08, 0, g); body.castShadow = true; body.scale.set(1, 0.85, 1);
+    const feet = [-1, 1].map(sx => mesh(footGeo, dark, sx * 0.17, 0.06, 0.05, g));
+    [-1, 1].forEach(sx => mesh(rubEyeGeo, rubEye, sx * 0.14, RULES.addR + 0.16, RULES.addR * 0.85, g));
+    const R = { g, body, feet, x, z, yaw: 0, tx: x, tz: z, ty: 0, t: Math.random() * 6, born: 0 }; rubs.set(id, R); return R;
+  }
+  function syncRubs(rows) {
+    const seen = new Set();
+    for (const [id, x, z, yaw, rest] of rows || []) { seen.add(id); const R = rubs.get(id) || rubbling(id, x, z); R.tx = x; R.tz = z; R.ty = yaw; R.rest = rest; R.body.material = rest ? rubSleep : rubMat; }
+    for (const [id, R] of rubs) if (!seen.has(id)) { group.remove(R.g); rubs.delete(id); }
+  }
+
   // ---- falling pebbles (one per pebble ring, shown in its last half second)
   const pebGeo = keep(new THREE.DodecahedronGeometry(0.42, 0));
 
@@ -73,7 +90,7 @@ export function createView(ctx) {
       G = g;
       if (g.ph !== ph) { if (g.ph === 'open') slamT = 0; ph = g.ph; }
       K.rings(g.rg, { onAdd: R => { if (R.r < 1.5) { R.peb = mesh(pebGeo, dark, R.x, 9, R.z); R.peb.castShadow = true; } }, onDrop: R => { if (R.peb) group.remove(R.peb); } });
-      K.hp(g.hp, init.hpMax);
+      K.hp(g.hp, init.hpMax); syncRubs(g.mn);
       const pips = g.ck ? Array.from({ length: init.hitsPer }, (_, i) => `<i class="bk-pip${i < init.hitsPer - g.ck[1] ? ' on' : ''}">${i < init.hitsPer - g.ck[1] ? '✓' : ''}</i>`).join('') : '';
       K.row(`<span class="bk-tag">Cracks ${g.br}/${init.cracks}</span>${g.ck ? `<span class="bk-tag hot">${LIMBS[g.ck[0]].name}!</span>${pips}` : ''}`);
       bar.set(g.sc, g.left);
@@ -86,12 +103,16 @@ export function createView(ctx) {
       else if (ev.e === 'hit') { const p = limbSpot(gx, gz, gy, ev.limb); K.puff(p.x, 1, p.z, '#ffd23f', 0.8); floatText(stage, p.x, 2.2, p.z, ev.left > 0 ? `${ev.left} more!` : 'CRACK!', 'good'); ctx.sfx(ev.pid === me ? 'coins' : 'hit'); }
       else if (ev.e === 'broke') { K.banner('Crack broken!', 'good', 1100); ctx.sfx('good'); }
       else if (ev.e === 'close') { K.banner('It closed up!', 'bad', 900); }
-      else if (ev.e === 'hurt') { ctx.sfx(ev.pid === me ? 'bad' : 'hit'); const p = ctx.pos(ev.pid); if (p) floatText(stage, p.x, 2, p.z, 'BONK!', 'bad'); }
+      else if (ev.e === 'hurt') { ctx.sfx(ev.pid === me ? 'bad' : 'hit'); const p = ctx.pos(ev.pid); if (p) floatText(stage, p.x, 2, p.z, ev.why === 'add' ? 'Nibbled!' : 'BONK!', 'bad'); }
       else if (ev.e === 'swing') { if (ev.pid === me) ctx.sfx('tap'); }
+      else if (ev.e === 'jump') { if (ev.pid === me) ctx.sfx('tap'); }
+      else if (ev.e === 'stomp') { const p = ctx.pos(ev.on); if (p) { floatText(stage, p.x, 2.2, p.z, 'BOING! ✦✦', 'bad'); K.puff(p.x, 1.6, p.z, '#fff4a8', 0.6); } ctx.sfx(ev.on === me ? 'bad' : 'throw'); }
+      else if (ev.e === 'addHit') { K.puff(ev.x, 0.5, ev.z, '#cfc4ad', 0.7); ctx.sfx('hit'); }
+      else if (ev.e === 'addDie') { K.puff(ev.x, 0.4, ev.z, '#bfb29a', 1.2); K.puff(ev.x, 0.7, ev.z, '#e3d6b8', 0.7); floatText(stage, ev.x, 1.4, ev.z, ev.how === 'stomp' ? 'STOMP!' : 'SMASH!', 'good'); ctx.sfx(ev.pid === me ? 'coins' : 'hit'); }
       else if (ev.e === 'end') { K.banner(ev.ok ? 'Golem crumbled!' : 'The golem stands!', ev.ok ? 'good' : 'bad', 4000); ctx.sfx(ev.ok ? 'win' : 'bad'); }
     },
     input(inp) { if (inp.b & IN.A) ctx.actor(me)?.play('punch', 380); },
-    pose(pid, flags) { if (flags & F.STUN) return 'hit'; if (G?.ph === 'end') return G.br >= init.cracks ? 'cheer' : 'sitGround'; return undefined; },
+    pose(pid, flags) { if (flags & F.STUN) return 'hit'; if (G?.ph === 'end') return G.br >= init.cracks ? 'cheer' : 'sitGround'; if (flags & F.AIR) return 'jump'; return undefined; },
     frame(dt, t) {
       K.frame(dt, t);
       if (G) { const k = Math.min(1, dt * 8); gx += (G.gx - gx) * k; gz += (G.gz - gz) * k; let d = G.gy - gy; d = Math.atan2(Math.sin(d), Math.cos(d)); gy += d * k; }
@@ -117,9 +138,17 @@ export function createView(ctx) {
       limbMat.forEach((m, i) => { m.emissiveIntensity = ck && ck[0] === i ? 0.55 + 0.4 * Math.abs(Math.sin(t * 6)) : 0; });
       mark.visible = !!ck;
       if (ck) { const s = limbSpot(gx, gz, gy, ck[0]); mark.position.set(s.x, 0, s.z); arrow.position.y = 2.1 + 0.25 * Math.sin(t * 6); arrow.rotation.y = t * 2; }
+      // rubblings waddle (eased toward the server's spot; feet patter while they move, a rest = sat still)
+      for (const R of rubs.values()) {
+        const k = Math.min(1, dt * 10), mx = R.tx - R.x, mz = R.tz - R.z; R.x += mx * k; R.z += mz * k;
+        let d = R.ty - R.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); R.yaw += d * k;
+        R.born = Math.min(1, R.born + dt * 3); R.t += dt * (R.rest ? 0 : 14);
+        R.g.position.set(R.x, R.rest ? 0 : Math.abs(Math.sin(R.t)) * 0.07, R.z); R.g.rotation.y = R.yaw; R.g.scale.setScalar(R.born);
+        R.feet[0].position.z = 0.05 + Math.sin(R.t) * 0.08; R.feet[1].position.z = 0.05 - Math.sin(R.t) * 0.08;
+      }
       // pebbles drop into their rings
       for (const R of K.live.values()) if (R.peb) { const f = Math.max(0, R.left / 0.5); R.peb.position.y = 0.4 + Math.min(1, f) * 9; R.peb.visible = R.left < 0.55; R.peb.rotation.x += dt * 5; }
     },
-    dispose() { removeEventListener('resize', frameCam); bar.el.remove(); K.dispose(); },
+    dispose() { for (const R of rubs.values()) group.remove(R.g); rubs.clear(); removeEventListener('resize', frameCam); bar.el.remove(); K.dispose(); },
   };
 }

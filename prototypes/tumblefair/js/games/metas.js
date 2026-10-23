@@ -1927,9 +1927,9 @@ export const GAMES = Object.freeze({
    "blurb": "Dodge the stone golem’s slams, then smash the glowing cracks together!",
    "how": [
     "Red ring on the ground = the golem is about to slam there. Get out!",
-    "After a slam a crack GLOWS on one of its limbs (gold ring beside it).",
-    "Run to the gold ring and press A to hit the crack.",
-    "Break every crack before the bell!"
+    "After a slam a crack GLOWS on a limb: stand in its gold ring and press A. Break every crack before the bell!",
+    "Slams shake loose little RUBBLINGS that chase you: A smashes them, or jump on them.",
+    "B jumps. Land on a friend's head and they see stars!"
    ],
    "kind": "arena",
    "min": 1,
@@ -1943,7 +1943,8 @@ export const GAMES = Object.freeze({
    ],
    "controls": {
     "stick": true,
-    "a": "Smash"
+    "a": "Smash",
+    "b": "Jump"
    },
    "move": {
     "speed": 6.2,

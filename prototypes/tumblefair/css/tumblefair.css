@@ -115,7 +115,7 @@ input[type=text], input:not([type]) { user-select: text; -webkit-user-select: te
 @media (max-aspect-ratio: 1/1) { .lobby-code .qr { width: 72px; height: 72px; } .lobby-code .code { font-size: 32px; } }
 
 /* ---- match bar ---- */
-.match-bar { position: absolute; top: calc(var(--st) + 6px); left: 6px; right: 48px;   /* 48: the ! button */ display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; align-items: center; }
+.match-bar { position: absolute; top: calc(var(--st) + 6px); left: 6px; right: calc(var(--sr, 0px) + 92px);   /* 92: the ☰ and ! buttons */ display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; align-items: center; }
 .match-bar .round { background: var(--ink); color: #fff; border-radius: 999px; padding: 4px 10px; font-size: 13px; }
 .match-bar .chip { font-size: 14px; } .match-bar .chip.turn { background: var(--sun); transform: scale(1.06); }
 .match-bar .sc { font-style: normal; font-weight: 900; } .sc.tk { color: #b07a00; } .sc.rb { color: #d1245e; }
@@ -182,6 +182,7 @@ input[type=text], input:not([type]) { user-select: text; -webkit-user-select: te
 .ed-row { display: grid; grid-template-columns: 84px 40px minmax(0, 1fr) 40px; gap: 6px; align-items: center; font-size: 14px; }
 .ed-row b { text-align: center; text-transform: capitalize; } .ed-row .sws { grid-column: 2 / -1; display: flex; gap: 5px; flex-wrap: wrap; } .ed-row input[type=range] { grid-column: 2 / -1; width: 100%; height: 36px; }
 .step { border: 3px solid var(--ink); border-radius: 10px; background: #fff; min-height: 38px; font-size: 20px; font-weight: 900; }
+.step-pick { min-width: 0; width: 100%; min-height: 38px; border: 3px solid var(--ink); border-radius: 10px; background: #fff; color: var(--ink); font: 800 16px/1.1 var(--font); text-align: center; text-align-last: center; text-transform: capitalize; padding: 0 6px; }   /* 16px: smaller and iPhone zooms the page on tap */
 .sw { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--ink); padding: 0; } .sw.on { outline: 3px solid var(--sun); outline-offset: 1px; }
 .costumes { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
 .costume { border: 3px solid var(--ink); border-radius: 14px; background: #fff; padding: 6px; display: grid; gap: 2px; justify-items: center; font-size: 13px; }
@@ -228,7 +229,8 @@ body[data-phase=game] .fb-btn { width: 28px; height: 28px; font-size: 15px; opac
 .mode-desc { margin: -2px 0 0; font-size: 13px; font-weight: 600; color: #47606a; }
 .modes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .mode { padding: 8px 6px; text-align: center; place-content: center; min-height: 52px; } .mode b { font-size: 14px; line-height: 1.15; } .mode span { display: none; }
-.lobby-go { position: sticky; bottom: 0; z-index: 2; display: grid; gap: 4px; justify-items: center; margin: 0 -16px -14px; padding: 12px 16px 12px; border-radius: 0 0 18px 18px; background: linear-gradient(rgba(255, 248, 232, 0), var(--paper) 22%); }
+.lobby-go { position: sticky; bottom: 0; z-index: 2; display: grid; gap: 4px; justify-items: center; margin: 0 -16px -14px; padding: 10px 16px 12px; border-radius: 0 0 18px 18px; background: var(--paper); box-shadow: 0 -14px 12px -6px var(--paper); }   /* solid: the old see-through fade let the Teams row show through the bar */
+.lobby-go.guest { position: static; box-shadow: none; }   /* only the host's Start button needs to follow you down the page */
 .lobby-go .btn.big { width: 100%; }
 .lobby-main .row.opts { gap: 6px; } .lobby-main .row.opts > span:first-child { min-width: 5.2em; font-weight: 800; font-size: 13px; }
 @media (max-width: 420px) { .lobby-main h2 { font-size: 13px; } .lobby-main .pill { padding: 6px 10px; font-size: 14px; } }
@@ -331,3 +333,13 @@ body[data-phase=game] .qr-btn { right: calc(var(--sr) + 76px); }
 .btn.danger.sure, .btn.sure { background: #e84a4a; color: #fff; }
 .watch-btn { margin-top: 2px; }
 .qr-big .qr-x { margin-top: 10px; min-width: 160px; }
+
+/* report #14: the button a controller is on (js/client/padnav.js) */
+.pad-focus { outline: 4px solid var(--sun, #ffc83d) !important; outline-offset: 3px; box-shadow: 0 0 0 7px rgba(26, 42, 50, .55) !important; z-index: 3; }
+
+/* round 9: move cards (report #16) */
+.ask.hand .cards { gap: 8px; justify-content: center; flex-wrap: nowrap; }
+.mcard { flex: 1 1 0; max-width: 84px; aspect-ratio: 5 / 7; display: grid; place-content: center; gap: 2px; border: 3px solid var(--ink); border-radius: 12px; background: linear-gradient(#fff, #fff1c9); box-shadow: 0 4px 0 var(--ink); color: var(--ink); cursor: pointer; padding: 4px; }
+.mcard b { font: 900 34px/1 var(--font); } .mcard small { font-size: 11px; font-weight: 800; color: #47606a; }
+.mcard.mystery { background: repeating-linear-gradient(45deg, #6b4bd6 0 8px, #5a3cc0 8px 16px); color: #fff; } .mcard.mystery small { color: #e8ddff; }
+.mcard:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }

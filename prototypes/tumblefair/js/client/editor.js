@@ -18,12 +18,16 @@ export function createEditor({ look, races, raceNames, onChange, onClose }) {
   const commit = () => { cur = lookWith(cur, custom); push(); draw(); };
   const sw = (list, val, key) => list.map(c => `<button class="sw${String(val).toLowerCase() === c ? ' on' : ''}" style="background:${c}" data-color="${key}" data-c="${c}" aria-label="${c}"></button>`).join('');
   const nice = (slot, id) => PART_NAMES[slot]?.[id] || String(id || '').replace(/_/g, ' ');
-  const stepper = (attrs, label) => `<button class="step" ${attrs} data-d="-1" aria-label="previous">‹</button><b>${label}</b><button class="step" ${attrs} data-d="1" aria-label="next">›</button>`;
+  // ‹ › still step one at a time, and the name between them is a pick-list straight to any one (report #15, 2026-10-23)
+  const stepper = (attrs, label, ids, now, name) => `<button class="step" ${attrs} data-d="-1" aria-label="previous">‹</button>${ids?.length > 1
+    ? `<select class="step-pick" ${attrs} aria-label="choose">${ids.map(id => `<option value="${String(id).replace(/"/g, '&quot;')}"${String(id) === String(now) ? ' selected' : ''}>${name(id)}</option>`).join('')}</select>`
+    : `<b>${label}</b>`}<button class="step" ${attrs} data-d="1" aria-label="next">›</button>`;
+  const fromStr = (ids, v) => ids.find(id => String(id) === v);
   function fieldRows(s) {
     const part = custom[s.slot] || {};
     return (s.fields || []).filter(f => !f.when || f.when.includes(part.id)).map(f => {
       const at = `data-slot="${s.slot}" data-field="${f.key}"`;
-      if (f.type === 'pick') return `<div class="ed-row sub"><span>${f.label}</span>${stepper(at, f.names?.[part[f.key] ?? f.ids[0]] || nice('', part[f.key] ?? f.ids[0]))}</div>`;
+      if (f.type === 'pick') { const fname = id => f.names?.[id] || nice('', id); return `<div class="ed-row sub"><span>${f.label}</span>${stepper(at, fname(part[f.key] ?? f.ids[0]), f.ids, part[f.key] ?? f.ids[0], fname)}</div>`; }
       if (f.type === 'range') return `<label class="ed-row sub"><span>${f.label}</span><input type="range" min="${f.min}" max="${f.max}" step="0.01" value="${part[f.key] ?? f.def ?? 1}" ${at}></label>`;
       if (f.type === 'color') return `<div class="ed-row sub"><span>${f.label}</span><div class="sws">${f.clear ? `<button class="sw clear${part[f.key] ? '' : ' on'}" data-color="${s.slot}" data-field="${f.key}" data-c="">${f.clear}</button>` : ''}${PALETTES[f.palette].map(c => `<button class="sw${String(part[f.key] || '').toLowerCase() === c ? ' on' : ''}" style="background:${c}" data-color="${s.slot}" data-field="${f.key}" data-c="${c}" aria-label="${c}"></button>`).join('')}</div></div>`;
       return '';
@@ -37,9 +41,9 @@ export function createEditor({ look, races, raceNames, onChange, onClose }) {
       <div class="presets">${PRESETS.map(p => `<button class="preset" data-preset="${p.id}"><img src="${portrait({ look: lookWith(cur, { body: custom.body, headShape: custom.headShape, ...p.custom }), costume: 'cos_none' })}" alt=""><b>${p.name}</b></button>`).join('')}</div>
       <h3 class="ed-h">Fine tune</h3>
       <div class="ed-grid">
-        ${FACE_SLOTS.map(s => { const ids = slotIds(s, cur.race), v = s.slot === 'headShape' ? custom.headShape : custom[s.slot]?.id; return `<div class="ed-row"><span>${s.label}</span>${stepper(`data-slot="${s.slot}"`, nice(s.slot, v || ids[0]))}${s.color ? `<div class="sws">${sw(PALETTES[s.color], custom[s.slot]?.color || '', s.slot)}</div>` : ''}</div>${fieldRows(s)}`; }).join('')}
+        ${FACE_SLOTS.map(s => { const ids = slotIds(s, cur.race), v = s.slot === 'headShape' ? custom.headShape : custom[s.slot]?.id; return `<div class="ed-row"><span>${s.label}</span>${stepper(`data-slot="${s.slot}"`, nice(s.slot, v || ids[0]), ids, v || ids[0], id => nice(s.slot, id))}${s.color ? `<div class="sws">${sw(PALETTES[s.color], custom[s.slot]?.color || '', s.slot)}</div>` : ''}</div>${fieldRows(s)}`; }).join('')}
         <div class="ed-row"><span>Skin</span><div class="sws">${sw(PALETTES.skin, custom.body?.skin || '', 'skin')}</div></div>
-        ${BODY_PICKS.map(p => `<div class="ed-row"><span>${p.label}</span>${stepper(`data-pick="${p.key}"`, p.names?.[custom.body?.[p.key] ?? p.ids[0]] || nice('', custom.body?.[p.key] ?? p.ids[0]))}</div>`).join('')}
+        ${BODY_PICKS.map(p => `<div class="ed-row"><span>${p.label}</span>${stepper(`data-pick="${p.key}"`, p.names?.[custom.body?.[p.key] ?? p.ids[0]] || nice('', custom.body?.[p.key] ?? p.ids[0]), p.ids, custom.body?.[p.key] ?? p.ids[0], id => p.names?.[id] || nice('', id))}</div>`).join('')}
         ${BODY_DIALS.map(d => `<label class="ed-row"><span>${d.label}</span><input type="range" min="${d.min}" max="${d.max}" step="0.01" value="${custom.body?.[d.key] ?? (d.min + d.max) / 2}" data-dial="${d.key}"></label>`).join('')}
       </div></div>`;
   }
@@ -70,7 +74,19 @@ export function createEditor({ look, races, raceNames, onChange, onClose }) {
       return commit();
     }
   });
+  el.addEventListener('change', e => {
+    const sel = e.target.closest('select.step-pick'); if (!sel) return;
+    const v = sel.value;
+    if (sel.dataset.pick) { const p = BODY_PICKS.find(x => x.key === sel.dataset.pick), id = fromStr(p.ids, v); if (id === undefined) return; custom.body = { ...custom.body, [p.key]: id }; return commit(); }
+    const s = FACE_SLOTS.find(x => x.slot === sel.dataset.slot); if (!s) return;
+    const f = sel.dataset.field;
+    if (f) { const fd = s.fields.find(x => x.key === f), id = fromStr(fd.ids, v); if (id === undefined) return; custom[s.slot] = { ...(custom[s.slot] || { id: s.ids[0] }), [f]: id }; return commit(); }
+    const id = fromStr(slotIds(s, cur.race), v); if (id === undefined) return;
+    if (s.slot === 'headShape') custom.headShape = id; else custom[s.slot] = { ...(custom[s.slot] || {}), id };
+    commit();
+  });
   el.addEventListener('input', e => {
+    if (e.target.tagName === 'SELECT') return;
     const d = e.target.dataset.dial, slot = e.target.dataset.slot, f = e.target.dataset.field;
     if (d) custom.body = { ...custom.body, [d]: +e.target.value };
     else if (slot && f) custom[slot] = { ...(custom[slot] || { id: FACE_SLOTS.find(x => x.slot === slot).ids[0] }), [f]: +e.target.value };

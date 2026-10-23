@@ -2,12 +2,16 @@
 //   roll (a tap, or the timer rolls for you) -> walk space by space -> stop to ASK at a crossroads or when passing a
 //   prize booth with enough tickets -> land -> the space's effect -> next player. When everyone has had a turn the
 //   round is over and the room moves on to the minigame vote.
+// Move cards (round 9, live report #16 "card mode instead of dice"): with `moves: 'cards'` every player holds a hand of
+// HAND move cards (1 to 6). On your turn you play one of yours (you know what you get) or draw a face-down card from a
+// random rival's hand and walk that (it could be anything; they draw a fresh one). A played card is replaced from the
+// deck straight away. A golden die adds a roll to the card; sticky shoes cap it at 3. No answer: your first card.
 // The room drives it: call tick(now) every server tick and roll()/choose() from player messages; every visible thing
 // that happens is handed to emit(event) for the room to broadcast. Pure: seeded rng in, events out.
 
 export const BOARD = Object.freeze({
   ROLL_MS: 12000, DICE_MS: 1100, STEP_MS: 330, ASK_MS: 8000, FX_MS: 1700, CHANCE_MS: 3400, BULLETIN_MS: 4200, DUEL_MS: 3200,
-  RIBBON_COST: 10, LAP_BONUS: 5, DIE: 6, TICKET: 3, JACKPOT: 8, PIT: 3, DUEL: 4, BUMPER: 3,
+  HAND: 4, RIBBON_COST: 10, LAP_BONUS: 5, DIE: 6, TICKET: 3, JACKPOT: 8, PIT: 3, DUEL: 4, BUMPER: 3,
   DUCKS: [1, 2, 3, 4, 6, 8, 10],               // what a duck can hide (three are drawn each time)
 });
 /** Round 5 (2026-10-22): the Fair Bulletin. Each round after the first draws one of `chance.bulletins` (weighted); the
@@ -24,15 +28,18 @@ export function indexBoard(def) {
   return byId;
 }
 
-export function createBoardMatch({ def, chance, order, rng, names = {}, emit = () => {} }) {
+export function createBoardMatch({ def, chance, order, rng, names = {}, emit = () => {}, moves = 'dice' }) {
+  const cards = moves === 'cards';
   const byId = indexBoard(def);
   const S = {
     order: order.slice(), pos: {}, tickets: {}, ribbons: {},
     turn: -1, pid: null, sub: 'idle', until: 0, left: 0, ask: null, rolled: 0, roundDone: false,
-    boost: {}, stats: {}, bulletin: null, mods: {},
+    boost: {}, stats: {}, bulletin: null, mods: {}, hands: {},
   };
+  const deal = () => rng.int(1, BOARD.DIE);
+  const fillHand = pid => { if (!cards) return; const h = S.hands[pid] || (S.hands[pid] = []); while (h.length < BOARD.HAND) h.push(deal()); };
   const newStats = () => ({ earned: 0, lost: 0, walked: 0, duels: 0, chance: 0 });
-  for (const pid of order) { S.pos[pid] = def.start; S.tickets[pid] = 5; S.ribbons[pid] = 0; S.stats[pid] = newStats(); }
+  for (const pid of order) { S.pos[pid] = def.start; S.tickets[pid] = 5; S.ribbons[pid] = 0; S.stats[pid] = newStats(); fillHand(pid); }
   const name = pid => names[pid] || 'Player';
   /** Tickets in or out; returns what actually moved. `count` = false for the minigame's payout (not a board stat). */
   const give = (pid, n, count = true) => {
@@ -47,10 +54,10 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
   const others = pid => S.order.filter(p => p !== pid);
   const fill = (text, p, o) => text.replaceAll('{p}', name(p)).replaceAll('{o}', o != null ? name(o) : 'nobody');
 
-  function addPlayer(pid) { if (pid in S.pos) return; S.order.push(pid); S.pos[pid] = def.start; S.tickets[pid] = 5; S.ribbons[pid] = 0; S.stats[pid] = newStats(); }
+  function addPlayer(pid) { if (pid in S.pos) return; S.order.push(pid); S.pos[pid] = def.start; S.tickets[pid] = 5; S.ribbons[pid] = 0; S.stats[pid] = newStats(); fillHand(pid); }
   function dropPlayer(pid) {
     const i = S.order.indexOf(pid); if (i < 0) return;
-    S.order.splice(i, 1);
+    S.order.splice(i, 1); delete S.hands[pid];
     if (i < S.turn) S.turn--; else if (i === S.turn) { S.turn--; S.sub = 'next'; S.until = 0; }
   }
 
@@ -82,9 +89,32 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
     S.turn++; S.ask = null;
     if (S.turn >= S.order.length) { S.sub = 'idle'; S.pid = null; S.roundDone = true; emit({ ev: 'roundEnd' }); return; }
     S.pid = S.order[S.turn]; S.sub = 'roll'; S.until = now + BOARD.ROLL_MS;
-    emit({ ev: 'turn', pid: S.pid, ms: BOARD.ROLL_MS });
+    emit({ ev: 'turn', pid: S.pid, ms: BOARD.ROLL_MS, ...(cards ? { hands: handsView() } : {}) });
+  }
+  const handsView = () => Object.fromEntries(Object.entries(S.hands).map(([p, h]) => [p, h.slice()]));
+  /** Card mode: play card `i` of your hand, or i = -1 for a face-down card out of a random rival's hand. */
+  function playCard(pid, i, now) {
+    if (!cards || S.sub !== 'roll' || pid !== S.pid) return false;
+    const hand = S.hands[pid] || []; let n, from = null;
+    if (i === -1) {
+      const rivals = others(pid).filter(p => S.hands[p]?.length);
+      if (!rivals.length) return false;
+      from = rng.pick(rivals); const h = S.hands[from], k = rng.int(0, h.length - 1); n = h.splice(k, 1)[0]; fillHand(from);
+    } else {
+      if (!(i >= 0 && i < hand.length)) return false;
+      n = hand.splice(i, 1)[0]; fillHand(pid);
+    }
+    const boost = S.boost[pid]; delete S.boost[pid];
+    let extra = null;
+    if (boost === 'gold') { extra = rng.int(1, BOARD.DIE); }
+    else if (boost === 'slow') n = Math.min(n, 3);
+    S.rolled = n + (extra || 0); S.left = S.rolled;
+    S.sub = 'dice'; S.until = now + BOARD.DICE_MS;
+    emit({ ev: 'rolled', pid, n: S.rolled, card: n, ...(from != null ? { from } : {}), ...(boost ? { boost, ...(extra ? { dice: [n, extra] } : {}) } : {}), hands: handsView() });
+    return true;
   }
   function roll(pid, now, forced = null) {
+    if (cards && forced == null) return false;
     if (S.sub !== 'roll' || pid !== S.pid) return false;
     const boost = S.boost[pid]; delete S.boost[pid];
     let dice = [rng.int(1, BOARD.DIE)];
@@ -236,7 +266,7 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
   function tick(now) {
     if (S.sub === 'idle' || now < S.until) return;
     switch (S.sub) {
-      case 'roll': roll(S.pid, now); break;                                   // the timer rolls for you
+      case 'roll': if (cards) playCard(S.pid, 0, now); else roll(S.pid, now); break;   // the timer rolls (or plays your first card) for you
       case 'dice': walk(now); break;
       case 'walk-ask': openAsk(now); break;
       case 'ask': choose(S.pid, S.ask.kind === 'fork' ? 0 : 0, now); break;    // no answer: the long way / buy the ribbon
@@ -246,8 +276,8 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
       case 'bulletin': nextTurn(now); break;
     }
   }
-  const view = () => ({ order: S.order, pos: S.pos, tickets: S.tickets, ribbons: S.ribbons, pid: S.pid, sub: S.sub, until: S.until, rolled: S.rolled, ask: S.sub === 'ask' && S.ask ? { kind: S.ask.kind, options: S.ask.options } : null, bulletin: S.bulletin ? { id: S.bulletin.id, title: S.bulletin.title, text: S.bulletin.text } : null, boost: S.boost });
-  return { S, byId, beginRound, roll, choose, tick, view, give, addPlayer, dropPlayer, bonus, gameMul: () => mod('gameMul', 1), get roundDone() { return S.roundDone; } };
+  const view = () => ({ order: S.order, pos: S.pos, tickets: S.tickets, ribbons: S.ribbons, pid: S.pid, sub: S.sub, until: S.until, rolled: S.rolled, ask: S.sub === 'ask' && S.ask ? { kind: S.ask.kind, options: S.ask.options } : null, bulletin: S.bulletin ? { id: S.bulletin.id, title: S.bulletin.title, text: S.bulletin.text } : null, boost: S.boost, moves, ...(cards ? { hands: handsView() } : {}) });
+  return { S, byId, beginRound, roll, playCard, choose, tick, view, give, addPlayer, dropPlayer, bonus, gameMul: () => mod('gameMul', 1), get roundDone() { return S.roundDone; } };
 }
 
 /** Final order: ribbons first, then tickets. -> [{ pid, ribbons, tickets, place }] (equal on both = the same place). */

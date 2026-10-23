@@ -12,7 +12,7 @@ import { GAMES, eligible } from '../games/index.js';
 import { createBoardMatch, boardStandings } from './board.js';
 import { SEASON_IDS, effectiveSeason, seasonByDate, inSeason } from '../shared/seasons.js';
 
-export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 7000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 15000, GONE_MATCH_MS: 90000, EMPTY_MS: 60000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
+export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 7000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 300000, GONE_MATCH_MS: 90000, EMPTY_MS: 300000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
 export const OPTS = Object.freeze({
   mode: { values: ['board', 'marathon', 'endless'], def: 'board' },
   board: { values: ['fairground', 'pier'], def: 'fairground' },          // round 5: the Moonlit Pier
@@ -21,6 +21,7 @@ export const OPTS = Object.freeze({
   shortlist: { min: 2, max: 4, def: 3 },
   difficulty: { values: ['easy', 'normal', 'hard'], def: 'normal' },
   holiday: { values: ['auto', 'off', 'only', ...SEASON_IDS], def: 'auto' },   // holiday minigames + reskins: by the date, never, forced on, or ONLY holiday games
+  moves: { values: ['dice', 'cards'], def: 'dice' },                     // round 9 (report #16): roll a die, or play move cards
   public: { values: [false, true], def: false },                           // round 7: listed in "Find a game" on the title screen
 });
 /** What a minigame placing is worth, best first. Board mode pays tickets, the marathon pays points. */
@@ -39,7 +40,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const rng = makeRng(seed);
   const members = new Map();          // pid -> member
   let nextPid = 1, hostPid = null, phase = 'lobby', until = 0, emptySince = null;
-  const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, holiday: OPTS.holiday.def, public: OPTS.public.def, pool: [] };
+  const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, holiday: OPTS.holiday.def, moves: OPTS.moves.def, public: OPTS.public.def, pool: [] };
   const playedBy = new Map();          // round 7: game id -> the pids who played it in this room (only they may rate it)
   const ratings = new Map();           // `${game}:${pid}` -> { v, why } (a change of mind replaces, never adds)
   const date = () => new Date(now());
@@ -106,6 +107,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   function startMatch(by) {
     if (phase !== 'lobby' || by.pid !== hostPid) return err(by, 'host', 'Only the host can start.');
     promote();
+    for (const m of seated()) if (!m.connected) remove(m);          // a lobby keeps a phone that slept for five minutes (report #13); a match starts without it
     const players = active();
     if (!players.length) return err(by, 'empty', 'Nobody is seated yet.');
     if (!eligible(players.length, opts.pool, season()).length) return err(by, 'pool', 'No minigame in the chosen pool fits this many players.');
@@ -116,7 +118,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     if (match.mode === 'board') {
       const names = new Proxy({}, { get: (_, pid) => members.get(+pid)?.name });
       match.boardId = data.boards[opts.board] ? opts.board : 'fairground';
-      match.board = createBoardMatch({ def: data.boards[match.boardId], chance: seasonal(data.chance, season()), order: players.map(m => m.pid), rng: rng.fork(), names, emit: ev => cast({ t: 'bd', ...ev }) });
+      match.board = createBoardMatch({ def: data.boards[match.boardId], chance: seasonal(data.chance, season()), order: players.map(m => m.pid), rng: rng.fork(), names, moves: opts.moves, emit: ev => cast({ t: 'bd', ...ev }) });
     }
     log('match', { code, mode: match.mode, players: players.length });
     report('match', { mode: match.mode, players: players.length, teams: !!opts.teams, board: match.boardId || null, rounds: match.rounds, difficulty: opts.difficulty, pool: opts.pool.length, public: !!opts.public });
@@ -284,6 +286,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
       case 'kick': { const k = members.get(msg.pid); if (m.pid === hostPid && k && k.pid !== hostPid) { send(k, { t: 'kicked' }); k.connected = false; k.send = null; remove(k); } return; }
       case 'roll': if (phase === 'board' && match?.board) match.board.roll(m.pid, now()); return;
       case 'choose': if (phase === 'board' && match?.board) match.board.choose(m.pid, msg.i, now()); return;
+      case 'card': if (phase === 'board' && match?.board) match.board.playCard(m.pid, msg.i, now()); return;
       case 'vote': {
         if ((phase !== 'vote' && phase !== 'continue') || m.seat == null || !(msg.i >= 0 && msg.i < vote.options.length)) return;
         vote.votes[m.pid] = msg.i; cast({ t: 'votes', votes: vote.votes });

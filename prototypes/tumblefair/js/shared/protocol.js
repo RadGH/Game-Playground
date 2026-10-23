@@ -47,6 +47,7 @@ export const CLIENT_MSGS = Object.freeze({
   kick:    { fields: { pid: 'int' }, rate: 1, burst: 4 },
   roll:    { fields: {}, rate: 3, burst: 6 },
   choose:  { fields: { i: 'int' }, rate: 4, burst: 8 },
+  card:    { fields: { i: 'int' }, rate: 3, burst: 6 },                 // round 9: play move card i (-1 = a face-down one from a rival)
   vote:    { fields: { i: 'int' }, rate: 4, burst: 8 },
   skip:    { fields: {}, rate: 2, burst: 6 },                        // "I have read the rules" on an intro / results card
   in:      { fields: { s: 'int', mx: 'num', mz: 'num', b: 'int' }, rate: 30, burst: 60 },

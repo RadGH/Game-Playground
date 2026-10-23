@@ -13,6 +13,7 @@ import { qrSvg, joinUrl } from './qr.js';
 import { h, esc } from './gamehud.js';
 import { createEditor } from './editor.js';
 import { btnText } from './buttons.js';
+import { createPadNav } from './padnav.js';
 import { createSounds } from './sounds.js';
 import { installFeedback } from './feedback.js';
 import { SEATS, cleanCode, CODE_LENGTH, RATE_REASONS } from '../shared/protocol.js';
@@ -147,7 +148,9 @@ async function showLobby() {
       <h2>Game</h2>
       <div class="modes">${Object.entries(modes).map(([id, [t, d]]) => `<button class="mode${r.opts.mode === id ? ' on' : ''}" data-act="opt" data-key="mode" data-value="${id}" ${host ? '' : 'disabled'}><b>${t}</b><span>${d}</span></button>`).join('')}</div>
       <p class="mode-desc">${esc(modes[r.opts.mode]?.[1] || '')}</p>
-      ${r.opts.mode === 'board' ? `<div class="row opts"><span>Board</span>${Object.values(BOARDS).map(b => `<button class="pill${r.opts.board === b.id ? ' on' : ''}" data-act="opt" data-key="board" data-value="${b.id}" ${host ? '' : 'disabled'}>${esc(b.title)}</button>`).join('')}</div>` : ''}
+      ${r.opts.mode === 'board' ? `<div class="row opts"><span>Board</span>${Object.values(BOARDS).map(b => `<button class="pill${r.opts.board === b.id ? ' on' : ''}" data-act="opt" data-key="board" data-value="${b.id}" ${host ? '' : 'disabled'}>${esc(b.title)}</button>`).join('')}</div>
+        <div class="row opts"><span>Moving</span>${[['dice', 'Roll a die'], ['cards', 'Move cards']].map(([v, t]) => `<button class="pill${(r.opts.moves || 'dice') === v ? ' on' : ''}" data-act="opt" data-key="moves" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}
+        <span class="est">${r.opts.moves === 'cards' ? 'Hold 4 cards, play one, or take a mystery card from a rival' : 'Tap to roll 1 to 6'}</span></div>` : ''}
       ${r.opts.mode === 'endless' ? '' : `<div class="row opts"><span>Rounds</span>${[3, 4, 5, 6].map(v => `<button class="pill${r.opts.rounds === v ? ' on' : ''}" data-act="opt" data-key="rounds" data-num="${v}" ${host ? '' : 'disabled'}>${v}</button>`).join('')}
         <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : 1.6))} min</span></div>`}
       <div class="row opts"><span>Play as</span><button class="pill${!r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="0" ${host ? '' : 'disabled'}>Everyone for themselves</button><button class="pill${r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="1" ${host ? '' : 'disabled'}>Teams</button>
@@ -157,7 +160,7 @@ async function showLobby() {
       <div class="row opts"><span>Difficulty</span>${[['easy', 'Family'], ['normal', 'Normal'], ['hard', 'Tricky']].map(([v, t]) => `<button class="pill${r.opts.difficulty === v ? ' on' : ''}" data-act="opt" data-key="difficulty" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}</div>
       <div class="row opts"><span>Holidays</span>${[['auto', `Auto${r.dateSeason ? ` (${seasonName(r.dateSeason)})` : ''}`], ...SEASONS.map(x => [x.id, x.name]), ['only', 'Holiday games only'], ['off', 'Off']].map(([v, t]) => `<button class="pill${(r.opts.holiday || 'auto') === v ? ' on' : ''}" data-act="opt" data-key="holiday" data-value="${v}" ${host ? '' : 'disabled'}>${esc(t)}</button>`).join('')}</div>
       <div class="row opts"><span>Minigames</span><button class="pill on" data-act="pool">${r.opts.pool?.length ? `${r.opts.pool.length} picked` : `All ${Object.values(GAMES).filter(g => inSeason(g.meta, r.season)).length}`}</button>${host ? '<span class="est">tap to choose</span>' : ''}</div>
-      <div class="lobby-go">${host ? `<button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}</button>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
+      <div class="lobby-go${host ? '' : ' guest'}">${host ? `<button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}</button>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
       ${me?.display ? '<button class="btn small" data-act="swap" data-to="play">Play instead</button>' : host ? '' : '<button class="btn small" data-act="swap" data-to="watch">Just watch instead</button>'}
       <button class="btn small ghost" data-act="leave">Leave</button></div>
     </div>`);
@@ -189,6 +192,7 @@ function showBoard() {
   if (b.ask && my && b.ask.kind === 'duck') body = `<div class="panel ask duck-ask"><h3>Duck Pond: pick a duck!</h3><div class="row ducks">${b.ask.options.map((o, i) => `<button class="btn big duck d${i}" data-act="choose" data-i="${i}" aria-label="${esc(o)}">${DUCK}<span>${esc(o.split(' ')[0])}</span></button>`).join('')}</div></div>`;
   else if (b.ask && my) body = `<div class="panel ask"><h3>${b.ask.kind === 'booth' ? 'Prize Booth' : 'Crossroads'}</h3><div class="row">${b.ask.options.map((o, i) => `<button class="btn big${i === 0 ? ' primary' : ''}" data-act="choose" data-i="${i}">${esc(o)}</button>`).join('')}</div></div>`;
   else if (b.ask) body = `<div class="banner">${esc(turn?.name || '')} ${b.ask.kind === 'duck' ? 'is picking a duck…' : 'is deciding…'}</div>`;
+  else if (b.sub === 'roll' && my && S.bd.hands) { const hand = S.bd.hands[S.room.you] || []; body = `<div class="panel ask hand"><h3>Play a move card</h3><div class="row cards">${hand.map((n, i) => `<button class="mcard" data-act="card" data-i="${i}" aria-label="Move ${n}"><b>${n}</b><small>${n === 1 ? 'space' : 'spaces'}</small></button>`).join('')}<button class="mcard mystery" data-act="card" data-i="-1" aria-label="A mystery card from a rival"><b>?</b><small>a rival's</small></button></div></div>`; }
   else if (b.sub === 'roll' && my) body = `<button class="btn huge primary roll" data-act="roll">ROLL!</button>`;
   else if (b.sub === 'roll') body = `<div class="banner">${esc(turn?.name || '')}'s turn</div>`;
   const dice = b.dice ? `<div class="dice2">${b.dice.map(n => `<div class="die ${b.boost === 'gold' ? 'gold' : 'sticky'}">${n}</div>`).join('')}</div>` : b.rolled ? `<div class="die" data-n="${b.rolled}">${b.rolled}</div>` : '';
@@ -207,8 +211,10 @@ function onBoard(ev) {
     setTimeout(() => { if (S.bd.bulletin?.title === ev.title) { S.bd.bulletin = null; if (S.phase === 'board') showBoard(); } }, 4000);
   }
   if (ev.ev === 'turn') { b.bulletin = null; b.duel = null; b.dice = null; b.boost = null; }
+  if (ev.hands) b.hands = ev.hands;
   if (ev.ev === 'turn') { b.pid = ev.pid; b.sub = 'roll'; b.ask = null; b.rolled = null; b.text = ''; if (ev.pid === S.room?.you) { sfx('turn'); navigator.vibrate?.(60); } }
-  if (ev.ev === 'rolled') { b.sub = 'move'; b.rolled = ev.n; b.dice = ev.dice || null; b.boost = ev.boost || null; sfx('dice'); }
+  if (ev.ev === 'rolled') { b.sub = 'move'; b.rolled = ev.n; b.dice = ev.dice || null; b.boost = ev.boost || null; sfx('dice');
+    if (ev.card != null) { const nm = p => members().find(m => m.pid === p)?.name || ''; b.text = ev.from != null ? `${nm(ev.pid)} draws a mystery card from ${nm(ev.from)}: ${ev.card}!` : `${nm(ev.pid)} plays a ${ev.card}`; } }
   if (ev.ev === 'step') { b.tickets[ev.pid] = ev.tickets; setTimeout(() => { S.bd.rolled = null; S.bd.dice = null; if (S.phase === 'board') showBoard(); }, 600); if (ev.lap) toast(`${members().find(m => m.pid === ev.pid)?.name || ''} passes the gate: +5 tickets`); }
   if (ev.ev === 'ask') { b.ask = { kind: ev.kind, options: ev.options }; b.sub = 'ask'; }
   if (ev.ev === 'chose') { b.ask = null; b.sub = 'move'; }
@@ -368,7 +374,7 @@ net.on('room', r => {
   // a host's last minigame list comes back with them (round 5)
   if (r.phase === 'lobby' && r.host === r.you && S.poolFor !== r.code) { S.poolFor = r.code; try { const v = JSON.parse(localStorage.getItem('tumblefair.pool') || '[]').filter(id => GAMES[id]); if (v.length && !r.opts.pool?.length) net.send({ t: 'opt', key: 'pool', value: v }); } catch {} }
   const first = !S.room; S.room = r;
-  if (r.match?.board) { Object.assign(S.bd.tickets, r.match.board.tickets); Object.assign(S.bd.ribbons, r.match.board.ribbons); S.bd.pid = r.match.board.pid; S.bd.mods = r.match.board.bulletin && r.match.board.bulletin.id !== 'quiet' ? r.match.board.bulletin.title.replace(/!$/, '') : ''; if (r.match.board.bulletin) S.bd.modsInfo = { title: r.match.board.bulletin.title, text: r.match.board.bulletin.text, round: r.match.board.bulletin.round ?? r.match.round }; S.bd.sub = S.bd.sub || r.match.board.sub; if (r.match.board.ask && !S.bd.ask) S.bd.ask = r.match.board.ask; S.board?.sync(r.match.board); }
+  if (r.match?.board) { Object.assign(S.bd.tickets, r.match.board.tickets); Object.assign(S.bd.ribbons, r.match.board.ribbons); S.bd.pid = r.match.board.pid; S.bd.mods = r.match.board.bulletin && r.match.board.bulletin.id !== 'quiet' ? r.match.board.bulletin.title.replace(/!$/, '') : ''; if (r.match.board.bulletin) S.bd.modsInfo = { title: r.match.board.bulletin.title, text: r.match.board.bulletin.text, round: r.match.board.bulletin.round ?? r.match.round }; S.bd.sub = S.bd.sub || r.match.board.sub; if (r.match.board.hands) S.bd.hands = r.match.board.hands; if (r.match.board.ask && !S.bd.ask) S.bd.ask = r.match.board.ask; S.board?.sync(r.match.board); }
   if (first) { history.replaceState(null, '', `?code=${r.code}${S.asDisplay ? '&display=1' : ''}`); if (r.phase === 'lobby') onPhase({ phase: 'lobby' }); }
   else if (r.phase === 'lobby' && S.phase === 'lobby') showLobby();
   else drawHud();
@@ -417,6 +423,7 @@ screen.addEventListener('click', e => {
     case 'start': net.send({ t: 'start' }); tally('start_match', { mode: S.room?.opts.mode, players: seated().length, public: !!S.room?.opts.public }); break;
     case 'kick': net.send({ t: 'kick', pid: +b.dataset.pid }); break;
     case 'roll': net.send({ t: 'roll' }); S.bd.sub = 'move'; showBoard(); break;
+    case 'card': net.send({ t: 'card', i: +b.dataset.i }); S.bd.sub = 'move'; showBoard(); break;
     case 'choose': net.send({ t: 'choose', i: +b.dataset.i }); S.bd.ask = null; showBoard(); break;
     case 'vote': net.send({ t: 'vote', i: +b.dataset.i }); break;
     case 'skip': net.send({ t: 'skip' }); break;
@@ -627,6 +634,14 @@ function showBigQr() {
 }
 function closeBigQr() { bigQr?.remove(); bigQr = null; }
 addEventListener('keydown', e => { if (e.key === 'Escape' && bigQr) closeBigQr(); });
+// a controller walks every menu (report #14): A presses, B closes the top sheet; an arena minigame keeps the pad to itself
+createPadNav({ busy: () => !!controls.shown, back: () => {
+  if (bigQr) return closeBigQr();
+  const top = [...document.querySelectorAll('.modal')].pop();
+  const x = top?.querySelector('[data-close], [data-x], [data-m="close"], .fb-cancel, .x-close');
+  if (x) return x.click();
+  if (top && S.modal?.el === top) return closeModal();
+} });
 function drawQrBtn() {
   const inRoom = !!S.room?.code && net.status === 'online';
   qrBtn.hidden = !(inRoom && (mine()?.display || !isTouch()));      // a phone's lobby has its own Big QR button (round 8: the corner holds ☰ and ! now)

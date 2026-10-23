@@ -136,8 +136,9 @@ export function create({ rng, players, difficulty = 'normal' }) {
     result() {
       const scores = {}, groups = new Map(), singles = sides.every(s => s.pids.length === 1);
       for (const p of players) {
-        const si = sideOf.get(p.pid), w = sides[si].wins; scores[p.pid] = w;
-        const key = singles && !solo ? w * 10000 + Math.round(P.get(p.pid).power * 10) : w;      // one-a-side: a tie on pulls goes to whoever heaved harder
+        const si = sideOf.get(p.pid), idle = !P.get(p.pid).pulls, w = idle ? 0 : sides[si].wins; scores[p.pid] = w;
+        // never pulled once = last, whatever the rope did (owner 2026-10-22: "I win and don't even press the pull button")
+        const key = idle ? -1 : singles && !solo ? w * 10000 + Math.round(P.get(p.pid).power * 10) : w;      // one-a-side: a tie on pulls goes to whoever heaved harder
         if (!groups.has(key)) groups.set(key, []); groups.get(key).push(p.pid);
       }
       return { order: [...groups.keys()].sort((a, b) => b - a).map(k => groups.get(k)), scores, unit: meta.unit };

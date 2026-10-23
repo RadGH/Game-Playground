@@ -129,7 +129,7 @@ export function buildFace(a, rig, c) {
   if (face.hollow > 0.5) for (const s of [-1, 1]) dotFace(s * 0.19, 0.17, 0.07, shade(skin, -0.12), -0.004, 0.2);
 
   // ---------------------------------------------------------------- ears
-  const hat = a.hat.id, earsHidden = ['hood', 'dragon_helm', 'goggles_up', 'chain_coif', 'plate_helm', 'great_helm', 'helmet'].includes(hat);
+  const hat = a.hat.id, earsHidden = ['hood', 'dragon_helm', 'goggles_up', 'chain_coif', 'plate_helm', 'great_helm', 'helmet', 'pumpkin_head', 'ghost_sheet'].includes(hat);
   const earK = face.ear || 1;
   if (a.ears.id !== 'none' && !earsHidden) for (const s of [-1, 1]) {
     const x = s * ringAt(rings, 0.225)[1] * 0.97, id = a.ears.id;
@@ -266,7 +266,7 @@ export function buildFace(a, rig, c) {
   }
 
   // ---------------------------------------------------------------- facial hair (above/around the mouth; the mouth is placed after)
-  const fh = a.facialHair.id;
+  const fh = ['pumpkin_head', 'ghost_sheet'].includes(a.hat.id) ? 'none' : a.facialHair.id;      // a whole-head costume hides the beard (it would hang out under the pumpkin)
   const hasMoustache = ['mustache', 'full', 'long', 'goatee', 'braided_beard'].includes(fh);
   // The mouth sits under the nose, and under the moustache when there is one — never behind it.
   const mouthY = Math.min(noseBottom - (hasMoustache ? 0.06 : 0.035), 0.1) - THREE.MathUtils.clamp((a.mouth.y || 0) * 0.025, -0.02, 0.03);

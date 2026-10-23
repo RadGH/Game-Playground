@@ -1,0 +1,76 @@
+/* Potion Mixer — a cosy witch's kitchen at night: purple stone, a parchment recipe card, a bubbling cauldron. */
+.game-potion-mixer { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 40px) calc(var(--sl) + 10px); background: radial-gradient(circle at 50% 30%, #4b2f74, #1d1430 80%); color: var(--ink); }
+.game-potion-mixer > * { flex: none; }
+.pm-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding: 0 96px 0 8px; flex-wrap: wrap; row-gap: 4px; }
+.pm-title { font: 900 24px/1.1 var(--font); color: #ff8a1a; -webkit-text-stroke: 1.2px #1d1430; paint-order: stroke fill; text-shadow: 0 3px 0 #1d1430; }
+.pm-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.pm-players .chip .sc { font-style: normal; font-weight: 900; background: #e9d8ff; border-radius: 8px; padding: 0 6px; }
+.pm-players .chip .sc::after { content: ' 🧪'; font-size: 11px; }
+.pm-st { font-size: 12px; color: #5a3a8a; } .pm-st:empty { display: none; }
+
+.pm-play { display: grid; gap: 8px; width: min(100%, 560px); justify-items: center; }
+.pm-card { width: 100%; background: linear-gradient(#fff4d6, #f1dcae); border: 4px solid #1d1430; border-radius: 16px 16px 30px 8px; box-shadow: 0 5px 0 #1d1430; padding: 6px 8px 8px; display: grid; gap: 4px; justify-items: center; }
+.pm-cardt { font: 900 16px/1 var(--font); text-transform: uppercase; letter-spacing: .5px; color: #7a3cc8; }
+.pm-steps { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
+.pm-step { position: relative; display: grid; justify-items: center; width: 70px; padding: 4px 2px 2px; border: 3px dashed #c9a86a; border-radius: 12px; background: rgba(255, 255, 255, .5); }
+.pm-step svg { width: 38px; height: 38px; display: block; }
+.pm-step small { font-size: 10px; font-weight: 800; text-align: center; line-height: 1.05; }
+.pm-step em { position: absolute; left: -4px; top: -6px; font: 900 13px/1 var(--font); font-style: normal; background: #1d1430; color: #fff; border-radius: 999px; padding: 2px 6px; }
+.pm-step.in { opacity: .45; border-style: solid; border-color: #1d8a37; background: #d4f7da; }
+.pm-step.in::after { content: '✓'; position: absolute; right: 2px; top: 0; font-weight: 900; color: #1d8a37; font-size: 18px; }
+.pm-step.next { border: 4px solid #ff8a1a; background: #fff; transform: scale(1.08); animation: bob 1s infinite; }
+
+.pm-kettle { --brew: #6a5a9a; position: relative; width: min(44vw, 170px, 20vh); }
+.pm-pot { width: 100%; display: block; overflow: visible; }
+.pm-brew { transition: fill .25s; }
+.pm-bubbles circle { animation: pm-bub 1.4s ease-in infinite; transform-box: fill-box; transform-origin: center; }
+.pm-bubbles circle:nth-child(2) { animation-delay: .45s; } .pm-bubbles circle:nth-child(3) { animation-delay: .9s; }
+@keyframes pm-bub { from { transform: translateY(6px) scale(.4); opacity: 0; } 50% { opacity: 1; } to { transform: translateY(-16px) scale(1); opacity: 0; } }
+.pm-kettle.plop .pm-pot { animation: pm-plop .3s; }
+@keyframes pm-plop { 40% { transform: scale(1.06, .94); } }
+.pm-smoke { position: absolute; left: 50%; top: -10%; width: 90%; transform: translateX(-50%); display: none; justify-items: center; pointer-events: none; }
+.pm-smoke i { position: absolute; width: 46%; aspect-ratio: 1; border-radius: 50%; background: #b9b2c8; border: 3px solid #1d1430; }
+.pm-smoke i:nth-child(1) { left: 0; top: 10%; } .pm-smoke i:nth-child(2) { left: 28%; top: -10%; } .pm-smoke i:nth-child(3) { right: 0; top: 14%; }
+.pm-smoke b { position: relative; top: 26px; font: 900 22px/1 var(--font); color: #fff; -webkit-text-stroke: 1px #1d1430; paint-order: stroke fill; }
+.pm-kettle.puff .pm-smoke { display: grid; animation: pm-puff 1s forwards; }
+@keyframes pm-puff { from { transform: translateX(-50%) scale(.3); opacity: 1; } 60% { opacity: 1; } to { transform: translateX(-50%) translateY(-30px) scale(1.2); opacity: 0; } }
+.pm-shelfb { position: absolute; left: 100%; bottom: 6%; display: flex; flex-wrap: wrap; width: 90px; gap: 2px; margin-left: 6px; align-content: flex-end; }
+.pm-shelfb b { color: #fff; font-weight: 900; }
+.pm-bottle { width: 14px; height: 22px; border: 2.5px solid #1d1430; border-radius: 4px 4px 7px 7px; background: linear-gradient(transparent 30%, var(--b) 30%); position: relative; }
+.pm-bottle::before { content: ''; position: absolute; left: 2px; right: 2px; top: -6px; height: 5px; background: #b06a2b; border: 2px solid #1d1430; border-radius: 2px; }
+
+.pm-shelf { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; padding: 8px; background: #8a5a2b; border: 4px solid #1d1430; border-radius: 16px; box-shadow: 0 5px 0 #1d1430; }
+.game-potion-mixer[data-diff=hard] .pm-shelf, .pm-shelf:has(> :nth-child(7)) { grid-template-columns: repeat(4, 1fr); }
+.pm-ing { appearance: none; display: grid; justify-items: center; gap: 2px; padding: 6px 2px 4px; min-height: 84px; background: #fff8e7; border: 3px solid #1d1430; border-bottom: 6px solid var(--c); border-radius: 14px; box-shadow: 0 4px 0 #1d1430; color: var(--ink); touch-action: manipulation; }
+.pm-ing svg { width: min(13vw, 52px); height: min(13vw, 52px); display: block; }
+.pm-ing span { font-size: 11px; font-weight: 900; line-height: 1.05; text-align: center; }
+.pm-ing:active { transform: translateY(3px); box-shadow: 0 1px 0 #1d1430; }
+.pm-ing.drop { animation: pm-drop .3s; } .pm-ing.nope { animation: shake .3s; }
+@keyframes pm-drop { 50% { transform: translateY(-8px) scale(1.06); background: #d4f7da; } }
+.smoky .pm-shelf { filter: grayscale(.8) brightness(.8); }
+.pm-pupil { animation: pm-look 2.4s ease-in-out infinite; }
+@keyframes pm-look { 25% { transform: translate(-10px, -4px); } 50% { transform: translate(-4px, -10px); } 75% { transform: translate(-12px, 2px); } }
+
+/* the TV: a cauldron per player */
+.pm-row { display: none; width: min(100%, 1180px); gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.pm-cell { position: relative; display: grid; gap: 6px; justify-items: center; background: rgba(255, 248, 231, .95); border: 4px solid #1d1430; border-top: 10px solid var(--seat); border-radius: 18px; padding: 8px 8px 10px; box-shadow: 0 5px 0 #1d1430; }
+.pm-cell .pm-kettle { width: min(160px, 26vh); }
+.pm-cell .pm-shelfb { position: static; width: auto; margin: 0; justify-content: center; min-height: 26px; }
+.pm-dots { display: flex; gap: 3px; } .pm-dots span { width: 34px; height: 34px; opacity: .35; } .pm-dots span.in { opacity: 1; } .pm-dots svg { width: 100%; height: 100%; }
+.game-potion-mixer.watching :is(.pm-play, .pm-players) { display: none; }
+.game-potion-mixer.watching .pm-row { display: grid; }
+.game-potion-mixer:not([data-phase=play]) .pm-row, .game-potion-mixer[data-phase=end] .pm-play { display: none; }
+.game-potion-mixer[data-phase=ready] .pm-play { pointer-events: none; }
+.game-potion-mixer[data-phase=ready] :is(.pm-card, .pm-kettle) { display: none; }
+
+.pm-big { display: none; gap: 10px; justify-items: center; margin-top: 8vh; }
+.game-potion-mixer[data-phase=end] .pm-big { display: grid; }
+.pm-final { display: flex; align-items: center; gap: 10px; background: #fff; border: 4px solid #1d1430; border-left: 12px solid var(--seat); border-radius: 16px; padding: 6px 14px; font-size: 18px; }
+.pm-final > b { font: 900 30px/1 var(--font); } .pm-final small { color: #5a3a8a; font-weight: 700; }
+.pm-final em { font-style: normal; font-weight: 900; background: #ff8a1a; border: 2px solid #1d1430; border-radius: 8px; padding: 1px 8px; }
+.pm-note { margin: 0; text-align: center; font: 800 17px/1.25 var(--font); color: #fff4e4; text-shadow: 0 2px 0 #1d1430; max-width: 560px; }
+.game-potion-mixer[data-phase=ready] .pm-note { font-size: 22px; margin-top: 4vh; }
+.game-potion-mixer.watching .pm-note { font-size: 22px; }
+@media (min-aspect-ratio: 1/1) { .pm-play { grid-template-columns: 1fr auto; width: min(100%, 980px); align-items: center; } .pm-card { grid-column: span 2; } .pm-shelf { grid-column: 1; } .pm-play .pm-kettle { grid-column: 2; grid-row: 2; margin-right: 90px; } }
+.pm-n { font: 900 26px/1 var(--font); color: #5a3a8a; }

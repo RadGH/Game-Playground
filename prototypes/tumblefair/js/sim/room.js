@@ -20,7 +20,7 @@ export const OPTS = Object.freeze({
   rounds: { min: 2, max: 8, def: 4 },
   shortlist: { min: 2, max: 4, def: 3 },
   difficulty: { values: ['easy', 'normal', 'hard'], def: 'normal' },
-  holiday: { values: ['auto', 'off', ...SEASON_IDS], def: 'auto' },        // holiday minigames + reskins: by the date, never, or forced on
+  holiday: { values: ['auto', 'off', 'only', ...SEASON_IDS], def: 'auto' },   // holiday minigames + reskins: by the date, never, forced on, or ONLY holiday games
   public: { values: [false, true], def: false },                           // round 7: listed in "Find a game" on the title screen
 });
 /** What a minigame placing is worth, best first. Board mode pays tickets, the marathon pays points. */
@@ -141,7 +141,9 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     let pool = eligible(n, opts.pool, season()); if (!pool.length) pool = eligible(n, [], season());
     const fresh = pool.filter(id => !match.played.includes(id)), notLast = pool.filter(id => id !== match.lastGame);
     // unplayed games first, then anything but the one just played, then whatever is left
-    const ranked = [...rng.shuffle(fresh), ...rng.shuffle(notLast.filter(id => !fresh.includes(id))), ...pool.filter(id => id === match.lastGame && !fresh.includes(id))];
+    let ranked = [...rng.shuffle(fresh), ...rng.shuffle(notLast.filter(id => !fresh.includes(id))), ...pool.filter(id => id === match.lastGame && !fresh.includes(id))];
+    // "Holiday games only" (owner 2026-10-22): holiday games first, in the same order; the rest only fill a short vote
+    if (opts.holiday === 'only') { const hol = id => !!GAMES[id]?.meta.season; ranked = [...ranked.filter(hol), ...ranked.filter(id => !hol(id))]; }
     const options = ranked.slice(0, opts.shortlist);
     if (options.length <= 1) return startGame(options[0] || pool[0]);
     vote = { options, votes: {} };

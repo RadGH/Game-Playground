@@ -30,10 +30,11 @@ export const SCALES = [
   { name: 'Leaf', shape: 'leaf', color: '#58d26b' },
 ];
 export const RULES = {
-  start: 2.5, attack: 9, prep: 2.5, window: 7,         // seconds; the order shows on phones `prep` s before the window
+  start: 2.5, attack: 9, prep: 2.5, window: 8,         // seconds; the order shows on phones `prep` s before the window
   pads: [-5.4, -1.8, 1.8, 5.4], padZ: -4.2, reach: 1.45,
   stepDmg: 10, comboPer: 5,                            // a finished order adds comboPer x its length
-  wrongCost: 1.5, strikeCool: 0.45,
+  wrongCost: 0.8, strikeCool: 0.45,
+  chip: 2,                                             // a strike on a pad outside the window still chips it (owner 2026-10-22: "he kept blocking my attacks")
   lengths: [2, 3, 3, 4, 4, 4, 4, 4],                   // order length per window
   hp: { easy: 115, normal: 150, hard: 190 },   // round 5: eased from the bot-tuned numbers
   hearts: 3, heartsPer: 1,
@@ -99,7 +100,11 @@ export function create({ rng, players, difficulty = 'normal' }) {
     let pad = -1;
     for (let i = 0; i < 4; i++) { const p = padAt(i); if (Math.hypot(b.x - p.x, b.z - p.z) <= RULES.reach) pad = i; }
     if (pad < 0) { events.push({ e: 'swing', pid }); return; }
-    if (phase !== 'window') { events.push({ e: 'clang', pid, pad }); return; }
+    if (phase !== 'window') {
+      if (phase !== 'attack') { events.push({ e: 'clang', pid, pad }); return; }
+      const dmg = Math.min(RULES.chip, hp - 1); if (dmg <= 0) { events.push({ e: 'clang', pid, pad }); return; }
+      hp -= dmg; s.dmg += dmg; events.push({ e: 'chip', pid, pad, dmg, hp }); return;
+    }
     if (pad === pattern[step]) {
       step++; let dmg = RULES.stepDmg; const done = step >= pattern.length;
       if (done) dmg += RULES.comboPer * pattern.length;
@@ -108,7 +113,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
       if (hp <= 0) finish(true);
       else if (done) { events.push({ e: 'recover', combo: 1 }); beginAttack(); }
     } else {
-      left -= RULES.wrongCost; s.stun = 0.5; b.flags |= F.STUN; b.vx = 0; b.vz = 4.5;
+      left -= RULES.wrongCost; s.stun = 0.3; b.flags |= F.STUN; b.vx = 0; b.vz = 2.5;
       events.push({ e: 'wrong', pid, pad });
     }
   }

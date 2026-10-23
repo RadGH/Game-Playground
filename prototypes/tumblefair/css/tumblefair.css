@@ -13,7 +13,10 @@ body { position: fixed; inset: 0; overflow: hidden; overscroll-behavior: none; }
 #tags, #game-ui, #hud, #screen, #toasts { position: fixed; inset: 0; pointer-events: none; }
 #tags { z-index: 5; overflow: hidden; } #game-ui { z-index: 10; } #hud { z-index: 15; } #screen { z-index: 20; } #toasts { z-index: 60; }
 #boot { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--sun); font: 900 44px/1 var(--font); z-index: 99; }
-#screen > *, #hud > *, #game-ui .game > * { pointer-events: auto; }
+#screen > *, #hud > * { pointer-events: auto; }
+/* :where() = no weight, so a game's own `pointer-events: none` on an overlay (confetti, a banner) still wins. With the id
+   in it this rule beat them all, and Defuse Together's invisible confetti layer ate every tap on the device (2026-10-22). */
+:where(#game-ui .game) > * { pointer-events: auto; }
 /* A menu screen takes touches itself (round 5 fix): a scroller with pointer-events: none can't be scrolled by a finger
    on a phone (the browser picks what to scroll by what is under the finger), so the lobby could not be scrolled down to
    Start. Nothing behind a menu screen needs a tap; the game and board screens keep letting touches through. */
@@ -84,7 +87,7 @@ input[type=text], input:not([type]) { user-select: text; -webkit-user-select: te
 #screen.lobby { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: calc(var(--st) + 10px) calc(var(--sr) + 12px) calc(var(--sb) + 10px) calc(var(--sl) + 12px); overflow-y: auto; }
 #screen.lobby > * { width: min(100%, 520px); flex: none; }
 #screen.lobby > .lobby-main { margin-top: auto; }
-#screen.lobby > .lobby-code { width: min(100% - 50px, 470px); align-self: flex-start; }      /* clear of the ! button */
+#screen.lobby > .lobby-code { width: min(100% - 92px, 470px); align-self: flex-start; }      /* clear of the ☰ and ! buttons */
 .lobby-code { display: flex; gap: 12px; align-items: center; padding: 8px 12px; position: relative; }
 .lobby-code .code-fold { position: absolute; bottom: 6px; right: 6px; min-width: 44px; height: 36px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; font: 800 14px var(--font); padding: 0 8px; }
 .lobby-code.small { padding: 6px 60px 6px 12px; }
@@ -310,3 +313,21 @@ body[data-phase=game] .qr-btn { height: 28px; font-size: 12px; opacity: .55; rig
 .pub-list .seats { font-weight: 900; font-size: 18px; }
 .note.small { font-size: 12px; }
 .foot.privacy { font-size: 11px; opacity: .8; margin-top: 2px; }
+
+/* ---- round 8 (2026-10-22, live reports) ---- */
+/* the bulletin pill is a button now: tap it to read what this round's bulletin does */
+button.mods { font-family: var(--font); cursor: pointer; box-shadow: 0 3px 0 var(--ink); pointer-events: auto; }
+button.mods i { font-style: normal; opacity: .85; }
+/* ☰ menu, left of the ! (and the QR button moves one place further left) */
+.menu-btn { position: fixed; z-index: 45; top: calc(var(--st) + 8px); right: calc(var(--sr) + 50px); width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--ink); background: #fff; color: var(--ink); font: 900 17px/1 var(--font); box-shadow: 0 3px 0 var(--ink); opacity: .8; cursor: pointer; padding: 0; }
+.menu-btn[hidden] { display: none; }
+body[data-phase=game] .menu-btn { width: 28px; height: 28px; font-size: 14px; opacity: .6; right: calc(var(--sr) + 42px); }
+.qr-btn { right: calc(var(--sr) + 92px); }
+body[data-phase=game] .qr-btn { right: calc(var(--sr) + 76px); }
+.modal.menu-sheet, .modal.watch { align-items: center; padding: calc(var(--st) + 12px) 12px calc(var(--sb) + 12px); background: rgba(13, 34, 40, .55); }
+.modal.menu-sheet .panel { display: grid; gap: 10px; width: min(92vw, 380px); }
+.modal.watch .panel { width: min(92vw, 420px); }
+.btn.danger { background: #ffe1e1; }
+.btn.danger.sure, .btn.sure { background: #e84a4a; color: #fff; }
+.watch-btn { margin-top: 2px; }
+.qr-big .qr-x { margin-top: 10px; min-width: 160px; }

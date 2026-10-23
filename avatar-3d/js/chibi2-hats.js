@@ -23,7 +23,11 @@ const lift = (c, k) => '#' + new THREE.Color(c).lerp(new THREE.Color('#ffffff'),
 // 'helmet' added 2026-10-21 (owner review, H5): the plain helmet was missing, so a Chibi 2 look built the whole hair cap,
 // the fringe and every lock under it and they all came out through the steel
 export const HATS_COVER_CROWN = ['cap', 'leather_cap', 'bandana', 'straw', 'top_hat', 'chain_coif',
-  'war_helm', 'great_helm', 'plate_helm', 'wolf_helm', 'rune_helm', 'tricorn', 'helmet'];
+  'war_helm', 'great_helm', 'plate_helm', 'wolf_helm', 'rune_helm', 'tricorn', 'helmet',
+  // Halloween headwear (Tumblefair, 2026-10-22)
+  'pumpkin_head', 'witch_hat', 'candy_corn_hat', 'toadstool_cap', 'ghost_sheet', 'bolt_crown'];
+/** Headwear that encloses the whole head (the face is still built, inside it): ears and beards are left out. */
+export const HATS_WHOLE_HEAD = ['pumpkin_head', 'ghost_sheet'];
 /**
  * 2026-09-25 class helms. Built HERE, not by chibi2.js's generic `/helm/` dome (which every id with
  * "helm" in it used to fall into, so a paladin's great helm and a knight's plate helm were the same
@@ -274,6 +278,92 @@ export function buildExtraHat(a, c) {
       const yBrow = CY + R[1] * Math.cos(BROW + 0.04);
       head(new THREE.TorusGeometry(at(yBrow), 0.011, 4, 26), tone(darkSteel, 0.8), { position: [0, yBrow, -0.02], rotation: [Math.PI / 2, 0, 0], scale: [1, R[2] / R[0], 1], metal: true });   // a leather-bound brow edge
       add(profile([[0.27 * T, 0.24 * W, 0.17 * W, -0.01], [0.3 * T, 0.2 * W, 0.15 * W, -0.011], [0.33 * T, 0.16 * W, 0.13 * W, -0.012], [0.4 * T, 0.1, 0.09, -0.015]], 22), 'chest', darkSteel, { metal: true, colorAt: (x, y, z, i) => Math.floor(i / 23) % 2 ? light : deep });   // the mantle, in the same mail
+      return;
+    }
+    // ---- Halloween headwear (Tumblefair costumes, 2026-10-22: "Pumpkin head … an actual pumpkin instead of wizard hat.
+    // Add or update existing halloween customizations with new models"). Spooky-cute, for kids. Full-head pieces (the
+    // pumpkin, the ghost sheet) enclose the whole head like the great helm does: the face stays built, just inside.
+    case 'pumpkin_head': {
+      // a ribbed jack-o'-lantern over the whole head with a carved, lit face and a curly stem
+      const orange = a.hat.color || '#ff8a1a', stem = a.hat.color2 || '#4a7a2a', glow = '#ffd23f', CY = 0.31, R = [0.5, 0.43, 0.47];
+      const g = new THREE.SphereGeometry(1, 30, 14), p = g.attributes.position, groove = [];
+      for (let i = 0; i < p.count; i++) {
+        const x = p.getX(i), y = p.getY(i), z = p.getZ(i), th = Math.atan2(x, z), rib = Math.abs(Math.cos(th * 5));   // ten ribs
+        const k = 0.93 + 0.07 * Math.sqrt(rib), flat = 1 - 0.18 * Math.max(0, y) ** 6;                              // grooves; a dimple on top
+        p.setXYZ(i, x * k, y * flat, z * k); groove.push(rib < 0.35);
+      }
+      g.computeVertexNormals();
+      head(g, orange, { position: [0, CY, -0.01], scale: R, colorAt: (x, y, z, i) => groove[i] ? tone(orange, 0.78) : orange });
+      // the carving sits on the surface: z on the ellipsoid at (x, y), a hair proud of it, turned to face out
+      const onFace = (x, y) => [x, y, R[2] * Math.sqrt(Math.max(0, 1 - (x / R[0]) ** 2 - ((y - CY) / R[1]) ** 2)) * 0.95 + 0.006];
+      const carve = (geo, x, y, rz = 0) => { const at = onFace(x, y); head(geo, glow, { position: at, rotation: [-(y - CY) * 1.2, Math.atan2(x, at[2]), rz] }); };
+      for (const s of [-1, 1]) carve(new THREE.CircleGeometry(0.085, 3), s * 0.16, 0.39, Math.PI / 2);          // triangle eyes, point up
+      carve(new THREE.CircleGeometry(0.045, 3), 0, 0.29, -Math.PI / 2);                                        // a little nose, point down
+      for (let k = -3; k <= 3; k++) {                                                                          // a toothy grin: segments with gaps
+        if (k === -1 || k === 2) continue;
+        const x = k * 0.055, y = 0.2 - 0.05 * Math.cos(k / 3 * Math.PI / 2) + 0.05;
+        carve(new THREE.PlaneGeometry(0.052, k % 2 ? 0.07 : 0.05), x, y, -k * 0.12);
+      }
+      head(new THREE.CylinderGeometry(0.045, 0.07, 0.16, 7), stem, { position: [0.02, CY + R[1] * 0.86 + 0.07, -0.03], rotation: [0.2, 0, -0.25] });
+      head(new THREE.TorusGeometry(0.06, 0.012, 4, 10, Math.PI * 1.4), stem, { position: [0.1, CY + R[1] * 0.86 + 0.06, 0.02], rotation: [Math.PI / 2, 0, 0.6] });   // a curly vine
+      head(new THREE.SphereGeometry(1, 8, 4), lift(stem, 0.15), { position: [-0.1, CY + R[1] * 0.86 + 0.03, 0.05], scale: [0.09, 0.015, 0.06], rotation: [0.3, 0.5, 0.2] });   // a leaf
+      return;
+    }
+    case 'witch_hat': {
+      // a wide brim and a tall crooked cone that bends back at the tip, a band and a buckle
+      const hat = a.hat.color || '#2a1a3a', band = a.hat.color2 || '#8a3ad8';
+      head(new THREE.CylinderGeometry(0.62, 0.62, 0.025, 22), hat, { position: [0, 0.53, -0.02], scale: [1, 1, 0.92] });
+      head(new THREE.CylinderGeometry(0.3, 0.34, 0.22, 16), hat, { position: [0, 0.65, -0.02], scale: [1, 1, 0.9] });
+      head(new THREE.CylinderGeometry(0.2, 0.3, 0.26, 14, 1, true), hat, { position: [0, 0.87, -0.06], rotation: [-0.25, 0, 0], scale: [1, 1, 0.9] });   // open-ended: no cap
+      head(new THREE.CylinderGeometry(0.08, 0.205, 0.24, 12, 1, true), hat, { position: [0, 1.06, -0.16], rotation: [-0.6, 0, 0] });                    // edges showing as dark rings
+      head(new THREE.ConeGeometry(0.08, 0.2, 10), hat, { position: [0, 1.17, -0.31], rotation: [-1.15, 0, 0] });
+      head(new THREE.CylinderGeometry(0.345, 0.345, 0.07, 16, 1, true), band, { position: [0, 0.58, -0.02], scale: [1, 1, 0.9] });
+      head(new THREE.BoxGeometry(0.11, 0.09, 0.02), '#d8b040', { position: [0, 0.58, 0.29], metal: true });
+      head(new THREE.BoxGeometry(0.06, 0.045, 0.025), band, { position: [0, 0.58, 0.293] });
+      return;
+    }
+    case 'candy_corn_hat': {
+      // a soft cone in candy-corn bands: yellow at the brim, orange, a white tip
+      const base = a.hat.color2 || '#ffd23f', mid = a.hat.color || '#ff8a1a';
+      const g = new THREE.CylinderGeometry(0.0, 0.37, 0.7, 18, 9); g.computeVertexNormals();
+      // bands by vertex ROW (colorAt's x/y/z are already placed and scaled): rows 0-2 the tip, 3-5 the middle, the rest the base
+      head(g, mid, { position: [0, 0.86, -0.03], scale: [1, 1, 0.9], rotation: [-0.08, 0, 0], colorAt: (x, y, z, i) => { const row = Math.floor(i / 19); return row <= 2 ? '#fff6e0' : row <= 5 ? mid : base; } });
+      head(new THREE.TorusGeometry(0.36, 0.035, 6, 20), base, { position: [0, 0.52, -0.03], rotation: [Math.PI / 2, 0, 0], scale: [1, 0.9, 1] });
+      return;
+    }
+    case 'toadstool_cap': {
+      // a big red toadstool cap with white spots and a pale frill underneath
+      const cap = a.hat.color || '#d02a2a', spot = a.hat.color2 || '#ffffff';
+      head(new THREE.SphereGeometry(1, 20, 9, 0, Math.PI * 2, 0, Math.PI * 0.55), cap, { position: [0, 0.5, -0.02], scale: [0.6, 0.38, 0.57] });
+      head(new THREE.CylinderGeometry(0.59, 0.4, 0.05, 20, 1, true), '#f4ecd8', { position: [0, 0.47, -0.02], scale: [1, 1, 0.95] });
+      const spots = [[0, 0.83, 0.1], [0.32, 0.7, 0.2], [-0.3, 0.72, 0.18], [0.15, 0.78, -0.3], [-0.25, 0.68, -0.3], [0.45, 0.58, -0.05], [-0.46, 0.58, 0.02], [0.05, 0.66, 0.42]];
+      for (const [x, y, z] of spots) { const n = new THREE.Vector3(x / 0.6, (y - 0.5) / 0.38, z / 0.57).normalize(); head(new THREE.SphereGeometry(1, 8, 4), spot, { position: [n.x * 0.6, 0.5 + n.y * 0.38, n.z * 0.57 - 0.02], scale: [0.07, 0.02, 0.07], rotation: [Math.atan2(n.z, n.y), 0, -Math.atan2(n.x, n.y)] }); }
+      return;
+    }
+    case 'ghost_sheet': {
+      // a bedsheet over the head down to the shoulders, a wavy hem, two dark eye holes
+      const sheet = a.hat.color || '#f8f8ff';
+      const g = profile([[-0.3, 0.5, 0.47], [-0.12, 0.47, 0.45], [0.1, 0.43, 0.42], [0.35, 0.41, 0.4], [0.55, 0.34, 0.33], [0.68, 0.2, 0.19], [0.74, 0.04, 0.04]], 20), p = g.attributes.position;
+      for (let i = 0; i < p.count; i++) if (p.getY(i) < -0.25) p.setY(i, -0.3 + 0.05 * Math.sin(Math.atan2(p.getX(i), p.getZ(i)) * 6));   // a wavy hem
+      g.computeVertexNormals();
+      const lining = backfaced(g.clone());                    // cloned BEFORE head() moves g into place (it transforms in place)
+      head(g, sheet, { position: [0, 0, -0.01] });
+      head(lining, tone(sheet, 0.85), { position: [0, 0, -0.01] });
+      for (const s of [-1, 1]) head(new THREE.SphereGeometry(1, 10, 6), '#1a1a28', { position: [s * 0.13, 0.36, 0.405], scale: [0.055, 0.075, 0.02], rotation: [0, s * 0.3, 0] });
+      head(new THREE.SphereGeometry(1, 10, 6), '#1a1a28', { position: [0, 0.2, 0.42], scale: [0.04, 0.03, 0.015] });       // a little 'oo' mouth
+      return;
+    }
+    case 'bolt_crown': {
+      // the bolt-neck monster: a tall flat-top of dark hair, a stitched brow and a bolt either side of the neck
+      const hair = a.hat.color || '#1a1a20', metal = a.hat.color2 || '#9aa0a8';
+      head(new THREE.BoxGeometry(0.66, 0.24, 0.64), hair, { position: [0, 0.6, -0.03] });
+      head(new THREE.BoxGeometry(0.67, 0.05, 0.08), tone(hair, 0.7), { position: [0, 0.48, 0.27] });                        // a straight fringe
+      head(new THREE.BoxGeometry(0.2, 0.012, 0.012), '#3a2a2a', { position: [0.05, 0.43, 0.345] });                         // a stitched scar
+      for (let k = 0; k < 4; k++) head(new THREE.BoxGeometry(0.01, 0.04, 0.012), '#3a2a2a', { position: [-0.03 + k * 0.05, 0.43, 0.347] });
+      for (const s of [-1, 1]) {
+        head(new THREE.CylinderGeometry(0.035, 0.035, 0.12, 8), metal, { position: [s * 0.24, -0.04, -0.02], rotation: [0, 0, Math.PI / 2], metal: true });
+        head(new THREE.CylinderGeometry(0.055, 0.055, 0.03, 6), metal, { position: [s * 0.31, -0.04, -0.02], rotation: [0, 0, Math.PI / 2], metal: true });
+      }
       return;
     }
   }

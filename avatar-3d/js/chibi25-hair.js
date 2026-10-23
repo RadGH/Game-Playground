@@ -44,6 +44,8 @@ export const HAT_FIT = {
   feather_cap: { shell: [0.43, 0.4] }, bard_red_feather: { shell: [0.43, 0.4] }, cap: { shell: [0.44, 0.36] }, bandana: { shell: [0.44, 0.33] },
   leather_cap: { shell: [0.4, 0.3] }, horned_helm: { shell: [0.43, 0.38] }, helmet: { shell: [0.43, 0.38] }, war_helm: { shell: [0.42, 0.2] },
   plate_helm: { shell: [0.42, 0.28] }, rune_helm: { shell: [0.42, 0.36] }, wolf_helm: { shell: [0.44, 0.2], noHang: true }, tricorn: { shell: [0.46, 0.46] },
+  pumpkin_head: { shell: [-0.1, -0.1], noHang: true }, ghost_sheet: { shell: [-0.1, -0.1], noHang: true },     // Halloween (Tumblefair 2026-10-22)
+  witch_hat: { shell: [0.41, 0.39] }, candy_corn_hat: { shell: [0.44, 0.4] }, toadstool_cap: { shell: [0.43, 0.41] }, bolt_crown: { shell: [0.47, 0.45], noHang: true },
   great_helm: { shell: [-0.1, -0.1], noHang: true }, dragon_helm: { shell: [-0.1, -0.1], noHang: true }, chain_coif: { shell: [0.47, -0.1], face: true, noHang: true }, goggles_up: { shell: [0.49, 0.3] },
   crown: { band: [0.57, 0.06, 0.262] }, circlet: { band: [0.45, 0.03, 0.318] }, headband: { band: [0.46, 0.035, 0.32] }, feather_band: { band: [0.46, 0.035, 0.32] },
   bone_headdress: { band: [0.46, 0.04, 0.322] },

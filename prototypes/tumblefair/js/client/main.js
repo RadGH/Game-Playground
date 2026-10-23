@@ -92,6 +92,7 @@ function showTitle() {
       <button class="btn" data-act="edit">Change look</button>
       <input type="hidden" id="code" value="${code}"><input type="checkbox" id="as-display" hidden ${S.asDisplay ? 'checked' : ''}>
       <button class="btn big primary" data-act="join">Join the game</button>
+      <button class="btn small ghost" data-act="home">Back to the main menu</button>
       <p class="err">${esc(S.err)}</p>
     </div>
     <p class="foot">2–4 players · everyone plays on their own phone · <span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>`);
@@ -105,7 +106,8 @@ function showTitle() {
       <button class="btn big primary" data-act="host">Host a game</button>
       <button class="btn big" data-act="find">Find a game</button>
       <div class="join-row"><input id="code" maxlength="${CODE_LENGTH}" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${code}"><button class="btn big" data-act="join">Join</button></div>
-      <label class="check"><input type="checkbox" id="as-display" ${S.asDisplay ? 'checked' : ''}> This is the big screen (watch only)</label>
+      <input type="checkbox" id="as-display" hidden ${S.asDisplay ? 'checked' : ''}>
+      <button class="btn small ghost watch-btn" data-act="watch">👀 Just watch a game (TV or sitting out)</button>
       <p class="err">${esc(S.err)}</p>
     </div>
     <p class="foot">2–4 players · everyone joins on their own phone · <span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>
@@ -142,9 +144,10 @@ async function showLobby() {
       <div class="row opts"><span>Who can join</span><button class="pill${!r.opts.public ? ' on' : ''}" data-act="opt" data-key="public" data-bool="0" ${host ? '' : 'disabled'}>Invite only</button><button class="pill${r.opts.public ? ' on' : ''}" data-act="opt" data-key="public" data-bool="1" ${host ? '' : 'disabled'}>Public</button>
         <span class="est">${r.opts.public ? 'Listed in Find a game' : 'Only people with the code'}</span></div>
       <div class="row opts"><span>Difficulty</span>${[['easy', 'Family'], ['normal', 'Normal'], ['hard', 'Tricky']].map(([v, t]) => `<button class="pill${r.opts.difficulty === v ? ' on' : ''}" data-act="opt" data-key="difficulty" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}</div>
-      <div class="row opts"><span>Holidays</span>${[['auto', `Auto${r.dateSeason ? ` (${seasonName(r.dateSeason)})` : ''}`], ...SEASONS.map(x => [x.id, x.name]), ['off', 'Off']].map(([v, t]) => `<button class="pill${(r.opts.holiday || 'auto') === v ? ' on' : ''}" data-act="opt" data-key="holiday" data-value="${v}" ${host ? '' : 'disabled'}>${esc(t)}</button>`).join('')}</div>
+      <div class="row opts"><span>Holidays</span>${[['auto', `Auto${r.dateSeason ? ` (${seasonName(r.dateSeason)})` : ''}`], ...SEASONS.map(x => [x.id, x.name]), ['only', 'Holiday games only'], ['off', 'Off']].map(([v, t]) => `<button class="pill${(r.opts.holiday || 'auto') === v ? ' on' : ''}" data-act="opt" data-key="holiday" data-value="${v}" ${host ? '' : 'disabled'}>${esc(t)}</button>`).join('')}</div>
       <div class="row opts"><span>Minigames</span><button class="pill on" data-act="pool">${r.opts.pool?.length ? `${r.opts.pool.length} picked` : `All ${Object.values(GAMES).filter(g => inSeason(g.meta, r.season)).length}`}</button>${host ? '<span class="est">tap to choose</span>' : ''}</div>
       <div class="lobby-go">${host ? `<button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}</button>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
+      ${me?.display ? '<button class="btn small" data-act="swap" data-to="play">Play instead</button>' : host ? '' : '<button class="btn small" data-act="swap" data-to="watch">Just watch instead</button>'}
       <button class="btn small ghost" data-act="leave">Leave</button></div>
     </div>`);
   qrSvg(joinUrl(r.code)).then(svg => { const e = $('#qr'); if (e) e.innerHTML = svg; }).catch(() => {});
@@ -180,7 +183,7 @@ function showBoard() {
   const dice = b.dice ? `<div class="dice2">${b.dice.map(n => `<div class="die ${b.boost === 'gold' ? 'gold' : 'sticky'}">${n}</div>`).join('')}</div>` : b.rolled ? `<div class="die" data-n="${b.rolled}">${b.rolled}</div>` : '';
   const duel = b.duel ? `<div class="dice2 duel">${b.duel.dice.map((n, i) => `<div class="die${b.duel.winner === b.duel.pids[i] ? ' won' : ''}"><small>${esc(b.duel.names[i])}</small>${n}</div>`).join('<b class="vs">VS</b>')}</div>` : '';
   const bull = b.bulletin ? `<div class="bulletin"><small>FAIR BULLETIN · Round ${b.bulletin.round}</small><h2>${esc(b.bulletin.title)}</h2><p>${esc(b.bulletin.text)}</p></div>` : '';
-  const mod = b.mods ? `<div class="mods" title="This round">${esc(b.mods)}</div>` : '';
+  const mod = b.mods ? `<button class="mods" data-act="bulletin" title="What this round's bulletin does">${esc(b.mods)} <i>ⓘ</i></button>` : '';
   setScreen('board', `${bull}${mod}${dice}${duel}${b.text ? `<div class="banner fx">${esc(b.text)}</div>` : ''}<div class="board-foot">${body}</div>`);
   drawHud();
 }
@@ -188,7 +191,7 @@ function onBoard(ev) {
   const b = S.bd;
   S.board?.event(ev);
   if (ev.ev === 'bulletin') {
-    b.bulletin = { title: ev.title, text: ev.text, round: ev.round }; b.mods = ev.id === 'quiet' ? '' : ev.title.replace(/!$/, '');
+    b.bulletin = { title: ev.title, text: ev.text, round: ev.round }; b.mods = ev.id === 'quiet' ? '' : ev.title.replace(/!$/, ''); b.modsInfo = b.bulletin;
     Object.assign(b.tickets, ev.tickets || {}); Object.assign(b.ribbons, ev.ribbons || {}); b.text = ''; sfx('open');
     setTimeout(() => { if (S.bd.bulletin?.title === ev.title) { S.bd.bulletin = null; if (S.phase === 'board') showBoard(); } }, 4000);
   }
@@ -354,13 +357,18 @@ net.on('room', r => {
   // a host's last minigame list comes back with them (round 5)
   if (r.phase === 'lobby' && r.host === r.you && S.poolFor !== r.code) { S.poolFor = r.code; try { const v = JSON.parse(localStorage.getItem('tumblefair.pool') || '[]').filter(id => GAMES[id]); if (v.length && !r.opts.pool?.length) net.send({ t: 'opt', key: 'pool', value: v }); } catch {} }
   const first = !S.room; S.room = r;
-  if (r.match?.board) { Object.assign(S.bd.tickets, r.match.board.tickets); Object.assign(S.bd.ribbons, r.match.board.ribbons); S.bd.pid = r.match.board.pid; S.bd.mods = r.match.board.bulletin && r.match.board.bulletin.id !== 'quiet' ? r.match.board.bulletin.title.replace(/!$/, '') : ''; S.bd.sub = S.bd.sub || r.match.board.sub; if (r.match.board.ask && !S.bd.ask) S.bd.ask = r.match.board.ask; S.board?.sync(r.match.board); }
+  if (r.match?.board) { Object.assign(S.bd.tickets, r.match.board.tickets); Object.assign(S.bd.ribbons, r.match.board.ribbons); S.bd.pid = r.match.board.pid; S.bd.mods = r.match.board.bulletin && r.match.board.bulletin.id !== 'quiet' ? r.match.board.bulletin.title.replace(/!$/, '') : ''; if (r.match.board.bulletin) S.bd.modsInfo = { title: r.match.board.bulletin.title, text: r.match.board.bulletin.text, round: r.match.board.bulletin.round ?? r.match.round }; S.bd.sub = S.bd.sub || r.match.board.sub; if (r.match.board.ask && !S.bd.ask) S.bd.ask = r.match.board.ask; S.board?.sync(r.match.board); }
   if (first) { history.replaceState(null, '', `?code=${r.code}${S.asDisplay ? '&display=1' : ''}`); if (r.phase === 'lobby') onPhase({ phase: 'lobby' }); }
   else if (r.phase === 'lobby' && S.phase === 'lobby') showLobby();
   else drawHud();
 });
 net.on('phase', onPhase);
-net.on('left', () => { S.room = null; S.inviting = false; dropPlay(); dropBoard(); history.replaceState(null, '', location.pathname); showTitle(); });
+net.on('left', () => {
+  S.room = null; S.inviting = false; dropPlay(); dropBoard(); history.replaceState(null, '', location.pathname); q.delete('code');
+  const sw = S.swapTo; S.swapTo = null;
+  if (sw) { S.asDisplay = sw.watch; net.join(sw.code, sw.watch); return; }       // "Just watch instead" / "Play instead": rejoin the same room the other way
+  showTitle();
+});
 net.on('kicked', () => { S.room = null; dropPlay(); dropBoard(); S.err = 'The host removed you from the room.'; showTitle(); });
 net.on('err', m => { if (!S.room) { S.err = m.msg; showTitle(); } else toast(m.msg, 'bad'); });
 net.on('bd', onBoard);
@@ -383,6 +391,14 @@ screen.addEventListener('click', e => {
     case 'host': saveName(); S.err = ''; S.asDisplay = false; net.create(); tally('host_game', { device: deviceKind() }); break;
     case 'join': { saveName(); if (S.me && !S.me.ready) { net.send({ t: 'profile', name: $('#name')?.value.trim() || S.me.name }); S.me.ready = true; } const code = cleanCode($('#code').value); if (!code) { S.err = `The code is ${CODE_LENGTH} letters.`; showTitle(); break; } S.err = ''; S.asDisplay = $('#as-display').checked; net.join(code, S.asDisplay); tally('join_game', { via: S.inviting ? 'invite' : 'code', display: S.asDisplay }); break; }
     case 'leave': net.leave(); break;
+    case 'watch': saveName(); openWatch(); break;
+    case 'home': S.inviting = false; S.err = ''; q.delete('code'); history.replaceState(null, '', location.pathname); showTitle(); break;
+    case 'swap': {
+      const watch = b.dataset.to === 'watch';
+      if (watch && !b.classList.contains('sure')) { b.classList.add('sure'); b.textContent = 'Tap again: you will watch, not play'; break; }
+      S.swapTo = { code: S.room.code, watch }; net.leave(); tally('swap_seat', { to: watch ? 'watch' : 'play' }); break;
+    }
+    case 'bulletin': { const i = S.bd.modsInfo; if (i) { S.bd.bulletin = i; showBoard(); setTimeout(() => { if (S.bd.bulletin === i) { S.bd.bulletin = null; if (S.phase === 'board') showBoard(); } }, 5000); } break; }
     case 'fold': S.codeSmall = !S.codeSmall; try { localStorage.setItem('tumblefair.codeSmall', S.codeSmall ? '1' : ''); } catch { /* private mode */ } showLobby(); break;
     case 'bigqr': showBigQr(); break;
     case 'copy': navigator.clipboard?.writeText(joinUrl(S.room.code)).then(() => toast('Invite link copied'), () => toast(joinUrl(S.room.code))) ?? toast(joinUrl(S.room.code)); break;
@@ -526,10 +542,66 @@ function openFind() {
   tally('find_game');
 }
 
+// ------------------------------------------------------------------ Just watch (owner 2026-10-22)
+// "Instead of 'this is a big screen' … just people choose to be spectators, with a popup to confirm explaining they can't
+// participate." The same thing as the old big-screen join (a TV is simply someone watching), asked as a choice.
+function openWatch() {
+  closeModal();
+  const code = cleanCode($('#code')?.value || q.get('code') || '');
+  const el = h('div', 'modal watch');
+  el.innerHTML = `<div class="panel"><h2>Just watch?</h2>
+    <p>You'll see the board and every minigame, but <b>you won't play</b> in this game. Good for a TV everyone can see, or for sitting one out.</p>
+    <p class="note">Want to play after all? Tap <b>Play instead</b> in the lobby. Late joiners who play get a seat at the next minigame.</p>
+    <label class="field"><span>Room code</span><input id="watch-code" maxlength="${CODE_LENGTH}" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(code)}"></label>
+    <p class="err" id="watch-err"></p>
+    <div class="row"><button class="btn" data-x="1">Cancel</button><button class="btn big primary" id="watch-go">Watch</button></div></div>`;
+  el.addEventListener('click', e => {
+    if (e.target === el || e.target.closest('[data-x]')) { closeModal(); return; }
+    if (!e.target.closest('#watch-go')) return;
+    const c = cleanCode(el.querySelector('#watch-code').value);
+    if (!c) { el.querySelector('#watch-err').textContent = `The code is ${CODE_LENGTH} letters.`; return; }
+    S.err = ''; S.asDisplay = true; closeModal(); net.join(c, true); tally('join_game', { via: 'code', display: true });
+  });
+  document.body.append(el); S.modal = { el, refresh: () => {} };
+  if (!code) el.querySelector('#watch-code').focus();
+}
+
+// ------------------------------------------------------------------ the menu button (2026-10-22, a player's report)
+// "There needs to be a reliable menu button to get back to the main menu, including this screen [a minigame] and the
+// invite QR screen." One ☰ next to the ! on every screen except the title (which IS the main menu).
+const menuBtn = h('button', 'menu-btn', '☰'); menuBtn.type = 'button'; menuBtn.title = 'Menu'; menuBtn.setAttribute('aria-label', 'Menu'); menuBtn.hidden = true;
+menuBtn.onclick = () => openMenu(); document.body.append(menuBtn);
+function openMenu() {
+  closeBigQr(); closeModal();
+  const inRoom = !!S.room, playing = inRoom && S.phase && S.phase !== 'lobby';
+  const el = h('div', 'modal menu-sheet');
+  el.innerHTML = `<div class="panel"><h2>Menu</h2>
+    <button class="btn big primary" data-m="close">Back to ${playing ? 'the game' : inRoom ? 'the lobby' : 'the fair'}</button>
+    ${inRoom ? '<button class="btn big" data-m="qr">Invite people (QR code)</button>' : ''}
+    <button class="btn big" data-m="fb">Report a bug or idea</button>
+    <button class="btn big danger" data-m="home">${inRoom ? 'Leave to the main menu' : 'Main menu'}</button></div>`;
+  el.addEventListener('click', e => {
+    if (e.target === el) { closeModal(); return; }
+    const m = e.target.closest('[data-m]')?.dataset.m; if (!m) return;
+    sfx('tap');
+    if (m === 'close') closeModal();
+    else if (m === 'qr') { closeModal(); showBigQr(); }
+    else if (m === 'fb') { closeModal(); fb.open({ kind: 'idea' }); }
+    else if (m === 'home') {
+      const b = e.target.closest('[data-m]');
+      if (inRoom && playing && !b.classList.contains('sure')) { b.classList.add('sure'); b.textContent = 'Tap again to leave this game'; return; }
+      closeModal(); tally('menu_leave', { phase: S.phase || 'title' });
+      if (inRoom) net.leave(); else { S.inviting = false; q.delete('code'); history.replaceState(null, '', location.pathname); showTitle(); }
+    }
+  });
+  document.body.append(el); S.modal = { el, refresh: () => {} };
+}
+function drawMenuBtn() { menuBtn.hidden = !(S.room || S.inviting); }
+
 // ------------------------------------------------------------------ the big QR code (owner 2026-10-22)
 // "Add a QR code button to join from. Useful with a TV and several people on phones." A full-screen code anyone in the
 // room can read from the sofa — in the lobby, and mid-match too (a late joiner watches, then gets a seat at the next
-// minigame). The corner button shows on the big screen and on a computer the whole time, and on a phone in the lobby.
+// minigame). The corner button shows on the big screen and on a computer the whole time (a phone uses the lobby's own Big QR button).
 const qrBtn = h('button', 'qr-btn', 'QR'); qrBtn.type = 'button'; qrBtn.title = 'Show a QR code to join this game'; qrBtn.hidden = true;
 qrBtn.onclick = () => showBigQr(); document.body.append(qrBtn);
 let bigQr = null;
@@ -537,7 +609,7 @@ function showBigQr() {
   if (!S.room?.code) return;
   bigQr?.remove();
   const code = S.room.code, el = h('div', 'qr-big', `<div class="qr-card"><div class="qr-pic"></div><p class="qr-say">Scan to join</p>
-    <p class="qr-code">${esc(code)}</p><p class="qr-at">or open <b>${esc(location.host)}</b> and type the code</p><p class="qr-close">Tap anywhere to close</p></div>`);
+    <p class="qr-code">${esc(code)}</p><p class="qr-at">or open <b>${esc(location.host)}</b> and type the code</p><button class="btn big qr-x" type="button">Close</button></div>`);
   el.addEventListener('click', () => closeBigQr());
   document.body.append(el); bigQr = el;
   qrSvg(joinUrl(code)).then(svg => { const e = el.querySelector('.qr-pic'); if (e) e.innerHTML = svg; }).catch(() => { const e = el.querySelector('.qr-pic'); if (e) e.textContent = 'The QR code could not be drawn — use the code below.'; });
@@ -546,7 +618,7 @@ function closeBigQr() { bigQr?.remove(); bigQr = null; }
 addEventListener('keydown', e => { if (e.key === 'Escape' && bigQr) closeBigQr(); });
 function drawQrBtn() {
   const inRoom = !!S.room?.code && net.status === 'online';
-  qrBtn.hidden = !(inRoom && (S.phase === 'lobby' || mine()?.display || !isTouch()));
+  qrBtn.hidden = !(inRoom && (mine()?.display || !isTouch()));      // a phone's lobby has its own Big QR button (round 8: the corner holds ☰ and ! now)
   if (!S.room && bigQr) closeBigQr();
 }
 window.tumblefairQr = { show: () => showBigQr(), close: () => closeBigQr(), get open() { return !!bigQr; }, get button() { return !qrBtn.hidden; } };      // specs
@@ -569,7 +641,7 @@ function frame(t) {
   lineup.frame(dt); S.board?.frame(dt); S.play?.frame(dt);
   stage.render(dt);
   drawNet(t);
-  if (t - qrAt > 500) { qrAt = t; drawQrBtn(); }
+  if (t - qrAt > 500) { qrAt = t; drawQrBtn(); drawMenuBtn(); }
   const c = left(); if (c !== lastCount) { lastCount = c; for (const e of document.querySelectorAll('.count')) e.textContent = c; }
   requestAnimationFrame(frame);
 }

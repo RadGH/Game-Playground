@@ -33,6 +33,14 @@ export const CHIBI2_2D = {
     bone_headdress: alias(hat, 'feather_band', 'Feathered headdress'),
     rune_helm: alias(hat, 'helmet', "Runesmith's helm"),
     tricorn: alias(hat, 'wide_brim', 'Tricorn'),
+    // Halloween headwear (Tumblefair costumes 2026-10-22); 3D models in avatar-3d/js/chibi2-hats.js
+    // the two that cover the whole head are drawn here: over the face, on the hatFront layer
+    pumpkin_head: { name: "Pumpkin head (jack-o'-lantern)", pieces: [{ layer: 'hatFront', svg: `<ellipse cx="150" cy="142" rx="104" ry="96" fill="var(--hat)" stroke="rgba(0,0,0,.35)" stroke-width="4"/><path d="M150 48 C120 80 120 200 150 236 M150 48 C180 80 180 200 150 236 M96 66 C70 110 74 190 104 226 M204 66 C230 110 226 190 196 226" stroke="rgba(0,0,0,.18)" stroke-width="5" fill="none"/><path d="M146 50 C144 36 150 24 162 20 L166 28 C158 32 156 40 158 50 Z" fill="#4a7a2a"/><path d="M100 128 L124 92 L148 128 Z M152 128 L176 92 L200 128 Z" fill="#ffd23f" stroke="#7a3a00" stroke-width="3"/><path d="M142 152 L150 138 L158 152 Z" fill="#ffd23f"/><path d="M96 166 Q150 222 204 166 L190 176 L180 166 L170 180 L158 168 L146 182 L134 168 L122 180 L112 168 Z" fill="#ffd23f" stroke="#7a3a00" stroke-width="3"/>` }] },
+    witch_hat: alias(hat, 'wizard', "Witch's hat"),
+    candy_corn_hat: alias(hat, 'wizard', 'Candy corn hat'),
+    toadstool_cap: alias(hat, 'wide_brim', 'Toadstool cap'),
+    ghost_sheet: { name: 'Ghost bedsheet', pieces: [{ layer: 'hatFront', svg: `<path d="M150 34 C214 34 236 90 236 150 L244 236 Q226 222 212 236 Q196 222 182 236 Q166 222 150 236 Q134 222 118 236 Q104 222 88 236 Q74 222 56 236 L64 150 C64 90 86 34 150 34 Z" fill="var(--hat)" stroke="rgba(0,0,0,.25)" stroke-width="4"/><ellipse cx="124" cy="132" rx="13" ry="19" fill="#1a1a28"/><ellipse cx="176" cy="132" rx="13" ry="19" fill="#1a1a28"/><ellipse cx="150" cy="176" rx="9" ry="7" fill="#1a1a28"/>` }] },
+    bolt_crown: alias(hat, 'cap', 'Flat-top with neck bolts'),
   },
   top: {
     gi: alias(top, 'sash_robe', 'Fitted wrap jacket (gi)'),

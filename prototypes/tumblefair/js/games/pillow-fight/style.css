@@ -1,0 +1,11 @@
+/* Pillow Fight: wobble % tags over heads, the sleepwalkers' Zzz, the tip and the knock-off banner. */
+.tag.pf-wob { margin-top: 26px; background: #fff; color: var(--ink); text-shadow: none; font-weight: 900; font-size: 14px; padding: 0 7px; transition: background .2s; }
+.tag.pf-wob.warm { background: #ffc46b; } .tag.pf-wob.hot { background: #ff5a5a; color: #fff; font-size: 16px; }
+.tag.pf-zzz { background: #3b3a7a; color: #e8e6ff; text-shadow: none; font-style: italic; }
+.game-pillow-fight .pf-tip { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); pointer-events: none; max-width: 96vw; white-space: nowrap;
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 240, 248, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); transition: opacity .5s; }
+.pf-tip.gone { opacity: 0; }
+.game-pillow-fight .pf-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center; max-width: 94vw;
+  font: 900 clamp(28px, 8vw, 60px)/1.05 var(--font); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); transition: transform .15s, opacity .15s; }
+.pf-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); } .pf-banner.bad { color: #ff9a9a; } .pf-banner.good { color: var(--sun); }
+@media (max-width: 520px) { .game-pillow-fight .pf-tip { top: calc(var(--st) + 52px); font-size: 13px; } }

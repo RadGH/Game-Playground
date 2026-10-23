@@ -4,7 +4,7 @@
 // post. LOW beams are orange at shin height, HIGH beams purple at head height (height and label as well as colour).
 // A spinner glows faintly round a centre pivot before it goes live. A zap throws a white-yellow flash and sparks.
 import { LOW, SWEEP } from './sim.js';
-import { scoreBar, floatText } from '../../client/gamehud.js';
+import { scoreBar, floatText, h } from '../../client/gamehud.js';
 import { F } from '../../shared/arena.js';
 
 const H = [0.38, 1.3];                     // drawn beam height for LOW / HIGH (the rule is in sim.js `catches`)
@@ -77,6 +77,9 @@ export function createView(ctx) {
   }
   const bar = scoreBar(ctx, { unit: 'sec' });
   const outSet = new Set(), winners = new Set();
+  const heartEls = new Map();
+  const hearts = pid => { if (!heartEls.has(pid)) { const c = bar.el.querySelector(`[data-pid="${pid}"]`); const e = c ? h('i', 'sb-lives') : null; if (e) { e.setAttribute('aria-label', 'lives'); c.append(e); } heartEls.set(pid, e); } return heartEls.get(pid); };
+  let safe = new Set();          // blinking for a moment after a zap that was not the last life
   return {
     state(g) {
       for (const B of beams.values()) B.seen = false;
@@ -90,9 +93,11 @@ export function createView(ctx) {
       for (const [id, B] of beams) if (!B.seen) { dropBeam(B); beams.delete(id); }
       for (const pid of g.out) if (!outSet.has(pid)) { outSet.add(pid); bar.mark(pid, 'out'); }
       bar.set(g.sc, g.left);
+      safe = new Set(g.sf || []);
+      if (g.lv) ctx.players.forEach((p, i) => { const e = hearts(p.pid), t = '♥'.repeat(g.lv[i] || 0); if (e && e.textContent !== t) e.textContent = t; });
     },
     event(ev) {
-      if (ev.e === 'zap') { ctx.sfx('out'); zapFx(ev.x, ev.z, ev.h); floatText(stage, ev.x, 1.6, ev.z, 'ZAPPED!', 'bad'); ctx.actor(ev.pid)?.play('hit', 380); }
+      if (ev.e === 'zap') { ctx.sfx(ev.lv ? 'bad' : 'out'); zapFx(ev.x, ev.z, ev.h); floatText(stage, ev.x, 1.6, ev.z, ev.lv ? `ZAP! ${'♥'.repeat(ev.lv)} left` : 'ZAPPED OUT!', 'bad'); ctx.actor(ev.pid)?.play('hit', 380); }
       else if (ev.e === 'hop') { if (ev.pid === ctx.me) ctx.sfx('tap'); }
       else if (ev.e === 'duck') { if (ev.pid === ctx.me) ctx.sfx('pick'); }
       else if (ev.e === 'win') { winners.add(ev.pid); if (ev.pid === ctx.me) ctx.sfx('win'); }
@@ -112,6 +117,7 @@ export function createView(ctx) {
         B.mats[1].opacity *= B.warn > 0 ? 1 : 0.85 + 0.15 * Math.sin(t * 30 + B.id);
       }
       hub.rotation.y += dt * 2;
+      for (const pid of ctx.players?.map(p => p.pid) || []) { const a = ctx.actor(pid); if (a && !outSet.has(pid)) a.group.visible = !safe.has(pid) || Math.sin(t * 30) > -0.3; }
       for (let i = fx.length - 1; i >= 0; i--) {
         const f = fx[i]; f.t += dt;
         f.flash.scale.setScalar(0.4 + f.t * 4); f.flash.material.opacity = Math.max(0, 1 - f.t * 3);

@@ -67,6 +67,10 @@ export function createView(ctx) { ... return { state(g), event(ev), priv(d), fra
 `ctx`:
 - `THREE`, `stage` (`stage.tag(obj, {text, seat})`, `stage.toScreen(x,y,z)`), `group` (a THREE.Group: put every 3D thing of the game here — it is emptied and freed for you)
 - `ui` (a DOM element over the canvas, removed for you; `pointer-events` are off on `.game` — set `pointer-events: auto` on what should be tappable)
+  (its direct children are tappable by default through a rule with NO weight, so a full-screen overlay — confetti, a
+  banner — must set `pointer-events: none` itself, and that now wins; round 8: Defuse Together's confetti layer ate
+  every tap while the old rule carried an id). InstancedMesh is never frustum-culled (stage.js): add instances freely
+  after starting at count 0 (three would otherwise keep the empty bounding sphere it computed first).
 - `init`, `meta`, `players` (`[{ pid, seat, name, color, dark, shape, portrait, look, costume }]` — `portrait` is an `<img src>` of the player's face from the avatar system: use it for every flat screen such as drawing, voting and results; `look` + `costume` let a ui game build the player's 3D character with `createActor({ look, costume, seat })`, e.g. One Button Orchestra's band), `me` (your pid, or null when this device is only watching), `watching`
 - `actor(pid)` (arena: the player's 3D character: `.group`, `.body.group` to attach props to, `.play(clip, ms)`; the room positions and animates it from the body; `pose()` may return a held clip name such as 'hit', 'dead', 'cheer', 'sitGround', 'ready', 'jump')
 - `arena` (the arena in use: `init.arena` if the game sent one, else `meta.arena`)

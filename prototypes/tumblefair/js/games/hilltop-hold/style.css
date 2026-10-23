@@ -1,0 +1,16 @@
+/* Hilltop Hold: the "who holds the hill" pill, solo medals, the hop banner, the next-hill and SHARED tags. */
+.game-hilltop-hold .hh-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; pointer-events: none; max-width: 96vw;
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 16px/1.2 var(--font); white-space: nowrap; }
+.hh-pill.free { background: #fff1a8; } .hh-pill.me { background: #c9f5d2; } .hh-pill.red { background: #ffb4b4; animation: hh-shake .25s infinite; }
+.hh-pill .dot { display: inline-block; width: 16px; height: 16px; border-radius: 50%; background: var(--c); border: 2px solid var(--ink); }
+.hh-pill .dot[data-shape=square] { border-radius: 3px; } .hh-pill .dot[data-shape=diamond] { border-radius: 2px; transform: rotate(45deg) scale(.85); } .hh-pill .dot[data-shape=triangle] { border-radius: 50% 50% 3px 3px; }
+@keyframes hh-shake { 50% { margin-left: 3px; } }
+.game-hilltop-hold .hh-medals { position: absolute; top: calc(var(--st) + 98px); left: 50%; transform: translateX(-50%); display: flex; gap: 6px; pointer-events: none; }
+.hh-medals span { padding: 2px 10px; border-radius: 999px; background: rgba(36, 26, 61, .72); color: #fff; font: 900 15px/1.4 var(--font); }
+.hh-medals span.won { background: #ffd23f; color: var(--ink); }
+.game-hilltop-hold .hh-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center; max-width: 94vw;
+  font: 900 clamp(28px, 8vw, 60px)/1.05 var(--font); color: var(--sun); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); transition: transform .15s, opacity .15s; }
+.hh-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); } .hh-banner.bad { color: #ff8a8a; } .hh-banner.go { color: #fff1a8; }
+.tag.hh-next { background: #fff; color: var(--ink); text-shadow: none; border: 2px dashed var(--ink); font-weight: 800; }
+.tag.hh-shared { background: #ff3b3b; color: #fff; font-weight: 900; }
+@media (max-width: 520px) { .game-hilltop-hold .hh-pill { top: calc(var(--st) + 52px); font-size: 13px; } .game-hilltop-hold .hh-medals { top: calc(var(--st) + 86px); } }

@@ -1,0 +1,65 @@
+/* Crow Count — a sunny cornfield in a picture frame, crows as little flapping SVGs, a big - / + counter. */
+.game-crow-count { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 40px) calc(var(--sl) + 10px); background: linear-gradient(#ffe7a8, #ffd47a); }
+.game-crow-count > * { flex: none; }
+.cc-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding: 0 96px 0 8px; flex-wrap: wrap; row-gap: 4px; }
+.cc-title { font: 900 24px/1.1 var(--font); color: #3a404e; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 #ffb02e; }
+.cc-round { font-weight: 900; font-size: 14px; text-transform: uppercase; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; }
+
+.cc-field { position: relative; width: min(100%, 560px, 80vh); aspect-ratio: 16 / 11; border: 5px solid var(--ink); border-radius: 20px; overflow: hidden; box-shadow: 0 6px 0 var(--ink); background: #8fd3f4; }
+.cc-sky { position: absolute; inset: 0 0 58% 0; background: linear-gradient(#7cc9ef, #c7ecfb); }
+.cc-sun { position: absolute; right: 8%; top: 12%; width: 13%; aspect-ratio: 1; border-radius: 50%; background: #ffd23f; box-shadow: 0 0 0 6px rgba(255, 210, 63, .35); }
+.cc-cloud { position: absolute; width: 22%; height: 16%; border-radius: 999px; background: #fff; opacity: .9; animation: cc-drift 22s linear infinite alternate; }
+.cc-cloud.a { left: 8%; top: 18%; } .cc-cloud.b { left: 52%; top: 40%; width: 16%; height: 12%; animation-duration: 30s; }
+@keyframes cc-drift { to { translate: 30% 0; } }
+.cc-ground { position: absolute; inset: 42% 0 0 0; background: repeating-linear-gradient(180deg, #8fcf5a 0 9%, #7fbf4c 9% 18%); }
+.cc-ground::before { content: ''; position: absolute; left: 0; right: 0; top: -6%; height: 12%; background: repeating-linear-gradient(90deg, #a06a32 0 2%, transparent 2% 9%), linear-gradient(transparent 30%, #a06a32 30% 45%, transparent 45% 65%, #a06a32 65% 80%, transparent 80%); }
+.cc-scare { position: absolute; left: 50%; top: 30%; width: 17%; transform: translateX(-50%); z-index: 50; }
+.cc-scare svg { width: 100%; display: block; animation: cc-sway 3s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes cc-sway { 50% { transform: rotate(3deg); } }
+.cc-birds { position: absolute; inset: 0; }
+.cc-crow { position: absolute; width: 12%; display: block; will-change: left, top, transform; }
+.cc-crow svg { width: 100%; display: block; overflow: visible; }
+.cc-wing, .cc-wing-b { transform-origin: 28px 24px; }
+.cc-crow.fly .cc-wing { animation: cc-flap .22s ease-in-out infinite alternate; } .cc-crow.fly .cc-wing-b { animation: cc-flap .22s ease-in-out infinite alternate-reverse; }
+.cc-crow:not(.fly) .cc-wing-b { display: none; }
+@keyframes cc-flap { from { transform: scaleY(1); } to { transform: scaleY(-.7); } }
+.cc-tag { position: absolute; left: 50%; top: -28%; transform: translateX(-50%); font: 900 clamp(14px, 3.4vw, 26px)/1 var(--font); font-style: normal; background: var(--sun); border: 3px solid var(--ink); border-radius: 999px; padding: 1px 7px; }
+.cc-tag:empty { display: none; }
+.cc-cover { position: absolute; inset: 0; z-index: 120; display: none; place-content: center; justify-items: center; gap: 4px; background: repeating-linear-gradient(45deg, #ffcf5a 0 22px, #ffbf3a 22px 44px); }
+.cc-cover b { font: 900 34px/1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); }
+.cc-cover span { font-weight: 800; background: #fff; border: 3px solid var(--ink); border-radius: 12px; padding: 2px 10px; }
+.game-crow-count[data-phase=guess] .cc-cover { display: grid; }
+.cc-total { position: absolute; left: 8px; top: 8px; z-index: 130; display: none; justify-items: center; background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; padding: 2px 12px 4px; box-shadow: 0 4px 0 var(--ink); }
+.cc-total b { font: 900 36px/1 var(--font); } .cc-total span { font-size: 12px; font-weight: 800; }
+.game-crow-count.counted[data-phase=reveal] .cc-total { display: grid; animation: bob .5s 2; }
+
+.cc-pad { display: none; gap: 10px; justify-items: center; width: min(100%, 420px); }
+.game-crow-count[data-phase=guess]:not(.watching) .cc-pad { display: grid; }
+.cc-ask { margin: 0; font: 800 18px/1.2 var(--font); text-align: center; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 4px 12px; box-shadow: 0 3px 0 var(--ink); }
+.cc-row { display: flex; align-items: center; gap: 16px; }
+.cc-pm { width: 84px; height: 84px; border-radius: 22px; border: 4px solid var(--ink); background: var(--sun); font: 900 48px/1 var(--font); box-shadow: 0 5px 0 var(--ink); padding: 0; touch-action: manipulation; color: var(--ink); }
+.cc-pm:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); } .cc-pm:disabled { opacity: .35; }
+.cc-n { min-width: 2.2ch; text-align: center; font: 900 64px/1 var(--font); background: #fff; border: 4px solid var(--ink); border-radius: 18px; padding: 6px 14px; }
+.cc-ok { width: 100%; background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; min-height: 56px; }
+.cc-ok.on { background: #1d8a37; } .cc-ok:disabled { opacity: .45; }
+
+.cc-guesses { display: none; gap: 8px; flex-wrap: wrap; justify-content: center; width: min(100%, 900px); }
+.game-crow-count[data-phase=reveal] .cc-guesses { display: flex; }
+.cc-g { display: grid; grid-template-columns: auto auto; align-items: center; gap: 0 6px; background: #fff; border: 3px solid var(--ink); border-left: 10px solid var(--seat); border-radius: 14px; padding: 4px 10px 4px 4px; }
+.cc-g .cc-face { grid-row: span 3; } .cc-g b { font: 900 26px/1 var(--font); } .cc-g span { font-size: 12px; font-weight: 800; color: #5a5040; } .cc-g em { font-style: normal; font-weight: 900; color: #1d8a37; }
+.cc-g.best { background: #fff3b8; } .cc-g.exact { background: #c9f5d2; }
+.cc-face { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; }
+.cc-face img { width: 100%; height: 100%; display: block; }
+
+.cc-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.cc-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.cc-st { font-size: 12px; color: #5a5040; } .cc-st:empty { display: none; }
+.cc-players .chip.in { outline: 4px solid var(--mint); }
+.cc-note { margin: 0; text-align: center; font: 800 17px/1.25 var(--font); background: rgba(255, 255, 255, .9); border: 3px solid var(--ink); border-radius: 12px; padding: 4px 12px; max-width: 560px; }
+.game-crow-count[data-phase=end] .cc-field { display: none; }
+.game-crow-count[data-phase=end] .cc-players { margin-top: 14vh; }
+.game-crow-count[data-phase=end] .cc-players .chip { font-size: 20px; } .game-crow-count[data-phase=end] .cc-players .chip .face { width: 52px; height: 52px; }
+/* the field takes most of a TV or a sideways phone */
+@media (min-aspect-ratio: 1/1) { .cc-field { width: min(100%, 1100px, 98vh); } .game-crow-count:not(.watching)[data-phase=guess] .cc-field { display: none; } }
+.game-crow-count.watching .cc-note { font-size: 22px; }

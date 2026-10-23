@@ -311,9 +311,9 @@
    "kind": "costume",
    "outfit": {
     "hat": {
-     "id": "wizard",
+     "id": "pumpkin_head",
      "color": "#ff8a1a",
-     "color2": "#2a8a2a"
+     "color2": "#4a7a2a"
     },
     "top": {
      "id": "tunic",
@@ -329,8 +329,7 @@
      "color": "#2a8a2a"
     },
     "extras": {
-     "id": "warpaint",
-     "color": "#1a1a1a"
+     "id": "none"
     },
     "cape": {
      "id": "none"
@@ -1093,7 +1092,7 @@
    "kind": "costume",
    "outfit": {
     "hat": {
-     "id": "hood",
+     "id": "ghost_sheet",
      "color": "#f8f8ff"
     },
     "top": {
@@ -1126,7 +1125,7 @@
    "kind": "costume",
    "outfit": {
     "hat": {
-     "id": "wide_brim",
+     "id": "witch_hat",
      "color": "#2a1a3a",
      "color2": "#8a3ad8"
     },
@@ -1449,9 +1448,9 @@
    "kind": "costume",
    "outfit": {
     "hat": {
-     "id": "wizard",
-     "color": "#ffffff",
-     "color2": "#ffb020"
+     "id": "candy_corn_hat",
+     "color": "#ff8a1a",
+     "color2": "#ffd23f"
     },
     "top": {
      "id": "tunic",
@@ -1523,7 +1522,9 @@
    "kind": "costume",
    "outfit": {
     "hat": {
-     "id": "none"
+     "id": "bolt_crown",
+     "color": "#1a1a20",
+     "color2": "#9aa0a8"
     },
     "top": {
      "id": "coat",
@@ -1785,7 +1786,7 @@
    "kind": "costume",
    "outfit": {
     "hat": {
-     "id": "wide_brim",
+     "id": "toadstool_cap",
      "color": "#d02a2a",
      "color2": "#ffffff"
     },

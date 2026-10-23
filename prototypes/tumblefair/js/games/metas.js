@@ -253,7 +253,7 @@ export const GAMES = Object.freeze({
    "how": [
     "Orange beams are LOW: press HOP to jump them.",
     "Purple beams are HIGH: hold DUCK to crouch under them.",
-    "One touch and you are zapped out. Last one standing wins!"
+    "You have 3 lives. Last one standing wins!"
    ],
    "kind": "arena",
    "min": 1,
@@ -1917,6 +1917,766 @@ export const GAMES = Object.freeze({
    ],
    "season": "halloween",
    "card": "card-monster-mash",
+   "css": true
+  }
+ },
+ "golem-smash": {
+  "meta": {
+   "id": "golem-smash",
+   "title": "Golem Smash",
+   "blurb": "Dodge the stone golem’s slams, then smash the glowing cracks together!",
+   "how": [
+    "Red ring on the ground = the golem is about to slam there. Get out!",
+    "After a slam a crack GLOWS on one of its limbs (gold ring beside it).",
+    "Run to the gold ring and press A to hit the crack.",
+    "Break every crack before the bell!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 72,
+   "scoring": "coop",
+   "unit": "hits",
+   "tags": [
+    "coop",
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Smash"
+   },
+   "move": {
+    "speed": 6.2,
+    "accel": 30,
+    "stunDrag": 3
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 6.5,
+    "wall": true
+   },
+   "pitch": 56,
+   "card": "card-golem-smash",
+   "css": false
+  }
+ },
+ "kraken-cove": {
+  "meta": {
+   "id": "kraken-cove",
+   "title": "Kraken Cove",
+   "blurb": "Dodge the tentacle slams and sweeps, then whack them while they rest!",
+   "how": [
+    "A tentacle rears up and the dock shows where it will hit in red. Get clear!",
+    "After it hits, it rests on the dock glowing gold: WHACK it with A!",
+    "3 whacks sends a tentacle packing early.",
+    "Empty the kraken’s courage bar before the bell!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "coop",
+   "unit": "whacks",
+   "tags": [
+    "coop",
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Whack"
+   },
+   "move": {
+    "speed": 6,
+    "accel": 30,
+    "stunDrag": 2.6
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 7.2,
+    "wall": true
+   },
+   "pitch": 60,
+   "card": "card-kraken-cove",
+   "css": false
+  }
+ },
+ "sky-serpent": {
+  "meta": {
+   "id": "sky-serpent",
+   "title": "Sky Serpent",
+   "blurb": "Man the harpoon cannons and dash out of the serpent’s diving shadow!",
+   "how": [
+    "Stand at a cannon, face the serpent and press A to fire a harpoon.",
+    "A shadow chasing you = it is about to dive. B = DASH out!",
+    "After a dive it is dazed and low: harpoons do double damage.",
+    "Beat it before the bell!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "coop",
+   "unit": "damage",
+   "tags": [
+    "coop",
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Fire",
+    "b": "Dash"
+   },
+   "move": {
+    "speed": 6,
+    "accel": 30,
+    "stunDrag": 2.6,
+    "boostMul": 2.1
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 7.5,
+    "wall": true,
+    "posts": [
+     {
+      "x": 4.77,
+      "z": 4.77,
+      "r": 0.5
+     },
+     {
+      "x": 4.77,
+      "z": -4.77,
+      "r": 0.5
+     },
+     {
+      "x": -4.77,
+      "z": -4.77,
+      "r": 0.5
+     },
+     {
+      "x": -4.77,
+      "z": 4.77,
+      "r": 0.5
+     }
+    ]
+   },
+   "pitch": 58,
+   "card": "card-sky-serpent",
+   "css": false
+  }
+ },
+ "goblin-kings-crown": {
+  "meta": {
+   "id": "goblin-kings-crown",
+   "title": "Goblin King's Crown",
+   "blurb": "Bonk the Goblin King for points — the final bonk wins the crown bonus!",
+   "how": [
+    "Bonk the King with A: 1 point a bonk. The final bonk is +5!",
+    "Red ring = a barrel or his landing. Get out of it!",
+    "Little goblin sneaks steal 2 points from the leader. Bonk them first (+1).",
+    "Most points wins!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Bonk"
+   },
+   "move": {
+    "speed": 6.2,
+    "accel": 30,
+    "stunDrag": 2.6
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 6.5,
+    "wall": true
+   },
+   "pitch": 56,
+   "card": "card-goblin-kings-crown",
+   "css": false
+  }
+ },
+ "pumpkin-knight": {
+  "meta": {
+   "id": "pumpkin-knight",
+   "title": "Pumpkin Knight",
+   "blurb": "Kick the knight’s runaway pumpkin head into the cauldron, then bonk the headless knight!",
+   "how": [
+    "While its head is loose the knight is protected.",
+    "Kick the bouncing pumpkin head (A) into the bubbling cauldron.",
+    "Head in the pot = the knight kneels: bonk it with A!",
+    "Orange wedge = sword swing. Step aside!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 72,
+   "scoring": "coop",
+   "unit": "pts",
+   "tags": [
+    "coop",
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Kick / Bonk"
+   },
+   "move": {
+    "speed": 6.2,
+    "accel": 30,
+    "stunDrag": 2.6
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 6.5,
+    "wall": true,
+    "posts": [
+     {
+      "x": 0,
+      "z": -5,
+      "r": 0.85
+     }
+    ]
+   },
+   "pitch": 56,
+   "card": "card-pumpkin-knight",
+   "css": false
+  }
+ },
+ "witchs-tower": {
+  "meta": {
+   "id": "witchs-tower",
+   "title": "Witch's Tower",
+   "blurb": "Catch the witch’s falling potions and throw them right back at her!",
+   "how": [
+    "A shadow on the floor = a potion is falling there.",
+    "Stand in it and press A as it glows NOW to catch it.",
+    "Press A again to throw it back up at the witch (gold = double!).",
+    "Missed potions leave sticky puddles. Beat her before the bell!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "coop",
+   "unit": "pts",
+   "tags": [
+    "coop",
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Catch / Throw"
+   },
+   "move": {
+    "speed": 6,
+    "accel": 30,
+    "stunDrag": 2.6,
+    "carryMul": 0.85,
+    "slowMul": 0.5
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 6.8,
+    "wall": true
+   },
+   "pitch": 60,
+   "card": "card-witchs-tower",
+   "css": false
+  }
+ },
+ "hilltop-hold": {
+  "meta": {
+   "id": "hilltop-hold",
+   "title": "Hilltop Hold",
+   "blurb": "Stand alone in the glowing zone to score — shove everyone else off the hill!",
+   "how": [
+    "Stand in the glowing zone ALONE to score.",
+    "Two in the zone? It turns red: nobody scores.",
+    "A shoves whoever is in front of you.",
+    "The zone hops to a new hill — watch for the dashed ring!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 60,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Shove"
+   },
+   "move": {
+    "speed": 6,
+    "accel": 24,
+    "stunDrag": 3
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 8,
+    "wall": true
+   },
+   "pitch": 58,
+   "card": "card-hilltop-hold",
+   "css": true
+  }
+ },
+ "thin-ice": {
+  "meta": {
+   "id": "thin-ice",
+   "title": "Thin Ice",
+   "blurb": "The ice cracks under your feet — keep moving and be the last one standing!",
+   "how": [
+    "Ice cracks where you stand, then falls away.",
+    "Keep moving! It is slippery.",
+    "B slides fast and knocks others.",
+    "Last one on the ice wins."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "survival",
+   "unit": "s",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "b": "Slide"
+   },
+   "move": {
+    "speed": 5.6,
+    "accel": 4.2,
+    "stunDrag": 0.9
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 7.4,
+    "wall": false
+   },
+   "pitch": 60,
+   "card": "card-thin-ice",
+   "css": true
+  }
+ },
+ "pillow-fight": {
+  "meta": {
+   "id": "pillow-fight",
+   "title": "Pillow Fight",
+   "blurb": "Bop everyone off the giant bed with your pillow — the more they are hit, the further they fly!",
+   "how": [
+    "A swings your pillow at whoever is in front.",
+    "Every bop raises their wobble %: they fly further.",
+    "Knock someone off the bed: +1. Fall off: -1.",
+    "B hops out of the way."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 60,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Swing",
+    "b": "Hop"
+   },
+   "move": {
+    "speed": 5.6,
+    "accel": 18,
+    "stunDrag": 1.5
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 6.5,
+    "hd": 4.6,
+    "wall": false
+   },
+   "pitch": 56,
+   "card": "card-pillow-fight",
+   "css": true
+  }
+ },
+ "odd-one-out": {
+  "meta": {
+   "id": "odd-one-out",
+   "title": "Odd One Out",
+   "blurb": "One picture is different. Spot it and tap it, fast!",
+   "how": [
+    "Every grid has ONE picture that is a little different.",
+    "It might be turned, flipped, smaller, an outline, or a look-alike.",
+    "Tap it to get the next grid. Grids grow as you go!",
+    "A wrong tap freezes you for a second. Most points wins."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 48,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "action"
+   ],
+   "card": "card-odd-one-out",
+   "css": true
+  }
+ },
+ "crow-count": {
+  "meta": {
+   "id": "crow-count",
+   "title": "Crow Count",
+   "blurb": "Crows come and go. How many are left in the field?",
+   "how": [
+    "Watch the field: crows fly in and land, others fly away.",
+    "Some just fly over. They do not count!",
+    "When it stops, guess how many crows are left with - and +.",
+    "Spot on = 5 points. Closest guess gets a bonus!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 76,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "social"
+   ],
+   "card": "card-crow-count",
+   "css": true
+  }
+ },
+ "higher-or-lower": {
+  "meta": {
+   "id": "higher-or-lower",
+   "title": "Higher or Lower",
+   "blurb": "Higher or lower? Ride your luck, and bank it before it goes bust!",
+   "how": [
+    "A prize card is showing. Will the next one be HIGHER or LOWER?",
+    "Each right call adds more to your pot. A wrong call loses the pot!",
+    "BANK to keep your pot safe instead of calling.",
+    "Right when nobody else picked your side? Brave call bonus!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 78,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "chance",
+    "social"
+   ],
+   "card": "card-higher-or-lower",
+   "css": true
+  }
+ },
+ "shape-sorter": {
+  "meta": {
+   "id": "shape-sorter",
+   "title": "Shape Sorter",
+   "blurb": "Sort the falling toys into the right bins, faster and faster!",
+   "how": [
+    "A toy drops down the chute.",
+    "Tap the bin with the same SHAPE and the same COLOUR.",
+    "Toys fall faster and faster. Keep a combo going for bonus points!",
+    "A wrong bin or a dropped toy breaks your combo."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 52,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action",
+    "puzzle"
+   ],
+   "card": "card-shape-sorter",
+   "css": true
+  }
+ },
+ "number-climb": {
+  "meta": {
+   "id": "number-climb",
+   "title": "Number Climb",
+   "blurb": "Tap the numbers in order, 1, 2, 3… as fast as you can!",
+   "how": [
+    "Everyone gets the same jumbled grid of numbers.",
+    "Tap them in order: 1, then 2, then 3… all the way up.",
+    "A wrong tap freezes you for a moment.",
+    "Finish first for a bonus. Grids get bigger each round!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 80,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action",
+    "puzzle"
+   ],
+   "card": "card-number-climb",
+   "css": true
+  }
+ },
+ "potion-mixer": {
+  "meta": {
+   "id": "potion-mixer",
+   "title": "Potion Mixer",
+   "blurb": "Follow the recipe and brew the most potions!",
+   "how": [
+    "Your recipe card shows what goes in, in order.",
+    "Tap each ingredient on the shelf to drop it in your cauldron.",
+    "Wrong one? Puff! That potion starts again.",
+    "Most potions bottled wins!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 52,
+   "scoring": "points",
+   "unit": "potions",
+   "tags": [
+    "action",
+    "puzzle",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-potion-mixer",
+   "css": true
+  }
+ },
+ "mummy-wrap": {
+  "meta": {
+   "id": "mummy-wrap",
+   "title": "Mummy Wrap",
+   "blurb": "Tap when the bandage hits the gap. Most-wrapped mummy wins!",
+   "how": [
+    "Your mummy spins and the loose bandage runs round the ring.",
+    "Tap WRAP when the bandage is inside the glowing gap.",
+    "Right in the middle = PERFECT, 2 wraps!",
+    "Miss and a wrap slips off. It spins faster and faster!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 47,
+   "scoring": "points",
+   "unit": "wraps",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-mummy-wrap",
+   "css": true
+  }
+ },
+ "firefly-catch": {
+  "meta": {
+   "id": "firefly-catch",
+   "title": "Firefly Catch",
+   "blurb": "Swing your net and catch the most fireflies before the night falls!",
+   "how": [
+    "A swings your net at the fireflies in front of you.",
+    "Golden fireflies are worth 3!",
+    "B by a bush shakes it: more fireflies pop out.",
+    "Fireflies dart away if you rush them."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 60,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Net",
+    "b": "Shake"
+   },
+   "move": {
+    "speed": 5.6,
+    "accel": 26,
+    "stunDrag": 2
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 6.5,
+    "wall": true
+   },
+   "pitch": 58,
+   "card": "card-firefly-catch",
+   "css": true
+  }
+ },
+ "spotlight-dance": {
+  "meta": {
+   "id": "spotlight-dance",
+   "title": "Spotlight Dance",
+   "blurb": "Dance in the spotlight on the beat — keep your streak going!",
+   "how": [
+    "Stand in a spotlight.",
+    "Press A on the beat (when the ring meets the light).",
+    "On-beat streaks multiply your points!",
+    "Lights merge and split — keep up."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 60,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Dance"
+   },
+   "move": {
+    "speed": 5.4,
+    "accel": 26,
+    "stunDrag": 2
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8,
+    "hd": 6,
+    "wall": true
+   },
+   "pitch": 56,
+   "card": "card-spotlight-dance",
+   "css": true
+  }
+ },
+ "bat-swarm": {
+  "meta": {
+   "id": "bat-swarm",
+   "title": "Bat Swarm",
+   "blurb": "Grab the piñata candy and dodge the swooping bat flocks!",
+   "how": [
+    "Walk over candy to grab it. Lollipops are worth 3!",
+    "Purple stripes = bats coming that way. Get out!",
+    "A wall of bats? Find the gap.",
+    "A bat bump makes you drop candy. A = dash."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 60,
+   "scoring": "points",
+   "unit": "candy",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Dash"
+   },
+   "move": {
+    "speed": 5.6,
+    "accel": 26,
+    "stunDrag": 2.6
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8,
+    "hd": 6,
+    "wall": true,
+    "posts": [
+     {
+      "x": 0,
+      "z": 0,
+      "r": 0.6
+     },
+     {
+      "x": -2.4,
+      "z": -0.9,
+      "r": 0.18
+     },
+     {
+      "x": 2.4,
+      "z": -0.9,
+      "r": 0.18
+     }
+    ]
+   },
+   "pitch": 58,
+   "card": "card-bat-swarm",
+   "css": true
+  }
+ },
+ "skeleton-stack": {
+  "meta": {
+   "id": "skeleton-stack",
+   "title": "Skeleton Stack",
+   "blurb": "Carry bones to your grave in the right order and build a dancing skeleton!",
+   "how": [
+    "A picks up a bone (or drops it).",
+    "Bring the NEXT piece to your plot: feet, legs, ribs, arms, skull.",
+    "A full skeleton dances: +3 bonus!",
+    "B bonks someone: they drop their bone."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Grab",
+    "b": "Bonk"
+   },
+   "move": {
+    "speed": 5.6,
+    "accel": 26,
+    "carryMul": 0.78,
+    "stunDrag": 2.4
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 6.5,
+    "wall": true
+   },
+   "pitch": 58,
+   "card": "card-skeleton-stack",
    "css": true
   }
  }

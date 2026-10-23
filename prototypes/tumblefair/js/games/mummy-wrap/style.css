@@ -1,0 +1,46 @@
+/* Mummy Wrap — a moonlit tomb in purple and orange, a big ring with a smiling mummy, one huge WRAP button. */
+.game-mummy-wrap { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 30px) calc(var(--sl) + 10px);
+  background: radial-gradient(circle at 6% 96%, #fff6c8 0 3%, transparent 3.5%), radial-gradient(circle at 50% 40%, #4b2f74, #170f26 80%); }
+.game-mummy-wrap > * { flex: none; }
+.mw-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding: 0 96px 0 8px; flex-wrap: wrap; row-gap: 4px; }
+.mw-title { font: 900 24px/1.1 var(--font); color: #fffaf0; -webkit-text-stroke: 1.2px #1d1430; paint-order: stroke fill; text-shadow: 0 3px 0 #ff8a1a; }
+.mw-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.mw-players .chip .sc { font-style: normal; font-weight: 900; background: #e9d8ff; border-radius: 8px; padding: 0 6px; }
+.mw-players .chip .sc::after { content: ' wraps'; font-size: 11px; font-weight: 600; }
+
+.mw-play { display: grid; justify-items: center; gap: 8px; width: min(100%, 520px); }
+.mw-stage { position: relative; width: min(92vw, 50vh, 440px); aspect-ratio: 1; touch-action: manipulation; }
+.mw-ring { width: 100%; height: 100%; display: block; overflow: visible; }
+.mw-s { opacity: 0; transition: opacity .2s; } .mw-s.on { opacity: 1; }
+.mw-bow, .mw-crown { display: none; } .bow .mw-bow { display: inline; } .crown .mw-crown { display: inline; } .crown .mw-bow { display: none; }
+.game-mummy-wrap:not([data-phase=play]) :is(.mw-gap, .mw-perf) { display: none; }
+.mw-gap { filter: drop-shadow(0 0 6px #7dff5a); }
+.mw-stage.hit .mw-ring { animation: mw-hit .3s; } .mw-stage.slip .mw-ring { animation: shake .3s; }
+@keyframes mw-hit { 40% { transform: scale(1.04); } }
+.mw-say { position: absolute; left: 50%; bottom: 2%; transform: translateX(-50%); font: 900 30px/1 var(--font); white-space: nowrap; pointer-events: none; opacity: 0; -webkit-text-stroke: 1.4px #1d1430; paint-order: stroke fill; }
+.mw-say.q2 { color: #fffb8a; } .mw-say.q1 { color: #7dff5a; } .mw-say.q0 { color: #ff8a8a; }
+.mw-say.go { animation: mw-say .8s; }
+@keyframes mw-say { from { opacity: 1; translate: 0 10px; scale: 1.2; } 70% { opacity: 1; } to { opacity: 0; translate: 0 -20px; scale: 1; } }
+.mw-count { font: 900 34px/1 var(--font); color: #fffaf0; text-shadow: 0 3px 0 #1d1430; } .mw-count small { font-size: 16px; }
+.mw-btn { width: min(100%, 420px); min-height: 84px; font-size: 34px; background: #ff8a1a; color: #fff; -webkit-text-stroke: 1.4px #1d1430; paint-order: stroke fill; border-color: #1d1430; box-shadow: 0 7px 0 #1d1430; touch-action: manipulation; }
+.mw-btn:active { transform: translateY(5px); box-shadow: 0 2px 0 #1d1430; }
+.game-mummy-wrap:not([data-phase=play]) .mw-btn { opacity: .5; pointer-events: none; }
+
+.mw-row { display: none; width: min(100%, 1180px); gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.mw-cell { display: grid; gap: 4px; justify-items: center; background: rgba(255, 250, 240, .1); border: 4px solid #1d1430; border-top: 10px solid var(--seat); border-radius: 18px; padding: 8px; }
+.mw-cell .mw-stage { width: min(100%, 52vh, 300px); } .mw-cell .mw-say { font-size: 22px; }
+.mw-n { font: 900 26px/1 var(--font); color: #fffaf0; text-shadow: 0 2px 0 #1d1430; }
+.game-mummy-wrap.watching :is(.mw-play, .mw-players) { display: none; }
+.game-mummy-wrap.watching .mw-row { display: grid; }
+.game-mummy-wrap[data-phase=end] :is(.mw-play, .mw-row) { display: none; }
+
+.mw-big { display: none; gap: 10px; justify-items: center; margin-top: 8vh; }
+.game-mummy-wrap[data-phase=end] .mw-big { display: grid; }
+.mw-final { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; background: #fff; border: 4px solid #1d1430; border-left: 12px solid var(--seat); border-radius: 16px; padding: 6px 14px; font-size: 18px; }
+.mw-final > b { font: 900 30px/1 var(--font); } .mw-final small { color: #5a3a8a; font-weight: 700; }
+.mw-final em { font-style: normal; font-weight: 900; background: #ff8a1a; border: 2px solid #1d1430; border-radius: 8px; padding: 1px 8px; }
+.mw-note { margin: 0; text-align: center; font: 800 17px/1.25 var(--font); color: #fff4e4; text-shadow: 0 2px 0 #1d1430; max-width: 560px; }
+.game-mummy-wrap[data-phase=ready] .mw-note { font-size: 22px; }
+.game-mummy-wrap.watching .mw-note { font-size: 22px; }
+@media (min-aspect-ratio: 1/1) and (max-height: 560px) { .mw-play { grid-template-columns: auto auto; align-items: center; } .mw-stage { width: min(60vh, 340px); } }

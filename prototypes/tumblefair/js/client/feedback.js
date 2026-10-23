@@ -37,11 +37,11 @@ export function installFeedback({ stage, getS, net }) {
     } catch { return null; }
   }
   /** Open the form. Round 7: "Tell us more" after rating a minigame opens it as a suggestion, already about that game. */
-  function open({ kind = 'bug', text = '', about = null, noPicture = false } = {}) {
+  function open({ kind = 'idea', text = '', about = null, noPicture = false } = {}) {
     const picture = noPicture ? null : shot(), info = { ...debug(), ...(about ? { about } : {}) };
     const el = h('div', 'modal fb-modal');
-    el.innerHTML = `<div class="panel"><h2>Report a bug or idea</h2>
-      <div class="row"><label class="pill${kind === 'bug' ? ' on' : ''}"><input type="radio" name="fbk" value="bug" ${kind === 'bug' ? 'checked' : ''}> Bug</label><label class="pill${kind === 'idea' ? ' on' : ''}"><input type="radio" name="fbk" value="idea" ${kind === 'idea' ? 'checked' : ''}> Suggestion</label></div>
+    el.innerHTML = `<div class="panel"><h2>Suggest something or report a bug</h2>
+      <div class="row"><label class="pill${kind === 'idea' ? ' on' : ''}"><input type="radio" name="fbk" value="idea" ${kind === 'idea' ? 'checked' : ''}> Suggestion</label><label class="pill${kind === 'bug' ? ' on' : ''}"><input type="radio" name="fbk" value="bug" ${kind === 'bug' ? 'checked' : ''}> Bug</label></div>
       <textarea id="fb-text" rows="5" maxlength="4000" placeholder="What happened, or what would make it better?"></textarea>
       ${picture ? `<label class="check fb-shot"><input type="checkbox" id="fb-pic" checked> Include this picture of the game<img src="${picture}" alt=""></label>` : ''}
       <p class="note">Also sent: what screen you were on, the players, your device and recent errors. Nothing else.</p>

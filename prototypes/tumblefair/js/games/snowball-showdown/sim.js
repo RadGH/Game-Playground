@@ -16,7 +16,8 @@ export const meta = {
 
 export const RULES = {
   lives: 3,
-  throwCool: 0.6, ballSpeed: 15, ballLife: 0.75, ballR: 0.7,      // ballR: hit distance, centre to centre
+  throwCool: 0.6, ballSpeed: 15, ballLife: 0.75, ballR: 0.8,      // ballR: hit distance, centre to centre
+  aimCone: 0.5, aimRange: 11.5,                                    // aim help: a throw turns toward the nearest-to-facing target this close (rad, m) — owner 2026-10-22 "very hard to aim"
   hitPush: 8.5, hitStun: 0.45,
   dashCool: 2.0, dashSpeed: 15, dashTime: 0.3, shovePush: 12, shoveStun: 0.5, shoveR: 1.05,
   edge: 8.15,                                                      // centre further out than this = falling
@@ -56,6 +57,18 @@ export function create({ rng, players }) {
     if (s.lives <= 0) s.outAt = elapsed;
     events.push({ e: 'fall', pid, by: credit, lives: s.lives, x: r2(b.x), z: r2(b.z) });
   }
+  /** Aim help: the direction to throw — toward the target closest to where you face (inside aimCone, leading it a little), else straight ahead. */
+  function aimFrom(pid, b, fx, fz) {
+    const marks = solo ? snowmen.map(m => ({ x: m.x, z: m.z, vx: 0, vz: 0 })) : players.filter(p => p.pid !== pid && active(p.pid)).map(p => bodies.get(p.pid));
+    let best = null, bestA = RULES.aimCone;
+    for (const m of marks) {
+      const dx = m.x - b.x, dz = m.z - b.z, d = Math.hypot(dx, dz); if (d < 0.3 || d > RULES.aimRange) continue;
+      const lead = d / RULES.ballSpeed, tx = dx + (m.vx || 0) * lead, tz = dz + (m.vz || 0) * lead, td = Math.hypot(tx, tz) || 1;
+      const ang = Math.acos(Math.max(-1, Math.min(1, (tx * fx + tz * fz) / td)));
+      if (ang < bestA) { bestA = ang; best = [tx / td, tz / td]; }
+    }
+    return best || [fx, fz];
+  }
   return {
     bodies, events,
     init: () => ({ solo, lives: RULES.lives, left: Math.ceil(time) }),
@@ -66,7 +79,8 @@ export function create({ rng, players }) {
       const fx = Math.sin(b.yaw), fz = Math.cos(b.yaw);
       if (pa && free && s.throwCool <= 0) {
         s.throwCool = RULES.throwCool;
-        balls.push({ id: ++bid, by: pid, x: b.x + fx * 0.6, z: b.z + fz * 0.6, vx: fx * RULES.ballSpeed + b.vx * 0.3, vz: fz * RULES.ballSpeed + b.vz * 0.3, life: RULES.ballLife });
+        const [ax, az] = aimFrom(pid, b, fx, fz);
+        balls.push({ id: ++bid, by: pid, x: b.x + ax * 0.6, z: b.z + az * 0.6, vx: ax * RULES.ballSpeed + b.vx * 0.3, vz: az * RULES.ballSpeed + b.vz * 0.3, life: RULES.ballLife });
         events.push({ e: 'throw', pid });
       }
       if (pb && free && s.dashCool <= 0) {

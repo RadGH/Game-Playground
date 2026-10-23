@@ -349,7 +349,7 @@ export function buildFace25(a, rig, c) {
 
   // ---------------------------------------------------------------- ears
   tag('face:ears');
-  const hat = a.hat.id, earsHidden = c.earsHidden ?? ['hood', 'dragon_helm', 'goggles_up', 'chain_coif', 'plate_helm', 'great_helm', 'helmet', 'war_helm', 'wolf_helm'].includes(hat);
+  const hat = a.hat.id, earsHidden = c.earsHidden ?? ['hood', 'dragon_helm', 'goggles_up', 'chain_coif', 'plate_helm', 'great_helm', 'helmet', 'war_helm', 'wolf_helm', 'pumpkin_head', 'ghost_sheet'].includes(hat);
   const earK = (face.ear || 1) * clamp(a.ears.scale || 1, 0.6, 1.6), earId = a.ears.id;
   const topEars = earId === 'cat_ears' || earId === 'wolf_ears';
   // ears that the hair covers (long hair over normal ears); pointed ears poke out through it, as an elf's do
@@ -652,7 +652,7 @@ export function buildFace25(a, rig, c) {
 
   // ---------------------------------------------------------------- facial hair
   tag('face:beard');
-  const fh = a.facialHair.id;
+  const fh = ['pumpkin_head', 'ghost_sheet'].includes(a.hat.id) ? 'none' : a.facialHair.id;      // a whole-head costume hides the beard (it would hang out under the pumpkin)
   // a goatee is chin-only, as the 2D picture draws it (v2 added a moustache); the van dyke is the goatee + moustache
   const hasMoustache = ['mustache', 'full', 'long', 'braided_beard', 'van_dyke', 'handlebar', 'short_beard', 'forked_beard'].includes(fh);
   const mouthY = Math.min(noseBottom - (hasMoustache ? 0.06 : 0.035), 0.1) - clamp((a.mouth.y || 0) * 0.025, -0.02, 0.03);

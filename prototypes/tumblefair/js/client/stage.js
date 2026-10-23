@@ -4,6 +4,12 @@
 import * as THREE from 'three';
 import { SEATS } from '../shared/protocol.js';
 
+// three.js works out an InstancedMesh's bounding sphere ONCE (the first time it is culled) and never again. A game that
+// starts with count 0 and adds instances later (Wobble Tower's blocks, splats, coins…) then has an EMPTY sphere pinned at
+// the mesh's origin, and the whole mesh vanishes as soon as that origin leaves the screen — on a phone following its own
+// tower upward, every block disappeared until a rejoin (owner's report, 2026-10-22). Our scenes are small: never cull them.
+THREE.InstancedMesh.prototype.intersectsFrustum = function () { return true; };
+
 export function pickQuality() {
   const q = new URLSearchParams(location.search).get('quality'); if (q) return q;
   try { const c = document.createElement('canvas'), g = c.getContext('webgl2') || c.getContext('webgl'), e = g?.getExtension('WEBGL_debug_renderer_info');

@@ -1,0 +1,8 @@
+/* Firefly Catch: the controls tip and the solo medal targets. */
+.game-firefly-catch .fc-tip { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); pointer-events: none; max-width: 96vw; white-space: nowrap;
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 250, 214, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); transition: opacity .5s; }
+.fc-tip.gone { opacity: 0; }
+.game-firefly-catch .fc-medals { position: absolute; top: calc(var(--st) + 98px); left: 50%; transform: translateX(-50%); display: flex; gap: 6px; pointer-events: none; }
+.fc-medals span { padding: 2px 10px; border-radius: 999px; background: rgba(36, 26, 61, .72); color: #fff; font: 900 15px/1.4 var(--font); }
+.fc-medals span.won { background: #ffd23f; color: var(--ink); }
+@media (max-width: 520px) { .game-firefly-catch .fc-tip { top: calc(var(--st) + 52px); font-size: 13px; } .game-firefly-catch .fc-medals { top: calc(var(--st) + 86px); } }

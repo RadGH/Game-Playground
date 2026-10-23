@@ -1,0 +1,8 @@
+/* Thin Ice: the "keep moving" tip under the score bar and the splash / winner banner. */
+.game-thin-ice .ti-tip { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); pointer-events: none; max-width: 96vw; white-space: nowrap;
+  padding: 4px 14px; border-radius: 999px; background: rgba(235, 248, 255, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); transition: opacity .5s; }
+.ti-tip.gone { opacity: 0; }
+.game-thin-ice .ti-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center; max-width: 94vw;
+  font: 900 clamp(28px, 8vw, 60px)/1.05 var(--font); color: #e8f7ff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); transition: transform .15s, opacity .15s; }
+.ti-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); } .ti-banner.bad { color: #9fd8ff; } .ti-banner.good { color: var(--sun); }
+@media (max-width: 520px) { .game-thin-ice .ti-tip { top: calc(var(--st) + 52px); font-size: 13px; } }

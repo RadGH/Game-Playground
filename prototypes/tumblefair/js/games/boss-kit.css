@@ -1,0 +1,22 @@
+/* The round-8 boss games' shared HUD (js/games/boss-kit-view.js): the boss's health bar under the score bar, a small
+   row for pips/hints, and a big banner. Nothing here is tappable. */
+.bk-hud { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); width: min(440px, calc(100% - 16px)); pointer-events: none;
+  display: flex; flex-direction: column; gap: 3px; padding: 5px 12px; border-radius: 16px; background: rgba(255, 248, 231, .94); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 14px/1.2 var(--font); color: var(--ink); }
+.bk-hp { display: flex; align-items: center; gap: 8px; }
+.bk-hp b { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; opacity: .8; white-space: nowrap; }
+.bk-hp em { order: 1; font-style: normal; font-weight: 900; min-width: 2.2em; text-align: left; }
+/* the bar sits right of the number and stops short of the corner, where the connection badge sits */
+.bk-hp .bk-bar { order: 2; margin-right: 34px; }
+.bk-bar { flex: 1; height: 14px; border-radius: 8px; background: #2b3a3e; border: 2px solid var(--ink); overflow: hidden; }
+.bk-bar i { display: block; height: 100%; width: 100%; background: var(--boss, #e8434f); box-shadow: inset 0 4px 0 rgba(255, 255, 255, .35); transition: width .25s; }
+.bk-row { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 20px; font-size: 13px; flex-wrap: wrap; }
+.bk-row:empty { display: none; }
+.bk-pip { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); font-size: 11px; }
+.bk-pip.on { background: #8ff07a; }
+.bk-tag { padding: 1px 8px; border-radius: 10px; background: var(--ink); color: #fff; font-size: 12px; }
+.bk-tag.hot { background: #ff9b3d; color: var(--ink); }
+.bk-banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none;
+  font: 900 clamp(26px, 7.5vw, 58px)/1.05 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); text-align: center; max-width: 94vw; transition: transform .25s, opacity .25s; }
+.bk-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.bk-banner.good { color: #8ff07a; } .bk-banner.bad { color: #ff7a7a; } .bk-banner.warn { color: #ffb04a; }
+@media (max-width: 520px) { .bk-hud { top: calc(var(--st) + 52px); padding: 4px 10px; } }

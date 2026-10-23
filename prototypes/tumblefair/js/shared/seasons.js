@@ -23,9 +23,10 @@ export function seasonByDate(date = new Date()) {
   for (const s of SEASONS) { const a = s.from[0] * 100 + s.from[1], b = s.to[0] * 100 + s.to[1]; if (a <= b ? k >= a && k <= b : k >= a || k <= b) return s.id; }
   return null;
 }
-/** The host's choice ('auto' | 'off' | a season id) -> the season in force, or null. */
+/** The host's choice ('auto' | 'off' | 'only' | a season id) -> the season in force, or null. */
 export function effectiveSeason(choice = 'auto', date = new Date()) {
   if (choice === 'off') return null;
+  if (choice === 'only') return seasonByDate(date) || SEASON_IDS[0];      // "holiday games only" (owner 2026-10-22): the date's holiday, else the first one
   if (SEASON_IDS.includes(choice)) return choice;
   return seasonByDate(date);
 }

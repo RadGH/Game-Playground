@@ -1,0 +1,46 @@
+/* Number Climb — a climbing wall: warm stone background, number tiles like holds, a progress bar per climber. */
+.game-number-climb { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px; --mine: #3ecf5a;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 40px) calc(var(--sl) + 10px); background: radial-gradient(circle at 30% 20%, #ffe2b8, #f2b77a 70%); }
+.game-number-climb > * { flex: none; }
+.nc-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding: 0 96px 0 8px; flex-wrap: wrap; row-gap: 4px; }
+.nc-title { font: 900 24px/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.nc-round { font-weight: 900; font-size: 14px; text-transform: uppercase; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; }
+
+.nc-bars { display: grid; gap: 4px; width: min(100%, 560px); }
+.nc-barrow { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 6px; }
+.nc-barrow .chip { font-size: 13px; padding: 1px 8px 1px 1px; } .nc-barrow .chip .face { width: 26px; height: 26px; }
+.nc-barrow.me .chip { background: #fff3b8; }
+.nc-bar { height: 16px; border: 3px solid var(--ink); border-radius: 9px; background: #fff; overflow: hidden; }
+.nc-bar u { display: block; height: 100%; width: 0; background: var(--seat); transition: width .2s; }
+.nc-of { font-size: 13px; min-width: 4.2em; text-align: right; } .nc-barrow.fin .nc-of { color: #1d8a37; }
+.nc-barrow .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border: 2px solid var(--ink); border-radius: 8px; padding: 0 6px; min-width: 2.2em; text-align: center; }
+.nc-barrow.lock .nc-bar { background: #ffd8d8; } .nc-barrow.shake { animation: shake .3s; }
+@media (max-width: 520px) { .nc-barrow .chip .nm { display: none; } }
+
+.nc-find { display: flex; align-items: baseline; gap: 8px; background: #fff; border: 4px solid var(--ink); border-radius: 16px; padding: 2px 16px; box-shadow: 0 4px 0 var(--ink); }
+.nc-find span { font-weight: 900; text-transform: uppercase; } .nc-find b { font: 900 40px/1 var(--font); color: var(--ink); min-width: 1.4em; text-align: center; }
+.finished .nc-find { background: #c9f5d2; }
+.nc-board { width: min(100%, 56vh, 540px); aspect-ratio: 1; position: relative; }
+.nc-grid { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 6px; width: 100%; height: 100%; padding: 8px; background: #8a6a4a; border: 5px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+.nc-tile { position: relative; appearance: none; padding: 0; min-width: 0; min-height: 0; border: 3px solid var(--ink); border-radius: 14px; background: #fff8e7; box-shadow: 0 4px 0 var(--ink); color: var(--ink); touch-action: manipulation; display: grid; place-items: center; overflow: visible; }
+.nc-tile b { font: 900 calc(var(--sz, 1) * min(10vw, 52px, 6vh) * 3 / var(--n))/1 var(--font); transform: rotate(var(--rot, 0deg)); display: block; }
+.nc-tile:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.nc-tile.done { background: #d9d3c4; color: #9a907c; box-shadow: none; transform: translateY(3px); border-color: #9a907c; }
+.nc-tile.done::after { content: '✓'; position: absolute; right: 6%; top: 2%; font: 900 min(6vw, 26px)/1 var(--font); color: var(--mine); -webkit-text-stroke: 1px var(--ink); }
+.nc-tile.pop { animation: nc-pop .2s; } .nc-tile.shake { animation: shake .3s; } .nc-tile.wrong { background: #ffb3b3; }
+@keyframes nc-pop { 50% { transform: scale(1.12); } }
+.frozen .nc-grid { filter: grayscale(.8); }
+.nc-badges { position: absolute; right: -4px; top: -6px; display: flex; gap: 0; font-style: normal; pointer-events: none; }
+.nc-face { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; margin-left: -8px; box-shadow: 0 2px 0 var(--ink); }
+.nc-face img { width: 100%; height: 100%; display: block; }
+.game-number-climb.watching .nc-find { display: none; }
+.game-number-climb.watching .nc-tile { pointer-events: none; }
+.game-number-climb.watching .nc-face { width: 38px; height: 38px; }
+.game-number-climb:not([data-phase=climb]) :is(.nc-board, .nc-find) { display: none; }
+.nc-sum { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.nc-sum:empty { display: none; }
+.nc-sum > span { display: inline-flex; align-items: center; gap: 4px; } .nc-sum b { font: 900 22px/1 var(--font); color: #1d8a37; }
+.nc-note { margin: 0; text-align: center; font: 800 17px/1.25 var(--font); background: rgba(255, 255, 255, .9); border: 3px solid var(--ink); border-radius: 12px; padding: 4px 12px; max-width: 560px; }
+.game-number-climb:is([data-phase=ready], [data-phase=between]) .nc-note { margin-top: 10vh; font-size: 22px; padding: 10px 18px; }
+.game-number-climb[data-phase=end] .nc-bars { margin-top: 10vh; }
+.game-number-climb.watching .nc-board { width: min(100%, 56vh, 640px); } .game-number-climb.watching .nc-note { font-size: 20px; }

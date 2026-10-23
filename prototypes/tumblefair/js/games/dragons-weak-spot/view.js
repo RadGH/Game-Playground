@@ -190,6 +190,7 @@ export function createView(ctx) {
         floatText(stage, p.x, 3.4, p.z - 1.5, `-${ev.dmg}${ev.done ? ' COMBO!' : ''}`, 'good'); puff(p.x, 2.6, p.z - 2.2, SCALES[ev.pad].color, 1.3);
         if (ev.done) showBanner('Combo!', 'good', 1100);
       } else if (ev.e === 'wrong') { ctx.sfx('bad'); const p = padAt(ev.pad); floatText(stage, p.x, 2.6, p.z, 'Wrong scale!', 'bad'); showBanner('It flinched!', 'bad', 900); }
+      else if (ev.e === 'chip') { const p = padAt(ev.pad); scales[ev.pad].pop = 1.2; if (ev.pid === me) ctx.sfx('tap'); floatText(stage, p.x, 2.6, p.z - 1, `-${ev.dmg}`, ''); }
       else if (ev.e === 'clang') { if (ev.pid === me) { ctx.sfx('tap'); const p = padAt(ev.pad); floatText(stage, p.x, 2.2, p.z, 'Wait for dizzy!', ''); } }
       else if (ev.e === 'recover') { if (!ev.combo) showBanner('It shook it off!', 'bad', 1100); }
       else if (ev.e === 'hop') { if (ev.pid === me) ctx.sfx('tap'); }

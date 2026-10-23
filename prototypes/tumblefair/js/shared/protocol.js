@@ -13,6 +13,16 @@ export const newCode = rand => { let c = ''; for (let i = 0; i < CODE_LENGTH; i+
 /** A player's name: 1-14 visible characters, no control characters or markup, spaces collapsed. */
 export const cleanName = s => { const n = String(s ?? '').replace(/[\u0000-\u001f\u007f<>&"'`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, 14); return n.length ? n : null; };
 
+/**
+ * Round 7 (owner 2026-10-22): players rate a minigame after playing it — 👍 or 👎, then any of these reasons. The ids
+ * travel comma-separated in `rate.why`; anything not on the list is dropped. The labels are what the buttons say.
+ */
+export const RATE_REASONS = Object.freeze({
+  up: [['fun', 'Fun'], ['funny', 'Funny'], ['exciting', 'Exciting'], ['teamwork', 'Good teamwork'], ['pretty', 'Looks great'], ['again', 'Play it again!']],
+  down: [['confusing', 'Confusing'], ['controls', 'Awkward controls'], ['hard', 'Too hard'], ['easy', 'Too easy'], ['long', 'Too long'], ['unfair', 'Unfair'], ['laggy', 'Laggy'], ['boring', 'Boring']],
+});
+export const cleanReasons = (v, why) => { const ok = new Set((v > 0 ? RATE_REASONS.up : RATE_REASONS.down).map(r => r[0])); return [...new Set(String(why || '').split(',').map(s => s.trim()).filter(id => ok.has(id)))].slice(0, 4); };
+
 /** Input bits of an arena step. */
 export const IN = Object.freeze({ A: 1, B: 2 });
 /** The four seat colours (reference card: red / blue / green / magenta), with a shape each so colour is never the only cue. */
@@ -45,6 +55,8 @@ export const CLIENT_MSGS = Object.freeze({
   equip:   { fields: { id: 'str:40' }, rate: 4, burst: 12 },
   emote:   { fields: { e: 'str:16' }, rate: 2, burst: 5 },
   ping:    { fields: { at: 'num' }, rate: 2, burst: 6 },
+  rate:    { fields: { game: 'str:40', v: 'int', why: '?str:120' }, rate: 2, burst: 10 },   // round 7: 👍/👎 a minigame you played (+ reasons)
+  rooms:   { fields: {}, rate: 1, burst: 4 },                         // round 7: the public games list
 });
 
 function typeOk(v, type) {

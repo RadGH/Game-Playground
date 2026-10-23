@@ -3,7 +3,8 @@
 //   node server/main.mjs [--port 8480] [--host 0.0.0.0] [--public <dir>] [--build <id>] [--data <dir>]
 //   --public <dir>   serve a published copy (tools/publish-tumblefair.sh) instead of the working tree
 //   --data <dir>     where profiles.json lives (default: .data/ beside this game)
-// GET /status (JSON) and /healthz for the publish script. WebSocket at /ws.
+// GET /status (JSON) and /healthz for the publish script. WebSocket at /ws. POST /feedback (the ! button), POST /tally
+// (round 7: cookie-free page counts, server/insights.mjs).
 import http from 'node:http';
 import { randomBytes } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs';
@@ -14,6 +15,7 @@ import { createStaticHandler } from './static.js';
 import { createHub } from '../js/sim/hub.js';
 import { createProfiles } from '../js/sim/profiles.js';
 import { createFeedback } from './feedback.mjs';
+import { createInsights } from './insights.mjs';
 import { MAX_FRAME, TICK_MS } from '../js/shared/protocol.js';
 import { cleanLook } from '../../thousandvale/js/sim/looks.js';
 
@@ -29,7 +31,8 @@ const profileFile = join(dataDir, 'profiles.json');
 let initial = {}; try { initial = JSON.parse(readFileSync(profileFile, 'utf8')); } catch { /* first run */ }
 const profiles = createProfiles({ initial, cosmetics: data.cosmetics, cleanLook, randomToken: () => randomBytes(18).toString('base64url'),
   persist: all => { const tmp = profileFile + '.tmp'; writeFileSync(tmp, JSON.stringify(all)); renameSync(tmp, profileFile); } });
-const hub = createHub({ data, profiles, build, log: (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d)) });
+const insights = createInsights(dataDir, { build });      // round 7: ratings, plays, votes + cookie-free page counts (tools/insights-report.mjs)
+const hub = createHub({ data, profiles, build, log: (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d)), report: (kind, d) => insights.report(kind, d) });
 
 const feedback = createFeedback(dataDir, { build });
 // The visitor's address: behind a proxy on this machine (Caddy on the games.radgh.com droplet sends X-Forwarded-For; the old
@@ -47,6 +50,7 @@ const server = http.createServer((req, res) => {
   if (path === '/healthz') { res.writeHead(200, { 'Content-Type': 'text/plain' }); res.end('ok'); return; }
   if (path === '/status') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify({ server: 'tumblefair', build, uptime: Math.round((Date.now() - started) / 1000), ...hub.status() })); return; }
   if (path === '/feedback' && req.method === 'POST') { feedback.handle(req, ipOf(req), (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); }); return; }
+  if (path === '/tally' && req.method === 'POST') { insights.handle(req, ipOf(req), req.headers['user-agent'], code => { res.writeHead(code); res.end(); }); return; }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); res.end(); return; }
   if (!serveStatic(req, res)) { res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('not found'); }
 });
@@ -72,6 +76,6 @@ setInterval(() => { for (const ws of wss.clients) { if (!ws.isAlive) { ws.termin
 let last = Date.now(), owed = 0;
 setInterval(() => { const t = Date.now(); owed = Math.min(owed + (t - last), TICK_MS * 5); last = t; while (owed >= TICK_MS) { owed -= TICK_MS; hub.tick(); } }, 10);   // 20 ticks a second, catching up at most a quarter second
 setInterval(() => profiles.flush(), 5000);
-const bye = () => { try { profiles.flush(); } catch { /* disk */ } process.exit(0); };
+const bye = () => { try { profiles.flush(); } catch { /* disk */ } try { insights.flush(); } catch { /* disk */ } process.exit(0); };
 process.on('SIGTERM', bye); process.on('SIGINT', bye);
 server.listen(port, host, () => console.log(`tumblefair ${build} on http://${host}:${port}/  (${publicDir ? 'published copy ' + publicDir : 'working tree'})`));

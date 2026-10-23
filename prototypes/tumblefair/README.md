@@ -261,6 +261,42 @@ and touch other players. Measured, not guessed (`tests/interp.test.js`, `tests/n
 only as new as the last `tools/publish-tumblefair.sh`. Anyone with Node can also run their own:
 `node prototypes/tumblefair/server/main.mjs --port 8480` from a checkout, and phones join at that machine's address.
 
+## Ratings, public games and counts (round 7, 2026-10-22)
+
+The owner: "a like/dislike system … players rate minigames after playing them … we can use that data later to weed out
+the unfun ones or prioritise the good ones", "a public lobby system to help people find games", "basic analytics, replace
+with GA later".
+
+- **Rating a minigame.** The results card asks everyone who PLAYED it "Did you like this one?" 👍 / 👎, then offers reasons
+  (👍 fun, funny, exciting, good teamwork, looks great, play it again; 👎 confusing, awkward controls, too hard, too easy,
+  too long, unfair, laggy, boring — `RATE_REASONS` in `js/shared/protocol.js`) and "Tell us more", which opens the ! form
+  as a suggestion already about that game (`fb.open({ kind, text, about })` in `js/client/feedback.js`). Skipped on the
+  results card, it shows again, small, on the next vote screen. Message `rate {game, v: 1|-1, why}`; the room accepts it
+  only from someone who played that game in this room, cleans the reasons, and answers `rated`. A change of mind
+  replaces the earlier rating (same `voter` id).
+- **What the rooms report** (`createRoom({ report })` -> hub -> `server/insights.mjs`): `rate`, `played` (game, players,
+  difficulty, real seconds against its clock, ended early, drop-outs, all tied, co-op success), `vote` (every minigame
+  offered with its votes, and the winner — a game nobody picks is as telling as a 👎), `match`, `final`. Never a name,
+  token or address. Stored as `<data>/insights/YYYY-MM.jsonl`.
+- **The report:** `node tools/insights-report.mjs [--env stable|dev] [--days 30] [--json]`, or on the droplet
+  `--dir /var/lib/tumblefair`. One row per minigame: plays, 👍, 👎, a score (lower edge of a 90% Wilson interval, so 3/3
+  does not beat 40/50), top reasons, how often it wins the vote when offered, average seconds against its clock, ended
+  early, drop-outs; then the day-by-day page counts.
+- **Find a game.** In the lobby the host picks "Who can join": Invite only (default) or Public. The title screen's
+  "Find a game" lists every public room — lobbies with a free seat first, fullest first — and refreshes every 3 s; one
+  tap joins (a game under way: you watch, then get a seat at the next minigame). Message `rooms` -> `rooms {list}`
+  (`hub.publicList`, `room.listing()`: code, host name, players/seats, phase, mode — nothing else).
+- **Counts, cookie-free.** `js/client/tally.js` `tally(name, props)` batches events (page_view with device kind,
+  host_game, join_game by code/invite/public, find_game, make_public, start_match, minigame_done, rate, rate_more,
+  open_editor, open_shop, buy_costume) to `POST /tally`. The server counts them per day in
+  `<data>/insights/counts-YYYY-MM-DD.json`; a day's visitors are counted with a hash of (address, browser, a salt thrown
+  away at midnight), so nobody can be followed across days and no address is written down. No cookies and nothing on
+  the device for this, so no consent banner; the title says so in one line. **For Google Analytics later:** load gtag
+  and set `window.tumblefairTally = (name, props) => gtag('event', name, props)` — every `tally()` call goes there too —
+  and add a consent banner then (GA sets cookies). The file is not called analytics.js because ad-blocker lists block
+  that name. Automated browsers are not counted unless the page has `?tally=1`.
+- Tests: `tests/insights.test.js`, `tests/tumblefair.spec.js` (rate on a phone, Tell us more, Find a game, big QR).
+
 ## Bug reports and suggestions
 
 The round **!** button (top right; bottom centre during a minigame) opens a form: Bug or Suggestion, a text box, and a

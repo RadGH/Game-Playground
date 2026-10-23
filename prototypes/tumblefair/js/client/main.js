@@ -15,14 +15,15 @@ import { createEditor } from './editor.js';
 import { btnText } from './buttons.js';
 import { createSounds } from './sounds.js';
 import { installFeedback } from './feedback.js';
-import { SEATS, cleanCode, CODE_LENGTH } from '../shared/protocol.js';
+import { SEATS, cleanCode, CODE_LENGTH, RATE_REASONS } from '../shared/protocol.js';
+import { tally, deviceKind } from './tally.js';
 import { GAMES, gameIds } from '../games/metas.js';     // meta only: the rules stay on the server
 
 const $ = s => document.querySelector(s);
 const screen = $('#screen'), hud = $('#hud'), toasts = $('#toasts');
 const ART = new URL('../../assets/art/', import.meta.url).href;
 const q = new URLSearchParams(location.search);
-const S = { codeSmall: (() => { try { return !!localStorage.getItem('tumblefair.codeSmall'); } catch { return false; } })(), me: null, room: null, phase: null, pm: null, play: null, playP: null, board: null, boardP: null, modal: null, ends: 0, bd: { tickets: {}, ribbons: {}, pid: null, ask: null, rolled: null }, votes: {}, skips: [], asDisplay: q.get('display') === '1', err: '' };
+const S = { codeSmall: (() => { try { return !!localStorage.getItem('tumblefair.codeSmall'); } catch { return false; } })(), me: null, room: null, phase: null, pm: null, play: null, playP: null, board: null, boardP: null, modal: null, ends: 0, bd: { tickets: {}, ribbons: {}, pid: null, ask: null, rolled: null }, votes: {}, skips: [], asDisplay: q.get('display') === '1', err: '', rated: {}, pub: null };
 
 await loadAvatarData();
 const stage = createStage($('#view'));
@@ -40,7 +41,8 @@ function setSeason(id) {
   if (id === 'halloween') { const b = document.createElement('div'); b.className = 'bats'; b.innerHTML = '<i></i><i></i><i></i>'; document.body.append(b); }
 }
 setSeason(seasonByDate());
-installFeedback({ stage, net, getS: () => S });                       // for tests and the console
+const fb = installFeedback({ stage, net, getS: () => S });            // for tests and the console; fb.open() = the form (round 7: "Tell us more")
+tally('page_view', { device: deviceKind(), invite: !!q.get('code'), display: q.get('display') === '1' });
 
 // ------------------------------------------------------------------ helpers
 const members = () => S.room?.members || [];
@@ -101,11 +103,13 @@ function showTitle() {
       <label class="field"><span>Your name</span><input id="name" maxlength="14" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(S.me?.name || '')}"></label>
       <div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>
       <button class="btn big primary" data-act="host">Host a game</button>
+      <button class="btn big" data-act="find">Find a game</button>
       <div class="join-row"><input id="code" maxlength="${CODE_LENGTH}" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${code}"><button class="btn big" data-act="join">Join</button></div>
       <label class="check"><input type="checkbox" id="as-display" ${S.asDisplay ? 'checked' : ''}> This is the big screen (watch only)</label>
       <p class="err">${esc(S.err)}</p>
     </div>
-    <p class="foot">2–4 players · everyone joins on their own phone · <span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>`);
+    <p class="foot">2–4 players · everyone joins on their own phone · <span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>
+    <p class="foot privacy">No cookies, no ads. We count plays anonymously to make the fair better.</p>`);
 }
 function saveName() { const n = $('#name')?.value.trim(); if (n && n !== S.me?.name) net.send({ t: 'profile', name: n }); }
 
@@ -135,6 +139,8 @@ async function showLobby() {
         <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : 1.6))} min</span></div>`}
       <div class="row opts"><span>Play as</span><button class="pill${!r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="0" ${host ? '' : 'disabled'}>Everyone for themselves</button><button class="pill${r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="1" ${host ? '' : 'disabled'}>Teams</button>
         ${r.opts.teams ? `<span class="est">${n === 3 ? 'Teams need 2 or 4 players' : 'Red &amp; Green vs Blue &amp; Pink'}</span>` : ''}</div>
+      <div class="row opts"><span>Who can join</span><button class="pill${!r.opts.public ? ' on' : ''}" data-act="opt" data-key="public" data-bool="0" ${host ? '' : 'disabled'}>Invite only</button><button class="pill${r.opts.public ? ' on' : ''}" data-act="opt" data-key="public" data-bool="1" ${host ? '' : 'disabled'}>Public</button>
+        <span class="est">${r.opts.public ? 'Listed in Find a game' : 'Only people with the code'}</span></div>
       <div class="row opts"><span>Difficulty</span>${[['easy', 'Family'], ['normal', 'Normal'], ['hard', 'Tricky']].map(([v, t]) => `<button class="pill${r.opts.difficulty === v ? ' on' : ''}" data-act="opt" data-key="difficulty" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}</div>
       <div class="row opts"><span>Holidays</span>${[['auto', `Auto${r.dateSeason ? ` (${seasonName(r.dateSeason)})` : ''}`], ...SEASONS.map(x => [x.id, x.name]), ['off', 'Off']].map(([v, t]) => `<button class="pill${(r.opts.holiday || 'auto') === v ? ' on' : ''}" data-act="opt" data-key="holiday" data-value="${v}" ${host ? '' : 'disabled'}>${esc(t)}</button>`).join('')}</div>
       <div class="row opts"><span>Minigames</span><button class="pill on" data-act="pool">${r.opts.pool?.length ? `${r.opts.pool.length} picked` : `All ${Object.values(GAMES).filter(g => inSeason(g.meta, r.season)).length}`}</button>${host ? '<span class="est">tap to choose</span>' : ''}</div>
@@ -216,7 +222,8 @@ function showVote() {
   }
   setScreen('vote', `<h1 class="shout">Vote for the next game!</h1>
     <div class="vote-cards">${pm.options.map((id, i) => `<button class="vote-card${S.votes[S.room.you] === i ? ' mine' : ''}${S.voted === i ? ' won' : ''}" data-act="vote" data-i="${i}" ${can ? '' : 'disabled'}>${card(id, `<u class="who">${voteDots(i)}</u>`)}</button>`).join('')}</div>
-    <p class="note">${can ? 'Tap a card.' : 'Watching.'} <b class="count">${left()}</b></p>`);
+    <p class="note">${can ? 'Tap a card.' : 'Watching.'} <b class="count">${left()}</b></p>
+    ${S.lastGame && !S.rated[S.lastGame] ? rateBox(S.lastGame, true) : ''}`);
   screen.dataset.vote = pm.options.join();
   drawHud();
 }
@@ -248,9 +255,28 @@ function showResults() {
     ${pm.mul > 1 ? `<p class="blurb double">Double Prize Day: tickets x${pm.mul}!</p>` : ''}
     <ol class="places">${rows.join('')}</ol>
     ${pm.teams ? `<p class="team-line">${pm.teams.map(t => `<b class="team t${t.team}">${esc(t.name)} ${pm.unit === 'tickets' ? t.tickets + ' tickets' : t.points + ' pts'}</b>`).join(' ')}</p>` : ''}
+    ${rateBox(pm.game)}
     ${me?.seat != null ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : 'Continue'}</button>` : ''}<p class="note">Next in <b class="count">${left()}</b></p></div>`);
   drawHud();
 }
+// ------------------------------------------------------------------ rating a minigame (round 7, owner 2026-10-22)
+// "Players rate minigames after playing them … we can use that data later to weed out the unfun ones or prioritise the
+// good ones." 👍 / 👎, then any of a few reasons, then "Tell us more" (the ! form, already about this game). It shows on
+// the results card, and again on the next vote screen if it was skipped. Only someone who PLAYED it is asked.
+const playedIt = id => { const me = mine(); return !!me && me.seat != null && (S.playedIds || []).includes(id); };
+function rateBox(id, small = false) {
+  if (!id || !GAMES[id] || !playedIt(id)) return '';
+  const r = S.rated[id], title = esc(GAMES[id].meta.title);
+  if (!r) return `<div class="rate${small ? ' small' : ''}" data-game="${id}"><span class="q">${small ? `How was <b>${title}</b>?` : 'Did you like this one?'}</span>
+    <button class="btn thumb up" data-act="rate" data-v="1" aria-label="I liked it">👍</button><button class="btn thumb down" data-act="rate" data-v="-1" aria-label="Not for me">👎</button></div>`;
+  const list = r.v > 0 ? RATE_REASONS.up : RATE_REASONS.down;
+  return `<div class="rate done${small ? ' small' : ''}" data-game="${id}"><span class="q">${r.v > 0 ? '👍 Thanks! What was good?' : '👎 Thanks! What was wrong?'}</span>
+    <div class="why">${list.map(([k, t]) => `<button class="pill${r.why.includes(k) ? ' on' : ''}" data-act="reason" data-k="${k}">${esc(t)}</button>`).join('')}</div>
+    <div class="row"><button class="btn small ghost" data-act="rechoose">${r.v > 0 ? 'Change to 👎' : 'Change to 👍'}</button><button class="btn small" data-act="tellmore">Tell us more</button></div></div>`;
+}
+let rateTimer = 0;
+function sendRate(id) { clearTimeout(rateTimer); rateTimer = setTimeout(() => { const r = S.rated[id]; if (r) net.send({ t: 'rate', game: id, v: r.v, why: r.why.join(',') }); }, 500); }
+function redrawRate(id) { for (const el of document.querySelectorAll(`.rate[data-game="${id}"]`)) { const small = el.classList.contains('small'); el.outerHTML = rateBox(id, small) || ''; } }
 /** The closing ceremony (board mode): two bonus ribbons, revealed one at a time. */
 function showBonus() {
   const pm = S.pm; setSafe('lobby'); dropBoard(); lineup.show(true);
@@ -286,6 +312,9 @@ async function onPhase(pm) {
   S.log = [...(S.log || []).slice(-30), `${Math.round(performance.now())} ${pm.phase}${pm.game ? ' ' + pm.game : ''}${pm.resume ? ' resume' : ''}`];   // recent phases, for tests and bug reports
   S.pm = pm; S.phase = pm.phase; S.ends = performance.now() + (pm.ms || 0); S.skips = [];
   document.body.dataset.phase = pm.phase;
+  // round 7: which minigames THIS player played here (only they are asked to rate one), and the latest of them
+  if (pm.phase === 'intro' && pm.game && pm.players?.some(p => p.pid === S.room?.you)) { S.playedIds = [...new Set([...(S.playedIds || []), pm.game])]; S.lastGame = pm.game; }
+  if (pm.phase === 'results' && pm.game && !pm.resume) tally('minigame_done', { game: pm.game });
   if (pm.phase !== 'game' && pm.phase !== 'results' && pm.phase !== 'intro') dropPlay();
   switch (pm.phase) {
     case 'lobby': S.teams = null; dropBoard(); S.bd = { tickets: {}, ribbons: {}, pid: null, ask: null, rolled: null }; showLobby(); break;
@@ -342,6 +371,8 @@ net.on('s', m => S.play?.snap(m));
 net.on('ge', m => S.play?.event(m));
 net.on('gp', m => { if (S.play) S.play.priv(m.d); else S.playP?.then(p => p.priv(m.d)); });
 net.on('emote', m => lineup.play(m.pid, m.e, 1500));
+net.on('rated', m => { if (!S.rated[m.game]) S.rated[m.game] = { v: m.v, why: m.why || [] }; });
+net.on('rooms', m => { S.pub = m.list || []; S.modal?.drawFind?.(); });
 
 // ------------------------------------------------------------------ taps
 screen.addEventListener('click', e => {
@@ -349,22 +380,39 @@ screen.addEventListener('click', e => {
   sfx.unlock(); sfx('tap');
   const act = b.dataset.act;
   switch (act) {
-    case 'host': saveName(); S.err = ''; S.asDisplay = false; net.create(); break;
-    case 'join': { saveName(); if (S.me && !S.me.ready) { net.send({ t: 'profile', name: $('#name')?.value.trim() || S.me.name }); S.me.ready = true; } const code = cleanCode($('#code').value); if (!code) { S.err = `The code is ${CODE_LENGTH} letters.`; showTitle(); break; } S.err = ''; S.asDisplay = $('#as-display').checked; net.join(code, S.asDisplay); break; }
+    case 'host': saveName(); S.err = ''; S.asDisplay = false; net.create(); tally('host_game', { device: deviceKind() }); break;
+    case 'join': { saveName(); if (S.me && !S.me.ready) { net.send({ t: 'profile', name: $('#name')?.value.trim() || S.me.name }); S.me.ready = true; } const code = cleanCode($('#code').value); if (!code) { S.err = `The code is ${CODE_LENGTH} letters.`; showTitle(); break; } S.err = ''; S.asDisplay = $('#as-display').checked; net.join(code, S.asDisplay); tally('join_game', { via: S.inviting ? 'invite' : 'code', display: S.asDisplay }); break; }
     case 'leave': net.leave(); break;
     case 'fold': S.codeSmall = !S.codeSmall; try { localStorage.setItem('tumblefair.codeSmall', S.codeSmall ? '1' : ''); } catch { /* private mode */ } showLobby(); break;
     case 'bigqr': showBigQr(); break;
     case 'copy': navigator.clipboard?.writeText(joinUrl(S.room.code)).then(() => toast('Invite link copied'), () => toast(joinUrl(S.room.code))) ?? toast(joinUrl(S.room.code)); break;
-    case 'opt': net.send({ t: 'opt', key: b.dataset.key, value: b.dataset.num ? +b.dataset.num : b.dataset.bool ? b.dataset.bool === '1' : b.dataset.value }); break;
-    case 'start': net.send({ t: 'start' }); break;
+    case 'opt': net.send({ t: 'opt', key: b.dataset.key, value: b.dataset.num ? +b.dataset.num : b.dataset.bool ? b.dataset.bool === '1' : b.dataset.value }); if (b.dataset.key === 'public' && b.dataset.bool === '1') tally('make_public'); break;
+    case 'start': net.send({ t: 'start' }); tally('start_match', { mode: S.room?.opts.mode, players: seated().length, public: !!S.room?.opts.public }); break;
     case 'kick': net.send({ t: 'kick', pid: +b.dataset.pid }); break;
     case 'roll': net.send({ t: 'roll' }); S.bd.sub = 'move'; showBoard(); break;
     case 'choose': net.send({ t: 'choose', i: +b.dataset.i }); S.bd.ask = null; showBoard(); break;
     case 'vote': net.send({ t: 'vote', i: +b.dataset.i }); break;
     case 'skip': net.send({ t: 'skip' }); break;
-    case 'edit': saveName(); openEditor(); break;
-    case 'shop': saveName(); openShop(); break;
+    case 'edit': saveName(); openEditor(); tally('open_editor'); break;
+    case 'shop': saveName(); openShop(); tally('open_shop'); break;
     case 'pool': openPool(); break;
+    case 'find': saveName(); openFind(); break;
+    case 'rate': case 'rechoose': {
+      const id = b.closest('.rate')?.dataset.game; if (!id) break;
+      const v = act === 'rate' ? +b.dataset.v : -(S.rated[id]?.v || 1);
+      S.rated[id] = { v, why: [] }; sendRate(id); redrawRate(id); tally('rate', { game: id, v: v > 0 ? 'up' : 'down' }); sfx('good'); break;
+    }
+    case 'reason': {
+      const id = b.closest('.rate')?.dataset.game, r = id && S.rated[id]; if (!r) break;
+      const k = b.dataset.k; r.why = r.why.includes(k) ? r.why.filter(x => x !== k) : [...r.why, k].slice(-4);
+      sendRate(id); redrawRate(id); break;
+    }
+    case 'tellmore': {
+      const id = b.closest('.rate')?.dataset.game; if (!id) break;
+      const r = S.rated[id], title = GAMES[id]?.meta.title || id;
+      fb.open({ kind: 'idea', text: `About ${title}${r ? ` (${r.v > 0 ? '👍' : '👎'}${r.why.length ? ' ' + r.why.join(', ') : ''})` : ''}: `, about: { game: id, rating: r || null }, noPicture: true });
+      tally('rate_more', { game: id }); break;
+    }
   }
 });
 screen.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'code') $('[data-act="join"]')?.click(); if (e.key === 'Enter' && e.target.id === 'name') e.target.blur(); });
@@ -405,7 +453,7 @@ function openShop() {
     if (e.target.closest('[data-close]')) return closeModal();
     const c = costumes().find(x => x.id === sel);
     if (e.target.closest('[data-wear]')) { net.send({ t: 'equip', id: c.id }); sfx('good'); return; }
-    if (e.target.closest('[data-buy]')) { if (confirm(`Buy ${c.name} for ${c.price} coins?`)) { net.send({ t: 'buy', id: c.id }); net.send({ t: 'equip', id: c.id }); sfx('coins'); } return; }
+    if (e.target.closest('[data-buy]')) { if (confirm(`Buy ${c.name} for ${c.price} coins?`)) { net.send({ t: 'buy', id: c.id }); net.send({ t: 'equip', id: c.id }); sfx('coins'); tally('buy_costume', { id: c.id }); } return; }
     const b = e.target.closest('.costume'); if (!b) return;
     sel = b.dataset.id; preview(sel); sfx('tap');
     const y = el.scrollTop; draw(); el.scrollTop = y;
@@ -445,6 +493,37 @@ function openPool() {
     const y = el.scrollTop; draw(); el.scrollTop = y;
   });
   draw(); document.body.append(el); S.modal = { el, refresh: () => {} };
+}
+
+// ------------------------------------------------------------------ Find a game (round 7, owner 2026-10-22)
+// "A public lobby system to help people find games." A host flips the lobby to Public; this list shows every public
+// room — lobbies with a free seat first — and one tap joins. It asks the server again every three seconds while open.
+function openFind() {
+  closeModal();
+  const el = h('div', 'modal find');
+  let poll = 0;
+  const modeName = { board: 'Board Game', marathon: 'Minigame Marathon', endless: 'Endless' };
+  function draw() {
+    const list = S.pub;
+    el.innerHTML = `<div class="panel"><div class="row head"><h2>Find a game</h2><span class="grow"></span><button class="btn small" data-x="1">Close</button></div>
+      ${list == null ? '<p class="note">Looking…</p>' : !list.length ? `<p class="note">No public games right now. Host one and set it to <b>Public</b> — it shows up here for everyone.</p>` : `<ul class="pub-list">${list.map(r => {
+        const full = r.players >= r.seats, playing = r.phase !== 'lobby';
+        return `<li><span class="who"><b>${esc(r.host)}'s game</b><span>${esc(modeName[r.mode] || r.mode)}${playing ? ` · playing${r.rounds ? `, round ${r.round} of ${r.rounds}` : ''}` : ''}</span></span>
+          <span class="seats">${r.players}/${r.seats}</span>
+          <button class="btn${!full && !playing ? ' primary' : ''}" data-pub="${esc(r.code)}">${full ? 'Watch' : playing ? 'Join next game' : 'Join'}</button></li>`; }).join('')}</ul>`}
+      <p class="note small">Games you join here can see your name and character.</p></div>`;
+  }
+  el.addEventListener('click', e => {
+    if (e.target === el || e.target.closest('[data-x]')) { closeModal(); return; }
+    const j = e.target.closest('[data-pub]'); if (!j) return;
+    const code = cleanCode(j.dataset.pub); if (!code) return;
+    if (S.me && !S.me.ready) { net.send({ t: 'profile', name: $('#name')?.value.trim() || S.me.name }); S.me.ready = true; }
+    S.err = ''; S.asDisplay = false; closeModal(); net.join(code, false); tally('join_game', { via: 'public' });
+  });
+  draw(); document.body.append(el);
+  S.pub = null; net.send({ t: 'rooms' }); poll = setInterval(() => net.send({ t: 'rooms' }), 3000);
+  S.modal = { el, refresh: () => {}, drawFind: draw, onClose: () => clearInterval(poll) };
+  tally('find_game');
 }
 
 // ------------------------------------------------------------------ the big QR code (owner 2026-10-22)

@@ -36,11 +36,12 @@ export function installFeedback({ stage, getS, net }) {
       return c.toDataURL('image/jpeg', 0.72);
     } catch { return null; }
   }
-  btn.addEventListener('click', () => {
-    const picture = shot(), info = debug();
+  /** Open the form. Round 7: "Tell us more" after rating a minigame opens it as a suggestion, already about that game. */
+  function open({ kind = 'bug', text = '', about = null, noPicture = false } = {}) {
+    const picture = noPicture ? null : shot(), info = { ...debug(), ...(about ? { about } : {}) };
     const el = h('div', 'modal fb-modal');
     el.innerHTML = `<div class="panel"><h2>Report a bug or idea</h2>
-      <div class="row"><label class="pill on"><input type="radio" name="fbk" value="bug" checked> Bug</label><label class="pill"><input type="radio" name="fbk" value="idea"> Suggestion</label></div>
+      <div class="row"><label class="pill${kind === 'bug' ? ' on' : ''}"><input type="radio" name="fbk" value="bug" ${kind === 'bug' ? 'checked' : ''}> Bug</label><label class="pill${kind === 'idea' ? ' on' : ''}"><input type="radio" name="fbk" value="idea" ${kind === 'idea' ? 'checked' : ''}> Suggestion</label></div>
       <textarea id="fb-text" rows="5" maxlength="4000" placeholder="What happened, or what would make it better?"></textarea>
       ${picture ? `<label class="check fb-shot"><input type="checkbox" id="fb-pic" checked> Include this picture of the game<img src="${picture}" alt=""></label>` : ''}
       <p class="note">Also sent: what screen you were on, the players, your device and recent errors. Nothing else.</p>
@@ -49,7 +50,7 @@ export function installFeedback({ stage, getS, net }) {
     document.body.append(el);
     el.querySelectorAll('input[name=fbk]').forEach(r => r.addEventListener('change', () => el.querySelectorAll('.row .pill').forEach(p => p.classList.toggle('on', p.querySelector('input').checked))));
     el.addEventListener('click', e => { if (e.target === el || e.target.closest('[data-x]')) el.remove(); });
-    el.querySelector('#fb-text').focus();
+    const ta = el.querySelector('#fb-text'); if (text) { ta.value = text; ta.setSelectionRange(text.length, text.length); } ta.focus();
     el.querySelector('#fb-send').addEventListener('click', async e => {
       const text = el.querySelector('#fb-text').value.trim(), err = el.querySelector('#fb-err');
       if (!text) { err.textContent = 'Please write a few words first.'; return; }
@@ -62,5 +63,7 @@ export function installFeedback({ stage, getS, net }) {
         el.querySelector('.panel').innerHTML = `<h2>Thank you!</h2><p>Saved as report #${esc(out.id)}.</p><button class="btn primary big" data-x="1">Close</button>`;
       } catch (x) { err.textContent = x.message || 'Could not send it. Try again in a moment.'; e.target.disabled = false; e.target.textContent = 'Send'; }
     });
-  });
+  }
+  btn.addEventListener('click', () => open());
+  return { open };
 }

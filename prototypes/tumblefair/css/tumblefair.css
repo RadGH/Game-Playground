@@ -291,3 +291,22 @@ body[data-phase=game] .qr-btn { height: 28px; font-size: 12px; opacity: .55; rig
 .qr-big .qr-code { margin: 4px 0; font: 900 clamp(30px, 7vh, 64px)/1 var(--font); letter-spacing: .18em; }
 .qr-big .qr-at { margin: 0; font: 600 clamp(13px, 2vh, 18px)/1.3 var(--font); }
 .qr-big .qr-close { margin: 8px 0 0; font: 600 12px var(--font); opacity: .6; }
+
+/* ---- round 7: rate a minigame (results card, and the next vote screen if skipped) ---- */
+.rate { display: grid; gap: 8px; justify-items: center; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 8px 10px; }
+.rate:not(.done) { grid-auto-flow: column; align-items: center; justify-content: center; }
+.rate .q { font-weight: 800; font-size: 15px; text-align: center; }
+.rate .thumb { min-width: 64px; min-height: 52px; font-size: 26px; padding: 2px 12px; }
+.rate .why { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; } .rate .why .pill { min-height: 36px; font-size: 13px; padding: 3px 10px; }
+.rate .row { gap: 8px; justify-content: center; }
+.rate.small { margin: 8px auto 0; max-width: 520px; }
+.rate.small .thumb { min-width: 52px; min-height: 44px; font-size: 22px; }
+/* ---- round 7: Find a game ---- */
+.modal.find { align-items: center; padding: calc(var(--st) + 12px) 8px calc(var(--sb) + 12px); background: rgba(13, 34, 40, .55); }
+.modal.find .row.head { display: flex; align-items: center; gap: 8px; } .modal.find .grow { flex: 1; }
+.pub-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }   /* the modal scrolls, never the list: a nested scroller blanks the WebGL canvas on phones */
+.pub-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 8px 10px; }
+.pub-list .who { display: grid; } .pub-list .who b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .pub-list .who span { font-size: 13px; color: #47606a; font-weight: 600; }
+.pub-list .seats { font-weight: 900; font-size: 18px; }
+.note.small { font-size: 12px; }
+.foot.privacy { font-size: 11px; opacity: .8; margin-top: 2px; }

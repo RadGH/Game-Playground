@@ -5,7 +5,7 @@
 //
 // Phases:  lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobby
 //          (the Minigame Marathon mode skips `board`)
-import { MAX_SEATS, cleanName, IN } from '../shared/protocol.js';
+import { MAX_SEATS, cleanName, IN, cleanReasons } from '../shared/protocol.js';
 import { DT, packBody } from '../shared/arena.js';
 import { makeRng } from '../shared/rng.js';
 import { GAMES, eligible } from '../games/index.js';
@@ -21,6 +21,7 @@ export const OPTS = Object.freeze({
   shortlist: { min: 2, max: 4, def: 3 },
   difficulty: { values: ['easy', 'normal', 'hard'], def: 'normal' },
   holiday: { values: ['auto', 'off', ...SEASON_IDS], def: 'auto' },        // holiday minigames + reskins: by the date, never, or forced on
+  public: { values: [false, true], def: false },                           // round 7: listed in "Find a game" on the title screen
 });
 /** What a minigame placing is worth, best first. Board mode pays tickets, the marathon pays points. */
 /** Endless: a 'keep going?' vote after every this many minigames; it gets harder every ENDLESS_STEP; never more than ENDLESS_MAX. */
@@ -31,11 +32,16 @@ export const AWARDS = Object.freeze({ board: [10, 6, 3, 1], marathon: [4, 3, 2, 
 /** Persistent coins at the end of a match (they buy costumes; they never help you win). */
 export const PAYOUT = Object.freeze({ base: 10, perRibbon: 5, perPoint: 1, winner: 10, perGameWon: 2 });
 
-export function createRoom({ code, now, seed = 1, data, profiles = null, log = () => {} }) {
+// `report(kind, data)` (round 7) is how a room tells the server what happened, for the insights log the owner reads to
+// find the unfun minigames: 'rate' (a player's 👍/👎 + reasons), 'played' (a minigame ran: how long, who dropped out),
+// 'vote' (which minigames were offered and which won), 'match' / 'final'. Never a name, a token or an address.
+export function createRoom({ code, now, seed = 1, data, profiles = null, log = () => {}, report = () => {} }) {
   const rng = makeRng(seed);
   const members = new Map();          // pid -> member
   let nextPid = 1, hostPid = null, phase = 'lobby', until = 0, emptySince = null;
-  const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, holiday: OPTS.holiday.def, pool: [] };
+  const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, holiday: OPTS.holiday.def, public: OPTS.public.def, pool: [] };
+  const playedBy = new Map();          // round 7: game id -> the pids who played it in this room (only they may rate it)
+  const ratings = new Map();           // `${game}:${pid}` -> { v, why } (a change of mind replaces, never adds)
   const date = () => new Date(now());
   const season = () => effectiveSeason(opts.holiday, date());              // holiday games + reskins (the host can force it)
   const costumeOk = id => inSeason(data.cosmetics?.items?.find(c => c.id === id), seasonByDate(date()));   // costumes: the date only
@@ -113,6 +119,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
       match.board = createBoardMatch({ def: data.boards[match.boardId], chance: seasonal(data.chance, season()), order: players.map(m => m.pid), rng: rng.fork(), names, emit: ev => cast({ t: 'bd', ...ev }) });
     }
     log('match', { code, mode: match.mode, players: players.length });
+    report('match', { mode: match.mode, players: players.length, teams: !!opts.teams, board: match.boardId || null, rounds: match.rounds, difficulty: opts.difficulty, pool: opts.pool.length, public: !!opts.public });
     nextRound();
   }
   /** The board's chance events and bulletins, with this season's added (and other seasons' left out). */
@@ -145,8 +152,9 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     for (const i of Object.values(vote.votes)) tally[i]++;
     const best = Math.max(...tally), tied = tally.map((n, i) => (n === best ? i : -1)).filter(i => i >= 0);
     const pick = tied[Math.floor(rng() * tied.length)];
-    const id = vote.options[pick]; vote = null;
+    const id = vote.options[pick], offered = vote.options.map((game, i) => ({ game, votes: tally[i] })); vote = null;
     cast({ t: 'voted', pick, id, tally });
+    report('vote', { offered, pick: id, players: active().length });
     startGame(id);
   }
   const bodiesOf = inst => { if (!inst.bodies) return null; const b = {}; for (const [pid, body] of inst.bodies) b[pid] = packBody(body, members.get(pid)?.ack || 0); return b; };
@@ -156,14 +164,15 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     const difficulty = match.mode === 'endless' ? ['easy', 'normal', 'hard'][Math.min(2, Math.floor((match.round - 1) / ENDLESS.STEP))] : opts.difficulty;   // the endless fair gets harder
     const inst = def.create({ seed: Math.floor(rng() * 2 ** 31), rng: rng.fork(), players: list, difficulty, season: season() });
     for (const m of members.values()) { m.queue.length = 0; m.lastIn = null; m.starve = 0; m.ack = 0; m.skip = false; }
-    game = { id, def, inst, players: list.map(p => p.pid), started: false, endsAt: 0, lastState: '', lastPriv: new Map(), gone: new Set() };
+    game = { id, def, inst, players: list.map(p => p.pid), started: false, endsAt: 0, lastState: '', lastPriv: new Map(), gone: new Set(), difficulty };
+    const who = playedBy.get(id) || new Set(); for (const p of list) who.add(p.pid); playedBy.set(id, who);
     game.introMsg = { t: 'phase', phase: 'intro', game: id, players: list, round: match.round, rounds: match.rounds, difficulty, season: season() };
     match.played.push(id); match.lastGame = id;
     setPhase('intro', { game: id, players: list, init: inst.init(), b: bodiesOf(inst), round: match.round, rounds: match.rounds, difficulty, season: season() }, TIMES.INTRO_MS);
     if (inst.priv) for (const m of players) send(m, { t: 'gp', d: inst.priv(m.pid) });
   }
   function beginPlay() {
-    game.started = true; game.endsAt = now() + game.def.meta.seconds * 1000 + TIMES.GAME_GRACE_MS;
+    game.started = true; game.startedAt = now(); game.endsAt = now() + game.def.meta.seconds * 1000 + TIMES.GAME_GRACE_MS;
     for (const m of members.values()) m.skip = false;
     setPhase('game', { game: game.id, seconds: game.def.meta.seconds });
   }
@@ -201,6 +210,11 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     }
     if (res.coop ? res.coop.success : !alone) for (const pid of (res.coop ? game.players : res.order[0] || [])) if (pid in match.wins) match.wins[pid]++;
     const msg = { game: game.id, result: res, award, unit: mode === 'board' ? 'tickets' : 'points', teams: teamTotals(), round: match.round, mul: mode === 'board' ? match.board.gameMul() : 1 };
+    // how the minigame actually went: did it end on its own or on the clock, how long it really took, who dropped out
+    const scores = Object.values(res.scores || {}).filter(x => typeof x === 'number');
+    report('played', { game: game.id, mode, players: game.players.length, difficulty: game.difficulty, season: season(), seconds: Math.round(((now() - (game.startedAt || now())) / 1000) * 10) / 10, limit: game.def.meta.seconds,
+      endedEarly: !!game.inst.over, dropped: game.gone.size + game.players.filter(pid => !members.get(pid)?.connected).length, coop: res.coop ? !!res.coop.success : null, allTied: !res.coop && (res.order?.length || 0) <= 1 && game.players.length > 1,
+      scoreSpread: scores.length > 1 ? Math.max(...scores) - Math.min(...scores) : null });
     game = null;
     for (const m of members.values()) m.skip = false;
     setPhase('results', msg, TIMES.RESULTS_MS);
@@ -240,6 +254,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     }
     const mode = match.mode;
     log('final', { code, mode, rows: rows.length });
+    report('final', { mode, players: rows.length, rounds: match.round, games: match.played.length });
     setPhase('final', { standings: rows, payout, mode, teams }, TIMES.FINAL_MS);
   }
   function toLobby() { match = null; game = null; vote = null; for (const m of members.values()) { m.ready = false; } promote(); setPhase('lobby'); }
@@ -286,6 +301,14 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
         return;
       }
       case 'act': if (phase === 'game' && game?.inst.act && game.players.includes(m.pid)) game.inst.act(m.pid, msg.a, msg.d); return;
+      case 'rate': {                                       // round 7: 👍/👎 + reasons for a minigame this member played here
+        if (!(msg.v === 1 || msg.v === -1) || !playedBy.get(msg.game)?.has(m.pid)) return;
+        const key = `${msg.game}:${m.pid}`, why = cleanReasons(msg.v, msg.why), prev = ratings.get(key);
+        if (prev && prev.v === msg.v && prev.why.join() === why.join()) return;
+        ratings.set(key, { v: msg.v, why });
+        report('rate', { game: msg.game, v: msg.v, why, change: !!prev, players: playedBy.get(msg.game).size, difficulty: opts.difficulty, mode: match?.mode || null, voter: `${code}:${m.pid}` });
+        return send(m, { t: 'rated', game: msg.game, v: msg.v, why });
+      }
       case 'emote': if (m.seat != null) cast({ t: 'emote', pid: m.pid, e: String(msg.e).replace(/[^a-z]/gi, '').slice(0, 12) }); return;
     }
   }
@@ -308,8 +331,15 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
       case 'final': if (t >= until) toLobby(); break;
     }
   }
+  /** Round 7: what "Find a game" shows for this room — null unless the host made it public. No tokens, no addresses. */
+  function listing() {
+    if (!opts.public) return null;
+    const seatedN = seated().length, host = members.get(hostPid);
+    if (![...members.values()].some(m => m.connected)) return null;
+    return { code, host: host?.name || 'Someone', players: seatedN, seats: MAX_SEATS, phase: phase === 'lobby' ? 'lobby' : 'playing', mode: opts.mode, board: opts.mode === 'board' ? opts.board : null, round: match?.round || 0, rounds: match?.rounds || null, season: season() };
+  }
   return {
-    code, join, disconnect, remove, message, tick,
+    code, join, disconnect, remove, message, tick, listing,
     get phase() { return phase; }, get host() { return hostPid; }, get members() { return members; }, get match() { return match; }, get game() { return game; }, get opts() { return opts; },
     get emptyFor() { return emptySince == null ? 0 : now() - emptySince; },
     get size() { return members.size; },

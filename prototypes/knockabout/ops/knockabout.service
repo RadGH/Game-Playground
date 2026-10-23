@@ -1,0 +1,12 @@
+# Knockabout STABLE server: the published copy (tools/publish-knockabout.sh) on port 8470 (+ https 8472). User unit.
+# LAN testing copy. The public game runs on the games.radgh.com droplet (https://knockabout.games.radgh.com/).
+[Unit]
+Description=Knockabout stable server (published copy) on :8470
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/knockabout/ops/start.sh stable
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=default.target

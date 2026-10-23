@@ -33,6 +33,17 @@ const sfx = createSounds();
 const net = connect();
 const BOARDS = Object.fromEntries(await Promise.all(['fairground', 'pier'].map(async id => [id, await (await fetch(new URL(`../../data/boards/${id}.json`, import.meta.url))).json()])));
 window.tumblefair = { S, net, stage, lineup, controls, GAMES };
+// game-eye (~/claude/game-eye, 2026-10-23): a small summary of what is going on, so Claude can play along and read the
+// game without screenshots — phase, room, players, the board turn, and the minigame's own public state (trimmed).
+window.gameEye = { state() {
+  const r = S.room, gs = S.play?.state;
+  let game = null; try { const j = gs ? JSON.stringify(gs) : ''; game = !gs ? null : j.length <= 3000 ? gs : { keys: Object.keys(gs), size: j.length, head: j.slice(0, 1500) }; } catch { game = '(unreadable)'; }
+  return { phase: S.phase, me: S.me?.name, room: r ? { code: r.code, you: r.you, host: r.host, opts: r.opts, season: r.season, members: r.members.map(m => ({ pid: m.pid, name: m.name, seat: m.seat, display: !!m.display, on: m.on })) } : null,
+    match: r?.match ? { mode: r.match.mode, round: r.match.round, rounds: r.match.rounds, points: r.match.points } : null,
+    minigame: S.pm?.game || null, controls: S.pm?.game ? GAMES[S.pm.game]?.meta.controls || GAMES[S.pm.game]?.meta.kind : null,
+    board: S.phase === 'board' ? { turn: S.bd.pid, sub: S.bd.sub, ask: S.bd.ask, tickets: S.bd.tickets, ribbons: S.bd.ribbons, bulletin: S.bd.mods } : null,
+    gameState: game, modal: S.modal ? (S.modal.el?.className || 'modal') : null, err: S.err || null };
+} };
 /** The holiday look of the menus (round 6): body[data-season], plus a few bats crossing the sky at Halloween. */
 function setSeason(id) {
   if (document.body.dataset.season === (id || '')) return;

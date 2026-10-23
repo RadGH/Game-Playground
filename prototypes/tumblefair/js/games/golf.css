@@ -1,0 +1,30 @@
+/* Golf games (Putt Party, Haunted Hole, Chip-In Challenge, Long Drive) share these: the hole pill under the score bar,
+   the banner, the scorecard between holes, and the power meter that floats by your ball. Each game's style.css
+   @imports this file first, then adds its own. */
+.gp-pill { position: absolute; top: calc(var(--st) + 56px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; white-space: nowrap;
+  max-width: calc(100% - 16px); padding: 4px 12px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); pointer-events: none; }
+.gp-pill em { font-style: normal; background: var(--ink); color: #fff; border-radius: 999px; padding: 0 8px; font-size: 13px; }
+.gp-pill .gp-hl { font-weight: 900; min-width: 2.4em; text-align: right; } .gp-pill .gp-hl.hurry { color: #d11f2f; }
+.gp-banner { position: absolute; left: 50%; top: 36%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center;
+  font: 900 clamp(34px, 9vw, 62px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .25s, opacity .25s; }
+.gp-banner small { display: block; font-size: .42em; margin-top: 6px; color: #fff; -webkit-text-stroke: 1.5px var(--ink); text-shadow: 0 3px 0 var(--ink); }
+.gp-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.gp-banner.good { color: #8ff07a; } .gp-banner.bad { color: #ff8a8a; }
+.gp-card { position: absolute; left: 50%; bottom: calc(var(--sb) + 14px); transform: translate(-50%, 30px); opacity: 0; pointer-events: none; transition: transform .25s, opacity .25s;
+  background: var(--paper); border: 4px solid var(--ink); border-radius: 18px; box-shadow: 0 6px 0 var(--ink); padding: 8px 12px; max-width: calc(100% - 16px); }
+.gp-card.show { opacity: 1; transform: translate(-50%, 0); }
+.gp-card .gp-title { display: block; text-align: center; font: 900 16px/1.2 var(--font); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
+.gp-card table { border-collapse: collapse; font: 800 15px/1.2 var(--font); }
+.gp-card th, .gp-card td { padding: 2px 7px; text-align: center; } .gp-card th small { display: block; font-size: 10px; opacity: .7; font-weight: 700; }
+.gp-card td:first-child { text-align: left; white-space: nowrap; max-width: 8.5em; overflow: hidden; text-overflow: ellipsis; }
+.gp-card tr.me td { background: rgba(255, 210, 63, .45); } .gp-card td.under { color: #138a2c; } .gp-card td.over { color: #b3261e; }
+.gp-card .gp-medal { margin: 4px 0 0; text-align: center; font: 900 17px/1.2 var(--font); }
+.gp-dot { display: inline-block; width: 11px; height: 11px; margin-right: 5px; background: var(--seat); border: 2px solid var(--ink); border-radius: 50%; vertical-align: -1px; }
+.gp-dot[data-shape="square"] { border-radius: 2px; } .gp-dot[data-shape="triangle"] { border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.gp-dot[data-shape="diamond"] { border-radius: 0; rotate: 45deg; width: 9px; height: 9px; }
+.gp-meter { position: absolute; left: 0; top: 0; width: 22px; height: 78px; border: 3px solid var(--ink); border-radius: 10px; background: rgba(255, 255, 255, .85); overflow: hidden; opacity: 0; pointer-events: none; transition: opacity .12s; }
+.gp-meter.on { opacity: 1; }
+.gp-meter i { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: linear-gradient(#ff5f5f, #ffd23f 45%, #3ecf5a); background-size: 100% 72px; background-position: bottom; }
+.gp-meter.hot { box-shadow: 0 0 0 3px #ff5f5f; }
+.gp-meter b { position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%); font: 900 10px/1 var(--font); color: #fff; -webkit-text-stroke: .5px var(--ink); }
+@media (max-width: 520px) { .gp-pill { top: calc(var(--st) + 50px); font-size: 13px; gap: 6px; padding: 3px 9px; } .gp-pill > span:not(.gp-hl) { display: none; } .gp-card table { font-size: 13px; } .gp-card th, .gp-card td { padding: 2px 4px; } }

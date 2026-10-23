@@ -1,0 +1,41 @@
+/* Knockabout online: the room screen, the title's online buttons, join-by-code and find-a-game. Loaded by
+   js/client/online-ui.js (the couch screens never need it). Same toy-box look as css/knockabout.css. */
+.online-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.online-btns .btn { background: var(--sky); }
+
+.room-wrap { max-width: 1100px; margin: 0 auto; padding: calc(var(--st) + 10px) calc(var(--sr) + 14px) calc(var(--sb) + 18px) calc(var(--sl) + 14px); }
+.bar h2 .code, .invite .code, .room-row .code { font-family: ui-monospace, "Cascadia Mono", Menlo, monospace; letter-spacing: 3px; }
+.bar h2 .code { color: var(--sun); }
+.net-badge { font-size: 14px; color: var(--pop); font-style: normal; }
+.wait-host { color: #fff; font-size: 14px; text-shadow: 0 2px 0 var(--ink); max-width: 160px; text-align: right; }
+.room-top { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px; margin-top: 10px; }
+.invite { display: grid; grid-template-columns: 132px 1fr; gap: 12px; align-items: center; }
+.invite .qr { width: 132px; height: 132px; background: #fff; border-radius: 12px; border: 3px solid var(--ink); overflow: hidden; }
+.invite .qr svg { width: 100%; height: 100%; display: block; }
+.inv-text { display: grid; gap: 6px; font-size: 14px; }
+.inv-text a { color: #2a4bd1; word-break: break-all; }
+.inv-text .code { font-size: 22px; }
+.how-online { display: grid; gap: 6px; font-size: 14px; align-content: center; }
+.card.mine { box-shadow: 0 6px 0 var(--ink), 0 0 0 4px var(--sun); }
+.card.away { opacity: .6; }
+.pill.ro, .mode.ro, .arenas.ro .arena { cursor: default; }
+.arenas.ro { grid-template-columns: minmax(0, 260px); }
+.code-in { width: 100%; font: 900 40px/1 ui-monospace, Menlo, monospace; letter-spacing: 12px; text-align: center; text-transform: uppercase; border: 4px solid var(--ink); border-radius: 14px; padding: 10px; margin-top: 6px; }
+.rooms { display: grid; gap: 8px; margin: 8px 0; }
+.room-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; border: 3px solid var(--ink); border-radius: 14px; background: #fff; padding: 8px 12px; text-align: left; cursor: pointer; box-shadow: 0 3px 0 var(--ink); font: inherit; }
+.room-row .code { font-size: 20px; } .room-row i { font-style: normal; color: #5a5470; font-size: 13px; }
+.vcount { color: var(--pop); }
+@media (max-width: 900px) {
+  .room-top { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  .invite { grid-template-columns: 96px 1fr; } .invite .qr { width: 96px; height: 96px; }
+  .how-online { display: none; }
+  .wait-host { display: none; }
+}
+/* a phone in a room: one free seat is enough to show (it has no controllers to join with) */
+@media (max-width: 520px) {
+  .room-wrap .card.empty ~ .card.empty { display: none; }
+  .room-wrap .card.empty { min-height: 0; padding: 14px 8px; }
+}
+@media (max-width: 520px) { .vote-wrap .shout { padding: 0 46px; font-size: 26px; } }

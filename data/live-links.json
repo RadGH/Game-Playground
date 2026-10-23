@@ -8,5 +8,10 @@
     "url": "https://tumblefair.games.radgh.com/",
     "note": "Hosted on games.radgh.com (our own server). Send a room link: https://tumblefair.games.radgh.com/prototypes/tumblefair/?code=ABCD",
     "updated": "2026-10-20"
+  },
+  "knockabout": {
+    "url": "https://knockabout.games.radgh.com/",
+    "note": "Hosted on games.radgh.com (our own server). Room links: https://knockabout.games.radgh.com/prototypes/knockabout/?code=ABCD",
+    "updated": "2026-10-23"
   }
 }

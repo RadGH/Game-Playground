@@ -1,0 +1,1622 @@
+{
+ "_doc": "Knockabout arenas. See docs/PLAN.md \"Arena data\". Static shapes: box {p,size,rot?}, cyl {p,r,h} (Y axis), color = a theme key. grab:true = can be gripped. deadly:true = not ground (bots avoid). kill = volumes that put you out. hazards = see js/sim/hazards.js. spawns = [x,y,z,yaw].",
+ "arenas": [
+  {
+   "id": "the-ring",
+   "name": "The Ring",
+   "blurb": "A classic square ring. Bouncy ropes, nowhere to hide.",
+   "trick": "The ropes are springy and grabbable \u2014 lift someone over them for a ring-out, or bounce off them to charge back in.",
+   "outY": -6,
+   "size": [11, 11],
+   "cam": {
+    "pos": [0, 12.5, 13],
+    "look": [0, 0, 0.6],
+    "fov": 45
+   },
+   "theme": {
+    "floor": "#3f7fd9",
+    "edge": "#1c2f63",
+    "wall": "#24345f",
+    "rope": "#ff4f6d",
+    "post": "#f2f2f2",
+    "accent": "#ffd23f",
+    "hazard": "#ff6a3d",
+    "spikes": "#c9ced6",
+    "sky": ["#1b1f4a", "#4f3a7a"],
+    "fog": "#2a2550",
+    "light": "#fff4e0"
+   },
+   "static": [
+    {
+     "type": "box",
+     "p": [0, -0.5, 0],
+     "size": [11, 1, 11],
+     "color": "floor"
+    },
+    {
+     "type": "box",
+     "p": [0, -1.6, 0],
+     "size": [11.6, 1.2, 11.6],
+     "color": "edge"
+    },
+    {
+     "type": "cyl",
+     "p": [-5.5, 0.75, -5.5],
+     "r": 0.18,
+     "h": 1.5,
+     "color": "post"
+    },
+    {
+     "type": "cyl",
+     "p": [-5.5, 0.75, 5.5],
+     "r": 0.18,
+     "h": 1.5,
+     "color": "post"
+    },
+    {
+     "type": "cyl",
+     "p": [5.5, 0.75, -5.5],
+     "r": 0.18,
+     "h": 1.5,
+     "color": "post"
+    },
+    {
+     "type": "cyl",
+     "p": [5.5, 0.75, 5.5],
+     "r": 0.18,
+     "h": 1.5,
+     "color": "post"
+    },
+    {
+     "type": "box",
+     "p": [0, 0.8, -5.5],
+     "size": [11, 0.12, 0.12],
+     "color": "rope",
+     "grab": true,
+     "mat": "bouncy"
+    },
+    {
+     "type": "box",
+     "p": [-5.5, 0.8, 0],
+     "size": [0.12, 0.12, 11],
+     "color": "rope",
+     "grab": true,
+     "mat": "bouncy"
+    },
+    {
+     "type": "box",
+     "p": [0, 0.8, 5.5],
+     "size": [11, 0.12, 0.12],
+     "color": "rope",
+     "grab": true,
+     "mat": "bouncy"
+    },
+    {
+     "type": "box",
+     "p": [5.5, 0.8, 0],
+     "size": [0.12, 0.12, 11],
+     "color": "rope",
+     "grab": true,
+     "mat": "bouncy"
+    }
+   ],
+   "kill": [],
+   "hazards": [],
+   "props": [],
+   "spawns": [
+    [3.4, 0, 0, -1.57],
+    [2.4, 0, 2.4, -2.36],
+    [0, 0, 3.4, -3.14],
+    [-2.4, 0, 2.4, 2.36],
+    [-3.4, 0, 0, 1.57],
+    [-2.4, 0, -2.4, 0.79],
+    [0, 0, -3.4, 0],
+    [2.4, 0, -2.4, -0.79]
+   ]
+  },
+  {
+   "id": "saw-pit",
+   "name": "Saw Pit",
+   "blurb": "Floor saws pop out of their slots and run the lanes. Mind the pit in the middle.",
+   "trick": "Saws only bite when they are up \u2014 watch the sparks in the slot. The pit has a curb: you will have to lift someone over it.",
+   "outY": -6,
+   "size": [16, 16],
+   "cam": {
+    "pos": [0, 16.5, 15.5],
+    "look": [0, 0, 0.8],
+    "fov": 48
+   },
+   "theme": {
+    "floor": "#7a8794",
+    "edge": "#3c4650",
+    "wall": "#4b5560",
+    "rope": "#ffb000",
+    "post": "#d5dbe2",
+    "accent": "#ffb000",
+    "hazard": "#ff5a1f",
+    "spikes": "#c9ced6",
+    "slot": "#22282e",
+    "sky": ["#202830", "#5a6b78"],
+    "fog": "#2c3540",
+    "light": "#ffffff"
+   },
+   "static": [
+    {
+     "type": "box",
+     "p": [0, -0.5, -4.85],
+     "size": [16, 1, 6.3],
+     "color": "floor"
+    },
+    {
+     "type": "box",
+     "p": [0, -0.5, 4.85],
+     "size": [16, 1, 6.3],
+     "color": "floor"
+    },
+    {
+     "type": "box",
+     "p": [-4.85, -0.5, 0],
+     "size": [6.3, 1, 3.4],
+     "color": "floor"
+    },
+    {
+     "type": "box",
+     "p": [4.85, -0.5, 0],
+     "size": [6.3, 1, 3.4],
+     "color": "floor"
+    },
+    {
+     "type": "box",
+     "p": [0, -3, 0],
+     "size": [3.4, 1, 3.4],
+     "color": "spikes",
+     "deadly": true
+    },
+    {
+     "type": "box",
+     "p": [0, -1.75, -1.75],
+     "size": [3.4, 2.5, 0.1],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [0, -1.75, 1.75],
+     "size": [3.4, 2.5, 0.1],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [-1.75, -1.75, 0],
+     "size": [0.1, 2.5, 3.4],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [1.75, -1.75, 0],
+     "size": [0.1, 2.5, 3.4],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [0, 0.22, -1.85],
+     "size": [3.9, 0.44, 0.3],
+     "color": "accent",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [0, 0.22, 1.85],
+     "size": [3.9, 0.44, 0.3],
+     "color": "accent",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [-1.85, 0.22, 0],
+     "size": [0.3, 0.44, 3.4],
+     "color": "accent",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [1.85, 0.22, 0],
+     "size": [0.3, 0.44, 3.4],
+     "color": "accent",
+     "grab": true
+    }
+   ],
+   "kill": [
+    {
+     "kind": "spikes",
+     "p": [0, -1.9, 0],
+     "size": [3.3, 2.6, 3.3]
+    }
+   ],
+   "hazards": [
+    {
+     "id": "saw-w",
+     "kind": "blade",
+     "p": [-5.2, 0, 0],
+     "r": 0.85,
+     "axis": "x",
+     "track": [
+      [-5.2, -6.6],
+      [-5.2, 6.6]
+     ],
+     "cycle": {
+      "period": 10,
+      "warn": 1.6,
+      "active": 4.2,
+      "offset": 0
+     }
+    },
+    {
+     "id": "saw-e",
+     "kind": "blade",
+     "p": [5.2, 0, 0],
+     "r": 0.85,
+     "axis": "x",
+     "track": [
+      [5.2, 6.6],
+      [5.2, -6.6]
+     ],
+     "cycle": {
+      "period": 10,
+      "warn": 1.6,
+      "active": 4.2,
+      "offset": 5
+     }
+    },
+    {
+     "id": "saw-n",
+     "kind": "blade",
+     "p": [0, 0, -5.2],
+     "r": 0.85,
+     "axis": "z",
+     "track": [
+      [6.6, -5.2],
+      [-6.6, -5.2]
+     ],
+     "cycle": {
+      "period": 10,
+      "warn": 1.6,
+      "active": 4.2,
+      "offset": 2.5
+     }
+    },
+    {
+     "id": "saw-s",
+     "kind": "blade",
+     "p": [0, 0, 5.2],
+     "r": 0.85,
+     "axis": "z",
+     "track": [
+      [-6.6, 5.2],
+      [6.6, 5.2]
+     ],
+     "cycle": {
+      "period": 10,
+      "warn": 1.6,
+      "active": 4.2,
+      "offset": 7.5
+     }
+    }
+   ],
+   "props": [
+    {
+     "id": 1,
+     "kind": "crate",
+     "p": [-7, 0.4, -7],
+     "size": [0.8, 0.8, 0.8],
+     "mass": 3
+    },
+    {
+     "id": 2,
+     "kind": "crate",
+     "p": [7, 0.4, 7],
+     "size": [0.8, 0.8, 0.8],
+     "mass": 3
+    }
+   ],
+   "spawns": [
+    [-3.4, 0, -6.8, 0.46],
+    [3.4, 0, -6.8, -0.46],
+    [6.8, 0, -3.4, -1.11],
+    [6.8, 0, 3.4, -2.03],
+    [3.4, 0, 6.8, -2.68],
+    [-3.4, 0, 6.8, 2.68],
+    [-6.8, 0, 3.4, 2.03],
+    [-6.8, 0, -3.4, 1.11]
+   ]
+  },
+  {
+   "id": "spike-floor",
+   "name": "Spike Floor",
+   "blurb": "The floor is made of trapdoors. Under every one: spikes.",
+   "trick": "A panel shakes before it drops \u2014 step off, or hold someone on it until it goes. The rails are low: a good throw still clears them.",
+   "outY": -6,
+   "size": [14.399999999999999, 14.399999999999999],
+   "cam": {
+    "pos": [0, 15.5, 14.5],
+    "look": [0, 0, 0.6],
+    "fov": 47
+   },
+   "theme": {
+    "floor": "#3fae7a",
+    "edge": "#1f5a3e",
+    "wall": "#2a3a33",
+    "rope": "#ffd23f",
+    "post": "#e8e8e8",
+    "accent": "#ffd23f",
+    "hazard": "#ff3d5a",
+    "spikes": "#d8dde4",
+    "sky": ["#13261f", "#3f6b55"],
+    "fog": "#1a2e26",
+    "light": "#f4fff4"
+   },
+   "static": [
+    {
+     "type": "box",
+     "p": [0, -3.9, 0],
+     "size": [14.399999999999999, 0.6, 14.399999999999999],
+     "color": "spikes",
+     "deadly": true
+    },
+    {
+     "type": "box",
+     "p": [0, -2.2, -7.249999999999999],
+     "size": [14.599999999999998, 4, 0.1],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [0, -2.2, 7.249999999999999],
+     "size": [14.599999999999998, 4, 0.1],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [-7.249999999999999, -2.2, 0],
+     "size": [0.1, 4, 14.399999999999999],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [7.249999999999999, -2.2, 0],
+     "size": [0.1, 4, 14.399999999999999],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [0, -0.2, -7.319999999999999],
+     "size": [14.899999999999999, 0.4, 0.24],
+     "color": "edge"
+    },
+    {
+     "type": "box",
+     "p": [0, -0.2, 7.319999999999999],
+     "size": [14.899999999999999, 0.4, 0.24],
+     "color": "edge"
+    },
+    {
+     "type": "box",
+     "p": [-7.319999999999999, -0.2, 0],
+     "size": [0.24, 0.4, 14.399999999999999],
+     "color": "edge"
+    },
+    {
+     "type": "box",
+     "p": [7.319999999999999, -0.2, 0],
+     "size": [0.24, 0.4, 14.399999999999999],
+     "color": "edge"
+    },
+    {
+     "type": "box",
+     "p": [0, 0.22, -7.319999999999999],
+     "size": [14.899999999999999, 0.44, 0.24],
+     "color": "accent",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [0, 0.22, 7.319999999999999],
+     "size": [14.899999999999999, 0.44, 0.24],
+     "color": "accent",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [-7.319999999999999, 0.22, 0],
+     "size": [0.24, 0.44, 14.399999999999999],
+     "color": "accent",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [7.319999999999999, 0.22, 0],
+     "size": [0.24, 0.44, 14.399999999999999],
+     "color": "accent",
+     "grab": true
+    }
+   ],
+   "kill": [
+    {
+     "kind": "spikes",
+     "p": [0, -2.7, 0],
+     "size": [14.399999999999999, 2.2, 14.399999999999999]
+    }
+   ],
+   "hazards": [
+    {
+     "id": "panel-0-0",
+     "kind": "dropfloor",
+     "p": [-6.0, -0.2, -6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 21.65,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 14.93
+     }
+    },
+    {
+     "id": "panel-0-1",
+     "kind": "dropfloor",
+     "p": [-6.0, -0.2, -3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 26.35,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 12.62
+     }
+    },
+    {
+     "id": "panel-0-2",
+     "kind": "dropfloor",
+     "p": [-6.0, -0.2, -1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 22.16,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 17.56
+     }
+    },
+    {
+     "id": "panel-0-3",
+     "kind": "dropfloor",
+     "p": [-6.0, -0.2, 1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 28.08,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 14.39
+     }
+    },
+    {
+     "id": "panel-0-4",
+     "kind": "dropfloor",
+     "p": [-6.0, -0.2, 3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 25.05,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 5.91
+     }
+    },
+    {
+     "id": "panel-0-5",
+     "kind": "dropfloor",
+     "p": [-6.0, -0.2, 6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 20.03,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 7.43
+     }
+    },
+    {
+     "id": "panel-1-0",
+     "kind": "dropfloor",
+     "p": [-3.6, -0.2, -6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 25.85,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 1.79
+     }
+    },
+    {
+     "id": "panel-1-1",
+     "kind": "dropfloor",
+     "p": [-3.6, -0.2, -3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 27.94,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 6.49
+     }
+    },
+    {
+     "id": "panel-1-2",
+     "kind": "dropfloor",
+     "p": [-3.6, -0.2, -1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 22.33,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 0.95
+     }
+    },
+    {
+     "id": "panel-1-3",
+     "kind": "dropfloor",
+     "p": [-3.6, -0.2, 1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 29.98,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 22.15
+     }
+    },
+    {
+     "id": "panel-1-4",
+     "kind": "dropfloor",
+     "p": [-3.6, -0.2, 3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 28.75,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 17.71
+     }
+    },
+    {
+     "id": "panel-1-5",
+     "kind": "dropfloor",
+     "p": [-3.6, -0.2, 6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 20.34,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 6.69
+     }
+    },
+    {
+     "id": "panel-2-0",
+     "kind": "dropfloor",
+     "p": [-1.2, -0.2, -6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 24.98,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 2.89
+     }
+    },
+    {
+     "id": "panel-2-1",
+     "kind": "dropfloor",
+     "p": [-1.2, -0.2, -3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 29.52,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 10.88
+     }
+    },
+    {
+     "id": "panel-2-2",
+     "kind": "dropfloor",
+     "p": [-1.2, -0.2, -1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 21.55,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 17.62
+     }
+    },
+    {
+     "id": "panel-2-3",
+     "kind": "dropfloor",
+     "p": [-1.2, -0.2, 1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 21.25,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 19.72
+     }
+    },
+    {
+     "id": "panel-2-4",
+     "kind": "dropfloor",
+     "p": [-1.2, -0.2, 3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 24.53,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 13.54
+     }
+    },
+    {
+     "id": "panel-2-5",
+     "kind": "dropfloor",
+     "p": [-1.2, -0.2, 6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 23.43,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 11.36
+     }
+    },
+    {
+     "id": "panel-3-0",
+     "kind": "dropfloor",
+     "p": [1.2, -0.2, -6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 21.87,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 0.81
+     }
+    },
+    {
+     "id": "panel-3-1",
+     "kind": "dropfloor",
+     "p": [1.2, -0.2, -3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 28.66,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 6.73
+     }
+    },
+    {
+     "id": "panel-3-2",
+     "kind": "dropfloor",
+     "p": [1.2, -0.2, -1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 27.8,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 5.8
+     }
+    },
+    {
+     "id": "panel-3-3",
+     "kind": "dropfloor",
+     "p": [1.2, -0.2, 1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 29.69,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 26.54
+     }
+    },
+    {
+     "id": "panel-3-4",
+     "kind": "dropfloor",
+     "p": [1.2, -0.2, 3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 27.55,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 21.01
+     }
+    },
+    {
+     "id": "panel-3-5",
+     "kind": "dropfloor",
+     "p": [1.2, -0.2, 6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 25.81,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 18.84
+     }
+    },
+    {
+     "id": "panel-4-0",
+     "kind": "dropfloor",
+     "p": [3.6, -0.2, -6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 21.22,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 10.11
+     }
+    },
+    {
+     "id": "panel-4-1",
+     "kind": "dropfloor",
+     "p": [3.6, -0.2, -3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 28.27,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 5.68
+     }
+    },
+    {
+     "id": "panel-4-2",
+     "kind": "dropfloor",
+     "p": [3.6, -0.2, -1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 29.23,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 25.94
+     }
+    },
+    {
+     "id": "panel-4-3",
+     "kind": "dropfloor",
+     "p": [3.6, -0.2, 1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 24.1,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 8.8
+     }
+    },
+    {
+     "id": "panel-4-4",
+     "kind": "dropfloor",
+     "p": [3.6, -0.2, 3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 24.51,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 9.46
+     }
+    },
+    {
+     "id": "panel-4-5",
+     "kind": "dropfloor",
+     "p": [3.6, -0.2, 6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 29.95,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 11.58
+     }
+    },
+    {
+     "id": "panel-5-0",
+     "kind": "dropfloor",
+     "p": [6.0, -0.2, -6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 20.27,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 1.89
+     }
+    },
+    {
+     "id": "panel-5-1",
+     "kind": "dropfloor",
+     "p": [6.0, -0.2, -3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 27.18,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 26.98
+     }
+    },
+    {
+     "id": "panel-5-2",
+     "kind": "dropfloor",
+     "p": [6.0, -0.2, -1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 24.96,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 12.27
+     }
+    },
+    {
+     "id": "panel-5-3",
+     "kind": "dropfloor",
+     "p": [6.0, -0.2, 1.2],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 25.5,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 19.08
+     }
+    },
+    {
+     "id": "panel-5-4",
+     "kind": "dropfloor",
+     "p": [6.0, -0.2, 3.6],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 22.22,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 13.53
+     }
+    },
+    {
+     "id": "panel-5-5",
+     "kind": "dropfloor",
+     "p": [6.0, -0.2, 6.0],
+     "size": [2.34, 0.4, 2.34],
+     "drop": 3.2,
+     "cycle": {
+      "period": 25.56,
+      "warn": 1.8,
+      "active": 2.6,
+      "offset": 15.91
+     }
+    }
+   ],
+   "props": [
+    {
+     "id": 1,
+     "kind": "ball",
+     "p": [0, 0.6, 0],
+     "r": 0.45,
+     "mass": 1.5
+    }
+   ],
+   "spawns": [
+    [3.88, 0, 1.61, -1.96],
+    [1.61, 0, 3.88, -2.75],
+    [-1.61, 0, 3.88, 2.75],
+    [-3.88, 0, 1.61, 1.96],
+    [-3.88, 0, -1.61, 1.18],
+    [-1.61, 0, -3.88, 0.39],
+    [1.61, 0, -3.88, -0.39],
+    [3.88, 0, -1.61, -1.18]
+   ]
+  },
+  {
+   "id": "furnace",
+   "name": "Furnace",
+   "blurb": "Belts roll everyone toward the fire pit. Flame jets roar from the walls.",
+   "trick": "The belts surge when the lights flash and carry everyone to the fire pit \u2014 a low lip stops you at the edge, so it takes a throw to finish the job.",
+   "outY": -6,
+   "size": [19, 10],
+   "cam": {
+    "pos": [1, 15, 13],
+    "look": [1, 0, 0.6],
+    "fov": 48
+   },
+   "theme": {
+    "floor": "#8c5a3c",
+    "edge": "#4a2a1a",
+    "wall": "#5a3a2a",
+    "rope": "#ffb000",
+    "post": "#d8c0a0",
+    "accent": "#ffb000",
+    "hazard": "#ff4a1a",
+    "belt": "#33302c",
+    "lava": "#ff6a00",
+    "spikes": "#c9ced6",
+    "sky": ["#2a0e08", "#7a2a10"],
+    "fog": "#3a1408",
+    "light": "#ffd8b0"
+   },
+   "static": [
+    {
+     "type": "box",
+     "p": [0, -0.5, 0],
+     "size": [16, 1, 10],
+     "color": "floor"
+    },
+    {
+     "type": "box",
+     "p": [9.3, -2.6, 0],
+     "size": [2.6, 1, 10],
+     "color": "lava",
+     "deadly": true
+    },
+    {
+     "type": "box",
+     "p": [10.85, 1, 0],
+     "size": [0.5, 4.2, 10],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [0, 0.6, -5.25],
+     "size": [16, 1.2, 0.5],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [0, 0.6, 5.25],
+     "size": [16, 1.2, 0.5],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [9.3, -1.1, -5.25],
+     "size": [2.6, 3, 0.5],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [9.3, -1.1, 5.25],
+     "size": [2.6, 3, 0.5],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [7.9, 0.25, 0],
+     "size": [0.25, 0.5, 10],
+     "color": "accent",
+     "grab": true
+    }
+   ],
+   "kill": [
+    {
+     "kind": "fire",
+     "p": [9.3, -1, 0],
+     "size": [2.6, 3.2, 10]
+    }
+   ],
+   "hazards": [
+    {
+     "id": "belt-n",
+     "kind": "conveyor",
+     "p": [1.5, 0.05, -2.6],
+     "size": [13, 0.1, 3.2],
+     "dir": [1, 0, 0],
+     "speed": 1.0,
+     "surge": 2.6,
+     "cycle": {
+      "period": 9,
+      "warn": 1.5,
+      "active": 3,
+      "offset": 0
+     }
+    },
+    {
+     "id": "belt-s",
+     "kind": "conveyor",
+     "p": [1.5, 0.05, 2.6],
+     "size": [13, 0.1, 3.2],
+     "dir": [1, 0, 0],
+     "speed": 1.0,
+     "surge": 2.6,
+     "cycle": {
+      "period": 9,
+      "warn": 1.5,
+      "active": 3,
+      "offset": 4.5
+     }
+    },
+    {
+     "id": "jet-n1",
+     "kind": "fire",
+     "p": [-3, 0.85, -4.45],
+     "size": [1.2, 1.7, 1.0],
+     "dir": [0, 0, 1],
+     "cycle": {
+      "period": 8,
+      "warn": 1.4,
+      "active": 1.6,
+      "offset": 0
+     }
+    },
+    {
+     "id": "jet-n2",
+     "kind": "fire",
+     "p": [3.5, 0.85, -4.45],
+     "size": [1.2, 1.7, 1.0],
+     "dir": [0, 0, 1],
+     "cycle": {
+      "period": 8,
+      "warn": 1.4,
+      "active": 1.6,
+      "offset": 4
+     }
+    },
+    {
+     "id": "jet-s1",
+     "kind": "fire",
+     "p": [0, 0.85, 4.45],
+     "size": [1.2, 1.7, 1.0],
+     "dir": [0, 0, -1],
+     "cycle": {
+      "period": 8,
+      "warn": 1.4,
+      "active": 1.6,
+      "offset": 2
+     }
+    },
+    {
+     "id": "jet-s2",
+     "kind": "fire",
+     "p": [5.5, 0.85, 4.45],
+     "size": [1.2, 1.7, 1.0],
+     "dir": [0, 0, -1],
+     "cycle": {
+      "period": 8,
+      "warn": 1.4,
+      "active": 1.6,
+      "offset": 6
+     }
+    }
+   ],
+   "props": [
+    {
+     "id": 1,
+     "kind": "barrel",
+     "p": [-5, 0.5, 0],
+     "r": 0.35,
+     "h": 0.9,
+     "mass": 4
+    },
+    {
+     "id": 2,
+     "kind": "crate",
+     "p": [-2, 0.4, 0.2],
+     "size": [0.8, 0.8, 0.8],
+     "mass": 3
+    }
+   ],
+   "spawns": [
+    [-6, 0, -2.6, 1.57],
+    [-6, 0, 2.6, 1.57],
+    [-3.5, 0, 0, 1.57],
+    [-1, 0, -2.6, 1.57],
+    [-1, 0, 2.6, 1.57],
+    [2, 0, 0, 1.57],
+    [-6.5, 0, 0, 1.57],
+    [-3.5, 0, -3.6, 1.57]
+   ]
+  },
+  {
+   "id": "crusher-yard",
+   "name": "Crusher Yard",
+   "blurb": "Rams punch out of the walls; a big block slams down in the middle.",
+   "trick": "Rams pull back and glow before they fire. The crusher shakes at the top \u2014 nobody wants to be under it then.",
+   "outY": -6,
+   "size": [14, 14],
+   "cam": {
+    "pos": [0, 15, 13.5],
+    "look": [0, 0, 0.6],
+    "fov": 47
+   },
+   "theme": {
+    "floor": "#c9a227",
+    "edge": "#5a4810",
+    "wall": "#3b3f46",
+    "rope": "#ffd23f",
+    "post": "#1d1f24",
+    "accent": "#1d1f24",
+    "hazard": "#ff3b3b",
+    "crusher": "#5b6470",
+    "spikes": "#c9ced6",
+    "sky": ["#1a1c22", "#565c66"],
+    "fog": "#262830",
+    "light": "#fffbe8"
+   },
+   "static": [
+    {
+     "type": "box",
+     "p": [0, -0.5, 0],
+     "size": [14, 1, 14],
+     "color": "floor"
+    },
+    {
+     "type": "box",
+     "p": [-7.25, 1.5, 0],
+     "size": [0.5, 3, 14],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [7.25, 1.5, 0],
+     "size": [0.5, 3, 14],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [-7.25, 3.15, 0],
+     "size": [0.7, 0.3, 14.2],
+     "color": "edge",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [7.25, 3.15, 0],
+     "size": [0.7, 0.3, 14.2],
+     "color": "edge",
+     "grab": true
+    }
+   ],
+   "kill": [],
+   "hazards": [
+    {
+     "id": "ram-w1",
+     "kind": "piston",
+     "p": [-6.3, 0.75, -4.2],
+     "size": [1.2, 1.3, 1.7],
+     "dir": [1, 0, 0],
+     "reach": 2.8,
+     "cycle": {
+      "period": 7,
+      "warn": 1.1,
+      "active": 1.5,
+      "offset": 0
+     }
+    },
+    {
+     "id": "ram-w2",
+     "kind": "piston",
+     "p": [-6.3, 0.75, 0],
+     "size": [1.2, 1.3, 1.7],
+     "dir": [1, 0, 0],
+     "reach": 2.8,
+     "cycle": {
+      "period": 7,
+      "warn": 1.1,
+      "active": 1.5,
+      "offset": 2.4
+     }
+    },
+    {
+     "id": "ram-w3",
+     "kind": "piston",
+     "p": [-6.3, 0.75, 4.2],
+     "size": [1.2, 1.3, 1.7],
+     "dir": [1, 0, 0],
+     "reach": 2.8,
+     "cycle": {
+      "period": 7,
+      "warn": 1.1,
+      "active": 1.5,
+      "offset": 4.8
+     }
+    },
+    {
+     "id": "ram-e1",
+     "kind": "piston",
+     "p": [6.3, 0.75, -4.2],
+     "size": [1.2, 1.3, 1.7],
+     "dir": [-1, 0, 0],
+     "reach": 2.8,
+     "cycle": {
+      "period": 7,
+      "warn": 1.1,
+      "active": 1.5,
+      "offset": 3.6
+     }
+    },
+    {
+     "id": "ram-e2",
+     "kind": "piston",
+     "p": [6.3, 0.75, 0],
+     "size": [1.2, 1.3, 1.7],
+     "dir": [-1, 0, 0],
+     "reach": 2.8,
+     "cycle": {
+      "period": 7,
+      "warn": 1.1,
+      "active": 1.5,
+      "offset": 6
+     }
+    },
+    {
+     "id": "ram-e3",
+     "kind": "piston",
+     "p": [6.3, 0.75, 4.2],
+     "size": [1.2, 1.3, 1.7],
+     "dir": [-1, 0, 0],
+     "reach": 2.8,
+     "cycle": {
+      "period": 7,
+      "warn": 1.1,
+      "active": 1.5,
+      "offset": 1.2
+     }
+    },
+    {
+     "id": "crusher",
+     "kind": "crusher",
+     "p": [0, 0, 0],
+     "size": [3, 1.2, 3],
+     "lift": 3.3,
+     "cycle": {
+      "period": 8,
+      "warn": 1.6,
+      "active": 1.6,
+      "offset": 3
+     }
+    }
+   ],
+   "props": [
+    {
+     "id": 1,
+     "kind": "crate",
+     "p": [-4, 0.4, -6],
+     "size": [0.8, 0.8, 0.8],
+     "mass": 3
+    },
+    {
+     "id": 2,
+     "kind": "crate",
+     "p": [4, 0.4, 6],
+     "size": [0.8, 0.8, 0.8],
+     "mass": 3
+    },
+    {
+     "id": 3,
+     "kind": "barrel",
+     "p": [3, 0.5, -6],
+     "r": 0.35,
+     "h": 0.9,
+     "mass": 4
+    }
+   ],
+   "spawns": [
+    [-3.5, 0, -5, 0.61],
+    [3.5, 0, -5, -0.61],
+    [5, 0, -2.2, -1.16],
+    [5, 0, 2.2, -1.99],
+    [3.5, 0, 5, -2.53],
+    [-3.5, 0, 5, 2.53],
+    [-5, 0, 2.2, 1.99],
+    [-5, 0, -2.2, 1.16]
+   ]
+  },
+  {
+   "id": "spinner-dome",
+   "name": "Spinner Dome",
+   "blurb": "A round stage with a giant spinning bar. Jump the low arm, duck the high one.",
+   "trick": "When the hub lights flash the arms speed up \u2014 jump the low bar, duck under the high one, and let it sweep your rivals off.",
+   "outY": -6,
+   "size": [18, 18],
+   "cam": {
+    "pos": [0, 17, 16],
+    "look": [0, 0, 0.6],
+    "fov": 48
+   },
+   "theme": {
+    "floor": "#a24bd1",
+    "edge": "#4a1c66",
+    "wall": "#3a1a50",
+    "rope": "#5ef0ff",
+    "post": "#f0e8ff",
+    "accent": "#5ef0ff",
+    "hazard": "#ff3dc8",
+    "arm": "#ffd23f",
+    "spikes": "#c9ced6",
+    "sky": ["#14082a", "#4a1f7a"],
+    "fog": "#1e0c38",
+    "light": "#f2e8ff"
+   },
+   "static": [
+    {
+     "type": "cyl",
+     "p": [0, -0.5, 0],
+     "r": 9,
+     "h": 1,
+     "color": "floor",
+     "segments": 32
+    },
+    {
+     "type": "cyl",
+     "p": [0, -1.3, 0],
+     "r": 9.3,
+     "h": 0.6,
+     "color": "edge",
+     "segments": 32
+    },
+    {
+     "type": "cyl",
+     "p": [0, 1.2, 0],
+     "r": 0.7,
+     "h": 2.4,
+     "color": "post"
+    }
+   ],
+   "kill": [],
+   "hazards": [
+    {
+     "id": "spinner",
+     "kind": "sweeper",
+     "p": [0, 0, 0],
+     "arms": [
+      {
+       "y": 0.33,
+       "len": 8.0,
+       "thick": 0.36,
+       "height": 0.42,
+       "angle": 0
+      },
+      {
+       "y": 1.78,
+       "len": 8.0,
+       "thick": 0.36,
+       "height": 0.36,
+       "angle": 1.5708
+      }
+     ],
+     "slow": 0.55,
+     "fast": 1.45,
+     "cycle": {
+      "period": 12,
+      "warn": 1.6,
+      "active": 4.2,
+      "offset": 0
+     },
+     "knock": 0.65
+    }
+   ],
+   "props": [],
+   "spawns": [
+    [4.62, 0, 1.91, -1.96],
+    [1.91, 0, 4.62, -2.75],
+    [-1.91, 0, 4.62, 2.75],
+    [-4.62, 0, 1.91, 1.96],
+    [-4.62, 0, -1.91, 1.18],
+    [-1.91, 0, -4.62, 0.39],
+    [1.91, 0, -4.62, -0.39],
+    [4.62, 0, -1.91, -1.18]
+   ]
+  },
+  {
+   "id": "sky-lift",
+   "name": "Sky Lift",
+   "blurb": "Two rooftops, a long drop and lifts that shuttle across. Hang from the ledges to survive.",
+   "trick": "The rooftops are railed; the gap in the middle is not. Every rim, rail and the gantry overhead can be grabbed \u2014 hang on while the lifts go by.",
+   "outY": -10,
+   "size": [24, 8],
+   "cam": {
+    "pos": [0, 15, 16],
+    "look": [0, 0, 0],
+    "fov": 50
+   },
+   "theme": {
+    "floor": "#e8774a",
+    "edge": "#7a3a20",
+    "wall": "#5a6a80",
+    "rope": "#ffe14d",
+    "post": "#d8e0ea",
+    "accent": "#ffe14d",
+    "hazard": "#ff3d5a",
+    "lift": "#4ac0e8",
+    "spikes": "#c9ced6",
+    "sky": ["#5ab4ff", "#d8f0ff"],
+    "fog": "#b8dcff",
+    "light": "#ffffff"
+   },
+   "static": [
+    {
+     "type": "box",
+     "p": [-9, -0.5, 0],
+     "size": [6, 1, 7],
+     "color": "floor"
+    },
+    {
+     "type": "box",
+     "p": [9, -0.5, 0],
+     "size": [6, 1, 7],
+     "color": "floor"
+    },
+    {
+     "type": "box",
+     "p": [-6.06, -0.12, 0],
+     "size": [0.18, 0.18, 7],
+     "color": "rope",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [6.06, -0.12, 0],
+     "size": [0.18, 0.18, 7],
+     "color": "rope",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [0, 2.95, 0],
+     "size": [12.4, 0.18, 0.18],
+     "color": "rope",
+     "grab": true
+    },
+    {
+     "type": "cyl",
+     "p": [-6.3, 1.5, 0],
+     "r": 0.15,
+     "h": 3,
+     "color": "post"
+    },
+    {
+     "type": "cyl",
+     "p": [6.3, 1.5, 0],
+     "r": 0.15,
+     "h": 3,
+     "color": "post"
+    },
+    {
+     "type": "box",
+     "p": [-9, -4, 0],
+     "size": [5, 6, 6.5],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [9, -4, 0],
+     "size": [5, 6, 6.5],
+     "color": "wall"
+    },
+    {
+     "type": "box",
+     "p": [-11.9, 0.3, 0],
+     "size": [0.2, 0.6, 7],
+     "color": "rope",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [-9, 0.3, -3.4],
+     "size": [6, 0.6, 0.2],
+     "color": "rope",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [-9, 0.3, 3.4],
+     "size": [6, 0.6, 0.2],
+     "color": "rope",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [11.9, 0.3, 0],
+     "size": [0.2, 0.6, 7],
+     "color": "rope",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [9, 0.3, -3.4],
+     "size": [6, 0.6, 0.2],
+     "color": "rope",
+     "grab": true
+    },
+    {
+     "type": "box",
+     "p": [9, 0.3, 3.4],
+     "size": [6, 0.6, 0.2],
+     "color": "rope",
+     "grab": true
+    }
+   ],
+   "kill": [],
+   "hazards": [
+    {
+     "id": "lift-n",
+     "kind": "mover",
+     "p": [-4.3, -0.25, -2.1],
+     "size": [3.2, 0.5, 3],
+     "path": [
+      [-4.3, -0.25, -2.1],
+      [4.3, -0.25, -2.1]
+     ],
+     "grab": true,
+     "cycle": {
+      "period": 7,
+      "warn": 1.2,
+      "active": 4,
+      "offset": 0
+     }
+    },
+    {
+     "id": "lift-s",
+     "kind": "mover",
+     "p": [4.3, -0.25, 2.1],
+     "size": [3.2, 0.5, 3],
+     "path": [
+      [4.3, -0.25, 2.1],
+      [-4.3, -0.25, 2.1]
+     ],
+     "grab": true,
+     "cycle": {
+      "period": 7,
+      "warn": 1.2,
+      "active": 4,
+      "offset": 0
+     }
+    }
+   ],
+   "props": [
+    {
+     "id": 1,
+     "kind": "crate",
+     "p": [-10.5, 0.4, -2.5],
+     "size": [0.8, 0.8, 0.8],
+     "mass": 3
+    },
+    {
+     "id": 2,
+     "kind": "crate",
+     "p": [10.5, 0.4, 2.5],
+     "size": [0.8, 0.8, 0.8],
+     "mass": 3
+    }
+   ],
+   "spawns": [
+    [-10.5, 0, -2, 1.57],
+    [10.5, 0, -2, -1.57],
+    [-10.5, 0, 2, 1.57],
+    [10.5, 0, 2, -1.57],
+    [-7.8, 0, 0, 1.57],
+    [7.8, 0, 0, -1.57],
+    [-9.5, 0, 0, 1.57],
+    [9.5, 0, 0, -1.57]
+   ]
+  }
+ ]
+}

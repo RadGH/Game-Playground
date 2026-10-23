@@ -1,0 +1,6 @@
+@import url('../golf.css');
+/* Chip-In Challenge: the shared golf HUD, plus the shot pips in the pill and the "75" tag over each bucket. */
+.ci-pips { display: inline-flex; gap: 4px; }
+.ci-pips i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--ink); background: transparent; }
+.ci-pips i.on { background: var(--ink); }
+.tag.ci-bucket { background: #ff5a7a; font-size: 15px; font-weight: 900; padding: 0 8px; }

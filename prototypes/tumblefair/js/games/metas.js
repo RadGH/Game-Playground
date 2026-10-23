@@ -2679,6 +2679,145 @@ export const GAMES = Object.freeze({
    "card": "card-skeleton-stack",
    "css": true
   }
+ },
+ "putt-party": {
+  "meta": {
+   "id": "putt-party",
+   "title": "Putt Party",
+   "blurb": "Putt your ball into the cup in the fewest strokes — everyone at once!",
+   "how": [
+    "Point the stick to aim. Hold A to charge, let go to putt.",
+    "Everyone putts at the same time. Bump other balls away!",
+    "Fewest strokes over 3 holes wins. Par + 3 picks you up."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 100,
+   "scoring": "points",
+   "unit": "strokes",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Putt (hold)"
+   },
+   "move": {
+    "speed": 0.01,
+    "accel": 40
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9.2,
+    "hd": 5.8,
+    "wall": false
+   },
+   "pitch": 64,
+   "card": "card-putt-party",
+   "css": true
+  }
+ },
+ "haunted-hole": {
+  "meta": {
+   "id": "haunted-hole",
+   "title": "Haunted Hole",
+   "blurb": "Putt through a moonlit graveyard course in the fewest strokes!",
+   "how": [
+    "Point the stick to aim. Hold A to charge, let go to putt.",
+    "The ghost puffs balls off line. The pumpkin grin is a shortcut!",
+    "The coffin lid shuts now and then. Fewest strokes wins."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 100,
+   "scoring": "points",
+   "unit": "strokes",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Putt (hold)"
+   },
+   "move": {
+    "speed": 0.01,
+    "accel": 40
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9.2,
+    "hd": 5.8,
+    "wall": false
+   },
+   "pitch": 64,
+   "card": "card-haunted-hole",
+   "css": true
+  }
+ },
+ "chip-in": {
+  "meta": {
+   "id": "chip-in",
+   "title": "Chip-In Challenge",
+   "blurb": "Chip onto the green — the closer to the flag, the more points!",
+   "how": [
+    "Point the stick to aim. Hold A — the ring shows where it lands.",
+    "Bullseye 50, rings 25 / 10 / 5. In the cup = 100!",
+    "Land it in a bucket for 75. Five shots each."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 60,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Chip (hold)"
+   },
+   "move": {
+    "speed": 0.01,
+    "accel": 40
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8.4,
+    "hd": 6.4,
+    "wall": false
+   },
+   "pitch": 58,
+   "card": "card-chip-in",
+   "css": true
+  }
+ },
+ "long-drive": {
+  "meta": {
+   "id": "long-drive",
+   "title": "Long Drive",
+   "blurb": "Tap for power, tap for accuracy — longest drive on the fairway wins!",
+   "how": [
+    "Tap to stop the POWER bar, then tap as the needle hits the middle.",
+    "Aim with ◀ ▶ to play the wind. Only drives on the fairway count.",
+    "Three drives each. Your best one is your score."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "points",
+   "unit": "yards",
+   "tags": [
+    "action"
+   ],
+   "card": "card-long-drive",
+   "css": true
+  }
  }
 });
 export const gameIds = () => Object.keys(GAMES);

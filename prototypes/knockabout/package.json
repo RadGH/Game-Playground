@@ -1,0 +1,14 @@
+{
+  "name": "knockabout",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Knockabout: a floppy physics brawler for the couch, with online rooms (authoritative Node + WebSocket server).",
+  "scripts": {
+    "start": "node server/main.mjs",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

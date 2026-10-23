@@ -1,0 +1,31 @@
+@import url('../golf.css');
+/* Long Drive: the wind badge under the score bar, yardage / medal / pin tags in the 3D view, and the swing panel at the
+   bottom of a phone that plays (aim row, two meters, one big button). Nothing in here scrolls. */
+.ld-wind { position: absolute; top: calc(var(--st) + 56px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; pointer-events: none;
+  padding: 3px 12px 3px 6px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); white-space: nowrap; }
+.ld-wind em { font-style: normal; font-weight: 900; }
+.ld-arrow { width: 28px; height: 28px; border-radius: 50%; background: #3d8bff; border: 2px solid var(--ink); position: relative; transition: transform .4s; }
+.ld-arrow::before { content: ''; position: absolute; left: 50%; top: 3px; transform: translateX(-50%); border: 7px solid transparent; border-bottom: 11px solid #fff; border-top: 0; }
+.ld-arrow::after { content: ''; position: absolute; left: 50%; top: 13px; width: 4px; height: 9px; transform: translateX(-50%); background: #fff; border-radius: 2px; }
+.tag.ld-yard { background: #fff; color: var(--ink); text-shadow: none; font-size: 12px; }
+.tag.ld-medal { color: var(--ink); text-shadow: none; } .tag.ld-gold { background: #ffd23f; } .tag.ld-silver { background: #d6dde6; } .tag.ld-bronze { background: #e0a26a; }
+.tag.ld-pin:empty, .tag.ld-pin span:empty { display: none; }
+.ld-panel { position: absolute; left: 50%; bottom: calc(var(--sb) + 10px); transform: translateX(-50%); width: min(440px, calc(100% - 16px)); pointer-events: auto;
+  display: grid; gap: 8px; padding: 10px 12px 12px; background: var(--paper); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+.ld-panel.hidden { display: none; }
+.ld-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 800; }
+.ld-info .ld-drive { font: 900 18px/1 var(--font); } .ld-info .ld-best { font-size: 15px; }
+.ld-aim .ld-aimtx { flex: 1; text-align: center; font: 900 16px/1 var(--font); }
+.ld-btn { min-width: 56px; min-height: 44px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; font: 900 20px/1 var(--font); box-shadow: 0 4px 0 var(--ink); cursor: pointer; }
+.ld-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.ld-meter { display: grid; grid-template-columns: 78px 1fr; align-items: center; gap: 8px; font: 900 13px/1 var(--font); text-transform: uppercase; letter-spacing: .4px; }
+.ld-track { position: relative; height: 26px; border: 3px solid var(--ink); border-radius: 10px; background: #fff; overflow: hidden; }
+.ld-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, #3ecf5a, #ffd23f 70%, #ff5f5f); }
+.ld-mark { position: absolute; top: -2px; bottom: -2px; width: 4px; margin-left: -2px; background: var(--ink); opacity: 0; }
+.ld-sweet { position: absolute; left: 44%; width: 12%; top: 0; bottom: 0; background: rgba(62, 207, 90, .55); border-left: 2px dashed var(--ink); border-right: 2px dashed var(--ink); }
+.ld-needle { position: absolute; top: -2px; bottom: -2px; width: 6px; margin-left: -3px; left: 50%; background: #ff5f5f; border: 2px solid var(--ink); border-radius: 3px; }
+.ld-panel:not([data-mode=acc]) .ld-acc { opacity: .45; } .ld-panel:not([data-mode=power]) .ld-power .ld-fill { filter: saturate(.6); }
+.ld-swing { min-height: 64px; font-size: 24px; touch-action: manipulation; user-select: none; cursor: pointer; }
+.ld-swing:disabled { background: #e8e1cc; color: #6a7a80; }
+.ld-panel[data-mode=acc] .ld-swing { background: #8ff07a; }
+@media (max-width: 520px) { .ld-wind { top: calc(var(--st) + 50px); font-size: 13px; } .ld-meter { grid-template-columns: 66px 1fr; font-size: 11px; } }

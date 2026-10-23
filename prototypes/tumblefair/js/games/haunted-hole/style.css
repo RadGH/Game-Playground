@@ -1,0 +1,5 @@
+@import url('../golf.css');
+/* Haunted Hole: the shared golf HUD in Halloween colours. */
+.game-haunted-hole .gp-pill { background: rgba(244, 236, 216, .95); }
+.game-haunted-hole .gp-banner { color: #ffb347; }
+.game-haunted-hole .gp-card { background: #f4ecd8; }

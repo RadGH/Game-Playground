@@ -496,6 +496,29 @@
    "readme": "prototypes/thousandvale/docs/PLAN.md"
   },
   {
+   "id": "knockabout",
+   "group": "prototypes",
+   "title": "Knockabout",
+   "folder": "prototypes/knockabout",
+   "summary": "A floppy physics brawler for 1 to 8 players: grab with L1/R1, tap to punch, raise your arms with X/Y, lift people up and throw them out of the ring or into the saws, spikes and fire. Three punches knock you down, longer every time. Versus, teams or co-op waves on seven trap arenas; several controllers on one screen, or online rooms with phones.",
+   "status": "playable",
+   "statusNote": "brawler, own server",
+   "date": "2026-10-23",
+   "isNew": true,
+   "tags": [
+    "brawler",
+    "physics",
+    "multiplayer",
+    "gamepad",
+    "3d"
+   ],
+   "server": {
+    "port": 8470,
+    "path": "prototypes/knockabout/"
+   },
+   "live": "knockabout"
+  },
+  {
    "id": "tumblefair",
    "group": "prototypes",
    "title": "Tumblefair",

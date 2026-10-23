@@ -1,0 +1,101 @@
+{
+  "_doc": "Knockabout modes. `rounds` = round WINS needed to take the match (first to N). Difficulty sets the default CPU level and how tough wave goons are.",
+  "modes": [
+    {
+      "id": "versus",
+      "name": "Versus",
+      "blurb": "Everyone for themselves. Last one standing takes the round.",
+      "minPlayers": 2,
+      "rounds": 3,
+      "roundTime": 90
+    },
+    {
+      "id": "teams",
+      "name": "Teams",
+      "blurb": "Two to four teams. Last team with anyone standing takes the round.",
+      "minPlayers": 2,
+      "minTeams": 2,
+      "maxTeams": 4,
+      "rounds": 3,
+      "roundTime": 90
+    },
+    {
+      "id": "waves",
+      "name": "Waves",
+      "blurb": "Team up against waves of goons. Toss them all out to clear a wave; anyone knocked out comes back next wave.",
+      "minPlayers": 1,
+      "waves": 10,
+      "waveTime": 150,
+      "goons": {
+        "perPlayer": 0.6,
+        "growth": 0.3,
+        "min": 1,
+        "maxFighters": 10,
+        "toughEvery": 3,
+        "punchPerWave": 0.04,
+        "speedPerWave": 0.02,
+        "dropIn": 2.5,
+        "toughStart": -1
+      },
+      "_goonsDoc": "goons in wave n = max(min, round(players * (perPlayer + growth * (n-1)))), capped so the arena holds at most maxFighters. Every toughEvery waves they take one more punch to knock down. A goon takes punchesToDown + toughStart + (waves so far / toughEvery) + difficulty goonTough punches (never fewer than 1)."
+    }
+  ],
+  "difficulty": {
+    "easy": {
+      "bot": "easy",
+      "goonLevel": "easy",
+      "goonTough": 0,
+      "goonPunch": 0.7,
+      "goonSpeed": 0.85
+    },
+    "normal": {
+      "bot": "normal",
+      "goonLevel": "easy",
+      "goonTough": 0,
+      "goonPunch": 0.85,
+      "goonSpeed": 0.9
+    },
+    "hard": {
+      "bot": "hard",
+      "goonLevel": "normal",
+      "goonTough": 1,
+      "goonPunch": 1.0,
+      "goonSpeed": 1.0
+    }
+  },
+  "botLevels": {
+    "easy": {
+      "think": 0.45,
+      "punchRate": 0.7,
+      "grabChance": 0.25,
+      "hazardSense": 0.5,
+      "escape": 0.35,
+      "aggro": 0.6,
+      "jumpSense": 0.4,
+      "pause": 0.35,
+      "accuracy": 0.5
+    },
+    "normal": {
+      "think": 0.28,
+      "punchRate": 1.1,
+      "grabChance": 0.38,
+      "hazardSense": 0.85,
+      "escape": 0.7,
+      "aggro": 0.85,
+      "jumpSense": 0.75,
+      "pause": 0.25,
+      "accuracy": 0.7
+    },
+    "hard": {
+      "think": 0.12,
+      "punchRate": 1.8,
+      "grabChance": 0.6,
+      "hazardSense": 1.0,
+      "escape": 1.0,
+      "aggro": 1.0,
+      "jumpSense": 0.95,
+      "pause": 0.08,
+      "accuracy": 0.9
+    }
+  }
+}

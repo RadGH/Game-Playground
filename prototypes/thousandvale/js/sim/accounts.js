@@ -123,11 +123,21 @@ export function createAccounts({ store, hasher = null, mailer = null, rgs = null
    */
   async function fromTicket(ticket) {
     if (!rgs || !rgs.redeem) return null;
-    const u = await rgs.redeem(String(ticket));
+    return forRgsUser(await rgs.redeem(String(ticket)));
+  }
+  /** The account here of a games.radgh.com user games.radgh.com has just vouched for (ticket or email + password). */
+  async function forRgsUser(u) {
     if (!u) return null;
+    if (!u.username) return { noName: true };
     if (!u.linkedHere) return rgsAccount(u);
     const info = await store.loginInfo(u.username);
     return info && !isRgs(info.passHash) ? info : null;
+  }
+  const NO_NAME_MSG = 'Your games.radgh.com account has no username yet. Pick one (or link this Thousandvale account) at games.radgh.com/account/, then sign in here.';
+  /** Log in with an EMAIL address: only games.radgh.com knows emails, so it checks the password. */
+  async function emailLogin(email, pass) {
+    if (!rgs) return null;
+    try { return await forRgsUser(await rgs.verify(email, pass)); } catch (err) { log('games.radgh.com check failed', err && err.message); return null; }
   }
 
   /** Sign this socket in (login or a reset). */
@@ -179,6 +189,7 @@ export function createAccounts({ store, hasher = null, mailer = null, rgs = null
           s.state = 'busy';
           try {
             const info = await fromTicket(m.ticket);
+            if (info?.noName) { s.state = 'anon'; return fail(s, op, 'auth', NO_NAME_MSG); }
             if (!info) { limiter.hit(ipKey(s)); s.state = 'anon'; return fail(s, op, 'auth', 'That games.radgh.com sign-in did not work. Sign in with your username and password instead.'); }
             if (info.banned > wallNow()) { s.state = 'anon'; s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
             const token = await store.newToken(info.account, 'session');
@@ -186,11 +197,24 @@ export function createAccounts({ store, hasher = null, mailer = null, rgs = null
             return signedIn(s, info.account, token, a ? a.username : null, !!(a && a.admin));
           } catch (err) { s.state = 'anon'; log('ticket login failed', err && err.message); return fail(s, op, 'auth', 'Signing in is not working right now.'); }
         }
-        const username = cleanUsername(m.user);
+        const isEmail = typeof m.user === 'string' && m.user.includes('@');
+        const username = isEmail ? m.user.trim() : cleanUsername(m.user);
         const uKey = 'user:' + String(username || m.user || '').toLowerCase();
         if (limited(s) && (limiter.over(ipKey(s), L.ipFails, L.ipWindowMs) || limiter.over(uKey, L.userFails, L.userWindowMs))) return fail(s, op, 'tooManyLogins');
         if (!username || typeof m.pass !== 'string') { limiter.hit(ipKey(s)); return fail(s, op, 'auth', 'Wrong username or password.'); }
         s.state = 'busy';
+        if (isEmail) {
+          try {
+            const info = await emailLogin(username, m.pass);
+            if (info?.noName) { s.state = 'anon'; return fail(s, op, 'auth', NO_NAME_MSG); }
+            if (!info) { limiter.hit(ipKey(s)); limiter.hit(uKey); s.state = 'anon'; return fail(s, op, 'auth', 'Wrong email or password.'); }
+            if (info.banned > wallNow()) { s.state = 'anon'; s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
+            limiter.clear(uKey);
+            const token = await store.newToken(info.account, 'session');
+            const a = await store.accountInfo(info.account);
+            return signedIn(s, info.account, token, a ? a.username : null, !!(a && a.admin));
+          } catch (err) { s.state = 'anon'; log('email login failed', err && err.message); return fail(s, op, 'auth', 'Login is not working right now.'); }
+        }
         try {
           let info = await store.loginInfo(username);
           if (!info) info = await fromRgs(username, m.pass);

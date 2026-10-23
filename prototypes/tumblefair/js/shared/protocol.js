@@ -18,7 +18,7 @@ export const cleanName = s => { const n = String(s ?? '').replace(/[\u0000-\u001
  * travel comma-separated in `rate.why`; anything not on the list is dropped. The labels are what the buttons say.
  */
 export const RATE_REASONS = Object.freeze({
-  up: [['fun', 'Fun'], ['funny', 'Funny'], ['exciting', 'Exciting'], ['teamwork', 'Good teamwork'], ['pretty', 'Looks great'], ['again', 'Play it again!']],
+  up: [['fun', 'Fun'], ['funny', 'Funny'], ['exciting', 'Exciting'], ['teamwork', 'Good teamwork'], ['pretty', 'Looks great'], ['again', 'Play it again!'], ['buggy', 'But buggy'], ['unfair', 'But unfair']],      // a fun game can still be buggy (owner 2026-10-22)
   down: [['confusing', 'Confusing'], ['controls', 'Awkward controls'], ['hard', 'Too hard'], ['easy', 'Too easy'], ['long', 'Too long'], ['unfair', 'Unfair'], ['laggy', 'Laggy'], ['boring', 'Boring'], ['buggy', 'Buggy'], ['unplayable', 'Unplayable']],      // buggy / unplayable: owner 2026-10-22
 });
 export const cleanReasons = (v, why) => { const ok = new Set((v > 0 ? RATE_REASONS.up : RATE_REASONS.down).map(r => r[0])); return [...new Set(String(why || '').split(',').map(s => s.trim()).filter(id => ok.has(id)))].slice(0, 4); };

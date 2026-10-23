@@ -39,7 +39,8 @@ const wilson = (up, n) => { if (!n) return 0; const z = 1.645, p = up / n; retur
 const rows = [...G.values()].map(g => {
   const rs = [...g.latest.values()], up = rs.filter(r => r.v > 0).length, down = rs.length - up, why = {};
   for (const r of rs) for (const k of r.why || []) why[(r.v > 0 ? '+' : '-') + k] = (why[(r.v > 0 ? '+' : '-') + k] || 0) + 1;
-  return { id: g.id, title: TITLES[g.id] || g.id, plays: g.plays, up, down, score: Math.round(wilson(up, up + down) * 100), why: Object.entries(why).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, n]) => `${k}×${n}`).join(' '),
+  const flag = k => rs.filter(r => (r.why || []).includes(k)).length;      // asked on both thumbs: a fun game can still be buggy
+  return { id: g.id, title: TITLES[g.id] || g.id, plays: g.plays, up, down, buggy: flag('buggy'), unfair: flag('unfair'), score: Math.round(wilson(up, up + down) * 100), why: Object.entries(why).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, n]) => `${k}×${n}`).join(' '),
     offered: g.offered, picked: g.picked, pickRate: g.offered ? Math.round(g.picked / g.offered * 100) : null, avgSecs: g.plays ? Math.round(g.secs / g.plays) : null, limit: g.limit, earlyPct: g.plays ? Math.round(g.early / g.plays * 100) : null,
     drops: g.dropped, ties: g.ties, coopWinPct: g.coopRuns ? Math.round(g.coopWin / g.coopRuns * 100) : null };
 }).sort((a, b) => b.score - a.score || (b.up - b.down) - (a.up - a.down) || b.plays - a.plays);
@@ -49,10 +50,10 @@ if (process.argv.includes('--json')) { console.log(JSON.stringify({ days, matche
 
 console.log(`# Tumblefair insights — last ${days} days (${dir})\n`);
 console.log(`${matches} matches started, ${finals} finished. ${rows.reduce((n, r) => n + r.up + r.down, 0)} ratings on ${rows.filter(r => r.up + r.down).length} minigames.\n`);
-console.log('| # | Minigame | Plays | 👍 | 👎 | Score | Reasons | Offered | Won vote | Avg s / clock | Ended early | Drop-outs |');
-console.log('|---|---|---|---|---|---|---|---|---|---|---|---|');
-rows.forEach((r, i) => console.log(`| ${i + 1} | ${r.title} | ${r.plays} | ${r.up} | ${r.down} | ${r.up + r.down ? r.score : '–'} | ${r.why || ''} | ${r.offered} | ${r.pickRate == null ? '–' : r.pickRate + '%'} | ${r.avgSecs ?? '–'} / ${r.limit || '–'} | ${r.earlyPct == null ? '–' : r.earlyPct + '%'} | ${r.drops} |`));
-console.log('\nScore = how sure we are that players like it (0–100; few ratings keep it low). "Won vote" = picked when offered.');
+console.log('| # | Minigame | Plays | 👍 | 👎 | Score | Buggy | Unfair | Reasons | Offered | Won vote | Avg s / clock | Ended early | Drop-outs |');
+console.log('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+rows.forEach((r, i) => console.log(`| ${i + 1} | ${r.title} | ${r.plays} | ${r.up} | ${r.down} | ${r.up + r.down ? r.score : '–'} | ${r.buggy || ''} | ${r.unfair || ''} | ${r.why || ''} | ${r.offered} | ${r.pickRate == null ? '–' : r.pickRate + '%'} | ${r.avgSecs ?? '–'} / ${r.limit || '–'} | ${r.earlyPct == null ? '–' : r.earlyPct + '%'} | ${r.drops} |`));
+console.log('\nScore = how sure we are that players like it (0–100; few ratings keep it low). Buggy / Unfair count both thumbs. "Won vote" = picked when offered.');
 if (counts.length) {
   console.log('\n## Visits and actions (no cookies; a visitor is counted once a day)\n');
   const names = [...new Set(counts.flatMap(c => Object.keys(c.events)))].filter(n => !n.startsWith('room_')).sort();

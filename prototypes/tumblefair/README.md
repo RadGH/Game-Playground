@@ -269,7 +269,7 @@ with GA later".
 
 - **Rating a minigame.** The results card asks everyone who PLAYED it "Did you like this one?" 👍 / 👎, then offers reasons
   (👍 fun, funny, exciting, good teamwork, looks great, play it again; 👎 confusing, awkward controls, too hard, too easy,
-  too long, unfair, laggy, boring — `RATE_REASONS` in `js/shared/protocol.js`) and "Tell us more", which opens the ! form
+  too long, unfair, laggy, boring, buggy, unplayable — `RATE_REASONS` in `js/shared/protocol.js`) and "Tell us more", which opens the ! form
   as a suggestion already about that game (`fb.open({ kind, text, about })` in `js/client/feedback.js`). Skipped on the
   results card, it shows again, small, on the next vote screen. Message `rate {game, v: 1|-1, why}`; the room accepts it
   only from someone who played that game in this room, cleans the reasons, and answers `rated`. A change of mind

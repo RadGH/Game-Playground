@@ -1,0 +1,16 @@
+/* "My games" (round 10, reports #28/#29): a player's play counts and ratings. The modal scrolls, never the list. */
+.modal.mygames { padding-top: calc(var(--st, 0px) + 16px); align-items: start; }
+.mygames .mg-head { display: flex; align-items: center; gap: 8px; }
+.mygames .mg-totals { margin: 0; font-weight: 700; }
+.mygames .mg-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.mygames .mg-pills .pill { min-height: 44px; }
+.mg-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.mg-row { display: grid; grid-template-columns: 66px minmax(0, 1fr) 40px; gap: 10px; align-items: center; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 6px 8px; }
+.mg-row.up { background: #eaffe3; } .mg-row.down { background: #ffecec; }
+.mg-row img { width: 66px; height: 44px; object-fit: cover; border-radius: 8px; border: 2px solid var(--ink); }
+.mg-main { display: grid; gap: 2px; min-width: 0; }
+.mg-title { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mg-main small { color: #47606a; font-weight: 700; }
+.mg-why { display: flex; flex-wrap: wrap; gap: 4px; }
+.mg-why i { font-style: normal; font-size: 11px; font-weight: 800; background: rgba(13, 34, 40, .08); border-radius: 999px; padding: 1px 7px; }
+.mg-v { font-size: 26px; text-align: center; }

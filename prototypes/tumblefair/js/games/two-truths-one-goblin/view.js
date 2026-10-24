@@ -23,6 +23,7 @@ export function createView(ctx) {
     <div class="tg-top"><span class="tg-title">Two Truths, One Goblin</span><span class="clock"><b>--</b></span></div>
     <div class="tg-chips">${who.map(p => p.cpu ? `<span class="chip tg-cpu" data-pid="${p.pid}" style="--seat:${p.color};--seat-dark:${p.dark}"><i class="face">${HOUSE_FACE}</i><b class="nm">${esc(p.name)}</b><em class="sc">0</em><strong class="delta"></strong></span>` : chip(p, '<em class="sc">0</em><strong class="delta"></strong>')).join('')}</div>
     <div class="tg-teller"></div>
+    <p class="tg-do"></p>
     <section class="tg-prep">
       <div class="tg-hand"></div>
       <button class="tg-plant big-btn"></button>
@@ -77,15 +78,28 @@ export function createView(ctx) {
     const you = g.teller === me;
     return `${face(p)}<span>${you ? '<b>You</b> are the Teller' : `<b>${esc(p.name)}</b> ${p.cpu ? 'is telling' : 'is the Teller'}`}</span>`;
   }
+  // round 10 (report #22, "not clear what to do"): one big line at the top that says what YOU do right now
+  function doLine(g) {
+    const p = byId.get(String(g.teller)), nm = p ? (p.cpu ? 'The House' : esc(p.name)) : '';
+    if (g.phase === 'ready' || g.round < 0) return 'Get ready: three facts, one of them is a lie.';
+    if (g.phase === 'prep') return g.teller === me ? 'Hide the lie! Pick the sneakier Goblin, a wording and the order, then press Ready.' : `<b>${nm}</b> is hiding one lie among three facts about themselves…`;
+    if (g.phase === 'guess') {
+      if (g.teller === me) return 'Keep a straight face while they guess!';
+      if (watching) return `Which fact about <b>${nm}</b> is the lie?`;
+      return guess == null ? `Which fact about <b>${nm}</b> is the LIE? Check their chip above, then tap it.` : `You picked <b>${L[guess]}</b>. Tap another card to change your mind.`;
+    }
+    if (g.phase === 'reveal') return `The lie was <b>${L[g.reveal.gob]}</b>.`;
+    return '';
+  }
   function note(g) {
     const tie = 'Ties go to the quickest catches.';
     if (g.phase === 'ready') return init.solo ? 'The House tells. Its Goblin is usually its longest claim (3 times in 4)!' : 'Get ready to lie… or to catch a liar.';
-    if (g.phase === 'prep') return g.teller === me ? 'Only you can see this. Swap wordings, reorder, or plant the other Goblin. Then Ready!' : 'Watch their face…';
+    if (g.phase === 'prep') return g.teller === me ? 'Only you can see this. Facts they can check on your chip are easy to catch; ones from earlier rounds are harder.' : 'Some facts can be checked on their chip; others you have to remember from earlier rounds.';
     if (g.phase === 'guess') {
       if (g.teller === me) return `Keep a straight face! You get +${init.fool} for everyone who picks a truth.`;
       if (watching) return `${g.guessed.length} of ${players.length - (init.solo ? 0 : 1)} have guessed. ${tie}`;
-      if (init.solo) return `${guess == null ? 'Tap the claim you think is the Goblin.' : `Picked ${L[guess]}.`} Tip: the House's Goblin is usually its longest claim.`;
-      return guess == null ? 'Tap the claim you think is the Goblin.' : `Picked ${L[guess]}. You can still change your mind. Catch it for +${init.catch}${players.length > 2 ? `, fastest catch +${init.sharp}` : ''}.`;
+      if (init.solo) return 'Tip: the House\'s Goblin is usually its longest claim.';
+      return `Catch it for +${init.catch}${players.length > 2 ? `, fastest catch +${init.sharp}` : ''}.`;
     }
     if (g.phase === 'reveal') { const sh = g.reveal.sharp != null ? byId.get(String(g.reveal.sharp)) : null; return `The Goblin was ${L[g.reveal.gob]}!${sh ? ` Sharp Eye: ${sh.name} (+${init.sharp}).` : ''}`; }
     return '';
@@ -119,6 +133,7 @@ export function createView(ctx) {
         dl.className = 'delta' + (gain > 0 ? ' good' : '');
       }
       $('.tg-note').textContent = note(g);
+      { const d = doLine(g), el = $('.tg-do'); if (el.innerHTML !== d) el.innerHTML = d; }
     },
     dispose() {},
   };

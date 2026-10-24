@@ -4,11 +4,14 @@
 //   MOVED  how many more are in the code but in a different place
 // Work it out within the tries the safe allows. Out of tries: the safe jams (a few seconds' lockout) and you get a
 // fresh code for it. The risky shortcut: LISTEN to the tumblers — it shows you one number in its place, but locks you
-// out for a moment and knocks points off what this safe pays. Safes get harder (more digits, then repeats allowed);
+// out for a moment and knocks points off what this safe pays. Round 10 (report #24, "Listening is OP"): it used to work
+// up to len-1 times a safe from the very first second, for 3 points each, so listening twice and guessing the rest beat
+// every honest player. Now it is ONCE a safe, only after LISTEN_AFTER guesses of your own, costs LISTEN_COST (6) and
+// locks you out LISTEN_S (4 s) — a choice to make when you are stuck, not the way to play. Safes get harder (more digits, then repeats allowed);
 // the first player to open each safe gets a bonus. Alone you race Nimble Nell, a CPU safecracker who opens at set times.
 export const meta = {
   id: 'safecracker', title: 'Safecracker', blurb: 'Crack the codes from the clues before anyone else!',
-  how: ['Punch in a guess. RIGHT = right number, right place. MOVED = in the code, wrong place.', 'Crack it before your tries run out, or the safe jams.', 'LISTEN shows one number but costs points and time. First to open each safe gets a bonus!'],
+  how: ['Punch in a guess. RIGHT = right number, right place. MOVED = in the code, wrong place.', 'Crack it before your tries run out, or the safe jams.', 'Stuck? After 2 guesses you may LISTEN once a safe: one number, but it costs 6 points and 4 s.', 'First to open each safe gets a bonus!'],
   kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'points', tags: ['puzzle'], card: 'card-safecracker', css: true,
 };
 export const LEVELS = [
@@ -18,7 +21,7 @@ export const LEVELS = [
   { len: 4, sym: 6, rep: true, tries: 8, pts: 25 },
   { len: 5, sym: 6, rep: true, tries: 10, pts: 30 },
 ];
-export const GAME_S = 60, FIRST_BONUS = 5, TRY_BONUS = 1, LISTEN_COST = 3, LISTEN_S = 2.5, JAM_S = 3, MIN_PAY = 3;
+export const GAME_S = 60, FIRST_BONUS = 5, TRY_BONUS = 1, LISTEN_COST = 6, LISTEN_S = 4, LISTEN_MAX = 1, LISTEN_AFTER = 2, JAM_S = 3, MIN_PAY = 3;
 export const CPU_NAME = 'Nimble Nell';
 export const CPU_TIMES = [[9, 14], [11, 16], [13, 19], [15, 22], [18, 26]];      // seconds to open each safe, rolled per game
 
@@ -59,7 +62,7 @@ export function create({ rng, players }) {
   }
   return {
     events,
-    init: () => ({ levels: LEVELS, seconds: GAME_S, solo, cpu: solo ? CPU_NAME : null, bonus: FIRST_BONUS, listenCost: LISTEN_COST, listenS: LISTEN_S, jamS: JAM_S }),
+    init: () => ({ levels: LEVELS, seconds: GAME_S, solo, cpu: solo ? CPU_NAME : null, bonus: FIRST_BONUS, listenCost: LISTEN_COST, listenS: LISTEN_S, listenMax: LISTEN_MAX, listenAfter: LISTEN_AFTER, jamS: JAM_S }),
     act(pid, a, d) {
       const p = me.get(pid); if (over || !p || p.lvl >= LEVELS.length || p.lock > 0) return;
       const lv = L(p);
@@ -73,7 +76,7 @@ export function create({ rng, players }) {
           p.jammed = p.code; newSafe(p);
         }
       } else if (a === 'listen') {
-        if (p.listens >= lv.len - 1) return;
+        if (p.listens >= Math.min(LISTEN_MAX, lv.len - 1) || p.guesses.length < LISTEN_AFTER) return;
         const hidden = [...Array(lv.len).keys()].filter(i => !(i in p.seen)); if (!hidden.length) return;
         const i = rng.pick(hidden); p.seen[i] = p.code[i]; p.listens++; p.lock = LISTEN_S;
         events.push({ e: 'listen', pid });

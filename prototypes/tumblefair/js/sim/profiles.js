@@ -61,6 +61,25 @@ export function createProfiles({ initial = {}, persist = null, randomToken, now 
     return { ok: true };
   }
   function equip(token, id) { const p = get(token); if (!p || !byId.has(id) || !owns(p, id) || !inSeason(byId.get(id), seasonByDate(new Date(now())))) return false; p.costume = id; touch(); return true; }
+  // ---- round 10 (reports #28, #29: "I want to see my like history" / "my play count"): every minigame this player has
+  // played, how many times, when last, and their latest 👍/👎 with its reasons. The ROOM calls played() when a minigame
+  // ends and rated() when a player rates one (both already checked there); the "My games" screen reads history().
+  // p.games = { [gameId]: { n, last, v?, why?, at? } }, at most GAMES_KEPT ids (the least recently played go first).
+  const GAMES_KEPT = 300, okId = id => typeof id === 'string' && /^[a-z0-9-]{1,40}$/.test(id);
+  function trimGames(p) { const ids = Object.keys(p.games); if (ids.length <= GAMES_KEPT) return; ids.sort((a, b) => (p.games[a].last || 0) - (p.games[b].last || 0)); for (const id of ids.slice(0, ids.length - GAMES_KEPT)) delete p.games[id]; }
+  function played(token, id) {
+    const p = get(token); if (!p || !okId(id)) return false;
+    const g = (p.games ||= {})[id] ||= { n: 0, last: 0 }; g.n++; g.last = now(); trimGames(p); touch(); return true;
+  }
+  function rated(token, id, v, why = []) {
+    const p = get(token); if (!p || !okId(id) || !(v === 1 || v === -1)) return false;
+    const g = (p.games ||= {})[id] ||= { n: 0, last: now() }; g.v = v; g.why = (Array.isArray(why) ? why : []).filter(w => typeof w === 'string').slice(0, 6); g.at = now(); trimGames(p); touch(); return true;
+  }
+  /** -> [{ id, n, last, v, why }] newest first. */
+  function history(token) {
+    const p = get(token); if (!p?.games) return [];
+    return Object.entries(p.games).map(([id, g]) => ({ id, n: g.n || 0, last: g.last || g.at || 0, v: g.v || 0, why: g.why || [] })).sort((a, b) => b.last - a.last);
+  }
   function flush() { if (!dirty || !persist) return; dirty = false; persist(Object.fromEntries(all)); }
-  return { create, get, guest, signIn, view, update, reward, buy, equip, flush, get size() { return all.size; } };
+  return { create, get, guest, signIn, view, update, reward, buy, equip, played, rated, history, flush, get size() { return all.size; } };
 }

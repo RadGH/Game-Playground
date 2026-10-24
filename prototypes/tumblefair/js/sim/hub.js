@@ -11,7 +11,7 @@ import { createRoom, TIMES } from './room.js';
 
 // `report(kind, data)` (round 7): the rooms' insights (ratings, plays, votes) go to the server's log (server/insights.mjs).
 export const PUBLIC_LIST_MAX = 30;
-export function createHub({ now = () => Date.now(), data, profiles, build = 'dev', seed = Date.now(), maxRooms = 200, log = () => {}, report = () => {}, redeem = null }) {
+export function createHub({ now = () => Date.now(), data, profiles, build = 'dev', seed = Date.now(), maxRooms = 200, log = () => {}, report = () => {}, redeem = null, ratings = () => ({}) }) {
   const rooms = new Map();
   let seedN = seed >>> 0;
   const stats = { sockets: 0, bad: 0, limited: 0, roomsMade: 0 };
@@ -29,6 +29,7 @@ export function createHub({ now = () => Date.now(), data, profiles, build = 'dev
       leave();
       S.room = room;
       S.member = room.join({ token: S.profile.token, name: S.profile.name, look: S.profile.look, costume: S.profile.costume, send: raw, display });
+      if (!S.member) S.room = null;                       // kicked from this room earlier (round 10): it said so
     }
     const accountInfo = () => S.user ? { id: String(S.user.id), name: String(S.user.name || S.user.username || '').slice(0, 40) || 'Signed in', username: String(S.user.username || '').slice(0, 40) } : null;
     /** Moves this socket onto profile p, telling the room (name, look, costume) when it is in one. */
@@ -81,7 +82,7 @@ export function createHub({ now = () => Date.now(), data, profiles, build = 'dev
         case 'create': {
           if (rooms.size >= maxRooms) return send({ t: 'err', code: 'full', msg: 'The fair is full right now. Try again in a minute.' });
           let code; do { code = newCode(rand); } while (rooms.has(code));
-          const room = createRoom({ code, now, seed: Math.floor(rand() * 2 ** 31), data, profiles, log, report: (kind, d) => report(kind, d) });
+          const room = createRoom({ code, now, seed: Math.floor(rand() * 2 ** 31), data, profiles, log, ratings, report: (kind, d) => report(kind, d) });
           rooms.set(code, room); stats.roomsMade++;
           return enter(room, false);
         }
@@ -92,6 +93,7 @@ export function createHub({ now = () => Date.now(), data, profiles, build = 'dev
         }
         case 'leave': leave(); return send({ t: 'left' });
         case 'rooms': return send({ t: 'rooms', list: publicList() });
+        case 'mygames': return send({ t: 'mygames', list: profiles.history(S.profile.token) });   // round 10 (#28/#29)
         case 'profile': {
           const out = profiles.update(S.profile.token, msg);
           send(me());

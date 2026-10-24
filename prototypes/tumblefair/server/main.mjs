@@ -17,8 +17,8 @@ import { createStaticHandler } from './static.js';
 import { createHub } from '../js/sim/hub.js';
 import { createProfiles } from '../js/sim/profiles.js';
 import { createFeedback } from './feedback.mjs';
-import { createInsights } from './insights.mjs';
-import { createRedeemer, createAdminFeed } from './rgs.mjs';
+import { createInsights, readInsightLines } from './insights.mjs';
+import { createRedeemer, createAdminFeed, summarizeRatings } from './rgs.mjs';
 import { MAX_FRAME, TICK_MS } from '../js/shared/protocol.js';
 import { cleanLook } from '../../thousandvale/js/sim/looks.js';
 
@@ -37,7 +37,11 @@ const profiles = createProfiles({ initial, cosmetics: data.cosmetics, cleanLook,
 const insights = createInsights(dataDir, { build });      // round 7: ratings, plays, votes + cookie-free page counts (tools/insights-report.mjs)
 const log = (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d));
 const redeem = createRedeemer({ game: 'tumblefair', log });
-const hub = createHub({ data, profiles, build, log, report: (kind, d) => insights.report(kind, d), redeem });
+// round 10: every player's 👍/👎 so far (last 90 days), for the vote's top-rated slot — recounted every 10 minutes
+let ratingCache = {};
+const refreshRatings = () => { try { ratingCache = Object.fromEntries(summarizeRatings(readInsightLines(join(dataDir, 'insights'), 90), { key: 'game' }).map(r => [r.id, { score: r.score, up: r.up, down: r.down, reasons: r.reasons }])); } catch (e) { log('ratings', { err: String(e?.message || e) }); } };
+refreshRatings(); setInterval(refreshRatings, 10 * 60e3).unref();
+const hub = createHub({ data, profiles, build, log, report: (kind, d) => insights.report(kind, d), redeem, ratings: () => ratingCache });
 
 const feedback = createFeedback(dataDir, { build });
 // The visitor's address: behind a proxy on this machine (Caddy on the games.radgh.com droplet sends X-Forwarded-For; the old

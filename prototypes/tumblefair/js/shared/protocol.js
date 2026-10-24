@@ -17,10 +17,16 @@ export const cleanName = s => { const n = String(s ?? '').replace(/[\u0000-\u001
  * Round 7 (owner 2026-10-22): players rate a minigame after playing it — 👍 or 👎, then any of these reasons. The ids
  * travel comma-separated in `rate.why`; anything not on the list is dropped. The labels are what the buttons say.
  */
+// Round 10 (owner 2026-10-24: "rethink the like/dislike tag as some options are never used"). Of the first 211 live
+// ratings, 'fun' was the most picked and said nothing a 👍 doesn't; hard / long / laggy / boring / unfair-down were never
+// picked. Now a 👍 says WHAT KIND of good (the vote's "Favour" option reads these: FAVOUR), a 👎 says what went wrong,
+// and both can flag the two problems we must fix whatever the thumb ("But…").
 export const RATE_REASONS = Object.freeze({
-  up: [['fun', 'Fun'], ['funny', 'Funny'], ['exciting', 'Exciting'], ['teamwork', 'Good teamwork'], ['pretty', 'Looks great'], ['again', 'Play it again!'], ['buggy', 'But buggy'], ['unfair', 'But unfair']],      // a fun game can still be buggy (owner 2026-10-22)
-  down: [['confusing', 'Confusing'], ['controls', 'Awkward controls'], ['hard', 'Too hard'], ['easy', 'Too easy'], ['long', 'Too long'], ['unfair', 'Unfair'], ['laggy', 'Laggy'], ['boring', 'Boring'], ['buggy', 'Buggy'], ['unplayable', 'Unplayable']],      // buggy / unplayable: owner 2026-10-22
+  up: [['funny', 'Made us laugh'], ['close', 'Close match'], ['teamwork', 'Good teamwork'], ['skill', 'Rewards skill'], ['chill', 'Relaxing'], ['pretty', 'Looks great'], ['again', 'Play it again!'], ['confusing', 'But confusing'], ['buggy', 'But buggy']],
+  down: [['confusing', "Didn't get it"], ['controls', 'Awkward controls'], ['random', 'Too random'], ['onesided', 'One-sided'], ['long', 'Dragged on'], ['short', 'Over too fast'], ['buggy', 'Broken / buggy']],
 });
+/** What the host's "Favour" option can ask the vote for (each is a 👍 reason above). */
+export const FAVOUR = Object.freeze([['funny', 'Funny'], ['close', 'Competitive'], ['teamwork', 'Teamwork'], ['skill', 'Skill'], ['chill', 'Relaxing']]);
 export const cleanReasons = (v, why) => { const ok = new Set((v > 0 ? RATE_REASONS.up : RATE_REASONS.down).map(r => r[0])); return [...new Set(String(why || '').split(',').map(s => s.trim()).filter(id => ok.has(id)))].slice(0, 4); };
 
 /** Input bits of an arena step. */
@@ -46,6 +52,8 @@ export const CLIENT_MSGS = Object.freeze({
   start:   { fields: {}, rate: 1, burst: 3 },
   end:     { fields: {}, rate: 1, burst: 3 },                       // host: back to the lobby
   kick:    { fields: { pid: 'int' }, rate: 1, burst: 4 },
+  votekick: { fields: { pid: 'int' }, rate: 1, burst: 4 },              // round 10 (#26): vote to remove someone
+  pick:    { fields: { id: 'str:40' }, rate: 2, burst: 4 },              // round 10: Custom mode — the host picks the next minigame ('finish' ends)
   roll:    { fields: {}, rate: 3, burst: 6 },
   choose:  { fields: { i: 'int' }, rate: 4, burst: 8 },
   card:    { fields: { i: 'int' }, rate: 3, burst: 6 },                 // round 9: play move card i (-1 = a face-down one from a rival)
@@ -59,6 +67,7 @@ export const CLIENT_MSGS = Object.freeze({
   ping:    { fields: { at: 'num' }, rate: 2, burst: 6 },
   rate:    { fields: { game: 'str:40', v: 'int', why: '?str:120' }, rate: 2, burst: 10 },   // round 7: 👍/👎 a minigame you played (+ reasons)
   rooms:   { fields: {}, rate: 1, burst: 4 },                         // round 7: the public games list
+  mygames: { fields: {}, rate: 1, burst: 4 },                         // round 10 (#28/#29): my play counts + ratings
 });
 
 function typeOk(v, type) {

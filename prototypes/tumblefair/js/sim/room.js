@@ -4,26 +4,36 @@
 // memory on a pretend clock.
 //
 // Phases:  lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobby
-//          (the Minigame Marathon mode skips `board`)
+//          (the Minigame Marathon mode skips `board`; Custom swaps the vote for `pick`, the host choosing each minigame;
+//          Golf plays the golf minigames one after another, a course of holes)
 import { MAX_SEATS, cleanName, IN, cleanReasons } from '../shared/protocol.js';
 import { DT, packBody } from '../shared/arena.js';
 import { makeRng } from '../shared/rng.js';
 import { GAMES, eligible } from '../games/index.js';
-import { createBoardMatch, boardStandings } from './board.js';
+import { createBoardMatch, boardStandings, BOARD } from './board.js';
+import { hasKind } from '../games/tags.js';
 import { SEASON_IDS, effectiveSeason, seasonByDate, inSeason } from '../shared/seasons.js';
 
-export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 7000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 300000, GONE_MATCH_MS: 90000, EMPTY_MS: 300000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
+export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 25000, KICKVOTE_MS: 45000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 300000, GONE_MATCH_MS: 90000, EMPTY_MS: 300000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
 export const OPTS = Object.freeze({
-  mode: { values: ['board', 'marathon', 'endless'], def: 'board' },
+  mode: { values: ['board', 'marathon', 'endless', 'custom', 'golf'], def: 'board' },   // round 10: Custom (the host picks each minigame), Golf
   board: { values: ['fairground', 'pier'], def: 'fairground' },          // round 5: the Moonlit Pier
   teams: { values: [false, true], def: false },
-  rounds: { min: 2, max: 8, def: 4 },
+  rounds: { min: 1, max: 9, def: 4 },
+  goal: { values: [0, 60, 100, 150, 200], def: 0 },                         // round 10: board mode "first to X tickets" (0 = a set number of rounds)
   shortlist: { min: 2, max: 4, def: 3 },
   difficulty: { values: ['easy', 'normal', 'hard'], def: 'normal' },
-  holiday: { values: ['auto', 'off', 'only', ...SEASON_IDS], def: 'auto' },   // holiday minigames + reskins: by the date, never, forced on, or ONLY holiday games
+  holiday: { values: ['auto', 'off', 'only', ...SEASON_IDS], def: 'auto' },   // NOT in the lobby since round 10: tests / dev force a season with it
+  holidayMode: { values: [false, true], def: false },                       // round 10: "Halloween mode" — only holiday minigames (only offered in season)
   moves: { values: ['dice', 'cards'], def: 'dice' },                     // round 9 (report #16): roll a die, or play move cards
-  public: { values: [false, true], def: false },                           // round 7: listed in "Find a game" on the title screen
+  public: { values: [false, true], def: false },
+  votePick: { values: ['mix', 'top', 'fresh'], def: 'mix' },             // round 10 (owner): one top-rated slot / all top rated / anything
+  favour: { values: ['', 'funny', 'close', 'teamwork', 'skill', 'chill'], def: '' },   // ... rated best FOR this (a 👍 reason)                           // round 7: listed in "Find a game" on the title screen
 });
+/** Custom mode never runs forever; a ticket goal neither. */
+/** A game needs this many 👍/👎 (everyone's, all rooms) before it can be the top-rated pick or show its %. */
+export const RATED_MIN = 3;
+export const LIMITS = Object.freeze({ CUSTOM_MAX: 40, GOAL_MAX_ROUNDS: 30 });
 /** What a minigame placing is worth, best first. Board mode pays tickets, the marathon pays points. */
 /** Endless: a 'keep going?' vote after every this many minigames; it gets harder every ENDLESS_STEP; never more than ENDLESS_MAX. */
 export const ENDLESS = Object.freeze({ EVERY: 3, STEP: 3, MAX: 30 });
@@ -36,15 +46,26 @@ export const PAYOUT = Object.freeze({ base: 10, perRibbon: 5, perPoint: 1, winne
 // `report(kind, data)` (round 7) is how a room tells the server what happened, for the insights log the owner reads to
 // find the unfun minigames: 'rate' (a player's 👍/👎 + reasons), 'played' (a minigame ran: how long, who dropped out),
 // 'vote' (which minigames were offered and which won), 'match' / 'final'. Never a name, a token or an address.
-export function createRoom({ code, now, seed = 1, data, profiles = null, log = () => {}, report = () => {} }) {
+export function createRoom({ code, now, seed = 1, data, profiles = null, log = () => {}, report = () => {}, ratings: allRatings = () => ({}) }) {
   const rng = makeRng(seed);
   const members = new Map();          // pid -> member
   let nextPid = 1, hostPid = null, phase = 'lobby', until = 0, emptySince = null;
-  const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, holiday: OPTS.holiday.def, moves: OPTS.moves.def, public: OPTS.public.def, pool: [] };
+  const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, holiday: OPTS.holiday.def, holidayMode: OPTS.holidayMode.def, goal: OPTS.goal.def, moves: OPTS.moves.def, public: OPTS.public.def, votePick: OPTS.votePick.def, favour: OPTS.favour.def, pool: [] };
+  const banned = new Set();            // round 10 (#26): tokens kicked out of this room (by the host or a vote) can't come back
+  let kickVote = null;                 // { target, by: Set(pid), until }
   const playedBy = new Map();          // round 7: game id -> the pids who played it in this room (only they may rate it)
   const ratings = new Map();           // `${game}:${pid}` -> { v, why } (a change of mind replaces, never adds)
   const date = () => new Date(now());
   const season = () => effectiveSeason(opts.holiday, date());              // holiday games + reskins (the host can force it)
+  /** Halloween mode (round 10): only holiday minigames — and only while a holiday is actually on. */
+  const holidayOnly = () => !!season() && (opts.holidayMode || opts.holiday === 'only');
+  /** The minigames this many players may get right now: the host's pool, the season, Halloween mode, the mode. */
+  function gamesFor(n, mode = opts.mode) {
+    if (mode === 'golf') return eligible(n, [], season()).filter(id => hasKind(id, 'golf'));
+    let pool = eligible(n, opts.pool, season()); if (!pool.length) pool = eligible(n, [], season());
+    if (holidayOnly()) { const s = season(), hol = pool.filter(id => GAMES[id]?.meta.season === s); if (hol.length) return hol; const all = eligible(n, [], s).filter(id => GAMES[id]?.meta.season === s); if (all.length) return all; }
+    return pool;
+  }
   const costumeOk = id => inSeason(data.cosmetics?.items?.find(c => c.id === id), seasonByDate(date()));   // costumes: the date only
   let match = null;                    // { mode, round, rounds, points, wins, played, board, lastGame }
   let vote = null, game = null, lastPhaseMsg = null, tickNo = 0;
@@ -58,12 +79,14 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const cast = obj => { const s = JSON.stringify(obj); for (const m of members.values()) if (m.connected && m.send) m.send(s); };
   function roomMsg(m) {
     return { t: 'room', code, phase, host: hostPid, you: m.pid, opts, season: season(), dateSeason: seasonByDate(date()), members: [...members.values()].map(pub),
-      match: match ? { mode: match.mode, round: match.round, rounds: match.rounds, points: match.points, wins: match.wins, board: match.board ? match.board.view() : null, boardId: match.boardId || null } : null };
+      kickVote: kickVote ? { target: kickVote.target, yes: [...kickVote.by], need: kickNeed() } : null,
+      match: match ? { mode: match.mode, round: match.round, rounds: match.rounds, goal: match.goal || 0, ribbonWorth: match.goal ? ribbonWorth() : 0, points: match.points, wins: match.wins, board: match.board ? match.board.view() : null, boardId: match.boardId || null } : null };
   }
   const syncRoom = () => { for (const m of members.values()) send(m, roomMsg(m)); };
   function setPhase(p, msg = {}, ms = 0) { phase = p; until = ms ? now() + ms : 0; lastPhaseMsg = { t: 'phase', phase: p, ms, ...msg }; syncRoom(); cast(lastPhaseMsg); }
 
   function join({ token, name, look, costume, send: sendFn, display = false }) {
+    if (banned.has(token)) { try { sendFn?.(JSON.stringify({ t: 'kicked' })); } catch {} return null; }
     // the same person coming back (a refresh, a phone that slept): same seat, same score
     for (const m of members.values()) if (m.token === token && !display && !m.display) { m.send = sendFn; m.connected = true; m.goneAt = null; m.name = name; m.look = look; m.costume = costume; emptySince = null; resync(m); syncRoom(); return m; }
     const m = { pid: nextPid++, token, name, look, costume, send: sendFn, connected: true, goneAt: null, ready: false, display, seat: null, queue: [], lastIn: null, starve: 0, ack: 0, skip: false };
@@ -95,6 +118,15 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     const next = active()[0] || [...members.values()].find(m => m.connected && !m.display) || [...members.values()].find(m => m.connected);
     if (next && next.pid !== hostPid) { hostPid = next.pid; syncRoom(); }
   }
+  /** Round 10 (#26): put someone out of the room for good (the host's ×, or a vote). */
+  function kickOut(k, why) {
+    if (!k) return;
+    banned.add(k.token); send(k, { t: 'kicked', why }); k.connected = false; k.send = null; remove(k);
+    if (kickVote?.target === k.pid) kickVote = null;
+    log('kick', { code, why });
+  }
+  /** A vote-kick passes with more than half of the OTHER players in the room (seated and connected). */
+  const kickNeed = () => { const voters = active().filter(m => m.pid !== kickVote?.target).length; return Math.max(1, Math.floor(voters / 2) + 1); };
   /** Waiting players take free seats (called between minigames, never during one). */
   function promote() {
     let any = false;
@@ -110,9 +142,10 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     for (const m of seated()) if (!m.connected) remove(m);          // a lobby keeps a phone that slept for five minutes (report #13); a match starts without it
     const players = active();
     if (!players.length) return err(by, 'empty', 'Nobody is seated yet.');
-    if (!eligible(players.length, opts.pool, season()).length) return err(by, 'pool', 'No minigame in the chosen pool fits this many players.');
+    if (!gamesFor(players.length).length) return err(by, 'pool', opts.mode === 'golf' ? 'No golf game fits this many players.' : 'No minigame in the chosen pool fits this many players.');
     if (opts.teams && players.length === 3) return err(by, 'teams', 'Teams need 2 or 4 players (red + green against blue + pink).');
-    match = { mode: opts.mode, round: 0, rounds: opts.mode === 'endless' ? null : opts.rounds, points: {}, wins: {}, played: [], board: null, lastGame: null, teams: opts.teams ? {} : null };
+    const goal = opts.mode === 'board' && opts.goal > 0 ? opts.goal : 0;
+    match = { mode: opts.mode, round: 0, rounds: opts.mode === 'endless' || opts.mode === 'custom' || goal ? null : opts.rounds, goal, points: {}, wins: {}, played: [], board: null, lastGame: null, teams: opts.teams ? {} : null };
     if (match.teams) for (const m of players) match.teams[m.pid] = m.seat % 2;
     for (const m of players) { match.points[m.pid] = 0; match.wins[m.pid] = 0; m.ready = false; }
     if (match.mode === 'board') {
@@ -132,24 +165,61 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
       if (match.round > 0 && match.round % ENDLESS.EVERY === 0 && !match.asked) { match.asked = true; vote = { options: ['keep', 'finish'], votes: {} }; return setPhase('continue', { round: match.round }, TIMES.VOTE_MS); }
       match.asked = false; match.round++; return startVote();
     }
-    if (match.round >= match.rounds) return finish();
+    if (match.mode === 'custom') {
+      if (match.round >= LIMITS.CUSTOM_MAX) return finish();
+      match.round++; promote();
+      return setPhase('pick', { round: match.round, options: gamesFor(active().length || 1) });
+    }
+    if (match.goal) { if (goalReached() || match.round >= LIMITS.GOAL_MAX_ROUNDS) return finish(); }
+    else if (match.round >= match.rounds) return finish();
     match.round++;
+    if (match.mode === 'golf') { promote(); return startGame(nextHole()); }
     if (match.mode === 'board') { setPhase('board', { round: match.round, rounds: match.rounds }); match.board.beginRound(now(), match.round, match.rounds); }
     else startVote();
   }
+  /** Golf: every course hole once (shuffled) before any repeats, never the same hole twice in a row. */
+  function nextHole() {
+    const holes = gamesFor(active().length || 1, 'golf');
+    const fresh = holes.filter(id => !match.played.includes(id)), other = holes.filter(id => id !== match.lastGame);
+    return rng.shuffle(fresh.length ? fresh : other.length ? other : holes)[0];
+  }
+  /**
+   * The candidates best first by everyone's ratings: the share of 👍 (Wilson lower bound, so 3/3 doesn't beat 40/45),
+   * or with Favour set, how often a 👍 named that reason. Games with too few ratings come after the rated ones. The
+   * first pick is drawn from the best few, so the same game isn't the top slot every round.
+   */
+  function topRated(cands, R) {
+    const rated = cands.filter(id => R[id] && R[id].up + R[id].down >= RATED_MIN);
+    if (!rated.length) return [];
+    const key = id => { const r = R[id]; if (!opts.favour) return r.score; const n = r.reasons?.['+' + opts.favour] || 0; return n / (r.up + r.down + 2) * 100 + r.score / 1000; };
+    const best = rated.sort((a, b) => key(b) - key(a));
+    const lead = best.slice(0, Math.min(4, best.length)), first = lead[Math.floor(rng() * lead.length)];
+    return [first, ...best.filter(id => id !== first)];
+  }
+  /** "First to X tickets": what a player is worth toward the goal — tickets in hand plus every ribbon at its price. */
+  const ribbonWorth = () => BOARD.RIBBON_COST;
+  const worthOf = pid => (match.board.S.tickets[pid] || 0) + (match.board.S.ribbons[pid] || 0) * ribbonWorth();
+  const goalReached = () => match.board.S.order.some(pid => members.has(pid) && worthOf(pid) >= match.goal);
   function startVote() {
     promote();
     const n = active().length || 1;
-    let pool = eligible(n, opts.pool, season()); if (!pool.length) pool = eligible(n, [], season());
+    const pool = gamesFor(n);
     const fresh = pool.filter(id => !match.played.includes(id)), notLast = pool.filter(id => id !== match.lastGame);
     // unplayed games first, then anything but the one just played, then whatever is left
     let ranked = [...rng.shuffle(fresh), ...rng.shuffle(notLast.filter(id => !fresh.includes(id))), ...pool.filter(id => id === match.lastGame && !fresh.includes(id))];
-    // "Holiday games only" (owner 2026-10-22): holiday games first, in the same order; the rest only fill a short vote
-    if (opts.holiday === 'only') { const hol = id => !!GAMES[id]?.meta.season; ranked = [...ranked.filter(hol), ...ranked.filter(id => !hol(id))]; }
-    const options = ranked.slice(0, opts.shortlist);
+    // round 10 (owner): "one of those slots is the top rated" — or every slot (votePick 'top'), or none ('fresh');
+    // 'favour' ranks by one 👍 reason instead of the 👍 share
+    const R = allRatings() || {}, top = topRated(ranked.filter(id => !match.played.includes(id)).length ? ranked.filter(id => !match.played.includes(id)) : ranked, R);
+    let options, labels = {};
+    if (opts.votePick === 'top') options = top.slice(0, opts.shortlist);
+    else if (opts.votePick === 'mix' && top.length) { options = [top[0], ...ranked.filter(id => id !== top[0])].slice(0, opts.shortlist); labels[top[0]] = opts.favour || 'top'; }
+    else options = ranked.slice(0, opts.shortlist);
+    if (opts.votePick === 'top') for (const id of options) labels[id] = opts.favour || 'top';
     if (options.length <= 1) return startGame(options[0] || pool[0]);
+    options = rng.shuffle(options);                 // the special slot isn't always the first card
+    const rating = Object.fromEntries(options.filter(id => R[id] && R[id].up + R[id].down >= RATED_MIN).map(id => [id, Math.round(100 * R[id].up / (R[id].up + R[id].down))]));
     vote = { options, votes: {} };
-    setPhase('vote', { options, round: match.round, rounds: match.rounds }, TIMES.VOTE_MS);
+    setPhase('vote', { options, labels, rating, round: match.round, rounds: match.rounds }, TIMES.VOTE_MS);
   }
   function endVote() {
     const tally = vote.options.map(() => 0);
@@ -219,6 +289,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     report('played', { game: game.id, mode, players: game.players.length, difficulty: game.difficulty, season: season(), seconds: Math.round(((now() - (game.startedAt || now())) / 1000) * 10) / 10, limit: game.def.meta.seconds,
       endedEarly: !!game.inst.over, dropped: game.gone.size + game.players.filter(pid => !members.get(pid)?.connected).length, coop: res.coop ? !!res.coop.success : null, allTied: !res.coop && (res.order?.length || 0) <= 1 && game.players.length > 1,
       scoreSpread: scores.length > 1 ? Math.max(...scores) - Math.min(...scores) : null });
+    for (const pid of game.players) { const m = members.get(pid); if (m?.token) profiles?.played?.(m.token, game.id); }   // round 10 (#28/#29): the "My games" play count
     game = null;
     for (const m of members.values()) m.skip = false;
     setPhase('results', msg, TIMES.RESULTS_MS);
@@ -234,7 +305,10 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   }
   function standings() {
     let rows;
-    if (match.mode === 'board') rows = boardStandings(match.board.S).map(r => ({ ...r, wins: match.wins[r.pid] || 0 }));
+    if (match.mode === 'board' && match.goal) {         // first to X: tickets + ribbons at their price decide it
+      rows = boardStandings(match.board.S).map(r => ({ ...r, worth: worthOf(r.pid), wins: match.wins[r.pid] || 0 })).sort((a, b) => b.worth - a.worth || b.ribbons - a.ribbons);
+      rows.forEach((r, i) => { const p = rows[i - 1]; r.place = p && p.worth === r.worth && p.ribbons === r.ribbons ? p.place : i + 1; });
+    } else if (match.mode === 'board') rows = boardStandings(match.board.S).map(r => ({ ...r, wins: match.wins[r.pid] || 0 }));
     else {
       rows = Object.keys(match.points).map(Number).filter(pid => members.has(pid)).map(pid => ({ pid, points: match.points[pid], wins: match.wins[pid] || 0 })).sort((a, b) => b.points - a.points || b.wins - a.wins);
       rows.forEach((r, i) => { const p = rows[i - 1]; r.place = p && p.points === r.points && p.wins === r.wins ? p.place : i + 1; });
@@ -242,7 +316,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     return rows;
   }
   function finish() {
-    if (match.mode === 'board' && !match.bonusDone) {                 // the closing ceremony: bonus ribbons first
+    if (match.mode === 'board' && !match.bonusDone && !match.goal) {                 // the closing ceremony: bonus ribbons first
       match.bonusDone = true;
       const awards = match.board.bonus(match.wins);
       if (awards.length) return setPhase('bonus', { awards }, TIMES.BONUS_MS);
@@ -283,7 +357,21 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
       }
       case 'start': return startMatch(m);
       case 'end': if (m.pid === hostPid && phase !== 'lobby') toLobby(); return;
-      case 'kick': { const k = members.get(msg.pid); if (m.pid === hostPid && k && k.pid !== hostPid) { send(k, { t: 'kicked' }); k.connected = false; k.send = null; remove(k); } return; }
+      case 'kick': { const k = members.get(msg.pid); if (m.pid === hostPid && k && k.pid !== hostPid) kickOut(k, 'host'); return; }
+      case 'votekick': {                                  // round 10 (#26): anyone seated may ask; others say yes; the target can't vote
+        const k = members.get(msg.pid);
+        if (m.seat == null || !k || k.pid === m.pid || k.display) return;
+        if (!kickVote || kickVote.target !== k.pid) { if (kickVote && now() < kickVote.until) return err(m, 'kickvote', 'A kick vote is already running.'); kickVote = { target: k.pid, by: new Set(), until: now() + TIMES.KICKVOTE_MS }; }
+        kickVote.by.add(m.pid);
+        if (kickVote.by.size >= kickNeed()) { kickOut(k, 'vote'); return syncRoom(); }
+        return syncRoom();
+      }
+      case 'pick': {                                      // round 10: Custom mode — the host picks the next minigame
+        if (phase !== 'pick' || m.pid !== hostPid) return;
+        if (msg.id === 'finish') return finish();
+        if (!gamesFor(active().length || 1).includes(msg.id)) return err(m, 'pick', 'That minigame does not fit this many players.');
+        return startGame(msg.id);
+      }
       case 'roll': if (phase === 'board' && match?.board) match.board.roll(m.pid, now()); return;
       case 'choose': if (phase === 'board' && match?.board) match.board.choose(m.pid, msg.i, now()); return;
       case 'card': if (phase === 'board' && match?.board) match.board.playCard(m.pid, msg.i, now()); return;
@@ -311,6 +399,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
         const key = `${msg.game}:${m.pid}`, why = cleanReasons(msg.v, msg.why), prev = ratings.get(key);
         if (prev && prev.v === msg.v && prev.why.join() === why.join()) return;
         ratings.set(key, { v: msg.v, why });
+        if (m.token) profiles?.rated?.(m.token, msg.game, msg.v, why);              // round 10 (#28): the "My games" like history
         report('rate', { game: msg.game, v: msg.v, why, change: !!prev, players: playedBy.get(msg.game).size, difficulty: opts.difficulty, mode: match?.mode || null, voter: `${code}:${m.pid}` });
         return send(m, { t: 'rated', game: msg.game, v: msg.v, why });
       }
@@ -323,6 +412,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     tickNo++;
     const t = now();
     for (const m of [...members.values()]) if (!m.connected && m.goneAt != null && t - m.goneAt > (phase === 'lobby' ? TIMES.GONE_LOBBY_MS : TIMES.GONE_MATCH_MS)) remove(m);
+    if (kickVote && (t >= kickVote.until || !members.has(kickVote.target))) { kickVote = null; syncRoom(); }
     if (phase === 'lobby') return;
     if (![...members.values()].some(m => m.connected && !m.display)) return;                       // every phone is asleep: hold everything where it is
     switch (phase) {
@@ -333,6 +423,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
       case 'game': tickGame(); break;
       case 'results': if (t >= until) nextRound(); break;
       case 'bonus': if (t >= until) finish(); break;
+      case 'pick': break;                                  // waits for the host (pick / finish); a new host takes over if they leave
       case 'final': if (t >= until) toLobby(); break;
     }
   }

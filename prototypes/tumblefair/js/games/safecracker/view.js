@@ -19,7 +19,7 @@ export function createView(ctx) {
       <div class="sc-slots"></div>
       <div class="sc-keys"></div>
       <div class="sc-row"><button class="sc-back" aria-label="Delete last number">⌫</button><button class="sc-try big-btn">Try it</button></div>
-      <button class="sc-listen"><b>Listen to the tumblers</b><span>Shows one number. Costs ${init.listenCost} points and ${init.listenS} s.</span></button>
+      <button class="sc-listen"><b>Listen to the tumblers</b><span class="sc-ltx"></span></button>
       <p class="sc-msg" aria-live="polite"></p>
       <ol class="sc-hist"></ol>
     </section>
@@ -53,7 +53,9 @@ export function createView(ctx) {
     ui.querySelectorAll('.sc-key').forEach(b => { b.disabled = locked || entry.every(v => v != null) || (!L.rep && entry.includes(+b.dataset.n)); });   // all-different safe: a number already in is greyed
     $('.sc-back').disabled = locked || !entry.some((v, i) => v != null && !(i in seen));
     $('.sc-try').disabled = locked || entry.some(v => v == null);
-    const ls = $('.sc-listen'); ls.disabled = locked || (Object.keys(seen).length >= L.len - 1);
+    const ls = $('.sc-listen'), max = Math.min(init.listenMax ?? L.len - 1, L.len - 1), after = init.listenAfter ?? 0, used = Object.keys(seen).length >= max;
+    ls.disabled = locked || used || mine.guesses.length < after;
+    $('.sc-ltx').textContent = used ? 'Used on this safe.' : mine.guesses.length < after ? `Unlocks after ${after} guesses on this safe.` : `Once a safe: one number. Costs ${init.listenCost} points and ${init.listenS} s.`;
   }
   ui.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b || watching || !mine || mine.lock || !LV[mine.lvl]) return;

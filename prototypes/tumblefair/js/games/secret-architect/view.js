@@ -15,8 +15,10 @@ export function createView(ctx) {
     <div class="sa-top"><span class="sa-title">Secret Architect</span><span class="clock"><b>--</b></span></div>
     <div class="sa-chips">${players.map(p => chip(p, '<em class="sc">0</em><strong class="sa-tag"></strong>')).join('')}</div>
     <p class="sa-role"></p>
+    <ol class="sa-do"></ol>
     <section class="sa-feed" aria-live="polite"></section>
     <section class="sa-arch">
+      <p class="sa-cap">Only you can see this picture. Tap a square on it to drop your <b class="sa-tooln">pin</b>.</p>
       <div class="sa-grid sa-bp" data-g="arch">${cells('', true)}</div>
       <div class="sa-tools"><button class="sa-tool on" data-k="p"><i class="sa-pin" aria-hidden="true"></i>Pin <small></small></button><button class="sa-tool" data-k="x"><i class="sa-x" aria-hidden="true">✕</i>Cross <small></small></button></div>
       <div class="sa-say-h">Messages <small class="sa-left"></small></div>
@@ -26,6 +28,7 @@ export function createView(ctx) {
       <div class="sa-builders"></div>
     </section>
     <section class="sa-build">
+      <p class="sa-legend"><span><i class="sa-c pin"></i> block goes here</span><span><i class="sa-c x"></i> leave empty</span></p>
       <div class="sa-grid sa-mine" data-g="mine">${cells('', true)}</div>
       <div class="sa-btns"><button class="sa-clear big-btn">Clear</button><button class="sa-done big-btn">Done</button><button class="sa-peek big-btn">Peek again</button></div>
     </section>
@@ -47,6 +50,7 @@ export function createView(ctx) {
     const [tp, tx] = ui.querySelectorAll('.sa-tool');
     tp.querySelector('small').textContent = `${init.pins - pins} left`; tx.querySelector('small').textContent = `${init.crosses - xs} left`;
     tp.classList.toggle('on', tool === 'p'); tx.classList.toggle('on', tool === 'x');
+    $('.sa-tooln').textContent = tool === 'p' ? 'pin' : 'cross';
     const used = g0?.msgs.length || 0;
     $('.sa-left').textContent = `${init.msgs - used} of ${init.msgs} left`;
     const nb = $('.sa-name'); nb.textContent = `Say "It's ${priv.name || '…'}!"`; nb.disabled = !!priv.named || used >= init.msgs;
@@ -81,19 +85,33 @@ export function createView(ctx) {
       else if (b.classList.contains('sa-peek')) { ctx.send('peek'); ctx.sfx('pick'); }
     }
   });
+  // round 10 (report #20, "confusing"): one headline saying who you are this round, then the one or two things to do
+  // RIGHT NOW as numbered steps, different for every role and phase
   function roleText(g) {
     const a = name(g.arch);
     if (g.phase === 'show') return `It was ${g.shown.name}!`;
-    if (init.solo) return g.phase === 'peek' ? 'Memorise the blueprint!' : 'Build it from memory!';
-    if (watching) return `${a} is the Architect. Builders, listen closely!`;
-    if (role === 'arch') return g.phase === 'peek' ? 'You are the Architect! Study the secret blueprint.' : 'Guide them: drop pins and crosses, send messages.';
-    return g.phase === 'peek' ? `${a} is the Architect. Get ready to build!` : `Build what ${a} describes.`;
+    if (init.solo) return g.phase === 'peek' ? 'Remember this picture!' : 'Now build it from memory!';
+    if (watching) return `${a} is the Architect this round`;
+    if (role === 'arch') return g.phase === 'peek' ? 'You are the ARCHITECT this round' : 'Help them copy your picture';
+    return g.phase === 'peek' ? `${a} is the Architect. You are a BUILDER` : `Copy ${a}'s secret picture`;
+  }
+  function steps(g) {
+    const a = name(g.arch);
+    if (g.phase === 'show') return [];
+    if (init.solo) return g.phase === 'peek' ? ['Look at which squares are filled. It disappears in a moment.'] : ['Tap squares to fill the ones you remember.', 'Stuck? "Peek again" shows it once more.'];
+    if (watching) return ['Only the Architect sees the picture. The builders copy it from pins, crosses and hints.'];
+    if (role === 'arch') return g.phase === 'peek'
+      ? ['Look at your secret picture. Only you can see it.', 'In a moment the builders start copying it. You cannot draw it for them.']
+      : ['Pick Pin or Cross, then tap your picture: it appears on their grids.', 'Send hints below. Their copies are at the bottom.'];
+    return g.phase === 'peek'
+      ? [`${a} is looking at a secret picture made of blocks.`, 'Get ready to copy it on your grid.']
+      : ['Tap squares to fill them. Red pins = fill that square, ✕ = leave it empty.', `Read ${a}'s hints, then press Done.`];
   }
   function note(g) {
     if (g.phase === 'show') return init.solo ? `Your match: ${g.shown.match[me] ?? 0}%. ${init.need}% average passes.` : `Builders score their match; ${name(g.shown.arch)} scores half the average. Team average so far: ${g.team}% (${init.need}% wins).`;
-    if (role === 'arch') return 'Pins and crosses appear on every builder\'s grid. Tap a tool, then a cell of your blueprint.';
+    if (role === 'arch') return 'The closer their copies, the more points for everyone (you get half their average).';
     if (watching) return 'Ties go to whoever used fewer messages as Architect.';
-    return 'Tap a square to place a block, tap again to remove it. Extra blocks lower your match.';
+    return 'Tap a filled square again to empty it. Extra blocks lower your match.';
   }
   function paintShow(s) {
     const order = Object.keys(s.grids);
@@ -120,6 +138,7 @@ export function createView(ctx) {
       $('.clock').classList.toggle('hurry', g.phase === 'build' && g.left <= 5);
       $('.sa-title').textContent = `Round ${g.round + 1} of ${init.rounds}`;
       $('.sa-role').textContent = roleText(g);
+      { const list = steps(g), html = list.map(t => `<li>${esc(t)}</li>`).join(''), el = $('.sa-do'); if (el.dataset.k !== html) { el.dataset.k = html; el.innerHTML = html; el.classList.toggle('one', list.length === 1); } }
       for (const p of players) {
         const el = ui.querySelector(`.sa-chips [data-pid="${p.pid}"]`); if (!el) continue;
         el.querySelector('.sc').textContent = g.scores[p.pid];

@@ -407,6 +407,81 @@ visible when they glimmer, holes freeze over, B chips ice). Shared pieces:
   is solid now and only the host's Start button stays stuck to the bottom), and the board's top bar ran under the
   ☰ button (it stops 92 px from the edge now).
 
+## Round 10 (2026-10-24)
+
+Live reports #19-#29 (owner and a friend, phones at 402x684). These items were fixed in one batch:
+- **Long Drive is less busy (#19):** a phone that plays keeps the wind and its last drive ("211 yards!", "Pond! —
+  doesn't count") INSIDE its swing panel, so nothing floats over the fairway where the balls land. An upright phone
+  shows three small yardage boards instead of five, pin labels are short ("211"), and someone else's fades to just the
+  flag after 2.5 s. The floating wind badge is now only on a watching screen.
+- **Secret Architect says what to do (#20):** a headline for who you are this round ("You are the ARCHITECT", "Copy
+  Pip's secret picture") and a numbered "do this now" box for each role and phase. There is a caption on the Architect's
+  picture ("Only you can see this… tap to drop your pin/cross"), a pin/cross key over the builder's grid, and the grid
+  is greyed out while you wait. The how-text was rewritten. On short phones the Architect's picture is smaller, so the
+  tools and the first hints fit without scrolling.
+- **The results and final cards say what their numbers mean (#21):** the bot-played check
+  (`tests/score-agree.test.js`: 73 games through a real room) found NO game whose top bar and results disagree. The
+  report fits the cards instead: the minigame score was the small grey line and the bold gold number was the prize,
+  and the final card showed bare 🎀/🎟 numbers. A player can win the fair on a bonus ribbon with the same tickets as
+  you. Now (`js/client/scoretext.js`) the results card's minigame score reads first ("5 points"), a key line says
+  "Score in this game · prize for the whole fair", the final rows read "1 ribbon · 18 tickets", and a line says how the
+  fair is won. Stack Attack counts **points** now (a gold block is 2). It used to say "blocks", and its tower label
+  said "5 high" over a tower three blocks tall.
+- **Two Truths, One Goblin makes sense (#22):** the claims used to be a deck of silly stories, and which ones were
+  "true" was picked at random, so there was nothing to go on. Now every claim is a real fact about the Teller
+  (`cards.js` `factsAbout`). Some you can check on their chip ("My colour is Red.", "My name has 4 letters.", "I have 2
+  points right now.") and some you have to remember ("Last round I caught the Goblin.", "This is my second turn as the
+  Teller."). A Goblin is the same kind of fact with one thing changed, and each deal mixes one you can check with one
+  you have to remember. The Teller's real choice is now the sneakier Goblin. There is about half as long again to read
+  (guess 14-16 s, prep 10-12 s, reveal 5-6 s; `meta.seconds` 120), and a "do this now" line at the top.
+- **Safecracker: Listen is a choice, not the way to play (#24):** it used to work up to len-1 times a safe from the
+  first second, for 3 points each. Now it is once a safe, only after 2 guesses of your own, costs 6 points and 4 s.
+  The button says when it unlocks. The bots and Nimble Nell never listened, so they are unchanged.
+- **My games (#28, #29):** ☰ → **My games** (`js/client/mygames.js` + `css/mygames.css`) lists every minigame you have
+  played: how many times, when, and your latest 👍/👎 with its reasons. You can filter it (all / liked / not for me /
+  not rated) and sort it (recent / most played / A-Z), and the totals sit at the top. It is kept in your profile
+  (`profiles.played / rated / history`, `p.games`, at most 300 ids), so a signed-in player's list follows the account.
+  The room records it: `profiles?.played?.(m.token, game.id)` for each player when a minigame ends (`endGame`), and
+  `profiles?.rated?.(m.token, game, v, why)` when a rating is accepted. Message `mygames {}` → `{ t: 'mygames',
+  list: [{ id, n, last, v, why }] }`. A reason id that is no longer in `RATE_REASONS` is not shown. Tests:
+  `tests/mygames.test.js`.
+
+The owner's own asks and the rest of the reports (`js/sim/room.js`, `js/games/tags.js`, `tests/round10.test.js`):
+- **Halloween mode (owner):** the old Holidays row (Auto / Halloween / Holiday games only / Off) is gone. During a
+  holiday the lobby shows ONE box, "Halloween mode": ticked, the vote (or Custom's list) offers only Halloween
+  minigames; unticked, Halloween games are mixed into normal play — but only while it is October. Out of season the
+  box isn't shown and holiday games never come up. (`opts.holiday` still exists for tests and dev forcing a season.)
+- **Custom mode (owner, #28):** no board and no vote. After each minigame the host gets the whole list (phase `pick`,
+  filter chips by kind, games already played look faded) and taps the next one, or "Finish and see who won". Scores
+  like the Marathon. At most `LIMITS.CUSTOM_MAX` (40) games. Others see "The host is picking…".
+- **Golf mode (owner, #23):** a course of holes — the golf minigames (`kind` golf in tags.js: Putt Party, Chip-In,
+  Long Drive, and Haunted Hole in October), every hole once before any repeat, never the same twice running. Holes:
+  3 / 4 / 6 / 9.
+- **First to X tickets (owner):** board mode's "Win by" row: Rounds, or First to 60 / 100 / 150 / 200. A player's
+  total toward the goal is tickets in hand plus each ribbon at its price (10), so buying a ribbon never sets you back.
+  Checked after each minigame; no bonus-ribbon ceremony (it would move the goal after the fact); final rows sorted by
+  that total; never more than 30 rounds.
+- **Vote: a top-rated slot (owner, mid-round):** lobby "Vote offers": *One top-rated pick* (default: one card is the
+  best-rated unplayed game, drawn from the top four so it varies, ribboned "⭐ Top rated"), *Top rated only*, or
+  *Anything*. "Favour" ranks the special slot by one 👍 reason instead (Funny / Competitive / Teamwork / Skill /
+  Relaxing). Every card with 3+ ratings shows its 👍 share. Ratings are everyone's, last 90 days, recounted every
+  10 minutes by `server/main.mjs` from the insights log (`summarizeRatings`, Wilson lower bound).
+- **New 👍/👎 reasons (owner, mid-round):** of the first 211 live ratings, "Fun" was picked most and said nothing a 👍
+  doesn't, and Too hard / Too long / Laggy / Boring / Unfair (👎) were never picked. 👍 now says what KIND of good:
+  Made us laugh, Close match, Good teamwork, Rewards skill, Relaxing, Looks great, Play it again!, plus "But
+  confusing" / "But buggy". 👎 says what went wrong: Didn't get it, Awkward controls, Too random, One-sided, Dragged
+  on, Over too fast, Broken / buggy. Old ids in old ratings are simply ignored. (Knockabout keeps its own list.)
+- **Minigame kinds + filter (#25):** `js/games/tags.js` gives every game one or two kinds (Memory, Quick reactions,
+  Aim & timing, Racing, Brawling, Dodging, Grab & collect, Rhythm, Draw & dress up, Words & talking, Bluffing,
+  Guessing, Logic, Boss fights, Golf, Fishing); a test fails if a game is missing. The host's minigame list has a
+  "Show:" chip row plus "Tick only X" / "Tick all X too".
+- **Kicking (#26):** the host's × now keeps that phone out of the room (its token is banned for the room's life). Any
+  other seated player gets a × that starts a **vote-kick**: a bar on everyone else's screen, passes with more than half
+  of the other players, runs out after 45 s.
+- **Time to read the rules (#27):** the intro card waits up to 25 s (was 7) and starts as soon as everyone taps "I'm
+  ready" ("Starts when everyone is ready (or in 24) · 1/2 ready").
+- **My games** is also on the title screen.
+
 ## Accounts (2026-10-23)
 
 The owner: "sign in optional. QR code to sign in using your phone on all games … I'd like to use my TV account for the

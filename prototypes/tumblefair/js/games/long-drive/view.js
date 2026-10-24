@@ -36,14 +36,16 @@ export function createView(ctx) {
   }
   trees.castShadow = true; group.add(trees, trunks);
   // yardage boards on the left edge of the fairway
-  for (const y of [100, 150, 200, 250, 300]) {
+  // round 10 (report #19, "screen is busy with overlay text"): an upright phone gets three small boards, not five
+  const tall = innerHeight > innerWidth * 1.15;
+  for (const y of tall ? [100, 200, 300] : [100, 150, 200, 250, 300]) {
     const post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.2, 0.12), std('#ffffff')); post.position.set(-(init.fairway + 3) * S, 0.6, -y * S); group.add(post);
     tags.push(stage.tag(post, { text: `${y}`, height: 0.9, cls: 'ld-yard' }));
   }
   if (init.medals) for (const [y, kind] of init.medals) {
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.4, 6), std('#ffffff')); pole.position.set(0, 1.7, -y * S); group.add(pole);
     const flag = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.8), new THREE.MeshStandardMaterial({ color: { gold: '#ffd23f', silver: '#d6dde6', bronze: '#d08a4a' }[kind], side: THREE.DoubleSide })); mats.push(flag.material); flag.position.set(0.72, 2.95, -y * S); group.add(flag);
-    tags.push(stage.tag(pole, { text: `${kind[0].toUpperCase() + kind.slice(1)} ${y}`, height: 2.2, cls: 'ld-medal ld-' + kind }));
+    tags.push(stage.tag(pole, { text: tall ? `${y}` : `${kind[0].toUpperCase() + kind.slice(1)} ${y}`, height: 2.2, cls: 'ld-medal ld-' + kind }));
   }
   // wind flag by the tees
   const windPole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 3, 6), std('#ffffff')); windPole.position.set(Math.max(4, n * 1.8 + 1.4), 1.5, -0.6); group.add(windPole);
@@ -63,25 +65,31 @@ export function createView(ctx) {
     const trail = new THREE.Line(tg, basic('#ffffff', { transparent: true, opacity: 0.8 })); trail.frustumCulled = false; group.add(trail);
     const pin = new THREE.Group(); pin.visible = false; group.add(pin);
     pin.add(new THREE.Mesh(pinGeo, std('#ffffff')), new THREE.Mesh(pinFlag, new THREE.MeshStandardMaterial({ color: p.color, side: THREE.DoubleSide })));
-    const pinTag = stage.tag(pin, { text: '', seat: p.seat, height: 2.7, cls: 'ld-pin' }); tags.push(pinTag);
-    R.set(p.pid, { i, ball, trail, tg, N, pin, pinTag, fly: null, actor: null, best: 0 });
+    const pinTag = stage.tag(pin, { text: '', seat: p.seat, height: 2.7, cls: 'ld-pin' + (p.pid === me ? ' mine' : '') }); tags.push(pinTag);
+    R.set(p.pid, { i, ball, trail, tg, N, pin, pinTag, fly: null, actor: null, best: 0, fade: 0 });
     ctx.createActor({ look: p.look || { race: 'human', seed: p.pid * 977 + 1 }, costume: p.costume, seat: p.seat }).then(a => { if (!a) return; a.place(teeX(i), 0.12, 0.6, Math.PI); R.get(p.pid).actor = a; });
   });
   // ---- HUD
   const bar = scoreBar(ctx, { unit: 'yards' });
-  const wind = h('div', 'ld-wind', '<i class="ld-arrow"></i><span><b>Wind</b> <em></em></span>');
-  const banner = h('div', 'gp-banner');
-  ui.append(wind, banner);
-  const showBanner = (html, cls = '', ms = 1800) => { banner.innerHTML = html; banner.className = 'gp-banner show ' + cls; clearTimeout(showBanner.t); showBanner.t = setTimeout(() => { banner.className = 'gp-banner'; }, ms); };
   const playing = me != null;
+  // a phone that plays shows the wind and its last drive INSIDE its own panel, so nothing floats over the fairway
+  // where the balls land; only a watching screen gets the floating wind badge
+  const wind = h('div', 'ld-wind' + (playing ? ' in-panel' : ''), '<i class="ld-arrow"></i><span><b>Wind</b> <em></em></span>');
+  const banner = h('div', 'gp-banner');
+  ui.append(banner); if (!playing) ui.append(wind);
+  const showBanner = (html, cls = '', ms = 1800) => { banner.innerHTML = html; banner.className = 'gp-banner show ' + cls; clearTimeout(showBanner.t); showBanner.t = setTimeout(() => { banner.className = 'gp-banner'; }, ms); };
   const panel = h('div', 'ld-panel' + (playing ? '' : ' hidden'), `
-    <div class="ld-row ld-info"><b class="ld-drive">Drive 1/${init.drives}</b><span class="ld-best">Best: –</span></div>
+    <div class="ld-row ld-info"><b class="ld-drive">Drive 1/${init.drives}</b><span class="ld-wind-slot"></span><span class="ld-best">Best: –</span></div>
+    <div class="ld-last" aria-live="polite"></div>
     <div class="ld-row ld-aim"><button class="ld-btn ld-l" aria-label="Aim left">◀</button><span class="ld-aimtx">Aim straight</span><button class="ld-btn ld-r" aria-label="Aim right">▶</button></div>
     <div class="ld-meter ld-power"><span>Power</span><div class="ld-track"><i class="ld-fill"></i><i class="ld-mark"></i></div></div>
     <div class="ld-meter ld-acc"><span>Accuracy</span><div class="ld-track"><i class="ld-sweet"></i><i class="ld-needle"></i></div></div>
     <button class="ld-swing big-btn">SWING!</button>`);
   ui.append(panel);
   const $ = s => panel.querySelector(s);
+  if (playing) $('.ld-wind-slot').append(wind);
+  const lastTx = $('.ld-last');
+  const showLast = (text, cls) => { lastTx.textContent = text; lastTx.className = 'ld-last show ' + cls; clearTimeout(showLast.t); showLast.t = setTimeout(() => { lastTx.className = 'ld-last'; }, 2200); };
   const fill = $('.ld-fill'), mark = $('.ld-mark'), ndl = $('.ld-needle'), swingBtn = $('.ld-swing'), aimTx = $('.ld-aimtx'), driveTx = $('.ld-drive'), bestTx = $('.ld-best');
   let mode = 'wait', t0 = 0, t1 = 0, lockedP = 0, aim = 0, myN = 0, last = null, sent = false, sentAt = 0;
   const now = () => performance.now() / 1000;
@@ -105,7 +113,7 @@ export function createView(ctx) {
   function showWind(k) {
     const w = init.winds[Math.min(k, init.winds.length - 1)]; if (!w) return;
     wind.querySelector('.ld-arrow').style.transform = `rotate(${w.dir + (wide ? Math.PI / 2 : 0)}rad)`;      // screen up = downrange (or right, looking across)
-    wind.querySelector('em').textContent = `${w.mph} mph` + (init.winds.length > 1 ? ` · drive ${Math.min(k, init.winds.length - 1) + 1}` : '');
+    wind.querySelector('em').textContent = `${w.mph} mph` + (init.winds.length > 1 && !playing ? ` · drive ${Math.min(k, init.winds.length - 1) + 1}` : '');
     windFlag.userData.w = w;
   }
   showWind(0);
@@ -138,8 +146,9 @@ export function createView(ctx) {
       if (ev.e === 'drive') { launch(ev); ctx.sfx(ev.pid === me ? 'throw' : 'tap'); }
       else if (ev.e === 'stop') {
         const r = R.get(ev.pid); if (!r) return;
-        r.pinTag.set(ev.lie === 'fairway' ? `${ev.y} yds` : `${LIE_TEXT[ev.lie]} (${ev.y})`);
-        if (ev.pid === me) { ctx.sfx(ev.lie === 'fairway' ? 'good' : 'bad'); showBanner(ev.lie === 'fairway' ? `${ev.y} yards!` : LIE_TEXT[ev.lie], ev.lie === 'fairway' ? 'good' : 'bad', 1300); }
+        // a short label (yards, or just where it went); someone else's fades after a moment, yours stays
+        r.pinTag.set(ev.lie === 'fairway' ? `${ev.y}` : LIE_TEXT[ev.lie]); r.fade = ev.pid === me ? 0 : 2.5; r.pinTag.el.classList.remove('faded');
+        if (ev.pid === me) { ctx.sfx(ev.lie === 'fairway' ? 'good' : 'bad'); if (playing) showLast(ev.lie === 'fairway' ? `${ev.y} yards!` : `${LIE_TEXT[ev.lie]} — doesn't count`, ev.lie === 'fairway' ? 'good' : 'bad'); }
         if (ev.lie === 'fairway' && ev.y >= (last?.sc?.[ev.pid] ?? 0)) r.actor?.play('cheer', 1200);
       }
       else if (ev.e === 'end') {
@@ -171,8 +180,8 @@ export function createView(ctx) {
         if (F.pts.length < r.N && F.t < F.T + 0.2) { F.pts.push(pos.x, pos.y, pos.z); r.tg.attributes.position.array.set(F.pts); r.tg.attributes.position.needsUpdate = true; r.tg.setDrawRange(0, F.pts.length / 3); }
         if (F.t >= F.T + 0.95) { r.fly = null; r.pin.visible = true; r.pin.position.set(F.stop.x, 0, F.stop.z); r.tg.setDrawRange(0, 0); if (F.lie === 'pond') r.ball.visible = false; }
       }
-      for (const r of R.values()) r.actor?.update(dt);
+      for (const r of R.values()) { r.actor?.update(dt); if (r.fade > 0 && (r.fade -= dt) <= 0) r.pinTag.el.classList.add('faded'); }
     },
-    dispose() { removeEventListener('keydown', onKey); clearTimeout(showBanner.t); bar.el.remove(); for (const tg of tags) tg.remove(); for (const m of mats) m.dispose(); },
+    dispose() { removeEventListener('keydown', onKey); clearTimeout(showBanner.t); clearTimeout(showLast.t); bar.el.remove(); for (const tg of tags) tg.remove(); for (const m of mats) m.dispose(); },
   };
 }

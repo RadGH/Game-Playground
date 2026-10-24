@@ -8,8 +8,8 @@ import { IN } from '../../shared/protocol.js';
 
 export const meta = {
   id: 'stack-attack', title: 'Stack Attack', blurb: 'Grab, carry, and stack blocks to build the tallest tower!',
-  how: ['GRAB a block in the middle, carry it to your pad, press GRAB again to stack it.', 'Gold blocks count double.', 'SHOVE a carrier to make them drop it. Grab from a rival pad to steal their top block!'],
-  kind: 'arena', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'blocks', tags: ['action'],
+  how: ['GRAB a block in the middle, carry it to your pad, press GRAB again to stack it.', 'Each block is 1 point, gold blocks 2.', 'SHOVE a carrier to make them drop it. Grab from a rival pad to steal their top block!'],
+  kind: 'arena', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'points', tags: ['action'],
   controls: { stick: true, a: 'Grab', b: 'Shove' }, move: { speed: 6.3, accel: 28, carryMul: 0.72, stunDrag: 3 },
   arena: { shape: 'rect', hw: 8, hd: 8, wall: true }, pitch: 58, card: 'card-stack-attack',
 };

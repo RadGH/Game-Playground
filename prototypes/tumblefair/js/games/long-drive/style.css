@@ -29,3 +29,18 @@
 .ld-swing:disabled { background: #e8e1cc; color: #6a7a80; }
 .ld-panel[data-mode=acc] .ld-swing { background: #8ff07a; }
 @media (max-width: 520px) { .ld-wind { top: calc(var(--st) + 50px); font-size: 13px; } .ld-meter { grid-template-columns: 66px 1fr; font-size: 11px; } }
+/* round 10 (report #19): a playing phone keeps the wind and its last drive in its own panel; tags are smaller and
+   someone else's pin label fades to just the flag after a moment */
+.ld-wind.in-panel { position: static; transform: none; box-shadow: none; border-width: 2px; padding: 1px 8px 1px 3px; font-size: 13px; background: #fff; }
+.ld-wind.in-panel .ld-arrow { width: 22px; height: 22px; }
+.ld-wind.in-panel .ld-arrow::before { top: 2px; border-width: 5px; border-bottom-width: 8px; border-top: 0; }
+.ld-wind.in-panel .ld-arrow::after { top: 9px; height: 7px; width: 3px; }
+.ld-wind-slot { flex: 1; display: flex; justify-content: center; }
+.ld-last { height: 0; overflow: hidden; text-align: center; font: 900 18px/1.2 var(--font); opacity: 0; transition: opacity .2s, height .2s; }
+.ld-last.show { height: 24px; opacity: 1; } .ld-last.good { color: #138a2c; } .ld-last.bad { color: #b3261e; }
+.tag.ld-yard { font-size: 10px; padding: 0 5px; opacity: .75; border-width: 1.5px; }
+.tag.ld-medal { font-size: 11px; padding: 0 6px; }
+.tag.ld-pin { font-size: 11px; padding: 0 6px; transition: opacity .4s; }
+.tag.ld-pin.mine { font-size: 13px; }
+.tag.ld-pin.faded { opacity: 0; }
+@media (max-width: 520px) { .ld-info .ld-drive { font-size: 16px; } .ld-info .ld-best { font-size: 13px; } }

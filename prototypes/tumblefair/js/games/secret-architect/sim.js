@@ -15,7 +15,7 @@ import { GRID, SHAPES } from './shapes.js';
 
 export const meta = {
   id: 'secret-architect', title: 'Secret Architect', blurb: 'Guide your builders to the secret blueprint, using only pins and a few words!',
-  how: ['Each round one of you is the Architect and sees a secret blueprint.', 'The others build on their phones. The Architect can only place 3 pins, 2 crosses and send 6 short messages.', 'The closer each build is, the more points. Everyone gets a turn as Architect.', 'Builders averaging 50% or better is a team win!'],
+  how: ['One of you (the Architect) sees a secret picture made of blocks. Everyone else copies it on their own grid.', 'The Architect cannot draw it: only drop red pins (a block goes here), crosses (leave this empty) and send short hints.', 'Builders: tap squares to fill them. The closer your copy, the more points.', 'Take turns as Architect. Copies averaging 50% or better = team win!'],
   kind: 'ui', min: 1, max: 4, seconds: 88, scoring: 'coop', unit: 'points', tags: ['social', 'coop', 'puzzle'], card: 'card-secret-architect', css: true,
 };
 export const CELLS = GRID * GRID, PINS = 3, CROSSES = 2, MSGS = 6, NEED = 50;

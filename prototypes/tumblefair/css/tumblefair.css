@@ -349,3 +349,27 @@ body[data-phase=game] .qr-btn { right: calc(var(--sr) + 76px); }
 .acct-slot > span { flex: 1 1 160px; }
 .ed-acct { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(0, 0, 0, .2); font-size: 12px; }
 .ed-acct > span { flex: 1 1 160px; }
+
+/* round 10: Halloween mode checkbox, Custom mode pick screen, vote-kick bar */
+.row.opts label.check { display: inline-flex; align-items: center; gap: 8px; font-size: 16px; cursor: pointer; }
+.row.opts label.check input { width: 22px; height: 22px; accent-color: var(--accent, #f0a020); }
+.kind-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 0 0 10px; width: 100%; max-width: min(760px, calc(100vw - 32px)); box-sizing: border-box; padding: 0 4px; }
+#screen .pick-grid { width: 100%; max-width: min(760px, calc(100vw - 32px)); margin: 0 auto 12px; box-sizing: border-box; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+#screen .pick-grid .pool-g { opacity: 1; filter: none; background: #fff; }
+#screen .pick-grid .pool-g.asleep { opacity: .8; }            /* already played this match: still pickable */
+#screen.vote { overflow-x: hidden; }
+.kickbar { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); transform: translateX(-50%); z-index: 60;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 32px);
+  background: var(--paper, #fff8ea); color: var(--ink, #2a1f14); border-radius: 14px; padding: 10px 14px; box-shadow: 0 6px 24px rgba(0,0,0,.3); font-size: 15px; }
+.kickbar em { font-style: normal; opacity: .7; }
+.pool-filter { flex-wrap: wrap; gap: 6px; margin: 6px 0 8px; }
+/* round 10: the top-rated vote slot */
+.vote-card .vote-badge { position: absolute; top: 8px; left: 8px; z-index: 2; font-style: normal; font-weight: 700; font-size: 13px; background: #ffd24a; color: #3a2400; border-radius: 999px; padding: 3px 9px; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.vote-card .vote-pct { position: absolute; top: 8px; right: 8px; z-index: 2; font-size: 12px; background: rgba(0,0,0,.55); color: #fff; border-radius: 999px; padding: 2px 8px; }
+.vote-card { position: relative; }
+/* Custom mode's list is taller than a phone: start at the top (a centred column can't scroll to its own top) */
+#screen.vote.pick { align-content: start; }
+/* round 10 (report #21): the minigame's own score reads first on the results card, and each card says what its numbers count */
+.results-card .places .score { font-size: 16px; font-weight: 900; color: var(--ink); }
+.places-key { margin: 0; font-size: 12px; }
+@media (max-width: 520px) { .results-card .places .score { font-size: 15px; } }

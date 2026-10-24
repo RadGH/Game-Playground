@@ -16,11 +16,14 @@ import { btnText } from './buttons.js';
 import { createPadNav } from './padnav.js';
 import { createSounds } from './sounds.js';
 import { installFeedback } from './feedback.js';
-import { SEATS, cleanCode, CODE_LENGTH, RATE_REASONS } from '../shared/protocol.js';
+import { createMyGames } from './mygames.js';              // round 10 (#28/#29): ☰ → My games
+import { gameScoreText, awardText, finalScoreText, finalHowText, resultsKeyText } from './scoretext.js';   // round 10 (#21): what each number on the cards counts
+import { SEATS, cleanCode, CODE_LENGTH, RATE_REASONS, FAVOUR } from '../shared/protocol.js';
 import { tally, deviceKind } from './tally.js';
 import { account } from '../../../../shared/rgs-account.js';          // games.radgh.com accounts (2026-10-23): optional
 import { openSignIn, accountButton } from '../../../../shared/rgs-signin.js';
-import { GAMES, gameIds } from '../games/metas.js';     // meta only: the rules stay on the server
+import { GAMES, gameIds } from '../games/metas.js';
+import { KINDS, kindsOf, hasKind } from '../games/tags.js';     // meta only: the rules stay on the server
 
 const $ = s => document.querySelector(s);
 const screen = $('#screen'), hud = $('#hud'), toasts = $('#toasts');
@@ -56,6 +59,7 @@ function setSeason(id) {
   if (id === 'halloween') { const b = document.createElement('div'); b.className = 'bats'; b.innerHTML = '<i></i><i></i><i></i>'; document.body.append(b); }
 }
 setSeason(seasonByDate());
+const myGames = createMyGames({ net, games: GAMES, reasons: RATE_REASONS, sfx: n => sfx(n) });
 const fb = installFeedback({ stage, net, getS: () => S });            // for tests and the console; fb.open() = the form (round 7: "Tell us more")
 tally('page_view', { device: deviceKind(), invite: !!q.get('code'), display: q.get('display') === '1' });
 
@@ -148,6 +152,7 @@ function showTitle() {
       <div class="join-row"><input id="code" maxlength="${CODE_LENGTH}" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${code}"><button class="btn big" data-act="join">Join</button></div>
       <input type="checkbox" id="as-display" hidden ${S.asDisplay ? 'checked' : ''}>
       <button class="btn small ghost watch-btn" data-act="watch">👀 Just watch a game (TV or sitting out)</button>
+      <button class="btn small ghost" data-act="mygames">My games: plays and likes</button>
       <div class="acct-slot"><span>Optional: sign in to keep your coins and costumes on every device</span></div>
       <p class="err">${esc(S.err)}</p>
     </div>
@@ -164,7 +169,7 @@ async function showLobby() {
   lineup.show(true); lineup.setPoses({});
   lineup.sync(seated(), { me: S.room.you });
   const r = S.room, host = isHost(), me = mine(), n = seated().length;
-  const modes = { board: ['Board Game', 'Roll dice round the board, buy ribbons, play a minigame every round.'], marathon: ['Minigame Marathon', 'No board. Vote, play, repeat. Most points wins.'], endless: ['The Fair Never Closes', 'Keep playing, harder and harder. Every 3 games you vote to go on or finish.'] };
+  const modes = { board: ['Board Game', 'Roll dice round the board, buy ribbons, play a minigame every round.'], marathon: ['Minigame Marathon', 'No board. Vote, play, repeat. Most points wins.'], endless: ['The Fair Never Closes', 'Keep playing, harder and harder. Every 3 games you vote to go on or finish.'], custom: ['Custom', 'No board, no vote: the host picks every minigame from the list, and finishes when you like.'], golf: ['Golf', 'A round of golf: the golf minigames one after another, a hole at a time.'] };
   setScreen('lobby', `
     <div class="panel lobby-code${S.codeSmall ? ' small' : ''}">
       <div class="qr" id="qr"></div>
@@ -173,7 +178,7 @@ async function showLobby() {
     </div>
     <div class="panel lobby-main">
       <h2>Players <small>${n} of 4</small></h2>
-      <div class="members">${members().filter(m => !m.display).map(m => chipOf(m, `${m.pid === r.host ? '<em class="tagh">host</em>' : ''}${m.wait ? '<em class="tagh">waiting</em>' : ''}${host && m.pid !== r.you ? `<button class="x" data-act="kick" data-pid="${m.pid}" title="Remove">×</button>` : ''}`)).join('')}
+      <div class="members">${members().filter(m => !m.display).map(m => chipOf(m, `${m.pid === r.host ? '<em class="tagh">host</em>' : ''}${m.wait ? '<em class="tagh">waiting</em>' : ''}${m.pid !== r.you && !m.display ? (host ? `<button class="x" data-act="kick" data-pid="${m.pid}" title="Remove">×</button>` : me?.seat != null ? `<button class="x" data-act="votekick" data-pid="${m.pid}" title="Vote to remove">×</button>` : '') : ''}`)).join('')}
         ${members().some(m => m.display) ? `<span class="chip tv">Big screen connected</span>` : ''}</div>
       ${me?.display ? '<p class="note">This screen is watching. Players join on their phones.</p>' : `<div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>`}
       <h2>Game</h2>
@@ -182,15 +187,21 @@ async function showLobby() {
       ${r.opts.mode === 'board' ? `<div class="row opts"><span>Board</span>${Object.values(BOARDS).map(b => `<button class="pill${r.opts.board === b.id ? ' on' : ''}" data-act="opt" data-key="board" data-value="${b.id}" ${host ? '' : 'disabled'}>${esc(b.title)}</button>`).join('')}</div>
         <div class="row opts"><span>Moving</span>${[['dice', 'Roll a die'], ['cards', 'Move cards']].map(([v, t]) => `<button class="pill${(r.opts.moves || 'dice') === v ? ' on' : ''}" data-act="opt" data-key="moves" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}
         <span class="est">${r.opts.moves === 'cards' ? 'Hold 4 cards, play one, or take a mystery card from a rival' : 'Tap to roll 1 to 6'}</span></div>` : ''}
-      ${r.opts.mode === 'endless' ? '' : `<div class="row opts"><span>Rounds</span>${[3, 4, 5, 6].map(v => `<button class="pill${r.opts.rounds === v ? ' on' : ''}" data-act="opt" data-key="rounds" data-num="${v}" ${host ? '' : 'disabled'}>${v}</button>`).join('')}
-        <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : 1.6))} min</span></div>`}
+      ${r.opts.mode === 'board' ? `<div class="row opts"><span>Win by</span>${[0, 60, 100, 150, 200].map(v => `<button class="pill${(r.opts.goal || 0) === v ? ' on' : ''}" data-act="opt" data-key="goal" data-num="${v}" ${host ? '' : 'disabled'}>${v ? `First to ${v}` : 'Rounds'}</button>`).join('')}
+        <span class="est">${r.opts.goal ? `First to ${r.opts.goal} tickets wins — a ribbon counts as 10. Longer games.` : 'Most ribbons after the last round'}</span></div>` : ''}
+      ${r.opts.mode === 'endless' || r.opts.mode === 'custom' || (r.opts.mode === 'board' && r.opts.goal) ? '' : `<div class="row opts"><span>${r.opts.mode === 'golf' ? 'Holes' : 'Rounds'}</span>${(r.opts.mode === 'golf' ? [3, 4, 6, 9] : [3, 4, 5, 6]).map(v => `<button class="pill${r.opts.rounds === v ? ' on' : ''}" data-act="opt" data-key="rounds" data-num="${v}" ${host ? '' : 'disabled'}>${v}</button>`).join('')}
+        <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : r.opts.mode === 'golf' ? 1.9 : 1.6))} min</span></div>`}
       <div class="row opts"><span>Play as</span><button class="pill${!r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="0" ${host ? '' : 'disabled'}>Everyone for themselves</button><button class="pill${r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="1" ${host ? '' : 'disabled'}>Teams</button>
         ${r.opts.teams ? `<span class="est">${n === 3 ? 'Teams need 2 or 4 players' : 'Red &amp; Green vs Blue &amp; Pink'}</span>` : ''}</div>
       <div class="row opts"><span>Who can join</span><button class="pill${!r.opts.public ? ' on' : ''}" data-act="opt" data-key="public" data-bool="0" ${host ? '' : 'disabled'}>Invite only</button><button class="pill${r.opts.public ? ' on' : ''}" data-act="opt" data-key="public" data-bool="1" ${host ? '' : 'disabled'}>Public</button>
         <span class="est">${r.opts.public ? 'Listed in Find a game' : 'Only people with the code'}</span></div>
+      ${['marathon', 'endless', 'board'].includes(r.opts.mode) ? `<div class="row opts"><span>Vote offers</span>${[['mix', 'One top-rated pick'], ['top', 'Top rated only'], ['fresh', 'Anything']].map(([v, t]) => `<button class="pill${(r.opts.votePick || 'mix') === v ? ' on' : ''}" data-act="opt" data-key="votePick" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}</div>
+        ${(r.opts.votePick || 'mix') !== 'fresh' ? `<div class="row opts"><span>Favour</span><button class="pill${!r.opts.favour ? ' on' : ''}" data-act="opt" data-key="favour" data-value="" ${host ? '' : 'disabled'}>Most liked</button>${FAVOUR.map(([v, t]) => `<button class="pill${r.opts.favour === v ? ' on' : ''}" data-act="opt" data-key="favour" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}
+          <span class="est">Picked from what players said they liked</span></div>` : ''}` : ''}
       <div class="row opts"><span>Difficulty</span>${[['easy', 'Family'], ['normal', 'Normal'], ['hard', 'Tricky']].map(([v, t]) => `<button class="pill${r.opts.difficulty === v ? ' on' : ''}" data-act="opt" data-key="difficulty" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}</div>
-      <div class="row opts"><span>Holidays</span>${[['auto', `Auto${r.dateSeason ? ` (${seasonName(r.dateSeason)})` : ''}`], ...SEASONS.map(x => [x.id, x.name]), ['only', 'Holiday games only'], ['off', 'Off']].map(([v, t]) => `<button class="pill${(r.opts.holiday || 'auto') === v ? ' on' : ''}" data-act="opt" data-key="holiday" data-value="${v}" ${host ? '' : 'disabled'}>${esc(t)}</button>`).join('')}</div>
-      <div class="row opts"><span>Minigames</span><button class="pill on" data-act="pool">${r.opts.pool?.length ? `${r.opts.pool.length} picked` : `All ${Object.values(GAMES).filter(g => inSeason(g.meta, r.season)).length}`}</button>${host ? '<span class="est">tap to choose</span>' : ''}</div>
+      ${r.dateSeason && r.opts.mode !== 'golf' ? `<div class="row opts"><label class="check"><input type="checkbox" data-act="holidaymode" ${r.opts.holidayMode ? 'checked' : ''} ${host ? '' : 'disabled'}> <b>${esc(seasonName(r.dateSeason))} mode</b></label>
+        <span class="est">${r.opts.holidayMode ? `Only ${esc(seasonName(r.dateSeason))} minigames` : `${esc(seasonName(r.dateSeason))} games are mixed in with the rest this month`}</span></div>` : ''}
+      ${r.opts.mode === 'golf' ? '' : `<div class="row opts"><span>Minigames</span><button class="pill on" data-act="pool">${r.opts.pool?.length ? `${r.opts.pool.length} picked` : `All ${Object.values(GAMES).filter(g => inSeason(g.meta, r.season)).length}`}</button>${host ? '<span class="est">tap to choose</span>' : ''}</div>`}
       <div class="lobby-go${host ? '' : ' guest'}">${host ? `<button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}</button>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
       ${me?.display ? '<button class="btn small" data-act="swap" data-to="play">Play instead</button>' : host ? '' : '<button class="btn small" data-act="swap" data-to="watch">Just watch instead</button>'}
       <button class="btn small ghost" data-act="leave">Leave</button></div>
@@ -203,7 +214,7 @@ function drawHud() {
   const r = S.room; if (!r?.match || S.phase === 'game' || S.phase === 'intro' || S.phase === 'lobby') { hud.innerHTML = ''; return; }
   const board = r.match.mode === 'board';
   const teams = S.teams ? `<span class="teams">${S.teams.map(t => `<b class="team t${t.team}">${esc(t.name)}: ${board ? `${t.ribbons} ribbons` : `${t.points} pts`}</b>`).join('')}</span>` : '';
-  hud.innerHTML = `<div class="match-bar"><span class="round">Round ${r.match.round}${r.match.rounds ? '/' + r.match.rounds : ''}</span>${teams}${seated().map(m => chipOf(m, board
+  hud.innerHTML = `<div class="match-bar"><span class="round">${r.match.mode === 'golf' ? 'Hole' : r.match.mode === 'custom' ? 'Game' : 'Round'} ${r.match.round}${r.match.rounds ? '/' + r.match.rounds : ''}${r.match.goal ? ` · first to ${r.match.goal}` : ''}</span>${teams}${seated().map(m => chipOf(m, board
     ? `<em class="sc tk">${ICON.ticket}${S.bd.tickets[m.pid] ?? 0}</em><em class="sc rb">${ICON.ribbon}${S.bd.ribbons[m.pid] ?? 0}</em>` : `<em class="sc">${r.match.points[m.pid] ?? 0} pts</em>`)).join('')}</div>`;
   if (board && S.bd.pid != null) hud.querySelector(`[data-pid="${S.bd.pid}"]`)?.classList.add('turn');
 }
@@ -272,11 +283,29 @@ function showVote() {
     return;
   }
   setScreen('vote', `<h1 class="shout">Vote for the next game!</h1>
-    <div class="vote-cards">${pm.options.map((id, i) => `<button class="vote-card${S.votes[S.room.you] === i ? ' mine' : ''}${S.voted === i ? ' won' : ''}" data-act="vote" data-i="${i}" ${can ? '' : 'disabled'}>${card(id, `<u class="who">${voteDots(i)}</u>`)}</button>`).join('')}</div>
+    <div class="vote-cards">${pm.options.map((id, i) => `<button class="vote-card${S.votes[S.room.you] === i ? ' mine' : ''}${S.voted === i ? ' won' : ''}" data-act="vote" data-i="${i}" ${can ? '' : 'disabled'}>${card(id, `${voteBadge(pm, id)}<u class="who">${voteDots(i)}</u>`)}</button>`).join('')}</div>
     <p class="note">${can ? 'Tap a card.' : 'Watching.'} <b class="count">${left()}</b></p>
     ${S.lastGame && !S.rated[S.lastGame] ? rateBox(S.lastGame, true) : ''}`);
   screen.dataset.vote = pm.options.join();
   drawHud();
+}
+/** Custom mode (round 10): the host picks the next minigame; everyone else watches the list. */
+function showPick() {
+  setSafe('title'); const pm = S.pm, host = isHost();
+  const by = (S.pickKind || ''), list = pm.options.filter(id => GAMES[id] && (!by || hasKind(id, by)));
+  const kinds = Object.keys(KINDS).filter(k => pm.options.some(id => hasKind(id, k)));
+  setScreen('vote pick', `<h1 class="shout">${host ? 'Pick the next game' : 'The host is picking…'}</h1>
+    ${host ? `<div class="row kind-chips"><button class="pill${by ? '' : ' on'}" data-act="pickkind" data-k="">All</button>${kinds.map(k => `<button class="pill${by === k ? ' on' : ''}" data-act="pickkind" data-k="${k}">${esc(KINDS[k])}</button>`).join('')}</div>` : ''}
+    <div class="pool-grid pick-grid">${list.map(id => { const m = GAMES[id].meta, again = S.room.match?.played?.includes?.(id); return `<button class="pool-g${again ? ' asleep' : ''}" data-act="pickgame" data-id="${id}" ${host ? '' : 'disabled'}><img src="${ART}${m.card}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><small>${esc(kindsOf(id).map(k => KINDS[k]).join(' · ') || (m.tags || []).join(', '))}</small></button>`; }).join('')}</div>
+    ${host ? `<div class="row"><button class="btn big" data-act="pickgame" data-id="finish">Finish and see who won</button></div>` : '<p class="note">Get ready — any moment now.</p>'}
+    ${S.lastGame && !S.rated[S.lastGame] ? rateBox(S.lastGame, true) : ''}`);
+  drawHud();
+}
+/** Round 10: the top-rated slot's ribbon and every rated card's 👍 share (everyone's ratings, all rooms). */
+const BADGE = { top: '⭐ Top rated', funny: '😂 Funniest', close: '🔥 Most competitive', teamwork: '🤝 Best teamwork', skill: '🎯 Most skillful', chill: '🌿 Most relaxing' };
+function voteBadge(pm, id) {
+  const b = pm.labels?.[id], pct = pm.rating?.[id];
+  return `${b ? `<em class="vote-badge">${esc(BADGE[b] || BADGE.top)}</em>` : ''}${pct != null ? `<small class="vote-pct">👍 ${pct}%</small>` : ''}`;
 }
 function showContinue() {
   setSafe('title'); const me = mine(), can = me?.seat != null, mineV = S.votes[S.room.you];
@@ -294,17 +323,17 @@ function showIntro() {
     ${pm.season === 'halloween' && !m.season ? '<p class="season-ribbon halloween">Halloween edition</p>' : ''}<h1 class="shout">${esc(m.title)}</h1><p class="blurb">${esc(m.blurb)}</p>
     <ul>${m.how.map(l => `<li>${btnText(esc(l), m.controls, { html: true })}</li>`).join('')}</ul><p class="ctl">${esc(ctl)}</p>${pm.difficulty && S.room.match?.mode === 'endless' ? `<p class="note">Difficulty: <b>${esc(pm.difficulty)}</b></p>` : ''}
     ${can ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : "I'm ready"}</button>` : '<p class="note">Watching this one.</p>'}
-    <p class="note">Starts in <b class="count">${left()}</b> · ${S.skips.length}/${pm.players.length} ready</p></div>`);
+    <p class="note">Starts when everyone is ready (or in <b class="count">${left()}</b>) · ${S.skips.length}/${pm.players.length} ready</p></div>`);
   hud.innerHTML = '';
 }
 function showResults() {
   const pm = S.pm, m = GAMES[pm.game].meta, me = mine();
   let place = 0; const rows = [];
-  for (const g of pm.result.order) { for (const pid of g) { const mem = members().find(x => x.pid === pid); if (mem) rows.push(`<li class="p${place + 1}"><span class="pl">${pm.result.coop ? '' : ['1st', '2nd', '3rd', '4th'][place]}</span>${chipOf(mem)}<span class="score">${pm.result.scores?.[pid] ?? ''} ${esc(pm.result.scores?.[pid] === 1 ? String(pm.result.unit || '').replace(/s$/, '') : pm.result.unit || '')}</span><span class="award">+${pm.award[pid] ?? 0} ${pm.unit === 'tickets' ? ICON.ticket : ''}${pm.unit}</span></li>`); } place += g.length; }
+  for (const g of pm.result.order) { for (const pid of g) { const mem = members().find(x => x.pid === pid); if (mem) rows.push(`<li class="p${place + 1}"><span class="pl">${pm.result.coop ? '' : ['1st', '2nd', '3rd', '4th'][place]}</span>${chipOf(mem)}<span class="score">${esc(gameScoreText(pm.result.scores?.[pid], pm.result.unit))}</span><span class="award">${pm.unit === 'tickets' ? ICON.ticket : ''}${esc(awardText(pm.award[pid], pm.unit))}</span></li>`); } place += g.length; }
   setScreen('results', `<div class="panel results-card"><h1 class="shout">${esc(m.title)}</h1>
     ${pm.result.coop ? `<p class="blurb">${pm.result.coop.success ? 'You did it together!' : 'So close. Better luck next time!'}</p>` : ''}
     ${pm.mul > 1 ? `<p class="blurb double">Double Prize Day: tickets x${pm.mul}!</p>` : ''}
-    <ol class="places">${rows.join('')}</ol>
+    <p class="note places-key">${esc(resultsKeyText(pm.unit))}</p><ol class="places">${rows.join('')}</ol>
     ${pm.teams ? `<p class="team-line">${pm.teams.map(t => `<b class="team t${t.team}">${esc(t.name)} ${pm.unit === 'tickets' ? t.tickets + ' tickets' : t.points + ' pts'}</b>`).join(' ')}</p>` : ''}
     ${rateBox(pm.game)}
     ${me?.seat != null ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : 'Continue'}</button>` : ''}<p class="note">Next in <b class="count">${left()}</b></p></div>`);
@@ -350,7 +379,8 @@ function showFinal() {
   const head = teamWin ? (teamWin.length > 1 ? "It's a draw!" : `Team ${teamWin[0].name} wins!`) : pm.standings.length > 1 ? `${win.join(' & ')} win${win.length > 1 ? '' : 's'}!` : 'Nice run!';
   setScreen('final', `<div class="panel final-card"><h1 class="shout">${esc(head)}</h1>
     ${pm.teams ? `<p class="team-line">${pm.teams.map(t => `<b class="team t${t.team}">${esc(t.name)} ${pm.mode === 'board' ? `${t.ribbons} ribbons · ${t.tickets} tickets` : `${t.points} pts`}</b>`).join(' ')}</p>` : ''}
-    <ol class="places">${pm.standings.map(r => { const mem = members().find(m => m.pid === r.pid); return mem ? `<li class="p${r.place}"><span class="pl">${['1st', '2nd', '3rd', '4th'][r.place - 1]}</span>${chipOf(mem)}<span class="score">${pm.mode === 'board' ? `${ICON.ribbon}${r.ribbons} ${ICON.ticket}${r.tickets}` : `${r.points} pts`}</span><span class="award">+${pm.payout[r.pid] ?? 0} ${ICON.coin}coins</span></li>` : ''; }).join('')}</ol>
+    <ol class="places">${pm.standings.map(r => { const mem = members().find(m => m.pid === r.pid); return mem ? `<li class="p${r.place}"><span class="pl">${['1st', '2nd', '3rd', '4th'][r.place - 1]}</span>${chipOf(mem)}<span class="score">${esc(finalScoreText(r, pm.mode))}</span><span class="award">+${pm.payout[r.pid] ?? 0} ${ICON.coin}coins</span></li>` : ''; }).join('')}</ol>
+    <p class="note places-key">${esc(finalHowText(pm.mode, S.room?.match?.goal || 0))}</p>
     <p class="note">Coins buy costumes. They never help you win.</p>
     ${me?.seat != null ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : 'Back to the lobby'}</button>` : ''}<p class="note">Lobby in <b class="count">${left()}</b></p></div>`);
   hud.innerHTML = ''; sfx('win');
@@ -386,6 +416,7 @@ async function onPhase(pm) {
     case 'game': setScreen('playing', ''); hud.innerHTML = ''; if (S.play) S.play.start(); sfx('go'); break;
     case 'results': controls.set(null); S.teams = pm.teams || null; showResults(); sfx('open'); break;
     case 'bonus': showBonus(); break;
+    case 'pick': lineup.show(false); showPick(); sfx('open'); break;
     case 'final': showFinal(); break;
   }
   if (prev !== pm.phase) drawHud();
@@ -411,13 +442,23 @@ net.on('room', r => {
   else drawHud();
 });
 net.on('phase', onPhase);
+/** Round 10 (#26): a vote to remove someone shows on every other player's screen until it passes or runs out. */
+function drawKickVote() {
+  let bar = document.getElementById('kickbar');
+  const kv = S.room?.kickVote, me = mine(), target = kv && members().find(m => m.pid === kv.target);
+  if (!kv || !target || kv.target === S.room.you || me?.seat == null) { bar?.remove(); return; }
+  if (!bar) { bar = h('div', 'kickbar'); bar.id = 'kickbar'; bar.addEventListener('click', e => { const b = e.target.closest('[data-act="votekick"]'); if (b) net.send({ t: 'votekick', pid: +b.dataset.pid }); }); document.body.append(bar); }
+  const yes = kv.yes.includes(S.room.you);
+  bar.innerHTML = `<span>Remove <b>${esc(target.name)}</b> from the room? ${kv.yes.length}/${kv.need} votes</span>${yes ? '<em>You voted yes</em>' : `<button class="btn small" data-act="votekick" data-pid="${target.pid}">Yes, remove</button>`}`;
+}
+net.on('room', () => drawKickVote());
 net.on('left', () => {
   S.room = null; S.inviting = false; dropPlay(); dropBoard(); history.replaceState(null, '', location.pathname); q.delete('code');
   const sw = S.swapTo; S.swapTo = null;
   if (sw) { S.asDisplay = sw.watch; net.join(sw.code, sw.watch); return; }       // "Just watch instead" / "Play instead": rejoin the same room the other way
   showTitle();
 });
-net.on('kicked', () => { S.room = null; dropPlay(); dropBoard(); S.err = 'The host removed you from the room.'; showTitle(); });
+net.on('kicked', m => { S.room = null; dropPlay(); dropBoard(); S.err = m?.why === 'vote' ? 'The other players voted you out of the room.' : 'You were removed from the room.'; showTitle(); });
 net.on('err', m => { if (!S.room) { S.err = m.msg; showTitle(); } else toast(m.msg, 'bad'); });
 net.on('bd', onBoard);
 net.on('votes', m => { S.votes = m.votes; if (S.phase === 'vote') showVote(); else if (S.phase === 'continue') showContinue(); });
@@ -453,6 +494,11 @@ screen.addEventListener('click', e => {
     case 'opt': net.send({ t: 'opt', key: b.dataset.key, value: b.dataset.num ? +b.dataset.num : b.dataset.bool ? b.dataset.bool === '1' : b.dataset.value }); if (b.dataset.key === 'public' && b.dataset.bool === '1') tally('make_public'); break;
     case 'start': net.send({ t: 'start' }); tally('start_match', { mode: S.room?.opts.mode, players: seated().length, public: !!S.room?.opts.public }); break;
     case 'kick': net.send({ t: 'kick', pid: +b.dataset.pid }); break;
+    case 'votekick': net.send({ t: 'votekick', pid: +b.dataset.pid }); break;
+    case 'mygames': myGames.open(); break;
+    case 'holidaymode': net.send({ t: 'opt', key: 'holidayMode', value: !!b.checked }); break;
+    case 'pickgame': net.send({ t: 'pick', id: b.dataset.id }); break;
+    case 'pickkind': S.pickKind = b.dataset.k; showPick(); break;
     case 'roll': net.send({ t: 'roll' }); S.bd.sub = 'move'; showBoard(); break;
     case 'card': net.send({ t: 'card', i: +b.dataset.i }); S.bd.sub = 'move'; showBoard(); break;
     case 'choose': net.send({ t: 'choose', i: +b.dataset.i }); S.bd.ask = null; showBoard(); break;
@@ -539,18 +585,25 @@ function openPool() {
     const groups = { holiday: [] };
     for (const [id, g] of Object.entries(GAMES)) { const t = g.meta.season ? 'holiday' : g.meta.tags?.[0] || 'action'; (groups[t] ||= []).push([id, g.meta]); }
     if (!groups.holiday.length) delete groups.holiday;
-    const season = S.room.season;
+    const season = S.room.season, kind = S.poolKind || '';
+    if (kind) for (const t of Object.keys(groups)) { groups[t] = groups[t].filter(([id]) => hasKind(id, kind)); if (!groups[t].length) delete groups[t]; }
     el.innerHTML = `<div class="panel"><h2>Minigames <small>${pick.size} of ${Object.keys(GAMES).length}</small></h2>
+      <div class="row pool-filter"><span class="note">Show:</span><button class="pill${kind ? '' : ' on'}" data-kind="">Every kind</button>${Object.entries(KINDS).map(([k, n]) => `<button class="pill${kind === k ? ' on' : ''}" data-kind="${k}">${esc(n)}</button>`).join('')}</div>
+      ${host && kind ? `<div class="row"><button class="btn small" data-only-kind="${kind}">Tick only ${esc(KINDS[kind])}</button><button class="btn small" data-add-kind="${kind}">Tick all ${esc(KINDS[kind])} too</button></div>` : ''}
       <p class="note">${host ? 'Untick the games you do not want tonight. The vote only offers ticked games that fit the number of players.' : 'Only the host can change this.'}</p>
       ${host ? `<div class="row"><button class="btn small" data-all="1">All</button><button class="btn small" data-all="0">None</button>${Object.entries(TAG_NAMES).map(([t, n]) => `<button class="btn small" data-tag="${t}">Only ${n}</button>`).join('')}</div>` : ''}
-      ${Object.entries(groups).map(([t, list]) => `<h3>${esc(TAG_NAMES[t] || t)}</h3>${t === 'holiday' ? `<p class="note">${season ? `On now: ${esc(seasonName(season))}.` : 'Off right now.'} Holiday games only come up while their holiday is on: by the date (Auto), or set Holidays in the lobby to switch one on any time.</p>` : ''}<div class="pool-grid">${list.sort((a, b) => a[1].title.localeCompare(b[1].title)).map(([id, m]) => `<button class="pool-g${pick.has(id) ? ' on' : ''}${m.season && m.season !== season ? ' asleep' : ''}" data-id="${id}" ${host ? '' : 'disabled'}><img src="${ART}${m.card}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><small>${m.season && m.season !== season ? `${esc(seasonName(m.season))} only` : `${m.min === m.max ? m.min : `${m.min}–${m.max}`} players`}</small><i class="tick">${pick.has(id) ? '✓' : ''}</i></button>`).join('')}</div>`).join('')}
+      ${Object.entries(groups).map(([t, list]) => `<h3>${esc(TAG_NAMES[t] || t)}</h3>${t === 'holiday' ? `<p class="note">${season ? `On now: ${esc(seasonName(season))}.` : 'Off right now.'} Holiday games only come up while their holiday is on. Tick the holiday mode box in the lobby to play nothing else.</p>` : ''}<div class="pool-grid">${list.sort((a, b) => a[1].title.localeCompare(b[1].title)).map(([id, m]) => `<button class="pool-g${pick.has(id) ? ' on' : ''}${m.season && m.season !== season ? ' asleep' : ''}" data-id="${id}" ${host ? '' : 'disabled'}><img src="${ART}${m.card}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><small>${m.season && m.season !== season ? `${esc(seasonName(m.season))} only` : `${m.min === m.max ? m.min : `${m.min}–${m.max}`} players`}</small><i class="tick">${pick.has(id) ? '✓' : ''}</i></button>`).join('')}</div>`).join('')}
       <button class="btn big primary" data-close="1">Done</button></div>`;
   };
   el.addEventListener('click', e => {
     if (e.target.closest('[data-close]') || e.target === el) { if (host && !pick.size) { toast('Pick at least one game (or tap All).', 'bad'); return; } return closeModal(); }
+    const kb = e.target.closest('[data-kind]');
+    if (kb) { S.poolKind = kb.dataset.kind; const y = el.scrollTop; draw(); el.scrollTop = y; return; }
     if (!host) return;
-    const a = e.target.closest('[data-all]'), t = e.target.closest('[data-tag]'), g = e.target.closest('.pool-g');
-    if (a) pick = new Set(a.dataset.all === '1' ? Object.keys(GAMES) : []);
+    const a = e.target.closest('[data-all]'), t = e.target.closest('[data-tag]'), g = e.target.closest('.pool-g'), ok = e.target.closest('[data-only-kind]'), ak = e.target.closest('[data-add-kind]');
+    if (ok) pick = new Set(Object.keys(GAMES).filter(id => hasKind(id, ok.dataset.onlyKind)));
+    else if (ak) for (const id of Object.keys(GAMES)) { if (hasKind(id, ak.dataset.addKind)) pick.add(id); }
+    else if (a) pick = new Set(a.dataset.all === '1' ? Object.keys(GAMES) : []);
     else if (t) pick = new Set(Object.keys(GAMES).filter(id => GAMES[id].meta.tags?.includes(t.dataset.tag)));
     else if (g) { if (pick.has(g.dataset.id)) pick.delete(g.dataset.id); else pick.add(g.dataset.id); }
     else return;
@@ -567,7 +620,7 @@ function openFind() {
   closeModal();
   const el = h('div', 'modal find');
   let poll = 0;
-  const modeName = { board: 'Board Game', marathon: 'Minigame Marathon', endless: 'Endless' };
+  const modeName = { board: 'Board Game', marathon: 'Minigame Marathon', endless: 'Endless', custom: 'Custom', golf: 'Golf' };
   function draw() {
     const list = S.pub;
     el.innerHTML = `<div class="panel"><div class="row head"><h2>Find a game</h2><span class="grow"></span><button class="btn small" data-x="1">Close</button></div>
@@ -627,6 +680,7 @@ function openMenu() {
   el.innerHTML = `<div class="panel"><h2>Menu</h2>
     <button class="btn big primary" data-m="close">Back to ${playing ? 'the game' : inRoom ? 'the lobby' : 'the fair'}</button>
     ${inRoom ? '<button class="btn big" data-m="qr">Invite people (QR code)</button>' : ''}
+    <button class="btn big" data-m="mygames">My games</button>
     <button class="btn big" data-m="fb">Report a bug or idea</button>
     ${account.known ? `<button class="btn big" data-m="signout">Sign out (${esc(account.known.username || account.known.name || 'account')})</button>` : '<button class="btn big" data-m="signin">Sign in (optional)</button>'}
     <button class="btn big danger" data-m="home">${inRoom ? 'Leave to the main menu' : 'Main menu'}</button></div>`;
@@ -637,6 +691,7 @@ function openMenu() {
     if (m === 'close') closeModal();
     else if (m === 'qr') { closeModal(); showBigQr(); }
     else if (m === 'fb') { closeModal(); fb.open({ kind: 'idea' }); }
+    else if (m === 'mygames') { closeModal(); myGames.open(); }
     else if (m === 'signin') { closeModal(); openSignIn(ACCT); }
     else if (m === 'signout') { closeModal(); account.signOut(); }
     else if (m === 'home') {

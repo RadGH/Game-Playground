@@ -18,7 +18,7 @@
 
 /* ---- Stack Attack ---- */
 .tag.sa-height { font-size: 16px; padding: 1px 10px; }
-.tag.sa-height span::after { content: ' high'; font-size: 11px; font-weight: 600; }
+.tag.sa-height span::after { content: ' pts'; font-size: 11px; font-weight: 600; }
 
 /* ---- Halloween reskins (round 6): the intro ribbon; per-game rules use .game-<id>.season-halloween (play.js adds it) ---- */
 .season-ribbon.halloween { margin: -4px 0 -2px; padding: 3px 16px 3px 14px; font-weight: 900; font-size: 14px; letter-spacing: .4px; text-transform: uppercase;

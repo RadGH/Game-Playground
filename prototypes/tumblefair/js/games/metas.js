@@ -141,7 +141,7 @@ export const GAMES = Object.freeze({
    "blurb": "Grab, carry, and stack blocks to build the tallest tower!",
    "how": [
     "GRAB a block in the middle, carry it to your pad, press GRAB again to stack it.",
-    "Gold blocks count double.",
+    "Each block is 1 point, gold blocks 2.",
     "SHOVE a carrier to make them drop it. Grab from a rival pad to steal their top block!"
    ],
    "kind": "arena",
@@ -149,7 +149,7 @@ export const GAMES = Object.freeze({
    "max": 4,
    "seconds": 60,
    "scoring": "points",
-   "unit": "blocks",
+   "unit": "points",
    "tags": [
     "action"
    ],
@@ -910,7 +910,8 @@ export const GAMES = Object.freeze({
    "how": [
     "Punch in a guess. RIGHT = right number, right place. MOVED = in the code, wrong place.",
     "Crack it before your tries run out, or the safe jams.",
-    "LISTEN shows one number but costs points and time. First to open each safe gets a bonus!"
+    "Stuck? After 2 guesses you may LISTEN once a safe: one number, but it costs 6 points and 4 s.",
+    "First to open each safe gets a bonus!"
    ],
    "kind": "ui",
    "min": 1,
@@ -1006,10 +1007,10 @@ export const GAMES = Object.freeze({
    "title": "Secret Architect",
    "blurb": "Guide your builders to the secret blueprint, using only pins and a few words!",
    "how": [
-    "Each round one of you is the Architect and sees a secret blueprint.",
-    "The others build on their phones. The Architect can only place 3 pins, 2 crosses and send 6 short messages.",
-    "The closer each build is, the more points. Everyone gets a turn as Architect.",
-    "Builders averaging 50% or better is a team win!"
+    "One of you (the Architect) sees a secret picture made of blocks. Everyone else copies it on their own grid.",
+    "The Architect cannot draw it: only drop red pins (a block goes here), crosses (leave this empty) and send short hints.",
+    "Builders: tap squares to fill them. The closer your copy, the more points.",
+    "Take turns as Architect. Copies averaging 50% or better = team win!"
    ],
    "kind": "ui",
    "min": 1,
@@ -1032,15 +1033,14 @@ export const GAMES = Object.freeze({
    "title": "Two Truths, One Goblin",
    "blurb": "Two claims are true and one is a Goblin. Spot the lie!",
    "how": [
-    "Each round one of you is the Teller and gets three claims about themselves.",
-    "The game says which one is the Goblin (the lie). The Teller arranges the cards to fool you.",
-    "Everyone else taps the Goblin. Catch it: +2. Fool someone: +2 to the Teller.",
-    "Ties go to the quickest catches."
+    "Each round one player is the Teller. Three facts about them go up: two are true, one is a lie (the Goblin).",
+    "Check their name, colour and points on the chips, and remember what happened earlier.",
+    "Tap the fact you think is the lie. Catch it: +2. The Teller gets +2 for each player fooled."
    ],
    "kind": "ui",
    "min": 1,
    "max": 4,
-   "seconds": 76,
+   "seconds": 120,
    "scoring": "points",
    "unit": "points",
    "tags": [

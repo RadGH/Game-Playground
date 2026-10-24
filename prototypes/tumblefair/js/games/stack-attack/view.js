@@ -54,7 +54,7 @@ export function createView(ctx) {
   const WOOD = ['#f3c98b', '#e8b26b', '#f8deb0', '#dca05a'].map(c => new THREE.Color(c));
   let floor = [];                                               // [id, x, z, gold, carrier]
   const seenAt = new Map();                                     // id -> drop-in height
-  const bar = scoreBar(ctx, { unit: 'blocks' });
+  const bar = scoreBar(ctx, { unit: 'points' });   // round 10 (#21): a gold block is 2, so the count is points, not blocks
   const carryOf = new Set();
   return {
     state(g) {

@@ -130,34 +130,32 @@ function showTitle() {
     <div class="panel title-panel invite">
       <h2>You're invited!</h2>
       <p class="note">Pick a name and a look for your character, then join room <b>${esc(code)}</b>.</p>
-      <label class="field"><span>Your name</span><input id="name" maxlength="14" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(S.me?.name || '')}"></label>
+      <div class="name-head"><label for="name">Your name</label><span class="acct-slot"></span></div>
+      <input id="name" class="name-input" maxlength="14" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(S.me?.name || '')}">
       <button class="btn" data-act="edit">Change look</button>
       <input type="hidden" id="code" value="${code}"><input type="checkbox" id="as-display" hidden ${S.asDisplay ? 'checked' : ''}>
       <button class="btn big primary" data-act="join">Join the game</button>
       <button class="btn small ghost" data-act="home">Back to the main menu</button>
-      <div class="acct-slot"><span>Optional: sign in to keep your character on every device</span></div>
       <p class="err">${esc(S.err)}</p>
     </div>
-    <p class="foot">2–4 players · everyone plays on their own phone · <span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>`);
+    <p class="foot"><span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>`);
     placeAcct();
     return;
   }
   setScreen('title', `
     <img class="logo" src="${ART}logo.webp" alt="Tumblefair" onerror="this.replaceWith(Object.assign(document.createElement('h1'),{className:'logo-text',textContent:'TUMBLEFAIR'}))">
     <div class="panel title-panel">
-      <label class="field"><span>Your name</span><input id="name" maxlength="14" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(S.me?.name || '')}"></label>
+      <div class="name-head"><label for="name">Your name</label><span class="acct-slot"></span></div>
+      <input id="name" class="name-input" maxlength="14" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(S.me?.name || '')}">
       <div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>
       <button class="btn big primary" data-act="host">Host a game</button>
       <button class="btn big" data-act="find">Find a game</button>
       <div class="join-row"><input id="code" maxlength="${CODE_LENGTH}" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${code}"><button class="btn big" data-act="join">Join</button></div>
       <input type="checkbox" id="as-display" hidden ${S.asDisplay ? 'checked' : ''}>
-      <button class="btn small ghost watch-btn" data-act="watch">👀 Just watch a game (TV or sitting out)</button>
-      <button class="btn small ghost" data-act="mygames">My games: plays and likes</button>
-      <div class="acct-slot"><span>Optional: sign in to keep your coins and costumes on every device</span></div>
+      <div class="row title-extras"><button class="btn" data-act="watch" title="Watch a game on a TV, or sit one out">👀 Spectate</button><button class="btn" data-act="mygames" title="Every minigame you've played, and your likes">⭐ My games</button></div>
       <p class="err">${esc(S.err)}</p>
     </div>
-    <p class="foot">2–4 players · everyone joins on their own phone · <span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>
-    <p class="foot privacy">No ads, and no cookies unless you sign in. We count plays anonymously to make the fair better.</p>`);
+    <p class="foot"><span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>`);
   placeAcct();
 }
 function placeAcct() { screen.querySelector('.acct-slot')?.append(acctTitle); }

@@ -67,7 +67,7 @@ input[type=text], input:not([type]) { user-select: text; -webkit-user-select: te
 
 /* ---- title ---- */
 #screen.title { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 10px; padding: calc(var(--st) + 10px) 14px calc(var(--sb) + 10px); }
-.logo { position: absolute; top: calc(var(--st) + 8px); left: 50%; transform: translateX(-50%); width: min(78vw, 460px); max-height: 20vh; object-fit: contain; pointer-events: none !important; }
+.logo { flex: 0 1 auto; min-height: 0; margin: 0 auto auto; width: min(78vw, 460px); max-height: 20vh; object-fit: contain; pointer-events: none !important; }   /* in the flow, pushed to the top: it can never sit on the panel */
 .logo-text { position: absolute; top: calc(var(--st) + 14px); left: 0; right: 0; margin: 0; text-align: center; font: 900 clamp(34px, 11vw, 72px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; text-shadow: 0 6px 0 var(--ink); }
 .title-panel { width: min(100%, 400px); display: grid; gap: 10px; }
 .field { display: grid; gap: 2px; font-size: 13px; color: #47606a; }
@@ -373,3 +373,11 @@ body[data-phase=game] .qr-btn { right: calc(var(--sr) + 76px); }
 .results-card .places .score { font-size: 16px; font-weight: 900; color: var(--ink); }
 .places-key { margin: 0; font-size: 12px; }
 @media (max-width: 520px) { .results-card .places .score { font-size: 15px; } }
+
+/* title tidy (owner 2026-10-24): name + the account pill on one line; Spectate + Favorites as the bottom pair */
+.name-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: #47606a; min-height: 34px; }
+.name-head .acct-slot { flex: 0 1 auto; opacity: 1; font-size: 13px; }
+.name-input { border: 3px solid var(--ink); border-radius: 12px; padding: 8px 12px; font-size: 20px; font-weight: 800; background: #fff; min-width: 0; width: 100%; margin-top: -6px; }
+.title-extras .btn { font-size: 15px; padding-top: 10px; padding-bottom: 10px; }
+.title-panel .err:empty { display: none; }
+.foot:has(.net:empty) { display: none; }

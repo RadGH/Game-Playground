@@ -85,6 +85,7 @@ export function createHub({ now = () => Date.now(), data, profiles, build = 'dev
           let code; do { code = newCode(rand); } while (rooms.has(code));
           const room = createRoom({ code, now, seed: Math.floor(rand() * 2 ** 31), data, profiles, log, ratings, fresh, report: (kind, d) => report(kind, d) });
           rooms.set(code, room); stats.roomsMade++;
+          if (msg.display) { enter(room, true); if (S.member) room.setOwner(S.member, { public: !!msg.public, guestHost: msg.guestHost !== false }); return; }   // a TV hosting (owner 2026-10-24)
           return enter(room, false);
         }
         case 'join': {

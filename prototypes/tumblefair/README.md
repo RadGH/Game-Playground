@@ -620,6 +620,25 @@ phone portrait first:
   players, a good player beats a sloppy one at every difficulty, determinism, small state, the rules one by one); UI
   bots for the three screen games in `tests/helpers.js`. Card art: Codex (`assets/art/card-<id>.webp`).
 
+## Host on a TV (2026-10-24)
+
+Owner: "Allow spectate button to host local or host public. It should be a lobby that stays open, the first user to join
+is granted sub admin access to change gamemodes etc while the room control stays the spectator host. It should open the
+QR menu by default and assume the spectator has no controls, ignored from any ready checks… Add optional spectator
+controls to change player view, and in some gamemodes an 'all' option." + "The first guest assuming control maybe
+should be a checkbox."
+- **Spectate** on the title offers *Host on this screen* (invite only / public) with a box "The first player to join runs
+  the game" (ticked by default, remembered), or *watch a friend's game* by code.
+- A TV-made room (`create {display, public, guestHost}`) has an **owner** (`room.owner`, the TV: no seat, never in ready,
+  votes or standings, can't be kicked, keeps the room open, gets it back after a wifi blip). The **host** is the
+  earliest-joined seated player (the next one when they leave), or nobody when the box is unticked (then the TV runs it).
+  Owner and host may both change options, start, end and kick (`isAdmin` in `js/sim/room.js`).
+- The TV's lobby (`showTvLobby` in `js/client/main.js`) is a giant QR code + code + who's in + who's setting up;
+  *Game settings* opens the normal lobby for a TV with a controller.
+- **Watching an arena game:** a *Watch: All · <players>* bar (`js/client/play.js`; `[` / `]` or PageUp/PageDown, or a
+  controller) follows one player or gives the game's own view. A game opts out with `meta.spectate: false`; screen
+  games don't show it. Tests: `tests/tv-host.test.js`.
+
 ## Round 12 (2026-10-24)
 
 ### Screen fixes and reports

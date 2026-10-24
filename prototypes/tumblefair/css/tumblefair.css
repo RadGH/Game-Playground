@@ -411,3 +411,20 @@ body[data-phase=results] #game-ui > .game > * { visibility: hidden; }
 .match-bar::-webkit-scrollbar { display: none; }
 .match-bar > * { flex: 0 0 auto; }
 @media (max-width: 480px) { .match-bar .chip { font-size: 12px; } .match-bar .chip img, .match-bar .chip .face { width: 26px; height: 26px; } .match-bar .round { font-size: 12px; padding: 3px 8px; } }
+/* round 12 (owner): the TV's own lobby — a giant QR code and code, who's in, who's setting up */
+#screen.tv-lobby { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; align-items: center; padding: calc(var(--st) + 60px) 24px calc(var(--sb) + 24px); }
+.tv-join { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; }
+.tv-qr { width: min(36vw, 46vh); aspect-ratio: 1; background: #fff; border-radius: 16px; padding: 12px; }
+.tv-qr svg { width: 100%; height: 100%; }
+.tv-say { margin: 0; font-size: clamp(20px, 3vw, 40px); font-weight: 800; }
+.tv-code { margin: 4px 0; font: 900 clamp(48px, 8vw, 120px)/1 var(--font); letter-spacing: .08em; }
+.tv-at, .tv-mode { margin: 4px 0; font-size: clamp(14px, 1.6vw, 22px); opacity: .8; }
+.tv-side h2 { margin-top: 0; } .tv-status { font-size: clamp(14px, 1.6vw, 22px); font-weight: 700; }
+@media (orientation: portrait) { #screen.tv-lobby { grid-template-columns: 1fr; } .tv-join { grid-template-columns: 1fr; justify-items: center; text-align: center; } .tv-qr { width: min(70vw, 40vh); } }
+.tv-join { grid-template-columns: auto minmax(0, 1fr); } .tv-text { min-width: 0; }
+.tv-qr { width: min(28vw, 52vh); }
+.tv-code { font-size: clamp(40px, 5.2vw, 96px); white-space: nowrap; } .tv-say { font-size: clamp(18px, 2.4vw, 34px); }
+#screen.tv-lobby { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); }
+.tv-qr { width: min(22vw, 48vh); }
+#screen.tv-lobby > .panel { width: 100%; max-width: none; box-sizing: border-box; margin: 0; }
+.tv-code { font-size: clamp(48px, 7vw, 140px); }

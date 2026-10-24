@@ -43,7 +43,7 @@ export const SEATS = Object.freeze([
 export const CLIENT_MSGS = Object.freeze({
   hello:   { fields: { v: 'int', token: '?str:64', name: '?str:32', ticket: '?str:256' }, rate: 2, burst: 4 },   // ticket: games.radgh.com sign-in (2026-10-23)
   account: { fields: { ticket: '?str:256' }, rate: 1, burst: 4 },                     // sign in (a ticket) or out (none) without reconnecting
-  create:  { fields: {}, rate: 0.5, burst: 3 },
+  create:  { fields: { display: '?bool', public: '?bool', guestHost: '?bool' }, rate: 0.5, burst: 3 },     // display: a TV hosts (owns the room, no seat)
   join:    { fields: { code: 'str:8', display: '?bool' }, rate: 1, burst: 6 },
   leave:   { fields: {}, rate: 1, burst: 3 },
   profile: { fields: { name: '?str:32', look: '?obj' }, rate: 4, burst: 12 },

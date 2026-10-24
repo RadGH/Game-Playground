@@ -53,3 +53,10 @@
 .game-trapdoor-treasury.season-halloween .tt-coins i:nth-child(odd) { background: radial-gradient(circle at 35% 35%, #ead4ff, #9b5be0 55%, #5a2a99); }
 .game-trapdoor-treasury.season-halloween .tt-bank { background: #ff9a3a; }
 .game-trapdoor-treasury.season-halloween .tt-bank.mine { background: #ffd08a; }
+/* round 12 (owner): a watching screen's view picker — follow one player or see All (js/client/play.js) */
+.spec-bar { position: absolute; left: 50%; bottom: calc(var(--sb, 0px) + 12px); transform: translateX(-50%); z-index: 30; pointer-events: auto;
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 32px);
+  background: rgba(13, 34, 40, .72); color: #fff; padding: 6px 10px; border-radius: 999px; font: 700 14px/1 var(--font, system-ui); }
+.spec-bar span { opacity: .75; margin-right: 2px; }
+.spec-bar button { border: 2px solid var(--seat, #fff); background: transparent; color: #fff; border-radius: 999px; padding: 6px 12px; font: inherit; cursor: pointer; }
+.spec-bar button.on { background: var(--seat, #fff); color: #10262c; }

@@ -15,6 +15,10 @@ import { dressArena } from './halloween.js';
 import { btnText } from './buttons.js';
 
 
+// Spectator view (owner 2026-10-24): a screen that only watches (a TV) may follow one player in an arena game, or see
+// "All" (the game's own camera). Remembered for the next game while that player is still in it. A game opts out with
+// `meta.spectate: false` (a fixed view where following adds nothing); screen (ui) games never show it.
+let FOCUS = 'all';
 export async function createPlay({ stage, net, controls, intro, members, me, uiRoot, sfx = () => {} }) {
   const def = GAMES[intro.game], meta = def.meta, arena = meta.kind === 'arena';
   const AR = intro.init?.arena || meta.arena;          // a game whose layout comes from the seed sends its arena in init()
@@ -41,6 +45,11 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
     const tallScreen = innerHeight > innerWidth * 1.15;          // a phone held upright: look down more steeply so the arena uses the height
     stage.setView({ cx: 0, cz: 0, hw: hw + 0.5, hd: hd + 0.5, pitch: (meta.pitch || 54) + (tallScreen ? 12 : 0), tall: 2.2, yaw: 0 }, { instant: true });
   }
+  const spectate = arena && !playing && meta.spectate !== false && players.length > 1;
+  if (!players.some(p => p.pid === FOCUS)) FOCUS = 'all';
+  const following = () => spectate && FOCUS !== 'all' && actors.has(FOCUS);
+  let lastCam = null, homeView = null;
+  if (arena) { const A = AR, hw = A.shape === 'circle' ? A.r : A.hw, hd = A.shape === 'circle' ? A.r : A.hd; homeView = { cx: 0, cz: 0, hw: hw + 0.5, hd: hd + 0.5, pitch: (meta.pitch || 54) + (innerHeight > innerWidth * 1.15 ? 12 : 0), tall: 2.2, yaw: 0 }; }
   const ctx = {
     btn: s => btnText(s, meta.controls),          // "press A" -> Space / E on a keyboard, the button's label on a phone (buttons.js)
     THREE, stage, group, ui, init: intro.init, season: intro.season || null, meta, players, me: playing ? me : null, watching: !playing,
@@ -50,7 +59,7 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
      *  Added to `group`; freed with the game. No seat = no colour ring. */
     createActor: async (m, opts) => { const a = await createActor({ pid: 'npc', seat: null, ...m }, opts); if (disposed) { a.dispose(); return null; } if (m.seat == null) a.setRing(false); a.group.traverse(o => { if (o.isMesh) o.castShadow = true; }); group.add(a.group); npcs.add(a); const d = a.dispose; a.dispose = () => { npcs.delete(a); d(); }; return a; },
     /** Move the camera: { cx, cz, hw, hd, pitch?, yaw?, tall? } (the rectangle of ground to frame). Call it every frame to follow. */
-    camera: (v, o) => stage.setView({ tall: 2.2, yaw: 0, ...v, pitch: (v.pitch ?? meta.pitch ?? 54) + (innerHeight > innerWidth * 1.15 ? 12 : 0) }, o),
+    camera: (v, o) => { lastCam = [v, o]; if (following()) return; stage.setView({ tall: 2.2, yaw: 0, ...v, pitch: (v.pitch ?? meta.pitch ?? 54) + (innerHeight > innerWidth * 1.15 ? 12 : 0) }, o); },
     /** Where a player's character is drawn right now (yours: predicted; others: interpolated) -> { x, y, z, yaw } or null. */
     pos: pid => { const a = actors.get(pid); return a ? { x: a.group.position.x, y: a.group.position.y, z: a.group.position.z, yaw: a.body.group.rotation.y } : null; },
   };
@@ -105,9 +114,25 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
     }
     view.frame?.(dt, performance.now() / 1000);
     dress?.frame(dt, performance.now() / 1000);
+    if (following()) { const a = actors.get(FOCUS); stage.setView({ cx: a.group.position.x, cz: a.group.position.z, hw: 5.5, hd: 5.5, pitch: (meta.pitch || 54) + (innerHeight > innerWidth * 1.15 ? 12 : 0), tall: 2.2, yaw: 0 }); }
+  }
+  // the spectator bar: All + one button per player
+  let specOff = null;
+  if (spectate) {
+    const bar = document.createElement('div'); bar.className = 'spec-bar';
+    const draw = () => { bar.innerHTML = `<span>Watch</span><button type="button" data-f="all" class="${FOCUS === 'all' ? 'on' : ''}">All</button>${players.map(p => `<button type="button" data-f="${p.pid}" class="${FOCUS === p.pid ? 'on' : ''}" style="--seat:${p.color}">${p.name.replace(/[<>&"]/g, '')}</button>`).join('')}`; };
+    const pick = f => {
+      FOCUS = f === 'all' ? 'all' : +f; draw();
+      if (FOCUS === 'all') { const [v, o] = lastCam || [homeView, null]; if (lastCam) stage.setView({ tall: 2.2, yaw: 0, ...v, pitch: (v.pitch ?? meta.pitch ?? 54) + (innerHeight > innerWidth * 1.15 ? 12 : 0) }, o); else stage.setView(homeView); }
+    };
+    bar.addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (b) pick(b.dataset.f); });
+    const keys = e => { if (e.key !== '[' && e.key !== ']' && e.key !== 'PageUp' && e.key !== 'PageDown') return; const list = ['all', ...players.map(p => p.pid)], i = list.indexOf(FOCUS); pick(String(list[(i + (e.key === ']' || e.key === 'PageDown' ? 1 : list.length - 1)) % list.length])); };
+    addEventListener('keydown', keys);
+    draw(); ui.append(bar);
+    specOff = () => removeEventListener('keydown', keys);
   }
   function dispose() {
-    disposed = true; live = false;
+    disposed = true; live = false; specOff?.();
     controls.set(null);
     try { view.dispose?.(); } catch (e) { console.error(e); }
     for (const t of tags) t.remove();

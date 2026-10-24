@@ -62,7 +62,7 @@ export function connect({ url = null, getTicket = null } = {}) {
   net.join = (code, display = false) => { net.code = code; net.display = display; net.send({ t: 'join', code, ...(display ? { display: true } : {}) }); };
   /** Sign in with a ticket, or out with null. The server answers 'acct' then 'me'. */
   net.signIn = ticket => net.send({ t: 'account', ...(ticket ? { ticket } : {}) });
-  net.create = () => net.send({ t: 'create' });
+  net.create = (o = {}) => { if (o.display) net.display = true; net.send({ t: 'create', ...(o.display ? { display: true, public: !!o.public, guestHost: o.guestHost !== false } : {}) }); };
   net.leave = () => { net.code = null; net.room = null; net.send({ t: 'leave' }); };
   net.close = () => { wanted = false; clearInterval(pingTimer); ws?.close(); };
   open();

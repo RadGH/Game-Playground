@@ -92,7 +92,8 @@ window.tumblefairAccount = { account, openSignIn: () => openSignIn(ACCT), net: (
 const members = () => S.room?.members || [];
 const mine = () => members().find(m => m.pid === S.room?.you) || null;
 const seatOf = m => (m?.seat != null ? SEATS[m.seat] : null);
-const isHost = () => S.room && S.room.host === S.room.you;
+const isHost = () => S.room && (S.room.host === S.room.you || S.room.owner === S.room.you);   // a TV that owns the room may run it too
+const tvOwner = () => !!S.room && S.room.owner != null && S.room.owner === S.room.you;
 const seated = () => members().filter(m => m.seat != null).sort((a, b) => a.seat - b.seat);
 const left = () => Math.max(0, Math.ceil((S.ends - performance.now()) / 1000));
 // "What's new" (2026-10-24): one button element, re-placed on the title like the account pill; a dot while unread
@@ -169,6 +170,7 @@ function saveName() { const n = $('#name')?.value.trim(); if (n && n !== S.me?.n
 
 // ------------------------------------------------------------------ lobby
 async function showLobby() {
+  if (tvOwner() && !S.tvSettings) return showTvLobby();
   setSafe('lobby'); hud.innerHTML = '';
   lineup.show(true); lineup.setPoses({});
   lineup.sync(seated(), { me: S.room.you });
@@ -184,7 +186,7 @@ async function showLobby() {
       <h2>Players <small>${n} of 4</small></h2>
       <div class="members">${members().filter(m => !m.display).map(m => chipOf(m, `${m.pid === r.host ? '<em class="tagh">host</em>' : ''}${m.wait ? '<em class="tagh">waiting</em>' : ''}${m.pid !== r.you && !m.display ? (host ? `<button class="x" data-act="kick" data-pid="${m.pid}" title="Remove">×</button>` : me?.seat != null ? `<button class="x" data-act="votekick" data-pid="${m.pid}" title="Vote to remove">×</button>` : '') : ''}`)).join('')}
         ${members().some(m => m.display) ? `<span class="chip tv">Big screen connected</span>` : ''}</div>
-      ${me?.display ? '<p class="note">This screen is watching. Players join on their phones.</p>' : `<div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>`}
+      ${me?.display ? `<p class="note">This screen is watching. Players join on their phones.</p>${tvOwner() ? '<button class="btn" data-act="tvview">Back to the big-screen view</button>' : ''}` : `<div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>`}
       <h2>Game</h2>
       <div class="modes">${Object.entries(modes).map(([id, [t, d]]) => `<button class="mode${r.opts.mode === id ? ' on' : ''}" data-act="opt" data-key="mode" data-value="${id}" ${host ? '' : 'disabled'}><b>${t}</b><span>${d}</span></button>`).join('')}</div>
       <p class="mode-desc">${esc(modes[r.opts.mode]?.[1] || '')}</p>
@@ -210,6 +212,26 @@ async function showLobby() {
       ${me?.display ? '<button class="btn small" data-act="swap" data-to="play">Play instead</button>' : host ? '' : '<button class="btn small" data-act="swap" data-to="watch">Just watch instead</button>'}
       <button class="btn small ghost" data-act="leave">Leave</button></div>
     </div>`);
+  qrSvg(joinUrl(r.code)).then(svg => { const e = $('#qr'); if (e) e.innerHTML = svg; }).catch(() => {});
+}
+
+// ------------------------------------------------------------------ the TV's own lobby (owner 2026-10-24)
+// "Host a lobby on my TV and anyone can see the code or scan to join and play, and then go idle as the spectator TV
+// screen." A TV that made the room shows a giant QR code + the code, who's in, and what's being set up; the first
+// player to join runs the game from their phone. "Game settings" opens the normal lobby (for a TV with a controller).
+function showTvLobby() {
+  setSafe('lobby'); hud.innerHTML = '';
+  lineup.show(true); lineup.setPoses({}); lineup.sync(seated(), { me: null });
+  const r = S.room, players = members().filter(m => !m.display), host = members().find(m => m.pid === r.host);
+  const modeName = { board: 'Board Game', marathon: 'Minigame Marathon', endless: 'The Fair Never Closes', custom: 'Custom', golf: 'Golf' }[r.opts.mode] || r.opts.mode;
+  setScreen('lobby tv-lobby', `
+    <div class="tv-join panel"><div class="qr tv-qr" id="qr"></div>
+      <div class="tv-text"><p class="tv-say">Scan to join</p><p class="tv-code">${esc(r.code)}</p><p class="tv-at">or open <b>${esc(location.host)}</b> and type the code</p>
+      <p class="tv-mode">${esc(modeName)}${r.opts.public ? ' · Public' : ' · Invite only'}</p></div></div>
+    <div class="tv-side panel"><h2>Players <small>${players.length} of 4</small></h2>
+      <div class="members">${players.map(m => chipOf(m, m.pid === r.host ? '<em class="tagh">host</em>' : '')).join('') || '<p class="note">Nobody yet — scan the code with your phone.</p>'}</div>
+      <p class="tv-status">${r.guestHost === false ? 'Set up the game here when everyone is in.' : host ? `${esc(host.name)} is setting up the game on their phone…` : 'The first player to join sets up the game.'}</p>
+      <div class="row"><button class="btn ${r.guestHost === false ? 'big primary' : 'small'}" data-act="tvsettings">${r.guestHost === false ? 'Set up the game' : 'Game settings'}</button><button class="btn small ghost" data-act="leave">Close the room</button></div></div>`);
   qrSvg(joinUrl(r.code)).then(svg => { const e = $('#qr'); if (e) e.innerHTML = svg; }).catch(() => {});
 }
 
@@ -529,6 +551,8 @@ screen.addEventListener('click', e => {
     case 'join': { saveName(); if (S.me && !S.me.ready) { net.send({ t: 'profile', name: $('#name')?.value.trim() || S.me.name }); S.me.ready = true; } const code = cleanCode($('#code').value); if (!code) { S.err = `The code is ${CODE_LENGTH} letters.`; showTitle(); break; } S.err = ''; S.asDisplay = $('#as-display').checked; net.join(code, S.asDisplay); tally('join_game', { via: S.inviting ? 'invite' : 'code', display: S.asDisplay }); break; }
     case 'leave': net.leave(); break;
     case 'watch': saveName(); openWatch(); break;
+    case 'tvsettings': S.tvSettings = true; showLobby(); break;
+    case 'tvview': S.tvSettings = false; showLobby(); break;
     case 'home': S.inviting = false; S.err = ''; q.delete('code'); history.replaceState(null, '', location.pathname); showTitle(); break;
     case 'swap': {
       const watch = b.dataset.to === 'watch';
@@ -700,14 +724,20 @@ function openWatch() {
   closeModal();
   const code = cleanCode($('#code')?.value || q.get('code') || '');
   const el = h('div', 'modal watch');
-  el.innerHTML = `<div class="panel"><h2>Just watch?</h2>
-    <p>You'll see the board and every minigame, but <b>you won't play</b> in this game. Good for a TV everyone can see, or for sitting one out.</p>
-    <p class="note">Want to play after all? Tap <b>Play instead</b> in the lobby. Late joiners who play get a seat at the next minigame.</p>
+  el.innerHTML = `<div class="panel"><h2>Spectate</h2>
+    <h3>Host on this screen</h3>
+    <p class="note">For a TV: this screen shows a big QR code, everyone joins on their phones, and the first to join sets up the game. This screen just watches.</p>
+    <label class="check"><input type="checkbox" id="tv-guesthost" ${(() => { try { return localStorage.getItem('tumblefair.tvGuestHost') === '0' ? '' : 'checked'; } catch { return 'checked'; } })()}> The first player to join runs the game (untick if this screen has a controller or keyboard and you want to set it up here)</label>
+    <div class="row"><button class="btn big primary" id="tv-local">📺 Host — invite only</button><button class="btn big" id="tv-public">📺 Host — public</button></div>
+    <h3>Or watch a friend's game</h3>
+    <p class="note">You'll see the board and every minigame, but <b>you won't play</b>. Want to play after all? Tap <b>Play instead</b> in the lobby.</p>
     <label class="field"><span>Room code</span><input id="watch-code" maxlength="${CODE_LENGTH}" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(code)}"></label>
     <p class="err" id="watch-err"></p>
     <div class="row"><button class="btn" data-x="1">Cancel</button><button class="btn big primary" id="watch-go">Watch</button></div></div>`;
   el.addEventListener('click', e => {
     if (e.target === el || e.target.closest('[data-x]')) { closeModal(); return; }
+    const tv = e.target.closest('#tv-local, #tv-public');
+    if (tv) { const gh = !!el.querySelector('#tv-guesthost')?.checked; try { localStorage.setItem('tumblefair.tvGuestHost', gh ? '1' : '0'); } catch {} S.err = ''; S.asDisplay = true; S.tvSettings = false; closeModal(); net.create({ display: true, public: tv.id === 'tv-public', guestHost: gh }); tally('host_game', { device: deviceKind(), tv: true, public: tv.id === 'tv-public' }); return; }
     if (!e.target.closest('#watch-go')) return;
     const c = cleanCode(el.querySelector('#watch-code').value);
     if (!c) { el.querySelector('#watch-err').textContent = `The code is ${CODE_LENGTH} letters.`; return; }

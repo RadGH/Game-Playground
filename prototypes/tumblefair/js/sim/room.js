@@ -49,7 +49,7 @@ export const PAYOUT = Object.freeze({ base: 10, perRibbon: 5, perPoint: 1, winne
 export function createRoom({ code, now, seed = 1, data, profiles = null, log = () => {}, report = () => {}, ratings: allRatings = () => ({}), fresh: freshNow = () => ({}) }) {
   const rng = makeRng(seed);
   const members = new Map();          // pid -> member
-  let nextPid = 1, hostPid = null, phase = 'lobby', until = 0, emptySince = null;
+  let nextPid = 1, hostPid = null, ownerPid = null, guestHost = true, phase = 'lobby', until = 0, emptySince = null;
   const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, holiday: OPTS.holiday.def, holidayMode: OPTS.holidayMode.def, goal: OPTS.goal.def, moves: OPTS.moves.def, public: OPTS.public.def, votePick: OPTS.votePick.def, favour: OPTS.favour.def, pool: [] };
   const banned = new Set();            // round 10 (#26): tokens kicked out of this room (by the host or a vote) can't come back
   let kickVote = null;                 // { target, by: Set(pid), until }
@@ -78,7 +78,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const send = (m, obj) => { if (m.connected && m.send) m.send(JSON.stringify(obj)); };
   const cast = obj => { const s = JSON.stringify(obj); for (const m of members.values()) if (m.connected && m.send) m.send(s); };
   function roomMsg(m) {
-    return { t: 'room', code, phase, host: hostPid, you: m.pid, opts, fresh: freshNow() || {}, season: season(), dateSeason: seasonByDate(date()), members: [...members.values()].map(pub),
+    return { t: 'room', code, phase, host: hostPid, owner: ownerPid, guestHost: ownerPid != null ? guestHost : undefined, you: m.pid, opts, fresh: freshNow() || {}, season: season(), dateSeason: seasonByDate(date()), members: [...members.values()].map(pub),
       kickVote: kickVote ? { target: kickVote.target, yes: [...kickVote.by], need: kickNeed() } : null,
       match: match ? { mode: match.mode, round: match.round, rounds: match.rounds, goal: match.goal || 0, ribbonWorth: match.goal ? ribbonWorth() : 0, points: match.points, wins: match.wins, board: match.board ? match.board.view() : null, boardId: match.boardId || null } : null };
   }
@@ -88,11 +88,14 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   function join({ token, name, look, costume, send: sendFn, display = false }) {
     if (banned.has(token)) { try { sendFn?.(JSON.stringify({ t: 'kicked' })); } catch {} return null; }
     // the same person coming back (a refresh, a phone that slept): same seat, same score
+    // a TV that owns the room (2026-10-24) coming back after a wifi blip: still the owner
+    for (const m of members.values()) if (display && m.display && m.pid === ownerPid && m.token === token) { m.send = sendFn; m.connected = true; m.goneAt = null; emptySince = null; resync(m); syncRoom(); return m; }
     for (const m of members.values()) if (m.token === token && !display && !m.display) { m.send = sendFn; m.connected = true; m.goneAt = null; m.name = name; m.look = look; m.costume = costume; emptySince = null; resync(m); syncRoom(); return m; }
     const m = { pid: nextPid++, token, name, look, costume, send: sendFn, connected: true, goneAt: null, ready: false, display, seat: null, queue: [], lastIn: null, starve: 0, ack: 0, skip: false };
     if (!display && phase === 'lobby') m.seat = freeSeat();           // mid-match joiners watch until the next minigame
     members.set(m.pid, m); emptySince = null;
-    if (hostPid == null || !members.has(hostPid)) hostPid = m.pid;
+    if (ownerPid == null && (hostPid == null || !members.has(hostPid))) hostPid = m.pid;
+    else if (ownerPid != null) pickHost(true);
     resync(m); syncRoom();
     return m;
   }
@@ -104,7 +107,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     if (lastPhaseMsg) send(m, { ...lastPhaseMsg, ms: until ? Math.max(0, until - now()) : 0, ...(phase === 'vote' || phase === 'continue' ? { votes: vote?.votes || {} } : {}) });
     if (phase === 'game' && game?.inst.priv && m.seat != null) send(m, { t: 'gp', d: { ...game.inst.priv(m.pid), ...(game.inst.restore?.(m.pid) || {}) } });   // restore: what a returning phone had made (its drawing)
   }
-  function disconnect(m) { if (!members.has(m.pid)) return; m.connected = false; m.send = null; m.goneAt = now(); m.queue.length = 0; if (m.display || m.seat == null) return remove(m); syncRoom(); pickHost(); }
+  function disconnect(m) { if (!members.has(m.pid)) return; m.connected = false; m.send = null; m.goneAt = now(); m.queue.length = 0; if ((m.display && m.pid !== ownerPid) || (!m.display && m.seat == null)) return remove(m); syncRoom(); pickHost(); }
   function remove(m) {
     if (!members.delete(m.pid)) return;
     if (match?.board && m.seat != null) match.board.dropPlayer(m.pid);
@@ -112,7 +115,20 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     pickHost(); syncRoom();
     if (![...members.values()].some(x => x.connected)) emptySince = emptySince ?? now();
   }
-  function pickHost() {
+  /**
+   * The host runs the game (options, start, kick). In a room a TV made (`ownerPid`), the TV keeps the room, and the host
+   * is a PLAYER: the earliest to join who is seated and here; when they go, the next one. No players yet: no host.
+   */
+  function pickHost(quiet = false) {
+    if (ownerPid != null) {
+      if (!guestHost) { if (hostPid !== null) { hostPid = null; if (!quiet) syncRoom(); } return; }   // the TV keeps control
+      const h = members.get(hostPid);
+      if (h && h.connected && !h.display && h.seat != null) return;
+      const next = seated().filter(x => x.connected).sort((a, b) => a.pid - b.pid)[0] || null;
+      const pid = next ? next.pid : null;
+      if (pid !== hostPid) { hostPid = pid; if (!quiet) syncRoom(); }
+      return;
+    }
     const h = members.get(hostPid);
     if (h && h.connected) return;
     const next = active()[0] || [...members.values()].find(m => m.connected && !m.display) || [...members.values()].find(m => m.connected);
@@ -136,8 +152,10 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   }
 
   // ---------------------------------------------------------------- the match
+  /** The host, or the TV that owns the room, may run the game. */
+  const isAdmin = m => m && (m.pid === hostPid || (ownerPid != null && m.pid === ownerPid));
   function startMatch(by) {
-    if (phase !== 'lobby' || by.pid !== hostPid) return err(by, 'host', 'Only the host can start.');
+    if (phase !== 'lobby' || !isAdmin(by)) return err(by, 'host', 'Only the host can start.');
     promote();
     for (const m of seated()) if (!m.connected) remove(m);          // a lobby keeps a phone that slept for five minutes (report #13); a match starts without it
     const players = active();
@@ -350,7 +368,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
         return syncRoom();
       }
       case 'opt': {
-        if (m.pid !== hostPid || phase !== 'lobby') return;
+        if (!isAdmin(m) || phase !== 'lobby') return;
         const o = OPTS[msg.key];
         if (msg.key === 'pool') { if (Array.isArray(msg.value)) opts.pool = msg.value.filter(id => typeof id === 'string' && GAMES[id]).slice(0, 120); }
         else if (!o) return;
@@ -359,8 +377,8 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
         return syncRoom();
       }
       case 'start': return startMatch(m);
-      case 'end': if (m.pid === hostPid && phase !== 'lobby') toLobby(); return;
-      case 'kick': { const k = members.get(msg.pid); if (m.pid === hostPid && k && k.pid !== hostPid) kickOut(k, 'host'); return; }
+      case 'end': if (isAdmin(m) && phase !== 'lobby') toLobby(); return;
+      case 'kick': { const k = members.get(msg.pid); if (isAdmin(m) && k && k.pid !== m.pid && k.pid !== ownerPid && (k.pid !== hostPid || m.pid === ownerPid)) kickOut(k, 'host'); return; }
       case 'votekick': {                                  // round 10 (#26): anyone seated may ask; others say yes; the target can't vote
         const k = members.get(msg.pid);
         if (m.seat == null || !k || k.pid === m.pid || k.display) return;
@@ -370,7 +388,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
         return syncRoom();
       }
       case 'pick': {                                      // round 10: Custom mode — the host picks the next minigame
-        if (phase !== 'pick' || m.pid !== hostPid) return;
+        if (phase !== 'pick' || !isAdmin(m)) return;
         if (msg.id === 'finish') return finish();
         if (!gamesFor(active().length || 1).includes(msg.id)) return err(m, 'pick', 'That minigame does not fit this many players.');
         return startGame(msg.id);
@@ -433,12 +451,15 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   /** Round 7: what "Find a game" shows for this room — null unless the host made it public. No tokens, no addresses. */
   function listing() {
     if (!opts.public) return null;
-    const seatedN = seated().length, host = members.get(hostPid);
+    const seatedN = seated().length, host = members.get(hostPid) || (ownerPid != null ? { name: 'TV' } : null);
     if (![...members.values()].some(m => m.connected)) return null;
     return { code, host: host?.name || 'Someone', players: seatedN, seats: MAX_SEATS, phase: phase === 'lobby' ? 'lobby' : 'playing', mode: opts.mode, board: opts.mode === 'board' ? opts.board : null, round: match?.round || 0, rounds: match?.rounds || null, season: season() };
   }
   return {
     code, join, disconnect, remove, message, tick, listing,
+    /** Round 12 (owner): a TV that made the room owns it — no seat, never waited for, keeps the room open. */
+    setOwner(m, { public: pub = false, guestHost: gh = true } = {}) { if (!m?.display) return; ownerPid = m.pid; opts.public = !!pub; guestHost = gh !== false; if (hostPid === m.pid) hostPid = null; pickHost(true); syncRoom(); },
+    get owner() { return ownerPid; },
     get phase() { return phase; }, get host() { return hostPid; }, get members() { return members; }, get match() { return match; }, get game() { return game; }, get opts() { return opts; },
     get emptyFor() { return emptySince == null ? 0 : now() - emptySince; },
     get size() { return members.size; },

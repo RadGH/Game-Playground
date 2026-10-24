@@ -14,7 +14,7 @@ import { createBoardMatch, boardStandings, BOARD } from './board.js';
 import { hasKind } from '../games/tags.js';
 import { SEASON_IDS, effectiveSeason, seasonByDate, inSeason } from '../shared/seasons.js';
 
-export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 25000, KICKVOTE_MS: 45000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 300000, GONE_MATCH_MS: 90000, EMPTY_MS: 300000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
+export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 25000, KICKVOTE_MS: 45000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 300000, GONE_MATCH_MS: 300000, EMPTY_MS: 300000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
 export const OPTS = Object.freeze({
   mode: { values: ['board', 'marathon', 'endless', 'custom', 'golf'], def: 'board' },   // round 10: Custom (the host picks each minigame), Golf
   board: { values: ['fairground', 'pier'], def: 'fairground' },          // round 5: the Moonlit Pier

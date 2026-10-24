@@ -27,6 +27,7 @@ export function connect({ url = null, getTicket = null } = {}) {
       net.send({ t: 'hello', v: PROTOCOL, ...(store.get(TOKEN_KEY) ? { token: store.get(TOKEN_KEY) } : {}), ...(ticket ? { ticket } : {}) });
     };
     ws.onmessage = e => {
+      lastMsg = performance.now();
       let m; try { m = JSON.parse(e.data); } catch { return; }
       if (m.t === 'welcome') {
         if (m.token) store.set(TOKEN_KEY, m.token);
@@ -42,13 +43,22 @@ export function connect({ url = null, getTicket = null } = {}) {
       if (m.t === 'pong') net.ping = Math.round(performance.now() - m.at);
       fire(m.t, m);
     };
-    ws.onclose = () => { if (!wanted) return; setStatus('reconnecting'); setTimeout(open, [300, 800, 1500, 3000, 5000][Math.min(tries++, 4)]); };
+    ws.onclose = () => { if (!wanted) return; setStatus('reconnecting'); clearTimeout(retry); retry = setTimeout(() => { retry = null; open(); }, [300, 800, 1500, 3000, 5000][Math.min(tries++, 4)]); };
     ws.onerror = () => {};
   }
   function setStatus(s) { if (net.status !== s) { net.status = s; fire('status', s); } }
-  pingTimer = setInterval(() => net.send({ t: 'ping', at: Math.round(performance.now()) }), 3000);
+  // A phone that was locked can come back with a socket that still says "open" but is dead (report #33, iPhone): the
+  // server answers a ping every 3 s, so silence for 10 s while the page is showing means reconnect now.
+  let lastMsg = performance.now(), retry = null;
+  const stale = () => ws && ws.readyState === 1 && performance.now() - lastMsg > 10000;
+  pingTimer = setInterval(() => { if (!document.hidden && stale()) { tries = 0; ws.close(); return; } net.send({ t: 'ping', at: Math.round(performance.now()) }); }, 3000);
   // Come straight back when the phone wakes up or the tab is shown again, rather than waiting out the back-off.
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && ws && ws.readyState > 1) { tries = 0; } });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden || !ws) return;
+    tries = 0;
+    if (ws.readyState > 1 && retry) { clearTimeout(retry); retry = null; open(); }   // closed while asleep: straight back
+    else if (ws.readyState === 1 && performance.now() - lastMsg > 4000) { lastMsg = performance.now(); ws.close(); }   // maybe dead: reopen
+  });
   net.join = (code, display = false) => { net.code = code; net.display = display; net.send({ t: 'join', code, ...(display ? { display: true } : {}) }); };
   /** Sign in with a ticket, or out with null. The server answers 'acct' then 'me'. */
   net.signIn = ticket => net.send({ t: 'account', ...(ticket ? { ticket } : {}) });

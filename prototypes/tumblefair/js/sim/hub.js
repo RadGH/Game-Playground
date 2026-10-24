@@ -7,11 +7,12 @@
 // (profiles.signIn). While a ticket is being redeemed this socket's other frames wait in a short queue. A failed
 // redeem (bad ticket, rgs-api down) carries on as the guest. `account` without a ticket signs out: back to the guest.
 import { PROTOCOL, parseFrame, createBuckets, cleanCode, newCode } from '../shared/protocol.js';
+import { freshBadges } from '../games/fresh.js';
 import { createRoom, TIMES } from './room.js';
 
 // `report(kind, data)` (round 7): the rooms' insights (ratings, plays, votes) go to the server's log (server/insights.mjs).
 export const PUBLIC_LIST_MAX = 30;
-export function createHub({ now = () => Date.now(), data, profiles, build = 'dev', seed = Date.now(), maxRooms = 200, log = () => {}, report = () => {}, redeem = null, ratings = () => ({}) }) {
+export function createHub({ now = () => Date.now(), data, profiles, build = 'dev', seed = Date.now(), maxRooms = 200, log = () => {}, report = () => {}, redeem = null, ratings = () => ({}), fresh = () => freshBadges() }) {
   const rooms = new Map();
   let seedN = seed >>> 0;
   const stats = { sockets: 0, bad: 0, limited: 0, roomsMade: 0 };
@@ -82,7 +83,7 @@ export function createHub({ now = () => Date.now(), data, profiles, build = 'dev
         case 'create': {
           if (rooms.size >= maxRooms) return send({ t: 'err', code: 'full', msg: 'The fair is full right now. Try again in a minute.' });
           let code; do { code = newCode(rand); } while (rooms.has(code));
-          const room = createRoom({ code, now, seed: Math.floor(rand() * 2 ** 31), data, profiles, log, ratings, report: (kind, d) => report(kind, d) });
+          const room = createRoom({ code, now, seed: Math.floor(rand() * 2 ** 31), data, profiles, log, ratings, fresh, report: (kind, d) => report(kind, d) });
           rooms.set(code, room); stats.roomsMade++;
           return enter(room, false);
         }

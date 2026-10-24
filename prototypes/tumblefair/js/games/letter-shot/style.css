@@ -1,0 +1,25 @@
+@import url('../hoops.css');
+/* Letter Shot: the letters strip under the score bar, the pill, and the setter's court map (seven tappable marks). */
+.ls-letters { position: absolute; top: calc(var(--st) + 52px); left: 6px; right: 6px; display: flex; flex-wrap: wrap; gap: 4px 6px; justify-content: center; pointer-events: none; }
+.ls-row { display: inline-flex; align-items: center; gap: 2px; padding: 2px 6px 2px 4px; border-radius: 999px; background: rgba(255, 248, 231, .94); border: 2px solid var(--ink); border-left: 7px solid var(--seat); font: 800 12px/1 var(--font); }
+.ls-row b { max-width: 5.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 3px; }
+.ls-row i { font-style: normal; font-weight: 900; width: 13px; text-align: center; color: rgba(29, 43, 51, .22); }
+.ls-row i.lit { color: #e8473a; }
+.ls-row.set { box-shadow: 0 0 0 3px #ffd23f; }
+.ls-row.out { opacity: .5; text-decoration: line-through; }
+.game-letter-shot .gp-pill { top: calc(var(--st) + 80px); font-size: 14px; }
+.game-letter-shot .gp-pill:empty { display: none; }
+.ls-map { position: absolute; left: 50%; bottom: calc(var(--sb) + 10px); transform: translateX(-50%); width: min(400px, calc(100% - 16px)); pointer-events: auto;
+  padding: 8px 10px 10px; background: var(--paper); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+.ls-map.hidden { display: none; }
+.ls-map-t { text-align: center; font: 900 18px/1.2 var(--font); margin-bottom: 4px; }
+.ls-map-t em { font-style: normal; background: var(--ink); color: #fff; border-radius: 999px; padding: 0 8px; margin-left: 6px; font-size: 14px; }
+.ls-court { position: relative; height: 230px; border: 3px solid var(--ink); border-radius: 12px; background: #e9b77a; overflow: hidden; }
+.ls-court::before { content: ''; position: absolute; left: 50%; top: -60%; width: 125%; aspect-ratio: 1; transform: translateX(-50%); border: 3px dashed rgba(255, 255, 255, .9); border-radius: 50%; }
+.ls-hoop { position: absolute; left: 50%; top: 4%; width: 34px; height: 12px; margin-left: -17px; border: 4px solid #ff5a1a; border-radius: 50%; background: rgba(255, 255, 255, .5); }
+.ls-spot { position: absolute; width: 50px; height: 50px; margin: -25px 0 0 -25px; border-radius: 50%; border: 3px solid var(--ink); background: #fff; box-shadow: 0 3px 0 var(--ink); cursor: pointer; padding: 0; display: grid; place-items: center; }
+.ls-spot b { font: 900 18px/1 var(--font); }
+.ls-spot small { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 3px; font: 800 10px/1 var(--font); white-space: nowrap; background: rgba(255, 255, 255, .85); border-radius: 4px; padding: 1px 3px; }
+.ls-spot:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.game-letter-shot.season-halloween .ls-court { background: #3a2a55; } .game-letter-shot.season-halloween .ls-row i.lit { color: #ff8a1a; }
+@media (max-height: 700px) { .ls-court { height: 196px; } .ls-spot { width: 46px; height: 46px; margin: -23px 0 0 -23px; } }

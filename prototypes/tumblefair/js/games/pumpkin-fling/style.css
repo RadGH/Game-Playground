@@ -1,0 +1,36 @@
+/* Pumpkin Fling — a night-time pumpkin patch on a canvas, the score bar on top, the swing panel under the field.
+   Nothing in here scrolls (the whole game fits a 402x780 phone). */
+.game-pumpkin-fling { pointer-events: auto; background: linear-gradient(#120a26, #22163f 60%, #1d1430); color: #fff; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.pf-wrap { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 58px) calc(var(--sr) + 8px) calc(var(--sb) + 10px) calc(var(--sl) + 8px); }
+.pf-field { position: relative; width: min(100%, 1100px); flex: 1 1 auto; min-height: 200px; border: 4px solid var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 5px 0 var(--ink); }
+.pf-field canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.pf-banner { position: absolute; left: 50%; top: 18%; transform: translateX(-50%) scale(.8); opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none;
+  background: #ff8a1a; color: var(--ink); border: 4px solid var(--ink); border-radius: 18px; padding: 8px 18px; font: 900 30px/1.05 var(--font); text-align: center; box-shadow: 0 5px 0 var(--ink); white-space: nowrap; }
+.pf-banner small { display: block; font-size: 18px; }
+.pf-banner.show { opacity: 1; transform: translateX(-50%) scale(1); }
+.pf-panel { flex: none; width: min(440px, 100%); display: grid; gap: 7px; padding: 9px 12px 12px; background: #fff4dc; color: var(--ink); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+.pf-panel.hidden { display: none; }
+.pf-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 800; }
+.pf-n { font: 900 18px/1 var(--font); } .pf-best { font-size: 15px; }
+.pf-wind { display: flex; align-items: center; gap: 5px; font: 800 13px/1 var(--font); background: #fff; border: 2px solid var(--ink); border-radius: 999px; padding: 2px 9px 2px 3px; }
+.pf-wind em { font-style: normal; }
+.pf-arrow { width: 20px; height: 20px; border-radius: 50%; background: #3ecf8a; border: 2px solid var(--ink); position: relative; transition: transform .3s; }
+.pf-wind.head .pf-arrow { background: #ff6f6f; }
+.pf-arrow::before { content: ''; position: absolute; top: 50%; right: 2px; transform: translateY(-50%); border: 5px solid transparent; border-left: 7px solid #fff; border-right: 0; }
+.pf-last { height: 0; overflow: hidden; text-align: center; font: 900 18px/1.2 var(--font); opacity: 0; transition: opacity .2s, height .2s; }
+.pf-last.show { height: 24px; opacity: 1; } .pf-last.good { color: #138a2c; } .pf-last.bad { color: #b3261e; }
+.pf-meter { display: grid; grid-template-columns: 66px 1fr; align-items: center; gap: 8px; font: 900 12px/1 var(--font); text-transform: uppercase; letter-spacing: .4px; }
+.pf-track { position: relative; height: 26px; border: 3px solid var(--ink); border-radius: 10px; background: #fff; overflow: hidden; }
+.pf-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, #ffd36b, #ff8a1a 70%, #e8434f); }
+.pf-mark { position: absolute; top: -2px; bottom: -2px; width: 4px; margin-left: -2px; background: var(--ink); opacity: 0; }
+.pf-arm .pf-track { background: linear-gradient(90deg, #e9f2ff, #fff); }
+.pf-sweet { position: absolute; top: 0; bottom: 0; background: rgba(62, 207, 90, .5); border-left: 2px dashed var(--ink); border-right: 2px dashed var(--ink); }
+.pf-needle { position: absolute; top: -2px; bottom: -2px; width: 6px; margin-left: -3px; left: 0; background: #8a5cf0; border: 2px solid var(--ink); border-radius: 3px; }
+.pf-panel:not([data-mode=arm]) .pf-arm { opacity: .45; }
+.pf-go { min-height: 66px; font-size: 26px; touch-action: manipulation; cursor: pointer; background: #ff8a1a; }
+.pf-go:disabled { background: #e8e1cc; color: #6a7a80; }
+.pf-panel[data-mode=arm] .pf-go { background: #8ff07a; }
+.pf-note { margin: 0; flex: none; text-align: center; font: 800 14px/1.2 var(--font); color: #f6eaff; text-shadow: 0 1px 0 var(--ink); }
+.pf-note:empty { display: none; }
+@media (max-height: 560px) { .pf-wrap { padding-top: calc(var(--st) + 46px); } .pf-go { min-height: 48px; font-size: 20px; } .pf-field { min-height: 120px; } }

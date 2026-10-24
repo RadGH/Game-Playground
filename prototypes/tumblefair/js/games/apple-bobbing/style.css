@@ -35,3 +35,16 @@
 .game-apple-bobbing.watching .ab-tub { width: min(100%, 1280px); height: calc(100dvh - 170px); max-height: none; }
 .game-apple-bobbing[data-phase=end] .ab-btn { opacity: .4; pointer-events: none; }
 @media (max-height: 520px) { .ab-tub { height: 52dvh; min-height: 160px; } .ab-btn { height: 64px; font-size: 28px; } .ab-btn small { display: none; } }
+
+/* ---- round 12 polish ---- */
+.ab-top { padding-right: 80px; }                                                 /* clear the ☰ / ! corner buttons */
+.ab-say.streak { color: var(--sun); font-size: 20px; }
+.ab-tub.shake { animation: ab-shake .35s; }
+@keyframes ab-shake { 20% { transform: translateX(-6px) rotate(-.6deg); } 45% { transform: translateX(5px) rotate(.5deg); } 70% { transform: translateX(-3px); } }
+/* three night-time settings (picked from the apples): the porch (above), a barn with string lights, a moonlit garden */
+.game-apple-bobbing.ab-scene-barn { background: radial-gradient(circle at 10% 6%, #ffe08a 0 3px, transparent 4px) 0 0 / 42px 22px repeat-x,
+    linear-gradient(#5a2e1c 0 18%, transparent 18%), linear-gradient(#3b2218, #1f120c 70%, #2a1810); }
+.game-apple-bobbing.ab-scene-barn .ab-title { color: #ffc56b; }
+.game-apple-bobbing.ab-scene-garden { background: radial-gradient(circle at 82% 9%, #fff6c8 0 26px, rgba(255, 246, 200, .25) 27px 44px, transparent 46px),
+    radial-gradient(120% 40% at 50% 100%, #24402c 0 60%, transparent 61%), linear-gradient(#13203a, #0c1426 70%, #142a22); }
+.game-apple-bobbing.ab-scene-garden .ab-title { color: #b7f08a; }

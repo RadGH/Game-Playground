@@ -1,0 +1,54 @@
+/* Carousel Recall — a merry-go-round drawn with CSS over a sunset sky, the players' chips, and a big grid of animal
+   buttons (3 across, 4 for eight animals). Nothing in here scrolls on its own. */
+.game-carousel-recall { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: radial-gradient(120% 70% at 50% 0%, #ffd9a8 0%, transparent 60%), linear-gradient(#ff9a7a, #ffcf8a 45%, #9be07a 45%, #6fbf5a);
+  color: var(--ink); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-carousel-recall.season-halloween { background: radial-gradient(120% 70% at 50% 0%, #4a3478 0%, transparent 60%), linear-gradient(#241a3d, #140f26 60%, #1d1430); }
+.game-carousel-recall > * { flex: none; }
+.game-carousel-recall.shake { animation: cr-shake .35s; }
+@keyframes cr-shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.cr-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 8px; }
+.cr-title { color: #fff3b8; font: 900 26px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.cr-ride { position: relative; width: min(100%, 520px); aspect-ratio: 5 / 3; max-height: 34dvh; }
+.cr-canopy { position: absolute; left: 4%; right: 4%; top: 0; height: 30%; border: 4px solid var(--ink); border-radius: 50% 50% 12px 12px / 90% 90% 12px 12px;
+  background: repeating-conic-gradient(from 0deg at 50% 100%, #e8394a 0 12deg, #fff 12deg 24deg); box-shadow: 0 5px 0 var(--ink); z-index: 1; }
+.season-halloween .cr-canopy { background: repeating-conic-gradient(from 0deg at 50% 100%, #ff8a1a 0 12deg, #2a1d4a 12deg 24deg); }
+.cr-canopy::after { content: ''; position: absolute; left: 50%; top: -18px; width: 16px; height: 22px; margin-left: -8px; background: #ffd23f; border: 3px solid var(--ink); border-radius: 50% 50% 4px 4px; }
+.cr-deck { position: absolute; left: 2%; right: 2%; bottom: 0; height: 26%; border: 4px solid var(--ink); border-radius: 50%; background: radial-gradient(#ffe7b8, #e0a26a); box-shadow: 0 6px 0 var(--ink); }
+.season-halloween .cr-deck { background: radial-gradient(#5a4a7a, #3b2c5c); }
+.cr-horse { position: absolute; width: 17%; aspect-ratio: 1; margin: 0 0 0 -8.5%; z-index: 2; animation: cr-bob 1.6s ease-in-out var(--d) infinite alternate; }
+.cr-horse .cr-ic { position: relative; width: 100%; height: 100%; padding: 8%; border-radius: 50%; background: var(--c); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); transition: transform .12s, box-shadow .12s, filter .12s; filter: saturate(.75) brightness(.95); }
+.cr-pole { position: absolute; left: 50%; top: -60%; bottom: -60%; width: 6px; margin-left: -3px; background: repeating-linear-gradient(#ffd23f 0 6px, #fff 6px 12px); border: 2px solid var(--ink); border-radius: 3px; z-index: -1; }
+.cr-horse.lit .cr-ic { transform: scale(1.35) translateY(-8%); filter: none; box-shadow: 0 0 0 5px #fff, 0 0 24px 10px #fff6b0, 0 3px 0 var(--ink); }
+@keyframes cr-bob { from { transform: translateY(-6%); } to { transform: translateY(6%); } }
+.cr-call { position: absolute; left: 0; right: 0; top: 34%; z-index: 4; text-align: center; font: 900 34px/1 var(--font); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.cr-call.show { opacity: 1; animation: cr-pop .4s ease-out; } .cr-call.good { color: var(--sun); } .cr-call.bad { color: #ffb3b3; } .cr-call.go { color: #b6ffa8; }
+@keyframes cr-pop { from { transform: scale(1.4); } to { transform: none; } }
+.cr-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.cr-board .chip { color: var(--ink); padding-right: 10px; }
+.cr-board .sc { font-style: normal; background: #fff3b8; border-radius: 8px; padding: 0 7px; }
+.cr-board .st { font-size: 13px; min-width: 14px; }
+.cr-board .chip.lead { background: var(--sun); } .cr-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.cr-board .chip.out { opacity: .5; } .cr-board .chip.done .st { color: #138a2c; }
+.cr-strip { min-height: 34px; display: grid; place-items: center; }
+.cr-progress { font: 900 20px/1 var(--font); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.cr-tune { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; max-width: 520px; }
+.cr-tune i { width: 30px; height: 30px; border-radius: 50%; background: var(--c); border: 2px solid var(--ink); display: grid; place-items: center; }
+.cr-tune .cr-ic { width: 24px; height: 24px; }
+.cr-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: min(100%, 460px); }
+.cr-pad.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.cr-btn { position: relative; display: grid; justify-items: center; gap: 2px; padding: 6px 2px 7px; min-height: 84px; border: 4px solid var(--ink); border-radius: 18px; background: var(--c);
+  box-shadow: 0 5px 0 var(--ink); font: 900 14px/1 var(--font); color: var(--ink); cursor: pointer; touch-action: none; -webkit-tap-highlight-color: transparent; opacity: .55; transition: opacity .15s; }
+.cr-btn .cr-ic { width: 52px; height: 52px; }
+.cr-btn b { background: rgba(255, 255, 255, .85); border-radius: 8px; padding: 2px 6px; }
+.can-tap .cr-btn { opacity: 1; }
+.cr-btn.lit { opacity: 1; box-shadow: 0 0 0 5px #fff, 0 0 22px 8px #fff6b0, 0 5px 0 var(--ink); transform: scale(1.06); }
+.cr-btn.tap { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.cr-btn.want { opacity: 1; animation: cr-want .3s 3; }
+@keyframes cr-want { 50% { box-shadow: 0 0 0 6px #ff5f5f, 0 5px 0 var(--ink); } }
+.cr-note { margin: 0; text-align: center; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px var(--ink); }
+.cr-note:empty { display: none; }
+.game-carousel-recall.watching .cr-pad { display: none; }
+.game-carousel-recall.watching .cr-ride { width: min(100%, 900px); max-height: 60dvh; }
+@media (max-height: 640px) { .cr-ride { max-height: 28dvh; } .cr-btn { min-height: 66px; } .cr-btn .cr-ic { width: 40px; height: 40px; } .cr-title { font-size: 20px; } }

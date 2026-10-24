@@ -11,3 +11,9 @@
 @media (max-width: 520px) { .game-fizzpop-pass .fzp-pill { top: calc(var(--st) + 52px); font-size: 14px; } }
 
 .tag.fzp-cpu { background: #ff8a1f; }
+/* round 12: the fizz meter in the pill (4 steps, the server's heat) and the 🚫 over who you cannot pass back to */
+.fzp-heat { display: inline-flex; gap: 3px; margin-left: 2px; }
+.fzp-heat u { width: 9px; height: 16px; border-radius: 3px; border: 2px solid var(--ink); background: #fff; }
+.fzp-heat u.on:nth-child(1) { background: #ffd23f; } .fzp-heat u.on:nth-child(2) { background: #ffa531; }
+.fzp-heat u.on:nth-child(3) { background: #ff6a3d; } .fzp-heat u.on:nth-child(4) { background: #ff2a4a; }
+.tag.fzp-noback { background: #fff; color: #d8203a; text-shadow: none; font-size: 14px; }

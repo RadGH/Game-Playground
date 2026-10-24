@@ -6,6 +6,7 @@ import { createStage } from './stage.js';
 import { createControls, isTouch } from './controls.js';
 import { createLineup } from './lineup.js';
 import { createBoardView, SPACE_LOOK } from './boardview.js';
+import { createEventDock, ITEMS } from './boardevents.js';   // round 12: the board's live events
 import { createPlay } from './play.js';
 import { loadAvatarData, portrait, costumes, RACES, RACE_NAMES } from './avatars.js';
 import { SEASONS, seasonByDate, seasonName, inSeason } from '../shared/seasons.js';
@@ -23,7 +24,8 @@ import { tally, deviceKind } from './tally.js';
 import { account } from '../../../../shared/rgs-account.js';          // games.radgh.com accounts (2026-10-23): optional
 import { openSignIn, accountButton } from '../../../../shared/rgs-signin.js';
 import { GAMES, gameIds } from '../games/metas.js';
-import { KINDS, kindsOf, hasKind } from '../games/tags.js';     // meta only: the rules stay on the server
+import { KINDS, kindsOf, hasKind } from '../games/tags.js';
+import { createWhatsNew } from '../../../../shared/whats-new.js';    // 2026-10-24: the changelog (data/changelog.json)     // meta only: the rules stay on the server
 
 const $ = s => document.querySelector(s);
 const screen = $('#screen'), hud = $('#hud'), toasts = $('#toasts');
@@ -48,7 +50,7 @@ window.gameEye = { state() {
   return { phase: S.phase, me: S.me?.name, room: r ? { code: r.code, you: r.you, host: r.host, opts: r.opts, season: r.season, members: r.members.map(m => ({ pid: m.pid, name: m.name, seat: m.seat, display: !!m.display, on: m.on })) } : null,
     match: r?.match ? { mode: r.match.mode, round: r.match.round, rounds: r.match.rounds, points: r.match.points } : null,
     minigame: S.pm?.game || null, controls: S.pm?.game ? GAMES[S.pm.game]?.meta.controls || GAMES[S.pm.game]?.meta.kind : null,
-    board: S.phase === 'board' ? { turn: S.bd.pid, sub: S.bd.sub, ask: S.bd.ask, tickets: S.bd.tickets, ribbons: S.bd.ribbons, bulletin: S.bd.mods } : null,
+    board: S.phase === 'board' ? { turn: S.bd.pid, sub: S.bd.sub, ask: S.bd.ask, tickets: S.bd.tickets, ribbons: S.bd.ribbons, bulletin: S.bd.mods, event: dock.kind, eventPlayers: dock.active && !dock.done ? dock.pids : [], cards: S.bd.items || {} } : null,
     gameState: game, modal: S.modal ? (S.modal.el?.className || 'modal') : null, err: S.err || null };
 } };
 /** The holiday look of the menus (round 6): body[data-season], plus a few bats crossing the sky at Halloween. */
@@ -93,6 +95,10 @@ const seatOf = m => (m?.seat != null ? SEATS[m.seat] : null);
 const isHost = () => S.room && S.room.host === S.room.you;
 const seated = () => members().filter(m => m.seat != null).sort((a, b) => a.seat - b.seat);
 const left = () => Math.max(0, Math.ceil((S.ends - performance.now()) / 1000));
+// "What's new" (2026-10-24): one button element, re-placed on the title like the account pill; a dot while unread
+const news = createWhatsNew({ url: new URL('../../data/changelog.json', import.meta.url), key: 'tumblefair', title: "What's new at the fair" });
+const newsBtn = news.button({ label: "✨ What's new", className: 'btn small ghost' });
+news.onUnread(n => { if (n && !S.newsToldFor) { S.newsToldFor = true; setTimeout(() => { if (!S.room) toast(`The fair was updated — tap ✨ What's new to see ${n > 1 ? `the ${n} updates` : 'what changed'}.`); }, 1500); } });
 function toast(text, cls = '') { const e = h('div', 'toast ' + cls); e.textContent = text; toasts.append(e); setTimeout(() => e.classList.add('out'), 2600); setTimeout(() => e.remove(), 3100); }
 const face = m => `<i class="face">${m?.look ? `<img src="${portrait(m)}" alt="">` : ''}</i>`;
 const chipOf = (m, extra = '') => { const s = seatOf(m); return `<span class="chip${m.pid === S.room?.you ? ' me' : ''}${m.on === false ? ' off' : ''}" data-pid="${m.pid}" ${s ? `data-shape="${s.shape}" style="--seat:${s.color};--seat-dark:${s.dark}"` : ''}>${face(m)}<b class="nm">${esc(m.name)}</b>${extra}</span>`; };
@@ -106,7 +112,7 @@ function setScreen(cls, html) { screen.className = cls; screen.innerHTML = html;
 function safeFor(kind) {
   const portraitMode = innerHeight > innerWidth;
   stage.setSafe(kind === 'arena' ? { top: 0.13, bottom: isTouch() ? (portraitMode ? 0.3 : 0.06) : 0.09, left: 0.03, right: 0.03 }
-    : kind === 'board' ? { top: 0.14, bottom: 0.2, left: 0.03, right: 0.03 }
+    : kind === 'board' ? (S.boardSafe || { top: 0.1, bottom: 0.18, left: 0.02, right: 0.02 })
     : kind === 'editor' ? (portraitMode ? { top: 0.07, bottom: 0.6, left: 0.06, right: 0.06 } : { top: 0.08, bottom: 0.06, left: 0.04, right: Math.min(0.62, 470 / innerWidth + 0.04) })
     : kind === 'lobby' ? (portraitMode ? { top: 0.1, bottom: 0.62, left: 0.04, right: 0.04 } : { top: 0.16, bottom: 0.12, left: 0.04, right: 0.5 })
     : { top: 0.1, bottom: 0.5, left: 0.04, right: 0.04 });
@@ -155,10 +161,10 @@ function showTitle() {
       <div class="row title-extras"><button class="btn" data-act="watch" title="Watch a game on a TV, or sit one out">👀 Spectate</button><button class="btn" data-act="mygames" title="Every minigame you've played, and your likes">⭐ My games</button></div>
       <p class="err">${esc(S.err)}</p>
     </div>
-    <p class="foot"><span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>`);
+    <p class="foot"><span class="wn-slot"></span><span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>`);
   placeAcct();
 }
-function placeAcct() { screen.querySelector('.acct-slot')?.append(acctTitle); }
+function placeAcct() { screen.querySelector('.acct-slot')?.append(acctTitle); screen.querySelector('.wn-slot')?.append(newsBtn); }
 function saveName() { const n = $('#name')?.value.trim(); if (n && n !== S.me?.name) net.send({ t: 'profile', name: n }); }
 
 // ------------------------------------------------------------------ lobby
@@ -212,58 +218,100 @@ function drawHud() {
   const r = S.room; if (!r?.match || S.phase === 'game' || S.phase === 'intro' || S.phase === 'lobby') { hud.innerHTML = ''; return; }
   const board = r.match.mode === 'board';
   const teams = S.teams ? `<span class="teams">${S.teams.map(t => `<b class="team t${t.team}">${esc(t.name)}: ${board ? `${t.ribbons} ribbons` : `${t.points} pts`}</b>`).join('')}</span>` : '';
+  if (board && S.phase === 'board') {
+    // round 12 (owner's phone screenshots): ONE row that never wraps — a face, tickets over ribbons, the player whose
+    // turn it is lit up; the round number moved down beside the bulletin tag so the strip has the width
+    hud.innerHTML = `<div class="match-bar board-strip">${teams}<div class="strip">${seated().map(m => chipOf(m, `<span class="sc2"><em class="sc tk">${ICON.ticket}${S.bd.tickets[m.pid] ?? 0}</em><em class="sc rb">${ICON.ribbon}${S.bd.ribbons[m.pid] ?? 0}</em></span>${(S.bd.items?.[m.pid] || []).length ? `<i class="cardn" title="Prize cards">${S.bd.items[m.pid].length}</i>` : ''}`)).join('')}</div></div>`;
+    const on = S.bd.pid != null && hud.querySelector(`[data-pid="${S.bd.pid}"]`); if (on) { on.classList.add('turn'); on.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }); }
+    return;
+  }
   hud.innerHTML = `<div class="match-bar"><span class="round">${r.match.mode === 'golf' ? 'Hole' : r.match.mode === 'custom' ? 'Game' : 'Round'} ${r.match.round}${r.match.rounds ? '/' + r.match.rounds : ''}${r.match.goal ? ` · first to ${r.match.goal}` : ''}</span>${teams}${seated().map(m => chipOf(m, board
     ? `<em class="sc tk">${ICON.ticket}${S.bd.tickets[m.pid] ?? 0}</em><em class="sc rb">${ICON.ribbon}${S.bd.ribbons[m.pid] ?? 0}</em>` : `<em class="sc">${r.match.points[m.pid] ?? 0} pts</em>`)).join('')}</div>`;
   if (board && S.bd.pid != null) hud.querySelector(`[data-pid="${S.bd.pid}"]`)?.classList.add('turn');
 }
 
 // ------------------------------------------------------------------ board
+// Round 12 (2026-10-24, owner: "more interactive… better presentation and pacing"): nothing covers the board any more.
+// Top: the one-row score strip, then a row with the round, the bulletin tag and the die. Bottom: a two-line ticker of
+// what just happened, and under it the live event card (js/client/boardevents.js), the "your turn" buttons, or whose
+// turn it is. Results also pop up over the pieces (boardview.js). The ticker and the score strip change when the board
+// PLAYS a result (boardview's onPlay), not when the message arrives, so a "+3" never shows before the piece gets there.
+const nameOf = p => members().find(m => m.pid === p)?.name || 'Player';
+const dock = createEventDock({ me: () => S.room?.you, nameOf, faceOf: p => face(members().find(m => m.pid === p)), send: i => net.send({ t: 'choose', i }), sfx: n => sfx(n) });
 async function ensureBoard() {
   const id = BOARDS[S.room?.match?.boardId] ? S.room.match.boardId : 'fairground';
   if (S.board && S.board.id !== id) dropBoard();
-  if (!S.board && !S.boardP) S.boardP = createBoardView({ stage, season: S.room?.season || null, def: BOARDS[id], members, me: S.room.you, assetBase: ART }).then(b => { b.id = id; S.board = b; S.boardP = null; if (S.room?.match?.board) b.sync(S.room.match.board); return b; });
+  if (!S.board && !S.boardP) S.boardP = createBoardView({ stage, season: S.room?.season || null, def: BOARDS[id], members, me: S.room.you, assetBase: ART, onPlay: playedBoard }).then(b => { b.id = id; S.board = b; S.boardP = null; if (S.room?.match?.board) b.sync(S.room.match.board); return b; });
   return S.board || S.boardP;
 }
-function dropBoard() { S.board?.dispose(); S.board = null; }
+function dropBoard() { S.board?.dispose(); S.board = null; dock.clear(); }
+/** One line on the ticker (the newest on the bottom; two lines at most). */
+function feed(text, pid = null, cls = '') {
+  if (!text) return;
+  const f = S.bd.feed || (S.bd.feed = []); f.push({ text, pid, cls, n: (S.bd.feedN = (S.bd.feedN || 0) + 1) }); while (f.length > 2) f.shift();
+}
 function showBoard() {
   setSafe('board'); lineup.show(false);
-  const b = S.bd, turn = members().find(m => m.pid === b.pid), my = b.pid === S.room.you;
+  const b = S.bd, turn = members().find(m => m.pid === b.pid), my = b.pid === S.room.you, r = S.room.match;
   let body = '';
-  if (b.ask && my && b.ask.kind === 'duck') body = `<div class="panel ask duck-ask"><h3>Duck Pond: pick a duck!</h3><div class="row ducks">${b.ask.options.map((o, i) => `<button class="btn big duck d${i}" data-act="choose" data-i="${i}" aria-label="${esc(o)}">${DUCK}<span>${esc(o.split(' ')[0])}</span></button>`).join('')}</div></div>`;
+  const items = (b.items?.[S.room.you] || []).map((id, i) => `<button class="pcard" data-act="item" data-i="${i}" title="${esc(ITEMS[id]?.text || '')}"><b>${esc(ITEMS[id]?.name || id)}</b><small>${esc(ITEMS[id]?.short || '')}</small></button>`).join('');
+  if (dock.active) body = '';
   else if (b.ask && my) body = `<div class="panel ask"><h3>${b.ask.kind === 'booth' ? 'Prize Booth' : 'Crossroads'}</h3><div class="row">${b.ask.options.map((o, i) => `<button class="btn big${i === 0 ? ' primary' : ''}" data-act="choose" data-i="${i}">${esc(o)}</button>`).join('')}</div></div>`;
-  else if (b.ask) body = `<div class="banner">${esc(turn?.name || '')} ${b.ask.kind === 'duck' ? 'is picking a duck…' : 'is deciding…'}</div>`;
-  else if (b.sub === 'roll' && my && S.bd.hands) { const hand = S.bd.hands[S.room.you] || []; body = `<div class="panel ask hand"><h3>Play a move card</h3><div class="row cards">${hand.map((n, i) => `<button class="mcard" data-act="card" data-i="${i}" aria-label="Move ${n}"><b>${n}</b><small>${n === 1 ? 'space' : 'spaces'}</small></button>`).join('')}<button class="mcard mystery" data-act="card" data-i="-1" aria-label="A mystery card from a rival"><b>?</b><small>a rival's</small></button></div></div>`; }
-  else if (b.sub === 'roll' && my) body = `<button class="btn huge primary roll" data-act="roll">ROLL!</button>`;
-  else if (b.sub === 'roll') body = `<div class="banner">${esc(turn?.name || '')}'s turn</div>`;
-  const dice = b.dice ? `<div class="dice2">${b.dice.map(n => `<div class="die ${b.boost === 'gold' ? 'gold' : 'sticky'}">${n}</div>`).join('')}</div>` : b.rolled ? `<div class="die" data-n="${b.rolled}">${b.rolled}</div>` : '';
-  const duel = b.duel ? `<div class="dice2 duel">${b.duel.dice.map((n, i) => `<div class="die${b.duel.winner === b.duel.pids[i] ? ' won' : ''}"><small>${esc(b.duel.names[i])}</small>${n}</div>`).join('<b class="vs">VS</b>')}</div>` : '';
-  const bull = b.bulletin ? `<div class="bulletin"><small>FAIR BULLETIN · Round ${b.bulletin.round}</small><h2>${esc(b.bulletin.title)}</h2><p>${esc(b.bulletin.text)}</p></div>` : '';
+  else if (b.ask) body = `<div class="turnline">${face(turn)}<b>${esc(turn?.name || '')}</b> is choosing a way…</div>`;
+  else if (b.sub === 'roll' && my && S.bd.hands) { const hand = S.bd.hands[S.room.you] || []; body = `<div class="panel ask hand cta"><h3>Your turn! Play a move card</h3>${items ? `<div class="row pcards">${items}</div>` : ''}<div class="row cards">${hand.map((n, i) => `<button class="mcard" data-act="card" data-i="${i}" aria-label="Move ${n}"><b>${n}</b><small>${n === 1 ? 'space' : 'spaces'}</small></button>`).join('')}<button class="mcard mystery" data-act="card" data-i="-1" aria-label="A mystery card from a rival"><b>?</b><small>a rival's</small></button></div></div>`; }
+  else if (b.sub === 'roll' && my) body = `<div class="cta">${items ? `<div class="row pcards"><span>Play a card first?</span>${items}</div>` : ''}<button class="btn huge primary roll" data-act="roll">Your turn! ROLL</button></div>`;
+  else if (b.sub === 'roll') body = `<div class="turnline">${face(turn)}<b>${esc(turn?.name || '')}'s turn</b></div>`;
+  const dice = b.dice ? `<div class="bdie two">${b.dice.map(n => `<i class="${b.boost === 'gold' ? 'gold' : 'sticky'}">${n}</i>`).join('')}</div>` : b.rolled ? `<div class="bdie"><i>${b.rolled}</i></div>` : '';
+  const bull = b.bulletin ? `<div class="bulletin"><small>FAIR BULLETIN · Round ${b.bulletin.round}</small><h2>${esc(b.bulletin.short || b.bulletin.title)}</h2><p><b>${esc(b.bulletin.title)}</b> ${esc(b.bulletin.text)}</p></div>` : '';
+  const round = r ? `<span class="round">Round ${r.round}${r.rounds ? '/' + r.rounds : ''}${r.goal ? ` · first to ${r.goal}` : ''}</span>` : '';
   const mod = b.mods ? `<button class="mods" data-act="bulletin" title="What this round's bulletin does">${esc(b.mods)} <i>ⓘ</i></button>` : '';
-  setScreen('board', `${bull}${mod}${dice}${duel}${b.text ? `<div class="banner fx">${esc(b.text)}</div>` : ''}<div class="board-foot">${body}</div>`);
+  const tick = (b.feed || []).map((f, i, all) => `<p class="${f.cls}${i === all.length - 1 ? ' new' : ''}" data-n="${f.n}">${f.pid != null ? face(members().find(m => m.pid === f.pid)) : ''}<span>${esc(f.text)}</span></p>`).join('');
+  setScreen('board', `<div class="board-sub">${round}${mod}</div>${dice}${bull}<div class="board-foot">${tick && !dock.active ? `<div class="ticker">${tick}</div>` : ''}<div class="foot-main">${body}</div></div>`);
+  if (dock.active) screen.querySelector('.foot-main').append(dock.el);
+  // the camera frames the board in whatever the foot leaves free (it grows for an event, shrinks for a banner)
+  const foot = screen.querySelector('.board-foot'), top = 0.1;
+  if (foot) { const hgt = foot.getBoundingClientRect().height + 12; S.boardSafe = { top, bottom: Math.min(0.55, Math.max(0.1, hgt / innerHeight)), left: 0.02, right: 0.02 }; stage.setSafe(S.boardSafe); }
   drawHud();
+}
+/** The board view has just played a result: now the ticker and the score strip may show it. */
+function playedBoard(ev) {
+  const b = S.bd;
+  if (ev.tickets && typeof ev.tickets === 'object') Object.assign(b.tickets, ev.tickets);
+  if (ev.ribbons && typeof ev.ribbons === 'object') Object.assign(b.ribbons, ev.ribbons);
+  if (ev.ev === 'fx' && ev.text && !['duel', 'striker', 'chance', 'shell', 'pact', 'crowd', 'fortune', 'duck', 'duckpond'].includes(ev.kind)) {
+    feed(ev.text, ev.pid, (ev.d ?? 0) < 0 || ev.kind === 'pit' || ev.kind === 'trap' ? 'bad' : (ev.d ?? 0) > 0 || ev.kind === 'ribbon' ? 'good' : '');
+    sfx(ev.kind === 'ribbon' ? 'win' : ev.kind === 'trap' ? 'trap' : (ev.d ?? 0) < 0 || ev.kind === 'pit' ? 'bad' : 'good');
+  }
+  if (ev.ev === 'item' && ev.text) feed(ev.text, ev.pid, 'good');
+  if (S.phase === 'board') showBoard();
 }
 function onBoard(ev) {
   const b = S.bd;
   S.board?.event(ev);
+  dock.onEvent(ev);
   if (ev.ev === 'bulletin') {
-    b.bulletin = { title: ev.title, text: ev.text, round: ev.round }; b.mods = ev.id === 'quiet' ? '' : ev.title.replace(/!$/, ''); b.modsInfo = b.bulletin;
-    Object.assign(b.tickets, ev.tickets || {}); Object.assign(b.ribbons, ev.ribbons || {}); b.text = ''; sfx('open');
-    setTimeout(() => { if (S.bd.bulletin?.title === ev.title) { S.bd.bulletin = null; if (S.phase === 'board') showBoard(); } }, 4000);
+    b.bulletin = { title: ev.title, short: ev.short, text: ev.text, round: ev.round }; b.mods = ev.id === 'quiet' ? '' : (ev.short || ev.title.replace(/!$/, '')); b.modsInfo = b.bulletin;
+    if (ev.items) b.items = ev.items;
+    Object.assign(b.tickets, ev.tickets || {}); Object.assign(b.ribbons, ev.ribbons || {}); b.feed = []; sfx('open');
+    setTimeout(() => { if (S.bd.bulletin?.title === ev.title) { S.bd.bulletin = null; if (S.phase === 'board') showBoard(); } }, 2500);
   }
-  if (ev.ev === 'turn') { b.bulletin = null; b.duel = null; b.dice = null; b.boost = null; }
+  if (ev.items) b.items = ev.items;
   if (ev.hands) b.hands = ev.hands;
-  if (ev.ev === 'turn') { b.pid = ev.pid; b.sub = 'roll'; b.ask = null; b.rolled = null; b.text = ''; if (ev.pid === S.room?.you) { sfx('turn'); navigator.vibrate?.(60); } }
+  if (ev.ev === 'turn') { dock.clear(); b.bulletin = null; b.dice = null; b.boost = null; b.pid = ev.pid; b.sub = 'roll'; b.ask = null; b.rolled = null; if (ev.pid === S.room?.you) { sfx('turn'); navigator.vibrate?.(60); } }
   if (ev.ev === 'rolled') { b.sub = 'move'; b.rolled = ev.n; b.dice = ev.dice || null; b.boost = ev.boost || null; sfx('dice');
-    if (ev.card != null) { const nm = p => members().find(m => m.pid === p)?.name || ''; b.text = ev.from != null ? `${nm(ev.pid)} draws a mystery card from ${nm(ev.from)}: ${ev.card}!` : `${nm(ev.pid)} plays a ${ev.card}`; } }
-  if (ev.ev === 'step') { b.tickets[ev.pid] = ev.tickets; setTimeout(() => { S.bd.rolled = null; S.bd.dice = null; if (S.phase === 'board') showBoard(); }, 600); if (ev.lap) toast(`${members().find(m => m.pid === ev.pid)?.name || ''} passes the gate: +5 tickets`); }
-  if (ev.ev === 'ask') { b.ask = { kind: ev.kind, options: ev.options }; b.sub = 'ask'; }
+    if (ev.card != null) feed(ev.from != null ? `${nameOf(ev.pid)} draws a mystery card from ${nameOf(ev.from)}: ${ev.card}!` : `${nameOf(ev.pid)} plays a ${ev.card}`, ev.pid); }
+  if (ev.ev === 'step') { b.tickets[ev.pid] = ev.tickets; setTimeout(() => { if (S.bd.sub !== 'roll') { S.bd.rolled = null; S.bd.dice = null; } if (S.phase === 'board') showBoard(); }, ev.ms + 300); if (ev.lap) feed(`${nameOf(ev.pid)} passes the gate: +5 tickets`, ev.pid, 'good'); }
+  if (ev.ev === 'ask' && ev.kind !== 'duck') { b.ask = { kind: ev.kind, options: ev.options }; b.sub = 'ask'; }
+  if (ev.ev === 'ask' && ev.kind === 'duck') b.sub = 'event';
   if (ev.ev === 'chose') { b.ask = null; b.sub = 'move'; }
+  if (ev.ev === 'event') { b.sub = 'event'; b.rolled = null; b.dice = null; }
   if (ev.ev === 'fx') {
-    if (ev.tickets && typeof ev.tickets === 'object') Object.assign(b.tickets, ev.tickets); else if (ev.tickets != null) b.tickets[ev.pid] = ev.tickets;
-    if (ev.ribbons && typeof ev.ribbons === 'object') Object.assign(b.ribbons, ev.ribbons); else if (ev.ribbons != null) b.ribbons[ev.pid] = ev.ribbons;
-    b.text = ev.text || ''; b.sub = 'fx';
-    b.duel = ev.kind === 'duel' && ev.dice ? { dice: ev.dice, pids: [ev.pid, ev.with], winner: ev.winner, names: [ev.pid, ev.with].map(p => members().find(m => m.pid === p)?.name || '') } : null;
-    if (ev.text) sfx(ev.kind === 'ribbon' ? 'win' : (ev.d ?? 0) < 0 || ev.kind === 'pit' ? 'bad' : 'good');
+    b.sub = 'fx';
+    if (!S.board) playedBoard(ev);                                  // (no board view yet: show it now)
+    if (ev.text && ['duel', 'striker', 'chance', 'shell', 'pact', 'crowd', 'fortune', 'duck'].includes(ev.kind)) {
+      if (ev.tickets) Object.assign(b.tickets, ev.tickets); if (ev.ribbons) Object.assign(b.ribbons, ev.ribbons);
+      feed(ev.text, ev.pid, (ev.d ?? 0) < 0 ? 'bad' : 'good'); sfx((ev.d ?? 0) < 0 ? 'bad' : 'good');
+    }
   }
   if (S.phase === 'board') showBoard();
 }
@@ -294,7 +342,7 @@ function showPick() {
   const kinds = Object.keys(KINDS).filter(k => pm.options.some(id => hasKind(id, k)));
   setScreen('vote pick', `<h1 class="shout">${host ? 'Pick the next game' : 'The host is picking…'}</h1>
     ${host ? `<div class="row kind-chips"><button class="pill${by ? '' : ' on'}" data-act="pickkind" data-k="">All</button>${kinds.map(k => `<button class="pill${by === k ? ' on' : ''}" data-act="pickkind" data-k="${k}">${esc(KINDS[k])}</button>`).join('')}</div>` : ''}
-    <div class="pool-grid pick-grid">${list.map(id => { const m = GAMES[id].meta, again = S.room.match?.played?.includes?.(id); return `<button class="pool-g${again ? ' asleep' : ''}" data-act="pickgame" data-id="${id}" ${host ? '' : 'disabled'}><img src="${ART}${m.card}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><small>${esc(kindsOf(id).map(k => KINDS[k]).join(' · ') || (m.tags || []).join(', '))}</small></button>`; }).join('')}</div>
+    <div class="pool-grid pick-grid">${list.map(id => { const m = GAMES[id].meta, again = S.room.match?.played?.includes?.(id); return `<button class="pool-g${again ? ' asleep' : ''}" data-act="pickgame" data-id="${id}" ${host ? '' : 'disabled'}><img src="${ART}${m.card}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><small>${esc(kindsOf(id).map(k => KINDS[k]).join(' · ') || (m.tags || []).join(', '))}</small>${freshTag(S.room?.fresh?.[id])}</button>`; }).join('')}</div>
     ${host ? `<div class="row"><button class="btn big" data-act="pickgame" data-id="finish">Finish and see who won</button></div>` : '<p class="note">Get ready — any moment now.</p>'}
     ${S.lastGame && !S.rated[S.lastGame] ? rateBox(S.lastGame, true) : ''}`);
   drawHud();
@@ -303,8 +351,10 @@ function showPick() {
 const BADGE = { top: '⭐ Top rated', funny: '😂 Funniest', close: '🔥 Most competitive', teamwork: '🤝 Best teamwork', skill: '🎯 Most skillful', chill: '🌿 Most relaxing' };
 function voteBadge(pm, id) {
   const b = pm.labels?.[id], pct = pm.rating?.[id];
-  return `${b ? `<em class="vote-badge">${esc(BADGE[b] || BADGE.top)}</em>` : ''}${pct != null ? `<small class="vote-pct">👍 ${pct}%</small>` : ''}`;
+  return `${b ? `<em class="vote-badge">${esc(BADGE[b] || BADGE.top)}</em>` : ''}${pct != null ? `<small class="vote-pct">👍 ${pct}%</small>` : ''}${freshTag(pm.fresh?.[id] || S.room?.fresh?.[id])}`;
 }
+/** Round 12: ✨ New / 🔧 Updated for a game that just arrived or changed (js/games/fresh.js; the server decides). */
+const freshTag = f => f ? `<em class="fresh-tag ${f}">${f === 'new' ? '✨ New' : '🔧 Updated'}</em>` : '';
 function showContinue() {
   setSafe('title'); const me = mine(), can = me?.seat != null, mineV = S.votes[S.room.you];
   const count = i => Object.values(S.votes).filter(v => v === i).length;
@@ -397,7 +447,7 @@ async function onPhase(pm) {
   if (pm.phase !== 'game' && pm.phase !== 'results' && pm.phase !== 'intro') dropPlay();
   switch (pm.phase) {
     case 'lobby': S.teams = null; dropBoard(); S.bd = { tickets: {}, ribbons: {}, pid: null, ask: null, rolled: null }; showLobby(); break;
-    case 'board': await ensureBoard(); if (S.phase !== 'board') return; S.board.show?.(); showBoard(); break;
+    case 'board': await ensureBoard(); if (S.phase !== 'board') return; S.board.show?.(); if (S.bd.pid != null) S.board.look(S.bd.pid); showBoard(); break;
     case 'continue': S.votes = pm.votes || {}; lineup.show(false); showContinue(); sfx('open'); break;
     case 'vote': S.votes = pm.votes || {}; S.voted = null; lineup.show(false); if (S.room.match.mode === 'board') await ensureBoard(); showVote(); sfx('open'); break;
     case 'intro': {
@@ -434,7 +484,7 @@ net.on('room', r => {
   // a host's last minigame list comes back with them (round 5)
   if (r.phase === 'lobby' && r.host === r.you && S.poolFor !== r.code) { S.poolFor = r.code; try { const v = JSON.parse(localStorage.getItem('tumblefair.pool') || '[]').filter(id => GAMES[id]); if (v.length && !r.opts.pool?.length) net.send({ t: 'opt', key: 'pool', value: v }); } catch {} }
   const first = !S.room; S.room = r;
-  if (r.match?.board) { Object.assign(S.bd.tickets, r.match.board.tickets); Object.assign(S.bd.ribbons, r.match.board.ribbons); S.bd.pid = r.match.board.pid; S.bd.mods = r.match.board.bulletin && r.match.board.bulletin.id !== 'quiet' ? r.match.board.bulletin.title.replace(/!$/, '') : ''; if (r.match.board.bulletin) S.bd.modsInfo = { title: r.match.board.bulletin.title, text: r.match.board.bulletin.text, round: r.match.board.bulletin.round ?? r.match.round }; S.bd.sub = S.bd.sub || r.match.board.sub; if (r.match.board.hands) S.bd.hands = r.match.board.hands; if (r.match.board.ask && !S.bd.ask) S.bd.ask = r.match.board.ask; S.board?.sync(r.match.board); }
+  if (r.match?.board) { Object.assign(S.bd.tickets, r.match.board.tickets); Object.assign(S.bd.ribbons, r.match.board.ribbons); S.bd.pid = r.match.board.pid; S.bd.mods = r.match.board.bulletin && r.match.board.bulletin.id !== 'quiet' ? (r.match.board.bulletin.short || r.match.board.bulletin.title.replace(/!$/, '')) : ''; if (r.match.board.bulletin) S.bd.modsInfo = { title: r.match.board.bulletin.title, short: r.match.board.bulletin.short, text: r.match.board.bulletin.text, round: r.match.board.bulletin.round ?? r.match.round }; if (r.match.board.items) S.bd.items = r.match.board.items; S.bd.sub = S.bd.sub || r.match.board.sub; if (r.match.board.hands) S.bd.hands = r.match.board.hands; if (r.match.board.ask && !S.bd.ask) S.bd.ask = r.match.board.ask; S.board?.sync(r.match.board); }
   if (first) { history.replaceState(null, '', `?code=${r.code}${S.asDisplay ? '&display=1' : ''}`); if (r.phase === 'lobby') onPhase({ phase: 'lobby' }); }
   else if (r.phase === 'lobby' && S.phase === 'lobby') showLobby();
   else drawHud();
@@ -500,6 +550,7 @@ screen.addEventListener('click', e => {
     case 'roll': net.send({ t: 'roll' }); S.bd.sub = 'move'; showBoard(); break;
     case 'card': net.send({ t: 'card', i: +b.dataset.i }); S.bd.sub = 'move'; showBoard(); break;
     case 'choose': net.send({ t: 'choose', i: +b.dataset.i }); S.bd.ask = null; showBoard(); break;
+    case 'item': net.send({ t: 'choose', i: +b.dataset.i }); break;                    // round 12: a prize card, before rolling
     case 'vote': net.send({ t: 'vote', i: +b.dataset.i }); break;
     case 'skip': net.send({ t: 'skip' }); break;
     case 'edit': saveName(); openEditor(); tally('open_editor'); break;
@@ -590,7 +641,7 @@ function openPool() {
       ${host && kind ? `<div class="row"><button class="btn small" data-only-kind="${kind}">Tick only ${esc(KINDS[kind])}</button><button class="btn small" data-add-kind="${kind}">Tick all ${esc(KINDS[kind])} too</button></div>` : ''}
       <p class="note">${host ? 'Untick the games you do not want tonight. The vote only offers ticked games that fit the number of players.' : 'Only the host can change this.'}</p>
       ${host ? `<div class="row"><button class="btn small" data-all="1">All</button><button class="btn small" data-all="0">None</button>${Object.entries(TAG_NAMES).map(([t, n]) => `<button class="btn small" data-tag="${t}">Only ${n}</button>`).join('')}</div>` : ''}
-      ${Object.entries(groups).map(([t, list]) => `<h3>${esc(TAG_NAMES[t] || t)}</h3>${t === 'holiday' ? `<p class="note">${season ? `On now: ${esc(seasonName(season))}.` : 'Off right now.'} Holiday games only come up while their holiday is on. Tick the holiday mode box in the lobby to play nothing else.</p>` : ''}<div class="pool-grid">${list.sort((a, b) => a[1].title.localeCompare(b[1].title)).map(([id, m]) => `<button class="pool-g${pick.has(id) ? ' on' : ''}${m.season && m.season !== season ? ' asleep' : ''}" data-id="${id}" ${host ? '' : 'disabled'}><img src="${ART}${m.card}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><small>${m.season && m.season !== season ? `${esc(seasonName(m.season))} only` : `${m.min === m.max ? m.min : `${m.min}–${m.max}`} players`}</small><i class="tick">${pick.has(id) ? '✓' : ''}</i></button>`).join('')}</div>`).join('')}
+      ${Object.entries(groups).map(([t, list]) => `<h3>${esc(TAG_NAMES[t] || t)}</h3>${t === 'holiday' ? `<p class="note">${season ? `On now: ${esc(seasonName(season))}.` : 'Off right now.'} Holiday games only come up while their holiday is on. Tick the holiday mode box in the lobby to play nothing else.</p>` : ''}<div class="pool-grid">${list.sort((a, b) => a[1].title.localeCompare(b[1].title)).map(([id, m]) => `<button class="pool-g${pick.has(id) ? ' on' : ''}${m.season && m.season !== season ? ' asleep' : ''}" data-id="${id}" ${host ? '' : 'disabled'}><img src="${ART}${m.card}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><small>${m.season && m.season !== season ? `${esc(seasonName(m.season))} only` : `${m.min === m.max ? m.min : `${m.min}–${m.max}`} players`}</small><i class="tick">${pick.has(id) ? '✓' : ''}</i>${freshTag(S.room?.fresh?.[id])}</button>`).join('')}</div>`).join('')}
       <button class="btn big primary" data-close="1">Done</button></div>`;
   };
   el.addEventListener('click', e => {
@@ -679,9 +730,11 @@ function openMenu() {
     <button class="btn big primary" data-m="close">Back to ${playing ? 'the game' : inRoom ? 'the lobby' : 'the fair'}</button>
     ${inRoom ? '<button class="btn big" data-m="qr">Invite people (QR code)</button>' : ''}
     <button class="btn big" data-m="mygames">My games</button>
+    <button class="btn big" data-m="news">✨ What's new</button>
     <button class="btn big" data-m="fb">Report a bug or idea</button>
     ${account.known ? `<button class="btn big" data-m="signout">Sign out (${esc(account.known.username || account.known.name || 'account')})</button>` : '<button class="btn big" data-m="signin">Sign in (optional)</button>'}
-    <button class="btn big danger" data-m="home">${inRoom ? 'Leave to the main menu' : 'Main menu'}</button></div>`;
+    <button class="btn big danger" data-m="home">${inRoom ? 'Leave to the main menu' : 'Main menu'}</button>
+    ${inRoom && net.status === 'online' ? `<p class="menu-net"><i class="netq ${netq.className.split(' ')[1] || 'good'}"></i>Connection: ${netText()} round trip</p>` : ''}</div>`;
   el.addEventListener('click', e => {
     if (e.target === el) { closeModal(); return; }
     const m = e.target.closest('[data-m]')?.dataset.m; if (!m) return;
@@ -690,6 +743,7 @@ function openMenu() {
     else if (m === 'qr') { closeModal(); showBigQr(); }
     else if (m === 'fb') { closeModal(); fb.open({ kind: 'idea' }); }
     else if (m === 'mygames') { closeModal(); myGames.open(); }
+    else if (m === 'news') { closeModal(); news.open(); }
     else if (m === 'signin') { closeModal(); openSignIn(ACCT); }
     else if (m === 'signout') { closeModal(); account.signOut(); }
     else if (m === 'home') {
@@ -740,14 +794,21 @@ window.tumblefairQr = { show: () => showBigQr(), close: () => closeBigQr(), get 
 let lastT = performance.now(), lastCount = -1, netAt = 0, qrAt = 0;
 // The connection readout (round 4): the round trip to the server and how uneven it is, in the corner during a match,
 // so "it lags" can be told apart from "this phone's line is bad". Green under 80 ms, amber under 160, red above.
-const netq = h('div', 'netq'); document.body.append(netq);
+// Round 12 (owner's phone screenshots): the "● 33 ms" pill sat ON the rightmost player card of every game's score bar.
+// It is now only a coloured dot on the ☰ button's corner (green / amber / red, so a bad line still shows at a glance);
+// the numbers are inside the ☰ menu (netText()).
+const netq = h('i', 'netq'); netq.setAttribute('aria-hidden', 'true'); menuBtn.append(netq);
+function netText() {
+  const j = S.play?.net?.().jitter ?? 0;
+  return `${net.ping} ms${j > 25 ? ` ±${Math.round(j)}` : ''}`;
+}
 function drawNet(t) {
   if (t - netAt < 1000) return; netAt = t;
   const on = !!S.room && S.phase && S.phase !== 'lobby' && net.status === 'online';
   netq.hidden = !on; if (!on) return;
   const j = S.play?.net?.().jitter ?? 0, ms = net.ping + Math.round(j), q = ms < 80 ? 'good' : ms < 160 ? 'ok' : 'bad';
-  netq.className = 'netq ' + q; netq.textContent = `${net.ping} ms${j > 25 ? ` ±${Math.round(j)}` : ''}`;
-  netq.title = 'Round trip to the server (± how uneven it is)';
+  netq.className = 'netq ' + q; netq.textContent = '';
+  menuBtn.title = `Menu · connection ${netText()}`;
 }
 function frame(t) {
   const dt = Math.min(0.1, (t - lastT) / 1000); lastT = t;

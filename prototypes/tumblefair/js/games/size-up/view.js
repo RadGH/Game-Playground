@@ -5,7 +5,8 @@ import { esc, chip } from '../../client/gamehud.js';
 import { hashStr } from '../../shared/rng.js';
 import { ITEMS, PALETTE } from './items.js';
 import { ICONS } from './icons.js';
-import { QUESTIONS, Q_S } from './sim.js';
+import { QUESTIONS, Q_S, RIGHT, QUICK } from './sim.js';
+const RIGHT_MAX = RIGHT + QUICK;
 
 const byId = new Map(ITEMS.map(t => [t.id, t]));
 const WORD = { m: ['bigger', 'smaller'], kg: ['heavier', 'lighter'], kmh: ['faster', 'slower'] };
@@ -39,7 +40,9 @@ export function createView(ctx) {
   const $ = s => ui.querySelector(s);
   ui.classList.toggle('watching', watching); ui.dataset.phase = 'ready';
   if (me != null) ui.querySelector(`.su-players [data-pid="${me}"]`)?.classList.add('me');
-  let phase = '', round = -1, shownAt = 0, mine = null, ids = [], q = null;
+  let phase = '', round = -1, shownAt = 0, mine = null, ids = [], q = null, streak = 0, lastLeft = null;
+  /** Round 12: a number that floats up off a card and fades. */
+  const pop = (el, text, cls = '') => { if (!el) return; const f = document.createElement('span'); f.className = 'su-pop ' + cls; f.textContent = text; el.appendChild(f); setTimeout(() => f.remove(), 1300); };
 
   ui.addEventListener('click', e => {
     const b = e.target.closest('.su-card'); if (!b || watching || phase !== 'q' || mine != null) return;
@@ -54,7 +57,7 @@ export function createView(ctx) {
     ids = g.ids; q = g.q;
     const text = QUESTIONS[q].text, key = KEY[q];
     $('.su-q').innerHTML = esc(text).replace(`${key}?`, `<span class="su-nw"><b class="su-key su-${QUESTIONS[q].stat}">${key}</b>?</span>`);
-    $('.su-cards').innerHTML = ids.map((id, i) => { const t = byId.get(id); return `<button class="su-card" data-i="${i}"><span class="su-ic">${icon(t)}</span><b class="su-nm">${esc(t.name)}</b><span class="su-val"></span><span class="su-who"></span><span class="su-mark"></span></button>`; }).join('');
+    $('.su-cards').innerHTML = ids.map((id, i) => { const t = byId.get(id); return `<button class="su-card" data-i="${i}"><span class="su-ic">${icon(t)}</span><b class="su-nm">${esc(t.name)}</b><span class="su-val"></span><span class="su-meter"><i></i></span><span class="su-who"></span><span class="su-mark"></span></button>`; }).join('');
     $('.su-cards').dataset.n = ids.length;
     mine = null; paintPick();
   }
@@ -67,7 +70,17 @@ export function createView(ctx) {
       c.querySelector('.su-mark').textContent = i === r.answer ? 'YES!' : '';
       c.querySelector('.su-who').innerHTML = players.filter(p => r.picks[p.pid] === i).map(p => `<i class="su-face" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : esc(p.name[0] || '?')}</i>`).join('');
       c.disabled = true;
+      // round 12: a bar on a log scale under each value, so "about 40x" reads at a glance
+      const vs = ids.map(id => Math.log10(byId.get(id)[stat])), lo = Math.min(...vs), hi = Math.max(...vs);
+      c.querySelector('.su-meter i').style.width = `${Math.round(18 + 82 * (hi > lo ? (vs[i] - lo) / (hi - lo) : 1))}%`;
+      c.style.setProperty('--d', `${i * 120}ms`);
     });
+    if (me != null && r.picks[me] != null) {
+      const card = ui.querySelectorAll('.su-card')[r.picks[me]], ok = r.picks[me] === r.answer;
+      streak = ok ? streak + 1 : 0;
+      if (ok) { pop(card, `+${r.gain[me]}`, r.gain[me] >= RIGHT_MAX ? 'quick' : ''); if (r.gain[me] >= RIGHT_MAX) pop(card, 'QUICK!', 'tag'); }
+      else pop(card, '✗', 'bad');
+    } else if (me != null) streak = 0;
     const a = byId.get(ids[r.answer]), vals = ids.map(id => byId.get(id)[stat]).filter((v, i) => i !== r.answer);
     const most = QUESTIONS[q].most, other = most ? Math.max(...vals) : Math.min(...vals), ratio = most ? a[stat] / other : other / a[stat];
     const otherT = byId.get(ids.find(id => byId.get(id)[stat] === other));
@@ -88,7 +101,9 @@ export function createView(ctx) {
   function note(g) {
     if (g.phase === 'ready') return 'Get ready! Quick answers score more.';
     if (g.phase === 'q') return watching ? `${g.in.length} of ${players.length} answered` : mine != null ? 'Locked in!' : 'Tap your answer!';
-    if (g.phase === 'end') return 'Quiz over! Most points wins.';
+    if (g.phase === 'end') { const best = Math.max(...players.map(p => g.scores[p.pid])), tops = players.filter(p => g.scores[p.pid] === best && best > 0);
+      return players.length > 1 && tops.length === 1 ? `Quiz over! Top sizer: ${tops[0].name}!` : 'Quiz over! Most points wins.'; }
+    if (g.phase === 'reveal' && me != null && streak >= 2 && g.reveal.picks[me] === g.reveal.answer) return `${streak} in a row!`;
     return '';
   }
 
@@ -104,6 +119,9 @@ export function createView(ctx) {
       phase = g.phase; round = g.round; ui.dataset.phase = g.phase;
       $('.clock b').textContent = g.left;
       $('.clock').classList.toggle('hurry', g.phase === 'q' && g.left <= 2);
+      if (g.phase === 'q' && g.left !== lastLeft && g.left <= 2 && g.left > 0 && me != null && mine == null) ctx.sfx('tap');
+      lastLeft = g.left;
+      ui.classList.toggle('streak', g.phase === 'reveal' && me != null && streak >= 2 && g.reveal?.picks[me] === g.reveal?.answer);
       $('.su-round').textContent = g.phase === 'end' ? 'Final scores' : `Question ${Math.max(0, g.round) + 1} of ${init.rounds}`;
       if (g.phase === 'ready') $('.su-q').textContent = 'Bigger? Heavier? Faster?';
       paintPick();

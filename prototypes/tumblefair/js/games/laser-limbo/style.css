@@ -3,3 +3,7 @@
 .tag.ll-low { background: #ff8a1a; }
 .tag.ll-high { background: #b14dff; }
 @media (max-width: 520px) { .tag.ll-tag { font-size: 12px; padding: 0 6px; } }
+/* round 12: the cue over your own head — what DODGE does for the next beam, and NOW when it is time */
+.tag.ll-cue { font-size: 14px; padding: 1px 9px; opacity: .8; }
+.tag.ll-cue.now { font-size: 18px; opacity: 1; animation: ll-now .3s ease-in-out infinite alternate; }
+@keyframes ll-now { from { filter: brightness(1); } to { filter: brightness(1.5); } }

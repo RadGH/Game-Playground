@@ -1,0 +1,43 @@
+/* Wagon Trail — the trail strip, the "do this now" card, the scene canvas and the challenge's buttons. Upright phone
+   first (402x780); nothing in here scrolls on its own. */
+.game-wagon-trail { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: linear-gradient(#f7e2b4, #e8c48a); color: var(--ink); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-wagon-trail.season-halloween { background: linear-gradient(#2a1d4a, #1d1430); }
+.game-wagon-trail > * { flex: none; }
+.wt-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 6px; }
+.wt-title { color: #fff6e0; font: 900 25px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.wt-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.wt-board .chip { color: var(--ink); padding-right: 10px; } .wt-board .sc { font-style: normal; background: #fff3d6; border-radius: 8px; padding: 0 7px; }
+.wt-board .chip.lead { background: var(--sun); } .wt-board .chip.me { box-shadow: 0 0 0 3px #fff; } .wt-board .chip.done::after { content: '✓'; font-weight: 900; margin-left: 3px; }
+.wt-trail { width: min(460px, 100%); display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 4px 10px; background: var(--paper); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 0 3px 0 var(--ink); }
+.wt-road { position: relative; display: flex; justify-content: space-between; height: 30px; align-items: center; border-bottom: 4px dashed #b8905a; }
+.wt-road i { font-style: normal; font-size: 18px; opacity: .45; } .wt-road i.done { opacity: 1; }
+.wt-wagon { position: absolute; top: -6px; width: 0; transition: left .8s ease-in-out; }
+.wt-wagon::before { content: ''; position: absolute; left: -11px; top: 4px; width: 22px; height: 15px; border-radius: 11px 11px 3px 3px; background: #fff6e0; border: 3px solid var(--ink); }
+.wt-wagon::after { content: ''; position: absolute; left: -9px; top: 21px; width: 6px; height: 6px; border-radius: 50%; background: var(--ink); box-shadow: 12px 0 0 var(--ink); }
+.wt-sup { display: grid; gap: 1px; font: 900 14px/1.1 var(--font); text-align: right; } .wt-hp { color: #e8394a; letter-spacing: 1px; }
+.wt-card { width: min(460px, 100%); display: grid; gap: 2px; text-align: center; padding: 7px 12px; background: #fff; border: 4px solid var(--ink); border-radius: 18px; box-shadow: 0 5px 0 var(--ink); }
+.wt-card b { font: 900 22px/1.1 var(--font); } .wt-card span { font: 800 14px/1.25 var(--font); }
+.wt-card.go { background: var(--sun); } .wt-card.out { background: #d9f7d0; } .wt-card.travel { background: #fff6e0; }
+.wt-scene { position: relative; width: min(100%, 520px); height: clamp(170px, 38dvh, 400px); border: 4px solid var(--ink); border-radius: 16px; overflow: hidden; }
+.wt-scene canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.wt-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 76px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.wt-count:empty { display: none; }
+.wt-say { position: absolute; left: 0; right: 0; top: 8%; text-align: center; font: 900 22px/1.05 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none; padding: 0 8px; }
+.wt-say.pop { animation: wt-pop 1.4s ease-out forwards; } .wt-say.good { color: var(--sun); } .wt-say.bad { color: #ffd0d0; }
+@keyframes wt-pop { 0% { opacity: 1; transform: scale(1.25); } 75% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.wt-panel { width: min(460px, 100%); display: grid; gap: 7px; min-height: 64px; }
+.wt-panel.hidden { display: none; } .wt-panel.quiet { min-height: 0; }
+.wt-row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; } .wt-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.wt-b { min-height: 52px; display: grid; gap: 1px; place-items: center; border: 3px solid var(--ink); border-radius: 12px; background: #fff; box-shadow: 0 3px 0 var(--ink); font: 800 13px/1.1 var(--font); color: var(--ink); cursor: pointer; }
+.wt-b.on { background: var(--sun); transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); } .wt-b span { font-size: 12px; }
+.wt-go, .wt-hold { min-height: 62px; font-size: 26px; } .wt-hold { background: #9fd3ff; touch-action: none; } .wt-hold:active { transform: translateY(3px); }
+.wt-v, .wt-buy { min-height: 64px; font-size: 18px; display: grid; gap: 2px; } .wt-v small, .wt-buy small { font: 800 12px/1 var(--font); }
+.wt-v.on { background: #8ff07a; } .wt-v:disabled:not(.on) { opacity: .5; }
+.wt-go:disabled { background: #e8e1cc; color: #6a7a80; }
+.wt-hint { margin: 0; text-align: center; font: 900 17px/1.2 var(--font); padding: 8px; background: #fff6e0; border: 3px solid var(--ink); border-radius: 14px; }
+.wt-note { margin: 0; text-align: center; font-size: 14px; font-weight: 800; } .wt-note:empty { display: none; }
+.season-halloween .wt-note { color: #fff; }
+.game-wagon-trail.watching .wt-scene { width: min(100%, 1100px); height: calc(100dvh - 280px); }
+@media (max-height: 700px) { .wt-scene { height: 28dvh; min-height: 150px; } .wt-card b { font-size: 19px; } .wt-title { font-size: 20px; } }

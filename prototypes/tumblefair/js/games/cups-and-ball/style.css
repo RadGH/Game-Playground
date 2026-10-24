@@ -1,0 +1,30 @@
+/* Shell Shuffle — a fairground cups table under a striped awning, a big "do this now" line above it, chips below.
+   Halloween: a night-purple booth with orange stripes. */
+.game-cups-and-ball { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 8px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 12px) calc(var(--sl) + 10px);
+  background: radial-gradient(circle at 50% 0, #fff1b8, #ffb36a 70%, #e0704a); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-cups-and-ball > * { flex: none; }
+.cb-top { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; width: 100%; padding: 0 96px 0 8px; min-height: 34px; }
+.cb-title { font: 900 22px/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.cb-round { font: 800 14px/1 var(--font); color: var(--ink); background: #fff7e6; border: 3px solid var(--ink); border-radius: 999px; padding: 4px 10px; }
+.cb-do { font: 900 clamp(24px, 7vw, 40px)/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.6px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); text-align: center; min-height: 1.15em; }
+.cb-do.guess { color: var(--sun); animation: cb-throb .45s ease-in-out infinite alternate; }
+.cb-do.good { color: #7dff9a; } .cb-do.bad { color: #ff8a8a; }
+@keyframes cb-throb { to { transform: scale(1.07); } }
+.cb-booth { width: min(100%, 620px); }
+.cb-awning { height: 22px; border: 4px solid var(--ink); border-bottom: 0; border-radius: 14px 14px 0 0; background: repeating-linear-gradient(90deg, #3d8bff 0 26px, #fff 26px 52px); }
+.cb-wrap { position: relative; border: 8px solid #8a5225; border-radius: 0 0 14px 14px; box-shadow: 0 6px 0 var(--ink), inset 0 0 0 3px var(--ink); background: #8a5225; overflow: hidden; }
+.cb-table { display: block; width: 100%; aspect-ratio: 100 / 74; touch-action: manipulation; cursor: pointer; }
+.game-cups-and-ball.watching .cb-table { cursor: default; }
+.cb-fx { position: absolute; inset: 0; pointer-events: none; }
+.cb-pop { position: absolute; transform: translate(-50%, -50%); font: 900 30px/1 var(--font); font-style: normal; color: var(--sun); -webkit-text-stroke: 1.6px var(--ink); paint-order: stroke fill; white-space: nowrap; animation: cb-rise 1.3s ease-out forwards; }
+@keyframes cb-rise { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -60%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -200%) scale(1); } }
+.cb-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.cb-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.cb-players .chip .pk { font-style: normal; font-weight: 900; min-width: 0; }
+.cb-players .chip.lead { background: var(--sun); } .cb-players .chip.me { box-shadow: 0 0 0 3px #fff; }
+.cb-note { margin: 0; text-align: center; font: 800 15px/1.25 var(--font); color: var(--ink); max-width: 560px; min-height: 1.3em; }
+.game-cups-and-ball.season-halloween { background: radial-gradient(circle at 50% 0, #7a4ab8, #3a1e5c 70%, #1c0e30); }
+.game-cups-and-ball.season-halloween .cb-awning { background: repeating-linear-gradient(90deg, #ff8a1a 0 26px, #2a1238 26px 52px); }
+.game-cups-and-ball.season-halloween .cb-wrap { border-color: #4a2a1a; background: #4a2a1a; }
+.game-cups-and-ball.season-halloween .cb-note { color: #fff; }

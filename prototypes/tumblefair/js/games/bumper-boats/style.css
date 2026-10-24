@@ -1,0 +1,10 @@
+/* Bumper Boats: 3-2-1-PADDLE and call-outs, and a pill with the scoring rule. */
+.game-bumper-boats .bb-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center;
+  font: 900 clamp(44px, 13vw, 96px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .15s, opacity .15s; }
+.bb-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.bb-banner.go { color: #8ff07a; } .bb-banner.small { font-size: clamp(24px, 7vw, 46px); }
+.game-bumper-boats .bb-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; pointer-events: none;
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); white-space: nowrap; }
+.bb-pill span b { font-weight: 600; font-size: 13px; }
+@media (max-width: 520px) { .game-bumper-boats .bb-pill { top: calc(var(--st) + 52px); font-size: 13px; gap: 7px; padding: 3px 10px; } }
+.tag.bb-cpu { background: #ffd23f; color: var(--ink); text-shadow: none; }

@@ -5,12 +5,16 @@
 // holder must hold it for a moment before passing. The holder runs a little faster. Everyone still standing scores a
 // point each time someone else is splatted; out of lives = out, cheering from the picnic blanket. Last one standing
 // wins (+2). Alone: two CPU picnickers to play pass with — splat them for points, three lives for you.
+// Round 12 (1/1, "confusing"): the rules were fine but invisible — a fresh holder could not pass for 0.45 s and the
+// giver could not take it back for 1.6 s, and nothing on screen said either. Now the hold is 0.25 s, bumping reaches a
+// little further (touchR 1.25, PASS 2.2 m), the view puts a 🚫 over whoever you cannot pass back to, shows the fizz as
+// a 4-step meter in the status pill, and pops a +1 over everyone who scores from a splat.
 import { makeBody, stepBody, separate, clampToArena, collideObstacles, spawnRing, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
 
 export const meta = {
   id: 'fizzpop-pass', title: 'Fizzpop Pass', blurb: 'Pass the fizzing pie before it pops — don’t be holding it when it goes SPLAT!',
-  how: ['Got the pie? Bump into someone to pass it (or press A next to them).', 'It fizzes faster near the end — but nobody knows exactly when!', 'You cannot pass it straight back to who gave it to you.', 'Splatted = lose a life. Last one standing wins!'],
+  how: ['Got the pie? Bump into someone (or press PASS near them) to hand it over.', 'It fizzes faster near the end — nobody knows exactly when it pops.', 'No passing straight back: the giver wears a 🚫 for a moment.', 'Holding it at SPLAT = lose a life; everyone else gets +1.'],
   kind: 'arena', min: 1, max: 4, seconds: 100, scoring: 'points', unit: 'pts', tags: ['action'],
   controls: { stick: true, a: 'Pass' }, move: { speed: 5.0, accel: 20, stunDrag: 2.5, boostMul: 1.17 },
   arena: { shape: 'circle', r: 6.6, wall: true, posts: [{ x: 0, z: 0.3, r: 0.65 }], blocks: [{ x: -3.2, z: -2.1, hw: 1.0, hd: 0.55 }, { x: 3.2, z: 2.3, hw: 1.0, hd: 0.55 }] },
@@ -19,7 +23,7 @@ export const meta = {
 
 export const RULES = {
   ready: 2.4, fuse: [6, 11], pause: 2.2, endPause: 2.4,
-  touchR: 1.05, passR: 1.9, holdMin: 0.45, noBack: 1.6,
+  touchR: 1.25, passR: 2.2, holdMin: 0.25, noBack: 1.6,
   lives: n => (n === 2 ? 3 : 2), soloLives: 3, winBonus: 2,
   heatJitter: 0.35,
   bench: { z: -5.3, xs: [-1.2, 0, 1.2, 2.4] },

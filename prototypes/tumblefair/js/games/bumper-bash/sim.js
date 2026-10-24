@@ -9,14 +9,14 @@ import { makeBody, stepBody, separate, clampToArena, collideObstacles, F } from 
 export const meta = {
   id: 'bumper-bash', title: 'Bumper Bash', blurb: 'Bash the other bumper cars — hits from behind score the most!',
   how: ['Point the stick where you want to drive.', 'Ram a car: from behind 3, side 2, nose to nose 1.', 'Grab ★ stars for points and ⚡ bolts for a turbo.', 'The walls are bouncy!'],
-  kind: 'arena', min: 1, max: 4, seconds: 70, scoring: 'points', unit: 'pts', tags: ['action'],
+  kind: 'arena', min: 1, max: 4, seconds: 75,   // 70 s of play + the 3 s countdown + the end pause (the room cuts off at seconds + 3) scoring: 'points', unit: 'pts', tags: ['action'],
   controls: { stick: true },
   move: { mode: 'car', speed: 6.3, accel: 3.6, turn: 3.9, grip: 4.5, boostMul: 1.5, stunDrag: 1.7 },
   arena: { shape: 'rect', hw: 8, hd: 8, wall: true, posts: [{ x: 0, z: 0, r: 0.75 }] }, pitch: 64, card: 'card-bumper-bash', css: true,
 };
 
 export const RULES = {
-  countdown: 3, endPause: 1.8,
+  countdown: 3, endPause: 1.8, play: 70,
   carR: 0.62, hitR: 1.3, minClose: 1.4,
   pts: { rear: 3, side: 2, front: 1, turbo: 1 },
   spin: 0.95, immune: 1.25, pairCool: 0.6, pushMin: 4, pushMax: 9.5,
@@ -25,9 +25,21 @@ export const RULES = {
   target: { speedMul: 0.5, names: ['Bonk-o', 'Dizzy', 'Wobbles'] },
 };
 const r2 = v => Math.round(v * 100) / 100;
+// Round 12: the rink is picked from the seed (same rules, same walls; the posts in the middle change, and so does the
+// floor). Sent in init() as `arena` so a phone predicts its own bumps off the posts. Post spots keep clear of the four
+// starting corners (±5.4) and the solo target cars' starts.
+export const RINKS = [
+  { id: 'pole', name: 'The Big Top', floor: '#2f4c8f', posts: [{ x: 0, z: 0, r: 0.75 }] },
+  { id: 'twin', name: 'Twin Poles', floor: '#6b2f8f', posts: [{ x: -3, z: 0.6, r: 0.7 }, { x: 3, z: -0.6, r: 0.7 }] },
+  { id: 'bumpers', name: 'Four Bumpers', floor: '#1f7a6b', posts: [{ x: -3.2, z: 2.6, r: 0.6 }, { x: 3.2, z: 2.6, r: 0.6 }, { x: -2.6, z: -2.2, r: 0.6 }, { x: 2.6, z: -2.2, r: 0.6 }] },
+  { id: 'drum', name: 'Bandstand', floor: '#8f3a2f', posts: [{ x: 0, z: 0.4, r: 1.6 }] },
+  { id: 'diamond', name: 'Diamond Posts', floor: '#2f6f8f', posts: [{ x: 0, z: 3, r: 0.55 }, { x: 0, z: -2.4, r: 0.55 }, { x: -3.6, z: 0.3, r: 0.55 }, { x: 3.6, z: 0.3, r: 0.55 }] },
+];
+export const rinkFor = seed => RINKS[Math.abs(Math.floor(seed || 0)) % RINKS.length];
 
-export function create({ rng, players }) {
-  const n = players.length, solo = n === 1, A = meta.arena, bodies = new Map();
+export function create({ seed = 0, rng, players }) {
+  const rink = rinkFor(seed), A = { ...meta.arena, posts: rink.posts.map(p => ({ ...p })) };       // the rink, from the seed (not the rng: the rest of the game rolls exactly as before)
+  const n = players.length, solo = n === 1, bodies = new Map();
   const corners = [[-5.4, 5.4], [5.4, -5.4], [5.4, 5.4], [-5.4, -5.4]];
   const cars = new Map();          // id -> car (players by pid, targets by negative id)
   players.forEach((p, i) => { const [x, z] = corners[i], b = makeBody(x, z, r2(Math.atan2(-x, -z))); b.flags = F.FROZEN; bodies.set(p.pid, b); cars.set(p.pid, { id: p.pid, b, target: false, pts: 0, spin: 0, immune: 0, turbo: 0 }); });
@@ -38,7 +50,7 @@ export function create({ rng, players }) {
   }
   const tMove = { ...meta.move, speed: meta.move.speed * RULES.target.speedMul };
   const pairCool = new Map();
-  let picks = [], pid0 = 0, nextPick = 2.5, countdown = RULES.countdown, lastCount = 4, time = meta.seconds, over = false, endIn = -1;
+  let picks = [], pid0 = 0, nextPick = 2.5, countdown = RULES.countdown, lastCount = 4, time = RULES.play, over = false, endIn = -1;
   const events = [];
   const live = () => countdown <= 0 && endIn < 0;
 
@@ -80,7 +92,7 @@ export function create({ rng, players }) {
   }
   return {
     bodies, events,
-    init: () => ({ solo, targets: [...cars.values()].filter(c => c.target).map(c => ({ id: c.id, name: c.name })), left: Math.ceil(time) }),
+    init: () => ({ arena: A, rink: rink.id, rinkName: rink.name, floor: rink.floor, solo, targets: [...cars.values()].filter(c => c.target).map(c => ({ id: c.id, name: c.name })), left: Math.ceil(time) }),
     input(pid, inp) {
       const c = cars.get(pid); if (!c || over) return;
       if (!live()) { stepBody(c.b, null, meta.move, A); return; }
@@ -119,7 +131,7 @@ export function create({ rng, players }) {
         nextPick = rng.range(RULES.pickEvery[0], RULES.pickEvery[1]);
         if (picks.length < RULES.pickMax) for (let k = 0; k < 12; k++) {
           const x = r2(rng.range(-6.4, 6.4)), z = r2(rng.range(-6.4, 6.4));
-          if (Math.hypot(x, z) < 2) continue;
+          if (A.posts.some(o => Math.hypot(x - o.x, z - o.z) < o.r + 1.2)) continue;
           if ([...cars.values()].some(c => Math.hypot(c.b.x - x, c.b.z - z) < 2.5) && k < 11) continue;
           picks.push({ id: ++pid0, x, z, kind: rng.chance(0.55) ? 'star' : 'zap' }); break;
         }

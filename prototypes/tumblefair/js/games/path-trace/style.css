@@ -1,0 +1,29 @@
+/* Steady Hand — a tall toy board with the path as a glowing groove, chips above, a big hint line below. The whole
+   screen takes the drag (the dot moves like a trackpad cursor), so nothing here scrolls. Halloween: a night board. */
+.game-path-trace { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow: hidden;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: radial-gradient(circle at 50% 0, #d6f4ff, #7fc8ff 60%, #3a7ad6); user-select: none; -webkit-user-select: none; touch-action: none; }
+.game-path-trace > * { flex: none; }
+.pt-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding: 0 96px 0 8px; min-height: 34px; }
+.pt-title { font: 900 22px/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.pt-round { font: 900 14px/1 var(--font); background: #fff; border: 3px solid var(--ink); border-radius: 999px; padding: 4px 10px; }
+.pt-round:empty { display: none; }
+.pt-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.pt-chips .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.pt-chips .chip.lead { background: var(--sun); } .pt-chips .chip.me { box-shadow: 0 0 0 3px #fff; }
+.pt-wrap { position: relative; width: min(100%, calc((100dvh - 150px) * 100 / 150), 520px); border: 6px solid #8a5225; border-radius: 16px; box-shadow: 0 6px 0 var(--ink), inset 0 0 0 3px var(--ink); background: #8a5225; overflow: hidden; }
+.pt-board { display: block; width: 100%; aspect-ratio: 100 / 150; }
+.pt-fx { position: absolute; inset: 0; pointer-events: none; }
+.pt-pop { position: absolute; transform: translate(-50%, -50%); font: 900 26px/1 var(--font); font-style: normal; color: #fff; -webkit-text-stroke: 1.4px var(--ink); paint-order: stroke fill; white-space: nowrap; animation: pt-rise 1.2s ease-out forwards; }
+.pt-pop.bad { color: #ff6a6a; font-size: 32px; } .pt-pop.gold { color: #ffd23f; } .pt-pop.good { color: var(--sun); font-size: 20px; }
+@keyframes pt-rise { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 15% { opacity: 1; transform: translate(-50%, -60%) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -170%) scale(1); } }
+.pt-msg { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); font: 900 64px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; text-shadow: 0 5px 0 var(--ink); }
+.pt-msg:empty { display: none; }
+.pt-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.7); opacity: 0; pointer-events: none; transition: .2s; display: flex; flex-direction: column; gap: 4px; align-items: stretch;
+  background: #fff7e6; border: 4px solid var(--ink); border-radius: 16px; box-shadow: 0 5px 0 var(--ink); padding: 10px 14px; font: 800 16px/1.25 var(--font); min-width: 200px; }
+.pt-card.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.pt-card b { font: 900 20px/1.1 var(--font); text-align: center; } .pt-card em { font-style: normal; font-weight: 900; color: #1d8a37; float: right; margin-left: 10px; }
+.pt-note { margin: 0; text-align: center; font: 800 16px/1.25 var(--font); color: var(--ink); max-width: 560px; min-height: 1.3em; }
+.game-path-trace.season-halloween { background: radial-gradient(circle at 50% 0, #7a4ab8, #3a1e5c 70%, #1c0e30); }
+.game-path-trace.season-halloween .pt-wrap { border-color: #4a2a1a; background: #4a2a1a; }
+.game-path-trace.season-halloween .pt-note { color: #fff; }

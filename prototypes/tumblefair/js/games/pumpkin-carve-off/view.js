@@ -113,7 +113,7 @@ export function createView(ctx) {
     point(e);
   });
   pad.addEventListener('pointermove', e => { if (!cur || e.pointerId !== cur.pid) return; for (const ev of (e.getCoalescedEvents?.() || [e])) point(ev); });
-  const end = e => { if (!cur || e.pointerId !== cur.pid) return; flush(); if (!cur.s[1]) cuts.pop(); else ctx.sfx('tap'); cur = null; };
+  const end = e => { if (!cur || e.pointerId !== cur.pid) return; flush(); if (!cur.s[1]) cuts.pop(); else { ctx.sfx('tap'); const pd = $('.pc-pad'); pd.classList.remove('wob'); void pd.offsetWidth; pd.classList.add('wob'); } cur = null; };
   pad.addEventListener('pointerup', end); pad.addEventListener('pointercancel', end); pad.addEventListener('lostpointercapture', end);
   function setFull(on) { if (full === on) return; full = on; $('.pc-full').classList.toggle('on', on); }
   function recount() { total = cuts.reduce((n, s) => n + s[1].length / 4, 0); setFull(total >= init.maxPoints); dirty = true; }
@@ -146,7 +146,7 @@ export function createView(ctx) {
     const el = $('.pc-gallery');
     const both = !init.solo && players.length === 2 && !watching;
     el.innerHTML = `<p class="pc-ghead"></p><div class="pc-cards n${art.length}">${art.map((a, i) => `
-      <button class="pc-card${a.k.length ? '' : ' blank'}" data-vote="${i}" aria-label="Lantern ${i + 1}">
+      <button class="pc-card${a.k.length ? '' : ' blank'}" data-vote="${i}" aria-label="Lantern ${i + 1}" style="--d:${(i * 0.35).toFixed(2)}s">
         <span class="pc-frame"><canvas width="320" height="320"></canvas>${a.k.length ? '<i class="pc-flicker"></i>' : '<i class="pc-empty">Not carved!</i>'}<i class="pc-ribbon">Night Judge's ribbon</i><b class="pc-num">${i + 1}</b></span>
         <span class="pc-pr"></span><span class="pc-by"></span><span class="pc-vt"></span><strong class="pc-pts"></strong>
       </button>`).join('')}</div>${both ? '<button class="pc-both big-btn" data-vote="both">Both are great!</button>' : ''}`;
@@ -168,6 +168,8 @@ export function createView(ctx) {
       c.el.querySelector('.pc-vt').innerHTML = voters.length ? voters.map(facePic).join('') : (init.solo ? '' : '<em>no votes</em>');
       c.el.classList.toggle('ribbon', r.ribbon.includes(pid));
       c.el.querySelector('.pc-pts').textContent = scores ? (init.solo ? `${scores[pid]}/10` : `+${scores[pid]}`) : '';
+      const best = scores ? Math.max(...Object.values(scores)) : 0, tops = scores ? Object.keys(scores).filter(k => scores[k] === best) : [];
+      c.el.classList.toggle('best', !init.solo && best > 0 && tops.length === 1 && +tops[0] === pid);
     });
   }
   function note(g) {

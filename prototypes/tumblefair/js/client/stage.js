@@ -3,6 +3,7 @@
 // that the buttons and panels leave free. Screens put their things in `stage.root` children and remove them after.
 import * as THREE from 'three';
 import { SEATS } from '../shared/protocol.js';
+import { declutter } from './declutter.js';
 
 // three.js works out an InstancedMesh's bounding sphere ONCE (the first time it is culled) and never again. A game that
 // starts with count 0 and adds instances later (Wobble Tower's blocks, splats, coins…) then has an EMPTY sphere pinned at
@@ -74,22 +75,40 @@ export function createStage(canvas, { quality = pickQuality() } = {}) {
 
   // ---- name tags: DOM labels that follow a 3D thing
   const tagLayer = document.getElementById('tags'), tags = new Set();
-  function tag(obj, { text = '', seat = null, height = 2, cls = '' } = {}) {
+  // Round 12 (owner's phone screenshots: "Ashley" and "YOU" stacked on each other in Putt Party, Kitchen Catastrophe's
+  // station labels on top of the players'): tags that would overlap are pushed apart. Each frame the tags are taken
+  // nearest the bottom of the screen first (the nearest thing keeps its place), and a tag that would cover one already
+  // placed is lifted to sit just above it; the lift eases in, so two players walking past each other do not flicker.
+  // A tag is also kept inside the screen sideways. { declutter: false } opts a tag out (it is drawn exactly where asked).
+  // The placing itself is js/client/declutter.js (pure, tested).
+  function tag(obj, { text = '', seat = null, height = 2, cls = '', declutter = true } = {}) {
     const el = document.createElement('div'); el.className = 'tag ' + cls;
     if (seat != null) { el.style.setProperty('--seat', SEATS[seat].color); el.dataset.shape = SEATS[seat].shape; }
     const label = document.createElement('span'); label.textContent = text; el.append(label);
     tagLayer.append(el);
-    const T = { el, obj, height, set: s => { label.textContent = s; }, remove: () => { el.remove(); tags.delete(T); } };
+    const T = { el, obj, height, declutter, w: 0, h: 0, lift: 0, fresh: true, set: s => { if (label.textContent !== s) { label.textContent = s; T.w = 0; } }, remove: () => { el.remove(); tags.delete(T); } };
     tags.add(T); return T;
   }
+  let tagFrame = 0;
+  const shown = [];
   function placeTags() {
-    const w = canvas.clientWidth, h = canvas.clientHeight;
+    const w = canvas.clientWidth, h = canvas.clientHeight, remeasure = ++tagFrame % 20 === 0;
+    shown.length = 0;
     for (const T of tags) {
-      if (!T.obj.parent || !T.obj.visible) { T.el.style.display = 'none'; continue; }
+      if (!T.obj.parent || !T.obj.visible) { T.el.style.display = 'none'; T.fresh = true; continue; }
       T.obj.getWorldPosition(v3); v3.y += T.height; v3.project(camera);
-      if (v3.z > 1) { T.el.style.display = 'none'; continue; }
-      T.el.style.display = ''; T.el.style.transform = `translate(-50%, -100%) translate(${((v3.x + 1) / 2 * w).toFixed(1)}px, ${((1 - v3.y) / 2 * h).toFixed(1)}px)`;
+      if (v3.z > 1) { T.el.style.display = 'none'; T.fresh = true; continue; }
+      if (T.el.style.display === 'none') T.el.style.display = '';
+      T.x = (v3.x + 1) / 2 * w; T.y = (1 - v3.y) / 2 * h; T.fixed = !T.declutter;
+      if (!T.w || remeasure) { T.w = T.el.offsetWidth; T.h = T.el.offsetHeight; }
+      shown.push(T);
     }
+    const at = declutter(shown, w);
+    shown.forEach((T, i) => {
+      const { x, lift } = at[i];
+      T.lift = T.fresh ? lift : T.lift + (lift - T.lift) * 0.3; T.fresh = false;
+      T.el.style.transform = `translate(-50%, -100%) translate(${x.toFixed(1)}px, ${(T.y + T.lift).toFixed(1)}px)`;
+    });
   }
   /** World point -> CSS pixels on the canvas (for floating numbers and the like). */
   function toScreen(x, y, z) { v3.set(x, y, z).project(camera); return { x: (v3.x + 1) / 2 * canvas.clientWidth, y: (1 - v3.y) / 2 * canvas.clientHeight }; }

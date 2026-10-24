@@ -1,6 +1,6 @@
 // ODD ONE OUT — a race through picture grids. Every player gets the SAME list of puzzles (made from the seed) and works
 // through it at their own speed: a square grid of one little picture repeated, where exactly ONE is different — turned,
-// mirrored, smaller, drawn in outline, or a look-alike (a smile among frowns). Tap it and the next, bigger grid appears.
+// mirrored, smaller, drawn in outline, or a look-alike (a half star among stars). Tap it and the next, bigger grid appears.
 // A wrong tap freezes you for a second. A puzzle is worth (grid side - 2) points: 3x3 = 1, 4x4 = 2, 5x5 = 3…
 // The odd one is never told apart by colour: every picture in a grid is the same colour.
 // Alone it is a score attack with bronze / silver / gold marks.
@@ -16,9 +16,21 @@ export const READY_S = 3, PLAY_S = 40, END_S = 3, WRONG_S = 1, PUZZLES = 150;
 export const MEDALS = { easy: [8, 18, 30], normal: [10, 25, 40], hard: [14, 32, 50] };
 /** Pictures the grids are made of (Font Awesome names). The ones in SYMMETRIC look the same mirrored, so never 'flip'. */
 export const BASES = ['cat', 'dog', 'fish', 'frog', 'crow', 'dove', 'horse', 'rabbit', 'hippo', 'otter', 'turtle', 'squirrel', 'kiwi-bird', 'duck', 'pig', 'cow', 'sheep', 'spider', 'bee', 'ice-cream', 'apple-whole', 'lemon', 'mushroom', 'umbrella', 'rocket', 'kite', 'hat-wizard', 'tree', 'leaf', 'feather', 'key', 'bell', 'music', 'anchor', 'balloon'];
-export const SYMMETRIC = new Set(['umbrella', 'tree', 'bell', 'balloon', 'anchor', 'mushroom', 'ice-cream', 'spider']);
+export const SYMMETRIC = new Set(['umbrella', 'tree', 'bell', 'balloon', 'anchor', 'mushroom', 'ice-cream', 'spider', 'bee', 'apple-whole']);
+/** Round 12 (owner's phone, 2026-10-24: a 5x5 of bees where all 25 looked the same). The Font Awesome bee is drawn
+ *  from the front, so a MIRRORED bee is the same picture, and its outline style is nearly as solid as the filled one.
+ *  tests/odd-one-out-looks.test.js draws every odd picture at phone size (js/shared/svg-raster.js) and fails any that
+ *  differs from the normal one by less than a quarter of its ink — these are the ones it found, by kind. */
+export const TOO_ALIKE = {
+  flip: SYMMETRIC,
+  style: new Set(['bee', 'kite', 'anchor', 'spider']),
+  turn180: new Set(['lemon', 'spider']),
+  turn25: new Set(['lemon']),
+};
+/** True when this odd picture would look the same as the rest. */
+export const alike = (base, kind, v) => !!TOO_ALIKE[kind === 'turn' ? 'turn' + v : kind]?.has(base);
 /** Look-alike pairs: the grid is one, the odd one is the other. */
-export const PAIRS = [['face-smile', 'face-frown'], ['star', 'star-half-stroke'], ['heart', 'heart-crack'], ['lock', 'lock-open'], ['bell', 'bell-slash'], ['volume-high', 'volume-low'], ['battery-full', 'battery-half'], ['hourglass-start', 'hourglass-end'], ['cloud-sun', 'cloud-moon']];
+export const PAIRS = [['face-smile', 'face-sunglasses'], ['star', 'star-half'], ['heart', 'heart-half'], ['lock', 'lock-open'], ['bell', 'bell-slash'], ['volume-high', 'volume-low'], ['battery-full', 'battery-empty'], ['hourglass-start', 'hourglass-end'], ['cloud-sun', 'cloud-moon']];
 export const COLORS = 8;
 /** What makes the odd one odd, by difficulty: [kind, value]. turn = degrees, small = scale. */
 export const KINDS = {
@@ -44,7 +56,7 @@ export function makePuzzles(rng, difficulty = 'normal', count = PUZZLES) {
     const P = { n, o: rng.int(0, n * n - 1), k: kind, c: rng.int(0, COLORS - 1) };
     if (kind === 'swap') { const pair = rng.pick(PAIRS), flip = rng.chance(0.5); P.b = 'solid/' + pair[flip ? 1 : 0]; P.x = 'solid/' + pair[flip ? 0 : 1]; }
     else {
-      let base; do { base = rng.pick(BASES); } while (base === lastBase || (kind === 'flip' && SYMMETRIC.has(base)));
+      let base; do { base = rng.pick(BASES); } while (base === lastBase || alike(base, kind, v));
       lastBase = base; P.b = 'solid/' + base;
       if (kind === 'style') P.x = 'regular/' + base;
       if (v != null) P.v = v;

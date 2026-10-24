@@ -3,7 +3,7 @@
 // B is a dash: a burst of speed that shoves anyone you run into. Slide off the edge and you lose a life; you come back
 // two seconds later somewhere safe, blinking (nothing can hit you) for 1.5 s. Three lives each. Whoever touched you
 // last in the three seconds before you fell gets the knock-out. Alone, snowmen pop up to knock off for points.
-import { makeBody, stepBody, separate, spawnRing, F } from '../../shared/arena.js';
+import { makeBody, stepBody, separate, spawnRing, collideObstacles, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
 
 export const meta = {
@@ -25,8 +25,20 @@ export const RULES = {
   snowmen: 3, snowmanR: 0.55, snowmanEvery: 1.6,                   // solo targets
 };
 const r2 = v => Math.round(v * 100) / 100;
+// Round 12: the rink is picked from the seed — the same sheet of ice and the same rules, with something solid on it to
+// hide behind: snow forts, an igloo, ice pillars. A snowball that meets one bursts on it. Sent in init() as `arena`
+// (posts) so a phone predicts its own bumps. Every post keeps clear of the starting ring (radius 4.6).
+export const RINKS = [
+  { id: 'open', name: 'Open Ice', posts: [] },
+  { id: 'forts', name: 'Snow Forts', posts: [{ x: 0, z: 2.6, r: 0.75, k: 'fort' }, { x: 0, z: -2.6, r: 0.75, k: 'fort' }, { x: 2.6, z: 0, r: 0.75, k: 'fort' }, { x: -2.6, z: 0, r: 0.75, k: 'fort' }] },
+  { id: 'igloo', name: 'The Igloo', posts: [{ x: 0, z: 0, r: 1.5, k: 'igloo' }] },
+  { id: 'pillars', name: 'Ice Pillars', posts: [{ x: 0, z: 2.2, r: 0.55, k: 'pillar' }, { x: 1.9, z: -1.1, r: 0.55, k: 'pillar' }, { x: -1.9, z: -1.1, r: 0.55, k: 'pillar' }] },
+];
+export const rinkFor = seed => RINKS[Math.abs(Math.floor(seed || 0)) % RINKS.length];
 
-export function create({ rng, players }) {
+export function create({ seed = 0, rng, players }) {
+  const rink = rinkFor(seed), POSTS = rink.posts.map(({ x, z, r }) => ({ x, z, r })), A = POSTS.length ? { ...meta.arena, posts: POSTS } : meta.arena;
+  const onPost = (x, z, pad = 0) => POSTS.some(o => Math.hypot(x - o.x, z - o.z) < o.r + pad);
   const n = players.length, solo = n === 1, bodies = new Map(), spawns = spawnRing(n, solo ? 0 : 4.6);
   players.forEach((p, i) => bodies.set(p.pid, makeBody(spawns[i].x, spawns[i].z, spawns[i].yaw)));
   const P = new Map(players.map(p => [p.pid, { prevB: 0, throwCool: 0, dashCool: 0, dash: 0, dashHit: new Set(), stun: 0, ghost: 0, falling: false, vy: 0, back: 0, lives: RULES.lives, kos: 0, by: -1, byAt: -99, outAt: -1 }]));
@@ -45,6 +57,7 @@ export function create({ rng, players }) {
     for (let k = 0; k < 10; k++) {
       const a = rng.range(0, Math.PI * 2), rr = rng.range(0, 3.8), x = Math.sin(a) * rr, z = Math.cos(a) * rr;
       let d = 99; for (const [pid, b] of bodies) if (active(pid)) d = Math.min(d, Math.hypot(b.x - x, b.z - z));
+      if (onPost(x, z, 0.7)) d = -2;          // never come back inside a fort
       if (d > bestD) { bestD = d; best = { x, z }; }
     }
     return best;
@@ -71,7 +84,7 @@ export function create({ rng, players }) {
   }
   return {
     bodies, events,
-    init: () => ({ solo, lives: RULES.lives, left: Math.ceil(time) }),
+    init: () => ({ ...(POSTS.length ? { arena: A } : {}), rink: rink.id, rinkName: rink.name, kinds: rink.posts.map(o => o.k), solo, lives: RULES.lives, left: Math.ceil(time) }),
     input(pid, inp) {
       const b = bodies.get(pid), s = P.get(pid); if (!b || over) return;
       const bits = inp?.b | 0, pa = (bits & IN.A) && !(s.prevB & IN.A), pb = (bits & IN.B) && !(s.prevB & IN.B); s.prevB = bits;
@@ -88,15 +101,17 @@ export function create({ rng, players }) {
         b.vx = fx * RULES.dashSpeed; b.vz = fz * RULES.dashSpeed;
         events.push({ e: 'dash', pid });
       }
-      stepBody(b, inp, meta.move, meta.arena);
+      stepBody(b, inp, meta.move, A);
     },
     step(dt) {
       if (over) return;
       elapsed += dt;
       separate([...bodies].filter(([pid]) => active(pid)).map(([, b]) => b));
+      if (POSTS.length) for (const [pid, b] of bodies) if (active(pid)) collideObstacles(b, A);      // a shove never pushes anyone into a fort
       // snowballs fly, hit the first body (or snowman) they touch
       for (const ball of balls) {
         ball.x += ball.vx * dt; ball.z += ball.vz * dt; ball.life -= dt;
+        if (POSTS.length && onPost(ball.x, ball.z, 0.15)) { ball.life = 0; events.push({ e: 'thud', x: r2(ball.x), z: r2(ball.z) }); continue; }
         for (const [pid, b] of bodies) {
           if (pid === ball.by || !hittable(pid) || Math.hypot(b.x - ball.x, b.z - ball.z) > RULES.ballR) continue;
           const sp = Math.hypot(ball.vx, ball.vz) || 1;
@@ -145,11 +160,12 @@ export function create({ rng, players }) {
         nextSnowman -= dt;
         if (nextSnowman <= 0 && snowmen.filter(s => !s.falling).length < RULES.snowmen) {
           nextSnowman = RULES.snowmanEvery; const b = bodies.get(players[0].pid);
-          for (let k = 0; k < 10; k++) { const a = rng.range(0, Math.PI * 2), rr = rng.range(1.5, 6), x = Math.sin(a) * rr, z = Math.cos(a) * rr; if (Math.hypot(x - b.x, z - b.z) > 2.5 || k === 9) { snowmen.push({ id: ++sid, x, z, vx: 0, vz: 0, y: 0, falling: false, by: -1 }); break; } }
+          for (let k = 0; k < 10; k++) { const a = rng.range(0, Math.PI * 2), rr = rng.range(1.5, 6), x = Math.sin(a) * rr, z = Math.cos(a) * rr; if ((Math.hypot(x - b.x, z - b.z) > 2.5 && !onPost(x, z, 1)) || k === 9) { snowmen.push({ id: ++sid, x, z, vx: 0, vz: 0, y: 0, falling: false, by: -1 }); break; } }
         }
         for (const sm of snowmen) {
           const k = Math.max(0, 1 - 0.9 * dt); sm.vx *= k; sm.vz *= k; sm.x += sm.vx * dt; sm.z += sm.vz * dt;
           if (sm.falling) { sm.y -= 9 * dt; continue; }
+          for (const o of POSTS) { const dx = sm.x - o.x, dz = sm.z - o.z, d = Math.hypot(dx, dz), min = o.r + 0.5; if (d < min && d > 1e-3) { sm.x = o.x + dx / d * min; sm.z = o.z + dz / d * min; const vn = (sm.vx * dx + sm.vz * dz) / d; if (vn < 0) { sm.vx -= vn * dx / d * 1.6; sm.vz -= vn * dz / d * 1.6; } } }
           for (const [, b] of bodies) { const dx = sm.x - b.x, dz = sm.z - b.z, d = Math.hypot(dx, dz); if (d < 1 && d > 1e-3) { sm.x += dx / d * (1 - d); sm.z += dz / d * (1 - d); } }
           if (Math.hypot(sm.x, sm.z) > RULES.edge) { sm.falling = true; const by = players[0].pid; P.get(by).kos++; events.push({ e: 'pop', sm: sm.id, by, x: r2(sm.x), z: r2(sm.z) }); }
         }

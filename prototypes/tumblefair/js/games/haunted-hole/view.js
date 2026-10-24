@@ -22,6 +22,10 @@ export function createView(ctx) {
   const pumpMat = std(PALETTE.pumpkin, { roughness: 0.55, emissive: '#b33a00', emissiveIntensity: 0.35 }), stemMat = std('#4c7a2a');
   const stoneMat = std('#b9a8d8', { roughness: 0.85 }), inkMat = std('#2a1f3d', { roughness: 0.5 }), woodMat = std('#7a4a2c', { roughness: 0.8 }), lidMat = std('#5e3a24', { roughness: 0.7 }), crossMat = std('#ffd36b', { roughness: 0.4, emissive: '#7a5a10', emissiveIntensity: 0.3 });
   let lid = null, lidT = 0;
+  // round 12 (report #30): when the course is on show (your ball is in, between holes, the end) a soft moonlight comes
+  // up so the dark corners can be seen. Always in the scene and only its strength changes (switching a light on and
+  // off recompiles every shader).
+  const moonlight = new THREE.HemisphereLight('#d9d2ff', '#3a3355', 0); group.add(moonlight);
 
   // ---- the ghost (outside the hole group: it lives across holes, shown when a hole has one)
   const ghost = new THREE.Group(); group.add(ghost); ghost.visible = false;
@@ -91,6 +95,7 @@ export function createView(ctx) {
       else if (ev.e === 'lidDown') ctx.sfx('hit');
     },
     onFrame(dt, t, clock) {
+      moonlight.intensity += ((view.overview() ? 1.6 : 0) - moonlight.intensity) * (1 - Math.exp(-dt * 3));
       ghost.visible = gshadow.visible = gOn && hasGhost;
       if (ghost.visible) {
         const k = 1 - Math.exp(-dt * 8); gx += ((ghost.userData.tx ?? gx) - gx) * k; gz += ((ghost.userData.tz ?? gz) - gz) * k;

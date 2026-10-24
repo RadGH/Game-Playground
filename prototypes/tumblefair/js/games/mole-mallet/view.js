@@ -4,7 +4,7 @@
 // a lit fuse on top and angry red eyes. Every player carries a big mallet whose head is their seat colour; BONK swings
 // it down in front. Your own aim spot is a white ring in front of you that turns gold when a mole is under it. Dizzy
 // players have yellow stars circling their heads.
-import { RULES, KIND } from './sim.js';
+import { RULES, KIND, aimAt } from './sim.js';
 import { SEATS } from '../../shared/protocol.js';
 import { scoreBar, floatText } from '../../client/gamehud.js';
 import { F } from '../../shared/arena.js';
@@ -87,7 +87,7 @@ export function createView(ctx) {
       else if (ev.e === 'bonk') {
         const m = moles.get(ev.id); if (m) m.bonk = 1;
         burst(ev.x, ev.z, ev.k === KIND.GOLD ? '#ffd23f' : '#ffffff', ev.k === KIND.GOLD ? 1.5 : 1);
-        floatText(stage, ev.x, 1.3, ev.z, '+' + ev.d, 'good');
+        floatText(stage, ev.x, 1.3, ev.z, ev.k === KIND.GOLD ? '+3 GOLD!' : '+' + ev.d, 'good');
         ctx.sfx(ev.pid === ctx.me ? (ev.k === KIND.GOLD ? 'coins' : 'good') : 'hit');
       } else if (ev.e === 'boom') {
         const m = moles.get(ev.id); if (m) m.bonk = 1;
@@ -130,9 +130,14 @@ export function createView(ctx) {
       // my aim ring
       const me = ctx.me != null ? ctx.pos(ctx.me) : null;
       if (me) {
-        const ax = me.x + Math.sin(me.yaw) * RULES.reach, az = me.z + Math.cos(me.yaw) * RULES.reach; aim.visible = true; aim.position.x = ax; aim.position.z = az;
-        let hot = false; for (const m of moles.values()) if (!m.bonk && m.th > 0.6 && Math.hypot(holes[m.hole].x - ax, holes[m.hole].z - az) < RULES.hitR) { hot = true; break; }
-        aim.material.color.set(hot ? '#ffd23f' : '#ffffff'); aim.scale.setScalar(hot ? 1.15 + Math.sin(t * 14) * 0.08 : 1);
+        // the ring sits where a swing now would land: gold on the mole the aim help would turn you to, red on a bomb
+        // right in front of you, white (just ahead) when there is nothing to hit
+        const tg = aimAt(me.x, me.z, me.yaw, [...moles.values()].filter(m => !m.bonk && m.th > 0.6));
+        aim.visible = true;
+        if (tg) { const H = holes[tg.m.hole]; aim.position.x = H.x; aim.position.z = H.z; }
+        else { aim.position.x = me.x + Math.sin(me.yaw) * RULES.reach; aim.position.z = me.z + Math.cos(me.yaw) * RULES.reach; }
+        const bomb = tg?.m.kind === KIND.BOMB;
+        aim.material.color.set(bomb ? '#ff3b3b' : tg ? '#ffd23f' : '#ffffff'); aim.scale.setScalar(tg ? 1.3 + Math.sin(t * 14) * 0.1 : 1);
       }
       // dizzy stars
       let si = 0;

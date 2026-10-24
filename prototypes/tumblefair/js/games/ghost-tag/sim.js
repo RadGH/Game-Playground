@@ -29,18 +29,26 @@ export const RULES = {
 const r2 = v => Math.round(v * 100) / 100;
 const GHOST = 0, HUMAN = 1;
 
+/** Round 12: three kinds of patch, picked from the seed (the rules are the same; how much there is to hide behind changes). */
+export const PATCHES = {
+  patch: { name: 'Pumpkin Patch', stones: 3, pumpkins: 3, sw: 0.55, pr: [0.45, 0.65], tries: 60 },
+  graveyard: { name: 'Old Graveyard', stones: 5, pumpkins: 1, sw: 0.62, pr: [0.5, 0.6], tries: 160 },
+  field: { name: 'Pumpkin Field', stones: 1, pumpkins: 6, sw: 0.55, pr: [0.5, 0.75], tries: 160 },
+};
+export const PATCH_IDS = Object.keys(PATCHES);
+export const patchFor = seed => PATCH_IDS[Math.abs(Math.floor(seed || 0)) % PATCH_IDS.length];
 /** The patch: gravestones (boxes) and pumpkins (round), mirrored left-right so neither side is easier; the middle stays clear. */
-export function makeLayout(rng) {
-  const blocks = [], posts = [];
+export function makeLayout(rng, style = 'patch') {
+  const S = PATCHES[style] || PATCHES.patch, blocks = [], posts = [];
   const free = (x, z, r) => Math.hypot(x, z) > 2.6 && Math.abs(x) < HW - 1.2 && Math.abs(z) < HD - 1.1 &&
     blocks.every(b => Math.abs(b.x - x) > b.hw + r + 1.1 || Math.abs(b.z - z) > b.hd + r + 1.1) && posts.every(p => Math.hypot(p.x - x, p.z - z) > p.r + r + 1.2);
-  for (let k = 0, made = 0; k < 60 && made < 3; k++) {          // gravestones: 3 pairs
+  for (let k = 0, made = 0; k < S.tries && made < S.stones; k++) {          // gravestones, in pairs
     const x = r2(rng.range(1.8, HW - 1.4)), z = r2(rng.range(-HD + 1.3, HD - 1.3));
     if (!free(x, z, 0.6) || !free(-x, z, 0.6)) continue;
-    blocks.push({ x, z, hw: 0.55, hd: 0.22 }, { x: -x, z, hw: 0.55, hd: 0.22 }); made++;
+    blocks.push({ x, z, hw: S.sw, hd: 0.22 }, { x: -x, z, hw: S.sw, hd: 0.22 }); made++;
   }
-  for (let k = 0, made = 0; k < 60 && made < 3; k++) {          // pumpkins: 3 pairs
-    const x = r2(rng.range(1.5, HW - 1.4)), z = r2(rng.range(-HD + 1.3, HD - 1.3)), r = r2(rng.range(0.45, 0.65));
+  for (let k = 0, made = 0; k < S.tries && made < S.pumpkins; k++) {          // pumpkins, in pairs
+    const x = r2(rng.range(1.5, HW - 1.4)), z = r2(rng.range(-HD + 1.3, HD - 1.3)), r = r2(rng.range(S.pr[0], S.pr[1]));
     if (!free(x, z, r) || !free(-x, z, r)) continue;
     posts.push({ x, z, r }, { x: -x, z, r }); made++;
   }
@@ -48,8 +56,8 @@ export function makeLayout(rng) {
   return { ...meta.arena, blocks, posts };
 }
 
-export function create({ rng, players }) {
-  const n = players.length, solo = n === 1, bodies = new Map(), arena = makeLayout(rng);
+export function create({ seed = 0, rng, players }) {
+  const style = patchFor(seed), n = players.length, solo = n === 1, bodies = new Map(), arena = makeLayout(rng, style);
   for (const p of players) bodies.set(p.pid, makeBody(0, 0, 0));
   const P = new Map(players.map(p => [p.pid, { prevB: 0, role: HUMAN, pts: 0, tags: 0, survived: 0, rs: 0, wait: 0, booCool: 0, dashCool: 0, dash: 0, stun: 0, lastHuman: 0, caughtAt: -1, lives: RULES.solo.lives, safe: 0 }]));
   const order = rng.shuffle(players.map(p => p.pid));           // who starts as the ghost each round
@@ -105,7 +113,7 @@ export function create({ rng, players }) {
   }
   return {
     bodies, events, arena,
-    init: () => ({ solo, arena, rounds, roundLen, order, lives: solo ? RULES.solo.lives : null, left: Math.ceil(time) }),
+    init: () => ({ solo, arena, patch: style, patchName: PATCHES[style].name, rounds, roundLen, order, lives: solo ? RULES.solo.lives : null, left: Math.ceil(time) }),
     input(pid, inp) {
       const b = bodies.get(pid), s = P.get(pid); if (!b || over) return;
       const bits = inp?.b | 0, pa = (bits & IN.A) && !(s.prevB & IN.A); s.prevB = bits;

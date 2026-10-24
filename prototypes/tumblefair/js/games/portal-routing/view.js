@@ -1,8 +1,11 @@
 // PORTAL ROUTING on a screen: the shared board drawn in SVG (rails on stone islands over a dark chasm), the marble
 // rolling on it, and on a phone that plays a row of big buttons, one per gate you own ("Gate 2 ->"). Your gates are
 // ringed in white and wear your colour + shape on the board as well; tapping them on the board works too. Portals
-// carry a letter AND a colour, so a pair is never told apart by colour alone.
+// carry a letter AND a colour, so a pair is never told apart by colour alone. Round 12: a glowing trail shows where
+// the marble will go with the gates as they are now (sim.js `trace`), ending in a green tick at the flag or a red
+// cross at a pit, so every flip shows its effect at once.
 import { esc, chip } from '../../client/gamehud.js';
+import { trace } from './sim.js';
 
 const SHAPE = { circle: '<circle cx="0" cy="0" r="7"/>', square: '<rect x="-6.5" y="-6.5" width="13" height="13" rx="2"/>', diamond: '<path d="M0 -8 L8 0 L0 8 L-8 0 Z"/>', triangle: '<path d="M0 -8 L8 6 H-8 Z"/>' };
 const DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];
@@ -18,7 +21,7 @@ export function createView(ctx) {
   ui.innerHTML = `
     <div class="pr-top"><span class="pr-title">Portal Routing</span><span class="clock"><b>--</b></span></div>
     <div class="pr-goal"><b class="pr-stage"></b><span class="pr-pips"></span></div>
-    <div class="pr-boardwrap"><svg class="pr-board" viewBox="-8 -8 ${W * 100 + 16} ${H * 100 + 16}"><g class="pr-cells"></g><g class="pr-fx"></g><g class="pr-ball"><circle r="20" class="pr-shadow" cx="4" cy="8"/><circle r="20" class="pr-marble"/><circle r="7" cx="-7" cy="-7" class="pr-shine"/></g></svg>
+    <div class="pr-boardwrap"><svg class="pr-board" viewBox="-8 -8 ${W * 100 + 16} ${H * 100 + 16}"><g class="pr-cells"></g><g class="pr-trail"></g><g class="pr-fx"></g><g class="pr-ball"><circle r="20" class="pr-shadow" cx="4" cy="8"/><circle r="20" class="pr-marble"/><circle r="7" cx="-7" cy="-7" class="pr-shine"/></g></svg>
       <div class="pr-banner"></div></div>
     <div class="pr-mine"></div>
     <div class="pr-players">${players.map(p => chip(p, `<i class="pr-mark" style="--seat:${p.color}"><svg viewBox="-10 -10 20 20">${SHAPE[p.shape] || SHAPE.circle}</svg></i>`)).join('')}</div>
@@ -78,6 +81,29 @@ export function createView(ctx) {
   function paintGates() {
     for (const el of gateEls) { const n = +el.dataset.g, v = setting(n); el.classList.toggle('s1', v === 1); el.classList.toggle('s0', v === 0); }
     for (const b of btnEls) { const n = +b.dataset.g, c = stage.cells[stage.gates[n]], d = c.arms[setting(n)]; b.querySelector('.dir').textContent = `${ARROW[d]} ${WORD[d]}`; b.setAttribute('aria-label', `Gate ${n + 1}, pointing ${WORD[d]}. Tap to flip.`); }
+    paintTrail();
+  }
+  // ---- where the marble goes now: one polyline per run (a portal jump starts a new one), and the end marker
+  let trailKey = '', heading = '';
+  function paintTrail() {
+    if (!stage) return;
+    const sts = stage.gates.map((_, n) => setting(n));
+    const from = ball && phase === 'roll' ? [ball[0], ball[1]] : [stage.start, -1];
+    const key = sts.join('') + '|' + from.join(',') + '|' + phase; if (key === trailKey) return; trailKey = key;
+    const el = $('.pr-trail');
+    if (phase === 'clear' || phase === 'drop') { el.innerHTML = ''; heading = ''; return; }
+    const { path, end } = trace(stage, sts, from[0], from[1]);
+    const runs = [[]];
+    for (const [c, i, o] of path) {
+      const x = c % W, y = (c / W) | 0, run = runs[runs.length - 1];
+      if (i >= 0) run.push(side(x, y, i)); run.push([x * 100 + 50, y * 100 + 50]); if (o >= 0) run.push(side(x, y, o));
+      if (o < 0 && stage.cells[c].k === 'p') runs.push([]);
+    }
+    const last = path[path.length - 1], lc = last ? last[0] : stage.start, lx = lc % W, ly = (lc / W) | 0;
+    const [ex, ey] = last && last[2] >= 0 ? side(lx, ly, last[2]) : [lx * 100 + 50, ly * 100 + 50];
+    heading = end;
+    el.innerHTML = runs.filter(r => r.length > 1).map(r => `<polyline class="pr-path ${end}" points="${r.map(p => p.join(',')).join(' ')}"/>`).join('')
+      + `<g class="pr-end ${end}" transform="translate(${ex} ${ey})"><circle r="26"/><path d="${end === 'goal' ? 'M-12 0 L-3 10 L13 -10' : 'M-10 -10 L10 10 M10 -10 L-10 10'}"/></g>`;
   }
   function flip(n) {
     if (watching || phase === 'clear' || !stage) return;
@@ -112,16 +138,17 @@ export function createView(ctx) {
       for (const [n, k] of pend) if (k > 0 && g.st[n] !== st[n]) pend.set(n, k - 1);
       st = g.st;
       paintGates();
-      ball = [g.b[0], g.b[1], g.b[2]]; ball.t = g.b[3] / 100; place();
+      ball = [g.b[0], g.b[1], g.b[2]]; ball.t = g.b[3] / 100; place(); paintTrail();
       $('.clock b').textContent = g.left; $('.clock').classList.toggle('hurry', g.left <= 10);
       $('.pr-stage').textContent = `Stage ${g.stage + 1} of ${init.stages.length}  ·  cleared ${g.cleared} (goal ${g.target})`;
       ui.querySelectorAll('.pr-pips i').forEach((p, i) => p.classList.toggle('done', i < g.cleared));
       const mineN = btnEls.length;
       $('.pr-note').textContent = g.phase === 'clear' ? (g.cleared >= g.target ? 'Goal reached! Keep going for more.' : `Nice! ${g.target - g.cleared} more to reach the goal.`)
-        : g.phase === 'ready' ? 'Get ready: the marble rolls in a moment!'
+        : g.phase === 'ready' ? (heading === 'goal' ? 'Get ready: the trail already reaches the flag!' : 'Quick: flip your gates so the glowing trail reaches the flag!')
         : g.phase === 'drop' ? 'Dropped! Back to the start…'
         : watching ? 'Flip the gates on your phones so the marble reaches the flag.'
-        : mineN ? 'Follow the track from the marble to the flag, then flip your gates to match.' : 'Shout directions to your team!';
+        : heading === 'goal' ? '✓ The glowing trail reaches the flag — keep it that way!'
+        : mineN ? '✗ The trail ends in a pit: flip your gates until it reaches the flag!' : 'The trail ends in a pit: shout at your team to flip!';
     },
     event(ev) {
       if (ev.e === 'drop') ctx.sfx('out');

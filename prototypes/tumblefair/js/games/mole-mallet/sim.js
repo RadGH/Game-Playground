@@ -7,12 +7,17 @@
 //                  cannot be bonked again (no stun-locking).
 // Plenty of moles are up at once (more with more players) so everybody is busy. Most points at the bell wins. Solo:
 // the same lawn as a score attack.
+// Round 12 (0/1 over 3 plays): the mallet only landed on a spot 0.55 m in front of you, so you had to stop ON a hole
+// FACING it — run past by a step, or arrive sideways, and the swing missed a mole you were standing next to. Now the
+// swing has aim help (`aimAt`, shared with the view): it turns you to the nearest real mole within ASSIST of you, and
+// your ring sits gold on that mole's hole before you press. A bomb is only ever hit when it is the one right in front
+// of you (the aim help never turns you onto a bomb), so bombs stay a 'don't swing here' and never a trap.
 import { makeBody, stepBody, separate, spawnRing, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
 
 export const meta = {
   id: 'mole-mallet', title: 'Mole Mallet', blurb: 'Bonk the moles as they pop up — but not the bombs!',
-  how: ['Moles pop out of the holes: run onto one and press BONK!', 'Golden moles are worth 3, but they are quick.', 'A mole in a black helmet is a BOMB — bonk it and you get dizzy.', 'Bonk a player to make them dizzy too. Most bonks wins!'],
+  how: ['Moles pop out of the holes: run up to one and press BONK!', 'Golden moles are worth 3, but they are quick.', 'A mole in a black helmet is a BOMB — bonk it and you get dizzy.', 'Bonk a player to make them dizzy too. Most bonks wins!'],
   kind: 'arena', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'points', tags: ['action'],
   controls: { stick: true, a: 'BONK!' }, move: { speed: 6.4, accel: 30, stunDrag: 3 },
   arena: { shape: 'rect', hw: 8.5, hd: 6.3, wall: true }, pitch: 60, card: 'card-mole-mallet',
@@ -21,7 +26,7 @@ export const meta = {
 export const KIND = Object.freeze({ MOLE: 0, GOLD: 1, BOMB: 2 });
 export const RULES = {
   cols: [-6, -3, 0, 3, 6], rows: [-4.4, -1.5, 1.5, 4.4],
-  reach: 0.55, hitR: 1.1, playerR: 1.0,               // the mallet lands this far in front of you; a mole within hitR of that spot is hit
+  reach: 0.55, hitR: 1.1, playerR: 1.0, assist: 1.9,                // the mallet lands this far in front of you; a mole within hitR of that spot is hit
   cool: 0.38, swingStun: 0, bopStun: 1.1, bopSafe: 2.3, bombStun: 1.6, bombPush: 6,
   rise: 0.18, sink: 0.22, squash: 0.4,
   life: { [0]: [1.5, 2.3], [1]: [1.0, 1.25], [2]: [2.2, 2.8] },
@@ -32,6 +37,18 @@ export const RULES = {
 const r2 = v => Math.round(v * 100) / 100;
 export const HOLES = RULES.rows.flatMap(z => RULES.cols.map(x => ({ x, z })));
 export const points = k => (k === KIND.GOLD ? 3 : k === KIND.MOLE ? 1 : 0);
+/** What a swing from (x, z) facing `yaw` would hit, of `list` = [{ hole, kind }] (moles that are up): the nearest brown or
+ *  gold mole within RULES.assist of you (you turn to it), else whatever is right under the mallet's spot (a bomb too).
+ *  Returns { m, yaw } or null. The sim swings with it; the view draws the ring with it. */
+export function aimAt(x, z, yaw, list) {
+  let best = null, bd = RULES.assist;
+  for (const m of list) { if (m.kind === KIND.BOMB) continue; const H = HOLES[m.hole], d = Math.hypot(H.x - x, H.z - z); if (d < bd) { bd = d; best = m; } }
+  if (best) { const H = HOLES[best.hole]; return { m: best, yaw: Math.hypot(H.x - x, H.z - z) > 0.05 ? Math.atan2(H.x - x, H.z - z) : yaw }; }
+  const hx = x + Math.sin(yaw) * RULES.reach, hz = z + Math.cos(yaw) * RULES.reach;
+  bd = RULES.hitR;
+  for (const m of list) { const H = HOLES[m.hole], d = Math.hypot(H.x - hx, H.z - hz); if (d < bd) { bd = d; best = m; } }
+  return best ? { m: best, yaw } : null;
+}
 
 export function create({ rng, players, difficulty = 'normal' }) {
   const n = players.length, solo = n === 1, S = RULES, pace = S.pace[difficulty] ?? 1;
@@ -50,10 +67,10 @@ export function create({ rng, players, difficulty = 'normal' }) {
     moles.push({ id: ++mid, hole, kind, age: 0, life: rng.range(a, b) * pace, st: 'up', by: -1 });
   }
   function swing(pid) {
-    const b = bodies.get(pid), s = P.get(pid), fx = Math.sin(b.yaw), fz = Math.cos(b.yaw);
-    const hx = b.x + fx * S.reach, hz = b.z + fz * S.reach;
-    let best = null, bd = S.hitR;
-    for (const m of moles) { if (!up(m)) continue; const H = HOLES[m.hole], d = Math.hypot(H.x - hx, H.z - hz); if (d < bd) { bd = d; best = m; } }
+    const b = bodies.get(pid), s = P.get(pid);
+    const aim = aimAt(b.x, b.z, b.yaw, moles.filter(up)), best = aim?.m || null;
+    if (aim) b.yaw = aim.yaw;
+    const hx = b.x + Math.sin(b.yaw) * S.reach, hz = b.z + Math.cos(b.yaw) * S.reach;
     events.push({ e: 'swing', pid });
     if (best) {
       const H = HOLES[best.hole];

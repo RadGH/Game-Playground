@@ -1,0 +1,40 @@
+/* Ring Toss — a stall with a striped awning; the table canvas in the middle, the throw panel (aim needle, power bar,
+   one big button) under it on a phone that plays. Nothing in here scrolls on its own. */
+.game-ring-toss { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: repeating-linear-gradient(90deg, #2f7ff0 0 18px, #fff 18px 36px) top / 100% 10px no-repeat, linear-gradient(#8fd0f5, #bfe8ff 55%, #9be07a 55%, #6fbf5a);
+  color: var(--ink); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-ring-toss.season-halloween { background: repeating-linear-gradient(90deg, #ff8a1a 0 18px, transparent 18px 36px) top / 100% 10px no-repeat, linear-gradient(#241a3d, #140f26 70%, #1d1430); }
+.game-ring-toss > * { flex: none; }
+.rt-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 8px; }
+.rt-title { color: #bfe8ff; font: 900 26px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.rt-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.rt-board .chip { color: var(--ink); padding-right: 10px; }
+.rt-board .sc { font-style: normal; background: #dff1ff; border-radius: 8px; padding: 0 7px; }
+.rt-board .chip.lead { background: var(--sun); }
+.rt-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.rt-stall { position: relative; width: min(100%, 620px); height: clamp(200px, 40dvh, 480px); flex: 1 1 auto; min-height: 190px; }
+.rt-stall canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.rt-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 76px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.rt-count:empty { display: none; }
+.rt-say { position: absolute; left: 0; right: 0; top: 18%; text-align: center; font: 900 24px/1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none; }
+.rt-say.pop { animation: rt-pop 1.3s ease-out forwards; } .rt-say.gold { color: var(--sun); } .rt-say.bad { color: #ffd9d9; }
+@keyframes rt-pop { 0% { opacity: 1; transform: scale(1.3); } 70% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.rt-panel { width: min(440px, 100%); display: grid; gap: 7px; padding: 9px 12px 11px; background: var(--paper); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+.rt-panel.hidden { display: none; }
+.rt-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 800; }
+.rt-n { font: 900 17px/1 var(--font); }
+.rt-wind { font: 800 14px/1 var(--font); padding: 3px 9px; border-radius: 999px; border: 2px solid var(--ink); background: #fff; }
+.rt-wind.on { background: #9fd3ff; }
+.rt-meter { display: grid; grid-template-columns: 62px 1fr; align-items: center; gap: 8px; font: 900 12px/1 var(--font); text-transform: uppercase; letter-spacing: .4px; }
+.rt-track { position: relative; height: 24px; border: 3px solid var(--ink); border-radius: 10px; background: #fff; overflow: hidden; }
+.rt-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, #3ecf5a, #ffd23f 70%, #ff5f5f); }
+.rt-needle { position: absolute; top: -2px; bottom: -2px; width: 6px; margin-left: -3px; left: 50%; background: #2f7ff0; border: 2px solid var(--ink); border-radius: 3px; }
+.rt-panel:not([data-mode=aim]) .rt-aim { opacity: .55; } .rt-panel:not([data-mode=power]) .rt-power { opacity: .45; }
+.rt-btn { min-height: 62px; font-size: 24px; touch-action: manipulation; cursor: pointer; }
+.rt-btn:disabled { background: #e8e1cc; color: #6a7a80; }
+.rt-panel[data-mode=power] .rt-btn { background: #8ff07a; }
+.rt-note { margin: 0; text-align: center; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px var(--ink); }
+.rt-note:empty { display: none; }
+.game-ring-toss.watching .rt-stall { width: min(100%, 1280px); height: calc(100dvh - 160px); }
+@media (max-height: 560px) { .rt-stall { height: 44dvh; min-height: 150px; } .rt-btn { min-height: 48px; font-size: 20px; } .rt-title { font-size: 20px; } }

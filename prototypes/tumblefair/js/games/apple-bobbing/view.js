@@ -29,6 +29,17 @@ export function createView(ctx) {
   if (me != null) ui.querySelector(`.ab-board [data-pid="${me}"]`)?.classList.add('me');
   const canvas = $('canvas'), g = canvas.getContext('2d');
   const tunes = createTunes({ volume: 0.22 });
+  // round 12: three night-time settings, picked from the apples (so every phone in the room shows the same one)
+  const SCENES = [
+    { id: 'porch', water: ['#3a6fb0', '#173a6a'], leaf: null },
+    { id: 'barn', water: ['#4f7fa0', '#1c3550'], leaf: '#e0902a' },
+    { id: 'garden', water: ['#2f8f8a', '#12424a'], leaf: '#b7d94a' },
+  ];
+  const scene = SCENES[Math.floor(((apples[0]?.ph || 0) * 1000)) % SCENES.length];
+  ui.classList.add('ab-scene-' + scene.id);
+  const leaves = Array.from({ length: scene.leaf ? 5 : 0 }, (_, i) => ({ x: ((i * 0.37 + (apples[1]?.ph || 0)) % 1), s: 0.6 + (i % 3) * 0.25, ph: i * 1.7 }));
+  let streak = 0;
+  const sparks = [];                                   // gold-apple sparkles: { x, y, vx, vy, at }
 
   // ---- faces
   const faces = new Map();
@@ -79,7 +90,12 @@ export function createView(ctx) {
       else if (r === 'spider') { tunes.fx('boing', 0.8); ctx.sfx('bad'); }
       else { crunch(); ctx.sfx(r === 'gold' ? 'coins' : 'good'); }
     }
-    if (pid === me) { const s = $('.ab-say'); s.textContent = SAY[r]; s.className = 'ab-say ' + r; void s.offsetWidth; s.classList.add('pop'); }
+    if (pid === me) {
+      streak = r === 'red' || r === 'gold' ? streak + 1 : 0;
+      const s = $('.ab-say'); s.textContent = SAY[r] + (streak >= 3 ? ` · ${streak} in a row!` : ''); s.className = 'ab-say ' + r + (streak >= 3 ? ' streak' : ''); void s.offsetWidth; s.classList.add('pop');
+      if (r === 'splash' || r === 'spider') { const tb = $('.ab-tub'); tb.classList.remove('shake'); void tb.offsetWidth; tb.classList.add('shake'); }
+      if (r === 'gold') for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; sparks.push({ a, v: 0.6 + (i % 3) * 0.25, at: nowS() }); }
+    }
   }
   const btn = $('.ab-btn');
   btn.addEventListener('pointerdown', e => { e.preventDefault(); press(); });
@@ -112,9 +128,14 @@ export function createView(ctx) {
     // the far rim (back of the barrel)
     g.fillStyle = '#5a3418'; g.beginPath(); g.ellipse(x + w / 2, wy, w / 2, wh * 0.55, 0, Math.PI, 0); g.fill();
     // water
-    const wg = g.createLinearGradient(0, wy - wh * 0.5, 0, wy + wh); wg.addColorStop(0, '#3a6fb0'); wg.addColorStop(1, '#173a6a');
+    const wg = g.createLinearGradient(0, wy - wh * 0.5, 0, wy + wh); wg.addColorStop(0, scene.water[0]); wg.addColorStop(1, scene.water[1]);
     g.fillStyle = wg; g.beginPath(); g.ellipse(x + w / 2, wy, w / 2 - 4, wh * 0.5, 0, 0, Math.PI * 2); g.fill();
     g.fillRect(x + 4, wy, w - 8, wh * 0.5);
+    if (scene.leaf) {                                  // a few leaves drifting on the water
+      const tt = nowS(); g.fillStyle = scene.leaf;
+      for (const L of leaves) { const lx = x + 10 + ((L.x + tt * 0.012 * L.s) % 1) * (w - 20), ly = wy + Math.sin(tt * 1.3 + L.ph) * wh * 0.12 + wh * 0.05 * L.s;
+        g.save(); g.translate(lx, ly); g.rotate(Math.sin(tt * 0.7 + L.ph) * 0.6); g.beginPath(); g.ellipse(0, 0, wh * 0.22 * L.s, wh * 0.09 * L.s, 0, 0, 7); g.fill(); g.restore(); }
+    }
     // front of the tub: staves and two iron hoops
     const fy = wy + wh * 0.25, fh = y + h - fy;
     const fg = g.createLinearGradient(x, 0, x + w, 0); fg.addColorStop(0, '#6b3d1c'); fg.addColorStop(0.5, '#a0622e'); fg.addColorStop(1, '#6b3d1c');
@@ -219,13 +240,19 @@ export function createView(ctx) {
     }
     const y0 = stripH + 4, wy = tub(4, y0, W - 8, H - y0 - 2);
     lane(players.find(p => p.pid === me), 4, y0, W - 8, H - y0 - 2, wy, t, true);
+    // gold sparkles burst from my face
+    const now = nowS(), cx = W / 2, cy = y0 + (H - y0) * 0.3;
+    for (let i = sparks.length - 1; i >= 0; i--) { const sp = sparks[i], k = (now - sp.at) / 0.8; if (k >= 1) { sparks.splice(i, 1); continue; }
+      const d = 20 + k * 110 * sp.v, sx = cx + Math.cos(sp.a) * d, sy = cy + Math.sin(sp.a) * d * 0.7, r = 7 * (1 - k);
+      g.fillStyle = `rgba(255,${200 + Math.round(55 * (1 - k))},80,${1 - k})`; g.beginPath(); g.moveTo(sx, sy - r); g.lineTo(sx + r * 0.35, sy); g.lineTo(sx, sy + r); g.lineTo(sx - r * 0.35, sy); g.closePath(); g.fill(); }
   }
 
   function note(gs) {
     if (gs.phase === 'count') return watching ? 'Get ready to bob for apples!' : 'Press BITE (or Space) when the apple is under your face.';
     if (gs.phase === 'end') {
       if (init.solo && me != null) { const s = gs.l[me]?.[3] ?? 0, m = init.medals; return `${s} apples — ${s >= m[2] ? 'GOLD medal!' : s >= m[1] ? 'SILVER medal!' : s >= m[0] ? 'BRONZE medal!' : `bronze needs ${m[0]}`}`; }
-      return 'Towels, please!';
+      const rows = players.map(p => [p, gs.l[p.pid]?.[3] ?? 0]), top = Math.max(...rows.map(r => r[1])), lead = rows.filter(r => r[1] === top && top > 0);
+      return lead.length === 1 ? `Towels, please! ${lead[0][0].name} bobbed the most: ${top} apple${top === 1 ? '' : 's'}!` : 'Towels, please!';
     }
     if (init.solo) return `Medals: bronze ${init.medals[0]}, silver ${init.medals[1]}, gold ${init.medals[2]}.`;
     return '';

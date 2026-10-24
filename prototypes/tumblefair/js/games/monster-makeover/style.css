@@ -1,0 +1,60 @@
+/* Monster Makeover — a cosy monster salon at night: purple wallpaper, a mirror ringed with orange bulbs, a pink
+   request card, chunky cream part buttons. The whole game element scrolls if a phone is short (never a box inside). */
+.game-monster-makeover { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 20px) calc(var(--sl) + 10px); color: #fff; user-select: none; -webkit-user-select: none; touch-action: manipulation;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, .06) 0 3px, transparent 4px) 0 0 / 28px 28px, linear-gradient(#3a2160, #22163f 60%, #1d1430); }
+.game-monster-makeover > * { flex: none; }
+.mm-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding-right: 80px; }
+.mm-title { font: 900 22px/1.1 var(--font); color: #ff9ad0; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); white-space: nowrap; }
+.mm-card { width: min(100%, 560px); background: #ffe3f0; color: var(--ink); border: 4px solid var(--ink); border-radius: 16px; box-shadow: 0 4px 0 var(--ink); padding: 6px 10px; display: grid; gap: 4px; justify-items: center; transform: rotate(-.6deg); }
+.mm-client { font: 900 15px/1 var(--font); }
+.mm-wishes { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+.mm-wish { font-style: normal; font: 900 15px/1 var(--font); background: #fff; border: 3px solid var(--ink); border-radius: 10px; padding: 4px 8px; }
+.mm-wish::before { content: '○ '; }
+.mm-wish.met { background: #b9f5c4; } .mm-wish.met::before { content: '✔ '; color: #138a2c; }
+.mm-style { font: 800 14px/1.1 var(--font); } .mm-style b { font-weight: 900; color: #8a2f9a; } .mm-styled { font-style: normal; color: #5a4a60; }
+.mm-stage { position: relative; display: grid; justify-items: center; }
+.mm-mirror { width: min(56vw, 210px); aspect-ratio: 200 / 230; border-radius: 48% 48% 18px 18px; background: radial-gradient(circle at 50% 40%, #f4e8ff, #c9b6e8 70%); border: 6px solid #e8b04a;
+  box-shadow: 0 0 0 4px var(--ink), 0 0 22px 6px rgba(255, 200, 90, .45); display: grid; place-items: center; overflow: hidden; }
+.mm-mirror svg { width: 96%; height: auto; display: block; }
+.mm-mirror.pop { animation: mm-pop .45s ease-out; }
+@keyframes mm-pop { 0% { transform: scale(.85); } 60% { transform: scale(1.06); } 100% { transform: none; } }
+.mm-stars { font: 900 26px/1 var(--font); color: #ffd23f; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; letter-spacing: 2px; margin-top: 3px; }
+.mm-say { font: 900 18px/1.1 var(--font); color: #fff; text-shadow: 0 2px 0 var(--ink); min-height: 1em; }
+.mm-say:empty { display: none; }
+.mm-dress { width: min(100%, 560px); display: grid; gap: 6px; }
+.mm-tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.mm-tab { min-height: 44px; border: 3px solid var(--ink); border-radius: 12px; background: #fff4dc; font: 900 13px/1 var(--font); color: var(--ink); padding: 0 2px; cursor: pointer; position: relative; }
+.mm-tab.on { background: #ff8a1a; transform: translateY(-2px); box-shadow: 0 3px 0 var(--ink); }
+.mm-tab.set::after { content: '✔'; position: absolute; top: -8px; right: -4px; font-size: 11px; background: #3ecf8a; border: 2px solid var(--ink); border-radius: 50%; width: 17px; height: 17px; display: grid; place-items: center; }
+.mm-parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.mm-part { min-height: 50px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; color: var(--ink); box-shadow: 0 3px 0 var(--ink); font: 900 14px/1.05 var(--font);
+  display: flex; align-items: center; justify-content: center; gap: 5px; padding: 3px 5px; position: relative; cursor: pointer; text-align: center; }
+.mm-part:active { transform: translateY(3px); box-shadow: 0 0 0 var(--ink); }
+.mm-part.on { background: #fff1a8; outline: 3px solid #ff8a1a; }
+.mm-part em { font-style: normal; position: absolute; top: -8px; right: -3px; font-size: 13px; }
+.mm-part.mm-undo { background: #e8e1cc; font-size: 12px; }
+.mm-sw { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--ink); flex: none; }
+.mm-done { min-height: 56px; font-size: 24px; background: #3ecf8a; cursor: pointer; }
+.mm-done.on { background: #ffd23f; font-size: 16px; }
+.mm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: min(100%, 640px); }
+.mm-grid:empty { display: none; }
+.mm-look { border: 4px solid var(--ink); border-radius: 18px; background: #f4e8ff; box-shadow: 0 4px 0 var(--ink); padding: 4px 4px 8px; display: grid; justify-items: center; gap: 2px; color: var(--ink); font: inherit; cursor: pointer; }
+.mm-look svg { width: 100%; max-width: 170px; height: auto; display: block; }
+.mm-look:disabled { cursor: default; }
+.game-monster-makeover[data-phase=vote] .mm-look.mine { background: #e0d4ee; opacity: .75; } .mm-look.voted { background: #fff1a8; outline: 4px solid #fff; }
+.mm-look.fav { background: #ffe3f0; outline: 4px solid #ff5fa8; }
+.mm-who { font: 900 15px/1 var(--font); color: var(--seat, var(--ink)); -webkit-text-stroke: .4px var(--ink); }
+.mm-pts { font: 900 16px/1.1 var(--font); color: #8a2f9a; text-align: center; }
+.mm-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.mm-players .chip { color: var(--ink); }
+.mm-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.mm-st { font-size: 12px; color: #1d8a37; } .mm-st:empty { display: none; }
+.mm-note { margin: 0; color: #ffd23f; text-align: center; font: 900 17px/1.25 var(--font); text-shadow: 0 2px 0 var(--ink); min-height: 1.3em; }
+.game-monster-makeover:not([data-phase=dress]) .mm-dress { display: none; }
+.game-monster-makeover.watching .mm-dress { display: none; }
+.game-monster-makeover:is([data-phase=vote], [data-phase=reveal]) .mm-stage { display: none; }
+.game-monster-makeover:not([data-phase=dress]) .mm-styled { display: none; }
+.game-monster-makeover[data-phase=dress] .mm-grid, .game-monster-makeover[data-phase=show] .mm-grid { display: none; }
+@media (max-height: 700px) { .mm-mirror { width: min(42vw, 160px); } .mm-part { min-height: 44px; } }
+@media (min-aspect-ratio: 1/1) { .mm-grid[data-n="3"], .mm-grid[data-n="4"] { grid-template-columns: repeat(var(--c, 4), minmax(0, 1fr)); width: min(100%, 980px); } }

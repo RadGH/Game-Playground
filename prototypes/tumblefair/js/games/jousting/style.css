@@ -1,0 +1,42 @@
+/* Tilt & Lance — the lane canvas on top, the rider's panel (shield + NOW strip + HOLD button) or the cheer buttons
+   under it. Nothing in here scrolls on its own. */
+.game-jousting { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: linear-gradient(#8fd0f5, #d6f0ff 50%, #e0c08a 50%, #c9a46a); color: var(--ink); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-jousting.season-halloween { background: linear-gradient(#1d1430, #3a2160 50%, #4a3a52 50%, #2a2036); }
+.game-jousting > * { flex: none; }
+.jt-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 8px; }
+.jt-title { color: #fff6e0; font: 900 25px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.jt-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.jt-board .chip { color: var(--ink); padding-right: 10px; } .jt-board .sc { font-style: normal; background: #fff3d6; border-radius: 8px; padding: 0 7px; }
+.jt-board .chip.lead { background: var(--sun); } .jt-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.jt-head { font: 900 16px/1.2 var(--font); background: var(--paper); border: 3px solid var(--ink); border-radius: 12px; padding: 4px 12px; box-shadow: 0 3px 0 var(--ink); text-align: center; max-width: 100%; }
+.jt-head:empty { display: none; }
+.jt-lane { position: relative; width: min(100%, 680px); height: clamp(170px, 30dvh, 380px); border: 4px solid var(--ink); border-radius: 16px; overflow: hidden; }
+.jt-lane canvas { width: 100%; height: 100%; display: block; }
+.jt-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 76px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.jt-count:empty { display: none; }
+.jt-say { position: absolute; left: 0; right: 0; top: 10%; text-align: center; font: 900 24px/1.05 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none; padding: 0 8px; }
+.jt-say.pop { animation: jt-pop 1.4s ease-out forwards; } .jt-say.gold { color: var(--sun); } .jt-say.bad { color: #ffd9d9; } .jt-say.good { color: #c9ffc0; }
+@keyframes jt-pop { 0% { opacity: 1; transform: scale(1.3); } 75% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.jt-panel, .jt-cheer { width: min(440px, 100%); display: grid; gap: 8px; padding: 9px 12px 11px; background: var(--paper); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+.jt-panel.hidden, .jt-cheer.hidden { display: none; }
+.jt-row { display: grid; grid-template-columns: minmax(120px, 44%) 1fr; gap: 10px; align-items: center; }
+.jt-shield { width: 100%; aspect-ratio: 1; display: block; }
+.jt-side { display: grid; gap: 8px; } .jt-pass { font: 900 18px/1 var(--font); } .jt-tip { margin: 0; font: 800 13px/1.25 var(--font); }
+.jt-strip { position: relative; height: 34px; border: 3px solid var(--ink); border-radius: 10px; background: #fff; }
+.jt-strip .jt-now { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 34px; margin-left: -17px; background: #8ff07a; border: 3px solid var(--ink); border-radius: 6px; font: 900 10px/26px var(--font); font-style: normal; text-align: center; }
+.jt-strip.now .jt-now { background: var(--sun); transform: scale(1.18); }
+.jt-strip .jt-k { position: absolute; top: 5px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; border: 3px solid var(--ink); }
+.jt-k.a { background: #e8394a; } .jt-k.b { background: #3d8bff; }
+.jt-btn { min-height: 66px; font-size: 26px; touch-action: none; cursor: pointer; }
+.jt-btn.held { background: #8ff07a; transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
+.jt-btn:disabled { background: #e8e1cc; color: #6a7a80; }
+.jt-cheer p { margin: 0; text-align: center; font: 900 16px/1.2 var(--font); }
+.jt-cbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.jt-c { min-height: 58px; font-size: 17px; background: var(--seat, var(--sun)); color: #fff; -webkit-text-stroke: .6px var(--ink); overflow: hidden; text-overflow: ellipsis; }
+.jt-c:disabled:not(.picked) { opacity: .45; } .jt-c.picked { box-shadow: 0 0 0 4px var(--sun), 0 5px 0 var(--ink); }
+.jt-note { margin: 0; text-align: center; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px var(--ink); }
+.jt-note:empty { display: none; }
+.game-jousting.watching .jt-lane { width: min(100%, 1280px); height: calc(100dvh - 190px); }
+@media (max-height: 640px) { .jt-lane { height: 26dvh; min-height: 140px; } .jt-btn { min-height: 52px; font-size: 21px; } .jt-title { font-size: 20px; } }

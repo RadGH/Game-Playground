@@ -46,7 +46,7 @@ export const PAYOUT = Object.freeze({ base: 10, perRibbon: 5, perPoint: 1, winne
 // `report(kind, data)` (round 7) is how a room tells the server what happened, for the insights log the owner reads to
 // find the unfun minigames: 'rate' (a player's 👍/👎 + reasons), 'played' (a minigame ran: how long, who dropped out),
 // 'vote' (which minigames were offered and which won), 'match' / 'final'. Never a name, a token or an address.
-export function createRoom({ code, now, seed = 1, data, profiles = null, log = () => {}, report = () => {}, ratings: allRatings = () => ({}) }) {
+export function createRoom({ code, now, seed = 1, data, profiles = null, log = () => {}, report = () => {}, ratings: allRatings = () => ({}), fresh: freshNow = () => ({}) }) {
   const rng = makeRng(seed);
   const members = new Map();          // pid -> member
   let nextPid = 1, hostPid = null, phase = 'lobby', until = 0, emptySince = null;
@@ -78,7 +78,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const send = (m, obj) => { if (m.connected && m.send) m.send(JSON.stringify(obj)); };
   const cast = obj => { const s = JSON.stringify(obj); for (const m of members.values()) if (m.connected && m.send) m.send(s); };
   function roomMsg(m) {
-    return { t: 'room', code, phase, host: hostPid, you: m.pid, opts, season: season(), dateSeason: seasonByDate(date()), members: [...members.values()].map(pub),
+    return { t: 'room', code, phase, host: hostPid, you: m.pid, opts, fresh: freshNow() || {}, season: season(), dateSeason: seasonByDate(date()), members: [...members.values()].map(pub),
       kickVote: kickVote ? { target: kickVote.target, yes: [...kickVote.by], need: kickNeed() } : null,
       match: match ? { mode: match.mode, round: match.round, rounds: match.rounds, goal: match.goal || 0, ribbonWorth: match.goal ? ribbonWorth() : 0, points: match.points, wins: match.wins, board: match.board ? match.board.view() : null, boardId: match.boardId || null } : null };
   }
@@ -193,7 +193,9 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     if (!rated.length) return [];
     const key = id => { const r = R[id]; if (!opts.favour) return r.score; const n = r.reasons?.['+' + opts.favour] || 0; return n / (r.up + r.down + 2) * 100 + r.score / 1000; };
     const best = rated.sort((a, b) => key(b) - key(a));
-    const lead = best.slice(0, Math.min(4, best.length)), first = lead[Math.floor(rng() * lead.length)];
+    // with Favour set, only games someone actually gave that 👍 reason can be the special pick (if there are any)
+    const named = opts.favour ? best.filter(id => (R[id].reasons?.['+' + opts.favour] || 0) > 0) : best;
+    const lead = (named.length ? named : best).slice(0, Math.min(4, (named.length ? named : best).length)), first = lead[Math.floor(rng() * lead.length)];
     return [first, ...best.filter(id => id !== first)];
   }
   /** "First to X tickets": what a player is worth toward the goal — tickets in hand plus every ribbon at its price. */
@@ -219,7 +221,8 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     options = rng.shuffle(options);                 // the special slot isn't always the first card
     const rating = Object.fromEntries(options.filter(id => R[id] && R[id].up + R[id].down >= RATED_MIN).map(id => [id, Math.round(100 * R[id].up / (R[id].up + R[id].down))]));
     vote = { options, votes: {} };
-    setPhase('vote', { options, labels, rating, round: match.round, rounds: match.rounds }, TIMES.VOTE_MS);
+    const F = freshNow() || {}, badges = Object.fromEntries(options.filter(id => F[id]).map(id => [id, F[id]]));
+    setPhase('vote', { options, labels, rating, fresh: badges, round: match.round, rounds: match.rounds }, TIMES.VOTE_MS);
   }
   function endVote() {
     const tally = vote.options.map(() => 0);
@@ -236,7 +239,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     const def = GAMES[id], players = active();
     const list = players.map(m => ({ pid: m.pid, seat: m.seat, name: m.name }));
     const difficulty = match.mode === 'endless' ? ['easy', 'normal', 'hard'][Math.min(2, Math.floor((match.round - 1) / ENDLESS.STEP))] : opts.difficulty;   // the endless fair gets harder
-    const inst = def.create({ seed: Math.floor(rng() * 2 ** 31), rng: rng.fork(), players: list, difficulty, season: season() });
+    const inst = def.create({ seed: Math.floor(rng() * 2 ** 31), rng: rng.fork(), players: list, difficulty, season: season(), teams: !!match.teams });   // teams: Wizard Duel turns off hitting your own side
     for (const m of members.values()) { m.queue.length = 0; m.lastIn = null; m.starve = 0; m.ack = 0; m.skip = false; }
     game = { id, def, inst, players: list.map(p => p.pid), started: false, endsAt: 0, lastState: '', lastPriv: new Map(), gone: new Set(), difficulty };
     const who = playedBy.get(id) || new Set(); for (const p of list) who.add(p.pid); playedBy.set(id, who);

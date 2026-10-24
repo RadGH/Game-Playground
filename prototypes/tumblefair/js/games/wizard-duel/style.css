@@ -1,0 +1,15 @@
+/* Wizard Duel — the spell bar under the score bar (six spells, the one in hand lit, a grey fill while one cools
+   down) and the tags over the wizards (hearts + zap meter). */
+.wd-spells { position: absolute; left: 50%; transform: translateX(-50%); top: calc(var(--st) + 62px); display: flex; gap: 4px; pointer-events: none; max-width: calc(100% - 20px); flex-wrap: wrap; justify-content: center; }
+.wd-spells.hidden { display: none; }
+.wd-sp { position: relative; display: flex; align-items: center; gap: 3px; padding: 3px 7px 3px 5px; border-radius: 999px; background: rgba(255,255,255,.82); border: 2px solid var(--ink); font: 800 11px/1 var(--font); color: var(--ink); overflow: hidden; opacity: .7; }
+.wd-sp b { font-size: 14px; font-weight: 400; }
+.wd-sp em { font-style: normal; white-space: nowrap; }
+.wd-sp i { position: absolute; left: 0; bottom: 0; height: 4px; width: 0; background: rgba(20,20,40,.55); }   /* the cool-down still to go */
+.wd-sp.on { opacity: 1; background: var(--c); transform: scale(1.12); box-shadow: 0 3px 0 var(--ink); z-index: 1; }
+.wd-sp.cool em { opacity: .6; }
+.wd-sp:not(.on) em { display: none; }
+.tag.wd-tag { background: #fff; color: var(--ink); text-shadow: none; font-size: 12px; letter-spacing: .5px; }
+.tag.wd-tag.hot { background: #ffd23f; animation: wd-hot .4s ease-in-out infinite alternate; }
+.tag.wd-tag.out { background: #777; color: #fff; }
+@keyframes wd-hot { to { filter: brightness(1.2); } }

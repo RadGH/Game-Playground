@@ -1,14 +1,13 @@
 // DEFUSE TOGETHER on a screen: the top shows the fuse (a burning cord that shortens, with the seconds), one pip per
-// module, and who holds the device / who holds the rule book. The DEVICE holder's phone (and a watching TV) shows the
-// confetti cannon's current module as big buttons: wires to snip, picture keys, switches + SET, word buttons. A
-// reader's phone shows only their torn pages of the rule book for the current module, with a nudge to ask the holder
-// what they see. Solo shows the device with the short rule book under it. A mistake shakes the device and burns the
-// fuse; the end is a confetti blast (fail) or a deflating cannon with "Safe!" (win).
-import { COLORS, LIGHTS } from './sim.js';
+// wire, and who holds the device / who holds the rule book. A big "do this now" line says what YOUR role does. The
+// DEVICE holder's phone (and a watching TV) shows the clue big (a glowing light, a picture, a number or a word) over
+// the wires to snip. A reader's phone shows only their torn page of the book: "clue -> cut the COLOUR wire" lines.
+// Solo shows the device with the short book under it. A wrong wire shakes the device and burns the fuse; the end is a
+// confetti blast (fail) or "Safe!" (win).
+import { COLORS, LIGHTS, GLYPHS } from './sim.js';
 import { esc, chip } from '../../client/gamehud.js';
 
 const COLHEX = { red: '#e8343b', blue: '#2f7bff', yellow: '#ffd23f', white: '#f7f7f7', black: '#25222b', green: '#36c25a' };
-const LIGHTHEX = { red: '#ff4d4d', blue: '#3d8bff', green: '#3ecf5a', yellow: '#ffd23f' };
 const P = 'fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"';
 const F = 'fill="currentColor"';
 /** The picture keys: plain line drawings, so they are told apart by shape alone (people have to describe them). */
@@ -33,13 +32,19 @@ export const GLYPH_SVG = {
   teapot: `<path ${P} d="M-6 7 H5 C8 4 8-2 5-4 H-5 C-8-2 -8 4 -6 7 Z M5-1 L10-5 M-7-1 C-11-1 -11 4 -7 4 M-2-4 V-6 H2 V-4"/>`,
 };
 const glyph = (g, cls = '') => `<svg class="dt-g ${cls}" viewBox="-12 -12 24 24" role="img" aria-label="${g}">${GLYPH_SVG[g] || ''}</svg>`;
-const KIND_NAME = { wires: 'Wires', symbols: 'Picture keys', switches: 'Switches', word: 'Word buttons' };
-const HOW = {
-  wires: 'Rules are numbered. Read them IN ORDER: the first one that is true says which wire to cut.',
-  symbols: 'One column has all of the device\'s pictures. Press them in that column\'s order, top to bottom.',
-  switches: 'Find the row for the light\'s colour and the number. Set the switches like that, then press SET.',
-  word: 'Find the word EXACTLY (spelling matters!) and press the button it names.',
-};
+const KIND_NAME = { light: 'Light', picture: 'Picture', number: 'Number', word: 'Word' };
+/** The one line each role needs, per clue kind (round 12: one verb for every module). */
+const ASK = { light: 'What colour is the light?', picture: 'What does the picture look like?', number: 'What number is it?', word: 'Spell the word, letter by letter!' };
+const SAY = { light: 'Say the light\'s COLOUR out loud.', picture: 'Describe the PICTURE out loud.', number: 'Say the NUMBER out loud.', word: 'SPELL the word out loud — some look alike!' };
+const LIGHTHEX = { purple: '#b46bff', orange: '#ff8a3d', pink: '#ff7ac8', teal: '#2ad4c4', brown: '#a8693a', silver: '#c8cdd6' };
+/** A clue drawn small (in the book) or big (on the device). */
+function clueHtml(kind, v, big = false) {
+  if (kind === 'light') { const c = LIGHTS[v]; return `<span class="dt-clue light${big ? ' big' : ''}" style="--l:${LIGHTHEX[c]}"><i></i>${c.toUpperCase()}</span>`; }
+  if (kind === 'picture') return `<span class="dt-clue pic${big ? ' big' : ''}">${glyph(GLYPHS[v])}</span>`;
+  if (kind === 'number') return `<span class="dt-clue num${big ? ' big' : ''}">${v}</span>`;
+  return `<span class="dt-clue word${big ? ' big' : ''}">${esc(v)}</span>`;
+}
+const wireChip = c => `<span class="dt-wchip" style="--w:${COLHEX[COLORS[c]]}"><i></i>${COLORS[c].toUpperCase()}</span>`;
 
 export function createView(ctx) {
   const { ui, players, me, init } = ctx, watching = me == null;
@@ -61,29 +66,26 @@ export function createView(ctx) {
     if (init.solo) return `<span class="dt-tag dev">Device + rule book</span>${op ? chip(op) : ''}`;
     return `<span class="dt-tag dev">Device</span>${op ? chip(op) : ''}<span class="dt-tag book">Rule book</span>${readers.map(pid => { const p = players.find(x => x.pid === pid); return p ? chip(p) : ''; }).join('')}`;
   }
-  // ---- the device
+  // ---- the device: the clue, big, and the wires to cut
   function deviceHtml(d, live) {
     const dis = live ? '' : ' disabled';
-    let body = '';
-    if (d.k === 'wires') body = `<div class="dt-wires">${d.w.map((c, i) => `<button class="dt-wire${d.cut[i] ? ' cut' : ''}" data-a="cut" data-d="${i}" style="--w:${COLHEX[COLORS[c]]}"${dis || (d.cut[i] ? ' disabled' : '')} aria-label="Wire ${i + 1}, ${COLORS[c]}${d.cut[i] ? ', cut' : ''}"><span class="n">${i + 1}</span><span class="cable"><i></i><i></i></span><span class="lab">${COLORS[c].toUpperCase()}</span></button>`).join('')}</div>`;
-    else if (d.k === 'symbols') body = `<div class="dt-keys">${d.s.map((s, i) => `<button class="dt-key" data-a="sym" data-d="${i}"${dis} aria-label="${s}">${glyph(s)}<span class="ok">✓</span></button>`).join('')}</div><p class="dt-sub">Pressed <b>${d.got}</b> of ${d.s.length} in the right order</p>`;
-    else if (d.k === 'switches') body = `<div class="dt-panel"><span class="dt-light" style="--l:${LIGHTHEX[LIGHTS[d.light]]}"><i></i>${LIGHTS[d.light].toUpperCase()}</span><span class="dt-num">${d.num}</span></div>
-      <div class="dt-sws">${d.sw.map((v, i) => `<button class="dt-sw ${v ? 'up' : 'down'}" data-a="flip" data-d="${i}"${dis} aria-label="Switch ${i + 1} ${v ? 'up' : 'down'}"><span class="slot"><i></i></span><b>${v ? '▲ UP' : '▼ DOWN'}</b></button>`).join('')}</div>
-      <button class="dt-set" data-a="set" data-d="1"${dis}>SET</button>`;
-    else if (d.k === 'word') body = `<div class="dt-screen">${esc(d.word)}</div><div class="dt-btns">${d.b.map((l, i) => `<button class="dt-btn" data-a="btn" data-d="${i}"${dis}>${esc(l)}</button>`).join('')}</div>`;
-    return `<div class="dt-device"><div class="dt-cannon" aria-hidden="true"><i class="barrel"></i><i class="wheel"></i><i class="wheel r"></i></div><div class="dt-mod"><h3>Module ${g.mod + 1}: ${KIND_NAME[d.k]}</h3>${body}</div></div>`;
+    const wires = `<div class="dt-wires">${d.w.map((c, i) => `<button class="dt-wire${d.cut[i] ? ' cut' : ''}" data-a="cut" data-d="${i}" style="--w:${COLHEX[COLORS[c]]}"${dis || (d.cut[i] ? ' disabled' : '')} aria-label="${COLORS[c]} wire${d.cut[i] ? ', cut' : ''}"><span class="cable"><i></i><i></i></span><span class="lab">${COLORS[c].toUpperCase()}</span><span class="snip" aria-hidden="true">✂</span></button>`).join('')}</div>`;
+    return `<div class="dt-device"><div class="dt-cannon" aria-hidden="true"><i class="barrel"></i><i class="wheel"></i><i class="wheel r"></i></div><div class="dt-mod"><h3>Wire ${g.mod + 1} of ${init.n} · the clue</h3><div class="dt-cluebox">${clueHtml(d.k, d.v, true)}</div>${wires}</div></div>`;
   }
-  // ---- the rule book page
+  // ---- the rule book page: "clue -> cut the COLOUR wire"
   function pageHtml(p) {
     const lines = p.lines || [];
-    let rows = '';
-    if (p.kind === 'wires') rows = lines.map(l => `<li><b>Rule ${l.n}</b> ${esc(l.text)}</li>`).join('');
-    else if (p.kind === 'symbols') rows = lines.map(l => `<li class="col"><b>Column ${'ABCD'[l.n - 1]}</b><span class="dt-colg">${l.g.map(x => glyph(x)).join('')}</span></li>`).join('');
-    else if (p.kind === 'switches') rows = lines.map(l => `<li><b>Row ${l.n}</b> Light <em style="--l:${LIGHTHEX[LIGHTS[l.c]]}">${LIGHTS[l.c].toUpperCase()}</em>, number <em>${l.odd ? 'ODD' : 'EVEN'}</em>: <span class="pat">${l.p.map(v => v ? '▲UP' : '▼DOWN').join(' ')}</span></li>`).join('');
-    else if (p.kind === 'word') rows = lines.map(l => `<li><b>${esc(l.w)}</b> → press <em>${esc(l.l)}</em></li>`).join('');
+    const rows = lines.map(l => `<li>${clueHtml(p.kind, l.v)}<span class="arrow">→ cut</span>${wireChip(l.col)}</li>`).join('');
     const others = (p.readers || []).filter(r => r !== me && r !== g.op).map(name);
-    const nudge = init.solo ? '' : `<p class="dt-nudge">Ask <b>${esc(name(g.op))}</b> what the device shows. ${others.length ? `${esc(others.join(' and '))} ${others.length > 1 ? 'have' : 'has'} the other lines.` : 'You have the whole page.'}</p>`;
-    return `<div class="dt-book"><h3>Rule book · ${KIND_NAME[p.kind]}</h3><p class="dt-how">${HOW[p.kind]}</p><ol class="dt-lines ${p.kind}">${rows || '<li>(no lines for you this time)</li>'}</ol>${nudge}</div>`;
+    const nudge = init.solo ? '' : `<p class="dt-nudge">${others.length ? `${esc(others.join(' and '))} ${others.length > 1 ? 'have' : 'has'} the other lines — the clue may be on theirs.` : 'You have the whole book.'}</p>`;
+    return `<div class="dt-book"><h3>Rule book · ${KIND_NAME[p.kind]}</h3><ol class="dt-lines ${p.kind}">${rows || '<li>(no lines for you this time)</li>'}</ol>${nudge}</div>`;
+  }
+  /** The big "do this now" line at the top of the main panel. */
+  function todo(kind) {
+    if (role === 'both') return `<p class="dt-todo">Find the clue in the rule book, then <b>cut that wire</b>.</p>`;
+    if (role === 'op') return `<p class="dt-todo"><b>You hold the device!</b> ${SAY[kind]} Then cut the wire your team shouts.</p>`;
+    if (role === 'read') return `<p class="dt-todo"><b>You hold the rule book.</b> Ask ${esc(name(g.op))}: “${ASK[kind]}” If it is on your page, <b>shout the wire colour!</b></p>`;
+    return `<p class="dt-todo">${esc(name(g.op))} holds the device; the rule book is on the other phones.</p>`;
   }
   function draw() {
     if (!g) return;
@@ -94,17 +96,16 @@ export function createView(ctx) {
     const k2 = JSON.stringify([g.mod, g.phase, g.dev, role, pv?.mod, pv?.lines?.length]);
     if (k2 === key) return; key = k2;
     $('.dt-who').innerHTML = whoHtml();
-    if (g.phase === 'swap') { $('.dt-main').innerHTML = `<div class="dt-msg"><b>Module ${g.mod + 1} defused!</b><span>Next the device goes to <b>${esc(name(init.ops[g.mod + 1]))}</b>…</span></div>`; return; }
+    if (g.phase === 'swap') { const by = !init.solo && g.by != null ? `<span>${g.by === me ? 'You' : esc(name(g.by))} had the right line!</span>` : ''; $('.dt-main').innerHTML = `<div class="dt-msg"><b>Wire ${g.mod + 1} cut — phew!</b>${by}<span>Next the device goes to <b>${esc(name(init.ops[g.mod + 1]))}</b>…</span></div>`; return; }
     if (g.phase !== 'go') { $('.dt-main').innerHTML = `<div class="dt-msg ${g.phase}"><b>${g.phase === 'done' ? 'Safe! The cannon fizzles out.' : 'POP! Confetti everywhere!'}</b></div>`; return; }
     const live = (role === 'op' || role === 'both');
-    if (role === 'read' && pv) $('.dt-main').innerHTML = pageHtml(pv);
-    else $('.dt-main').innerHTML = deviceHtml(g.dev, live) + (role === 'both' && pv ? pageHtml(pv) : '') + (live && !init.solo ? `<p class="dt-nudge">Describe it out loud: your team has the rule book.</p>` : '') + (role === 'watch' ? `<p class="dt-nudge">${esc(name(g.op))} holds the device; the rule book is on the other phones.</p>` : '');
+    if (role === 'read' && pv) $('.dt-main').innerHTML = todo(g.dev.k) + pageHtml(pv);
+    else $('.dt-main').innerHTML = todo(g.dev.k) + deviceHtml(g.dev, live) + (role === 'both' && pv ? pageHtml(pv) : '');
   }
   ui.addEventListener('click', e => {
     const b = e.target.closest('button[data-a]'); if (!b || b.disabled || !g || g.phase !== 'go' || (role !== 'op' && role !== 'both')) return;
     const a = b.dataset.a, d = +b.dataset.d;
     ctx.send(a, d); ctx.sfx('tap');
-    if (a === 'flip') { b.classList.toggle('up'); b.classList.toggle('down'); b.querySelector('b').textContent = b.classList.contains('up') ? '▲ UP' : '▼ DOWN'; }   // flips at once; the server agrees a moment later
     if (a === 'cut') b.classList.add('cut');
   });
   function banner(text, cls = '') { const b = $('.dt-banner'); b.textContent = text; b.className = 'dt-banner ' + cls; void b.offsetWidth; b.classList.add('show'); }
@@ -116,10 +117,10 @@ export function createView(ctx) {
     state(s) { g = s; draw(); },
     priv(d) { pv = d; key = ''; draw(); },
     event(ev) {
-      if (ev.e === 'oops') { ctx.sfx('bad'); banner(`Oops! -${ev.cost}s`, 'bad'); const d = $('.dt-device'); d?.classList.remove('shake'); void d?.offsetWidth; d?.classList.add('shake'); }
-      else if (ev.e === 'defused') { ctx.sfx('good'); banner('Defused!', 'good'); }
+      if (ev.e === 'oops') { ctx.sfx('bad'); banner(`Wrong wire! -${ev.cost}s`, 'bad'); navigator.vibrate?.(120); const d = $('.dt-device'); d?.classList.remove('shake'); void d?.offsetWidth; d?.classList.add('shake'); }
+      else if (ev.e === 'defused') { ctx.sfx('good'); banner('Snip! ✓', 'good'); }
       else if (ev.e === 'next') { if (ev.op === me) { ctx.sfx('pick'); banner('You hold the device!'); } else banner(`${name(ev.op)} holds the device`); }
-      else if (ev.e === 'snip' || ev.e === 'click' || ev.e === 'flip') ctx.sfx('tap');
+      else if (ev.e === 'snip') ctx.sfx('throw');
       else if (ev.e === 'boom') { ctx.sfx('splat'); confetti(); banner('POP!', 'bad'); }
       else if (ev.e === 'safe') { ctx.sfx('win'); banner('Safe!', 'good'); }
     },

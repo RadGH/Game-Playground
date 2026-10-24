@@ -11,6 +11,10 @@
 // RUBBLINGS — little rock critters that waddle after the nearest player and bonk them (a short stun, like the slam's
 // but smaller). A swing (A) near one smashes it; so does landing on it. B JUMPS, and landing on a team-mate's head
 // bounces you up again and leaves them seeing stars for a moment — it costs the team, so it is a joke, not a tactic.
+// Round 12 (1/1): the rubblings turned into a stun-lock. A rubbling rested 1.1 s after a bonk and came again, so a
+// perfect team that dodged every slam was still knocked dizzy ~60 (2 players) to ~110 (4 players) times a game on
+// normal — you were out of control every couple of seconds. Now a rubbling CRUMBLES when it bonks someone (each one
+// is one bonk at most, smash it first and it is a point), so the same team is bonked a handful of times.
 import { makeBody, stepBody, separate, spawnRing, clampToArena, F, BODY_R } from '../../shared/arena.js';
 import { r2, clamp, byDiff, angDiff, knock, presses, coopResult } from '../boss-kit.js';
 
@@ -199,8 +203,9 @@ export function create({ rng, players, difficulty = 'normal' }) {
         const gd = Math.hypot(ad.x - G.x, ad.z - G.z), gmin = RULES.golemR + RULES.addR;
         if (gd < gmin && gd > 1e-3) { ad.x = G.x + (ad.x - G.x) / gd * gmin; ad.z = G.z + (ad.z - G.z) / gd * gmin; }
         ad.x = clamp(ad.x, -A.hw + RULES.addR, A.hw - RULES.addR); ad.z = clamp(ad.z, -A.hd + RULES.addR, A.hd - RULES.addR);
-        if (td < RULES.addBonk && !(tb.flags & F.AIR) && hurt(tp, ad.x, ad.z, { stun: RULES.addStun, power: RULES.addKnock, inv: 0.9, why: 'add' })) ad.rest = RULES.addRest;
+        if (td < RULES.addBonk && !(tb.flags & F.AIR) && hurt(tp, ad.x, ad.z, { stun: RULES.addStun, power: RULES.addKnock, inv: 0.9, why: 'add' })) { ad.gone = true; events.push({ e: 'addPop', id: ad.id, x: r2(ad.x), z: r2(ad.z) }); }
       }
+      adds = adds.filter(a => !a.gone);              // a rubbling that bonked someone crumbles (one bonk each, no stun-lock)
       for (let i = 0; i < adds.length; i++) for (let j = i + 1; j < adds.length; j++) {   // they do not pile into one rock
         const a = adds[i], c = adds[j], dx = c.x - a.x, dz = c.z - a.z, d = Math.hypot(dx, dz), min = RULES.addR * 2;
         if (d < min && d > 1e-4) { const p = (min - d) / 2; a.x -= dx / d * p; a.z -= dz / d * p; c.x += dx / d * p; c.z += dz / d * p; }

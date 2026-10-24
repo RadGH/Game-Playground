@@ -1,4 +1,4 @@
-// PIN THE TAIL on a screen. One SVG paddock (160 x 100 units, the sim's own coordinates, so a tap is converted to
+// PIN THE TAIL on a screen. Round 12: 14 pictures (tails, a horn, noses, a candle, a stem) in five scenes (sceneSvg). One SVG paddock (160 x 100 units, the sim's own coordinates, so a tap is converted to
 // paddock units with the SVG's own matrix and is the same on every screen size). The paddock (grass, fence, flowers,
 // rocks, the animals) is one group that can turn (the spin trick); pins and the answer are drawn on top, unturned.
 // Show: the animal, its tail spot as a pulsing star. Trick: the animal trots to its new spot / the paddock turns / two
@@ -43,6 +43,46 @@ const BODY = {
     <path d="M8 20 a6 6 0 0 1 6 -9 a7 7 0 0 1 11 -4 a7 7 0 0 1 12 1 a6 6 0 0 1 6 9 a6 6 0 0 1 -3 10 a7 7 0 0 1 -11 2 a7 7 0 0 1 -12 0 a6 6 0 0 1 -9 -9 Z" fill="${c}" ${O()}/>
     <ellipse cx="44" cy="14" rx="5.6" ry="7.2" transform="rotate(-15 44 14)" fill="#3c3a40" ${O()}/><path d="M39 9 L34 11 L39 13 Z" fill="#3c3a40" ${O(1)}/>
     <circle cx="45.5" cy="12" r="1.3" fill="#fff"/><path d="M40 7 q4 -4 8 0" fill="${c}" ${O(1)}/>`; },
+  // ---- round 12: more pictures, and more than tails ----
+  cat: () => { const c = '#f2a03d'; return `<rect x="11" y="26" width="4" height="13" rx="1.8" fill="${c}" ${O()}/><rect x="17" y="27" width="4" height="12" rx="1.8" fill="${c}" ${O()}/><rect x="29" y="27" width="4" height="12" rx="1.8" fill="${c}" ${O()}/><rect x="35" y="26" width="4" height="13" rx="1.8" fill="${c}" ${O()}/>
+    <ellipse cx="24" cy="21" rx="18" ry="9.5" fill="${c}" ${O()}/><path d="M17 13 q2 5 0 9 M24 12 q2 5 0 9 M31 13 q2 5 0 9" fill="none" stroke="#c46a12" stroke-width="2" stroke-linecap="round"/>
+    <path d="M35 9 L36 1 L41 6 Z M43 6 L47 1 L47.5 9 Z" fill="${c}" ${O(1.1)}/><circle cx="41.5" cy="12" r="8" fill="${c}" ${O()}/>
+    <ellipse cx="45" cy="14.5" rx="3.6" ry="2.6" fill="#ffe2b8" ${O(.9)}/><circle cx="40" cy="10" r="1.3" fill="${INK}"/><circle cx="45" cy="10" r="1.3" fill="${INK}"/><path d="M45 13.5 l-1 1.2 h2 Z" fill="#e8708f"/>
+    <path d="M47 15 h4 M47 16.5 l4 1.2" stroke="${INK}" stroke-width=".6"/>`; },
+  dog: () => { const c = '#d9a066'; return `${leg(12, 25, 42, c, '#7a4f2a')}${leg(18, 26, 42, c, '#7a4f2a')}${leg(33, 26, 42, c, '#7a4f2a')}${leg(39, 25, 42, c, '#7a4f2a')}
+    <ellipse cx="26" cy="21" rx="20" ry="10.5" fill="${c}" ${O()}/><ellipse cx="22" cy="18" rx="7" ry="5" fill="#fff4e0"/>
+    <ellipse cx="45" cy="13" rx="8.5" ry="7.5" fill="${c}" ${O()}/><ellipse cx="51.5" cy="16" rx="3.6" ry="3" fill="#fff4e0" ${O(.9)}/><circle cx="53.6" cy="14.6" r="1.4" fill="${INK}"/>
+    <path d="M39 7 q-5 2 -4 11 q3 1 5 -2 Z" fill="#7a4f2a" ${O(1)}/><circle cx="46" cy="10.5" r="1.3" fill="${INK}"/><rect x="36" y="18" width="8" height="2.6" rx="1.2" fill="#e8434f" ${O(.7)}/>`; },
+  bunny: () => { const c = '#e8e4ee'; return `<ellipse cx="15" cy="36" rx="7" ry="3" fill="${c}" ${O()}/><ellipse cx="32" cy="36.5" rx="5" ry="2.6" fill="${c}" ${O()}/>
+    <ellipse cx="21" cy="26" rx="15" ry="10.5" fill="${c}" ${O()}/>
+    <ellipse cx="34" cy="4" rx="3" ry="8" transform="rotate(-14 34 8)" fill="${c}" ${O()}/><ellipse cx="34" cy="4.5" rx="1.3" ry="5.6" transform="rotate(-14 34 8)" fill="#ffc2d6"/>
+    <ellipse cx="40" cy="5" rx="3" ry="8" transform="rotate(12 40 9)" fill="${c}" ${O()}/><ellipse cx="40" cy="5.5" rx="1.3" ry="5.6" transform="rotate(12 40 9)" fill="#ffc2d6"/>
+    <circle cx="37" cy="17" r="7.5" fill="${c}" ${O()}/><circle cx="39" cy="15.5" r="1.3" fill="${INK}"/><circle cx="43.5" cy="18.5" r="1.2" fill="#ff8fae"/><path d="M42 20 h4 M42 21.4 l4 1" stroke="${INK}" stroke-width=".5"/>`; },
+  unicorn: () => { const c = '#fbf6ff'; return `<g transform="translate(0 4)">${leg(12, 26, 46, c, '#c9a8ff')}${leg(18, 27, 46, c, '#c9a8ff')}${leg(34, 27, 46, c, '#c9a8ff')}${leg(40, 26, 46, c, '#c9a8ff')}
+    <ellipse cx="26" cy="21" rx="21" ry="11.5" fill="${c}" ${O()}/>
+    <path d="M37 16 L44 4 L52 8 L46 23 Z" fill="${c}" ${O()}/><path d="M36 18 Q37 8 44 3 Q41 9 41 13 Q39 15 40 18 Z" fill="#ff8fd0" ${O(1)}/><path d="M38 17 Q40 10 43 7" fill="none" stroke="#8fd6ff" stroke-width="1.6"/>
+    <path d="M45 5 L44 0.5 L48.5 4 Z" fill="${c}" ${O(1.1)}/>
+    <ellipse cx="49" cy="11" rx="7.5" ry="5.6" transform="rotate(25 49 11)" fill="${c}" ${O()}/><ellipse cx="53.5" cy="14" rx="2.8" ry="2.6" fill="#ffd6ec" ${O(1)}/>
+    <circle cx="48.5" cy="9" r="1.3" fill="${INK}"/><path d="M6 17 q-6 2 -5 12 q3 -4 6 -6 Z" fill="#ff8fd0" ${O(1)}/></g>`; },
+  clown: () => `<path d="M10 14 L22 -1 L34 14 Z" fill="#3d8bff" ${O()}/><circle cx="22" cy="-1" r="2.6" fill="#ffd23f" ${O(1)}/><circle cx="16" cy="9" r="1.3" fill="#ffd23f"/><circle cx="27" cy="7" r="1.3" fill="#ffd23f"/>
+    <circle cx="6" cy="24" r="6" fill="#ff7a3c" ${O()}/><circle cx="38" cy="24" r="6" fill="#ff7a3c" ${O()}/><circle cx="7" cy="32" r="5" fill="#ff7a3c" ${O()}/><circle cx="37" cy="32" r="5" fill="#ff7a3c" ${O()}/>
+    <circle cx="22" cy="29" r="16" fill="#fff4e8" ${O()}/>
+    <path d="M14 20 l2 -4 l2 4 Z M26 20 l2 -4 l2 4 Z" fill="#3d8bff"/><circle cx="16" cy="22.5" r="1.7" fill="${INK}"/><circle cx="28" cy="22.5" r="1.7" fill="${INK}"/>
+    <path d="M12 33 q10 11 20 0 q-10 5 -20 0 Z" fill="#e8434f" ${O(1)}/><circle cx="11" cy="30" r="2.4" fill="#ffb3c8"/><circle cx="33" cy="30" r="2.4" fill="#ffb3c8"/>
+    <path d="M14 44 l8 3 l8 -3 l-3 4 h-10 Z" fill="#8a4fd8" ${O(1)}/>`,
+  snowman: () => `<path d="M12 27 L1 19 M28 27 L39 18" stroke="#7a4f2a" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="20" cy="46" r="12" fill="#fff" ${O()}/><circle cx="20" cy="28" r="10" fill="#fff" ${O()}/><circle cx="20" cy="13" r="8.5" fill="#fff" ${O()}/>
+    <rect x="13" y="19.5" width="14" height="3" rx="1.4" fill="#e8434f" ${O(.8)}/><path d="M24 21 l3 9 l-3 1 Z" fill="#e8434f" ${O(.8)}/>
+    <rect x="13" y="1" width="14" height="6" rx="1" fill="${INK}"/><rect x="10" y="6.5" width="20" height="2" rx="1" fill="${INK}"/>
+    <circle cx="17" cy="11" r="1.2" fill="${INK}"/><circle cx="23.5" cy="11" r="1.2" fill="${INK}"/><path d="M16 16.5 q4 2 8 0" fill="none" stroke="${INK}" stroke-width=".9" stroke-linecap="round" stroke-dasharray=".1 1.6"/>
+    <circle cx="20" cy="27" r="1.2" fill="${INK}"/><circle cx="20" cy="32" r="1.2" fill="${INK}"/><circle cx="20" cy="42" r="1.3" fill="${INK}"/>`,
+  cake: () => `<ellipse cx="23" cy="41" rx="22" ry="3" fill="#e9eef2" ${O()}/>
+    <rect x="5" y="24" width="36" height="16" rx="3" fill="#ff9ec4" ${O()}/><path d="M5 27 q4.5 5 9 0 q4.5 5 9 0 q4.5 5 9 0 q4.5 5 9 0" fill="#fff" ${O(.8)}/>
+    <rect x="11" y="11" width="24" height="14" rx="3" fill="#fff3d6" ${O()}/><path d="M11 14 q4 4 8 0 q4 4 8 0 q4 4 8 0" fill="#ff7aa8" ${O(.8)}/>
+    <circle cx="10" cy="34" r=".9" fill="#3d8bff"/><circle cx="18" cy="36" r=".9" fill="#ffd23f"/><circle cx="27" cy="33" r=".9" fill="#1f9d55"/><circle cx="35" cy="36" r=".9" fill="#8a4fd8"/>
+    <circle cx="16" cy="20" r=".9" fill="#e8434f"/><circle cx="30" cy="21" r=".9" fill="#3d8bff"/>`,
+  pumpkin: () => `<ellipse cx="23" cy="25" rx="21" ry="13" fill="#ff7a14" ${O()}/><ellipse cx="23" cy="25" rx="11" ry="13" fill="#ff8f2e" ${O(1)}/><ellipse cx="23" cy="25" rx="4" ry="13" fill="#ffa040" ${O(1)}/>
+    <path d="M30 12 q8 -6 13 0 q-7 3 -13 0 Z" fill="#4caf50" ${O(1)}/>`,
 };
 /** Each animal's tail, starting at its tail point (ANIMALS[k].tail). */
 const TAIL = {
@@ -52,12 +92,52 @@ const TAIL = {
   pig: ([x, y]) => `<path d="M${x} ${y} q-4 -1 -4 2 q0 3 3 2 q2 -1 0 -3 q-3 -2 -5 1" fill="none" stroke="#e66f93" stroke-width="1.6" stroke-linecap="round"/>`,
   cow: ([x, y]) => `<path d="M${x} ${y} q-4 3 -4 15" fill="none" ${O(1.8)}/><path d="M${x - 4} ${y + 14} q-3 4 0 7 q3 -3 0 -7 Z" fill="${INK}"/>`,
   sheep: ([x, y]) => `<circle cx="${x - 1.5}" cy="${y}" r="3.4" fill="#f7f3ea" ${O(1.1)}/>`,
+  cat: ([x, y]) => `<path d="M${x + 1} ${y} q-8 -2 -6 -14 q1 -3 3 -1" fill="none" stroke="${INK}" stroke-width="4.4" stroke-linecap="round"/><path d="M${x + 1} ${y} q-8 -2 -6 -14 q1 -3 3 -1" fill="none" stroke="#f2a03d" stroke-width="2.6" stroke-linecap="round"/>`,
+  dog: ([x, y]) => `<path d="M${x + 1} ${y} q-7 -3 -6 -12" fill="none" stroke="${INK}" stroke-width="4.4" stroke-linecap="round"/><path d="M${x + 1} ${y} q-7 -3 -6 -12" fill="none" stroke="#d9a066" stroke-width="2.6" stroke-linecap="round"/>`,
+  bunny: ([x, y]) => `<circle cx="${x - 1}" cy="${y}" r="4" fill="#fff" ${O(1.1)}/>`,
+  unicorn: ([x, y]) => `<path d="M${x - 2.6} ${y + 1.4} L${x + 4} ${y - 10} L${x + 2.4} ${y + 2.4} Z" fill="#ffd23f" ${O(1)}/><path d="M${x - 1} ${y - 1} l3 -1 M${x} ${y - 4} l2.6 -1" stroke="#c98a00" stroke-width=".8"/>`,
+  clown: ([x, y]) => `<circle cx="${x}" cy="${y}" r="4.6" fill="#ff2d46" ${O(1.1)}/><circle cx="${x - 1.4}" cy="${y - 1.5}" r="1.2" fill="#fff" opacity=".8"/>`,
+  snowman: ([x, y]) => `<path d="M${x} ${y - 1.8} L${x + 10} ${y} L${x} ${y + 1.8} Z" fill="#ff8a1a" ${O(.9)}/>`,
+  cake: ([x, y]) => `<rect x="${x - 1.6}" y="${y - 9}" width="3.2" height="9" fill="#8fd6ff" ${O(.8)}/><path d="M${x - 1.6} ${y - 6} l3.2 -2 M${x - 1.6} ${y - 2.5} l3.2 -2" stroke="#fff" stroke-width=".9"/><path d="M${x} ${y - 15} q2.6 3 0 5 q-2.6 -2 0 -5 Z" fill="#ffd23f" ${O(.7)}/>`,
+  pumpkin: ([x, y]) => `<path d="M${x - 2.4} ${y + 1.5} q0 -6 3 -9 l2.6 1.4 q-2.6 2.4 -1.6 7.6 Z" fill="#6b8a2a" ${O(1)}/>`,
 };
+/** What you pin, for the words on screen. */
+const PART_WORD = { tail: 'tail', horn: 'horn', nose: 'nose', candle: 'candle', stem: 'stem' };
+/** Round 12: each round is set somewhere — ground colour, the strip at the top, and what is round the edge. */
+const SCENE = {
+  paddock: { ground: '#8fd27a', sky: '#a9dcf2', line: '#6aa857', edge: 'fence' },
+  beach: { ground: '#f4dc9a', sky: '#5cc2ea', line: '#e9c46a', edge: 'waves' },
+  circus: { ground: '#e7584f', sky: '#ffe9a8', line: '#c43a33', edge: 'bunting', ring: true },
+  garden: { ground: '#2f5e48', sky: '#1d2550', line: '#23473a', edge: 'stars', night: true },
+  snow: { ground: '#eef5fb', sky: '#bcd9ee', line: '#cfe1ef', edge: 'pines' },
+};
+function sceneSvg(id) {
+  const S = SCENE[id] || SCENE.paddock, n = Math.ceil(BW / 10);
+  let edge = '';
+  if (S.edge === 'fence') edge = `${Array.from({ length: 17 }, (_, i) => `<rect x="${i * 10 + 1}" y="3" width="3" height="10" rx="1" fill="#e9c48a" ${O(.8)}/>`).join('')}<rect x="0" y="6" width="${BW}" height="2" fill="#d9a865" ${O(.6)}/>`;
+  if (S.edge === 'waves') edge = `<path d="M0 9 ${Array.from({ length: n }, (_, i) => `q2.5 -3 5 0 q2.5 3 5 0`).join(' ')}" fill="none" stroke="#fff" stroke-width="1.6"/>`;
+  if (S.edge === 'bunting') edge = `<path d="M0 2 Q${BW / 2} 7 ${BW} 2" fill="none" stroke="${INK}" stroke-width=".6"/>${Array.from({ length: 16 }, (_, i) => { const x = i * 10 + 3, y = 2 + 5 * Math.sin(Math.PI * x / BW); return `<path d="M${x} ${y} h6 l-3 5 Z" fill="${['#3d8bff', '#ffd23f', '#1f9d55', '#8a4fd8'][i % 4]}" ${O(.5)}/>`; }).join('')}`;
+  if (S.edge === 'stars') edge = `<circle cx="140" cy="5" r="3.6" fill="#fff4c2"/>${Array.from({ length: 12 }, (_, i) => `<circle cx="${(i * 37) % 150 + 4}" cy="${(i * 13) % 8 + 1.5}" r=".6" fill="#fff"/>`).join('')}`;
+  if (S.edge === 'pines') edge = Array.from({ length: 16 }, (_, i) => `<path d="M${i * 10 + 5} 1 l4 9 h-8 Z" fill="#3f7a5a" ${O(.5)}/>`).join('');
+  return `<rect width="${BW}" height="${BH}" fill="${S.ground}"/>${S.ring ? `<ellipse cx="${BW / 2}" cy="${BH / 2 + 6}" rx="${BW / 2 - 6}" ry="${BH / 2 - 14}" fill="#f6efe2" stroke="#ffd23f" stroke-width="3"/>` : ''}<rect width="${BW}" height="10" fill="${S.sky}"/><path d="M0 10 H${BW}" stroke="${S.line}" stroke-width="2"/>${edge}`;
+}
 const DECO = {
   flower: (x, y) => `<g transform="translate(${x} ${y})"><path d="M0 0 v-4" stroke="#2f7a2f" stroke-width="1"/><circle cy="-5" r="2.2" fill="#ffd23f" stroke="#e8434f" stroke-width="1.6" stroke-dasharray="1.2 .6"/></g>`,
   rock: (x, y) => `<path d="M${x - 5} ${y} q1 -5 5 -5 q5 0 5 5 Z" fill="#b8b4ad" ${O(1)}/>`,
   bush: (x, y) => `<path d="M${x - 6} ${y} a3.5 3.5 0 0 1 3 -5 a4 4 0 0 1 6 -1 a3.5 3.5 0 0 1 3 6 Z" fill="#4caf50" ${O(1)}/>`,
   mushroom: (x, y) => `<g transform="translate(${x} ${y})"><rect x="-1" y="-3.5" width="2" height="3.5" fill="#fff" ${O(.8)}/><path d="M-3.4 -3.4 a3.4 3 0 0 1 6.8 0 Z" fill="#e8434f" ${O(.8)}/></g>`,
+  shell: (x, y) => `<path d="M${x - 4} ${y} q4 -7 8 0 Z M${x - 2} ${y} l2 -5 l2 5" fill="#ffd6c2" ${O(.8)}/>`,
+  starfish: (x, y) => `<path transform="translate(${x} ${y - 3})" d="M0 -4 L1.2 -1.2 L4 -1 L1.8 1 L2.6 4 L0 2.4 L-2.6 4 L-1.8 1 L-4 -1 L-1.2 -1.2 Z" fill="#ff8a5c" ${O(.7)}/>`,
+  bucket: (x, y) => `<path d="M${x - 3.5} ${y - 6} h7 l-1 6 h-5 Z" fill="#3d8bff" ${O(.8)}/><path d="M${x - 3.5} ${y - 6} q3.5 -4 7 0" fill="none" ${O(.6)}/>`,
+  pebble: (x, y) => `<ellipse cx="${x}" cy="${y - 1.5}" rx="3" ry="1.8" fill="#c9bfb0" ${O(.7)}/>`,
+  star: (x, y) => `<path transform="translate(${x} ${y - 3})" d="M0 -3.6 L1 -1 L3.6 -1 L1.6 .7 L2.3 3.4 L0 1.9 L-2.3 3.4 L-1.6 .7 L-3.6 -1 L-1 -1 Z" fill="#ffd23f" ${O(.6)}/>`,
+  ball: (x, y) => `<circle cx="${x}" cy="${y - 3.5}" r="3.5" fill="#3d8bff" ${O(.8)}/><path d="M${x - 3.5} ${y - 3.5} h7" stroke="#fff" stroke-width="1.4"/>`,
+  confetti: (x, y) => `<rect x="${x - 3}" y="${y - 3}" width="2" height="1.2" fill="#8a4fd8"/><rect x="${x + 1}" y="${y - 5}" width="2" height="1.2" fill="#1f9d55" transform="rotate(30 ${x + 2} ${y - 4})"/><rect x="${x}" y="${y - 1}" width="2" height="1.2" fill="#3d8bff"/>`,
+  balloon: (x, y) => `<path d="M${x} ${y} q1 -3 0 -5" fill="none" stroke="${INK}" stroke-width=".5"/><ellipse cx="${x}" cy="${y - 8}" rx="3" ry="3.6" fill="#ff5a7a" ${O(.7)}/>`,
+  lantern: (x, y) => `<rect x="${x - .4}" y="${y - 9}" width=".8" height="9" fill="#5a4a3a"/><rect x="${x - 2.4}" y="${y - 12}" width="4.8" height="4.6" rx="1" fill="#ffd36b" ${O(.6)}/>`,
+  firefly: (x, y) => `<circle cx="${x}" cy="${y - 6}" r="2.4" fill="#fff6a0" opacity=".35"/><circle cx="${x}" cy="${y - 6}" r=".9" fill="#fff6a0"/>`,
+  pine: (x, y) => `<path d="M${x} ${y - 11} l5 10 h-10 Z" fill="#3f7a5a" ${O(.7)}/><path d="M${x - 2.4} ${y - 6} q2.4 1.4 4.8 0" fill="none" stroke="#fff" stroke-width="1"/>`,
+  snowball: (x, y) => `<circle cx="${x}" cy="${y - 2.6}" r="2.6" fill="#fff" ${O(.7)}/>`,
 };
 const TRICK_TEXT = { blur: 'Round 1: it goes blurry', hide: 'Round 2: it hides', slide: 'Round 3: it trots away!', spin: 'Round 4: the paddock spins!', swap: 'Round 5: they swap places!' };
 
@@ -77,9 +157,7 @@ export function createView(ctx) {
         <defs><filter id="pt-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.4"/></filter>
           <radialGradient id="pt-glow"><stop offset="0" stop-color="#fff7b0"/><stop offset=".6" stop-color="#ffd23f" stop-opacity=".7"/><stop offset="1" stop-color="#ffd23f" stop-opacity="0"/></radialGradient></defs>
         <g class="pt-world" style="transform-origin:${BW / 2}px ${BH / 2}px">
-          <rect width="${BW}" height="${BH}" fill="#8fd27a"/><rect width="${BW}" height="10" fill="#a9dcf2"/>
-          <path d="M0 10 H${BW}" stroke="#6aa857" stroke-width="2"/>
-          <g class="pt-fence">${Array.from({ length: 17 }, (_, i) => `<rect x="${i * 10 + 1}" y="3" width="3" height="10" rx="1" fill="#e9c48a" ${O(.8)}/>`).join('')}<rect x="0" y="6" width="${BW}" height="2" fill="#d9a865" ${O(.6)}/></g>
+          <g class="pt-scene">${sceneSvg('paddock')}</g>
           <g class="pt-deco"></g><g class="pt-animals"></g><g class="pt-star"></g>
         </g>
         <g class="pt-marks"></g>
@@ -119,13 +197,17 @@ export function createView(ctx) {
     g.innerHTML = (list || []).map((a, i) => animalSvg(a, i, tail, i === starIndex)).join('');
     g.classList.toggle('blurred', blur);
   }
-  function drawDeco(deco) { $('.pt-deco').innerHTML = (deco || []).map(d => DECO[d.k](d.x, d.y)).join(''); }
+  let sceneId = 'paddock';
+  function drawDeco(deco, scene) {
+    if (scene && scene !== sceneId) { sceneId = scene; $('.pt-scene').innerHTML = sceneSvg(scene); ui.dataset.scene = scene; }
+    $('.pt-deco').innerHTML = (deco || []).map(d => (DECO[d.k] || DECO.flower)(d.x, d.y)).join('');
+  }
 
   function enter(g) {
     timers.forEach(clearTimeout); timers = [];
     $('.pt-star').innerHTML = ''; $('.pt-marks').innerHTML = '';
     if (g.phase === 'show') {
-      setRot(0, 0); drawDeco(g.deco);
+      setRot(0, 0); drawDeco(g.deco, g.scene);
       drawAnimals(g.animals, { starIndex: g.trick === 'swap' ? 0 : -1 });
       const [x, y] = g.star;
       $('.pt-star').innerHTML = `<g class="pt-target" transform="translate(${x} ${y})"><circle r="9" fill="url(#pt-glow)"/><path d="M0 -5 L1.5 -1.6 L5 -1.5 L2.3 .8 L3.1 4.4 L0 2.4 L-3.1 4.4 L-2.3 .8 L-5 -1.5 L-1.5 -1.6 Z" fill="#ffd23f" ${O(.9)}/></g>`;
@@ -144,14 +226,14 @@ export function createView(ctx) {
       }
     }
     if (g.phase === 'guess') {
-      setRot(g.rot, 0); drawDeco(g.deco);
+      setRot(g.rot, 0); drawDeco(g.deco, g.scene);
       if (g.trick === 'blur') drawAnimals(g.animals, { blur: true });
       else { ui.querySelectorAll('.pt-an').forEach(el => el.classList.add('gone')); timers.push(setTimeout(() => drawAnimals([]), 400)); }
       ctx.sfx('tap'); paintMine();
     }
     if (g.phase === 'reveal') {
       const r = g.reveal;
-      setRot(g.rot, 0); drawDeco(g.deco);
+      setRot(g.rot, 0); drawDeco(g.deco, g.scene);
       drawAnimals(g.animals, { tail: true, starIndex: g.trick === 'swap' ? 0 : -1 });
       const [tx, ty] = r.target;
       const order = players.filter(p => r.pins[p.pid]).sort((a, b) => r.dist[b.pid] - r.dist[a.pid]);   // closest drawn last (on top)
@@ -172,12 +254,13 @@ export function createView(ctx) {
     }
   }
   function note(g) {
-    if (g.phase === 'ready') return 'Watch for the star: that is where the tail goes!';
+    const part = PART_WORD[g.part] || 'tail';
+    if (g.phase === 'ready') return 'Watch for the star: that is where the tail (or the horn, or the nose…) goes!';
     if (g.phase === 'show') return g.trick === 'swap' ? 'Remember the one with the gold dot!' : 'Remember the star!';
     if (g.phase === 'trick') return g.trick === 'spin' ? 'Round and round…' : 'Keep your eye on it!';
-    if (g.phase === 'guess') return watching ? `${g.pinned.length} of ${players.length} pinned` : done ? 'Pinned! Waiting for the others…' : 'Tap where the tail goes!';
+    if (g.phase === 'guess') return watching ? `${g.pinned.length} of ${players.length} pinned` : done ? 'Pinned! Waiting for the others…' : `Tap where the ${part} goes!`;
     if (g.phase === 'reveal') { const w = g.reveal.closest.map(p => byPid.get(p)?.name); return w.length ? `${w.join(' and ')} pinned it closest!` : init.solo ? `+${g.reveal.gain[me ?? players[0].pid]} points` : 'Nobody got close!'; }
-    return 'What a tail! Most points wins.';
+    return 'What a game! Most points wins.';
   }
 
   return {
@@ -189,7 +272,7 @@ export function createView(ctx) {
       $('.clock').classList.toggle('hurry', g.phase === 'guess' && g.left <= 3);
       $('.pt-round').textContent = g.phase === 'end' ? 'Final scores' : `Round ${Math.max(0, g.round) + 1} of ${init.rounds}`;
       $('.pt-banner').textContent = g.trick && g.phase !== 'end' ? TRICK_TEXT[g.trick] : '';
-      $('.pt-hint').textContent = g.phase === 'show' ? 'The tail goes here!' : g.phase === 'guess' && !watching && !myPin ? 'Tap!' : '';
+      $('.pt-hint').textContent = g.phase === 'show' ? `The ${PART_WORD[g.part] || 'tail'} goes here!` : g.phase === 'guess' && !watching && !myPin ? 'Tap!' : '';
       paintChips(g);
       $('.pt-note').textContent = note(g);
     },

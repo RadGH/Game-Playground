@@ -8,7 +8,7 @@
 .ss-meter { display: grid; grid-template-columns: 22px 46px 1fr 28px 34px; align-items: center; gap: 6px; }
 .ss-ic { font-size: 18px; }
 .ss-meter b { font-size: 13px; text-transform: uppercase; }
-.ss-bar { height: 14px; border-radius: 8px; background: #d8cdb6; border: 2px solid var(--ink); overflow: hidden; }
+.ss-bar { position: relative; height: 14px; border-radius: 8px; background: #d8cdb6; border: 2px solid var(--ink); overflow: hidden; }
 .ss-bar i { display: block; height: 100%; transition: width .35s; }
 .ss-meter[data-k=heat] .ss-bar i { background: #ff8a3d; } .ss-meter[data-k=roof] .ss-bar i { background: #9b7ad8; } .ss-meter[data-k=food] .ss-bar i { background: #e8b94a; }
 .ss-meter em { font-style: normal; font-weight: 900; font-size: 17px; text-align: right; }
@@ -43,3 +43,13 @@
 .game-storm-shelter.watching .ss-handh, .game-storm-shelter.watching .ss-hand { display: none; }
 .game-storm-shelter.watching .ss-ch { pointer-events: none; }
 .scorebar .chip.ss-in::after { content: '✓'; margin-left: 2px; font-weight: 900; color: #1f8a3a; }
+
+/* round 12: where each meter is heading this beat ("6 → 4"), the part about to go striped */
+.ss-meter { grid-template-columns: 22px 46px 1fr 54px 34px; }
+.ss-bar s { position: absolute; top: 0; bottom: 0; text-decoration: none; transition: left .25s, width .25s; }
+.ss-bar s.down { background: repeating-linear-gradient(45deg, #d6203a 0 4px, transparent 4px 8px); }
+.ss-bar s.up { background: repeating-linear-gradient(45deg, #1f8a3a 0 4px, transparent 4px 8px); }
+.ss-meter em small { font-size: 13px; margin-left: 2px; color: #d6203a; } .ss-meter em small.up { color: #1f8a3a; }
+.ss-meter.danger { background: #ffd0d4; border-radius: 8px; animation: ss-throb .6s infinite; }
+.ss-hits span { font-weight: 900; }
+.ss-handh b { color: var(--sun); }

@@ -3,7 +3,7 @@
 // stripe painted on the floor under it so you can read where it is from above, and a HOP / DUCK label riding on one
 // post. LOW beams are orange at shin height, HIGH beams purple at head height (height and label as well as colour).
 // A spinner glows faintly round a centre pivot before it goes live. A zap throws a white-yellow flash and sparks.
-import { LOW, SWEEP } from './sim.js';
+import { LOW, SWEEP, incoming } from './sim.js';
 import { scoreBar, floatText, h } from '../../client/gamehud.js';
 import { F } from '../../shared/arena.js';
 
@@ -80,6 +80,19 @@ export function createView(ctx) {
   const heartEls = new Map();
   const hearts = pid => { if (!heartEls.has(pid)) { const c = bar.el.querySelector(`[data-pid="${pid}"]`); const e = c ? h('i', 'sb-lives') : null; if (e) { e.setAttribute('aria-label', 'lives'); c.append(e); } heartEls.set(pid, e); } return heartEls.get(pid); };
   let safe = new Set();          // blinking for a moment after a zap that was not the last life
+  // round 12: one DODGE button — a cue over YOUR head says what it will do for the beam that reaches you first
+  // (the sim's own `incoming`), and flashes NOW when it is time to press
+  let cue = null, cueAnchor = null, cueKey = '';
+  function cueFrame() {
+    if (ctx.me == null || outSet.has(ctx.me)) { if (cueAnchor) cueAnchor.visible = false; return; }
+    const a = ctx.actor(ctx.me), p = ctx.pos(ctx.me); if (!a || !p) return;
+    if (!cue) { cueAnchor = new THREE.Object3D(); a.group.add(cueAnchor); cue = stage.tag(cueAnchor, { text: '', height: (a.height || 1.4) + 1.6, cls: 'll-cue', declutter: false }); }
+    const next = incoming([...beams.values()].map(B => ({ k: B.k, h: B.h, a: B.a, s: B.s, v: B.vel, warn: B.warn })), p.x, p.z);
+    cueAnchor.visible = !!next;
+    if (!next) return;
+    const now = next.t < 0.38, key = next.beam.h + (now ? 'n' : '');
+    if (key !== cueKey) { cueKey = key; cue.set(next.beam.h === LOW ? (now ? '▲ HOP NOW!' : '▲ hop') : (now ? '▼ DUCK NOW!' : '▼ duck')); cue.el.className = 'tag ll-cue ' + (next.beam.h === LOW ? 'll-low' : 'll-high') + (now ? ' now' : ''); }
+  }
   return {
     state(g) {
       for (const B of beams.values()) B.seen = false;
@@ -117,6 +130,7 @@ export function createView(ctx) {
         B.mats[1].opacity *= B.warn > 0 ? 1 : 0.85 + 0.15 * Math.sin(t * 30 + B.id);
       }
       hub.rotation.y += dt * 2;
+      cueFrame();
       for (const pid of ctx.players?.map(p => p.pid) || []) { const a = ctx.actor(pid); if (a && !outSet.has(pid)) a.group.visible = !safe.has(pid) || Math.sin(t * 30) > -0.3; }
       for (let i = fx.length - 1; i >= 0; i--) {
         const f = fx[i]; f.t += dt;
@@ -125,6 +139,6 @@ export function createView(ctx) {
         if (f.t > 0.8) { group.remove(f.flash); f.flash.material.dispose(); for (const b of f.bits) group.remove(b); fx.splice(i, 1); }
       }
     },
-    dispose() { bar.el.remove(); for (const B of beams.values()) B.label.remove(); },
+    dispose() { bar.el.remove(); for (const B of beams.values()) B.label.remove(); cue?.remove(); },
   };
 }

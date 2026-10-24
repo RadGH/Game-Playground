@@ -1,0 +1,5 @@
+/* Water Balloon Ambush — only the tags over the characters (the yard is 3D): balloons in hand, SOAKED in blue. */
+.tag.wb-tag { background: #fff; color: var(--ink); text-shadow: none; font-size: 12px; letter-spacing: 1px; }
+.tag.wb-tag.soaked { background: #4fb0e8; color: #fff; letter-spacing: 0; animation: wb-drip .5s ease-in-out infinite alternate; }
+.tag.wb-tag.empty { opacity: .7; font-size: 11px; letter-spacing: 0; }
+@keyframes wb-drip { to { filter: brightness(1.2); } }

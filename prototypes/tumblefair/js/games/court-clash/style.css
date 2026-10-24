@@ -1,0 +1,14 @@
+@import url('../hoops.css');
+/* Court Clash: the pill, the hoop / CPU tags in team colours, and the power meter that floats by whoever is charging. */
+.game-court-clash .gp-pill { font-size: 14px; white-space: nowrap; }
+.game-court-clash .gp-pill b { font-weight: 900; }
+.tag.cc-hoop { font-size: 11px; padding: 0 6px; color: #fff; }
+.tag.cc-t0 { background: #e8473a; } .tag.cc-t1 { background: #2f6fd8; }
+.tag.cc-cpu { font-size: 11px; color: #fff; }
+.cc-meter { position: absolute; left: 0; top: 0; width: 24px; height: 84px; border: 3px solid var(--ink); border-radius: 10px; background: rgba(255, 255, 255, .9); overflow: hidden; opacity: 0; pointer-events: none; transition: opacity .1s; }
+.cc-meter.on { opacity: 1; }
+.cc-band { position: absolute; left: 0; right: 0; bottom: 40%; height: 20%; background: rgba(62, 207, 90, .6); border-top: 2px dashed var(--ink); border-bottom: 2px dashed var(--ink); }
+.cc-fill { position: absolute; left: 5px; right: 5px; bottom: 0; height: 0; background: #ffd23f; border-top: 4px solid var(--ink); }
+.cc-fill.in { background: #3ecf5a; }
+.cc-meter b { position: absolute; left: 0; right: 0; top: 2px; text-align: center; font: 900 11px/1 var(--font); }
+@media (max-width: 520px) { .game-court-clash .gp-pill { font-size: 12px; } }

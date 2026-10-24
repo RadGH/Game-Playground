@@ -1,0 +1,35 @@
+/* Fair Darts — a darts stall: the board canvas in the middle, a THROW panel under it on a phone that plays.
+   Nothing in here scrolls on its own. Halloween: a night-purple stall. */
+.game-fair-darts { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: repeating-linear-gradient(90deg, #e8394a 0 18px, #fff 18px 36px) top / 100% 10px no-repeat, linear-gradient(#ffcf7a, #f2a55a);
+  color: var(--ink); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-fair-darts.season-halloween { background: repeating-linear-gradient(90deg, #ff8a1a 0 18px, transparent 18px 36px) top / 100% 10px no-repeat, linear-gradient(#241a3d, #140f26); }
+.game-fair-darts > * { flex: none; }
+.fd-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 8px; }
+.fd-title { color: #fff; font: 900 26px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.fd-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.fd-board .chip { color: var(--ink); padding-right: 10px; }
+.fd-board .sc { font-style: normal; background: #fff1c8; border-radius: 8px; padding: 0 7px; }
+.fd-pips { font-style: normal; font-size: 13px; letter-spacing: -1px; color: var(--seat-dark, #333); margin-left: 3px; }
+.fd-board .chip.lead { background: var(--sun); } .fd-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.fd-stall { position: relative; width: min(100%, 560px); height: clamp(220px, 46dvh, 560px); flex: 1 1 auto; min-height: 200px; border: 4px solid var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 6px 0 var(--ink); }
+.fd-stall canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.fd-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 76px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.fd-count:empty { display: none; }
+.fd-say { position: absolute; left: 0; right: 0; top: 10%; text-align: center; font: 900 26px/1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none; }
+.fd-say.pop { animation: fd-pop 1.2s ease-out forwards; } .fd-say.gold { color: var(--sun); font-size: 34px; } .fd-say.bad { color: #ffd9d9; }
+@keyframes fd-pop { 0% { opacity: 1; transform: scale(1.4); } 70% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.fd-panel { width: min(440px, 100%); display: grid; gap: 7px; padding: 9px 12px 11px; background: var(--paper); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+.fd-panel.hidden { display: none; }
+.fd-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fd-n { font: 900 17px/1 var(--font); }
+.fd-x2 { font: 800 13px/1 var(--font); padding: 3px 9px; border-radius: 999px; border: 2px solid var(--ink); background: #fff; opacity: .7; }
+.fd-x2.on { background: var(--sun); opacity: 1; animation: fd-wob .5s ease-in-out infinite alternate; }
+@keyframes fd-wob { to { transform: rotate(-3deg) scale(1.06); } }
+.fd-btn { min-height: 66px; font-size: 26px; touch-action: manipulation; cursor: pointer; background: #8ff07a; }
+.fd-btn:disabled { background: #e8e1cc; color: #6a7a80; }
+.fd-note { margin: 0; text-align: center; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px var(--ink); }
+.fd-note:empty { display: none; }
+.game-fair-darts.watching .fd-stall { width: min(100%, 1280px); height: calc(100dvh - 170px); }
+@media (max-height: 560px) { .fd-stall { height: 44dvh; min-height: 150px; } .fd-btn { min-height: 48px; font-size: 20px; } .fd-title { font-size: 20px; } }

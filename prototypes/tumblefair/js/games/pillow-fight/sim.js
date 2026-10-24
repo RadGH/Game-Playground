@@ -1,16 +1,18 @@
 // PILLOW FIGHT — everyone on one giant bed, high off the bedroom floor, with nothing round the edge. A = swing your
 // pillow: it bops everyone just in front of you (a little aim help turns you to the nearest), and the bop sends them
 // sliding. Every bop you take raises your WOBBLE (shown over your head, like a percentage), and the higher it is, the
-// further the next bop sends you. Slide off the bed and you are out for 2 s (you land on the rug and climb back up),
-// lose a point and your wobble goes back to 0; whoever bopped you last gets the knock-off (+1). B = a quick hop to
-// dodge. Most points wins. Solo: sleepwalkers in nightcaps climb onto the bed and shuffle at you with their arms out
+// further the next bop sends you. Slide off the bed and you are out for 2 s (you land on the rug and climb back up)
+// and your wobble goes back to 0; whoever bopped you last gets the knock-off (+1). B = a quick hop to dodge. Most
+// points wins. Round 12 ("buggy", 2/1): ONLY A BOP SENDS YOU OVER — walking, hopping or being shoved by a crowd to the
+// edge makes you teeter on it instead of falling, and a fall no longer costs a point. Before, most falls were someone
+// walking or hopping off by themselves, nobody scored, the -1 floored at 0, and whole games ended 0-0-0. Solo: sleepwalkers in nightcaps climb onto the bed and shuffle at you with their arms out
 // — a sleepwalker bump wobbles you too. Bop them off the bed for points.
 import { makeBody, stepBody, separate, spawnRing, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
 
 export const meta = {
   id: 'pillow-fight', title: 'Pillow Fight', blurb: 'Bop everyone off the giant bed with your pillow — the more they are hit, the further they fly!',
-  how: ['A swings your pillow at whoever is in front.', 'Every bop raises their wobble %: they fly further.', 'Knock someone off the bed: +1. Fall off: -1.', 'B hops out of the way.'],
+  how: ['A swings your pillow at whoever is in front.', 'Every bop raises their wobble %: they fly further.', 'Bop someone off the bed: +1. Only a bop sends you over.', 'B hops out of the way.'],
   kind: 'arena', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'pts', tags: ['action'],
   controls: { stick: true, a: 'Swing', b: 'Hop' }, move: { speed: 5.6, accel: 18, stunDrag: 1.5 },
   arena: { shape: 'rect', hw: 6.5, hd: 4.6, wall: false }, pitch: 56, card: 'card-pillow-fight', css: true,
@@ -23,7 +25,7 @@ export const RULES = {
   wobble: { easy: 10, normal: 13, hard: 16 },                       // wobble added per bop
   hopCool: 1.3, hopSpeed: 9.5, hopTime: 0.25,
   edgeX: 6.5, edgeZ: 4.6,                                           // centre further out than this = falling
-  out: 2.0, ghost: 1.2, credit: 3.0,
+  out: 2.0, ghost: 1.2, credit: 3.0, teeter: 0.7,                  // credit: a fall this soon after a bop counts as knocked off
   sleep: {                                                          // solo sleepwalkers
     speed: { easy: 1.3, normal: 1.75, hard: 2.2 }, max: { easy: 3, normal: 4, hard: 5 }, every: 2.6, first: 1.2,
     bumpR: 1.05, bumpCool: 1.3, bumpPush: 3.6, bumpWobble: { easy: 6, normal: 9, hard: 12 }, r: 0.5,
@@ -36,7 +38,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
   const D = RULES.wobble[difficulty] ? difficulty : 'normal';
   const n = players.length, solo = n === 1, bodies = new Map(), spawns = spawnRing(n, solo ? 0 : 2.6);
   players.forEach((p, i) => bodies.set(p.pid, makeBody(spawns[i].x, spawns[i].z, spawns[i].yaw)));
-  const P = new Map(players.map(p => [p.pid, { prevB: 0, cool: 0, hopCool: 0, hop: 0, stun: 0, wob: 0, pts: 0, kos: 0, falls: 0, falling: false, vy: 0, back: 0, ghost: 0, by: -1, byAt: -99 }]));
+  const P = new Map(players.map(p => [p.pid, { prevB: 0, cool: 0, hopCool: 0, hop: 0, stun: 0, wob: 0, pts: 0, kos: 0, falls: 0, falling: false, vy: 0, back: 0, ghost: 0, by: -1, byAt: -99, teeter: 0 }]));
   let sleepers = [], sid = 0, sleepIn = RULES.sleep.first, time = meta.seconds, el = 0, over = false;
   const events = [];
   const onBed = (x, z) => Math.abs(x) <= RULES.edgeX && Math.abs(z) <= RULES.edgeZ;
@@ -65,7 +67,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
     s.falling = true; s.vy = 1.5; s.back = RULES.out; b.flags |= F.STUN; s.hop = 0;
     const credit = s.by >= 0 && el - s.byAt <= RULES.credit && s.by !== pid ? s.by : -1;
     if (credit >= 0) { const c = P.get(credit); c.pts++; c.kos++; }
-    s.falls++; s.pts = Math.max(0, s.pts - 1);
+    s.falls++;
     events.push({ e: 'fall', pid, by: credit, x: r2(b.x), z: r2(b.z) });
   }
   return {
@@ -127,14 +129,25 @@ export function create({ rng, players, difficulty = 'normal' }) {
           b.vx *= 0.8; b.vz *= 0.8;
           s.back -= dt;
           if (s.back <= 0) {
-            const at = safeSpot(); s.falling = false; s.stun = 0; s.wob = 0; s.by = -1; s.ghost = RULES.ghost;
+            const at = safeSpot(); s.falling = false; s.stun = 0; s.wob = 0; s.by = -1; s.byAt = -99; s.ghost = RULES.ghost;
             b.x = r2(at.x); b.z = r2(at.z); b.y = BED_Y; b.vx = b.vz = 0; b.yaw = Math.atan2(-b.x, -b.z); b.flags = F.GHOST;
             events.push({ e: 'back', pid });
           }
           continue;
         }
         if (s.stun > 0) { s.stun -= dt; if (s.stun <= 0) b.flags &= ~F.STUN; }
-        if (!onBed(b.x, b.z)) startFall(pid);
+        if (s.teeter > 0) s.teeter -= dt;
+        if (!onBed(b.x, b.z)) {
+          // only a bop (or a sleepwalker's bump) sends you over: walk, hop or get crowded to the edge and you teeter on it
+          if (el - s.byAt <= RULES.credit) startFall(pid);
+          else {
+            const ex = RULES.edgeX, ez = RULES.edgeZ;
+            if (Math.abs(b.x) > ex) { b.x = Math.sign(b.x) * ex; if (b.vx * Math.sign(b.x) > 0) b.vx = 0; }
+            if (Math.abs(b.z) > ez) { b.z = Math.sign(b.z) * ez; if (b.vz * Math.sign(b.z) > 0) b.vz = 0; }
+            if (s.teeter <= 0) events.push({ e: 'teeter', pid, x: r2(b.x), z: r2(b.z) });
+            s.teeter = RULES.teeter;
+          }
+        }
       }
       // solo: sleepwalkers climb on and shuffle at you
       if (solo) {
@@ -166,7 +179,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
               sl.bump = S.bumpCool;
               const tgt = { x: b.x, z: b.z, wob: s.wob, vx: 0, vz: 0 };
               const st = knock(tgt, sl.x, sl.z, S.bumpWobble[D]) * 0.8;
-              s.wob = tgt.wob; b.vx = tgt.vx * (S.bumpPush / RULES.push); b.vz = tgt.vz * (S.bumpPush / RULES.push); b.flags |= F.STUN; s.stun = st; s.hop = 0; s.by = -1;
+              s.wob = tgt.wob; b.vx = tgt.vx * (S.bumpPush / RULES.push); b.vz = tgt.vz * (S.bumpPush / RULES.push); b.flags |= F.STUN; s.stun = st; s.hop = 0; s.by = -1; s.byAt = el;
               events.push({ e: 'bump', sl: sl.id, to: me, wob: Math.round(s.wob), x: r2(b.x), z: r2(b.z) });
             }
           }

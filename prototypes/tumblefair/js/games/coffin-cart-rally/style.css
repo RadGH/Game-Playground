@@ -1,0 +1,22 @@
+/* Coffin Cart Rally: your place / lap / lid-slam strip under the score bar, the big HOP! prompt, the banners. */
+.game-coffin-cart-rally > * { pointer-events: none !important; }
+.game-coffin-cart-rally .cc-hud { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center;
+  padding: 4px 12px; border-radius: 999px; background: rgba(244, 236, 216, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); white-space: nowrap; color: var(--ink); }
+.cc-place b { font: 900 24px/1 var(--font); }
+.cc-lap b { font-weight: 900; font-size: 18px; }
+.cc-slam { padding: 2px 8px; border-radius: 999px; font-size: 13px; background: #b06cff; color: #fff; border: 2px solid var(--ink); }
+.cc-slam[data-ready="0"] { background: #cfc6dc; color: #6a5f7a; border-color: transparent; }
+.game-coffin-cart-rally .cc-prompt { position: absolute; left: 50%; bottom: calc(var(--sb) + 190px); transform: translateX(-50%) scale(.7); opacity: 0; padding: 8px 22px; border-radius: 999px;
+  background: #b06cff; color: #fff; border: 4px solid var(--ink); box-shadow: 0 5px 0 var(--ink); font: 900 30px/1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; white-space: nowrap; transition: transform .12s, opacity .12s; }
+.cc-prompt.show { opacity: 1; transform: translateX(-50%) scale(1); animation: cc-throb .5s ease-in-out infinite alternate; }
+.cc-prompt.boo { background: var(--sun); color: var(--ink); -webkit-text-stroke: 0; }
+@keyframes cc-throb { to { transform: translateX(-50%) scale(1.08); } }
+.game-coffin-cart-rally .cc-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0;
+  font: 900 clamp(40px, 12vw, 84px)/1 var(--font); color: #ffc04a; -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .2s, opacity .2s; }
+.cc-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.cc-banner.go { color: #b6ff8a; } .cc-banner.small { font-size: clamp(26px, 7vw, 44px); top: 30%; }
+.game-coffin-cart-rally .cc-sub { position: absolute; left: 50%; top: 52%; transform: translateX(-50%); opacity: 0; padding: 4px 14px; border-radius: 999px;
+  background: #2a1840; color: #fff; font: 800 16px/1.3 var(--font); white-space: nowrap; transition: opacity .3s; }
+.cc-sub.show { opacity: 1; }
+@media (max-width: 520px) { .game-coffin-cart-rally .cc-hud { top: calc(var(--st) + 52px); gap: 6px; font-size: 13px; padding: 3px 10px; } .cc-place b { font-size: 20px; } .game-coffin-cart-rally .cc-prompt { font-size: 26px; } }
+.tag.cc-cpu { background: #7fa88a; }

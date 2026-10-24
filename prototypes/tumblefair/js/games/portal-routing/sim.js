@@ -10,20 +10,29 @@
 // portal hops), then gates are put ON that route, each with a decoy branch leading off into free cells. With every gate
 // on its route arm the marble rolls start -> goal (checked by `runBall`, the same rules the live marble uses); with
 // the starting gate settings it does not. Tests check thousands of stages.
+//
+// Round 12 (2026-10-24): 2 up / 2 down, "Didn't get it" + "too easy". Two fixes. (1) Every phone now draws WHERE THE
+// MARBLE WILL GO with the gates as they are (`trace`, the same rules as `runBall`): a glowing trail from the marble
+// through the portals, ending at the flag (green) or a pit (red). Flip a gate and the trail swings — cause and effect
+// at a glance, no tracing rails by eye. (2) It is a race now: ten stages, the marble rolls faster each stage, the
+// "get ready" pause is shorter, and the goal is 4 / 6 / 8 stages (easy / normal / hard) in the minute, so the team
+// has to flip fast and the marble is never a long wait.
 export const meta = {
   id: 'portal-routing', title: 'Portal Routing', blurb: 'Flip your gates to roll the marble through the portals to the goal!',
-  how: ['A marble rolls by itself. Gates with your colour and shape are yours: tap to flip them.', 'Portals with the same letter are joined: in one, out the other.', 'Set every gate so the marble reaches the flag. Clear enough stages together to win!'],
+  how: ['A marble rolls by itself. Gates with your colour and shape are yours: tap to flip them.', 'The glowing trail shows where it will go: flip until it reaches the flag ✓.', 'Each stage is faster. Clear the goal number of stages together in time!'],
   kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'coop', unit: 'stages', tags: ['coop', 'puzzle'], card: 'card-portal-routing', css: true,
 };
 export const W = 7, H = 6;
 export const DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];              // sides: 0 N, 1 E, 2 S, 3 W
 export const opp = d => (d + 2) & 3;
 export const STAGES = [
-  { gates: 2, portals: 1, speed: 2.3 }, { gates: 3, portals: 1, speed: 2.5 }, { gates: 3, portals: 2, speed: 2.7 },
-  { gates: 4, portals: 1, speed: 2.9 }, { gates: 4, portals: 2, speed: 3.1 }, { gates: 5, portals: 2, speed: 3.3 },
+  { gates: 2, portals: 1, speed: 3.4 }, { gates: 3, portals: 1, speed: 3.7 }, { gates: 3, portals: 2, speed: 4.0 },
+  { gates: 4, portals: 1, speed: 4.3 }, { gates: 4, portals: 2, speed: 4.6 }, { gates: 5, portals: 2, speed: 4.9 },
+  { gates: 4, portals: 2, speed: 5.2 }, { gates: 5, portals: 1, speed: 5.5 }, { gates: 5, portals: 2, speed: 5.8 },
+  { gates: 5, portals: 2, speed: 6.1 },
 ];
-export const GAME_S = 60, FIRST_READY_S = 3, READY_S = 1.6, DROP_S = 1.0, CLEAR_S = 1.6;
-export const TARGET = { easy: 2, normal: 3, hard: 4 };
+export const GAME_S = 60, FIRST_READY_S = 3, READY_S = 1.0, DROP_S = 0.9, CLEAR_S = 1.1;
+export const TARGET = { easy: 4, normal: 6, hard: 8 };
 
 const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H) ? -1 : y * W + x;
 const step = (i, d) => at(i % W + DX[d], ((i / W) | 0) + DY[d]);
@@ -55,6 +64,27 @@ export function runBall(stage, st) {
     c = j; inD = opp(o);
   }
   return 'loop';
+}
+
+/**
+ * Where the marble goes from cell `c` (entered through side `inD`, -1 = sitting in its middle) with gate settings
+ * `st`: the cells it passes, in order, as [cell, side in, side out] (a portal jump starts a new run at the twin), and
+ * how it ends. The browser draws this as the "where it goes now" trail. -> { path: [[c, in, out]…], end }
+ */
+export function trace(stage, st, c = stage.start, inD = -1) {
+  const { cells } = stage, path = [], seen = new Set();
+  for (let n = 0; n < 400; n++) {
+    const cell = cells[c];
+    if (cell.k === 'G') { path.push([c, inD, -1]); return { path, end: 'goal' }; }
+    if (cell.k === 'x') { path.push([c, inD, -1]); return { path, end: 'drop' }; }
+    if (cell.k === 'p' && inD >= 0) { path.push([c, inD, -1]); c = cell.twin; inD = -1; continue; }
+    const key = c * 5 + inD + 1; if (seen.has(key)) return { path, end: 'loop' }; seen.add(key);
+    const o = cell.k === 'p' ? sides(cell.m)[0] : exitOf(cell, inD, st), j = step(c, o);
+    path.push([c, inD, o]);
+    if (j < 0 || !cells[j] || !(cells[j].m & (1 << opp(o)))) return { path, end: 'drop' };
+    c = j; inD = opp(o);
+  }
+  return { path, end: 'loop' };
 }
 
 /**

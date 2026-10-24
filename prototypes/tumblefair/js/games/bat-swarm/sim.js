@@ -21,7 +21,9 @@ export const RULES = {
   waveEvery: { easy: 5.2, normal: 4.4, hard: 3.6 }, waveFirst: 3.0, waveFaster: 0.25,   // a little quicker every wave, to a floor of 60%
   warn: { easy: 2.0, normal: 1.6, hard: 1.25 }, batSpeed: { easy: 6, normal: 7.5, hard: 9 },
   band: 1.35, gap: 1.5, batR: 0.62,
-  kinds: { easy: ['lane', 'column', 'double'], normal: ['lane', 'column', 'double', 'wall', 'cross'], hard: ['lane', 'column', 'double', 'wall', 'cross', 'wall2'] },
+  kinds: { easy: ['lane', 'column', 'double', 'comb'], normal: ['lane', 'column', 'double', 'wall', 'cross', 'comb', 'gate', 'frame'], hard: ['lane', 'column', 'double', 'wall', 'cross', 'wall2', 'comb', 'gate', 'frame'] },
+  // round 12 formations: comb = three columns at once (stand between them), gate = a wall flying down the courtyard with one
+  // gap COLUMN, frame = a flock along all four edges at once (the middle is safe)
   daze: 1.2, safe: 1.9, spill: 2, spillWait: 0.6,
   dashCool: 1.5, dashSpeed: 11, dashTime: 0.2,
   medals: { easy: [20, 35, 50], normal: [20, 35, 50], hard: [15, 26, 38] },
@@ -58,12 +60,21 @@ export function create({ rng, players, difficulty = 'normal' }) {
       if (hi < hd) rects.push([0, r2((hi + hd) / 2), hw, r2((hd - hi) / 2), dir, 0]);
       for (let z = -hd + 0.4; z <= hd - 0.4; z += 0.75) if (z < lo || z > hi) for (let c = 0; c < 2; c++) list.push({ x: -dir * (hw + 1.2 + c * 1.0 + ((z * 4) & 1) * 0.4), z, vx: dir * speed * 0.85, vz: 0 });
     };
+    const wallZ = (g, dir) => {           // the same wall turned round: everything except a gap column at x = g, sweeping along z
+      const lo = g - RULES.gap, hi = g + RULES.gap;
+      if (lo > -hw) rects.push([r2((-hw + lo) / 2), 0, r2((lo + hw) / 2), hd, 0, dir]);
+      if (hi < hw) rects.push([r2((hi + hw) / 2), 0, r2((hw - hi) / 2), hd, 0, dir]);
+      for (let x = -hw + 0.4; x <= hw - 0.4; x += 0.75) if (x < lo || x > hi) for (let c = 0; c < 2; c++) list.push({ x, z: -dir * (hd + 1.2 + c * 1.0 + ((x * 4) & 1) * 0.4), vx: 0, vz: dir * speed * 0.85 });
+    };
     const zc = () => rng.range(-hd + B + 0.3, hd - B - 0.3), xc = () => rng.range(-hw + B + 0.5, hw - B - 0.5), dir = () => (rng.chance(0.5) ? 1 : -1);
     if (kind === 'lane') lane(zc(), dir());
     else if (kind === 'column') column(xc(), dir());
     else if (kind === 'double') { const a = rng.range(-hd + B + 0.3, -0.4 - B * 0.2), b = rng.range(0.4 + B * 0.2, hd - B - 0.3); lane(a, dir()); lane(b, dir()); }
     else if (kind === 'cross') { lane(zc(), dir()); column(xc(), dir()); }
     else if (kind === 'wall') wall(rng.range(-hd + 1.8, hd - 1.8), dir());
+    else if (kind === 'comb') { const d = dir(), off = rng.range(-1, 1); for (const x of [-hw * 0.62, 0, hw * 0.62]) column(Math.max(-hw + B + 0.5, Math.min(hw - B - 0.5, x + off)), d); }
+    else if (kind === 'gate') wallZ(rng.range(-hw + 2.2, hw - 2.2), dir());
+    else if (kind === 'frame') { const d = dir(); lane(-hd + B, d); lane(hd - B, -d); column(-hw + B + 0.2, -d); column(hw - B - 0.2, d); }
     else { wall(rng.range(-hd + 1.8, hd - 1.8), dir()); column(xc(), dir()); }   // wall2: a wall and a column at once
     const w = { id: ++wid, kind, rects, warn, bats: list.map(b => ({ ...b, x: r2(b.x), z: r2(b.z) })) };
     return w;

@@ -95,3 +95,18 @@
 }
 /* a short landscape phone: smaller doll */
 @media (max-height: 520px) { .ck-pic svg { width: 66px; height: 88px; } }
+
+/* ---- round 12 polish ---- */
+.ck-doll.bounce { animation: ck-bounce .35s ease-out; }
+@keyframes ck-bounce { 35% { transform: scale(1.08) translateY(-6px); } 70% { transform: scale(.98); } }
+/* a camera flash when a model strikes the pose */
+.ck-flash { position: fixed; inset: 0; pointer-events: none; background: #fff; opacity: 0; z-index: 4; }
+.ck-flash.go { animation: ck-flash .5s ease-out; }
+@keyframes ck-flash { 0% { opacity: .75; } 100% { opacity: 0; } }
+/* the reveal: the top look gets a gold frame and a banner */
+.ck-card.best { box-shadow: 0 0 0 5px var(--sun), 0 6px 0 var(--ink); animation: bob .6s 3; }
+.ck-card.best::before { content: 'Best dressed!'; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%) rotate(-3deg); z-index: 2; background: var(--sun); color: var(--ink);
+  font: 900 13px/1 var(--font); padding: 4px 9px; border: 3px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.ck-card { position: relative; }
+.ck-pts:not(:empty) { animation: ck-pts .6s backwards .3s; }
+@keyframes ck-pts { from { transform: scale(2.2); opacity: 0; } }

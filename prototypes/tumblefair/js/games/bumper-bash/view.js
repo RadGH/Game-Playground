@@ -9,6 +9,7 @@ import { scoreBar, floatText, h } from '../../client/gamehud.js';
 import { canvasTexture } from '../../client/stage.js';
 import { createTunes } from '../../client/tunes.js';
 import { F } from '../../shared/arena.js';
+import { createJuice } from '../../client/juice.js';
 
 const SHAPE_CH = { circle: '●', square: '■', triangle: '▲', diamond: '◆' };
 const SEAT_Y = 0.32, CAR_SCALE = 1.0;
@@ -21,12 +22,12 @@ export function createView(ctx) {
   const geo = g => { geos.push(g); return g; };
   const tex = t => { texs.push(t); return t; };
   const mesh = (g, m, x = 0, y = 0, z = 0, parent = group) => { const o = new THREE.Mesh(g, m); o.position.set(x, y, z); o.castShadow = true; parent.add(o); return o; };
-  const tunes = createTunes({ volume: 0.22 });
+  const tunes = createTunes({ volume: 0.22 }), juice = createJuice(ctx);
 
   // ---- floor, painted circles, outside ground
   const outside = new THREE.Mesh(geo(new THREE.PlaneGeometry(90, 90).rotateX(-Math.PI / 2)), std('#6fbf5a', { roughness: 1 })); outside.position.y = -0.03; outside.receiveShadow = true; group.add(outside);
   const deck = new THREE.Mesh(geo(new THREE.BoxGeometry(A.hw * 2 + 2.4, 0.2, A.hd * 2 + 2.4)), std('#8a5a32', { roughness: 0.9 })); deck.position.y = -0.11; deck.receiveShadow = true; group.add(deck);
-  const floorTex = tex(canvasTexture(256, 256, (c, w) => { c.fillStyle = '#2f4c8f'; c.fillRect(0, 0, w, w); c.strokeStyle = 'rgba(255,255,255,.08)'; c.lineWidth = 2; for (let i = 0; i <= 8; i++) { c.beginPath(); c.moveTo(i * 32, 0); c.lineTo(i * 32, w); c.stroke(); c.beginPath(); c.moveTo(0, i * 32); c.lineTo(w, i * 32); c.stroke(); } }));
+  const floorTex = tex(canvasTexture(256, 256, (c, w) => { c.fillStyle = init.floor || '#2f4c8f'; c.fillRect(0, 0, w, w); c.strokeStyle = 'rgba(255,255,255,.08)'; c.lineWidth = 2; for (let i = 0; i <= 8; i++) { c.beginPath(); c.moveTo(i * 32, 0); c.lineTo(i * 32, w); c.stroke(); c.beginPath(); c.moveTo(0, i * 32); c.lineTo(w, i * 32); c.stroke(); } }));
   floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(3, 3);
   const floor = new THREE.Mesh(geo(new THREE.PlaneGeometry(A.hw * 2, A.hd * 2).rotateX(-Math.PI / 2)), std('#ffffff', { map: floorTex, roughness: 0.25, metalness: 0.15 })); floor.position.y = 0.005; floor.receiveShadow = true; group.add(floor);
   for (const [x, z, r, c] of [[0, 0, 3.2, '#9fd3ff'], [-5.2, 4, 1.4, '#ffd23f'], [5.2, -4, 1.4, '#ff7ab8'], [5.4, 4.2, 1, '#8ff07a'], [-5.4, -4.2, 1, '#b48cff']]) {
@@ -42,12 +43,24 @@ export function createView(ctx) {
   tubes.castShadow = true; group.add(tubes);
   function placeTubes() { segs.forEach((s, i) => { const k = 1 - s.squish * 0.35; m4.compose(v.set(s.x, 0.3 * k, s.z), q.setFromEuler(e3.set(0, s.rot, 0)), sc.set(s.corner ? 0.6 : 1, k, 1 + s.squish * 0.3)); tubes.setMatrixAt(i, m4); }); tubes.instanceMatrix.needsUpdate = true; }
   placeTubes();
-  // ---- the striped pole in the middle
-  const P0 = A.posts[0];
+  // ---- the posts in the middle (round 12: the rink comes from the seed — one pole, two, four bumpers, a bandstand…)
   const poleTex = tex(canvasTexture(64, 256, (c, w, hh) => { for (let i = 0; i < 16; i++) { c.fillStyle = i % 2 ? '#ffffff' : '#e8394a'; c.save(); c.translate(0, i * 16); c.transform(1, 0.4, 0, 1, 0, 0); c.fillRect(-40, 0, w + 80, 16); c.restore(); } }));
-  mesh(geo(new THREE.CylinderGeometry(0.32, 0.32, 3.6, 16)), std('#ffffff', { map: poleTex }), P0.x, 1.8, P0.z);
-  mesh(geo(new THREE.TorusGeometry(P0.r - 0.12, 0.2, 10, 24).rotateX(Math.PI / 2)), std('#3d8bff', { roughness: 0.45 }), P0.x, 0.22, P0.z);
-  mesh(geo(new THREE.ConeGeometry(0.6, 0.6, 16)), std('#ffd23f', { roughness: 0.4 }), P0.x, 3.9, P0.z);
+  const poleMat = std('#ffffff', { map: poleTex }), padMat = std('#3d8bff', { roughness: 0.45 }), capMat = std('#ffd23f', { roughness: 0.4 });
+  const postParts = [];        // [{ pad, o }] — a pad squishes when a car bounces off it
+  for (const o of A.posts || []) {
+    if (o.r > 1.2) {           // a bandstand: a padded drum with a little roof on poles
+      const drum = mesh(geo(new THREE.CylinderGeometry(o.r - 0.05, o.r, 0.7, 28)), std('#e8394a', { roughness: 0.5 }), o.x, 0.35, o.z);
+      mesh(geo(new THREE.TorusGeometry(o.r - 0.02, 0.16, 8, 32).rotateX(Math.PI / 2)), capMat, o.x, 0.7, o.z);
+      for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; mesh(geo(new THREE.CylinderGeometry(0.07, 0.07, 2.2, 6)), poleMat, o.x + Math.sin(a) * (o.r - 0.35), 1.8, o.z + Math.cos(a) * (o.r - 0.35)); }
+      mesh(geo(new THREE.ConeGeometry(o.r + 0.2, 0.9, 8)), std('#ffffff', { map: poleTex }), o.x, 3.3, o.z);
+      postParts.push({ pad: drum, o, y: 0.35 });
+    } else {
+      mesh(geo(new THREE.CylinderGeometry(o.r * 0.43, o.r * 0.43, 3.6, 16)), poleMat, o.x, 1.8, o.z);
+      const pad = mesh(geo(new THREE.TorusGeometry(o.r - 0.12, 0.2, 10, 24).rotateX(Math.PI / 2)), padMat, o.x, 0.22, o.z);
+      mesh(geo(new THREE.ConeGeometry(o.r * 0.8, 0.6, 16)), capMat, o.x, 3.9, o.z);
+      postParts.push({ pad, o, y: 0.22 });
+    }
+  }
   // ---- light strings over the corners
   const BULBS = 64, bulbs = new THREE.InstancedMesh(geo(new THREE.SphereGeometry(0.12, 8, 6)), basic({ color: '#ffffff' }), BULBS);
   const corners = [[-A.hw - 0.9, -A.hd - 0.9], [A.hw + 0.9, -A.hd - 0.9], [A.hw + 0.9, A.hd + 0.9], [-A.hw - 0.9, A.hd + 0.9]];
@@ -77,7 +90,7 @@ export function createView(ctx) {
       const bull = new THREE.Mesh(geo(new THREE.CircleGeometry(0.34, 20)), basic({ map: eye })); bull.position.set(0, 0.36, -0.97); bull.rotation.y = Math.PI; g.add(bull);
     }
     const flame = new THREE.Mesh(flameGeo, flameMat); flame.position.set(0, 0.3, -1.15); flame.visible = false; g.add(flame);
-    g.scale.setScalar(CAR_SCALE); g.userData = { flame, flag, spark };
+    g.scale.setScalar(CAR_SCALE); g.userData = { flame, flag, spark, body, hit: 0 };
     return g;
   }
   const cars = new Map();       // id -> { car, actor, target?, cur, to, holder }
@@ -111,11 +124,12 @@ export function createView(ctx) {
   const nameOf = id => id < 0 ? ((init.targets || []).find(t => t.id === id)?.name || 'Target') : id === ctx.me ? 'You' : ctx.players.find(p => p.pid === id)?.name || '?';
   const posOf = id => { const K = cars.get(id); if (!K) return null; if (K.target) return K.cur; const a = K.actor; return a ? { x: a.group.position.x, z: a.group.position.z } : null; };
   const flagsOf = new Map();
-  let started = false;
+  let started = false, lastScores = null, rinkShown = false;
   const ZONE = { rear: 'BACK', side: 'SIDE', front: 'NOSE' };
   return {
     state(g) {
-      bar.set(g.sc, g.left);
+      bar.set(g.sc, g.left); lastScores = g.sc;
+      if (!rinkShown && g.cd) { rinkShown = true; if (init.rinkName) show(init.rinkName, 'small rink', 1400); }
       const seen = new Set();
       for (const [id, x, z, kind] of g.pk) {
         seen.add(id); if (picks.has(id)) continue;
@@ -136,17 +150,25 @@ export function createView(ctx) {
         ctx.sfx(ev.zone === 'rear' ? 'melee.crit' : 'hit'); tunes.fx('honk', ev.zone === 'rear' ? 0.8 : 1.1);
         burst(ev.x, ev.z, ev.zone === 'rear' ? '#ffd23f' : ev.zone === 'side' ? '#ff7ab8' : '#9fd3ff');
         floatText(stage, ev.x, 2.2, ev.z, `+${ev.pts} ${ZONE[ev.zone]}!`, ev.by === ctx.me ? 'good' : '');
-        if (ev.by === ctx.me && ev.zone === 'rear') show('BACK BASH!', 'go small', 800);
-        if (ev.id === ctx.me) show('Bonk!', 'small', 700);
+        if (ev.by === ctx.me) { show(ev.zone === 'rear' ? 'BACK BASH!' : ev.zone === 'side' ? 'SIDE SWIPE!' : 'NOSE BONK!', 'go small', 800); juice.flash('rgba(255,210,63,.75)', 160); }
+        if (ev.id === ctx.me) { show('Bonk!', 'small', 700); juice.flash('rgba(232,57,74,.8)', 220); navigator.vibrate?.(60); }
+        juice.shake(ev.zone === 'rear' ? 0.16 : 0.09, 0.25);
+        const V = cars.get(ev.id); if (V) V.car.userData.hit = 1;
       } else if (ev.e === 'clonk') { ctx.sfx('dice'); }
       else if (ev.e === 'boing') {
         tunes.fx('boing', 0.9 + Math.random() * 0.3);
         let best = null, bd = 2.5; for (const s of segs) { const d = Math.hypot(s.x - ev.x, s.z - ev.z); if (d < bd) { bd = d; best = s; } } if (best) best.squish = 1;
+        for (const P of postParts) if (Math.hypot(P.o.x - ev.x, P.o.z - ev.z) < P.o.r + 1.4) P.squish = 1;
       } else if (ev.e === 'pick') {
         ctx.sfx(ev.kind === 'star' ? 'coins' : 'pick');
         floatText(stage, ev.x, 1.6, ev.z, ev.kind === 'star' ? `+${RULES.star}` : 'TURBO!', 'good');
         if (ev.id === ctx.me && ev.kind === 'zap') show('TURBO!', 'go small', 900);
-      } else if (ev.e === 'end') { show('Time!', 'small', 1500); ctx.sfx('win'); tunes.stop(false); }
+      } else if (ev.e === 'end') {
+        show('Time!', 'small', 1500); ctx.sfx('win'); tunes.stop(false);
+        // the winner gets a crown call-out over their car
+        const sc = lastScores || {}, best = Math.max(0, ...Object.values(sc));
+        if (best > 0) for (const [pid, v] of Object.entries(sc)) if (v === best) { const p = posOf(+pid); if (p) floatText(stage, p.x, 2.6, p.z, `👑 ${nameOf(+pid)}!`, 'good'); }
+      }
     },
     pose(pid, flags) { flagsOf.set(pid, flags); return 'sitGround'; },
     frame(dt, t) {
@@ -170,11 +192,14 @@ export function createView(ctx) {
         ud.spark.scale.setScalar(0.3 + Math.random() * 0.25);
       }
       for (const P of picks.values()) { P.born = Math.min(1, P.born + dt * 4); P.g.scale.setScalar(P.born); P.icon.rotation.y = t * 2.5; P.icon.position.y = 0.8 + Math.sin(t * 3 + P.g.position.x) * 0.12; P.glow.material.opacity = 0.35 + Math.sin(t * 5) * 0.2; }
+      juice.frame(dt, t);
+      for (const P of postParts) if (P.squish > 0) { P.squish = Math.max(0, P.squish - dt * 3); const k = 1 - P.squish * 0.3; P.pad.scale.set(1 + P.squish * 0.25, k, 1 + P.squish * 0.25); }
+      for (const K of cars.values()) { const ud = K.car.userData; if (ud.hit > 0) { ud.hit = Math.max(0, ud.hit - dt * 4); ud.body.emissive.setRGB(ud.hit, ud.hit, ud.hit * 0.8); } }
       let any = false; for (const s of segs) if (s.squish > 0) { s.squish = Math.max(0, s.squish - dt * 3); any = true; } if (any) placeTubes();
       for (let i = bursts.length - 1; i >= 0; i--) { const B = bursts[i]; B.t += dt; const u = B.b.userData.v; u[1] -= 12 * dt; B.b.position.x += u[0] * dt; B.b.position.y = Math.max(0.1, B.b.position.y + u[1] * dt); B.b.position.z += u[2] * dt; B.b.rotation.x += dt * 8; if (B.first) B.m.opacity = Math.max(0, 1 - B.t * 1.6); if (B.t > 0.65) { group.remove(B.b); if (B.first) B.m.dispose(); bursts.splice(i, 1); } }
     },
     dispose() {
-      tunes.dispose(); bar.el.remove(); pill.remove(); banner.remove();
+      tunes.dispose(); juice.dispose(); bar.el.remove(); pill.remove(); banner.remove();
       for (const t2 of cpuTags) t2.remove();
       for (const K of cars.values()) if (!K.target) { K.car.removeFromParent(); if (K.actor) { K.actor.body.group.position.y = 0; K.actor.group.rotation.y = 0; } }
       for (const P of picks.values()) P.glow.material.dispose();

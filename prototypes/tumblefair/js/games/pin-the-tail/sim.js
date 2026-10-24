@@ -8,26 +8,48 @@
 // +3 for the closest pin of the round (2+ players, ties share). Your last tap is your pin; DONE locks it in early.
 // Alone: the same, a score out of 50. Everything is from the seed; the final tail spot is never in the state before
 // the reveal (the start spot is, during the show: that is the point).
+// Round 12 (report #32, "add more pin the tail varieties"; the best-rated game, 9 to 0): fourteen pictures, and not only
+// tails — the unicorn's horn, the clown's and the snowman's nose, the candle on the cake, the pumpkin's stem — and every
+// round in a different scene (paddock, beach, circus ring, moonlit garden, snowy field) with its own little things lying
+// about. The starred picture is a new one each round. The rules, timings and scoring are exactly as before: a picture's
+// `tail` is simply "the spot", and `part` says what goes there.
 export const meta = {
   id: 'pin-the-tail', title: 'Pin the Tail', blurb: 'Remember where the tail goes, then pin it with your eyes shut!',
-  how: ['An animal shows where its tail goes (the glowing star). Remember it!', 'Then it hides. Tap where the tail goes. You can tap again to move your pin.', 'Closest pin wins the round. Each round has a trick: slides, spins and swaps!', 'Five rounds.'],
+  how: ['A picture shows where its tail goes (the glowing star) — or its horn, its nose, the candle… Remember it!', 'Then it hides. Tap where it goes. You can tap again to move your pin.', 'Closest pin wins the round. Each round has a trick: slides, spins and swaps!', 'Five rounds.'],
   kind: 'ui', min: 1, max: 4, seconds: 84, scoring: 'points', unit: 'points', tags: ['puzzle', 'action'], card: 'card-pin-the-tail', css: true,
 };
 export const BW = 160, BH = 120;
 export const ROUNDS = 5, START_S = 2, SHOW_S = 2.6, TRICK_S = 1.7, GUESS_S = 7.5, REVEAL_S = 4, END_S = 3;
 export const TRICKS = ['blur', 'hide', 'slide', 'spin', 'swap'];
 export const NEAR = 25, CLOSEST_BONUS = 3;
-/** Each animal's box (facing right: head on the right) and where its tail joins the body, in its own units. */
+/** Each picture's box (facing right: head on the right), the spot where its missing part goes (`tail`, in its own
+ *  units — the name is kept from when every part was a tail) and what that part is. */
 export const ANIMALS = {
-  donkey: { w: 56, h: 46, tail: [6, 19] },
-  pony: { w: 56, h: 46, tail: [6, 18] },
-  goat: { w: 50, h: 44, tail: [6, 20] },
-  pig: { w: 52, h: 36, tail: [4, 16] },
-  cow: { w: 60, h: 44, tail: [5, 17] },
-  sheep: { w: 52, h: 40, tail: [5, 17] },
+  donkey: { w: 56, h: 46, tail: [6, 19], part: 'tail' },
+  pony: { w: 56, h: 46, tail: [6, 18], part: 'tail' },
+  goat: { w: 50, h: 44, tail: [6, 20], part: 'tail' },
+  pig: { w: 52, h: 36, tail: [4, 16], part: 'tail' },
+  cow: { w: 60, h: 44, tail: [5, 17], part: 'tail' },
+  sheep: { w: 52, h: 40, tail: [5, 17], part: 'tail' },
+  cat: { w: 50, h: 40, tail: [6, 18], part: 'tail' },
+  dog: { w: 54, h: 42, tail: [7, 17], part: 'tail' },
+  bunny: { w: 46, h: 40, tail: [6, 24], part: 'tail' },
+  unicorn: { w: 56, h: 50, tail: [51, 10], part: 'horn' },
+  clown: { w: 44, h: 48, tail: [22, 28], part: 'nose' },
+  snowman: { w: 40, h: 58, tail: [21, 13], part: 'nose' },
+  cake: { w: 46, h: 44, tail: [23, 11], part: 'candle' },
+  pumpkin: { w: 46, h: 38, tail: [23, 11], part: 'stem' },
 };
 export const KINDS = Object.keys(ANIMALS);
-const DECO = ['flower', 'rock', 'bush', 'flower', 'mushroom'];
+/** The scenes a round can be set in, and the little things lying about in each. */
+export const SCENES = {
+  paddock: ['flower', 'rock', 'bush', 'flower', 'mushroom'],
+  beach: ['shell', 'starfish', 'bucket', 'shell', 'pebble'],
+  circus: ['star', 'ball', 'confetti', 'star', 'balloon'],
+  garden: ['lantern', 'firefly', 'flower', 'firefly', 'mushroom'],
+  snow: ['pine', 'snowball', 'pine', 'rock', 'snowball'],
+};
+export const SCENE_IDS = Object.keys(SCENES);
 
 /** Where the tail joins an animal placed as { k, x, y, s, f } (f = facing left). */
 export function tailOf(a) {
@@ -47,9 +69,12 @@ function atCentre(a, [cx, cy]) {
   const A = ANIMALS[a.k], w = A.w * a.s, h = A.h * a.s;
   return { ...a, x: r1(Math.min(BW - w - 4, Math.max(4, cx - w / 2))), y: r1(Math.min(BH - h - 4, Math.max(8, cy - h / 2))) };
 }
-/** One round's layout: the animals before and after the trick, which one is starred, the paddock dressing, the answer. */
-export function planRound(rng, i) {
+/** One round's layout: the animals before and after the trick, which one is starred, the scene and its dressing, the
+ *  answer. opts.scene picks the scene (default: the paddock); opts.avoid = kinds already starred this game. */
+export function planRound(rng, i, { scene = 'paddock', avoid = null } = {}) {
   const trick = TRICKS[i], kinds = rng.shuffle(KINDS), s = r1(rng.range(1.2, 1.45)), f = rng.chance(0.5);
+  if (avoid) { const k = kinds.findIndex(x => !avoid.has(x)); if (k > 0) kinds.unshift(...kinds.splice(k, 1)); }
+  const DECO = SCENES[scene] || SCENES.paddock;
   const deco = Array.from({ length: 7 }, (_, j) => ({ k: DECO[j % DECO.length], x: r1(rng.range(8, BW - 8)), y: r1(rng.range(14, BH - 6)) }));
   let from, to, rot = 0;
   if (trick === 'swap') {
@@ -65,7 +90,7 @@ export function planRound(rng, i) {
   }
   let target = tailOf(to[0]);
   if (rot) target = [BW - target[0], BH - target[1]];
-  return { trick, from, to, rot, deco, start: tailOf(from[0]).map(r1), target: target.map(r1) };
+  return { trick, from, to, rot, deco, scene, part: ANIMALS[from[0].k].part, start: tailOf(from[0]).map(r1), target: target.map(r1) };
 }
 /** Settle a round. pins: pid -> [x, y]. */
 export function settleRound(pins, target, pids) {
@@ -79,7 +104,8 @@ export function settleRound(pins, target, pids) {
 
 export function create({ rng, players }) {
   const pids = players.map(p => p.pid), solo = pids.length === 1;
-  const plan = TRICKS.map((_, i) => planRound(rng, i));
+  const scenes = rng.shuffle(SCENE_IDS), starred = new Set();
+  const plan = TRICKS.map((_, i) => { const P = planRound(rng, i, { scene: scenes[i % scenes.length], avoid: starred }); starred.add(P.from[0].k); return P; });
   const total = Object.fromEntries(pids.map(p => [p, 0]));
   let phase = 'ready', round = -1, left = START_S, over = false, pins = {}, done = new Set(), reveal = null;
   function next() { round++; phase = 'show'; left = SHOW_S; pins = {}; done = new Set(); reveal = null; }
@@ -115,7 +141,7 @@ export function create({ rng, players }) {
       const g = { phase, round, left: Math.max(0, Math.ceil(left)), scores: { ...total } };
       if (round < 0 || phase === 'end') return g;
       const P = plan[round];
-      g.trick = P.trick; g.deco = P.deco;
+      g.trick = P.trick; g.deco = P.deco; g.scene = P.scene; g.part = P.part;
       if (phase === 'show') { g.animals = P.from; g.star = P.start; g.rot = 0; }
       if (phase === 'trick') { g.animals = P.from; g.to = P.to; g.rot = P.rot; }
       if (phase === 'guess') { g.rot = P.rot; if (P.trick === 'blur') g.animals = P.to; g.pinned = pids.filter(p => pins[p]); g.done = [...done]; }

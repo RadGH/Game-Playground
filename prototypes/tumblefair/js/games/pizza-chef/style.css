@@ -1,0 +1,53 @@
+/* Pizza Pronto — the ticket on top, the pizza canvas, the tray of buttons, one big OVEN / PULL button, and the
+   gallery at the end. Built for an upright phone (402x780); nothing in here scrolls on its own (the whole ui does). */
+.game-pizza-chef { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: repeating-linear-gradient(45deg, #fff6e0 0 16px, #ffe7c2 16px 32px); color: var(--ink); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-pizza-chef.season-halloween { background: repeating-linear-gradient(45deg, #241a3d 0 16px, #2e2150 16px 32px); }
+.game-pizza-chef > * { flex: none; }
+.pz-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 6px; }
+.pz-title { color: #ffd23f; font: 900 25px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.pz-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.pz-board .chip { color: var(--ink); padding-right: 8px; } .pz-board .sc { font-style: normal; background: #fff3d6; border-radius: 8px; padding: 0 7px; }
+.pz-board .pz-n { font-style: normal; font-size: 12px; margin-left: 3px; } .pz-board .chip.lead { background: var(--sun); } .pz-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.pz-ticket { width: min(460px, 100%); display: flex; flex-wrap: wrap; gap: 5px; align-items: center; justify-content: center; padding: 7px 9px; background: #fff; border: 3px solid var(--ink); border-radius: 6px 6px 16px 16px; box-shadow: 0 4px 0 var(--ink);
+  background-image: linear-gradient(#fff 0 0); }
+.pz-ticket.hidden { display: none; }
+.pz-oh { width: 100%; text-align: center; font: 900 15px/1 var(--font); letter-spacing: .5px; text-transform: uppercase; }
+.pz-p { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; border: 2px solid var(--ink); background: #ffe9a8; font: 800 14px/1.15 var(--font); }
+.pz-p.ok { background: #b8f5a8; } .pz-p.ok::after { content: '✓'; font-weight: 900; }
+.pz-p u { text-decoration: none; background: var(--ink); color: #fff; border-radius: 6px; padding: 0 4px; }
+.pz-p i, .pz-b i { width: 13px; height: 13px; border-radius: 50%; background: var(--c); border: 2px solid var(--ink); flex: none; display: inline-block; }
+.pz-stage { position: relative; width: min(100%, 330px); height: clamp(190px, 36dvh, 330px); }
+.pz-stage canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.pz-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 76px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.pz-count:empty { display: none; }
+.pz-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.7); opacity: 0; pointer-events: none; display: grid; gap: 2px; text-align: center; min-width: 210px;
+  padding: 8px 14px; background: var(--paper); border: 4px solid var(--ink); border-radius: 18px; box-shadow: 0 5px 0 var(--ink); transition: opacity .15s, transform .15s; }
+.pz-card.show { opacity: 1; transform: translate(-50%, -50%); } .pz-card b { font: 900 34px/1 var(--font); } .pz-card span { font: 800 13px/1.25 var(--font); } .pz-card em { font: 900 15px/1.2 var(--font); color: #b0302a; }
+.pz-card.gold b { color: #d89a00; } .pz-card.good b { color: #2a9a3a; } .pz-card.bad b { color: #b0302a; }
+.pz-bake { width: min(400px, 100%); display: grid; gap: 2px; } .pz-bake.hidden { display: none; }
+.pz-bar { position: relative; height: 26px; border: 3px solid var(--ink); border-radius: 10px; overflow: hidden; background: linear-gradient(90deg, #f3e2b8, #e9b86a 45%, #b8743a 70%, #3a2210); }
+.pz-gold { position: absolute; top: 0; bottom: 0; background: rgba(255, 210, 63, .55); border-left: 3px dashed var(--ink); border-right: 3px dashed var(--ink); }
+.pz-mark { position: absolute; top: -3px; bottom: -3px; width: 8px; margin-left: -4px; background: #fff; border: 2px solid var(--ink); border-radius: 3px; }
+.pz-bar.in { box-shadow: 0 0 0 4px var(--sun); } .pz-bar.burn .pz-mark { background: #ff5f5f; }
+.pz-bakew { display: flex; justify-content: space-between; font: 800 12px/1 var(--font); color: var(--ink); }
+.season-halloween .pz-bakew, .season-halloween .pz-note { color: #fff; }
+.pz-tray { width: min(460px, 100%); display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.pz-tray.hidden { display: none; } .pz-tray.off { opacity: .5; pointer-events: none; }
+.pz-b { position: relative; min-height: 46px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 3px 2px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; box-shadow: 0 3px 0 var(--ink); font: 800 11px/1.05 var(--font); color: var(--ink); cursor: pointer; touch-action: manipulation; text-align: center; }
+.pz-b.on { background: var(--sun); transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.pz-b.undo, .pz-b.clear { background: #e8f1ff; }
+.pz-cnt { position: absolute; top: -8px; right: -6px; min-width: 20px; padding: 0 4px; border-radius: 10px; background: var(--ink); color: #fff; font: 900 12px/18px var(--font); }
+.pz-cnt:empty { display: none; }
+.pz-go { width: min(460px, 100%); min-height: 60px; font-size: 23px; } .pz-go.pull { background: #ff9a3a; } .pz-go.hidden { display: none; }
+.pz-go:disabled { background: #e8e1cc; color: #6a7a80; }
+.pz-gal { width: min(520px, 100%); display: grid; gap: 8px; padding: 10px; background: var(--paper); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+.pz-gal.hidden { display: none; } .pz-gal h3 { margin: 0; text-align: center; font: 900 20px/1 var(--font); }
+.pz-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; border-top: 3px dashed var(--seat); padding-top: 6px; }
+.pz-row figure { margin: 0; display: grid; justify-items: center; gap: 2px; } .pz-row figcaption { display: grid; text-align: center; font: 800 12px/1.2 var(--font); }
+.pz-row em { font: 800 13px/1 var(--font); }
+.pz-note { margin: 0; text-align: center; font-size: 14px; font-weight: 800; }
+.pz-note:empty { display: none; }
+.game-pizza-chef.watching .pz-stage { width: min(100%, 520px); height: 44dvh; }
+@media (max-height: 700px) { .pz-stage { height: 31dvh; min-height: 170px; } .pz-go { min-height: 50px; font-size: 20px; } .pz-title { font-size: 20px; } .pz-p { font-size: 13px; } }

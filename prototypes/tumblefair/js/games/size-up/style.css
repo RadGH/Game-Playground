@@ -62,3 +62,22 @@
   .su-val { font-size: 20px; }
   .su-q { font-size: 40px; }
 }
+
+/* ---- round 12 polish ---- */
+.su-top { padding-right: 86px; }                                                 /* clear the ☰ / ! corner buttons */
+.su-card { animation: su-in .32s backwards; }
+.su-card:nth-child(2) { animation-delay: .08s; } .su-card:nth-child(3) { animation-delay: .16s; }
+@keyframes su-in { from { transform: translateY(26px) scale(.85); opacity: 0; } }
+.game-size-up[data-phase=reveal] .su-card { animation: none; }
+.game-size-up[data-phase=reveal] .su-card.right { animation: bob .5s 2; }
+.su-meter { display: none; width: 86%; height: 10px; border: 2px solid var(--ink); border-radius: 6px; background: rgba(13, 34, 40, .12); overflow: hidden; }
+.game-size-up[data-phase=reveal] .su-meter { display: block; }
+.su-meter i { display: block; height: 100%; width: 0; background: #47606a; border-radius: 4px; animation: su-grow .6s var(--d, 0ms) backwards ease-out; }
+.su-card.right .su-meter i { background: #1d8a37; }
+@keyframes su-grow { from { width: 0; } }
+.su-pop { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); pointer-events: none; z-index: 3; white-space: nowrap; font: 900 44px/1 var(--font); color: #fff;
+  -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; animation: su-float 1.2s ease-out forwards; }
+.su-pop.quick { color: var(--sun); } .su-pop.bad { color: var(--pop); }
+.su-pop.tag { top: 50%; font-size: 20px; color: var(--sun); animation-delay: .12s; animation-fill-mode: both; }
+@keyframes su-float { 0% { transform: translate(-50%, 10px) scale(.5); opacity: 0; } 20% { transform: translate(-50%, -6px) scale(1.15); opacity: 1; } 100% { transform: translate(-50%, -50px); opacity: 0; } }
+.game-size-up.streak .su-note { color: var(--sun); animation: bob .5s 2; }

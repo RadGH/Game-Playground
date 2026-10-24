@@ -9,6 +9,7 @@ import { scoreBar, floatText, h } from '../../client/gamehud.js';
 import { canvasTexture } from '../../client/stage.js';
 import { F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { createJuice } from '../../client/juice.js';
 
 export function createView(ctx) {
   const { THREE, group, stage, init } = ctx;
@@ -89,6 +90,9 @@ export function createView(ctx) {
   const myKey = ctx.me != null ? 'p' + ctx.me : null;
   let carriers = new Map(), carried = new Set(), grabAt = 0, lastG = null, shrinkSaid = false, prevBits = 0, lastIn = 0;
   const flagsOf = new Map(), spin = new Map();
+  // round 12: a splash ring where someone hits the water, a screen shake, and a flash on your own phone
+  const juice = createJuice(ctx), splashes = [], splashGeo = new THREE.RingGeometry(0.5, 0.85, 28).rotateX(-Math.PI / 2);
+  function splash(x, z) { for (let k = 0; k < 2; k++) { const m = new THREE.Mesh(splashGeo, new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.9, depthWrite: false })); m.position.set(x, -1.5, z); group.add(m); splashes.push({ m, t: -k * 0.18 }); } }
 
   return {
     start() { banner(D.name, 1600); },
@@ -129,6 +133,9 @@ export function createView(ctx) {
         ctx.sfx('out'); spin.delete(ev.k);
         const R = (lastG?.r ?? (A.r || A.hw)) + 1, x = Math.max(-R, Math.min(R, ev.x)), z = Math.max(-R, Math.min(R, ev.z));
         floatText(stage, x, 0.6, z, ev.k[0] === 'd' ? '+1' : ev.by != null ? `KO! ${name('p' + ev.by)}` : 'Splash!', ev.by != null ? 'good' : 'bad');
+        splash(ev.x, ev.z); juice.shake(0.12, 0.3);
+        if (ev.k === myKey) { juice.flash('rgba(57,140,224,.85)', 260); navigator.vibrate?.(90); }
+        else if (ev.by != null && ev.by === ctx.me) { juice.flash('rgba(255,210,63,.75)', 180); if (ev.k[0] === 'p') banner(`You flung ${name(ev.k)}!`, 1200); }
       }
       else if (ev.e === 'back') { if (ev.k === myKey) ctx.sfx('pick'); }
       else if (ev.e === 'tell') { const r = dummies.get(+ev.k.slice(1)); r?.a?.play('ready', 600); }
@@ -142,6 +149,8 @@ export function createView(ctx) {
       return undefined;
     },
     frame(dt, t) {
+      juice.frame(dt, t);
+      for (let i = splashes.length - 1; i >= 0; i--) { const S = splashes[i]; S.t += dt; if (S.t < 0) continue; S.m.scale.setScalar(1 + S.t * 3.2); S.m.material.opacity = Math.max(0, 0.9 - S.t * 1.4); if (S.t > 0.65) { group.remove(S.m); S.m.material.dispose(); splashes.splice(i, 1); } }
       const g = lastG;
       if (g) {
         if (g.r != null) { const s = g.r / A.r; deck.scale.set(s, 1, s); }
@@ -172,6 +181,6 @@ export function createView(ctx) {
       for (const r of dummies.values()) if (r.a) wob('d' + r.id, r.a, r.id);
       if (!power.hidden) powerFill.style.width = Math.min(100, (performance.now() - grabAt) / (RULES.fullHold * 1000) * 100) + '%';
     },
-    dispose() { bar.el.remove(); for (const r of [...dummies.values()]) dropDummy(r); },
+    dispose() { juice.dispose(); for (const S of splashes) S.m.material.dispose(); bar.el.remove(); for (const r of [...dummies.values()]) dropDummy(r); },
   };
 }

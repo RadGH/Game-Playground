@@ -33,14 +33,21 @@ export function makeApples(rng, difficulty = 'normal') {
     if (k >= 2) { const r = rng(); if (r < 0.16) kind = 'gold'; else if (r < 0.34 && out[k - 1].kind !== 'spider') kind = 'spider'; }
     const ramp = Math.min(1.45, 1 + k * 0.025);
     const w = rng.range(1.7, 2.4) * speed * ramp * (kind === 'gold' ? 1.35 : 1);
+    // round 12: from the 7th apple on, some move differently (same speed, same reach): ZIG bounces side to side at an
+    // even pace with sharp turns, DART lingers at the edges and darts through the middle (a shorter window)
+    const pr = k >= 6 ? rng() : 1, p = pr < 0.18 ? 'zig' : pr < 0.3 ? 'dart' : null;
     out.push({ kind, a: +rng.range(0.55, 0.85).toFixed(3), w: +w.toFixed(3), ph: +rng.range(0, 6.283).toFixed(3),
       a2: +rng.range(0.08, 0.2).toFixed(3), w2: +(w * rng.range(1.7, 2.6)).toFixed(3), ph2: +rng.range(0, 6.283).toFixed(3),
-      ...(kind === 'spider' ? { life: SPIDER_LIFE } : {}) });
+      ...(p ? { p } : {}), ...(kind === 'spider' ? { life: SPIDER_LIFE } : {}) });
   }
   return out;
 }
 /** Where apple `ap` is (-1..1 across the lane) `s` seconds after it appeared. */
-export function appleX(ap, s) { return Math.max(-1, Math.min(1, ap.a * Math.sin(ap.w * s + ap.ph) + ap.a2 * Math.sin(ap.w2 * s + ap.ph2))); }
+export function appleX(ap, s) {
+  const v = Math.sin(ap.w * s + ap.ph);
+  const m = ap.p === 'zig' ? Math.asin(v) * (2 / Math.PI) : ap.p === 'dart' ? Math.sign(v) * Math.abs(v) ** 0.7 : v;
+  return Math.max(-1, Math.min(1, ap.a * m + ap.a2 * Math.sin(ap.w2 * s + ap.ph2)));
+}
 /** A fresh lane. */
 export const newLane = () => ({ k: 0, from: 0, stun: 0, score: 0, red: 0, gold: 0, splash: 0, yuck: 0, last: -1 });
 /** Let spiders nobody bit bob away, up to time t (they leave at from + life). Shared by the phone's prediction. */

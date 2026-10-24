@@ -1,0 +1,69 @@
+/* Order Up! — a food stand drawn with CSS (striped awning, a counter), the line of customers with order bubbles, a
+   tray strip with the SERVE button and a grid of big food buttons. Sized for a 402x780 phone; nothing scrolls. */
+.game-order-up { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow: hidden;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 8px) calc(var(--sl) + 10px);
+  background: radial-gradient(120% 60% at 50% 0%, #fff1c8 0%, transparent 60%), linear-gradient(#ffb48a, #ffd9a8 40%, #f0c07a 40%, #d6a865);
+  color: var(--ink); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-order-up.season-halloween { background: radial-gradient(60% 40% at 15% 6%, #fff2b0 0 8%, transparent 9%), linear-gradient(#241a3d, #3b2c5c 40%, #2a1d1a 40%, #1d1410); }
+.game-order-up > * { flex: none; }
+.ou-top { display: flex; gap: 12px; align-items: center; justify-content: center; padding: 0 70px; min-height: 36px; }
+.ou-title { color: #fff3b8; font: 900 25px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); white-space: nowrap; }
+.ou-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.ou-board .chip { color: var(--ink); padding-right: 10px; }
+.ou-board .sc { font-style: normal; background: #fff3b8; border-radius: 8px; padding: 0 7px; }
+.ou-board .st { font-size: 13px; } .ou-board .chip.lead { background: var(--sun); } .ou-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.ou-stand { position: relative; width: min(100%, 460px); min-height: 200px; padding: 32px 8px 8px; border: 4px solid var(--ink); border-radius: 14px;
+  background: linear-gradient(#fff8ea, #fff8ea 70%, #e0a26a 70%); box-shadow: 0 5px 0 var(--ink); display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.season-halloween .ou-stand { background: linear-gradient(#2a1d4a, #2a1d4a 70%, #4a3478 70%); }
+.ou-awning { position: absolute; left: 0; right: 0; top: 0; height: 26px; border-bottom: 4px solid var(--ink); border-radius: 10px 10px 0 0;
+  background: repeating-linear-gradient(90deg, #2fc4c4 0 28px, #fff 28px 56px); }
+.season-halloween .ou-awning { background: repeating-linear-gradient(90deg, #6fe06a 0 28px, #2a1d4a 28px 56px); }
+.ou-line { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 4px; width: 100%; }
+.ou-cust { position: relative; display: grid; justify-items: center; align-content: start; width: 98px; }
+.ou-cust .cust { width: 66px; height: 72px; }
+.ou-line.show .ou-cust { animation: ou-walk .4s ease-out backwards; } .ou-line.show .ou-cust:nth-child(2) { animation-delay: .08s; } .ou-line.show .ou-cust:nth-child(3) { animation-delay: .16s; }
+.ou-line.show .ou-cust:nth-child(4) { animation-delay: .24s; } .ou-line.show .ou-cust:nth-child(5) { animation-delay: .32s; } .ou-line.show .ou-cust:nth-child(n+6) { animation-delay: .4s; }
+@keyframes ou-walk { from { transform: translateX(40px); opacity: 0; } }
+.ou-bubble { display: flex; gap: 1px; justify-content: center; min-width: 40px; padding: 3px 5px; margin-top: 2px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; position: relative; }
+.ou-bubble::before { content: ''; position: absolute; left: 50%; top: -9px; margin-left: -6px; border: 6px solid transparent; border-bottom: 6px solid var(--ink); }
+.ou-bubble .mi { width: 30px; height: 30px; }
+.ou-line.n5 .ou-cust, .ou-line.n6 .ou-cust, .ou-line.n7 .ou-cust { width: 86px; } .ou-line.n5 .ou-cust .cust, .ou-line.n6 .ou-cust .cust, .ou-line.n7 .ou-cust .cust { width: 56px; height: 62px; }
+.ou-line.n6 .ou-bubble .mi, .ou-line.n7 .ou-bubble .mi { width: 25px; height: 25px; }
+.ou-line.wait .ou-cust { width: 44px; } .ou-line.wait .ou-cust .cust { width: 40px; height: 44px; }
+.ou-line.wait .ou-cust.done { opacity: .55; }
+.ou-res { position: absolute; top: -4px; right: -2px; font-size: 18px; }
+.ou-counter { min-height: 0; display: grid; place-items: center; }
+.ou-counter .ou-cust.at { width: auto; display: flex; align-items: center; gap: 8px; animation: ou-walk .35s ease-out; }
+.ou-counter .ou-cust.at .cust { width: 92px; height: 100px; }
+.ou-bubble.ask { font: 900 30px/1 var(--font); min-width: 56px; padding: 6px 12px; }
+.ou-bubble.ask::before { left: -9px; top: 50%; margin: -6px 0 0; border: 6px solid transparent; border-right: 6px solid var(--ink); }
+.ou-closed { font: 900 20px/1 var(--font); color: #138a2c; padding: 18px 0; }
+.season-halloween .ou-closed { color: #9bff8a; }
+.ou-got { display: flex; gap: 1px; margin-top: 3px; padding: 2px 4px; border-radius: 10px; background: rgba(13, 34, 40, .12); min-height: 22px; font: 900 12px/18px var(--font); }
+.ou-got i { position: relative; } .ou-got .mi { width: 20px; height: 20px; }
+.ou-got i.no::after { content: '✗'; position: absolute; right: -3px; top: -6px; color: #ff5f5f; font: 900 13px/1 var(--font); font-style: normal; -webkit-text-stroke: .6px var(--ink); }
+.ou-now { min-height: 34px; padding: 4px 14px; border-radius: 14px; background: #fff3b8; border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink);
+  font: 900 18px/1.15 var(--font); text-align: center; max-width: 100%; }
+.ou-now.look { background: #bfe8ff; } .ou-now.go { background: #b6ffa8; } .ou-now.reveal { background: #ffe08a; }
+.ou-tray { display: flex; gap: 8px; align-items: stretch; width: min(100%, 460px); }
+.ou-plate { flex: 1; display: flex; gap: 4px; align-items: center; justify-content: center; min-height: 58px; padding: 4px 8px; border: 4px solid var(--ink); border-radius: 30px; background: #fff; box-shadow: inset 0 0 0 4px #e8e2d6; }
+.ou-plate em { font-size: 13px; font-weight: 800; opacity: .6; }
+.ou-plate i { cursor: pointer; } .ou-plate .mi { width: 42px; height: 42px; animation: ou-drop .2s ease-out; }
+@keyframes ou-drop { from { transform: translateY(-14px) scale(1.2); } }
+.ou-serve { min-width: 108px; min-height: 58px; border: 4px solid var(--ink); border-radius: 18px; background: #ff6b6b; box-shadow: 0 5px 0 var(--ink); color: #fff;
+  font: 900 22px/1 var(--font); -webkit-text-stroke: 1px var(--ink); cursor: pointer; touch-action: none; }
+.ou-serve:disabled { opacity: .45; } .ou-serve.press { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.ou-menu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; width: min(100%, 460px); }
+.ou-menu.cols-3 { grid-template-columns: repeat(3, 1fr); } .ou-menu.cols-5 { grid-template-columns: repeat(5, 1fr); }
+.ou-food { position: relative; display: grid; justify-items: center; gap: 1px; padding: 5px 2px 6px; min-height: 86px; border: 4px solid var(--ink); border-radius: 16px; background: #fffaf0;
+  box-shadow: 0 5px 0 var(--ink); font: 900 11px/1.05 var(--font); color: var(--ink); cursor: pointer; touch-action: none; -webkit-tap-highlight-color: transparent; opacity: .55; }
+.season-halloween .ou-food { background: #f3ecff; }
+.ou-food .mi { width: 52px; height: 52px; } .ou-food b { text-align: center; }
+.ou-food > i { position: absolute; top: 2px; left: 6px; font-style: normal; font-size: 10px; opacity: .5; }
+.can-tap .ou-food { opacity: 1; }
+.ou-food.on { background: #b6ffa8; transform: translateY(3px); box-shadow: 0 2px 0 var(--ink), 0 0 0 3px #fff; }
+.ou-note { margin: 0; text-align: center; font-size: 13px; font-weight: 800; color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px var(--ink); }
+.ou-note:empty { display: none; }
+.game-order-up.watching .ou-tray, .game-order-up.watching .ou-menu { display: none; }
+.game-order-up.watching .ou-stand { width: min(100%, 860px); }
+@media (max-height: 640px) { .ou-title { font-size: 20px; } .ou-food { min-height: 60px; } .ou-food .mi { width: 34px; height: 34px; } .ou-counter .ou-cust.at .cust { width: 70px; height: 76px; } }

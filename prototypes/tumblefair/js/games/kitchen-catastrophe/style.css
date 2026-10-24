@@ -23,10 +23,11 @@
 .kc-order.hurry .kc-pat i { background: #ff4d6d; }
 .kc-mark { width: 15px; height: 15px; display: inline-block; vertical-align: middle; }
 .kc-mark svg { width: 100%; height: 100%; fill: var(--seat); stroke: var(--ink); stroke-width: 2.4; display: block; }
-.kc-job { position: absolute; left: 50%; bottom: calc(var(--sb) + 150px); transform: translateX(-50%); max-width: 92vw; text-align: center; padding: 6px 14px; border-radius: 14px;
+.kc-foot { position: absolute; left: 50%; bottom: calc(var(--sb) + 150px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; width: max-content; max-width: 92vw; }
+.kc-job { max-width: 92vw; text-align: center; padding: 6px 14px; border-radius: 14px;
   background: rgba(43, 29, 14, .86); color: #fff; font: 800 15px/1.25 var(--font); border: 3px solid var(--ink); }
 .kc-job.go { background: var(--sun); color: var(--ink); animation: kc-bob .6s infinite alternate; }
-@keyframes kc-bob { to { transform: translateX(-50%) translateY(-4px); } }
+@keyframes kc-bob { to { transform: translateY(-4px); } }
 .tag.kc-st { font-size: 12px; }
 .tag.kc-st.me { background: #fff; color: var(--ink); text-shadow: none; box-shadow: 0 0 0 3px var(--seat); font-weight: 900; }
 .tag.kc-tray { background: #ffd23f; color: var(--ink); text-shadow: none; font-weight: 900; }
@@ -34,6 +35,17 @@
 .kc-banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(.6); opacity: 0;
   font: 900 clamp(32px, 9vw, 64px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .25s, opacity .25s; }
 .kc-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-@media (min-width: 900px) { .kc-job { bottom: calc(var(--sb) + 62px); }
-  .kc-panel { left: 8px; transform: none; width: 215px; flex-direction: column; align-items: stretch; } .kc-goal { align-self: flex-start; } .kc-order.later .kc-steps { display: flex; } }
+/* round 12: one block — a top line (served + the waiting orders as pills) and the front order's card */
+.kc-panel { flex-direction: column; align-items: center; flex-wrap: nowrap; }
+.kc-line { display: flex; gap: 6px; align-items: center; justify-content: center; flex-wrap: wrap; max-width: 100%; }
+.kc-queue { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.kc-queue > i { font-style: normal; font: 800 12px/1 var(--font); color: #fff; text-shadow: 0 1px 0 var(--ink); }
+.kc-q { padding: 2px 8px; border-radius: 999px; border: 2px solid var(--ink); background: rgba(255, 248, 231, .95); color: var(--ink); font: 800 12px/1.2 var(--font); white-space: nowrap; }
+.kc-q.hurry b { color: #d7263d; }
+.kc-say { transform: translateY(8px); opacity: 0; max-width: 92vw; text-align: center; white-space: nowrap;
+  padding: 4px 14px; border-radius: 999px; border: 3px solid var(--ink); background: #fff; color: var(--ink); font: 900 16px/1.2 var(--font); transition: opacity .2s, transform .2s; }
+.kc-say.show { opacity: 1; transform: none; }
+.kc-say.bad { background: #ffd8d8; color: #a3122a; } .kc-say.good { background: #d9f7df; color: #156b2c; }
+@media (min-width: 900px) { .kc-foot { bottom: calc(var(--sb) + 62px); }
+  .kc-panel { left: 8px; transform: none; width: 215px; align-items: stretch; } .kc-line { justify-content: flex-start; } .kc-queue { flex-direction: column; align-items: stretch; } }
 @media (max-width: 520px) { .kc-panel { top: calc(var(--st) + 50px); gap: 4px; } .kc-order { font-size: 11px; padding: 3px 6px 5px; } .kc-oh b { font-size: 13px; } .kc-step { padding: 0 5px; } .kc-goal { font-size: 13px; } }

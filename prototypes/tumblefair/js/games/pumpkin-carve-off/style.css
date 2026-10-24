@@ -100,3 +100,17 @@
 @media (prefers-reduced-motion: reduce) { .pc-bat, .pc-flicker, .pc-blank.wob canvas { animation: none; } }
 .game-pumpkin-carve-off .vface { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; box-shadow: 0 0 0 2px var(--ink); }
 .game-pumpkin-carve-off .vface img { width: 100%; height: 100%; display: block; }
+
+/* ---- round 12 polish ---- */
+.pc-pad.wob { animation: pc-wob .28s ease-out; }
+@keyframes pc-wob { 30% { transform: rotate(-1.4deg) scale(1.01); } 65% { transform: rotate(1deg); } }
+/* the lanterns light one after another, left to right */
+.pc-frame canvas { animation: pc-light .9s var(--d, 0s) backwards ease-out; }
+.pc-frame .pc-flicker { animation-name: pc-candle; }
+@keyframes pc-light { 0% { filter: brightness(.18) saturate(.4); } 55% { filter: brightness(1.35); } 100% { filter: none; } }
+/* the reveal: the lantern with the most points glows gold and gets a banner */
+.pc-card.best { border-color: var(--sun); box-shadow: 0 0 22px rgba(255, 196, 70, .75); animation: bob .6s 3; }
+.pc-card.best::before { content: 'Best lantern!'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%) rotate(-3deg); z-index: 3; background: var(--sun); color: var(--ink);
+  font: 900 13px/1 var(--font); padding: 4px 9px; border: 3px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.pc-pts:not(:empty) { animation: pc-pts .6s backwards .3s; display: inline-block; }
+@keyframes pc-pts { from { transform: scale(2.2); opacity: 0; } }

@@ -13,6 +13,7 @@ import { createTunes } from '../../client/tunes.js';
 import { spookyKit } from './spooky-kit.js';
 import { F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { createJuice } from '../../client/juice.js';
 
 export function createView(ctx) {
   const { THREE, group, stage, arena: A, init } = ctx;
@@ -24,7 +25,7 @@ export function createView(ctx) {
   const tex = t => { texs.push(t); return t; };
   const mesh = (g, m, x = 0, y = 0, z = 0, parent = group) => { const o = new THREE.Mesh(g, m); o.position.set(x, y, z); o.castShadow = true; parent.add(o); return o; };
   const kit = spookyKit(ctx); kit.night();
-  const tunes = createTunes({ volume: 0.24 });
+  const tunes = createTunes({ volume: 0.24 }), juice = createJuice(ctx);
 
   // ---- ground: mossy patch, darker tufts, a dirt ring path, fence
   const outside = new THREE.Mesh(geo(new THREE.PlaneGeometry(90, 90).rotateX(-Math.PI / 2)), std('#33523f', { roughness: 1 })); outside.position.y = -0.03; outside.receiveShadow = true; group.add(outside);
@@ -147,7 +148,7 @@ export function createView(ctx) {
   const nameOf = pid => (pid === ctx.me ? 'You' : ctx.players.find(p => p.pid === pid)?.name || '?');
   function setPill(icon, text, cls = '') { const k = icon + text + cls; if (k === lastPill) return; lastPill = k; pill.className = 'gt-pill ' + cls; pill.innerHTML = `<i>${icon}</i><span>${text}</span>`; }
   tunes.start('spooky');
-  show(init.solo ? 'Run from the ghosts!' : 'Ghost Tag!', 'go', 1400);
+  show(init.solo ? 'Run from the ghosts!' : (init.patchName ? `Ghost Tag<small>${init.patchName}</small>` : 'Ghost Tag!'), 'go', 1600);
 
   // the pill (and the line under it) sit just under the score bar, which wraps to two rows with four players on a phone
   let hudTop = -1;
@@ -182,7 +183,8 @@ export function createView(ctx) {
       } else if (ev.e === 'tag') {
         puff(ev.x, ev.z); tunes.fx('boo', 1.1); ctx.sfx(ev.pid === ctx.me ? 'bad' : ev.by === ctx.me ? 'good' : 'tap');
         floatText(stage, ev.x, 2.3, ev.z, ev.pid === ctx.me ? 'Tagged! You’re a ghost!' : ev.by === ctx.me ? 'Tagged! +3' : `${nameOf(ev.pid)} tagged!`, ev.by === ctx.me ? 'good' : 'bad');
-        if (ev.pid === ctx.me) show('👻 You’re a ghost now!', 'boo', 1400);
+        if (ev.pid === ctx.me) { show('👻 You’re a ghost now!', 'boo', 1400); juice.flash('rgba(170,220,255,.9)', 260); navigator.vibrate?.(80); }
+        else if (ev.by === ctx.me) juice.flash('rgba(255,210,63,.7)', 160);
         ctx.actor(ev.pid)?.play('hit', 600);
       } else if (ev.e === 'boo') {
         ripple(ev.x, ev.z); tunes.fx('boo', 0.85);
@@ -190,6 +192,7 @@ export function createView(ctx) {
         if (ev.pid !== ctx.me) ctx.actor(ev.pid)?.play('cast', 500);
       } else if (ev.e === 'caught') {
         puff(ev.x, ev.z); tunes.fx('boo'); ctx.sfx('bad');
+        juice.flash('rgba(170,220,255,.9)', 260); juice.shake(0.1, 0.25);
         show(ev.lives > 0 ? `Caught! ${ev.lives} lantern${ev.lives > 1 ? 's' : ''} left` : 'Caught!', 'boo', 1300);
       } else if (ev.e === 'cpu') { tunes.fx('boo', 1.3); }
       else if (ev.e === 'dash') { tunes.fx('whistle'); if (ev.pid !== ctx.me) ctx.actor(ev.pid)?.play('jump', 280); }
@@ -214,6 +217,7 @@ export function createView(ctx) {
       return undefined;
     },
     frame(dt, t) {
+      juice.frame(dt, t);
       attach(); frameCam(dt); placeHud();
       if (bannerT > 0) { bannerT -= dt; if (bannerT <= 0) banner.classList.remove('show'); }
       for (const [pid, s] of P) {
@@ -244,14 +248,14 @@ export function createView(ctx) {
       if (ended) setPill('🎃', 'Done! Happy Halloween!');
       else if (ctx.me == null || !s) setPill('👻', phase === 'play' ? 'Ghosts are hunting!' : 'Get ready…');
       else if (phase !== 'play') setPill('⏳', 'Next round…');
-      else if (init.solo) setPill('🏃', g.safe ? 'Phew! Run!' : ctx.btn('RUN! (A = dash)'), g.safe ? 'go' : '');
+      else if (init.solo) setPill('🏃', g.safe ? 'Phew! Run!' : 'RUN! Your button = dash', g.safe ? 'go' : '');
       else if (s.ro === 2 && (s.flags & F.FROZEN)) setPill('🙈', 'Counting… then tag them!', 'ghost');
-      else if (s.ro > 0) setPill('👻', ctx.btn('GHOST: tag them! (A = BOO!)'), 'ghost');
+      else if (s.ro > 0) setPill('👻', 'GHOST: tag them! Your button = BOO!', 'ghost');
       else if (s.flags & F.STUN) setPill('😱', 'Eek! Run!', 'warn');
-      else setPill('🏃', ctx.btn('HUMAN: run! (A = dash)'), 'human');
+      else setPill('🏃', 'HUMAN: run! Your button = dash', 'human');
     },
     dispose() {
-      tunes.dispose(); kit.dispose();
+      juice.dispose(); tunes.dispose(); kit.dispose();
       bar.el.remove(); pill.remove(); banner.remove(); lives?.remove();
       for (const [pid, s] of P) {
         s.beam.removeFromParent(); s.aura.removeFromParent(); s.sparks.removeFromParent();

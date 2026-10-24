@@ -10,6 +10,9 @@ import { canvasTexture } from '../../client/stage.js';
 import { renderSVG } from '../../../../../avatar-2d/js/render.js';
 import { SLOTS, PIECES, COLOURS, TAGS, POSES, RACES, dressedAvatar, worn, themeFit, colourMatch, soloScore } from './pieces.js';
 
+/** Round 12: the curtain's two stripes follow the theme's first style. */
+const CURTAIN = { fancy: ['#8a1830', '#c8304a'], spooky: ['#3a1f5c', '#6a3a9a'], wild: ['#2f5a1f', '#4f8a2f'], cosy: ['#7a4a22', '#b0703a'],
+  magic: ['#1f2f7a', '#3f5ac0'], mighty: ['#5a5f6a', '#8a96a4'], sunny: ['#c8701a', '#f2a63a'], silly: ['#b02a7a', '#e85aa8'] };
 const RULE_TEXT = { theme: 'the most pieces that fit the theme', match: 'the most pieces in one colour', rainbow: 'the most different colours' };
 const WALK_T = 3.2;                                     // seconds of walking before the pose (the sim gives each model 5.5)
 // the line-up at the back, left to right by look number, leaving the middle free for whoever walks out next
@@ -34,7 +37,8 @@ export function createView(ctx) {
     <section class="ck-wait"><p class="ck-shout">Backstage! Everyone is getting dressed…</p><div class="ck-dressers">${players.map(p => chip(p, '<em class="st">dressing…</em>')).join('')}</div></section>
     <section class="ck-run"><b class="ck-runno"></b><span class="ck-runpose"></span></section>
     <section class="ck-gallery"><p class="ck-ghead"></p><div class="ck-cards"></div><button class="ck-both big-btn" data-vote="both" hidden>Both look great!</button></section>
-    <p class="ck-note"></p>`;
+    <p class="ck-note"></p>
+    <div class="ck-flash" aria-hidden="true"></div>`;
   const $ = s => ui.querySelector(s);
   ui.classList.toggle('watching', watching); ui.dataset.phase = 'dress';
   if (init.solo) ui.classList.add('solo');
@@ -56,7 +60,8 @@ export function createView(ctx) {
   function paintDress() {
     if (!tray || watching) return;
     const list = worn(tray, outfit);
-    $('.ck-doll').innerHTML = doll(model, list);
+    const dl = $('.ck-doll'), had = dl.dataset.n; dl.innerHTML = doll(model, list); dl.dataset.n = list.map(x => x.join('.')).join(',');
+    if (had != null && had !== dl.dataset.n) { dl.classList.remove('bounce'); void dl.offsetWidth; dl.classList.add('bounce'); }
     const fit = themeFit(theme, list), match = colourMatch(list);
     $('.ck-tally').innerHTML = `<span><b>${fit}</b> fit the theme</span><span><b>${match}</b> match in colour</span>${init.solo ? `<span>Practice score <b>${soloScore(theme, list)}</b></span>` : ''}`;
     for (const b of ui.querySelectorAll('.ck-slot')) {
@@ -101,7 +106,8 @@ export function createView(ctx) {
   const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.02, 7.2), new THREE.MeshStandardMaterial({ color: '#d0304a', roughness: 0.8 })); stripe.position.set(0, 0.41, -1.2); G.add(stripe);
   const curtainTex = canvasTexture(256, 128, (c, w, h) => {
     const g = c.createLinearGradient(0, 0, w, 0);
-    for (let i = 0; i <= 16; i++) g.addColorStop(i / 16, i % 2 ? '#8a1830' : '#c8304a');
+    const [c1, c2] = CURTAIN[theme.likes[0]] || CURTAIN.fancy;
+    for (let i = 0; i <= 16; i++) g.addColorStop(i / 16, i % 2 ? c1 : c2);
     c.fillStyle = g; c.fillRect(0, 0, w, h); c.fillStyle = '#f2c033'; c.fillRect(0, 0, w, 10);
   });
   const curtain = new THREE.Mesh(new THREE.PlaneGeometry(8, 4.2), new THREE.MeshStandardMaterial({ map: curtainTex, roughness: 0.9 })); curtain.position.set(0, 2.1, -5.85); G.add(curtain);
@@ -163,6 +169,8 @@ export function createView(ctx) {
       c.querySelector('.ck-vt').innerHTML = voters.length ? voters.map(face).join('') : (init.solo ? '' : '<em>no votes</em>');
       c.classList.toggle('ribbon', r.ribbon === pid);
       c.querySelector('.ck-pts').textContent = scores ? `+${scores[pid]}` : '';
+      const best = scores ? Math.max(...Object.values(scores)) : 0, tops = scores ? Object.keys(scores).filter(k => scores[k] === best) : [];
+      c.classList.toggle('best', !init.solo && best > 0 && tops.length === 1 && +tops[0] === pid);
     });
   }
   function note(g) {
@@ -224,7 +232,8 @@ export function createView(ctx) {
           const e = now - walkAt, k = Math.min(1, e / WALK_T);
           a.place(0, 0.4, START_Z + (END_Z - START_Z) * k, 0);
           if (k < 1) { a.setPose('walk'); }
-          else if (!a.posed) { a.posed = true; a.setPose('idle'); a.play(POSES[show[i].pose]?.id || 'cheer', 2200); ctx.sfx('good'); }
+          else if (!a.posed) { a.posed = true; a.setPose('idle'); a.play(POSES[show[i].pose]?.id || 'cheer', 2200); ctx.sfx('good');
+            const fl = $('.ck-flash'); fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go'); }
           lit = a;
         } else {
           const [x, z] = lineup(i); a.place(x, 0.4, z, 0); a.setPose('idle');

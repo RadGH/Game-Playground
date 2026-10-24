@@ -2,6 +2,7 @@
 // shuts and five quick questions follow ("What was in the top-left corner?", "How many crowns?", "What colour was the
 // vase?"). Everyone gets the same vault and the same questions (seeded). A right answer scores 5 plus up to 5 more
 // for speed; a wrong one scores nothing. After each question everyone sees the answer and who got it.
+import { makeRng } from '../../shared/rng.js';
 export const meta = {
   id: 'memory-heist', title: 'Memory Heist', blurb: 'Study the vault, then remember what you saw!',
   how: ['The vault opens for a few seconds. Remember everything!', 'Then answer five quick questions about it.', 'Right answers score; fast right answers score more.'],
@@ -14,6 +15,29 @@ export const TREASURES = [
   { id: 'mask', name: 'Mask', many: 'masks' }, { id: 'bell', name: 'Bell', many: 'bells' }, { id: 'medal', name: 'Star Medal', many: 'star medals' },
 ];
 const PLAIN = TREASURES;
+/** Round 12: two more twelve-thing sets for a plain (non-holiday) vault, picked from the game's seed on a side rng so
+ *  the vault and the questions use the same rng calls whatever the theme. Same slot count, so every rule works alike. */
+export const TREASURES_PIRATE = [
+  { id: 'anchor', name: 'Anchor', many: 'anchors' }, { id: 'compass', name: 'Compass', many: 'compasses' }, { id: 'map', name: 'Map', many: 'maps' },
+  { id: 'spyglass', name: 'Spyglass', many: 'spyglasses' }, { id: 'shell', name: 'Shell', many: 'shells' }, { id: 'pearl', name: 'Pearl', many: 'pearls' },
+  { id: 'bottle', name: 'Bottle', many: 'bottles' }, { id: 'barrel', name: 'Barrel', many: 'barrels' }, { id: 'flag', name: 'Flag', many: 'flags' },
+  { id: 'cutlass', name: 'Cutlass', many: 'cutlasses' }, { id: 'parrot', name: 'Parrot', many: 'parrots' }, { id: 'chest', name: 'Chest', many: 'chests' },
+];
+export const TREASURES_TOYS = [
+  { id: 'teddy', name: 'Teddy Bear', many: 'teddy bears' }, { id: 'ball', name: 'Ball', many: 'balls' }, { id: 'kite', name: 'Kite', many: 'kites' },
+  { id: 'yoyo', name: 'Yo-yo', many: 'yo-yos' }, { id: 'drum', name: 'Drum', many: 'drums' }, { id: 'rocket', name: 'Rocket', many: 'rockets' },
+  { id: 'duck', name: 'Rubber Duck', many: 'rubber ducks' }, { id: 'block', name: 'Toy Block', many: 'toy blocks' }, { id: 'robot', name: 'Robot', many: 'robots' },
+  { id: 'car', name: 'Toy Car', many: 'toy cars' }, { id: 'top', name: 'Spinning Top', many: 'spinning tops' }, { id: 'trumpet', name: 'Trumpet', many: 'trumpets' },
+];
+/** The vault's look + its treasure set. `door` is the word on the door, `title` the header. */
+export const THEMES = [
+  { id: 'royal', title: 'The Royal Vault', door: 'VAULT', set: TREASURES },
+  { id: 'pirate', title: "The Pirate's Hold", door: 'HOLD', set: TREASURES_PIRATE },
+  { id: 'toys', title: 'The Toy Chest', door: 'TOYS', set: TREASURES_TOYS },
+];
+export const THEME_HW = { id: 'haunted', title: 'The Haunted Vault', door: 'BOO', set: null };
+/** Which plain theme a game seed gets (a side rng: never touches the game's own rng). */
+export const themeFor = seed => THEMES[Math.floor(makeRng(((seed >>> 0) ^ 0x5eed1) >>> 0)() * THEMES.length)];
 /** Halloween (round 6): the same twelve slots, spooky-cute things (same count, so every vault and question works alike). */
 export const TREASURES_HW = [
   { id: 'pumpkin', name: 'Pumpkin', many: 'pumpkins' }, { id: 'hat', name: 'Witch Hat', many: 'witch hats' }, { id: 'potion', name: 'Potion', many: 'potions' },
@@ -80,6 +104,19 @@ export function makeQuestions(rng, vault, w, h, TREASURES = PLAIN) {
       const right = rng.pick(absent), opts = rng.shuffle([right, ...rng.shuffle(present).slice(0, 3)]);
       return { kind: 'missing', text: 'Which of these was NOT in the vault?', opts: opts.map(kindOpt), a: opts.indexOf(right) };
     },
+    beside(used) {                                              // round 12: "what was just to the LEFT of the robot?"
+      if (used.has('beside')) return null;
+      const spots = [];
+      for (const k of present) if (count.get(k) === 1) {
+        const i = vault.findIndex(v => v[0] === k), x = i % w;
+        if (x > 0) spots.push([k, i - 1, 'LEFT']);
+        if (x < w - 1) spots.push([k, i + 1, 'RIGHT']);
+      }
+      if (!spots.length) return null; used.add('beside');
+      const [k, j, side] = rng.pick(spots), right = vault[j][0];
+      const { opts, a } = choices(rng, right, [...present, ...absent].filter(o => o !== k));
+      return { kind: 'beside', text: `What was just to the ${side} of the ${TREASURES[k].name.toLowerCase()}?`, k, spot: j, opts: opts.map(kindOpt), a };
+    },
     most(used) {
       if (used.has('most')) return null;
       const top = Math.max(...count.values()), best = present.filter(k => count.get(k) === top);
@@ -89,13 +126,13 @@ export function makeQuestions(rng, vault, w, h, TREASURES = PLAIN) {
     },
   };
   const used = new Set(), out = [];
-  const order = ['spot', ...rng.shuffle(['count', 'colour', 'missing', 'most']), 'spot', 'count', 'colour', 'spot', 'count'];
+  const order = ['spot', ...rng.shuffle(['count', 'colour', 'missing', 'most', 'beside']), 'spot', 'count', 'colour', 'spot', 'count'];
   for (const kind of order) { if (out.length >= QUESTIONS) break; const q = make[kind](used); if (q) out.push(q); }
   return rng.shuffle(out.slice(1)).reduce((list, q) => (list.push(q), list), [out[0]]);   // a corner question opens; the rest shuffled
 }
 
-export function create({ rng, players, difficulty = 'normal', season = null }) {
-  const T = season === 'halloween' ? TREASURES_HW : TREASURES;
+export function create({ seed = 1, rng, players, difficulty = 'normal', season = null }) {
+  const theme = season === 'halloween' ? { ...THEME_HW, set: TREASURES_HW } : themeFor(seed), T = theme.set;
   const pids = players.map(p => p.pid);
   const [w, h] = SIZES[difficulty] || SIZES.normal;
   const vault = makeVault(rng, w, h), qs = makeQuestions(rng, vault, w, h, T);
@@ -109,7 +146,7 @@ export function create({ rng, players, difficulty = 'normal', season = null }) {
     phase = 'ans'; left = ANS_S;
   }
   return {
-    init: () => ({ w, h, treasures: T, colours: COLOURS, questions: qs.length, qs: Q_S, ...(phase === 'study' || phase === 'end' ? { vault } : {}) }),
+    init: () => ({ w, h, theme: { id: theme.id, title: theme.title, door: theme.door }, treasures: T, colours: COLOURS, questions: qs.length, qs: Q_S, ...(phase === 'study' || phase === 'end' ? { vault } : {}) }),
     act(pid, a, d) {
       if (phase !== 'q' || a !== 'ans' || !pids.includes(pid) || pid in picks) return;
       if (!Number.isInteger(d) || d < 0 || d >= qs[qi].opts.length) return;

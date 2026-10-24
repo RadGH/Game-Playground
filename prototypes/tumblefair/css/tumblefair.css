@@ -56,6 +56,8 @@ input[type=text], input:not([type]) { user-select: text; -webkit-user-select: te
 /* name tags over 3D characters */
 .tag { position: absolute; left: 0; top: 0; padding: 1px 8px; border-radius: 999px; background: var(--seat, #fff); border: 2px solid var(--ink); color: #fff; font: 800 13px/1.3 var(--font); white-space: nowrap; text-shadow: 0 1px 0 rgba(0, 0, 0, .5); will-change: transform; }
 .tag.me { background: #fff; color: var(--ink); text-shadow: none; box-shadow: 0 0 0 3px var(--seat); }
+/* round 12: a long name ("Peyton is Not…") is cut with an ellipsis instead of running across the arena */
+.tag > span { display: inline-block; max-width: 8.5em; overflow: hidden; text-overflow: ellipsis; vertical-align: top; }
 .float-text { position: absolute; transform: translate(-50%, -50%); font: 900 22px/1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; animation: rise 1.1s ease-out forwards; }
 .float-text.bad { color: var(--pop); } .float-text.good { color: var(--sun); }
 @keyframes rise { to { transform: translate(-50%, -260%); opacity: 0; } }
@@ -208,10 +210,13 @@ body[data-phase=game] .fb-btn { width: 28px; height: 28px; font-size: 15px; opac
 .ed-row.sub span { padding-left: 10px; font-size: 12px; color: #47606a; }
 .sw.clear { width: auto; padding: 0 8px; font: 700 12px var(--font); background: #fff; }
 /* the connection readout (main.js drawNet) */
-.netq { position: fixed; z-index: 16; top: calc(var(--st, 0px) + 50px); right: 6px; pointer-events: none; font: 700 11px var(--font); color: #fff; background: rgba(13, 34, 40, .6); border-radius: 999px; padding: 2px 8px 2px 18px; }
-.netq::before { content: ''; position: absolute; left: 7px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: #3fcf6a; }
-.netq.ok::before { background: #f2c230; } .netq.bad::before { background: #e84a4a; }
+/* round 12: the connection is a dot on the ☰ button's corner (it used to be a pill that covered the score bar); the
+   numbers are in the ☰ menu (.menu-net) */
+.netq { position: absolute; top: -4px; left: -4px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ink, #0d2228); background: #3fcf6a; pointer-events: none; }
+.netq.ok { background: #f2c230; } .netq.bad { background: #e84a4a; }
 .netq[hidden] { display: none; }
+.menu-net { margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; font: 700 13px var(--font); color: #4a6066; }
+.menu-net .netq { position: static; flex: none; }
 .costume { position: relative; } .costume .tag { position: absolute; top: 4px; right: 4px; font: 900 10px/1 var(--font); font-style: normal; background: #3ecf5a; color: #fff; border: 2px solid var(--ink); border-radius: 999px; padding: 3px 6px; }
 .costume .tag.t-spooky { background: #8a3ad8; }
 .blurb.double { background: #fff3b8; border: 3px solid var(--ink); border-radius: 12px; padding: 4px 10px; font-weight: 900; }
@@ -380,4 +385,29 @@ body[data-phase=game] .qr-btn { right: calc(var(--sr) + 76px); }
 .name-input { border: 3px solid var(--ink); border-radius: 12px; padding: 8px 12px; font-size: 20px; font-weight: 800; background: #fff; min-width: 0; width: 100%; margin-top: -6px; }
 .title-extras .btn { font-size: 15px; padding-top: 10px; padding-bottom: 10px; }
 .title-panel .err:empty { display: none; }
-.foot:has(.net:empty) { display: none; }
+.foot .wn-open { color: #fff; border-color: rgba(255,255,255,.6); }
+.foot .net:not(:empty) { margin-left: 10px; }
+/* round 12: ✨ New / 🔧 Updated */
+.fresh-tag { position: absolute; left: 8px; bottom: 8px; z-index: 2; font-style: normal; font-weight: 800; font-size: 12px; border-radius: 999px; padding: 2px 8px; border: 2px solid var(--ink); box-shadow: 0 2px 5px rgba(0,0,0,.2); }
+.fresh-tag.new { background: #7cf0b0; color: #08361d; }
+.fresh-tag.updated { background: #9cc8ff; color: #0b2b55; }
+.pool-g .fresh-tag { left: 4px; top: 4px; bottom: auto; font-size: 11px; }
+.vote-card .fresh-tag { top: 40px; bottom: auto; }
+
+/* round 12 sweep: on the results card the fair's own top bar (round + points) is drawn, and the minigame's score bar,
+   clock and pills were still there underneath it, so two rows of chips sat on top of each other. The finished game's
+   screen bits step aside (its background and 3D view stay, so a golf course can still be seen whole behind the card). */
+body[data-phase=results] #game-ui > .game > * { visibility: hidden; }
+/* round 12 sweep: on a phone the ☰ and ! buttons sit in the top-right corner, and many screen games' title row
+   (".xx-top": the title and the clock, centred) ran under them (Pattern Impostor, Circuit Scramble, Going Going Gone,
+   Draw the Disaster…; some games had their own 36 px gap, some 96). One rule for all of them: the row keeps clear of
+   the corner and wraps rather than running under it. */
+@media (max-width: 600px) {
+  #game-ui .game.kind-ui > [class$="-top"] { padding-right: 88px; padding-left: 8px; flex-wrap: wrap; row-gap: 4px; box-sizing: border-box; max-width: 100%; }
+}
+/* round 12: the score bar is ONE row on every screen (it wrapped into two rows with just two players on a phone):
+   it scrolls sideways if it must, and the chips shrink a little first */
+.match-bar { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding-bottom: 2px; }
+.match-bar::-webkit-scrollbar { display: none; }
+.match-bar > * { flex: 0 0 auto; }
+@media (max-width: 480px) { .match-bar .chip { font-size: 12px; } .match-bar .chip img, .match-bar .chip .face { width: 26px; height: 26px; } .match-bar .round { font-size: 12px; padding: 3px 8px; } }

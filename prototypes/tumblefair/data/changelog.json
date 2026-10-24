@@ -1,0 +1,83 @@
+{
+ "_doc": "Player-facing changelog for Tumblefair, newest first (shared/whats-new.js reads it). Append one entry at EVERY publish: plain language, what players will notice, no file names. `id` is stable and unique (date, plus a letter for a second publish that day).",
+ "entries": [
+  {
+   "id": "2026-10-24b",
+   "date": "2026-10-24",
+   "title": "42 new minigames and a livelier board",
+   "items": [
+    "42 new minigames, including: basketball (Hoop Frenzy, Court Clash, Letter Shot), Dirt Dash, Wizard Duel, Tower Pull, Castle Archers, Fair Darts, Pizza Pronto, Wagon Trail, Hide & Peek, Tilt & Lance, Floor Is Lava, Flood Rush, Claw Machine, Steady Hand, Shell Shuffle, Monster Rampage and Night of the Shamblers.",
+    "10 new Halloween games (October only), built on your favourites — Patchwork Pal, Cauldron Bobbing, Shifty Portraits, Pumpkin Fling, Coffin Cart Rally and more.",
+    "Fair games: Bumper Boats, Downhill Derby, Pie Toss, Ring Toss, Balloon Darts, Duck Derby, Water Balloon Ambush, Photo Booth and Sketchy Copy.",
+    "More memory games: Carousel Recall, Gone Missing!, Pair Panic and Order Up!",
+    "The board game: live events everyone plays — a real Dice Duel, High Striker, Shell Game, Steal or Share, Tomato Toss, Fortune Teller — plus prize cards, a shortcut toll, a cannon and quicker turns. The scores and results no longer cover the board.",
+    "Your favourite games got more variety (new rinks, tracks, themes and pictures), and the least-liked ones were rebuilt to be simpler.",
+    "✨ New and 🔧 Updated tags show which games just arrived or changed.",
+    "Screens are tidier on phones: name tags don't pile up, the connection dot moved into the ☰ menu, and the odd one out is always visible.",
+    "What's new: this list!"
+   ]
+  },
+  {
+   "id": "2026-10-24",
+   "date": "2026-10-24",
+   "title": "New ways to play: Custom, Golf, and first to 100",
+   "items": [
+    "Custom mode: no board and no vote — the host picks every minigame from the list and finishes whenever you like.",
+    "Golf mode: a round of golf, one hole after another.",
+    "Board games can be \"First to 60 / 100 / 150 / 200 tickets\" instead of a set number of rounds (a ribbon counts as 10).",
+    "Halloween mode: tick the box in the lobby to play only Halloween games. Unticked, they're mixed in while it's October.",
+    "One card in every vote is a ⭐ Top rated game, picked from everyone's 👍. The host can favour funny, competitive, teamwork, skill or relaxing games.",
+    "New 👍/👎 reasons that say what kind of fun it was, or what went wrong.",
+    "Filter the minigame list by kind: memory, racing, golf, fishing, boss fights and more.",
+    "Vote to remove a player, and the host's remove now keeps them out.",
+    "More time to read the rules: the game starts as soon as everyone taps \"I'm ready\".",
+    "My games: every minigame you've played, how many times, and what you thought of it.",
+    "Fixes: a clearer Long Drive, step-by-step Secret Architect, Two Truths now uses real facts, a fairer Safecracker, and the results screen says what each number means.",
+    "A tidier title screen."
+   ]
+  },
+  {
+   "id": "2026-10-23b",
+   "date": "2026-10-23",
+   "title": "Accounts and fishing",
+   "items": [
+    "Sign in (optional) to keep your coins, costumes and look on every phone — one account for every game on games.radgh.com. Scan a QR code to sign in with your phone.",
+    "Four fishing games: Reel Rumble, Pier Pressure, Net Gains and Glimmer Ice."
+   ]
+  },
+  {
+   "id": "2026-10-23",
+   "date": "2026-10-23",
+   "title": "Controllers, move cards and a tougher golem",
+   "items": [
+    "Walk every menu with a game controller.",
+    "Move cards: hold 4 cards instead of rolling the die, or steal a mystery card from a rival.",
+    "Lobbies wait 5 minutes for a phone that fell asleep.",
+    "Pick clothes from a list in Change look.",
+    "Golem Smash: little rock critters to stomp, and a jump."
+   ]
+  },
+  {
+   "id": "2026-10-22",
+   "date": "2026-10-22",
+   "title": "Boss fights, ratings and Halloween",
+   "items": [
+    "20 new minigames, including co-op boss fights.",
+    "Rate every minigame 👍 or 👎 — it helps us make the fair better.",
+    "Public games: find a game to join from the title screen.",
+    "Halloween: spooky minigames, costumes and a haunted board all October.",
+    "The ☰ menu, Just watch, and Play instead."
+   ]
+  },
+  {
+   "id": "2026-10-21",
+   "date": "2026-10-21",
+   "title": "Dozens of new minigames and the Moonlit Pier",
+   "items": [
+    "Over 50 minigames: races, brawls, boxing, dress-up and more.",
+    "A second board: the Moonlit Pier.",
+    "Smoother online play."
+   ]
+  }
+ ]
+}

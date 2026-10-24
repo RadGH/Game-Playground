@@ -107,6 +107,8 @@ export function createView(ctx) {
       else if (ev.e === 'swing') { if (ev.pid === me) ctx.sfx('tap'); }
       else if (ev.e === 'jump') { if (ev.pid === me) ctx.sfx('tap'); }
       else if (ev.e === 'stomp') { const p = ctx.pos(ev.on); if (p) { floatText(stage, p.x, 2.2, p.z, 'BOING! ✦✦', 'bad'); K.puff(p.x, 1.6, p.z, '#fff4a8', 0.6); } ctx.sfx(ev.on === me ? 'bad' : 'throw'); }
+      else if (ev.e === 'addPop') K.puff(ev.x, 0.4, ev.z, '#bfb29a', 0.9);
+      else if (ev.e === 'walk') { if (ev.target === me && me != null && (ev.cyc > 0 || init.solo === false)) K.banner('It’s after YOU — keep moving!', 'warn', 1100); }
       else if (ev.e === 'addHit') { K.puff(ev.x, 0.5, ev.z, '#cfc4ad', 0.7); ctx.sfx('hit'); }
       else if (ev.e === 'addDie') { K.puff(ev.x, 0.4, ev.z, '#bfb29a', 1.2); K.puff(ev.x, 0.7, ev.z, '#e3d6b8', 0.7); floatText(stage, ev.x, 1.4, ev.z, ev.how === 'stomp' ? 'STOMP!' : 'SMASH!', 'good'); ctx.sfx(ev.pid === me ? 'coins' : 'hit'); }
       else if (ev.e === 'end') { K.banner(ev.ok ? 'Golem crumbled!' : 'The golem stands!', ev.ok ? 'good' : 'bad', 4000); ctx.sfx(ev.ok ? 'win' : 'bad'); }

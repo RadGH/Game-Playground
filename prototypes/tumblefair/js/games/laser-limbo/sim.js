@@ -6,14 +6,18 @@
 // that touches you costs a life (RULES.lives; a short blink of safety follows); lose them all and you are out. Last one
 // standing wins (more lives left breaks a tie); alone, survive as long as you can. (Lives since 2026-10-22: one zap
 // used to end a 2-player game in four seconds — the owner's rating said "short".)
+// Round 12 (2/1, "controls"): ONE button. Two buttons on a phone — tap one, HOLD the other, pick which while a beam
+// is a metre away — was the complaint. DODGE (A) now looks at the beam that will reach you first (`incoming`, shared
+// with the view, which shows ▲ HOP / ▼ DUCK over your head for it) and does the right thing: hops a low one, crouches
+// under a high one (0.7 s, longer while held). The skill left is WHEN. B still crouches for keyboards and pads.
 import { makeBody, stepBody, separate, spawnRing, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
 
 export const meta = {
   id: 'laser-limbo', title: 'Laser Limbo', blurb: 'Jump and duck the sweeping lasers — last one standing!',
-  how: ['Orange beams are LOW: press HOP to jump them.', 'Purple beams are HIGH: hold DUCK to crouch under them.', 'You have 3 lives. Last one standing wins!'],
+  how: ['Lasers sweep the stage: press DODGE just before one reaches you.', 'You hop the orange low beams and duck the purple high ones by yourself.', 'You have 3 lives. Last one standing wins!'],
   kind: 'arena', min: 1, max: 4, seconds: 60, scoring: 'survival', unit: 'sec', tags: ['action'],
-  controls: { stick: true, a: 'Hop', b: 'Duck' }, move: { speed: 5.6, accel: 30, carryMul: 0.4, stunDrag: 3 },
+  controls: { stick: true, a: 'Dodge' }, move: { speed: 5.6, accel: 30, carryMul: 0.4, stunDrag: 3 },
   arena: { shape: 'circle', r: 7, wall: true }, pitch: 58, card: 'card-laser-limbo', css: true,
 };
 
@@ -22,6 +26,7 @@ export const RULES = {
   hop: 0.62, hopH: 1.05, hopCool: 0.2,     // a hop lasts 0.62 s and peaks at 1.05 m; you clear a low beam above `clear`
   clear: 0.28,
   duckMin: 0.3,                            // a tap of DUCK still crouches you this long
+  duckTap: 0.7, look: 1.4,                 // DODGE under a high beam crouches you this long; it looks this far ahead (s)
   beamW: 0.32,                             // how close (centre of body to the beam's line) counts as touching
   start: 1.6,                              // the first beam (s)
   everyStart: 2.7, everyEnd: 1.05,         // seconds between beams at the start / at the end
@@ -50,10 +55,33 @@ export function beamDist(beam, x, z) {
 /** Does a beam at height `h` catch a body? Low: unless you are in the air above `clear`. High: unless you are crouched on the ground. */
 export const catches = (h, body, ducked) => (h === LOW ? !((body.flags & F.AIR) && body.y > RULES.clear) : !(ducked && !(body.flags & F.AIR)));
 
+/** The beam that will touch (x, z) first within `horizon` seconds, of `list` = [{ k, h, a, s, v, warn, left }]: { beam, t } or
+ *  null. Sweeps by their straight-line approach, spinners by the angle still to turn (after any warm-up). Pure: the
+ *  sim's DODGE uses it to choose hop or duck, the view to label what DODGE will do. */
+export function incoming(list, x, z, horizon = RULES.look) {
+  let best = null;
+  for (const b of list) {
+    let t;
+    if (b.k === SWEEP) { const d = beamDist(b, x, z); if (d < -RULES.beamW || b.v <= 0) continue; t = Math.max(0, (d - RULES.beamW) / b.v); }
+    else {
+      const r = Math.hypot(x, z); if (r < 0.05) t = Math.max(0, b.warn || 0);
+      else {
+        const phi = Math.atan2(z, x), a = b.a;   // the spinner's line runs along angle a (beamDist = 0 there)
+        let da = (phi - a) * Math.sign(b.v || 1); da = ((da % Math.PI) + Math.PI) % Math.PI;
+        da = Math.max(0, da - Math.asin(Math.min(1, RULES.beamW / r)));
+        if (b.left != null && b.left < 90 && da > b.left) continue;
+        t = Math.max(0, b.warn || 0) + da / Math.max(0.01, Math.abs(b.v));
+      }
+    }
+    if (t <= horizon && (!best || t < best.t)) best = { beam: b, t };
+  }
+  return best;
+}
+
 export function create({ rng, players, difficulty = 'normal' }) {
   const n = players.length, bodies = new Map(), spawns = spawnRing(n, n === 1 ? 0 : 3.4), R = meta.arena.r;
   players.forEach((p, i) => bodies.set(p.pid, makeBody(spawns[i].x, spawns[i].z, spawns[i].yaw)));
-  const P = new Map(players.map(p => [p.pid, { prevB: 0, hop: 0, cool: 0, duck: 0, out: false, outStep: -1, alive: 0, lives: RULES.lives, safe: 0 }]));
+  const P = new Map(players.map(p => [p.pid, { prevB: 0, hop: 0, cool: 0, duck: 0, aDuck: false, out: false, outStep: -1, alive: 0, lives: RULES.lives, safe: 0 }]));
   let beams = [], bid = 0, next = RULES.start, time = meta.seconds, elapsed = 0, stepNo = 0, over = false;
   const events = [];
   const standing = pid => !P.get(pid).out;
@@ -88,8 +116,16 @@ export function create({ rng, players, difficulty = 'normal' }) {
       const bits = inp?.b | 0, pressA = (bits & IN.A) && !(s.prevB & IN.A); s.prevB = bits;
       if (!s.out) {
         const air = !!(b.flags & F.AIR);
-        if (bits & IN.B && !air) { if (!(b.flags & F.CARRY)) events.push({ e: 'duck', pid }); s.duck = Math.max(s.duck, RULES.duckMin); b.flags |= F.CARRY; }
-        if (pressA && !air && !(b.flags & F.CARRY) && s.cool <= 0) { s.hop = RULES.hop; b.flags |= F.AIR; events.push({ e: 'hop', pid }); }
+        const crouch = () => { if (!(b.flags & F.CARRY)) events.push({ e: 'duck', pid }); b.flags |= F.CARRY; };
+        if (bits & IN.B && !air) { crouch(); s.duck = Math.max(s.duck, RULES.duckMin); }
+        if (bits & IN.A && !pressA && s.aDuck && (b.flags & F.CARRY)) s.duck = Math.max(s.duck, RULES.duckMin);    // DODGE held under a high beam: stay down
+        if (pressA && !air && !(b.flags & F.CARRY) && s.cool <= 0) {
+          // DODGE: the beam that reaches you first decides — duck a high one, hop anything else (or nothing coming)
+          const next = incoming(beams, b.x, b.z);
+          if (next?.beam.h === HIGH) { crouch(); s.duck = RULES.duckTap; s.aDuck = true; }
+          else { s.hop = RULES.hop; b.flags |= F.AIR; events.push({ e: 'hop', pid }); }
+        }
+        if (!(b.flags & F.CARRY)) s.aDuck = false;
       }
       stepBody(b, inp, meta.move, meta.arena);
     },
@@ -138,6 +174,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
       return { bm: beams.map(b => [b.id, b.k, b.h, r3(b.a), r2(b.s), r3(b.v), r2(Math.max(0, b.warn))]), sc, out: players.filter(p => !standing(p.pid)).map(p => p.pid), lv: players.map(p => P.get(p.pid).lives), sf: players.filter(p => P.get(p.pid).safe > 0).map(p => p.pid), left: Math.ceil(time) };
     },
     get over() { return over; },
+    _setBeams: list => { beams = list; }, _incoming: (x, z) => incoming(beams, x, z),    // tests
     result() {
       const scores = {}, groups = new Map();
       for (const p of players) { const s = P.get(p.pid); scores[p.pid] = Math.floor(s.alive); const k = s.out ? s.outStep : 1e9 + s.lives; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p.pid); }

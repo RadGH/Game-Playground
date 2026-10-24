@@ -1,0 +1,28 @@
+/* Dirt Dash — the lane canvas (my lane on a phone, everyone's stacked on a watching screen) and two big hold pads
+   under it: LEAN on the left, GAS on the right. Nothing in here scrolls on its own. */
+.game-dirt-dash { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow: hidden;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: linear-gradient(#8fd0f5, #c9a06a); color: var(--ink); user-select: none; -webkit-user-select: none; touch-action: none; }
+.game-dirt-dash.season-halloween { background: linear-gradient(#1d1438, #3a2440); }
+.game-dirt-dash > * { flex: none; }
+.dd-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 8px; }
+.dd-title { color: #fff; font: 900 26px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.dd-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.dd-board .chip { color: var(--ink); padding-right: 10px; }
+.dd-board .sc { font-style: normal; background: #fff1c8; border-radius: 8px; padding: 0 7px; }
+.dd-board .chip.lead { background: var(--sun); } .dd-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.dd-track { position: relative; width: min(100%, 1100px); flex: 1 1 auto; min-height: 200px; border: 4px solid var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 6px 0 var(--ink); }
+.dd-track canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.dd-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 76px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.dd-count:empty { display: none; }
+.dd-say { position: absolute; left: 0; right: 0; top: 46%; text-align: center; font: 900 28px/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none; }
+.dd-say.pop { animation: dd-pop 1.4s ease-out forwards; } .dd-say.gold { color: var(--sun); } .dd-say.bad { color: #ffd9d9; }
+@keyframes dd-pop { 0% { opacity: 1; transform: scale(1.3); } 75% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.dd-pads { width: min(560px, 100%); display: grid; grid-template-columns: 1fr 1.25fr; gap: 10px; }
+.dd-pads.hidden { display: none; }
+.dd-pad { min-height: 96px; font-size: 26px; touch-action: none; cursor: pointer; -webkit-touch-callout: none; transition: transform .05s; }
+.dd-lean { background: #9fd3ff; } .dd-gas { background: #8ff07a; }
+.dd-pad.on { transform: translateY(4px) scale(.98); box-shadow: 0 2px 0 var(--ink); filter: brightness(1.1); }
+.dd-note { margin: 0; text-align: center; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px var(--ink); }
+.dd-note:empty { display: none; }
+@media (max-height: 600px) { .dd-pad { min-height: 64px; font-size: 21px; } .dd-title { font-size: 20px; } }

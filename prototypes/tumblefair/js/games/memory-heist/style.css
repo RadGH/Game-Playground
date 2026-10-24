@@ -49,3 +49,40 @@
   .watching .mh-players .chip, .mh-players .chip { font-size: 18px; }
 }
 @media (max-width: 380px) { .mh-opt { min-height: 80px; } .mh-opt .mh-ic { width: 44px; height: 44px; } }
+
+/* ---- round 12 polish ---- */
+.mh-top { padding: 0 86px 0 0; min-height: 40px; white-space: nowrap; font-size: clamp(17px, 5vw, 22px); }   /* clear the ☰ / ! buttons in the corner */
+.mh-stage { margin-top: auto; }                                                 /* centred on a tall phone (auto margins collapse when it overflows) */
+.mh-note { margin-bottom: auto; }
+.clock.tick { animation: mh-tick .45s; }
+@keyframes mh-tick { 40% { transform: scale(1.35); background: var(--pop); } }
+.mh-pop { position: absolute; left: 50%; top: 6px; transform: translateX(-50%); pointer-events: none; z-index: 3; font: 900 34px/1 var(--font); color: #fff;
+  -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; animation: mh-float 1.2s ease-out forwards; white-space: nowrap; }
+.mh-pop.fast { color: var(--sun); }
+.mh-pop.tag { top: 44px; font-size: 18px; color: var(--sun); animation-delay: .12s; animation-fill-mode: both; }
+@keyframes mh-float { 0% { transform: translate(-50%, 8px) scale(.6); opacity: 0; } 20% { transform: translate(-50%, -6px) scale(1.15); opacity: 1; } 100% { transform: translate(-50%, -40px) scale(1); opacity: 0; } }
+.game-memory-heist.streak .mh-note { color: var(--sun); animation: bob .5s 2; }
+/* the door slams as the questions start */
+.mh-slam { position: fixed; inset: 0; display: none; place-items: center; align-content: center; gap: 6px; pointer-events: none; z-index: 5; }
+.mh-slam.go { display: grid; animation: mh-slam .75s forwards; }
+.mh-slam b { font: 900 54px/1 var(--font); color: #2b3546; background: radial-gradient(circle, #9aa7b8 0 30%, #6c7a8e 31% 60%, #8996a8 61%); border: 6px solid var(--ink); border-radius: 50%; width: 180px; aspect-ratio: 1; display: grid; place-items: center; letter-spacing: 3px; }
+.mh-slam span { font: 900 30px/1 var(--font); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; }
+@keyframes mh-slam { 0% { transform: scale(2.2); opacity: 0; } 25% { transform: scale(.95); opacity: 1; } 32% { transform: scale(1.04); } 75% { opacity: 1; } 100% { opacity: 0; transform: scale(.9); } }
+/* where it was: a little map of the vault with the asked-about spot lit (only at the reveal) */
+.mh-map { display: none; grid-template-columns: repeat(var(--w), 22px); gap: 4px; justify-content: center; margin: 16px auto 0; }
+.game-memory-heist.map-on .mh-map { display: grid; }
+.mh-map i { aspect-ratio: 1; border-radius: 5px; background: #2b3546; border: 2px solid #0d2228; }
+.mh-map i.on { background: var(--sun); box-shadow: 0 0 10px var(--sun); animation: bob .5s 2; }
+/* each theme dresses the vault differently */
+.theme-pirate .mh-vault { background: #7a5432; box-shadow: inset 0 0 0 6px #a67844, 0 8px 0 var(--ink); }
+.theme-pirate .mh-cell { background: radial-gradient(circle at 50% 40%, #2c7f9a, #123c52); }
+.theme-pirate .mh-door { background: repeating-linear-gradient(90deg, #8a5d34 0 22px, #6b4526 22px 26px); }
+.theme-pirate .mh-door b { color: #f4e2b8; }
+.theme-toys .mh-vault { background: #e86a8f; box-shadow: inset 0 0 0 6px #ffb3c8, 0 8px 0 var(--ink); }
+.theme-toys .mh-cell { background: radial-gradient(circle at 50% 40%, #fff3c4, #f2c46b); }
+.theme-toys .mh-cell span { color: var(--ink); text-shadow: 0 1px 0 #fff; }
+.theme-toys .mh-door { background: repeating-linear-gradient(45deg, #ffd23f 0 18px, #f28fb0 18px 36px); }
+.theme-toys .mh-door b { color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; }
+.theme-pirate .mh-slam b { background: radial-gradient(circle, #a67844 0 30%, #7a5432 31%); color: #f4e2b8; }
+.theme-toys .mh-slam b { background: radial-gradient(circle, #ffd23f 0 30%, #f28fb0 31%); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; }
+.mh-opt { overflow: visible; }

@@ -54,3 +54,14 @@
 .pr-mark { width: 22px; height: 22px; display: block; } .pr-mark svg { width: 100%; height: 100%; fill: var(--seat); stroke: var(--ink); stroke-width: 2; }
 .pr-note { margin: 0; color: #fff; text-align: center; min-height: 1.3em; font-size: 15px; max-width: 640px; }
 .game-portal-routing.watching .pr-board { --cell: min(calc((100vw - 52px) / var(--cols, 7)), calc((100dvh - 230px) / var(--rows, 6)), 130px); }
+/* round 12: where the marble goes now */
+.pr-trail { pointer-events: none; }
+.pr-path { fill: none; stroke-width: 16; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2 26; opacity: .95; animation: pr-march .6s linear infinite; }
+.pr-path.goal { stroke: #7dff9a; filter: drop-shadow(0 0 6px #3ecf5a); }
+.pr-path.drop, .pr-path.loop { stroke: #ff6b6b; filter: drop-shadow(0 0 6px #ff3b3b); }
+@keyframes pr-march { to { stroke-dashoffset: -28; } }
+.pr-end circle { stroke: var(--ink); stroke-width: 5; }
+.pr-end path { fill: none; stroke: #fff; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.pr-end.goal circle { fill: #2a9e45; } .pr-end.drop circle, .pr-end.loop circle { fill: #d6203a; }
+.pr-end { animation: pr-endpop .35s ease-out; transform-box: fill-box; transform-origin: center; }
+@keyframes pr-endpop { from { opacity: 0; } }

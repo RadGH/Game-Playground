@@ -1,0 +1,14 @@
+/* Hide & Peek: the "what to do now" pill under the score bar, the seeker's dark "Eyes shut!" screen, the "!" over a
+   peeker and the "🙈 You" tag on your own spot. Nothing here takes taps. */
+.game-hide-and-seek .hs-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); pointer-events: none; max-width: 94vw; text-align: center;
+  padding: 5px 14px; border-radius: 16px; background: #fff7e6; border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 900 15px/1.2 var(--font); }
+.hs-pill.seek { background: #ffd36b; } .hs-pill.hid { background: #c9f2c9; } .hs-pill.found { background: #ffd0d0; } .hs-pill.open { background: #ffe9c2; }
+.game-hide-and-seek .hs-shut { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 6px; pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, #1b1530, #07050d 75%); color: #fff; font: 900 20px/1.2 var(--font); z-index: 4; }
+.hs-shut.on { display: flex; } .hs-shut b { font-size: 44px; color: var(--sun); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; }
+.hs-shut em { font-style: normal; font-size: 90px; color: #fff; }
+.tag.hs-peek { background: var(--sun); font-size: 20px; font-weight: 900; padding: 0 10px; animation: hs-bob .35s ease-in-out infinite alternate; }
+.tag.hs-me { background: #c9f2c9; }
+.tag.hs-tag { background: #ffe08a; }
+@keyframes hs-bob { to { margin-top: -6px; } }
+@media (max-width: 520px) { .game-hide-and-seek .hs-pill { top: calc(var(--st) + 52px); font-size: 13px; } }

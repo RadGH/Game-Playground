@@ -1,0 +1,11 @@
+/* Night of the Shamblers: the "Sunrise in 40s · Wave 2" pill under the score bar, the big banner, the "Help X up!" tags. */
+.game-zombie-survival .zs-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); pointer-events: none; white-space: nowrap; max-width: 94vw; overflow: hidden; text-overflow: ellipsis;
+  padding: 5px 14px; border-radius: 999px; background: #1d2a4a; color: #fff; border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 900 16px/1.2 var(--font); }
+.zs-pill.down { background: #7dff9a; color: var(--ink); animation: zs-throb .5s ease-in-out infinite alternate; }
+@keyframes zs-throb { to { transform: translateX(-50%) scale(1.06); } }
+.game-zombie-survival .zs-banner { position: absolute; left: 50%; top: 36%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center; width: max-content; max-width: 92vw;
+  font: 900 clamp(24px, 7vw, 52px)/1.05 var(--font); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); transition: transform .15s, opacity .15s; }
+.zs-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); } .zs-banner.good { color: var(--sun); } .zs-banner.bad { color: #ffb3c0; } .zs-banner.warn { color: #ffd23f; }
+.zs-banner.small { font-size: clamp(18px, 5vw, 30px); top: 30%; }
+.tag.zs-help > span { background: #7dff9a; color: var(--ink); max-width: 14em; }
+@media (max-width: 520px) { .game-zombie-survival .zs-pill { top: calc(var(--st) + 52px); font-size: 14px; } }

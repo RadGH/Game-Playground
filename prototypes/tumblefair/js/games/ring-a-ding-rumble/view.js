@@ -9,23 +9,33 @@ import { scoreBar, floatText, h } from '../../client/gamehud.js';
 import { canvasTexture } from '../../client/stage.js';
 import { F } from '../../shared/arena.js';
 import { SEATS } from '../../shared/protocol.js';
+import { createJuice } from '../../client/juice.js';
 
 const POW = ['POW!', 'BAM!', 'WHAM!', 'BOP!'];
+// Round 12: five halls (sim.js VENUE_COUNT), picked from the seed — the same ring, dressed differently each bout.
+export const VENUES = [
+  { name: 'The Big Top', floor: '#3a2448', deck: '#2b2f6e', skirt: ['#ffd23f', '#e8394a'], mat: '#3d8bff', words: ['RING-A', 'DING!'], ropes: ['#e8394a', '#ffffff', '#3d8bff'] },
+  { name: 'Harbour Ring', floor: '#2f4a58', deck: '#1f3a5a', skirt: ['#ffffff', '#2b5fb8'], mat: '#2fa88a', words: ['DOCK', 'SIDE!'], ropes: ['#ffd23f', '#ffffff', '#ffd23f'] },
+  { name: 'Barn Brawl', floor: '#5a3a20', deck: '#6e4424', skirt: ['#ffd23f', '#8a5a32'], mat: '#c84a2a', words: ['BARN', 'BRAWL!'], ropes: ['#e8d8a8', '#e8d8a8', '#e8d8a8'] },
+  { name: 'Moonlight Match', floor: '#1f1838', deck: '#2a2058', skirt: ['#c8a8ff', '#3a2466'], mat: '#6a3fbf', words: ['MOON', 'MATCH!'], ropes: ['#ffd23f', '#c8a8ff', '#ffd23f'] },
+  { name: 'Title Fight', floor: '#3a1a1a', deck: '#5a1a1a', skirt: ['#ffd23f', '#1d1f24'], mat: '#d89a1a', words: ['TITLE', 'FIGHT!'], ropes: ['#e8394a', '#ffd23f', '#e8394a'] },
+];
 export function createView(ctx) {
   const { THREE, group, stage, meta, init } = ctx, hw = meta.arena.hw, hd = meta.arena.hd;
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), e3 = new THREE.Euler();
   const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, ...extra });
+  const V = VENUES[(init.venue | 0) % VENUES.length], juice = createJuice(ctx);
   const world = new THREE.Group(); group.add(world);                 // everything but the boxers: shaken on big hits
   // ---- tent floor, ring platform, mat
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 60).rotateX(-Math.PI / 2), std('#3a2448', { roughness: 1 })); floor.position.y = -0.62; floor.receiveShadow = true; world.add(floor);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 60).rotateX(-Math.PI / 2), std(V.floor, { roughness: 1 })); floor.position.y = -0.62; floor.receiveShadow = true; world.add(floor);
   const W = hw + 0.9, D = hd + 0.9;
-  const deck = new THREE.Mesh(new THREE.BoxGeometry(W * 2, 0.6, D * 2), std('#2b2f6e')); deck.position.y = -0.31; deck.receiveShadow = true; world.add(deck);
-  const skirtTex = canvasTexture(256, 32, (c, w, hh) => { c.fillStyle = '#ffd23f'; c.fillRect(0, 0, w, hh); c.fillStyle = '#e8394a'; for (let i = 0; i < 8; i++) c.fillRect(i * 32, 0, 16, hh); });
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(W * 2, 0.6, D * 2), std(V.deck)); deck.position.y = -0.31; deck.receiveShadow = true; world.add(deck);
+  const skirtTex = canvasTexture(256, 32, (c, w, hh) => { c.fillStyle = V.skirt[0]; c.fillRect(0, 0, w, hh); c.fillStyle = V.skirt[1]; for (let i = 0; i < 8; i++) c.fillRect(i * 32, 0, 16, hh); });
   const skirt = new THREE.Mesh(new THREE.BoxGeometry(W * 2 + 0.04, 0.5, D * 2 + 0.04), new THREE.MeshBasicMaterial({ map: skirtTex })); skirt.position.y = -0.33; world.add(skirt);
   const matTex = canvasTexture(512, 512, (c, w) => {
-    c.fillStyle = '#3d8bff'; c.fillRect(0, 0, w, w); c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = 10; c.strokeRect(14, 14, w - 28, w - 28);
+    c.fillStyle = V.mat; c.fillRect(0, 0, w, w); c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = 10; c.strokeRect(14, 14, w - 28, w - 28);
     c.beginPath(); c.arc(w / 2, w / 2, 120, 0, Math.PI * 2); c.lineWidth = 12; c.stroke();
-    c.fillStyle = 'rgba(255,255,255,.92)'; c.font = '900 50px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('RING-A', w / 2, w / 2 - 26); c.fillText('DING!', w / 2, w / 2 + 30);
+    c.fillStyle = 'rgba(255,255,255,.92)'; c.font = '900 50px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(V.words[0], w / 2, w / 2 - 26); c.fillText(V.words[1], w / 2, w / 2 + 30);
   });
   const mat = new THREE.Mesh(new THREE.PlaneGeometry(W * 2 - 0.1, D * 2 - 0.1).rotateX(-Math.PI / 2), std('#ffffff', { map: matTex, roughness: 0.9 })); mat.position.y = 0.005; mat.receiveShadow = true; world.add(mat);
   // ---- posts (a seat colour each) and ropes
@@ -34,7 +44,7 @@ export function createView(ctx) {
     const p = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 1.5, 10), std('#d9dde3', { metalness: 0.5, roughness: 0.35 })); p.position.set(x, 0.75, z); p.castShadow = true; world.add(p);
     const pad = new THREE.Mesh(new THREE.BoxGeometry(0.34, 1.1, 0.34), std(SEATS[i].color, { roughness: 0.55 })); pad.position.set(x, 0.62, z); pad.castShadow = true; world.add(pad);
   });
-  const ROPE_Y = [0.38, 0.68, 0.98], ROPE_C = ['#e8394a', '#ffffff', '#3d8bff'];
+  const ROPE_Y = [0.38, 0.68, 0.98], ROPE_C = V.ropes;
   const ropes = { n: [], s: [], e: [], w: [] }, shake = { n: 0, s: 0, e: 0, w: 0 };
   for (const side of ['n', 's', 'e', 'w']) for (let i = 0; i < 3; i++) {
     const along = side === 'n' || side === 's', len = (along ? PX : PZ) * 2;
@@ -103,6 +113,7 @@ export function createView(ctx) {
       bar.set(pts, g.left);
       if (g.cpu) { const [x, z, yaw, flags, sp] = g.cpu; Object.assign(cpuPos, { tx: x, tz: z, tyaw: yaw, flags, v: sp }); if (!cpuPos.seen) { cpuPos.x = x; cpuPos.z = z; cpuPos.yaw = yaw; cpuPos.seen = true; } }
     },
+    start() { show(V.name, 'small', 1600); },
     event(ev) {
       const a = actorOf(ev.id), mine = ev.id === ctx.me, now = performance.now();
       if (ev.e === 'jab') { if (!(mine && now - localJab < 450)) a?.play('punch', 320); if (!mine) ctx.sfx('tap'); }
@@ -113,10 +124,11 @@ export function createView(ctx) {
         floatText(stage, ev.x, 1.9, ev.z, big ? POW[(ev.dmg + ev.id) % POW.length] : '+1', big ? 'good' : '');
         ctx.sfx('hit'); a?.play('hit', big ? 520 : 260); if (big) { quake = Math.max(quake, 0.25); cheer = 1; }
         if (mine && 'vibrate' in navigator) try { navigator.vibrate(big ? 70 : 25); } catch { /* not allowed */ }
+        if (mine) juice.flash(big ? 'rgba(232,57,74,.85)' : 'rgba(232,57,74,.45)', big ? 240 : 120); else if (ev.by === ctx.me && big) juice.flash('rgba(255,210,63,.7)', 160);
       }
       else if (ev.e === 'block') { burst(ev.x, ev.z, '#9ad8ff', ev.big ? 1 : 0.6); ctx.sfx('tap'); if (ev.big) floatText(stage, ev.x, 1.9, ev.z, 'Blocked!', ''); }
       else if (ev.e === 'break') { ctx.sfx('bad'); const p = posOf(ev.id); if (p) floatText(stage, p.x, 2.1, p.z, 'Guard broken!', 'bad'); }
-      else if (ev.e === 'down') { quake = 0.45; cheer = 1.5; ctx.sfx('out'); show(mine ? 'You\'re down! Get up!' : `KNOCKDOWN! ${ev.n}/${RULES.downs}`, mine ? 'bad' : '', 1500); }
+      else if (ev.e === 'down') { quake = 0.45; cheer = 1.5; ctx.sfx('out'); if (mine) juice.flash('rgba(232,57,74,.9)', 420); else if (ev.by === ctx.me) { juice.flash('rgba(255,210,63,.8)', 260); ctx.sfx('good'); } show(mine ? 'You\'re down! Get up!' : `KNOCKDOWN! ${ev.n}/${RULES.downs}`, mine ? 'bad' : '', 1500); }
       else if (ev.e === 'out') { quake = 0.5; cheer = 2; ctx.sfx('out'); show(mine ? 'Knocked out!' : `${nameOf(ev.id)} is out!`, mine ? 'bad' : 'good', 1800); }
       else if (ev.e === 'up') { if (mine) ctx.sfx('pick'); }
       else if (ev.e === 'dodge') { if (mine) ctx.sfx('tap'); }
@@ -143,6 +155,7 @@ export function createView(ctx) {
       return undefined;
     },
     frame(dt, t) {
+      juice.frame(dt, t);
       // a let-go of A that view.input never sees (it is only called while a button is down)
       if ((lastBits & 1) && performance.now() - lastInputAt > 80) { localHayNow(); lastBits = 0; holdT = 0; }
       else if (performance.now() - lastInputAt > 80) lastBits = 0;
@@ -172,6 +185,7 @@ export function createView(ctx) {
       for (let i = fx.length - 1; i >= 0; i--) { const f = fx[i]; f.t += dt * 4; f.m.scale.setScalar((0.5 + f.t * 1.4) * f.m.userData.size); f.m.material.opacity = Math.max(0, 1 - f.t); f.m.rotation.z += dt * 4; if (f.t >= 1) { group.remove(f.m); f.m.material.dispose(); fx.splice(i, 1); } }
     },
     dispose() {
+      juice.dispose();
       bar.el.remove(); banner.remove(); for (const M of meters.values()) M.e.remove(); cpuTag?.remove();
       for (const g of gloves) g.removeFromParent();
       for (const m of gloveMats) m.dispose(); gloveGeo.dispose();

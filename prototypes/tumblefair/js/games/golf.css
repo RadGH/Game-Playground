@@ -28,3 +28,5 @@
 .gp-meter.hot { box-shadow: 0 0 0 3px #ff5f5f; }
 .gp-meter b { position: absolute; left: 50%; bottom: -20px; transform: translateX(-50%); font: 900 10px/1 var(--font); color: #fff; -webkit-text-stroke: .5px var(--ink); }
 @media (max-width: 520px) { .gp-pill { top: calc(var(--st) + 50px); font-size: 13px; gap: 6px; padding: 3px 9px; } .gp-pill > span:not(.gp-hl) { display: none; } .gp-card table { font-size: 13px; } .gp-card th, .gp-card td { padding: 2px 4px; } }
+/* round 12: on a phone the stick and the Putt button own the bottom third — the scorecard sits above them */
+@media (pointer: coarse) and (orientation: portrait) { .gp-card { bottom: calc(var(--sb) + 34vh); } }

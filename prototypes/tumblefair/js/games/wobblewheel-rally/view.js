@@ -9,6 +9,7 @@ import { scoreBar, floatText, h } from '../../client/gamehud.js';
 import { canvasTexture } from '../../client/stage.js';
 import { F } from '../../shared/arena.js';
 import { SEATS } from '../../shared/protocol.js';
+import { createJuice } from '../../client/juice.js';
 
 const ITEM_NAME = { zoom: 'Zoom Jar', slick: 'Slick', bonk: 'Bonk Ball' }, ITEM_ICON = { zoom: '⚡', slick: '💧', bonk: '●' };
 const SHAPE_CH = { circle: '●', square: '■', triangle: '▲', diamond: '◆' };
@@ -16,7 +17,7 @@ const ord = n => n + (n % 10 === 1 && n % 100 !== 11 ? 'st' : n % 10 === 2 && n 
 const SEAT_Y = 0.29, CHAR_SCALE = 1.05, KART_SCALE = 1.2;      // drawn a little bigger than the 0.45 m body so it reads on a phone
 
 export function createView(ctx) {
-  const { THREE, group, stage, init } = ctx, T = init.track, A = ctx.arena, segs = A.segs, N = T.N;
+  const { THREE, group, stage, init } = ctx, T = init.track, A = ctx.arena, segs = A.segs, N = T.N, juice = createJuice(ctx);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), e3 = new THREE.Euler();
   const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...extra });
   // ---- grass, tarmac ribbon (from the two walls: segs 0..N-1 are one side, N..2N-1 the other), centre dashes, start line
@@ -140,12 +141,12 @@ export function createView(ctx) {
       else if (ev.e === 'go') { show('GO!', 'go', 900); ctx.sfx('good'); }
       else if (ev.e === 'item') { if (mine) ctx.sfx('pick'); }
       else if (ev.e === 'use') { if (ev.it === 1) { if (mine || ctx.me == null) ctx.sfx('throw'); } else ctx.sfx(ev.it === 2 ? 'splat' : 'throw'); }
-      else if (ev.e === 'pad') { if (mine) ctx.sfx('tap'); }
-      else if (ev.e === 'spin') { ctx.sfx('trap'); if (P) floatText(stage, P.x, 1.6, P.z, ev.by != null && ev.by !== ev.id ? `Bonk! ${nameOf(ev.by)}` : 'Whoops!', mine ? 'bad' : ''); }
+      else if (ev.e === 'pad') { if (mine) { ctx.sfx('tap'); juice.flash('rgba(57,208,224,.55)', 140); } }
+      else if (ev.e === 'spin') { ctx.sfx('trap'); if (mine) { juice.flash('rgba(232,57,74,.8)', 240); navigator.vibrate?.(60); } else if (ev.by === ctx.me && ev.by !== ev.id) { juice.flash('rgba(255,210,63,.7)', 160); show('Got them!', 'small', 800); } if (P) floatText(stage, P.x, 1.6, P.z, ev.by != null && ev.by !== ev.id ? `Bonk! ${nameOf(ev.by)}` : 'Whoops!', mine ? 'bad' : ''); }
       else if (ev.e === 'bump') { ctx.sfx('hit'); if (P) floatText(stage, P.x, 1.6, P.z, 'Bump!', ev.id === ctx.me ? 'bad' : 'good'); }
       else if (ev.e === 'lap') { if (mine) { show(ev.lap === T.laps ? 'Final lap!' : `Lap ${ev.lap}`, 'small', 1100); ctx.sfx('pick'); } }
       else if (ev.e === 'fin') {
-        if (mine) { show(`${ord(ev.place)}!`, ev.place === 1 ? 'go' : '', 2400); ctx.sfx(ev.place === 1 ? 'win' : 'good'); }
+        if (mine) { show(`${ord(ev.place)}!`, ev.place === 1 ? 'go' : '', 2400); ctx.sfx(ev.place === 1 ? 'win' : 'good'); juice.flash(ev.place === 1 ? 'rgba(255,210,63,.9)' : 'rgba(255,255,255,.7)', 500); }
         else if (P) floatText(stage, P.x, 2, P.z, `${nameOf(ev.id)} ${ord(ev.place)}`, 'good');
       }
     },
@@ -157,6 +158,7 @@ export function createView(ctx) {
     },
     pose(pid, flags) { flagsOf.set(pid, flags); return 'sitGround'; },
     frame(dt, t) {
+      juice.frame(dt, t);
       if (bannerT > 0) { bannerT -= dt; if (bannerT <= 0) banner.classList.remove('show'); }
       if (performance.now() - lastInputAt > 90) lastBits = 0;           // view.input is only called while a button is down
       // player karts ride in their actor's group; turn the kart with the body, sit the character in it
@@ -191,6 +193,7 @@ export function createView(ctx) {
       ballMesh.count = bi; ballMesh.instanceMatrix.needsUpdate = true;
     },
     dispose() {
+      juice.dispose();
       bar.el.remove(); hud.remove(); banner.remove(); sub.remove();
       for (const t of cpuTags) t.remove();
       for (const K of karts.values()) if (!K.cpu) { K.kart.removeFromParent(); if (K.actor) { K.actor.body.group.position.y = 0; K.actor.body.group.scale.setScalar(1); K.actor.group.rotation.y = 0; } K.kart.traverse(o => { if (o.isMesh) o.geometry.dispose(); }); }

@@ -1,0 +1,32 @@
+/* Duck Derby — a stream in a grassy frame, two chunky paddle buttons under it, the tempo word popping over the water.
+   Halloween: a purple night. Prefix dd2- (dd- is Draw the Disaster's). */
+.game-duck-derby { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow: hidden;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: linear-gradient(#bfeaa0, #7fcf6a); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-duck-derby > * { flex: none; }
+.dd2-top { display: flex; gap: 8px; align-items: center; justify-content: center; width: 100%; padding: 0 96px 0 8px; }
+.dd2-title { white-space: nowrap; font: 900 20px/1.1 var(--font); color: #ffd23f; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.dd2-dist { white-space: nowrap; font-weight: 900; font-size: 13px; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; }
+.game-duck-derby > .dd2-wrap { flex: 1 1 auto; min-height: 200px; position: relative; width: min(100%, 560px); border: 5px solid var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 5px 0 var(--ink); }
+.dd2-river { display: block; width: 100%; height: 100%; }
+.dd2-msg { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); font: 900 60px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); pointer-events: none; }
+.dd2-msg:empty { display: none; }
+.dd2-tempo { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); font: 900 24px/1 var(--font); color: #fff; -webkit-text-stroke: 1.6px var(--ink); paint-order: stroke fill; pointer-events: none; white-space: nowrap; }
+.dd2-tempo.pop { animation: dd2-pop .45s ease-out; }
+.dd2-tempo.good { color: #8dff8a; } .dd2-tempo.bad { color: #ff8a8a; } .dd2-tempo.splash { color: #7fd6ff; font-size: 30px; } .dd2-tempo.meh { color: #ffe27a; }
+@keyframes dd2-pop { from { transform: translateX(-50%) scale(1.5); } to { transform: translateX(-50%) scale(1); } }
+.dd2-pads { display: flex; gap: 10px; width: min(100%, 560px); }
+.dd2-pad { flex: 1; appearance: none; min-height: 84px; border: 4px solid var(--ink); border-radius: 22px; background: var(--sun); box-shadow: 0 6px 0 var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; }
+.dd2-pad b { font: 900 26px/1 var(--font); } .dd2-pad small { font-weight: 800; font-size: 12px; opacity: .7; }
+.dd2-pad.hit { animation: dd2-hit .16s ease-out; }
+@keyframes dd2-hit { 0% { transform: translateY(5px); box-shadow: 0 1px 0 var(--ink); background: #fff3a0; } 100% { transform: none; } }
+.game-duck-derby:is(.watching) .dd2-pads { display: none; }
+.game-duck-derby:not([data-phase=play]) .dd2-pad { opacity: .6; }
+.dd2-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.dd2-players .chip .sc { font-style: normal; font-weight: 900; background: #fff3c4; border-radius: 8px; padding: 0 6px; }
+.dd2-players .chip.me { box-shadow: 0 0 0 3px #fff; }
+.dd2-cpu { --seat: #9aa0a8; padding-left: 10px; }
+.dd2-note { margin: 0; text-align: center; font: 800 14px/1.25 var(--font); min-height: 1.3em; }
+.game-duck-derby.season-halloween { background: linear-gradient(#3a1e5c, #1c0e30); }
+.game-duck-derby.season-halloween .dd2-note { color: #fff; }
+.game-duck-derby.season-halloween .dd2-pad { background: #ff9a3a; }

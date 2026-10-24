@@ -138,6 +138,12 @@ export function createPuttView(ctx, { theme = {}, decorate = null, onState = nul
   let last = null, tLocal = 0, held = 0, lastIn = 0, cam = null;
   const tall = () => innerHeight > innerWidth * 1.15;
   function ballYaw(pid) { const a = ctx.actor(pid); return a ? a.body.group.rotation.y : 0; }
+  /** The live hole's rails as [x0, x1, z0, z1]. */
+  function holeBounds() {
+    let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+    for (const w of course.walls || []) { x0 = Math.min(x0, w.ax, w.bx); x1 = Math.max(x1, w.ax, w.bx); z0 = Math.min(z0, w.az, w.bz); z1 = Math.max(z1, w.az, w.bz); }
+    return x0 < x1 ? [x0, x1, z0, z1] : [-6, 6, -4, 4];
+  }
 
   const view = {
     halloween: { spots: [[-10.4, 0, 5.6], [-3.5, 0, 6.4], [3.5, 0, 6.4], [10.4, 0, 5.6], [-10.6, 0, -5.4], [10.6, 0, -5.4]], ghosts: [[-11.5, 1.4, -6.5], [11.5, 1.6, -6.8], [0, 2.4, -8.2]] },
@@ -217,11 +223,17 @@ export function createPuttView(ctx, { theme = {}, decorate = null, onState = nul
         meter.style.transform = `translate(${(p.x + 34).toFixed(0)}px, ${(p.y - 70).toFixed(0)}px)`; meter.classList.toggle('on', held > 0);
         meterFill.style.height = Math.round(ch * 100) + '%'; meter.classList.toggle('hot', ch > 0.8);
       } else { dots.count = 0; meter.classList.remove('on'); }
-      // a phone held upright follows its own ball (and the cup); everyone else sees the whole hole
-      if (tall() && mine && course && holeIdx >= 0) {
+      // a phone held upright follows its own ball (and the cup); everyone else sees the whole hole.
+      // Round 12 (report #30, "after game should allow me to see the whole map in haunted golf"): once your ball is in
+      // (or picked up), between holes, and at the end — through the results card — the camera pulls back to the WHOLE
+      // course, so the part the close-up and the dark kept from you can be seen. view.overview() says when.
+      if (tall() && course && holeIdx >= 0 && view.overview()) {
+        const [x0, x1, z0, z1] = holeBounds(), want = { cx: (x0 + x1) / 2, cz: (z0 + z1) / 2, hw: (x1 - x0) / 2 + 1, hd: (z1 - z0) / 2 + 1 };
+        if (!cam || !cam.all || Math.hypot(cam.cx - want.cx, cam.cz - want.cz) > 0.4) { cam = { ...want, all: true }; ctx.camera({ ...want, pitch: 66 }); }
+      } else if (tall() && mine && course && holeIdx >= 0) {
         const cx = (mine.x + cup.x) / 2, cz = (mine.z + cup.z) / 2, hw = Math.max(3.6, Math.abs(mine.x - cup.x) / 2 + 1.6), hd = Math.max(3.6, Math.abs(mine.z - cup.z) / 2 + 1.6);
         const want = { cx, cz, hw, hd };
-        if (!cam || Math.hypot(cam.cx - cx, cam.cz - cz) > 0.4 || Math.abs(cam.hw - hw) > 0.4 || Math.abs(cam.hd - hd) > 0.4) { cam = want; ctx.camera({ ...want, pitch: 62 }); }
+        if (!cam || cam.all || Math.hypot(cam.cx - cx, cam.cz - cz) > 0.4 || Math.abs(cam.hw - hw) > 0.4 || Math.abs(cam.hd - hd) > 0.4) { cam = want; ctx.camera({ ...want, pitch: 62 }); }
       }
       around?.frame?.(dt, t);
       onFrame?.(dt, t, tLocal);
@@ -229,6 +241,8 @@ export function createPuttView(ctx, { theme = {}, decorate = null, onState = nul
     dispose() { bar.el.remove(); clearTimeout(showBanner.t); for (const m of mats) m.dispose(); },
     /** For a game's own pieces: the live hole index, its course, the local course clock. */
     hole: () => holeIdx, course: () => course, clock: () => tLocal, holeGroup: () => holeG, flag: () => flagParts,
+    /** True when the whole course should be on show: between holes, at the end, or once YOUR ball is in / picked up. */
+    overview: () => !!last && (last.ph !== 'play' || (me != null && [ST.in, ST.out].includes(B.get(me)?.st))),
   };
   return view;
 }

@@ -1,0 +1,43 @@
+/* Sketchy Copy — a sketchbook on a desk: paper cards with a pencil line, rows of small copies in the gallery. The whole
+   game screen scrolls when the gallery is long (never a scroller inside a panel). Halloween: orange paper, purple ink. */
+.game-sketchy-copy { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 8px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 30px) calc(var(--sl) + 10px);
+  background: linear-gradient(#a8d8ff, #d6eeff 50%, #c8a97a 50.2%, #b08d5c); user-select: none; -webkit-user-select: none; touch-action: manipulation; --paper-c: #fffdf6; --ink-c: #1d1d24; }
+.game-sketchy-copy.season-halloween { background: linear-gradient(#3a1e5c, #5a2e8a 50%, #4a2a1a 50.2%, #2a1a10); --paper-c: #ffe2c0; --ink-c: #4a1a7a; }
+.game-sketchy-copy > * { flex: none; }
+.sk-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding: 0 96px 0 8px; }
+.sk-title { white-space: nowrap; font: 900 20px/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.sk-round { white-space: nowrap; font-weight: 900; font-size: 13px; text-transform: uppercase; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; }
+.sk-say { margin: 0; font: 900 22px/1.15 var(--font); text-align: center; color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-shadow: 0 2px 0 var(--ink); }
+.game-sketchy-copy section { display: none; flex-direction: column; align-items: center; gap: 8px; width: min(100%, 560px); }
+.game-sketchy-copy[data-phase=show] .sk-show, .game-sketchy-copy:is([data-phase=reveal], [data-phase=gallery]) .sk-reveal { display: flex; }
+.game-sketchy-copy[data-phase=draw]:not(.watching) .sk-draw, .game-sketchy-copy.watching[data-phase=draw] .sk-wait { display: flex; }
+.sk-card, .sk-pad { position: relative; width: min(100%, calc(100dvh - 260px), 460px); aspect-ratio: 1; background: var(--paper-c); border: 5px solid var(--ink); border-radius: 18px; box-shadow: 0 6px 0 var(--ink); overflow: hidden; }
+.sk-card { width: min(100%, calc(100dvh - 230px), 460px); }
+.sk-pad canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.sk-full { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); font-style: normal; font-weight: 900; background: #ff5f5f; color: #fff; border-radius: 999px; padding: 2px 10px; display: none; }
+.sk-full.on { display: block; }
+.sk-pic { display: block; width: 100%; height: 100%; fill: var(--ink-c); stroke: var(--ink-c); }
+.sk-pic polyline { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.sk-pic.orig polyline { stroke-width: 7; }
+.sk-bar { display: block; width: min(100%, 460px); height: 12px; border: 3px solid var(--ink); border-radius: 999px; background: #fff; overflow: hidden; }
+.sk-bar i { display: block; height: 100%; background: linear-gradient(90deg, #ff5f5f, #ffd23f 40%, #3ecf5a); transform-origin: 0 50%; }
+.sk-tools { display: flex; gap: 10px; width: min(100%, 460px); }
+.sk-clear { min-height: 52px; } .sk-done { flex: 1; min-height: 52px; background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.sk-done:disabled { background: #fff; color: #6a5a60; -webkit-text-stroke: 0; }
+.drawn .sk-pad { opacity: .75; }
+.sk-artists { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; } .sk-artists .chip.in { outline: 4px solid var(--mint); }
+.sk-rows { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.sk-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(68px, 1fr)); gap: 6px; background: rgba(255, 255, 255, .55); border: 3px solid var(--ink); border-radius: 16px; padding: 6px; }
+.sk-copy { margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.sk-copy .sk-pic { aspect-ratio: 1; height: auto; background: var(--paper-c); border: 3px solid var(--seat, var(--ink)); border-radius: 10px; }
+.sk-copy.orig .sk-pic { border-color: var(--ink); border-style: dashed; }
+.sk-copy figcaption { display: flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 800; justify-content: center; flex-wrap: wrap; text-align: center; line-height: 1.1; }
+.sk-copy figcaption .face { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; background: var(--seat); display: inline-block; flex: none; }
+.sk-copy figcaption .face img { width: 100%; height: 100%; }
+.sk-copy figcaption b { max-width: 5.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sk-copy figcaption em { font-style: normal; font-weight: 900; background: var(--sun); border-radius: 6px; padding: 0 4px; }
+.sk-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.sk-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.sk-players .chip.me { box-shadow: 0 0 0 3px #fff; }
+.sk-note { margin: 0; text-align: center; font: 800 15px/1.25 var(--font); color: var(--ink); max-width: 560px; min-height: 1.3em; background: rgba(255,255,255,.7); border-radius: 10px; padding: 2px 8px; }

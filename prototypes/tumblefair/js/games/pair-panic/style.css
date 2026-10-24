@@ -1,0 +1,51 @@
+/* Pair Panic — a felt card table under the chips; the grid is sized from the screen height so 4x6 still fits a
+   402x780 phone without scrolling. Nothing in here scrolls on its own. */
+.game-pair-panic { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow: hidden;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 8px) calc(var(--sl) + 10px);
+  background: radial-gradient(120% 80% at 50% 30%, #3fb37a 0%, #1f7a52 70%, #155c3d); color: var(--ink);
+  user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-pair-panic.season-halloween { background: radial-gradient(120% 80% at 50% 30%, #4a3478 0%, #2a1d4a 70%, #1a1230); }
+.game-pair-panic > * { flex: none; }
+.pp-top { display: flex; gap: 12px; align-items: center; justify-content: center; padding: 0 70px; min-height: 36px; }
+.pp-title { color: #fff3b8; font: 900 26px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); white-space: nowrap; }
+.pp-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.pp-board .chip { color: var(--ink); padding-right: 10px; }
+.pp-board .sc { font-style: normal; background: #fff3b8; border-radius: 8px; padding: 0 7px; }
+.pp-board .st { font-size: 13px; }
+.pp-board .chip.lead { background: var(--sun); } .pp-board .chip.me { box-shadow: 0 0 0 3px #fff; } .pp-board .chip.locked { opacity: .55; }
+.pp-now { min-height: 34px; padding: 4px 14px; border-radius: 14px; background: #fff3b8; border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink);
+  font: 900 19px/1.15 var(--font); text-align: center; max-width: 100%; }
+.pp-now:empty { visibility: hidden; }
+.pp-now.peek { background: #bfe8ff; animation: pp-pulse .8s ease-in-out infinite alternate; } .pp-now.go { background: #b6ffa8; } .pp-now.bad { background: #ffb3b3; }
+@keyframes pp-pulse { to { transform: scale(1.05); } }
+.pp-table { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 7px;
+  width: min(100%, 480px, calc((100dvh - var(--st) - var(--sb) - 200px) * var(--cols) / var(--rows) / 1.08)); }
+.pp-card { position: relative; aspect-ratio: 1 / 1.08; padding: 0; border: 0; background: none; perspective: 500px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: none; min-height: 44px; }
+.pp-in { position: absolute; inset: 0; transition: transform .28s ease-out; transform-style: preserve-3d; }
+.pp-back, .pp-front { position: absolute; inset: 0; border-radius: 12px; border: 3px solid var(--ink); box-shadow: 0 4px 0 var(--ink); backface-visibility: hidden; -webkit-backface-visibility: hidden; display: grid; place-items: center; }
+.pp-back { background: radial-gradient(circle at 50% 50%, #ffd23f 0 18%, transparent 19%), repeating-linear-gradient(45deg, #e8394a 0 8px, #ff6b6b 8px 16px); }
+.pp-back::after { content: '★'; font-size: 22px; color: #fff; -webkit-text-stroke: 1px var(--ink); }
+.season-halloween .pp-back { background: radial-gradient(circle at 62% 38%, #ffe7a0 0 16%, transparent 17%), repeating-linear-gradient(45deg, #3b2c5c 0 8px, #4a3478 8px 16px); }
+.season-halloween .pp-back::after { content: '🦇'; font-size: 18px; }
+.pp-front { background: #fffaf0; transform: rotateY(180deg); box-shadow: 0 0 0 4px var(--who, transparent), 0 4px 0 var(--ink); }
+.season-halloween .pp-front { background: #f3ecff; }
+.pp-front .mi { width: 78%; height: 78%; }
+.pp-card.up .pp-in { transform: rotateY(180deg); }
+.pp-card.press .pp-in { scale: .94; }
+.pp-tag { position: absolute; right: -4px; top: -6px; z-index: 2; min-width: 20px; padding: 0 4px; border-radius: 9px; background: var(--who); border: 2px solid var(--ink);
+  font: 900 12px/16px var(--font); font-style: normal; color: #fff; -webkit-text-stroke: .6px var(--ink); text-align: center; }
+.pp-tag:empty { display: none; }
+.pp-card.gone { pointer-events: none; }
+.pp-card.gone::before { content: ''; position: absolute; inset: 6px; border-radius: 10px; border: 3px dashed rgba(255, 255, 255, .28); }
+.pp-card.gone .pp-in { transform: rotateY(180deg) scale(.7); opacity: 0; transition: transform .35s .45s, opacity .35s .45s; }
+.pp-card.gone .pp-tag { display: none; }
+.pp-card.pop .pp-front { animation: pp-pop .5s ease-out; }
+@keyframes pp-pop { 40% { transform: rotateY(180deg) scale(1.18); box-shadow: 0 0 0 6px var(--who), 0 0 22px 10px #fff6b0; } }
+.pp-card.shake { animation: pp-shake .35s; }
+@keyframes pp-shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.game-pair-panic:not(.can-tap) .pp-card { cursor: default; }
+.pp-note { margin: 0; text-align: center; font-size: 13px; font-weight: 800; color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px var(--ink); }
+.pp-note:empty { display: none; }
+.juice-say.pp-pts { font-size: 26px; }
+.game-pair-panic.watching .pp-table { width: min(100%, 900px, calc((100dvh - 170px) * var(--cols) / var(--rows) / 1.08)); }
+@media (max-height: 640px) { .pp-title { font-size: 20px; } .pp-now { font-size: 16px; min-height: 28px; } }

@@ -25,6 +25,13 @@ export const PROMPTS = [
   'a pumpkin who is in love', 'a pumpkin who ate a lemon', 'a wizard pumpkin', 'a baby pumpkin', 'a pumpkin doing a big yawn',
   'a pumpkin who is scared of the dark', 'a pumpkin telling a secret', 'a vampire pumpkin with tiny fangs', 'a pumpkin with a beard', 'a star-eyed pumpkin',
   'a pumpkin who just woke up', 'a frog pumpkin', 'a pumpkin who smells pie', 'a pumpkin with a band-aid', 'a pumpkin dancing',
+  // round 12: thirty more
+  'a pumpkin who lost a tooth', 'a pumpkin astronaut', 'a pumpkin who heard a joke', 'a pumpkin with freckles', 'a pumpkin chef',
+  'a pumpkin stuck in a hat', 'a pumpkin who is very proud', 'a pumpkin seeing a rainbow', 'a pumpkin with a lollipop', 'a pumpkin on a rollercoaster',
+  'a pumpkin who is counting sheep', 'a sneaky pumpkin', 'a pumpkin with a snorkel', 'a pumpkin pulling a face at you', 'a bunny pumpkin',
+  'a pumpkin who loves music', 'a pumpkin caught in the rain', 'a pumpkin with a hiccupping ghost', 'a pumpkin who won the lottery', 'a spider pumpkin',
+  'a pumpkin with a funny nose', 'a pumpkin blowing out candles', 'a pumpkin wearing a crown of leaves', 'a pumpkin doing a magic trick', 'a pumpkin who smelled cheese',
+  'a pumpkin with a star sticker', 'a pumpkin taking a selfie', 'a puppy pumpkin', 'a pumpkin who is ticklish', 'a pumpkin at the dentist',
 ];
 export const TOOLS = [5, 13];                     // carving widths on the 256 grid: thin knife, big scoop
 export const CARVE_S = 42, VOTE_S = 20, REVEAL_S = 9, SHOW_S = 9;

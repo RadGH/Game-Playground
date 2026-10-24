@@ -35,7 +35,10 @@ export const RULES = {
 export const MODE = { IDLE: 0, BLOCK: 1, CHARGE: 2, DOWN: 3, OUT: 4, SWING: 5, DODGE: 6 };
 const r2 = v => Math.round(v * 100) / 100;
 
-export function create({ rng, players, difficulty = 'normal' }) {
+// Round 12: which hall the bout is in (looks only: the mat, ropes, skirt and crowd colours) — from the seed, so the rng and
+// the rules are untouched. The names and colours live in view.js VENUES; the sim only says which one.
+export const VENUE_COUNT = 5;
+export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
   const solo = players.length === 1, A = meta.arena;
   const ids = players.map(p => p.pid); if (solo) ids.push(-1);
   const spots = ids.length === 2 ? [{ x: -1.8, z: 0, yaw: Math.PI / 2 }, { x: 1.8, z: 0, yaw: -Math.PI / 2 }] : spawnRing(ids.length, 2.5);
@@ -172,7 +175,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
 
   return {
     bodies, events,
-    init: () => ({ solo, cpu: solo ? { id: -1, name: 'Bolster' } : null, downs: RULES.downs, left: Math.ceil(time) }),
+    init: () => ({ venue: Math.abs(Math.floor(seed || 0)) % VENUE_COUNT, solo, cpu: solo ? { id: -1, name: 'Bolster' } : null, downs: RULES.downs, left: Math.ceil(time) }),
     input(pid, inp) { const f = Fs.get(pid); if (f) drive(f, f.out ? null : inp); },
     step(dt) {
       if (over) return;

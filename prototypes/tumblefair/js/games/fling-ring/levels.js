@@ -24,4 +24,26 @@ export const DECKS = [
     barrels: [{ z: -3.1, speed: 4.2, r: 0.75 }, { z: 2.9, speed: -3.6, r: 0.75 }],
     theme: { floor: '#9a8a7a', plank: '#7a6a5a', rim: '#4a3a2a', water: '#1f6fa8', sky: '#bfe8ff', flags: ['#3ecf5a', '#ffd23f', '#f04fd8'] },
   },
+  // round 12: four more decks built from the same parts, so a long night of Fling Ring does not keep landing on the same three
+  {
+    id: 'teacup', name: 'Spinning Teacup', shape: 'circle', r: 7,
+    spin: 0.45, shrink: { from: 7, to: 4.4, start: 18, end: 56 },
+    theme: { floor: '#9fd8ff', plank: '#ffffff', rim: '#3a6ab8', water: '#2a7fb8', sky: '#d6f0ff', flags: ['#ff7ab8', '#ffd23f', '#ffffff'] },
+  },
+  {
+    id: 'windmill', name: 'Windmill Raft', shape: 'circle', r: 7.8,
+    sweeper: { len: 7.2, speed: 1.45, push: 7.5 },
+    theme: { floor: '#d8b06a', plank: '#b8863e', rim: '#5a3a1a', water: '#2f8fd0', sky: '#ffe9b0', flags: ['#e8394a', '#ffffff', '#3d8bff'] },
+  },
+  {
+    id: 'barrels', name: 'Barrel Dock', shape: 'rect', hw: 8, hd: 5.5,
+    barrels: [{ z: -3.4, speed: 3.6, r: 0.75 }, { z: 0.4, speed: -4.6, r: 0.75 }, { z: 3.6, speed: 3.1, r: 0.75 }],
+    theme: { floor: '#b89a72', plank: '#8a6a48', rim: '#4a3220', water: '#1f6f98', sky: '#c8ecff', flags: ['#ffd23f', '#ff5f5f', '#39d0e0'] },
+  },
+  {
+    id: 'checker', name: 'Checker Pier', shape: 'rect', hw: 7.5, hd: 6,      // hole edges on the half-metre grid
+    holes: [{ x: -4, z: 0, hw: 1, hd: 1 }, { x: 4, z: 0, hw: 1, hd: 1 }, { x: 0, z: 3.5, hw: 1, hd: 1 }, { x: 0, z: -3.5, hw: 1, hd: 1 }],     // a plus of gaps, clear of the diagonal starts
+    barrels: [{ z: -5, speed: 3.4, r: 0.6 }],
+    theme: { floor: '#a8b0b8', plank: '#7a8490', rim: '#3a4048', water: '#24609a', sky: '#d0e8ff', flags: ['#3ecf5a', '#ff7ab8', '#ffd23f'] },
+  },
 ];

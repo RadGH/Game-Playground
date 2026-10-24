@@ -6,9 +6,16 @@
 // rival's land in two hurts them and joining yours up pays. Highest score after 20 flips wins.
 // Solo: you race Tumbleweed, a CPU rival on the opposite corner (its picks come from the seed only).
 // The value layout is mirrored both ways, so every corner starts with the same land around it.
+//
+// Round 12 (2026-10-24): 2 up / 1 down, "Awkward controls". A pick used to have to be a tile TOUCHING your land and
+// was wiped at every flip, so you had to re-aim a fresh tap every 2 seconds and a tap one tile too far just buzzed.
+// Now a pick is a TARGET: tap any tile (not a rock, not your own, not a home corner) and each flip your land grows one
+// tile toward it (`stepToward`: the tile next to your land that is the fewest steps from the target), until you own
+// it. The target stays put between flips, so one tap can carry you across the board; tap a new tile to change course.
+// The flip itself (`settleFlip`: same-tile bounces, steals) is unchanged.
 export const meta = {
   id: 'tile-flip-race', title: 'Tile Flip Race', blurb: 'Grab the tiles next to yours, every two seconds, before your rivals do!',
-  how: ['Tap a tile next to your land. Every 2 seconds everyone\'s pick flips together.', 'Stars are worth 2, gems 3. You can steal a rival\'s tile too.', 'Pick the same tile as someone else and you both bounce off.', 'Your biggest joined-up patch scores a bonus point per tile.'],
+  how: ['Tap any tile: every 2 seconds your land grows one tile toward it.', 'Stars are worth 2, gems 3. You can steal a rival\'s tile too.', 'Pick the same tile as someone else and you both bounce off.', 'Your biggest joined-up patch scores a bonus point per tile.'],
   kind: 'ui', min: 1, max: 4, seconds: 45, scoring: 'points', unit: 'points', tags: ['puzzle', 'action'], card: 'card-tile-flip-race', css: true,
 };
 export const W = 7, H = 7, TICK_S = 2, FLIPS = 20, START_S = 2, END_S = 3;
@@ -68,6 +75,19 @@ export function settleFlip(values, owner, homes, picks) {
   for (const [i, w] of flips) owner[i] = w;
   return { flips, bounced };
 }
+/** Where who-index `who` grows this flip on the way to `target`: the target itself if it touches their land, else the
+ *  legal tile next to their land that is the fewest steps from it (rocks and home corners block the way; ties go to
+ *  the lower tile number). null = no way there. */
+export function stepToward(values, owner, homes, who, target) {
+  if (!Number.isInteger(target) || target < 0 || target >= owner.length || values[target] === ROCK || owner[target] === who || homes.includes(target)) return null;
+  const legal = i => values[i] !== ROCK && owner[i] !== who && !homes.includes(i) && neighbours(i).some(j => owner[j] === who);
+  if (legal(target)) return target;
+  const dist = new Map([[target, 0]]), q = [target];
+  for (let h = 0; h < q.length; h++) { const a = q[h]; for (const b of neighbours(a)) if (!dist.has(b) && values[b] !== ROCK && !homes.includes(b) && owner[b] !== who) { dist.set(b, dist.get(a) + 1); q.push(b); } }
+  let best = null, bd = Infinity;
+  for (let i = 0; i < owner.length; i++) if (dist.has(i) && legal(i) && dist.get(i) < bd) { bd = dist.get(i); best = i; }
+  return best;
+}
 /** The CPU's pick: best value, steals count a little extra; ties and the easy CPU's slips come from the seed. */
 export function cpuPick(values, owner, homes, who, rng, difficulty = 'normal') {
   const opts = [];
@@ -95,10 +115,12 @@ export function create({ rng, players, difficulty = 'normal' }) {
   const totals = () => Object.fromEntries(who.map((w, k) => [w.pid, scoreOf(values, owner, k)]));
 
   function doFlip() {
-    const p = { ...picks };
+    const p = {};
+    for (const [k, t] of Object.entries(picks)) { const st = stepToward(values, owner, homes, +k, t); if (st != null) p[k] = st; }
     if (solo) { const c = cpuPick(values, owner, homes, who.length - 1, rng, difficulty); if (c != null) p[who.length - 1] = c; }
     last = { n: flip, ...settleFlip(values, owner, homes, p) };
-    picks = {}; flip++;
+    for (const [k, t] of Object.entries(picks)) if (owner[t] === +k || stepToward(values, owner, homes, +k, t) == null) delete picks[k];   // reached (or cut off): pick again
+    flip++;
   }
   return {
     init: () => ({ w: W, h: H, values, who: who.map(w => ({ pid: w.pid, seat: w.seat, home: w.home, ...(w.cpu ? { cpu: true, name: w.name } : {}) })), flips: FLIPS, tick: TICK_S, solo }),
@@ -107,7 +129,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
       const k = idx.get(pid);
       if (d === null || d === -1) { delete picks[k]; return; }
       if (!Number.isInteger(d) || d < 0 || d >= W * H || values[d] === ROCK || owner[d] === k || homes.includes(d)) return;
-      if (!neighbours(d).some(j => owner[j] === k)) return;
+      if (stepToward(values, owner, homes, k, d) == null) return;
       picks[k] = d;
     },
     step(dt) {

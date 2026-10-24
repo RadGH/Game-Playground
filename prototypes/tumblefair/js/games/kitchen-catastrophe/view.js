@@ -6,7 +6,7 @@
 // front order big, its recipe as steps (done ✓ / NEXT / later) with who owns each; on your phone a line says what
 // to do next, and says YOU when the next part is yours.
 import { RECIPES, ITEMS } from './sim.js';
-import { scoreBar, floatText, h, esc } from '../../client/gamehud.js';
+import { scoreBar, h, esc } from '../../client/gamehud.js';
 import { canvasTexture } from '../../client/stage.js';
 
 const SHAPE = { circle: '<circle cx="0" cy="0" r="7"/>', square: '<rect x="-6.5" y="-6.5" width="13" height="13" rx="2"/>', diamond: '<path d="M0 -8 L8 0 L0 8 L-8 0 Z"/>', triangle: '<path d="M0 -8 L8 6 H-8 Z"/>' };
@@ -62,7 +62,9 @@ export function createView(ctx) {
     const it = itemMesh(s.item, 1.7); it.position.set(spot.x, 0.97, spot.z); group.add(it);
     const mat = new THREE.Mesh(new THREE.CircleGeometry(0.75, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: p?.color || '#888', transparent: true, opacity: 0.6, depthWrite: false })); mat.position.set(spot.use.x, 0.012, spot.use.z); group.add(mat);
     const ring = new THREE.Mesh(new THREE.RingGeometry(0.7, 0.8, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#2b1d0e' })); ring.position.set(spot.use.x, 0.013, spot.use.z); group.add(ring);
-    tags.push(stage.tag(it, { text: ITEMS[s.item].name + (s.own === ctx.me ? ' (you)' : ''), seat: p?.seat ?? null, height: 1.15, cls: 'kc-st' + (s.own === ctx.me ? ' me' : '') }));
+    // round 12: just the ingredient's name ("Sausage (you)" was three labels' worth of width); your own counters are the
+    // white tags with a star, which the job line below also says
+    tags.push(stage.tag(it, { text: (s.own === ctx.me ? '★ ' : '') + ITEMS[s.item].name, seat: p?.seat ?? null, height: 0.75, cls: 'kc-st' + (s.own === ctx.me ? ' me' : '') }));
   }
   // ---- the hatch and the tray
   const T = init.tray;
@@ -104,11 +106,16 @@ export function createView(ctx) {
     const m = itemMesh(item, 1.1); m.position.set(0, 0.85, 0.42); a.body.group.add(m); carried.set(pid, { item, m });
   }
   // ---- HUD: score bar, order cards, your next job
-  const bar = scoreBar(ctx, { unit: 'items' }), panel = h('div', 'kc-panel'), job = h('div', 'kc-job'), banner = h('div', 'kc-banner');
-  ctx.ui.append(panel, job, banner);
+  const bar = scoreBar(ctx, { unit: 'items' }), panel = h('div', 'kc-panel'), job = h('div', 'kc-job'), banner = h('div', 'kc-banner'), say = h('div', 'kc-say');
+  const foot = h('div', 'kc-foot'); foot.append(say, job);
+  ctx.ui.append(panel, foot, banner);
   if (ctx.me == null) job.style.display = 'none';
+  // Round 12: what just happened at the tray ("Spoiled! Needed Ice", "Corn Dog served!") used to float up from the
+  // tray, which is under the order cards, so a big faded word sat BEHIND them. It is one line above your job now.
+  const shout = (text, cls = '') => { say.textContent = text; say.className = 'kc-say show ' + cls; clearTimeout(shout.t); shout.t = setTimeout(() => { say.className = 'kc-say'; }, 1600); };
   const showBanner = (text, cls = '') => { banner.textContent = text; banner.className = 'kc-banner show ' + cls; clearTimeout(showBanner.t); showBanner.t = setTimeout(() => { banner.className = 'kc-banner'; }, 1400); };
   let panelKey = '', jobKey = '';
+  const onResize = () => { panel._safe = 0; }; addEventListener('resize', onResize);   // main.js re-frames on resize: frame below the orders again
   return {
     start() { showBanner('Orders up!'); },
     state(g) {
@@ -124,11 +131,14 @@ export function createView(ctx) {
       const key = JSON.stringify([g.o.map(o => [o[0], o[2]]), g.tray, g.served]);
       if (key !== panelKey) {
         panelKey = key;
-        panel.innerHTML = `<div class="kc-goal">Served <b>${g.served}</b> / ${g.target}</div>` + g.o.map((o, i) => {
+        // round 12: ONE tidy block under the score bar — a top line (served count, then the waiting orders as small
+        // pills) and the front order's card under it — instead of cards wrapping wherever they fit over the stalls
+        const later = g.o.slice(1).map(o => `<span class="kc-q${o[2] <= 6 ? ' hurry' : ''}">${esc(RECIPES[o[1]].name)} <b>${o[2]}s</b></span>`).join('');
+        panel.innerHTML = `<div class="kc-line"><div class="kc-goal">Served <b>${g.served}</b> / ${g.target}</div>${later ? `<div class="kc-queue"><i>Then</i>${later}</div>` : ''}</div>` + g.o.slice(0, 1).map(o => {
           const r = RECIPES[o[1]], warn = o[2] <= 6 ? ' hurry' : '';
-          const steps = r.steps.map((it, k) => { const st = i ? 'todo' : k < g.tray.length ? 'done' : k === g.tray.length ? 'next' : 'todo';
+          const steps = r.steps.map((it, k) => { const st = k < g.tray.length ? 'done' : k === g.tray.length ? 'next' : 'todo';
             return `<span class="kc-step ${st}" style="--c:${COL[ITEMS[it].id]}">${st === 'done' ? '✓ ' : st === 'next' ? '▶ ' : ''}${esc(ITEMS[it].name)}${mark(ownerOf.get(it))}</span>`; }).join('<i class="kc-arrow">›</i>');
-          return `<div class="kc-order${i ? ' later' : ' front'}${warn}"><div class="kc-oh"><b>${esc(r.name)}</b><span class="kc-time">${o[2]}s</span></div><div class="kc-steps">${steps}</div><div class="kc-pat"><i style="width:${Math.round(o[3] * 100)}%"></i></div></div>`;
+          return `<div class="kc-order front${warn}"><div class="kc-oh"><b>${esc(r.name)}</b><span class="kc-time">${o[2]}s</span></div><div class="kc-steps">${steps}</div><div class="kc-pat"><i style="width:${Math.round(o[3] * 100)}%"></i></div></div>`;
         }).join('');
       }
       if (ctx.me != null) {
@@ -143,15 +153,18 @@ export function createView(ctx) {
         const k2 = text + cls; if (k2 !== jobKey) { jobKey = k2; job.textContent = text; job.className = 'kc-job ' + cls; }
       }
       { const y = bar.el.offsetTop + bar.el.offsetHeight + 6; if (y > 20 && panel.dataset.y !== String(y)) { panel.dataset.y = y; panel.style.top = y + 'px'; } }
+      // round 12: frame the stall BELOW the order block, so no order card sits over a counter
+      { const H = innerHeight || 1, b = panel.getBoundingClientRect().bottom, top = Math.min(0.32, Math.max(0.13, (b + 8) / H));
+        if (innerWidth < 900 && Math.abs(top - (panel._safe || 0)) > 0.01) { panel._safe = top; stage.setSafe?.({ top }); } }
     },
     event(ev) {
       const mine = ev.pid === ctx.me, a = ev.pid != null ? ctx.actor(ev.pid) : null;
       if (ev.e === 'grab') { if (mine) ctx.sfx('pick'); a?.play('throw', 250); }
-      else if (ev.e === 'add') { ctx.sfx(mine ? 'good' : 'tap'); floatText(stage, T.x, 1.8, T.z, `+ ${ITEMS[ev.item].name}`, 'good'); }
-      else if (ev.e === 'spoil') { ctx.sfx('splat'); floatText(stage, T.x, 2, T.z, `Spoiled! Needed ${ITEMS[ev.want].name}`, 'bad'); a?.play('hit', 500); }
-      else if (ev.e === 'serve') { ctx.sfx('coins'); dropCustomer(ev.id, 'happy'); floatText(stage, T.x, 2.4, T.z - 1, `${RECIPES[ev.r].name} served!`, 'good'); }
-      else if (ev.e === 'gone') { ctx.sfx('bad'); floatText(stage, 0, 2.4, -A.hd - 1, 'Too slow!', 'bad'); }
-      else if (ev.e === 'nope') { const s = init.spots[ev.spot]; floatText(stage, s.x, 1.8, s.z, `That's ${name(ev.own)}'s!`, 'bad'); ctx.sfx('bad'); }
+      else if (ev.e === 'add') { ctx.sfx(mine ? 'good' : 'tap'); shout(`+ ${ITEMS[ev.item].name} on the tray`, 'good'); }
+      else if (ev.e === 'spoil') { ctx.sfx('splat'); shout(`Spoiled! It needed ${ITEMS[ev.want].name}`, 'bad'); a?.play('hit', 500); }
+      else if (ev.e === 'serve') { ctx.sfx('coins'); dropCustomer(ev.id, 'happy'); shout(`${RECIPES[ev.r].name} served!`, 'good'); }
+      else if (ev.e === 'gone') { ctx.sfx('bad'); shout('Too slow! A customer left', 'bad'); }
+      else if (ev.e === 'nope') { if (mine) shout(`That's ${name(ev.own)}'s counter!`, 'bad'); ctx.sfx('bad'); }
       else if (ev.e === 'order') { ctx.sfx('tap'); }
       else if (ev.e === 'end') { showBanner(ev.ok ? 'Kitchen saved!' : 'Closing time!', ev.ok ? 'win' : ''); ctx.sfx(ev.ok ? 'win' : 'out'); }
     },
@@ -159,6 +172,6 @@ export function createView(ctx) {
       for (const c of customers.values()) if (c.a) { c.a.update?.(dt); }
       onTray.position.y = 1.08 + Math.sin(t * 3) * 0.01;
     },
-    dispose() { bar.el.remove(); panel.remove(); job.remove(); banner.remove(); trayTag.remove(); for (const t of tags) t.remove(); for (const c of customers.values()) c.tag?.remove(); clearTimeout(showBanner.t); tiles.dispose(); stripe.dispose(); sign.dispose(); },
+    dispose() { removeEventListener('resize', onResize); if (panel._safe) stage.setSafe?.({ top: 0.13 }); bar.el.remove(); panel.remove(); foot.remove(); banner.remove(); clearTimeout(shout.t); trayTag.remove(); for (const t of tags) t.remove(); for (const c of customers.values()) c.tag?.remove(); clearTimeout(showBanner.t); tiles.dispose(); stripe.dispose(); sign.dispose(); },
   };
 }

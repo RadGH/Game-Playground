@@ -1,0 +1,8 @@
+/* Flood Rush: the "Water rising in 3" pill under the score bar. Nothing here takes taps. */
+.game-flood-rush .fr-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); pointer-events: none; white-space: nowrap; max-width: 94vw;
+  padding: 5px 14px; border-radius: 999px; background: #e8f6ff; border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 900 16px/1.2 var(--font); }
+.fr-pill.warn { background: #ffb020; animation: fr-throb .5s ease-in-out infinite alternate; } .fr-pill.rise { background: #3d9be8; color: #fff; -webkit-text-stroke: .6px var(--ink); }
+.fr-pill.out { background: #ffd23f; }
+.season-halloween .fr-pill.rise { background: #4fdc6a; color: var(--ink); -webkit-text-stroke: 0; } .season-halloween .fr-pill.warn { background: #b38dff; }
+@keyframes fr-throb { to { transform: translateX(-50%) scale(1.08); } }
+@media (max-width: 520px) { .game-flood-rush .fr-pill { top: calc(var(--st) + 52px); font-size: 14px; } }

@@ -1,0 +1,52 @@
+/* Photo Booth — the 3D booth shows through the top of the screen; the pose card, the countdown and four chunky pose
+   buttons sit in a paper panel at the bottom. The flash is a white sheet that fades out (it never takes taps). */
+.game-photo-booth { pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-photo-booth > * { flex: none; }
+.pb-top { display: flex; gap: 8px; align-items: center; justify-content: center; width: 100%; padding: 0 96px 0 8px; }
+.pb-title { white-space: nowrap; font: 900 20px/1.1 var(--font); color: #ffd23f; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.pb-round { white-space: nowrap; font-weight: 900; font-size: 13px; text-transform: uppercase; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; }
+.game-photo-booth > .pb-space { flex: 1 1 auto; min-height: 30dvh; pointer-events: none; }
+.game-photo-booth > .pb-flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 3; }
+.pb-flash.go { animation: pb-flash .7s ease-out; }
+@keyframes pb-flash { 0% { opacity: .95; } 100% { opacity: 0; } }
+.pb-panel { width: min(100%, 560px); display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--paper); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); padding: 8px 10px; }
+.pb-card { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+.pb-card small { font-weight: 800; font-size: 12px; text-transform: uppercase; color: #8a6a50; }
+.pb-name { font: 900 22px/1.1 var(--font); }
+.pb-want { display: flex; align-items: center; gap: 4px; min-height: 40px; }
+.pb-wi { display: inline-flex; align-items: center; gap: 3px; font-style: normal; background: #ffe9a8; border: 2px solid var(--ink); border-radius: 12px; padding: 2px 8px 2px 4px; }
+.pb-wi svg { width: 30px; height: 30px; }
+.pb-wi em { font-style: normal; font-weight: 900; font-size: 14px; white-space: nowrap; }
+.pb-want:has(.pb-wi:nth-child(5)) .pb-wi em { font-size: 12px; } .pb-want:has(.pb-wi:nth-child(5)) .pb-wi svg { width: 24px; height: 24px; }
+.pb-plus { font: 900 20px/1 var(--font); }
+.pb-bar { display: block; width: 100%; height: 10px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; overflow: hidden; }
+.pb-bar i { display: block; height: 100%; background: linear-gradient(90deg, #ff5f5f, #ffd23f 40%, #3ecf5a); transform-origin: 0 50%; }
+.game-photo-booth:not([data-phase=pose]) .pb-bar i { transform: scaleX(0) !important; }
+.pb-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+.pb-btn { appearance: none; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 58px; border: 3px solid var(--ink); border-radius: 16px; background: #fff; box-shadow: 0 4px 0 var(--ink); font-weight: 900; font-size: 17px; cursor: pointer; touch-action: manipulation; }
+.pb-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.pb-btn.on { background: var(--sun); transform: translateY(2px); box-shadow: 0 2px 0 var(--ink), inset 0 0 0 3px #fff; }
+.pb-ic svg, .pb-wi svg { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.pb-ic svg { width: 36px; height: 36px; display: block; }
+.pb-ic svg circle, .pb-wi svg circle { fill: #ffe0c0; }
+.game-photo-booth:is(.watching, [data-phase=strip]) .pb-btns { display: none; }
+.game-photo-booth:not([data-phase=pose]) .pb-btn { opacity: .55; }
+.game-photo-booth[data-phase=strip] .pb-card { display: none; }
+.pb-strip { display: none; width: 100%; flex-direction: column; gap: 4px; }
+.game-photo-booth[data-phase=strip] .pb-strip { display: flex; }
+.pb-row { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+.pb-row .chip { flex: none; } .pb-row .chip .nm { max-width: 5.5em; overflow: hidden; text-overflow: ellipsis; }
+.pb-film { display: flex; gap: 2px; background: #222; border-radius: 6px; padding: 3px; }
+.pb-film i { width: 18px; height: 22px; display: grid; place-items: center; font-style: normal; font-weight: 900; font-size: 13px; border-radius: 3px; background: #fff; }
+.pb-film i.ok { background: #c8f5cf; color: #1d8a37; } .pb-film i.no { background: #ffd0d0; color: #b81f33; }
+.pb-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.pb-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.pb-players .chip.me { box-shadow: 0 0 0 3px var(--sun); }
+.pb-st { font-size: 13px; } .pb-st:empty { display: none; } .pb-st.good { color: #1d8a37; } .pb-st.bad { color: #b81f33; }
+.game-photo-booth[data-phase=strip] .pb-players { display: none; }
+.pb-note { margin: 0; text-align: center; font: 800 14px/1.25 var(--font); min-height: 1.3em; }
+.tag.pb-tag.empty { opacity: 0; }
+.tag.pb-tag { font-size: 15px; } .tag.pb-tag.good { background: #3ecf5a; } .tag.pb-tag.bad { background: #ff5f5f; }
+@media (min-aspect-ratio: 1/1) { .game-photo-booth > .pb-space { min-height: 40dvh; } }
+.season-halloween .pb-panel { background: #f3e2ff; }

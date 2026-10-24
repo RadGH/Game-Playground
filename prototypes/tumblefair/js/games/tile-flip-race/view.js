@@ -3,10 +3,11 @@
 // hexagon), so colour is never the only cue. On a phone that plays, the tiles you may pick glow; tap one and it is
 // marked with a dashed ring in your colour until the flip. A bar under the board runs down to each flip (it is timed
 // here from the moment a flip arrives — the server does not send a countdown 20 times a second). Flipped tiles turn
-// over; bounced ones shake with "BOUNCE!".
+// over; bounced ones shake with "BOUNCE!". Round 12: a pick is a TARGET anywhere on the board (a pulsing ring), and
+// the tile your land grabs next on the way there wears an arrow; it stays until you get there.
 import { SEATS } from '../../shared/protocol.js';
 import { chip, esc } from '../../client/gamehud.js';
-import { neighbours } from './sim.js';
+import { neighbours, stepToward } from './sim.js';
 
 const GLYPH = { 1: '<i class="tf-dot"></i>', 2: '<b class="tf-star">★</b>', 3: '<b class="tf-gem">◆</b>' };
 const SHAPE_SVG = {
@@ -49,9 +50,10 @@ export function createView(ctx) {
   /** The tiles you may pick now: next to your land, not yours, not a home corner, not a rock. */
   function paintCan() {
     const homes = who.map(w => w.home);
+    const next = pick != null && mineK >= 0 && phase === 'play' ? stepToward(init.values, owner, homes, mineK, pick) : null;
     tiles.forEach((t, i) => {
       const can = !watching && phase === 'play' && mineK >= 0 && init.values[i] > 0 && owner[i] !== mineK && !homes.includes(i) && neighbours(i).some(j => owner[j] === mineK);
-      t.classList.toggle('can', can); t.classList.toggle('picked', pick === i);
+      t.classList.toggle('can', can); t.classList.toggle('picked', pick === i); t.classList.toggle('next', i === next && pick !== i);
     });
     if (me != null) { const w = who[mineK]; ui.style.setProperty('--me', w?.color || '#fff'); }
   }
@@ -59,7 +61,8 @@ export function createView(ctx) {
     const t = e.target.closest('.tf-tile'); if (!t || watching || phase !== 'play') return;
     const i = +t.dataset.i;
     if (pick === i) { pick = null; ctx.send('pick', -1); ctx.sfx('tap'); paintCan(); return; }
-    if (!t.classList.contains('can')) { ctx.sfx('bad'); t.classList.remove('nope'); void t.offsetWidth; t.classList.add('nope'); return; }
+    const homes = who.map(w => w.home);
+    if (mineK < 0 || stepToward(init.values, owner, homes, mineK, i) == null) { ctx.sfx('bad'); t.classList.remove('nope'); void t.offsetWidth; t.classList.add('nope'); return; }
     pick = i; ctx.send('pick', i); ctx.sfx('pick'); paintCan();
   });
   function showFlip(L) {
@@ -69,13 +72,13 @@ export function createView(ctx) {
     if (L.bounced.includes(pick)) ctx.sfx('bad'); else if (mine) ctx.sfx(init.values[mine[0]] > 1 ? 'coins' : 'good'); else if (lost) ctx.sfx('trap'); else ctx.sfx('tap');
   }
   function note(g) {
-    if (g.phase === 'ready') return watching ? 'Every 2 seconds, everyone grabs a tile at once…' : 'Get ready: tap a glowing tile next to your corner!';
+    if (g.phase === 'ready') return watching ? 'Every 2 seconds, everyone grabs a tile at once…' : 'Get ready: tap any tile — your land grows toward it!';
     if (g.phase === 'end') {
       if (init.solo && me != null) { const a = g.scores[me], b = g.scores.cpu; return a > b ? `You beat ${who[who.length - 1].name}, ${a} to ${b}!` : a === b ? `A draw with ${who[who.length - 1].name}!` : `${who[who.length - 1].name} wins, ${b} to ${a}.`; }
       return 'Board locked! Biggest land wins.';
     }
     if (watching) return `${g.in.length} of ${players.length} have picked`;
-    return pick == null ? 'Tap a glowing tile. Same tile as a rival = you both bounce!' : 'Picked! Tap it again to cancel, or tap another.';
+    return pick == null ? 'Tap any tile: your land grows one tile toward it each flip.' : 'Heading for the ringed tile (→ marks the next grab). Tap another to change course.';
   }
   return {
     priv(d) { if (phase === 'play') { pick = d.pick; paintCan(); } },
@@ -83,7 +86,7 @@ export function createView(ctx) {
       if (g.phase !== phase) { if (g.phase === 'end') ctx.sfx('win'); }
       phase = g.phase; ui.dataset.phase = g.phase;
       owner = [...g.o].map(c => c === '.' ? -1 : +c);
-      if (g.flip !== flipN) { flipN = g.flip; flipAt = performance.now(); pick = null; }
+      if (g.flip !== flipN) { flipN = g.flip; flipAt = performance.now(); }
       paintOwners();
       if (g.last && g.last.n !== lastShown) { lastShown = g.last.n; showFlip(g.last); }
       $('.clock b').textContent = g.left;

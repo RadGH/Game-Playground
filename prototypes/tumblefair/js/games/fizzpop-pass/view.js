@@ -100,6 +100,11 @@ export function createView(ctx) {
   function show(text, cls = '', ms = 1200) { banner.textContent = text; banner.className = 'fzp-banner show ' + cls; bannerT = ms / 1000; }
   const nameOf = id => (id === ctx.me ? 'You' : id < 0 ? (cpus.get(id)?.name || 'CPU') : ctx.players.find(p => p.pid === id)?.name || '?');
   const maxLives = init.solo ? RULES.soloLives : RULES.lives(ctx.players.length);
+  // round 12: a 🚫 over whoever just gave YOU the pie (you cannot pass it straight back), and a fizz meter in the pill
+  const noBackAt = new THREE.Object3D(); group.add(noBackAt); noBackAt.visible = false;
+  const noBackTag = stage.tag(noBackAt, { text: '🚫 not back', height: 0, cls: 'fzp-noback', declutter: false });
+  const meter = n => `<b class="fzp-heat">${[0, 1, 2, 3].map(i => `<u class="${i <= n ? 'on' : ''}"></u>`).join('')}</b>`;
+  let pillFit = 0;
   let lastBits = 0, lastInputAt = 0, g = null, holder = null, heat = 0, ph = 'ready', tickIn = 0, lastPill = '', fly = null, splatted = null, outSet = new Set();
   return {
     state(s) {
@@ -114,10 +119,10 @@ export function createView(ctx) {
       else if (s.ph === 'pop') { icon = '💥'; text = 'SPLAT!'; }
       else if (s.ph === 'done') { icon = '🏆'; text = 'Done!'; }
       else if (mineOut) { icon = '📣'; text = 'You’re out — cheer!'; }
-      else if (holder === ctx.me) { icon = '🥧'; text = 'You’ve got the pie — bump someone!'; }
+      else if (holder === ctx.me) { icon = '🥧'; text = 'Your pie — bump someone!'; }
       else if (holder != null) { icon = '🏃'; text = `Run from ${nameOf(holder)}!`; }
-      const key = icon + text + (holder === ctx.me);
-      if (key !== lastPill) { lastPill = key; pill.dataset.hot = holder === ctx.me && s.ph === 'live' ? '1' : ''; pill.innerHTML = `<i>${icon}</i><span>${text}</span>`; }
+      const live = s.ph === 'live' && holder != null, key = icon + text + (holder === ctx.me) + (live ? heat : '');
+      if (key !== lastPill) { lastPill = key; pill.dataset.hot = holder === ctx.me && s.ph === 'live' ? '1' : ''; pill.innerHTML = `<i>${icon}</i><span>${text}</span>${live ? meter(heat) : ''}`; }
     },
     event(ev) {
       if (ev.e === 'pass') {
@@ -130,6 +135,8 @@ export function createView(ctx) {
         const p = posOf(ev.id); floatText(stage, ev.x, (p?.h || 1.6) + 0.8, ev.z, 'SPLAT!', 'bad');
         show(ev.id === ctx.me ? 'SPLAT! You!' : `SPLAT! ${nameOf(ev.id)}`, ev.id === ctx.me ? 'hot' : '', 1800);
         if (ev.id >= 0 && ev.lives <= 0) setTimeout(() => ctx.sfx('out'), 500);
+        // everyone still standing (not the CPUs) scores from a splat: say so over their heads
+        for (const p of ctx.players) { if (p.pid === ev.id || outSet.has(p.pid)) continue; const q = posOf(p.pid); if (q) floatText(stage, q.x, q.h + 0.5, q.z, '+1', 'good'); }
       } else if (ev.e === 'nopass') { if (ev.to === ctx.me) show(ev.back ? 'Not straight back!' : 'Get closer!', 'small', 900); ctx.sfx('tap'); }
       else if (ev.e === 'done') { if (ev.win != null) { ctx.sfx('win'); show(ev.win === ctx.me ? 'You win!' : `${nameOf(ev.win)} wins!`, 'go', 2600); } else show('Time!', 'small', 2000); }
     },
@@ -147,6 +154,9 @@ export function createView(ctx) {
     },
     frame(dt, t) {
       if (bannerT > 0) { bannerT -= dt; if (bannerT <= 0) banner.classList.remove('show'); }
+      // round 12: the pill sits under the score bar whatever its height (3-4 players wrap it onto two rows on a phone,
+      // and a fixed top put the pill over the third chip and the clock)
+      if (!(pillFit++ % 15)) { const bb = bar.el.getBoundingClientRect(), ub = ctx.ui.getBoundingClientRect(); if (bb.height) pill.style.top = Math.round(bb.bottom - ub.top + 6) + 'px'; }
       if (performance.now() - lastInputAt > 90) lastBits = 0;
       // CPUs slide between updates
       for (const K of cpus.values()) {
@@ -157,6 +167,8 @@ export function createView(ctx) {
       }
       // the pie rides over the holder's head (and arcs across on a pass)
       const hp = holder != null ? posOf(holder) : null;
+      const nb = holder === ctx.me && ph === 'live' && g?.from != null ? posOf(g.from) : null;
+      noBackAt.visible = !!nb; if (nb) noBackAt.position.set(nb.x, nb.h + 0.95, nb.z);
       pie.visible = !!hp && ph === 'live'; holdRing.visible = pie.visible;
       if (hp) {
         let x = hp.x, y = hp.h + 0.55, z = hp.z;
@@ -178,7 +190,7 @@ export function createView(ctx) {
       for (let i = splats.length - 1; i >= 0; i--) { const s = splats[i]; s.t += dt; s.g.scale.setScalar(Math.min(1, s.t * 6)); if (s.t > 4) s.m.opacity = Math.max(0, 1 - (s.t - 4) / 2); if (s.t > 6) { group.remove(s.g); s.m.dispose(); splats.splice(i, 1); } }
     },
     dispose() {
-      tunes.dispose(); bar.el.remove(); pill.remove(); banner.remove(); hat?.removeFromParent();
+      tunes.dispose(); bar.el.remove(); pill.remove(); banner.remove(); noBackTag.remove(); hat?.removeFromParent();
       for (const K of cpus.values()) K.tag?.remove();
       for (const s of splats) s.m.dispose();
       for (const t2 of texs) t2.dispose(); for (const m of mats) m.dispose(); for (const g2 of geos) g2.dispose();

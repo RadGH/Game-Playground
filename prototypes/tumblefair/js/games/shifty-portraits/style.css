@@ -1,0 +1,49 @@
+/* Shifty Portraits — a cosy haunted hallway: striped purple wallpaper, a wooden dado rail, gilded frames in a grid.
+   The lights flicker out between looks. */
+.game-shifty-portraits { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 30px) calc(var(--sl) + 10px);
+  background: repeating-linear-gradient(90deg, #3a2460 0 22px, #331f56 22px 44px); color: #fff; user-select: none; -webkit-user-select: none; }
+.game-shifty-portraits > * { flex: none; }
+.sp-top { display: flex; gap: 8px; align-items: center; justify-content: center; width: 100%; padding-right: 80px; }
+.sp-title { font: 900 22px/1.1 var(--font); color: #ffb35a; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); white-space: nowrap; }
+.sp-round { font-weight: 900; font-size: 13px; text-transform: uppercase; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+@media (max-width: 460px) { .sp-title { font-size: 18px; } .sp-round { font-size: 11px; padding: 2px 7px; } .sp-top { gap: 5px; padding-right: 76px; } }
+.sp-banner { font: 900 19px/1.15 var(--font); color: var(--ink); background: #ffe7a8; border: 3px solid var(--ink); border-radius: 999px; padding: 4px 14px; box-shadow: 0 3px 0 var(--ink); text-align: center; max-width: 100%; }
+.sp-banner:empty { visibility: hidden; }
+.game-shifty-portraits[data-phase=guess] .sp-banner { background: var(--sun); animation: bob .9s infinite; }
+.sp-hall { position: relative; width: min(100%, 760px); padding: 12px 10px 18px; border-radius: 14px; background: linear-gradient(transparent 82%, #5a3418 82% 86%, #3a2010 86%); transition: filter .25s; }
+.sp-wall { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: 10px; }
+.sp-cell { position: relative; padding: 0; border: 0; background: none; border-radius: 10px; cursor: default; aspect-ratio: 100 / 120; min-height: 44px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: transform .15s, filter .2s; }
+.sp-cell .sp-pic { display: block; width: 100%; height: 100%; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, .45)); }
+.game-shifty-portraits[data-phase=guess]:not(.watching) .sp-cell:not(.picked):not(.full) { cursor: pointer; }
+.game-shifty-portraits[data-phase=guess]:not(.watching) .sp-cell:not(.picked):not(.full):hover { transform: translateY(-3px) rotate(-1deg); }
+.sp-cell.picked { outline: 5px solid var(--sun); outline-offset: 1px; transform: scale(.96); }
+.sp-cell.picked::after { content: '🔍'; position: absolute; top: -8px; right: -6px; font-size: 26px; filter: drop-shadow(0 2px 0 var(--ink)); }
+.sp-cell.full:not(.picked) { filter: saturate(.6) brightness(.8); }
+.sp-badge { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); white-space: nowrap; font: 900 12px/1 var(--font); background: var(--mint); color: #fff; -webkit-text-stroke: .6px var(--ink); paint-order: stroke fill; border: 2px solid var(--ink); border-radius: 999px; padding: 3px 7px; }
+.sp-badge:empty { display: none; }
+.sp-was { position: absolute; top: 4px; left: 4px; width: 38%; display: none; background: rgba(26, 15, 38, .85); border-radius: 6px; padding: 2px; text-align: center; }
+.sp-was small { display: block; font: 900 10px/1 var(--font); color: #ffe7a8; margin-bottom: 1px; }
+.sp-was .sp-pic { width: 100%; height: auto; filter: none; }
+.sp-cell.changed .sp-was { display: block; }
+.sp-cell.changed { outline: 5px solid var(--mint); outline-offset: 1px; animation: sp-glow .8s ease-in-out infinite alternate; }
+.sp-cell.changed.right::after { content: '✔'; position: absolute; top: -10px; right: -6px; font: 900 26px/1 var(--font); color: var(--mint); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; }
+.sp-cell.wrong { outline: 5px solid var(--pop); outline-offset: 1px; }
+.sp-cell.wrong::after { content: '✖'; position: absolute; top: -10px; right: -6px; font: 900 26px/1 var(--font); color: var(--pop); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; }
+@keyframes sp-glow { from { box-shadow: 0 0 0 0 rgba(62, 207, 90, .0); } to { box-shadow: 0 0 22px 6px rgba(62, 207, 90, .75); } }
+/* lights out: almost black, flickering, a ghost floats across */
+.game-shifty-portraits[data-phase=dark] .sp-hall { filter: brightness(.08) saturate(0); animation: sp-flicker 1.3s steps(1) forwards; }
+@keyframes sp-flicker { 0% { filter: brightness(.6); } 12% { filter: brightness(.1); } 22% { filter: brightness(.45); } 30%, 100% { filter: brightness(.06) saturate(0); } }
+.sp-ghost { position: absolute; top: 30%; left: -20%; font-size: 64px; opacity: 0; pointer-events: none; filter: drop-shadow(0 0 14px #fff); }
+.game-shifty-portraits[data-phase=dark] .sp-ghost { animation: sp-float 1.3s ease-in-out forwards; }
+@keyframes sp-float { 0% { left: -20%; opacity: 0; } 25% { opacity: 1; } 75% { opacity: 1; } 100% { left: 105%; opacity: 0; } }
+.game-shifty-portraits[data-phase=ready] .sp-hall { filter: brightness(.5); }
+.sp-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.sp-players .chip { color: var(--ink); }
+.sp-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.sp-st { font-size: 12px; color: #6a5a60; } .sp-st:empty { display: none; } .sp-st.in { color: #1d8a37; } .sp-st.bad { color: #c02040; }
+.sp-note { margin: 0; text-align: center; font: 800 16px/1.25 var(--font); color: #f6eaff; max-width: 600px; min-height: 1.3em; text-shadow: 0 1px 0 var(--ink); }
+.game-shifty-portraits[data-phase=end] .sp-hall, .game-shifty-portraits[data-phase=end] .sp-banner { display: none; }
+.game-shifty-portraits[data-phase=end] .sp-players { margin-top: 14vh; }
+.game-shifty-portraits[data-phase=end] .sp-players .chip { font-size: 20px; }
+.game-shifty-portraits.watching .sp-hall { width: min(100%, 1100px, calc((100dvh - 220px) * 1.2 * var(--cols, 3) / 2)); }

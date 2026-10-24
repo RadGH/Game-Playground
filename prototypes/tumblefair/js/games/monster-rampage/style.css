@@ -1,0 +1,8 @@
+/* Monster Rampage: the tip pill under the score bar. Nothing here takes taps. */
+.game-monster-rampage .mr-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); pointer-events: none; white-space: nowrap; max-width: 94vw;
+  padding: 5px 14px; border-radius: 999px; background: #e8f6ff; border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 900 16px/1.2 var(--font); }
+.mr-pill.warn { background: #ffb020; animation: mr-throb .5s ease-in-out infinite alternate; } .mr-pill.rise { background: #3d9be8; color: #fff; -webkit-text-stroke: .6px var(--ink); }
+.mr-pill.out { background: #ffd23f; }
+.season-halloween .mr-pill.rise { background: #4fdc6a; color: var(--ink); -webkit-text-stroke: 0; } .season-halloween .mr-pill.warn { background: #b38dff; }
+@keyframes mr-throb { to { transform: translateX(-50%) scale(1.08); } }
+@media (max-width: 520px) { .game-monster-rampage .mr-pill { top: calc(var(--st) + 52px); font-size: 14px; } }

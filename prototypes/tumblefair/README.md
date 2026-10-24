@@ -114,7 +114,7 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
 
 ## Minigames
 
-85 games (12 of them Halloween-only, see "Holidays"). Fishing (2026-10-23) added 4 — Reel Rumble, Pier Pressure, Net Gains and Glimmer Ice (see "Fishing" below). Golf (2026-10-23) added 4 — Putt Party, Long Drive, Chip-In Challenge and Halloween's Haunted Hole — with shared ball physics in `js/games/golf-kit.js` (a small same-input-same-output 2D rolling model: friction, wall/bumper/ball bounces, ramps, slope patches, windmill paddles, cup capture under a speed, aim help), the putting match flow in `js/games/golf-putt.js`, and the putting view + HUD in `js/games/golf-view.js` / `golf.css`. Round 8 (2026-10-22) added 20: six boss fights in the spirit of Dragon's Weak Spot (Golem Smash, Kraken Cove, Sky Serpent, Goblin King's Crown, and Halloween's Pumpkin Knight and Witch's Tower — shared helpers in `js/games/boss-kit*.js`), seven arena games (Hilltop Hold, Thin Ice, Pillow Fight, Firefly Catch, Spotlight Dance, and Halloween's Bat Swarm and Skeleton Stack) and seven tap games (Odd One Out, Crow Count, Higher or Lower, Shape Sorter, Number Climb, and Halloween's Potion Mixer and Mummy Wrap; `tools/build-fa-icons.mjs` copies in the Font Awesome Pro icons they use). Round 5 (2026-10-22) added 12 (Tiptoe Tiger, Hay Bale Scramble, Fizzpop Pass, Bumper Bash, Sheep Shuffle, Mole Mallet, Rope Rumble, Lantern Leap, Jellybean Jar, Quick Draw, Pin the Tail, Size Up — Size Up draws 153 Font Awesome Pro icons, copied in by `tools/build-size-up-icons.mjs`). Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
+127 games (Round 11 added 13 and round 12 added 29 — see those sections; 22 are Halloween-only, see "Holidays"). Fishing (2026-10-23) added 4 — Reel Rumble, Pier Pressure, Net Gains and Glimmer Ice (see "Fishing" below). Golf (2026-10-23) added 4 — Putt Party, Long Drive, Chip-In Challenge and Halloween's Haunted Hole — with shared ball physics in `js/games/golf-kit.js` (a small same-input-same-output 2D rolling model: friction, wall/bumper/ball bounces, ramps, slope patches, windmill paddles, cup capture under a speed, aim help), the putting match flow in `js/games/golf-putt.js`, and the putting view + HUD in `js/games/golf-view.js` / `golf.css`. Round 8 (2026-10-22) added 20: six boss fights in the spirit of Dragon's Weak Spot (Golem Smash, Kraken Cove, Sky Serpent, Goblin King's Crown, and Halloween's Pumpkin Knight and Witch's Tower — shared helpers in `js/games/boss-kit*.js`), seven arena games (Hilltop Hold, Thin Ice, Pillow Fight, Firefly Catch, Spotlight Dance, and Halloween's Bat Swarm and Skeleton Stack) and seven tap games (Odd One Out, Crow Count, Higher or Lower, Shape Sorter, Number Climb, and Halloween's Potion Mixer and Mummy Wrap; `tools/build-fa-icons.mjs` copies in the Font Awesome Pro icons they use). Round 5 (2026-10-22) added 12 (Tiptoe Tiger, Hay Bale Scramble, Fizzpop Pass, Bumper Bash, Sheep Shuffle, Mole Mallet, Rope Rumble, Lantern Leap, Jellybean Jar, Quick Draw, Pin the Tail, Size Up — Size Up draws 153 Font Awesome Pro icons, copied in by `tools/build-size-up-icons.mjs`). Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
 brawler, Fling Ring — toss-out, Ring-a-Ding Rumble — boxing, Costume Catwalk — dress-up runway) and every unbuilt game
 of the design document's 30-game list. Several were tuned against perfect bots (Kitchen Catastrophe targets, Castle
 Defense waves, Dragon's Weak Spot): ease them after a real play-test if they feel hard. Round 5 (2026-10-22) eased those three by about one step
@@ -145,7 +145,7 @@ a second set).
 | `draw-the-disaster` | screen | a private prompt (`data/prompts.json`, 135), 45 s drawing on your phone, anonymous gallery vote (not your own), a rule-based judge's ribbon (+1) breaks 2-player ties; avatar portraits on every card |
 | `memory-heist` | screen | study a vault of 9-16 treasures, then 5 quick questions; speed scores more |
 | `circuit-scramble` | screen, co-op | everyone turns only their own tiles to connect the battery to the bulbs; 6 boards, clear the goal together |
-| `laser-limbo` | arena | beams sweep a round stage: A hops the low ones, hold B to duck the high ones (slower); one touch and you're out; last one standing |
+| `laser-limbo` | arena | beams sweep a round stage: A hops the low ones, hold B to duck the high ones (slower); one touch and you're out; last one standing; **Round 12:** one DODGE button that hops or ducks for you |
 | `cannonball-catch` | arena, co-op | stand in the landing ring to catch (A = dive); big balls need two catchers; misses cost the castle hearts; 4 waves |
 | `balloon-stampede` | arena | pop your colour (+1) and gold (+3); someone else's colour gives them the point; A = dash/barge; solo adds grey decoys |
 | `caption-clash` | screen | one silly picture for everyone (`data/scenes.json`, 42 scenes drawn from SVG props in `kit.js`); 40 s to write a caption (80 letters, cleaned; "Give me a starter" offers 3 openers), anonymous vote (not your own), points = votes + one judge's ribbon by a printed rule (shortest / most same-letter words / most words; tie = finished first) |
@@ -158,13 +158,13 @@ a second set).
 | `costume-catwalk` | screen | a theme card (`pieces.js`: 34 themes, each loving two of eight style tags) and a private tray of ~22 random Chibi 2 pieces in random colours (hat, top, legs, feet, cape, prop, extra, hair dye); 40 s to dress a runway model (live 2D paper doll), pick a pose; then each outfit walks a 3D catwalk on a random anonymous body and poses; vote (not your own; 2 players may vote both) + one judge's ribbon by a printed rule (most theme pieces / most in one colour / most colours; tie = ready first); solo: judge scores theme pieces +2 for three in one colour. The outfit is temporary: piece indexes on the wire, rebuilt on every browser, never touches the real look |
 | `one-button-orchestra` | screen | one big button: notes fall to a line, tap on the beat; seeded chart in four sections (on the beat, eighths, off-beats, busy finale), WebAudio backing + a tick on every note; perfect 100 / good 50 x combo (x2/x3/x4 at 8/16/24); timing judged ON THE PHONE against its audio clock, the server only accepts possible verdicts (each note once, never before its time); a 3D bandstand of everyone's characters with drum / chimes / gong / bongos; solo = score attack with a grade |
 | `going-going-gone` | screen | 5-lot auction paid with ONE pool of 20 energy, all lots shown up front: secret bids, revealed together; highest bid wins and pays (tie splits the points), the mystery lot's worth (0-10) shows when sold, the cursed lot (-4) goes to the LOWEST bid and everyone pays; RUMMAGE: mash for +1 energy per 4 taps (3 a round) but everyone sees you rattling; ties on points go to energy left; solo bids against Auntie Gavel (CPU) |
-| `portal-routing` | screen, co-op | a marble rolls by itself along rails broken by chasms; same-letter portals carry it across; gates (junctions) belong to one player each, who taps to flip them (big "Gate 2 → right" buttons on the phone, the gate ringed on the board); a wrong arm leads to a pit (back to the start) or a shut arm bounces it back; 6 stages, at least one gate per player (fewer players = more gates each); each stage is built route-first and checked with `runBall` (solves with the right settings, not with the starting ones); clear the goal number together |
+| `portal-routing` | screen, co-op | a marble rolls by itself along rails broken by chasms; same-letter portals carry it across; gates (junctions) belong to one player each, who taps to flip them (big "Gate 2 → right" buttons on the phone, the gate ringed on the board); a wrong arm leads to a pit (back to the start) or a shut arm bounces it back; 6 stages, at least one gate per player (fewer players = more gates each); each stage is built route-first and checked with `runBall` (solves with the right settings, not with the starting ones); clear the goal number together; **Round 12:** a "where it goes now" trail, 10 faster stages, goal 4/6/8 |
 | `word-relay` | screen | everyone races on the same prompt: a word starting with the last letter of the chain's word AND obeying a rule (contains R, no E, 6+ letters, double letter… changes every 2 words); score = length, first good word +3 and becomes the next link, others get a few seconds to add theirs; no word twice; live ticks as you type, a refused word says why on your phone only; dictionary `words.js` = 17,000 common words (wordfreq rank x SCOWL-50 x CMUdict, minus a blocklist; rebuild with `tools/build-words.py`); a letter + rule pair is only asked when 20+ unused words fit; solo races Quill (CPU owl) |
 | `safecracker` | screen | crack your own row of 5 safes (3-5 numbers, later ones may repeat): each guess answers RIGHT (right number, right place) and MOVED (in the code, wrong place) as dots + rings + words; out of tries = the safe jams (3 s) and gets a new code; LISTEN shows one number in place for -3 points and a 2.5 s lockout; pay = worth + 1 a try left, +5 to the first to open each safe; the TV shows everyone's answers, never their numbers; solo races Nimble Nell (CPU) |
 | `wobble-tower` | arena | each player stacks their own candy-block tower: a block swings over the top, one big DROP button lets it fall; dead centre = PERFECT (steadies the tower, block grows back), a little off = it leans, further off = the overhang is sliced off; wobble builds with height and lean and topples the top third at 1 (then you keep building); characters ride a lift beside their tower; the press is judged at the swing phase the phone SAW (act `drop` [block, phase], accepted within 0.7 s); tallest at 45 s; solo = score attack; a phone with 3-4 towers centres on its own |
 | `rope-bridge-panic` | arena, co-op | three plank-and-rope bridges over a gorge (seeded lengths, weak planks, pre-broken holes); planks wear when walked, fast when stood on or shared by two or more, A = hop (thumps the landing); each bridge tips toward the weight on it plus warned gusts — tip it fully and everyone not on the high side falls (back to the start of that bridge); everyone across = success; order = who made it first; score = bridges crossed; 50 s |
 | `slippery-delivery` | arena | pie carts on a wet square (kart steering, low grip; A = brake): stop at the bakery counter to stack up to 5 pies, deliver at any of three doors (1 a pie, +2 for a full five, the moving RUSH door doubles); hard bumps on walls/crates cost pies, rolling barrels and spinning signs knock you back (-2), cart crashes cost both a pie; 60 s; solo = score attack with medal targets 10/20/30 |
-| `tile-flip-race` | screen | 7x7 board (mirrored both ways: plain 1, star 2, gem 3, rocks), everyone starts on a home corner; every 2 s all picks flip together: one tile next to your land, free or a rival's (never a home corner); two picks on the same tile bounce; score = tile values + 1 a tile of your biggest joined-up patch; 20 flips; solo races Tumbleweed (CPU) |
+| `tile-flip-race` | screen | 7x7 board (mirrored both ways: plain 1, star 2, gem 3, rocks), everyone starts on a home corner; every 2 s all picks flip together: one tile next to your land, free or a rival's (never a home corner); two picks on the same tile bounce; score = tile values + 1 a tile of your biggest joined-up patch; 20 flips; solo races Tumbleweed (CPU); **Round 12:** a pick is a TARGET anywhere; your land grows one tile toward it each flip |
 | `monster-forecast` | screen | one goofy 3D monster per game (`monsters.js`: 4, built from plain shapes, 3 moves each with 2 tells and one answer); each round a tell plays (crouch, eyes glow, big breath…), everyone secretly picks DODGE / BLOCK / COUNTER, then the move and every pick show together; right = 3 (+1 from a third in a row); rounds 1-3 big tell + caption, 4-6 quicker, 7-8 fake-outs (the LAST tell is true); 8 rounds; players' characters act out their picks; solo = score attack |
 | `treasure-map-bluff` | screen | 5 rounds, 4 routes on a parchment map: 1 treasure, 1-2 traps; each phone privately sees 2 routes; post up to 3 canned claims a round ("Route B is safe!", true or not) and secretly pick a route; the 12-gold pot is split between finders, traps -4 (never below 0); the reveal stamps every claim TRUE or FIB; solo shares the map with Captain Squawk (CPU parrot, honest about half the time) |
 | `auction-of-chaos` | screen | 6 curios from `items.js` (57, each with a value on paper, tags, a clue and a hidden twist: eats your best item, melts next to hot things, goes to the poorest rival, +1 a chip kept…); 15 chips for the whole auction, secret bids revealed together (tie = fewer prizes, then more chips, else unsold); the finale reveals every twist and appraises each haul; solo bids against Baron Bidwell (CPU) |
@@ -173,21 +173,21 @@ a second set).
 | `two-truths-one-goblin` | screen | the Teller rotates (4 rounds, 3 for 3 players): dealt 2 TRUE claims and 2 possible GOBLINS (`cards.js`, 122 cards x 2 wordings, truth decided by the deal); privately plants one Goblin, picks wordings, reorders, Ready; others tap the Goblin (changeable): catch +2, fastest catch +1 (2+ guessers), Teller +2 a fooled guesser; tie = least time on catches; solo: 5 rounds against The House, whose Goblin is usually its longest claim |
 | `kitchen-catastrophe` | arena, co-op | a fair food stall: orders (lemonade, corn dog, candy floss, combos) queue at the hatch with patience timers; eight ingredient stations round the kitchen, each OWNED by one player (colour mat + shape tag; dealt evenly, so fewer players = more each); A at your station grabs, A at the tray adds — the oldest order is built in recipe order and a wrong step spoils the tray (and costs patience); fill the target (solo 6 → four players 10) in 75 s; score = parts you added; solo owns all eight with more patient customers |
 | `castle-defense` | arena, co-op | a cardboard castle courtyard; scripted waves (data in `RULES.waves`, scaled by headcount) of googly blobs, hoppers and horned stompers waddle up to bash three wall stretches; man a cannon (stick aims, A fires, B steps off), carry ammo crates (+3) and planks (repair) from the piles, bonk creatures at the wall with empty hands; a broken stretch lets creatures through to the keep (5 hearts); hold to the bell or clear all six waves; score = kills + loads + repairs |
-| `defuse-together` | screen, co-op | a confetti cannon with 4 modules (wires / picture keys / switches / word buttons, `makeModule` + reference `solve`); the DEVICE passes round the team, the rule book for the module is dealt line by line across everyone else's phones so they must talk; mistakes burn 8 s of the 85 s fuse; solo holds the device plus a short book (3 modules, fewer rules) |
+| `defuse-together` | screen, co-op | a confetti cannon with 4 modules (wires / picture keys / switches / word buttons, `makeModule` + reference `solve`); the DEVICE passes round the team, the rule book for the module is dealt line by line across everyone else's phones so they must talk; mistakes burn 8 s of the 85 s fuse; solo holds the device plus a short book (3 modules, fewer rules); **Round 12: rebuilt** — every module is one lookup, "clue → cut the COLOUR wire" (5 wires; clue = light / picture / number / word), see "Polish and rework" |
 | `dragons-weak-spot` | arena, co-op | a goofy fairground dragon behind the yard: ATTACK phases telegraph fire rings (get out) and a fire sweep (the arc glows, then B = hop as the flame reaches you; a burn costs a team heart, 3 + 1 a player); then it gets DIZZY and four scales open (Sun/Moon/Star/Leaf, colour + picture, each with a pad): hit them in a secret 2-4 step order, each phone privately shows only SOME steps (rotating holders), so call them out; stand on the pad + A = 10 damage, the whole order adds a bonus, the wrong scale makes it flinch (window -1.5 s); beat its health before the bell; scores = damage; solo sees the one step it is on |
 | `ghost-photographer` | arena, co-op | invisible ghosts drift round a funhouse floor of nine named rooms; each ghost's clue is on ONE phone (room it is in / footprints on a mini map / a cold-spot thermometer from your own character); one player carries the LANTERN (passes every 12 s): ghosts near it show for everyone and slow, B = big flash; everyone else A = snap the frame in front of them; catch the goal (50-75% of the ghosts by team size); a catch = 2 to the photographer, +1 clue holder, +1 lantern if lit; solo carries a smaller lantern AND the camera with every clue |
-| `storm-shelter` | screen, co-op | three meters (Heat, Roof, Food, 0-10, start 6); 13 beats of 5 s: an event card (`deck.js`, 45: hit + 2-3 trade-off choices, team vote, tie = first voted) plus wind that grows with team size and the storm; each player plays one card a beat from a private hand of 3 (10 kinds; a meter caps at 10, so talk); any meter at 0 = lost; the beat ends early once all are in; scores = meter points your cards really added; solo holds 4 and plays 2 |
+| `storm-shelter` | screen, co-op | three meters (Heat, Roof, Food, 0-10, start 6); 13 beats of 5 s: an event card (`deck.js`, 45: hit + 2-3 trade-off choices, team vote, tie = first voted) plus wind that grows with team size and the storm; each player plays one card a beat from a private hand of 3 (10 kinds; a meter caps at 10, so talk); any meter at 0 = lost; the beat ends early once all are in; scores = meter points your cards really added; solo holds 4 and plays 2; **Round 12:** no vote any more — the event is the incoming hit; play one card; meters show "6 → 4" |
 | `jellybean-jar` | screen | round 5. 3 rounds of "how many?": a jar of jellybeans, a gumball machine, a paddling pool of rubber ducks or a bunch of balloons (one each round, 18-45 / 50-110 / 110-220 of them), drawn from the seed by `jar-art.js` (hex packing clipped to the container, filled to a level); a big number pad (every digit is a draft, OK locks); the reveal dims everything and lights it up one by one while a counter climbs and every guess waits on a guess-o-meter; closeness 0-10 + exact +5 + closest +5 (ties share); solo = score out of 45 |
 | `quick-draw` | screen | round 5. 7 rounds: wait for the BELL, first tap wins (3, 2nd 1 with 3+ players); fake-outs (hen, balloon pop, cow, the words BALL / BELT, never in the last 0.9 s) and any tap before the bell = out of the round, -1 (never below 0); no clock while waiting. Fair-ish timing: the server rings, each phone times its OWN reaction from the frame it showed the bell, the server keeps that number inside what it saw (no slower than its own count, no more than 0.7 s of lag forgiven, under 90 ms = a guess); solo = points for speed (5 under 0.25 s) |
 | `pin-the-tail` | screen | round 5. 5 rounds in a 160 x 120 SVG paddock: a donkey / pony / goat / pig / cow / sheep shows its tail spot (a star) for 2.6 s, then a trick per round (blurry, hidden, trots across, the paddock spins 180, two animals swap places) and everyone taps where the tail goes (tap again to move, Done locks); 0-10 by distance + closest +3; reveal puts the tail back and every pin in seat colour with name and points; solo = score out of 50 |
 | `size-up` | screen | round 5. 8 quick questions (rounds 4 and 8 have three things): BIGGER / SMALLER / HEAVIER / LIGHTER / FASTER / SLOWER over 153 things in `items.js` (rough real size m, weight kg, top speed km/h for things that move), only asked when values differ 2.5x+ ("bigger" needs size AND weight to agree), close calls preferred; first tap final; right = 5 + up to 5 for speed (phone-timed like Quick Draw); reveal shows real values and "about 7x heavier"; pictures are Font Awesome Pro duotone icons (`icons.js`, built by `tools/build-size-up-icons.mjs`) |
 | `sheep-shuffle` | arena | a meadow with a straw pen in each player's corner (fenced on its two inner sides, gap at the inner corner, flag + painted seat shape + live count); sheep graze and run from anyone within ~3 m, so you herd by walking BEHIND them; A = BAA! scares every sheep in a 50° cone ahead into a sprint (the only thing that moves a penned sheep, so walk into a rival pen and BAA toward its gap to steal); golden sheep count 3; the field restocks; score = what is in your pen at the bell; solo: score attack |
-| `mole-mallet` | arena | a garden lawn with 20 holes; moles pop up all over (4 solo → 10 with four players) and duck back after ~2 s; A swings your mallet at the spot in front of you (a ring there turns gold when a mole is under it): brown +1, gold +3 (quick), black bomb-mole = BOOM, dizzy 1.6 s, no points lost; bonking a player makes them dizzy 1.1 s, then they blink and cannot be bonked for 2.3 s; most points wins; solo: score attack |
+| `mole-mallet` | arena | a garden lawn with 20 holes; moles pop up all over (4 solo → 10 with four players) and duck back after ~2 s; A swings your mallet at the spot in front of you (a ring there turns gold when a mole is under it): brown +1, gold +3 (quick), black bomb-mole = BOOM, dizzy 1.6 s, no points lost; bonking a player makes them dizzy 1.1 s, then they blink and cannot be bonked for 2.3 s; most points wins; solo: score attack; **Round 12:** aim help to the nearest mole within 1.9 m |
 | `rope-rumble` | arena (no stick) | tug of war on a village green, best of three pulls: solo vs Big Barnaby (a CPU strongman), 1v1, a three-way rope star for three, 2v2 for four; tap PULL (or the drum on screen) once per drum beat — a tap is judged ON THE PHONE (perfect = full heave, a bit off = 0.6, extra taps in the same beat do nothing, so rhythm beats mashing) and sent as `pull {n, q}`; drag the ribbon over your chalk line; on time-out the side it leans toward wins; plain A presses without a view are judged on the server's beat |
 | `lantern-leap` | arena | a lily pond between a dock and a reedy bank; lily pads with paper lanterns drift across in four lanes (each its own way), new ones float in and fresh ones bob up in big gaps; a pad you stand on wobbles (turns yellow) then sinks; you ride your pad; A = leap (further than a walk); coins +1 and fireflies +3 sit on pads; fall in = splash back to the dock and lose your streak (4+ in a row = +1 a pickup, 8+ = +2); most points wins; solo: score attack |
 | `tiptoe-tiger` | arena | round 5. creep up a mown strip toward a cardboard tiger on a stage; while it SINGS (back turned, `tunes.js` lullaby) you may walk; the TELL (0.45 s: music scratches off, tail shoots up, red "!", FREEZE! banner) comes before it LOOKS — anyone still moving faster than 0.55 m/s after a 0.35 s grace is roared back to the start line in an arc (and safe until the next song); about one in four tells after the first is a fake-out half-turn; hold A = statue (stock-still); first to the bell wins and ends it, else furthest at the bell; solo = the same race on the clock |
 | `hay-bale-scramble` | arena | round 5. musical bales: a fiddler on a barrel plays a jig (`tunes.js`) while a ring of one-fewer-than-players hay bales turns like a carousel; music stops = ring stops, free bales glow, A beside a free bale sits (first come); left standing = out to the cheer wagon; a fiddle hiccup (music cuts out but the ring keeps turning) catches early presses — A during music = stumble; B = barge (seated players are safe); nobody sat = round again; last one standing; solo: five bales VANISH one by one after the stop, one fewer each time you make it, three tries |
-| `fizzpop-pass` | arena | round 5. hot potato with a cream pie on a picnic lawn (two tables + a party cake to dodge round): bump someone (or A within 1.9 m) to pass; a fresh holder must hold 0.45 s and cannot pass straight back to the giver for 1.6 s; the holder runs 17% faster; hidden fuse 6-11 s, the fizz (sparks, shake, ticks) climbs in 4 steps with a per-round random offset so it is never exact; SPLAT = lose a life (2, or 3 for two players), everyone still standing +1, last one standing +2; out players sit on the OUT blanket; solo plays pass with Dot and Pip (CPU; they juggle a fresh pie for 0.7 s), +1 a CPU splat, 3 lives |
+| `fizzpop-pass` | arena | round 5. hot potato with a cream pie on a picnic lawn (two tables + a party cake to dodge round): bump someone (or A within 1.9 m) to pass; a fresh holder must hold 0.45 s and cannot pass straight back to the giver for 1.6 s; the holder runs 17% faster; hidden fuse 6-11 s, the fizz (sparks, shake, ticks) climbs in 4 steps with a per-round random offset so it is never exact; SPLAT = lose a life (2, or 3 for two players), everyone still standing +1, last one standing +2; out players sit on the OUT blanket; solo plays pass with Dot and Pip (CPU; they juggle a fresh pie for 0.7 s), +1 a CPU splat, 3 lives; **Round 12:** "not back" tag, fizz meter, quicker passes |
 | `bumper-bash` | arena | round 5. bumper cars (`move.mode: 'car'`, drifty grip) in a square rink with bouncy padded walls and a striped pole; ram a car: from behind 3, side 2, nose to nose 1 (the car that was driving into the other harder scores); the hit car spins out and cannot be scored on until it recovers; ★ stars +2, ⚡ bolts = 2.6 s turbo (+1 a hit while charged); fair-organ music; 70 s, most points; solo bashes three drifting target cars (two players get one to fight over) |
 | `trick-or-treat-street` | arena | **Halloween, Oct only** (round 6, `meta.season: 'halloween'`). A moonlit street of candy-coloured houses (5 along the back, 2 down each side); a LIT door glows (warm door, yellow windows, light pool + ring, jack-o'-lantern, a floating sweet over it); A by a lit door = knock: you wait 0.5 s on the step, then a treat (+1/+2/+3, BIG BAR +5) or a harmless trick (a cartoon bedsheet ghost pops out: BOO, spooked 1.1 s and nudged off the step; or slime: slowed 3 s, green puddle); a knocked door goes dark 5-8 s, at most players+2 lit at once; CANDY RUSH in the last 12 s relights doors fast; B = bump: the bumped player spills one candy on the road for anyone to grab (then safe 1.4 s); pumpkin buckets in seat colours fill up; portrait phones follow their own character; solo = score attack, medals 20/35/50 |
 | `ghost-tag` | arena | **Halloween, Oct only** (round 6). A moonlit pumpkin patch with lavender gravestones and jack-o'-lanterns (seeded layout, mirrored left-right, sent as `arena.blocks/posts`), lantern posts and a crooked tree; one round per player, each player starts as the ghost exactly once (2 s counting, eyes covered); ghosts float, glow pale blue, go see-through with sparkles and run 10% faster; a touch turns a human into a ghost (rises 0.8 s); one button A: human = quick dash, ghost = BOO! (nearby humans stumble 0.35 s); humans carry torch beams; points = 1 a second survived as a human + 3 a tag + 5 for the last human standing (still human at the bell, or the last one tagged); solo: bedsheet CPU ghosts drift in (one more every 9 s, each quicker), 3 lanterns (a catch shoos them to the corners), score = seconds survived; `spooky-kit.js` (night lighting that restores the stage, sheet ghost, jack-o'-lantern, glow sprite) is shared with Trick-or-Treat Street |
@@ -201,7 +201,7 @@ a second set).
 | `number-climb` | screen | round 8. Three rounds of one scrambled grid for everyone (normal 3×3, 4×4, 5×5; easy 3,4,4; hard 4,5,5 with numbers drawn at different sizes and angles): tap 1, 2, 3… in order; a wrong (ahead) tap freezes 0.8 s; +1 a number, + the seconds left when you finish, + 5/3/2/1 by finishing place (2+ players); a round ends when everyone is done or on its clock; bars show everyone's climb; TV: the grid big with each player's face on the number they need next; solo = medals |
 | `potion-mixer` | screen | **Halloween, Oct only** (round 8). A witch's kitchen: the recipe card shows 3-6 ingredients in order (Eye of Newt is a cute googly eye; Glow Mushroom, Bat Wing, Spider Silk, Candy Corn, Old Bone, Crow Feather, Moon Dust, Pixie Sparkle, Frog Burp, Acorn Cap, Wiggle Worm, Pumpkin Seed — Font Awesome duotone, each with its name); tap them off the shelf into your smiling cauldron (it takes each colour); a full recipe bottles a potion and the next appears; a wrong one = puff of smoke, start that potion again, 1 s wait; same recipes for all, own pace; easy 5-shelf short recipes, hard 8 and the shelf shuffles every potion; TV: everyone's cauldron with bottles; most potions wins; solo = medals |
 | `mummy-wrap` | screen | **Halloween, Oct only** (round 8). A smiling mummy wobbles in a ring while the loose end of its bandage runs round it; tap WRAP (or the ring, or Space) when the end is in the glowing gap: centre = PERFECT 2 wraps, inside = GOOD 1; then the gap jumps ahead (110-300° from where you hit, seeded offsets); outside = a wrap slips off and you fumble 0.6 s, so mashing loses; the spin speeds up over 40 s; the phone sends WHEN it tapped (`tap {t}`) and the server judges that moment itself (not ahead, at most 1.2 s old, never backwards); a stripe per wrap, then a bow, then a crown; TV: everyone's mummy spinning side by side; easy wide/slow, hard narrow/fast; solo = medals |
-| `golem-smash` | arena, co-op | round 8 boss. A big stone golem stomps after one player at a time (it takes turns), stops and raises both fists while a red ring fills where they will land (1.25 s; 1.5 easy, 1.0 hard), then SLAMS (caught = knocked back + dizzy, nothing lost); from the 2nd turn pebbles rain too (small rings). After each slam it is stuck and a CRACK glows gold on one limb (a fist, a leg or its back — always a reachable spot) with a gold ring + bobbing arrow beside it: stand in it and A to hit (2 + 1 a player hits a crack, 3 solo; hits stay if it closes). Break every crack (6/8/10 by difficulty) before the bell; it never blocks; scores = hits (cracks + rubblings). Round 9: each slam shakes loose RUBBLINGS (clay-orange rock critters; 1 + half the players on normal, capped at 2 + 2 per player) that waddle after the nearest player and bonk them (short stun); A in reach smashes one, landing on one does too; B jumps, and landing on a team-mate's head stuns them a second and bounces you |
+| `golem-smash` | arena, co-op | round 8 boss. A big stone golem stomps after one player at a time (it takes turns), stops and raises both fists while a red ring fills where they will land (1.25 s; 1.5 easy, 1.0 hard), then SLAMS (caught = knocked back + dizzy, nothing lost); from the 2nd turn pebbles rain too (small rings). After each slam it is stuck and a CRACK glows gold on one limb (a fist, a leg or its back — always a reachable spot) with a gold ring + bobbing arrow beside it: stand in it and A to hit (2 + 1 a player hits a crack, 3 solo; hits stay if it closes). Break every crack (6/8/10 by difficulty) before the bell; it never blocks; scores = hits (cracks + rubblings). Round 9: each slam shakes loose RUBBLINGS (clay-orange rock critters; 1 + half the players on normal, capped at 2 + 2 per player) that waddle after the nearest player and bonk them (short stun); A in reach smashes one, landing on one does too; B jumps, and landing on a team-mate's head stuns them a second and bounces you; **Round 12:** a rubbling crumbles after one bonk |
 | `kraken-cove` | arena, co-op | round 8 boss. A round dock in a cove, a googly purple kraken in a sailor hat behind it. Tentacles rise at the edge (2 at once, 3 with 3-4 players, one more after 30 s): a red zone shows the hit first — SLAM = a strip from the edge inward that fills, SWEEP = a curved band with arrows for its direction — then it lands/sweeps (caught = knocked back + dizzy); then it RESTS on the dock with a gold zone round it: A beside it = 1 whack, the 3rd whack counts double and sends it off early. Empty the courage bar (56 normal, x1.3 a player more) before the bell; scores = whacks |
 | `sky-serpent` | arena, co-op | round 8 boss. A paper-lantern sky serpent loops round a floating stone lookout with four harpoon cannons on the rim (a green ring = loaded, grey = reloading 0.9 s). Stand at a cannon, face it (the cannon swivels with you) and A: aim help snaps to it within ~30 degrees and the harpoon curves after it. DIVE: a shadow chases one player for 1.2 s, locks and flashes red, then it swoops through — B = dash out; after a dive it skids across DAZED for 2.2 s (harpoons do double). Beat it before the bell; scores = damage |
 | `goblin-kings-crown` | arena | round 8, everyone vs one boss but the score is yours. A Chibi goblin king in royal robes waddles round a treasure courtyard; A next to him = 1 point, the FINAL bonk +5 and ends the game; he never blocks. He lobs barrels (red landing ring, 1.2 s), does a royal hop after a flurry of bonks or every 6 s (landing ring), and whistles up two pickpocket sneaks (red rings) that run at whoever has the most points and steal 2 — bonk one first for +1. Most points wins; solo = score attack, every second left when he falls is a bonus point |
@@ -209,7 +209,7 @@ a second set).
 | `witchs-tower` | arena, co-op | **Halloween, Oct only** (round 8 boss). The round top of a crooked tower at night; a witch on a broom loops a figure-eight overhead dropping potions: a shadow grows where one will land and its ring turns green and pulses in the last 0.9 s — stand in it and A to catch (early presses do nothing). A again throws it back up: it flies straight to her if she is within ~35 degrees of your facing or right above you (purple 1 damage, gold 2; she spins dizzy and stops dropping for 1 s). Missed potions burst into sticky puddles (7 s, slow you); one landing on you splashes you. Scores = 1 a catch + 2 a hit (3 gold) |
 | `hilltop-hold` | arena | round 8. A round meadow with six soft hills (one shared `groundAt()` height function: the sim sets `body.y`, the view bends the mesh); one hill wears the glowing ZONE (disc + light column): alone in it = 2 pts/s, two or more = red "SHARED", nobody scores; a dashed turning ring + "Next hill in N" warns 2.5 s before it hops (~every 10 s, never the same hill); A = shove (nearest player in a wide cone, aim help turns you, 1 s cooldown); difficulty = zone size + hop rate; solo: hops every ~5 s to a hill away from you, medal scores |
 | `thin-ice` | arena | round 8. A frozen pond of hexagon tiles (61 for 1-2 players, 91 for 3-4: `pond(rings)`, the arena is sent from `init`); slippery (accel 4.2); standing on a tile strains it, then it CRACKS (three crack overlays, it shivers) and drops into the water; skating across is safe, stopping is not (strain heals fast); 2.5 s "Ready…" grace; after ~16 s the pond cracks on its own, faster and faster; B (or A) = slide dash that bumps others; fall in = out; last one standing (falls on the same step tie); solo: survive for seconds + snowflakes (+3) |
-| `pillow-fight` | arena | round 8. A giant bed (patchwork quilt) high over a bedroom floor, no edge; A = pillow swing (wide cone, aim help, pillow on the hand bone, feather bursts from one instanced pool); every bop raises the target's WOBBLE % (shown under their feet) and knock-back grows with it; off the bed = 2 s on the rug, −1 (not below 0), wobble back to 0, last bopper within 3 s gets +1; B = hop (a short straight slide); solo: sleepwalkers in nightcaps (`createActor`, Sleepyhead costume) climb on and shuffle at you, a bump wobbles you, bop them off for points |
+| `pillow-fight` | arena | round 8. A giant bed (patchwork quilt) high over a bedroom floor, no edge; A = pillow swing (wide cone, aim help, pillow on the hand bone, feather bursts from one instanced pool); every bop raises the target's WOBBLE % (shown under their feet) and knock-back grows with it; off the bed = 2 s on the rug, −1 (not below 0), wobble back to 0, last bopper within 3 s gets +1; B = hop (a short straight slide); solo: sleepwalkers in nightcaps (`createActor`, Sleepyhead costume) climb on and shuffle at you, a bump wobbles you, bop them off for points; **Round 12:** only a bop knocks you off; falls cost nothing |
 | `firefly-catch` | arena | round 8. A meadow at dusk (stage lights dimmed and restored; Halloween uses the shared dressing); fireflies are blinking glow points that wander and dart away from people (harder = jumpier); golden ones are quicker and worth 3; A = net swing (cone in front, aim help, a faint wedge on the grass shows your reach); B by a bush = shake out 3 more (sometimes a golden one), the bush refills in ~10 s; portrait phones follow their own character; solo: medal scores |
 | `spotlight-dance` | arena | round 8. A light-up club floor, mirror ball, coloured spotlights gliding about; a beat ring shrinks onto each light's edge on the beat (66 steps a minute = every 2 beats of the fair-organ tune, started on a beat); stand in a light and press A on the beat: timing is judged on the PHONE's clock (`act('step', {t})`, like Apple Bobbing) — perfect +1 bonus, streak ×2/×3/×4 after 4/8/12; early/late/out of the light/twice in a beat/skipped beat = streak gone; two lights merge into one big one every ~12 s and split again; difficulty = timing window, light size and speed; solo: medal scores (a perfect dancer gets ~300) |
 | `bat-swarm` | arena | **Halloween, Oct only** (round 8, `meta.season`). A moonlit cobbled courtyard with a jack-o'-lantern piñata on a striped party arch that bursts wrapped sweets (lollipops = 3); flocks of cute bats sweep across in FORMATIONS — lane, column, two lanes, criss-cross, a wall with one gap (hard: wall + column) — always shown first as glowing purple stripes with arrows sliding the way they will fly (2.0/1.6/1.25 s warning by difficulty); a bat bump = dizzy 1.2 s, drop up to 2 sweets for anyone, then safe 1.9 s; A = dash; bats cast shadows; most candy wins; solo: medal scores |
@@ -481,6 +481,692 @@ The owner's own asks and the rest of the reports (`js/sim/room.js`, `js/games/ta
 - **Time to read the rules (#27):** the intro card waits up to 25 s (was 7) and starts as soon as everyone taps "I'm
   ready" ("Starts when everyone is ready (or in 24) · 1/2 ready").
 - **My games** is also on the title screen.
+
+## Round 11 (2026-10-24)
+
+### Basketball
+
+Owner: "Generate a few basketball themed minigames". Three games that play differently, all with one skill a new
+player gets in five seconds — HOLD a button and let go while the meter is in the green band:
+- **Hoop Frenzy** (`hoop-frenzy`, screen, 1-4, 45 s): a fairground hoops booth, one lane + hoop each, everyone at
+  once. After every shot you step to the next mark (close / middle / far = 3 points / middle), so the green band moves.
+  3 makes in a row = ON FIRE (double until you miss); halfway the hoops start to slide (the ball leads a moving hoop
+  only partly, so let go as it slows at the end of its slide); the last 10 s are gold money balls (double again). The
+  meter runs on the phone; it sends `shoot { p, ht }` (power + the hoop clock it saw) and the server flies the shot.
+  Solo: medal scores 40 / 80 / 130.
+- **Court Clash** (`court-clash`, arena, 1-4, 75 s): two-hoop basketball. Teams by seat like Net Gains (red + green
+  shoot right, blue + pink left). With the ball: HOLD A + let go in the green (a meter floats by your head; outside
+  the arc is 3), TAP A = pass, near the rim any press is a layup. B = jump (a jumping defender near a shooter can swat
+  it) and steal (from behind nearly always works; from the front you may whiff and stumble). Just got the ball = 1 s
+  nobody can steal it. A lone player against two gets a CPU teammate (Dunk / Swish) — so 3 players play 2v2, not the
+  1v2 in the brief; solo is 1v1 against Hopper. A without the ball while your CPU teammate has it = "pass it here".
+  The tip-off bounces toward a random side (the first version always gave red the first ball: a 13-7 edge over 24
+  bot games).
+- **Letter Shot** (`letter-shot`, screen, 1-4, 90 s): call-your-shot. The setter taps one of 7 marks on a little
+  court map, then shoots; if it drops, EVERYONE ELSE shoots that mark at the same moment (no queue — this is what
+  keeps the dead time short) and each miss earns the next letter of F-A-I-R; 4 letters = out, last one in wins.
+  Setter misses = nothing, the next player sets. Timers: 5 s to pick, 6 s to shoot (then the clock throws a bad one
+  for you). In the second half a missed copy costs TWO letters, so most games finish with one player left; at the bell
+  the fewest letters wins. Solo: you against Rimsby (CPU). Scores are letters (`scoring: 'survival'`, fewer = better).
+- **`js/games/hoops-kit.js`** (pure, sim + view): a real ball flight — gravity, a rim you can bounce off, a backboard
+  you can bank off (both faces: a ball over the top lands behind it), the floor, walls; `flyShot` returns the path
+  every 0.05 s, which the server sends so every phone draws exactly the flight that was judged (no `Math.sin`
+  differences between browsers). The meter is forgiving on purpose: `q = (p - idealPower(d)) / tolFor(d, tol)` and
+  the release speed is the ideal one nudged by q, so |q| <= ~0.8 drops from any distance and the green band is what
+  the rules judge. A fairground hoop is roomy (r 0.3 m), the rim is soft (e 0.2) and a ball dropping onto it is drawn
+  in a little. `hoops-view.js` (hoop / ball / flame meshes, the HOLD panel) and `hoops.css` are the browser side.
+- Lobby difficulty: meter speed, band width, how far the Frenzy hoops slide, how good the CPUs are. Halloween:
+  pumpkin balls, purple court / booth, a slime-green net, Letter Shot spells B-O-O-! (looks only; all three are in
+  `tests/halloween-reskins.test.js`).
+- Tests: `tests/{hoop-frenzy,court-clash,letter-shot}.test.js` (whole bot games for 1-4 players, a good shooter beats a
+  sloppy one at every difficulty, determinism, small state); UI bots for Hoop Frenzy and Letter Shot in `tests/helpers.js`.
+- Also fixed: the vote's "Favour: Funny" slot could pick a game nobody had called funny (it drew from the top four
+  even when only one had that reason); it now draws only from games that have it (`room.js` `topRated`).
+- Card art: Codex (`assets/art/card-{hoop-frenzy,court-clash,letter-shot}.webp`).
+
+### Silly games
+
+Owner: "Generate … 10 other minigames based on feedback." The live ratings say players love SHORT, physical, FUNNY
+games with one timing or aim skill (Pin the Tail 9👍/0, Apple Bobbing 9/1, Pumpkin Carve-Off 7/1, Costume Catwalk,
+Snowball Showdown, Size Up) and dislike long talk/co-op puzzles (Defuse Together 0/3, Two Truths 1/2). Five of the ten,
+each one verb, 40-70 s, 2-3 lines of how-text, built for a 402x684 phone:
+- **Balloon Darts** (`balloon-darts`, screen, 1-4, ~51 s): one tall cork board, balloons drifting up it, everyone
+  throwing at the SAME balloons. Drag to aim (the crosshair sits above your finger on touch), let go to throw; a dart
+  takes 0.25 s to land, so lead the balloon. Red 1 / blue 2 / green 3 / gold 5; the same colour again chains x2, x3,
+  x4; the black BOOM balloon costs 5 and breaks the chain. Balloon paths are fixed functions of the clock (in init),
+  the phone sends `throw { x, y, t }` and the server lands it at t + 0.25 where the balloons were then (Apple Bobbing's
+  timing rule), first dart to land wins the balloon. Difficulty: rise speed, spawn rate, boom share, hit radius.
+  Solo medals 25 / 50 / 80.
+- **Photo Booth** (`photo-booth`, screen + 3D, 1-4, 37-46 s): everyone's Chibi character stands in a curtained booth.
+  A pose card flashes ("Arms up!", "Royal bow!" = crouch + wave, "Party time!" = arms up + silly…) and you switch on
+  its buttons (Arms up / Crouch / Wave / Silly face, tap = on/off) before the FLASH (2.2 / 1.6 / 1.25 s). Exactly the
+  card = 3 points (2 if you got there in the second half), anything else 0 — and each character plays the pose its
+  player actually held (every one of the 16 masks has a Chibi 2 emote clip in `POSES`), so wrong answers are the funny
+  part. Ten photos, then the strip flips through them all with a ✓/✗ film strip per player. `set { m, t }`; the
+  server judges LAG_S after the flash with the last change stamped at or before it. Solo medals 12 / 21 / 27.
+- **Duck Derby** (`duck-derby`, screen, 1-4, ~35-52 s): rubber ducks down a 100 m stream, a lane each. LEFT / RIGHT
+  alternately in a steady beat (strokes 0.26-0.5 s apart are full power; mashing under 0.16 s is 10%; the same side
+  twice is a half stroke that steers). Rapids push you sideways toward rocks (a bonk stops you 0.6 s and bounces you
+  to the middle). Both buttons within 0.1 s = SPLASH: the nearest duck just ahead paddles at half power for 1 s (4 s
+  cooldown). A stroke carries the phone's own time, so the rhythm is measured as tapped. A bar across the top shows
+  everyone's duck. First across wins (scores are metres). Solo: race Puddles, a CPU duck (steadier on hard).
+- **Water Balloon Ambush** (`water-balloon-ambush`, arena, 1-4, 60 s): a fenced farmyard with eight mirrored hay
+  bales. Walk into one of four buckets for balloons (carry 3; a bucket refills one every 2.4 s), HOLD A to wind up (a
+  ring shows where it lands, 2.5-10 m), let go to throw. It bursts on landing or on the first bale in its way
+  (`baleHit`), soaking anyone in the splash: a point to the thrower, half speed (F.SLOW) for 1.6 s, 1.4 s before you
+  can be soaked again. Every burst leaves a puddle; stand in one to scoop a balloon. B = dodge. Difficulty = the aim
+  help's cone. Solo: soak the scarecrows. Ties go to whoever was soaked less.
+- **Sketchy Copy** (`sketchy-copy`, screen, 1-4, ~60-72 s): a doodle shows for 4 / 3 / 2.2 s, then you draw it from
+  memory (10-12 s, one pencil, Clear, Done). No voting: `likeness()` fits both outlines into a 200 box (size and place
+  don't matter), lays them on a 48x48 grid with a one-cell allowance and takes F1 of "your ink near the doodle" and
+  "the doodle near your ink", with a penalty for ink far beyond the doodle's length; 30% raw is the zero (a wrong
+  shape lands about there), so a careful copy reads ~80%, a sloppy one ~40%, a scribble 0. Up to 10 points a doodle,
+  three doodles getting harder (24 in `shapes.js`, levels 1-3). The gallery shows each original beside everyone's
+  copies. Strokes travel like Draw the Disaster's (hex points in chunks).
+- Halloween (looks only, same rules; all five are in `tests/halloween-reskins.test.js`): night board + pumpkin-faced
+  balloons, a purple booth with bats, a moonlit stream and ducks in witch hats, slime balloons + pumpkin buckets and
+  scarecrows, and Sketchy Copy swaps to 12 spooky doodles (`SHAPES_HW`, same levels in the same order, so the same
+  rng picks).
+- Tests: `tests/{balloon-darts,photo-booth,duck-derby,water-balloon-ambush,sketchy-copy}.test.js` (whole bot games
+  for 1-4 players, a good player beats a sloppy one at every difficulty, determinism, small state); UI bots for the
+  four screen games in `tests/helpers.js`. Card art: Codex (`assets/art/card-<id>.webp`).
+
+### Fair games
+
+The other five of the owner's ten ("Generate … 10 other minigames based on feedback"), built from the same ratings:
+one clear verb, short, physical or memory, close funny results. Five classic fair stalls, 45-70 s, 3 lines of how-text,
+phone portrait first:
+- **Bumper Boats** (`bumper-boats`, arena, 1-4, 64 s): round tub boats on a round pond (drifty water: `move.accel`
+  2.4), the stick paddles and A squirts a water cannon the way you point — it shoves any boat in the jet away (a short
+  stun so the push carries), nudges you back, and marks you as the last one to touch it. Points come from sending
+  OTHER boats into trouble within 4 s of touching them: the whirlpool in the middle pulls boats in (down the drain =
+  +3 to the pusher, -1 to the boat, which pops up at the rim 1.6 s later); three fountains glide round the rim,
+  bubble, then spout and fling anyone on them (+2 to the pusher); rubber ducks are +1. Bumps also give the credit (the
+  boat that was driving harder). Solo: three CPU duck boats (one with two players). Difficulty: whirlpool pull and
+  fountain pace.
+- **Downhill Derby** (`downhill-derby`, arena, 1-4, 64 s): soapbox carts down a 284 m hill (`move.mode: 'car'`; down
+  the hill is up the screen). Hold A to TUCK (F.BOOST, x1.42) — but a tucked cart turning faster than 0.55 rad/s builds
+  wobble and tips over at 1 (1.3 s on its side). Hay bales are `arena.blocks` (sent in init, so the phone predicts its
+  own crash; a crash is a sudden loss of speed next to one); puddles are F.SLOW; a ramp at speed is 0.6-1 s of air
+  over the puddle behind it and a landing boost. First down wins; once someone finishes the rest have 12 s; scores are
+  metres down the hill (finish order first). The camera follows your own cart on an upright phone and the pack on a
+  TV; a strip on the right shows everyone's place. Solo: race Pip Pedalwell and Granny Gearbox (faster on hard).
+  `driver()` in the sim is the CPU and the tests' bot.
+- **Carousel Recall** (`carousel-recall`, screen, 1-4, 84 s): a merry-go-round lights its animals in order, each with
+  its own note, then everyone taps them back at once on a big 3x2 (or 4x2) grid of animal buttons. The SAME tune every
+  round with one more animal on the end (start 2 / 3 / 3). A slip = out for that round only; 1 point a right tap, +2 for
+  the whole tune, +1 to the first to finish. Rounds stop when the next one would not fit the clock. Easy 5 animals and
+  a slower show, hard 8 and quicker. Solo medals 20 / 36 / 52.
+- **Pie Toss** (`pie-toss`, screen, 1-4, 54 s): painted face cut-outs slide along three rails of a pie booth (back
+  small and quick, front big and slow) or pop up from behind the counter; tap the booth to throw a pie there. It lands
+  0.42-0.56 s later, so you lead the face. Plain 1, the gold face 3 (quicker), Granny's cut-out -3 (never below 0).
+  Everyone throws at the same faces, so a splat can be stolen. One pie per 0.5-0.65 s. Timing like Apple Bobbing: the
+  whole show is a fixed function of the clock (in init), the phone sends `throw { x, y, t }` and the server lands the
+  pie at t + flight against where the faces were then. Solo medals 12 / 22 / 32.
+- **Ring Toss** (`ring-toss`, screen, 1-4, 66 s): a table of 18 bottles in three rows slides side to side. Two taps
+  (Long Drive's meters): the AIM needle sweeps, then the POWER bar runs while a marker slides up your dashed aim line;
+  the ring flies 0.8 s while the table keeps moving, so lead it. Ringer = front 1 / middle 2 / back 3 / the gold bottle
+  8; a near miss clinks off the rim and about one rim hit in ten bounces onto the next neck (a lucky ringer). Wind from
+  ring 5, the same for everyone, shown as an arrow. Eight rings each; it ends when everyone has thrown. Rings stack on
+  the necks in seat colours. Solo medals 8 / 16 / 24.
+- **`js/games/toss-kit.js`** (pure, sim + view): `pingPong` / `sweep` meters, `arcY`, `phoneTime` (checks the time a
+  phone says it threw at — not ahead, not too old, not before its last throw + a gap), `placeOrder` and the browser's
+  `createPhoneClock` (counts from when it saw play start, catches up on the server's half-second clock).
+- Halloween (looks only; all five are in `tests/halloween-reskins.test.js`): a night pond with a green-glowing swirl
+  and orange/purple tubes, pumpkins down the hill, a spooky carousel (bat, black cat, pumpkin, Frankie, ghost, owl,
+  spider, mummy), spooky pie faces (Granny keeps her glasses and gets an orange bow; the witch has the hat), potion
+  bottles and a pumpkin for the gold one.
+- Tests: `tests/{bumper-boats,downhill-derby,carousel-recall,pie-toss,ring-toss}.test.js` (whole bot games for 1-4
+  players, a good player beats a sloppy one at every difficulty, determinism, small state, the rules one by one); UI
+  bots for the three screen games in `tests/helpers.js`. Card art: Codex (`assets/art/card-<id>.webp`).
+
+## Round 12 (2026-10-24)
+
+### Screen fixes and reports
+
+From the owner's phone screenshots (portrait, about 402x780) and live reports #30-#32:
+- **Odd One Out, every odd picture can be seen:** a 5x5 grid of bees all looked the same, because the Font Awesome bee
+  is drawn from the front. A mirrored bee is the same bee, and its outline style is nearly as solid as the filled one.
+  `js/shared/svg-raster.js` is a small pure-JS SVG path rasterizer. `tests/odd-one-out-looks.test.js` uses it to draw the
+  normal and the odd picture of every generated grid (3 difficulties x 30 seeds), the way the view does at the size a
+  402 px phone draws that grid. It fails any odd picture that differs by less than a quarter of its ink.
+  `TOO_ALIKE` / `alike()` in `sim.js` is the list it found (mirror: + bee, apple; outline: bee, kite, anchor, spider;
+  turned 180: lemon, spider; turned 25: lemon). The look-alike pairs that read as the same picture (smile/frown,
+  heart/cracked heart, star/half-stroke star, full/half battery) are now sunglasses face, half star, half heart and empty
+  battery (`tools/build-fa-icons.mjs`).
+- **The ping badge no longer covers the score bar:** it is a green / amber / red dot on the corner of the ☰ button. The
+  numbers ("Connection: 33 ms ±38 round trip") are inside the ☰ menu (`js/client/main.js` `netText`, `.netq` / `.menu-net`).
+- **Name tags never sit on each other (every arena game):** `js/client/declutter.js` (pure, `tests/declutter.test.js`)
+  runs from `stage.js` every frame. The tag nearest the bottom of the screen keeps its place, a tag that would cover
+  another is lifted just above it (the lift eases in, so two players walking past each other do not flicker), and every
+  tag is kept on screen sideways. `stage.tag(obj, { declutter: false })` opts a tag out. Long names are cut with an
+  ellipsis (`.tag > span`, 8.5em). Your own tag was already the only one that says YOU, so there was nothing to merge.
+- **Kitchen Catastrophe:** the orders are one block under the score bar: "Served 0/8", then the waiting orders as small
+  pills ("Then Corn Dog 27s"), then the front order's card. The camera frames the stall below that block
+  (`stage.setSafe`), so no card sits over a counter. Counter tags are just the ingredient, and yours are white with a ★.
+  "Spoiled! It needed Ice", "served!" and "Too slow!" are a line above your job. They used to float up from the tray,
+  BEHIND the order cards.
+- **Report #30, see the whole course in Haunted Hole:** on an upright phone (which follows your own ball), the camera
+  pulls back to the whole hole once your ball is in or picked up, between holes, and at the end (and stays that way under
+  the results card). `golf-view.js` `view.overview()`. It applies to Putt Party too. In Haunted Hole a soft moonlight
+  comes up at the same moments (a light that is always there, only its strength changes).
+- **Report #31, Long Drive's Halloween edition is a night course:** a starry night sky band with a moon across the top of
+  the screen, purple-dark grounds and trees, smiling tombstones down both edges, jack-o'-lantern yardage boards (orange
+  tags), jack-o'-lanterns by the tees, pumpkin balls with a band and trail in the player's colour, bats and ghosts. Looks
+  only: `tests/long-drive.test.js` plays the same seed and swings with and without the season and gets the same result.
+- **Report #32, more Pin the Tail:** 14 pictures (donkey, pony, goat, pig, cow, sheep, cat, dog, bunny, and also a
+  unicorn's HORN, a clown's and a snowman's NOSE, the CANDLE on a cake, a pumpkin's STEM). Each round is in its own
+  scene (paddock, beach, circus ring, moonlit garden, snowy field) with its own things lying about, and the starred
+  picture is a new one every round. The rounds, tricks, timings and points are exactly as before; a picture's `tail` is
+  just "the spot" and `part` names what goes there (the words on screen follow it).
+- **Results card:** the fair's own top bar (round + points) is drawn on the results card, and the finished minigame's
+  score bar, clock and pills were still drawn under it, so there were two rows of chips on top of each other (Cannonball
+  Catch, Laser Limbo and others). The game's screen bits are hidden while the results card is up, but its background and
+  3D view stay (`css/tumblefair.css`).
+- **Phone sweep (402x780, 3 phones, every minigame, 4 s and 9 s into play, an automatic check for tags covering tags
+  and the ☰ / ! corner covering game text):** the corner was the common fault. Many screen games put their title and
+  clock in a centred `.xx-top` row that ran under ☰ / ! (Pattern Impostor, Circuit Scramble, Going Going Gone, Draw the
+  Disaster, Number Climb, Pin the Tail…). Some games had their own gap and some did not. One rule in
+  `css/tumblefair.css` now keeps every screen game's `-top` row clear of the corner on a phone, and the row wraps rather
+  than running under it. After the fixes, the only overlaps left were short-lived: a tag still easing up, or a game's
+  own big banner ("SPLAT!", "New clue!", "It's after YOU") drawn over the arena on purpose. Games that other round-12
+  work was changing at the same time (Laser Limbo, Golem Smash, Bat Swarm, Fizzpop Pass and others) were checked but not
+  edited here.
+
+### Polish and rework
+
+Owner (2026-10-24): "For games that are highly upvoted, polish them without changing the games. If the games are
+repetitive add more variations. For games that were downvoted, consider changing them or removing them." Decisions
+from the live ratings. **Nothing was retired**: every downvoted game could be cut down to one clear verb, so no
+`retired` flag was added. Pin the Tail and Long Drive's look were left to the screen-fix batch above, and Putt Party
+was not polished because its view is the shared `golf-view.js`, which that batch was changing.
+
+**Downvoted games: changed** (rules changed on purpose; each game's own tests were updated):
+- **Defuse Together — CHANGED (0👍/3👎, "Didn't get it", "Awkward controls").** It was four different puzzles with
+  four different controls and reading rules (wires decided by "the first TRUE numbered rule", picture columns, a
+  switch table + SET, near-twin words with button labels). Now every module is the same lookup and the same tap: the
+  device shows a CLUE (a glowing light, a picture, a number or a word) over 4 coloured wires, and one line somewhere in
+  the torn-up book says "clue → cut the RED wire". Five wires, light first, the near-twin words last; light colours are
+  never wire colours (purple / orange / pink / teal / brown / silver); every book line names a wire that is really
+  there, so nothing can be ruled out without the book. A yellow "do this now" line per role ("You hold the device! Say
+  the light's COLOUR out loud…" / "Ask Rex: 'What colour is the light?' If it is on your page, shout the wire!"), the
+  swap card names the reader who had the right line, and the whole device fits a 402x780 phone. Fuse 70 s, -7 s a wrong
+  wire (solo -5). Tests rewritten (`tests/defuse-together.test.js`).
+- **Storm Shelter — CHANGED (1/1, "Didn't get it", "Awkward controls").** Every 5 s beat asked for TWO things: vote
+  one of the event's 2-3 trade-off choices AND play a card. The vote is gone: the event is now just the incoming hit,
+  shown before you choose ("Coming at the end of this beat: −1 Heat −3 Food"), and the one thing to do is play a card.
+  Each meter shows where it is heading ("6 →4", the part about to go striped red, a pulsing row when it would hit 0-1),
+  including the card you have picked. The wind for 1-2 players went from 2 to 1.67 (without the choices' +1 a talking
+  team survived only half the time; now ~80-87% for the test bot, random play ~20%).
+- **Portal Routing — CHANGED (2/2, "Didn't get it", "too easy").** (1) A glowing trail shows where the marble will go
+  with the gates as they are now (`trace` in sim.js, the same rules as `runBall`, tested to agree for every setting),
+  ending in a green ✓ at the flag or a red ✗ at a pit, so every flip shows its effect at once. (2) It is a race now:
+  ten stages, the marble 3.4 → 6.1 cells a second, a 1 s "ready" pause, and the goal 4 / 6 / 8 stages (easy / normal
+  / hard). A team that sorts each stage in 2 s clears ~9-10, one that takes 7 s misses the normal goal.
+- **Tile Flip Race — CHANGED (2/1, "Awkward controls").** A pick had to be a tile touching your land and was wiped
+  every flip, so you re-aimed a fresh tap every 2 s and one tile too far just buzzed. Now a pick is a TARGET: tap any
+  open tile and each flip your land grows one tile toward it (`stepToward`, round rocks, never onto a home corner)
+  until you own it. The target pulses (🎯), the next grab wears an arrow, and it stays until you get there or tap
+  another. Bounces and steals are unchanged.
+- **Pillow Fight, CHANGED (2/1, "buggy"):** in bot games most falls were people walking or hopping off on their
+  own. Nobody got credit, the −1 floored at 0, and whole games ended 0-0-0. Now only a bop sends you over: walking,
+  hopping or being crowded to the edge makes you teeter ("Whoa!"), and a fall no longer costs a point (the last
+  bopper within 3 s still gets +1). Bot games end around 7-12 each.
+- **Mole Mallet, CHANGED (0/1):** the mallet only landed 0.55 m ahead, so you had to stop on a hole facing it.
+  `aimAt()` (sim and view) turns the swing to the nearest brown or gold mole within 1.9 m. Your ring sits gold on its
+  hole, or red on a bomb straight ahead. The aim help never turns you onto a bomb. Gold bonks say "+3 GOLD!".
+- **Laser Limbo, CHANGED (2/1, "controls"):** there were two buttons, one tapped and one held, and you had to pick
+  one while a beam was a metre away. Now there is one DODGE button. `incoming()` (sim and view) finds the beam that
+  reaches you first, and DODGE hops a low one or crouches under a high one (0.7 s, longer while held). A cue over your
+  head says ▲ hop or ▼ duck and flashes NOW!. B still ducks for keyboards and controllers.
+- **Fizzpop Pass, CHANGED (1/1, "confusing"):** the hidden rules are now on screen. A 🚫 "not back" tag sits over
+  whoever just gave you the pie, a 4-step fizz meter is in the status pill, and +1 floats over everyone who scores
+  from a splat. The hold before you can pass went from 0.45 to 0.25 s, bumps reach 1.25 m and PASS reaches 2.2 m. The
+  status pill also used to cover the third chip and the clock when 3-4 players wrapped the score bar to two rows on a
+  phone; it now sits under the bar.
+- **Golem Smash, CHANGED (1/1):** the round-9 rubblings had become a stun-lock. A team that dodged every slam was
+  still knocked dizzy about 60-110 times a game on normal. Now a rubbling crumbles after one bonk, so it is about 15-25
+  hits a game counting slams and pebbles. The rubblings and the jump stay, as the owner asked for them in round 9. A
+  banner says "It's after YOU" when the golem picks you.
+- **Two Truths, One Goblin / Secret Architect / Safecracker: checked, LEFT AS THEY ARE.** All three were reworked in
+  round 10 and most of their ratings are older than that. Each was played at 402x780: the step-by-step prompts, the
+  fact claims and the Listen nerf all show, and there are no console errors.
+
+**Top-rated games: polished.** The rules, scoring, how-text and controls did not change. New layouts and themes are
+picked from the seed without moving the game's own random rolls, and every new layout is played to the end by bots
+for 1-4 players in that game's tests. The edge flash, shake and banner card come from one new shared helper,
+`js/client/juice.js` (its overlays never block taps).
+- **Bumper Bash:** five rinks from the seed (`RINKS`: The Big Top, Twin Poles, Four Bumpers, Bandstand, Diamond
+  Posts), sent in `init().arena.posts` so a phone predicts its own bumps; pickups keep clear of the posts. A hit
+  flashes and shakes, the bashed car flashes white, the call-out names the zone ("SIDE SWIPE!"), and the winner gets
+  a 👑 at the bell.
+- **Snowball Showdown:** four rinks (Open Ice, Snow Forts, The Igloo, Ice Pillars). A snowball that hits a fort bursts
+  on it, and respawn spots and snowmen keep out of the forts. There is a flash when you are hit, "Splash! N lives
+  left" / "You knocked out X!" banners, and a shake on every fall.
+- **Wobblewheel Rally:** three more tracks (Diamond Dash, Tee Time, Clover Cross), so 28 variants (were 16). There are
+  flashes for a boost pad, a spin-out, a hit and the finish.
+- **Bat Swarm:** three new formations, each with its own warning banner: comb (stand between the columns), gate (a
+  wall with one gap) and frame (the middle is safe). There are flashes for a lollipop (+3) and a bat bump.
+- **Ghost Tag:** three kinds of patch from the seed (Pumpkin Patch, Old Graveyard, Pumpkin Field), still mirrored.
+  The role pill read "(DASH / BOO = BOO!)" and now says "GHOST: tag them! Your button = BOO!". There are flashes for a
+  tag or a catch.
+- **Fling Ring:** four more decks in `levels.js` (Spinning Teacup, Windmill Raft, Barrel Dock, Checker Pier), 7 in
+  all. There are splash rings where someone lands in the water, a shake, a flash when you fall, and "You flung X!".
+- **Ring-a-Ding Rumble:** five halls, looks only (The Big Top, Harbour Ring, Barn Brawl, Moonlight Match, Title
+  Fight), named at the start. A red flash when you are hit or knocked down, gold when you land a big swing or a
+  knockdown.
+- **Rope Rumble:** five grounds, looks only (Village Green, Sandy Beach, Snowy Field, Foam Pit Fair, Autumn Orchard),
+  named before the first pull. A "PERFECT ×N!" streak call-out, and a flash plus a shake when a pull is won or lost.
+- **Memory Heist:** outside Halloween the vault is one of three themes picked from the seed: The Royal Vault (the
+  old twelve), The Pirate's Hold or The Toy Chest. That adds 24 new treasure pictures, and each theme dresses the
+  vault differently. There is a new question, "What was just to the LEFT/RIGHT of the robot?". The clock ticks over
+  the last 3 s of study, the door slams shut as the questions start, and points pop, with streaks and a "Master
+  thief" line. At the reveal, a small map lights the cell that was asked about. The header no longer sits under ☰.
+- **Size Up:** 87 more things (153 → 240), with the icons rebuilt by `tools/build-size-up-icons.mjs`; the question
+  kinds and the 2.5x rule are the same. The cards slide in, and at the reveal a bar on a log scale under each value
+  makes "about 40x" readable at a glance. +points / QUICK! / ✗ pops, a streak line, and "Top sizer".
+- **Apple Bobbing:** from the 7th apple on, some apples ZIG (even pace, sharp turns) or DART (linger at the edges,
+  rush through the middle). `appleX` stays one fixed function of time on the phone and the server. Three night
+  settings are picked from the apples: the porch, a barn with string lights, and a moonlit garden with leaves on the
+  water. There are "N in a row!" call-outs, a tub shake on a splash, gold sparkles on a golden apple, and an end line.
+- **Costume Catwalk:** 55 more pieces, added at the end of `PIECES` so no index sent to the phones moves (the Halloween
+  hats, dragon helm, gowns, cloaks, boots, lute, spell book, wands…), and 16 more themes (34 → 50). The curtain
+  follows the theme's colours, the paper doll bounces as you dress, a camera flashes at each pose, and the winner
+  gets a gold "Best dressed!" frame.
+- **Pumpkin Carve-Off:** 30 more secret prompts (50 → 80). The pumpkin wobbles with every cut, the lanterns light one
+  after another, and the best one gets a gold "Best lantern!" banner.
+- Not done: the new Memory Heist themes have no Halloween versions (Halloween keeps its one spooky set, as its test
+  requires), and Pillow Fight's wobble % tags can still overlap when players stand close.
+
+### New games (batch 1)
+
+The owner (2026-10-24): "Add a side scrolling dirtbike minigame … a wizard battle game … a jenga type minigame … a game
+where you work together to defend a castle by clicking to shoot arrows at an arc … create a darts game." Five games,
+built to what the ratings say players like (short, physical, one verb you get in five seconds, close results):
+- **Dirt Dash** (`dirt-dash`, screen, 1-4, 62 s): a side-on dirt-bike race on one seeded track (kickers, big jumps,
+  whoops, hills; 500 m). Hold GAS (right button) to go — speeding up lifts the front wheel and too far loops you over,
+  so tap LEAN (left button) to keep it down (a held wheelie scores). In the air GAS spins you back and LEAN forward;
+  land level with the ground or crash for 1.2 s. Score = 1 point per 10 m + flips (10, front 12) + big air / perfect
+  landings + a finish bonus 12/7/4/2. Everyone rides their own lane, the others are see-through ghosts in yours, a
+  strip on top shows the race; a watching screen stacks one lane each. Netcode is different from the other screen
+  games: one pure `stepBike` runs in fixed 50 ms ticks on the server AND the rider's phone; the phone sends its
+  buttons per tick (`in { k, g, l }`), the server only simulates a bike up to the newest tick it has heard (a quiet
+  phone is carried on after 24 ticks), and the phone rolls back to the server's exact bike (`priv`) if they ever
+  differ — so a press lands on exactly the tick it was made. Keys → / ← (Space / Shift), a controller's A / B or the
+  triggers.
+- **Wizard Duel** (`wizard-duel`, arena, 1-4, 75 s): a round floating platform with no railing. Six spells, each with
+  its own cool-down: Zip Spark, Big Ember (bursts), Frost Puff (slowing cone), Bubble Ward (spells bounce back), Hop
+  Step (a short jump — mind the edge), Homing Wisp. A casts, B picks the next; a bar under the score bar shows the six
+  and their cool-downs, and an orb circling each wizard is the colour of the spell in hand. Hits fill the ZAP meter
+  and the fuller it is the further you fly; off the edge, or a full meter, costs a heart (credited to the last hitter).
+  Three hearts; +1 a heart taken, +2 the last one, +3 still standing. **Teams:** the room now passes `teams` to every
+  game's `create` (`js/sim/room.js`, one key); Wizard Duel then puts seats 0+2 against 1+3 (the room's red + green vs
+  blue + pink) with no hitting your own side. Solo: straw practice wizards.
+- **Tower Pull** (`tower-pull`, screen, 1-4, 82 s): a 13-layer wooden block tower, turns of at most 8 s. Tap a block
+  (a tap snaps to the nearest block that may be pulled), then tap PULL while the marker is in the green — a clean pull
+  barely shakes the shared WOBBLE meter, a clumsy one adds a lot; the block goes on top. The physics-lite risk table:
+  middle of a full layer 8, edge 13, leaving a lone middle 20, leaving a lone edge 34, +0.5 per layer above, +2.5 per
+  lone-middle layer and +6 per lone-edge layer in the tower; the green zone narrows with risk; the meter settles a bit
+  each turn. Past 100 it crashes: the puller -4 (never below 0), everyone else +2, and a new tower goes up. +1 a clean
+  pull, +2 for a risky block. From 50 s, SUDDEN WOBBLE (x1.5). Out of time = a fumbled pull. Arrow keys + Space work.
+- **Castle Archers** (`castle-archers`, screen, co-op, 1-4, 80 s): everyone on one castle wall, seen from the side.
+  Drag BACK anywhere and let go (a bow string): the direction is the angle, the length the power, a dotted arc shows
+  the start of the flight with the wind (a flag on the tower). One pure `stepArrow` flies arrows on the server and
+  the phones. Three waves of goblins — Grunt, Runner, Shield (the first hit knocks the shield off), Kite (flies high),
+  Bruiser (4 hits) — and the team wins if the gate (100) holds. More archers = more goblins. Points for each goblin
+  you finish (1-4).
+- **Fair Darts** (`fair-darts`, screen, 1-4, 54 s): your own dartboard; the aim ring wanders on its own and
+  "breathes" — it swings wide, then drifts in near the gold bullseye for a moment. Tap THROW at the calm moment.
+  Rings 10 / 5 / 3 / 2 / 1, nine darts in three sets, the last three count DOUBLE. Like Ring Toss, the paths are a fixed
+  function of the clock in init and the phone sends only WHEN it threw. A watching screen shows every board.
+- Halloween (looks only; all five are in `tests/halloween-reskins.test.js`): Night Ride (moon, purple dirt, pumpkins
+  by the markers, headlamps), a purple platform with orange runes where the Ember is a pumpkin and the Wisp a ghost,
+  Bone Tower (bone-white and orange blocks, cobwebs), Pumpkin Patrol (night sky, pumpkin helmets, bat-wing gliders,
+  jack-o'-lanterns on the battlements), Spooky Darts (orange and purple board, a bat for the aim, a jack-o'-lantern
+  bullseye).
+- Tests: `tests/{dirt-dash,wizard-duel,tower-pull,castle-archers,fair-darts}.test.js` (whole bot games for 1-4
+  players, a good player beats a sloppy one at every difficulty, determinism, small state, the rules one by one;
+  Dirt Dash also replays a phone's presses and must match the server to the centimetre). UI bots for the four screen
+  games in `tests/helpers.js`. Card art: Codex (`assets/art/card-<id>.webp`).
+
+### New games (batch 2)
+
+The owner (2026-10-24): "Create a pizza chef game. Create a game something like [a frontier trail game] with challenges
+to try overcome. Create a hide and seek game. Create a jousting game based on accuracy and timing. Create a floor is lava
+minigame where you have to platform jump over and dodge lava." Five more, built to the same ratings (short, one clear
+verb, close and funny results, a big "do this now" line, phone portrait 402x780 first):
+- **Pizza Pronto** (`pizza-chef`, screen, 1-4, 78 s): a ticket asks for a sauce, cheese (or NO cheese) and topping lines
+  with amounts and places ("3 peppers · LEFT half", "4 pepperoni · anywhere"); everyone gets the same 14 tickets in the
+  same order. Tap a sauce and the cheese, pick a topping and tap the pizza (drag sprinkles one every few centimetres;
+  Undo / Redo), then INTO THE OVEN, and PULL IT OUT while the bake bar is in the golden band. Each pizza: match 0-10
+  (sauce 2, cheese 2, per line exact count 2 / one off 1 + right place 1, minus 1 per topping nobody ordered, scaled),
+  bake 0-4 (golden 4, pale/dark 2, raw/burnt 0; left in it burns by itself), speed 0-2 against a par of 5 s + 2.2 s a
+  line. The ticket's pills turn green as you match them, the tray buttons count what you dropped, and the half the
+  selected topping belongs on is lit. At the bell a gallery shows each cook's best pizza and their funniest one with its
+  name (Charcoal Surprise, Doughy Disaster, Topping Avalanche, Mystery Pie, Naked Pizza, Lonely Crust). The phone sends
+  the whole pizza with WHEN it went in, then WHEN it came out (`phoneTime`); the server judges. Difficulty: bake time
+  4.4 / 3.7 / 3.1 s, topping amounts and lines. Solo medals 25 / 45 / 65.
+- **Wagon Trail** (`wagon-trail`, screen, 1-4, ~70 s): the party rides one wagon to Fairhaven Valley through five
+  challenges everyone plays at the same moment, each 7-10 s with a 2.6 s "Next:" card before it and a 2 s outcome
+  card after. River (always first): pick Shallow ford 1 / Rope ferry 2 / Deep swim 3, then GO while the bobbing marker
+  is in the CALM patch (deeper = smaller patch; a miss costs a food barrel). Hunt: tap the critters hopping across the
+  meadow (+1, the gold one +3; shared targets, first tap wins). Wheel: tap the glowing bolt, then the next (six; a wrong
+  one jams you 0.6 s); first fixed 3, second 2, the rest 1, nobody = the wagon takes a knock. Storm: a 4 s vote (RIDGE
+  quick but stormy / VALLEY costs 2 food), then HOLD ON: tap the moment lightning flashes (+1, the quickest +1 more; a
+  ridge the party mostly fails tears the canvas). Trading post (always last): a price needle swings over 4-2-1-3-5;
+  tap Spare wheel (+1 heart) or Food sack (+4 food) on a low price (1 = 3 points, 2 = 2, 3 = 1; it costs the party
+  that much food). Food and the wagon's three hearts are shared; points are yours; arriving pays everyone a bonus for
+  the food left. Never a long vote: the only vote is the 4 s route. Difficulty: marker and needle speed, calm-patch
+  size, hit radius, starting food.
+- **Hide & Peek** (`hide-and-seek`, arena, 1-4, 54-84 s): a fairground after dark with 12-14 hiding places from the seed
+  (barrels, crates, curtained stalls, hay stacks — solid, sent as `arena.posts` / `blocks`). Rounds: 3 for 3-4 players
+  (the seeker is whoever has sought least, then has the fewest points), 2 for two; solo = hide from Lamplighter Lou,
+  then find three Peekers (CPU stand-ins in the state, drawn with `createActor`). Hide 6 s (the seeker's phone goes
+  dark: "Eyes shut!"), seek 17 s. A at a spot climbs in (one hider a spot; A again climbs out), B peeks out for 1.2 s:
+  +1 if the lantern does not catch you at it. The seeker's lantern (a fan on the ground; 4.2 / 5 / 5.8 m by difficulty)
+  spots anyone in the open in 0.35 s (a peeker in 0.2 s); touching finds them too; A at a spot looks inside (empty = 1 s
+  lost). Found = +2 to the seeker, hidden at the bell = +3. A hidden hider is not drawn on any screen (your own spot
+  wears a "🙈 You" tag); a peeker is drawn standing in the spot, head out, with a "!" over it.
+- **Tilt & Lance** (`jousting`, screen, 1-4, 37-73 s): two knights at a time on hobby horses, three passes a bout.
+  Bracket: 2 players three bouts swapping sides; 3 = A v B then the winner v C; 4 = two semi-finals and a final; solo =
+  Sir Wobbleton then Dame Clatter (CPU knights, skill by difficulty). The rider's panel: the other knight's target
+  shield with your WOBBLING aim dot, a strip where both knights close in on NOW, and one HOLD button. Holding steadies
+  the dot (amplitude 1.25 → 0.2-0.32 of the shield over 0.9 s, then it tires and grows again after 1.9 s); letting go
+  strikes. q = sqrt(aim x timing) (aim full inside a quarter of the shield, timing full within 0.08 s of the crossing,
+  nothing past 0.5 s or off the shield): crack 3 / solid 2 / glance 1 / miss 0; a crack while the other only glances
+  or misses UNHORSES them (+3, the bout ends). Bout win +3. Riders not in the bout tap the knight they cheer for before
+  the first charge: right = +2. The phone sends only WHEN it pressed and WHEN it let go (`lance { h, t }`); the server
+  works the dot out with the same `wobble()` from phases drawn in init, so an aim cannot be made up. Solo medals 8 / 14
+  / 20.
+- **Floor Is Lava** (`floor-is-lava`, arena, 1-4, up to 70 s): a toy-room floor with 9-12 things to stand on from the
+  seed (cushions, footstools, toy boxes, flat rocks — never touching, each within a long jump of another). The floor
+  glows for 1.8 s (WARNING), then it is lava for 4-8 s, then cools for 2-3 s; five waves, each longer, then it stays. On
+  the floor when it is hot = hot-foot, you are out. A hops (0.42 s); A still held 0.12 s into the hop makes it a LONG
+  jump (0.72 s, `F.BOOST` x1.6, so about 6 m). B shoves whoever is in front (a short stun: they can slide off their
+  cushion). Whatever you stand on while it is hot wears out (cushion 3.2 s, stool 2.4, box 4.2, rock 6.5; faster with
+  two on it; slowly on its own once the lava stays), darkens, shivers and sinks; while it is cool a fresh one rises if
+  the floor is getting bare. Last one standing wins; scores are seconds survived (`scoring: 'survival'`). Solo medals
+  30 / 45 / 60 s. A pill under the score bar counts down ("LAVA in 2", "Cools in 4").
+- Halloween (looks only; all five are in `tests/halloween-reskins.test.js`): Fright Pizza (pumpkin and ghost sauces,
+  cobweb cheese, pumpkin coins, toadstools, spooky olives, slime peppers, candy corn), Moonlit Trail (night prairie,
+  pumpkin critters), Hide & Peek in the dusk dressing with pumpkin barrels, purple stalls and a green lantern glow,
+  Moonlit Joust (moon, purple stands, pumpkin shields), and green slime instead of lava with pumpkins for cushions and
+  toadstools for stools.
+- Tests: `tests/{pizza-chef,wagon-trail,hide-and-seek,jousting,floor-is-lava}.test.js` (whole bot games for 1-4
+  players, a good player beats a sloppy one at every difficulty, determinism, small state, the rules one by one; each
+  sim exports its own sensible bot: `perfectPizza`, `trailBot`, `hideBot`, `bestLance`, `lavaBot`). UI bots for the
+  three screen games in `tests/helpers.js`. Kinds in `tags.js`: Pizza Pronto reaction + create, Wagon Trail reaction +
+  aim, Hide & Peek dodge + guess, Tilt & Lance aim, Floor Is Lava dodge. Card art: Codex (`assets/art/card-<id>.webp`).
+- Checked in a browser on two 402x780 phones (plain and Halloween): no console errors. Not tried by real players yet;
+  likely knobs after a play-test: Hide & Peek's seek time and beam size, Floor Is Lava's wave lengths, Pizza Pronto's
+  par times.
+
+### New games (batch 3)
+
+The owner (2026-10-24): "Create a flood minigame where you have to race to high ground and thwart each other. Create a
+crane machine minigame. Create a path tracing minigame. ... Create a cups and ball moving game. ... Create a monster
+rampage minigame. Create a zombie survival game." Six more, to the same ratings (short, physical, one verb you get in
+five seconds, close results, a big "do this now" line, phone portrait 402x780 first):
+- **Flood Rush** (`flood-rush`, arena, 1-4, 74 s): a hilly fairground from the seed (5 flat-topped hills, striped
+  stalls on the three biggest with a crate beside each, loose crates, up to 3 plank bridges between hilltops). The
+  water rises in 6 stages (2.5 s warning, 2.2 s rise, then a hold of 6.5 / 5.6 / 4.8 s by difficulty); the last level
+  is above every hilltop, so only crates and stall roofs stay dry. A jumps about 1 m (crate, then roof; a box too tall
+  for your feet is a wall). B at the end of a plank knocks the bridge down, anywhere else it shoves whoever is in front.
+  Water over your feet slows you; over your knees you are swept off in a rubber-duck ring. 1 point a second dry, +10
+  for the last one dry, +3 per metre above the water at the bell. Solo medals 45 / 60 / 72. A pill says "Water rising
+  in 3!". The crates and stalls are solid: `init().arena.blocks`, and the view rewrites `ctx.arena.blocks` from the
+  state so a phone predicts against the boxes too tall for its own feet.
+- **Monster Rampage** (`monster-rampage`, arena, 1-4, 64 s): everyone is a horned, tailed monster in a toy town of about
+  24 buildings on a street grid (houses, shops, towers, a Clock Tower and a Windmill). A punches the building in reach
+  (with a little aim help); B stomps (a hop: 1 hit to every building nearby, houses 2, and nearby monsters go dizzy and
+  are pushed back; 2.2 s cool-down). 1 point a hit, plus house 2 / shop 4 / tower 6 / landmark 12 when it goes flat.
+  Flat buildings burst into toy blocks and are rebuilt after 9 s if the lot is empty. Toy tanks fire slow foam shells and
+  helicopters drop a bonk inside a shrinking red ring: dizzy and -2 (never below 0); punch or stomp a tank to flip it
+  (+3). Difficulty: building hit points x0.8 / 1 / 1.2, tanks 1 / 2 / 3, helicopters 1 / 1 / 2. Solo medals 90 / 160
+  / 230. Not built: grab-and-throw between monsters (the stomp's dizzy push does that job more simply).
+- **Claw Machine** (`crane-claw`, screen, 1-4, ~45 s): everyone has their own prize machine with the same heap of
+  14 plush prizes from the seed, seen from above through the glass. Drag ANYWHERE to move the claw (like a trackpad,
+  so your finger never covers it), tap DROP. The claw hangs on a cable and SWINGS when it stops (a damped spring in the
+  pure `stepClaw`, run on the phone), so let it settle over the middle of a prize. Grip chance = how centred you were
+  x the prize's grip (`gripChance`; the dice for every grab are rolled up front from the seed). A weak grip often
+  slips on the way up and drops the prize somewhere else, and every grab nudges the prizes round it (it is a slippery
+  heap; balls roll furthest). Ball 1, duck 2, heart 2, bear 3 (big but heavy), star 4 (small), one golden egg 8 (small
+  and slippery, far from the chute). 5 grabs each (4 on hard); difficulty also sets the grip, the claw's speed and
+  how much it swings. A grab plays out on the server's clock: down 0.7 s, close, up, over to the chute, let go. The
+  others' machines are small windows under yours; a watching screen shows them all. Solo medals 7 / 12 / 18.
+- **Steady Hand** (`path-trace`, screen, 1-4, ~65 s): three glowing paths up a tall board, each narrower, longer and
+  wigglier (more wiggle stretches and pinches; hard also narrows them). Everyone races the SAME path at once on their
+  own phone; the others' dots are see-through ghosts with their initial. Drag anywhere: the dot moves with your
+  finger (trackpad again), capped at a top speed. Touch the edge = BZZT: sent back a few steps and frozen for about
+  half a second. Each round: first to the top 5 points, then 3 / 2 / 1, +2 for a clean run, +1 for every 3 s left;
+  anyone still going at the bell gets up to 3 for how far they got. Netcode is the Dirt Dash way: one pure `advance`
+  moves a dot one 50 ms tick on the server AND the phone, the phone sends each tick's finger movement (`tr` { k, d }),
+  the server plays them in tick order, and the phone rolls back to the server's dot (`priv`) if they ever disagree.
+  A dot only looks for the path near where it already is, so it cannot cut across to a neighbouring bend. Solo medals
+  15 / 22 / 28.
+- **Shell Shuffle** (`cups-and-ball`, screen, 1-4, ~65 s): a round showman with a curly moustache lifts one cup to show
+  the red ball, then shuffles; everyone watches the same shuffle on their own phone and taps a cup at once. 7 rounds of
+  3, 3, 4, 4, 5, 5, 5 cups, 4 to 12 moves, quicker each round. Fake-outs from round 2 (a swap that goes half way and
+  back, a nudge, an empty cup lifted a crack) and double swaps from 4 cups. Right = 3, +1 for a tap in the first 1.2 s,
+  +1 / +2 for a 2nd / 3rd right in a row; your first tap is your answer. Nobody sees anyone's pick until the reveal
+  (chips show only "✓ picked"); then every face pops up over the cup it chose. Guess window 5 / 4.2 / 3.6 s (ends early
+  once everyone has picked); difficulty also sets swap speed, fake-outs and double swaps. Solo medals 20 / 30 / 38. Keys
+  1-5, or arrows + Space.
+- **Night of the Shamblers** (`zombie-survival`, arena, co-op, 1-4, 74 s, sunrise at 66 s): after closing time goofy
+  green Shamblers in paper party hats waddle in from the fence (a steady stream that speeds up, bursts at 20 / 40 / 56
+  s, a Big Shambler in a bow tie now and then). A swings a foam bat (turns you to the nearest one in front, knocks it
+  back; two bonks flop a walker, four a Big one). B plants a fence (3 carried, one back every 15 s; they stop and chew
+  through it). A Shambler that reaches you starts a hug and slows you; half a second of hug and you are DOWN. A friend
+  standing by you for 2 s picks you up (+3 to them) and shoos nearby Shamblers back. Everyone down at once = the night
+  is lost; lasting to sunrise wins it. Solo: three hugs to spare, and you get up by yourself after 2.5 / 3.5 / 4.5 s.
+  Personal score: 1 a bonk, +1 a flop (+2 a Big one), +3 a revive. Difficulty: pace 1.05 / 1.3 / 1.45 m/s (+35% by the
+  end), how often and how many. Not gory: round faces, droopy eyes, smiles, no teeth.
+- Halloween (looks only; all six are in `tests/halloween-reskins.test.js`): Flood Rush gets murky glowing swamp water
+  with foam and bubbles, purple hills and pumpkins on the crates; Monster Rampage a moonlit haunted town with pumpkin
+  houses and little ghost helicopters; Spooky Claw a purple and orange machine full of candy, bats, ghosts, pumpkins,
+  witch hats and a golden pumpkin; Steady Hand a night board with a slime-green path and a ghost over the flag; Shell
+  Shuffle smiling skull cups, an eyeball ball and a showman in a witch's hat; the Shamblers pumpkin heads, witch hats
+  and candy-corn fences.
+- Tests: `tests/{flood-rush,monster-rampage,crane-claw,path-trace,cups-and-ball,zombie-survival}.test.js` (whole bot
+  games for 1-4 players, a good player beats a sloppy one at every difficulty, determinism, small state, the rules one
+  by one; bots exported from the sims: `floodBot`, `rampageBot`, `shamblerBot`, `bestTarget` + `stepClaw`, `traceStep` +
+  `advance`, `ballAfter`). UI bots for the three screen games in `tests/helpers.js`. Kinds in `tags.js`: Flood Rush race
+  + dodge, Claw Machine aim, Steady Hand aim + reaction, Shell Shuffle memory + guess, Monster Rampage brawl + collect,
+  Night of the Shamblers brawl + dodge. Card art: Codex (`assets/inbox/new12c` -> `assets/art/card-<id>.webp`).
+- Checked in a browser on two 402x780 phones (plain and Halloween), with no console errors. Real players have not
+  tried them yet. Likely knobs after a play-test: Steady Hand's path widths, the claw's swing, and the Shamblers' size
+  and the camera framing on a phone.
+
+### Halloween games
+
+The owner (2026-10-24): "Create 10 more halloween minigames based on the highest rated ones." The live ratings at the
+time: Pin the Tail 9/0, Apple Bobbing 9/1, Pumpkin Carve-Off 7/1, Bumper Bash 6/0, Long Drive 5/0, Memory Heist 5/0,
+Wobblewheel Rally, Size Up, Bat Swarm, Costume Catwalk and Snowball Showdown 4/0. Each new game keeps what is liked
+about one of them (its verb, its timing or memory skill) and gives it a new Halloween rule. They are not reskins: those
+already exist. All ten have `season: 'halloween'` and the `holiday` tag, so they only come up in October or in a
+Halloween lobby. Every one can be played alone (medals or CPU riders) and the difficulty changes a real rule.
+- **Patchwork Pal** (`patchwork-pal`, screen, 1-4, 76 s; from Pin the Tail): a stitched monster's face is shown with
+  all its parts on (googly eyes, button nose, grin, hat, neck bolt, heart patch, bow). Then the parts pop off and come
+  back one at a time ("Pin the HAT!"). Tap once where each one goes. You see only your own pieces. Up to 5 points a part
+  for closeness, +1 within 3 units. A gallery puts "The real pal" next to every player's monster. Three monsters. Tricky:
+  4 parts, and from the second monster the bare face is hung a little higher, lower, bigger or smaller than it was shown.
+- **Cauldron Bobbing** (`cauldron-bobbing`, screen, 1-4, 50 s; from Apple Bobbing): gummy candy eyeballs drift side to
+  side AND bob up and down under the bubbles. Bite when one is under your face and at the top. If it is too deep or off
+  to the side you get a splash and a pause. Gold eyeballs are 3, three good bites in a row +1, and the crowned toad costs
+  a point. The phone sends WHEN it bit and the server judges, as in Apple Bobbing.
+- **Shifty Portraits** (`shifty-portraits`, screen, 1-4, 74 s; from Memory Heist): a hall of friendly monster portraits.
+  Lights out, a ghost floats by, and some change: a new face, a hat swap, a repainted frame, one turned round, or two
+  swapped. The game says how many changed. Tap them: right +3 (+1 for the first to find it), wrong -1. The reveal shows
+  a small "was" picture. The hall keeps its changes into the next round. Five rounds. Easy is a 3x2 wall; Tricky is 4x2
+  with up to 3 changes.
+- **Pumpkin Fling** (`pumpkin-fling`, screen, 1-4; from Long Drive): three flings from a catapult. Tap to stop POWER,
+  then tap to LET GO as the arm swings (about halfway up goes furthest). Bats blow a wind. The twist is the graveyard
+  wall at 120 m: over it the pumpkin is lost and scores nothing, so the best throw is the longest one that stays in. The
+  scarecrow's bucket is +20. Your best fling counts. The phone sends what it locked and the server works out the flight.
+- **Monster Line-Up** (`monster-line-up`, screen, 1-4; from Size Up): seven quick questions about 2-4 cartoon monsters:
+  MOST EYES? FEWEST LEGS? MOST SPOTS? MOST HORNS? BIGGEST? The answer can always be counted in the picture
+  (`js/games/monster-svg.js` draws them; a test counts the drawn shapes against the state). Right 5, +up to 5 for speed.
+  Your first tap is final. Tricky: up to 4 monsters, close counts, less time.
+- **Monster Makeover** (`monster-makeover`, screen, 1-4, 72 s; from Costume Catwalk): everyone dresses the same monster
+  client, which brings a request card: two or three wishes ("3 EYES", "PINK fur", "NO horns") and a style (CUTE / SPOOKY
+  / FANCY). Fill six slots from your own tray; the wishes tick green as you meet them. The mirror reveal shows each look,
+  and the client gives a star per wish met plus up to 2 for its style. With 3+ players everyone votes (not for their
+  own). Score = stars + votes, +1 for the client's favourite. Every wish can be met from every tray.
+- **Broomstick Bumpers** (`broomstick-bumpers`, arena, 1-4, 66 s; from Bumper Bash): bumper brooms in a graveyard ring
+  with tombstones (or a crypt) from the seed. Ram for 3 / 2 / 1 (behind / side / nose), A = a short boost (+1 on a hit).
+  Graves glow green, then open one at a time: bash someone into an open grave for +3, but fly in yourself and you lose 1.
+  Pumpkins +2. Alone: three scarecrow riders and medals.
+- **Witch's Sweep** (`witchs-sweep`, arena, 1-4, 62 s; from Bat Swarm): a cauldron in the middle of a round courtyard
+  spits candy corn (1) and lollipops (3) while the witch's giant broom sweeps round like a clock hand. A = JUMP it; caught
+  on the ground and you are swept along and drop sweets. It speeds up, sometimes swings back the other way (with a
+  warning), and a second broom joins later. The broom follows a fixed plan from the seed and the clock, so every phone
+  draws the same broom.
+- **Slime Slingers** (`slime-slingers`, arena, 1-4, 64 s; from Snowball Showdown): nobody is knocked out, because the
+  slime is sticky. A throws a glob (1 point a hit). One glob slows you, two slow you more, and the third sticks you for
+  2 s (+2 to the thrower). The slowing goes through body flags (SLOW, then SLOW + CARRY), so the phone's own prediction
+  agrees. Wash at the pump in the middle (no throwing while you wash). Missed globs leave puddles that slow anyone for
+  6 s. B = dodge. Alone: jelly ghosts and medals.
+- **Coffin Cart Rally** (`coffin-cart-rally`, arena, 1-4, 75 s; from Wobblewheel Rally): coffin carts on 4 crypt
+  layouts (x mirror x direction). No item boxes. Cracks in the floor glow purple, then a friendly bony hand pops up and
+  HOLDS any cart on the ground for a second (A = hop over it). Candle gates flicker on their own beat, and rolling
+  through one while it is lit gives a burst of speed. B = lid slam: BOO the carts right beside you (a cool-down). Easy has
+  4 cracks on a slow beat, Tricky 6 on a quick one. Lesson: the first version gave the boost to the FIRST cart through,
+  and the leader took every gate, so the race was decided on lap 1. A gate on a beat gives close finishes (often 0.1 s
+  apart in the bot races).
+- Tests: `tests/<id>.test.js` for all ten (only offered in season; whole bot games for 1-4 players at every difficulty;
+  a good player beats a sloppy one at each difficulty; same seed = same game; small state; the rules one by one; a room
+  match with Halloween forced on). UI bots for the six screen games are in `tests/helpers.js`. Kinds are in `tags.js`.
+  Card art: Codex (`assets/art/card-<id>.webp`).
+- Checked in a browser on two phones at 402x780 (three phones for the voting games): no console errors. Nobody has
+  played these for real yet. Knobs likely to need a tweak: Slime Slingers' wash time, Witch's Sweep's broom speed, and
+  Coffin Cart Rally's lap count (5-8 short laps).
+
+### Board game
+
+Owner (phone screenshots): "make the board game more interactive with event cards being just the dice duel, also with
+better presentation and pacing. Experiment with some more events and board mechanics that would fit nicely." The only
+space where anyone did anything was the Dice Duel, and even that was a text box over the middle of the board.
+
+**Presentation** (`js/client/main.js` board functions, `css/board.css`, `js/client/boardview.js`):
+- The score strip is ONE row that never wraps: face, tickets over ribbons, a purple badge for prize cards held, the
+  current player lit up and scrolled into view; it scrolls sideways before it would wrap. The round number moved down
+  to a second row with the bulletin tag, so neither can sit on a chip.
+- Nothing covers the middle of the board any more. Results go to a two-line **ticker** docked at the bottom, and pop
+  up as "+3" / "−4" / "SPLAT" / "BOOM" over the piece (boardview `pop()`, a name tag that floats away). The ticker and
+  the score strip change when the board PLAYS the result (boardview `onPlay`), not when the message arrives, so a "+3"
+  never shows before the piece gets there.
+- The die tumbles into the top-right corner (52 px) instead of a 110 px card in the middle.
+- The camera fits a tall phone: a portrait follow view (it was a landscape one with a band of nothing under it), kept
+  on the board near the edges, both players framed in a two-player event, everyone's pieces (not the whole
+  landscape-shaped board) in a wide shot. `main.js` measures the bottom panel and frames the board in what is left.
+- Your turn: a big "Your turn! ROLL" button (plus your prize cards); everyone else sees whose turn it is.
+- The Fair Bulletin is one big line you read in a second (`short`: "Puddles −5", "Striker ×2") with the details small
+  under it, shown 2.5 s, then folded into the tag (tap it to read it again).
+
+**Live events** (`js/sim/board.js` `openEvent` / `evInput` / `evTimeout` / `evResolve`, drawn by
+`js/client/boardevents.js` as a card docked at the bottom of every phone). Everyone watches the same thing as it
+happens; the players it is waiting for get the buttons; a timer answers for anyone who doesn't, so a sleeping phone
+never holds the board up. All inputs are `choose { i }` (no new message types). The timing games send how many ms after
+the event opened the finger landed; the server turns that into a result with the pure functions in
+`js/shared/board-rules.js` (also used to draw the bar and the wheel), clamped so nobody can tap "in the future".
+- **Dice Duel** (reworked): you and a random rival each tap ROLL; each die tumbles until its owner taps and is shown to
+  everyone as it lands (the dice are rolled when the event opens and never sent early). Higher takes 4.
+- **High Striker** (new space): a power bar runs 0→100→0 every 1.3 s; tap at the top. 95+ rings the bell: +8 and a
+  prize card; 75+ +5, 45+ +3, else +1 (`chance.json` `board.striker`).
+- **Wheel of Whatever** (reworked): eight results drawn from the event list are painted on a wheel that spins on every
+  phone; the lander taps STOP and it eases onto the segment under the pointer, which is what happens. Each event now
+  has a `short` label for its segment.
+- **Shell Game** (new): the lander hides the pea, everyone watches five swaps, a random rival guesses. Right: the
+  rival takes 3 from the lander; wrong: the other way round.
+- **Steal or Share** (new): you and a rival pick in secret (only "locked in" is broadcast); both share 3 each, one
+  steals 6, both steal −2 each.
+- **Tomato Toss** (new): everyone votes (live, on screen) who gets a tomato; the most-hit goes back 3 spaces (ties all
+  go back), the lander gets +2. No vote = the richest player who isn't you.
+- **Fortune Teller** (new): pick one of three face-down cards: a prize card or tickets; all three turn over.
+- **Duck Pond**: the same rules, drawn in the event card with the three prizes revealed.
+- `botChoice(pid, now)` says what a bot would press in any of them (tests drive whole matches with it).
+
+**Board mechanics** (data in `data/chance.json` `board` and the board tables in `tools/build-board.mjs`):
+- **Prize cards** (hold 2; a third pushes out the oldest): **Double Die** (two dice this turn), **Whoopee Cushion**
+  (left on your space; the next rival who STOPS there pays you 4, before the space's own effect), **Express Pass**
+  (instead of rolling, ride to the next Prize Booth and buy a ribbon if you can). Played before rolling by tapping the
+  card (`choose { i }` during `roll`), one a turn. From the Fortune Teller, the High Striker bell, two Wheel results
+  ("Prize card", "Double Die") and the Prize Card Party bulletin.
+- **Shortcut toll**: the shortcut costs 3 tickets (`toll: [0, 3]` on the crossroads). Too poor = no question, you go
+  the long way at once.
+- **Cannon** (one per board, one way): fires you through the air over the gate (+5) to its landing pad (Fairground:
+  last puddle -> the High Striker; Pier: -> the Duck Pond). A dashed arc on the board shows where it goes.
+- **Prize booths buy by themselves** when you pass or stop with enough tickets (the question had one sensible answer
+  and was a stop on every lap).
+- New bulletins: Free Shortcut (no toll), Strongman Day (striker ×2), Prize Card Party (everyone draws a card), Big
+  Pot Night (Steal or Share pot 12). New bonus ribbon: Bell Ringer.
+- Both boards: five passive spaces each became the new events (Fairground: High Striker, Fortune Teller, Shell Game,
+  Steal or Share, Tomato Toss, Cannon; Pier the same with a Strongman Bell and Pier Cannon). Positions are unchanged
+  (the fit files are keyed by space id), so the painted backdrops and the Halloween repaint still line up.
+
+**Pacing** (sim time per turn, 4 players, 40 seeds x 5 rounds; "quick" = players tap within about a second):
+ROLL 12 → 9 s, dice 1.1 → 0.7 s, a step 330 → 270 ms, ask 8 → 6 s, a plain result 1.7 → 1.3 s, an empty space 0.5 →
+0.3 s, bulletin 4.2 → 2.6 s, no booth question. Quick players: **4.7 s → 4.1 s a turn** on average (longest 8.6 → 9.0 s,
+now with a live event on most special spaces); nobody tapping at all: **19.5 s → 15.7 s**. The client catches up when
+it falls behind (a queue of more than 2 animations plays 1.6x, more than 4 plays 3x), and several pieces move at once
+(Tomato Toss, the Parade, the carousel).
+
+Tests: `tests/board.test.js` (+12: the shared timing rules, each event with real taps and with nobody tapping, every
+prize card, the trap, the toll, the cannon, a player leaving mid-event, and 48 whole 4-player matches on both boards
+in dice and card modes with bots tapping, every event and card seen, no turn longer than 9.5 s).
+
+### Memory games
+
+The owner (2026-10-24): "Create a few more memory minigames." The memory games players already rate highly are Pin
+the Tail (9/0, look and then act from memory), Memory Heist (5/0, remember a vault) and the new Carousel Recall (repeat
+a growing tune). Each new game tests a DIFFERENT kind of memory from those and from Crow Count, Potion Mixer, Sketchy
+Copy, Monster Forecast and Shifty Portraits. All three are screen games for 1-4 players, use the lobby difficulty, can
+be played alone for medals, and draw from one new picture module, `js/games/memory-icons.js` (24 fair prizes, 24
+Halloween prizes, 8 foods, 8 Halloween treats, 10 customers with their own hats or monster looks; every picture has
+its own shape, so colour is never the only clue).
+- **Gone Missing!** (`prize-shelf`, screen, 1-4, 78 s): RECALL — which things were there? A prize stall's shelves
+  are shown for a few seconds. Then a shutter rattles down, and when it goes up some prizes have vanished in a puff of
+  sparkles. Tap the missing ones in a tray that also holds look-alike prizes that were never on the shelf. You get as
+  many taps as there are missing prizes, and every tap is final. Right = 3, and +1 for the first player to find that
+  prize. Five shelves. Family: 6-8 prizes, 1-2 gone, 4.6 s to look, and the gaps stay in place. Normal: 6-9 prizes,
+  1-3 gone, and the prizes that are left are SHUFFLED round the shelf, so the gaps give nothing away. Tricky: 8-12
+  prizes, 2-4 gone, a tray of 8. Solo medals at 50 / 75 / 95% of the most you could score. Which prizes went is never in
+  the state before the reveal. Keys 1-8.
+- **Pair Panic** (`pair-panic`, screen, 1-4, 62 s): WHERE things are, on one shared table. It is the pairs game with
+  no turns: everybody flips cards on the same table at once. Each table is shown face up for a PEEK, then everything
+  turns over. A flipped card turns over on every phone with the flipper's colour and initial, so you learn from the
+  others' flips too. A pair is 2 points, a streak adds +1 on the 2nd pair and +2 from the 3rd, and the last pair of a
+  table is +1. A miss stays up for about a second (everyone sees it) while you wait. A lone card flips back after a few
+  seconds. **SNATCH**: your second card may be one a rival is holding up on its own, and if it matches yours the pair
+  is yours. This came out of the bot games: with 3-4 players, the last few cards jammed with everybody holding one up
+  and no face-down card left to flip. The snatch makes that end the most exciting part instead. A cleared table deals
+  a new one. Family 4x4 with a 3 s peek; Normal 4x5 with 2.2 s; Tricky 4x6 with 1.4 s and shorter misses. Solo medals
+  20 / 40 / 64.
+- **Order Up!** (`order-up`, screen, 1-4, 76 s): WHO wanted WHAT. A line of customers at a food stand, each with a
+  different hat, shows their orders in speech bubbles. Then the bubbles pop and the customers come to the counter one
+  at a time. Tap the foods that customer wanted onto your tray, then SERVE. Each order scores 1 a right food and -1 a
+  wrong one (never below 0), +2 when it is exactly right, and +1 goes to the first player to serve the whole line. One
+  more customer joins the line every round (2, 3, 4…). Family: 5 foods and orders of 1-2. Normal: 6 foods and 1-3.
+  Tricky: 8 foods, 2-3 items, and the customers come back to the counter in a NEW order, so you must know them by their
+  hats. The tray is built on the phone and sent as one `serve`, so it needs one message per order. The tally shows
+  every real order next to what you served (wrong foods marked ✗). Unit: tips. Solo medals by difficulty
+  (14/22/30, 16/26/34, 16/26/38). Keys 1-8 + Enter.
+- Halloween (looks only; all three are in `tests/halloween-reskins.test.js`): Gone Ghostly! is a haunted stall with
+  purple stripes, a cobweb, a moon and a ghost on the shutter, selling Halloween prizes. Spooky Pairs has purple card
+  backs with a moon and a bat, and Halloween pictures. Monster Snacks has little monster customers (horns, bolts,
+  antennae, a ghost hood…) ordering candy apples, witch's brew, eyeball gum and gummy worms. The sims never see the
+  season: they send indices, and the view picks the plain or the Halloween picture.
+- Tests: `tests/{prize-shelf,pair-panic,order-up}.test.js`. They cover whole bot games for 1-4 players inside the
+  clock, a sharp memory beating a sloppy one at every difficulty (same speed, 5 seeds), the rules one by one (taps are
+  final, snatch, last pair, served in turn, no answers in the state early, nonsense ignored), determinism, small state
+  (< 400 chars), and a real room match with the UI bots, plain and Halloween. Bots exported from the sims
+  (`shelfBot`, `pairBot`, `orderBot`) know only what they saw in the public state, each with its own rng. UI bots for
+  all three are in `tests/helpers.js`. Kinds in `tags.js`: Gone Missing memory, Pair Panic memory + reaction, Order Up
+  memory. Card art: Codex (`assets/inbox/mem12` -> `assets/art/card-<id>.webp`). Codex could not write the files
+  itself (its shell transfer failed), so the pictures were picked up from its own output folder.
+- Checked in a browser on two 402x780 phones, plain and Halloween, at Family, Normal and Tricky, with no console
+  errors. Real players have not tried them yet. Likely knobs after a play-test: Pair Panic's peek length and how long a
+  lone card stays up, Gone Missing's study time, and how fast Order Up's line grows.
 
 ## Accounts (2026-10-23)
 

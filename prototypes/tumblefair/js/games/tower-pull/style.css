@@ -1,0 +1,46 @@
+/* Tower Pull — a whose-turn banner, the tower canvas with a WOBBLE bar over it, and the PULL panel (meter with a green
+   zone, one big button) on a phone that plays. Nothing in here scrolls on its own. */
+.game-tower-pull { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: linear-gradient(#ffd98a, #f2a55a); color: var(--ink); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-tower-pull.season-halloween { background: linear-gradient(#241a3d, #140f26); }
+.game-tower-pull > * { flex: none; }
+.tp-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 8px; }
+.tp-title { color: #fff; font: 900 26px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.tp-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.tp-board .chip { color: var(--ink); padding-right: 10px; }
+.tp-board .sc { font-style: normal; background: #fff1c8; border-radius: 8px; padding: 0 7px; }
+.tp-board .chip.lead { background: var(--sun); } .tp-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.tp-board .chip.turn { outline: 3px dashed var(--ink); outline-offset: 2px; }
+.tp-who { font: 900 20px/1.1 var(--font); padding: 6px 16px; border: 4px solid var(--ink); border-radius: 999px; background: #fff; box-shadow: 0 4px 0 var(--ink); border-color: var(--ink); text-align: center; }
+.tp-who.mine { background: var(--c, var(--sun)); color: #fff; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; font-size: 23px; animation: tp-wob .55s ease-in-out infinite alternate; }
+@keyframes tp-wob { to { transform: rotate(-2deg) scale(1.05); } }
+.tp-stall { position: relative; width: min(100%, 560px); height: clamp(240px, 46dvh, 640px); flex: 1 1 auto; min-height: 220px; border: 4px solid var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 6px 0 var(--ink); }
+.tp-stall canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.tp-wob { position: absolute; left: 10px; top: 18px; width: 112px; display: grid; gap: 2px; font: 900 11px/1 var(--font); text-transform: uppercase; letter-spacing: .5px; pointer-events: none; color: var(--ink); text-shadow: 0 0 3px #fff; }
+.tp-wtrack { height: 14px; border: 3px solid var(--ink); border-radius: 8px; background: #fff; overflow: hidden; }
+.tp-wtrack i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3ecf5a, #ffd23f 60%, #ff5f5f); transition: width .25s; }
+.tp-wob.hot .tp-wtrack { animation: tp-hot .25s linear infinite alternate; }
+@keyframes tp-hot { to { transform: translateX(2px); } }
+.season-halloween .tp-wob { color: #fff; text-shadow: 0 0 3px #000; }
+.tp-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 76px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.tp-count:empty { display: none; }
+.tp-say { position: absolute; left: 0; right: 0; top: 22%; text-align: center; font: 900 24px/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none; padding: 0 10px; }
+.tp-say.pop { animation: tp-pop 1.5s ease-out forwards; } .tp-say.gold { color: var(--sun); } .tp-say.bad { color: #ffd9d9; }
+@keyframes tp-pop { 0% { opacity: 1; transform: scale(1.3); } 75% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.tp-panel { width: min(440px, 100%); display: grid; gap: 7px; padding: 9px 12px 11px; background: var(--paper); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+.tp-panel.hidden { display: none; }
+.tp-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tp-hint { font: 900 17px/1.1 var(--font); }
+.tp-tl { font: 900 16px/1 var(--font); padding: 3px 9px; border-radius: 999px; border: 2px solid var(--ink); background: #fff; }
+.tp-tl:empty { display: none; }
+.tp-meter { position: relative; height: 26px; border: 3px solid var(--ink); border-radius: 10px; background: #ffd9d9; overflow: hidden; }
+.tp-zone { position: absolute; top: 0; bottom: 0; left: 40%; width: 20%; background: #8ff07a; border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); }
+.tp-mark { position: absolute; top: -2px; bottom: -2px; width: 8px; margin-left: -4px; left: 50%; background: #2f7ff0; border: 2px solid var(--ink); border-radius: 3px; }
+.tp-panel:not([data-mode=pull]) .tp-meter { opacity: .45; } .tp-panel:not([data-mode=pull]) .tp-zone { display: none; }
+.tp-btn { min-height: 62px; font-size: 25px; touch-action: manipulation; cursor: pointer; background: #8ff07a; }
+.tp-btn:disabled { background: #e8e1cc; color: #6a7a80; }
+.tp-note { margin: 0; text-align: center; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px var(--ink); }
+.tp-note:empty { display: none; }
+.game-tower-pull.watching .tp-stall { width: min(100%, 900px); height: calc(100dvh - 190px); }
+@media (max-height: 640px) { .tp-stall { height: 40dvh; min-height: 160px; } .tp-btn { min-height: 48px; font-size: 20px; } .tp-title { font-size: 20px; } .tp-who { font-size: 16px; } }

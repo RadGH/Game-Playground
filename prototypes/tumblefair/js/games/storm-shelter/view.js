@@ -2,9 +2,10 @@
 // in a dark rainy night — a stove whose fire glows with HEAT (emissive turned up/down, never a light switched on), a
 // plank roof whose planks go missing as ROOF falls, a pantry shelf holding as many sacks and jars as FOOD, rain
 // streaks (one instanced mesh) and everyone's character inside, shivering when it is cold.
-// Below / right: the three meters (picture + name + number, never colour alone), the beat clock, the event card
-// (picture, what it does, the wind, 2-3 choice buttons with their effects and live vote counts), and your private
-// hand of action cards — tap to play (tap again to take it back). After each beat the meters show what changed.
+// Below / right: the three meters (picture + name + number, never colour alone, and during a beat where each one is
+// heading: "6 → 4"), the beat clock, the event card with what it will hit (storm + wind added up per meter), and
+// your private hand of action cards — tap to play (tap again to take it back). After each beat the meters show what
+// changed. (Round 12: the event's vote is gone; playing a card is the only thing to do.)
 import { RULES, EVENTS, CARDS, METERS } from './sim.js';
 import { METER_NAMES } from './deck.js';
 import { scoreBar, h, esc } from '../../client/gamehud.js';
@@ -59,7 +60,7 @@ export function createView(ctx) {
   ui.dataset.ph = 'ready'; ui.classList.toggle('watching', watching);
   const panel = h('div', 'ss-panel');
   panel.innerHTML = `
-    <div class="ss-meters">${METERS.map(k => `<div class="ss-meter" data-k="${k}"><span class="ss-ic">${ICON[k]}</span><b>${METER_NAMES[k]}</b><span class="ss-bar"><i></i></span><em>${RULES.begin}</em><u class="ss-d"></u></div>`).join('')}</div>
+    <div class="ss-meters">${METERS.map(k => `<div class="ss-meter" data-k="${k}"><span class="ss-ic">${ICON[k]}</span><b>${METER_NAMES[k]}</b><span class="ss-bar"><i></i><s></s></span><em>${RULES.begin}</em><u class="ss-d"></u></div>`).join('')}</div>
     <div class="ss-beat"><b>Beat <span class="ss-n">1</span> of ${init.beats}</b><span class="ss-tbar"><i></i></span></div>
     <div class="ss-event"></div>
     <div class="ss-handh"></div>
@@ -68,33 +69,46 @@ export function createView(ctx) {
   ui.append(panel);
   const $ = s => panel.querySelector(s);
   const meterEls = Object.fromEntries(METERS.map(k => [k, panel.querySelector(`.ss-meter[data-k=${k}]`)]));
-  let G = null, mine = { hand: [], play: [], vote: null }, evKey = '', handKey = '', beatStart = 0, curBeat = -1;
+  let G = null, mine = { hand: [], play: [] }, evKey = '', handKey = '', beatStart = 0, curBeat = -1;
   const per = init.per;
+  /** What the storm will hit this beat, per meter (event + wind), and where each meter is heading with my own picks. */
+  const incoming = () => { if (G?.ph !== 'beat') return null; const ev = EVENTS[G.ev]; return METERS.map((k, i) => (ev.hit[k] || 0) + (G.wind[i] || 0)); };
+  function heading() {
+    const inc = incoming(); if (!inc) return null;
+    const m = G.m.map((v, i) => v + inc[i]);
+    for (const i of mine.play) { const c = CARDS[mine.hand[i]]; if (!c) continue; for (const [k, v] of Object.entries(c.fx)) { const j = k === 'low' ? m.indexOf(Math.min(...m)) : METERS.indexOf(k); m[j] = Math.min(RULES.max, m[j] + v); } }
+    return m;
+  }
   function drawMeters(m) {
-    METERS.forEach((k, i) => { const el = meterEls[k]; el.querySelector('i').style.width = (m[i] * 10) + '%'; el.querySelector('em').textContent = m[i]; el.classList.toggle('low', m[i] <= 2); });
+    const to = heading();
+    METERS.forEach((k, i) => {
+      const el = meterEls[k], t = to ? Math.max(0, to[i]) : null;
+      el.querySelector('i').style.width = (m[i] * 10) + '%';
+      const ghost = el.querySelector('s'); ghost.style.left = (Math.min(m[i], t ?? m[i]) * 10) + '%'; ghost.style.width = (t == null ? 0 : Math.abs(m[i] - t) * 10) + '%'; ghost.className = t == null ? '' : t < m[i] ? 'down' : 'up';
+      el.querySelector('em').innerHTML = t == null || t === m[i] ? `${m[i]}` : `${m[i]}<small class="${t > m[i] ? 'up' : ''}">→${t}</small>`;
+      el.classList.toggle('low', m[i] <= 2); el.classList.toggle('danger', t != null && t <= 1);
+    });
   }
   function drawEvent() {
     if (!G || G.ph !== 'beat') { $('.ss-event').innerHTML = G?.ph === 'end' ? `<div class="ss-final ${G.ok ? 'good' : 'bad'}">${G.ok ? '🌈 The storm has passed — you made it!' : '💥 The shelter gave in…'}</div>` : '<div class="ss-final">Batten down the hatches…</div>'; evKey = ''; return; }
-    const ev = EVENTS[G.ev], key = G.ev + '|' + G.votes.join() + '|' + mine.vote + '|' + G.wind.join();
+    const ev = EVENTS[G.ev], key = G.ev + '|' + G.wind.join();
     if (key === evKey) return; evKey = key;
-    const wind = METERS.map((k, i) => G.wind[i] ? `<i class="ss-fx down">−${-G.wind[i]} ${ICON[k]} ${METER_NAMES[k]}</i>` : '').join('');
+    const inc = incoming(), hits = METERS.map((k, i) => inc[i] ? `<i class="ss-fx ${inc[i] > 0 ? 'up' : 'down'}">${inc[i] > 0 ? '+' : '−'}${Math.abs(inc[i])} ${ICON[k]} ${METER_NAMES[k]}</i>` : '').join('');
     $('.ss-event').innerHTML = `<div class="ss-card"><span class="ss-art">${ev.a}</span><div><b>${esc(ev.t)}</b><p>${esc(ev.d)}</p></div></div>
-      <div class="ss-hits"><span>Storm:</span>${fxChips(ev.hit)}${wind ? `<span>Wind:</span>${wind}` : ''}</div>
-      <div class="ss-choices">${ev.ch.map((c, i) => `<button class="ss-ch${mine.vote === i ? ' on' : ''}" data-i="${i}"><b>${esc(c.l)}</b><span>${fxChips(c.fx)}</span><em>${G.votes[i] ? `${G.votes[i]} vote${G.votes[i] > 1 ? 's' : ''}` : ''}${mine.vote === i ? ' · yours' : ''}</em></button>`).join('')}</div>`;
+      <div class="ss-hits"><span>Coming at the end of this beat:</span>${hits || '<i class="ss-fx">nothing</i>'}</div>`;
   }
   function drawHand() {
     if (watching) return;
     const key = JSON.stringify(mine) + (G?.ph || '');
     if (key === handKey) return; handKey = key;
     const open = G?.ph === 'beat';
-    $('.ss-handh').textContent = open ? `Your hand — play ${per === 2 ? 'TWO cards' : 'ONE card'} (${mine.play.length}/${per})` : 'Your hand';
+    $('.ss-handh').innerHTML = open ? (mine.play.length >= per ? `✓ Played! Tap it again to change your mind.` : `<b>Your turn:</b> tap ${per === 2 ? 'TWO cards' : 'ONE card'} to cover what is coming (${mine.play.length}/${per})`) : 'Your hand';
     $('.ss-hand').innerHTML = mine.hand.map((id, i) => { const c = CARDS[id], on = mine.play.includes(i); return `<button class="ss-cardbtn${on ? ' on' : ''}" data-i="${i}" ${open ? '' : 'disabled'}><span class="ss-art">${c.a}</span><b>${esc(c.n)}</b><span>${fxChips(c.fx)}</span>${on ? '<em>PLAYED ✓</em>' : ''}</button>`; }).join('');
   }
   panel.addEventListener('click', e => {
-    const ch = e.target.closest('.ss-ch'), cd = e.target.closest('.ss-cardbtn');
+    const cd = e.target.closest('.ss-cardbtn');
     if (watching || G?.ph !== 'beat') return;
-    if (ch) { const i = +ch.dataset.i; mine.vote = i; ctx.send('vote', i); ctx.sfx('tap'); evKey = ''; drawEvent(); }
-    if (cd && !cd.disabled) { const i = +cd.dataset.i; const at = mine.play.indexOf(i); if (at >= 0) mine.play.splice(at, 1); else { mine.play.push(i); if (mine.play.length > per) mine.play.shift(); } ctx.send('play', i); ctx.sfx('pick'); drawHand(); }
+    if (cd && !cd.disabled) { const i = +cd.dataset.i; const at = mine.play.indexOf(i); if (at >= 0) mine.play.splice(at, 1); else { mine.play.push(i); if (mine.play.length > per) mine.play.shift(); } ctx.send('play', i); ctx.sfx('pick'); drawHand(); if (G) drawMeters(G.m); }
   });
   drawMeters([RULES.begin, RULES.begin, RULES.begin]); drawEvent();
 
@@ -113,10 +127,10 @@ export function createView(ctx) {
       if (g.beat !== curBeat) { curBeat = g.beat; beatStart = performance.now(); if (g.ph === 'beat') ctx.sfx('trap'); }
       $('.ss-n').textContent = Math.max(1, g.beat + 1);
       drawMeters(g.m); setScene(g.m); drawEvent(); drawHand();
-      for (const p of players) bar.mark(p.pid, 'ss-in', !!g.done?.includes(p.pid) && !!g.voted?.includes(p.pid));
+      for (const p of players) bar.mark(p.pid, 'ss-in', !!g.done?.includes(p.pid));
       bar.set(g.sc, g.left);
     },
-    priv(d) { mine = { hand: d.hand || [], play: d.play || [], vote: d.vote ?? null }; evKey = ''; drawEvent(); drawHand(); },
+    priv(d) { mine = { hand: d.hand || [], play: d.play || [] }; evKey = ''; drawEvent(); drawHand(); if (G) drawMeters(G.m); },
     event(ev) {
       if (ev.e === 'resolve') {
         METERS.forEach((k, i) => { const el = meterEls[k].querySelector('.ss-d'), d = ev.d[i]; el.textContent = d ? (d > 0 ? '+' : '−') + Math.abs(d) : '±0'; el.className = 'ss-d show ' + (d > 0 ? 'up' : d < 0 ? 'down' : ''); clearTimeout(el.t); el.t = setTimeout(() => { el.className = 'ss-d'; }, 1600); });

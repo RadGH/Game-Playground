@@ -251,8 +251,8 @@ export const GAMES = Object.freeze({
    "title": "Laser Limbo",
    "blurb": "Jump and duck the sweeping lasers — last one standing!",
    "how": [
-    "Orange beams are LOW: press HOP to jump them.",
-    "Purple beams are HIGH: hold DUCK to crouch under them.",
+    "Lasers sweep the stage: press DODGE just before one reaches you.",
+    "You hop the orange low beams and duck the purple high ones by yourself.",
     "You have 3 lives. Last one standing wins!"
    ],
    "kind": "arena",
@@ -266,8 +266,7 @@ export const GAMES = Object.freeze({
    ],
    "controls": {
     "stick": true,
-    "a": "Hop",
-    "b": "Duck"
+    "a": "Dodge"
    },
    "move": {
     "speed": 5.6,
@@ -688,7 +687,7 @@ export const GAMES = Object.freeze({
    "title": "Tile Flip Race",
    "blurb": "Grab the tiles next to yours, every two seconds, before your rivals do!",
    "how": [
-    "Tap a tile next to your land. Every 2 seconds everyone's pick flips together.",
+    "Tap any tile: every 2 seconds your land grows one tile toward it.",
     "Stars are worth 2, gems 3. You can steal a rival's tile too.",
     "Pick the same tile as someone else and you both bounce off.",
     "Your biggest joined-up patch scores a bonus point per tile."
@@ -862,8 +861,8 @@ export const GAMES = Object.freeze({
    "blurb": "Flip your gates to roll the marble through the portals to the goal!",
    "how": [
     "A marble rolls by itself. Gates with your colour and shape are yours: tap to flip them.",
-    "Portals with the same letter are joined: in one, out the other.",
-    "Set every gate so the marble reaches the flag. Clear enough stages together to win!"
+    "The glowing trail shows where it will go: flip until it reaches the flag ✓.",
+    "Each stage is faster. Clear the goal number of stages together in time!"
    ],
    "kind": "ui",
    "min": 1,
@@ -1177,16 +1176,16 @@ export const GAMES = Object.freeze({
   "meta": {
    "id": "defuse-together",
    "title": "Defuse Together",
-   "blurb": "One holds the confetti cannon, the others hold the rule book — talk it out before it blows!",
+   "blurb": "One holds the confetti cannon, the others hold the rule book — shout out the right wire before it blows!",
    "how": [
-    "The DEVICE moves round the team: its holder describes it and taps.",
-    "Everyone else has a few torn pages of the RULE BOOK: read them out!",
-    "Mistakes burn the fuse. Defuse every module in time!"
+    "The DEVICE moves round the team: its holder says the CLUE out loud.",
+    "The others hold the RULE BOOK: \"clue → cut the RED wire\". Shout it!",
+    "A wrong wire burns the fuse. Cut all 5 in time!"
    ],
    "kind": "ui",
    "min": 1,
    "max": 4,
-   "seconds": 90,
+   "seconds": 80,
    "scoring": "coop",
    "unit": "points",
    "tags": [
@@ -1247,8 +1246,8 @@ export const GAMES = Object.freeze({
    "title": "Storm Shelter",
    "blurb": "Keep the shelter warm, dry and fed until the storm passes!",
    "how": [
-    "Every few seconds the storm throws an event: vote how to handle it.",
-    "Play one action card from your hand each beat.",
+    "Each beat the storm shows what it will hit: \"−2 Roof\".",
+    "Play ONE card from your hand to cover it before the beat ends.",
     "Talk it over: a meter tops out at 10, and if any hits 0 you lose!",
     "Survive all 13 beats."
    ],
@@ -1321,8 +1320,8 @@ export const GAMES = Object.freeze({
    "title": "Pin the Tail",
    "blurb": "Remember where the tail goes, then pin it with your eyes shut!",
    "how": [
-    "An animal shows where its tail goes (the glowing star). Remember it!",
-    "Then it hides. Tap where the tail goes. You can tap again to move your pin.",
+    "A picture shows where its tail goes (the glowing star) — or its horn, its nose, the candle… Remember it!",
+    "Then it hides. Tap where it goes. You can tap again to move your pin.",
     "Closest pin wins the round. Each round has a trick: slides, spins and swaps!",
     "Five rounds."
    ],
@@ -1474,10 +1473,10 @@ export const GAMES = Object.freeze({
    "title": "Fizzpop Pass",
    "blurb": "Pass the fizzing pie before it pops — don’t be holding it when it goes SPLAT!",
    "how": [
-    "Got the pie? Bump into someone to pass it (or press A next to them).",
-    "It fizzes faster near the end — but nobody knows exactly when!",
-    "You cannot pass it straight back to who gave it to you.",
-    "Splatted = lose a life. Last one standing wins!"
+    "Got the pie? Bump into someone (or press PASS near them) to hand it over.",
+    "It fizzes faster near the end — nobody knows exactly when it pops.",
+    "No passing straight back: the giver wears a 🚫 for a moment.",
+    "Holding it at SPLAT = lose a life; everyone else gets +1."
    ],
    "kind": "arena",
    "min": 1,
@@ -1543,12 +1542,7 @@ export const GAMES = Object.freeze({
    "kind": "arena",
    "min": 1,
    "max": 4,
-   "seconds": 70,
-   "scoring": "points",
-   "unit": "pts",
-   "tags": [
-    "action"
-   ],
+   "seconds": 75,
    "controls": {
     "stick": true
    },
@@ -1625,7 +1619,7 @@ export const GAMES = Object.freeze({
    "title": "Mole Mallet",
    "blurb": "Bonk the moles as they pop up — but not the bombs!",
    "how": [
-    "Moles pop out of the holes: run onto one and press BONK!",
+    "Moles pop out of the holes: run up to one and press BONK!",
     "Golden moles are worth 3, but they are quick.",
     "A mole in a black helmet is a BOMB — bonk it and you get dizzy.",
     "Bonk a player to make them dizzy too. Most bonks wins!"
@@ -2286,7 +2280,7 @@ export const GAMES = Object.freeze({
    "how": [
     "A swings your pillow at whoever is in front.",
     "Every bop raises their wobble %: they fly further.",
-    "Knock someone off the bed: +1. Fall off: -1.",
+    "Bop someone off the bed: +1. Only a bop sends you over.",
     "B hops out of the way."
    ],
    "kind": "arena",
@@ -2963,6 +2957,1315 @@ export const GAMES = Object.freeze({
    "pitch": 58,
    "card": "card-glimmer-ice",
    "css": true
+  }
+ },
+ "hoop-frenzy": {
+  "meta": {
+   "id": "hoop-frenzy",
+   "title": "Hoop Frenzy",
+   "blurb": "Hold, let go in the green, sink it — three in a row and your ball catches fire!",
+   "how": [
+    "HOLD the button, let go when the meter is in the GREEN.",
+    "Every shot moves you to a new mark: further back needs more power.",
+    "3 in a row = ON FIRE (double points). Last 10 s: gold money balls!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 45,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-hoop-frenzy",
+   "css": true
+  }
+ },
+ "letter-shot": {
+  "meta": {
+   "id": "letter-shot",
+   "title": "Letter Shot",
+   "blurb": "Call your shot — if it drops, everyone must copy it or take a letter!",
+   "how": [
+    "The setter taps a mark, then HOLDS and lets go in the green.",
+    "If it goes in, everyone else shoots that mark. Miss = a letter of FAIR.",
+    "Spell FAIR and you are out. Last one in wins!",
+    "Second half: a missed copy costs TWO letters."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 90,
+   "scoring": "survival",
+   "unit": "letters",
+   "tags": [
+    "action"
+   ],
+   "card": "card-letter-shot",
+   "css": true
+  }
+ },
+ "court-clash": {
+  "meta": {
+   "id": "court-clash",
+   "title": "Court Clash",
+   "blurb": "Two hoops, one ball, 75 seconds — shoot, pass, steal and swat!",
+   "how": [
+    "Red + green shoot right, blue + pink shoot left.",
+    "With the ball: HOLD A, let go in the green to shoot. Tap A to pass.",
+    "B = jump and steal. Outside the arc is worth 3!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 75,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action",
+    "coop"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Shoot / pass",
+    "b": "Steal / jump"
+   },
+   "move": {
+    "speed": 5.4,
+    "accel": 24,
+    "carryMul": 0.45,
+    "stunDrag": 2.2
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 5.2,
+    "wall": true
+   },
+   "pitch": 42,
+   "card": "card-court-clash",
+   "css": true
+  }
+ },
+ "balloon-darts": {
+  "meta": {
+   "id": "balloon-darts",
+   "title": "Balloon Darts",
+   "blurb": "Pop the drifting balloons, chain the colours, and never hit the BOOM!",
+   "how": [
+    "Drag on the board to aim, let go to throw a dart.",
+    "Red 1, blue 2, green 3, gold 5. Same colour again = a chain (x2, x3, x4)!",
+    "The black BOOM balloon costs 5 points."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 56,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-balloon-darts",
+   "css": true,
+   "controls": {
+    "a": "Throw"
+   }
+  }
+ },
+ "photo-booth": {
+  "meta": {
+   "id": "photo-booth",
+   "title": "Photo Booth",
+   "blurb": "Strike the pose on the card before the flash. Say cheese!",
+   "how": [
+    "A pose card flashes up: hit its buttons before the camera FLASHES!",
+    "Tap a button to switch it on, tap again for off.",
+    "Right pose = 3 points (2 if you were slow). Wrong = a very silly photo."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 50,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-photo-booth",
+   "css": true,
+   "controls": {
+    "a": "Pose"
+   }
+  }
+ },
+ "duck-derby": {
+  "meta": {
+   "id": "duck-derby",
+   "title": "Duck Derby",
+   "blurb": "Paddle your rubber duck down the stream: a steady beat beats mashing!",
+   "how": [
+    "Tap LEFT, RIGHT, LEFT, RIGHT in a steady beat to paddle.",
+    "Rapids push you sideways: an extra tap on one side steers.",
+    "Both buttons at once = SPLASH the duck just ahead!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 62,
+   "scoring": "points",
+   "unit": "m",
+   "tags": [
+    "action"
+   ],
+   "card": "card-duck-derby",
+   "css": true,
+   "controls": {
+    "a": "Left paddle",
+    "b": "Right paddle"
+   }
+  }
+ },
+ "water-balloon-ambush": {
+  "meta": {
+   "id": "water-balloon-ambush",
+   "title": "Water Balloon Ambush",
+   "blurb": "Grab balloons, hide behind the hay, and soak everybody!",
+   "how": [
+    "Walk into a bucket (or stand in a puddle) to grab water balloons.",
+    "HOLD A to wind up, let go to throw: longer = further.",
+    "A soaking is a point. Hay bales block balloons: hide! B = dodge."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 64,
+   "scoring": "points",
+   "unit": "soaks",
+   "tags": [
+    "action"
+   ],
+   "card": "card-water-balloon-ambush",
+   "css": true,
+   "controls": {
+    "stick": true,
+    "a": "Throw (hold)",
+    "b": "Dodge"
+   },
+   "move": {
+    "speed": 5.6,
+    "accel": 30,
+    "carryMul": 0.75,
+    "slowMul": 0.5,
+    "stunDrag": 3
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 7,
+    "wall": true
+   },
+   "pitch": 58
+  }
+ },
+ "sketchy-copy": {
+  "meta": {
+   "id": "sketchy-copy",
+   "title": "Sketchy Copy",
+   "blurb": "Look at the doodle, then draw it from memory. How close can you get?",
+   "how": [
+    "A doodle shows for a few seconds. Remember it!",
+    "Then draw it from memory with your finger.",
+    "The closer your copy, the more points. Size and place don't matter."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 74,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "social"
+   ],
+   "card": "card-sketchy-copy",
+   "css": true,
+   "controls": {
+    "a": "Done"
+   }
+  }
+ },
+ "bumper-boats": {
+  "meta": {
+   "id": "bumper-boats",
+   "title": "Bumper Boats",
+   "blurb": "Squirt the other boats down the whirlpool and onto the fountains!",
+   "how": [
+    "Paddle with the stick. A squirts water the way you point.",
+    "Push a boat down the whirlpool for 3, onto a spouting fountain for 2.",
+    "Grab rubber ducks for 1. Do not go down the drain yourself!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 64,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Squirt"
+   },
+   "move": {
+    "speed": 4.4,
+    "accel": 2.4,
+    "stunDrag": 1.1
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 8.6,
+    "wall": true
+   },
+   "pitch": 62,
+   "card": "card-bumper-boats",
+   "css": true
+  }
+ },
+ "downhill-derby": {
+  "meta": {
+   "id": "downhill-derby",
+   "title": "Downhill Derby",
+   "blurb": "Race your soapbox cart to the bottom of the hill!",
+   "how": [
+    "Point the stick where you want to go. Down the hill is up the screen.",
+    "Hold A to tuck for speed, but a tucked cart wobbles in turns!",
+    "Dodge hay bales and puddles. Ramps make you fly."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 64,
+   "scoring": "points",
+   "unit": "metres",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Tuck"
+   },
+   "move": {
+    "mode": "car",
+    "speed": 7.2,
+    "accel": 2.4,
+    "turn": 3,
+    "grip": 6.5,
+    "boostMul": 1.42,
+    "slowMul": 0.5,
+    "stunDrag": 2.2
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 6.5,
+    "hd": 150,
+    "wall": true
+   },
+   "pitch": 46,
+   "card": "card-downhill-derby",
+   "css": true
+  }
+ },
+ "carousel-recall": {
+  "meta": {
+   "id": "carousel-recall",
+   "title": "Carousel Recall",
+   "blurb": "Watch the carousel light up, then tap the animals back in order!",
+   "how": [
+    "Watch which animals light up, in order.",
+    "Then tap them back in the same order. A slip and you sit out the round.",
+    "Each round adds one more animal to the end."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 84,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle"
+   ],
+   "card": "card-carousel-recall",
+   "css": true
+  }
+ },
+ "pie-toss": {
+  "meta": {
+   "id": "pie-toss",
+   "title": "Pie Toss",
+   "blurb": "Splat the sliding faces with cream pies, but never Granny!",
+   "how": [
+    "Tap the booth to throw a pie there. It takes half a second to land!",
+    "Throw where a face is GOING. Gold faces are worth 3.",
+    "Splat Granny and you lose 3 points."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 54,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-pie-toss",
+   "css": true
+  }
+ },
+ "ring-toss": {
+  "meta": {
+   "id": "ring-toss",
+   "title": "Ring Toss",
+   "blurb": "Land rings round the bottle necks on a sliding table!",
+   "how": [
+    "Tap to set your AIM, then tap again to throw when the marker is far enough.",
+    "The table slides while the ring flies, so throw a little ahead.",
+    "Back bottles score more. A ringer on the GOLD bottle is 8! Watch the wind later on."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 66,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-ring-toss",
+   "css": true
+  }
+ },
+ "pizza-chef": {
+  "meta": {
+   "id": "pizza-chef",
+   "title": "Pizza Pronto",
+   "blurb": "Build the pizza on the ticket, bake it golden, and serve it fast!",
+   "how": [
+    "Copy the ticket: tap the sauce and cheese, pick a topping, tap the pizza.",
+    "Slide it INTO THE OVEN, then PULL IT OUT when the bar is golden.",
+    "Right toppings + golden bake + speed = points. Then the next order!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 80,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-pizza-chef",
+   "css": true
+  }
+ },
+ "wagon-trail": {
+  "meta": {
+   "id": "wagon-trail",
+   "title": "Wagon Trail",
+   "blurb": "Roll the party's wagon across the frontier — ford rivers, fix wheels and ride out the storm together!",
+   "how": [
+    "Your wagon meets a quick challenge every few seconds. Everyone plays it at once.",
+    "Read the big card: it says what to tap. Food and the wagon are shared.",
+    "The best at each challenge scores the most points!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 78,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-wagon-trail",
+   "css": true
+  }
+ },
+ "hide-and-seek": {
+  "meta": {
+   "id": "hide-and-seek",
+   "title": "Hide & Peek",
+   "blurb": "Climb into a barrel and stay hidden — or carry the lantern and find everyone!",
+   "how": [
+    "Hiders: run to a barrel, crate or stall and press A to climb in.",
+    "B peeks out for +1 — if the lantern does not catch you.",
+    "Seeker: the lantern spots anyone out in the open. A looks inside a spot.",
+    "Found: +2 to the seeker. Hidden at the bell: +3."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 86,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-hide-and-seek",
+   "css": true,
+   "controls": {
+    "stick": true,
+    "a": "Hide / Look",
+    "b": "Peek"
+   },
+   "move": {
+    "speed": 5.4,
+    "accel": 30,
+    "stunDrag": 4
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 7,
+    "wall": true
+   },
+   "pitch": 60
+  }
+ },
+ "jousting": {
+  "meta": {
+   "id": "jousting",
+   "title": "Tilt & Lance",
+   "blurb": "Steady your wobbling lance, strike as you cross, and knock the other knight off their horse!",
+   "how": [
+    "HOLD to steady your wobbling lance on the target shield.",
+    "LET GO right at the NOW mark as the knights cross.",
+    "A crack (3) while they only glance UNHORSES them!",
+    "Not riding? Cheer for a knight before the charge: right = +2."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 78,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-jousting",
+   "css": true
+  }
+ },
+ "floor-is-lava": {
+  "meta": {
+   "id": "floor-is-lava",
+   "title": "Floor Is Lava",
+   "blurb": "The floor turns to lava in waves — jump between the cushions and rocks and be the last one standing!",
+   "how": [
+    "When the floor GLOWS, get up on something: lava is coming!",
+    "Press A to hop. Keep A held to jump FAR. B shoves.",
+    "Things you stand on crumble while it is hot: keep hopping.",
+    "Touch the lava and you are out. Last one standing wins!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 72,
+   "scoring": "survival",
+   "unit": "s",
+   "tags": [
+    "action"
+   ],
+   "card": "card-floor-is-lava",
+   "css": true,
+   "controls": {
+    "stick": true,
+    "a": "Jump",
+    "b": "Shove"
+   },
+   "move": {
+    "speed": 5.2,
+    "accel": 26,
+    "stunDrag": 2.6,
+    "boostMul": 1.6
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8.5,
+    "hd": 6.5,
+    "wall": true
+   },
+   "pitch": 58
+  }
+ },
+ "dirt-dash": {
+  "meta": {
+   "id": "dirt-dash",
+   "title": "Dirt Dash",
+   "blurb": "Race your dirt bike over the jumps, flip in the air and land it!",
+   "how": [
+    "Hold GAS to go. The front lifts as you speed up: tap LEAN to keep it down.",
+    "In the air, GAS flips you back and LEAN flips you forward.",
+    "Land level with the ground or you crash! Flips, wheelies and distance all score."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 62,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-dirt-dash",
+   "css": true,
+   "controls": {
+    "a": "Gas",
+    "b": "Lean"
+   }
+  }
+ },
+ "wizard-duel": {
+  "meta": {
+   "id": "wizard-duel",
+   "title": "Wizard Duel",
+   "blurb": "Pick your spell, blast your rivals and knock them off the platform!",
+   "how": [
+    "A casts your spell. B picks the next of six (each has its own cool-down).",
+    "Hits fill their ZAP meter: the fuller it is, the further they fly.",
+    "Knock them off the edge (or fill the meter) to take a heart. Three each!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 75,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-wizard-duel",
+   "css": true,
+   "controls": {
+    "stick": true,
+    "a": "Cast",
+    "b": "Next spell"
+   },
+   "move": {
+    "speed": 5.6,
+    "accel": 16,
+    "stunDrag": 1.4,
+    "slowMul": 0.45
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 8.5,
+    "wall": false
+   },
+   "pitch": 58
+  }
+ },
+ "tower-pull": {
+  "meta": {
+   "id": "tower-pull",
+   "title": "Tower Pull",
+   "blurb": "Pull a block, stack it on top, and don't be the one who topples the tower!",
+   "how": [
+    "On your turn, tap a block, then tap PULL while the marker is in the green.",
+    "Middle blocks are safest. A clumsy pull makes the tower wobble.",
+    "Topple it and you lose 4 points. Everyone else gets 2!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 82,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-tower-pull",
+   "css": true,
+   "controls": {
+    "a": "Pull"
+   }
+  }
+ },
+ "castle-archers": {
+  "meta": {
+   "id": "castle-archers",
+   "title": "Castle Archers",
+   "blurb": "Fire arrows over the wall together and keep the goblins from the gate!",
+   "how": [
+    "Drag BACK from anywhere and let go to shoot, like a bow string.",
+    "Further back = more power. The arrow flies in an arc and the wind pushes it.",
+    "Stop the goblins reaching the gate. Bruisers take 4 arrows!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 80,
+   "scoring": "coop",
+   "unit": "points",
+   "tags": [
+    "coop",
+    "action"
+   ],
+   "card": "card-castle-archers",
+   "css": true,
+   "controls": {
+    "a": "Shoot"
+   }
+  }
+ },
+ "fair-darts": {
+  "meta": {
+   "id": "fair-darts",
+   "title": "Fair Darts",
+   "blurb": "Steady your wobbly aim and land darts on the bullseye!",
+   "how": [
+    "Your aim ring wanders and breathes in and out.",
+    "Tap THROW when it drifts in close to the gold bullseye.",
+    "Bullseye 10, then 5, 3, 2, 1. The last three darts count DOUBLE!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 54,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-fair-darts",
+   "css": true,
+   "controls": {
+    "a": "Throw"
+   }
+  }
+ },
+ "flood-rush": {
+  "meta": {
+   "id": "flood-rush",
+   "title": "Flood Rush",
+   "blurb": "The water is rising — race to higher ground, climb the crates and keep the others off your hill!",
+   "how": [
+    "The water rises in stages: get to HIGH ground before it comes.",
+    "A jumps up onto crates and stall roofs.",
+    "B shoves — or, at the end of a plank bridge, knocks it down behind you.",
+    "Water over your knees = swept away. Last one dry wins!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 74,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-flood-rush",
+   "css": true,
+   "controls": {
+    "stick": true,
+    "a": "Jump",
+    "b": "Shove"
+   },
+   "move": {
+    "speed": 5.2,
+    "accel": 26,
+    "stunDrag": 2.6,
+    "slowMul": 0.55
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 10,
+    "hd": 7.5,
+    "wall": true
+   },
+   "pitch": 56
+  }
+ },
+ "crane-claw": {
+  "meta": {
+   "id": "crane-claw",
+   "title": "Claw Machine",
+   "blurb": "Steer the claw over a prize, let the swing settle and DROP — grab the most points!",
+   "how": [
+    "Drag anywhere to move the claw, then tap DROP.",
+    "The claw swings: let it settle over the MIDDLE of a prize for a strong grip.",
+    "Ball 1 · duck 2 · bear 3 · star 4 · golden egg 8. Five grabs each!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 52,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-crane-claw",
+   "css": true,
+   "controls": {
+    "a": "Drop"
+   }
+  }
+ },
+ "path-trace": {
+  "meta": {
+   "id": "path-trace",
+   "title": "Steady Hand",
+   "blurb": "Guide your dot up the winding path without touching the edge — fastest steady hand wins!",
+   "how": [
+    "Drag anywhere: your dot moves with your finger.",
+    "Stay on the glowing path to the top. Touch the edge = BZZT, sent back!",
+    "First up wins the round. Three paths, each one trickier."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-path-trace",
+   "css": true,
+   "controls": {
+    "a": "Trace"
+   }
+  }
+ },
+ "cups-and-ball": {
+  "meta": {
+   "id": "cups-and-ball",
+   "title": "Shell Shuffle",
+   "blurb": "Keep your eye on the ball while the cups shuffle — then tap the right cup!",
+   "how": [
+    "Watch the ball go under a cup, then follow that cup!",
+    "When the shuffle stops, TAP the cup with the ball.",
+    "Quick taps and streaks score more. Beware fake-outs!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 88,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle"
+   ],
+   "card": "card-cups-and-ball",
+   "css": true,
+   "controls": {
+    "a": "Pick"
+   }
+  }
+ },
+ "monster-rampage": {
+  "meta": {
+   "id": "monster-rampage",
+   "title": "Monster Rampage",
+   "blurb": "You are a giant monster in a toy town — smash the most buildings before time runs out!",
+   "how": [
+    "A punches the building in front of you. B stomps everything round you.",
+    "Big landmarks are worth the most. Every hit scores!",
+    "Tanks and helicopters bonk you: dodge the red rings."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 64,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-monster-rampage",
+   "css": true,
+   "controls": {
+    "stick": true,
+    "a": "Punch",
+    "b": "Stomp"
+   },
+   "move": {
+    "speed": 5,
+    "accel": 24,
+    "stunDrag": 3
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 11,
+    "hd": 8,
+    "wall": true
+   },
+   "pitch": 56
+  }
+ },
+ "zombie-survival": {
+  "meta": {
+   "id": "zombie-survival",
+   "title": "Night of the Shamblers",
+   "blurb": "Bonk the goofy Shamblers, pick your friends back up and last until sunrise together!",
+   "how": [
+    "Shamblers want a hug: a hug knocks you DOWN.",
+    "A swings your foam bat (two bonks flop one). B plants a fence.",
+    "Stand by a downed friend to pick them up. Last until sunrise!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 74,
+   "scoring": "coop",
+   "unit": "points",
+   "tags": [
+    "coop",
+    "action"
+   ],
+   "card": "card-zombie-survival",
+   "css": true,
+   "controls": {
+    "stick": true,
+    "a": "Bonk",
+    "b": "Fence"
+   },
+   "move": {
+    "speed": 5,
+    "accel": 30,
+    "stunDrag": 3,
+    "slowMul": 0.55
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 7,
+    "wall": true
+   },
+   "pitch": 60
+  }
+ },
+ "broomstick-bumpers": {
+  "meta": {
+   "id": "broomstick-bumpers",
+   "title": "Broomstick Bumpers",
+   "blurb": "Bash the other brooms — and knock them into the open graves!",
+   "how": [
+    "Point the stick to fly your broom. A = a quick boost.",
+    "Ram a broom: from behind 3, side 2, nose to nose 1.",
+    "Graves glow green, then open: bash someone in for +3!",
+    "Fly into an open grave yourself and you lose a point."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 66,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Boost"
+   },
+   "move": {
+    "mode": "car",
+    "speed": 6.2,
+    "accel": 3.8,
+    "turn": 4,
+    "grip": 4.2,
+    "boostMul": 1.55,
+    "stunDrag": 1.7
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8,
+    "hd": 8,
+    "wall": true
+   },
+   "pitch": 64,
+   "card": "card-broomstick-bumpers",
+   "css": true
+  }
+ },
+ "coffin-cart-rally": {
+  "meta": {
+   "id": "coffin-cart-rally",
+   "title": "Coffin Cart Rally",
+   "blurb": "Race coffin carts round the crypt — hop the skeleton hands!",
+   "how": [
+    "Point the stick where you want to go — your cart turns that way.",
+    "A purple crack = a hand is coming. Press A to HOP over it!",
+    "Roll through a candle gate while it is lit for a burst of speed.",
+    "B = lid slam: BOO the carts right beside you."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 75,
+   "scoring": "points",
+   "unit": "laps",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Hop",
+    "b": "Lid slam"
+   },
+   "move": {
+    "mode": "car",
+    "speed": 7,
+    "accel": 3.2,
+    "turn": 3.7,
+    "grip": 7,
+    "boostMul": 1.5,
+    "slowMul": 0.55,
+    "stunDrag": 2.4
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 11,
+    "hd": 10,
+    "wall": true
+   },
+   "pitch": 70,
+   "card": "card-coffin-cart-rally",
+   "css": true
+  }
+ },
+ "witchs-sweep": {
+  "meta": {
+   "id": "witchs-sweep",
+   "title": "Witch's Sweep",
+   "blurb": "Grab the candy and JUMP the giant sweeping broom!",
+   "how": [
+    "Walk over candy to grab it. Lollipops are worth 3!",
+    "The witch's broom sweeps round and round. Press A to JUMP it!",
+    "Swept up? You drop candy. It can swing back the other way!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 62,
+   "scoring": "points",
+   "unit": "candy",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Jump"
+   },
+   "move": {
+    "speed": 5.4,
+    "accel": 24,
+    "stunDrag": 2.2
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 8,
+    "wall": true,
+    "posts": [
+     {
+      "x": 0,
+      "z": 0,
+      "r": 1.1
+     }
+    ]
+   },
+   "pitch": 60,
+   "card": "card-witchs-sweep",
+   "css": true
+  }
+ },
+ "pumpkin-fling": {
+  "meta": {
+   "id": "pumpkin-fling",
+   "title": "Pumpkin Fling",
+   "blurb": "Catapult your pumpkin down the patch — but not over the graveyard wall!",
+   "how": [
+    "Tap to stop the POWER bar, then tap to LET GO as the arm swings up.",
+    "Halfway up throws furthest. Over the wall at the end = lost!",
+    "Land in the scarecrow's bucket for +20. Best of three flings."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 66,
+   "scoring": "points",
+   "unit": "metres",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-pumpkin-fling",
+   "css": true
+  }
+ },
+ "monster-line-up": {
+  "meta": {
+   "id": "monster-line-up",
+   "title": "Monster Line-Up",
+   "blurb": "Count the eyes, legs and spots — tap the right monster, quick!",
+   "how": [
+    "Monsters line up with a question: MOST EYES? FEWEST LEGS? BIGGEST?",
+    "Count and tap the right monster. Your first tap counts!",
+    "Right = 5 points, plus up to 5 more for being quick."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 75,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-monster-line-up",
+   "css": true
+  }
+ },
+ "monster-makeover": {
+  "meta": {
+   "id": "monster-makeover",
+   "title": "Monster Makeover",
+   "blurb": "Give the monster the makeover it asked for — then vote for the best look!",
+   "how": [
+    "A monster wants a makeover: read its request card.",
+    "Tap parts onto it: fur, eyes, horns, hat, mouth and more.",
+    "It gives a star for each wish, and more for its style.",
+    "Then vote for your favourite look (not your own!)."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 72,
+   "scoring": "vote",
+   "unit": "points",
+   "tags": [
+    "social",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-monster-makeover",
+   "css": true
+  }
+ },
+ "slime-slingers": {
+  "meta": {
+   "id": "slime-slingers",
+   "title": "Slime Slingers",
+   "blurb": "Fling sticky slime — three globs and they are stuck fast!",
+   "how": [
+    "A throws a glob of slime where you face. A hit is a point.",
+    "Slimed? You get slower. Three globs = stuck! (+2 to the thrower)",
+    "Wash it off at the pump in the middle. B = dodge."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 64,
+   "scoring": "points",
+   "unit": "splats",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Throw",
+    "b": "Dodge"
+   },
+   "move": {
+    "speed": 6,
+    "accel": 22,
+    "stunDrag": 2.4,
+    "slowMul": 0.62,
+    "carryMul": 0.62
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8,
+    "hd": 7,
+    "wall": true
+   },
+   "pitch": 58,
+   "card": "card-slime-slingers",
+   "css": true
+  }
+ },
+ "patchwork-pal": {
+  "meta": {
+   "id": "patchwork-pal",
+   "title": "Patchwork Pal",
+   "blurb": "Remember the monster's face, then stitch every part back on!",
+   "how": [
+    "Look closely: the monster's eyes, nose, grin and hat are all in place.",
+    "Then they pop off! Each part comes back one at a time.",
+    "Tap ONCE where it goes. Closer = more points.",
+    "Then see everyone's silly monsters side by side!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 76,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-patchwork-pal",
+   "css": true
+  }
+ },
+ "cauldron-bobbing": {
+  "meta": {
+   "id": "cauldron-bobbing",
+   "title": "Cauldron Bobbing",
+   "blurb": "Bite the gummy eyeballs when they pop up under your face!",
+   "how": [
+    "Gummy eyeballs drift side to side and duck under the bubbles.",
+    "BITE when one is under your face AND up at the top.",
+    "Gold ones are worth 3. Three in a row is a bonus!",
+    "Leave the crowned toad alone: biting him loses a point."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 50,
+   "scoring": "points",
+   "unit": "eyeballs",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-cauldron-bobbing",
+   "css": true
+  }
+ },
+ "shifty-portraits": {
+  "meta": {
+   "id": "shifty-portraits",
+   "title": "Shifty Portraits",
+   "blurb": "The ghost is changing the portraits — spot what moved!",
+   "how": [
+    "The lights are on: remember the portraits on the wall.",
+    "Lights out! A ghost changes some of them.",
+    "Tap the portraits that changed. Right +3, wrong -1.",
+    "Find one first for +1. Five rounds!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 74,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-shifty-portraits",
+   "css": true
+  }
+ },
+ "prize-shelf": {
+  "meta": {
+   "id": "prize-shelf",
+   "title": "Gone Missing!",
+   "blurb": "Remember the prize shelf — then spot which prizes vanished!",
+   "how": [
+    "Look at the prize shelf. Remember every prize!",
+    "The shutter drops, and some prizes vanish.",
+    "Tap the missing ones in the tray. Right = 3, first to find it +1."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 78,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle"
+   ],
+   "card": "card-prize-shelf",
+   "css": true,
+   "controls": {
+    "a": "Pick"
+   }
+  }
+ },
+ "pair-panic": {
+  "meta": {
+   "id": "pair-panic",
+   "title": "Pair Panic",
+   "blurb": "Everyone flips at once — find the matching pairs before your friends do!",
+   "how": [
+    "Peek at the table, then every card turns face down.",
+    "Tap two cards: a match is yours, a miss flips back.",
+    "No turns! Watch the others' flips — and SNATCH a card a friend holds up."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 62,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle"
+   ],
+   "card": "card-pair-panic",
+   "css": true,
+   "controls": {
+    "a": "Flip"
+   }
+  }
+ },
+ "order-up": {
+  "meta": {
+   "id": "order-up",
+   "title": "Order Up!",
+   "blurb": "Remember who ordered what — then serve every customer right!",
+   "how": [
+    "Read every order while the bubbles are up.",
+    "Then serve each customer: tap their food, then SERVE.",
+    "Exactly right = +2 bonus. One more customer every round!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 76,
+   "scoring": "points",
+   "unit": "tips",
+   "tags": [
+    "puzzle"
+   ],
+   "card": "card-order-up",
+   "css": true,
+   "controls": {
+    "a": "Add food",
+    "b": "Serve"
+   }
   }
  }
 });

@@ -8,7 +8,9 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 
 const ODD_BASE = ['cat', 'dog', 'fish', 'frog', 'crow', 'dove', 'horse', 'rabbit', 'hippo', 'otter', 'turtle', 'squirrel', 'kiwi-bird', 'duck', 'pig', 'cow', 'sheep', 'spider', 'bee', 'ice-cream', 'apple-whole', 'lemon', 'mushroom', 'umbrella', 'rocket', 'kite', 'hat-wizard', 'tree', 'leaf', 'feather', 'key', 'bell', 'music', 'anchor', 'balloon'];
-const ODD_SWAP = ['face-smile', 'face-frown', 'star', 'star-half-stroke', 'heart', 'heart-crack', 'lock', 'lock-open', 'bell-slash', 'volume-high', 'volume-low', 'battery-full', 'battery-half', 'hourglass-start', 'hourglass-end', 'cloud-sun', 'cloud-moon'];
+// round 12: smile/frown, star/half-stroke, heart/crack and full/half battery read as the SAME picture on a phone
+// (tests/odd-one-out-looks.test.js measures them) — swapped for pairs that differ by a whole shape.
+const ODD_SWAP = ['face-smile', 'face-sunglasses', 'star', 'star-half', 'heart', 'heart-half', 'lock', 'lock-open', 'bell-slash', 'volume-high', 'volume-low', 'battery-full', 'battery-empty', 'hourglass-start', 'hourglass-end', 'cloud-sun', 'cloud-moon'];
 export const LISTS = {
   'odd-one-out': [...ODD_BASE.flatMap(n => ['solid/' + n, 'regular/' + n]), ...ODD_SWAP.map(n => 'solid/' + n)],
   'higher-or-lower': ['ticket', 'candy', 'lollipop', 'popcorn', 'ice-cream', 'balloon', 'hotdog', 'teddy-bear', 'dice', 'gift', 'ferris-wheel', 'crown', 'trophy'].map(n => 'duotone/' + n),

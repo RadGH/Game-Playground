@@ -1,0 +1,19 @@
+/* Downhill Derby: 3-2-1-GO and call-outs, a strip on the right with everyone's place on the hill, distance boards. */
+.game-downhill-derby .dd-banner { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center;
+  font: 900 clamp(44px, 13vw, 96px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .15s, opacity .15s; }
+.dd-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.dd-banner.go { color: #8ff07a; } .dd-banner.small { font-size: clamp(24px, 7vw, 46px); }
+.game-downhill-derby .dd-strip { position: absolute; right: calc(var(--sr) + 6px); top: calc(var(--st) + 96px); bottom: calc(var(--sb) + 150px); width: 26px; pointer-events: none;
+  border-radius: 13px; background: linear-gradient(#95e27c, #5aa84a); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); }
+.season-halloween .dd-strip { background: linear-gradient(#4a7a50, #2c3a2e); }
+.dd-strip i { position: absolute; left: 50%; transform: translateX(-50%); font-style: normal; font-size: 14px; }
+.dd-strip .dd-top { top: -2px; color: #fff; text-shadow: 0 1px 0 var(--ink); } .dd-strip .dd-flag { bottom: -4px; }
+.dd-dot { position: absolute; left: 50%; top: 8%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--seat, #9aa3ad); border: 2px solid var(--ink);
+  font: 900 11px/18px var(--font); color: #fff; text-align: center; transition: top .2s linear; }
+.dd-dot.cpu { width: 14px; height: 14px; margin: -7px 0 0 -7px; background: #9aa3ad; }
+.dd-dot[data-place]:not([data-place=""])::after { content: attr(data-place); position: absolute; right: 24px; top: 0; background: var(--sun); color: var(--ink); border: 2px solid var(--ink); border-radius: 8px; padding: 0 4px; font-size: 11px; line-height: 16px; white-space: nowrap; }
+.game-downhill-derby .dd-tip { position: absolute; top: calc(var(--st) + 56px); left: 50%; transform: translateX(-50%); pointer-events: none; padding: 4px 14px; border-radius: 999px;
+  background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 14px/1.2 var(--font); white-space: nowrap; transition: opacity .6s; }
+.dd-tip.gone { opacity: 0; }
+.tag.dd-mark { background: #fff; color: var(--ink); text-shadow: none; font-size: 11px; padding: 0 6px; opacity: .85; }
+.tag.dd-cpu { background: #9aa3ad; }

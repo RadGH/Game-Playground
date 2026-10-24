@@ -12,6 +12,7 @@ import { createTunes } from '../../client/tunes.js';
 import { pumpkinGeo, stemGeo, faceTexture, spriteTexture } from '../../client/halloween.js';
 import { F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { createJuice } from '../../client/juice.js';
 
 export function createView(ctx) {
   const { THREE, group, stage, init, meta } = ctx;
@@ -78,7 +79,7 @@ export function createView(ctx) {
   function dropStripe(id) { for (const s of stripes.get(id) || []) { s.mesh.removeFromParent(); s.mesh.geometry.dispose(); s.mesh.material.dispose(); } stripes.delete(id); }
   const warnLeft = new Map();
   // ---- bats
-  const MB = 90, batMesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1.35, 1.35), new THREE.MeshBasicMaterial({ map: tex(spriteTexture(THREE, 'bat')), transparent: true, alphaTest: 0.3, side: THREE.DoubleSide }), MB);
+  const MB = 140, batMesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1.35, 1.35), new THREE.MeshBasicMaterial({ map: tex(spriteTexture(THREE, 'bat')), transparent: true, alphaTest: 0.3, side: THREE.DoubleSide }), MB);
   batMesh.frustumCulled = false; group.add(batMesh); for (let i = 0; i < MB; i++) batMesh.setMatrixAt(i, zero);
   const shadows = new THREE.InstancedMesh(new THREE.CircleGeometry(0.42, 12).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#1a0f26', transparent: true, opacity: 0.35, depthWrite: false }), MB);
   shadows.frustumCulled = false; shadows.renderOrder = 1; group.add(shadows); for (let i = 0; i < MB; i++) shadows.setMatrixAt(i, zero);
@@ -101,13 +102,13 @@ export function createView(ctx) {
   };
   frameCam(0, true);
   // ---- sound + HUD
-  const tunes = createTunes({ volume: 0.22 });
+  const tunes = createTunes({ volume: 0.22 }), juice = createJuice(ctx);
   const sbar = scoreBar(ctx, { unit: 'candy' });
   const medals = init.solo ? h('div', 'bs-medals', init.medals.map((m, i) => `<span>${['🥉', '🥈', '🥇'][i]} ${m}</span>`).join('')) : null; if (medals) ctx.ui.append(medals);
   const tip = h('div', 'bs-tip', '🦇 Purple stripes = bats coming. Get out!'); ctx.ui.append(tip); setTimeout(() => tip.classList.add('gone'), 5500);
   const banner = h('div', 'bs-banner'); ctx.ui.append(banner); let bannerT = 0;
   const show = (text, cls = '', s = 1.1) => { banner.textContent = text; banner.className = 'bs-banner show ' + cls; bannerT = s; };
-  const WAVE_WORDS = { lane: 'Bats!', column: 'Bats!', double: 'Two flocks!', cross: 'Criss-cross!', wall: 'Bat wall — find the gap!', wall2: 'Wall + flock!' };
+  const WAVE_WORDS = { lane: 'Bats!', column: 'Bats!', double: 'Two flocks!', cross: 'Criss-cross!', wall: 'Bat wall — find the gap!', wall2: 'Wall + flock!', comb: 'Three flocks — stand between!', gate: 'Bat wall — find the gap!', frame: 'Round the edge — get to the middle!' };
   let prevB = 0, prevS = -9;
   const cq = new THREE.Quaternion();
   return {
@@ -135,16 +136,16 @@ export function createView(ctx) {
       if (fresh && !(flags.get(ctx.me) & F.STUN)) ctx.actor(ctx.me)?.play('jump', 260);
     },
     event(ev) {
-      if (ev.e === 'grab') { ctx.sfx(ev.add > 1 ? 'coins' : 'pick'); floatText(stage, ev.x, 1.4, ev.z, `+${ev.add}`, ev.pid === ctx.me ? 'good' : ''); }
+      if (ev.e === 'grab') { ctx.sfx(ev.add > 1 ? 'coins' : 'pick'); if (ev.pid === ctx.me && ev.add > 1) { juice.flash('rgba(255,210,63,.7)', 160); show('Lollipop! +3', 'good', 0.8); } floatText(stage, ev.x, 1.4, ev.z, `+${ev.add}`, ev.pid === ctx.me ? 'good' : ''); }
       else if (ev.e === 'burst') { jiggle = 0.6; tunes.fx('pop', 1.3); }
-      else if (ev.e === 'warn') { tunes.fx('boo', 1.4); if (WAVE_WORDS[ev.kind] && ev.kind.startsWith('wall')) show(WAVE_WORDS[ev.kind], 'warn', 1.3); }
+      else if (ev.e === 'warn') { tunes.fx('boo', 1.4); if (WAVE_WORDS[ev.kind] && /^(wall|comb|gate|frame)/.test(ev.kind)) show(WAVE_WORDS[ev.kind], 'warn', 1.3); }
       else if (ev.e === 'swoop') tunes.fx('whistle');
-      else if (ev.e === 'bump') { ctx.sfx('hit'); ctx.actor(ev.pid)?.play('hit', 500); floatText(stage, ev.x, 2.1, ev.z, ev.lose ? `−${ev.lose}` : 'Bonk!', 'bad'); if (ev.pid === ctx.me) show(ev.lose ? `Bat bump! −${ev.lose}` : 'Bat bump!', 'bad', 0.9); }
+      else if (ev.e === 'bump') { ctx.sfx('hit'); ctx.actor(ev.pid)?.play('hit', 500); floatText(stage, ev.x, 2.1, ev.z, ev.lose ? `−${ev.lose}` : 'Bonk!', 'bad'); if (ev.pid === ctx.me) { show(ev.lose ? `Bat bump! −${ev.lose}` : 'Bat bump!', 'bad', 0.9); juice.flash('rgba(160,90,255,.85)', 240); juice.shake(0.08, 0.2); navigator.vibrate?.(70); } }
       else if (ev.e === 'dash') { if (ev.pid !== ctx.me) ctx.actor(ev.pid)?.play('jump', 260); }
     },
     pose(pid, fl) { flags.set(pid, fl); if (fl & F.FROZEN) return 'cheer'; if ((fl & F.STUN) && (fl & F.GHOST)) return 'hit'; return undefined; },
     frame(dt, t) {
-      frameCam(dt);
+      frameCam(dt); juice.frame(dt, t);
       const now = performance.now();
       cq.copy(stage.camera.quaternion);
       // piñata sway + jiggle
@@ -198,6 +199,6 @@ export function createView(ctx) {
       stars.instanceMatrix.needsUpdate = true;
       if (bannerT > 0) { bannerT -= dt; if (bannerT <= 0) banner.className = 'bs-banner'; }
     },
-    dispose() { sbar.el.remove(); tunes.dispose(); for (const id of [...stripes.keys()]) dropStripe(id); for (const t of texs) t.dispose(); },
+    dispose() { juice.dispose(); sbar.el.remove(); tunes.dispose(); for (const id of [...stripes.keys()]) dropStripe(id); for (const t of texs) t.dispose(); },
   };
 }

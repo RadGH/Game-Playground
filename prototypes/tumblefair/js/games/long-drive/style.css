@@ -8,6 +8,7 @@
 .ld-arrow::before { content: ''; position: absolute; left: 50%; top: 3px; transform: translateX(-50%); border: 7px solid transparent; border-bottom: 11px solid #fff; border-top: 0; }
 .ld-arrow::after { content: ''; position: absolute; left: 50%; top: 13px; width: 4px; height: 9px; transform: translateX(-50%); background: #fff; border-radius: 2px; }
 .tag.ld-yard { background: #fff; color: var(--ink); text-shadow: none; font-size: 12px; }
+.tag.ld-yard.hw { background: #ff8a1a; color: #1a0f26; border-color: #1a0f26; }   /* round 12: the Halloween edition's lantern boards */
 .tag.ld-medal { color: var(--ink); text-shadow: none; } .tag.ld-gold { background: #ffd23f; } .tag.ld-silver { background: #d6dde6; } .tag.ld-bronze { background: #e0a26a; }
 .tag.ld-pin:empty, .tag.ld-pin span:empty { display: none; }
 .ld-panel { position: absolute; left: 50%; bottom: calc(var(--sb) + 10px); transform: translateX(-50%); width: min(440px, calc(100% - 16px)); pointer-events: auto;
@@ -44,3 +45,13 @@
 .tag.ld-pin.mine { font-size: 13px; }
 .tag.ld-pin.faded { opacity: 0; }
 @media (max-width: 520px) { .ld-info .ld-drive { font-size: 16px; } .ld-info .ld-best { font-size: 13px; } }
+
+/* round 12 (report #31): the Halloween edition's night sky across the top of the screen */
+.ld-night { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--st) + 100px); pointer-events: none;
+  background: radial-gradient(1.5px 1.5px at 12% 30%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 27% 14%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 41% 38%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 58% 20%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 66% 44%, #fff 50%, transparent 51%), radial-gradient(1.5px 1.5px at 88% 52%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 58%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 94% 18%, #fff 50%, transparent 51%),
+    linear-gradient(#120a26 0%, rgba(42, 22, 80, .9) 40%, rgba(58, 33, 96, 0) 100%); }
+.ld-moon { position: absolute; right: 16%; top: calc(var(--st) + 46px); width: 40px; height: 40px; border-radius: 50%; background: #fff4cf; box-shadow: 0 0 24px 8px rgba(255, 244, 207, .55);
+  background-image: radial-gradient(circle at 35% 40%, rgba(200, 190, 160, .5) 0 6px, transparent 7px), radial-gradient(circle at 65% 65%, rgba(200, 190, 160, .45) 0 4px, transparent 5px); }
+@media (min-aspect-ratio: 23/20) { .ld-night { height: calc(var(--st) + 110px); } .ld-moon { top: calc(var(--st) + 40px); } }

@@ -31,7 +31,13 @@ export const TRACKS = [
   { id: 'elbow', name: 'Crooked Elbow', pts: [[-9, -8], [9, -8], [9, 0], [1, 0], [1, 8], [-9, 8]], r: 3.2 },
   { id: 'hairpin', name: 'Hairpin Hollow', pts: [[-9, -8], [9, -8], [9, 8], [3, 8], [3, -1], [-3, -1], [-3, 8], [-9, 8]], r: 2.6 },
   { id: 'pinch', name: 'Pinch Point', pts: [[-9, -8], [9, -8], [9, 8], [4, 8], [0, 1.5], [-4, 8], [-9, 8]], r: 2.6 },
+  // round 12: three more, so a night of racing is not the same four loops
+  { id: 'diamond', name: 'Diamond Dash', pts: [[0, -8], [9, 0], [0, 8], [-9, 0]], r: 4 },
+  { id: 'tee', name: 'Tee Time', pts: [[-9, -8], [9, -8], [9, -1.5], [3, -1.5], [3, 8], [-3, 8], [-3, -1.5], [-9, -1.5]], r: 2.6 },
+  { id: 'clover', name: 'Clover Cross', pts: [[-3, -8], [3, -8], [3, -3], [9, -3], [9, 3], [3, 3], [3, 8], [-3, 8], [-3, 3], [-9, 3], [-9, -3], [-3, -3]], r: 2.2 },
 ];
+/** Every layout, plain / mirrored / backwards / both. */
+export const VARIANTS = TRACKS.length * 4;
 export const RULES = {
   SCALE: 0.85, stretch: 1.12, W: 1.9, ds: 1.0,                    // track half-width; centre-line sample spacing
   lapDist: 250, minLaps: 3, maxLaps: 5,            // laps = this many metres of racing, rounded
@@ -76,9 +82,9 @@ function buildLoop(pts, r, ds) {
   return { cx, cz, tx, tz, N, L };
 }
 
-/** A track, ready to race: the loop, its walls, pads, mud, boxes and the grid. `variant` 0-15 picks layout + mirror + direction. */
+/** A track, ready to race: the loop, its walls, pads, mud, boxes and the grid. `variant` 0..VARIANTS-1 picks layout + mirror + direction. */
 export function makeTrack(variant) {
-  const T = TRACKS[variant % TRACKS.length], mirror = (variant >> 2) & 1, rev = (variant >> 3) & 1, S = RULES.SCALE, W = RULES.W;
+  const nT = TRACKS.length, T = TRACKS[variant % nT], mirror = Math.floor(variant / nT) & 1, rev = Math.floor(variant / (nT * 2)) & 1, S = RULES.SCALE, W = RULES.W;
   let pts = T.pts.map(([a, b]) => [(mirror ? -b : b) * S, a * S * RULES.stretch]);      // drawn wide, laid out tall (phones are tall)
   if (mirror !== rev) pts = pts.reverse();          // mirroring flips the direction; undo that unless we also want it reversed
   const loop = buildLoop(pts, T.r * S, RULES.ds), { cx, cz, tx, tz, N, L } = loop;
@@ -99,7 +105,7 @@ export function makeTrack(variant) {
 const inRect = (o, x, z, pad = 0) => { const dx = x - o.x, dz = z - o.z, s = Math.sin(o.yaw), c = Math.cos(o.yaw); return Math.abs(dx * s + dz * c) <= o.hl + pad && Math.abs(dx * c - dz * s) <= o.hw + pad; };
 
 export function create({ rng, players, difficulty = 'normal' }) {
-  const track = makeTrack(rng.int(0, 15)), { loop, at } = track, { N } = loop, LAPS = track.laps, W = RULES.W;
+  const track = makeTrack(rng.int(0, VARIANTS - 1)), { loop, at } = track, { N } = loop, LAPS = track.laps, W = RULES.W;
   const arena = { shape: 'rect', hw: track.hw, hd: track.hd, wall: true, segs: track.segs };
   const solo = players.length === 1;
   // racers: every player, plus two CPU karts when alone (negative ids)

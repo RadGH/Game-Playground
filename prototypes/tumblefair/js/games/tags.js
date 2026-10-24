@@ -5,7 +5,7 @@
 export const KINDS = Object.freeze({
   memory: 'Memory', reaction: 'Quick reactions', aim: 'Aim & timing', race: 'Racing', brawl: 'Brawling', dodge: 'Dodging',
   collect: 'Grab & collect', rhythm: 'Rhythm', create: 'Draw & dress up', words: 'Words & talking', bluff: 'Bluffing',
-  guess: 'Guessing', logic: 'Logic', boss: 'Boss fights', golf: 'Golf', fishing: 'Fishing',
+  guess: 'Guessing', logic: 'Logic', boss: 'Boss fights', golf: 'Golf', fishing: 'Fishing', basketball: 'Basketball',
 });
 
 export const GAME_KINDS = Object.freeze({
@@ -28,6 +28,17 @@ export const GAME_KINDS = Object.freeze({
   'mummy-wrap': ['reaction'], 'firefly-catch': ['collect'], 'spotlight-dance': ['dodge'], 'bat-swarm': ['collect'], 'skeleton-stack': ['collect'],
   'putt-party': ['golf', 'aim'], 'haunted-hole': ['golf', 'aim'], 'chip-in': ['golf', 'aim'], 'long-drive': ['golf', 'aim'],
   'reel-rumble': ['fishing'], 'pier-pressure': ['fishing', 'reaction'], 'net-gains': ['fishing'], 'glimmer-ice': ['fishing'],
+  'balloon-darts': ['aim'], 'photo-booth': ['reaction', 'create'], 'duck-derby': ['race', 'rhythm'], 'water-balloon-ambush': ['aim', 'brawl'], 'sketchy-copy': ['create', 'memory'],
+  'hoop-frenzy': ['basketball', 'aim'], 'letter-shot': ['basketball', 'aim'], 'court-clash': ['basketball', 'brawl'],
+  'bumper-boats': ['brawl'], 'downhill-derby': ['race', 'dodge'], 'carousel-recall': ['memory'], 'pie-toss': ['aim'], 'ring-toss': ['aim'],
+  'pizza-chef': ['reaction', 'create'], 'wagon-trail': ['reaction', 'aim'], 'hide-and-seek': ['dodge', 'guess'], jousting: ['aim'], 'floor-is-lava': ['dodge'],
+  'dirt-dash': ['race'], 'wizard-duel': ['brawl', 'aim'], 'tower-pull': ['reaction'], 'castle-archers': ['aim'], 'fair-darts': ['aim'],
+  'flood-rush': ['race', 'dodge'], 'crane-claw': ['aim'], 'path-trace': ['aim', 'reaction'], 'cups-and-ball': ['memory', 'guess'], 'monster-rampage': ['brawl', 'collect'], 'zombie-survival': ['brawl', 'dodge'],
+  'coffin-cart-rally': ['race', 'dodge'],
+  'patchwork-pal': ['memory', 'aim'], 'cauldron-bobbing': ['reaction'], 'shifty-portraits': ['memory'],
+  'pumpkin-fling': ['aim'], 'monster-line-up': ['reaction', 'guess'], 'monster-makeover': ['create'],
+  'broomstick-bumpers': ['brawl'], 'witchs-sweep': ['collect', 'dodge'], 'slime-slingers': ['aim', 'brawl'],
+  'prize-shelf': ['memory'], 'pair-panic': ['memory', 'reaction'], 'order-up': ['memory'],
 });
 
 export const kindsOf = id => GAME_KINDS[id] || [];

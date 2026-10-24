@@ -3,7 +3,7 @@
   padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 40px) calc(var(--sl) + 10px);
   background: linear-gradient(#ffcf8a, #ffe8c2 40%, #f7d9a8); }
 .game-pin-the-tail > * { flex: none; }
-.pt-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding-right: 36px; }
+.pt-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding-right: 84px; }   /* round 12: the clock sat under ☰ / ! */
 .pt-title { font: 900 22px/1.1 var(--font); color: #ff8a3d; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
 .pt-round { font-weight: 900; font-size: 14px; text-transform: uppercase; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; }
 .pt-banner { font: 900 19px/1.15 var(--font); background: #fff; border: 3px solid var(--ink); border-radius: 999px; padding: 3px 14px; box-shadow: 0 3px 0 var(--ink); text-align: center; }
@@ -39,3 +39,8 @@
 .game-pin-the-tail[data-phase=end] .pt-players { margin-top: 14vh; }
 .game-pin-the-tail[data-phase=end] .pt-players .chip { font-size: 20px; } .game-pin-the-tail[data-phase=end] .pt-players .chip .face { width: 52px; height: 52px; }
 @media (min-aspect-ratio: 1/1) { .watching .pt-banner { font-size: 24px; } }
+/* round 12: the moonlit garden is dark — pins' names and the hint stay readable on it */
+.game-pin-the-tail[data-scene=garden] .pt-hint { color: #fff6a0; }
+/* round 12: title, round and clock on one line at phone width, clear of ☰ / ! */
+.pt-title, .pt-round { white-space: nowrap; }
+@media (max-width: 460px) { .pt-top { gap: 6px; padding-right: 76px; } .pt-title { font-size: 18px; } .pt-round { font-size: 12px; padding: 2px 8px; } }

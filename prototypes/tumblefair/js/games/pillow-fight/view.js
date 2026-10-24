@@ -107,7 +107,7 @@ export function createView(ctx) {
   const show = (text, cls = '', s = 1.2) => { banner.textContent = text; banner.className = 'pf-banner show ' + cls; bannerT = s; };
   const tip = h('div', 'pf-tip', init.solo ? '🛏 Bop the sleepwalkers off the bed!' : '🛏 Bop everyone off the bed!'); ctx.ui.append(tip); setTimeout(() => tip.classList.add('gone'), 4500);
   const nameOf = pid => (pid === ctx.me ? 'You' : ctx.players.find(p => p.pid === pid)?.name || '?');
-  const hopUntil = new Map(); let prevB = 0, prevS = -9;
+  const hopUntil = new Map(); let prevB = 0, prevS = -9, teeterTold = 0;
   const wobClass = w => (w >= 80 ? 'hot' : w >= 40 ? 'warm' : '');
   function setWob(tg, w) { if (!tg) return; const t = w + '%'; if (tg._t !== t) { tg._t = t; tg.set(t); tg.el.className = 'tag pf-wob ' + wobClass(w); } }
   attach();
@@ -141,8 +141,13 @@ export function createView(ctx) {
         ctx.sfx('out'); burst(ev.x, ev.z, 0.2, 18);
         const cx = Math.max(-hw, Math.min(hw, ev.x)), cz = Math.max(-hd, Math.min(hd, ev.z));
         floatText(stage, cx, 0.6, cz, ev.by >= 0 ? `+1 ${nameOf(ev.by)}` : `${nameOf(ev.pid)} fell!`, ev.by === ctx.me ? 'good' : ev.pid === ctx.me ? 'bad' : '');
-        if (ev.pid === ctx.me) show('Off the bed! −1', 'bad'); else if (ev.by === ctx.me) show('Knock-off! +1', 'good');
+        if (ev.pid === ctx.me) show('Off the bed!', 'bad'); else if (ev.by === ctx.me) show('Knock-off! +1', 'good');
       } else if (ev.e === 'drop') { ctx.sfx('good'); burst(ev.x, ev.z, 0.2, 16); floatText(stage, Math.max(-hw, Math.min(hw, ev.x)), 0.6, Math.max(-hd, Math.min(hd, ev.z)), '+1', 'good'); }
+      else if (ev.e === 'teeter') {
+        // walked or hopped to the edge: you wobble on it instead of falling (only a bop sends you over)
+        ctx.actor(ev.pid)?.play('hit', 300);
+        if (ev.pid === ctx.me) { ctx.sfx('tap'); if (!teeterTold++) show('Whoa! Only a bop knocks you off', '', 1.6); else show('Whoa!', '', 0.6); }
+      }
       else if (ev.e === 'climb') ctx.sfx('tap');
       else if (ev.e === 'back') { if (ev.pid === ctx.me) ctx.sfx('pick'); }
     },

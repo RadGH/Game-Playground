@@ -19,6 +19,7 @@ import { createProfiles } from '../js/sim/profiles.js';
 import { createFeedback } from './feedback.mjs';
 import { createInsights, readInsightLines } from './insights.mjs';
 import { createRedeemer, createAdminFeed, summarizeRatings } from './rgs.mjs';
+import { freshBadges, RULE as FRESH_RULE } from '../js/games/fresh.js';
 import { MAX_FRAME, TICK_MS } from '../js/shared/protocol.js';
 import { cleanLook } from '../../thousandvale/js/sim/looks.js';
 
@@ -40,8 +41,11 @@ const redeem = createRedeemer({ game: 'tumblefair', log });
 // round 10: every player's 👍/👎 so far (last 90 days), for the vote's top-rated slot — recounted every 10 minutes
 let ratingCache = {};
 const refreshRatings = () => { try { ratingCache = Object.fromEntries(summarizeRatings(readInsightLines(join(dataDir, 'insights'), 90), { key: 'game' }).map(r => [r.id, { score: r.score, up: r.up, down: r.down, reasons: r.reasons }])); } catch (e) { log('ratings', { err: String(e?.message || e) }); } };
-refreshRatings(); setInterval(refreshRatings, 10 * 60e3).unref();
-const hub = createHub({ data, profiles, build, log, report: (kind, d) => insights.report(kind, d), redeem, ratings: () => ratingCache });
+// round 12: NEW / UPDATED badges (js/games/fresh.js) — by the clock, and by how often each game was played since
+let freshCache = {};
+const refreshFresh = () => { try { const played = readInsightLines(join(dataDir, 'insights'), FRESH_RULE.maxDays + 1).filter(r => r.kind === 'played'); freshCache = freshBadges(Date.now(), (id, iso) => played.filter(r => r.game === id && r.at >= iso).length); } catch (e) { log('fresh', { err: String(e?.message || e) }); freshCache = freshBadges(); } };
+refreshRatings(); refreshFresh(); setInterval(() => { refreshRatings(); refreshFresh(); }, 10 * 60e3).unref();
+const hub = createHub({ data, profiles, build, log, report: (kind, d) => insights.report(kind, d), redeem, ratings: () => ratingCache, fresh: () => freshCache });
 
 const feedback = createFeedback(dataDir, { build });
 // The visitor's address: behind a proxy on this machine (Caddy on the games.radgh.com droplet sends X-Forwarded-For; the old

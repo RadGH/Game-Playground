@@ -52,3 +52,9 @@
 .tf-legend span { display: inline-flex; align-items: center; gap: 4px; }
 .tf-legend .tf-dot { display: inline-block; width: 10px; height: 10px; }
 .tf-legend .tf-home { width: 12px; height: 12px; background: var(--ink); clip-path: polygon(50% 0, 100% 45%, 85% 45%, 85% 100%, 15% 100%, 15% 45%, 0 45%); display: inline-block; }
+/* round 12: a pick is a target; the next grab on the way wears an arrow */
+.tf-tile.picked::before { content: '🎯 TARGET'; }
+.tf-tile.picked { animation: tf-target 0.9s ease-in-out infinite alternate; }
+@keyframes tf-target { to { outline-offset: -7px; } }
+.tf-tile.next { box-shadow: 0 0 0 4px var(--me), 0 0 14px 4px var(--me); }
+.tf-tile.next::after { content: '➜'; position: absolute; top: 1px; right: 3px; font: 900 14px/1 var(--font); color: var(--ink); text-shadow: 0 0 3px #fff; }

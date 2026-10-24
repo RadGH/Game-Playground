@@ -48,7 +48,10 @@ export function sidesFor(players) {
   return [{ pids: [ps[0], ps[1]], dir: [-1, 0] }, { pids: [ps[2], ps[3]], dir: [1, 0] }];
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
+// Round 12: where the tug of war is (looks only — the green, the puddle in the middle, the bales round the edge), from the
+// seed so the rng and the rules are untouched. Names and colours: view.js GROUNDS.
+export const GROUND_COUNT = 5;
+export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
   const S = RULES, n = players.length, solo = n === 1, bps = (S.bpm[difficulty] || S.bpm.normal) / 60;
   const sides = sidesFor(players).map(s => ({ ...s, wins: 0, power: 0 }));
   const sideOf = new Map(); sides.forEach((s, i) => s.pids.forEach(pid => sideOf.set(pid, i)));
@@ -85,7 +88,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
   }
   return {
     bodies, events,
-    init: () => ({ solo, arena: n === 3 ? { shape: 'rect', hw: 4.4, hd: 4.0, wall: true } : { shape: 'rect', hw: n === 4 ? 5.6 : 4.8, hd: 2.4, wall: true }, bpm: bps * 60, count: S.count, line: S.line, pulls: S.pulls, sides: sides.map(s => ({ pids: s.pids, dir: s.dir })), left: Math.ceil(time) }),
+    init: () => ({ ground: Math.abs(Math.floor(seed || 0)) % GROUND_COUNT, solo, arena: n === 3 ? { shape: 'rect', hw: 4.4, hd: 4.0, wall: true } : { shape: 'rect', hw: n === 4 ? 5.6 : 4.8, hd: 2.4, wall: true }, bpm: bps * 60, count: S.count, line: S.line, pulls: S.pulls, sides: sides.map(s => ({ pids: s.pids, dir: s.dir })), left: Math.ceil(time) }),
     input(pid, inp) {
       const s = P.get(pid); if (!s || over) return;
       const bits = inp?.b | 0, pa = (bits & IN.A) && !(s.prevB & IN.A); s.prevB = bits;

@@ -1,0 +1,34 @@
+/* Castle Archers — a wave / gate / wind bar over the side-view field canvas. The whole canvas is the aiming pad
+   (drag back, let go). Nothing in here scrolls on its own. */
+.game-castle-archers { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 10px) calc(var(--sl) + 10px);
+  background: linear-gradient(#8fd0f5, #6fbf5a); color: var(--ink); user-select: none; -webkit-user-select: none; touch-action: none; }
+.game-castle-archers.season-halloween { background: linear-gradient(#1d1438, #2a1d4a); }
+.game-castle-archers > * { flex: none; }
+.ca-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 8px; }
+.ca-title { color: #fff; font: 900 26px/1.1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.ca-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.ca-board .chip { color: var(--ink); padding-right: 10px; }
+.ca-board .sc { font-style: normal; background: #e6ffd8; border-radius: 8px; padding: 0 7px; }
+.ca-board .chip.lead { background: var(--sun); } .ca-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.ca-bar { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; font: 900 14px/1 var(--font); }
+.ca-bar > span { background: #fff; border: 3px solid var(--ink); border-radius: 999px; padding: 4px 10px; box-shadow: 0 3px 0 var(--ink); }
+.ca-gate { display: flex; align-items: center; gap: 6px; }
+.ca-gate i { display: block; width: 90px; height: 12px; border: 2px solid var(--ink); border-radius: 6px; overflow: hidden; background: #ffd9d9; }
+.ca-gate u { display: block; height: 100%; width: 100%; background: #3ecf5a; transition: width .3s; text-decoration: none; }
+.ca-gate.low u { background: #ff5f5f; } .ca-gate.low { animation: ca-shake .2s linear infinite alternate; }
+@keyframes ca-shake { to { transform: translateX(2px); } }
+.ca-wind.on { background: #9fd3ff; }
+.ca-field { position: relative; width: min(100%, 980px); height: clamp(260px, 56dvh, 620px); flex: 1 1 auto; min-height: 220px; border: 4px solid var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 6px 0 var(--ink); }
+.ca-field canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+.game-castle-archers.watching .ca-field canvas { cursor: default; }
+.ca-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 76px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.ca-count:empty { display: none; }
+.ca-say { position: absolute; left: 0; right: 0; top: 12%; text-align: center; font: 900 28px/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none; }
+.ca-say.pop { animation: ca-pop 1.6s ease-out forwards; } .ca-say.gold { color: var(--sun); } .ca-say.bad { color: #ffd9d9; }
+@keyframes ca-pop { 0% { opacity: 1; transform: scale(1.3); } 75% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.ca-note { margin: 0; text-align: center; font-size: 15px; font-weight: 800; color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px var(--ink); }
+.ca-note:empty { display: none; }
+.game-castle-archers.watching .ca-field { height: calc(100dvh - 170px); }
+@media (orientation: portrait) { .game-castle-archers:not(.watching) .ca-field { height: auto; aspect-ratio: 1 / 0.92; max-height: 58dvh; flex: none; } }
+@media (max-height: 560px) { .ca-field { height: 50dvh; min-height: 160px; } .ca-title { font-size: 20px; } }

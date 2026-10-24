@@ -1,0 +1,12 @@
+/* Floor Is Lava: the "LAVA in 2" pill under the score bar and the big phase / hot-foot banner. Nothing here takes taps. */
+.game-floor-is-lava .fl-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); pointer-events: none; white-space: nowrap; max-width: 94vw;
+  padding: 5px 14px; border-radius: 999px; background: #fff7e6; border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 900 16px/1.2 var(--font); }
+.fl-pill.warn { background: #ffb020; animation: fl-throb .5s ease-in-out infinite alternate; } .fl-pill.lava { background: #ff6a2a; color: #fff; -webkit-text-stroke: .6px var(--ink); }
+.fl-pill.cool, .fl-pill.calm { background: #d9f7ff; }
+.season-halloween .fl-pill.lava { background: #4fdc6a; color: var(--ink); -webkit-text-stroke: 0; } .season-halloween .fl-pill.warn { background: #b38dff; }
+@keyframes fl-throb { to { transform: translateX(-50%) scale(1.08); } }
+.game-floor-is-lava .fl-banner { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center; width: max-content; max-width: 92vw;
+  font: 900 clamp(26px, 7.5vw, 56px)/1.05 var(--font); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); transition: transform .15s, opacity .15s; }
+.fl-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); } .fl-banner.hot { color: #ff8a3a; } .fl-banner.warn { color: #ffd23f; } .fl-banner.good { color: var(--sun); }
+.season-halloween .fl-banner.hot { color: #7dff5a; }
+@media (max-width: 520px) { .game-floor-is-lava .fl-pill { top: calc(var(--st) + 52px); font-size: 14px; } }

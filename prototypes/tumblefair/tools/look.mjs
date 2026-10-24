@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // A quick look at the running dev server (port 8480) in a headless browser, for whoever is building: opens N pages
 // (one host + joiners), optionally starts a match, and saves screenshots to tests/shots/look-*.png.
-//   node prototypes/tumblefair/tools/look.mjs [--players 2] [--mode board|marathon] [--until lobby|board|vote|intro|game|results|final] [--phone] [--wait ms] [--pool id,id] [--board pier] [--round n (with --until: wait for that round)] [--shots n,ms (n more screenshots every ms)] [--holiday off|halloween|auto]
+//   node prototypes/tumblefair/tools/look.mjs [--players 2] [--mode board|marathon] [--until lobby|board|vote|intro|game|results|final] [--phone] [--wait ms] [--pool id,id] [--board pier] [--round n (with --until: wait for that round)] [--shots n,ms (n more screenshots every ms)] [--holiday off|halloween|auto] [--vw 402 --vh 780 (phone viewport)] [--url http://127.0.0.1:85xx/prototypes/tumblefair/]
 // Run it from the playground root under the browser lock:  flock /tmp/claude-1000/farhold-pw.lock node ...
 import { chromium } from '@playwright/test';
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : d; };
@@ -12,7 +12,7 @@ const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable
 const pages = [], errors = [];
 async function open(i, url) {
   const big = i === 0 && !phone;
-  const ctx = await browser.newContext(big ? { viewport: { width: 1280, height: 720 } } : { viewport: { width: 393, height: 852 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+  const ctx = await browser.newContext(big ? { viewport: { width: 1280, height: 720 } } : { viewport: { width: +arg('vw', 393), height: +arg('vh', 852) }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
   const page = await ctx.newPage();
   page.on('console', m => { if (m.type() === 'error') errors.push(`[p${i}] ${m.text()}`); });
   page.on('pageerror', e => errors.push(`[p${i}] PAGE ${e.message}`));

@@ -1,0 +1,39 @@
+/* Claw Machine — a bright fairground prize machine: a red cabinet with a light-up sign of prize values over a glass
+   pit seen from above, a big DROP button under it, the other players' machines as small windows. Halloween: purple
+   and orange. */
+.game-crane-claw { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 12px) calc(var(--sl) + 10px);
+  background: radial-gradient(circle at 50% 0, #ffe1f0, #ff9ac4 60%, #d8579a); user-select: none; -webkit-user-select: none; touch-action: none; }
+.game-crane-claw > * { flex: none; }
+.cc-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding: 0 96px 0 8px; min-height: 34px; }
+.cc-title { font: 900 22px/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.cc-grabs { display: inline-flex; gap: 4px; align-items: center; font: 900 14px/1 var(--font); background: #fff; border: 3px solid var(--ink); border-radius: 999px; padding: 3px 9px; }
+.cc-grabs:empty { display: none; } .cc-grabs i { font-style: normal; letter-spacing: -2px; }
+.cc-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.cc-chips .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.cc-chips .chip.lead { background: var(--sun); } .cc-chips .chip.me { box-shadow: 0 0 0 3px #fff; }
+.cc-machine { width: min(100%, calc((100dvh - 330px) * 100 / 80 + 24px), 560px); background: #e8394a; border: 4px solid var(--ink); border-radius: 20px 20px 12px 12px; padding: 8px 10px 10px; box-shadow: 0 6px 0 var(--ink); }
+.cc-sign { display: flex; justify-content: space-around; background: #2a1238; border: 3px solid var(--ink); border-radius: 10px; padding: 3px 4px; margin-bottom: 7px; }
+.cc-sign i { font-style: normal; font-size: 17px; display: inline-flex; align-items: center; gap: 2px; }
+.cc-sign b { font: 900 14px/1 var(--font); color: #ffd23f; }
+.cc-glass { position: relative; border: 4px solid var(--ink); border-radius: 8px; overflow: hidden; touch-action: none; cursor: grab; box-shadow: inset 0 0 0 3px rgba(255,255,255,.5); }
+.cc-pit { display: block; width: 100%; aspect-ratio: 100 / 80; }
+.cc-glass::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(120deg, rgba(255,255,255,.28) 0 12%, transparent 12% 30%, rgba(255,255,255,.14) 30% 34%, transparent 34%); }
+.cc-fx { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.cc-pop { font: 900 24px/1.1 var(--font); font-style: normal; color: #fff; -webkit-text-stroke: 1.4px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); white-space: nowrap; animation: cc-rise 1.4s ease-out forwards; }
+.cc-pop.good { color: var(--sun); } .cc-pop.gold { color: #ffd23f; font-size: 28px; } .cc-pop.bad { color: #ffb0b0; }
+@keyframes cc-rise { 0% { opacity: 0; transform: scale(.6); } 15% { opacity: 1; transform: scale(1.15); } 100% { opacity: 0; transform: translateY(-60px); } }
+.cc-msg { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); font: 900 60px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; text-shadow: 0 5px 0 var(--ink); }
+.cc-msg:empty { display: none; }
+.cc-drop { min-width: 210px; min-height: 64px; font-size: 28px; background: #ffd23f; }
+.cc-drop:disabled { opacity: .55; } .cc-drop.busy { transform: translateY(3px); }
+.cc-minis, .cc-all { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.cc-minis figure, .cc-all figure { margin: 0; background: #e8394a; border: 3px solid var(--ink); border-radius: 10px; padding: 3px; }
+.cc-minis canvas { display: block; width: 104px; aspect-ratio: 100 / 80; border-radius: 6px; }
+.cc-all canvas { display: block; width: min(44vw, 340px); aspect-ratio: 100 / 80; border-radius: 6px; }
+.cc-minis figcaption, .cc-all figcaption { font: 800 12px/1.2 var(--font); color: #fff; text-align: center; max-width: 104px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-all figcaption { max-width: none; font-size: 15px; }
+.cc-note { margin: 0; text-align: center; font: 800 16px/1.25 var(--font); color: var(--ink); max-width: 560px; min-height: 1.3em; }
+.game-crane-claw.season-halloween { background: radial-gradient(circle at 50% 0, #7a4ab8, #3a1e5c 70%, #1c0e30); }
+.game-crane-claw.season-halloween .cc-machine, .game-crane-claw.season-halloween .cc-minis figure, .game-crane-claw.season-halloween .cc-all figure { background: #ff8a1a; }
+.game-crane-claw.season-halloween .cc-note { color: #fff; }

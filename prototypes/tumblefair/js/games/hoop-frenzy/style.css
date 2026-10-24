@@ -1,0 +1,3 @@
+@import url('../hoops.css');
+/* Hoop Frenzy: everything it needs is in the shared basketball HUD. */
+.game-hoop-frenzy .gp-pill { font-size: 13px; }

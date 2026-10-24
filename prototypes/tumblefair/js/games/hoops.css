@@ -1,0 +1,24 @@
+/* Basketball games (Hoop Frenzy, Court Clash, Letter Shot) share these on top of the golf HUD (pill, banner, power
+   meter): the HOLD-to-shoot panel (hoops-view.js powerPanel), the fire badge and the medal row. Each game's style.css
+   @imports this file first, then adds its own. Nothing in here scrolls. */
+@import url('./golf.css');
+.hk-panel { position: absolute; left: 50%; bottom: calc(var(--sb) + 10px); transform: translateX(-50%); width: min(440px, calc(100% - 16px)); pointer-events: auto;
+  display: grid; gap: 8px; padding: 10px 12px 12px; background: var(--paper); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); }
+.hk-panel.hidden { display: none; }
+.hk-info { display: flex; align-items: center; justify-content: space-between; gap: 8px; font: 800 15px/1.2 var(--font); min-height: 22px; }
+.hk-info b { font: 900 17px/1 var(--font); }
+.hk-info .hk-fire { color: #e8473a; font-weight: 900; } .hk-info .hk-gold { color: #a87800; font-weight: 900; }
+.hk-track { position: relative; height: 30px; border: 3px solid var(--ink); border-radius: 10px; background: #fff; overflow: hidden; }
+.hk-band { position: absolute; top: 0; bottom: 0; left: 40%; width: 20%; background: rgba(62, 207, 90, .55); border-left: 2px dashed var(--ink); border-right: 2px dashed var(--ink); }
+.hk-fill { position: absolute; left: 0; top: 6px; bottom: 6px; width: 0; background: #ffd23f; border-right: 4px solid var(--ink); }
+.hk-fill.in { background: #3ecf5a; }
+.hk-mark { position: absolute; top: -2px; bottom: -2px; width: 4px; margin-left: -2px; background: #e8473a; opacity: 0; }
+.hk-btn { min-height: 66px; font-size: 24px; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; cursor: pointer; }
+.hk-btn:disabled { background: #e8e1cc; color: #6a7a80; }
+.hk-panel[data-mode=ready] .hk-btn { background: #8ff07a; }
+.hk-medals { position: absolute; top: calc(var(--st) + 56px); left: 50%; transform: translateX(-50%); display: flex; gap: 6px; pointer-events: none; font: 800 13px/1 var(--font); }
+.hk-medals span { background: rgba(255, 248, 231, .9); border: 2px solid var(--ink); border-radius: 999px; padding: 2px 8px; opacity: .6; }
+.hk-medals span.won { opacity: 1; background: #ffd23f; }
+.tag.hk-tag { font-size: 12px; padding: 0 6px; }
+.tag.hk-fire { background: #ff6a1a; color: #fff; }
+@media (max-width: 520px) { .hk-info { font-size: 13px; } .hk-info b { font-size: 15px; } .hk-btn { min-height: 58px; font-size: 21px; } .hk-medals { top: calc(var(--st) + 50px); } }

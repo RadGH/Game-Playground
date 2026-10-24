@@ -7,8 +7,17 @@
 import { RULES, CPU } from './sim.js';
 import { SEATS } from '../../shared/protocol.js';
 import { scoreBar, h, esc } from '../../client/gamehud.js';
+import { createJuice } from '../../client/juice.js';
 
 const ROPE_Y = 0.78;
+// Round 12: five places to pull (sim.js GROUND_COUNT), picked from the seed.
+export const GROUNDS = [
+  { name: 'Village Green', grass: '#6cc95a', green: '#86da6c', pit: '#7a5230', blob: '#5e3c20', bale: '#e9c45c', bunt: ['#ff4d4d', '#ffd23f', '#3d8bff', '#3ecf5a', '#f04fd8'] },
+  { name: 'Sandy Beach', grass: '#e8d49a', green: '#f2e2b0', pit: '#4fb6e8', blob: '#2f8fd0', bale: '#b08a5a', bunt: ['#ff7a3d', '#ffffff', '#39d0e0', '#ffd23f', '#3d8bff'] },
+  { name: 'Snowy Field', grass: '#dfeefc', green: '#f6fbff', pit: '#9fd8ff', blob: '#7fc0ee', bale: '#ffffff', bunt: ['#e8394a', '#ffffff', '#3d8bff', '#3ecf5a', '#ffd23f'] },
+  { name: 'Foam Pit Fair', grass: '#5ab84a', green: '#c8955a', pit: '#ff8fb8', blob: '#ffd0e4', bale: '#ff6b6b', bunt: ['#ffd23f', '#ff7ab8', '#39d0e0', '#b07cff', '#ffffff'] },
+  { name: 'Autumn Orchard', grass: '#8fa84a', green: '#b8b85a', pit: '#7a5230', blob: '#5e3c20', bale: '#e9b04c', bunt: ['#ff7a14', '#ffd23f', '#c8324a', '#8a5a32', '#ffb02e'] },
+];
 export function createView(ctx) {
   const { THREE, group, stage, meta } = ctx;
   const init = ctx.init, sides = init.sides, bps = init.bpm / 60, L = init.line, count = init.count;
@@ -18,15 +27,16 @@ export function createView(ctx) {
   const sideColor = s => (s.pids[0] === CPU ? '#b5743a' : player(s.pids[0])?.color || '#888');
   const sideName = s => s.pids.map(pid => (pid === CPU ? 'Big Barnaby' : pid === ctx.me ? 'You' : player(pid)?.name || '?')).join(' + ');
   const mySide = sides.findIndex(s => s.pids.includes(ctx.me));
+  const G = GROUNDS[(init.ground | 0) % GROUNDS.length], juice = createJuice(ctx);
   // ---- the green
-  const grass = new THREE.Mesh(new THREE.PlaneGeometry(90, 70).rotateX(-Math.PI / 2), std('#6cc95a')); grass.position.y = -0.02; grass.receiveShadow = true; group.add(grass);
-  const green = new THREE.Mesh(new THREE.CircleGeometry(1, 48).rotateX(-Math.PI / 2), std('#86da6c')); green.position.y = -0.01; green.scale.set(ctx.arena.hw + 1.9, 1, ctx.arena.hd + 1.8); green.receiveShadow = true; group.add(green);
-  const mud = new THREE.Mesh(new THREE.CircleGeometry(1.5, 28).rotateX(-Math.PI / 2), std('#7a5230', { roughness: 0.4 })); mud.position.y = 0.005; mud.scale.set(1.25, 1, 0.9); mud.receiveShadow = true; group.add(mud);
-  const blobs = new THREE.InstancedMesh(new THREE.CircleGeometry(0.4, 14).rotateX(-Math.PI / 2), std('#5e3c20', { roughness: 0.3 }), 6);
+  const grass = new THREE.Mesh(new THREE.PlaneGeometry(90, 70).rotateX(-Math.PI / 2), std(G.grass)); grass.position.y = -0.02; grass.receiveShadow = true; group.add(grass);
+  const green = new THREE.Mesh(new THREE.CircleGeometry(1, 48).rotateX(-Math.PI / 2), std(G.green)); green.position.y = -0.01; green.scale.set(ctx.arena.hw + 1.9, 1, ctx.arena.hd + 1.8); green.receiveShadow = true; group.add(green);
+  const mud = new THREE.Mesh(new THREE.CircleGeometry(1.5, 28).rotateX(-Math.PI / 2), std(G.pit, { roughness: 0.4 })); mud.position.y = 0.005; mud.scale.set(1.25, 1, 0.9); mud.receiveShadow = true; group.add(mud);
+  const blobs = new THREE.InstancedMesh(new THREE.CircleGeometry(0.4, 14).rotateX(-Math.PI / 2), std(G.blob, { roughness: 0.3 }), 6);
   for (let i = 0; i < 6; i++) { m4.compose(v.set(Math.sin(i * 1.9) * 1.1, 0.01, Math.cos(i * 1.9) * 0.7), q.identity(), sc.setScalar(0.6 + (i % 3) * 0.3)); blobs.setMatrixAt(i, m4); }
   group.add(blobs);
   // hay bales round the edge (gaps where the ropes run out), bunting along the back
-  const AR = ctx.arena, RX = AR.hw + 1.5, RZ = AR.hd + 1.4, HB = 22, bales = new THREE.InstancedMesh(new THREE.BoxGeometry(1.2, 0.7, 0.75), std('#e9c45c'), HB); let bi = 0;
+  const AR = ctx.arena, RX = AR.hw + 1.5, RZ = AR.hd + 1.4, HB = 22, bales = new THREE.InstancedMesh(new THREE.BoxGeometry(1.2, 0.7, 0.75), std(G.bale), HB); let bi = 0;
   for (let i = 0; i < HB; i++) {
     const a = i / HB * Math.PI * 2, x = Math.sin(a) * RX, z = Math.cos(a) * RZ, d = Math.hypot(x, z);
     if (sides.some(s => (x * s.dir[0] + z * s.dir[1]) / d > 0.9)) continue;
@@ -35,7 +45,7 @@ export function createView(ctx) {
   bales.count = bi; bales.castShadow = true; group.add(bales);
   const NP = 5, poles = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.08, 0.1, 4, 8), std('#ffffff'), NP);
   const FLAGS = 48, pennants = new THREE.InstancedMesh(new THREE.ConeGeometry(0.2, 0.42, 3).rotateX(Math.PI), std('#ffffff', { side: THREE.DoubleSide }), FLAGS);
-  const BUNT = ['#ff4d4d', '#ffd23f', '#3d8bff', '#3ecf5a', '#f04fd8'].map(c => new THREE.Color(c));
+  const BUNT = G.bunt.map(c => new THREE.Color(c));
   const polePos = []; for (let i = 0; i < NP; i++) { const x = -RX - 1 + i * (RX + 1) * 2 / (NP - 1), z = -RZ - 1.6; polePos.push([x, z]); m4.makeTranslation(x, 2, z); poles.setMatrixAt(i, m4); }
   for (let i = 0; i < FLAGS; i++) {
     const per = FLAGS / (NP - 1), seg = Math.floor(i / per), t = (i % per + 0.5) / per, [ax, az] = polePos[seg], [bx, bz] = polePos[seg + 1];
@@ -82,15 +92,18 @@ export function createView(ctx) {
   function verdict(text, cls) { say.textContent = text; say.className = 'rr-say on ' + cls; sayT = 0.6; }
   function setShout(text, cls = '') { const key = text + cls; if (key === shoutKey) return; shoutKey = key; shout.textContent = text; shout.className = 'rr-shout' + (text ? ' on ' + cls : ''); }
   /** One tap of PULL (the A button, Space, a gamepad, or the drum itself): judged here against the drum we show. */
+  let streak = 0;
   function tap() {
     if (ctx.me == null) return;
     if (ph !== 'pull') { if (ph === 'ready') verdict('Wait for PULL!', 'meh'); return; }
     const nb = Math.round(lb), off = (lb - nb) / bps;
-    if (nb === lastN || nb < count) { verdict('Too fast!', 'bad'); return; }
+    if (nb === lastN || nb < count) { verdict('Too fast!', 'bad'); streak = 0; return; }
     lastN = nb;
     const qv = off >= -RULES.perfect && off <= RULES.perfect + 0.06 ? 2 : 1;
     ctx.send('pull', { n: nb, q: qv });
-    verdict(qv === 2 ? 'PERFECT!' : 'Good', qv === 2 ? 'good' : 'ok');
+    streak = qv === 2 ? streak + 1 : 0;
+    verdict(qv === 2 ? (streak >= 3 ? `PERFECT ×${streak}!` : 'PERFECT!') : 'Good', qv === 2 ? 'good' : 'ok');
+    if (qv === 2 && streak >= 3) navigator.vibrate?.(25);
     jolt.set(ctx.me, qv === 2 ? 1 : 0.6); ctx.sfx(qv === 2 ? 'good' : 'tap');
   }
   if (ctx.me != null) drum.addEventListener('pointerdown', e => { e.preventDefault(); tap(); });
@@ -112,11 +125,14 @@ export function createView(ctx) {
       else if (ev.e === 'win') {
         const s = sides[ev.side], mine = s && s.pids.includes(ctx.me);
         ctx.sfx(ev.side < 0 ? 'bad' : mine ? 'win' : ctx.me == null ? 'good' : 'bad');
+        if (ev.side >= 0 && ctx.me != null && mySide >= 0) juice.flash(mine ? 'rgba(255,210,63,.8)' : 'rgba(232,57,74,.7)', 360);
+        juice.shake(0.1, 0.35); streak = 0;
         for (const [i, sd] of sides.entries()) for (const pid of sd.pids) { if (pid === CPU) { barnaby?.play(i === ev.side ? 'cheer' : 'hit', 2400); continue; } ctx.actor(pid)?.play(i === ev.side ? 'cheer' : 'hit', 2400); }
       }
     },
     pose() { return ph === 'pull' || ph === 'ready' ? 'ready' : undefined; },
     frame(dt, t) {
+      juice.frame(dt, t);
       lb += dt * bps;
       const nb = Math.floor(lb);
       if (nb !== lastBeat) { if (lastBeat >= 0 && (ph === 'pull' || ph === 'ready') && nb >= 1) { ctx.sfx(nb < count ? 'tap' : 'dice'); flash = 1; } lastBeat = nb; }
@@ -127,7 +143,7 @@ export function createView(ctx) {
       drum.classList.toggle('live', ph === 'pull');
       if (sayT > 0) { sayT -= dt; if (sayT <= 0) say.classList.remove('on'); }
       // count-in / result shout
-      if (ph === 'ready') { const c = count - Math.floor(lb); setShout(c >= 1 && c <= 3 ? String(c) : lb < 1 ? 'Ready…' : '', 'count'); }
+      if (ph === 'ready') { const c = count - Math.floor(lb); setShout(c >= 1 && c <= 3 ? String(c) : lb < 1 ? (round === 0 ? G.name + '!' : 'Ready…') : '', c >= 1 && c <= 3 ? 'count' : ''); }
       else if (ph === 'pull') setShout(lb < count + 1 ? 'PULL!' : '', 'go');
       else if (ph === 'done') { const s = sides[win]; setShout(s ? (s.pids.includes(ctx.me) ? 'You win the pull!' : `${sideName(s)} ${s.pids.length > 1 ? 'win' : s.pids[0] === ctx.me ? 'win' : 'wins'} the pull!`) : 'Nobody got it!', s && s.pids.includes(ctx.me) ? 'go' : ''); }
       // knot, ropes
@@ -153,6 +169,6 @@ export function createView(ctx) {
       if (tug) { const p = (k[0] * sides[1].dir[0] + k[1] * sides[1].dir[1]) / L; tug.querySelector('.rr-rib').style.left = `${(50 + Math.max(-1.08, Math.min(1.08, p)) * 46).toFixed(1)}%`; }
       minis.forEach((b, i) => { const p = (k[0] * sides[i].dir[0] + k[1] * sides[i].dir[1]) / L; b.style.width = `${Math.max(0, Math.min(100, 50 + p * 50)).toFixed(1)}%`; });
     },
-    dispose() { bar.el.remove(); barnaby?.tag?.remove(); },
+    dispose() { juice.dispose(); bar.el.remove(); barnaby?.tag?.remove(); },
   };
 }

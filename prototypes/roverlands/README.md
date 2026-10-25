@@ -21,7 +21,7 @@ authority model and who owns which file. This README is what each part does and 
 | Test drive (solo, no menus) | `drive.html?seed=7&mode=sandbox` (`&online=1`, `&code=ABCD` to join, `&view=full`) |
 | World preview (fly around) | `world.html` |
 
-## Vehicles (released: 9 of the planned 21)
+## Vehicles (released: 16 of the planned 23)
 
 | id | name | seats | notes |
 |---|---|---|---|
@@ -34,9 +34,14 @@ authority model and who owns which file. This README is what each part does and 
 | `rocket_car` | Bounder Rocket Car | driver | jump / dodge / boost; big balls in the sandbox lot |
 | `forklift` | Lugmore Forklift | driver | Space / Shift move the forks; they lift a parked vehicle |
 | `trailer_utility` | Utility Trailer | — | hitch behind the Trail Jeep (`tow` added to the jeep) with T |
+| `semi_truck` | Longhaul Semi | driver + 1 | tows the three semi-trailers (fifth wheel: the trailer's nose rides over its back) |
+| `trailer_box` / `trailer_flatbed` / `trailer_tanker` | Box / Flatbed / Tanker Trailer | — | landing legs (`leg: 1` wheels) at z 1.8, clear of the semi's back tyres; box doors = a ramp (F) |
+| `fire_truck` | Brightwater Fire Truck | driver (siren), passenger, gunner (water cannon at the back) | model shares `models/lightbar.js` |
+| `ambulance` | Swiftcare Ambulance | driver (siren) + 3 (two on benches in the back) | rear doors open into a ramp |
+| `police_car` | Patrol Car | driver (siren) + 3 | trunk lid; no police words anywhere |
 
-The rest (bicycle, motorcycle, quad, sedan with a physics trunk, army truck with a standing bed, dune buggy, fire truck,
-ambulance, patrol car, semi + trailers, harvester + wheat) come in batches — see `~/claude/agent/roverlands-checklist.md`. Codex reference sheets for all of them
+The rest (bicycle, motorcycle, quad, sedan with a physics trunk, army truck with a standing bed, dune buggy, harvester +
+wheat) come in batches — see `~/claude/agent/roverlands-checklist.md`. Codex reference sheets for all of them
 are in `assets/ref/` (README there).
 
 **Adding a vehicle** = one entry in `data/vehicles.json` (numbers, wheels, seats) + `js/client/models/<id>.js`

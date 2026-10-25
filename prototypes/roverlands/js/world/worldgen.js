@@ -67,7 +67,8 @@ export function generateWorld(opts = {}) {
 export function* generateWorldSteps(opts = {}) {
   const t0 = now();
   const seed = (Number(opts.seed) || 0) >>> 0;
-  const vehicles = opts.vehicles && opts.vehicles.length ? opts.vehicles : ['trail_jeep', 'dirtbike', 'tank', 'hover_tank', 'helicopter', 'rocket_car', 'forklift', 'trailer_utility'];
+  const vehicles = opts.vehicles && opts.vehicles.length ? opts.vehicles : ['trail_jeep', 'dirtbike', 'tank', 'hover_tank', 'helicopter', 'rocket_car', 'forklift', 'trailer_utility',
+    'semi_truck', 'trailer_box', 'trailer_flatbed', 'trailer_tanker', 'fire_truck', 'ambulance', 'police_car'];
   const S = (seed * 7919 + 1013) % 100000;          // noise seed base
   const rng = makeRng(seed * 2654435761 + 7);
 
@@ -587,14 +588,14 @@ export function* generateWorldSteps(opts = {}) {
     const n = flagNodes[f.id];
     sites.flags.push({ id: f.id, name: f.name, note: f.note, x: n.x, z: n.z, y: world.heightAt(n.x, n.z), r: 3 });
   }
-  // vehicle pads: two rows of eight at home, eight more in the sandbox lot
+  // vehicle pads: two rows of eight at home, two columns of eight in the sandbox lot (16 m apart: a semi-trailer is 9 m)
   let vi = 0;
   for (let row = 0; row < 2; row++) for (let c = 0; c < 8; c++) {
     const x = -49 + c * 14, z = home.z + 6 + row * 16;
     sites.pads.push({ x, z, y: hHome, yaw: Math.PI, vehicle: vehicles[vi++ % vehicles.length], area: 'home' });
   }
-  for (let c = 0; c < 8; c++) {
-    const x = lot.x - 60, z = lot.z - 28 + c * 8;
+  for (const col of [-60, -44]) for (let c = 0; c < 8; c++) {
+    const x = lot.x + col, z = lot.z - 28 + c * 8;
     sites.pads.push({ x, z, y: hLot, yaw: Math.PI / 2, vehicle: vehicles[vi++ % vehicles.length], area: 'sandbox' });
   }
 

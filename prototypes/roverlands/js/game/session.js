@@ -627,7 +627,7 @@ export async function createSession(o) {
     stepShots(dt);
 
     // ---- the harvester's header cuts standing wheat under it
-    if (wheat && E?.def.harvest && mySeat[1] === 0 && E.veh.local && Math.abs(E.veh.forwardSpeed()) > 0.5) {
+    if (wheat && E?.def.harvest && mySeat?.[1] === 0 && E.veh.local && Math.abs(E.veh.forwardSpeed()) > 0.5) {
       const cells = wheat.harvest(E.veh, E.def);
       if (cells.length) {
         wheat.cut(cells); grain += cells.length; cutQueue.push(...cells);

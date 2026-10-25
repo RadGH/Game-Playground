@@ -1,6 +1,15 @@
 {
   "entries": [
     {
+      "id": "2026-10-25f",
+      "date": "2026-10-25",
+      "title": "The harvester",
+      "items": [
+        "The Goldline Harvester is parked at Haystead Farms: drive it through the tall wheat and it cuts a path, counting the grain you've gathered. Other players see the cut fields too.",
+        "That's every vehicle on the list — 23 in all."
+      ]
+    },
+    {
       "id": "2026-10-25e",
       "date": "2026-10-25",
       "title": "Six more vehicles and better handling",

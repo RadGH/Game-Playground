@@ -21,7 +21,7 @@ authority model and who owns which file. This README is what each part does and 
 | Test drive (solo, no menus) | `drive.html?seed=7&mode=sandbox` (`&online=1`, `&code=ABCD` to join, `&view=full`) |
 | World preview (fly around) | `world.html` |
 
-## Vehicles (released: 22 of the planned 23 — the harvester is left)
+## Vehicles (all 23 released)
 
 | id | name | seats | notes |
 |---|---|---|---|
@@ -44,12 +44,13 @@ authority model and who owns which file. This README is what each part does and 
 | `dune_buggy` | Sandhopper Buggy | 2 | 0.75 m suspension travel (jeep 0.42) |
 | `motorcycle` | Roadrunner Motorcycle | rider | road bike: faster, lower, less travel than the dirtbike |
 | `bicycle` | Pedalpush Bicycle | rider | tap gas to pedal (`pedal`) |
+| `harvester` | Goldline Harvester | driver + passenger | red + cream; two parked at Haystead Farms (own pads, spliced in before the props); the header cuts wheat (`harvest`), the reel turns with the wheels |
 | `army_truck` | Trailhauler Six | 2 cab + 8 benches + 1 standing | open bed you can stand in while it drives; tailgate = ramp |
 
 Tow points (`tow`, T to hitch): jeep, forklift, tank, rocket car, fire truck, ambulance, patrol car, sedan, quad, buggy,
 army truck, semi, and the utility trailer itself (so trailers chain).
 
-The harvester + wheat comes next — see `~/claude/agent/roverlands-checklist.md`. Codex reference sheets for all of them
+Every planned vehicle is released; data/vehicles-next.json is empty until the next idea — see `~/claude/agent/roverlands-checklist.md`. Codex reference sheets for all of them
 are in `assets/ref/` (README there).
 
 **Adding a vehicle** = one entry in `data/vehicles.json` (numbers, wheels, seats) + `js/client/models/<id>.js`

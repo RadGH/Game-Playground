@@ -737,6 +737,31 @@ export function* generateWorldSteps(opts = {}) {
   ];
   const { decor } = scatterObjects(world, { S, addObj, objects, exclusions, discs, nearestK });
 
+  // the harvesters wait at Haystead Farms, lined up with the field rows: the nearest flat farm ground to the farm node
+  // with nothing within 8 m. Spliced in before the prop pads (the room numbers entities in pad order; page and server
+  // run this same code, so both agree).
+  if (!opts.vehicles || opts.vehicles.includes('harvester')) {
+    const firstProp = sites.pads.findIndex(p => p.prop);
+    const farmPads = [];
+    const clear = (x, z) => {
+      const k = nearestK(x, z);
+      if (biome[k] !== BIOME.farm || !Number.isNaN(water[k])) return false;
+      const h0 = world.heightAt(x, z);
+      for (const [dx, dz] of [[5, 0], [-5, 0], [0, 5], [0, -5]]) if (Math.abs(world.heightAt(x + dx, z + dz) - h0) > 0.7) return false;
+      for (const o of objects) { const r = o.shape.r ?? Math.max(o.shape.hx || 0, o.shape.hz || 0); if (Math.hypot(o.x - x, o.z - z) < r + 8) return false; }
+      for (const p of [...sites.pads, ...farmPads]) if (Math.hypot(p.x - x, p.z - z) < 14) return false;
+      return true;
+    };
+    for (let r = 0; r <= 160 && farmPads.length < 2; r += 4) {
+      const steps = Math.max(1, Math.round(r * 0.8));
+      for (let a = 0; a < steps && farmPads.length < 2; a++) {
+        const x = nFarm.x + r * Math.cos(a / steps * 6.283185307179586), z = nFarm.z + r * Math.sin(a / steps * 6.283185307179586);
+        if (clear(x, z)) farmPads.push({ x, z, y: world.heightAt(x, z), yaw: theta, vehicle: 'harvester', area: 'farm' });
+      }
+    }
+    sites.pads.splice(firstProp < 0 ? sites.pads.length : firstProp, 0, ...farmPads);
+  }
+
   // ------------------------------------------------------------------------------------------------------------------
   // 8. labels, graph, river description
   const lab = (x, z, text, kind = 'place') => sites.labels.push({ x: Math.round(x), z: Math.round(z), text, kind });

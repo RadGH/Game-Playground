@@ -271,3 +271,15 @@ html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: non
 #cross[hidden] { display: none; }
 #boot { position: fixed; inset: 0; display: grid; place-items: center; background: #1d2a1f; color: #f4b04a; font: 800 42px/1 system-ui, sans-serif;
   letter-spacing: .02em; z-index: 50; text-align: center; padding: 16px; }
+
+/* ---- phones: no text selection / copy menu / tap flash while playing (iPhone report #3); text boxes stay selectable */
+html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+input, textarea, [contenteditable] { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+/* seats that don't steer have no stick: the whole screen looks around (report #4), buttons sit in the corner (#5) */
+.rl-touch[data-mode=gunner] .rl-tzone, .rl-touch[data-mode=passenger] .rl-tzone { display: none; }
+.rl-touch[data-mode=gunner] .rl-tlook, .rl-touch[data-mode=passenger] .rl-tlook { width: 100%; }
+.rl-touch[data-mode=gunner] .rl-t-use { right: 96px; bottom: 6px; width: 70px; height: 70px; }
+.rl-touch[data-mode=gunner] .rl-t-swap, .rl-touch[data-mode=passenger] .rl-t-swap { right: 0; bottom: 96px; width: 62px; height: 62px; }
+.rl-touch[data-mode=passenger] .rl-t-use { right: 0; bottom: 0; width: 84px; height: 84px; }
+.rl-touch[data-mode=drive] .rl-t-swap { right: 0; bottom: 166px; }
+.rl-t-hitch { right: 92px; bottom: 166px; width: 62px; height: 62px; font-size: 12px; background: rgba(140, 200, 255, .9); }

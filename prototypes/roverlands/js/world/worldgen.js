@@ -67,7 +67,7 @@ export function generateWorld(opts = {}) {
 export function* generateWorldSteps(opts = {}) {
   const t0 = now();
   const seed = (Number(opts.seed) || 0) >>> 0;
-  const vehicles = opts.vehicles && opts.vehicles.length ? opts.vehicles : ['trail_jeep', 'dirtbike'];
+  const vehicles = opts.vehicles && opts.vehicles.length ? opts.vehicles : ['trail_jeep', 'dirtbike', 'tank', 'hover_tank', 'helicopter', 'rocket_car', 'forklift', 'trailer_utility'];
   const S = (seed * 7919 + 1013) % 100000;          // noise seed base
   const rng = makeRng(seed * 2654435761 + 7);
 
@@ -596,6 +596,12 @@ export function* generateWorldSteps(opts = {}) {
   for (let c = 0; c < 8; c++) {
     const x = lot.x - 60, z = lot.z - 28 + c * 8;
     sites.pads.push({ x, z, y: hLot, yaw: Math.PI / 2, vehicle: vehicles[vi++ % vehicles.length], area: 'sandbox' });
+  }
+
+  // the airplane waits at the west end of the runway, nose down the strip (needs the whole strip, so it never cycles)
+  if (!opts.vehicles || opts.vehicles.includes('airplane')) {
+    const RWs = PLACES.runway, ax = RWs.x - RWs.len / 2 + 22;
+    sites.pads.push({ x: ax, z: RWs.z, y: world.heightAt(ax, RWs.z), yaw: Math.PI / 2, vehicle: 'airplane', area: 'runway' });
   }
 
   // loose props (vehicles.json type 'prop'): pads AFTER the vehicle pads, because the room numbers entities in pad

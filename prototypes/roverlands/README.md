@@ -21,16 +21,22 @@ authority model and who owns which file. This README is what each part does and 
 | Test drive (solo, no menus) | `drive.html?seed=7&mode=sandbox` (`&online=1`, `&code=ABCD` to join, `&view=full`) |
 | World preview (fly around) | `world.html` |
 
-## Vehicles (demo: 2 of the planned 21)
+## Vehicles (released: 9 of the planned 21)
 
 | id | name | seats | notes |
 |---|---|---|---|
 | `trail_jeep` | Trail Jeep | driver, passenger, gunner (standing, twin-barrel turret on a riser) | open: a hard crash or rolling it throws everyone out |
 | `dirtbike` | Dirtbike | rider | balances itself while ridden, leans into turns, Shift = lean back (wheelie), you fall off if it goes over |
+| `tank` | Ironback Tank | driver (stands in the hatch, aims + fires the shell gun), 2 passengers | enclosed; tank controls |
+| `hover_tank` | Driftwing Hover Tank | driver (bolt gun), passenger | enclosed; floats over water |
+| `helicopter` | Skylark Helicopter | pilot + 3 | Space climbs, Shift sinks |
+| `airplane` | Tundra Hopper | pilot + 1 | parked on the runway (own pad, never in the cycling pad list) |
+| `rocket_car` | Bounder Rocket Car | driver | jump / dodge / boost; big balls in the sandbox lot |
+| `forklift` | Lugmore Forklift | driver | Space / Shift move the forks; they lift a parked vehicle |
+| `trailer_utility` | Utility Trailer | — | hitch behind the Trail Jeep (`tow` added to the jeep) with T |
 
-The rest (bicycle, motorcycle, quad, sedan with a physics trunk, army truck with a standing bed, tank, helicopter,
-airplane, jetpack, dune buggy, forklift, fire truck, ambulance, patrol car, semi + trailers, harvester + wheat, hover
-tank, rocket car) come in batches — see `~/claude/agent/roverlands-checklist.md`. Codex reference sheets for all of them
+The rest (bicycle, motorcycle, quad, sedan with a physics trunk, army truck with a standing bed, dune buggy, fire truck,
+ambulance, patrol car, semi + trailers, harvester + wheat) come in batches — see `~/claude/agent/roverlands-checklist.md`. Codex reference sheets for all of them
 are in `assets/ref/` (README there).
 
 **Adding a vehicle** = one entry in `data/vehicles.json` (numbers, wheels, seats) + `js/client/models/<id>.js`
@@ -100,13 +106,16 @@ gas/brake and steer unless noted. Fire = left click / RT; F = Y on a controller.
 | rocket car | gas / brake | steer; in the air A/D roll | jump, again in the air = dodge / flip | boost (also in the air) | — | |
 | forklift | gas / brake | steer (rear wheels) | forks up | forks down | — | the forks really lift a vehicle |
 | seat switches | | | | | fire flips the seat's switch (siren and lights) | `act` in the seat's data |
-| on foot | walk | walk | jump (jetpack: hold to fly) | run | — | E: get in / pick up / put down (Shift+E throws); F: open or close doors |
+| trailer hitch | | | | | | T / d-pad left / HITCH while driving something with `tow` and its tow ball within 1.8 m of a trailer's tongue (`hitch`); press again to unhitch. The trailer is claimed (`own`) first so both ends are simulated on one machine; a hitch drops itself if either end stops being mine |
+| on foot | run (hold Shift to walk) | walk | jump (jetpack: hold to fly) | walk | — | E: get in / pick up / put down (Shift+E throws); F: open or close doors |
 
 ## Systems added after the demo plan
 
 * **Props** (`js/phys/props.js`, type `prop` in vehicles.json: crate, bag, barrel, big ball, jetpack): CCD bodies you
   carry, drop or throw; a vehicle claims (`own`) any prop that touches it, so trunk cargo is simulated with the car.
   Soft-CCD prediction was tried and REMOVED: it shot squeezed crates out of a trunk at 50 m/s.
+  A wheel's cast ignores any prop whose centre is above its own chassis top (cargo in the trunk or bed): the top of a
+  wheel's travel pokes up through the floor, and a crate there used to read as ground and get shoved through the floor.
 * **Doors** (`parts[].door` + `open` shape): closed = solid wall, open = its ramp / lid shape. Box trailer, ambulance,
   sedan / patrol car trunk. Opened with F on foot via the `act` message (`door_<name>`), the room remembers the state.
 * **Towing** (`tow` on the puller, `hitch` on the trailer; ball joint): semi trailers (`fifthWheel: true`) don't

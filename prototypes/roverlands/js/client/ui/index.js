@@ -58,9 +58,10 @@ export const CONTROLS = [
   ['Look around', 'Mouse (click to grab it)', 'Right stick', 'Drag on the right side'],
   ['Get in / out', 'E', 'X (Square)', 'ENTER'],
   ['Handbrake / jump', 'Space', 'A (Cross)', 'JUMP'],
-  ['Boost / sprint / lean', 'Shift', 'B (Circle) / L3', '—'],
+  ['Boost / walk (you run by default) / lean', 'Shift', 'B (Circle) / L3', '—'],
   ['Fire (gunner) / horn', 'Left click / H', 'RT (gunner) / R3', 'FIRE'],
   ['Change seat', 'F', 'Y (Triangle)', 'SEAT'],
+  ['Hitch / unhitch a trailer (back up to it)', 'T', 'D-pad left', 'HITCH'],
   ['Camera distance', 'Mouse wheel / V', 'D-pad up / down', 'Pinch'],
   ['Map / menu', 'M / Esc', 'Back / Start', '☰'],
 ];

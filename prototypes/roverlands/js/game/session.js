@@ -43,6 +43,7 @@ export async function createSession(o) {
   let walker = spectate ? null : createWalker(phys, { p: startSpot() });
   let mySeat = null;             // [entId, seatIdx]
   let carrying = null, pendingPick = null;
+  let pendingHitch = null, hitchNear = null;   // a trailer I asked the room for so I can hitch it; the trailer my tow point is near
   let pendingSeat = null, sendT = 0, flag = null, run = null, lastCrash = 0, resetHold = 0, bumpT = new Map(), lastDrive = null;
   let hostPid = net.room?.host, lastDev = 'keys', sleepCursor = 0;
   const brokenSet = new Set();
@@ -120,6 +121,29 @@ export async function createSession(o) {
     for (const E of ents.values()) { if (E.isProp) continue; const d = E.seats[0] != null; if (d && !E.veh.driver) E.veh.wake?.(); E.veh.driver = d; }
     // a prop I asked for is mine now: pick it up
     if (pendingPick != null) { const P = ents.get(pendingPick); if (P?.owner === me) { pendingPick = null; pickUp(P); } }
+    // a trailer I asked for is mine now: hitch it (if I'm still in the tow vehicle and still close)
+    if (pendingHitch) { const A = ents.get(pendingHitch.from), T = ents.get(pendingHitch.to); if (T?.owner === me) { pendingHitch = null; if (A?.veh.local && mySeat?.[0] === A.id) doHitch(A, T); } }
+  }
+  // ---- trailers: back the tow point up to a trailer's tongue, then T / d-pad left / HITCH
+  const HITCH_RANGE = 1.8;
+  function nearestTrailer(A) {
+    const tp = A.veh.towPointWorld?.(); if (!tp) return null;
+    let best = null, bd = HITCH_RANGE;
+    for (const X of ents.values()) {
+      if (X === A || X.isProp || !X.def.hitch || X.veh.towedBy || X.veh.towing === A.veh) continue;
+      const hp = X.veh.hitchPointWorld(); const d = Math.hypot(hp.x - tp.x, hp.y - tp.y, hp.z - tp.z);
+      if (d < bd) { bd = d; best = X; }
+    }
+    return best;
+  }
+  function doHitch(A, T) {
+    if (A.veh.hitch(T.veh)) { toast(`Hitched the ${T.def.name}`); sounds?.play('door', { at: T.veh.rb.translation() }); }
+  }
+  function hitchPress(A) {
+    if (A.veh.towing) { const t = A.veh.unhitch(); const T = t && [...ents.values()].find(X => X.veh === t); toast(`Unhitched the ${T?.def.name || 'trailer'}`); return; }
+    const T = nearestTrailer(A);
+    if (!T) { toast('Back up to a trailer\'s tongue first'); return; }
+    if (T.veh.local) doHitch(A, T); else { pendingHitch = { from: A.id, to: T.id }; net.send({ t: 'own', id: T.id }); }
   }
 
   // ---------------------------------------------------------------------------------------------- people
@@ -494,7 +518,7 @@ export async function createSession(o) {
       const fx = Math.sin(cam.yaw), fz = Math.cos(cam.yaw);
       walker.input.mx = fx * s.my - fz * s.mx;
       walker.input.mz = fz * s.my + fx * s.mx;
-      walker.input.run = s.boost;
+      walker.input.run = !s.boost;          // run by default; hold Shift (B / L3) to walk
       walker.input.jump = s.jump;
       if (s.use && !pendingSeat && !walker.isRag()) {
         if (carrying) putDown(s.boost);
@@ -540,6 +564,11 @@ export async function createSession(o) {
         if (d.type === 'heli' || d.type === 'plane') inp.flip = false;
         Object.assign(E.veh.input, inp);
         if (s.horn) { net.send({ t: 'horn', id: E.id }); sounds?.play('horn', { at: E.veh.rb.translation() }); }
+        if (d.tow) { hitchNear = E.veh.towing ? 'on' : nearestTrailer(E); if (s.hitch) hitchPress(E); } else hitchNear = null;
+        // on its side or roof and not moving: after 3 s it is put back on its wheels by itself (phones have no R key)
+        { const up = qrot(E.veh.rb.rotation(), { x: 0, y: 1, z: 0 }).y;
+          if (up < 0.55 && E.veh.speed() < 2) { frame.stuckFor = (frame.stuckFor || 0) + dt; if (frame.stuckFor > 3) { frame.stuckFor = 0; const t = E.veh.rb.translation(); E.veh.teleport([t.x, world.heightAt(t.x, t.z) + restLift(E.def) + 0.6, t.z], yawOf(E.veh.rb.rotation())); toast('Back on its wheels'); } }
+          else frame.stuckFor = 0; }
         // stuck? hold R for a second to sit it back on its wheels where it is
         if (input.keys.has('KeyR')) { resetHold += dt; if (resetHold > 0.8) { const t = E.veh.rb.translation(); E.veh.teleport([t.x, world.heightAt(t.x, t.z) + restLift(E.def) + 0.6, t.z], yawOf(E.veh.rb.rotation())); resetHold = 0; toast('Back on its wheels'); } }
         else resetHold = 0;
@@ -619,6 +648,10 @@ export async function createSession(o) {
       net.send({ t: 'pos', me: meState, ents: owned });
       stat.sent++;
     }
+
+    // a hitch only lives while both ends are simulated on this machine (someone else took the trailer or the truck)
+    for (const X of ents.values()) if (X.veh.towing && (!X.veh.local || !X.veh.towing.trailer.local)) X.veh.unhitch();
+    if (!mySeat || mySeat[1] !== 0) hitchNear = null;
 
     // ---- draw bodies
     for (const X of ents.values()) {
@@ -803,7 +836,7 @@ export async function createSession(o) {
       else if (carrying) hint = carrying.def.jetpack ? 'Take off the jetpack' : `Put down the ${carrying.def.name} (Shift: throw)`;
       else { const np = nearestProp(walker.feet); if (np) hint = np.def.jetpack ? 'Put on the jetpack' : `Pick up the ${np.def.name}`; }
       if (!hint) { const nd = nearestDoor(walker.feet); if (nd) hint = `F — ${nd.E.acts['door_' + nd.name] ? 'Close' : 'Open'} the ${nd.name === 'rear' ? 'back doors' : nd.name}`; }
-    } else if (E) hint = seat.act ? `Fire: ${seat.act === 'siren' ? 'siren and lights' : seat.act} ${E.acts[seat.act] ? 'off' : 'on'}` : mySeat[1] === 0 ? null : seat.gun ? 'Gunner — aim and fire' : 'Passenger — look around';
+    } else if (E) hint = seat.act ? `Fire: ${seat.act === 'siren' ? 'siren and lights' : seat.act} ${E.acts[seat.act] ? 'off' : 'on'}` : mySeat[1] === 0 ? (hitchNear === 'on' ? 'T — Unhitch the trailer' : hitchNear ? `T — Hitch the ${hitchNear.def.name}` : null) : seat.gun ? 'Gunner — aim and fire' : 'Passenger — look around';
     const markers = [];
     for (const P of people.values()) if (P.rider) { const g = P.rider.group.position; markers.push({ kind: P.pid === me ? 'me' : 'player', x: g.x, z: g.z, label: P.name, yaw: P.pid === me ? cam.yaw : 0 }); }
     for (const X of ents.values()) { if (X.isProp) continue; const t = X.veh.rb.translation(); markers.push({ kind: 'vehicle', vehicle: X.kind, x: t.x, z: t.z, label: X.def.name, busy: X.seats.some(p => p != null) }); }
@@ -814,14 +847,14 @@ export async function createSession(o) {
       speed: E ? Math.abs(E.veh.forwardSpeed()) : walker ? Math.hypot(walker.vel[0], walker.vel[2]) : 0,
       kmh: E ? Math.round(Math.abs(E.veh.forwardSpeed()) * 3.6) : null,
       vehicle: E?.def.name || null, role: seat?.role || null, boost: E?.def.engine.boost ? E.veh.boostFuel : null,
-      hint, flag, run, grain: E?.def.harvest ? grain : null, runClock: run?.phase === 'go' && run.startedAt ? (net.serverNow() - run.startedAt) : run?.time ?? null,
+      hint, hitch: !!hitchNear, flag, run, grain: E?.def.harvest ? grain : null, runClock: run?.phase === 'go' && run.startedAt ? (net.serverNow() - run.startedAt) : run?.time ?? null,
       markers, toasts: toasts.filter(t => performance.now() - t.at < 4000).map(t => t.text),
       camYaw: cam.yaw, me: walker ? walker.feet : null, device: lastDev, mode: net.room?.mode, carrying: flag?.state === 'carried' && flag.by === me,
       biome: world.biomeAt?.(...(E ? [E.veh.rb.translation().x, E.veh.rb.translation().z] : walker ? [walker.feet[0], walker.feet[2]] : [0, 0])),
     };
   }
   function debug() {
-    return { me, seat: mySeat, ents: [...ents.values()].map(E => ({ id: E.id, kind: E.kind, owner: E.owner, local: E.veh.local, seats: E.seats, p: Object.values(E.veh.rb.translation()).map(v => Math.round(v * 10) / 10), speed: Math.round(E.veh.speed() * 10) / 10 })),
+    return { me, seat: mySeat, ents: [...ents.values()].map(E => ({ id: E.id, kind: E.kind, owner: E.owner, local: E.veh.local, seats: E.seats, p: Object.values(E.veh.rb.translation()).map(v => Math.round(v * 10) / 10), yaw: Math.round(yawOf(E.veh.rb.rotation()) * 100) / 100, up: Math.round(qrot(E.veh.rb.rotation(), { x: 0, y: 1, z: 0 }).y * 100) / 100, speed: Math.round(E.veh.speed() * 10) / 10 })),
       walker: walker ? { feet: walker.feet.map(v => Math.round(v * 100) / 100), anim: walker.anim, on: walker.platform?.id ?? null } : null,
       flag, run, broken: brokenSet.size, ticks: stat.ticks, sent: stat.sent, people: people.size };
   }

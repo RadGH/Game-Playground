@@ -100,9 +100,11 @@ function frame() {
     if (hd.grain != null) ui.hud.flagText?.(`Grain cut: ${Math.round(hd.grain * 4)} m²`); else if (frame.grainShown) ui.hud.flagText?.(null);
     frame.grainShown = hd.grain != null;
     // a hint that names its own key ("F — Open the back doors") gets that key for this device instead of E
-    const ownKey = hd.hint && /^F — /.test(hd.hint);
-    ui.hud.seatHint(hd.hint ? (ownKey ? `${SWAPNAME[hd.device] || 'F'} — ${hd.hint.slice(4)}` : `${KEYNAME[hd.device] || 'E'} — ${hd.hint}`) : null);
+    const ownKey = hd.hint && /^[FT] — /.test(hd.hint) && hd.hint[0];
+    const KEYS = ownKey === 'T' ? HITCHNAME : SWAPNAME;
+    ui.hud.seatHint(hd.hint ? (ownKey ? `${KEYS[hd.device] || ownKey} — ${hd.hint.slice(4)}` : `${KEYNAME[hd.device] || 'E'} — ${hd.hint}`) : null);
     ui.touch.mode(hd.role === 'driver' ? 'drive' : hd.role === 'gunner' ? 'gunner' : hd.role ? 'passenger' : 'foot');
+    ui.touch.hitchable?.(hd.hitch);
     const meM = hd.markers.find(m => m.kind === 'me');
     ui.markers({
       you: meM ? { x: meM.x, z: meM.z, dir: [Math.sin(session.cam.yaw), Math.cos(session.cam.yaw)] } : null,
@@ -124,7 +126,7 @@ function frame() {
   if (world) render(dt);
   requestAnimationFrame(frame);
 }
-const KEYNAME = { keys: 'E', pad: 'X', touch: 'ENTER' }, SWAPNAME = { keys: 'F', pad: 'Y', touch: 'SEAT' };
+const KEYNAME = { keys: 'E', pad: 'X', touch: 'ENTER' }, SWAPNAME = { keys: 'F', pad: 'Y', touch: 'SEAT' }, HITCHNAME = { keys: 'T', pad: 'D-pad left', touch: 'HITCH' };
 frame();
 
 window.roverlands = { get session() { return session; }, get world() { return world; }, ui, renderer, scene: () => scene, camera };

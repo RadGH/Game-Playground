@@ -1,6 +1,18 @@
 {
   "entries": [
     {
+      "id": "2026-10-25c",
+      "date": "2026-10-25",
+      "title": "Seven new vehicles",
+      "items": [
+        "New to drive: the Ironback Tank, a hover tank that floats over the river, a helicopter, a bush plane waiting at the end of the runway, a rocket car, a forklift whose forks really lift things, and a small utility trailer.",
+        "Trailers: back the Trail Jeep up to the trailer and press T (d-pad left on a controller, HITCH on a phone) to hook it on; press again to let it go.",
+        "Your character now runs by default; hold Shift (B on a controller) to walk.",
+        "A vehicle stuck on its side or roof puts itself back on its wheels after a few seconds.",
+        "Phones: the thumb stick no longer stops working after a long press or after turning the phone, and long presses no longer select text or open the copy menu."
+      ]
+    },
+    {
       "id": "2026-10-25b",
       "date": "2026-10-25",
       "title": "iPhone fix",

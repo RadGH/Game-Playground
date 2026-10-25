@@ -130,8 +130,18 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
   // a parked vehicle that has settled goes to sleep: no casts, no forces, until someone gets in or something hits it
   // (Rapier wakes a sleeping body on contact by itself)
   let still = 0;
-  // a wheel never stands on the thing it is hitched to (a trailer's nose sits right over the tractor's back wheels)
-  const notHitched = c => { const b = phys.infoOf(c)?.body; return !b || (b !== self.towing?.trailer && b !== self.towedBy); };
+  // a wheel never stands on the thing it is hitched to (a trailer's nose sits right over the tractor's back wheels),
+  // nor on loose cargo riding in its own trunk or bed: the top of a wheel's travel pokes up through the floor (the
+  // wheel arch), and a crate there used to read as ground — full spring force on the car and the same shoved down into
+  // the crate, straight through the floor. A prop whose centre is above the chassis top is cargo, not road.
+  const cargoAbove = (ch.p?.[1] ?? 0) + ch.hy - 0.05;
+  const wheelFilter = c => {
+    const i = phys.infoOf(c), b = i?.body;
+    if (!b) return true;
+    if (b === self.towing?.trailer || b === self.towedBy) return false;
+    if (i.prop && b.rb && self.toLocal(b.rb.translation()).y > cargoAbove) return false;
+    return true;
+  };
   function tick(dt) {
     if (!self.local) { tickRemote(dt); return; }
     if (!self.driver && self.crashed <= 0) {
@@ -162,7 +172,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     for (const w of wheels) {
       const anchor = add(t, qrot(q, { x: w.p.x, y: w.p.y + travel, z: w.p.z }));
       const down = scale(up, -1);
-      const hit = rw.castShape(anchor, q, down, w.shape, 0, travel + 0.05, true, undefined, GROUPS.wheel, undefined, rb, (self.towing || self.towedBy) ? notHitched : undefined);
+      const hit = rw.castShape(anchor, q, down, w.shape, 0, travel + 0.05, true, undefined, GROUPS.wheel, undefined, rb, wheelFilter);
       w.compPrev = w.comp;
       let hitT = hit ? (hit.time_of_impact ?? hit.timeOfImpact) : Infinity, onWater = false;
       if (def.type === 'hover' && world.waterAt) {          // a hover pad stands on water like on ground
@@ -370,7 +380,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     if (def.type === 'bike') balanceBike(dt, q, lv, av, fwd, up, grounded);
 
     // upside down: the old trick — hold jump (flip) to roll it back on its wheels
-    if (up.y < 0.3 && speed < 3) self.upsideDownFor += dt; else self.upsideDownFor = 0;
+    if (up.y < 0.55 && speed < 3) self.upsideDownFor += dt; else self.upsideDownFor = 0;   // on its side counts too
     if (input.flip && self.upsideDownFor > 0.6 && def.type !== 'bike') {
       const side = qrot(q, { x: 1, y: 0, z: 0 });
       const axis = norm(cross(up, UP));

@@ -1,59 +1,1574 @@
 {
-  "_doc": "Seat p = the rider's HIPS when sitting (Chibi sit: hips 0.41 above the feet, hands +0.20 up / +0.34 forward; ride: hips 0.60, hands +0.13 / +0.32), or the FEET when stand: true. Every vehicle's numbers. Frame: +z forward, +y up, +x = the LEFT side. Units: metres, kg, newtons. Wheel p = hub position with the suspension fully extended. Seats: p = where the rider's hips go; pose = Chibi clip ('sit', 'ride', 'idle'); exit = where you step out (vehicle frame). Built for Chibi 2.5 riders: 1.73 m tall, hips 0.60, arms 0.41, head top = seat + 1.13.",
-  "vehicles": [
+ "_doc": "Seat p = the rider's HIPS when sitting (Chibi sit: hips 0.41 above the feet, hands +0.20 up / +0.34 forward; ride: hips 0.60, hands +0.13 / +0.32), or the FEET when stand: true. Every vehicle's numbers. Frame: +z forward, +y up, +x = the LEFT side. Units: metres, kg, newtons. Wheel p = hub position with the suspension fully extended. Seats: p = where the rider's hips go; pose = Chibi clip ('sit', 'ride', 'idle'); exit = where you step out (vehicle frame). Built for Chibi 2.5 riders: 1.73 m tall, hips 0.60, arms 0.41, head top = seat + 1.13.",
+ "vehicles": [
+  {
+   "id": "trail_jeep",
+   "name": "Trail Jeep",
+   "type": "car",
+   "enclosed": false,
+   "mass": 1350,
+   "blurb": "Rugged open jeep. Driver, a gunner on the turret and a passenger.",
+   "chassis": {
+    "hx": 0.92,
+    "hy": 0.32,
+    "hz": 1.75,
+    "p": [
+     0,
+     0.05,
+     0
+    ],
+    "com": [
+     0,
+     -0.32,
+     0.05
+    ]
+   },
+   "parts": [
     {
-      "id": "trail_jeep", "name": "Trail Jeep", "type": "car", "enclosed": false, "mass": 1350,
-      "blurb": "Rugged open jeep. Driver, a gunner on the turret and a passenger.",
-      "chassis": { "hx": 0.92, "hy": 0.32, "hz": 1.75, "p": [0, 0.05, 0], "com": [0, -0.32, 0.05] },
-      "parts": [
-        { "box": [0.9, 0.06, 0.55], "p": [0, 0.42, -1.25], "_doc": "rear deck the gunner stands on" },
-        { "box": [0.06, 0.5, 0.06], "p": [0.8, 1.05, 0.55] }, { "box": [0.06, 0.5, 0.06], "p": [-0.8, 1.05, 0.55] }
-      ],
-      "wheels": [
-        { "p": [0.9, -0.22, 1.25], "r": 0.44, "w": 0.34, "steer": 1, "drive": 1, "brake": 1 },
-        { "p": [-0.9, -0.22, 1.25], "r": 0.44, "w": 0.34, "steer": 1, "drive": 1, "brake": 1 },
-        { "p": [0.9, -0.22, -1.2], "r": 0.44, "w": 0.34, "steer": 0, "drive": 1, "brake": 1 },
-        { "p": [-0.9, -0.22, -1.2], "r": 0.44, "w": 0.34, "steer": 0, "drive": 1, "brake": 1 }
-      ],
-      "susp": { "travel": 0.42, "k": 30000, "damp": 3000, "antiRoll": 9000 },
-      "engine": { "force": 9500, "top": 27, "reverse": 9 },
-      "steer": { "max": 0.6, "speedFalloff": 0.62, "rate": 2.6 },
-      "tyre": { "grip": 1.45, "slide": 0.68, "handbrakeRear": 0.2, "peak": 0.17, "stiff": 0.8, "rollCenter": 0.5 },
-      "air": { "control": 0.55, "damp": 0.8 },
-      "downforce": 2.5,
-      "seats": [
-        { "role": "driver", "p": [0.42, 0.22, 0.15], "pose": "sit", "exit": [1.9, -0.3, 0.15], "hands": "wheel", "wheelAt": [0.42, 0.47, 0.52] },
-        { "role": "passenger", "p": [-0.42, 0.22, 0.15], "pose": "sit", "exit": [-1.9, -0.3, 0.15], "look": true },
-        { "role": "gunner", "p": [0, 0.78, -1.42], "pose": "idle", "stand": true, "exit": [0, -0.3, -2.9], "gun": { "kind": "pellet", "pivot": [0, 1.72, -1.02], "rate": 6, "speed": 90, "push": 900 } }
-      ],
-      "eject": { "threshold": 13, "upsideDown": true },
-      "camera": { "dist": 7.5, "height": 2.4 }
+     "box": [
+      0.9,
+      0.06,
+      0.55
+     ],
+     "p": [
+      0,
+      0.42,
+      -1.25
+     ],
+     "_doc": "rear deck the gunner stands on"
     },
     {
-      "id": "dirtbike", "name": "Dirtbike", "type": "bike", "enclosed": false, "mass": 150,
-      "blurb": "Light, quick and jumpy. Lean into turns; hold Shift to lean back for a wheelie.",
-      "chassis": { "hx": 0.17, "hy": 0.26, "hz": 0.72, "p": [0, 0.08, 0], "com": [0, -0.08, 0] },
-      "parts": [],
-      "wheels": [
-        { "p": [0, -0.16, 0.74], "r": 0.36, "w": 0.12, "steer": 1, "drive": 0, "brake": 1 },
-        { "p": [0, -0.16, -0.7], "r": 0.36, "w": 0.15, "steer": 0, "drive": 1, "brake": 1, "hand": 1 }
-      ],
-      "susp": { "travel": 0.34, "k": 6500, "damp": 520, "antiRoll": 0 },
-      "engine": { "force": 2300, "top": 29, "reverse": 3 },
-      "steer": { "max": 0.55, "speedFalloff": 0.78, "rate": 4 },
-      "tyre": { "grip": 1.5, "slide": 0.7, "handbrakeRear": 0.35, "peak": 0.2, "stiff": 0.75, "rollCenter": 0.8 },
-      "air": { "control": 0.9, "damp": 1.2 },
-      "inertiaScale": 1.0,
-      "seats": [
-        { "role": "driver", "p": [0, 0.38, -0.05], "pose": "ride", "exit": [0.9, -0.2, 0], "hands": "bars", "barsAt": [0, 0.62, 0.28] }
-      ],
-      "eject": { "threshold": 9, "upsideDown": true },
-      "camera": { "dist": 5.2, "height": 1.8 }
+     "box": [
+      0.06,
+      0.5,
+      0.06
+     ],
+     "p": [
+      0.8,
+      1.05,
+      0.55
+     ]
     },
-    {"id": "crate", "name": "crate", "type": "prop", "kind": "crate", "mass": 25, "shape": {"t": "box", "hx": 0.3, "hy": 0.25, "hz": 0.3}, "seats": [], "blurb": "A wooden crate. Pick it up with E; it fits in a trunk."},
-    {"id": "bag", "name": "bag", "type": "prop", "kind": "bag", "mass": 8, "shape": {"t": "box", "hx": 0.25, "hy": 0.15, "hz": 0.18}, "seats": [], "blurb": "A canvas kit bag."},
-    {"id": "barrel", "name": "barrel", "type": "prop", "kind": "barrel", "mass": 40, "shape": {"t": "cyl", "r": 0.28, "h": 0.85}, "seats": [], "blurb": "A fuel barrel. Heavy."},
-    {"id": "ball", "name": "big ball", "type": "prop", "kind": "ball", "mass": 30, "restitution": 0.75, "friction": 0.5, "shape": {"t": "ball", "r": 0.9}, "seats": [], "blurb": "A huge bouncy ball. Push it around with a car."},
-    {"id": "jetpack", "name": "Jetpack", "type": "prop", "kind": "jetpack", "mass": 12, "shape": {"t": "box", "hx": 0.22, "hy": 0.3, "hz": 0.15}, "seats": [], "jetpack": {"secs": 4, "refill": 3, "thrust": 30, "maxUp": 7, "speed": 9}, "blurb": "Strap it on (E), then hold jump in the air to fly."}
-  ]
+    {
+     "box": [
+      0.06,
+      0.5,
+      0.06
+     ],
+     "p": [
+      -0.8,
+      1.05,
+      0.55
+     ]
+    }
+   ],
+   "wheels": [
+    {
+     "p": [
+      0.9,
+      -0.22,
+      1.25
+     ],
+     "r": 0.44,
+     "w": 0.34,
+     "steer": 1,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.9,
+      -0.22,
+      1.25
+     ],
+     "r": 0.44,
+     "w": 0.34,
+     "steer": 1,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      0.9,
+      -0.22,
+      -1.2
+     ],
+     "r": 0.44,
+     "w": 0.34,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.9,
+      -0.22,
+      -1.2
+     ],
+     "r": 0.44,
+     "w": 0.34,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.42,
+    "k": 30000,
+    "damp": 3000,
+    "antiRoll": 9000
+   },
+   "engine": {
+    "force": 9500,
+    "top": 27,
+    "reverse": 9
+   },
+   "steer": {
+    "max": 0.6,
+    "speedFalloff": 0.62,
+    "rate": 2.6
+   },
+   "tyre": {
+    "grip": 1.45,
+    "slide": 0.68,
+    "handbrakeRear": 0.2,
+    "peak": 0.17,
+    "stiff": 0.8,
+    "rollCenter": 0.5
+   },
+   "air": {
+    "control": 0.55,
+    "damp": 0.8
+   },
+   "downforce": 2.5,
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0.42,
+      0.22,
+      0.15
+     ],
+     "pose": "sit",
+     "exit": [
+      1.9,
+      -0.3,
+      0.15
+     ],
+     "hands": "wheel",
+     "wheelAt": [
+      0.42,
+      0.47,
+      0.52
+     ]
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.42,
+      0.22,
+      0.15
+     ],
+     "pose": "sit",
+     "exit": [
+      -1.9,
+      -0.3,
+      0.15
+     ],
+     "look": true
+    },
+    {
+     "role": "gunner",
+     "p": [
+      0,
+      0.78,
+      -1.42
+     ],
+     "pose": "idle",
+     "stand": true,
+     "exit": [
+      0,
+      -0.3,
+      -2.9
+     ],
+     "gun": {
+      "kind": "pellet",
+      "pivot": [
+       0,
+       1.72,
+       -1.02
+      ],
+      "rate": 6,
+      "speed": 90,
+      "push": 900
+     }
+    }
+   ],
+   "eject": {
+    "threshold": 13,
+    "upsideDown": true
+   },
+   "camera": {
+    "dist": 7.5,
+    "height": 2.4
+   },
+   "tow": [
+    0,
+    -0.1,
+    -2.15
+   ]
+  },
+  {
+   "id": "dirtbike",
+   "name": "Dirtbike",
+   "type": "bike",
+   "enclosed": false,
+   "mass": 150,
+   "blurb": "Light, quick and jumpy. Lean into turns; hold Shift to lean back for a wheelie.",
+   "chassis": {
+    "hx": 0.17,
+    "hy": 0.26,
+    "hz": 0.72,
+    "p": [
+     0,
+     0.08,
+     0
+    ],
+    "com": [
+     0,
+     -0.08,
+     0
+    ]
+   },
+   "parts": [],
+   "wheels": [
+    {
+     "p": [
+      0,
+      -0.16,
+      0.74
+     ],
+     "r": 0.36,
+     "w": 0.12,
+     "steer": 1,
+     "drive": 0,
+     "brake": 1
+    },
+    {
+     "p": [
+      0,
+      -0.16,
+      -0.7
+     ],
+     "r": 0.36,
+     "w": 0.15,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1,
+     "hand": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.34,
+    "k": 6500,
+    "damp": 520,
+    "antiRoll": 0
+   },
+   "engine": {
+    "force": 2300,
+    "top": 29,
+    "reverse": 3
+   },
+   "steer": {
+    "max": 0.55,
+    "speedFalloff": 0.78,
+    "rate": 4
+   },
+   "tyre": {
+    "grip": 1.5,
+    "slide": 0.7,
+    "handbrakeRear": 0.35,
+    "peak": 0.2,
+    "stiff": 0.75,
+    "rollCenter": 0.8
+   },
+   "air": {
+    "control": 0.9,
+    "damp": 1.2
+   },
+   "inertiaScale": 1.0,
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0,
+      0.38,
+      -0.05
+     ],
+     "pose": "ride",
+     "exit": [
+      0.9,
+      -0.2,
+      0
+     ],
+     "hands": "bars",
+     "barsAt": [
+      0,
+      0.62,
+      0.28
+     ]
+    }
+   ],
+   "eject": {
+    "threshold": 9,
+    "upsideDown": true
+   },
+   "camera": {
+    "dist": 5.2,
+    "height": 1.8
+   }
+  },
+  {
+   "id": "tank",
+   "name": "Ironback Tank",
+   "type": "tank",
+   "enclosed": true,
+   "mass": 9000,
+   "chassis": {
+    "hx": 1.45,
+    "hy": 0.45,
+    "hz": 2.5,
+    "p": [
+     0,
+     0.15,
+     0
+    ],
+    "com": [
+     0,
+     -0.35,
+     0
+    ]
+   },
+   "parts": [
+    {
+     "box": [
+      0.95,
+      0.31,
+      0.95
+     ],
+     "p": [
+      0,
+      0.92,
+      -0.2
+     ]
+    }
+   ],
+   "wheels": [
+    {
+     "p": [
+      1.25,
+      -0.4,
+      1.9
+     ],
+     "r": 0.36,
+     "w": 0.5,
+     "drive": 1
+    },
+    {
+     "p": [
+      1.25,
+      -0.45,
+      0.95
+     ],
+     "r": 0.36,
+     "w": 0.5,
+     "drive": 1
+    },
+    {
+     "p": [
+      1.25,
+      -0.45,
+      0
+     ],
+     "r": 0.36,
+     "w": 0.5,
+     "drive": 1
+    },
+    {
+     "p": [
+      1.25,
+      -0.45,
+      -0.95
+     ],
+     "r": 0.36,
+     "w": 0.5,
+     "drive": 1
+    },
+    {
+     "p": [
+      1.25,
+      -0.4,
+      -1.9
+     ],
+     "r": 0.36,
+     "w": 0.5,
+     "drive": 1
+    },
+    {
+     "p": [
+      -1.25,
+      -0.4,
+      1.9
+     ],
+     "r": 0.36,
+     "w": 0.5,
+     "drive": 1
+    },
+    {
+     "p": [
+      -1.25,
+      -0.45,
+      0.95
+     ],
+     "r": 0.36,
+     "w": 0.5,
+     "drive": 1
+    },
+    {
+     "p": [
+      -1.25,
+      -0.45,
+      0
+     ],
+     "r": 0.36,
+     "w": 0.5,
+     "drive": 1
+    },
+    {
+     "p": [
+      -1.25,
+      -0.45,
+      -0.95
+     ],
+     "r": 0.36,
+     "w": 0.5,
+     "drive": 1
+    },
+    {
+     "p": [
+      -1.25,
+      -0.4,
+      -1.9
+     ],
+     "r": 0.36,
+     "w": 0.5,
+     "drive": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.3,
+    "k": 52000,
+    "damp": 7000,
+    "antiRoll": 20000
+   },
+   "engine": {
+    "force": 72000,
+    "top": 13,
+    "reverse": 7
+   },
+   "steer": {
+    "max": 0,
+    "pivot": 0.9,
+    "rate": 4
+   },
+   "tyre": {
+    "grip": 1.3,
+    "slide": 0.6,
+    "peak": 0.12,
+    "stiff": 0.3,
+    "rollCenter": 0.6
+   },
+   "air": {
+    "control": 0.15,
+    "damp": 1
+   },
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0,
+      0.62,
+      -0.45
+     ],
+     "pose": "idle",
+     "stand": true,
+     "exit": [
+      2.3,
+      -0.3,
+      -0.2
+     ],
+     "gun": {
+      "kind": "shell",
+      "pivot": [
+       0,
+       1.15,
+       -0.2
+      ],
+      "rate": 0.6,
+      "speed": 140,
+      "push": 18000
+     },
+     "hands": "hatch"
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0.75,
+      0.55,
+      -1.6
+     ],
+     "pose": "sit",
+     "exit": [
+      2.3,
+      -0.3,
+      -1.6
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.75,
+      0.55,
+      -1.6
+     ],
+     "pose": "sit",
+     "exit": [
+      -2.3,
+      -0.3,
+      -1.6
+     ],
+     "look": true
+    }
+   ],
+   "eject": {
+    "threshold": 99,
+    "upsideDown": false
+   },
+   "camera": {
+    "dist": 10,
+    "height": 3.2
+   }
+  },
+  {
+   "id": "hover_tank",
+   "name": "Driftwing Hover Tank",
+   "type": "hover",
+   "enclosed": true,
+   "mass": 4200,
+   "chassis": {
+    "hx": 1.4,
+    "hy": 0.4,
+    "hz": 2.3,
+    "p": [
+     0,
+     0.1,
+     0
+    ],
+    "com": [
+     0,
+     -0.3,
+     0
+    ]
+   },
+   "parts": [],
+   "wheels": [
+    {
+     "p": [
+      1.1,
+      -0.5,
+      1.6
+     ],
+     "r": 0.5,
+     "w": 0.6
+    },
+    {
+     "p": [
+      -1.1,
+      -0.5,
+      1.6
+     ],
+     "r": 0.5,
+     "w": 0.6
+    },
+    {
+     "p": [
+      1.1,
+      -0.5,
+      -1.6
+     ],
+     "r": 0.5,
+     "w": 0.6
+    },
+    {
+     "p": [
+      -1.1,
+      -0.5,
+      -1.6
+     ],
+     "r": 0.5,
+     "w": 0.6
+    }
+   ],
+   "susp": {
+    "travel": 0.9,
+    "k": 26000,
+    "damp": 5200,
+    "antiRoll": 9000
+   },
+   "engine": {
+    "force": 26000,
+    "top": 21,
+    "reverse": 8,
+    "boost": 0.5
+   },
+   "steer": {
+    "max": 1.5,
+    "rate": 4
+   },
+   "tyre": {
+    "grip": 0.2
+   },
+   "hover": {
+    "sideDamp": 0.9,
+    "drag": 0.05
+   },
+   "air": {
+    "control": 0.4,
+    "damp": 1
+   },
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0,
+      0.47,
+      0.6
+     ],
+     "pose": "sit",
+     "exit": [
+      2.2,
+      -0.3,
+      0.6
+     ],
+     "hands": "wheel",
+     "wheelAt": [
+      0,
+      0.68,
+      1
+     ],
+     "gun": {
+      "kind": "bolt",
+      "pivot": [
+       0,
+       0.75,
+       1.35
+      ],
+      "rate": 2.5,
+      "speed": 120,
+      "push": 6000
+     }
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0.9,
+      0.45,
+      -1.2
+     ],
+     "pose": "sit",
+     "exit": [
+      2.2,
+      -0.3,
+      -1.2
+     ],
+     "look": true
+    }
+   ],
+   "eject": {
+    "threshold": 99,
+    "upsideDown": false
+   },
+   "camera": {
+    "dist": 10,
+    "height": 3
+   }
+  },
+  {
+   "id": "helicopter",
+   "name": "Skylark Helicopter",
+   "type": "heli",
+   "enclosed": false,
+   "mass": 1700,
+   "chassis": {
+    "hx": 0.85,
+    "hy": 0.7,
+    "hz": 1.9,
+    "p": [
+     0,
+     0.4,
+     0.2
+    ],
+    "com": [
+     0,
+     -0.2,
+     0.1
+    ]
+   },
+   "parts": [
+    {
+     "box": [
+      0.15,
+      0.2,
+      1.6
+     ],
+     "p": [
+      0,
+      0.7,
+      -2.6
+     ]
+    }
+   ],
+   "wheels": [
+    {
+     "p": [
+      0.85,
+      -0.45,
+      0.9
+     ],
+     "r": 0.12,
+     "w": 0.1
+    },
+    {
+     "p": [
+      -0.85,
+      -0.45,
+      0.9
+     ],
+     "r": 0.12,
+     "w": 0.1
+    },
+    {
+     "p": [
+      0.85,
+      -0.45,
+      -0.7
+     ],
+     "r": 0.12,
+     "w": 0.1
+    },
+    {
+     "p": [
+      -0.85,
+      -0.45,
+      -0.7
+     ],
+     "r": 0.12,
+     "w": 0.1
+    }
+   ],
+   "susp": {
+    "travel": 0.15,
+    "k": 40000,
+    "damp": 5000,
+    "antiRoll": 0
+   },
+   "engine": {
+    "force": 0,
+    "top": 40,
+    "reverse": 0
+   },
+   "steer": {
+    "max": 0,
+    "rate": 3
+   },
+   "tyre": {
+    "grip": 1,
+    "slide": 0.8
+   },
+   "heli": {
+    "climb": 6,
+    "tilt": 0.32,
+    "bank": 0.18,
+    "yaw": 1.4,
+    "drag": 0.22
+   },
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0.35,
+      0.15,
+      0.9
+     ],
+     "pose": "sit",
+     "exit": [
+      1.8,
+      -0.4,
+      0.9
+     ],
+     "hands": "wheel",
+     "wheelAt": [
+      0.35,
+      0.33,
+      1.22
+     ]
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.35,
+      0.15,
+      0.9
+     ],
+     "pose": "sit",
+     "exit": [
+      -1.8,
+      -0.4,
+      0.9
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0.55,
+      0.15,
+      -0.2
+     ],
+     "pose": "sit",
+     "yaw": 1.5708,
+     "exit": [
+      1.8,
+      -0.4,
+      -0.2
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.55,
+      0.15,
+      -0.2
+     ],
+     "pose": "sit",
+     "yaw": -1.5708,
+     "exit": [
+      -1.8,
+      -0.4,
+      -0.2
+     ],
+     "look": true
+    }
+   ],
+   "eject": {
+    "threshold": 16,
+    "upsideDown": true
+   },
+   "camera": {
+    "dist": 11,
+    "height": 3
+   }
+  },
+  {
+   "id": "airplane",
+   "name": "Tundra Hopper",
+   "type": "plane",
+   "enclosed": true,
+   "mass": 900,
+   "chassis": {
+    "hx": 0.6,
+    "hy": 0.55,
+    "hz": 2.6,
+    "p": [
+     0,
+     0.3,
+     0.2
+    ],
+    "com": [
+     0,
+     -0.1,
+     0.4
+    ]
+   },
+   "parts": [
+    {
+     "box": [
+      5.2,
+      0.06,
+      0.8
+     ],
+     "p": [
+      0,
+      1.45,
+      0.6
+     ],
+     "_doc": "the high wing: raised from 1.15 to 1.45 so the cabin roof under it clears seated Chibi heads (seat + 1.13)"
+    },
+    {
+     "box": [
+      1.6,
+      0.05,
+      0.5
+     ],
+     "p": [
+      0,
+      0.6,
+      -3.2
+     ]
+    }
+   ],
+   "wheels": [
+    {
+     "p": [
+      0,
+      -0.55,
+      2
+     ],
+     "r": 0.28,
+     "w": 0.18,
+     "steer": 1,
+     "brake": 0
+    },
+    {
+     "p": [
+      1,
+      -0.6,
+      0.1
+     ],
+     "r": 0.36,
+     "w": 0.24,
+     "brake": 1
+    },
+    {
+     "p": [
+      -1,
+      -0.6,
+      0.1
+     ],
+     "r": 0.36,
+     "w": 0.24,
+     "brake": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.25,
+    "k": 16000,
+    "damp": 1800,
+    "antiRoll": 2000
+   },
+   "engine": {
+    "force": 5200,
+    "top": 55,
+    "reverse": 0
+   },
+   "steer": {
+    "max": 0.5,
+    "speedFalloff": 0.9,
+    "rate": 3
+   },
+   "tyre": {
+    "grip": 1.1,
+    "slide": 0.8,
+    "peak": 0.2,
+    "stiff": 0.6
+   },
+   "aero": {
+    "area": 16,
+    "clSlope": 5,
+    "stall": 0.28,
+    "cd0": 0.03,
+    "k": 0.05,
+    "bodyDrag": 0.35,
+    "incidence": 0.06,
+    "vane": 2,
+    "vRotate": 26,
+    "inertia": 4,
+    "pitchRate": 0.55,
+    "rollRate": 1.3,
+    "turn": 0.6
+   },
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0,
+      0.02,
+      0.9
+     ],
+     "pose": "sit",
+     "exit": [
+      1.6,
+      -0.5,
+      0.9
+     ],
+     "hands": "wheel",
+     "wheelAt": [
+      0,
+      0.23,
+      1.2
+     ]
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0,
+      0.02,
+      0
+     ],
+     "pose": "sit",
+     "exit": [
+      1.6,
+      -0.5,
+      0
+     ],
+     "look": true
+    }
+   ],
+   "eject": {
+    "threshold": 99,
+    "upsideDown": false
+   },
+   "camera": {
+    "dist": 12,
+    "height": 3
+   }
+  },
+  {
+   "id": "rocket_car",
+   "name": "Bounder Rocket Car",
+   "type": "car",
+   "enclosed": true,
+   "mass": 900,
+   "chassis": {
+    "hx": 0.8,
+    "hy": 0.3,
+    "hz": 1.3,
+    "p": [
+     0,
+     0.05,
+     0
+    ],
+    "com": [
+     0,
+     -0.15,
+     0
+    ]
+   },
+   "parts": [],
+   "wheels": [
+    {
+     "p": [
+      0.82,
+      -0.18,
+      0.9
+     ],
+     "r": 0.42,
+     "w": 0.32,
+     "steer": 1,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.82,
+      -0.18,
+      0.9
+     ],
+     "r": 0.42,
+     "w": 0.32,
+     "steer": 1,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      0.82,
+      -0.18,
+      -0.85
+     ],
+     "r": 0.46,
+     "w": 0.36,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.82,
+      -0.18,
+      -0.85
+     ],
+     "r": 0.46,
+     "w": 0.36,
+     "drive": 1,
+     "brake": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.3,
+    "k": 24000,
+    "damp": 2600,
+    "antiRoll": 8000
+   },
+   "engine": {
+    "force": 9000,
+    "top": 23,
+    "reverse": 10,
+    "boost": 0.6,
+    "boostThrust": 9000,
+    "boostSecs": 3.5,
+    "boostRefill": 5
+   },
+   "steer": {
+    "max": 0.65,
+    "speedFalloff": 0.4,
+    "rate": 5
+   },
+   "tyre": {
+    "grip": 1.7,
+    "slide": 0.7,
+    "peak": 0.18,
+    "stiff": 0.85,
+    "rollCenter": 0.6
+   },
+   "air": {
+    "control": 1.4,
+    "damp": 2
+   },
+   "downforce": 4,
+   "rocket": {
+    "jump": 5.5,
+    "dodge": 7,
+    "flip": 9
+   },
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0,
+      0.15,
+      -0.1
+     ],
+     "pose": "sit",
+     "exit": [
+      1.6,
+      -0.3,
+      -0.1
+     ],
+     "hands": "wheel",
+     "wheelAt": [
+      0,
+      0.4,
+      0.27
+     ]
+    }
+   ],
+   "eject": {
+    "threshold": 99,
+    "upsideDown": false
+   },
+   "camera": {
+    "dist": 6.5,
+    "height": 2
+   }
+  },
+  {
+   "id": "trailer_utility",
+   "name": "Utility Trailer",
+   "type": "trailer",
+   "enclosed": false,
+   "mass": 300,
+   "chassis": {
+    "hx": 0.8,
+    "hy": 0.12,
+    "hz": 1,
+    "p": [
+     0,
+     0,
+     0
+    ],
+    "com": [
+     0,
+     -0.05,
+     0.1
+    ]
+   },
+   "parts": [
+    {
+     "box": [
+      0.8,
+      0.22,
+      0.04
+     ],
+     "p": [
+      0,
+      0.3,
+      -1
+     ]
+    },
+    {
+     "box": [
+      0.04,
+      0.22,
+      1
+     ],
+     "p": [
+      0.78,
+      0.3,
+      0
+     ]
+    },
+    {
+     "box": [
+      0.04,
+      0.22,
+      1
+     ],
+     "p": [
+      -0.78,
+      0.3,
+      0
+     ]
+    },
+    {
+     "box": [
+      0.8,
+      0.22,
+      0.04
+     ],
+     "p": [
+      0,
+      0.3,
+      1
+     ]
+    }
+   ],
+   "wheels": [
+    {
+     "p": [
+      0.95,
+      -0.15,
+      -0.1
+     ],
+     "r": 0.33,
+     "w": 0.2,
+     "brake": 0
+    },
+    {
+     "p": [
+      -0.95,
+      -0.15,
+      -0.1
+     ],
+     "r": 0.33,
+     "w": 0.2,
+     "brake": 0
+    }
+   ],
+   "hitch": [
+    0,
+    -0.05,
+    1.75
+   ],
+   "tow": [
+    0,
+    -0.05,
+    -1.1
+   ],
+   "susp": {
+    "travel": 0.2,
+    "k": 9000,
+    "damp": 900,
+    "antiRoll": 0
+   },
+   "engine": {
+    "force": 0,
+    "top": 30,
+    "reverse": 0
+   },
+   "steer": {
+    "max": 0,
+    "rate": 1
+   },
+   "tyre": {
+    "grip": 1.2,
+    "slide": 0.8,
+    "stiff": 0.8
+   },
+   "seats": [],
+   "eject": {
+    "threshold": 99
+   },
+   "camera": {
+    "dist": 6,
+    "height": 2
+   }
+  },
+  {
+   "id": "forklift",
+   "name": "Lugmore Forklift",
+   "type": "car",
+   "enclosed": false,
+   "mass": 3200,
+   "chassis": {
+    "hx": 0.6,
+    "hy": 0.35,
+    "hz": 1,
+    "p": [
+     0,
+     0.1,
+     -0.1
+    ],
+    "com": [
+     0,
+     -0.25,
+     -0.45
+    ]
+   },
+   "parts": [
+    {
+     "box": [
+      0.06,
+      1.1,
+      0.06
+     ],
+     "p": [
+      0.35,
+      1.1,
+      0.85
+     ]
+    },
+    {
+     "box": [
+      0.06,
+      1.1,
+      0.06
+     ],
+     "p": [
+      -0.35,
+      1.1,
+      0.85
+     ]
+    }
+   ],
+   "wheels": [
+    {
+     "p": [
+      0.55,
+      -0.22,
+      0.65
+     ],
+     "r": 0.3,
+     "w": 0.24,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.55,
+      -0.22,
+      0.65
+     ],
+     "r": 0.3,
+     "w": 0.24,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      0.5,
+      -0.27,
+      -0.75
+     ],
+     "r": 0.25,
+     "w": 0.2,
+     "steer": -1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.5,
+      -0.27,
+      -0.75
+     ],
+     "r": 0.25,
+     "w": 0.2,
+     "steer": -1,
+     "brake": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.12,
+    "k": 140000,
+    "damp": 12000,
+    "antiRoll": 40000
+   },
+   "engine": {
+    "force": 15000,
+    "top": 8,
+    "reverse": 5
+   },
+   "steer": {
+    "max": 0.75,
+    "speedFalloff": 0.2,
+    "rate": 3
+   },
+   "tyre": {
+    "grip": 1.4,
+    "slide": 0.8,
+    "stiff": 0.8,
+    "rollCenter": 0.7
+   },
+   "forks": {
+    "anchor": [
+     0,
+     -0.42,
+     1
+    ],
+    "travel": [
+     0,
+     2.3
+    ],
+    "speed": 0.6,
+    "tines": [
+     0.32,
+     -0.32
+    ],
+    "tineHalf": [
+     0.07,
+     0.03,
+     0.62
+    ],
+    "plateHalf": [
+     0.5,
+     0.35
+    ],
+    "mass": 150,
+    "stiffness": 600000,
+    "damping": 60000
+   },
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0,
+      0.35,
+      -0.3
+     ],
+     "pose": "sit",
+     "exit": [
+      1.4,
+      -0.3,
+      -0.3
+     ],
+     "hands": "wheel",
+     "wheelAt": [
+      0,
+      0.62,
+      0.1
+     ]
+    }
+   ],
+   "eject": {
+    "threshold": 12,
+    "upsideDown": true
+   },
+   "camera": {
+    "dist": 6,
+    "height": 2.4
+   }
+  },
+  {
+   "id": "crate",
+   "name": "crate",
+   "type": "prop",
+   "kind": "crate",
+   "mass": 25,
+   "shape": {
+    "t": "box",
+    "hx": 0.3,
+    "hy": 0.25,
+    "hz": 0.3
+   },
+   "seats": [],
+   "blurb": "A wooden crate. Pick it up with E; it fits in a trunk."
+  },
+  {
+   "id": "bag",
+   "name": "bag",
+   "type": "prop",
+   "kind": "bag",
+   "mass": 8,
+   "shape": {
+    "t": "box",
+    "hx": 0.25,
+    "hy": 0.15,
+    "hz": 0.18
+   },
+   "seats": [],
+   "blurb": "A canvas kit bag."
+  },
+  {
+   "id": "barrel",
+   "name": "barrel",
+   "type": "prop",
+   "kind": "barrel",
+   "mass": 40,
+   "shape": {
+    "t": "cyl",
+    "r": 0.28,
+    "h": 0.85
+   },
+   "seats": [],
+   "blurb": "A fuel barrel. Heavy."
+  },
+  {
+   "id": "ball",
+   "name": "big ball",
+   "type": "prop",
+   "kind": "ball",
+   "mass": 30,
+   "restitution": 0.75,
+   "friction": 0.5,
+   "shape": {
+    "t": "ball",
+    "r": 0.9
+   },
+   "seats": [],
+   "blurb": "A huge bouncy ball. Push it around with a car."
+  },
+  {
+   "id": "jetpack",
+   "name": "Jetpack",
+   "type": "prop",
+   "kind": "jetpack",
+   "mass": 12,
+   "shape": {
+    "t": "box",
+    "hx": 0.22,
+    "hy": 0.3,
+    "hz": 0.15
+   },
+   "seats": [],
+   "jetpack": {
+    "secs": 4,
+    "refill": 3,
+    "thrust": 30,
+    "maxUp": 7,
+    "speed": 9
+   },
+   "blurb": "Strap it on (E), then hold jump in the air to fly."
+  }
+ ]
 }

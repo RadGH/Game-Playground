@@ -26,9 +26,9 @@ const look = randomLook();
 const online = Q.get('online') === '1';
 const code = Q.get('code');
 // solo: the world first (the in-page referee needs its sites); online: the room first (the world comes from its seed)
-let world = online ? null : generateWorld({ seed, vehicles: defs.map(d => d.id) });
+let world = online ? null : generateWorld({ seed });
 const net = await connect({ online, ...(code ? { code } : { create: { mode: Q.get('mode') || 'flag', seed, start: true } }), name: Q.get('name') || 'Tester', look, sites: world?.sites, vehicles: defs });
-if (online) { seed = net.room.seed; world = generateWorld({ seed, vehicles: defs.map(d => d.id) }); }
+if (online) { seed = net.room.seed; world = generateWorld({ seed }); }
 let view;
 if (Q.get('view') === 'full') { try { view = await (await import('./world-view/index.js')).createWorldView({ THREE, renderer, scene, camera, world, quality: Q.get('q') || 'medium' }); } catch (e) { console.warn('full view failed', e); } }
 view ||= createSimpleView({ THREE, renderer, scene, camera, world });

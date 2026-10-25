@@ -1,6 +1,15 @@
 {
   "entries": [
     {
+      "id": "2026-10-25b",
+      "date": "2026-10-25",
+      "title": "iPhone fix",
+      "items": [
+        "The game no longer shows a black screen on iPhones (the 3D view now draws on every phone).",
+        "Crates and barrels no longer sit on the vehicle parking spots at home base."
+      ]
+    },
+    {
       "id": "2026-10-25",
       "date": "2026-10-25",
       "title": "First test drive",

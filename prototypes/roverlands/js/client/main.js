@@ -38,7 +38,7 @@ async function buildWorld(seed, progress = () => {}) {
   if (worldSeed === seed && world) return world;
   progress(0.05);
   await new Promise(r => setTimeout(r, 0));
-  world = generateWorld({ seed, vehicles: defs.map(d => d.id) });
+  world = generateWorld({ seed });
   worldSeed = seed;
   progress(0.55);
   scene = new THREE.Scene();
@@ -72,9 +72,10 @@ ui = createUI({
   },
   onLeave: () => { session?.dispose(); session = null; input.inGame = false; sounds.stopAll(); input.unlock(); },
   onFollow: () => {},
-  getDebug: () => ({ ...(session?.debug() || {}), fps: Math.round(fps), draws: renderer.info.render.calls, tris: renderer.info.render.triangles, quality: ui?.settings().quality, view: view?.kind || (view?.render ? 'full' : 'simple') }),
+  getDebug: () => ({ ...(session?.debug() || {}), fps: Math.round(fps), draws: renderer.info.render.calls, tris: renderer.info.render.triangles, quality: ui?.settings().quality, view: view?.kind || (view?.render ? 'full' : 'simple'), post: view?.post || null, gl: glInfo() }),
   screenshot: () => { render(); return canvas.toDataURL('image/jpeg', 0.72); },
 });
+function glInfo() { try { const gl = renderer.getContext(); const d = gl.getExtension('WEBGL_debug_renderer_info'); return { v: gl.getParameter(gl.VERSION), gpu: d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : null, lost: gl.isContextLost(), half: renderer.extensions.has('EXT_color_buffer_half_float'), float: renderer.extensions.has('EXT_color_buffer_float') }; } catch { return null; } }
 const input = createInput(canvas, { touch: () => ui.touchState(), settings: () => ui.settings() });
 ui.onSettings?.(s => { sounds.setVolume(s.volume ?? 0.8); view?.setQuality?.(s.quality); });
 
@@ -83,7 +84,7 @@ rapierReady.then(() => buildWorld(7)).then(() => { bootEl.remove(); ui.setFlagSi
 
 // ----------------------------------------------------------------------------------------------------- frame loop
 let last = performance.now(), fps = 60, flyT = 0;
-function render() { if (composer) composer.render(scene, camera); else renderer.render(scene, camera); }
+function render(dt = 1 / 60) { if (composer) composer.render(dt); else renderer.render(scene, camera); }   // view.render takes the time step (it once got the scene: NaN in the grade pass)
 function frame() {
   const now = performance.now(), dt = Math.min(0.1, (now - last) / 1000); last = now;
   fps += (1 / Math.max(dt, 1e-3) - fps) * 0.05;
@@ -120,7 +121,7 @@ function frame() {
     view?.update?.(dt, camera);
     cross.hidden = true;
   }
-  if (world) render();
+  if (world) render(dt);
   requestAnimationFrame(frame);
 }
 const KEYNAME = { keys: 'E', pad: 'X', touch: 'ENTER' }, SWAPNAME = { keys: 'F', pad: 'Y', touch: 'SEAT' };

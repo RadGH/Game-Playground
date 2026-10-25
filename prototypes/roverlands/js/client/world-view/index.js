@@ -47,6 +47,7 @@ export async function createWorldView({ THREE = THREE_NS, renderer, scene, camer
 
   const mapCache = new Map();
   let q, sky, ground, water, things, grass, tracks, dust, composer, passes, textures;
+  const postInfo = { mode: /[?&]post=0\b/.test(globalThis.location?.search || '') ? 'direct' : 'post', target: null, frame: 0, checks: 0, black: 0, why: null };
   let elapsed = 0;
   let lastCam = new T.Vector3();
   const size = new T.Vector2();
@@ -94,9 +95,13 @@ export async function createWorldView({ THREE = THREE_NS, renderer, scene, camer
     composer?.dispose();
     renderer.getSize(size);
     const pr = renderer.getPixelRatio();
+    // a half-float target only where the GPU says it can draw into one (iPhones may not: the frame comes out black)
+    const ext = renderer.extensions;
+    const canHalf = ext.has('EXT_color_buffer_half_float') || ext.has('EXT_color_buffer_float');
     const target = new T.WebGLRenderTarget(Math.max(1, size.x * pr), Math.max(1, size.y * pr), {
-      type: T.HalfFloatType, samples: q.msaa || 0, colorSpace: T.LinearSRGBColorSpace, depthBuffer: true,
+      type: canHalf ? T.HalfFloatType : T.UnsignedByteType, samples: canHalf ? (q.msaa || 0) : 0, colorSpace: T.LinearSRGBColorSpace, depthBuffer: true,
     });
+    postInfo.target = canHalf ? 'half' : 'byte';
     composer = new EffectComposer(renderer, target);
     composer.setPixelRatio(pr);
     composer.setSize(size.x, size.y);
@@ -161,11 +166,24 @@ export async function createWorldView({ THREE = THREE_NS, renderer, scene, camer
       renderer.toneMappingExposure = sky.exposure;
     },
     render(dt = 1 / 60) {
+      renderer.info.reset();
+      if (postInfo.mode === 'direct') { renderer.setRenderTarget(null); renderer.render(scene, camera); return; }
       if (passes.render.camera !== camera) passes.render.camera = camera;
       if (passes.grade) passes.grade.uniforms.uTime.value += dt;
-      renderer.info.reset();
       composer.render(dt);
+      // Safety net: for the first few hundred frames, look at a few pixels of what reached the screen. A post chain
+      // the GPU cannot run leaves the frame pure black (no error is thrown); after several black looks in a row,
+      // drop to drawing the scene straight to the screen (no bloom / grade), and say so in bug reports.
+      if (postInfo.checks < 40 && ++postInfo.frame % 8 === 0) {
+        postInfo.checks++;
+        const gl = renderer.getContext(), w = gl.drawingBufferWidth, h = gl.drawingBufferHeight, px = new Uint8Array(4);
+        let sum = 0;
+        for (const [fx, fy] of [[0.5, 0.5], [0.2, 0.8], [0.8, 0.8], [0.5, 0.25], [0.15, 0.3]]) { gl.readPixels(Math.floor(w * fx), Math.floor(h * fy), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); sum += px[0] + px[1] + px[2]; }
+        postInfo.black = sum === 0 ? postInfo.black + 1 : 0;
+        if (postInfo.black >= 4) { postInfo.mode = 'direct'; postInfo.why = 'black frames'; console.warn('[roverlands] post effects drew a black frame on this device: drawing without them'); }
+      }
     },
+    get post() { return { ...postInfo }; },
     /** Use a different camera from now on (the shadows and the sky follow it). */
     setCamera(cam) { camera = cam; passes.render.camera = cam; if (sky.csm) { sky.csm.camera = cam; sky.csm.updateFrustums(); } },
     resize(w, h) {

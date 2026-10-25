@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Roverlands World Preview</title>
+<link rel="stylesheet" href="css/world-preview.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="panel">
+  <label>Seed <input id="seed" type="number" value="7"></label>
+  <label>Quality <select id="quality"><option>low</option><option selected>medium</option><option>high</option></select></label>
+  <label>Time <input id="time" type="range" min="5" max="20" step="0.25" value="10.5"></label>
+  <button id="go" type="button">Go</button>
+  <select id="jump" aria-label="Jump to a place"><option value="">Jump to…</option></select>
+</div>
+<div id="stats">loading…</div>
+<canvas id="map" width="220" height="220"></canvas>
+<div id="loading"><div id="bar"><i></i></div><p id="label">raising the land</p></div>
+<div id="help">Click the view to look around · W A S D fly · Q / E down / up · Shift fast · M bigger map</div>
+<script type="module" src="js/client/world-preview.js"></script>
+</body>
+</html>

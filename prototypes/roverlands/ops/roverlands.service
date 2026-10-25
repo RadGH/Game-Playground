@@ -1,0 +1,12 @@
+# Roverlands STABLE server: the published copy (tools/publish-roverlands.sh) on port 8550 (+ https 8552). User unit.
+# LAN testing copy. The public game runs on the games.radgh.com droplet (see ~/claude/docs/rgs.md).
+[Unit]
+Description=Roverlands stable server (published copy) on :8550
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/roverlands/ops/start.sh stable
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=default.target

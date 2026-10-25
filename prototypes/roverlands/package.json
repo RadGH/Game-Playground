@@ -1,0 +1,14 @@
+{
+  "name": "roverlands",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Roverlands: co-op vehicles across a big landscape. Node + WebSocket relay/referee server (the browsers simulate their own bodies).",
+  "scripts": {
+    "start": "node server/main.mjs",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

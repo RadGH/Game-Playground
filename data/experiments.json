@@ -496,6 +496,20 @@
    "readme": "prototypes/thousandvale/docs/PLAN.md"
   },
   {
+   "id": "roverlands",
+   "group": "prototypes",
+   "title": "Roverlands",
+   "folder": "prototypes/roverlands",
+   "summary": "A co-op vehicle game: a big landscape of meadows, mudflats, a river with fords, a red-rock canyon, dunes and snowy uplands. Pick a vehicle at home base, drive out, get out and grab the flag, drive it home. Suspension, drifting, ramps, tyre tracks, things that break when you hit them hard enough, and open vehicles that throw you out in a crash. Driver, gunner and passenger seats; a sandbox with every vehicle parked around.",
+   "status": "playable",
+   "statusNote": "demo: 2 vehicles, own server",
+   "date": "2026-10-25",
+   "isNew": true,
+   "tags": ["vehicles", "physics", "multiplayer", "co-op", "3d"],
+   "server": { "port": 8550, "path": "prototypes/roverlands/" },
+   "live": "roverlands"
+  },
+  {
    "id": "knockabout",
    "group": "prototypes",
    "title": "Knockabout",

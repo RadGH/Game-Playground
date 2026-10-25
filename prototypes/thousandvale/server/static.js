@@ -23,7 +23,7 @@ export const ALLOW = Object.freeze([
   // prototypes (prototypes/tinyrts is a symlink to another repo, so a published copy cannot hold it)
   'prototypes/thousandvale', 'prototypes/farhold', 'prototypes/emberveil', 'prototypes/bannerline',
   'prototypes/frontier-foundry', 'prototypes/lanternfall',
-  'prototypes/tumblefair', 'prototypes/knockabout',
+  'prototypes/tumblefair', 'prototypes/knockabout', 'prototypes/roverlands',
 ]);
 /** Paths inside the allow-list that are still refused. */
 export const DENY = Object.freeze([

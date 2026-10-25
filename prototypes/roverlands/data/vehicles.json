@@ -1,0 +1,59 @@
+{
+  "_doc": "Seat p = the rider's HIPS when sitting (Chibi sit: hips 0.41 above the feet, hands +0.20 up / +0.34 forward; ride: hips 0.60, hands +0.13 / +0.32), or the FEET when stand: true. Every vehicle's numbers. Frame: +z forward, +y up, +x = the LEFT side. Units: metres, kg, newtons. Wheel p = hub position with the suspension fully extended. Seats: p = where the rider's hips go; pose = Chibi clip ('sit', 'ride', 'idle'); exit = where you step out (vehicle frame). Built for Chibi 2.5 riders: 1.73 m tall, hips 0.60, arms 0.41, head top = seat + 1.13.",
+  "vehicles": [
+    {
+      "id": "trail_jeep", "name": "Trail Jeep", "type": "car", "enclosed": false, "mass": 1350,
+      "blurb": "Rugged open jeep. Driver, a gunner on the turret and a passenger.",
+      "chassis": { "hx": 0.92, "hy": 0.32, "hz": 1.75, "p": [0, 0.05, 0], "com": [0, -0.32, 0.05] },
+      "parts": [
+        { "box": [0.9, 0.06, 0.55], "p": [0, 0.42, -1.25], "_doc": "rear deck the gunner stands on" },
+        { "box": [0.06, 0.5, 0.06], "p": [0.8, 1.05, 0.55] }, { "box": [0.06, 0.5, 0.06], "p": [-0.8, 1.05, 0.55] }
+      ],
+      "wheels": [
+        { "p": [0.9, -0.22, 1.25], "r": 0.44, "w": 0.34, "steer": 1, "drive": 1, "brake": 1 },
+        { "p": [-0.9, -0.22, 1.25], "r": 0.44, "w": 0.34, "steer": 1, "drive": 1, "brake": 1 },
+        { "p": [0.9, -0.22, -1.2], "r": 0.44, "w": 0.34, "steer": 0, "drive": 1, "brake": 1 },
+        { "p": [-0.9, -0.22, -1.2], "r": 0.44, "w": 0.34, "steer": 0, "drive": 1, "brake": 1 }
+      ],
+      "susp": { "travel": 0.42, "k": 30000, "damp": 3000, "antiRoll": 9000 },
+      "engine": { "force": 9500, "top": 27, "reverse": 9 },
+      "steer": { "max": 0.6, "speedFalloff": 0.62, "rate": 2.6 },
+      "tyre": { "grip": 1.45, "slide": 0.68, "handbrakeRear": 0.2, "peak": 0.17, "stiff": 0.8, "rollCenter": 0.5 },
+      "air": { "control": 0.55, "damp": 0.8 },
+      "downforce": 2.5,
+      "seats": [
+        { "role": "driver", "p": [0.42, 0.22, 0.15], "pose": "sit", "exit": [1.9, -0.3, 0.15], "hands": "wheel", "wheelAt": [0.42, 0.47, 0.52] },
+        { "role": "passenger", "p": [-0.42, 0.22, 0.15], "pose": "sit", "exit": [-1.9, -0.3, 0.15], "look": true },
+        { "role": "gunner", "p": [0, 0.78, -1.42], "pose": "idle", "stand": true, "exit": [0, -0.3, -2.9], "gun": { "kind": "pellet", "pivot": [0, 1.72, -1.02], "rate": 6, "speed": 90, "push": 900 } }
+      ],
+      "eject": { "threshold": 13, "upsideDown": true },
+      "camera": { "dist": 7.5, "height": 2.4 }
+    },
+    {
+      "id": "dirtbike", "name": "Dirtbike", "type": "bike", "enclosed": false, "mass": 150,
+      "blurb": "Light, quick and jumpy. Lean into turns; hold Shift to lean back for a wheelie.",
+      "chassis": { "hx": 0.17, "hy": 0.26, "hz": 0.72, "p": [0, 0.08, 0], "com": [0, -0.08, 0] },
+      "parts": [],
+      "wheels": [
+        { "p": [0, -0.16, 0.74], "r": 0.36, "w": 0.12, "steer": 1, "drive": 0, "brake": 1 },
+        { "p": [0, -0.16, -0.7], "r": 0.36, "w": 0.15, "steer": 0, "drive": 1, "brake": 1, "hand": 1 }
+      ],
+      "susp": { "travel": 0.34, "k": 6500, "damp": 520, "antiRoll": 0 },
+      "engine": { "force": 2300, "top": 29, "reverse": 3 },
+      "steer": { "max": 0.55, "speedFalloff": 0.78, "rate": 4 },
+      "tyre": { "grip": 1.5, "slide": 0.7, "handbrakeRear": 0.35, "peak": 0.2, "stiff": 0.75, "rollCenter": 0.8 },
+      "air": { "control": 0.9, "damp": 1.2 },
+      "inertiaScale": 1.0,
+      "seats": [
+        { "role": "driver", "p": [0, 0.38, -0.05], "pose": "ride", "exit": [0.9, -0.2, 0], "hands": "bars", "barsAt": [0, 0.62, 0.28] }
+      ],
+      "eject": { "threshold": 9, "upsideDown": true },
+      "camera": { "dist": 5.2, "height": 1.8 }
+    },
+    {"id": "crate", "name": "crate", "type": "prop", "kind": "crate", "mass": 25, "shape": {"t": "box", "hx": 0.3, "hy": 0.25, "hz": 0.3}, "seats": [], "blurb": "A wooden crate. Pick it up with E; it fits in a trunk."},
+    {"id": "bag", "name": "bag", "type": "prop", "kind": "bag", "mass": 8, "shape": {"t": "box", "hx": 0.25, "hy": 0.15, "hz": 0.18}, "seats": [], "blurb": "A canvas kit bag."},
+    {"id": "barrel", "name": "barrel", "type": "prop", "kind": "barrel", "mass": 40, "shape": {"t": "cyl", "r": 0.28, "h": 0.85}, "seats": [], "blurb": "A fuel barrel. Heavy."},
+    {"id": "ball", "name": "big ball", "type": "prop", "kind": "ball", "mass": 30, "restitution": 0.75, "friction": 0.5, "shape": {"t": "ball", "r": 0.9}, "seats": [], "blurb": "A huge bouncy ball. Push it around with a car."},
+    {"id": "jetpack", "name": "Jetpack", "type": "prop", "kind": "jetpack", "mass": 12, "shape": {"t": "box", "hx": 0.22, "hy": 0.3, "hz": 0.15}, "seats": [], "jetpack": {"secs": 4, "refill": 3, "thrust": 30, "maxUp": 7, "speed": 9}, "blurb": "Strap it on (E), then hold jump in the air to fly."}
+  ]
+}

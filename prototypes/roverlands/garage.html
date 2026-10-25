@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Roverlands Garage</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #c9cdd2; font: 14px system-ui, sans-serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  #bar { position: fixed; top: 8px; left: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  #bar select, #bar button, #bar label { padding: 6px 10px; border-radius: 8px; border: 0; background: #fff; }
+  #info { position: fixed; bottom: 8px; left: 8px; background: #fffc; padding: 6px 10px; border-radius: 8px; }
+</style>
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="bar"><select id="pick"></select><button id="riders">Riders: on</button><button id="spin">Turn: on</button>
+  <select id="cam"><option value="34">3/4</option><option value="side">Side</option><option value="front">Front</option><option value="top">Top</option></select>
+  <label><input type="range" id="comp" min="0" max="0.45" step="0.01" value="0.11"> suspension</label></div>
+<div id="info"></div>
+<script type="module" src="js/client/garage.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+html, body { margin: 0; height: 100%; overflow: hidden; background: #8ea4ba; font: 13px system-ui, sans-serif; color: #f4f1ea; }
+#view { display: block; width: 100vw; height: 100vh; touch-action: none; }
+#panel { position: fixed; left: 8px; top: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; max-width: calc(100vw - 16px);
+  background: #1d1a16cc; padding: 6px 8px; border-radius: 8px; }
+#panel label { display: flex; gap: 4px; align-items: center; }
+#panel input[type=number] { width: 70px; }
+#panel input, #panel select, #panel button { font: inherit; }
+#stats { position: fixed; left: 8px; bottom: 8px; background: #1d1a16cc; padding: 6px 8px; border-radius: 8px; white-space: pre;
+  font: 11px ui-monospace, monospace; max-width: calc(100vw - 16px); overflow: hidden; }
+#map { position: fixed; right: 8px; top: 8px; width: 220px; height: 220px; border-radius: 8px; border: 2px solid #1d1a16; background: #222; }
+#map.big { width: min(80vw, 80vh); height: min(80vw, 80vh); }
+#loading { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #2b2722; }
+#loading.done { display: none; }
+#bar { width: 240px; height: 8px; background: #000; border-radius: 4px; overflow: hidden; }
+#bar i { display: block; height: 100%; width: 0; background: #d9b56a; }
+#help { position: fixed; right: 8px; bottom: 8px; background: #1d1a16aa; padding: 4px 8px; border-radius: 6px; font-size: 11px; }
+@media (max-width: 520px) {
+  #map { width: 120px; height: 120px; top: auto; bottom: 64px; }
+  #help { display: none; }
+  #stats { font-size: 10px; }
+}

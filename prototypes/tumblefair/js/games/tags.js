@@ -26,7 +26,7 @@ export const GAME_KINDS = Object.freeze({
   'witchs-tower': ['boss', 'dodge'], 'hilltop-hold': ['brawl'], 'thin-ice': ['dodge'], 'pillow-fight': ['brawl'], 'odd-one-out': ['reaction', 'logic'],
   'crow-count': ['memory'], 'higher-or-lower': ['guess'], 'shape-sorter': ['reaction'], 'number-climb': ['logic'], 'potion-mixer': ['memory'],
   'mummy-wrap': ['reaction'], 'firefly-catch': ['collect'], 'spotlight-dance': ['dodge'], 'bat-swarm': ['collect'], 'skeleton-stack': ['collect'],
-  'putt-party': ['golf', 'aim'], 'haunted-hole': ['golf', 'aim'], 'chip-in': ['golf', 'aim'], 'long-drive': ['golf', 'aim'],
+  'putt-party': ['golf', 'aim'], 'haunted-hole': ['golf', 'aim'], 'chip-in': ['golf', 'aim'], 'long-drive': ['golf', 'aim'], 'mini-golf': ['golf', 'aim'], 'fairway-golf': ['golf', 'aim'],
   'reel-rumble': ['fishing'], 'pier-pressure': ['fishing', 'reaction'], 'net-gains': ['fishing'], 'glimmer-ice': ['fishing'],
   'balloon-darts': ['aim'], 'photo-booth': ['reaction', 'create'], 'duck-derby': ['race', 'rhythm'], 'water-balloon-ambush': ['aim', 'brawl'], 'sketchy-copy': ['create', 'memory'],
   'hoop-frenzy': ['basketball', 'aim'], 'letter-shot': ['basketball', 'aim'], 'court-clash': ['basketball', 'brawl'],

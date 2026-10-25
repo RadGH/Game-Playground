@@ -620,6 +620,113 @@ phone portrait first:
   players, a good player beats a sloppy one at every difficulty, determinism, small state, the rules one by one); UI
   bots for the three screen games in `tests/helpers.js`. Card art: Codex (`assets/art/card-<id>.webp`).
 
+## Golf mode: Mini golf (2026-10-24)
+
+Owner: "change golf mode so you pick mini golf or fairway. For mini golf create a 18 course mini game where some of the
+levels are shaped like the outlines of numbers or letters, and other are distinct … the shape and path of the course
+is more important than graphics or props." `js/games/mini-golf/` is that course; Fairway is `js/games/fairway-golf/`.
+
+- **How the room plays it:** Golf mode → Course: Mini golf → Holes 3 / 6 / 9 / 18. ONE hole per room round: the room
+  calls `create({ …, hole, holes, course, card })` (`hole` = 0-based place in the round, `course` = a number fixed for
+  the whole round, `card` = strokes so far). `meta.mode: 'golf'` keeps it out of votes, Custom lists and the picker;
+  no `season` and no Halloween dressing (`view.halloween = false`, and the room hands Golf mode `season: null`).
+- **Which holes:** `pickHoles(holes, course)` (holes.js). 18 = holes 1-18 in order; 9 = the front or back nine
+  (`course` odd/even); fewer = an even spread round the course from a start `course` picks (3 = e.g. holes 1, 8 and 13; 6 =
+  every third hole), always mixing letter/number holes with designs, played in course order.
+- **The eighteen** (odd course numbers are designs, even ones glyphs): 1 The Funnel (2), 2 Letter L (3), 3 Bumper Maze
+  (3), 4 Number 2 (4), 5 The Windmill (3), 6 Letter U (3), 7 Switchbacks (4), 8 Letter S (4), 9 The Spiral (4),
+  10 Number 7 (3), 11 Hump Jump (3), 12 Letter Z (3), 13 Island Green (3), 14 Number 3 (4), 15 Split Decision (3),
+  16 The Big O (4, a ring with one side shut and the cup in a pocket), 17 Spinner Gauntlet (4), 18 Figure Eight (4,
+  each ring has one side shut so the way round really is an 8). Par 61.
+- **Holes are drawn as pieces, not walls** (`shape.js`): thick strokes along a glyph's centre-line, rectangles,
+  circles, polygons, minus cut-outs. They are added into one signed distance field, its edge is traced with marching
+  squares on a 5 cm grid and simplified to straight wall pieces (2.5 cm tolerance). The loops close by construction,
+  so no gaps, every corner meets, and a counter (the hole in an O or 8) is its own inner loop. Hand-offsetting each
+  stroke into two walls breaks wherever strokes cross (the 8's waist, the 3's middle). Gotcha: inside the course the
+  field's VALUE is not the distance to the edge where two pieces overlap (a seam reads as "almost at the edge"); the
+  tests measure depth against the traced walls instead.
+- **A hole has up to ~130 wall pieces**, so `golf-kit.js` got an opt-in `course.near(x, z)` lookup (a 1 m grid,
+  `shape.js nearGrid`) that stepBalls and clearLine use when it is there; every other golf game is unchanged.
+- **Plays like Putt Party** (`golf-putt.js` with one hole): stick to aim, hold A, let go; everyone at once; par + 3 =
+  picked up. Balls tee side by side ACROSS the way the hole starts (`teeYaw`), not across the line to the cup (which on
+  a letter points at a wall). Time per hole: `holeSeconds(par, difficulty)` = 50 + 11 x par, +8 easy / -8 hard (72-97
+  s; `meta.seconds` 100). Spinners turn 0.75x / 1x / 1.35x by difficulty; cup size and aim help are Putt Party's levels.
+- **View:** the felt is the hole's own outline on a sandy plaza (Island Green sits in a pond); the camera always shows
+  the whole hole, phones included (golf-view's portrait close-up is switched off by handing it a no-op camera); the
+  pill reads "Hole 2/3 · name · Par"; the scorecard holds the whole round, nine holes a row, with totals, shown between
+  holes (from the second hole, until the putting starts) and when the hole ends.
+- **Tests:** `tests/mini-golf.test.js` — a look-ahead bot that knows the way round (a grid walk to the cup along the
+  course) holes every hole within par + 2 at easy, normal and hard; 2,880 random putts of four balls at once (full
+  power included) never leave the felt; tees; hole picking for every round length; init/state size; 1-4 player
+  holes; standing still never beats trying; determinism; whole 3- and 18-hole rounds (1-4 players) and a 9-hole round
+  at easy and hard through a real room with phone bots that read only the room's messages. `MG=1` prints the bot's
+  strokes per hole.
+
+## Golf mode: Fairway (2026-10-24)
+
+Owner: "Fairway mode plays like Long Drive except had larger levels and you try to get a hole in 1 … more detailed
+levels with more time allowed for each level … just make it somewhat realistic." `js/games/fairway-golf/` is that
+course (`course.js` the holes + geometry, `sim.js` the rules, `view.js` + `style.css` the screen). No Halloween: no
+`season`, and the room hands Golf mode `season: null`.
+
+- **How the room plays it:** Golf mode → Course: Fairway → Holes 3 / 6 / 9 / 18; one hole per room round, same
+  contract as Mini golf (`create({ …, hole, holes, course, card })`, `meta.mode: 'golf'`, kind `ui`). `pickHoles(course,
+  holes)`: 18 = 1-18 in order, 9 = the front or back nine, 6 = two par 3s, two par 4s, two par 5s, 3 = one of each,
+  always in course order. The course seed also mirrors a hole (30%), picks one of its three pin spots and the wind.
+- **The eighteen** (par 70; yards to the pin at pin 1): 1 Opening Drive (4, 385 — fairway bunker left, greenside pair),
+  2 Willow Pond (3, 155 — pond front-right), 3 Long Meadow (5, 526 — creek across the second landing zone, gentle dogleg
+  right), 4 Hawk's Bend (4, 401 — dogleg left, a clump of trees on the corner stops anyone cutting it), 5 Short Shot
+  (3, 135 — three bunkers round the green), 6 Ridge Run (4, 360 — the fairway pinches to 13 yd in the middle),
+  7 Lakeside (5, 541 — a lake down the whole left side, a pond by the green), 8 The Island (3, 145 — an island green),
+  9 Home Stretch (4, 420 — creek in front of the green), 10 Birch Corner (4, 397 — dogleg right, trees on the corner),
+  11 Sandy Hollow (3, 185 — a long waste bunker short of the green), 12 Twin Ponds (4, 345 — two ponds squeeze the
+  drive), 13 Big Sky (5, 560 — wide, windy, five bunkers), 14 Narrow Gate (4, 330 — tight woods both sides),
+  15 Clifftop (3, 200 — long iron, windy, bunkers left), 16 S-Bend (5, 517 — double dogleg with a creek), 17 Lighthouse
+  (3, 165 — water all down the right), 18 Grand Finish (4, 440 — pond left of the green).
+- **Geometry** (`course.js`, yards, x across, y down the hole): a smoothed centre line; fairway spans measured along it
+  (round ends), rough within `rw` (40), woods to `ow` (rw + 22) with trees every ~8 yd, out of bounds past that;
+  ellipse greens (+2.5 yd fringe), bunkers and ponds, creeks as fat polylines, a tee box. `lieAt()` has one priority
+  order — green > fringe > sand > water > tee > fairway > rough > woods > oob — and the browser draws flat ground
+  layers in exactly that order (no depth writes, `renderOrder`), so what you see is what the lie is, at any zoom.
+  init() sends the very layout object the server measures on.
+- **The swing** is Long Drive's: the POWER bar swings up and back (tap to lock; a ⛳ tick marks the power for the
+  distance), then the ACCURACY needle sweeps (tap in the green sweet spot = pure; early hooks, late slices; a miss also
+  costs up to 22% carry). Aim with ◀ ▶ (hold to repeat, 0.25° a step; Shift+arrow 1°) or drag the view. Clubs: Driver
+  255 (tee only), 3 Wood 230, 4 Iron 200, 6 Iron 178, 7 Iron 165, 8 Iron 150, 9 Iron 138, Pitching Wedge 122, Sand Wedge
+  92, Putter (green and fringe only). The best club is picked for you (shortest that gets there; putter on the green,
+  and on the fringe within 14 yd); ◀ ▶ on the club, the club button, B or ↑ ↓ change it. Lies: rough 85% carry, trees
+  70%, sand 55% (the sand wedge 85%) and the needle hurts more there.
+- **The ball** (`shotFrom`, pure — the server, the bots and the tests all call it): carry × power × lie, a curve of
+  `club.curve × carry` at a full miss, wind 1.3 yd per mph per 200 yd of carry (tail, head and cross), an arc with the
+  club's apex; a tree canopy it passes under the top of stops it; it lands and rolls with each surface's friction
+  (green speed by difficulty, greens tilt, a slow ball near the cup is drawn in, a fast one lips out). Water = +1 and a
+  drop on dry ground behind where it went in; out of bounds = +1 and play again from the same spot; landing in the cup
+  on the fly is in. The browser replays the server's numbers: the flight from `flightPos(F, k)`, the roll from its
+  0.1 s points. Par + 3 = picked up (scores par + 3); a hole you do not finish counts par + 3.
+- **Putting:** the putter swings the same bar — one tap putts (no needle). The panel says the distance in feet and the
+  slope ("downhill, breaks left"), chevrons on the green point downhill, the dotted line shows a flat roll's length.
+- **Difficulty** (`LEVELS`): meter speeds, the needle's sweet spot (10% / 6% / 3.5%), the strongest wind (5 / 11 / 17
+  mph, × a windy hole's own factor), green speed and tilt, cup size and how slow a ball must be to drop. Easy's
+  suggested aim and power tick already allow for the wind.
+- **Time:** 100 s for a par 3, 125 s par 4, 150 s par 5 (`HOLE_SECONDS`; `meta.seconds` 150). Everyone plays at once;
+  a hole ends when every ball is in or picked up (2.5 s later, 6 s after a hole in one so everyone sees it) or on the
+  clock.
+- **View:** phones see the whole hole for ~3 s, then sit behind their ball looking where they aim (an arc of dots and a
+  landing ring at the bar's live power), chase the ball in flight, look over the green to putt, and once in watch
+  whoever is still playing. A TV (or anyone watching) frames everyone still playing and the cup — the whole hole runs
+  left to right on a wide screen — with a wind badge and a list of where each player is. Other players' balls are
+  see-through ghosts; characters (Chibi 2 at 0.55 scale, with a club) stand side-on at their balls and swing. Wind
+  arrow turned to the camera. Scorecard (holes as rows, so 18 fit a phone without scrolling) on the Card button / C,
+  and shown when you hole out. Hole in one: full-screen banner, confetti, a gold flash and a shake, for everyone.
+- **Tests:** `tests/fairway-golf.test.js` — every hole in every mirror/pin: yardage by par, features lie where they are
+  drawn, no tree on a fairway/green/bunker, out of bounds past the woods; hole picking; club rules; pure vs hook vs
+  slice, lie costs; wind and `solveShot`; water drop, out of bounds, the trees on Hawk's Bend's corner; green break,
+  lip-out, a sunk putt; **a hole in one is possible on all six par 3s** (and the game scores it); a tidy bot finishes
+  all 18 under par + 3 at easy, normal and hard; tidy beats sloppy over 18; determinism; the hole clock; small state
+  (< 220 bytes, only changes when something happens); 3-hole rounds for 1-4 players and 18-hole rounds for 1 and 4
+  through a real room (UI bot `fairway-golf` in `tests/helpers.js` plans with `planShot`). Card picture: a render of
+  Willow Pond (no Codex art yet).
+
 ## Host on a TV (2026-10-24)
 
 Owner: "Allow spectate button to host local or host public. It should be a lobby that stays open, the first user to join

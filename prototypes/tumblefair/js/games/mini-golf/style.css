@@ -1,0 +1,7 @@
+@import url('../golf.css');
+/* Mini Golf: the shared golf HUD (js/games/golf.css) plus a scorecard that holds a whole round (nine holes a row). */
+.game-mini-golf .gp-card table + table { margin-top: 6px; }
+.game-mini-golf .gp-card th.now { background: rgba(255, 210, 63, .7); border-radius: 6px; }
+.game-mini-golf .gp-card tr.par td { opacity: .65; font-size: .85em; }
+.game-mini-golf .gp-card th small { font-size: 10px; }
+@media (max-width: 520px) { .game-mini-golf .gp-card table { font-size: 12px; } .game-mini-golf .gp-card th, .game-mini-golf .gp-card td { padding: 1px 3px; } .game-mini-golf .gp-card td:first-child { max-width: 5.5em; } }

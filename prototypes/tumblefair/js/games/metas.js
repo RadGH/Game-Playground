@@ -4267,6 +4267,69 @@ export const GAMES = Object.freeze({
     "b": "Serve"
    }
   }
+ },
+ "mini-golf": {
+  "meta": {
+   "id": "mini-golf",
+   "title": "Mini Golf",
+   "blurb": "Eighteen holes shaped like letters, numbers and wild designs — fewest strokes wins!",
+   "how": [
+    "Point the stick to aim. Hold A to charge, let go to putt.",
+    "Everyone putts at the same time. Bump other balls away!",
+    "Follow the shape to the cup. Par + 3 picks you up."
+   ],
+   "kind": "arena",
+   "mode": "golf",
+   "min": 1,
+   "max": 4,
+   "seconds": 100,
+   "scoring": "points",
+   "unit": "strokes",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Putt (hold)"
+   },
+   "move": {
+    "speed": 0.01,
+    "accel": 40
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 5,
+    "hd": 7,
+    "wall": false
+   },
+   "pitch": 64,
+   "css": true,
+   "card": "card-putt-party"
+  }
+ },
+ "fairway-golf": {
+  "meta": {
+   "id": "fairway-golf",
+   "title": "Fairway Golf",
+   "blurb": "Real golf holes — tee off, find the green and hole out in as few strokes as you can!",
+   "how": [
+    "Aim with ◀ ▶ or drag. The best club is picked for you — B changes it.",
+    "Tap to stop the POWER bar, then tap as the needle hits the middle.",
+    "On the green, one tap putts. Mind the wind, the bunkers and the water!"
+   ],
+   "kind": "ui",
+   "mode": "golf",
+   "min": 1,
+   "max": 4,
+   "seconds": 150,
+   "scoring": "points",
+   "unit": "strokes",
+   "tags": [
+    "action"
+   ],
+   "card": "card-fairway-golf",
+   "css": true
+  }
  }
 });
 export const gameIds = () => Object.keys(GAMES);

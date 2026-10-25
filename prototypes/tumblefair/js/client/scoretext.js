@@ -10,9 +10,9 @@ export const gameScoreText = (n, unit) => (typeof n === 'number' ? `${n} ${one(n
 /** What that placing earns for the whole fair: "+4 points", "+10 tickets". */
 export const awardText = (n, unit) => `+${n || 0} ${one(n || 0, unit)}`;
 /** A row of the final standings: board "2 ribbons · 31 tickets", otherwise "12 points". */
-export const finalScoreText = (r, mode) => (mode === 'board' ? `${r.ribbons || 0} ${one(r.ribbons || 0, 'ribbons')} · ${r.tickets || 0} ${one(r.tickets || 0, 'tickets')}` : `${r.points || 0} ${one(r.points || 0, 'points')}`);
+export const finalScoreText = (r, mode) => (mode === 'golf' ? `${r.strokes ?? 0} ${one(r.strokes ?? 0, 'strokes')}` : mode === 'board' ? `${r.ribbons || 0} ${one(r.ribbons || 0, 'ribbons')} · ${r.tickets || 0} ${one(r.tickets || 0, 'tickets')}` : `${r.points || 0} ${one(r.points || 0, 'points')}`);
 /** How the whole fair is won, under the final standings. */
-export const finalHowText = (mode, goal = 0) => (mode === 'board'
+export const finalHowText = (mode, goal = 0) => (mode === 'golf' ? 'Fewest strokes over the whole round wins.' : mode === 'board'
   ? (goal ? `Whole-fair totals: first to ${goal} tickets (ribbons count at their price).` : 'Whole-fair totals: most ribbons wins, then most tickets.')
   : 'Whole-fair totals: the points from every minigame added up.');
 /** The line under a results card's title. */

@@ -15,6 +15,8 @@
 //             cup: { x, z, r, cap }              r = the hole; cap = the most speed a ball can drop in at
 //             roll, lin                          friction: speed falls by (roll + lin * speed) each second
 //             dyn: [{ x, z, r, vx, vz, e? }]     extra moving round things a game sets each step (a closed coffin lid)
+//             near: (x, z) => walls            optional: only the walls near a point (a course with hundreds of wall
+//                                                pieces, like Mini Golf's letter-shaped holes, hands the kit a lookup grid)
 //           }
 // stepBalls(balls, course, t, dt) moves every ball one step in 8 small slices (no tunnelling at putting speeds),
 // bounces them off everything (moving paddles push with their own speed), off each other (equal masses), and drops a
@@ -109,7 +111,7 @@ export function stepBalls(balls, course, t, dt) {
       if (sp > 0) { const ns = Math.max(0, sp - (roll + lin * sp) * h); b.vx *= ns / sp; b.vz *= ns / sp; sp = ns; }
       b.x += b.vx * h; b.z += b.vz * h;
       // bounce off things
-      for (const W of course.walls || []) { const c = segHit(b, W.ax, W.az, W.bx, W.bz); if (c && bounce(b, c.nx, c.nz, c.depth, W.e ?? 0.72) > 0.4) note('wall', i, b.x, b.z); }
+      for (const W of (course.near ? course.near(b.x, b.z) : course.walls) || []) { const c = segHit(b, W.ax, W.az, W.bx, W.bz); if (c && bounce(b, c.nx, c.nz, c.depth, W.e ?? 0.72) > 0.4) note('wall', i, b.x, b.z); }
       for (const P of course.posts || []) {
         const dx = b.x - P.x, dz = b.z - P.z, d = Math.hypot(dx, dz), min = P.r + BALL_R;
         if (d < min) { const nx = d > 1e-6 ? dx / d : 1, nz = d > 1e-6 ? dz / d : 0; if (bounce(b, nx, nz, min - d, P.e ?? 0.8) > 0.3) note('post', i, b.x, b.z); }
@@ -173,7 +175,7 @@ export function clearLine(course, x0, z0, x1, z1) {
   const probe = { x: 0, z: 0 };
   for (let k = 1; k < steps; k++) {
     probe.x = x0 + ex * k / steps; probe.z = z0 + ez * k / steps;
-    for (const W of course.walls || []) if (segHit(probe, W.ax, W.az, W.bx, W.bz)) return false;
+    for (const W of (course.near ? course.near(probe.x, probe.z) : course.walls) || []) if (segHit(probe, W.ax, W.az, W.bx, W.bz)) return false;
     for (const P of course.posts || []) if (Math.hypot(probe.x - P.x, probe.z - P.z) < P.r + BALL_R) return false;
     for (const B of course.boxes || []) if (Math.abs(probe.x - B.x) < B.hw + BALL_R && Math.abs(probe.z - B.z) < B.hd + BALL_R) return false;
     for (const R of course.ramps || []) if (Math.abs(probe.x - R.x) < R.hw && Math.abs(probe.z - R.z) < R.hd) return false;

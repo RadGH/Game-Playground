@@ -175,7 +175,7 @@ async function showLobby() {
   lineup.show(true); lineup.setPoses({});
   lineup.sync(seated(), { me: S.room.you });
   const r = S.room, host = isHost(), me = mine(), n = seated().length;
-  const modes = { board: ['Board Game', 'Roll dice round the board, buy ribbons, play a minigame every round.'], marathon: ['Minigame Marathon', 'No board. Vote, play, repeat. Most points wins.'], endless: ['The Fair Never Closes', 'Keep playing, harder and harder. Every 3 games you vote to go on or finish.'], custom: ['Custom', 'No board, no vote: the host picks every minigame from the list, and finishes when you like.'], golf: ['Golf', 'A round of golf: the golf minigames one after another, a hole at a time.'] };
+  const modes = { board: ['Board Game', 'Roll dice round the board, buy ribbons, play a minigame every round.'], marathon: ['Minigame Marathon', 'No board. Vote, play, repeat. Most points wins.'], endless: ['The Fair Never Closes', 'Keep playing, harder and harder. Every 3 games you vote to go on or finish.'], custom: ['Custom', 'No board, no vote: the host picks every minigame from the list, and finishes when you like.'], golf: ['Golf', 'A round of golf: Mini golf on a course of 18 crazy holes, or Fairway on real-looking holes. Fewest strokes wins.'] };
   setScreen('lobby', `
     <div class="panel lobby-code${S.codeSmall ? ' small' : ''}">
       <div class="qr" id="qr"></div>
@@ -195,8 +195,10 @@ async function showLobby() {
         <span class="est">${r.opts.moves === 'cards' ? 'Hold 4 cards, play one, or take a mystery card from a rival' : 'Tap to roll 1 to 6'}</span></div>` : ''}
       ${r.opts.mode === 'board' ? `<div class="row opts"><span>Win by</span>${[0, 60, 100, 150, 200].map(v => `<button class="pill${(r.opts.goal || 0) === v ? ' on' : ''}" data-act="opt" data-key="goal" data-num="${v}" ${host ? '' : 'disabled'}>${v ? `First to ${v}` : 'Rounds'}</button>`).join('')}
         <span class="est">${r.opts.goal ? `First to ${r.opts.goal} tickets wins — a ribbon counts as 10. Longer games.` : 'Most ribbons after the last round'}</span></div>` : ''}
-      ${r.opts.mode === 'endless' || r.opts.mode === 'custom' || (r.opts.mode === 'board' && r.opts.goal) ? '' : `<div class="row opts"><span>${r.opts.mode === 'golf' ? 'Holes' : 'Rounds'}</span>${(r.opts.mode === 'golf' ? [3, 4, 6, 9] : [3, 4, 5, 6]).map(v => `<button class="pill${r.opts.rounds === v ? ' on' : ''}" data-act="opt" data-key="rounds" data-num="${v}" ${host ? '' : 'disabled'}>${v}</button>`).join('')}
-        <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : r.opts.mode === 'golf' ? 1.9 : 1.6))} min</span></div>`}
+      ${r.opts.mode === 'golf' ? `<div class="row opts"><span>Course</span>${[['mini', '⛳ Mini golf'], ['fairway', '🏌️ Fairway']].map(([v, t]) => `<button class="pill${(r.opts.golf || 'mini') === v ? ' on' : ''}" data-act="opt" data-key="golf" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}
+        <span class="est">${(r.opts.golf || 'mini') === 'mini' ? 'Putt round walls, ramps and windmills — some holes are shaped like letters and numbers' : 'Tee off, fairway, rough, bunkers and greens — go for a hole in one'}</span></div>` : ''}
+      ${r.opts.mode === 'endless' || r.opts.mode === 'custom' || (r.opts.mode === 'board' && r.opts.goal) ? '' : `<div class="row opts"><span>${r.opts.mode === 'golf' ? 'Holes' : 'Rounds'}</span>${(r.opts.mode === 'golf' ? [3, 6, 9, 18] : [3, 4, 5, 6]).map(v => `<button class="pill${r.opts.rounds === v ? ' on' : ''}" data-act="opt" data-key="rounds" data-num="${v}" ${host ? '' : 'disabled'}>${v}</button>`).join('')}
+        <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : r.opts.mode === 'golf' ? ((r.opts.golf || 'mini') === 'mini' ? 1.6 : 2.4) : 1.6))} min</span></div>`}
       <div class="row opts"><span>Play as</span><button class="pill${!r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="0" ${host ? '' : 'disabled'}>Everyone for themselves</button><button class="pill${r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="1" ${host ? '' : 'disabled'}>Teams</button>
         ${r.opts.teams ? `<span class="est">${n === 3 ? 'Teams need 2 or 4 players' : 'Red &amp; Green vs Blue &amp; Pink'}</span>` : ''}</div>
       <div class="row opts"><span>Who can join</span><button class="pill${!r.opts.public ? ' on' : ''}" data-act="opt" data-key="public" data-bool="0" ${host ? '' : 'disabled'}>Invite only</button><button class="pill${r.opts.public ? ' on' : ''}" data-act="opt" data-key="public" data-bool="1" ${host ? '' : 'disabled'}>Public</button>
@@ -399,11 +401,11 @@ function showIntro() {
 function showResults() {
   const pm = S.pm, m = GAMES[pm.game].meta, me = mine();
   let place = 0; const rows = [];
-  for (const g of pm.result.order) { for (const pid of g) { const mem = members().find(x => x.pid === pid); if (mem) rows.push(`<li class="p${place + 1}"><span class="pl">${pm.result.coop ? '' : ['1st', '2nd', '3rd', '4th'][place]}</span>${chipOf(mem)}<span class="score">${esc(gameScoreText(pm.result.scores?.[pid], pm.result.unit))}</span><span class="award">${pm.unit === 'tickets' ? ICON.ticket : ''}${esc(awardText(pm.award[pid], pm.unit))}</span></li>`); } place += g.length; }
+  for (const g of pm.result.order) { for (const pid of g) { const mem = members().find(x => x.pid === pid); if (mem) rows.push(`<li class="p${place + 1}"><span class="pl">${pm.result.coop ? '' : ['1st', '2nd', '3rd', '4th'][place]}</span>${chipOf(mem)}<span class="score">${esc(gameScoreText(pm.result.scores?.[pid], pm.result.unit))}</span><span class="award">${pm.golf ? esc(`${pm.golf.totals?.[pid] ?? 0} total`) : `${pm.unit === 'tickets' ? ICON.ticket : ''}${esc(awardText(pm.award[pid], pm.unit))}`}</span></li>`); } place += g.length; }
   setScreen('results', `<div class="panel results-card"><h1 class="shout">${esc(m.title)}</h1>
     ${pm.result.coop ? `<p class="blurb">${pm.result.coop.success ? 'You did it together!' : 'So close. Better luck next time!'}</p>` : ''}
     ${pm.mul > 1 ? `<p class="blurb double">Double Prize Day: tickets x${pm.mul}!</p>` : ''}
-    <p class="note places-key">${esc(resultsKeyText(pm.unit))}</p><ol class="places">${rows.join('')}</ol>
+    <p class="note places-key">${pm.golf ? `Strokes on this hole · total for the round (hole ${pm.round} of ${pm.golf.holes})` : esc(resultsKeyText(pm.unit))}</p><ol class="places">${rows.join('')}</ol>
     ${pm.teams ? `<p class="team-line">${pm.teams.map(t => `<b class="team t${t.team}">${esc(t.name)} ${pm.unit === 'tickets' ? t.tickets + ' tickets' : t.points + ' pts'}</b>`).join(' ')}</p>` : ''}
     ${rateBox(pm.game)}
     ${me?.seat != null ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : 'Continue'}</button>` : ''}<p class="note">Next in <b class="count">${left()}</b></p></div>`);
@@ -502,7 +504,7 @@ if (net.me) onWelcome(net.me);                      // the hello was answered wh
 net.on('me', () => { S.me = net.me; if (!S.room) showTitle(); else if (S.phase === 'lobby') showLobby(); S.modal?.refresh?.(); });
 net.on('wallet', () => { S.me = net.me; });
 net.on('room', r => {
-  setSeason(r.season ?? r.dateSeason ?? null);
+  setSeason((r.match?.mode ?? r.opts?.mode) === 'golf' ? null : (r.season ?? r.dateSeason ?? null));   // no Halloween menus in Golf mode (owner)
   // a host's last minigame list comes back with them (round 5)
   if (r.phase === 'lobby' && r.host === r.you && S.poolFor !== r.code) { S.poolFor = r.code; try { const v = JSON.parse(localStorage.getItem('tumblefair.pool') || '[]').filter(id => GAMES[id]); if (v.length && !r.opts.pool?.length) net.send({ t: 'opt', key: 'pool', value: v }); } catch {} }
   const first = !S.room; S.room = r;

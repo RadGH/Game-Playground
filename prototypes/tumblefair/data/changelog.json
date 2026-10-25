@@ -2,6 +2,17 @@
  "_doc": "Player-facing changelog for Tumblefair, newest first (shared/whats-new.js reads it). Append one entry at EVERY publish: plain language, what players will notice, no file names. `id` is stable and unique (date, plus a letter for a second publish that day).",
  "entries": [
   {
+   "id": "2026-10-24e",
+   "date": "2026-10-24",
+   "title": "Golf mode: Mini golf and Fairway",
+   "items": [
+    "Golf mode now asks which course: ⛳ Mini golf or 🏌️ Fairway — and how many holes: 3, 6, 9 or a full 18.",
+    "Mini golf: an 18-hole course where half the holes are shaped like letters and numbers (L, U, S, Z, 2, 3, 7, O, a figure 8) and the rest are wild designs — a spiral, an island green, a windmill, a spinner gauntlet.",
+    "Fairway: 18 real-looking holes with tee shots, fairways, rough, bunkers, water and sloping greens. Pick your club, read the wind, swing with the power and accuracy meter, and go for a hole in one on the par 3s.",
+    "Fewest strokes over the whole round wins, with a full scorecard. Golf mode is always Halloween-free."
+   ]
+  },
+  {
    "id": "2026-10-24d",
    "date": "2026-10-24",
    "title": "Host on your TV",

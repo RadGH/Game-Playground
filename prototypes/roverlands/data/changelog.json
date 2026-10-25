@@ -1,6 +1,19 @@
 {
   "entries": [
     {
+      "id": "2026-10-25e",
+      "date": "2026-10-25",
+      "title": "Six more vehicles and better handling",
+      "items": [
+        "New: the Meadowlark Sedan (with a trunk that really carries things), the Scramble Quad, the Sandhopper Buggy with huge springy suspension, the Roadrunner Motorcycle, the Pedalpush Bicycle (tap gas to pedal faster) and the Trailhauler Six army truck with an open back you can stand in.",
+        "The helicopter climbs much faster, and its rotor spins up quicker.",
+        "Lean forward and back with the left stick (Z and Q on a keyboard): bikes do wheelies and stoppies on the ground, and every vehicle can be tipped in the air to land a jump. Holding gas over a jump no longer tips you.",
+        "On a controller or phone the plane's nose follows the stick.",
+        "Helicopter on a controller or phone: the stick tips it, gas climbs and brake sinks.",
+        "Trailers hook onto many more vehicles now, including the forklift, tank, sedan, quad, buggy and army truck."
+      ]
+    },
+    {
       "id": "2026-10-25d",
       "date": "2026-10-25",
       "title": "Big rigs and sirens",

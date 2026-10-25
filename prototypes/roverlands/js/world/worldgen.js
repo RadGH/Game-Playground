@@ -68,7 +68,8 @@ export function* generateWorldSteps(opts = {}) {
   const t0 = now();
   const seed = (Number(opts.seed) || 0) >>> 0;
   const vehicles = opts.vehicles && opts.vehicles.length ? opts.vehicles : ['trail_jeep', 'dirtbike', 'tank', 'hover_tank', 'helicopter', 'rocket_car', 'forklift', 'trailer_utility',
-    'semi_truck', 'trailer_box', 'trailer_flatbed', 'trailer_tanker', 'fire_truck', 'ambulance', 'police_car'];
+    'semi_truck', 'trailer_box', 'trailer_flatbed', 'trailer_tanker', 'fire_truck', 'ambulance', 'police_car',
+    'sedan', 'quad', 'dune_buggy', 'motorcycle', 'bicycle', 'army_truck'];
   const S = (seed * 7919 + 1013) % 100000;          // noise seed base
   const rng = makeRng(seed * 2654435761 + 7);
 

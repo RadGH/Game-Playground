@@ -513,7 +513,7 @@ export async function createSession(o) {
     // ---- controls
     if (s.camNear) cam.distScale = Math.max(0.55, cam.distScale - 0.12);
     if (s.camFar) cam.distScale = Math.min(1.8, cam.distScale + 0.12);
-    for (const X of ents.values()) if (X.veh.local && !X.isProp && !(E === X && mySeat[1] === 0)) Object.assign(X.veh.input, { throttle: 0, brake: 0, steer: 0, handbrake: X.seats[0] == null, boost: false, pitch: 0, lean: 0, flip: false });
+    for (const X of ents.values()) if (X.veh.local && !X.isProp && !(E === X && mySeat[1] === 0)) Object.assign(X.veh.input, { throttle: 0, brake: 0, steer: 0, handbrake: X.seats[0] == null, boost: false, pitch: 0, lean: 0, flip: false, elev: undefined });
     if (walker && !mySeat) {
       const fx = Math.sin(cam.yaw), fz = Math.cos(cam.yaw);
       walker.input.mx = fx * s.my - fz * s.mx;
@@ -556,8 +556,19 @@ export async function createSession(o) {
         }
         // Space and Shift mean different things per vehicle (README "Controls by vehicle")
         const d = E.def, jumpEdge = s.jump && !frame.jumpWas;
-        const inp = { throttle: s.gas, brake: s.brake, steer, handbrake: s.jump, boost: s.boost, pitch: 0, lean: 0, flip: s.jump, jump: false, lift: 0 };
-        if (d.type === 'bike') { inp.pitch = s.boost ? 1 : 0; inp.lean = s.mx; }
+        const inp = { throttle: s.gas, brake: s.brake, steer, handbrake: s.jump, boost: s.boost, pitch: 0, lean: 0, flip: s.jump, jump: false, lift: 0, elev: undefined };
+        // bikes: stick back = lean back (wheelie), stick forward = lean forward; with keys Shift leans back (and Q / Z,
+        // below, for every vehicle). Gas is the trigger / GAS button there, so the stick's Y is free.
+        if (d.type === 'bike') { inp.pitch = s.boost ? 1 : s.device !== 'keys' ? -(s.my || 0) : 0; inp.lean = s.mx; }
+        // helicopter on a controller / phone: the stick tips it (forward / back), gas climbs, brake sinks
+        // everything else on a controller / phone: the stick's up / down leans the vehicle forward / back in the air
+        // (cars, trucks, buggy, quad, tank, hover) and is the elevator on the plane (stick back = nose up)
+        const sy = Math.abs(s.my || 0) > 0.15 ? -(s.my || 0) : 0;
+        if (s.device !== 'keys' && d.type !== 'bike' && d.type !== 'heli' && d.type !== 'plane' && sy) inp.pitch = sy;
+        // keyboard: Q leans back, Z leans forward, any vehicle but the helicopter and plane (not Ctrl: Ctrl+W closes the tab)
+        if (d.type !== 'heli' && d.type !== 'plane') { const kq = (input.keys.has('KeyQ') ? 1 : 0) - (input.keys.has('KeyZ') ? 1 : 0); if (kq) inp.pitch = kq; }
+        if (s.device !== 'keys' && d.type === 'plane') inp.elev = Math.max(-1, Math.min(1, sy + (s.jump ? 1 : 0) - (s.boost ? 1 : 0)));
+        if (d.type === 'heli' && s.device !== 'keys') { inp.throttle = Math.max(0, s.my || 0); inp.brake = Math.max(0, -(s.my || 0)); inp.handbrake = s.jump || s.gas > 0.1; inp.boost = s.boost || s.brake > 0.1; }
         if (d.pedal) { inp.pedalTap = s.gas > 0.5 && !(frame.gasWas > 0.5); inp.pitch = 0; }
         if (d.rocket) { inp.jump = jumpEdge; inp.handbrake = false; inp.flip = false; inp.lean = s.mx; }
         if (d.forks) { inp.lift = (s.jump ? 1 : 0) - (s.boost ? 1 : 0); inp.handbrake = false; inp.boost = false; inp.flip = false; }

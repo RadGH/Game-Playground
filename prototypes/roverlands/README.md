@@ -21,7 +21,7 @@ authority model and who owns which file. This README is what each part does and 
 | Test drive (solo, no menus) | `drive.html?seed=7&mode=sandbox` (`&online=1`, `&code=ABCD` to join, `&view=full`) |
 | World preview (fly around) | `world.html` |
 
-## Vehicles (released: 16 of the planned 23)
+## Vehicles (released: 22 of the planned 23 — the harvester is left)
 
 | id | name | seats | notes |
 |---|---|---|---|
@@ -39,9 +39,17 @@ authority model and who owns which file. This README is what each part does and 
 | `fire_truck` | Brightwater Fire Truck | driver (siren), passenger, gunner (water cannon at the back) | model shares `models/lightbar.js` |
 | `ambulance` | Swiftcare Ambulance | driver (siren) + 3 (two on benches in the back) | rear doors open into a ramp |
 | `police_car` | Patrol Car | driver (siren) + 3 | trunk lid; no police words anywhere |
+| `sedan` | Meadowlark Sedan | 4 | enclosed; trunk (door `trunk`) carries props with physics |
+| `quad` | Scramble Quad | rider + passenger | open, thrown off in big crashes |
+| `dune_buggy` | Sandhopper Buggy | 2 | 0.75 m suspension travel (jeep 0.42) |
+| `motorcycle` | Roadrunner Motorcycle | rider | road bike: faster, lower, less travel than the dirtbike |
+| `bicycle` | Pedalpush Bicycle | rider | tap gas to pedal (`pedal`) |
+| `army_truck` | Trailhauler Six | 2 cab + 8 benches + 1 standing | open bed you can stand in while it drives; tailgate = ramp |
 
-The rest (bicycle, motorcycle, quad, sedan with a physics trunk, army truck with a standing bed, dune buggy, harvester +
-wheat) come in batches — see `~/claude/agent/roverlands-checklist.md`. Codex reference sheets for all of them
+Tow points (`tow`, T to hitch): jeep, forklift, tank, rocket car, fire truck, ambulance, patrol car, sedan, quad, buggy,
+army truck, semi, and the utility trailer itself (so trailers chain).
+
+The harvester + wheat comes next — see `~/claude/agent/roverlands-checklist.md`. Codex reference sheets for all of them
 are in `assets/ref/` (README there).
 
 **Adding a vehicle** = one entry in `data/vehicles.json` (numbers, wheels, seats) + `js/client/models/<id>.js`
@@ -101,12 +109,12 @@ gas/brake and steer unless noted. Fire = left click / RT; F = Y on a controller.
 
 | type | W / S | A / D | Space | Shift | fire | notes |
 |---|---|---|---|---|---|---|
-| car (jeep, sedan, trucks…) | gas / brake, then reverse | steer (or point the camera: look-to-steer) | handbrake (drift) / flip back when upside down | boost if it has one | — | hold R to sit it back on its wheels |
-| bike (dirtbike, motorcycle) | gas / brake | steer (it leans itself) | rear brake | lean back (wheelie) | — | falls over if it goes too far over |
+| car (jeep, sedan, trucks…) | gas / brake, then reverse | steer (or point the camera: look-to-steer) | handbrake (drift) / flip back when upside down | boost if it has one | — | hold R to sit it back on its wheels; in the air Q / Z or the stick's up / down lean it back / forward (gas no longer does — it flipped people holding gas over jumps); plane: stick = elevator |
+| bike (dirtbike, motorcycle) | gas / brake | steer (it leans itself) | rear brake | lean back (wheelie); Q / Z lean back / forward | — | controller / phone: left stick up / down leans forward / back (pitch): on the ground an angle target (`def.wheelie`, 0.45 rad), in the air (a 2.2 rad/s pitch-rate hold, `def.airPitch`); falls over if it goes too far over |
 | bicycle | **tap** gas to sprint (hold = cruise) | steer | brake | — | — | `pedal` in its data |
 | tank | both tracks | turn (on the spot with no gas) | — | — | gun (the driver aims with the camera) | no look-to-steer |
 | hover | thrust / reverse | turn | — | boost | gun | floats over water |
-| helicopter | tip forward / back | turn | climb | sink | — | rotor spins up when someone takes the seat |
+| helicopter | tip forward / back | turn | climb | sink | — | controller / phone: stick tips, RT / GAS climbs, LT / BRAKE sinks; climb aims for `heli.climb` m/s (9); rotor spins up in ~1 s |
 | plane | throttle lever up / down (it stays) | roll + turn | pull up | push down | — | needs ~27 m/s to lift off (the runway) |
 | rocket car | gas / brake | steer; in the air A/D roll | jump, again in the air = dodge / flip | boost (also in the air) | — | |
 | forklift | gas / brake | steer (rear wheels) | forks up | forks down | — | the forks really lift a vehicle |

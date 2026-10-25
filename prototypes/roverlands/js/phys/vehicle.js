@@ -331,18 +331,19 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
       if (gb && gb !== self && gb.local && gb.rb) gb.rb.applyImpulseAtPoint(scale(up, -w.load * dt), w.point, true);
     }
 
-    // air: steer the car's attitude like the old arcade jeeps — pitch with gas/brake, yaw with steer, lean with roll
+    // air: steer the car's attitude like the old arcade jeeps — pitch with the lean (stick / Q / Z), yaw with steer, lean with roll
     const air = def.air || {};
     if (grounded === 0 && def.type !== 'heli' && def.type !== 'plane') {
       self.airTime += dt;
       const right = qrot(q, { x: -1, y: 0, z: 0 });
-      const k = (air.control ?? 0.6) * mass;
-      const pitch = (input.pitch || (input.throttle - input.brake)) * k;
+      const k = (air.control ?? 0.6) * mass * 4;     // x4 once the push stopped being wiped out (2026-10-25)
+      const pitch = (input.pitch || 0) * k;      // only a deliberate lean: gas held through a jump must not flip you
       const yaw = -input.steer * k * 0.6;
       const roll = (input.lean || 0) * k * 0.8;
       rb.applyTorqueImpulse(scale(add(add(scale(right, pitch), scale(up, yaw)), scale(fwd, roll)), dt), true);
       // a little damping on the spin so it lands readable
-      rb.setAngvel(scale(av, 1 - (air.damp ?? 0.6) * dt), true);
+      // (read the spin AFTER the push above: damping the frame-start `av` overwrote the push, so air control did nothing)
+      rb.setAngvel(scale(rb.angvel(), 1 - (air.damp ?? 0.6) * dt), true);
     } else if (grounded > 0) self.airTime = 0; else self.airTime += dt;
 
     // downforce grows with speed: keeps a fast car planted over crests
@@ -406,13 +407,14 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
   function flyHeli(dt, q, lv, av, fwd, up) {
     const h = def.heli || {};
     const want = self.driver ? 1 : 0;
-    self.rotor += (want - self.rotor) * dt * (want ? 1.4 : 0.25);
+    self.rotor += (want - self.rotor) * dt * (want ? 2.6 : 0.25);   // spins up in about a second
     const right = qrot(q, { x: -1, y: 0, z: 0 });
     const climb = (input.handbrake ? 1 : 0) - (input.boost ? 1 : 0);
     // lift that holds height, plus climb / sink, minus the part lost when tipped (so a hard tilt also sinks a bit)
     const hover = mass * 9.81 / Math.max(0.5, up.y);
     const vy = lv.y;
-    const lift = self.rotor * (hover * Math.min(1.25, up.y > 0 ? 1 : 0) + mass * (climb * (h.climb ?? 6) - vy * 1.2));
+    // climb: aims for a climb / sink RATE (h.climb m/s), so holding climb really goes up (owner: it 'doesn't go up very much')
+    const lift = self.rotor * (hover * Math.min(1.25, up.y > 0 ? 1 : 0) + mass * (climb * (h.climb ?? 6) - vy) * 1.6);
     rb.applyImpulse(scale(up, Math.max(0, lift) * dt), true);
     // attitude: pitch forward with gas, back with brake; roll into the turn a little
     const pitchWant = (input.throttle - input.brake) * (h.tilt ?? 0.32);
@@ -456,7 +458,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     // The stick asks for a RATE (hold Space = a steady climb-in, let go = it holds its attitude), and the surfaces only
     // have the authority the airflow gives them: none at a crawl, full from about take-off speed.
     const authority = clamp(qd / (0.5 * rho * (a.vRotate ?? 26) ** 2), 0, 1.3);
-    const stick = self.driver ? (input.handbrake ? 1 : 0) - (input.boost ? 1 : 0) : 0;
+    const stick = self.driver ? (input.elev ?? ((input.handbrake ? 1 : 0) - (input.boost ? 1 : 0))) : 0;   // elev: analog stick (controller / phone)
     const roll = self.driver ? input.steer : 0;
     const Ip = mass * (a.inertia ?? 4);
     const pr = dot(av, right), rr = dot(av, fwd), yr = dot(av, up);
@@ -493,8 +495,20 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     const kp = (parked ? 0.6 : 1) * def.mass * 14, kd = def.mass * 2.4;
     const tau = kp * (target - roll) - kd * rollRate;
     if (grounded > 0 || !parked) rb.applyTorqueImpulse(scale(fwd, tau * dt), true);
-    // wheelie / stoppie with lean (shift / pitch) when on the back wheel
-    if (!parked && input.pitch && grounded > 0) rb.applyTorqueImpulse(scale(right, -input.pitch * def.mass * 2.2 * dt), true);
+    // lean forward / back (input.pitch, + = lean back = nose up). Turning about `right` (= fwd x up) with + lifts the
+    // nose. On the ground it aims for an ANGLE (a wheelie of up to ~26°, a stoppie the other way) so holding it never
+    // loops the bike; in the air it holds a pitch RATE so you can rotate to land a jump. (Before 2026-10-25 the ground
+    // lean pushed the wrong way: Shift pressed the nose down.)
+    if (!parked && input.pitch) {
+      const pr = dot(av, right);
+      if (grounded > 0) {
+        const nose = Math.asin(clamp(dot(fwd, UP), -1, 1));
+        const want = input.pitch * (def.wheelie ?? 0.45);
+        rb.applyTorqueImpulse(scale(right, ((want - nose) * 9 - pr * 2.5) * def.mass * (def.groundPitch ?? 0.5) * dt * 10), true);
+      } else {
+        rb.applyTorqueImpulse(scale(right, (input.pitch * 2.2 - pr) * def.mass * 0.35 * dt * 60 * (def.airPitch ?? 0.05)), true);
+      }
+    }
     // too far over: the rider loses it
     if (!parked && Math.abs(roll) > 1.15) { self.crashed = 2.5; if (self.onImpact) self.onImpact(99, { fell: true, upright: up.y }); }
   }

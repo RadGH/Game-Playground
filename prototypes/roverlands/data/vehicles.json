@@ -558,7 +558,12 @@
    "camera": {
     "dist": 10,
     "height": 3.2
-   }
+   },
+   "tow": [
+    0,
+    -0.05,
+    -2.85
+   ]
   },
   {
    "id": "hover_tank",
@@ -797,7 +802,7 @@
     "slide": 0.8
    },
    "heli": {
-    "climb": 6,
+    "climb": 9,
     "tilt": 0.32,
     "bank": 0.18,
     "yaw": 1.4,
@@ -1181,7 +1186,12 @@
    "camera": {
     "dist": 6.5,
     "height": 2
-   }
+   },
+   "tow": [
+    0,
+    0.0,
+    -1.65
+   ]
   },
   {
    "id": "trailer_utility",
@@ -1487,7 +1497,12 @@
    "camera": {
     "dist": 6,
     "height": 2.4
-   }
+   },
+   "tow": [
+    0,
+    0.0,
+    -1.45
+   ]
   },
   {
    "id": "semi_truck",
@@ -2361,7 +2376,12 @@
     "height": 3
    },
    "voice": "truck",
-   "blurb": "Siren for the driver; the one on the back aims a water cannon that shoves things around."
+   "blurb": "Siren for the driver; the one on the back aims a water cannon that shoves things around.",
+   "tow": [
+    0,
+    -0.2,
+    -3.75
+   ]
   },
   {
    "id": "ambulance",
@@ -2613,7 +2633,12 @@
     "dist": 9,
     "height": 3
    },
-   "blurb": "Siren and lights for the driver; open the back (F) to load a stretcher or crates."
+   "blurb": "Siren and lights for the driver; open the back (F) to load a stretcher or crates.",
+   "tow": [
+    0,
+    -0.15,
+    -3.05
+   ]
   },
   {
    "id": "police_car",
@@ -2863,7 +2888,1374 @@
     "dist": 9,
     "height": 3
    },
-   "blurb": "Fast and grippy, with siren and lights. Lift the trunk (F) to load it."
+   "blurb": "Fast and grippy, with siren and lights. Lift the trunk (F) to load it.",
+   "tow": [
+    0,
+    -0.08,
+    -2.5
+   ]
+  },
+  {
+   "id": "sedan",
+   "name": "Meadowlark Sedan",
+   "type": "car",
+   "enclosed": true,
+   "mass": 1250,
+   "blurb": "A friendly four-door family car. Safe in a crash, and the trunk (F to lift it) holds a crate and a bag.",
+   "chassis": {
+    "hx": 0.86,
+    "hy": 0.2,
+    "hz": 1.9,
+    "p": [
+     0,
+     0.02,
+     0
+    ],
+    "com": [
+     0,
+     -0.2,
+     0.15
+    ],
+    "_doc": "floor pan: shorter than the body and 0.25 m off the ground so the overhangs clear rolling bumps; its top (y 0.22) is the cabin and trunk floor"
+   },
+   "parts": [
+    {
+     "box": [
+      0.82,
+      0.685,
+      1.11
+     ],
+     "p": [
+      0,
+      0.905,
+      -0.11
+     ],
+     "_doc": "cabin: roof top 1.59 so the drawn roof (underside 1.52) clears seated heads (seat + 1.13 = 1.49)"
+    },
+    {
+     "box": [
+      0.84,
+      0.13,
+      0.55
+     ],
+     "p": [
+      0,
+      0.35,
+      1.6
+     ],
+     "_doc": "bonnet + front bumper (underside 0.65 m off the ground)"
+    },
+    {
+     "box": [
+      0.86,
+      0.06,
+      0.15
+     ],
+     "p": [
+      0,
+      0.16,
+      -2.0
+     ],
+     "_doc": "trunk floor past the floor pan, + rear bumper"
+    },
+    {
+     "box": [
+      0.06,
+      0.28,
+      0.44
+     ],
+     "p": [
+      0.8,
+      0.5,
+      -1.7
+     ],
+     "_doc": "trunk side walls (0.12 m thick so CCD props cannot slip through)"
+    },
+    {
+     "box": [
+      0.06,
+      0.28,
+      0.44
+     ],
+     "p": [
+      -0.8,
+      0.5,
+      -1.7
+     ]
+    },
+    {
+     "box": [
+      0.86,
+      0.28,
+      0.06
+     ],
+     "p": [
+      0,
+      0.5,
+      -2.14
+     ],
+     "_doc": "trunk back wall; the floor is the chassis top (y 0.22)"
+    },
+    {
+     "box": [
+      0.86,
+      0.04,
+      0.48
+     ],
+     "p": [
+      0,
+      0.82,
+      -1.7
+     ],
+     "door": "trunk",
+     "_doc": "trunk lid: inside is x +-0.74, y 0.22..0.78, z -2.08..-1.22 (fits a crate + a bag)",
+     "open": {
+      "box": [
+       0.86,
+       0.04,
+       0.48
+      ],
+      "p": [
+       0,
+       1.26,
+       -1.42
+      ],
+      "rot": [
+       1.2,
+       0,
+       0
+      ]
+     }
+    }
+   ],
+   "wheels": [
+    {
+     "p": [
+      0.8,
+      -0.2,
+      1.35
+     ],
+     "r": 0.34,
+     "w": 0.24,
+     "steer": 1,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.8,
+      -0.2,
+      1.35
+     ],
+     "r": 0.34,
+     "w": 0.24,
+     "steer": 1,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      0.8,
+      -0.2,
+      -1.35
+     ],
+     "r": 0.34,
+     "w": 0.24,
+     "steer": 0,
+     "drive": 0,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.8,
+      -0.2,
+      -1.35
+     ],
+     "r": 0.34,
+     "w": 0.24,
+     "steer": 0,
+     "drive": 0,
+     "brake": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.28,
+    "k": 23000,
+    "damp": 2300,
+    "antiRoll": 8500
+   },
+   "engine": {
+    "force": 7800,
+    "top": 31,
+    "reverse": 9
+   },
+   "steer": {
+    "max": 0.58,
+    "speedFalloff": 0.62,
+    "rate": 2.6
+   },
+   "tyre": {
+    "grip": 1.4,
+    "slide": 0.72,
+    "handbrakeRear": 0.25,
+    "peak": 0.16,
+    "stiff": 0.8,
+    "rollCenter": 0.55
+   },
+   "air": {
+    "control": 0.4,
+    "damp": 0.9
+   },
+   "downforce": 2.5,
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0.4,
+      0.36,
+      0.3
+     ],
+     "pose": "sit",
+     "exit": [
+      1.8,
+      -0.3,
+      0.3
+     ],
+     "hands": "wheel",
+     "wheelAt": [
+      0.4,
+      0.62,
+      0.7
+     ]
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.4,
+      0.36,
+      0.3
+     ],
+     "pose": "sit",
+     "exit": [
+      -1.8,
+      -0.3,
+      0.3
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0.4,
+      0.36,
+      -0.65
+     ],
+     "pose": "sit",
+     "exit": [
+      1.8,
+      -0.3,
+      -0.65
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.4,
+      0.36,
+      -0.65
+     ],
+     "pose": "sit",
+     "exit": [
+      -1.8,
+      -0.3,
+      -0.65
+     ],
+     "look": true
+    }
+   ],
+   "eject": {
+    "threshold": 99,
+    "upsideDown": false
+   },
+   "camera": {
+    "dist": 8,
+    "height": 2.6
+   },
+   "tow": [
+    0,
+    0.07,
+    -2.25
+   ]
+  },
+  {
+   "id": "quad",
+   "name": "Scramble Quad",
+   "type": "car",
+   "enclosed": false,
+   "mass": 330,
+   "blurb": "A nippy four-wheeler with fat tyres. One rider and a pillion; hit something hard and you both go flying.",
+   "chassis": {
+    "hx": 0.5,
+    "hy": 0.22,
+    "hz": 0.85,
+    "p": [
+     0,
+     0.05,
+     0
+    ],
+    "com": [
+     0,
+     -0.17,
+     0
+    ]
+   },
+   "parts": [
+    {
+     "box": [
+      0.42,
+      0.03,
+      0.18
+     ],
+     "p": [
+      0,
+      0.42,
+      0.68
+     ],
+     "_doc": "front rack"
+    },
+    {
+     "box": [
+      0.42,
+      0.03,
+      0.22
+     ],
+     "p": [
+      0,
+      0.42,
+      -0.68
+     ],
+     "_doc": "rear rack"
+    }
+   ],
+   "wheels": [
+    {
+     "p": [
+      0.56,
+      -0.15,
+      0.64
+     ],
+     "r": 0.3,
+     "w": 0.26,
+     "steer": 1,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.56,
+      -0.15,
+      0.64
+     ],
+     "r": 0.3,
+     "w": 0.26,
+     "steer": 1,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      0.56,
+      -0.15,
+      -0.64
+     ],
+     "r": 0.3,
+     "w": 0.28,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.56,
+      -0.15,
+      -0.64
+     ],
+     "r": 0.3,
+     "w": 0.28,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.28,
+    "k": 9000,
+    "damp": 760,
+    "antiRoll": 3200
+   },
+   "engine": {
+    "force": 3200,
+    "top": 22,
+    "reverse": 5
+   },
+   "steer": {
+    "max": 0.6,
+    "speedFalloff": 0.65,
+    "rate": 3.5
+   },
+   "tyre": {
+    "grip": 1.5,
+    "slide": 0.7,
+    "handbrakeRear": 0.3,
+    "peak": 0.18,
+    "stiff": 0.8,
+    "rollCenter": 0.6
+   },
+   "air": {
+    "control": 0.8,
+    "damp": 1.0
+   },
+   "inertiaScale": 1.2,
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0,
+      0.55,
+      -0.1
+     ],
+     "pose": "ride",
+     "exit": [
+      1.3,
+      -0.25,
+      -0.1
+     ],
+     "hands": "bars",
+     "barsAt": [
+      0,
+      0.76,
+      0.34
+     ]
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0,
+      0.6,
+      -0.52
+     ],
+     "pose": "ride",
+     "exit": [
+      -1.3,
+      -0.25,
+      -0.52
+     ],
+     "look": true
+    }
+   ],
+   "eject": {
+    "threshold": 10,
+    "upsideDown": true
+   },
+   "camera": {
+    "dist": 5.8,
+    "height": 2
+   },
+   "tow": [
+    0,
+    0.08,
+    -1.2
+   ]
+  },
+  {
+   "id": "dune_buggy",
+   "name": "Sandhopper Buggy",
+   "type": "car",
+   "enclosed": false,
+   "mass": 700,
+   "blurb": "Light, open roll cage and huge springs: it soaks up landings that would throw you out of anything else.",
+   "chassis": {
+    "hx": 0.7,
+    "hy": 0.2,
+    "hz": 1.5,
+    "p": [
+     0,
+     0.15,
+     0
+    ],
+    "com": [
+     0,
+     -0.27,
+     -0.05
+    ],
+    "_doc": "rides 0.57 m off the ground: more than the springs can squash, so a big landing never hits the belly"
+   },
+   "parts": [
+    {
+     "box": [
+      0.7,
+      0.05,
+      0.8
+     ],
+     "p": [
+      0,
+      1.58,
+      -0.15
+     ],
+     "_doc": "roll cage roof: it lands on this, not on heads (seated head 1.43)"
+    },
+    {
+     "box": [
+      0.05,
+      0.6,
+      0.05
+     ],
+     "p": [
+      0.68,
+      0.95,
+      0.6
+     ]
+    },
+    {
+     "box": [
+      0.05,
+      0.6,
+      0.05
+     ],
+     "p": [
+      -0.68,
+      0.95,
+      0.6
+     ]
+    },
+    {
+     "box": [
+      0.05,
+      0.6,
+      0.05
+     ],
+     "p": [
+      0.68,
+      0.95,
+      -0.9
+     ]
+    },
+    {
+     "box": [
+      0.05,
+      0.6,
+      0.05
+     ],
+     "p": [
+      -0.68,
+      0.95,
+      -0.9
+     ]
+    },
+    {
+     "box": [
+      0.45,
+      0.25,
+      0.4
+     ],
+     "p": [
+      0,
+      0.5,
+      -1.2
+     ],
+     "_doc": "rear engine block"
+    }
+   ],
+   "wheels": [
+    {
+     "p": [
+      0.98,
+      -0.42,
+      1.25
+     ],
+     "r": 0.38,
+     "w": 0.28,
+     "steer": 1,
+     "drive": 0,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.98,
+      -0.42,
+      1.25
+     ],
+     "r": 0.38,
+     "w": 0.28,
+     "steer": 1,
+     "drive": 0,
+     "brake": 1
+    },
+    {
+     "p": [
+      0.98,
+      -0.34,
+      -1.15
+     ],
+     "r": 0.46,
+     "w": 0.4,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -0.98,
+      -0.34,
+      -1.15
+     ],
+     "r": 0.46,
+     "w": 0.4,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.75,
+    "k": 8500,
+    "damp": 1700,
+    "antiRoll": 3200
+   },
+   "engine": {
+    "force": 6200,
+    "top": 30,
+    "reverse": 8
+   },
+   "steer": {
+    "max": 0.6,
+    "speedFalloff": 0.6,
+    "rate": 3
+   },
+   "tyre": {
+    "grip": 1.45,
+    "slide": 0.68,
+    "handbrakeRear": 0.22,
+    "peak": 0.18,
+    "stiff": 0.8,
+    "rollCenter": 0.55
+   },
+   "air": {
+    "control": 0.8,
+    "damp": 1.0
+   },
+   "downforce": 1.5,
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0.38,
+      0.3,
+      -0.1
+     ],
+     "pose": "sit",
+     "exit": [
+      1.9,
+      -0.4,
+      -0.1
+     ],
+     "hands": "wheel",
+     "wheelAt": [
+      0.38,
+      0.55,
+      0.28
+     ]
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.38,
+      0.3,
+      -0.1
+     ],
+     "pose": "sit",
+     "exit": [
+      -1.9,
+      -0.4,
+      -0.1
+     ],
+     "look": true
+    }
+   ],
+   "eject": {
+    "threshold": 14,
+    "upsideDown": true
+   },
+   "camera": {
+    "dist": 7,
+    "height": 2.4
+   },
+   "tow": [
+    0,
+    0.2,
+    -1.85
+   ]
+  },
+  {
+   "id": "motorcycle",
+   "name": "Roadrunner Motorcycle",
+   "type": "bike",
+   "enclosed": false,
+   "mass": 220,
+   "blurb": "A road bike: lower and faster than the dirtbike, stiff springs. Lean into the bends; it hates rough ground.",
+   "chassis": {
+    "hx": 0.2,
+    "hy": 0.24,
+    "hz": 0.8,
+    "p": [
+     0,
+     0.05,
+     0
+    ],
+    "com": [
+     0,
+     -0.12,
+     0
+    ]
+   },
+   "parts": [],
+   "wheels": [
+    {
+     "p": [
+      0,
+      -0.12,
+      0.78
+     ],
+     "r": 0.32,
+     "w": 0.13,
+     "steer": 1,
+     "drive": 0,
+     "brake": 1
+    },
+    {
+     "p": [
+      0,
+      -0.12,
+      -0.72
+     ],
+     "r": 0.32,
+     "w": 0.17,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1,
+     "hand": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.18,
+    "k": 10000,
+    "damp": 1100,
+    "antiRoll": 0
+   },
+   "engine": {
+    "force": 3400,
+    "top": 38,
+    "reverse": 3
+   },
+   "steer": {
+    "max": 0.45,
+    "speedFalloff": 0.82,
+    "rate": 3.5
+   },
+   "tyre": {
+    "grip": 1.6,
+    "slide": 0.72,
+    "handbrakeRear": 0.35,
+    "peak": 0.16,
+    "stiff": 0.8,
+    "rollCenter": 0.8
+   },
+   "air": {
+    "control": 0.6,
+    "damp": 1.2
+   },
+   "inertiaScale": 1.0,
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0,
+      0.38,
+      -0.15
+     ],
+     "pose": "ride",
+     "exit": [
+      0.9,
+      -0.2,
+      -0.1
+     ],
+     "hands": "bars",
+     "barsAt": [
+      0,
+      0.64,
+      0.3
+     ]
+    }
+   ],
+   "eject": {
+    "threshold": 9,
+    "upsideDown": true
+   },
+   "camera": {
+    "dist": 5.4,
+    "height": 1.7
+   }
+  },
+  {
+   "id": "bicycle",
+   "name": "Pedalpush Bicycle",
+   "type": "bike",
+   "enclosed": false,
+   "mass": 70,
+   "blurb": "Tap the gas to pedal hard (holding it just cruises). Slow, quiet, and easy to fall off.",
+   "chassis": {
+    "hx": 0.08,
+    "hy": 0.3,
+    "hz": 0.5,
+    "p": [
+     0,
+     0.2,
+     0
+    ],
+    "com": [
+     0,
+     -0.05,
+     0
+    ],
+    "_doc": "tall thin box: frame + where the (massless) rider sits; the height gives it enough roll inertia to balance smoothly at 60 Hz"
+   },
+   "parts": [],
+   "wheels": [
+    {
+     "p": [
+      0,
+      -0.1,
+      0.5
+     ],
+     "r": 0.3,
+     "w": 0.05,
+     "steer": 1,
+     "drive": 0,
+     "brake": 1
+    },
+    {
+     "p": [
+      0,
+      -0.1,
+      -0.48
+     ],
+     "r": 0.3,
+     "w": 0.05,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1,
+     "hand": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.12,
+    "k": 7000,
+    "damp": 450,
+    "antiRoll": 0
+   },
+   "engine": {
+    "force": 520,
+    "top": 10,
+    "reverse": 1
+   },
+   "pedal": {
+    "tap": 0.5,
+    "decay": 1.5,
+    "max": 1.6,
+    "cruise": 0.35,
+    "_doc": "each fresh press of gas adds `tap` to a burst that fades at `decay`/s; holding gas only cruises at `cruise`"
+   },
+   "linDamp": 0.25,
+   "steer": {
+    "max": 0.5,
+    "speedFalloff": 0.6,
+    "rate": 3
+   },
+   "tyre": {
+    "grip": 1.3,
+    "slide": 0.7,
+    "handbrakeRear": 0.35,
+    "peak": 0.18,
+    "stiff": 0.75,
+    "rollCenter": 0.8
+   },
+   "air": {
+    "control": 0.6,
+    "damp": 1.2
+   },
+   "inertiaScale": 1.5,
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0,
+      0.36,
+      -0.18
+     ],
+     "pose": "ride",
+     "exit": [
+      0.8,
+      -0.2,
+      0
+     ],
+     "hands": "bars",
+     "barsAt": [
+      0,
+      0.6,
+      0.28
+     ]
+    }
+   ],
+   "eject": {
+    "threshold": 6,
+    "upsideDown": true
+   },
+   "camera": {
+    "dist": 4.6,
+    "height": 1.6
+   }
+  },
+  {
+   "id": "army_truck",
+   "name": "Trailhauler Six",
+   "type": "car",
+   "enclosed": false,
+   "mass": 7500,
+   "blurb": "Six-wheel cargo truck. Ten ride: two in the cab, eight on the benches, one standing — or just stand in the open bed. F drops the tailgate as a ramp.",
+   "chassis": {
+    "hx": 1.2,
+    "hy": 0.3,
+    "hz": 3.6,
+    "p": [
+     0,
+     0.15,
+     0
+    ],
+    "com": [
+     0,
+     -0.45,
+     0.4
+    ],
+    "_doc": "the chassis top IS the cargo-bed floor (y 0.45): people stand on it and ride it like any vehicle platform"
+   },
+   "parts": [
+    {
+     "box": [
+      1.2,
+      0.83,
+      0.9
+     ],
+     "p": [
+      0,
+      1.28,
+      2.7
+     ],
+     "_doc": "cab (roof at 2.11; seated head 1.98)"
+    },
+    {
+     "box": [
+      1.2,
+      0.35,
+      0.06
+     ],
+     "p": [
+      0,
+      0.8,
+      1.66
+     ],
+     "_doc": "bed front wall"
+    },
+    {
+     "box": [
+      0.06,
+      0.35,
+      2.6
+     ],
+     "p": [
+      1.16,
+      0.8,
+      -1.0
+     ],
+     "_doc": "side rails, waist-high to a standing rider"
+    },
+    {
+     "box": [
+      0.06,
+      0.35,
+      2.6
+     ],
+     "p": [
+      -1.16,
+      0.8,
+      -1.0
+     ]
+    },
+    {
+     "box": [
+      0.2,
+      0.2,
+      1.95
+     ],
+     "p": [
+      0.9,
+      0.65,
+      -1.1
+     ],
+     "_doc": "benches (seat top 0.85)"
+    },
+    {
+     "box": [
+      0.2,
+      0.2,
+      1.95
+     ],
+     "p": [
+      -0.9,
+      0.65,
+      -1.1
+     ]
+    },
+    {
+     "box": [
+      1.2,
+      0.35,
+      0.06
+     ],
+     "p": [
+      0,
+      0.8,
+      -3.56
+     ],
+     "door": "tailgate",
+     "_doc": "tailgate; open, it is a ramp down to the ground behind the truck",
+     "open": {
+      "box": [
+       1.0,
+       0.05,
+       1.25
+      ],
+      "p": [
+       0,
+       -0.25,
+       -4.6
+      ],
+      "rot": [
+       -0.6,
+       0,
+       0
+      ]
+     }
+    }
+   ],
+   "wheels": [
+    {
+     "p": [
+      1.05,
+      -0.45,
+      2.45
+     ],
+     "r": 0.55,
+     "w": 0.42,
+     "steer": 1,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -1.05,
+      -0.45,
+      2.45
+     ],
+     "r": 0.55,
+     "w": 0.42,
+     "steer": 1,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      1.05,
+      -0.45,
+      -1.1
+     ],
+     "r": 0.55,
+     "w": 0.42,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -1.05,
+      -0.45,
+      -1.1
+     ],
+     "r": 0.55,
+     "w": 0.42,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      1.05,
+      -0.45,
+      -2.4
+     ],
+     "r": 0.55,
+     "w": 0.42,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1
+    },
+    {
+     "p": [
+      -1.05,
+      -0.45,
+      -2.4
+     ],
+     "r": 0.55,
+     "w": 0.42,
+     "steer": 0,
+     "drive": 1,
+     "brake": 1
+    }
+   ],
+   "susp": {
+    "travel": 0.38,
+    "k": 110000,
+    "damp": 11000,
+    "antiRoll": 38000
+   },
+   "engine": {
+    "force": 40000,
+    "top": 22,
+    "reverse": 6
+   },
+   "steer": {
+    "max": 0.5,
+    "speedFalloff": 0.6,
+    "rate": 2.4
+   },
+   "tyre": {
+    "grip": 1.45,
+    "slide": 0.72,
+    "peak": 0.16,
+    "stiff": 0.8,
+    "rollCenter": 0.55
+   },
+   "air": {
+    "control": 0.2,
+    "damp": 1.0
+   },
+   "downforce": 2.5,
+   "seats": [
+    {
+     "role": "driver",
+     "p": [
+      0.5,
+      0.85,
+      2.6
+     ],
+     "pose": "sit",
+     "exit": [
+      2.2,
+      -0.5,
+      2.6
+     ],
+     "hands": "wheel",
+     "wheelAt": [
+      0.5,
+      1.12,
+      3.0
+     ]
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.5,
+      0.85,
+      2.6
+     ],
+     "pose": "sit",
+     "exit": [
+      -2.2,
+      -0.5,
+      2.6
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0.86,
+      0.88,
+      0.7
+     ],
+     "pose": "sit",
+     "yaw": -1.5707963267948966,
+     "exit": [
+      2.2,
+      -0.5,
+      0.7
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.86,
+      0.88,
+      0.7
+     ],
+     "pose": "sit",
+     "yaw": 1.5707963267948966,
+     "exit": [
+      -2.2,
+      -0.5,
+      0.7
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0.86,
+      0.88,
+      -0.5
+     ],
+     "pose": "sit",
+     "yaw": -1.5707963267948966,
+     "exit": [
+      2.2,
+      -0.5,
+      -0.5
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.86,
+      0.88,
+      -0.5
+     ],
+     "pose": "sit",
+     "yaw": 1.5707963267948966,
+     "exit": [
+      -2.2,
+      -0.5,
+      -0.5
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0.86,
+      0.88,
+      -1.7
+     ],
+     "pose": "sit",
+     "yaw": -1.5707963267948966,
+     "exit": [
+      2.2,
+      -0.5,
+      -1.7
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.86,
+      0.88,
+      -1.7
+     ],
+     "pose": "sit",
+     "yaw": 1.5707963267948966,
+     "exit": [
+      -2.2,
+      -0.5,
+      -1.7
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0.86,
+      0.88,
+      -2.9
+     ],
+     "pose": "sit",
+     "yaw": -1.5707963267948966,
+     "exit": [
+      2.2,
+      -0.5,
+      -2.9
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      -0.86,
+      0.88,
+      -2.9
+     ],
+     "pose": "sit",
+     "yaw": 1.5707963267948966,
+     "exit": [
+      -2.2,
+      -0.5,
+      -2.9
+     ],
+     "look": true
+    },
+    {
+     "role": "passenger",
+     "p": [
+      0,
+      0.45,
+      0.9
+     ],
+     "pose": "idle",
+     "stand": true,
+     "exit": [
+      0,
+      -0.5,
+      -4.5
+     ],
+     "look": true,
+     "_doc": "standing behind the cab, holding the front rail"
+    }
+   ],
+   "eject": {
+    "threshold": 15,
+    "upsideDown": true
+   },
+   "camera": {
+    "dist": 11,
+    "height": 3.6
+   },
+   "voice": "truck",
+   "tow": [
+    0,
+    0.1,
+    -3.95
+   ]
   },
   {
    "id": "crate",

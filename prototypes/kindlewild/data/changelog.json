@@ -5,6 +5,7 @@
    "date": "2026-10-29",
    "title": "Real sounds",
    "items": [
+    "Bug reports from the ! button now reach the developer wherever you play.",
     "Fixed: the big slowdown after casting Frost Nova. Its chill used to creep across the whole map and kept every corner of the world busy, which on phones dropped the game to a few frames a second.",
     "Knights, archers, mages and wardens now fight wolves and bears, and soldiers you place guard that spot (following the flock they were set beside) instead of walking back to the village. Wolves at Bay can be defended now.",
     "Healing Light now puts out fires on the ground too.",

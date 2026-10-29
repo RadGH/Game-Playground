@@ -12,7 +12,7 @@ BASE="$HOME/.local/share/tumblefair"; PORT=8480
 # exactly what server/static.js ALLOWs, plus the server's own imports (thousandvale/js/sim/looks.js)
 ALLOW=(prototypes/tumblefair prototypes/thousandvale/js shared avatar-3d avatar-2d vendor/three vendor/qrcode-generator sfx assets)
 NOT_PUBLIC=(prototypes/tumblefair/server prototypes/tumblefair/ops prototypes/tumblefair/tests prototypes/tumblefair/tools prototypes/tumblefair/docs
-  prototypes/tumblefair/package.json prototypes/tumblefair/package-lock.json prototypes/thousandvale/js/sim prototypes/thousandvale/js/net)
+  prototypes/tumblefair/package.json prototypes/tumblefair/package-lock.json prototypes/thousandvale/js/sim prototypes/thousandvale/js/net avatar-3d/kestrel)
 echo "== publishing $SHORT ($(git log -1 --format=%s "$SHA"))"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 PRESENT=(); for p in "${ALLOW[@]}"; do git cat-file -e "$SHA:$p" 2>/dev/null && PRESENT+=("$p"); done

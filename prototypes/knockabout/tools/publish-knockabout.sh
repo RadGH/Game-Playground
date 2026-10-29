@@ -15,7 +15,7 @@ ALLOW=(prototypes/knockabout prototypes/tumblefair/js/client/look-tidy.js protot
   prototypes/thousandvale/js shared avatar-3d avatar-2d vendor/three vendor/cannon-es vendor/qrcode-generator sfx assets
   prototypes/tumblefair/server/feedback.mjs prototypes/tumblefair/server/insights.mjs prototypes/tumblefair/server/rgs.mjs)
 NOT_PUBLIC=(prototypes/knockabout/server prototypes/knockabout/ops prototypes/knockabout/tests prototypes/knockabout/tools prototypes/knockabout/docs
-  prototypes/knockabout/package.json prototypes/knockabout/package-lock.json prototypes/tumblefair/server prototypes/thousandvale/js/sim prototypes/thousandvale/js/net)
+  prototypes/knockabout/package.json prototypes/knockabout/package-lock.json prototypes/tumblefair/server prototypes/thousandvale/js/sim prototypes/thousandvale/js/net avatar-3d/kestrel)
 echo "== publishing $SHORT ($(git log -1 --format=%s "$SHA"))"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 PRESENT=(); for p in "${ALLOW[@]}"; do git cat-file -e "$SHA:$p" 2>/dev/null && PRESENT+=("$p"); done

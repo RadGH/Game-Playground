@@ -19,7 +19,7 @@ ALLOW=(prototypes/roverlands prototypes/knockabout/js/client prototypes/tumblefa
   prototypes/knockabout/server/accounts.js prototypes/knockabout/js/net/protocol.js)
 NOT_PUBLIC=(prototypes/roverlands/server prototypes/roverlands/ops prototypes/roverlands/tests prototypes/roverlands/tools prototypes/roverlands/docs
   prototypes/roverlands/package.json prototypes/roverlands/package-lock.json prototypes/tumblefair/server prototypes/knockabout/server prototypes/knockabout/js/net
-  prototypes/thousandvale/js/sim prototypes/thousandvale/js/net prototypes/roverlands/assets/ref)
+  prototypes/thousandvale/js/sim prototypes/thousandvale/js/net prototypes/roverlands/assets/ref avatar-3d/kestrel)
 echo "== publishing $SHORT ($(git -C "$PLAY" log -1 --format=%s "$SHA"))"
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 PRESENT=(); for p in "${ALLOW[@]}"; do git -C "$PLAY" cat-file -e "$SHA:$p" 2>/dev/null && PRESENT+=("$p"); done

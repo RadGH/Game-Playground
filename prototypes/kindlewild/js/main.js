@@ -373,16 +373,20 @@ function perfHud(on) {
 }
 if (save.settings.perfHud) setTimeout(() => perfHud(true), 0);
 
-// Reports go to the LAN server's inbox at once (served by tools/serve.py: POST /api/inbox/<name>), so
-// Claude can read them without the player signing in; they also stay in localStorage and ride the
-// cloud save. Unsent ones are retried at start-up.
+// Reports are sent at once: on the LAN to the dev server's inbox (tools/serve.py: POST /api/inbox/<name>),
+// anywhere else to games.radgh.com's report inbox (rgs-api POST /api/report/kindlewild, read on the admin
+// page; signing in is optional and only adds the account name). They also stay in localStorage and ride
+// the cloud save. Unsent ones are retried at start-up.
+const REPORT_LAN = /^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname);
+const REPORT_URL = REPORT_LAN ? new URL('../../../api/inbox/kindlewild-report', import.meta.url) : 'https://games.radgh.com/api/report/kindlewild';
 async function sendReports() {
   const list = JSON.parse(ls.get('kindlewild.reports') || '[]');
   let changed = false;
   for (const rep of list) {
     if (rep.sent) continue;
     try {
-      const r = await fetch(new URL('../../../api/inbox/kindlewild-report', import.meta.url), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(rep) });
+      const body = REPORT_LAN ? rep : { ...rep, kind: 'report', page: rep.level || rep.screen };
+      const r = await fetch(REPORT_URL, { method: 'POST', credentials: REPORT_LAN ? 'same-origin' : 'include', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (r.ok) { rep.sent = true; changed = true; } else break;
     } catch { break; }
   }
@@ -397,7 +401,7 @@ app.report = () => {
   const was = play.s?.paused; if (play.s) play.s.paused = true;     // the game waits while you write
   modal({
     onClose: () => { if (play.s) play.s.paused = was; },
-    title: 'Report a problem', body: [text, el('p', { class: 'tip', text: 'Your note, a picture of the screen and a few details about the game are saved and sent with your next cloud save.' })],
+    title: 'Report a problem', body: [text, el('p', { class: 'tip', text: 'Your note, a picture of the screen and a few details about the game (speed, level, device) are sent to the developer.' })],
     buttons: [{ label: 'Send', cls: 'big go', onClick: () => {
       const rep = { at: new Date().toISOString(), text: text.value, screen: app.current?.kind || 'title', level: app.current?.level?.id || null, state: play.s?.state?.() || null, perf, ua: navigator.userAgent, size: [innerWidth, innerHeight], build: BUILD, shot: shot && shot.length < 180000 ? shot : null };
       const list = JSON.parse(ls.get('kindlewild.reports') || '[]');

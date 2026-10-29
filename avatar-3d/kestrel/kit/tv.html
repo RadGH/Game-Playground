@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kestrel game poses</title>
+<link rel="stylesheet" href="../../../shared/style.css">
+<link rel="stylesheet" href="css/tv.css">
+<script type="importmap">{ "imports": { "three": "../../../vendor/three/three.module.js", "three/addons/": "../../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<!-- Kestrel kit, Thousandvale batch 1: real Thousandvale looks (avatarFor {race, cls, seed}, held items swapped) in any
+     game clip, to review the retargeted clips and the gear bridge without booting the game.
+     Query: ?clip=attack ?t=0.4 (freeze at t seconds; omit to play) ?set=weapons|races|emotes|work ?view=front|side|back|three|top
+     ?chibi=1 (the same looks as Chibi 2.5, to compare) ?shot=1 (canvas only)   window.__tv = { ready, stats } for tools. -->
+<header class="tv-top">
+  <h1>Kestrel in Thousandvale <small class="muted">batch 1: Chibi 2's clips and gear on the Kestrel body</small></h1>
+  <div class="row"><label>clip <select id="clip"></select></label> <label>set <select id="set"></select></label>
+    <label>view <select id="view"></select></label> <label><input type="checkbox" id="chibi"> Chibi 2.5</label> <span id="stats" class="muted small"></span></div>
+</header>
+<canvas id="c"></canvas>
+<script type="module" src="js/tv-page.js"></script>
+</body>
+</html>

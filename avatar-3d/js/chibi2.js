@@ -149,6 +149,25 @@ function buildTemplate(a, rig, opts = {}) {
     if ((hairId === 'bun' || hairId === 'buns') && !hoodUp) for (const s of hairId === 'bun' ? [1] : [-1, 1]) head(sphere(), hair, { position: [s * (hairId === 'bun' ? 0 : 0.22), 0.47, -0.04], scale: [0.13, 0.13, 0.11] });
   }
   tagAs('hat');
+  buildChibiHat(a, { add, head, H, W, T, trim, leather, steel, darkSteel });
+  // Held and off-hand items, accessories, marks, capes, greaves and decorations live in chibi2-gear.js.
+  const gearCtx = { add, head, ellipsoid, strip, H, W, T, L: rig.leg, A: rig.arm, trim, leather, steel, darkSteel, skin: a.body.skin, faceWidth, faceDepth, chestZ: body.chestZ, hipsZ: body.hipsZ, faceZ: face.faceZ, topStyle: body.top, LW: body.LW, rig, wrap: body.wrap, chestRings: body.chestRings };
+  tagAs('gear');
+  buildGear(a, gearCtx);
+  tagAs('armour2');
+  buildArmour2(a, gearCtx);   // tier-2 armour kits + emblems (chibi2-armour2.js) — opt-in: nothing for a look that names neither
+  tagAs('gear5');
+  buildGear5(a, { ...gearCtx, body, face });   // play-test 5: the g5_ models (chibi2-gear5.js) — opt-in: nothing for a look that names no g5_ id
+  return b.finish();
+}
+
+/**
+ * Every hat Chibi 2 draws, on its own (2026-10-27, Kestrel in Thousandvale: the hat stand-in builds the same hat for
+ * a Kestrel head). Moved out of buildTemplate unchanged — same calls, same order, so every look builds byte-for-byte
+ * what it did. `ctx` = { add, head, H, W, T, trim, leather, steel, darkSteel } as buildTemplate has them.
+ */
+export function buildChibiHat(a, ctx) {
+  const { add, head, H, W, T, trim, leather, steel, darkSteel } = ctx;
   if (a.hat.id === 'dragon_helm') {
     buildDragonHelm(a, head);
   } else if (CLASS_HATS.includes(a.hat.id)) {
@@ -193,15 +212,6 @@ function buildTemplate(a, rig, opts = {}) {
   } else if (a.hat.id === 'goggles_up') {
     buildAviatorCap(a, head, leather);
   } else buildExtraHat(a, { add, head, H, W, T, trim, leather, steel, darkSteel });
-  // Held and off-hand items, accessories, marks, capes, greaves and decorations live in chibi2-gear.js.
-  const gearCtx = { add, head, ellipsoid, strip, H, W, T, L: rig.leg, A: rig.arm, trim, leather, steel, darkSteel, skin: a.body.skin, faceWidth, faceDepth, chestZ: body.chestZ, hipsZ: body.hipsZ, faceZ: face.faceZ, topStyle: body.top, LW: body.LW, rig, wrap: body.wrap, chestRings: body.chestRings };
-  tagAs('gear');
-  buildGear(a, gearCtx);
-  tagAs('armour2');
-  buildArmour2(a, gearCtx);   // tier-2 armour kits + emblems (chibi2-armour2.js) — opt-in: nothing for a look that names neither
-  tagAs('gear5');
-  buildGear5(a, { ...gearCtx, body, face });   // play-test 5: the g5_ models (chibi2-gear5.js) — opt-in: nothing for a look that names no g5_ id
-  return b.finish();
 }
 
 /** The face builder's drawing kit with every colour replaced by one (and no metal): a mannequin's carved face. */

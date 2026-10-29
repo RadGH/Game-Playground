@@ -1,0 +1,106 @@
+/* Phone layouts (PLAN M2, BRAINSTORM 1.6): the same bunker, stacked. Lamps on top, the scope, a strip of mini knobs,
+   ONE fixed-height drawer that pages (TOOLS · DIALS · TIME · LOG · MORE) and its handles. Nothing scrolls; every tap
+   target is at least 44 px. Landscape: scope on the left, the rest in a column on the right. */
+@media (max-width: 899px), (max-height: 559px) {
+  .desk { gap: 6px; padding: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 52px minmax(0, 1fr) 52px 232px 50px;
+    grid-template-areas: "alarms top" "scope scope" "strip strip" "drawer drawer" "handles handles"; }
+  .strip, .handles { display: flex; }
+  .desk .page { display: none; grid-area: drawer; gap: 6px; min-height: 0; min-width: 0; }
+  .desk[data-page="tools"] .page[data-page="tools"], .desk[data-page="dials"] .page[data-page="dials"], .desk[data-page="time"] .page[data-page="time"],
+  .desk[data-page="log"] .page[data-page="log"], .desk[data-page="more"] .page[data-page="more"] { display: flex; }
+  .desk.drawer-open .page { display: none !important; }
+  .page > .machine { flex: 1; min-width: 0; }
+  .page[data-page="log"] { flex-direction: column; }
+  .page[data-page="log"] .m-radio { flex: 0 0 74px; padding-top: 20px; }
+  .page[data-page="log"] .m-teletype { flex: 1; }
+  .drawer { grid-area: drawer; height: 100%; min-height: 0; margin: 0; border-radius: 7px; animation-duration: .16s; }
+  .drawer-head { padding: 3px 6px 3px 10px; }
+  .drawer-body { padding: 6px; }
+  .rp-stencil { font-size: 22px; }
+
+  .machine { padding: 20px 8px 8px; }
+  .machine-strip { padding: 4px 6px; }
+  .m-alarms .machine-plate { display: none; }
+  .lamp-row { padding-top: 0; gap: 0; justify-content: space-between; } /* six 44 px targets (5 lamps + MUTE) in one slim strip */
+  .m-alarms.machine-strip { padding: 4px 3px; }
+  .lamp { flex-direction: column; justify-content: center; gap: 1px; width: 44px; padding: 0; border-radius: 8px; }
+  .lamp-bezel { width: 28px; height: 28px; } .lamp-jewel { width: 20px; height: 20px; }
+  .lamp-label { font-size: 7.5px; letter-spacing: .08em; }
+  .topright { gap: 6px; }
+  .m-dayclock { padding: 4px 2px; }
+  .m-dayclock .machine-body { flex-direction: column; gap: 2px; }
+  .dc-window { width: 46px; height: 24px; border-radius: 23px 23px 3px 3px; }
+  .dc-disc { top: 24px; width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+  .dc-sun, .dc-moon { width: 10px; height: 10px; margin-left: -5px; } .dc-sun { top: 3px; } .dc-moon { bottom: 3px; }
+  .dc-day { display: none; } .dc-time { font-size: 12px; }
+  .menu-btn { width: 48px; min-height: 0; height: 100%; font-size: 20px; }
+
+  .m-scope { padding: 6px 6px 4px; }
+  .m-scope .machine-plate { display: none; }
+  .m-scope .focus-lamp { position: absolute; top: 4px; right: 10px; }
+  .bezel { padding: 14px 6px 6px 16px; border-radius: 14px; }
+  .grid-cols { left: 16px; right: 6px; top: 2px; font-size: 8.5px; } .grid-rows { top: 14px; bottom: 6px; left: 1px; width: 14px; font-size: 8.5px; }
+  .grid-rows span { width: 14px; }
+  .glass { border-radius: 14px / 18px; }
+  .scope-readout { min-height: 22px; gap: 4px; }
+  .scope-readout .degauss, .ro-cell { display: none; }
+  .ro { padding: 2px 6px; font-size: 8.5px; } .ro b { font-size: 11px; }
+  .crt-vignette { box-shadow: inset 0 0 36px 8px rgba(0,0,0,0.85), inset 0 0 8px 2px rgba(0,0,0,0.9); }
+
+  .switchbank { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .toggle { flex-direction: row; justify-content: center; gap: 8px; padding: 4px; }
+  .toggle-plate { flex: none; width: 34px; height: 100%; min-height: 0; max-height: 78px; }
+  .toggle-key { display: none; }
+
+  .knob { --kc: 64px; --kr: 66px; }
+  .m-range, .m-filter, .m-timedial { padding-left: 6px; padding-right: 6px; }
+  .page[data-page="time"] .m-timedial { flex: 1.3; }
+  .mute-strip { min-width: 44px; width: 44px; padding: 0; flex-direction: column; justify-content: center; gap: 1px; border-radius: 8px; }
+  .mute-strip .mute-guard { width: 14px; height: 18px; }
+  .mute-strip .mute-label { font-size: 7.5px; letter-spacing: .08em; }
+  .m-teletype .machine-body { grid-template-columns: minmax(0, 1fr) 52px; grid-template-rows: 44px minmax(0, 1fr) minmax(0, 1fr); gap: 4px;
+    grid-template-areas: "pin pinbtn" "paper older" "paper newer"; }
+  .page[data-page="log"] .m-radio { flex: 0 0 62px; padding-top: 8px; }
+  .page[data-page="log"] .m-radio .machine-plate { display: none; }
+  .page[data-page="log"] .m-teletype { padding-top: 8px; }
+  .page[data-page="log"] .m-teletype .machine-plate { display: none; }
+  .tty-btn { min-height: 0; }
+  .tty-line { font-size: 11px; line-height: 16px; }
+  .tty-paper { background-size: auto; }
+  .radio-grille { width: 58px; }
+  .radio-sub { padding: 4px 8px; gap: 1px; } .radio-text { font-size: 11px; -webkit-line-clamp: 2; }
+  .m-bay .machine-body { gap: 6px; }
+  .bay-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(52px, 1fr); }
+  .bay-slot { min-height: 52px; padding: 4px 22px; }
+  .slot-stencil { font-size: 11px; letter-spacing: .26em; }
+  .settings-toggles { grid-template-columns: 1fr; gap: 4px; }
+  .toggle.single { min-height: 48px; }
+  .toggle.single .toggle-plate { height: 40px; }
+  .settings-knobs .knob { --kc: 44px; --kr: 52px; }
+  .plate-panel { padding: 14px 12px 12px; }
+  .plate-note { font-size: 10px; }
+}
+/* landscape phone */
+@media (max-height: 559px) and (orientation: landscape) {
+  .desk { grid-template-columns: minmax(0, 1fr) minmax(260px, 344px);
+    grid-template-rows: 50px 50px minmax(0, 1fr) 48px;
+    grid-template-areas: "alarms top" "scope strip" "scope drawer" "scope handles"; }
+  .desk .page, .drawer { min-height: 0; }
+  .knob { --kc: 46px; --kr: 54px; }
+  .page[data-page="dials"] .knob-plate { margin-top: -10px; }
+  .page[data-page="log"] .m-radio { flex-basis: 52px; }
+  .handle { min-height: 44px; gap: 2px; } .handle-pull { height: 5px; }
+  .strip { padding: 2px 6px; }
+  .settings-knobs .knob { --kc: 44px; --kr: 52px; }
+  .toggle { flex-direction: column; gap: 4px; }
+  .toggle-plate { width: 30px; height: auto; flex: 1; max-height: 64px; }
+  .toggle-label { font-size: 10px; padding: 2px 4px; }
+  .toggle.single { flex-direction: row; }
+  .plate-panel { max-height: 100%; }
+  .settings-modal .plate-panel { width: min(720px, 100%); }
+  .settings-modal .plate-body { flex-direction: row; flex-wrap: wrap; }
+  .settings-modal .settings-toggles { grid-template-columns: 1fr 1fr; flex: 1; }
+  .settings-modal .plate-note { display: none; }
+}

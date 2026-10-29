@@ -1,0 +1,88 @@
+{
+ "about": "Every Kestrel attempt the review page shows. The lead adds a row once an attempt builds; module paths are relative to avatar-3d/kestrel/. kind 'code' = a module implementing CONTRACT.md.",
+ "attempts": [
+  {
+   "id": "opus",
+   "title": "Hand-coded by Opus",
+   "by": "Claude Opus 5.5",
+   "kind": "code",
+   "module": "opus/js/kestrel.js",
+   "page": "opus/index.html",
+   "readme": "opus/README.md"
+  },
+  {
+   "id": "opus2",
+   "title": "Opus, refined from Meshy",
+   "by": "Claude Opus 5.5 (second pass, fitted to the Meshy model)",
+   "kind": "code",
+   "module": "opus2/js/kestrel.js",
+   "page": "opus2/index.html",
+   "readme": "opus2/README.md"
+  },
+  {
+   "id": "kit",
+   "title": "Kestrel game kit (in progress)",
+   "by": "opus2 grown into the version the games use",
+   "kind": "code",
+   "module": "kit/js/kestrel.js",
+   "page": "kit/index.html",
+   "readme": "kit/README.md"
+  },
+  {
+   "id": "fable",
+   "title": "Hand-coded by Fable",
+   "by": "Claude Fable 5.1",
+   "kind": "code",
+   "module": "fable/js/kestrel.js",
+   "page": "fable/index.html",
+   "readme": "fable/README.md"
+  },
+  {
+   "id": "meshy-multi",
+   "title": "Meshy \u00b7 4 pictures",
+   "by": "Meshy API (auto-rig + 16 library animations)",
+   "kind": "glb",
+   "module": "js/glb-attempt.js",
+   "files": {
+    "male": "meshy/models/multi-male.glb",
+    "female": "meshy/models/multi-female.glb"
+   },
+   "readme": "meshy/README.md"
+  },
+  {
+   "id": "meshy-single",
+   "title": "Meshy \u00b7 1 picture",
+   "by": "Meshy API (auto-rig + 16 library animations)",
+   "kind": "glb",
+   "module": "js/glb-attempt.js",
+   "files": {
+    "male": "meshy/models/single-male.glb",
+    "female": "meshy/models/single-female.glb"
+   },
+   "readme": "meshy/README.md"
+  },
+  {
+   "id": "meshy-lowpoly",
+   "title": "Meshy \u00b7 clean low-poly",
+   "by": "Meshy API (auto-rig + 16 library animations)",
+   "kind": "glb",
+   "module": "js/glb-attempt.js",
+   "files": {
+    "male": "meshy/models/lowpoly-male.glb",
+    "female": "meshy/models/lowpoly-female.glb"
+   },
+   "readme": "meshy/README.md"
+  }
+ ],
+ "scores": [
+  "Looks like the reference",
+  "Face",
+  "Body and proportions",
+  "Hands and feet",
+  "Hair",
+  "Animation",
+  "Expressions",
+  "Modular (outfit swap)",
+  "Phone cost"
+ ]
+}

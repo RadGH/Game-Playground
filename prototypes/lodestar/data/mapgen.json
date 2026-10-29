@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "_doc": "Map generator settings per planet archetype (M1 builds the home world). Distances in cells (0.5 m). Counts are for a Normal 1,536 map and scale with map area. M13 may fold these rows into planets.json.",
+  "home": {
+    "sizes": { "small": 1024, "normal": 1536, "large": 2048 },
+    "ambient": 60,
+    "biome": { "scale": 260, "forest": 0.6, "dry": 0.37, "soilPatch": 0.1, "beach": 4, "clearing": 0.34 },
+    "river": { "deep": [5, 9], "shallowExtra": [4, 8], "step": 150, "wiggle": 0.5, "meander": 110, "fords": [2, 4], "fordLen": 10, "fordSpacing": 160 },
+    "lakes": { "onRiver": [1, 2], "extra": [0, 1], "r": [45, 95], "shallowBand": 12 },
+    "lava": { "count": 1, "r": [50, 90], "basalt": 7, "minHqDist": 420, "waterGap": 30 },
+    "plateaus": { "count": [1, 2], "r": [85, 150], "gaps": [1, 2], "gapLen": [26, 44], "minHqDist": 170, "waterGap": 14 },
+    "outcrops": { "copper": 5, "iron": 5, "coal": 4, "stone": 5, "silica": 3, "crystal": 3 },
+    "outcropR": [6, 12],
+    "nearHq": ["copper", "iron", "coal", "stone"],
+    "nearHqR": [60, 140],
+    "hq": { "clear": 30, "waterDist": 60, "treeClear": 44 }
+  }
+}

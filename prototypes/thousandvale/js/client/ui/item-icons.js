@@ -17,6 +17,7 @@
 // (item bases, the wearer's class kit, armour themes, stream F's gear catalog). Farhold's look tables are no longer read.
 //   weapons, shields, foci   built on their own by the same builders the hands hold (chibi2-gear.js; chibi2-gear5.js for g5_)
 //   armour, cloaks, packs, belts, torcs, catalog rings   a plain Chibi 2 body wearing exactly the item's parts, framed on them
+//                                                     (under ?chars=kestrel a plain Kestrel body, framed by its own table)
 //   potions, food, goods, materials, fish, junk, amulets, foci   drawn SVG art from icons/js/game-icons.js (2026-10-14)
 //   a ring the catalog does not draw                              a 2D glyph in the ring's own colours
 // Nothing is drawn until the look data has loaded (an icon made without the catalog would be the wrong picture, cached).
@@ -30,8 +31,11 @@ import { itemIconUrl, itemArtKey } from '../../../../../icons/js/game-icons.js';
 import { wornPart } from '../gear-look.js';
 import { gearOpts, lookDataReady, loadLookData } from '../looks.js';
 
+import { KESTREL } from '../chars-mode.js';      // Kestrel batch 5: under ?chars=kestrel the mannequin is a Kestrel body
 const VERSION = 'v6';      // v6 (2026-10-16): the mannequin is a Chibi 2.5 body (robes with room at the hips, both coat tails)
 //      // v5 (2026-10-14): armour is worn by a plain mannequin, not a person; potions/goods are drawn art (v4: the worn model)
+// Kestrel batch 5 (2026-10-28): under ?chars=kestrel its own pictures ('v6k1'), never mixed with the Chibi ones
+const CACHE_V = KESTREL ? VERSION + 'k1' : VERSION;
 const SIZE = 96, PX = SIZE;
 const DB = 'tv-icons', OS = 'icons';
 const mem = new Map();               // key -> object URL
@@ -41,7 +45,7 @@ let ctx = { cls: () => null };       // whose class kit a rare chest piece wears
 /** bag.js: tell the icons whose class to dress tier-2 armour as. */
 export function setIconContext(c = {}) { ctx = { ...ctx, ...c }; }
 
-// ---- storage: IndexedDB, blobs keyed by VERSION + icon key (async; a private window just keeps memory) ----
+// ---- storage: IndexedDB, blobs keyed by CACHE_V + icon key (async; a private window just keeps memory) ----
 // the old localStorage cache (big data: URLs parsed synchronously at boot) is removed once
 try { for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.startsWith('tv.icons.')) localStorage.removeItem(k); } } catch { /* blocked */ }
 let dbP = null;
@@ -61,7 +65,7 @@ const cacheReady = (async () => {
   await new Promise(res => {
     try {
       const tx = d.transaction(OS, 'readonly'), st = tx.objectStore(OS), req = st.openCursor();
-      req.onsuccess = () => { const c = req.result; if (!c) return res(); const k = String(c.key); if (k.startsWith(VERSION + ':') && c.value instanceof Blob) mem.set(k.slice(VERSION.length + 1), URL.createObjectURL(c.value)); c.continue(); };
+      req.onsuccess = () => { const c = req.result; if (!c) return res(); const k = String(c.key); if (k.startsWith(CACHE_V + ':') && c.value instanceof Blob) mem.set(k.slice(CACHE_V.length + 1), URL.createObjectURL(c.value)); c.continue(); };
       req.onerror = () => res();
     } catch { res(); }
   });
@@ -69,7 +73,7 @@ const cacheReady = (async () => {
 })();
 async function persist(key, blob) {
   const d = await db(); if (!d || !blob) return;
-  try { d.transaction(OS, 'readwrite').objectStore(OS).put(blob, VERSION + ':' + key); } catch { /* quota / blocked */ }
+  try { d.transaction(OS, 'readwrite').objectStore(OS).put(blob, CACHE_V + ':' + key); } catch { /* quota / blocked */ }
 }
 const toBlobUrl = c => new Promise(res => c.toBlob(b => res(b ? { blob: b, url: URL.createObjectURL(b) } : null), 'image/png'));
 
@@ -253,6 +257,8 @@ const PART_FRAMES = {
   ring: { bones: ['handR'], lift: 0, radius: 0.075, yaw: -1.2, pitch: 0.35 },
   carry: { bones: ['chest'], lift: -0.08, radius: 0.5, yaw: 0.45, pitch: 0.08 },
 };
+let kFrames = null;
+const kestrelFrames = () => (kFrames ||= import('../../../../../avatar-3d/kestrel/kit/js/icon-frames.js').then(m => m.KESTREL_ICON_FRAMES));
 async function armourShot(spec) {
   const { create, avatarFor } = await bodyModules();
   const base = JSON.parse(JSON.stringify(await avatarFor({ race: 'human', cls: 'warrior', seed: 4242 })));
@@ -275,11 +281,14 @@ async function armourShot(spec) {
   scene.add(actor.group);
   actor.setAnim?.('idle', 0); for (let i = 0; i < 4; i++) actor.update?.(0.15);
   actor.group.updateMatrixWorld(true);
-  const F = PART_FRAMES[spec.frame] || PART_FRAMES.torso, H = actor.metrics().height;
+  // Kestrel batch 5: a real-proportion mannequin has its own frames (avatar-3d/kestrel/kit/js/icon-frames.js)
+  const FR = KESTREL ? (await kestrelFrames()) : PART_FRAMES;
+  const F = FR[spec.frame] || FR.torso, H = actor.metrics().height;
   const target = new THREE.Vector3(); let n = 0;
   for (const b of F.bones) { const bone = actor.parts[b]; if (bone) { bone.getWorldPosition(_v); target.add(_v); n++; } }
   if (!n) { _box.setFromObject(actor.group); _box.getCenter(target); } else target.multiplyScalar(1 / n);
   target.y += H * F.lift;
+  if (F.fwd) target.z += H * F.fwd;               // (Kestrel frames only: a belt's pouches, a boot's toe)
   aim(camera, target, H * F.radius, F.yaw, F.pitch ?? 0.12);
   syncSpan(t0, 'pose');
   await new Promise(r => setTimeout(r, 0));         // and between posing and drawing

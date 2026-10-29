@@ -63,19 +63,46 @@ adding a fifth is a new file in `js/methods/` plus a line in `METHODS`.
 
 | id | What it is | Licence | Coverage |
 |---|---|---|---|
-| `synth` | Our own procedural Web Audio synthesis, driven by the layer recipes in the catalog | ours | all 164 ids |
-| `library` | Recorded samples from three Kenney CC0 packs | **CC0 1.0** | 39 ids |
-| `hybrid` | Samples where the pack has them, synth everywhere else — **the default** | CC0 + ours | all 164 ids |
-| `retro` | Chiptune: square, triangle and noise channels, stepped envelopes, semitone notes | ours | all 164 ids |
+| `synth` | Our own procedural Web Audio synthesis, driven by the layer recipes in the catalog | ours | every id |
+| `library` | Real recordings: CC0 freesound.org recordings (`assets/fs/`) + three Kenney CC0 packs | **CC0 1.0** | every id (since 2026-10-29) |
+| `hybrid` | The recording, synth only if a file fails to load — **the default** | CC0 + ours | every id |
+| `retro` | Chiptune: square, triangle and noise channels, stepped envelopes, semitone notes | ours | every id |
 
 **synth** builds each sound from a stack of layers: filtered noise bursts, oscillator sweeps,
 2-operator FM, Karplus-Strong plucks, grain scatters, stacked chords, and LFO-modulated drones for
 loops. A seed jitters pitch and timing per play, so twenty fireballs do not sound like the same file
 twenty times. The recipes live in the catalog, not in the code, so retuning a sound is a data edit.
 
-**library** uses `sfx/assets/kenney/` — see `sfx/assets/kenney/README.md` for the download commands,
-the licence files and what the packs do and do not cover. CC0 means public domain: commercial use is
-fine and credit is optional.
+**library** plays real recordings. Until 2026-10-29 it had only the Kenney packs (`sfx/assets/kenney/`,
+about a quarter of the ids) and everything else was synthesized — the owner called the result "pretty
+bad". Now every id has 1-3 recordings (see "Recordings" below). CC0 means public domain: commercial
+use is fine and credit is optional, but every author is listed on the credits page anyway.
+
+## Recordings (2026-10-29)
+
+- `sfx/assets/fs/<id>-<n>.ogg` — CC0 recordings from freesound.org, mono 44.1 kHz Ogg, trimmed,
+  faded, loops cross-faded. Each has `<file>.ogg.json` beside it: title, author, url, licence.
+- `sfx/tools/freesound.py` — `search "query"` lists CC0 hits (id, author, length, downloads,
+  rating) with no API key; `fetch <id> <out.ogg> [--start --len --fade --gain --loop]` downloads the
+  high-quality preview, cuts it and writes the credit file.
+- `sfx/data/recordings/A.json, B.json, C.json` — which files play for which id (A = spells, stings
+  and the big set pieces; B = statuses, combat, loot, interface; C = world sounds and ambience
+  beds). `BRIEF.md` there is the brief the pick followed (lengths, variants, what to avoid).
+  `build-catalog.py` reads these and they win over the old Kenney table.
+- `sfx/tools/build-credits.mjs` → `sfx/data/credits.json` (authors of every file the catalog uses).
+  `shared/credits.js` shows it in a game's Credits window, `credits.html` shows the whole playground.
+- Only ambience beds loop. The `spell.*.travel` sounds were loops until 2026-10-29 and a game that
+  played one and never stopped it (Kindlewild's meteor, Bannerline's bolts) hung on forever; they
+  are short one-shot whooshes now. `tests/recordings.test.js` keeps every rule above.
+
+- A loop is never boosted by the normalizer, so a quietly recorded bed would stay quiet: four beds
+  (forest, light rain, fire crackle, night) were raised 9-13 dB in the FILE (ffmpeg `volume` +
+  `alimiter`), as were `lamp.post` and `fragment.crash.small`, whose peaks capped the boost.
+  `node sfx/tools/measure.mjs hybrid` lists any id more than 2 dB off its target (none at 2026-10-29);
+  `node sfx/tools/decode-all.mjs` decodes every file in a browser (405 OK).
+
+To change a sound: search, fetch over the old file (same name), `python3 sfx/tools/build-catalog.py`,
+`node sfx/tools/build-credits.mjs`, `node --test sfx/tests/`.
 
 **retro** knows nothing about fire or frostbite. It picks a pattern from the sound's category and
 tunes it with a hash of the id, which is a useful proof that the catalog really is an interface.
@@ -254,9 +281,10 @@ formant band — no sawtooth), `hvf.bell` (the farmer's handbell), `hvf.horn` (h
 
 ## Adding a sound
 
-1. Add it to `tools/build-catalog.py` (a `synth` recipe, optionally a `library` mapping, a category).
-2. `python3 sfx/tools/build-catalog.py`.
-3. `node --test sfx/tests/sfx.test.js` — the tests check the recipe is renderable and any sample file
+1. Add it to `tools/build-catalog.py` (a `synth` recipe as the fallback, a category), fetch a
+   recording with `tools/freesound.py fetch` and map it in `data/recordings/*.json`.
+2. `python3 sfx/tools/build-catalog.py && node sfx/tools/build-credits.mjs`.
+3. `node --test sfx/tests/` — the tests check the recipe is renderable and any sample file
    really exists.
 4. Play it in the gallery and check where it lands in the loudness table; nudge `trim` if it is
    measurably on target but still feels wrong.

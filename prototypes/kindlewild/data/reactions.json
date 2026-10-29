@@ -1,0 +1,33 @@
+{
+  "about": "Two touching materials and what happens. a/b are material ids (order does not matter). aTo/bTo replace them ('keep' leaves it, 'empty' clears it). gas puffs a gas, heat warms both, blast makes a small explosion, light flashes a colour. discover names a discovery (data/discoveries.json) paid the first time. Read by js/sim/reactions.js.",
+  "list": [
+    { "a": "water", "b": "lava", "chance": 0.5, "aTo": "empty", "bTo": "obsidian", "gas": "steam", "gasAmt": 120, "light": "#ffffff", "sound": "hiss", "discover": "obsidian" },
+    { "a": "holy", "b": "lava", "chance": 0.5, "aTo": "empty", "bTo": "sunstone", "gas": "steam", "gasAmt": 90, "light": "#ffe060", "sound": "chime", "discover": "sunstone" },
+    { "a": "ice", "b": "lava", "chance": 0.4, "aTo": "water", "bTo": "crust", "gas": "steam", "gasAmt": 80, "sound": "hiss", "discover": "steam" },
+    { "a": "water", "b": "crust", "chance": 0.15, "aTo": "keep", "bTo": "obsidian", "gas": "steam", "gasAmt": 40, "discover": "obsidian" },
+    { "a": "frostfire", "b": "water", "chance": 0.6, "aTo": "keep", "bTo": "ice", "light": "#9ff4ff", "discover": "frozen-flame" },
+    { "a": "frostfire", "b": "lava", "chance": 0.5, "aTo": "empty", "bTo": "obsidian", "gas": "steam", "gasAmt": 60, "light": "#bff8ff", "discover": "frozen-flame" },
+    { "a": "frostfire", "b": "fire", "chance": 0.7, "aTo": "empty", "bTo": "empty", "gas": "steam", "gasAmt": 40, "discover": "quench" },
+    { "a": "acid", "b": "wall_stone", "chance": 0.08, "aTo": "keep", "bTo": "empty", "gas": "poison", "gasAmt": 50, "sound": "fizz", "discover": "corrosion" },
+    { "a": "acid", "b": "boulder", "chance": 0.06, "aTo": "keep", "bTo": "rubble", "gas": "poison", "gasAmt": 40, "sound": "fizz", "discover": "corrosion" },
+    { "a": "acid", "b": "wall_iron", "chance": 0.03, "aTo": "empty", "bTo": "empty", "gas": "poison", "gasAmt": 60, "sound": "fizz", "discover": "corrosion" },
+    { "a": "acid", "b": "wall_wood", "chance": 0.1, "aTo": "keep", "bTo": "empty", "gas": "poison", "gasAmt": 40, "sound": "fizz", "discover": "corrosion" },
+    { "a": "acid", "b": "tree", "chance": 0.1, "aTo": "keep", "bTo": "deadtree", "gas": "poison", "gasAmt": 30, "discover": "corrosion" },
+    { "a": "acid", "b": "rubble", "chance": 0.08, "aTo": "keep", "bTo": "empty", "gas": "poison", "gasAmt": 20 },
+    { "a": "acid", "b": "water", "chance": 0.2, "aTo": "water", "bTo": "keep", "discover": "diluted" },
+    { "a": "acid", "b": "holy", "chance": 0.5, "aTo": "water", "bTo": "water", "light": "#ffffff", "discover": "purified" },
+    { "a": "goo", "b": "holy", "chance": 0.5, "aTo": "flowers", "bTo": "water", "light": "#ffe9a8", "sound": "chime", "discover": "purified" },
+    { "a": "goo", "b": "fire", "chance": 0.4, "aTo": "empty", "bTo": "keep", "gas": "spores", "gasAmt": 120, "light": "#c46bff", "discover": "bog-flare" },
+    { "a": "goo", "b": "lava", "chance": 0.4, "aTo": "empty", "bTo": "keep", "blast": 2.2, "light": "#c46bff", "discover": "bog-flare" },
+    { "a": "oil", "b": "lava", "chance": 0.5, "aTo": "fire", "bTo": "keep", "heat": 120, "light": "#ff9a2a", "discover": "pitch-fire" },
+    { "a": "seed", "b": "water", "chance": 0.05, "aTo": "tree", "bTo": "keep", "discover": "sapling" },
+    { "a": "seed", "b": "holy", "chance": 0.2, "aTo": "tree", "bTo": "flowers", "light": "#9fff7a", "discover": "sapling" },
+    { "a": "crystal", "b": "lava", "chance": 0.03, "aTo": "empty", "bTo": "keep", "blast": 4, "light": "#c26bff", "discover": "arcane-burst" },
+    { "a": "void", "b": "holy", "chance": 0.4, "aTo": "empty", "bTo": "empty", "light": "#ffffff", "blast": 1.6, "discover": "unmaking" },
+    { "a": "ice", "b": "acid", "chance": 0.2, "aTo": "water", "bTo": "keep", "gas": "poison", "gasAmt": 20 },
+    { "a": "mushroom", "b": "fire", "chance": 0.4, "aTo": "empty", "bTo": "keep", "gas": "spores", "gasAmt": 160, "light": "#29ffd0", "discover": "spore-cloud" },
+    { "a": "blackpowder", "b": "lava", "chance": 0.9, "aTo": "fire", "bTo": "keep", "heat": 200 },
+    { "a": "bones", "b": "goo", "chance": 0.02, "aTo": "empty", "bTo": "keep", "spawn": "skeleton", "light": "#9b3fff", "discover": "restless-bones" },
+    { "a": "dragonegg", "b": "lava", "chance": 0.00006, "aTo": "keep", "bTo": "keep", "spawn": "wyrmling", "light": "#ffb04a", "discover": "hatchling" }
+  ]
+}

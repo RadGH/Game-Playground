@@ -1,0 +1,13 @@
+You are making small GAME ICONS for an original pixel-art fantasy god game. Use your image generation tool to create the images listed below. For EACH line create ONE separate square image (1024x1024 PNG) and save it in the current working directory with exactly the given file name. Do nothing else (no other files). IMPORTANT when saving: never pass the image data on a command line (it is too long). Write the base64 data to a temporary file in small pieces or let your image tool save directly, then decode it from that file (for example `base64 -d tmp.b64 > name.png`). Save each image as soon as it is made, one at a time, and check each file exists before going on.
+
+Style for every icon (keep them consistent as a set):
+- True PIXEL ART: chunky square pixels, as if drawn on a 32x32 grid and scaled up with no smoothing; crisp hard pixel edges, no anti-aliasing, no gradients except pixel dithering.
+- Medieval fantasy and magic theme, rich saturated colours with glowing highlights (fire orange, arcane violet, frost cyan, gold).
+- ONE simple, bold, abstract emblem centred, filling about 70% of the square, readable at a tiny size.
+- Plain flat background of solid dark purple #1e1630 filling the whole square, no border, no frame, no scenery beyond what is described.
+- ABSOLUTELY NO PEOPLE, no human figures, no faces of people, no hands of people. No text, no letters, no numbers, no logos.
+
+The icons (file name, then what it shows):
+- spell-volcano.png: a small erupting volcano cone
+- spell-acidrain.png: a green cloud dripping bright green drops
+- spell-void.png: a black orb with a violet ring

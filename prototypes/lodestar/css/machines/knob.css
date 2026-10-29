@@ -1,0 +1,42 @@
+/* Bakelite knobs with knurled skirts, an engraved scale and a ring of labelled detents (each a 44 px tap target). */
+.m-range .machine-body, .m-filter .machine-body, .m-timedial .machine-body { align-items: center; justify-content: center; }
+.knob { position: relative; display: flex; flex-direction: column; align-items: center; --kc: 52px; --kr: 58px; }
+.knob-full .knob-face { position: relative; width: calc(var(--kr) * 2 + 44px); height: calc(var(--kr) * 2 + 44px); flex: none; }
+.knob-scale { position: absolute; left: 50%; top: 50%; width: calc(var(--kc) + 26px); height: calc(var(--kc) + 26px); transform: translate(-50%, -50%); overflow: visible; }
+.knob-scale line { stroke: rgba(230, 220, 190, 0.55); stroke-width: 2.4; stroke-linecap: round; }
+.knob-cap { position: absolute; left: 50%; top: 50%; width: var(--kc); height: var(--kc); margin: calc(var(--kc) / -2) 0 0 calc(var(--kc) / -2);
+  border: 0; padding: 0; border-radius: 50%; cursor: grab; touch-action: none; background: transparent; }
+/* the button stays square to the panel (honest hit box); only the bakelite inside it turns */
+.knob-rot { position: absolute; inset: 0; border-radius: 50%; transform: rotate(var(--rot, 0deg)); transition: transform .11s cubic-bezier(.25, 1.9, .45, 1); }
+.knob.turning .knob-cap { cursor: grabbing; } .knob.turning .knob-rot { transition-duration: .07s; }
+/* the shadow it throws on the panel does not rotate */
+.knob-face::before { content: ""; position: absolute; left: 50%; top: 50%; width: var(--kc); height: var(--kc); transform: translate(-46%, -42%); border-radius: 50%;
+  background: rgba(0,0,0,0.55); filter: blur(6px); }
+.knob-skirt { position: absolute; inset: 0; border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, #2a201b 0 6deg, #0f0b09 6deg 12deg);
+  box-shadow: inset 0 0 0 2px #0a0706, 0 0 0 1px rgba(255,255,255,0.06); }
+.knob-grip { position: absolute; inset: 12%; border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, var(--bakelite-hi), #2b201b 45%, var(--bakelite) 80%);
+  box-shadow: inset 0 2px 2px rgba(255,255,255,0.12), inset 0 -3px 6px rgba(0,0,0,0.6), 0 2px 3px rgba(0,0,0,0.6); }
+.knob-pointer { position: absolute; left: 50%; top: 5%; width: 4px; height: 38%; margin-left: -2px; border-radius: 2px;
+  background: linear-gradient(180deg, #fff6dc, #d9cba4); box-shadow: 0 0 4px rgba(255,240,200,0.5); }
+/* the filter selector is a chicken-head: a long pointer bar instead of a round grip */
+.knob-selector .knob-grip { inset: 18% 34%; border-radius: 40% 40% 30% 30% / 70% 70% 30% 30%; }
+.knob-selector .knob-pointer { top: 0; height: 30%; }
+.knob-selector .knob-detent { font-size: 10.5px; letter-spacing: .02em; }
+.knob-heavy .knob-skirt { background: repeating-conic-gradient(from 0deg, #3a3f40 0 5deg, #1d2122 5deg 10deg); }
+.knob-heavy .knob-grip { background: radial-gradient(circle at 36% 30%, #8d9592, #4a5150 45%, #252a2a 85%); }
+.knob-heavy .knob-pointer { background: linear-gradient(180deg, #ffd27a, #c58a20); }
+.knob-detent { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  background: transparent; color: rgba(236, 226, 196, 0.7); font: 700 12px var(--font-stencil); letter-spacing: .04em; white-space: nowrap;
+  transform: rotate(var(--a)) translateY(calc(var(--kr) * -1)) rotate(calc(var(--a) * -1)); }
+.knob-detent:hover { color: #fff; }
+.knob-detent.on { color: var(--amber); text-shadow: 0 0 8px rgba(255,180,60,0.9); }
+.knob-detent.on::after { content: ""; position: absolute; left: 50%; bottom: 7px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.knob-plate { margin-top: -6px; font: 700 10px var(--font-stencil); letter-spacing: .24em; color: rgba(0,0,0,0.55); text-shadow: 0 1px 0 rgba(255,255,255,0.1); white-space: nowrap; }
+/* mini knob (phone strip): 44 px, a readout beside it; tap left half = down, right half = up */
+.knob.knob-mini { flex-direction: row; gap: 4px; --kc: 44px; }
+.knob-mini .knob-face { position: relative; width: 44px; height: 44px; flex: none; }
+.knob-mini .knob-scale { width: 48px; height: 48px; }
+.knob-mini .knob-plate { margin: 0; display: flex; flex-direction: column; align-items: flex-start; color: rgba(255,200,120,0.6); letter-spacing: .14em; font-size: 8px; }
+.knob-mini .knob-read { font: 700 13px var(--font-nixie); color: var(--amber); text-shadow: 0 0 6px rgba(255,170,40,0.7); letter-spacing: 0; }

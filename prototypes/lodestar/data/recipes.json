@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "_doc": "What each producer makes (PLAN M3). `in` is taken from the building's pool at the start of a batch, `out` is put back when it ends after `ticks` (20 a second, at full power and full speed). `fuel`: one of these is burned per batch, the first the pool holds (so a smelter runs on coal or on timber, whichever is there). `keep` is the default keep-in-stock target: the producer stops while the base holds at least this much of its first output, and starts again below it. Mining recipes have no `in`: `dig` names the resource taken from the ground around the building.",
+  "list": [
+    { "id": "cut_timber", "name": "Cut timber", "dig": "timber", "out": { "timber": 6 }, "ticks": 120, "keep": 300 },
+    { "id": "dig_copper", "name": "Dig copper ore", "dig": "copper_ore", "out": { "copper_ore": 8 }, "ticks": 240, "keep": 400 },
+    { "id": "dig_iron", "name": "Dig iron ore", "dig": "iron_ore", "out": { "iron_ore": 8 }, "ticks": 240, "keep": 400 },
+    { "id": "dig_coal", "name": "Dig coal", "dig": "coal", "out": { "coal": 8 }, "ticks": 240, "keep": 300 },
+    { "id": "dig_stone", "name": "Quarry stone", "dig": "stone", "out": { "stone": 8 }, "ticks": 200, "keep": 300 },
+    { "id": "dig_sand", "name": "Dig sand", "dig": "sand", "out": { "sand": 8 }, "ticks": 200, "keep": 200 },
+    { "id": "drill_copper", "name": "Drill copper ore", "dig": "copper_ore", "out": { "copper_ore": 8 }, "ticks": 80, "keep": 600 },
+    { "id": "drill_iron", "name": "Drill iron ore", "dig": "iron_ore", "out": { "iron_ore": 8 }, "ticks": 80, "keep": 600 },
+    { "id": "drill_coal", "name": "Drill coal", "dig": "coal", "out": { "coal": 8 }, "ticks": 80, "keep": 400 },
+    { "id": "drill_stone", "name": "Drill stone", "dig": "stone", "out": { "stone": 8 }, "ticks": 70, "keep": 400 },
+    { "id": "planks", "name": "Saw planks", "in": { "timber": 2 }, "out": { "planks": 3 }, "ticks": 100, "keep": 200 },
+    { "id": "block", "name": "Cut stone block", "in": { "stone": 2 }, "out": { "block": 1 }, "ticks": 100, "keep": 200 },
+    { "id": "copper_bar", "name": "Smelt copper bars", "in": { "copper_ore": 4 }, "fuel": { "coal": 1, "timber": 2 }, "out": { "copper_bar": 4 }, "ticks": 240, "keep": 200 },
+    { "id": "iron_bar", "name": "Smelt iron bars", "in": { "iron_ore": 4 }, "fuel": { "coal": 1, "timber": 2 }, "out": { "iron_bar": 4 }, "ticks": 280, "keep": 200 },
+    { "id": "grow_food", "name": "Grow food", "out": { "food": 8 }, "ticks": 600, "keep": 400, "_m7": "a farm field: output scales with the share of its field that is crop (fire burns it, the farm replants)" },
+    { "id": "fish", "name": "Fish", "out": { "food": 4 }, "ticks": 300, "keep": 400 },
+    { "id": "draw_water", "name": "Draw water", "out": { "water": 4 }, "ticks": 160, "keep": 300 },
+    { "id": "harvest_crystal", "name": "Harvest crystal shards", "dig": "crystal", "out": { "crystal": 8 }, "ticks": 260, "keep": 300, "_m6": "harvester" },
+    { "id": "refine_mana", "name": "Refine mana", "in": { "crystal": 4 }, "out": { "mana": 6 }, "ticks": 160, "keep": 30, "_m6": "mana refinery; a keep of 30 jars means it stops once the mana store is full and the jars pile up" }
+  ]
+}

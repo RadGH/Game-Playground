@@ -1,0 +1,66 @@
+{
+  "_about": "The bunker console (M2). Every machine, where it lives, and what delivers it. Later milestones ADD rows to `machines` (PLAN §4.1); never edit another milestone's rows. `place`: desk = bolted to the desk from the start; drawer = lives in the drawer bay under its group label. `unlock`: 'start' or the id of the unlock that delivers it as a crate (event machineUnlocked).",
+  "groups": [
+    { "id": "front", "label": "FRONT" },
+    { "id": "logistics", "label": "LOGISTICS" },
+    { "id": "arcane", "label": "ARCANE" },
+    { "id": "space", "label": "SPACE" }
+  ],
+  "machines": [
+    { "id": "scope", "name": "Tactical Scope", "group": "front", "place": "desk", "unlock": "start", "milestone": "M2" },
+    { "id": "range", "name": "Range", "group": "front", "place": "desk", "unlock": "start", "milestone": "M2" },
+    { "id": "filter", "name": "Filter", "group": "front", "place": "desk", "unlock": "start", "milestone": "M2" },
+    { "id": "toolbank", "name": "Tool Bank", "group": "front", "place": "desk", "unlock": "start", "milestone": "M2" },
+    { "id": "timedial", "name": "Time", "group": "front", "place": "desk", "unlock": "start", "milestone": "M2" },
+    { "id": "teletype", "name": "Teletype", "group": "front", "place": "desk", "unlock": "start", "milestone": "M2" },
+    { "id": "radio", "name": "Radio", "group": "front", "place": "desk", "unlock": "start", "milestone": "M2" },
+    { "id": "alarms", "name": "Alarms", "group": "front", "place": "desk", "unlock": "start", "milestone": "M2" },
+    { "id": "dayclock", "name": "Day Clock", "group": "front", "place": "desk", "unlock": "start", "milestone": "M2" },
+    { "id": "ledger", "name": "Build Ledger", "group": "front", "place": "drawer", "unlock": "hq", "arrives": "when the HQ is raised", "milestone": "M3" },
+    { "id": "garrison", "name": "Garrison Board", "group": "front", "place": "drawer", "unlock": "barracks", "arrives": "with the first barracks", "milestone": "M5" },
+    { "id": "calculator", "name": "Calculator", "group": "logistics", "place": "drawer", "unlock": "lab", "arrives": "with the first lab", "milestone": "M9" },
+    { "id": "dispatch", "name": "Dispatch Board", "group": "logistics", "place": "drawer", "unlock": "first-line", "arrives": "with the first haul line", "milestone": "M10" },
+    { "id": "gauge", "name": "Mana Gauge", "group": "arcane", "place": "drawer", "unlock": "mana-refinery", "arrives": "with the mana refinery", "milestone": "M6" },
+    { "id": "spellboard", "name": "Spell Board", "group": "arcane", "place": "drawer", "unlock": "mana-refinery", "arrives": "with the mana refinery", "milestone": "M6" },
+    { "id": "orrery", "name": "Orrery", "group": "space", "place": "drawer", "unlock": "rocketry", "arrives": "with rocketry", "milestone": "M13" },
+    { "id": "orbital-scope", "name": "Orbital Scope", "group": "space", "place": "drawer", "unlock": "satellite", "arrives": "with the first satellite", "milestone": "M13" },
+    { "id": "channel", "name": "Channel Selector", "group": "space", "place": "drawer", "unlock": "second-base", "arrives": "with a second base", "milestone": "M14b" },
+    { "id": "town", "name": "Town Board", "group": "front", "place": "drawer", "unlock": "hq", "arrives": "when the HQ is raised", "milestone": "M7" }
+  ],
+  "range": { "detents": [0.25, 0.5, 1, 2, 4, 8], "labels": ["¼", "½", "1", "2", "4", "8"], "default": 3, "chartBelow": 1, "_chartBelow": "pixels per cell under this draw the downsampled chart instead of cells" },
+  "filters": [
+    { "id": "sight", "label": "SIGHT", "empty": null },
+    { "id": "ore", "label": "ORE", "empty": "NO SURVEY DATA" },
+    { "id": "flow", "label": "FLOW", "empty": "NO LINES RUNNING" },
+    { "id": "threat", "label": "THREAT", "empty": "NO CONTACTS" }
+  ],
+  "time": { "detents": [0, 20, 40, 80], "labels": ["II", "1×", "2×", "4×"], "names": ["PAUSE", "1×", "2×", "4×"], "default": 1, "_detents": "ticks a second (PLAN §1.2)" },
+  "tools": [
+    { "id": "build", "label": "BUILD", "key": "1" },
+    { "id": "wall", "label": "WALL", "key": "2" },
+    { "id": "road", "label": "ROAD", "key": "3" },
+    { "id": "rail", "label": "RAIL", "key": "4", "unlock": "rails" },
+    { "id": "order", "label": "ORDER", "key": "5" },
+    { "id": "clear", "label": "CLEAR", "key": "6" }
+  ],
+  "lamps": [
+    { "id": "raid", "label": "RAID", "colour": "red" },
+    { "id": "fire", "label": "FIRE", "colour": "amber" },
+    { "id": "convoy", "label": "CONVOY", "colour": "yellow" },
+    { "id": "hq", "label": "HQ", "colour": "red" },
+    { "id": "base", "label": "BASE", "colour": "blue" }
+  ],
+  "knob": { "dragPxPerDetent": 26, "wheelPerDetent": 1 },
+  "pen": { "touchOffsetPx": 40, "padSpeedPx": 520, "snapPx": 18, "panPadPx": 900, "panKeyPx": 640 },
+  "sight": { "hqSensorRadius": 160, "smokeBlocks": 90, "darkBelow": 70, "litAbove": 70, "_about": "quarter-res: smoke density ≥ smokeBlocks hides a cell; at night (daylight < darkBelow) only cells with light ≥ litAbove are seen" },
+  "newGame": {
+    "difficulty": [{ "id": "calm", "label": "CALM" }, { "id": "standard", "label": "STANDARD" }, { "id": "grim", "label": "GRIM" }],
+    "mapSize": [{ "id": "small", "label": "SMALL", "cells": 1024 }, { "id": "normal", "label": "NORMAL", "cells": 1536 }, { "id": "large", "label": "LARGE", "cells": 2048 }],
+    "defaultDifficulty": 1, "defaultMapSize": 1
+  },
+  "stub": {
+    "_about": "Stand-in world used until M1's cell world and worker land (js/console/stub/). Only the console reads these.",
+    "dayTicks": 9600, "startHour": 9, "hqLampRadius": 34, "fireLightRadius": 22, "lavaLightRadius": 10,
+    "smokePerFire": 26, "smokeDecay": 3, "windCells": 1
+  }
+}

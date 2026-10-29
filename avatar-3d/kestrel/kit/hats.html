@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kestrel Hats</title>
+<link rel="stylesheet" href="../../../shared/style.css">
+<link rel="stylesheet" href="css/faces.css">
+<script type="importmap">{ "imports": { "three": "../../../vendor/three/three.module.js", "three/addons/": "../../../vendor/three/addons/" } }</script>
+</head>
+<body class="fc">
+<!-- Kestrel kit review sheet for hats (batch 3): every hat on both bodies under several hairstyles, front + 3/4, turns,
+     clips and expressions, and Thousandvale's dressed class looks.
+     Query: ?mode=grid|turn|clips|expr|classes  ?body=both|male|female  ?hairs=short,long,ponytail  ?ids=a,b
+            ?views=front,three  ?frame=head|bust  ?beard=full  ?ears=pointed  ?emblem=flame  ?lod=1  ?cols=6  ?shot=1
+     window.__hats = { ready, cells, error } for tools (tools/hats-shot.mjs). -->
+<header class="fc-top">
+  <h1>Kestrel hats <small class="muted">every hat a look can name, refitted to the realistic head and every hairstyle</small></h1>
+  <p class="muted small">Each cell is a whole character: the hat, the hair cut to it, the ears / beard / face it hides left out. The number is the character's triangle count. <a href="faces.html">faces and hair</a> · <a href="index.html">kit preview</a> · <a href="README.md">notes</a></p>
+  <div class="row" id="c-mode"></div>
+  <div class="row" id="c-body"></div>
+  <div class="row" id="c-hair"></div>
+  <div class="row" id="c-view"></div>
+</header>
+<main class="fc-stage"><canvas id="view"></canvas><div id="grid" class="fc-grid"></div></main>
+<script type="module" src="js/hats-page.js"></script>
+</body>
+</html>

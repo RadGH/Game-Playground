@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playground — Credits</title>
+<link rel="stylesheet" href="shared/style.css">
+<link rel="stylesheet" href="shared/credits.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>Credits</h1>
+  <p class="muted">Everything in these games that someone else made: sounds, fonts and code libraries, with their authors and licences. Each game's own Credits button shows only what that game uses. <a href="index.html">Back to the playground</a></p>
+  <div id="credits" class="cr-body"><p class="cr-empty">Loading…</p></div>
+</div>
+<script type="module">
+import { loadCredits, creditsHtml } from './shared/credits.js';
+document.getElementById('credits').innerHTML = creditsHtml(await loadCredits());
+</script>
+</body>
+</html>

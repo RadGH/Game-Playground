@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kestrel reference pictures</title>
+<link rel="stylesheet" href="../../../shared/style.css">
+<link rel="stylesheet" href="../kestrel.css">
+</head>
+<body class="ks">
+<!-- Every Codex reference picture for Kestrel, from manifest.json. Click one for the full-size file (to upload to a service). -->
+<header class="ks-top">
+  <h1>Kestrel <small class="muted">reference pictures</small></h1>
+  <p class="muted">Made with Codex from the owner's mockup. Every attempt, hand-coded or from a 3D service, works from these.
+    Click a picture to open the full-size file. Services that take one picture want the <b>front</b>; services that take several want
+    front, left, back and right from the <b>same set</b>. The crops are cut from one sheet, so they match each other exactly; the
+    single views are higher detail but drawn one at a time. <a href="../">Back to the review page</a></p>
+</header>
+<main id="sets"></main>
+<script type="module">
+const m = await (await fetch('manifest.json')).json();
+const host = document.getElementById('sets');
+for (const group of m.groups) {
+  const h = document.createElement('h2'); h.textContent = group.title; host.appendChild(h);
+  if (group.note) { const p = document.createElement('p'); p.className = 'muted small'; p.textContent = group.note; host.appendChild(p); }
+  const grid = document.createElement('div'); grid.className = 'ks-cols'; host.appendChild(grid);
+  for (const [file, label] of group.files) {
+    const a = document.createElement('a'); a.href = file; a.className = 'ks-col'; a.target = '_blank';
+    a.innerHTML = `<div class="ks-view"><img loading="lazy" alt=""></div><div class="line"></div>`;
+    a.querySelector('img').src = file; a.querySelector('.line').textContent = `${label} · ${file}`;
+    grid.appendChild(a);
+  }
+}
+</script>
+</body>
+</html>

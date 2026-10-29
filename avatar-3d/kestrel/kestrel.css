@@ -1,0 +1,28 @@
+/* Kestrel review page. Phone first: one column per row on a phone, up to four across on a wide screen. */
+.ks { margin: 0; padding: 0 16px 40px; background: #12151b; color: #dde3ea; }
+.ks-top h1 { margin: 14px 0 4px; font-size: 1.4rem; }
+.ks-top p { margin: 0 0 10px; max-width: 70ch; }
+.ks a { color: #8cc8ff; }
+.ks .small { font-size: 0.82rem; }
+.ks-controls { position: sticky; top: 0; z-index: 5; background: #12151bee; padding: 6px 0; border-bottom: 1px solid #2a313c; }
+.ks-controls .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0; }
+.ks-controls button, .ks-panel button { background: #222a35; color: #dde3ea; border: 1px solid #364151; border-radius: 6px; padding: 6px 10px; font: inherit; font-size: 0.85rem; cursor: pointer; min-height: 34px; }
+.ks-controls button.on { background: #2f6fb0; border-color: #4a8fd6; }
+.ks-controls label { font-size: 0.85rem; display: inline-flex; gap: 4px; align-items: center; margin-right: 10px; }
+.ks-cols { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin: 12px 0; }
+.ks-col { background: #1a1f27; border: 1px solid #2a313c; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+.ks-col h3 { margin: 0; padding: 8px 10px 2px; font-size: 0.95rem; }
+.ks-col .by { padding: 0 10px 6px; font-size: 0.78rem; color: #8a96a6; }
+.ks-col .by a { margin-left: 6px; }
+.ks-view { position: relative; aspect-ratio: 3 / 4; background: #c9ccd1; touch-action: none; }
+.ks-view canvas { width: 100%; height: 100%; display: block; }
+.ks-view img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ks-view .msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; text-align: center; color: #333; font-size: 0.9rem; }
+.ks-col .line { padding: 6px 10px; font-size: 0.78rem; color: #9aa6b6; min-height: 1.2em; }
+.ks-panel h2 { font-size: 1.05rem; margin: 18px 0 6px; }
+.ks-table { border-collapse: collapse; font-size: 0.82rem; width: 100%; max-width: 900px; display: block; overflow-x: auto; }
+.ks-table th, .ks-table td { border: 1px solid #2a313c; padding: 4px 8px; text-align: left; white-space: nowrap; }
+.ks-table th { background: #1d232c; }
+.ks-table td.bad { color: #ff9a8a; }
+.ks-table select, .ks-table input { background: #222a35; color: #dde3ea; border: 1px solid #364151; border-radius: 4px; font: inherit; }
+.ks-table input[type=text] { width: 22ch; }

@@ -1,0 +1,275 @@
+{
+ "id": "act5",
+ "name": "Act V — The Hollow Dark",
+ "blurb": "Night falls and stays. The dead walk, the bog splits and something hungry opens in the dark.",
+ "levels": [
+  {
+   "id": "5-1", "name": "The Restless Yard", "icon": "lvl-5-1",
+   "intro": ["The old graveyard above Mossfold will not stay quiet tonight.", "The bones climb out in waves and march for the lamps.", "Hold them off until the sun comes up."],
+   "map": { "W": 160, "H": 240, "seed": 5101, "recipe": "greenvale", "override": { "sea": 0.04, "rivers": 0, "villages": 0, "glades": 0 }, "clock": 0.8, "dayLength": 9800,
+    "ops": [
+     { "op": "flatten", "at": [80, 130], "r": 80 },
+     { "op": "clear", "at": [80, 48], "r": 26 },
+     { "op": "ground", "at": [80, 48], "r": 24, "mat": "dirt" },
+     { "op": "paint", "at": [80, 48], "r": 22, "mat": "bones", "density": 0.05 },
+     { "op": "paint", "at": [80, 48], "r": 22, "mat": "boulder", "density": 0.035 },
+     { "op": "paint", "at": [80, 48], "r": 30, "mat": "deadtree", "density": 0.025 },
+     { "op": "paint", "at": [30, 120], "r": 16, "mat": "tree", "density": 0.3 },
+     { "op": "paint", "at": [132, 128], "r": 14, "mat": "tree", "density": 0.3 }
+    ] },
+   "villages": [ { "at": [80, 196], "name": "Mossfold", "people": 8, "wardens": 1, "prebuilt": ["cottage", "cottage", "cottage", "cottage", "cottage", "farm", "well", "lamppost", "lamppost"] } ],
+   "herds": [["sheep", 1, 4]],
+   "spawns": [
+    { "species": "wisp", "count": 10, "at": [80, 48], "spread": 22 },
+    { "species": "skeleton", "count": 10, "at": [80, 48], "spread": 14, "goal": "village", "time": 2, "hp": 2.2, "announce": "The graves are opening!" },
+    { "species": "skeleton", "count": 10, "at": [80, 40], "spread": 14, "goal": "village", "time": 24, "hp": 2.2 },
+    { "species": "skeleton", "count": 7, "at": "west", "t": 0.45, "spread": 6, "goal": "village", "time": 42, "hp": 2.2, "announce": "More from the west barrows!" },
+    { "species": "skeleton", "count": 14, "at": [80, 48], "spread": 16, "goal": "village", "time": 62, "hp": 2.2 },
+    { "species": "skeleton", "count": 8, "at": "east", "t": 0.5, "spread": 6, "goal": "village", "time": 82, "hp": 2.2, "announce": "The east barrows wake too." },
+    { "species": "skeleton", "count": 14, "at": [80, 44], "spread": 18, "goal": "village", "time": 100, "hp": 2.5 },
+    { "species": "skeleton", "count": 12, "at": [80, 48], "spread": 18, "goal": "village", "time": 122, "hp": 2.5, "announce": "The last of the dead are coming — dawn is close." }
+   ],
+   "mana": { "start": 80, "max": 130, "regen": 4 },
+   "loadout": ["spell:fireball", "spell:lightning", "spell:heal", "spell:barrier", "creature:archer", "tool:inspect"],
+   "goals": [
+    { "type": "survive", "secs": 150, "text": "Hold until dawn", "short": "Dawn" },
+    { "type": "people", "min": 5, "text": "Keep 5 people alive", "failText": "The dead took Mossfold", "short": "People" },
+    { "type": "protect", "what": "houses", "min": 3, "text": "Keep 3 cottages standing", "failText": "The dead took Mossfold", "short": "Houses" }
+   ],
+   "stars": [
+    { "type": "win", "text": "See the dawn" },
+    { "type": "peopleLostMax", "n": 1, "text": "Lose one person at most" },
+    { "type": "killedBy", "species": "skeleton", "by": ["heal"], "count": 15, "text": "Lay 15 to rest with Healing Light" }
+   ],
+   "reward": "creature:skeleton",
+   "tip": "Healing Light mends the living and burns the restless dead. Bones do not catch fire, but a fireball still breaks them."
+  },
+  {
+   "id": "5-2", "name": "The Splitting Bog", "icon": "lvl-5-2",
+   "intro": ["Huge bog slimes are crawling out of the fen toward Reedwick.", "Strike one and it splits in two — and the halves split again.", "Fire is different: a slime that burns does not split."],
+   "map": { "W": 160, "H": 240, "seed": 5202, "recipe": "greenvale", "override": { "sea": 0.06, "rivers": 0, "villages": 0, "glades": 0, "wet": 0.3 }, "clock": 0.78, "dayLength": 11000,
+    "ops": [
+     { "op": "flatten", "at": [80, 120], "r": 80 },
+     { "op": "ground", "at": [80, 104], "r": 54, "mat": "marsh" },
+     { "op": "paint", "at": [56, 98], "r": 5, "mat": "goo", "amount": 30 },
+     { "op": "paint", "at": [106, 110], "r": 4, "mat": "goo", "amount": 30 },
+     { "op": "paint", "at": [80, 80], "r": 4, "mat": "goo", "amount": 30 },
+     { "op": "paint", "at": [80, 100], "r": 46, "mat": "tallgrass", "density": 0.25 },
+     { "op": "paint", "at": [80, 100], "r": 46, "mat": "deadtree", "density": 0.02 },
+     { "op": "line", "at": [0, 156], "to": [159, 150], "r": 3, "mat": "cobble" },
+     { "op": "line", "at": [0, 160], "to": [159, 154], "r": 2, "mat": "dirt" }
+    ] },
+   "villages": [ { "at": [80, 200], "name": "Reedwick", "people": 9, "wardens": 1, "prebuilt": ["cottage", "cottage", "cottage", "cottage", "longhouse", "farm", "well", "lamppost"] } ],
+   "herds": [["frog", 2, 4]],
+   "spawns": [
+    { "species": "slime", "count": 4, "at": [80, 112], "spread": 16, "goal": "village", "time": 2, "hp": 2.3, "announce": "Something huge is oozing out of the bog." },
+    { "species": "slime", "count": 3, "at": [14, 118], "spread": 6, "goal": "village", "time": 24, "hp": 2.3, "announce": "More from the west reeds!" },
+    { "species": "slime", "count": 3, "at": [146, 118], "spread": 6, "goal": "village", "time": 46, "hp": 2.3, "announce": "And from the east!" },
+    { "species": "slime", "count": 5, "at": [80, 104], "spread": 14, "goal": "village", "time": 70, "hp": 2.3, "announce": "The heart of the bog is emptying." },
+    { "species": "slime", "count": 2, "at": [14, 110], "spread": 6, "goal": "village", "time": 92, "hp": 2.3 },
+    { "species": "slime", "count": 2, "at": [146, 110], "spread": 6, "goal": "village", "time": 94, "hp": 2.3 },
+    { "species": "slime", "count": 4, "at": [80, 116], "spread": 16, "goal": "village", "time": 112, "hp": 2.3, "announce": "One last swell from the bog." }
+   ],
+   "mana": { "start": 120, "max": 160, "regen": 5.5 },
+   "loadout": ["spell:fireball", "spell:firewall", "spell:frost", "material:oil", "creature:archer", "tool:inspect"],
+   "goals": [
+    { "type": "survive", "secs": 155, "text": "Hold until the bog sleeps", "short": "Hold" },
+    { "type": "protect", "what": "houses", "min": 3, "text": "Keep 3 houses standing", "failText": "The slimes swallowed Reedwick", "short": "Houses" },
+    { "type": "people", "min": 5, "text": "Keep 5 people alive", "failText": "The slimes swallowed Reedwick", "short": "People" }
+   ],
+   "stars": [
+    { "type": "win", "text": "Reedwick holds" },
+    { "type": "killedBy", "species": "slime", "by": ["fire"], "count": 12, "text": "Burn 12 slimes" },
+    { "type": "peopleLostMax", "n": 1, "text": "Lose one person at most" }
+   ],
+   "reward": "creature:slime",
+   "tip": "Drag a Wall of Fire across their path north of the road, or paint pitch and drop a fireball on it. Frost Nova holds them still while they burn. Keep fire away from the thatch."
+  },
+  {
+   "id": "5-3", "name": "Mire of the Drowned", "icon": "lvl-5-3",
+   "intro": ["Three pools of bog goo lie above Fennick, full of old bones.", "Wherever bones touch the goo, the dead climb out.", "Purify the pools with blessed water before the bog empties its graves."],
+   "map": { "W": 160, "H": 240, "seed": 5303, "recipe": "greenvale", "override": { "sea": 0.04, "rivers": 0, "villages": 0, "glades": 0, "wet": 0.25 }, "clock": 0.82, "dayLength": 13000,
+    "ops": [
+     { "op": "flatten", "at": [80, 120], "r": 80 },
+     { "op": "ground", "at": [80, 70], "r": 52, "mat": "marsh" },
+     { "op": "raise", "at": [40, 76], "r": 12, "h": -2.5 },
+     { "op": "raise", "at": [120, 84], "r": 12, "h": -2.5 },
+     { "op": "raise", "at": [80, 40], "r": 12, "h": -2.5 },
+     { "op": "paint", "at": [40, 76], "r": 9, "mat": "goo", "amount": 14 },
+     { "op": "paint", "at": [120, 84], "r": 9, "mat": "goo", "amount": 14 },
+     { "op": "paint", "at": [80, 40], "r": 9, "mat": "goo", "amount": 14 },
+     { "op": "paint", "at": [40, 76], "r": 5, "mat": "bones", "density": 0.03 },
+     { "op": "paint", "at": [120, 84], "r": 5, "mat": "bones", "density": 0.03 },
+     { "op": "paint", "at": [80, 40], "r": 5, "mat": "bones", "density": 0.03 },
+     { "op": "paint", "at": [80, 70], "r": 46, "mat": "deadtree", "density": 0.02 }
+    ] },
+   "villages": [ { "at": [80, 198], "name": "Fennick", "people": 9, "wardens": 2, "prebuilt": ["cottage", "cottage", "cottage", "cottage", "cottage", "farm", "well", "lamppost", "lamppost"] } ],
+   "herds": [["frog", 2, 4]],
+   "spawns": [
+    { "species": "wisp", "count": 8, "at": [80, 70], "spread": 40 },
+    { "species": "skeleton", "count": 6, "at": [40, 94], "spread": 6, "goal": "village", "time": 15, "hp": 1.6, "announce": "The drowned are wading out of the west pool." },
+    { "species": "skeleton", "count": 6, "at": [120, 102], "spread": 6, "goal": "village", "time": 45, "hp": 1.6 },
+    { "species": "skeleton", "count": 8, "at": [80, 58], "spread": 6, "goal": "village", "time": 75, "hp": 1.7 },
+    { "species": "skeleton", "count": 8, "at": [40, 94], "spread": 6, "goal": "village", "time": 105, "hp": 1.8 },
+    { "species": "skeleton", "count": 10, "at": [120, 102], "spread": 6, "goal": "village", "time": 135, "hp": 1.8 }
+   ],
+   "events": [
+    { "time": 30, "op": { "op": "paint", "at": [40, 76], "r": 5, "mat": "bones", "density": 0.035 }, "say": "The bog gives up more of its dead." },
+    { "time": 31, "op": { "op": "paint", "at": [120, 84], "r": 5, "mat": "bones", "density": 0.035 } },
+    { "time": 32, "op": { "op": "paint", "at": [80, 40], "r": 5, "mat": "bones", "density": 0.035 } },
+    { "time": 60, "op": { "op": "paint", "at": [40, 76], "r": 5, "mat": "bones", "density": 0.045 }, "say": "Bones are surfacing in every pool." },
+    { "time": 61, "op": { "op": "paint", "at": [120, 84], "r": 5, "mat": "bones", "density": 0.045 } },
+    { "time": 62, "op": { "op": "paint", "at": [80, 40], "r": 5, "mat": "bones", "density": 0.045 } },
+    { "time": 90, "op": { "op": "paint", "at": [40, 76], "r": 5, "mat": "bones", "density": 0.05 } },
+    { "time": 91, "op": { "op": "paint", "at": [120, 84], "r": 5, "mat": "bones", "density": 0.05 } },
+    { "time": 92, "op": { "op": "paint", "at": [80, 40], "r": 5, "mat": "bones", "density": 0.05 }, "say": "The pools are churning with bones." },
+    { "time": 120, "op": { "op": "paint", "at": [40, 76], "r": 5, "mat": "bones", "density": 0.05 } },
+    { "time": 121, "op": { "op": "paint", "at": [120, 84], "r": 5, "mat": "bones", "density": 0.05 } },
+    { "time": 122, "op": { "op": "paint", "at": [80, 40], "r": 5, "mat": "bones", "density": 0.05 } }
+   ],
+   "mana": { "start": 100, "max": 170, "regen": 4.4 },
+   "loadout": ["material:holy", "spell:holyrain", "spell:heal", "spell:fireball", "creature:knight", "tool:inspect"],
+   "timeLimit": 170,
+   "failText": "The bog still breeds the dead",
+   "goals": [
+    { "type": "destroy", "material": "goo", "zone": [80, 64, 68], "pct": 0.9, "text": "Purify the bog pools", "short": "Bog" },
+    { "type": "people", "min": 6, "text": "Keep 6 people alive", "failText": "The drowned dead took Fennick", "short": "People" }
+   ],
+   "stars": [
+    { "type": "win", "text": "The bog is clean" },
+    { "type": "peopleLostMax", "n": 1, "text": "Lose one person at most" },
+    { "type": "timeMax", "secs": 100, "text": "Clean it in 100 seconds" }
+   ],
+   "reward": "material:holy",
+   "tip": "Blessed water turns bog goo into clean water and flowers. A fireball burns goo too — but it leaves a cloud of spores that flares if fire finds it."
+  },
+  {
+   "id": "5-4", "name": "The Hollowing", "icon": "lvl-5-4",
+   "intro": ["Orbs of nothing are drifting down from the broken hills.", "Wherever they pass, the land falls into the dark.", "Unmake them with light before they reach Lanterns' Rest."],
+   "map": { "W": 160, "H": 240, "seed": 5404, "recipe": "greenvale", "override": { "sea": 0.05, "rivers": 0, "villages": 0, "glades": 0 }, "clock": 0.86, "dayLength": 14000,
+    "ops": [
+     { "op": "flatten", "at": [80, 130], "r": 80 },
+     { "op": "ground", "at": [80, 26], "r": 40, "mat": "basalt", "clearCells": true },
+     { "op": "paint", "at": [80, 26], "r": 34, "mat": "rubble", "density": 0.08 },
+     { "op": "paint", "at": [80, 110], "r": 50, "mat": "tree", "density": 0.16 },
+     { "op": "paint", "at": [80, 110], "r": 50, "mat": "bush", "density": 0.08 }
+    ] },
+   "villages": [ { "at": [80, 200], "name": "Lanterns' Rest", "people": 9, "wardens": 1, "prebuilt": ["cottage", "cottage", "cottage", "cottage", "stonehouse", "stonehouse", "farm", "well", "shrine", "lamppost", "lamppost"] } ],
+   "herds": [["deer", 1, 3], ["sheep", 1, 4]],
+   "spawns": [
+    { "species": "hollow", "count": 2, "at": [80, 40], "spread": 24, "goal": "village", "time": 2, "hp": 2.6, "announce": "Something dark is drifting down from the hills." },
+    { "species": "hollow", "count": 3, "at": [80, 34], "spread": 26, "goal": "village", "time": 26, "hp": 2.6, "announce": "More orbs!" },
+    { "species": "hollow", "count": 3, "at": [80, 34], "spread": 26, "goal": "village", "time": 52, "hp": 2.8 },
+    { "species": "hollow", "count": 2, "at": [20, 90], "spread": 8, "goal": "village", "time": 70, "hp": 2.8, "announce": "One is coming round through the west wood." },
+    { "species": "hollow", "count": 2, "at": [80, 34], "spread": 26, "goal": "village", "time": 88, "hp": 3.2, "announce": "The last of them — the biggest." }
+   ],
+   "mana": { "start": 90, "max": 160, "regen": 4.4 },
+   "loadout": ["spell:smite", "spell:heal", "spell:holyrain", "material:holy", "spell:missiles", "spell:lightning", "tool:inspect"],
+   "timeLimit": 175,
+   "failText": "The hollow orbs still roam",
+   "goals": [
+    { "type": "kill", "species": "hollow", "count": 12, "text": "Unmake 12 hollow orbs", "short": "Orbs" },
+    { "type": "protect", "what": "houses", "min": 4, "text": "Keep 4 houses standing", "failText": "Lanterns' Rest fell into the dark", "short": "Houses" }
+   ],
+   "stars": [
+    { "type": "win", "text": "The dark is gone" },
+    { "type": "housesLostMax", "n": 0, "text": "Lose no house" },
+    { "type": "killedBy", "species": "hollow", "by": ["smite"], "count": 5, "text": "Pierce 5 with a Sunlance" }
+   ],
+   "reward": "material:void",
+   "tip": "Fire passes straight through a hollow orb and arrows barely scratch it. Light is what hurts it. Blessed water unmakes the void it leaves behind."
+  },
+  {
+   "id": "5-5", "name": "Wraithfire", "icon": "lvl-5-5",
+   "intro": ["Flame wraiths are walking out of the autumn woods, and everything they touch catches.", "They are made of fire, so fire will not stop them.", "Water will. Soak the ground they walk on."],
+   "map": { "W": 160, "H": 240, "seed": 5505, "recipe": "greenvale", "override": { "sea": 0, "rivers": 0, "villages": 0, "glades": 0, "wet": -0.1, "temp": 0.35 }, "clock": 0.82, "dayLength": 13000,
+    "wind": [0, 1, 1.2], "windLocked": true,
+    "ops": [
+     { "op": "drain" },
+     { "op": "dry", "p": 0.14 },
+     { "op": "flatten", "at": [80, 196], "r": 26 },
+     { "op": "paint", "at": [80, 50], "r": 44, "mat": "tree", "density": 0.3 },
+     { "op": "paint", "at": [26, 120], "r": 20, "mat": "tree", "density": 0.28 },
+     { "op": "paint", "at": [134, 124], "r": 20, "mat": "tree", "density": 0.28 },
+     { "op": "paint", "at": [124, 208], "r": 7, "mat": "water", "amount": 40 }
+    ] },
+   "villages": [ { "at": [80, 198], "name": "Tallowmere", "people": 8, "wardens": 1, "prebuilt": ["cottage", "cottage", "cottage", "cottage", "cottage", "cottage", "farm", "well", "lamppost"] } ],
+   "herds": [["deer", 2, 3]],
+   "spawns": [
+    { "species": "flamewraith", "count": 3, "at": [80, 30], "spread": 14, "goal": "village", "time": 2, "hp": 2.4, "announce": "Fire is walking out of the woods." },
+    { "species": "flamewraith", "count": 3, "at": [12, 120], "spread": 5, "goal": "village", "time": 30, "hp": 2.4, "announce": "Wraiths in the west wood!" },
+    { "species": "flamewraith", "count": 3, "at": [148, 124], "spread": 5, "goal": "village", "time": 56, "hp": 2.4, "announce": "And the east!" },
+    { "species": "flamewraith", "count": 3, "at": [20, 150], "spread": 6, "goal": "village", "time": 70, "hp": 2.4, "announce": "Behind you — the west field is alight!" },
+    { "species": "flamewraith", "count": 4, "at": [80, 24], "spread": 16, "goal": "village", "time": 88, "hp": 2.6, "announce": "The whole north wood is walking." }
+   ],
+   "mana": { "start": 90, "max": 160, "regen": 4.4 },
+   "loadout": ["spell:rain", "spell:frost", "spell:lightning", "material:water", "spell:earth", "creature:archer", "tool:inspect"],
+   "timeLimit": 175,
+   "failText": "The wraiths still walk",
+   "goals": [
+    { "type": "kill", "species": "flamewraith", "count": 15, "text": "Put out 15 flame wraiths", "short": "Wraiths" },
+    { "type": "protect", "what": "houses", "min": 3, "text": "Keep 3 cottages standing", "failText": "Tallowmere burned", "short": "Houses" }
+   ],
+   "stars": [
+    { "type": "win", "text": "The woods are dark again" },
+    { "type": "killedBy", "species": "flamewraith", "by": ["rain", "water", "frost"], "count": 8, "text": "Drown or freeze 8 of them" },
+    { "type": "housesLostMax", "n": 1, "text": "Lose one cottage at most" }
+   ],
+   "reward": "creature:flamewraith",
+   "tip": "Rain soaks the ground for a while after it passes, and a wraith on wet ground hisses away. Frost Nova bites them hard."
+  },
+  {
+   "id": "5-6", "name": "The Bone Throne", "icon": "lvl-5-6",
+   "intro": ["Under the hill north of Kingsrest sits a throne of rubble, and the dead answer it.", "Tonight it sends everything: the bones, the bog, the hollow orbs and a troll.", "Keep Kingsrest alive until dawn."],
+   "map": { "W": 176, "H": 256, "seed": 5606, "recipe": "greenvale", "override": { "sea": 0.04, "rivers": 0, "villages": 0, "glades": 0 }, "clock": 0.8, "dayLength": 9400,
+    "ops": [
+     { "op": "flatten", "at": [88, 140], "r": 90 },
+     { "op": "ground", "at": [88, 34], "r": 30, "mat": "basalt", "clearCells": true },
+     { "op": "paint", "at": [88, 28], "r": 12, "mat": "rubble", "density": 0.5 },
+     { "op": "paint", "at": [88, 34], "r": 26, "mat": "bones", "density": 0.05 },
+     { "op": "raise", "at": [44, 78], "r": 10, "h": -2.5 },
+     { "op": "raise", "at": [132, 78], "r": 10, "h": -2.5 },
+     { "op": "paint", "at": [44, 78], "r": 7, "mat": "goo", "amount": 14 },
+     { "op": "paint", "at": [132, 78], "r": 7, "mat": "goo", "amount": 14 },
+     { "op": "paint", "at": [44, 78], "r": 5, "mat": "bones", "density": 0.05 },
+     { "op": "paint", "at": [132, 78], "r": 5, "mat": "bones", "density": 0.05 },
+     { "op": "paint", "at": [88, 110], "r": 60, "mat": "deadtree", "density": 0.02 }
+    ] },
+   "villages": [ { "at": [88, 200], "name": "Kingsrest", "people": 11, "wardens": 2, "mages": 1, "prebuilt": ["cottage", "cottage", "cottage", "cottage", "stonehouse", "stonehouse", "farm", "farm", "well", "shrine", "lamppost", "lamppost"] } ],
+   "herds": [["sheep", 1, 4]],
+   "spawns": [
+    { "species": "skeleton", "count": 10, "at": [88, 36], "spread": 16, "goal": "village", "time": 3, "hp": 1.6, "announce": "The throne calls its host." },
+    { "species": "skeleton", "count": 8, "at": "west", "t": 0.4, "spread": 6, "goal": "village", "time": 26, "hp": 1.6 },
+    { "species": "hollow", "count": 2, "at": [88, 24], "spread": 24, "goal": "village", "time": 40, "hp": 1.3, "announce": "Hollow orbs rise from behind the throne." },
+    { "species": "skeleton", "count": 12, "at": [88, 36], "spread": 18, "goal": "village", "time": 55, "hp": 1.7 },
+    { "species": "troll", "count": 1, "at": [88, 30], "spread": 0, "goal": "village", "time": 68, "announce": "A troll lumbers down from the throne." },
+    { "species": "skeleton", "count": 8, "at": "east", "t": 0.4, "spread": 6, "goal": "village", "time": 84, "hp": 1.7 },
+    { "species": "hollow", "count": 2, "at": [88, 24], "spread": 24, "goal": "village", "time": 100, "hp": 1.4 },
+    { "species": "skeleton", "count": 16, "at": [88, 36], "spread": 20, "goal": "village", "time": 118, "hp": 1.8, "announce": "Everything the throne has left." },
+    { "species": "hollow", "count": 2, "at": [88, 30], "spread": 24, "goal": "village", "time": 128, "hp": 1.6 },
+    { "species": "skeleton", "count": 10, "at": "west", "t": 0.5, "spread": 8, "goal": "village", "time": 140, "hp": 1.8 },
+    { "species": "skeleton", "count": 10, "at": "east", "t": 0.5, "spread": 8, "goal": "village", "time": 146, "hp": 1.8 }
+   ],
+   "events": [
+    { "time": 50, "op": { "op": "paint", "at": [44, 78], "r": 5, "mat": "bones", "density": 0.06 }, "say": "The bog pools are stirring." },
+    { "time": 51, "op": { "op": "paint", "at": [132, 78], "r": 5, "mat": "bones", "density": 0.06 } },
+    { "time": 110, "op": { "op": "paint", "at": [44, 78], "r": 5, "mat": "bones", "density": 0.07 } },
+    { "time": 111, "op": { "op": "paint", "at": [132, 78], "r": 5, "mat": "bones", "density": 0.07 } }
+   ],
+   "mana": { "start": 110, "max": 200, "regen": 5 },
+   "loadout": ["spell:heal", "spell:smite", "spell:holyrain", "spell:fireball", "spell:lightning", "spell:barrier", "material:holy", "creature:knight", "tool:inspect"],
+   "goals": [
+    { "type": "survive", "secs": 165, "text": "Survive until dawn", "short": "Dawn" },
+    { "type": "people", "min": 6, "text": "Keep 6 people alive", "failText": "Kingsrest joined the host", "short": "People" },
+    { "type": "protect", "what": "houses", "min": 3, "text": "Keep 3 houses standing", "failText": "Kingsrest fell", "short": "Houses" }
+   ],
+   "stars": [
+    { "type": "win", "text": "The throne is quiet" },
+    { "type": "peopleLostMax", "n": 2, "text": "Lose 2 people at most" },
+    { "type": "housesLostMax", "n": 0, "text": "Every house still standing" }
+   ],
+   "reward": "spell:smite",
+   "tip": "The troll turns to stone at sunrise, so slow it rather than fight it. Purify the bog pools early or they keep raising more dead."
+  }
+ ]
+}

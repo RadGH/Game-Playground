@@ -19,6 +19,8 @@
 // options (`BODY_DIALS` shoulders / legs / arms, `BODY_PICKS` shape and posture). Tails are not offered: none of the
 // four playable peoples has one (CHIBI25_OPTIONS.body.raceTails), and clothes come from your calling and your gear.
 import { CHIBI25_OPTIONS } from '../../../../../avatar-3d/js/chibi25-options.js';
+import { BODY_FORM_PICK } from '../../../../../avatar-3d/kestrel/kit/js/form-pick.js';
+import { KESTREL } from '../chars-mode.js';
 const C25 = CHIBI25_OPTIONS.face, F25 = CHIBI25_OPTIONS.fields, B25 = CHIBI25_OPTIONS.body;
 const plus = (ids, slot, skip = []) => [...ids, ...C25[slot].added.filter(id => !ids.includes(id) && !skip.includes(id))];
 /** Ear shapes for beast folk only (none of Thousandvale's peoples). */
@@ -55,7 +57,9 @@ export const BODY_DIALS = [
   { key: 'arms', label: 'Arm thickness', min: 0, max: 1 },
 ];
 /** Chibi 2.5 body choices from a list (`avatar.body.shape`, `.posture`). */
+// Kestrel (batch 1, `?chars=kestrel` only): the Body pick (masc / fem) comes first; a Chibi body has no use for it
 export const BODY_PICKS = [
+  ...(KESTREL ? [BODY_FORM_PICK] : []),
   { key: 'shape', label: 'Body type', ids: B25.shape.ids, names: B25.shape.names },
   { key: 'posture', label: 'Posture', ids: B25.posture.ids, names: B25.posture.names },
 ];

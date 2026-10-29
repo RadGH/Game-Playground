@@ -1,0 +1,46 @@
+/* Alarm jewel lamps, the klaxon MUTE at the end of their strip (hold it = lamp test), and the day clock dial. */
+.machine-strip { padding: 8px 14px; }
+.m-alarms .machine-plate { left: 14px; transform: none; }
+.lamp-row { display: flex; align-items: center; gap: 10px; width: 100%; height: 100%; padding-top: 10px; }
+.lamp { display: flex; align-items: center; gap: 8px; min-width: var(--tap); min-height: var(--tap); padding: 0 10px 0 4px; border: 0; border-radius: 22px; cursor: pointer;
+  background: rgba(0,0,0,0.22); box-shadow: inset 0 1px 3px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06); }
+.lamp-bezel { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(from 20deg, #e0c58c, #6d532a, #e6cf98, #5a4220, #d8bd84, #6d532a, #e0c58c); box-shadow: 0 2px 3px rgba(0,0,0,0.6); }
+.lamp-jewel { width: 26px; height: 26px; border-radius: 50%; --c: 255, 180, 60; --dk: #3a2a12;
+  background: radial-gradient(circle at 38% 32%, rgba(255,255,255,0.35), transparent 30%), repeating-conic-gradient(from 0deg, rgba(255,255,255,0.05) 0 15deg, rgba(0,0,0,0.12) 15deg 30deg), radial-gradient(circle at 50% 55%, var(--dk), #0b0806 80%);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.7); transition: background .12s, box-shadow .12s; }
+.lamp-red .lamp-jewel { --c: 255, 70, 50; --dk: #3a0f0a; } .lamp-amber .lamp-jewel { --c: 255, 170, 50; --dk: #3a2408; }
+.lamp-yellow .lamp-jewel { --c: 255, 226, 90; --dk: #383010; } .lamp-blue .lamp-jewel { --c: 110, 200, 255; --dk: #0d2236; }
+.lamp[data-state="on"] .lamp-jewel, .lamp[data-state="blink"] .lamp-jewel, .testing .lamp .lamp-jewel {
+  background: radial-gradient(circle at 38% 32%, rgba(255,255,255,0.9), transparent 28%), repeating-conic-gradient(from 0deg, rgba(255,255,255,0.12) 0 15deg, rgba(0,0,0,0.08) 15deg 30deg), radial-gradient(circle at 50% 55%, rgb(var(--c)), rgba(var(--c), 0.55) 70%);
+  box-shadow: 0 0 12px 3px rgba(var(--c), 0.75), 0 0 30px rgba(var(--c), 0.4); }
+.lamp[data-state="blink"] .lamp-jewel { animation: lamp-blink .7s steps(2) infinite; }
+@keyframes lamp-blink { 50% { background: radial-gradient(circle at 50% 55%, var(--dk), #0b0806 80%); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.7); } }
+.lamp-label { font: 700 12px var(--font-stencil); letter-spacing: .2em; color: rgba(236,226,196,0.75); }
+.lamp[data-state="on"] .lamp-label, .lamp[data-state="blink"] .lamp-label { color: #fff3d6; }
+.mute { position: relative; display: flex; align-items: center; gap: 8px; min-height: var(--tap); min-width: 82px; padding: 0 10px; border: 0; border-radius: 6px; cursor: pointer;
+  background: linear-gradient(180deg, #2b2f30, #191c1d); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.7), 0 3px 0 #0b0d0e; }
+.mute-guard { width: 18px; height: 26px; border-radius: 4px; background: linear-gradient(180deg, #d6c06a, #8a7020); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5); transform-origin: 50% 0; transition: transform .1s; }
+.mute.on .mute-guard { transform: scaleY(-0.5); background: linear-gradient(180deg, #ff6a50, #9a1c0c); }
+.mute-label { font: 700 11px var(--font-stencil); letter-spacing: .18em; }
+.mute.on .mute-label { color: var(--red); }
+.mute-strip { margin-left: auto; flex: none; }
+.lamptest { min-height: var(--tap); min-width: 60px; padding: 2px 10px; border: 0; border-radius: 50% / 30%; cursor: pointer; font: 700 9px/1.15 var(--font-stencil); letter-spacing: .16em; color: #1e1a12;
+  background: radial-gradient(circle at 50% 30%, #f2ead2, #b4a988 75%); box-shadow: inset 0 0 0 2px rgba(0,0,0,0.25), 0 3px 0 #0b0d0e; }
+.lamptest:active { transform: translateY(2px); box-shadow: inset 0 0 0 2px rgba(0,0,0,0.25), 0 1px 0 #0b0d0e; }
+.m-alarms.klaxon { animation: klaxon-glow 1.25s ease-in-out infinite; }
+@keyframes klaxon-glow { 50% { box-shadow: inset 0 0 40px rgba(255,60,40,0.35), 0 0 22px rgba(255,60,40,0.35); } }
+
+/* day clock: the sun and moon turn behind a half-moon window */
+.m-dayclock { padding: 8px 12px; }
+.m-dayclock .machine-body { align-items: center; gap: 10px; }
+.dc-window { position: relative; flex: none; width: 76px; height: 40px; overflow: hidden; border-radius: 40px 40px 4px 4px;
+  background: #050708; box-shadow: inset 0 0 0 2px #0a0c0d, 0 0 0 2px var(--brass), 0 0 0 3px var(--brass-lo); }
+.dc-disc { position: absolute; left: 50%; top: 40px; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; transform: rotate(var(--turn, 0deg)); transition: transform .9s linear;
+  background: linear-gradient(180deg, #6fb6e8 0 50%, #0b1630 50% 100%); }
+.dc-sun, .dc-moon { position: absolute; left: 50%; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; }
+.dc-sun { top: 6px; background: radial-gradient(circle at 40% 40%, #fff6c8, #ffc23a 60%, #e28a10); box-shadow: 0 0 10px #ffcf55; }
+.dc-moon { bottom: 6px; background: radial-gradient(circle at 60% 40%, #f4f2e8, #b8b6aa 70%); box-shadow: inset -4px -2px 0 rgba(0,0,0,0.35); }
+.dc-read { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dc-day { font: 700 10px var(--font-stencil); letter-spacing: .22em; color: rgba(255,200,120,0.6); }
+.dc-time { font: 700 20px/1 var(--font-nixie); color: #ff9a3a; text-shadow: 0 0 6px rgba(255,120,30,0.9), 0 0 14px rgba(255,100,20,0.5); letter-spacing: .04em; }

@@ -1,0 +1,135 @@
+/* Lodestar — the bunker: shared tokens, the desk layout (desktop), machine housings, rivets, plates, the focus
+   lamp, push-buttons. Phone layouts are in phone.css; each machine's own parts in machines/*.css. */
+:root {
+  --wall-0: #07090a; --wall-1: #121618; --wall-2: #1b2023;
+  --enamel: #3c4b45; --enamel-hi: #56685f; --enamel-lo: #27312d; --enamel-edge: #182019;
+  --steel: #7d8784; --steel-hi: #c5ccc8; --steel-lo: #3a403f;
+  --brass: #a8834a; --brass-hi: #e6c98a; --brass-lo: #5f4723;
+  --bakelite: #1b1411; --bakelite-hi: #5c4639;
+  --paper: #ece4cc; --paper-lo: #cdc3a5; --ink: #2b2620; --ink-red: #b42417;
+  --amber: #ffb43c; --amber-dim: #6a4a1c; --phosphor: #8cffb0; --phosphor-dim: #2d6a44; --red: #ff4b38; --blue: #7fd0ff;
+  --font-stencil: "Arial Narrow", "Roboto Condensed", "Liberation Sans Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-type: "Courier Prime", "Courier New", "Nimbus Mono PS", ui-monospace, monospace;
+  --font-nixie: "DejaVu Sans Mono", ui-monospace, "Consolas", monospace;
+  --gap: 10px;
+  --tap: 44px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--wall-0); color: var(--steel-hi); }
+body {
+  font: 14px/1.3 var(--font-stencil); -webkit-font-smoothing: antialiased; touch-action: manipulation;
+  -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+  /* poured concrete lit by one bulb above the desk */
+  background:
+    radial-gradient(120% 70% at 50% -10%, rgba(255, 196, 110, 0.10), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 2px, transparent 2px 160px),
+    linear-gradient(180deg, var(--wall-2), var(--wall-0) 85%);
+}
+button { font: inherit; color: inherit; }
+#app { position: fixed; inset: 0; }
+[hidden] { display: none !important; }
+
+/* ---------- the desk (desktop) ---------- */
+.desk {
+  position: absolute; inset: 0; display: grid; gap: var(--gap);
+  padding: max(var(--gap), env(safe-area-inset-top)) max(var(--gap), env(safe-area-inset-right)) max(var(--gap), env(safe-area-inset-bottom)) max(var(--gap), env(safe-area-inset-left));
+  grid-template-columns: minmax(240px, 290px) 184px 184px minmax(0, 1fr) minmax(210px, 240px);
+  grid-template-rows: 54px minmax(0, 1fr) 156px 196px;
+  grid-template-areas:
+    "alarms alarms alarms alarms top"
+    "tele   scope  scope  scope  bay"
+    "radio  scope  scope  scope  bay"
+    "time   range  filter tools  tools";
+  animation: desk-in .5s ease-out both;
+}
+@keyframes desk-in { from { opacity: 0; transform: scale(1.02); } }
+.desk .page { display: contents; }
+/* a drawer pulled out (owner 2026-10-28: "the build ledger should replace the tool bank so the game screen can remain
+   larger") takes the bottom row where the range/filter knobs and the tool bank sit; the scope keeps its size. The time
+   dial stays, so you can still pause while shopping. The klaxon panel is gone from the top row (MUTE lives on the
+   alarm strip), which gives the scope that height back too. */
+@media (min-width: 900px) and (min-height: 560px) {
+.desk.drawer-open { grid-template-rows: 54px minmax(0, 1fr) 156px 236px;
+  grid-template-areas: "alarms alarms alarms alarms top" "tele scope scope scope bay" "radio scope scope scope bay" "time drawer drawer drawer drawer"; }
+.desk.drawer-open > .m-range, .desk.drawer-open > .m-filter, .desk.drawer-open > .m-toolbank,
+.desk.drawer-open .page > .m-range, .desk.drawer-open .page > .m-filter, .desk.drawer-open .page > .m-toolbank { display: none; }
+.desk .m-klaxon { display: none; }
+.desk .m-alarms .machine-plate { display: none; }   /* the slim strip: the lamps are labelled, the brass plate only overlapped RAID */
+}
+.desk-lamp { position: absolute; left: 50%; top: -40px; width: 70vw; height: 160px; transform: translateX(-50%); pointer-events: none;
+  background: radial-gradient(50% 50% at 50% 30%, rgba(255, 210, 140, 0.10), transparent 70%); z-index: 0; }
+.m-alarms { grid-area: alarms; } .m-klaxon { grid-area: klaxon; } .topright { grid-area: top; }
+.m-scope { grid-area: scope; } .m-teletype { grid-area: tele; } .m-radio { grid-area: radio; }
+.m-bay { grid-area: bay; } .m-timedial { grid-area: time; } .m-range { grid-area: range; } .m-filter { grid-area: filter; }
+.m-toolbank { grid-area: tools; }
+.m-range, .m-filter, .m-timedial { padding-left: 8px; padding-right: 8px; }
+.strip, .handles { display: none; }
+.topright { display: flex; gap: var(--gap); min-width: 0; }
+.topright .m-dayclock { flex: 1; min-width: 0; }
+
+/* ---------- machine housing: green-grey enamel on steel, riveted ---------- */
+.machine {
+  position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column;
+  padding: 22px 12px 12px; border-radius: 7px;
+  background:
+    repeating-linear-gradient(92deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 3px),
+    linear-gradient(175deg, var(--enamel-hi), var(--enamel) 30%, var(--enamel-lo));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -2px 0 rgba(0,0,0,0.35), inset 0 0 0 1px rgba(0,0,0,0.25),
+    0 1px 0 rgba(255,255,255,0.04), 0 10px 18px -8px rgba(0,0,0,0.8);
+  border: 1px solid var(--enamel-edge);
+  z-index: 1;
+}
+.machine-body { flex: 1; min-height: 0; display: flex; position: relative; }
+.rivet { position: absolute; width: 7px; height: 7px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, #d7dcd8, #6c7470 55%, #2c3230); box-shadow: 0 1px 1px rgba(0,0,0,0.6); }
+.rivet.tl { left: 6px; top: 6px; } .rivet.tr { right: 6px; top: 6px; } .rivet.bl { left: 6px; bottom: 6px; } .rivet.br { right: 6px; bottom: 6px; }
+.machine-plate { position: absolute; top: 3px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px;
+  padding: 1px 9px 1px 6px; border-radius: 2px; white-space: nowrap; pointer-events: none;
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, var(--brass-lo));
+  box-shadow: inset 0 0 0 1px rgba(60,40,10,0.5), 0 1px 1px rgba(0,0,0,0.6);
+  color: #2c1e0b; font: 700 10.5px/15px var(--font-stencil); letter-spacing: .2em; text-shadow: 0 1px 0 rgba(255,240,200,0.45); }
+/* the amber lamp the controller lights over the machine it is in */
+.focus-lamp { width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #6d4f22, #2b1d0b); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5); }
+.focus-lamp.floating { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); }
+.machine.pad-machine .focus-lamp { background: radial-gradient(circle at 40% 35%, #fff2c4, var(--amber) 50%, #b06a10); box-shadow: 0 0 8px 2px rgba(255,180,60,0.8); }
+.machine.pad-grabbed .focus-lamp { background: radial-gradient(circle at 40% 35%, #eaffef, var(--phosphor) 50%, #2a8a50); box-shadow: 0 0 8px 2px rgba(140,255,176,0.8); }
+.pad-focus { outline: 3px solid var(--amber) !important; outline-offset: 2px; box-shadow: 0 0 0 6px rgba(255,180,60,0.22), 0 0 18px rgba(255,180,60,0.5) !important; }
+.pad-grab { outline-color: var(--phosphor) !important; box-shadow: 0 0 0 6px rgba(140,255,176,0.25), 0 0 18px rgba(140,255,176,0.6) !important; }
+:focus { outline: none; }
+:focus-visible { outline: 2px dashed var(--amber); outline-offset: 2px; }
+.engrave { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font: 700 9px var(--font-stencil); letter-spacing: .25em; color: rgba(0,0,0,0.45); text-shadow: 0 1px 0 rgba(255,255,255,0.08); pointer-events: none; }
+
+/* ---------- lit push-buttons (title, menus) ---------- */
+.push { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 16px 8px 12px; cursor: pointer;
+  border: 0; border-radius: 6px; text-align: left; color: #e9e4d6;
+  background: linear-gradient(180deg, #3b3f40, #23272a 60%, #1a1d1f);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 0 1px rgba(0,0,0,0.6), 0 4px 0 #0b0d0e, 0 6px 10px rgba(0,0,0,0.5);
+  font: 700 15px/1.1 var(--font-stencil); letter-spacing: .16em; transition: transform .06s, box-shadow .06s; }
+.push:active, .push.pressed { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 0 0 1px rgba(0,0,0,0.6), 0 1px 0 #0b0d0e, 0 2px 4px rgba(0,0,0,0.5); }
+.push:disabled { opacity: .45; cursor: default; }
+.push:disabled .push-lamp { background: #2a2520; box-shadow: inset 0 0 0 2px #120e0c; }
+.push-label small { display: block; margin-top: 3px; font-size: 10px; letter-spacing: .14em; opacity: .65; }
+.push-lamp { flex: none; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(0,0,0,0.55), 0 0 10px currentColor; }
+.push-lamp.lamp-amber { color: rgba(255,180,60,0.7); background: radial-gradient(circle at 40% 35%, #fff3cf, var(--amber) 45%, #8a4f0a); }
+.push-lamp.lamp-green { color: rgba(140,255,176,0.7); background: radial-gradient(circle at 40% 35%, #f0fff4, #6fe39a 45%, #1d6e3e); }
+.push-lamp.lamp-red { color: rgba(255,80,60,0.7); background: radial-gradient(circle at 40% 35%, #ffe2dc, var(--red) 45%, #7a160c); }
+.push.small { min-height: var(--tap); padding: 6px 12px 6px 10px; font-size: 13px; }
+.push.big { min-height: 60px; justify-content: center; font-size: 17px; }
+
+/* ---------- ☰ menu button: a heavy square key in the corner ---------- */
+.menu-btn { flex: none; width: 70px; min-height: var(--tap); border: 0; border-radius: 7px; cursor: pointer; color: #efe7d0;
+  background: linear-gradient(180deg, #4a4f50, #2a2e30); box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), inset 0 0 0 1px rgba(0,0,0,0.6), 0 4px 0 #0b0d0e, 0 7px 10px rgba(0,0,0,0.5);
+  font-size: 24px; position: relative; z-index: 2; }
+.menu-btn:active { transform: translateY(3px); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.6), 0 1px 0 #0b0d0e; }
+
+/* CRT glass switched off in Settings: the plain picture */
+body.no-crt .crt-lines, body.no-crt .crt-shine, body.no-crt .crt-vignette { display: none; }
+body.no-crt .glass { border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+
+/* large desktop: more room for the scope's neighbours */
+@media (min-width: 1600px) and (min-height: 900px) {
+  .desk { grid-template-columns: 330px 200px 200px minmax(0, 1fr) 280px; grid-template-rows: 60px minmax(0, 1fr) 180px 220px; }
+  .desk.drawer-open { grid-template-rows: 60px minmax(0, 1fr) 180px 256px; }
+}

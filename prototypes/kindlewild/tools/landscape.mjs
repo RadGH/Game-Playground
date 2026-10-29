@@ -1,0 +1,16 @@
+import { chromium } from 'playwright';
+const out = process.argv[2];
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await (await browser.newContext({ viewport: { width: 780, height: 402 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true })).newPage();
+const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+await page.goto('http://localhost:8401/prototypes/kindlewild/');
+await page.waitForFunction(() => window.gameEye);
+await page.waitForTimeout(600);
+await page.screenshot({ path: out + '-title.png' });
+await page.evaluate(() => window.gameEye.startLevel('1-6'));
+await page.waitForTimeout(400);
+await page.locator('.modal .big.go').tap();
+await page.waitForTimeout(4000);
+await page.screenshot({ path: out + '-game.png' });
+console.log('errors', errors.length ? errors : 'none');
+await browser.close();

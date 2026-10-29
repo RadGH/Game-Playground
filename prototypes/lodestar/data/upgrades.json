@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "_doc": "Global level ladders (PLAN §0.5: one wall, one road — a level belongs to the whole game and changes EVERY piece of that kind at once, the ones already standing too, with one subtle look change). M4 owns `wall` and `tower.*`; M9/M10 add the rest (road, bridge, rail, producers, housing, batteries, vehicles). Each level row says which research.json row raises it (`research`; level I needs none). Wall: `hp` per 4 m section, `mat` = the cell material every wall cell becomes (so fire follows the material: timber burns, stone does not), `acid` = share of acid damage that gets through, `regen` = hit points a section mends by itself every second, `glow` = Glow each wall cell gives off, `towersOn` = towers may stand on the wall, `trim` = the edge paint the scope draws on every wall at this level.",
+  "wall": {
+    "name": "Wall",
+    "levels": [
+      { "level": 1, "name": "Timber", "hp": 320, "mat": "wall", "acid": 1, "regen": 0, "glow": 0, "towersOn": false, "trim": "#8a6a42" },
+      { "level": 2, "name": "Stone", "hp": 760, "mat": "wall_stone", "acid": 1, "regen": 0, "glow": 0, "towersOn": false, "trim": "#b9b3a6", "research": "wall_stone" },
+      { "level": 3, "name": "Steel-banded", "hp": 1300, "mat": "wall_steel", "acid": 1, "regen": 0, "glow": 0, "towersOn": true, "trim": "#7f9aa8", "research": "wall_steel" },
+      { "level": 4, "name": "Poured", "hp": 2000, "mat": "wall_concrete", "acid": 0.25, "regen": 0, "glow": 0, "towersOn": true, "trim": "#d8d2c2", "research": "wall_poured" },
+      { "level": 5, "name": "Runed", "hp": 2600, "mat": "wall_runed", "acid": 0.25, "regen": 6, "glow": 26, "towersOn": true, "trim": "#a98cff", "research": "wall_runed" }
+    ]
+  },
+  "towers": {
+    "_doc": "One ladder per tower kind (`tower.<id>` in sim.levels). Multipliers per level are in towers.json perLevel.",
+    "levels": [
+      { "kind": "tower.watch_post", "level": 2, "research": "watch_lenses" },
+      { "kind": "tower.bolt_thrower", "level": 2, "research": "steel_bolts" },
+      { "kind": "tower.gun_nest", "level": 2, "research": "belt_feed" },
+      { "kind": "tower.mortar_pit", "level": 2, "research": "heavy_shells" }
+    ],
+    "trims": ["#00000000", "#ffd27a", "#ff9a4a", "#ff5a4a", "#c08cff"]
+  }
+}

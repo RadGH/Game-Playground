@@ -1,0 +1,11 @@
+{
+ "about": "Challenge levels. map: size, seed, recipe (data/biomes.json) + override + ops (terrain edits, see session.js terrainOp). villages: [{ at, people, prebuilt, wardens }]. herds: [[species, groups, size]]. spawns: groups at the start or at `time` secs or `every` secs. events: things that happen at `time`. goals + stars: js/game/objectives.js. loadout: the tools this level gives. reward: the Grimoire page a first clear unlocks. Positions are cells; maps are drawn portrait for phones. Each act lives in data/acts/<id>.json; this file only lists them in order.",
+ "acts": [
+  "act1",
+  "act2",
+  "act3",
+  "act4",
+  "act5",
+  "act6"
+ ]
+}

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kestrel Faces and Hair</title>
+<link rel="stylesheet" href="../../../shared/style.css">
+<link rel="stylesheet" href="css/faces.css">
+<script type="importmap">{ "imports": { "three": "../../../vendor/three/three.module.js", "three/addons/": "../../../vendor/three/addons/" } }</script>
+</head>
+<body class="fc">
+<!-- Kestrel kit review sheet: every id of one face / hair slot on both bodies, as a grid of heads.
+     Query: ?slot=hair|headShape|eyes|pupil|iris|brows|nose|mouth|ears|facialHair|accessory|extras|expressions|clips
+            ?body=both|male|female  ?view=front|three|side|back  ?frame=head|bust  ?anim=idle|walk|… (pose)  ?t=0.4
+            ?expr=neutral|happy|…  ?cols=6  ?shot=1 (grid only)   window.__faces = { ready, cells, error } for tools. -->
+<header class="fc-top">
+  <h1>Kestrel faces and hair <small class="muted">every id a look can name, both bodies</small></h1>
+  <p class="muted small">Each cell is a whole character built from the look with only that one part changed. The number is the character's triangle count. <a href="index.html">kit preview</a> · <a href="README.md">notes</a></p>
+  <div class="row" id="c-slot"></div>
+  <div class="row" id="c-body"></div>
+  <div class="row" id="c-view"></div>
+  <div class="row" id="c-expr"></div>
+  <div class="row" id="c-anim"></div>
+</header>
+<main class="fc-stage"><canvas id="view"></canvas><div id="grid" class="fc-grid"></div></main>
+<script type="module" src="js/faces-page.js"></script>
+</body>
+</html>

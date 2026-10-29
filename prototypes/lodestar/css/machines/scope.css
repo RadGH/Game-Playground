@@ -1,0 +1,57 @@
+/* Tactical Scope: a CRT behind a brass-edged steel bezel, grid stencils round the glass, readout strip underneath. */
+.m-scope { padding: 22px 10px 8px; background:
+    repeating-linear-gradient(92deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px),
+    linear-gradient(175deg, #4a5350, #2f3634 40%, #1f2524); }
+.m-scope .machine-body { flex-direction: column; gap: 6px; }
+.bezel { position: relative; flex: 1; min-height: 0; padding: 18px 10px 10px 24px; border-radius: 22px;
+  background: radial-gradient(120% 120% at 30% 0%, #2a2f2f, #0d1010 70%);
+  box-shadow: inset 0 0 0 2px #070909, inset 0 3px 8px rgba(0,0,0,0.9), 0 0 0 3px var(--brass-lo), 0 0 0 4px var(--brass), 0 0 0 5px #2a1e0c, 0 2px 0 6px rgba(255,255,255,0.05); }
+.grid-cols, .grid-rows { position: absolute; pointer-events: none; font: 700 10px/1 var(--font-stencil); letter-spacing: .08em; color: rgba(255,200,120,0.55); }
+.grid-cols { left: 24px; right: 10px; top: 4px; height: 12px; }
+.grid-rows { left: 4px; top: 18px; bottom: 10px; width: 18px; }
+.grid-cols span { position: absolute; transform: translateX(-50%); top: 0; }
+.grid-rows span { position: absolute; transform: translateY(-50%); left: 0; width: 18px; text-align: center; }
+.glass { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 26px / 30px; background: #020403; cursor: crosshair; touch-action: none;
+  box-shadow: inset 0 0 0 1px rgba(140,255,176,0.08); }
+.glass canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.scope-world { image-rendering: pixelated; }
+body[data-quality="high"] .scope-world { filter: saturate(1.08) contrast(1.05); }
+.glass.panning { cursor: grabbing; }
+/* the CRT: scan lines, a curved-glass shine, a vignette and a faint phosphor bloom */
+.crt-lines { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: .55;
+  background: repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.42) 2px 3px); }
+/* M1's WebGL scope draws its own CRT pass: only the glass shine and vignette are added on top */
+.m-scope[data-renderer="m1-webgl"] .crt-lines { display: none; }
+.crt-shine { position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(70% 45% at 30% 12%, rgba(255,255,255,0.10), transparent 60%), radial-gradient(90% 90% at 50% 50%, transparent 60%, rgba(140,255,176,0.05) 85%); }
+.crt-vignette { position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  box-shadow: inset 0 0 60px 14px rgba(0,0,0,0.85), inset 0 0 12px 2px rgba(0,0,0,0.9); }
+.scope-stamp { position: absolute; pointer-events: none; font: 700 12px/1 var(--font-stencil); letter-spacing: .3em; color: var(--phosphor);
+  text-shadow: 0 0 6px rgba(140,255,176,0.8); opacity: 0; transition: opacity .2s; }
+.stamp-chart { top: 14px; right: 22px; padding: 4px 8px; border: 1px solid rgba(140,255,176,0.6); border-radius: 3px; }
+.machine-scope.chart .stamp-chart { opacity: .85; }
+.stamp-filter { left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 18px; padding: 8px 14px; border: 2px solid currentColor; border-radius: 4px; background: rgba(0,0,0,0.35); }
+.stamp-filter.on { opacity: .8; animation: stamp-flicker 3.2s infinite; }
+[data-filter="ore"] .stamp-filter { color: #9fb7ff; } [data-filter="flow"] .stamp-filter { color: #8ff0e0; } [data-filter="threat"] .stamp-filter { color: #ff8a70; }
+@keyframes stamp-flicker { 0%, 92%, 100% { opacity: .8; } 94% { opacity: .35; } 96% { opacity: .9; } }
+.stamp-paused { left: 22px; top: 14px; color: var(--amber); text-shadow: 0 0 6px rgba(255,180,60,0.9); }
+.machine-scope.paused .stamp-paused { opacity: 1; animation: blink-slow 1.2s steps(2) infinite; }
+@keyframes blink-slow { 50% { opacity: .25; } }
+/* degauss: a colour wobble washes across the glass and the picture snaps clean */
+.glass.degaussing canvas { animation: degauss .85s ease-out; }
+@keyframes degauss {
+  0% { filter: hue-rotate(0) saturate(2); transform: scale(1.04) skewX(3deg); }
+  18% { filter: hue-rotate(140deg) saturate(3); transform: scale(0.98) skewX(-3deg); }
+  40% { filter: hue-rotate(260deg) saturate(2); transform: scale(1.015) skewX(1.5deg); }
+  70% { filter: hue-rotate(330deg) saturate(1.3); transform: scale(0.997) skewX(-.4deg); }
+  100% { filter: none; transform: none; }
+}
+.scope-readout { display: flex; align-items: center; gap: 6px; min-height: var(--tap); padding: 0 2px; }
+.ro { padding: 4px 8px; border-radius: 3px; background: #0a0d0c; box-shadow: inset 0 1px 3px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.06);
+  font: 700 10px/1.2 var(--font-stencil); letter-spacing: .14em; color: rgba(255,200,120,0.6); white-space: nowrap; }
+.ro b { font: 700 13px var(--font-nixie); letter-spacing: .05em; color: var(--amber); text-shadow: 0 0 6px rgba(255,170,40,0.7); }
+.ro-cell b { color: #ffcf80; font-size: 12px; }
+.degauss { margin-left: auto; min-width: 96px; min-height: var(--tap); border: 0; border-radius: 22px; cursor: pointer;
+  background: radial-gradient(circle at 50% 30%, #c4382a, #7a140a 70%); color: #ffe2d8; font: 700 11px var(--font-stencil); letter-spacing: .18em;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), inset 0 0 0 2px #3a0904, 0 0 0 3px #1a1c1c, 0 0 0 4px #4a4f4f, 0 4px 0 4px #0b0d0e; }
+.degauss:active { transform: translateY(2px); }

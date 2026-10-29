@@ -1,0 +1,18 @@
+/* Kestrel kit — faces and hair review sheet */
+.fc { margin: 0; background: #1d2026; color: #e6e6e6; }
+.fc-top { padding: 10px 16px 6px; display: flex; flex-direction: column; gap: 6px; }
+.fc-top h1 { margin: 0; font-size: 1.25rem; }
+.fc-top p { margin: 0; }
+.fc-top .row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.fc-top button { padding: 4px 9px; font-size: 0.8rem; }
+.fc-top button.on { background: #b98a3e; color: #111; }
+.fc-stage { position: relative; margin: 0 16px 16px; }
+.fc-stage canvas { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.fc-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(var(--cols, 6), minmax(0, 1fr)); gap: 4px; }
+.fc-cell { aspect-ratio: 4 / 5; border-radius: 6px; background: transparent; position: relative; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15); }
+.fc-cell b { position: absolute; left: 6px; bottom: 4px; font-size: 0.72rem; color: #222; font-weight: 600; background: rgba(255, 255, 255, 0.55); padding: 0 4px; border-radius: 3px; }
+.fc-cell i { position: absolute; right: 6px; bottom: 4px; font-size: 0.66rem; color: #333; font-style: normal; }
+.fc-cell.bad { outline: 2px solid #c33; }
+body.shot .fc-top { display: none; }
+body.shot .fc-stage { margin: 0; }
+@media (max-width: 700px) { .fc-grid { --cols: 3 !important; } }

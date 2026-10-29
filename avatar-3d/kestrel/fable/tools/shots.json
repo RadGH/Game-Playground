@@ -1,0 +1,21 @@
+[
+ { "out": "avatar-3d/kestrel/fable/shots/male-front.png", "query": "body=male&view=front", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/male-left.png", "query": "body=male&view=left", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/male-back.png", "query": "body=male&view=back", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/male-right.png", "query": "body=male&view=right", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/male-three-quarter.png", "query": "body=male&view=three", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/male-face.png", "query": "body=male&view=face", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/female-front.png", "query": "body=female&view=front", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/female-left.png", "query": "body=female&view=left", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/female-back.png", "query": "body=female&view=back", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/female-right.png", "query": "body=female&view=right", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/female-three-quarter.png", "query": "body=female&view=three", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/female-face.png", "query": "body=female&view=face", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/male-expressions.png", "query": "body=male&sheet=expr&w=1500&h=500" },
+ { "out": "avatar-3d/kestrel/fable/shots/female-expressions.png", "query": "body=female&sheet=expr&w=1500&h=500" },
+ { "out": "avatar-3d/kestrel/fable/shots/male-poses.png", "query": "body=male&sheet=poses&w=1600&h=1000" },
+ { "out": "avatar-3d/kestrel/fable/shots/female-poses.png", "query": "body=female&sheet=poses&w=1600&h=1000" },
+ { "out": "avatar-3d/kestrel/fable/shots/male-outfit.png", "query": "body=male&view=three&outfit=1", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/female-outfit.png", "query": "body=female&view=three&outfit=1", "w": 600, "h": 800 },
+ { "out": "avatar-3d/kestrel/fable/shots/male-lod1.png", "query": "body=male&view=three&lod=1", "w": 600, "h": 800 }
+]

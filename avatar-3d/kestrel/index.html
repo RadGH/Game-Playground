@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kestrel — character attempts</title>
+<link rel="stylesheet" href="../../shared/style.css">
+<link rel="stylesheet" href="kestrel.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body class="ks">
+<!-- Kestrel review page: every attempt in data/attempts.json side by side with the Codex reference for the same view.
+     ?body=male|female  ?view=front|left|back|right|three|face|free  ?anim=walk  ?outfit=1  ?only=opus,fable
+     window.__kestrel = { ready, attempts: [{ id, ok, error, stats }] } for tests. -->
+<header class="ks-top">
+  <h1>Kestrel <small class="muted">character attempts</small></h1>
+  <p class="muted">The next character system: realistic proportions, still light enough for phones, built from swappable pieces.
+    Each column is one attempt, built to the same <a href="CONTRACT.md">contract</a>. The first column is the Codex picture
+    it is trying to match. Drag any 3D view to turn it.</p>
+</header>
+<section class="ks-controls">
+  <div class="row" id="c-body"></div>
+  <div class="row" id="c-view"></div>
+  <div class="row" id="c-anim"></div>
+  <div class="row" id="c-expr"></div>
+  <div class="row">
+    <label><input type="checkbox" id="c-outfit"> outfit (shirt, trousers, boots)</label>
+    <label><input type="checkbox" id="c-spin"> turntable</label>
+    <label><input type="checkbox" id="c-wire"> wireframe</label>
+    <label><input type="checkbox" id="c-lod"> far version (LOD 1)</label>
+  </div>
+</section>
+<main id="cols" class="ks-cols"></main>
+<section class="ks-panel">
+  <h2>Numbers</h2>
+  <table id="stats" class="ks-table"></table>
+  <h2>Crowd test</h2>
+  <p class="muted small">30 characters of one attempt walking in a grid at game camera distance; frames per second averaged over 3 s
+    on whatever device opened this page (compare columns, not machines).</p>
+  <div class="row" id="crowd-btns"></div>
+  <table id="crowd" class="ks-table"></table>
+  <h2>Your scores</h2>
+  <p class="muted small">1–5 per row, saved in this browser. "Copy scores" puts them on the clipboard as JSON so you can paste them to Claude.</p>
+  <table id="scores" class="ks-table"></table>
+  <div class="row"><button id="copy-scores">Copy scores</button><span id="copied" class="muted small"></span></div>
+</section>
+<script type="module" src="js/compare.js"></script>
+</body>
+</html>

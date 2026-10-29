@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "_doc": "M4 towers (PLAN M4). Each row is the fighting part of a buildings.json row of the same id (that row holds size, cost, look, sight, tag `military`). `range` in cells (0.5 m), `cooldown` in ticks between shots (20 a second), `damage` per hit, `shot`: bolt (a projectile that flies at `speed` cells a second and hits one enemy), burst (instant rounds with tracers: `rounds` hits at `spacing` ticks), shell (a mortar round that lands after `flight` ticks where the target was and bursts with radius `splash`, breaking the ground with a blast of `blast` [radius, power]). `minRange` = too close to aim at. `nests: true` = it shoots a nest in range when there is no enemy to shoot. Every shot needs the target on LIVE sight (fog 2). Own shots pass over own walls. `noise` is what one shot adds to the Noise field (gunfire is loud). Global level per kind (upgrades.json `tower.<id>`): each level above I multiplies damage by `perLevel.damage`, range by `perLevel.range` and hit points by `perLevel.hp`.",
+  "list": [
+    { "id": "watch_post", "name": "Watch post", "range": 34, "cooldown": 30, "damage": 12, "shot": "bolt", "speed": 60, "hp": 220, "nests": false, "noise": 0,
+      "about": "A lamp and a lookout with a crossbow. Sees far and lights the dark around it." },
+    { "id": "bolt_thrower", "name": "Bolt thrower", "range": 54, "cooldown": 44, "damage": 42, "shot": "bolt", "speed": 80, "hp": 420, "nests": true, "noise": 8,
+      "about": "A heavy crossbow on a turntable. One big hit at a time, a long way out." },
+    { "id": "gun_nest", "name": "Gun nest", "range": 40, "cooldown": 36, "damage": 7, "shot": "burst", "rounds": 6, "spacing": 3, "hp": 520, "nests": false, "noise": 30,
+      "about": "Sandbags and a rattling gun. Shreds a swarm up close. Loud." },
+    { "id": "mortar_pit", "name": "Mortar pit", "range": 96, "minRange": 14, "cooldown": 110, "damage": 70, "shot": "shell", "flight": 34, "splash": 6, "blast": [4, 0.55], "hp": 460, "nests": true, "noise": 45,
+      "about": "Lobs shells over your own walls. Breaks the ground and sets it alight where they land." }
+  ],
+  "perLevel": { "damage": 1.25, "range": 1.08, "hp": 1.2 },
+  "maxLevel": 5
+}

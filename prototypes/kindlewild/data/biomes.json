@@ -1,0 +1,27 @@
+{
+  "about": "Biomes for the map generator (js/sim/mapgen.js). ground = the floor; scatter = cells sprinkled on it with a chance each; a biome is picked per cell from height, moisture and the recipe's climate.",
+  "biomes": {
+    "meadow":  { "ground": "meadow", "scatter": [["flowers", 0.02], ["tallgrass", 0.07], ["tree", 0.006], ["bush", 0.01]] },
+    "grass":   { "ground": "grass", "scatter": [["tallgrass", 0.08], ["tree", 0.012], ["bush", 0.015], ["boulder", 0.002]] },
+    "forest":  { "ground": "grass", "scatter": [["tree", 0.42], ["bush", 0.05], ["mushroom", 0.004]] },
+    "pines":   { "ground": "snow", "scatter": [["pine", 0.3], ["boulder", 0.004]] },
+    "tundra":  { "ground": "snow", "scatter": [["pine", 0.02], ["boulder", 0.006]] },
+    "desert":  { "ground": "sand", "scatter": [["deadtree", 0.003], ["boulder", 0.004], ["bones", 0.002]] },
+    "steppe":  { "ground": "dirt", "scatter": [["tallgrass", 0.12], ["deadtree", 0.004], ["bush", 0.01]] },
+    "marsh":   { "ground": "marsh", "scatter": [["mushroom", 0.03], ["tallgrass", 0.1], ["deadtree", 0.01], ["goo", 0.003]] },
+    "ash":     { "ground": "basalt", "scatter": [["deadtree", 0.01], ["boulder", 0.01], ["ashpile", 0.02], ["charwood", 0.01]] },
+    "mountain":{ "ground": "rock", "scatter": [["boulder", 0.12], ["pine", 0.01]] },
+    "peak":    { "ground": "snow", "scatter": [["boulder", 0.08]] },
+    "glade":   { "ground": "crystalfloor", "scatter": [["crystal", 0.05], ["mushroom", 0.05], ["flowers", 0.03]] },
+    "beach":   { "ground": "sand", "scatter": [] }
+  },
+  "recipes": {
+    "greenvale":  { "name": "Greenvale",   "shape": "plain",   "temp": 0.2,  "wet": 0.25, "sea": 0.3,  "rivers": 2, "glades": 1, "villages": 2, "herds": [["sheep", 2, 6], ["deer", 2, 4], ["rabbit", 2, 6], ["chicken", 1, 5]] },
+    "pinewood":   { "name": "Pinewood",    "shape": "valley",  "temp": -0.35, "wet": 0.2, "sea": 0.28, "rivers": 2, "glades": 0, "villages": 1, "herds": [["deer", 3, 4], ["wolf", 1, 3], ["rabbit", 2, 5]] },
+    "dunesea":    { "name": "Sunscour Dunes", "shape": "basin", "temp": 0.8,  "wet": -0.6, "sea": 0.22, "rivers": 1, "glades": 0, "villages": 1, "herds": [["goat", 2, 5], ["chicken", 1, 4]] },
+    "ashlands":   { "name": "Ashlands",    "shape": "volcano", "temp": 0.6,  "wet": -0.2, "sea": 0.25, "rivers": 1, "glades": 0, "villages": 1, "vents": 3, "herds": [["goat", 1, 4]] },
+    "fenmoor":    { "name": "Fenmoor",     "shape": "basin",   "temp": 0.2,  "wet": 0.8,  "sea": 0.4,  "rivers": 3, "glades": 1, "villages": 1, "herds": [["frog", 3, 6], ["deer", 1, 3]] },
+    "isles":      { "name": "Gull Isles",  "shape": "island",  "temp": 0.3,  "wet": 0.2,  "sea": 0.42, "rivers": 1, "glades": 1, "villages": 2, "herds": [["sheep", 2, 5], ["chicken", 2, 4]] },
+    "blank":      { "name": "Open field",  "shape": "flat",    "temp": 0.2,  "wet": 0.2,  "sea": 0,    "rivers": 0, "glades": 0, "villages": 0, "herds": [] }
+  }
+}

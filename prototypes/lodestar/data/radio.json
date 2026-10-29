@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "_doc": "Radio and teletype lines (PLAN M4: the raid story). Each pool is a list of lines; one is picked by the event's own numbers (same game, same words). {where} = grid square, {n} = how many, {what} = the thing hit, {stage} = nest stage. M11 gives them voices; every line is also printed on the teletype. Skitterkin only (other families add pools later).",
+  "who": { "watch": "Watch", "signals": "Signals", "works": "Works", "command": "High Command" },
+  "pools": {
+    "raidForming": [
+      { "who": "watch", "text": "Movement at the nest near {where}. They are gathering. Heading for the {what}." },
+      { "who": "signals", "text": "Nest at {where} is stirring — a party is forming. Looks like they want the {what}." },
+      { "who": "watch", "text": "Chittering from {where}. Something has them riled. Plotting their line to the {what} now." }
+    ],
+    "raidSpotted": [
+      { "who": "watch", "text": "Contact! {n} of them in sight at {where}." },
+      { "who": "watch", "text": "Eyes on the raid, {where}. I count {n}." },
+      { "who": "signals", "text": "Raid in sight at {where}. {n} on the scope. All posts stand to." }
+    ],
+    "raidAtWall": [
+      { "who": "watch", "text": "They are on the wall at {where}! Chewing at it." },
+      { "who": "works", "text": "Wall under attack at {where}. Hold them there." }
+    ],
+    "wallBreached": [
+      { "who": "works", "text": "Breach! The wall is down at {where}." },
+      { "who": "watch", "text": "They are through the wall at {where}!" }
+    ],
+    "buildingLost": [
+      { "who": "works", "text": "We have lost the {what} at {where}." },
+      { "who": "works", "text": "The {what} at {where} is gone. Crews are clear." }
+    ],
+    "convoyHit": [
+      { "who": "signals", "text": "Porters under attack at {where}!" },
+      { "who": "signals", "text": "Carriers hit on the road at {where}. They have dropped their load." }
+    ],
+    "raidBeaten": [
+      { "who": "watch", "text": "That is the last of them. Raid beaten." },
+      { "who": "signals", "text": "All clear. The raid is broken." },
+      { "who": "watch", "text": "Quiet again. They are done." }
+    ],
+    "raidWithdrew": [
+      { "who": "watch", "text": "They are pulling back toward the nest at {where}." }
+    ],
+    "hqHit": [
+      { "who": "command", "text": "The headquarters is under attack! Everything to the bunker!" },
+      { "who": "command", "text": "They are at the bunker doors. Hold the HQ." }
+    ],
+    "nestGrew": [
+      { "who": "signals", "text": "The nest at {where} has grown (stage {stage})." }
+    ],
+    "nestBudded": [
+      { "who": "signals", "text": "A new nest has budded off near {where}." }
+    ],
+    "nestCleared": [
+      { "who": "watch", "text": "Nest at {where} destroyed. Crews are lifting a core sample." }
+    ],
+    "ringClosed": [
+      { "who": "works", "text": "Ring closed. The wall is tight from end to end." }
+    ],
+    "gameOver": [
+      { "who": "command", "text": "The headquarters has fallen. All stations, this is the end of the line." }
+    ],
+    "crippled": [
+      { "who": "command", "text": "The headquarters is crippled. We are blind and slow until the crews patch it up." }
+    ]
+  }
+}

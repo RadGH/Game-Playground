@@ -1,0 +1,282 @@
+{
+ "about": "Spells. aim: point (tap), line (drag; cost is per cell), drag (tap and hold to keep casting). cost = mana; cd = seconds before it can be cast again; tier = where it sits in the Grimoire (0 = known from the start). power grows with the spell's level (upgrades): radius and strength x (1 + 0.2 per level). color tints it. Read by js/sim/spells.js.",
+ "spells": {
+  "fireball": {
+   "name": "Fireball",
+   "color": "#ff7a20",
+   "aim": "point",
+   "cost": 6,
+   "cd": 0.35,
+   "tier": 0,
+   "radius": 4,
+   "power": 1.8,
+   "desc": "A ball of fire drops from the sky and bursts, lighting whatever can burn."
+  },
+  "rain": {
+   "name": "Rain Cloud",
+   "color": "#5fa8ff",
+   "aim": "point",
+   "cost": 10,
+   "cd": 2,
+   "tier": 0,
+   "radius": 14,
+   "secs": 16,
+   "desc": "A cloud drifts with the wind, soaking the ground and drowning fires."
+  },
+  "earth": {
+   "name": "Raise Earth",
+   "color": "#b89a6a",
+   "aim": "line",
+   "cost": 0.6,
+   "cd": 0,
+   "tier": 0,
+   "desc": "Drag to push up a ridge of stone. Lava and water must flow round it."
+  },
+  "lightning": {
+   "name": "Lightning",
+   "color": "#bfe0ff",
+   "aim": "point",
+   "cost": 8,
+   "cd": 0.4,
+   "tier": 0,
+   "power": 1,
+   "desc": "A bolt from above. In water the shock runs through everything wet. Sand turns to glass."
+  },
+  "meteor": {
+   "name": "Meteor",
+   "color": "#ffb04a",
+   "aim": "point",
+   "cost": 40,
+   "cd": 5,
+   "tier": 1,
+   "radius": 12,
+   "power": 6,
+   "crater": 10,
+   "desc": "A falling star. Leaves a crater, a shower of burning rock and a lot of smoke."
+  },
+  "frost": {
+   "name": "Frost Nova",
+   "color": "#9ff0ff",
+   "aim": "point",
+   "cost": 16,
+   "cd": 1.5,
+   "tier": 1,
+   "radius": 9,
+   "power": 2,
+   "desc": "A burst of cold: water freezes to ice, lava to obsidian, fires go out and creatures stiffen."
+  },
+  "growth": {
+   "name": "Growth",
+   "color": "#7aff6a",
+   "aim": "point",
+   "cost": 10,
+   "cd": 1,
+   "tier": 1,
+   "radius": 10,
+   "desc": "The land greens: grass, seedlings, flowers. Burnt ground heals."
+  },
+  "heal": {
+   "name": "Healing Light",
+   "color": "#ffe9a8",
+   "aim": "point",
+   "cost": 14,
+   "cd": 2,
+   "tier": 1,
+   "radius": 12,
+   "power": 30,
+   "desc": "Mends every creature in the light and puts out any fire it touches."
+  },
+  "gale": {
+   "name": "Gale",
+   "color": "#d0f0ff",
+   "aim": "line",
+   "cost": 6,
+   "cd": 3,
+   "tier": 1,
+   "secs": 25,
+   "flat": true,
+   "desc": "Drag the way the wind should blow. Strong wind drives fire and smoke before it."
+  },
+  "bless": {
+   "name": "Blessing",
+   "color": "#ff8ad0",
+   "aim": "point",
+   "cost": 18,
+   "cd": 4,
+   "tier": 2,
+   "radius": 18,
+   "secs": 40,
+   "desc": "Creatures in the glow breed four times as fast."
+  },
+  "quake": {
+   "name": "Quake",
+   "color": "#c89060",
+   "aim": "point",
+   "cost": 28,
+   "cd": 6,
+   "tier": 2,
+   "radius": 24,
+   "power": 2,
+   "desc": "The ground shakes and splits. Walls crack, trees fall, everyone is thrown about."
+  },
+  "storm": {
+   "name": "Thunderstorm",
+   "color": "#8f8fff",
+   "aim": "point",
+   "cost": 34,
+   "cd": 6,
+   "tier": 2,
+   "radius": 18,
+   "secs": 20,
+   "desc": "A rain cloud that throws lightning about as it goes."
+  },
+  "spring": {
+   "name": "Wellspring",
+   "color": "#4fb2ff",
+   "aim": "point",
+   "cost": 18,
+   "cd": 2,
+   "tier": 2,
+   "desc": "Water bubbles up from the ground, forever."
+  },
+  "sinkhole": {
+   "name": "Sinkhole",
+   "color": "#8a7a6a",
+   "aim": "point",
+   "cost": 14,
+   "cd": 1.5,
+   "tier": 2,
+   "radius": 7,
+   "power": 12,
+   "desc": "The ground drops away. Water pours in to fill it."
+  },
+  "firewall": {
+   "name": "Wall of Fire",
+   "color": "#ff4a10",
+   "aim": "line",
+   "cost": 0.5,
+   "cd": 0,
+   "tier": 2,
+   "desc": "Drag a line of flame. Nothing likes to cross it."
+  },
+  "tornado": {
+   "name": "Whirlwind",
+   "color": "#c8d8e8",
+   "aim": "point",
+   "cost": 35,
+   "cd": 8,
+   "tier": 3,
+   "radius": 7,
+   "secs": 14,
+   "desc": "A twister that wanders, tearing up grass and flinging creatures. It carries fire if it meets some."
+  },
+  "smite": {
+   "name": "Sunlance",
+   "color": "#ffe14a",
+   "aim": "point",
+   "cost": 22,
+   "cd": 2,
+   "tier": 3,
+   "radius": 3,
+   "power": 90,
+   "desc": "A beam of sunlight. Huge harm to one spot, worst for the restless dead."
+  },
+  "chain": {
+   "name": "Chain Lightning",
+   "color": "#9fd0ff",
+   "aim": "point",
+   "cost": 26,
+   "cd": 3,
+   "tier": 3,
+   "power": 1,
+   "jumps": 6,
+   "desc": "A bolt that leaps from creature to creature."
+  },
+  "shower": {
+   "name": "Meteor Shower",
+   "color": "#ffcf6a",
+   "aim": "point",
+   "cost": 80,
+   "cd": 15,
+   "tier": 4,
+   "radius": 30,
+   "count": 9,
+   "desc": "Stars rain down over a wide area for a few seconds."
+  },
+  "volcano": {
+   "name": "Raise Volcano",
+   "color": "#ff5a14",
+   "aim": "point",
+   "cost": 70,
+   "cd": 20,
+   "tier": 4,
+   "radius": 10,
+   "desc": "A mountain heaves up and lava pours from its top."
+  },
+  "acidrain": {
+   "name": "Bile Rain",
+   "color": "#9cff2a",
+   "aim": "point",
+   "cost": 30,
+   "cd": 6,
+   "tier": 4,
+   "radius": 14,
+   "secs": 14,
+   "desc": "Green rain that eats stone and stings everything under it."
+  },
+  "void": {
+   "name": "Void Orb",
+   "color": "#7a3aff",
+   "aim": "point",
+   "cost": 60,
+   "cd": 12,
+   "tier": 5,
+   "radius": 5,
+   "secs": 7,
+   "desc": "A seed of nothing. It drinks in the land around it and drags creatures toward it."
+  },
+  "fireflies": {
+   "name": "Fireflies",
+   "color": "#c8ff6a",
+   "aim": "point",
+   "cost": 3,
+   "cd": 0.5,
+   "tier": 1,
+   "desc": "A swarm of little lights to brighten the night."
+  },
+  "holyrain": {
+   "name": "Blessed Rain",
+   "color": "#ffe9a8",
+   "aim": "point",
+   "cost": 26,
+   "cd": 6,
+   "tier": 3,
+   "radius": 14,
+   "secs": 16,
+   "desc": "Golden rain that heals what it falls on and drowns fire."
+  },
+  "barrier": {
+   "name": "Barrier",
+   "color": "#7fd8ff",
+   "aim": "point",
+   "cost": 22,
+   "cd": 4,
+   "tier": 1,
+   "radius": 10,
+   "secs": 20,
+   "desc": "A shining dome. Monsters cannot walk in; fire, lava, blasts and dragon breath stop at its skin."
+  },
+  "missiles": {
+   "name": "Arcane Missiles",
+   "color": "#c27aff",
+   "aim": "point",
+   "cost": 14,
+   "cd": 1.5,
+   "tier": 1,
+   "count": 5,
+   "power": 18,
+   "radius": 18,
+   "desc": "Violet darts that seek the nearest foes around where you touch — even ones in the air."
+  }
+ }
+}

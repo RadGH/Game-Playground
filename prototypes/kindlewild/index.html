@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#120d1c">
+<title>Kindlewild</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/whats-new.css">
+<link rel="stylesheet" href="../../shared/credits.css">
+<link rel="stylesheet" href="../../shared/rgs-signin.css">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<canvas id="world" aria-label="The world"></canvas>
+
+<!-- in-game interface -->
+<div id="hud" class="hidden">
+  <div class="topbar">
+    <button class="icon-btn" id="btn-menu" aria-label="Menu">☰</button>
+    <div class="mana" id="mana" title="Mana">
+      <div class="mana-fill" id="mana-fill"></div>
+      <div class="mana-ghost" id="mana-ghost"></div>
+      <span class="mana-text"><b id="mana-num">0</b><small id="mana-regen"></small></span>
+    </div>
+    <button class="goal-chip" id="goal-chip" aria-label="Goals"><span id="goal-text">Sandbox</span></button>
+    <div class="wind" id="wind" title="Wind"><span id="wind-arrow">➤</span></div>
+    <button class="icon-btn" id="btn-speed" aria-label="Speed">1×</button>
+    <button class="icon-btn report" id="btn-report" aria-label="Report a problem">!</button>
+  </div>
+  <div id="realm-strip" class="realm-strip hidden"></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="banner" class="banner hidden"></div>
+  <div id="inspect" class="inspect hidden"></div>
+</div>
+
+<div id="dock" class="hidden">
+  <div class="dock-info">
+    <div class="sel-icon" id="sel-icon"></div>
+    <div class="sel-text"><b id="sel-name">—</b><small id="sel-sub"></small></div>
+    <div class="brush" id="brush">
+      <button class="icon-btn small" id="brush-minus" aria-label="Smaller brush">−</button>
+      <span id="brush-size">3</span>
+      <button class="icon-btn small" id="brush-plus" aria-label="Bigger brush">+</button>
+    </div>
+    <button class="icon-btn small" id="btn-hand" aria-label="Move the view" title="Move the view with one finger">✥</button>
+    <button class="icon-btn small" id="btn-collapse" aria-label="Hide the tools">▾</button>
+  </div>
+  <div class="chips hidden" id="chips"></div>
+  <div class="dock-tiles">
+    <button class="page-arrow" id="page-prev" aria-label="Previous page">‹</button>
+    <div class="tiles" id="tiles"></div>
+    <button class="page-arrow" id="page-next" aria-label="Next page">›</button>
+  </div>
+  <div class="page-dots" id="page-dots"></div>
+  <div class="dock-tabs" id="tabs">
+    <button data-tab="spell"><i class="tab-ico"></i>Spells</button>
+    <button data-tab="material"><i class="tab-ico"></i>Elements</button>
+    <button data-tab="creature"><i class="tab-ico"></i>Creatures</button>
+    <button data-tab="tool"><i class="tab-ico"></i>Tools</button>
+  </div>
+</div>
+<button id="dock-open" class="dock-open hidden" aria-label="Show the tools">▴ Tools</button>
+
+<!-- screens -->
+<section id="title" class="screen">
+  <div class="title-card">
+    <h1 class="logo">Kindlewild</h1>
+    <p class="tag">A tiny realm. Your sky.</p>
+    <div class="essence-pill" id="title-essence">✦ 0</div>
+    <div class="title-buttons">
+      <button class="big" id="go-challenges">⚔️ Challenges</button>
+      <button class="big" id="go-sandbox">🌋 Sandbox</button>
+      <button class="big" id="go-realm">🏰 Realm</button>
+      <button class="big" id="go-grimoire">📖 Grimoire <span class="dot hidden" id="grim-dot"></span></button>
+    </div>
+    <div class="title-small">
+      <span id="news-slot"></span>
+      <button class="small-btn" id="go-journal">📜 Journal</button>
+      <button class="small-btn" id="go-settings">⚙ Settings</button>
+      <button class="small-btn" id="go-credits">Credits</button>
+      <span id="account-slot"></span>
+    </div>
+  </div>
+</section>
+
+<section id="challenges" class="screen hidden">
+  <header class="screen-head"><button class="icon-btn" data-back>‹</button><h2>Challenges</h2><span class="essence-pill" data-essence>✦ 0</span></header>
+  <div class="scroll" id="act-list"></div>
+</section>
+
+<section id="sandbox-setup" class="screen hidden">
+  <header class="screen-head"><button class="icon-btn" data-back>‹</button><h2>Sandbox</h2></header>
+  <div class="scroll">
+    <h3>Pick a land</h3>
+    <div class="cards" id="land-cards"></div>
+    <h3>Size</h3>
+    <div class="seg" id="size-seg"><button data-v="small">Small</button><button data-v="medium" class="on">Medium</button><button data-v="large">Large</button></div>
+    <label class="toggle"><input type="checkbox" id="endless" checked> Endless mana</label>
+    <label class="toggle"><input type="checkbox" id="everything"> Unlock every page here (try anything; your Grimoire is not changed)</label>
+    <button class="big go" id="start-sandbox">Begin</button>
+  </div>
+</section>
+
+<section id="realm-setup" class="screen hidden">
+  <header class="screen-head"><button class="icon-btn" data-back>‹</button><h2>Realm</h2><span class="essence-pill" data-essence>✦ 0</span></header>
+  <div class="scroll" id="realm-body"></div>
+</section>
+
+<section id="grimoire" class="screen hidden">
+  <header class="screen-head"><button class="icon-btn" data-back>‹</button><h2>Grimoire</h2><span class="essence-pill" data-essence>✦ 0</span></header>
+  <div class="seg tabs" id="grim-tabs"><button data-g="pages" class="on">Pages</button><button data-g="upgrades">Empower</button><button data-g="boons">Boons</button><button data-g="disc">Discoveries</button></div>
+  <div class="scroll" id="grim-body"></div>
+</section>
+
+<div id="modal-root"></div>
+
+<div id="loading" class="loading"><div class="spark"></div><p>Kindling…</p></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

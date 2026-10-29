@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kestrel by Opus</title>
+<link rel="stylesheet" href="../../../shared/style.css">
+<link rel="stylesheet" href="css/opus.css">
+<script type="importmap">{ "imports": { "three": "../../../vendor/three/three.module.js", "three/addons/": "../../../vendor/three/addons/" } }</script>
+</head>
+<body class="op">
+<!-- Kestrel (opus) preview. Query: ?body=male|female ?outfit=1 ?anim=walk ?expr=happy ?view=front|left|back|right|three|face|free
+     ?lod=1 ?t=0.4 (freeze the clip at t seconds) ?shot=1 (canvas only, for screenshots) ?w=1 (wireframe)
+     window.__opus = { ready, stats } for tools. -->
+<header class="op-top">
+  <h1>Kestrel <small class="muted">hand-coded by Opus</small></h1>
+  <p class="muted small">Procedural body, face, hair and clothes in one skinned mesh, one draw call. Drag to turn the view. <a href="README.md">notes</a> · <a href="../index.html">all attempts</a></p>
+</header>
+<section class="op-controls">
+  <div class="row" id="c-body"></div>
+  <div class="row" id="c-view"></div>
+  <div class="row" id="c-anim"></div>
+  <div class="row" id="c-expr"></div>
+  <div class="row">
+    <label><input type="checkbox" id="c-outfit"> outfit (shirt, pants, boots)</label>
+    <label><input type="checkbox" id="c-lod"> far version (LOD 1)</label>
+    <label><input type="checkbox" id="c-wire"> wireframe</label>
+    <label><input type="checkbox" id="c-spin"> turntable</label>
+  </div>
+</section>
+<main class="op-stage"><canvas id="view"></canvas><div id="line" class="op-line small muted"></div></main>
+<script type="module" src="js/page.js"></script>
+</body>
+</html>

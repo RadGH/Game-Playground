@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "_doc": "M3's simple unlock list (PLAN M3): each row is unlocked the moment the base has PRODUCED `needs.produced` in total (dug, cut or made — not stock, so spending it does not undo it). `unlocks` names buildings.json rows. M9's Calculator replaces this list with the research tree; these ids stay so its rows can say they replace them. Other milestones add rows; never edit another milestone's rows.",
+  "list": [
+    { "id": "smelting", "era": 1, "name": "Smelting", "needs": { "produced": { "copper_ore": 24 } }, "unlocks": ["smelter"], "milestone": "M3" },
+    { "id": "stonework", "era": 1, "name": "Stonework", "needs": { "produced": { "stone": 40 } }, "unlocks": ["stonecutter"], "milestone": "M3" },
+    { "id": "carts", "era": 1, "name": "Mule carts", "needs": { "produced": { "planks": 30 } }, "unlocks": ["cart_shed"], "milestone": "M3" },
+    { "id": "power", "era": 1, "name": "Steam power", "needs": { "produced": { "coal": 40 } }, "unlocks": ["generator"], "milestone": "M3" },
+    { "id": "survey", "era": 2, "name": "Ground survey", "needs": { "produced": { "copper_bar": 30 } }, "unlocks": ["thumper"], "milestone": "M3" },
+    { "id": "drills", "era": 2, "name": "Drilling", "needs": { "produced": { "iron_bar": 16 } }, "unlocks": ["drill"], "milestone": "M3" },
+    { "id": "town_charter", "era": 1, "name": "Town charter", "needs": { "produced": { "food": 150 } }, "unlocks": ["commons"], "levels": { "house": 2 }, "milestone": "M7" },
+    { "id": "arcana", "era": 1, "name": "Crystal lore", "needs": { "produced": { "copper_bar": 12 } }, "unlocks": ["harvester", "mana_refinery"], "milestone": "M6" },
+    { "id": "mana_storage", "era": 2, "name": "Mana storage", "needs": { "produced": { "mana": 120 } }, "unlocks": ["battery"], "milestone": "M6" },
+    { "id": "fortify", "era": 1, "name": "Fortification", "needs": { "produced": { "timber": 240 } }, "unlocks": ["bolt_thrower"], "milestone": "M4" },
+    { "id": "gunnery", "era": 2, "name": "Gunnery", "needs": { "produced": { "iron_bar": 24 } }, "unlocks": ["gun_nest"], "milestone": "M4" },
+    { "id": "mortars", "era": 2, "name": "Mortars", "needs": { "produced": { "iron_bar": 50, "block": 30 } }, "unlocks": ["mortar_pit"], "milestone": "M4" },
+    { "id": "wall_stone", "era": 1, "name": "Stone walls", "needs": { "produced": { "block": 60 } }, "unlocks": [], "levels": { "wall": 2 }, "milestone": "M4" },
+    { "id": "wall_steel", "era": 2, "name": "Steel-banded walls", "needs": { "produced": { "iron_bar": 90 } }, "unlocks": [], "levels": { "wall": 3 }, "milestone": "M4" },
+    { "id": "wall_poured", "era": 3, "name": "Poured walls", "needs": { "produced": { "block": 400, "iron_bar": 240 } }, "unlocks": [], "levels": { "wall": 4 }, "milestone": "M4" },
+    { "id": "wall_runed", "era": 3, "name": "Runed walls", "needs": { "produced": { "crystal": 160 } }, "unlocks": [], "levels": { "wall": 5 }, "milestone": "M4" },
+    { "id": "watch_lenses", "era": 1, "name": "Ground lenses", "needs": { "produced": { "planks": 160 } }, "unlocks": [], "levels": { "tower.watch_post": 2 }, "milestone": "M4" },
+    { "id": "steel_bolts", "era": 2, "name": "Steel bolts", "needs": { "produced": { "iron_bar": 70 } }, "unlocks": [], "levels": { "tower.bolt_thrower": 2 }, "milestone": "M4" },
+    { "id": "belt_feed", "era": 2, "name": "Belt feed", "needs": { "produced": { "iron_bar": 140 } }, "unlocks": [], "levels": { "tower.gun_nest": 2 }, "milestone": "M4" },
+    { "id": "heavy_shells", "era": 2, "name": "Heavy shells", "needs": { "produced": { "copper_bar": 260 } }, "unlocks": [], "levels": { "tower.mortar_pit": 2 }, "milestone": "M4" }
+  ]
+}

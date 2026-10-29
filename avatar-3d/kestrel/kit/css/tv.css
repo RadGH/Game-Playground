@@ -1,0 +1,7 @@
+/* Kestrel kit — the Thousandvale pose page (tv.html). */
+body { margin: 0; background: #1d2126; color: #dde3ea; overflow: hidden; }
+.tv-top { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: rgba(20, 24, 28, 0.82); z-index: 2; }
+.tv-top h1 { font-size: 16px; margin: 0 0 6px; }
+.tv-top .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+#c { display: block; width: 100vw; height: 100vh; }
+body.shot .tv-top { display: none; }

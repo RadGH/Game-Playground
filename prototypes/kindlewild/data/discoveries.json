@@ -1,0 +1,221 @@
+{
+ "about": "Things the world can do that the player is rewarded for finding, once each. essence = reward. hint = shown (greyed) before it is found, in the Grimoire's Discoveries page. Raised by the sim through api.discover(id).",
+ "list": {
+  "obsidian": {
+   "name": "Obsidian",
+   "essence": 10,
+   "text": "Water met lava and it set into black glass.",
+   "hint": "What happens when water meets lava?"
+  },
+  "steam": {
+   "name": "Steam",
+   "essence": 5,
+   "text": "Heat boiled water into a white cloud.",
+   "hint": "Heat some water."
+  },
+  "glass": {
+   "name": "Glassmaking",
+   "essence": 10,
+   "text": "Sand melted into glass.",
+   "hint": "Sand can take a lot of heat... or a bolt."
+  },
+  "doused": {
+   "name": "Doused",
+   "essence": 5,
+   "text": "Water ran over a flame and put it out.",
+   "hint": "Let water reach a fire."
+  },
+  "rain-quench": {
+   "name": "Rain on fire",
+   "essence": 5,
+   "text": "Rain drowned a burning patch.",
+   "hint": "Rain over a fire."
+  },
+  "frozen": {
+   "name": "Freeze",
+   "essence": 5,
+   "text": "Water froze into ice.",
+   "hint": "Make water very cold."
+  },
+  "frozen-lava": {
+   "name": "Stopped flow",
+   "essence": 12,
+   "text": "Frost turned lava straight to stone.",
+   "hint": "Cold can stop a lava flow."
+  },
+  "frozen-flame": {
+   "name": "Frozen flame",
+   "essence": 12,
+   "text": "Frostfire turned water to ice where it touched.",
+   "hint": "A cold fire meets water."
+  },
+  "quench": {
+   "name": "Fire against fire",
+   "essence": 8,
+   "text": "Frostfire and flame put each other out.",
+   "hint": "Two kinds of fire meet."
+  },
+  "corrosion": {
+   "name": "Corrosion",
+   "essence": 10,
+   "text": "Wyrmbile ate through something solid.",
+   "hint": "What does bile do to stone?"
+  },
+  "diluted": {
+   "name": "Watered down",
+   "essence": 5,
+   "text": "Bile mixed with water and lost its bite.",
+   "hint": "Bile meets water."
+  },
+  "purified": {
+   "name": "Purified",
+   "essence": 12,
+   "text": "Blessed water made something foul clean again.",
+   "hint": "Blessed water against foulness."
+  },
+  "bog-flare": {
+   "name": "Bog flare",
+   "essence": 12,
+   "text": "Bog goo flashed in the heat.",
+   "hint": "Heat some bog goo."
+  },
+  "pitch-fire": {
+   "name": "Pitch fire",
+   "essence": 10,
+   "text": "Pitch caught from the lava and roared.",
+   "hint": "Pitch near great heat."
+  },
+  "sapling": {
+   "name": "Sapling",
+   "essence": 5,
+   "text": "A seed drank and became a tree.",
+   "hint": "Seeds and water."
+  },
+  "arcane-burst": {
+   "name": "Arcane burst",
+   "essence": 15,
+   "text": "Mana crystal went off like a star.",
+   "hint": "Mana crystal does not like lightning."
+  },
+  "unmaking": {
+   "name": "Unmaking",
+   "essence": 20,
+   "text": "Blessed water and void cancelled each other in a flash.",
+   "hint": "Light against the void."
+  },
+  "spore-cloud": {
+   "name": "Spore cloud",
+   "essence": 8,
+   "text": "A burning glowcap burst into spores.",
+   "hint": "Burn a glowcap."
+  },
+  "spore-flash": {
+   "name": "Spore flash",
+   "essence": 15,
+   "text": "A cloud of spores caught fire all at once.",
+   "hint": "Spores are dust... and dust burns."
+  },
+  "marsh-flare": {
+   "name": "Marsh flare",
+   "essence": 15,
+   "text": "Marsh gas met a flame.",
+   "hint": "Something rises from a marsh at night."
+  },
+  "restless-bones": {
+   "name": "Restless bones",
+   "essence": 15,
+   "text": "Bog goo woke a pile of bones.",
+   "hint": "Bones and bog goo."
+  },
+  "chain-blast": {
+   "name": "Chain blast",
+   "essence": 10,
+   "text": "Blackpowder set off more blackpowder.",
+   "hint": "Light one end of a trail of blackpowder."
+  },
+  "void": {
+   "name": "The void hungers",
+   "essence": 10,
+   "text": "Voidseed ate the land around it.",
+   "hint": "Plant a voidseed."
+  },
+  "charged-water": {
+   "name": "Charged water",
+   "essence": 10,
+   "text": "Lightning ran through a whole pool.",
+   "hint": "Lightning into water."
+  },
+  "steam-crater": {
+   "name": "Steam crater",
+   "essence": 15,
+   "text": "A meteor fell into water and boiled it.",
+   "hint": "Drop a meteor into a lake."
+  },
+  "drowned": {
+   "name": "In over their heads",
+   "essence": 5,
+   "text": "Something that cannot swim found deep water.",
+   "hint": "Not everything can swim."
+  },
+  "cooked": {
+   "name": "Cooked",
+   "essence": 5,
+   "text": "Something walked into lava.",
+   "hint": "Lava is not a floor."
+  },
+  "troll-stone": {
+   "name": "Sunrise",
+   "essence": 15,
+   "text": "A troll caught by the dawn turned to stone.",
+   "hint": "Trolls do not like mornings."
+  },
+  "rebirth": {
+   "name": "Rebirth",
+   "essence": 20,
+   "text": "A phoenix burned away and came back.",
+   "hint": "What happens when a phoenix falls?"
+  },
+  "fire-twister": {
+   "name": "Fire twister",
+   "essence": 20,
+   "text": "A whirlwind caught fire.",
+   "hint": "A whirlwind meets a wildfire."
+  },
+  "chain-four": {
+   "name": "Four in a row",
+   "essence": 12,
+   "text": "Chain lightning jumped four times.",
+   "hint": "Line up some foes for the chain."
+  },
+  "volcano": {
+   "name": "Mountain maker",
+   "essence": 10,
+   "text": "You raised a volcano.",
+   "hint": "Raise a volcano."
+  },
+  "sunstone": {
+   "name": "Sunstone",
+   "essence": 20,
+   "text": "Blessed water cooled lava into sunstone.",
+   "hint": "Blessed water meets lava."
+  },
+  "flung": {
+   "name": "Hand of the sky",
+   "essence": 5,
+   "text": "You picked something up and threw it.",
+   "hint": "Try the Grab tool."
+  },
+  "fireworks": {
+   "name": "Fireworks",
+   "essence": 10,
+   "text": "Starpowder burst into coloured stars.",
+   "hint": "Light some starpowder."
+  },
+  "hatchling": {
+   "name": "Hatchling",
+   "essence": 15,
+   "text": "A wyrm egg kept warm in lava cracked open.",
+   "hint": "Eggs like it hot."
+  }
+ }
+}

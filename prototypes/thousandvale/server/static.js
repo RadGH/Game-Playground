@@ -14,7 +14,7 @@ import { gzipSync } from 'node:zlib';
 /** Playground folders and root files a browser may load. Anything not under one of these is refused. */
 export const ALLOW = Object.freeze([
   // the home page
-  'index.html', 'GAME-GUIDE.md', 'js', 'css', 'data',
+  'index.html', 'credits.html', 'GAME-GUIDE.md', 'js', 'css', 'data',
   // shared code and art
   'shared', 'vendor', 'assets',
   // experiments
@@ -22,7 +22,7 @@ export const ALLOW = Object.freeze([
   'lingo', 'meters', 'namegen', 'proctown', 'sfx', 'universe', 'voice-lab', 'worldgen',
   // prototypes (prototypes/tinyrts is a symlink to another repo, so a published copy cannot hold it)
   'prototypes/thousandvale', 'prototypes/farhold', 'prototypes/emberveil', 'prototypes/bannerline',
-  'prototypes/frontier-foundry', 'prototypes/lanternfall',
+  'prototypes/frontier-foundry', 'prototypes/lanternfall', 'prototypes/lodestar', 'prototypes/kindlewild',
   'prototypes/tumblefair', 'prototypes/knockabout', 'prototypes/roverlands',
 ]);
 /** Paths inside the allow-list that are still refused. */

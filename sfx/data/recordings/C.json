@@ -1,0 +1,398 @@
+{
+ "travel.step": {
+  "files": [
+   "fs/travel.step-1.ogg",
+   "fs/travel.step-2.ogg",
+   "fs/travel.step-3.ogg"
+  ],
+  "note": "three single boot steps on gravel, one recording (Fission9)"
+ },
+ "travel.step.soft": {
+  "files": [
+   "fs/travel.step.soft-1.ogg",
+   "fs/travel.step.soft-2.ogg",
+   "fs/travel.step.soft-3.ogg"
+  ],
+  "note": "three single boot steps on grass (Fission9)"
+ },
+ "camp.fire": {
+  "files": [
+   "fs/camp.fire-1.ogg"
+  ],
+  "note": "small campfire, steady crackle with air tone (kyles)"
+ },
+ "fire.crackle": {
+  "files": [
+   "fs/fire.crackle-1.ogg"
+  ],
+  "note": "close crackles and pops, quiet flames (ahriik)"
+ },
+ "ambience.fire": {
+  "files": [
+   "fs/ambience.fire-1.ogg"
+  ],
+  "note": "big roaring fire, steady, no sharp crackles (Aegersum)"
+ },
+ "ambience.forest": {
+  "files": [
+   "fs/ambience.forest-1.ogg"
+  ],
+  "note": "spring forest afternoon, birds + breeze (bajko)"
+ },
+ "ambience.cave": {
+  "files": [
+   "fs/ambience.cave-1.ogg"
+  ],
+  "note": "dark dungeon drone/rumble, steady (Kinoton)"
+ },
+ "ambience.town": {
+  "files": [
+   "fs/ambience.town-1.ogg"
+  ],
+  "note": "designed medieval village atmosphere (ramonmineiro)"
+ },
+ "ambience.marsh": {
+  "files": [
+   "fs/ambience.marsh-1.ogg"
+  ],
+  "note": "many frogs at night in a marsh, dense and even (bmacphail)"
+ },
+ "ambience.mountain": {
+  "files": [
+   "fs/ambience.mountain-1.ogg"
+  ],
+  "note": "howling high wind (DBlover)"
+ },
+ "ambience.wind": {
+  "files": [
+   "fs/ambience.wind-1.ogg"
+  ],
+  "note": "steady cold arctic wind (cobratronik)"
+ },
+ "ambience.void": {
+  "files": [
+   "fs/ambience.void-1.ogg"
+  ],
+  "note": "ominous deep drone (Resaural)"
+ },
+ "ambience.night": {
+  "files": [
+   "fs/ambience.night-1.ogg"
+  ],
+  "note": "crickets with a distant tawny owl (raoul_slayer)"
+ },
+ "ambience.storm": {
+  "files": [
+   "fs/ambience.storm-1.ogg"
+  ],
+  "note": "heavy rain with thunder rumbles (Audeption)"
+ },
+ "ambience.rain.light": {
+  "files": [
+   "fs/ambience.rain.light-1.ogg"
+  ],
+  "note": "light rural rain (jmbphilmes)"
+ },
+ "ambience.rain.heavy": {
+  "files": [
+   "fs/ambience.rain.heavy-1.ogg"
+  ],
+  "note": "heavy rural rain, steady (jmbphilmes)"
+ },
+ "fire.whoosh": {
+  "files": [
+   "fs/fire.whoosh-1.ogg",
+   "fs/fire.whoosh-2.ogg"
+  ],
+  "note": "two fire whooshes (LookIMadeAThing, hnhnh)"
+ },
+ "water.splash.small": {
+  "files": [
+   "fs/water.splash.small-1.ogg",
+   "fs/water.splash.small-2.ogg",
+   "fs/water.splash.small-3.ogg"
+  ],
+  "note": "three small splashes from one 10-shot take (vibe_crc)"
+ },
+ "water.splash.big": {
+  "files": [
+   "fs/water.splash.big-1.ogg",
+   "fs/water.splash.big-2.ogg",
+   "fs/water.splash.big-3.ogg"
+  ],
+  "note": "three big splashes (qubodup, Bird_man, Sheyvan)"
+ },
+ "rain.tick.metal": {
+  "files": [
+   "fs/rain.tick.metal-1.ogg",
+   "fs/rain.tick.metal-2.ogg"
+  ],
+  "note": "drops on a tin roof, two 1.4 s slices (moviebuffgavin)"
+ },
+ "water.pour": {
+  "files": [
+   "fs/water.pour-1.ogg",
+   "fs/water.pour-2.ogg"
+  ],
+  "note": "water poured into a glass/vessel (JohnsonBrandEditing, Dvideoguy)"
+ },
+ "water.drain": {
+  "files": [
+   "fs/water.drain-1.ogg",
+   "fs/water.drain-2.ogg"
+  ],
+  "note": "bath emptying gurgle, two slices (swiftoid)"
+ },
+ "steam.hiss": {
+  "files": [
+   "fs/steam.hiss-1.ogg",
+   "fs/steam.hiss-2.ogg"
+  ],
+  "note": "steam release hiss (sniperous, wubitog)"
+ },
+ "ice.form": {
+  "files": [
+   "fs/ice.form-1.ogg",
+   "fs/ice.form-2.ogg"
+  ],
+  "note": "designed freeze effect + ice grinding/cracking (antonsoederberg, kyles)"
+ },
+ "ice.crack": {
+  "files": [
+   "fs/ice.crack-1.ogg",
+   "fs/ice.crack-2.ogg",
+   "fs/ice.crack-3.ogg"
+  ],
+  "note": "three single ice cracks from one take (timbreknight)"
+ },
+ "stone.crumble": {
+  "files": [
+   "fs/stone.crumble-1.ogg",
+   "fs/stone.crumble-2.ogg"
+  ],
+  "note": "rocks tumbling and crumbling (adamgryu, ALLANZ10D)"
+ },
+ "fragment.crash.small": {
+  "files": [
+   "fs/fragment.crash.small-1.ogg",
+   "fs/fragment.crash.small-2.ogg",
+   "fs/fragment.crash.small-3.ogg"
+  ],
+  "note": "small clatters + a crunch (leonelmail x2, Aurelon)"
+ },
+ "fragment.crash.medium": {
+  "files": [
+   "fs/fragment.crash.medium-1.ogg",
+   "fs/fragment.crash.medium-2.ogg",
+   "fs/fragment.crash.medium-3.ogg"
+  ],
+  "note": "three rock smashes from one take (NeoSpica)"
+ },
+ "fragment.crash.large": {
+  "files": [
+   "fs/fragment.crash.large-1.ogg",
+   "fs/fragment.crash.large-2.ogg",
+   "fs/fragment.crash.large-3.ogg"
+  ],
+  "note": "big falling debris x2 (xkeril) + heavy rockfall (ALLANZ10D)"
+ },
+ "lever.pull": {
+  "files": [
+   "fs/lever.pull-1.ogg",
+   "fs/lever.pull-2.ogg"
+  ],
+  "note": "two metal lever pulls from one take (A_Kuha)"
+ },
+ "door.grind": {
+  "files": [
+   "fs/door.grind-1.ogg",
+   "fs/door.grind-2.ogg"
+  ],
+  "note": "heavy stone slab/door scraping (NahuelMartinez, PostProdDog)"
+ },
+ "sluice.open": {
+  "files": [
+   "fs/sluice.open-1.ogg",
+   "fs/sluice.open-2.ogg"
+  ],
+  "note": "storm-drain water rush + a water gush (RoofDog, HonorHunter)"
+ },
+ "rope.creak": {
+  "files": [
+   "fs/rope.creak-1.ogg",
+   "fs/rope.creak-2.ogg"
+  ],
+  "note": "leather/rope under strain creaks (Nox_Sound)"
+ },
+ "grapple.fire": {
+  "files": [
+   "fs/grapple.fire-1.ogg",
+   "fs/grapple.fire-2.ogg"
+  ],
+  "note": "grappling hook launch + chain extend (16bitstudios, randbsoundbites)"
+ },
+ "lantern.out": {
+  "files": [
+   "fs/lantern.out-1.ogg",
+   "fs/lantern.out-2.ogg"
+  ],
+  "note": "candle flame blown out (peridactyloptrix)"
+ },
+ "lamp.post": {
+  "files": [
+   "fs/lamp.post-1.ogg",
+   "fs/lamp.post-2.ogg"
+  ],
+  "note": "match strike lighting a wick / candle (shelbyshark, mfearnley)"
+ },
+ "lamp.relight": {
+  "files": [
+   "fs/lamp.relight-1.ogg"
+  ],
+  "note": "bonfire catching with a big whoomp (samararaine)"
+ },
+ "rekindle": {
+  "files": [
+   "fs/rekindle-1.ogg"
+  ],
+  "note": "magic fire swell (TheLittleCrow)"
+ },
+ "bell.toll": {
+  "files": [
+   "fs/bell.toll-1.ogg"
+  ],
+  "note": "single deep funeral bell toll with ring-out (aoristos)"
+ },
+ "gutter.burst": {
+  "files": [
+   "fs/gutter.burst-1.ogg",
+   "fs/gutter.burst-2.ogg",
+   "fs/gutter.burst-3.ogg"
+  ],
+  "note": "short flame bursts (Za-Games, kyles, magnuswaker)"
+ },
+ "oil.pickup": {
+  "files": [
+   "fs/oil.pickup-1.ogg",
+   "fs/oil.pickup-2.ogg"
+  ],
+  "note": "liquid sloshing in a bottle (alegemaate)"
+ },
+ "pearl.pickup": {
+  "files": [
+   "fs/pearl.pickup-1.ogg",
+   "fs/pearl.pickup-2.ogg"
+  ],
+  "note": "glass marble clinks on tile (patchytherat)"
+ },
+ "hvf.horn": {
+  "files": [
+   "fs/hvf.horn-1.ogg"
+  ],
+  "note": "hunting horn call (nanoPlink)"
+ },
+ "hvf.hawk": {
+  "files": [
+   "fs/hvf.hawk-1.ogg",
+   "fs/hvf.hawk-2.ogg"
+  ],
+  "note": "red-tailed hawk cries (craigsmith)"
+ },
+ "hvf.bell": {
+  "files": [
+   "fs/hvf.bell-1.ogg"
+  ],
+  "note": "hand bell ringing (WebbFilmsUK)"
+ },
+ "animal.sheep.bleat": {
+  "files": [
+   "fs/animal.sheep.bleat-1.ogg",
+   "fs/animal.sheep.bleat-2.ogg"
+  ],
+  "note": "two clear sheep bleats (zachrau)"
+ },
+ "animal.cow.moo": {
+  "files": [
+   "fs/animal.cow.moo-1.ogg",
+   "fs/animal.cow.moo-2.ogg"
+  ],
+  "note": "short and long cow moo (JosephSardin)"
+ },
+ "wood.chop": {
+  "files": [
+   "fs/wood.chop-1.ogg",
+   "fs/wood.chop-2.ogg",
+   "fs/wood.chop-3.ogg"
+  ],
+  "note": "three single axe-into-wood chops (xkeril); replaces the Kenney set"
+ },
+ "trap.snap": {
+  "files": [
+   "fs/trap.snap-1.ogg",
+   "fs/trap.snap-2.ogg",
+   "fs/trap.snap-3.ogg"
+  ],
+  "note": "steel spring trap snapping shut (ThePriest909, fractionalist x2)"
+ },
+ "ward.pull": {
+  "files": [
+   "fs/ward.pull-1.ogg",
+   "fs/ward.pull-2.ogg"
+  ],
+  "note": "heavy stone scraped/dragged out (CheatinSloth)"
+ },
+ "build.place": {
+  "files": [
+   "fs/build.place-1.ogg",
+   "fs/build.place-2.ogg",
+   "fs/build.place-3.ogg"
+  ],
+  "note": "single hammer-on-nail knocks (aidansamuel); replaces the Kenney set"
+ },
+ "hvf.revive": {
+  "files": [
+   "fs/hvf.revive-1.ogg"
+  ],
+  "note": "short rising heal shimmer (colorsCrimsonTears)"
+ },
+ "animal.hen.cluck": {
+  "files": [
+   "fs/animal.hen.cluck-1.ogg",
+   "fs/animal.hen.cluck-2.ogg"
+  ],
+  "note": "hen clucks from a farmyard take (Breviceps)"
+ },
+ "animal.pig.oink": {
+  "files": [
+   "fs/animal.pig.oink-1.ogg",
+   "fs/animal.pig.oink-2.ogg"
+  ],
+  "note": "pig oink + pig grunt (qubodup)"
+ },
+ "tower.shot": {
+  "files": [
+   "fs/tower.shot-1.ogg",
+   "fs/tower.shot-2.ogg",
+   "fs/tower.shot-3.ogg"
+  ],
+  "note": "crossbow shots (Ali_6868 shot+thunk, LeMudCrab, spookymodem)"
+ },
+ "hvf.down": {
+  "files": [
+   "fs/hvf.down-1.ogg"
+  ],
+  "note": "heavy body fall on dirt (leonelmail)"
+ },
+ "build.done": {
+  "files": [
+   "fs/build.done-1.ogg"
+  ],
+  "note": "single clean anvil ring as a 'finished' cue (michorvath)"
+ },
+ "hvf.turn": {
+  "files": [
+   "fs/hvf.turn-1.ogg"
+  ],
+  "note": "big gong hit with ring-out (BOSS MUSIC user, a plain gong recording)"
+ }
+}

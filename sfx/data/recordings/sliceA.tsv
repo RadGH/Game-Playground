@@ -1,0 +1,52 @@
+spell.fire.launch	spell		Fire launch	
+spell.fire.travel	spell	loop	Fire in flight	
+spell.fire.impact	impact		Fire impact	
+spell.ice.launch	spell		Ice launch	
+spell.ice.travel	spell	loop	Ice in flight	
+spell.ice.impact	impact		Ice impact	kenney:5
+spell.shadow.launch	spell		Shadow launch	
+spell.shadow.travel	spell	loop	Shadow in flight	
+spell.shadow.impact	impact		Shadow impact	
+spell.holy.launch	spell		Holy launch	
+spell.holy.travel	spell	loop	Holy in flight	
+spell.holy.impact	impact		Holy impact	kenney:5
+spell.nature.launch	spell		Nature launch	
+spell.nature.travel	spell	loop	Nature in flight	
+spell.nature.impact	impact		Nature impact	kenney:5
+spell.arcane.launch	spell		Arcane launch	
+spell.arcane.travel	spell	loop	Arcane in flight	
+spell.arcane.impact	impact		Arcane impact	
+spell.lightning.launch	spell		Lightning launch	
+spell.lightning.travel	spell	loop	Lightning in flight	
+spell.lightning.impact	impact		Lightning impact	
+spell.physical.launch	spell		Physical launch	kenney:3
+spell.physical.travel	spell	loop	Physical in flight	
+spell.physical.impact	impact		Physical impact	kenney:5
+spell.poison.launch	spell		Poison launch	
+spell.poison.travel	spell	loop	Poison in flight	
+spell.poison.impact	impact		Poison impact	
+spell.bleed.launch	spell		Bleed launch	
+spell.bleed.travel	spell	loop	Bleed in flight	
+spell.bleed.impact	impact		Bleed impact	kenney:5
+spell.true.launch	spell		True launch	
+spell.true.travel	spell	loop	True in flight	
+spell.true.impact	impact		True impact	kenney:5
+cast.start	spell		Cast start	
+heal	sting		Heal	kenney:2
+revive	sting		Revive	kenney:2
+levelup	sting		Level up	kenney:4
+quest.complete	sting		Quest complete	kenney:3
+night.ambush	sting		Night ambush	
+explosion.small	impact		Small explosion / blast	
+explosion.large	impact		Big explosion (meteor impact, powder keg)	
+meteor.fall	spell		A falling star whistling down (about 1.5-2 s, ends before impact)	
+thunder	impact		Lightning strike: sharp crack then a rumble (2-3 s)	
+tornado	spell		Whirlwind / twister howl, one-shot about 3-4 s, fades out	
+quake.rumble	impact		Earthquake rumble (2-3 s)	
+dragon.roar	death		Dragon roar (big, fierce, 1.5-2.5 s)	
+beast.growl	world		Monster/troll growl (short)	
+wolf.howl	world		Wolf howl	
+arrow.shot	melee		Bow release + arrow whoosh	
+magic.missile	spell		Small magic dart zip (very short)	
+lava.bubble	world		Thick lava / mud bubbling blorp	
+crowd.cheer	sting		Small village crowd cheering (short, 1.5-2.5 s)	

@@ -1,0 +1,2033 @@
+{
+ "id": "act3",
+ "name": "Act III — The Alchemist’s Road",
+ "blurb": "Fire, water, frost and stranger brews: win with what the world does when they meet.",
+ "levels": [
+  {
+   "id": "3-1",
+   "name": "Blackwater Ford",
+   "icon": "lvl-3-1",
+   "intro": [
+    "Two vents have opened above Ashbrook, and the river is all that stands between.",
+    "Where lava meets water it turns to obsidian. Keep the river full and the ford held.",
+    "Goblins and fire imps are coming down behind the lava."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 3101,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0,
+     "temp": 0.4
+    },
+    "clock": 0.5,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "slope",
+      "dir": [
+       0,
+       1
+      ],
+      "h": 110,
+      "base": 100,
+      "keep": 0.12
+     },
+     {
+      "op": "paint",
+      "at": [
+       150,
+       126
+      ],
+      "r": 6,
+      "mat": "water",
+      "amount": 40
+     },
+     {
+      "op": "paint",
+      "at": [
+       12,
+       126
+      ],
+      "r": 5,
+      "mat": "water",
+      "amount": 40
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       205
+      ],
+      "r": 24
+     },
+     {
+      "op": "raise",
+      "at": [
+       80,
+       205
+      ],
+      "r": 30,
+      "h": 14
+     },
+     {
+      "op": "ground",
+      "at": [
+       55,
+       14
+      ],
+      "r": 14,
+      "mat": "basalt",
+      "clearCells": true
+     },
+     {
+      "op": "ground",
+      "at": [
+       112,
+       16
+      ],
+      "r": 14,
+      "mat": "basalt",
+      "clearCells": true
+     },
+     {
+      "op": "vent",
+      "at": [
+       55,
+       12
+      ]
+     },
+     {
+      "op": "paint",
+      "at": [
+       55,
+       18
+      ],
+      "r": 4,
+      "mat": "lava",
+      "amount": 60
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      205
+     ],
+     "people": 7,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "well"
+     ],
+     "name": "Ashbrook"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     1,
+     3
+    ],
+    [
+     "deer",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "goblin",
+     "count": 8,
+     "at": [
+      6,
+      150
+     ],
+     "spread": 5,
+     "goal": "village",
+     "time": 16,
+     "announce": "Goblins coming round the lava from the west!"
+    },
+    {
+     "species": "imp",
+     "count": 4,
+     "at": [
+      150,
+      70
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 38,
+     "announce": "Fire imps — they walk on lava."
+    },
+    {
+     "species": "goblin",
+     "count": 12,
+     "at": [
+      154,
+      150
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 60,
+     "announce": "A war band from the east!"
+    },
+    {
+     "species": "imp",
+     "count": 5,
+     "at": [
+      10,
+      70
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 85
+    },
+    {
+     "species": "goblin",
+     "count": 10,
+     "at": [
+      6,
+      160
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 100
+    },
+    {
+     "species": "goblin",
+     "count": 10,
+     "at": [
+      154,
+      160
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 104,
+     "announce": "The last of them, from both sides!"
+    }
+   ],
+   "events": [
+    {
+     "time": 30,
+     "op": {
+      "op": "vent",
+      "at": [
+       112,
+       14
+      ]
+     },
+     "say": "The second vent breaks open!"
+    },
+    {
+     "time": 31,
+     "op": {
+      "op": "paint",
+      "at": [
+       112,
+       20
+      ],
+      "r": 4,
+      "mat": "lava",
+      "amount": 60
+     }
+    }
+   ],
+   "mana": {
+    "start": 90,
+    "max": 160,
+    "regen": 4
+   },
+   "loadout": [
+    "spell:frost",
+    "spell:lightning",
+    "spell:fireball",
+    "spell:earth",
+    "material:water",
+    "spell:spring",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "survive",
+     "secs": 140,
+     "text": "Hold the ford until the vents run dry",
+     "short": "Hold"
+    },
+    {
+     "type": "contain",
+     "material": "lava",
+     "zone": [
+      80,
+      205,
+      24
+     ],
+     "text": "Keep lava out of Ashbrook",
+     "failText": "Lava reached Ashbrook",
+     "short": "Lava"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 2,
+     "text": "Keep 2 cottages standing",
+     "failText": "Ashbrook was overrun",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Hold the ford"
+    },
+    {
+     "type": "killedBy",
+     "team": "monster",
+     "by": [
+      "shock"
+     ],
+     "count": 6,
+     "text": "Shock 6 raiders in the water"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Lose no cottage"
+    }
+   ],
+   "reward": "spell:spring",
+   "tip": "Lightning on the ford runs through all the wet water and hits everyone wading in it. Frost turns lava straight to obsidian."
+  },
+  {
+   "id": "3-2",
+   "name": "The Long Fuse",
+   "icon": "lvl-3-2",
+   "intro": [
+    "A goblin war camp sits at the head of Grimsby Pass, packed with stolen blackpowder.",
+    "Lay powder along the pass and light it when they march, then blow their stores sky high."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 3202,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0,
+     "wet": -0.1
+    },
+    "clock": 0.45,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       120
+      ],
+      "r": 90,
+      "h": 70
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       40
+      ],
+      "r": 26
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       40
+      ],
+      "r": 48,
+      "mat": "dirt"
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       40
+      ],
+      "r": 20,
+      "mat": "wall_wood"
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       40
+      ],
+      "r": 18
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       60
+      ],
+      "r": 4
+     },
+     {
+      "op": "paint",
+      "at": [
+       70,
+       34
+      ],
+      "r": 3,
+      "mat": "blackpowder"
+     },
+     {
+      "op": "paint",
+      "at": [
+       92,
+       36
+      ],
+      "r": 3,
+      "mat": "blackpowder"
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       26
+      ],
+      "r": 3,
+      "mat": "blackpowder"
+     },
+     {
+      "op": "line",
+      "at": [
+       46,
+       70
+      ],
+      "to": [
+       62,
+       160
+      ],
+      "r": 3,
+      "mat": "boulder"
+     },
+     {
+      "op": "line",
+      "at": [
+       114,
+       70
+      ],
+      "to": [
+       98,
+       160
+      ],
+      "r": 3,
+      "mat": "boulder"
+     },
+     {
+      "op": "ridge",
+      "at": [
+       46,
+       70
+      ],
+      "to": [
+       62,
+       160
+      ],
+      "r": 7,
+      "h": 20
+     },
+     {
+      "op": "ridge",
+      "at": [
+       114,
+       70
+      ],
+      "to": [
+       98,
+       160
+      ],
+      "r": 7,
+      "h": 20
+     },
+     {
+      "op": "line",
+      "at": [
+       80,
+       60
+      ],
+      "to": [
+       80,
+       165
+      ],
+      "r": 30,
+      "mat": "dirt"
+     },
+     {
+      "op": "line",
+      "at": [
+       80,
+       60
+      ],
+      "to": [
+       80,
+       165
+      ],
+      "r": 16,
+      "mat": "rock"
+     },
+     {
+      "op": "paint",
+      "at": [
+       18,
+       100
+      ],
+      "r": 16,
+      "mat": "tree",
+      "density": 0.5
+     },
+     {
+      "op": "paint",
+      "at": [
+       142,
+       100
+      ],
+      "r": 16,
+      "mat": "tree",
+      "density": 0.5
+     },
+     {
+      "op": "line",
+      "at": [
+       80,
+       60
+      ],
+      "to": [
+       80,
+       205
+      ],
+      "r": 2,
+      "mat": "empty"
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       205
+      ],
+      "r": 26
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       200
+      ],
+      "r": 42,
+      "mat": "dirt"
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      208
+     ],
+     "people": 8,
+     "wardens": 3,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "well"
+     ],
+     "name": "Grimsby"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     1,
+     4
+    ],
+    [
+     "chicken",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "goblin",
+     "count": 10,
+     "at": [
+      80,
+      42
+     ],
+     "spread": 10,
+     "goal": "village",
+     "time": 4,
+     "announce": "The first band marches out of the camp!"
+    },
+    {
+     "species": "goblin",
+     "count": 14,
+     "at": [
+      80,
+      42
+     ],
+     "spread": 10,
+     "goal": "village",
+     "time": 30
+    },
+    {
+     "species": "torchgob",
+     "count": 4,
+     "at": [
+      80,
+      42
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 34,
+     "announce": "Firebrands with them!"
+    },
+    {
+     "species": "goblin",
+     "count": 18,
+     "at": [
+      80,
+      42
+     ],
+     "spread": 12,
+     "goal": "village",
+     "time": 60,
+     "announce": "A big band is forming in the camp."
+    },
+    {
+     "species": "goblin",
+     "count": 16,
+     "at": [
+      80,
+      42
+     ],
+     "spread": 12,
+     "goal": "village",
+     "time": 90
+    },
+    {
+     "species": "troll",
+     "count": 1,
+     "at": [
+      80,
+      40
+     ],
+     "spread": 2,
+     "goal": "village",
+     "time": 92,
+     "announce": "A troll leads the last band!"
+    }
+   ],
+   "mana": {
+    "start": 70,
+    "max": 120,
+    "regen": 3.2
+   },
+   "loadout": [
+    "material:blackpowder",
+    "tool:torch",
+    "spell:lightning",
+    "spell:rain",
+    "creature:archer",
+    "tool:inspect"
+   ],
+   "timeLimit": 170,
+   "failText": "The whole war host got loose",
+   "goals": [
+    {
+     "type": "kill",
+     "team": "monster",
+     "count": 54,
+     "text": "Destroy 54 of the war camp",
+     "short": "Camp"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 2,
+     "text": "Keep 2 cottages standing",
+     "failText": "Grimsby was overrun",
+     "short": "Houses"
+    },
+    {
+     "type": "people",
+     "min": 4,
+     "text": "Keep 4 villagers alive",
+     "failText": "Grimsby was overrun",
+     "short": "People"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Break the war camp"
+    },
+    {
+     "type": "killedBy",
+     "team": "monster",
+     "by": [
+      "powder"
+     ],
+     "count": 40,
+     "text": "Blow up 40 of them with powder"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Lose no cottage"
+    }
+   ],
+   "reward": "material:starpowder",
+   "tip": "One spark runs along a whole trail of powder in a heartbeat. Paint a thin line across the pass, wait for the band, then light one end."
+  },
+  {
+   "id": "3-3",
+   "name": "Rime and Cinder",
+   "icon": "lvl-3-3",
+   "intro": [
+    "Fire spirits are boiling out of the ash fields above Hollin, and the woods are dry.",
+    "Fire cannot hurt them, but cold cracks them apart. Frost them, and lay frostfire in their path."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 3303,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0,
+     "wet": -0.05,
+     "temp": 0.4
+    },
+    "clock": 0.62,
+    "freezeTime": true,
+    "wind": [
+     0.1,
+     1,
+     1.2
+    ],
+    "windLocked": true,
+    "ops": [
+     {
+      "op": "drain"
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       150
+      ],
+      "r": 70,
+      "h": 70
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       22
+      ],
+      "r": 50,
+      "mat": "basalt",
+      "clearCells": true
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       22
+      ],
+      "r": 50,
+      "mat": "ashpile",
+      "density": 0.04
+     },
+     {
+      "op": "paint",
+      "at": [
+       46,
+       12
+      ],
+      "r": 3,
+      "mat": "lava",
+      "amount": 20
+     },
+     {
+      "op": "paint",
+      "at": [
+       116,
+       14
+      ],
+      "r": 3,
+      "mat": "lava",
+      "amount": 20
+     },
+     {
+      "op": "paint",
+      "at": [
+       40,
+       110
+      ],
+      "r": 26,
+      "mat": "tree",
+      "density": 0.4
+     },
+     {
+      "op": "paint",
+      "at": [
+       122,
+       116
+      ],
+      "r": 26,
+      "mat": "tree",
+      "density": 0.4
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       92
+      ],
+      "r": 16,
+      "mat": "tree",
+      "density": 0.3
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       180
+      ],
+      "r": 26
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       180
+      ],
+      "r": 22
+     },
+     {
+      "op": "paint",
+      "at": [
+       134,
+       196
+      ],
+      "r": 7,
+      "mat": "water",
+      "amount": 40
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      180
+     ],
+     "people": 8,
+     "wardens": 2,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "well"
+     ],
+     "name": "Hollin"
+    }
+   ],
+   "herds": [
+    [
+     "deer",
+     1,
+     3
+    ],
+    [
+     "goat",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "imp",
+     "count": 8,
+     "at": [
+      50,
+      30
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 6,
+     "announce": "Fire imps from the western vent!"
+    },
+    {
+     "species": "imp",
+     "count": 10,
+     "at": [
+      112,
+      32
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 28
+    },
+    {
+     "species": "flamewraith",
+     "count": 2,
+     "at": [
+      80,
+      20
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 45,
+     "announce": "Flame wraiths — tougher, and they set everything alight."
+    },
+    {
+     "species": "imp",
+     "count": 12,
+     "at": [
+      50,
+      30
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 64
+    },
+    {
+     "species": "flamewraith",
+     "count": 3,
+     "at": [
+      112,
+      30
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 82
+    },
+    {
+     "species": "imp",
+     "count": 14,
+     "at": [
+      80,
+      26
+     ],
+     "spread": 10,
+     "goal": "village",
+     "time": 100,
+     "announce": "The last flare-up!"
+    },
+    {
+     "species": "flamewraith",
+     "count": 2,
+     "at": [
+      80,
+      22
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 104
+    }
+   ],
+   "mana": {
+    "start": 90,
+    "max": 150,
+    "regen": 4.2
+   },
+   "loadout": [
+    "spell:frost",
+    "material:frostfire",
+    "creature:rimeling",
+    "spell:rain",
+    "material:water",
+    "tool:inspect"
+   ],
+   "timeLimit": 180,
+   "failText": "The fire spirits still dance in the ashes",
+   "goals": [
+    {
+     "type": "kill",
+     "tags": [
+      "fiery"
+     ],
+     "count": 46,
+     "text": "Put out 46 fire spirits",
+     "short": "Spirits"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 cottages standing",
+     "failText": "Hollin burned down",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Quench the fire spirits"
+    },
+    {
+     "type": "killedBy",
+     "tags": [
+      "fiery"
+     ],
+     "by": [
+      "frost"
+     ],
+     "count": 35,
+     "text": "Crack 35 of them with cold"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Every cottage still standing"
+    }
+   ],
+   "reward": "material:frostfire",
+   "tip": "Frost Nova cracks a fire imp in one go and a flame wraith in two. Frostfire burns cold, creeps through trees and puts fires out; a rimeling chills the ground it floats over."
+  },
+  {
+   "id": "3-4",
+   "name": "Gallowmere Keep",
+   "icon": "lvl-3-4",
+   "intro": [
+    "Outlaws hold Gallowmere Keep, and every half minute a raiding party slips out to plunder Fenwick.",
+    "No fire will crack those walls. Wyrmbile will: pour it on the stone, eat a way in, and clear them out."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 3404,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.1,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.4,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       52
+      ],
+      "r": 34,
+      "h": 90
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       52
+      ],
+      "r": 32
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       52
+      ],
+      "r": 22,
+      "mat": "cobble"
+     },
+     {
+      "op": "line",
+      "at": [
+       56,
+       32
+      ],
+      "to": [
+       104,
+       32
+      ],
+      "r": 1.5,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "line",
+      "at": [
+       56,
+       74
+      ],
+      "to": [
+       104,
+       74
+      ],
+      "r": 1.5,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "line",
+      "at": [
+       56,
+       32
+      ],
+      "to": [
+       56,
+       74
+      ],
+      "r": 1.5,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "line",
+      "at": [
+       104,
+       32
+      ],
+      "to": [
+       104,
+       74
+      ],
+      "r": 1.5,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "paint",
+      "at": [
+       56,
+       32
+      ],
+      "r": 4,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "paint",
+      "at": [
+       104,
+       32
+      ],
+      "r": 4,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "paint",
+      "at": [
+       56,
+       74
+      ],
+      "r": 4,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "paint",
+      "at": [
+       104,
+       74
+      ],
+      "r": 4,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       205
+      ],
+      "r": 26
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       205
+      ],
+      "r": 22
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      205
+     ],
+     "people": 8,
+     "wardens": 2,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "farm",
+      "well"
+     ],
+     "name": "Fenwick"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     1,
+     4
+    ],
+    [
+     "cow",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "goblin",
+     "count": 18,
+     "at": [
+      80,
+      52
+     ],
+     "spread": 14,
+     "goal": "village"
+    },
+    {
+     "species": "goblin",
+     "count": 6,
+     "at": [
+      80,
+      84
+     ],
+     "spread": 4,
+     "goal": "village",
+     "every": 24,
+     "until": 170
+    }
+   ],
+   "mana": {
+    "start": 90,
+    "max": 150,
+    "regen": 3.8
+   },
+   "loadout": [
+    "material:acid",
+    "spell:acidrain",
+    "spell:lightning",
+    "creature:knight",
+    "tool:inspect"
+   ],
+   "timeLimit": 180,
+   "failText": "The keep still stands",
+   "goals": [
+    {
+     "type": "destroy",
+     "material": "wall_stone",
+     "zone": [
+      80,
+      53,
+      34
+     ],
+     "pct": 0.25,
+     "text": "Eat through a quarter of the keep walls",
+     "short": "Walls"
+    },
+    {
+     "type": "kill",
+     "team": "monster",
+     "count": 30,
+     "text": "Defeat 30 outlaws",
+     "short": "Outlaws"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 2,
+     "text": "Keep 2 cottages standing",
+     "failText": "Fenwick was plundered",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Take the keep"
+    },
+    {
+     "type": "killedBy",
+     "team": "monster",
+     "by": [
+      "acid",
+      "poison"
+     ],
+     "count": 10,
+     "text": "Catch 10 of them in the bile"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Lose no cottage"
+    }
+   ],
+   "reward": "material:acid",
+   "tip": "Wyrmbile eats stone where it touches it and goes on eating. A puddle against a wall eats a hole; whatever stands in it burns."
+  },
+  {
+   "id": "3-5",
+   "name": "The Drowned Graves",
+   "icon": "lvl-3-5",
+   "intro": [
+    "Bog goo has seeped into the old barrow at Mournwell, and the bones in it are climbing out.",
+    "Blessed water burns the dead and turns the goo back to clean water and flowers.",
+    "Cleanse the bog before the dead overrun the chapel village."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 3505,
+    "recipe": "fenmoor",
+    "override": {
+     "sea": 0,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0,
+     "wet": 0.2
+    },
+    "clock": 0.86,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "drain"
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       120
+      ],
+      "r": 90,
+      "h": 80
+     },
+     {
+      "op": "raise",
+      "at": [
+       80,
+       58
+      ],
+      "r": 24,
+      "h": -8
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       58
+      ],
+      "r": 30
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       58
+      ],
+      "r": 30,
+      "mat": "marsh"
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       58
+      ],
+      "r": 24,
+      "mat": "bones",
+      "density": 0.035
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       58
+      ],
+      "r": 19,
+      "mat": "goo",
+      "amount": 18
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       58
+      ],
+      "r": 30,
+      "mat": "deadtree",
+      "density": 0.03
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       200
+      ],
+      "r": 26
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       200
+      ],
+      "r": 22
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       140
+      ],
+      "r": 18,
+      "mat": "tree",
+      "density": 0.25
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      200
+     ],
+     "people": 9,
+     "wardens": 2,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "shrine",
+      "farm",
+      "well",
+      "lamppost",
+      "lamppost"
+     ],
+     "name": "Mournwell"
+    }
+   ],
+   "herds": [
+    [
+     "frog",
+     1,
+     4
+    ],
+    [
+     "goat",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "skeleton",
+     "count": 8,
+     "at": [
+      80,
+      92
+     ],
+     "spread": 10,
+     "goal": "village",
+     "time": 3,
+     "announce": "The dead are climbing out of the bog!"
+    },
+    {
+     "species": "skeleton",
+     "count": 7,
+     "at": [
+      80,
+      92
+     ],
+     "spread": 10,
+     "goal": "village",
+     "every": 18,
+     "until": 160
+    },
+    {
+     "species": "slime",
+     "count": 3,
+     "at": [
+      80,
+      90
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 50,
+     "announce": "Bog slimes crawl out of the goo."
+    },
+    {
+     "species": "skeleton",
+     "count": 14,
+     "at": [
+      80,
+      94
+     ],
+     "spread": 14,
+     "goal": "village",
+     "time": 110,
+     "announce": "The whole barrow is rising!"
+    }
+   ],
+   "mana": {
+    "start": 90,
+    "max": 150,
+    "regen": 4
+   },
+   "loadout": [
+    "material:holy",
+    "spell:holyrain",
+    "spell:heal",
+    "spell:lightning",
+    "tool:inspect"
+   ],
+   "timeLimit": 180,
+   "failText": "The bog is still full of the dead",
+   "goals": [
+    {
+     "type": "destroy",
+     "material": "goo",
+     "zone": [
+      80,
+      58,
+      26
+     ],
+     "pct": 0.75,
+     "text": "Cleanse most of the bog",
+     "short": "Bog"
+    },
+    {
+     "type": "kill",
+     "tags": [
+      "undead"
+     ],
+     "count": 45,
+     "text": "Lay 45 of the dead to rest",
+     "short": "Dead"
+    },
+    {
+     "type": "people",
+     "min": 6,
+     "text": "Keep 6 people alive",
+     "failText": "The dead took Mournwell",
+     "short": "People"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 2,
+     "text": "Keep 2 cottages standing",
+     "failText": "The dead took Mournwell",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Lay the dead to rest"
+    },
+    {
+     "type": "killedBy",
+     "tags": [
+      "undead"
+     ],
+     "by": [
+      "holy"
+     ],
+     "count": 25,
+     "text": "Put 25 of the dead down with blessing"
+    },
+    {
+     "type": "peopleLostMax",
+     "n": 0,
+     "text": "Nobody lost"
+    }
+   ],
+   "reward": "spell:holyrain",
+   "tip": "Blessed water poured into goo turns it clean. The dead fall apart in blessed water, and Healing Light burns them."
+  },
+  {
+   "id": "3-6",
+   "name": "The Crucible",
+   "icon": "lvl-3-6",
+   "intro": [
+    "An alchemist’s great circle has torn open above Saltmarsh, and everything is pouring out of it.",
+    "Fire, the dead, slime and goblins, and before long the earth itself will bleed lava.",
+    "Answer each with its opposite, and hold until the circle closes."
+   ],
+   "map": {
+    "W": 176,
+    "H": 256,
+    "seed": 3606,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.12,
+     "rivers": 1,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.7,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "slope",
+      "dir": [
+       0,
+       1
+      ],
+      "h": 40,
+      "base": 90,
+      "keep": 0.25
+     },
+     {
+      "op": "flatten",
+      "at": [
+       88,
+       90
+      ],
+      "r": 24
+     },
+     {
+      "op": "clear",
+      "at": [
+       88,
+       90
+      ],
+      "r": 22
+     },
+     {
+      "op": "ground",
+      "at": [
+       88,
+       90
+      ],
+      "r": 20,
+      "mat": "crystalfloor"
+     },
+     {
+      "op": "ground",
+      "at": [
+       88,
+       90
+      ],
+      "r": 6,
+      "mat": "basalt"
+     },
+     {
+      "op": "paint",
+      "at": [
+       102,
+       96
+      ],
+      "r": 2,
+      "mat": "crystal"
+     },
+     {
+      "op": "paint",
+      "at": [
+       94,
+       104
+      ],
+      "r": 2,
+      "mat": "crystal"
+     },
+     {
+      "op": "paint",
+      "at": [
+       82,
+       104
+      ],
+      "r": 2,
+      "mat": "crystal"
+     },
+     {
+      "op": "paint",
+      "at": [
+       74,
+       96
+      ],
+      "r": 2,
+      "mat": "crystal"
+     },
+     {
+      "op": "paint",
+      "at": [
+       74,
+       84
+      ],
+      "r": 2,
+      "mat": "crystal"
+     },
+     {
+      "op": "paint",
+      "at": [
+       82,
+       76
+      ],
+      "r": 2,
+      "mat": "crystal"
+     },
+     {
+      "op": "paint",
+      "at": [
+       94,
+       76
+      ],
+      "r": 2,
+      "mat": "crystal"
+     },
+     {
+      "op": "paint",
+      "at": [
+       102,
+       84
+      ],
+      "r": 2,
+      "mat": "crystal"
+     },
+     {
+      "op": "paint",
+      "at": [
+       88,
+       66
+      ],
+      "r": 1.5,
+      "mat": "sunstone"
+     },
+     {
+      "op": "paint",
+      "at": [
+       112,
+       90
+      ],
+      "r": 1.5,
+      "mat": "moonstone"
+     },
+     {
+      "op": "paint",
+      "at": [
+       88,
+       114
+      ],
+      "r": 1.5,
+      "mat": "verdstone"
+     },
+     {
+      "op": "paint",
+      "at": [
+       64,
+       90
+      ],
+      "r": 1.5,
+      "mat": "rosestone"
+     },
+     {
+      "op": "flatten",
+      "at": [
+       88,
+       222
+      ],
+      "r": 28
+     },
+     {
+      "op": "clear",
+      "at": [
+       88,
+       222
+      ],
+      "r": 24
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      88,
+      222
+     ],
+     "people": 10,
+     "wardens": 3,
+     "mages": 1,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "stonehouse",
+      "farm",
+      "well",
+      "lamppost"
+     ],
+     "name": "Saltmarsh"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     1,
+     4
+    ],
+    [
+     "cow",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "goblin",
+     "count": 18,
+     "at": [
+      68,
+      100
+     ],
+     "spread": 5,
+     "goal": "village",
+     "time": 5,
+     "announce": "Goblins tumble out of the circle!"
+    },
+    {
+     "species": "imp",
+     "count": 9,
+     "at": [
+      108,
+      100
+     ],
+     "spread": 5,
+     "goal": "village",
+     "time": 22,
+     "announce": "Fire imps!"
+    },
+    {
+     "species": "slime",
+     "count": 4,
+     "at": [
+      68,
+      100
+     ],
+     "spread": 5,
+     "goal": "village",
+     "time": 38,
+     "announce": "Bog slimes. Blades only split them; fire does not."
+    },
+    {
+     "species": "skeleton",
+     "count": 14,
+     "at": [
+      108,
+      100
+     ],
+     "spread": 5,
+     "goal": "village",
+     "time": 52,
+     "announce": "The dead walk out of the light."
+    },
+    {
+     "species": "flamewraith",
+     "count": 2,
+     "at": [
+      68,
+      100
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 76
+    },
+    {
+     "species": "imp",
+     "count": 10,
+     "at": [
+      108,
+      100
+     ],
+     "spread": 5,
+     "goal": "village",
+     "time": 78
+    },
+    {
+     "species": "goblin",
+     "count": 18,
+     "at": [
+      68,
+      100
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 94
+    },
+    {
+     "species": "torchgob",
+     "count": 3,
+     "at": [
+      108,
+      100
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 96
+    },
+    {
+     "species": "skeleton",
+     "count": 16,
+     "at": [
+      68,
+      100
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 112,
+     "announce": "Everything at once!"
+    },
+    {
+     "species": "slime",
+     "count": 3,
+     "at": [
+      108,
+      100
+     ],
+     "spread": 5,
+     "goal": "village",
+     "time": 114
+    },
+    {
+     "species": "flamewraith",
+     "count": 2,
+     "at": [
+      68,
+      100
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 116
+    }
+   ],
+   "events": [
+    {
+     "time": 64,
+     "op": {
+      "op": "vent",
+      "at": [
+       88,
+       90
+      ]
+     },
+     "say": "The heart of the circle splits: lava!"
+    },
+    {
+     "time": 65,
+     "op": {
+      "op": "paint",
+      "at": [
+       88,
+       94
+      ],
+      "r": 4,
+      "mat": "lava",
+      "amount": 60
+     }
+    }
+   ],
+   "mana": {
+    "start": 110,
+    "max": 200,
+    "regen": 5
+   },
+   "loadout": [
+    "spell:frost",
+    "spell:fireball",
+    "spell:lightning",
+    "spell:heal",
+    "spell:earth",
+    "material:water",
+    "material:holy",
+    "material:blackpowder",
+    "spell:rain",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "survive",
+     "secs": 150,
+     "text": "Hold until the circle closes",
+     "short": "Hold"
+    },
+    {
+     "type": "people",
+     "min": 6,
+     "text": "Keep 6 people alive",
+     "failText": "Saltmarsh fell",
+     "short": "People"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 houses standing",
+     "failText": "Saltmarsh fell",
+     "short": "Houses"
+    },
+    {
+     "type": "contain",
+     "material": "lava",
+     "zone": [
+      88,
+      222,
+      26
+     ],
+     "text": "Keep lava out of Saltmarsh",
+     "failText": "Lava reached Saltmarsh",
+     "short": "Lava"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Close the circle"
+    },
+    {
+     "type": "killedBy",
+     "team": "monster",
+     "by": [
+      "arcane"
+     ],
+     "count": 8,
+     "text": "Catch 8 in the crystals’ blast"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Every house still standing"
+    }
+   ],
+   "reward": "material:crystal",
+   "tip": "The mana crystals round the circle burst when lightning or a blast hits them. Frost for fire, blessing for the dead, fire for slime, water for lava."
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kestrel — fable attempt</title>
+<link rel="stylesheet" href="../../../shared/style.css">
+<link rel="stylesheet" href="kestrel.css">
+<script type="importmap">{ "imports": { "three": "../../../vendor/three/three.module.js", "three/addons/": "../../../vendor/three/addons/" } }</script>
+</head>
+<body class="kf">
+<!-- Preview page for the fable attempt. Query: ?body=male|female ?view=front|left|back|right|three|face|free ?anim=idle ?expr=happy
+     ?outfit=1 ?lod=1 ?wire=1 ?sheet=views|expr|poses|both (one canvas with a grid, for screenshots) ?w=900 ?h=1200
+     window.__kf = { ready, stats, error } for the screenshot tool and tests. -->
+<header class="kf-top">
+  <h1>Kestrel <small class="muted">attempt: fable</small></h1>
+  <p class="muted small">Hand-coded Three.js character (Claude Fable 5.1). Both bodies, every clip, every expression, outfit on/off. Drag to turn. <a href="README.md">notes</a> · <a href="../index.html">review page</a></p>
+</header>
+<section class="kf-controls" id="controls">
+  <div class="row" id="c-body"></div>
+  <div class="row" id="c-view"></div>
+  <div class="row" id="c-anim"></div>
+  <div class="row" id="c-expr"></div>
+  <div class="row">
+    <label><input type="checkbox" id="c-outfit"> outfit</label>
+    <label><input type="checkbox" id="c-spin"> turntable</label>
+    <label><input type="checkbox" id="c-wire"> wireframe</label>
+    <label><input type="checkbox" id="c-lod"> far version (LOD 1)</label>
+    <label><input type="checkbox" id="c-look"> look at the camera</label>
+    <span class="muted small" id="line"></span>
+  </div>
+</section>
+<main class="kf-main"><canvas id="view"></canvas></main>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

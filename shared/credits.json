@@ -1,0 +1,31 @@
+{
+ "about": "Third-party assets used by the playground games, for the credits page (shared/credits.js, credits.html). Sounds are NOT listed here: sfx/tools/build-credits.mjs gathers them into sfx/data/credits.json from the credit file beside every recording. `games` lists the game folders that use an item ('*' = every game). Add a row whenever a game starts using something made by someone else. Everything the owner or Claude/Codex made is ours and is not listed.",
+ "groups": [
+  {
+   "id": "fonts",
+   "title": "Fonts",
+   "items": [
+    { "title": "Pixelify Sans", "author": "Stefie Justprince", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Pixelify+Sans", "games": ["kindlewild"] },
+    { "title": "Alegreya SC", "author": "Juan Pablo del Peral (Huerta Tipográfica)", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Alegreya+SC", "games": ["bannerline", "thousandvale"] },
+    { "title": "Cinzel", "author": "Natanael Gama", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Cinzel", "games": ["emberveil", "lanternfall", "thousandvale"] },
+    { "title": "Spectral", "author": "Production Type", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Spectral", "games": ["emberveil"] },
+    { "title": "Chakra Petch", "author": "Cadson Demak", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Chakra+Petch", "games": ["frontier-foundry"] }
+   ]
+  },
+  {
+   "id": "code",
+   "title": "Code libraries",
+   "items": [
+    { "title": "three.js", "author": "three.js authors", "license": "MIT", "licenseUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE", "url": "https://threejs.org", "games": ["bannerline", "emberveil", "farhold", "frontier-foundry", "knockabout", "roverlands", "thousandvale", "tumblefair"] },
+    { "title": "cannon-es", "author": "Stefan Hedman and the pmndrs contributors", "license": "MIT", "licenseUrl": "https://github.com/pmndrs/cannon-es/blob/master/LICENSE", "url": "https://github.com/pmndrs/cannon-es", "games": ["knockabout"] },
+    { "title": "Rapier", "author": "Dimforge", "license": "Apache 2.0", "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0", "url": "https://rapier.rs", "games": ["roverlands"] },
+    { "title": "meshoptimizer decoder", "author": "Arseny Kapoulkine", "license": "MIT", "licenseUrl": "https://github.com/zeux/meshoptimizer/blob/master/LICENSE.md", "url": "https://github.com/zeux/meshoptimizer", "games": ["thousandvale"] },
+    { "title": "PeerJS", "author": "Michelle Bu, Eric Zhang and contributors", "license": "MIT", "licenseUrl": "https://github.com/peers/peerjs/blob/master/LICENSE", "url": "https://peerjs.com", "games": ["bannerline"] },
+    { "title": "QR Code Generator", "author": "Kazuhiko Arase", "license": "MIT", "licenseUrl": "https://github.com/kazuhikoarase/qrcode-generator/blob/master/LICENSE", "url": "https://github.com/kazuhikoarase/qrcode-generator", "games": ["*"] },
+    { "title": "pluralize", "author": "Blake Embrey", "license": "MIT", "licenseUrl": "https://github.com/plurals/pluralize/blob/master/LICENSE", "url": "https://github.com/plurals/pluralize", "games": ["emberveil"] },
+    { "title": "meSpeak.js (eSpeak)", "author": "Norbert Landsteiner; eSpeak by Jonathan Duddington", "license": "GPL 3.0", "licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.html", "url": "https://www.masswerk.at/mespeak/", "games": ["voice-lab"] },
+    { "title": "The CMU Pronouncing Dictionary", "author": "Carnegie Mellon University", "license": "BSD 2-Clause", "licenseUrl": "https://github.com/cmusphinx/cmudict/blob/master/LICENSE", "url": "https://github.com/cmusphinx/cmudict", "games": ["emberveil", "voice-lab"] }
+   ]
+  }
+ ]
+}

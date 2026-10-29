@@ -1,0 +1,126 @@
+{
+ "date": "2026-10-27",
+ "total_credits": 468,
+ "tasks": [
+  {
+   "run": "female-lowpoly-animA",
+   "credits": 30,
+   "task_id": "01a18077-ef66-7313-b5b6-39ddc62367c0"
+  },
+  {
+   "run": "female-lowpoly-animB",
+   "credits": 18,
+   "task_id": "01a18079-0365-776d-ab58-6e1f963c3d2f"
+  },
+  {
+   "run": "female-lowpoly-rig",
+   "credits": 5,
+   "task_id": "01a18077-1840-7521-83e2-2e8fc4a38a20"
+  },
+  {
+   "run": "female-lowpoly",
+   "credits": 15,
+   "task_id": "01a18069-2a48-72b6-8b9f-11e96d733155"
+  },
+  {
+   "run": "female-multi-animA",
+   "credits": 30,
+   "task_id": "01a18077-ef58-71d8-97fc-fc23aae86df5"
+  },
+  {
+   "run": "female-multi-animB",
+   "credits": 18,
+   "task_id": "01a18079-2627-773b-9b45-dc8079bbceb4"
+  },
+  {
+   "run": "female-multi-rig",
+   "credits": 5,
+   "task_id": "01a18077-18e3-7170-a0d0-b749803fde11"
+  },
+  {
+   "run": "female-multi",
+   "credits": 30,
+   "task_id": "01a18069-2be5-7714-bf5a-2d72ebd2e886"
+  },
+  {
+   "run": "female-single-animA",
+   "credits": 30,
+   "task_id": "01a18077-ef50-7379-bfae-e9868c156b78"
+  },
+  {
+   "run": "female-single-animB",
+   "credits": 18,
+   "task_id": "01a18079-2022-72c8-8526-4343c552a64d"
+  },
+  {
+   "run": "female-single-rig",
+   "credits": 5,
+   "task_id": "01a18077-18e5-75ae-8741-aedc8b338d09"
+  },
+  {
+   "run": "female-single",
+   "credits": 30,
+   "task_id": "01a18069-2a41-75cb-90f2-b02e84fedab2"
+  },
+  {
+   "run": "male-lowpoly-animA",
+   "credits": 30,
+   "task_id": "01a18077-ef03-76ed-8577-fef17cd0d3f1"
+  },
+  {
+   "run": "male-lowpoly-animB",
+   "credits": 18,
+   "task_id": "01a18079-044f-725c-8307-651675bcafc5"
+  },
+  {
+   "run": "male-lowpoly-rig",
+   "credits": 5,
+   "task_id": "01a18077-17dd-747f-9a28-7f3bedb80de1"
+  },
+  {
+   "run": "male-lowpoly",
+   "credits": 15,
+   "task_id": "01a18069-2a47-722a-a296-af9ed9ae40f5"
+  },
+  {
+   "run": "male-multi-animA",
+   "credits": 30,
+   "task_id": "01a18077-eee6-7098-8fa2-970690e726b9"
+  },
+  {
+   "run": "male-multi-animB",
+   "credits": 18,
+   "task_id": "01a18079-0450-7512-a56f-a7dbe1823470"
+  },
+  {
+   "run": "male-multi-rig",
+   "credits": 5,
+   "task_id": "01a18077-17d0-77ba-83f9-a6c101b68165"
+  },
+  {
+   "run": "male-multi",
+   "credits": 30,
+   "task_id": "01a18069-2a43-72c7-be8e-d3a86a1d7445"
+  },
+  {
+   "run": "male-single-animA",
+   "credits": 30,
+   "task_id": "01a18077-eefa-70b9-944f-e53e51723de2"
+  },
+  {
+   "run": "male-single-animB",
+   "credits": 18,
+   "task_id": "01a18079-22e3-729f-9e0b-9d289f816a02"
+  },
+  {
+   "run": "male-single-rig",
+   "credits": 5,
+   "task_id": "01a18077-17d2-7797-b2dc-c6a40812485f"
+  },
+  {
+   "run": "male-single",
+   "credits": 30,
+   "task_id": "01a18069-2a4b-70d0-9d2a-4c5d599e8333"
+  }
+ ]
+}

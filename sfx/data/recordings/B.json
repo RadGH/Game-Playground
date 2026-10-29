@@ -1,0 +1,515 @@
+{
+ "status.burn.apply": {
+  "files": [
+   "fs/status.burn.apply-1.ogg",
+   "fs/status.burn.apply-2.ogg"
+  ],
+  "note": "Fire burst flash and a short fire-magic whoosh: catching fire."
+ },
+ "status.burn.tick": {
+  "files": [
+   "fs/status.burn.tick-1.ogg",
+   "fs/status.burn.tick-2.ogg",
+   "fs/status.burn.tick-3.ogg"
+  ],
+  "note": "Three 0.45 s slices of burning coal crackle, quiet and short."
+ },
+ "status.poison.apply": {
+  "files": [
+   "fs/status.poison.apply-1.ogg",
+   "fs/status.poison.apply-2.ogg"
+  ],
+  "note": "Acid bubbling and a designed 'poison effect' swell."
+ },
+ "status.poison.tick": {
+  "files": [
+   "fs/status.poison.tick-1.ogg",
+   "fs/status.poison.tick-2.ogg",
+   "fs/status.poison.tick-3.ogg"
+  ],
+  "note": "Small single bubbles: soft, short."
+ },
+ "status.bleed.apply": {
+  "files": [
+   "fs/status.bleed.apply-1.ogg",
+   "fs/status.bleed.apply-2.ogg"
+  ],
+  "note": "Bloody blade cut and a wet blood squirt."
+ },
+ "status.bleed.tick": {
+  "files": [
+   "fs/status.bleed.tick-1.ogg",
+   "fs/status.bleed.tick-2.ogg",
+   "fs/status.bleed.tick-3.ogg"
+  ],
+  "note": "Water drips and a small splat, short and quiet."
+ },
+ "status.freeze.apply": {
+  "files": [
+   "fs/status.freeze.apply-1.ogg",
+   "fs/status.freeze.apply-2.ogg"
+  ],
+  "note": "Designed freeze FX and ice grinding/cracking."
+ },
+ "status.freeze.tick": {
+  "files": [
+   "fs/status.freeze.tick-1.ogg",
+   "fs/status.freeze.tick-2.ogg",
+   "fs/status.freeze.tick-3.ogg"
+  ],
+  "note": "Single ice cracks sliced from one ice-cracking recording."
+ },
+ "status.stun.apply": {
+  "files": [
+   "fs/status.stun.apply-1.ogg",
+   "fs/status.stun.apply-2.ogg"
+  ],
+  "note": "A heavy pipe bonk and a light ringing clang: a blow that rings the head."
+ },
+ "status.stun.tick": {
+  "files": [
+   "fs/status.stun.tick-1.ogg",
+   "fs/status.stun.tick-2.ogg",
+   "fs/status.stun.tick-3.ogg"
+  ],
+  "note": "A short bird chirp, a small bell and a tiny tap: soft 'stars around the head' ticks."
+ },
+ "status.sleep.apply": {
+  "files": [
+   "fs/status.sleep.apply-1.ogg",
+   "fs/status.sleep.apply-2.ogg"
+  ],
+  "note": "An RPG power-down and a small gentle spell."
+ },
+ "status.sleep.tick": {
+  "files": [
+   "fs/status.sleep.tick-1.ogg",
+   "fs/status.sleep.tick-2.ogg",
+   "fs/status.sleep.tick-3.ogg"
+  ],
+  "note": "Quiet slices of a magic-wand glitter (sleep dust)."
+ },
+ "status.confused.apply": {
+  "files": [
+   "fs/status.confused.apply-1.ogg",
+   "fs/status.confused.apply-2.ogg"
+  ],
+  "note": "Mystical wind-chime transition and an 'old timey magic' flourish."
+ },
+ "status.confused.tick": {
+  "files": [
+   "fs/status.confused.tick-1.ogg",
+   "fs/status.confused.tick-2.ogg",
+   "fs/status.confused.tick-3.ogg"
+  ],
+  "note": "Single soft wind-chime notes."
+ },
+ "status.dazed.apply": {
+  "files": [
+   "fs/status.dazed.apply-1.ogg",
+   "fs/status.dazed.apply-2.ogg"
+  ],
+  "note": "A designed tinnitus swell and a high fading ring."
+ },
+ "status.dazed.tick": {
+  "files": [
+   "fs/status.dazed.tick-1.ogg",
+   "fs/status.dazed.tick-2.ogg"
+  ],
+  "note": "Soft slices of a long ringing magic-circle tone."
+ },
+ "status.blind.apply": {
+  "files": [
+   "fs/status.blind.apply-1.ogg",
+   "fs/status.blind.apply-2.ogg"
+  ],
+  "note": "Old flash-powder burst and an invisibility spell swell."
+ },
+ "status.blind.tick": {
+  "files": [
+   "fs/status.blind.tick-1.ogg",
+   "fs/status.blind.tick-2.ogg"
+  ],
+  "note": "Soft airy 'burning air' hiss slices."
+ },
+ "status.slow.apply": {
+  "files": [
+   "fs/status.slow.apply-1.ogg",
+   "fs/status.slow.apply-2.ogg"
+  ],
+  "note": "A slow-down zoom effect and a pause sound."
+ },
+ "status.slow.tick": {
+  "files": [
+   "fs/status.slow.tick-1.ogg",
+   "fs/status.slow.tick-2.ogg",
+   "fs/status.slow.tick-3.ogg"
+  ],
+  "note": "Low soft whooshes (bass deep whoosh, broomstick, soft swish)."
+ },
+ "status.marked.apply": {
+  "files": [
+   "fs/status.marked.apply-1.ogg",
+   "fs/status.marked.apply-2.ogg"
+  ],
+  "note": "A bell ding and a clean ping: you have been picked out."
+ },
+ "status.marked.tick": {
+  "files": [
+   "fs/status.marked.tick-1.ogg",
+   "fs/status.marked.tick-2.ogg"
+  ],
+  "note": "A single clean heartbeat; quiet and short."
+ },
+ "status.barrier.apply": {
+  "files": [
+   "fs/status.barrier.apply-1.ogg",
+   "fs/status.barrier.apply-2.ogg"
+  ],
+  "note": "A force-field swell and a magic-shield block."
+ },
+ "status.barrier.tick": {
+  "files": [
+   "fs/status.barrier.tick-1.ogg",
+   "fs/status.barrier.tick-2.ogg"
+  ],
+  "note": "Soft slices of a wind-and-water aura."
+ },
+ "status.regen.apply": {
+  "files": [
+   "fs/status.regen.apply-1.ogg",
+   "fs/status.regen.apply-2.ogg"
+  ],
+  "note": "An RPG heal shimmer and a short heal-up."
+ },
+ "status.regen.tick": {
+  "files": [
+   "fs/status.regen.tick-1.ogg",
+   "fs/status.regen.tick-2.ogg",
+   "fs/status.regen.tick-3.ogg"
+  ],
+  "note": "Single soft twinkles."
+ },
+ "status.sunder.apply": {
+  "files": [
+   "fs/status.sunder.apply-1.ogg",
+   "fs/status.sunder.apply-2.ogg"
+  ],
+  "note": "A crack-and-crunch and scrap metal crashing: armour giving way."
+ },
+ "status.sunder.tick": {
+  "files": [
+   "fs/status.sunder.tick-1.ogg",
+   "fs/status.sunder.tick-2.ogg"
+  ],
+  "note": "Quiet metal creaks."
+ },
+ "status.curse.apply": {
+  "files": [
+   "fs/status.curse.apply-1.ogg",
+   "fs/status.curse.apply-2.ogg"
+  ],
+  "note": "A cursed dark-magic stinger and a necromancy summoning swell."
+ },
+ "status.curse.tick": {
+  "files": [
+   "fs/status.curse.tick-1.ogg",
+   "fs/status.curse.tick-2.ogg"
+  ],
+  "note": "Short slices of a low dark-magic loop."
+ },
+ "status.silence.apply": {
+  "files": [
+   "fs/status.silence.apply-1.ogg",
+   "fs/status.silence.apply-2.ogg"
+  ],
+  "note": "A muffled boom and a negative spell echo: sound shut off."
+ },
+ "status.silence.tick": {
+  "files": [
+   "fs/status.silence.tick-1.ogg",
+   "fs/status.silence.tick-2.ogg"
+  ],
+  "note": "Very soft dull thuds."
+ },
+ "status.disarm.apply": {
+  "files": [
+   "fs/status.disarm.apply-1.ogg",
+   "fs/status.disarm.apply-2.ogg"
+  ],
+  "note": "A sword dropped on the floor and a weapon drop."
+ },
+ "status.disarm.tick": {
+  "files": [
+   "fs/status.disarm.tick-1.ogg",
+   "fs/status.disarm.tick-2.ogg"
+  ],
+  "note": "Tiny metal-object clinks."
+ },
+ "status.root.apply": {
+  "files": [
+   "fs/status.root.apply-1.ogg",
+   "fs/status.root.apply-2.ogg"
+  ],
+  "note": "A wooden creak and creaking wood: roots taking hold."
+ },
+ "status.root.tick": {
+  "files": [
+   "fs/status.root.tick-1.ogg",
+   "fs/status.root.tick-2.ogg",
+   "fs/status.root.tick-3.ogg"
+  ],
+  "note": "Soft leather/wood creaks (quiet source, peaks only)."
+ },
+ "status.rally.apply": {
+  "files": [
+   "fs/status.rally.apply-1.ogg",
+   "fs/status.rally.apply-2.ogg"
+  ],
+  "note": "A war horn and a cinematic hit with horns: a call to arms."
+ },
+ "status.rally.tick": {
+  "files": [
+   "fs/status.rally.tick-1.ogg"
+  ],
+  "note": "One soft mid tom drum hit (a marching beat)."
+ },
+ "status.haste.apply": {
+  "files": [
+   "fs/status.haste.apply-1.ogg",
+   "fs/status.haste.apply-2.ogg"
+  ],
+  "note": "A quick whoosh and a positive shimmer whoosh."
+ },
+ "status.haste.tick": {
+  "files": [
+   "fs/status.haste.tick-1.ogg",
+   "fs/status.haste.tick-2.ogg",
+   "fs/status.haste.tick-3.ogg"
+  ],
+  "note": "Tiny quick swishes."
+ },
+ "status.enchant.apply": {
+  "files": [
+   "fs/status.enchant.apply-1.ogg",
+   "fs/status.enchant.apply-2.ogg"
+  ],
+  "note": "Two 'magic enchant' recordings."
+ },
+ "status.enchant.tick": {
+  "files": [
+   "fs/status.enchant.tick-1.ogg",
+   "fs/status.enchant.tick-2.ogg",
+   "fs/status.enchant.tick-3.ogg"
+  ],
+  "note": "Soft glimmer and harmony-bell slices."
+ },
+ "status.block.apply": {
+  "files": [
+   "fs/status.block.apply-1.ogg",
+   "fs/status.block.apply-2.ogg"
+  ],
+  "note": "A shield guard hit and an 'attack blocked' clang."
+ },
+ "status.block.tick": {
+  "files": [
+   "fs/status.block.tick-1.ogg",
+   "fs/status.block.tick-2.ogg"
+  ],
+  "note": "Quiet clothing/pouch rustles (holding a guard)."
+ },
+ "status.deflect.apply": {
+  "files": [
+   "fs/status.deflect.apply-1.ogg",
+   "fs/status.deflect.apply-2.ogg"
+  ],
+  "note": "A sword contact with swipe and a sword impact ring."
+ },
+ "status.deflect.tick": {
+  "files": [
+   "fs/status.deflect.tick-1.ogg",
+   "fs/status.deflect.tick-2.ogg"
+  ],
+  "note": "Small knife cling and a light ringing clang, short."
+ },
+ "melee.swing": {
+  "files": [
+   "fs/melee.swing-1.ogg",
+   "fs/melee.swing-2.ogg",
+   "fs/melee.swing-3.ogg"
+  ],
+  "note": "Three short, dry melee whooshes (basic melee swing, swing woosh, stick swish)."
+ },
+ "melee.hit": {
+  "files": [
+   "fs/melee.hit-1.ogg",
+   "fs/melee.hit-2.ogg",
+   "fs/melee.hit-3.ogg"
+  ],
+  "note": "Sword hit impact, a sword hitting a body, and a short damage thud."
+ },
+ "melee.crit": {
+  "files": [
+   "fs/melee.crit-1.ogg",
+   "fs/melee.crit-2.ogg",
+   "fs/melee.crit-3.ogg"
+  ],
+  "note": "Heavier: a gore impact, a boxing punch and a slash-cut."
+ },
+ "melee.miss": {
+  "files": [
+   "fs/melee.miss-1.ogg",
+   "fs/melee.miss-2.ogg",
+   "fs/melee.miss-3.ogg"
+  ],
+  "note": "Very short air whooshes, lighter than the swing."
+ },
+ "melee.block": {
+  "files": [
+   "fs/melee.block-1.ogg",
+   "fs/melee.block-2.ogg",
+   "fs/melee.block-3.ogg"
+  ],
+  "note": "Sword clashes: metal on metal."
+ },
+ "death.humanoid": {
+  "files": [
+   "fs/death.humanoid-1.ogg",
+   "fs/death.humanoid-2.ogg"
+  ],
+  "note": "Two short male death grunts (no screams, no words)."
+ },
+ "death.beast": {
+  "files": [
+   "fs/death.beast-1.ogg",
+   "fs/death.beast-2.ogg"
+  ],
+  "note": "A medium monster death and a monster dying growl."
+ },
+ "death.construct": {
+  "files": [
+   "fs/death.construct-1.ogg",
+   "fs/death.construct-2.ogg"
+  ],
+  "note": "Falling debris crash and a stone collapse: a golem/construct breaking apart."
+ },
+ "loot.common": {
+  "files": [
+   "fs/loot.common-1.ogg",
+   "fs/loot.common-2.ogg"
+  ],
+  "note": "Plain: a canvas bag with buckles and a leather pouch."
+ },
+ "loot.normal": {
+  "files": [
+   "fs/loot.normal-1.ogg",
+   "fs/loot.normal-2.ogg"
+  ],
+  "note": "Still plain: handling/inspecting an item and a small pickup pop."
+ },
+ "loot.uncommon": {
+  "files": [
+   "fs/loot.uncommon-1.ogg",
+   "fs/loot.uncommon-2.ogg"
+  ],
+  "note": "A lyre-strum item pickup chime and a small magic-item ping."
+ },
+ "loot.magic": {
+  "files": [
+   "fs/loot.magic-1.ogg",
+   "fs/loot.magic-2.ogg"
+  ],
+  "note": "A glittery glissando and an item sparkle."
+ },
+ "loot.rare": {
+  "files": [
+   "fs/loot.rare-1.ogg",
+   "fs/loot.rare-2.ogg"
+  ],
+  "note": "Crystal twinkle and a 'fragment retrieve' shimmer."
+ },
+ "loot.epic": {
+  "files": [
+   "fs/loot.epic-1.ogg",
+   "fs/loot.epic-2.ogg"
+  ],
+  "note": "A bell-tree magic spell and an achievement sparkle, longer and richer."
+ },
+ "loot.legendary": {
+  "files": [
+   "fs/loot.legendary-1.ogg",
+   "fs/loot.legendary-2.ogg"
+  ],
+  "note": "Grand: a short holy choir ('aah') and an epic cinematic level-up whoosh."
+ },
+ "coin": {
+  "files": [
+   "fs/coin-1.ogg",
+   "fs/coin-2.ogg"
+  ],
+  "note": "A money bag and a handful of coins."
+ },
+ "equip": {
+  "files": [
+   "fs/equip-1.ogg",
+   "fs/equip-2.ogg",
+   "fs/equip-3.ogg"
+  ],
+  "note": "Sword unsheathe, leather armour being put on, and a belt buckle."
+ },
+ "ui.click": {
+  "files": [
+   "kenney/interface/click_001.ogg",
+   "kenney/interface/click_002.ogg",
+   "kenney/interface/click_003.ogg",
+   "kenney/interface/click_004.ogg",
+   "kenney/interface/click_005.ogg"
+  ],
+  "note": "Kept Kenney: short, clean, subtle clicks that suit a sound heard constantly."
+ },
+ "ui.hover": {
+  "files": [
+   "kenney/interface/tick_001.ogg",
+   "kenney/interface/tick_002.ogg",
+   "kenney/interface/tick_004.ogg"
+  ],
+  "note": "Kept Kenney: tiny ticks, the least intrusive option."
+ },
+ "ui.tab": {
+  "files": [
+   "kenney/interface/select_001.ogg",
+   "kenney/interface/select_002.ogg",
+   "kenney/interface/select_003.ogg",
+   "kenney/interface/select_004.ogg",
+   "kenney/interface/select_005.ogg"
+  ],
+  "note": "Kept Kenney select clicks."
+ },
+ "ui.open": {
+  "files": [
+   "kenney/interface/open_001.ogg",
+   "kenney/interface/open_002.ogg",
+   "kenney/interface/open_003.ogg",
+   "kenney/interface/open_004.ogg"
+  ],
+  "note": "Kept Kenney: clean and short; nothing on freesound beat it for a constantly-heard sound."
+ },
+ "ui.close": {
+  "files": [
+   "kenney/interface/close_001.ogg",
+   "kenney/interface/close_002.ogg",
+   "kenney/interface/close_003.ogg",
+   "kenney/interface/close_004.ogg"
+  ],
+  "note": "Kept Kenney, pairs with ui.open."
+ },
+ "ui.error": {
+  "files": [
+   "kenney/interface/error_001.ogg",
+   "kenney/interface/error_002.ogg",
+   "kenney/interface/error_003.ogg",
+   "kenney/interface/error_004.ogg"
+  ],
+  "note": "Kept Kenney: soft error blips; freesound buzzers are harsh/electronic."
+ }
+}

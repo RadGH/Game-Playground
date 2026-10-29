@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "_doc": "M4 enemies (PLAN §2: Skitterkin are the home world's family; other families arrive with other planets). Speeds in metres a second (a cell is 0.5 m, a tick 1/20 s) — the cell's walk % applies (shallow water slows them), a road or bridge multiplies by `family.road`. `reach` = melee reach in cells (`range` for a spitter's acid). `damage` per bite every `cooldown` ticks. `wall` multiplies damage to walls and gates (a gnasher chews). `acid: true` = its damage is acid (Wall level IV shrugs most of it off). `size`: small / medium / large (M10 trains plow small and medium). `remains` = the stain it leaves. `burst` = [radius, power] of a blast when it dies (none = 0).",
+  "families": {
+    "skitterkin": { "name": "Skitterkin", "colour": "#b8d24a", "road": 1.2, "glowWeight": 0.4, "noiseWeight": 1.0,
+      "about": "Chitin crawlers of the home world. Nests in the woods; drawn by noise." }
+  },
+  "list": [
+    { "id": "skitter", "family": "skitterkin", "name": "Skitter", "hp": 34, "speed": 2.4, "reach": 1.6, "damage": 5, "cooldown": 14, "wall": 1, "size": "small", "remains": "husk", "burst": 0, "colour": "#c9e05a" },
+    { "id": "gnasher", "family": "skitterkin", "name": "Gnasher", "hp": 150, "speed": 1.5, "reach": 1.9, "damage": 16, "cooldown": 22, "wall": 2.5, "size": "medium", "remains": "husk", "burst": 0, "colour": "#8fae3a" },
+    { "id": "spitter", "family": "skitterkin", "name": "Spitter", "hp": 60, "speed": 1.7, "reach": 1.6, "range": 11, "damage": 10, "cooldown": 40, "wall": 1.5, "acid": true, "size": "small", "remains": "husk", "burst": 0, "colour": "#e3ef7a" },
+    { "id": "carapace", "family": "skitterkin", "name": "Carapace", "hp": 700, "speed": 1.0, "reach": 2.6, "damage": 48, "cooldown": 36, "wall": 3, "size": "large", "remains": "husk", "burst": [3, 0.45], "colour": "#5e7a2c" }
+  ]
+}

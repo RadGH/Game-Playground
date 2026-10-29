@@ -1,0 +1,69 @@
+status.burn.apply	status		Burn applied	
+status.burn.tick	status		Burn tick	
+status.poison.apply	status		Poison applied	
+status.poison.tick	status		Poison tick	
+status.bleed.apply	status		Bleed applied	
+status.bleed.tick	status		Bleed tick	
+status.freeze.apply	status		Freeze applied	kenney:5
+status.freeze.tick	status		Freeze tick	
+status.stun.apply	status		Stun applied	kenney:1
+status.stun.tick	status		Stun tick	
+status.sleep.apply	status		Sleep applied	
+status.sleep.tick	status		Sleep tick	
+status.confused.apply	status		Confused applied	
+status.confused.tick	status		Confused tick	
+status.dazed.apply	status		Dazed applied	
+status.dazed.tick	status		Dazed tick	
+status.blind.apply	status		Blind applied	
+status.blind.tick	status		Blind tick	
+status.slow.apply	status		Slow applied	
+status.slow.tick	status		Slow tick	
+status.marked.apply	status		Marked applied	
+status.marked.tick	status		Marked tick	
+status.barrier.apply	status		Barrier applied	
+status.barrier.tick	status		Barrier tick	
+status.regen.apply	status		Regen applied	
+status.regen.tick	status		Regen tick	
+status.sunder.apply	status		Sunder applied	kenney:5
+status.sunder.tick	status		Sunder tick	
+status.curse.apply	status		Curse applied	
+status.curse.tick	status		Curse tick	
+status.silence.apply	status		Silence applied	
+status.silence.tick	status		Silence tick	
+status.disarm.apply	status		Disarm applied	
+status.disarm.tick	status		Disarm tick	
+status.root.apply	status		Root applied	
+status.root.tick	status		Root tick	
+status.rally.apply	status		Rally applied	
+status.rally.tick	status		Rally tick	
+status.haste.apply	status		Haste applied	
+status.haste.tick	status		Haste tick	
+status.enchant.apply	status		Enchant applied	
+status.enchant.tick	status		Enchant tick	
+status.block.apply	status		Block applied	kenney:5
+status.block.tick	status		Block tick	
+status.deflect.apply	status		Deflect applied	
+status.deflect.tick	status		Deflect tick	
+melee.swing	melee		Melee swing	kenney:5
+melee.hit	melee		Melee hit	kenney:5
+melee.crit	melee		Melee crit	kenney:5
+melee.miss	melee		Melee miss	kenney:4
+melee.block	melee		Block	kenney:5
+death.humanoid	death		Death (humanoid)	kenney:3
+death.beast	death		Death (beast)	kenney:2
+death.construct	death		Death (construct)	kenney:5
+loot.common	loot		Loot: common	kenney:3
+loot.normal	loot		Loot: normal	kenney:3
+loot.uncommon	loot		Loot: uncommon	kenney:4
+loot.magic	loot		Loot: magic	kenney:4
+loot.rare	loot		Loot: rare	kenney:3
+loot.epic	loot		Loot: epic	kenney:3
+loot.legendary	loot		Loot: legendary	kenney:2
+coin	loot		Coins	kenney:2
+equip	world		Equip	kenney:6
+ui.click	ui		UI click	kenney:5
+ui.hover	ui		UI hover	kenney:3
+ui.tab	ui		UI tab	kenney:5
+ui.open	ui		UI open	kenney:4
+ui.close	ui		UI close	kenney:4
+ui.error	ui		UI error	kenney:4

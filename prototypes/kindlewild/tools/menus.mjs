@@ -1,0 +1,28 @@
+// Screenshots of the menus at phone size. node prototypes/kindlewild/tools/menus.mjs <outprefix>
+import { chromium } from 'playwright';
+const out = process.argv[2] || '/tmp/kwm';
+const base = process.env.KW_URL || 'http://localhost:8401/prototypes/kindlewild/';
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const ctx = await browser.newContext({ viewport: { width: 402, height: 780 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+const page = await ctx.newPage();
+const errors = [];
+page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+page.on('pageerror', (e) => errors.push('PAGEERROR ' + e.message));
+await page.goto(base);
+await page.waitForFunction(() => window.gameEye);
+await page.evaluate(() => { const s = window.gameEye.save; s.essence = 120; s.levels['1-1'] = { stars: [true, true, false], cleared: true, plays: 1 }; s.discoveries.push('obsidian', 'steam'); });
+await page.tap('#go-challenges'); await page.waitForTimeout(300); await page.screenshot({ path: out + '-challenges.png' });
+await page.tap('#challenges [data-back]'); await page.tap('#go-grimoire'); await page.waitForTimeout(400); await page.screenshot({ path: out + '-grimoire.png' });
+await page.tap('#grim-tabs [data-g="disc"]'); await page.waitForTimeout(200); await page.screenshot({ path: out + '-disc.png' });
+await page.tap('#grimoire [data-back]'); await page.tap('#go-sandbox'); await page.waitForTimeout(200); await page.screenshot({ path: out + '-sandbox.png' });
+await page.tap('#sandbox-setup [data-back]'); await page.tap('#go-realm'); await page.waitForTimeout(200); await page.screenshot({ path: out + '-realm.png' });
+await page.tap('#realm-setup [data-back]');
+await page.evaluate(() => window.gameEye.startLevel('1-1'));
+await page.waitForTimeout(500);
+await page.tap('.modal .big.go');
+await page.waitForTimeout(500);
+await page.tap('#tabs [data-tab="tool"]'); await page.waitForTimeout(200); await page.screenshot({ path: out + '-tools.png' });
+await page.evaluate(() => { const s = window.gameEye.app.stage.session; s.objectives.finish(true); });
+await page.waitForTimeout(2200); await page.screenshot({ path: out + '-result.png' });
+console.log('errors:', errors.length ? errors.join('\n') : 'none');
+await browser.close();

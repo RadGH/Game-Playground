@@ -1,0 +1,52 @@
+{
+ "entries": [
+  {
+   "id": "2026-10-29b",
+   "date": "2026-10-29",
+   "title": "Real sounds",
+   "items": [
+    "Fixed: the big slowdown after casting Frost Nova. Its chill used to creep across the whole map and kept every corner of the world busy, which on phones dropped the game to a few frames a second.",
+    "Knights, archers, mages and wardens now fight wolves and bears, and soldiers you place guard that spot (following the flock they were set beside) instead of walking back to the village. Wolves at Bay can be defended now.",
+    "Healing Light now puts out fires on the ground too.",
+    "Frost Nova leaves its patch icy for a few seconds, so slimes and imps that walk in still freeze. The Splitting Bog starts with a little more mana, and so do dragon and wildfire Daily Trials.",
+    "Every sound is now a real recording: crackling fire, thunder, rain, roaring dragons, explosions, birdsong by day and crickets at night.",
+    "Meteors whistle down and land with a boom, whirlwinds howl, archers' bows twang and the Mage's darts zip.",
+    "Fixed: the meteor and whirlwind sounds no longer keep playing forever.",
+    "Fixed: press, drag the aiming circle and let go, and the spell now lands where you let go (it used to land where you first touched). Same with the mouse.",
+    "Lightning strikes dragons at full strength again.",
+    "Smoother on slow phones: the game switches to the Fast picture after a couple of slow seconds instead of minutes, and the Fast picture uses fewer lights.",
+    "The game pauses while you write a bug report, and stops drawing behind any open window, so typing no longer lags on slow phones.",
+    "Fixed: after a level played at 3x, the next level's speed button now says 1x, which is the speed it really runs at.",
+    "New Credits page (title screen and the in-game menu) naming everyone whose sounds and fonts the game uses.",
+    "Settings has a new 'Show speed numbers' switch, and bug reports now include those numbers so slowdowns can be tracked down."
+   ]
+  },
+  {
+   "id": "2026-10-29",
+   "date": "2026-10-29",
+   "title": "Five new acts and the creatures you call",
+   "items": [
+    "30 new challenges in five acts: The Gathering (call archers, knights, mages and golems to fight for you), The Alchemist's Road (win with fire, water, frost, powder and bile), Stormcrown (storms, griffins, wyrmlings and a phoenix), The Hollow Dark (the restless dead, splitting slimes and the void) and Wyrmfall (dragons, volcanoes, falling stars and the Elder Wyrm).",
+    "New creatures: the Archer and the Mage, whose seeking darts find foes even in the air.",
+    "New spells: Barrier, a shining dome that monsters, fire, lava and dragon breath cannot pass, and Arcane Missiles.",
+    "Dragons are a real fight now: lightning only half bites through their scales, frost barely slows them, and they grow furious and call their young.",
+    "You start with less mana. The Deeper Well and Quicker Flow boons in the Grimoire now raise your mana everywhere.",
+    "Every level, spell and tool has its own pixel-art picture.",
+    "A new kind of Daily Trial: call your defenders."
+   ]
+  },
+  {
+   "id": "2026-10-28",
+   "date": "2026-10-28",
+   "title": "Kindlewild is born",
+   "items": [
+    "A little pixel realm you watch over from the sky: fire spreads with the wind, lava flows downhill and cools to stone, water pools in craters.",
+    "Act I — The First Kindling: six challenges (meteors, a lava flood, a wildfire, a hungry wolf pack, a dragon, and one very long night).",
+    "A Daily Trial: a brand-new generated challenge every day (swarms, lava, wildfire, wolves, a dragon or a long night), harder toward the weekend.",
+    "Sandbox with seven kinds of land, and a Realm that keeps going between visits — its people's faith feeds your mana.",
+    "24 spells, 44 elements to paint and build with, and 36 creatures — from one-pixel swarm mites to a fire-breathing dragon — unlocked a few at a time in the Grimoire with Essence.",
+    "Over thirty hidden discoveries to find by mixing things."
+   ]
+  }
+ ]
+}

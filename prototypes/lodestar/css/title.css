@@ -1,0 +1,57 @@
+/* Title: the bunker hatch and the posting plate. */
+.title { position: absolute; inset: 0; z-index: 50; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr); align-items: center; gap: 4vw;
+  padding: max(24px, env(safe-area-inset-top)) 5vw max(24px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(60% 70% at 35% 50%, rgba(255, 190, 110, 0.10), transparent 70%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.25) 0 2px, transparent 2px 120px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.2) 0 2px, transparent 2px 240px),
+    linear-gradient(180deg, #23292a, #0d1011);
+  transition: opacity .55s ease .25s; }
+.title.gone { opacity: 0; pointer-events: none; }
+body.in-game .title:not(.gone) { display: none; }
+.hatch-wrap { display: grid; place-items: center; perspective: 1400px; min-width: 0; }
+.hatch { --hs: min(64vh, 40vw, 560px); position: relative; width: var(--hs); aspect-ratio: 1; }
+.hatch-ring { position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle, transparent 59%, #0a0c0c 60%, #3b4241 61%, #6a7472 66%, #3a4140 72%, #1d2222 74%);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(0,0,0,0.7); }
+.hatch-ring i { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e6ebe8, #7b8481 50%, #2c3231);
+  transform: rotate(calc(var(--i) * 15deg)) translateY(calc(var(--hs) * -0.43)); }
+.hatch-door { position: absolute; inset: 13%; border-radius: 50%; transform-origin: 100% 50%; transition: transform .7s cubic-bezier(.55, 0, .3, 1);
+  background:
+    radial-gradient(circle at 50% 50%, transparent 30%, rgba(0,0,0,0.25) 31%, transparent 33%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 38% 30%, #7c8c84, #4b5a53 45%, #2a3430 80%);
+  box-shadow: inset 0 0 0 6px #2c3532, inset 0 0 0 9px #59665f, inset 0 -18px 40px rgba(0,0,0,0.55), inset 0 12px 30px rgba(255,255,255,0.08), 0 10px 30px rgba(0,0,0,0.8);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4%; }
+.hatch-name { font: 700 calc(var(--hs) * 0.075)/1 var(--font-stencil); letter-spacing: .22em; padding-left: .22em; color: rgba(236, 222, 180, 0.88);
+  text-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 -1px 0 rgba(255,255,255,0.08); }
+.hatch-stencil { font: 700 max(8px, calc(var(--hs) * 0.022)) var(--font-stencil); letter-spacing: .3em; color: rgba(0,0,0,0.55); }
+.hatch-wheel { position: relative; width: 34%; aspect-ratio: 1; border-radius: 50%; transition: transform .7s cubic-bezier(.4, 0, .2, 1);
+  box-shadow: inset 0 0 0 8px #b23a22, inset 0 0 0 10px #5e1a0c, 0 6px 10px rgba(0,0,0,0.6); }
+.hatch-wheel i { position: absolute; left: 50%; top: 4%; bottom: 4%; width: 9%; margin-left: -4.5%; border-radius: 6px; background: linear-gradient(90deg, #5e1a0c, #c4482c 45%, #7a2312); }
+.hatch-wheel i:nth-child(2) { transform: rotate(60deg); } .hatch-wheel i:nth-child(3) { transform: rotate(120deg); }
+.hatch-wheel b { position: absolute; left: 50%; top: 50%; width: 26%; height: 26%; margin: -13%; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #e6ebe8, #7b8481 50%, #2c3231); box-shadow: 0 3px 5px rgba(0,0,0,0.6); }
+.hatch-hinge { position: absolute; right: 2%; top: 38%; width: 8%; height: 24%; border-radius: 6px; background: linear-gradient(90deg, #2c3231, #8a9390 50%, #2c3231); box-shadow: 0 4px 8px rgba(0,0,0,0.7); }
+.title.opening .hatch-wheel { transform: rotate(-200deg); }
+.title.opening .hatch-door { transform: rotateY(-108deg); transition-delay: .25s; }
+.title-panel { position: relative; display: flex; flex-direction: column; gap: 14px; padding: 26px 24px 18px; border-radius: 10px;
+  background: repeating-linear-gradient(92deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px), linear-gradient(175deg, var(--enamel-hi), var(--enamel) 35%, var(--enamel-lo));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 0 0 1px rgba(0,0,0,0.4), 0 0 0 3px #171c1b, 0 24px 60px rgba(0,0,0,0.8); }
+.tp-name { font: 700 40px/1 var(--font-stencil); letter-spacing: .3em; color: #efe5c6; text-shadow: 0 2px 0 rgba(0,0,0,0.5); }
+.tp-sub { margin-top: -8px; font: 700 12px var(--font-stencil); letter-spacing: .45em; color: var(--amber); text-shadow: 0 0 8px rgba(255,170,40,0.6); }
+.tp-buttons { display: flex; flex-direction: column; gap: 12px; }
+.tp-foot { font: 700 10.5px var(--font-type); color: rgba(0,0,0,0.5); }
+
+@media (max-width: 899px), (max-height: 559px) and (orientation: landscape) {
+  .title { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; gap: 14px; padding: max(14px, env(safe-area-inset-top)) 16px max(14px, env(safe-area-inset-bottom)); }
+  .hatch { --hs: min(42vh, 82vw); }
+  .title-panel { padding: 18px 16px 12px; gap: 10px; }
+  .tp-name { display: none; } .tp-sub { margin: 0; text-align: center; }
+  .tp-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .tp-buttons .push { min-height: 50px; font-size: 13px; letter-spacing: .1em; padding: 6px 10px; }
+}
+@media (max-height: 559px) and (orientation: landscape) {
+  .title { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); grid-template-rows: 1fr; }
+  .hatch { --hs: min(74vh, 44vw); }
+}

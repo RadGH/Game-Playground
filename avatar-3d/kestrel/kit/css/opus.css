@@ -1,0 +1,13 @@
+/* Kestrel (opus) preview page */
+.op { margin: 0; background: #1d2026; color: #e6e6e6; }
+.op-top { padding: 10px 16px 0; }
+.op-top h1 { margin: 0; font-size: 1.3rem; }
+.op-controls { padding: 6px 16px; display: flex; flex-direction: column; gap: 6px; }
+.op-controls .row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.op-controls button { padding: 4px 9px; font-size: 0.8rem; }
+.op-controls button.on { background: #b98a3e; color: #111; }
+.op-stage { position: relative; margin: 0 16px 16px; height: min(78vh, 860px); border-radius: 8px; overflow: hidden; background: #c9ccd1; touch-action: none; }
+.op-stage canvas { width: 100%; height: 100%; display: block; }
+.op-line { position: absolute; left: 10px; bottom: 8px; color: #333; }
+body.shot .op-top, body.shot .op-controls, body.shot .op-line { display: none; }
+body.shot .op-stage { margin: 0; height: 100vh; border-radius: 0; }

@@ -16,7 +16,8 @@
 // for movement.
 
 import * as THREE from 'three';
-import { createTvBody } from './chibi-version.js';      // 2026-10-16: every person is Chibi 2.5 (one switch; ?chibi=2 = the old bodies)
+import { createTvBody } from './chibi-version.js';
+import { KESTREL } from './chars-mode.js';      // ?chars=kestrel (batch 1): mount size and the far crowd's shape      // 2026-10-16: every person is Chibi 2.5 (one switch; ?chibi=2 = the old bodies)
 import { createCreature, randomCreature } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
 import { bodyKindFor } from './body-kind.js';
@@ -59,10 +60,26 @@ export function rankScale(rank, mods = null) {
  * The seat is counter-scaled in avatar-3d/js/mounts.js, so the rider keeps their size and sits on the bigger back.
  */
 export const MOUNT_SCALE = 1.38;
+/** …and for a Kestrel rider (`?chars=kestrel`, batch 1): a real-proportioned 1.78 m body needs a horse only a little bigger
+ *  than the shared table's (its back ~1.5 m), not one sized against a big chibi head. */
+export const KESTREL_MOUNT_SCALE = 1.12;
+/**
+ * Kestrel batch 5 (`?chars=kestrel` only): a full body this far from the camera (m) shows the low-detail mesh (LOD 1,
+ * ≤ 4,000 triangles against ≤ 15,000), and comes back to LOD 0 only inside `near` — the 3 m between is so a body walking
+ * at the line does not flicker. At 16 m a 1.78 m body is ~11 % of the screen's height under the 55° camera.
+ */
+export const KESTREL_LOD = { far: 16, near: 13 };
+/** Which LOD a Kestrel body at `d` m should show, given the one it shows now (null = not built yet). Pure — exported for tests. */
+export function kestrelLodFor(cur, d, { far = KESTREL_LOD.far, near = KESTREL_LOD.near } = {}) {
+  if (!Number.isFinite(d)) return cur ?? 0;
+  if (cur == null) return d > (far + near) / 2 ? 1 : 0;
+  return cur ? (d < near ? 0 : 1) : (d > far ? 1 : 0);
+}
+const kBreathe = () => new Promise(r => setTimeout(r, 0));
 /** The shared table's spec for a mount id or the server's mount look, at Thousandvale's size. Pure — exported for tests. */
 export function tvMountSpec(want) {
   const look = want && typeof want === 'object' ? want : { id: want };
-  return mountSpecFor({ ...look, scale: (Number.isFinite(look.scale) && look.scale > 0 ? look.scale : 1) * MOUNT_SCALE });
+  return mountSpecFor({ ...look, scale: (Number.isFinite(look.scale) && look.scale > 0 ? look.scale : 1) * (KESTREL ? KESTREL_MOUNT_SCALE : MOUNT_SCALE) });
 }
 /**
  * Z54 (live #55: "a Giant Slagborn Firecaller was normal size"): the body size an entity should be drawn at, from what the
@@ -124,7 +141,8 @@ function mergeColoured(pieces) {
   return out;
 }
 /** The far stand-in's body (~1.45 m chibi): tunic tinted by class, darker legs, arms, boots. */
-export function farBodyGeometry() {
+export function farBodyGeometry(tall = false) {
+  if (tall) return farKestrelBody();
   const tunic = new THREE.CylinderGeometry(0.2, 0.3, 0.55, 8); tunic.translate(0, 0.62, 0);
   const belt = new THREE.CylinderGeometry(0.29, 0.29, 0.06, 8); belt.translate(0, 0.42, 0);
   const legL = new THREE.CylinderGeometry(0.075, 0.08, 0.38, 6); legL.translate(-0.11, 0.2, 0);
@@ -135,12 +153,29 @@ export function farBodyGeometry() {
   return mergeColoured([{ g: tunic, c: '#ffffff' }, { g: belt, c: '#4a3a2a' }, { g: legL, c: '#5a5560' }, { g: legR, c: '#5a5560' }, { g: armL, c: '#e6e6e6' }, { g: armR, c: '#e6e6e6' }, { g: boots, c: '#3a2e24' }]);
 }
 /** …and its head: a big skin sphere (tinted by people) with a hair cap and two dark eyes. */
-export function farHeadGeometry() {
+export function farHeadGeometry(tall = false) {
+  if (tall) return farKestrelHead();
   const head = new THREE.SphereGeometry(0.34, 12, 9); head.translate(0, 1.14, 0);
   const hair = new THREE.SphereGeometry(0.36, 12, 6, 0, Math.PI * 2, 0, Math.PI * 0.55); hair.translate(0, 1.16, -0.02);
   const eyeL = new THREE.SphereGeometry(0.045, 6, 4); eyeL.translate(-0.11, 1.12, 0.31);
   const eyeR = eyeL.clone(); eyeR.translate(0.22, 0, 0);
   return mergeColoured([{ g: head, c: '#ffffff' }, { g: hair, c: '#4a3426' }, { g: eyeL, c: '#1a1410' }, { g: eyeR, c: '#1a1410' }]);
+}
+/** Kestrel (`?chars=kestrel`): the far stand-in at a real body's proportions (1.78 m, a head ~1/7 of it). */
+function farKestrelBody() {
+  const tunic = new THREE.CylinderGeometry(0.16, 0.19, 0.62, 8); tunic.translate(0, 1.13, 0);
+  const belt = new THREE.CylinderGeometry(0.19, 0.19, 0.05, 8); belt.translate(0, 0.84, 0);
+  const legL = new THREE.CylinderGeometry(0.075, 0.06, 0.8, 6); legL.translate(-0.1, 0.44, 0);
+  const legR = legL.clone(); legR.translate(0.2, 0, 0);
+  const armL = new THREE.CylinderGeometry(0.048, 0.04, 0.6, 6); armL.rotateZ(0.2); armL.translate(-0.25, 1.1, 0);
+  const armR = new THREE.CylinderGeometry(0.048, 0.04, 0.6, 6); armR.rotateZ(-0.2); armR.translate(0.25, 1.1, 0);
+  const boots = new THREE.BoxGeometry(0.3, 0.07, 0.24); boots.translate(0, 0.035, 0.03);
+  return mergeColoured([{ g: tunic, c: '#ffffff' }, { g: belt, c: '#4a3a2a' }, { g: legL, c: '#5a5560' }, { g: legR, c: '#5a5560' }, { g: armL, c: '#e6e6e6' }, { g: armR, c: '#e6e6e6' }, { g: boots, c: '#3a2e24' }]);
+}
+function farKestrelHead() {
+  const head = new THREE.SphereGeometry(0.115, 10, 8); head.scale(0.9, 1.08, 1); head.translate(0, 1.6, 0.01);
+  const hair = new THREE.SphereGeometry(0.122, 10, 5, 0, Math.PI * 2, 0, Math.PI * 0.55); hair.translate(0, 1.62, -0.01);
+  return mergeColoured([{ g: head, c: '#ffffff' }, { g: hair, c: '#4a3426' }]);
 }
 const CLASS_TINT = { warrior: '#b04a3a', knight: '#9aa4b4', paladin: '#e0c060', ranger: '#4f8a3a', rogue: '#3a3a44', cleric: '#e8e0c8', mage: '#4a6ad0', bard: '#c060a0', monk: '#d0902a', druid: '#6a9a4a', necromancer: '#5a3a6a', pyromancer: '#e0602a' };
 
@@ -195,8 +230,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   // class, the head by people (skin) with dark hair baked in — two draw calls for the whole crowd
   const FAR_CAP = 400;
   const farMat = new THREE.MeshLambertMaterial({ vertexColors: true });
-  const farBody = new THREE.InstancedMesh(farBodyGeometry(), farMat, FAR_CAP);
-  const farHead = new THREE.InstancedMesh(farHeadGeometry(), farMat, FAR_CAP);
+  const farBody = new THREE.InstancedMesh(farBodyGeometry(KESTREL), farMat, FAR_CAP);
+  const farHead = new THREE.InstancedMesh(farHeadGeometry(KESTREL), farMat, FAR_CAP);
   for (const m of [farBody, farHead]) { m.count = 0; m.frustumCulled = false; m.castShadow = false; scene.add(m); }
   farBody.name = 'far-crowd-body'; farHead.name = 'far-crowd-head';
   const _fm = new THREE.Matrix4(), _fq = new THREE.Quaternion(), _fs = new THREE.Vector3(1, 1, 1), _fp = new THREE.Vector3(), _fc = new THREE.Color(), _up = new THREE.Vector3(0, 1, 0);
@@ -273,6 +308,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   }
   function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family, rank: i.rank || null, pet: !!i.pet, role: i.role || null, mods: Array.isArray(i.mods) ? i.mods : null, sc: Number.isFinite(i.sc) && i.sc > 0 ? i.sc : null }; }
 
+  /** Kestrel batch 5: a body built far from the camera starts at LOD 1 (createTvBody passes `lod` to kestrel-body.js). */
+  const kestrelBuildLod = a => (KESTREL && !a.self ? { lod: kestrelLodFor(null, camera.position.distanceTo(a.pos) / (a.kind === 'monster' ? bodyScale(a.sc, a.rank, a.mods) : 1)) } : {});
   async function build(a) {
     a.building = true; lodStats.built++;
     const t0 = performance.now();
@@ -290,7 +327,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
           body = createDummyBody(); a.fixed = true; a.flying = false;
         } else if (look?.avatar) {
           // A humanoid monster (brigand, cultist, knight): a Chibi 2 body, scaled up when it is an elite or boss.
-          body = await createTvBody(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS });
+          body = await createTvBody(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS, ...kestrelBuildLod(a) });
           a.humanoid = true; a.heldId = look.avatar.held?.id || null;      // Z26: the bow a brigand archer looses arrows from (projectiles.js heldOf)
           body.group.scale.setScalar(big); a.builtBig = 1;
         } else {
@@ -300,7 +337,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         // One draw call per moving part instead of one per eye and toe (Farhold R27 M8).
         if (!body.isProp) try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
       } else {
-        body = await createTvBody(await avatarFor(a.look), { anims: CHIBI_ANIMS });
+        body = await createTvBody(await avatarFor(a.look), { anims: CHIBI_ANIMS, ...kestrelBuildLod(a) });
       }
       lodStats.buildMs = Math.max(lodStats.buildMs || 0, Math.round(performance.now() - t0));   // wall time, awaits included
       if (!actors.has(a.id) || a.body) { body.dispose?.(); return; }
@@ -561,9 +598,16 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       for (const a of actors.values()) {
         const full = fullSet.has(a.id) || a.id === 'preview';
         if (a.lod === undefined || full !== (a.lod === 'full')) { a.lod = full ? 'full' : 'far'; a.lodSince = now; }
+        // Kestrel batch 5: a full body switches between its two meshes by camera distance (the other one is built in
+        // slices the first time it is needed; the body keeps the one it has meanwhile)
+        if (KESTREL && full && a.body?.wantLod && !a.lodBusy) {
+          const want = a.self ? 0 : kestrelLodFor(a.body.lod, camera.position.distanceTo(a.pos) / (a.humanoid ? (a.big || 1) : 1));   // (a giant reads big further off)
+          if (want !== a.body.lod) { a.lodBusy = true; const b = a.body; b.wantLod(want, { slice: kBreathe }).catch(() => {}).finally(() => { a.lodBusy = false; }); }
+        }
         // a body far away for half a minute is let go
         if (a.lod === 'far' && a.body && now - a.lodSince > 30000) { dropMount(a); dropShape(a); a.group.remove(a.model); a.body.dispose?.(); a.body = null; a.model = null; a.building = false; a.group.add(a.standin); }
       }
+      if (KESTREL) { let low = 0; for (const a of actors.values()) if (a.body?.kestrel && a.body.lod === 1) low++; lodStats.kestrelLow = low; }   // Kestrel batch 5
     }
     // build the nearest full actor still waiting for a body (one a frame)
     if (queue.length) {

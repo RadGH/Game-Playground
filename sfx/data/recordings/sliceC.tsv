@@ -1,0 +1,58 @@
+travel.step	world		Travel step	kenney:15
+travel.step.soft	world		Travel step (grass / earth)	
+camp.fire	ambience	loop	Campfire (loop)	
+ambience.forest	ambience	loop	Ambience: forest	
+ambience.cave	ambience	loop	Ambience: cave	
+ambience.town	ambience	loop	Ambience: town	
+ambience.marsh	ambience	loop	Ambience: marsh	
+ambience.mountain	ambience	loop	Ambience: mountain	
+ambience.void	ambience	loop	Ambience: void	
+ambience.fire	ambience	loop	Ambience: fire	
+ambience.wind	ambience	loop	Ambience: wind	
+ambience.rain.light	ambience	loop	Rain (light, loop)	
+ambience.rain.heavy	ambience	loop	Rain (heavy, loop)	
+rain.tick.metal	world		Rain on metal	
+water.splash.small	world		Splash (small)	
+water.splash.big	impact		Splash (big)	
+water.pour	world		Water pouring	
+water.drain	world		Water draining	
+steam.hiss	world		Steam hiss	
+fire.whoosh	world		Fire whoosh	
+fire.crackle	ambience	loop	Fire crackle (loop)	
+ice.form	world		Ice forming	
+ice.crack	impact		Ice cracking	
+stone.crumble	world		Stone crumbling	
+fragment.crash.small	impact		Fragment crash (small)	
+fragment.crash.medium	impact		Fragment crash (medium)	
+fragment.crash.large	impact		Fragment crash (large)	
+lever.pull	world		Lever pull	
+door.grind	world		Door grinding	
+sluice.open	world		Sluice opening	
+rope.creak	world		Rope creak	
+grapple.fire	world		Grapple fire	
+lamp.relight	sting		Great Lamp relit	
+lamp.post	sting		Lamp-post lit	
+lantern.out	world		Lantern goes out	
+bell.toll	sting		Bell toll	
+gutter.burst	impact		Wick guttering burst	
+rekindle	sting		Rekindle	
+oil.pickup	loot		Oil pickup	
+pearl.pickup	loot		Pearl pickup	
+animal.sheep.bleat	world		Sheep bleat	
+animal.hen.cluck	world		Hen cluck	
+animal.pig.oink	world		Pig oink	
+animal.cow.moo	world		Cow moo	
+hvf.bell	sting		Farm bell (call the flock home)	
+hvf.horn	sting		Hunting horn	
+hvf.hawk	world		Hawk cry	
+wood.chop	impact		Axe into a tree	kenney:6
+trap.snap	impact		Snare snaps shut	kenney:6
+ward.pull	world		Watchstone pulled up	
+build.place	world		Building placed	kenney:5
+build.done	sting		Building finished	
+tower.shot	melee		Arrow tower shot	
+hvf.down	sting		Farmer downed	
+hvf.revive	sting		Farmer back on his feet	
+hvf.turn	sting		The Turn: the hunt changes hands	
+ambience.night	ambience	loop	Night: crickets, maybe distant owl	
+ambience.storm	ambience	loop	Storm: heavy rain + wind + distant thunder	

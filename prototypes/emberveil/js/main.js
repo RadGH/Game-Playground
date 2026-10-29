@@ -117,6 +117,14 @@ async function startWorld(resumed) {
       const { BatchedSpellFx } = await import('../../../avatar-3d/js/spellfx-batched.js');
       options.characterFactory = createChibi2Character; options.effectsClass = BatchedSpellFx;
     }
+    // Kestrel trial (avatar-3d/kestrel/): ?chars=kestrel or ?chars=kestrel-fable draws the people with it, sized like Chibi 2
+    if (/[?&]chars=kestrel/.test(location.search)) {
+      try {
+        const { kestrelFromUrl } = await import('../../../avatar-3d/kestrel/js/swap.js');
+        const kestrel = await kestrelFromUrl(location.search, { height: 1.45 });
+        if (kestrel) options.characterFactory = kestrel;
+      } catch (err) { console.warn('Kestrel did not load; drawing Chibi 2', err); }
+    }
     stage = new Stage($('stage'), options); window.emberveilSfx = await installSfx({ stage, game });
   }
   talk = new Talk({ lingo, game, voice }); talk.muted = $('mute').checked; talk.engineOverride = $('engine').value || 'formant'; for (const h of game.party) talk.speaker(h);

@@ -1,0 +1,1110 @@
+{
+ "id": "act1",
+ "name": "Act I — The First Kindling",
+ "blurb": "A green little realm, and its first troubles.",
+ "levels": [
+  {
+   "id": "1-1",
+   "name": "Falling Star",
+   "icon": "lvl-1-1",
+   "intro": [
+    "A swarm is pouring out of the northern hills — and more will follow.",
+    "Drop meteors right into the middle of them before they reach the village."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 1101,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.1,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.42,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       120
+      ],
+      "r": 70
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       200
+      ],
+      "r": 26
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       60
+      ],
+      "r": 22
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      200
+     ],
+     "people": 6,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "well"
+     ],
+     "name": "Larkford"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     1,
+     4
+    ],
+    [
+     "rabbit",
+     2,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "mite",
+     "count": 60,
+     "at": [
+      70,
+      40
+     ],
+     "spread": 18,
+     "goal": "village"
+    },
+    {
+     "species": "goblin",
+     "count": 12,
+     "at": [
+      150,
+      70
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 14,
+     "announce": "Goblins from the east!"
+    },
+    {
+     "species": "mite",
+     "count": 30,
+     "at": [
+      12,
+      110
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 28,
+     "announce": "More from the west woods!"
+    }
+   ],
+   "mana": {
+    "start": 130,
+    "max": 140,
+    "regen": 3.6
+   },
+   "loadout": [
+    "spell:meteor",
+    "spell:fireball",
+    "spell:lightning",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "kill",
+     "team": "monster",
+     "count": 87,
+     "text": "Wipe out 87 of the swarm",
+     "short": "Swarm"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 2,
+     "text": "Keep 2 cottages standing",
+     "failText": "The swarm overran the village",
+     "short": "Houses"
+    },
+    {
+     "type": "people",
+     "min": 4,
+     "text": "Keep 4 villagers alive",
+     "failText": "The swarm overran the village",
+     "short": "People"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Stop the swarm"
+    },
+    {
+     "type": "killedBy",
+     "team": "monster",
+     "by": [
+      "meteor"
+     ],
+     "count": 70,
+     "text": "Catch 70 of them in meteors"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Lose no cottage"
+    }
+   ],
+   "reward": "spell:meteor",
+   "tip": "Meteors take two seconds to fall — aim where the swarm is going, not where it is."
+  },
+  {
+   "id": "1-2",
+   "name": "The Molten Tide",
+   "icon": "lvl-1-2",
+   "intro": [
+    "The mountain above Cinderford has woken.",
+    "Raise walls of earth to turn the lava aside until it cools."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 1202,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.0,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0,
+     "temp": 0.4
+    },
+    "clock": 0.5,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "slope",
+      "dir": [
+       0,
+       1
+      ],
+      "h": 120,
+      "base": 100,
+      "keep": 0.12
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       205
+      ],
+      "r": 24
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       14
+      ],
+      "r": 18,
+      "mat": "basalt",
+      "clearCells": true
+     },
+     {
+      "op": "vent",
+      "at": [
+       80,
+       12
+      ]
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       18
+      ],
+      "r": 5,
+      "mat": "lava",
+      "amount": 60
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      205
+     ],
+     "people": 6,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "well"
+     ],
+     "name": "Cinderford"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     1,
+     3
+    ],
+    [
+     "deer",
+     1,
+     3
+    ]
+   ],
+   "events": [
+    {
+     "time": 35,
+     "op": {
+      "op": "vent",
+      "at": [
+       40,
+       22
+      ]
+     },
+     "say": "The mountain splits again — a second vent!"
+    },
+    {
+     "time": 36,
+     "op": {
+      "op": "paint",
+      "at": [
+       40,
+       26
+      ],
+      "r": 4,
+      "mat": "lava",
+      "amount": 60
+     }
+    }
+   ],
+   "mana": {
+    "start": 90,
+    "max": 160,
+    "regen": 3.5
+   },
+   "loadout": [
+    "spell:earth",
+    "material:wall_stone",
+    "material:water",
+    "spell:rain",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "survive",
+     "secs": 100,
+     "text": "Hold until the mountain sleeps",
+     "short": "Hold"
+    },
+    {
+     "type": "contain",
+     "material": "lava",
+     "zone": [
+      80,
+      205,
+      22
+     ],
+     "text": "Keep lava out of the village",
+     "failText": "Lava reached the village",
+     "short": "Lava"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Save the village"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Not a single house burned"
+    },
+    {
+     "type": "manaUsedMax",
+     "n": 220,
+     "text": "Spend under 220 mana"
+    }
+   ],
+   "reward": "material:obsidian",
+   "tip": "Lava runs downhill. Water on lava makes obsidian — a wall that never melts."
+  },
+  {
+   "id": "1-3",
+   "name": "Dry Season",
+   "icon": "lvl-1-3",
+   "intro": [
+    "No rain for a month, and the wind is up.",
+    "Fires have started in the north woods. Keep the cottages standing."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 1303,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0,
+     "wet": -0.1,
+     "temp": 0.35
+    },
+    "clock": 0.55,
+    "freezeTime": true,
+    "wind": [
+     0.15,
+     1,
+     1.7
+    ],
+    "windLocked": true,
+    "ops": [
+     {
+      "op": "drain"
+     },
+     {
+      "op": "dry",
+      "p": 0.18
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       196
+      ],
+      "r": 26
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       70
+      ],
+      "r": 40,
+      "mat": "tree",
+      "density": 0.35
+     },
+     {
+      "op": "paint",
+      "at": [
+       40,
+       120
+      ],
+      "r": 22,
+      "mat": "tree",
+      "density": 0.3
+     },
+     {
+      "op": "paint",
+      "at": [
+       124,
+       130
+      ],
+      "r": 20,
+      "mat": "tree",
+      "density": 0.3
+     },
+     {
+      "op": "paint",
+      "at": [
+       140,
+       200
+      ],
+      "r": 8,
+      "mat": "water",
+      "amount": 40
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      198
+     ],
+     "people": 8,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "well"
+     ],
+     "name": "Fernbury"
+    }
+   ],
+   "herds": [
+    [
+     "deer",
+     2,
+     3
+    ],
+    [
+     "rabbit",
+     2,
+     4
+    ]
+   ],
+   "events": [
+    {
+     "time": 3,
+     "ignite": [
+      [
+       60,
+       30,
+       4
+      ],
+      [
+       110,
+       40,
+       4
+      ],
+      [
+       85,
+       22,
+       3
+      ]
+     ],
+     "say": "Smoke in the north woods!"
+    },
+    {
+     "time": 45,
+     "ignite": [
+      [
+       20,
+       110,
+       3
+      ]
+     ],
+     "say": "Sparks have jumped to the west field."
+    }
+   ],
+   "mana": {
+    "start": 80,
+    "max": 140,
+    "regen": 3
+   },
+   "loadout": [
+    "spell:rain",
+    "spell:earth",
+    "material:dirt",
+    "material:water",
+    "tool:erase",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "survive",
+     "secs": 100,
+     "text": "Last until the fire burns itself out",
+     "short": "Hold"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 4,
+     "text": "Keep 4 cottages standing",
+     "failText": "Too many cottages burned",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Survive the wildfire"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Every cottage still standing"
+    },
+    {
+     "type": "peopleLostMax",
+     "n": 0,
+     "text": "Nobody lost"
+    }
+   ],
+   "reward": "spell:gale",
+   "tip": "Fire cannot cross bare dirt. Paint a wide strip of it across the wind."
+  },
+  {
+   "id": "1-4",
+   "name": "Shepherd's Watch",
+   "icon": "lvl-1-4",
+   "intro": [
+    "Old Meg's flock is all that is left after a hard winter.",
+    "Help it grow to thirty — the wolves are hungry too."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 1404,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.2,
+     "rivers": 1,
+     "villages": 0,
+     "glades": 0,
+     "wet": 0.3
+    },
+    "clock": 0.35,
+    "dayLength": 5400,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       120
+      ],
+      "r": 40
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       120
+      ],
+      "r": 26
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       120
+      ],
+      "r": 30,
+      "mat": "meadow"
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      34,
+      206
+     ],
+     "people": 3,
+     "prebuilt": [
+      "cottage",
+      "farm"
+     ],
+     "name": "Meg's Hollow"
+    }
+   ],
+   "herds": [
+    [
+     "rabbit",
+     1,
+     4
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "sheep",
+     "count": 8,
+     "at": [
+      80,
+      120
+     ],
+     "spread": 6
+    },
+    {
+     "species": "wolf",
+     "count": 2,
+     "at": "north",
+     "time": 25,
+     "hunger": 0.6,
+     "goal": [
+      80,
+      120
+     ],
+     "announce": "Wolves on the northern ridge!"
+    },
+    {
+     "species": "wolf",
+     "count": 3,
+     "at": "east",
+     "time": 70,
+     "hunger": 0.6,
+     "goal": [
+      80,
+      120
+     ]
+    },
+    {
+     "species": "wolf",
+     "count": 3,
+     "at": "west",
+     "time": 120,
+     "hunger": 0.6,
+     "goal": [
+      80,
+      120
+     ],
+     "announce": "A pack from the west woods."
+    },
+    {
+     "species": "wolf",
+     "count": 4,
+     "at": "north",
+     "time": 170,
+     "hunger": 0.6,
+     "goal": [
+      80,
+      120
+     ]
+    }
+   ],
+   "mana": {
+    "start": 60,
+    "max": 120,
+    "regen": 2.5
+   },
+   "loadout": [
+    "spell:bless",
+    "spell:heal",
+    "spell:lightning",
+    "material:wall_wood",
+    "spell:growth",
+    "tool:grab",
+    "tool:inspect"
+   ],
+   "timeLimit": 240,
+   "failText": "The season ended before the flock was big enough",
+   "goals": [
+    {
+     "type": "grow",
+     "species": "sheep",
+     "count": 30,
+     "text": "Grow the flock to 30 sheep",
+     "short": "Flock"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Thirty sheep"
+    },
+    {
+     "type": "timeMax",
+     "secs": 170,
+     "text": "Before the fourth pack arrives"
+    },
+    {
+     "type": "killedBy",
+     "species": "wolf",
+     "by": [
+      "lightning"
+     ],
+     "count": 3,
+     "text": "Strike down 3 wolves"
+    }
+   ],
+   "reward": "spell:bless",
+   "tip": "Blessing makes creatures breed four times as fast. A fence of timber keeps wolves out."
+  },
+  {
+   "id": "1-5",
+   "name": "Wings over Thornby",
+   "icon": "lvl-1-5",
+   "intro": [
+    "An ashwing dragon has found Thornby.",
+    "Bring it down — or hurt it enough that it flies home."
+   ],
+   "map": {
+    "W": 176,
+    "H": 240,
+    "seed": 1505,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.22,
+     "rivers": 1,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.6,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       88,
+       160
+      ],
+      "r": 30
+     },
+     {
+      "op": "clear",
+      "at": [
+       88,
+       160
+      ],
+      "r": 22
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      88,
+      160
+     ],
+     "people": 8,
+     "wardens": 3,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "stonehouse",
+      "farm",
+      "well",
+      "tower"
+     ],
+     "name": "Thornby"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     2,
+     4
+    ],
+    [
+     "chicken",
+     1,
+     4
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "dragon",
+     "count": 1,
+     "at": [
+      88,
+      10
+     ],
+     "spread": 0,
+     "goal": "village",
+     "time": 4,
+     "announce": "A shadow crosses the sun..."
+    }
+   ],
+   "mana": {
+    "start": 120,
+    "max": 180,
+    "regen": 5
+   },
+   "loadout": [
+    "spell:lightning",
+    "spell:missiles",
+    "spell:barrier",
+    "spell:frost",
+    "spell:rain",
+    "creature:archer",
+    "creature:warden",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "dragon",
+     "text": "Drive off or bring down the dragon",
+     "short": "Dragon"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 houses standing",
+     "failText": "Thornby burned",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "The skies are clear"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 1,
+     "text": "Lose one house at most"
+    },
+    {
+     "type": "killedBy",
+     "species": "dragon",
+     "count": 1,
+     "text": "Bring it down for good"
+    }
+   ],
+   "reward": "spell:frost",
+   "tip": "Frost only slows a dragon for a moment and lightning half-bites through its scales. Arcane Missiles find it in the air; a Barrier over the roofs stops its breath."
+  },
+  {
+   "id": "1-6",
+   "name": "The Long Night",
+   "icon": "lvl-1-6",
+   "intro": [
+    "Night falls on Brackwell, and everything comes at once.",
+    "Keep the people alive until the sun comes up."
+   ],
+   "map": {
+    "W": 176,
+    "H": 256,
+    "seed": 1606,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.18,
+     "rivers": 1,
+     "villages": 0,
+     "glades": 1
+    },
+    "clock": 0.8,
+    "dayLength": 10200,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       88,
+       140
+      ],
+      "r": 30
+     },
+     {
+      "op": "clear",
+      "at": [
+       88,
+       140
+      ],
+      "r": 22
+     },
+     {
+      "op": "ground",
+      "at": [
+       150,
+       30
+      ],
+      "r": 14,
+      "mat": "basalt",
+      "clearCells": true
+     },
+     {
+      "op": "raise",
+      "at": [
+       150,
+       30
+      ],
+      "r": 20,
+      "h": 30
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      88,
+      140
+     ],
+     "people": 10,
+     "wardens": 3,
+     "mages": 1,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "farm",
+      "well",
+      "lamppost",
+      "lamppost"
+     ],
+     "name": "Brackwell"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     1,
+     4
+    ],
+    [
+     "deer",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "goblin",
+     "count": 10,
+     "at": "west",
+     "time": 8,
+     "goal": "village",
+     "announce": "Goblins from the west!"
+    },
+    {
+     "species": "mite",
+     "count": 45,
+     "at": "north",
+     "time": 30,
+     "goal": "village",
+     "spread": 8
+    },
+    {
+     "species": "torchgob",
+     "count": 5,
+     "at": "east",
+     "time": 50,
+     "goal": "village",
+     "announce": "Firebrands from the east!"
+    },
+    {
+     "species": "troll",
+     "count": 2,
+     "at": "south",
+     "time": 70,
+     "goal": "village",
+     "announce": "Something big is coming up from the south..."
+    },
+    {
+     "species": "goblin",
+     "count": 14,
+     "at": "north",
+     "time": 95,
+     "goal": "village"
+    },
+    {
+     "species": "imp",
+     "count": 6,
+     "at": [
+      150,
+      30
+     ],
+     "time": 110,
+     "goal": "village"
+    },
+    {
+     "species": "mite",
+     "count": 60,
+     "at": "west",
+     "time": 125,
+     "goal": "village",
+     "spread": 10
+    },
+    {
+     "species": "torchgob",
+     "count": 6,
+     "at": "west",
+     "time": 135,
+     "goal": "village"
+    }
+   ],
+   "events": [
+    {
+     "time": 60,
+     "op": {
+      "op": "vent",
+      "at": [
+       150,
+       30
+      ]
+     },
+     "say": "The eastern hill splits — fire is coming!"
+    },
+    {
+     "time": 105,
+     "cast": "shower",
+     "x": 120,
+     "y": 60,
+     "say": "Stars are falling!"
+    }
+   ],
+   "mana": {
+    "start": 100,
+    "max": 200,
+    "regen": 4.5
+   },
+   "loadout": [
+    "spell:fireball",
+    "spell:lightning",
+    "spell:meteor",
+    "spell:frost",
+    "spell:rain",
+    "spell:earth",
+    "spell:heal",
+    "material:wall_stone",
+    "material:water",
+    "creature:warden",
+    "tool:grab",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "survive",
+     "secs": 150,
+     "text": "Survive until dawn",
+     "short": "Hold"
+    },
+    {
+     "type": "people",
+     "min": 8,
+     "text": "Keep 8 people alive",
+     "failText": "Too many lost in the night",
+     "short": "People"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 houses standing",
+     "failText": "Brackwell fell",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "See the dawn"
+    },
+    {
+     "type": "peopleLostMax",
+     "n": 2,
+     "text": "Lose 2 people at most"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Every house still standing"
+    }
+   ],
+   "reward": "spell:storm",
+   "tip": "Trolls turn to stone at sunrise. Wardens need you to keep the fires off them."
+  }
+ ]
+}

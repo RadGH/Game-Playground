@@ -1,0 +1,2266 @@
+{
+ "about": "Every creature. sprite frames are rows of palette letters ('.' = see-through), drawn top-down at 1 cell per pixel; 'walk' frames alternate while moving, 'fly' frames while airborne. tint letters (t1, t2) are re-coloured per individual from the tints list. glow letters light the world. speed in cells per tick. life in game seconds. breed: cooldown seconds, litter [min, max], cap = most of this species at once (people use beds instead). diet: graze | hunt | village | none | fire. Read by js/sim/creatures.js.",
+ "species": {
+  "villager": {
+   "name": "Villager",
+   "kind": "person",
+   "team": "village",
+   "tags": [
+    "person",
+    "villager",
+    "prey-big"
+   ],
+   "hp": 30,
+   "speed": 0.11,
+   "life": 600,
+   "adultAt": 90,
+   "diet": "village",
+   "hunger": 0.00054,
+   "breed": {
+    "cooldown": 55,
+    "litter": [
+     1,
+     1
+    ],
+    "beds": true
+   },
+   "fears": [
+    "monster",
+    "fire",
+    "predator",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 6,
+   "sprite": {
+    "w": 3,
+    "h": 4,
+    "palette": {
+     "h": "@hair",
+     "s": "#e8b48a",
+     "b": "@cloth",
+     "l": "#3a2a22"
+    },
+    "walk": [
+     ".h.",
+     "sbs",
+     ".b.",
+     "l.l"
+    ],
+    "walk2": [
+     ".h.",
+     "sbs",
+     ".b.",
+     ".l."
+    ],
+    "young": [
+     ".h.",
+     "sbs",
+     "l.l"
+    ]
+   },
+   "tints": {
+    "cloth": [
+     "#c0392b",
+     "#2e86c1",
+     "#27ae60",
+     "#d4ac0d",
+     "#8e44ad",
+     "#d35400",
+     "#7f8c8d",
+     "#f5f5f5"
+    ],
+    "hair": [
+     "#3b2414",
+     "#6e4422",
+     "#e2c06b",
+     "#1a1a1a",
+     "#b3541e",
+     "#dcdcdc"
+    ]
+   }
+  },
+  "warden": {
+   "name": "Warden",
+   "kind": "person",
+   "team": "village",
+   "tags": [
+    "person",
+    "warden",
+    "prey-big"
+   ],
+   "hp": 60,
+   "speed": 0.12,
+   "life": 600,
+   "adultAt": 0,
+   "diet": "village",
+   "hunger": 0.00045,
+   "fears": [
+    "fire",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 12,
+   "attack": {
+    "dmg": 9,
+    "range": 2.5,
+    "rate": 1.0,
+    "kind": "melee",
+    "targets": [
+     "monster"
+    ]
+   },
+   "ranged": {
+    "dmg": 6,
+    "range": 26,
+    "rate": 1.6,
+    "kind": "arrow"
+   },
+   "sprite": {
+    "w": 3,
+    "h": 5,
+    "palette": {
+     "h": "#b8c2cc",
+     "s": "#e8b48a",
+     "b": "#5d6d7e",
+     "c": "#c0392b",
+     "l": "#2c2c2c",
+     "p": "#d6d0b8"
+    },
+    "walk": [
+     ".hp",
+     "sbp",
+     ".c.",
+     ".b.",
+     "l.l"
+    ],
+    "walk2": [
+     ".hp",
+     "sbp",
+     ".c.",
+     ".b.",
+     ".l."
+    ]
+   }
+  },
+  "mage": {
+   "name": "Mage",
+   "kind": "person",
+   "team": "village",
+   "tags": [
+    "person",
+    "mage",
+    "prey-big"
+   ],
+   "hp": 30,
+   "speed": 0.1,
+   "life": 700,
+   "adultAt": 0,
+   "diet": "village",
+   "hunger": 0.00045,
+   "fears": [
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 14,
+   "ranged": {
+    "dmg": 6,
+    "range": 34,
+    "rate": 2.2,
+    "kind": "missile",
+    "count": 3,
+    "color": "#c27aff",
+    "targets": [
+     "monster"
+    ]
+   },
+   "sprite": {
+    "w": 3,
+    "h": 5,
+    "palette": {
+     "h": "#3b2f8f",
+     "s": "#e8b48a",
+     "b": "#5b3fb8",
+     "o": "#c27aff",
+     "l": "#2c2440"
+    },
+    "glow": {
+     "o": 0.9
+    },
+    "walk": [
+     ".h.",
+     "hhh",
+     "sbo",
+     ".b.",
+     "l.l"
+    ],
+    "walk2": [
+     ".h.",
+     "hhh",
+     "sbo",
+     ".b.",
+     ".l."
+    ]
+   },
+   "guard": true
+  },
+  "sheep": {
+   "name": "Sheep",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "prey",
+    "livestock",
+    "sheep"
+   ],
+   "hp": 14,
+   "speed": 0.06,
+   "life": 360,
+   "adultAt": 60,
+   "diet": "graze",
+   "hunger": 0.00066,
+   "breed": {
+    "cooldown": 60,
+    "litter": [
+     1,
+     2
+    ],
+    "cap": 70
+   },
+   "fears": [
+    "predator",
+    "fire",
+    "monster",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 2,
+   "herd": true,
+   "sprite": {
+    "w": 4,
+    "h": 3,
+    "palette": {
+     "w": "#f2efe6",
+     "v": "#d9d4c4",
+     "h": "#2b2b2b",
+     "l": "#2b2b2b"
+    },
+    "walk": [
+     "wvwh",
+     "wwwh",
+     "l.l."
+    ],
+    "walk2": [
+     "wvwh",
+     "wwwh",
+     ".l.l"
+    ],
+    "young": [
+     "wwh",
+     "l.l"
+    ]
+   }
+  },
+  "goat": {
+   "name": "Goat",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "prey",
+    "livestock"
+   ],
+   "hp": 16,
+   "speed": 0.08,
+   "life": 380,
+   "adultAt": 40,
+   "diet": "graze",
+   "hunger": 0.0006,
+   "breed": {
+    "cooldown": 34,
+    "litter": [
+     1,
+     2
+    ],
+    "cap": 40
+   },
+   "fears": [
+    "predator",
+    "fire",
+    "monster",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 2,
+   "herd": true,
+   "sprite": {
+    "w": 4,
+    "h": 3,
+    "palette": {
+     "w": "#a08a6a",
+     "h": "#6a5640",
+     "k": "#d8d0c0",
+     "l": "#3a3026"
+    },
+    "walk": [
+     "wwhk",
+     "wwh.",
+     "l.l."
+    ],
+    "walk2": [
+     "wwhk",
+     "wwh.",
+     ".l.l"
+    ],
+    "young": [
+     "wwh",
+     "l.l"
+    ]
+   }
+  },
+  "deer": {
+   "name": "Deer",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "prey"
+   ],
+   "hp": 18,
+   "speed": 0.13,
+   "life": 420,
+   "adultAt": 50,
+   "diet": "graze",
+   "hunger": 0.00054,
+   "breed": {
+    "cooldown": 45,
+    "litter": [
+     1,
+     1
+    ],
+    "cap": 40
+   },
+   "fears": [
+    "predator",
+    "fire",
+    "monster",
+    "person",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 3,
+   "herd": true,
+   "sprite": {
+    "w": 5,
+    "h": 4,
+    "palette": {
+     "b": "#a0612c",
+     "w": "#e9d8b8",
+     "a": "#5a3a1e",
+     "l": "#4a2e18"
+    },
+    "walk": [
+     "...aa",
+     "bbbbw",
+     "bbbb.",
+     "l..l."
+    ],
+    "walk2": [
+     "...aa",
+     "bbbbw",
+     "bbbb.",
+     ".l..l"
+    ],
+    "young": [
+     "bbbw",
+     "l.l."
+    ]
+   }
+  },
+  "rabbit": {
+   "name": "Rabbit",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "prey",
+    "small"
+   ],
+   "hp": 5,
+   "speed": 0.14,
+   "life": 200,
+   "adultAt": 20,
+   "diet": "graze",
+   "hunger": 0.00084,
+   "breed": {
+    "cooldown": 14,
+    "litter": [
+     1,
+     3
+    ],
+    "cap": 40
+   },
+   "fears": [
+    "predator",
+    "fire",
+    "monster",
+    "person",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 1,
+   "hops": true,
+   "sprite": {
+    "w": 2,
+    "h": 2,
+    "palette": {
+     "r": "#c8b49a",
+     "e": "#9a8670"
+    },
+    "walk": [
+     "e.",
+     "rr"
+    ],
+    "walk2": [
+     ".e",
+     "rr"
+    ]
+   }
+  },
+  "chicken": {
+   "name": "Hen",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "prey",
+    "small",
+    "livestock"
+   ],
+   "hp": 4,
+   "speed": 0.07,
+   "life": 240,
+   "adultAt": 25,
+   "diet": "graze",
+   "hunger": 0.00075,
+   "breed": {
+    "cooldown": 18,
+    "litter": [
+     1,
+     2
+    ],
+    "cap": 30
+   },
+   "fears": [
+    "predator",
+    "fire",
+    "monster",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 1,
+   "sprite": {
+    "w": 2,
+    "h": 2,
+    "palette": {
+     "w": "#fbfbf3",
+     "c": "#e03c28",
+     "y": "#f0b400"
+    },
+    "walk": [
+     "cw",
+     "wy"
+    ],
+    "walk2": [
+     "cw",
+     "yw"
+    ]
+   }
+  },
+  "frog": {
+   "name": "Bog frog",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "prey",
+    "small"
+   ],
+   "hp": 4,
+   "speed": 0.1,
+   "life": 220,
+   "adultAt": 20,
+   "diet": "graze",
+   "hunger": 0.0006,
+   "breed": {
+    "cooldown": 16,
+    "litter": [
+     1,
+     3
+    ],
+    "cap": 40,
+    "nearWater": true
+   },
+   "fears": [
+    "predator",
+    "fire",
+    "dragon"
+   ],
+   "burns": true,
+   "swims": true,
+   "cost": 1,
+   "hops": true,
+   "sprite": {
+    "w": 2,
+    "h": 2,
+    "palette": {
+     "g": "#5fbf3a",
+     "y": "#d8ff6a"
+    },
+    "walk": [
+     "yy",
+     "gg"
+    ],
+    "walk2": [
+     "gg",
+     "yy"
+    ]
+   }
+  },
+  "fish": {
+   "name": "Silverfin",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "prey",
+    "small",
+    "fish"
+   ],
+   "hp": 3,
+   "speed": 0.08,
+   "life": 260,
+   "adultAt": 20,
+   "diet": "none",
+   "hunger": 0,
+   "breed": {
+    "cooldown": 20,
+    "litter": [
+     1,
+     2
+    ],
+    "cap": 50
+   },
+   "fears": [
+    "fire"
+   ],
+   "aquatic": true,
+   "cost": 1,
+   "sprite": {
+    "w": 3,
+    "h": 1,
+    "palette": {
+     "s": "#d0e8f8",
+     "t": "#7fa8c8"
+    },
+    "walk": [
+     "tss"
+    ],
+    "walk2": [
+     "sts"
+    ]
+   }
+  },
+  "wolf": {
+   "name": "Grey wolf",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "predator"
+   ],
+   "hp": 26,
+   "speed": 0.14,
+   "life": 420,
+   "adultAt": 50,
+   "diet": "hunt",
+   "hunger": 0.00066,
+   "breed": {
+    "cooldown": 60,
+    "litter": [
+     1,
+     2
+    ],
+    "cap": 16
+   },
+   "hunts": [
+    "prey",
+    "livestock"
+   ],
+   "fears": [
+    "fire",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 4,
+   "pack": true,
+   "attack": {
+    "dmg": 7,
+    "range": 1.8,
+    "rate": 1.0,
+    "kind": "melee"
+   },
+   "sprite": {
+    "w": 5,
+    "h": 3,
+    "palette": {
+     "g": "#7d8288",
+     "d": "#4f5358",
+     "e": "#ffd23f",
+     "l": "#3a3d40"
+    },
+    "glow": {
+     "e": 0.5
+    },
+    "walk": [
+     "dggge",
+     "ggggg",
+     "l.l.l"
+    ],
+    "walk2": [
+     "dggge",
+     "ggggg",
+     ".l.l."
+    ]
+   }
+  },
+  "bear": {
+   "name": "Cave bear",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "predator",
+    "big"
+   ],
+   "hp": 70,
+   "speed": 0.08,
+   "life": 560,
+   "adultAt": 60,
+   "diet": "hunt",
+   "hunger": 0.00042,
+   "breed": {
+    "cooldown": 120,
+    "litter": [
+     1,
+     1
+    ],
+    "cap": 6
+   },
+   "hunts": [
+    "prey",
+    "livestock",
+    "fish"
+   ],
+   "fears": [
+    "fire",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 8,
+   "attack": {
+    "dmg": 14,
+    "range": 2.2,
+    "rate": 1.4,
+    "kind": "melee"
+   },
+   "sprite": {
+    "w": 6,
+    "h": 4,
+    "palette": {
+     "b": "#5a3d28",
+     "d": "#3e2a1c",
+     "n": "#1a1a1a"
+    },
+    "walk": [
+     "dbbbbn",
+     "bbbbbb",
+     "bbbbbd",
+     "d.dd.d"
+    ],
+    "walk2": [
+     "dbbbbn",
+     "bbbbbb",
+     "bbbbbd",
+     ".d..d."
+    ]
+   }
+  },
+  "goblin": {
+   "name": "Goblin",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "goblin"
+   ],
+   "hp": 14,
+   "speed": 0.1,
+   "life": 400,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "person",
+    "livestock",
+    "building"
+   ],
+   "fears": [
+    "fire"
+   ],
+   "burns": true,
+   "cost": 3,
+   "raider": true,
+   "attack": {
+    "dmg": 4,
+    "range": 1.6,
+    "rate": 1.1,
+    "kind": "melee"
+   },
+   "sprite": {
+    "w": 3,
+    "h": 4,
+    "palette": {
+     "g": "#6ab04c",
+     "e": "#ff3b3b",
+     "b": "#6d4c2f",
+     "l": "#2f3b1f"
+    },
+    "glow": {
+     "e": 0.6
+    },
+    "walk": [
+     "geg",
+     ".b.",
+     ".g.",
+     "l.l"
+    ],
+    "walk2": [
+     "geg",
+     ".b.",
+     ".g.",
+     ".l."
+    ]
+   }
+  },
+  "torchgob": {
+   "name": "Goblin firebrand",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "goblin"
+   ],
+   "hp": 14,
+   "speed": 0.1,
+   "life": 400,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "building",
+    "person"
+   ],
+   "burns": true,
+   "cost": 5,
+   "raider": true,
+   "ignites": 0.02,
+   "attack": {
+    "dmg": 3,
+    "range": 1.6,
+    "rate": 1.2,
+    "kind": "melee"
+   },
+   "sprite": {
+    "w": 4,
+    "h": 4,
+    "palette": {
+     "g": "#6ab04c",
+     "e": "#ff3b3b",
+     "b": "#6d4c2f",
+     "l": "#2f3b1f",
+     "f": "#ffb12a",
+     "s": "#7a5a3a"
+    },
+    "glow": {
+     "e": 0.6,
+     "f": 1.4
+    },
+    "walk": [
+     "gegf",
+     ".bs.",
+     ".g..",
+     "l.l."
+    ],
+    "walk2": [
+     "gegf",
+     ".bs.",
+     ".g..",
+     ".l.."
+    ]
+   },
+   "fireproof": true
+  },
+  "mite": {
+   "name": "Swarm mite",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "swarm"
+   ],
+   "hp": 2,
+   "speed": 0.16,
+   "life": 300,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "person",
+    "livestock",
+    "crop"
+   ],
+   "burns": true,
+   "cost": 0.3,
+   "swarm": true,
+   "raider": true,
+   "attack": {
+    "dmg": 1,
+    "range": 1.2,
+    "rate": 0.8,
+    "kind": "melee"
+   },
+   "sprite": {
+    "w": 2,
+    "h": 1,
+    "palette": {
+     "m": "#ff2030",
+     "d": "#3a0008"
+    },
+    "glow": {
+     "m": 0.7
+    },
+    "walk": [
+     "dm"
+    ],
+    "walk2": [
+     "md"
+    ]
+   }
+  },
+  "imp": {
+   "name": "Fire imp",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "fiery"
+   ],
+   "hp": 10,
+   "speed": 0.13,
+   "life": 260,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "building",
+    "person"
+   ],
+   "fireproof": true,
+   "cost": 4,
+   "ignites": 0.05,
+   "raider": true,
+   "glows": "#ff7a20",
+   "attack": {
+    "dmg": 3,
+    "range": 1.5,
+    "rate": 1.0,
+    "kind": "melee",
+    "fire": true
+   },
+   "sprite": {
+    "w": 3,
+    "h": 3,
+    "palette": {
+     "r": "#ff5a1e",
+     "y": "#ffd23f",
+     "d": "#8a1e0e"
+    },
+    "glow": {
+     "r": 0.9,
+     "y": 1.3
+    },
+    "walk": [
+     "y.y",
+     "ryr",
+     "d.d"
+    ],
+    "walk2": [
+     "y.y",
+     "ryr",
+     ".d."
+    ]
+   }
+  },
+  "slime": {
+   "name": "Bog slime",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "slime"
+   ],
+   "hp": 20,
+   "speed": 0.05,
+   "life": 500,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "person",
+    "livestock",
+    "building"
+   ],
+   "raider": true,
+   "smashes": 32,
+   "burns": true,
+   "cost": 3,
+   "splits": true,
+   "glows": "#9b3fff",
+   "attack": {
+    "dmg": 3,
+    "range": 1.5,
+    "rate": 1.5,
+    "kind": "melee"
+   },
+   "sprite": {
+    "w": 4,
+    "h": 3,
+    "palette": {
+     "p": "#9b5fe0",
+     "l": "#d8b8ff",
+     "d": "#5a2f8f"
+    },
+    "glow": {
+     "l": 0.6
+    },
+    "walk": [
+     ".lp.",
+     "pppp",
+     "dddd"
+    ],
+    "walk2": [
+     "..l.",
+     "pppp",
+     "dppd"
+    ]
+   }
+  },
+  "skeleton": {
+   "name": "Restless bones",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "undead"
+   ],
+   "hp": 16,
+   "speed": 0.09,
+   "life": 500,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "person",
+    "livestock"
+   ],
+   "burns": false,
+   "undead": true,
+   "cost": 3,
+   "attack": {
+    "dmg": 5,
+    "range": 1.6,
+    "rate": 1.2,
+    "kind": "melee"
+   },
+   "sprite": {
+    "w": 3,
+    "h": 4,
+    "palette": {
+     "w": "#ece6d0",
+     "e": "#4fffb0",
+     "g": "#b8b29a"
+    },
+    "glow": {
+     "e": 0.8
+    },
+    "walk": [
+     "wew",
+     ".g.",
+     "wgw",
+     "g.g"
+    ],
+    "walk2": [
+     "wew",
+     ".g.",
+     "wgw",
+     ".g."
+    ]
+   }
+  },
+  "troll": {
+   "name": "Hill troll",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "big",
+    "troll"
+   ],
+   "hp": 160,
+   "speed": 0.06,
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "person",
+    "building",
+    "livestock"
+   ],
+   "burns": true,
+   "cost": 14,
+   "smashes": 150,
+   "stoneAtDawn": true,
+   "raider": true,
+   "attack": {
+    "dmg": 18,
+    "range": 2.6,
+    "rate": 2.0,
+    "kind": "melee",
+    "knock": 1.2
+   },
+   "sprite": {
+    "w": 6,
+    "h": 6,
+    "palette": {
+     "t": "#7a8f5a",
+     "d": "#55663e",
+     "e": "#ffef7a",
+     "c": "#5a4632",
+     "l": "#3e4a2c"
+    },
+    "glow": {
+     "e": 0.6
+    },
+    "walk": [
+     ".tttt.",
+     "tetett",
+     "dttttd",
+     "dtcctd",
+     ".tttt.",
+     ".l..l."
+    ],
+    "walk2": [
+     ".tttt.",
+     "tetett",
+     "dttttd",
+     "dtcctd",
+     ".tttt.",
+     "..ll.."
+    ]
+   }
+  },
+  "dragon": {
+   "name": "Ashwing dragon",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "dragon",
+    "big"
+   ],
+   "hp": 800,
+   "speed": 0.26,
+   "life": 99999,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "person",
+    "building",
+    "livestock"
+   ],
+   "flies": true,
+   "fireproof": true,
+   "cost": 60,
+   "boss": true,
+   "altitude": 14,
+   "breath": {
+    "range": 26,
+    "cone": 0.45,
+    "rate": 7,
+    "duration": 2.2,
+    "power": 1
+   },
+   "sprite": {
+    "w": 15,
+    "h": 11,
+    "palette": {
+     "r": "#b8321e",
+     "m": "#e2603a",
+     "b": "#8a1e14",
+     "h": "#c8401e",
+     "e": "#ffe14a",
+     "s": "#f0c070",
+     "t": "#6e1610"
+    },
+    "glow": {
+     "e": 1.2
+    },
+    "fly": [
+     "m.............m",
+     "mm....heh....mm",
+     "mmm...hhh...mmm",
+     "rmmm..sbs..mmmr",
+     ".rmmmmbbbmmmmr.",
+     "..rrrrbbbrrrr..",
+     "....rrbbbrr....",
+     "......bbb......",
+     ".......b.......",
+     ".......t.......",
+     "......t........"
+    ],
+    "fly2": [
+     "...............",
+     "......heh......",
+     "......hhh......",
+     "..mmm.sbs.mmm..",
+     ".mmmmmbbbmmmmm.",
+     "mmrrrrbbbrrrrmm",
+     "mr....bbb....rm",
+     "r......bb.....r",
+     ".......b.......",
+     "........t......",
+     ".......t......."
+    ]
+   }
+  },
+  "wyrmling": {
+   "name": "Wyrmling",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "dragon"
+   ],
+   "hp": 60,
+   "speed": 0.2,
+   "life": 99999,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "livestock",
+    "person",
+    "building"
+   ],
+   "flies": true,
+   "fireproof": true,
+   "cost": 20,
+   "altitude": 8,
+   "breath": {
+    "range": 12,
+    "cone": 0.35,
+    "rate": 4,
+    "duration": 1.2,
+    "power": 0.6
+   },
+   "sprite": {
+    "w": 7,
+    "h": 5,
+    "palette": {
+     "r": "#3a8f4a",
+     "m": "#7ad07a",
+     "b": "#2a6a36",
+     "e": "#ffe14a"
+    },
+    "glow": {
+     "e": 1.0
+    },
+    "fly": [
+     "m.beb.m",
+     "mm.b.mm",
+     ".rrbrr.",
+     "...b...",
+     "...b..."
+    ],
+    "fly2": [
+     ".mbebm.",
+     "mmmbmmm",
+     "r..b..r",
+     "...b...",
+     "....b.."
+    ]
+   }
+  },
+  "phoenix": {
+   "name": "Phoenix",
+   "kind": "spirit",
+   "team": "wild",
+   "tags": [
+    "spirit",
+    "fiery"
+   ],
+   "hp": 40,
+   "speed": 0.22,
+   "life": 99999,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "flies": true,
+   "fireproof": true,
+   "cost": 30,
+   "altitude": 10,
+   "ignites": 0.04,
+   "reborn": true,
+   "glows": "#ff9a2a",
+   "sprite": {
+    "w": 7,
+    "h": 5,
+    "palette": {
+     "y": "#ffe14a",
+     "o": "#ff8a1e",
+     "r": "#ff3f1e"
+    },
+    "glow": {
+     "y": 1.4,
+     "o": 1.1,
+     "r": 0.9
+    },
+    "fly": [
+     "o..y..o",
+     "oo.y.oo",
+     ".rryrr.",
+     "...r...",
+     "..r.r.."
+    ],
+    "fly2": [
+     "...y...",
+     "ooryroo",
+     "or.r.ro",
+     "...r...",
+     "...r..."
+    ]
+   }
+  },
+  "griffin": {
+   "name": "Griffin",
+   "kind": "beast",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "predator",
+    "big"
+   ],
+   "hp": 80,
+   "speed": 0.2,
+   "life": 900,
+   "adultAt": 60,
+   "diet": "hunt",
+   "hunger": 0.00048,
+   "hunts": [
+    "livestock",
+    "monster"
+   ],
+   "flies": true,
+   "burns": true,
+   "cost": 22,
+   "altitude": 9,
+   "breed": {
+    "cooldown": 200,
+    "litter": [
+     1,
+     1
+    ],
+    "cap": 4
+   },
+   "attack": {
+    "dmg": 16,
+    "range": 2.5,
+    "rate": 1.4,
+    "kind": "melee"
+   },
+   "sprite": {
+    "w": 9,
+    "h": 6,
+    "palette": {
+     "w": "#e0c890",
+     "b": "#a07a3a",
+     "h": "#f4f0e0",
+     "k": "#f0b400"
+    },
+    "fly": [
+     "w...h...w",
+     "ww.hkh.ww",
+     ".wwbbbww.",
+     "...bbb...",
+     "...b.b...",
+     "....b...."
+    ],
+    "fly2": [
+     "....h....",
+     "...hkh...",
+     "wwwbbbwww",
+     "w..bbb..w",
+     "...b.b...",
+     "....b...."
+    ]
+   }
+  },
+  "golem": {
+   "name": "Stone golem",
+   "kind": "beast",
+   "team": "village",
+   "tags": [
+    "golem",
+    "big"
+   ],
+   "hp": 220,
+   "speed": 0.05,
+   "life": 1800,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "monster"
+   ],
+   "fireproof": true,
+   "cost": 25,
+   "guard": true,
+   "glows": "#4fd8ff",
+   "attack": {
+    "dmg": 22,
+    "range": 2.8,
+    "rate": 1.8,
+    "kind": "melee",
+    "knock": 1.5
+   },
+   "sprite": {
+    "w": 5,
+    "h": 6,
+    "palette": {
+     "s": "#9a96a0",
+     "d": "#6a6670",
+     "e": "#4fd8ff",
+     "r": "#4fd8ff"
+    },
+    "glow": {
+     "e": 1.0,
+     "r": 0.6
+    },
+    "walk": [
+     ".sss.",
+     ".ses.",
+     "ssrss",
+     "sdsds",
+     ".s.s.",
+     "dd.dd"
+    ],
+    "walk2": [
+     ".sss.",
+     ".ses.",
+     "ssrss",
+     "sdsds",
+     ".s.s.",
+     ".d.d."
+    ]
+   }
+  },
+  "treant": {
+   "name": "Elderbark",
+   "kind": "beast",
+   "team": "wild",
+   "tags": [
+    "treant",
+    "big"
+   ],
+   "hp": 180,
+   "speed": 0.04,
+   "life": 2400,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "monster"
+   ],
+   "burns": true,
+   "cost": 20,
+   "plants": true,
+   "guard": true,
+   "attack": {
+    "dmg": 16,
+    "range": 2.6,
+    "rate": 2.0,
+    "kind": "melee",
+    "knock": 1.0
+   },
+   "sprite": {
+    "w": 6,
+    "h": 7,
+    "palette": {
+     "g": "#3f8f3a",
+     "d": "#2a6a2a",
+     "b": "#6a4a2a",
+     "e": "#c8ff6a"
+    },
+    "glow": {
+     "e": 0.7
+    },
+    "walk": [
+     ".gggg.",
+     "ggdggg",
+     "gdggdg",
+     ".gbbg.",
+     "..bb..",
+     ".b..b.",
+     "b....b"
+    ],
+    "walk2": [
+     ".gggg.",
+     "gggdgg",
+     "gdggdg",
+     ".gbbg.",
+     "..bb..",
+     "..bb..",
+     ".b..b."
+    ]
+   }
+  },
+  "fairy": {
+   "name": "Glimmerkin",
+   "kind": "spirit",
+   "team": "village",
+   "tags": [
+    "spirit"
+   ],
+   "hp": 8,
+   "speed": 0.15,
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "flies": true,
+   "burns": true,
+   "cost": 5,
+   "altitude": 4,
+   "glows": "#9fffd8",
+   "heal": {
+    "amt": 3,
+    "range": 8,
+    "rate": 1.5
+   },
+   "sprite": {
+    "w": 3,
+    "h": 2,
+    "palette": {
+     "w": "#e8fff8",
+     "c": "#7fffd0"
+    },
+    "glow": {
+     "w": 0.9,
+     "c": 1.4
+    },
+    "fly": [
+     "w.w",
+     ".c."
+    ],
+    "fly2": [
+     ".w.",
+     "wcw"
+    ]
+   }
+  },
+  "wisp": {
+   "name": "Wisp",
+   "kind": "spirit",
+   "team": "wild",
+   "tags": [
+    "spirit"
+   ],
+   "hp": 6,
+   "speed": 0.06,
+   "life": 600,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "flies": true,
+   "fireproof": true,
+   "cost": 2,
+   "altitude": 3,
+   "glows": "#6bb8ff",
+   "drift": true,
+   "night": true,
+   "sprite": {
+    "w": 1,
+    "h": 1,
+    "palette": {
+     "c": "#bfe0ff"
+    },
+    "glow": {
+     "c": 2.4
+    },
+    "fly": [
+     "c"
+    ],
+    "fly2": [
+     "c"
+    ]
+   }
+  },
+  "cow": {
+   "name": "Cow",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "prey",
+    "livestock"
+   ],
+   "hp": 30,
+   "speed": 0.05,
+   "life": 420,
+   "adultAt": 60,
+   "diet": "graze",
+   "hunger": 0.0006,
+   "breed": {
+    "cooldown": 80,
+    "litter": [
+     1,
+     1
+    ],
+    "cap": 40
+   },
+   "fears": [
+    "predator",
+    "fire",
+    "monster",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 3,
+   "herd": true,
+   "sprite": {
+    "w": 5,
+    "h": 3,
+    "palette": {
+     "w": "#f4f0e8",
+     "b": "#2a2a2a",
+     "h": "#e8a8a0",
+     "l": "#3a3030"
+    },
+    "walk": [
+     "wbwbh",
+     "bwwwh",
+     "l.l.l"
+    ],
+    "walk2": [
+     "wbwbh",
+     "bwwwh",
+     ".l.l."
+    ],
+    "young": [
+     "wbh",
+     "l.l"
+    ]
+   }
+  },
+  "boar": {
+   "name": "Wild boar",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "prey"
+   ],
+   "hp": 24,
+   "speed": 0.09,
+   "life": 380,
+   "adultAt": 50,
+   "diet": "graze",
+   "hunger": 0.0006,
+   "breed": {
+    "cooldown": 70,
+    "litter": [
+     1,
+     3
+    ],
+    "cap": 30
+   },
+   "fears": [
+    "fire",
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 3,
+   "herd": true,
+   "attack": {
+    "dmg": 6,
+    "range": 1.6,
+    "rate": 1.2,
+    "kind": "melee",
+    "targets": [
+     "monster"
+    ]
+   },
+   "sprite": {
+    "w": 5,
+    "h": 3,
+    "palette": {
+     "b": "#5a4030",
+     "d": "#3a2a20",
+     "t": "#f0e8d0",
+     "l": "#2a2018"
+    },
+    "walk": [
+     "dbbbt",
+     "bbbbd",
+     "l.l.l"
+    ],
+    "walk2": [
+     "dbbbt",
+     "bbbbd",
+     ".l.l."
+    ],
+    "young": [
+     "bbt",
+     "l.l"
+    ]
+   }
+  },
+  "bee": {
+   "name": "Honeybees",
+   "kind": "animal",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "small"
+   ],
+   "hp": 1,
+   "speed": 0.12,
+   "life": 240,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "breed": {
+    "cooldown": 40,
+    "litter": [
+     1,
+     1
+    ],
+    "cap": 60,
+    "solo": true
+   },
+   "fears": [
+    "fire"
+   ],
+   "flies": true,
+   "burns": true,
+   "cost": 1,
+   "altitude": 2,
+   "blooms": 0.004,
+   "swarm": true,
+   "sprite": {
+    "w": 1,
+    "h": 1,
+    "palette": {
+     "y": "#ffd23f"
+    },
+    "glow": {
+     "y": 0.25
+    },
+    "fly": [
+     "y"
+    ],
+    "fly2": [
+     "y"
+    ]
+   }
+  },
+  "knight": {
+   "name": "Knight",
+   "kind": "person",
+   "team": "village",
+   "tags": [
+    "person",
+    "warden",
+    "prey-big"
+   ],
+   "hp": 110,
+   "speed": 0.1,
+   "life": 700,
+   "adultAt": 0,
+   "diet": "village",
+   "hunger": 0.00045,
+   "fears": [
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 20,
+   "guard": true,
+   "attack": {
+    "dmg": 15,
+    "range": 2.2,
+    "rate": 1.1,
+    "kind": "melee",
+    "knock": 0.8
+   },
+   "sprite": {
+    "w": 4,
+    "h": 5,
+    "palette": {
+     "h": "#cfd6de",
+     "v": "#4a5058",
+     "t": "#2e6ad0",
+     "y": "#ffd23f",
+     "s": "#e8e8f0",
+     "l": "#2c2c2c"
+    },
+    "walk": [
+     ".hv.",
+     "stts",
+     ".ty.",
+     ".tt.",
+     "l..l"
+    ],
+    "walk2": [
+     ".hv.",
+     "stts",
+     ".ty.",
+     ".tt.",
+     ".ll."
+    ]
+   }
+  },
+  "druid": {
+   "name": "Grove druid",
+   "kind": "person",
+   "team": "village",
+   "tags": [
+    "person",
+    "mage",
+    "prey-big"
+   ],
+   "hp": 40,
+   "speed": 0.09,
+   "life": 800,
+   "adultAt": 0,
+   "diet": "village",
+   "hunger": 0.00045,
+   "fears": [
+    "fire",
+    "dragon",
+    "monster"
+   ],
+   "burns": true,
+   "cost": 18,
+   "plants": true,
+   "heal": {
+    "amt": 8,
+    "range": 12,
+    "rate": 2.5
+   },
+   "sprite": {
+    "w": 4,
+    "h": 5,
+    "palette": {
+     "g": "#3f8f3a",
+     "s": "#e8b48a",
+     "b": "#6a4a2a",
+     "o": "#9fff6a",
+     "l": "#2a2018"
+    },
+    "glow": {
+     "o": 0.9
+    },
+    "walk": [
+     ".gg.",
+     "gsgo",
+     ".bbb",
+     ".bb.",
+     "l..l"
+    ],
+    "walk2": [
+     ".gg.",
+     "gsgo",
+     ".bbb",
+     ".bb.",
+     ".ll."
+    ]
+   }
+  },
+  "flamewraith": {
+   "name": "Flame wraith",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "fiery",
+    "big"
+   ],
+   "hp": 45,
+   "speed": 0.08,
+   "life": 500,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "person",
+    "building",
+    "livestock"
+   ],
+   "fireproof": true,
+   "waterHurts": 0.12,
+   "cost": 16,
+   "ignites": 0.09,
+   "raider": true,
+   "glows": "#ff8a2a",
+   "attack": {
+    "dmg": 6,
+    "range": 1.8,
+    "rate": 1.0,
+    "kind": "melee",
+    "fire": true
+   },
+   "sprite": {
+    "w": 4,
+    "h": 5,
+    "palette": {
+     "y": "#fff07a",
+     "o": "#ff9a2a",
+     "r": "#ff4a1a",
+     "e": "#ffffff"
+    },
+    "glow": {
+     "y": 1.5,
+     "o": 1.2,
+     "r": 0.9,
+     "e": 1.0
+    },
+    "walk": [
+     ".y..",
+     "yoy.",
+     "oeeo",
+     "roor",
+     ".rr."
+    ],
+    "walk2": [
+     "..y.",
+     ".yoy",
+     "oeeo",
+     "roor",
+     "r..r"
+    ]
+   }
+  },
+  "rimeling": {
+   "name": "Rimeling",
+   "kind": "spirit",
+   "team": "wild",
+   "tags": [
+    "spirit"
+   ],
+   "hp": 12,
+   "speed": 0.07,
+   "life": 700,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "flies": true,
+   "fireproof": false,
+   "burns": false,
+   "cost": 8,
+   "altitude": 3,
+   "glows": "#8ff0ff",
+   "freezes": true,
+   "drift": true,
+   "sprite": {
+    "w": 3,
+    "h": 3,
+    "palette": {
+     "c": "#bff8ff",
+     "w": "#ffffff",
+     "b": "#4fc8ff"
+    },
+    "glow": {
+     "c": 1.2,
+     "w": 1.4,
+     "b": 0.8
+    },
+    "fly": [
+     ".c.",
+     "cwc",
+     ".b."
+    ],
+    "fly2": [
+     "c.c",
+     ".w.",
+     "c.c"
+    ]
+   }
+  },
+  "serpent": {
+   "name": "Deepcoil",
+   "kind": "beast",
+   "team": "wild",
+   "tags": [
+    "animal",
+    "predator",
+    "big"
+   ],
+   "hp": 120,
+   "speed": 0.07,
+   "life": 1500,
+   "adultAt": 0,
+   "diet": "hunt",
+   "hunger": 0.0005,
+   "hunts": [
+    "prey",
+    "livestock",
+    "person",
+    "fish"
+   ],
+   "aquatic": true,
+   "cost": 24,
+   "attack": {
+    "dmg": 18,
+    "range": 3.2,
+    "rate": 1.6,
+    "kind": "melee"
+   },
+   "sprite": {
+    "w": 9,
+    "h": 3,
+    "palette": {
+     "g": "#2f8f7a",
+     "d": "#1f5f52",
+     "e": "#ffe14a",
+     "f": "#7fe0c0"
+    },
+    "glow": {
+     "e": 0.8
+    },
+    "walk": [
+     "..ff.....",
+     "gggdgggge",
+     "d..ddd..."
+    ],
+    "walk2": [
+     "......ff.",
+     "gggdgggge",
+     "...ddd..d"
+    ]
+   }
+  },
+  "unicorn": {
+   "name": "Moonhorn",
+   "kind": "spirit",
+   "team": "wild",
+   "tags": [
+    "spirit"
+   ],
+   "hp": 60,
+   "speed": 0.13,
+   "life": 2000,
+   "adultAt": 0,
+   "diet": "graze",
+   "hunger": 0.0003,
+   "fears": [
+    "monster",
+    "fire",
+    "dragon",
+    "predator"
+   ],
+   "burns": true,
+   "cost": 30,
+   "glows": "#d8b8ff",
+   "heal": {
+    "amt": 10,
+    "range": 14,
+    "rate": 2.0
+   },
+   "sprite": {
+    "w": 5,
+    "h": 4,
+    "palette": {
+     "w": "#f8f4ff",
+     "m": "#c8a0ff",
+     "y": "#ffe08a",
+     "l": "#d8d0e8"
+    },
+    "glow": {
+     "y": 1.2,
+     "m": 0.6
+    },
+    "walk": [
+     "...my",
+     "wwwmw",
+     "wwww.",
+     "l..l."
+    ],
+    "walk2": [
+     "...my",
+     "wwwmw",
+     "wwww.",
+     ".ll.."
+    ]
+   }
+  },
+  "archer": {
+   "name": "Archer",
+   "kind": "person",
+   "team": "village",
+   "tags": [
+    "person",
+    "warden",
+    "prey-big"
+   ],
+   "hp": 32,
+   "speed": 0.11,
+   "life": 700,
+   "adultAt": 0,
+   "diet": "village",
+   "hunger": 0.00045,
+   "fears": [
+    "dragon"
+   ],
+   "burns": true,
+   "cost": 8,
+   "guard": true,
+   "attack": {
+    "dmg": 2,
+    "range": 1.5,
+    "rate": 1.2,
+    "kind": "melee"
+   },
+   "ranged": {
+    "dmg": 7,
+    "range": 38,
+    "rate": 1.1,
+    "kind": "arrow"
+   },
+   "sprite": {
+    "w": 4,
+    "h": 5,
+    "palette": {
+     "h": "#3f7a3a",
+     "s": "#e8b48a",
+     "b": "#5a7a3a",
+     "w": "#8a5a2a",
+     "q": "#c8a050",
+     "l": "#2c2c2c"
+    },
+    "walk": [
+     ".hw.",
+     "sbqw",
+     ".b.w",
+     ".b..",
+     "l.l."
+    ],
+    "walk2": [
+     ".hw.",
+     "sbqw",
+     ".b.w",
+     ".b..",
+     ".l.."
+    ]
+   }
+  },
+  "elderwyrm": {
+   "name": "Elder wyrm",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "dragon",
+    "big"
+   ],
+   "hp": 3200,
+   "speed": 0.24,
+   "life": 99999,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "person",
+    "building",
+    "livestock"
+   ],
+   "flies": true,
+   "fireproof": true,
+   "cost": 120,
+   "boss": true,
+   "noFlee": true,
+   "altitude": 17,
+   "enrageAt": 0.65,
+   "calls": [
+    "wyrmling",
+    3
+   ],
+   "enrage2": {
+    "at": 0.3,
+    "calls": [
+     "wyrmling",
+     4
+    ],
+    "firefall": {
+     "every": 11,
+     "count": 4,
+     "radius": 22
+    }
+   },
+   "breath": {
+    "range": 32,
+    "cone": 0.5,
+    "rate": 5.5,
+    "duration": 2.6,
+    "power": 1.3
+   },
+   "sprite": {
+    "w": 21,
+    "h": 15,
+    "palette": {
+     "r": "#6e1712",
+     "m": "#a8321e",
+     "b": "#3e0c08",
+     "h": "#8a2414",
+     "e": "#ff9a1a",
+     "s": "#ead2a0",
+     "t": "#2e0806",
+     "g": "#d8a040"
+    },
+    "glow": {
+     "e": 1.6,
+     "g": 0.3
+    },
+    "fly": [
+     "m...................m",
+     "mm.......s.s.......mm",
+     "mmm......hhh......mmm",
+     "rmmm.....heh.....mmmr",
+     "rrmmm....sbs....mmmrr",
+     ".rrmmmmm.gbg.mmmmmrr.",
+     "..rrrmmmmbbbmmmmrrr..",
+     "....rrrrrbbbrrrrr....",
+     ".......rrbgbrr.......",
+     "........rbbbr........",
+     ".........bgb.........",
+     "..........b..........",
+     "..........t..........",
+     "...........t.........",
+     "..........t.........."
+    ],
+    "fly2": [
+     ".....................",
+     ".........s.s.........",
+     ".........hhh.........",
+     ".........heh.........",
+     ".........sbs.........",
+     "....mmmm.gbg.mmmm....",
+     "..mmmmmmmbbbmmmmmmm..",
+     ".mmrrrrrrbbbrrrrrrmm.",
+     "mmr....rrbgbrr....rmm",
+     "mr......rbbbr......rm",
+     "r........bgb........r",
+     "..........b..........",
+     "...........t.........",
+     "..........t..........",
+     ".........t..........."
+    ]
+   }
+  },
+  "hollow": {
+   "name": "Hollow orb",
+   "kind": "monster",
+   "team": "monster",
+   "tags": [
+    "monster",
+    "void"
+   ],
+   "hp": 70,
+   "speed": 0.055,
+   "life": 99999,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [
+    "building"
+   ],
+   "flies": true,
+   "fireproof": true,
+   "burns": false,
+   "undead": true,
+   "cost": 20,
+   "altitude": 3,
+   "raider": true,
+   "smashes": 60,
+   "voids": 0.035,
+   "glows": "#6a2aff",
+   "resist": {
+    "fire": 0,
+    "lava": 0,
+    "blast": 0.35,
+    "lightning": 0.3,
+    "shock": 0.3,
+    "frost": 0.3,
+    "arrow": 0.25,
+    "bite": 0.4,
+    "magic": 0.5,
+    "void": 0
+   },
+   "attack": {
+    "dmg": 4,
+    "range": 2,
+    "rate": 1.5,
+    "kind": "melee"
+   },
+   "sprite": {
+    "w": 5,
+    "h": 5,
+    "palette": {
+     "k": "#07040e",
+     "v": "#7a3aff",
+     "p": "#2a0e4a"
+    },
+    "glow": {
+     "v": 1.2
+    },
+    "fly": [
+     ".pvp.",
+     "pkkkv",
+     "vkkkp",
+     "pkkkv",
+     ".pvp."
+    ],
+    "fly2": [
+     ".vpv.",
+     "vkkkp",
+     "pkkkv",
+     "vkkkp",
+     ".vpv."
+    ]
+   }
+  }
+ }
+}

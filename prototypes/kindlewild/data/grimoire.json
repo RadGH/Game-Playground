@@ -1,0 +1,675 @@
+{
+ "about": "The Grimoire: everything the player can unlock, a few at a time. A tier opens when you own `opensAt` pages of the tier below. kind: spell | material | creature | tool. cost in Essence. free: known from the start. mana = cost per cell (materials) — creatures and spells carry their own cost. Read by js/game/progress.js.",
+ "opensAt": [
+  0,
+  3,
+  4,
+  4,
+  4,
+  3
+ ],
+ "tierNames": [
+  "Apprentice",
+  "Adept",
+  "Magus",
+  "Archmage",
+  "Sage",
+  "Eternal"
+ ],
+ "upgrades": {
+  "max": 3,
+  "cost": [
+   30,
+   70,
+   140
+  ]
+ },
+ "boons": {
+  "manaCap": {
+   "name": "Deeper well",
+   "text": "+10% mana pool in challenges, +50 in the Realm",
+   "cost": [
+    30,
+    70,
+    130,
+    220,
+    350
+   ],
+   "step": 50
+  },
+  "manaRegen": {
+   "name": "Quicker flow",
+   "text": "+10% mana flow in challenges, +25% in the Realm",
+   "cost": [
+    30,
+    70,
+    130,
+    220,
+    350
+   ],
+   "step": 0.25
+  },
+  "faith": {
+   "name": "Kindled hearts",
+   "text": "+25% faith from your people",
+   "cost": [
+    50,
+    110,
+    200,
+    320
+   ],
+   "step": 0.25
+  },
+  "fertility": {
+   "name": "Bountiful years",
+   "text": "Villages store more food and grow faster",
+   "cost": [
+    60,
+    140,
+    260
+   ],
+   "step": 0.25
+  }
+ },
+ "pages": [
+  {
+   "id": "spell:fireball",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "spell:rain",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "spell:earth",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "spell:lightning",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "material:grass",
+   "tier": 0,
+   "free": true,
+   "mana": 0.05
+  },
+  {
+   "id": "material:dirt",
+   "tier": 0,
+   "free": true,
+   "mana": 0.05
+  },
+  {
+   "id": "material:sand",
+   "tier": 0,
+   "free": true,
+   "mana": 0.05
+  },
+  {
+   "id": "material:water",
+   "tier": 0,
+   "free": true,
+   "mana": 0.2
+  },
+  {
+   "id": "material:tree",
+   "tier": 0,
+   "free": true,
+   "mana": 0.2
+  },
+  {
+   "id": "material:seed",
+   "tier": 0,
+   "free": true,
+   "mana": 0.1
+  },
+  {
+   "id": "material:wall_wood",
+   "tier": 0,
+   "free": true,
+   "mana": 0.3
+  },
+  {
+   "id": "material:wall_stone",
+   "tier": 0,
+   "free": true,
+   "mana": 0.5
+  },
+  {
+   "id": "material:boulder",
+   "tier": 0,
+   "free": true,
+   "mana": 0.4
+  },
+  {
+   "id": "material:cobble",
+   "tier": 0,
+   "free": true,
+   "mana": 0.05
+  },
+  {
+   "id": "material:fire",
+   "tier": 0,
+   "free": true,
+   "mana": 0.15
+  },
+  {
+   "id": "creature:villager",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "creature:sheep",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "creature:rabbit",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "creature:chicken",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "creature:deer",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "creature:wolf",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "creature:goblin",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "creature:mite",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "tool:erase",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "tool:torch",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "tool:grab",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "tool:inspect",
+   "tier": 0,
+   "free": true
+  },
+  {
+   "id": "material:lava",
+   "tier": 0,
+   "mana": 0.6,
+   "free": true
+  },
+  {
+   "id": "material:oil",
+   "tier": 0,
+   "mana": 0.3,
+   "free": true
+  },
+  {
+   "id": "material:blackpowder",
+   "tier": 0,
+   "mana": 0.5,
+   "free": true
+  },
+  {
+   "id": "spell:meteor",
+   "tier": 1,
+   "cost": 30
+  },
+  {
+   "id": "spell:frost",
+   "tier": 1,
+   "cost": 25
+  },
+  {
+   "id": "spell:growth",
+   "tier": 1,
+   "cost": 20
+  },
+  {
+   "id": "spell:heal",
+   "tier": 1,
+   "cost": 25
+  },
+  {
+   "id": "spell:gale",
+   "tier": 1,
+   "cost": 20
+  },
+  {
+   "id": "spell:fireflies",
+   "tier": 1,
+   "cost": 10
+  },
+  {
+   "id": "material:ice",
+   "tier": 1,
+   "cost": 15,
+   "mana": 0.2
+  },
+  {
+   "id": "material:starpowder",
+   "tier": 1,
+   "cost": 20,
+   "mana": 0.4
+  },
+  {
+   "id": "material:sunstone",
+   "tier": 1,
+   "cost": 15,
+   "mana": 0.4
+  },
+  {
+   "id": "material:moonstone",
+   "tier": 1,
+   "cost": 15,
+   "mana": 0.4
+  },
+  {
+   "id": "material:rosestone",
+   "tier": 1,
+   "cost": 15,
+   "mana": 0.4
+  },
+  {
+   "id": "material:verdstone",
+   "tier": 1,
+   "cost": 15,
+   "mana": 0.4
+  },
+  {
+   "id": "material:lamp",
+   "tier": 1,
+   "cost": 10,
+   "mana": 0.4
+  },
+  {
+   "id": "material:planks",
+   "tier": 1,
+   "cost": 10,
+   "mana": 0.1
+  },
+  {
+   "id": "material:roof_thatch",
+   "tier": 1,
+   "cost": 12,
+   "mana": 0.3
+  },
+  {
+   "id": "material:meadow",
+   "tier": 1,
+   "cost": 8,
+   "mana": 0.05
+  },
+  {
+   "id": "material:tallgrass",
+   "tier": 1,
+   "cost": 8,
+   "mana": 0.05
+  },
+  {
+   "id": "material:flowers",
+   "tier": 1,
+   "cost": 8,
+   "mana": 0.05
+  },
+  {
+   "id": "material:snow",
+   "tier": 1,
+   "cost": 10,
+   "mana": 0.05
+  },
+  {
+   "id": "creature:goat",
+   "tier": 1,
+   "cost": 10
+  },
+  {
+   "id": "creature:bear",
+   "tier": 1,
+   "cost": 20
+  },
+  {
+   "id": "creature:fish",
+   "tier": 1,
+   "cost": 10
+  },
+  {
+   "id": "creature:frog",
+   "tier": 1,
+   "cost": 10
+  },
+  {
+   "id": "creature:warden",
+   "tier": 1,
+   "cost": 25
+  },
+  {
+   "id": "creature:imp",
+   "tier": 1,
+   "cost": 20
+  },
+  {
+   "id": "creature:slime",
+   "tier": 1,
+   "cost": 20
+  },
+  {
+   "id": "creature:cow",
+   "tier": 1,
+   "cost": 12
+  },
+  {
+   "id": "creature:boar",
+   "tier": 1,
+   "cost": 14
+  },
+  {
+   "id": "creature:bee",
+   "tier": 1,
+   "cost": 10
+  },
+  {
+   "id": "spell:barrier",
+   "tier": 1,
+   "cost": 35
+  },
+  {
+   "id": "spell:missiles",
+   "tier": 1,
+   "cost": 30
+  },
+  {
+   "id": "creature:archer",
+   "tier": 1,
+   "cost": 20
+  },
+  {
+   "id": "spell:bless",
+   "tier": 2,
+   "cost": 50
+  },
+  {
+   "id": "spell:quake",
+   "tier": 2,
+   "cost": 60
+  },
+  {
+   "id": "spell:storm",
+   "tier": 2,
+   "cost": 60
+  },
+  {
+   "id": "spell:spring",
+   "tier": 2,
+   "cost": 40
+  },
+  {
+   "id": "spell:sinkhole",
+   "tier": 2,
+   "cost": 45
+  },
+  {
+   "id": "spell:firewall",
+   "tier": 2,
+   "cost": 45
+  },
+  {
+   "id": "material:acid",
+   "tier": 2,
+   "cost": 40,
+   "mana": 0.5
+  },
+  {
+   "id": "material:crystal",
+   "tier": 2,
+   "cost": 45,
+   "mana": 0.8
+  },
+  {
+   "id": "material:mushroom",
+   "tier": 2,
+   "cost": 25,
+   "mana": 0.2
+  },
+  {
+   "id": "material:thorns",
+   "tier": 2,
+   "cost": 30,
+   "mana": 0.3
+  },
+  {
+   "id": "material:wall_iron",
+   "tier": 2,
+   "cost": 40,
+   "mana": 0.8
+  },
+  {
+   "id": "material:roof_slate",
+   "tier": 2,
+   "cost": 25,
+   "mana": 0.5
+  },
+  {
+   "id": "material:obsidian",
+   "tier": 2,
+   "cost": 30,
+   "mana": 0.7
+  },
+  {
+   "id": "material:glass",
+   "tier": 2,
+   "cost": 25,
+   "mana": 0.3
+  },
+  {
+   "id": "material:holy",
+   "tier": 2,
+   "cost": 40,
+   "mana": 0.6
+  },
+  {
+   "id": "material:marsh",
+   "tier": 2,
+   "cost": 20,
+   "mana": 0.05
+  },
+  {
+   "id": "creature:torchgob",
+   "tier": 2,
+   "cost": 35
+  },
+  {
+   "id": "creature:skeleton",
+   "tier": 2,
+   "cost": 35
+  },
+  {
+   "id": "creature:troll",
+   "tier": 2,
+   "cost": 60
+  },
+  {
+   "id": "creature:mage",
+   "tier": 1,
+   "cost": 30
+  },
+  {
+   "id": "creature:fairy",
+   "tier": 2,
+   "cost": 40
+  },
+  {
+   "id": "creature:golem",
+   "tier": 2,
+   "cost": 60
+  },
+  {
+   "id": "creature:treant",
+   "tier": 2,
+   "cost": 55
+  },
+  {
+   "id": "creature:wyrmling",
+   "tier": 2,
+   "cost": 70
+  },
+  {
+   "id": "creature:knight",
+   "tier": 2,
+   "cost": 45
+  },
+  {
+   "id": "creature:druid",
+   "tier": 2,
+   "cost": 45
+  },
+  {
+   "id": "creature:flamewraith",
+   "tier": 2,
+   "cost": 55
+  },
+  {
+   "id": "creature:rimeling",
+   "tier": 2,
+   "cost": 40
+  },
+  {
+   "id": "spell:tornado",
+   "tier": 3,
+   "cost": 110
+  },
+  {
+   "id": "spell:smite",
+   "tier": 3,
+   "cost": 90
+  },
+  {
+   "id": "spell:chain",
+   "tier": 3,
+   "cost": 100
+  },
+  {
+   "id": "spell:holyrain",
+   "tier": 3,
+   "cost": 90
+  },
+  {
+   "id": "material:goo",
+   "tier": 3,
+   "cost": 70,
+   "mana": 0.5
+  },
+  {
+   "id": "material:runestone",
+   "tier": 3,
+   "cost": 80,
+   "mana": 1
+  },
+  {
+   "id": "material:frostfire",
+   "tier": 3,
+   "cost": 90,
+   "mana": 0.6
+  },
+  {
+   "id": "material:vent",
+   "tier": 3,
+   "cost": 120,
+   "mana": 8
+  },
+  {
+   "id": "material:spring",
+   "tier": 3,
+   "cost": 80,
+   "mana": 5
+  },
+  {
+   "id": "material:bones",
+   "tier": 3,
+   "cost": 40,
+   "mana": 0.2
+  },
+  {
+   "id": "creature:griffin",
+   "tier": 3,
+   "cost": 110
+  },
+  {
+   "id": "creature:phoenix",
+   "tier": 3,
+   "cost": 140
+  },
+  {
+   "id": "creature:wisp",
+   "tier": 3,
+   "cost": 50
+  },
+  {
+   "id": "creature:serpent",
+   "tier": 3,
+   "cost": 90
+  },
+  {
+   "id": "creature:unicorn",
+   "tier": 3,
+   "cost": 100
+  },
+  {
+   "id": "spell:shower",
+   "tier": 4,
+   "cost": 220
+  },
+  {
+   "id": "spell:volcano",
+   "tier": 4,
+   "cost": 200
+  },
+  {
+   "id": "spell:acidrain",
+   "tier": 4,
+   "cost": 160
+  },
+  {
+   "id": "creature:dragon",
+   "tier": 4,
+   "cost": 300
+  },
+  {
+   "id": "spell:void",
+   "tier": 5,
+   "cost": 400
+  },
+  {
+   "id": "material:void",
+   "tier": 5,
+   "cost": 350,
+   "mana": 3
+  }
+ ]
+}

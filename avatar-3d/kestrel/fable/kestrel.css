@@ -1,0 +1,16 @@
+/* Kestrel fable attempt — preview page. Phone first. */
+.kf { margin: 0; padding: 0 16px 24px; background: #12151b; color: #dde3ea; }
+.kf-top h1 { margin: 12px 0 2px; font-size: 1.3rem; }
+.kf-top p { margin: 0 0 8px; }
+.kf a { color: #8cc8ff; }
+.kf .small { font-size: 0.82rem; }
+.kf-controls .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0; }
+.kf-controls button { background: #222a35; color: #dde3ea; border: 1px solid #364151; border-radius: 6px; padding: 6px 10px; font: inherit; font-size: 0.85rem; cursor: pointer; min-height: 34px; }
+.kf-controls button.on { background: #2f6fb0; border-color: #4a8fd6; }
+.kf-controls label { font-size: 0.85rem; display: inline-flex; gap: 4px; align-items: center; margin-right: 8px; }
+.kf-main { margin-top: 8px; }
+.kf-main canvas { display: block; width: 100%; max-width: 900px; aspect-ratio: 3 / 4; background: #c9ccd1; border-radius: 8px; touch-action: none; }
+.kf.sheet { padding: 0; background: #c9ccd1; }
+.kf.sheet .kf-top, .kf.sheet .kf-controls { display: none; }
+.kf.sheet .kf-main { margin: 0; }
+.kf.sheet .kf-main canvas { max-width: none; aspect-ratio: auto; border-radius: 0; }

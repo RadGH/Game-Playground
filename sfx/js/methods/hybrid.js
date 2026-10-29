@@ -1,6 +1,6 @@
-// Method "hybrid": use the recorded sample when the pack has one, fall back to our synthesizer for
-// everything it does not cover. This is the default in a game — punches and interface clicks sound
-// real, and the 79 ids the pack has nothing for (elements, statuses, ambience beds) still play.
+// Method "hybrid": use the recording, and fall back to our synthesizer only if a file fails to load.
+// This is the default in a game. Since 2026-10-29 every id has a recording (see library.js), so the
+// synth is a safety net, not half the mix.
 import * as library from './library.js';
 import * as synth from './synth.js';
 

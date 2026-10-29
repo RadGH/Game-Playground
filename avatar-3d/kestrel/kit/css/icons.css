@@ -1,0 +1,8 @@
+/* Kestrel kit — icons.html: Thousandvale's gear icons on a dark slot, as the bag shows them (batch 5). */
+body { padding: 16px; }
+.icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 12px; }
+.icon-cell { background: #1c1f26; border: 1px solid #343a46; border-radius: 6px; padding: 8px; text-align: center; }
+.icon-cell .slot { width: 96px; height: 96px; margin: 0 auto 6px; border-radius: 6px; background: radial-gradient(circle at 50% 40%, #3a3f4c, #20232b); display: flex; align-items: center; justify-content: center; }
+.icon-cell img { width: 96px; height: 96px; image-rendering: auto; }
+.icon-cell .name { font-size: 12px; line-height: 1.25; color: #cfd6e2; }
+.icon-cell .frame { font-size: 11px; color: #8a93a3; }

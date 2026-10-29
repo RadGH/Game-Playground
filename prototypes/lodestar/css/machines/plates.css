@@ -1,0 +1,30 @@
+/* Enamel plates for the ☰ menu, Settings and New game, and the What's new window re-dressed as a teletype sheet. */
+.lodestar-modal { position: fixed; inset: 0; z-index: 900; display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  background: radial-gradient(80% 80% at 50% 40%, rgba(10,14,14,0.55), rgba(0,0,0,0.85)); animation: fade-in .14s ease-out; }
+@keyframes fade-in { from { opacity: 0; } }
+.plate-panel { position: relative; width: min(560px, 100%); max-height: calc(100% - 8px); display: flex; flex-direction: column; overflow: hidden; border-radius: 10px; padding: 18px 18px 18px;
+  background: repeating-linear-gradient(92deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px), linear-gradient(175deg, var(--enamel-hi), var(--enamel) 35%, var(--enamel-lo));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 0 0 1px rgba(0,0,0,0.4), 0 0 0 3px #171c1b, 0 24px 60px rgba(0,0,0,0.85); animation: plate-in .18s cubic-bezier(.2, .9, .3, 1.2); }
+@keyframes plate-in { from { transform: translateY(14px) scale(.97); } }
+.plate-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.plate-head h2 { margin: 0; padding: 4px 14px; border-radius: 2px; font: 700 15px var(--font-stencil); letter-spacing: .3em; color: #2c1e0b;
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, var(--brass-lo)); box-shadow: inset 0 0 0 1px rgba(60,40,10,0.5), 0 1px 1px rgba(0,0,0,0.6); }
+.plate-head span { flex: 1; font: 700 11px var(--font-stencil); letter-spacing: .14em; color: rgba(0,0,0,0.5); }
+.plate-x { width: var(--tap); height: var(--tap); flex: none; margin-left: auto; border: 0; border-radius: 50%; cursor: pointer; font-size: 16px; color: #f0e6cc;
+  background: radial-gradient(circle at 40% 35%, #555b5c, #1e2223); box-shadow: inset 0 0 0 2px rgba(0,0,0,0.6), 0 3px 0 #0b0d0e; }
+.plate-body { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.menu-modal .plate-panel { width: min(400px, 100%); }
+.settings-knobs { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 6px; }
+.settings-knobs .knob { --kc: 44px; --kr: 52px; }
+.settings-toggles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.plate-note { margin: 0; font: 700 11px/1.45 var(--font-type); color: rgba(240,234,214,0.65); }
+.seed-row { display: flex; align-items: center; gap: 10px; }
+.nixie-label { font: 700 11px var(--font-stencil); letter-spacing: .24em; color: rgba(0,0,0,0.55); }
+.nixie { flex: 1; min-width: 0; min-height: var(--tap); padding: 4px 12px; border: 0; border-radius: 4px; background: #0a0806; color: #ff9a3a; font: 700 24px var(--font-nixie); letter-spacing: .18em;
+  text-shadow: 0 0 6px rgba(255,120,30,0.9), 0 0 14px rgba(255,100,20,0.5); box-shadow: inset 0 2px 6px rgba(0,0,0,0.9), 0 0 0 2px #2a2f2e, 0 0 0 3px var(--brass-lo); -webkit-user-select: text; user-select: text; }
+.newgame-modal .settings-knobs .knob { --kc: 58px; --kr: 56px; }
+/* What's new: the shared window, dressed as a teletype sheet on the desk */
+.wn-modal { --wn-bg: #ece4cc; --wn-ink: #2b2620; --wn-edge: #3a4a44; --wn-accent: #ffb43c; }
+.wn-panel { font-family: var(--font-type); border-radius: 6px; border-width: 4px; }
+.wn-head h2 { font-family: var(--font-stencil); letter-spacing: .2em; }
+.push.wn-has-new::after, .menu-modal [data-act=news].wn-has-new::after { content: ""; position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: #ffd24a; box-shadow: 0 0 0 2px #2a1600, 0 0 8px #ffd24a; }

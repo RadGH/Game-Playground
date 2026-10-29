@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "_doc": "M4 nests (PLAN M4: 6-10 on the home map, stages 1-5, grow over time and from Noise/Glow, bud at stage 4, destroyed = a core sample). `count` is for a Normal map and scales with map area. Nests are laid from the seed at the start, at least `minHqDist` cells from the HQ and `minGap` from each other, on land in or beside woods when it can. A nest's `fed` (0-1) follows the Noise (and Glow, by the family's weights) arriving at it: every `every` ticks fed = fed x (1 - `feedRate`) + heard x `feedRate`, where heard = field / 255. Growth per tick to the next stage = 1 / growTicks x (1 + `feedGrow` x fed). The raid timer counts down by (`raidBase` + `feedRaid` x fed) a tick: an unfed nest raids rarely, a fed one often. `reach` = how far (cells) its raids look for a target. `raid` = how many of each enemy a raid of this stage sends (scaled by difficulty and by `perDay` a day). `guards` stay round the nest. `budAt`: from this stage on, every `budTicks` it sends out a new stage-1 nest `budDist` cells away (up to `max` nests).",
+  "count": [6, 10], "minHqDist": 300, "minGap": 150, "edgeGap": 24, "max": 16,
+  "every": 20, "feedRate": 0.06, "feedGrow": 3, "raidBase": 0.4, "feedRaid": 3.2, "perDay": 0.12,
+  "budAt": 4, "budTicks": 14400, "budDist": [50, 110],
+  "startStages": [1, 1, 2, 2, 2, 3, 3, 3, 3, 3],
+  "stages": [
+    { "stage": 1, "hp": 600, "r": 4, "growTicks": 19200, "raidEvery": 24000, "reach": 300, "guards": { "skitter": 2 }, "raid": { "skitter": 4 } },
+    { "stage": 2, "hp": 1200, "r": 5, "growTicks": 24000, "raidEvery": 21000, "reach": 340, "guards": { "skitter": 3 }, "raid": { "skitter": 6, "spitter": 1 } },
+    { "stage": 3, "hp": 2200, "r": 7, "growTicks": 28800, "raidEvery": 18000, "reach": 380, "guards": { "skitter": 3, "gnasher": 1 }, "raid": { "skitter": 8, "gnasher": 1, "spitter": 2 } },
+    { "stage": 4, "hp": 3600, "r": 9, "growTicks": 38400, "raidEvery": 15000, "reach": 430, "guards": { "skitter": 4, "gnasher": 2 }, "raid": { "skitter": 10, "gnasher": 3, "spitter": 3 } },
+    { "stage": 5, "hp": 5500, "r": 11, "growTicks": 0, "raidEvery": 12000, "reach": 500, "guards": { "skitter": 5, "gnasher": 2, "carapace": 1 }, "raid": { "skitter": 14, "gnasher": 4, "spitter": 4, "carapace": 1 } }
+  ]
+}

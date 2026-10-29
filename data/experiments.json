@@ -97,6 +97,29 @@
     }
    ]
   },
+{
+  "id": "kestrel",
+  "group": "characters",
+  "title": "Kestrel",
+  "href": "avatar-3d/kestrel/",
+  "folder": "avatar-3d",
+  "summary": "The next character system, as a trial: realistic proportions (about seven heads tall), more detail than Chibi 2.5, still light enough for phones, built from swappable pieces, and a drop-in for games that use Chibi 2 today. Several attempts build the same male and female base bodies to one contract: hand-coded by Opus, hand-coded by Fable, and later AI 3D services, side by side with the Codex reference pictures, with numbers, a crowd test and a score sheet.",
+  "status": "prototype",
+  "statusNote": "test 1 (hand-coded) 2026-10-27",
+  "date": "2026-10-27",
+  "isNew": true,
+  "tags": [
+   "3d",
+   "character",
+   "three.js"
+  ],
+  "links": [
+   {
+    "label": "Reference pictures",
+    "href": "avatar-3d/kestrel/ref/"
+   }
+  ]
+ },
   {
    "id": "chibi4",
    "group": "characters",
@@ -648,6 +671,38 @@
     "action-rpg",
     "pixel physics",
     "spellcrafting"
+   ]
+  },
+  {
+   "id": "lodestar",
+   "group": "prototypes",
+   "title": "Lodestar",
+   "href": "prototypes/lodestar/",
+   "folder": "prototypes/lodestar",
+   "summary": "A top-down pixel-physics strategy game played from a commander's bunker: screens, knobs and switches. Mine and refine, draw walls and roads, hold off raids from growing nests, cast spells on mana from crystals, and later take it to space.",
+   "status": "prototype",
+   "statusNote": "being built in milestones",
+   "date": "2026-10-28",
+   "tags": [
+    "rts",
+    "city-building",
+    "pixel physics"
+   ]
+  },
+  {
+   "id": "kindlewild",
+   "group": "prototypes",
+   "title": "Kindlewild",
+   "href": "prototypes/kindlewild/",
+   "folder": "prototypes/kindlewild",
+   "summary": "A pixel god-game sandbox in a medieval fantasy realm: wildfires that run with the wind, lava floods, meteors, dragons and little villagers who farm, build and raise families. Sandbox, six challenge levels and a Realm whose people's faith feeds your mana.",
+   "status": "prototype",
+   "statusNote": "Act I playable",
+   "date": "2026-10-28",
+   "tags": [
+    "god game",
+    "pixel physics",
+    "sandbox"
    ]
   }
  ]

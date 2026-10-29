@@ -1,0 +1,61 @@
+/* The Town Board (M7): a brass-rimmed morale gauge, nixie counters, six input jewels and the SETTLERS bat switch.
+   One fixed page, nothing scrolls; the switch is the only control and it is at least 44 px. */
+.machine-town .machine-body { display: grid; gap: 6px 10px; min-height: 0; height: 100%;
+  grid-template-columns: minmax(170px, 260px) minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "gauge nix switch" "gauge lamps lamps" "gauge why why"; }
+.drawer .machine-town { padding: 4px 6px 6px; height: 100%; box-sizing: border-box; }
+.drawer .machine-town > .machine-plate { display: none; }
+
+.tw-gauge { grid-area: gauge; position: relative; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 4px 6px; border-radius: 8px; background: radial-gradient(ellipse at 50% 20%, #2b2f2c, #121514 70%);
+  box-shadow: inset 0 0 0 2px var(--brass-lo), inset 0 0 0 4px #0c0e0d, 0 2px 0 rgba(0,0,0,0.5); }
+.tw-gauge svg { width: 100%; max-height: 100%; min-height: 0; flex: 1; overflow: visible; }
+.tw-face { fill: #efe6cc; stroke: var(--brass); stroke-width: 2; }
+.tw-red { fill: none; stroke: rgba(180,36,23,0.75); stroke-width: 4; }
+.tw-ticks line { stroke: var(--ink); stroke-width: 1.2; }
+.tw-gauge text { font: 700 7px var(--font-stencil); fill: var(--ink); text-anchor: middle; letter-spacing: .08em; }
+.tw-gauge .tw-name { font-size: 6.5px; letter-spacing: .3em; opacity: .65; }
+.tw-needle, .tw-ghost { transform-origin: 60px 62px; transition: transform .9s cubic-bezier(.3, 1.4, .5, 1); }
+.tw-needle line { stroke: #b42417; stroke-width: 2; stroke-linecap: round; }
+.tw-needle circle { fill: #2b2620; stroke: var(--brass); stroke-width: 1.5; }
+.tw-ghost line { stroke: rgba(40,70,140,0.55); stroke-width: 1; stroke-dasharray: 2 2; }
+.tw-factor { position: absolute; left: 8px; top: 3px; font: 700 13px var(--font-nixie); color: var(--amber); text-shadow: 0 0 6px rgba(255,160,40,0.7); }
+
+.tw-nixies { grid-area: nix; display: grid; grid-template-columns: repeat(auto-fit, minmax(64px, 1fr)); gap: 4px; min-width: 0; align-content: start; }
+.tw-nx { display: flex; flex-direction: column; align-items: center; padding: 3px 4px; border-radius: 4px; background: #0d0f0e; box-shadow: inset 0 0 0 1px #2a302c, inset 0 2px 6px rgba(0,0,0,0.8); min-width: 0; }
+.tw-nx span { font: 700 7.5px var(--font-stencil); letter-spacing: .14em; color: rgba(240,230,200,0.55); white-space: nowrap; }
+.tw-nx b { font: 700 15px var(--font-nixie); color: #ff9c3a; text-shadow: 0 0 6px rgba(255,120,30,0.8), 0 0 1px #ffd9a0; white-space: nowrap; }
+
+.tw-lamps { grid-area: lamps; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; min-width: 0; }
+.tw-lamp { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; }
+.tw-lamp i { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #4b524d, #1d211f 70%); box-shadow: 0 0 0 3px #0c0e0d, 0 0 0 4px var(--steel-lo); }
+.tw-lamp.lit i { background: radial-gradient(circle at 35% 30%, #fff2c0, #ffb43c 45%, #8a4d10); box-shadow: 0 0 0 3px #0c0e0d, 0 0 0 4px var(--steel-lo), 0 0 12px rgba(255,170,50,0.85); }
+.tw-lamp.bad i { background: radial-gradient(circle at 35% 30%, #ffd0c0, #ff4b38 45%, #6a120a); box-shadow: 0 0 0 3px #0c0e0d, 0 0 0 4px var(--steel-lo), 0 0 12px rgba(255,70,50,0.9); }
+.tw-lamp em { font: 700 7.5px var(--font-stencil); font-style: normal; letter-spacing: .08em; color: #e8dfc4; white-space: nowrap; }
+.tw-lamp small { font: 700 8px var(--font-type); color: var(--amber); min-height: 9px; }
+
+.tw-settlers { grid-area: switch; align-self: start; display: flex; align-items: center; gap: 6px; min-height: var(--tap); min-width: 96px; padding: 4px 10px 4px 6px;
+  border: 0; border-radius: 6px; cursor: pointer; color: #e8dfc4; background: linear-gradient(180deg, #3b3f40, #1f2224); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.6), 0 3px 0 #0b0d0e; }
+.tw-bat { position: relative; width: 14px; height: 32px; border-radius: 7px; background: #0b0d0e; box-shadow: inset 0 0 0 2px var(--steel-lo); }
+.tw-bat::after { content: ""; position: absolute; left: 2px; top: 2px; width: 10px; height: 16px; border-radius: 5px; background: linear-gradient(180deg, var(--steel-hi), var(--steel)); transition: top .12s; }
+.tw-settlers.closed .tw-bat::after { top: 14px; }
+.tw-sw-label { display: flex; flex-direction: column; text-align: left; }
+.tw-sw-label b { font: 700 9px var(--font-stencil); letter-spacing: .16em; }
+.tw-sw-label i { font: 700 11px var(--font-stencil); font-style: normal; letter-spacing: .12em; color: var(--phosphor); }
+.tw-settlers.closed .tw-sw-label i { color: var(--red); }
+
+.tw-why { grid-area: why; margin: 0; padding: 2px 8px; border-radius: 2px; background: var(--paper); color: var(--ink); font: 700 9.5px var(--font-type);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* phone: gauge left, counters right, lamps and the switch underneath */
+@media (max-width: 899px), (max-height: 559px) {
+  .machine-town .machine-body { grid-template-columns: minmax(120px, 44%) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto auto;
+    grid-template-areas: "gauge nix" "gauge switch" "lamps lamps" "why why"; gap: 4px 6px; }
+  .tw-nixies { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; }
+  .tw-nx { padding: 1px 3px; }
+  .tw-nx b { font-size: 12px; }
+  .tw-nx:nth-child(3) { display: none; }
+  .tw-settlers { justify-self: stretch; }
+  .tw-lamp i { width: 14px; height: 14px; }
+}

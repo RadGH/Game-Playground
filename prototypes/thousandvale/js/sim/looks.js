@@ -23,7 +23,7 @@ const PART_HEX = ['white', 'colorR'];
 /** Per-part numbers beyond PART_NUM, by slot: brow thickness. */
 const PART_NUM25 = { brows: { thick: [F25.brows.thick.min, F25.brows.thick.max] } };
 /** Body choices by name (2.5): body type, posture, tail. */
-const BODY_PICK = { shape: new Set(B25.shape.ids), posture: new Set(B25.posture.ids), tail: new Set(B25.tail.ids) };
+const BODY_PICK = { shape: new Set(B25.shape.ids), posture: new Set(B25.posture.ids), tail: new Set(B25.tail.ids), form: new Set(['masc', 'fem']) };   // form: the Kestrel Body pick (avatar-3d/kestrel/kit/js/form-pick.js)
 
 export const PLAYABLE_RACES = Object.freeze(['human', 'elf', 'dwarf', 'halfling']);
 export const LOOK_MAX_BYTES = 4096;

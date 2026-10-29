@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "_doc": "Mana (PLAN M6, §0.11). Every number the mana system reads. Mana is kept per base (planet-specific): the HQ holds the store. `store.cap` is the HQ's own capacity; every battery adds `battery.capByLevel[global battery level]`. Mana comes back by itself at `regenPerSecond`, but only while the store is under `regenShare` of the cap; above that it must be REFINED from mana crystal (harvester -> porters -> mana refinery inside the HQ yard ring -> the store). Spell tiers open by cap: a spell of tier N can be armed once the cap reaches `tiers[N-1].cap`. `arm.ticks` = how long the key takes to turn itself after you pull a cartridge (20 ticks a second). Glow is the quarter-res field enemies that hunt magic follow; M4 owns the field and rebuilds it from sources: a spell that lands leaves a pulse of level `glow.spellBase` + `glow.perMana` x its cost for `glow.spellTicks`; a working refinery is a steady source of `refineryLevel`, a battery of `batteryLevel` (more when the store is fuller). Crystal clusters grow back one step per `crystal.regrowEvery` ticks (`crystal.regrowTries` cells tried) as long as at least one crystal cell is left; a cluster that was stripped bare never comes back.",
+  "store": { "cap": 100, "regenPerSecond": 0.5, "regenShare": 0.25, "start": 25 },
+  "tiers": [
+    { "tier": 1, "cap": 100, "name": "I" },
+    { "tier": 2, "cap": 400, "name": "II" },
+    { "tier": 3, "cap": 1500, "name": "III" },
+    { "tier": 4, "cap": 5000, "name": "IV" }
+  ],
+  "battery": {
+    "_doc": "One battery kind with a global level (§0.5). A battery that is destroyed (not pulled down) bursts: radius = r0 + perRoot x sqrt(charge it held), capped at rMax; power likewise. Pulled down, its crew bleeds it safely and the mana above the new cap is lost.",
+    "capByLevel": { "1": 300, "2": 450, "3": 700, "4": 1000, "5": 1500 },
+    "burst": { "r0": 4, "perRoot": 0.9, "rMax": 30, "power0": 0.8, "powerPerRoot": 0.06, "powerMax": 2.6 }
+  },
+  "glow": { "every": 20, "spellBase": 40, "perMana": 0.6, "spellTicks": 600, "refineryLevel": 110, "batteryLevel": 80, "max": 255,
+    "decay": 236, "refinery": 10, "refineryR": 6, "battery": 6, "batteryR": 4, "_fallback": "decay / refinery / battery / *R are used only in a sim with no defence module (M4 owns and rebuilds the field; M6 hands it pulses and steady sources)" },
+  "crystal": { "regrowEvery": 600, "regrowTries": 6 },
+  "sweepEvery": 5,
+  "arm": { "ticks": 10, "_doc": "the key turns itself in half a second after you pull a cartridge" },
+  "crafting": {
+    "_doc": "Mana crystal is also a crafting input (owner: magical energy sources and empowered units). M6 provides the hooks; the rows land in M12 (PLAN). `sim.mana.spend(n, why)` takes mana from the store for an empowered unit or a ward; any recipe may list `crystal` as an input (the dispatcher already hauls it); a building with `power.fuel: { crystal: n }` is a crystal-burning power source with no new code (js/sim/economy/production.js powers it).",
+    "planned": [
+      { "id": "mana_cell", "what": "a power source that burns mana crystal", "milestone": "M12" },
+      { "id": "crystal_lens", "what": "a refined crystal part for empowered towers and units", "milestone": "M12" },
+      { "id": "battlemage", "what": "an empowered unit that draws mana from the HQ store", "milestone": "M12" },
+      { "id": "crystal_golem", "what": "an empowered unit built from crystal lenses", "milestone": "M12" }
+    ]
+  }
+}

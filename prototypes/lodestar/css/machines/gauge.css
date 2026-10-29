@@ -1,0 +1,47 @@
+/* The Mana Gauge (M6): an enamel meter face behind glass, a black store needle, a thin brass cap needle, a pale ghost
+   needle, the red reserve band and engraved tier marks; a nixie readout and lamps beside it. Never scrolls. Also the
+   bunker shake when a meteor lands (the whole desk jolts). */
+.machine-gauge .machine-body { gap: 10px; align-items: stretch; min-height: 0; }
+.gauge-face { position: relative; flex: 1 1 auto; min-width: 0; min-height: 0; border-radius: 10px;
+  background: radial-gradient(circle at 50% 40%, #2a2f2e, #121514 75%); box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.06); }
+.gauge-face svg { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px); overflow: visible; }
+.gauge-face .g-rim { fill: none; stroke: #6b5530; stroke-width: 6; stroke-linecap: round; }
+.gauge-face .g-face { stroke: url(#gface); stroke-width: 26; }
+.gauge-face.small .g-face { stroke: url(#gfaces); }
+.gauge-face .g-reserve { fill: none; stroke: #b8321f; stroke-width: 7; opacity: .9; }
+.gauge-face .g-fill { fill: none; stroke: #6c4fb8; stroke-width: 4; opacity: .75; }
+.gauge-face .g-tick { stroke: #3a3328; stroke-width: 1.2; }
+.gauge-face .g-tier { stroke: #2b2217; stroke-width: 2.4; }
+.gauge-face .g-tier-label { font: 700 10px var(--font-stencil); fill: #3a2c18; text-anchor: middle; letter-spacing: .05em; }
+.gauge-face .g-num { font: 700 8px var(--font-stencil); fill: #d9cfae; text-anchor: middle; }
+.gauge-face .g-title { font: 700 9px var(--font-stencil); fill: rgba(220,206,170,0.55); text-anchor: middle; letter-spacing: .4em; }
+.gauge-face .g-needle { transition: transform .45s cubic-bezier(.3, 1.6, .5, 1); }
+.gauge-face .g-store polygon { fill: #141210; stroke: #000; stroke-width: .4; filter: drop-shadow(1px 2px 1px rgba(0,0,0,0.5)); }
+.gauge-face .g-cap line { stroke: #d9b45a; stroke-width: 1.6; }
+.gauge-face .g-ghost line { stroke: rgba(160,120,255,0.75); stroke-width: 2.4; stroke-dasharray: 3 2; }
+.gauge-face .g-ghost { transition: transform .25s ease-out, opacity .2s; }
+.gauge-face .g-hub { fill: #2a2622; stroke: #8f7440; stroke-width: 1.4; } .gauge-face .g-hub-pin { fill: #d9c48a; }
+.gg-side { flex: 0 0 auto; width: 46%; max-width: 240px; min-width: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+.gg-nixie { display: flex; align-items: baseline; justify-content: center; gap: 4px; padding: 4px 8px; border-radius: 6px; background: #0b0908;
+  box-shadow: inset 0 0 0 1px #000, inset 0 2px 8px rgba(0,0,0,0.9); font: 700 22px var(--font-nixie); color: #ffb06a; text-shadow: 0 0 8px rgba(255,140,60,0.8); }
+.gg-nixie i { font-style: normal; opacity: .45; font-size: 16px; } .gg-nixie .gg-cap { font-size: 15px; color: #d9b45a; }
+.gg-lamps { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 6px; }
+.gg-lamp, .gg-tier { display: flex; align-items: center; gap: 5px; font: 700 9px var(--font-stencil); letter-spacing: .12em; color: rgba(236,226,196,0.6); white-space: nowrap; }
+.gg-lamp em { font-style: normal; color: #ffd28a; }
+.gg-lamp b, .gg-tier b { flex: none; width: 11px; height: 11px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #4a3a52, #160f1a); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.6); }
+.gg-lamp.on b, .gg-tier.on b { background: radial-gradient(circle at 40% 35%, #fff, #b48cff 45%, #5a2fb0); box-shadow: 0 0 8px 2px rgba(170,120,255,0.75); }
+.gg-lamp[data-lamp="regen"].on b { background: radial-gradient(circle at 40% 35%, #fff, #ff6a50 45%, #8a1a0c); box-shadow: 0 0 8px 2px rgba(255,90,60,0.7); }
+.gg-lamp.on, .gg-tier.on { color: #f3e8cc; }
+.gg-tiers { display: flex; justify-content: space-between; gap: 4px; padding: 3px 6px; border-radius: 4px; background: rgba(0,0,0,0.25); }
+.gg-note { margin: 0; font: 700 8.5px/1.3 var(--font-type); color: rgba(236,226,196,0.55); }
+@media (max-width: 899px), (max-height: 559px) {
+  .gg-side { width: 50%; gap: 4px; } .gg-nixie { font-size: 18px; padding: 2px 6px; } .gg-note { display: none; }
+}
+
+/* the bunker shakes: a meteor landing, a battery bursting */
+#app.shake { animation: desk-shake .42s cubic-bezier(.36, .07, .19, .97) both; }
+#app.shake-big { animation: desk-shake-big .9s cubic-bezier(.36, .07, .19, .97) both; }
+@keyframes desk-shake { 10%, 90% { transform: translate(-1px, 0); } 20%, 80% { transform: translate(2px, 1px); } 30%, 50%, 70% { transform: translate(-3px, -1px); } 40%, 60% { transform: translate(3px, 1px); } }
+@keyframes desk-shake-big { 5% { transform: translate(-6px, 3px) rotate(-.3deg); } 12% { transform: translate(7px, -4px) rotate(.35deg); } 20% { transform: translate(-6px, 4px); } 30% { transform: translate(5px, -2px) rotate(.2deg); }
+  42% { transform: translate(-4px, 2px); } 56% { transform: translate(3px, -1px); } 70% { transform: translate(-2px, 1px); } 85% { transform: translate(1px, 0); } }
+@media (prefers-reduced-motion: reduce) { #app.shake, #app.shake-big { animation: none; } }

@@ -1,0 +1,47 @@
+{
+  "attempt": "fable",
+  "by": "Claude Fable 5.1",
+  "version": "0.1.0",
+  "date": "2026-10-28",
+  "textures": 0,
+  "note": "headless node build on the VM; buildMs is the first (cold) build of each look, lod1 = the far version",
+  "male": {
+    "triangles": 11904,
+    "drawCalls": 1,
+    "bones": 55,
+    "buildMs": 121.3,
+    "lod1": {
+      "triangles": 3776,
+      "buildMs": 49.5
+    }
+  },
+  "female": {
+    "triangles": 11908,
+    "drawCalls": 1,
+    "bones": 55,
+    "buildMs": 62.1,
+    "lod1": {
+      "triangles": 3780,
+      "buildMs": 38.9
+    }
+  },
+  "outfit": {
+    "male": {
+      "triangles": 12276,
+      "drawCalls": 1,
+      "bones": 55,
+      "buildMs": 59.1
+    },
+    "female": {
+      "triangles": 11904,
+      "drawCalls": 1,
+      "bones": 55,
+      "buildMs": 43.9
+    },
+    "adds": {
+      "male": 372,
+      "female": -4
+    }
+  },
+  "warmBuildMs": 33.7
+}

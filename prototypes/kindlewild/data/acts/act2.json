@@ -1,0 +1,1335 @@
+{
+ "id": "act2",
+ "name": "Act II — The Gathering",
+ "blurb": "Call people and beasts to your side. They fight; you lend a hand.",
+ "levels": [
+  {
+   "id": "2-1",
+   "name": "Bowmen of the Ridge",
+   "icon": "lvl-2-1",
+   "intro": [
+    "Goblins are coming down the valley, torches lit.",
+    "Raise a line of archers behind the palisade and let them do the work."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 2101,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.08,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.45,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       150
+      ],
+      "r": 60
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       200
+      ],
+      "r": 26
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       120
+      ],
+      "r": 40
+     },
+     {
+      "op": "line",
+      "at": [
+       6,
+       150
+      ],
+      "to": [
+       64,
+       150
+      ],
+      "r": 1,
+      "mat": "wall_wood"
+     },
+     {
+      "op": "line",
+      "at": [
+       96,
+       150
+      ],
+      "to": [
+       154,
+       150
+      ],
+      "r": 1,
+      "mat": "wall_wood"
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      200
+     ],
+     "name": "Ashby",
+     "people": 7,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "well"
+     ]
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     1,
+     4
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "goblin",
+     "count": 10,
+     "at": [
+      80,
+      20
+     ],
+     "spread": 10,
+     "goal": "village",
+     "time": 10,
+     "announce": "Goblins in the valley!"
+    },
+    {
+     "species": "torchgob",
+     "count": 4,
+     "at": [
+      40,
+      15
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 35,
+     "announce": "Firebrands — they will try for the roofs."
+    },
+    {
+     "species": "goblin",
+     "count": 12,
+     "at": [
+      120,
+      15
+     ],
+     "spread": 10,
+     "goal": "village",
+     "time": 60
+    },
+    {
+     "species": "troll",
+     "count": 1,
+     "at": [
+      80,
+      10
+     ],
+     "spread": 0,
+     "goal": "village",
+     "time": 90,
+     "announce": "A hill troll leads the last wave!"
+    },
+    {
+     "species": "goblin",
+     "count": 8,
+     "at": [
+      80,
+      15
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 92
+    }
+   ],
+   "mana": {
+    "start": 90,
+    "max": 120,
+    "regen": 3.2
+   },
+   "loadout": [
+    "creature:archer",
+    "creature:warden",
+    "material:wall_wood",
+    "spell:heal",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "kill",
+     "team": "monster",
+     "count": 31,
+     "text": "Beat back 31 raiders",
+     "short": "Raiders"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 cottages standing",
+     "failText": "Ashby burned",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Hold the valley"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "No cottage lost"
+    },
+    {
+     "type": "peopleLostMax",
+     "n": 0,
+     "text": "Nobody lost"
+    }
+   ],
+   "reward": "creature:archer",
+   "tip": "Archers shoot over the palisade. Put them just behind it, out of reach of goblin blades."
+  },
+  {
+   "id": "2-2",
+   "name": "Wolves at Bay",
+   "icon": "lvl-2-2",
+   "intro": [
+    "The flock is out on the high meadow, and the wolves know it.",
+    "Call knights and wardens to stand guard. Keep the flock alive until the snows."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 2202,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.15,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.4,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       120
+      ],
+      "r": 44
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       120
+      ],
+      "r": 30
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       120
+      ],
+      "r": 32,
+      "mat": "meadow"
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      34,
+      214
+     ],
+     "name": "Crook's End",
+     "people": 3,
+     "prebuilt": [
+      "cottage",
+      "farm"
+     ]
+    }
+   ],
+   "herds": [],
+   "spawns": [
+    {
+     "species": "sheep",
+     "count": 12,
+     "at": [
+      80,
+      120
+     ],
+     "spread": 7,
+     "tag": "flock"
+    },
+    {
+     "species": "wolf",
+     "count": 3,
+     "at": "north",
+     "time": 12,
+     "hunger": 0.8,
+     "goal": [
+      80,
+      120
+     ],
+     "announce": "Wolves on the north ridge!"
+    },
+    {
+     "species": "wolf",
+     "count": 3,
+     "at": "east",
+     "time": 40,
+     "hunger": 0.8,
+     "goal": [
+      80,
+      120
+     ],
+     "announce": "And from the east!"
+    },
+    {
+     "species": "wolf",
+     "count": 4,
+     "at": "west",
+     "time": 70,
+     "hunger": 0.8,
+     "goal": [
+      80,
+      120
+     ]
+    },
+    {
+     "species": "bear",
+     "count": 1,
+     "at": "south",
+     "time": 85,
+     "hunger": 0.9,
+     "goal": [
+      80,
+      120
+     ],
+     "announce": "A cave bear smells the flock..."
+    },
+    {
+     "species": "wolf",
+     "count": 5,
+     "at": "north",
+     "time": 100,
+     "hunger": 0.8,
+     "goal": [
+      80,
+      120
+     ],
+     "announce": "The whole pack comes at once!"
+    }
+   ],
+   "mana": {
+    "start": 90,
+    "max": 130,
+    "regen": 3.4
+   },
+   "loadout": [
+    "creature:knight",
+    "creature:warden",
+    "creature:archer",
+    "spell:heal",
+    "spell:bless",
+    "tool:grab",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "survive",
+     "secs": 130,
+     "text": "Keep watch until the snows",
+     "short": "Watch"
+    },
+    {
+     "type": "guard",
+     "species": "sheep",
+     "min": 7,
+     "text": "Keep at least 7 sheep alive",
+     "failText": "The wolves took the flock",
+     "short": "Flock"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "The flock survives"
+    },
+    {
+     "type": "aliveMin",
+     "species": "sheep",
+     "n": 14,
+     "text": "Finish with 14 sheep"
+    },
+    {
+     "type": "killedBy",
+     "species": "wolf",
+     "by": [
+      "village"
+     ],
+     "count": 10,
+     "text": "Your guards fell 10 wolves"
+    }
+   ],
+   "reward": "creature:knight",
+   "tip": "Knights hit hard and hold a spot. A blessing makes lambs while you fight."
+  },
+  {
+   "id": "2-3",
+   "name": "Stone Guardians",
+   "icon": "lvl-2-3",
+   "intro": [
+    "A ravine splits the valley, and one pass crosses it.",
+    "Trolls are coming by night. Wake stone guardians to hold the pass until the sun rises."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 2303,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.05,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.84,
+    "dayLength": 13000,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       120
+      ],
+      "r": 70
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       200
+      ],
+      "r": 26
+     },
+     {
+      "op": "line",
+      "at": [
+       0,
+       118
+      ],
+      "to": [
+       68,
+       118
+      ],
+      "r": 3,
+      "mat": "boulder"
+     },
+     {
+      "op": "line",
+      "at": [
+       92,
+       118
+      ],
+      "to": [
+       159,
+       118
+      ],
+      "r": 3,
+      "mat": "boulder"
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       118
+      ],
+      "r": 9,
+      "mat": "cobble",
+      "clearCells": true
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      200
+     ],
+     "name": "Pennick",
+     "people": 8,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "well",
+      "lamppost",
+      "lamppost"
+     ]
+    }
+   ],
+   "herds": [
+    [
+     "goat",
+     1,
+     4
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "goblin",
+     "count": 8,
+     "at": [
+      80,
+      20
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 4,
+     "announce": "Goblins first — the trolls are behind them."
+    },
+    {
+     "species": "troll",
+     "count": 1,
+     "at": [
+      60,
+      30
+     ],
+     "spread": 0,
+     "goal": "village",
+     "time": 8,
+     "announce": "A troll at the head of the valley!"
+    },
+    {
+     "species": "torchgob",
+     "count": 4,
+     "at": [
+      40,
+      20
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 22
+    },
+    {
+     "species": "troll",
+     "count": 2,
+     "at": [
+      100,
+      30
+     ],
+     "spread": 3,
+     "goal": "village",
+     "time": 35
+    },
+    {
+     "species": "goblin",
+     "count": 10,
+     "at": [
+      80,
+      15
+     ],
+     "spread": 10,
+     "goal": "village",
+     "time": 55
+    },
+    {
+     "species": "torchgob",
+     "count": 4,
+     "at": [
+      120,
+      20
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 60
+    },
+    {
+     "species": "troll",
+     "count": 2,
+     "at": [
+      80,
+      30
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 75,
+     "announce": "Two more trolls!"
+    }
+   ],
+   "mana": {
+    "start": 110,
+    "max": 150,
+    "regen": 3.6
+   },
+   "loadout": [
+    "creature:golem",
+    "creature:knight",
+    "creature:archer",
+    "spell:barrier",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "survive",
+     "secs": 140,
+     "text": "Hold the pass until sunrise",
+     "short": "Dawn"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 houses standing",
+     "failText": "The trolls broke Pennick",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "See the sun rise"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Not one house lost"
+    },
+    {
+     "type": "killedBy",
+     "species": "troll",
+     "by": [
+      "village"
+     ],
+     "count": 3,
+     "text": "Fell 3 trolls before dawn"
+    }
+   ],
+   "reward": "creature:golem",
+   "tip": "Golems are slow but stand like walls. Trolls turn to stone in the sunrise — you only have to last."
+  },
+  {
+   "id": "2-4",
+   "name": "Apprentices",
+   "icon": "lvl-2-4",
+   "intro": [
+    "The old fire-pits in the hills have spilled their imps.",
+    "Call mages to the village — their seeking darts fly true. Keep the roofs from burning."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 2404,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.12,
+     "rivers": 1,
+     "villages": 0,
+     "glades": 0,
+     "wet": -0.05
+    },
+    "clock": 0.62,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       190
+      ],
+      "r": 30
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       190
+      ],
+      "r": 22
+     },
+     {
+      "op": "dry",
+      "p": 0.1
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      190
+     ],
+     "name": "Wickmere",
+     "people": 9,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "well"
+     ]
+    }
+   ],
+   "herds": [
+    [
+     "chicken",
+     1,
+     4
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "imp",
+     "count": 6,
+     "at": [
+      40,
+      15
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 8,
+     "announce": "Imps! Every step they take catches fire."
+    },
+    {
+     "species": "imp",
+     "count": 8,
+     "at": [
+      120,
+      15
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 35
+    },
+    {
+     "species": "flamewraith",
+     "count": 2,
+     "at": [
+      80,
+      10
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 60,
+     "announce": "Flame wraiths drift down the hill."
+    },
+    {
+     "species": "imp",
+     "count": 10,
+     "at": "west",
+     "spread": 6,
+     "goal": "village",
+     "time": 85
+    },
+    {
+     "species": "imp",
+     "count": 10,
+     "at": "east",
+     "spread": 6,
+     "goal": "village",
+     "time": 100
+    }
+   ],
+   "mana": {
+    "start": 100,
+    "max": 140,
+    "regen": 3.8
+   },
+   "loadout": [
+    "creature:mage",
+    "creature:archer",
+    "spell:missiles",
+    "spell:barrier",
+    "spell:rain",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "kill",
+     "team": "monster",
+     "count": 34,
+     "text": "Put out every imp and wraith",
+     "short": "Imps"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 4,
+     "text": "Keep 4 cottages standing",
+     "failText": "Wickmere burned",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Wickmere stands"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Nothing burned"
+    },
+    {
+     "type": "killedBy",
+     "team": "monster",
+     "by": [
+      "village"
+     ],
+     "count": 20,
+     "text": "Your mages and archers take 20"
+    }
+   ],
+   "reward": "spell:missiles",
+   "tip": "Imps are quick and fragile. Mages fire three seeking darts at once; a Barrier keeps a fire from reaching the roofs."
+  },
+  {
+   "id": "2-5",
+   "name": "The Long March",
+   "icon": "lvl-2-5",
+   "intro": [
+    "Settlers are walking the old road to the new town at the lantern gate.",
+    "Goblins wait along the way. Call guards to walk with them and bring them home."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 2505,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.12,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.48,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "line",
+      "at": [
+       12,
+       20
+      ],
+      "to": [
+       60,
+       90
+      ],
+      "r": 2,
+      "mat": "cobble"
+     },
+     {
+      "op": "line",
+      "at": [
+       60,
+       90
+      ],
+      "to": [
+       110,
+       140
+      ],
+      "r": 2,
+      "mat": "cobble"
+     },
+     {
+      "op": "line",
+      "at": [
+       110,
+       140
+      ],
+      "to": [
+       80,
+       220
+      ],
+      "r": 2,
+      "mat": "cobble"
+     },
+     {
+      "op": "clear",
+      "at": [
+       12,
+       20
+      ],
+      "r": 8
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       222
+      ],
+      "r": 8
+     },
+     {
+      "op": "paint",
+      "at": [
+       74,
+       222
+      ],
+      "r": 0,
+      "mat": "lamp"
+     },
+     {
+      "op": "paint",
+      "at": [
+       86,
+       222
+      ],
+      "r": 0,
+      "mat": "lamp"
+     }
+    ]
+   },
+   "villages": false,
+   "herds": [
+    [
+     "deer",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "villager",
+     "count": 10,
+     "at": [
+      12,
+      20
+     ],
+     "spread": 3,
+     "goal": [
+      80,
+      222
+     ],
+     "tag": "settler"
+    },
+    {
+     "species": "goblin",
+     "count": 7,
+     "at": [
+      20,
+      100
+     ],
+     "spread": 4,
+     "time": 8,
+     "goal": [
+      60,
+      90
+     ],
+     "announce": "Goblins hiding in the west woods!"
+    },
+    {
+     "species": "wolf",
+     "count": 4,
+     "at": [
+      140,
+      80
+     ],
+     "spread": 4,
+     "time": 25,
+     "hunger": 0.9
+    },
+    {
+     "species": "goblin",
+     "count": 8,
+     "at": [
+      150,
+      150
+     ],
+     "spread": 5,
+     "time": 40,
+     "goal": [
+      110,
+      140
+     ],
+     "announce": "An ambush at the bend!"
+    },
+    {
+     "species": "torchgob",
+     "count": 4,
+     "at": [
+      30,
+      200
+     ],
+     "spread": 4,
+     "time": 60,
+     "goal": [
+      80,
+      200
+     ]
+    },
+    {
+     "species": "goblin",
+     "count": 8,
+     "at": [
+      140,
+      220
+     ],
+     "spread": 5,
+     "time": 70,
+     "goal": [
+      80,
+      215
+     ]
+    }
+   ],
+   "mana": {
+    "start": 100,
+    "max": 140,
+    "regen": 3.4
+   },
+   "loadout": [
+    "creature:archer",
+    "creature:knight",
+    "creature:warden",
+    "spell:heal",
+    "spell:barrier",
+    "tool:grab",
+    "tool:inspect"
+   ],
+   "timeLimit": 200,
+   "failText": "Night fell on the road before they arrived",
+   "goals": [
+    {
+     "type": "reach",
+     "tag": "settler",
+     "count": 6,
+     "zone": [
+      80,
+      222,
+      7
+     ],
+     "text": "Bring 6 settlers to the lantern gate",
+     "failText": "Too few settlers are left alive",
+     "short": "Settlers"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "A new town"
+    },
+    {
+     "type": "reachedMin",
+     "n": 9,
+     "text": "Bring 9 home"
+    },
+    {
+     "type": "timeMax",
+     "secs": 120,
+     "text": "Before two minutes are out"
+    }
+   ],
+   "reward": "spell:barrier",
+   "tip": "Settlers run from danger and lose the road. Clear the way ahead of them; the Grab tool can carry a straggler."
+  },
+  {
+   "id": "2-6",
+   "name": "Hold the Gate",
+   "icon": "lvl-2-6",
+   "intro": [
+    "Greyward has walls, one gate, and not enough soldiers.",
+    "Everything in the hills is coming. Fill the walls with archers, the gate with knights, and hold."
+   ],
+   "map": {
+    "W": 176,
+    "H": 256,
+    "seed": 2606,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.1,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.7,
+    "dayLength": 12000,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       88,
+       170
+      ],
+      "r": 46
+     },
+     {
+      "op": "clear",
+      "at": [
+       88,
+       170
+      ],
+      "r": 40
+     },
+     {
+      "op": "line",
+      "at": [
+       52,
+       132
+      ],
+      "to": [
+       80,
+       132
+      ],
+      "r": 1,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "line",
+      "at": [
+       96,
+       132
+      ],
+      "to": [
+       124,
+       132
+      ],
+      "r": 1,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "line",
+      "at": [
+       52,
+       132
+      ],
+      "to": [
+       52,
+       205
+      ],
+      "r": 1,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "line",
+      "at": [
+       124,
+       132
+      ],
+      "to": [
+       124,
+       205
+      ],
+      "r": 1,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "line",
+      "at": [
+       52,
+       205
+      ],
+      "to": [
+       124,
+       205
+      ],
+      "r": 1,
+      "mat": "wall_stone"
+     },
+     {
+      "op": "ground",
+      "at": [
+       88,
+       132
+      ],
+      "r": 6,
+      "mat": "cobble",
+      "clearCells": true
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      88,
+      172
+     ],
+     "name": "Greyward",
+     "people": 10,
+     "wardens": 2,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "stonehouse",
+      "stonehouse",
+      "farm",
+      "well",
+      "lamppost",
+      "lamppost"
+     ]
+    }
+   ],
+   "herds": [],
+   "spawns": [
+    {
+     "species": "goblin",
+     "count": 14,
+     "at": [
+      88,
+      15
+     ],
+     "spread": 12,
+     "goal": "village",
+     "time": 8,
+     "announce": "The first wave!"
+    },
+    {
+     "species": "torchgob",
+     "count": 6,
+     "at": [
+      30,
+      20
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 35
+    },
+    {
+     "species": "troll",
+     "count": 2,
+     "at": [
+      140,
+      15
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 55,
+     "announce": "Trolls — they will break the wall."
+    },
+    {
+     "species": "mite",
+     "count": 50,
+     "at": [
+      88,
+      10
+     ],
+     "spread": 12,
+     "goal": "village",
+     "time": 75
+    },
+    {
+     "species": "wyrmling",
+     "count": 2,
+     "at": [
+      20,
+      10
+     ],
+     "spread": 4,
+     "goal": "village",
+     "time": 95,
+     "announce": "Wyrmlings over the wall!"
+    },
+    {
+     "species": "goblin",
+     "count": 18,
+     "at": [
+      88,
+      15
+     ],
+     "spread": 14,
+     "goal": "village",
+     "time": 115,
+     "announce": "The last of them — everything at once!"
+    },
+    {
+     "species": "troll",
+     "count": 1,
+     "at": [
+      88,
+      10
+     ],
+     "spread": 0,
+     "goal": "village",
+     "time": 118
+    }
+   ],
+   "mana": {
+    "start": 130,
+    "max": 190,
+    "regen": 4.6
+   },
+   "loadout": [
+    "creature:archer",
+    "creature:mage",
+    "creature:knight",
+    "creature:golem",
+    "spell:barrier",
+    "spell:missiles",
+    "spell:heal",
+    "material:wall_stone",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "survive",
+     "secs": 160,
+     "text": "Hold Greyward until the last wave breaks",
+     "short": "Hold"
+    },
+    {
+     "type": "people",
+     "min": 7,
+     "text": "Keep 7 people alive",
+     "failText": "Greyward fell",
+     "short": "People"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 4,
+     "text": "Keep 4 houses standing",
+     "failText": "Greyward burned",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "The gate holds"
+    },
+    {
+     "type": "peopleLostMax",
+     "n": 2,
+     "text": "Lose 2 people at most"
+    },
+    {
+     "type": "manaUsedMax",
+     "n": 380,
+     "text": "Spend under 380 mana"
+    }
+   ],
+   "reward": "creature:mage",
+   "tip": "Archers on the inside of the wall are safe from blades. Knights in the gate stop the rush; golems stop trolls."
+  }
+ ]
+}

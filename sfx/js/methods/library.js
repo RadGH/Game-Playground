@@ -1,22 +1,19 @@
-// Method "library": real recorded samples from a CC0 pack.
+// Method "library": real recorded samples.
 //
-// The pack vendored under sfx/assets/kenney/ is three of Kenney's CC0 audio sets (RPG Audio,
-// Impact Sounds, Interface Sounds) — see sfx/assets/kenney/README.md for the download commands and
-// the licence files that came in the zips. CC0 means public domain: usable in a commercial game
-// with no credit required (crediting Kenney is still the decent thing to do).
-//
-// The pack does not cover everything. Fire, ice, shadow, holy, arcane, lightning and most statuses
-// have no matching recording, so those catalog ids simply have no "library" block and `has()`
-// answers false. That is what the "hybrid" method exists for.
+// Since 2026-10-29 every catalog id has recordings: sfx/assets/fs/ holds CC0 (public domain)
+// recordings from freesound.org, each with a `<file>.json` credit beside it, fetched and trimmed by
+// sfx/tools/freesound.py and mapped to ids in sfx/data/recordings/*.json; sfx/assets/kenney/ holds the
+// three Kenney CC0 packs still used for a few clicks and footsteps. Credits for all of them are in
+// sfx/data/credits.json (sfx/tools/build-credits.mjs) and shown by shared/credits.js.
 
 export const meta = {
   id: 'library',
-  name: 'Sample pack (Kenney CC0)',
+  name: 'Recordings (freesound + Kenney, CC0)',
   license: 'CC0 1.0 — public domain, commercial use fine',
   licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
   badge: 'CC0',
-  pros: ['Recorded, so hits and interface clicks sound real', 'Public domain: no credit or fee required', 'Cheap at runtime — decode once and replay'],
-  cons: ['Only covers about a third of the catalog (no spell elements, no ambience)', 'Ships ~3 MB of audio files', 'Every play of one id is the same recording unless variants are mapped'],
+  pros: ['Real recordings for every sound in the catalog', 'Public domain: no fee; authors credited anyway on the credits page', 'Cheap at runtime — decode once and replay'],
+  cons: ['Ships a few MB of audio files, fetched the first time each sound plays', 'Variety is limited to the 1-3 takes mapped per id (plus a small pitch wobble)'],
 };
 
 /** True when this catalog entry has files mapped to it. */

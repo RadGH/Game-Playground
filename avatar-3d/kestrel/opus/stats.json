@@ -1,0 +1,52 @@
+{
+ "about": "Headless numbers (node, this VM). buildMs = first build of that look in this process (the very first build also pays JIT warm-up: coldMs); cachedMs = the same look again.",
+ "male": {
+  "triangles": 11649,
+  "drawCalls": 1,
+  "bones": 64,
+  "textures": 0,
+  "buildMs": 141,
+  "cachedMs": 1.4,
+  "lod1Triangles": 3214,
+  "height": 1.78
+ },
+ "female": {
+  "triangles": 11373,
+  "drawCalls": 1,
+  "bones": 64,
+  "textures": 0,
+  "buildMs": 68,
+  "cachedMs": 1.4,
+  "lod1Triangles": 3474,
+  "height": 1.68
+ },
+ "outfit": {
+  "male": {
+   "triangles": 10006,
+   "drawCalls": 1,
+   "bones": 64,
+   "textures": 0,
+   "buildMs": 93,
+   "cachedMs": 1.2,
+   "lod1Triangles": 3259,
+   "height": 1.78,
+   "addsTriangles": -1643
+  },
+  "female": {
+   "triangles": 9886,
+   "drawCalls": 1,
+   "bones": 64,
+   "textures": 0,
+   "buildMs": 69,
+   "cachedMs": 1.9,
+   "lod1Triangles": 3327,
+   "height": 1.68,
+   "addsTriangles": -1487
+  }
+ },
+ "coldMs": 217,
+ "cache": {
+  "templates": 5,
+  "references": 0
+ }
+}

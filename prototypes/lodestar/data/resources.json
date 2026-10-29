@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "_doc": "Every resource (PLAN §2, ROAST 2.5). `kind`: raw (dug or cut) | refined (made) | arcane (M6). `colour` is the scope/ledger tint. `sources` say which cell materials a camp or drill takes a raw from: an ore cell's `amt` byte counts lumps of `unitsPerAmt` units (§3.1), so a camp lifts one lump at a time and the cell's amt falls by one; at zero the cell becomes `becomes`. A tree cell has no amt: cutting it gives `yield` units at once. Order of `list` is the ledger/stores order; append new rows at the end.",
+  "unitsPerAmt": 8,
+  "list": [
+    { "id": "timber", "name": "Timber", "short": "TMB", "kind": "raw", "colour": "#8a6234" },
+    { "id": "stone", "name": "Stone", "short": "STN", "kind": "raw", "colour": "#a7a39a" },
+    { "id": "copper_ore", "name": "Copper ore", "short": "CU ORE", "kind": "raw", "colour": "#c07a45" },
+    { "id": "iron_ore", "name": "Iron ore", "short": "FE ORE", "kind": "raw", "colour": "#9a6050" },
+    { "id": "coal", "name": "Coal", "short": "COAL", "kind": "raw", "colour": "#45423f" },
+    { "id": "sand", "name": "Silica sand", "short": "SAND", "kind": "raw", "colour": "#e3d6a8" },
+    { "id": "crystal", "name": "Mana crystal", "short": "CRYS", "kind": "arcane", "colour": "#9a6cf0", "_note": "harvested in M6" },
+    { "id": "planks", "name": "Planks", "short": "PLNK", "kind": "refined", "colour": "#c49a5a" },
+    { "id": "block", "name": "Stone block", "short": "BLCK", "kind": "refined", "colour": "#cfcac0" },
+    { "id": "copper_bar", "name": "Copper bar", "short": "CU BAR", "kind": "refined", "colour": "#e08a4a" },
+    { "id": "iron_bar", "name": "Iron bar", "short": "FE BAR", "kind": "refined", "colour": "#9fa8ad" },
+    { "id": "food", "name": "Food", "short": "FOOD", "kind": "town", "colour": "#d9b45a", "_note": "M7: farms and fisheries make it, houses eat it" },
+    { "id": "water", "name": "Water", "short": "H2O", "kind": "town", "colour": "#5aa6d0", "_note": "M7: wells draw it, houses drink it" },
+    { "id": "mana", "name": "Refined mana", "short": "MANA", "kind": "arcane", "colour": "#c29cff", "_m6": "made by the mana refinery inside the HQ yard ring; js/sim/mana pours it into the HQ mana store while there is room (it waits in jars when the store is full)" }
+  ],
+  "sources": {
+    "timber": { "mats": ["tree"], "yield": 6, "becomes": "stumps", "tool": "lumber" },
+    "stone": { "mats": ["ore_stone"], "becomes": "scar", "tool": "camp" },
+    "copper_ore": { "mats": ["ore_copper"], "becomes": "scar", "tool": "camp" },
+    "iron_ore": { "mats": ["ore_iron"], "becomes": "scar", "tool": "camp" },
+    "coal": { "mats": ["ore_coal"], "becomes": "scar", "tool": "camp" },
+    "sand": { "mats": ["ore_sand"], "becomes": "sand", "tool": "camp" },
+    "crystal": { "mats": ["crystal"], "becomes": "scar", "tool": "harvester", "_m6": "crystal clusters grow back while any crystal cell is left (js/sim/mana/crystals.js)" }
+  },
+  "deposits": {
+    "_doc": "Shallow deposits under the ground (§3.1 records, not cells). Counts are for a Normal map and scale with map area. Revealed only by a survey thumper pulse. `amt` is units.",
+    "shallow": { "copper_ore": 4, "iron_ore": 4, "coal": 3, "stone": 2 },
+    "r": [10, 18],
+    "amt": [4000, 12000],
+    "minHqDist": 70,
+    "waterGap": 6
+  }
+}

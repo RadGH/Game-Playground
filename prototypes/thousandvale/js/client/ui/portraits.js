@@ -25,6 +25,7 @@ import { deviceAllowsLive, canvasMatches, squareOnCanvas } from './portrait-mode
 // G-PROPS 2026-10-16: painted art for monsters / townsfolk, a painted-look filter on the live face (?props=0 = neither)
 import { paintedUrl, paintFilter } from './painted-portraits.js';
 import { propsOff } from '../surface-plan.js';
+import { KESTREL } from '../chars-mode.js';      // ?chars=kestrel (batch 1): Kestrel faces are framed and cached on their own
 const PAINT = !propsOff();
 
 export const PORTRAIT_LAYER = 1;
@@ -38,7 +39,7 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
   const nav = typeof navigator !== 'undefined' ? navigator : {};
   const coarse = (() => { try { return matchMedia('(pointer: coarse)').matches; } catch { return false; } })();
   const SOFT = software ?? (softwareRenderer(renderer) || !deviceAllowsLive({ ua: nav.userAgent || '', platform: nav.platform || '', maxTouchPoints: nav.maxTouchPoints || 0, coarse }));
-  const VER = VERSION + (SOFT ? 's' : '');
+  const VER = VERSION + (SOFT ? 's' : '') + (KESTREL ? 'k' : '');      // Kestrel faces are their own cached pictures
   let flat = SOFT;                  // this pass: the 2D picture (true) or the live 3D one (false)
   let flatWhy = SOFT ? 'device' : '';
   // ---------------------------------------------------------------- live
@@ -109,9 +110,11 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
     // Z54 (live #55): a humanoid MONSTER (a brigand, a Slagborn) has a face too — framed like a person's, at its own size
     // (it was framed as a beast, whole body, so a Giant came out a speck in the corner)
     const creature = !(a.kind === 'player' || a.kind === 'npc' || a.humanoid) || a.pet || !head;
-    if (head && !creature) { head.getWorldPosition(_h); _h.y += a.height * 0.1; }
+    // a Kestrel body (`?chars=kestrel`) says where its face is: a real head is a seventh of the body, not a third
+    const ff = !creature && b.faceFrame ? b.faceFrame() : null, k = (a.big || 1) / (a.builtBig || 1);
+    if (head && !creature) { head.getWorldPosition(_h); _h.y += ff ? ff.up * k : a.height * 0.1; }
     else { const p = a.group.position; _h.set(p.x, p.y + (a.pickTop || a.height) * 0.62, p.z); }
-    const r = creature ? Math.max(0.35, (a.pickR || 0.6) * 0.75, (a.pickTop || a.height) * 0.33) : Math.max(0.24, a.height * 0.2);
+    const r = creature ? Math.max(0.35, (a.pickR || 0.6) * 0.75, (a.pickTop || a.height) * 0.33) : ff ? ff.r * k : Math.max(0.24, a.height * 0.2);
     const yaw = (a.model ? a.model.rotation.y : a.yaw || 0) + (creature ? 0.75 : 0.32);
     const dist = r / Math.sin(THREE.MathUtils.degToRad(cam.fov) / 2);
     cam.position.set(_h.x + Math.sin(yaw) * dist, _h.y + dist * 0.12, _h.z + Math.cos(yaw) * dist);
@@ -309,8 +312,9 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
     const H = body.metrics?.().height || 1.8;
     const head = body.parts?.head;
     const t = new THREE.Vector3();
-    if (head) { head.getWorldPosition(t); t.y += H * 0.1; } else t.set(0, H * 0.85, 0);
-    const rad = H * 0.2, dist = rad / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2);
+    const ff = body.faceFrame?.() || null;      // a Kestrel body frames its own (smaller) face
+    if (head) { head.getWorldPosition(t); t.y += ff ? ff.up : H * 0.1; } else t.set(0, H * 0.85, 0);
+    const rad = ff ? ff.r : H * 0.2, dist = rad / Math.sin(THREE.MathUtils.degToRad(camera.fov) / 2);
     camera.position.set(t.x + Math.sin(0.32) * dist, t.y + dist * 0.12, t.z + Math.cos(0.32) * dist);
     camera.near = 0.01; camera.far = dist + 5; camera.lookAt(t); camera.updateProjectionMatrix();
     r.clear(); r.render(s2, camera);

@@ -299,10 +299,23 @@ RETRO_PATTERN = {
 }
 
 
+# ---------------------------------------------------------------------------------------------
+# recordings: sfx/data/recordings/*.json map an id to real CC0 recordings under sfx/assets/ (mostly
+# fs/ = freesound.org, each file with a .json credit beside it). They win over the Kenney table.
+RECORDINGS = {}
+_RDIR = os.path.join(HERE, '..', 'data', 'recordings')
+if os.path.isdir(_RDIR):
+    for _name in sorted(os.listdir(_RDIR)):
+        if _name.endswith('.json'):
+            RECORDINGS.update(json.load(open(os.path.join(_RDIR, _name))))
+
+
 def entry(sid, category, label, synth_dur, layers, loop=False, trim=0.0, retro_over=None):
     e = {'id': sid, 'category': category, 'label': label, 'loop': loop, 'trim': trim,
          'synth': {'dur': round(synth_dur, 3), 'jitter': 0.06, 'layers': layers}}
-    if sid in LIBRARY:
+    if sid in RECORDINGS:
+        e['library'] = {'files': RECORDINGS[sid]['files'], 'pitch': [1, 1] if loop else [0.95, 1.05]}
+    elif sid in LIBRARY:
         e['library'] = {'files': LIBRARY[sid], 'pitch': [0.94, 1.06]}
     r = dict(RETRO_PATTERN.get(category, RETRO_PATTERN['ui']))
     if retro_over:
@@ -322,7 +335,7 @@ def build():
             cat = 'impact' if phase == 'impact' else 'spell'
             out.append(entry('spell.%s.%s' % (el, phase), cat,
                              '%s %s' % (el.capitalize(), labels[phase]),
-                             dur, layers, loop=(phase == 'travel')))
+                             dur, layers))  # 'travel' is a one-shot whoosh: a loop nobody stopped hung on forever
     for st in STATUSES:
         el, layers = STATUS_RECIPE[st]
         dur = max(l.get('dur', 0.3) + l.get('delay', 0) for l in layers)
@@ -666,6 +679,49 @@ def world_sounds():
         chord(2.00, [220, 261.63, 329.63], 'triangle', gain=0.35, stagger=0.04, delay=0.1),
         chord(1.60, [246.94, 311.13, 369.99], 'triangle', gain=0.35, stagger=0.04, delay=0.9),
         noise(2.00, 300, 1200, 0.8, color='pink', gain=0.2, a=0.6, curve='lin')]))
+    # --- 2026-10-29: big set pieces for Kindlewild (and anyone else). The recordings carry these;
+    # the synth recipe is only the fallback when a file fails to load.
+    W.append(entry('explosion.small', 'impact', 'Small explosion', 0.70, [
+        noise(0.60, 1800, 200, 0.8, ftype='lowpass', color='brown', gain=0.9, a=0.002),
+        tone(0.35, 90, 40, 'sine', gain=0.7)]))
+    W.append(entry('explosion.large', 'impact', 'Big explosion', 1.80, [
+        noise(1.70, 1400, 90, 0.7, ftype='lowpass', color='brown', gain=1.0, a=0.003),
+        tone(0.90, 60, 28, 'sine', gain=0.9),
+        grain(1.20, 24, 200, 1800, 0.01, 0.05, gain=0.3, noisy=True, delay=0.1)]))
+    W.append(entry('meteor.fall', 'spell', 'Falling star whistle', 1.60, [
+        noise(1.50, 600, 2600, 2.0, color='pink', gain=0.6, a=1.2, d=0.3, curve='lin'),
+        tone(1.50, 1400, 500, 'sine', gain=0.2, a=1.0, d=0.5)]))
+    W.append(entry('thunder', 'impact', 'Thunder crack and rumble', 2.60, [
+        noise(0.15, 5000, 2000, 0.7, ftype='highpass', gain=0.9, a=0.001),
+        noise(2.50, 400, 60, 0.7, ftype='lowpass', color='brown', gain=0.9, a=0.05, delay=0.05)]))
+    W.append(entry('tornado', 'spell', 'Whirlwind', 3.20, [
+        drone(3.20, 300, 1400, 1.5, 'pink', gain=0.7, lfo=1.7, depth=0.7),
+        noise(3.0, 120, 300, 0.9, ftype='lowpass', color='brown', gain=0.5, a=0.8, curve='lin')]))
+    W.append(entry('quake.rumble', 'impact', 'Earthquake rumble', 2.40, [
+        noise(2.30, 160, 50, 0.8, ftype='lowpass', color='brown', gain=1.0, a=0.2, curve='lin'),
+        grain(2.0, 30, 150, 900, 0.01, 0.05, gain=0.3, noisy=True)]))
+    W.append(entry('dragon.roar', 'death', 'Dragon roar', 2.00, [
+        fm(1.80, 140, 80, ratio=1.5, index=600, index1=150, gain=0.7, a=0.08),
+        noise(1.80, 900, 300, 1.0, color='brown', gain=0.6, a=0.08)]))
+    W.append(entry('beast.growl', 'world', 'Monster growl', 1.00, [
+        fm(0.90, 90, 70, ratio=1.3, index=300, index1=80, gain=0.7, a=0.05),
+        noise(0.90, 500, 250, 1.2, color='brown', gain=0.4, a=0.05)]))
+    W.append(entry('wolf.howl', 'world', 'Wolf howl', 2.20, [
+        tone(2.10, 420, 560, 'sine', gain=0.6, a=0.3, vib=(5, 8))]))
+    W.append(entry('arrow.shot', 'melee', 'Bow shot', 0.45, [
+        pluck(0.30, 180, 0.6, gain=0.6),
+        noise(0.30, 2500, 5000, 1.2, ftype='highpass', gain=0.35, a=0.01, delay=0.03)]))
+    W.append(entry('magic.missile', 'spell', 'Magic dart', 0.30, [
+        tone(0.25, 1800, 900, 'sine', gain=0.5), noise(0.2, 4000, 2000, 2.0, gain=0.2)]))
+    W.append(entry('lava.bubble', 'world', 'Lava bubbling', 0.50, [
+        tone(0.20, 120, 260, 'sine', gain=0.7), tone(0.18, 150, 300, 'sine', gain=0.5, delay=0.2)]))
+    W.append(entry('crowd.cheer', 'sting', 'Village cheer', 2.00, [
+        noise(1.90, 800, 2400, 0.8, color='pink', gain=0.6, a=0.15)]))
+    W.append(entry('ambience.night', 'ambience', 'Ambience: night', 3.0, [
+        grain(3.0, 40, 4200, 5200, 0.01, 0.03, gain=0.2), drone(3.0, 200, 600, 0.8, 'pink', gain=0.1)], loop=True))
+    W.append(entry('ambience.storm', 'ambience', 'Ambience: storm', 3.0, [
+        drone(3.0, 500, 1800, 0.8, 'pink', gain=0.4, lfo=0.2, depth=0.5),
+        drone(3.0, 60, 200, 1.0, 'brown', gain=0.4, lfo=0.07, depth=0.5)], loop=True))
     return W
 
 

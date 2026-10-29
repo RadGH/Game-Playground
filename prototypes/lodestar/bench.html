@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lodestar — cell world bench</title>
+<link rel="stylesheet" href="bench/bench.css">
+</head>
+<body>
+<canvas id="scope" aria-label="Cell world"></canvas>
+<div id="readout" class="panel" aria-live="polite">loading…</div>
+<div id="dock">
+  <div id="tools" class="row" role="toolbar" aria-label="Tools"></div>
+  <div id="mats" class="row" role="toolbar" aria-label="Materials"></div>
+  <div id="more" class="row hidden">
+    <label>Brush <input id="brush" type="range" min="1" max="24" value="5"></label>
+    <label>Time <input id="tod" type="range" min="0" max="1000" value="420"></label>
+    <label>Wind <select id="windDir"></select></label>
+    <label>Gust <input id="windStr" type="range" min="0" max="3" value="1"></label>
+    <label>Quality <select id="quality"><option>low</option><option selected>standard</option><option>high</option></select></label>
+    <label class="tick"><input id="crt" type="checkbox" checked> CRT</label>
+    <label>Speed <select id="tps"><option value="0">pause</option><option value="20" selected>1×</option><option value="40">2×</option><option value="80">4×</option></select></label>
+    <label>Seed <input id="seed" type="number" value="7" min="1"></label>
+    <label>Map <select id="mapSize"><option>small</option><option selected>normal</option><option>large</option></select></label>
+    <button id="regen" type="button">New map</button>
+    <button id="stressFires" type="button">80 fires</button>
+    <button id="stressBlasts" type="button">50 blasts</button>
+    <button id="rainAll" type="button">Rain: off</button>
+    <button id="goto" type="button">Next sight</button>
+  </div>
+</div>
+<script type="module" src="bench/bench.js"></script>
+</body>
+</html>

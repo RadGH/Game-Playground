@@ -1,0 +1,1440 @@
+{
+ "id": "act4",
+ "name": "Act IV — Stormcrown",
+ "blurb": "Storms over the high country, and the things that fly in them.",
+ "levels": [
+  {
+   "id": "4-1",
+   "name": "Thunder on the Downs",
+   "icon": "lvl-4-1",
+   "intro": [
+    "A goblin host is crossing the open downs toward Highcombe, and there is nowhere for it to hide.",
+    "Call thunderstorms down on them. The wind will carry the clouds north, into their faces."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 4101,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0,
+     "wet": 0.1
+    },
+    "clock": 0.55,
+    "freezeTime": true,
+    "wind": [
+     0,
+     -1,
+     1.4
+    ],
+    "windLocked": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       120
+      ],
+      "r": 100,
+      "h": 80
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       110
+      ],
+      "r": 70
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       110
+      ],
+      "r": 70,
+      "mat": "meadow"
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       110
+      ],
+      "r": 70,
+      "mat": "tallgrass",
+      "density": 0.05
+     },
+     {
+      "op": "ridge",
+      "at": [
+       0,
+       96
+      ],
+      "to": [
+       159,
+       112
+      ],
+      "r": 4,
+      "h": -2
+     },
+     {
+      "op": "line",
+      "at": [
+       0,
+       96
+      ],
+      "to": [
+       159,
+       112
+      ],
+      "r": 2,
+      "mat": "water",
+      "amount": 5
+     },
+     {
+      "op": "ridge",
+      "at": [
+       0,
+       150
+      ],
+      "to": [
+       159,
+       140
+      ],
+      "r": 4,
+      "h": -2
+     },
+     {
+      "op": "line",
+      "at": [
+       0,
+       150
+      ],
+      "to": [
+       159,
+       140
+      ],
+      "r": 2,
+      "mat": "water",
+      "amount": 5
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       208
+      ],
+      "r": 24
+     },
+     {
+      "op": "paint",
+      "at": [
+       30,
+       196
+      ],
+      "r": 6,
+      "mat": "water",
+      "amount": 40
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      208
+     ],
+     "people": 8,
+     "wardens": 3,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "tower",
+      "farm",
+      "well"
+     ],
+     "name": "Highcombe"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     1,
+     4
+    ],
+    [
+     "rabbit",
+     2,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "goblin",
+     "count": 16,
+     "at": [
+      80,
+      8
+     ],
+     "spread": 14,
+     "goal": "village",
+     "time": 5,
+     "announce": "The goblin host is on the downs!"
+    },
+    {
+     "species": "goblin",
+     "count": 18,
+     "at": [
+      40,
+      8
+     ],
+     "spread": 14,
+     "goal": "village",
+     "time": 28
+    },
+    {
+     "species": "goblin",
+     "count": 18,
+     "at": [
+      120,
+      8
+     ],
+     "spread": 14,
+     "goal": "village",
+     "time": 52
+    },
+    {
+     "species": "torchgob",
+     "count": 4,
+     "at": [
+      80,
+      8
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 54,
+     "announce": "Firebrands among them!"
+    },
+    {
+     "species": "goblin",
+     "count": 22,
+     "at": [
+      80,
+      8
+     ],
+     "spread": 18,
+     "goal": "village",
+     "time": 76,
+     "announce": "The main body of the host!"
+    },
+    {
+     "species": "torchgob",
+     "count": 4,
+     "at": [
+      80,
+      8
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 78
+    }
+   ],
+   "mana": {
+    "start": 90,
+    "max": 150,
+    "regen": 4.2
+   },
+   "loadout": [
+    "spell:storm",
+    "spell:lightning",
+    "spell:rain",
+    "material:water",
+    "tool:inspect"
+   ],
+   "timeLimit": 180,
+   "failText": "The host is still on the downs",
+   "goals": [
+    {
+     "type": "kill",
+     "team": "monster",
+     "count": 66,
+     "text": "Break the goblin host (66)",
+     "short": "Host"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 cottages standing",
+     "failText": "Highcombe was overrun",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Break the host"
+    },
+    {
+     "type": "killedBy",
+     "team": "monster",
+     "by": [
+      "shock"
+     ],
+     "count": 20,
+     "text": "Shock 20 of them in the streams"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Lose no cottage"
+    }
+   ],
+   "reward": "spell:acidrain",
+   "tip": "A thunderstorm throws bolts all over the ground under it and drifts with the wind. A bolt that lands in a stream hits everyone wading in it."
+  },
+  {
+   "id": "4-2",
+   "name": "The Griffin Moor",
+   "icon": "lvl-4-2",
+   "intro": [
+    "Golden griffins have come down off the crags, and Tamsin’s flock is what they are hungry for.",
+    "Post archers, send up missiles and bolts, and keep the flock alive until the griffins give up."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 4202,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.1,
+     "rivers": 1,
+     "villages": 0,
+     "glades": 0,
+     "wet": 0.3
+    },
+    "clock": 0.4,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       170
+      ],
+      "r": 44
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       170
+      ],
+      "r": 32
+     },
+     {
+      "op": "ground",
+      "at": [
+       80,
+       170
+      ],
+      "r": 34,
+      "mat": "meadow"
+     },
+     {
+      "op": "raise",
+      "at": [
+       30,
+       20
+      ],
+      "r": 26,
+      "h": 40
+     },
+     {
+      "op": "raise",
+      "at": [
+       134,
+       26
+      ],
+      "r": 24,
+      "h": 40
+     },
+     {
+      "op": "ground",
+      "at": [
+       30,
+       20
+      ],
+      "r": 22,
+      "mat": "rock",
+      "clearCells": true
+     },
+     {
+      "op": "ground",
+      "at": [
+       134,
+       26
+      ],
+      "r": 20,
+      "mat": "rock",
+      "clearCells": true
+     },
+     {
+      "op": "paint",
+      "at": [
+       30,
+       20
+      ],
+      "r": 22,
+      "mat": "boulder",
+      "density": 0.12
+     },
+     {
+      "op": "paint",
+      "at": [
+       134,
+       26
+      ],
+      "r": 20,
+      "mat": "boulder",
+      "density": 0.12
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       214
+      ],
+      "r": 16
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      210
+     ],
+     "people": 4,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "farm"
+     ],
+     "name": "Tamsin’s Fold"
+    }
+   ],
+   "herds": [
+    [
+     "rabbit",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "sheep",
+     "count": 24,
+     "at": [
+      80,
+      172
+     ],
+     "spread": 14,
+     "tag": "flock"
+    },
+    {
+     "species": "griffin",
+     "count": 3,
+     "at": [
+      30,
+      16
+     ],
+     "spread": 3,
+     "team": "monster",
+     "hunger": 1,
+     "goal": [
+      80,
+      172
+     ],
+     "time": 6,
+     "announce": "Griffins off the western crag!"
+    },
+    {
+     "species": "griffin",
+     "count": 3,
+     "at": [
+      134,
+      22
+     ],
+     "spread": 3,
+     "team": "monster",
+     "hunger": 1,
+     "goal": [
+      80,
+      172
+     ],
+     "time": 30,
+     "announce": "More from the east!"
+    },
+    {
+     "species": "griffin",
+     "count": 4,
+     "at": [
+      80,
+      4
+     ],
+     "spread": 6,
+     "team": "monster",
+     "hunger": 1,
+     "goal": [
+      80,
+      172
+     ],
+     "time": 58,
+     "announce": "A whole pride is coming!"
+    },
+    {
+     "species": "griffin",
+     "count": 4,
+     "at": [
+      30,
+      16
+     ],
+     "spread": 4,
+     "team": "monster",
+     "hunger": 1,
+     "goal": [
+      80,
+      172
+     ],
+     "time": 88,
+     "announce": "The last of the pride, hungriest of all."
+    }
+   ],
+   "mana": {
+    "start": 90,
+    "max": 150,
+    "regen": 4.4
+   },
+   "loadout": [
+    "creature:archer",
+    "spell:missiles",
+    "spell:lightning",
+    "spell:heal",
+    "spell:barrier",
+    "tool:grab",
+    "tool:inspect"
+   ],
+   "timeLimit": 170,
+   "failText": "The griffins are still circling",
+   "goals": [
+    {
+     "type": "kill",
+     "species": "griffin",
+     "count": 13,
+     "text": "Bring down 13 griffins",
+     "short": "Griffins"
+    },
+    {
+     "type": "guard",
+     "species": "sheep",
+     "tag": "flock",
+     "min": 12,
+     "text": "Keep 12 of the flock alive",
+     "failText": "The flock was taken",
+     "short": "Flock"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Save the flock"
+    },
+    {
+     "type": "aliveMin",
+     "species": "sheep",
+     "n": 20,
+     "text": "End with 20 sheep or more"
+    },
+    {
+     "type": "timeMax",
+     "secs": 115,
+     "text": "Clear the sky within 115 seconds"
+    }
+   ],
+   "reward": "creature:griffin",
+   "tip": "Arrows and Arcane Missiles reach a griffin in the air; blasts do not. A Barrier over the flock keeps their claws off."
+  },
+  {
+   "id": "4-3",
+   "name": "Eye of the Gale",
+   "icon": "lvl-4-3",
+   "intro": [
+    "Three great swarms are boiling across the fields toward Windlow.",
+    "A Whirlwind tears them to bits, but it will tear the thatch off a roof just as happily.",
+    "Steer it with the wind and keep it off the houses."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 4303,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.05,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.5,
+    "freezeTime": true,
+    "wind": [
+     0,
+     0.3,
+     0.6
+    ],
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       120
+      ],
+      "r": 100,
+      "h": 80
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       200
+      ],
+      "r": 22
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      202
+     ],
+     "people": 9,
+     "wardens": 2,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "farm",
+      "well"
+     ],
+     "name": "Windlow"
+    }
+   ],
+   "herds": [
+    [
+     "cow",
+     1,
+     3
+    ],
+    [
+     "chicken",
+     1,
+     4
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "mite",
+     "count": 70,
+     "at": [
+      40,
+      20
+     ],
+     "spread": 14,
+     "goal": "village",
+     "time": 4,
+     "announce": "A swarm from the north-west!"
+    },
+    {
+     "species": "mite",
+     "count": 70,
+     "at": [
+      130,
+      30
+     ],
+     "spread": 14,
+     "goal": "village",
+     "time": 34,
+     "announce": "Another from the north-east!"
+    },
+    {
+     "species": "goblin",
+     "count": 8,
+     "at": [
+      80,
+      10
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 50
+    },
+    {
+     "species": "mite",
+     "count": 90,
+     "at": [
+      80,
+      16
+     ],
+     "spread": 18,
+     "goal": "village",
+     "time": 70,
+     "announce": "The biggest swarm yet, straight down the middle!"
+    },
+    {
+     "species": "mite",
+     "count": 40,
+     "at": [
+      10,
+      120
+     ],
+     "spread": 10,
+     "goal": "village",
+     "time": 96
+    },
+    {
+     "species": "mite",
+     "count": 40,
+     "at": [
+      150,
+      120
+     ],
+     "spread": 10,
+     "goal": "village",
+     "time": 98
+    }
+   ],
+   "mana": {
+    "start": 100,
+    "max": 160,
+    "regen": 4
+   },
+   "loadout": [
+    "spell:tornado",
+    "spell:gale",
+    "spell:barrier",
+    "spell:fireball",
+    "spell:rain",
+    "tool:inspect"
+   ],
+   "timeLimit": 170,
+   "failText": "The swarms are still in the fields",
+   "goals": [
+    {
+     "type": "kill",
+     "team": "monster",
+     "count": 270,
+     "text": "Shred the swarms (270)",
+     "short": "Swarm"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 cottages standing",
+     "failText": "Windlow was stripped bare",
+     "short": "Houses"
+    },
+    {
+     "type": "people",
+     "min": 5,
+     "text": "Keep 5 people alive",
+     "failText": "Windlow was stripped bare",
+     "short": "People"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Scatter the swarms"
+    },
+    {
+     "type": "killedBy",
+     "team": "monster",
+     "by": [
+      "tornado"
+     ],
+     "count": 150,
+     "text": "Whirl away 150 of them"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Not a roof torn off"
+    }
+   ],
+   "reward": "spell:tornado",
+   "tip": "A Whirlwind drifts with the wind. Drag a Gale to point it, and put up a Barrier if it wanders toward the houses."
+  },
+  {
+   "id": "4-4",
+   "name": "Three on the Wing",
+   "icon": "lvl-4-4",
+   "intro": [
+    "Young green wyrms hunt in threes, and a brood of them has found Pellbury.",
+    "Every one can breathe fire on a roof. Bring them down before the village is ash."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 4404,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.18,
+     "rivers": 1,
+     "villages": 0,
+     "glades": 0
+    },
+    "clock": 0.6,
+    "freezeTime": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       150
+      ],
+      "r": 32
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       150
+      ],
+      "r": 26
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      152
+     ],
+     "people": 10,
+     "wardens": 2,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "stonehouse",
+      "farm",
+      "well",
+      "tower"
+     ],
+     "name": "Pellbury"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     2,
+     4
+    ],
+    [
+     "cow",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "wyrmling",
+     "count": 3,
+     "at": [
+      80,
+      8
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 5,
+     "announce": "Three wyrms out of the north!"
+    },
+    {
+     "species": "wyrmling",
+     "count": 3,
+     "at": [
+      8,
+      120
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 45,
+     "announce": "Three more from the west!"
+    },
+    {
+     "species": "wyrmling",
+     "count": 3,
+     "at": [
+      152,
+      200
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 80,
+     "announce": "And three from the south-east!"
+    },
+    {
+     "species": "wyrmling",
+     "count": 3,
+     "at": [
+      80,
+      8
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 110,
+     "announce": "The brood mother sends her last three."
+    }
+   ],
+   "mana": {
+    "start": 100,
+    "max": 170,
+    "regen": 4.6
+   },
+   "loadout": [
+    "spell:missiles",
+    "spell:barrier",
+    "spell:lightning",
+    "spell:rain",
+    "creature:archer",
+    "tool:inspect"
+   ],
+   "timeLimit": 175,
+   "failText": "The wyrms still circle Pellbury",
+   "goals": [
+    {
+     "type": "kill",
+     "species": "wyrmling",
+     "count": 12,
+     "text": "Bring down all 12 wyrms",
+     "short": "Wyrms"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 houses standing",
+     "failText": "Pellbury burned",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Clear the sky"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 1,
+     "text": "Lose one house at most"
+    },
+    {
+     "type": "killedBy",
+     "species": "wyrmling",
+     "by": [
+      "missiles"
+     ],
+     "count": 6,
+     "text": "Six wyrms to Arcane Missiles"
+    }
+   ],
+   "reward": "spell:firewall",
+   "tip": "Arcane Missiles chase a wyrm wherever it flies. A Barrier over the roofs stops their breath at its skin."
+  },
+  {
+   "id": "4-5",
+   "name": "Ashes and Wings",
+   "icon": "lvl-4-5",
+   "intro": [
+    "A phoenix nests in the Ashwood, and every feather it drops sets the trees alight.",
+    "Bring it down, and when it rises again from its own ashes, bring it down a second time.",
+    "Keep the fire away from Rookhill while you do."
+   ],
+   "map": {
+    "W": 160,
+    "H": 240,
+    "seed": 4505,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0,
+     "rivers": 0,
+     "villages": 0,
+     "glades": 0,
+     "wet": -0.1,
+     "temp": 0.35
+    },
+    "clock": 0.55,
+    "freezeTime": true,
+    "wind": [
+     0.2,
+     1,
+     1.1
+    ],
+    "windLocked": true,
+    "ops": [
+     {
+      "op": "drain"
+     },
+     {
+      "op": "dry",
+      "p": 0.15
+     },
+     {
+      "op": "flatten",
+      "at": [
+       80,
+       200
+      ],
+      "r": 26
+     },
+     {
+      "op": "paint",
+      "at": [
+       80,
+       80
+      ],
+      "r": 50,
+      "mat": "tree",
+      "density": 0.55
+     },
+     {
+      "op": "paint",
+      "at": [
+       30,
+       150
+      ],
+      "r": 20,
+      "mat": "tree",
+      "density": 0.35
+     },
+     {
+      "op": "paint",
+      "at": [
+       130,
+       150
+      ],
+      "r": 20,
+      "mat": "tree",
+      "density": 0.35
+     },
+     {
+      "op": "clear",
+      "at": [
+       80,
+       202
+      ],
+      "r": 22
+     },
+     {
+      "op": "paint",
+      "at": [
+       134,
+       210
+      ],
+      "r": 7,
+      "mat": "water",
+      "amount": 40
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      80,
+      202
+     ],
+     "people": 9,
+     "wardens": 1,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "farm",
+      "well",
+      "well"
+     ],
+     "name": "Rookhill"
+    }
+   ],
+   "herds": [
+    [
+     "deer",
+     2,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "phoenix",
+     "count": 1,
+     "at": [
+      80,
+      70
+     ],
+     "spread": 0,
+     "team": "monster",
+     "hp": 18,
+     "lives": 1,
+     "time": 3,
+     "announce": "The phoenix wakes over the Ashwood!"
+    },
+    {
+     "species": "imp",
+     "count": 5,
+     "at": [
+      80,
+      60
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 40,
+     "announce": "Fire imps hatch from the burning trees."
+    },
+    {
+     "species": "imp",
+     "count": 6,
+     "at": [
+      80,
+      60
+     ],
+     "spread": 8,
+     "goal": "village",
+     "time": 90
+    }
+   ],
+   "mana": {
+    "start": 100,
+    "max": 160,
+    "regen": 4.4
+   },
+   "loadout": [
+    "spell:rain",
+    "spell:frost",
+    "spell:missiles",
+    "spell:lightning",
+    "creature:archer",
+    "material:water",
+    "tool:inspect"
+   ],
+   "timeLimit": 170,
+   "failText": "The phoenix still burns over the Ashwood",
+   "goals": [
+    {
+     "type": "kill",
+     "species": "phoenix",
+     "count": 2,
+     "text": "Bring the phoenix down twice",
+     "short": "Phoenix"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 cottages standing",
+     "failText": "Rookhill burned",
+     "short": "Houses"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Ash to ash"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 0,
+     "text": "Every cottage still standing"
+    },
+    {
+     "type": "timeMax",
+     "secs": 100,
+     "text": "Within 100 seconds"
+    }
+   ],
+   "reward": "creature:phoenix",
+   "tip": "Frost cracks a creature of fire, and Arcane Missiles find it in the sky. It falls in a burst of flame, so keep the rain close."
+  },
+  {
+   "id": "4-6",
+   "name": "The Storm’s Eye",
+   "icon": "lvl-4-6",
+   "intro": [
+    "The great storm over Crownmere has an eye, and everything with wings is riding it in.",
+    "Its lightning falls on friend and foe alike. Shield the houses, turn the clouds with the wind,",
+    "and hold the village until the storm blows itself out."
+   ],
+   "map": {
+    "W": 176,
+    "H": 256,
+    "seed": 4606,
+    "recipe": "greenvale",
+    "override": {
+     "sea": 0.2,
+     "rivers": 1,
+     "villages": 0,
+     "glades": 0,
+     "wet": 0.3
+    },
+    "clock": 0.66,
+    "freezeTime": true,
+    "wind": [
+     0.3,
+     0.8,
+     1
+    ],
+    "windLocked": true,
+    "ops": [
+     {
+      "op": "flatten",
+      "at": [
+       88,
+       150
+      ],
+      "r": 32
+     },
+     {
+      "op": "clear",
+      "at": [
+       88,
+       150
+      ],
+      "r": 26
+     }
+    ]
+   },
+   "villages": [
+    {
+     "at": [
+      88,
+      152
+     ],
+     "people": 12,
+     "wardens": 3,
+     "mages": 1,
+     "prebuilt": [
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "cottage",
+      "stonehouse",
+      "stonehouse",
+      "farm",
+      "well",
+      "tower"
+     ],
+     "name": "Crownmere"
+    }
+   ],
+   "herds": [
+    [
+     "sheep",
+     2,
+     4
+    ],
+    [
+     "cow",
+     1,
+     3
+    ]
+   ],
+   "spawns": [
+    {
+     "species": "wyrmling",
+     "count": 3,
+     "at": [
+      88,
+      6
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 10,
+     "announce": "Wyrms ride the front of the storm!"
+    },
+    {
+     "species": "griffin",
+     "count": 3,
+     "at": [
+      10,
+      40
+     ],
+     "spread": 5,
+     "team": "monster",
+     "hunger": 1,
+     "goal": "village",
+     "time": 30,
+     "announce": "Griffins, mad with the thunder!"
+    },
+    {
+     "species": "wyrmling",
+     "count": 4,
+     "at": [
+      166,
+      60
+     ],
+     "spread": 6,
+     "goal": "village",
+     "time": 55
+    },
+    {
+     "species": "imp",
+     "count": 8,
+     "at": [
+      88,
+      20
+     ],
+     "spread": 10,
+     "goal": "village",
+     "time": 70
+    },
+    {
+     "species": "dragon",
+     "count": 1,
+     "at": [
+      88,
+      4
+     ],
+     "spread": 0,
+     "hp": 0.6,
+     "goal": "village",
+     "time": 92,
+     "announce": "In the eye of the storm: a dragon!"
+    },
+    {
+     "species": "griffin",
+     "count": 2,
+     "at": [
+      166,
+      30
+     ],
+     "spread": 5,
+     "team": "monster",
+     "hunger": 1,
+     "goal": "village",
+     "time": 118
+    }
+   ],
+   "events": [
+    {
+     "time": 6,
+     "cast": "storm",
+     "x": 70,
+     "y": 80,
+     "say": "The storm breaks."
+    },
+    {
+     "time": 36,
+     "cast": "storm",
+     "x": 110,
+     "y": 100
+    },
+    {
+     "time": 62,
+     "cast": "storm",
+     "x": 60,
+     "y": 110
+    },
+    {
+     "time": 88,
+     "cast": "storm",
+     "x": 100,
+     "y": 90,
+     "say": "The eye is right overhead!"
+    },
+    {
+     "time": 112,
+     "cast": "storm",
+     "x": 80,
+     "y": 120
+    },
+    {
+     "time": 136,
+     "cast": "storm",
+     "x": 96,
+     "y": 110
+    }
+   ],
+   "mana": {
+    "start": 120,
+    "max": 200,
+    "regen": 5.2
+   },
+   "loadout": [
+    "spell:barrier",
+    "spell:missiles",
+    "spell:gale",
+    "spell:rain",
+    "spell:lightning",
+    "spell:frost",
+    "creature:archer",
+    "tool:inspect"
+   ],
+   "goals": [
+    {
+     "type": "survive",
+     "secs": 150,
+     "text": "Hold until the storm passes",
+     "short": "Hold"
+    },
+    {
+     "type": "protect",
+     "what": "houses",
+     "min": 3,
+     "text": "Keep 3 houses standing",
+     "failText": "Crownmere burned",
+     "short": "Houses"
+    },
+    {
+     "type": "people",
+     "min": 6,
+     "text": "Keep 6 people alive",
+     "failText": "Crownmere was lost",
+     "short": "People"
+    }
+   ],
+   "stars": [
+    {
+     "type": "win",
+     "text": "Outlast the storm"
+    },
+    {
+     "type": "killedBy",
+     "species": "dragon",
+     "count": 1,
+     "text": "Bring down the dragon"
+    },
+    {
+     "type": "housesLostMax",
+     "n": 1,
+     "text": "Lose one house at most"
+    }
+   ],
+   "reward": "material:runestone",
+   "tip": "Lightning cannot hurt the folk under a Barrier, and the dome puts out fires under it. A Gale pushes the storm clouds away."
+  }
+ ]
+}

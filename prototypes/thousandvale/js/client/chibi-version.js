@@ -22,10 +22,17 @@ export const CHIBI_V = chibiVersion(typeof location !== 'undefined' ? location.s
 /** createChibi2Character options with the version switch applied (pure — exported for tests). */
 export const tvChibiOpts = (opts = {}, v = CHIBI_V) => (v >= 2.5 ? { ...opts, v25: true } : { ...opts });
 
+// KESTREL (batch 1, 2026-10-27): `?chars=kestrel` draws every humanoid with the Kestrel kit body (chars-mode.js,
+// kestrel-body.js). Anything else = Chibi 2.5 exactly as before (the kit is never even loaded). Batch 5: the item icons'
+// shop mannequin is a Kestrel mannequin under the switch too (kestrel-body.js `mannequin`, ui/item-icons.js).
+import { CHARS, KESTREL, charsMode } from './chars-mode.js';
+export { CHARS, KESTREL, charsMode };
+
 const breathe = () => new Promise(r => setTimeout(r, 0));
 /** A Chibi body for Thousandvale: the template baked in slices (no long task), then built from the cache. */
 export async function createTvBody(avatar, opts = {}) {
   avatar = dropRetired(avatar);      // play-test 12 (#77): a monster's designed look or an old save may still name a blindfold
+  if (KESTREL) return (await import('./kestrel-body.js')).createKestrelTvBody(avatar, { ...opts, slice: opts.slice || breathe });   // batch 5: the icon mannequin too
   const o = tvChibiOpts(opts);
   if (opts.trace == null) { try { await prepareChibi2(avatar, { ...o, slice: opts.slice || breathe, budget: opts.budget ?? 10 }); } catch { /* the build below reports it */ } }
   return createChibi2Character(avatar, o);

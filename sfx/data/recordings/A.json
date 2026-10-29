@@ -1,0 +1,393 @@
+{
+ "spell.fire.launch": {
+  "files": [
+   "fs/spell.fire.launch-1.ogg",
+   "fs/spell.fire.launch-2.ogg",
+   "fs/spell.fire.launch-3.ogg"
+  ],
+  "note": "fire-magic burst and two RPG fire casts"
+ },
+ "spell.fire.travel": {
+  "files": [
+   "fs/spell.fire.travel-1.ogg",
+   "fs/spell.fire.travel-2.ogg"
+  ],
+  "note": "short fireball woosh + fast fireball pass-by"
+ },
+ "spell.fire.impact": {
+  "files": [
+   "fs/spell.fire.impact-1.ogg",
+   "fs/spell.fire.impact-2.ogg",
+   "fs/spell.fire.impact-3.ogg"
+  ],
+  "note": "three fireball explosions / fire bursts"
+ },
+ "spell.ice.launch": {
+  "files": [
+   "fs/spell.ice.launch-1.ogg",
+   "fs/spell.ice.launch-2.ogg",
+   "fs/spell.ice.launch-3.ogg"
+  ],
+  "note": "ice spell cast, icy shimmer, icy magic cast"
+ },
+ "spell.ice.travel": {
+  "files": [
+   "fs/spell.ice.travel-1.ogg",
+   "fs/spell.ice.travel-2.ogg"
+  ],
+  "note": "ice-arrow flight whoosh + freeze swish"
+ },
+ "spell.ice.impact": {
+  "files": [
+   "fs/spell.ice.impact-1.ogg",
+   "fs/spell.ice.impact-2.ogg",
+   "fs/spell.ice.impact-3.ogg"
+  ],
+  "note": "ice/glass break and shatter (replaces Kenney)"
+ },
+ "spell.shadow.launch": {
+  "files": [
+   "fs/spell.shadow.launch-1.ogg",
+   "fs/spell.shadow.launch-2.ogg",
+   "fs/spell.shadow.launch-3.ogg"
+  ],
+  "note": "dark fantasy spell casts"
+ },
+ "spell.shadow.travel": {
+  "files": [
+   "fs/spell.shadow.travel-1.ogg",
+   "fs/spell.shadow.travel-2.ogg"
+  ],
+  "note": "dark magic drone + ghostly whoosh"
+ },
+ "spell.shadow.impact": {
+  "files": [
+   "fs/spell.shadow.impact-1.ogg",
+   "fs/spell.shadow.impact-2.ogg",
+   "fs/spell.shadow.impact-3.ogg"
+  ],
+  "note": "dark rift, deep ghostly impact, deep cinematic impact"
+ },
+ "spell.holy.launch": {
+  "files": [
+   "fs/spell.holy.launch-1.ogg",
+   "fs/spell.holy.launch-2.ogg",
+   "fs/spell.holy.launch-3.ogg"
+  ],
+  "note": "bright buff/heal casts"
+ },
+ "spell.holy.travel": {
+  "files": [
+   "fs/spell.holy.travel-1.ogg",
+   "fs/spell.holy.travel-2.ogg"
+  ],
+  "note": "bright magic whooshes"
+ },
+ "spell.holy.impact": {
+  "files": [
+   "fs/spell.holy.impact-1.ogg",
+   "fs/spell.holy.impact-2.ogg"
+  ],
+  "note": "magic smite + short choir swell (replaces Kenney)"
+ },
+ "spell.nature.launch": {
+  "files": [
+   "fs/spell.nature.launch-1.ogg",
+   "fs/spell.nature.launch-2.ogg",
+   "fs/spell.nature.launch-3.ogg"
+  ],
+  "note": "bush hit/rustle and a quick plant cut"
+ },
+ "spell.nature.travel": {
+  "files": [
+   "fs/spell.nature.travel-1.ogg",
+   "fs/spell.nature.travel-2.ogg"
+  ],
+  "note": "wind gust whooshes"
+ },
+ "spell.nature.impact": {
+  "files": [
+   "fs/spell.nature.impact-1.ogg",
+   "fs/spell.nature.impact-2.ogg",
+   "fs/spell.nature.impact-3.ogg"
+  ],
+  "note": "branch cracks and wood snaps (replaces Kenney)"
+ },
+ "spell.arcane.launch": {
+  "files": [
+   "fs/spell.arcane.launch-1.ogg",
+   "fs/spell.arcane.launch-2.ogg",
+   "fs/spell.arcane.launch-3.ogg"
+  ],
+  "note": "punchy magic casts (separate takes) + two game magic casts"
+ },
+ "spell.arcane.travel": {
+  "files": [
+   "fs/spell.arcane.travel-1.ogg",
+   "fs/spell.arcane.travel-2.ogg"
+  ],
+  "note": "magic missile flight + teleport whoosh"
+ },
+ "spell.arcane.impact": {
+  "files": [
+   "fs/spell.arcane.impact-1.ogg",
+   "fs/spell.arcane.impact-2.ogg",
+   "fs/spell.arcane.impact-3.ogg"
+  ],
+  "note": "magic strike, dispel, small magic attack"
+ },
+ "spell.lightning.launch": {
+  "files": [
+   "fs/spell.lightning.launch-1.ogg",
+   "fs/spell.lightning.launch-2.ogg",
+   "fs/spell.lightning.launch-3.ogg"
+  ],
+  "note": "electric zaps"
+ },
+ "spell.lightning.travel": {
+  "files": [
+   "fs/spell.lightning.travel-1.ogg",
+   "fs/spell.lightning.travel-2.ogg"
+  ],
+  "note": "crackling electricity cut to a short burst"
+ },
+ "spell.lightning.impact": {
+  "files": [
+   "fs/spell.lightning.impact-1.ogg",
+   "fs/spell.lightning.impact-2.ogg",
+   "fs/spell.lightning.impact-3.ogg"
+  ],
+  "note": "electric shock, short crackle, electro hit"
+ },
+ "spell.physical.launch": {
+  "files": [
+   "fs/spell.physical.launch-1.ogg",
+   "fs/spell.physical.launch-2.ogg",
+   "fs/spell.physical.launch-3.ogg"
+  ],
+  "note": "plain air whooshes / whip swing (replaces Kenney)"
+ },
+ "spell.physical.travel": {
+  "files": [
+   "fs/spell.physical.travel-1.ogg",
+   "fs/spell.physical.travel-2.ogg"
+  ],
+  "note": "swoosh pass-bys"
+ },
+ "spell.physical.impact": {
+  "files": [
+   "fs/spell.physical.impact-1.ogg",
+   "fs/spell.physical.impact-2.ogg",
+   "fs/spell.physical.impact-3.ogg"
+  ],
+  "note": "rock impact, concrete smash, heavy punch (replaces Kenney)"
+ },
+ "spell.poison.launch": {
+  "files": [
+   "fs/spell.poison.launch-1.ogg",
+   "fs/spell.poison.launch-2.ogg"
+  ],
+  "note": "poison effect + slimy ooze"
+ },
+ "spell.poison.travel": {
+  "files": [
+   "fs/spell.poison.travel-1.ogg",
+   "fs/spell.poison.travel-2.ogg"
+  ],
+  "note": "goo squish + acid bubbling"
+ },
+ "spell.poison.impact": {
+  "files": [
+   "fs/spell.poison.impact-1.ogg",
+   "fs/spell.poison.impact-2.ogg",
+   "fs/spell.poison.impact-3.ogg"
+  ],
+  "note": "mud/slug splats and slime"
+ },
+ "spell.bleed.launch": {
+  "files": [
+   "fs/spell.bleed.launch-1.ogg",
+   "fs/spell.bleed.launch-2.ogg",
+   "fs/spell.bleed.launch-3.ogg"
+  ],
+  "note": "bloody blade, slash, stab with whoosh"
+ },
+ "spell.bleed.travel": {
+  "files": [
+   "fs/spell.bleed.travel-1.ogg",
+   "fs/spell.bleed.travel-2.ogg"
+  ],
+  "note": "short blade swishes"
+ },
+ "spell.bleed.impact": {
+  "files": [
+   "fs/spell.bleed.impact-1.ogg",
+   "fs/spell.bleed.impact-2.ogg",
+   "fs/spell.bleed.impact-3.ogg"
+  ],
+  "note": "wet meaty / gore splats (replaces Kenney)"
+ },
+ "spell.true.launch": {
+  "files": [
+   "fs/spell.true.launch-1.ogg",
+   "fs/spell.true.launch-2.ogg"
+  ],
+  "note": "spellcast build + magic blast"
+ },
+ "spell.true.travel": {
+  "files": [
+   "fs/spell.true.travel-1.ogg",
+   "fs/spell.true.travel-2.ogg"
+  ],
+  "note": "epic whoosh + reversed-breath whoosh"
+ },
+ "spell.true.impact": {
+  "files": [
+   "fs/spell.true.impact-1.ogg",
+   "fs/spell.true.impact-2.ogg",
+   "fs/spell.true.impact-3.ogg"
+  ],
+  "note": "magical hit, wall hit, sword-hit ring (replaces Kenney)"
+ },
+ "cast.start": {
+  "files": [
+   "fs/cast.start-1.ogg",
+   "fs/cast.start-2.ogg",
+   "fs/cast.start-3.ogg"
+  ],
+  "note": "magical focus, power-up shimmer, spell charge"
+ },
+ "heal": {
+  "files": [
+   "fs/heal-1.ogg",
+   "fs/heal-2.ogg"
+  ],
+  "note": "warm healing wave + soft heal shimmer (replaces Kenney)"
+ },
+ "revive": {
+  "files": [
+   "fs/revive-1.ogg",
+   "fs/revive-2.ogg"
+  ],
+  "note": "angelic fanfare swell + angel reveal (replaces Kenney)"
+ },
+ "levelup": {
+  "files": [
+   "fs/levelup-1.ogg",
+   "fs/levelup-2.ogg"
+  ],
+  "note": "bright level-up jingle + short RPG fanfare (replaces Kenney)"
+ },
+ "quest.complete": {
+  "files": [
+   "fs/quest.complete-1.ogg",
+   "fs/quest.complete-2.ogg"
+  ],
+  "note": "brass success fanfare + short RPG fanfare (replaces Kenney)"
+ },
+ "night.ambush": {
+  "files": [
+   "fs/night.ambush-1.ogg",
+   "fs/night.ambush-2.ogg"
+  ],
+  "note": "spooky sting + short nightmare sting"
+ },
+ "explosion.small": {
+  "files": [
+   "fs/explosion.small-1.ogg",
+   "fs/explosion.small-2.ogg",
+   "fs/explosion.small-3.ogg"
+  ],
+  "note": "three short close explosions"
+ },
+ "explosion.large": {
+  "files": [
+   "fs/explosion.large-1.ogg",
+   "fs/explosion.large-2.ogg",
+   "fs/explosion.large-3.ogg"
+  ],
+  "note": "three big explosions with body and tail (~2.6-3 s) for meteor/keg blasts"
+ },
+ "meteor.fall": {
+  "files": [
+   "fs/meteor.fall-1.ogg",
+   "fs/meteor.fall-2.ogg"
+  ],
+  "note": "falling-bomb whistles, both end before any impact"
+ },
+ "thunder": {
+  "files": [
+   "fs/thunder-1.ogg",
+   "fs/thunder-2.ogg"
+  ],
+  "note": "close lightning strike crack + big thunder clap with roll (3 s)"
+ },
+ "tornado": {
+  "files": [
+   "fs/tornado-1.ogg",
+   "fs/tornado-2.ogg"
+  ],
+  "note": "howling storm wind cut to ~3.7 s with fade out (two parts of one recording)"
+ },
+ "quake.rumble": {
+  "files": [
+   "fs/quake.rumble-1.ogg",
+   "fs/quake.rumble-2.ogg"
+  ],
+  "note": "cracking-earth earthquake + deep cinematic rumble (3 s)"
+ },
+ "dragon.roar": {
+  "files": [
+   "fs/dragon.roar-1.ogg",
+   "fs/dragon.roar-2.ogg",
+   "fs/dragon.roar-3.ogg"
+  ],
+  "note": "three big dragon/monster roars (2-2.6 s)"
+ },
+ "beast.growl": {
+  "files": [
+   "fs/beast.growl-1.ogg",
+   "fs/beast.growl-2.ogg",
+   "fs/beast.growl-3.ogg"
+  ],
+  "note": "short monster roar, beast growl, angry beast growl"
+ },
+ "wolf.howl": {
+  "files": [
+   "fs/wolf.howl-1.ogg",
+   "fs/wolf.howl-2.ogg"
+  ],
+  "note": "single wolf howl + echoing howl (~4 s, faded)"
+ },
+ "arrow.shot": {
+  "files": [
+   "fs/arrow.shot-1.ogg",
+   "fs/arrow.shot-2.ogg",
+   "fs/arrow.shot-3.ogg"
+  ],
+  "note": "bow-and-arrow release/loose takes"
+ },
+ "magic.missile": {
+  "files": [
+   "fs/magic.missile-1.ogg",
+   "fs/magic.missile-2.ogg",
+   "fs/magic.missile-3.ogg"
+  ],
+  "note": "short magic-missile zips and a sparkle"
+ },
+ "lava.bubble": {
+  "files": [
+   "fs/lava.bubble-1.ogg",
+   "fs/lava.bubble-2.ogg",
+   "fs/lava.bubble-3.ogg"
+  ],
+  "note": "thick single blorp, single bubble, hot bubbling mud"
+ },
+ "crowd.cheer": {
+  "files": [
+   "fs/crowd.cheer-1.ogg",
+   "fs/crowd.cheer-2.ogg"
+  ],
+  "note": "short crowd cheers with clapping"
+ }
+}

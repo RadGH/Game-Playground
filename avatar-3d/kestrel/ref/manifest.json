@@ -1,0 +1,12 @@
+{
+ "about": "Codex reference pictures for Kestrel. 'male'/'female' map a review-page view to a file (the compare page reads these); 'groups' is the gallery on ref/index.html.",
+ "male":   { "front": "male-front.png", "left": "male-left.png", "back": "male-back.png", "right": "male-right.png", "three": "male-three-quarter.png", "face": "male-head.png" },
+ "female": { "front": "female-front.png", "left": "female-left.png", "back": "female-back.png", "right": "female-right.png", "three": "female-three-quarter.png", "face": "female-head.png" },
+ "groups": [
+  { "title": "Owner's mockup", "files": [["source/owner-mockup.png", "the design every picture comes from"]] },
+  { "title": "Turnaround sheets", "note": "Four views in one picture: front, left, back, right. Use for services that take one sheet.", "files": [["male-turnaround.png", "male"], ["female-turnaround.png", "female"]] },
+  { "title": "Matched set (cut from the sheets)", "note": "Front, left, back, right cut from ONE sheet, so they agree exactly. Best for multi-view services (four pictures).", "files": [["male-crop-front.png", "male front"], ["male-crop-left.png", "male left"], ["male-crop-back.png", "male back"], ["male-crop-right.png", "male right"], ["female-crop-front.png", "female front"], ["female-crop-left.png", "female left"], ["female-crop-back.png", "female back"], ["female-crop-right.png", "female right"]] },
+  { "title": "Single high-detail views", "note": "1024x1536 each, drawn one at a time (so small differences between them). Best for one-picture services: use the front.", "files": [["male-front.png", "male front"], ["male-three-quarter.png", "male 3/4"], ["male-left.png", "male left"], ["male-back.png", "male back"], ["male-right.png", "male right"], ["female-front.png", "female front"], ["female-three-quarter.png", "female 3/4"], ["female-left.png", "female left"], ["female-back.png", "female back"], ["female-right.png", "female right"]] },
+  { "title": "Head close-ups", "note": "Front, left, back, 3/4 of the head, for face detail.", "files": [["male-head.png", "male head"], ["female-head.png", "female head"]] }
+ ]
+}

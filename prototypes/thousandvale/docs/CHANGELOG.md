@@ -1679,3 +1679,34 @@ Owner: "stuttering … usually smooth exploring, and once I start getting target
 ## 2026-10-23 — one account with every games.radgh.com game (owner: "TV accounts should be linked. I'd like to use my TV account for the other games - same password, different saves")
 - **A** Thousandvale accounts sign in on every other game with their Thousandvale password — rgs-api reads this database's `accounts` (id, username, pass_hash, email, admin, claimed) through a read-only column grant, checks the password live, never copies it (`~/claude/rads-game-server/docs/API.md` "One account for every game").
 - **A** `server/rgs-link.mjs` (env `RGS_API`): a username that isn't a Thousandvale account but is a games.radgh.com account signs in here; its account is claimed with the stored "password" `rgs:<user id>` (js/sim/accounts.js `RGS_PASS`), so every later check asks games.radgh.com; its password change / reset says to use games.radgh.com/account/. A name being claimed must be free there too. `login {ticket}`: "Continue as <name>" on the title's Log in tab when the browser is signed in on games.radgh.com (`shared/rgs-account.js`). Tests: `tests/A/rgs-link.test.js`.
+
+## 2026-10-27 — Kestrel bodies, batch 1 (behind `?chars=kestrel` only)
+- **Opt-in switch**: `?chars=kestrel` in the page address draws every humanoid (players, townsfolk, humanoid monsters,
+  title figure, creation preview, portraits) with the Kestrel kit body (`js/client/chars-mode.js`, `js/client/kestrel-body.js`;
+  avatar-3d/kestrel/kit/README.md "Thousandvale"). Without it the game is the Chibi 2.5 game it was (the kit is not even loaded).
+- Every clip the game plays is Chibi 2's, hold-aware, retargeted onto the Kestrel rig; weapons, shields, foci, quivers,
+  capes, packs, belts and (stand-in) hats are Chibi's own models moved onto the body; stand-in clothes until batch 4.
+- Under the switch only: mounts are drawn at `KESTREL_MOUNT_SCALE` 1.12 (not 1.38), the far instanced crowd has real
+  proportions, portraits frame the smaller face (and are cached as their own pictures), walk/run rates are converted to
+  the Kestrel stride. The editor gets a Body pick (masc / fem) first, and the server keeps `body.form` in a custom look.
+- Tests: `tests/D/kestrel.spec.js` (walk, swing, sit, fish, work, ride under the switch);
+  `avatar-3d/kestrel/kit/tests/tv.test.js`. Item icons' shop mannequin stays Chibi.
+
+## 2026-10-28 — Kestrel bodies, batch 4: clothing (behind `?chars=kestrel` only)
+- Every top, bottom, pair of shoes and pair of gloves a look can name (27 / 12 / 12 / 4 reachable; 41 / 17 / 17 / 5 rows) is
+  built for the Kestrel body — robes, gowns, coats, mail, plate with pauldrons and tassets, kilts, greaves, sandals,
+  gauntlets — in its colour, trim, quality and tier-2 emblem; the stand-in shirt / trousers / boots are gone. Long garments
+  hang on skirt bones the legs push (and take a shorter step), so no leg comes through a robe; measured over every class's
+  tier-1 and tier-2 outfit in the game's clips (avatar-3d/kestrel/kit/README.md "Clothing (batch 4)",
+  `avatar-3d/kestrel/kit/tests/clothes.test.js`). Without the switch nothing changes.
+
+## 2026-10-28 — Kestrel bodies, batch 5 (behind `?chars=kestrel` only)
+- Gear icons (armour, cloaks, packs, belts) are drawn on a plain Kestrel mannequin — one ash colour, a carved face with no
+  eyes — framed by its own table so each piece fills the icon (`ui/item-icons.js`, cache version `v6k1`; Chibi icons stay `v6`).
+- Mining and woodcutting swing the pick / hatchet with BOTH hands on the haft; the off hand slides down it into the blow
+  and the edge leads.
+- Far bodies use the low-detail mesh: built at LOD 1 past ~15 m, switching at 16 m out / 13 m in (the other mesh is
+  built in slices in the background; `actors.js` `KESTREL_LOD`, `kestrelLodFor`).
+- Sitting on the ground is a real cross-legged sit (the knees no longer cross); long capes (and robes' hems) fold back
+  over the seat or the grass instead of going through them when sitting or riding. avatar-3d/kestrel/kit/README.md
+  "Batch 5"; `avatar-3d/kestrel/kit/tests/batch5.test.js`, `tests/D/kestrel.spec.js`. Without the switch nothing changes.

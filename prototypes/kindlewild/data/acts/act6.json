@@ -1,0 +1,263 @@
+{
+ "id": "act6",
+ "name": "Act VI — Wyrmfall",
+ "blurb": "The mountains wake, the sky burns and the oldest dragon of all comes down from the north.",
+ "levels": [
+  {
+   "id": "6-1", "name": "Smoke over Cindercrag", "icon": "lvl-6-1",
+   "intro": ["Cindercrag is smoking again, and young wyrms are circling the plume.", "They dive at Stonebarrow below while the mountain spills its lava.", "Bring the wyrmlings down and keep the lava out of the village."],
+   "map": { "W": 160, "H": 240, "seed": 6101, "recipe": "greenvale", "override": { "sea": 0, "rivers": 0, "villages": 0, "glades": 0, "temp": 0.4 }, "clock": 0.62, "freezeTime": true,
+    "ops": [
+     { "op": "slope", "dir": [0, 1], "h": 90, "base": 100, "keep": 0.15 },
+     { "op": "raise", "at": [80, 34], "r": 34, "h": 34 },
+     { "op": "ground", "at": [80, 34], "r": 26, "mat": "basalt", "clearCells": true },
+     { "op": "vent", "at": [80, 30] },
+     { "op": "paint", "at": [80, 36], "r": 4, "mat": "lava", "amount": 60 },
+     { "op": "flatten", "at": [80, 204], "r": 26 }
+    ] },
+   "villages": [ { "at": [80, 204], "name": "Stonebarrow", "people": 8, "wardens": 1, "prebuilt": ["cottage", "cottage", "cottage", "cottage", "stonehouse", "farm", "well", "tower"] } ],
+   "herds": [["goat", 2, 4]],
+   "spawns": [
+    { "species": "wyrmling", "count": 3, "at": [80, 26], "spread": 10, "goal": "village", "time": 4, "hp": 1.5, "announce": "Wyrmlings rise from the plume!" },
+    { "species": "wyrmling", "count": 3, "at": [80, 26], "spread": 10, "goal": "village", "time": 34, "hp": 1.5 },
+    { "species": "wyrmling", "count": 4, "at": [80, 26], "spread": 12, "goal": "village", "time": 64, "hp": 1.6, "announce": "More of them, bolder now." },
+    { "species": "wyrmling", "count": 4, "at": [80, 26], "spread": 12, "goal": "village", "time": 94, "hp": 1.7 }
+   ],
+   "events": [
+    { "time": 50, "op": { "op": "vent", "at": [56, 44] }, "say": "A second mouth opens on the west slope!" },
+    { "time": 51, "op": { "op": "paint", "at": [56, 48], "r": 3, "mat": "lava", "amount": 60 } }
+   ],
+   "mana": { "start": 110, "max": 180, "regen": 5.5 },
+   "loadout": ["spell:missiles", "spell:lightning", "spell:frost", "spell:earth", "spell:barrier", "creature:archer", "tool:inspect"],
+   "timeLimit": 170,
+   "failText": "The wyrmlings still rule the sky",
+   "goals": [
+    { "type": "kill", "species": "wyrmling", "count": 13, "text": "Bring down 13 wyrmlings", "short": "Wyrms" },
+    { "type": "contain", "material": "lava", "zone": [80, 204, 24], "text": "Keep lava out of the village", "failText": "Lava reached Stonebarrow", "short": "Lava" },
+    { "type": "protect", "what": "houses", "min": 3, "text": "Keep 3 houses standing", "failText": "Stonebarrow burned", "short": "Houses" }
+   ],
+   "stars": [
+    { "type": "win", "text": "The sky is clear" },
+    { "type": "housesLostMax", "n": 1, "text": "Lose one house at most" },
+    { "type": "timeMax", "secs": 130, "text": "Done in 130 seconds" }
+   ],
+   "reward": "creature:wyrmling",
+   "tip": "Arcane Missiles find wyrmlings in the air. Raise Earth turns the lava aside — a ridge across the slope, not round the village."
+  },
+  {
+   "id": "6-2", "name": "Twin Fires", "icon": "lvl-6-2",
+   "intro": ["Two ashwing dragons have come to Harrowgate together.", "They do not take turns.", "Bring them down, or hurt them enough that both fly home."],
+   "map": { "W": 176, "H": 240, "seed": 6202, "recipe": "greenvale", "override": { "sea": 0.2, "rivers": 1, "villages": 0, "glades": 0 }, "clock": 0.58, "freezeTime": true,
+    "ops": [
+     { "op": "flatten", "at": [88, 160], "r": 32 },
+     { "op": "clear", "at": [88, 160], "r": 24 },
+     { "op": "ground", "at": [88, 160], "r": 30, "mat": "dirt" },
+     { "op": "ground", "at": [88, 160], "r": 18, "mat": "cobble" }
+    ] },
+   "villages": [ { "at": [88, 160], "name": "Harrowgate", "people": 10, "wardens": 3, "mages": 1, "prebuilt": ["stonehouse", "stonehouse", "stonehouse", "cottage", "cottage", "cottage", "longhouse", "farm", "well", "well", "tower"] } ],
+   "herds": [["sheep", 2, 4], ["cow", 1, 3]],
+   "spawns": [
+    { "species": "dragon", "count": 1, "at": [24, 12], "spread": 0, "goal": "village", "time": 4, "hp": 1.2, "announce": "A dragon from the north-west..." },
+    { "species": "dragon", "count": 1, "at": [152, 12], "spread": 0, "goal": "village", "time": 22, "hp": 1.2, "announce": "...and another from the north-east!" }
+   ],
+   "mana": { "start": 130, "max": 200, "regen": 6 },
+   "timeLimit": 200,
+   "failText": "The dragons still circle Harrowgate",
+   "loadout": ["spell:missiles", "spell:lightning", "spell:frost", "spell:barrier", "spell:rain", "creature:archer", "creature:mage", "tool:inspect"],
+   "goals": [
+    { "type": "dragon", "text": "Drive off or bring down both dragons", "short": "Dragons" },
+    { "type": "protect", "what": "houses", "min": 4, "text": "Keep 4 houses standing", "failText": "Harrowgate burned", "short": "Houses" }
+   ],
+   "stars": [
+    { "type": "win", "text": "Both are gone" },
+    { "type": "killedBy", "species": "dragon", "count": 2, "text": "Bring both down for good" },
+    { "type": "housesLostMax", "n": 1, "text": "Lose one house at most" }
+   ],
+   "reward": "spell:chain",
+   "tip": "Hurt one dragon badly and it calls its young. Finish one before you start on the other, and keep a Barrier ready over the roofs."
+  },
+  {
+   "id": "6-3", "name": "Night of Falling Stars", "icon": "lvl-6-3",
+   "intro": ["Stars are falling on the hills around Greystair — whole showers of them.", "And the creatures of the mountain are using the chaos to attack.", "Shield the roofs and fight until the sky goes quiet."],
+   "map": { "W": 160, "H": 240, "seed": 6303, "recipe": "greenvale", "override": { "sea": 0.05, "rivers": 0, "villages": 0, "glades": 0 }, "clock": 0.85, "dayLength": 16000,
+    "ops": [
+     { "op": "raise", "at": [30, 50], "r": 22, "h": 30 },
+     { "op": "raise", "at": [120, 36], "r": 26, "h": 36 },
+     { "op": "raise", "at": [70, 90], "r": 18, "h": 24 },
+     { "op": "raise", "at": [136, 120], "r": 20, "h": 28 },
+     { "op": "raise", "at": [24, 140], "r": 18, "h": 26 },
+     { "op": "ground", "at": [120, 36], "r": 18, "mat": "rock" },
+     { "op": "ground", "at": [30, 50], "r": 14, "mat": "rock" },
+     { "op": "flatten", "at": [80, 196], "r": 28 }
+    ] },
+   "villages": [ { "at": [80, 198], "name": "Greystair", "people": 10, "wardens": 2, "prebuilt": ["cottage", "cottage", "cottage", "cottage", "cottage", "stonehouse", "farm", "well", "lamppost", "lamppost"] } ],
+   "herds": [["goat", 2, 4]],
+   "spawns": [
+    { "species": "imp", "count": 8, "at": [120, 40], "spread": 8, "goal": "village", "time": 8, "announce": "Imps are running down from the hills!" },
+    { "species": "wyrmling", "count": 3, "at": [30, 40], "spread": 6, "goal": "village", "time": 26, "hp": 1.4 },
+    { "species": "imp", "count": 10, "at": [24, 140], "spread": 6, "goal": "village", "time": 46 },
+    { "species": "troll", "count": 1, "at": [136, 120], "spread": 0, "goal": "village", "time": 62, "announce": "A troll is coming down the east crag." },
+    { "species": "wyrmling", "count": 3, "at": [120, 30], "spread": 8, "goal": "village", "time": 80, "hp": 1.5 },
+    { "species": "imp", "count": 10, "at": [136, 150], "spread": 6, "goal": "village", "time": 96 },
+    { "species": "troll", "count": 1, "at": [24, 140], "spread": 0, "goal": "village", "time": 104 },
+    { "species": "imp", "count": 12, "at": [80, 20], "spread": 12, "goal": "village", "time": 114, "announce": "The hills are emptying of imps." },
+    { "species": "wyrmling", "count": 2, "at": [80, 20], "spread": 8, "goal": "village", "time": 120, "hp": 1.5 }
+   ],
+   "events": [
+    { "time": 6, "cast": "shower", "x": 40, "y": 70, "say": "Stars are falling!" },
+    { "time": 22, "cast": "shower", "x": 110, "y": 120 },
+    { "time": 38, "cast": "shower", "x": 80, "y": 178, "say": "They are falling on the village!" },
+    { "time": 56, "cast": "shower", "x": 40, "y": 160 },
+    { "time": 74, "cast": "shower", "x": 96, "y": 196, "say": "Right over the roofs!" },
+    { "time": 92, "cast": "shower", "x": 120, "y": 80 },
+    { "time": 108, "cast": "shower", "x": 66, "y": 190 },
+    { "time": 126, "cast": "shower", "x": 90, "y": 150 }
+   ],
+   "mana": { "start": 100, "max": 170, "regen": 5 },
+   "loadout": ["spell:barrier", "spell:missiles", "spell:lightning", "spell:frost", "spell:rain", "creature:archer", "tool:inspect"],
+   "goals": [
+    { "type": "survive", "secs": 145, "text": "Hold until the sky goes quiet", "short": "Hold" },
+    { "type": "protect", "what": "houses", "min": 3, "text": "Keep 3 houses standing", "failText": "Greystair was crushed", "short": "Houses" },
+    { "type": "people", "min": 6, "text": "Keep 6 people alive", "failText": "Too many lost under the stars", "short": "People" }
+   ],
+   "stars": [
+    { "type": "win", "text": "The sky is quiet" },
+    { "type": "housesLostMax", "n": 1, "text": "Lose one house at most" },
+    { "type": "peopleLostMax", "n": 2, "text": "Lose 2 people at most" }
+   ],
+   "reward": "spell:shower",
+   "tip": "A falling star is a blast, and blasts stop at a Barrier's skin. The red rings on the ground show where they will land."
+  },
+  {
+   "id": "6-4", "name": "The Wyrm's Hoard", "icon": "lvl-6-4",
+   "intro": ["Up on the black rock above Dunmarrow, a dragon guards a hoard of gold and five nests of eggs.", "The eggs keep hatching in the lava, and every hatchling flies straight for the village.", "Break the eggs. She will not like it."],
+   "map": { "W": 160, "H": 240, "seed": 6404, "recipe": "greenvale", "override": { "sea": 0, "rivers": 0, "villages": 0, "glades": 0, "temp": 0.35 }, "clock": 0.68, "freezeTime": true,
+    "ops": [
+     { "op": "flatten", "at": [80, 140], "r": 90 },
+     { "op": "raise", "at": [80, 60], "r": 66, "h": 22 },
+     { "op": "ground", "at": [80, 60], "r": 78, "mat": "basalt", "clearCells": true },
+     { "op": "paint", "at": [80, 60], "r": 56, "mat": "gold", "density": 0.025 },
+     { "op": "raise", "at": [30, 72], "r": 8, "h": -10 },
+     { "op": "paint", "at": [30, 72], "r": 7, "mat": "obsidian" },
+     { "op": "clear", "at": [30, 72], "r": 5 },
+     { "op": "paint", "at": [30, 72], "r": 5, "mat": "lava", "amount": 200 },
+     { "op": "paint", "at": [30, 72], "r": 10, "mat": "gold", "density": 0.15 },
+     { "op": "paint", "at": [30, 72], "r": 3, "mat": "dragonegg", "density": 0.55 },
+     { "op": "raise", "at": [130, 72], "r": 8, "h": -10 },
+     { "op": "paint", "at": [130, 72], "r": 7, "mat": "obsidian" },
+     { "op": "clear", "at": [130, 72], "r": 5 },
+     { "op": "paint", "at": [130, 72], "r": 5, "mat": "lava", "amount": 200 },
+     { "op": "paint", "at": [130, 72], "r": 10, "mat": "gold", "density": 0.15 },
+     { "op": "paint", "at": [130, 72], "r": 3, "mat": "dragonegg", "density": 0.55 },
+     { "op": "raise", "at": [56, 40], "r": 8, "h": -10 },
+     { "op": "paint", "at": [56, 40], "r": 7, "mat": "obsidian" },
+     { "op": "clear", "at": [56, 40], "r": 5 },
+     { "op": "paint", "at": [56, 40], "r": 5, "mat": "lava", "amount": 200 },
+     { "op": "paint", "at": [56, 40], "r": 10, "mat": "gold", "density": 0.15 },
+     { "op": "paint", "at": [56, 40], "r": 3, "mat": "dragonegg", "density": 0.55 },
+     { "op": "raise", "at": [104, 40], "r": 8, "h": -10 },
+     { "op": "paint", "at": [104, 40], "r": 7, "mat": "obsidian" },
+     { "op": "clear", "at": [104, 40], "r": 5 },
+     { "op": "paint", "at": [104, 40], "r": 5, "mat": "lava", "amount": 200 },
+     { "op": "paint", "at": [104, 40], "r": 10, "mat": "gold", "density": 0.15 },
+     { "op": "paint", "at": [104, 40], "r": 3, "mat": "dragonegg", "density": 0.55 },
+     { "op": "raise", "at": [80, 88], "r": 8, "h": -10 },
+     { "op": "paint", "at": [80, 88], "r": 7, "mat": "obsidian" },
+     { "op": "clear", "at": [80, 88], "r": 5 },
+     { "op": "paint", "at": [80, 88], "r": 5, "mat": "lava", "amount": 200 },
+     { "op": "paint", "at": [80, 88], "r": 10, "mat": "gold", "density": 0.15 },
+     { "op": "paint", "at": [80, 88], "r": 3, "mat": "dragonegg", "density": 0.55 }
+    ] },
+   "villages": [ { "at": [80, 200], "name": "Dunmarrow", "people": 9, "wardens": 2, "prebuilt": ["stonehouse", "stonehouse", "stonehouse", "cottage", "cottage", "cottage", "farm", "well", "tower"] } ],
+   "herds": [],
+   "spawns": [
+    { "species": "dragon", "count": 1, "at": [80, 50], "spread": 0, "goal": "village", "leash": [80, 60, 70], "time": 1, "hp": 0.9 }
+   ],
+   "mana": { "start": 60, "max": 140, "regen": 5.2 },
+   "loadout": ["spell:meteor", "spell:lightning", "spell:missiles", "spell:frost", "spell:barrier", "creature:knight", "tool:inspect"],
+   "timeLimit": 175,
+   "failText": "The clutch is still hatching",
+   "goals": [
+    { "type": "destroy", "material": "dragonegg", "zone": [80, 62, 62], "pct": 0.9, "text": "Break the dragon's eggs", "short": "Eggs" },
+    { "type": "protect", "what": "houses", "min": 4, "text": "Keep 4 houses standing", "failText": "Dunmarrow burned", "short": "Houses" }
+   ],
+   "stars": [
+    { "type": "win", "text": "The clutch is broken" },
+    { "type": "housesLostMax", "n": 1, "text": "Lose one house at most" },
+    { "type": "killedBy", "species": "dragon", "count": 1, "text": "Bring the mother down too" }
+   ],
+   "reward": "creature:dragon",
+   "tip": "Only a falling star hits hard enough to crack a wyrm egg. The mother circles her nest until she is hurt — then she goes for the village."
+  },
+  {
+   "id": "6-5", "name": "Three Mouths", "icon": "lvl-6-5",
+   "intro": ["The ridge above Lowmarsh has split in three places at once.", "Three rivers of lava are coming down, and fire imps and wyrmlings ride the heat.", "Hold the lava back until the mountain tires."],
+   "map": { "W": 160, "H": 240, "seed": 6505, "recipe": "greenvale", "override": { "sea": 0, "rivers": 0, "villages": 0, "glades": 0, "temp": 0.4 }, "clock": 0.66, "freezeTime": true,
+    "ops": [
+     { "op": "slope", "dir": [0, 1], "h": 110, "base": 100, "keep": 0.12 },
+     { "op": "ground", "at": [80, 16], "r": 70, "mat": "basalt", "clearCells": true },
+     { "op": "vent", "at": [36, 14] },
+     { "op": "vent", "at": [80, 12] },
+     { "op": "vent", "at": [124, 14] },
+     { "op": "paint", "at": [36, 18], "r": 3, "mat": "lava", "amount": 60 },
+     { "op": "paint", "at": [80, 16], "r": 3, "mat": "lava", "amount": 60 },
+     { "op": "paint", "at": [124, 18], "r": 3, "mat": "lava", "amount": 60 },
+     { "op": "flatten", "at": [80, 208], "r": 24 }
+    ] },
+   "villages": [ { "at": [80, 208], "name": "Lowmarsh", "people": 9, "wardens": 1, "prebuilt": ["cottage", "cottage", "cottage", "cottage", "stonehouse", "farm", "well", "lamppost"] } ],
+   "herds": [["goat", 1, 4], ["deer", 1, 3]],
+   "spawns": [
+    { "species": "imp", "count": 5, "at": [36, 30], "spread": 6, "goal": "village", "time": 20, "announce": "Fire imps are riding the lava down!" },
+    { "species": "wyrmling", "count": 2, "at": [80, 20], "spread": 6, "goal": "village", "time": 45, "hp": 1.3 },
+    { "species": "imp", "count": 6, "at": [124, 30], "spread": 6, "goal": "village", "time": 70 },
+    { "species": "wyrmling", "count": 3, "at": [80, 20], "spread": 8, "goal": "village", "time": 100, "hp": 1.4, "announce": "Wyrmlings over the ridge!" },
+    { "species": "imp", "count": 8, "at": [80, 30], "spread": 10, "goal": "village", "time": 125 }
+   ],
+   "mana": { "start": 110, "max": 190, "regen": 5.5 },
+   "loadout": ["spell:earth", "spell:frost", "spell:rain", "material:water", "spell:missiles", "spell:lightning", "creature:archer", "tool:inspect"],
+   "goals": [
+    { "type": "survive", "secs": 150, "text": "Hold until the mountain tires", "short": "Hold" },
+    { "type": "contain", "material": "lava", "zone": [80, 208, 22], "text": "Keep lava out of the village", "failText": "Lava reached Lowmarsh", "short": "Lava" },
+    { "type": "protect", "what": "houses", "min": 3, "text": "Keep 3 houses standing", "failText": "Lowmarsh burned", "short": "Houses" }
+   ],
+   "stars": [
+    { "type": "win", "text": "Lowmarsh stands" },
+    { "type": "housesLostMax", "n": 0, "text": "Lose no house" },
+    { "type": "manaUsedMax", "n": 520, "text": "Spend under 520 mana" }
+   ],
+   "reward": "spell:volcano",
+   "tip": "Frost Nova turns a lava front to obsidian, and water does the same more slowly. Imps die in water and frost — they hate the cold."
+  },
+  {
+   "id": "6-6", "name": "The Elder Wyrm", "icon": "lvl-6-6",
+   "intro": ["The oldest dragon in the realm has woken, and it is coming for Highmere.", "It is bigger than anything you have faced, and it will not flee.", "Twice it will rage and call its brood — the second time, the sky itself will burn."],
+   "map": { "W": 176, "H": 256, "seed": 6606, "recipe": "greenvale", "override": { "sea": 0.18, "rivers": 1, "villages": 0, "glades": 0 }, "clock": 0.55, "freezeTime": true,
+    "ops": [
+     { "op": "flatten", "at": [88, 168], "r": 36 },
+     { "op": "clear", "at": [88, 168], "r": 28 },
+     { "op": "ground", "at": [88, 168], "r": 34, "mat": "dirt" },
+     { "op": "ground", "at": [88, 168], "r": 20, "mat": "cobble" }
+    ] },
+   "villages": [ { "at": [88, 168], "name": "Highmere", "people": 12, "wardens": 3, "mages": 2, "prebuilt": ["cottage", "cottage", "cottage", "cottage", "stonehouse", "stonehouse", "stonehouse", "longhouse", "farm", "farm", "well", "tower", "shrine"] } ],
+   "herds": [["sheep", 2, 4], ["cow", 1, 3]],
+   "spawns": [
+    { "species": "elderwyrm", "count": 1, "at": [88, 8], "spread": 0, "goal": "village", "time": 5, "announce": "The sky goes dark from end to end..." }
+   ],
+   "mana": { "start": 150, "max": 240, "regen": 7 },
+   "timeLimit": 210,
+   "failText": "Highmere could not hold out",
+   "loadout": ["spell:missiles", "spell:lightning", "spell:chain", "spell:frost", "spell:barrier", "spell:meteor", "spell:rain", "spell:heal", "creature:archer", "creature:mage", "tool:inspect"],
+   "goals": [
+    { "type": "dragon", "species": "elderwyrm", "text": "Bring down the Elder Wyrm", "short": "Wyrm" },
+    { "type": "protect", "what": "houses", "min": 6, "text": "Keep 6 houses standing", "failText": "Highmere burned", "short": "Houses" }
+   ],
+   "stars": [
+    { "type": "win", "text": "Wyrmfall" },
+    { "type": "peopleLostMax", "n": 6, "text": "Lose 6 people at most" },
+    { "type": "timeMax", "secs": 150, "text": "Down in 150 seconds" }
+   ],
+   "reward": "spell:void",
+   "tip": "Its hide turns fire, frost and half of every bolt. Arcane Missiles, archers and mages wear it down; a falling star that catches it hurts most of all. Shield the roofs when the burning stones come."
+  }
+ ]
+}

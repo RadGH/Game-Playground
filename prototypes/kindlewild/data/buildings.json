@@ -1,0 +1,173 @@
+{
+ "about": "What villages build, as real cells. Key: R thatch roof, T slate roof, W timber wall, S stone wall, D doorway (plank floor, open), F crop on farmland, w water, L lantern, s sunstone, r rosestone, c cobbles, . leave as is. beds = people it houses. cost in the village store. needs = village level. Read by js/sim/village.js.",
+ "key": {
+  "R": "roof_thatch",
+  "T": "roof_slate",
+  "W": "wall_wood",
+  "S": "wall_stone",
+  "L": "lamp",
+  "s": "sunstone",
+  "r": "rosestone",
+  "w": "water",
+  "F": "crop",
+  "G": "glass"
+ },
+ "ground": {
+  "D": "planks",
+  "F": "farmland",
+  "c": "cobble"
+ },
+ "kinds": {
+  "cottage": {
+   "name": "Cottage",
+   "beds": 3,
+   "cost": {
+    "wood": 8
+   },
+   "needs": 1,
+   "cells": [
+    "RRRRRR",
+    "RRRRRR",
+    "RRRRRR",
+    "WGWWGW",
+    "WWDWWW"
+   ]
+  },
+  "longhouse": {
+   "name": "Longhouse",
+   "beds": 5,
+   "cost": {
+    "wood": 14
+   },
+   "needs": 2,
+   "cells": [
+    "RRRRRRRR",
+    "RRRRRRRR",
+    "RRRRRRRR",
+    "WGWWWWGW",
+    "WWWDDWWW"
+   ]
+  },
+  "stonehouse": {
+   "name": "Stone house",
+   "beds": 4,
+   "cost": {
+    "wood": 4,
+    "stone": 10
+   },
+   "needs": 2,
+   "cells": [
+    "TTTTTT",
+    "TTTTTT",
+    "TTTTTT",
+    "SGSSGS",
+    "SSDSSS"
+   ]
+  },
+  "farm": {
+   "name": "Field",
+   "beds": 0,
+   "cost": {
+    "wood": 2
+   },
+   "needs": 1,
+   "farm": true,
+   "cells": [
+    "FFFFFF",
+    "FFFFFF",
+    "FFFFFF",
+    "FFFFFF"
+   ]
+  },
+  "well": {
+   "name": "Well",
+   "beds": 0,
+   "cost": {
+    "stone": 4
+   },
+   "needs": 1,
+   "well": true,
+   "cells": [
+    "cSc",
+    "SwS",
+    "cSc"
+   ]
+  },
+  "shrine": {
+   "name": "Shrine",
+   "beds": 0,
+   "cost": {
+    "stone": 8,
+    "wood": 4
+   },
+   "needs": 2,
+   "shrine": true,
+   "cells": [
+    "cTc",
+    "TsT",
+    "crc"
+   ]
+  },
+  "tower": {
+   "name": "Watchtower",
+   "beds": 0,
+   "cost": {
+    "stone": 14
+   },
+   "needs": 2,
+   "tower": true,
+   "cells": [
+    "SSSS",
+    "SLLS",
+    "SSSS",
+    "SSDS"
+   ]
+  },
+  "lamppost": {
+   "name": "Lamp",
+   "beds": 0,
+   "cost": {
+    "wood": 1
+   },
+   "needs": 1,
+   "lamp": true,
+   "cells": [
+    "L"
+   ]
+  }
+ },
+ "names": {
+  "first": [
+   "Thorn",
+   "Ash",
+   "Mill",
+   "Brack",
+   "Elder",
+   "Wick",
+   "Hollow",
+   "Stone",
+   "Fern",
+   "Oak",
+   "Cobble",
+   "Larks",
+   "Bram",
+   "Fox",
+   "Wren",
+   "Holly"
+  ],
+  "last": [
+   "by",
+   "ford",
+   "ham",
+   "brook",
+   "stead",
+   "wick",
+   "dale",
+   "mere",
+   "field",
+   "cross",
+   "well",
+   "bury"
+  ]
+ }
+}

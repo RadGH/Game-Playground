@@ -1,0 +1,17 @@
+import { chromium } from 'playwright';
+const out = process.argv[2];
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await (await browser.newContext({ viewport: { width: 402, height: 780 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true })).newPage();
+const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+await page.goto('http://localhost:8401/prototypes/kindlewild/');
+await page.waitForFunction(() => window.gameEye);
+await page.tap('#go-realm');
+await page.locator('#realm-body .card').first().tap();
+await page.waitForTimeout(500);
+await page.evaluate(() => { const s = window.gameEye.app.stage.session; s.realm.nextOmen = s.sim.tick + 5; });
+await page.waitForTimeout(800);
+await page.evaluate(() => window.gameEye.step(14 * 30));
+await page.waitForTimeout(1200);
+await page.screenshot({ path: out });
+console.log('errors', errors.length ? errors : 'none', JSON.stringify(await page.evaluate(() => window.gameEye.state().game.villages)));
+await browser.close();

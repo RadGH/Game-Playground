@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "_doc": "Tuning that is not a row of another file (PLAN §1.6). One top-level block per system; a milestone adds its own block and never edits another's (M4 raids, M6 mana regen, M7 town). Times in ticks (20 a second).",
+  "day": { "_doc": "The day clock lives in the sim (M3). daylight is 20 at night and 255 by day, ramping over two hours at dawn (5-7) and dusk (18-20).", "ticks": 9600, "startHour": 9 },
+  "sight": { "_doc": "Fog of war (§0.10), worked out in the worker every `every` ticks (js/world/fog.js). Quarter-res values: smoke at or above `smokeBlocks` hides a spot; at night (daylight below `darkBelow`) only spots with light at or above `litAbove` are seen; a sensor always sees its own `close` share of its radius.", "every": 20, "smokeBlocks": 90, "darkBelow": 70, "litAbove": 70, "close": 0.06 },
+  "start": { "_doc": "What the landing brings (the HQ starts nearly empty, ROAST 2.5).", "stock": { "timber": 90, "stone": 30 } },
+  "economy": {
+    "_doc": "M3. The dispatcher and producers run every `every` ticks. A carrier leaves only with at least `minLoad` (or everything there is, when a camp is full). `inputBatches` = how many batches of input a producer keeps in its pool. Idle carriers walk home after `idleHome` ticks. `pathBudget` caps the cells one route search may open. `refund` = share of the cost left as a pile when you demolish (undo within `undoTicks` refunds everything). Camps stop when their own store is full (OUTPUT lamp). A lamp must stay lit `jamDebounce` ticks before the teletype hears of it, and the same lamp for the same reason is not reported again within `jamRepeat` ticks.",
+    "every": 5, "minLoad": 6, "inputBatches": 2, "idleHome": 400, "pathBudget": 400000, "refund": 0.5, "undoTicks": 600,
+    "jamDebounce": 40, "jamRepeat": 2400, "outcropRescan": 100
+  },
+  "town": {
+    "_doc": "M7 (js/sim/town/). The town step runs every `every` ticks. The landing party (`startPop`) sleeps in the HQ (`hqBeds`); `start` is the food and water it brings. Every `mealEvery` ticks each home eats `foodPerMeal` and drinks `waterPerMeal` per person from ITS OWN pool (a home outside every yard ring has a pantry the porters fill: `pantryMeals` meals of it). A home that misses `leaveAfterMeals` meals in a row loses one person (they walk out). Every `arriveEvery` ticks, if there is a free bed, the base holds `bufferMeals` meals for everyone, morale is at least `minMorale` and no enemy is within `dangerR` cells of a home, a group of up to `groupMax` settlers starts walking in from the map edge (edge points sampled every `gateStep` cells, the `gates` nearest the HQ); the teletype hears of the town each time it passes a multiple of `tellEvery` people. Jobs: food and water buildings (`staffFirst`) are staffed first, then the rest nearest a home first. Morale: each home scores the five inputs (`morale.weights`) minus `smokePenalty` when smoke over it is at least `smokeAt` (quarter-res density); `light` = the coarse light field at the home is at least `lightAt`; `commons` = within a Commons' `serves` radius. The base needle is the residents' average, it moves `morale.rate` a step toward its target, and work speed = low + (high - low) x needle. `chimneys`: puffs of smoke (density `amount`, radius `r`) from running producers and lived-in houses every `every` ticks. Town size feeds M4's Noise: one source at the middle of the homes, `noisePerPerson` x people, at most `noiseMax`. Farms grow in `farm.stages` (share of a batch: tilled, young, ripe) and replant `farm.replant` burnt cells a step.",
+    "every": 20, "phase": 13,
+    "startPop": 20, "hqBeds": 20, "start": { "food": 90, "water": 70 },
+    "mealEvery": 600, "foodPerMeal": 0.125, "waterPerMeal": 0.125, "pantryMeals": 6, "leaveAfterMeals": 4,
+    "arriveEvery": 300, "tellEvery": 10, "groupMax": 3, "bufferMeals": 6, "minMorale": 0.35, "dangerR": 60, "gateStep": 24, "gates": 4,
+    "smokeAt": 16, "smokePenalty": 0.3, "lightAt": 70,
+    "morale": { "weights": { "food": 0.3, "water": 0.25, "commons": 0.15, "light": 0.15, "safety": 0.15 }, "low": 0.6, "high": 1.2, "start": 0.7, "rate": 0.02 },
+    "chimneys": {
+      "smelter": { "amount": 60, "r": 12, "every": 20 },
+      "generator": { "amount": 45, "r": 10, "every": 20 },
+      "house": { "amount": 14, "r": 0, "every": 20 }
+    },
+    "farm": { "stages": [0.3, 0.65], "replant": 6 },
+    "noisePerPerson": 0.6, "noiseMax": 160
+  },
+  "defence": {
+    "_doc": "M4 (js/sim/defence/). `difficulty`: `raid` scales every raid's size, `grace` = ticks before any nest may send its first raid, `hqLoss` = what losing the home HQ means (end = game over; cripple = the HQ is crippled for `crippleTicks`: half sight and half speed, then it is patched back to `crippleHp` of full). `hp`: hit points of a building that is not a tower = footprint cells x `perCell` (at least `min`), the HQ `hq`. `noise`: what each running building puts into the Noise field (quarter-res, 0-255), falling by `fall` a quarter-cell and by `forest` more through woods (forest soaks it up); a blast adds `blast` x power for `blastTicks`; the town adds town.noisePerPerson a person (M7). `glow`: the same for the Glow field (M6 feeds it: spells, the refinery, batteries; Wall V adds its own). `raid`: `warn` = ticks between a raid forming and it leaving the nest (the predicted path is drawn all that time); `giveUp` = a raid that has not reached anything in this many ticks goes home; `fieldBudget` = flow-field cells settled a tick; `margin` = cells round the nest-to-target box the field covers; `refresh` = ticks between field rebuilds while anything blocking changed; `aggro` = cells an enemy turns aside for a damageable thing; `chew` = what one hit point of wall or building costs in the field, in cells of walking (so a raid goes round a wall when the way round is shorter than chewing through); `farReach` = with nothing in reach, a raid goes for the nearest thing it may damage out to this many times its reach; `maxEnemies` caps the map. `fire`: hit points a building or section loses each `every` ticks for every burning cell of it. `blast`: damage at the centre of a blast per unit of power (falls to zero at the edge), `enemy` multiplies it for enemies. `crew`: a porter or cart has `hp` hit points; a lost one is replaced at its home after `respawn` ticks. `threat`: the Noise/Glow fields are sent to the scope every `fieldEvery` ticks.",
+    "difficulty": {
+      "calm": { "raid": 0.6, "grace": 19200, "hqLoss": "cripple", "crippleTicks": 9600, "crippleHp": 0.5 },
+      "standard": { "raid": 1, "grace": 9600, "hqLoss": "end" },
+      "grim": { "raid": 1.45, "grace": 4800, "hqLoss": "end" }
+    },
+    "hp": { "perCell": 3, "min": 120, "hq": 6000 },
+    "noise": {
+      "every": 20, "fall": 2, "forest": 6, "blast": 140, "blastTicks": 200, "shot": 1,
+      "byType": { "hq": 30, "camp": 70, "lumber": 55, "drill": 110, "smelter": 80, "sawmill": 70, "stonecutter": 70, "generator": 90, "thumper": 130, "harvester": 60, "mana_refinery": 60 }
+    },
+    "glow": { "fall": 3, "forest": 2 },
+    "raid": { "warn": [1200, 2400], "giveUp": 7200, "chew": 0.2, "farReach": 1.8, "fieldBudget": 60000, "margin": 140, "refresh": 120, "aggro": 5, "maxEnemies": 700, "spawnEvery": 3 },
+    "fire": { "every": 20 },
+    "blast": { "damage": 160, "enemy": 1.6 },
+    "crew": { "respawn": 1200, "hp": { "porter": 24, "cart": 70 } },
+    "threat": { "fieldEvery": 40 }
+  }
+}

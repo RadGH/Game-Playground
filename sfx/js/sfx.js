@@ -97,13 +97,64 @@ export class Sfx {
 
   /** The live AudioContext, created on the first sound (browsers want a user gesture first). */
   get context() {
-    if (!this._ctx) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      this._ctx = new AC();
-      this._buildGraph();
-    }
-    if (this._ctx.state === 'suspended') this._ctx.resume().catch(() => {});
+    if (!this._ctx || this._ctx.state === 'closed') this._newContext();
+    if (this._ctx.state !== 'running') this._ctx.resume().catch(() => {});
     return this._ctx;
+  }
+
+  _newContext() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    const old = this._ctx;
+    this._ctx = new AC();
+    this._buildGraph();
+    if (old) {
+      // Built takes are AudioBuffers, which are not tied to a context, so the cache carries over. Loops were
+      // nodes in the old graph: start them again in the new one.
+      const looping = [...this._loops.keys()];
+      this._loops.clear();
+      if (old.state !== 'closed') old.close().catch(() => {});
+      for (const id of looping) this.play(id).catch(() => {});
+    }
+    this._watchWake();
+  }
+
+  /**
+   * Keep sound alive on phones (Kindlewild, 2026-10-30: "the sounds stop after a couple levels until I refresh").
+   * iOS pauses a page's audio whenever something interrupts it (a notification, a call, the screen dimming,
+   * switching apps). The context then sits at 'interrupted' or 'suspended', and iOS only lets a page resume
+   * it from inside a tap. The old code tried once, only for 'suspended', and only when a sound played. Now:
+   * every tap or key press checks; coming back to the page checks; if a resume has not taken half a second
+   * later, the next tap throws the context away and builds a new one; and if the clock has stopped while the
+   * state still says 'running' (another iOS state after an interruption), it is rebuilt at once.
+   */
+  _watchWake() {
+    if (this._wakeWired || typeof window === 'undefined' || !window.addEventListener) return;
+    this._wakeWired = true;
+    const wake = () => this.wake();
+    for (const ev of ['pointerdown', 'touchend', 'keydown', 'click']) window.addEventListener(ev, wake, { capture: true, passive: true });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') wake(); });
+    window.addEventListener('pageshow', wake);
+  }
+
+  /** Make sure sound is actually playing. Safe to call any time; cheap when all is well. */
+  wake() {
+    const ctx = this._ctx;
+    if (!ctx) return;
+    if (ctx.state === 'closed') { this._newContext(); return; }
+    const nowWall = performance.now(), nowAudio = ctx.currentTime;
+    const prev = this._clockSeen;
+    this._clockSeen = { wall: nowWall, audio: nowAudio };
+    if (ctx.state === 'running') {
+      // the audio clock should have moved about as far as the wall clock since the last look
+      if (prev && nowWall - prev.wall > 1500 && nowAudio - prev.audio < 0.05) this._newContext();
+      return;
+    }
+    // A resume that did not take last time: build a fresh context now, while we are inside a tap (a context
+    // made outside one starts paused on phones), and resume that instead.
+    if (this._stale === ctx) { this._stale = null; this._newContext(); this._ctx.resume().catch(() => {}); return; }
+    ctx.resume().catch(() => {});
+    clearTimeout(this._staleTimer);
+    this._staleTimer = setTimeout(() => { if (this._ctx === ctx && ctx.state !== 'running') this._stale = ctx; }, 500);
   }
 
   _buildGraph() {

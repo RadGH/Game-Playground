@@ -168,3 +168,46 @@ export function realmMana(save, grimoire) {
     growth: 1 + (save.boons.fertility || 0) * B.fertility.step,
   };
 }
+
+/**
+ * Combine two copies of the progress save (owner 2026-10-30: finished four acts on the phone, the PC signed in to the
+ * same account still showed a fresh start). Progress only grows, so nothing has to be thrown away: the copy that has
+ * earned more Essence is the base, and whatever only the other copy has is added to it — cleared levels and stars,
+ * unlocks, spell levels, boosts, discoveries, ratings. Essence: the base's balance, plus what the other copy earned
+ * that the base did not (first clears 20, stars 10, discoveries their own value), minus what the other copy bought
+ * that the base did not. When one copy already holds everything the other does, the result IS that copy.
+ * `keep` = settings to keep (this device's: picture quality and volume belong to the device).
+ */
+export function mergeSaves(a, b, data, keep = a.settings) {
+  const G = data.grimoire;
+  const [M, O] = (b.essenceTotal || 0) > (a.essenceTotal || 0) ? [b, a] : [a, b];
+  const out = structuredClone(M);
+  let earned = 0, spent = 0;
+  const rewards = new Set(data.levels.acts.flatMap(x => x.levels).map(l => l.reward).filter(Boolean));
+  out.levels = out.levels || {};
+  for (const [id, r] of Object.entries(O.levels || {})) {
+    const m = out.levels[id];
+    if (!m) { out.levels[id] = structuredClone(r); if (r.cleared && !id.startsWith('trial-')) earned += 20; earned += (r.stars || []).filter(Boolean).length * 10; continue; }
+    if (r.cleared && !m.cleared) { m.cleared = true; earned += 20; }
+    (r.stars || []).forEach((st, k) => { if (st && !m.stars[k]) { m.stars[k] = true; earned += 10; } });
+    m.plays = Math.max(m.plays || 0, r.plays || 0);
+    if (r.best != null) m.best = m.best == null ? r.best : Math.min(m.best, r.best);
+  }
+  for (const id of O.discoveries || []) if (!out.discoveries.includes(id)) { out.discoveries.push(id); earned += data.discoveries.list[id]?.essence || 0; }
+  for (const id of O.pages || []) if (!out.pages.includes(id)) {
+    out.pages.push(id);
+    const p = G.pages.find(q => q.id === id);
+    if (p && !p.free && !rewards.has(id)) spent += p.cost;
+  }
+  for (const id of O.seenPages || []) if (!(out.seenPages ||= []).includes(id)) out.seenPages.push(id);
+  for (const [id, lv] of Object.entries(O.spellLevels || {})) for (let k = out.spellLevels[id] || 0; k < lv; k++) { spent += G.upgrades.cost[k] || 0; out.spellLevels[id] = k + 1; }
+  for (const [id, lv] of Object.entries(O.boons || {})) for (let k = out.boons[id] || 0; k < lv; k++) { spent += G.boons[id]?.cost[k] || 0; out.boons[id] = k + 1; }
+  for (const [id, r] of Object.entries(O.ratings || {})) if (!out.ratings[id] || (r.at || 0) > (out.ratings[id].at || 0)) out.ratings[id] = r;
+  out.seenIntro = { ...(O.seenIntro || {}), ...(out.seenIntro || {}) };
+  for (const [k, v] of Object.entries(O.stats || {})) out.stats[k] = Math.max(out.stats[k] || 0, v || 0);
+  if ((O.realm?.day || 0) > (out.realm?.day || 0)) out.realm = O.realm;
+  out.essenceTotal = (M.essenceTotal || 0) + earned;
+  out.essence = Math.max(0, (M.essence || 0) + earned - spent);
+  if (keep) out.settings = structuredClone(keep);
+  return out;
+}

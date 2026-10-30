@@ -54,6 +54,7 @@ because browsers want a user gesture before an AudioContext will start.
 | `levels(id, variant)` / `normalizationTable()` | Measured before/after levels, as rows |
 | `setVolume` / `setBusVolume(bus, v)` / `setBusMuted` / `setMuted` | Mixing |
 | `ambience(id)` / `stopLoop(id)` / `stopLoops()` / `loopingIds()` | Looping beds |
+| `wake()` | Make sure sound is really playing. Called for you on every tap/key and on coming back to the page: a paused context (iOS pauses it on any interruption and only lets a tap resume it) is resumed; one whose resume did not take, or whose clock stopped while it says 'running', is rebuilt on the next tap with the cache kept and loops restarted (2026-10-30, Kindlewild going silent after a few levels on iPhone) |
 | `entry(id)` / `ids()` / `byCategory()` / `sourceOf(id)` / `targetFor(id)` / `busFor(id)` | Catalog queries |
 
 ## Methods

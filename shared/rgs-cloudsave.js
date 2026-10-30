@@ -19,7 +19,9 @@
 //                                         Uploads also wait while the account is ahead, so the newer copy is never
 //                                         overwritten. status() is 'waiting' with a message saying so.
 //   onConflict(q) may resolve to 'cloud', 'local', or anything else to decide later (it is not asked again until
-//                                         the page reloads or the player signs in again).
+//                                         the page reloads or the player signs in again). q.cloud = { slot: value } is
+//                                         the account's copy, so a game can MERGE instead of asking: write the combined
+//                                         saves to localStorage and resolve 'local' (Kindlewild, 2026-10-30).
 //
 // Which copy wins: each browser remembers the cloud copy it last matched (the server's time + a fingerprint of the
 // values).
@@ -113,7 +115,7 @@ export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => lo
   async function ask(rows, latest) {
     if (held) return wait('Your account and this device have different saves. Nothing was changed.');
     const from = rows.find(r => r.updated_at === latest)?.device || 'another device';
-    const q = { cloudAt: latest, cloudDevice: from, text: `Your account has saves from ${when(latest)} (${from}).\n\nOK = use your account's saves on this device.\nCancel = keep this device's saves and copy them to your account.` };
+    const q = { cloudAt: latest, cloudDevice: from, cloud: Object.fromEntries(rows.map(r => [r.slot, r.state?.v ?? null])), text: `Your account has saves from ${when(latest)} (${from}).\n\nOK = use your account's saves on this device.\nCancel = keep this device's saves and copy them to your account.` };
     const pick = onConflict ? await onConflict(q) : (window.confirm(q.text) ? 'cloud' : 'local');
     if (pick === 'cloud') {
       // the player may have started a run while the question was up

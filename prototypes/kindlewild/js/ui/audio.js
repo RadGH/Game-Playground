@@ -11,6 +11,12 @@ export async function initAudio(vol) {
     sfx.preload(['explosion.large', 'explosion.small', 'meteor.fall', 'thunder', 'spell.fire.launch', 'fire.whoosh', 'tornado', 'dragon.roar', 'ambience.forest']).catch(() => {});
   } catch (e) { console.warn('sound off:', e.message); sfx = null; }
 }
+/** What the sound engine is doing right now — for bug reports and tests. */
+export function audioInfo() {
+  if (!sfx) return { on: false };
+  let bytes = 0; for (const r of sfx._cache.values()) bytes += r.buffer.length * r.buffer.numberOfChannels * 4;
+  return { on: true, state: sfx._ctx?.state || 'not started', cached: sfx._cache.size, mb: +(bytes / 1048576).toFixed(1), pending: sfx._pending.size, loops: sfx.loopingIds(), lastError: sfx.lastError?.message || null };
+}
 export function setVolume(v) { volume = v; if (sfx) { sfx.setVolume(v); sfx.setMuted(v <= 0); } }
 
 /** Play a sound, at most once per `gap` ms for the same id (a wildfire must not machine-gun).

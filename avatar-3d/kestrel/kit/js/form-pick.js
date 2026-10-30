@@ -1,4 +1,7 @@
-// Kestrel kit — the "Body" pick for a character editor (masc / fem → avatar.body.form). Pure, no DOM, no Three.js.
+// Kestrel kit — reading the "Body" pick (masc / fem → avatar.body.form). Pure, no DOM, no Three.js.
+// The pick itself (BODY_FORM_PICK) lives in prototypes/thousandvale/js/client/ui/appearance-core.js since 2026-10-30:
+// games whose public copy leaves Kestrel out load that file, so it must not import from here. The notes below are the
+// original wiring plan.
 //
 // Thousandvale's looks have no gender field anywhere (kit/js/from-chibi.js formForChibi guesses one from the beard and
 // the hair). This is the ONE pick a game adds so a player chooses instead. It has the same shape as an entry of
@@ -11,10 +14,6 @@
 // over the avatar's body, so `avatar.body.form` then reaches createKestrelCharacter (and from-chibi.js, where
 // `body.form` already wins over the guess). The wiring is left to batch 1 / the lead (batch 2 does not edit
 // Thousandvale files).
-export const BODY_FORM_PICK = {
-  key: 'form', label: 'Body', ids: ['masc', 'fem'],
-  names: { masc: 'Broad (masculine)', fem: 'Slender (feminine)' },
-};
 
 /** The form a look asks for: 'masc' | 'fem' (anything else → null, so a caller can fall back to its own guess). */
 export function formOf(look) {

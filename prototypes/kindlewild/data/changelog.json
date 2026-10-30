@@ -1,6 +1,16 @@
 {
  "entries": [
   {
+   "id": "2026-10-30",
+   "date": "2026-10-30",
+   "title": "Your progress on every device",
+   "items": [
+    "Signed in on more than one device? Your progress is now combined: levels, stars, unlocks, spell levels, boosts and discoveries from each device all end up on both, with no question to answer.",
+    "Upgrades now opens on Spell levels.",
+    "Fixed: on iPhones the sound could go quiet after a few levels (a notification, a dimmed screen or switching apps paused it) and only came back with a refresh. Now the next tap brings it back."
+   ]
+  },
+  {
    "id": "2026-10-29c",
    "date": "2026-10-29",
    "title": "Easier to read, easier to tell us",

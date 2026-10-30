@@ -11,7 +11,7 @@ import { createPlay } from './ui/play.js';
 import { el, $, modal, toast, show, anyModal } from './ui/ui.js';
 import { pageInfo, pageArt, iconUrl } from './ui/icons.js';
 const picStyle = (id) => { const u = iconUrl(data, id); return u ? { backgroundImage: `url(${u})` } : {}; };
-import { initAudio, setVolume, wireSounds, play as sound } from './ui/audio.js';
+import { initAudio, setVolume, wireSounds, play as sound, audioInfo } from './ui/audio.js';
 import { createPad } from './ui/pad.js';
 import { createWhatsNew } from '../../../shared/whats-new.js';
 import { createCredits } from '../../../shared/credits.js';
@@ -40,7 +40,13 @@ app.pad = pad;
 
 // ---------- saving / progress ----------
 let cloud = null;
-app.saveNow = () => { PR.writeSave(save); cloud?.saveSoon?.(); refreshEssence(); };
+let merging = false;   // mergeWithAccount() below
+// The page reloads to read saves the account just wrote into localStorage. While it goes, nothing may write this
+// page's in-memory save back over them — the 'hidden' handler did exactly that, so a download from the account was
+// undone on the way out and the device's old progress came back (and could then be uploaded over the account's).
+let leaving = false;
+function reloadFromStorage() { leaving = true; location.reload(); }
+app.saveNow = () => { if (leaving) return; PR.writeSave(save); cloud?.saveSoon?.(); refreshEssence(); };
 app.earn = (n) => { PR.earn(save, n); app.saveNow(); };
 app.onDiscover = (id) => {
   const got = PR.discover(save, data.discoveries, id);
@@ -61,7 +67,7 @@ function affordable() {
 }
 setInterval(() => { if (app.current) { save.stats.playSecs = (save.stats.playSecs || 0) + 10; } }, 10000);
 setInterval(() => { if (app.current?.kind === 'realm' && play.s) writeRealm(); }, 60000);
-addEventListener('visibilitychange', () => { if (document.hidden) { if (app.current?.kind === 'realm' && play.s) writeRealm(); PR.writeSave(save); } });
+addEventListener('visibilitychange', () => { if (document.hidden && !leaving) { if (app.current?.kind === 'realm' && play.s) writeRealm(); PR.writeSave(save); } });
 
 // ---------- screens ----------
 function screen(id) {
@@ -272,8 +278,8 @@ function writeRealm() {
   PR.writeSave(save);
 }
 
-// ---------- upgrades (the Grimoire in code; renamed for players 2026-10-29, owner: Boosts first) ----------
-let grimTab = 'boons';
+// ---------- upgrades (the Grimoire in code; renamed for players 2026-10-29; owner 2026-10-30: Spell levels first) ----------
+let grimTab = 'upgrades';
 for (const b of document.querySelectorAll('#grim-tabs button')) b.addEventListener('click', () => { grimTab = b.dataset.g; drawGrimoire(); });
 function drawGrimoire() {
   for (const b of document.querySelectorAll('#grim-tabs button')) b.classList.toggle('on', b.dataset.g === grimTab);
@@ -407,7 +413,7 @@ app.report = (o = {}) => {
     title: o.title || 'Report a problem', body: [text, el('p', { class: 'tip', text: fb ? 'Your note and your rating are sent to the developer.' : 'Your note, a picture of the screen and a few details about the game (speed, level, device) are sent to the developer.' })],
     buttons: [{ label: 'Send', cls: 'big go', onClick: () => {
       if (fb && !text.value.trim()) return toast('Write a few words first.', 'bad');
-      const rep = { at: new Date().toISOString(), kind: o.kind || 'report', rating: o.rating || null, text: text.value, screen: app.current?.kind || 'title', level: app.current?.level?.id || null, state: play.s?.state?.() || null, perf, ua: navigator.userAgent, size: [innerWidth, innerHeight], build: BUILD, shot: shot && shot.length < 180000 ? shot : null };
+      const rep = { at: new Date().toISOString(), kind: o.kind || 'report', rating: o.rating || null, text: text.value, screen: app.current?.kind || 'title', level: app.current?.level?.id || null, state: play.s?.state?.() || null, perf, audio: audioInfo(), ua: navigator.userAgent, size: [innerWidth, innerHeight], build: BUILD, shot: shot && shot.length < 180000 ? shot : null };
       const list = JSON.parse(ls.get('kindlewild.reports') || '[]');
       list.push(rep);
       while (JSON.stringify(list).length > 600000) list.shift();
@@ -418,7 +424,7 @@ app.report = (o = {}) => {
     } }, { label: 'Cancel', cls: 'small-btn' }],
   });
 };
-const BUILD = '2026-10-29';
+const BUILD = '2026-10-30';
 
 // ---------- game-eye (Claude's own test hook) ----------
 window.gameEye = {
@@ -428,15 +434,37 @@ window.gameEye = {
   startLevel: (id) => app.startLevel(id === 'trial' ? makeTrial(dayKey(), save.pages) : data.levels.acts.flatMap(a => a.levels).find(l => l.id === id)),
   sandbox: (recipe = 'greenvale') => { sbLand = recipe; $('#start-sandbox').click(); },
   step: (n = 30) => { for (let k = 0; k < n; k++) play.s?.step(); },
-  save, app,
+  save, app, audio: audioInfo,
 };
+
+// ---------- one account, several devices ----------
+// Owner 2026-10-30: four acts done on the phone, the PC (signed in to the same account) showed a fresh start — the
+// account copy was offered through a browser OK/Cancel box, where Cancel would even have copied the empty PC save
+// over the phone's. Progress only grows, so this device's copy and the account's are COMBINED instead, with no
+// question: the combined save is written here, uploaded, and the page reloads to read it.
+function mergeWithAccount(q) {
+  try {
+    const theirs = q.cloud.save ? JSON.parse(q.cloud.save) : null;
+    if (theirs) { const both = PR.mergeSaves(save, { ...PR.freshSave(data.grimoire), ...theirs }, data); ls.set(PR.SAVE_KEY, JSON.stringify(both)); }
+    // the realm world goes with whichever copy has lived more days (mergeSaves picked the record the same way)
+    const mine = save.realm?.day || 0, other = theirs?.realm?.day || 0;
+    if (q.cloud.realm && (other > mine || !ls.get(REALM_KEY))) ls.set(REALM_KEY, q.cloud.realm);
+    const reps = [...JSON.parse(ls.get('kindlewild.reports') || '[]'), ...JSON.parse(q.cloud.reports || '[]')];
+    const seen = new Set();
+    ls.set('kindlewild.reports', JSON.stringify(reps.filter(r => { const k = r.at + '|' + r.text; if (seen.has(k)) return false; seen.add(k); return true; }).sort((x, y) => (x.at < y.at ? -1 : 1))));
+    merging = true;
+    return 'local';
+  } catch (e) { console.warn('could not combine saves:', e.message); return 'later'; }
+}
+if (ls.get('kindlewild.merged')) { ls.del('kindlewild.merged'); setTimeout(() => toast('Your progress from your account and this device are combined.', 'good', 5000), 800); }
 
 // ---------- go ----------
 (async () => {
   initAudio(save.settings.volume);
   try {
     const { cloudSave } = await import('../../../shared/rgs-cloudsave.js');
-    cloud = cloudSave({ game: 'kindlewild', keys: { save: PR.SAVE_KEY, realm: REALM_KEY, reports: 'kindlewild.reports' }, onRestore: () => location.reload(), canRestore: () => !app.current });
+    cloud = cloudSave({ game: 'kindlewild', keys: { save: PR.SAVE_KEY, realm: REALM_KEY, reports: 'kindlewild.reports' }, onRestore: reloadFromStorage, canRestore: () => !app.current, onConflict: mergeWithAccount });
+    cloud.onStatus((st) => { if (merging && st.state === 'saved') { merging = false; ls.set('kindlewild.merged', '1'); reloadFromStorage(); } });
     const { accountButton } = await import('../../../shared/rgs-signin.js');
     $('#account-slot').append(accountButton({ game: 'kindlewild', gameName: 'Kindlewild', onChange: () => cloud?.sync?.() }));
   } catch (e) { console.warn('accounts unavailable:', e.message); }

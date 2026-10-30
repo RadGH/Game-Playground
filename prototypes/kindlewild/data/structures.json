@@ -1,0 +1,23 @@
+{
+  "about": "Tower Defense structures, built from real cells. Everything sits on a grid of `grid` cells; `size` is in grid squares (a tower is 2x2, so 6x6 cells). cells = rows of the key below. range in cells, rate in seconds, dmg per hit. fromWave = appears in the dock when that wave starts. Read by js/game/towers.js.",
+  "grid": 3,
+  "key": { "S": "wall_stone", "W": "wall_wood", "I": "wall_iron", "T": "roof_slate", "R": "roof_thatch", "L": "lamp", "s": "sunstone", "m": "moonstone", "r": "rosestone", "v": "verdstone", "G": "glass", "o": "obsidian", "g": "gold" },
+  "upgrade": { "max": 3, "cost": [0.8, 1.5], "dmg": 1.5, "range": 1.1, "rate": 0.92 },
+  "sell": 0.7,
+  "keep": { "name": "The Keep", "cells": ["SSTTTTTTTTSS", "SSTTTTTTTTSS", "TTTTGssGTTTT", "TTTGssssGTTT", "TTTsssssoTTT", "TTTsssssoTTT", "TTTGssssGTTT", "TTTTGssGTTTT", "TTTTTTTTTTTT", "SSGSSSSSSGSS", "SSSSSooSSSSS", "SSSSSooSSSSS"] },
+  "kinds": {
+    "palisade": { "name": "Timber Wall", "group": "wall", "size": 1, "cost": 2, "cells": ["WWW", "WWW", "WWW"], "desc": "Cheap, and a line of it steers enemies. It burns." },
+    "wall": { "name": "Stone Wall", "group": "wall", "size": 1, "cost": 5, "cells": ["SSS", "STS", "SSS"], "desc": "Drag to build a line. Enemies must walk round it, so a long maze keeps them under your towers. Fire does not touch it." },
+    "ironwall": { "name": "Iron Wall", "group": "wall", "size": 1, "cost": 12, "fromWave": 4, "cells": ["III", "IoI", "III"], "desc": "The one to put in front of trolls and golems, which smash their way through." },
+    "archer": { "name": "Archers", "group": "tower", "size": 2, "cost": 30, "fire": "arrow", "range": 30, "dmg": 10, "rate": 0.7, "air": true, "color": "#e8d8a0", "cells": ["WWWWWW", "WRRRRW", "WRLLRW", "WRLLRW", "WRRRRW", "WWWWWW"], "desc": "Quick arrows at one enemy, on the ground or in the air. Timber: it can burn." },
+    "ballista": { "name": "Ballista", "group": "tower", "size": 2, "cost": 70, "fire": "arrow", "range": 48, "dmg": 44, "rate": 2.2, "air": true, "boss": 2, "speed": 1.8, "color": "#c8c8d8", "cells": ["SSSSSS", "SWWWWS", "SWIIWS", "SWIIWS", "SWWWWS", "SSSSSS"], "desc": "One slow, huge bolt from far away. Double damage to bosses." },
+    "cannon": { "name": "Bombard", "group": "tower", "size": 2, "cost": 80, "fire": "bomb", "range": 30, "dmg": 18, "splash": 5, "rate": 2.2, "color": "#ff9040", "cells": ["IIIIII", "IooooI", "IorroI", "IorroI", "IooooI", "IIIIII"], "desc": "Stone shot that bursts among a crowd. Ground only." },
+    "flame": { "name": "Fire Pit", "group": "tower", "size": 2, "cost": 55, "fire": "flame", "range": 13, "dmg": 4, "rate": 0.35, "color": "#ff6020", "cells": ["SSSSSS", "SrrrrS", "SrLLrS", "SrLLrS", "SrrrrS", "SSSSSS"], "desc": "Burns everything close by and sets it alight. Short reach, and it can light the grass." },
+    "frost": { "name": "Frost Spire", "group": "tower", "size": 2, "cost": 50, "fire": "frost", "range": 20, "dmg": 1, "rate": 1, "color": "#a0e0ff", "cells": ["SSSSSS", "SmmmmS", "SmGGmS", "SmGGmS", "SmmmmS", "SSSSSS"], "desc": "Chills everything near it to a crawl. Put it at a corner of your maze." },
+    "mint": { "name": "Mint", "group": "support", "size": 2, "cost": 60, "income": 10, "color": "#ffd860", "cells": ["TTTTTT", "TggggT", "TgSSgT", "TgSSgT", "TggggT", "TTTTTT"], "desc": "Pays gold after every wave. Upgrades pay more." },
+    "mender": { "name": "Mender", "group": "support", "size": 2, "cost": 45, "fire": "mend", "range": 15, "rate": 1.2, "color": "#90ffb0", "cells": ["SSSSSS", "SvvvvS", "SvLLvS", "SvLLvS", "SvvvvS", "SSSSSS"], "desc": "Rebuilds damaged structures around it, one stone at a time." },
+    "storm": { "name": "Storm Mast", "group": "tower", "size": 2, "cost": 110, "fromWave": 5, "fire": "chain", "range": 26, "dmg": 20, "chain": 3, "rate": 1.6, "air": true, "color": "#bfe0ff", "cells": ["IIIIII", "ITTTTI", "ITggTI", "ITggTI", "ITTTTI", "IIIIII"], "desc": "Lightning that jumps between enemies." },
+    "arcane": { "name": "Obelisk", "group": "tower", "size": 2, "cost": 120, "fromWave": 8, "fire": "missile", "range": 40, "dmg": 6, "count": 3, "rate": 1.5, "air": true, "color": "#c98aff", "cells": ["oooooo", "ommmmo", "omssmo", "omssmo", "ommmmo", "oooooo"], "desc": "Three homing darts of light that never miss." },
+    "beacon": { "name": "War Beacon", "group": "support", "size": 2, "cost": 90, "fromWave": 10, "fire": "aura", "range": 16, "buff": 0.25, "color": "#ffb070", "cells": ["SSSSSS", "SsssSS", "SsLLsS", "SsLLsS", "SSsssS", "SSSSSS"], "desc": "Towers near it hit 25% harder." }
+  }
+}

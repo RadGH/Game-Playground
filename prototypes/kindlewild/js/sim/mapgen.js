@@ -17,6 +17,15 @@ import { setCell, LEVEL } from './world.js';
 
 export function generate(w, biomesJson, recipeId, seed, opts = {}) {
   const recipe = { ...biomesJson.recipes[recipeId] || biomesJson.recipes.greenvale, ...(opts.recipe || {}) };
+  // a bigger map gets more of everything (custom games and the sandbox ask for this; levels are tuned as they are)
+  if (opts.grow > 1) {
+    const k = opts.grow, q = Math.sqrt(k);
+    recipe.rivers = Math.round((recipe.rivers ?? 0) * q);
+    recipe.glades = Math.round((recipe.glades ?? 0) * k);
+    recipe.vents = Math.round((recipe.vents ?? 0) * q);
+    recipe.villages = Math.round((recipe.villages ?? 0) * Math.pow(k, 0.7));
+    recipe.herds = (recipe.herds || []).map(([sp, groups, size]) => [sp, Math.round(groups * k), size]);
+  }
   const B = biomesJson.biomes;
   const M = w.M, ID = M.id, W = w.W, H = w.H;
   const rng = makeRng(seed);
@@ -129,6 +138,9 @@ export function generate(w, biomesJson, recipeId, seed, opts = {}) {
   if (sea > 0) {
     for (let i = 0; i < w.N; i++) {
       if (w.height[i] < seaH) {
+        // calmSea: the amount tops out at 255, so a deeper bed leaves that water BELOW the shore's surface and the sea
+        // drains seaward for ever, keeping every coast awake. Raising the bed to what the amount can fill stops it.
+        if (opts.calmSea) w.height[i] = Math.max(w.height[i], seaH - (255 >> 3));
         const depth = Math.min(255, (seaH - w.height[i]) * LEVEL);
         w.mat[i] = ID.water; w.life[i] = depth; w.flag[i] = 0;
         if (w.ground[i] !== ID.snow) w.ground[i] = w.height[i] < seaH - 3 ? ID.sand : (w.ground[i] === ID.marsh ? ID.marsh : ID.sand);
@@ -176,7 +188,8 @@ export function generate(w, biomesJson, recipeId, seed, opts = {}) {
   for (let v = 0; v < (recipe.villages ?? 0) + (opts.extraSites ?? 0); v++) {
     let best = null, bs = Infinity;
     for (let t = 0; t < 140; t++) {
-      const x = 24 + rng.int(W - 48), y = 24 + rng.int(H - 48);
+      const edge = opts.siteMargin ?? 24;
+      const x = edge + rng.int(W - edge * 2), y = edge + rng.int(H - edge * 2);
       if (sites.some(s => Math.hypot(s.x - x, s.y - y) < 60)) continue;
       const b = biomeOf[y * W + x];
       if (b === 'mountain' || b === 'peak' || b === 'marsh' || b === 'ash') continue;

@@ -222,12 +222,19 @@ export function createRenderer(canvas) {
       gl.bindVertexArray(vao);
       if (frame.dirty !== false) {
         frame.dirty = false;
+        // a big world sends only the box it rebuilt
+        const [rx0, ry0, rx1, ry1] = frame.rect || [0, 0, W, H];
+        const box = (data, fmt) => {
+          gl.pixelStorei(gl.UNPACK_ROW_LENGTH, W); gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, rx0); gl.pixelStorei(gl.UNPACK_SKIP_ROWS, ry0);
+          gl.texSubImage2D(gl.TEXTURE_2D, 0, rx0, ry0, rx1 - rx0, ry1 - ry0, fmt, gl.UNSIGNED_BYTE, data);
+          gl.pixelStorei(gl.UNPACK_ROW_LENGTH, 0); gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0); gl.pixelStorei(gl.UNPACK_SKIP_ROWS, 0);
+        };
         gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, colorT);
-        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, frame.color);
+        box(frame.color, gl.RGBA);
         gl.bindTexture(gl.TEXTURE_2D, emitT);
-        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, frame.emit);
+        box(frame.emit, gl.RGBA);
         gl.bindTexture(gl.TEXTURE_2D, reliefT);
-        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, W, H, gl.RED, gl.UNSIGNED_BYTE, frame.relief);
+        box(frame.relief, gl.RED);
         // light field: tight halo (half res), wide wash (eighth res)
         pass(A1, emitT, 1 / W, 0, 1);
         pass(A2, A1.t, 0, 1 / ah, 1);

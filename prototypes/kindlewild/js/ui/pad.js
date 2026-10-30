@@ -74,6 +74,8 @@ export function createPad(app, play) {
       if (!cursor) cursor = st.toWorld(innerWidth / 2, innerHeight / 2);
       const dz = (v) => (Math.abs(v) < 0.15 ? 0 : v);
       const sp = 1.6 / Math.max(0.6, st.cam.zoom / 3);
+      // choosing a base: the cursor starts on the chosen spot and only takes over once the stick moves
+      if (play.s.placing && play.pick && !dz(ax[0]) && !dz(ax[1])) cursor = [play.pick[0], play.pick[1]];
       cursor[0] += dz(ax[0]) * sp; cursor[1] += dz(ax[1]) * sp;
       const w = play.s.sim.world;
       cursor[0] = Math.max(0, Math.min(w.W - 1, cursor[0])); cursor[1] = Math.max(0, Math.min(w.H - 1, cursor[1]));

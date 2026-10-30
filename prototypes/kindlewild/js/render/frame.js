@@ -39,7 +39,10 @@ export function buildFrame(f, w, ps, extra) {
   const lb = f.lb;
   lb.fill(0);
   const night = extra.daylight < 0.5;
-  for (let i = 0, o = 0; i < w.N; i++, o += 4) {
+  // big worlds rebuild only what the camera can see (extra.rect = [x0, y0, x1, y1), the renderer uploads the same box)
+  const rect = extra.rect || [0, 0, W, H];
+  f.rect = extra.rect || null;
+  for (let ry = rect[1]; ry < rect[3]; ry++) for (let i = ry * W + rect[0], o = i * 4, end = ry * W + rect[2]; i < end; i++, o += 4) {
     const m = mat[i];
     const g = ground[i];
     const v = hv[i] - 128;
@@ -192,7 +195,7 @@ export function buildFrame(f, w, ps, extra) {
   // gas: blend over the cells
   if (w.gasTotal) {
     const GW = w.GW;
-    for (let gy = 0; gy < w.GH; gy++) for (let gx = 0; gx < GW; gx++) {
+    for (let gy = rect[1] >> 1; gy < Math.min(w.GH, (rect[3] + 1) >> 1); gy++) for (let gx = rect[0] >> 1; gx < Math.min(GW, (rect[2] + 1) >> 1); gx++) {
       const j = gy * GW + gx;
       const d = w.gasDens[j];
       if (d < 4) continue;

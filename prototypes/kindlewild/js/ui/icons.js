@@ -10,6 +10,7 @@ export function pageInfo(data, page) {
   if (kind === 'spell') { const d = data.spells.spells[id]; return { kind, id, name: d?.name || id, desc: d?.desc || '', color: d?.color || '#c26bff' }; }
   if (kind === 'material') { const m = data.compiled.list[data.compiled.id[id]]; return { kind, id, name: m?.name || id, desc: matDesc(data, id), color: m?.color }; }
   if (kind === 'creature') { const s = data.species[id]; return { kind, id, name: s?.name || id, desc: creatureDesc(s), color: '#7cf09a' }; }
+  if (kind === 'structure') { const s = data.structures.kinds[id]; return { kind, id, name: s?.name || id, desc: s?.desc || '', color: s?.color || '#d8c8a8' }; }
   return { kind, id, ...(TOOLS[id] || { name: id, desc: '' }) };
 }
 
@@ -66,6 +67,7 @@ export function pageArt(data, page, size = 32) {
   let url = null;
   if (kind === 'material') url = materialArt(data, id, size);
   else if (kind === 'creature') url = creatureArt(data, id, size);
+  else if (kind === 'structure') url = structureArt(data, id, size);
   else url = iconUrl(data, kind + '-' + id) || badgeArt(pageInfo(data, page), size);
   cache.set(key, url);
   return url;
@@ -124,6 +126,21 @@ function materialArt(data, id, n) {
     img.data[o + 3] = 255;
   }
   g.putImageData(img, 0, 0);
+  return c.toDataURL();
+}
+
+/** A structure's own cells, drawn big: what the tile shows is what lands on the map. */
+function structureArt(data, id, n) {
+  const K = data.structures.kinds[id], M = data.compiled;
+  if (!K) return null;
+  const rows = K.cells, cells = rows.length, px = Math.floor(n / cells), o = Math.floor((n - px * cells) / 2);
+  const c = canvas(n), g = c.getContext('2d');
+  rows.forEach((row, y) => { for (let x = 0; x < row.length; x++) {
+    const m = M.id[data.structures.key[row[x]]];
+    const k = ((hash2(x * 3, y * 5) - 128) * M.vary[m]) >> 7;
+    g.fillStyle = `rgb(${M.r[m] + k},${M.g[m] + k},${M.b[m] + k})`;
+    g.fillRect(o + x * px, o + y * px, px, px);
+  } });
   return c.toDataURL();
 }
 

@@ -1,5 +1,5 @@
 // Fetch every data file (the browser twin of tests/load.mjs).
-const FILES = ['materials', 'reactions', 'creatures', 'spells', 'biomes', 'buildings', 'grimoire', 'discoveries', 'levels', 'icons'];
+const FILES = ['materials', 'reactions', 'creatures', 'spells', 'biomes', 'buildings', 'grimoire', 'discoveries', 'levels', 'icons', 'structures', 'gamemodes'];
 export async function loadData() {
   const base = new URL('../../data/', import.meta.url);
   const parts = await Promise.all(FILES.map(async (f) => {

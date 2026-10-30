@@ -18,6 +18,7 @@ import { makeRng } from '../sim/rng.js';
 import { createObjectives } from './objectives.js';
 
 export const TPS = TICKS_PER_SECOND;
+export const BASE_RADIUS = 13;
 const SWARM_PLACE = { mite: 14, rabbit: 2, chicken: 2, fish: 3, frog: 2, wisp: 3 };
 
 /** Compile the data once (materials + creatures) and reuse it across sessions. */
@@ -59,7 +60,10 @@ export function createSession(rawData, cfg = {}) {
   for (const p of data.grimoire.pages) if (p.mana != null) s.pageMana[p.id] = p.mana;
 
   // ---------- the land ----------
-  s.info = generate(w, data.biomes, map.recipe || cfg.recipe || 'greenvale', seed, { recipe: map.override, dormantVents: map.dormantVents, extraSites: map.extraSites });
+  const free = !level;   // anything that is not a tuned level
+  const grow = cfg.scaleMap ? Math.max(1, W * H / (224 * 224)) : 1;
+  s.info = generate(w, data.biomes, map.recipe || cfg.recipe || 'greenvale', seed, { recipe: map.override, dormantVents: map.dormantVents, extraSites: map.extraSites, calmSea: free, grow, siteMargin: cfg.scaleMap ? Math.round(Math.min(W, H) * 0.2) : undefined });
+  if (grow > 1) w.popScale = Math.min(2.5, Math.sqrt(grow));
   if (map.ops) for (const op of map.ops) terrainOp(op);
   if (map.clock != null) w.clock = map.clock;
   if (map.dayLength) w.dayLength = map.dayLength;
@@ -69,8 +73,10 @@ export function createSession(rawData, cfg = {}) {
   // villages + wildlife
   const villageCfg = level?.villages ?? cfg.villages;
   const sites = s.info.sites;
-  if (villageCfg !== false) {
-    const vlist = Array.isArray(villageCfg) ? villageCfg : sites.map(() => ({}));
+  // base 'choose': the land is shown first and the first village waits for the player's tap (s.placeBase below)
+  s.placing = !level && cfg.base === 'choose' ? { r: cfg.baseRadius ?? BASE_RADIUS } : null;
+  if (villageCfg !== false && !s.placing) {
+    const vlist = Array.isArray(villageCfg) ? villageCfg : sites.map(() => cfg.villageTemplate || {});
     vlist.forEach((vc, k) => {
       const at = vc.at ? { x: vc.at[0], y: vc.at[1] } : sites[k];
       if (!at) return;
@@ -78,7 +84,7 @@ export function createSession(rawData, cfg = {}) {
       sim.village.found(at.x, at.y, { name: vc.name, people: vc.people ?? 5, prebuilt: vc.prebuilt, wardens: vc.wardens, mages: vc.mages, food: vc.food, wood: vc.wood, stone: vc.stone });
     });
   }
-  const herds = level?.herds ?? s.info.recipe.herds ?? [];
+  const herds = cfg.herds === false ? [] : level?.herds ?? s.info.recipe.herds ?? [];
   for (const [sp, groups, size] of herds) {
     for (let g = 0; g < groups; g++) {
       const want = data.species[sp]?.aquatic ? 'water' : 'land';
@@ -210,16 +216,82 @@ export function createSession(rawData, cfg = {}) {
     return out;
   }
   s.spawnGroup = spawnGroup;
+
+  /** A point `dir` of the first living village, at most `far` cells out: a threat on a huge map must not need minutes to arrive. */
+  s.edgeNear = function (dir, far = 110) {
+    const v = sim.village.list.find(q => q.alive);
+    if (!v) return dir;
+    const dx = dir === 'west' ? -1 : dir === 'east' ? 1 : 0, dy = dir === 'north' ? -1 : dir === 'south' ? 1 : 0;
+    const across = (rng() - 0.5) * 60;
+    for (let d = far; d > 20; d -= 6) {
+      const x = Math.round(v.x + dx * d + dy * across), y = Math.round(v.y + dy * d + dx * across);
+      if (x < 4 || y < 4 || x >= W - 4 || y >= H - 4) continue;
+      const i = y * W + x;
+      if (!M.solid[w.mat[i]] && !M.liquid[w.mat[i]]) return [x, y];
+    }
+    return dir;
+  };
+
+  // ---------- choosing where the base goes ----------
+  /** Can the base stand here? { ok, reason }. A mode may add its own rule (s.baseRule). */
+  s.canBase = function (x, y) {
+    x |= 0; y |= 0;
+    const r = s.placing?.r ?? BASE_RADIUS, edge = r + 6;
+    if (x < edge || y < edge || x >= W - edge || y >= H - edge) return { ok: false, reason: 'Too close to the edge of the world' };
+    let wet = 0, n = 0, lo = 255, hi = 0;
+    for (let yy = y - r; yy <= y + r; yy += 2) for (let xx = x - r; xx <= x + r; xx += 2) {
+      if ((xx - x) ** 2 + (yy - y) ** 2 > r * r) continue;
+      const i = yy * W + xx, m = w.mat[i];
+      n++;
+      if (m === ID.lava) return { ok: false, reason: 'Lava!' };
+      if (M.liquid[m]) wet++;
+      lo = Math.min(lo, w.height[i]); hi = Math.max(hi, w.height[i]);
+    }
+    if (wet > n * 0.2) return { ok: false, reason: 'Too much water here' };
+    if (hi - lo > 26) return { ok: false, reason: 'Too steep here' };
+    return s.baseRule ? s.baseRule(x, y) : { ok: true };
+  };
+  /** A good place to start the choosing from: the generator's best site, else the nearest spot that works. */
+  s.suggestBase = function () {
+    for (const site of sites) if (s.canBase(site.x, site.y).ok) return [site.x, site.y];
+    for (let r = 0; r < Math.max(W, H) / 2; r += 6) for (let k = 0; k < 16; k++) {
+      const x = (W / 2 + Math.cos(k / 16 * 6.283) * r) | 0, y = (H / 2 + Math.sin(k / 16 * 6.283) * r) | 0;
+      if (s.canBase(x, y).ok) return [x, y];
+    }
+    return null;
+  };
+  s.placeBase = function (x, y) {
+    if (!s.placing) return { ok: false, reason: 'The base is already built' };
+    x |= 0; y |= 0;
+    const can = s.canBase(x, y);
+    if (!can.ok) return can;
+    const r = s.placing.r;
+    s.placing = null;
+    clearArea(x, y, r);
+    w.wakeAll();
+    // nothing with teeth waits inside a brand-new base
+    sim.creatures.near(x, y, r + 8, (c) => { if (c.sp.diet === 'hunt' || c.team === 'monster') sim.creatures.remove(c); });
+    if (s.onBase) s.onBase(x, y);
+    else {
+      sim.village.found(x, y, { people: 5 });
+      // the land's other villages take their sites, as long as they are not on top of this one
+      const rest = sites.filter(q => Math.hypot(q.x - x, q.y - y) > 60).slice(0, Math.max(0, sites.length - 1));
+      if (cfg.villages !== false) for (const q of rest) sim.village.found(q.x, q.y, { people: 5 });
+    }
+    sim.fire('base-placed', { x, y });
+    return { ok: true };
+  };
   s.terrainOp = terrainOp;
 
   // ---------- the player's hand ----------
-  s.has = (page) => s.mode === 'sandbox' && s.cfg.everything ? true : s.unlocked.has(page);
+  s.has = (page) => (s.mode === 'sandbox' && s.cfg.everything) || (page.startsWith('structure:') && !!s.run?.build) ? true : s.unlocked.has(page);
   s.costOf = function (page, x, y, o = {}) {
     const [kind, id] = page.split(':');
     if (kind === 'spell') return sim.spells.costOf(id, x, y, o);
     if (kind === 'creature') return (data.species[id]?.cost ?? 1) * (SWARM_PLACE[id] ? 1 : 1);
     if (kind === 'material') return s.pageMana[page] ?? 0.2;
     if (kind === 'tool') return page === 'tool:torch' ? 0.5 : 0;
+    if (kind === 'structure') return s.run?.priceOf ? s.run.priceOf(id) : 0;
     return 0;
   };
   s.spend = function (cost) {
@@ -237,6 +309,7 @@ export function createSession(rawData, cfg = {}) {
    */
   s.use = function (page, x, y, o = {}) {
     if (s.result) return { ok: false, reason: 'The level is over' };
+    if (s.placing) return { ok: false, reason: 'Choose where your base goes first' };
     if (!s.has(page)) return { ok: false, reason: 'Not unlocked yet' };
     const [kind, id] = page.split(':');
     x = Math.max(0, Math.min(W - 1, x)); y = Math.max(0, Math.min(H - 1, y));
@@ -290,6 +363,7 @@ export function createSession(rawData, cfg = {}) {
       sim.fire('placed', { species: id, x, y });
       return { ok: !!first, cost, creature: first };
     }
+    if (kind === 'structure') return s.run?.build ? s.run.build(id, x, y, o) : { ok: false, reason: 'Nothing happens' };
     if (kind === 'tool') {
       const brush = o.brush ?? 3;
       if (id === 'erase') { const n = paint(w, x, y, brush, 0); return { ok: n > 0, cost: 0 }; }
@@ -343,7 +417,7 @@ export function createSession(rawData, cfg = {}) {
 
   // ---------- the tick ----------
   s.step = function () {
-    if (s.paused || s.result) return;
+    if (s.paused || s.result || s.placing) return;
     sim.step();
     s.stats.ticks++;
     if (!s.endless) s.mana.cur = Math.min(s.mana.max, s.mana.cur + s.mana.regen / TPS * (s.regenScale ?? 1));
@@ -380,7 +454,7 @@ export function createSession(rawData, cfg = {}) {
   /** A compact view of the game for tests and the game-eye MCP. */
   s.state = function () {
     return {
-      mode: s.mode, tick: sim.tick, mana: { cur: Math.floor(s.mana.cur), max: s.mana.max }, result: s.result,
+      mode: s.mode, tick: sim.tick, placing: !!s.placing, run: s.run?.state?.() ?? null, mana: { cur: Math.floor(s.mana.cur), max: s.mana.max }, result: s.result,
       creatures: Object.fromEntries(Object.entries(sim.creatures.counts).filter(([, n]) => n > 0)),
       villages: sim.village.list.map(v => ({ name: v.name, pop: v.pop, beds: v.beds, houses: sim.village.housesStanding(v.id), food: Math.floor(v.food), alive: v.alive })),
       burning: w.stats.burning, lava: w.stats.lava, particles: sim.ps.n,

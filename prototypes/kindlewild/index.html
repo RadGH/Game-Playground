@@ -21,14 +21,14 @@
     <div class="mana" id="mana" title="Mana">
       <div class="mana-fill" id="mana-fill"></div>
       <div class="mana-ghost" id="mana-ghost"></div>
-      <span class="mana-text"><b id="mana-num">0</b><small id="mana-regen"></small></span>
+      <span class="mana-text"><b id="mana-num">0</b></span>
     </div>
     <button class="goal-chip" id="goal-chip" aria-label="Goals"><span id="goal-text">Sandbox</span></button>
-    <div class="wind" id="wind" title="Wind"><span id="wind-arrow">➤</span></div>
     <button class="icon-btn" id="btn-speed" aria-label="Speed">1×</button>
     <button class="icon-btn report" id="btn-report" aria-label="Report a problem">!</button>
   </div>
   <div id="realm-strip" class="realm-strip hidden"></div>
+  <button id="run-action" class="run-action hidden"></button>
   <div id="toasts" aria-live="polite"></div>
   <div id="banner" class="banner hidden"></div>
   <div id="inspect" class="inspect hidden"></div>
@@ -58,9 +58,15 @@
     <button data-tab="material"><i class="tab-ico"></i>Elements</button>
     <button data-tab="creature"><i class="tab-ico"></i>Creatures</button>
     <button data-tab="tool"><i class="tab-ico"></i>Tools</button>
+    <button data-tab="structure" class="hidden"><i class="tab-ico"></i>Structures</button>
   </div>
 </div>
 <button id="dock-open" class="dock-open hidden" aria-label="Show the tools">▴ Tools</button>
+<div id="base-pick" class="base-pick hidden">
+  <b id="base-title">Choose where your base goes</b>
+  <small id="base-why">Tap the land. Two fingers move the view.</small>
+  <div class="base-buttons"><button class="big go" id="base-ok">Build here</button><button class="big" id="base-any">Pick for me</button></div>
+</div>
 
 <!-- screens -->
 <section id="title" class="screen">
@@ -71,7 +77,7 @@
     <div class="title-buttons">
       <button class="big" id="go-challenges">⚔️ Challenges</button>
       <button class="big" id="go-sandbox">🌋 Sandbox</button>
-      <button class="big" id="go-realm">🏰 Realm</button>
+      <button class="big" id="go-custom">🏰 Custom Game</button>
       <button class="big" id="go-grimoire">📖 Upgrades <span class="dot hidden" id="grim-dot"></span></button>
     </div>
     <div class="title-small">
@@ -89,22 +95,14 @@
   <div class="scroll" id="act-list"></div>
 </section>
 
-<section id="sandbox-setup" class="screen hidden">
-  <header class="screen-head"><button class="icon-btn" data-back>‹</button><h2>Sandbox</h2></header>
-  <div class="scroll">
-    <h3>Pick a land</h3>
-    <div class="cards" id="land-cards"></div>
-    <h3>Size</h3>
-    <div class="seg" id="size-seg"><button data-v="small">Small</button><button data-v="medium" class="on">Medium</button><button data-v="large">Large</button></div>
-    <label class="toggle"><input type="checkbox" id="endless" checked> Endless mana</label>
-    <label class="toggle"><input type="checkbox" id="everything"> Unlock everything here (try anything; your own unlocks are not changed)</label>
-    <button class="big go" id="start-sandbox">Begin</button>
-  </div>
+<section id="custom" class="screen hidden">
+  <header class="screen-head"><button class="icon-btn" data-back>‹</button><h2>Custom Game</h2><span class="essence-pill" data-essence>✦ 0</span></header>
+  <div class="scroll" id="custom-body"></div>
 </section>
 
-<section id="realm-setup" class="screen hidden">
-  <header class="screen-head"><button class="icon-btn" data-back>‹</button><h2>Realm</h2><span class="essence-pill" data-essence>✦ 0</span></header>
-  <div class="scroll" id="realm-body"></div>
+<section id="custom-new" class="screen hidden">
+  <header class="screen-head"><button class="icon-btn" id="custom-new-back">‹</button><h2>New game</h2></header>
+  <div class="scroll" id="custom-form"></div>
 </section>
 
 <section id="grimoire" class="screen hidden">

@@ -5,12 +5,14 @@
 import { createRenderer } from '../render/gl.js';
 import { createFrame, buildFrame } from '../render/frame.js';
 
+const BIG_WORLD = 100000, BUILD_BUDGET = 110000;   // cells
+
 export function createStage(canvas, opts = {}) {
   const renderer = createRenderer(canvas);
   const st = {
     renderer, session: null, frame: null,
     cam: { x: 0, y: 0, zoom: 3 },
-    frameNo: 0, time: 0, slow: 1 / 60, autoDropped: false, slowSince: 0,
+    frameNo: 0, buildSkip: 0, time: 0, slow: 1 / 60, autoDropped: false, slowSince: 0,
     // speed numbers (ms, smoothed): the readout in Settings and every bug report carry these
     perf: { frame: 16, sim: 0, build: 0, draw: 0, gpu: 0, lights: 0, worst: 0 },
     frameTimes: new Float32Array(120), diag: false,   // diag: wait for the GPU each frame to time it (readout on only)
@@ -121,15 +123,28 @@ export function createStage(canvas, opts = {}) {
   }
   requestAnimationFrame(loop);
 
+  /** The cells on screen plus a margin, for a big world. */
+  function viewRect(w) {
+    const hw = VW() / 2 / st.cam.zoom + 10, hh = innerHeight / 2 / st.cam.zoom + 10;
+    return [Math.max(0, (st.cam.x - hw) | 0), Math.max(0, (st.cam.y - hh) | 0), Math.min(w.W, Math.ceil(st.cam.x + hw)), Math.min(w.H, Math.ceil(st.cam.y + hh))];
+  }
   function draw(rebuild) {
     const s = st.session, w = s.sim.world;
     const day = s.sim.daylight();
     const cursor = st.controller?.cursorView?.() || null;
     const tb = performance.now();
+    // a big world: rebuild only what the camera sees, and when nearly all of it is in view rebuild less often
+    // (building 512x512 cells 30 times a second is more than a phone has)
+    const rect = w.N > BIG_WORLD && st.frame.built ? viewRect(w) : null;
+    if (rect && rebuild) {
+      const every = Math.ceil((rect[2] - rect[0]) * (rect[3] - rect[1]) / BUILD_BUDGET);
+      if (every > 1 && (++st.buildSkip % every)) rebuild = false;
+    }
     if (rebuild) { st.frame.built = true; st.frame.dirty = true; buildFrame(st.frame, w, s.sim.ps, {
-      daylight: day,
+      daylight: day, rect,
       draw: (api) => {
         s.sim.creatures.draw(api, s.sim.tick);
+        s.run?.draw?.(api, s.sim.tick, cursor);
         // meteor warning rings, pulsing
         if (w.warnings) for (const wr of w.warnings) {
           const pulse = (s.sim.tick >> 2) & 1;
@@ -162,6 +177,12 @@ export function createStage(canvas, opts = {}) {
             const a = k / n * Math.PI * 2;
             api.px(ring.x + Math.cos(a) * rr, ring.y + Math.sin(a) * rr, ring.color[0], ring.color[1], ring.color[2], k2);
           }
+        }
+        // where a structure would go
+        if (cursor?.rect) {
+          const [x, y, rw, rh] = cursor.rect, c = cursor.color;
+          for (let k = 0; k < rw; k++) { api.px(x + k, y, c[0] * 255, c[1] * 255, c[2] * 255, 0.5); api.px(x + k, y + rh - 1, c[0] * 255, c[1] * 255, c[2] * 255, 0.5); }
+          for (let k = 0; k < rh; k++) { api.px(x, y + k, c[0] * 255, c[1] * 255, c[2] * 255, 0.5); api.px(x + rw - 1, y + k, c[0] * 255, c[1] * 255, c[2] * 255, 0.5); }
         }
         // line tool preview
         if (cursor?.line) {
@@ -199,7 +220,7 @@ export function createStage(canvas, opts = {}) {
   st.setQuality = (q) => { st.quality = q; resize(); };
   /** A picture of the world for a bug report. The canvas no longer keeps every frame (that costs a
    *  copy per frame on iPhones), so draw one now and read it back in the same task. */
-  st.capture = (type = 'image/jpeg', q = 0.5) => { try { if (st.session) draw(true); return canvas.toDataURL(type, q); } catch { return null; } };
+  st.capture = (type = 'image/jpeg', q = 0.5) => { try { if (st.session) { st.buildSkip = -1; draw(true); } return canvas.toDataURL(type, q); } catch { return null; } };
   /** Everything a speed report needs, as plain data. */
   st.perfReport = () => {
     const ft = [...st.frameTimes].filter(x => x > 0).sort((a, b) => a - b);

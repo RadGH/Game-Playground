@@ -7,7 +7,7 @@ import { el, modal, toast, banner, show, $ } from './ui.js';
 import { pageInfo, pageArt, iconUrl } from './icons.js';
 import { play as sound, ambience, stopAmbience, ambienceFor } from './audio.js';
 
-const TABS = ['spell', 'material', 'creature', 'tool'];
+const TABS = ['spell', 'material', 'creature', 'tool', 'structure'];
 const BRUSHED = (page) => page.startsWith('material:') || page === 'tool:erase' || page === 'tool:torch';
 const SPEEDS = [1, 2, 3, 0];
 
@@ -16,7 +16,7 @@ export function createPlay(app) {
   const canvas = document.getElementById('world');
   const P = {
     s: null, kind: null, level: null,
-    tab: 'spell', page: null, pageIdx: { spell: 0, material: 0, creature: 0, tool: 0 },
+    tab: 'spell', page: null, pageIdx: { spell: 0, material: 0, creature: 0, tool: 0, structure: 0 },
     brush: 3, hand: false, speedIdx: 0, collapsed: false,
     pointers: new Map(), gesture: null, cursor: null, held: null,
     lastFail: 0, hudT: 0, seen: new Set(),
@@ -29,26 +29,60 @@ export function createPlay(app) {
     updateSpeed();   // a new level starts at 1x, and the button must say so (it kept showing the old 3x)
     app.stage.setSession(session);
     const v0 = session.sim.village.list.find(v => v.alive);
-    app.stage.wholeMap = kind === 'challenge';
-    app.stage.fit(level?.focus || (kind !== 'challenge' && v0 ? [v0.x, v0.y + 10] : null));
-    show('hud'); show('dock'); show('dock-open', false); P.collapsed = false;
+    const keep = session.sim.td?.keep;
+    app.stage.wholeMap = kind === 'challenge' || !!session.placing;
+    app.stage.fit(level?.focus || (keep ? [keep.x, keep.y + 10] : kind !== 'challenge' && v0 ? [v0.x, v0.y + 10] : null));
+    show('hud'); show('dock', !session.placing); show('dock-open', false); P.collapsed = false;
     document.body.classList.add('playing'); dispatchEvent(new Event('resize'));
-    $('#realm-strip').classList.toggle('hidden', kind !== 'realm');
-    $('#hud').classList.toggle('realm', kind === 'realm');
+    const strip = !!(session.realm || session.run);
+    $('#realm-strip').classList.toggle('hidden', !strip);
+    $('#hud').classList.toggle('realm', strip);
     // first page that exists in the first tab that has one
-    P.tab = TABS.find(t => pagesOf(t).length) || 'spell';
+    P.tab = session.run?.startTab || TABS.find(t => pagesOf(t).length) || 'spell';
     P.page = pagesOf(P.tab)[0] || null;
     for (const t of TABS) P.pageIdx[t] = 0;
     renderTabs(); renderTiles(); renderSel();
     setTimeout(dockH, 30);
     wireSession(session);
-    if (level) showIntro(); else if (kind === 'sandbox') toast('Tap a tile, then touch the land. Two fingers move the view.', '', 4200);
+    if (session.placing) startPicking();
+    else if (level) showIntro(); else if (kind === 'sandbox') toast('Tap a tile, then touch the land. Two fingers move the view.', '', 4200);
   };
+  // ---------- choosing where the base goes ----------
+  function startPicking() {
+    show('base-pick');
+    $('#base-title').textContent = P.s.sim.td ? 'Choose where your keep goes' : 'Choose where your base goes';
+    P.pickBase(P.s.suggestBase());
+  }
+  P.pickBase = function (at) {
+    P.pick = at;
+    const r = at ? P.s.canBase(at[0], at[1]) : { ok: false, reason: 'Tap the land' };
+    P.pickOk = r.ok;
+    $('#base-why').textContent = r.ok ? 'Tap the land to move it. Two fingers move the view.' : r.reason;
+    $('#base-ok').disabled = !r.ok;
+  };
+  P.confirmBase = function () {
+    if (!P.s?.placing || !P.pick) return;
+    const r = P.s.placeBase(P.pick[0], P.pick[1]);
+    if (!r.ok) { fail(r.reason); return; }
+    show('base-pick', false); show('dock');
+    app.stage.wholeMap = false;
+    app.stage.fit([P.pick[0], P.pick[1] + 10]);
+    dispatchEvent(new Event('resize'));
+    sound('build.done', {}, 100);
+    if (P.s.sim.td) toast('Build towers and walls. The moving dots show the road the enemies will take.', '', 5000);
+    else if (P.kind === 'sandbox') toast('Tap a tile, then touch the land. Two fingers move the view.', '', 4200);
+  };
+  $('#base-ok').addEventListener('click', () => P.confirmBase());
+  $('#base-any').addEventListener('click', () => {
+    const w = P.s.sim.world;
+    for (let k = 0; k < 200; k++) { const at = [(Math.random() * w.W) | 0, (Math.random() * w.H) | 0]; if (P.s.canBase(at[0], at[1]).ok) { P.pickBase(at); P.confirmBase(); return; } }
+    P.pickBase(P.s.suggestBase()); P.confirmBase();
+  });
   P.stop = function () {
     P.s = null;
     P.amb = null; stopAmbience();
     document.body.classList.remove('playing'); dispatchEvent(new Event('resize'));
-    show('hud', false); show('dock', false); show('dock-open', false);
+    show('hud', false); show('dock', false); show('dock-open', false); show('base-pick', false);
     $('#inspect').classList.add('hidden');
   };
 
@@ -81,6 +115,11 @@ export function createPlay(app) {
     sim.on('omen-fire', (e) => pointAt(e.x, e.y, 8));
     sim.on('omen', (e) => { if (e.warn) { banner('Omen: ' + e.name); toast(e.text, 'warn', 4000); sound('bell.toll', {}, 1000); } });
     sim.on('omen-end', (e) => toast(`${e.name} is over — +${e.essence} ✦`, 'good', 3000));
+    sim.on('blessing', (e) => { banner(e.name); toast(`${e.text} +${e.essence} ✦`, 'good', 3600); });
+    sim.on('wave-end', (e) => toast(`Wave ${e.wave} beaten — +${e.gold} gold`, 'good', 2600));
+    sim.on('structures-new', (e) => { toast(`New: <b>${e.names.join(', ')}</b>`, 'disc', 3600); renderTabs(); renderTiles(); });
+    sim.on('structure-lost', (e) => toast(`A ${e.st.K.name} was destroyed`, 'warn', 2000));
+    sim.on('keep-hit', (e) => { buzz(30); if (e.lives <= 5) banner(`${e.lives} lives left!`, 900); });
     sim.on('milestone', (e) => toast(`<b>${e.text}</b>${e.essence ? ' +' + e.essence + ' ✦' : ''}`, 'disc', 3600));
     sim.on('building-lost', (e) => { if (P.kind !== 'sandbox' && e.b.beds) toast(`A ${e.kind === 'stonehouse' ? 'stone house' : e.kind} in ${e.v.name} is lost`, 'warn'); });
     sim.on('village-lost', (e) => toast(`${e.v.name} is gone…`, 'warn', 4000));
@@ -93,7 +132,7 @@ export function createPlay(app) {
     sim.on('blast', (e) => { if (!e.quiet) app.stats.blasts = (app.stats.blasts || 0) + 1; });
     sim.on('birth', () => { app.stats.born = (app.stats.born || 0) + 1; });
     sim.on('building-lost', () => { app.stats.burned = (app.stats.burned || 0) + 1; });
-    sim.on('result', (r) => setTimeout(() => showResult(r), 1300));
+    sim.on('result', (r) => setTimeout(() => (r.custom ? showRunResult(r) : showResult(r)), 1300));
   }
 
   // ---------- pages / tabs / tiles ----------
@@ -127,6 +166,8 @@ export function createPlay(app) {
     if (!s) return [];
     if (tab === 'material' && !unfiltered && P.chip !== 'all') return pagesOf(tab, true).filter(p => chipOf(p) === P.chip);
     if (s.level) return s.level.loadout.filter(p => p.startsWith(tab + ':'));
+    if (tab === 'structure' && !s.run?.pages) return [];
+    if (s.run?.pages) return s.run.pages(tab, app.save.pages);
     const src = s.cfg.everything ? data.grimoire.pages.map(p => p.id) : app.save.pages;
     const order = data.grimoire.pages.map(p => p.id);
     return src.filter(p => p.startsWith(tab + ':')).sort((a, b) => order.indexOf(a) - order.indexOf(b));
@@ -143,7 +184,7 @@ export function createPlay(app) {
     document.getElementById('tiles').style.minHeight = rows === 1 ? 'var(--tile)' : '';
     return { cols, rows, per: cols * rows };
   }
-  const TAB_PIC = { spell: 'spell:missiles', material: 'material:lava', creature: 'creature:sheep', tool: 'tool:inspect' };
+  const TAB_PIC = { spell: 'spell:missiles', material: 'material:lava', creature: 'creature:sheep', tool: 'tool:inspect', structure: 'structure:archer' };
   function renderTabs() {
     for (const b of document.querySelectorAll('#tabs button')) {
       const t = b.dataset.tab;
@@ -151,6 +192,7 @@ export function createPlay(app) {
       if (ico && !ico.style.backgroundImage) ico.style.backgroundImage = `url(${pageArt(data, TAB_PIC[t], 32)})`;
       b.classList.toggle('on', t === P.tab);
       b.disabled = pagesOf(t).length === 0;
+      b.classList.toggle('hidden', t === 'structure' ? !P.s?.run?.build : !!P.s?.run?.hideTabs?.includes(t));
     }
   }
   function renderTiles() {
@@ -173,12 +215,12 @@ export function createPlay(app) {
   function tileFor(page) {
     const info = pageInfo(data, page);
     const art = pageArt(data, page, 32);
-    const fresh = P.kind !== 'challenge' && app.save.seenPages && !app.save.seenPages.includes(page);
+    const fresh = P.kind !== 'challenge' && !page.startsWith('structure:') && app.save.seenPages && !app.save.seenPages.includes(page);
     const t = el('button', { class: 'tile' + (page === P.page ? ' sel' : '') + (fresh ? ' new' : ''), 'data-page': page, 'aria-label': info.name });
     if (art) t.append(el('div', { class: 'art', style: { backgroundImage: `url(${art})` } }));
     t.append(el('div', { class: 'name', text: info.name }));
     const cost = P.s.costOf(page, 0, 0, {});
-    if (cost && !P.s.endless) t.append(el('div', { class: 'cost', text: page.startsWith('material:') ? `${+cost.toFixed(2)}` : Math.ceil(cost) }));
+    if (cost && !P.s.endless) t.append(el('div', { class: 'cost' + (page.startsWith('structure:') ? ' gold' : ''), text: page.startsWith('material:') ? `${+cost.toFixed(2)}` : Math.ceil(cost) }));
     t.append(el('div', { class: 'cd', style: { transform: 'scaleY(0)' } }));
     // tap selects; long press shows the card
     let lp = 0, longDone = false;
@@ -218,6 +260,7 @@ export function createPlay(app) {
       if (lv) sub += ` · power ${'+'.repeat(lv)}`;
     } else if (page.startsWith('material:')) sub = 'Drag to paint' + (!P.s.endless ? ` · ${+cost.toFixed(2)} mana a cell (brush ${P.brush}: ~${Math.max(1, Math.round(Math.PI * P.brush * P.brush * cost))})` : '');
     else if (page.startsWith('creature:')) sub = 'Tap to place' + (!P.s.endless ? ` · ${cost} mana` : '');
+    else if (page.startsWith('structure:')) sub = `${lineTool(page) ? 'Drag to build a line' : 'Tap to build'} · ${cost} gold`;
     else sub = pageInfo(data, page).desc;
     $('#sel-sub').textContent = sub;
     $('#brush').classList.toggle('hidden', !BRUSHED(page));
@@ -228,7 +271,7 @@ export function createPlay(app) {
     const art = pageArt(data, page, 48);
     const pic = art ? el('div', { style: { width: '72px', height: '72px', margin: '0 auto', backgroundImage: `url(${art})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', imageRendering: 'pixelated' } }) : null;
     const cost = P.s.costOf(page, 0, 0, {});
-    modal({ title: info.name, body: [pic, el('p', { text: info.desc || '' }), cost ? el('p', { class: 'tip', text: (page.startsWith('material:') ? `${+cost.toFixed(2)} mana a cell` : `${Math.ceil(cost)} mana`) + (P.s.endless ? ' (free here: endless mana)' : '') }) : null], buttons: [{ label: 'Use it', cls: 'big go', onClick: () => select(page) }, { label: 'Close', cls: 'small-btn' }] });
+    modal({ title: info.name, body: [pic, el('p', { text: info.desc || '' }), cost ? el('p', { class: 'tip', text: (page.startsWith('material:') ? `${+cost.toFixed(2)} mana a cell` : page.startsWith('structure:') ? `${cost} gold` : `${Math.ceil(cost)} mana`) + (P.s.endless ? ' (free here: endless mana)' : '') }) : null], buttons: [{ label: 'Use it', cls: 'big go', onClick: () => select(page) }, { label: 'Close', cls: 'small-btn' }] });
   }
 
   // dock buttons
@@ -256,13 +299,32 @@ export function createPlay(app) {
   P.togglePause = () => { P.speedIdx = SPEEDS[P.speedIdx] === 0 ? 0 : SPEEDS.length - 1; updateSpeed(); };
   $('#btn-menu').addEventListener('click', () => openMenu());
   $('#btn-report').addEventListener('click', () => app.report());
+  // the bar shows only the amount; the flow is one tap away (owner 2026-10-30)
+  $('#mana').addEventListener('click', () => { if (!P.s) return; const m = P.s.mana; toast(P.s.endless ? 'Endless mana' : `Mana ${Math.floor(m.cur)} of ${m.max}, refilling ${m.regen.toFixed(1)} a second`, '', 2400); });
   $('#goal-chip').addEventListener('click', () => showGoals());
 
   // ---------- using the tool on the world ----------
   function worldAt(cx, cy) { return app.stage.toWorld(cx, cy); }
+  // a wall is dragged like a line spell
+  function lineTool(page) {
+    if (page.startsWith('spell:')) return data.spells.spells[page.slice(6)]?.aim === 'line';
+    return page.startsWith('structure:') && !!P.s?.run?.isLine?.(page.slice(10));
+  }
+  function structurePanel(st) {
+    const run = P.s.run, info = run.info(st);
+    run.select(st);
+    const was = P.s.paused; P.s.paused = true;
+    const buttons = [];
+    if (info.upgrade != null) buttons.push({ label: `Upgrade: ${info.upgrade} gold`, cls: 'big go', onClick: () => { const r = run.upgrade(st); if (!r.ok) { fail(r.reason); return false; } } });
+    buttons.push({ label: `Sell: +${info.refund} gold`, cls: 'big', onClick: () => { run.sell(st); } }, { label: 'Close', cls: 'small-btn' });
+    modal({ title: `${info.name}${st.K.group === 'wall' ? '' : ` (level ${info.tier})`}`, body: [el('p', { text: info.desc }), info.stats ? el('p', { class: 'tip', text: info.stats }) : null, el('p', { class: 'tip', text: `You have ${info.gold} gold.` })], buttons, onClose: () => { if (P.s) { P.s.paused = was; run.select(null); } } });
+  }
   function use(x, y, o = {}) {
     if (!P.s || !P.page) return null;
+    const on = P.page === 'tool:inspect' ? P.s.run?.structureAt?.(x, y) : null;
+    if (on) { structurePanel(on); return { ok: true }; }
     const r = P.s.use(P.page, x, y, { brush: P.brush, ...o });
+    if (r.open) { structurePanel(r.open); return r; }
     if (!r.ok && r.reason) fail(r.reason);
     if (r.ok && P.page === 'tool:inspect' && r.info) showInspect(r.info);
     if (r.ok && P.page.startsWith('spell:')) {
@@ -312,8 +374,10 @@ export function createPlay(app) {
     const panning = P.hand || e.button === 1 || e.button === 2 || (e.pointerType === 'mouse' && e.shiftKey);
     if (panning) { P.gesture = { kind: 'pan', x: e.clientX, y: e.clientY, cam: { ...app.stage.cam } }; return; }
     const [wx, wy] = worldAt(e.clientX, e.clientY);
+    if (P.s.placing) { P.gesture = { kind: 'pick' }; P.pickBase([wx, wy]); return; }
     const page = P.page;
     if (!page) return;
+    P.cursor = page.startsWith('structure:') ? [wx, wy] : P.cursor;
     if (page === 'tool:grab') {
       const c = P.s.grab(wx, wy);
       P.held = c;
@@ -321,8 +385,7 @@ export function createPlay(app) {
       if (!c) toast('Nothing to grab there', '', 1000);
       return;
     }
-    const spell = page.startsWith('spell:') ? data.spells.spells[page.slice(6)] : null;
-    if (spell?.aim === 'line') { P.gesture = { kind: 'line', x0: wx, y0: wy, x1: wx, y1: wy }; return; }
+    if (lineTool(page)) { P.gesture = { kind: 'line', x0: wx, y0: wy, x1: wx, y1: wy }; return; }
     if (BRUSHED(page)) {
       // touch: wait a moment in case a second finger is coming (that means "move the view")
       P.gesture = { kind: 'brush', lx: wx, ly: wy, started: e.pointerType === 'mouse', t0: performance.now() };
@@ -348,6 +411,7 @@ export function createPlay(app) {
     if (g.kind === 'pan') { app.stage.panFrom(g.cam, e.clientX - g.x, e.clientY - g.y); return; }
     const [wx, wy] = worldAt(e.clientX, e.clientY);
     P.cursor = [wx, wy];
+    if (g.kind === 'pick') { P.pickBase([wx, wy]); return; }
     if (g.kind === 'grab') { if (P.held) P.s.carry(P.held, wx, wy); g.hist.push([wx, wy, performance.now()]); if (g.hist.length > 6) g.hist.shift(); return; }
     if (g.kind === 'line') { g.x1 = wx; g.y1 = wy; return; }
     if (g.kind === 'brush') {
@@ -367,7 +431,7 @@ export function createPlay(app) {
     if (g.kind === 'pinch') { if (P.pointers.size === 0) P.gesture = null; else P.gesture = { kind: 'dead' }; return; }
     if (P.pointers.size > 0) return;
     P.gesture = null;
-    if (g.kind === 'dead' || g.kind === 'pan') return;
+    if (g.kind === 'dead' || g.kind === 'pan' || g.kind === 'pick') return;
     const [wx, wy] = worldAt(e.clientX, e.clientY);
     if (g.kind === 'tap') {
       // cast where the finger LIFTS: the aiming circle follows a press-and-drag, so that is where the
@@ -407,11 +471,16 @@ export function createPlay(app) {
   /** What the shader should draw at the cursor (brush size / spell radius / line preview). */
   P.cursorView = function () {
     const g = P.gesture;
+    if (P.s?.placing) return P.pick ? { x: P.pick[0], y: P.pick[1], r: P.s.placing.r, color: P.pickOk ? [0.5, 1, 0.6] : [1, 0.35, 0.35] } : null;
     if (!P.s || !P.page) return null;
     const color = [1, 0.85, 0.5];
     if (g?.kind === 'line') return { x: g.x1, y: g.y1, r: 1.5, color, line: [g.x0, g.y0, g.x1, g.y1] };
     const at = g?.kind === 'brush' ? [g.lx, g.ly] : P.cursor;
     if (!at) return null;
+    if (P.page.startsWith('structure:') && P.s.run?.snapRect) {
+      const id = P.page.slice(10), q = P.s.run.snapRect(id, at[0], at[1]), ok = P.s.run.canBuild(id, at[0], at[1]).ok;
+      return { x: q.x + q.n / 2, y: q.y + q.n / 2, r: q.range || q.n / 2, color: ok ? [0.6, 1, 0.65] : [1, 0.35, 0.35], rect: [q.x, q.y, q.n, q.n] };
+    }
     let r = 2;
     if (BRUSHED(P.page)) r = P.brush;
     else if (P.page.startsWith('spell:')) { const d = data.spells.spells[P.page.slice(6)]; r = (d.radius ?? 3) * (1 + 0.2 * (P.s.spellLevels[P.page.slice(6)] || 0)); }
@@ -419,16 +488,15 @@ export function createPlay(app) {
     const ok = P.s.endless || P.s.mana.cur >= Math.min(cost, P.page.startsWith('material:') ? 0.5 : cost);
     return { x: at[0], y: at[1], r, color: ok ? color : [1, 0.35, 0.35] };
   };
-  P.setCursor = (c) => { P.cursor = c; };
+  P.setCursor = (c) => { P.cursor = c; if (P.s?.placing && (!P.pick || Math.hypot(c[0] - P.pick[0], c[1] - P.pick[1]) >= 1)) P.pickBase(c); };
 
   function hud() {
     const s = P.s;
     const m = s.mana;
-    if (s.endless) { $('#mana-fill').style.width = '100%'; $('#mana-num').textContent = '∞'; $('#mana-regen').textContent = ''; $('#mana-ghost').style.width = '0'; }
+    if (s.endless) { $('#mana-fill').style.width = '100%'; $('#mana-num').textContent = '∞'; $('#mana-ghost').style.width = '0'; }
     else {
       $('#mana-fill').style.width = (100 * m.cur / m.max).toFixed(1) + '%';
       $('#mana-num').textContent = `${Math.floor(m.cur)}/${m.max}`;
-      $('#mana-regen').textContent = `+${m.regen.toFixed(1)}/s`;
       const cost = P.page?.startsWith('spell:') || P.page?.startsWith('creature:') ? P.s.costOf(P.page, 0, 0, {}) : 0;
       const after = Math.max(0, m.cur - cost);
       $('#mana-ghost').style.left = (100 * after / m.max).toFixed(1) + '%';
@@ -443,17 +511,25 @@ export function createPlay(app) {
       const keep = st.find(g => g.keep && g.progress < 0.75);
       if (keep && !keep.failed) text += ' !';
     }
-    if (P.kind === 'realm') {
+    if (s.run) {
+      text = s.run.goal();
+      $('#realm-strip').innerHTML = s.placing ? '' : s.run.strip();
+      const got = s.run.collect?.();
+      if (got) app.earn(got);
+      const act = s.placing ? null : s.run.action?.();
+      const ab = $('#run-action');
+      ab.classList.toggle('hidden', !act);
+      if (act) { ab.textContent = act.label; P.runAct = act.run; }
+    }
+    if (s.realm) {
       const R = s.realm, sum = R.summary();
       text = `Day ${R.day + 1}`;
       const o = R.omen;
-      $('#realm-strip').innerHTML = `<span>People ${sum.people}</span><span>Animals ${sum.animals}</span><span>Villages ${sum.villages}</span><span>Faith ${sum.faithRate.toFixed(0)}</span>` + (o ? `<span class="omen">${o.started ? `${o.name}${o.left ? ' — ' + o.left + ' left' : ''}` : `${o.name} in ${Math.max(0, Math.ceil((o.at - s.sim.tick) / 30))}s`}</span>` : `<span>next omen ${Math.max(0, Math.ceil((R.nextOmen - s.sim.tick) / 30))}s</span>`);
+      $('#realm-strip').innerHTML = `<span>People ${sum.people}</span><span>Animals ${sum.animals}</span><span>Villages ${sum.villages}</span><span>Faith ${sum.faithRate.toFixed(0)}</span>` + (o ? `<span class="omen">${o.started ? `${o.name}${o.left ? ' — ' + o.left + ' left' : ''}` : `${o.name} in ${Math.max(0, Math.ceil((o.at - s.sim.tick) / 30))}s`}</span>` : `<span>next ${R.word === 'wave' ? `wave (${R.wave + 1})` : R.word} ${Math.max(0, Math.ceil((R.nextOmen - s.sim.tick) / 30))}s</span>`);
       const got = R.collect();
       if (got) app.earn(got);
     }
     $('#goal-text').textContent = text;
-    { const w = s.sim.world; const a = Math.atan2(w.wind.y, w.wind.x); const st = w.wind.strength;
-      const ar = $('#wind-arrow'); ar.style.transform = `rotate(${a}rad)`; ar.style.opacity = String(0.45 + Math.min(1, st / 2.5) * 0.55); ar.style.fontSize = (12 + Math.min(3, st) * 4) + 'px'; }
     // ambience follows the world: a blaze crackles, rain patters, nights are windy, days are birdsong
     const w = s.sim.world;
     const want = ambienceFor(w, s.sim.daylight());
@@ -466,7 +542,7 @@ export function createPlay(app) {
       const frac = d && d.cd ? Math.min(1, cd / d.cd) : 0;
       t.querySelector('.cd').style.transform = `scaleY(${frac})`;
       const cost = s.costOf(page, 0, 0, {});
-      t.classList.toggle('poor', !s.endless && !page.startsWith('material:') && cost > m.cur);
+      t.classList.toggle('poor', !s.endless && !page.startsWith('material:') && cost > (page.startsWith('structure:') ? s.sim.td.gold : m.cur));
     }
   }
 
@@ -505,12 +581,17 @@ export function createPlay(app) {
   function showGoals() {
     if (!P.s) return;
     if (!P.s.objectives) {
-      if (P.kind === 'realm') return realmPanel();
+      if (P.s.realm) return realmPanel();
+      if (P.s.run) return runPanel();
       toast('Sandbox — no goals, just play. Try mixing things!', '', 2400);
       return;
     }
     const was = P.s.paused; P.s.paused = true;
     modal({ title: 'Goals', body: [...goalList(true), P.level.tip ? el('p', { class: 'tip', text: 'Tip: ' + P.level.tip }) : null], buttons: [{ label: 'Back to it', cls: 'big go' }], onClose: () => { if (P.s) P.s.paused = was; } });
+  }
+  function runPanel() {
+    const p = P.s.run.panel(), was = P.s.paused; P.s.paused = true;
+    modal({ title: p.title, body: [...p.rows.map(t => el('p', { text: t })), p.tip ? el('p', { class: 'tip', text: p.tip }) : null], buttons: [{ label: 'Back to it', cls: 'big go' }], onClose: () => { if (P.s) P.s.paused = was; } });
   }
   function realmPanel() {
     const R = P.s.realm, sum = R.summary();
@@ -528,9 +609,10 @@ export function createPlay(app) {
     const buttons = [{ label: 'Resume', cls: 'big go' }];
     if (P.kind === 'challenge') buttons.push({ label: '↻ Restart', onClick: () => app.restart() }, { label: 'Goals', onClick: () => setTimeout(showGoals, 50) });
     if (P.kind === 'sandbox') buttons.push({ label: 'Day / night', onClick: () => { const w = P.s.sim.world; w.clock = P.s.sim.daylight() > 0.4 ? 0.9 : 0.42; } }, { label: '↻ New land', onClick: () => app.restart() });
-    if (P.kind === 'realm') buttons.push({ label: 'Realm', onClick: () => setTimeout(realmPanel, 50) });
+    if (P.s.realm) buttons.push({ label: 'Realm', onClick: () => setTimeout(realmPanel, 50) });
+    if (P.s.run) buttons.push({ label: P.s.run.name, onClick: () => setTimeout(runPanel, 50) });
     if (P.kind !== 'challenge') buttons.push({ label: 'Upgrades', onClick: () => setTimeout(() => app.openGrimoire(), 50) });
-    buttons.push({ label: 'Settings', onClick: () => setTimeout(() => app.settings(), 50) }, { label: "What's new", onClick: () => app.news.open() }, { label: 'Credits', onClick: () => setTimeout(() => app.credits.open(), 50) }, { label: '! Report a problem', onClick: () => setTimeout(() => app.report(), 50) }, { label: P.kind === 'realm' ? 'Save and leave' : 'Leave', cls: 'small-btn', onClick: () => app.quit() });
+    buttons.push({ label: 'Settings', onClick: () => setTimeout(() => app.settings(), 50) }, { label: "What's new", onClick: () => app.news.open() }, { label: 'Credits', onClick: () => setTimeout(() => app.credits.open(), 50) }, { label: '! Report a problem', onClick: () => setTimeout(() => app.report(), 50) }, { label: app.current?.custom ? 'Save and leave' : 'Leave', cls: 'small-btn', onClick: () => app.quit() });
     modal({ title: 'Paused', body: [], buttons, onClose: () => { if (P.s) P.s.paused = was; } });
   }
   P.openMenu = openMenu;
@@ -559,6 +641,15 @@ export function createPlay(app) {
     if (r.won && L.trial) buttons.push({ label: 'Come back tomorrow for a new trial', cls: 'big go', onClick: () => app.exitTo('challenges') });
     buttons.push({ label: '↻ Try again', cls: r.won ? 'big' : 'big go', onClick: () => app.restart() }, { label: 'Levels', cls: 'small-btn', onClick: () => app.exitTo('challenges') });
     modal({ title: r.won ? (r.starCount === 3 ? 'Perfect!' : 'Well done!') : 'Not this time', body, buttons, cls: 'sticky' });
+  }
+
+  function showRunResult(r) {
+    if (!P.s) return;
+    const { best } = app.runOver(r);
+    const body = [el('p', { style: { textAlign: 'center' }, text: r.text })];
+    if (r.essence) body.push(el('div', { class: 'essence-gain', text: `+${r.essence} ✦ Essence` }));
+    if (r.score != null) body.push(el('p', { class: 'tip', style: { textAlign: 'center' }, text: !best ? `First score: ${r.label}` : r.score > best.score ? `New best: ${r.label} (was ${best.label})` : `Your best: ${best.label}` }));
+    modal({ title: r.title, body, buttons: [{ label: '↻ Same again, new land', cls: 'big go', onClick: () => app.restart() }, { label: 'Leave', cls: 'small-btn', onClick: () => app.exitTo('custom') }], cls: 'sticky' });
   }
 
   function rating(L) {
@@ -614,6 +705,8 @@ export function createPlay(app) {
     else return;
     app.stage.clamp();
   });
+  $('#run-action').addEventListener('click', () => P.runAct?.());
+  addEventListener('keydown', (e) => { if (e.key === 'Enter' && P.s?.placing && !document.querySelector('.modal-back')) P.confirmBase(); });
   P.nextTab = (d) => {
     const avail = TABS.filter(t => pagesOf(t).length);
     if (!avail.length) return;
@@ -631,10 +724,10 @@ export function createPlay(app) {
   // controller: press/hold/release at a world point, like a finger
   P.padDown = (wx, wy) => {
     const page = P.page;
+    if (P.s?.placing) { P.pickBase([wx, wy]); P.confirmBase(); return; }
     if (!page || !P.s) return;
     if (page === 'tool:grab') { P.held = P.s.grab(wx, wy); P.gesture = { kind: 'grab', hist: [[wx, wy, performance.now()]] }; return; }
-    const spell = page.startsWith('spell:') ? data.spells.spells[page.slice(6)] : null;
-    if (spell?.aim === 'line') { P.gesture = { kind: 'line', x0: wx, y0: wy, x1: wx, y1: wy }; return; }
+    if (lineTool(page)) { P.gesture = { kind: 'line', x0: wx, y0: wy, x1: wx, y1: wy }; return; }
     if (BRUSHED(page)) { P.gesture = { kind: 'brush', lx: wx, ly: wy, started: true, t0: 0 }; use(wx, wy); return; }
     use(wx, wy);
     P.gesture = null;

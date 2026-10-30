@@ -125,7 +125,7 @@ export function createCreatures(sim, species) {
     near(x, y, r, (c, d2) => { if (d2 < bd && pred(c)) { bd = d2; best = c; } });
     return best;
   }
-  C.near = near; C.nearest = nearest; C.add = add;
+  C.near = near; C.nearest = nearest; C.add = add; C.remove = remove;
 
   // ---------- harm ----------
   function hurt(c, dmg, cause, by) {
@@ -199,7 +199,7 @@ export function createCreatures(sim, species) {
     }
     // the body: burnt ones leave ash, the rest bones (a big beast leaves a pile)
     if (c.sp.splits && c.maxHp > 8 && cause !== 'fire' && cause !== 'lava') {
-      for (let k = 0; k < 2; k++) { const s = add(c.sp.id, x + (k ? 1 : -1), y, { hpScale: (c.maxHp / c.sp.hp) * 0.5 }); if (s) { s.kx = (k ? 0.4 : -0.4); } }
+      for (let k = 0; k < 2; k++) { const s = add(c.sp.id, x + (k ? 1 : -1), y, { hpScale: (c.maxHp / c.sp.hp) * 0.5 }); if (s) { s.kx = (k ? 0.4 : -0.4); sim.fire('split', { c, child: s }); } }
       burst(sim.ps, rng, c.x, c.y, 10, { kind: P.spark, life: 14, palette: [[180, 120, 255], [220, 190, 255]], glow: 0.6, speed: 0.4 });
       return;
     }
@@ -451,6 +451,8 @@ export function createCreatures(sim, species) {
     const sp = c.sp;
     // in the middle of a meal: finish it
     if (c.state === 'eat' && c.eatCell != null && c.eatT > 0 && !c.burning) { c.think = 6; return; }
+    // tower defense: a runner follows the flow field to the keep and nothing else
+    if (c.runner && sim.td?.steer(c)) return;
     if (sp.flies && (sp.boss || sp.breath)) { dragonThink(c); return; }
     // burning: run about wildly (people head for water if they know some)
     if (c.burning) {

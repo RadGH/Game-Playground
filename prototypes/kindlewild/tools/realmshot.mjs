@@ -5,8 +5,7 @@ const page = await (await browser.newContext({ viewport: { width: 402, height: 7
 const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
 await page.goto('http://localhost:8401/prototypes/kindlewild/');
 await page.waitForFunction(() => window.gameEye);
-await page.tap('#go-realm');
-await page.locator('#realm-body .card').first().tap();
+await page.evaluate(() => window.gameEye.custom({ type: 'realm', base: 'random' }));
 await page.waitForTimeout(500);
 await page.evaluate(() => { const s = window.gameEye.app.stage.session; s.realm.nextOmen = s.sim.tick + 5; });
 await page.waitForTimeout(800);

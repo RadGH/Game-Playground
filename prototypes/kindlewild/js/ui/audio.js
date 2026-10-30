@@ -73,6 +73,12 @@ export function wireSounds(sim, panOf) {
   sim.on('dragon-enrage', (e) => play('dragon.roar', pan(e), 300));
   sim.on('risen', (e) => play('spell.shadow.impact', pan(e), 300));
   sim.on('shoot', (e) => play(e.kind === 'missile' ? 'magic.missile' : e.kind === 'bolt' ? 'spell.arcane.launch' : 'arrow.shot', pan(e.c), 120));
+  sim.on('tower-boom', (e) => play('explosion.small', pan(e), 160));
+  sim.on('keep-hit', (e) => play('stone.crumble', pan(e), 300));
+  sim.on('wave-end', () => play('loot.rare', {}, 300));
+  sim.on('structure', (e) => play('build.done', pan(e), 120));
+  sim.on('structure-lost', (e) => play('stone.crumble', pan(e), 200));
+  sim.on('blessing', () => play('spell.holy.impact', {}, 800));
   sim.on('sound', (e) => { const id = EVENT_SOUNDS[e.id]; if (id) play(id, pan(e), 150); });
   sim.on('omen', (e) => { if (e.warn) play('night.ambush', {}, 2000); });
   sim.on('discover', () => play('loot.rare', {}, 300));

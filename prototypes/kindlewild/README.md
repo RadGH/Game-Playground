@@ -19,7 +19,7 @@ do something dramatic.
 | **Challenges** | Six acts × 6 levels, one file each in `data/acts/act1..6.json` (listed in `data/levels.json`): I The First Kindling, II The Gathering (creatures first), III The Alchemist's Road (reactions), IV Stormcrown (sky and weather), V The Hollow Dark (undead, slimes, void), VI Wyrmfall (dragons, volcanoes, the Elder Wyrm). An act opens when the last level of the one before is cleared. Each gives its own tools (loadout), a mana pool that regenerates, goals (`js/game/objectives.js`) and three stars. A first clear unlocks its reward page. |
 | **Daily Trial** | `js/game/trials.js`: a GENERATED challenge per day (same date = same trial everywhere): threat archetype (swarm, molten tide, wildfire, flock, wyrm, siege night) → land + side (mirrored) → numbers scaled Mon 0.75× … Sun 1.29× → loadout (archetype tools + 2 spells the player owns) → goals and stars. Saved as level id `trial-YYYY-MM-DD`; stars pay Essence like any level. `node tools/bot.mjs trials 14` checks two weeks (lose idle, win with the bot). |
 | **Sandbox** | Seven lands (`data/biomes.json` recipes) in three sizes. Endless mana by default; "Use everything" ignores what is unlocked. |
-| **Realm** | A saved world (`js/game/realm.js`, localStorage `kindlewild.realm.v1`, RLE + base64). People's **faith** speeds mana and pays Essence; **omens** (raids, swarms, wolves, dry spells, trolls, imps, slimes, the dead, a dragon from day 4) arrive every ~2-3 minutes, announced 12 s ahead; milestones pay once. |
+| **Custom Game** | Realm, Tower Defense, Wildfire Watch, Rising Tide, Cataclysm, Wild Garden, Sandbox: see "Custom Game" below. **Realm**: a saved world (`js/game/realm.js`, localStorage `kindlewild.realm.v1`, RLE + base64). People's **faith** speeds mana and pays Essence; **omens** (raids, swarms, wolves, dry spells, trolls, imps, slimes, the dead, a dragon from day 4) arrive every ~2-3 minutes, announced 12 s ahead; milestones pay once. |
 
 Progress (`js/game/progress.js`, localStorage `kindlewild.save.v1`, cloud-synced through `shared/rgs-cloudsave.js`
 when signed in): **Essence ✦** from stars (10 each, first time), first clears (20), discoveries (5-20 each, first time),
@@ -176,3 +176,29 @@ the cloud save. There is no reports feed for static games on games.radgh.com yet
   `visibilitychange → hidden` handler wrote the page's OLD in-memory save back over it on the way out (and the next sync
   could upload that). `reloadFromStorage()` sets `leaving`, which stops `app.saveNow` and that handler. The browser test
   "signed in on a second device" fails if the guard is removed.
+
+## Custom Game (2026-10-30)
+
+Owner: "replace Realm with Custom Game". The title's Sandbox button opens the same form with Sandbox chosen. Types, event styles and
+sizes are data: `data/gamemodes.json`. `js/game/modes.js` = `fillSetup`, `newGame`, `saveGame`, `loadGame`; a type other than Realm
+and Sandbox attaches a **run** to the session: `s.run` = { id, name, strip(), goal(), progress?, panel(), action?, collect(), state(),
+save(), load(), pages?, hideTabs?, startTab?, draw? }. Play reads only that interface. End a run with `s.finishRun({ won, title, text,
+score, label, essence })`; records go to `save.records`, and a finished game's save is deleted.
+
+- **Saves**: one localStorage key per game (`kindlewild.game.<id>`) + an index (`kindlewild.games`), 12 at most, autosaved every minute and
+  on leaving. An XL world is ~700 KB. **Game worlds do NOT go to the account**: rgs-api takes 2 MB a request and all slots upload together,
+  so a few big worlds would block the progress save. Progress, stars and unlocks still sync. The old `kindlewild.realm.v1` moves into a slot at boot.
+- **Extra Large** = 512x512. `stage.js` rebuilds only the visible box on worlds over 100k cells and `gl.js` uploads only that box; with most
+  of the map in view it rebuilds every Nth step (budget 110k cells). `cfg.scaleMap` scales rivers/villages/herds with area and keeps
+  village sites 20% in from the edge. Raids on big maps start within 110 cells of the base (`s.edgeNear`).
+- **The sea bug**: mapgen capped a cell's water at 255, so a deep bed's surface sat below the shore's and the sea drained for ever, keeping
+  every coast chunk awake (isles at 512: 15 ms a tick). `calmSea` raises the bed; on for everything except tuned levels, which keep their land.
+- **Choosing the base**: `cfg.base: 'choose'` leaves the first village out; `s.placing` stops the clock; `s.canBase / suggestBase / placeBase`;
+  `s.onBase` + `s.baseRule` let a mode replace what gets built (Tower Defense's keep). UI: `#base-pick` in play.js; pad A confirms, Enter too.
+- **Realm events** (`realm.js`): styles pick pools: threat (`OMENS`), blessing (`BLESSINGS`), disaster (`DISASTERS`, real spells), wave (`realmWave`).
+- **Tower Defense** (`js/game/towers.js`, `flowfield.js`, `data/structures.json`): cells are real, so timber burns. Grid of 3 cells; walls 1 square,
+  towers 2. One flow field from the keep steers every `c.runner` (`creatures.js` think hook). Build refuses anything that would seal a gate from the keep
+  (`field.test` with a mask). Breakers walk the road but smash walls within 7 cells on the straight line to the keep. A runner with no headway for 60 s is removed so
+  a wave always ends. Gold buys structures, mana casts spells. `node tools/td-bot.mjs [seeds] [waves]`: idle must lose; the crude bot (no spells, little mazing) wins Gentle sometimes and reaches 10-15 on Fair.
+- **Smaller modes** (`js/game/scenarios.js`): Wildfire Watch, Rising Tide, Cataclysm, Wild Garden.
+- **Phone top bar**: no wind arrow any more, `!` hidden under 700 px wide (in the menu), mana is 74 px and shows the flow on tap, the objective takes the rest on two lines.

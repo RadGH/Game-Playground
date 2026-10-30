@@ -54,7 +54,8 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .mana-text small { color: #d8c8ff; font-size: 12px; }
 .mana.flash { animation: manaflash 0.4s; }
 @keyframes manaflash { 0%, 100% { border-color: #5a4a8a; } 50% { border-color: var(--bad); box-shadow: 0 0 14px var(--bad); } }
-.goal-chip { flex: 0 1 auto; min-width: 0; max-width: 40%; height: 44px; padding: 0 8px; font-size: 14px !important; border-radius: 12px; background: rgba(30, 22, 48, 0.85); border: 1px solid var(--gold); color: var(--gold2); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.goal-chip { flex: 1 1 0; min-width: 0; height: 44px; padding: 0 8px; font-size: 14px !important; line-height: 1.1; border-radius: 12px; background: rgba(30, 22, 48, 0.85); border: 1px solid var(--gold); color: var(--gold2); text-align: left; overflow: hidden; }
+.goal-chip span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .realm-strip { position: absolute; top: calc(var(--safe-t) + 58px); left: calc(var(--safe-l) + 8px); right: calc(var(--safe-r) + 8px); display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; font-size: 13px; pointer-events: none !important; }
 .realm-strip span { background: rgba(14, 10, 24, 0.75); border: 1px solid var(--edge); border-radius: 10px; padding: 3px 8px; }
 .realm-strip .omen { border-color: var(--bad); color: #ffc0c0; }
@@ -97,7 +98,7 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 .page-dots { display: flex; justify-content: center; gap: 6px; height: 10px; margin: 4px 0 2px; }
 .page-dots i { width: 6px; height: 6px; border-radius: 50%; background: #4a3a6a; }
 .page-dots i.on { background: var(--gold); }
-.dock-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.dock-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
 .dock-tabs button { min-height: 46px; border-radius: 12px; background: #1e1630; border: 1px solid #3a2d58; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; color: var(--dim); }
 .dock-tabs button span { font-size: 18px; color: var(--text); }
 .dock-tabs button.on { background: linear-gradient(180deg, #4a3570, #2c2048); border-color: var(--gold); color: var(--gold2); }
@@ -234,8 +235,6 @@ textarea { width: 100%; min-height: 90px; border-radius: 12px; background: #120d
 /* review fixes */
 body, button { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
 .num, .mana-text, .tile .cost, .essence-pill, .goal-chip, .level b, .star-row, .essence-gain, .pips, .page .price, .row-item button, .goal-list small, .goal-list b, .realm-strip, #brush-size { font-family: ui-rounded, 'SF Pro Rounded', system-ui, sans-serif; font-weight: 700; }
-.wind { width: 36px; height: 44px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(30, 22, 48, 0.82); border: 1px solid var(--edge); color: #cfe8ff; }
-.wind span { display: inline-block; transition: transform 0.4s; }
 .page-arrow { width: 36px; }
 .icon-btn.small { min-width: 44px; height: 44px; }
 .tiles { min-height: calc(var(--tile) * 2 + 6px); align-content: start; }
@@ -287,3 +286,29 @@ details.owned summary { cursor: pointer; color: var(--dim); min-height: 44px; di
   padding: 4px 6px; border-radius: 6px; }
 /* "Tell us more" under the thumbs (not .small-btn: the controller's Back picks the first .small-btn in a window) */
 .rate .tell-more { min-height: 40px; padding: 8px 16px; border-radius: 12px; background: #241a3a; border: 1px solid var(--gold); color: var(--gold2); font-size: 17px; }
+
+/* Custom Game */
+.save-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.save-open { flex: 1; min-width: 0; min-height: 60px; text-align: left; padding: 8px 12px; border-radius: 14px; background: #241a3a; border: 2px solid #3a2d58; display: flex; flex-direction: column; gap: 2px; }
+.save-open b { font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.save-open small { color: var(--dim); font-size: 14px; }
+.save-del { width: 48px; flex: none; border-radius: 14px; background: #1e1630; border: 1px solid #3a2d58; color: var(--dim); font-size: 18px; }
+.game-name { display: block; width: 100%; box-sizing: border-box; min-height: 46px; margin: 12px 0; padding: 0 12px; border-radius: 12px; background: #1e1630; border: 1px solid #3a2d58; color: var(--text); font: inherit; font-size: 17px; }
+.realm-strip .gold { border-color: var(--gold); color: var(--gold2); }
+.run-action { position: absolute; top: calc(var(--safe-t) + 92px); left: 50%; transform: translateX(-50%); min-height: 44px; padding: 0 16px; border-radius: 12px; background: linear-gradient(180deg, #5a3a20, #3a2412); border: 1px solid var(--gold); color: var(--gold2); font-size: 16px; white-space: nowrap; }
+.tile .cost.gold { color: var(--gold2); }
+.base-pick { position: fixed; left: calc(var(--safe-l) + 10px); right: calc(var(--safe-r) + 10px); bottom: calc(var(--safe-b) + 10px); z-index: 12; padding: 12px; border-radius: 16px; background: rgba(14, 10, 24, 0.92); border: 1px solid var(--edge); display: flex; flex-direction: column; gap: 4px; text-align: center; }
+.base-pick b { font-size: 19px; color: var(--gold2); }
+.base-pick small { font-size: 15px; color: var(--dim); min-height: 18px; }
+.base-buttons { display: flex; gap: 8px; margin-top: 6px; }
+.base-buttons button { flex: 1; }
+.base-buttons button:disabled { opacity: 0.4; }
+@media (min-width: 700px) { .base-pick { left: 50%; right: auto; width: 460px; transform: translateX(-50%); } }
+
+/* phone top bar (owner 2026-10-30): the objective matters most, so it takes the room; the report button lives in the menu */
+@media (max-width: 700px), (max-height: 520px) {
+  #btn-report { display: none; }
+  .mana { flex: 0 0 74px; min-width: 74px; height: 28px; }
+  .mana-text { font-size: 13px; }
+  .topbar { gap: 5px; }
+}

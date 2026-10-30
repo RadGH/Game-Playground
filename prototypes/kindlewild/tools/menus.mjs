@@ -15,7 +15,7 @@ await page.tap('#go-challenges'); await page.waitForTimeout(300); await page.scr
 await page.tap('#challenges [data-back]'); await page.tap('#go-grimoire'); await page.waitForTimeout(400); await page.screenshot({ path: out + '-grimoire.png' });
 await page.tap('#grim-tabs [data-g="disc"]'); await page.waitForTimeout(200); await page.screenshot({ path: out + '-disc.png' });
 await page.tap('#grimoire [data-back]'); await page.tap('#go-sandbox'); await page.waitForTimeout(200); await page.screenshot({ path: out + '-sandbox.png' });
-await page.tap('#sandbox-setup [data-back]'); await page.tap('#go-realm'); await page.waitForTimeout(200); await page.screenshot({ path: out + '-realm.png' });
+await page.tap('#custom-new-back'); await page.tap('#go-custom'); await page.waitForTimeout(200); await page.screenshot({ path: out + '-realm.png' });
 await page.tap('#realm-setup [data-back]');
 await page.evaluate(() => window.gameEye.startLevel('1-1'));
 await page.waitForTimeout(500);

@@ -1,6 +1,21 @@
 {
  "entries": [
   {
+   "id": "2026-10-30b",
+   "date": "2026-10-30",
+   "title": "Custom Game and Tower Defense",
+   "items": [
+    "Realm is now Custom Game: pick a game type, land, world size and options, then keep up to 12 saved games on this device. Your old realm is already in the list.",
+    "New game type, Tower Defense: place your keep, build 13 kinds of towers and walls from the new Structures tab, and stretch the enemies' road into a maze. Upgrade or sell anything you built. Trolls break walls, some enemies fly, and bosses come every tenth wave.",
+    "Realms now have event types: Peaceful, Wave Defense, Disasters or Random.",
+    "Four more game types: Wildfire Watch (save the forest), Rising Tide (water or lava pours in), Cataclysm (bring down the kingdoms against the clock) and Wild Garden (keep as many creatures alive as you can).",
+    "New Extra Large worlds, more than five times the size of Medium, with more rivers, villages and herds to match.",
+    "You choose where your base goes, or tap Pick for me. Picked spots stay away from the map edge.",
+    "A cleaner top bar on phones: the objective gets the room and shows in full, the mana bar is smaller (tap it to see how fast it refills), and Report a problem is in the menu.",
+    "Island maps run much more smoothly: the sea now stays calm instead of draining for ever."
+   ]
+  },
+  {
    "id": "2026-10-30",
    "date": "2026-10-30",
    "title": "Your progress on every device",

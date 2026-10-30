@@ -1,0 +1,30 @@
+{
+  "about": "Custom Game: game types, the Realm's event styles and the world sizes. js/game/modes.js reads this; js/main.js draws the setup screen from it. lands = recipe ids a type may use (omit for all). opts = which choices the setup screen shows.",
+  "sizes": { "small": { "name": "Small", "W": 160, "H": 160 }, "medium": { "name": "Medium", "W": 224, "H": 224 }, "large": { "name": "Large", "W": 288, "H": 288 }, "xl": { "name": "Extra Large", "W": 512, "H": 512 } },
+  "types": {
+    "realm": { "name": "Realm", "blurb": "A world that keeps going. Your people's faith feeds your mana and pays Essence while events come and go.", "size": "large", "lands": ["greenvale", "pinewood", "isles", "fenmoor", "dunesea", "ashlands"], "opts": ["events", "base"] },
+    "td": { "name": "Tower Defense", "blurb": "Enemies march on your keep. Build towers, shape their route with walls, and hold out wave after wave.", "size": "medium", "lands": ["greenvale", "pinewood", "dunesea", "ashlands", "fenmoor", "blank"], "opts": ["difficulty", "length", "base"] },
+    "wildfire": { "name": "Wildfire Watch", "blurb": "Fires keep breaking out and the wind keeps turning. Save the forest and your village for as long as you can.", "size": "medium", "lands": ["greenvale", "pinewood", "fenmoor"], "opts": ["difficulty", "base"] },
+    "flood": { "name": "Rising Tide", "blurb": "Surges pour in from the edge of the world, each bigger than the last. Raise banks, dig channels, keep your people alive.", "size": "medium", "sizes": ["small", "medium", "large"], "lands": ["greenvale", "pinewood", "dunesea", "fenmoor", "blank"], "opts": ["difficulty", "liquid", "base"] },
+    "cataclysm": { "name": "Cataclysm", "blurb": "The kingdoms forgot you. Bring them down before the clock runs out: everything you can do to a world, in one go.", "size": "medium", "lands": ["greenvale", "pinewood", "dunesea", "fenmoor", "isles", "ashlands"], "opts": ["difficulty"] },
+    "garden": { "name": "Wild Garden", "blurb": "An empty land and no one to protect. Bring creatures in and keep them alive together: every living kind feeds your mana.", "size": "large", "lands": ["greenvale", "pinewood", "dunesea", "fenmoor", "isles", "blank"], "opts": [] },
+    "sandbox": { "name": "Sandbox", "blurb": "No goals and no threats. Build a city, or burn it down.", "size": "medium", "opts": ["base", "endless", "everything"] }
+  },
+  "events": {
+    "random": { "name": "Random", "blurb": "Raids, omens, disasters and blessings, in no order.", "pools": ["threat", "threat", "disaster", "blessing"], "gap": [100, 180] },
+    "peaceful": { "name": "Peaceful", "blurb": "No enemies. Good harvests, travellers and blessings. Slow and kind.", "pools": ["blessing"], "gap": [80, 140], "word": "blessing" },
+    "waves": { "name": "Wave Defense", "blurb": "Numbered waves on a timer, stronger each time. Pays best for holding on.", "pools": ["wave"], "gap": [100, 100], "word": "wave", "first": 75 },
+    "disasters": { "name": "Disasters", "blurb": "No raiders: the world itself turns on you. Storms, quakes, meteors, fire.", "pools": ["disaster"], "gap": [90, 150], "word": "disaster" }
+  },
+  "difficulty": { "gentle": { "name": "Gentle" }, "fair": { "name": "Fair" }, "fierce": { "name": "Fierce" } },
+  "length": { "20": { "name": "20 waves" }, "40": { "name": "40 waves" }, "0": { "name": "Endless" } },
+  "td": {
+    "gentle": { "gold": 170, "lives": 30, "hp": 0.8, "gates": [1, 12, 99] },
+    "fair": { "gold": 130, "lives": 20, "hp": 1, "gates": [1, 8, 16] },
+    "fierce": { "gold": 100, "lives": 10, "hp": 1.3, "gates": [1, 5, 10] }
+  },
+  "wildfire": { "gentle": { "gap": 50, "lose": 0.2 }, "fair": { "gap": 36, "lose": 0.3 }, "fierce": { "gap": 25, "lose": 0.4 } },
+  "flood": { "gentle": { "gap": 60, "win": 10, "size": 0.7 }, "fair": { "gap": 45, "win": 12, "size": 1 }, "fierce": { "gap": 32, "win": 15, "size": 1.4 } },
+  "cataclysm": { "gentle": { "secs": 420, "mana": 260, "regen": 4, "people": 6, "wardens": 1 }, "fair": { "secs": 300, "mana": 200, "regen": 3, "people": 8, "wardens": 2 }, "fierce": { "secs": 210, "mana": 160, "regen": 2.5, "people": 10, "wardens": 4 } },
+  "garden": [ { "species": 3 }, { "animals": 30 }, { "species": 6 }, { "animals": 60 }, { "species": 9 }, { "animals": 100 }, { "species": 12 }, { "animals": 160 }, { "species": 15 } ]
+}

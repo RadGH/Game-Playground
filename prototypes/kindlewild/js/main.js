@@ -3,7 +3,7 @@
 
 import { loadData } from './game/data.js';
 import { createSession, prepareData } from './game/session.js';
-import { createRealm, saveRealm, loadRealm } from './game/realm.js';
+import { newGame, saveGame, loadGame, fillSetup, titleOf, progressOf } from './game/modes.js';
 import { makeTrial, dayKey } from './game/trials.js';
 import * as PR from './game/progress.js';
 import { createStage } from './ui/stage.js';
@@ -16,8 +16,9 @@ import { createPad } from './ui/pad.js';
 import { createWhatsNew } from '../../../shared/whats-new.js';
 import { createCredits } from '../../../shared/credits.js';
 
-const REALM_KEY = 'kindlewild.realm.v1';
-const SCREENS = ['title', 'challenges', 'sandbox-setup', 'realm-setup', 'grimoire'];
+const REALM_KEY = 'kindlewild.realm.v1';   // the one realm of before Custom Game; moved into a save slot at boot
+const GAMES_KEY = 'kindlewild.games', GAME_KEY = (id) => 'kindlewild.game.' + id, MAX_GAMES = 12;
+const SCREENS = ['title', 'challenges', 'custom', 'custom-new', 'grimoire'];
 const ls = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); return true; } catch { return false; } }, del(k) { try { localStorage.removeItem(k); } catch { /* */ } } };
 
 const raw = await loadData().catch((e) => { document.getElementById('loading').innerHTML = `<p>Could not load the game: ${e.message}</p>`; throw e; });
@@ -66,16 +67,16 @@ function affordable() {
   return data.grimoire.pages.some(p => !save.pages.includes(p.id) && !PR.pageRefusal(save, data.grimoire, p.id));
 }
 setInterval(() => { if (app.current) { save.stats.playSecs = (save.stats.playSecs || 0) + 10; } }, 10000);
-setInterval(() => { if (app.current?.kind === 'realm' && play.s) writeRealm(); }, 60000);
-addEventListener('visibilitychange', () => { if (document.hidden && !leaving) { if (app.current?.kind === 'realm' && play.s) writeRealm(); PR.writeSave(save); } });
+setInterval(() => { if (app.current?.custom && play.s) writeGame(); }, 60000);
+addEventListener('visibilitychange', () => { if (document.hidden && !leaving) { if (app.current?.custom && play.s) writeGame(); PR.writeSave(save); } });
 
 // ---------- screens ----------
 function screen(id) {
   for (const s of SCREENS) show(s, s === id);
   if (id === 'challenges') drawChallenges();
   if (id === 'grimoire') drawGrimoire();
-  if (id === 'sandbox-setup') drawSandboxSetup();
-  if (id === 'realm-setup') drawRealmSetup();
+  if (id === 'custom') drawCustom();
+  if (id === 'custom-new') drawNewGame();
   refreshEssence();
   pad.refocus();
 }
@@ -94,8 +95,9 @@ for (const b of document.querySelectorAll('[data-back]')) b.addEventListener('cl
 });
 app.openGrimoire = () => { grimFromGame = true; if (play.s) play.s.paused = true; screen('grimoire'); };
 $('#go-challenges').addEventListener('click', () => screen('challenges'));
-$('#go-sandbox').addEventListener('click', () => screen('sandbox-setup'));
-$('#go-realm').addEventListener('click', () => screen('realm-setup'));
+$('#go-sandbox').addEventListener('click', () => { form = fillSetup(data, { ...form, type: 'sandbox', endless: save.settings.endless, everything: save.settings.everything }); fromTitle = true; screen('custom-new'); });
+$('#go-custom').addEventListener('click', () => { if (!games().length) { fromTitle = true; form = fillSetup(data, { ...form, type: 'realm' }); screen('custom-new'); } else screen('custom'); });
+$('#custom-new-back').addEventListener('click', () => { sound('ui.close', {}, 50); screen(fromTitle ? 'title' : 'custom'); });
 $('#go-grimoire').addEventListener('click', () => screen('grimoire'));
 $('#go-settings').addEventListener('click', () => app.settings());
 $('#go-journal').addEventListener('click', () => {
@@ -184,15 +186,15 @@ app.restart = () => {
   closeModals();
   const c = app.current;
   if (!c) return;
-  if (c.kind === 'realm') return;
-  if (c.kind === 'sandbox') c.cfg = { ...c.cfg, seed: (Math.random() * 1e9) | 0 };
+  // a custom game starts again on fresh land, with the same choices
+  if (c.custom) return startCustom({ ...c.cfg.session.setup, seed: undefined });
   begin(c.kind, c.cfg, c.level);
 };
 function begin(kind, cfg, level) {
   for (const s of SCREENS) show(s, false);
   stage.onFrame = null;
-  const s = kind === 'realm' ? cfg.session : createSession(data, cfg);
-  app.current = { kind, cfg, level };
+  const s = cfg.session || createSession(data, cfg);
+  app.current = { kind, cfg, level, custom: !!cfg.session, gameId: cfg.gameId };
   wireSounds(s.sim, (x) => Math.max(-1, Math.min(1, (x - stage.cam.x) / 60)));
   stage.controller = play;
   play.start(s, kind, level);
@@ -200,7 +202,7 @@ function begin(kind, cfg, level) {
 }
 app.quit = () => {
   closeModals();
-  if (app.current?.kind === 'realm') writeRealm();
+  if (app.current?.custom && !play.s?.result) writeGame();
   app.current = null;
   play.stop();
   startDemo();
@@ -209,73 +211,125 @@ app.quit = () => {
 app.exitTo = (id) => { app.quit(); screen(id); };
 function closeModals() { for (const b of document.querySelectorAll('.modal-back')) b.remove(); }
 
-// ---------- sandbox ----------
-let sbLand = 'greenvale', sbSize = 'medium';
-function drawSandboxSetup() {
-  const box = $('#land-cards');
-  box.innerHTML = '';
-  const lands = { ...data.biomes.recipes };
-  const blurbs = { greenvale: 'Meadows, woods and a river.', pinewood: 'Snowy pine valleys.', dunesea: 'Hot dunes round a dry basin.', ashlands: 'A smoking volcano. Lava!', fenmoor: 'Wet marsh, glowcaps, bog gas.', isles: 'Little islands in the sea.', blank: 'Flat grass. Build anything.' };
-  for (const [id, r] of Object.entries(lands)) {
-    const c = el('button', { class: 'card' + (id === sbLand ? ' on' : '') }, el('b', { text: r.name }), el('small', { text: blurbs[id] || '' }));
-    c.addEventListener('click', () => { sbLand = id; drawSandboxSetup(); });
-    box.append(c);
-  }
-  for (const b of document.querySelectorAll('#size-seg button')) { b.classList.toggle('on', b.dataset.v === sbSize); b.onclick = () => { sbSize = b.dataset.v; drawSandboxSetup(); }; }
-  $('#endless').checked = save.settings.endless;
-  $('#everything').checked = save.settings.everything;
+// ---------- custom games ----------
+// Every saved game has its own localStorage key, with a small index for the list. Worlds stay on the device they were
+// played on: an Extra Large one is ~700 KB and the account's upload limit is 2 MB a go, so they would crowd out the
+// progress save that does travel (owner 2026-10-30: fine to leave out).
+let form = fillSetup(data, {});
+let fromTitle = false;
+const player = () => ({ mana: PR.realmMana(save, data.grimoire), unlocked: save.pages, spellLevels: save.spellLevels, discovered: save.discoveries });
+function games() { try { return JSON.parse(ls.get(GAMES_KEY) || '[]'); } catch { return []; } }
+function setGames(list) { ls.set(GAMES_KEY, JSON.stringify(list)); }
+function dropGame(id) { ls.del(GAME_KEY(id)); setGames(games().filter(g => g.id !== id)); }
+function migrateRealm() {
+  const old = ls.get(REALM_KEY);
+  if (!old) return;
+  try {
+    const o = JSON.parse(old);
+    const size = Object.entries(data.gamemodes.sizes).find(([, z]) => z.W === o.W)?.[0] || 'large';
+    const setup = { ...fillSetup(data, { type: 'realm', recipe: o.recipe, size, events: 'random', seed: o.seed }), size };
+    if (ls.set(GAME_KEY('realm-old'), JSON.stringify({ game: 2, setup, ...o }))) {
+      setGames([{ id: 'realm-old', title: titleOf(data, setup), type: 'realm', size, progress: `Day ${(o.realm?.day || 0) + 1}`, at: Date.now() }, ...games().filter(g => g.id !== 'realm-old')]);
+      ls.del(REALM_KEY);
+    }
+  } catch (e) { console.warn('old realm not moved:', e.message); }
 }
-$('#start-sandbox').addEventListener('click', () => {
-  save.settings.endless = $('#endless').checked;
-  save.settings.everything = $('#everything').checked;
-  app.saveNow();
-  const size = { small: [160, 160], medium: [224, 224], large: [288, 288] }[sbSize];
-  const cfg = { mode: 'sandbox', recipe: sbLand, W: size[0], H: size[1], seed: (Math.random() * 1e9) | 0, endlessMana: save.settings.endless, everything: save.settings.everything, manaMax: Math.round(150 * PR.challengeMana(save).manaScale), manaRegen: +(3 * PR.challengeMana(save).regenScale).toFixed(2), unlocked: save.pages, spellLevels: save.spellLevels, discovered: save.discoveries, villages: sbLand === 'blank' ? false : undefined };
-  begin('sandbox', cfg, null);
-});
-
-// ---------- realm ----------
-function realmCfg() { return { mana: PR.realmMana(save, data.grimoire), unlocked: save.pages, spellLevels: save.spellLevels, discovered: save.discoveries }; }
-function drawRealmSetup() {
-  const box = $('#realm-body');
-  box.innerHTML = '';
-  const has = !!ls.get(REALM_KEY);
-  box.append(el('p', { text: 'Your own realm, saved as you go. Its people pray to you: their faith speeds your mana and pays Essence. Omens come every few minutes — protect them and grow.' }));
-  const m = PR.realmMana(save, data.grimoire);
-  box.append(el('p', { class: 'tip', text: `Mana ${m.max} · regen ×${m.regenScale.toFixed(2)} · faith ×${m.faithScale.toFixed(2)} — grow these with Boosts in Upgrades.` }));
-  if (has) {
-    const info = save.realm || {};
-    const b = el('button', { class: 'big go', text: `Continue${info.name ? ' — ' + info.name : ''}${info.day != null ? ` (day ${info.day + 1})` : ''}` });
-    b.addEventListener('click', () => { try { const s = loadRealm(data, ls.get(REALM_KEY), realmCfg()); begin('realm', { session: s }, null); } catch (e) { console.error(e); toast('That realm could not be loaded: ' + e.message, 'warn'); } });
-    box.append(b);
-  }
-  box.append(el('h3', { text: has ? 'Or start over in a new land' : 'Choose your land' }));
-  const cards = el('div', { class: 'cards' });
-  for (const id of ['greenvale', 'pinewood', 'isles', 'fenmoor', 'dunesea', 'ashlands']) {
-    const r = data.biomes.recipes[id];
-    const c = el('button', { class: 'card' }, el('b', { text: r.name }));
-    c.addEventListener('click', () => {
-      const go = () => {
-        const s = createRealm(data, { ...realmCfg(), recipe: id, seed: (Math.random() * 1e9) | 0 });
-        save.realm = { name: r.name, recipe: id, day: 0 };
-        app.saveNow();
-        begin('realm', { session: s, recipe: id }, null);
-        writeRealm();
-      };
-      if (has) modal({ title: 'Start over?', body: ['Your current realm will be gone for good.'], buttons: [{ label: 'Yes, a new realm', cls: 'big go', onClick: go }, { label: 'Keep my realm', cls: 'small-btn' }] });
-      else go();
-    });
-    cards.append(c);
-  }
-  box.append(cards);
-}
-function writeRealm() {
-  const s = play.s;
-  if (!s || !s.realm) return;
-  const str = saveRealm(s, { recipe: save.realm?.recipe || 'greenvale' });
-  if (!ls.set(REALM_KEY, str)) toast('Could not save the realm (storage full?)', 'warn');
-  save.realm = { ...(save.realm || {}), day: s.realm.day };
+migrateRealm();
+function writeGame() {
+  const s = play.s, c = app.current;
+  if (!s || !c?.custom || s.placing || s.result) return;
+  const id = c.gameId ||= 'g' + Date.now().toString(36);
+  const row = { id, title: titleOf(data, s.setup), type: s.setup.type, size: s.setup.size, progress: progressOf(s), at: Date.now() };
+  if (!ls.set(GAME_KEY(id), saveGame(s))) { toast('This device is out of room for saves. Delete an old game in Custom Game.', 'warn', 4000); return; }
+  setGames([row, ...games().filter(g => g.id !== id)]);
   PR.writeSave(save);
+}
+function startCustom(setup) {
+  const list = games();
+  if (list.length >= MAX_GAMES) { toast(`You have ${MAX_GAMES} saved games. Delete one first.`, 'warn', 3000); return; }
+  const s = newGame(data, setup, player());
+  begin(s.setup.type, { session: s }, null);
+}
+function openGame(g) {
+  const str = ls.get(GAME_KEY(g.id));
+  if (!str) { toast('That save is missing.', 'warn'); dropGame(g.id); drawCustom(); return; }
+  try { const s = loadGame(data, str, player()); begin(s.setup.type, { session: s, gameId: g.id }, null); }
+  catch (e) { console.error(e); toast('That game could not be loaded: ' + e.message, 'warn'); }
+}
+app.runOver = (r) => {
+  const t = play.s.setup.type, recs = save.records ||= {};
+  const best = recs[t] || null;
+  if (r.score != null && (!best || r.score > best.score)) recs[t] = { score: r.score, label: r.label };
+  if (r.essence) app.earn(r.essence);
+  if (app.current?.gameId) dropGame(app.current.gameId);
+  app.current.gameId = null;
+  app.saveNow();
+  return { best };
+};
+function drawCustom() {
+  const box = $('#custom-body');
+  box.innerHTML = '';
+  const go = el('button', { class: 'big go', text: 'New game' });
+  go.addEventListener('click', () => { fromTitle = false; screen('custom-new'); });
+  box.append(go);
+  const list = games();
+  box.append(el('h3', { text: list.length ? 'Saved games' : 'No saved games yet' }));
+  for (const g of list) {
+    const open = el('button', { class: 'save-open' }, el('b', { text: g.title }), el('small', { text: [data.gamemodes.types[g.type]?.name, data.gamemodes.sizes[g.size]?.name, g.progress].filter(Boolean).join(' · ') }));
+    open.addEventListener('click', () => openGame(g));
+    const del = el('button', { class: 'save-del', 'aria-label': `Delete ${g.title}`, text: '✕' });
+    del.addEventListener('click', () => modal({ title: 'Delete this game?', body: [`${g.title} will be gone for good.`], buttons: [{ label: 'Delete it', cls: 'big', onClick: () => { dropGame(g.id); drawCustom(); } }, { label: 'Keep it', cls: 'small-btn' }] }));
+    box.append(el('div', { class: 'save-row' }, open, del));
+  }
+  const best = Object.entries(save.records || {}).filter(([t]) => data.gamemodes.types[t]);
+  if (best.length) box.append(el('p', { class: 'tip', text: 'Best: ' + best.map(([t, r]) => `${data.gamemodes.types[t].name} ${r.label}`).join(' · ') }));
+}
+function seg(label, value, options, pick) {
+  const row = el('div', { class: 'seg' }, ...options.map(([v, name]) => { const b = el('button', { class: String(v) === String(value) ? 'on' : '', text: name }); b.addEventListener('click', () => pick(v)); return b; }));
+  return [el('h3', { text: label }), row];
+}
+function drawNewGame() {
+  const box = $('#custom-form'), G = data.gamemodes, f = form = fillSetup(data, form), t = G.types[f.type];
+  const set = (patch) => { form = fillSetup(data, { ...form, ...patch }); const y = box.parentElement.scrollTop; drawNewGame(); box.parentElement.scrollTop = y; };
+  box.innerHTML = '';
+  box.append(el('h3', { text: 'Game type' }));
+  const types = el('div', { class: 'cards' });
+  for (const [id, x] of Object.entries(G.types)) {
+    const c = el('button', { class: 'card' + (id === f.type ? ' on' : ''), 'data-type': id }, el('b', { text: x.name }));
+    c.addEventListener('click', () => set({ type: id, size: undefined }));
+    types.append(c);
+  }
+  box.append(types, el('p', { class: 'tip', text: t.blurb }));
+  box.append(el('h3', { text: 'Land' }));
+  const lands = el('div', { class: 'cards' });
+  const blurbs = { greenvale: 'Meadows, woods and a river.', pinewood: 'Snowy pine valleys.', dunesea: 'Hot dunes round a dry basin.', ashlands: 'A smoking volcano. Lava!', fenmoor: 'Wet marsh, glowcaps, bog gas.', isles: 'Little islands in the sea.', blank: 'Flat grass. Build anything.' };
+  for (const id of t.lands || Object.keys(data.biomes.recipes)) {
+    const c = el('button', { class: 'card' + (id === f.recipe ? ' on' : '') }, el('b', { text: data.biomes.recipes[id].name }), el('small', { text: blurbs[id] || '' }));
+    c.addEventListener('click', () => set({ recipe: id }));
+    lands.append(c);
+  }
+  box.append(lands);
+  box.append(...seg('World size', f.size, (t.sizes || Object.keys(G.sizes)).map(k => [k, G.sizes[k].name]), (v) => set({ size: v })));
+  if (t.opts.includes('events')) { box.append(...seg('Events', f.events, Object.entries(G.events).map(([k, e]) => [k, e.name]), (v) => set({ events: v })), el('p', { class: 'tip', text: G.events[f.events].blurb })); }
+  if (t.opts.includes('difficulty')) box.append(...seg('Difficulty', f.difficulty, Object.entries(G.difficulty).map(([k, e]) => [k, e.name]), (v) => set({ difficulty: v })));
+  if (t.opts.includes('length')) box.append(...seg('Length', f.length, Object.entries(G.length).map(([k, e]) => [k, e.name]), (v) => set({ length: v })));
+  if (t.opts.includes('liquid')) box.append(...seg('What pours in', f.liquid, [['water', 'Water'], ['lava', 'Lava']], (v) => set({ liquid: v })));
+  if (t.opts.includes('base')) {
+    const opts = [['choose', 'I choose'], ['random', 'Pick for me']];
+    if (f.type === 'sandbox') opts.push(['none', 'No base']);
+    box.append(...seg('Your base', f.base, opts, (v) => set({ base: v })));
+  }
+  const tog = (key, text) => { const i = el('input', { type: 'checkbox' }); i.checked = !!f[key]; i.addEventListener('change', () => { form[key] = i.checked; }); return el('label', { class: 'toggle' }, i, text); };
+  if (t.opts.includes('endless')) box.append(tog('endless', 'Endless mana'));
+  if (t.opts.includes('everything')) box.append(tog('everything', 'Unlock everything here (try anything; your own unlocks are not changed)'));
+  const name = el('input', { class: 'game-name', type: 'text', maxlength: 32, placeholder: 'Name (optional)', 'aria-label': 'Name this game', value: f.name });
+  name.addEventListener('input', () => { form.name = name.value; });
+  const start = el('button', { class: 'big go', id: 'start-custom', text: 'Begin' });
+  start.addEventListener('click', () => {
+    if (form.type === 'sandbox') { save.settings.endless = form.endless; save.settings.everything = form.everything; app.saveNow(); }
+    startCustom({ ...form, seed: undefined });
+  });
+  box.append(name, start);
 }
 
 // ---------- upgrades (the Grimoire in code; renamed for players 2026-10-29; owner 2026-10-30: Spell levels first) ----------
@@ -356,7 +410,7 @@ app.settings = () => {
   const q = el('div', { class: 'seg' }, ...['high', 'low'].map(v => { const b = el('button', { class: S.quality === v ? 'on' : '', text: v === 'high' ? 'Sharp' : 'Fast' }); b.addEventListener('click', () => { S.quality = v; stage.setQuality(v); app.saveNow(); q.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); }); return b; }));
   const tog = (key, label) => { const i = el('input', { type: 'checkbox' }); i.checked = !!S[key]; i.addEventListener('change', () => { S[key] = i.checked; if (key === 'shake') stage.shakeOn = i.checked; if (key === 'perfHud') perfHud(i.checked); app.saveNow(); }); return el('label', { class: 'toggle' }, i, label); };
   const reset = el('button', { class: 'small-btn', text: 'Reset all progress' });
-  reset.addEventListener('click', () => modal({ title: 'Reset everything?', body: ['Essence, unlocks, stars, discoveries and your realm will be wiped.'], buttons: [{ label: 'Wipe it', cls: 'big', onClick: () => { ls.del(PR.SAVE_KEY); ls.del(REALM_KEY); location.reload(); } }, { label: 'Keep', cls: 'small-btn' }] }));
+  reset.addEventListener('click', () => modal({ title: 'Reset everything?', body: ['Essence, unlocks, stars, discoveries and your saved games will be wiped.'], buttons: [{ label: 'Wipe it', cls: 'big', onClick: () => { for (const g of games()) ls.del(GAME_KEY(g.id)); ls.del(GAMES_KEY); ls.del(PR.SAVE_KEY); ls.del(REALM_KEY); leaving = true; location.reload(); } }, { label: 'Keep', cls: 'small-btn' }] }));
   modal({ title: 'Settings', body: [el('p', { text: 'Sound' }), vol, el('p', { text: 'Picture' }), q, tog('shake', 'Screen shake'), tog('tips', 'Show tips'), tog('perfHud', 'Show speed numbers'), reset], buttons: [{ label: 'Done', cls: 'big go' }] });
 };
 
@@ -432,7 +486,10 @@ window.gameEye = {
   use: (page, x, y, o) => play.s?.use(page, x, y, o),
   select: (page) => play.select(page),
   startLevel: (id) => app.startLevel(id === 'trial' ? makeTrial(dayKey(), save.pages) : data.levels.acts.flatMap(a => a.levels).find(l => l.id === id)),
-  sandbox: (recipe = 'greenvale') => { sbLand = recipe; $('#start-sandbox').click(); },
+  sandbox: (recipe = 'greenvale') => startCustom({ type: 'sandbox', recipe, base: 'random', endless: true }),
+  custom: (setup) => startCustom(setup),
+  placeBase: () => { const at = play.s?.suggestBase(); if (at) play.pickBase(at); play.confirmBase(); },
+  writeGame,
   step: (n = 30) => { for (let k = 0; k < n; k++) play.s?.step(); },
   save, app, audio: audioInfo,
 };

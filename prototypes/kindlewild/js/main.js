@@ -96,7 +96,7 @@ $('#go-journal').addEventListener('click', () => {
   const st = save.stats;
   const mins = Math.round((st.playSecs || 0) / 60);
   const rows = [
-    ['✦ Essence earned', save.essenceTotal], ['Grimoire pages', `${save.pages.length} / ${data.grimoire.pages.length}`],
+    ['✦ Essence earned', save.essenceTotal], ['Unlocks', `${save.pages.length} / ${data.grimoire.pages.length}`],
     ['★ Stars', `${data.levels.acts.reduce((a, x) => a + x.levels.reduce((b, l) => b + (save.levels[l.id]?.stars.filter(Boolean).length || 0), 0), 0)} / ${data.levels.acts.reduce((a, x) => a + x.levels.length * 3, 0)}`], ['Trials cleared', Object.entries(save.levels).filter(([id, r]) => id.startsWith('trial-') && r.cleared).length], ['Discoveries', `${save.discoveries.length} / ${Object.keys(data.discoveries.list).length}`],
     ['Meteors dropped', st.meteors || 0], ['Explosions', st.blasts || 0], ['Spells cast', st.casts || 0], ['Births seen', st.born || 0],
     ['Buildings lost', st.burned || 0], ['Levels cleared', st.levelsWon || 0], ['Time played', mins < 60 ? `${mins} min` : `${(mins / 60).toFixed(1)} h`],
@@ -166,7 +166,7 @@ function drawChallenges() {
     box.append(el('div', { class: 'act' }, el('h3', { text: act.name }), el('p', { text: `${act.blurb}  ★ ${stars}/${act.levels.length * 3}` }), list));
   }
   if (newcomer) { trialBox.classList.add('dim'); box.append(trialBox); }
-  box.append(el('p', { class: 'tip', text: 'More acts are coming. Stars and first clears pay Essence — spend it in the Grimoire.' }));
+  box.append(el('p', { class: 'tip', text: 'More acts are coming. Stars and first clears pay Essence — spend it in Upgrades.' }));
 }
 
 app.startLevel = (L) => {
@@ -236,7 +236,7 @@ function drawRealmSetup() {
   const has = !!ls.get(REALM_KEY);
   box.append(el('p', { text: 'Your own realm, saved as you go. Its people pray to you: their faith speeds your mana and pays Essence. Omens come every few minutes — protect them and grow.' }));
   const m = PR.realmMana(save, data.grimoire);
-  box.append(el('p', { class: 'tip', text: `Mana ${m.max} · regen ×${m.regenScale.toFixed(2)} · faith ×${m.faithScale.toFixed(2)} — grow these with Boons in the Grimoire.` }));
+  box.append(el('p', { class: 'tip', text: `Mana ${m.max} · regen ×${m.regenScale.toFixed(2)} · faith ×${m.faithScale.toFixed(2)} — grow these with Boosts in Upgrades.` }));
   if (has) {
     const info = save.realm || {};
     const b = el('button', { class: 'big go', text: `Continue${info.name ? ' — ' + info.name : ''}${info.day != null ? ` (day ${info.day + 1})` : ''}` });
@@ -272,8 +272,8 @@ function writeRealm() {
   PR.writeSave(save);
 }
 
-// ---------- grimoire ----------
-let grimTab = 'pages';
+// ---------- upgrades (the Grimoire in code; renamed for players 2026-10-29, owner: Boosts first) ----------
+let grimTab = 'boons';
 for (const b of document.querySelectorAll('#grim-tabs button')) b.addEventListener('click', () => { grimTab = b.dataset.g; drawGrimoire(); });
 function drawGrimoire() {
   for (const b of document.querySelectorAll('#grim-tabs button')) b.classList.toggle('on', b.dataset.g === grimTab);
@@ -281,7 +281,7 @@ function drawGrimoire() {
   box.innerHTML = '';
   const G = data.grimoire;
   if (grimTab === 'pages') {
-    box.append(el('p', { class: 'tip', text: 'Spend Essence ✦ on new spells, elements and creatures. Each tier opens when you own enough pages of the one before.' }));
+    box.append(el('p', { class: 'tip', text: 'Spend Essence ✦ on new spells, elements and creatures. Each tier opens when you own enough unlocks from the one before.' }));
     const tiers = Math.max(...G.pages.map(p => p.tier));
     for (let t = 0; t <= tiers; t++) {
       const open = PR.tierOpen(save, G, t);
@@ -308,12 +308,12 @@ function drawGrimoire() {
         (owned ? ownedBox : pages).append(b);
       }
       const nOwned = ownedBox.children.length;
-      const fold = nOwned ? el('details', { class: 'owned' }, el('summary', { text: `✓ ${nOwned} page${nOwned > 1 ? 's' : ''} you own` }), ownedBox) : null;
-      const tierBox = el('div', { class: 'tier' }, el('h3', {}, `${G.tierNames[t]}`, el('small', { text: open ? `${notOwned.length} to learn` : `opens after ${G.opensAt[t]} ${G.tierNames[t - 1]} pages` })), notOwned.length ? pages : null, fold);
+      const fold = nOwned ? el('details', { class: 'owned' }, el('summary', { text: `✓ ${nOwned} unlock${nOwned > 1 ? 's' : ''} you own` }), ownedBox) : null;
+      const tierBox = el('div', { class: 'tier' }, el('h3', {}, `${G.tierNames[t]}`, el('small', { text: open ? `${notOwned.length} to learn` : `opens after ${G.opensAt[t]} ${G.tierNames[t - 1]} unlocks` })), notOwned.length ? pages : null, fold);
       if (notOwned.length && open) box.insertBefore(tierBox, box.querySelector('.tier.done') || null); else { tierBox.classList.add(notOwned.length ? 'later' : 'done'); box.append(tierBox); }
     }
   } else if (grimTab === 'upgrades') {
-    box.append(el('p', { class: 'tip', text: 'Empower a spell you know: each level makes it 20% bigger and stronger.' }));
+    box.append(el('p', { class: 'tip', text: 'Level up a spell you know: each level makes it 20% bigger and stronger.' }));
     for (const id of Object.keys(data.spells.spells)) {
       if (!save.pages.includes('spell:' + id)) continue;
       const d = data.spells.spells[id];
@@ -324,7 +324,7 @@ function drawGrimoire() {
       box.append(el('div', { class: 'row-item' }, el('div', { class: 'art', style: { backgroundImage: `url(${pageArt(data, 'spell:' + id, 32)})` } }), el('div', { class: 'txt' }, el('b', { text: d.name }), el('span', { class: 'pips', text: '◆'.repeat(lv) + '◇'.repeat(G.upgrades.max - lv) })), btn));
     }
   } else if (grimTab === 'boons') {
-    box.append(el('p', { class: 'tip', text: `Boons grow your mana in every mode. Right now a challenge gives you ${Math.round(PR.challengeMana(save).manaScale * 100)}% of its mana pool and ${Math.round(PR.challengeMana(save).regenScale * 100)}% of its flow.` }));
+    box.append(el('p', { class: 'tip', text: `Boosts grow your mana in every mode. Right now a challenge gives you ${Math.round(PR.challengeMana(save).manaScale * 100)}% of its mana pool and ${Math.round(PR.challengeMana(save).regenScale * 100)}% of its flow.` }));
     for (const [id, b] of Object.entries(G.boons)) {
       const lv = save.boons[id] || 0;
       const c = PR.boonCost(save, G, id);
@@ -350,7 +350,7 @@ app.settings = () => {
   const q = el('div', { class: 'seg' }, ...['high', 'low'].map(v => { const b = el('button', { class: S.quality === v ? 'on' : '', text: v === 'high' ? 'Sharp' : 'Fast' }); b.addEventListener('click', () => { S.quality = v; stage.setQuality(v); app.saveNow(); q.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); }); return b; }));
   const tog = (key, label) => { const i = el('input', { type: 'checkbox' }); i.checked = !!S[key]; i.addEventListener('change', () => { S[key] = i.checked; if (key === 'shake') stage.shakeOn = i.checked; if (key === 'perfHud') perfHud(i.checked); app.saveNow(); }); return el('label', { class: 'toggle' }, i, label); };
   const reset = el('button', { class: 'small-btn', text: 'Reset all progress' });
-  reset.addEventListener('click', () => modal({ title: 'Reset everything?', body: ['Essence, pages, stars, discoveries and your realm will be wiped.'], buttons: [{ label: 'Wipe it', cls: 'big', onClick: () => { ls.del(PR.SAVE_KEY); ls.del(REALM_KEY); location.reload(); } }, { label: 'Keep', cls: 'small-btn' }] }));
+  reset.addEventListener('click', () => modal({ title: 'Reset everything?', body: ['Essence, unlocks, stars, discoveries and your realm will be wiped.'], buttons: [{ label: 'Wipe it', cls: 'big', onClick: () => { ls.del(PR.SAVE_KEY); ls.del(REALM_KEY); location.reload(); } }, { label: 'Keep', cls: 'small-btn' }] }));
   modal({ title: 'Settings', body: [el('p', { text: 'Sound' }), vol, el('p', { text: 'Picture' }), q, tog('shake', 'Screen shake'), tog('tips', 'Show tips'), tog('perfHud', 'Show speed numbers'), reset], buttons: [{ label: 'Done', cls: 'big go' }] });
 };
 
@@ -385,7 +385,7 @@ async function sendReports() {
   for (const rep of list) {
     if (rep.sent) continue;
     try {
-      const body = REPORT_LAN ? rep : { ...rep, kind: 'report', page: rep.level || rep.screen };
+      const body = REPORT_LAN ? rep : { ...rep, kind: rep.kind || 'report', page: rep.level || rep.screen };
       const r = await fetch(REPORT_URL, { method: 'POST', credentials: REPORT_LAN ? 'same-origin' : 'include', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
       if (r.ok) { rep.sent = true; changed = true; } else break;
     } catch { break; }
@@ -394,23 +394,27 @@ async function sendReports() {
 }
 setTimeout(sendReports, 4000);
 
-app.report = () => {
-  const text = el('textarea', { placeholder: 'What went wrong, or what would you like? (Plain words are perfect.)' });
+// The ! button, and "Tell us more" after rating a level (owner 2026-10-29: "a feedback button after liking or
+// disliking, similar to Tumblefair"). `o.kind` 'feedback' + `o.rating` ({ level, vote, reasons }) ride along in the report.
+app.report = (o = {}) => {
+  const fb = o.kind === 'feedback';
+  const text = el('textarea', { placeholder: fb ? 'What made it fun, or not? Anything you would change? (Plain words are perfect.)' : 'What went wrong, or what would you like? (Plain words are perfect.)' });
   // the picture and the speed numbers are taken NOW, before the window covers the world
   const shot = stage.capture(), perf = stage.perfReport();
   const was = play.s?.paused; if (play.s) play.s.paused = true;     // the game waits while you write
   modal({
     onClose: () => { if (play.s) play.s.paused = was; },
-    title: 'Report a problem', body: [text, el('p', { class: 'tip', text: 'Your note, a picture of the screen and a few details about the game (speed, level, device) are sent to the developer.' })],
+    title: o.title || 'Report a problem', body: [text, el('p', { class: 'tip', text: fb ? 'Your note and your rating are sent to the developer.' : 'Your note, a picture of the screen and a few details about the game (speed, level, device) are sent to the developer.' })],
     buttons: [{ label: 'Send', cls: 'big go', onClick: () => {
-      const rep = { at: new Date().toISOString(), text: text.value, screen: app.current?.kind || 'title', level: app.current?.level?.id || null, state: play.s?.state?.() || null, perf, ua: navigator.userAgent, size: [innerWidth, innerHeight], build: BUILD, shot: shot && shot.length < 180000 ? shot : null };
+      if (fb && !text.value.trim()) return toast('Write a few words first.', 'bad');
+      const rep = { at: new Date().toISOString(), kind: o.kind || 'report', rating: o.rating || null, text: text.value, screen: app.current?.kind || 'title', level: app.current?.level?.id || null, state: play.s?.state?.() || null, perf, ua: navigator.userAgent, size: [innerWidth, innerHeight], build: BUILD, shot: shot && shot.length < 180000 ? shot : null };
       const list = JSON.parse(ls.get('kindlewild.reports') || '[]');
       list.push(rep);
       while (JSON.stringify(list).length > 600000) list.shift();
       ls.set('kindlewild.reports', JSON.stringify(list));
       cloud?.saveSoon?.();
       sendReports();
-      toast('Thank you — report sent.', 'good');
+      toast(fb ? 'Thank you — feedback sent.' : 'Thank you — report sent.', 'good');
     } }, { label: 'Cancel', cls: 'small-btn' }],
   });
 };

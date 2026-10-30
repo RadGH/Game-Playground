@@ -63,7 +63,7 @@ export function pageRefusal(save, grimoire, id) {
   const p = grimoire.pages.find(q => q.id === id);
   if (!p) return 'Unknown page';
   if (save.pages.includes(id)) return 'Already yours';
-  if (!tierOpen(save, grimoire, p.tier)) return `Own ${grimoire.opensAt[p.tier]} ${grimoire.tierNames[p.tier - 1]} pages first`;
+  if (!tierOpen(save, grimoire, p.tier)) return `Own ${grimoire.opensAt[p.tier]} ${grimoire.tierNames[p.tier - 1]} unlocks first`;
   if (save.essence < p.cost) return `Needs ${p.cost} ✦`;
   return null;
 }

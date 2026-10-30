@@ -1,6 +1,16 @@
 {
  "entries": [
   {
+   "id": "2026-10-29c",
+   "date": "2026-10-29",
+   "title": "Easier to read, easier to tell us",
+   "items": [
+    "A new, clearer pixel font: B and G, 5 and 8 no longer look alike, so \"+25%\" reads as 25%.",
+    "The Grimoire is now called Upgrades, and it opens on Boosts (more mana, faith and food). The other tabs are Spell levels, Unlocks and Discoveries.",
+    "After you rate a level with Liked it or Not for me, a Tell us more button lets you write what you thought. It goes straight to the developer."
+   ]
+  },
+  {
    "id": "2026-10-29b",
    "date": "2026-10-29",
    "title": "Real sounds",

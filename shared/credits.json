@@ -5,7 +5,7 @@
    "id": "fonts",
    "title": "Fonts",
    "items": [
-    { "title": "Pixelify Sans", "author": "Stefie Justprince", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Pixelify+Sans", "games": ["kindlewild"] },
+    { "title": "Jersey 10", "author": "Sarah Cadigan-Fried (The Soft Type Project)", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Jersey+10", "games": ["kindlewild"] },
     { "title": "Alegreya SC", "author": "Juan Pablo del Peral (Huerta Tipográfica)", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Alegreya+SC", "games": ["bannerline", "thousandvale"] },
     { "title": "Cinzel", "author": "Natanael Gama", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Cinzel", "games": ["emberveil", "lanternfall", "thousandvale"] },
     { "title": "Spectral", "author": "Production Type", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Spectral", "games": ["emberveil"] },

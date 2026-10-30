@@ -23,7 +23,7 @@ do something dramatic.
 
 Progress (`js/game/progress.js`, localStorage `kindlewild.save.v1`, cloud-synced through `shared/rgs-cloudsave.js`
 when signed in): **Essence ✦** from stars (10 each, first time), first clears (20), discoveries (5-20 each, first time),
-Realm faith, omens and milestones. Spent in the **Grimoire** (`data/grimoire.json`): pages in 6 tiers — a tier opens when
+Realm faith, omens and milestones. Spent in the **Grimoire** — called **Upgrades** on screen since 2026-10-29, tabs Boosts / Spell levels / Unlocks / Discoveries; the code, data and save keep the old names (`data/grimoire.json`): pages in 6 tiers — a tier opens when
 you own `opensAt[t]` bought/won pages of the tier below — plus spell **Empower** levels (+20% size and power each, max 3)
 and Realm **Boons** (mana cap, regen, faith, fertility).
 
@@ -151,3 +151,15 @@ the cloud save. There is no reports feed for static games on games.radgh.com yet
 - Healing Light douses burning cells in its circle. Fire and dragon trials got more starting mana.
 - WebKit (the iPhone's engine) runs here now: `WEBKIT=1 node tools/perf-hud.mjs 1-5` (system deps
   installed 2026-10-29).
+
+## Round 4 (2026-10-29): font, Upgrades, Tell us more
+
+- **Font**: Jersey 10 (OFL, self-hosted `assets/fonts/jersey10-latin.woff2` + `OFL-Jersey10.txt`, family `Kindle Pixel`
+  in `css/game.css` with `size-adjust: 128%` because it is narrow, and `font-synthesis: none` because it has one weight).
+  Pixelify Sans, the first font, made B/G and 5/8 look alike at phone size ("+25%" read as "+28%"). No Google Fonts link.
+- **Upgrades**: the Grimoire screen is named Upgrades for players and opens on Boosts (`grimTab = 'boons'`); "page" is
+  "unlock" in all player text. Internal ids (`#grimoire`, `data-g="pages"`, `save.pages`) are unchanged so saves carry over.
+- **Tell us more** (`js/ui/play.js` `rating()`): shown once a thumb is picked; opens `app.report({ kind: 'feedback', title,
+  rating: { level, vote, reasons } })` (`js/main.js`). A feedback note must have text; it goes to the same inbox as the !
+  button (LAN inbox / games.radgh.com `playground.reports`, kind `feedback`, the rating inside `detail`). The button is
+  NOT `.small-btn`, because the controller's Back presses the first `.small-btn` in a window.

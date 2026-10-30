@@ -518,7 +518,7 @@ export function createPlay(app) {
     for (const l of R.log.slice(0, 5)) log.append(el('li', {}, el('span', { text: `Day ${l.day + 1}: ${l.name}` }), el('small', { text: `+${l.essence} ✦` })));
     modal({ title: `Day ${R.day + 1}`, body: [
       el('p', { html: `${sum.people} people in ${sum.villages} villages · ${sum.animals} animals<br>Faith ${sum.faithRate.toFixed(1)} — it speeds your mana and pays Essence.<br>Shrines: ${sum.shrines}` }),
-      el('p', { class: 'tip', text: 'Omens come every few minutes. Protect your people and they will thank you with faith. Buy Boons in the Grimoire to grow your mana.' }),
+      el('p', { class: 'tip', text: 'Omens come every few minutes. Protect your people and they will thank you with faith. Buy Boosts in Upgrades to grow your mana.' }),
       R.log.length ? log : null,
     ], buttons: [{ label: 'Back to it', cls: 'big go' }] });
   }
@@ -529,7 +529,7 @@ export function createPlay(app) {
     if (P.kind === 'challenge') buttons.push({ label: '↻ Restart', onClick: () => app.restart() }, { label: 'Goals', onClick: () => setTimeout(showGoals, 50) });
     if (P.kind === 'sandbox') buttons.push({ label: 'Day / night', onClick: () => { const w = P.s.sim.world; w.clock = P.s.sim.daylight() > 0.4 ? 0.9 : 0.42; } }, { label: '↻ New land', onClick: () => app.restart() });
     if (P.kind === 'realm') buttons.push({ label: 'Realm', onClick: () => setTimeout(realmPanel, 50) });
-    if (P.kind !== 'challenge') buttons.push({ label: 'Grimoire', onClick: () => setTimeout(() => app.openGrimoire(), 50) });
+    if (P.kind !== 'challenge') buttons.push({ label: 'Upgrades', onClick: () => setTimeout(() => app.openGrimoire(), 50) });
     buttons.push({ label: 'Settings', onClick: () => setTimeout(() => app.settings(), 50) }, { label: "What's new", onClick: () => app.news.open() }, { label: 'Credits', onClick: () => setTimeout(() => app.credits.open(), 50) }, { label: '! Report a problem', onClick: () => setTimeout(() => app.report(), 50) }, { label: P.kind === 'realm' ? 'Save and leave' : 'Leave', cls: 'small-btn', onClick: () => app.quit() });
     modal({ title: 'Paused', body: [], buttons, onClose: () => { if (P.s) P.s.paused = was; } });
   }
@@ -547,7 +547,7 @@ export function createPlay(app) {
     else body.push(el('p', { style: { textAlign: 'center' }, text: r.reason }));
     body.push(el('p', { style: { textAlign: 'center', color: '#a897c8' }, text: `${Math.round(r.secs)}s · ${r.manaUsed} mana used` }));
     if (gained.essence) body.push(el('div', { class: 'essence-gain', text: `+${gained.essence} ✦ Essence` }));
-    if (gained.reward) body.push(el('p', { class: 'tip', text: `New Grimoire page: ${pageInfo(data, gained.reward).name}` }));
+    if (gained.reward) body.push(el('p', { class: 'tip', text: `New unlock: ${pageInfo(data, gained.reward).name}` }));
     body.push(rating(L));
     const all = data.levels.acts.flatMap(a => a.levels);
     const idx = all.findIndex(l => l.id === L.id);
@@ -572,6 +572,7 @@ export function createPlay(app) {
     const draw = () => {
       reasons.innerHTML = '';
       thumbs.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.v === cur.vote));
+      more.classList.toggle('hidden', !cur.vote);
       if (!cur.vote) return;
       for (const r of cur.vote > 0 ? GOOD : BAD) {
         const b = el('button', { class: cur.reasons.has(r) ? 'on' : '', text: r });
@@ -579,13 +580,16 @@ export function createPlay(app) {
         reasons.append(b);
       }
     };
+    // owner 2026-10-29: a feedback button after the thumbs, like Tumblefair's "Tell us more"
+    const more = el('button', { class: 'tell-more', text: 'Tell us more' });
+    more.addEventListener('click', () => app.report({ kind: 'feedback', title: `Tell us more about ${L.name}`, rating: { level: L.id, vote: cur.vote, reasons: [...cur.reasons] } }));
     const save = () => { app.save.ratings[L.id] = { vote: cur.vote, reasons: [...cur.reasons], at: Date.now() }; app.saveNow(); };
     for (const [v, t] of [[1, 'Liked it'], [-1, 'Not for me']]) {
       const b = el('button', { 'data-v': v, text: t });
       b.addEventListener('click', () => { cur.vote = cur.vote === v ? 0 : v; cur.reasons.clear(); save(); draw(); });
       thumbs.append(b);
     }
-    box.append(thumbs, reasons);
+    box.append(thumbs, reasons, more);
     draw();
     return box;
   }

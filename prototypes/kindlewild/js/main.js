@@ -194,6 +194,7 @@ function begin(kind, cfg, level) {
   for (const s of SCREENS) show(s, false);
   stage.onFrame = null;
   const s = cfg.session || createSession(data, cfg);
+  s.sim.unitDamage = PR.unitDamage(save, data.grimoire);
   app.current = { kind, cfg, level, custom: !!cfg.session, gameId: cfg.gameId };
   wireSounds(s.sim, (x) => Math.max(-1, Math.min(1, (x - stage.cam.x) / 60)));
   stage.controller = play;
@@ -334,11 +335,13 @@ function drawNewGame() {
 
 // ---------- upgrades (the Grimoire in code; renamed for players 2026-10-29; owner 2026-10-30: Spell levels first) ----------
 let grimTab = 'upgrades';
-for (const b of document.querySelectorAll('#grim-tabs button')) b.addEventListener('click', () => { grimTab = b.dataset.g; drawGrimoire(); });
+for (const b of document.querySelectorAll('#grim-tabs button')) b.addEventListener('click', () => { grimTab = b.dataset.g; $('#grim-body').scrollTop = 0; drawGrimoire(); });
 function drawGrimoire() {
   for (const b of document.querySelectorAll('#grim-tabs button')) b.classList.toggle('on', b.dataset.g === grimTab);
   const box = $('#grim-body');
+  const top = box.scrollTop;   // buying something redraws the list: stay where you were
   box.innerHTML = '';
+  queueMicrotask(() => { box.scrollTop = top; });
   const G = data.grimoire;
   if (grimTab === 'pages') {
     box.append(el('p', { class: 'tip', text: 'Spend Essence ✦ on new spells, elements and creatures. Each tier opens when you own enough unlocks from the one before.' }));
@@ -384,13 +387,13 @@ function drawGrimoire() {
       box.append(el('div', { class: 'row-item' }, el('div', { class: 'art', style: { backgroundImage: `url(${pageArt(data, 'spell:' + id, 32)})` } }), el('div', { class: 'txt' }, el('b', { text: d.name }), el('span', { class: 'pips', text: '◆'.repeat(lv) + '◇'.repeat(G.upgrades.max - lv) })), btn));
     }
   } else if (grimTab === 'boons') {
-    box.append(el('p', { class: 'tip', text: `Boosts grow your mana in every mode. Right now a challenge gives you ${Math.round(PR.challengeMana(save).manaScale * 100)}% of its mana pool and ${Math.round(PR.challengeMana(save).regenScale * 100)}% of its flow.` }));
+    box.append(el('p', { class: 'tip', text: `Boosts carry into every mode. Right now a challenge gives you ${Math.round(PR.challengeMana(save).manaScale * 100)}% of its mana pool and ${Math.round(PR.challengeMana(save).regenScale * 100)}% of its flow.` }));
     for (const [id, b] of Object.entries(G.boons)) {
       const lv = save.boons[id] || 0;
       const c = PR.boonCost(save, G, id);
       const btn = el('button', { text: c == null ? 'Max' : `${c} ✦`, disabled: c == null || save.essence < c });
       btn.addEventListener('click', () => { const r = PR.buyBoon(save, G, id); if (r.ok) { sound('levelup', {}, 100); app.saveNow(); drawGrimoire(); } else toast(r.reason, 'warn'); });
-      box.append(el('div', { class: 'row-item' }, el('div', { class: 'art', style: picStyle({ manaCap: 'spell-barrier', manaRegen: 'spell-spring', faith: 'spell-heal', fertility: 'spell-growth' }[id]) }), el('div', { class: 'txt' }, el('b', { text: b.name }), el('small', { text: b.text }), el('span', { class: 'pips', text: '◆'.repeat(lv) + '◇'.repeat(b.cost.length - lv) })), btn));
+      box.append(el('div', { class: 'row-item' }, el('div', { class: 'art', style: id === 'unitDamage' ? { backgroundImage: `url(${pageArt(data, 'creature:knight', 32)})` } : picStyle({ manaCap: 'spell-barrier', manaRegen: 'spell-spring', faith: 'spell-heal', fertility: 'spell-growth' }[id]) }), el('div', { class: 'txt' }, el('b', { text: b.name }), el('small', { text: b.text }), el('span', { class: 'pips', text: '◆'.repeat(lv) + '◇'.repeat(b.cost.length - lv) })), btn));
     }
   } else {
     const all = Object.entries(data.discoveries.list);

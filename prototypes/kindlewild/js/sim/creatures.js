@@ -130,6 +130,7 @@ export function createCreatures(sim, species) {
   // ---------- harm ----------
   function hurt(c, dmg, cause, by) {
     if (!c.alive || dmg <= 0) return;
+    if (by === 'village') dmg *= sim.unitDamage ?? 1;   // the Sharper steel boost
     // per-species hide: resist { cause: multiplier } (0 = immune, 2 = takes double)
     if (c.sp.resist && c.sp.resist[cause] != null) { dmg *= c.sp.resist[cause]; if (dmg <= 0) return; }
     if (c.sp.boss) {
@@ -647,7 +648,9 @@ export function createCreatures(sim, species) {
           spawn(sim.ps, { kind: P.spark, x: t.x, y: t.y - 1, vx: (rng() - 0.5) * 0.4, vy: -0.2, life: 6, rgb: [255, 255, 255], glow: 0.4 });
           if (!t.alive && sp.diet === 'hunt') c.hunger = Math.max(0, c.hunger - 0.8);
         }
-      } else if (sp.attack || !sp.ranged || d > sp.ranged.range * 0.8) {
+      } else if (!sp.ranged || d > sp.ranged.range * 0.8 || d <= 3 || t.sp.flies) {
+        // a shooter holds its ground between shots and only walks up to get in range (report #9:
+        // archers ran into the enemy every time the bow was reloading). Too close to shoot, or a flyer: still close in.
         c.tx = t.x; c.ty = t.y;
       }
     }

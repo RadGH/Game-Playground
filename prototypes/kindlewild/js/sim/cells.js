@@ -313,7 +313,9 @@ export function createCellRules(w, R, ps, rng, api) {
                 continue;
               }
               flag[i] &= ~STILL;
-              flow(i, x, y, m);
+              // burning stays put: lighting a liquid fills its `life` to its fuel, so a burning cell that kept
+              // flowing shared out fuel it had just been given and pitch multiplied across the map (report #11)
+              if (!(flag[i] & BURN)) flow(i, x, y, m);
               if (mat[i] !== m) continue;
               if (M.wets[m]) {
                 flag[i] |= WET;

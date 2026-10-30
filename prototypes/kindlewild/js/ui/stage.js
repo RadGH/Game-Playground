@@ -145,6 +145,15 @@ export function createStage(canvas, opts = {}) {
       draw: (api) => {
         s.sim.creatures.draw(api, s.sim.tick);
         s.run?.draw?.(api, s.sim.tick, cursor);
+        // what a destroy goal still wants broken: a slow gold ring round each patch
+        for (const g of s.objectives?.goals || []) if (g.marks && !g.done) for (const mk of g.marks) {
+          const n = Math.ceil(mk.r * 6.3), bright = 0.65 + 0.35 * Math.sin(s.sim.tick / 8);
+          for (let k = 0; k < n; k++) {
+            if ((k + (s.sim.tick >> 2)) % 4 === 0) continue;
+            const a = k / n * Math.PI * 2;
+            api.px(mk.x + Math.cos(a) * mk.r, mk.y + Math.sin(a) * mk.r, 255, 225, 110, bright);
+          }
+        }
         // meteor warning rings, pulsing
         if (w.warnings) for (const wr of w.warnings) {
           const pulse = (s.sim.tick >> 2) & 1;

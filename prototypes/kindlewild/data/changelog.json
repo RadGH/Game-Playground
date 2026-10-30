@@ -1,6 +1,18 @@
 {
  "entries": [
   {
+   "id": "2026-10-30d",
+   "date": "2026-10-30",
+   "title": "The Wyrm's Hoard and more of your reports",
+   "items": [
+    "The Wyrm's Hoard: every nest now has a gold ring around it, the eggs are pale and easy to spot, the goal counts the nests left, and the level says plainly that only a Meteor landed right on a nest cracks the eggs.",
+    "Burning pitch no longer floods the whole map. It burns where you poured it, so you can use it near your village.",
+    "Archers stand their ground and shoot instead of running into the enemy between shots.",
+    "New boost: Sharper steel, more damage from your soldiers and wardens.",
+    "Upgrades: switching tabs now starts at the top of the list."
+   ]
+  },
+  {
    "id": "2026-10-30c",
    "date": "2026-10-30",
    "title": "Fixes from your reports",

@@ -71,6 +71,6 @@
     { "id": "bones", "name": "Bones", "layer": "cell", "color": "#e8e0c8", "var": 16, "walk": 90, "hard": 6, "flyOver": true, "floats": true },
     { "id": "spring", "name": "Wellspring", "layer": "cell", "color": "#5fb8ff", "var": 10, "walk": 0, "hard": 200, "emit": "#4fb2ff", "emitStr": 0.6, "source": "water", "solid": true },
     { "id": "vent", "name": "Lava vent", "layer": "cell", "color": "#ffb02a", "var": 20, "walk": 0, "hard": 255, "hot": 245, "emit": "#ff6a10", "emitStr": 2.0, "source": "lava", "sourceRate": 1, "sourceAmt": 10, "solid": true },
-    { "id": "dragonegg", "name": "Wyrm egg", "layer": "cell", "color": "#c8643a", "var": 34, "walk": 0, "hard": 190, "emit": "#ff8a3a", "emitStr": 0.6, "solid": true, "shiny": true, "blastTo": "rubble" }
+    { "id": "dragonegg", "name": "Wyrm egg", "layer": "cell", "color": "#f6e7bd", "var": 18, "walk": 0, "hard": 190, "emit": "#ff8a3a", "emitStr": 0.6, "solid": true, "shiny": true, "blastTo": "rubble" }
   ]
 }

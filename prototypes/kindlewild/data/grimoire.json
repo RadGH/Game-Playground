@@ -69,6 +69,18 @@
     260
    ],
    "step": 0.25
+  },
+  "unitDamage": {
+   "name": "Sharper steel",
+   "text": "+10% damage from your soldiers and wardens in every mode",
+   "cost": [
+    40,
+    90,
+    160,
+    260,
+    400
+   ],
+   "step": 0.1
   }
  },
  "pages": [

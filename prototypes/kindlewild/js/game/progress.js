@@ -158,6 +158,11 @@ export function challengeMana(save) {
   return { manaScale: 0.75 + 0.1 * (save.boons.manaCap || 0), regenScale: 0.75 + 0.1 * (save.boons.manaRegen || 0) };
 }
 
+/** How hard the people on your side hit: 1 = as written. */
+export function unitDamage(save, grimoire) {
+  return 1 + (save.boons.unitDamage || 0) * grimoire.boons.unitDamage.step;
+}
+
 /** Mana numbers for the Realm from boons. */
 export function realmMana(save, grimoire) {
   const B = grimoire.boons;

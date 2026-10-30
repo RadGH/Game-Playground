@@ -130,7 +130,7 @@
   },
   {
    "id": "6-4", "name": "The Wyrm's Hoard", "icon": "lvl-6-4",
-   "intro": ["Up on the black rock above Dunmarrow, a dragon guards a hoard of gold and five nests of eggs.", "The eggs keep hatching in the lava, and every hatchling flies straight for the village.", "Break the eggs. She will not like it."],
+   "intro": ["Up on the black rock above Dunmarrow, a dragon guards a hoard of gold and five nests of eggs.", "The eggs keep hatching in the lava, and every hatchling flies straight for the village.", "Only a falling star can crack an egg. Land a Meteor right on each gold ring. She will not like it."],
    "map": { "W": 160, "H": 240, "seed": 6404, "recipe": "greenvale", "override": { "sea": 0, "rivers": 0, "villages": 0, "glades": 0, "temp": 0.35 }, "clock": 0.68, "freezeTime": true,
     "ops": [
      { "op": "flatten", "at": [80, 140], "r": 90 },
@@ -178,7 +178,7 @@
    "timeLimit": 175,
    "failText": "The clutch is still hatching",
    "goals": [
-    { "type": "destroy", "material": "dragonegg", "zone": [80, 62, 62], "pct": 0.9, "text": "Break the dragon's eggs", "short": "Eggs" },
+    { "type": "destroy", "material": "dragonegg", "zone": [80, 62, 62], "pct": 0.9, "text": "Break the eggs in the gold rings with Meteors", "short": "Eggs", "markWord": "nests", "hint": { "secs": 25, "text": "The eggs are untouched. Drop a Meteor on a gold ring!" } },
     { "type": "protect", "what": "houses", "min": 4, "text": "Keep 4 houses standing", "failText": "Dunmarrow burned", "short": "Houses" }
    ],
    "stars": [
@@ -187,7 +187,7 @@
     { "type": "killedBy", "species": "dragon", "count": 1, "text": "Bring the mother down too" }
    ],
    "reward": "creature:dragon",
-   "tip": "Only a falling star hits hard enough to crack a wyrm egg. The mother circles her nest until she is hurt — then she goes for the village."
+   "tip": "Only a falling star hits hard enough to crack a wyrm egg, and it must land close: a near miss barely scratches them. The mother circles her nest until she is hurt — then she goes for the village."
   },
   {
    "id": "6-5", "name": "Three Mouths", "icon": "lvl-6-5",

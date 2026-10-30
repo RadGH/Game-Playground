@@ -10,6 +10,7 @@
 //   protect { what: 'houses', min }   keep at least `min` houses standing
 //   people  { min }                   keep at least `min` people alive
 //   contain { material, zone: [x, y, r] }   none of that material may enter the zone
+//   destroy { material, zone, pct, markWord?, hint?: { secs, text } }   break that much of it; each patch left is ringed on the map
 //   extinguish { secs }               no fire left on the map (checked from `secs` on)
 // level.stars: [{ type: 'win' | 'housesLostMax' | 'peopleLostMax' | 'manaUsedMax' | 'timeMax' |
 //                       'castsMax' | 'killedBy' | 'aliveMin', ...params, text }]
@@ -70,6 +71,16 @@ export function createObjectives(s, level) {
     }
     return n;
   };
+  // What is left of a destroy goal, grouped into patches the map rings: [{ x, y, r }]
+  function clumps(mat, [zx, zy, zr]) {
+    const m = M.id[mat], out = [];
+    for (let y = Math.max(0, zy - zr); y <= Math.min(w.H - 1, zy + zr); y++) for (let x = Math.max(0, zx - zr); x <= Math.min(w.W - 1, zx + zr); x++) {
+      if (w.mat[y * w.W + x] !== m || (x - zx) ** 2 + (y - zy) ** 2 > zr * zr) continue;
+      const c = out.find(o => Math.hypot(o.sx / o.n - x, o.sy / o.n - y) < 12);
+      if (c) { c.sx += x; c.sy += y; c.n++; c.far = Math.max(c.far, Math.hypot(c.sx / c.n - x, c.sy / c.n - y)); } else out.push({ sx: x, sy: y, n: 1, far: 0 });
+    }
+    return out.map(c => ({ x: c.sx / c.n, y: c.sy / c.n, r: Math.max(5, c.far + 3) }));
+  }
   O.peopleLost = () => peopleLost;
   O.housesLost = () => Math.max(0, (housesAtStart ?? 0) - sim.village.housesStanding());
 
@@ -166,7 +177,13 @@ export function createObjectives(s, level) {
           const now = countIn(g.material, g.zone), was = Math.max(1, startCount[key]);
           g.progress = Math.min(1, (was - now) / (was * (g.pct ?? 0.8)));
           g.label = `${Math.round(100 * (was - now) / was)}%`;
-          if (g.progress >= 1) g.done = true;
+          if (s.stats.ticks % 15 === 0 || !g.marks) g.marks = clumps(g.material, g.zone);
+          if (g.markWord) g.label += ` · ${g.marks.length} ${g.markWord}`;
+          if (g.hint && !g.hinted && t >= g.hint.secs && now >= was) {
+            g.hinted = true;
+            sim.fire('announce', { text: g.hint.text, x: g.marks[0]?.x, y: g.marks[0]?.y });
+          }
+          if (g.progress >= 1) { g.done = true; g.marks = []; }
           break;
         }
         case 'extinguish':

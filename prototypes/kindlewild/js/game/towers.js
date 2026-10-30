@@ -138,11 +138,17 @@ export function attachTowerGame(s, o) {
 
   // ---------- building ----------
   const snap = (v) => Math.floor(v / G);
+  // enemies spawn across a little patch, so a gate is open if any of that patch has a way to the keep
+  function gateOpen(d, g) {
+    for (let yy = g.y - 3; yy <= g.y + 3; yy++) for (let xx = g.x - 3; xx <= g.x + 3; xx++) if (w.inside(xx, yy) && d[yy * W + xx] !== FAR) return true;
+    return false;
+  }
   function canPlace(id, gx, gy, skipPath) {
     const K = KIND[id], n = K.size;
     const x0 = gx * G, y0 = gy * G, cells = n * G;
     if (x0 < 3 || y0 < 3 || x0 + cells >= W - 3 || y0 + cells >= H - 3) return { ok: false, reason: 'Too close to the edge' };
-    if (T.keep && Math.max(Math.abs(x0 + cells / 2 - T.keep.x), Math.abs(y0 + cells / 2 - T.keep.y)) < KEEP_R + cells / 2) return { ok: false, reason: 'Too close to the keep' };
+    // the ring the road is measured from stays clear, or walls could box the measurement in
+    if (T.keep && Math.max(Math.abs(x0 + cells / 2 - T.keep.x), Math.abs(y0 + cells / 2 - T.keep.y)) < KEEP_R + 1 + cells / 2) return { ok: false, reason: 'Too close to the keep' };
     for (const g of T.gates) if (Math.hypot(x0 + cells / 2 - g.x, y0 + cells / 2 - g.y) < GATE_CLEAR + cells / 2) return { ok: false, reason: 'Too close to an enemy gate' };
     for (let yy = y0; yy < y0 + cells; yy++) for (let xx = x0; xx < x0 + cells; xx++) {
       const i = yy * W + xx, m = w.mat[i];
@@ -153,8 +159,12 @@ export function attachTowerGame(s, o) {
     if (!skipPath) {
       const mask = new Uint8Array(w.N);
       for (let yy = y0; yy < y0 + cells; yy++) mask.fill(1, yy * W + x0, yy * W + x0 + cells);
-      const d = field.test(T.seeds, mask);
-      for (const g of T.gates) if (d[g.y * W + g.x] === FAR) return { ok: false, reason: 'That seals the road. Leave them a way through' };
+      // Only what THIS piece would cut off counts. A gate that is already cut off (a troll turned to stone on it, a landslide)
+      // must not refuse every wall on the map: that stopped all building until a refresh, and selling walls could not help.
+      const seeds = keepSeeds(T.keep.x, T.keep.y);
+      const was = T.gates.map(g => gateOpen(field.test(seeds), g));
+      const d = field.test(seeds, mask);
+      for (let k = 0; k < T.gates.length; k++) if (was[k] && !gateOpen(d, T.gates[k])) return { ok: false, reason: 'That seals the road. Leave them a way through' };
     }
     return { ok: true };
   }
@@ -258,6 +268,12 @@ export function attachTowerGame(s, o) {
   }
   function startWave() {
     T.wave++;
+    // whatever fell on a gate (a petrified troll, rubble) is swept away, so nobody spawns inside a rock
+    for (const g of T.gates) for (let yy = g.y - 3; yy <= g.y + 3; yy++) for (let xx = g.x - 3; xx <= g.x + 3; xx++) {
+      const i = yy * W + xx;
+      if (w.inside(xx, yy) && M.solid[w.mat[i]] && !(w.flag[i] & OWNED)) setCell(w, i, 0);
+    }
+    T.dirty = true;
     const gates = T.gates.filter(g => T.wave >= g.from);
     if (!gates.length) gates.push(T.gates[0]);
     const groups = waveOf(T.wave, D.hp);

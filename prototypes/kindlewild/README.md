@@ -202,3 +202,6 @@ score, label, essence })`; records go to `save.records`, and a finished game's s
   a wave always ends. Gold buys structures, mana casts spells. `node tools/td-bot.mjs [seeds] [waves]`: idle must lose; the crude bot (no spells, little mazing) wins Gentle sometimes and reaches 10-15 on Fair.
 - **Smaller modes** (`js/game/scenarios.js`): Wildfire Watch, Rising Tide, Cataclysm, Wild Garden.
 - **Phone top bar**: no wind arrow any more, `!` hidden under 700 px wide (in the menu), mana is 74 px and shows the flow on tap, the objective takes the rest on two lines.
+
+- **Stuck zoom (reports 2026-10-30)**: `P.pointers` kept a finger iOS never reported lifting, so every later touch became a pinch. A primary pointerdown or `touches.length === 0` now clears it. **"Seals the road" everywhere**: the check read the exact gate cell, so one rock on it refused all building; a piece is now refused only if it cuts off a gate that was open (`gateOpen`, a 7x7 patch), and each wave sweeps rocks off the gates.
+- **Reach goals** end when every traveller has arrived or died, 45 s after the count is met (`stragglerSecs`), or at the time limit.

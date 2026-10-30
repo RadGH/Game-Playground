@@ -79,6 +79,7 @@ export function createPlay(app) {
     P.pickBase(P.s.suggestBase()); P.confirmBase();
   });
   P.stop = function () {
+    P.pointers.clear(); P.gesture = null; P.held = null;
     P.s = null;
     P.amb = null; stopAmbience();
     document.body.classList.remove('playing'); dispatchEvent(new Event('resize'));
@@ -361,7 +362,10 @@ export function createPlay(app) {
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
   canvas.addEventListener('pointerdown', (e) => {
     if (!P.s) return;
-    canvas.setPointerCapture(e.pointerId);
+    // The first finger down means no finger was on the glass. iPhones sometimes never report a finger lifting, and a
+    // leftover made every later touch look like the second finger of a pinch: stuck zooming until a refresh (owner 2026-10-30).
+    if (e.isPrimary && P.pointers.size) forgetFingers();
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* that finger is already gone */ }
     P.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now() });
     if (P.pointers.size === 2) {
       // two fingers: cancel the tool, start moving the view
@@ -451,6 +455,13 @@ export function createPlay(app) {
       P.held = null;
     }
   };
+  function forgetFingers() {
+    P.pointers.clear();
+    if (P.held) { P.s?.throw(P.held, 0, 0); P.held = null; }
+    P.gesture = null;
+  }
+  // the browser's own count of fingers is the truth: none left means none left
+  for (const t of ['touchend', 'touchcancel']) addEventListener(t, (e) => { if (e.touches.length === 0) setTimeout(() => { if (P.pointers.size) forgetFingers(); }, 0); });
   canvas.addEventListener('pointerup', end);
   canvas.addEventListener('pointercancel', (e) => { P.pointers.delete(e.pointerId); if (P.pointers.size === 0) { if (P.held) { P.s?.throw(P.held, 0, 0); P.held = null; } P.gesture = null; } });
   canvas.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') P.cursor = null; });

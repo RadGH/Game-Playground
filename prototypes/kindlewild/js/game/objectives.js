@@ -144,8 +144,12 @@ export function createObjectives(s, level) {
           }
           g.progress = Math.min(1, g.arrived / g.count);
           g.label = `${g.arrived}/${g.count}`;
-          if (g.arrived >= g.count) g.done = true;
-          else if (t > 2 && left + g.arrived < g.count && !g.waiting) g.failed = true;
+          // enough have made it: wait for the rest, who may still arrive, die or run out the clock (owner 2026-10-30:
+          // the level used to end the moment the count was met, so a star for bringing more was out of reach)
+          if (g.arrived >= g.count) {
+            g.metAt ??= t;
+            if (left === 0 || t - g.metAt > (g.stragglerSecs ?? 45)) g.done = true;
+          } else if (t > 2 && left + g.arrived < g.count && !g.waiting) g.failed = true;
           break;
         }
         case 'guard': {
@@ -175,6 +179,7 @@ export function createObjectives(s, level) {
     const win = goals.filter(g => ['kill', 'grow', 'survive', 'dragon', 'extinguish', 'reach', 'destroy'].includes(g.type));
     const failed = goals.find(g => g.failed);
     if (failed) { finish(false, failed.failText || 'Failed: ' + failed.text); return; }
+    if (level.timeLimit && t >= level.timeLimit) for (const g of win) if (g.metAt != null) g.done = true;
     if (level.timeLimit && t >= level.timeLimit && !win.every(g => g.done)) { finish(false, level.failText || 'Out of time'); return; }
     if (win.length && win.every(g => g.done)) finish(true);
   };

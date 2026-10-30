@@ -431,11 +431,23 @@ export function createSpells(sim, json) {
     }
     if (a.fire > 0) a.fire--;
     // the funnel itself, drawn with particles
-    for (let k = 0; k < 6; k++) {
-      const h = rng();
-      const aa = rng() * 6.28 + sim.tick * 0.4;
-      const rr = (0.3 + h) * a.r * 0.6;
-      spawn(sim.ps, { kind: P.mote, x: a.x + Math.cos(aa) * rr, y: a.y + Math.sin(aa) * rr * 0.5, z: h * 30, vx: -Math.sin(aa) * 0.5, vy: Math.cos(aa) * 0.25, life: 6, rgb: a.fire > 0 ? [255, 140 + (rng() * 80 | 0), 40] : [200 + (rng() * 40 | 0), 210, 220], glow: a.fire > 0 ? 1 : 0.05 });
+    // two arms winding up it, so it reads as a spinning column and not a cloud of specks
+    const hot = a.fire > 0;
+    for (let k = 0; k < 28; k++) {
+      const h = (k + rng()) / 28;
+      const aa = sim.tick * 0.45 + h * 9 + (k & 1) * 3.14;
+      const rr = (0.18 + h * h) * a.r * 0.8;
+      const v = 130 + (rng() * 90 | 0);
+      spawn(sim.ps, { kind: P.mote, x: a.x + Math.cos(aa) * rr, y: a.y + Math.sin(aa) * rr * 0.5, z: h * 34, vx: -Math.sin(aa) * 0.7, vy: Math.cos(aa) * 0.35, life: 5, rgb: hot ? [255, 120 + (rng() * 110 | 0), 40] : [v, v + 6, v + 12], glow: hot ? 1 : 0.12 });
+    }
+    // dust thrown out round its foot, and streaks of wind circling further out
+    for (let k = 0; k < 5; k++) {
+      const aa = rng() * 6.28, rr = a.r * (0.5 + rng() * 0.5);
+      spawn(sim.ps, { kind: P.spark, x: a.x + Math.cos(aa) * rr, y: a.y + Math.sin(aa) * rr * 0.6, z: 0.5, vx: -Math.sin(aa) * 0.8 + Math.cos(aa) * 0.25, vy: Math.cos(aa) * 0.5 + Math.sin(aa) * 0.15, vz: 0.12, grav: 0.01, life: 14, rgb: hot ? [255, 150, 60] : [150, 125, 90] });
+    }
+    for (let k = 0; k < 3; k++) {
+      const aa = rng() * 6.28, rr = a.r * (1.1 + rng() * 0.8);
+      spawn(sim.ps, { kind: P.mote, x: a.x + Math.cos(aa) * rr, y: a.y + Math.sin(aa) * rr * 0.6, z: 2 + rng() * 8, vx: -Math.sin(aa) * 1.5, vy: Math.cos(aa) * 0.9, life: 9, rgb: [235, 240, 245], glow: 0.25 });
     }
     sim.creatures.near(a.x, a.y, a.r * 1.4, (c) => {
       const dx = c.x - a.x, dy = c.y - a.y, d = Math.hypot(dx, dy) || 1;

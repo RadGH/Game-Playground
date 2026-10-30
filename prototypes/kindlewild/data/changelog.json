@@ -1,6 +1,17 @@
 {
  "entries": [
   {
+   "id": "2026-10-30c",
+   "date": "2026-10-30",
+   "title": "Fixes from your reports",
+   "items": [
+    "Fixed: on phones the map could get stuck zooming, with no way to pan or build until you refreshed.",
+    "Tower Defense: fixed \"That seals the road\" appearing everywhere late in a game, even after selling walls.",
+    "Levels where you escort people now wait for the rest of the group once enough have arrived, so Bring 9 home can actually be earned.",
+    "Tornados are much easier to see: a spinning funnel, dust at the base and wind around it."
+   ]
+  },
+  {
    "id": "2026-10-30b",
    "date": "2026-10-30",
    "title": "Custom Game and Tower Defense",

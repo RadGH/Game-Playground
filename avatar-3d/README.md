@@ -155,6 +155,37 @@ Emberveil 2 parks the party's vehicle behind them on the world stage, stands it 
 circle in the firelight, and rolls it across the stage during a crossing
 (`prototypes/emberveil/js/stage.js`: `setVehicle`, `parkVehicle`, `camp`, `travelAcross`).
 
+### Vehicle catalog — `data/vehicle-catalog.json`, `js/vehicle-catalog.js`, `js/vehicle-gallery.js`
+
+Added 2026-10-30 (owner: "Categorize the models with some tags being whether it's fantasy/medieval/modern"). One row per
+vehicle MODEL in the playground, 66 rows: fantasy 8, medieval 20, modern 32, future 6.
+
+```json
+{ "id": "rl_sedan", "name": "Meadowlark Sedan", "era": "modern", "domain": "land", "class": "car",
+  "tags": ["passenger", "enclosed", "road"], "source": "roverlands", "games": ["roverlands"],
+  "module": "prototypes/roverlands/js/client/models/sedan.js", "builder": "roverlands", "model": "sedan", "seats": 4 }
+```
+
+* `era`: `fantasy | medieval | modern | future`. `domain`: `land | water | air | space`. `tags`: free list (passenger, work,
+  cargo, trailer, emergency, military, draft-animal, magic, sci-fi, racing…).
+* `js/vehicle-catalog.js` is pure (no Three.js, no DOM): `loadVehicleCatalog()`, `filterVehicles(rows, { era, tags })`,
+  `tagsOf(row)`, `facetCounts(rows)`. Browser code fetches the JSON; never use `import … with { type: 'json' }`.
+* `js/vehicle-gallery.js` `buildCatalogModel(row, { thumb })` builds a row with the owning game's own code and returns the
+  same show object as `tv-vehicles-gallery.js`. Models built facing +z are turned to the page's +x and stood on the floor.
+* `vehicles.html` shows it as "Every vehicle model": era, where and tag filters (eras are one at a time, every tag picked
+  must match) over a grid of cards. A card opens the model in the viewer; `vehicles.html#rl_sedan` links to one. Pictures come
+  from ONE `createThumbnailer` renderer, only for cards near the screen. On phones the viewer comes first and the page is
+  the only thing that scrolls.
+* **Rows with `builder: null`** have a `notShown` reason and a "No separate model" card: Thousandvale's rowboat and canoe
+  (parts lists inside `harbour-view.js`) and six Tumblefair minigame vehicles (built inside a view that needs a live room).
+  Games with no 3D vehicle model at all (Frontier Foundry, Lodestar) are not listed.
+* **Public copies:** every game's code is a dynamic import. The Tumblefair, Knockabout and Roverlands copies hold avatar-3d
+  but not every prototype, so a missing game's cards say "Not in this copy" and the page keeps working (tested in
+  `vehicles.spec.js`; `tests/public-copies.test.js` follows the page's and the Roverlands models' static imports).
+* **Adding a vehicle:** add its row. `tests/vehicle-catalog.test.js` fails if a Roverlands vehicle, cart, mount, ground
+  vehicle, boat hull or Thousandvale model has no row, or a row has no era. Roverlands' five carried props are left out,
+  except the jetpack.
+
 ## Mounts (mounts.js) — `js/mounts.js` + pure `js/mount-types.js`, demo `mounts.html`
 
 Added 2026-10-05 for Thousandvale (play-test 2, Q16); built so Farhold, Bannerline or any page can use it.
@@ -441,7 +472,7 @@ The Quaternius CC0 packs were removed 2026-10-21 (see the top of this file).
 Mode switch, orbit camera, animation chips (procedural or clip list), turntable, PNG snapshot, random (with race rules) / random face / random outfit, presets (shared), slot editor + body sliders + Mii face sliders, body frame select, side-by-side 2D render of the same JSON, JSON copy/export/import.
 
 ## Tests
-`npm test -- avatar-3d` (Playwright, headless WebGL): Mii mode draws skin-coloured pixels, walk animation moves the leg pivots, all 15 presets build; Quaternius mode loads skinned meshes, plays `Walk_Loop`, bone scaling raises the root; screenshots saved in `test-results/avatar-3d-*.png`. `creatures.spec.js` builds every creature type. `vehicles.spec.js` builds every vehicle type, checks the measurements and the draft-animal counts, rolls them and reads pixels back off the canvas. `spellfx.spec.js` loads the gallery, throws and bursts every element (checking a projectile resolves under the flight cap), runs every status aura at once and checks the effects layer returns to zero children afterwards, and drives the page's buttons; screenshots in `test-results/spellfx-*.png`.
+`npm test -- avatar-3d` (Playwright, headless WebGL): Mii mode draws skin-coloured pixels, walk animation moves the leg pivots, all 15 presets build; Quaternius mode loads skinned meshes, plays `Walk_Loop`, bone scaling raises the root; screenshots saved in `test-results/avatar-3d-*.png`. `creatures.spec.js` builds every creature type. `vehicles.spec.js` builds every vehicle type, checks the measurements and the draft-animal counts, rolls them and reads pixels back off the canvas. It also runs the catalog at desktop and phone size (one thumbnail renderer, filters, no sideways scroll, no scrolling panel), builds every catalog row and loads the page with Roverlands missing. `spellfx.spec.js` loads the gallery, throws and bursts every element (checking a projectile resolves under the flight cap), runs every status aura at once and checks the effects layer returns to zero children afterwards, and drives the page's buttons; screenshots in `test-results/spellfx-*.png`.
 
 ## Ideas / limits
 - Accessories (glasses, eyepatch) are not built in 3D yet; `mask`/`scarf` etc. would be simple meshes.

@@ -41,6 +41,19 @@ export const CHIBI2_2D = {
     toadstool_cap: alias(hat, 'wide_brim', 'Toadstool cap'),
     ghost_sheet: { name: 'Ghost bedsheet', pieces: [{ layer: 'hatFront', svg: `<path d="M150 34 C214 34 236 90 236 150 L244 236 Q226 222 212 236 Q196 222 182 236 Q166 222 150 236 Q134 222 118 236 Q104 222 88 236 Q74 222 56 236 L64 150 C64 90 86 34 150 34 Z" fill="var(--hat)" stroke="rgba(0,0,0,.25)" stroke-width="4"/><ellipse cx="124" cy="132" rx="13" ry="19" fill="#1a1a28"/><ellipse cx="176" cy="132" rx="13" ry="19" fill="#1a1a28"/><ellipse cx="150" cy="176" rx="9" ry="7" fill="#1a1a28"/>` }] },
     bolt_crown: alias(hat, 'cap', 'Flat-top with neck bolts'),
+    // Oddhaven M4, modern work clothes: 3D models in avatar-3d/js/chibi2-hats.js. Bespoke, so no seeded roll hands one out
+    hard_hat: { ...alias(hat, 'helmet', 'Hard hat'), bespoke: true },
+    ball_cap: { ...alias(hat, 'cap', 'Ball cap'), bespoke: true },
+    beanie: { ...alias(hat, 'cap', 'Beanie'), bespoke: true },
+    // Oddhaven M7
+    police_cap: { ...alias(hat, 'cap', 'Police cap'), bespoke: true },
+    warden_cap: { ...alias(hat, 'cap', 'Warden cap'), bespoke: true },
+    chef_hat: { ...alias(hat, 'cap', 'Chef hat'), bespoke: true },
+    bucket_hat: { ...alias(hat, 'cap', 'Bucket hat'), bespoke: true },
+    sun_hat: { ...alias(hat, 'cap', 'Sun hat'), bespoke: true },
+    visor: { ...alias(hat, 'cap', 'Visor'), bespoke: true },
+    bobble_hat: { ...alias(hat, 'cap', 'Bobble hat'), bespoke: true },
+    ear_muffs: { ...alias(hat, 'cap', 'Ear muffs'), bespoke: true },
   },
   top: {
     gi: alias(top, 'sash_robe', 'Fitted wrap jacket (gi)'),

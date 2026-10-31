@@ -1,0 +1,7473 @@
+{
+ "_doc": "Oddhaven: modern words (entries) and the first pack of lines (symbols, read with lingo.grammar.add). Every line is checked for stray braces by prototypes/oddhaven/tests/talk.test.js.",
+ "version": 1,
+ "entries": [
+  {
+   "id": "bridge",
+   "type": "place",
+   "forms": {
+    "sg": "Wend Bridge"
+   },
+   "tags": [
+    "oddhaven",
+    "place",
+    "road"
+   ],
+   "proper": true,
+   "pron": {
+    "respell": "WEND BRIJ"
+   }
+  },
+  {
+   "id": "river",
+   "type": "place",
+   "forms": {
+    "sg": "River Wend"
+   },
+   "tags": [
+    "oddhaven",
+    "place",
+    "water"
+   ],
+   "proper": true
+  },
+  {
+   "id": "town_oddhaven",
+   "type": "place",
+   "forms": {
+    "sg": "Oddhaven"
+   },
+   "tags": [
+    "oddhaven",
+    "town"
+   ],
+   "proper": true
+  },
+  {
+   "id": "town_brackenford",
+   "type": "place",
+   "forms": {
+    "sg": "Brackenford"
+   },
+   "tags": [
+    "oddhaven",
+    "town"
+   ],
+   "proper": true
+  },
+  {
+   "id": "the_park",
+   "type": "place",
+   "forms": {
+    "sg": "park"
+   },
+   "tags": [
+    "oddhaven",
+    "place",
+    "outdoors"
+   ]
+  },
+  {
+   "id": "the_diner",
+   "type": "place",
+   "forms": {
+    "sg": "diner"
+   },
+   "tags": [
+    "oddhaven",
+    "place",
+    "food"
+   ]
+  },
+  {
+   "id": "the_cafe",
+   "type": "place",
+   "forms": {
+    "sg": "cafe"
+   },
+   "tags": [
+    "oddhaven",
+    "place",
+    "food"
+   ]
+  },
+  {
+   "id": "the_pub",
+   "type": "place",
+   "forms": {
+    "sg": "pub"
+   },
+   "tags": [
+    "oddhaven",
+    "place",
+    "fun"
+   ]
+  },
+  {
+   "id": "the_gym",
+   "type": "place",
+   "forms": {
+    "sg": "gym"
+   },
+   "tags": [
+    "oddhaven",
+    "place",
+    "fit"
+   ]
+  },
+  {
+   "id": "the_grocery",
+   "type": "place",
+   "forms": {
+    "sg": "grocery"
+   },
+   "tags": [
+    "oddhaven",
+    "place",
+    "shop"
+   ]
+  },
+  {
+   "id": "the_clinic",
+   "type": "place",
+   "forms": {
+    "sg": "clinic"
+   },
+   "tags": [
+    "oddhaven",
+    "place"
+   ]
+  },
+  {
+   "id": "the_town_hall",
+   "type": "place",
+   "forms": {
+    "sg": "town hall"
+   },
+   "tags": [
+    "oddhaven",
+    "place"
+   ]
+  },
+  {
+   "id": "the_garage",
+   "type": "place",
+   "forms": {
+    "sg": "garage"
+   },
+   "tags": [
+    "oddhaven",
+    "place"
+   ]
+  },
+  {
+   "id": "the_sawmill",
+   "type": "place",
+   "forms": {
+    "sg": "sawmill"
+   },
+   "tags": [
+    "oddhaven",
+    "place"
+   ]
+  },
+  {
+   "id": "the_school",
+   "type": "place",
+   "forms": {
+    "sg": "school"
+   },
+   "tags": [
+    "oddhaven",
+    "place"
+   ]
+  }
+ ],
+ "symbols": {
+  "od_greet": [
+   {
+    "t": "Morning, {listener.name}."
+   },
+   {
+    "t": "Hello, {listener.name}. Still alive, then?"
+   },
+   {
+    "t": "{listener.name}! Just the person."
+   },
+   {
+    "t": "Oh, hello. I did not see you there. Or I did, and I panicked."
+   },
+   {
+    "t": "There you are, {listener.name}."
+   },
+   {
+    "t": "Well, look who it is."
+   },
+   {
+    "t": "{listener.name}! You look different. Taller? No. Oh well."
+   },
+   {
+    "t": "Afternoon. Or morning. I have stopped checking."
+   },
+   {
+    "t": "Hi. Is it just me or is {town.name} loud today?"
+   },
+   {
+    "t": "Fancy meeting you outside {place.the}."
+   },
+   {
+    "t": "Hey, {listener.name}. Got a minute? Got two?"
+   },
+   {
+    "t": "Oh good, a person."
+   }
+  ],
+  "od_small": [
+   {
+    "t": "Traffic on {place.the} was murder this morning."
+   },
+   {
+    "t": "Somebody has been parking across two spaces again."
+   },
+   {
+    "t": "The tow gnome sent me another invoice. I was not even there."
+   },
+   {
+    "t": "Have you tried {place.the} lately? Same as ever. Reassuring, really."
+   },
+   {
+    "t": "They say it might rain. They always say that."
+   },
+   {
+    "t": "I walked past {place.the} and it smelled of toast. Nobody knows why."
+   },
+   {
+    "t": "My neighbour has started a podcast. About his hedge."
+   },
+   {
+    "t": "The bins went out on the wrong day. The whole street followed me."
+   },
+   {
+    "t": "I saw a pigeon carrying a chip the size of its head. Good for it."
+   },
+   {
+    "t": "Is it me, or does {town.name} have more roundabouts than last year?"
+   },
+   {
+    "t": "Bills again. I swear they breed."
+   },
+   {
+    "t": "I bought a plant. It looked at me funny."
+   },
+   {
+    "t": "Somebody at {place.the} asked if I was local. I have lived here for sixty years."
+   },
+   {
+    "t": "Fuel went up again. I blame the moon."
+   },
+   {
+    "t": "I found a coin in the sofa and honestly it made my week."
+   },
+   {
+    "t": "You heard about the bridge? No? Me neither. I just like saying that."
+   },
+   {
+    "t": "Apparently {town.name} is lovely this time of year. I would not know, I work."
+   },
+   {
+    "t": "The cafe got a new mug. People are taking sides."
+   },
+   {
+    "t": "I slept for eight hours and I feel worse. Explain that."
+   },
+   {
+    "t": "Nothing ever happens here. I find that very suspicious."
+   },
+   {
+    "t": "Saw a car go past with nobody laughing in it. Very odd."
+   },
+   {
+    "t": "I am thinking of taking up a hobby. Possibly sitting."
+   },
+   {
+    "t": "Everyone at {place.the} looks tired. Is it a uniform?"
+   },
+   {
+    "t": "The river looked at me. I looked at the river. We have an understanding."
+   }
+  ],
+  "od_warm": [
+   {
+    "t": "You always know how to cheer me up, {listener.name}."
+   },
+   {
+    "t": "We should do this more often."
+   },
+   {
+    "t": "Honestly, you are my favourite person on this street."
+   },
+   {
+    "t": "Come round for dinner. I will burn something for you."
+   },
+   {
+    "t": "I saved you the good biscuit. It is slightly sat on."
+   },
+   {
+    "t": "I told everyone at {place.the} how great you are. They were tired of hearing it."
+   },
+   {
+    "t": "You look well. Suspiciously well."
+   },
+   {
+    "t": "Do not ever move to {town.name}, all right? Promise me."
+   },
+   {
+    "t": "You make this town bearable, {listener.name}."
+   },
+   {
+    "t": "I laughed at what you said on Tuesday. Just now. In the shower."
+   },
+   {
+    "t": "I would help you move house. A small house."
+   },
+   {
+    "t": "You are the only one who gets my jokes. You are also the only one who hears them."
+   }
+  ],
+  "od_tense": [
+   {
+    "t": "We both know what you did, {listener.name}."
+   },
+   {
+    "t": "Oh. It's you."
+   },
+   {
+    "t": "I am not angry. I am just writing it all down."
+   },
+   {
+    "t": "Nice of you to return my ladder. Oh, wait."
+   },
+   {
+    "t": "Some of us park inside the lines, {listener.name}."
+   },
+   {
+    "t": "I heard what you told them at {place.the}."
+   },
+   {
+    "t": "Keep your voice down, people think we are friends."
+   },
+   {
+    "t": "You owe me a casserole dish. I have not forgotten."
+   },
+   {
+    "t": "That hedge of yours is on my side now."
+   },
+   {
+    "t": "I have no quarrel with you. I have several."
+   },
+   {
+    "t": "Lovely to see you. That is a lie, I am practising."
+   },
+   {
+    "t": "Do not start, {listener.name}. I will finish it, and then I will be late."
+   }
+  ],
+  "od_part": [
+   {
+    "t": "Right, I must get on."
+   },
+   {
+    "t": "Anyway. Things to do, and people to avoid."
+   },
+   {
+    "t": "See you around, {listener.name}."
+   },
+   {
+    "t": "Good talk. I kept none of it."
+   },
+   {
+    "t": "I should go before I say something honest."
+   },
+   {
+    "t": "Mind how you go."
+   },
+   {
+    "t": "Well. Onward, I suppose."
+   },
+   {
+    "t": "Say hello to {place.the} for me."
+   }
+  ],
+  "od_ack": [
+   {
+    "t": "Right you are."
+   },
+   {
+    "t": "Fine, fine. I was going to anyway."
+   },
+   {
+    "t": "Is that me? That's me. On my way."
+   },
+   {
+    "t": "All right. Why not."
+   },
+   {
+    "t": "Did I think of that? I must have."
+   },
+   {
+    "t": "Off I go, then."
+   },
+   {
+    "t": "Sure. It was my idea all along."
+   },
+   {
+    "t": "Yes. Yes, good plan, me."
+   }
+  ],
+  "od_refuse": [
+   {
+    "t": "I can't do that right now."
+   },
+   {
+    "t": "It's shut. I checked. I stood there like a fool."
+   },
+   {
+    "t": "Not today, I'm afraid."
+   },
+   {
+    "t": "Absolutely not. Well. Not yet."
+   }
+  ],
+  "od_tired": [
+   {
+    "t": "I could sleep on this pavement."
+   },
+   {
+    "t": "My eyes are closing by themselves."
+   },
+   {
+    "t": "Is it bedtime? It feels like bedtime."
+   },
+   {
+    "t": "I have stopped being a person and become a yawn."
+   }
+  ],
+  "od_hungry": [
+   {
+    "t": "I would eat that pigeon."
+   },
+   {
+    "t": "When did I last eat? Was it Tuesday?"
+   },
+   {
+    "t": "My stomach just said something rude."
+   },
+   {
+    "t": "Everything smells of food. Even the bus stop."
+   }
+  ],
+  "od_happy": [
+   {
+    "t": "What a day!"
+   },
+   {
+    "t": "I feel wonderful and I do not trust it."
+   },
+   {
+    "t": "Nothing can go wrong now. I said that out loud, didn't I."
+   },
+   {
+    "t": "I may hum. I may hum loudly."
+   }
+  ],
+  "od_sad": [
+   {
+    "t": "Don't look at me. I'm having a whole weather system."
+   },
+   {
+    "t": "Everything is fine. Everything. Fine."
+   },
+   {
+    "t": "I need a sit down and a different life."
+   },
+   {
+    "t": "Today has been a lot of today."
+   }
+  ],
+  "od_towed": [
+   {
+    "t": "All those coins! For a gnome!"
+   },
+   {
+    "t": "My car was fine until it was not."
+   },
+   {
+    "t": "The gnome said nothing. He just handed me the bill."
+   }
+  ],
+  "od_work": [
+   {
+    "t": "Another shift, another chair with a wobble."
+   },
+   {
+    "t": "The boss wants it done by yesterday."
+   },
+   {
+    "t": "I did something useful today, by accident."
+   },
+   {
+    "t": "My job is mostly pretending the printer is my friend."
+   },
+   {
+    "t": "Payday can't come soon enough."
+   },
+   {
+    "t": "Somebody at work labelled the milk. It has begun."
+   },
+   {
+    "t": "I have a meeting about the meeting."
+   },
+   {
+    "t": "I was promoted to the same desk."
+   },
+   {
+    "t": "Eight hours, and I learned one new sigh."
+   },
+   {
+    "t": "They gave me a lanyard. I think it means something."
+   }
+  ],
+  "od_race_human": [
+   {
+    "t": "I told them I'm from here. They asked which here."
+   },
+   {
+    "t": "Being the normal one is exhausting, you know."
+   },
+   {
+    "t": "I can't lift a car, I can't live for ever. I do have a loyalty card."
+   },
+   {
+    "t": "Everyone assumes humans are in charge. Have you seen us park?"
+   },
+   {
+    "t": "I have a plan for the weekend. It has bullet points.",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Nobody warned me being the normal one would be this tiring.",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "My cousin says humans invented queueing. I am proud of that.",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I do not have a special ability. I have a loyalty card.",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Everyone here can do something. I can parallel park.",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I checked the weather, the bins and the calendar. I feel alive.",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "We live about ninety years and we spend most of them on hold.",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "An elf asked me what my long-term plans were. I said Thursday.",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Do you ever feel like the only one who reads the instructions?",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I am a morning person. I resent it, but I am.",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I told a giant I was five foot nine. He said \"aw\".",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "My whole personality is having a nice mug.",
+    "tags": [
+     "race:human"
+    ],
+    "src": "races"
+   }
+  ],
+  "od_race_elf": [
+   {
+    "t": "I have owned this coat since the old king died. Which old king? Exactly."
+   },
+   {
+    "t": "Your century has been very loud."
+   },
+   {
+    "t": "I do not age. I do, however, get annoyed."
+   },
+   {
+    "t": "I can recall when this street was a tree."
+   },
+   {
+    "t": "I have seen this hedge grow from a seed. It has not improved.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Six hundred years old and I still cannot work the self-checkout.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I need something green. A leaf. Honestly a salad would do.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "You will understand when you are three hundred.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I was at the founding of this town. It was also raining.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "We do not age. We just get more disappointed.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "My therapist retired. So did the one before her. So did her granddaughter.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Pavement is just a meadow somebody gave up on.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I sat under a tree for an afternoon, and it was a very good year.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Humans keep telling me to live a little. I have. A lot.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "That bench is new. I mean it is from the eighties.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I remember when all this was trees, and I intend to keep bringing it up.",
+    "tags": [
+     "race:elf"
+    ],
+    "src": "races"
+   }
+  ],
+  "od_race_dwarf": [
+   {
+    "t": "This pavement was laid by amateurs. I could cry."
+   },
+   {
+    "t": "Lovely day. Too much sky, mind."
+   },
+   {
+    "t": "I measure twice and complain three times."
+   },
+   {
+    "t": "You call that a basement?"
+   },
+   {
+    "t": "I do not trust a floor that is not on the ground.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Good stonework, that kerb. Somebody cared.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "They put me on the fourth floor. I could hear the air.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "A proper wall is a promise. Plasterboard is a rumour.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "My grandmother dug this valley. By hand. Out of spite.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I have nothing against heights. I just think they should stay up there.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Show me a lift and I will show you a shaft somebody ruined.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "You call that a beard? That is a rumour on a chin.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Nothing says home like a low ceiling and a heavy door.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I knocked on that wall. It sounded hollow. So does this town.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Tea should be strong enough to mortar with.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I have measured this pub. It is two inches out, and I cannot relax.",
+    "tags": [
+     "race:dwarf"
+    ],
+    "src": "races"
+   }
+  ],
+  "od_race_orc": [
+   {
+    "t": "I gave the barista a firm handshake. She is off work for a week."
+   },
+   {
+    "t": "Yes, I am tusked. No, you may not hang your keys on them."
+   },
+   {
+    "t": "My therapist says I must use my inside voice. THIS IS IT."
+   },
+   {
+    "t": "I cried at the advert with the dog. Tell no one."
+   },
+   {
+    "t": "I would like to shout now. Is that all right? Lovely.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "My indoor voice is in storage.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I was told to use my words. I used all of them, at once.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "A good argument clears the sinuses.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I hugged my neighbour. He is with the clinic now. He is fine.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Yes I am gentle. I have a certificate. I yelled until they gave it to me.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "This is my quiet shirt.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I do not have a temper. I have a hobby.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Nothing bonds a street like a really loud disagreement.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I cried at the bakery advert. Loudly. They came to check on me.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "If nobody has complained by nine, I did not enjoy the evening.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I love my mum. You can hear me love her from the bridge.",
+    "tags": [
+     "race:orc"
+    ],
+    "src": "races"
+   }
+  ],
+  "od_race_giant": [
+   {
+    "t": "I said excuse me to a lamp post. It was a person."
+   },
+   {
+    "t": "Every door in this town is a personal insult."
+   },
+   {
+    "t": "I have not seen my own feet since Sunday."
+   },
+   {
+    "t": "Yes, the weather up here is the same. You are the eighteenth to ask today."
+   },
+   {
+    "t": "Sorry. Was that your car? I thought it was a step.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I have been ducking since I was four.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Is there somewhere with a bit more room? Like a field?",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Doors are a suggestion made by small people.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "The ceiling and I have a professional relationship.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I do not mean to loom. I am just here.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I bought a normal chair. I wear it now.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I take up two seats on the bus. I pay for one. I feel terrible.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "When I sneeze, three streets say bless you.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Everyone in this town is lovely, and about the size of a sandwich.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "People ask what the weather is like up here. It is the same. It is just closer.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I sat down carefully, and it was still in the paper.",
+    "tags": [
+     "race:giant"
+    ],
+    "src": "races"
+   }
+  ],
+  "od_race_goblin": [
+   {
+    "t": "It fell off a lorry. Which I was on. Which I stopped."
+   },
+   {
+    "t": "That's not stolen, that's early inheritance."
+   },
+   {
+    "t": "I have a very small business, and a very large story."
+   },
+   {
+    "t": "Don't look in my bag. Don't weigh it either."
+   },
+   {
+    "t": "Is that new? Can I hold it? I will give it back. Eventually.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I have a very reasonable number of spoons.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Finders keepers is a legal principle, look it up.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I own eleven keys and I do not know what any of them open. That is the fun.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Everything is shiny if you look at it hopefully.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I am not stealing this. I am keeping it safe from you.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Do you want a discount? I know a guy. I am the guy.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Nobody ever misses a teaspoon. Except, it turns out, the cafe.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I read the terms and conditions. I read them for fun. I found a loophole.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "My landlord says the flat is full. I say it is well stocked.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "It is not a pile. It is a collection with ambition.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I once swapped a paperclip for a bicycle. I am still paying for the bicycle.",
+    "tags": [
+     "race:goblin"
+    ],
+    "src": "races"
+   }
+  ],
+  "od_race_halfling": [
+   {
+    "t": "Second breakfast was fine. Third needs work."
+   },
+   {
+    "t": "I can reach everything. I own a stool and a grudge."
+   },
+   {
+    "t": "Is that a pie I smell? Be honest with me."
+   },
+   {
+    "t": "No, I do not know your cousin. Fine, I do."
+   },
+   {
+    "t": "Have you eaten? You look like you have not eaten.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "It is not a snack if you sit down for it. That makes it a meal, which is better.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I only came to say goodbye, and that was an hour ago.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Second lunch is a tradition and I will not be questioned on it.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I keep a sandwich in this coat for emergencies, like being awake.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I left the party forty minutes ago. I am still leaving it.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Eleven o'clock at night is a perfectly good time for a pie.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "What do you mean you do not know your neighbours' middle names?",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "There is always room for something small and hot.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "My cousin's wife's sister knows your mother. Sit down, I will explain.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I would not call it gossip. I call it keeping the street informed.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Nobody leaves my house hungry. Several have tried.",
+    "tags": [
+     "race:halfling"
+    ],
+    "src": "races"
+   }
+  ],
+  "od_race_undead": [
+   {
+    "t": "I am fine. It's just the smell of the good soap."
+   },
+   {
+    "t": "Please stop asking how I died. It was a Tuesday."
+   },
+   {
+    "t": "I had a heart once. It was a good one."
+   },
+   {
+    "t": "Dental plans are wasted on me, and yet I pay."
+   },
+   {
+    "t": "I am fine. Well. I am here.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "People forget about me. I have been dead for a while and it is still rude.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I went to the reunion. They had me down as a memorial.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I do not sleep, I just lie down and go over things.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Do you remember me? Please say you remember me.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "My doctor was very honest with me. He asked me to stop coming in.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Dying was the easy part. It was the paperwork that nearly killed me.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I went to my own grave. Nobody had been round. I left a note.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Ask me about my day. Go on. Nobody asks.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I still get mail for me.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I have been very cold since nineteen fifty-two, and I would like a cardigan.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "It is nice to be spoken to. It stops me fading a bit.",
+    "tags": [
+     "race:undead"
+    ],
+    "src": "races"
+   }
+  ],
+  "od_race_beast": [
+   {
+    "t": "I am not shedding. It is a seasonal statement."
+   },
+   {
+    "t": "Do not whistle at me, I will turn round. I hate that."
+   },
+   {
+    "t": "I chased a car today. I do not want to talk about it."
+   },
+   {
+    "t": "Yes, it's real. No, you may not pet it. All right, once."
+   },
+   {
+    "t": "I need a run. A big one. Is that field taken?",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I can smell rain, toast and your disappointment.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "No, you may not scratch behind my ears. Well. Briefly.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I chased a car this morning. I am not proud. I am a bit proud.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I have shed on everything I own, and I call that marking my territory.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Do not throw that. I mean it. Oh no. Oh, it is so hard.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I could hear your stomach from the corner shop.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "The vet is a very rude thing to call a doctor by accident.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "I sat in the sun for three hours and did not regret a minute.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "There is a smell on the corner of the street that I would like to discuss.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "Nobody tells a human to stop howling in the shower.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   },
+   {
+    "t": "If I turn round three times before I sit down, you will say nothing about it.",
+    "tags": [
+     "race:beast"
+    ],
+    "src": "races"
+   }
+  ],
+  "od_quirk_narrates": [
+   {
+    "t": "She walked away slowly, unaware of the mistake she had made. Sorry. I do that."
+   },
+   {
+    "t": "He said, narrating, and then he sighed."
+   },
+   {
+    "t": "And so they stood there, wondering if anyone had noticed.",
+    "tags": [
+     "quirk:narrates"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "\"That is an interesting point,\" they said, not listening.",
+    "tags": [
+     "quirk:narrates"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "A silence fell. They made a note of it.",
+    "tags": [
+     "quirk:narrates"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "They reached for a sentence, and it was not there.",
+    "tags": [
+     "quirk:narrates"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Slowly, they turned to look at {listener.name}. It was going fine.",
+    "tags": [
+     "quirk:narrates"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "They had come here for a reason. It would come back to them.",
+    "tags": [
+     "quirk:narrates"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "The wind picked up. Nobody asked it to.",
+    "tags": [
+     "quirk:narrates"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Little did they know, it was almost lunchtime.",
+    "tags": [
+     "quirk:narrates"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_duck_fear": [
+   {
+    "t": "Do not go near the river. They have been watching."
+   },
+   {
+    "t": "It's not a phobia if they really are planning something."
+   },
+   {
+    "t": "Is that a duck? Be honest with me.",
+    "tags": [
+     "quirk:duck_fear"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "They look at you. All at once. You have not seen it.",
+    "tags": [
+     "quirk:duck_fear"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I do not go to the park. You know why I do not go to the park.",
+    "tags": [
+     "quirk:duck_fear"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "A duck has no reason to be that calm.",
+    "tags": [
+     "quirk:duck_fear"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I saw one on a roof. A roof, {listener.name}. They are getting organised.",
+    "tags": [
+     "quirk:duck_fear"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "People say geese are worse. People have not met a duck that knows their name.",
+    "tags": [
+     "quirk:duck_fear"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I hear quacking when nobody else does.",
+    "tags": [
+     "quirk:duck_fear"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I had a bad experience with some bread. That is all I will say.",
+    "tags": [
+     "quirk:duck_fear"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_overtips": [
+   {
+    "t": "I left a little something. Twenty. It was a glass of water."
+   },
+   {
+    "t": "He looked sad, so I tipped him. He was a statue."
+   },
+   {
+    "t": "I tipped the barista forty percent and I would do it again.",
+    "tags": [
+     "quirk:overtips"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Everyone deserves a little something. Here is a little something.",
+    "tags": [
+     "quirk:overtips"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I tipped the bus driver. He said it was not that kind of bus.",
+    "tags": [
+     "quirk:overtips"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Round it up. No, up. Further.",
+    "tags": [
+     "quirk:overtips"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "My bank has asked if I am being held against my will.",
+    "tags": [
+     "quirk:overtips"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I left a tip at the doctor's.",
+    "tags": [
+     "quirk:overtips"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I do not know why I do it. They looked tired.",
+    "tags": [
+     "quirk:overtips"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I tipped a man at a cash machine. He was just using it.",
+    "tags": [
+     "quirk:overtips"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_names_car": [
+   {
+    "t": "Gerald is making a noise. I think he is upset with me."
+   },
+   {
+    "t": "I told Gerald about you. He says hello."
+   },
+   {
+    "t": "Maureen does not like the rain, so we are taking it slowly.",
+    "tags": [
+     "quirk:names_car"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Do not lean on her. She has had a hard week.",
+    "tags": [
+     "quirk:names_car"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I told the car about you. She is not convinced.",
+    "tags": [
+     "quirk:names_car"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I said good night to the car and I will not apologise.",
+    "tags": [
+     "quirk:names_car"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "We walked past a nicer car. I covered her headlights.",
+    "tags": [
+     "quirk:names_car"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "The mechanic says she is fine. He does not know her like I do.",
+    "tags": [
+     "quirk:names_car"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "She is making that noise again. It means she misses me.",
+    "tags": [
+     "quirk:names_car"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I drive to the end of the road. She needs the company.",
+    "tags": [
+     "quirk:names_car"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_shower_singer": [
+   {
+    "t": "You could hear me on the third floor? Thank you."
+   },
+   {
+    "t": "I reached the high note. The neighbours reached the wall."
+   },
+   {
+    "t": "Did you hear the high note this morning? The whole block did.",
+    "tags": [
+     "quirk:shower_singer"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "The tiles give it a lovely ring. Nobody else has said so.",
+    "tags": [
+     "quirk:shower_singer"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I was halfway through the second act when the hot water went.",
+    "tags": [
+     "quirk:shower_singer"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Somebody banged on the wall. I am choosing to call that applause.",
+    "tags": [
+     "quirk:shower_singer"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I have an aria for every kind of soap.",
+    "tags": [
+     "quirk:shower_singer"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I do not sing in the shower. The shower is a venue.",
+    "tags": [
+     "quirk:shower_singer"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "The neighbours left a note. It said \"encore\", in a way.",
+    "tags": [
+     "quirk:shower_singer"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Forty minutes is not long for a full opera.",
+    "tags": [
+     "quirk:shower_singer"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_couch_nester": [
+   {
+    "t": "I have everything I need within arm's reach of the sofa."
+   },
+   {
+    "t": "The sofa and I are in a good place right now."
+   },
+   {
+    "t": "I have a dent in the sofa that fits only me. It took years.",
+    "tags": [
+     "quirk:couch_nester"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Everything I need is within reach of the left cushion.",
+    "tags": [
+     "quirk:couch_nester"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I went outside once. There was nowhere to put my feet up.",
+    "tags": [
+     "quirk:couch_nester"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I have a system. It involves three blankets and a long stick.",
+    "tags": [
+     "quirk:couch_nester"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I get my post delivered to the sofa. It is a process.",
+    "tags": [
+     "quirk:couch_nester"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "The sofa and I have an understanding.",
+    "tags": [
+     "quirk:couch_nester"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "You can sit there, but it will not be the same.",
+    "tags": [
+     "quirk:couch_nester"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I am not lazy. I am load-bearing.",
+    "tags": [
+     "quirk:couch_nester"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_bad_spells": [
+   {
+    "t": "I meant to warm my tea. Does anyone need a hat that sings?"
+   },
+   {
+    "t": "Sorry about your shoes. They will stop croaking by Friday."
+   },
+   {
+    "t": "I did a small charm on the kettle, and now it is mostly a pigeon.",
+    "tags": [
+     "quirk:bad_spells"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Do not worry about the smell, that is meant to wear off.",
+    "tags": [
+     "quirk:bad_spells"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I sneezed, and now there is a second one of my shoes.",
+    "tags": [
+     "quirk:bad_spells"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "It only goes wrong when somebody is watching. Or not watching.",
+    "tags": [
+     "quirk:bad_spells"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Everything was fine until I said the word out loud.",
+    "tags": [
+     "quirk:bad_spells"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "That was not a spell. That was a cough. Probably.",
+    "tags": [
+     "quirk:bad_spells"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "My eyebrows should grow back by the weekend.",
+    "tags": [
+     "quirk:bad_spells"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I tried to warm my tea and I have warmed the street.",
+    "tags": [
+     "quirk:bad_spells"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_fridge_talker": [
+   {
+    "t": "I apologised to the fridge again. It knows what it did."
+   },
+   {
+    "t": "The fridge and I have reached an agreement about the cheese."
+   },
+   {
+    "t": "I had to apologise to the fridge again.",
+    "tags": [
+     "quirk:fridge_talker"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "It is hard to look it in the eye at three in the morning.",
+    "tags": [
+     "quirk:fridge_talker"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I said \"excuse me\" to the fridge and it hummed. We are all right now.",
+    "tags": [
+     "quirk:fridge_talker"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I closed the door too hard. I went back and explained.",
+    "tags": [
+     "quirk:fridge_talker"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "It knows what I did to that cheese.",
+    "tags": [
+     "quirk:fridge_talker"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "We have good days and bad days, the fridge and I.",
+    "tags": [
+     "quirk:fridge_talker"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I told it about my week. It was very cool about it.",
+    "tags": [
+     "quirk:fridge_talker"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "It has been in the family longer than I have.",
+    "tags": [
+     "quirk:fridge_talker"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_gym_evangelist": [
+   {
+    "t": "Speaking of tiredness, have you considered my gym?"
+   },
+   {
+    "t": "It's not a cult, it's leg day."
+   },
+   {
+    "t": "As I was saying to my trainer, have you tried the gym?",
+    "tags": [
+     "quirk:gym_evangelist"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "That reminds me of leg day.",
+    "tags": [
+     "quirk:gym_evangelist"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "You would feel so much better if you lifted something.",
+    "tags": [
+     "quirk:gym_evangelist"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I did not ask how you are, because I already know: you have not stretched.",
+    "tags": [
+     "quirk:gym_evangelist"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Lovely weather for the gym.",
+    "tags": [
+     "quirk:gym_evangelist"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "My heart rate is forty and I will tell you about it.",
+    "tags": [
+     "quirk:gym_evangelist"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "You carry that shopping like someone who has never been to the gym.",
+    "tags": [
+     "quirk:gym_evangelist"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I met my wife at the gym. Well. I met the gym.",
+    "tags": [
+     "quirk:gym_evangelist"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_park_judge": [
+   {
+    "t": "That bench by the pond? A solid six. Poor lumbar work."
+   },
+   {
+    "t": "I gave the new bench a nine. I am not made of stone."
+   },
+   {
+    "t": "That bench is a six. Good back, poor outlook.",
+    "tags": [
+     "quirk:park_judge"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I gave the one by the pond a nine, and I stand by it.",
+    "tags": [
+     "quirk:park_judge"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Seven out of ten. It lost a point for the pigeon.",
+    "tags": [
+     "quirk:park_judge"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "There are no tens. A ten is a thing to work towards.",
+    "tags": [
+     "quirk:park_judge"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "The new bench is a four. I sat on it twice to be fair.",
+    "tags": [
+     "quirk:park_judge"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I keep the ratings in a little book. The council has asked for a copy.",
+    "tags": [
+     "quirk:park_judge"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "A bench is a promise to the legs.",
+    "tags": [
+     "quirk:park_judge"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "That was a good sit. Eight, maybe eight and a half.",
+    "tags": [
+     "quirk:park_judge"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_coupon_hoarder": [
+   {
+    "t": "This coupon is for a town that no longer exists. Still valid."
+   },
+   {
+    "t": "I saved nine coins on something I do not need."
+   },
+   {
+    "t": "Hold on, I have a voucher for this. It is in here somewhere.",
+    "tags": [
+     "quirk:coupon_hoarder"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "That is two for one, if you buy three.",
+    "tags": [
+     "quirk:coupon_hoarder"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Do not throw that away, there is ten off on the back.",
+    "tags": [
+     "quirk:coupon_hoarder"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "It expired, yes, but it expired recently.",
+    "tags": [
+     "quirk:coupon_hoarder"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I saved four coins today, and it took an hour.",
+    "tags": [
+     "quirk:coupon_hoarder"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Everybody behind me can wait. It is a matter of principle.",
+    "tags": [
+     "quirk:coupon_hoarder"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I got a free side salad out of a house fire once.",
+    "tags": [
+     "quirk:coupon_hoarder"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "This folder is my pension.",
+    "tags": [
+     "quirk:coupon_hoarder"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_gossip": [
+   {
+    "t": "You did not hear this from me. You did not hear it from anyone, in fact, but listen."
+   },
+   {
+    "t": "I know what your neighbour had for lunch, and why."
+   },
+   {
+    "t": "You did not hear this from me, but you will hear it from me.",
+    "tags": [
+     "quirk:gossip"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I said nothing. I only said it to three people.",
+    "tags": [
+     "quirk:gossip"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Don't look now. No, look now.",
+    "tags": [
+     "quirk:gossip"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I am not one to talk, and yet.",
+    "tags": [
+     "quirk:gossip"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Do you know what I heard by ten o'clock this morning? Sit down.",
+    "tags": [
+     "quirk:gossip"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I heard about it before they did.",
+    "tags": [
+     "quirk:gossip"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I have it on very good authority. Mine.",
+    "tags": [
+     "quirk:gossip"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I cannot say who told me. It was me, I saw it through the curtains.",
+    "tags": [
+     "quirk:gossip"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_night_owl": [
+   {
+    "t": "Morning? Oh, is that what this light is?"
+   },
+   {
+    "t": "I do my best thinking at four. Nobody has complained. Nobody's awake."
+   },
+   {
+    "t": "What is this morning everyone keeps talking about?",
+    "tags": [
+     "quirk:night_owl"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I do my best work at two.",
+    "tags": [
+     "quirk:night_owl"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Do not talk to me before noon, it is the middle of the night.",
+    "tags": [
+     "quirk:night_owl"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I had breakfast at dusk. It was lovely.",
+    "tags": [
+     "quirk:night_owl"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Have you seen the town at three? It is all mine.",
+    "tags": [
+     "quirk:night_owl"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "The sun is a bit much, is it not?",
+    "tags": [
+     "quirk:night_owl"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I have seen every delivery in this town arrive.",
+    "tags": [
+     "quirk:night_owl"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I was just going to bed when I heard you get up.",
+    "tags": [
+     "quirk:night_owl"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_plant_parent": [
+   {
+    "t": "Don't touch that one. She is going through something."
+   },
+   {
+    "t": "My fern has a better social life than I do."
+   },
+   {
+    "t": "Gerald has a new leaf, and I am beside myself.",
+    "tags": [
+     "quirk:plant_parent"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I cannot stay, the fern gets anxious.",
+    "tags": [
+     "quirk:plant_parent"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I have forty-one plants and they all know my voice.",
+    "tags": [
+     "quirk:plant_parent"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "You look a bit dry. No? Sorry, habit.",
+    "tags": [
+     "quirk:plant_parent"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "The big one by the window is sulking. It knows what it did.",
+    "tags": [
+     "quirk:plant_parent"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I had to leave a party. A cutting needed me.",
+    "tags": [
+     "quirk:plant_parent"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I talk to them. They do not talk back. That is why I like them.",
+    "tags": [
+     "quirk:plant_parent"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "People are fine, but have you tried a nice succulent?",
+    "tags": [
+     "quirk:plant_parent"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_pigeon_friend": [
+   {
+    "t": "Gerald the pigeon says hello. Different Gerald."
+   },
+   {
+    "t": "The pigeons are organising. I have said too much."
+   },
+   {
+    "t": "That is Derek. He has a limp and a very good attitude.",
+    "tags": [
+     "quirk:pigeon_friend"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "They trust me now. I have a seat on the council.",
+    "tags": [
+     "quirk:pigeon_friend"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Do not feed that one, he is on a diet.",
+    "tags": [
+     "quirk:pigeon_friend"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "You think they all look alike because you have not been listening.",
+    "tags": [
+     "quirk:pigeon_friend"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I told the pigeons what you said. They were disappointed.",
+    "tags": [
+     "quirk:pigeon_friend"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "Every morning at seven, we have a meeting.",
+    "tags": [
+     "quirk:pigeon_friend"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "That one owes me a chip.",
+    "tags": [
+     "quirk:pigeon_friend"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "People call them vermin. People have not seen Sandra with her chicks.",
+    "tags": [
+     "quirk:pigeon_friend"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_quirk_lost_keys": [
+   {
+    "t": "Have you seen my keys? They were in my hand."
+   },
+   {
+    "t": "I found my keys! In the fridge. Now I have lost the fridge."
+   },
+   {
+    "t": "Have you seen my keys? Do not say \"where you left them\".",
+    "tags": [
+     "quirk:lost_keys"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "They were in my hand. They were literally in my hand.",
+    "tags": [
+     "quirk:lost_keys"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I found them. They were in the fridge. I do not know who I am.",
+    "tags": [
+     "quirk:lost_keys"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I have checked the same pocket nine times, and I will check it again.",
+    "tags": [
+     "quirk:lost_keys"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I had them when I came in. I know that, because I lost them.",
+    "tags": [
+     "quirk:lost_keys"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I keep a spare set. I do not know where.",
+    "tags": [
+     "quirk:lost_keys"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "They cannot have gone far. They have no legs.",
+    "tags": [
+     "quirk:lost_keys"
+    ],
+    "src": "quirks"
+   },
+   {
+    "t": "I was late. Yes. Keys. Yes. Thank you.",
+    "tags": [
+     "quirk:lost_keys"
+    ],
+    "src": "quirks"
+   }
+  ],
+  "od_stir_introduce": [
+   {
+    "t": "Have you two met? No? Well, now you have."
+   },
+   {
+    "t": "This is the one I told you about."
+   },
+   {
+    "t": "You should meet someone."
+   }
+  ],
+  "od_stir_introduce_ok": [
+   {
+    "t": "Nice to meet you. No, really."
+   },
+   {
+    "t": "Any friend of theirs."
+   },
+   {
+    "t": "We should do this again."
+   }
+  ],
+  "od_stir_introduce_bad": [
+   {
+    "t": "We have met. Twice. You forgot."
+   },
+   {
+    "t": "Oh. It is you."
+   },
+   {
+    "t": "I will be over there."
+   }
+  ],
+  "od_stir_date": [
+   {
+    "t": "Dinner? Just the two of us?"
+   },
+   {
+    "t": "I booked a table. Do not ask how."
+   },
+   {
+    "t": "You. Me. The good cafe."
+   }
+  ],
+  "od_stir_date_ok": [
+   {
+    "t": "Well, that went better than the last one."
+   },
+   {
+    "t": "Same time next week?"
+   },
+   {
+    "t": "I think I am smiling. Is that what this is?"
+   }
+  ],
+  "od_stir_date_bad": [
+   {
+    "t": "I have a thing. A long thing."
+   },
+   {
+    "t": "You talked about gravel for an hour."
+   },
+   {
+    "t": "I am going to walk home now."
+   }
+  ],
+  "od_stir_row": [
+   {
+    "t": "I know what you did with my hedge."
+   },
+   {
+    "t": "You have been parking in my spot."
+   },
+   {
+    "t": "Say that again. Slowly."
+   }
+  ],
+  "od_stir_row_ok": [
+   {
+    "t": "I will remember this!"
+   },
+   {
+    "t": "That is it. Hedge war."
+   },
+   {
+    "t": "You will hear from my lawyer. He is a goblin."
+   }
+  ],
+  "od_stir_row_bad": [
+   {
+    "t": "Ha. All right. It was a very bad hedge."
+   },
+   {
+    "t": "We are both too tired for this."
+   },
+   {
+    "t": "Fine. Pint?"
+   }
+  ],
+  "od_stir_patch": [
+   {
+    "t": "Look. About the other day."
+   },
+   {
+    "t": "I was out of line."
+   },
+   {
+    "t": "Can we start again?"
+   }
+  ],
+  "od_stir_patch_ok": [
+   {
+    "t": "Water under the bridge."
+   },
+   {
+    "t": "Come here, you."
+   },
+   {
+    "t": "I missed being annoyed by you."
+   }
+  ],
+  "od_stir_patch_bad": [
+   {
+    "t": "Not yet. Not today."
+   },
+   {
+    "t": "It was a very good hedge."
+   },
+   {
+    "t": "Sorry is a start. Only a start."
+   }
+  ],
+  "od_fact_fire_mine": [
+   {
+    "t": "We had the fire {fact.ago}. I keep smelling toast that isn't there.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "The insurance man looked at {fact.place} and whistled. Never a good sign.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "{fact.rooms} gone, {fact.ago}. I'd only just painted.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I still can't believe it. I left the oven on once in thirty years.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "The firefighters were lovely. One of them complimented the wallpaper, what was left.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Everything I own now smells of barbecue.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "They've told us it will take boards. Boards! I thought it would take a miracle.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "We're fine. We're fine. Do you know how long it takes to replace a sofa?",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_fire_near": [
+   {
+    "t": "Did you hear about {fact.place}? {fact.ago}, it was. You could see it from the bridge.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "They say it was the wiring. They always say it was the wiring.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I smelled the smoke from {fact.place} and thought, somebody's doing a roast.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "That engine came past with the siren on and I spilled my whole tea.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "{fact.rooms} burned at {fact.place}. I'm checking my smoke alarm. Tomorrow.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "My cousin saw the whole thing from {place.the}, and enjoyed it far too much.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "It's always the quiet houses, isn't it? {fact.place}. Who knew.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I took a casserole round to {fact.place}. I took it back, they'd moved out.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_rescuer": [
+   {
+    "t": "I went in {fact.ago}. {fact.person} was heavier than they look.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I don't want to talk about it. I do, though. I carried {fact.person} out.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Anybody would have done it. Well. I did it.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "My shoulder still knows about {fact.person}.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Everyone keeps buying me drinks. I've told them it was nothing. Keep going.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You don't think, you just pick them up. Then you think, oof.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_rescued": [
+   {
+    "t": "{fact.who} carried me out, {fact.ago}. Like a bag of shopping.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I owe {fact.who} a very big dinner.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I woke up upside down over {fact.who}'s shoulder. It was quite a view.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've sent {fact.who} a card. What do you write? \"Thanks for the not dying\"?",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "They tell me I was very brave. I was asleep.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I would like it known I had shoes on the whole time.",
+    "tags": [
+     "fact:rescue"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_moved_out": [
+   {
+    "t": "We've been put up somewhere else till {fact.place} is fixed. The towels are wrong.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "It's very nice, this temporary place. It's just nobody's. You know?",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "The county found us a house. It has somebody else's smell.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I went to my own front door by accident this morning, and it wasn't.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "All our things are in bags. I've been wearing the same jumper since the fire.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "They say another week. They said that last week.",
+    "tags": [
+     "fact:fire"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_promoted": [
+   {
+    "t": "They've promoted me. Nobody can explain what changed.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've got a new title and the same chair.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Rank up, {fact.ago}! There was a cake. It was adequate.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm in charge of things now. I'm as worried as you are.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "More money, more meetings. I may have been robbed.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "My mother rang to say she always knew. She didn't.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_towed": [
+   {
+    "t": "The tow gnome got my car {fact.ago}. He charges by the sigh.",
+    "tags": [
+     "fact:road"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I don't know how it ended up on its roof. Neither does the roof.",
+    "tags": [
+     "fact:road"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "A very small man turned my car over and sent me a bill.",
+    "tags": [
+     "fact:road"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've had a letter from the gnome. It wasn't a friendly letter.",
+    "tags": [
+     "fact:road"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Thirty-five coins! For a gnome! He didn't even wipe his feet.",
+    "tags": [
+     "fact:road"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "That gnome looked at me like I'd done it on purpose.",
+    "tags": [
+     "fact:road"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_mishap": [
+   {
+    "t": "I had a little accident at work, {fact.ago}. Don't look at the thumb.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "It's only a plaster. It's several plasters.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "They've put me in the accident book again. I've got my own page.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've been told to be more careful, by the person who left it there.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "It stopped bleeding eventually. Mostly on the form.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Health and safety have asked me to stop waving.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_job": [
+   {
+    "t": "Being {fact.job} is not what they said at the careers day.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Nobody tells you, about being {fact.job}. Nobody tells you anything.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've been {fact.job} for years, and I'm just getting the hang of the car park.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "People always ask if being {fact.job} is hard. Yes. Thank you.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "My mother still tells people I'm {fact.job}. She says it quietly.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You'd be surprised what you see as {fact.job}. I was.",
+    "tags": [
+     "fact:work"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_date_soon": [
+   {
+    "t": "I've got a date! With {fact.with}! At {fact.place}! I've ironed something.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm meeting {fact.with}. What do people do with their hands?",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've changed my shirt three times and it's a Tuesday.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "What do I talk about? I've only got bins and the weather.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "If it goes badly, ring me and pretend the house is on fire. Too soon?",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "{fact.with} said yes! I had a whole speech ready for no.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_date_went": [
+   {
+    "t": "It went well with {fact.with}! I think! They laughed at the right bits!",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've been smiling since {fact.ago}. My face hurts.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "We talked for hours. I said the thing about the ducks and {fact.with} stayed.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've got a second date. I've already planned the third. And the house.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Don't tell anyone. Tell everyone. No, don't.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I walked into a lamp post on the way home, and I didn't mind.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_date_bad": [
+   {
+    "t": "Don't ask about {fact.with}. I asked if they liked soup. It went downhill.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "It was the longest hour of my life, and I've been to a planning meeting.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "There was a silence. It's still going on, I think.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I called {fact.with} by the wrong name, and then I called the waiter \"mum\".",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "We shook hands at the end. Shook. Hands.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm retiring from dating. I'm getting a plant.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_stood_up": [
+   {
+    "t": "{fact.with} left me sat there, at {place.the}, with two coffees. I drank both.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I waited an hour. The waiter brought me a pity biscuit.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Not a word from {fact.with}. Not one. I've a mind to say something. Loudly.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm not bitter. I've just kept the receipt, for evidence.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "They've stood me up, {listener.name}. Me! With my hair like this!",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I told everyone I'd been ill. I wasn't ill. I was ironed.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_split": [
+   {
+    "t": "It's over with {fact.with}. I'm keeping the plant.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "We've called it off. Very grown up. I cried in a car park.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've still got {fact.with}'s jumper, and I'm not giving it back.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm fine. I've eaten a whole cheesecake, but I'm fine.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "The town's stopped the sweepstake. That's how you know.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Don't say you're sorry. Say something bad about {fact.with}. Go on.",
+    "tags": [
+     "fact:romance"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_wedding_mine": [
+   {
+    "t": "I'm getting married! At {fact.place}! I've just told you and I'm shaking!",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "The seating plan is the worst thing that has ever happened to me.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've written my vows. They're mostly about the dishwasher.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "My feet are cold. Not like that. They're actually cold.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Who invited the goblin? He's brought his own spoons.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Two days! Two days and then it's for ever! Is there cake?",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_wedding_guest": [
+   {
+    "t": "I've been asked to the do for {fact.a} and {fact.b}. What does one wear to that?",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've bought a hat. A person can only make so many mistakes.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Going to see {fact.a} marry {fact.b}. I give it thirty years, tops.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm only going for the sandwiches. I'll cry at the sandwiches.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "{fact.a} and {fact.b}! Who'd have thought! I would. I had money on it.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "What do you buy two people who already have a toaster?",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_wedding_near": [
+   {
+    "t": "Did you see {fact.a} and {fact.b}? Married! {fact.ago}!",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "It was a lovely wedding. Nobody fell in anything.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I cried at the wedding. I don't even like them.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "The cake was very good. I had three bits and a word with the caterer.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I hear {fact.a} and {fact.b} are looking for a bigger sofa.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "They looked so happy. I give it a week before someone mentions the towels.",
+    "tags": [
+     "fact:wedding"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_feud_near": [
+   {
+    "t": "Have you heard about {fact.a} and {fact.b}? It's {fact.cause}. It's always {fact.cause}.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "{fact.a} and {fact.b} aren't speaking. I've picked a side. I've picked both.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I walked past the pair of them, and the temperature dropped.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "There's a sign up now. An actual sign. In a garden.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm staying out of it. Now tell me everything.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've got popcorn, a folding chair and a good view of the fence.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_pranked": [
+   {
+    "t": "Somebody {fact.prank}. I know exactly who. I've got a list, and it has one name.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I don't want to say anything. I've just got a camera on the gnome now.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "{fact.by} thinks this is funny, {fact.ago}. Well. I've got a hedge trimmer and a free afternoon.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm rising above it. I've bought a ladder, for rising.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Did you see what {fact.by} did? In broad daylight? Well, dusk?",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "This is war. A quiet one. With very good manners.",
+    "tags": [
+     "fact:feud"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_meet_soon": [
+   {
+    "t": "I've got to be at {fact.place} later. I've been told to bring my dignity.",
+    "tags": [
+     "fact:meet"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm seeing {fact.with} tonight. Wish me luck. Or a good lawyer.",
+    "tags": [
+     "fact:meet"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "They want to talk, at {fact.place}. Nothing good starts like that.",
+    "tags": [
+     "fact:meet"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've got a thing later. It's in the diary. I've underlined it.",
+    "tags": [
+     "fact:meet"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Is it today I've got to see {fact.with}? It is. Wonderful.",
+    "tags": [
+     "fact:meet"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've rehearsed what I'm going to say. In the mirror. I lost.",
+    "tags": [
+     "fact:meet"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_hedge": [
+   {
+    "t": "That hedge is on my side. I've measured it. I've had it surveyed.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Eleven inches. That's how far it's come. Eleven inches of nerve.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I cut my side. I left the other side. It looks like a bad haircut, and that's the point.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You think you own the sun? Your hedge does.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "A hedge is a wall that thinks it's better than you.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've read the bylaws, {listener.name}. All nine pages of hedge.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_bins": [
+   {
+    "t": "Your bin was out on a Tuesday, {listener.name}. A Tuesday.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "That's my bin. It has a number on it. I painted the number.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Bins go out the night before. Not the night before that. It's not hard.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've seen what you recycle. We know about you now.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You left the lid up. On purpose. For the foxes.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've moved it back. You'll move it again. This is my life now.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_parking": [
+   {
+    "t": "That space has been mine since before you were born.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Two spaces! You took two spaces! With one car!",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've put a cone there. It's a legal cone.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Your front tyre was over the line. Don't tell me it wasn't. I have a photograph.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've parked in front of your drive, and I feel nothing.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You can't own the road, {listener.name}. Except that bit. That bit's mine.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_noise": [
+   {
+    "t": "Do you know what time it was? Do you? It was the second act.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I could hear every note through the wall. Every. Single. Note.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Some of us have ears, {listener.name}.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Six in the morning is not a time for a high C.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've bought earplugs. I can still hear it. I can hear it in my teeth.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've written to the council, in the key of G.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_casserole": [
+   {
+    "t": "I want my casserole dish back. It's been four years.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "That's my dish. It has a chip on the left, and so do you.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You returned it dirty. That's what you did. You returned it dirty.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "It was my mother's dish, {listener.name}. She's not dead. She's very angry.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've seen it on your draining board. I've seen it through the window.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Lids don't just go missing. Lids get taken.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_ladder": [
+   {
+    "t": "I lent you that ladder in good faith.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You said a weekend. Which weekend, {listener.name}? Which weekend?",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "That's my ladder on your shed. I can see it from my bedroom.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "It came back with a dent, and an attitude.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Neither a borrower be. That's all I'm saying. That's all I'm saying this week.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "A person who keeps a ladder can't be trusted with anything taller.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_fire": [
+   {
+    "t": "Your stove, {listener.name}. Your stove, in my kitchen. In my lungs.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You could've burned us all in our beds. You nearly burned my bed.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I smell like your dinner, and I'll never forgive it.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Who leaves a pan on? Who does that? You, that's who.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've got soot on things I didn't know I had.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Insurance doesn't cover what you did to my nerves.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_stood_up": [
+   {
+    "t": "Two coffees, {listener.name}. I drank two coffees.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You could have sent a message. A pigeon. Anything.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I wore the good shirt. You'll never know, because you weren't there.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "An hour, I sat there. The waiter knows my whole life now.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've told everyone. I've told the waiter's mother.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You don't get to wave at me. You lost waving.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_ex": [
+   {
+    "t": "You kept my jumper.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I saw you with that plant. That was our plant.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm happy for you. I've been practising saying that.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You said we'd go to the seaside. I've still got the towel.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've told everybody it was mutual. It was me that was mutual.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'm over it. I've been over it for hours.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_promotion": [
+   {
+    "t": "Eleven years, I've been there. Eleven. And they gave it to you.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Enjoy the chair, {listener.name}. I hope it's everything you think it is.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "Congratulations, by the way. Through my teeth.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "What did you do, stand near the boss? Is that all it took?",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I trained you. I showed you the good stapler.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You'll need someone to blame in that new job. I'd start with me. I do.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_row": [
+   {
+    "t": "I said what I said, and I'll say it louder.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You started it. No, you did. No, you did.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "People heard you, {listener.name}. People in {town.name} heard you.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "That's twice you've raised your voice to me, and I raised it first.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've forgotten what it was about, and I'm still right.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I'd apologise, but then you'd think you'd won.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_fact_cause_words": [
+   {
+    "t": "I know what you said about me. I know who you said it to.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You used a tone. Don't tell me you didn't. There was a tone.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "It wasn't what you said. It was your eyebrows.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "I've been thinking about it for two weeks, and I've got a reply.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "You called me \"fine\". I heard you. \"Fine.\"",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   },
+   {
+    "t": "There are some things you can't say in a queue.",
+    "tags": [
+     "fact:cause"
+    ],
+    "src": "facts"
+   }
+  ],
+  "od_mood_up": [
+   {
+    "t": "I don't want to alarm anyone, but today is going quite well.",
+    "tags": [
+     "mood:high"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I woke up happy and now I am suspicious.",
+    "tags": [
+     "mood:high"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Everything is lovely and I would like it noted.",
+    "tags": [
+     "mood:high"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "The sun came out just for me. I checked.",
+    "tags": [
+     "mood:high"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I smiled at a stranger and they did not call anyone.",
+    "tags": [
+     "mood:high"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I feel like a person in an advert for yoghurt.",
+    "tags": [
+     "mood:high"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Today I am the main character.",
+    "tags": [
+     "mood:high"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Somebody held a door for me. I may never recover.",
+    "tags": [
+     "mood:high"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I am in such a good mood that I let someone merge.",
+    "tags": [
+     "mood:high"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Nothing is wrong. I looked.",
+    "tags": [
+     "mood:high"
+    ],
+    "src": "moods"
+   }
+  ],
+  "od_mood_down": [
+   {
+    "t": "I have got a small rain cloud of my own and it follows me about.",
+    "tags": [
+     "mood:low"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "It's fine. It's all fine. I said it's fine.",
+    "tags": [
+     "mood:low"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Do you ever just look at a wall for a while?",
+    "tags": [
+     "mood:low"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I had a good cry in the car. Well, the bus.",
+    "tags": [
+     "mood:low"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Today has not been one of the good ones.",
+    "tags": [
+     "mood:low"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I am having a day, and it is having me.",
+    "tags": [
+     "mood:low"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I would like it to be some other time, please.",
+    "tags": [
+     "mood:low"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "If anyone wants me, I will be being quiet somewhere.",
+    "tags": [
+     "mood:low"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I tried looking on the bright side, and it was shut.",
+    "tags": [
+     "mood:low"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Even my toast was disappointed.",
+    "tags": [
+     "mood:low"
+    ],
+    "src": "moods"
+   }
+  ],
+  "od_need_tired": [
+   {
+    "t": "I am so tired I saluted a lamp post.",
+    "tags": [
+     "mood:tired"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I slept for an hour and I remember none of it.",
+    "tags": [
+     "mood:tired"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "If I sit down I will not get up. I am telling you this now.",
+    "tags": [
+     "mood:tired"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "My eyes are open but I would not call it a decision.",
+    "tags": [
+     "mood:tired"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I have reached the part of tired where everything is funny.",
+    "tags": [
+     "mood:tired"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I put the milk in the cupboard and my keys in the tea.",
+    "tags": [
+     "mood:tired"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Is it bedtime? It feels like it was bedtime a while ago.",
+    "tags": [
+     "mood:tired"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I yawned so wide I heard the news.",
+    "tags": [
+     "mood:tired"
+    ],
+    "src": "moods"
+   }
+  ],
+  "od_need_hungry": [
+   {
+    "t": "Is it just me or does that bin smell delicious?",
+    "tags": [
+     "mood:hungry"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I could eat a whole town. Starting with the diner.",
+    "tags": [
+     "mood:hungry"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "My stomach has started making statements.",
+    "tags": [
+     "mood:hungry"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I would do something quite bad for a sausage roll.",
+    "tags": [
+     "mood:hungry"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I have been thinking about a sandwich and it is getting personal.",
+    "tags": [
+     "mood:hungry"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "When did we last eat? As a people?",
+    "tags": [
+     "mood:hungry"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "If you need me, I will be looking at food in a window.",
+    "tags": [
+     "mood:hungry"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I am so hungry I read a menu for pleasure.",
+    "tags": [
+     "mood:hungry"
+    ],
+    "src": "moods"
+   }
+  ],
+  "od_need_lonely": [
+   {
+    "t": "You're the first person I have talked to today. Sorry. Are you busy?",
+    "tags": [
+     "mood:lonely"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "It's been nice talking to you. Is it all right if I go on a bit?",
+    "tags": [
+     "mood:lonely"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I said good morning to the radio.",
+    "tags": [
+     "mood:lonely"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I rang the bank just to hear somebody say my name.",
+    "tags": [
+     "mood:lonely"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "The cashier asked how I was, and I told her. All of it.",
+    "tags": [
+     "mood:lonely"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "It gets very quiet round our way.",
+    "tags": [
+     "mood:lonely"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I have started to recognise the people on the adverts.",
+    "tags": [
+     "mood:lonely"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Anyway, you must be busy. Are you? Don't go.",
+    "tags": [
+     "mood:lonely"
+    ],
+    "src": "moods"
+   }
+  ],
+  "od_need_grubby": [
+   {
+    "t": "Do I smell of anything? Be kind.",
+    "tags": [
+     "mood:grubby"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I have been meaning to have a wash since Tuesday.",
+    "tags": [
+     "mood:grubby"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Somebody stepped away from me on the bus, and that was fair.",
+    "tags": [
+     "mood:grubby"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "This shirt has seen things.",
+    "tags": [
+     "mood:grubby"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I found something in my hair, and I have decided not to look.",
+    "tags": [
+     "mood:grubby"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "The shower and I have been growing apart.",
+    "tags": [
+     "mood:grubby"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I am at one with the outdoors, mostly on me.",
+    "tags": [
+     "mood:grubby"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "It is not dirt, it is a layer.",
+    "tags": [
+     "mood:grubby"
+    ],
+    "src": "moods"
+   }
+  ],
+  "od_need_bored": [
+   {
+    "t": "I counted the ceiling tiles again. There are still forty.",
+    "tags": [
+     "mood:bored"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Something should happen. I am not fussy what.",
+    "tags": [
+     "mood:bored"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I have read the back of everything in the house.",
+    "tags": [
+     "mood:bored"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "If I have to watch one more quiz, I will start winning.",
+    "tags": [
+     "mood:bored"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I went to the shop just to see what the shop was doing.",
+    "tags": [
+     "mood:bored"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I would pay to see a fire. Sorry. A small one.",
+    "tags": [
+     "mood:bored"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Is anything on? Anywhere? For anyone?",
+    "tags": [
+     "mood:bored"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I have started having opinions about gravel.",
+    "tags": [
+     "mood:bored"
+    ],
+    "src": "moods"
+   }
+  ],
+  "od_need_stiff": [
+   {
+    "t": "My back has handed in its notice.",
+    "tags": [
+     "mood:stiff"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I sat on something at some point, and it was not a chair.",
+    "tags": [
+     "mood:stiff"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I would like to lie down somewhere soft and be forgotten.",
+    "tags": [
+     "mood:stiff"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "Everything that bends has stopped bending.",
+    "tags": [
+     "mood:stiff"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "There is a knot in my shoulder with its own postcode.",
+    "tags": [
+     "mood:stiff"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I stood up and three things clicked.",
+    "tags": [
+     "mood:stiff"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I have not been comfortable since the spring.",
+    "tags": [
+     "mood:stiff"
+    ],
+    "src": "moods"
+   },
+   {
+    "t": "I think my spine is a question mark now.",
+    "tags": [
+     "mood:stiff"
+    ],
+    "src": "moods"
+   }
+  ],
+  "od_rel_stranger": [
+   {
+    "t": "Sorry, have we met? You look like someone I owe money.",
+    "tags": [
+     "rel:stranger"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I don't think we've met. I am, as far as I know, nobody important.",
+    "tags": [
+     "rel:stranger"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Do you live round here, or are you just visiting the pavement?",
+    "tags": [
+     "rel:stranger"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Lovely weather for not knowing each other.",
+    "tags": [
+     "rel:stranger"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You're new. Or I'm new. One of us is new.",
+    "tags": [
+     "rel:stranger"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I'm going to pretend I know your name, and you can help me.",
+    "tags": [
+     "rel:stranger"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You have a very familiar coat.",
+    "tags": [
+     "rel:stranger"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Is this the queue? Are we a queue?",
+    "tags": [
+     "rel:stranger"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Forgive me, I talk to anyone. It's a condition.",
+    "tags": [
+     "rel:stranger"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I've seen you at {place.the}, I think. You had a face.",
+    "tags": [
+     "rel:stranger"
+    ],
+    "src": "relations"
+   }
+  ],
+  "od_rel_known": [
+   {
+    "t": "Oh! You. Hello. It's... you!",
+    "tags": [
+     "rel:known"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Still at the same place? Good. Good, good.",
+    "tags": [
+     "rel:known"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "We keep meeting like this. On the pavement, I mean.",
+    "tags": [
+     "rel:known"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "How's the, you know. The thing.",
+    "tags": [
+     "rel:known"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Say hello to, um, everyone.",
+    "tags": [
+     "rel:known"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I know exactly who you are, {listener.name}. Mostly from the shoes.",
+    "tags": [
+     "rel:known"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I always mean to stop and chat, and here I am, regretting it. Joke!",
+    "tags": [
+     "rel:known"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Are we the sort of people who hug? No. Good.",
+    "tags": [
+     "rel:known"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I saw you at {place.the} and did a little wave. You didn't see it. That's fine.",
+    "tags": [
+     "rel:known"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You look just the same. I'm not sure what you looked like before.",
+    "tags": [
+     "rel:known"
+    ],
+    "src": "relations"
+   }
+  ],
+  "od_rel_friend": [
+   {
+    "t": "Oh good, it's you. I can stop being polite.",
+    "tags": [
+     "rel:friend"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I have got so much to tell you, and most of it is about bins.",
+    "tags": [
+     "rel:friend"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "There she is! Or he. There you are. You know what I mean.",
+    "tags": [
+     "rel:friend"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You're the only person who knows about the thing with the trifle.",
+    "tags": [
+     "rel:friend"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You look terrible. I say that with love.",
+    "tags": [
+     "rel:friend"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I told my mother about you, and she said to stop talking about you.",
+    "tags": [
+     "rel:friend"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Pub? I know it's nine in the morning. I'm just saying the word.",
+    "tags": [
+     "rel:friend"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "If I ever get arrested, you're my phone call. Don't pick up.",
+    "tags": [
+     "rel:friend"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "We should do something. Not now. We should think about it, though.",
+    "tags": [
+     "rel:friend"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Remember the night at {place.the}? We don't speak of it. We just did.",
+    "tags": [
+     "rel:friend"
+    ],
+    "src": "relations"
+   }
+  ],
+  "od_rel_housemate": [
+   {
+    "t": "Whose turn was it to do the thing? I'll tell you whose.",
+    "tags": [
+     "rel:housemate"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "There's a mug in the sink, and I am not angry, I am just noting it.",
+    "tags": [
+     "rel:housemate"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Somebody has eaten my yoghurt, and it had my name on it in pen.",
+    "tags": [
+     "rel:housemate"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You left the landing light on. I'm not your mother. I just live like her.",
+    "tags": [
+     "rel:housemate"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Could you not breathe so loudly in the mornings?",
+    "tags": [
+     "rel:housemate"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I've labelled the shelves. You don't need to read it. Just know.",
+    "tags": [
+     "rel:housemate"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "We're out of milk. We have been out of milk, as a household, since I was born.",
+    "tags": [
+     "rel:housemate"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Did you say something, or was that the boiler?",
+    "tags": [
+     "rel:housemate"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I love you, but the bathroom is a crime scene.",
+    "tags": [
+     "rel:housemate"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Who keeps moving the good scissors? I need to know before I die.",
+    "tags": [
+     "rel:housemate"
+    ],
+    "src": "relations"
+   }
+  ],
+  "od_rel_coworker": [
+   {
+    "t": "Is it Friday? Do not tell me if it is not.",
+    "tags": [
+     "rel:coworker"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I saw the rota. We don't have to talk about the rota.",
+    "tags": [
+     "rel:coworker"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "The boss said a word today. It was \"synergy\". I had to sit down.",
+    "tags": [
+     "rel:coworker"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I'd love to help, but I've just remembered I'm on a break.",
+    "tags": [
+     "rel:coworker"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Same time tomorrow, then. Same everything. Same soup.",
+    "tags": [
+     "rel:coworker"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "If they ask, I was here all morning, and so were you.",
+    "tags": [
+     "rel:coworker"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "My favourite part of the job is leaving it.",
+    "tags": [
+     "rel:coworker"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Did you get the email? Don't read the email.",
+    "tags": [
+     "rel:coworker"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Somebody has been microwaving fish, and I intend to find them.",
+    "tags": [
+     "rel:coworker"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I've worked here eleven years and I still don't know what we do.",
+    "tags": [
+     "rel:coworker"
+    ],
+    "src": "relations"
+   }
+  ],
+  "od_rel_date": [
+   {
+    "t": "You look nice. Have you always looked this nice? I would have said.",
+    "tags": [
+     "rel:date"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I have told everyone about you. Including, I think, a bus driver.",
+    "tags": [
+     "rel:date"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I saved you a chair in my whole entire life. Sorry. That got away from me.",
+    "tags": [
+     "rel:date"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Is it too soon to show you my spreadsheet of holidays?",
+    "tags": [
+     "rel:date"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "My mother wants to meet you. I've told her you're shorter than you are.",
+    "tags": [
+     "rel:date"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I keep smiling at nothing. People have started moving seats.",
+    "tags": [
+     "rel:date"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I like how you say \"the\". The way you do it. \"The\".",
+    "tags": [
+     "rel:date"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Text me when you get home. It's four doors down, I know. Text me.",
+    "tags": [
+     "rel:date"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You make me want to buy a new towel.",
+    "tags": [
+     "rel:date"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "We should get a plant. Start small. See who it likes.",
+    "tags": [
+     "rel:date"
+    ],
+    "src": "relations"
+   }
+  ],
+  "od_rel_spouse": [
+   {
+    "t": "Did you remember the thing? No. Neither did I.",
+    "tags": [
+     "rel:spouse"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You're doing that with your jaw again.",
+    "tags": [
+     "rel:spouse"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I've been married to you long enough to know that was a sigh.",
+    "tags": [
+     "rel:spouse"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "What do you want for dinner? No, what do you really want. No, not that.",
+    "tags": [
+     "rel:spouse"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You left the receipt in your coat, and I've read it. Very interesting.",
+    "tags": [
+     "rel:spouse"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Love you. Have you seen the scissors?",
+    "tags": [
+     "rel:spouse"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I'd marry you again. I'd want to see the kitchen first.",
+    "tags": [
+     "rel:spouse"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "That's not what happened, and you know it. Tell it properly.",
+    "tags": [
+     "rel:spouse"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Remember when we used to talk? No, nor me, we're talking now.",
+    "tags": [
+     "rel:spouse"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Who was that? You had your telephone voice on.",
+    "tags": [
+     "rel:spouse"
+    ],
+    "src": "relations"
+   }
+  ],
+  "od_rel_foe": [
+   {
+    "t": "I see you're still alive.",
+    "tags": [
+     "rel:foe"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I've been meaning to not speak to you.",
+    "tags": [
+     "rel:foe"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Don't mind me. I'm just standing here disapproving.",
+    "tags": [
+     "rel:foe"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Nice coat. Who died?",
+    "tags": [
+     "rel:foe"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I hope you get exactly what you deserve, {listener.name}.",
+    "tags": [
+     "rel:foe"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You've got a nerve, turning up on your own pavement.",
+    "tags": [
+     "rel:foe"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I'm writing this down. Yes, this. All of this.",
+    "tags": [
+     "rel:foe"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I've nothing to say to you. Here it is, in full.",
+    "tags": [
+     "rel:foe"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Lovely day. It was, anyway.",
+    "tags": [
+     "rel:foe"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "We're all very impressed with how you're holding up, considering what you did.",
+    "tags": [
+     "rel:foe"
+    ],
+    "src": "relations"
+   }
+  ],
+  "od_rel_sour": [
+   {
+    "t": "Oh. Right. Hello, then.",
+    "tags": [
+     "rel:sour"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I'm sure you meant well. I'm sure that's what it was.",
+    "tags": [
+     "rel:sour"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Don't worry about last time. I'm not. I've hardly thought about it. Eleven times.",
+    "tags": [
+     "rel:sour"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Fine, thanks. Not that you asked. Which you didn't.",
+    "tags": [
+     "rel:sour"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I'd stop and talk, but then I'd have stopped.",
+    "tags": [
+     "rel:sour"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Was that a joke? I couldn't tell, it wasn't funny.",
+    "tags": [
+     "rel:sour"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "Yes, well. We all saw that.",
+    "tags": [
+     "rel:sour"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "No hard feelings. A few soft ones.",
+    "tags": [
+     "rel:sour"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "You're looking well, in the circumstances. You know the circumstances.",
+    "tags": [
+     "rel:sour"
+    ],
+    "src": "relations"
+   },
+   {
+    "t": "I'll say nothing. I'll say it very clearly.",
+    "tags": [
+     "rel:sour"
+    ],
+    "src": "relations"
+   }
+  ],
+  "od_scene_first_date_open": [
+   {
+    "t": "You came! I mean, hello. You came.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Hi. I've practised this. Hi.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Sorry I'm late. I've been outside for twenty minutes, deciding.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You look just like yourself! That's a good thing!",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I didn't know if we were hugging, so I've brought this menu.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Is this seat taken? It's mine. I booked it. Sorry. Nerves.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_first_date_mid": [
+   {
+    "t": "So. What do you, you know. Do. With your time. On earth.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Tell me something about yourself that isn't on your face.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I should say now, I have strong opinions on ducks.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've got three stories and that was one of them.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Do you like soup? That's not a test. It's a test.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "My mother says I talk too much when I'm nervous. She's right, she has a list, it's quite long.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_first_date_close": [
+   {
+    "t": "I had a nice time. I think. Did we?",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "We should do this again, unless you've got a better idea, like moving away.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'll text you. Do I text you? Who goes first?",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "That went fine. Nothing's on fire. That's a good sign round here.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Well. Goodbye. I'm going this way. I live the other way, but I'm going this way.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'd like you to know that I usually have more chin.",
+    "tags": [
+     "scene:first_date"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_second_date_open": [
+   {
+    "t": "You came back! Nobody comes back!",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I wore the other shirt. I only have two. Now you know everything.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I told my mother. I told her a nicer version of you.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've been looking forward to this since about four minutes after the last one.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I brought a question. I've written it down. Is that weird?",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "This time I've eaten first, so I can concentrate.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_second_date_mid": [
+   {
+    "t": "You did that thing again, with your eyebrow.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "What's your worst habit? I'll go first. How long have you got?",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I think I like you. I wanted to say it before I ate.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've told you about the ducks. Nobody gets the ducks at a second date.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "What are we doing about Sundays? Long term. I'm just asking.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Do you want the last chip? I'm asking because I've decided you're important.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_second_date_close": [
+   {
+    "t": "So we're doing this, are we? This?",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'm going to tell people. Is that all right? I've already told people.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You're my favourite person at this table.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Same time next week? And all the other weeks? I'm joking. I'm not.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'm not going to say anything soppy. I've got it written down for later.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'd walk you home, but I think I'm walking on the road.",
+    "tags": [
+     "scene:second_date"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_proposal_open": [
+   {
+    "t": "Can I talk to you about something? It isn't the bins.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Sit down. No, stand up. Sit. I've thought about this.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Remember when you said you liked this bench? I've had it rated.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've got something in my pocket. It's not a sandwich. Don't get excited. Get excited.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You look nice. Why are you looking nice today? It makes this harder.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Is it me, or is it hot? Don't answer. I need you to listen.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_proposal_ask": [
+   {
+    "t": "Will you marry me? I've got a whole speech but I've eaten it.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'd like to be annoyed by you for the rest of my life. Officially.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've looked at everyone in this town, and you're my favourite. Marry me.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "So I was wondering if you'd want to share a toaster. For ever. With a ring.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Marry me. I'll give you the left side of the bed and all of the blanket.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I got down on one knee, and I may need help, but first: will you?",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_proposal_answer": [
+   {
+    "t": "Are you asking me or are you stuck? Yes. Both. Yes.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've been waiting for you to work that out for weeks.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Oh, you ridiculous person. Get up. Well, in a minute. Ask me again.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Is that a real ring? Don't tell me. Let me enjoy it.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I need to sit down. I am sitting down. I need to sit down more.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'll tell you what I'd say if you got up off the ground.",
+    "tags": [
+     "scene:proposal"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_wedding_open": [
+   {
+    "t": "You look like the best decision I've ever made.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'm not crying, it's the flowers. I'm allergic to being this happy.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Everyone's here. Even your aunt. Especially your aunt.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Did you see the goblin's got the rings? Check the rings.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Your hands are shaking. So are mine. That'll be the whole building, then.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "This is either the best day of my life, or a very expensive lunch.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_wedding_vow": [
+   {
+    "t": "I promise to tell you when you've got something in your teeth.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I promise to love you, and to pretend to like your mother's soup.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'll always listen. Mostly. I'll nod in the right places.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I promise to wake you up for fires, and to let you sleep through the rest.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I take you, with the snoring and the opinions about gravel.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "For better, for worse, for all the bills, every three days.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_wedding_close": [
+   {
+    "t": "Well, that's that. You can't get rid of me now. I've read the paperwork.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "We did it! Nobody objected! I checked the back row!",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Is it cake now? I was promised cake.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Mine. Sorry. I just wanted to say it out loud.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've never loved anyone so much in such uncomfortable shoes.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Let's go home. Whose home? We should have sorted that out.",
+    "tags": [
+     "scene:wedding"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_row_open": [
+   {
+    "t": "There you are. I've been wanting a word. Several, in fact.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Oh, here we go. Everyone, this is the one I told you about.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You've got a nerve, showing your face at {place.the}.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Don't you walk away from me. I'm walking towards you. Stop.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'm so glad I've run into you. I've written this down.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Excuse me! Excuse me! Yes, you! I'm excusing you!",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_row_mid": [
+   {
+    "t": "Don't you dare bring my mother into this. She'll only agree with you.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've got witnesses! That man saw it! Sir, did you see it?",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You're not even listening! I can tell by your ears!",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "That is the single most ridiculous thing that's been said in this building.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Oh, I'm sorry, was my opinion too close to your opinion?",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Say that again, slower, so everyone can enjoy it.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_row_close": [
+   {
+    "t": "This isn't over. It's just, I've got to get to the shops.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'll see you in court. Or at the bins. Whichever's first.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Good day! I said good day! Good evening, if it gets that far!",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You'll hear from me. You'll hear it through the wall.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Fine! Fine. It's fine! I'm leaving now, on purpose!",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "And another thing! No, it's gone. It'll come back to me. It'll come back to you.",
+    "tags": [
+     "scene:row"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_showdown_open": [
+   {
+    "t": "Thank you for hearing me, and for the chairs.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've brought photographs, a tape measure and a sworn statement from a pigeon.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'd like it on the record that I was here first.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "The town clerk can see what kind of person I'm dealing with.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've prepared a folder. It has tabs. This is what you've brought me to.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've taken a morning off work for this, and I intend to enjoy it.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_showdown_mid": [
+   {
+    "t": "If you look at exhibit four, that's the moment it all went wrong.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I object! Can I object? Is that what we do here?",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've lived on that street for nineteen years, and I've never once been so insulted by a shrub.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "That's not what happened. That's what happened in your head.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "On the night in question, I was at home, listening to the whole thing.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "The facts are simple, and there are forty-one of them.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_showdown_close": [
+   {
+    "t": "Fine. If that's what the town hall says. I'll be appealing to the town.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "So that's it, is it? After all that? I want my folder back.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I accept the ruling, and I'll never speak of it again, except daily.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I hope you're happy. You look happy. It's not a good look.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Well. I suppose that's that. Is there a cafe round here?",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Next time, I'm bringing a lawyer. Or a bigger pigeon.",
+    "tags": [
+     "scene:showdown"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_thanks_open": [
+   {
+    "t": "Sit down, it's on me. Everything's on me. For a year.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I don't know how you say thank you for this, so I got you a muffin.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Here's the person who carried me out of a fire, everyone. Everyone? No? Just me then.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've been wanting to find you. I had a speech, and it was mostly crying.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I hear you've got a bad shoulder. That'd be me.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You're looking well. Last time I saw you, I was upside down.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_thanks_mid": [
+   {
+    "t": "You didn't have to do that. I mean, it was your job. But you didn't have to.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "If you ever need anything: a kidney, a lift, a casserole.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "They told me you went back in. Why would anyone do that?",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'd have left me in there, if I'd seen the state of my kitchen.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "It was nothing. It wasn't nothing. It was very heavy.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I keep thinking about it. Then I think about what I was wearing.",
+    "tags": [
+     "scene:thanks"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_housewarming_open": [
+   {
+    "t": "Come in, come in! Mind the wet paint, it's holding the wall up.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Welcome back to the house! It's the same one, only less on fire.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You can still smell it a bit, if you lean on the door.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "We've got new boards! Smell the boards! Go on!",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Shoes off! We've only just got a floor.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've made a cake. I've kept an eye on it the entire time.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_housewarming_mid": [
+   {
+    "t": "It looks better than it did, if I'm honest. Sorry. It does.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've missed this kitchen. I've missed it not being a crime scene.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Who's for tea? I've got the kettle back. We've made peace.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Thank you all for coming, and for the pie. There were eleven pies.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've put a smoke alarm in every room. Including the cupboard.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You'd never know. You'd know a bit. Don't go upstairs.",
+    "tags": [
+     "scene:housewarming"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_introduce_open": [
+   {
+    "t": "Hello. I'm told I have to meet you.",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Somebody said we'd get on. I don't know why people say these things.",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "So. You're you, then.",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Hi! Everyone keeps saying we should meet! So this is that!",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've heard a lot about you. None of it was checked.",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Don't get up. I'll be over here, being introduced.",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_introduce_mid": [
+   {
+    "t": "What do you do when you're not being pushed at strangers?",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I can tell we're going to be polite to each other for years.",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Well, this is nice. Is it? I think it's nice.",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Do you know anything about gutters? No? Well, we tried.",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You have a very firm handshake. I'd like my hand back.",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "We've got nothing in common, and I find that very restful.",
+    "tags": [
+     "scene:introduce"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_date_open": [
+   {
+    "t": "They said you were single. They said it quite loudly.",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Somebody's set us up. I'd like to know who, and whether they're watching.",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I don't usually do this. I've done this four times.",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'm told I should \"be myself\". I've brought someone else in case.",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Are you here for the date, or the free bread?",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You don't look like the description. It said \"tall-ish\".",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_date_mid": [
+   {
+    "t": "So what's wrong with you? I'm joking. I've got a list.",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've got to be up early, in case this goes badly.",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "If this works, we tell people we met at a library.",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "What's your stance on sharing a dessert? It's a serious question.",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You've got nice hands. I don't know why I said that.",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Should we be enjoying this? I've lost track.",
+    "tags": [
+     "scene:date"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_rowstir_open": [
+   {
+    "t": "I never liked you. I've only just realised, but I never did.",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Something about your face has been bothering me since Tuesday.",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Who do you think you are? Be specific.",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I saw what you did. I don't know what it was, but I saw it.",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Don't look at me in that tone of voice.",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "What did you say? You didn't say anything? Exactly.",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_rowstir_mid": [
+   {
+    "t": "You're everything that's wrong with this street, and it's a long street.",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'll have you know I've been in a bad mood for years, and I earned it.",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "My whole family's going to hear about this. I'll start with the quiet ones.",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You call that an argument? I've had better rows with a door.",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Go on, say it! Say it! No, not that, that's horrible!",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "And your shoes, while we're at it!",
+    "tags": [
+     "scene:rowstir"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_patch_open": [
+   {
+    "t": "Look. I've been thinking. Don't get excited.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I brought you a casserole. I don't know what's in it. Peace, mainly.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Can we not do this any more? I'm tired, and my folder's full.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'm not saying I was wrong. I'm saying I've stopped enjoying it.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I saw you at the shop and I hid behind the bread. This has to stop.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "This is hard for me to say, so I'll say it fast, and to your shoulder.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_scene_patch_mid": [
+   {
+    "t": "I suppose we both said some things. You said more. But we both said some.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "What was it about, even? No, don't. Don't. It'll start again.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "You're all right. Don't tell anyone I said so.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I'm sorry about the gnome. I'm not sorry about the other gnome.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "Shall we say no more about it? I've got a lot more about it, but shall we?",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   },
+   {
+    "t": "I've missed having someone to wave at, even if it was in a rude way.",
+    "tags": [
+     "scene:patch"
+    ],
+    "src": "scenes"
+   }
+  ],
+  "od_sit_cafe": [
+   {
+    "t": "They've started writing my name on the cup wrong on purpose.",
+    "tags": [
+     "sit:cafe"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Is it just me, or has this coffee got an aftertaste of Monday?",
+    "tags": [
+     "sit:cafe"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "That's four coins for a drink that's mostly air.",
+    "tags": [
+     "sit:cafe"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I come here to work. I've been working on this muffin since nine.",
+    "tags": [
+     "sit:cafe"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Somebody's laptop has been here longer than the staff.",
+    "tags": [
+     "sit:cafe"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I asked for it small. It came in a bucket.",
+    "tags": [
+     "sit:cafe"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I can tell how a day's going by the foam.",
+    "tags": [
+     "sit:cafe"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "They've got oat, soy, almond and something called \"regret\".",
+    "tags": [
+     "sit:cafe"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_sit_pub": [
+   {
+    "t": "Same again? Is it ever not the same again?",
+    "tags": [
+     "sit:pub"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "The quiz is on Thursday. I'm not saying I've been revising.",
+    "tags": [
+     "sit:pub"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "That stool's been mine since the flood.",
+    "tags": [
+     "sit:pub"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I only came in for the one. That was on Friday.",
+    "tags": [
+     "sit:pub"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Somebody's put a song on. I'd like to speak to them outside. Kindly.",
+    "tags": [
+     "sit:pub"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "The crisps are the healthiest thing in here, and that includes us.",
+    "tags": [
+     "sit:pub"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "We're not drunk. We're relaxed about the floor.",
+    "tags": [
+     "sit:pub"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "They've changed the beer. It's got a name now, and opinions.",
+    "tags": [
+     "sit:pub"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_sit_gym": [
+   {
+    "t": "What's the point of a mirror that's this honest?",
+    "tags": [
+     "sit:gym"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I've been on this bike for an hour and I'm still here.",
+    "tags": [
+     "sit:gym"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Is that sweat, or am I just sad from the top down?",
+    "tags": [
+     "sit:gym"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I only come for the shower, and the sense of having been.",
+    "tags": [
+     "sit:gym"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Somebody's grunting like they're being paid to.",
+    "tags": [
+     "sit:gym"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I've paid for this year. I've come twice. That's the best two visits money can buy.",
+    "tags": [
+     "sit:gym"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I lifted a thing and put it back. I feel like the universe.",
+    "tags": [
+     "sit:gym"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Do I look bigger? Be honest. Lie.",
+    "tags": [
+     "sit:gym"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_sit_park": [
+   {
+    "t": "It's nice here, if you don't look at the ducks.",
+    "tags": [
+     "sit:park"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Someone's dog just looked at me like it knew.",
+    "tags": [
+     "sit:park"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "This is my favourite tree. Don't tell the others.",
+    "tags": [
+     "sit:park"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I come here to think, and then I look at a squirrel instead.",
+    "tags": [
+     "sit:park"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Nothing here wants anything from me. Except that goose.",
+    "tags": [
+     "sit:park"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "They've mown it again. It had only just got comfortable.",
+    "tags": [
+     "sit:park"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I sat on the wet bit. I'm staying till it's dry.",
+    "tags": [
+     "sit:park"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Every park has one man with a very small kite.",
+    "tags": [
+     "sit:park"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_sit_shop": [
+   {
+    "t": "I came in for milk, and I'm leaving with a lamp.",
+    "tags": [
+     "sit:shop"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Is this cheaper, or is it just a bigger sign?",
+    "tags": [
+     "sit:shop"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "They've moved everything, and it's so they can see us suffer.",
+    "tags": [
+     "sit:shop"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I don't need it. I'm just holding it for a while.",
+    "tags": [
+     "sit:shop"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Have you seen what they want for a cucumber?",
+    "tags": [
+     "sit:shop"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I've been looking at this shelf so long I've started to work here.",
+    "tags": [
+     "sit:shop"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Unexpected item in the bagging area. Story of my life.",
+    "tags": [
+     "sit:shop"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Everything is on offer, except what I came for.",
+    "tags": [
+     "sit:shop"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_sit_diner": [
+   {
+    "t": "What's the soup? Don't tell me. I like the surprise.",
+    "tags": [
+     "sit:diner"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I've had the same order for nine years. It has my name on it, sort of.",
+    "tags": [
+     "sit:diner"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Is that gravy, or is it holding the table up?",
+    "tags": [
+     "sit:diner"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "You get a free refill and a free opinion from the cook.",
+    "tags": [
+     "sit:diner"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "It's all fried, even the salad. Especially the salad.",
+    "tags": [
+     "sit:diner"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "It's not a good menu, but it's a long one.",
+    "tags": [
+     "sit:diner"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "She calls everyone \"love\" here. She hasn't learned a name since 1990.",
+    "tags": [
+     "sit:diner"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I asked for it well done, and they called the fire brigade. Joke. Sorry. Too soon?",
+    "tags": [
+     "sit:diner"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_sit_clinic": [
+   {
+    "t": "I've been in this waiting room long enough to get promoted.",
+    "tags": [
+     "sit:clinic"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "The magazines are from before the bridge.",
+    "tags": [
+     "sit:clinic"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "They told me to take a seat. I've been taking it for two hours.",
+    "tags": [
+     "sit:clinic"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "It's probably nothing. I've looked it up. It's definitely something.",
+    "tags": [
+     "sit:clinic"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "The nurse said \"hmm\". I don't like a \"hmm\".",
+    "tags": [
+     "sit:clinic"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "What's the worst it could be? Don't answer that, I've got a leaflet.",
+    "tags": [
+     "sit:clinic"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Everyone in here is coughing at each other like it's a conversation.",
+    "tags": [
+     "sit:clinic"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "They asked me to rate my pain out of ten. I said it's more of a feeling about the car park.",
+    "tags": [
+     "sit:clinic"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_sit_work": [
+   {
+    "t": "Is it me, or is it still only ten o'clock?",
+    "tags": [
+     "sit:work"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Look busy, someone's coming. Oh. It's only you.",
+    "tags": [
+     "sit:work"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Remind me what we do here. Broadly.",
+    "tags": [
+     "sit:work"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "We've run out of the good pens, and morale.",
+    "tags": [
+     "sit:work"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I've been told I'm a valued member of the team, so I'm looking for another job.",
+    "tags": [
+     "sit:work"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Only four hours till the end of the day. Or six. It's hard to look.",
+    "tags": [
+     "sit:work"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "This could've been an email. So could I.",
+    "tags": [
+     "sit:work"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I'm on my break. I've been on it, spiritually, since March.",
+    "tags": [
+     "sit:work"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_sit_morning": [
+   {
+    "t": "Don't talk to me. Talk near me. Very quietly.",
+    "tags": [
+     "sit:morning"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I've had one coffee, so I'm technically a person.",
+    "tags": [
+     "sit:morning"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Who invented seven o'clock, and were they punished?",
+    "tags": [
+     "sit:morning"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Something's wrong with the morning. It's all over the place.",
+    "tags": [
+     "sit:morning"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I put my shoes on the wrong feet and just thought, fine.",
+    "tags": [
+     "sit:morning"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "The birds are at it already. What have they got to be so pleased about?",
+    "tags": [
+     "sit:morning"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I've been awake for an hour and nothing has been explained.",
+    "tags": [
+     "sit:morning"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Today's the day. I don't know for what.",
+    "tags": [
+     "sit:morning"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_sit_night": [
+   {
+    "t": "What are you doing up? I mean, what am I?",
+    "tags": [
+     "sit:night"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "It's very quiet. I don't trust it.",
+    "tags": [
+     "sit:night"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I can see every light in the street. I've named some of them.",
+    "tags": [
+     "sit:night"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "You think different things at this hour. Mostly about the boiler.",
+    "tags": [
+     "sit:night"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Is that a fox, or a neighbour?",
+    "tags": [
+     "sit:night"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I should go to bed. I've been saying that since Tuesday.",
+    "tags": [
+     "sit:night"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "It's one of those nights where you can hear the fridge thinking.",
+    "tags": [
+     "sit:night"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "There's a light on at the town hall, and I would like to know why.",
+    "tags": [
+     "sit:night"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_sit_home": [
+   {
+    "t": "There's a noise, and I've decided it's the pipes.",
+    "tags": [
+     "sit:home"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I'm going to sit down for one minute. Tell my family I loved them.",
+    "tags": [
+     "sit:home"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Who lives like this? We do. I know. We do.",
+    "tags": [
+     "sit:home"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I'd tidy up, but then I'd know where things were.",
+    "tags": [
+     "sit:home"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "The house is either too hot or too cold, and it's always somebody's fault.",
+    "tags": [
+     "sit:home"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Someone's left a light on in a room nobody's been in since Easter.",
+    "tags": [
+     "sit:home"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "Home is where you know which stair creaks. We have no stairs, I know. It's a saying.",
+    "tags": [
+     "sit:home"
+    ],
+    "src": "situations"
+   },
+   {
+    "t": "I've been looking for the remote, and I've found a whole other remote.",
+    "tags": [
+     "sit:home"
+    ],
+    "src": "situations"
+   }
+  ],
+  "od_spell_tidy_cast": [
+   {
+    "t": "Right, everything back in its place. Quickly, before I lose my nerve.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "A little Tidy. Nothing fancy. Just the floor, and possibly my life.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Come on, socks. You know where you live.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Up you get, the lot of you. Shelves. Now.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_tidy_ok": [
+   {
+    "t": "Look at that. You could eat off it. Don't.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "All done, and I never touched a duster.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "It's beautiful. I feel like a different person with a smaller pile.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "There. Now nobody touch anything for ever.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_tidy_bad": [
+   {
+    "t": "It's tidied everything. Everything. Where's the cutlery? Where's the cat?",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "It's filed the cushions by size. I can't find my keys or the door.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "It has alphabetised the fridge. I don't want to talk about it.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Well, it's very clean. I've just lost most of my belongings.",
+    "tags": [
+     "spell:tidy"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_warm_cast": [
+   {
+    "t": "Hold still, you look perished.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Here, a little bit of warm. Don't tell the gas company.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Bit of a chill. Leave it with me.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "I do this to the bed sometimes. It's the same thing. It's fine.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_warm_ok": [
+   {
+    "t": "There. Like standing next to a good radiator.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "That's better, isn't it? Your ears have gone a nice colour.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Toasty. I'm good at this. I should charge.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Oh, that's lovely. I've done my own socks as well.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_warm_bad": [
+   {
+    "t": "Why is the curtain smoking? Is it meant to be smoking?",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "That's too warm. That's definitely too warm. That's not a colour.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "I've cooked the armchair a bit.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Don't panic, but your hat has started to steam.",
+    "tags": [
+     "spell:warm"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_mend_cast": [
+   {
+    "t": "Come on, you. Back the way you were.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Right, you lovely burnt thing, let's have a look.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "A little Mend. Not the whole wall. Just where it hurts.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Hold on. Wood remembers. You have to ask it nicely.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_mend_ok": [
+   {
+    "t": "Good as new. Better. It's got a bit of a shine.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "There, that's one less for the crew.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "That took some doing. The wall's stopped sulking.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Look, you can't even see where it went wrong.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_mend_bad": [
+   {
+    "t": "It's mended itself to the door. The door was not involved before.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Well, that's worse. How is that worse?",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Ah. I've mended the burn. It's a very solid burn now.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "We're going to need more boards. And an apology.",
+    "tags": [
+     "spell:mend"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_hush_cast": [
+   {
+    "t": "I'm so sorry, but you're being very loud. Shh.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Just a moment of peace, if I may.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Let's all have a nice bit of quiet.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Sorry, I can't hear myself think. It's a short spell.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_hush_ok": [
+   {
+    "t": "Oh, that's better. You can hear the birds.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "There. Now we can all pretend nothing was said.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Lovely. It wears off in an hour. Use it wisely.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "You've got a very nice face when you're not using it.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   }
+  ],
+  "od_spell_hush_bad": [
+   {
+    "t": "Why are you louder? How are you louder?",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "Oh no. It's turned you up.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "I can hear you in my fillings now.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   },
+   {
+    "t": "That's the whole street's windows rattling. That was you.",
+    "tags": [
+     "spell:hush"
+    ],
+    "src": "spells"
+   }
+  ]
+ }
+}

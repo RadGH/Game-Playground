@@ -1,0 +1,14 @@
+{
+ "_doc": "Oddhaven's own facts about Roverlands vehicles (roverlands/data/vehicles.json stays untouched, PLAN §2). traffic = how often this type turns up on the rails. paint = the body colours a car may be resprayed from: hex list, 'auto' for the commonest colour on the model, [] for a fixed livery. tints = the colours it comes in. Prices and jobs arrive with the milestones that use them.",
+ "player": "sedan",
+ "vehicles": [
+  { "id": "sedan", "name": "Meadowlark Sedan", "traffic": 20, "paint": ["#74a6dc", "#5d8cc2"], "tints": ["#74a6dc", "#c9c9c4", "#2f3946", "#a43a33", "#e9e4d8", "#5d7f5f", "#d9a441"] },
+  { "id": "trail_jeep", "name": "Trail Jeep", "traffic": 7, "paint": "auto", "tints": ["#6f7f4d", "#c2592e", "#3f6a8c", "#d7c9a7"] },
+  { "id": "motorcycle", "name": "Hopper 250", "traffic": 3, "paint": "auto", "tints": ["#b8372f", "#23232a", "#3f6a8c"] },
+  { "id": "dune_buggy", "name": "Sandflea Buggy", "traffic": 2, "paint": "auto", "tints": ["#d9a441", "#c2592e", "#5d7f5f"] },
+  { "id": "police_car", "name": "Patrol Car", "traffic": 3, "paint": [], "tints": [] },
+  { "id": "ambulance", "name": "Ambulance", "traffic": 2, "paint": [], "tints": [] },
+  { "id": "fire_truck", "name": "Fire Engine", "traffic": 2, "paint": [], "tints": [] },
+  { "id": "semi_truck", "name": "Road Tractor", "traffic": 6, "paint": "auto", "tints": ["#b8372f", "#2f5f95", "#e0e0dc", "#3c7a56"] }
+ ]
+}

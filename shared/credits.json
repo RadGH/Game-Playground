@@ -16,15 +16,15 @@
    "id": "code",
    "title": "Code libraries",
    "items": [
-    { "title": "three.js", "author": "three.js authors", "license": "MIT", "licenseUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE", "url": "https://threejs.org", "games": ["bannerline", "emberveil", "farhold", "frontier-foundry", "knockabout", "roverlands", "thousandvale", "tumblefair"] },
+    { "title": "three.js", "author": "three.js authors", "license": "MIT", "licenseUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE", "url": "https://threejs.org", "games": ["bannerline", "emberveil", "farhold", "frontier-foundry", "knockabout", "oddhaven", "roverlands", "thousandvale", "tumblefair"] },
     { "title": "cannon-es", "author": "Stefan Hedman and the pmndrs contributors", "license": "MIT", "licenseUrl": "https://github.com/pmndrs/cannon-es/blob/master/LICENSE", "url": "https://github.com/pmndrs/cannon-es", "games": ["knockabout"] },
-    { "title": "Rapier", "author": "Dimforge", "license": "Apache 2.0", "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0", "url": "https://rapier.rs", "games": ["roverlands"] },
+    { "title": "Rapier", "author": "Dimforge", "license": "Apache 2.0", "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0", "url": "https://rapier.rs", "games": ["oddhaven", "roverlands"] },
     { "title": "meshoptimizer decoder", "author": "Arseny Kapoulkine", "license": "MIT", "licenseUrl": "https://github.com/zeux/meshoptimizer/blob/master/LICENSE.md", "url": "https://github.com/zeux/meshoptimizer", "games": ["thousandvale"] },
     { "title": "PeerJS", "author": "Michelle Bu, Eric Zhang and contributors", "license": "MIT", "licenseUrl": "https://github.com/peers/peerjs/blob/master/LICENSE", "url": "https://peerjs.com", "games": ["bannerline"] },
     { "title": "QR Code Generator", "author": "Kazuhiko Arase", "license": "MIT", "licenseUrl": "https://github.com/kazuhikoarase/qrcode-generator/blob/master/LICENSE", "url": "https://github.com/kazuhikoarase/qrcode-generator", "games": ["*"] },
     { "title": "pluralize", "author": "Blake Embrey", "license": "MIT", "licenseUrl": "https://github.com/plurals/pluralize/blob/master/LICENSE", "url": "https://github.com/plurals/pluralize", "games": ["emberveil"] },
     { "title": "meSpeak.js (eSpeak)", "author": "Norbert Landsteiner; eSpeak by Jonathan Duddington", "license": "GPL 3.0", "licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.html", "url": "https://www.masswerk.at/mespeak/", "games": ["voice-lab"] },
-    { "title": "The CMU Pronouncing Dictionary", "author": "Carnegie Mellon University", "license": "BSD 2-Clause", "licenseUrl": "https://github.com/cmusphinx/cmudict/blob/master/LICENSE", "url": "https://github.com/cmusphinx/cmudict", "games": ["emberveil", "voice-lab"] }
+    { "title": "The CMU Pronouncing Dictionary", "author": "Carnegie Mellon University", "license": "BSD 2-Clause", "licenseUrl": "https://github.com/cmusphinx/cmudict/blob/master/LICENSE", "url": "https://github.com/cmusphinx/cmudict", "games": ["oddhaven", "emberveil", "voice-lab"] }
    ]
   }
  ]

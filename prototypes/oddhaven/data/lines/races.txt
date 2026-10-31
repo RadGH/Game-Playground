@@ -1,0 +1,117 @@
+# od_race_human race:human
+I have a plan for the weekend. It has bullet points.
+Nobody warned me being the normal one would be this tiring.
+My cousin says humans invented queueing. I am proud of that.
+I do not have a special ability. I have a loyalty card.
+Everyone here can do something. I can parallel park.
+I checked the weather, the bins and the calendar. I feel alive.
+We live about ninety years and we spend most of them on hold.
+An elf asked me what my long-term plans were. I said Thursday.
+Do you ever feel like the only one who reads the instructions?
+I am a morning person. I resent it, but I am.
+I told a giant I was five foot nine. He said "aw".
+My whole personality is having a nice mug.
+# od_race_elf race:elf
+I have seen this hedge grow from a seed. It has not improved.
+Six hundred years old and I still cannot work the self-checkout.
+I need something green. A leaf. Honestly a salad would do.
+You will understand when you are three hundred.
+I was at the founding of this town. It was also raining.
+We do not age. We just get more disappointed.
+My therapist retired. So did the one before her. So did her granddaughter.
+Pavement is just a meadow somebody gave up on.
+I sat under a tree for an afternoon, and it was a very good year.
+Humans keep telling me to live a little. I have. A lot.
+That bench is new. I mean it is from the eighties.
+I remember when all this was trees, and I intend to keep bringing it up.
+# od_race_dwarf race:dwarf
+I do not trust a floor that is not on the ground.
+Good stonework, that kerb. Somebody cared.
+They put me on the fourth floor. I could hear the air.
+A proper wall is a promise. Plasterboard is a rumour.
+My grandmother dug this valley. By hand. Out of spite.
+I have nothing against heights. I just think they should stay up there.
+Show me a lift and I will show you a shaft somebody ruined.
+You call that a beard? That is a rumour on a chin.
+Nothing says home like a low ceiling and a heavy door.
+I knocked on that wall. It sounded hollow. So does this town.
+Tea should be strong enough to mortar with.
+I have measured this pub. It is two inches out, and I cannot relax.
+# od_race_orc race:orc
+I would like to shout now. Is that all right? Lovely.
+My indoor voice is in storage.
+I was told to use my words. I used all of them, at once.
+A good argument clears the sinuses.
+I hugged my neighbour. He is with the clinic now. He is fine.
+Yes I am gentle. I have a certificate. I yelled until they gave it to me.
+This is my quiet shirt.
+I do not have a temper. I have a hobby.
+Nothing bonds a street like a really loud disagreement.
+I cried at the bakery advert. Loudly. They came to check on me.
+If nobody has complained by nine, I did not enjoy the evening.
+I love my mum. You can hear me love her from the bridge.
+# od_race_giant race:giant
+Sorry. Was that your car? I thought it was a step.
+I have been ducking since I was four.
+Is there somewhere with a bit more room? Like a field?
+Doors are a suggestion made by small people.
+The ceiling and I have a professional relationship.
+I do not mean to loom. I am just here.
+I bought a normal chair. I wear it now.
+I take up two seats on the bus. I pay for one. I feel terrible.
+When I sneeze, three streets say bless you.
+Everyone in this town is lovely, and about the size of a sandwich.
+People ask what the weather is like up here. It is the same. It is just closer.
+I sat down carefully, and it was still in the paper.
+# od_race_goblin race:goblin
+Is that new? Can I hold it? I will give it back. Eventually.
+I have a very reasonable number of spoons.
+Finders keepers is a legal principle, look it up.
+I own eleven keys and I do not know what any of them open. That is the fun.
+Everything is shiny if you look at it hopefully.
+I am not stealing this. I am keeping it safe from you.
+Do you want a discount? I know a guy. I am the guy.
+Nobody ever misses a teaspoon. Except, it turns out, the cafe.
+I read the terms and conditions. I read them for fun. I found a loophole.
+My landlord says the flat is full. I say it is well stocked.
+It is not a pile. It is a collection with ambition.
+I once swapped a paperclip for a bicycle. I am still paying for the bicycle.
+# od_race_halfling race:halfling
+Have you eaten? You look like you have not eaten.
+It is not a snack if you sit down for it. That makes it a meal, which is better.
+I only came to say goodbye, and that was an hour ago.
+Second lunch is a tradition and I will not be questioned on it.
+I keep a sandwich in this coat for emergencies, like being awake.
+I left the party forty minutes ago. I am still leaving it.
+Eleven o'clock at night is a perfectly good time for a pie.
+What do you mean you do not know your neighbours' middle names?
+There is always room for something small and hot.
+My cousin's wife's sister knows your mother. Sit down, I will explain.
+I would not call it gossip. I call it keeping the street informed.
+Nobody leaves my house hungry. Several have tried.
+# od_race_undead race:undead
+I am fine. Well. I am here.
+People forget about me. I have been dead for a while and it is still rude.
+I went to the reunion. They had me down as a memorial.
+I do not sleep, I just lie down and go over things.
+Do you remember me? Please say you remember me.
+My doctor was very honest with me. He asked me to stop coming in.
+Dying was the easy part. It was the paperwork that nearly killed me.
+I went to my own grave. Nobody had been round. I left a note.
+Ask me about my day. Go on. Nobody asks.
+I still get mail for me.
+I have been very cold since nineteen fifty-two, and I would like a cardigan.
+It is nice to be spoken to. It stops me fading a bit.
+# od_race_beast race:beast
+I need a run. A big one. Is that field taken?
+I can smell rain, toast and your disappointment.
+No, you may not scratch behind my ears. Well. Briefly.
+I chased a car this morning. I am not proud. I am a bit proud.
+I have shed on everything I own, and I call that marking my territory.
+Do not throw that. I mean it. Oh no. Oh, it is so hard.
+I could hear your stomach from the corner shop.
+The vet is a very rude thing to call a doctor by accident.
+I sat in the sun for three hours and did not regret a minute.
+There is a smell on the corner of the street that I would like to discuss.
+Nobody tells a human to stop howling in the shower.
+If I turn round three times before I sit down, you will say nothing about it.

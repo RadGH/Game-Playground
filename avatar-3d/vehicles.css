@@ -1,0 +1,41 @@
+/* Vehicles page: the catalog under the viewer. The page itself scrolls; nothing here is a scrolling panel. */
+.vc-section { margin-top: 12px; }
+#left p { overflow-wrap: anywhere; }
+#viewport { scroll-margin: 96px 0 12px; }
+.topbar h1, .topbar > a { white-space: nowrap; }
+.vc-head { justify-content: space-between; align-items: baseline; }
+.vc-head h2 { margin: 0; }
+.vc-filter { display: flex; gap: 8px; align-items: baseline; margin: 6px 0; }
+.vc-filter > label { flex: 0 0 44px; font-size: 12px; color: var(--fg2); }
+button.chip { font: inherit; font-size: 12px; color: var(--fg); padding: 3px 9px; }
+button.chip.on { color: #000; }
+.vc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
+.vc-card { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left; padding: 6px; min-width: 0; }
+.vc-card.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.vc-card.off { cursor: default; }
+.vc-card.off:hover { border-color: var(--border); }
+.vc-pic { display: grid; place-items: center; width: 100%; aspect-ratio: 1; background: var(--bg2); border-radius: 4px; overflow: hidden; }
+.vc-pic img { display: block; width: 100%; height: 100%; }
+.vc-pic img[hidden], .vc-empty[hidden] { display: none; }
+.vc-empty { padding: 8px; text-align: center; }
+.vc-name { font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+.vc-era { font-size: 11px; padding: 0 6px; border-radius: 9px; color: #000; }
+.vc-fantasy { background: #c9a2ff; } .vc-medieval { background: #e0b878; } .vc-modern { background: #8cc8ff; } .vc-future { background: #7fe0c4; }
+
+/* the cards make the page long: the side panels travel with it instead of ending half way down */
+@media (min-width: 901px) {
+  .sidebar { position: sticky; top: 72px; align-self: start; max-height: calc(100vh - 72px); }
+}
+
+@media (max-width: 900px) {
+  /* the viewer first; the side panels were pushing it a whole screen down */
+  #main { order: -1; min-width: 0; padding: 0; }
+  .layout.three { min-height: 0; }
+  #viewport { height: min(52vh, 380px); }
+  .topbar { flex-wrap: wrap; position: static; }
+  #viewport { scroll-margin: 8px; }
+  button.chip { padding: 6px 11px; }
+  .vc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vc-filter { display: block; }
+  .vc-filter > label { display: block; margin-bottom: 3px; }
+}

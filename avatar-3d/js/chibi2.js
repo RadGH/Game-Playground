@@ -493,7 +493,7 @@ export function prepareChibi2(avatar, opts = {}) {
     if (!templates.has(key)) {
       // unclaimed prepared templates (refs 0) beyond the cap are let go, oldest first
       const idle = [...templates.entries()].filter(([, t]) => t.refs === 0 && t.prepared);
-      for (let i = 0; i < idle.length - PREPARED_MAX; i++) { for (const p of idle[i][1].parts) { p.geometry.dispose(); p.material.dispose(); } templates.delete(idle[i][0]); }
+      for (let i = 0; i < idle.length - (opts.keep ?? PREPARED_MAX); i++) { for (const p of idle[i][1].parts) { p.geometry.dispose(); p.material.dispose(); } templates.delete(idle[i][0]); }
       templates.set(key, { parts, clips, refs: 0, anims, prepared: true });
     } else for (const p of parts) { p.geometry.dispose(); p.material.dispose(); }
     return true;
@@ -526,6 +526,8 @@ function acquire(avatar, anims = CHIBI2_ANIMS, opts = {}) {
   return { root, rig, mixer, actions, template, skeleton, release() {
     mixer.stopAllAction(); mixer.uncacheRoot(root); skeleton.dispose();
     if (--template.refs === 0) {
+      // `park` (opt-in, Oddhaven M7): a look taken off stays ready to put back on, as if `prepareChibi2` had built it. The cap there lets it go
+      if (opts.park && templates.get(key) === template) { template.prepared = true; templates.delete(key); templates.set(key, template); return; }
       for (const p of template.parts) { p.geometry.dispose(); p.material.dispose(); }
       if (templates.get(key) === template) templates.delete(key);
     }
@@ -544,7 +546,7 @@ export async function createChibi2Character(avatar, opts = {}) {
   const gaze = { x: 0, y: 0, tx: 0, ty: 0, next: 0.8 + Math.random() * 1.5 };
   const eyes25 = new EyeDriver25();      // Chibi 2.5: blinking + looking (chibi25-eyes.js); idle for a v2 look
   function install(a) {
-    const next = acquire(a, anims, { mannequin: !!opts.mannequin, v25: !!opts.v25, trace: opts.trace || null });
+    const next = acquire(a, anims, { mannequin: !!opts.mannequin, v25: !!opts.v25, trace: opts.trace || null, park: !!opts.park });
     if (asset) { group.remove(asset.root); asset.release(); }
     asset = next; group.add(asset.root); action = null; elapsed = 0;
     asset.lidded = ['narrow', 'sleepy', 'tired', 'angry'].includes(a?.eyes?.id);   // lidded eyes never glance up under the lid

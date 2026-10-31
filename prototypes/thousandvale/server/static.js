@@ -22,7 +22,7 @@ export const ALLOW = Object.freeze([
   'lingo', 'meters', 'namegen', 'proctown', 'sfx', 'universe', 'voice-lab', 'worldgen',
   // prototypes (prototypes/tinyrts is a symlink to another repo, so a published copy cannot hold it)
   'prototypes/thousandvale', 'prototypes/farhold', 'prototypes/emberveil', 'prototypes/bannerline',
-  'prototypes/frontier-foundry', 'prototypes/lanternfall', 'prototypes/lodestar', 'prototypes/kindlewild',
+  'prototypes/frontier-foundry', 'prototypes/lanternfall', 'prototypes/lodestar', 'prototypes/kindlewild', 'prototypes/oddhaven',
   'prototypes/tumblefair', 'prototypes/knockabout', 'prototypes/roverlands',
 ]);
 /** Paths inside the allow-list that are still refused. */

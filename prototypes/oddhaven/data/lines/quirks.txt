@@ -1,0 +1,144 @@
+# od_quirk_narrates quirk:narrates
+And so they stood there, wondering if anyone had noticed.
+"That is an interesting point," they said, not listening.
+A silence fell. They made a note of it.
+They reached for a sentence, and it was not there.
+Slowly, they turned to look at {listener.name}. It was going fine.
+They had come here for a reason. It would come back to them.
+The wind picked up. Nobody asked it to.
+Little did they know, it was almost lunchtime.
+# od_quirk_duck_fear quirk:duck_fear
+Is that a duck? Be honest with me.
+They look at you. All at once. You have not seen it.
+I do not go to the park. You know why I do not go to the park.
+A duck has no reason to be that calm.
+I saw one on a roof. A roof, {listener.name}. They are getting organised.
+People say geese are worse. People have not met a duck that knows their name.
+I hear quacking when nobody else does.
+I had a bad experience with some bread. That is all I will say.
+# od_quirk_overtips quirk:overtips
+I tipped the barista forty percent and I would do it again.
+Everyone deserves a little something. Here is a little something.
+I tipped the bus driver. He said it was not that kind of bus.
+Round it up. No, up. Further.
+My bank has asked if I am being held against my will.
+I left a tip at the doctor's.
+I do not know why I do it. They looked tired.
+I tipped a man at a cash machine. He was just using it.
+# od_quirk_names_car quirk:names_car
+Maureen does not like the rain, so we are taking it slowly.
+Do not lean on her. She has had a hard week.
+I told the car about you. She is not convinced.
+I said good night to the car and I will not apologise.
+We walked past a nicer car. I covered her headlights.
+The mechanic says she is fine. He does not know her like I do.
+She is making that noise again. It means she misses me.
+I drive to the end of the road. She needs the company.
+# od_quirk_shower_singer quirk:shower_singer
+Did you hear the high note this morning? The whole block did.
+The tiles give it a lovely ring. Nobody else has said so.
+I was halfway through the second act when the hot water went.
+Somebody banged on the wall. I am choosing to call that applause.
+I have an aria for every kind of soap.
+I do not sing in the shower. The shower is a venue.
+The neighbours left a note. It said "encore", in a way.
+Forty minutes is not long for a full opera.
+# od_quirk_couch_nester quirk:couch_nester
+I have a dent in the sofa that fits only me. It took years.
+Everything I need is within reach of the left cushion.
+I went outside once. There was nowhere to put my feet up.
+I have a system. It involves three blankets and a long stick.
+I get my post delivered to the sofa. It is a process.
+The sofa and I have an understanding.
+You can sit there, but it will not be the same.
+I am not lazy. I am load-bearing.
+# od_quirk_bad_spells quirk:bad_spells
+I did a small charm on the kettle, and now it is mostly a pigeon.
+Do not worry about the smell, that is meant to wear off.
+I sneezed, and now there is a second one of my shoes.
+It only goes wrong when somebody is watching. Or not watching.
+Everything was fine until I said the word out loud.
+That was not a spell. That was a cough. Probably.
+My eyebrows should grow back by the weekend.
+I tried to warm my tea and I have warmed the street.
+# od_quirk_fridge_talker quirk:fridge_talker
+I had to apologise to the fridge again.
+It is hard to look it in the eye at three in the morning.
+I said "excuse me" to the fridge and it hummed. We are all right now.
+I closed the door too hard. I went back and explained.
+It knows what I did to that cheese.
+We have good days and bad days, the fridge and I.
+I told it about my week. It was very cool about it.
+It has been in the family longer than I have.
+# od_quirk_gym_evangelist quirk:gym_evangelist
+As I was saying to my trainer, have you tried the gym?
+That reminds me of leg day.
+You would feel so much better if you lifted something.
+I did not ask how you are, because I already know: you have not stretched.
+Lovely weather for the gym.
+My heart rate is forty and I will tell you about it.
+You carry that shopping like someone who has never been to the gym.
+I met my wife at the gym. Well. I met the gym.
+# od_quirk_park_judge quirk:park_judge
+That bench is a six. Good back, poor outlook.
+I gave the one by the pond a nine, and I stand by it.
+Seven out of ten. It lost a point for the pigeon.
+There are no tens. A ten is a thing to work towards.
+The new bench is a four. I sat on it twice to be fair.
+I keep the ratings in a little book. The council has asked for a copy.
+A bench is a promise to the legs.
+That was a good sit. Eight, maybe eight and a half.
+# od_quirk_coupon_hoarder quirk:coupon_hoarder
+Hold on, I have a voucher for this. It is in here somewhere.
+That is two for one, if you buy three.
+Do not throw that away, there is ten off on the back.
+It expired, yes, but it expired recently.
+I saved four coins today, and it took an hour.
+Everybody behind me can wait. It is a matter of principle.
+I got a free side salad out of a house fire once.
+This folder is my pension.
+# od_quirk_gossip quirk:gossip
+You did not hear this from me, but you will hear it from me.
+I said nothing. I only said it to three people.
+Don't look now. No, look now.
+I am not one to talk, and yet.
+Do you know what I heard by ten o'clock this morning? Sit down.
+I heard about it before they did.
+I have it on very good authority. Mine.
+I cannot say who told me. It was me, I saw it through the curtains.
+# od_quirk_night_owl quirk:night_owl
+What is this morning everyone keeps talking about?
+I do my best work at two.
+Do not talk to me before noon, it is the middle of the night.
+I had breakfast at dusk. It was lovely.
+Have you seen the town at three? It is all mine.
+The sun is a bit much, is it not?
+I have seen every delivery in this town arrive.
+I was just going to bed when I heard you get up.
+# od_quirk_plant_parent quirk:plant_parent
+Gerald has a new leaf, and I am beside myself.
+I cannot stay, the fern gets anxious.
+I have forty-one plants and they all know my voice.
+You look a bit dry. No? Sorry, habit.
+The big one by the window is sulking. It knows what it did.
+I had to leave a party. A cutting needed me.
+I talk to them. They do not talk back. That is why I like them.
+People are fine, but have you tried a nice succulent?
+# od_quirk_pigeon_friend quirk:pigeon_friend
+That is Derek. He has a limp and a very good attitude.
+They trust me now. I have a seat on the council.
+Do not feed that one, he is on a diet.
+You think they all look alike because you have not been listening.
+I told the pigeons what you said. They were disappointed.
+Every morning at seven, we have a meeting.
+That one owes me a chip.
+People call them vermin. People have not seen Sandra with her chicks.
+# od_quirk_lost_keys quirk:lost_keys
+Have you seen my keys? Do not say "where you left them".
+They were in my hand. They were literally in my hand.
+I found them. They were in the fridge. I do not know who I am.
+I have checked the same pocket nine times, and I will check it again.
+I had them when I came in. I know that, because I lost them.
+I keep a spare set. I do not know where.
+They cannot have gone far. They have no legs.
+I was late. Yes. Keys. Yes. Thank you.

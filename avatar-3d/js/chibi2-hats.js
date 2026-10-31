@@ -22,7 +22,7 @@ const lift = (c, k) => '#' + new THREE.Color(c).lerp(new THREE.Color('#ffffff'),
 /** Hats that sit over the crown and hide the hair under them (a fringe may still show). */
 // 'helmet' added 2026-10-21 (owner review, H5): the plain helmet was missing, so a Chibi 2 look built the whole hair cap,
 // the fringe and every lock under it and they all came out through the steel
-export const HATS_COVER_CROWN = ['cap', 'leather_cap', 'bandana', 'straw', 'top_hat', 'chain_coif',
+export const HATS_COVER_CROWN = ['hard_hat', 'ball_cap', 'beanie', 'police_cap', 'chef_hat', 'bucket_hat', 'sun_hat', 'bobble_hat', 'warden_cap', 'cap', 'leather_cap', 'bandana', 'straw', 'top_hat', 'chain_coif',
   'war_helm', 'great_helm', 'plate_helm', 'wolf_helm', 'rune_helm', 'tricorn', 'helmet',
   // Halloween headwear (Tumblefair, 2026-10-22)
   'pumpkin_head', 'witch_hat', 'candy_corn_hat', 'toadstool_cap', 'ghost_sheet', 'bolt_crown'];
@@ -33,13 +33,13 @@ export const HATS_WHOLE_HEAD = ['pumpkin_head', 'ghost_sheet'];
  * "helm" in it used to fall into, so a paladin's great helm and a knight's plate helm were the same
  * grey bowl as everyone else's). chibi2.js checks this list before its generic branch.
  */
-export const CLASS_HATS = ['war_helm', 'great_helm', 'plate_helm', 'wolf_helm', 'bone_headdress', 'rune_helm', 'tricorn'];
+export const CLASS_HATS = ['war_helm', 'great_helm', 'plate_helm', 'wolf_helm', 'bone_headdress', 'rune_helm', 'tricorn', 'hard_hat', 'ball_cap', 'beanie', 'police_cap', 'chef_hat', 'bucket_hat', 'sun_hat', 'visor', 'bobble_hat', 'ear_muffs', 'warden_cap'];
 /**
  * Headwear whose rim stops above the ears: the hair cap is cut flat just under the rim instead of
  * dropped, so no band of bare scalp shows between the hair at the back and the helm ("his hair has a
  * gap before the helmet"). Head units; see HAT_BRIM in chibi2.js.
  */
-export const HELM_BRIM = { horned_helm: 0.43, helmet: 0.43, war_helm: 0.42, plate_helm: 0.42, rune_helm: 0.42, wolf_helm: 0.44, tricorn: 0.46 };
+export const HELM_BRIM = { hard_hat: 0.43, ball_cap: 0.44, beanie: 0.42, police_cap: 0.44, chef_hat: 0.44, bucket_hat: 0.42, sun_hat: 0.43, bobble_hat: 0.42, warden_cap: 0.44, horned_helm: 0.43, helmet: 0.43, war_helm: 0.42, plate_helm: 0.42, rune_helm: 0.42, wolf_helm: 0.44, tricorn: 0.46 };
 
 /** A dome over the skull, from `brim` up; stays outside the skull and the hair cap. */
 function dome(head, colour, { brim = 0.4, r = [0.37, 0.28, 0.33], cy = 0.36, tilt = -0.12, open = 0.5, metal = false } = {}) {
@@ -50,6 +50,59 @@ function dome(head, colour, { brim = 0.4, r = [0.37, 0.28, 0.33], cy = 0.36, til
 export function buildExtraHat(a, c) {
   const id = a.hat.id, hc = a.hat.color || '#6a4a2a', { head, add, trim, leather, darkSteel, W, T } = c;
   switch (id) {
+    case 'hard_hat': {
+      // Oddhaven M4: a site helmet, a shell with a ridge front to back and a short peak
+      const st = a.hat.color || '#f2c230', dk = tone(st, 0.8);
+      head(profile([[0.42, 0.372, 0.32], [0.47, 0.362, 0.312], [0.56, 0.288, 0.25], [0.63, 0.16, 0.14], [0.668, 0.02, 0.02]], 16), st);
+      head(profile([[0.415, 0.395, 0.34], [0.435, 0.395, 0.34]], 16), dk);
+      head(new THREE.BoxGeometry(0.075, 0.05, 0.5), dk, { position: [0, 0.625, -0.01], rotation: [-0.04, 0, 0] });
+      head(new THREE.CylinderGeometry(0.21, 0.21, 0.016, 12, 1, false, -Math.PI / 2, Math.PI), st, { position: [0, 0.43, 0.3], scale: [1, 1, 0.5] });
+      return;
+    }
+    case 'ball_cap':
+      dome(head, hc, { cy: 0.38, r: [0.37, 0.3, 0.33], tilt: -0.08, open: 0.52 });
+      head(new THREE.CylinderGeometry(0.22, 0.22, 0.014, 12, 1, false, -Math.PI / 2, Math.PI), tone(hc, 0.85), { position: [0, 0.43, 0.29], scale: [1, 1, 0.8] });
+      return;
+    case 'beanie':
+      dome(head, hc, { cy: 0.37, r: [0.372, 0.31, 0.335], tilt: -0.1, open: 0.54 });
+      head(profile([[0.385, 0.372, 0.32], [0.45, 0.378, 0.325]], 16), tone(hc, 0.82));
+      return;
+    // Oddhaven M7: modern hats. Each sits on the same brim line as the ball cap, so it clears every head and every hair
+    case 'police_cap': case 'warden_cap': {
+      const dark = tone(hc, 0.7);
+      head(profile([[0.42, 0.365, 0.315], [0.47, 0.362, 0.312], [0.5, 0.33, 0.29]], 16), dark);
+      head(profile([[0.49, 0.37, 0.33], [0.55, 0.42, 0.38], [0.6, 0.39, 0.35], [0.635, 0.2, 0.18], [0.645, 0.02, 0.02]], 16), hc);
+      head(new THREE.CylinderGeometry(0.2, 0.2, 0.014, 12, 1, false, -Math.PI / 2, Math.PI), '#1a1a20', { position: [0, 0.43, 0.3], scale: [1, 1, 0.55] });
+      head(new THREE.BoxGeometry(0.07, 0.06, 0.02), a.hat.color2 || (id === 'police_cap' ? '#e0c060' : '#8ad0e0'), { position: [0, 0.525, 0.335], rotation: [-0.2, 0, 0], metal: true });
+      return;
+    }
+    case 'chef_hat': {
+      const white = a.hat.color || '#f4f0e6';
+      head(profile([[0.42, 0.37, 0.32], [0.5, 0.36, 0.31]], 16), white);
+      head(profile([[0.5, 0.34, 0.3], [0.58, 0.44, 0.4], [0.72, 0.46, 0.42], [0.82, 0.32, 0.3], [0.86, 0.02, 0.02]], 14), lift(white, 0.3));
+      return;
+    }
+    case 'bucket_hat': case 'sun_hat': {
+      const wide = id === 'sun_hat' ? 0.56 : 0.46, drop = id === 'sun_hat' ? 0.39 : 0.37;
+      dome(head, hc, { cy: 0.39, r: [0.365, 0.28, 0.325], tilt: -0.04, open: 0.5 });
+      head(profile([[drop, wide, wide * 0.92], [0.41, 0.46 * 0.8, 0.4 * 0.8], [0.43, 0.34, 0.3]], 18), id === 'sun_hat' ? hc : tone(hc, 0.9));
+      if (id === 'sun_hat') head(profile([[0.42, 0.372, 0.328], [0.47, 0.362, 0.318]], 16), a.hat.color2 || tone(hc, 0.6));
+      return;
+    }
+    case 'visor':
+      head(profile([[0.42, 0.372, 0.322], [0.48, 0.362, 0.312]], 16), hc);
+      head(new THREE.CylinderGeometry(0.24, 0.24, 0.016, 12, 1, false, -Math.PI / 2, Math.PI), tone(hc, 0.82), { position: [0, 0.44, 0.3], scale: [1, 1, 0.85] });
+      return;
+    case 'bobble_hat':
+      dome(head, hc, { cy: 0.37, r: [0.372, 0.31, 0.335], tilt: -0.1, open: 0.54 });
+      head(profile([[0.385, 0.378, 0.325], [0.46, 0.382, 0.33]], 16), a.hat.color2 || lift(hc, 0.5));
+      head(new THREE.SphereGeometry(0.085, 7, 5), a.hat.color2 || lift(hc, 0.5), { position: [0, 0.725, -0.03] });
+      return;
+    case 'ear_muffs':
+      // a band over the top of the head and a pad on each side: nothing about it minds which ears are under it
+      head(new THREE.TorusGeometry(0.385, 0.02, 5, 18, Math.PI), hc, { position: [0, 0.27, 0], scale: [1, 0.98, 1] });
+      for (const s of [-1, 1]) head(new THREE.SphereGeometry(0.095, 8, 6), a.hat.color2 || lift(hc, 0.25), { position: [s * 0.385, 0.27, 0], scale: [0.6, 1, 1] });
+      return;
     case 'war_helm': {
       // the warrior's helm: a round steel cap with a nasal bar, riveted cheek guards and a mail
       // curtain at the back of the neck

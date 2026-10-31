@@ -1,0 +1,14 @@
+{
+  "_doc": "Stir (PLAN §1): drag one person onto another and a scene plays. minutes = how long the scene lasts. A scene goes well at chance = base + like x likeScale + love x loveScale - grudge x grudgeScale (feelings of the one you dragged towards the other). good and bad = feeling changes for both, mood = passing feeling for both, as [value, hours].",
+  "minutes": 24,
+  "kinds": {
+    "introduce": { "label": "Introduce them", "base": 0.85, "likeScale": 0.002, "loveScale": 0, "grudgeScale": 0.01,
+      "good": { "known": 30, "like": 10 }, "bad": { "known": 18, "like": -4, "grudge": 4 }, "goodMood": [0.06, 6], "badMood": [-0.04, 6] },
+    "date": { "label": "Set up a date", "base": 0.3, "likeScale": 0.006, "loveScale": 0.006, "grudgeScale": 0.012, "adultsOnly": true,
+      "good": { "known": 12, "like": 12, "love": 20 }, "bad": { "known": 8, "like": -8, "grudge": 6 }, "goodMood": [0.14, 12], "badMood": [-0.1, 10] },
+    "row": { "label": "Start a row", "base": 0.92, "likeScale": -0.002, "loveScale": 0, "grudgeScale": -0.002,
+      "good": { "known": 8, "like": -18, "grudge": 16, "trust": -6 }, "bad": { "known": 6, "like": 6 }, "goodMood": [-0.1, 8], "badMood": [0.05, 4] },
+    "patch": { "label": "Patch it up", "base": 0.55, "likeScale": 0.004, "loveScale": 0.002, "grudgeScale": 0.004,
+      "good": { "known": 6, "like": 14, "grudge": -20, "trust": 8 }, "bad": { "known": 4, "grudge": 5 }, "goodMood": [0.1, 8], "badMood": [-0.05, 6] }
+  }
+}

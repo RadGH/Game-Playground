@@ -1,0 +1,99 @@
+# od_sit_cafe sit:cafe
+They've started writing my name on the cup wrong on purpose.
+Is it just me, or has this coffee got an aftertaste of Monday?
+That's four coins for a drink that's mostly air.
+I come here to work. I've been working on this muffin since nine.
+Somebody's laptop has been here longer than the staff.
+I asked for it small. It came in a bucket.
+I can tell how a day's going by the foam.
+They've got oat, soy, almond and something called "regret".
+# od_sit_pub sit:pub
+Same again? Is it ever not the same again?
+The quiz is on Thursday. I'm not saying I've been revising.
+That stool's been mine since the flood.
+I only came in for the one. That was on Friday.
+Somebody's put a song on. I'd like to speak to them outside. Kindly.
+The crisps are the healthiest thing in here, and that includes us.
+We're not drunk. We're relaxed about the floor.
+They've changed the beer. It's got a name now, and opinions.
+# od_sit_gym sit:gym
+What's the point of a mirror that's this honest?
+I've been on this bike for an hour and I'm still here.
+Is that sweat, or am I just sad from the top down?
+I only come for the shower, and the sense of having been.
+Somebody's grunting like they're being paid to.
+I've paid for this year. I've come twice. That's the best two visits money can buy.
+I lifted a thing and put it back. I feel like the universe.
+Do I look bigger? Be honest. Lie.
+# od_sit_park sit:park
+It's nice here, if you don't look at the ducks.
+Someone's dog just looked at me like it knew.
+This is my favourite tree. Don't tell the others.
+I come here to think, and then I look at a squirrel instead.
+Nothing here wants anything from me. Except that goose.
+They've mown it again. It had only just got comfortable.
+I sat on the wet bit. I'm staying till it's dry.
+Every park has one man with a very small kite.
+# od_sit_shop sit:shop
+I came in for milk, and I'm leaving with a lamp.
+Is this cheaper, or is it just a bigger sign?
+They've moved everything, and it's so they can see us suffer.
+I don't need it. I'm just holding it for a while.
+Have you seen what they want for a cucumber?
+I've been looking at this shelf so long I've started to work here.
+Unexpected item in the bagging area. Story of my life.
+Everything is on offer, except what I came for.
+# od_sit_diner sit:diner
+What's the soup? Don't tell me. I like the surprise.
+I've had the same order for nine years. It has my name on it, sort of.
+Is that gravy, or is it holding the table up?
+You get a free refill and a free opinion from the cook.
+It's all fried, even the salad. Especially the salad.
+It's not a good menu, but it's a long one.
+She calls everyone "love" here. She hasn't learned a name since 1990.
+I asked for it well done, and they called the fire brigade. Joke. Sorry. Too soon?
+# od_sit_clinic sit:clinic
+I've been in this waiting room long enough to get promoted.
+The magazines are from before the bridge.
+They told me to take a seat. I've been taking it for two hours.
+It's probably nothing. I've looked it up. It's definitely something.
+The nurse said "hmm". I don't like a "hmm".
+What's the worst it could be? Don't answer that, I've got a leaflet.
+Everyone in here is coughing at each other like it's a conversation.
+They asked me to rate my pain out of ten. I said it's more of a feeling about the car park.
+# od_sit_work sit:work
+Is it me, or is it still only ten o'clock?
+Look busy, someone's coming. Oh. It's only you.
+Remind me what we do here. Broadly.
+We've run out of the good pens, and morale.
+I've been told I'm a valued member of the team, so I'm looking for another job.
+Only four hours till the end of the day. Or six. It's hard to look.
+This could've been an email. So could I.
+I'm on my break. I've been on it, spiritually, since March.
+# od_sit_morning sit:morning
+Don't talk to me. Talk near me. Very quietly.
+I've had one coffee, so I'm technically a person.
+Who invented seven o'clock, and were they punished?
+Something's wrong with the morning. It's all over the place.
+I put my shoes on the wrong feet and just thought, fine.
+The birds are at it already. What have they got to be so pleased about?
+I've been awake for an hour and nothing has been explained.
+Today's the day. I don't know for what.
+# od_sit_night sit:night
+What are you doing up? I mean, what am I?
+It's very quiet. I don't trust it.
+I can see every light in the street. I've named some of them.
+You think different things at this hour. Mostly about the boiler.
+Is that a fox, or a neighbour?
+I should go to bed. I've been saying that since Tuesday.
+It's one of those nights where you can hear the fridge thinking.
+There's a light on at the town hall, and I would like to know why.
+# od_sit_home sit:home
+There's a noise, and I've decided it's the pipes.
+I'm going to sit down for one minute. Tell my family I loved them.
+Who lives like this? We do. I know. We do.
+I'd tidy up, but then I'd know where things were.
+The house is either too hot or too cold, and it's always somebody's fault.
+Someone's left a light on in a room nobody's been in since Easter.
+Home is where you know which stair creaks. We have no stairs, I know. It's a saying.
+I've been looking for the remote, and I've found a whole other remote.

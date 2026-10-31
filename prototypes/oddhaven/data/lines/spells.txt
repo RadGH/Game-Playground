@@ -1,0 +1,60 @@
+# od_spell_tidy_cast spell:tidy
+Right, everything back in its place. Quickly, before I lose my nerve.
+A little Tidy. Nothing fancy. Just the floor, and possibly my life.
+Come on, socks. You know where you live.
+Up you get, the lot of you. Shelves. Now.
+# od_spell_tidy_ok spell:tidy
+Look at that. You could eat off it. Don't.
+All done, and I never touched a duster.
+It's beautiful. I feel like a different person with a smaller pile.
+There. Now nobody touch anything for ever.
+# od_spell_tidy_bad spell:tidy
+It's tidied everything. Everything. Where's the cutlery? Where's the cat?
+It's filed the cushions by size. I can't find my keys or the door.
+It has alphabetised the fridge. I don't want to talk about it.
+Well, it's very clean. I've just lost most of my belongings.
+# od_spell_warm_cast spell:warm
+Hold still, you look perished.
+Here, a little bit of warm. Don't tell the gas company.
+Bit of a chill. Leave it with me.
+I do this to the bed sometimes. It's the same thing. It's fine.
+# od_spell_warm_ok spell:warm
+There. Like standing next to a good radiator.
+That's better, isn't it? Your ears have gone a nice colour.
+Toasty. I'm good at this. I should charge.
+Oh, that's lovely. I've done my own socks as well.
+# od_spell_warm_bad spell:warm
+Why is the curtain smoking? Is it meant to be smoking?
+That's too warm. That's definitely too warm. That's not a colour.
+I've cooked the armchair a bit.
+Don't panic, but your hat has started to steam.
+# od_spell_mend_cast spell:mend
+Come on, you. Back the way you were.
+Right, you lovely burnt thing, let's have a look.
+A little Mend. Not the whole wall. Just where it hurts.
+Hold on. Wood remembers. You have to ask it nicely.
+# od_spell_mend_ok spell:mend
+Good as new. Better. It's got a bit of a shine.
+There, that's one less for the crew.
+That took some doing. The wall's stopped sulking.
+Look, you can't even see where it went wrong.
+# od_spell_mend_bad spell:mend
+It's mended itself to the door. The door was not involved before.
+Well, that's worse. How is that worse?
+Ah. I've mended the burn. It's a very solid burn now.
+We're going to need more boards. And an apology.
+# od_spell_hush_cast spell:hush
+I'm so sorry, but you're being very loud. Shh.
+Just a moment of peace, if I may.
+Let's all have a nice bit of quiet.
+Sorry, I can't hear myself think. It's a short spell.
+# od_spell_hush_ok spell:hush
+Oh, that's better. You can hear the birds.
+There. Now we can all pretend nothing was said.
+Lovely. It wears off in an hour. Use it wisely.
+You've got a very nice face when you're not using it.
+# od_spell_hush_bad spell:hush
+Why are you louder? How are you louder?
+Oh no. It's turned you up.
+I can hear you in my fillings now.
+That's the whole street's windows rattling. That was you.

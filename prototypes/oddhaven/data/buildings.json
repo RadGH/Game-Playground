@@ -1,0 +1,35 @@
+{
+  "_doc": "One row per building kind. A town building names a kind; slots are capacities, one record each for a home unit, and planInterior must find a real place for every one (a home's work is done at its desks, table or sofa). tags = what an action's site can ask for. hours = [open, close] in game hours, may wrap past midnight; missing = always open. jobs = how many people this kind employs, by job id.",
+  "worldKinds": {
+    "houses": ["house"],
+    "flats": ["apartment"],
+    "park": ["park"],
+    "shops": ["grocery", "cafe", "diner", "office", "bar", "boutique", "gym", "clinic", "garage", "fire_station", "police_station", "school", "cafe", "sawmill", "lumber_yard", "rift_lodge", "office", "town_hall", "grocery", "diner", "office"],
+    "civic": ["town_hall", "school"],
+    "camp": ["forest_camp"],
+    "mill": ["saw_mill"]
+  },
+  "kinds": {
+    "house": { "role": "home", "slots": { "bed": 6, "stove": 1, "fridge": 1, "chair": 4, "shower": 1, "toilet": 1, "sofa": 3, "desk": 2, "work": 6 }, "rent": 60 },
+    "apartment": { "role": "home", "unitsDefault": 6, "slots": { "bed": 6, "stove": 1, "fridge": 1, "chair": 4, "shower": 1, "toilet": 1, "sofa": 2, "desk": 1, "work": 6 }, "rent": 40 },
+    "grocery": { "role": "shop", "tags": ["shop"], "hours": [7, 22], "slots": { "work": 6, "counter": 14 }, "jobs": { "clerk": 6 } },
+    "boutique": { "role": "shop", "tags": ["shop"], "hours": [9, 20], "slots": { "work": 3, "counter": 8 }, "jobs": { "clerk": 3 } },
+    "cafe": { "role": "shop", "tags": ["cafe", "food"], "hours": [6, 20], "slots": { "work": 4, "counter": 12 }, "jobs": { "barista": 4 } },
+    "diner": { "role": "shop", "tags": ["food"], "hours": [8, 23], "slots": { "work": 6, "counter": 16 }, "jobs": { "cook": 3, "server": 3 } },
+    "bar": { "role": "shop", "tags": ["bar"], "hours": [16, 2], "slots": { "work": 3, "counter": 16 }, "jobs": { "bartender": 3 } },
+    "gym": { "role": "shop", "tags": ["gym"], "hours": [6, 22], "slots": { "work": 2, "counter": 12 }, "jobs": { "trainer": 2 } },
+    "park": { "role": "public", "tags": ["park"], "slots": { "work": 2 }, "jobs": { "gardener": 2 } },
+    "office": { "role": "work", "slots": { "work": 14 }, "jobs": { "office_clerk": 10, "accountant": 4 } },
+    "school": { "role": "work", "slots": { "work": 10 }, "jobs": { "teacher": 8, "caretaker": 2 } },
+    "clinic": { "role": "work", "tags": ["clinic"], "slots": { "work": 9 }, "jobs": { "nurse": 6, "doctor": 3 } },
+    "fire_station": { "role": "work", "slots": { "work": 9 }, "jobs": { "firefighter": 9 } },
+    "police_station": { "role": "work", "slots": { "work": 9 }, "jobs": { "officer": 9 } },
+    "garage": { "role": "work", "slots": { "work": 5 }, "jobs": { "mechanic": 5 } },
+    "lumber_yard": { "role": "work", "slots": { "work": 4 }, "jobs": { "yard_clerk": 3 }, "tags": ["planks"] },
+    "sawmill": { "role": "work", "slots": { "work": 5 }, "jobs": { "office_clerk": 5 } },
+    "forest_camp": { "role": "work", "slots": { "work": 2 }, "jobs": { "logger": 8 } },
+    "saw_mill": { "role": "work", "slots": { "work": 2 }, "jobs": { "sawyer": 6, "timber_driver": 2 } },
+    "town_hall": { "role": "work", "slots": { "work": 6 }, "jobs": { "town_clerk": 6 } },
+    "rift_lodge": { "role": "work", "slots": { "work": 5 }, "jobs": { "rift_warden": 5 } }
+  }
+}

@@ -316,6 +316,27 @@ export function buildBody(a, rig, c) {
   if (f === 'buttons') for (let i = 0; i < 4; i++) studChest(0, (0.2 - i * 0.075) * T, 0.012, trim);
   if (f === 'seam') onChest([[0, 0.26 * T], [0, waistY]], 0.005, lining);
   if (f === 'band') onChest([[0, 0.27 * T], [0, 0.1 * T], [0, waistY]], 0.018, cloth2, { lift: 0.004 });
+  if (f === 'hivis') {
+    // silver tape: two straps over the shoulders and a band round the middle (only the modern work clothes ask for this)
+    const tape = a.top.color2 || '#d9dee2';
+    for (const sx of [-1, 1]) onChest([[sx * 0.1 * W, 0.28 * T], [sx * 0.1 * W, waistY]], 0.012, tape, { lift: 0.006 });
+    bandChest(0.02 * T, 0.018, tape, 0.012);
+    bandChest(0.1 * T, 0.018, tape, 0.012);
+  }
+  // Oddhaven M7, modern clothes batch 2: only the new ids reach these. color2 = the tie, the stripe, the print, the sparkle
+  if (f === 'tie') {
+    const tie = a.top.color2 || '#7a2a2a';
+    onChest([[0, 0.27 * T], [0, 0.2 * T]], 0.014, tie, { lift: 0.006 });
+    onChest([[0, 0.2 * T], [0, 0.02 * T]], 0.022, tie, { lift: 0.006 });
+    for (let i = 0; i < 2; i++) studChest(0, (-0.02 - i * 0.07) * T, 0.009, trim);
+  }
+  if (f === 'zip') {
+    onChest([[0, 0.28 * T], [0, waistY]], 0.007, a.top.color2 || lining, { lift: 0.003 });
+    studChest(0, 0.25 * T, 0.012, trim);
+  }
+  if (f === 'stripes') for (const sx of [-1, 1]) onChest([[sx * 0.15 * W, 0.26 * T], [sx * 0.15 * W, waistY]], 0.012, a.top.color2 || '#e8e2d4', { lift: 0.004 });
+  if (f === 'print') ellipsoid('chest', a.top.color2 || '#e8e2d4', [0, 0.1 * T, chestZ(0, 0.1 * T, 1, 0.002)], [0.075 * W, 0.075 * T, 0.008]);
+  if (f === 'sequins') for (let i = 0; i < 12; i++) { const k = i * 2.399, r = Math.sqrt(i / 12) * 0.13, x = Math.cos(k) * r * W, y = (0.1 + Math.sin(k) * r) * T; studChest(x, y, 0.008, a.top.color2 || '#f0d060', false, 0.004); }
   if (f === 'open') {
     // an open coat: the shirt shows in a V between the two fronts, which are edged in the lining
     chestPanel(y => (0.03 + Math.max(0, y / T) * 0.14) * W, 0.29 * T, waistY - 0.02, cloth2, 0.004);

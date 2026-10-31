@@ -1,0 +1,228 @@
+# od_fact_fire_mine fact:fire
+We had the fire {fact.ago}. I keep smelling toast that isn't there.
+The insurance man looked at {fact.place} and whistled. Never a good sign.
+{fact.rooms} gone, {fact.ago}. I'd only just painted.
+I still can't believe it. I left the oven on once in thirty years.
+The firefighters were lovely. One of them complimented the wallpaper, what was left.
+Everything I own now smells of barbecue.
+They've told us it will take boards. Boards! I thought it would take a miracle.
+We're fine. We're fine. Do you know how long it takes to replace a sofa?
+# od_fact_fire_near fact:fire
+Did you hear about {fact.place}? {fact.ago}, it was. You could see it from the bridge.
+They say it was the wiring. They always say it was the wiring.
+I smelled the smoke from {fact.place} and thought, somebody's doing a roast.
+That engine came past with the siren on and I spilled my whole tea.
+{fact.rooms} burned at {fact.place}. I'm checking my smoke alarm. Tomorrow.
+My cousin saw the whole thing from {place.the}, and enjoyed it far too much.
+It's always the quiet houses, isn't it? {fact.place}. Who knew.
+I took a casserole round to {fact.place}. I took it back, they'd moved out.
+# od_fact_rescuer fact:rescue
+I went in {fact.ago}. {fact.person} was heavier than they look.
+I don't want to talk about it. I do, though. I carried {fact.person} out.
+Anybody would have done it. Well. I did it.
+My shoulder still knows about {fact.person}.
+Everyone keeps buying me drinks. I've told them it was nothing. Keep going.
+You don't think, you just pick them up. Then you think, oof.
+# od_fact_rescued fact:rescue
+{fact.who} carried me out, {fact.ago}. Like a bag of shopping.
+I owe {fact.who} a very big dinner.
+I woke up upside down over {fact.who}'s shoulder. It was quite a view.
+I've sent {fact.who} a card. What do you write? "Thanks for the not dying"?
+They tell me I was very brave. I was asleep.
+I would like it known I had shoes on the whole time.
+# od_fact_moved_out fact:fire
+We've been put up somewhere else till {fact.place} is fixed. The towels are wrong.
+It's very nice, this temporary place. It's just nobody's. You know?
+The county found us a house. It has somebody else's smell.
+I went to my own front door by accident this morning, and it wasn't.
+All our things are in bags. I've been wearing the same jumper since the fire.
+They say another week. They said that last week.
+# od_fact_promoted fact:work
+They've promoted me. Nobody can explain what changed.
+I've got a new title and the same chair.
+Rank up, {fact.ago}! There was a cake. It was adequate.
+I'm in charge of things now. I'm as worried as you are.
+More money, more meetings. I may have been robbed.
+My mother rang to say she always knew. She didn't.
+# od_fact_towed fact:road
+The tow gnome got my car {fact.ago}. He charges by the sigh.
+I don't know how it ended up on its roof. Neither does the roof.
+A very small man turned my car over and sent me a bill.
+I've had a letter from the gnome. It wasn't a friendly letter.
+Thirty-five coins! For a gnome! He didn't even wipe his feet.
+That gnome looked at me like I'd done it on purpose.
+# od_fact_mishap fact:work
+I had a little accident at work, {fact.ago}. Don't look at the thumb.
+It's only a plaster. It's several plasters.
+They've put me in the accident book again. I've got my own page.
+I've been told to be more careful, by the person who left it there.
+It stopped bleeding eventually. Mostly on the form.
+Health and safety have asked me to stop waving.
+# od_fact_job fact:work
+Being {fact.job} is not what they said at the careers day.
+Nobody tells you, about being {fact.job}. Nobody tells you anything.
+I've been {fact.job} for years, and I'm just getting the hang of the car park.
+People always ask if being {fact.job} is hard. Yes. Thank you.
+My mother still tells people I'm {fact.job}. She says it quietly.
+You'd be surprised what you see as {fact.job}. I was.
+# od_fact_date_soon fact:romance
+I've got a date! With {fact.with}! At {fact.place}! I've ironed something.
+I'm meeting {fact.with}. What do people do with their hands?
+I've changed my shirt three times and it's a Tuesday.
+What do I talk about? I've only got bins and the weather.
+If it goes badly, ring me and pretend the house is on fire. Too soon?
+{fact.with} said yes! I had a whole speech ready for no.
+# od_fact_date_went fact:romance
+It went well with {fact.with}! I think! They laughed at the right bits!
+I've been smiling since {fact.ago}. My face hurts.
+We talked for hours. I said the thing about the ducks and {fact.with} stayed.
+I've got a second date. I've already planned the third. And the house.
+Don't tell anyone. Tell everyone. No, don't.
+I walked into a lamp post on the way home, and I didn't mind.
+# od_fact_date_bad fact:romance
+Don't ask about {fact.with}. I asked if they liked soup. It went downhill.
+It was the longest hour of my life, and I've been to a planning meeting.
+There was a silence. It's still going on, I think.
+I called {fact.with} by the wrong name, and then I called the waiter "mum".
+We shook hands at the end. Shook. Hands.
+I'm retiring from dating. I'm getting a plant.
+# od_fact_stood_up fact:romance
+{fact.with} left me sat there, at {place.the}, with two coffees. I drank both.
+I waited an hour. The waiter brought me a pity biscuit.
+Not a word from {fact.with}. Not one. I've a mind to say something. Loudly.
+I'm not bitter. I've just kept the receipt, for evidence.
+They've stood me up, {listener.name}. Me! With my hair like this!
+I told everyone I'd been ill. I wasn't ill. I was ironed.
+# od_fact_split fact:romance
+It's over with {fact.with}. I'm keeping the plant.
+We've called it off. Very grown up. I cried in a car park.
+I've still got {fact.with}'s jumper, and I'm not giving it back.
+I'm fine. I've eaten a whole cheesecake, but I'm fine.
+The town's stopped the sweepstake. That's how you know.
+Don't say you're sorry. Say something bad about {fact.with}. Go on.
+# od_fact_wedding_mine fact:wedding
+I'm getting married! At {fact.place}! I've just told you and I'm shaking!
+The seating plan is the worst thing that has ever happened to me.
+I've written my vows. They're mostly about the dishwasher.
+My feet are cold. Not like that. They're actually cold.
+Who invited the goblin? He's brought his own spoons.
+Two days! Two days and then it's for ever! Is there cake?
+# od_fact_wedding_guest fact:wedding
+I've been asked to the do for {fact.a} and {fact.b}. What does one wear to that?
+I've bought a hat. A person can only make so many mistakes.
+Going to see {fact.a} marry {fact.b}. I give it thirty years, tops.
+I'm only going for the sandwiches. I'll cry at the sandwiches.
+{fact.a} and {fact.b}! Who'd have thought! I would. I had money on it.
+What do you buy two people who already have a toaster?
+# od_fact_wedding_near fact:wedding
+Did you see {fact.a} and {fact.b}? Married! {fact.ago}!
+It was a lovely wedding. Nobody fell in anything.
+I cried at the wedding. I don't even like them.
+The cake was very good. I had three bits and a word with the caterer.
+I hear {fact.a} and {fact.b} are looking for a bigger sofa.
+They looked so happy. I give it a week before someone mentions the towels.
+# od_fact_feud_near fact:feud
+Have you heard about {fact.a} and {fact.b}? It's {fact.cause}. It's always {fact.cause}.
+{fact.a} and {fact.b} aren't speaking. I've picked a side. I've picked both.
+I walked past the pair of them, and the temperature dropped.
+There's a sign up now. An actual sign. In a garden.
+I'm staying out of it. Now tell me everything.
+I've got popcorn, a folding chair and a good view of the fence.
+# od_fact_pranked fact:feud
+Somebody {fact.prank}. I know exactly who. I've got a list, and it has one name.
+I don't want to say anything. I've just got a camera on the gnome now.
+{fact.by} thinks this is funny, {fact.ago}. Well. I've got a hedge trimmer and a free afternoon.
+I'm rising above it. I've bought a ladder, for rising.
+Did you see what {fact.by} did? In broad daylight? Well, dusk?
+This is war. A quiet one. With very good manners.
+# od_fact_meet_soon fact:meet
+I've got to be at {fact.place} later. I've been told to bring my dignity.
+I'm seeing {fact.with} tonight. Wish me luck. Or a good lawyer.
+They want to talk, at {fact.place}. Nothing good starts like that.
+I've got a thing later. It's in the diary. I've underlined it.
+Is it today I've got to see {fact.with}? It is. Wonderful.
+I've rehearsed what I'm going to say. In the mirror. I lost.
+# od_fact_cause_hedge fact:cause
+That hedge is on my side. I've measured it. I've had it surveyed.
+Eleven inches. That's how far it's come. Eleven inches of nerve.
+I cut my side. I left the other side. It looks like a bad haircut, and that's the point.
+You think you own the sun? Your hedge does.
+A hedge is a wall that thinks it's better than you.
+I've read the bylaws, {listener.name}. All nine pages of hedge.
+# od_fact_cause_bins fact:cause
+Your bin was out on a Tuesday, {listener.name}. A Tuesday.
+That's my bin. It has a number on it. I painted the number.
+Bins go out the night before. Not the night before that. It's not hard.
+I've seen what you recycle. We know about you now.
+You left the lid up. On purpose. For the foxes.
+I've moved it back. You'll move it again. This is my life now.
+# od_fact_cause_parking fact:cause
+That space has been mine since before you were born.
+Two spaces! You took two spaces! With one car!
+I've put a cone there. It's a legal cone.
+Your front tyre was over the line. Don't tell me it wasn't. I have a photograph.
+I've parked in front of your drive, and I feel nothing.
+You can't own the road, {listener.name}. Except that bit. That bit's mine.
+# od_fact_cause_noise fact:cause
+Do you know what time it was? Do you? It was the second act.
+I could hear every note through the wall. Every. Single. Note.
+Some of us have ears, {listener.name}.
+Six in the morning is not a time for a high C.
+I've bought earplugs. I can still hear it. I can hear it in my teeth.
+I've written to the council, in the key of G.
+# od_fact_cause_casserole fact:cause
+I want my casserole dish back. It's been four years.
+That's my dish. It has a chip on the left, and so do you.
+You returned it dirty. That's what you did. You returned it dirty.
+It was my mother's dish, {listener.name}. She's not dead. She's very angry.
+I've seen it on your draining board. I've seen it through the window.
+Lids don't just go missing. Lids get taken.
+# od_fact_cause_ladder fact:cause
+I lent you that ladder in good faith.
+You said a weekend. Which weekend, {listener.name}? Which weekend?
+That's my ladder on your shed. I can see it from my bedroom.
+It came back with a dent, and an attitude.
+Neither a borrower be. That's all I'm saying. That's all I'm saying this week.
+A person who keeps a ladder can't be trusted with anything taller.
+# od_fact_cause_fire fact:cause
+Your stove, {listener.name}. Your stove, in my kitchen. In my lungs.
+You could've burned us all in our beds. You nearly burned my bed.
+I smell like your dinner, and I'll never forgive it.
+Who leaves a pan on? Who does that? You, that's who.
+I've got soot on things I didn't know I had.
+Insurance doesn't cover what you did to my nerves.
+# od_fact_cause_stood_up fact:cause
+Two coffees, {listener.name}. I drank two coffees.
+You could have sent a message. A pigeon. Anything.
+I wore the good shirt. You'll never know, because you weren't there.
+An hour, I sat there. The waiter knows my whole life now.
+I've told everyone. I've told the waiter's mother.
+You don't get to wave at me. You lost waving.
+# od_fact_cause_ex fact:cause
+You kept my jumper.
+I saw you with that plant. That was our plant.
+I'm happy for you. I've been practising saying that.
+You said we'd go to the seaside. I've still got the towel.
+I've told everybody it was mutual. It was me that was mutual.
+I'm over it. I've been over it for hours.
+# od_fact_cause_promotion fact:cause
+Eleven years, I've been there. Eleven. And they gave it to you.
+Enjoy the chair, {listener.name}. I hope it's everything you think it is.
+Congratulations, by the way. Through my teeth.
+What did you do, stand near the boss? Is that all it took?
+I trained you. I showed you the good stapler.
+You'll need someone to blame in that new job. I'd start with me. I do.
+# od_fact_cause_row fact:cause
+I said what I said, and I'll say it louder.
+You started it. No, you did. No, you did.
+People heard you, {listener.name}. People in {town.name} heard you.
+That's twice you've raised your voice to me, and I raised it first.
+I've forgotten what it was about, and I'm still right.
+I'd apologise, but then you'd think you'd won.
+# od_fact_cause_words fact:cause
+I know what you said about me. I know who you said it to.
+You used a tone. Don't tell me you didn't. There was a tone.
+It wasn't what you said. It was your eyebrows.
+I've been thinking about it for two weeks, and I've got a reply.
+You called me "fine". I heard you. "Fine."
+There are some things you can't say in a queue.

@@ -1,0 +1,42 @@
+{
+  "_doc": "People (M6): what scenes, feud causes, pranks, spells and race moods are. Numbers that tune the sim are in balance.json; the words are in lingo/data/packs/oddhaven.json (scenes, spells) and data/news.json (beats). A scene's beats name a Lingo pool per line; who = a or b, clip = a body clip. places = kinds or tags to hold it at, tried in order.",
+  "scenes": {
+    "first_date":   { "label": "First date", "minutes": 34, "places": ["cafe", "food", "bar", "park"], "beats": [["a", "open", "wave"], ["b", "open", "laugh"], ["a", "mid", "talk"], ["b", "mid", "shrug"], ["a", "close", "nod"], ["b", "close", "laugh"]] },
+    "second_date":  { "label": "Second date", "minutes": 34, "places": ["food", "bar", "park", "cafe"], "beats": [["a", "open", "laugh"], ["b", "open", "talk"], ["a", "mid", "nod"], ["b", "mid", "laugh"], ["a", "close", "wave"]] },
+    "proposal":     { "label": "The question", "minutes": 30, "places": ["park", "cafe", "food"], "beats": [["a", "open", "shrug"], ["b", "open", "nod"], ["a", "ask", "wave"], ["b", "answer", "laugh"]] },
+    "wedding":      { "label": "Wedding", "minutes": 44, "places": ["town_hall", "park"], "guests": 7, "beats": [["a", "open", "wave"], ["b", "open", "laugh"], ["a", "vow", "nod"], ["b", "vow", "nod"], ["a", "close", "laugh"], ["b", "close", "wave"]] },
+    "row":          { "label": "A public row", "minutes": 30, "places": ["shop", "food", "park", "cafe"], "beats": [["a", "open", "crossArms"], ["b", "open", "shrug"], ["a", "mid", "talk"], ["b", "mid", "crossArms"], ["a", "close", "crossArms"]] },
+    "showdown":     { "label": "The hearing", "minutes": 34, "places": ["town_hall", "park"], "beats": [["a", "open", "crossArms"], ["b", "open", "crossArms"], ["a", "mid", "talk"], ["b", "mid", "talk"], ["b", "close", "shrug"]] },
+    "thanks":       { "label": "A proper thank you", "minutes": 26, "places": ["cafe", "food", "bar", "park"], "beats": [["a", "open", "wave"], ["b", "open", "shrug"], ["a", "mid", "nod"], ["b", "mid", "laugh"]] },
+    "housewarming": { "label": "Housewarming", "minutes": 34, "places": ["home"], "guests": 4, "beats": [["a", "open", "wave"], ["b", "open", "laugh"], ["a", "mid", "shrug"], ["b", "mid", "laugh"]] },
+    "introduce":    { "label": "Introductions", "beats": [["a", "open", "wave"], ["b", "open", "nod"], ["a", "mid", "shrug"]] },
+    "date":         { "label": "A set-up date", "beats": [["a", "open", "wave"], ["b", "open", "laugh"], ["a", "mid", "shrug"]] },
+    "rowstir":      { "label": "A row", "beats": [["a", "open", "crossArms"], ["b", "open", "shrug"], ["a", "mid", "crossArms"]] },
+    "patch":        { "label": "Making up", "beats": [["a", "open", "shrug"], ["b", "open", "crossArms"], ["a", "mid", "nod"]] }
+  },
+  "stirScene": { "introduce": "introduce", "date": "date", "row": "rowstir", "patch": "patch" },
+  "feudCauses": {
+    "hedge": { "heat": 18 }, "bins": { "heat": 14 }, "parking": { "heat": 20 }, "noise": { "heat": 16 }, "casserole": { "heat": 12 }, "ladder": { "heat": 12 },
+    "fire": { "heat": 34 }, "stood_up": { "heat": 26 }, "ex": { "heat": 30 }, "promotion": { "heat": 22 }, "row": { "heat": 32 }, "words": { "heat": 22 }
+  },
+  "neighbourCauses": ["hedge", "bins", "parking", "casserole", "ladder"],
+  "pranks": ["gnome", "bins", "hedge", "note", "flyers", "doorbell", "cones"],
+  "signs": 7,
+  "spells": {
+    "tidy": { "label": "Tidy", "verb": "Tidy the place", "needs": "home" },
+    "warm": { "label": "Warm", "verb": "Warm someone up", "needs": "person" },
+    "mend": { "label": "Mend", "verb": "Mend a burned room", "needs": "burnt" },
+    "hush": { "label": "Hush", "verb": "Hush someone", "needs": "person" }
+  },
+  "raceMoods": {
+    "human":    { "rule": "plan", "on": ["pub", "dine_out", "coffee", "browse_shops"], "fresh": 36, "stale": 90, "plus": 0.05, "minus": 0.05, "label": "Needs a plan for the weekend" },
+    "elf":      { "rule": "since", "on": ["park_walk", "stroll", "sit_out"], "fresh": 12, "stale": 34, "plus": 0.06, "minus": 0.08, "label": "Wilts without something green nearby" },
+    "dwarf":    { "rule": "floor", "plus": 0.05, "minus": 0.08, "label": "Likes stone underfoot: happy on the ground floor, miserable up high" },
+    "orc":      { "rule": "since", "on": ["pub", "gym", "row", "quarrel"], "fresh": 14, "stale": 40, "plus": 0.06, "minus": 0.07, "label": "Has to be loud now and then; a good row counts" },
+    "giant":    { "rule": "room", "roomy": 2, "crowded": 4, "plus": 0.05, "minus": 0.08, "label": "Needs room: a full house weighs on them" },
+    "goblin":   { "rule": "since", "on": ["browse_shops", "found"], "fresh": 16, "stale": 48, "plus": 0.07, "minus": 0.06, "label": "Needs something new and shiny" },
+    "halfling": { "rule": "odd", "on": ["snack", "dine_out", "home_block"], "meals": [[420, 540], [720, 810], [1080, 1200]], "fresh": 6, "stale": 26, "plus": 0.06, "minus": 0.05, "label": "Needs a snack at an odd hour" },
+    "undead":   { "rule": "since", "on": ["chat", "phone_friend", "mentioned", "wedding"], "fresh": 18, "stale": 54, "plus": 0.06, "minus": 0.09, "label": "Needs to feel remembered" },
+    "beast":    { "rule": "since", "on": ["park_walk", "stroll", "gym"], "fresh": 10, "stale": 30, "plus": 0.06, "minus": 0.07, "label": "Needs a good run outdoors" }
+  }
+}

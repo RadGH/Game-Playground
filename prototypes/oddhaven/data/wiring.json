@@ -1,0 +1,447 @@
+{
+  "_doc": "Levers, buttons, plates and timers as data (PLAN §2 Mechanisms). A thing fires an event, a wire turns the event into actions. A set is a list of things and wires; byKind says which sets a kind of building gets. {room}, {garage}, {bay}, {shutter}, {vault} are filled in by planInterior. Actions: toggle, set (value), pay (amount, once), call (rings the fire station), sprinkle and extinguish (water on a room, target = the room or none for wherever the fire is). detector and sprinkler things are not pressed: fire.js fires them on smoke and heat. A gate fires 'on' the moment every row of `all` is true ('target=value'); thing:<id> is a lever or plate's own value. A timer fires 'open' or 'close' at the place's hours. needs = only on plans that have that feature. Sim workers and players press the same things.",
+  "sets": {
+    "lights": {
+      "things": [
+        {
+          "id": "sw:{room}",
+          "kind": "switch",
+          "each": "room",
+          "label": "Light"
+        }
+      ],
+      "wires": [
+        {
+          "from": "sw:{room}",
+          "on": "press",
+          "each": "room",
+          "do": [
+            {
+              "act": "toggle",
+              "target": "light:{room}"
+            }
+          ]
+        }
+      ]
+    },
+    "garage": {
+      "needs": "garage",
+      "things": [
+        {
+          "id": "gd-in",
+          "kind": "button",
+          "at": "garage-in",
+          "label": "Garage door"
+        },
+        {
+          "id": "gd-out",
+          "kind": "button",
+          "at": "garage-out",
+          "label": "Garage door"
+        }
+      ],
+      "wires": [
+        {
+          "from": "gd-in",
+          "on": "press",
+          "do": [
+            {
+              "act": "toggle",
+              "target": "door:{garage}"
+            }
+          ]
+        },
+        {
+          "from": "gd-out",
+          "on": "press",
+          "do": [
+            {
+              "act": "toggle",
+              "target": "door:{garage}"
+            }
+          ]
+        }
+      ]
+    },
+    "bay": {
+      "needs": "bay",
+      "things": [
+        {
+          "id": "bay-in",
+          "kind": "button",
+          "at": "bay-in",
+          "label": "Roller door"
+        },
+        {
+          "id": "bay-out",
+          "kind": "button",
+          "at": "bay-out",
+          "label": "Roller door"
+        }
+      ],
+      "wires": [
+        {
+          "from": "bay-in",
+          "on": "press",
+          "do": [
+            {
+              "act": "toggle",
+              "target": "door:{bay}"
+            }
+          ]
+        },
+        {
+          "from": "bay-out",
+          "on": "press",
+          "do": [
+            {
+              "act": "toggle",
+              "target": "door:{bay}"
+            }
+          ]
+        }
+      ]
+    },
+    "shutter": {
+      "needs": "shutter",
+      "things": [
+        {
+          "id": "shut-in",
+          "kind": "button",
+          "at": "shutter-in",
+          "label": "Shutter"
+        },
+        {
+          "id": "shut-out",
+          "kind": "button",
+          "at": "shutter-out",
+          "label": "Shutter"
+        },
+        {
+          "id": "shut-timer",
+          "kind": "timer"
+        }
+      ],
+      "wires": [
+        {
+          "from": "shut-in",
+          "on": "press",
+          "do": [
+            {
+              "act": "toggle",
+              "target": "door:{shutter}"
+            }
+          ]
+        },
+        {
+          "from": "shut-out",
+          "on": "press",
+          "do": [
+            {
+              "act": "toggle",
+              "target": "door:{shutter}"
+            }
+          ]
+        },
+        {
+          "from": "shut-timer",
+          "on": "open",
+          "do": [
+            {
+              "act": "set",
+              "target": "door:{shutter}",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "from": "shut-timer",
+          "on": "close",
+          "do": [
+            {
+              "act": "set",
+              "target": "door:{shutter}",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    },
+    "test": {
+      "needs": "vault",
+      "things": [
+        {
+          "id": "lever-a",
+          "kind": "lever",
+          "at": "testroom-left",
+          "label": "Left lever"
+        },
+        {
+          "id": "lever-b",
+          "kind": "lever",
+          "at": "testroom-right",
+          "label": "Right lever"
+        },
+        {
+          "id": "plate",
+          "kind": "plate",
+          "at": "testroom-mid",
+          "label": "Plate"
+        },
+        {
+          "id": "vault-gate",
+          "kind": "gate",
+          "all": [
+            "thing:lever-a=1",
+            "thing:lever-b=0",
+            "thing:plate=1"
+          ]
+        },
+        {
+          "id": "chest",
+          "kind": "button",
+          "at": "vault",
+          "label": "Open the chest"
+        }
+      ],
+      "wires": [
+        {
+          "from": "lever-a",
+          "on": "press",
+          "do": [
+            {
+              "act": "toggle",
+              "target": "thing:lever-a"
+            }
+          ]
+        },
+        {
+          "from": "lever-b",
+          "on": "press",
+          "do": [
+            {
+              "act": "toggle",
+              "target": "thing:lever-b"
+            }
+          ]
+        },
+        {
+          "from": "plate",
+          "on": "step",
+          "do": [
+            {
+              "act": "set",
+              "target": "thing:plate",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "from": "plate",
+          "on": "leave",
+          "do": [
+            {
+              "act": "set",
+              "target": "thing:plate",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "from": "vault-gate",
+          "on": "on",
+          "do": [
+            {
+              "act": "set",
+              "target": "door:{vault}",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "from": "chest",
+          "on": "press",
+          "do": [
+            {
+              "act": "pay",
+              "amount": 40,
+              "once": "chest-paid"
+            }
+          ]
+        }
+      ]
+    },
+    "alarm": {
+      "things": [
+        {
+          "id": "alarm:{room}",
+          "kind": "detector",
+          "each": "room",
+          "label": "Smoke alarm"
+        }
+      ],
+      "wires": [
+        {
+          "from": "alarm:{room}",
+          "on": "smoke",
+          "each": "room",
+          "do": [
+            {
+              "act": "call"
+            }
+          ]
+        }
+      ]
+    },
+    "sprinklers": {
+      "things": [
+        {
+          "id": "spr:{room}",
+          "kind": "sprinkler",
+          "each": "room",
+          "label": "Sprinkler"
+        }
+      ],
+      "wires": [
+        {
+          "from": "spr:{room}",
+          "on": "heat",
+          "each": "room",
+          "do": [
+            {
+              "act": "sprinkle",
+              "target": "{room}"
+            }
+          ]
+        }
+      ]
+    },
+    "extinguisher": {
+      "things": [
+        {
+          "id": "ext",
+          "kind": "extinguisher",
+          "at": "extinguisher",
+          "label": "Extinguisher"
+        }
+      ],
+      "wires": [
+        {
+          "from": "ext",
+          "on": "press",
+          "do": [
+            {
+              "act": "extinguish"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "byKind": {
+    "house": [
+      "lights",
+      "alarm",
+      "garage"
+    ],
+    "apartment": [
+      "lights",
+      "alarm"
+    ],
+    "grocery": [
+      "lights",
+      "alarm",
+      "shutter",
+      "extinguisher"
+    ],
+    "boutique": [
+      "lights",
+      "alarm",
+      "shutter",
+      "extinguisher"
+    ],
+    "cafe": [
+      "lights",
+      "alarm",
+      "shutter",
+      "extinguisher"
+    ],
+    "diner": [
+      "lights",
+      "alarm",
+      "shutter",
+      "extinguisher"
+    ],
+    "bar": [
+      "lights",
+      "alarm",
+      "shutter",
+      "extinguisher"
+    ],
+    "gym": [
+      "lights",
+      "alarm",
+      "shutter",
+      "extinguisher"
+    ],
+    "office": [
+      "lights",
+      "alarm",
+      "sprinklers",
+      "extinguisher"
+    ],
+    "school": [
+      "lights",
+      "alarm",
+      "sprinklers",
+      "extinguisher"
+    ],
+    "clinic": [
+      "lights",
+      "alarm",
+      "sprinklers",
+      "extinguisher"
+    ],
+    "town_hall": [
+      "lights",
+      "alarm",
+      "sprinklers",
+      "extinguisher"
+    ],
+    "police_station": [
+      "lights",
+      "alarm",
+      "extinguisher"
+    ],
+    "fire_station": [
+      "lights",
+      "alarm",
+      "bay",
+      "extinguisher"
+    ],
+    "garage": [
+      "lights",
+      "alarm",
+      "bay",
+      "extinguisher"
+    ],
+    "sawmill": [
+      "lights",
+      "alarm",
+      "bay",
+      "extinguisher"
+    ],
+    "lumber_yard": [
+      "lights",
+      "alarm",
+      "bay",
+      "extinguisher"
+    ],
+    "rift_lodge": [
+      "lights",
+      "alarm",
+      "test",
+      "extinguisher"
+    ]
+  }
+}

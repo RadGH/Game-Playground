@@ -1,0 +1,99 @@
+# od_rel_stranger rel:stranger
+Sorry, have we met? You look like someone I owe money.
+I don't think we've met. I am, as far as I know, nobody important.
+Do you live round here, or are you just visiting the pavement?
+Lovely weather for not knowing each other.
+You're new. Or I'm new. One of us is new.
+I'm going to pretend I know your name, and you can help me.
+You have a very familiar coat.
+Is this the queue? Are we a queue?
+Forgive me, I talk to anyone. It's a condition.
+I've seen you at {place.the}, I think. You had a face.
+# od_rel_known rel:known
+Oh! You. Hello. It's... you!
+Still at the same place? Good. Good, good.
+We keep meeting like this. On the pavement, I mean.
+How's the, you know. The thing.
+Say hello to, um, everyone.
+I know exactly who you are, {listener.name}. Mostly from the shoes.
+I always mean to stop and chat, and here I am, regretting it. Joke!
+Are we the sort of people who hug? No. Good.
+I saw you at {place.the} and did a little wave. You didn't see it. That's fine.
+You look just the same. I'm not sure what you looked like before.
+# od_rel_friend rel:friend
+Oh good, it's you. I can stop being polite.
+I have got so much to tell you, and most of it is about bins.
+There she is! Or he. There you are. You know what I mean.
+You're the only person who knows about the thing with the trifle.
+You look terrible. I say that with love.
+I told my mother about you, and she said to stop talking about you.
+Pub? I know it's nine in the morning. I'm just saying the word.
+If I ever get arrested, you're my phone call. Don't pick up.
+We should do something. Not now. We should think about it, though.
+Remember the night at {place.the}? We don't speak of it. We just did.
+# od_rel_housemate rel:housemate
+Whose turn was it to do the thing? I'll tell you whose.
+There's a mug in the sink, and I am not angry, I am just noting it.
+Somebody has eaten my yoghurt, and it had my name on it in pen.
+You left the landing light on. I'm not your mother. I just live like her.
+Could you not breathe so loudly in the mornings?
+I've labelled the shelves. You don't need to read it. Just know.
+We're out of milk. We have been out of milk, as a household, since I was born.
+Did you say something, or was that the boiler?
+I love you, but the bathroom is a crime scene.
+Who keeps moving the good scissors? I need to know before I die.
+# od_rel_coworker rel:coworker
+Is it Friday? Do not tell me if it is not.
+I saw the rota. We don't have to talk about the rota.
+The boss said a word today. It was "synergy". I had to sit down.
+I'd love to help, but I've just remembered I'm on a break.
+Same time tomorrow, then. Same everything. Same soup.
+If they ask, I was here all morning, and so were you.
+My favourite part of the job is leaving it.
+Did you get the email? Don't read the email.
+Somebody has been microwaving fish, and I intend to find them.
+I've worked here eleven years and I still don't know what we do.
+# od_rel_date rel:date
+You look nice. Have you always looked this nice? I would have said.
+I have told everyone about you. Including, I think, a bus driver.
+I saved you a chair in my whole entire life. Sorry. That got away from me.
+Is it too soon to show you my spreadsheet of holidays?
+My mother wants to meet you. I've told her you're shorter than you are.
+I keep smiling at nothing. People have started moving seats.
+I like how you say "the". The way you do it. "The".
+Text me when you get home. It's four doors down, I know. Text me.
+You make me want to buy a new towel.
+We should get a plant. Start small. See who it likes.
+# od_rel_spouse rel:spouse
+Did you remember the thing? No. Neither did I.
+You're doing that with your jaw again.
+I've been married to you long enough to know that was a sigh.
+What do you want for dinner? No, what do you really want. No, not that.
+You left the receipt in your coat, and I've read it. Very interesting.
+Love you. Have you seen the scissors?
+I'd marry you again. I'd want to see the kitchen first.
+That's not what happened, and you know it. Tell it properly.
+Remember when we used to talk? No, nor me, we're talking now.
+Who was that? You had your telephone voice on.
+# od_rel_foe rel:foe
+I see you're still alive.
+I've been meaning to not speak to you.
+Don't mind me. I'm just standing here disapproving.
+Nice coat. Who died?
+I hope you get exactly what you deserve, {listener.name}.
+You've got a nerve, turning up on your own pavement.
+I'm writing this down. Yes, this. All of this.
+I've nothing to say to you. Here it is, in full.
+Lovely day. It was, anyway.
+We're all very impressed with how you're holding up, considering what you did.
+# od_rel_sour rel:sour
+Oh. Right. Hello, then.
+I'm sure you meant well. I'm sure that's what it was.
+Don't worry about last time. I'm not. I've hardly thought about it. Eleven times.
+Fine, thanks. Not that you asked. Which you didn't.
+I'd stop and talk, but then I'd have stopped.
+Was that a joke? I couldn't tell, it wasn't funny.
+Yes, well. We all saw that.
+No hard feelings. A few soft ones.
+You're looking well, in the circumstances. You know the circumstances.
+I'll say nothing. I'll say it very clearly.

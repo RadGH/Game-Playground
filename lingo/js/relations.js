@@ -20,8 +20,8 @@ export class Relationship {
   tags() { const scope = { ...this.dims, familiarity: this.familiarity, opinion: this.opinion() }; const out = []; for (const t of this.model.tags) { try { if (new Function(...Object.keys(scope), 'return (' + t.when + ')')(...Object.values(scope))) out.push(t.tag); } catch {} } return out; }
   knows(trait) { return this.knowledge.has(trait); }
   learn(trait) { if (trait) this.knowledge.add(trait); return this; }
-  /** Apply a named event. opts: { traits (viewer's), now, strength (multiplier), source } */
-  apply(eventId, { traits = [], now = 0, strength = 1, source = null, targetTraits = [] } = {}) {
+  /** Apply a named event. opts: { traits (viewer's), now, strength (multiplier), source, rng (optional seeded 0..1 source; default Math.random) } */
+  apply(eventId, { traits = [], now = 0, strength = 1, source = null, targetTraits = [], rng = Math.random } = {}) {
     const ev = this.model.events[eventId]; if (!ev) throw new Error('unknown relationship event ' + eventId);
     const before = { ...this.dims };
     for (const [dim, delta] of Object.entries(ev.effects || {})) {
@@ -33,7 +33,7 @@ export class Relationship {
     let fam = ev.familiarity || 0; for (const t of traits) { const m = this.model.traitModifiers[t]?.familiarity; if (m && fam > 0) fam *= m.gain ?? 1; } this.familiarity = clamp(this.familiarity + fam, 0, 1);
     // learning: events reveal the target's traits (only ones they actually have); familiarity reveals random ones
     for (const t of ev.reveals || []) if (targetTraits.includes(t)) this.knowledge.add(t);
-    if (targetTraits.length && this.familiarity > 0.3 && Math.random() < this.familiarity * 0.3) this.knowledge.add(targetTraits[Math.floor(Math.random() * targetTraits.length)]);
+    if (targetTraits.length && this.familiarity > 0.3 && rng() < this.familiarity * 0.3) this.knowledge.add(targetTraits[Math.floor(rng() * targetTraits.length)]);
     this.history.push({ at: now, event: eventId, source, delta: Object.fromEntries(Object.keys(this.dims).filter(d => this.dims[d] !== before[d]).map(d => [d, +(this.dims[d] - before[d]).toFixed(3)])) });
     if (this.history.length > 50) this.history.shift(); this.updatedAt = now;
     return this;

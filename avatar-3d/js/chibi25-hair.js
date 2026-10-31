@@ -49,6 +49,9 @@ export const HAT_FIT = {
   great_helm: { shell: [-0.1, -0.1], noHang: true }, dragon_helm: { shell: [-0.1, -0.1], noHang: true }, chain_coif: { shell: [0.47, -0.1], face: true, noHang: true }, goggles_up: { shell: [0.49, 0.3] },
   crown: { band: [0.57, 0.06, 0.262] }, circlet: { band: [0.45, 0.03, 0.318] }, headband: { band: [0.46, 0.035, 0.32] }, feather_band: { band: [0.46, 0.035, 0.32] },
   bone_headdress: { band: [0.46, 0.04, 0.322] },
+  // Oddhaven M7
+  police_cap: { shell: [0.44, 0.36] }, warden_cap: { shell: [0.44, 0.36] }, chef_hat: { shell: [0.44, 0.38] }, bucket_hat: { shell: [0.42, 0.38] }, sun_hat: { shell: [0.43, 0.41] }, bobble_hat: { shell: [0.42, 0.36] },
+  visor: { band: [0.45, 0.035, 0.325] }, ear_muffs: { band: [0.62, 0.025, 0.23] },
   flower: { spot: [0.27, 0.47, 0.15, 0.085] },                   // a flower over the left temple: hair under it lies flat
 };
 /** g5_ and other hats: anything whose id says helm/hat/hood/cap gets a generic shell (a 2.5 look only). */

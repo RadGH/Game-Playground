@@ -1,0 +1,50 @@
+{
+ "_doc": "The biggest body each race can roll, in model metres, before any scale in the game. Written by tools/measure-races.mjs.",
+ "races": {
+  "human": {
+   "tall": 2.022,
+   "wide": 0.858,
+   "deep": 0.683
+  },
+  "elf": {
+   "tall": 2.075,
+   "wide": 0.769,
+   "deep": 0.6
+  },
+  "dwarf": {
+   "tall": 1.633,
+   "wide": 1.168,
+   "deep": 0.839
+  },
+  "orc": {
+   "tall": 2.064,
+   "wide": 1.201,
+   "deep": 0.637
+  },
+  "giant": {
+   "tall": 2.9,
+   "wide": 1.387,
+   "deep": 0.801
+  },
+  "goblin": {
+   "tall": 1.598,
+   "wide": 1.1,
+   "deep": 0.802
+  },
+  "halfling": {
+   "tall": 1.566,
+   "wide": 0.883,
+   "deep": 0.686
+  },
+  "undead": {
+   "tall": 1.972,
+   "wide": 0.81,
+   "deep": 0.67
+  },
+  "beast": {
+   "tall": 2.097,
+   "wide": 0.983,
+   "deep": 0.785
+  }
+ }
+}

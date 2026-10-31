@@ -1,0 +1,9 @@
+{
+  "name": "oddhaven",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Oddhaven: a modern life sim with fantasy races. The page needs nothing; this is for the dev room server.",
+  "scripts": { "room": "node server/main.mjs 8561" },
+  "dependencies": { "ws": "^8.18.0" }
+}

@@ -1,0 +1,210 @@
+# od_scene_first_date_open scene:first_date
+You came! I mean, hello. You came.
+Hi. I've practised this. Hi.
+Sorry I'm late. I've been outside for twenty minutes, deciding.
+You look just like yourself! That's a good thing!
+I didn't know if we were hugging, so I've brought this menu.
+Is this seat taken? It's mine. I booked it. Sorry. Nerves.
+# od_scene_first_date_mid scene:first_date
+So. What do you, you know. Do. With your time. On earth.
+Tell me something about yourself that isn't on your face.
+I should say now, I have strong opinions on ducks.
+I've got three stories and that was one of them.
+Do you like soup? That's not a test. It's a test.
+My mother says I talk too much when I'm nervous. She's right, she has a list, it's quite long.
+# od_scene_first_date_close scene:first_date
+I had a nice time. I think. Did we?
+We should do this again, unless you've got a better idea, like moving away.
+I'll text you. Do I text you? Who goes first?
+That went fine. Nothing's on fire. That's a good sign round here.
+Well. Goodbye. I'm going this way. I live the other way, but I'm going this way.
+I'd like you to know that I usually have more chin.
+# od_scene_second_date_open scene:second_date
+You came back! Nobody comes back!
+I wore the other shirt. I only have two. Now you know everything.
+I told my mother. I told her a nicer version of you.
+I've been looking forward to this since about four minutes after the last one.
+I brought a question. I've written it down. Is that weird?
+This time I've eaten first, so I can concentrate.
+# od_scene_second_date_mid scene:second_date
+You did that thing again, with your eyebrow.
+What's your worst habit? I'll go first. How long have you got?
+I think I like you. I wanted to say it before I ate.
+I've told you about the ducks. Nobody gets the ducks at a second date.
+What are we doing about Sundays? Long term. I'm just asking.
+Do you want the last chip? I'm asking because I've decided you're important.
+# od_scene_second_date_close scene:second_date
+So we're doing this, are we? This?
+I'm going to tell people. Is that all right? I've already told people.
+You're my favourite person at this table.
+Same time next week? And all the other weeks? I'm joking. I'm not.
+I'm not going to say anything soppy. I've got it written down for later.
+I'd walk you home, but I think I'm walking on the road.
+# od_scene_proposal_open scene:proposal
+Can I talk to you about something? It isn't the bins.
+Sit down. No, stand up. Sit. I've thought about this.
+Remember when you said you liked this bench? I've had it rated.
+I've got something in my pocket. It's not a sandwich. Don't get excited. Get excited.
+You look nice. Why are you looking nice today? It makes this harder.
+Is it me, or is it hot? Don't answer. I need you to listen.
+# od_scene_proposal_ask scene:proposal
+Will you marry me? I've got a whole speech but I've eaten it.
+I'd like to be annoyed by you for the rest of my life. Officially.
+I've looked at everyone in this town, and you're my favourite. Marry me.
+So I was wondering if you'd want to share a toaster. For ever. With a ring.
+Marry me. I'll give you the left side of the bed and all of the blanket.
+I got down on one knee, and I may need help, but first: will you?
+# od_scene_proposal_answer scene:proposal
+Are you asking me or are you stuck? Yes. Both. Yes.
+I've been waiting for you to work that out for weeks.
+Oh, you ridiculous person. Get up. Well, in a minute. Ask me again.
+Is that a real ring? Don't tell me. Let me enjoy it.
+I need to sit down. I am sitting down. I need to sit down more.
+I'll tell you what I'd say if you got up off the ground.
+# od_scene_wedding_open scene:wedding
+You look like the best decision I've ever made.
+I'm not crying, it's the flowers. I'm allergic to being this happy.
+Everyone's here. Even your aunt. Especially your aunt.
+Did you see the goblin's got the rings? Check the rings.
+Your hands are shaking. So are mine. That'll be the whole building, then.
+This is either the best day of my life, or a very expensive lunch.
+# od_scene_wedding_vow scene:wedding
+I promise to tell you when you've got something in your teeth.
+I promise to love you, and to pretend to like your mother's soup.
+I'll always listen. Mostly. I'll nod in the right places.
+I promise to wake you up for fires, and to let you sleep through the rest.
+I take you, with the snoring and the opinions about gravel.
+For better, for worse, for all the bills, every three days.
+# od_scene_wedding_close scene:wedding
+Well, that's that. You can't get rid of me now. I've read the paperwork.
+We did it! Nobody objected! I checked the back row!
+Is it cake now? I was promised cake.
+Mine. Sorry. I just wanted to say it out loud.
+I've never loved anyone so much in such uncomfortable shoes.
+Let's go home. Whose home? We should have sorted that out.
+# od_scene_row_open scene:row
+There you are. I've been wanting a word. Several, in fact.
+Oh, here we go. Everyone, this is the one I told you about.
+You've got a nerve, showing your face at {place.the}.
+Don't you walk away from me. I'm walking towards you. Stop.
+I'm so glad I've run into you. I've written this down.
+Excuse me! Excuse me! Yes, you! I'm excusing you!
+# od_scene_row_mid scene:row
+Don't you dare bring my mother into this. She'll only agree with you.
+I've got witnesses! That man saw it! Sir, did you see it?
+You're not even listening! I can tell by your ears!
+That is the single most ridiculous thing that's been said in this building.
+Oh, I'm sorry, was my opinion too close to your opinion?
+Say that again, slower, so everyone can enjoy it.
+# od_scene_row_close scene:row
+This isn't over. It's just, I've got to get to the shops.
+I'll see you in court. Or at the bins. Whichever's first.
+Good day! I said good day! Good evening, if it gets that far!
+You'll hear from me. You'll hear it through the wall.
+Fine! Fine. It's fine! I'm leaving now, on purpose!
+And another thing! No, it's gone. It'll come back to me. It'll come back to you.
+# od_scene_showdown_open scene:showdown
+Thank you for hearing me, and for the chairs.
+I've brought photographs, a tape measure and a sworn statement from a pigeon.
+I'd like it on the record that I was here first.
+The town clerk can see what kind of person I'm dealing with.
+I've prepared a folder. It has tabs. This is what you've brought me to.
+I've taken a morning off work for this, and I intend to enjoy it.
+# od_scene_showdown_mid scene:showdown
+If you look at exhibit four, that's the moment it all went wrong.
+I object! Can I object? Is that what we do here?
+I've lived on that street for nineteen years, and I've never once been so insulted by a shrub.
+That's not what happened. That's what happened in your head.
+On the night in question, I was at home, listening to the whole thing.
+The facts are simple, and there are forty-one of them.
+# od_scene_showdown_close scene:showdown
+Fine. If that's what the town hall says. I'll be appealing to the town.
+So that's it, is it? After all that? I want my folder back.
+I accept the ruling, and I'll never speak of it again, except daily.
+I hope you're happy. You look happy. It's not a good look.
+Well. I suppose that's that. Is there a cafe round here?
+Next time, I'm bringing a lawyer. Or a bigger pigeon.
+# od_scene_thanks_open scene:thanks
+Sit down, it's on me. Everything's on me. For a year.
+I don't know how you say thank you for this, so I got you a muffin.
+Here's the person who carried me out of a fire, everyone. Everyone? No? Just me then.
+I've been wanting to find you. I had a speech, and it was mostly crying.
+I hear you've got a bad shoulder. That'd be me.
+You're looking well. Last time I saw you, I was upside down.
+# od_scene_thanks_mid scene:thanks
+You didn't have to do that. I mean, it was your job. But you didn't have to.
+If you ever need anything: a kidney, a lift, a casserole.
+They told me you went back in. Why would anyone do that?
+I'd have left me in there, if I'd seen the state of my kitchen.
+It was nothing. It wasn't nothing. It was very heavy.
+I keep thinking about it. Then I think about what I was wearing.
+# od_scene_housewarming_open scene:housewarming
+Come in, come in! Mind the wet paint, it's holding the wall up.
+Welcome back to the house! It's the same one, only less on fire.
+You can still smell it a bit, if you lean on the door.
+We've got new boards! Smell the boards! Go on!
+Shoes off! We've only just got a floor.
+I've made a cake. I've kept an eye on it the entire time.
+# od_scene_housewarming_mid scene:housewarming
+It looks better than it did, if I'm honest. Sorry. It does.
+I've missed this kitchen. I've missed it not being a crime scene.
+Who's for tea? I've got the kettle back. We've made peace.
+Thank you all for coming, and for the pie. There were eleven pies.
+I've put a smoke alarm in every room. Including the cupboard.
+You'd never know. You'd know a bit. Don't go upstairs.
+# od_scene_introduce_open scene:introduce
+Hello. I'm told I have to meet you.
+Somebody said we'd get on. I don't know why people say these things.
+So. You're you, then.
+Hi! Everyone keeps saying we should meet! So this is that!
+I've heard a lot about you. None of it was checked.
+Don't get up. I'll be over here, being introduced.
+# od_scene_introduce_mid scene:introduce
+What do you do when you're not being pushed at strangers?
+I can tell we're going to be polite to each other for years.
+Well, this is nice. Is it? I think it's nice.
+Do you know anything about gutters? No? Well, we tried.
+You have a very firm handshake. I'd like my hand back.
+We've got nothing in common, and I find that very restful.
+# od_scene_date_open scene:date
+They said you were single. They said it quite loudly.
+Somebody's set us up. I'd like to know who, and whether they're watching.
+I don't usually do this. I've done this four times.
+I'm told I should "be myself". I've brought someone else in case.
+Are you here for the date, or the free bread?
+You don't look like the description. It said "tall-ish".
+# od_scene_date_mid scene:date
+So what's wrong with you? I'm joking. I've got a list.
+I've got to be up early, in case this goes badly.
+If this works, we tell people we met at a library.
+What's your stance on sharing a dessert? It's a serious question.
+You've got nice hands. I don't know why I said that.
+Should we be enjoying this? I've lost track.
+# od_scene_rowstir_open scene:rowstir
+I never liked you. I've only just realised, but I never did.
+Something about your face has been bothering me since Tuesday.
+Who do you think you are? Be specific.
+I saw what you did. I don't know what it was, but I saw it.
+Don't look at me in that tone of voice.
+What did you say? You didn't say anything? Exactly.
+# od_scene_rowstir_mid scene:rowstir
+You're everything that's wrong with this street, and it's a long street.
+I'll have you know I've been in a bad mood for years, and I earned it.
+My whole family's going to hear about this. I'll start with the quiet ones.
+You call that an argument? I've had better rows with a door.
+Go on, say it! Say it! No, not that, that's horrible!
+And your shoes, while we're at it!
+# od_scene_patch_open scene:patch
+Look. I've been thinking. Don't get excited.
+I brought you a casserole. I don't know what's in it. Peace, mainly.
+Can we not do this any more? I'm tired, and my folder's full.
+I'm not saying I was wrong. I'm saying I've stopped enjoying it.
+I saw you at the shop and I hid behind the bread. This has to stop.
+This is hard for me to say, so I'll say it fast, and to your shoulder.
+# od_scene_patch_mid scene:patch
+I suppose we both said some things. You said more. But we both said some.
+What was it about, even? No, don't. Don't. It'll start again.
+You're all right. Don't tell anyone I said so.
+I'm sorry about the gnome. I'm not sorry about the other gnome.
+Shall we say no more about it? I've got a lot more about it, but shall we?
+I've missed having someone to wave at, even if it was in a rude way.

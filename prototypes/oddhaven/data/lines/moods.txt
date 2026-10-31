@@ -1,0 +1,76 @@
+# od_mood_up mood:high
+I don't want to alarm anyone, but today is going quite well.
+I woke up happy and now I am suspicious.
+Everything is lovely and I would like it noted.
+The sun came out just for me. I checked.
+I smiled at a stranger and they did not call anyone.
+I feel like a person in an advert for yoghurt.
+Today I am the main character.
+Somebody held a door for me. I may never recover.
+I am in such a good mood that I let someone merge.
+Nothing is wrong. I looked.
+# od_mood_down mood:low
+I have got a small rain cloud of my own and it follows me about.
+It's fine. It's all fine. I said it's fine.
+Do you ever just look at a wall for a while?
+I had a good cry in the car. Well, the bus.
+Today has not been one of the good ones.
+I am having a day, and it is having me.
+I would like it to be some other time, please.
+If anyone wants me, I will be being quiet somewhere.
+I tried looking on the bright side, and it was shut.
+Even my toast was disappointed.
+# od_need_tired mood:tired
+I am so tired I saluted a lamp post.
+I slept for an hour and I remember none of it.
+If I sit down I will not get up. I am telling you this now.
+My eyes are open but I would not call it a decision.
+I have reached the part of tired where everything is funny.
+I put the milk in the cupboard and my keys in the tea.
+Is it bedtime? It feels like it was bedtime a while ago.
+I yawned so wide I heard the news.
+# od_need_hungry mood:hungry
+Is it just me or does that bin smell delicious?
+I could eat a whole town. Starting with the diner.
+My stomach has started making statements.
+I would do something quite bad for a sausage roll.
+I have been thinking about a sandwich and it is getting personal.
+When did we last eat? As a people?
+If you need me, I will be looking at food in a window.
+I am so hungry I read a menu for pleasure.
+# od_need_lonely mood:lonely
+You're the first person I have talked to today. Sorry. Are you busy?
+It's been nice talking to you. Is it all right if I go on a bit?
+I said good morning to the radio.
+I rang the bank just to hear somebody say my name.
+The cashier asked how I was, and I told her. All of it.
+It gets very quiet round our way.
+I have started to recognise the people on the adverts.
+Anyway, you must be busy. Are you? Don't go.
+# od_need_grubby mood:grubby
+Do I smell of anything? Be kind.
+I have been meaning to have a wash since Tuesday.
+Somebody stepped away from me on the bus, and that was fair.
+This shirt has seen things.
+I found something in my hair, and I have decided not to look.
+The shower and I have been growing apart.
+I am at one with the outdoors, mostly on me.
+It is not dirt, it is a layer.
+# od_need_bored mood:bored
+I counted the ceiling tiles again. There are still forty.
+Something should happen. I am not fussy what.
+I have read the back of everything in the house.
+If I have to watch one more quiz, I will start winning.
+I went to the shop just to see what the shop was doing.
+I would pay to see a fire. Sorry. A small one.
+Is anything on? Anywhere? For anyone?
+I have started having opinions about gravel.
+# od_need_stiff mood:stiff
+My back has handed in its notice.
+I sat on something at some point, and it was not a chair.
+I would like to lie down somewhere soft and be forgotten.
+Everything that bends has stopped bending.
+There is a knot in my shoulder with its own postcode.
+I stood up and three things clicked.
+I have not been comfortable since the spring.
+I think my spine is a question mark now.

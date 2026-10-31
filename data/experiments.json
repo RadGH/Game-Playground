@@ -690,6 +690,18 @@
    ]
   },
   {
+   "id": "oddhaven",
+   "group": "prototypes",
+   "title": "Oddhaven",
+   "href": "prototypes/oddhaven/",
+   "folder": "prototypes/oddhaven",
+   "summary": "A modern town that keeps living without you, and you can jump into anyone in it. So far (M1): pick one of 13 households, watch 300 people live out their days across two towns from a god camera, tap anyone, give them orders. Jumping in comes next.",
+   "status": "prototype",
+   "statusNote": "M1 the street lives",
+   "date": "2026-10-30",
+   "tags": ["life sim", "god game", "driving"]
+  },
+  {
    "id": "kindlewild",
    "group": "prototypes",
    "title": "Kindlewild",

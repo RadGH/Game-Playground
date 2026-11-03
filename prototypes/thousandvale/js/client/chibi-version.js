@@ -16,11 +16,18 @@
 import { createChibi2Character, prepareChibi2 } from '../../../../avatar-3d/js/chibi2.js';
 import { dropRetired } from './retired-parts.js';      // #77
 
-/** 2 or 2.5 from a page's query string (pure — exported for tests). */
-export function chibiVersion(search = '') { return /(?:^|[?&])chibi=2(?:&|$)/.test(String(search || '')) ? 2 : 2.5; }
+/** Chibi version from a page's query string (pure — exported for tests). */
+export function chibiVersion(search = '') {
+  const q = String(search || '');
+  if (/(?:^|[?&])chibi=2(?:&|$)/.test(q)) return 2;
+  if (/(?:^|[?&])chibi=2\.5(?:&|$)/.test(q)) return 2.5;
+  return 2.6;
+}
 export const CHIBI_V = chibiVersion(typeof location !== 'undefined' ? location.search : '');
 /** createChibi2Character options with the version switch applied (pure — exported for tests). */
-export const tvChibiOpts = (opts = {}, v = CHIBI_V) => (v >= 2.5 ? { ...opts, v25: true } : { ...opts });
+export const tvChibiOpts = (opts = {}, v = CHIBI_V) => v >= 2.6
+  ? { ...opts, v25: true, v26: true }
+  : v >= 2.5 ? { ...opts, v25: true } : { ...opts };
 
 // KESTREL (batch 1, 2026-10-27): `?chars=kestrel` draws every humanoid with the Kestrel kit body (chars-mode.js,
 // kestrel-body.js). Anything else = Chibi 2.5 exactly as before (the kit is never even loaded). Batch 5: the item icons'

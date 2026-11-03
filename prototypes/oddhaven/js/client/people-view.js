@@ -14,7 +14,8 @@ import { hashText } from './looks.js';
 import { LIFE_ANIMS } from './life-clips.js';
 import { indoorScale, DOOR_CLEAR } from '../sim/interior.js';
 
-const FIRE_CLIPS = { spray: 'lifeHose', force: 'lifeChop', hose: 'lifeLift', hook: 'lifeLift', lift: 'lifeLift', haul: 'lifeCarry', go: 'walk', wait: 'idle' };
+const FIRE_CLIPS = { spray: 'lifeHose', force: 'lifeChop', hose: 'lifeLift', hook: 'lifeLift', lift: 'lifeLift', haul: 'lifeCarry', go: 'walk', wait: 'idle', run: 'walk' };
+const AT_JOB = new Set(['fire_work', 'police_work', 'fight_work', 'questioned', 'flee']);
 export const ANIMS = ['idle', 'walk', 'talk', 'wave', 'sit', 'drink', 'laugh', 'shrug', 'nod', 'crossArms', ...LIFE_ANIMS];
 const CLIPS = { chat: 'talk', phone_friend: 'talk', coffee: 'drink', browse_shops: 'idle', work: 'idle', meet_wait: 'idle' };
 const STROLL_METRES_PER_TICK = 0.45;
@@ -23,7 +24,7 @@ const FIT_RATE = 0.9, DUCK = 0.42;    // body scale a second at the door; how fa
 const SKY_MAX = 30, SKY_FROM = 150, FULL = 10, STAND = 60, WALK_CLIP_SPEED = 2.3, BODY_SCALE = 1.35;   // Chibi bodies are built a metre and a bit tall: next to a car and a door that reads as a toddler
 const CLOSED = new Set(['sedan', 'semi_truck']);                 // nobody can see in: a body would be wasted on the driver
 
-export function createPeopleView({ THREE, scene, world, town, looks, paths, cars, carTypes, vdefs, indoors = null, floorOf = null, timber = null, fullMax = FULL, standInMax = STAND }) {
+export function createPeopleView({ THREE, scene, world, town, looks, paths, cars, carTypes, vdefs, indoors = null, floorOf = null, timber = null, isOpenAt = null, fullMax = FULL, standInMax = STAND }) {
   const group = new THREE.Group(); group.name = 'people'; scene.add(group);
   const stand = createStandIns({ THREE, cap: standInMax }), marks = createMoodMarks({ THREE, cap: fullMax + standInMax + SKY_MAX });
   group.add(stand.mesh, marks.mesh);
@@ -47,12 +48,12 @@ export function createPeopleView({ THREE, scene, world, town, looks, paths, cars
     return lap;
   }
   // ---- where somebody is, right now. Returns false if they cannot be seen.
-  const carByDriver = new Map();
+  const carByDriver = new Map(), seen = {};
   function locate(p, r, tick, out) {
     out.walking = false; out.anim = 'idle'; out.car = null; out.seat = 0; out.k = 1; out.inside = false; out.lie = false; out.lv = 0; out.carry = null;
     const trip = p.trip, roster = town.roster;
     if (p.a === 'site_work' && timber && p.at >= 0) return timber.place(p, tick, out);
-    if (p.a === 'fire_work' && p.at >= 0) {       // on a fire: between the two ends of what they are doing, like a timber worker
+    if (AT_JOB.has(p.a) && p.at >= 0) {       // on a fire, a call or a rift: between the two ends of what they are doing, like a timber worker
       const k = p.tk;
       if (!k) { if (p.x == null) return false; out.x = p.x; out.z = p.z; out.lv = 0; } else {
         const u = Math.max(0, Math.min(1, (tick - k.st) / Math.max(1, k.en - k.st))), mover = k.x0 !== k.x1 || k.z0 !== k.z1;
@@ -62,6 +63,7 @@ export function createPeopleView({ THREE, scene, world, town, looks, paths, cars
       }
       out.y = floorOf ? floorOf(out.x, out.z, out.lv) : groundAt(out.x, out.z);
       out.carry = p.cy ?? null;
+      if (p.fg?.down) { out.lie = true; out.anim = 'lifeSleep'; out.walking = false; } else if (p.strikeT > tick) out.anim = 'lifeChop';
       return true;
     }
     if (p.a === 'carried' && p.by != null) {     // over someone's shoulder
@@ -72,13 +74,16 @@ export function createPeopleView({ THREE, scene, world, town, looks, paths, cars
     }
     if (trip?.mode === 'held') {
       if (self.hands?.spot(p.i, out)) return true;
-      // somebody else's: where their browser last said, smoothed
-      if (p.x == null) return false;
+      // somebody else's: on the room's clock, a moment behind, between two things they really did
       const c = p.hold?.car >= 0 ? cars.byLive.get(p.hold.car) : null;
-      if (c) { cars.pose(c, out); out.y += carTypes.get(c.type)?.lift ?? 0; out.car = c; out.seat = p.hold.seat; out.anim = 'sit'; return true; }
-      const was = out.x == null || Math.hypot(p.x - out.x, p.z - out.z) > 12, dx = p.x - (out.x ?? p.x), dz = p.z - (out.z ?? p.z);
-      out.x = was ? p.x : out.x + dx * 0.25; out.z = was ? p.z : out.z + dz * 0.25; out.yaw = p.h ?? 0; out.lv = p.hold?.lv ?? 0; out.y = floorOf ? floorOf(out.x, out.z, out.lv) : groundAt(out.x, out.z);
-      out.walking = Math.hypot(dx, dz) > 0.2; out.anim = out.walking ? 'walk' : 'idle'; out.speed = 2.6;
+      if (c) { cars.pose(c, out); out.y += carTypes.get(c.type)?.lift ?? 0; out.car = c; out.seat = p.hold.seat; out.anim = 'sit'; out.walking = false; out.speed = 0; out.lv = 0; out.inside = false; return true; }
+      const track = town.bodies.get(p.i), at = track?.read(town.serverNow(), seen) ?? (p.x == null ? null : { x: p.x, z: p.z, h: p.h ?? 0, lv: p.hold?.lv ?? 0, inside: p.hold?.inside ?? -1, speed: 0 });
+      if (!at) return false;
+      out.x = at.x; out.z = at.z; out.yaw = at.h; out.lv = at.lv; out.inside = at.inside >= 0;
+      // indoors, the same rule as anyone: drawn at indoor size, and only while that building is open to you
+      if (out.inside && !isOpenAt?.(at.inside, at.lv)) return false;
+      out.y = floorOf ? floorOf(out.x, out.z, out.lv) : groundAt(out.x, out.z);
+      out.speed = at.speed; out.walking = at.speed > 0.2; out.anim = out.walking ? 'walk' : 'idle';
       return true;
     }
     if (trip?.mode === 'walk') {
@@ -259,7 +264,7 @@ export function createPeopleView({ THREE, scene, world, town, looks, paths, cars
           const ours = self.hands?.on && self.hands.ids().includes(p.i);
           if (d > reach && p.i !== self.selected && !ours) continue;
           // the driver of a closed car is only worth a body if you are looking right at them
-          const rank = ours ? -2e6 : d + (q.car && CLOSED.has(q.car.type) ? 60 : 0) - (p.i === self.selected ? 1e6 : 0) - (self.household.has(p.i) ? 25 : 0);
+          const rank = ours ? -2e6 : p.hold ? d - 5e5 : d + (q.car && CLOSED.has(q.car.type) ? 60 : 0) - (p.i === self.selected ? 1e6 : 0) - (self.household.has(p.i) ? 25 : 0);
           seenList.push([rank, p, q]);
         }
         for (const id of spots.keys()) if (!town.mirror.people.has(id)) spots.delete(id);

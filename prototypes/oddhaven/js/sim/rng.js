@@ -31,3 +31,9 @@ export function hashString(text) {
   for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
   return (h >>> 0).toString(16).padStart(8, '0');
 }
+/** A roll of 0..1 off a string. FNV alone barely moves its top bits for strings that differ in the last character, which is exactly what `.../hour/n` does, so this stirs them first. */
+export function hash01(text) {
+  let h = parseInt(hashString(text), 16);
+  h ^= h >>> 15; h = Math.imul(h, 0x2c1b3c6d); h ^= h >>> 12; h = Math.imul(h, 0x297a2d39); h ^= h >>> 15;
+  return (h >>> 0) / 4294967296;
+}

@@ -1,850 +1,1156 @@
 {
-  "_doc": "Every word of Moments, the family Story and the Odd Sheet. One row per kind of beat, or per story id. Each list is variants; the same beat always gets the same variant, picked by its number. head = a newspaper headline, line = a plain sentence for a Moment or a family's story, body = the paper's first paragraph. {who} {person} {other} {a} {b} = first names, {full} = whole name, {place} {cause} {rooms} {amount} {seconds}. Plain words, no real brands, no other game's names.",
-  "cause": {
-    "stove": "a stove left on",
-    "wiring": "old wiring",
-    "mishap": "an accident at work",
-    "spell": "a small spell gone wrong",
-    "hedge": "the hedge",
-    "bins": "the bins",
-    "parking": "a parking space",
-    "noise": "the singing",
-    "casserole": "a casserole dish",
-    "ladder": "a borrowed ladder",
-    "fire": "the fire",
-    "stood_up": "being stood up",
-    "ex": "how things ended",
-    "promotion": "a promotion",
-    "row": "a row in the street",
-    "words": "something that was said"
+ "_doc": "Every word of Moments, the family Story and the Odd Sheet. One row per kind of beat, or per story id. Each list is variants; the same beat always gets the same variant, picked by its number. head = a newspaper headline, line = a plain sentence for a Moment or a family's story, body = the paper's first paragraph. {who} {person} {other} {a} {b} = first names, {full} = whole name, {place} {cause} {rooms} {amount} {seconds}. Plain words, no real brands, no other game's names.",
+ "cause": {
+  "stove": "a stove left on",
+  "wiring": "old wiring",
+  "mishap": "an accident at work",
+  "spell": "a small spell gone wrong",
+  "hedge": "the hedge",
+  "bins": "the bins",
+  "parking": "a parking space",
+  "noise": "the singing",
+  "casserole": "a casserole dish",
+  "ladder": "a borrowed ladder",
+  "fire": "the fire",
+  "stood_up": "being stood up",
+  "ex": "how things ended",
+  "promotion": "a promotion",
+  "row": "a row in the street",
+  "words": "something that was said",
+  "arrest": "an arrest"
+ },
+ "beats": {
+  "fire.call": {
+   "line": [
+    "Fire at {place}. The engine is on its way.",
+    "Smoke over {place}. The crew are rolling."
+   ],
+   "head": [
+    "FIRE AT {PLACE}",
+    "{PLACE} ALIGHT"
+   ],
+   "body": [
+    "Crews were called to {place}, where {cause} is blamed."
+   ]
   },
-  "beats": {
-    "fire.call": {
-      "line": [
-        "Fire at {place}. The engine is on its way.",
-        "Smoke over {place}. The crew are rolling."
-      ],
-      "head": [
-        "FIRE AT {PLACE}",
-        "{PLACE} ALIGHT"
-      ],
-      "body": [
-        "Crews were called to {place}, where {cause} is blamed."
-      ]
-    },
-    "trapped": {
-      "line": [
-        "{who} is trapped inside {place}.",
-        "{who} can't get out of {place}."
-      ],
-      "head": [
-        "{WHO} TRAPPED AT {PLACE}"
-      ],
-      "body": [
-        "{who} was cut off inside {place} as the smoke came down."
-      ]
-    },
-    "rescued": {
-      "line": [
-        "{who} carried {person} out of {place}.",
-        "{person} is out of {place}, over {who}'s shoulder."
-      ],
-      "head": [
-        "{WHO} CARRIES {PERSON} TO SAFETY",
-        "HERO OF {PLACE}: {WHO}",
-        "\"I JUST PICKED THEM UP,\" SAYS {WHO}"
-      ],
-      "body": [
-        "{who} went into the smoke at {place} and came out with {person} over one shoulder. {person} has promised to buy the drinks for a year.",
-        "Bystanders at {place} watched {who} carry {person} out of the front door. {who} would not be drawn on the subject of the wig."
-      ]
-    },
-    "fire.out": {
-      "line": [
-        "The fire at {place} is out. {roomcount} damaged.",
-        "Fire out at {place}, {roomcount} burned. It was {cause}, they say."
-      ],
-      "head": [
-        "{PLACE} GUTTED",
-        "FIRE TAKES {rooms} ROOMS AT {PLACE}",
-        "{CAUSE} BLAMED FOR {PLACE} BLAZE"
-      ],
-      "body": [
-        "{cause} started it. {roomcount} of {place} are burned, and {seconds} seconds of hard work put it out. The insurers have been told.",
-        "It took the crew {seconds} seconds to put out the fire at {place}. The cause, they say, was {cause}. Boards are on order."
-      ]
-    },
-    "injured": {
-      "line": [
-        "{who} has gone to the clinic from {place}."
-      ],
-      "head": [
-        "{WHO} TAKEN TO CLINIC"
-      ],
-      "body": [
-        "{who} was taken from {place} by ambulance, coughing, and asking who was feeding the cat."
-      ]
-    },
-    "discharged": {
-      "line": [
-        "{who} is out of the clinic and home."
-      ],
-      "head": [
-        "{WHO} HOME FROM CLINIC"
-      ],
-      "body": [
-        "{who} walked out of the clinic today. The nurses say they will miss the complaints."
-      ]
-    },
-    "rehoused": {
-      "line": [
-        "The family have moved out of {place} until the repairs are done.",
-        "Burned out of {place}. The county has found them somewhere to stay."
-      ],
-      "head": [
-        "FAMILY MOVED OUT OF {PLACE}"
-      ],
-      "body": [
-        "The household at {place} is sleeping somewhere else tonight. The county is covering it."
-      ]
-    },
-    "home.again": {
-      "line": [
-        "Home again: the repairs are done at {place} and they have moved back."
-      ],
-      "head": [
-        "BACK HOME AT LAST"
-      ],
-      "body": [
-        "The family from {place} have moved back in. It smells of new wood."
-      ]
-    },
-    "repaired": {
-      "line": [
-        "The repairs are done at {place}, with {boards} boards from the yard."
-      ],
-      "head": [
-        "{PLACE} REBUILT"
-      ],
-      "body": [
-        "{place} is back, with {boards} new boards from Wend Mill."
-      ]
-    },
-    "promoted": {
-      "line": [
-        "{who} got a promotion."
-      ],
-      "head": [
-        "{WHO} MOVES UP IN THE WORLD"
-      ],
-      "body": [
-        "{who} has been promoted. The office cake was, by all accounts, adequate."
-      ]
-    },
-    "friends": {
-      "line": [
-        "{a} and {b} are friends now."
-      ],
-      "head": [
-        "{A} AND {B}: IT'S OFFICIAL"
-      ],
-      "body": [
-        "{a} and {b} are now to be seen together. Nobody saw it coming."
-      ]
-    },
-    "quarrel": {
-      "line": [
-        "{a} and {b} had words."
-      ],
-      "head": [
-        "WORDS EXCHANGED"
-      ],
-      "body": [
-        "{a} and {b} had words. Witnesses report that some of the words were long."
-      ]
-    },
-    "stir": {
-      "line": [
-        "{a} and {b} made a scene."
-      ],
-      "head": [
-        "A SCENE"
-      ],
-      "body": [
-        "{a} and {b} made a scene in public, and the town would like to know more."
-      ]
-    },
-    "hardship": {
-      "line": [
-        "The county had to step in with a grant."
-      ],
-      "head": [
-        "COUNTY PAYS UP"
-      ],
-      "body": [
-        "A household was helped out by the county. This should not happen."
-      ]
-    },
-    "tow": {
-      "line": [
-        "{who}'s car ended up on its roof. The tow gnome came."
-      ],
-      "head": [
-        "GNOME RIGHTS CAR"
-      ],
-      "body": [
-        "{who}'s car was found upside down. The tow gnome declined to comment, and sent a bill."
-      ]
-    },
-    "mishap": {
-      "line": [
-        "{who} had a small mishap at work."
-      ],
-      "head": [
-        "PLASTER APPLIED"
-      ],
-      "body": [
-        "{who} had a mishap at work. A plaster was involved."
-      ]
-    },
-    "newjob": {
-      "line": [
-        "{who} has a new job."
-      ],
-      "head": [
-        "{WHO} STARTS MONDAY"
-      ],
-      "body": [
-        "{who} has taken a new job, and has been told not to be late."
-      ]
-    }
+  "trapped": {
+   "line": [
+    "{who} is trapped inside {place}.",
+    "{who} can't get out of {place}."
+   ],
+   "head": [
+    "{WHO} TRAPPED AT {PLACE}"
+   ],
+   "body": [
+    "{who} was cut off inside {place} as the smoke came down."
+   ]
   },
-  "stories": {
-    "birthday": {
-      "line": [
-        "It was {who}'s birthday.",
-        "{who} turned {age}. There was cake."
-      ],
-      "head": [
-        "MANY HAPPY RETURNS, {WHO}"
-      ],
-      "body": [
-        "{who} is {age} today, and has asked us not to mention it."
-      ]
-    },
-    "windfall": {
-      "line": [
-        "{who} found {amount} coins on the pavement."
-      ],
-      "head": [
-        "PAVEMENT PAYS OUT"
-      ],
-      "body": [
-        "{who} found {amount} coins on the pavement and has told everybody."
-      ]
-    },
-    "neighbour_row": {
-      "line": [
-        "{who} and {other} fell out over the fence.",
-        "{who} told {other} exactly what they think of the hedge."
-      ],
-      "head": [
-        "THE WAR OF THE HEDGE"
-      ],
-      "body": [
-        "{who} and {other} are no longer speaking. It is about the hedge, as it always is."
-      ]
-    },
-    "neighbour_kind": {
-      "line": [
-        "{other} brought {who} a plant.",
-        "{who} helped {other} carry the shopping in."
-      ],
-      "head": [
-        "GOOD NEIGHBOURS"
-      ],
-      "body": [
-        "{who} and {other} were seen being nice to each other. We will keep an eye on it."
-      ]
-    },
-    "first_date": {
-      "line": [
-        "{who} went on a date with {other}.",
-        "{who} met {other} for a coffee that lasted four hours."
-      ],
-      "head": [
-        "SEEN TOGETHER: {WHO} AND {OTHER}"
-      ],
-      "body": [
-        "{who} and {other} were seen sharing a table. Sources say there was laughing."
-      ]
-    },
-    "second_date": {
-      "line": [
-        "{who} and {other} went out again.",
-        "{who} is seeing {other} again. The family have noticed."
-      ],
-      "head": [
-        "{WHO} AND {OTHER}, AGAIN"
-      ],
-      "body": [
-        "That is twice now for {who} and {other}. The town has started a sweepstake."
-      ]
-    },
-    "couple": {
-      "line": [
-        "{who} and {other} are a couple now."
-      ],
-      "head": [
-        "IT'S LOVE: {WHO} AND {OTHER}"
-      ],
-      "body": [
-        "{who} and {other} have told their families. The sweepstake has paid out."
-      ]
-    },
-    "keys_lost": {
-      "line": [
-        "{who} lost the keys. They were in the fridge."
-      ],
-      "head": [
-        "KEYS FOUND IN FRIDGE"
-      ],
-      "body": [
-        "{who} spent the morning looking for the keys. They were in the fridge."
-      ]
-    },
-    "car_trouble": {
-      "line": [
-        "{who}'s car made a noise. {amount} coins later, it stopped."
-      ],
-      "head": [
-        "THAT NOISE"
-      ],
-      "body": [
-        "{who} paid to have a noise taken out of the car."
-      ]
-    },
-    "a_cold": {
-      "line": [
-        "{who} has a cold and wants everybody to know."
-      ],
-      "head": [
-        "COLD GOING ROUND"
-      ],
-      "body": [
-        "{who} has a cold. Please stand well back."
-      ]
-    },
-    "quiz_win": {
-      "line": [
-        "{who} won the pub quiz: {amount} coins."
-      ],
-      "head": [
-        "{WHO} KNOWS THE CAPITAL OF EVERYWHERE"
-      ],
-      "body": [
-        "{who} won the pub quiz and {amount} coins. There has been a complaint."
-      ]
-    },
-    "spell_wrong": {
-      "line": [
-        "A small spell of {who}'s went wrong. The kettle is now a very small horse.",
-        "{who} tried a small spell. Their eyebrows are blue."
-      ],
-      "head": [
-        "SPELL GOES SLIGHTLY WRONG"
-      ],
-      "body": [
-        "{who} attempted a small spell at home. The results are still in the kitchen."
-      ]
-    },
-    "duck": {
-      "line": [
-        "A duck followed {who} all the way to the shops.",
-        "{who} has been adopted by a duck."
-      ],
-      "head": [
-        "DUCK FOLLOWS RESIDENT"
-      ],
-      "body": [
-        "A duck has been following {who} around town. Neither party will explain."
-      ]
-    },
-    "pie": {
-      "line": [
-        "{other} brought {who} a pie after the fire."
-      ],
-      "head": [
-        "THE STREET LOOKS AFTER ITS OWN"
-      ],
-      "body": [
-        "{other} turned up at the door with a pie for {who}. It helped."
-      ]
-    },
-    "rm_spark": {
-      "line": [
-        "{who} asked {other} out.",
-        "{who} has asked {other} for a coffee. Nobody is calling it a date. It is a date."
-      ],
-      "head": [
-        "{WHO} HAS ASKED {OTHER} OUT"
-      ],
-      "body": [
-        "{who} has asked {other} out, in a voice witnesses describe as \"quite high\". They are to meet at {place}."
-      ]
-    },
-    "rm_first_ok": {
-      "line": [
-        "{who} and {other} had a first date at {place}. It went well.",
-        "Four hours at {place} for {who} and {other}. They forgot to order."
-      ],
-      "head": [
-        "SEEN TOGETHER: {WHO} AND {OTHER}",
-        "FIRST DATE, NO CASUALTIES"
-      ],
-      "body": [
-        "{who} and {other} shared a table at {place}. Sources say there was laughing, and that it was not nervous by the end."
-      ]
-    },
-    "rm_first_bad": {
-      "line": [
-        "{who} and {other} had a first date at {place}. There will not be a second.",
-        "{other} left the date with {who} early, by the kitchen."
-      ],
-      "head": [
-        "DATE ENDS IN SILENCE AT {PLACE}"
-      ],
-      "body": [
-        "{who} and {other} tried a date at {place}. Staff report one of the longest silences in the history of the building."
-      ]
-    },
-    "rm_stood": {
-      "line": [
-        "{who} waited at {place}. {other} never came.",
-        "{other} stood {who} up at {place}."
-      ],
-      "head": [
-        "STOOD UP AT {PLACE}"
-      ],
-      "body": [
-        "{who} sat alone at {place} for most of an hour, and has been heard asking what {other} thinks they are playing at."
-      ]
-    },
-    "rm_second_ok": {
-      "line": [
-        "{who} and {other} went out again, and it went better.",
-        "That is twice now for {who} and {other}."
-      ],
-      "head": [
-        "{WHO} AND {OTHER}, AGAIN"
-      ],
-      "body": [
-        "That is twice now for {who} and {other}. The town has started a sweepstake."
-      ]
-    },
-    "rm_second_bad": {
-      "line": [
-        "The second date did not go like the first: {who} and {other} left separately."
-      ],
-      "head": [
-        "THE SECOND DATE: NOT A SUCCESS"
-      ],
-      "body": [
-        "Whatever {who} and {other} had at the first date, they did not bring it to the second."
-      ]
-    },
-    "rm_couple": {
-      "line": [
-        "{who} and {other} are a couple now."
-      ],
-      "head": [
-        "IT'S LOVE: {WHO} AND {OTHER}"
-      ],
-      "body": [
-        "{who} and {other} have told their families. The sweepstake has paid out."
-      ]
-    },
-    "rm_family": {
-      "line": [
-        "{who} met {other}'s family. Everyone was very polite. It was awful."
-      ],
-      "head": [
-        "{WHO} MEETS THE FAMILY"
-      ],
-      "body": [
-        "{who} has been to dinner with {other}'s family, and answered all the questions."
-      ]
-    },
-    "rm_feud_love": {
-      "line": [
-        "{who} and {other} are seeing each other, and their families are not speaking.",
-        "Two houses at war over {cause}, and {who} and {other} have gone on a date."
-      ],
-      "head": [
-        "LOVE ACROSS THE FENCE"
-      ],
-      "body": [
-        "With their families still at war over {cause}, {who} and {other} have been making plans. This column has bought popcorn."
-      ]
-    },
-    "rm_propose_yes": {
-      "line": [
-        "{who} asked {other} at {place}. {other} said yes!"
-      ],
-      "head": [
-        "{WHO} ASKS, {OTHER} SAYS YES"
-      ],
-      "body": [
-        "{who} got down on one knee at {place}, and needed some help getting back up. The answer was yes."
-      ]
-    },
-    "rm_propose_no": {
-      "line": [
-        "{who} asked {other} at {place}. {other} said not yet."
-      ],
-      "head": [
-        "\"NOT YET,\" SAYS {OTHER}"
-      ],
-      "body": [
-        "{who} asked the question at {place}. The answer was \"not yet\", which {who} is trying to find encouraging."
-      ]
-    },
-    "rm_wedding": {
-      "line": [
-        "{who} and {other} got married at {place}, with {guests} guests."
-      ],
-      "head": [
-        "{WHO} AND {OTHER}: MARRIED",
-        "THE TOWN TURNS OUT FOR {WHO} AND {OTHER}"
-      ],
-      "body": [
-        "{who} and {other} were married at {place} in front of {guests} guests, several of whom had money on it."
-      ]
-    },
-    "rm_moved": {
-      "line": [
-        "{who} and {other} have moved in together."
-      ],
-      "head": [
-        "ONE HOME, TWO TOOTHBRUSHES"
-      ],
-      "body": [
-        "{who} and {other} have set up home. Decisions about the sofa are ongoing."
-      ]
-    },
-    "rm_split": {
-      "line": [
-        "{who} and {other} have called it off."
-      ],
-      "head": [
-        "IT'S OVER FOR {WHO} AND {OTHER}"
-      ],
-      "body": [
-        "{who} and {other} are no longer an item. The sweepstake organisers have declined to comment."
-      ]
-    },
-    "fd_start": {
-      "line": [
-        "{who} and {other} have fallen out over {cause}.",
-        "It started with {cause}. {who} and {other} are not speaking."
-      ],
-      "head": [
-        "TROUBLE BREWING: {WHO} AND {OTHER}"
-      ],
-      "body": [
-        "{who} and {other} have fallen out over {cause}. Neighbours expect this to run."
-      ]
-    },
-    "fd_words": {
-      "line": [
-        "{who} told {other} what they think about {cause}. At length.",
-        "{who} and {other} had words about {cause} again."
-      ],
-      "head": [
-        "WORDS OVER {CAUSE}"
-      ],
-      "body": [
-        "{who} and {other} were heard discussing {cause} at a volume that discouraged anyone from joining in."
-      ]
-    },
-    "fd_prank": {
-      "line": [
-        "{who} {prank}. {other} knows exactly who did it.",
-        "{other} woke to find {who} had {prank2}."
-      ],
-      "head": [
-        "THE WAR GOES ON: {WHO} STRIKES"
-      ],
-      "body": [
-        "The business of {cause} goes on. {who} {prank}, and {other} has put a sign up."
-      ]
-    },
-    "fd_row": {
-      "line": [
-        "{who} and {other} had it out at {place}, in front of everyone.",
-        "A public row at {place}: {who} against {other}, over {cause}."
-      ],
-      "head": [
-        "SCENES AT {PLACE}",
-        "{WHO} AND {OTHER} GO PUBLIC"
-      ],
-      "body": [
-        "The matter of {cause} boiled over at {place}, where {who} and {other} had an audience and used it."
-      ]
-    },
-    "fd_ruling": {
-      "line": [
-        "The town hall has ruled: {who} is in the right about {cause}. {other} paid {amount} coins.",
-        "{who} won the hearing over {cause}. {other} says it is not over. It is over."
-      ],
-      "head": [
-        "TOWN HALL RULES FOR {WHO}"
-      ],
-      "body": [
-        "After a hearing about {cause}, the town clerk found for {who} and fined {other} {amount} coins. The clerk has asked never to hear the word again."
-      ]
-    },
-    "fd_noshow": {
-      "line": [
-        "{other} did not turn up to the hearing about {cause}. {who} says that says it all."
-      ],
-      "head": [
-        "EMPTY CHAIR AT THE HEARING"
-      ],
-      "body": [
-        "The hearing into {cause} lasted four minutes, because only {who} came."
-      ]
-    },
-    "fd_patched": {
-      "line": [
-        "{who} and {other} have made it up. Nobody mentioned {cause}.",
-        "It's over: {who} took a casserole round to {other}."
-      ],
-      "head": [
-        "PEACE BREAKS OUT: {WHO} AND {OTHER}"
-      ],
-      "body": [
-        "After all that about {cause}, {who} and {other} have shaken hands. Neighbours report feeling slightly let down."
-      ]
-    },
-    "fd_rescue": {
-      "line": [
-        "{who} carried {other} out of a fire, and that was the end of the feud."
-      ],
-      "head": [
-        "{WHO} SAVES OLD ENEMY {OTHER}"
-      ],
-      "body": [
-        "They were not speaking. Then {who} went into the smoke and came out with {other} over one shoulder. Nobody has mentioned {cause} since."
-      ]
-    },
-    "fd_wedding": {
-      "line": [
-        "With the wedding, the row over {cause} is over. {who} and {other} shook hands."
-      ],
-      "head": [
-        "A WEDDING ENDS THE WAR"
-      ],
-      "body": [
-        "The families are one family now, so {who} and {other} have agreed that {cause} was nobody's fault. It was entirely somebody's fault."
-      ]
-    },
-    "fd_fizzle": {
-      "line": [
-        "{who} and {other} seem to have forgotten what the fuss about {cause} was."
-      ],
-      "head": [
-        "THE GREAT ROW FIZZLES OUT"
-      ],
-      "body": [
-        "Nobody can quite remember why {who} and {other} fell out. It may have been {cause}."
-      ]
-    },
-    "fd_hushed": {
-      "line": [
-        "A well-placed Hush has ended it. {who} and {other} are done arguing about {cause}."
-      ],
-      "head": [
-        "HUSHED"
-      ],
-      "body": [
-        "The row over {cause} ended quite suddenly, in silence, with a faint smell of magic."
-      ]
-    },
-    "fa_thanks": {
-      "line": [
-        "{who} took {other} out to say thank you for the rescue."
-      ],
-      "head": [
-        "\"THANK YOU\" AT {PLACE}"
-      ],
-      "body": [
-        "{who} has bought {other} a meal at {place}, and promised to go on doing so for about a year."
-      ]
-    },
-    "fa_party": {
-      "line": [
-        "The housewarming at {place}: {guests} guests, and everyone admired the new boards."
-      ],
-      "head": [
-        "BACK IN, AND THE KETTLE'S ON"
-      ],
-      "body": [
-        "After the fire, the family at {place} had the street round. It still smells of new wood. Nobody minded."
-      ]
-    },
-    "sp_tidy_bad": {
-      "line": [
-        "{who} tidied up by magic and now nobody can find anything."
-      ],
-      "head": [
-        "TIDY SPELL: EVERYTHING GONE"
-      ],
-      "body": [
-        "{who} cast a small Tidy in a bad mood. The house is spotless. The cutlery has not been seen since."
-      ]
-    },
-    "sp_warm_bad": {
-      "line": [
-        "{who} tried a Warm and overdid it. There is a smell of toast, and it is the curtains."
-      ],
-      "head": [
-        "WARM GOES HOT"
-      ],
-      "body": [
-        "A small Warm went further than planned when {who} cast it in a temper."
-      ]
-    },
-    "sp_mend_bad": {
-      "line": [
-        "{who} tried to Mend the damage and made it worse. The repairs need more boards."
-      ],
-      "head": [
-        "MENDED BACKWARDS"
-      ],
-      "body": [
-        "{who} cast a Mend on a burned wall and the wall has taken offence."
-      ]
-    },
-    "sp_hush_bad": {
-      "line": [
-        "{who} tried to Hush {other}. {other} has never been louder."
-      ],
-      "head": [
-        "HUSH BACKFIRES"
-      ],
-      "body": [
-        "The Hush that {who} cast on {other} did the opposite, and can be heard from the bridge."
-      ]
-    },
-    "sp_mend_ok": {
-      "line": [
-        "{who} mended a burned room at {place} by magic."
-      ],
-      "head": [
-        "ONE ROOM, GOOD AS NEW"
-      ],
-      "body": [
-        "{who} has saved the repair crew a day with one small Mend at {place}."
-      ]
-    },
-    "sp_hush_ok": {
-      "line": [
-        "{who} Hushed {other}, and things have calmed down."
-      ],
-      "head": [
-        "A QUIET WORD, LITERALLY"
-      ],
-      "body": [
-        "{who} cast a small Hush on {other}. Peace, for an hour or so."
-      ]
-    },
-    "rm_steady": {
-      "line": [
-        "{who} and {other} are going steady. Nobody is in a hurry."
-      ],
-      "head": [
-        "{WHO} AND {OTHER}: NO RUSH"
-      ],
-      "body": [
-        "{who} and {other} have told this paper there are no plans, in a way that suggests there is a spreadsheet."
-      ]
-    }
+  "rescued": {
+   "line": [
+    "{who} carried {person} out of {place}.",
+    "{person} is out of {place}, over {who}'s shoulder."
+   ],
+   "head": [
+    "{WHO} CARRIES {PERSON} TO SAFETY",
+    "HERO OF {PLACE}: {WHO}",
+    "\"I JUST PICKED THEM UP,\" SAYS {WHO}"
+   ],
+   "body": [
+    "{who} went into the smoke at {place} and came out with {person} over one shoulder. {person} has promised to buy the drinks for a year.",
+    "Bystanders at {place} watched {who} carry {person} out of the front door. {who} would not be drawn on the subject of the wig."
+   ]
   },
-  "sheet": {
-    "quiet": {
-      "head": [
-        "NOTHING HAPPENS IN ODDHAVEN"
-      ],
-      "body": [
-        "A quiet few days. We have checked twice."
-      ]
-    },
-    "column": [
-      "This column has heard this much: {line}",
-      "A little bird tells us: {line}",
-      "We name no names, but: {line}",
-      "Not that we are one to talk, but: {line}"
-    ],
-    "signoff": [
-      "Yours, with a raised eyebrow, {who}.",
-      "That's all. I saw nothing. {who}.",
-      "{who}, from behind the curtains."
-    ],
-    "part": [
-      "Part {n} of a story this paper is following.",
-      "This paper has been following this one: part {n}.",
-      "Part {n}. Do keep up."
-    ],
-    "sofar": [
-      "So far: {tale}",
-      "The story so far: {tale}"
-    ]
+  "fire.out": {
+   "line": [
+    "The fire at {place} is out. {roomcount} damaged.",
+    "Fire out at {place}, {roomcount} burned. It was {cause}, they say."
+   ],
+   "head": [
+    "{PLACE} GUTTED",
+    "FIRE TAKES {rooms} ROOMS AT {PLACE}",
+    "{CAUSE} BLAMED FOR {PLACE} BLAZE"
+   ],
+   "body": [
+    "{cause} started it. {roomcount} of {place} are burned, and {seconds} seconds of hard work put it out. The insurers have been told.",
+    "It took the crew {seconds} seconds to put out the fire at {place}. The cause, they say, was {cause}. Boards are on order."
+   ]
   },
-  "pranks": {
-    "gnome": "moved a garden gnome one inch to the left every night for a week",
-    "bins": "put all the bins out on the wrong day, on purpose",
-    "hedge": "trimmed the hedge into a rude shape",
-    "note": "left a very polite note, which is the worst kind",
-    "flyers": "pinned up flyers asking if anyone had lost their manners",
-    "doorbell": "taught the doorbell a new tune",
-    "cones": "put traffic cones round the car, all of them"
+  "injured": {
+   "line": [
+    "{who} has gone to the clinic from {place}."
+   ],
+   "head": [
+    "{WHO} TAKEN TO CLINIC"
+   ],
+   "body": [
+    "{who} was taken from {place} by ambulance, coughing, and asking who was feeding the cat."
+   ]
   },
-  "tale": {
-    "rm_spark": "{a} asked {b} out",
-    "rm_first_ok": "the first date went well",
-    "rm_first_bad": "the first date was a disaster",
-    "rm_stood": "someone was stood up",
-    "rm_second_ok": "the second date went better",
-    "rm_second_bad": "the second date went badly",
-    "rm_couple": "they became a couple",
-    "rm_family": "the families met",
-    "rm_feud_love": "all while their families were at war over {cause}",
-    "rm_propose_yes": "then the question, and a yes",
-    "rm_propose_no": "the question got a \"not yet\"",
-    "rm_wedding": "and they were married",
-    "rm_moved": "and they moved in together",
-    "rm_split": "and then it was over",
-    "fd_start": "{a} and {b} fell out over {cause}",
-    "fd_words": "there were words",
-    "fd_prank": "there was a prank, and a sign went up",
-    "fd_row": "there was a row in public",
-    "fd_ruling": "the town hall ruled on it",
-    "fd_noshow": "someone did not turn up to the hearing",
-    "fd_patched": "and they made it up",
-    "fd_rescue": "and it ended when one carried the other out of a fire",
-    "fd_wedding": "and a wedding ended it",
-    "fd_fizzle": "and it fizzled out",
-    "fd_hushed": "and a spell ended it",
-    "fire.start": "a fire started at {place}",
-    "fire.out": "a fire burned {rooms} at {place}, and {firecause} got the blame",
-    "rescued": "someone was carried out",
-    "rehoused": "the family had to move out",
-    "pie": "the neighbours brought a pie",
-    "fa_thanks": "there was a proper thank-you",
-    "repaired": "the boards went in",
-    "home.again": "they moved back home",
-    "fa_party": "and the street came round to see it",
-    "rm_steady": "and they are going steady"
+  "discharged": {
+   "line": [
+    "{who} is out of the clinic and home."
+   ],
+   "head": [
+    "{WHO} HOME FROM CLINIC"
+   ],
+   "body": [
+    "{who} walked out of the clinic today. The nurses say they will miss the complaints."
+   ]
+  },
+  "rehoused": {
+   "line": [
+    "The family have moved out of {place} until the repairs are done.",
+    "Burned out of {place}. The county has found them somewhere to stay."
+   ],
+   "head": [
+    "FAMILY MOVED OUT OF {PLACE}"
+   ],
+   "body": [
+    "The household at {place} is sleeping somewhere else tonight. The county is covering it."
+   ]
+  },
+  "home.again": {
+   "line": [
+    "Home again: the repairs are done at {place} and they have moved back."
+   ],
+   "head": [
+    "BACK HOME AT LAST"
+   ],
+   "body": [
+    "The family from {place} have moved back in. It smells of new wood."
+   ]
+  },
+  "repaired": {
+   "line": [
+    "The repairs are done at {place}, with {boards} boards from the yard."
+   ],
+   "head": [
+    "{PLACE} REBUILT"
+   ],
+   "body": [
+    "{place} is back, with {boards} new boards from Wend Mill."
+   ]
+  },
+  "promoted": {
+   "line": [
+    "{who} got a promotion."
+   ],
+   "head": [
+    "{WHO} MOVES UP IN THE WORLD"
+   ],
+   "body": [
+    "{who} has been promoted. The office cake was, by all accounts, adequate."
+   ]
+  },
+  "friends": {
+   "line": [
+    "{a} and {b} are friends now."
+   ],
+   "head": [
+    "{A} AND {B}: IT'S OFFICIAL"
+   ],
+   "body": [
+    "{a} and {b} are now to be seen together. Nobody saw it coming."
+   ]
+  },
+  "quarrel": {
+   "line": [
+    "{a} and {b} had words."
+   ],
+   "head": [
+    "WORDS EXCHANGED"
+   ],
+   "body": [
+    "{a} and {b} had words. Witnesses report that some of the words were long."
+   ]
+  },
+  "stir": {
+   "line": [
+    "{a} and {b} made a scene."
+   ],
+   "head": [
+    "A SCENE"
+   ],
+   "body": [
+    "{a} and {b} made a scene in public, and the town would like to know more."
+   ]
+  },
+  "hardship": {
+   "line": [
+    "The county had to step in with a grant."
+   ],
+   "head": [
+    "COUNTY PAYS UP"
+   ],
+   "body": [
+    "A household was helped out by the county. This should not happen."
+   ]
+  },
+  "tow": {
+   "line": [
+    "{who}'s car ended up on its roof. The tow gnome came."
+   ],
+   "head": [
+    "GNOME RIGHTS CAR"
+   ],
+   "body": [
+    "{who}'s car was found upside down. The tow gnome declined to comment, and sent a bill."
+   ]
+  },
+  "mishap": {
+   "line": [
+    "{who} had a small mishap at work."
+   ],
+   "head": [
+    "PLASTER APPLIED"
+   ],
+   "body": [
+    "{who} had a mishap at work. A plaster was involved."
+   ]
+  },
+  "newjob": {
+   "line": [
+    "{who} has a new job."
+   ],
+   "head": [
+    "{WHO} STARTS MONDAY"
+   ],
+   "body": [
+    "{who} has taken a new job, and has been told not to be late."
+   ]
+  },
+  "radio.speeding": {
+   "line": [
+    "{who} was clocked speeding near {place}.",
+    "Radio: {who} going too fast along {place}."
+   ],
+   "head": [
+    "{WHO} CLOCKED AT {PLACE}",
+    "SPEEDING NEAR {PLACE}"
+   ]
+  },
+  "radio.theft": {
+   "line": [
+    "Someone was seen lifting something from a shop at {place}. {other} rang it in.",
+    "{other} reports a theft at {place}, and names {who}."
+   ],
+   "head": [
+    "THEFT AT {PLACE}",
+    "{PLACE} SHOP LOSES A LOAF"
+   ]
+  },
+  "radio.noise": {
+   "line": [
+    "{other} rang about the noise from {who} at {place}.",
+    "Noise complaint at {place}: {other} against {who}."
+   ],
+   "head": [
+    "NOISE ROW AT {PLACE}",
+    "{OTHER} COMPLAINS ABOUT {WHO}"
+   ]
+  },
+  "radio.lost_pet": {
+   "line": [
+    "A lost pet is reported near {place}.",
+    "Radio: a pet is wandering loose around {place}."
+   ],
+   "head": [
+    "LOST PET NEAR {PLACE}",
+    "PET ON THE LOOSE AT {PLACE}"
+   ]
+  },
+  "radio.fender": {
+   "line": [
+    "A small bump at {place}. Nobody hurt, plenty said.",
+    "Two drivers arguing over a dent at {place}."
+   ],
+   "head": [
+    "BUMP AT {PLACE}",
+    "FENDER ROW AT {PLACE}"
+   ]
+  },
+  "radio.panic": {
+   "line": [
+    "Crowd running indoors near {place}.",
+    "People are scattering from {place}."
+   ],
+   "head": [
+    "PANIC AT {PLACE}",
+    "{PLACE} EMPTIES FAST"
+   ]
+  },
+  "radio.hawking": {
+   "line": [
+    "{who} is selling things at {place} with no permit.",
+    "Radio: {who} has a stall at {place} and no paper for it."
+   ],
+   "head": [
+    "NO PERMIT AT {PLACE}",
+    "{WHO} SELLS WITHOUT LEAVE"
+   ]
+  },
+  "radio.street_magic": {
+   "line": [
+    "{who} was casting in the street at {place}. No permit.",
+    "Radio: street magic by {who} near {place}."
+   ],
+   "head": [
+    "STREET MAGIC AT {PLACE}",
+    "{WHO} CASTS IN THE OPEN"
+   ]
+  },
+  "ticket": {
+   "line": [
+    "{who} got a ticket for {offence} at {place}.",
+    "{who} was written up for {offence}."
+   ],
+   "head": [
+    "{WHO} TICKETED FOR {OFFENCE}",
+    "TICKET AT {PLACE}"
+   ],
+   "body": [
+    "{who} was ticketed for {offence} at {place}. The officer was polite and the fine was not small.",
+    "An officer wrote {who} up for {offence} near {place}. The pen was reported to be very good."
+   ]
+  },
+  "warned": {
+   "line": [
+    "{who} was let off with a warning for {offence}.",
+    "{who} got a stern word about {offence} at {place}."
+   ],
+   "head": [
+    "{WHO} GETS A WARNING",
+    "LET OFF AT {PLACE}"
+   ]
+  },
+  "arrested": {
+   "line": [
+    "{who} was arrested at {place} over {offence}.",
+    "{who} spent the night in the cells after {offence}."
+   ],
+   "head": [
+    "{WHO} ARRESTED AT {PLACE}",
+    "{WHO} TAKEN IN OVER {OFFENCE}"
+   ],
+   "body": [
+    "{who} was taken in at {place} over {offence}. The cells were said to be cold and the tea hot.",
+    "Officers arrested {who} near {place}. {offence} was the reason given, and {who} had thoughts about that."
+   ]
+  },
+  "ran": {
+   "line": [
+    "{who} ran from the officer at {place}.",
+    "{who} bolted at {place} and was last seen going round the back."
+   ],
+   "head": [
+    "{WHO} BOLTS AT {PLACE}",
+    "CHASE AT {PLACE}"
+   ],
+   "body": [
+    "{who} took off from an officer at {place}, which is rarely a good plan. Witnesses gave the sprint a seven.",
+    "A chase broke out at {place} when {who} ran. The officer, who had just had lunch, was not thrilled."
+   ]
+  },
+  "got.away": {
+   "line": [
+    "{who} got away from the officer at {place}.",
+    "{who} gave the law the slip near {place}."
+   ],
+   "head": [
+    "{WHO} GETS AWAY",
+    "SLIPS AWAY FROM {PLACE}"
+   ],
+   "body": [
+    "{who} outran the officer near {place} and is, for now, at large. The officer is said to be sitting down.",
+    "{who} vanished from {place} before anyone could say stop. Neighbours report a rustle in a hedge."
+   ]
+  },
+  "pet.found": {
+   "line": [
+    "{pet} was found near {place} and given back to {who}.",
+    "{who} has {pet} home again."
+   ],
+   "head": [
+    "{PET} FOUND NEAR {PLACE}",
+    "{WHO} GETS {PET} BACK"
+   ],
+   "body": [
+    "An officer found {pet} near {place} and brought them home to {who}. A pie is promised.",
+    "{pet} had gone astray and turned up near {place}. {who} was overjoyed and a little cross."
+   ]
+  },
+  "calmed": {
+   "line": [
+    "The officer calmed the crowd at {place}.",
+    "Nerves settled at {place} once an officer arrived."
+   ],
+   "head": [
+    "CALM RETURNS TO {PLACE}",
+    "OFFICER SETTLES {PLACE}"
+   ]
+  },
+  "permit": {
+   "line": [
+    "{who} was told to get a permit.",
+    "{who} was sent off to get the right paper."
+   ],
+   "head": [
+    "{WHO} NEEDS A PERMIT",
+    "PAPERWORK FOR {WHO}"
+   ]
+  },
+  "rift.signs": {
+   "line": [
+    "Odd signs near {place}: a hum, and the milk has turned.",
+    "The sky looks wrong over {place}."
+   ],
+   "head": [
+    "ODD SKY OVER {PLACE}",
+    "MILK TURNS NEAR {PLACE}"
+   ],
+   "body": [
+    "Residents near {place} reported a low hum and milk going off in the fridge. Hunters have been told.",
+    "The sky above {place} has been looking strange all morning. The pigeons have gone."
+   ]
+  },
+  "rift.open": {
+   "line": [
+    "A rift opened at {place}.",
+    "The sky tore open over {place}."
+   ],
+   "head": [
+    "RIFT OPENS AT {PLACE}",
+    "SKY SPLITS OVER {PLACE}"
+   ],
+   "body": [
+    "A rift opened at {place} and the street emptied fast. Hunters were called.",
+    "The sky over {place} tore open this afternoon. Everyone went indoors, politely, at speed."
+   ]
+  },
+  "rift.closed": {
+   "line": [
+    "Hunters sealed the rift at {place}.",
+    "The rift at {place} is shut."
+   ],
+   "head": [
+    "RIFT AT {PLACE} SEALED",
+    "HUNTERS CLOSE {PLACE} RIFT"
+   ],
+   "body": [
+    "Hunters closed the rift at {place} after a short, loud fight. Nobody was lost and the pavement is scorched.",
+    "The rift at {place} is sealed. The hunters asked for tea and were given three."
+   ]
+  },
+  "rift.county": {
+   "line": [
+    "The county's own people had to close the rift at {place}.",
+    "No hunters came, so the county sealed the rift at {place}."
+   ],
+   "head": [
+    "COUNTY SEALS {PLACE} RIFT",
+    "NO HUNTERS, SO COUNTY STEPS IN"
+   ],
+   "body": [
+    "With no hunters free, the county's own people closed the rift at {place}. It took longer, and went to a lot of tea.",
+    "The rift at {place} was shut by the county's own crews, who were not paid for it and said so."
+   ]
+  },
+  "hunter.down": {
+   "line": [
+    "{who} was knocked down at the rift by {place}.",
+    "{who} went down fighting at {place}."
+   ],
+   "head": [
+    "{WHO} DOWN AT {PLACE}",
+    "HUNTER DOWN AT RIFT"
+   ],
+   "body": [
+    "{who} was knocked down in the fight at {place}. They were carried off, grumbling, and expected to recover.",
+    "A blow at {place} put {who} on the floor. A medic gave them a sandwich and an opinion."
+   ]
+  },
+  "hunter.find": {
+   "line": [
+    "{who} found {find} at the rift near {place}.",
+    "{find} turned up in the rift at {place}, and {who} took it."
+   ],
+   "head": [
+    "{WHO} FINDS {FIND}",
+    "FIND AT {PLACE} RIFT"
+   ],
+   "body": [
+    "After the fight at {place}, {who} came away with {find}, and {kills} to their name.",
+    "{who} picked up {find} at the rift near {place}. Whether it was lost or left is not clear."
+   ]
+  },
+  "radio.medic": {
+   "line": [
+    "Someone at {place} needs the clinic."
+   ],
+   "head": [
+    "AMBULANCE CALLED TO {PLACE}"
+   ]
+  },
+  "patient.in": {
+   "line": [
+    "{who} got {person} to the clinic.",
+    "{person} is at the clinic, thanks to {who}."
+   ],
+   "head": [
+    "{WHO} DELIVERS {PERSON}",
+    "QUICK WORK BY {WHO}"
+   ],
+   "body": [
+    "{who} drove {person} to the clinic with the lights on and the radio off.",
+    "{person} arrived at the clinic in the back of an ambulance, complaining about the corners."
+   ]
   }
+ },
+ "stories": {
+  "birthday": {
+   "line": [
+    "It was {who}'s birthday.",
+    "{who} turned {age}. There was cake."
+   ],
+   "head": [
+    "MANY HAPPY RETURNS, {WHO}"
+   ],
+   "body": [
+    "{who} is {age} today, and has asked us not to mention it."
+   ]
+  },
+  "windfall": {
+   "line": [
+    "{who} found {amount} coins on the pavement."
+   ],
+   "head": [
+    "PAVEMENT PAYS OUT"
+   ],
+   "body": [
+    "{who} found {amount} coins on the pavement and has told everybody."
+   ]
+  },
+  "neighbour_row": {
+   "line": [
+    "{who} and {other} fell out over the fence.",
+    "{who} told {other} exactly what they think of the hedge."
+   ],
+   "head": [
+    "THE WAR OF THE HEDGE"
+   ],
+   "body": [
+    "{who} and {other} are no longer speaking. It is about the hedge, as it always is."
+   ]
+  },
+  "neighbour_kind": {
+   "line": [
+    "{other} brought {who} a plant.",
+    "{who} helped {other} carry the shopping in."
+   ],
+   "head": [
+    "GOOD NEIGHBOURS"
+   ],
+   "body": [
+    "{who} and {other} were seen being nice to each other. We will keep an eye on it."
+   ]
+  },
+  "first_date": {
+   "line": [
+    "{who} went on a date with {other}.",
+    "{who} met {other} for a coffee that lasted four hours."
+   ],
+   "head": [
+    "SEEN TOGETHER: {WHO} AND {OTHER}"
+   ],
+   "body": [
+    "{who} and {other} were seen sharing a table. Sources say there was laughing."
+   ]
+  },
+  "second_date": {
+   "line": [
+    "{who} and {other} went out again.",
+    "{who} is seeing {other} again. The family have noticed."
+   ],
+   "head": [
+    "{WHO} AND {OTHER}, AGAIN"
+   ],
+   "body": [
+    "That is twice now for {who} and {other}. The town has started a sweepstake."
+   ]
+  },
+  "couple": {
+   "line": [
+    "{who} and {other} are a couple now."
+   ],
+   "head": [
+    "IT'S LOVE: {WHO} AND {OTHER}"
+   ],
+   "body": [
+    "{who} and {other} have told their families. The sweepstake has paid out."
+   ]
+  },
+  "keys_lost": {
+   "line": [
+    "{who} lost the keys. They were in the fridge."
+   ],
+   "head": [
+    "KEYS FOUND IN FRIDGE"
+   ],
+   "body": [
+    "{who} spent the morning looking for the keys. They were in the fridge."
+   ]
+  },
+  "car_trouble": {
+   "line": [
+    "{who}'s car made a noise. {amount} coins later, it stopped."
+   ],
+   "head": [
+    "THAT NOISE"
+   ],
+   "body": [
+    "{who} paid to have a noise taken out of the car."
+   ]
+  },
+  "a_cold": {
+   "line": [
+    "{who} has a cold and wants everybody to know."
+   ],
+   "head": [
+    "COLD GOING ROUND"
+   ],
+   "body": [
+    "{who} has a cold. Please stand well back."
+   ]
+  },
+  "quiz_win": {
+   "line": [
+    "{who} won the pub quiz: {amount} coins."
+   ],
+   "head": [
+    "{WHO} KNOWS THE CAPITAL OF EVERYWHERE"
+   ],
+   "body": [
+    "{who} won the pub quiz and {amount} coins. There has been a complaint."
+   ]
+  },
+  "spell_wrong": {
+   "line": [
+    "A small spell of {who}'s went wrong. The kettle is now a very small horse.",
+    "{who} tried a small spell. Their eyebrows are blue."
+   ],
+   "head": [
+    "SPELL GOES SLIGHTLY WRONG"
+   ],
+   "body": [
+    "{who} attempted a small spell at home. The results are still in the kitchen."
+   ]
+  },
+  "duck": {
+   "line": [
+    "A duck followed {who} all the way to the shops.",
+    "{who} has been adopted by a duck."
+   ],
+   "head": [
+    "DUCK FOLLOWS RESIDENT"
+   ],
+   "body": [
+    "A duck has been following {who} around town. Neither party will explain."
+   ]
+  },
+  "pie": {
+   "line": [
+    "{other} brought {who} a pie after the fire."
+   ],
+   "head": [
+    "THE STREET LOOKS AFTER ITS OWN"
+   ],
+   "body": [
+    "{other} turned up at the door with a pie for {who}. It helped."
+   ]
+  },
+  "rm_spark": {
+   "line": [
+    "{who} asked {other} out.",
+    "{who} has asked {other} for a coffee. Nobody is calling it a date. It is a date."
+   ],
+   "head": [
+    "{WHO} HAS ASKED {OTHER} OUT"
+   ],
+   "body": [
+    "{who} has asked {other} out, in a voice witnesses describe as \"quite high\". They are to meet at {place}."
+   ]
+  },
+  "rm_first_ok": {
+   "line": [
+    "{who} and {other} had a first date at {place}. It went well.",
+    "Four hours at {place} for {who} and {other}. They forgot to order."
+   ],
+   "head": [
+    "SEEN TOGETHER: {WHO} AND {OTHER}",
+    "FIRST DATE, NO CASUALTIES"
+   ],
+   "body": [
+    "{who} and {other} shared a table at {place}. Sources say there was laughing, and that it was not nervous by the end."
+   ]
+  },
+  "rm_first_bad": {
+   "line": [
+    "{who} and {other} had a first date at {place}. There will not be a second.",
+    "{other} left the date with {who} early, by the kitchen."
+   ],
+   "head": [
+    "DATE ENDS IN SILENCE AT {PLACE}"
+   ],
+   "body": [
+    "{who} and {other} tried a date at {place}. Staff report one of the longest silences in the history of the building."
+   ]
+  },
+  "rm_stood": {
+   "line": [
+    "{who} waited at {place}. {other} never came.",
+    "{other} stood {who} up at {place}."
+   ],
+   "head": [
+    "STOOD UP AT {PLACE}"
+   ],
+   "body": [
+    "{who} sat alone at {place} for most of an hour, and has been heard asking what {other} thinks they are playing at."
+   ]
+  },
+  "rm_second_ok": {
+   "line": [
+    "{who} and {other} went out again, and it went better.",
+    "That is twice now for {who} and {other}."
+   ],
+   "head": [
+    "{WHO} AND {OTHER}, AGAIN"
+   ],
+   "body": [
+    "That is twice now for {who} and {other}. The town has started a sweepstake."
+   ]
+  },
+  "rm_second_bad": {
+   "line": [
+    "The second date did not go like the first: {who} and {other} left separately."
+   ],
+   "head": [
+    "THE SECOND DATE: NOT A SUCCESS"
+   ],
+   "body": [
+    "Whatever {who} and {other} had at the first date, they did not bring it to the second."
+   ]
+  },
+  "rm_couple": {
+   "line": [
+    "{who} and {other} are a couple now."
+   ],
+   "head": [
+    "IT'S LOVE: {WHO} AND {OTHER}"
+   ],
+   "body": [
+    "{who} and {other} have told their families. The sweepstake has paid out."
+   ]
+  },
+  "rm_family": {
+   "line": [
+    "{who} met {other}'s family. Everyone was very polite. It was awful."
+   ],
+   "head": [
+    "{WHO} MEETS THE FAMILY"
+   ],
+   "body": [
+    "{who} has been to dinner with {other}'s family, and answered all the questions."
+   ]
+  },
+  "rm_feud_love": {
+   "line": [
+    "{who} and {other} are seeing each other, and their families are not speaking.",
+    "Two houses at war over {cause}, and {who} and {other} have gone on a date."
+   ],
+   "head": [
+    "LOVE ACROSS THE FENCE"
+   ],
+   "body": [
+    "With their families still at war over {cause}, {who} and {other} have been making plans. This column has bought popcorn."
+   ]
+  },
+  "rm_propose_yes": {
+   "line": [
+    "{who} asked {other} at {place}. {other} said yes!"
+   ],
+   "head": [
+    "{WHO} ASKS, {OTHER} SAYS YES"
+   ],
+   "body": [
+    "{who} got down on one knee at {place}, and needed some help getting back up. The answer was yes."
+   ]
+  },
+  "rm_propose_no": {
+   "line": [
+    "{who} asked {other} at {place}. {other} said not yet."
+   ],
+   "head": [
+    "\"NOT YET,\" SAYS {OTHER}"
+   ],
+   "body": [
+    "{who} asked the question at {place}. The answer was \"not yet\", which {who} is trying to find encouraging."
+   ]
+  },
+  "rm_wedding": {
+   "line": [
+    "{who} and {other} got married at {place}, with {guests} guests."
+   ],
+   "head": [
+    "{WHO} AND {OTHER}: MARRIED",
+    "THE TOWN TURNS OUT FOR {WHO} AND {OTHER}"
+   ],
+   "body": [
+    "{who} and {other} were married at {place} in front of {guests} guests, several of whom had money on it."
+   ]
+  },
+  "rm_moved": {
+   "line": [
+    "{who} and {other} have moved in together."
+   ],
+   "head": [
+    "ONE HOME, TWO TOOTHBRUSHES"
+   ],
+   "body": [
+    "{who} and {other} have set up home. Decisions about the sofa are ongoing."
+   ]
+  },
+  "rm_split": {
+   "line": [
+    "{who} and {other} have called it off."
+   ],
+   "head": [
+    "IT'S OVER FOR {WHO} AND {OTHER}"
+   ],
+   "body": [
+    "{who} and {other} are no longer an item. The sweepstake organisers have declined to comment."
+   ]
+  },
+  "fd_start": {
+   "line": [
+    "{who} and {other} have fallen out over {cause}.",
+    "It started with {cause}. {who} and {other} are not speaking."
+   ],
+   "head": [
+    "TROUBLE BREWING: {WHO} AND {OTHER}"
+   ],
+   "body": [
+    "{who} and {other} have fallen out over {cause}. Neighbours expect this to run."
+   ]
+  },
+  "fd_words": {
+   "line": [
+    "{who} told {other} what they think about {cause}. At length.",
+    "{who} and {other} had words about {cause} again."
+   ],
+   "head": [
+    "WORDS OVER {CAUSE}"
+   ],
+   "body": [
+    "{who} and {other} were heard discussing {cause} at a volume that discouraged anyone from joining in."
+   ]
+  },
+  "fd_prank": {
+   "line": [
+    "{who} {prank}. {other} knows exactly who did it.",
+    "{other} woke to find {who} had {prank2}."
+   ],
+   "head": [
+    "THE WAR GOES ON: {WHO} STRIKES"
+   ],
+   "body": [
+    "The business of {cause} goes on. {who} {prank}, and {other} has put a sign up."
+   ]
+  },
+  "fd_row": {
+   "line": [
+    "{who} and {other} had it out at {place}, in front of everyone.",
+    "A public row at {place}: {who} against {other}, over {cause}."
+   ],
+   "head": [
+    "SCENES AT {PLACE}",
+    "{WHO} AND {OTHER} GO PUBLIC"
+   ],
+   "body": [
+    "The matter of {cause} boiled over at {place}, where {who} and {other} had an audience and used it."
+   ]
+  },
+  "fd_ruling": {
+   "line": [
+    "The town hall has ruled: {who} is in the right about {cause}. {other} paid {amount} coins.",
+    "{who} won the hearing over {cause}. {other} says it is not over. It is over."
+   ],
+   "head": [
+    "TOWN HALL RULES FOR {WHO}"
+   ],
+   "body": [
+    "After a hearing about {cause}, the town clerk found for {who} and fined {other} {amount} coins. The clerk has asked never to hear the word again."
+   ]
+  },
+  "fd_noshow": {
+   "line": [
+    "{other} did not turn up to the hearing about {cause}. {who} says that says it all."
+   ],
+   "head": [
+    "EMPTY CHAIR AT THE HEARING"
+   ],
+   "body": [
+    "The hearing into {cause} lasted four minutes, because only {who} came."
+   ]
+  },
+  "fd_patched": {
+   "line": [
+    "{who} and {other} have made it up. Nobody mentioned {cause}.",
+    "It's over: {who} took a casserole round to {other}."
+   ],
+   "head": [
+    "PEACE BREAKS OUT: {WHO} AND {OTHER}"
+   ],
+   "body": [
+    "After all that about {cause}, {who} and {other} have shaken hands. Neighbours report feeling slightly let down."
+   ]
+  },
+  "fd_rescue": {
+   "line": [
+    "{who} carried {other} out of a fire, and that was the end of the feud."
+   ],
+   "head": [
+    "{WHO} SAVES OLD ENEMY {OTHER}"
+   ],
+   "body": [
+    "They were not speaking. Then {who} went into the smoke and came out with {other} over one shoulder. Nobody has mentioned {cause} since."
+   ]
+  },
+  "fd_wedding": {
+   "line": [
+    "With the wedding, the row over {cause} is over. {who} and {other} shook hands."
+   ],
+   "head": [
+    "A WEDDING ENDS THE WAR"
+   ],
+   "body": [
+    "The families are one family now, so {who} and {other} have agreed that {cause} was nobody's fault. It was entirely somebody's fault."
+   ]
+  },
+  "fd_fizzle": {
+   "line": [
+    "{who} and {other} seem to have forgotten what the fuss about {cause} was."
+   ],
+   "head": [
+    "THE GREAT ROW FIZZLES OUT"
+   ],
+   "body": [
+    "Nobody can quite remember why {who} and {other} fell out. It may have been {cause}."
+   ]
+  },
+  "fd_hushed": {
+   "line": [
+    "A well-placed Hush has ended it. {who} and {other} are done arguing about {cause}."
+   ],
+   "head": [
+    "HUSHED"
+   ],
+   "body": [
+    "The row over {cause} ended quite suddenly, in silence, with a faint smell of magic."
+   ]
+  },
+  "fa_thanks": {
+   "line": [
+    "{who} took {other} out to say thank you for the rescue."
+   ],
+   "head": [
+    "\"THANK YOU\" AT {PLACE}"
+   ],
+   "body": [
+    "{who} has bought {other} a meal at {place}, and promised to go on doing so for about a year."
+   ]
+  },
+  "fa_party": {
+   "line": [
+    "The housewarming at {place}: {guests} guests, and everyone admired the new boards."
+   ],
+   "head": [
+    "BACK IN, AND THE KETTLE'S ON"
+   ],
+   "body": [
+    "After the fire, the family at {place} had the street round. It still smells of new wood. Nobody minded."
+   ]
+  },
+  "sp_tidy_bad": {
+   "line": [
+    "{who} tidied up by magic and now nobody can find anything."
+   ],
+   "head": [
+    "TIDY SPELL: EVERYTHING GONE"
+   ],
+   "body": [
+    "{who} cast a small Tidy in a bad mood. The house is spotless. The cutlery has not been seen since."
+   ]
+  },
+  "sp_warm_bad": {
+   "line": [
+    "{who} tried a Warm and overdid it. There is a smell of toast, and it is the curtains."
+   ],
+   "head": [
+    "WARM GOES HOT"
+   ],
+   "body": [
+    "A small Warm went further than planned when {who} cast it in a temper."
+   ]
+  },
+  "sp_mend_bad": {
+   "line": [
+    "{who} tried to Mend the damage and made it worse. The repairs need more boards."
+   ],
+   "head": [
+    "MENDED BACKWARDS"
+   ],
+   "body": [
+    "{who} cast a Mend on a burned wall and the wall has taken offence."
+   ]
+  },
+  "sp_hush_bad": {
+   "line": [
+    "{who} tried to Hush {other}. {other} has never been louder."
+   ],
+   "head": [
+    "HUSH BACKFIRES"
+   ],
+   "body": [
+    "The Hush that {who} cast on {other} did the opposite, and can be heard from the bridge."
+   ]
+  },
+  "sp_mend_ok": {
+   "line": [
+    "{who} mended a burned room at {place} by magic."
+   ],
+   "head": [
+    "ONE ROOM, GOOD AS NEW"
+   ],
+   "body": [
+    "{who} has saved the repair crew a day with one small Mend at {place}."
+   ]
+  },
+  "sp_hush_ok": {
+   "line": [
+    "{who} Hushed {other}, and things have calmed down."
+   ],
+   "head": [
+    "A QUIET WORD, LITERALLY"
+   ],
+   "body": [
+    "{who} cast a small Hush on {other}. Peace, for an hour or so."
+   ]
+  },
+  "rm_steady": {
+   "line": [
+    "{who} and {other} are going steady. Nobody is in a hurry."
+   ],
+   "head": [
+    "{WHO} AND {OTHER}: NO RUSH"
+   ],
+   "body": [
+    "{who} and {other} have told this paper there are no plans, in a way that suggests there is a spreadsheet."
+   ]
+  }
+ },
+ "sheet": {
+  "quiet": {
+   "head": [
+    "NOTHING HAPPENS IN ODDHAVEN"
+   ],
+   "body": [
+    "A quiet few days. We have checked twice."
+   ]
+  },
+  "column": [
+   "This column has heard this much: {line}",
+   "A little bird tells us: {line}",
+   "We name no names, but: {line}",
+   "Not that we are one to talk, but: {line}"
+  ],
+  "signoff": [
+   "Yours, with a raised eyebrow, {who}.",
+   "That's all. I saw nothing. {who}.",
+   "{who}, from behind the curtains."
+  ],
+  "part": [
+   "Part {n} of a story this paper is following.",
+   "This paper has been following this one: part {n}.",
+   "Part {n}. Do keep up."
+  ],
+  "sofar": [
+   "So far: {tale}",
+   "The story so far: {tale}"
+  ]
+ },
+ "pranks": {
+  "gnome": "moved a garden gnome one inch to the left every night for a week",
+  "bins": "put all the bins out on the wrong day, on purpose",
+  "hedge": "trimmed the hedge into a rude shape",
+  "note": "left a very polite note, which is the worst kind",
+  "flyers": "pinned up flyers asking if anyone had lost their manners",
+  "doorbell": "taught the doorbell a new tune",
+  "cones": "put traffic cones round the car, all of them"
+ },
+ "tale": {
+  "rm_spark": "{a} asked {b} out",
+  "rm_first_ok": "the first date went well",
+  "rm_first_bad": "the first date was a disaster",
+  "rm_stood": "someone was stood up",
+  "rm_second_ok": "the second date went better",
+  "rm_second_bad": "the second date went badly",
+  "rm_couple": "they became a couple",
+  "rm_family": "the families met",
+  "rm_feud_love": "all while their families were at war over {cause}",
+  "rm_propose_yes": "then the question, and a yes",
+  "rm_propose_no": "the question got a \"not yet\"",
+  "rm_wedding": "and they were married",
+  "rm_moved": "and they moved in together",
+  "rm_split": "and then it was over",
+  "fd_start": "{a} and {b} fell out over {cause}",
+  "fd_words": "there were words",
+  "fd_prank": "there was a prank, and a sign went up",
+  "fd_row": "there was a row in public",
+  "fd_ruling": "the town hall ruled on it",
+  "fd_noshow": "someone did not turn up to the hearing",
+  "fd_patched": "and they made it up",
+  "fd_rescue": "and it ended when one carried the other out of a fire",
+  "fd_wedding": "and a wedding ended it",
+  "fd_fizzle": "and it fizzled out",
+  "fd_hushed": "and a spell ended it",
+  "fire.start": "a fire started at {place}",
+  "fire.out": "a fire burned {rooms} at {place}, and {firecause} got the blame",
+  "rescued": "someone was carried out",
+  "rehoused": "the family had to move out",
+  "pie": "the neighbours brought a pie",
+  "fa_thanks": "there was a proper thank-you",
+  "repaired": "the boards went in",
+  "home.again": "they moved back home",
+  "fa_party": "and the street came round to see it",
+  "rm_steady": "and they are going steady"
+ },
+ "offence": {
+  "speeding": "speeding",
+  "theft": "lifting something from a shop",
+  "noise": "making a racket",
+  "hawking": "selling with no permit",
+  "street_magic": "street magic with no permit",
+  "lost_pet": "a lost pet",
+  "fender": "a bump",
+  "panic": "the panic",
+  "cordon": "the cordon",
+  "medic": "the ambulance"
+ },
+ "finds": [
+  "a shard of riftglass",
+  "a tooth that hums",
+  "a pebble that is warm",
+  "a scale that will not stay dull",
+  "a feather from nothing"
+ ]
 }

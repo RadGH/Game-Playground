@@ -17,7 +17,7 @@
   "stirScene": { "introduce": "introduce", "date": "date", "row": "rowstir", "patch": "patch" },
   "feudCauses": {
     "hedge": { "heat": 18 }, "bins": { "heat": 14 }, "parking": { "heat": 20 }, "noise": { "heat": 16 }, "casserole": { "heat": 12 }, "ladder": { "heat": 12 },
-    "fire": { "heat": 34 }, "stood_up": { "heat": 26 }, "ex": { "heat": 30 }, "promotion": { "heat": 22 }, "row": { "heat": 32 }, "words": { "heat": 22 }
+    "fire": { "heat": 34 }, "stood_up": { "heat": 26 }, "ex": { "heat": 30 }, "promotion": { "heat": 22 }, "row": { "heat": 32 }, "words": { "heat": 22 }, "arrest": { "heat": 30 }
   },
   "neighbourCauses": ["hedge", "bins", "parking", "casserole", "ladder"],
   "pranks": ["gnome", "bins", "hedge", "note", "flyers", "doorbell", "cones"],

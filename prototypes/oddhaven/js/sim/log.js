@@ -4,6 +4,7 @@
 import { mailFromLog } from './mail.js';
 import { momentFromLog } from './moments.js';
 import { threadsOnLog } from './threads.js';
+import { lawOnLog } from './law.js';
 
 export function say(c, kind, data = {}) { c.out.push({ kind, t: c.s.t, ...data }); }
 
@@ -16,4 +17,5 @@ export function log(c, kind, data = {}) {
   c.out.push({ ...entry });
   mailFromLog(c, entry);
   momentFromLog(c, entry);
+  lawOnLog(c, entry);
 }

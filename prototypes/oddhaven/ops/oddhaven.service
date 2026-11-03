@@ -1,0 +1,11 @@
+# Oddhaven STABLE room server: the published copy (tools/publish-oddhaven.sh) on port 8560 (+ https 8562). User unit. LAN testing copy.
+[Unit]
+Description=Oddhaven stable room server (published copy) on :8560
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/oddhaven/ops/start.sh stable
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=default.target

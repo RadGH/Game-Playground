@@ -6,7 +6,7 @@ in it.** The spec is `docs/PLAN.md` (rules in §0, decisions in §2, milestones 
 
 Credit: Radley Sustaire (independent). Sandbox. Not listed on games.radgh.com until he says so.
 
-## Where it stands: M7 "Make yourself"
+## Where it stands: M8 "Bring a friend"
 
 Radley has now played it on a real iPhone (2026-10-31, plain http on 8400). There are still no speed numbers from a phone: the soak link has not been run on one.
 
@@ -26,8 +26,8 @@ Make your own person on the title screen (or Make a person on the ☰ menu in to
   `library/synced/inbox/oddhaven-soak-*.json` on the server that served the page (stable: `~/claude/playground-stable/...`).
   Numbers go out at minute 1 and every 4 minutes after, so a phone that dies still reports. Never blocks anything:
   `?mins=` shortens it, and an unsent result is resent the next time the page opens.
-* **Two tabs in one town:** `node prototypes/oddhaven/server/main.mjs` (needs `npm install` in `prototypes/oddhaven/` once, for `ws`; port 8561),
-  then open `prototypes/oddhaven/?room=ABCD&seed=5&play=1` twice. Dev only: no limits or permissions until M8. In a room the clock stays at 1x.
+* **Play together, on the LAN:** `http://<lan-ip>:8560/` (stable room server, page and rooms on one origin) or `https://<lan-ip>:8562/` for a controller or a page that needs https (one certificate warning, and it covers the page and the socket). The playground ports work too: a page on 8400 finds the rooms on 8560, 8401 on 8561, 8442 on 8562, 8441 on 8563. `tools/publish-oddhaven.sh` moves stable; `ops/install.sh` installs the units; `systemctl --user restart oddhaven-dev` after changing `server/` or `js/sim/`.
+* **Addresses:** `?room=ABCD` joins a room. On the dev server (`--dev`) `?room=ANYTHING&seed=5&play=1` makes one too. `?roomPort=8566` points at another server, `?roomPort=none` behaves like a copy with no server, `?seat=` is a seat token for two tabs in one browser, `?roomRetry=2500` gives up sooner on a lost line (tests).
 * Reports from the ! button: `library/synced/inbox/oddhaven-report-*.json` on the LAN.
 
 ## How it is put together
@@ -70,11 +70,13 @@ js/client/       the page
   moment-card.js   the Moment pop-up and what may interrupt (shouldPop); news-text.js the words of Moments, the Story and the Odd Sheet, out of data/news.json
   job-hands.js     a job in your hands: what the big button does, the needle, the marked target. ../world/job-kit.js is the pure half
   phone.js         the Phone: apps on the same sheet as every list. phone-text.js the words of letters, the statement, Happening now (pure)
+  coop.js          playing together: every sheet, the bar, name tags, the backup; room-link.js the socket and how to find the server; smooth.js others on the room's clock (pure)
   touch.js, shell.js, perf.js, soak.js, gfx-tier.js
 js/sim/          the town: pure and seeded (README-sim.md). Runs in the Worker; the page holds only a mirror. control.js = being played; room.js = several clients;
                  interior.js = planInterior, interior-nav.js = the way round a plan, spots.js = who stands where, wiring.js = things that fire and wires that act
                  work.js = the timber chain both ways, fire.js = fires, calls, the crew, repairs, moments.js = what is worth telling + the paper, stories.js = small things that happen to a household, mail.js = letters, stir.js = scenes, phone.js = what the Phone reads, happening.js = the live list
-server/main.mjs  tiny dev room server, port 8561
+server/          main.mjs the process (http + https + ws, /status, /rooms), hub.mjs every room, limits, sleep and wake, store.mjs rooms on disk, static.js what may be served
+ops/             user units, start.sh, install.sh
 data/            sim data, premades.json (the gallery), changelog.json, vehicle-extra.json
 data/lines/*.txt  the lines as plain text; tools/build-lines.mjs writes them into
 ../../lingo/data/packs/oddhaven.json   words and 1,100+ lines
@@ -192,6 +194,22 @@ Faces: a premade's face is `data/portraits/<household>-<n>.webp`, with a hash pe
 
 Contact sheets: `tests/creator.spec.js -g "contact sheets"` writes `tests/shots/m7-sheet-*.jpg`.
 
+### Playing together (M8)
+
+`js/sim/room.js` is pure and is the rule book; `server/hub.mjs` has no sockets; `server/main.mjs` brings them and the clock. `js/sim/protocol.js` checks every message before anything else sees it: a list of commands a client may send, field by field. Anything not listed is dropped, so `owner`, `crew`, `noWheel`, `comp`, `guest` and `transfer` cannot come from a browser.
+
+A socket says `hello` (token, name, a ticket if signed in), then `host` or `join`. The reply is the Worker's `ready` plus `you`, `code`, `room`, `lines`, `holds`, `at`. New messages down: `room` (who is here, parties, offers, vote, speed), `rel` (where others are, between ticks), `yield`, `said`, `note`, `denied`, `closed`, `home`, `pong`. Up: `perm setRoom kick partyInvite partyAsk partyAnswer partyLeave partySplit takeback yielded give vote voteAnswer said bye takeHome ping name`.
+
+Takeback: leader asks, the room sends `yield` to the browser running the body, that browser reports its last position, drops the car and says `yielded` (300 ms at most, or straight away if it is offline). The room flushes the queue and runs `transfer` between ticks, with the time of that last report, and the new browser starts the car at that position plus speed times the time since. `transfer` changes `hold.owner` and `row.owner`, nothing else, and the old front person's other followers go back to their day. A car with nobody at the wheel moves the same way when a party-mate gets in (`car.owner`). A party-mate's body in your car stays run by their own browser (`hold.car` of a row they do not own, `seatIn` in hands.js); if the car goes, `car.left` puts them out.
+
+Others on screen (`smooth.js`): a body is drawn 320 ms in the past between two real reports; a car is drawn now, carried on from its last report and steered back, because a picture 0.3 s late is 6 m behind at 20 m/s. The clock is ping and pong, best trip wins.
+
+A snapshot sent just before a hand-over can land just after it and still call the car yours: a car stays as long as a snapshot lists it, whoever it names (that race once faded a car out and rebuilt it 10 m on). A new driver gets a new track, stamped by the room's time, not by the page's guess at it.
+
+A dropped socket: `drop` keeps the seat 90 s, the car stops, the same token gets the same seat. `room-link.js` retries for 100 s; a page still holding the body just carries on (`back`), a reloaded page rebuilds from `holds`. Too long: the town takes them back, the seat stays. `lost` offers the host the last backup (every 2 minutes, in localStorage) and a Worker that was loaded and kept ready for this, because the page may have come from the server that just died.
+
+Keys: Friends on ☰, the Phone, or the Y list. Bar: Yes and No, J on keys, Y on a pad.
+
 ### Vehicles and the budget
 
 A sedan is 17 draw calls as built, so traffic never draws one. `bakeVehicle` builds each type once at load and flattens it
@@ -223,6 +241,8 @@ M3 on this VM: every interior (836 views: every floor of every building, four tu
 
 M4 and M5 on this VM: see `~/claude/docs/oddhaven.md` "Measured" (the same numbers, kept in one place).
 
+M8 on this VM: see `~/claude/docs/oddhaven.md` "Measured".
+
 ## Tests
 
 * `node --test prototypes/oddhaven/tests/*.test.js prototypes/oddhaven/tests/sim/*.test.js` (also part of `npm run test:unit`).
@@ -240,11 +260,12 @@ M4 and M5 on this VM: see `~/claude/docs/oddhaven.md` "Measured" (the same numbe
 * `tests/iphone.spec.js`: what a real iPhone found: summoned cars stay put and the HUD is true, parked vehicles of every type, garages fit, select zooms, only what hides you comes down, sound after a tab change (context suspended on purpose; a real iPhone is the only full proof), no control over a prompt at 380, 402 and 430 wide.
 * `tests/fire.spec.js`: M5 end to end: the undrawn building, a whole fire by bot on the real keys and the same fire left to the crew, the budget with a real burning frame and a count of shader builds, Moments, a hose by thumb in portrait, a real v4 save. `tests/sim/fire.test.js` is the node half and prints family stories. `tests/fixtures/save-v4.json.gz` is a real old save; never regenerate it.
 * `tests/creator.spec.js`: M7 end to end: your own person by thumb at a person's pace, by keys and by pad, a family, editing, a made person's life, clothes, the worst-case budget, doors, the gallery, the contact sheets. `tests/creator.test.js` every option through a save, the gallery, uniforms, other games' looks unchanged (`fixtures/random-looks.json`, written before the new clothes). `tests/races.test.js` nine races with every option really built, hats on every head and ear. `tests/sim/newcomer.test.js` the sim half. `tests/fixtures/save-v6.json.gz` is a real old save; never regenerate it.
+* `tests/friends.spec.js`: M8 end to end, each phone its own browser, the page served by the room server: walking, driving, a seat in someone else's car, a building, a fire; takeback at 20 m/s and on a 120 ms line; solo into a room and home; reconnect and reload; no server; server dying mid-game; sheets by thumb, keys and pad; follow, catch-up, split, rejoin; bring your person; https + wss; bandwidth at the wire through `tests/slow-line.mjs`; the budget with four players. `tests/room-coop.test.js` every rule in memory, `room-server.test.js` a real server process with bad messages, floods and a restart, `room-hub.test.js` limits and accounts, `room-load.test.js` the 2% pass test, `smooth.test.js` the pretend bad line. `tools/load-rooms.mjs [rooms] [players] [seconds]` measures a whole server over sockets.
 * `window.gameEye`: M5 adds `fires()`, `burnt()`, `fireDrawn()`, `fireStats()`, `startFire(b, opts)`, `moment()`, `momentShow(m)`, `momentJump()`, `hydrants()`, `cmd(c)`, `printSheet()`, `news()`, `sweepFire(b)`, `routeMe(x, z)`, `spraying()`, `roadPath(...)`, `loadSaveBytes(u8)`. Also `state()` (with `sim`, `god`, `talk`, `hands`), `take(id)`, `handBack()`, `use()`, `partyAdd(id)`, `swap(id)`, `summon(id)`, `putMe(x, z)`, `sweepHands()`, `saveText()`, `plan(building)`, `buildings()`, `mech(building, target)`, `spots()`, `parkedCars()`, `sweepIndoors()`, `goFloor(lv)`, `owner()`, `health()` (the sim's audit), `begin(id)`, `speed(x)`, `turbo(x)` (tests
   only), `select(id, go)`, `goTo(x, z, dist)`, `who()`, `mirror()`, `roster()`, `screenOf(id)`, `tapThing(x, y)`, `save()`, `job()`, `site()`, `timber()`, `phone()`, `phoneApp(name)`, `now()`, `stir(a, b)`, `sweepTimber()`, `bark(id, intent)`,
   `say(id, text, opts)`, `parkOnBridge()`, `toDrive()`, `toGod()`, `pile(on)`, `sweep()`, `perf()`, `teleport`, `view`, `autopilot`.
 
 ## Not in yet
 
-Repairs have no hands-on version: a contractor fits the boards (rule 3 not met for repairs, nobody holds that job yet). Smoke does not hurt the person you play. Swimwear has nowhere to be worn yet. Other jobs are not hands-on yet (M9, M10). Site trees have no car collider, so a car drives through them. A rail car you hit is not knocked (M11). Rooms: dev only, no permissions, no leader takeback, no saved rooms (M8). Co-op lines would need Lingo in the room (M8). Party overflow walks; no second car drives itself. A party member's catch-up is a quick shrink and grow, not a see-through fade: fading a body's material recompiles shaders mid-frame. Faces of ordinary townsfolk (not gallery, not made, not your family) are still the 2D paper doll.
+Repairs have no hands-on version: a contractor fits the boards (rule 3 not met for repairs, nobody holds that job yet). Smoke does not hurt the person you play. Swimwear has nowhere to be worn yet. Other jobs are not hands-on yet (M9, M10). Site trees have no car collider, so a car drives through them. A rail car you hit is not knocked (M11). Rooms: no vote-kick, and no real two-phone run by a person yet. A Direct order that ends in a taxi still costs a guest with no money right. Party overflow walks; no second car drives itself. A party member's catch-up is a quick shrink and grow, not a see-through fade: fading a body's material recompiles shaders mid-frame. Faces of ordinary townsfolk (not gallery, not made, not your family) are still the 2D paper doll.
 Rail cars still end at the junction: a parked car stands at home and the moving one fades out at the corner, nothing drives up the last few metres. Trucks are not drawn parked at a house. Bodies pass through each other while walking indoors (where they stand and sit is checked, not their paths). Stairs: none, flats have a lift. Upper floors of shops and offices are not rooms. Tall races still draw smaller indoors; since M7 it eases over a stride with a bend at the waist, there is no ducking clip. Sim people use doors but only near-camera people press light switches.

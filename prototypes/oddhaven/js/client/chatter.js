@@ -14,6 +14,8 @@ export function createChatter({ town, people, talk, bubbles, voice, voiceOn, pro
   };
   const self = {
     stats, pairs,
+    /** A line said on someone else's screen comes out of the same allowance: a room says no more in a day than one town does. */
+    othersSaid() { allowance.spend(); },
     /** A one-off bubble: someone reacts to an order, a tow, a bad day. */
     bark(id, intent) {
       const p = town.roster?.people[id]; if (!p) return null;

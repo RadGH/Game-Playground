@@ -13,6 +13,10 @@ const LETTER = {
   friends: e => ({ a: e.a, b: e.b }),
   rescued: e => ({ who: e.who, person: e.person, place: e.place }),
   discharged: e => ({ who: e.who }),
+  ticket: e => ({ who: e.who, amount: e.amount, why: e.why }),
+  arrested: e => ({ who: e.who, amount: e.amount, why: e.why, place: e.place }),
+  permit: e => ({ who: e.who, amount: e.amount, permit: e.permit, days: e.days }),
+  'pet.found': e => ({ who: e.who, person: e.person, pet: e.pet }),
 };
 
 export function sendMail(c, h, k, facts) {

@@ -226,6 +226,20 @@ export const CHIBI2_RACES = {
 
 export const CHIBI2_RACE_IDS = Object.keys(CHIBI2_RACES);
 
+// Chibi 2.6 race body cues. Shared face/posture/part weights remain in CHIBI2_RACES;
+// these explicit rows tune proportions for the realistic-cartoon rig only.
+export const CHIBI26_RACES = {
+  human: { height: 1, shoulders: 1, arm: 1, hand: 1, head: 1, hips: 1 },
+  elf: { height: 1.02, shoulders: 0.94, arm: 1.02, hand: 0.96, head: 0.98, hips: 0.96 },
+  dwarf: { height: 0.82, shoulders: 1.12, arm: 1.04, hand: 1.14, head: 1.07, hips: 1.08 },
+  orc: { height: 1.02, shoulders: 1.16, arm: 1.08, hand: 1.14, head: 0.96, hips: 1.06 },
+  giant: { height: 1.08, shoulders: 1.16, arm: 1.08, hand: 1.18, head: 0.93, hips: 1.08 },
+  goblin: { height: 0.82, shoulders: 0.88, arm: 1.03, hand: 1.04, head: 1.03, hips: 0.90 },
+  halfling: { height: 0.86, shoulders: 0.94, arm: 0.96, hand: 0.98, head: 1.05, hips: 1.02 },
+  undead: { height: 0.98, shoulders: 0.96, arm: 1.02, hand: 0.98, head: 1.00, hips: 0.96 },
+  beast: { height: 1, shoulders: 1.08, arm: 1.05, hand: 1.08, head: 1, hips: 1.04 },
+};
+
 /** The race record for an avatar (human when unset or unknown). */
 export function raceOf(avatar) {
   const id = avatar?.body?.race;

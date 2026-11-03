@@ -162,3 +162,7 @@ The rules that matter (full list: `prototypes/thousandvale/ops/SECURITY.md`):
 * Bots and Playwright run against **8491**, like the playground suite runs against 8401.
 * The terrain viewer and other `tools/` pages of Thousandvale are dev pages: open them on 8401
   (`/prototypes/thousandvale/tools/terrain-viewer.html`); the game server does not serve `tools/`.
+
+## Game room servers beside these two
+
+Some games have a Node server of their own, with the same stable/dev split: a published copy on one port, the working tree on the next. Oddhaven: 8560 stable, 8561 dev, https 8562/8563 (`prototypes/oddhaven/ops/`, user units `oddhaven` and `oddhaven-dev`, publish with `prototypes/oddhaven/tools/publish-oddhaven.sh`). A page on 8400/8401/8442/8441 finds the room server on the matching port; the room server also serves the page.

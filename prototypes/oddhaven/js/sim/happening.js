@@ -4,12 +4,14 @@
 import { liveMoments } from './moments.js';
 
 const RECENT_HOURS = 2;
-const LOGGED = { mishap: 2.5, wage: 3, tow: 3 };
+const LOGGED = { mishap: 2.5, wage: 3, tow: 3, ticket: 3.5, arrested: 5.5 };
 
 export function happening(c, max = 8) {
   const s = c.s, t = s.t, rows = [], T = c.town.timber;
   for (const F of s.fire.fires) { const pl = c.places[F.place], C = s.fire.calls.find(x => x.id === F.call); rows.push({ k: 'fire', pri: 9.5, place: F.place, st: C?.st ?? 'none', n: Object.values(F.rooms).filter(R => R.h > 0).length, down: F.down?.length ?? 0, at: [pl.x, pl.z], jump: C?.crew[0] ?? -1 }); }
-  for (const m of liveMoments(c)) { if (m.pri >= 4 && m.k !== 'fire.call') rows.push({ k: 'moment', m, pri: m.pri, t: m.t, at: m.at, jump: m.jump ?? -1 }); }
+  for (const R of s.rifts.list) rows.push({ k: 'rift', pri: R.st === 'signs' ? 8.5 : 9.6, st: R.st, place: R.place, n: R.M.length, crew: R.crew.length, at: [R.x, R.z], jump: R.team?.[0] ?? -1 });
+  for (const C of s.law.calls) if (C.st !== 'open' || C.k !== 'patrol') { if (C.k === 'patrol') continue; rows.push({ k: 'call', pri: 3 + c.d.law.calls[C.k].pri * 0.5, why: C.k, st: C.st, place: C.place, at: [C.x, C.z], jump: C.by }); }
+  for (const m of liveMoments(c)) { if (m.pri >= 4 && m.k !== 'fire.call' && m.k !== 'rift.open' && m.k !== 'rift.signs') rows.push({ k: 'moment', m, pri: m.pri, t: m.t, at: m.at, jump: m.jump ?? -1 }); }
   const spot = id => { const p = s.people[id]; if (p.hold) return [p.hold.x, p.hold.z]; if (p.wpos && p.act?.a === 'site_work') return p.wpos; const pl = c.places[p.at >= 0 ? p.at : p.home]; return [pl.x, pl.z]; };
   for (const p of s.people) if (p.act?.stir) rows.push({ k: 'scene', pri: 8, a: p.id, b: p.act.with, stir: p.act.stir, at: spot(p.id) });
   for (const M of s.social.meets) if (M.st === 2) rows.push({ k: 'stage', pri: M.k === 'wedding' ? 9 : 7.5, a: M.a, b: M.b, scene: M.k, place: M.place, at: [c.places[M.place].x, c.places[M.place].z], i: M.i });
@@ -29,7 +31,7 @@ export function happening(c, max = 8) {
     if (e.t < since) break;
     if (!LOGGED[e.kind]) continue;
     const who = e.who ?? e.a;
-    rows.push({ k: e.kind, pri: LOGGED[e.kind], who, a: e.a, b: e.b, stir: e.stir, ok: e.ok, t: e.t, at: who !== undefined ? spot(who) : null });
+    rows.push({ k: e.kind, pri: LOGGED[e.kind], who, a: e.a, b: e.b, stir: e.stir, ok: e.ok, why: e.why, t: e.t, at: who !== undefined ? spot(who) : null });
   }
   const m = c.clock.minute(t), every = c.k.economy.billsEveryDays;
   if (m >= 1080 && (c.clock.day(t) + 1) % every === 0) rows.push({ k: 'bills', pri: 1, at: null });

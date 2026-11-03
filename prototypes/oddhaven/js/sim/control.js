@@ -17,6 +17,8 @@ import { settle } from './needs.js';
 import { spotInWorld } from './spots.js';
 import { pauseForTake, shiftSwitch, backToWork, clockOut, addTruck } from './work.js';
 import { fireTaken, workerSpot, callSwitch, backToFire, engineTaken, engineBack } from './fire.js';
+import { lawTaken, backToBeat, dutyRelease } from './law.js';
+import { fightTaken, backToFight } from './rifts.js';
 
 const dist = (ax, az, bx, bz) => Math.hypot(ax - bx, az - bz);
 
@@ -67,8 +69,10 @@ function take(c, cmd, refuse) {
   settle(c, p);
   shiftSwitch(c, p, false);
   const onSite = p.act?.a === 'site_work' ? pauseForTake(c, p) : null;     // a worker stays where they are, with what they have in their arms
-  const onFire = p.act?.a === 'fire_work' ? workerSpot(c, p) : null, carrier = p.act?.a === 'carried' ? c.s.people[p.act.by] : null, cab = p.trip?.mode === 'aboard' ? s.live.find(r => r.id === p.trip.id) : null, up = p.wlv ?? 0;
+  const onFire = p.act?.a === 'fire_work' || p.act?.a === 'police_work' || p.act?.a === 'fight_work' ? workerSpot(c, p) : null, carrier = p.act?.a === 'carried' ? c.s.people[p.act.by] : null, cab = p.trip?.mode === 'aboard' ? s.live.find(r => r.id === p.trip.id) : null, up = p.wlv ?? 0;
   fireTaken(c, p);
+  lawTaken(c, p);
+  fightTaken(c, p);
   let pos = null, to = -1, drive = null, inside = -1, ride = null;
   // indoors they stay where they are: in the room, on their floor, not on the doorstep
   const room = p.act ? spotInWorld(c.places[p.act.place], p.act.spot) : null;
@@ -123,6 +127,7 @@ function nextStop(c, p) {
   const h = p.hold;
   if (h.to >= 0) return h.to;
   if (p.call) { const C = c.s.fire.calls.find(x => x.id === p.call.id); if (C) return c.s.fire.fires.find(f => f.id === C.fire)?.place ?? p.home; }
+  if (p.beat) { const C = c.s.law.calls.find(x => x.id === p.beat.id); if (C) return C.place; }
   const shift = nextShift(c, p);
   return shift && c.s.t >= shift.leave - c.clock.ticks(c.k.schedule.earlyMinutes) ? p.work : p.home;
 }
@@ -134,7 +139,8 @@ function carBack(c, row) {
   const route = c.roads.routeAlong(k.e.id, k.fwd, dest);
   const fade = row.key < 0;
   const trip = { id: s.nextTrip++, car: row.car, driver: driver.id, route: route.id, to, s: Math.max(0, Math.min(k.e.len - 0.5, k.pos)), v: Math.max(0, row.v), e: 0, state: 'rail', stuck: 0, ghost: fade ? s.t + c.clock.seconds(c.k.traffic.ghostSeconds) : 0, token: -1 };
-  const inside = inCar(c, row.id).filter(p => p !== driver);
+  const all = inCar(c, row.id).filter(p => p !== driver), inside = all.filter(p => p.hold.owner === row.owner);
+  for (const p of all) if (p.hold.owner !== row.owner) outOfCar(c, p, row);     // another player's body in the back: the car is leaving, they get out where it is
   if (inside.length) trip.riders = inside.map(p => p.id);
   s.trips.push(trip);
   engineBack(c, row, trip);
@@ -148,10 +154,16 @@ function carFetched(c, row) {
   if (row.car >= 0) {
     const car = s.cars[row.car], h = s.households[car.household];
     car.at = car.base ?? h.home;
-    if (!car.engine) charge(c, h, c.k.control.carFetchInvoice, 'tow');
-    if (!car.engine) log(c, 'fetched', { who: ownedBy(c, row.owner).find(p => p.hold.kind === 'you')?.id ?? car.driver, household: h.id, amount: c.k.control.carFetchInvoice });
+    if (!car.engine && !car.van && !row.comp) charge(c, h, c.k.control.carFetchInvoice, 'tow');       // `comp`: brought out by a guest who may not spend this household's money
+    if (!car.engine && !car.van && !row.comp) log(c, 'fetched', { who: ownedBy(c, row.owner).find(p => p.hold.kind === 'you')?.id ?? car.driver, household: h.id, amount: c.k.control.carFetchInvoice });
   }
   say(c, 'car.gone', { live: row.id });
+}
+
+/** Out of a car that is going away. Someone else's browser runs this body, so it has to be told. */
+function outOfCar(c, p, row) {
+  p.hold.car = -1; p.hold.seat = 0;
+  say(c, 'car.left', { who: p.id, owner: p.hold.owner, live: row.id, x: row.x, z: row.z, yaw: row.yaw });
 }
 
 function letGo(c, p) {
@@ -163,6 +175,7 @@ function letGo(c, p) {
   s.held = s.held.filter(id => id !== p.id);
   shiftSwitch(c, p, true);
   callSwitch(c, p, true);
+  dutyRelease(c, p);
   p.since = t;
   return h;
 }
@@ -174,6 +187,7 @@ function releaseOnFoot(c, p) {
   p.goal = h.goal;
   if (backToWork(c, p, h)) { p.goal = null; return; }     // on the site in shift time: straight back to it, from where they stand
   if (backToFire(c, p, h)) { p.goal = null; return; }     // the same on a fire
+  if (backToBeat(c, p, h) || backToFight(c, p, h)) { p.goal = null; return; }      // and on a call, and at a rift
   // still riding: back to being a passenger, and the car carries them on to wherever it was going
   if (h.ride >= 0) {
     const tr = c.s.trips.find(x => x.id === h.ride);
@@ -218,7 +232,7 @@ function releaseRow(c, row) {
     driver.goal = h.goal; driver.trip = { mode: 'drive', id: trip.id, from: trip.to, to: trip.to }; driver.at = -1; driver.wake = NEVER;
     for (const p of inside) { letGo(c, p); delete p.hold; p.goal = null; p.trip = { mode: 'ride', id: trip.id, to: trip.to }; p.at = -1; p.wake = NEVER; }
   } else {
-    for (const p of inCar(c, row.id)) { p.hold.car = -1; p.hold.seat = 0; }   // nobody at the wheel: they get out
+    for (const p of inCar(c, row.id)) outOfCar(c, p, row);   // nobody at the wheel: they get out
     carFetched(c, row);
   }
   s.live = s.live.filter(r => r !== row);
@@ -250,19 +264,62 @@ function carExit(c, p) {
   log(c, 'car.out', { who: p.id, model: row.model });
 }
 
+/**
+ * In a car. A car is simulated by one browser (`row.owner`), but a party shares its seats (M8): `cmd.crew` is the list of players in the same party, written by the room and
+ * never by a client. Nobody at the wheel, and you may drive: the car comes over to your browser and you take the wheel. `cmd.noWheel`, also the room's: this player may ride but not drive.
+ */
 function enterCar(c, cmd, refuse) {
   const s = c.s, p = s.people[cmd.who], row = s.live.find(r => r.id === cmd.car), owner = cmd.owner ?? 'solo';
-  if (!p?.hold || p.hold.owner !== owner || !row || row.owner !== owner) return refuse('cannot get in');
-  const taken = new Set(inCar(c, row.id).map(q => q.hold.seat));
-  const wantFront = p.hold.kind === 'you' && row.driver < 0 && !taken.has(0);
+  if (!p?.hold || p.hold.owner !== owner || !row || (row.owner !== owner && !(cmd.crew ?? []).includes(row.owner))) return refuse('cannot get in');
+  const taken = new Set(inCar(c, row.id).map(q => q.hold.seat)), mayDrive = !cmd.noWheel;
+  const wantFront = p.hold.kind === 'you' && row.driver < 0 && !taken.has(0) && mayDrive;
   let seat = wantFront ? 0 : -1;
   if (seat < 0) for (let i = 1; i < row.seats; i++) if (!taken.has(i)) { seat = i; break; }
-  if (seat < 0 && !taken.has(0) && row.driver < 0) seat = 0;
+  if (seat < 0 && !taken.has(0) && row.driver < 0 && mayDrive) seat = 0;
   if (seat < 0) { say(c, 'car.full', { who: p.id, car: row.id, owner }); return; }
+  if (seat === 0 && row.owner !== owner) moveCar(c, row, owner);
   p.hold.car = row.id; p.hold.seat = seat;
   if (seat === 0) row.driver = p.id;
   log(c, 'car.in', { who: p.id, model: row.model });
   say(c, 'car.seat', { who: p.id, car: row.id, seat, owner });
+}
+const liveView = row => ({ id: row.id, model: row.model, car: row.car, x: row.x, z: row.z, yaw: row.yaw, v: row.v, seats: row.seats });
+function moveCar(c, row, to) {
+  const from = row.owner;
+  row.owner = to;
+  say(c, 'car.owner', { live: liveView(row), from, to });
+}
+
+/**
+ * A body changes hands while it is moving (M8: leader takeback, and a leader handing someone over). Nothing about the person changes, only whose browser runs them, so it costs
+ * no time and nothing moves: the room has already had the last position from the old browser, and `at` (the room's clock) lets the new one carry on from the right spot.
+ * { kind:'transfer', who, from, to, as?:'you'|'party', at? }: written by the room; a client cannot send it.
+ * With `as:'you'` the new owner plays them and whoever they were playing joins their party. If `who` was at the wheel the car and everyone of the old owner's in it go too.
+ * If `who` was the front person, the rest of the old owner's party is let go: nobody is left steering them.
+ */
+function transfer(c, cmd, refuse) {
+  const s = c.s, p = s.people[cmd.who], { from, to } = cmd, as = cmd.as === 'party' ? 'party' : 'you';
+  if (!p?.hold || p.hold.owner !== from || !to || to === from) return refuse('not theirs to hand over');
+  const wasFront = p.hold.kind === 'you', row = s.live.find(r => r.driver === p.id) ?? null, riders = [];
+  const old = as === 'you' ? ownedBy(c, to).find(q => q.hold.kind === 'you') : null;
+  if (old) {
+    old.hold.kind = 'party';
+    if (s.live.find(r => r.id === old.hold.car)?.driver === old.id && old.hold.car !== row?.id) carExit(c, old);      // their own car stops where it is: the player has just left its wheel
+  }
+  p.hold.owner = to; p.hold.kind = as;
+  if (row) {
+    for (const q of inCar(c, row.id)) if (q !== p && q.hold.owner === from) { q.hold.owner = to; q.hold.kind = 'party'; }
+    row.owner = to;
+    for (const q of inCar(c, row.id)) if (q !== p) riders.push([q.id, q.hold.seat, q.hold.owner]);
+  }
+  log(c, 'changed.hands', { who: p.id });
+  say(c, 'owner.moved', { who: p.id, from, to, as, x: p.hold.x, z: p.hold.z, h: p.hold.h, lv: p.hold.lv ?? 0, car: p.hold.car, seat: p.hold.seat, ride: p.hold.ride ?? -1, wasYou: old?.id ?? -1, live: row ? liveView(row) : null, riders, at: cmd.at ?? 0 });
+  if (wasFront) {
+    for (const r of s.live.filter(q => q.owner === from)) releaseRow(c, r);
+    for (const q of ownedBy(c, from)) releaseOnFoot(c, q);
+  }
+  // a party has a size: the one who was at the front goes back to their day if there is no room
+  if (old && ownedBy(c, to).filter(q => q.hold.kind === 'party').length > c.k.control.partyMax) { if (old.hold.car >= 0) carExit(c, old); say(c, 'party.over', { who: old.id, owner: to }); releaseOnFoot(c, old); }
 }
 
 /** One of the household's parked cars comes out to the player. */
@@ -271,9 +328,9 @@ function summon(c, cmd, refuse) {
   if (!car) return refuse('no such car');
   if (car.at < 0) return refuse('that car is out');
   if (s.live.filter(r => r.owner === owner).length >= k.maxLiveCars) return refuse('too many cars out');
-  if (!ownedBy(c, owner).some(p => p.household === car.household || p.van === car.id)) return refuse('not your car');
+  if (!ownedBy(c, owner).some(p => (p.household === car.household && !car.van) || p.van === car.id || (car.van && car.base === p.work))) return refuse('not your car');
   car.at = -1;
-  const row = addLive(c, { car: car.id, model: car.model, seats: seatsOf(c, car.model), owner, x: cmd.x, z: cmd.z, yaw: cmd.yaw ?? 0 });
+  const row = addLive(c, { car: car.id, model: car.model, seats: seatsOf(c, car.model), owner, x: cmd.x, z: cmd.z, yaw: cmd.yaw ?? 0, ...(cmd.comp ? { comp: true } : null) });
   log(c, 'summoned', { who: ownedBy(c, owner).find(p => p.hold.kind === 'you')?.id ?? car.driver, model: car.model, household: car.household });
   say(c, 'car.summoned', { live: row.id, car: car.id, model: car.model, owner, x: row.x, z: row.z, yaw: row.yaw });
 }
@@ -364,6 +421,7 @@ export function controlCommand(c, cmd) {
     case 'pos': positions(c, cmd); return true;
     case 'rideOut': rideOut(c, cmd, refuse); return true;
     case 'carIn': enterCar(c, cmd, refuse); return true;
+    case 'transfer': transfer(c, cmd, refuse); return true;
     case 'carOut': { const p = c.s.people[cmd.who]; if (p?.hold?.owner === (cmd.owner ?? 'solo')) carExit(c, p); else refuse('cannot get out'); return true; }
     case 'summon': summon(c, cmd, refuse); return true;
     case 'setJob': setJob(c, cmd, refuse); return true;

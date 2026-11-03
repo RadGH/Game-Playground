@@ -1,0 +1,23 @@
+{
+  "_doc": "What comes out of a rift (js/sim/rifts.js). look = a Creature spec for avatar-3d (the page). hp, dmg in points; speed m/s, reach m; wind = seconds of warning before a blow lands (the time to dodge), rest = seconds after it. move: melee stands and bites; spit strikes the spot you stood on from a distance; charge runs through a line. sizes: waves in order, each a list of kinds. skills: the second button, by job. Names are ours.",
+  "kinds": {
+    "snagjaw":     { "name": "Snagjaw",     "look": { "type": "hyena",  "size": 1.25, "colors": { "body": "#4b3a66", "belly": "#8a76a8", "accent": "#1f1630", "eyes": "#ff5a4a" } }, "hp": 140, "dmg": 14,  "speed": 4.2, "reach": 2.1, "wind": 0.8, "rest": 1.5, "move": "melee", "find": 2 },
+    "mirelump":    { "name": "Mirelump",    "look": { "type": "slime",  "size": 1.5,  "colors": { "body": "#3f8f78", "belly": "#a9e8c8", "accent": "#17463c", "eyes": "#f5e96a" } }, "hp": 300, "dmg": 20, "speed": 2.1, "reach": 2.4, "wind": 1.1, "rest": 2.0, "move": "melee", "find": 3 },
+    "flitterwick": { "name": "Flitterwick", "look": { "type": "moth",   "size": 3.2,  "colors": { "body": "#5b3f8a", "belly": "#c2a8e8", "accent": "#2a1f4a", "eyes": "#9dff6a" } }, "hp": 90, "dmg": 12,  "speed": 3.4, "reach": 9.0, "wind": 1.2, "rest": 2.3, "move": "spit",  "find": 2 },
+    "stonegrub":   { "name": "Stonegrub",   "look": { "type": "beetle", "size": 1.9,  "colors": { "body": "#5a5148", "belly": "#8d8272", "accent": "#d48a3a", "eyes": "#ffd34a" } }, "hp": 200, "dmg": 18, "speed": 2.8, "reach": 2.3, "wind": 0.9, "rest": 1.8, "move": "charge", "find": 3 },
+    "gloamwarden": { "name": "The Gloamkeeper", "boss": true, "look": { "type": "wraith", "size": 1.6, "colors": { "body": "#2b2547", "belly": "#7a6ab0", "accent": "#100c22", "eyes": "#6ae8ff" } }, "hp": 800, "dmg": 28, "speed": 2.6, "reach": 3.2, "wind": 1.3, "rest": 2.4, "move": "melee", "find": 12 }
+  },
+  "sizes": {
+    "swarm":    { "weight": 0, "crew": 4, "waves": [["snagjaw", "snagjaw", "snagjaw", "snagjaw", "snagjaw", "flitterwick", "flitterwick", "flitterwick", "mirelump", "stonegrub"]] },
+    "small":    { "weight": 6, "crew": 2, "waves": [["snagjaw", "snagjaw", "flitterwick"]] },
+    "middling": { "weight": 3, "crew": 3, "waves": [["snagjaw", "snagjaw", "mirelump"], ["flitterwick", "stonegrub", "snagjaw"]] },
+    "big":      { "weight": 1, "crew": 4, "waves": [["snagjaw", "snagjaw", "flitterwick", "stonegrub"], ["mirelump", "stonegrub", "flitterwick"], ["gloamwarden", "snagjaw", "snagjaw"]] }
+  },
+  "skills": {
+    "rift_warden": { "name": "Ward burst", "dmg": 30, "radius": 4.6, "cool": 6 },
+    "officer":     { "name": "Flash stick", "dmg": 22, "radius": 3.6, "cool": 7 },
+    "firefighter": { "name": "Axe sweep", "dmg": 26, "radius": 3.4, "cool": 7 },
+    "default":     { "name": "Wild swing", "dmg": 18, "radius": 3.0, "cool": 8 }
+  },
+  "finds": ["a shard of riftglass", "a tooth that hums", "a pebble that is warm", "a scale that will not stay dull", "a feather from nothing"]
+}

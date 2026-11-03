@@ -5,6 +5,8 @@ import { NEVER } from './people.js';
 import { chainProblems } from './work.js';
 import { fireProblems } from './fire.js';
 import { socialProblems } from './threads.js';
+import { lawProblems } from './law.js';
+import { riftProblems } from './rifts.js';
 
 const sum = list => list.reduce((a, b) => a + b, 0);
 
@@ -81,6 +83,8 @@ export function problems(sim) {
   chainProblems(c, fail);
   socialProblems(c, fail);
   fireProblems(c, fail);
+  lawProblems(c, fail);
+  riftProblems(c, fail);
   if (s.people.length !== c.k.population.people + (s.made ?? 0)) fail('the population changed');
   return bad;
 }

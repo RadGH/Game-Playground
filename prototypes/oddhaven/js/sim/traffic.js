@@ -75,7 +75,7 @@ function resetCar(c, trip, reason) {
   while (trip.e < r.steps.length - 1 && trip.s >= r.steps[trip.e].start + r.steps[trip.e].len) trip.e++;
   c.s.stats.resets++;
   say(c, 'car.reset', { trip: trip.id, reason, s: Math.min(next, r.length) });
-  if (trip.car >= 0 && !c.s.cars[trip.car].engine) {
+  if (trip.car >= 0 && !c.s.cars[trip.car].engine && !c.s.cars[trip.car].van) {
     const h = c.s.households[c.s.cars[trip.car].household], amount = k.invoice[reason];
     charge(c, h, amount, 'tow');
     log(c, 'tow', { who: trip.driver, household: h.id, reason, amount, trip: trip.id, route: trip.route });
@@ -114,10 +114,10 @@ export function stepTraffic(c) {
     let ahead = -1;
     for (const trip of list) {
       const r = trip._r, st = r.steps[trip.e], pos = trip._p;
-      if (trip.state === 'flipped') {
+      if (trip.state === 'flipped' || trip.state === 'bumped') {
         trip.v = 0;
         ahead = pos;
-        if (++trip.stuck >= resetAt) resetCar(c, trip, 'flipped');
+        if (++trip.stuck >= resetAt) resetCar(c, trip, trip.state === 'bumped' ? 'blocked' : 'flipped');
         continue;
       }
       let gap = Infinity;
@@ -148,11 +148,11 @@ export function stepTraffic(c) {
           for (const o of blockers?.get(nextStep.key) || []) gap = Math.min(gap, toEnd + o.at - o.len / 2);
         }
       }
-      const top = trip.siren ? st.speed * noise.sirenBoost : trip.yield ? Math.min(st.speed, pulledOver) : st.speed;
-      const want = trip.halt !== undefined ? 0 : Math.min(top, Math.max(0, (gap - k.minGap) / k.headwaySeconds));
+      const top = trip.siren ? st.speed * noise.sirenBoost : trip.yield ? Math.min(st.speed, pulledOver) : trip.fast ? st.speed * c.k.law.speedBoost : st.speed;
+      const want = trip.halt !== undefined || trip.pull ? 0 : Math.min(top, Math.max(0, (gap - k.minGap) / k.headwaySeconds));
       // a passenger asked to get out: it brakes harder than it pulls away, and lets them out when it has all but stopped
-      trip.v = trip.halt !== undefined ? Math.max(0, trip.v - k.acceleration * 2 * dt) : Math.min(trip.v + k.acceleration * dt, want);
-      if (trip.yield) trip.stuck = 0;
+      trip.v = trip.halt !== undefined || trip.pull ? Math.max(0, trip.v - k.acceleration * 2 * dt) : Math.min(trip.v + k.acceleration * dt, want);
+      if (trip.yield || trip.pull) trip.stuck = 0;
       trip.s += trip.v * dt;
       if (trip.halt !== undefined && trip.v < c.k.control.rideOutSpeed) rideEnded(c, s.people[trip.halt], trip);
       if (trip.ghost <= t) ahead = pos;

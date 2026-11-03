@@ -8,7 +8,7 @@ const pickOf = (list, key) => (Array.isArray(list) ? list[hash(key) % list.lengt
 const cap = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
-const tallyLine = c => `Since the last issue: ${plural(c.fires, 'fire')}, ${plural(c.rescues, 'rescue')}, ${plural(c.tows, 'tow')}, ${plural(c.friends, 'new friendship')}, ${plural(c.promoted, 'promotion')}, ${plural(c.weddings ?? 0, 'wedding')}, ${plural(c.feuds ?? 0, 'feud')} still going.`;
+const tallyLine = c => `Since the last issue: ${plural(c.rifts ?? 0, 'rift')}, ${plural(c.arrests ?? 0, 'arrest')}, ${plural(c.tickets ?? 0, 'ticket')}, ${plural(c.fires, 'fire')}, ${plural(c.rescues, 'rescue')}, ${plural(c.tows, 'tow')}, ${plural(c.friends, 'new friendship')}, ${plural(c.promoted, 'promotion')}, ${plural(c.weddings ?? 0, 'wedding')}, ${plural(c.feuds ?? 0, 'feud')} still going.`;
 
 export function createNews(T, roster) {
   const first = id => roster.people[id]?.name.split(' ')[0] ?? 'Someone', full = id => roster.people[id]?.name ?? 'Someone';
@@ -21,12 +21,12 @@ export function createNews(T, roster) {
     const name = placeName(pl), w = town(pl.zone);
     return `the ${name[0].toLowerCase() + name.slice(1)}${w ? ` in ${w}` : ''}`;
   };
-  const entry = row => (row.k === 'story' ? T.stories[row.story] : T.beats[row.k]);
+  const entry = row => (row.k === 'story' ? T.stories[row.story] : row.k === 'radio' ? T.beats[`radio.${row.why}`] : row.k === 'rift.closed' && row.how === 'county' ? T.beats['rift.county'] : T.beats[row.k]);
   const pranked = id => T.pranks[id] ?? 'did something unspeakable';
   const vars = row => ({
     prank: pranked(row.prank), prank2: pranked(row.prank), guests: row.guests ?? 0,
     who: first(row.who), full: full(row.who), person: first(row.person), other: first(row.other), a: first(row.a), b: first(row.b), place: place(row.place), cause: T.cause[row.cause] ?? 'nobody knows what',
-    rooms: row.rooms ?? 0, roomcount: plural(row.rooms ?? 0, 'room'), amount: Math.abs(row.amount ?? 0), seconds: row.seconds ?? 0, boards: row.boards ?? 0, age: row.age ?? 0,
+    pet: row.pet ?? 'the pet', find: T.finds?.[row.find] ?? 'something odd', kills: row.kills ?? 0, each: row.each ?? 0, offence: T.offence?.[row.why] ?? 'something', rooms: row.rooms ?? 0, roomcount: plural(row.rooms ?? 0, 'room'), amount: Math.abs(row.amount ?? 0), seconds: row.seconds ?? 0, boards: row.boards ?? 0, age: row.age ?? 0,
   });
   const fill = (text, v) => text.replace(/\{(\w+)\}/g, (_, k) => { const low = k.toLowerCase(), val = v[low]; if (val === undefined) return ''; return k === low ? val : String(val).toUpperCase(); });
   const word = (row, part) => { const e = entry(row), list = e?.[part] ?? e?.line; return list ? cap(fill(pickOf(list, `${row.i ?? 0}${part}`), vars(row))) : 'Something happened.'; };

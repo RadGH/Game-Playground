@@ -12,7 +12,7 @@ export const el = (tag, props = {}, ...kids) => {
 };
 const ls = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch { /* private window */ } } };
 
-export const BUILD = '2026-10-31-m7';
+export const BUILD = '2026-10-31-m8';
 const REPORT_LAN = /^(localhost|127\.|192\.168\.|10\.|100\.)/.test(location.hostname);
 const REPORT_URL = REPORT_LAN ? new URL('../../../../api/inbox/oddhaven-report', import.meta.url) : 'https://games.radgh.com/api/report/oddhaven';
 export const SOAK_URL = new URL('../../../../api/inbox/oddhaven-soak', import.meta.url);
@@ -58,6 +58,7 @@ export function createShell({ game }) {
       el('p', { class: 'od-tip', text: 'Driving: W A S D or arrows, Space handbrake, H horn, M view, R back on the road. Controller: stick, right trigger gas, left trigger brake, A handbrake, Back view, Start menu.' }),
       el('p', { class: 'od-tip', text: 'Playing someone: T takes over whoever you have picked. W is always the top of the screen, Shift walks, E gets in and out of cars, F opens Hand back, Party and Car. Click or tap the ground to walk there. Controller: stick moves, X gets in and out, Y opens the list. In any list: arrows and Enter, or d-pad and A.' }),
       el('p', { class: 'od-tip', text: 'On a fire: walk to the engine and press E to take the hose, E at a hydrant to connect it. Hold E, X on a controller, or the big button to spray, and steer with the stick or W A S D. E breaks a jammed door with the needle in the middle, lifts someone, and sets them down outside. When a Moment pops up, press J or Y on a controller to jump in.' }),
+      el('p', { class: 'od-tip', text: 'With friends: Friends on the ☰ menu has the code, the players and the party. When someone asks something, the bar at the top takes Yes and No: J on keys, Y on a controller says yes.' }),
       el('p', { class: 'od-tip', text: 'At work: E, X on a controller, or the big button does the job it names. Swing and pull with the needle in the middle. A log on your shoulder slows you down. P opens the Phone; a controller has it on the Y list, and Back in town view. To Stir, drag one person onto another, or tap someone with a person picked.' }),
     ], buttons: [{ label: 'Done' }] });
   }
@@ -88,6 +89,7 @@ export function createShell({ game }) {
     const hands = game.screen === 'hands', driving = game.driving && !hands;
     modal({ title: 'Menu', body: [], buttons: [
       { label: hands ? 'Keep going' : driving ? 'Back to the road' : 'Back to town' },
+      ...(game.screen === 'title' ? [] : [{ label: game.inRoom() ? 'Friends' : 'Bring a friend', onClick: () => game.friends() }]),
       { label: 'Phone', onClick: () => game.phoneOpen() },
       ...(hands ? [{ label: 'Hand back', onClick: () => game.handBack() }, { label: 'Party', onClick: () => game.partyMenu() }, { label: 'Summon a car', onClick: () => game.carMenu() }, { label: 'Change clothes', onClick: () => game.clothesMenu() }, ...(game.driving ? [{ label: 'Put the car back on the road', onClick: () => game.rescue() }] : [])] : []),
       ...(driving ? [{ label: 'View: ' + (game.view === 'top' ? 'top-down' : 'behind the car'), onClick: () => game.toggleView() },
@@ -126,7 +128,7 @@ export function createShell({ game }) {
   const title = el('div', { class: 'od-title' }), cont = el('div', { class: 'od-cont' }), gallerySlot = el('div', { class: 'od-gslot' });
   title.append(
     el('h1', { text: 'Oddhaven' }), el('p', { text: 'A town that keeps going without you. Pick a household and watch.' }),
-    cont, el('button', { class: 'od-big od-make', type: 'button', text: 'Make your own person', on: { click: () => game.makePerson() } }), el('h2', { class: 'od-pick', text: 'Or choose a household' }), gallerySlot,
+    cont, el('button', { class: 'od-big od-make', type: 'button', text: 'Make your own person', on: { click: () => game.makePerson() } }), el('button', { class: 'od-big od-together quiet', type: 'button', text: 'Play together', on: { click: () => game.playTogether() } }), el('h2', { class: 'od-pick', text: 'Or choose a household' }), gallerySlot,
     el('div', { class: 'od-small' }, news.button({ label: "What's new" }), credits.button({ label: 'Credits', className: 'od-link' }), el('button', { class: 'od-link', text: 'Settings', on: { click: settings } })));
   root.append(title);
   try { root.append(el('div', { class: 'od-account' }, accountButton({ game: 'oddhaven', gameName: 'Oddhaven' }))); } catch (e) { console.warn('[oddhaven] account', e); }
@@ -140,7 +142,7 @@ export function createShell({ game }) {
   return {
     fade() { fadeBox.classList.remove('on'); void fadeBox.offsetWidth; fadeBox.classList.add('on'); },
     toast, showPlace, menu, toggleMenu: () => (topModal() ? topModal().close() : menu()), report, settings, modal, closeAll() { for (const m of document.querySelectorAll('.od-modal')) m.close(); },
-    root, gallerySlot,
+    root, gallerySlot, burger,
     /** The Continue button; `meta` null hides it. */
     continueWith(meta, onClick) { cont.textContent = ''; if (meta) cont.append(el('button', { class: 'od-big od-play', text: 'Continue', on: { click: onClick } }), el('small', { text: `${meta.name}, day ${meta.day + 1}` })); },
     screen(name) { title.hidden = name !== 'title'; hud.hidden = name !== 'drive'; root.dataset.screen = name; root.querySelector('.od-account').hidden = name !== 'title'; },

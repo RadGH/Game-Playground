@@ -17,9 +17,15 @@ import { buildFace25, addEyelids, eyeSpec25 } from './chibi25-face.js';
 import { buildHair25, hatFit, HAIR_COVERS_EARS } from './chibi25-hair.js';
 import { EyeDriver25 } from './chibi25-eyes.js';
 import { needsSkirt, addSkirtBones, strideFor, applyBody25, race25 } from './chibi25-body.js';
+import { applyBody26, makeBodyLods } from './chibi26-body.js';
+import { buildFace26 } from './chibi26-face.js';
+import { buildHair26 } from './chibi26-hair.js';
+import { addExpressionBones, applyExpression, expressionState, faceJawWeights, setMood, setMouth } from './chibi26-expression.js';
+import { createFootFloorCorrection } from './chibi26-motion.js';
 
 export { CHIBI2_ANIMS, CHIBI2_SWIM_ANIMS, CHIBI2_ALL_ANIMS };
 const templates = new Map();
+function disposePart(part) { for (const g of new Set(part.lodGeometries || [part.geometry])) g.dispose(); part.material.map?.dispose(); part.material.dispose(); }
 /** Hats with a brim the hair shows beneath, and the height (head units) the hair is cut off at. */
 const HAT_BRIM = { wizard: 0.445, wide_brim: 0.41, straw: 0.43, top_hat: 0.51, feather_cap: 0.43, bard_red_feather: 0.43, cap: 0.44, bandana: 0.44, leather_cap: 0.4, ...HELM_BRIM, ...G5_HAT_BRIM };
 const sphere = () => new THREE.SphereGeometry(1, 10, 6);
@@ -35,7 +41,18 @@ function buildTemplate(a, rig, opts = {}) {
   // `opts.trace` (Chibi 2.5 measuring hook): every piece's bind-space vertices, tagged by build stage. Off = no cost.
   let traceTag = 'body';
   const tagAs = t => { traceTag = t; };
-  const add = opts.trace ? (g, bone, ...rest) => { b.add(g, bone, ...rest); opts.trace.push({ tag: traceTag, bone, positions: Float32Array.from(g.attributes.position.array), index: g.index ? Uint32Array.from(g.index.array) : null }); } : (...args) => b.add(...args);
+  const addRaw = opts.trace ? (g, bone, color, options) => { b.add(g, bone, color, options); opts.trace.push({ tag: traceTag, bone, color, surface: options?.surface || null, positions: Float32Array.from(g.attributes.position.array), index: g.index ? Uint32Array.from(g.index.array) : null }); } : (g, bone, color, options) => b.add(g, bone, color, options);
+  const add = (g, bone, color, options = {}) => {
+    const faceSurface = rig.v26 && !options.metal && traceTag.startsWith('face')
+      ? (traceTag === 'face:beard' || traceTag === 'face:brows' ? 'hair' : 'skin') : undefined;
+    const surface = options.surface || faceSurface
+      || (rig.v26 && traceTag.startsWith('hair') ? 'hair' : undefined)
+      || (rig.v26 && color === leather ? 'leather' : undefined);
+    const faceWeight = rig.v26 && bone === 'head' && traceTag.startsWith('face') ? { weigh: (x, y, z) => faceJawWeights(y, H) } : {};
+    const finalOptions = { ...faceWeight, ...options };
+    if (surface) finalOptions.surface = surface;
+    return addRaw(g, bone, color, finalOptions);
+  };
   const ellipsoid = (bone, color, position, scale, options = {}) => add(sphere(), bone, color, { position, scale, ...options });
   const strip = (bone, points, radius, color, options = {}) => add(taperedCurve(points, [radius, radius, radius], 4, 4), bone, color, options);
   const head = (g, color, options = {}) => add(g, 'head', color, { ...options, position: (options.position || [0, 0, 0]).map(v => v * H), scale: (options.scale || [1, 1, 1]).map(v => v * H) });
@@ -52,9 +69,14 @@ function buildTemplate(a, rig, opts = {}) {
     // and hands the hair the brow height its fringe must stop above
     const fit = hatFit(a.hat.id, { ...HAT_BRIM }), ctx = opts.mannequin ? mannequinCtx(add, a.body.skin, H) : { add, head, ellipsoid, strip };
     tagAs('face');
-    face = buildFace25(a, rig, { ...ctx, tag: tagAs, chestZ: body.chestZ, neckLift: rig.byName.head.position.y, crownCovered: !!(fit && (fit.shell || fit.hood)), hairCoversEars: HAIR_COVERS_EARS.includes(a.hair.id) && !(fit && (fit.hood || fit.shell)) });
+    const faceBuilder = rig.v26 ? buildFace26 : buildFace25;
+    face = faceBuilder(a, rig, { ...ctx, tag: tagAs, chestZ: body.chestZ, neckLift: rig.byName.head.position.y, crownCovered: !!(fit && (fit.shell || fit.hood)), hairCoversEars: HAIR_COVERS_EARS.includes(a.hair.id) && !(fit && (fit.hood || fit.shell)) });
+    if (rig.v26) {
+      tagAs('face:expression-mouth');
+      add(sphere(), 'mouth', '#38191c', { scale: [0.028 * H, 0.003 * H, 0.004 * H] });
+    }
     tagAs('hair');
-    buildHair25(a, rig, { head, faceWidth, faceDepth, fit, browTop: face.browTop, faceZ: face.faceZ, tag: tagAs });
+    (rig.v26 ? buildHair26 : buildHair25)(a, rig, { head, faceWidth, faceDepth, fit, browTop: face.browTop, faceZ: face.faceZ, tag: tagAs });
     tagAs('hat');
   } else {
     tagAs('face');
@@ -158,7 +180,17 @@ function buildTemplate(a, rig, opts = {}) {
   buildArmour2(a, gearCtx);   // tier-2 armour kits + emblems (chibi2-armour2.js) — opt-in: nothing for a look that names neither
   tagAs('gear5');
   buildGear5(a, { ...gearCtx, body, face });   // play-test 5: the g5_ models (chibi2-gear5.js) — opt-in: nothing for a look that names no g5_ id
-  return b.finish();
+  // Keep 2.6's character at two skinned draw calls even when a look has no metal item.
+  // This single hidden root-weighted triangle occupies no visible space and keeps the material bucket stable.
+  if (rig.v26 && !b.buckets.metal.length) {
+    const anchor = new THREE.BufferGeometry();
+    anchor.setAttribute('position', new THREE.Float32BufferAttribute([-0.001, -100, 0, 0.001, -100, 0, 0, -100, 0.002], 3));
+    anchor.setIndex([0, 1, 2]); anchor.computeVertexNormals();
+    add(anchor, 'root', '#202020', { metal: true });
+  }
+  const parts = b.finish();
+  if (rig.v26) makeBodyLods(parts);
+  return parts;
 }
 
 /**
@@ -451,8 +483,16 @@ function normalizeForChibi2(avatar) {
 function rigFor(avatar, anims, opts) {
   const a = applyHandsRule(normalizeForChibi2(avatar));      // W11 (2026-10-21): no off-hand item with a two-hander, except a worn quiver
   if (opts.v25 && !isV25(a)) a.body = { ...a.body, v: 2.5 };      // `{ v25: true }` = the flag in the look (so it is in the cache key)
-  const v25 = isV25(a), rig = createRig(a.body, v25 ? race25(a, raceOf(a)) : raceOf(a));
+  const v26 = !!opts.v26 || Number(a.body?.v) >= 2.6;
+  if (v26 && !['masc', 'fem'].includes(a.body.form)) a.body = { ...a.body, form: 'masc' };
+  const v25 = v26 || isV25(a), rig = createRig(a.body, v25 ? race25(a, raceOf(a)) : raceOf(a));
   rig.v25 = v25;
+  if (v26) {
+    rig.textures = opts.graphics !== 'low' && opts.textures !== false; applyBody26(rig, a);
+    rig.byName.eyeL.rotation.z = -(a.eyes.rot || 0) * Math.PI / 180;
+    rig.byName.eyeR.rotation.z = (a.eyes.rot || 0) * Math.PI / 180;
+  }
+  if (v26) addExpressionBones(rig);
   if (v25) addEyelids(rig, a);      // part A: eyelidL/R, appended right after the 22 v2 bones (before part B's)
   // Chibi 2.5 part B: skirt bones for a long garment, appended after every other bone, and the robe stride the gait
   // clips read (chibi25-body.js). Nothing for a v2 look.
@@ -460,7 +500,7 @@ function rigFor(avatar, anims, opts) {
   rig.hold = holdFor(a);            // what the hands carry decides how every clip carries it
   // the clip set is part of the cache key: two characters with different animation sets are not
   // the same template
-  const key = JSON.stringify(a) + '|' + anims.length + (opts.mannequin ? '|mannequin' : '');
+  const key = JSON.stringify(a) + '|' + anims.length + (opts.mannequin ? '|mannequin' : '') + (v26 ? `|v26:${rig.textures ? 'tex' : 'flat'}` : '');
   return { a, rig, key };
 }
 
@@ -477,7 +517,7 @@ const pending = new Map();
 const PREPARED_MAX = 48;
 export function prepareChibi2(avatar, opts = {}) {
   const anims = opts.swim ? CHIBI2_ALL_ANIMS : (opts.anims || CHIBI2_ANIMS);
-  const o = { mannequin: !!opts.mannequin, v25: !!opts.v25 };
+  const o = { mannequin: !!opts.mannequin, v25: !!opts.v25, v26: !!opts.v26, textures: opts.textures, graphics: opts.graphics };
   const { a, rig, key } = rigFor(avatar, anims, o);
   if (templates.has(key)) return Promise.resolve(false);
   if (pending.has(key)) return pending.get(key);
@@ -493,9 +533,9 @@ export function prepareChibi2(avatar, opts = {}) {
     if (!templates.has(key)) {
       // unclaimed prepared templates (refs 0) beyond the cap are let go, oldest first
       const idle = [...templates.entries()].filter(([, t]) => t.refs === 0 && t.prepared);
-      for (let i = 0; i < idle.length - (opts.keep ?? PREPARED_MAX); i++) { for (const p of idle[i][1].parts) { p.geometry.dispose(); p.material.dispose(); } templates.delete(idle[i][0]); }
+      for (let i = 0; i < idle.length - (opts.keep ?? PREPARED_MAX); i++) { for (const p of idle[i][1].parts) disposePart(p); templates.delete(idle[i][0]); }
       templates.set(key, { parts, clips, refs: 0, anims, prepared: true });
-    } else for (const p of parts) { p.geometry.dispose(); p.material.dispose(); }
+    } else for (const p of parts) disposePart(p);
     return true;
   })().finally(() => pending.delete(key));
   pending.set(key, job);
@@ -528,7 +568,7 @@ function acquire(avatar, anims = CHIBI2_ANIMS, opts = {}) {
     if (--template.refs === 0) {
       // `park` (opt-in, Oddhaven M7): a look taken off stays ready to put back on, as if `prepareChibi2` had built it. The cap there lets it go
       if (opts.park && templates.get(key) === template) { template.prepared = true; templates.delete(key); templates.set(key, template); return; }
-      for (const p of template.parts) { p.geometry.dispose(); p.material.dispose(); }
+      for (const p of template.parts) disposePart(p);
       if (templates.get(key) === template) templates.delete(key);
     }
   } };
@@ -542,13 +582,15 @@ function acquire(avatar, anims = CHIBI2_ANIMS, opts = {}) {
 export async function createChibi2Character(avatar, opts = {}) {
   const anims = opts.swim ? CHIBI2_ALL_ANIMS : (opts.anims || CHIBI2_ANIMS);
   const group = new THREE.Group(); group.userData.character = true;
-  let asset, action, anim = 'idle', elapsed = 0, disposed = false, handsFree = false;
+  let asset, action, anim = 'idle', elapsed = 0, disposed = false, handsFree = false, lod = 0, footFloorCorrection = null;
   const gaze = { x: 0, y: 0, tx: 0, ty: 0, next: 0.8 + Math.random() * 1.5 };
+  const faceExpression = expressionState();
   const eyes25 = new EyeDriver25();      // Chibi 2.5: blinking + looking (chibi25-eyes.js); idle for a v2 look
   function install(a) {
-    const next = acquire(a, anims, { mannequin: !!opts.mannequin, v25: !!opts.v25, trace: opts.trace || null, park: !!opts.park });
+    const next = acquire(a, anims, { mannequin: !!opts.mannequin, v25: !!opts.v25, v26: !!opts.v26, textures: opts.textures, graphics: opts.graphics, trace: opts.trace || null, park: !!opts.park });
     if (asset) { group.remove(asset.root); asset.release(); }
-    asset = next; group.add(asset.root); action = null; elapsed = 0;
+    asset = next; group.add(asset.root); action = null; elapsed = 0; lod = 0;
+    footFloorCorrection = asset.rig.v26 ? createFootFloorCorrection(asset.root, asset.rig) : null;
     asset.lidded = ['narrow', 'sleepy', 'tired', 'angry'].includes(a?.eyes?.id);   // lidded eyes never glance up under the lid
     asset.mixer.addEventListener('finished', e => { if (e.action === action && anim !== 'dead') play('idle'); });
     play('idle', 0); group.userData.fxHeight = asset.rig.height;
@@ -582,9 +624,20 @@ export async function createChibi2Character(avatar, opts = {}) {
     group,
     get anim() { return anim; }, get parts() { return asset.rig.byName; },
     get skeleton() { return asset.skeleton; },
-    metrics() { return { totalHeight: asset.rig.height, height: asset.rig.height }; },
-    stats() { return { meshes: asset.template.parts.length, bones: asset.rig.bones.length, triangles: asset.template.parts.reduce((n, p) => n + p.geometry.index.count / 3, 0) }; },
+    metrics() { return { totalHeight: asset.rig.height, height: asset.rig.height, ...(asset.rig.v26 ? { headHeight: asset.rig.headScale * 0.60 } : {}) }; },
+    stats() { let triangles = 0, meshes = 0; asset.root.traverse(o => { if (o.isSkinnedMesh) { meshes++; triangles += o.geometry.index.count / 3; } }); return { meshes, bones: asset.rig.bones.length, triangles, lod }; },
+    setLod(n = 0) {
+      if (!asset.rig.v26) return false;
+      const level = Math.max(0, Math.min(2, Math.round(Number(n) || 0))), meshes = [];
+      asset.root.traverse(o => { if (o.isSkinnedMesh) meshes.push(o); });
+      asset.template.parts.forEach((part, i) => { meshes[i].geometry = part.lodGeometries[level]; });
+      lod = level; return true;
+    },
     setAnim: play,
+    /** Chibi 2.6 face controls; false on older rigs or for an unknown mood. */
+    setExpression(mood, intensity = 1) { return asset.rig.v26 ? setMood(faceExpression, mood, intensity) : false; },
+    setMouthShape(shape, intensity = 1) { return asset.rig.v26 ? setMouth(faceExpression, shape, intensity) : false; },
+    get expression() { return asset.rig.v26 ? { mood: faceExpression.mood, intensity: faceExpression.intensity, shape: faceExpression.shape, mouthIntensity: faceExpression.mouthIntensity } : null; },
     async setAvatar(a) { if (!disposed) install(a); },
     /**
      * How fast the current clip plays, 1 being its own natural pace.
@@ -619,6 +672,7 @@ export async function createChibi2Character(avatar, opts = {}) {
       asset.mixer.update(d * rate);
       twist.on = !!(chest && (twist.yaw || twist.side || twist.fwd));
       if (twist.on) { twist.q.setFromEuler(twist.e.set(twist.fwd, twist.yaw, twist.side)); twist.inv.copy(twist.q).invert(); chest.quaternion.multiply(twist.q); }
+      if (footFloorCorrection && !/^(ride|rideGallop|boat|swim)/.test(anim)) footFloorCorrection();
       // THE EYES GLANCE instead of blinking. A blink squashed the eye to a line, which on a face this
       // simple read as eyes clamped shut every few seconds; now the iris drifts to a new spot every
       // couple of seconds and settles there, which is what makes a face look alive.
@@ -626,6 +680,7 @@ export async function createChibi2Character(avatar, opts = {}) {
       if (asset.rig.v25) {
         // Chibi 2.5: real blinks with eyelids, glances clamped inside the white, lookAt (chibi25-eyes.js)
         eyes25.update(asset.rig, d, anim);
+        if (asset.rig.v26) applyExpression(asset.rig, faceExpression, anim === 'dead');
         if (handsFree) for (const s of ['L', 'R']) bones['grip' + s].scale.setScalar(0.001);
         return;
       }

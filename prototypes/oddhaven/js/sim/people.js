@@ -26,6 +26,8 @@ import { foeAt, isFoe, h01 } from './social.js';
 import { meetDone } from './threads.js';
 import { spellOrder } from './spells.js';
 import { dressForAct, dressToLeave } from './wardrobe.js';
+import { lawWake, hawkEnded, hawkStarted } from './law.js';
+import { riftWake } from './rifts.js';
 
 export const NEVER = 2147483647;
 
@@ -135,6 +137,7 @@ export function finishAct(c, p) {
   } else if (a.id === 'home_block' || a.id === 'morning') {
     swapNumbers(c, p, c.s.households[p.household].members);
   }
+  if (a.id === 'hawk') hawkEnded(c, p);
   if (a.id === 'site_work') {
     if (p.sh?.keep) p.sh.keep = false; else clockOut(c, p);       // taken over or out on a run: the shift stays open
   }
@@ -190,6 +193,7 @@ export function startAct(c, p, a, place, until, extra = null) {
   p.last = a.id;
   if (a.id !== 'idle') { (p.diary ||= []).push([t, a.id, place]); if (p.diary.length > c.k.control.diaryCap) p.diary.shift(); }
   if (a.site !== 'home' && a.site !== 'here' && a.id !== 'work') c.s.visits[placeRec.kind] = (c.s.visits[placeRec.kind] || 0) + 1;
+  if (a.id === 'hawk') hawkStarted(c, p);
   if (p.lv === 0) say(c, 'act', { who: p.id, a: a.id });
 }
 
@@ -401,6 +405,8 @@ export function wakeUp(c, p) {
     endTrip(c, p);
   }
   if (fireWake(c, p)) return;
+  if (lawWake(c, p)) return;
+  if (riftWake(c, p)) return;
   if (p.run && runWake(c, p)) return;
   if (p.goal) {
     const g = p.goal;

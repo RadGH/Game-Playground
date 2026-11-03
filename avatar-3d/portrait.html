@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chibi 2.6 Portrait Preview</title>
+<link rel="stylesheet" href="../shared/style.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+<style>
+  :root { color-scheme: dark; }
+  body { max-width: 1100px; margin: 0 auto; padding: 20px; background:#171a20; color:#edf0f4; }
+  a { color:#a8c8ff; }
+  header { display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+  header h1 { margin:0; }
+  .portrait-layout { display:grid; grid-template-columns:minmax(250px, 340px) minmax(380px, 1fr); gap:24px; align-items:start; }
+  .controls { display:grid; gap:14px; padding:18px; border:1px solid #39404b; border-radius:12px; background:#20252d; }
+  label { display:grid; gap:6px; color:#c4ccd7; font-size:14px; }
+  select, input, button { font:inherit; }
+  select, input[type=range] { width:100%; }
+  select { padding:8px; color:#f5f6f8; background:#303742; border:1px solid #56606e; border-radius:6px; }
+  .checks { display:flex; gap:16px; flex-wrap:wrap; }
+  .checks label { display:flex; align-items:center; gap:7px; }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; }
+  button { padding:9px 13px; border:1px solid #56606e; border-radius:7px; background:#303742; color:#f5f6f8; cursor:pointer; }
+  button.primary { background:#3569a8; border-color:#568ad0; }
+  button:disabled { opacity:.55; cursor:wait; }
+  .previews { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  figure { margin:0; min-width:0; }
+  figcaption { margin:0 0 8px; color:#c4ccd7; font-size:14px; }
+  .image-checker { display:grid; place-items:center; min-height:300px; overflow:hidden; border:1px solid #39404b; border-radius:10px; background-color:#2a3039; background-image:linear-gradient(45deg,#343b46 25%,transparent 25%),linear-gradient(-45deg,#343b46 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#343b46 75%),linear-gradient(-45deg,transparent 75%,#343b46 75%); background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0; }
+  .image-checker img { display:block; width:100%; height:auto; max-height:620px; object-fit:contain; }
+  #status { min-height:1.5em; color:#aeb8c6; font-size:13px; }
+  .help { color:#aeb8c6; line-height:1.5; }
+  @media(max-width:760px) { body{padding:12px}.portrait-layout{grid-template-columns:1fr}.previews{grid-template-columns:1fr 1fr;gap:10px}.image-checker{min-height:220px} }
+  @media(max-width:480px) { .previews{grid-template-columns:1fr 1fr}.image-checker{min-height:180px} }
+</style>
+</head>
+<body>
+<header><a href="./">← Avatar 3D</a><h1>2.6 portrait preview</h1></header>
+<main class="portrait-layout">
+  <section class="controls" aria-label="Portrait settings">
+    <label for="preset">Character</label>
+    <select id="preset"></select>
+    <label for="yaw">View angle <output id="yaw-value">0°</output></label>
+    <input id="yaw" type="range" min="-45" max="45" step="1" value="0">
+    <label for="resolution">PNG size</label>
+    <select id="resolution"><option value="320">320 × 400</option><option value="640">640 × 800</option></select>
+    <div class="checks">
+      <label><input id="feminine" type="checkbox"> Feminine form</label>
+      <label><input id="round" type="checkbox"> Round chest</label>
+    </div>
+    <label for="graphics">Graphics</label>
+    <select id="graphics"><option value="high">Textures</option><option value="low">Solid colors</option></select>
+    <div class="actions"><button id="render" class="primary">Render portrait</button><button id="download" disabled>Download PNG</button></div>
+    <div id="status" role="status" aria-live="polite">Loading characters…</div>
+    <p class="help">The left preview is baked from the Chibi 2.6 3D model. The right preview is the existing 2D SVG renderer. Transparent areas use a checkerboard.</p>
+  </section>
+  <section class="previews" aria-label="Portrait previews">
+    <figure><figcaption>Chibi 2.6 · rendered PNG</figcaption><div class="image-checker"><img id="baked" alt="Baked Chibi 2.6 portrait"></div></figure>
+    <figure><figcaption>2D renderer · SVG reference</figcaption><div class="image-checker"><img id="svg" alt="2D SVG portrait reference"></div></figure>
+  </section>
+</main>
+<script type="module" src="./js/chibi26-portrait-page.js"></script>
+</body>
+</html>

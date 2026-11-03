@@ -1,6 +1,6 @@
 // The data bundle: what createSim needs from data/*.json. Pass it in; the sim itself never touches the network or disk.
 
-export const DATA_FILES = ['balance', 'actions', 'buildings', 'jobs', 'people', 'premades', 'wiring', 'stir', 'stories', 'social'];
+export const DATA_FILES = ['balance', 'actions', 'buildings', 'jobs', 'people', 'premades', 'wiring', 'stir', 'stories', 'social', 'law', 'monsters'];
 
 /** Fetch the bundle (Worker, page). `base` = URL of the data folder, ending in a slash. */
 export async function fetchData(base) {

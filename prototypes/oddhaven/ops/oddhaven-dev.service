@@ -1,0 +1,12 @@
+# Oddhaven DEV room server: the live working tree on port 8561 (+ https 8563). LAN only. User unit. Restart after changing server/, js/net/, js/sim/ or data/:
+#   systemctl --user restart oddhaven-dev
+[Unit]
+Description=Oddhaven dev room server (working tree) on :8561
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/oddhaven/ops/start.sh dev
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=default.target

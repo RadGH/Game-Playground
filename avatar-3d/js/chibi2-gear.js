@@ -143,7 +143,7 @@ export function buildHeld(a, c) {
   if (id === 'none' || isG5(id)) return;
   if (buildFarholdHeld(a, c)) return;            // an `fh_` weapon; everything below is unchanged
   const R = 'handR', z = 0.055;
-  const shaft = (bone, from, to, r, color) => add(profile([[from, r, r], [to, r, r]], 8), bone, color, { position: [0, 0, z] });
+  const shaft = (bone, from, to, r, color) => add(profile([[from, r, r], [to, r, r]], 8), bone, color, { position: [0, 0, z], ...(color === wood ? { surface: 'wood' } : color === leather ? { surface: 'leather' } : {}) });
   // OWNER REVIEW 2026-10-21 (W1, W8): the blade began at y -0.165 and the guard's underside is at -0.136, so every
   // sword, greatsword and pair of daggers in this vocabulary had 3 cm of air between blade and hilt; the blade now
   // starts inside the guard (-0.105). The guard is an open tube — its ends were holes you could see through — and is
@@ -197,7 +197,7 @@ export function buildHeld(a, c) {
     return;
   }
   if (id === 'crossbow') {
-    add(new THREE.BoxGeometry(0.05, 0.055, 0.36), R, wood, { position: [0, -0.07, 0.19] });
+    add(new THREE.BoxGeometry(0.05, 0.055, 0.36), R, wood, { position: [0, -0.07, 0.19], surface: 'wood' });
     add(taperedCurve([[-0.19, -0.05, 0.30], [0, -0.04, 0.36], [0.19, -0.05, 0.30]], [0.012, 0.02, 0.012], 5, 6), R, hc, { metal: true });
     polyline(c, R, [[-0.19, -0.05, 0.30], [0, -0.04, 0.22], [0.19, -0.05, 0.30]], 0.004, '#e8e0c0');
     polyline(c, R, [[0, -0.035, 0.20], [0, -0.035, 0.40]], 0.007, steel, { metal: true });
@@ -270,7 +270,8 @@ export function buildHeld(a, c) {
      * forearm lies across the bowl and the left hand closes on the neck just under the pegbox. A lute's hold kind is
      * 'lute' (chibi2-weapon-ids.js) and it is two-handed: nothing is drawn in the off hand with it.
      */
-    const F = LUTE_FRAME, m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+    const F = LUTE_FRAME.clone(), m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+    if (c.rig?.v26) F.multiply(new THREE.Matrix4().makeScale(1.3, 1.3, 1.3));
     const put = (g, color, o = {}) => {
       g.applyMatrix4(m.compose(new THREE.Vector3(...(o.position || [0, 0, 0])), q.setFromEuler(e.set(...(o.rotation || [0, 0, 0]))), new THREE.Vector3(...(o.scale || [1, 1, 1]))));
       add(g.applyMatrix4(F), R, color, { metal: o.metal });
@@ -285,8 +286,18 @@ export function buildHeld(a, c) {
     put(new THREE.BoxGeometry(0.044, 0.1, 0.026), tone(body, 0.6), { position: [0, 0.475, -0.012], rotation: [-0.6, 0, 0] });   // the pegbox, bent back
     for (const y of [0.455, 0.49]) put(new THREE.BoxGeometry(0.08, 0.009, 0.009), dark, { position: [0, y, -0.012 - (y - 0.44) * 0.68] });   // pegs
     for (const x of [-0.011, 0, 0.011]) {
-      const a = new THREE.Vector3(x, -0.085, 0.05).applyMatrix4(F), b = new THREE.Vector3(x, 0.43, 0.043).applyMatrix4(F);
-      polyline(c, R, [a.toArray(), b.toArray()], 0.0022, gut);
+      const stringPoint = y => new THREE.Vector3(x, y, THREE.MathUtils.lerp(0.05, 0.043, (y + 0.085) / 0.515)).applyMatrix4(F);
+      if (c.rig?.v26) {
+        // Leave the fret and strum hand contact zones clear. Full straight strings ran visibly
+        // across the backs of both hands in the 2.6 lute pose.
+        for (const [from, to] of [[-0.085, -0.04], [0.04, 0.275], [0.37, 0.43]]) {
+          const a = stringPoint(from), b = stringPoint(to);
+          polyline(c, R, [a.toArray(), b.toArray()], 0.0022, gut);
+        }
+      } else {
+        const a = stringPoint(-0.085), b = stringPoint(0.43);
+        polyline(c, R, [a.toArray(), b.toArray()], 0.0022, gut);
+      }
     }
     return;
   }
@@ -433,7 +444,7 @@ export function buildOffhand(a, c) {
   if (id === 'tv_totem') {
     // PLAY-TEST 4 (S17): a TOTEM — a carved stack of three faces on a haft, a beak on top, two feathers.
     const wood2 = oc && oc !== '#9aa3ad' ? oc : '#8a6a42', paint = '#b03a2a', teal = '#2a8a8a', ZF = 0.055;
-    add(new THREE.CylinderGeometry(0.02, 0.02, 0.22, 6), L, wood, { position: [0, -0.02, ZF] });   // W4 (2026-10-21): the haft through the fist
+    add(new THREE.CylinderGeometry(0.02, 0.02, 0.22, 6), L, wood, { position: [0, -0.02, ZF], surface: 'wood' });   // W4 (2026-10-21): the haft through the fist
     for (let k = 0; k < 3; k++) {
       const y = 0.11 + k * 0.065;
       add(new THREE.CylinderGeometry(0.042 - k * 0.004, 0.046 - k * 0.004, 0.06, 8), L, k % 2 ? tone(wood2, 0.85) : wood2, { position: [0, y, ZF] });
@@ -456,7 +467,7 @@ export function buildOffhand(a, c) {
     // pointy cone". The two flame cones are gone; the head is a ball of pitch-soaked rag bound with three turns of
     // cord, charred dark at the business end. The FIRE is the game's: `createHeldFlame` / `attachHeldFlame` in
     // avatar-3d/js/held-flame.js put a flickering flame on `TORCH_FLAME_AT.torch`.
-    add(profile([[-0.4, 0.02, 0.02], [0.07, 0.016, 0.016]], 6), L, wood, { position: [0, 0, 0.055] });
+    add(profile([[-0.4, 0.02, 0.02], [0.07, 0.016, 0.016]], 6), L, wood, { position: [0, 0, 0.055], surface: 'wood' });
     rag(c, L, 0.055, -0.38, 1);
     return;
   }

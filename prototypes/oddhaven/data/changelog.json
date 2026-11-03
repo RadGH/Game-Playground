@@ -1,6 +1,22 @@
 {
  "entries": [
   {
+   "id": "m8-bring-a-friend",
+   "date": "2026-10-31",
+   "title": "Bring a friend",
+   "items": [
+    "Play together: press Play together on the title screen, or Bring a friend on the menu, and your town opens up for friends. They join with a four-letter code, a link or a QR code. Up to eight people in one town.",
+    "A friend can bring a person they made, make one on the spot, or take anyone free in your town. That person stays in town when they go.",
+    "Parties work across players. Invite a friend or ask to join theirs, follow the leader on foot, share a car, and if you fall behind you catch up.",
+    "The party leader can take back anyone at any moment, even a car at full speed. It carries on down the road without a jump.",
+    "Split off to start your own party whenever you like, keep who you are playing, and rejoin later.",
+    "The host decides what each friend may do: take people, spend money, drive cars, change settings, Direct and Stir. Five plain switches, one player at a time.",
+    "One clock for everyone. Going faster or skipping the night needs everybody to agree.",
+    "If your connection drops you keep your person, and you are back as soon as it returns. When everyone leaves, the town goes to sleep and wakes with the same code.",
+    "It is still your town: take it home whenever you like and carry on alone, exactly where it was. Nobody has to sign in to any of this."
+   ]
+  },
+  {
    "id": "m7-make-yourself",
    "date": "2026-10-31",
    "title": "Make yourself",

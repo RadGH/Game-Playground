@@ -1,0 +1,23 @@
+{
+  "_doc": "Police, crime and permits (js/sim/law.js). One row per kind of call. steps = what has to happen, in order, whoever does it: the sim runs them at the balance.json pace, a player's `law` command runs the same ones from where the browser says they stand. urgent = lights and siren. fine = coins asked for; a household only ever pays what it can spare (rule 4). arrest = a night in the cells is on the table. Words are in data/news.json and the page.",
+  "calls": {
+    "speeding":     { "label": "Speeding",           "pri": 4, "urgent": true,  "steps": ["pull", "talk", "book"], "fine": 18, "arrest": false },
+    "theft":        { "label": "Shop theft",         "pri": 5, "urgent": true,  "steps": ["witness", "find", "talk", "book"], "fine": 30, "arrest": true },
+    "noise":        { "label": "Noise complaint",    "pri": 3, "urgent": false, "steps": ["talk", "other", "book"], "fine": 12, "arrest": false },
+    "lost_pet":     { "label": "Lost pet",           "pri": 3, "urgent": false, "steps": ["pick", "home"], "fine": 0, "arrest": false },
+    "cordon":       { "label": "Fire scene cordon",  "pri": 4, "urgent": true,  "steps": ["stand", "move", "move"], "fine": 0, "arrest": false },
+    "fender":       { "label": "Fender bender",      "pri": 3, "urgent": false, "steps": ["talk", "clear", "clear", "clear"], "fine": 0, "arrest": false },
+    "panic":        { "label": "Rift panic",         "pri": 5, "urgent": true,  "steps": ["calm", "calm", "calm"], "fine": 0, "arrest": false },
+    "hawking":      { "label": "Selling with no permit", "pri": 2, "urgent": false, "steps": ["talk", "book"], "fine": 10, "arrest": false },
+    "street_magic": { "label": "Street magic with no permit", "pri": 2, "urgent": false, "steps": ["talk", "book"], "fine": 14, "arrest": false },
+    "medic":        { "label": "Someone for the clinic", "pri": 4, "urgent": true, "steps": ["load", "clinic"], "fine": 0, "arrest": false, "job": "nurse" },
+    "patrol":       { "label": "Patrol",             "pri": 0, "urgent": false, "steps": ["look"], "fine": 0, "arrest": false, "quiet": true }
+  },
+  "permits": {
+    "magic": { "label": "Street magic permit", "fee": 25, "days": 12 },
+    "stall": { "label": "Market stall permit", "fee": 30, "days": 12 }
+  },
+  "pets": { "kinds": ["cat", "hound", "hen", "frog"], "names": ["Biscuit", "Mister Toes", "Gravy", "Pudding", "Sir Nibbles", "Dumpling", "Wellington", "Mabel", "Tuppence", "Crumpet", "Button", "Chutney"] },
+  "rough": ["greedy", "cynical", "abrasive", "pompous"],
+  "calm": ["kind", "pious", "loyal", "shy"]
+}

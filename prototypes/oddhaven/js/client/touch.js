@@ -3,14 +3,16 @@
 // Reads like Roverlands' touch.state(), so its input.js can take this as its `touch` option.
 const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
 
-export function createTouch({ onView, onHorn, onTap }) {
+export function createTouch({ onView, onHorn, onTap, onSkill, onDodge }) {
   const root = el('div', 'od-touch');
   const look = el('div', 'od-look'), zone = el('div', 'od-stickzone'), ring = el('i', 'od-ring'), thumb = el('b', 'od-thumb');
   zone.append(ring, thumb);
-  const gas = el('button', 'od-btn od-gas', 'GAS'), brake = el('button', 'od-btn od-brake', 'BRAKE'), horn = el('button', 'od-btn od-mini od-horn', 'HORN'), view = el('button', 'od-btn od-mini od-view', 'VIEW'), use = el('button', 'od-btn od-use', 'GET IN');
-  for (const b of [gas, brake, horn, view, use]) { b.type = 'button'; b.dataset.nonav = '1'; }
+  const gas = el('button', 'od-btn od-gas', 'GAS'), brake = el('button', 'od-btn od-brake', 'BRAKE'), horn = el('button', 'od-btn od-mini od-horn', 'HORN'), view = el('button', 'od-btn od-mini od-view', 'VIEW'), use = el('button', 'od-btn od-use', 'GET IN'), skill = el('button', 'od-btn od-skill', 'SKILL'), dodge = el('button', 'od-btn od-dodge', 'DODGE');
+  for (const b of [gas, brake, horn, view, use, skill, dodge]) { b.type = 'button'; b.dataset.nonav = '1'; }
   use.hidden = true;
-  root.append(look, zone, gas, brake, horn, view, use);
+  root.append(look, zone, gas, brake, horn, view, use, skill, dodge);
+  skill.addEventListener('pointerdown', e => { e.preventDefault(); st.active = true; onSkill?.(); skill.classList.add('down'); setTimeout(() => skill.classList.remove('down'), 120); });
+  dodge.addEventListener('pointerdown', e => { e.preventDefault(); st.active = true; onDodge?.(); dodge.classList.add('down'); setTimeout(() => dodge.classList.remove('down'), 120); });
   const st = { active: false, mx: 0, my: 0, lookX: 0, lookY: 0, gas: false, brake: false, use: false, useHeld: false };
   // the big button is pressed once for most things and held down for a hose
   use.addEventListener('pointerdown', e => { e.preventDefault(); st.active = true; st.use = true; st.useHeld = true; use.classList.add('down'); try { use.setPointerCapture?.(e.pointerId); } catch { /* not a live pointer */ } });
@@ -54,6 +56,7 @@ export function createTouch({ onView, onHorn, onTap }) {
     show(v) { root.classList.toggle('on', !!v); if (!v) letGo(); },
     /** 'car' shows the pedals; 'foot' only the stick and the use button. */
     mode(m) { root.dataset.mode = m; },
+    skillInfo(name, left, dleft) { const a = left > 0 ? `${Math.ceil(left)}` : name, b = dleft > 0 ? `${Math.ceil(dleft)}` : 'DODGE'; if (skill.textContent !== a) skill.textContent = a; if (dodge.textContent !== b) dodge.textContent = b; skill.classList.toggle('wait', left > 0); dodge.classList.toggle('wait', dleft > 0); },
     useLabel(text) { use.hidden = !text; if (text && use.textContent !== text) use.textContent = text; },
     state() { const out = { ...st, swap: false }; st.lookX = 0; st.lookY = 0; st.use = false; return out; },
   };

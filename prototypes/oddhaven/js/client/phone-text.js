@@ -8,7 +8,10 @@ const jobName = (roster, id) => roster.jobs[id]?.title ?? 'the job';
 const SCENE = { introduce: 'meeting', date: 'on a date', row: 'having a row', patch: 'patching it up' };
 const PRANK = { gnome: 'has been moving your gnome', bins: 'put your bins out on the wrong day', hedge: 'trimmed your hedge into a rude shape', note: 'left you a very polite note', flyers: 'pinned up flyers about your manners', doorbell: 'taught your doorbell a new tune', cones: 'put traffic cones round your car' };
 const STAGE = { first_date: 'on a first date', second_date: 'on a second date', proposal: 'having a big talk', wedding: 'getting married', row: 'having a public row', showdown: 'at the town hall', thanks: 'saying thank you', housewarming: 'at a housewarming' };
-const WHY = { fine: 'Town hall fine', wedding: 'Wedding', joined: 'Joined accounts', pay: 'Wages', handson: 'Hands-on wages', pension: 'Pension', bills: 'Bills', repairs: 'Repairs', food: 'Food', treats: 'Treats', tow: 'Tow gnome', travel: 'Taxi', hardship: 'Hardship grant', found: 'Found', mech: 'Found', insurance: 'Insurance paid out', clinic: 'Clinic' };
+const WHY = { fine: 'Town hall fine', wedding: 'Wedding', joined: 'Joined accounts', pay: 'Wages', handson: 'Hands-on wages', pension: 'Pension', bills: 'Bills', repairs: 'Repairs', food: 'Food', treats: 'Treats', tow: 'Tow gnome', travel: 'Taxi', hardship: 'Hardship grant', found: 'Found', mech: 'Found', insurance: 'Insurance paid out', clinic: 'Clinic', fines: 'Fines', permits: 'Permits', stall: 'Market stall', lifted: 'Found', finds: 'Rift finds' };
+const OFFENCE = { speeding: 'speeding', theft: 'lifting something from a shop', noise: 'making a racket', hawking: 'selling with no permit', street_magic: 'street magic with no permit' };
+const CALL = { speeding: 'A speeding car', theft: 'A shop theft', noise: 'A noise complaint', lost_pet: 'A lost pet', cordon: 'A fire cordon', fender: 'A fender bender', panic: 'A rift panic', hawking: 'A stall with no permit', street_magic: 'Street magic', medic: 'Someone for the clinic' };
+export const callName = k => CALL[k] ?? 'A call';
 export const bookReason = r => WHY[r] ?? 'Other';
 
 /** { from, subject, lines } for one letter. */
@@ -17,7 +20,7 @@ export function letterOf(m, roster) {
   switch (m.k) {
     case 'statement': return { from: 'Wend County Bank', subject: `Your bills: ${coins(m.bill)}`, lines: [`Bills paid: ${coins(m.bill)}.`, m.pay > 0 ? `Wages since last time: ${coins(m.pay)}.` : 'No wages since last time.', ...(m.pension ? [`Pension: ${coins(m.pension)}.`] : []), ...(m.planks ? [`Your home's repairs used ${m.planks} boards from the lumber yard.`] : []), ...(m.short ? [`The yard was short of boards, so repairs cost ${coins(m.short)} more.`] : []), `Balance now: ${coins(m.money)}.`] };
     case 'hardship': return { from: 'Wend County Bank', subject: 'A hardship grant', lines: [`You were ${coins(m.amount)} short, so the county covered it. This should never happen. Tell someone.`] };
-    case 'wage': return { from: m.job === 'firefighter' ? 'Wend County Fire Service' : 'Wend Timber Co.', subject: `Payslip for ${who}: ${coins(m.pay)}`, lines: [`${who} worked a shift as ${jobName(roster, m.job)} and was paid ${coins(m.pay)}.`, `${m.hands} hours done by hand at the hands-on rate, out of ${m.heldHours} on site.`] };
+    case 'wage': return { from: m.job === 'firefighter' ? 'Wend County Fire Service' : m.job === 'officer' ? 'Wend County Police' : m.job === 'rift_warden' ? 'The Rift Lodge' : 'Wend Timber Co.', subject: `Payslip for ${who}: ${coins(m.pay)}`, lines: [`${who} worked a shift as ${jobName(roster, m.job)} and was paid ${coins(m.pay)}.`, `${m.hands} hours done by hand at the hands-on rate, out of ${m.heldHours} on site.`] };
     case 'promoted': return { from: 'The boss', subject: `${who} got a promotion`, lines: [`Well done, ${who}. You are now rank ${m.rank} as ${jobName(roster, m.job)}, and that means more pay.`] };
     case 'mishap': return { from: 'The accident book', subject: `${who} had a small mishap`, lines: [`${who} had a mishap at work as ${jobName(roster, m.job)}. Nothing a plaster cannot fix. Please be more careful.`] };
     case 'tow': return { from: 'The tow gnome', subject: `Invoice: ${coins(m.amount)}`, lines: [`${who}'s car got ${m.reason === 'flipped' ? 'turned over' : 'stuck'}. It has been put back on the road. That will be ${coins(m.amount)}.`] };
@@ -26,6 +29,10 @@ export function letterOf(m, roster) {
     case 'friends': return { from: first(roster, m.a), subject: 'Good to see you', lines: [`${first(roster, m.a)} and ${first(roster, m.b)} are friends now. Nobody saw it coming.`] };
     case 'insurance': return { from: 'Wend Mutual Insurance', subject: `Your fire claim: ${coins(m.cost)}`, lines: [`We have paid for the repairs to ${m.rooms} room${m.rooms === 1 ? '' : 's'}: ${coins(m.cost)}.`, m.excess ? `Your share is ${coins(m.excess)}.` : 'There is nothing for you to pay.', ...(m.moved ? ['Your home cannot be lived in yet. The county has found you somewhere to stay, and you go back when the repairs are done.'] : ['The repair crew will be round once the boards come from the yard.'])] };
     case 'clinic': return { from: 'Wend Clinic', subject: `${who} is with us`, lines: [`${who} breathed in some smoke and we are keeping an eye on them. Your insurance has paid the ${coins(m.cost)}.`] };
+    case 'ticket': return { from: 'Wend County Police', subject: `A ticket for ${who}: ${coins(m.amount)}`, lines: [`${who} was stopped for ${OFFENCE[m.why] ?? 'something'}. The fine is ${coins(m.amount)}. It has been taken care of.`] };
+    case 'arrested': return { from: 'Wend County Police', subject: `${who} spent a night with us`, lines: [`${who} was arrested for ${OFFENCE[m.why] ?? 'something'} and kept in the cells overnight. The fine is ${coins(m.amount)}.`, 'Breakfast was included.'] };
+    case 'permit': return { from: 'The Town Hall', subject: `${who}'s permit`, lines: [`${who} now holds a permit, good for ${m.days} days. That was ${coins(m.amount)}.`] };
+    case 'pet.found': return { from: 'Wend County Police', subject: `${m.pet} is home`, lines: [`${who} brought ${m.pet} back. ${first(roster, m.person)} has been told to check the gate.`] };
     case 'feud': return { from: 'A neighbour', subject: 'Regarding last night', lines: [`Somebody ${PRANK[m.prank] ?? 'did something unspeakable'}. ${first(roster, m.b)} knows who it was, and so does ${first(roster, m.a)}.`] };
     case 'sheet': return { from: 'The Odd Sheet', subject: `The Odd Sheet, issue ${m.no}, is out`, lines: ['The paper is out. Open the Paper app on your Phone to read it.'] };
     case 'rescued': return { from: 'Wend County Fire Service', subject: `${first(roster, m.person)} is out safe`, lines: [`${who} carried ${first(roster, m.person)} out of ${roster.places[m.place] ? placeName(roster.places[m.place]) : 'the fire'}. You may want to say thank you.`] };
@@ -44,6 +51,10 @@ export function happeningLine(r, roster, news = null) {
   switch (r.k) {
     case 'fire': return `Fire at ${roster.places[r.place] ? placeName(roster.places[r.place]) : 'a building'}: ${r.n} room${r.n === 1 ? '' : 's'} alight${r.down ? `, ${r.down} inside` : ''}`;
     case 'moment': return news ? news.line(r.m) : 'Something is going on';
+    case 'rift': return r.st === 'signs' ? `Something odd in the sky over ${roster.places[r.place] ? placeName(roster.places[r.place]) : 'town'}` : `A rift is open by ${roster.places[r.place] ? placeName(roster.places[r.place]) : 'town'}: ${r.n} things out, ${r.crew} fighting`;
+    case 'call': return `${callName(r.why)} at ${roster.places[r.place] ? placeName(roster.places[r.place]) : 'town'}${r.st === 'open' ? ': nobody on it yet' : ''}`;
+    case 'ticket': return `${who} got a ticket`;
+    case 'arrested': return `${who} was arrested`;
     case 'scene': return `${first(roster, r.a)} and ${first(roster, r.b)}: ${SCENE[r.stir] ?? 'a scene'}`;
     case 'stage': return `${first(roster, r.a)} and ${first(roster, r.b)}: ${STAGE[r.scene] ?? 'a scene'}`;
     case 'flipped': return `${who}'s car is on its roof`;

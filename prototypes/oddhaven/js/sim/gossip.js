@@ -26,6 +26,13 @@ export function talkFacts(c, aId, bId) {
     else if (e.kind === 'promoted' && e.who === aId) add({ k: 'promoted', job: e.job, ago: day(e.t) });
     else if (e.kind === 'tow' && e.who === aId) add({ k: 'towed', ago: day(e.t) });
     else if (e.kind === 'mishap' && e.who === aId) add({ k: 'mishap', ago: day(e.t) });
+    else if (e.kind === 'arrested' && e.who === aId) add({ k: 'arrested', by: e.by, place: e.place, ago: day(e.t) });
+    else if (e.kind === 'ticket' && e.who === aId) add({ k: 'ticketed', by: e.by, ago: day(e.t) });
+    else if ((e.kind === 'arrested') && e.who !== aId && e.hh?.includes(b.household)) add({ k: 'lifted_near', who: e.who, ago: day(e.t) });
+    else if (e.kind === 'rift.closed' && e.crew?.includes(aId)) add({ k: 'hunter', place: e.place, ago: day(e.t) });
+    else if (e.kind === 'hunter.down' && e.who === aId) add({ k: 'knocked', place: e.place, ago: day(e.t) });
+    else if (e.kind === 'rift.closed') add({ k: 'rift_near', place: e.place, ago: day(e.t) });
+    else if (e.kind === 'pet.found' && e.person === aId) add({ k: 'pet_back', who: e.who, ago: day(e.t) });
     else if (e.kind === 'story' && e.story === 'rm_wedding' && !mine) add({ k: 'wedding_near', a: e.who, b: e.other, ago: day(e.t) });
     else if (e.kind === 'story' && e.story === 'rm_first_ok' && mine) add({ k: 'date_went', with: e.who === aId ? e.other : e.who, ago: day(e.t) });
     else if (e.kind === 'story' && e.story === 'rm_first_bad' && mine) add({ k: 'date_bad', with: e.who === aId ? e.other : e.who, ago: day(e.t) });

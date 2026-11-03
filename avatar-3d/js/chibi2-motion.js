@@ -266,9 +266,9 @@ export function createClips(rig, anims = CHIBI2_ANIMS) {
     }
     followThrough(frames, names, loop, duration / steps);
     // Chibi 2.5: a rig with skirt bones (a 2.5 body in something long) tilts them off the legs on every frame
-    if (rig.skirt) for (const f of frames) {
+    if (rig.v26 || rig.skirt) for (const f of frames) {
       if (GAIT_CLIPS.has(name)) capShin(f.pose, rig.stride, rig.leg);
-      f.skirtScale = {}; driveSkirt(f.pose, rig, undefined, f.skirtScale);
+      if (rig.skirt) { f.skirtScale = {}; driveSkirt(f.pose, rig, undefined, f.skirtScale); }
     }
     const times = frames.map((_, i) => i / steps * duration);
     const tracks = [];
@@ -358,10 +358,12 @@ function base(ctx) {
  */
 const LUTE_LETS_GO = new Set(['dead', 'swim', 'swimBack', 'swimSide', 'swimCrawl', 'swimTread']);
 export const LUTE_POSE = { armR: [-0.5, -0.8, -0.1], elbowR: [-1.0, 0, 0], armL: [-0.8, 0.4, -0.1], elbowL: [-1.2, 0, 0] };
-function luteHold(p, strum = 0, fret = 0, leftFree = true) {
+const LUTE_POSE26 = { armR: [-0.42, -0.72, -0.08], elbowR: [-0.88, 0, 0], armL: [-0.72, 0.34, -0.08], elbowL: [-1.0, 0, 0] };
+function luteHold(p, strum = 0, fret = 0, leftFree = true, v26 = false) {
   // owner, same day: the two-handed hold applies only when the off hand is EMPTY — with something in it, the left arm
   // keeps carrying that and only the right arm holds the lute (strumming, the neck resting on the arm)
-  for (const [b, r] of Object.entries(LUTE_POSE)) if (leftFree || b.endsWith('R')) p[b] = [...r];
+  const pose = v26 ? LUTE_POSE26 : LUTE_POSE;
+  for (const [b, r] of Object.entries(pose)) if (leftFree || b.endsWith('R')) p[b] = [...r];
   p.handR = [strum * 0.28, 0, 0]; p.gripR = [-strum * 0.28, 0, 0];
   if (leftFree) { p.handL = [0, 0, 0.15 + fret * 0.12]; p.elbowL[0] += fret * 0.06; }
 }
@@ -370,9 +372,9 @@ function luteHold(p, strum = 0, fret = 0, leftFree = true) {
 function carry(p, ctx, mode, swing = 0) {
   const h = ctx.hold, aims = {};
   if (h.right === 'lute') {
-    if (h.left === 'none') { luteHold(p); return { R: false }; }
+    if (h.left === 'none') { luteHold(p, 0, 0, true, ctx.rig?.v26); return { R: false }; }
     const aims = carry(p, { ...ctx, hold: { ...h, right: 'none' } }, mode, swing);   // the off hand carries its own thing
-    luteHold(p, 0, 0, false); return { ...aims, R: false };
+    luteHold(p, 0, 0, false, ctx.rig?.v26); return { ...aims, R: false };
   }
   const rp = REST_PITCH[h.right];
   if (h.right === 'heavy' && mode !== 'ready') {            // (2026-10-06: also with a second two-hander in the left hand — the right one hung at the hip pointing backwards)
@@ -433,7 +435,7 @@ function poseAt(name, u, ctx) {
   out.aim = aims || {};
   // W3 (2026-10-21): a lute stays in both hands, in playing position, through every clip that does not put the hands
   // away (a strike with a lute is `lutePlay` played hard — see attackFor)
-  if (h.right === 'lute' && clip !== CLIPS.lutePlay && !HANDS_FREE.has(name) && !LUTE_LETS_GO.has(name)) { luteHold(p, 0, 0, h.left === 'none'); out.aim = { ...out.aim, R: false }; }
+  if (h.right === 'lute' && clip !== CLIPS.lutePlay && !HANDS_FREE.has(name) && !LUTE_LETS_GO.has(name)) { luteHold(p, 0, 0, h.left === 'none', ctx.rig?.v26); out.aim = { ...out.aim, R: false }; }
   /**
    * NO WEAPON IS EVER LEFT UN-AIMED (2026-10-06, Thousandvale play-test 5, T22: "dual-wielded daggers are held 90
    * degrees wrong, not by the handle"). A held item is authored running straight out of the fist along the forearm
@@ -535,7 +537,7 @@ const CLIPS = {
     p.chest[0] += 0.05; p.head[0] += 0.08 + Math.abs(sin(cy * 2)) * 0.07; p.head[1] = -0.2 + shift * 0.08;
     o.bob = -Math.abs(sin(cy * 2)) * 0.008; o.sway = shift * 0.01;
     if (ctx.hold.right !== 'lute') return carry(p, ctx, 'idle');     // nothing to play: just the sway
-    luteHold(p, strum, fret * ss(Math.abs(sin(cy)), 0.2, 0.6), ctx.hold.left === 'none');
+    luteHold(p, strum, fret * ss(Math.abs(sin(cy)), 0.2, 0.6), ctx.hold.left === 'none', ctx.rig?.v26);
     return { R: false };
   },
   // ---------------------------------------------------------------- standing, walking, running

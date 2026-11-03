@@ -123,6 +123,10 @@ Saves: v6 adds `s.social`; a v5 save's couples become married bonds, and `p.coup
 
 Buses, memories, relations beyond the six numbers. `job.physical` is read only for the timber jobs and the brigade.
 
+## M8
+
+`room.js` adds seats, parties, permissions, votes, shared lines, the `pos` relay (top of the file). `transfer` `{ who, from, to, as?, at? }` is written by the room only; events `owner.moved`, `car.owner`, `car.left`, `party.over`. `carIn` reads `crew` and `noWheel`, `summon` reads `comp`, `addPerson` reads `guest`: all stamped by the room. `sim.apply(cmd)` runs a command between ticks; `driver.commandNow`, `setAgreed`, `tap`, and `addClient(send, { busy, focus })` (a client that is busy skips snapshots and gets the news later; `focus` limits what it is sent to what is near it). A command that throws is refused, not fatal. `protocol.js` is the message check. Save v8 adds `s.guests` (`tests/fixtures/save-v7.json.gz` is the real old save).
+
 ## M7
 
 `addPerson`, `editPerson` (newcomer.js), `wear` { who, wear, indoors } (wardrobe.js). Events `person.added { row, house }`, `person.edited { row }`. Log `newcomer`. `p.wear` is one of WEARS; snapshot field `we`. Save v7.

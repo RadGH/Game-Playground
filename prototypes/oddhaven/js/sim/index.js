@@ -37,8 +37,10 @@ import { stepSky, talkFacts } from './gossip.js';
 import { travelTicks } from './people.js';
 import { addPerson, editPerson } from './newcomer.js';
 import { setWear, WEARS } from './wardrobe.js';
+import { newLaw, newVans, stepLaw, lawCommand, permitCommand, startCall } from './law.js';
+import { newRifts, refreshRifts, stepRifts, fightCommand, startRift } from './rifts.js';
 
-export const SAVE_VERSION = 7;
+export const SAVE_VERSION = 9;
 
 /** An older save: everything new starts empty. A v2 save's people are given their real spots when the sim is built (spots.js). */
 function upgrade(s) {
@@ -48,6 +50,8 @@ function upgrade(s) {
   if (s.v === 4) { s.v = 5; s.fromV4 = true; s.fire = newFireState(); s.moments = []; s.news = []; s.sheets = []; for (const h of s.households) h.story ??= []; }
   if (s.v === 5) { s.v = 6; s.social = newSocial(); s.fromV5 = true; }
   if (s.v === 6) { s.v = 7; for (const p of s.people) p.wear ??= 'casual'; }
+  if (s.v === 7) { s.v = 8; s.guests = []; }
+  if (s.v === 8) { s.v = 9; s.law = newLaw(); s.rifts = newRifts(); s.fromV8 = true; }
   return s;
 }
 
@@ -116,7 +120,7 @@ function newState(c, seed) {
     people: [], households: [], cars: [], trips: [], nextTrip: 1,
     slots: c.places.map(() => ({})), obstacles: [], nextObstacle: 1, junctions: {},
     live: [], held: [], nextLive: 1, mech: {}, crew: [], sites: null, fire: newFireState(), moments: [], news: [], sheets: [], social: newSocial(),
-    focus: { points: [], party: [] },
+    focus: { points: [], party: [] }, guests: [], law: newLaw(), rifts: newRifts(),
     log: [], output: {}, visits: {}, stats: { trips: 0, resets: 0, billsRun: 0 },
   };
   c.s = s;
@@ -146,7 +150,9 @@ export function createSim({ seed = 1, data, town, save = null }) {
   refreshSocial(c);
   if (c.s.fromV3) { fitV3(c); indexPeople(c); }
   if (c.s.fromV4) { delete c.s.fromV4; newEngines(c); }
+  if (c.s.fromV8) { delete c.s.fromV8; newVans(c); }
   refreshFire(c);
+  refreshRifts(c);
 
   const K = c.k, clock = c.clock;
 
@@ -174,6 +180,11 @@ export function createSim({ seed = 1, data, town, save = null }) {
       case 'work': workCommand(c, cmd, refuse); return;
       case 'fire': fireCommand(c, cmd, refuse); return;
       case 'cast': spellCommand(c, cmd, refuse); return;
+      case 'law': lawCommand(c, cmd, refuse); return;
+      case 'fight': fightCommand(c, cmd, refuse); return;
+      case 'permit': permitCommand(c, cmd, refuse); return;
+      case 'startCall': if (!startCall(c, cmd)) refuse('no such call'); return;      // tests, and a dev server
+      case 'startRift': if (!startRift(c, cmd)) refuse('no rift'); return;
       case 'addPerson': addPerson(c, cmd, refuse); return;
       case 'editPerson': editPerson(c, cmd, refuse); return;
       case 'wear': { const p = person(cmd.who); if (!p || !WEARS.includes(cmd.wear) || !cmd.indoors) return refuse('not here'); setWear(c, p, cmd.wear); return; }
@@ -203,15 +214,20 @@ export function createSim({ seed = 1, data, town, save = null }) {
     }
   }
 
+  /** A command that blows up is refused, not fatal: in a room it came from someone else's browser, and the town goes on for everybody. */
+  function safely(cmd) { try { command(cmd); } catch (e) { say(c, 'cmd.refused', { cmd: cmd?.kind, why: 'bad command', owner: cmd?.owner ?? 'solo', error: String(e?.message ?? e).slice(0, 120) }); } }
+
   function tick(commands = []) {
     const s = c.s;
     s.t++;
     const t = s.t;
-    for (const cmd of commands) command(cmd);
+    for (const cmd of commands) safely(cmd);
     if (t % K.levels.everyTicks === 0) updateLevels(c);
     stepTraffic(c);
     stepWork(c);
     stepFire(c);
+    stepRifts(c);
+    stepLaw(c);
     stepSocial(c);
     stepThreads(c);
     stepMeets(c);
@@ -237,6 +253,8 @@ export function createSim({ seed = 1, data, town, save = null }) {
     get context() { return c; },
     clock, tick,
     get t() { return c.s.t; },
+    /** A command between ticks: the one thing that may not wait a quarter of a second is a body changing hands at speed (control.js transfer). Reads and writes the state like any command. */
+    apply: cmd => safely(cmd),
     drainEvents() { const e = c.out; c.out = []; return e; },
     hash: () => hashString(JSON.stringify(c.s)),
     save: (now = null) => JSON.stringify({ ...c.s, savedAt: now }),

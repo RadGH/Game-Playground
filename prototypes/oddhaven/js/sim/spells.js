@@ -2,6 +2,7 @@
 // a spell can go wrong, and wrong is a real result, not a miss. Both ways (rule 3): anyone can cast by themselves, one roll an hour off a hash (the same at every detail level), an
 // order can tell them to (Direct), or you do it with your own hands (`cast`). All of them end in castSpell, so a spell does the same thing whoever asked.
 //   { kind:'cast', who, spell, target?, room? }   hands-on: `who` must be yours; target = a person within reach
+import { publicCast } from './law.js';
 import { say, log } from './log.js';
 import { addMoodlet, settle, peekNeeds } from './needs.js';
 import { h01, partnerId } from './social.js';
@@ -32,6 +33,7 @@ export function castSpell(c, p, id, { target = -1, room = null } = {}) {
   const k = K(c), s = c.s, t = s.t, salt = `${s.seed}/${p.id}/${id}/${t}`, wrong = h01(salt) < wrongChance(c, p), other = target >= 0 ? s.people[target] : p;
   settle(c, p);
   p.sp = t + c.clock.ticks(k.cooldownMinutes);
+  publicCast(c, p);
   const facts = { who: p.id, hh: [...new Set([p.household, other.household])], ...(other !== p ? { other: other.id } : null) };
   let done = true;
   switch (id) {

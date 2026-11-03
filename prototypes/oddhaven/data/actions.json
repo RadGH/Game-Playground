@@ -34,6 +34,13 @@
     {"id": "down", "verb": "Wait for help", "label": "Trapped and calling for help", "site": "here", "minutes": 60, "refill": {}},
     {"id": "carried", "verb": "Be carried", "label": "Being carried out", "site": "here", "outdoors": true, "minutes": 60, "refill": {}},
     {"id": "clinic_stay", "verb": "Get patched up", "label": "At the clinic, getting patched up", "site": "here", "minutes": 300, "refill": {"food": 0.2, "comfort": 0.2}},
+    {"id": "police_work", "wear": "work", "verb": "Answer a call", "label": "On a call", "site": "work", "outdoors": true, "minutes": 480, "refill": {"food": 0.04, "comfort": 0.05, "company": 0.2, "fun": 0.1}},
+    {"id": "questioned", "verb": "Answer some questions", "label": "Being asked some questions", "site": "here", "outdoors": true, "minutes": 20, "refill": {}},
+    {"id": "flee", "verb": "Run for it", "label": "Running from the police", "site": "here", "outdoors": true, "minutes": 20, "refill": {}},
+    {"id": "cells", "verb": "Sit in the cells", "label": "Spending the night in the cells", "site": "here", "minutes": 480, "refill": {"sleep": 0.2, "food": 0.1, "comfort": 0.06}},
+    {"id": "hawk", "verb": "Sell things from a folding table", "label": "Selling things from a folding table", "site": "park", "outdoors": true, "minutes": 60, "refill": {"fun": 0.2, "company": 0.3}},
+    {"id": "fight_work", "wear": "work", "verb": "Fight the rift", "label": "Fighting at a rift", "site": "work", "outdoors": true, "minutes": 480, "refill": {"food": 0.04, "comfort": 0.05, "company": 0.2, "fun": 0.2}},
+    {"id": "gawk", "verb": "Stare at the sky", "label": "Staring at the odd light in the sky", "site": "here", "outdoors": true, "minutes": 15, "refill": {"fun": 0.3}},
     {"id": "work", "wear": "work", "verb": "Do some work", "label": "At work", "site": "work", "slot": "work", "minutes": 480, "refill": {"food": 0.04, "comfort": 0.05, "company": 0.05, "fun": 0.04}}
   ]
 }

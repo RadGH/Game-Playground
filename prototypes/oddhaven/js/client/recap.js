@@ -21,6 +21,11 @@ export function recapCard(e, roster, carName = m => m) {
     else if (r.kind === 'quarrel') once(`Had words with ${first(roster, r.a === e.who ? r.b : r.a)}.`);
     else if (r.kind === 'friends') once(`Made a friend: ${first(roster, r.a === e.who ? r.b : r.a)}.`);
     else if (r.kind === 'promoted') once('Got a promotion.');
+    else if (r.kind === 'hunter.down') once('Got knocked down at a rift.');
+    else if (r.kind === 'rift.closed') once('Helped close a rift.');
+    else if (r.kind === 'ticket') once(r.who === e.who ? `Got a ticket: ${r.amount} coins.` : 'Wrote someone a ticket.');
+    else if (r.kind === 'arrested') once('Made an arrest.');
+    else if (r.kind === 'pet.found') once(`Brought ${r.pet} home.`);
     else if (r.kind === 'mishap') once('Had a small mishap.');
   }
   if (!lines.length) lines.push('Not much. A quiet moment.');

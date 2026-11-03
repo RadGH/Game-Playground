@@ -7,6 +7,7 @@ import { setBill } from './economy.js';
 import { nudge } from './feelings.js';
 import { newTrucks } from './work.js';
 import { newEngines } from './fire.js';
+import { newVans } from './law.js';
 
 function householdSizes(s, k, fixed = []) {
   const sizes = [], weights = Object.entries(k.sizeWeights).map(([n, w]) => ({ n: Number(n), w }));
@@ -104,6 +105,7 @@ export function generateResidents(c) {
   assignJobs(c);
   newTrucks(c);
   newEngines(c);
+  newVans(c);
   for (const p of s.people) buildSchedule(c, p);
   for (const h of s.households) setBill(c, h);
 }

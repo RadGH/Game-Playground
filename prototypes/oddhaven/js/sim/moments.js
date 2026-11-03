@@ -11,7 +11,7 @@ import { raceTouch } from './racemood.js';
 /** What is worth telling, and how much. Anything not here stays in the log and is never told. */
 const BEATS = {
   'fire.call': 9, trapped: 10, rescued: 8, 'fire.out': 7, injured: 6, rehoused: 6, 'home.again': 4, repaired: 3, discharged: 3,
-  promoted: 4, friends: 3, quarrel: 3, stir: 4, hardship: 9, tow: 2, mishap: 2, newjob: 3, 'door.forced': 0, sheet: 0,
+  promoted: 4, 'rift.signs': 7, 'rift.open': 9.5, 'rift.closed': 8, 'hunter.down': 6, 'hunter.find': 6, arrested: 6, ticket: 3, warned: 2, ran: 5, 'got.away': 5, 'pet.found': 4, 'patient.in': 5, calmed: 3, permit: 2, friends: 3, quarrel: 3, stir: 4, hardship: 9, tow: 2, mishap: 2, newjob: 3, 'door.forced': 0, sheet: 0,
 };
 const peopleOf = e => [e.who, e.person, e.a, e.b, e.other].filter(x => x !== undefined && x >= 0);
 
@@ -25,15 +25,18 @@ function whereIs(c, e) {
 }
 /** Who to fade into if the player says yes. */
 function jumpFor(c, e) {
-  if (e.kind === 'fire.call') return e.crew[0] ?? -1;
+  if (e.kind === 'fire.call' || e.kind === 'rift.open') return e.crew[0] ?? -1;
+  if (e.kind === 'radio') { const C = c.s.law.calls.find(x => x.id === e.call); return C?.by ?? -1; }
   if (e.kind === 'trapped') { const C = c.s.fire.calls.find(x => c.s.fire.fires.find(f => f.id === x.fire)?.id === e.fire); return C?.crew[0] ?? e.who; }
   return peopleOf(e)[0] ?? -1;
 }
 
 export function momentFromLog(c, e) {
-  const pri = e.kind === 'story' ? c.d.stories.kinds[e.story]?.pri ?? c.d.stories.beats[e.story]?.pri ?? 3 : BEATS[e.kind];
+  const pri = e.kind === 'story' ? c.d.stories.kinds[e.story]?.pri ?? c.d.stories.beats[e.story]?.pri ?? 3 : e.kind === 'radio' ? Math.max(0, c.d.law.calls[e.why].pri - 1) : BEATS[e.kind];
   if (!pri) return;
   if (e.kind === 'fire.out' && !e.rooms && !e.rescued) return;
+  if (e.kind === 'radio' && e.why === 'cordon') return;
+  if (e.kind === 'rift.closed' && e.how === 'county' && !e.kills) return;
   if (e.kind === 'tow' && e.reason !== 'flipped') return;
   if (e.kind === 'quarrel' && e.quiet) return;
   const s = c.s, k = c.k.moments, { kind, t, ...facts } = e, hh = e.hh ?? [...new Set(peopleOf(e).map(id => s.people[id]?.household).filter(h => h !== undefined))];
@@ -53,13 +56,15 @@ export const liveMoments = c => { const since = c.s.t - c.clock.ticks(c.k.moment
 
 /** A fire makes one story: the end of it if it is over, its worst beat if not. */
 function pickStories(rows) {
-  const out = [], fires = new Map(), threads = new Map();
+  const out = [], fires = new Map(), threads = new Map(), rifts = new Map();
   for (const r of rows) {
     if (r.thread) { const had = threads.get(r.thread); if (!had || r.pri >= had.pri) threads.set(r.thread, r); continue; }      // a thread makes one story, its biggest step since the last issue
+    if (r.rift !== undefined) { const had = rifts.get(r.rift); if (!had || r.k === 'rift.closed' || (had.k !== 'rift.closed' && r.pri > had.pri)) rifts.set(r.rift, r); continue; }
     if (r.fire === undefined) { out.push(r); continue; }
     const had = fires.get(r.fire); if (!had || r.k === 'fire.out' || (had.k !== 'fire.out' && r.pri > had.pri)) fires.set(r.fire, r);
   }
   for (const r of fires.values()) out.push(r);
+  for (const r of rifts.values()) out.push(r);
   for (const r of threads.values()) out.push(r);
   // a rescue is its own story, whatever else happened that night
   for (const r of rows) if (r.k === 'rescued' && !out.includes(r)) out.push(r);
@@ -86,7 +91,7 @@ export function printSheet(c) {
   for (const r of [lead, ...stories]) for (const id of [r?.who, r?.other, r?.person, r?.a, r?.b]) { if (id !== undefined && id >= 0 && s.people[id]) raceTouch(c, s.people[id], 'mentioned'); }
   const count = kind => s.news.filter(r => r.k === kind).length;
   s.columnist ??= s.people.filter(p => p.retired)[0]?.id ?? s.people[0].id;
-  const sheet = { no, t: s.t, day: c.clock.day(s.t), lead: inPaper(c, lead), stories: stories.map(r => inPaper(c, r)), column, columnist: s.columnist, tally: { fires: count('fire.out'), rescues: count('rescued'), tows: count('tow'), friends: count('friends'), promoted: count('promoted'), weddings: s.news.filter(r => r.story === 'rm_wedding').length, feuds: s.social.threads.filter(x => x.k === 'feud').length, planks: s.sites?.made.delivered ?? 0 } };
+  const sheet = { no, t: s.t, day: c.clock.day(s.t), lead: inPaper(c, lead), stories: stories.map(r => inPaper(c, r)), column, columnist: s.columnist, tally: { rifts: count('rift.closed'), arrests: count('arrested'), tickets: count('ticket'), fires: count('fire.out'), rescues: count('rescued'), tows: count('tow'), friends: count('friends'), promoted: count('promoted'), weddings: s.news.filter(r => r.story === 'rm_wedding').length, feuds: s.social.threads.filter(x => x.k === 'feud').length, planks: s.sites?.made.delivered ?? 0 } };
   s.sheets.push(sheet);
   if (s.sheets.length > k.sheetKeep) s.sheets.shift();
   s.news = [];

@@ -84,8 +84,9 @@ export function addPerson(c, cmd, refuse) {
   buildSchedule(c, p);
   for (const m of h.members) if (m !== id) setBill(c, h);
   setBill(c, h);
+  if (cmd.guest) s.guests.push({ id, name: text(cmd.guest, 24), t });       // someone a friend brought with them (M8): the room writes this, a client cannot
   log(c, 'newcomer', { who: id, household: h.id, fresh });
-  say(c, 'person.added', { row: personRow(p), house: householdRow(c, h) });
+  say(c, 'person.added', { row: personRow(p), house: householdRow(c, h), owner: cmd.owner ?? 'solo' });
 }
 
 export function editPerson(c, cmd, refuse) {

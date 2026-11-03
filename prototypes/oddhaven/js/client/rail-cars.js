@@ -5,11 +5,12 @@
 //   const rc = createRailCars({ rails, routes: id => route, types });
 //   rc.apply(snap);  rc.step(dt, speed);  rc.cars;  rc.pose(car, out);  rc.stats();
 import { railPose } from '../world/rails.js';
+import { createCar } from './smooth.js';
 
-const FADE_OUT = 0.6, BLEND = 1.3;
+const FADE_OUT = 0.6, BLEND = 1.3, SILENT = 1500, SNAP_AGE = 250;
 const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
 
-export function createRailCars({ rails, routes, types, fallback = 'sedan', groundAt = () => 0 }) {
+export function createRailCars({ rails, routes, types, fallback = 'sedan', groundAt = () => 0, serverNow = () => performance.now() }) {
   const byTrip = new Map(), byLive = new Map(), cars = [];
   let fakes = [];
   const lenOf = t => types.get(t)?.len ?? 4.5;
@@ -55,21 +56,30 @@ export function createRailCars({ rails, routes, types, fallback = 'sedan', groun
     unpile() { fakes = []; },
     /** A vehicle standing still somewhere, drawn but not a trip (the bridge test's truck; later, parked cars). */
     park({ type, x, y, z, yaw }) { const c = { id: `parked${cars.length}`, type, len: lenOf(type), tint: 3, fade: 1, moved: 0, ghost: 0, gone: 0, fixed: { x, y, z, yaw, pitch: 0 } }; cars.push(c); return c; },
+    /** Where a car handed to this browser must be by now: its last report, plus the time since, at its speed. Off the room's own clock, so a slow line does not put it behind. */
+    ahead(live, at) { const dt = Math.min(0.7, Math.max(0, serverNow() - (at || serverNow())) / 1000); return { x: live.x + Math.sin(live.yaw) * live.v * dt, z: live.z + Math.cos(live.yaw) * live.v * dt, yaw: live.yaw }; },
+    /** This car is someone else's to drive now: from here on it is drawn from what their browser says. */
+    goRemote(c, at, pose) { c.remote = true; c.mine = false; c.heard = serverNow(); c.track ??= createCar(); if (pose) c.track.push(at, pose.x, pose.z, pose.yaw, pose.v ?? 0); return c; },
+    /** The room passed on what another browser just said. */
+    relayed(g) { for (const [id, x, z, yaw, v] of g.c) { const c = byLive.get(id); if (c?.remote) { c.track ??= createCar(); c.track.push(g.at, x, z, yaw, v); c.heard = g.at; } } },
     apply(snap) {
-      const seen = new Set();
+      const seen = new Set(), now = serverNow();
       for (const e of snap.events || []) {
-        if (e.kind === 'took.done' && e.live) self.toLive(e.live).remote = e.owner !== self.owner;
+        if (e.kind === 'took.done' && e.live) { const c = self.toLive(e.live); if (e.owner !== self.owner) self.goRemote(c, now, { ...c.fixed, v: e.live.v }); }
         else if (e.kind === 'car.back') self.toRail(e);
         else if (e.kind === 'car.gone') self.dropLive(e.live);
+        else if ((e.kind === 'owner.moved' && e.live) || e.kind === 'car.owner') { const c = byLive.get(e.live.id); if (c && e.to === self.owner) { c.remote = false; c.track = null; } else if (c && e.from !== e.to && c.remote !== false || c && e.from === self.owner) { c.track = null; self.goRemote(c, e.at || now, e.live); } }      // a new driver: a new track, on the room's own time. A stamp from this page's guess at that time could sit ahead of every report the new driver sends
       }
-      // other players' cars: drawn where their browser says, smoothed
+      // other players' cars: drawn where their browser says, on the room's clock. A car nobody has spoken for lately gets its place from the sim
       const others = new Set();
       for (const [id, model, x, z, yaw, v, , , owner] of snap.live || []) {
+        others.add(id);       // listed is alive, whoever it says owns it: a snapshot sent just before a hand-over can land just after it, and still call the car ours
         if (owner === self.owner) continue;
-        others.add(id);
         let c = byLive.get(id);
-        if (!c) c = self.addLive({ id, type: types.has(model) ? model : fallback, tint: id * 13, pose: { x, y: groundAt(x, z), z, yaw }, remote: true });
-        if (c.remote) { c.to = { x, z, yaw }; c.v = v; }
+        if (!c) c = self.goRemote(self.addLive({ id, type: types.has(model) ? model : fallback, tint: id * 13, pose: { x, y: groundAt(x, z), z, yaw }, remote: true }), now, { x, z, yaw, v });
+        // only if its browser has gone quiet: the sim's copy is a tick or more behind a report, and at 20 m/s stamping it `now` pulls the picture back metres
+        if (c.remote && now - (c.heard ?? -1e9) > SILENT) { c.track ??= createCar(); c.track.push(now - SNAP_AGE, x, z, yaw, v); }
+        c.v = v;
       }
       for (const c of cars) if (c.remote && !others.has(c.liveId) && !c.gone) c.gone = FADE_OUT;
       for (const [id, model, route, s, v, flag, driver, car, noise] of snap.cars) {
@@ -91,7 +101,7 @@ export function createRailCars({ rails, routes, types, fallback = 'sedan', groun
         const c = cars[i];
         if (c.fixed && !c.gone) {
           c.fade += (1 - c.fade) * Math.min(1, dt * 2.5);
-          if (c.to) { const f = c.fixed, k = Math.min(1, dt * 7); f.x += (c.to.x - f.x) * k; f.z += (c.to.z - f.z) * k; f.yaw += wrap(c.to.yaw - f.yaw) * k; f.y = groundAt(f.x, f.z); c.moved += Math.abs(c.v) * dt; }
+          if (c.remote && c.track?.ready) { const f = c.fixed; c.track.steer(f, serverNow(), dt); f.y = groundAt(f.x, f.z); c.moved += Math.abs(c.v) * dt; }
           continue;
         }
         if (c.blend) { c.blend.k -= dt / BLEND; if (c.blend.k <= 0) c.blend = null; }

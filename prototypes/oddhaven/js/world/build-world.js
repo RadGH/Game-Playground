@@ -342,12 +342,25 @@ export function buildWorld(input) {
   const hydrants = [];
   for (const n of nodes) { if (n.edges.length < 3 || !n.town) continue; const d = lane.halfW + 1.3; hydrants.push([n.x + d, n.z + d]); }
 
+  // where a rift can open: open ground only. The middle of each park, and a clear patch by the county road
+  const riftSites = [];
+  for (const b of blocks) { if (b.style !== 'park') continue; const [a, , c] = b.loop; riftSites.push({ id: `rift:${b.id}`, x: (a[0] + c[0]) / 2, z: (a[1] + c[1]) / 2 }); }
+  for (const e of edges) {
+    if (e.town || riftSites.length >= 14) continue;
+    for (let i = 6; i + 1 < e.pts.length && riftSites.length < 14; i += 7) {
+      const [ax, az] = e.pts[i], [bx, bz] = e.pts[i + 1], L = Math.hypot(bx - ax, bz - az) || 1;
+      for (const side of [24, -24]) {
+        const x = ax - (bz - az) / L * side, z = az + (bx - ax) / L * side;
+        if (roadDistance(x, z) > 14 && riverDistance(x, z) > R.halfW + 12 && !inTown(x, z, 6) && !(timber && Math.hypot(x - timber.centre[0], z - timber.centre[1]) < timber.radius) && !riftSites.some(q => Math.hypot(q.x - x, q.z - z) < 120)) { riftSites.push({ id: `rift:${e.id}:${i}`, x, z }); break; }
+      }
+    }
+  }
   const world = {
     id: map.id, zone: map.zone, seed, size, cell, dim, heights, heightAt, normalAt, surfaceAt, waterAt, roadDistance, riverDistance,
     surface: null, objects, decor: [],
     roads: edges.map(e => ({ id: e.id, cls: e.cls, from: e.a, to: e.b, halfW: e.halfW, limit: e.limit, town: e.town, name: e.name, pts: e.pts })),
     roadGraph: { nodes: nodes.map(n => ({ id: n.id, x: n.x, z: n.z, y: n.y, town: n.town, edges: n.edges })), edges: edges.map((e, i) => ({ a: e.a, b: e.b, road: i })) },
-    towns, buildings, blocks, lamps, trees, bridge, footpaths, timber, hydrants,
+    towns, buildings, blocks, lamps, trees, bridge, footpaths, timber, hydrants, riftSites,
     river: { name: R.name, level: R.level, halfW: R.halfW, pts: riverPts },
     lane, speed: map.speed, sites: { labels: towns.map(t => ({ name: t.name, x: t.x, z: t.z })) },
   };

@@ -10,6 +10,8 @@ import { makeStore } from '../../shared/store.js';
 import { installTooltips } from '../../shared/tooltip.js';
 import { fmt } from '../../shared/format.js';
 import { createChibi2Character } from '../../avatar-3d/js/chibi2.js';
+import { createChibi26Character } from '../../avatar-3d/js/chibi26.js';
+import { CHIBI26_ALL_ANIMS } from '../../avatar-3d/js/chibi26-motion.js';
 import { attachHeldFlame } from '../../avatar-3d/js/held-flame.js';
 import * as motion from '../../avatar-3d/js/chibi2-motion.js';
 import * as dualMotion from '../../avatar-3d/js/chibi2-motion-dual.js';      // importing it registers the dual-wield, angling and revive clips
@@ -25,6 +27,20 @@ import {
 installTooltips();
 const $ = id => document.getElementById(id);
 const store = makeStore('armory', 1);
+const pageParams = new URLSearchParams(location.search);
+let chibiVersion = pageParams.get('v') === '2.6' || (!pageParams.has('v') && localStorage.getItem('avatar-3d-version') === '2.6') ? '2.6' : '2.5';
+let compareVersions = pageParams.get('compare') === '1';
+const makeActor = (look, options = {}, version = chibiVersion) => version === '2.6'
+  ? createChibi26Character(look, { ...options, anims: options.anims || CHIBI26_ALL_ANIMS })
+  : createChibi2Character(look, { ...options, v25: true });
+function setChibiVersion(version, compare = compareVersions) {
+  chibiVersion = version; compareVersions = compare;
+  localStorage.setItem('avatar-3d-version', version);
+  const u = new URL(location.href); u.searchParams.set('v', version); compare ? u.searchParams.set('compare', '1') : u.searchParams.delete('compare'); history.replaceState(null, '', u);
+  for (const b of document.querySelectorAll('[data-chibi-version]')) b.classList.toggle('on', b.dataset.chibiVersion === version);
+  $('chibi-compare').classList.toggle('on', compareVersions);
+  if (state.id) rebuild();
+}
 const thumbs = createThumbnailer({ size: 192 });
 const state = { rows: [], lookFor: null, origin: '', itemData: null, flags: store.get('flags', {}), ...parseHash(location.hash), measured: new Map() };
 const label = (map, v) => map[v] || String(v).replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
@@ -54,9 +70,9 @@ const ATTACKS = new Set([...(ANIM_GROUPS.Strikes || []), ...(ANIM_GROUPS.Weapons
 const baseKeyCache = new Map();
 /** The vertex fingerprint of a bare body (built once per body). */
 async function baseKeys(avatar) {
-  const k = JSON.stringify(avatar);
+  const k = chibiVersion + '|' + JSON.stringify(avatar);
   if (!baseKeyCache.has(k)) {
-    const c = await createChibi2Character(avatar, { anims: ['idle'], v25: true });
+    const c = await makeActor(avatar, { anims: ['idle'] });
     baseKeyCache.set(k, { keys: vertexKeys(c), stats: characterStats(c) }); c.dispose();
     if (baseKeyCache.size > 24) baseKeyCache.delete(baseKeyCache.keys().next().value);
   }
@@ -177,7 +193,7 @@ function drawGrid() {
 }
 
 // ---------------------------------------------------------------- detail
-let scene = null, actor = null, extract = null, alone = null, base = null, buildSeq = 0, loopTimer = 0, live = null;
+let scene = null, actor = null, comparisonActor = null, extract = null, alone = null, base = null, buildSeq = 0, loopTimer = 0, live = null;
 const view = () => state.view;
 const current = () => findRow(state.rows, state.id);
 
@@ -189,6 +205,7 @@ function ensureScene() {
     if (!actor) return;
     const speed = Number(view().speed);
     actor.setRate(speed > 0 ? speed : 1); actor.update(speed > 0 ? dt : 0); flame?.update(dt);     // paused still holds the pose it stopped on
+    comparisonActor?.setRate(speed > 0 ? speed : 1); comparisonActor?.update(speed > 0 ? dt : 0);
     // a one-shot falls back to idle when it ends: play it again while "repeat" is on
     if ($('anim-loop').checked && view().anim !== 'idle' && actor.anim === 'idle' && motion.ONE_SHOTS.has(view().anim)) {
       loopTimer += dt; if (loopTimer > 0.45) { loopTimer = 0; actor.setAnim(view().anim, 0.1, true); }
@@ -210,23 +227,31 @@ async function rebuild() {
   const hand = v.hand || defaultHand(row);
   const look = dress(body, row, { ...lookOpts(row, v), hand });
   let next;
-  try { next = await createChibi2Character(look, { anims: ANIMS, v25: true }); }
+  try { next = await makeActor(look, { anims: chibiVersion === '2.6' ? [...new Set([...ANIMS, ...CHIBI26_ALL_ANIMS])] : ANIMS }); }
   catch (e) { console.error(e); $('stage').classList.remove('busy'); $('stage-msg').textContent = 'Could not build this model: ' + e.message; return; }
   if (seq !== buildSeq) { next.dispose(); return; }
+  let side = null;
+  try { if (compareVersions) side = await makeActor(look, { anims: [...new Set([...ANIMS, ...CHIBI26_ALL_ANIMS])] }, chibiVersion === '2.6' ? '2.5' : '2.6'); }
+  catch (e) { console.warn('Armory comparison actor unavailable', e); }
   flame?.dispose(); flame = null;
   if (actor) { scene.scene.remove(actor.group); actor.dispose(); }
+  if (comparisonActor) { scene.scene.remove(comparisonActor.group); comparisonActor.dispose(); comparisonActor = null; }
   if (alone) { scene.scene.remove(alone); alone.userData.dispose(); alone = null; }
   extract?.dispose();
   actor = next; base = bare;
+  comparisonActor = side;
+  if (compareVersions) { actor.group.position.x = -0.55; comparisonActor.group.position.x = 0.55; }
+  if (compareVersions && chibiVersion === '2.6') { actor.group.position.x = 0.55; comparisonActor.group.position.x = -0.55; }
   flame = attachHeldFlame(actor, look);   // a lit torch / cresset burns here as it does in the games
   // for headwear the shown body has hair, so measure a bald twin instead of the one on screen
   if (row.slot === 'hat' && v.hair !== 'none') {
-    const twin = await createChibi2Character(dress(baselineFor(row, bodyOpts), row, { ...lookOpts(row, v), hand }), { anims: ['idle'], v25: true });
+    const twin = await makeActor(dress(baselineFor(row, bodyOpts), row, { ...lookOpts(row, v), hand }), { anims: ['idle'] });
     extract = extractAdded(twin, bare.keys); live = summarise(row, extract, bare, twin, hand); twin.dispose();
   } else { extract = extractAdded(actor, bare.keys); live = summarise(row, extract, bare, actor, hand); }
   live.hand = hand; live.holds = holdsFor(row, hand);
   scene.scene.add(actor.group);
   actor.setAnim(ANIMS.includes(v.anim) ? v.anim : 'idle', 0, true);
+  if (comparisonActor) comparisonActor.setAnim(ANIMS.includes(v.anim) ? v.anim : 'idle', 0, true);
   $('stage-msg').textContent = extract.triangles ? '' : 'This id adds no geometry to the body' + (hand === 'off' && row.slot === 'held' ? ' in the off hand.' : '.');
   applyAlone();
   $('stage').classList.remove('busy');
@@ -471,9 +496,11 @@ function wire() {
   $('search').addEventListener('input', () => { state.filter.q = $('search').value; refresh(); });
   $('sort').value = state.sort; $('sort').addEventListener('change', () => { state.sort = $('sort').value; refresh(); });
   $('anim').replaceChildren(...Object.entries(ANIM_GROUPS).map(([g, names]) => el('optgroup', { label: g }, ...names.filter(n => ANIMS.includes(n)).map(n => el('option', { value: n, text: n })))));
-  $('anim').addEventListener('change', () => { view().anim = $('anim').value; actor?.setAnim(view().anim, 0.12, true); writeHash(); });
-  $('anim-replay').addEventListener('click', () => actor?.setAnim(view().anim, 0.05, true));
-  $('anim-next').addEventListener('click', () => { const list = ANIMS.filter(n => ATTACKS.has(n)); const i = list.indexOf(view().anim); view().anim = list[(i + 1) % list.length]; $('anim').value = view().anim; actor?.setAnim(view().anim, 0.05, true); writeHash(); });
+  $('anim').addEventListener('change', () => { view().anim = $('anim').value; actor?.setAnim(view().anim, 0.12, true); comparisonActor?.setAnim(view().anim, 0.12, true); writeHash(); });
+  $('anim-replay').addEventListener('click', () => { actor?.setAnim(view().anim, 0.05, true); comparisonActor?.setAnim(view().anim, 0.05, true); });
+  $('anim-next').addEventListener('click', () => { const list = ANIMS.filter(n => ATTACKS.has(n)); const i = list.indexOf(view().anim); view().anim = list[(i + 1) % list.length]; $('anim').value = view().anim; actor?.setAnim(view().anim, 0.05, true); comparisonActor?.setAnim(view().anim, 0.05, true); writeHash(); });
+  for (const b of document.querySelectorAll('[data-chibi-version]')) b.addEventListener('click', () => setChibiVersion(b.dataset.chibiVersion));
+  $('chibi-compare').addEventListener('click', () => setChibiVersion(chibiVersion, !compareVersions));
   $('race').replaceChildren(...CHIBI2_RACE_IDS.map(id => el('option', { value: id, text: CHIBI2_RACES[id].name })));
   $('height').replaceChildren(...Object.keys(HEIGHTS).map(k => el('option', { value: k, text: k })));
   $('build').replaceChildren(...Object.keys(BUILDS).map(k => el('option', { value: k, text: k })));
@@ -507,13 +534,15 @@ function wire() {
 }
 
 async function main() {
-  window.armory = { state, thumbs, ready: false, get live() { return live; }, get actor() { return actor; }, select, exportFlags: () => exportFlags(state.flags, state.rows), shown: () => shown };
+  window.armory = { state, thumbs, ready: false, get live() { return live; }, get actor() { return actor; }, get comparisonActor() { return comparisonActor; }, select, exportFlags: () => exportFlags(state.flags, state.rows), shown: () => shown };
   const [src, itemData] = await Promise.all([
     loadRows(),
     fetch(new URL('../../prototypes/emberveil/data/items.json', import.meta.url)).then(r => r.json()).catch(() => null),
   ]);
   Object.assign(state, { rows: src.rows, lookFor: src.lookFor, origin: src.origin, itemData });
   $('origin').textContent = 'Source: ' + src.note;
+  for (const b of document.querySelectorAll('[data-chibi-version]')) b.classList.toggle('on', b.dataset.chibiVersion === chibiVersion);
+  $('chibi-compare').classList.toggle('on', compareVersions);
   wire(); drawFilters(); drawGrid();
   const first = findRow(state.rows, state.id);
   if (state.id && !first) toast(`No model with the id "${state.id}"`);

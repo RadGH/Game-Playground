@@ -119,5 +119,35 @@ export function promptFire({ me, lv, carry, F, doors, k, who, inCab, here, aim, 
   return { target: [C.spot.x, C.spot.z], hint: 'Take the hose off the engine' };
 }
 
+const STEP_WORD = { talk: ['TALK', 'Have a word'], other: ['TALK', 'Hear the other side'], witness: ['ASK', 'Ask what happened'], find: ['STOP THEM', 'Find them. The marker is where they are now'], catch: ['CATCH', 'They ran. Get close and grab them'], book: ['BOOK', 'Decide: ticket, warning or the cells'], pick: ['PICK UP', 'Pick the poor thing up'], load: ['LOAD', 'Get them on the stretcher'], clinic: ['HAND OVER', 'Get them to the clinic. Lights on'], home: ['HAND OVER', 'Take it home'], move: ['MOVE ALONG', 'Keep people back from the tape'], calm: ['CALM', 'Calm people down'], look: ['LOOK', 'Have a look round'] };
+/** How close a step has to be. The same numbers law.js checks. */
+export function lawReach(k, st, inCar, who) { const r = inCar ? k.carReachMeters : k.reachMeters; return st === 'home' || st === 'clinic' ? k.reachMeters * 3 : st === 'witness' || st === 'other' || (st === 'talk' && who < 0) ? k.reachMeters * 2.5 : r; }
+
+/** An officer on a call: the same shape as any prompt. `C` is the sim's row (lawView). */
+export function promptLaw({ me, inCar, C, k, lights, place }) {
+  const st = C.step, at = [C.tx, C.tz], d = dist(me, at), ok = d <= lawReach(k, st, inCar, C.who) - 0.4;
+  if (st === 'pull') {
+    if (!inCar) return { target: at, hint: 'Get in the car and catch them. Lights on' };
+    if (!lights) return { label: 'LIGHTS', cmd: { verb: 'lights' }, target: at, hint: `Lights on, and get behind them` };
+    return { target: at, hint: d > k.pullMeters ? 'Catch up with them' : `Stay close. They are pulling over (${C.lit} of ${k.stepSeconds.pull})` };
+  }
+  if (st === 'stand') return { target: at, hint: d > k.standMeters ? `Get to the tape at ${place}` : `Hold the line (${C.stood} of ${k.stepSeconds.stand})` };
+  if (st === 'clear') return ok ? { label: 'CLEAR', timed: 'swing', cmd: { verb: 'step' }, target: at, hint: 'Sweep the bits off the road. Press in the middle' } : { target: at, hint: `Get to the bump at ${place}` };
+  const w = STEP_WORD[st] ?? ['GO', 'Carry on'];
+  if (!ok) return { target: at, hint: C.urgent && !lights && inCar ? 'Lights on if you need them' : st === 'catch' ? w[1] : `${w[1]}: ${place}`, ...(C.urgent && !lights && inCar ? { label: 'LIGHTS', cmd: { verb: 'lights' } } : null) };
+  if (st === 'book') return { label: 'BOOK', book: true, target: at, hint: w[1] };
+  return { label: w[0], cmd: { verb: 'step' }, target: at, hint: w[1] };
+}
+
+/** At a rift. `F` = your fight row, `R` the rift. The big button is always live in a fight: it hits the nearest thing in reach, and nothing in reach just swings. */
+export function promptFight({ me, F, R, k, tick }) {
+  const core = [R.x, R.z];
+  if (F.down) return { hint: 'Knocked down. Swap to someone else, or hand back. The clinic can wait', down: true };
+  if (R.st === 'seal') return dist(me, core) <= k.sealMeters - 0.4 ? { label: 'SEAL', timed: 'swing', cmd: { verb: 'seal' }, target: core, hint: `Close it. Press in the middle (${R.seal.toFixed(1).replace('.0', '')} of ${k.sealHits})` } : { target: core, hint: 'All clear. Get to the tear and seal it' };
+  if (!R.M.length) return { target: core, hint: R.wave + 1 < R.waves ? 'Something else is coming' : 'That is the last of them' };
+  const win = R.M.find(m => m[5] === 1 && m[8] === F.who);
+  return { label: 'HIT', cmd: { verb: 'hit' }, cool: F.a > tick, hint: win ? 'Dodge!' : `${R.M.length} left, wave ${R.wave + 1} of ${R.waves}` };
+}
+
 /** What a person on shift could do right now: { label?, cmd?, timed?, target?, hint }. `label` means the big button is live. */
 export function promptFor({ chain, ...rest }) { const f = CHAINS[chain]; return f && rest.site ? f(rest) : null; }

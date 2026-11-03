@@ -4,7 +4,7 @@
 
 import { workerAt } from './work.js';
 
-const AT_WORK = new Set(['site_work', 'fire_work']);
+const AT_WORK = new Set(['site_work', 'fire_work', 'police_work', 'fight_work', 'questioned', 'flee']);
 
 export function positionOf(c, p) {
   if (p.act?.a === 'carried') return positionOf(c, c.s.people[p.act.by]);

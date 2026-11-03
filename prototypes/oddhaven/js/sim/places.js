@@ -55,7 +55,7 @@ export function buildPlaces(town, kinds, roads, wiring = null) {
 
 /** Is this place open at minute `m`? Places with no hours are always open. */
 export function isOpen(place, m) {
-  if (place.fireShut) return false;
+  if (place.fireShut || place.riftShut) return false;
   if (!place.hours) return true;
   const [a, b] = place.hours, from = a * 60, to = b * 60;
   return from <= to ? (m >= from && m < to) : (m >= from || m < to);

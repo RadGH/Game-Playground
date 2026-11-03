@@ -47,6 +47,17 @@ export async function buildMeasured(look, opts = {}) {
 
 // ---------------------------------------------------------------- CPU skinning
 const _v = new THREE.Vector3(), _acc = new THREE.Vector3(), _t = new THREE.Vector3();
+// Character.update intentionally caps a single frame delta at 100 ms. Measurement samples are
+// spaced by clip time, often several hundred milliseconds apart, so feed each interval through
+// bounded substeps instead of silently sampling only the first 100 ms of every interval.
+export function advanceToSample(actor, dt) {
+  let remaining = Math.max(0, dt);
+  while (remaining > 1e-8) {
+    const step = Math.min(0.08, remaining);
+    actor.update(step);
+    remaining -= step;
+  }
+}
 function boneMatrices(skeleton) {
   return skeleton.bones.map((b, i) => new THREE.Matrix4().multiplyMatrices(b.matrixWorld, skeleton.boneInverses[i]));
 }
@@ -139,7 +150,7 @@ export function robeCheck({ actor, pieces }, clips, { steps = 24 } = {}) {
     let last = 0;
     for (let f = 0; f < n; f++) {
       const t = f / n * dur * (ONE_SHOTS.has(clip) ? 0.98 : 1);
-      actor.update(t - last); last = t;
+      advanceToSample(actor, t - last); last = t;
       actor.group.updateMatrixWorld(true);
       inv.copy(hips.matrixWorld).invert();
       const mats = boneMatrices(skel);
@@ -250,7 +261,7 @@ export function clipCheck({ actor, pieces }, clips, { steps = 12 } = {}) {
     let last = 0;
     for (let f = 0; f < steps; f++) {
       const t = f / steps * dur * (ONE_SHOTS.has(clip) ? 0.98 : 1);
-      actor.update(t - last); last = t;
+      advanceToSample(actor, t - last); last = t;
       actor.group.updateMatrixWorld(true);
       const mats = boneMatrices(skel), sol = solids(actor);
       for (const it of items) {

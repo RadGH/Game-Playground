@@ -31,12 +31,14 @@ import { createPortraits, faceKey } from './portraits.js';
 import { WEAR_KINDS, WEAR_NAMES } from './outfits.js';
 import { RACE_NAMES as RACE_WORDS } from './mood.js';
 import { createTown } from './town-link.js';
+import { createCoop } from './coop.js';
 import { createTalk } from './talk.js';
 import { createBubbles } from './bubbles.js';
 import { createChatter } from './chatter.js';
 import { createStage } from './stage.js';
 import { createVoice, profileFor, delivery } from './voice-api.js';
 import { createSaves } from './saves.js';
+import { gunzipText } from '../sim/save.js';
 import { createTouch } from './touch.js';
 import { createPerf } from './perf.js';
 import { createShell, loadSettings, saveSettings, SOAK_URL, BUILD, el } from './shell.js';
@@ -54,9 +56,12 @@ import { createIndoors } from './indoors.js';
 import { createTimberView } from './timber-view.js';
 import { createJobHands } from './job-hands.js';
 import { createPhone } from './phone.js';
-import { happeningLine } from './phone-text.js';
+import { happeningLine, callName } from './phone-text.js';
 import { Sfx } from '../../../../sfx/js/sfx.js';
 import { createFireView } from './fire-view.js';
+import { createRiftView } from './rift-view.js';
+import { createCreature } from '../../../../avatar-3d/js/creatures.js';
+import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
 import { createSiren } from './fire-sound.js';
 import { createMomentCard } from './moment-card.js';
 import { createNews } from './news-text.js';
@@ -85,7 +90,7 @@ async function boot() {
   const extra = await (await fetch(new URL('../../data/vehicle-extra.json', import.meta.url))).json();
   const presets = await (await fetch(new URL('../../../../avatar-2d/data/presets.json', import.meta.url))).json();
   const dataFile = async f => (await fetch(new URL(`../../data/${f}.json`, import.meta.url))).json();
-  const [buildingsData, peopleData, premades, wiring, newsTable, jobsData] = await Promise.all([dataFile('buildings'), dataFile('people'), dataFile('premades'), dataFile('wiring'), dataFile('news'), dataFile('jobs')]);
+  const [buildingsData, peopleData, premades, wiring, newsTable, jobsData, monstersData] = await Promise.all([dataFile('buildings'), dataFile('people'), dataFile('premades'), dataFile('wiring'), dataFile('news'), dataFile('jobs'), dataFile('monsters')]);
   const baked = await fetch(new URL('../../data/portraits/index.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).catch(() => ({}));     // the gallery's faces, drawn once
   // the town: every building's trade and its real plan. One plan per building, the same one the sim is holding
   const townData = townFromWorld(world, buildingsData);
@@ -123,24 +128,25 @@ async function boot() {
   line('Washing the cars');
   await breathe();
   const types = new Map(), extras = new Map(extra.vehicles.map(v => [v.id, v]));
-  const usedTypes = new Set([...peopleData.cars, peopleData.taxiModel, extra.player, 'fire_truck', 'ambulance']);
+  const usedTypes = new Set([...peopleData.cars, peopleData.taxiModel, extra.player, 'fire_truck', 'ambulance', 'police_car']);
   for (const v of extra.vehicles) { if (!usedTypes.has(v.id)) continue; types.set(v.id, await bakeVehicle(THREE, defOf(v.id), v)); await breathe(); }
   const vdefs = new Map([...usedTypes].map(id => [id, defOf(id)]));
   const looks = createLooks({ presets, premades });
-  const roomCode = params.get('room'), roomUrl = roomCode ? `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.hostname}:${params.get('roomPort') || 8561}/room/${roomCode}` : null;
-  const town = createTown({ room: roomUrl, onEvent: e => game.simEvent(e), onError: e => console.error('[oddhaven sim]', e) });
+  const town = createTown({ onEvent: e => game.simEvent(e), onError: e => console.error('[oddhaven sim]', e), onRoom: m => coop.message(m) });
   const rails = createRails(net), paths = createPaths(world), feet = createFeet(world, net, { plans, shut: (box, d) => doorShut(box.b.id, d) }), roads = createRoads(townData);
-  const cars = createRailCars({ rails, routes: id => town.mirror.routes.get(id), types, groundAt: (x, z) => feet.ground(x, z) });
+  const cars = createRailCars({ rails, routes: id => town.mirror.routes.get(id), types, groundAt: (x, z) => feet.ground(x, z), serverNow: () => town.serverNow() });
   town.onSnap(snap => { cars.owner = town.owner; if (snap) cars.apply(snap); else cars.reset(); });
+  town.onRel(g => cars.relayed(g));
   const traffic = cars;
   const trafficView = createTrafficView({ THREE, scene, traffic, types, extras });
   const interiors = createInteriorView({ THREE, scene, plans, mech, burnt: id => town.mirror.burnt?.[id] ?? null });
   const fireView = createFireView({ THREE, scene, world, town, plans, ground: (x, z) => feet.ground(x, z), tier: tierName });
+  const riftView = createRiftView({ THREE, scene, town, ground: (x, z) => feet.ground(x, z), tier: tierName, kinds: monstersData.kinds, createCreature, compactCreature });
   town.handsPos = id => (hands.on && id === hands.me ? hands.you : null);
   const openLv = new Map();          // building id -> the floor showing, for whoever is open this frame
   const indoors = createIndoors({ town, buildings: buildingById, plans, shut: doorShut, isOpen: id => openLv.get(id) ?? null });
   const timber = createTimberView({ THREE, scene, world, town });
-  const people = createPeopleView({ THREE, scene, world, town, looks, paths, cars, carTypes: types, vdefs, indoors, timber, floorOf: (x, z, lv) => feet.ground(x, z, lv) });
+  const people = createPeopleView({ THREE, scene, world, town, looks, paths, cars, carTypes: types, vdefs, indoors, timber, floorOf: (x, z, lv) => feet.ground(x, z, lv), isOpenAt: (place, lv) => openLv.get(town.roster.places[place]?.building) === lv });
   line('Finding the keys');
   const playerDef = defOf(extra.player), restLift = types.get(extra.player).lift;
   const drive = await createDrive({ THREE, RAPIER, scene, camera, world, def: playerDef, net, enhance, restLift });
@@ -194,7 +200,7 @@ async function boot() {
     if (sounds || settings.sound === 0) return;
     try { const { createSounds } = await import('../../../roverlands/js/client/sounds.js'); sounds = await createSounds({ volume: settings.sound }); await sounds.unlock(); } catch (e) { console.warn('[oddhaven] sound', e); }
   };
-  const touch = createTouch({ onView: () => game.toggleView(), onHorn: () => sounds?.play('horn'), onTap: (x, y) => game.handsTap(x, y) });
+  const touch = createTouch({ onView: () => game.toggleView(), onHorn: () => sounds?.play('horn'), onTap: (x, y) => game.handsTap(x, y), onSkill: () => jobs.skill(), onDodge: () => jobs.dodge() });
   document.body.append(touch.el);
   const input = createInput(canvas, { touch: () => touch.state(), settings: () => ({}) });
   input.wantLock = false;
@@ -205,9 +211,14 @@ async function boot() {
     /** A new life: pick a household, the town starts at 06:00 on day one. */
     async begin(h) {
       unlockSound();
-      await startTown({ seed: Number(params.get('seed')) || (Math.random() * 1e9) | 0 });
+      const seed = Number(params.get('seed')) || (Math.random() * 1e9) | 0, wanted = coop.wantedFromUrl, hosting = game.pendingHost;
+      game.pendingHost = false;
+      const first = wanted ? coop.urlFirst() : hosting ? coop.hostFirst({ seed }) : null, joined = first ? await startTown({ link: coop.linkFor(first) }) : false;
+      if (!joined) { if (first) await soloInstead(); await startTown({ seed }); }
       enterGod(town.roster.households.find(x => x.premade === h.id) ?? town.roster.households[0]);
       game.saveNow();
+      if (joined) coop.afterRoom();
+      if (joined && hosting) coop.sheet();
     },
     /** A person from the creator, into a brand-new town: with a family from the gallery, or in a home of their own. */
     async beginMade(cmd, premade) {
@@ -216,6 +227,7 @@ async function boot() {
       const h = premade ? town.roster.households.find(x => x.premade === premade) : null;
       madeNext = { go: true };
       town.cmd({ kind: 'addPerson', ...cmd, household: h ? h.id : null });
+      coop.rememberMe({ ...cmd, household: null });
     },
     async resume() {
       unlockSound();
@@ -228,12 +240,12 @@ async function boot() {
       if (days > 0.04) shell.toast(`The town carried on without you: ${days >= 1 ? `${days.toFixed(1)} days` : `${Math.round(days * 24)} hours`}.`);
     },
     start() { unlockSound(); worldView.setBuildingHeight(1); drive.testCarOn(true); game.screen = 'drive'; game.driving = true; input.inGame = true; shell.screen('drive'); hud.show(false); touch.mode('car'); touch.useLabel(null); touch.show(wantsTouch()); god.active = false; if (!town.roster) startTown({ seed: 1 }); town.cmd({ kind: 'liveAdd', model: extra.player }); },
-    toDrive() { if (!town.roster) return; game.deselect(); drive.testCarOn(true); const c = god.target; drive.teleportToRoad(c.x, c.z); drive.setView('chase'); game.start(); },
+    toDrive() { if (!town.roster) return; if (town.inRoom && !coop.isHost() && !coop.room?.players.find(p => p.id === town.owner)?.perms.drive) { shell.toast('The host has not said you can drive.'); return; } game.deselect(); drive.testCarOn(true); const c = god.target; drive.teleportToRoad(c.x, c.z); drive.setView('chase'); game.start(); },
     toGod() { worldView.setBuildingHeight(GOD_HEIGHT); game.driving = false; game.screen = 'god'; touch.show(false); shell.screen('god'); hud.show(true); camera.up.set(0, 1, 0); const p = drive.pos; god.goTo(p.x, p.z); drive.testCarOn(false); if (testLive != null) { town.cmd({ kind: 'liveDrop', id: testLive }); testLive = null; } },
     /** Jump into someone. Free and unlimited (rule 2); the clock drops to 1x (rule 1). */
     takeOver(id) {
       if (hands.on || id < 0) return;
-      if (game.speed !== 1) game.setSpeed(1);
+      if (game.speed !== 1 && !town.inRoom) game.setSpeed(1);
       const q = people.spots.get(id);
       voice.unlock();
       hands.take(id, q && !q.hidden && !q.car ? q : null);
@@ -243,14 +255,15 @@ async function boot() {
     happeningOpen() { phone.app('happening'); },
     handsTap(x, y) { if (game.screen === 'hands' && !document.querySelector('.modal')) hands.tap(x, y); },
     partyMenu() { partyMenu(); },
+    radioMenu() { radioMenu(); },
     carMenu() { carMenu(); },
     handsMenu() {
       const box = shell.modal({ title: shortName(hands.me), body: [], buttons: [
-        { label: 'Hand back', onClick: () => game.handBack() }, { label: 'Party', onClick: () => partyMenu() }, { label: 'Summon a car', onClick: () => carMenu() }, { label: 'Spells', onClick: () => spellMenu() }, { label: 'Change clothes', onClick: () => clothesMenu() }, { label: 'Phone', onClick: () => game.phoneOpen() }, { label: 'Keep going', quiet: true },
+        { label: 'Hand back', onClick: () => game.handBack() }, { label: 'Party', onClick: () => partyMenu() }, { label: 'Summon a car', onClick: () => carMenu() }, { label: 'Spells', onClick: () => spellMenu() }, { label: 'Change clothes', onClick: () => clothesMenu() }, ...(town.roster.jobs[town.roster.people[hands.me]?.job]?.beat ? [{ label: 'Radio', onClick: () => game.radioMenu() }] : []), { label: 'Phone', onClick: () => game.phoneOpen() }, ...(town.inRoom ? [{ label: 'Friends', onClick: () => coop.sheet() }] : []), { label: 'Keep going', quiet: true },
       ] });
       return box;
     },
-    toTitle() { creator.close(); if (hands.on) hands.handBack(); game.saveNow(); shell.closeAll(); game.driving = false; game.screen = 'title'; input.inGame = false; touch.show(false); hud.show(false); god.active = false; game.deselect(); bubbles.clear(); shell.screen('title'); refreshTitle(); },
+    toTitle() { creator.close(); if (hands.on) hands.handBack(); if (town.inRoom) { coop.leave(); town.leaveRoom(); } game.saveNow(); shell.closeAll(); game.driving = false; game.screen = 'title'; input.inGame = false; touch.show(false); hud.show(false); god.active = false; game.deselect(); bubbles.clear(); shell.screen('title'); refreshTitle(); },
     toggleView() { if (game.screen === 'hands') { hands.toggleView(); return; } drive.setView(drive.view === 'top' ? 'chase' : 'top'); shell.toast(drive.view === 'top' ? 'Top-down. Up is north.' : 'Behind the car'); },
     rescue() { drive.rescue(); },
     setVolume(v) { sounds?.setVolume?.(v); voice.setVolume(v); if (v > 0) unlockSound(); },
@@ -258,7 +271,9 @@ async function boot() {
     capture() { try { renderer.render(scene, camera); const c = document.createElement('canvas'), k = Math.min(1, 480 / canvas.width); c.width = canvas.width * k; c.height = canvas.height * k; c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', 0.6); } catch { return null; } },
     perfReport: () => perf.report(),
     state: () => state(),
-    setSpeed(x) { game.speed = x; town.setSpeed(x); hud.speed(x); },
+    /** In a room nobody sets the clock alone: this asks everyone (rule 1). `quiet`: the game itself wants 1x, which a room already is. */
+    setSpeed(x, quiet = false) { if (town.inRoom) { if (!quiet) coop.askSpeed(x); return; } game.speed = x; town.setSpeed(x); hud.speed(x); },
+    roomSpeed(x) { game.speed = x; hud.speed(x); },
     /** Select someone. `go` also brings the camera to them. */
     /** Selecting someone brings the camera in until you can really see them; it never pulls back out. */
     select(id, go = false) {
@@ -302,8 +317,68 @@ async function boot() {
       const places = town.roster.places.filter(p => p.building === id);
       if (places.length) showOrders({ kind: 'place', places }, placeName(places[0]));
     },
+    inRoom: () => town.inRoom,
+    playTogether: () => coop.title(),
+    friends: () => coop.sheet(),
+    personName: id => shortName(id),
+    heardLine(id, d) { talk?.heard(id, d); chatter.othersSaid(); },
+    /** Everyone worth offering a joiner first: the host's household, then the gallery's. */
+    freePeople() { const r = town.roster, hh = [...(game.household?.members ?? []), ...r.households.filter(h => h.premade).flatMap(h => h.members)]; return [...new Set(hh)]; },
+    soloSave: () => (saves.has() ? saves.meta() : null),
+    /** ?room=, or Join with a code: a town that is not yours. */
+    async joinRoom(code) {
+      unlockSound();
+      const ok = await startTown({ link: coop.linkFor({ type: 'join', code }) });
+      if (!ok) { await backToTitleSolo(); return false; }
+      enterGod(town.roster.households.find(h => h.premade) ?? town.roster.households[0]);
+      coop.afterRoom();
+      return true;
+    },
+    /** From the title: the town you have saved goes up to the server. */
+    async hostSaved() {
+      unlockSound();
+      const meta = saves.meta(), text = await gunzipText(saves.bytes());
+      const ok = await startTown({ lines: meta.lines ?? [], link: coop.linkFor(coop.hostFirst({ seed: 1, save: text, lines: meta.lines ?? [] })) });
+      if (!ok) { await backToTitleSolo(); return; }
+      enterGod(town.roster.households[meta.household] ?? town.roster.households[0]);
+      coop.sheet();
+    },
+    /** From inside a game on your own: hand back, send the town up, carry on as the same person. */
+    async hostLive() {
+      const was = hands.on ? hands.me : -1, h = game.household, lines = talk?.dump?.() ?? [];
+      if (hands.on) { hands.handBack(); await new Promise(r => setTimeout(r, 400)); }
+      shell.closeAll();
+      const m = await town.saveText();
+      shared = m.hash;
+      const ok = await startTown({ lines, link: coop.linkFor(coop.hostFirst({ seed: 1, save: m.text, lines })) });
+      if (!ok) { await startTown({ save: m.text, lines }); enterGod(town.roster.households[h.id]); shell.toast('Could not open the room. Your town is fine.'); return; }
+      enterGod(town.roster.households[h.id]);
+      if (was >= 0) setTimeout(() => game.takeOver(was), 500);
+      coop.sheet();
+    },
+    /** Take the town home: it comes back as the server's exact save, and carries on in your own browser. */
+    async homeAgain(m) {
+      homeSeen = { hash: m.hash, size: m.text.length };
+      const h = game.household?.id ?? 0;
+      await startTown({ save: m.text, lines: m.lines ?? [] });
+      town.cmd({ kind: 'releaseAll' });
+      enterGod(town.roster.households[h] ?? town.roster.households[0]);
+      setTimeout(() => game.saveNow(), 400);
+      shell.toast('Your town is home.');
+    },
+    async fromBackup(b) {
+      const bytes = Uint8Array.from(atob(b.b64), ch => ch.charCodeAt(0));
+      await startTown({ save: bytes });
+      town.cmd({ kind: 'releaseAll' });
+      enterGod(town.roster.households[b.household] ?? town.roster.households[0]);
+    },
+    /** Sent out of a room, or the room has gone. */
+    outOfRoom() { if (hands.on) hands.reset(); town.leaveRoom(); game.driving = false; game.screen = 'title'; input.inGame = false; touch.show(false); hud.show(false); hhud.show(false); god.active = false; game.deselect(); bubbles.clear(); shell.closeAll(); shell.screen('title'); document.body.classList.remove('od-playing'); refreshTitle(); },
+    /** A person you made has arrived in the room: go and be them. */
+    becomeNew(e) { enterGod(e.house); setTimeout(() => { game.select(e.row.id); game.takeOver(e.row.id); }, 300); },
     simEvent(e) {
       if (HANDS_EVENTS.has(e.kind)) hands.event(e);
+      if (FIGHT_EVENTS.has(e.kind)) { fightEvent(e); }
       if (e.kind === 'moment') { momentBeat(e.m); return; }
       if (e.kind === 'sheet') { shell.toast(`The Odd Sheet, issue ${e.no}, is out. It is on your Phone.`); return; }
       if (e.kind === 'home.moved') { const h = town.roster.households[e.household]; if (h) { h.home = e.home; for (const id of h.members) town.roster.people[id].home = e.home; } return; }
@@ -329,7 +404,7 @@ async function boot() {
       else if (e.kind === 'tow' && people.spots.get(e.who) && !people.spots.get(e.who).hidden) chatter.bark(e.who, 'od_towed');
     },
     async saveNow() {
-      if (!town.roster || game.household == null || town.inRoom) return false;
+      if (!town.roster || game.household == null || town.inRoom) return false;     // a room is kept by the server; `coop.backup` keeps a copy for the host
       const m = await town.save(Date.now());
       return saves.write(new Uint8Array(m.bytes), { household: game.household.id, premade: game.household.premade, name: game.household.title, day: town.mirror.day, minute: town.mirror.minute, lines: talk?.dump?.() ?? [] });
     },
@@ -350,6 +425,7 @@ async function boot() {
   function personAdded(e) {
     const r = town.roster, row = e.row; r.people[row.id] = row; r.households[e.house.id] = e.house;
     wantFace(row);
+    if (coop.personAdded(e)) return;
     if (madeNext?.go) { madeNext = null; enterGod(e.house); game.saveNow(); shell.toast(`${shortName(row.id)} has moved in.`); setTimeout(() => game.select(row.id), 400); return; }
     if (game.household?.id === e.house.id) { game.household.members = e.house.members; people.household = new Set(e.house.members); hud.family(e.house.members, town); }
     shell.toast(`${shortName(row.id)} has moved in.`);
@@ -378,7 +454,7 @@ async function boot() {
       const fromTitle = c.back === 'title';
       if (c.editing != null) { town.cmd({ kind: 'editPerson', who: c.editing, ...cmd }); toTown(); shell.toast('Saved.'); return; }
       if (fromTitle) { const pick = cmd.household; game.screen = 'title'; game.beginMade({ ...cmd, household: null }, pick === 'new' ? null : pick); return; }
-      town.cmd({ kind: 'addPerson', ...cmd, household: cmd.household === 'new' ? null : cmd.household }); toTown();
+      town.cmd({ kind: 'addPerson', ...cmd, household: cmd.household === 'new' ? null : cmd.household }); coop.rememberMe({ ...cmd, household: null }); toTown();
     },
     onCancel(c) { if (c.back === 'title') { game.screen = 'title'; shell.screen('title'); } else toTown(); } });
   function toTown() { game.screen = 'god'; shell.screen('god'); hud.show(true); input.inGame = true; }
@@ -389,9 +465,10 @@ async function boot() {
   }
   game.makePerson = () => {
     const fromTitle = game.screen === 'title', r = town.roster;
-    const households = fromTitle ? [{ v: 'new', name: 'A home of their own' }, ...premades.households.map(h => ({ v: h.id, name: h.name }))]
+    const guest = town.inRoom && !coop.isHost();      // a guest's person gets a home of their own: moving in with someone is the host's to allow
+    const households = guest ? [{ v: 'new', name: 'A home of their own' }] : fromTitle ? [{ v: 'new', name: 'A home of their own' }, ...premades.households.map(h => ({ v: h.id, name: h.name }))]
       : [{ v: 'new', name: 'A home of their own' }, ...(game.household ? [{ v: game.household.id, name: game.household.title }] : []), ...r.households.filter(h => h.members.length && h.premade && h.id !== game.household?.id).map(h => ({ v: h.id, name: premades.households.find(x => x.id === h.premade)?.name ?? h.name }))];
-    openCreator({ design: randomDesign((Math.random() * 1e9) | 0, { presets, people: peopleData }), households, jobs: jobRows(), household: fromTitle ? 'new' : game.household?.id ?? 'new', job: 'auto' });
+    openCreator({ design: randomDesign((Math.random() * 1e9) | 0, { presets, people: peopleData }), households, jobs: jobRows(), household: fromTitle || guest ? 'new' : game.household?.id ?? 'new', job: 'auto' });
     creator.back(fromTitle ? 'title' : 'town');
   };
   game.clothesMenu = () => clothesMenu();
@@ -430,14 +507,20 @@ async function boot() {
     for (const row of stirRows({ id: b }, town.roster)) list.append(el('button', { class: 'od-big', type: 'button', text: row.label, on: { click: () => { box.close(); giveOrder(a, row.order); } } }));
     void A; void B;
   }
+  /** False if a room would not have us: the town is whatever it was before, and the caller goes on alone. */
   async function startTown(opts) {
     cars.reset(); people.reset(); bubbles.clear(); hands.reset();
-    await town.start({ townData, ...opts });
+    const roster = await town.start({ townData, ...opts });
+    if (!roster) return false;
     news = null; momentCard.hide();
     talk = null;
-    createTalk({ seed: town.roster.people.length * 7 + (opts.seed || 1), day: gameDay }).then(t => { talk = t; if (opts.lines) t.load?.(opts.lines); });
-    game.setSpeed(1);
+    createTalk({ seed: town.roster.people.length * 7 + (opts.seed || 1), day: gameDay }).then(t => { talk = t; if (opts.lines) t.load?.(opts.lines); t.onSaid = town.inRoom ? (id, d) => town.post({ type: 'said', id, d }) : null; });
+    game.speed = 1; hud.speed(1); if (!town.inRoom) town.setSpeed(1);
+    return true;
   }
+  /** The room would not have us, or there is no server. The game on your own is still all there. */
+  async function soloInstead() { shell.toast('Could not reach the room. Playing on your own.'); }
+  async function backToTitleSolo() { await town.start({ townData, seed: 1 }); game.outOfRoom(); }
   function enterGod(h) {
     const homePl = town.roster.places[h.home], pre = premades.households.find(x => x.id === h.premade);
     game.household = { ...h, title: pre?.name ?? `The ${h.name} household` };
@@ -476,19 +559,21 @@ async function boot() {
     chatter.bark(id, 'od_ack');
     setTimeout(refreshInfo, 400);
   }
-  let lastTown = null, testLive = null;
+  let lastTown = null, testLive = null, homeSeen = null, shared = null;
   const wantsTouch = () => facts.mobile || matchMedia('(pointer: coarse)').matches || params.has('touch');
   const shell = createShell({ game });
   const hud = createGodHud({ parent: shell.root, game, portrait: portraitOf });
   let stageSpeed = 1;
   const stage = createStage({ camera, town, people, god, talk: () => talk, voice, voiceOn: () => settings.voices !== 'off' && settings.sound > 0, profileFor, bubbles, el, parent: shell.root, buildings: buildingById, words: () => talkWords(),
-    setHud: v => hud.show(v), onBegin() { stageSpeed = game.speed; if (game.speed !== 1) game.setSpeed(1); people.stage = stage.stage; }, onEnd() { if (game.speed !== stageSpeed) game.setSpeed(stageSpeed); people.stage = null; } });
+    setHud: v => hud.show(v), onBegin() { stageSpeed = game.speed; if (game.speed !== 1 && !town.inRoom) game.setSpeed(1); people.stage = stage.stage; }, onEnd() { if (game.speed !== stageSpeed && !town.inRoom) game.setSpeed(stageSpeed); people.stage = null; } });
   const hhud = createHandsHud({ parent: shell.root, game });
+  let coop = null;
   createKeyNav();
   const carName = m => extras.get(m)?.name ?? m;
   // ---- playing someone: everything main.js needs to know about it
-  const JOB_EVENTS = new Set(['work.done', 'shift.in', 'shift.out', 'fire.done', 'call.done']);
-  const HANDS_EVENTS = new Set(['took.done', 'car.summoned', 'car.seat', 'car.full', 'swapped', 'recap', 'cmd.refused', 'ride.out', 'mech.paid', 'mech.empty']);
+  const JOB_EVENTS = new Set(['work.done', 'shift.in', 'shift.out', 'fire.done', 'call.done', 'law.done', 'law.answer', 'duty.paid', 'fight.down', 'fight.over']);
+  const FIGHT_EVENTS = new Set(['fight.hit', 'fight.kill', 'fight.skill', 'fight.wave', 'fight.hurt', 'fight.miss', 'fight.seal', 'fight.blow', 'fight.wind', 'fight.down', 'law.ran', 'law.caught', 'law.pulled', 'permit.done', 'rift.signs', 'rift.open', 'rift.closed', 'arrested', 'ticket', 'warned', 'pet.found', 'calmed']);
+  const HANDS_EVENTS = new Set(['took.done', 'car.summoned', 'car.seat', 'car.full', 'swapped', 'recap', 'cmd.refused', 'ride.out', 'mech.paid', 'mech.empty', 'owner.moved', 'car.owner', 'car.left', 'party.over']);
   const hands = createHands({ THREE, scene, camera, town, world, net, drive, cars, types, vdefs, paths, roads, feetIn: feet, project, plans, shut: doorShut, ui: {
     liftMenu() { liftMenu(); },
     parkedNear: () => parkedRows,
@@ -512,8 +597,13 @@ async function boot() {
     async whileAway(id, since) { const info = await town.inspect(id), lines = diaryLines(info?.diary ?? [], since, town.roster); if (lines.length) hhud.note('While you were away', lines); },
     summoned(model, spot, rec) { shell.toast(`The ${carName(model)} is at the kerb, ${Math.round(spot.d)} m away.`); carOut = rec; },
     partyChanged() {},
+    leader: () => coop.leader(),
+    crewCars: () => coop.crewCars(),
+    taken() {},
   } });
   people.hands = hands;
+  coop = createCoop({ game, town, shell, el, hands, people, cars, params, project, parent: shell.root, premades });
+  coop.mount(shell.burger);
   // sounds through the shared library: one-shots only, loaded on first use
   let sfxLib = null, sfxAsked = false;
   const sfx = id => { if (settings.sound === 0) return; if (!sfxAsked) { sfxAsked = true; Sfx.create({ method: 'hybrid', volume: settings.sound }).then(l => { sfxLib = l; }).catch(e => console.warn('[oddhaven] sfx', e)); } sfxLib?.cue?.(id); };
@@ -524,10 +614,10 @@ async function boot() {
     }
   };
   const useHeld = () => input.keys.has('KeyE') || touch.useHeld || [...(navigator.getGamepads?.() ?? [])].some(g => g?.buttons[2]?.pressed);
-  const jobs = createJobHands({ town, hands, timber, plans, buildings: buildingById, held: useHeld, placeWord: id => newsText().place(id), hud: hhud, say: t => shell.toast(t), sfx, clip: n => hands.clip(n),
+  const jobs = createJobHands({ town, hands, timber, plans, buildings: buildingById, held: useHeld, placeWord: id => newsText().place(id), hud: hhud, say: t => shell.toast(t), sfx, clip: n => hands.clip(n), bookSheet: C => bookSheet(C), lightsOn: () => town.mirror.live.some(r => r[6] === hands.me && r[9]),
     truckAt: me => { const car = me.van; const row = town.mirror.parked.get(car), live = town.mirror.live.find(r => r[7] === car), p = hands.pos, yard = town.roster.places.some(pl => pl.kind === 'lumber_yard' && Math.hypot(pl.x - p.x, pl.z - p.z) < 26); return { inCab: !!hands.car && hands.car.car === car, load: town.mirror.site?.trucks?.[car] ?? 0, nearYard: yard, parked: !!row, live: !!live }; } });
   hands.jobs = jobs;
-  const phone = createPhone({ showPerson: id => { if (!hands.on) game.select(id); }, patch: (a, b) => { if (!hands.on) stirMenu(a, b); }, watch: r => stage.play({ scene: r.scene, a: r.a, b: r.b, place: r.place }), town, world, shell, el, hands, say: t => shell.toast(t), whose: () => { const id = hands.on ? hands.me : game.selected >= 0 ? game.selected : game.household?.members?.[0] ?? -1; return { who: id, household: id >= 0 ? town.roster.people[id].household : game.household?.id ?? 0 }; }, goTo: (x, z) => { if (hands.on) hands.routeTo({ x, z }); else { god.goTo(x, z, 60); } }, handsMenu: { party: () => partyMenu(), car: () => carMenu(), spells: () => spellMenu() }, news: newsText, jumpTo: r => jumpInto(r.jump) });
+  const phone = createPhone({ showPerson: id => { if (!hands.on) game.select(id); }, patch: (a, b) => { if (!hands.on) stirMenu(a, b); }, watch: r => stage.play({ scene: r.scene, a: r.a, b: r.b, place: r.place }), town, world, shell, el, hands, say: t => shell.toast(t), whose: () => { const id = hands.on ? hands.me : game.selected >= 0 ? game.selected : game.household?.members?.[0] ?? -1; return { who: id, household: id >= 0 ? town.roster.people[id].household : game.household?.id ?? 0 }; }, goTo: (x, z) => { if (hands.on) hands.routeTo({ x, z }); else { god.goTo(x, z, 60); } }, handsMenu: { party: () => partyMenu(), car: () => carMenu(), spells: () => spellMenu(), friends: () => coop.sheet() }, news: newsText, jumpTo: r => jumpInto(r.jump) });
   // ---- Moments: the sim notices, the page decides what may catch your eye. Nothing here pauses anything
   function newsText() { return (news ??= createNews(newsTable, town.roster)); }
   let news = null;
@@ -553,6 +643,56 @@ async function boot() {
     const list = el('div', { class: 'od-list' }), sheet = shell.modal({ title: 'Lift', body: [list], buttons: [{ label: 'Stay here', quiet: true }] });
     for (let lv = 0; lv < plan.levels; lv++) list.append(el('button', { class: 'od-big', type: 'button', ...(lv === hands.you.lv ? { disabled: '' } : {}), text: lv ? `Floor ${lv}` : 'Ground floor', on: { click: () => { sheet.close(); hands.toFloor(lv); } } }));
   }
+  /** The radio: what is open, nearest first, and the car. Keys and a pad walk it like any sheet. */
+  function radioMenu() {
+    const me = hands.me, row = town.roster.people[me], job = town.roster.jobs[row.job], p = hands.pos, list = el('div', { class: 'od-list' }), box = shell.modal({ title: 'Radio', body: [list], buttons: [{ label: 'Over and out', quiet: true }] }), W = newsText();
+    const near = (a, b) => Math.hypot(a.x - p.x, a.z - p.z) - Math.hypot(b.x - p.x, b.z - p.z), add = (text, run, off = false) => list.append(el('button', { class: 'od-big', type: 'button', ...(off ? { disabled: '' } : {}), text, on: { click: () => { box.close(); run(); } } }));
+    const mine = (town.mirror.calls ?? []).find(C => C.by === me), onShift = town.mirror.people.get(me) && shiftNow(row);
+    list.append(el('p', { class: 'od-tip', text: onShift ? 'On shift. Pick one up, or leave it and someone else will.' : 'Off shift. You can still take one: the pay comes in with the hours you put in.' }));
+    if (mine) add(`Hand back: ${callName(mine.k)}`, () => town.cmd({ kind: 'law', who: me, verb: 'drop' }));
+    const van = vanFree(row);
+    const vanName = { law: 'patrol car', rift: 'jeep', medic: 'ambulance' }[job.beat];
+    if (!hands.car) add(van === null ? `The ${vanName} is out` : `Bring the ${vanName} here`, () => hands.summon(van), van === null);
+    if (job.beat === 'rift') for (const R of (town.mirror.rifts ?? []).slice().sort(near)) add(`${R.st === 'signs' ? 'Odd sky' : 'Rift open'}: ${W.place(R.place)}, ${Math.round(Math.hypot(R.x - p.x, R.z - p.z))} m`, () => { hands.routeTo({ x: R.x, z: R.z }); });
+    if (job.beat !== 'rift') { const open = (town.mirror.calls ?? []).filter(C => C.st === 'open' && (C.job ?? 'officer') === row.job).sort(near); if (!open.length && !mine) list.append(el('p', { class: 'od-tip', text: 'Quiet on the radio.' })); for (const C of open.slice(0, 5)) add(`${callName(C.k)}: ${W.place(C.place)}, ${Math.round(Math.hypot(C.x - p.x, C.z - p.z))} m`, () => { town.cmd({ kind: 'law', who: me, verb: 'take', id: C.id }); chatter.bark(me, 'od_radio_take'); }, !!mine); }
+    return box;
+  }
+  const VANS = { law: 'police_car', rift: 'trail_jeep', medic: 'ambulance' };
+  const shiftNow = row => { const job = town.roster.jobs[row.job], [a, b] = job.shifts[row.shift ?? 0], m = town.mirror.minute / 60; return a < b ? m >= a && m < b : m >= a || m < b; };
+  function vanFree(row) { const model = VANS[town.roster.jobs[row.job].beat]; if (row.van === undefined) return null; for (const [car, q] of town.mirror.parked) if (q.model === model && q.at === row.work) return car; return null; }
+  /** The end of a call: three short rows, the same list by thumb, key or pad. */
+  function bookSheet(C) {
+    const me = hands.me, list = el('div', { class: 'od-list' }), box = shell.modal({ title: `${shortName(C.who)}: what is it to be?`, body: [list], buttons: [{ label: 'Not yet', quiet: true }] });
+    const go = (how, pool) => { box.close(); hands.syncNow(); town.cmd({ kind: 'law', who: me, verb: 'step', how }); chatter.bark(me, pool); hands.clip('lifeLift'); };
+    list.append(el('button', { class: 'od-big', type: 'button', text: `Ticket: ${C.fine} coins, if they can spare it`, on: { click: () => go('ticket', 'od_law_ticket') } }), el('button', { class: 'od-big', type: 'button', text: 'A warning', on: { click: () => go('warn', 'od_law_warn') } }));
+    if (C.arrest || C.ran) list.append(el('button', { class: 'od-big', type: 'button', text: 'Arrest: a night in the cells', on: { click: () => go('arrest', 'od_law_arrest') } }));
+  }
+  /** Every blow and every word of a fight or a call, on screen and in your ears. The sim has already decided all of it. */
+  function fightEvent(e) {
+    riftView.event(e);
+    const near = (x, z, r = 90) => { const c = hands.on ? hands.pos : god.target; return Math.hypot(x - c.x, z - c.z) < r; }, spot = id => { const q = people.spots.get(id); return q && !q.hidden ? q : null; };
+    switch (e.kind) {
+      case 'fight.hit': { const q = spot(e.who); if (q) { if (e.who === hands.me) sfx(e.crit ? 'melee.crit' : 'melee.hit'); else { hands.partyClip(e.who, 'lifeChop'); const row = town.mirror.people.get(e.who); if (row) row.strikeT = town.mirror.t + 3; if (q.car == null && Math.random() < 0.12) chatter.bark(e.who, 'od_fight_hit'); } } return; }
+      case 'fight.skill': { const q = spot(e.who); if (q) { magic.push({ x: e.x, y: q.y + 1, z: e.z, left: 0.7 }); if (magic.length > 3) magic.shift(); sfx('status.barrier.apply'); if (Math.random() < 0.5) chatter.bark(e.who, 'od_fight_skill'); } return; }
+      case 'fight.kill': if (near(e.x, e.z)) sfx('death.beast'); return;
+      case 'fight.wave': shell.toast('Here they come.'); sfx('bell.toll'); return;
+      case 'fight.hurt': if (e.who === hands.me) { sfx('melee.block'); hands.clip('shrug'); if (Math.random() < 0.3) chatter.bark(e.who, 'od_fight_hurt'); } return;
+      case 'fight.miss': if (e.who === hands.me) sfx('melee.miss'); return;
+      case 'fight.seal': sfx('door.grind'); return;
+      case 'fight.down': { const q = spot(e.who); if (q) { chatter.bark(e.who, 'od_fight_down'); sfx('death.humanoid'); } return; }
+      case 'law.ran': { const q = spot(e.who); if (q) chatter.bark(e.who, 'od_law_run'); if (hands.on && town.roster.jobs[town.roster.people[hands.me].job]?.beat === 'law') shell.toast('They ran!'); return; }
+      case 'law.caught': { chatter.bark(e.who, 'od_law_caught'); return; }
+      case 'law.pulled': { chatter.bark(e.who, 'od_law_excuse'); if (e.by === hands.me) shell.toast('They have pulled over. Get out and have a word.'); return; }
+      case 'permit.done': if (e.owner === town.owner) { shell.toast('Permit granted.'); sfx('coin'); } return;
+      case 'rift.signs': if (near(e.x, e.z, 200)) { sfx('night.ambush'); for (const q of people.shown.slice(0, 2)) chatter.bark(q.id, 'od_rift_signs'); } return;
+      case 'rift.open': if (near(e.x, e.z, 220)) { sfx('bell.toll'); for (const q of people.shown.slice(0, 3)) chatter.bark(q.id, 'od_rift_panic'); } return;
+      case 'rift.closed': if (hands.on && (e.crew ?? []).includes(hands.me)) { sfx('quest.complete'); chatter.bark(hands.me, 'od_rift_sealed'); hhud.note(e.how === 'sealed' ? 'Sealed' : 'It is over', [`${e.kills} down${e.each ? `, ${e.each} coins in finds` : ''}`], 7000); } return;
+      case 'ticket': case 'arrested': case 'warned': if (e.who != null && spot(e.who)) chatter.bark(e.who, 'od_law_excuse'); return;
+      case 'pet.found': if (e.person != null && spot(e.person)) chatter.bark(e.person, 'od_law_pet_thanks'); return;
+      case 'calmed': if (e.who === hands.me) chatter.bark(e.who, 'od_law_calm'); return;
+      default: 
+    }
+  }
   async function partyMenu() {
     const me = town.roster.people[hands.me], info = await town.inspect(hands.me), h = town.roster.households[me.household], list = el('div', { class: 'od-list' }), inParty = new Set(hands.party.keys());
     const friends = (info?.feelings ?? []).filter(f => f.like >= 30 && town.roster.people[f.person].household !== me.household).sort((a, b) => b.like - a.like).slice(0, 5).map(f => f.person);
@@ -560,6 +700,7 @@ async function boot() {
     const row = (label, run) => list.append(el('button', { class: 'od-big', type: 'button', text: label, on: { click: () => { box.close(); run(); } } }));
     for (const id of inParty) { row(`Play as ${shortName(id)}`, () => hands.swapTo(id)); row(`Let ${shortName(id)} go`, () => hands.dropFromParty(id)); }
     for (const id of [...h.members, ...friends]) if (id !== hands.me && !inParty.has(id)) row(`Bring ${shortName(id)}`, () => hands.addToParty(id));
+    for (const [label, run] of coop.partyRows()) row(label, run);
     if (!list.children.length) list.append(el('p', { class: 'od-tip', text: 'Nobody to bring along yet. Friends show up here.' }));
   }
   async function carMenu() {
@@ -573,6 +714,7 @@ async function boot() {
   }
   shell.gallerySlot.append(createGallery({ households: premades.households, portrait: premadePortrait, onPick: h => game.begin(h) }));
   people.seen = q => !!project(q.x, q.y + 0.9, q.z);
+  addEventListener('keydown', e => { if (e.code === 'KeyJ' && coop.asked && !/INPUT|TEXTAREA/.test(e.target?.tagName || '')) { e.preventDefault(); coop.yes(); } });
   const refreshTitle = () => shell.continueWith(saves.has() ? saves.meta() : null, () => game.resume());
   refreshTitle();
   shell.screen('title');
@@ -714,6 +856,7 @@ async function boot() {
     const simSpeed = town.turbo || game.speed;
     cars.step(dt, simSpeed);
     const inMenu = !game.driving || modal, inHands = game.screen === 'hands';
+    if ((inHands || inGod) && s.swap && coop.asked) { coop.yes(); s.swap = false; }      // Y on a pad: yes to the bar, with a sheet open or not
     if ((inHands || inGod) && s.swap && !modal && momentCard.open) { momentCard.jump(); s.swap = false; }      // Y on a pad: jump in
     if (inHands && s.swap && !modal) game.handsMenu();
     if (inHands && !game.driving && s.map && !modal) game.toggleView();
@@ -756,10 +899,11 @@ async function boot() {
     looksRound(focus, dt);
     if (town.roster && game.screen !== 'title' && doorsOpen(inGod, inHands, focus, dt)) hemi.intensity = Math.max(hemi.intensity, 1.3);     // people in a lit room are lit
     worldView.update(focus, dt, camera);
-    if (town.roster) { siteClock += dt; timber.update(dt, town.tick(), siteClock); jobs.frame(dt); fireFrame(dt, focus); if (inGod) { const n = town.mirror.now ?? []; hud.now(n[0] ? happeningLine(n[0], town.roster, newsText()) : '', n.length); } }
+    if (town.roster) { siteClock += dt; timber.update(dt, town.tick(), siteClock); jobs.frame(dt); fightHud(dt, s, modal); fireFrame(dt, focus); riftView.update(dt, fireSeconds, focus, hands.on ? hands.you : null); if (inGod) { const n = town.mirror.now ?? []; hud.now(n[0] ? happeningLine(n[0], town.roster, newsText()) : '', n.length); } }
     trafficView.update(camera, dt, tierName, pile);
     people.update(focus, camera, dt, stage.on ? 20 : inGod ? god.dist : openLv.size ? 24 : 40, simSpeed);    // close in a room: faces, not weather signs
     chatter.update(dt, inGod ? god.dist : 40, simSpeed);
+    coop.frame(dt);
     bubbles.update(dt, id => { const q = people.spots.get(id); return q && !q.hidden ? q : null; });
     if (town.roster) {
       focusClock += dt;
@@ -816,6 +960,24 @@ async function boot() {
       indoors: { open: interiors.stats.open, tris: interiors.stats.tris, parts: interiors.stats.parts, drawn: people.stats.indoors, parked: parkedRows.length, lv: godLv, building: godBuilding }, hands: hands.state(), god: { yaw: +god.yaw.toFixed(2), dist: +god.dist.toFixed(1), target: [+god.target.x.toFixed(1), +god.target.z.toFixed(1)], selected: game.selected, moved: god.moved }, household: game.household?.title ?? null, talk: { ready: !!talk?.ready, lines: chatter.stats.lines, spoken: chatter.stats.spoken, voices: voice.spoken } };
   }
 
+  /** The three buttons on keys and pad, the mode of the on-screen ones, and the row of people you could swap to. */
+  let fJump = false, fBoost = false, fSwap = 0, wasFight = false;
+  function fightHud(dt, s, modal) {
+    const on = hands.on && !hands.car && !!jobs.fightOf(hands.me);
+    hhud.radio(hands.on && !!town.roster.jobs[town.roster.people[hands.me]?.job]?.beat);
+    if (on !== wasFight) { wasFight = on; touch.mode(on ? 'fight' : game.driving ? 'car' : 'foot'); if (!on) hhud.fightCrew([], () => {}); }
+    if (!on) { fJump = s.jump; fBoost = s.boost; return; }
+    const f = jobs.fightOf(hands.me), S = town.roster.monsters.skills[town.roster.people[hands.me].job] ?? town.roster.monsters.skills.default, tps = town.roster.clock.ticksPerSecond, tick = town.mirror.t;
+    touch.skillInfo(S.name, Math.max(0, (f.F.s - tick) / tps), Math.max(0, (f.F.d - tick) / tps));
+    if (!modal) {
+      if (s.jump && !fJump) jobs.dodge();
+      if (s.boost && !fBoost && s.device === 'pad') jobs.skill();
+      if (s.hitch) { const ids = [...hands.party.keys()]; if (ids.length) { fSwap = (fSwap + 1) % ids.length; hands.swapTo(ids[fSwap]); } }
+    }
+    fJump = s.jump; fBoost = s.boost;
+    hhud.fightCrew([...hands.party.keys()].map(id => { const r = town.mirror.people.get(id)?.fg; return { id, name: shortName(id), hp: r?.hp ?? 1, max: r?.max ?? 1, down: !!r?.down }; }), id => hands.swapTo(id));
+    void dt;
+  }
   const engineVoice = def => (def.id === 'motorcycle' ? 'bike' : /truck|ambulance/.test(def.id) ? 'truck' : 'car');
   // ---- fire: what the sim says is burning, on screen and in your ears
   let fireSeconds = 0, fireLoop = false, hoseClock = 0;
@@ -838,7 +1000,7 @@ async function boot() {
     const heard = (x, z) => { const d = Math.hypot(x - c.x, z - c.z); if (loud === null || d < loud) loud = d; };
     for (const car of cars.cars) { if (!car.siren) continue; const q = cars.pose(car, {}); sirenList.push(q); heard(q.x, q.z); }
     // a live engine: where the picture is this frame. The sim's copy of a live car is four updates a second behind, which is why the lights trailed the truck
-    for (const r of town.mirror.live) if (r[1] === 'fire_truck' && (town.mirror.fires?.some(F => F.call?.engine === r[7]))) { const car = cars.byLive.get(r[0]), q = car ? cars.pose(car, {}) : { x: r[2], y: feet.ground(r[2], r[3]), z: r[3], yaw: r[4] }; sirenList.push(q); heard(q.x, q.z); }
+    for (const r of town.mirror.live) if (r[9] || (r[1] === 'fire_truck' && (town.mirror.fires?.some(F => F.call?.engine === r[7])))) { const car = cars.byLive.get(r[0]), q = car ? cars.pose(car, {}) : { x: r[2], y: feet.ground(r[2], r[3]), z: r[3], yaw: r[4] }; sirenList.push(q); heard(q.x, q.z); }
     for (const F of town.mirror.fires ?? []) if (F.call?.st === 'scene' && F.call.live == null) sirenList.push({ x: F.call.spot.x, y: feet.ground(F.call.spot.x, F.call.spot.z), z: F.call.spot.z, yaw: F.call.spot.yaw });
     for (let i = magic.length - 1; i >= 0; i--) { magic[i].left -= dt; if (magic[i].left <= 0) magic.splice(i, 1); }
     fireView.update(dt, fireSeconds, c, openLv, streamList, sirenList, magic);
@@ -894,6 +1056,21 @@ async function boot() {
       return { worstDraws: out[0], worstTris: out.slice().sort((a, b) => b.tris - a.tris)[0], views: out.length };
     },
     frameOnce: (dt = 1 / 30) => frame(performance.now(), { fixedDt: dt }),
+    /** M8. */
+    coop, room: () => coop.stateOf(), roomPost: m => town.post(m), netCut: () => coop.cut(),
+    rosterAll: () => town.roster, setMe: cmd => coop.rememberMe(cmd), randomMaker: () => makerOf(randomDesign(Math.floor(Math.random() * 1e6), { presets, people: peopleData }), { household: null }), spotOf: id => people.spots.get(id), mirrorLive: () => town.mirror.live, handJump: () => hands.handJump ?? null, tookAt: () => hands.tookAt ?? 0,
+    lastShared: () => shared, keepHome: () => { homeSeen = null; }, homeSeen: () => homeSeen, saveMeta: () => saves.meta(),
+    /** The longest straight lane on the map, for a car at speed: { x, z, y, yaw, len }. */
+    longLane() { let best = null; for (const L of net.roads) { let i = 0; while (i + 3 < L.n) { const y0 = Math.atan2(L.x[i + 2] - L.x[i], L.z[i + 2] - L.z[i]); let j = i + 2; while (j + 2 < L.n && Math.abs(Math.atan2(Math.sin(Math.atan2(L.x[j + 2] - L.x[j], L.z[j + 2] - L.z[j]) - y0), Math.cos(Math.atan2(L.x[j + 2] - L.x[j], L.z[j + 2] - L.z[j]) - y0))) < 0.05) j += 2; const len = Math.hypot(L.x[j] - L.x[i], L.z[j] - L.z[i]); if (!best || len > best.len) best = { x: L.x[i], z: L.z[i], y: L.y[i], yaw: y0, len }; i = j; } } return best; },
+    /** Your car on that lane, doing `v`. */
+    putCar: (q, v = 0) => { const c = hands.car; c.veh.teleport([q.x, q.y + 0.9, q.z], q.yaw); c.veh.rb.setLinvel({ x: Math.sin(q.yaw) * v, y: 0, z: Math.cos(q.yaw) * v }, true); hands.snapCamera(); drive.cam.yaw = q.yaw; drive.cam.snap(); },
+    moveFor: (code, ms) => new Promise(res => { dispatchEvent(new KeyboardEvent('keydown', { code })); input.keys?.add?.(code); setTimeout(() => { input.keys?.delete?.(code); dispatchEvent(new KeyboardEvent('keyup', { code })); res(); }, ms); }),
+    summonHere: id => hands.summon(id), putMeBy: (q, d) => { hands.you.x = q.x + d; hands.you.z = q.z + d; hands.snapCamera(); },
+    coopCarSpeed: () => { const c = cars.byLive.get(hands.seatIn); return Math.abs(c?.v ?? 0); },
+    /** A home with a front door, to walk in by. */
+    aHome: () => { const b = world.buildings.find(q => plans(q.id)?.doors?.some(d => d.a === 'out') && plans(q.id).units?.length === 0 || plans(q.id)?.levels === 1); const d = plans(b.id).doors.find(x => x.a === 'out'), w = toWorld({ cx: b.x, cz: b.z, yaw: b.yaw }, d.x, d.z); return { b: b.id, x: w.x, z: w.z, cx: b.x, cz: b.z }; },
+    walkIn: d => { const k = 1.2 / Math.hypot(d.cx - d.x, d.cz - d.z); hands.you.x = d.x + (d.cx - d.x) * k; hands.you.z = d.z + (d.cz - d.z) * k; hands.you.lv = 0; hands.snapCamera(); },
+    bodyFit: id => { const s = people.slots.find(q => q.pid === id), q = people.spots.get(id); return { inside: !!q?.inside, hidden: !!q?.hidden, scale: s ? +s.actor.group.scale.x.toFixed(2) : null, standIn: !s }; },
     /** M2. */
     take: id => game.takeOver(id), handBack: () => game.handBack(), use: () => hands.use(), partyAdd: id => hands.addToParty(id), partyDrop: id => hands.dropFromParty(id), swap: id => hands.swapTo(id), summon: id => hands.summon(id), strand: (id, x, z) => hands.strand(id, x, z), walkTo: (x, z) => hands.walkTo(x, z),
     camYaw: y => { hands.yaw = y; }, handYaw: () => hands.yaw, closeCard: () => shell.closeAll(), inspect: id => town.inspect(id), hop: () => hands.hopMs, owner: () => town.owner, railCar: id => { const c = cars.cars.find(k => k.driver === id && !k.gone); return c ? { id: c.id, ...cars.pose(c, {}) } : null; }, carPose: () => { const r = hands.car; return r ? { ...cars.pose(r.c, {}) } : null; }, nextPose: trip => { const c = cars.byTrip.get(trip); return c ? { ...cars.pose(c, {}) } : null; },
@@ -954,6 +1131,8 @@ async function boot() {
     /** The iPhone list. */
     garages: () => world.buildings.filter(b => b.garage).map(b => { const p = plans(b.id), r = p.rooms.find(q => q.kind === 'garage'), d = p.doors.find(q => q.kind === 'garage'); return { id: b.id, w: r.x1 - r.x0, d: r.z1 - r.z0, doorW: d.w, doorH: d.h }; }), parkedRows: () => parkedRows,
     audio: () => wake.contexts, audioStates: () => wake.states(), engineVoices: () => (game.driving ? 1 : 0), carHint: () => document.querySelector('.od-hhint')?.textContent ?? '', godDist: () => god.dist, selectedSeen: () => { const q = people.selectedSpot; return q ? project(q.x, q.y + 1, q.z) : null; }, carDims: () => Object.fromEntries([...types].map(([id, t]) => [id, { len: t.len, width: t.width, height: t.height }])), recSpot: () => { const r = [...hands.recs.values()].at(-1); if (!r) return null; const t = r.veh.rb.translation(); return { x: t.x, y: t.y, z: t.z, id: r.id, model: r.model, drawn: cars.byLive.get(r.id)?.fade, v: r.veh.forwardSpeed() }; }, veiled: () => [...veil.values()].map(r => ({ id: r.b.id, k: +r.k.toFixed(2) })), buildingHeight: () => worldView.buildingHeight, lightGap: () => { const out = []; for (const l of fireView.lastLights) { const r = [...hands.recs.values()].find(x => x.model === 'fire_truck'); if (r) { const t = r.veh.rb.translation(); out.push(Math.hypot(l.x - t.x, l.z - t.z)); } } return out; }, spawnParked: (model, x, z, yaw = 0) => { const def = vdefs.get(model), y = Math.max(feet.ground(x, z), world.heightAt(x, z)) + (types.get(model)?.lift ?? 0.6) + 0.1, veh = drive.spawn(def, { x, y, z, yaw, v: 0 }); parkedTests.push(veh); return parkedTests.length - 1; }, parkedSpot: i => { const b = parkedTests[i], t = b.rb.translation(), l = b.rb.linvel(); return { x: +t.x.toFixed(2), y: +t.y.toFixed(2), z: +t.z.toFixed(2), v: +b.forwardSpeed().toFixed(2), ly: +l.y.toFixed(2), sleep: b.rb.isSleeping() }; },
+    /** M9. */
+    calls: () => town.mirror.calls, rifts: () => town.mirror.rifts, riftSites: () => town.roster.riftSites, riftView: () => riftView.state(), radio: () => radioMenu(), startRift: o => town.cmd({ kind: 'startRift', ...o }), startCall: k => town.cmd({ kind: 'startCall', call: k }), fightOf: id => jobs.fightOf(id), useKey: () => hands.use(), skill: () => jobs.skill(), dodge: () => jobs.dodge(), facePos: () => ({ x: hands.you.x, z: hands.you.z, lv: hands.you.lv }), sweepRift() { frozen = true; const out = [], R = town.mirror.rifts[0]; for (const d of [12, 26, 60]) for (let k = 0; k < 4; k++) { god.goTo(R.x, R.z, d); god.yaw = k * Math.PI / 2; game.screen = 'god'; god.active = true; frame(performance.now(), { fixedDt: 0.26 }); frame(performance.now(), { fixedDt: 0.26 }); out.push({ d, k, draws: renderer.info.render.calls, tris: renderer.info.render.triangles, bodies: people.stats.bodies, standIns: people.stats.standIns, monsters: riftView.stats.monsters }); } god.yaw = 0; frozen = false; out.sort((a, b) => b.draws - a.draws || b.tris - a.tris); return { worstDraws: out[0], worstTris: out.slice().sort((a, b) => b.tris - a.tris)[0], views: out.length }; },
     /** M5. */
     fires: () => town.mirror.fires, burnt: () => town.mirror.burnt, fireDrawn: () => interiors.drawnBurn(), fireStats: () => fireView.stats, startFire: (building, opts = {}) => town.cmd({ kind: 'startFire', building, ...opts }), moment: () => momentCard.state(), momentShow: m => momentCard.show(m), momentJump: () => momentCard.jump(), startRoom: async (id, who) => { const p = plans(id), a = (await town.inspect(who))?.act, row = a && a.spot != null && a.spot !== -1 ? (a.spot >= 0 ? p.slots[a.spot] : p.floor[-2 - a.spot]) : null; return row?.room ?? (p.rooms.find(r => r.kind === 'living') ?? p.rooms[0]).id; }, routeMe: (x, z) => hands.routeTo({ x, z }), spraying: () => jobs.spraying, loadSaveBytes: async bytes => { saves.write(bytes, { household: 0, name: 'Old save', day: 0, minute: 0 }); await game.resume(); }, hydrants: () => world.hydrants, roadPath: (x0, z0, x1, z1) => { const nodeAt = (x, z) => roads.nodes.reduce((b, n) => ((n.x - x) ** 2 + (n.z - z) ** 2 < (b.x - x) ** 2 + (b.z - z) ** 2 ? n : b)); return roads.route(nodeAt(x0, z0).id, nodeAt(x1, z1).id).points; }, cmd: c => town.cmd(c), printSheet: () => town.cmd({ kind: 'printSheet' }), news: () => newsText(),
     /** Draw calls and triangles round a burning building, from every side, close and far, at the worst moment the sim can give. */
@@ -1003,6 +1182,7 @@ async function boot() {
   const compass = (dx, dz) => ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'][((Math.round(Math.atan2(dx, -dz) / (Math.PI / 4)) % 8) + 8) % 8];
   canvas.addEventListener('click', e => game.handsTap(e.clientX, e.clientY));
   addEventListener('keydown', e => { if (e.code === 'KeyJ' && momentCard.open && !/INPUT|TEXTAREA/.test(e.target?.tagName || '')) momentCard.jump(); });
+  addEventListener('keydown', e => { if (e.code === 'KeyR' && game.screen === 'hands' && !document.querySelector('.modal') && !/INPUT|TEXTAREA/.test(e.target?.tagName || '') && !e.repeat) { if (hands.on && jobs.fightOf(hands.me)) jobs.skill(); else if (town.roster.jobs[town.roster.people[hands.me]?.job]?.beat) radioMenu(); } if (/^Digit[1-4]$/.test(e.code) && game.screen === 'hands' && hands.on && jobs.fightOf(hands.me) && !document.querySelector('.modal')) { const id = [...hands.party.keys()][Number(e.code.slice(5)) - 1]; if (id !== undefined) hands.swapTo(id); } });
   addEventListener('keydown', e => { if (e.code === 'KeyC' && game.screen === 'hands' && !document.querySelector('.modal') && !/INPUT|TEXTAREA/.test(e.target?.tagName || '') && !e.repeat) spellMenu(); });
   addEventListener('keydown', e => { if (e.code === 'KeyP' && game.screen === 'hands' && !/INPUT|TEXTAREA/.test(e.target?.tagName || '') && !e.repeat) game.phoneOpen(); });
   document.getElementById('boot')?.remove();
@@ -1016,7 +1196,7 @@ async function boot() {
     else if (e.code === 'Enter') game.tap(innerWidth / 2, innerHeight / 2);
   });
   document.addEventListener('visibilitychange', () => { if (document.hidden) game.saveNow(); });
-  if (params.has('play')) { const h = premades.households.find(x => x.id === params.get('play')) ?? premades.households[0]; await game.begin(h); }
+  if (params.has('play')) { const h = premades.households.find(x => x.id === params.get('play')) ?? premades.households[0]; await game.begin(h); } else if (params.has('room')) await game.joinRoom(params.get('room'));
   else if (asked) { await startTown({ seed: 1 }); game.start(); }
   if (asked) {
     autopilot();
@@ -1026,6 +1206,8 @@ async function boot() {
     window.gameEye.soak = soak;
   }
   fireView.warm(renderer, camera);
+  // the rift pool: after the first frame is up, a slice at a time, then every program compiled once, so no rift ever stalls the game with a shader build
+  riftView.build(() => new Promise(r => setTimeout(r, 0))).then(() => riftView.warm(renderer, camera)).catch(e => console.warn('[oddhaven] rift pool', e));
   requestAnimationFrame(loop);
 }
 function gpuName(r) { try { const gl = r.getContext(), d = gl.getExtension('WEBGL_debug_renderer_info'); return d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : null; } catch { return null; } }

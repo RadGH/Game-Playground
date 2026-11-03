@@ -1,0 +1,349 @@
+# od_law_stop law
+Evening. Do you know why I've pulled you over?
+Afternoon. A word, if you've got a minute.
+Hello there. Mind stepping this way for a moment?
+Just a quick chat. Nothing to worry about yet.
+Could I have a look at your licence, please?
+You were in a bit of a hurry back there. Everything all right?
+Hold on there, if you would. Won't take long.
+Sorry to bother you. Routine. Mostly.
+Good day. Is this yours? Only it's doing something it shouldn't.
+Pop over here for me, would you?
+# od_law_excuse law
+I was only going a little bit fast. A normal amount of fast.
+It wasn't me. It was someone who looks a lot like me.
+I was just holding it for a friend. A tall friend. He's gone.
+My cat does the driving on Tuesdays, so really it's her you want.
+I was late. Is being late not a kind of emergency?
+The sign was very small. I think the town should do something about the sign.
+I thought it was allowed. Everybody does it. Everybody!
+I've never done anything like this in my life. Well. Not today.
+It was a spell. A very small one. It practically did itself.
+I'm a lovely person, ask anyone. Not that one. The other one.
+# od_law_ticket law
+Name and address, please. And yes, I can spell it for you.
+That's a ticket, I'm afraid. Pay it at the town office, and have a nice day.
+I'll just write this down. Don't look at the pen like that.
+Here you are. It's not a gift, but it is wrapped nicely.
+You'll want to read the back. Nobody does, but you'll want to.
+Sign here. That's not a confession, only a receipt.
+It's a small fine, in the grand scheme. Smaller than my sandwich budget.
+Keep this somewhere safe. The pocket you lose things in is not safe.
+Fourteen days to pay. Fourteen. I counted on my fingers.
+Nothing personal. The book says what the book says.
+# od_law_warn law
+Go on, then. But I'll remember your face.
+Just this once. And I'm only saying that because it's cold.
+Consider yourself told. Properly told. With the voice.
+I'm letting you off with a warning. Don't make me regret the warning.
+Off you go. Next time I'll find my pen.
+I'll pretend I didn't see that. I'm good at pretending. Ask my mother.
+Fair enough. A word to the wise, then, and a smile to the wise.
+Right. Be sensible. I'm too tired for paperwork.
+Not today. Go on, before I change my mind.
+It's a warning. A warning is like a ticket but kinder.
+# od_law_arrest law
+I'm afraid I'll have to ask you to come with me.
+Hands where I can see them, please. Gently. There's no rush.
+You're under arrest. I'd say it's nothing personal, but it is, a bit.
+Right, that's quite enough. Down to the station we go.
+Come along, there's a good soul. I've got a kettle at the station.
+I'm taking you in. Mind the step, it's a terrible step.
+That's the end of it, I'm afraid. Turn around for me.
+You have the right to a cup of tea and a very long think.
+I did ask nicely. Twice. Let's go.
+Mind your head in the car. I'd hate to add to your troubles.
+# od_law_run law
+Nope! Not today!
+You'll never catch me! Probably!
+I've left the oven on! Goodbye!
+Oh no, oh no, oh no, oh no.
+I was never here!
+Somebody stop that hedge! I need it!
+I'm quite fast when I want to be!
+Don't look at me! Look at that cloud!
+Run, legs, run! You were built for this!
+I'm not running. I'm walking very, very quickly!
+# od_law_caught law
+Fine. Fine! I'm done. I'm very out of breath.
+I should have done more stairs. Please write that down.
+Alright, alright. You've got me. Can I sit?
+That was a lot of running for one little thing.
+I give up. My knees gave up a street ago.
+I'd like a lawyer and a glass of water. In that order. No, the other order.
+It seemed like a good idea at the time. It always does.
+Don't be cross. I can't breathe and be told off at once.
+I only ran because you were chasing. That's how it started.
+Oh, my side. Oh, my other side.
+# od_law_pet_found law
+Somebody here is missing a very cross little face. Anyone?
+Found this one wandering near the shops. No collar, plenty of opinions.
+Has anyone lost a pet? Only this one's been very polite about it, which is suspicious.
+I've got a lost one here. It's eaten my biscuit. It stays until someone claims it.
+Is this yours? It keeps looking at the door like it's late for something.
+Right, who's missing a friend? Hands up. Nicely.
+Little scamp was under a bench. We had a long talk. I did most of it.
+Found one wandering about. Looks fed, looks loved, looks unrepentant.
+Anyone know whose this is? It has, I should say, a lot of fur on my uniform now.
+It followed me for three streets. I'm not complaining. I'm only saying.
+# od_law_pet_thanks law
+Oh, you found them! Oh, bless you! I've been out of my mind!
+Thank you, thank you. I'd have gone on looking until Christmas.
+There you are, you terror! Where have you been? Don't answer that.
+You're a marvel. I'll bring you a cake. Or a pie. Or both.
+I'd given up, honestly. I'd started on the posters.
+Oh, my little rascal. Never do that to me again. You will, but never.
+I can't thank you enough. I can try, though, for quite a while.
+You've no idea what this means. Well, you might. You've got a kind face.
+They were only gone since breakfast and I've aged ten years.
+Right, home. Both of us. Straight home. No detours.
+# od_law_calm law
+Nothing to see here, folks. Well, a bit. But not much.
+Step back, please. Give them some room. They're only a fire engine, not a show.
+Let's all take a breath. In through the nose, out through the gossip.
+Everything's under control. I say that a lot, and it's mostly true.
+Back a bit, please. Nobody needs to see that close.
+Nobody's in danger. That's the best news you'll get today, so enjoy it.
+Easy now. If we all shout at once, nobody hears anything.
+Please keep walking. The excitement is on its way home.
+Stay calm. If you can't be calm, be quiet. If you can't be quiet, be elsewhere.
+It's all in hand, I promise. If it isn't, you'll be the second to know.
+# od_law_cordon law
+Sorry, can't go through. The crew need the space.
+Keep behind the tape, please. It's not decoration.
+That way's closed until further notice. And by further I mean quite a bit.
+I know it's your shortcut. It's everyone's shortcut. Today it's a no.
+Not through here, madam. Not through here, sir. Not through here, dog.
+Back a bit, please. A bit more. That's it. You're a treasure.
+It's a cordon, not a suggestion.
+Round the other side, please. The scenic route is lovely this time of year.
+We'll let you know when it's safe. You'll hear it from me first, and then from everyone.
+The only place you're going is back. Gently, but back.
+# od_law_fender law
+You reversed straight into me! Straight! Like a drunk crab!
+It's a scratch. It was already there. Probably.
+I was indicating! I was indicating with my heart!
+You can't just stop in the middle of the road. It's a road! It's literally for going!
+Well, your bumper was in the way. Your bumper was extremely in the way.
+Nobody's hurt, so can we all stop shouting? I'm getting a headache.
+I'll give you my details if you give me yours and stop pointing.
+That's my mother's car. She's going to ask. She always asks.
+It's a small dent. A very small dent. A dent you could put a mouse in.
+We'll swap names and say no more. Or we'll say plenty more, but quietly.
+# od_law_noise law
+It's gone half past ten and they're still singing. Singing!
+Every Saturday, the same. A drill. Who drills for fun?
+I don't mind a bit of music. I mind that particular bit, three times.
+That dog has opinions about the moon, and so does the owner.
+It sounds like somebody's moving a piano. Through the roof.
+Their party's got a bass you can feel in your teeth.
+I've knocked twice. They knocked back. In rhythm.
+I'm not one to complain. I'm having a very good go, though.
+I can hear them through the wall. I can hear what they're having for dinner.
+It's quiet, then it's loud. It's the quiet I mind. It's planning.
+# od_law_witness law
+Somebody just walked out with a bag of crisps and a very guilty face.
+I turned my back for a second. One second! And the till's an inch lighter.
+They were here, they were looking at the mugs, then they were not here and neither was a mug.
+I saw the whole thing. I was holding a mop at the time, which I mention for context.
+They took it and left, like it was theirs. Very confident. I admired it, honestly.
+I called out and they just waved. Waved! Like they were leaving a party.
+It was a very small thing, but it was my small thing.
+That's the third time this month. I'm thinking of getting a bell.
+They put it up their coat. A whole loaf, up a coat. Impressive, in its way.
+I'd like to say I stopped them. I'd like a lot of things.
+# od_radio_take law
+Received. On my way. Hold the tea.
+Copy that. Two minutes, maybe three, depending on the roundabout.
+Understood. Tell them to stay put and not to touch anything.
+Right, I'll go and have a look. Don't wait up.
+That's us. We're rolling. Mind the cat.
+Heard you. I'll be there before the kettle boils. Mine, not theirs.
+Roger. Is it the same one as last week, or a fresh one?
+Okay, noted. I'll take it from here.
+On it. Tell my sandwich I'll be back.
+Message received. Don't say anything I'd regret in a report.
+# od_rift_signs rift
+The milk's gone off, and I only bought it this morning.
+Has the sky always looked a bit wrong in that corner?
+There's a hum. You hear it? Under the traffic. Like a fridge, but cross.
+All the dogs are facing the same way. I don't like it.
+My watch is running slow. Or the afternoon is.
+The streetlamps are flickering in order. In ORDER.
+The air tastes of pennies. Is that normal?
+The pigeons have all gone. Every one. Even the rude one.
+Something's off with the light round here. Everything's a bit too sharp.
+The tea tastes of thunder, and I haven't even added anything.
+# od_rift_gawk rift
+Well, would you look at that.
+It's rather pretty, isn't it? Don't tell anyone I said so.
+Is it supposed to move like that? It looks like it's breathing.
+My phone says there's no signal. Funny. I'm only looking.
+I've never seen the sky go that colour. Or do that, with its edges.
+Somebody should do something. I'll just watch while they do.
+I'm not afraid. I'm standing very still, which is different.
+Look at it just sit there, like it owns the place.
+That's no cloud. I know a cloud. That's a hole in the afternoon.
+Stay out of it, mind. Don't touch. Do not poke it with the umbrella.
+# od_rift_panic rift
+Everyone inside! Inside! Shut the door!
+Not again! We only just fixed the awning!
+Mind the pram! Mind the pram!
+Get indoors! Take the cat! Leave the cake!
+Oh no, oh no, oh dear, oh my, oh no.
+Close the shutters! The big ones! The ones we never use!
+I'm going home. Don't look for me. I'll be under the bed.
+Move, move, move, I've left my kettle on in my mind!
+Lock the door and keep the lights low. Then the biscuits.
+Stay away from the sky! That's all I've got!
+# od_rift_hunter rift
+Right, stand back. This is our department.
+Hunters, coming through. Mind the gear, it bites.
+Everyone clear of the edge, please. We'll take it from here.
+Nobody panic. We've done this before, and mostly it worked.
+Form up. You take left, I'll take the noisy bit.
+Good. It's small. I've seen worse on a Friday.
+Keep the crowd back. If it's got teeth, I'll let you know.
+All right, team. Be brave and be tidy.
+We'll have this closed by teatime. Possibly late tea.
+Stay behind me. No, further behind. Further. Ah, fine.
+# od_rift_sealed rift
+That's it, sealed. You can all breathe now.
+All quiet again. Funny how much I miss the hum.
+The sky looks normal. I'm trusting it about as far as I can throw it.
+They closed it! The hunters closed it! Someone clap.
+Right, it's done. Back to your lives. And your cups of tea.
+There's a scorch on the pavement. I'd put a plant pot on it.
+Quiet, finally. I could sleep for a week.
+It's gone. The milk's still off, but it's gone.
+And that's one more for the book. Mind the paperwork.
+Nobody tell the council. They'll want a form.
+# od_fight_hit rift
+Take that!
+Hah! Again!
+Oof! Got you!
+Stay down!
+Right on the nose!
+And another!
+Nothing personal!
+That's for the milk!
+Eat sky!
+Hup!
+# od_fight_skill rift
+Watch this one!
+Here comes my best trick!
+Brace yourselves, it's the good one!
+A little something I've been saving!
+This is going to look much cooler than it feels!
+Now for the clever part!
+I practised this in the bathroom!
+Sparks, don't fail me now!
+Stand back, I'm doing the thing!
+One flourish, coming up!
+# od_fight_down rift
+Ow. Just a minute. Ow.
+I'm fine. I'm just going to lie here a bit.
+Floor's quite comfy, actually.
+Someone tell my tea I'll be late.
+Oh, that's not good. That's not good at all.
+Ooh, stars. Lots of little stars.
+I'll just rest my eyes. For a good while.
+Tell them I was brilliant. Tell them I was brilliant and horizontal.
+Down, but not out. Down, mostly.
+Not dead! Just resting! Very, very firmly resting!
+# od_fight_win rift
+That's the lot! We did it!
+Got it! Somebody write that down!
+Ha! Not so clever now, are you?
+Done. And nobody's even bleeding. Much.
+Another one for the pub quiz.
+We won! I wasn't sure. I'm still not sure.
+Clear! The coast is clear, the sky is clear, I'm hungry.
+That's it. Tidy up and go home.
+Well. That was bracing.
+Job done. Anyone fancy chips?
+# od_fight_swap rift
+I've got this one. Step back.
+My turn. Go and have a sit.
+Move over, I'm in!
+I'll cover you. Go on, get your breath.
+Switch! Switch! Quickly!
+Don't worry, I'm up. Go and recover.
+Right, I'll take the front. You take the biscuits.
+Behind me, please. All of you. I mean it.
+Stepping up! Somebody hold my coat!
+Let the rested one have a go.
+# od_fight_hurt rift
+Ouch! That was my good arm!
+That one stung. I may complain later.
+Ooh, that's going to bruise.
+Right, that's rude. That's just rude.
+Ow! I only just got dressed!
+That's going on the invoice!
+My ribs! My dignity! Both!
+I felt that in my teeth.
+Not the face! Anything but the face!
+Argh, my knee! The other knee!
+# od_fact_arrested fact:arrested
+I spent the night in the cells, {fact.ago}. The tea was surprisingly good.
+They let me go, {fact.ago}, with a stern talking-to and a biscuit.
+{fact.ago} I was arrested. Don't ask. It was a misunderstanding with a very small crime.
+I've been in the cells, {fact.ago}. The bunk was lumpy and the company was me.
+Spent a night with the law, {fact.ago}. They don't do breakfast.
+The officer was polite about it, {fact.ago}. That made it worse, somehow.
+I was brought in, {fact.ago}, over the {fact.cause}. I'm still cross.
+The cells are smaller than they look, {fact.ago}. I'd know.
+# od_fact_ticketed fact:ticketed
+I got a ticket, {fact.ago}. I'm using it as a bookmark.
+The officer wrote me up {fact.ago}. Lovely handwriting. Awful news.
+Fined, {fact.ago}. I'm still arguing it in the bath.
+I had a ticket {fact.ago}. Don't tell my mother, she'll tell the street.
+They fined me, {fact.ago}, for something I'd call a small oversight.
+{fact.ago} I was ticketed. It was {fact.cause}, they said. I say it was Tuesday.
+I got a ticket, {fact.ago}. The pen was the nicest thing about it.
+I paid up, {fact.ago}, and I'm still sore about it.
+# od_fact_rift_near fact:rift
+Did you see it? A rift opened at {fact.place} {fact.ago}. The milk's off to this day.
+There was a rift at {fact.place}, {fact.ago}. I could hear the hum in my fillings.
+A rift opened near {fact.place} {fact.ago}. My cat has not been the same.
+{fact.ago}, over at {fact.place}. That sky was never meant to look like that.
+You hear about the rift at {fact.place}? {fact.ago}. I stayed in, and so should you.
+The rift at {fact.place} gave me a turn, {fact.ago}. I'm better now. Mostly.
+{fact.place} had a rift {fact.ago}. Property prices are a mystery to me now.
+I saw the sky go wrong over {fact.place} {fact.ago}. I still check it twice a day.
+# od_fact_hunter fact:hunter
+I fought at the rift, {fact.ago}. My arms haven't forgiven me.
+{fact.ago} I was out at the rift with the hunters. I'd do it again. In a bigger hat.
+I stood with the hunters at the rift, {fact.ago}. Nobody asked, I just went.
+I helped close that rift {fact.ago}. It's on my arm. The scar, not the rift.
+I went out to the rift {fact.ago}. I came back with a story and a limp.
+I'm not a hunter, but I held the line at the rift {fact.ago}.
+The rift, {fact.ago}. I was there. I'd tell you more but my ears are still ringing.
+I swung a stick at a rift {fact.ago}. It worked, apparently.
+# od_fact_knocked fact:knocked
+I got knocked flat at the rift, {fact.ago}. Lovely view of the ceiling afterwards.
+{fact.ago} a rift put me on the floor. I woke up to a medic and a sandwich.
+I went down hard at the rift {fact.ago}. I'm told I said something poetic.
+Knocked down at the rift, {fact.ago}. I'm fine. I only walk with one hand on the wall.
+I was out cold at the rift {fact.ago}. The first thing I saw was a hunter's boots.
+I took a thump at the rift {fact.ago}. I still hear the bell.
+A rift put me down {fact.ago}. Don't make a fuss. Actually, make a small fuss.
+Flat on my back at the rift, {fact.ago}. It gives you perspective.
+# od_fact_pet_back fact:pet
+Got the little one back, {fact.ago}. The officer carried them home. I cried a bit.
+They found my pet {fact.ago}. Under a bench, the villain.
+{fact.ago} my pet came home with a policeman. Best surprise of my year.
+My pet went missing {fact.ago}, and turned up with a very proud officer.
+I've got my pet back, {fact.ago}. Don't ever tell them how worried I was.
+Lost, then found, {fact.ago}. I'd like it to stay found.
+The officer brought my pet back {fact.ago}. I owe that person a pie.
+My pet is home again, {fact.ago}. I counted the whiskers. All there.
+# od_fact_lifted_near fact:lifted
+Did you hear? {fact.person} got caught, {fact.ago}. Lifting something from a shop, they say.
+{fact.who} told me about it {fact.ago}. Someone I know was caught with a loaf up their coat.
+{fact.a} got nabbed {fact.ago}. I'm only saying it because it's true.
+Somebody I know was picked up {fact.ago}. I won't say who. It was {fact.person}.
+I heard {fact.person} got caught {fact.ago}. Not that I'd gossip.
+{fact.ago} a friend of mine was caught lifting. I'm sworn to silence and also to tell you.
+It was in the shop on the corner, {fact.ago}. {fact.person}, would you believe.
+{fact.person} was caught, {fact.ago}. A shame. They had such nice manners.

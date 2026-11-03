@@ -32,5 +32,5 @@ export function townFromWorld(world, kindsData) {
   }
   // The timber site comes last of all: a save names places by position, so anything new goes on the end.
   for (const b of world.buildings) if (b.site) buildings.push(row(b));
-  return { id: world.id, nodes, edges, buildings, timber: world.timber ?? null, hydrants: world.hydrants ?? [] };
+  return { id: world.id, nodes, edges, buildings, timber: world.timber ?? null, hydrants: world.hydrants ?? [], riftSites: world.riftSites ?? [] };
 }

@@ -16,7 +16,7 @@ export const WINDOW = 5;
  * spends from an allowance: words while there is some, otherwise they chat on with no bubble, as people across a street do. Scenes and spells do not spend it.
  */
 export const PER_DAY = 100, BURST = 16;
-export function createAllowance(day) { let have = BURST, was = null; return { take() { const d = day(); have = Math.min(BURST, have + (was === null ? 0 : d - was) * PER_DAY); was = d; if (have < 1) return false; have -= 1; return true; } }; }
+export function createAllowance(day) { let have = BURST, was = null; return { spend() { have = Math.max(-BURST, have - 1); }, take() { const d = day(); have = Math.min(BURST, have + (was === null ? 0 : d - was) * PER_DAY); was = d; if (have < 1) return false; have -= 1; return true; } }; }
 
 export async function getJSON(url) {
   if (typeof window === 'undefined' && String(url).startsWith('file:')) {
@@ -29,7 +29,7 @@ export async function getJSON(url) {
 function seeded(seed) { let a = (seed >>> 0) || 1; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 const first = name => String(name).split(' ')[0];
 
-export const stubTalk = reason => ({ ready: false, reason, say: () => null, beat: () => null, bark: () => null, flavour: () => [], stats: { said: 0, dry: 0 }, dump: () => [], load: () => {} });
+export const stubTalk = reason => ({ ready: false, reason, heard() {}, say: () => null, beat: () => null, bark: () => null, flavour: () => [], stats: { said: 0, dry: 0 }, dump: () => [], load: () => {} });
 
 export async function createTalk(opts = {}) {
   try { return await build(opts); } catch (e) { console.warn('[oddhaven] words not available:', e?.message || e); return stubTalk(String(e?.message || e)); }
@@ -80,6 +80,7 @@ async function build({ seed = 1, day = () => 0 }) {
     const out = lingo.speak(intent, { speaker: sp, listener: who, place: entity(pick(placeIds)), town: entity(pick(townIds)), fact: f, exclude: shut });
     if (!out?.text || out.error || !out.entry?.id || shut.has(out.entry.id)) { stats.dry++; return null; }       // a personality can rule out everything still fresh: silence, never a repeat
     used.set(out.entry.id, day()); stats.said++;
+    self.onSaid?.(out.entry.id, day());      // in a room everyone's "used" is one list (M8)
     return { text: out.text, speech: out.speech, id: out.entry.id };
   }
   /** Which pools this person can talk from. */
@@ -118,10 +119,13 @@ async function build({ seed = 1, day = () => 0 }) {
     if (i % 2 === 1 && rng() < 0.6) return tryPools([...mood, ...warm, 'od_small']);
     return tryPools([...(rel ? [`od_rel_${rel}`] : []), ...warm, 'od_small', ...mood]);
   }
-  return {
-    ready: true, lingo, graph, say, beat, bark: (p, intent) => say(p, intent), flavour, pack, stats, used, left,
+  const self = {
+    ready: true, lingo, graph, say, beat, bark: (p, intent) => say(p, intent), flavour, pack, stats, used, left, onSaid: null,
+    /** Someone else in the room said this. */
+    heard(id, d) { used.set(id, d); },
     /** The lines used in the last five days, for the save. */
     dump() { const now = day(), out = []; for (const [id, d] of used) if (now - d < WINDOW) out.push([id, +d.toFixed(2)]); return out; },
     load(rows) { used.clear(); for (const [id, d] of rows ?? []) used.set(id, d); },
   };
+  return self;
 }

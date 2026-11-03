@@ -1,0 +1,5546 @@
+{
+  "version": "2.6",
+  "clips": 106,
+  "samplesPerClip": 4,
+  "sampleUpdateMaxSeconds": 0.08,
+  "spread": [
+    {
+      "name": "mage-robe-staff",
+      "triangles": 7876,
+      "bodyEvents": [
+        {
+          "clip": "idle",
+          "pair": "back>upperL",
+          "frames": 4,
+          "vertices": 41,
+          "deepestM": 0.0529,
+          "at": 0
+        },
+        {
+          "clip": "idle",
+          "pair": "back>foreL",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0307,
+          "at": 0
+        },
+        {
+          "clip": "ready",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0501,
+          "at": 0
+        },
+        {
+          "clip": "ready",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.016,
+          "at": 0
+        },
+        {
+          "clip": "walk",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 25,
+          "deepestM": 0.0487,
+          "at": 0.5
+        },
+        {
+          "clip": "walk",
+          "pair": "back>foreL",
+          "frames": 2,
+          "vertices": 3,
+          "deepestM": 0.0154,
+          "at": 0.5
+        },
+        {
+          "clip": "run",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 14,
+          "deepestM": 0.0286,
+          "at": 0.5
+        },
+        {
+          "clip": "hit",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 17,
+          "deepestM": 0.0487,
+          "at": 0.73
+        },
+        {
+          "clip": "hit",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0154,
+          "at": 0.73
+        },
+        {
+          "clip": "guard",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0487,
+          "at": 0
+        },
+        {
+          "clip": "guard",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0154,
+          "at": 0
+        },
+        {
+          "clip": "wave",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 30,
+          "deepestM": 0.0487,
+          "at": 0.75
+        },
+        {
+          "clip": "wave",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0154,
+          "at": 0.75
+        },
+        {
+          "clip": "talk",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 12,
+          "deepestM": 0.0487,
+          "at": 0
+        },
+        {
+          "clip": "talk",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0154,
+          "at": 0
+        },
+        {
+          "clip": "jump",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 10,
+          "deepestM": 0.0193,
+          "at": 0.73
+        },
+        {
+          "clip": "jump",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0043,
+          "at": 0.73
+        },
+        {
+          "clip": "dead",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 7,
+          "deepestM": 0.0304,
+          "at": 0.24
+        },
+        {
+          "clip": "dead",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0043,
+          "at": 0
+        },
+        {
+          "clip": "swim",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 9,
+          "deepestM": 0.052,
+          "at": 0.25
+        },
+        {
+          "clip": "swim",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 4,
+          "deepestM": 0.0167,
+          "at": 0.25
+        },
+        {
+          "clip": "slashBack",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 39,
+          "deepestM": 0.0524,
+          "at": 0.24
+        },
+        {
+          "clip": "slashBack",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 23,
+          "deepestM": 0.0452,
+          "at": 0.49
+        },
+        {
+          "clip": "slashBack",
+          "pair": "heldR>upperL",
+          "frames": 2,
+          "vertices": 19,
+          "deepestM": 0.0495,
+          "at": 0.24
+        },
+        {
+          "clip": "thrust",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 17,
+          "deepestM": 0.051,
+          "at": 0
+        },
+        {
+          "clip": "thrust",
+          "pair": "back>foreL",
+          "frames": 2,
+          "vertices": 10,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "overhead",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 15,
+          "deepestM": 0.0321,
+          "at": 0.73
+        },
+        {
+          "clip": "overhead",
+          "pair": "back>foreL",
+          "frames": 2,
+          "vertices": 4,
+          "deepestM": 0.0177,
+          "at": 0.73
+        },
+        {
+          "clip": "sweep",
+          "pair": "back>upperL",
+          "frames": 4,
+          "vertices": 30,
+          "deepestM": 0.0474,
+          "at": 0.73
+        },
+        {
+          "clip": "sweep",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0177,
+          "at": 0
+        },
+        {
+          "clip": "sweep",
+          "pair": "heldR>torso",
+          "frames": 4,
+          "vertices": 24,
+          "deepestM": 0.0337,
+          "at": 0.73
+        },
+        {
+          "clip": "sweep",
+          "pair": "heldR>hips",
+          "frames": 2,
+          "vertices": 19,
+          "deepestM": 0.0398,
+          "at": 0.73
+        },
+        {
+          "clip": "sweep",
+          "pair": "heldR>thighR",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0055,
+          "at": 0.73
+        },
+        {
+          "clip": "jab",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0474,
+          "at": 0
+        },
+        {
+          "clip": "jab",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0163,
+          "at": 0
+        },
+        {
+          "clip": "jab",
+          "pair": "heldR>torso",
+          "frames": 4,
+          "vertices": 24,
+          "deepestM": 0.0337,
+          "at": 0
+        },
+        {
+          "clip": "jab",
+          "pair": "heldR>hips",
+          "frames": 2,
+          "vertices": 19,
+          "deepestM": 0.0398,
+          "at": 0
+        },
+        {
+          "clip": "jab",
+          "pair": "heldR>thighR",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0055,
+          "at": 0
+        },
+        {
+          "clip": "slam",
+          "pair": "heldR>torso",
+          "frames": 4,
+          "vertices": 63,
+          "deepestM": 0.073,
+          "at": 0.24
+        },
+        {
+          "clip": "slam",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.039,
+          "at": 0.49
+        },
+        {
+          "clip": "slam",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 3,
+          "deepestM": 0.0187,
+          "at": 0.49
+        },
+        {
+          "clip": "lunge",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 4,
+          "deepestM": 0.0204,
+          "at": 0.24
+        },
+        {
+          "clip": "reload",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 20,
+          "deepestM": 0.0504,
+          "at": 0.24
+        },
+        {
+          "clip": "reload",
+          "pair": "back>foreL",
+          "frames": 2,
+          "vertices": 4,
+          "deepestM": 0.0161,
+          "at": 0.24
+        },
+        {
+          "clip": "castPoint",
+          "pair": "back>upperL",
+          "frames": 4,
+          "vertices": 28,
+          "deepestM": 0.0487,
+          "at": 0
+        },
+        {
+          "clip": "castPoint",
+          "pair": "back>foreL",
+          "frames": 4,
+          "vertices": 5,
+          "deepestM": 0.0154,
+          "at": 0
+        },
+        {
+          "clip": "castStaff",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 6,
+          "deepestM": 0.0254,
+          "at": 0
+        },
+        {
+          "clip": "castStaff",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0103,
+          "at": 0
+        },
+        {
+          "clip": "sit",
+          "pair": "heldR>shinR",
+          "frames": 3,
+          "vertices": 14,
+          "deepestM": 0.037,
+          "at": 0.25
+        },
+        {
+          "clip": "ride",
+          "pair": "heldR>shinR",
+          "frames": 1,
+          "vertices": 4,
+          "deepestM": 0.0247,
+          "at": 0
+        },
+        {
+          "clip": "ride",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 9,
+          "deepestM": 0.0154,
+          "at": 0.25
+        },
+        {
+          "clip": "rideGallop",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 3,
+          "deepestM": 0.0154,
+          "at": 0
+        },
+        {
+          "clip": "pickSwing",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 14,
+          "deepestM": 0.0355,
+          "at": 0.25
+        },
+        {
+          "clip": "pickSwing",
+          "pair": "back>foreL",
+          "frames": 2,
+          "vertices": 2,
+          "deepestM": 0.02,
+          "at": 0.25
+        },
+        {
+          "clip": "chopSwing",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 6,
+          "deepestM": 0.0228,
+          "at": 0
+        },
+        {
+          "clip": "chopSwing",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0077,
+          "at": 0
+        },
+        {
+          "clip": "forage",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 10,
+          "deepestM": 0.0277,
+          "at": 0.75
+        },
+        {
+          "clip": "chop",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 17,
+          "deepestM": 0.0358,
+          "at": 0.73
+        },
+        {
+          "clip": "chop",
+          "pair": "back>foreL",
+          "frames": 2,
+          "vertices": 2,
+          "deepestM": 0.0203,
+          "at": 0.73
+        },
+        {
+          "clip": "hack",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 4,
+          "deepestM": 0.0358,
+          "at": 0
+        },
+        {
+          "clip": "hack",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0203,
+          "at": 0
+        },
+        {
+          "clip": "smash",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 5,
+          "deepestM": 0.0454,
+          "at": 0.73
+        },
+        {
+          "clip": "smash",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0091,
+          "at": 0.73
+        },
+        {
+          "clip": "uppercut",
+          "pair": "back>upperL",
+          "frames": 4,
+          "vertices": 35,
+          "deepestM": 0.0487,
+          "at": 0.73
+        },
+        {
+          "clip": "uppercut",
+          "pair": "back>foreL",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0154,
+          "at": 0.73
+        },
+        {
+          "clip": "stab",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 11,
+          "deepestM": 0.0487,
+          "at": 0
+        },
+        {
+          "clip": "stab",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0154,
+          "at": 0
+        },
+        {
+          "clip": "flurry",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0051,
+          "at": 0
+        },
+        {
+          "clip": "bash",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 10,
+          "deepestM": 0.0211,
+          "at": 0.24
+        },
+        {
+          "clip": "bash",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 13,
+          "deepestM": 0.0464,
+          "at": 0.24
+        },
+        {
+          "clip": "bash",
+          "pair": "heldR>thighR",
+          "frames": 2,
+          "vertices": 9,
+          "deepestM": 0.0224,
+          "at": 0.49
+        },
+        {
+          "clip": "block",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 4,
+          "deepestM": 0.0175,
+          "at": 0
+        },
+        {
+          "clip": "block",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0155,
+          "at": 0
+        },
+        {
+          "clip": "parry",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 30,
+          "deepestM": 0.0487,
+          "at": 0.73
+        },
+        {
+          "clip": "parry",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0154,
+          "at": 0.73
+        },
+        {
+          "clip": "offSlash",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0487,
+          "at": 0
+        },
+        {
+          "clip": "offSlash",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0154,
+          "at": 0
+        },
+        {
+          "clip": "offThrust",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0464,
+          "at": 0.24
+        },
+        {
+          "clip": "offThrust",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 4,
+          "deepestM": 0.0244,
+          "at": 0.24
+        },
+        {
+          "clip": "twinCleave",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 15,
+          "deepestM": 0.042,
+          "at": 0.73
+        },
+        {
+          "clip": "twinCleave",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0073,
+          "at": 0.73
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 25,
+          "deepestM": 0.042,
+          "at": 0
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0073,
+          "at": 0
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "heldR>torso",
+          "frames": 3,
+          "vertices": 59,
+          "deepestM": 0.0627,
+          "at": 0.24
+        },
+        {
+          "clip": "spinSweep",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 14,
+          "deepestM": 0.0372,
+          "at": 0
+        },
+        {
+          "clip": "thrust2h",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 13,
+          "deepestM": 0.0407,
+          "at": 0.24
+        },
+        {
+          "clip": "thrust2h",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 5,
+          "deepestM": 0.0267,
+          "at": 0.24
+        },
+        {
+          "clip": "punch",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 3,
+          "deepestM": 0.0241,
+          "at": 0
+        },
+        {
+          "clip": "throw",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 3,
+          "deepestM": 0.0097,
+          "at": 0.73
+        },
+        {
+          "clip": "castBook",
+          "pair": "back>upperL",
+          "frames": 4,
+          "vertices": 15,
+          "deepestM": 0.0155,
+          "at": 0.24
+        },
+        {
+          "clip": "whirl",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 4,
+          "deepestM": 0.0155,
+          "at": 0
+        },
+        {
+          "clip": "bowGreet",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 15,
+          "deepestM": 0.0315,
+          "at": 0.24
+        },
+        {
+          "clip": "point",
+          "pair": "back>upperL",
+          "frames": 4,
+          "vertices": 26,
+          "deepestM": 0.0343,
+          "at": 0.73
+        },
+        {
+          "clip": "point",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 3,
+          "deepestM": 0.0068,
+          "at": 0.73
+        },
+        {
+          "clip": "shrug",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 7,
+          "deepestM": 0.0343,
+          "at": 0
+        },
+        {
+          "clip": "shrug",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0068,
+          "at": 0
+        },
+        {
+          "clip": "nod",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 30,
+          "deepestM": 0.0487,
+          "at": 0.73
+        },
+        {
+          "clip": "nod",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0154,
+          "at": 0.73
+        },
+        {
+          "clip": "headShake",
+          "pair": "back>upperL",
+          "frames": 4,
+          "vertices": 40,
+          "deepestM": 0.0487,
+          "at": 0.73
+        },
+        {
+          "clip": "headShake",
+          "pair": "back>foreL",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0154,
+          "at": 0.73
+        },
+        {
+          "clip": "laugh",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0487,
+          "at": 0
+        },
+        {
+          "clip": "laugh",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0154,
+          "at": 0
+        },
+        {
+          "clip": "salute",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 30,
+          "deepestM": 0.0487,
+          "at": 0.74
+        },
+        {
+          "clip": "salute",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0154,
+          "at": 0.74
+        },
+        {
+          "clip": "kneel",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 11,
+          "deepestM": 0.0487,
+          "at": 0
+        },
+        {
+          "clip": "kneel",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0154,
+          "at": 0
+        },
+        {
+          "clip": "lookAround",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 30,
+          "deepestM": 0.0487,
+          "at": 0.75
+        },
+        {
+          "clip": "lookAround",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0154,
+          "at": 0.75
+        },
+        {
+          "clip": "crossArms",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0487,
+          "at": 0
+        },
+        {
+          "clip": "crossArms",
+          "pair": "back>foreL",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0227,
+          "at": 0.25
+        },
+        {
+          "clip": "stretch",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 4,
+          "deepestM": 0.0227,
+          "at": 0
+        },
+        {
+          "clip": "drink",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 30,
+          "deepestM": 0.0487,
+          "at": 0.73
+        },
+        {
+          "clip": "drink",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0154,
+          "at": 0.73
+        },
+        {
+          "clip": "sleep",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0487,
+          "at": 0
+        },
+        {
+          "clip": "sleep",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0154,
+          "at": 0
+        },
+        {
+          "clip": "lutePlay",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 30,
+          "deepestM": 0.0487,
+          "at": 0.75
+        },
+        {
+          "clip": "lutePlay",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0154,
+          "at": 0.75
+        },
+        {
+          "clip": "sprint",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 14,
+          "deepestM": 0.0487,
+          "at": 0
+        },
+        {
+          "clip": "sprint",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0154,
+          "at": 0
+        },
+        {
+          "clip": "backpedal",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 25,
+          "deepestM": 0.0487,
+          "at": 0.5
+        },
+        {
+          "clip": "backpedal",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 5,
+          "deepestM": 0.0244,
+          "at": 0.75
+        },
+        {
+          "clip": "strafeL",
+          "pair": "back>upperL",
+          "frames": 4,
+          "vertices": 38,
+          "deepestM": 0.0438,
+          "at": 0.25
+        },
+        {
+          "clip": "strafeL",
+          "pair": "back>foreL",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0244,
+          "at": 0
+        },
+        {
+          "clip": "strafeR",
+          "pair": "back>upperL",
+          "frames": 4,
+          "vertices": 40,
+          "deepestM": 0.0438,
+          "at": 0
+        },
+        {
+          "clip": "strafeR",
+          "pair": "back>foreL",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.013,
+          "at": 0
+        },
+        {
+          "clip": "dualSlashR",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0438,
+          "at": 0
+        },
+        {
+          "clip": "dualSlashR",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.013,
+          "at": 0
+        },
+        {
+          "clip": "dualStabL",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 6,
+          "deepestM": 0.0208,
+          "at": 0.24
+        },
+        {
+          "clip": "dualFlurry",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 3,
+          "deepestM": 0.02,
+          "at": 0.49
+        },
+        {
+          "clip": "twinChopR",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 30,
+          "deepestM": 0.0487,
+          "at": 0.74
+        },
+        {
+          "clip": "twinChopR",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0154,
+          "at": 0.74
+        },
+        {
+          "clip": "twinChopR",
+          "pair": "heldR>torso",
+          "frames": 2,
+          "vertices": 16,
+          "deepestM": 0.0366,
+          "at": 0.49
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 35,
+          "deepestM": 0.0593,
+          "at": 0.74
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 8,
+          "deepestM": 0.0238,
+          "at": 0.74
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "heldR>torso",
+          "frames": 1,
+          "vertices": 7,
+          "deepestM": 0.0348,
+          "at": 0
+        },
+        {
+          "clip": "twinCrash",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 25,
+          "deepestM": 0.0593,
+          "at": 0
+        },
+        {
+          "clip": "twinCrash",
+          "pair": "back>foreL",
+          "frames": 2,
+          "vertices": 4,
+          "deepestM": 0.0238,
+          "at": 0
+        },
+        {
+          "clip": "fishCast",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 11,
+          "deepestM": 0.0476,
+          "at": 0
+        },
+        {
+          "clip": "fishCast",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0149,
+          "at": 0
+        },
+        {
+          "clip": "fishReel",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0063,
+          "at": 0.75
+        },
+        {
+          "clip": "fishShow",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0063,
+          "at": 0
+        },
+        {
+          "clip": "standUp",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 3,
+          "deepestM": 0.0185,
+          "at": 0.73
+        },
+        {
+          "clip": "swimCrawl",
+          "pair": "back>upperL",
+          "frames": 2,
+          "vertices": 10,
+          "deepestM": 0.0348,
+          "at": 0.5
+        },
+        {
+          "clip": "swimCrawl",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0071,
+          "at": 0.5
+        },
+        {
+          "clip": "seated",
+          "pair": "back>upperL",
+          "frames": 3,
+          "vertices": 21,
+          "deepestM": 0.0293,
+          "at": 0.25
+        },
+        {
+          "clip": "seated",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 3,
+          "deepestM": 0.0169,
+          "at": 0.25
+        },
+        {
+          "clip": "drive",
+          "pair": "back>upperL",
+          "frames": 4,
+          "vertices": 34,
+          "deepestM": 0.0386,
+          "at": 0.25
+        },
+        {
+          "clip": "drive",
+          "pair": "back>foreL",
+          "frames": 4,
+          "vertices": 7,
+          "deepestM": 0.0184,
+          "at": 0.75
+        },
+        {
+          "clip": "drive",
+          "pair": "heldR>shinR",
+          "frames": 3,
+          "vertices": 12,
+          "deepestM": 0.0197,
+          "at": 0.5
+        }
+      ],
+      "skirtEvents": [
+        {
+          "clip": "idle",
+          "frames": 1,
+          "vertices": 18,
+          "minGapM": -0.2634,
+          "worst": {
+            "frame": 0,
+            "t": 0,
+            "gap": -0.2634,
+            "at": [
+              -0.172,
+              0.067,
+              0.395
+            ],
+            "bone": "legL"
+          }
+        },
+        {
+          "clip": "sit",
+          "frames": 3,
+          "vertices": 6,
+          "minGapM": -0.0153,
+          "worst": {
+            "frame": 2,
+            "t": 1.5,
+            "gap": -0.0153,
+            "at": [
+              0.205,
+              0.057,
+              0.092
+            ],
+            "bone": "legR"
+          }
+        },
+        {
+          "clip": "ride",
+          "frames": 4,
+          "vertices": 8,
+          "minGapM": -0.0153,
+          "worst": {
+            "frame": 0,
+            "t": 0,
+            "gap": -0.0153,
+            "at": [
+              0.205,
+              0.057,
+              0.092
+            ],
+            "bone": "legR"
+          }
+        },
+        {
+          "clip": "rideGallop",
+          "frames": 1,
+          "vertices": 2,
+          "minGapM": -0.0117,
+          "worst": {
+            "frame": 0,
+            "t": 0,
+            "gap": -0.0117,
+            "at": [
+              -0.196,
+              0.06,
+              0.098
+            ],
+            "bone": "legL"
+          }
+        },
+        {
+          "clip": "kick",
+          "frames": 1,
+          "vertices": 10,
+          "minGapM": -0.7788,
+          "worst": {
+            "frame": 2,
+            "t": 0.294,
+            "gap": -0.7788,
+            "at": [
+              0.159,
+              0.081,
+              0.923
+            ],
+            "bone": "footR"
+          }
+        },
+        {
+          "clip": "kneel",
+          "frames": 2,
+          "vertices": 4,
+          "minGapM": -0.1087,
+          "worst": {
+            "frame": 2,
+            "t": 1.5,
+            "gap": -0.1087,
+            "at": [
+              -0.121,
+              0.055,
+              0.263
+            ],
+            "bone": "legL"
+          }
+        },
+        {
+          "clip": "sitGround",
+          "frames": 4,
+          "vertices": 20,
+          "minGapM": -0.1087,
+          "worst": {
+            "frame": 0,
+            "t": 0,
+            "gap": -0.1087,
+            "at": [
+              -0.121,
+              0.055,
+              0.263
+            ],
+            "bone": "legL"
+          }
+        },
+        {
+          "clip": "pray",
+          "frames": 1,
+          "vertices": 8,
+          "minGapM": -0.0169,
+          "worst": {
+            "frame": 0,
+            "t": 0,
+            "gap": -0.0169,
+            "at": [
+              0.43,
+              -0.047,
+              0.411
+            ],
+            "bone": "footR"
+          }
+        },
+        {
+          "clip": "swimCrawl",
+          "frames": 1,
+          "vertices": 1,
+          "minGapM": -0.0027,
+          "worst": {
+            "frame": 1,
+            "t": 0.325,
+            "gap": -0.0027,
+            "at": [
+              0.161,
+              -0.434,
+              -0.555
+            ],
+            "bone": "footR"
+          }
+        },
+        {
+          "clip": "sitHold",
+          "frames": 3,
+          "vertices": 24,
+          "minGapM": -0.0169,
+          "worst": {
+            "frame": 1,
+            "t": 1,
+            "gap": -0.0169,
+            "at": [
+              0.43,
+              -0.047,
+              0.411
+            ],
+            "bone": "footR"
+          }
+        },
+        {
+          "clip": "profMine",
+          "frames": 1,
+          "vertices": 8,
+          "minGapM": -0.0169,
+          "worst": {
+            "frame": 0,
+            "t": 0,
+            "gap": -0.0169,
+            "at": [
+              0.43,
+              -0.047,
+              0.411
+            ],
+            "bone": "footR"
+          }
+        },
+        {
+          "clip": "profSkin",
+          "frames": 3,
+          "vertices": 6,
+          "minGapM": -0.1087,
+          "worst": {
+            "frame": 1,
+            "t": 0.4,
+            "gap": -0.1087,
+            "at": [
+              -0.121,
+              0.055,
+              0.263
+            ],
+            "bone": "legL"
+          }
+        },
+        {
+          "clip": "profHammer",
+          "frames": 1,
+          "vertices": 2,
+          "minGapM": -0.1087,
+          "worst": {
+            "frame": 0,
+            "t": 0,
+            "gap": -0.1087,
+            "at": [
+              -0.121,
+              0.055,
+              0.263
+            ],
+            "bone": "legL"
+          }
+        },
+        {
+          "clip": "seated",
+          "frames": 3,
+          "vertices": 54,
+          "minGapM": -0.2634,
+          "worst": {
+            "frame": 1,
+            "t": 0.25,
+            "gap": -0.2634,
+            "at": [
+              -0.172,
+              0.067,
+              0.395
+            ],
+            "bone": "legL"
+          }
+        },
+        {
+          "clip": "drive",
+          "frames": 4,
+          "vertices": 72,
+          "minGapM": -0.2634,
+          "worst": {
+            "frame": 0,
+            "t": 0,
+            "gap": -0.2634,
+            "at": [
+              -0.172,
+              0.067,
+              0.395
+            ],
+            "bone": "legL"
+          }
+        }
+      ]
+    },
+    {
+      "name": "armour-shield",
+      "triangles": 8620,
+      "bodyEvents": [
+        {
+          "clip": "idle",
+          "pair": "plate>upperL",
+          "frames": 18,
+          "vertices": 52,
+          "deepestM": 0.0479,
+          "at": 0
+        },
+        {
+          "clip": "idle",
+          "pair": "plate>upperR",
+          "frames": 21,
+          "vertices": 64,
+          "deepestM": 0.0479,
+          "at": 0
+        },
+        {
+          "clip": "idle",
+          "pair": "heldR>thighR",
+          "frames": 9,
+          "vertices": 21,
+          "deepestM": 0.0193,
+          "at": 0
+        },
+        {
+          "clip": "idle",
+          "pair": "heldR>shinR",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.004,
+          "at": 0
+        },
+        {
+          "clip": "idle",
+          "pair": "heldL>thighL",
+          "frames": 2,
+          "vertices": 11,
+          "deepestM": 0.0236,
+          "at": 0
+        },
+        {
+          "clip": "ready",
+          "pair": "plate>upperL",
+          "frames": 19,
+          "vertices": 62,
+          "deepestM": 0.0459,
+          "at": 0.75
+        },
+        {
+          "clip": "ready",
+          "pair": "plate>upperR",
+          "frames": 14,
+          "vertices": 44,
+          "deepestM": 0.0423,
+          "at": 0
+        },
+        {
+          "clip": "walk",
+          "pair": "plate>upperL",
+          "frames": 17,
+          "vertices": 47,
+          "deepestM": 0.0459,
+          "at": 0
+        },
+        {
+          "clip": "walk",
+          "pair": "plate>upperR",
+          "frames": 16,
+          "vertices": 48,
+          "deepestM": 0.0437,
+          "at": 0.5
+        },
+        {
+          "clip": "run",
+          "pair": "plate>upperL",
+          "frames": 13,
+          "vertices": 35,
+          "deepestM": 0.0279,
+          "at": 0
+        },
+        {
+          "clip": "run",
+          "pair": "plate>upperR",
+          "frames": 13,
+          "vertices": 38,
+          "deepestM": 0.0344,
+          "at": 0.5
+        },
+        {
+          "clip": "attack",
+          "pair": "plate>upperL",
+          "frames": 18,
+          "vertices": 62,
+          "deepestM": 0.0459,
+          "at": 0.73
+        },
+        {
+          "clip": "attack",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 13,
+          "deepestM": 0.0218,
+          "at": 0.73
+        },
+        {
+          "clip": "cast",
+          "pair": "plate>upperL",
+          "frames": 11,
+          "vertices": 36,
+          "deepestM": 0.0459,
+          "at": 0
+        },
+        {
+          "clip": "cast",
+          "pair": "plate>upperR",
+          "frames": 8,
+          "vertices": 22,
+          "deepestM": 0.0305,
+          "at": 0.25
+        },
+        {
+          "clip": "hit",
+          "pair": "plate>upperL",
+          "frames": 12,
+          "vertices": 32,
+          "deepestM": 0.0437,
+          "at": 0.73
+        },
+        {
+          "clip": "hit",
+          "pair": "plate>upperR",
+          "frames": 12,
+          "vertices": 32,
+          "deepestM": 0.0437,
+          "at": 0.73
+        },
+        {
+          "clip": "guard",
+          "pair": "plate>upperL",
+          "frames": 14,
+          "vertices": 44,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "guard",
+          "pair": "plate>upperR",
+          "frames": 11,
+          "vertices": 38,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "wave",
+          "pair": "plate>upperL",
+          "frames": 18,
+          "vertices": 52,
+          "deepestM": 0.0437,
+          "at": 0.25
+        },
+        {
+          "clip": "wave",
+          "pair": "plate>upperR",
+          "frames": 2,
+          "vertices": 8,
+          "deepestM": 0.0207,
+          "at": 0
+        },
+        {
+          "clip": "wave",
+          "pair": "shoulderR>head",
+          "frames": 6,
+          "vertices": 18,
+          "deepestM": 0.018,
+          "at": 0.25
+        },
+        {
+          "clip": "talk",
+          "pair": "plate>upperL",
+          "frames": 14,
+          "vertices": 41,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "talk",
+          "pair": "shoulderR>head",
+          "frames": 2,
+          "vertices": 6,
+          "deepestM": 0.018,
+          "at": 0
+        },
+        {
+          "clip": "talk",
+          "pair": "plate>upperR",
+          "frames": 10,
+          "vertices": 32,
+          "deepestM": 0.03,
+          "at": 0.75
+        },
+        {
+          "clip": "jump",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 27,
+          "deepestM": 0.0288,
+          "at": 0.24
+        },
+        {
+          "clip": "jump",
+          "pair": "plate>upperR",
+          "frames": 10,
+          "vertices": 33,
+          "deepestM": 0.03,
+          "at": 0
+        },
+        {
+          "clip": "dead",
+          "pair": "plate>upperL",
+          "frames": 9,
+          "vertices": 23,
+          "deepestM": 0.0384,
+          "at": 0.24
+        },
+        {
+          "clip": "dead",
+          "pair": "plate>upperR",
+          "frames": 9,
+          "vertices": 23,
+          "deepestM": 0.0375,
+          "at": 0.24
+        },
+        {
+          "clip": "swim",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 14,
+          "deepestM": 0.0443,
+          "at": 0.25
+        },
+        {
+          "clip": "swim",
+          "pair": "shoulderR>head",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0052,
+          "at": 0.25
+        },
+        {
+          "clip": "swim",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 14,
+          "deepestM": 0.0443,
+          "at": 0.75
+        },
+        {
+          "clip": "swim",
+          "pair": "shoulderL>head",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0052,
+          "at": 0.75
+        },
+        {
+          "clip": "swimBack",
+          "pair": "plate>upperR",
+          "frames": 10,
+          "vertices": 25,
+          "deepestM": 0.0443,
+          "at": 0
+        },
+        {
+          "clip": "swimBack",
+          "pair": "shoulderL>head",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0052,
+          "at": 0
+        },
+        {
+          "clip": "swimBack",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 13,
+          "deepestM": 0.0204,
+          "at": 0.5
+        },
+        {
+          "clip": "swimSide",
+          "pair": "plate>upperL",
+          "frames": 2,
+          "vertices": 5,
+          "deepestM": 0.0108,
+          "at": 0
+        },
+        {
+          "clip": "swimSide",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 10,
+          "deepestM": 0.0166,
+          "at": 0
+        },
+        {
+          "clip": "slash",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0127,
+          "at": 0.73
+        },
+        {
+          "clip": "slash",
+          "pair": "plate>upperL",
+          "frames": 15,
+          "vertices": 54,
+          "deepestM": 0.0459,
+          "at": 0.49
+        },
+        {
+          "clip": "slashBack",
+          "pair": "plate>upperL",
+          "frames": 20,
+          "vertices": 72,
+          "deepestM": 0.0459,
+          "at": 0.49
+        },
+        {
+          "clip": "slashBack",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.017,
+          "at": 0.73
+        },
+        {
+          "clip": "thrust",
+          "pair": "plate>upperL",
+          "frames": 13,
+          "vertices": 39,
+          "deepestM": 0.0454,
+          "at": 0
+        },
+        {
+          "clip": "thrust",
+          "pair": "plate>upperR",
+          "frames": 9,
+          "vertices": 24,
+          "deepestM": 0.0373,
+          "at": 0.24
+        },
+        {
+          "clip": "overhead",
+          "pair": "plate>upperL",
+          "frames": 17,
+          "vertices": 58,
+          "deepestM": 0.0459,
+          "at": 0.73
+        },
+        {
+          "clip": "overhead",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0233,
+          "at": 0
+        },
+        {
+          "clip": "sweep",
+          "pair": "plate>upperL",
+          "frames": 12,
+          "vertices": 47,
+          "deepestM": 0.0474,
+          "at": 0.24
+        },
+        {
+          "clip": "sweep",
+          "pair": "plate>upperR",
+          "frames": 9,
+          "vertices": 36,
+          "deepestM": 0.0531,
+          "at": 0.49
+        },
+        {
+          "clip": "sweep",
+          "pair": "heldL>foreR",
+          "frames": 6,
+          "vertices": 67,
+          "deepestM": 0.0379,
+          "at": 0.49
+        },
+        {
+          "clip": "jab",
+          "pair": "plate>upperL",
+          "frames": 12,
+          "vertices": 41,
+          "deepestM": 0.0462,
+          "at": 0
+        },
+        {
+          "clip": "jab",
+          "pair": "plate>upperR",
+          "frames": 10,
+          "vertices": 34,
+          "deepestM": 0.0526,
+          "at": 0
+        },
+        {
+          "clip": "jab",
+          "pair": "heldL>foreR",
+          "frames": 2,
+          "vertices": 22,
+          "deepestM": 0.0345,
+          "at": 0
+        },
+        {
+          "clip": "arcCut",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 16,
+          "deepestM": 0.028,
+          "at": 0
+        },
+        {
+          "clip": "arcCut",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 9,
+          "deepestM": 0.0303,
+          "at": 0
+        },
+        {
+          "clip": "slam",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 26,
+          "deepestM": 0.052,
+          "at": 0.49
+        },
+        {
+          "clip": "slam",
+          "pair": "shoulderL>head",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0041,
+          "at": 0.24
+        },
+        {
+          "clip": "slam",
+          "pair": "plate>upperR",
+          "frames": 8,
+          "vertices": 26,
+          "deepestM": 0.0479,
+          "at": 0.49
+        },
+        {
+          "clip": "slam",
+          "pair": "heldR>thighR",
+          "frames": 4,
+          "vertices": 51,
+          "deepestM": 0.0635,
+          "at": 0.73
+        },
+        {
+          "clip": "slam",
+          "pair": "heldR>hips",
+          "frames": 1,
+          "vertices": 14,
+          "deepestM": 0.0307,
+          "at": 0.73
+        },
+        {
+          "clip": "slam",
+          "pair": "heldL>thighL",
+          "frames": 1,
+          "vertices": 25,
+          "deepestM": 0.0451,
+          "at": 0.73
+        },
+        {
+          "clip": "slam",
+          "pair": "heldL>hips",
+          "frames": 2,
+          "vertices": 28,
+          "deepestM": 0.0472,
+          "at": 0.73
+        },
+        {
+          "clip": "lunge",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 22,
+          "deepestM": 0.0366,
+          "at": 0
+        },
+        {
+          "clip": "lunge",
+          "pair": "plate>upperR",
+          "frames": 12,
+          "vertices": 30,
+          "deepestM": 0.0447,
+          "at": 0.24
+        },
+        {
+          "clip": "lunge",
+          "pair": "heldR>thighR",
+          "frames": 4,
+          "vertices": 51,
+          "deepestM": 0.0635,
+          "at": 0
+        },
+        {
+          "clip": "lunge",
+          "pair": "heldR>hips",
+          "frames": 1,
+          "vertices": 14,
+          "deepestM": 0.0307,
+          "at": 0
+        },
+        {
+          "clip": "lunge",
+          "pair": "heldL>thighL",
+          "frames": 1,
+          "vertices": 25,
+          "deepestM": 0.0451,
+          "at": 0
+        },
+        {
+          "clip": "lunge",
+          "pair": "heldL>hips",
+          "frames": 2,
+          "vertices": 28,
+          "deepestM": 0.0472,
+          "at": 0
+        },
+        {
+          "clip": "shoot",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 5,
+          "deepestM": 0.0175,
+          "at": 0
+        },
+        {
+          "clip": "shoot",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 3,
+          "deepestM": 0.0073,
+          "at": 0.24
+        },
+        {
+          "clip": "shoot",
+          "pair": "heldR>head",
+          "frames": 3,
+          "vertices": 11,
+          "deepestM": 0.0313,
+          "at": 0.49
+        },
+        {
+          "clip": "reload",
+          "pair": "plate>upperL",
+          "frames": 12,
+          "vertices": 31,
+          "deepestM": 0.0443,
+          "at": 0.24
+        },
+        {
+          "clip": "reload",
+          "pair": "plate>upperR",
+          "frames": 12,
+          "vertices": 38,
+          "deepestM": 0.0298,
+          "at": 0.24
+        },
+        {
+          "clip": "castPoint",
+          "pair": "plate>upperL",
+          "frames": 17,
+          "vertices": 56,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "castPoint",
+          "pair": "plate>upperR",
+          "frames": 8,
+          "vertices": 25,
+          "deepestM": 0.0295,
+          "at": 0
+        },
+        {
+          "clip": "castStaff",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 18,
+          "deepestM": 0.03,
+          "at": 0
+        },
+        {
+          "clip": "castStaff",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0181,
+          "at": 0.24
+        },
+        {
+          "clip": "channel",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 4,
+          "deepestM": 0.0086,
+          "at": 0
+        },
+        {
+          "clip": "channel",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0177,
+          "at": 0
+        },
+        {
+          "clip": "boat",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 12,
+          "deepestM": 0.0169,
+          "at": 0.25
+        },
+        {
+          "clip": "boat",
+          "pair": "plate>upperR",
+          "frames": 7,
+          "vertices": 23,
+          "deepestM": 0.0278,
+          "at": 0.75
+        },
+        {
+          "clip": "sit",
+          "pair": "plate>upperL",
+          "frames": 7,
+          "vertices": 20,
+          "deepestM": 0.0232,
+          "at": 0.25
+        },
+        {
+          "clip": "sit",
+          "pair": "plate>upperR",
+          "frames": 9,
+          "vertices": 28,
+          "deepestM": 0.0278,
+          "at": 0
+        },
+        {
+          "clip": "ride",
+          "pair": "plate>upperL",
+          "frames": 11,
+          "vertices": 42,
+          "deepestM": 0.0414,
+          "at": 0.75
+        },
+        {
+          "clip": "ride",
+          "pair": "plate>upperR",
+          "frames": 11,
+          "vertices": 42,
+          "deepestM": 0.0414,
+          "at": 0.75
+        },
+        {
+          "clip": "rideGallop",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 25,
+          "deepestM": 0.0414,
+          "at": 0
+        },
+        {
+          "clip": "rideGallop",
+          "pair": "plate>upperR",
+          "frames": 8,
+          "vertices": 25,
+          "deepestM": 0.0414,
+          "at": 0
+        },
+        {
+          "clip": "pickSwing",
+          "pair": "plate>upperL",
+          "frames": 13,
+          "vertices": 43,
+          "deepestM": 0.0319,
+          "at": 0
+        },
+        {
+          "clip": "pickSwing",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 18,
+          "deepestM": 0.0321,
+          "at": 0.75
+        },
+        {
+          "clip": "chopSwing",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 22,
+          "deepestM": 0.0297,
+          "at": 0
+        },
+        {
+          "clip": "chopSwing",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 14,
+          "deepestM": 0.0328,
+          "at": 0.75
+        },
+        {
+          "clip": "chopSwing",
+          "pair": "heldR>shinR",
+          "frames": 1,
+          "vertices": 5,
+          "deepestM": 0.0235,
+          "at": 0.75
+        },
+        {
+          "clip": "forage",
+          "pair": "plate>upperL",
+          "frames": 14,
+          "vertices": 41,
+          "deepestM": 0.0371,
+          "at": 0.75
+        },
+        {
+          "clip": "forage",
+          "pair": "plate>upperR",
+          "frames": 13,
+          "vertices": 38,
+          "deepestM": 0.0371,
+          "at": 0.25
+        },
+        {
+          "clip": "forage",
+          "pair": "heldR>shinR",
+          "frames": 1,
+          "vertices": 5,
+          "deepestM": 0.0235,
+          "at": 0
+        },
+        {
+          "clip": "chop",
+          "pair": "plate>upperL",
+          "frames": 20,
+          "vertices": 68,
+          "deepestM": 0.0459,
+          "at": 0.49
+        },
+        {
+          "clip": "chop",
+          "pair": "plate>upperR",
+          "frames": 12,
+          "vertices": 38,
+          "deepestM": 0.045,
+          "at": 0.73
+        },
+        {
+          "clip": "chop",
+          "pair": "heldR>thighL",
+          "frames": 4,
+          "vertices": 27,
+          "deepestM": 0.0342,
+          "at": 0.73
+        },
+        {
+          "clip": "chop",
+          "pair": "heldR>thighR",
+          "frames": 3,
+          "vertices": 41,
+          "deepestM": 0.0558,
+          "at": 0.73
+        },
+        {
+          "clip": "chop",
+          "pair": "heldR>shinL",
+          "frames": 2,
+          "vertices": 4,
+          "deepestM": 0.019,
+          "at": 0.73
+        },
+        {
+          "clip": "hack",
+          "pair": "plate>upperL",
+          "frames": 14,
+          "vertices": 48,
+          "deepestM": 0.0456,
+          "at": 0
+        },
+        {
+          "clip": "hack",
+          "pair": "plate>upperR",
+          "frames": 7,
+          "vertices": 24,
+          "deepestM": 0.045,
+          "at": 0
+        },
+        {
+          "clip": "hack",
+          "pair": "heldR>thighL",
+          "frames": 4,
+          "vertices": 27,
+          "deepestM": 0.0342,
+          "at": 0
+        },
+        {
+          "clip": "hack",
+          "pair": "heldR>thighR",
+          "frames": 3,
+          "vertices": 41,
+          "deepestM": 0.0558,
+          "at": 0
+        },
+        {
+          "clip": "hack",
+          "pair": "heldR>shinL",
+          "frames": 2,
+          "vertices": 4,
+          "deepestM": 0.019,
+          "at": 0
+        },
+        {
+          "clip": "smash",
+          "pair": "plate>upperL",
+          "frames": 18,
+          "vertices": 64,
+          "deepestM": 0.0459,
+          "at": 0.73
+        },
+        {
+          "clip": "smash",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0249,
+          "at": 0.73
+        },
+        {
+          "clip": "uppercut",
+          "pair": "plate>upperL",
+          "frames": 20,
+          "vertices": 60,
+          "deepestM": 0.0459,
+          "at": 0
+        },
+        {
+          "clip": "uppercut",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 11,
+          "deepestM": 0.0249,
+          "at": 0
+        },
+        {
+          "clip": "stab",
+          "pair": "plate>upperL",
+          "frames": 14,
+          "vertices": 44,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "stab",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0286,
+          "at": 0.73
+        },
+        {
+          "clip": "flurry",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 24,
+          "deepestM": 0.028,
+          "at": 0
+        },
+        {
+          "clip": "flurry",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 16,
+          "deepestM": 0.0286,
+          "at": 0
+        },
+        {
+          "clip": "bash",
+          "pair": "plate>upperL",
+          "frames": 12,
+          "vertices": 42,
+          "deepestM": 0.0471,
+          "at": 0.24
+        },
+        {
+          "clip": "bash",
+          "pair": "plate>upperR",
+          "frames": 7,
+          "vertices": 12,
+          "deepestM": 0.024,
+          "at": 0
+        },
+        {
+          "clip": "bash",
+          "pair": "heldL>foreR",
+          "frames": 1,
+          "vertices": 5,
+          "deepestM": 0.0067,
+          "at": 0.24
+        },
+        {
+          "clip": "block",
+          "pair": "plate>upperL",
+          "frames": 12,
+          "vertices": 42,
+          "deepestM": 0.0445,
+          "at": 0
+        },
+        {
+          "clip": "block",
+          "pair": "plate>upperR",
+          "frames": 8,
+          "vertices": 28,
+          "deepestM": 0.0207,
+          "at": 0.25
+        },
+        {
+          "clip": "parry",
+          "pair": "plate>upperL",
+          "frames": 18,
+          "vertices": 52,
+          "deepestM": 0.0437,
+          "at": 0.24
+        },
+        {
+          "clip": "parry",
+          "pair": "plate>upperR",
+          "frames": 9,
+          "vertices": 37,
+          "deepestM": 0.0427,
+          "at": 0.24
+        },
+        {
+          "clip": "offSlash",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 20,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "offSlash",
+          "pair": "plate>upperR",
+          "frames": 12,
+          "vertices": 40,
+          "deepestM": 0.037,
+          "at": 0
+        },
+        {
+          "clip": "offThrust",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 20,
+          "deepestM": 0.0427,
+          "at": 0.24
+        },
+        {
+          "clip": "offThrust",
+          "pair": "plate>upperR",
+          "frames": 18,
+          "vertices": 52,
+          "deepestM": 0.0437,
+          "at": 0.24
+        },
+        {
+          "clip": "offThrust",
+          "pair": "heldL>torso",
+          "frames": 1,
+          "vertices": 8,
+          "deepestM": 0.0088,
+          "at": 0.24
+        },
+        {
+          "clip": "crossSlash",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 4,
+          "deepestM": 0.0243,
+          "at": 0
+        },
+        {
+          "clip": "crossSlash",
+          "pair": "plate>upperR",
+          "frames": 7,
+          "vertices": 16,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "crossSlash",
+          "pair": "heldR>foreL",
+          "frames": 4,
+          "vertices": 18,
+          "deepestM": 0.0301,
+          "at": 0.24
+        },
+        {
+          "clip": "crossSlash",
+          "pair": "heldL>foreR",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0247,
+          "at": 0.24
+        },
+        {
+          "clip": "twinCleave",
+          "pair": "plate>upperL",
+          "frames": 10,
+          "vertices": 29,
+          "deepestM": 0.0391,
+          "at": 0.73
+        },
+        {
+          "clip": "twinCleave",
+          "pair": "plate>upperR",
+          "frames": 11,
+          "vertices": 33,
+          "deepestM": 0.0391,
+          "at": 0.49
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "plate>upperL",
+          "frames": 12,
+          "vertices": 40,
+          "deepestM": 0.0391,
+          "at": 0
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "plate>upperR",
+          "frames": 12,
+          "vertices": 40,
+          "deepestM": 0.0391,
+          "at": 0
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "heldR>thighR",
+          "frames": 7,
+          "vertices": 78,
+          "deepestM": 0.0623,
+          "at": 0.73
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "heldR>hips",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0057,
+          "at": 0.73
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "heldL>thighL",
+          "frames": 4,
+          "vertices": 48,
+          "deepestM": 0.0488,
+          "at": 0.73
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "heldL>shinL",
+          "frames": 2,
+          "vertices": 20,
+          "deepestM": 0.0197,
+          "at": 0.73
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "heldL>hips",
+          "frames": 1,
+          "vertices": 13,
+          "deepestM": 0.0194,
+          "at": 0.73
+        },
+        {
+          "clip": "spinSweep",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 20,
+          "deepestM": 0.038,
+          "at": 0
+        },
+        {
+          "clip": "spinSweep",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 20,
+          "deepestM": 0.038,
+          "at": 0
+        },
+        {
+          "clip": "spinSweep",
+          "pair": "heldR>thighR",
+          "frames": 7,
+          "vertices": 78,
+          "deepestM": 0.0623,
+          "at": 0
+        },
+        {
+          "clip": "spinSweep",
+          "pair": "heldR>hips",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0057,
+          "at": 0
+        },
+        {
+          "clip": "spinSweep",
+          "pair": "heldL>thighL",
+          "frames": 4,
+          "vertices": 48,
+          "deepestM": 0.0488,
+          "at": 0
+        },
+        {
+          "clip": "spinSweep",
+          "pair": "heldL>shinL",
+          "frames": 2,
+          "vertices": 20,
+          "deepestM": 0.0197,
+          "at": 0
+        },
+        {
+          "clip": "spinSweep",
+          "pair": "heldL>hips",
+          "frames": 1,
+          "vertices": 13,
+          "deepestM": 0.0194,
+          "at": 0
+        },
+        {
+          "clip": "thrust2h",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 32,
+          "deepestM": 0.053,
+          "at": 0.73
+        },
+        {
+          "clip": "thrust2h",
+          "pair": "plate>upperR",
+          "frames": 10,
+          "vertices": 34,
+          "deepestM": 0.0512,
+          "at": 0.49
+        },
+        {
+          "clip": "punch",
+          "pair": "plate>upperL",
+          "frames": 9,
+          "vertices": 32,
+          "deepestM": 0.053,
+          "at": 0
+        },
+        {
+          "clip": "punch",
+          "pair": "plate>upperR",
+          "frames": 8,
+          "vertices": 25,
+          "deepestM": 0.0468,
+          "at": 0
+        },
+        {
+          "clip": "kick",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 26,
+          "deepestM": 0.0307,
+          "at": 0
+        },
+        {
+          "clip": "kick",
+          "pair": "plate>upperR",
+          "frames": 7,
+          "vertices": 12,
+          "deepestM": 0.0265,
+          "at": 0
+        },
+        {
+          "clip": "throw",
+          "pair": "plate>upperL",
+          "frames": 10,
+          "vertices": 30,
+          "deepestM": 0.0276,
+          "at": 0.73
+        },
+        {
+          "clip": "throw",
+          "pair": "plate>upperR",
+          "frames": 2,
+          "vertices": 4,
+          "deepestM": 0.0229,
+          "at": 0
+        },
+        {
+          "clip": "castBook",
+          "pair": "plate>upperL",
+          "frames": 13,
+          "vertices": 41,
+          "deepestM": 0.0417,
+          "at": 0.24
+        },
+        {
+          "clip": "castBook",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.025,
+          "at": 0.49
+        },
+        {
+          "clip": "whirl",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 10,
+          "deepestM": 0.0417,
+          "at": 0
+        },
+        {
+          "clip": "whirl",
+          "pair": "plate>upperR",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0105,
+          "at": 0
+        },
+        {
+          "clip": "cheer",
+          "pair": "shoulderL>head",
+          "frames": 9,
+          "vertices": 12,
+          "deepestM": 0.0226,
+          "at": 0.24
+        },
+        {
+          "clip": "cheer",
+          "pair": "shoulderR>head",
+          "frames": 9,
+          "vertices": 12,
+          "deepestM": 0.0226,
+          "at": 0.24
+        },
+        {
+          "clip": "bowGreet",
+          "pair": "shoulderL>head",
+          "frames": 3,
+          "vertices": 4,
+          "deepestM": 0.0226,
+          "at": 0
+        },
+        {
+          "clip": "bowGreet",
+          "pair": "shoulderR>head",
+          "frames": 3,
+          "vertices": 4,
+          "deepestM": 0.0226,
+          "at": 0
+        },
+        {
+          "clip": "bowGreet",
+          "pair": "plate>upperL",
+          "frames": 11,
+          "vertices": 36,
+          "deepestM": 0.0362,
+          "at": 0.24
+        },
+        {
+          "clip": "bowGreet",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 17,
+          "deepestM": 0.0311,
+          "at": 0.73
+        },
+        {
+          "clip": "point",
+          "pair": "plate>upperL",
+          "frames": 19,
+          "vertices": 54,
+          "deepestM": 0.0408,
+          "at": 0.24
+        },
+        {
+          "clip": "point",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 12,
+          "deepestM": 0.0311,
+          "at": 0
+        },
+        {
+          "clip": "shrug",
+          "pair": "plate>upperL",
+          "frames": 10,
+          "vertices": 26,
+          "deepestM": 0.0408,
+          "at": 0
+        },
+        {
+          "clip": "shrug",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 14,
+          "deepestM": 0.0217,
+          "at": 0.73
+        },
+        {
+          "clip": "nod",
+          "pair": "plate>upperL",
+          "frames": 17,
+          "vertices": 46,
+          "deepestM": 0.0437,
+          "at": 0.24
+        },
+        {
+          "clip": "nod",
+          "pair": "plate>upperR",
+          "frames": 17,
+          "vertices": 46,
+          "deepestM": 0.0437,
+          "at": 0.24
+        },
+        {
+          "clip": "headShake",
+          "pair": "plate>upperL",
+          "frames": 20,
+          "vertices": 56,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "headShake",
+          "pair": "plate>upperR",
+          "frames": 20,
+          "vertices": 56,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "laugh",
+          "pair": "plate>upperL",
+          "frames": 14,
+          "vertices": 44,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "laugh",
+          "pair": "plate>upperR",
+          "frames": 14,
+          "vertices": 44,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "clap",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 22,
+          "deepestM": 0.0301,
+          "at": 0.24
+        },
+        {
+          "clip": "clap",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 22,
+          "deepestM": 0.0301,
+          "at": 0.24
+        },
+        {
+          "clip": "salute",
+          "pair": "plate>upperL",
+          "frames": 16,
+          "vertices": 46,
+          "deepestM": 0.0437,
+          "at": 0.24
+        },
+        {
+          "clip": "salute",
+          "pair": "plate>upperR",
+          "frames": 1,
+          "vertices": 4,
+          "deepestM": 0.0301,
+          "at": 0
+        },
+        {
+          "clip": "kneel",
+          "pair": "plate>upperL",
+          "frames": 14,
+          "vertices": 47,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "kneel",
+          "pair": "plate>upperR",
+          "frames": 13,
+          "vertices": 43,
+          "deepestM": 0.0351,
+          "at": 0.75
+        },
+        {
+          "clip": "sitGround",
+          "pair": "plate>upperL",
+          "frames": 7,
+          "vertices": 25,
+          "deepestM": 0.0358,
+          "at": 0
+        },
+        {
+          "clip": "sitGround",
+          "pair": "plate>upperR",
+          "frames": 8,
+          "vertices": 28,
+          "deepestM": 0.0351,
+          "at": 0
+        },
+        {
+          "clip": "pray",
+          "pair": "plate>upperL",
+          "frames": 7,
+          "vertices": 22,
+          "deepestM": 0.0323,
+          "at": 0.25
+        },
+        {
+          "clip": "pray",
+          "pair": "plate>upperR",
+          "frames": 7,
+          "vertices": 22,
+          "deepestM": 0.0323,
+          "at": 0.25
+        },
+        {
+          "clip": "dance",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 12,
+          "deepestM": 0.0323,
+          "at": 0
+        },
+        {
+          "clip": "dance",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 14,
+          "deepestM": 0.0323,
+          "at": 0
+        },
+        {
+          "clip": "lookAround",
+          "pair": "plate>upperL",
+          "frames": 16,
+          "vertices": 44,
+          "deepestM": 0.0437,
+          "at": 0.25
+        },
+        {
+          "clip": "lookAround",
+          "pair": "plate>upperR",
+          "frames": 11,
+          "vertices": 30,
+          "deepestM": 0.0306,
+          "at": 0.5
+        },
+        {
+          "clip": "crossArms",
+          "pair": "plate>upperL",
+          "frames": 14,
+          "vertices": 41,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "crossArms",
+          "pair": "plate>upperR",
+          "frames": 12,
+          "vertices": 43,
+          "deepestM": 0.0369,
+          "at": 0.25
+        },
+        {
+          "clip": "stretch",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 9,
+          "deepestM": 0.0338,
+          "at": 0
+        },
+        {
+          "clip": "stretch",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 11,
+          "deepestM": 0.0369,
+          "at": 0
+        },
+        {
+          "clip": "stretch",
+          "pair": "shoulderL>head",
+          "frames": 4,
+          "vertices": 7,
+          "deepestM": 0.0192,
+          "at": 0.49
+        },
+        {
+          "clip": "stretch",
+          "pair": "shoulderR>head",
+          "frames": 4,
+          "vertices": 7,
+          "deepestM": 0.0192,
+          "at": 0.49
+        },
+        {
+          "clip": "drink",
+          "pair": "shoulderL>head",
+          "frames": 2,
+          "vertices": 3,
+          "deepestM": 0.0089,
+          "at": 0
+        },
+        {
+          "clip": "drink",
+          "pair": "shoulderR>head",
+          "frames": 2,
+          "vertices": 3,
+          "deepestM": 0.0089,
+          "at": 0
+        },
+        {
+          "clip": "drink",
+          "pair": "plate>upperL",
+          "frames": 15,
+          "vertices": 42,
+          "deepestM": 0.0437,
+          "at": 0.24
+        },
+        {
+          "clip": "drink",
+          "pair": "plate>upperR",
+          "frames": 9,
+          "vertices": 27,
+          "deepestM": 0.0362,
+          "at": 0.24
+        },
+        {
+          "clip": "sleep",
+          "pair": "plate>upperL",
+          "frames": 14,
+          "vertices": 32,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "sleep",
+          "pair": "plate>upperR",
+          "frames": 13,
+          "vertices": 40,
+          "deepestM": 0.0333,
+          "at": 0
+        },
+        {
+          "clip": "lutePlay",
+          "pair": "plate>upperL",
+          "frames": 15,
+          "vertices": 30,
+          "deepestM": 0.0342,
+          "at": 0.25
+        },
+        {
+          "clip": "lutePlay",
+          "pair": "plate>upperR",
+          "frames": 18,
+          "vertices": 52,
+          "deepestM": 0.0437,
+          "at": 0.25
+        },
+        {
+          "clip": "sprint",
+          "pair": "plate>upperL",
+          "frames": 9,
+          "vertices": 18,
+          "deepestM": 0.0342,
+          "at": 0
+        },
+        {
+          "clip": "sprint",
+          "pair": "plate>upperR",
+          "frames": 11,
+          "vertices": 27,
+          "deepestM": 0.0437,
+          "at": 0
+        },
+        {
+          "clip": "sprint",
+          "pair": "heldR>thighR",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0255,
+          "at": 0.25
+        },
+        {
+          "clip": "sprint",
+          "pair": "heldR>shinR",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0091,
+          "at": 0.25
+        },
+        {
+          "clip": "backpedal",
+          "pair": "plate>upperL",
+          "frames": 11,
+          "vertices": 31,
+          "deepestM": 0.0342,
+          "at": 0.5
+        },
+        {
+          "clip": "backpedal",
+          "pair": "plate>upperR",
+          "frames": 14,
+          "vertices": 45,
+          "deepestM": 0.0437,
+          "at": 0.5
+        },
+        {
+          "clip": "strafeL",
+          "pair": "plate>upperL",
+          "frames": 15,
+          "vertices": 34,
+          "deepestM": 0.0344,
+          "at": 0.25
+        },
+        {
+          "clip": "strafeL",
+          "pair": "plate>upperR",
+          "frames": 19,
+          "vertices": 59,
+          "deepestM": 0.0415,
+          "at": 0.75
+        },
+        {
+          "clip": "strafeR",
+          "pair": "plate>upperL",
+          "frames": 16,
+          "vertices": 32,
+          "deepestM": 0.0344,
+          "at": 0
+        },
+        {
+          "clip": "strafeR",
+          "pair": "plate>upperR",
+          "frames": 20,
+          "vertices": 60,
+          "deepestM": 0.0415,
+          "at": 0.75
+        },
+        {
+          "clip": "dualSlashR",
+          "pair": "plate>upperL",
+          "frames": 11,
+          "vertices": 26,
+          "deepestM": 0.0344,
+          "at": 0
+        },
+        {
+          "clip": "dualSlashR",
+          "pair": "plate>upperR",
+          "frames": 7,
+          "vertices": 19,
+          "deepestM": 0.0415,
+          "at": 0
+        },
+        {
+          "clip": "dualSlashL",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0201,
+          "at": 0
+        },
+        {
+          "clip": "dualSlashL",
+          "pair": "plate>upperR",
+          "frames": 8,
+          "vertices": 20,
+          "deepestM": 0.0218,
+          "at": 0.24
+        },
+        {
+          "clip": "dualCross",
+          "pair": "plate>upperL",
+          "frames": 2,
+          "vertices": 5,
+          "deepestM": 0.0227,
+          "at": 0.25
+        },
+        {
+          "clip": "dualCross",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 7,
+          "deepestM": 0.0227,
+          "at": 0.25
+        },
+        {
+          "clip": "dualCross",
+          "pair": "heldR>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0069,
+          "at": 0.25
+        },
+        {
+          "clip": "dualStabR",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 20,
+          "deepestM": 0.0233,
+          "at": 0.74
+        },
+        {
+          "clip": "dualStabR",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 16,
+          "deepestM": 0.0346,
+          "at": 0.24
+        },
+        {
+          "clip": "dualStabL",
+          "pair": "plate>upperL",
+          "frames": 9,
+          "vertices": 22,
+          "deepestM": 0.0346,
+          "at": 0.24
+        },
+        {
+          "clip": "dualStabL",
+          "pair": "plate>upperR",
+          "frames": 9,
+          "vertices": 22,
+          "deepestM": 0.0233,
+          "at": 0.74
+        },
+        {
+          "clip": "dualFlurry",
+          "pair": "plate>upperL",
+          "frames": 10,
+          "vertices": 26,
+          "deepestM": 0.0356,
+          "at": 0.49
+        },
+        {
+          "clip": "dualFlurry",
+          "pair": "plate>upperR",
+          "frames": 11,
+          "vertices": 28,
+          "deepestM": 0.0354,
+          "at": 0.73
+        },
+        {
+          "clip": "twinChopR",
+          "pair": "plate>upperL",
+          "frames": 15,
+          "vertices": 34,
+          "deepestM": 0.0342,
+          "at": 0.24
+        },
+        {
+          "clip": "twinChopR",
+          "pair": "plate>upperR",
+          "frames": 16,
+          "vertices": 57,
+          "deepestM": 0.0516,
+          "at": 0.74
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "plate>upperL",
+          "frames": 16,
+          "vertices": 55,
+          "deepestM": 0.0515,
+          "at": 0.74
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "plate>upperR",
+          "frames": 21,
+          "vertices": 66,
+          "deepestM": 0.0516,
+          "at": 0
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "heldL>hips",
+          "frames": 2,
+          "vertices": 15,
+          "deepestM": 0.0199,
+          "at": 0.74
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "heldL>thighR",
+          "frames": 2,
+          "vertices": 20,
+          "deepestM": 0.0235,
+          "at": 0.74
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "heldL>thighL",
+          "frames": 2,
+          "vertices": 36,
+          "deepestM": 0.0611,
+          "at": 0.74
+        },
+        {
+          "clip": "twinCrash",
+          "pair": "plate>upperL",
+          "frames": 13,
+          "vertices": 44,
+          "deepestM": 0.0515,
+          "at": 0
+        },
+        {
+          "clip": "twinCrash",
+          "pair": "plate>upperR",
+          "frames": 12,
+          "vertices": 34,
+          "deepestM": 0.0484,
+          "at": 0.73
+        },
+        {
+          "clip": "twinCrash",
+          "pair": "heldL>hips",
+          "frames": 2,
+          "vertices": 15,
+          "deepestM": 0.0199,
+          "at": 0
+        },
+        {
+          "clip": "twinCrash",
+          "pair": "heldL>thighR",
+          "frames": 2,
+          "vertices": 20,
+          "deepestM": 0.0235,
+          "at": 0
+        },
+        {
+          "clip": "twinCrash",
+          "pair": "heldL>thighL",
+          "frames": 2,
+          "vertices": 36,
+          "deepestM": 0.0611,
+          "at": 0
+        },
+        {
+          "clip": "fishCast",
+          "pair": "plate>upperL",
+          "frames": 15,
+          "vertices": 50,
+          "deepestM": 0.0484,
+          "at": 0
+        },
+        {
+          "clip": "fishCast",
+          "pair": "plate>upperR",
+          "frames": 7,
+          "vertices": 20,
+          "deepestM": 0.0484,
+          "at": 0
+        },
+        {
+          "clip": "fishWait",
+          "pair": "plate>upperL",
+          "frames": 12,
+          "vertices": 44,
+          "deepestM": 0.0368,
+          "at": 0.25
+        },
+        {
+          "clip": "fishWait",
+          "pair": "plate>upperR",
+          "frames": 12,
+          "vertices": 34,
+          "deepestM": 0.0308,
+          "at": 0.25
+        },
+        {
+          "clip": "fishReel",
+          "pair": "plate>upperL",
+          "frames": 11,
+          "vertices": 42,
+          "deepestM": 0.0406,
+          "at": 0.75
+        },
+        {
+          "clip": "fishReel",
+          "pair": "plate>upperR",
+          "frames": 9,
+          "vertices": 28,
+          "deepestM": 0.0298,
+          "at": 0
+        },
+        {
+          "clip": "fishShow",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 12,
+          "deepestM": 0.0406,
+          "at": 0
+        },
+        {
+          "clip": "fishShow",
+          "pair": "plate>upperR",
+          "frames": 14,
+          "vertices": 48,
+          "deepestM": 0.0303,
+          "at": 0.24
+        },
+        {
+          "clip": "fishShow",
+          "pair": "shoulderL>head",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0132,
+          "at": 0.73
+        },
+        {
+          "clip": "standUp",
+          "pair": "plate>upperR",
+          "frames": 13,
+          "vertices": 37,
+          "deepestM": 0.031,
+          "at": 0.49
+        },
+        {
+          "clip": "standUp",
+          "pair": "shoulderL>head",
+          "frames": 2,
+          "vertices": 5,
+          "deepestM": 0.0132,
+          "at": 0
+        },
+        {
+          "clip": "standUp",
+          "pair": "plate>upperL",
+          "frames": 9,
+          "vertices": 27,
+          "deepestM": 0.0286,
+          "at": 0.73
+        },
+        {
+          "clip": "swimCrawl",
+          "pair": "plate>upperL",
+          "frames": 10,
+          "vertices": 29,
+          "deepestM": 0.0411,
+          "at": 0.5
+        },
+        {
+          "clip": "swimCrawl",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 15,
+          "deepestM": 0.0293,
+          "at": 0
+        },
+        {
+          "clip": "swimCrawl",
+          "pair": "shoulderR>head",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0086,
+          "at": 0.5
+        },
+        {
+          "clip": "swimTread",
+          "pair": "plate>upperR",
+          "frames": 2,
+          "vertices": 3,
+          "deepestM": 0.0095,
+          "at": 0.75
+        },
+        {
+          "clip": "swimTread",
+          "pair": "plate>upperL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0095,
+          "at": 0.75
+        },
+        {
+          "clip": "sitHold",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0243,
+          "at": 0.25
+        },
+        {
+          "clip": "sitHold",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0243,
+          "at": 0.25
+        },
+        {
+          "clip": "profMine",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 7,
+          "deepestM": 0.0302,
+          "at": 0.75
+        },
+        {
+          "clip": "profMine",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 9,
+          "deepestM": 0.027,
+          "at": 0.75
+        },
+        {
+          "clip": "profChop",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0302,
+          "at": 0
+        },
+        {
+          "clip": "profChop",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.027,
+          "at": 0
+        },
+        {
+          "clip": "profGather",
+          "pair": "plate>upperL",
+          "frames": 9,
+          "vertices": 27,
+          "deepestM": 0.0371,
+          "at": 0.75
+        },
+        {
+          "clip": "profGather",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 15,
+          "deepestM": 0.0313,
+          "at": 0.75
+        },
+        {
+          "clip": "profSkin",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 18,
+          "deepestM": 0.0371,
+          "at": 0
+        },
+        {
+          "clip": "profSkin",
+          "pair": "plate>upperR",
+          "frames": 10,
+          "vertices": 22,
+          "deepestM": 0.0423,
+          "at": 0.75
+        },
+        {
+          "clip": "profHammer",
+          "pair": "plate>upperL",
+          "frames": 7,
+          "vertices": 20,
+          "deepestM": 0.0296,
+          "at": 0.75
+        },
+        {
+          "clip": "profHammer",
+          "pair": "plate>upperR",
+          "frames": 10,
+          "vertices": 24,
+          "deepestM": 0.0423,
+          "at": 0
+        },
+        {
+          "clip": "profStitch",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 24,
+          "deepestM": 0.0314,
+          "at": 0.25
+        },
+        {
+          "clip": "profStitch",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0304,
+          "at": 0.25
+        },
+        {
+          "clip": "profStir",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 18,
+          "deepestM": 0.0314,
+          "at": 0
+        },
+        {
+          "clip": "profStir",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 15,
+          "deepestM": 0.028,
+          "at": 0.5
+        },
+        {
+          "clip": "seated",
+          "pair": "plate>upperL",
+          "frames": 14,
+          "vertices": 52,
+          "deepestM": 0.0398,
+          "at": 0.75
+        },
+        {
+          "clip": "seated",
+          "pair": "plate>upperR",
+          "frames": 13,
+          "vertices": 51,
+          "deepestM": 0.0398,
+          "at": 0.75
+        },
+        {
+          "clip": "drive",
+          "pair": "plate>upperL",
+          "frames": 13,
+          "vertices": 58,
+          "deepestM": 0.0508,
+          "at": 0.25
+        },
+        {
+          "clip": "drive",
+          "pair": "plate>upperR",
+          "frames": 13,
+          "vertices": 58,
+          "deepestM": 0.0508,
+          "at": 0.25
+        },
+        {
+          "clip": "drive",
+          "pair": "heldR>foreL",
+          "frames": 6,
+          "vertices": 42,
+          "deepestM": 0.0317,
+          "at": 0.75
+        },
+        {
+          "clip": "drive",
+          "pair": "heldL>thighL",
+          "frames": 6,
+          "vertices": 36,
+          "deepestM": 0.0131,
+          "at": 0.25
+        }
+      ],
+      "skirtEvents": []
+    },
+    {
+      "name": "heavy-cape-twohand",
+      "triangles": 9504,
+      "bodyEvents": [
+        {
+          "clip": "idle",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 16,
+          "deepestM": 0.047,
+          "at": 0
+        },
+        {
+          "clip": "idle",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 13,
+          "deepestM": 0.047,
+          "at": 0
+        },
+        {
+          "clip": "idle",
+          "pair": "heldR>thighR",
+          "frames": 2,
+          "vertices": 38,
+          "deepestM": 0.0325,
+          "at": 0
+        },
+        {
+          "clip": "ready",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 27,
+          "deepestM": 0.0609,
+          "at": 0.75
+        },
+        {
+          "clip": "ready",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 23,
+          "deepestM": 0.0542,
+          "at": 0.25
+        },
+        {
+          "clip": "walk",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 16,
+          "deepestM": 0.0609,
+          "at": 0
+        },
+        {
+          "clip": "walk",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0542,
+          "at": 0
+        },
+        {
+          "clip": "run",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 7,
+          "deepestM": 0.0292,
+          "at": 0.5
+        },
+        {
+          "clip": "run",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.03,
+          "at": 0.25
+        },
+        {
+          "clip": "attack",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 17,
+          "deepestM": 0.0494,
+          "at": 0.49
+        },
+        {
+          "clip": "attack",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 18,
+          "deepestM": 0.0494,
+          "at": 0.49
+        },
+        {
+          "clip": "cast",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 17,
+          "deepestM": 0.0438,
+          "at": 0
+        },
+        {
+          "clip": "cast",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 17,
+          "deepestM": 0.0438,
+          "at": 0
+        },
+        {
+          "clip": "hit",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0316,
+          "at": 0.73
+        },
+        {
+          "clip": "hit",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0316,
+          "at": 0.73
+        },
+        {
+          "clip": "guard",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 27,
+          "deepestM": 0.0567,
+          "at": 0.25
+        },
+        {
+          "clip": "guard",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 21,
+          "deepestM": 0.048,
+          "at": 0.25
+        },
+        {
+          "clip": "wave",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 17,
+          "deepestM": 0.0567,
+          "at": 0
+        },
+        {
+          "clip": "wave",
+          "pair": "plate>upperR",
+          "frames": 1,
+          "vertices": 6,
+          "deepestM": 0.048,
+          "at": 0
+        },
+        {
+          "clip": "talk",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 14,
+          "deepestM": 0.0395,
+          "at": 0.25
+        },
+        {
+          "clip": "talk",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0396,
+          "at": 0.75
+        },
+        {
+          "clip": "jump",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0314,
+          "at": 0
+        },
+        {
+          "clip": "jump",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 11,
+          "deepestM": 0.0396,
+          "at": 0
+        },
+        {
+          "clip": "dead",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0371,
+          "at": 0.24
+        },
+        {
+          "clip": "dead",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0367,
+          "at": 0.24
+        },
+        {
+          "clip": "swim",
+          "pair": "plate>upperL",
+          "frames": 2,
+          "vertices": 5,
+          "deepestM": 0.0329,
+          "at": 0.25
+        },
+        {
+          "clip": "swim",
+          "pair": "plate>upperR",
+          "frames": 2,
+          "vertices": 5,
+          "deepestM": 0.0329,
+          "at": 0.75
+        },
+        {
+          "clip": "swimBack",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0329,
+          "at": 0
+        },
+        {
+          "clip": "swimBack",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0296,
+          "at": 0.5
+        },
+        {
+          "clip": "swimSide",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 5,
+          "deepestM": 0.0166,
+          "at": 0.25
+        },
+        {
+          "clip": "swimSide",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 5,
+          "deepestM": 0.0166,
+          "at": 0.75
+        },
+        {
+          "clip": "slash",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0175,
+          "at": 0.73
+        },
+        {
+          "clip": "slash",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0233,
+          "at": 0.73
+        },
+        {
+          "clip": "slashBack",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 20,
+          "deepestM": 0.0523,
+          "at": 0.73
+        },
+        {
+          "clip": "slashBack",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 7,
+          "deepestM": 0.0275,
+          "at": 0.73
+        },
+        {
+          "clip": "thrust",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 15,
+          "deepestM": 0.0523,
+          "at": 0
+        },
+        {
+          "clip": "thrust",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 13,
+          "deepestM": 0.0365,
+          "at": 0.24
+        },
+        {
+          "clip": "overhead",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0345,
+          "at": 0.49
+        },
+        {
+          "clip": "overhead",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 7,
+          "deepestM": 0.0229,
+          "at": 0.73
+        },
+        {
+          "clip": "sweep",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 31,
+          "deepestM": 0.0576,
+          "at": 0.24
+        },
+        {
+          "clip": "sweep",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 28,
+          "deepestM": 0.0584,
+          "at": 0.49
+        },
+        {
+          "clip": "jab",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 18,
+          "deepestM": 0.0435,
+          "at": 0
+        },
+        {
+          "clip": "jab",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 18,
+          "deepestM": 0.0524,
+          "at": 0
+        },
+        {
+          "clip": "arcCut",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0311,
+          "at": 0
+        },
+        {
+          "clip": "arcCut",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 6,
+          "deepestM": 0.0357,
+          "at": 0
+        },
+        {
+          "clip": "slam",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 19,
+          "deepestM": 0.0521,
+          "at": 0.49
+        },
+        {
+          "clip": "slam",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 17,
+          "deepestM": 0.0586,
+          "at": 0.49
+        },
+        {
+          "clip": "lunge",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 13,
+          "deepestM": 0.0451,
+          "at": 0
+        },
+        {
+          "clip": "lunge",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 15,
+          "deepestM": 0.0438,
+          "at": 0
+        },
+        {
+          "clip": "shoot",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0148,
+          "at": 0.73
+        },
+        {
+          "clip": "shoot",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 7,
+          "deepestM": 0.0106,
+          "at": 0
+        },
+        {
+          "clip": "shoot",
+          "pair": "heldR>head",
+          "frames": 8,
+          "vertices": 90,
+          "deepestM": 0.0702,
+          "at": 0.49
+        },
+        {
+          "clip": "reload",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0319,
+          "at": 0.24
+        },
+        {
+          "clip": "reload",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 7,
+          "deepestM": 0.0253,
+          "at": 0.24
+        },
+        {
+          "clip": "castPoint",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0343,
+          "at": 0.24
+        },
+        {
+          "clip": "castPoint",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0249,
+          "at": 0
+        },
+        {
+          "clip": "castStaff",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 6,
+          "deepestM": 0.0343,
+          "at": 0
+        },
+        {
+          "clip": "castStaff",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0192,
+          "at": 0.24
+        },
+        {
+          "clip": "channel",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 4,
+          "deepestM": 0.0117,
+          "at": 0
+        },
+        {
+          "clip": "channel",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0177,
+          "at": 0
+        },
+        {
+          "clip": "boat",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 7,
+          "deepestM": 0.0286,
+          "at": 0.25
+        },
+        {
+          "clip": "boat",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0374,
+          "at": 0.75
+        },
+        {
+          "clip": "sit",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0289,
+          "at": 0.25
+        },
+        {
+          "clip": "sit",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0374,
+          "at": 0
+        },
+        {
+          "clip": "ride",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0434,
+          "at": 0.25
+        },
+        {
+          "clip": "ride",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0434,
+          "at": 0.25
+        },
+        {
+          "clip": "rideGallop",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 19,
+          "deepestM": 0.0434,
+          "at": 0
+        },
+        {
+          "clip": "rideGallop",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 19,
+          "deepestM": 0.0434,
+          "at": 0
+        },
+        {
+          "clip": "pickSwing",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0348,
+          "at": 0.25
+        },
+        {
+          "clip": "pickSwing",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 15,
+          "deepestM": 0.0364,
+          "at": 0.75
+        },
+        {
+          "clip": "chopSwing",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0341,
+          "at": 0
+        },
+        {
+          "clip": "chopSwing",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0364,
+          "at": 0
+        },
+        {
+          "clip": "forage",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 15,
+          "deepestM": 0.041,
+          "at": 0.5
+        },
+        {
+          "clip": "forage",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 15,
+          "deepestM": 0.041,
+          "at": 0.5
+        },
+        {
+          "clip": "chop",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 12,
+          "deepestM": 0.0362,
+          "at": 0
+        },
+        {
+          "clip": "chop",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0441,
+          "at": 0.73
+        },
+        {
+          "clip": "hack",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0348,
+          "at": 0
+        },
+        {
+          "clip": "hack",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0441,
+          "at": 0
+        },
+        {
+          "clip": "smash",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 12,
+          "deepestM": 0.0337,
+          "at": 0.49
+        },
+        {
+          "clip": "smash",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 5,
+          "deepestM": 0.0315,
+          "at": 0.73
+        },
+        {
+          "clip": "uppercut",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 13,
+          "deepestM": 0.0318,
+          "at": 0
+        },
+        {
+          "clip": "uppercut",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0315,
+          "at": 0
+        },
+        {
+          "clip": "stab",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0321,
+          "at": 0.73
+        },
+        {
+          "clip": "stab",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 15,
+          "deepestM": 0.0301,
+          "at": 0.73
+        },
+        {
+          "clip": "flurry",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0321,
+          "at": 0
+        },
+        {
+          "clip": "flurry",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 13,
+          "deepestM": 0.0301,
+          "at": 0
+        },
+        {
+          "clip": "bash",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 22,
+          "deepestM": 0.0449,
+          "at": 0.24
+        },
+        {
+          "clip": "bash",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0294,
+          "at": 0.73
+        },
+        {
+          "clip": "block",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 30,
+          "deepestM": 0.0567,
+          "at": 0.25
+        },
+        {
+          "clip": "block",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 20,
+          "deepestM": 0.048,
+          "at": 0.25
+        },
+        {
+          "clip": "parry",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 17,
+          "deepestM": 0.0567,
+          "at": 0
+        },
+        {
+          "clip": "parry",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 26,
+          "deepestM": 0.048,
+          "at": 0
+        },
+        {
+          "clip": "offSlash",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0316,
+          "at": 0
+        },
+        {
+          "clip": "offSlash",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 16,
+          "deepestM": 0.0357,
+          "at": 0
+        },
+        {
+          "clip": "offThrust",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0313,
+          "at": 0.24
+        },
+        {
+          "clip": "offThrust",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0316,
+          "at": 0.73
+        },
+        {
+          "clip": "crossSlash",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0321,
+          "at": 0.24
+        },
+        {
+          "clip": "crossSlash",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0321,
+          "at": 0.24
+        },
+        {
+          "clip": "twinCleave",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0437,
+          "at": 0.24
+        },
+        {
+          "clip": "twinCleave",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 11,
+          "deepestM": 0.0299,
+          "at": 0.49
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "plate>upperL",
+          "frames": 6,
+          "vertices": 20,
+          "deepestM": 0.0489,
+          "at": 0.49
+        },
+        {
+          "clip": "twinSlam",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 20,
+          "deepestM": 0.0489,
+          "at": 0.49
+        },
+        {
+          "clip": "spinSweep",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 12,
+          "deepestM": 0.0438,
+          "at": 0
+        },
+        {
+          "clip": "spinSweep",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 12,
+          "deepestM": 0.0438,
+          "at": 0
+        },
+        {
+          "clip": "thrust2h",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 28,
+          "deepestM": 0.0582,
+          "at": 0.73
+        },
+        {
+          "clip": "thrust2h",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 22,
+          "deepestM": 0.0608,
+          "at": 0.49
+        },
+        {
+          "clip": "punch",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 20,
+          "deepestM": 0.0582,
+          "at": 0
+        },
+        {
+          "clip": "punch",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 17,
+          "deepestM": 0.0559,
+          "at": 0
+        },
+        {
+          "clip": "kick",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0367,
+          "at": 0
+        },
+        {
+          "clip": "kick",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0321,
+          "at": 0.73
+        },
+        {
+          "clip": "throw",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0414,
+          "at": 0.73
+        },
+        {
+          "clip": "throw",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 7,
+          "deepestM": 0.0321,
+          "at": 0
+        },
+        {
+          "clip": "castBook",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 25,
+          "deepestM": 0.043,
+          "at": 0.24
+        },
+        {
+          "clip": "castBook",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.022,
+          "at": 0.49
+        },
+        {
+          "clip": "whirl",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.043,
+          "at": 0
+        },
+        {
+          "clip": "whirl",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 6,
+          "deepestM": 0.014,
+          "at": 0
+        },
+        {
+          "clip": "cheer",
+          "pair": "plate>upperL",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0114,
+          "at": 0
+        },
+        {
+          "clip": "cheer",
+          "pair": "plate>upperR",
+          "frames": 1,
+          "vertices": 1,
+          "deepestM": 0.0071,
+          "at": 0
+        },
+        {
+          "clip": "bowGreet",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 11,
+          "deepestM": 0.0273,
+          "at": 0.24
+        },
+        {
+          "clip": "bowGreet",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 17,
+          "deepestM": 0.033,
+          "at": 0.24
+        },
+        {
+          "clip": "point",
+          "pair": "plate>upperL",
+          "frames": 8,
+          "vertices": 16,
+          "deepestM": 0.0379,
+          "at": 0.24
+        },
+        {
+          "clip": "point",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 15,
+          "deepestM": 0.0288,
+          "at": 0
+        },
+        {
+          "clip": "shrug",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 11,
+          "deepestM": 0.0379,
+          "at": 0
+        },
+        {
+          "clip": "shrug",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0309,
+          "at": 0.73
+        },
+        {
+          "clip": "nod",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0316,
+          "at": 0.73
+        },
+        {
+          "clip": "nod",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0316,
+          "at": 0.73
+        },
+        {
+          "clip": "headShake",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0316,
+          "at": 0.73
+        },
+        {
+          "clip": "headShake",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0316,
+          "at": 0.73
+        },
+        {
+          "clip": "laugh",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0388,
+          "at": 0.24
+        },
+        {
+          "clip": "laugh",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0388,
+          "at": 0.24
+        },
+        {
+          "clip": "clap",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 18,
+          "deepestM": 0.0388,
+          "at": 0
+        },
+        {
+          "clip": "clap",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 18,
+          "deepestM": 0.0388,
+          "at": 0
+        },
+        {
+          "clip": "salute",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0316,
+          "at": 0.74
+        },
+        {
+          "clip": "salute",
+          "pair": "plate>upperR",
+          "frames": 1,
+          "vertices": 5,
+          "deepestM": 0.0239,
+          "at": 0
+        },
+        {
+          "clip": "kneel",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 13,
+          "deepestM": 0.0416,
+          "at": 0.25
+        },
+        {
+          "clip": "kneel",
+          "pair": "plate>upperR",
+          "frames": 6,
+          "vertices": 15,
+          "deepestM": 0.0455,
+          "at": 0.25
+        },
+        {
+          "clip": "sitGround",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 16,
+          "deepestM": 0.0397,
+          "at": 0
+        },
+        {
+          "clip": "sitGround",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 18,
+          "deepestM": 0.0453,
+          "at": 0
+        },
+        {
+          "clip": "pray",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 22,
+          "deepestM": 0.0278,
+          "at": 0.25
+        },
+        {
+          "clip": "pray",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 22,
+          "deepestM": 0.0278,
+          "at": 0.25
+        },
+        {
+          "clip": "dance",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0278,
+          "at": 0
+        },
+        {
+          "clip": "dance",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0278,
+          "at": 0
+        },
+        {
+          "clip": "lookAround",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0316,
+          "at": 0.75
+        },
+        {
+          "clip": "lookAround",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0346,
+          "at": 0.25
+        },
+        {
+          "clip": "crossArms",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 21,
+          "deepestM": 0.0358,
+          "at": 0.75
+        },
+        {
+          "clip": "crossArms",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 21,
+          "deepestM": 0.0384,
+          "at": 0.75
+        },
+        {
+          "clip": "crossArms",
+          "pair": "back>foreL",
+          "frames": 3,
+          "vertices": 6,
+          "deepestM": 0.0058,
+          "at": 0.25
+        },
+        {
+          "clip": "stretch",
+          "pair": "plate>upperL",
+          "frames": 1,
+          "vertices": 6,
+          "deepestM": 0.0358,
+          "at": 0
+        },
+        {
+          "clip": "stretch",
+          "pair": "plate>upperR",
+          "frames": 1,
+          "vertices": 6,
+          "deepestM": 0.0384,
+          "at": 0
+        },
+        {
+          "clip": "stretch",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 2,
+          "deepestM": 0.0058,
+          "at": 0
+        },
+        {
+          "clip": "drink",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 9,
+          "deepestM": 0.0316,
+          "at": 0.73
+        },
+        {
+          "clip": "drink",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 14,
+          "deepestM": 0.0449,
+          "at": 0.24
+        },
+        {
+          "clip": "drink",
+          "pair": "back>foreR",
+          "frames": 1,
+          "vertices": 4,
+          "deepestM": 0.01,
+          "at": 0.49
+        },
+        {
+          "clip": "sleep",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0316,
+          "at": 0
+        },
+        {
+          "clip": "sleep",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 16,
+          "deepestM": 0.041,
+          "at": 0.25
+        },
+        {
+          "clip": "lutePlay",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0316,
+          "at": 0.75
+        },
+        {
+          "clip": "lutePlay",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0403,
+          "at": 0
+        },
+        {
+          "clip": "sprint",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 7,
+          "deepestM": 0.0316,
+          "at": 0
+        },
+        {
+          "clip": "sprint",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.03,
+          "at": 0.25
+        },
+        {
+          "clip": "backpedal",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0349,
+          "at": 0.75
+        },
+        {
+          "clip": "backpedal",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.03,
+          "at": 0.75
+        },
+        {
+          "clip": "strafeL",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0349,
+          "at": 0
+        },
+        {
+          "clip": "strafeL",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.03,
+          "at": 0
+        },
+        {
+          "clip": "strafeR",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0338,
+          "at": 0
+        },
+        {
+          "clip": "strafeR",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0278,
+          "at": 0.75
+        },
+        {
+          "clip": "dualSlashR",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0346,
+          "at": 0.24
+        },
+        {
+          "clip": "dualSlashR",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 6,
+          "deepestM": 0.0278,
+          "at": 0
+        },
+        {
+          "clip": "dualSlashL",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 6,
+          "deepestM": 0.024,
+          "at": 0
+        },
+        {
+          "clip": "dualSlashL",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 9,
+          "deepestM": 0.0346,
+          "at": 0.24
+        },
+        {
+          "clip": "dualCross",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0396,
+          "at": 0.25
+        },
+        {
+          "clip": "dualCross",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0396,
+          "at": 0.25
+        },
+        {
+          "clip": "dualStabR",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0345,
+          "at": 0.24
+        },
+        {
+          "clip": "dualStabR",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0345,
+          "at": 0.24
+        },
+        {
+          "clip": "dualStabL",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0345,
+          "at": 0.24
+        },
+        {
+          "clip": "dualStabL",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0345,
+          "at": 0.24
+        },
+        {
+          "clip": "dualFlurry",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 14,
+          "deepestM": 0.0388,
+          "at": 0.49
+        },
+        {
+          "clip": "dualFlurry",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0352,
+          "at": 0.73
+        },
+        {
+          "clip": "twinChopR",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0346,
+          "at": 0
+        },
+        {
+          "clip": "twinChopR",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 15,
+          "deepestM": 0.047,
+          "at": 0.49
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 15,
+          "deepestM": 0.047,
+          "at": 0.49
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 12,
+          "deepestM": 0.0451,
+          "at": 0
+        },
+        {
+          "clip": "twinCrash",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 14,
+          "deepestM": 0.045,
+          "at": 0
+        },
+        {
+          "clip": "twinCrash",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0409,
+          "at": 0.73
+        },
+        {
+          "clip": "fishCast",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 14,
+          "deepestM": 0.0409,
+          "at": 0
+        },
+        {
+          "clip": "fishCast",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.0409,
+          "at": 0
+        },
+        {
+          "clip": "fishWait",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0406,
+          "at": 0.75
+        },
+        {
+          "clip": "fishWait",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 16,
+          "deepestM": 0.0426,
+          "at": 0.25
+        },
+        {
+          "clip": "fishReel",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 21,
+          "deepestM": 0.0414,
+          "at": 0.75
+        },
+        {
+          "clip": "fishReel",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0414,
+          "at": 0
+        },
+        {
+          "clip": "fishShow",
+          "pair": "plate>upperL",
+          "frames": 1,
+          "vertices": 5,
+          "deepestM": 0.0414,
+          "at": 0
+        },
+        {
+          "clip": "fishShow",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 15,
+          "deepestM": 0.0433,
+          "at": 0.24
+        },
+        {
+          "clip": "standUp",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 13,
+          "deepestM": 0.0426,
+          "at": 0
+        },
+        {
+          "clip": "standUp",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 10,
+          "deepestM": 0.042,
+          "at": 0.73
+        },
+        {
+          "clip": "swimCrawl",
+          "pair": "plate>upperL",
+          "frames": 5,
+          "vertices": 12,
+          "deepestM": 0.042,
+          "at": 0
+        },
+        {
+          "clip": "swimCrawl",
+          "pair": "plate>upperR",
+          "frames": 3,
+          "vertices": 8,
+          "deepestM": 0.0423,
+          "at": 0
+        },
+        {
+          "clip": "swimCrawl",
+          "pair": "shoulderL>head",
+          "frames": 3,
+          "vertices": 9,
+          "deepestM": 0.0364,
+          "at": 0.75
+        },
+        {
+          "clip": "swimTread",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 8,
+          "deepestM": 0.0157,
+          "at": 0.75
+        },
+        {
+          "clip": "swimTread",
+          "pair": "shoulderL>head",
+          "frames": 1,
+          "vertices": 3,
+          "deepestM": 0.0364,
+          "at": 0
+        },
+        {
+          "clip": "swimTread",
+          "pair": "plate>upperL",
+          "frames": 3,
+          "vertices": 5,
+          "deepestM": 0.0157,
+          "at": 0.75
+        },
+        {
+          "clip": "sitHold",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.02,
+          "at": 0.25
+        },
+        {
+          "clip": "sitHold",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.02,
+          "at": 0.25
+        },
+        {
+          "clip": "profMine",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0267,
+          "at": 0.25
+        },
+        {
+          "clip": "profMine",
+          "pair": "plate>upperR",
+          "frames": 2,
+          "vertices": 8,
+          "deepestM": 0.0216,
+          "at": 0.75
+        },
+        {
+          "clip": "profChop",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 20,
+          "deepestM": 0.0285,
+          "at": 0.5
+        },
+        {
+          "clip": "profChop",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0216,
+          "at": 0
+        },
+        {
+          "clip": "profGather",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 21,
+          "deepestM": 0.0397,
+          "at": 0.75
+        },
+        {
+          "clip": "profGather",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 18,
+          "deepestM": 0.0349,
+          "at": 0.75
+        },
+        {
+          "clip": "profSkin",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 16,
+          "deepestM": 0.0397,
+          "at": 0
+        },
+        {
+          "clip": "profSkin",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 17,
+          "deepestM": 0.0394,
+          "at": 0.75
+        },
+        {
+          "clip": "profHammer",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 19,
+          "deepestM": 0.0227,
+          "at": 0.75
+        },
+        {
+          "clip": "profHammer",
+          "pair": "plate>upperR",
+          "frames": 5,
+          "vertices": 13,
+          "deepestM": 0.0394,
+          "at": 0
+        },
+        {
+          "clip": "profStitch",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 23,
+          "deepestM": 0.0296,
+          "at": 0.75
+        },
+        {
+          "clip": "profStitch",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 11,
+          "deepestM": 0.0249,
+          "at": 0
+        },
+        {
+          "clip": "profStir",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 12,
+          "deepestM": 0.0296,
+          "at": 0
+        },
+        {
+          "clip": "profStir",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 13,
+          "deepestM": 0.0324,
+          "at": 0.25
+        },
+        {
+          "clip": "seated",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 14,
+          "deepestM": 0.0473,
+          "at": 0.75
+        },
+        {
+          "clip": "seated",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 16,
+          "deepestM": 0.0473,
+          "at": 0.75
+        },
+        {
+          "clip": "drive",
+          "pair": "plate>upperL",
+          "frames": 4,
+          "vertices": 28,
+          "deepestM": 0.0589,
+          "at": 0.75
+        },
+        {
+          "clip": "drive",
+          "pair": "plate>upperR",
+          "frames": 4,
+          "vertices": 28,
+          "deepestM": 0.0589,
+          "at": 0.75
+        },
+        {
+          "clip": "drive",
+          "pair": "heldR>thighR",
+          "frames": 6,
+          "vertices": 60,
+          "deepestM": 0.0595,
+          "at": 0.75
+        }
+      ],
+      "skirtEvents": []
+    },
+    {
+      "name": "nature-hair-pack",
+      "triangles": 10124,
+      "bodyEvents": [
+        {
+          "clip": "slashBack",
+          "pair": "belt>foreL",
+          "frames": 5,
+          "vertices": 105,
+          "deepestM": 0.0427,
+          "at": 0.49
+        },
+        {
+          "clip": "sweep",
+          "pair": "heldR>hips",
+          "frames": 1,
+          "vertices": 21,
+          "deepestM": 0.0322,
+          "at": 0.73
+        },
+        {
+          "clip": "sweep",
+          "pair": "heldR>thighR",
+          "frames": 1,
+          "vertices": 9,
+          "deepestM": 0.0337,
+          "at": 0.73
+        },
+        {
+          "clip": "jab",
+          "pair": "heldR>hips",
+          "frames": 1,
+          "vertices": 21,
+          "deepestM": 0.0322,
+          "at": 0
+        },
+        {
+          "clip": "jab",
+          "pair": "heldR>thighR",
+          "frames": 1,
+          "vertices": 9,
+          "deepestM": 0.0337,
+          "at": 0
+        },
+        {
+          "clip": "slam",
+          "pair": "belt>foreL",
+          "frames": 4,
+          "vertices": 93,
+          "deepestM": 0.0455,
+          "at": 0.49
+        },
+        {
+          "clip": "slam",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0451,
+          "at": 0.73
+        },
+        {
+          "clip": "lunge",
+          "pair": "back>upperL",
+          "frames": 1,
+          "vertices": 10,
+          "deepestM": 0.0451,
+          "at": 0
+        },
+        {
+          "clip": "bash",
+          "pair": "back>foreL",
+          "frames": 1,
+          "vertices": 9,
+          "deepestM": 0.0384,
+          "at": 0.24
+        },
+        {
+          "clip": "bash",
+          "pair": "belt>foreL",
+          "frames": 20,
+          "vertices": 302,
+          "deepestM": 0.0432,
+          "at": 0.73
+        },
+        {
+          "clip": "block",
+          "pair": "belt>foreL",
+          "frames": 7,
+          "vertices": 68,
+          "deepestM": 0.0432,
+          "at": 0
+        },
+        {
+          "clip": "twinChopL",
+          "pair": "belt>foreL",
+          "frames": 3,
+          "vertices": 9,
+          "deepestM": 0.0235,
+          "at": 0.49
+        },
+        {
+          "clip": "twinCrash",
+          "pair": "belt>foreL",
+          "frames": 1,
+          "vertices": 3,
+          "deepestM": 0.0198,
+          "at": 0
+        }
+      ],
+      "skirtEvents": []
+    }
+  ],
+  "note": "Proxy results use CPU-skinned vertices; each reported clip time is reached using updates of at most 0.08 s. Robe ray-profile gaps are approximate. Positive body-solid depth above 0.004 m is a clipping event.",
+  "totals": {
+    "bodyPairsWithEvents": 656,
+    "skirtClipsWithEvents": 15,
+    "bodyVerticesInside": 12810
+  }
+}

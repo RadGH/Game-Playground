@@ -24,6 +24,8 @@ export function createPhone({ town, world, shell, el, whose, hands, goTo, say, o
     body.append(el('p', { class: 'od-phonetop', text: `${data.name} · ${data.money} coins` }));
     const grid = el('div', { class: 'od-apps' });
     grid.append(tile('🏦', 'Bank', bank), tile('🪓', 'Jobs', jobs), tile('✉️', unread ? `Mail (${unread})` : 'Mail', mail, unread > 0), tile('🗺️', 'Map', map), tile('📅', 'Calendar', calendar), tile('📣', now ? `Now (${now})` : 'Now', happening), tile('📰', data.sheets.length ? `Paper (${data.sheets[0].no})` : 'Paper', paper), tile('📖', 'Story', story), tile('🧑‍🤝‍🧑', "Who's Who", whoswho));
+    grid.append(tile('📜', 'Permits', permits));
+    if (handsMenu.friends) grid.append(tile('🧑‍🤝‍🧑', 'Friends', () => { box.close(); handsMenu.friends(); }));
     if (hands.on && handsMenu.spells) grid.append(tile('✨', 'Spells', () => { box.close(); handsMenu.spells(); }));
     if (handsMenu.party && hands.on) grid.append(tile('🚶', 'Party', () => { box.close(); handsMenu.party(); }), tile('🚗', 'Call a car', () => { box.close(); handsMenu.car(); }));
     body.append(grid);
@@ -51,6 +53,13 @@ export function createPhone({ town, world, shell, el, whose, hands, goTo, say, o
       if (!list.length) body.append(el('p', { class: 'od-tip', text: 'Nothing going right now.' }));
       for (const o of list) body.append(el('button', { class: 'od-big quiet', type: 'button', text: `${o.title}, ${o.pay} an hour${o.hands ? ' (hands-on)' : ''}`, on: { click: () => { town.cmd({ kind: 'setJob', who: hold.who, job: o.job }); town.roster.people[hold.who].job = o.job; say(`${pick.name.split(' ')[0]} takes the job.`); box.close(); } } }));
     }
+  }
+  /** The town hall, on your Phone: a street magic permit, a market stall permit. */
+  function permits() {
+    head('Permits');
+    const L = R().law.permits, who = hold.who >= 0 ? hold.who : data.members[0]?.id;
+    body.append(el('p', { class: 'od-tip', text: 'Casting in the street or selling off a table needs a permit. Without one, somebody rings the police.' }));
+    for (const [id, P] of Object.entries(L)) body.append(el('button', { class: 'od-big', type: 'button', ...(data.money < P.fee ? { disabled: '' } : {}), text: `${P.label}: ${P.fee} coins for ${P.days} days`, on: { click: () => { box.close(); town.cmd({ kind: 'permit', who, permit: id }); } } }));
   }
   function mail() {
     head('Mail');
@@ -159,7 +168,7 @@ export function createPhone({ town, world, shell, el, whose, hands, goTo, say, o
     },
     state: () => ({ open: !!(box && document.body.contains(box)), data }),
     /** Straight to one app: gameEye and the tests. */
-    async app(name) { await self.open(); ({ bank, jobs, mail, map, calendar, happening, story, paper, whoswho })[name]?.(); },
+    async app(name) { await self.open(); ({ bank, jobs, mail, map, calendar, happening, story, paper, whoswho, permits })[name]?.(); },
   };
   return self;
 }

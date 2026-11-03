@@ -862,7 +862,12 @@ export function buildFace25(a, rig, c) {
 
   // ---------------------------------------------------------------- the head shell, and the paint ON it
   tag('face:head');
-  const shell = profile(rings, 20), shellTris = paint.length ? trianglesOf(shell) : null;
+  const shellRings = rig.v26 ? rings.flatMap((r, i) => {
+    if (i === rings.length - 1) return [r];
+    const q = rings[i + 1];
+    return [0, 1, 2].map(k => { const t = k / 3; return [0, 1, 2].map(j => THREE.MathUtils.lerp(r[j], q[j], t)); });
+  }) : rings;
+  const shell = profile(shellRings, rig.v26 ? 32 : 20), shellTris = paint.length ? trianglesOf(shell) : null;
   head(shell, skin);
   tag('face:nose');
   let noseTris = null;

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chibi 2.6 — Real-world fit</title>
+  <link rel="stylesheet" href="../shared/style.css">
+  <style>
+    body { margin: 0; } main { max-width: 1100px; margin: auto; padding: 1rem; }
+    #fit-stage { height: min(68vh, 680px); min-height: 420px; border-radius: 12px; overflow: hidden; }
+    #fit-stage canvas { display: block; width: 100%; height: 100%; }
+    #fit-numbers { display: grid; grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); gap: .5rem; margin-top: 1rem; }
+    #fit-numbers div { padding: .7rem; background: #20242c; border-radius: 8px; }
+  </style>
+  <script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body><main>
+  <p><a href="./">← Avatar 3D</a></p>
+  <h1>Real-world fit · 1.75 m reference</h1>
+  <p class="muted">Full-scale doorway (2.0 m), adult silhouette, car seat and wheel, and chair. Live rig measurements are compared with project adult-fit bands; seated eye/reach bands are approximate visual targets, not a population study.</p>
+  <div class="row"><button id="pose-drive" class="primary">Sit at wheel</button><button id="pose-walk">Stand by doorway</button><button id="pose-chair">Sit on chair</button><span id="fit-status" class="small muted">Building…</span></div>
+  <div id="fit-stage"></div><div id="fit-numbers"></div>
+  <section class="panel"><h2>2.6 clipping check</h2><p id="clip-summary" class="small muted">Checking a four-look spread across 106 clips…</p><button id="clip-details" type="button" class="small">Show clip details</button><pre id="clip-report" hidden></pre></section>
+</main><script type="module" src="js/chibi26-fit.js"></script></body></html>

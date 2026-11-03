@@ -25,6 +25,7 @@ import { spotRow, claimFloor, lineUp } from './spots.js';
 import { fire as fireThing, mechValue, setMech } from './wiring.js';
 import { useBoards } from './work.js';
 import { sendMail } from './mail.js';
+import { medicWanted } from './law.js';
 
 const SOFT = new Set(['bed1', 'bed2', 'bunk', 'sofa', 'wardrobe', 'shelf', 'rack', 'desk', 'table', 'boxes', 'cabinet']);
 const HARD_ROOMS = new Set(['bath', 'wc', 'landing', 'vault', 'garage']);
@@ -265,11 +266,12 @@ function nearestClinic(c, p) {
   for (const pl of c.tags.get('clinic') || []) { if (c.burning.has(pl.building)) continue; const e = c.roads.distance(from.node, pl.node); if (e < d) { d = e; best = pl; } }
   return best;
 }
-function toClinic(c, p) {
+export function toClinic(c, p) {
   const clinic = nearestClinic(c, p), s = c.s;
   if (!clinic) return false;
   p.goal = null;
   if (p.at === clinic.id) { startStay(c, p); return true; }
+  if (medicWanted(c, p)) return true;
   const from = p.at;
   p.at = -1; p.since = s.t;
   startDrive(c, p, c.places[from], clinic, from, clinic.id, -1);
@@ -287,7 +289,7 @@ function startStay(c, p) {
   sendMail(c, h, 'clinic', { who: p.id, cost: k.medicalCost, excess: 0 });
 }
 /** What a household pays out of its own pocket: never more than it has to spare after the next bill. */
-function excess(c, h, amount, reason) {
+export function excess(c, h, amount, reason) {
   const spare = Math.max(0, h.money - h.bill - c.k.economy.spendCushion), a = Math.min(amount, Math.floor(spare / 3));
   if (a > 0) charge(c, h, a, reason);
   return a;

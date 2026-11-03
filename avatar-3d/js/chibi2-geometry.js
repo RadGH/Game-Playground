@@ -130,7 +130,8 @@ function grade25(attr) {
 
 export class SkinBuilder {
   constructor(rig) { this.rig = rig; this.buckets = { cloth: [], metal: [] }; }
-  add(geometry, boneName, color, { position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0], metal = false, bend = null, skinTo = null, weigh = null, colorAt = null } = {}) {
+  add(geometry, boneName, color, options = {}) {
+    const { position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0], metal = false, bend = null, skinTo = null, weigh = null, colorAt = null } = options;
     // `skinTo` places the piece in one bone's space but skins it to another (a weapon authored in
     // hand space, carried by the grip bone). Both are at rest in the bind pose, so nothing moves.
     const bone = this.rig.byName[boneName], skin = skinTo ? this.rig.byName[skinTo] : bone, count = geometry.attributes.position.count;
@@ -190,6 +191,16 @@ export class SkinBuilder {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     geometry.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndices, 4));
     geometry.setAttribute('skinWeight', new THREE.Float32BufferAttribute(weights, 4));
+    if (this.rig.v26) {
+      const skinMask = new Float32Array(count);
+      // Surface classification is explicit: base body/face skin bypasses the cloth map without
+      // misclassifying a garment simply because it happens to use a skin-like color.
+      if (options.surface === 'skin' || options.surface === 'face') skinMask.fill(1);
+      geometry.setAttribute('skinMask', new THREE.BufferAttribute(skinMask, 1));
+      const surfaces = { cloth: 0, leather: 1, metal: 2, wood: 3, hair: 4, stone: 5, skin: 6, face: 6 };
+      const surfaceClass = new Float32Array(count); surfaceClass.fill(surfaces[options.surface || (metal ? 'metal' : 'cloth')] ?? 0);
+      geometry.setAttribute('surfaceClass', new THREE.BufferAttribute(surfaceClass, 1));
+    }
     this.buckets[metal ? 'metal' : 'cloth'].push(geometry);
   }
   finish() {
@@ -201,9 +212,45 @@ export class SkinBuilder {
       if (!geometry) throw new Error('Chibi 2 geometry assembly failed');
       geometry.computeBoundingSphere();
       if (this.rig.v25) grade25(geometry.attributes.color);
+      if (this.rig.v26 && this.rig.textures) {
+        const p = geometry.attributes.position, box = geometry.boundingBox || (geometry.computeBoundingBox(), geometry.boundingBox), size = box.getSize(new THREE.Vector3());
+        const uv = new Float32Array(p.count * 2), surface = geometry.attributes.surfaceClass, bands = 7;
+        for (let i = 0; i < p.count; i++) uv.set([
+          (p.getX(i) - box.min.x) / Math.max(size.x, 0.01) * 32,
+          ((p.getY(i) - box.min.y) / Math.max(size.y, 0.01) * 32 + surface.getX(i)) / bands,
+        ], i * 2);
+        geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+      }
       // Double-sided (owner 2026-10-21): hair, hats, collars and hems are open shells, and from behind
       // or below a front-only material made them see-through. Same draw calls; back faces get flipped normals.
       const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: name === 'metal' ? 0.38 : (this.rig.v25 ? 0.97 : 0.82), metalness: name === 'metal' ? 0.65 : 0, side: THREE.DoubleSide });
+      if (this.rig.v26 && this.rig.textures) {
+        const bands = [
+          (x, y) => (x % 4 === 0) !== (y % 4 === 0) ? 248 : 255, // woven cloth
+          (x, y) => (x * 11 + y * 7) % 17 === 0 ? 207 : ((x + 2 * y) % 7 === 0 ? 232 : 250), // pebbled leather
+          (x, y) => (x * 13 + y * 7) % 13 === 0 ? 215 : (y === 2 || y === 6 ? 238 : 250), // brushed metal
+          (x, y) => [238, 250, 242, 255, 228, 250, 236, 252][(y + (x % 3 === 0 ? 1 : 0)) % 8], // wood grain
+          (x, y) => x % 4 === 1 ? 224 : (x % 4 === 2 ? 242 : 250), // hair strands
+          (x, y) => (x * 9 + y * 5) % 11 === 0 ? 211 : ((x + y) % 4 === 0 ? 237 : 250), // worn stone
+          () => 255, // skin is never patterned
+        ];
+        const pixels = new Uint8Array(8 * 56 * 4);
+        for (let band = 0; band < bands.length; band++) for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+          const i = ((band * 8 + y) * 8 + x) * 4, value = bands[band](x, y);
+          pixels.set([value, value, value, 255], i);
+        }
+        const map = new THREE.DataTexture(pixels, 8, 56, THREE.RGBAFormat); map.colorSpace = THREE.SRGBColorSpace; map.wrapS = map.wrapT = THREE.RepeatWrapping; map.magFilter = THREE.NearestFilter; map.minFilter = THREE.LinearMipmapLinearFilter; map.generateMipmaps = true; map.needsUpdate = true; material.map = map;
+        material.onBeforeCompile = shader => {
+          shader.vertexShader = shader.vertexShader
+            .replace('#include <common>', '#include <common>\nattribute float skinMask;\nvarying float vSkinMask;')
+            .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSkinMask = skinMask;');
+          shader.fragmentShader = shader.fragmentShader
+            .replace('#include <common>', '#include <common>\nvarying float vSkinMask;')
+            .replace('#include <map_fragment>', '#include <map_fragment>\n#ifdef USE_MAP\ndiffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb / max(sampledDiffuseColor.rgb, vec3(0.001)), vSkinMask);\n#endif')
+            .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.7, vSkinMask);');
+        };
+        material.customProgramCacheKey = () => 'chibi26-surface-texture-mask-v3';
+      }
       if (this.rig.v25 && name === 'cloth') material.envMapIntensity = 0.55;
       result.push({ name, geometry, material });
     }

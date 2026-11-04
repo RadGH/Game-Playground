@@ -108,6 +108,7 @@ self.onmessage = e => {
       if (m.q === 'building') result = sim.town?.buildingAt(m.x, m.y) ?? null;
       if (m.q === 'save') result = saveSim(sim, settings);
       if (m.q === 'wall') { const w = sim.walls?.wallAt(m.x, m.y); result = w ? { id: w.id, tier: w.tier, n: w.cells.length, towers: w.towers.length, gates: w.gates.length } : null; }
+      if (m.q === 'cell') { const at = sim.cell(m.x, m.y); result = at ? { mat: sim.M.list[at.c.mat[at.i]]?.id ?? null, ground: sim.M.list[at.c.ground[at.i]]?.id, height: at.c.height[at.i], life: at.c.life[at.i], part: at.c.part[at.i] } : null; }
       if (m.q === 'fits') result = sim.town?.fits(m.x, m.y, m.w, m.h, { margin: 0 }) ?? false;
       self.postMessage({ t: 'reply', id: m.reply, result });
     }

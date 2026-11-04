@@ -220,7 +220,17 @@ export function createTown(sim, data) {
     const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
     const [ddx, ddy] = dirs[(rng() * 4) | 0], len = 16 + ((rng() * 12) | 0);
     const tx = e.x + ddx * len, ty = e.y + ddy * len;
-    for (let k = 1; k <= len; k++) { const at = sim.cell(e.x + ddx * k, e.y + ddy * k); if (!at || M.liquid[at.c.mat[at.i]] && at.c.height[at.i] < 52 || at.c.part[at.i]) return false; }
+    // The town's own streets stay on land: they may bridge a stream (a few cells of water) but never
+    // start from a bridge, end in water or run out across a bay. Shallow water used to count as
+    // land here, so a lakeside town paved its lake with a grid of plank bridges (play-test 1).
+    const startAt = sim.cell(e.x, e.y); if (!startAt || startAt.c.mat[startAt.i] === M.id.bridge) return false;
+    let wet = 0;
+    for (let k = 1; k <= len; k++) {
+      const at = sim.cell(e.x + ddx * k, e.y + ddy * k);
+      if (!at || at.c.part[at.i]) return false;
+      const m = at.c.mat[at.i];
+      if (M.liquid[m] || m === M.id.bridge) { if (at.c.height[at.i] < 52 || ++wet > 6 || k === len) return false; }
+    }
     layRoad(e.x, e.y, tx, ty, 'dirt');
     return true;
   }

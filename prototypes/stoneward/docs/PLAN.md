@@ -346,4 +346,6 @@ M9 (powers) and M10 (trains) were built by helper agents in worktrees and then m
 | 11 | Raid: where did they come from? | The spawn point is picked at the warning. The banner and toasts name the direction and fly to the spot, and a pulsing red ring marks it. Enemies near towns get a ⚔ counter in the top bar (tap to look at the next one), red markers when zoomed out, and arrows at the screen edge (`hooks.screen`). |
 | 12 | Far wildfires out of control, fps | js/sim/wildfire.js: a fire with no town, building or rival town within 220 m spreads at 0.55× heat and burns out 2× faster. If more than 120 wild cells burn on average, natural rain falls on the fire's middle and nearby chunks go out a little at a time for a minute. |
 
+| (found while publishing) | Lakes paved with bridges | `growRoads` treated shallow water as land and grew new streets from bridge ends, so a lakeside town built a grid of plank bridges over the lake (82–188 bridge cells by day 3). A town street now starts on land, ends on land and crosses at most 6 water cells (1–5 bridge cells by day 3; population unchanged). |
+
 Tests: town.test (open-plan buildings are not lost; fountain water), powers.test (a wildfire stays small and goes out). Screens: tools/shots-pt1.mjs, shots-pt1b.mjs.

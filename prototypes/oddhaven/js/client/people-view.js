@@ -162,7 +162,7 @@ export function createPeopleView({ THREE, scene, world, town, looks, paths, cars
   const wearOf = pid => town.mirror.people.get(pid)?.we ?? town.roster.people[pid]?.wear ?? 'casual';
   /** A body's key: the look, and what is on it. The same key is the same template, built once (`park` keeps what they took off). */
   const keyOf = (person, wear) => `${person.look}|${wear}|${wear === 'work' ? person.job ?? '' : ''}`;
-  const ready = avatar => prepareChibi2(avatar, { anims: ANIMS, v25: true, slice: () => new Promise(r => setTimeout(r, 0)), budget: 10, keep: KEEP_LOOKS });
+  const ready = avatar => prepareChibi2(avatar, { anims: ANIMS, v25: true, v26: true, slice: () => new Promise(r => setTimeout(r, 0)), budget: 10, keep: KEEP_LOOKS });
   // how tall this body stands, once, so it can be scaled to clear a door indoors
   function measure(s) {
     const g = s.actor.group, was = g.scale.x; g.scale.setScalar(1); g.rotation.set(0, 0, 0); g.position.set(0, 0, 0); g.updateMatrixWorld(true);
@@ -173,7 +173,7 @@ export function createPeopleView({ THREE, scene, world, town, looks, paths, cars
     await ready(avatar);
     let s = null;
     if (slots.length < fullMax) {
-      const actor = await createChibi2Character(avatar, { anims: ANIMS, v25: true, park: true });
+      const actor = await createChibi2Character(avatar, { anims: ANIMS, v25: true, v26: true, park: true });
       group.add(actor.group);
       s = { actor, pid: -1, tick: 0 };
       slots.push(s);

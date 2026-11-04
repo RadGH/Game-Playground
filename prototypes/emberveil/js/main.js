@@ -115,7 +115,8 @@ async function startWorld(resumed) {
     if (useChibi2) {
       const { createChibi2Character } = await import('../../../avatar-3d/js/chibi2.js');
       const { BatchedSpellFx } = await import('../../../avatar-3d/js/spellfx-batched.js');
-      options.characterFactory = createChibi2Character; options.effectsClass = BatchedSpellFx;
+      options.characterFactory = (avatar, bodyOptions = {}) => createChibi2Character(avatar, { ...bodyOptions, v25: true, v26: true });
+      options.effectsClass = BatchedSpellFx;
     }
     // Kestrel trial (avatar-3d/kestrel/): ?chars=kestrel or ?chars=kestrel-fable draws the people with it, sized like Chibi 2
     if (/[?&]chars=kestrel/.test(location.search)) {

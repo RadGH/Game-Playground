@@ -122,10 +122,10 @@ export function createCreator({ THREE, renderer, shell, voice, profileFor, rando
   function rebuild() { clearTimeout(timer); timer = setTimeout(apply, 50); }
   async function apply() {
     const me = ++token, av = designAvatar(C.design, C.previewJob ? 'work' : C.wear, C.previewJob);
-    building = prepareChibi2(av, { anims: ANIMS, v25: true, budget: 8, slice: () => new Promise(r => setTimeout(r, 0)) });
+    building = prepareChibi2(av, { anims: ANIMS, v25: true, v26: true, budget: 8, slice: () => new Promise(r => setTimeout(r, 0)) });
     await building; building = null;
     if (me !== token || !C) return;
-    if (!actor) { actor = await createChibi2Character(av, { anims: ANIMS, v25: true }); pivot.add(actor.group); } else await actor.setAvatar(av);
+    if (!actor) { actor = await createChibi2Character(av, { anims: ANIMS, v25: true, v26: true }); pivot.add(actor.group); } else await actor.setAvatar(av);
     shown++;
     frameBody();
   }

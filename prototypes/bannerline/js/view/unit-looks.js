@@ -182,7 +182,7 @@ export async function buildActor(look, { merge = true, anims } = {}) {
       stats() { let meshes = 0, triangles = 0; c.group.traverse(o => { if (o.isMesh) { meshes++; triangles += (o.geometry.index?.count || o.geometry.attributes.position.count) / 3; } }); return { meshes, triangles }; },
     };
   }
-  const ch = await createChibi2Character(look.avatar, anims ? { anims } : {});
+  const ch = await createChibi2Character(look.avatar, { ...(anims ? { anims } : {}), v25: true, v26: true });
   return {
     kind: 'chibi2', group: ch.group, look,
     height: ch.metrics().totalHeight, metrics: () => ch.metrics(),

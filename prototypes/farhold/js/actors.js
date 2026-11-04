@@ -78,7 +78,7 @@ export async function makeActor(look = {}) {
    * takes to place them; the town tests show no change in their timings. Enemies do not use the
    * new clips, but they share `makeActor` and there is no honest way to tell them apart here.
    */
-  const actor = await createChibi2Character(avatar, { anims: CHIBI2_COMBAT_RIDE });
+  const actor = await createChibi2Character(avatar, { anims: CHIBI2_COMBAT_RIDE, v25: true, v26: true });
   actor.beast = false;
   actor.combatClips = true;
   /**

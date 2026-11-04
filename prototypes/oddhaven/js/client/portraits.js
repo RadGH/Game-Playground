@@ -22,8 +22,8 @@ export function createPortraits({ THREE, renderer }) {
 
   /** A picture of someone: `head` for a face, else the whole body (the contact sheets). */
   async function draw(avatar, { size = FACE_SIZE, whole = false } = {}) {
-    await prepareChibi2(avatar, { anims: ANIMS, v25: true, budget: 8, slice: () => new Promise(r => setTimeout(r, 0)) });
-    const actor = await createChibi2Character(avatar, { anims: ANIMS, v25: true });
+    await prepareChibi2(avatar, { anims: ANIMS, v25: true, v26: true, budget: 8, slice: () => new Promise(r => setTimeout(r, 0)) });
+    const actor = await createChibi2Character(avatar, { anims: ANIMS, v25: true, v26: true });
     scene.add(actor.group); actor.update(0.01); actor.group.updateMatrixWorld(true);
     const bone = actor.parts.head; bone.getWorldPosition(head);
     const H = actor.parts.eyeR.position.y / 0.25;          // a head's size, as chibi2 itself measures it

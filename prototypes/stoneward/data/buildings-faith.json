@@ -1,0 +1,338 @@
+{
+ "_doc": "M9 Powers and disasters. Faith buildings (group services, shape church: a nave with a bell tower), the seven ruler powers and the world disasters. faith on a kind = { rate: faith per content person per minute, reach: metres, cap: how much it adds to the faith cap }. A person counts once, for the best church that reaches them. Each power lists small / medium / large in that order: cost (faith), cool (seconds before it can be used again, shared by every size), r (radius in cells), secs (how long it lasts), power (how hard it hits). Read by js/sim/powers.js and js/features/powers.js.",
+ "kinds": {
+  "chapel": {
+   "name": "Chapel",
+   "group": "services",
+   "shape": "church",
+   "w": 6,
+   "h": 5,
+   "tall": 3,
+   "tower": 9,
+   "towerW": 2,
+   "roof": "roof_tile",
+   "wall": "keepstone",
+   "cost": {
+    "log": 12,
+    "stone": 10
+   },
+   "work": 40,
+   "faith": {
+    "rate": 0.5,
+    "reach": 45,
+    "cap": 100
+   }
+  },
+  "church": {
+   "name": "Church",
+   "group": "services",
+   "shape": "church",
+   "w": 10,
+   "h": 7,
+   "tall": 4,
+   "tower": 15,
+   "towerW": 3,
+   "roof": "roof_slate",
+   "wall": "keepstone",
+   "cost": {
+    "log": 24,
+    "stone": 40
+   },
+   "work": 110,
+   "faith": {
+    "rate": 0.8,
+    "reach": 75,
+    "cap": 250
+   }
+  },
+  "cathedral": {
+   "name": "Cathedral",
+   "group": "services",
+   "shape": "church",
+   "w": 16,
+   "h": 11,
+   "tall": 6,
+   "tower": 24,
+   "towerW": 4,
+   "spire": 5,
+   "roof": "roof_slate",
+   "wall": "keepstone",
+   "cost": {
+    "log": 50,
+    "stone": 140
+   },
+   "work": 300,
+   "faith": {
+    "rate": 1.2,
+    "reach": 130,
+    "cap": 900
+   }
+  }
+ },
+ "faith": {
+  "baseCap": 50,
+  "startFaith": 20
+ },
+ "powers": {
+  "rain": {
+   "name": "Call Rain",
+   "icon": "🌧",
+   "about": "Clouds gather and rain falls for a while. Puts out fires and soaks the ground so it will not catch.",
+   "cost": [
+    15,
+    35,
+    70
+   ],
+   "cool": [
+    15,
+    30,
+    50
+   ],
+   "r": [
+    14,
+    24,
+    40
+   ],
+   "secs": [
+    20,
+    35,
+    60
+   ],
+   "wetSecs": 90
+  },
+  "smite": {
+   "name": "Smite",
+   "icon": "⚡",
+   "about": "A bolt of lightning on one spot. Sets it alight and knocks things apart.",
+   "cost": [
+    10,
+    25,
+    50
+   ],
+   "cool": [
+    5,
+    10,
+    18
+   ],
+   "r": [
+    2,
+    3,
+    5
+   ],
+   "power": [
+    1.4,
+    2.2,
+    3.2
+   ]
+  },
+  "meteor": {
+   "name": "Meteor",
+   "icon": "☄",
+   "about": "A burning rock from the sky. Digs a crater, throws debris and leaves a pool of lava.",
+   "cost": [
+    40,
+    100,
+    220
+   ],
+   "cool": [
+    20,
+    45,
+    90
+   ],
+   "r": [
+    6,
+    10,
+    16
+   ],
+   "power": [
+    3,
+    5,
+    8
+   ],
+   "crater": [
+    6,
+    12,
+    20
+   ],
+   "lava": 0.35,
+   "fall": 30
+  },
+  "tornado": {
+   "name": "Tornado",
+   "icon": "🌪",
+   "about": "A twister that wanders where the wind takes it, tearing up anything light and flinging the pieces.",
+   "cost": [
+    35,
+    80,
+    160
+   ],
+   "cool": [
+    25,
+    50,
+    90
+   ],
+   "r": [
+    3,
+    5,
+    8
+   ],
+   "secs": [
+    12,
+    20,
+    32
+   ],
+   "power": [
+    1.0,
+    1.6,
+    2.4
+   ],
+   "speed": [
+    0.12,
+    0.15,
+    0.18
+   ]
+  },
+  "blackhole": {
+   "name": "Black Hole",
+   "icon": "🌑",
+   "about": "A tear that drags everything nearby into itself for a few seconds, then collapses with a bang.",
+   "cost": [
+    60,
+    140,
+    300
+   ],
+   "cool": [
+    40,
+    80,
+    150
+   ],
+   "r": [
+    8,
+    14,
+    22
+   ],
+   "core": [
+    1.5,
+    2.5,
+    4
+   ],
+   "secs": [
+    5,
+    8,
+    12
+   ],
+   "power": [
+    2,
+    3,
+    4.5
+   ]
+  },
+  "earthquake": {
+   "name": "Earthquake",
+   "icon": "〰",
+   "about": "The ground shakes and splits open. Tall towers and trees crack and fall.",
+   "cost": [
+    30,
+    70,
+    150
+   ],
+   "cool": [
+    30,
+    60,
+    120
+   ],
+   "r": [
+    20,
+    35,
+    60
+   ],
+   "secs": [
+    6,
+    10,
+    16
+   ],
+   "cracks": [
+    2,
+    3,
+    5
+   ],
+   "hit": [
+    24,
+    34,
+    48
+   ]
+  },
+  "firestorm": {
+   "name": "Firestorm",
+   "icon": "🔥",
+   "about": "Fire falls from the sky over an area. Each burning stone sets things alight and some leave lava.",
+   "cost": [
+    45,
+    110,
+    240
+   ],
+   "cool": [
+    35,
+    70,
+    130
+   ],
+   "r": [
+    8,
+    14,
+    22
+   ],
+   "secs": [
+    8,
+    12,
+    18
+   ],
+   "rate": [
+    0.25,
+    0.4,
+    0.6
+   ],
+   "lava": 0.25
+  }
+ },
+ "disasters": {
+  "_doc": "World disasters on their own. perDay = how many to expect in a day (10 minutes at 1x) at each setting; graceDays = none before this; weights pick which kind; near = they land this far (min..max cells) from a random town.",
+  "perDay": {
+   "off": 0,
+   "rare": 0.4,
+   "normal": 1.2,
+   "frequent": 4
+  },
+  "graceDays": 2,
+  "near": [
+   50,
+   260
+  ],
+  "kinds": {
+   "lightning": {
+    "weight": 45,
+    "size": 0,
+    "say": "Lightning struck near {town}."
+   },
+   "forestfire": {
+    "weight": 25,
+    "size": 1,
+    "say": "A forest fire has started near {town}!"
+   },
+   "earthquake": {
+    "weight": 12,
+    "size": 1,
+    "say": "An earthquake is shaking {town}!"
+   },
+   "tornado": {
+    "weight": 10,
+    "size": 1,
+    "say": "A tornado is touching down near {town}!"
+   },
+   "meteor": {
+    "weight": 8,
+    "size": 0,
+    "say": "A meteor is falling near {town}!"
+   }
+  }
+ }
+}

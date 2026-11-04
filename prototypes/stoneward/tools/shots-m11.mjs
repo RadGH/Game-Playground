@@ -1,0 +1,26 @@
+// M11 screenshots: the globe at night with towns, borders and lights; a far flat zoom with town glows.
+import { chromium } from 'playwright';
+const [out, w = 402, h = 780] = process.argv.slice(2);
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: +w, height: +h } });
+const logs = [];
+page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') logs.push(m.type() + ': ' + m.text()); });
+page.on('pageerror', e => logs.push('PAGEERROR: ' + e.message));
+await page.goto('http://localhost:8401/prototypes/stoneward/?shots&dev', { waitUntil: 'networkidle' });
+await page.click('#btn-new'); await page.click('#nw-go');
+await page.waitForFunction(() => window.gameEye.state().screen === 'landing', null, { timeout: 30000 });
+await page.mouse.click(+w / 2, +h / 2); await page.waitForTimeout(1500);
+await page.click('#land-go');
+await page.waitForFunction(() => window.gameEye.state().screen === 'hud', null, { timeout: 10000 });
+await page.evaluate(() => window.gameEye.speed(8));
+await page.waitForTimeout(8000);
+await page.evaluate(() => window.gameEye.order({ t: 'time', tod: 0.72 }));
+const t = (await page.evaluate(() => window.gameEye.state())).town.towns[0];
+await page.evaluate(({ x, y }) => window.gameEye.fly(x, y, 0.3), t);
+await page.waitForTimeout(2500);
+await page.screenshot({ path: out + '-far.png' });
+await page.evaluate(({ x, y }) => window.gameEye.fly(x + 600, y, 0.01), t);
+await page.waitForTimeout(2500);
+await page.screenshot({ path: out + '-globe.png' });
+console.log(logs.join('\n'));
+await browser.close();

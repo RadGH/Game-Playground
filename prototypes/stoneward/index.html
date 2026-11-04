@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#14110d">
+<title>Stoneward</title>
+<link rel="stylesheet" href="../../shared/whats-new.css">
+<link rel="stylesheet" href="../../shared/credits.css">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<canvas id="world" aria-label="The world"></canvas>
+
+<section id="title" class="screen">
+  <div class="title-card">
+    <h1>Stoneward</h1>
+    <p class="tag">Raise a kingdom on a whole world.</p>
+    <div class="title-buttons">
+      <button id="btn-continue" class="big hidden">Continue</button>
+      <button id="btn-new" class="big">New world</button>
+      <button id="btn-load" class="hidden">Load a world</button>
+      <div class="row" id="title-extra"></div>
+    </div>
+  </div>
+</section>
+
+<section id="newworld" class="screen hidden">
+  <div class="panel">
+    <h2>New world</h2>
+    <label>Kingdom name <span class="row"><input id="nw-name" maxlength="28"><button id="nw-reroll" class="small" aria-label="Another name">↻</button></span></label>
+    <div class="choices" id="nw-choices"></div>
+    <label>Seed <span class="row"><input id="nw-seed" inputmode="numeric" maxlength="10"><button id="nw-seed-roll" class="small" aria-label="Random seed">↻</button></span></label>
+    <div class="row end">
+      <button id="nw-back">Back</button>
+      <button id="nw-go" class="big">Make the world</button>
+    </div>
+  </div>
+</section>
+
+<div id="hud" class="hidden">
+  <div class="topbar">
+    <button class="icon-btn" id="btn-menu" aria-label="Menu">☰</button>
+    <div class="stat" id="st-kingdom">—</div>
+    <div class="stat" id="st-pop" title="People">👪 0</div>
+    <div class="stat" id="st-gold" title="Gold">🪙 0</div>
+    <div class="grow"></div>
+    <div class="stat" id="st-clock">Day 1</div>
+    <button class="icon-btn" id="btn-speed" aria-label="Speed">1×</button>
+  </div>
+  <div class="where"><span class="stat" id="st-where">—</span></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="sheet" class="sheet hidden"></div>
+  <div class="dock">
+    <div class="dock-panel hidden" id="dock-panel"></div>
+    <div class="dock-tabs" id="dock-tabs">
+      <button data-tab="build">Build</button>
+      <button data-tab="roads">Lines</button>
+      <button data-tab="info">Info</button>
+    </div>
+  </div>
+</div>
+
+<div id="menu" class="screen modal-back hidden">
+  <div class="panel">
+    <h2>Menu</h2>
+    <div class="col" id="menu-buttons"></div>
+  </div>
+</div>
+
+<div id="landing" class="hidden">
+  <div class="landing-card"><b id="landing-title">Where will your kingdom begin?</b><p id="landing-text">Spin the world and tap a place. Gold glow marks good land: water, wood and hills nearby.</p>
+  <div class="row"><button id="land-go" class="big hidden">Found here</button><button id="land-back" class="hidden">Look elsewhere</button></div></div>
+</div>
+
+<div id="loading" class="screen hidden"><div class="panel"><p id="loading-text">Making the world…</p></div></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

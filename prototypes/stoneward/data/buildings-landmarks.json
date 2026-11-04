@@ -1,0 +1,106 @@
+{
+ "_doc": "Landmarks: unique monuments earned at population milestones (data/progress.json). Free to build once earned; big beauty (mood, land value).",
+ "kinds": {
+  "great_fountain": {
+   "name": "Great fountain",
+   "group": "landmarks",
+   "shape": "fountain",
+   "w": 5,
+   "h": 5,
+   "tall": 2,
+   "cost": {},
+   "work": 30,
+   "beauty": 10,
+   "landmark": true
+  },
+  "bell_tower": {
+   "name": "Bell tower",
+   "group": "landmarks",
+   "shape": "tower",
+   "w": 3,
+   "h": 3,
+   "tall": 14,
+   "cost": {},
+   "work": 30,
+   "beauty": 10,
+   "landmark": true,
+   "wall": "keepstone"
+  },
+  "royal_garden": {
+   "name": "Royal garden",
+   "group": "landmarks",
+   "shape": "garden",
+   "w": 9,
+   "h": 7,
+   "tall": 0,
+   "cost": {},
+   "work": 30,
+   "beauty": 14,
+   "landmark": true
+  },
+  "great_statue": {
+   "name": "Great statue",
+   "group": "landmarks",
+   "shape": "statue",
+   "w": 3,
+   "h": 3,
+   "tall": 9,
+   "cost": {},
+   "work": 30,
+   "beauty": 16,
+   "landmark": true
+  },
+  "victory_arch": {
+   "name": "Victory arch",
+   "group": "landmarks",
+   "shape": "keep",
+   "w": 7,
+   "h": 3,
+   "tall": 8,
+   "cost": {},
+   "work": 30,
+   "beauty": 18,
+   "landmark": true,
+   "wall": "keepstone"
+  },
+  "obelisk": {
+   "name": "Obelisk",
+   "group": "landmarks",
+   "shape": "statue",
+   "w": 2,
+   "h": 2,
+   "tall": 16,
+   "cost": {},
+   "work": 30,
+   "beauty": 20,
+   "landmark": true
+  },
+  "grand_library": {
+   "name": "Grand library",
+   "group": "landmarks",
+   "shape": "house",
+   "w": 10,
+   "h": 8,
+   "tall": 8,
+   "cost": {},
+   "work": 30,
+   "beauty": 24,
+   "landmark": true,
+   "roof": "roof_slate"
+  },
+  "sky_spire": {
+   "name": "Sky spire",
+   "group": "landmarks",
+   "shape": "tower",
+   "w": 4,
+   "h": 4,
+   "tall": 28,
+   "cost": {},
+   "work": 30,
+   "beauty": 30,
+   "landmark": true,
+   "wall": "keepstone",
+   "top": "crystal"
+  }
+ }
+}

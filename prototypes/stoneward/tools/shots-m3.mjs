@@ -1,0 +1,41 @@
+// M3 screenshots: found nodes, a mine on one, the route carrying goods home, the Routes screen.
+import { chromium } from 'playwright';
+const [out, w = 402, h = 780] = process.argv.slice(2);
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: +w, height: +h } });
+const logs = [];
+page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') logs.push(m.type() + ': ' + m.text()); });
+page.on('pageerror', e => logs.push('PAGEERROR: ' + e.message));
+await page.goto('http://localhost:8401/prototypes/stoneward/?shots&dev', { waitUntil: 'networkidle' });
+await page.click('#btn-new'); await page.click('#nw-go');
+await page.waitForFunction(() => window.gameEye.state().screen === 'landing', null, { timeout: 30000 });
+await page.mouse.click(+w / 2, +h / 2); await page.waitForTimeout(1500);
+await page.click('#land-go');
+await page.waitForFunction(() => window.gameEye.state().screen === 'hud', null, { timeout: 10000 });
+await page.waitForTimeout(1200);
+const st = await page.evaluate(() => window.gameEye.state());
+await page.evaluate(({ x, y }) => window.gameEye.fly(x, y, 0.9), st.town.towns[0]);
+await page.evaluate(() => window.gameEye.speed(8));
+await page.waitForTimeout(3000);
+await page.screenshot({ path: out + '-nodes.png' });
+// build a mine on the nearest found node that is a little way out
+const placed = await page.evaluate(async () => {
+  const v = window.gameEye.view(); const t = v.towns[0];
+  const kinds = { iron: 'iron_mine', coal: 'coal_mine', granite: 'stone_pit', crystal: 'crystal_mine', gold: 'gold_mine' };
+  const list = (v.nodes || []).map(([id, kind, x, y]) => ({ kind, x, y, d: Math.hypot(x - t.x, y - t.y) })).filter(n => n.d > 100).sort((a, b) => a.d - b.d);
+  if (!list.length) return null;
+  const n = list[0];
+  const r = await window.gameEye.order({ t: 'build', kind: kinds[n.kind], x: n.x, y: n.y });
+  return r ? n : null;
+});
+console.log('mine at', JSON.stringify(placed));
+await page.waitForTimeout(45000);
+if (placed) await page.evaluate(({ x, y }) => window.gameEye.fly(x, y, 2.2), placed);
+await page.waitForTimeout(1500);
+await page.screenshot({ path: out + '-mine.png' });
+await page.click('[data-tab="info"]'); await page.waitForTimeout(300);
+await page.click('text=Routes'); await page.waitForTimeout(600);
+await page.screenshot({ path: out + '-routes.png' });
+console.log(JSON.stringify((await page.evaluate(() => window.gameEye.view()))?.routes));
+console.log(logs.join('\n'));
+await browser.close();

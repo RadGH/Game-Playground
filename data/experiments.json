@@ -716,6 +716,18 @@
     "pixel physics",
     "sandbox"
    ]
+  },
+  {
+   "id": "stoneward",
+   "group": "prototypes",
+   "title": "Stoneward",
+   "href": "prototypes/stoneward/",
+   "folder": "prototypes/stoneward",
+   "summary": "A medieval city sim on a whole pixel-physics planet: the map wraps around and zooms out to a globe; towns grow on their own while you connect, harvest and defend.",
+   "status": "prototype",
+   "statusNote": "M0-M12 built",
+   "date": "2026-11-03",
+   "tags": ["city sim", "pixel physics", "planet", "medieval"]
   }
  ]
 }

@@ -1,0 +1,8 @@
+{
+ "_doc": "Train track (M10). Track can NEVER be damaged (PLAN §0.3): no ignite, no melt, no blastTo, hard 255. Any later fire, blast, melt or flow rule must leave a cell alone when its ground or its material has hard 255 (js/sim/cells.js already does for cooling crust and burnt-out ground). rail = the track bed (a ground); rail_bridge = track over shallow water (a cell standing in the water); platform = the stone edge of a station.",
+ "list": [
+  { "id": "rail", "name": "Railway", "layer": "ground", "color": "#5e5248", "var": 10, "walk": 100, "hard": 255, "bricks": true },
+  { "id": "rail_bridge", "name": "Rail bridge", "layer": "cell", "color": "#4a3a2c", "var": 8, "walk": 100, "hard": 255, "built": true, "floats": true, "flyOver": true, "rows": true, "tall": 0 },
+  { "id": "platform", "name": "Station platform", "layer": "cell", "color": "#b4ada0", "var": 10, "walk": 0, "hard": 150, "solid": true, "built": true, "bricks": true, "face": "#8f877a", "tall": 1 }
+ ]
+}

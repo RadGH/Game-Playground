@@ -1,0 +1,19 @@
+/* M9 Powers tab and the faith counter in the top bar (js/features/powers.js). */
+#st-faith { flex-shrink: 0; max-width: none; color: #f3e2a8; }
+#st-faith.low { color: var(--dim); }
+
+.pw-head { width: 100%; display: flex; align-items: center; gap: 8px; font-size: .88em; color: var(--dim); }
+.pw-head b { color: var(--gold); font-size: 1.05em; }
+.pw-head .grow { flex: 1; }
+.pw-sizes { display: flex; gap: 4px; width: 100%; }
+.pw-sizes button { flex: 1; min-height: 36px; font-size: .85em; padding: 0 6px; }
+.pw-grid { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.pw-grid button { min-height: 42px; padding: 3px 8px; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 6px; text-align: left; align-items: center; }
+.pw-grid .ic { grid-row: 1 / 3; font-size: 20px; width: 24px; text-align: center; }
+.pw-grid .nm { font-size: .88em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pw-grid .st { font-size: .76em; color: var(--dim); white-space: nowrap; }
+.pw-grid button.cant { opacity: .55; }
+.pw-grid button.cool .st { color: #9fb6d8; }
+@media (min-width: 700px) { .pw-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+.pw-head .pw-fill { min-height: 28px; min-width: 0; padding: 0 8px; font-size: .85em; }
+.dock-panel .pw-hint { line-height: 1.25; }

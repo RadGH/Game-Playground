@@ -1,0 +1,44 @@
+{
+  "_doc": "Guards, towers and monsters (js/sim/military/*.js). hp/dmg are plain numbers; range in cells; speed x a walker; cd = seconds between attacks. Guards are paid in gold only (owner): hire once, then a daily wage. Monsters list which group they belong to and what they go for. Original names only.",
+  "guards": {
+    "watchman":    { "name": "Watchman",    "hp": 30, "dmg": 4, "range": 1.6, "speed": 1.0, "cd": 1.0, "hire": 15, "wage": 1, "color": [0.55, 0.42, 0.3] },
+    "spearman":    { "name": "Spearman",    "hp": 45, "dmg": 6, "range": 2.2, "speed": 0.95, "cd": 1.2, "hire": 25, "wage": 2, "big": 2, "color": [0.45, 0.5, 0.62] },
+    "archer":      { "name": "Archer",      "hp": 25, "dmg": 4, "range": 14, "speed": 1.0, "cd": 1.4, "hire": 25, "wage": 2, "ranged": true, "color": [0.3, 0.55, 0.3] },
+    "crossbowman": { "name": "Crossbowman", "hp": 30, "dmg": 8, "range": 18, "speed": 0.85, "cd": 2.4, "hire": 40, "wage": 3, "ranged": true, "color": [0.5, 0.35, 0.2] },
+    "mage":        { "name": "Mage",        "hp": 22, "dmg": 6, "range": 12, "speed": 0.9, "cd": 1.8, "hire": 60, "wage": 4, "ranged": true, "magic": true, "splash": 2, "color": [0.45, 0.35, 0.85], "needs": "mage_guild" }
+  },
+  "towers": {
+    "watchtower":     { "range": 16, "dmg": 4, "cd": 1.2, "crew": "archer", "bonus": 1.5 },
+    "ballista_tower": { "range": 24, "dmg": 14, "cd": 3.0, "crew": "any", "pierce": 3 },
+    "catapult_tower": { "range": 34, "dmg": 18, "cd": 6.0, "crew": "any", "splash": 3, "minRange": 6 },
+    "lightning_tower":{ "range": 16, "dmg": 9, "cd": 2.0, "chain": 4, "magic": true },
+    "arcane_tower":   { "range": 30, "dmg": 16, "cd": 2.6, "homing": true, "magic": true, "bonusVs": ["brute", "dragon"] },
+    "shield_tower":   { "range": 0, "shield": 18, "absorb": 400, "recharge": 4, "magic": true },
+    "flame_tower":    { "range": 8, "dmg": 5, "cd": 0.6, "cone": true, "burn": true, "magic": true, "bonusVs": ["undead", "siege"] }
+  },
+  "safety": { "tile": 8, "patrolFade": 2400, "postRadius": 22, "patrolRadius": 14, "callRadius": 30 },
+  "monsters": {
+    "wolf":     { "name": "Wolf",          "group": "beast",  "hp": 18, "dmg": 3, "range": 1.4, "speed": 1.5, "cd": 0.9, "wants": "people", "color": [0.45, 0.45, 0.48], "size": 1 },
+    "bear":     { "name": "Bear",          "group": "beast",  "hp": 60, "dmg": 8, "range": 1.6, "speed": 1.1, "cd": 1.4, "wants": "people", "color": [0.35, 0.24, 0.16], "size": 2, "big": true },
+    "boar":     { "name": "Wild boar",     "group": "beast",  "hp": 28, "dmg": 5, "range": 1.4, "speed": 1.3, "cd": 1.1, "wants": "carts",  "color": [0.4, 0.3, 0.25], "size": 1 },
+    "spider":   { "name": "Giant spider",  "group": "beast",  "hp": 35, "dmg": 6, "range": 1.6, "speed": 1.4, "cd": 1.0, "wants": "people", "color": [0.15, 0.12, 0.12], "size": 2 },
+    "troll":    { "name": "Troll",         "group": "brute",  "hp": 160, "dmg": 18, "range": 1.8, "speed": 0.8, "cd": 1.8, "wants": "walls", "smash": 30, "color": [0.4, 0.5, 0.35], "size": 3, "big": true },
+    "ogre":     { "name": "Ogre",          "group": "brute",  "hp": 120, "dmg": 14, "range": 1.8, "speed": 0.85, "cd": 1.6, "wants": "walls", "smash": 22, "color": [0.55, 0.45, 0.35], "size": 3, "big": true },
+    "skeleton": { "name": "Restless bones","group": "undead", "hp": 16, "dmg": 3, "range": 1.4, "speed": 0.9, "cd": 1.0, "wants": "people", "night": true, "burns": true, "color": [0.85, 0.83, 0.75], "size": 1 },
+    "ghoul":    { "name": "Ghoul",         "group": "undead", "hp": 30, "dmg": 6, "range": 1.4, "speed": 1.1, "cd": 1.0, "wants": "people", "night": true, "burns": true, "color": [0.45, 0.55, 0.45], "size": 1 },
+    "drake":    { "name": "Drake",         "group": "dragon", "hp": 140, "dmg": 10, "range": 6, "speed": 2.2, "cd": 1.5, "wants": "roofs", "fly": true, "fire": true, "color": [0.75, 0.35, 0.2], "size": 4, "big": true },
+    "bandit":   { "name": "Bandit",        "group": "bandit", "hp": 26, "dmg": 4, "range": 1.5, "speed": 1.1, "cd": 1.1, "wants": "stores", "steal": 8, "color": [0.4, 0.32, 0.4], "size": 1 },
+    "archer_bandit": { "name": "Bandit bowman", "group": "bandit", "hp": 20, "dmg": 3, "range": 12, "speed": 1.0, "cd": 1.6, "wants": "stores", "ranged": true, "steal": 4, "color": [0.35, 0.3, 0.38], "size": 1 },
+    "soldier":  { "name": "Soldier",       "group": "army",   "hp": 40, "dmg": 6, "range": 1.8, "speed": 1.0, "cd": 1.2, "wants": "keep", "color": [0.6, 0.2, 0.2], "size": 1 },
+    "sapper":   { "name": "Sapper",        "group": "siege",  "hp": 30, "dmg": 3, "range": 1.4, "speed": 1.0, "cd": 1.0, "wants": "walls", "smash": 18, "fireWood": true, "color": [0.5, 0.3, 0.2], "size": 1 },
+    "catapult": { "name": "Catapult",      "group": "siege",  "hp": 80, "dmg": 30, "range": 38, "speed": 0.5, "cd": 7.0, "wants": "walls", "lob": true, "splash": 3, "color": [0.55, 0.4, 0.25], "size": 3, "big": true }
+  },
+  "lairs": {
+    "den":      { "name": "Wolf den",      "spawn": ["wolf", "wolf", "boar", "bear", "spider"], "biomes": ["forest", "deepwood", "hills"], "every": 5, "group": [2, 5] },
+    "cave":     { "name": "Brute cave",    "spawn": ["troll", "ogre"], "biomes": ["mountain", "hills", "volcanic"], "every": 9, "group": [1, 2] },
+    "graveyard":{ "name": "Old graveyard", "spawn": ["skeleton", "skeleton", "ghoul"], "biomes": ["moor", "ruins"], "every": 2, "group": [3, 7], "night": true },
+    "nest":     { "name": "Drake nest",    "spawn": ["drake"], "biomes": ["volcanic", "peak", "mountain"], "every": 14, "group": [1, 1], "rare": true },
+    "camp":     { "name": "Bandit camp",   "spawn": ["bandit", "bandit", "archer_bandit"], "biomes": ["forest", "grass", "hills", "meadow"], "every": 6, "group": [3, 6] }
+  },
+  "raids": { "_doc": "Raiders grow with wealth and population; strength = (pop / 20 + gold / 400) x the world's raid setting. warn = seconds of warning.", "warn": 45, "firstDay": 2, "every": [1.5, 3], "levels": { "off": 0, "low": 0.6, "normal": 1, "high": 1.6 } }
+}

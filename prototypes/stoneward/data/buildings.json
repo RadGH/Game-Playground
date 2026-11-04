@@ -1,0 +1,1287 @@
+{
+ "_doc": "Every building. shape + w/h/tall/roof are drawn by js/sim/town/blueprints.js as real cells (so any of it can burn or fall). cost = goods carried to the site; work = builder-seconds to raise it. houses = people it homes; job = what its workers do (js/sim/town/jobs.js). storage = goods it holds as part of the kingdom's stock (a warehouse) or as a producer's own pile (store, not counted until hauled). auto = the town may build it on its own. group = Build tab section.",
+ "goods": {
+  "log": {
+   "name": "Logs",
+   "icon": "🪵"
+  },
+  "stone": {
+   "name": "Stone",
+   "icon": "🪨"
+  },
+  "berries": {
+   "name": "Berries",
+   "icon": "🫐",
+   "food": true
+  },
+  "fish": {
+   "name": "Fish",
+   "icon": "🐟",
+   "food": true
+  },
+  "game": {
+   "name": "Game",
+   "icon": "🍖",
+   "food": true
+  },
+  "iron_ore": {
+   "name": "Iron ore",
+   "icon": "⛏️"
+  },
+  "coal": {
+   "name": "Coal",
+   "icon": "⚫"
+  },
+  "gold_ore": {
+   "name": "Gold ore",
+   "icon": "🟡"
+  },
+  "crystal": {
+   "name": "Mana crystals",
+   "icon": "🔮"
+  },
+  "plank": {
+   "name": "Planks",
+   "icon": "🪚"
+  },
+  "iron": {
+   "name": "Iron",
+   "icon": "🔩"
+  },
+  "tools": {
+   "name": "Tools",
+   "icon": "🔨"
+  },
+  "weapons": {
+   "name": "Weapons",
+   "icon": "🗡️"
+  },
+  "grain": {
+   "name": "Grain",
+   "icon": "🌾"
+  },
+  "barley": {
+   "name": "Barley",
+   "icon": "🌿"
+  },
+  "flour": {
+   "name": "Flour",
+   "icon": "🥡"
+  },
+  "bread": {
+   "name": "Bread",
+   "icon": "🍞",
+   "food": true
+  },
+  "ale": {
+   "name": "Ale",
+   "icon": "🍺"
+  },
+  "wool": {
+   "name": "Wool",
+   "icon": "🧶"
+  },
+  "cloth": {
+   "name": "Cloth",
+   "icon": "🧵"
+  },
+  "furniture": {
+   "name": "Furniture",
+   "icon": "🪑"
+  },
+  "jewelry": {
+   "name": "Jewellery",
+   "icon": "💍"
+  },
+  "vegetables": {
+   "name": "Vegetables",
+   "icon": "🥕",
+   "food": true
+  }
+ },
+ "kinds": {
+  "keep": {
+   "name": "Keep",
+   "group": "military",
+   "shape": "keep",
+   "w": 12,
+   "h": 11,
+   "tall": 10,
+   "wall": "keepstone",
+   "work": 0,
+   "storage": 400,
+   "kingdom": true,
+   "scan": 260,
+   "houses": 6,
+   "unique": true
+  },
+  "tent": {
+   "name": "Tent",
+   "group": "homes",
+   "shape": "tent",
+   "w": 3,
+   "h": 3,
+   "tall": 2,
+   "roof": "canvas",
+   "work": 4,
+   "houses": 2,
+   "level": 0,
+   "home": true
+  },
+  "hut": {
+   "name": "Hut",
+   "group": "homes",
+   "shape": "house",
+   "w": 4,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_thatch",
+   "cost": {
+    "log": 6
+   },
+   "work": 30,
+   "houses": 3,
+   "level": 1,
+   "home": true
+  },
+  "cottage": {
+   "name": "Cottage",
+   "group": "homes",
+   "shape": "house",
+   "w": 5,
+   "h": 5,
+   "tall": 4,
+   "roof": "roof_thatch",
+   "cost": {
+    "log": 8,
+    "plank": 4,
+    "stone": 4
+   },
+   "work": 45,
+   "houses": 5,
+   "level": 2,
+   "home": true
+  },
+  "warehouse": {
+   "name": "Warehouse",
+   "group": "services",
+   "shape": "house",
+   "w": 8,
+   "h": 5,
+   "tall": 4,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 16,
+    "stone": 6
+   },
+   "work": 60,
+   "storage": 300,
+   "kingdom": true,
+   "auto": true,
+   "crates": true
+  },
+  "well": {
+   "name": "Well",
+   "group": "services",
+   "shape": "well",
+   "w": 2,
+   "h": 2,
+   "tall": 1,
+   "cost": {
+    "stone": 4
+   },
+   "work": 15,
+   "cover": {
+    "water": 40
+   },
+   "auto": true
+  },
+  "woodcutter": {
+   "name": "Woodcutter's hut",
+   "group": "extraction",
+   "shape": "house",
+   "w": 4,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 4
+   },
+   "work": 20,
+   "storage": 30,
+   "auto": true,
+   "job": {
+    "kind": "chop",
+    "workers": 2,
+    "radius": 36,
+    "makes": "log",
+    "per": 2,
+    "secs": 6
+   }
+  },
+  "forager": {
+   "name": "Forager's hut",
+   "group": "food",
+   "shape": "house",
+   "w": 4,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_thatch",
+   "cost": {
+    "log": 4
+   },
+   "work": 20,
+   "storage": 30,
+   "auto": true,
+   "job": {
+    "kind": "forage",
+    "workers": 2,
+    "radius": 40,
+    "makes": "berries",
+    "per": 3,
+    "secs": 5
+   }
+  },
+  "fisher": {
+   "name": "Fisher's hut",
+   "group": "food",
+   "shape": "house",
+   "w": 4,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 5
+   },
+   "work": 20,
+   "storage": 30,
+   "auto": true,
+   "nearWater": true,
+   "job": {
+    "kind": "fish",
+    "workers": 2,
+    "radius": 30,
+    "makes": "fish",
+    "per": 3,
+    "secs": 7
+   }
+  },
+  "hunter": {
+   "name": "Hunter's lodge",
+   "group": "food",
+   "shape": "house",
+   "w": 4,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_thatch",
+   "cost": {
+    "log": 6
+   },
+   "work": 22,
+   "storage": 30,
+   "auto": true,
+   "job": {
+    "kind": "hunt",
+    "workers": 1,
+    "radius": 60,
+    "makes": "game",
+    "per": 4,
+    "secs": 14
+   }
+  },
+  "quarry": {
+   "name": "Stone quarry",
+   "group": "extraction",
+   "shape": "house",
+   "w": 4,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 6
+   },
+   "work": 25,
+   "storage": 30,
+   "auto": true,
+   "nearRock": true,
+   "job": {
+    "kind": "quarry",
+    "workers": 2,
+    "radius": 40,
+    "makes": "stone",
+    "per": 2,
+    "secs": 8
+   }
+  },
+  "iron_mine": {
+   "name": "Iron mine",
+   "group": "extraction",
+   "shape": "mine",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 12,
+    "stone": 4
+   },
+   "work": 40,
+   "storage": 60,
+   "houses": 3,
+   "node": "iron",
+   "job": {
+    "kind": "mine",
+    "workers": 3,
+    "radius": 10,
+    "makes": "iron_ore",
+    "per": 2,
+    "secs": 10
+   }
+  },
+  "coal_mine": {
+   "name": "Coal mine",
+   "group": "extraction",
+   "shape": "mine",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 12,
+    "stone": 4
+   },
+   "work": 40,
+   "storage": 60,
+   "houses": 3,
+   "node": "coal",
+   "job": {
+    "kind": "mine",
+    "workers": 3,
+    "radius": 10,
+    "makes": "coal",
+    "per": 2,
+    "secs": 10
+   }
+  },
+  "stone_pit": {
+   "name": "Stone pit",
+   "group": "extraction",
+   "shape": "mine",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 8
+   },
+   "work": 40,
+   "storage": 60,
+   "houses": 3,
+   "node": "granite",
+   "job": {
+    "kind": "mine",
+    "workers": 3,
+    "radius": 10,
+    "makes": "stone",
+    "per": 2,
+    "secs": 10
+   }
+  },
+  "gold_mine": {
+   "name": "Gold mine",
+   "group": "extraction",
+   "shape": "mine",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 16,
+    "stone": 8
+   },
+   "work": 40,
+   "storage": 60,
+   "houses": 3,
+   "node": "gold",
+   "job": {
+    "kind": "mine",
+    "workers": 3,
+    "radius": 10,
+    "makes": "gold_ore",
+    "per": 2,
+    "secs": 10
+   }
+  },
+  "crystal_mine": {
+   "name": "Crystal mine",
+   "group": "extraction",
+   "shape": "mine",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 14,
+    "stone": 6
+   },
+   "work": 40,
+   "storage": 60,
+   "houses": 3,
+   "node": "crystal",
+   "job": {
+    "kind": "mine",
+    "workers": 3,
+    "radius": 10,
+    "makes": "crystal",
+    "per": 2,
+    "secs": 10
+   }
+  },
+  "outpost": {
+   "name": "Outpost",
+   "group": "military",
+   "shape": "fort",
+   "w": 9,
+   "h": 9,
+   "tall": 3,
+   "wall": "wall_wood",
+   "cost": {
+    "log": 24
+   },
+   "work": 60,
+   "storage": 200,
+   "depot": true,
+   "scan": 170,
+   "houses": 2
+  },
+  "sawmill": {
+   "name": "Sawmill",
+   "group": "industry",
+   "shape": "house",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 10,
+    "stone": 6
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "log": 2
+    },
+    "out": {
+     "plank": 2
+    },
+    "secs": 8
+   }
+  },
+  "charcoal": {
+   "name": "Charcoal kiln",
+   "group": "industry",
+   "shape": "house",
+   "w": 4,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_tile",
+   "cost": {
+    "log": 10,
+    "stone": 6
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "log": 3
+    },
+    "out": {
+     "coal": 1
+    },
+    "secs": 12
+   },
+   "chimney": true
+  },
+  "smelter": {
+   "name": "Smelter",
+   "group": "industry",
+   "shape": "house",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_tile",
+   "cost": {
+    "log": 8,
+    "stone": 14
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "iron_ore": 2,
+     "coal": 1
+    },
+    "out": {
+     "iron": 1
+    },
+    "secs": 14
+   },
+   "chimney": true
+  },
+  "smithy": {
+   "name": "Smithy",
+   "group": "industry",
+   "shape": "house",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_tile",
+   "cost": {
+    "log": 8,
+    "stone": 10
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "iron": 1,
+     "plank": 1
+    },
+    "out": {
+     "tools": 1
+    },
+    "secs": 16
+   },
+   "chimney": true
+  },
+  "armourer": {
+   "name": "Armourer",
+   "group": "industry",
+   "shape": "house",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_tile",
+   "cost": {
+    "log": 8,
+    "stone": 12
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "iron": 2,
+     "coal": 1
+    },
+    "out": {
+     "weapons": 1
+    },
+    "secs": 20
+   },
+   "chimney": true
+  },
+  "mill": {
+   "name": "Windmill",
+   "group": "industry",
+   "shape": "house",
+   "w": 4,
+   "h": 4,
+   "tall": 5,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 12,
+    "stone": 4
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "grain": 3
+    },
+    "out": {
+     "flour": 2
+    },
+    "secs": 10
+   }
+  },
+  "bakery": {
+   "name": "Bakery",
+   "group": "industry",
+   "shape": "house",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_tile",
+   "cost": {
+    "log": 8,
+    "stone": 8
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "flour": 2
+    },
+    "out": {
+     "bread": 3
+    },
+    "secs": 10
+   },
+   "chimney": true
+  },
+  "brewery": {
+   "name": "Brewery",
+   "group": "industry",
+   "shape": "house",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_tile",
+   "cost": {
+    "log": 10,
+    "stone": 6
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "barley": 3
+    },
+    "out": {
+     "ale": 2
+    },
+    "secs": 14
+   }
+  },
+  "weaver": {
+   "name": "Weaver",
+   "group": "industry",
+   "shape": "house",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_thatch",
+   "cost": {
+    "log": 10
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "wool": 2
+    },
+    "out": {
+     "cloth": 1
+    },
+    "secs": 12
+   }
+  },
+  "carpenter": {
+   "name": "Carpenter",
+   "group": "industry",
+   "shape": "house",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 10,
+    "stone": 4
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "plank": 3
+    },
+    "out": {
+     "furniture": 1
+    },
+    "secs": 16
+   }
+  },
+  "goldsmith": {
+   "name": "Goldsmith",
+   "group": "industry",
+   "shape": "house",
+   "w": 5,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_tile",
+   "cost": {
+    "log": 8,
+    "stone": 12
+   },
+   "work": 40,
+   "storage": 40,
+   "auto": true,
+   "job": {
+    "kind": "craft",
+    "workers": 2,
+    "in": {
+     "gold_ore": 2,
+     "coal": 1
+    },
+    "out": {
+     "jewelry": 1
+    },
+    "secs": 20
+   },
+   "chimney": true
+  },
+  "farm": {
+   "name": "Grain farm",
+   "group": "food",
+   "shape": "farm",
+   "w": 12,
+   "h": 9,
+   "tall": 3,
+   "roof": "roof_thatch",
+   "cost": {
+    "log": 10
+   },
+   "work": 35,
+   "storage": 40,
+   "auto": true,
+   "crop": "crop",
+   "field": true,
+   "job": {
+    "kind": "farm",
+    "workers": 3,
+    "makes": "grain",
+    "per": 2,
+    "secs": 5,
+    "regrow": 2400
+   }
+  },
+  "barley_farm": {
+   "name": "Barley farm",
+   "group": "food",
+   "shape": "farm",
+   "w": 12,
+   "h": 9,
+   "tall": 3,
+   "roof": "roof_thatch",
+   "cost": {
+    "log": 10
+   },
+   "work": 35,
+   "storage": 40,
+   "auto": true,
+   "crop": "crop",
+   "field": true,
+   "job": {
+    "kind": "farm",
+    "workers": 2,
+    "makes": "barley",
+    "per": 2,
+    "secs": 5,
+    "regrow": 2600
+   }
+  },
+  "pasture": {
+   "name": "Sheep pasture",
+   "group": "food",
+   "shape": "pasture",
+   "w": 12,
+   "h": 10,
+   "tall": 2,
+   "roof": "roof_thatch",
+   "cost": {
+    "log": 12
+   },
+   "work": 30,
+   "storage": 30,
+   "auto": true,
+   "job": {
+    "kind": "herd",
+    "workers": 1,
+    "makes": "wool",
+    "per": 2,
+    "secs": 18
+   }
+  },
+  "house": {
+   "name": "House",
+   "group": "homes",
+   "shape": "house",
+   "w": 6,
+   "h": 5,
+   "tall": 4,
+   "roof": "roof_tile",
+   "cost": {
+    "plank": 10,
+    "stone": 8
+   },
+   "work": 55,
+   "houses": 7,
+   "level": 3,
+   "home": true
+  },
+  "townhouse": {
+   "name": "Townhouse",
+   "group": "homes",
+   "shape": "house",
+   "w": 6,
+   "h": 6,
+   "tall": 6,
+   "roof": "roof_slate",
+   "cost": {
+    "plank": 14,
+    "stone": 14,
+    "iron": 2
+   },
+   "work": 70,
+   "houses": 10,
+   "level": 4,
+   "home": true
+  },
+  "manor": {
+   "name": "Manor",
+   "group": "homes",
+   "shape": "house",
+   "w": 9,
+   "h": 8,
+   "tall": 7,
+   "roof": "roof_slate",
+   "cost": {
+    "plank": 24,
+    "stone": 24,
+    "iron": 4,
+    "furniture": 2
+   },
+   "work": 100,
+   "houses": 14,
+   "level": 5,
+   "home": true
+  },
+  "market": {
+   "name": "Market",
+   "group": "services",
+   "shape": "market",
+   "w": 8,
+   "h": 6,
+   "tall": 2,
+   "roof": "canvas",
+   "cost": {
+    "log": 10,
+    "plank": 4
+   },
+   "work": 30,
+   "cover": {
+    "market": 60
+   },
+   "auto": true
+  },
+  "tavern": {
+   "name": "Tavern",
+   "group": "services",
+   "shape": "house",
+   "w": 6,
+   "h": 5,
+   "tall": 4,
+   "roof": "roof_tile",
+   "cost": {
+    "plank": 10,
+    "stone": 6
+   },
+   "work": 40,
+   "cover": {
+    "tavern": 55
+   },
+   "auto": true
+  },
+  "healer": {
+   "name": "Healer",
+   "group": "services",
+   "shape": "house",
+   "w": 4,
+   "h": 4,
+   "tall": 3,
+   "roof": "roof_thatch",
+   "cost": {
+    "log": 8
+   },
+   "work": 25,
+   "cover": {
+    "health": 50
+   },
+   "auto": true
+  },
+  "garden": {
+   "name": "Garden",
+   "group": "beauty",
+   "shape": "garden",
+   "w": 5,
+   "h": 5,
+   "tall": 0,
+   "cost": {
+    "log": 2
+   },
+   "work": 10,
+   "beauty": 3,
+   "auto": true
+  },
+  "fountain": {
+   "name": "Fountain",
+   "group": "beauty",
+   "shape": "fountain",
+   "w": 3,
+   "h": 3,
+   "tall": 1,
+   "cost": {
+    "stone": 10
+   },
+   "work": 20,
+   "beauty": 5,
+   "auto": true
+  },
+  "statue": {
+   "name": "Statue",
+   "group": "beauty",
+   "shape": "statue",
+   "w": 2,
+   "h": 2,
+   "tall": 4,
+   "cost": {
+    "stone": 14
+   },
+   "work": 25,
+   "beauty": 6
+  },
+  "veg_plot": {
+   "name": "Vegetable plot",
+   "group": "food",
+   "shape": "farm",
+   "w": 9,
+   "h": 7,
+   "tall": 3,
+   "roof": "roof_thatch",
+   "cost": {
+    "log": 6
+   },
+   "work": 25,
+   "storage": 40,
+   "auto": true,
+   "crop": "crop",
+   "field": true,
+   "job": {
+    "kind": "farm",
+    "workers": 2,
+    "makes": "vegetables",
+    "per": 3,
+    "secs": 4,
+    "regrow": 1500
+   }
+  },
+  "fire_station": {
+   "name": "Fire station",
+   "group": "services",
+   "shape": "house",
+   "w": 6,
+   "h": 5,
+   "tall": 4,
+   "roof": "roof_tile",
+   "cost": {
+    "log": 10,
+    "stone": 10
+   },
+   "work": 45,
+   "cover": {
+    "fire": 70
+   },
+   "auto": true,
+   "job": {
+    "kind": "firefight",
+    "workers": 3,
+    "radius": 70
+   }
+  },
+  "town_hall": {
+   "name": "Town hall",
+   "group": "services",
+   "shape": "keep",
+   "w": 8,
+   "h": 7,
+   "tall": 6,
+   "wall": "wall_stone",
+   "cost": {
+    "log": 30,
+    "stone": 20
+   },
+   "gold": 150,
+   "work": 60,
+   "storage": 200,
+   "kingdom": true,
+   "scan": 200,
+   "houses": 4,
+   "settlers": 6,
+   "founds": true
+  },
+  "dock": {
+   "name": "Dock",
+   "group": "transport",
+   "shape": "dock",
+   "w": 6,
+   "h": 4,
+   "tall": 2,
+   "roof": "roof_plank",
+   "cost": {
+    "log": 14
+   },
+   "work": 30,
+   "storage": 150,
+   "depot": true,
+   "dock": true,
+   "nearWater": true
+  }
+ },
+ "start": {
+  "people": 8,
+  "stock": {
+   "log": 40,
+   "stone": 16,
+   "berries": 30
+  },
+  "gold": 100
+ },
+ "town": {
+  "eatPerDay": 1,
+  "migrantEverySecs": 25,
+  "migrantGroup": [
+   1,
+   3
+  ],
+  "taxPerHomeLevel": 2,
+  "plotSearch": 70,
+  "plotSetback": 1,
+  "pathWear": 6,
+  "builderCarry": 8,
+  "haulAt": 6,
+  "haulCarry": 6,
+  "remoteAt": 90,
+  "hamletAt": {
+   "_doc": "an outpost becomes a hamlet when it is road-linked, safe and the kingdom is this big",
+   "pop": 60,
+   "safety": 0.4,
+   "road": 0.85
+  }
+ },
+ "vehicles": {
+  "_doc": "What carries a route's goods. speed = x a walker on the same ground; carry = goods a trip; offroad = cost multiplier off roads (carts crawl on grass); cost = to add one; feed = food a day.",
+  "porter": {
+   "name": "Porters",
+   "speed": 1.0,
+   "carry": 6,
+   "offroad": 1,
+   "cost": {},
+   "gold": 5
+  },
+  "handcart": {
+   "name": "Handcart",
+   "speed": 1.1,
+   "carry": 16,
+   "offroad": 3.5,
+   "cost": {
+    "log": 4
+   },
+   "gold": 10
+  },
+  "oxcart": {
+   "name": "Ox cart",
+   "speed": 0.9,
+   "carry": 40,
+   "offroad": 3,
+   "cost": {
+    "log": 10
+   },
+   "gold": 20,
+   "feed": 1
+  },
+  "wagon": {
+   "name": "Wagon",
+   "speed": 1.5,
+   "carry": 60,
+   "offroad": 4,
+   "cost": {
+    "log": 16,
+    "iron_ore": 4
+   },
+   "gold": 35,
+   "feed": 1
+  },
+  "barge": {
+   "name": "Barge",
+   "speed": 1.8,
+   "carry": 80,
+   "offroad": 1,
+   "water": true,
+   "cost": {
+    "log": 20
+   },
+   "gold": 30
+  }
+ },
+ "townScan": 260,
+ "scoutRadius": 110,
+ "scoutCost": 20,
+ "extras": [
+  "buildings-trains.json",
+  "buildings-military.json",
+  "military.json",
+  "buildings-faith.json",
+  "buildings-landmarks.json",
+  "progress.json",
+  "research.json",
+  "tiers.json"
+ ],
+ "homes": {
+  "_doc": "House levels, lowest first. needs = what a home of that level must have to stay at it (and to reach it from the level below). cover needs come from a service building in reach; goods are eaten from the town stock each day per household. Losing a need for `dropDays` days drops the level.",
+  "ladder": [
+   "tent",
+   "hut",
+   "cottage",
+   "house",
+   "townhouse",
+   "manor"
+  ],
+  "needs": {
+   "tent": {},
+   "hut": {
+    "cover": [
+     "water"
+    ]
+   },
+   "cottage": {
+    "cover": [
+     "water"
+    ],
+    "food": 1
+   },
+   "house": {
+    "cover": [
+     "water",
+     "market",
+     "faith"
+    ],
+    "food": 2
+   },
+   "townhouse": {
+    "cover": [
+     "water",
+     "market",
+     "faith",
+     "tavern"
+    ],
+    "food": 2,
+    "goods": {
+     "bread": 0.3,
+     "ale": 0.3,
+     "cloth": 0.2
+    }
+   },
+   "manor": {
+    "cover": [
+     "water",
+     "market",
+     "faith",
+     "tavern",
+     "health"
+    ],
+    "food": 3,
+    "goods": {
+     "bread": 0.4,
+     "ale": 0.4,
+     "cloth": 0.3,
+     "furniture": 0.1,
+     "jewelry": 0.05
+    },
+    "safety": 0.5
+   }
+  },
+  "dropDays": 2,
+  "mergeAt": [
+   "house",
+   "townhouse"
+  ],
+  "tax": {
+   "low": 0.5,
+   "normal": 1,
+   "high": 1.6
+  },
+  "taxMood": {
+   "low": 0.08,
+   "normal": 0,
+   "high": -0.15
+  }
+ },
+ "walls": {
+  "_doc": "Drawn walls (js/sim/walls.js). tier: material, height, cost per cell, hit points per cell. Towers go at corners and every towerEvery cells, gates where a road crosses.",
+  "tiers": {
+   "wood": {
+    "name": "Palisade",
+    "mat": "wall_wood",
+    "tall": 4,
+    "cost": {
+     "log": 1
+    },
+    "hp": 120
+   },
+   "stone": {
+    "name": "Stone wall",
+    "mat": "wall_stone",
+    "tall": 5,
+    "cost": {
+     "stone": 1
+    },
+    "hp": 220
+   },
+   "thick": {
+    "name": "Thick wall",
+    "mat": "wall_thick",
+    "tall": 6,
+    "cost": {
+     "stone": 2
+    },
+    "hp": 255
+   }
+  },
+  "towerEvery": 30,
+  "towerSize": 3,
+  "towerExtra": 3,
+  "repairEvery": 120,
+  "repairHp": 8,
+  "rubbleSecs": 180
+ }
+}

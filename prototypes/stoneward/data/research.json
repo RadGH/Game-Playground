@@ -1,0 +1,21 @@
+{
+  "_doc": "The research tree (wired, OFF for now — owner 2026-11-03: 'to start let's just unlock everything; we should have infrastructure to support it later'). Each node unlocks building kinds, guards, powers, wall tiers or vehicles by id. js/sim/unlock.js reads this; with unlockEverything (progress) on, every check passes.",
+  "unlockEverything": true,
+  "nodes": {
+    "masonry":     { "name": "Masonry",        "cost": 40,  "after": [],              "unlocks": ["quarry", "stone_pit", "wall:stone", "cottage", "well"] },
+    "carpentry":   { "name": "Carpentry",      "cost": 40,  "after": [],              "unlocks": ["sawmill", "carpenter", "handcart", "house"] },
+    "farming":     { "name": "Farming",        "cost": 30,  "after": [],              "unlocks": ["farm", "veg_plot", "barley_farm", "pasture", "mill"] },
+    "brewing":     { "name": "Brewing and baking", "cost": 60, "after": ["farming"],  "unlocks": ["bakery", "brewery", "tavern", "weaver"] },
+    "mining":      { "name": "Mining",         "cost": 60,  "after": ["masonry"],     "unlocks": ["iron_mine", "coal_mine", "outpost", "charcoal"] },
+    "smelting":    { "name": "Smelting",       "cost": 90,  "after": ["mining"],      "unlocks": ["smelter", "smithy", "oxcart"] },
+    "arms":        { "name": "Arms",           "cost": 90,  "after": ["smelting"],    "unlocks": ["armourer", "barracks", "guard:spearman", "guard:crossbowman", "watchtower"] },
+    "siegecraft":  { "name": "Siegecraft",     "cost": 150, "after": ["arms"],        "unlocks": ["ballista_tower", "catapult_tower", "wall:thick"] },
+    "faith":       { "name": "Faith",          "cost": 50,  "after": [],              "unlocks": ["chapel", "church", "power:rain", "power:smite"] },
+    "cathedrals":  { "name": "Cathedrals",     "cost": 200, "after": ["faith", "masonry"], "unlocks": ["cathedral", "power:earthquake", "power:tornado"] },
+    "arcana":      { "name": "Arcana",         "cost": 160, "after": ["faith", "mining"], "unlocks": ["crystal_mine", "mage_guild", "guard:mage", "lightning_tower", "arcane_tower", "shield_tower", "flame_tower"] },
+    "wrath":       { "name": "Wrath of the crown", "cost": 300, "after": ["cathedrals", "arcana"], "unlocks": ["power:meteor", "power:firestorm", "power:blackhole"] },
+    "fine_living": { "name": "Fine living",    "cost": 180, "after": ["brewing", "smelting"], "unlocks": ["townhouse", "manor", "goldsmith", "gold_mine", "market", "healer"] },
+    "roads":       { "name": "Paving",         "cost": 80,  "after": ["masonry"],     "unlocks": ["road:gravel", "road:stone", "wagon"] },
+    "railways":    { "name": "Railways",       "cost": 400, "after": ["roads", "smelting"], "unlocks": ["rail", "station", "train:freight", "train:passenger"] }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "_doc": "World settings shown on the New World screen. Sizes are the distance around the planet in cells (1 cell = 1 m). Height is always half the width; the top and bottom rows are ice caps nobody can cross. macroCell = how many cells one macro-map cell covers.",
+  "macroCell": 32,
+  "chunk": 64,
+  "sizes": [
+    { "id": "xtiny",  "name": "X-tiny",  "width": 1024 },
+    { "id": "tiny",   "name": "Tiny",    "width": 2048 },
+    { "id": "small",  "name": "Small",   "width": 4096 },
+    { "id": "medium", "name": "Medium",  "width": 8192 },
+    { "id": "large",  "name": "Large",   "width": 16384 },
+    { "id": "xlarge", "name": "X-large", "width": 32768 }
+  ],
+  "defaults": { "size": "small", "water": 0.45, "shape": "continents", "rivals": 3, "monsters": "normal", "raids": "normal", "disasters": "normal", "powers": true, "faithRate": 1 },
+  "water": [ { "id": 0.3, "name": "Dry" }, { "id": 0.45, "name": "Normal" }, { "id": 0.6, "name": "Wet" }, { "id": 0.72, "name": "Islands" } ],
+  "shapes": [ { "id": "continents", "name": "Continents" }, { "id": "archipelago", "name": "Archipelago" }, { "id": "pangea", "name": "One big land" } ],
+  "levels": [ { "id": "off", "name": "Off" }, { "id": "low", "name": "Low" }, { "id": "normal", "name": "Normal" }, { "id": "high", "name": "High" } ],
+  "disasterLevels": [ { "id": "off", "name": "Off" }, { "id": "rare", "name": "Rare" }, { "id": "normal", "name": "Normal" }, { "id": "frequent", "name": "Frequent" } ],
+  "rivalCounts": [2, 3, 4],
+  "iceRows": 0.06
+}

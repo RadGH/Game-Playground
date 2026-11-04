@@ -1,0 +1,11 @@
+{
+  "_doc": "Settlement tiers (wired, OFF for now). A tier is reached by population; each opens building groups. js/sim/unlock.js reads this only when research gating is on.",
+  "tiers": [
+    { "id": "camp",    "name": "Camp",    "pop": 0,    "opens": ["homes", "food", "extraction"] },
+    { "id": "hamlet",  "name": "Hamlet",  "pop": 30,   "opens": ["services"] },
+    { "id": "village", "name": "Village", "pop": 80,   "opens": ["industry", "military"] },
+    { "id": "town",    "name": "Town",    "pop": 250,  "opens": ["magic", "beauty"] },
+    { "id": "city",    "name": "City",    "pop": 800,  "opens": [] },
+    { "id": "capital", "name": "Capital", "pop": 2500, "opens": [] }
+  ]
+}

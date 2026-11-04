@@ -1,0 +1,24 @@
+// Phone-size screenshots of the main flow: node prototypes/stoneward/tools/shots.mjs <out-prefix> (dev server :8401)
+import { chromium } from 'playwright';
+const out = process.argv[2];
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: 402, height: 780 } });
+const logs = [];
+page.on('console', m => logs.push(m.type() + ': ' + m.text()));
+page.on('pageerror', e => logs.push('PAGEERROR: ' + e.message));
+await page.goto('http://localhost:8401/prototypes/stoneward/?shots', { waitUntil: 'networkidle' });
+await page.waitForTimeout(2500);
+await page.screenshot({ path: out + '-title.png' });
+await page.click('#btn-new'); await page.waitForTimeout(400);
+await page.screenshot({ path: out + '-new.png' });
+await page.click('#nw-go');
+await page.waitForFunction(() => window.gameEye.state().screen === 'hud', null, { timeout: 30000 });
+await page.waitForTimeout(400);
+await page.screenshot({ path: out + '-globe.png' });
+await page.waitForTimeout(4500);
+await page.screenshot({ path: out + '-ground.png' });
+await page.keyboard.down('KeyE'); await page.waitForTimeout(900); await page.keyboard.up('KeyE'); await page.waitForTimeout(2500);
+await page.screenshot({ path: out + '-close.png' });
+console.log(JSON.stringify(await page.evaluate(() => window.gameEye.state())));
+console.log(logs.join('\n'));
+await browser.close();

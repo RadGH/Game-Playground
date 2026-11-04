@@ -1,0 +1,6 @@
+{
+  "_doc": "M9 materials, appended after materials.json (never reorder). fissure = a crack an earthquake opens in the ground: slow to cross, never heals on its own.",
+  "list": [
+    { "id": "fissure", "name": "Fissure", "layer": "ground", "color": "#1c1512", "var": 10, "walk": 25 }
+  ]
+}

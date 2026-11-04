@@ -1,0 +1,25 @@
+// M1 screenshots: fire + lava at noon and at night. node prototypes/stoneward/tools/shots-m1.mjs <prefix>
+import { chromium } from 'playwright';
+const out = process.argv[2];
+const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: 402, height: 780 } });
+const logs = [];
+page.on('console', m => { if (m.type() !== 'log') logs.push(m.type() + ': ' + m.text()); });
+page.on('pageerror', e => logs.push('PAGEERROR: ' + e.message));
+await page.goto('http://localhost:8401/prototypes/stoneward/?shots&dev', { waitUntil: 'networkidle' });
+await page.click('#btn-new'); await page.click('#nw-go');
+await page.waitForFunction(() => window.gameEye.state().screen === 'hud', null, { timeout: 30000 });
+await page.waitForTimeout(3500);
+const c = (await page.evaluate(() => window.gameEye.state())).camera;
+await page.evaluate(({ x, y }) => { window.gameEye.order({ t: 'poke', kind: 'fire', x: x - 20, y: y - 30, r: 3 }); window.gameEye.order({ t: 'poke', kind: 'lava', x: x + 25, y: y + 20, r: 4 }); window.gameEye.speed(4); }, c);
+await page.waitForTimeout(5000);
+await page.screenshot({ path: out + '-noon.png' });
+await page.evaluate(() => window.gameEye.order({ t: 'time', tod: 0.72 }));
+await page.waitForTimeout(1500);
+await page.screenshot({ path: out + '-night.png' });
+await page.evaluate(() => window.gameEye.order({ t: 'time', tod: 0.5 }));
+await page.waitForTimeout(1200);
+await page.screenshot({ path: out + '-dusk.png' });
+console.log(JSON.stringify(await page.evaluate(() => window.gameEye.state())));
+console.log(logs.join('\n'));
+await browser.close();

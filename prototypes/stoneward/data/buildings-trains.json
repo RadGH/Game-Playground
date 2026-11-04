@@ -1,0 +1,34 @@
+{
+ "_doc": "Trains (M10), read by js/sim/logistics/trains.js. A station is a KINGDOM store: what a train unloads there is in stock. `trains` are kept apart from `vehicles` so they never show up in a route's vehicle list. speed = x a walker on plain ground; accel = seconds from a stop to full speed; safeAbove = share of full speed above which nothing can hurt a train; dwell = seconds at each station; carry = goods a freight train holds; seats = riders a passenger train holds; hp = how much a stopped or slow train can take; gold + cost = to add one (half the gold back when removed). rail.per = metres of track one lot of rail.cost pays for; rail.shallow = the lowest water bed (height) a rail bridge can stand on; rail.yard = metres around a station whose town stores a freight train may load from; rail.minDiff = smallest stock gap worth carrying; appealShare / appealCap = extra settlers per person a linked bigger town has more, and the most per group. research = what it will need once research gating is switched on (M12; off for now).",
+ "kinds": {
+  "station": {
+   "name": "Railway station",
+   "group": "rail",
+   "shape": "station",
+   "w": 10,
+   "h": 5,
+   "tall": 4,
+   "roof": "roof_slate",
+   "cost": { "log": 16, "stone": 8 },
+   "work": 50,
+   "storage": 300,
+   "kingdom": true,
+   "research": "railways"
+  }
+ },
+ "trains": {
+  "freight": { "name": "Freight train", "speed": 9, "accel": 7, "safeAbove": 0.5, "dwell": 6, "carry": 120, "cars": 4, "hp": 120, "gold": 60, "cost": { "iron_ore": 10 }, "research": "railways" },
+  "passenger": { "name": "Passenger train", "speed": 10, "accel": 6, "safeAbove": 0.5, "dwell": 5, "seats": 24, "cars": 3, "hp": 90, "gold": 50, "cost": { "iron_ore": 8 }, "research": "railways" }
+ },
+ "rail": {
+  "per": 4,
+  "cost": { "stone": 1, "iron_ore": 1 },
+  "shallow": 52,
+  "yard": 60,
+  "minDiff": 8,
+  "appealShare": 0.04,
+  "appealCap": 3,
+  "carSpacing": 4.2,
+  "research": "railways"
+ }
+}

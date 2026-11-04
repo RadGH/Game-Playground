@@ -1,0 +1,28 @@
+{
+  "_doc": "Progress (M12). milestones: population thresholds (owner: milestones are POPULATION) — each pays a chest of gold and goods into the keep and a landmark to place. achievements: special firsts, kept in the browser and carried over to every world. Research and tiers are wired (js/sim/unlock.js) but OFF: unlockEverything is true until the owner turns gating on.",
+  "milestones": [
+    { "pop": 50,    "gold": 150,  "goods": { "log": 40, "stone": 30 },              "landmark": "great_fountain", "title": "A real village" },
+    { "pop": 100,   "gold": 300,  "goods": { "plank": 40, "stone": 60 },            "landmark": "bell_tower",     "title": "A market town" },
+    { "pop": 250,   "gold": 600,  "goods": { "iron": 20, "plank": 60 },             "landmark": "royal_garden",   "title": "A busy town" },
+    { "pop": 500,   "gold": 1200, "goods": { "iron": 40, "stone": 200 },            "landmark": "great_statue",   "title": "A city" },
+    { "pop": 1000,  "gold": 2500, "goods": { "furniture": 20, "cloth": 40 },        "landmark": "victory_arch",   "title": "A great city" },
+    { "pop": 2500,  "gold": 5000, "goods": { "jewelry": 20, "iron": 100 },          "landmark": "obelisk",        "title": "A capital" },
+    { "pop": 5000,  "gold": 9000, "goods": { "crystal": 40, "jewelry": 40 },        "landmark": "grand_library",  "title": "The heart of a kingdom" },
+    { "pop": 10000, "gold": 20000,"goods": { "crystal": 100, "jewelry": 100 },      "landmark": "sky_spire",      "title": "A wonder of the world" }
+  ],
+  "achievements": {
+    "first_mine":    { "name": "Into the hills",      "text": "A mine is working a seam." },
+    "first_route":   { "name": "Cart by cart",        "text": "Goods arrived home along a route." },
+    "second_town":   { "name": "A second hearth",     "text": "Your kingdom has two towns." },
+    "first_walls":   { "name": "Behind the walls",    "text": "You drew your first wall." },
+    "castle":        { "name": "A castle",            "text": "Thick stone walls stand around your keep." },
+    "first_guard":   { "name": "The watch",           "text": "You hired your first guard." },
+    "raid_survived": { "name": "We held",             "text": "A raid came and went, and the keep still stands." },
+    "siege_survived":{ "name": "The siege is broken", "text": "A catapult came against you and was destroyed." },
+    "first_ally":    { "name": "A friend abroad",     "text": "Another kingdom became your ally." },
+    "first_train":   { "name": "The first train",     "text": "A train is running on your line." },
+    "first_power":   { "name": "By royal hand",       "text": "You used a ruler power." },
+    "manor":         { "name": "Lords of the town",   "text": "A home rose to a manor." },
+    "pop_1000":      { "name": "A thousand souls",    "text": "A thousand people live in your kingdom." }
+  }
+}

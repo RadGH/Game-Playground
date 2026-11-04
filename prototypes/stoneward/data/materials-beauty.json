@@ -1,0 +1,7 @@
+{
+ "_doc": "Decorations (play-test 1). basin = the stone rim of a fountain; pool = the still water inside it — drawn like water and sparkling, but it never flows out (not a liquid), so a fountain cannot flood the square.",
+ "list": [
+  { "id": "basin", "name": "Fountain basin", "layer": "cell", "color": "#a7a39a", "var": 8, "walk": 0, "hard": 150, "solid": true, "built": true, "bricks": true, "face": "#87837a", "tall": 1 },
+  { "id": "pool", "name": "Fountain water", "layer": "cell", "color": "#3f8fdc", "var": 16, "walk": 0, "hard": 150, "solid": true, "built": true, "shiny": true, "emit": "#6ab8ff", "emitStr": 0.25, "tall": 0 }
+ ]
+}

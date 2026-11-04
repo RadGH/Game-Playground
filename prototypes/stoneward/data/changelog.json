@@ -1,0 +1,47 @@
+{
+ "entries": [
+  {
+   "id": "2026-11-04",
+   "date": "2026-11-04",
+   "title": "Play-test fixes",
+   "items": [
+    "Markets, paddocks, docks, gardens and farms no longer get \"lost\" for nothing. When a building really is lost, the message says why: fire, enemies, or it was knocked down.",
+    "The game no longer drops back to 1x or blows the horn over and over just because a creature wanders near town. Only a real raid or army does that.",
+    "Fire and other world sounds only play when they happen on screen, so a far-off wildfire stays quiet.",
+    "Wildfires far from your towns spread more slowly and burn out sooner, and big ones bring rain clouds.",
+    "The build list and other long lists turn pages instead of running off the screen.",
+    "While you place a building or draw a road or wall, the panel shrinks to one slim strip so you can see the map.",
+    "Tap a found resource (the square in a dotted ring) or a monster lair (the dark square with a red rim) to see what it is. Resources get a 'Build a mine here' button, and lairs can be hidden in Views.",
+    "Raids say which direction they come from, and a red ring marks where they will appear. A ⚔ counter shows enemies near your towns (tap it to look), and arrows at the screen edge point at any you can't see.",
+    "The globe snaps in and out instead of fading, and its lit side faces you. At night the whole globe dims and town lights glow.",
+    "Fountains have water in them.",
+    "Report a problem is in the ☰ menu now, and opening the menu pauses the game."
+   ]
+  },
+  {
+   "id": "2026-11-03b",
+   "date": "2026-11-03",
+   "title": "A kingdom that runs itself",
+   "items": [
+    "Land anywhere on the globe and found your keep; settlers arrive and build their own homes along your roads.",
+    "Homes climb from tents to manors as their needs are met, and neighbours merge into bigger houses.",
+    "Find iron, coal, gold and crystals in the hills, build mines on them, and carts bring the goods home.",
+    "Workshops turn logs, ore, grain, wool and gold into planks, iron, bread, ale, cloth, furniture and jewellery.",
+    "Draw walls with towers and gates; they crack, fall and get repaired. Fire stations and neighbours fight fires.",
+    "Hire guards, post them or draw patrol loops — they answer trouble on their own. Magic towers need no crew.",
+    "Wolves, trolls, the restless dead, drakes, bandits and raiders come for you. Rival kingdoms may be friends or foes.",
+    "Seven ruler powers paid in faith, trains between your towns, milestones with landmarks to raise, and achievements."
+   ]
+  },
+  {
+   "id": "2026-11-03",
+   "date": "2026-11-03",
+   "title": "A whole world",
+   "items": [
+    "Make a world in six sizes, from X-tiny to X-large.",
+    "The map wraps all the way around; zoom out and it becomes a spinning globe.",
+    "Turn on 'Good places to settle' to see where a kingdom could start."
+   ]
+  }
+ ]
+}

@@ -85,15 +85,16 @@ hooks.tick.push((msg, ui) => {
   for (const e of msg.said || []) if (e.warn) showBanner(ui, e);
   if (msg.attack && ui.app.prefs.slowOnAttack && ui.app.speed > 1) ui.setSpeed?.(1);
 });
-// ---- enemies near your towns: a ⚔ pill in the top bar (tap to look at the next one) and arrows at
+// ---- enemies near your towns: a ⚔ pill on the row under the top bar (never in the top bar — it pushed
+// the speed button off an iPhone screen) (tap to look at the next one) and arrows at
 // the screen edge pointing at any that are off screen
 let pill = null, pillIdx = 0;
 hooks.tick.push((msg, ui) => {
   const near = ui.app.stream?.town?.military?.near || [];
   if (!pill) {
-    pill = document.createElement('button'); pill.className = 'icon-btn enemy-pill hidden';
+    pill = document.createElement('button'); pill.className = 'enemy-pill hidden';
     pill.addEventListener('click', () => { const list = ui.app.stream?.town?.military?.near || []; if (!list.length) return; const [x, y] = list[pillIdx++ % list.length]; ui.camera()?.flyTo(x, y, Math.max(2.5, ui.camera().cam.ppc), 700); });
-    document.querySelector('#btn-speed')?.before(pill);
+    document.querySelector('.where')?.append(pill);
   }
   pill.classList.toggle('hidden', !near.length);
   pill.textContent = '⚔ ' + near.length;

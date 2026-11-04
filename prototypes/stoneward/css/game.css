@@ -55,16 +55,16 @@ input, select { font: inherit; color: var(--ink); background: #120f0b; border: 1
 .dock-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-wrap: wrap; gap: 6px; max-height: 40vh; overflow: hidden; }
 .dock-panel h3 { width: 100%; margin: 0; font-size: .95em; color: var(--gold); }
 .dock-panel p { width: 100%; margin: 0; color: var(--dim); font-size: .9em; }
-#toasts { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
+#toasts { position: absolute; top: 104px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
 .toast.go { pointer-events: auto; cursor: pointer; text-decoration: underline dotted; }
 .toast { background: #000c; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; font-size: .9em; }
 .sheet { position: absolute; left: 8px; right: 8px; bottom: 112px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: .92em; }
 @media (min-width: 900px) { .dock { left: 50%; transform: translateX(-50%); width: 640px; } .sheet { left: auto; right: 12px; width: 340px; top: 70px; bottom: auto; } }
 
-.where { position: absolute; top: 58px; left: 8px; pointer-events: none; }
+#hud > .where { position: absolute; top: 58px; left: 8px; right: 8px; pointer-events: none; display: flex; gap: 6px; align-items: center; }
 .where .stat { font-size: .8em; opacity: .85; }
 #btn-speed { font-size: 15px; font-weight: bold; flex-shrink: 0; }
-#st-clock { flex-shrink: 0; max-width: none; }
+#st-clock { flex-shrink: 1; max-width: none; }
 
 #landing { position: fixed; left: 8px; right: 8px; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 15; display: flex; justify-content: center; pointer-events: none; }
 .landing-card { pointer-events: auto; background: var(--panel); border: 1px solid var(--gold); border-radius: 14px; padding: 12px 14px; width: min(440px, 100%); display: flex; flex-direction: column; gap: 6px; }
@@ -94,7 +94,7 @@ input, select { font: inherit; color: var(--ink); background: #120f0b; border: 1
 .dock-panel .list { overflow: hidden; }
 .dock-panel { max-height: 58vh; }
 
-.banner-warn { position: absolute; top: 96px; left: 50%; transform: translateX(-50%); width: min(420px, calc(100% - 32px)); background: #5a1a12ee; border: 1px solid var(--red); border-radius: 10px; padding: 10px 12px; font-weight: bold; text-align: center; cursor: pointer; }
+.banner-warn { position: absolute; top: 104px; left: 50%; transform: translateX(-50%); width: min(420px, calc(100% - 32px)); background: #5a1a12ee; border: 1px solid var(--red); border-radius: 10px; padding: 10px 12px; font-weight: bold; text-align: center; cursor: pointer; }
 .dock-tabs button { min-width: 0; padding: 0 2px; font-size: .78em; }
 
 .celebrate { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); width: min(420px, calc(100% - 32px)); background: #3b2c10f0; border: 2px solid var(--gold); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; text-align: center; box-shadow: 0 0 30px #e2b65a55; z-index: 12; animation: pop .35s ease-out; }
@@ -116,4 +116,13 @@ input, select { font: inherit; color: var(--ink); background: #120f0b; border: 1
 .strip button { min-height: 40px; }
 .groups button { min-height: 32px; padding: 0 8px; font-size: .8em; }
 #menu .panel { overflow: hidden; }
-.enemy-pill { color: #ffb3a6; border-color: var(--red); background: #3a1410; font-size: 14px; font-weight: bold; padding: 0 8px; flex-shrink: 0; }
+.enemy-pill { pointer-events: auto; color: #ffb3a6; border-color: var(--red); background: #3a1410; font-size: 14px; font-weight: bold; padding: 0 10px; min-height: 34px; flex-shrink: 0; }
+/* the top bar holds only ☰, people, gold, faith, clock and speed — nothing else goes up there.
+   ☰ and speed never shrink; on a phone the stats tighten and the clock gives way first */
+.topbar > * { flex-shrink: 1; }
+#btn-menu, #btn-speed { flex-shrink: 0; }
+@media (max-width: 480px) {
+  .topbar { gap: 4px; padding-left: 6px; padding-right: 6px; }
+  .topbar .stat { padding: 5px 6px; font-size: .78em; }
+  .topbar .icon-btn { min-width: 40px; }
+}

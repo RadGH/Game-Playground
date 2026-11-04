@@ -293,6 +293,11 @@ details.owned summary { cursor: pointer; color: var(--dim); min-height: 44px; di
 .save-open b { font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .save-open small { color: var(--dim); font-size: 14px; }
 .save-del { width: 48px; flex: none; border-radius: 14px; background: #1e1630; border: 1px solid #3a2d58; color: var(--dim); font-size: 18px; }
+.hist-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; padding: 6px 10px; border-radius: 12px; background: #1b1430; border: 1px solid #2f2448; }
+.hist-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.hist-info b { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-info small { color: var(--dim); font-size: 13px; overflow-wrap: anywhere; }
+.hist-row .small-btn { flex: none; }
 .game-name { display: block; width: 100%; box-sizing: border-box; min-height: 46px; margin: 12px 0; padding: 0 12px; border-radius: 12px; background: #1e1630; border: 1px solid #3a2d58; color: var(--text); font: inherit; font-size: 17px; }
 .realm-strip .gold { border-color: var(--gold); color: var(--gold2); }
 .run-action { position: absolute; top: calc(var(--safe-t) + 92px); left: 50%; transform: translateX(-50%); min-height: 44px; padding: 0 16px; border-radius: 12px; background: linear-gradient(180deg, #5a3a20, #3a2412); border: 1px solid var(--gold); color: var(--gold2); font-size: 16px; white-space: nowrap; }
@@ -303,6 +308,9 @@ details.owned summary { cursor: pointer; color: var(--dim); min-height: 44px; di
 .base-buttons { display: flex; gap: 8px; margin-top: 6px; }
 .base-buttons button { flex: 1; }
 .base-buttons button:disabled { opacity: 0.4; }
+.seed-row { display: flex; gap: 6px; align-items: center; justify-content: center; flex-wrap: wrap; margin: 4px 0; }
+.seed-row label { color: var(--dim); font-size: 16px; }
+.seed-row input { width: 9.5em; font: inherit; font-size: 18px; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.35); color: var(--text); text-align: center; user-select: text; -webkit-user-select: text; touch-action: manipulation; }
 @media (min-width: 700px) { .base-pick { left: 50%; right: auto; width: 460px; transform: translateX(-50%); } }
 
 /* phone top bar (owner 2026-10-30): the objective matters most, so it takes the room; the report button lives in the menu */

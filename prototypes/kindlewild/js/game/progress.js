@@ -211,6 +211,14 @@ export function mergeSaves(a, b, data, keep = a.settings) {
   out.seenIntro = { ...(O.seenIntro || {}), ...(out.seenIntro || {}) };
   for (const [k, v] of Object.entries(O.stats || {})) out.stats[k] = Math.max(out.stats[k] || 0, v || 0);
   if ((O.realm?.day || 0) > (out.realm?.day || 0)) out.realm = O.realm;
+  // custom-game bests and the finished-games history: keep both devices' rows (a row is one game, keyed by when it ended)
+  for (const [t, r] of Object.entries(O.records || {})) { const m = (out.records ||= {})[t]; if (!m || (r.score ?? -1) > (m.score ?? -1)) out.records[t] = r; }
+  if (O.history?.length) {
+    const seen = new Set((out.history ||= []).map(h => h.at + ':' + h.seed));
+    for (const h of O.history) if (!seen.has(h.at + ':' + h.seed)) out.history.push(h);
+    out.history.sort((x, y) => y.at - x.at);
+    out.history.length = Math.min(out.history.length, 60);
+  }
   out.essenceTotal = (M.essenceTotal || 0) + earned;
   out.essence = Math.max(0, (M.essence || 0) + earned - spent);
   if (keep) out.settings = structuredClone(keep);

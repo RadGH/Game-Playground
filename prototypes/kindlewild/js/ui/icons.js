@@ -133,9 +133,10 @@ function materialArt(data, id, n) {
 function structureArt(data, id, n) {
   const K = data.structures.kinds[id], M = data.compiled;
   if (!K) return null;
-  const rows = K.cells, cells = rows.length, px = Math.floor(n / cells), o = Math.floor((n - px * cells) / 2);
+  const rows = K.cells || K.art, cells = rows.length, px = Math.floor(n / cells), o = Math.floor((n - px * cells) / 2);
   const c = canvas(n), g = c.getContext('2d');
   rows.forEach((row, y) => { for (let x = 0; x < row.length; x++) {
+    if (row[x] === '.') continue;   // a trap's picture shows the ground through it
     const m = M.id[data.structures.key[row[x]]];
     const k = ((hash2(x * 3, y * 5) - 128) * M.vary[m]) >> 7;
     g.fillStyle = `rgb(${M.r[m] + k},${M.g[m] + k},${M.b[m] + k})`;

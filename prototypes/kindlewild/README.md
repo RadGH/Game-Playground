@@ -183,7 +183,8 @@ Owner: "replace Realm with Custom Game". The title's Sandbox button opens the sa
 sizes are data: `data/gamemodes.json`. `js/game/modes.js` = `fillSetup`, `newGame`, `saveGame`, `loadGame`; a type other than Realm
 and Sandbox attaches a **run** to the session: `s.run` = { id, name, strip(), goal(), progress?, panel(), action?, collect(), state(),
 save(), load(), pages?, hideTabs?, startTab?, draw? }. Play reads only that interface. End a run with `s.finishRun({ won, title, text,
-score, label, essence })`; records go to `save.records`, and a finished game's save is deleted.
+score, label, essence })`; the best score per type goes to `save.records` and every finished game to `save.history` (see
+"Round of 2026-11-04" below); the world save itself is deleted.
 
 - **Saves**: one localStorage key per game (`kindlewild.game.<id>`) + an index (`kindlewild.games`), 12 at most, autosaved every minute and
   on leaving. An XL world is ~700 KB. **Game worlds do NOT go to the account**: rgs-api takes 2 MB a request and all slots upload together,
@@ -207,3 +208,34 @@ score, label, essence })`; records go to `save.records`, and a finished game's s
 - **Reach goals** end when every traveller has arrived or died, 45 s after the count is met (`stragglerSecs`), or at the time limit.
 
 - **Round of 2026-10-30 (reports #9-#12)**: a `destroy` goal keeps `g.marks` (`clumps()` in `js/game/objectives.js`), one gold ring on the map per patch left (`js/ui/stage.js`); `markWord` adds a count to the goal chip and `hint: { secs, text }` nudges a player who has not touched it and points the camera. **Burning liquids do not flow**: `ignite` fills `life` to the fuel, and `life` is also a liquid's amount, so flowing while lit made pitch out of nothing (49 cells -> 15,771 in 8 s). Shooters hold their ground between shots and close in only when out of range, too close to shoot, or the target flies. Boost `unitDamage` (Sharper steel) goes through `sim.unitDamage`, set in `begin()`, and applies to any `hurt` whose `by` is `'village'`; towers are not included.
+
+- **Round of 2026-11-04 (owner: "build 2 archer towers and survive until wave 18")**:
+  - **Title**: a 🗼 Tower Defense button above Sandbox opens the setup form with Tower Defense picked.
+  - **Map review**: every new custom game (title, Custom Game, "New map", "Same map") starts with `s.reviewing = true`, which stops the
+    clock like `s.placing`. `#map-review` (play.js `startReview` / `P.acceptMap`) shows the whole map and its seed: type a number (or a
+    word, hashed with FNV) and Go, or 🎲 New map; `app.reviewSeed(seed)` in main.js builds a fresh session and calls `begin` again.
+    One finger pans while reviewing. Enter / pad A = Play this map, then the base is chosen as before. `gameEye.custom()` /
+    `gameEye.sandbox()` skip the review unless `setup.review` is set (scripts and old specs).
+  - **History**: `app.runOver` adds a row to `save.history` (newest first, 60 at most: type, title, land, size, difficulty, length,
+    seed, won, label, score, secs, at). It syncs with progress; `mergeSaves` keeps both devices' rows and the better `records`.
+    Custom Game lists them under Finished games with a **Same map** button (`app.replay`). The result card names the seed;
+    a won Tower Defense game offers **Keep going (endless)** (`run.keepGoing()` clears `s.result` and the length).
+  - **Enemies** (`ROSTER` in towers.js, 21 kinds, 10 of them new in `data/creatures.json`: ratling, ironclad, duskwing, hexer,
+    delver, broodsack, wardbearer, ram, gloomrider, lich). A runner carries `c.td` (saved through realm.js `saveWorld` extra):
+    `armor` (taken off every tower hit; a fifth always gets through), `shield` (from a wardbearer, soaks first), `heals`
+    (hexer: 6% max hp to runners within 10 every 1.5 s), `wards` (30% max hp shield every 6 s), `burrows` (delver: `c.under` 2.5 s
+    of every 6; creatures.js does not draw it and towers do not see it), `brood` (6 mites on death), `summons` (lich: 2 skeletons
+    every 4 s), `gen` (a slime splits twice at most: before this a late slime made 127), elites from wave 12 (`armoured` +4 armour,
+    `swift` `c.speedK` 1.35, `mending` 1.2%/s), champions every 5th wave from 15, bosses every 10th in turn (troll, dragon, lich,
+    ram). A type's first wave puts it at the front and fires `enemy-new` with a tip. `MAX_PER_WAVE` 150: past it the crowd gets
+    tougher, not bigger. hp per wave `(1 + 0.17(n-1)) * 1.042^n`, size `8 + 1.9n`, 1-4 groups.
+  - **Towers** (`data/structures.json`): every tower hit goes through `strike()` (armour, shield, tar doubles fire).
+    New: Spike Trap and Tar Pit (`group: "trap"`: no cells, never block the road, so no road test; `art` is only the tile picture;
+    drawn by `run.draw`), Arbalest (`pierce`), Venom Spitter (`fire: "venom"`: up to 5 stacks of poison that skip armour and
+    shields), Sun Shrine (`fire: "sun"`: x3 to the undead, clears shields, `reveal` stops burrowing), Trebuchet (`minRange`).
+    Upgrades go to level 4 (cost x1, x1.8, x3; dmg x1.35 a level). Archers 35 gold, 9 damage. Slow from tar is `c.slowT/slowK` in
+    creatures.js `move`.
+  - **Balance** (`node tools/td-bot.mjs [seeds] [waves] [difficulty...]`, strategies idle / lazy / bot, 20 waves): idle loses on
+    wave 1-3; **lazy (two Archers, upgraded) falls on wave 7-11 on Fair** (was 18) and 6-10 on Fierce; the crude bot (no spells,
+    a little mazing, no upgrades) wins Gentle 20 about half the time and reaches 16-20 on Fair, 6-13 on Fierce. Fierce: 12 lives,
+    gates on waves 1/6/12. `tests/td2.test.mjs` holds the rules and the two-Archer check.

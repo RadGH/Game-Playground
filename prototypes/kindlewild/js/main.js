@@ -95,8 +95,9 @@ for (const b of document.querySelectorAll('[data-back]')) b.addEventListener('cl
 });
 app.openGrimoire = () => { grimFromGame = true; if (play.s) play.s.paused = true; screen('grimoire'); };
 $('#go-challenges').addEventListener('click', () => screen('challenges'));
+$('#go-td').addEventListener('click', () => { form = fillSetup(data, { ...form, type: 'td', size: undefined }); fromTitle = true; screen('custom-new'); });
 $('#go-sandbox').addEventListener('click', () => { form = fillSetup(data, { ...form, type: 'sandbox', endless: save.settings.endless, everything: save.settings.everything }); fromTitle = true; screen('custom-new'); });
-$('#go-custom').addEventListener('click', () => { if (!games().length) { fromTitle = true; form = fillSetup(data, { ...form, type: 'realm' }); screen('custom-new'); } else screen('custom'); });
+$('#go-custom').addEventListener('click', () => { if (!games().length && !(save.history || []).length) { fromTitle = true; form = fillSetup(data, { ...form, type: 'realm' }); screen('custom-new'); } else screen('custom'); });
 $('#custom-new-back').addEventListener('click', () => { sound('ui.close', {}, 50); screen(fromTitle ? 'title' : 'custom'); });
 $('#go-grimoire').addEventListener('click', () => screen('grimoire'));
 $('#go-settings').addEventListener('click', () => app.settings());
@@ -186,7 +187,7 @@ app.restart = () => {
   closeModals();
   const c = app.current;
   if (!c) return;
-  // a custom game starts again on fresh land, with the same choices
+  // a custom game starts again on fresh land, with the same choices (and the map to look over first)
   if (c.custom) return startCustom({ ...c.cfg.session.setup, seed: undefined });
   begin(c.kind, c.cfg, c.level);
 };
@@ -245,28 +246,49 @@ function writeGame() {
   setGames([row, ...games().filter(g => g.id !== id)]);
   PR.writeSave(save);
 }
-function startCustom(setup) {
+// A new custom game opens on its map with the clock stopped: the player can look it over, type a seed or roll again
+// (owner 2026-11-04), then place the base. play.js shows the panel; app.reviewSeed swaps the session for another seed.
+function startCustom(setup, review = true) {
   const list = games();
   if (list.length >= MAX_GAMES) { toast(`You have ${MAX_GAMES} saved games. Delete one first.`, 'warn', 3000); return; }
   const s = newGame(data, setup, player());
+  s.reviewing = review;
   begin(s.setup.type, { session: s }, null);
 }
+app.reviewSeed = (seed) => {
+  const old = play.s;
+  if (!old?.reviewing) return;
+  const cam = { ...stage.cam };
+  const s = newGame(data, { ...old.setup, seed: seed ?? undefined }, player());
+  s.reviewing = true;
+  begin(s.setup.type, { session: s }, null);
+  if (old.sim.world.W === s.sim.world.W) Object.assign(stage.cam, cam);   // keep the view where it was
+};
 function openGame(g) {
   const str = ls.get(GAME_KEY(g.id));
   if (!str) { toast('That save is missing.', 'warn'); dropGame(g.id); drawCustom(); return; }
   try { const s = loadGame(data, str, player()); begin(s.setup.type, { session: s, gameId: g.id }, null); }
   catch (e) { console.error(e); toast('That game could not be loaded: ' + e.message, 'warn'); }
 }
+// A finished game goes into the history (owner 2026-11-04: keep the result and its seed instead of just deleting the save).
+// The world itself is not kept (an XL one is 700 KB); the row holds everything needed to play the same map again.
+const HISTORY_MAX = 60;
 app.runOver = (r) => {
-  const t = play.s.setup.type, recs = save.records ||= {};
+  const s = play.s, setup = s.setup, t = setup.type, recs = save.records ||= {};
   const best = recs[t] || null;
   if (r.score != null && (!best || r.score > best.score)) recs[t] = { score: r.score, label: r.label };
   if (r.essence) app.earn(r.essence);
+  const row = { type: t, title: titleOf(data, setup), recipe: setup.recipe, size: setup.size, difficulty: setup.difficulty, length: setup.length, liquid: setup.liquid, events: setup.events,
+    seed: setup.seed, won: !!r.won, label: r.label || '', score: r.score ?? null, secs: Math.round(r.secs || 0), at: Date.now() };
+  (save.history ||= []).unshift(row);
+  save.history.length = Math.min(save.history.length, HISTORY_MAX);
   if (app.current?.gameId) dropGame(app.current.gameId);
   app.current.gameId = null;
   app.saveNow();
-  return { best };
+  return { best, row };
 };
+/** Play a finished game's map again: same type, land, size, choices and seed. */
+app.replay = (row) => { closeModals(); startCustom({ ...row, name: "" }); };
 function drawCustom() {
   const box = $('#custom-body');
   box.innerHTML = '';
@@ -284,6 +306,17 @@ function drawCustom() {
   }
   const best = Object.entries(save.records || {}).filter(([t]) => data.gamemodes.types[t]);
   if (best.length) box.append(el('p', { class: 'tip', text: 'Best: ' + best.map(([t, r]) => `${data.gamemodes.types[t].name} ${r.label}`).join(' · ') }));
+  const hist = (save.history || []).filter(h => data.gamemodes.types[h.type]);
+  if (!hist.length) return;
+  box.append(el('h3', { text: 'Finished games' }));
+  for (const h of hist) {
+    const G = data.gamemodes, when = new Date(h.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const bits = [G.types[h.type].name, h.type === 'td' || G.types[h.type].opts?.includes('difficulty') ? G.difficulty[h.difficulty]?.name : null, G.sizes[h.size]?.name, `seed ${h.seed}`, when].filter(Boolean);
+    const info = el('div', { class: 'hist-info' }, el('b', { text: `${h.won ? '🏆' : '💀'} ${h.title}` }), el('small', { text: `${h.won ? 'Won' : 'Lost'}${h.label ? ' · ' + h.label : ''}${h.secs ? ' · ' + Math.round(h.secs / 60) + ' min' : ''}` }), el('small', { text: bits.join(' · ') }));
+    const again = el('button', { class: 'small-btn', text: 'Same map', 'aria-label': `Play ${h.title} on seed ${h.seed} again` });
+    again.addEventListener('click', () => app.replay(h));
+    box.append(el('div', { class: 'hist-row' }, info, again));
+  }
 }
 function seg(label, value, options, pick) {
   const row = el('div', { class: 'seg' }, ...options.map(([v, name]) => { const b = el('button', { class: String(v) === String(value) ? 'on' : '', text: name }); b.addEventListener('click', () => pick(v)); return b; }));
@@ -489,8 +522,9 @@ window.gameEye = {
   use: (page, x, y, o) => play.s?.use(page, x, y, o),
   select: (page) => play.select(page),
   startLevel: (id) => app.startLevel(id === 'trial' ? makeTrial(dayKey(), save.pages) : data.levels.acts.flatMap(a => a.levels).find(l => l.id === id)),
-  sandbox: (recipe = 'greenvale') => startCustom({ type: 'sandbox', recipe, base: 'random', endless: true }),
-  custom: (setup) => startCustom(setup),
+  // scripts skip the map review unless they ask for it (setup.review)
+  sandbox: (recipe = 'greenvale') => startCustom({ type: 'sandbox', recipe, base: 'random', endless: true }, false),
+  custom: (setup) => startCustom(setup, !!setup.review),
   placeBase: () => { const at = play.s?.suggestBase(); if (at) play.pickBase(at); play.confirmBase(); },
   writeGame,
   step: (n = 30) => { for (let k = 0; k < n; k++) play.s?.step(); },

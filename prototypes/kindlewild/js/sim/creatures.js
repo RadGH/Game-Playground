@@ -717,6 +717,9 @@ export function createCreatures(sim, species) {
       if (c.z === 0) { if (c.vz < -1.2) hurt(c, -c.vz * 4, 'fall', c.lastHurtBy); c.vz = 0; }
     }
     let speed = sp.speed * (c.frozen > 0 ? 0.3 : 1) * (c.state === 'flee' || c.state === 'panic' ? 1.35 : 1) * (c.state === 'wander' ? 0.6 : 1);
+    // tower defense: tar slows (c.slowT ticks at c.slowK), an elite can be swift (c.speedK)
+    if (c.slowT > 0) { c.slowT--; speed *= c.slowK ?? 0.5; }
+    if (c.speedK) speed *= c.speedK;
     if (c.age < sp.adultAt * TPS) speed *= 0.8;
     // knock-back first
     if (Math.abs(c.kx) + Math.abs(c.ky) > 0.01) {
@@ -958,11 +961,13 @@ export function createCreatures(sim, species) {
     return F.walk || F.fly;
   }
   function drawShadow(api, c) {
+    if (c.under) return;
     const f = frameOf(c, 0);
     const k = Math.max(0.45, 0.75 - c.z * 0.01);
     for (const p of f.px) api.shade(c.x + p.x * c.dir + 1 + c.z * 0.15, c.y + p.y + c.z * 0.25 * 0 + 1, k);
   }
   function drawOne(api, c, tick) {
+    if (c.under) return;   // a burrowing runner is out of sight (towers.js draws the mound)
     const f = frameOf(c, tick);
     const lift = c.z * 0.7;
     const fl = c.hurtFlash > 0;

@@ -30,9 +30,9 @@ export function createPlay(app) {
     app.stage.setSession(session);
     const v0 = session.sim.village.list.find(v => v.alive);
     const keep = session.sim.td?.keep;
-    app.stage.wholeMap = kind === 'challenge' || !!session.placing;
+    app.stage.wholeMap = kind === 'challenge' || !!session.placing || !!session.reviewing;
     app.stage.fit(level?.focus || (keep ? [keep.x, keep.y + 10] : kind !== 'challenge' && v0 ? [v0.x, v0.y + 10] : null));
-    show('hud'); show('dock', !session.placing); show('dock-open', false); P.collapsed = false;
+    show('hud'); show('dock', !session.placing && !session.reviewing); show('dock-open', false); P.collapsed = false;
     document.body.classList.add('playing'); dispatchEvent(new Event('resize'));
     const strip = !!(session.realm || session.run);
     $('#realm-strip').classList.toggle('hidden', !strip);
@@ -44,9 +44,44 @@ export function createPlay(app) {
     renderTabs(); renderTiles(); renderSel();
     setTimeout(dockH, 30);
     wireSession(session);
-    if (session.placing) startPicking();
+    if (session.reviewing) startReview();
+    else if (session.placing) startPicking();
     else if (level) showIntro(); else if (kind === 'sandbox') toast('Tap a tile, then touch the land. Two fingers move the view.', '', 4200);
   };
+  // ---------- looking the map over first (owner 2026-11-04: reroll until you find a good map) ----------
+  // A custom game opens on its whole map with the clock stopped (s.reviewing). The seed can be typed over or rolled again;
+  // app.reviewSeed builds a fresh session and calls P.start again. Then the base is chosen as before.
+  function startReview() {
+    show('map-review'); show('base-pick', false);
+    $('#seed-input').value = String(P.s.setup?.seed ?? P.s.seed ?? '');
+  }
+  P.acceptMap = function () {
+    const s = P.s;
+    if (!s?.reviewing) return;
+    s.reviewing = false;
+    show('map-review', false);
+    sound('ui.open', {}, 50);
+    if (s.placing) { startPicking(); return; }
+    show('dock');
+    app.stage.wholeMap = false;
+    const keep = s.sim.td?.keep, v0 = s.sim.village.list.find(v => v.alive);
+    app.stage.fit(keep ? [keep.x, keep.y + 10] : v0 ? [v0.x, v0.y + 10] : null);
+    dispatchEvent(new Event('resize'));
+    if (P.kind === 'sandbox') toast('Tap a tile, then touch the land. Two fingers move the view.', '', 4200);
+  };
+  const typedSeed = () => {
+    const t = $('#seed-input').value.trim();
+    if (!t) return null;
+    if (/^\d+$/.test(t)) return +t % 1e12;
+    let h = 2166136261;   // words are fine too: they are hashed into a number
+    for (const ch of t) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
+    return h;
+  };
+  $('#seed-go').addEventListener('click', () => app.reviewSeed(typedSeed()));
+  $('#seed-roll').addEventListener('click', () => app.reviewSeed(null));
+  $('#seed-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); app.reviewSeed(typedSeed()); } });
+  $('#review-ok').addEventListener('click', () => P.acceptMap());
+
   // ---------- choosing where the base goes ----------
   function startPicking() {
     show('base-pick');
@@ -83,7 +118,7 @@ export function createPlay(app) {
     P.s = null;
     P.amb = null; stopAmbience();
     document.body.classList.remove('playing'); dispatchEvent(new Event('resize'));
-    show('hud', false); show('dock', false); show('dock-open', false); show('base-pick', false);
+    show('hud', false); show('dock', false); show('dock-open', false); show('base-pick', false); show('map-review', false);
     $('#inspect').classList.add('hidden');
   };
 
@@ -118,6 +153,7 @@ export function createPlay(app) {
     sim.on('omen-end', (e) => toast(`${e.name} is over — +${e.essence} ✦`, 'good', 3000));
     sim.on('blessing', (e) => { banner(e.name); toast(`${e.text} +${e.essence} ✦`, 'good', 3600); });
     sim.on('wave-end', (e) => toast(`Wave ${e.wave} beaten — +${e.gold} gold`, 'good', 2600));
+    sim.on('enemy-new', (e) => toast(`New enemy: <b>${e.name}</b>. ${e.tip}`, 'disc', 6000));
     sim.on('structures-new', (e) => { toast(`New: <b>${e.names.join(', ')}</b>`, 'disc', 3600); renderTabs(); renderTiles(); });
     sim.on('structure-lost', (e) => toast(`A ${e.st.K.name} was destroyed`, 'warn', 2000));
     sim.on('keep-hit', (e) => { buzz(30); if (e.lives <= 5) banner(`${e.lives} lives left!`, 900); });
@@ -376,7 +412,7 @@ export function createPlay(app) {
     }
     if (P.pointers.size > 2) return;
     const panning = P.hand || e.button === 1 || e.button === 2 || (e.pointerType === 'mouse' && e.shiftKey);
-    if (panning) { P.gesture = { kind: 'pan', x: e.clientX, y: e.clientY, cam: { ...app.stage.cam } }; return; }
+    if (panning || P.s.reviewing) { P.gesture = { kind: 'pan', x: e.clientX, y: e.clientY, cam: { ...app.stage.cam } }; return; }
     const [wx, wy] = worldAt(e.clientX, e.clientY);
     if (P.s.placing) { P.gesture = { kind: 'pick' }; P.pickBase([wx, wy]); return; }
     const page = P.page;
@@ -524,10 +560,10 @@ export function createPlay(app) {
     }
     if (s.run) {
       text = s.run.goal();
-      $('#realm-strip').innerHTML = s.placing ? '' : s.run.strip();
+      $('#realm-strip').innerHTML = s.placing || s.reviewing ? '' : s.run.strip();
       const got = s.run.collect?.();
       if (got) app.earn(got);
-      const act = s.placing ? null : s.run.action?.();
+      const act = s.placing || s.reviewing ? null : s.run.action?.();
       const ab = $('#run-action');
       ab.classList.toggle('hidden', !act);
       if (act) { ab.textContent = act.label; P.runAct = act.run; }
@@ -624,7 +660,7 @@ export function createPlay(app) {
     if (P.s.run) buttons.push({ label: P.s.run.name, onClick: () => setTimeout(runPanel, 50) });
     if (P.kind !== 'challenge') buttons.push({ label: 'Upgrades', onClick: () => setTimeout(() => app.openGrimoire(), 50) });
     buttons.push({ label: 'Settings', onClick: () => setTimeout(() => app.settings(), 50) }, { label: "What's new", onClick: () => app.news.open() }, { label: 'Credits', onClick: () => setTimeout(() => app.credits.open(), 50) }, { label: '! Report a problem', onClick: () => setTimeout(() => app.report(), 50) }, { label: app.current?.custom ? 'Save and leave' : 'Leave', cls: 'small-btn', onClick: () => app.quit() });
-    modal({ title: 'Paused', body: [], buttons, onClose: () => { if (P.s) P.s.paused = was; } });
+    modal({ title: 'Paused', body: P.s.setup ? [el('p', { class: 'tip', style: { textAlign: 'center' }, text: `Map seed ${P.s.setup.seed}` })] : [], buttons, onClose: () => { if (P.s) P.s.paused = was; } });
   }
   P.openMenu = openMenu;
 
@@ -656,11 +692,16 @@ export function createPlay(app) {
 
   function showRunResult(r) {
     if (!P.s) return;
-    const { best } = app.runOver(r);
+    const { best, row } = app.runOver(r);
     const body = [el('p', { style: { textAlign: 'center' }, text: r.text })];
     if (r.essence) body.push(el('div', { class: 'essence-gain', text: `+${r.essence} ✦ Essence` }));
     if (r.score != null) body.push(el('p', { class: 'tip', style: { textAlign: 'center' }, text: !best ? `First score: ${r.label}` : r.score > best.score ? `New best: ${r.label} (was ${best.label})` : `Your best: ${best.label}` }));
-    modal({ title: r.title, body, buttons: [{ label: '↻ Same again, new land', cls: 'big go', onClick: () => app.restart() }, { label: 'Leave', cls: 'small-btn', onClick: () => app.exitTo('custom') }], cls: 'sticky' });
+    body.push(el('p', { class: 'tip', style: { textAlign: 'center' }, text: `Map seed ${row.seed}. This game is kept under Finished games in Custom Game.` }));
+    const buttons = [];
+    // a won Tower Defense can carry on as an endless one
+    if (r.won && P.s.run?.keepGoing) buttons.push({ label: 'Keep going (endless)', cls: 'big go', onClick: () => { P.s.run.keepGoing(); toast('Endless: the waves keep coming.', 'warn', 3000); } });
+    buttons.push({ label: '↻ Same map again', cls: r.won && P.s.run?.keepGoing ? 'big' : 'big go', onClick: () => app.replay(row) }, { label: 'New map', cls: 'big', onClick: () => app.restart() }, { label: 'Leave', cls: 'small-btn', onClick: () => app.exitTo('custom') });
+    modal({ title: r.title, body, buttons, cls: 'sticky' });
   }
 
   function rating(L) {
@@ -717,7 +758,10 @@ export function createPlay(app) {
     app.stage.clamp();
   });
   $('#run-action').addEventListener('click', () => P.runAct?.());
-  addEventListener('keydown', (e) => { if (e.key === 'Enter' && P.s?.placing && !document.querySelector('.modal-back')) P.confirmBase(); });
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || document.querySelector('.modal-back') || e.target.tagName === 'INPUT') return;
+    if (P.s?.reviewing) P.acceptMap(); else if (P.s?.placing) P.confirmBase();
+  });
   P.nextTab = (d) => {
     const avail = TABS.filter(t => pagesOf(t).length);
     if (!avail.length) return;
@@ -735,6 +779,7 @@ export function createPlay(app) {
   // controller: press/hold/release at a world point, like a finger
   P.padDown = (wx, wy) => {
     const page = P.page;
+    if (P.s?.reviewing) { P.acceptMap(); return; }
     if (P.s?.placing) { P.pickBase([wx, wy]); P.confirmBase(); return; }
     if (!page || !P.s) return;
     if (page === 'tool:grab') { P.held = P.s.grab(wx, wy); P.gesture = { kind: 'grab', hist: [[wx, wy, performance.now()]] }; return; }

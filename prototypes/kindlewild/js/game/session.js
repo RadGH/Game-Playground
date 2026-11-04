@@ -417,7 +417,7 @@ export function createSession(rawData, cfg = {}) {
 
   // ---------- the tick ----------
   s.step = function () {
-    if (s.paused || s.result || s.placing) return;
+    if (s.paused || s.result || s.placing || s.reviewing) return;
     sim.step();
     s.stats.ticks++;
     if (!s.endless) s.mana.cur = Math.min(s.mana.max, s.mana.cur + s.mana.regen / TPS * (s.regenScale ?? 1));

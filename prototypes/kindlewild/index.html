@@ -62,6 +62,12 @@
   </div>
 </div>
 <button id="dock-open" class="dock-open hidden" aria-label="Show the tools">▴ Tools</button>
+<div id="map-review" class="base-pick hidden">
+  <b>Your map</b>
+  <small id="review-why">Drag to look around. Not keen? Roll a new one.</small>
+  <div class="seed-row"><label for="seed-input">Seed</label><input id="seed-input" type="text" inputmode="numeric" maxlength="12" autocomplete="off" aria-label="Map seed"><button class="small-btn" id="seed-go">Go</button><button class="small-btn" id="seed-roll" aria-label="New random map">🎲 New map</button></div>
+  <div class="base-buttons"><button class="big go" id="review-ok">Play this map</button></div>
+</div>
 <div id="base-pick" class="base-pick hidden">
   <b id="base-title">Choose where your base goes</b>
   <small id="base-why">Tap the land. Two fingers move the view.</small>
@@ -76,6 +82,7 @@
     <div class="essence-pill" id="title-essence">✦ 0</div>
     <div class="title-buttons">
       <button class="big" id="go-challenges">⚔️ Challenges</button>
+      <button class="big" id="go-td">🗼 Tower Defense</button>
       <button class="big" id="go-sandbox">🌋 Sandbox</button>
       <button class="big" id="go-custom">🏰 Custom Game</button>
       <button class="big" id="go-grimoire">📖 Upgrades <span class="dot hidden" id="grim-dot"></span></button>

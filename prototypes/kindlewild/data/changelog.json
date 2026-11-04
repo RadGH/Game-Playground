@@ -1,6 +1,20 @@
 {
  "entries": [
   {
+   "id": "2026-11-04",
+   "date": "2026-11-04",
+   "title": "Tower Defense gets tough",
+   "items": [
+    "Tower Defense has its own button on the title screen.",
+    "Every custom game now starts by showing you the map. You can see its seed, type in a seed of your own, or roll a new map until you like what you see, then pick where your base goes.",
+    "Finished games are kept: win or lose, Custom Game lists the result with its map seed, and a Same map button plays it again. A won Tower Defense game can carry on as an endless one.",
+    "Tower Defense is much harder. Waves are bigger and tougher, two Archers alone will not get you far any more, and from wave 12 some enemies are elites (armoured, swift or mending).",
+    "Ten new enemies: quick Ratlings, armoured Ironclads, Duskwing flocks, Hexers who heal, Delvers who dig under the ground, Broodsacks that burst into mites, Wardbearers who shield their friends, Siege rams, Gloom riders, and the Bone lich, a boss that raises the dead. Bosses now take turns every tenth wave, and champions show up every fifth wave from wave 15.",
+    "Six new things to build: Spike Traps and Tar Pits that go right on the road, the armour-piercing Arbalest, the Venom Spitter, the Sun Shrine (drags Delvers out of the ground and breaks shields), and the long-range Trebuchet. Towers can now be upgraded one level further.",
+    "A 60-wave game length to go with 20, 40 and endless."
+   ]
+  },
+  {
    "id": "2026-10-30d",
    "date": "2026-10-30",
    "title": "The Wyrm's Hoard and more of your reports",

@@ -243,7 +243,7 @@ export function saveWorld(s, cfg = {}) {
   return {
     v: 1, W: w.W, H: w.H, seed: s.seed, recipe: cfg.recipe, tick: s.sim.tick, clock: w.clock, arrays,
     mana: s.mana.cur,
-    creatures: s.sim.creatures.list.filter(c => c.alive && (!c.sp.boss || c.towerBoss)).map(c => [c.sp.id, +c.x.toFixed(1), +c.y.toFixed(1), Math.round(c.hp), Math.round(c.age), +c.hunger.toFixed(2), c.sex, c.village, c.team, c.tint.cloth ? c.tint : 0, c.runner || c.towerBoss ? { max: c.maxHp, run: c.runner ? 1 : 0, breaker: c.breaker ? 1 : 0, bounty: c.bounty, leak: c.leak, boss: c.boss ? 1 : 0, towerBoss: c.towerBoss ? 1 : 0 } : 0]),
+    creatures: s.sim.creatures.list.filter(c => c.alive && (!c.sp.boss || c.towerBoss)).map(c => [c.sp.id, +c.x.toFixed(1), +c.y.toFixed(1), Math.round(c.hp), Math.round(c.age), +c.hunger.toFixed(2), c.sex, c.village, c.team, c.tint.cloth ? c.tint : 0, c.runner || c.towerBoss ? { max: c.maxHp, run: c.runner ? 1 : 0, breaker: c.breaker ? 1 : 0, bounty: c.bounty, leak: c.leak, boss: c.boss ? 1 : 0, towerBoss: c.towerBoss ? 1 : 0, td: c.td || undefined } : 0]),
     villages: s.sim.village.list.map(v => ({ ...v, plan: null, fire: null, buildings: v.buildings.filter(b => b.done && b.alive) })),
   };
 }

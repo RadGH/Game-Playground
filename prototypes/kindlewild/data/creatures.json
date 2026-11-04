@@ -2261,6 +2261,526 @@
      ".vpv."
     ]
    }
+  },
+  "ratling": {
+   "kind": "monster",
+   "team": "monster",
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [],
+   "burns": true,
+   "cost": 2,
+   "raider": true,
+   "name": "Ratling",
+   "tags": [
+    "monster",
+    "swarm"
+   ],
+   "hp": 8,
+   "speed": 0.19,
+   "sprite": {
+    "w": 4,
+    "h": 3,
+    "palette": {
+     "r": "#8a7a6a",
+     "d": "#5a4a40",
+     "e": "#ff4040",
+     "t": "#d0a090"
+    },
+    "glow": {
+     "e": 0.5
+    },
+    "walk": [
+     "..re",
+     "rrrd",
+     "t.d."
+    ],
+    "walk2": [
+     "..re",
+     "rrrd",
+     ".d.t"
+    ]
+   },
+   "attack": {
+    "dmg": 2,
+    "range": 1.4,
+    "rate": 0.8,
+    "kind": "melee"
+   }
+  },
+  "ironclad": {
+   "kind": "monster",
+   "team": "monster",
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [],
+   "burns": true,
+   "cost": 6,
+   "raider": true,
+   "name": "Ironclad",
+   "tags": [
+    "monster",
+    "goblin",
+    "armoured"
+   ],
+   "hp": 34,
+   "speed": 0.07,
+   "sprite": {
+    "w": 5,
+    "h": 5,
+    "palette": {
+     "I": "#9aa4b0",
+     "i": "#5c6470",
+     "g": "#6ab04c",
+     "e": "#ff3b3b",
+     "s": "#c8b070",
+     "l": "#2f3b1f"
+    },
+    "glow": {
+     "e": 0.6
+    },
+    "walk": [
+     ".III.",
+     "sgeg.",
+     "siIi.",
+     "s.ii.",
+     ".l.l."
+    ],
+    "walk2": [
+     ".III.",
+     "sgeg.",
+     "siIi.",
+     "s.ii.",
+     "..l.."
+    ]
+   },
+   "attack": {
+    "dmg": 6,
+    "range": 1.6,
+    "rate": 1.3,
+    "kind": "melee"
+   }
+  },
+  "duskwing": {
+   "kind": "monster",
+   "team": "monster",
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [],
+   "burns": true,
+   "cost": 2,
+   "raider": true,
+   "name": "Duskwing",
+   "tags": [
+    "monster",
+    "swarm"
+   ],
+   "hp": 6,
+   "speed": 0.17,
+   "flies": true,
+   "altitude": 6,
+   "sprite": {
+    "w": 5,
+    "h": 3,
+    "palette": {
+     "b": "#3a2a4a",
+     "w": "#5a3a6a",
+     "e": "#ffd040"
+    },
+    "glow": {
+     "e": 0.7
+    },
+    "fly": [
+     "w...w",
+     "wbebw",
+     ".b.b."
+    ],
+    "fly2": [
+     ".....",
+     "wbebw",
+     "w...w"
+    ],
+    "walk": [
+     ".....",
+     "wbebw",
+     "w...w"
+    ]
+   }
+  },
+  "hexer": {
+   "kind": "monster",
+   "team": "monster",
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [],
+   "burns": true,
+   "cost": 7,
+   "raider": true,
+   "name": "Goblin hexer",
+   "tags": [
+    "monster",
+    "goblin",
+    "caster"
+   ],
+   "hp": 24,
+   "speed": 0.075,
+   "glows": "#7aff8a",
+   "sprite": {
+    "w": 5,
+    "h": 6,
+    "palette": {
+     "h": "#4a2a6a",
+     "H": "#6a3a8a",
+     "g": "#6ab04c",
+     "e": "#ff3b3b",
+     "s": "#7a5a3a",
+     "o": "#7aff8a",
+     "l": "#2f3b1f"
+    },
+    "glow": {
+     "o": 1.4,
+     "e": 0.5
+    },
+    "walk": [
+     "..h.o",
+     ".HHHs",
+     ".gegs",
+     "HHHHs",
+     ".HHH.",
+     ".l.l."
+    ],
+    "walk2": [
+     "..h.o",
+     ".HHHs",
+     ".gegs",
+     "HHHHs",
+     ".HHH.",
+     "..l.."
+    ]
+   }
+  },
+  "delver": {
+   "kind": "monster",
+   "team": "monster",
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [],
+   "burns": true,
+   "cost": 6,
+   "raider": true,
+   "name": "Delver",
+   "tags": [
+    "monster",
+    "burrower"
+   ],
+   "hp": 40,
+   "speed": 0.09,
+   "sprite": {
+    "w": 5,
+    "h": 4,
+    "palette": {
+     "m": "#6a4a30",
+     "M": "#8a6a48",
+     "c": "#e8d8b0",
+     "e": "#ffb040"
+    },
+    "glow": {
+     "e": 0.5
+    },
+    "walk": [
+     ".MMM.",
+     "MemeM",
+     "mmmmm",
+     "c...c"
+    ],
+    "walk2": [
+     ".MMM.",
+     "MemeM",
+     "mmmmm",
+     ".c.c."
+    ]
+   }
+  },
+  "broodsack": {
+   "kind": "monster",
+   "team": "monster",
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [],
+   "burns": true,
+   "cost": 8,
+   "raider": true,
+   "name": "Broodsack",
+   "tags": [
+    "monster",
+    "swarm",
+    "big"
+   ],
+   "hp": 70,
+   "speed": 0.045,
+   "glows": "#b4ff5a",
+   "sprite": {
+    "w": 6,
+    "h": 6,
+    "palette": {
+     "p": "#5a2a5a",
+     "P": "#8a3a7a",
+     "y": "#b4ff5a",
+     "l": "#2a1a2a"
+    },
+    "glow": {
+     "y": 1.0
+    },
+    "walk": [
+     ".pPPp.",
+     "pPyPPp",
+     "PPPyPP",
+     "pPyPPp",
+     ".pppp.",
+     "l.ll.l"
+    ],
+    "walk2": [
+     ".pPPp.",
+     "pPPyPp",
+     "PyPPPP",
+     "pPPyPp",
+     ".pppp.",
+     ".l..l."
+    ]
+   }
+  },
+  "wardbearer": {
+   "kind": "monster",
+   "team": "monster",
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [],
+   "burns": true,
+   "cost": 8,
+   "raider": true,
+   "name": "Wardbearer",
+   "tags": [
+    "monster",
+    "goblin",
+    "armoured"
+   ],
+   "hp": 50,
+   "speed": 0.07,
+   "glows": "#80d0ff",
+   "sprite": {
+    "w": 5,
+    "h": 6,
+    "palette": {
+     "b": "#b08040",
+     "B": "#d0a050",
+     "g": "#6ab04c",
+     "e": "#ff3b3b",
+     "w": "#80d0ff",
+     "l": "#2f3b1f"
+    },
+    "glow": {
+     "w": 1.2,
+     "e": 0.5
+    },
+    "walk": [
+     "..w..",
+     ".bBb.",
+     "wgegw",
+     "wBbBw",
+     ".bbb.",
+     ".l.l."
+    ],
+    "walk2": [
+     "..w..",
+     ".bBb.",
+     "wgegw",
+     "wBbBw",
+     ".bbb.",
+     "..l.."
+    ]
+   },
+   "attack": {
+    "dmg": 5,
+    "range": 1.6,
+    "rate": 1.3,
+    "kind": "melee"
+   }
+  },
+  "ram": {
+   "kind": "monster",
+   "team": "monster",
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [],
+   "burns": true,
+   "cost": 16,
+   "raider": true,
+   "name": "Siege ram",
+   "tags": [
+    "monster",
+    "big",
+    "armoured"
+   ],
+   "hp": 200,
+   "speed": 0.045,
+   "smashes": 150,
+   "sprite": {
+    "w": 8,
+    "h": 5,
+    "palette": {
+     "w": "#7a5a3a",
+     "W": "#9a7a50",
+     "I": "#8a929c",
+     "r": "#5a3a2a",
+     "k": "#3a2a20"
+    },
+    "walk": [
+     "..wwwww.",
+     "IIWWWWWw",
+     "IIwwwwww",
+     "..r..r..",
+     ".k.kk.k."
+    ],
+    "walk2": [
+     "..wwwww.",
+     "IIWWWWWw",
+     "IIwwwwww",
+     "..r..r..",
+     "k.k..k.k"
+    ]
+   }
+  },
+  "gloomrider": {
+   "kind": "monster",
+   "team": "monster",
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [],
+   "burns": true,
+   "cost": 10,
+   "raider": true,
+   "name": "Gloom rider",
+   "tags": [
+    "monster",
+    "goblin",
+    "armoured"
+   ],
+   "hp": 60,
+   "speed": 0.15,
+   "sprite": {
+    "w": 6,
+    "h": 6,
+    "palette": {
+     "I": "#7a828c",
+     "g": "#6ab04c",
+     "e": "#ff3b3b",
+     "f": "#4a4a52",
+     "F": "#6a6a72",
+     "t": "#e8e0d0",
+     "l": "#2a2a30"
+    },
+    "glow": {
+     "e": 0.6
+    },
+    "walk": [
+     "..I...",
+     ".geg..",
+     "fFIFFf",
+     "tfFFff",
+     ".ffff.",
+     "l.l.l."
+    ],
+    "walk2": [
+     "..I...",
+     ".geg..",
+     "fFIFFf",
+     "tfFFff",
+     ".ffff.",
+     ".l.l.l"
+    ]
+   },
+   "attack": {
+    "dmg": 9,
+    "range": 1.8,
+    "rate": 1.0,
+    "kind": "melee"
+   }
+  },
+  "lich": {
+   "kind": "monster",
+   "team": "monster",
+   "life": 900,
+   "adultAt": 0,
+   "diet": "none",
+   "hunger": 0,
+   "hunts": [],
+   "burns": false,
+   "cost": 40,
+   "raider": true,
+   "name": "Bone lich",
+   "tags": [
+    "monster",
+    "undead",
+    "big"
+   ],
+   "hp": 600,
+   "speed": 0.04,
+   "undead": true,
+   "glows": "#60ff90",
+   "sprite": {
+    "w": 5,
+    "h": 8,
+    "palette": {
+     "k": "#1a1420",
+     "K": "#3a2a4a",
+     "s": "#e8e0c8",
+     "e": "#60ff90",
+     "o": "#60ff90",
+     "c": "#c8a040"
+    },
+    "glow": {
+     "e": 1.2,
+     "o": 1.6
+    },
+    "walk": [
+     "c.c.o",
+     ".sss.",
+     ".ses.",
+     "KKsKs",
+     "KKKKs",
+     "KKKK.",
+     "kKKK.",
+     ".k.k."
+    ],
+    "walk2": [
+     "c.c.o",
+     ".sss.",
+     ".ses.",
+     "KKsKs",
+     "KKKKs",
+     "KKKK.",
+     "kKKK.",
+     "..kk."
+    ]
+   }
   }
  }
 }

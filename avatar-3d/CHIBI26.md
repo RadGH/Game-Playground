@@ -1,6 +1,6 @@
 # Chibi 2.6 work log
 
-Branch: `chibi26` · no push. All work is confined to `avatar-3d/` and `tools/`; no files under `prototypes/` are part of this work.
+Branch: `chibi26`. The original Avatar 3D milestones M0–M19 are recorded below. The owner later authorized game adoption and production deployment; see the rollout record at the end. No ordinary Git branch was pushed; the static site was published through its documented GitHub Pages release channel.
 
 ## M0 — baseline and version switch
 
@@ -384,3 +384,42 @@ The owner reported that M18's full-width upper rings exposed an open cylinder ab
 ### Still open / why
 
 - The general animated outfit/clipping proxy still needs visual classification across the full spread. Device and production-car limitations remain as listed in M16.
+
+## Game adoption and production rollout (2026-11-03)
+
+The owner explicitly overrode the original no-game-adoption restriction and prioritized Thousandvale and Tumblefair. Both now default to Chibi 2.6 through Thousandvale's shared factory; `?chibi=2.5` and `?chibi=2` remain comparison switches. Roverlands and Knockabout use that same factory. Direct builders in Farhold, Emberveil 2, Bannerline and Oddhaven now pass both `v25` and `v26`, including Oddhaven's sliced preparation and portrait paths. Kestrel mode remains its own body system.
+
+### Rollout measurements and checks
+
+- Thousandvale and Tumblefair are live at [thousandvale.games.radgh.com](https://thousandvale.games.radgh.com/) and [tumblefair.games.radgh.com](https://tumblefair.games.radgh.com/), build `9e9d7de2`. Public playground snapshot `91645ef8` delivered those priority releases.
+- The remaining direct-builder update is commit `82ab1895`; public snapshot `08a982c5` is live. Knockabout and Roverlands report build `82ab1895`. Farhold, Emberveil 2 and Oddhaven are served from that playground snapshot. Thousandvale `/status` reported build `9e9d7de2`; RGS `tools/deploy.sh status` reported all four game servers healthy.
+- Thousandvale release gate: **1,837 passed, 0 failed**. Focused adoption checks: `tests/D/chibi25-tv.test.js` **4 passed**; Farhold/Bannerline/Emberveil focused checks **22 passed**; Oddhaven creator checks **11 passed**. All six modified modules passed `node --check`.
+- The repository-wide stable gate ran **3,841 tests: 3,830 passed, 6 failed, 5 skipped**. Three failures were Chibi 2.5 clothing/robe clearance assertions in tests untouched by this rollout. Three 2.6 clipping/contact/joint test files could not resolve the `three` package from the root test environment. The stable publisher refused normally; after recording those results and passing game-specific gates, the explicitly authorized rollout used its documented `--force` option. The avatar tests do pass when run with the Avatar 3D test loader as recorded in M18–M19.
+- Visual references: [Wizard T-shirt](shots/chibi26/m19/wizard-tshirt.png), [Wizard robe](shots/chibi26/m19/wizard-robe.png), [Doublet arm and knee seams](shots/chibi26/m18/doublet.png), [portrait preview](shots/chibi26/m13/preview-page.png). Game adoption changes the builder version and does not change the measured mesh geometry: M19 T-shirt **8,764 triangles / 2 draw calls / 26 bones**, robe **8,733 / 2 / 34**.
+
+### Still open after rollout
+
+- Full animated outfit clearance remains unresolved: the proxy report includes unclassified intersections, and skirts/outfits still need broader visual review. No claim of zero clipping is made.
+- The physical mid-range phone benchmark and production-car/mount fit reviews remain undone. Current game quality preferences are not yet wired to the Chibi `graphics: 'low'` option, so the in-game low-graphics toggle for disabling procedural textures remains unfinished.
+- Tumblefair's player portraits still use its shared 2D SVG portrait path. The existing 2.6 portrait preview is available at `/avatar-3d/portrait.html` in the playground snapshot.
+
+## M20 — shoulders, knees, hands, and the Avatar 3D page redesign (2026-11-03, Claude)
+
+**Owner reports:** the shoulder "looks like a ball on a stump" (the older shoulder was right, but the upper arm went missing under short sleeves); the upper and lower leg "do not connect and are different sizes" at the knee; two lines on each hand.
+
+- **Shoulder — the real cause.** `ringAt()` in `chibi2-body.js` reads rings listed bottom-up, but arm and leg rings are listed top-down (shoulder first). For every height it returned the first ring, the closed dome tip (1.5 mm). So under a short sleeve, the sleeve hem and the skin below it were pinched to a peg. That was the "missing upper arm" before M17. M17-M19 patched around it with a flat cap and a sphere on the pivot (the "ball"). Now 2.6 uses the 2.5 dome again, reads limb rings with `ringAtLimb()`, and the sphere is gone. 2.5 still calls `ringAt` so its hashes hold; in 2.5 the pinch is hidden inside the arm.
+- **Knee.** The thigh ran 3 cm past the knee at about 7.8 cm across while the shin began above it at about 9 cm, so there was a step and a seam. Now both meet at one knee ring at the knee pivot (`kneeR`, scaled per side by the thigh and shin thickness), each tucking 2 cm inside the other. The knee filler sphere sits inside that ring, so it fills a bend without bulging when standing. The skin under shorts or cropped trousers now starts at the hem (it started at the next listed ring, which left a gap).
+- **Hands.** No knuckle lines on 2.6 (palm and thumb only).
+- **Measured:** the knee is 7.6 / 7.6 / 7.6 cm (half-width 3 cm above, at, and 3 cm below the pivot) for shorts, pants, leggings, breeches, baggy and jeans. The upper arm stays at least 5 cm (half-width) from 12% to 90% of its length for doublet, strapped leather, sequin top, T-shirt, tank and robe.
+- **Tests:** `chibi26-joints.test.js` was rewritten to check the rules (a closed dome, full width, no ball, no pinch, matched knee, no knuckle lines) rather than M19's exact cap numbers. 2.5 hashes are unchanged (11/11). `chibi26.test.js` passes 15/15, and the surfaces, clipping and foot-contact tests pass.
+
+**Avatar 3D page redesign** (`index.html`, `js/app.js`, `js/avatar-nav.js`, `avatar-3d.css`; spec `tests/avatar-page.spec.js`):
+
+- One page menu under the title, grouped by version: **Chibi 2.6** (builder, side by side, real-world fit, portrait preview), **Chibi 2.5** (builder, 2.5 vs v2 builder, face sheet, the four body/outfit sheets), **Chibi 2**, **Viewers** (shared by all versions), and **Archive**. The open page is marked. Only one group is open at a time, and Escape closes it. The menu is one table in `avatar-nav.js`.
+- The old "Chibi 2.5 details" and "Chibi 2.5 body" boxes are gone. They repeated Race and the whole outfit. Each 2.5 field now sits next to the part it belongs to: body shape, posture, shoulders, leg length, arm thickness and tail under Body; pupil, iris, eye white, blink and so on under Face; ear size under Ears; beard colour under Facial hair. The robe and outfit sheets moved to the menu.
+- Every drop-down has ◀ ▶ buttons (`stepper()` in `shared/ui.js`). They wrap at both ends, skip disabled options, and fire the normal change event.
+- Animation is a collapsible section showing the current clip. Open and closed sections are remembered. The clip being reviewed is kept when the look changes, and side by side plays the same clip on both.
+- Stats are a table under the viewport (triangles, vertices, draw calls, bones, build time, height, head) for one or both versions. The version switch is a segmented control with `aria-pressed`. Starting looks are tabs (Races, Classes, Presets) that work with the arrow keys.
+- Accessibility: a skip link, labels tied to their controls, slider and swatch names, buttons in place of clickable spans (clip chips, look cards), keyboard-operable panel headers in `shared/ui.js` `panel()`, focus outlines, and reduced motion respected. Other changes: Reset view, `R` for a random character, and a phone layout with the preview first and no sideways scroll.
+- Screenshots: `shots/chibi26/m20/` (before and after for the shoulder and knee, kneeling, desktop, menu, phone).
+- **Stable test gate (M20):** the three 2.6 test files now register the three.js loader themselves, so `npm run test:unit` runs them and they pass. That leaves the three older Chibi 2.5 clothing clearance failures (`chibi25-clip-body.test.js` class looks; `chibi25-robe.test.js` legs through long garments, twice). These fail identically on the previous stable build and were not touched. LAN stable `6cf50c3b` was published with `--force` past those three only. The public site (games.radgh.com, where Thousandvale and Tumblefair already build 2.6) was **not** updated; it needs the owner's go-ahead.

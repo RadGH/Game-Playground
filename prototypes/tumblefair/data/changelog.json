@@ -2,6 +2,16 @@
  "_doc": "Player-facing changelog for Tumblefair, newest first (shared/whats-new.js reads it). Append one entry at EVERY publish: plain language, what players will notice, no file names. `id` is stable and unique (date, plus a letter for a second publish that day).",
  "entries": [
   {
+   "id": "2026-11-03",
+   "date": "2026-11-03",
+   "title": "New character bodies",
+   "items": [
+    "Characters are taller, with longer legs and real shoulders, while keeping their cartoon faces.",
+    "Shoulders are smooth and round, the upper arm no longer disappears under short sleeves, and legs join cleanly at the knee.",
+    "Hands are plain fists, without the two lines across them."
+   ]
+  },
+  {
    "id": "2026-10-24e",
    "date": "2026-10-24",
    "title": "Golf mode: Mini golf and Fairway",

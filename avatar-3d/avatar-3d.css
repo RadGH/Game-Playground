@@ -1,21 +1,104 @@
-#viewport { width: 100%; height: 560px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; position: relative; }
+/* Avatar 3D builder (redesigned 2026-11-03). Shared look from shared/style.css; this file adds the page menu, the
+   character sections, the stage toolbar and the stats strip. */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.skip-link { position: absolute; left: 8px; top: -40px; z-index: 50; background: var(--accent); color: #000; padding: 6px 10px; border-radius: var(--radius); }
+.skip-link:focus { top: 8px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---- title bar + page menu ---- */
+.a3-top { flex-wrap: wrap; row-gap: 6px; }
+.a3-top h1 { margin: 0; white-space: nowrap; }
+#site-nav { flex: 1; min-width: 0; }
+.a3-nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.a3-nav-group { position: relative; }
+.a3-nav-group > summary { white-space: nowrap; list-style: none; cursor: pointer; padding: 4px 10px; border: 1px solid transparent; border-radius: var(--radius); font-size: 13px; color: var(--fg2); display: flex; align-items: center; gap: 6px; user-select: none; }
+.a3-nav-group > summary::-webkit-details-marker { display: none; }
+.a3-nav-group > summary::after { content: "▾"; font-size: 10px; opacity: .7; }
+.a3-nav-group > summary:hover, .a3-nav-group[open] > summary { border-color: var(--border); background: var(--bg3); color: var(--fg); }
+.a3-nav-group.current > summary { color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); }
+.a3-badge { font-size: 10px; padding: 0 6px; border-radius: 8px; background: var(--bg3); border: 1px solid var(--border); color: var(--accent2); text-transform: uppercase; letter-spacing: .04em; }
+.a3-nav-menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 20; min-width: 270px; max-width: min(360px, 92vw); background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,.45); padding: 8px; }
+.a3-nav-note { font-size: 12px; color: var(--fg2); margin: 2px 6px 6px; }
+.a3-nav-menu ul { list-style: none; margin: 0; padding: 0; }
+.a3-nav-menu a { display: block; padding: 5px 8px; border-radius: 4px; text-decoration: none; color: var(--fg); }
+.a3-nav-menu a:hover, .a3-nav-menu a:focus-visible { background: var(--bg3); }
+.a3-nav-menu a b { font-weight: 600; font-size: 13px; display: block; } .a3-nav-menu a small { color: var(--fg2); font-size: 11px; }
+.a3-nav-menu a[aria-current] { background: #1c2a3a; box-shadow: inset 3px 0 0 var(--accent); }
+
+/* ---- sections (details) ---- */
+.a3-sec { border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg2); margin-bottom: 10px; }
+.a3-sec > summary { list-style: none; cursor: pointer; padding: 9px 12px; display: flex; align-items: baseline; gap: 8px; user-select: none; }
+.a3-sec > summary::-webkit-details-marker { display: none; }
+.a3-sec > summary::before { content: "▸"; color: var(--fg2); font-size: 11px; width: 10px; transition: transform .12s; }
+.a3-sec[open] > summary::before { transform: rotate(90deg); }
+.a3-sec > summary h2 { font-size: 13px; margin: 0; text-transform: uppercase; letter-spacing: .05em; color: var(--fg); }
+.a3-sec-hint { font-size: 11px; color: var(--fg2); margin-left: auto; }
+.a3-sec-body { padding: 0 12px 10px; }
+.sidebar .a3-sec { background: var(--bg); }
+.a3-sub { font-size: 11px; color: var(--fg2); text-transform: uppercase; letter-spacing: .05em; margin: 12px 0 6px; padding-top: 8px; border-top: 1px solid var(--border); }
+.a3-sec-body > .a3-sub:first-child { border-top: 0; margin-top: 0; padding-top: 0; }
+body:not([data-chibi]) .c25-details { display: none; }   /* the archived v2 builder has none of the 2.5 fields */
+
+/* ---- rows ---- */
+.a3-layout { grid-template-columns: 350px minmax(0, 1fr) 300px; }
+.slot-row { display: grid; grid-template-columns: 92px minmax(0, 1fr) 28px; gap: 6px; align-items: center; margin-bottom: 5px; }
+.slot-row > label { font-size: 12px; min-width: 0; }
+.slot-row .stepper { width: 100%; }
+.slot-row select { width: 100%; font-size: 12px; padding: 4px 4px; }
+.slot-row > .span2 { grid-column: 2 / 4; }
+.a3-check { margin: 0 0 6px 98px; } .a3-check label.row { font-size: 12px; margin: 0; }
+.a3-inline { display: inline-flex; align-items: center; gap: 8px; }
+.a3-inline > label.row { margin: 0; }
+.swatch { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; padding: 0; position: relative; }
+.swatch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.knob input[type=range] { height: 22px; }
+
+/* ---- stage ---- */
+.a3-stage { padding: 10px; }
+.a3-toolbar, .a3-viewbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.a3-toolbar { margin-bottom: 6px; } .a3-tools { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.a3-viewbar { margin-top: 8px; } .a3-viewbar .spacer { flex: 1; } .a3-viewbar label.row { margin: 0; }
+.a3-viewbar .a3-inline > label, .a3-viewbar label.row { font-size: 13px; }
+.segmented { display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.segmented .seg { border: 0; border-radius: 0; background: var(--bg3); padding: 5px 12px; font-size: 13px; }
+.segmented .seg + .seg { border-left: 1px solid var(--border); }
+.segmented .seg:last-child { border-left: 1px solid var(--accent2); }
+.segmented .seg[aria-pressed="true"] { background: var(--accent); color: #000; }
+.segmented .seg:last-child[aria-pressed="true"] { background: var(--accent2); }
+.a3-version-note { margin: 0 0 6px; min-height: 1.4em; }
+#viewport { width: 100%; height: clamp(320px, 62vh, 620px); background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; position: relative; touch-action: none; }
 #viewport canvas { width: 100% !important; height: 100% !important; display: block; }
-#viewport .overlay { position: absolute; left: 8px; bottom: 8px; font-size: 11px; color: var(--fg2); background: rgba(0,0,0,.4); padding: 3px 6px; border-radius: 4px; }
-.mode-btns button.on { border-color: var(--accent); background: #1c2a3a; }
-.anim-chips .chip { margin-bottom: 3px; }
-.presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 6px; }
-.presets .card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 3px; cursor: pointer; text-align: center; font-size: 11px; }
-.presets .card:hover { border-color: var(--accent); } .presets .card svg { width: 100%; height: 80px; }
-.slot-row { display: grid; grid-template-columns: 86px 1fr 26px; gap: 4px; align-items: center; margin-bottom: 4px; }
-.slot-row label { font-size: 12px; } .slot-row select { width: 100%; font-size: 12px; padding: 3px 4px; }
-.swatch { width: 26px; height: 26px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; padding: 0; } .swatch input { opacity: 0; width: 0; height: 0; }
-#json { font-family: var(--mono); font-size: 11px; min-height: 220px; }
-.mini2d { width: 150px; margin: 0 auto; } .mini2d svg { width: 100%; height: auto; }
-.compare { display: flex; gap: 8px; align-items: flex-start; }
-.compare .side { flex: 1; }
-/* 2026-09-24: the two older renderers are deprecated; Chibi 2 is the flagship */
-.mode-btns button.deprecated { opacity: 0.6; font-size: 0.85em; }
-.mode-btns button.deprecated.on { opacity: 0.9; }
+#viewport .overlay { position: absolute; left: 8px; bottom: 8px; font-size: 11px; color: var(--fg2); background: rgba(0,0,0,.4); padding: 3px 6px; border-radius: 4px; pointer-events: none; }
+.a3-stats { margin-top: 8px; overflow-x: auto; }
+.a3-stats table { font-variant-numeric: tabular-nums; } .a3-stats th, .a3-stats td { padding: 2px 8px; white-space: nowrap; } .a3-stats tbody th { color: var(--fg); }
+
+/* ---- animation ---- */
 .anim-chips { display: flex; flex-direction: column; gap: 4px; }
 .anim-chips .anim-group { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
-.anim-chips .anim-group b { font-size: 0.75em; opacity: 0.7; min-width: 64px; text-transform: uppercase; letter-spacing: 0.04em; }
+.anim-chips .anim-group b { font-size: 0.75em; opacity: 0.7; min-width: 72px; text-transform: uppercase; letter-spacing: 0.04em; }
+.anim-chips .chip { margin-bottom: 3px; color: var(--fg); font: inherit; font-size: 12px; }
+
+/* ---- starting looks ---- */
+.a3-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 8px; flex-wrap: wrap; }
+.a3-tabs [role=tab] { border: 1px solid transparent; border-bottom: 0; border-radius: var(--radius) var(--radius) 0 0; background: none; color: var(--fg2); font-size: 13px; }
+.a3-tabs [role=tab][aria-selected=true] { background: var(--bg3); border-color: var(--border); color: var(--fg); box-shadow: inset 0 2px 0 var(--accent); }
+.presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 6px; }
+.presets .card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 3px; cursor: pointer; text-align: center; font-size: 11px; color: var(--fg); }
+.presets .card:hover, .presets .card:focus-visible { border-color: var(--accent); } .presets .card svg { width: 100%; height: 80px; }
+
+/* ---- right ---- */
+#json { font-family: var(--mono); font-size: 11px; min-height: 220px; }
+.mini2d { width: 150px; margin: 0 auto; } .mini2d svg { width: 100%; height: auto; }
+
+/* ---- phones ---- */
+@media (max-width: 1200px) { .a3-layout { grid-template-columns: 330px minmax(0, 1fr); } .a3-layout > #right { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border); max-height: none; } }
+@media (max-width: 900px) {
+  .a3-layout { grid-template-columns: 1fr; }
+  .a3-layout > #main { order: -1; }
+  #site-nav { flex-basis: 100%; }
+  .a3-nav { flex-wrap: nowrap; overflow-x: auto; }
+  #viewport { height: 58vh; }
+  .a3-tools { margin-left: 0; }
+  .a3-nav-menu { position: fixed; left: 8px; right: 8px; top: auto; max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) { .a3-sec > summary::before { transition: none; } }

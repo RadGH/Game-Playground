@@ -1,4 +1,4 @@
-// Players' characters, from the same avatar system Thousandvale uses (Chibi 2.5 since 2026-10-21), in the two forms this game needs:
+// Players' characters, from the same avatar system Thousandvale uses (Chibi 2.6 since 2026-11-03), in the two forms this game needs:
 //   actor(member)     a 3D body with a seat-colour ring under its feet, for the board and the arena games
 //   portrait(member)  a 2D head-shot (an SVG data URL) for every flat screen: lobby rows, votes, drawing, results
 // A look on the wire is tiny — { race, seed, custom? } plus a costume id — and every browser rebuilds the same avatar.

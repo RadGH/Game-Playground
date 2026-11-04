@@ -25,7 +25,7 @@ export function el(tag, attrs = {}, ...children) {
  */
 export function knob(label, opts, onChange) {
   const { min = 0, max = 1, step = 0.01, value = 0, format = v => (Number.isInteger(step) ? String(v) : Number(v).toFixed(2)), title } = opts;
-  const input = el('input', { type: 'range', min, max, step, value });
+  const input = el('input', { type: 'range', min, max, step, value, 'aria-label': label });
   const val = el('span', { class: 'val', text: format(value) });
   const wrap = el('div', { class: 'knob', title }, el('div', { class: 'head' }, el('span', { text: label }), val), input);
   input.addEventListener('input', () => { val.textContent = format(+input.value); onChange?.(+input.value); });
@@ -72,8 +72,32 @@ export function textInput(label, value, onChange, opts = {}) {
 
 /** Collapsible panel: panel('Title', child1, child2). Click title to collapse. */
 export function panel(title, ...children) {
-  const p = el('div', { class: 'panel collapsible' }, el('h3', { text: title, onclick: () => p.classList.toggle('closed') }), ...children);
+  // (2026-11-03: the title is a real button for keyboards and screen readers — Enter/Space toggle, aria-expanded)
+  const toggle = () => { p.classList.toggle('closed'); h.setAttribute('aria-expanded', String(!p.classList.contains('closed'))); };
+  const h = el('h3', { text: title, role: 'button', tabindex: '0', 'aria-expanded': 'true', onclick: toggle, onkeydown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } } });
+  const p = el('div', { class: 'panel collapsible' }, h, ...children);
   return p;
+}
+
+/**
+ * Previous / next buttons around a <select> (2026-11-03): click ◀ ▶ to step through the options instead of opening the
+ * list. Wraps at both ends, skips disabled options and fires the select's own `change` event, so existing handlers run.
+ * Returns the wrapper (class `stepper`); the select is moved inside it. `label` names the buttons for screen readers.
+ */
+export function stepper(sel, label = '') {
+  const go = d => {
+    const opts = [...sel.options]; if (!opts.length) return;
+    let i = sel.selectedIndex;
+    for (let n = 0; n < opts.length; n++) { i = (i + d + opts.length) % opts.length; if (!opts[i].disabled) break; }
+    if (i === sel.selectedIndex) return;
+    sel.selectedIndex = i; sel.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+  const name = label ? ' ' + label.toLowerCase() : '';
+  const prev = el('button', { type: 'button', class: 'step prev', text: '◀', title: 'Previous' + name, 'aria-label': 'Previous' + name, onclick: () => go(-1) });
+  const next = el('button', { type: 'button', class: 'step next', text: '▶', title: 'Next' + name, 'aria-label': 'Next' + name, onclick: () => go(1) });
+  const wrap = el('span', { class: 'stepper' });
+  sel.replaceWith(wrap); wrap.append(prev, sel, next);
+  return wrap;
 }
 
 let toastTimer;

@@ -1,36 +1,20 @@
-# Chibi 2.6 adoption notes — proposal only
+# Chibi 2.6 adoption and deployment record
 
-No game files have been edited. Keep this as the review plan for a separate owner-approved adoption task.
+Owner authorized rollout on 2026-11-03, overriding the earlier “proposal only” and “no game edits” notes below. Production sequence: Thousandvale and Tumblefair first, then the remaining games. Detailed measurements, checks and screenshots are in [CHIBI26.md](CHIBI26.md#game-adoption-and-production-rollout-2026-11-03).
 
 ## 1. Thousandvale
 
-All Thousandvale humanoids already route through `prototypes/thousandvale/js/client/chibi-version.js` → `createTvBody`, so a central opt-in would cover players, NPCs, portraits, warm-up builds and the shop mannequin. Preserve the current `?chibi=2` escape hatch and 2.5 default. Proposed change in `chibi-version.js`:
+All Thousandvale humanoids route through `prototypes/thousandvale/js/client/chibi-version.js` → `createTvBody`. The shared switch now defaults to 2.6, with `?chibi=2.5` and `?chibi=2` comparison modes. `tvChibiOpts` sends both `v25` and `v26` to the body factory.
 
-```js
-export function chibiVersion(search = '') {
-  if (/(?:^|[?&])chibi=2(?:&|$)/.test(String(search || ''))) return 2;
-  return /(?:^|[?&])chibi=2\.6(?:&|$)/.test(String(search || '')) ? 2.6 : 2.5;
-}
-export const tvChibiOpts = (opts = {}, v = CHIBI_V) =>
-  v >= 2.6 ? { ...opts, v25: true, v26: true } : v >= 2.5 ? { ...opts, v25: true } : { ...opts };
-```
-
-`createTvBody` already forwards the option to both `prepareChibi2` and `createChibi2Character`; Avatar 3D now preserves `v26` in preparation. Keep the existing sliced warm-up and run `tests/D/chibi25-tv.test.js`, crowd timing, mount fit and portrait coverage before enabling the query in a game review.
+`createTvBody` forwards the selected options to both `prepareChibi2` and `createChibi2Character`, preserving sliced warm-up. The Thousandvale release passed 1,837 unit tests.
 
 ## 2. Tumblefair
 
-`prototypes/tumblefair/js/client/avatars.js` already imports `createTvBody` from Thousandvale's central wrapper. Its actor build at line 71 and the two Kestrel fallback builds at lines 330 and 340 pass their animation lists through that wrapper. **No Tumblefair source line needs to change** for a query-driven experiment; opening Tumblefair with `?chibi=2.6` would use the shared switch after Thousandvale's wrapper change. The player portrait still calls Tumblefair's `svgPortrait` path, which is the shared 2D renderer; the 3D `svgPortrait` helper in this branch is available to replace that only if the owner wants a 2.6-specific portrait review.
+`prototypes/tumblefair/js/client/avatars.js` imports `createTvBody`, so its actors inherit the shared 2.6 default without a separate call-site change. Tumblefair is live on build `9e9d7de2`. Its player portraits still use the shared 2D SVG portrait path. Kestrel mode remains separate.
 
-To pin Tumblefair independently instead of inheriting the shared query, the optional call-site change is:
+## Other game builders
 
-```js
-let body = await createTvBody(avatarOf(m.look, m.costume), {
-  anims: ANIMS,
-  ...(new URLSearchParams(location.search).get('chibi') === '2.6' ? { v25: true, v26: true } : {}),
-});
-```
-
-Use the same option at its Kestrel fallback calls only after deciding whether Kestrel remains higher priority. The current `createTvBody` returns Kestrel immediately when that mode is active, so `v26` is not applied there.
+Roverlands and Knockabout also use `createTvBody`; both are live on build `82ab1895`. Farhold, Emberveil 2, Bannerline and Oddhaven call the 3D factory directly; those builders now pass `v25: true, v26: true`. Oddhaven's sliced preparation and portrait paths were updated alongside its actors. Farhold, Emberveil 2 and Oddhaven are in the live playground snapshot `08a982c5`. Bannerline is included in the snapshot but is not listed as a public game in `games.json`.
 
 ## Risks and required rollout checks
 
@@ -39,5 +23,5 @@ Use the same option at its Kestrel fallback calls only after deciding whether Ke
 - **Clearance:** `data/chibi26-clipping.json` reports 601 body-solid pair events across the four-look proxy sweep and skirt hits in ten clips. These proxies need art review; outfits should not be treated as clear.
 - **Mount/vehicle fit:** `seatRider` works with the new actor and the metric wagon API runs, but the fit scene does not establish real seat/wheel comfort for every mount or vehicle. Recheck Thousandvale mounts at full scale before rollout.
 - **Expressions and portraits:** 2.6 retains 2.5 blinking and gaze. There is no new expression/jaw/lip-shape API. Tumblefair's existing SVG portraits remain 2D-renderer portraits.
-- **Visual asset policy:** keep saved avatar JSON unchanged; choose 2.6 in the body builder option. Do not rewrite saves or change the default until the owner approves the rollout.
+- **Visual asset policy:** saved avatar JSON remains unchanged; version selection is in the body builder.
 - **Kestrel:** Thousandvale and Tumblefair can route through a Kestrel branch that returns before the Chibi factory. Decide explicitly whether `?chibi=2.6` is subordinate to Kestrel or whether those characters need a separate port.

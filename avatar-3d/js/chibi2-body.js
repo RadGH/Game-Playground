@@ -144,6 +144,9 @@ function ringAt(rings, y) {
   }
   return rings[rings.length - 1];
 }
+/** ringAt for a limb: arm and leg rings run TOP DOWN (shoulder first), which ringAt (bottom up) cannot read — it hands
+ *  back the first ring (the closed shoulder apex) for every height. 2.6 only; 2.5 keeps ringAt so its hashes hold. */
+function ringAtLimb(rings, y) { return ringAt([...rings].sort((a, b) => a[0] - b[0]), y); }
 /** z of a lathe surface at (x, y), front (side 1) or back (side -1), pushed out by `lift`. */
 function surfaceZ(rings, x, y, side = 1, lift = 0) {
   const [, rx, rz, z0] = ringAt(rings, y);
@@ -544,11 +547,9 @@ export function buildBody(a, rig, c) {
     const lwl = rr => rr.map(([y, x, z, o]) => [y, x * LW * (rig.legThick || 1), z * LW * (rig.legThick || 1), o]);
     // FX: the shoulder ball ended in an open ring 2.4 cm across (3.6-6 cm under a puffed / short sleeve) on top of
     // every arm — "holes at the top of the shoulders you can see through". It now closes in a dome.
-    const upper = lw([...(rig.v26
-      // A short dome joins the chest at the shoulder. The former full-width top rings made an
-      // open cylinder above the shoulder; keep its apex close to the arm pivot and grow smoothly.
-      ? [[0.03, 0.0015, 0.0015], [0.02, 0.038 + armT, 0.037 + armT], [0, 0.07 + armT, 0.068 + armT]]
-      : FX
+    // 2.6 (2026-11-03, owner): the same closed dome as 2.5 — M19's flat cap plus an extra ball on it read as "a ball
+    // on a stump". The real fault under short sleeves was ringAt reading these top-down rings (see ringAtLimb).
+    const upper = lw([...(FX
         ? [[0.062, 0.0015, 0.0015], [0.056, 0.038 + armT, 0.037 + armT], [0.035, 0.07 + armT, 0.068 + armT]]
         : [[0.05, 0.012, 0.012], [0.035, 0.07 + armT, 0.068 + armT]]),
       [-0.02, 0.09 + armT, 0.086 + armT], [-0.09, 0.083 + armT, 0.08 + armT], [-Ua * 0.75, 0.074 + armT * 0.8, 0.072 + armT * 0.8], [-Ua - 0.012, 0.067 + armT * 0.6, 0.066 + armT * 0.6]]);
@@ -556,11 +557,10 @@ export function buildBody(a, rig, c) {
       // sleeve to the middle of the upper arm (rolled: to just above the elbow), then skin
       const cut = top.sleeve === 'rolled' ? -Ua * 0.82 : -Ua * 0.5;
       // (FX: the dome's apex stays closed — the sleeve's own offset opened it back into a hole)
-      const sl = upper.filter(r => r[0] > cut).map(([y, x, z], i) => FX && !rig.v26 && i === 0
+      const sl = upper.filter(r => r[0] > cut).map(([y, x, z], i) => FX && i === 0
         ? [y + (top.sleeve === 'puff' ? 0.016 : 0.005), x, z]
-        : rig.v26 && i === 0 ? [y, x, z]
-          : [y, x + (top.sleeve === 'puff' ? 0.018 : 0.006), z + (top.sleeve === 'puff' ? 0.018 : 0.006)]);
-      const cr = ringAt(upper, cut);
+        : [y, x + (top.sleeve === 'puff' ? 0.018 : 0.006), z + (top.sleeve === 'puff' ? 0.018 : 0.006)]);
+      const cr = rig.v26 ? ringAtLimb(upper, cut) : ringAt(upper, cut);
       sl.push([cut, cr[1] + 0.008, cr[2] + 0.008]);
       add(profile(sl, 10), arm, shirt, { bend });
       const sleeveUnderColour = top.sleeve === 'puff' ? shirt : skin;
@@ -587,7 +587,8 @@ export function buildBody(a, rig, c) {
     // the hand
     ellipsoid(hand, skin, [0, -0.035 * HK, 0.003], [0.065 * HK, 0.082 * HK, 0.061 * HK], { surface: 'skin' });
     ellipsoid(hand, shade(skin, -0.05), [-s * 0.046 * HK, -0.013 * HK, 0.025 * HK], [0.03 * HK, 0.043 * HK, 0.034 * HK], { surface: 'skin' });
-    for (let i = 0; i < 2; i++) add(taperedCurve([[-0.033 * HK, (-0.043 - i * 0.018) * HK, 0.054 * HK], [0, (-0.048 - i * 0.018) * HK, 0.061 * HK], [0.027 * HK, (-0.043 - i * 0.018) * HK, 0.054 * HK]], [0.0026, 0.0026, 0.0026], 4, 4), hand, shade(skin, -0.26), { surface: 'skin' });
+    // (2.6, owner 2026-11-03: the two knuckle lines on each fist read as scratches — 2.6 hands are plain)
+    if (!rig.v26) for (let i = 0; i < 2; i++) add(taperedCurve([[-0.033 * HK, (-0.043 - i * 0.018) * HK, 0.054 * HK], [0, (-0.048 - i * 0.018) * HK, 0.061 * HK], [0.027 * HK, (-0.043 - i * 0.018) * HK, 0.054 * HK]], [0.0026, 0.0026, 0.0026], 4, 4), hand, shade(skin, -0.26), { surface: 'skin' });
     if (top.armor === 'plate' && a.decor?.id !== 'pauldrons') {
       // 2.5: the shoulder caps follow the top too (lower plate a shade darker, the rivet on `color2`), so a tabard and
       // coloured shoulders can be worn together without spending the decor slot on pauldrons
@@ -598,40 +599,50 @@ export function buildBody(a, rig, c) {
     }
     if (top.armor === 'scale' && a.decor?.id !== 'pauldrons') ellipsoid(arm, a.top.color, [s * 0.02, 0.03, 0], [0.12, 0.065, 0.11], { metal: true });
     if (a.top.id === 'fur_tunic') ellipsoid(arm, a.top.color2 || '#d8c8a8', [s * 0.01, 0.03, 0], [0.1, 0.06, 0.1]);
-    if (rig.v26) {
-      ellipsoid(arm, upperColour, [0, 0.018, 0], [0.058, 0.056, 0.062], { metal: top.sleeve === 'mail' });
-    }
 
     // ---------------------------------------------------------------- legs
     const leg = 'leg' + side, knee = 'knee' + side, foot = 'foot' + side;
     const legT = R * 0.03, calfT = R * 0.012;
     const loose = bot.loose ? 0.022 : bot.tight ? -0.006 : 0;
-    const thigh = lwl([[0.03, 0.02, 0.02], [0.0, 0.097 + legT + loose, 0.088 + legT + loose], [-0.08, 0.105 + legT + loose, 0.104 + legT + loose], [-L * 0.3, 0.094 + legT * 0.8 + loose, 0.093 + legT * 0.8 + loose], [-L * 0.46, 0.082 + legT * 0.5 + loose, 0.083 + legT * 0.5 + loose], [-L * 0.55, 0.078 + loose, 0.08 + loose]]);
+    // 2.6 (2026-11-03, owner: "the upper and lower leg do not connect and are different sizes at the knee"): the thigh
+    // tapers to ONE knee ring at the knee pivot and the shin starts from that same ring, each tucking 2 cm inside the other.
+    // (Before, the thigh ran 3 cm past the knee at ~0.078 while the shin began above it at ~0.09 — a step and a seam.)
+    const kneeR = rig.v26 ? 0.078 + legT * 0.45 : 0, kneeY = -L * 0.51;
+    const thigh = rig.v26
+      ? lwl([[0.03, 0.02, 0.02], [0.0, 0.097 + legT + loose, 0.088 + legT + loose], [-0.08, 0.105 + legT + loose, 0.104 + legT + loose], [kneeY * 0.55, 0.096 + legT * 0.8 + loose, 0.095 + legT * 0.8 + loose], [kneeY * 0.85, 0.083 + legT * 0.55 + loose, 0.083 + legT * 0.55 + loose], [kneeY, kneeR + loose, kneeR + 0.003 + loose], [kneeY - 0.02, (kneeR + loose) * 0.96, (kneeR + 0.003 + loose) * 0.96]])
+      : lwl([[0.03, 0.02, 0.02], [0.0, 0.097 + legT + loose, 0.088 + legT + loose], [-0.08, 0.105 + legT + loose, 0.104 + legT + loose], [-L * 0.3, 0.094 + legT * 0.8 + loose, 0.093 + legT * 0.8 + loose], [-L * 0.46, 0.082 + legT * 0.5 + loose, 0.083 + legT * 0.5 + loose], [-L * 0.55, 0.078 + loose, 0.08 + loose]]);
     const kneeBend = { bone: knee, at: L * 0.51, width: 0.07 };
     const legCloth = bot.leg;  // share of the whole leg covered
     const thighCut = legCloth >= 0.55 ? null : legCloth > 0 ? -L * 0.51 * (legCloth / 0.5) : 0.05;
     if (thighCut == null) add(profile(thigh, 10), leg, pants, { bend: kneeBend });
     else {
       if (thighCut < 0.03) {
-        const cr = ringAt(thigh, thighCut);
+        const cr = rig.v26 ? ringAtLimb(thigh, thighCut) : ringAt(thigh, thighCut);
         add(profile([...thigh.filter(r => r[0] > thighCut).map(([y, x, z]) => [y, x + 0.004, z + 0.004]), [thighCut, cr[1] + 0.008, cr[2] + 0.008]], 10), leg, pants, { bend: kneeBend });
         if (bot.torn) for (let k = 0; k < 5; k++) { const t = k / 5 * Math.PI * 2; add(new THREE.ConeGeometry(0.02, 0.05, 3), leg, pants, { position: [Math.sin(t) * (cr[1] + 0.004), thighCut - 0.02, Math.cos(t) * (cr[2] + 0.004)], rotation: [Math.PI, 0, 0] }); }
       }
-      add(profile(thigh.filter(r => r[0] < thighCut + 0.02), 10), leg, skin, { bend: kneeBend, surface: 'skin' });
+      // (2.6: the skin starts AT the hem, not at whichever listed ring happens to be next below it)
+      const bareThigh = rig.v26 ? [ringAtLimb(thigh, thighCut + 0.02), ...thigh.filter(r => r[0] < thighCut + 0.02 - 1e-6)] : thigh.filter(r => r[0] < thighCut + 0.02);
+      add(profile(bareThigh, 10), leg, skin, { bend: kneeBend, surface: 'skin' });
     }
     // shin on the knee bone: calf, then ankle
     const lws = rr => rr.map(([y, x, z, o]) => [y, x * LW * (rig.shinThick || rig.legThick || 1), z * LW * (rig.shinThick || rig.legThick || 1), o]);
-    const shin = lws([[0.012, 0.079 + calfT + loose * 0.8, 0.081 + calfT + loose * 0.8], [-L * 0.12, 0.081 + calfT + loose * 0.8, 0.087 + calfT + loose * 0.8], [-L * 0.3, 0.068 + calfT * 0.6 + loose * 0.7, 0.072 + calfT * 0.6 + loose * 0.7], [-L * 0.46, 0.058 + loose * 0.5, 0.062 + loose * 0.5], [-L * 0.5, 0.056, 0.06]]);
+    // (2.6: the shin's top ring is the thigh's knee ring at the same thickness, so the two meet with no step)
+    const kneeK = rig.v26 ? LW * (rig.legThick || 1) / (LW * (rig.shinThick || rig.legThick || 1)) : 1;
+    const shin = rig.v26
+      ? lws([[0.02, (kneeR + loose) * 0.96 * kneeK, (kneeR + 0.003 + loose) * 0.96 * kneeK], [0, (kneeR + loose) * kneeK, (kneeR + 0.003 + loose) * kneeK], [-L * 0.12, 0.077 + calfT + loose * 0.8, 0.083 + calfT + loose * 0.8], [-L * 0.3, 0.068 + calfT * 0.6 + loose * 0.7, 0.072 + calfT * 0.6 + loose * 0.7], [-L * 0.46, 0.058 + loose * 0.5, 0.062 + loose * 0.5], [-L * 0.5, 0.056, 0.06]])
+      : lws([[0.012, 0.079 + calfT + loose * 0.8, 0.081 + calfT + loose * 0.8], [-L * 0.12, 0.081 + calfT + loose * 0.8, 0.087 + calfT + loose * 0.8], [-L * 0.3, 0.068 + calfT * 0.6 + loose * 0.7, 0.072 + calfT * 0.6 + loose * 0.7], [-L * 0.46, 0.058 + loose * 0.5, 0.062 + loose * 0.5], [-L * 0.5, 0.056, 0.06]]);
     const shinCloth = legCloth >= 1 ? pants : legCloth > 0.5 ? (bot.stockings ? '#e8e2d2' : null) : null;
     if (legCloth > 0.5 && legCloth < 1 && !bot.stockings) {
       // cropped: cloth to `legCloth` of the shin, skin under it
       const cut = -L * 0.49 * ((legCloth - 0.5) / 0.5);
-      const cr = ringAt(shin, cut);
+      const cr = rig.v26 ? ringAtLimb(shin, cut) : ringAt(shin, cut);
       add(profile([...shin.filter(r => r[0] > cut).map(([y, x, z]) => [y, x + 0.004, z + 0.004]), [cut, cr[1] + 0.008, cr[2] + 0.008]], 10), knee, pants);
-      add(profile(shin.filter(r => r[0] < cut + 0.02), 10), knee, skin, { surface: 'skin' });
+      add(profile(rig.v26 ? [ringAtLimb(shin, cut + 0.02), ...shin.filter(r => r[0] < cut + 0.02 - 1e-6)] : shin.filter(r => r[0] < cut + 0.02), 10), knee, skin, { surface: 'skin' });
       if (bot.torn) for (let k = 0; k < 5; k++) { const t = k / 5 * Math.PI * 2 + 0.3; add(new THREE.ConeGeometry(0.02, 0.05, 3), knee, pants, { position: [Math.sin(t) * (cr[1] + 0.004), cut - 0.02, Math.cos(t) * (cr[2] + 0.004)], rotation: [Math.PI, 0, 0] }); }
     } else add(profile(shin, 10), knee, shinCloth || skin, shinCloth ? {} : { surface: 'skin' });
-    if (rig.v26) ellipsoid(knee, legCloth >= 1 ? pants : skin, [0, -0.008, 0], [0.086, 0.068, 0.088], legCloth >= 1 ? {} : { surface: 'skin' });
+    // the knee cap fills the inside of the joint when it bends; kept inside the knee ring so it never bulges standing
+    if (rig.v26) ellipsoid(knee, legCloth >= 1 ? pants : skin, [0, -0.004, 0.004], [(kneeR + loose) * LW * (rig.legThick || 1) * 0.94, 0.06, (kneeR + loose) * LW * (rig.legThick || 1) * 0.94], legCloth >= 1 ? {} : { surface: 'skin' });
     if (bot.stockings) add(profile([[0.02, 0.086 + calfT, 0.088 + calfT], [-0.05, 0.088 + calfT, 0.092 + calfT]], 10), knee, pants);
     if (bot.loose) add(profile([[-L * 0.44, 0.07, 0.074], [-L * 0.4, 0.078, 0.082]], 10), knee, shade(pants, -0.15));
     // boot shafts

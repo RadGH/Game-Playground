@@ -1,4 +1,4 @@
-// A fighter on screen: a Chibi 2.5 body (the same avatars as Tumblefair) worn over the sim's physics puppet.
+// A fighter on screen: a Chibi 2.6 body (the same avatars as Tumblefair) worn over the sim's physics puppet.
 //
 // The sim only sends a handful of points per fighter (torso position + rotation, head, two hands, two feet). The body is
 // fitted to them every frame:

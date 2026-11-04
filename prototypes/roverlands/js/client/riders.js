@@ -1,4 +1,4 @@
-// People: a Chibi 2.5 body (built exactly like Thousandvale's, createTvBody) that walks, rides in a seat with its
+// People: a Chibi 2.6 body (built exactly like Thousandvale's, createTvBody) that walks, rides in a seat with its
 // hands on the controls, or tumbles when thrown out.
 //
 //   const r = await createRider(look);           scene.add(r.group)

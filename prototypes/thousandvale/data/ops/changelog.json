@@ -2,6 +2,17 @@
  "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
  "entries": [
   {
+   "id": "2026-11-03",
+   "date": "2026-11-03",
+   "title": "Taller, better-proportioned characters",
+   "items": [
+    "Characters have new bodies: taller, with longer legs, real shoulders and a smaller head, closer to a real person while keeping the cartoon look.",
+    "Shoulders are smooth and round where the arm meets the body. No more knob on top of the arm, and the upper arm is full width under short sleeves.",
+    "Thigh and shin now meet cleanly at the knee, with no step or seam.",
+    "Hands are plain fists, without the two lines across them."
+   ]
+  },
+  {
    "id": "2026-10-22",
    "date": "2026-10-22",
    "title": "Sign in with your phone, class armour, and tidier characters",

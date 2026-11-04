@@ -1,6 +1,6 @@
 // Everyone in the world you can see: their models, animation, nameplates and hit reactions.
 //
-// A player is a Chibi 2 body (avatar-3d/js/chibi2.js) built from `{ race, cls, seed }` (looks.js); a
+// A player is a Chibi 2.6 body (avatar-3d/js/chibi2.js) built from `{ race, cls, seed }` (looks.js); a
 // monster is an avatar-3d creature. Bodies are built through a small queue (one per frame) so twenty
 // players walking into view do not freeze a frame; until a body is ready a soft stand-in shows where
 // it is. Identical looks share one template (chibi2.js caches by avatar JSON).

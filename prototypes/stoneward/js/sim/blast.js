@@ -94,7 +94,7 @@ export function createBlast(sim) {
         } else if (m && M.built[m] && sim.damage) {
           // built things (walls, houses) have hit points: a blast wears them down, then they fall
           // (js/sim/walls.js damage → collapse straight down), so stone walls survive small blasts
-          if (sim.damage(xx, yy, push * 0.8)) broke++;
+          if (sim.damage(xx, yy, push * 0.8, { blast: true })) broke++;
         } else if (m && push > M.hard[m]) {
           const hot = (c.flag[i] & BURN) || (o.fire && rng() < 0.5 && M.ignite[m]);
           let fling = null;

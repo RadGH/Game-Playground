@@ -349,3 +349,37 @@ M9 (powers) and M10 (trains) were built by helper agents in worktrees and then m
 | (found while publishing) | Lakes paved with bridges | `growRoads` treated shallow water as land and grew new streets from bridge ends, so a lakeside town built a grid of plank bridges over the lake (82–188 bridge cells by day 3). A town street now starts on land, ends on land and crosses at most 6 water cells (1–5 bridge cells by day 3; population unchanged). |
 
 Tests: town.test (open-plan buildings are not lost; fountain water), powers.test (a wildfire stays small and goes out). Screens: tools/shots-pt1.mjs, shots-pt1b.mjs.
+
+## 8. Play-test 2 (2026-11-04) — owner's 25 items
+
+| # | Report | Cause → fix |
+|---|---|---|
+| 1 | Pinch gets stuck zooming | Same as Kindlewild: iOS can skip a finger's pointerup, and the leftover made every later touch the second finger of a pinch. js/ui/camera.js forgets old fingers on a primary pointerdown and on the browser's touchend with 0 touches; the finger left after a pinch does nothing until it lifts. |
+| 2 | Globe blurry | js/render/gl.js `MACRO_FN`: per-pixel coasts from a smooth water field + noise, warped biome borders, fine speckle and hill shading, thin rivers, crisp ice caps (helper agent). |
+| 3 | Enemies hard to see | Red outline + red cap on every enemy at any zoom, a blinking red pixel close up, a red marker with a dark rim when zoomed out; guards wear a blue sash. |
+| 4 | Settler popups + beeps | `migrants()` no longer toasts; good toasts make no sound (bad ones at most every 5 s). |
+| 5 | What are the top numbers? | Tapping a top-bar number explains it. The "white moon" is 🪙 gold, drawn as a plain silver coin on some systems. |
+| 6 | Remove Guards | No hiring or orders: `stepGarrison` raises each town's own guards (data/military.json `garrison`). Guards tab removed. |
+| 7 | People sat still after loading | Headless save → load keeps everyone moving (187 of 202 moved in 30 s, same as without the reload). The browser run (tools/shots-pt2.mjs) checks it after a real reload. The likely cause was the sim stalling: a rival caravan re-planned an 80k-node path every trip (~1 s freeze; now planned once and reused), and a raid planned every soldier's path in one tick (now at most 3 searches a tick). |
+| 8 | Growth stopped at ~150 | `plan()` RETURNED whenever a tent didn't fit, and plots were searched within a fixed 70 m — so once the land near the keep was full, nothing (woodcutters, houses…) was ever planned again: logs ran out, 180 of 311 people jobless. The search radius grows with the town and a failed tent no longer stops the plan. |
+| 9 | Visible work | `fell` events → toppling trees + chop sound; fishers row out in boats (`boatSpot`, `p.boat`); `act` codes animate tools (axe, pick, hoe, hammer, bucket, bow). |
+| 10 | Info → Needs | First Info sub-tab: food days, homeless, each missing need (worst first) and the town's wants, each with a Build button. |
+| 11 | Meteor | Visible fall with sparks and smoke, warning ring, much bigger blast/crater/lava, flash + shake, meteor.fall + explosion.large (helper agent). |
+| 12 | Smite → Lightning Strike, + Frost Nova | data/buildings-faith.json + js/sim/powers.js; enemies hurt and frozen through `sim.military.strike` (helper agent). |
+| 13 | Random fires; nobody puts them out | Natural lightning + forest fires removed from disasters (they were 70% of disasters). Fire duty pulls in up to a dozen nearest townsfolk per blaze, who go for the nearest burning cell and beat flames out when there is no water. |
+| 14 | Remove power cooldowns | Gone; powers only cost faith. |
+| 15 | Roads outward | `longRoad()` every 3–8 minutes once a town has 25 people. |
+| 16 | City builds its own defences | `autoWalls()` (walls.js): a ring outside the town from 45 people, a stretch at a time while logs are spare, towers every 30 m, gates on roads, a firebreak band outside, stone when stone is spare, a bigger ring when outgrown (the old one comes down). Watchtowers and more barracks in the plan; roads through walls make gates. |
+| 17 | Raids do nothing; no defence | Raiders raze (break + burn) buildings, kill townsfolk; the garrison fights anything inside the town's reach. |
+| 18 | Too dense; yards; roads from afar; clickable + indicator | Homes: margin 2, more jitter, yards. Streets are 3 cells wide (the keep's cross 4; `town.roadWidth`) and plots sit 2 cells back from them (`plotSetback`). (A first try drew road lines over the map when zoomed out; the owner rejected it — he meant the town was too dense to see walking space, not that roads should be highlighted.) Taps on people, walls, carts, wagons, ground; a pulsing gold outline on whatever was tapped. |
+| 19 | Soldiers AFK at the keep | They stopped one step short: the path finder stops when the cell is in reach, units stand mid-cell → +0.8 m slack on the reach test; and they now go for random cells of buildings, not one keep cell that was already gone. |
+| 20 | Send a settler | Info → Kingdom: 500 gold, a wagon with six folk and supplies founds a town hall where you tap. |
+| 21 | People drawn in front of tall buildings | Depth buffer: chunk pixels carry the row of what painted them; people, units, carts carry their foot row (helper agent + main.js / features/military.js). |
+| 22 | Attack flags | Army tab: up to 3 flags; spare guards gather at the edge of town and march together; lairs and camps in the circle burn; rival towns are raided; Move / Clear. |
+| 23 | Rails → Transport, docks | Tab renamed; Dock button; a town on water builds its own dock, and a far dock + a town dock open a barge route by themselves. |
+| 24 | Attacks pathetic | Catapult stones and sappers' powder kegs are real blasts; fire arrows; burning buildings; no more settler beeps. |
+| 25 | Lines menu | Keep clear / Build here / Erase removed; Wooden wall + Stone wall. Stone takes 4% from blades and claws and full damage from blasts; wood has 200 hp and burns. |
+
+Tests: military.test (own garrison makes homes safe; attack flag → band gathers, marches together, burns a lair, comes home; raiders burn/break; stone vs blades vs blasts), town.test (no stall without tent room; yards + long road; settler wagon; boats), walls.test (fire goes out), powers.test (meteor, lightning chain, frost nova, no cooldowns, no lightning/forest fires). Screens: tools/shots-pt2.mjs, tools/shots-render.mjs, tools/depth-check.mjs.
+
+Known: a rival's first shared road / caravan path is still one long search (~0.8 s, once per rival).

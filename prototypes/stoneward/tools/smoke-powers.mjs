@@ -12,13 +12,13 @@ const count = (x, y, r, pred) => {
 };
 // each power gets its own patch of dry land with something standing on it
 const spots = [];
-for (let r = 60; r < 900 && spots.length < 7; r += 25) for (let a = 0; a < 24 && spots.length < 7; a++) {
+for (let r = 60; r < 900 && spots.length < 8; r += 25) for (let a = 0; a < 24 && spots.length < 8; a++) {
   const x = Math.round(town.x + Math.cos(a / 24 * 6.283) * r), y = Math.round(town.y + Math.sin(a / 24 * 6.283) * r);
   if (spots.some(s => Math.hypot(s[0] - x, s[1] - y) < 90)) continue;
   const wet = count(x, y, 20, (c, i) => M.liquid[c.mat[i]]), stuff = count(x, y, 20, (c, i) => c.mat[i] && !M.liquid[c.mat[i]]);
   if (wet === 0 && stuff > 60) spots.push([x, y]);
 }
-for (const id of ['smite', 'meteor', 'tornado', 'blackhole', 'earthquake', 'firestorm', 'rain']) {
+for (const id of ['lightning', 'frost', 'meteor', 'tornado', 'blackhole', 'earthquake', 'firestorm', 'rain']) {
   const [x, y] = spots.shift();
   const before = count(x, y, 20, (c, i) => c.mat[i] !== 0);
   const t0 = performance.now();

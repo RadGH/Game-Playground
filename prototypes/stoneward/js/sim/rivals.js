@@ -120,7 +120,7 @@ export function createRivals(sim, data) {
     const res = sim.town.nav.findLong(home.x, home.y + 12, rv.towns[0].x, rv.towns[0].y + 10, { offroad: 1, maxNodes: 80000 });
     if (!res) return;
     const pts = res.path;
-    for (let k = 0; k + 1 < pts.length; k++) sim.town.layRoad(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1], 'dirt');
+    for (let k = 0; k + 1 < pts.length; k++) sim.town.layRoad(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1], 'dirt', 3, 'country');
     rv.road = true;
     say(`A road now joins you to ${rv.name}.`, 'good');
   }
@@ -182,9 +182,14 @@ export function createRivals(sim, data) {
       if (rv.stance !== 'ally' || day < rv.next.caravan) continue;
       rv.next.caravan = day + 0.8 + sim.rng() * 0.6;
       const home = t.towns.slice().sort((a, b) => dist(a.x, a.y, rv.towns[0].x, rv.towns[0].y) - dist(b.x, b.y, rv.towns[0].x, rv.towns[0].y))[0];
-      const res = sim.town.nav.findLong(rv.towns[0].x, rv.towns[0].y + 10, home.x, home.y + 10, { offroad: 2, maxNodes: 80000 });
-      if (!res) continue;
-      S.caravans.push({ id: S.nextId++, rival: rv.id, path: res.path, pi: 0, x: rv.towns[0].x, y: rv.towns[0].y + 10, town: home.id, back: false });
+      // the way is planned once and reused for a few days: a fresh 80k-node search every caravan
+      // stalled the whole game for about a second (play-test 2)
+      if (!rv.cpath || rv.cpath.town !== home.id || day - rv.cpath.day > 3) {
+        const res = sim.town.nav.findLong(rv.towns[0].x, rv.towns[0].y + 10, home.x, home.y + 10, { offroad: 2, maxNodes: 80000 });
+        rv.cpath = res ? { town: home.id, day, path: res.path } : { town: home.id, day, path: null };
+      }
+      if (!rv.cpath.path) continue;
+      S.caravans.push({ id: S.nextId++, rival: rv.id, path: rv.cpath.path, pi: 0, x: rv.towns[0].x, y: rv.towns[0].y + 10, town: home.id, back: false });
     }
     for (const c of S.caravans) {
       const tgt = c.path[c.pi]; if (!tgt) { arrive(c); continue; }

@@ -5,7 +5,6 @@
 // PCM once and caches it, so repeating a line costs nothing; play() mixes any number of results at once.
 import { ENGINES, getEngine } from './engines/index.js';
 import { applyFx, FX_DEFAULTS } from './fx.js';
-import * as piper from './engines/piper.js';
 
 export const DEFAULT_VOICE = {
   engine: 'formant', pitch: 0.5, speed: 0.3, depth: 0.5, tone: 0.5, breath: 0.1, rough: 0.1, flutter: 0.1, intonation: 2, wordgap: 0,
@@ -42,7 +41,7 @@ export async function synthesize(text, voice, { noCache = false } = {}) {
   const t0 = performance.now();
   const raw = await eng.synth(text, v);
   let fx = { ...v.fx };
-  if (v.engine === 'piper') { const d = piper.derivedFx(v); fx = { ...d, ...fx, pitchShift: (fx.pitchShift || 0) + d.pitchShift, formant: (fx.formant || 0) + d.formant, speed: (fx.speed || 1) * d.speed }; }
+  if (eng.derivedFx) { const d = eng.derivedFx(v); fx = { ...d, ...fx, pitchShift: (fx.pitchShift || 0) + d.pitchShift, formant: (fx.formant || 0) + d.formant, speed: (fx.speed || 1) * d.speed }; }
   const samples = applyFx(raw.samples, raw.sampleRate, fx);
   const result = { samples, sampleRate: raw.sampleRate, duration: samples.length / raw.sampleRate, engine: v.engine, info: { ...raw.info, totalMs: performance.now() - t0, fxApplied: fx } };
   if (!noCache) { cache.set(key, result); if (cache.size > CACHE_MAX) cache.delete(cache.keys().next().value); }

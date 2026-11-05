@@ -1,0 +1,7 @@
+{
+  "name": "voice-lab-kokoro-server",
+  "private": true,
+  "type": "module",
+  "description": "Kokoro TTS as a small HTTP service so phones and plain-http pages get neural voices without running the model themselves.",
+  "dependencies": { "kokoro-js": "1.2.1" }
+}

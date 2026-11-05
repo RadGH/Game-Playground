@@ -81,6 +81,19 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def __init__(self, *a, **k): super().__init__(*a, directory=ROOT, **k)
 
+    # The Voice Lab's Kokoro engine runs ONNX Runtime in WebAssembly; it only gets more than one CPU thread
+    # (and SharedArrayBuffer) on a "cross-origin isolated" page, which needs these two headers. "credentialless"
+    # still lets the page load the model from Hugging Face. Scoped to the voice lab so no other page changes.
+    ISOLATED_PREFIXES = ('/voice-lab/', '/vendor/kokoro/')
+
+    def end_headers(self):
+        # Browsers ignore (and warn about) these on plain-http LAN pages, so send them only where they can work.
+        host = (self.headers.get('Host') or '').split(':')[0] if getattr(self, 'headers', None) else ''
+        if self.path.startswith(self.ISOLATED_PREFIXES) and (HTTPS or host in ('localhost', '127.0.0.1')):
+            self.send_header('Cross-Origin-Opener-Policy', 'same-origin')
+            self.send_header('Cross-Origin-Embedder-Policy', 'credentialless')
+        super().end_headers()
+
     def log_message(self, fmt, *args):
         if '/api/' in (args[0] if args else ''): super().log_message(fmt, *args)
 
@@ -94,7 +107,32 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    # ----------------------------------------------------------------- Kokoro voice service
+    # /api/kokoro/* is forwarded to the Kokoro TTS service (voice-lab/server/kokoro-server.mjs, user service
+    # kokoro-tts on 127.0.0.1:8402), so phones and plain-http pages get neural voices from the same address
+    # and port as the page — no extra port to open, and it works on the https ports too.
+    def _proxy_kokoro(self):
+        import http.client
+        body = None
+        if self.command == 'POST':
+            body = self.rfile.read(int(self.headers.get('Content-Length', 0)))
+        try:
+            conn = http.client.HTTPConnection('127.0.0.1', int(os.environ.get('KOKORO_PORT', 8402)), timeout=180)
+            conn.request(self.command, self.path, body=body, headers={'Content-Type': self.headers.get('Content-Type', 'application/json')})
+            r = conn.getresponse(); data = r.read()
+        except OSError as e:
+            return self._json(502, {'error': 'Kokoro voice service is not running (systemctl --user start kokoro-tts): %s' % e})
+        self.send_response(r.status)
+        for k in ('Content-Type', 'X-Synth-Ms', 'X-Cache', 'X-Phonemes'):
+            if r.getheader(k) is not None: self.send_header(k, r.getheader(k))
+        self.send_header('Content-Length', str(len(data)))
+        self.send_header('Cache-Control', 'no-store')
+        self.end_headers()
+        self.wfile.write(data)
+
     def do_GET(self):
+        if self.path.startswith('/api/kokoro/'):
+            return self._proxy_kokoro()
         if self.path.startswith('/api/library/sync'):
             p = os.path.join(SYNC_DIR, 'library.json')
             return self._json(200, json.load(open(p)) if os.path.exists(p) else {})
@@ -110,6 +148,8 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         return super().do_HEAD()
 
     def do_POST(self):
+        if self.path.startswith('/api/kokoro/'):
+            return self._proxy_kokoro()
         n = int(self.headers.get('Content-Length', 0)); raw = self.rfile.read(n)
         try: data = json.loads(raw or b'{}')
         except Exception as e: return self._json(400, {'error': 'bad json: %s' % e})

@@ -1,15 +1,178 @@
 {
-  "_doc": "Military and magic buildings (M6). Guards are hired at a barracks (cap = guards it holds); mages need a mage guild. Towers with crew take a guard from the nearest barracks. Magic structures cost mana crystals to build and then have unlimited ammo (owner).",
-  "kinds": {
-    "barracks":        { "name": "Barracks",        "group": "military", "shape": "house", "w": 7, "h": 5, "tall": 4, "roof": "roof_slate", "cost": { "log": 14, "stone": 14 }, "work": 60, "barracks": 12 },
-    "guard_post":      { "name": "Guard post",      "group": "military", "shape": "statue", "w": 2, "h": 2, "tall": 3, "cost": { "log": 4 }, "work": 10, "post": true },
-    "watchtower":      { "name": "Watchtower",      "group": "military", "shape": "tower", "w": 3, "h": 3, "tall": 9, "wall": "wall_wood", "cost": { "log": 16 }, "work": 40, "tower": "watchtower" },
-    "ballista_tower":  { "name": "Ballista tower",  "group": "military", "shape": "tower", "w": 4, "h": 4, "tall": 8, "wall": "wall_stone", "cost": { "log": 12, "stone": 20, "iron": 2 }, "work": 60, "tower": "ballista_tower" },
-    "catapult_tower":  { "name": "Catapult tower",  "group": "military", "shape": "tower", "w": 4, "h": 4, "tall": 7, "wall": "wall_stone", "cost": { "log": 16, "stone": 24, "iron": 3 }, "work": 70, "tower": "catapult_tower" },
-    "mage_guild":      { "name": "Mage guild",      "group": "magic", "shape": "house", "w": 6, "h": 6, "tall": 6, "roof": "roof_slate", "cost": { "stone": 20, "crystal": 6 }, "work": 70 },
-    "lightning_tower": { "name": "Lightning tower", "group": "magic", "shape": "tower", "w": 3, "h": 3, "tall": 11, "wall": "keepstone", "top": "crystal", "cost": { "stone": 16, "crystal": 8 }, "work": 60, "tower": "lightning_tower", "glow": [0.6, 0.75, 1] },
-    "arcane_tower":    { "name": "Arcane missile tower", "group": "magic", "shape": "tower", "w": 3, "h": 3, "tall": 12, "wall": "keepstone", "top": "crystal", "cost": { "stone": 18, "crystal": 10 }, "work": 60, "tower": "arcane_tower", "glow": [0.75, 0.45, 1] },
-    "shield_tower":    { "name": "Shield tower",    "group": "magic", "shape": "tower", "w": 3, "h": 3, "tall": 10, "wall": "keepstone", "top": "crystal", "cost": { "stone": 16, "crystal": 12 }, "work": 60, "tower": "shield_tower", "glow": [0.4, 0.9, 1] },
-    "flame_tower":     { "name": "Flamethrower tower", "group": "magic", "shape": "tower", "w": 3, "h": 3, "tall": 8, "wall": "keepstone", "top": "lamp", "cost": { "stone": 14, "crystal": 8, "coal": 6 }, "work": 55, "tower": "flame_tower", "glow": [1, 0.55, 0.2] }
+ "_doc": "Military and magic buildings (M6). Guards are hired at a barracks (cap = guards it holds); mages need a mage guild. Towers with crew take a guard from the nearest barracks. Magic structures cost mana crystals to build and then have unlimited ammo (owner).",
+ "kinds": {
+  "barracks": {
+   "name": "Barracks",
+   "group": "military",
+   "shape": "house",
+   "w": 7,
+   "h": 5,
+   "tall": 4,
+   "roof": "roof_slate",
+   "cost": {
+    "log": 14,
+    "stone": 14
+   },
+   "work": 60,
+   "barracks": 12
+  },
+  "guard_post": {
+   "name": "Guard post",
+   "group": "military",
+   "shape": "statue",
+   "w": 2,
+   "h": 2,
+   "tall": 3,
+   "cost": {
+    "log": 4
+   },
+   "work": 10,
+   "post": 3
+  },
+  "watchtower": {
+   "name": "Watchtower",
+   "group": "military",
+   "shape": "tower",
+   "w": 3,
+   "h": 3,
+   "tall": 9,
+   "wall": "wall_wood",
+   "cost": {
+    "log": 16
+   },
+   "work": 40,
+   "tower": "watchtower"
+  },
+  "ballista_tower": {
+   "name": "Ballista tower",
+   "group": "military",
+   "shape": "tower",
+   "w": 4,
+   "h": 4,
+   "tall": 8,
+   "wall": "wall_stone",
+   "cost": {
+    "log": 12,
+    "stone": 20,
+    "iron": 2
+   },
+   "work": 60,
+   "tower": "ballista_tower"
+  },
+  "catapult_tower": {
+   "name": "Catapult tower",
+   "group": "military",
+   "shape": "tower",
+   "w": 4,
+   "h": 4,
+   "tall": 7,
+   "wall": "wall_stone",
+   "cost": {
+    "log": 16,
+    "stone": 24,
+    "iron": 3
+   },
+   "work": 70,
+   "tower": "catapult_tower"
+  },
+  "mage_guild": {
+   "name": "Mage guild",
+   "group": "magic",
+   "shape": "house",
+   "w": 6,
+   "h": 6,
+   "tall": 6,
+   "roof": "roof_slate",
+   "cost": {
+    "stone": 20,
+    "crystal": 6
+   },
+   "work": 70
+  },
+  "lightning_tower": {
+   "name": "Lightning tower",
+   "group": "magic",
+   "shape": "tower",
+   "w": 3,
+   "h": 3,
+   "tall": 11,
+   "wall": "keepstone",
+   "top": "crystal",
+   "cost": {
+    "stone": 16,
+    "crystal": 8
+   },
+   "work": 60,
+   "tower": "lightning_tower",
+   "glow": [
+    0.6,
+    0.75,
+    1
+   ]
+  },
+  "arcane_tower": {
+   "name": "Arcane missile tower",
+   "group": "magic",
+   "shape": "tower",
+   "w": 3,
+   "h": 3,
+   "tall": 12,
+   "wall": "keepstone",
+   "top": "crystal",
+   "cost": {
+    "stone": 18,
+    "crystal": 10
+   },
+   "work": 60,
+   "tower": "arcane_tower",
+   "glow": [
+    0.75,
+    0.45,
+    1
+   ]
+  },
+  "shield_tower": {
+   "name": "Shield tower",
+   "group": "magic",
+   "shape": "tower",
+   "w": 3,
+   "h": 3,
+   "tall": 10,
+   "wall": "keepstone",
+   "top": "crystal",
+   "cost": {
+    "stone": 16,
+    "crystal": 12
+   },
+   "work": 60,
+   "tower": "shield_tower",
+   "glow": [
+    0.4,
+    0.9,
+    1
+   ]
+  },
+  "flame_tower": {
+   "name": "Flamethrower tower",
+   "group": "magic",
+   "shape": "tower",
+   "w": 3,
+   "h": 3,
+   "tall": 8,
+   "wall": "keepstone",
+   "top": "lamp",
+   "cost": {
+    "stone": 14,
+    "crystal": 8,
+    "coal": 6
+   },
+   "work": 55,
+   "tower": "flame_tower",
+   "glow": [
+    1,
+    0.55,
+    0.2
+   ]
   }
+ }
 }

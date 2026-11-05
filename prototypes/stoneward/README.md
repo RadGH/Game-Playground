@@ -28,6 +28,7 @@ Guards patrol, walls are drawn as lines and crack and fall, rivals rise, and rul
 | M8 Rivals | done 2026-11-03: 2-4 kingdoms with a rolled split of stances, opinion with warnings and flips, towns drawn as real cells that grow, border pressure, demands and tribute, armies with sappers and catapults, ally caravans that walk in and trade by your Market settings, a shared road on alliance, powers on their land sour them |
 | M11 Big cities | done 2026-11-03: town halls found new towns, outposts grow into hamlets, commuters on passenger lines, far towns run cheaper (every 4th tick, 4 steps), tile-cost cache for long paths, globe marks (towns, borders, night lights, routes, armies) with filters and a sun that follows the clock |
 | M12 Progress & publish | done 2026-11-03 (except the public listing — ask Radley): population milestones with chests and landmarks, achievements kept across worlds, research + tiers wired behind one unlock check (everything unlocked), sound + music, ! reports with a picture, cloud saves, gamepad menus, account button, What's new |
+| Play-test 2 | done 2026-11-04: towns defend themselves (garrison, archers on walls, auto walls/gates/firebreaks/watchtowers), Army tab with attack flags, raiders burn and blast, stone walls only break to explosions, growth no longer stalls, yards + long roads, visible work (felling, boats, tools), Info → Needs, settler wagons, Transport tab with docks, Lightning Strike + Frost Nova, no cooldowns, no random fires, bigger meteor, depth so buildings hide people behind them, sharper globe, pinch fix. See docs/PLAN.md §8 |
 
 ## How the planet works (M0)
 
@@ -75,6 +76,12 @@ chunks are drawn north to south, so whatever is further south is drawn later and
 the whole 3/4 occlusion rule. Trees are drawn as canopy blobs or pine triangles on a trunk. Walls and stones are a
 darker front face with a lighter top.
 
+**Depth (play-test 2).** The painter also stores, in each pixel's alpha, the ROW of whatever standing thing
+painted it (160 + row; 255 = flat ground). The chunk pass writes that as depth, and sprites that carry a
+FOOT (9th value of a quad: the y they stand on) are depth-tested against it, so a building, wall or tree
+standing further south hides a person behind it. Quads without a foot draw on top as before. API in the
+header of `js/render/gl.js`.
+
 **Renderer** (`js/render/gl.js`, WebGL2). Three passes share one camera:
 
 1. The macro pass is always drawn first. It reads the biome texture through a jitter, so ragged edges show and a
@@ -86,7 +93,10 @@ darker front face with a lighter top.
 **Camera** (`js/ui/camera.js`). Zoom is `ppc`, CSS pixels per cell, from 14 down to "the globe fills 38% of the
 short side". The globe fades in once the map is about 1.7 screens wide. Controls:
 
-- touch: one finger drags, two fingers pinch;
+- touch: one finger drags, two fingers pinch. A primary pointer-down (or the browser's own touchend with no
+  fingers left) forgets every finger the camera still holds: iPhones sometimes never report a finger lifting,
+  and that leftover made every later touch the second finger of a pinch — stuck zooming (Kindlewild had the
+  same bug). The finger left on the glass after a pinch does nothing until it lifts;
 - mouse wheel;
 - keyboard: WASD or arrows (W = screen north = north), Q/E to zoom;
 - gamepad: left stick, triggers.
@@ -153,7 +163,30 @@ How it runs:
   4. upgrades: tent → hut → cottage, when stock covers twice the cost;
   5. wells and warehouses.
 - **Plots** sit beside road cells (`findPlot`). When nothing fits, the town pushes a new dirt road out
-  (`growRoads`).
+  (`growRoads`). The search radius grows with the town (`searchR`: 40 + 10·√pop, 70..300 m). Before
+  play-test 2 it was a fixed 70 m and the tent step RETURNED when no tent fitted, so a town with no room left
+  near the keep never planned anything again — the "stopped growing at about 150" stall. A failed tent no
+  longer stops the rest of the plan.
+- **Spreading out (play-test 2):** homes are placed with a 2-cell margin and more jitter, and a finished
+  home gets a **yard** (`makeYard`): a hedge or fence with a bush or two and flowers on the side with the
+  most open ground. Yard cells belong to the home (`part`), so a tap on them opens the home, and they go
+  when it goes (`clearYard`). Every 3–8 minutes a town of 25+ pushes one **long road** out (`longRoad`,
+  30–110 m, toward woods, stone or water), and roads that hit a wall turn that cell into a gate. Streets are
+  `town.roadWidth` (3) cells wide, the keep's first cross 4, and plots sit `plotSetback` (2) cells back.
+- **Radius** (`radius(town)`): the farthest home, service or workshop from the keep (not woodcutters,
+  fields, docks or towers, which sit at the edge on purpose). Walls and the garrison's reach use it.
+- **Work you can see:** woodcutting pushes a `fell` event the page draws as a toppling tree (with a chop
+  sound); fishers row out over open water in a boat (`boatSpot`, `p.boat`); the people snapshot carries an
+  `act` code (chop, dig, field, fish, build, douse, hunt, workshop, flee) that the page animates, and what is
+  carried by name.
+- **Fleeing:** townsfolk within 12 m of an enemy drop what they carry and run for the keep (`flee`).
+- **Settler wagons** (`settler` order, data `settler`): 500 gold, six free folk and a load of logs, stone and
+  food from the nearest town, at least 110 m from any town. The wagon follows `nav.findLong` and founds a
+  town hall where it stops; its riders become the new town (nothing teleports).
+- **Fire duty** (walls.js `fireDuty`): every burning building or yard near a town pulls in up to a dozen of
+  the nearest townsfolk (not just those resting at home), plus the fire station's crew. Each fetches water
+  from a well or open water (or beats the flames when there is none) and then goes for the NEAREST burning
+  cell (`sim.nearestFire`), not a random spot.
 - **Kingdom stock** is whatever sits in the keep or warehouses (`kingdom: true` in `data/buildings.json`).
   A producer's pile doesn't count until a hauler carries it home (§0.2).
 - **Daily:** each person eats one food from the stock. Hungry people leave. Taxes come in by home level.
@@ -400,10 +433,35 @@ Later milestones (walls, sieges, monsters) use them as they are:
 - **Units** (guards and enemies alike): `{ side, kind, x, y, hp, mode, path }`. Guards move with the town's
   nav, so walls block them. Brutes and sappers plan *through* built cells at a cost of 12 and break them when
   next to them (`sim.damage`). Gates hold enemies back until broken. Drakes fly straight.
-- **Guards** have modes `post`, `patrol` (a loop of points), `hold`, `barracks`, `crew` (manning a tower) and
-  `escort` (following a route's cart). Each think, a guard checks for an enemy within `callRadius` of its post
-  or any patrol point and goes to fight it. That is the owner's "enemies near a patrol call the guards". A
-  guard standing on a wall gets 1.5× range.
+- **The garrison (play-test 2, owner: "no micromanaging")**: every town raises its OWN guards — no hiring,
+  no orders. `stepGarrison` keeps `garrison.base + pop / garrison.per + barracks × garrison.barracks` guards
+  (data/military.json `garrison`), recruiting one every `every` ticks at the barracks or keep, about 40%
+  archers (crossbows with an armourer, a mage with a mage guild, spearmen once there is a smithy). Modes:
+  `garrison` (walks a beat between random street cells from `sim.town.streetPoint`, marking safety, and goes
+  for any enemy inside the town's reach = `sim.town.radius(town) + 45`), `wall` (an archer on a wall tower or
+  a watchtower — it climbs up, `u.up`, gets 1.5× range and only comes down for an enemy already inside),
+  `crew` (manning a crewed tower), `army` (with an attack flag) and `escort`. Old saves' `post`/`patrol`/
+  `hold`/`barracks` guards fold into `garrison`. Wages come out of the treasury daily; an empty treasury stops
+  new recruits, nobody deserts.
+- **Attack flags** (`flag.add` / `flag.move` / `flag.clear`, at most 3): each flag takes the guards its
+  nearest town can spare (everyone above max(3, 35%) who is walking the streets), gathers them at the edge
+  of town on the flag's side (`gather`), and only when they are all there (or after 45 s) sets off together
+  (`march`). In the flag's 34 m circle they fight anything hostile (`fight`); a lair or camp in it burns once
+  no defender is left and half the band has stood there ~10 s; a rival town in it is raided
+  (`sim.rivals.raided`). A moved flag re-routes them; a cleared one sends them back to the garrison.
+- **Raiders raze** (play-test 2: raids "just run up and touch your city"): raiders (bandits, soldiers) pick
+  the nearest standing building (homes first, the keep last, spreading out over the town), break a random
+  cell of it (`sim.damage`) and set flammable cells alight; bowmen shoot fire arrows. When it burns or is
+  gone they move on, and after `raidLeft` ticks they go home. Anyone of the town within reach is cut down
+  (townsfolk run for the keep: `flee` in town.js). Catapult stones and sappers' powder kegs are real blasts
+  (`S.pending` → `blastOf(sim).blast`), and blasts are the only thing that really hurts a stone wall
+  (walls.js `damage(x, y, n, { blast })`, tiers' `melee` factor). The reach test has +0.8 m of slack: the
+  path finder stops when the CELL is in reach and a unit stands mid-cell, so without it a soldier could stop
+  one step short of the keep forever (the "AFK at the keep door").
+- **Planning budget**: at most 3 path searches a tick across all units (`plansLeft`), so a big raid
+  arriving at once spreads its planning instead of stalling.
+- `strike(x, y, r, dmg, { kind, freeze })` hurts every enemy in a circle (Lightning Strike, Frost Nova);
+  a frozen unit (`u.frozen` ticks) skips its turn.
 - **Safety**: a patrol marks 8 m tiles as it passes, and the mark fades over `patrolFade` ticks. Posts and
   towers cover a radius, and a known lair nearby lowers safety. Homes get `b.safety` every 10 s; manors need
   it, raids avoid it, and the Views tab shows it.
@@ -417,13 +475,14 @@ Later milestones (walls, sieges, monsters) use them as they are:
 - **Raids**: strength = (population / 20 + gold / 400) × the Raids setting. The raid is announced `warn`
   seconds ahead with the target named, and aimed at `weakestPoint()`: outskirts, a far mine, an outpost, a
   store with little safety.
-- **Wages** are paid daily in gold. Unpaid guards leave.
 - **Defeat**: a town is lost only when its keep is not standing AND nobody is left. Ruins stay. With no town
   left the page goes back to the landing step.
 
-**Page** (`js/features/military.js`): the Guards tab (hire, pick, Post here…, Draw patrol…, Hold, Barracks),
-Info → Military (threat meter, roster, recent attacks), units with health bars, shots, shield domes, lair
-markers, a raid banner (tap it to fly there), and dropping to 1x on attack (a setting).
+**Page** (`js/features/military.js`): the Army tab (garrison per town, plant / move / clear attack flags;
+tapping a flag or a lair has the same buttons), Info → Military (threat meter, recent attacks), units with
+health bars — every enemy has a red outline and cap, and a red marker zoomed out — guards wear a blue sash,
+shots, shield domes, lair markers, flags with their circle and gathering point, a raid banner (tap it to fly
+there), and dropping to 1x on attack (a setting).
 
 ## Rivals (M8)
 
@@ -491,6 +550,82 @@ turned off.
 - The account button on the title.
 - Sound comes from `sfx/` ids, with an ambience bed for town, night, attack or wind.
 - Generated music beds change for day, night and attack.
+
+## Play-test 3: wards, flags that reinforce, street plan (2026-11-04)
+
+Owner: "the command flag system… was almost useless against a raid, they just died easily and no more troops went
+out… bandits were destroying my farms before I had a chance to react… make it so a percentage of townfolk are
+staffed as guards who wander around… [the town] started spamming roads… they should follow a sensible hierarchy…
+long term cities should be sprawling and interesting." And: "make the guard post summon guards to be stationed nearby".
+
+**Wards** (`js/sim/military.js` `computeWards` / `assignWards` / `wardThreat`). About 1 in 10 people serve as guards
+(`garrison.per`). A town's buildings are grouped into wards: clusters `garrison.wardGap` (70) m apart, farms, mines,
+docks and outposts included, so the far edge is covered too. Each street guard gets one, busiest wards first. It
+walks the streets of its ward (`town.streetPoint(town, rng, area)`) and fights what comes there. It only helps next
+door when fewer than two guards are already on that enemy and it is within `wardHelp` (130) m, so nobody walks
+across the map. Wards are worked out again every 30 s. **Guard posts** (`kinds.guard_post.post = 3`) add 3 guards to
+the town's count and are wards of their own, filled first. Attack flags can still call on those guards.
+
+**At war** (`atWar(town)`: a flag of this town is up, or enemies are in its wards) the town calls up a levy of
+`garrison.levy` (8%) of its people on top of its guards and recruits `warRecruit` (4) times faster. **Flags** keep
+only `keepHome` (20%) at home. The first band is picked once and gathers before marching. After it marches, anyone
+who falls is replaced: up to 4 fresh guards every 3 s go straight to the flag (`u.direct`). The Army tab shows
+"N sent as help".
+
+**Bandits further out.** A lair or bandit camp closer than `safety.lairGap` (240) m to a town lies quiet. It can
+still be found and burned with a flag. Raids now start `raids.spawnDist` (200) m from their target (was 110), with
+60 s of warning (was 45).
+
+**Street plan** (`js/sim/town/town.js`, "the street plan"). Every road run on `S.roads` now records
+`[x0, y0, x1, y1, tier, cls, tick, width]`, where `cls` is one of:
+- `main`: the keep's cross. These avenues keep growing outward as the town spreads, bending 45° round whatever is
+  in the way. `paveMain` paves them with gravel from 60 people, then stone from 160, as stone allows.
+- `street`: side streets one `block` (28 m) apart, off an avenue or another street, and streets carrying on from
+  their ends.
+- `country`: long roads, and roads between kingdoms.
+- `player`: roads the player drew.
+
+`growRoads` lays at most one road every `roadEvery` (600) ticks, and only when a small building (≤ 64 cells) found
+no room. Big fields no longer push roads out. `roadOk` refuses a road that lies more than 25% on top of another, or
+that runs alongside one closer than `streetGap` (11) m. `tidyRoads` (every minute) turns town streets older than 4
+minutes, with nothing built beside them, back to grass, 24 at a time. Cells another road still uses are kept.
+`main`, `country` and `player` roads are never removed. Old saves: avenues are found by walking out from the keep
+(`ensureAvenues`). Their unclassed streets get tidied the same way, which is what cleans up a road-spammed town.
+The town looks for room up to 420 m out (was 300), so a big city sprawls along its avenues and country roads.
+`tools/road-map.mjs <out.ppm> [days] [seed]` grows a town headless and draws its roads.
+
+**Blocks, not ribbons.** Houses fill every spot along a road first, so with only the rules above a town became a
+cross of avenues lined with houses and almost no side streets. `onAvenueWay` now keeps two kinds of space free of
+buildings: a strip 3 m either side of every future side street (one `block` apart along every straight avenue and
+street, out to 30 m, both sides, from `corridors()`), and the next 30 m in front of each living avenue. A test
+town of seed 7 after 4 days: old code 287 people, 149 buildings, 102 overlapping road runs. New code 300 people,
+193 buildings, 17 avenue + 13 street + 7 country runs, laid out as radial avenues with blocks between them.
+
+**Two guard bugs found on the way.** (1) A trip over 50 m uses a coarse route of waypoints (`nav.findLong`), and
+the straight walk between two waypoints can catch on a building's corner. The guard used to drop the route and
+ask again, got the same corner, and stood at the corner of the keep forever. Now it walks a fine path to the
+next waypoint (`u.finePi`). (2) A patrol fallback could pick a spot inside a building. `openNear` only picks
+walkable ground, and `unstick` moves a guard found inside something solid out to the nearest open cell.
+
+## Info cards (2026-11-04)
+
+Owner: "update all the build and other menus like Outpost to have hover tooltips that explain what it is and does, and any
+of its calculable stats listed… on mobile you should be able to click a button to read info about it."
+
+- `data/about.json` — the WORDS: one or two plain sentences per building kind (`kinds`), per Lines/Transport tool
+  (`tools`: roads, walls, firebreak, track, settler, flag) and the cover names. `tests/about.test.mjs` fails if a building
+  has no row.
+- `js/ui/about.js` (pure) — the NUMBERS, worked out from the same data the sim reads: cost, build work, size, people housed,
+  home level + tax + needs (from `homes.needs`), workers, makes per trip and per minute, craft in → out, work area, crop
+  regrow, storage, service reach, beauty, faith (rate/reach/cap), scan range, guard limit, tower damage/range/dps/chain/
+  pierce/splash/shield, wall strength, power cost/radius/damage per size. Move a knob in the data and the card moves.
+- `js/ui/infotip.js` — `withInfo(button, 'kind:<id>' | 'tool:<id>' | 'power:<id>:<size>')`. Where the device can hover
+  (`(hover: hover) and (pointer: fine)`) the shared tooltip engine (`shared/tooltip.js`) shows the card; every button
+  also gets a small "i" (`.info-btn`, inside the button, its press does not choose the item) that opens the card in the
+  sheet — at the TOP on a phone, because the open dock covers the bottom. Features call it as `ui.info(el, spec)`.
+- Settings: Sound and Music are 0–100 sliders (`prefs.soundVol` / `prefs.musicVol`, 0 = off, 70 = the old level;
+  an old `sound: false` reads as 0). `js/features/sound.js` `applyVolumes()` sets the sound library's master volume and
+  scales the music beds.
 
 ## Files
 

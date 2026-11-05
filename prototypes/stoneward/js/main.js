@@ -16,6 +16,7 @@ import { hooks, ui } from './ui/hooks.js';
 import { loadBuildings, loadMaterials } from './data.js';
 import { createWhatsNew } from '../../../shared/whats-new.js';
 import { createCredits } from '../../../shared/credits.js';
+import { initInfo, withInfo, openInfo } from './ui/infotip.js';
 
 const $ = s => document.querySelector(s);
 const store = {
@@ -25,7 +26,7 @@ const store = {
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 const fetchJson = async p => (await fetch(new URL(p, import.meta.url))).json();
-const [settingsData, materialsJson, buildingsData] = await Promise.all([fetchJson('../data/worldsettings.json'), loadMaterials(f => fetchJson('../data/' + f)), loadBuildings(f => fetchJson('../data/' + f))]);
+const [settingsData, materialsJson, buildingsData, aboutData] = await Promise.all([fetchJson('../data/worldsettings.json'), loadMaterials(f => fetchJson('../data/' + f)), loadBuildings(f => fetchJson('../data/' + f)), fetchJson('../data/about.json').catch(() => ({}))]);
 const M = compileMaterials(materialsJson);
 const KINDS = buildingsData.kinds, GOODS = buildingsData.goods;
 const DAY_TICKS = 12000;
@@ -215,15 +216,16 @@ async function onTap(p) {
   if (devTool) { link.send('order', { order: { t: 'poke', kind: devTool, x: Math.floor(p.x), y: Math.floor(p.y), r: 3 } }); return; }
   for (const h of hooks.tap) if (await h(p, ui)) return;
   if (viaFor) { const id = viaFor; viaFor = null; via = { x: p.x, y: p.y }; setTimeout(() => { via = null; }, 2500); await link.order({ t: 'route.via', route: id, x: p.x, y: p.y }); toast('The route will pass that way.', 'good'); return; }
-  if (scoutPick) { scoutPick = false; const r = await link.order({ t: 'scout', x: p.x, y: p.y }); toast(r?.error || 'A scout rides out.', r?.error ? 'bad' : 'good'); return; }
+  if (settlerPick) { settlerPick = false; const r = await link.order({ t: 'settler', x: p.x, y: p.y }); toast(r?.error || `A settler wagon sets out (about ${fmtSecs(r?.secs || 0)}).`, r?.error ? 'bad' : 'good'); if (!r?.error) select({ x: p.x - 4, y: p.y - 4, w: 8, h: 8 }); return; }
   const t = app.stream?.town, W = app.world.W;
   const near2 = (x, y, r) => Math.hypot(near(x, p.x, W) - p.x, y - p.y) < r;
   const g = (t?.military?.units || []).find(([, , , x, y]) => near2(x, y - 1, 2.2));
   if (g) {
     const [id, guard, kind, , , hp, mode] = g;
     const def = guard ? buildingsData.guards[kind] : buildingsData.monsters[kind];
-    sheet(`<b>${esc(def?.name || kind)}</b><br>${guard ? `Guard · ${mode}` : 'Enemy'} · health ${Math.round(hp * 100)}%`, 6000);
-    if (guard && ui.app) { /* select it in the Guards tab */ window.dispatchEvent(new CustomEvent('stoneward:pick-guard', { detail: id })); }
+    const doing = { garrison: 'walking the streets', wall: 'on the wall', crew: 'crewing a tower', army: 'with the troops at a flag', escort: 'riding with a cart' }[mode] || mode;
+    sheet(`<b>${esc(def?.name || kind)}</b><br>${guard ? `Your guard · ${doing}` : `<span style="color:var(--red)">Enemy</span> · ${esc({ beast: 'a wild beast', brute: 'a brute — it smashes walls', undead: 'undead — fire and dawn hurt it', dragon: 'a drake — it flies over walls and burns roofs', bandit: 'a bandit — it robs and burns', army: 'a rival soldier', siege: 'siege — it breaks walls' }[def?.group] || '')}`} · health ${Math.round(hp * 100)}%`, 6000);
+    select({ unit: id });
     return;
   }
   // a found seam (the square marker with the dotted ring): what it is and a button to mine it
@@ -231,23 +233,49 @@ async function onTap(p) {
   const node = app.layers.nodes !== false && (t?.nodes || []).map(n => ({ n, d: Math.hypot(near(n[2], p.x, W) - p.x, n[3] - p.y) })).filter(o => o.d < Math.max(tapR, o.n[5] || 0)).sort((a, b) => a.d - b.d)[0]?.n;
   if (node) { showNode(node); return; }
   const cart = (t?.carts || []).find(([x, y]) => near2(x, y - 1, 2.2));
-  if (cart) { const r = (t.routes || []).find(rt => true); sheet(`<b>${cart[3] ? 'Cart' : 'Porter'}</b><br>${cart[2] ? 'Carrying goods home' : 'Going back for more'}`, 5000); return; }
+  if (cart) { sheet(`<b>${cart[3] ? 'Cart' : 'Porter'}</b><br>${cart[2] ? 'Carrying goods home' : 'Going back for more'}`, 5000); select({ x: cart[0] - 1.5, y: cart[1] - 2.5, w: 3, h: 3 }); return; }
+  const wagon = (t?.wagons || []).find(([x, y]) => near2(x, y - 1, 3));
+  if (wagon) { sheet('<b>Settler wagon</b><br>Six settlers with logs, stone and food, on their way to found a new town.', 6000); select({ x: wagon[0] - 2, y: wagon[1] - 3, w: 4, h: 4 }); return; }
   const scout = (t?.scouts || []).find(([x, y]) => near2(x, y - 1, 2.5));
-  if (scout) { sheet('<b>Scout</b><br>Riding out to find what lies beyond. Anything found shows on the map.', 5000); return; }
+  if (scout) { sheet('<b>Scout</b><br>Riding out to find what lies beyond. Anything found shows on the map.', 5000); select({ x: scout[0] - 1.5, y: scout[1] - 2.5, w: 3, h: 3 }); return; }
+  // a person (play-test 2: "more things should be clickable")
+  const who = app.camera.cam.ppc > 2 && (t?.people || []).find(([x, y]) => near2(x, y - 1, 1.2));
+  if (who) { const [x, y, carry, job, , id, act, boat] = who; sheet(`<b>Townsperson</b><br>${esc(personText(carry, job, act, boat))}`, 5000); select({ person: id }); return; }
   const b = await link.ask('building', { x: Math.floor(p.x), y: Math.floor(p.y) });
-  if (b) return showBuilding(b);
+  if (b) { select({ x: b.x, y: b.y, w: b.w, h: b.h }); return showBuilding(b); }
   const w = await link.ask('wall', { x: Math.floor(p.x), y: Math.floor(p.y) });
   if (w) {
-    const names = { wood: 'Palisade', stone: 'Stone wall', thick: 'Thick stone wall' };
-    const el = sheet(`<b>${names[w.tier]}</b><br>${w.n} m · ${w.towers} towers · ${w.gates} gates<br>Damaged parts are repaired for free once no enemy is near.`, 9000);
-    if (w.tier !== 'thick') { const row = document.createElement('div'); row.className = 'row'; row.append(btn(`Upgrade to ${w.tier === 'wood' ? 'stone' : 'thick stone'}`, async () => { const r = await link.order({ t: 'wall.upgrade', id: w.id }); if (r) { toast('Wall upgraded.', 'good'); el.classList.add('hidden'); } })); el.append(row); }
+    const names = { wood: 'Wooden wall', stone: 'Stone wall', thick: 'Thick stone wall' };
+    const about = w.tier === 'wood' ? 'Strong against blades and claws, but it burns.' : 'Only explosions really hurt it.';
+    const el = sheet(`<b>${names[w.tier]}</b><br>${w.n} m · ${w.towers} towers · ${w.gates} gates<br>${about} Damaged parts are repaired for free once no enemy is near.${w.auto ? '<br><small>Your town built this wall itself.</small>' : ''}`, 9000);
+    select({ cell: [Math.floor(p.x), Math.floor(p.y)] });
+    if (w.tier === 'wood') { const row = document.createElement('div'); row.className = 'row'; row.append(btn('Rebuild in stone (🪨 1 a metre)', async () => { const r = await link.order({ t: 'wall.upgrade', id: w.id }); if (r) { toast('Wall rebuilt in stone.', 'good'); el.classList.add('hidden'); } })); el.append(row); }
     return;
   }
   const cell = app.stream.cellAt(p.x, p.y);
   const lines = [];
-  if (cell) lines.push(`${M.list[cell.ground].name}${cell.mat ? ' · ' + M.list[cell.mat].name : ''}`);
+  if (cell) {
+    const mat = cell.mat ? M.list[cell.mat] : null, gr = M.list[cell.ground];
+    lines.push(`${gr.name}${mat ? ' · ' + mat.name : ''}`);
+    if (cell.flag & 1) lines.push('<span style="color:var(--red)">On fire!</span> Townsfolk nearby come with water.');
+    else if (mat && M.tree[cell.mat]) lines.push('<small>Woodcutters fell trees like this one; they grow back in a few days.</small>');
+    else if (gr.road) lines.push(`<small>A road. Houses grow along roads, and carts go faster on them.</small>`);
+  }
   sheet(`<b>${biomeAt(p.x, p.y).name}</b><br>${lines.join('<br>')}`);
+  select({ cell: [Math.floor(p.x), Math.floor(p.y)] });
 }
+/** What a townsperson is up to, in plain words. */
+function personText(carry, job, act, boat) {
+  const A = ['', 'Felling a tree', 'Digging stone', 'Working the fields', 'Fishing from a boat', 'Building', 'Fighting a fire', 'Hunting', 'At work in a workshop', 'Running from raiders'];
+  if (boat) return 'Out on the water in a fishing boat.';
+  if (act) return A[act] + '.';
+  if (carry) return `Carrying ${GOODS[carry]?.name.toLowerCase() || carry}${job ? ' for their work' : ' to the stores'}.`;
+  return job ? 'On the way to work.' : 'Free to haul and build: the town finds them jobs.';
+}
+// ---------------------------------------------------------------- selection: what was tapped gets a gold outline
+let selected = null;
+function select(s) { selected = s ? { ...s, at: performance.now() } : null; }
+function fmtSecs(s) { return s >= 60 ? `${Math.round(s / 60)} min` : `${s} s`; }
 const NODE_INFO = {
   iron: ['Iron ore seam', 'Smelted into iron for tools and weapons.'],
   coal: ['Coal seam', 'Fuel for the smelter and the smithy.'],
@@ -262,7 +290,7 @@ function showNode([id, kind, x, y, rich]) {
   const el = sheet(`<b>${name}</b> <small>${'★'.repeat(rich || 1)}${rich === 3 ? ' rich' : ''}</small><br>${use}<br><small>The dotted ring is the seam. ${mine ? `Build a ${esc(mine[1].name.toLowerCase())} on it and a road route carries what it digs home — it counts once it reaches a warehouse.` : ''}${rich > 1 ? ' More stars dig faster.' : ''}</small>`, 12000);
   if (mine) {
     const row = document.createElement('div'); row.className = 'row';
-    row.append(btn(`Build a ${mine[1].name.toLowerCase()} here`, () => { el.classList.add('hidden'); openTab = 'build'; TABS.build.group = mine[1].group; startGhost(mine[0]); moveGhost({ x, y }); refreshDock(); }));
+    row.append(withInfo(btn(`Build a ${mine[1].name.toLowerCase()} here`, () => { el.classList.add('hidden'); openTab = 'build'; TABS.build.group = mine[1].group; startGhost(mine[0]); moveGhost({ x, y }); refreshDock(); }), 'kind:' + mine[0]));
     el.append(row);
   }
 }
@@ -290,8 +318,8 @@ function showBuilding(b) {
   }
 }
 function sheet(html, ms = 5000) {
-  const el = $('#sheet'); el.innerHTML = html; el.classList.remove('hidden');
-  clearTimeout(sheet.t); sheet.t = setTimeout(() => el.classList.add('hidden'), ms);
+  const el = $('#sheet'); el.innerHTML = html; el.className = 'sheet'; el.onclick = null;
+  clearTimeout(sheet.t); sheet.t = setTimeout(() => { el.classList.add('hidden'); selected = null; }, ms);
   return el;
 }
 function toast(text, kind = '', at = null) {
@@ -304,6 +332,13 @@ function toast(text, kind = '', at = null) {
 
 // ---------------------------------------------------------------- ticks from the sim
 function onTick(m) {
+  if (m.fells?.length) {
+    const c = app.camera?.cam; app.fells ??= [];
+    for (const [x, y, tall, dir, pine] of m.fells) {
+      app.fells.push({ x, y, tall, dir, pine, t0: performance.now() });
+      if (c && c.ppc > 1.5 && Math.abs(near(x, c.x, app.world.W) - c.x) < innerWidth / 2 / c.ppc && Math.abs(y - c.y) < innerHeight / 2 / c.ppc && performance.now() - (onTick.chop || 0) > 900) { onTick.chop = performance.now(); ui.sound?.('wood.chop'); }
+    }
+  }
   for (const s of m.said || []) {
     if (s.defeated) { toast(`${s.name} has fallen. Choose a new place to begin again.`, 'bad'); setTimeout(beginLanding, 2500); continue; }
     if (s.text && !s.warn) toast(s.text, s.kind, s.x != null ? { x: s.x, y: s.y } : null);
@@ -317,6 +352,23 @@ function onTick(m) {
   }
 }
 
+// ---------------------------------------------------------------- the top-bar numbers explain themselves on a tap
+// (play-test 2: "I don't know what the white moon icon is" — that is the gold coin, 🪙, which some
+// systems draw as a plain silver disc)
+document.querySelector('.topbar').addEventListener('click', e => {
+  const el = e.target.closest('.stat'); if (!el || app.state !== 'hud') return;
+  const t = app.stream?.town; if (!t) return;
+  const pw = t.powers;
+  const text = {
+    'st-pop': `<b>👪 People: ${t.pop}</b><br>Everyone living in your towns (${(t.towns || []).map(x => `${esc(x.name)} ${x.pop}`).join(', ')}). Newcomers arrive while there is food, room and good cheer; hungry or unhappy people leave.`,
+    'st-gold': `<b>🪙 Gold: ${t.gold}</b><br>Coins in the treasury. Taxes from homes bring it in (better homes pay more); it pays your guards' wages, moving buildings, extra carts, and settler wagons (🪙 ${buildingsData.settler?.gold ?? 500}).`,
+    'st-faith': `<b>✨ Faith: ${pw?.faith ?? 0} of ${pw?.cap ?? 0}</b><br>Prayer from your churches, more when people are happy. It pays for ruler powers (the Powers tab). Bigger churches raise the most you can hold.`,
+    'st-kingdom': `<b>${esc(app.settings?.name || '')}</b><br>Your kingdom: ${(t.towns || []).length} town${(t.towns || []).length === 1 ? '' : 's'}, ${t.pop} people. Info → Kingdom has a card for each town.`,
+    'st-clock': `<b>${esc(el.textContent)}</b><br>A day is about ten minutes at 1×. Tap the speed button to go faster.`,
+  }[el.id];
+  if (text) sheet(text, 7000);
+});
+
 // ================================================================ dock
 const TABS = {
   build: () => {
@@ -328,7 +380,7 @@ const TABS = {
       const p = panel('');
       const strip = document.createElement('div'); strip.className = 'strip';
       strip.innerHTML = `<span class="nm"><b>${esc(k.name)}</b> <small>${cost}</small><br><small>${k.node ? 'Tap near a found seam: it snaps on.' : 'Tap the map to place it. Two fingers move the map.'}</small></span>`;
-      strip.append(btn('Change', () => { stopGhost(); TABS.build(); }), btn('Done', () => { stopGhost(); openTab = null; refreshDock(); }));
+      strip.append(btn('ⓘ', () => openInfo('kind:' + ghost.kind)), btn('Change', () => { stopGhost(); TABS.build(); }), btn('Done', () => { stopGhost(); openTab = null; refreshDock(); }));
       p.append(strip);
       return;
     }
@@ -349,18 +401,19 @@ const TABS = {
       const want = (app.stream?.town?.towns?.[0]?.wants || []).find(w => w.kind === id);
       if (want) b.innerHTML += ` <span class="want" title="${esc(want.why)}">★</span>`;
       b.addEventListener('click', () => startGhost(id));
-      items.push(b);
+      items.push(withInfo(b, 'kind:' + id));
     }
     if (!items.length) { p.append(hint('Nothing to build here yet.')); return; }
     p.append(pager(items, 'build', 'grid'));
-    p.append(hint('Your town builds most things itself. Place one here to jump the queue. ★ = your town wants one.'));
+    p.append(hint('Your town builds most things itself. Place one here to jump the queue. ★ = your town wants one. ⓘ = what it does and its numbers.'));
   },
   roads: () => {
-    const tip = { wall: 'Drag to draw a wall. Towers go up at the ends and corners, a gate wherever a road crosses.', firebreak: 'Drag to clear a strip that fire cannot cross.', clear: 'Drag a box the town will never build in.', build: 'Drag a box the town will build in first.', erase: 'Drag over painted boxes to remove them.' };
+    // play-test 2: walls are named (wooden / stone), and the paint tools are gone — towns build their
+    // own roads, walls, gates and firebreaks; this tab is for the ones YOU want on top of that
+    const tip = { wall_wood: 'Drag to draw a wooden wall: strong, but fire burns it. Towers at the ends and corners, a gate wherever a road crosses.', wall_stone: 'Drag to draw a stone wall: only explosions really hurt it. Towers at the ends and corners, a gate wherever a road crosses.', firebreak: 'Drag to clear a strip that fire cannot cross.' };
     const items = [
       ['dirt', 'Dirt path', 'free'], ['gravel', 'Gravel road', '🪨 1 per 8 m'], ['stone', 'Paved road', '🪨 2 per 8 m'],
-      ['wall', 'Wall (best you can afford)', '🪵 or 🪨 per metre'], ['firebreak', 'Firebreak', 'free'],
-      ['clear', 'Keep clear (paint)', ''], ['build', 'Build here (paint)', ''], ['erase', 'Erase painted area', ''],
+      ['wall_wood', 'Wooden wall', '🪵 1 a metre'], ['wall_stone', 'Stone wall', '🪨 1 a metre'], ['firebreak', 'Firebreak', 'free'],
     ];
     if (roadTool) {
       // drawing: one strip, the map stays clear
@@ -368,7 +421,7 @@ const TABS = {
       const p = panel('');
       const strip = document.createElement('div'); strip.className = 'strip';
       strip.innerHTML = `<span class="nm"><b>${it[1]}</b> <small>${it[2]}</small><br><small>${tip[roadTool.tier] || 'Drag on the map to lay it. Two fingers move the map.'}</small></span>`;
-      strip.append(btn('Change', () => { stopRoad(); TABS.roads(); }), btn('Done', () => { stopRoad(); openTab = null; refreshDock(); }));
+      strip.append(btn('ⓘ', () => openInfo('tool:' + roadTool.tier)), btn('Change', () => { stopRoad(); TABS.roads(); }), btn('Done', () => { stopRoad(); openTab = null; refreshDock(); }));
       p.append(strip);
       return;
     }
@@ -378,18 +431,19 @@ const TABS = {
       const b = document.createElement('button'); b.className = 'item';
       b.innerHTML = `<span class="nm">${name}</span><span class="cost">${cost}</span>`;
       b.addEventListener('click', () => startRoad(tier));
-      list.push(b);
+      list.push(withInfo(b, 'tool:' + tier));
     }
     p.append(pager(list, 'roads', 'grid'));
-    p.append(hint('Roads steer where houses grow. Walls keep raiders out.'));
+    p.append(hint('Your towns lay their own roads, walls and firebreaks as they grow. Draw more here: roads steer where houses grow, walls keep raiders out.'));
   },
   layers: () => panel(`<h3>Map layers</h3>`, [toggle('Good places to settle', 'sites'), toggle('Found resources', 'nodes')]),
   globe: () => panel(`<h3>Globe</h3><p>Pinch out or press Q to see the whole world.</p>`, [btn('Zoom out to the globe', () => { const c = app.camera; c.flyTo(c.cam.x, c.cam.y, c.minPpc(), 900); }), btn('Back to the ground', () => { const c = app.camera; c.flyTo(c.cam.x, c.cam.y, 2.5, 900); })]),
   info: () => {
-    const sub = TABS.info.sub || 'kingdom';
+    const sub = TABS.info.sub || 'needs';
     const head = document.createElement('div'); head.className = 'groups';
-    for (const [k, name] of [['kingdom', 'Kingdom'], ['routes', 'Routes'], ...hooks.infoTabs.map(t => [t.id, t.label])]) { const b = btn(name, () => { TABS.info.sub = k; TABS.info(); }); b.classList.toggle('on', k === sub); head.append(b); }
+    for (const [k, name] of [['needs', 'Needs'], ['kingdom', 'Kingdom'], ['routes', 'Routes'], ...hooks.infoTabs.map(t => [t.id, t.label])]) { const b = btn(name, () => { TABS.info.sub = k; TABS.info(); }); b.classList.toggle('on', k === sub); head.append(b); }
     if (sub === 'routes') return routesPanel(head);
+    if (sub === 'needs') return needsPanel(head);
     const extra = hooks.infoTabs.find(t => t.id === sub); if (extra) return extra.render(ui, head);
     const t = app.stream?.town; const m = app.macro;
     const size = settingsData.sizes.find(s => s.width === m.width)?.name || '';
@@ -407,7 +461,10 @@ const TABS = {
       cards.push(c);
     }
     p.append(pagerOf(cards, 'towns', innerHeight > 700 ? 3 : 2));
-    p.append(btn('Send a scout (🪙 20)', () => { scoutPick = true; toast('Tap where the scout should ride.'); }));
+    const cost = buildingsData.settler?.gold ?? 500;
+    const send = btn(`Send a settler (🪙 ${cost})`, () => { settlerPick = true; toast('Tap where the new town should be. The wagon rolls there and founds it.'); });
+    if ((t?.gold ?? 0) < cost) send.title = `You have ${t?.gold ?? 0} gold`;
+    p.append(withInfo(send, 'tool:settler'));
   },
   dev: () => panel('<h3>Test tools</h3><p>Tap the map to use one.</p>', [btn('Night', () => link.send('order', { order: { t: 'time', tod: 0.7 } })), btn('Noon', () => link.send('order', { order: { t: 'time', tod: 0.25 } }))].concat(['fire', 'lava', 'water', null].map(k => { const b = btn(k ? 'Drop ' + k : 'Just look', () => { devTool = k; for (const x of b.parentNode.querySelectorAll('button')) x.classList.toggle('on', x === b); }); b.classList.toggle('on', devTool === k); return b; }))),
 };
@@ -416,6 +473,7 @@ if (DEV) { const b = document.createElement('button'); b.dataset.tab = 'dev'; b.
 $('#dock-tabs').addEventListener('click', e => {
   const b = e.target.closest('button[data-tab]'); if (!b) return;
   openTab = openTab === b.dataset.tab ? null : b.dataset.tab;
+  if ($('#sheet').classList.contains('info-sheet')) $('#sheet').classList.add('hidden');   // an info card belongs to the tab it came from
   if (openTab !== 'build') stopGhost();
   if (openTab !== 'roads') stopRoad();
   if (hooks.tabs.some(t => t.tool) && !hooks.tabs.some(t => t.id === openTab && t.tool)) { const cur = app.camera?.tool; if (cur && cur.feature) app.camera.setTool(null); }
@@ -461,8 +519,53 @@ function toggle(label, key) {
   b.classList.toggle('on', !!app.layers[key]); return b;
 }
 
+// ---------------------------------------------------------------- Info → Needs (play-test 2)
+// "The Info tab should have Needs and show what your people need most, especially relevant things you
+// can actually build." One card per need, worst first, each with the building that answers it.
+const NEED_FIX = {
+  water: ['well', 'Homes without a well in reach cannot grow past a tent.'],
+  market: ['market', 'Houses and better need a market in reach.'],
+  faith: ['chapel', 'Houses and better need a church in reach. Churches also give faith for powers.'],
+  tavern: ['tavern', 'Townhouses and manors need a tavern in reach.'],
+  health: ['healer', 'Manors need a healer in reach.'],
+  food: ['farm', 'Better homes want more kinds of food: fish, game, berries, vegetables, bread.'],
+  bread: ['bakery', 'Bread: a farm grows grain, a mill grinds flour, a bakery bakes.'],
+  ale: ['brewery', 'Ale: a barley farm and a brewery.'],
+  cloth: ['weaver', 'Cloth: a sheep pasture for wool and a weaver.'],
+  furniture: ['carpenter', 'Furniture: a carpenter, fed with planks from a sawmill.'],
+  jewelry: ['goldsmith', 'Jewellery: a gold mine on a found gold seam, then a goldsmith.'],
+  safety: ['watchtower', 'Unsafe streets: more guards come with more people and barracks; towers and walls help too.'],
+};
+const NEED_NAME = { water: 'Water', market: 'A market', faith: 'A church', tavern: 'A tavern', health: 'A healer', food: 'More kinds of food', bread: 'Bread', ale: 'Ale', cloth: 'Cloth', furniture: 'Furniture', jewelry: 'Jewellery', safety: 'Safety' };
+function needsPanel(head) {
+  const t = app.stream?.town; const p = panel(''); p.append(head);
+  const town = t?.towns?.[0]; if (!town) { p.append(hint('Found a town first.')); return; }
+  const rows = [];
+  const add = (n, title, text, kind) => rows.push({ n, title, text, kind });
+  if (town.foodDays < 2) add(1e6, `Food: ${town.foodDays} days left`, 'People leave when they go hungry. More fishers, foragers, hunters and farms.', 'farm');
+  if (town.homeless) add(9e5, `${town.homeless} without a home`, 'The town puts up tents as fast as it has room. A road out of town gives it room.', null);
+  for (const [need, n] of Object.entries(town.missing || {})) add(n, `${NEED_NAME[need] || need} — ${n} home${n > 1 ? 's' : ''} lack it`, NEED_FIX[need]?.[1] || '', NEED_FIX[need]?.[0]);
+  for (const w of town.wants || []) if (!rows.some(r => r.kind === w.kind)) add(0.5, KINDS[w.kind]?.name || w.kind, `Your town wants one: ${w.why}.`, w.kind);
+  if (town.safety != null && town.safety < 0.35) add(2, 'Unsafe streets', NEED_FIX.safety[1], 'barracks');
+  rows.sort((a, b) => b.n - a.n);
+  const cards = rows.map(r => {
+    const c = document.createElement('div'); c.className = 'card';
+    c.innerHTML = `<b>${esc(r.title)}</b><span>${esc(r.text)}</span>`;
+    const k = r.kind && KINDS[r.kind];
+    if (k) {
+      const cost = Object.entries(k.cost || {}).map(([g, n]) => `${GOODS[g]?.icon || g} ${n}`).join(' ') || 'free';
+      const row = document.createElement('div'); row.className = 'row';
+      row.append(withInfo(btn(`Build a ${k.name.toLowerCase()} · ${cost}`, () => { openTab = 'build'; TABS.build.group = k.group; startGhost(r.kind); refreshDock(); }), 'kind:' + r.kind));
+      c.append(row);
+    }
+    return c;
+  });
+  if (!cards.length) { p.append(hint(`${town.name} has everything it needs right now. It will ask for more as it grows.`)); return; }
+  p.append(pagerOf(cards, 'needs', innerHeight > 700 ? 3 : 2));
+}
+
 // ---------------------------------------------------------------- routes screen
-let via = null, viaFor = null, scoutPick = false;
+let via = null, viaFor = null, settlerPick = false;
 function routesPanel(head) {
   const t = app.stream?.town;
   const p = panel(''); p.append(head);
@@ -569,7 +672,7 @@ function startRoad(tier) {
       const { a, b } = roadTool; roadTool.a = roadTool.b = null;
       if (!a || tap) return;
       const tier = roadTool.tier;
-      if (tier === 'wall') { const r = await link.order({ t: 'wall', x0: a.x, y0: a.y, x1: b.x, y1: b.y }); if (r) toast(`${r.tier === 'wood' ? 'Palisade' : r.tier === 'stone' ? 'Stone wall' : 'Thick wall'} built: ${r.towers} towers, ${r.gates} gates.`, 'good'); return; }
+      if (tier === 'wall_wood' || tier === 'wall_stone') { const r = await link.order({ t: 'wall', tier: tier === 'wall_wood' ? 'wood' : 'stone', x0: a.x, y0: a.y, x1: b.x, y1: b.y }); if (r && !r.error) toast(`${r.tier === 'wood' ? 'Wooden wall' : 'Stone wall'} built: ${r.towers} towers, ${r.gates} gates.`, 'good'); return; }
       if (tier === 'firebreak') { await link.order({ t: 'firebreak', x0: a.x, y0: a.y, x1: b.x, y1: b.y }); return; }
       if (tier === 'clear' || tier === 'build' || tier === 'erase') { await link.order({ t: 'zone', kind: tier, x0: a.x, y0: a.y, x1: b.x, y1: b.y }); return; }
       const n = await link.order({ t: 'road', x0: a.x, y0: a.y, x1: b.x, y1: b.y, tier });
@@ -607,13 +710,25 @@ function openSettings() {
     const paint = () => { b.textContent = `${label}: ${(values.find(v => v[0] === app.prefs[key]) || values[0])[1]}`; };
     paint(); return b;
   };
+  // volume sliders (owner 2026-11-04): 0..100, 0 = off; the old On/Off pref still counts as 0 or 70
+  const slider = (label, key) => {
+    const cur = app.prefs[key] === false ? 0 : (app.prefs[key + 'Vol'] ?? 70);
+    const wrap = document.createElement('label'); wrap.className = 'vol';
+    wrap.innerHTML = `<span>${label}</span><input type="range" min="0" max="100" step="5" aria-label="${label} volume"><b></b>`;
+    const r = wrap.querySelector('input'), out = wrap.querySelector('b');
+    r.value = cur;
+    const paint = () => { out.textContent = +r.value ? r.value + '%' : 'Off'; };
+    r.addEventListener('input', () => { app.prefs[key + 'Vol'] = +r.value; app.prefs[key] = +r.value > 0; paint(); ui.applyVolumes?.(); });
+    r.addEventListener('change', () => { store.set('prefs', app.prefs); if (key === 'sound') ui.sound?.('ui.click'); });
+    paint(); return wrap;
+  };
   box.append(
     opt('Graphics', 'graphics', [['high', 'High'], ['low', 'Low (no lighting)']]),
     opt('Glow', 'bloom', [[true, 'On'], [false, 'Off']]),
     opt('Night', 'dark', [[1, 'Dark'], [0.6, 'Dim'], [0.3, 'Light']]),
     opt('Slow down when attacked', 'slowOnAttack', [[true, 'On'], [false, 'Off']]),
-    opt('Sound', 'sound', [[true, 'On'], [false, 'Off']]),
-    opt('Music', 'music', [[true, 'On'], [false, 'Off']]),
+    slider('Sound', 'sound'),
+    slider('Music', 'music'),
     btn('Back', closeMenu),
   );
 }
@@ -657,6 +772,9 @@ Object.assign(ui, {
   capture: () => new Promise(res => { app.captureNext = res; setTimeout(() => { if (app.captureNext === res) { app.captureNext = null; res(null); } }, 500); }),
   importCloudSlots: async () => { for (let k = 0; k < saves.SLOTS; k++) { const v = store.get('slot.' + k, null); if (v?.save) await saves.put(k, v.save, v.meta); } },
   refreshDock: () => refreshDock(),
+  info: (el, spec) => withInfo(el, spec), openInfo: spec => openInfo(spec),
+  /** Start placing a building (other tabs use it: Transport → Dock). */
+  place: kind => { openTab = 'build'; TABS.build.group = KINDS[kind]?.group; startGhost(kind); refreshDock(); },
   closeMenu: () => closeMenu(),
   // the map toggles and globe buttons, for the Views tab
   mapToggles: () => [toggle('Good places to settle', 'sites'), toggle('Found resources', 'nodes'), toggleOn('Monster lairs & camps', 'lairs'),
@@ -664,6 +782,7 @@ Object.assign(ui, {
     btn('Whole world', () => { const c = app.camera; c.flyTo(c.cam.x, c.cam.y, c.minPpc(), 900); }), btn('Back to the ground', () => { const c = app.camera; c.flyTo(c.cam.x, c.cam.y, 2.5, 900); })],
 });
 Object.defineProperty(ui, 'openTab', { get: () => openTab });
+initInfo({ data: buildingsData, about: aboutData, esc, sheet });
 await import('./features/index.js');
 for (const t of hooks.tabs) { const b = document.createElement('button'); b.dataset.tab = t.id; b.textContent = t.label; $('#dock-tabs').insertBefore(b, $('#dock-tabs [data-tab="info"]')); }
 
@@ -676,34 +795,96 @@ function resize() {
   return dpr;
 }
 function near(x, cx, W) { const d = x - cx; if (d > W / 2) x -= W; if (d < -W / 2) x += W; return x; }
+/** Colour of what someone carries (logs brown, stone grey, food warm, water blue…). */
+const CARRY_COL = { log: [0.55, 0.38, 0.2], plank: [0.8, 0.6, 0.35], stone: [0.62, 0.6, 0.58], water: [0.4, 0.65, 0.95], fish: [0.6, 0.75, 0.85], berries: [0.7, 0.2, 0.35], game: [0.55, 0.3, 0.25], vegetables: [0.5, 0.75, 0.3], grain: [0.9, 0.8, 0.4], iron_ore: [0.6, 0.4, 0.3], coal: [0.15, 0.15, 0.17] };
 function sprites(cam) {
   const out = [];
   const t = app.stream.town; if (!t) return out;
   const W = app.world.W;
+  const now = performance.now(), sec = now / 1000;
   // ease from where each walker was drawn toward its latest position, so they glide instead of hopping
   const next = new Map();
-  for (const [x, y, carry, job, build, id] of t.people) {
+  const far = cam.ppc < 2.2;                  // zoomed out: skip the small details
+  // every quad carries its FOOT (9th value, the y it stands on) so a building standing further south
+  // hides it (js/render/gl.js DEPTH; play-test 2: "people walk in front of buildings")
+  for (const [x, y, carry, job, build, id, act, boat] of t.people) {
     const o = app.people.get(id);
     let px = x, py = y;
     if (o) { let dx = x - o.x; if (dx > W / 2) dx -= W; if (dx < -W / 2) dx += W; if (Math.abs(dx) + Math.abs(y - o.y) < 6) { px = o.x + dx * 0.25; py = o.y + (y - o.y) * 0.25; } }
     next.set(id, { x: px, y: py });
-    const sx = near(px, cam.x, W) - 0.5, sy = py - 2;
-    const shirt = build ? [0.85, 0.62, 0.25] : job ? [0.35, 0.45, 0.7] : [0.62, 0.32, 0.28];
-    out.push([sx, sy + 0.9, 1, 1.1, ...shirt, 1]);
-    out.push([sx + 0.1, sy, 0.8, 0.9, 0.93, 0.78, 0.62, 1]);
-    if (carry) out.push([sx + 0.6, sy + 0.5, 0.7, 0.7, 0.55, 0.38, 0.2, 1]);
+    const sx = near(px, cam.x, W) - 0.5, sy = py - 2, foot = py;
+    const shirt = act === 9 ? [0.9, 0.85, 0.8] : build ? [0.85, 0.62, 0.25] : job ? [0.35, 0.45, 0.7] : [0.62, 0.32, 0.28];
+    if (boat) {
+      // a little rowing boat with the fisher sitting in it, oars dipping
+      const rock = Math.sin(sec * 2 + id) * 0.15;
+      out.push([sx - 0.9, py - 0.5 + rock, 2.8, 0.9, 0.42, 0.28, 0.16, 1, foot + 1]);
+      out.push([sx - 0.6, py - 0.75 + rock, 2.2, 0.35, 0.58, 0.42, 0.26, 1, foot + 1]);
+      out.push([sx + 0.1, py - 1.5 + rock, 0.8, 0.8, ...shirt, 1, foot + 1]);
+      out.push([sx + 0.15, py - 2.2 + rock, 0.7, 0.7, 0.93, 0.78, 0.62, 1, foot + 1]);
+      const oar = Math.sin(sec * 3 + id) * 0.6;
+      out.push([sx - 0.6 + oar, py - 0.3, 0.4, 0.4, 0.75, 0.6, 0.4, 1, foot + 1]);
+      if (!far && Math.sin(sec * 3 + id) > 0.8) out.push([sx - 1.2, py + 0.3, 0.5, 0.25, 0.85, 0.92, 1, 0.8, foot + 1]);
+      continue;
+    }
+    out.push([sx, sy + 0.9, 1, 1.1, ...shirt, 1, foot]);
+    out.push([sx + 0.1, sy, 0.8, 0.9, 0.93, 0.78, 0.62, 1, foot]);
+    if (carry) { const c = CARRY_COL[carry] || [0.55, 0.38, 0.2]; out.push([sx + 0.6, sy + 0.5, 0.7, 0.7, ...c, 1, foot]); }
+    if (far || !act) continue;
+    // the work, so you can see it being done (play-test 2: "wood cutters actually fell trees, etc.")
+    const swing = Math.sin(sec * 7 + id * 1.7);
+    if (act === 1 || act === 2 || act === 3 || act === 5) {
+      const tool = act === 1 ? [0.75, 0.75, 0.8] : act === 2 ? [0.55, 0.55, 0.6] : act === 3 ? [0.6, 0.45, 0.25] : [0.5, 0.5, 0.55];
+      const tx = sx + 1 + Math.max(0, swing) * 0.3, ty = sy + 0.2 - swing * 0.6;
+      out.push([tx, sy + 0.5, 0.25, 1.1 - swing * 0.3, 0.45, 0.3, 0.18, 1, foot]);          // handle
+      out.push([tx - 0.1, ty, 0.55, 0.4, ...tool, 1, foot]);                               // head
+      if (swing < -0.85) {                                                                // chips fly on the stroke
+        const chip = act === 1 ? [0.85, 0.7, 0.45] : act === 2 ? [0.7, 0.68, 0.65] : act === 3 ? [0.45, 0.65, 0.3] : [0.9, 0.8, 0.55];
+        out.push([sx + 1.6, sy + 1.2, 0.3, 0.3, ...chip, 1], [sx + 1.9, sy + 0.8, 0.25, 0.25, ...chip, 1]);
+      }
+    } else if (act === 6) {
+      // throwing water: a bucket and a splash arc
+      out.push([sx + 0.7, sy + 0.9, 0.6, 0.6, 0.45, 0.35, 0.25, 1, foot]);
+      for (let k = 0; k < 4; k++) { const f = ((sec * 2 + k * 0.25 + id) % 1); out.push([sx + 1 + f * 2.5, sy + 0.6 - Math.sin(f * Math.PI) * 1.5, 0.35, 0.35, 0.5, 0.75, 1, 0.9 - f * 0.5]); }
+    } else if (act === 7) {
+      out.push([sx + 0.9, sy, 0.25, 1.6, 0.5, 0.35, 0.2, 1, foot]);                          // a bow
+      const f = (sec * 1.3 + id * 0.3) % 1; out.push([sx + 1.2 + f * 6, sy + 0.7, 0.8, 0.15, 0.85, 0.8, 0.7, 1 - f]);
+    } else if (act === 8) {
+      if (swing > 0.6) out.push([sx + 1, sy + 0.2, 0.3, 0.3, 1, 0.8, 0.4, 1, foot]);
+    } else if (act === 4) {
+      out.push([sx + 0.9, sy - 0.2, 0.15, 1.8, 0.5, 0.35, 0.2, 1, foot]);                     // a rod from the bank
+    }
   }
   app.people = next;
   // carts: a box with wheels (porters are people with packs); scouts on horseback
   for (const [x, y, load, cart] of t.carts || []) {
-    const sx = near(x, cam.x, W);
-    if (cart) { out.push([sx - 1.2, y - 1.6, 2.4, 1.3, 0.55, 0.38, 0.22, 1]); out.push([sx - 1, y - 0.4, 0.7, 0.7, 0.2, 0.15, 0.1, 1]); out.push([sx + 0.4, y - 0.4, 0.7, 0.7, 0.2, 0.15, 0.1, 1]); if (load) out.push([sx - 1, y - 2.3, 2, 0.8, 0.35, 0.3, 0.28, 1]); }
-    else { out.push([sx - 0.5, y - 1.1, 1, 1.1, 0.5, 0.4, 0.3, 1]); out.push([sx - 0.4, y - 2, 0.8, 0.9, 0.93, 0.78, 0.62, 1]); if (load) out.push([sx - 1.1, y - 1.6, 0.8, 1, 0.45, 0.3, 0.18, 1]); }
+    const sx = near(x, cam.x, W), f = y;
+    if (cart) { out.push([sx - 1.2, y - 1.6, 2.4, 1.3, 0.55, 0.38, 0.22, 1, f]); out.push([sx - 1, y - 0.4, 0.7, 0.7, 0.2, 0.15, 0.1, 1, f]); out.push([sx + 0.4, y - 0.4, 0.7, 0.7, 0.2, 0.15, 0.1, 1, f]); if (load) out.push([sx - 1, y - 2.3, 2, 0.8, 0.35, 0.3, 0.28, 1, f]); }
+    else { out.push([sx - 0.5, y - 1.1, 1, 1.1, 0.5, 0.4, 0.3, 1, f]); out.push([sx - 0.4, y - 2, 0.8, 0.9, 0.93, 0.78, 0.62, 1, f]); if (load) out.push([sx - 1.1, y - 1.6, 0.8, 1, 0.45, 0.3, 0.18, 1, f]); }
+  }
+  // settler wagons: a covered wagon with an ox in front
+  for (const [x, y] of t.wagons || []) {
+    const sx = near(x, cam.x, W), f = y;
+    out.push([sx - 2, y - 2.6, 3.2, 1.8, 0.92, 0.88, 0.78, 1, f]);                 // the canvas cover
+    out.push([sx - 2, y - 1.2, 3.2, 0.9, 0.55, 0.38, 0.22, 1, f]);                 // the bed
+    out.push([sx - 1.8, y - 0.5, 0.8, 0.8, 0.2, 0.15, 0.1, 1, f]); out.push([sx + 0.4, y - 0.5, 0.8, 0.8, 0.2, 0.15, 0.1, 1, f]);
+    out.push([sx + 1.4, y - 1.4, 1.6, 1, 0.45, 0.35, 0.28, 1, f]);                 // the ox
   }
   for (const [x, y] of t.scouts || []) {
     const sx = near(x, cam.x, W);
-    out.push([sx - 1.2, y - 1.2, 2.4, 1.1, 0.42, 0.28, 0.18, 1]);
-    out.push([sx - 0.4, y - 2.4, 0.8, 1.2, 0.25, 0.5, 0.3, 1]);
+    out.push([sx - 1.2, y - 1.2, 2.4, 1.1, 0.42, 0.28, 0.18, 1, y]);
+    out.push([sx - 0.4, y - 2.4, 0.8, 1.2, 0.25, 0.5, 0.3, 1, y]);
+  }
+  // trees toppling where a woodcutter just felled one (the sim says where; this is only the picture)
+  app.fells = (app.fells || []).filter(f => now - f.t0 < 2200);
+  for (const f of app.fells) {
+    const k = Math.min(1, (now - f.t0) / 700), th = k * k * Math.PI / 2 * f.dir, fade = now - f.t0 > 1400 ? 1 - (now - f.t0 - 1400) / 800 : 1;
+    const bx = near(f.x + 0.5, cam.x, W), by = f.y + 0.5, tall = Math.max(4, f.tall);
+    for (let j = 1; j < tall; j++) {
+      const leaf = j > tall * 0.4;
+      const c = leaf ? (f.pine ? [0.2, 0.42, 0.25] : [0.28, 0.55, 0.25]) : [0.42, 0.29, 0.16];
+      const w = leaf ? 1.6 - (j / tall) * (f.pine ? 1.2 : 0.4) : 0.6;
+      out.push([bx + Math.sin(th) * j - w / 2, by - Math.cos(th) * j - w / 2, w, w, ...c, fade]);
+    }
   }
   for (const h of hooks.sprites) h(cam, out, ui);
   return out;
@@ -726,13 +907,31 @@ function overlay(cam) {
     }
   }
   if (via) out.push([near(via.x, cam.x, W) - 2, via.y - 2, 4, 4, 1, 0.9, 0.3, 0.6]);
+  // what you tapped: pulsing gold corners around it (play-test 2: "an indicator when you click")
+  if (selected) {
+    let box = null;
+    if (selected.w) box = selected;
+    else if (selected.cell) box = { x: selected.cell[0], y: selected.cell[1], w: 1, h: 1 };
+    else if (selected.unit != null) { const u = (t?.military?.units || []).find(u => u[0] === selected.unit); if (u) box = { x: u[3] - 1, y: u[4] - 2.6, w: 2, h: 3 }; }
+    else if (selected.person != null) { const q = (t?.people || []).find(q => q[5] === selected.person); if (q) box = { x: q[0] - 1, y: q[1] - 2.6, w: 2, h: 3 }; }
+    if (box) {
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 180), m = 0.6 + pulse * 0.5, L = Math.max(1, Math.min(box.w, box.h) * 0.35), th = Math.max(0.35, 1.5 / cam.ppc);
+      const x0 = near(box.x, cam.x, W) - m, y0 = box.y - m, x1 = x0 + box.w + m * 2, y1 = y0 + box.h + m * 2;
+      const c = [1, 0.85, 0.35, 0.95];
+      for (const [cx, cy, sx, sy] of [[x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1]]) {
+        out.push([sx > 0 ? cx : cx - L, sy > 0 ? cy : cy - th, L, th, ...c]);
+        out.push([sx > 0 ? cx : cx - th, sy > 0 ? cy : cy - L, th, L, ...c]);
+      }
+    }
+  }
+
   for (const h of hooks.overlay) h(cam, out, ui);
   if (ghost) {
     const c = ghost.ok ? [0.4, 0.9, 0.4, 0.35] : [0.95, 0.3, 0.25, 0.35];
     out.push([near(ghost.x, cam.x, W), ghost.y, ghost.w, ghost.h, ...c]);
   }
   for (const [kind, x0, y0, x1, y1] of app.stream.town?.walls?.zones || []) out.push([near(x0, cam.x, W), y0, x1 - x0, y1 - y0, ...(kind === 'clear' ? [0.95, 0.4, 0.3, 0.16] : [0.35, 0.8, 0.95, 0.16])]);
-  if (roadTool?.a && roadTool.b && ['clear', 'build', 'erase'].includes(roadTool.tier)) {
+  if (roadTool?.a && roadTool.b && ['clear', 'build', 'erase'].includes(roadTool.tier)) {   // (old paint tools: gone from the menu)
     const { a, b } = roadTool;
     out.push([near(Math.min(a.x, b.x), cam.x, W), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y), ...(roadTool.tier === 'clear' ? [0.95, 0.4, 0.3, 0.3] : roadTool.tier === 'build' ? [0.35, 0.8, 0.95, 0.3] : [1, 1, 1, 0.25])]);
   } else if (roadTool?.a && roadTool.b) {

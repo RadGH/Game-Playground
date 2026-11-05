@@ -70,17 +70,27 @@ export function createCamera(world, el) {
   const pointers = new Map();
   let pinch = null, dragged = 0, tapHandler = null, tool = null, toolOn = false;
   const local = e => { const r = el.getBoundingClientRect(); return toWorld(e.clientX - r.left, e.clientY - r.top); };
+  // The first finger down means no finger was on the glass. iPhones sometimes never report a finger
+  // lifting, and that leftover made every later touch the second finger of a pinch: stuck zooming
+  // until a refresh (same bug Kindlewild had, play-test 2). So a primary press forgets old fingers,
+  // and the browser's own finger count (touchend with 0 touches) wipes the map too.
+  function forgetFingers() { pointers.clear(); pinch = null; deadAfterPinch = false; if (toolOn) { tool.cancel?.(); toolOn = false; } }
+  let deadAfterPinch = false;
+  for (const t of ['touchend', 'touchcancel']) addEventListener(t, e => { if (e.touches.length === 0) setTimeout(() => { if (pointers.size) forgetFingers(); deadAfterPinch = false; }, 0); });
   el.addEventListener('pointerdown', e => {
-    el.setPointerCapture(e.pointerId);
+    if (e.isPrimary && pointers.size) forgetFingers();
+    if (pointers.size === 0) deadAfterPinch = false;
+    try { el.setPointerCapture(e.pointerId); } catch { /* finger already gone */ }
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY });
     dragged = 0; cam.fly = null;
-    if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch = { d: dist(a, b), ppc: cam.ppc }; if (toolOn) { tool.cancel?.(); toolOn = false; } }
+    if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch = { d: Math.max(1, dist(a, b)), ppc: cam.ppc }; if (toolOn) { tool.cancel?.(); toolOn = false; } }
     else if (pointers.size === 1 && tool && globeAmount() < 0.5) { toolOn = tool.down?.(local(e), e) !== false; }
   });
   el.addEventListener('pointermove', e => {
     const p = pointers.get(e.pointerId); if (!p) return;
     const dx = e.clientX - p.x, dy = e.clientY - p.y;
     p.x = e.clientX; p.y = e.clientY;
+    if (deadAfterPinch && pointers.size < 2) return;   // the finger left over after a pinch does nothing
     if (pointers.size === 1 && toolOn) { tool.move?.(local(e), e); dragged += Math.abs(dx) + Math.abs(dy); }
     else if (pointers.size === 1) { pan(dx, dy); dragged += Math.abs(dx) + Math.abs(dy); }
     else if (pointers.size === 2 && pinch) {
@@ -88,14 +98,15 @@ export function createCamera(world, el) {
       const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
       const r = el.getBoundingClientRect();
       const f = (pinch.ppc * dist(a, b) / pinch.d) / cam.ppc;
-      zoomAt(f, mid.x - r.left, mid.y - r.top);
+      if (isFinite(f) && f > 0) zoomAt(f, mid.x - r.left, mid.y - r.top);
       pan(dx / 2, dy / 2); dragged += 99;
     }
   });
   const up = e => {
     const p = pointers.get(e.pointerId);
     pointers.delete(e.pointerId);
-    if (pointers.size < 2) pinch = null;
+    if (pinch && pointers.size < 2) { pinch = null; deadAfterPinch = pointers.size > 0; dragged = 99; }
+    if (pointers.size === 0) deadAfterPinch = false;
     if (toolOn && pointers.size === 0) { toolOn = false; tool.up?.(local(e), e, dragged < 8); return; }
     if (p && dragged < 8 && pointers.size === 0 && tapHandler) tapHandler(local(e), e);
   };

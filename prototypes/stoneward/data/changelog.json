@@ -1,6 +1,59 @@
 {
   "entries": [
     {
+      "id": "2026-11-04d",
+      "date": "2026-11-04",
+      "title": "Guards close to home, tidy streets",
+      "items": [
+        "Guards now keep watch over their own part of town: each one walks a ward (a few streets, the farms, a far mine) and fights what comes there, so help is always close by instead of running in from across the map.",
+        "Guard posts work: each one stations three guards who stand watch around it. Attack flags can still call on them.",
+        "Attack flags keep going: when troops fall, fresh ones march out to replace them. While a flag is up your towns call up extra guards and train them much faster.",
+        "Bandit camps and monster lairs close to a town lie quiet, and raiders gather much further away (with more warning), so you have time to react before they reach your farms.",
+        "Towns plan their streets: main avenues run out from the keep and keep growing as the town spreads, side streets branch off a block apart, and no road is laid on top of or squeezed beside another. Main avenues get paved with gravel and then stone as the town grows.",
+        "Old empty streets that nothing was ever built on slowly turn back to grass. Roads you drew yourself are never removed.",
+        "Big towns spread further out along their avenues and country roads."
+      ]
+    },
+    {
+      "id": "2026-11-04c",
+      "date": "2026-11-04",
+      "title": "Know what you build",
+      "items": [
+        "Every building in the Build tab has an info card: what it is, what it does, and its numbers — cost, build time, how many people it houses, workers, what it makes and how fast, reach, storage, scan range, tower damage and range, faith and more.",
+        "On a computer, hover over a button to see its card. On a phone, tap the small i on the button.",
+        "Cards are on the Lines tools (roads and walls), Transport (track, stations, docks), Powers (they follow the size you picked), the attack flag, the settler wagon and the Needs buttons too.",
+        "Settings has Sound and Music volume sliders instead of on/off switches."
+      ]
+    },
+    {
+      "id": "2026-11-04b",
+      "date": "2026-11-04",
+      "title": "Towns that defend themselves",
+      "items": [
+        "Your towns raise their own guards now — no hiring, no orders. Spearmen walk the streets, archers stand on the wall towers and watchtowers, and they fight anything that comes into town. The Guards tab is gone.",
+        "New Army tab: plant an attack flag on a lair, a bandit camp, a rival town or a band of enemies. The guards your towns can spare gather and march out together, and burn lairs and camps once their defenders fall. Move the flag and they follow; clear it and they come home.",
+        "Raids hurt now: raiders break into buildings and set them alight, bowmen shoot fire arrows, catapults and sappers' powder kegs really explode, and soldiers no longer stand idle at the keep door. Townsfolk run for the keep when raiders are close.",
+        "Towns build their own walls once they reach about 45 people: a wooden ring with towers and gates, rebuilt in stone when there is stone to spare, with a cleared firebreak outside. Roads that reach a wall get a gate.",
+        "Stone walls shrug off blades and claws; only explosions really hurt them. Wooden walls are strong but burn.",
+        "Towns spread out: homes have yards with hedges, fences and flowers, now and then a long road heads out into the country, and a town keeps finding room as it grows (one used to stop at about 150 people).",
+        "Woodcutters swing axes and trees topple, quarrymen and farmers work with their tools, builders hammer, and fishers row out on the water in little boats.",
+        "Buildings stand in front of people walking behind them.",
+        "Info → Needs shows what your people need most, worst first, each with a button to build the answer.",
+        "Tap the numbers at the top to see what they are (🪙 is gold).",
+        "Tap people, walls, carts, wagons and the ground to see what they are. Whatever you tap gets a gold outline.",
+        "Streets are wider (3 m, the main ones 4 m) and homes sit further back from them, so a town has room to walk instead of being a solid block of roofs.",
+        "Send a settler (Info → Kingdom, 500 gold): a wagon with six settlers and supplies rolls out and founds a new town where you tap.",
+        "Rails is now Transport, and has docks: a dock near a far mine and one in town open a boat route on their own.",
+        "Lines: Wooden wall and Stone wall instead of \"best you can afford\". The paint tools are gone.",
+        "Powers: Smite is replaced by Lightning Strike (bolts that jump between enemies), and Frost Nova is new (freezes water, puts out fire, freezes enemies). No more waiting between casts: powers only cost faith.",
+        "The meteor is a real meteor: you see it falling, the ground shakes, it leaves a big crater and lava, and you hear it.",
+        "No more random lightning fires and forest fires, and townsfolk put fires out much better: everyone nearby comes with water.",
+        "Settlers arriving no longer pop up a message and a beep every few seconds.",
+        "Pinch-zoom no longer gets stuck zooming after a finger lifts.",
+        "The globe and the zoomed-out map are much sharper."
+      ]
+    },
+    {
       "id": "2026-11-04",
       "date": "2026-11-04",
       "title": "Play-test fixes",

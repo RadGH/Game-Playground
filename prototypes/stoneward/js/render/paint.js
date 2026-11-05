@@ -8,6 +8,12 @@
 // later and covers what is behind it — that is the whole 3/4 occlusion rule. Chunks are drawn in the
 // same order by the renderer, so a chunk's overhang covers the bottom of the chunk north of it.
 //
+// Colour alpha = DEPTH (play-test 2, "people walk in front of buildings"): 255 = flat ground (never
+// hides a sprite); 160 + row = a pixel painted by something STANDING on cell row `row` (0..63) of this
+// chunk (pass 2). The renderer turns that row into a depth value, so a person standing north of a
+// tall building is hidden by its front face. 0 = nothing painted. Anything reading the colour image
+// should treat any alpha > 0 as opaque.
+//
 // Glow alpha: 255 = always lit (lava, fire, crystals, lamps); 120 = a window, which the renderer
 // lights only at night.
 
@@ -33,9 +39,10 @@ export function createPainter(M) {
   function paint(c, out, gx0, gy0, glow) {
     out.fill(0); glow?.fill(0);
     let gr = 0, gg = 0, gb = 0, ga = 0;            // the glow the next put() writes
+    let ca = 255;                                    // the colour alpha (depth row) the next put() writes
     const put = (px, py, r, g, b) => {
       if (px < 0 || py < 0 || px >= IW || py >= IH) return;
-      const o = (py * IW + px) * 4; out[o] = r; out[o + 1] = g; out[o + 2] = b; out[o + 3] = 255;
+      const o = (py * IW + px) * 4; out[o] = r; out[o + 1] = g; out[o + 2] = b; out[o + 3] = ca;
       if (glow) { glow[o] = gr; glow[o + 1] = gg; glow[o + 2] = gb; glow[o + 3] = ga; }
     };
     const noGlow = () => { gr = gg = gb = ga = 0; };
@@ -74,6 +81,7 @@ export function createPainter(M) {
       const R = M.r[m], G = M.g[m], B = M.b[m];
       const px = x + MX, py = y + OV;
       const burning = c.flag[i] & BURN;
+      ca = 160 + y;
       noGlow();
       if (M.emit[m]) { gr = M.er[m] * 255; gg = M.eg[m] * 255; gb = M.eb[m] * 255; ga = 255; }
       if (burning) { gr = 255; gg = 120; gb = 30; ga = 255; }

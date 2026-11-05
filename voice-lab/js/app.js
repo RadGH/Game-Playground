@@ -8,6 +8,10 @@ import { encodeWav } from './dsp.js';
 import * as espeakEngine from './engines/espeak.js';
 import * as piperEngine from './engines/piper.js';
 import * as webspeechEngine from './engines/webspeech.js';
+import * as kokoroEngine from './engines/kokoro.js';
+
+// Default 'variant' per engine (piper and kokoro use it for the voice id; the others for built-in variants).
+const defaultVariant = (id, cur) => id === 'piper' ? (cur?.startsWith('en_') ? cur : 'en_US-hfc_female-medium') : id === 'kokoro' ? (kokoroEngine.isVoice(cur) ? cur : 'af_heart') : (cur?.startsWith('en_') || kokoroEngine.isVoice(cur) ? 'custom' : cur);
 
 const store = makeStore('voice-lab', 1);
 const PRESETS = await (await fetch('data/presets.json')).json();
@@ -79,10 +83,14 @@ textArea.addEventListener('input', () => store.set('text', textArea.value));
 const wave = el('canvas', { id: 'wave', width: 800, height: 90 });
 const infoLine = el('div', { class: 'info-line', text: 'Nothing synthesized yet.' });
 const btnSay = button('▶ Say it', () => speak(), 'primary');
-const btnStop = button('■ Stop', () => { stopAll(); setStatus('stopped'); });
+const btnStop = button('■ Stop', () => { stopAll(); kokoroEngine.reset('stopped'); btnSay.disabled = false; setStatus('stopped'); });
+// Firefox remembers a disabled button across a refresh; a page that just loaded is never busy.
+btnSay.disabled = false; btnSay.setAttribute('autocomplete', 'off');
 const btnWav = button('⬇ WAV', () => { if (!lastResult) return toast('Nothing to download'); const a = el('a', { href: URL.createObjectURL(encodeWav(lastResult.samples, lastResult.sampleRate)), download: `voice-${voice.engine}.wav` }); document.body.append(a); a.click(); a.remove(); });
 const autoCb = checkbox('Auto-play when a knob changes', autoPlay, v => { autoPlay = v; store.set('autoPlay', v); });
 const piperProgress = el('div', { style: { display: 'none' } }, el('span', { class: 'small muted', id: 'piper-msg' }), el('progress', { max: 100, value: 0 }));
+kokoroEngine.onStage(t => setStatus('Kokoro: ' + t + '…'));
+kokoroEngine.onProgress(p => { if (p.status !== 'progress' || !p.total) return; piperProgress.style.display = 'block'; piperProgress.querySelector('progress').value = p.progress || 0; piperProgress.querySelector('#piper-msg').textContent = `Downloading Kokoro ${p.file} — ${(p.loaded / 1048576).toFixed(1)} / ${(p.total / 1048576).toFixed(1)} MB`; if (p.loaded >= p.total) setTimeout(() => piperProgress.style.display = 'none', 1500); });
 piperEngine.onProgress(p => { piperProgress.style.display = 'block'; piperProgress.querySelector('progress').value = p.total ? p.loaded / p.total * 100 : 0; piperProgress.querySelector('#piper-msg').textContent = `Downloading ${p.url.split('/').pop()} — ${(p.loaded / 1048576).toFixed(1)} / ${(p.total / 1048576).toFixed(1)} MB`; if (p.loaded >= p.total) setTimeout(() => piperProgress.style.display = 'none', 1500); });
 
 // compare
@@ -91,7 +99,7 @@ const cmpBtn = button('Play this line on every engine', async () => {
   cmpBody.replaceChildren(); stopAll();
   const text = textArea.value.trim();
   for (const id of ENGINE_ORDER) {
-    const v = { ...voice, engine: id, variant: id === voice.engine ? voice.variant : (id === 'piper' ? 'en_US-hfc_female-medium' : 'custom') };
+    const v = { ...voice, engine: id, variant: id === voice.engine ? voice.variant : defaultVariant(id, 'custom') };
     const row = el('tr', {}, el('td', { text: ENGINES[id].meta.name }), el('td', { text: '…' }), el('td', { text: '' }), el('td', {}, licenseBadge(ENGINES[id].meta))); cmpBody.append(row);
     try {
       setStatus('comparing: ' + id);
@@ -112,11 +120,11 @@ const crowdLog = el('div', { class: 'crowd-log' });
 const crowdBtn = button('Run crowd test', async () => {
   stopAll(); crowdLog.replaceChildren();
   const n = crowdN.value, r = rng(Date.now() & 0xffff), presets = PRESETS.presets.filter(p => p.voice.engine !== 'piper' && p.voice.engine !== 'webspeech');
-  if (crowdEngine.value === 'piper' && n > 6 && !confirm(`Piper takes several seconds per line on CPU; ${n} lines may take a few minutes. Continue?`)) return;
+  if ((crowdEngine.value === 'piper' || crowdEngine.value === 'kokoro') && n > 6 && !confirm(`Piper takes several seconds per line on CPU; ${n} lines may take a few minutes. Continue?`)) return;
   const lines = SAMPLE_LINES.filter(l => !l.startsWith('[['));
   const t0 = performance.now(); let synthMs = 0; const results = [];
   for (let i = 0; i < n; i++) {
-    const p = r.pick(presets), v = { ...p.voice, engine: crowdEngine.value === 'preset' ? p.voice.engine : crowdEngine.value, variant: crowdEngine.value === 'piper' ? r.pick(['en_US-hfc_female-medium', 'en_US-hfc_male-medium', 'en_US-amy-low', 'en_US-danny-low']) : (crowdEngine.value === 'preset' ? p.voice.variant : 'custom'), pitch: Math.min(1, Math.max(0, (p.voice.pitch ?? 0.5) + r.range(-0.1, 0.1))) };
+    const p = r.pick(presets), v = { ...p.voice, engine: crowdEngine.value === 'preset' ? p.voice.engine : crowdEngine.value, variant: crowdEngine.value === 'piper' ? r.pick(['en_US-hfc_female-medium', 'en_US-hfc_male-medium', 'en_US-amy-low', 'en_US-danny-low']) : crowdEngine.value === 'kokoro' ? r.pick(kokoroEngine.VOICES).value : (crowdEngine.value === 'preset' ? p.voice.variant : 'custom'), pitch: Math.min(1, Math.max(0, (p.voice.pitch ?? 0.5) + r.range(-0.1, 0.1))) };
     const line = r.pick(lines);
     const ts = performance.now(); const res = await synthesize(line, v, { noCache: true }); const ms = performance.now() - ts; synthMs += ms;
     results.push({ res, v, line, p, ms });
@@ -127,7 +135,7 @@ const crowdBtn = button('Run crowd test', async () => {
   for (const { res } of results) play(res, { when: r.range(0, crowdSpread.value), pan: r.range(-1, 1), volume: 0.6 });
   setStatus(`crowd: ${n} talkers`);
 });
-const crowdEngine = select('Engine', [{ value: 'preset', label: "each preset's own engine (formant/espeak/babble)" }, 'formant', 'espeak', 'babble', { value: 'piper', label: 'piper (slow: seconds per line, pre-rendered)' }], 'preset');
+const crowdEngine = select('Engine', [{ value: 'preset', label: "each preset's own engine (formant/espeak/babble)" }, 'formant', 'espeak', 'babble', { value: 'kokoro', label: 'kokoro (neural: about a second per line)' }, { value: 'piper', label: 'piper (slow: seconds per line, pre-rendered)' }], 'preset');
 const crowdPanel = panel('Crowd stress test', el('p', { class: 'small muted', text: 'Synthesizes N random NPC lines with random presets, reports CPU time, then plays them all overlapping. This is the real answer to "how many characters can talk at once".' }), crowdEngine, crowdN, crowdSpread, crowdBtn, crowdLog);
 
 // engine comparison table (static, from meta)
@@ -164,7 +172,19 @@ const accentSel = select('Accent', espeakEngine.ACCENTS, voice.accent, v => { vo
 const variantSel = select('Variant', [], voice.variant, v => { voice.variant = v; changed(); });
 const babbleSel = select('Babble mode', [{ value: 'letters', label: 'letters (Animalese)' }, { value: 'syllables', label: 'syllables' }, { value: 'simlish', label: 'simlish (word → fixed syllables)' }], voice.babbleMode, v => { voice.babbleMode = v; changed(); });
 const piperDl = button('Download this Piper voice now', async () => { setStatus('downloading piper voice…'); try { await piperEngine.download(voice.variant || 'en_US-hfc_female-medium'); toast('Voice ready'); } catch (e) { toast('Download failed: ' + e.message); } setStatus('idle'); }, 'small');
-const engineOptsPanel = panel('Engine options', el('div', { class: 'row' }, el('label', { text: 'Gender' }), genderChips), accentSel, variantSel, babbleSel, piperDl);
+// v2 key: the first version defaulted to running in the browser, which never worked on phones; the voice service is the default now.
+const kokoroSettings = store.get('kokoroSettings2', { dtype: 'q8', device: 'server' });
+if (kokoroSettings.device === 'webgpu' && !kokoroEngine.webgpuAvailable()) kokoroSettings.device = 'server';
+kokoroEngine.configure(kokoroSettings);
+const kokoroMixSel = select('Blend with', [{ value: '', label: '— none —' }, ...kokoroEngine.VOICES], voice.kokoroMix || '', v => { voice.kokoroMix = v; changed(); });
+const kokoroMixAmt = knob('Blend amount', { min: 0, max: 1, step: 0.05, value: voice.kokoroMixAmt ?? 0.5, title: '0 = only the main voice, 1 = only the blend voice. Mixing two voices makes a new one for each character.' }, v => { voice.kokoroMixAmt = v; changed(); });
+const saveKokoro = () => { store.set('kokoroSettings2', kokoroSettings); kokoroDtype.style.display = kokoroSettings.device === 'server' ? 'none' : ''; kokoroEngine.configure(kokoroSettings); };
+const kokoroDtype = select('Model size', kokoroEngine.DTYPES, kokoroSettings.dtype, v => { kokoroSettings.dtype = v; saveKokoro(); });
+const kokoroDevice = select('Runs on', [{ value: 'server', label: 'Voice service on the VM (fast, works on phones)' }, { value: 'wasm', label: 'This browser — CPU (slow, ~110 MB download)' }, { value: 'webgpu', label: kokoroEngine.webgpuAvailable() ? 'This browser — graphics card (WebGPU)' : 'This browser — graphics card (needs an https page)' }], kokoroSettings.device, v => { if (v === 'webgpu' && !kokoroEngine.webgpuAvailable()) { toast('WebGPU needs a secure (https) page and a supporting browser — try port 8442/8441'); kokoroDevice.set('wasm'); return; } kokoroSettings.device = v; saveKokoro(); });
+const kokoroLoad = button('Check / load Kokoro now', async () => { setStatus('loading Kokoro…'); try { const r = await kokoroEngine.load(); toast(r.cached ? 'Kokoro already loaded' : `Kokoro ready in ${(r.ms / 1000).toFixed(1)} s`); } catch (e) { toast('Kokoro failed: ' + e.message); } setStatus('idle'); }, 'small');
+const kokoroBox = el('div', {}, kokoroMixSel, kokoroMixAmt, kokoroDtype, kokoroDevice, kokoroLoad, el('p', { class: 'small muted', text: 'Voice service: the VM makes the clip (about 2 s for a new line, instant for a line it has said before) and the page just plays it, so it works on phones. "This browser" runs the model in the tab instead — a ~110 MB download, 10–35 s per line on plain-http pages, and it does not start on iPhones.' }));
+kokoroDtype.style.display = kokoroSettings.device === 'server' ? 'none' : '';
+const engineOptsPanel = panel('Engine options', el('div', { class: 'row' }, el('label', { text: 'Gender' }), genderChips), accentSel, variantSel, babbleSel, piperDl, kokoroBox);
 
 const fxEls = {};
 const fxPanel = panel('Effects (post-processing)');
@@ -187,9 +207,9 @@ const jsonPanel = panel('Voice JSON',
 right.append(knobPanel, engineOptsPanel, fxPanel, jsonPanel);
 
 // ---------- behaviour ----------
-function setEngine(id) { voice.engine = id; if (id === 'piper' && (!voice.variant || !voice.variant.startsWith('en_'))) voice.variant = 'en_US-hfc_female-medium'; if (id !== 'piper' && voice.variant?.startsWith('en_')) voice.variant = 'custom'; renderEngines(); syncUI(); changed(); }
+function setEngine(id) { voice.engine = id; voice.variant = defaultVariant(id, voice.variant); renderEngines(); syncUI(); changed(); }
 function setVoice(v) { voice = normalizeVoice(v); renderEngines(); syncUI(); changed(); }
-function applyPreset(p) { activePreset = p.id; store.set('activePreset', p.id); const v = { ...DEFAULT_VOICE, ...p.voice, fx: { ...(p.voice.fx || {}) } }; if (!followEngine) { v.engine = voice.engine; if (v.engine !== 'piper' && v.variant?.startsWith('en_')) v.variant = 'custom'; } setVoice(v); renderPresets(); if (!autoPlay) speak(); }
+function applyPreset(p) { activePreset = p.id; store.set('activePreset', p.id); const v = { ...DEFAULT_VOICE, ...p.voice, fx: { ...(p.voice.fx || {}) } }; if (!followEngine) { v.engine = voice.engine; v.variant = defaultVariant(v.engine, v.variant); } setVoice(v); renderPresets(); if (!autoPlay) speak(); }
 async function syncUI() {
   for (const k in knobEls) knobEls[k].set(voice[k]);
   for (const k in fxEls) fxEls[k].set(voice.fx[k] ?? FX_DEFAULTS[k]);
@@ -199,12 +219,15 @@ async function syncUI() {
   accentSel.style.display = voice.engine === 'espeak' ? '' : 'none';
   babbleSel.style.display = voice.engine === 'babble' ? '' : 'none';
   piperDl.style.display = voice.engine === 'piper' ? '' : 'none';
+  kokoroBox.style.display = voice.engine === 'kokoro' ? '' : 'none';
+  kokoroMixSel.set(voice.kokoroMix || ''); kokoroMixAmt.set(voice.kokoroMixAmt ?? 0.5);
   genderChips.parentElement.style.display = voice.engine === 'espeak' ? '' : 'none';
   fxPanel.style.opacity = ENGINES[voice.engine].meta.yieldsBuffer ? 1 : 0.35;
   // variant options per engine
   let opts = [];
   if (voice.engine === 'espeak') opts = espeakEngine.VARIANTS.map(v => ({ value: v, label: v === 'custom' ? 'custom (use knobs)' : v }));
   else if (voice.engine === 'piper') opts = piperEngine.VOICES;
+  else if (voice.engine === 'kokoro') opts = kokoroEngine.VOICES;
   else if (voice.engine === 'webspeech') { try { await webspeechEngine.load(); } catch {} opts = webspeechEngine.voiceOptions(); }
   variantSel.style.display = opts.length ? '' : 'none';
   variantSel.select.replaceChildren(...opts.map(o => el('option', { value: o.value, text: o.label })));
@@ -222,7 +245,7 @@ async function speak() {
     setStatus('synthesizing (' + voice.engine + ')…'); btnSay.disabled = true;
     const { result, done } = await say(text, voice, { noCache: false });
     lastResult = result;
-    if (result) { drawWave(result); infoLine.textContent = `${voice.engine}: ${result.info.totalMs.toFixed(0)} ms to synthesize, ${result.duration.toFixed(2)} s of audio @ ${result.sampleRate} Hz. fx: ${describeFx(result.info.fxApplied)}` + (result.info.phonemes ? `\nphonemes (d=dictionary, r=rules, c=custom, p=given): ${result.info.phonemes}` : '') + (result.info.variantText ? `\n--- espeak variant file ---\n${result.info.variantText}` : '') + (result.info.opts ? `\nengine opts: ${JSON.stringify(result.info.opts)}` : ''); }
+    if (result) { drawWave(result); infoLine.textContent = `${voice.engine}: ${result.info.totalMs.toFixed(0)} ms to synthesize, ${result.duration.toFixed(2)} s of audio @ ${result.sampleRate} Hz. fx: ${describeFx(result.info.fxApplied)}` + (result.info.phonemes ? `\nphonemes (d=dictionary, r=rules, c=custom, p=given): ${result.info.phonemes}` : '') + (result.info.variantText ? `\n--- espeak variant file ---\n${result.info.variantText}` : '') + (result.info.opts ? `\nengine opts: ${JSON.stringify(result.info.opts)}` : '') + (result.info.engine === 'kokoro' && result.info.device === 'server' ? `\nkokoro voice service: ${result.info.cache === 'hit' ? 'already made earlier (cached)' : result.info.ms + ' ms to make the clip'}, ${result.info.roundTripMs.toFixed(0)} ms round trip, voice ${result.info.voice}` : '') + (result.info.engine === 'kokoro' && result.info.device !== 'server' ? `\nkokoro: ${result.info.ms.toFixed(0)} ms in the model on ${result.info.device} (${result.info.dtype})` + (result.info.modelLoadMs ? `, plus ${(result.info.modelLoadMs / 1000).toFixed(1)} s to load the model the first time` : '') + `, voice ${result.info.voice}` : ''); }
     else { wave.getContext('2d').clearRect(0, 0, wave.width, wave.height); infoLine.textContent = 'Web Speech API: played directly by the browser, no audio buffer available.'; }
     setStatus('playing'); await done; setStatus('idle');
   } catch (e) { console.error(e); infoLine.textContent = 'Error: ' + e.message; setStatus('error'); toast(e.message); }

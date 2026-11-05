@@ -2,20 +2,31 @@
 // loudness for everything), an ambience bed that follows the view (town by day, night, an attack),
 // and simple generated music beds that change at night and when the town is attacked (owner:
 // "generated music beds change at night and during attacks"). Starts on the first tap — browsers
-// refuse to make sound before that. Settings: Sound / Music on or off (☰ → Settings).
+// refuse to make sound before that. Settings: Sound and Music volume sliders (☰ → Settings; 0 = off).
 
 import { hooks, ui as UI } from '../ui/hooks.js';
 
 let sfx = null, starting = false, music = null;
-const on = k => UI.app?.prefs?.[k] !== false;
+// volume 0..100 per slider (prefs.soundVol / prefs.musicVol); 0 is off. 70 = the level the game
+// always played at, so an old save sounds the same.
+const vol = k => { const p = UI.app?.prefs || {}; if (p[k] === false) return 0; const v = p[k + 'Vol']; return typeof v === 'number' ? Math.max(0, Math.min(100, v)) : 70; };
+const on = k => vol(k) > 0;
+/** Put the sliders' levels on the sound library and the music (Settings calls this as a slider moves). */
+export function applyVolumes() {
+  try { sfx?.setVolume?.(vol('sound') / 100); } catch { /* fine */ }
+  music?.level(vol('music') / 70);
+  if (sfx) bed();
+}
+UI.applyVolumes = applyVolumes;
 
 async function start() {
   if (sfx || starting) return; starting = true;
   try {
     const { Sfx } = await import('../../../../sfx/js/sfx.js');
-    sfx = await Sfx.create({ method: 'hybrid', volume: 0.7 });
+    sfx = await Sfx.create({ method: 'hybrid', volume: vol('sound') / 100 });
+    sfx.preload?.(['explosion.large', 'explosion.small', 'meteor.fall', 'thunder', 'spell.ice.impact'])?.catch?.(() => {});
   } catch (e) { console.warn('[sound] no sound library', e); }
-  try { music = createMusic(); } catch (e) { console.warn('[sound] no music', e); }
+  try { music = createMusic(); music.level(vol('music') / 70); } catch (e) { console.warn('[sound] no music', e); }
 }
 window.addEventListener('pointerdown', () => { start(); try { sfx?.wake?.(); } catch { /* fine */ } }, { passive: true });
 window.addEventListener('keydown', start, { passive: true });
@@ -24,7 +35,7 @@ export function play(id, opts) { if (id && sfx && on('sound')) try { sfx.play(id
 UI.sound = play;
 
 // ---- what the sim says → sounds
-const MAP = { collapse: 'stone.crumble', fire: 'fire.whoosh', enemyDown: 'death.beast', guardDown: 'death.humanoid', power: 'thunder', node: 'loot.uncommon' };
+const MAP = { collapse: 'stone.crumble', fire: 'fire.whoosh', enemyDown: 'death.beast', guardDown: 'death.humanoid', power: 'thunder', node: 'loot.uncommon', blast: 'explosion.small', blastBig: 'explosion.large' };
 let lastSay = 0;
 const lastKind = {};
 // A sound from the world plays only when it happens ON SCREEN (or near the middle of it) and at
@@ -37,11 +48,15 @@ function heard(x, y) {
   const halfW = innerWidth / 2 / c.ppc + 20, halfH = innerHeight / 2 / c.ppc + 20;
   return Math.abs(dx) < halfW && Math.abs(y - c.y) < halfH;
 }
-const GAP = { fire: 4000, collapse: 700, enemyDown: 250, guardDown: 400, power: 500, node: 0 };
+const GAP = { fire: 4000, collapse: 700, enemyDown: 250, guardDown: 400, power: 500, node: 0, blast: 250, blastBig: 400 };
+const lastSfx = {};
 hooks.tick.push(msg => {
   const now = performance.now();
   for (const s of msg.sounds || []) {
-    const [k, x, y] = Array.isArray(s) ? s : [s];
+    const [k, x, y, id, big] = Array.isArray(s) ? s : [s];
+    // a named sound from a power (meteor falling, its impact, thunder, frost): heard a little off screen
+    // too when it is a big one, at most every 150 ms per id
+    if (k === 'sfx') { if (now - (lastSfx[id] || 0) > 150 && (big || id === 'meteor.fall' || heard(x, y))) { lastSfx[id] = now; play(id); } continue; }
     if (now - (lastKind[k] || 0) < (GAP[k] ?? 1000) || !heard(x, y)) continue;
     lastKind[k] = now; play(MAP[k]);
   }
@@ -49,7 +64,9 @@ hooks.tick.push(msg => {
     if (s.built) play('build.done');
     else if (s.warn) play('bell.toll');
     else if (s.defeated) play('night.ambush');
-    else if (s.text && now - lastSay > 1500) { lastSay = now; play(s.kind === 'bad' ? 'ui.error' : 'ui.open'); }
+    // only BAD news makes a sound, and not more than once every 5 s (play-test 2: "little beep sounds of
+    // settlers arriving constantly" — every good toast used to play one)
+    else if (s.text && s.kind === 'bad' && now - lastSay > 5000) { lastSay = now; play('ui.error'); }
   }
   // the horn sounds once when an attack STARTS, not every time the sim notices enemies near a town
   if (msg.attack && now > attackUntil) play('hvf.horn');
@@ -81,12 +98,19 @@ function createMusic() {
     return { o, g };
   });
   const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 0.08; lg.gain.value = 0.02; lfo.connect(lg); lg.connect(master.gain); lfo.start();
-  let cur = null;
+  let cur = null, scale = 1;
   return {
+    /** Loudness from the Music slider: 1 = the old fixed level, 0 = silent. */
+    level(v) {
+      scale = Math.max(0, v);
+      const t = ctx.currentTime;
+      master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(master.gain.value, t);
+      master.gain.linearRampToValueAtTime(cur ? (cur === 'attack' ? 0.07 : 0.045) * scale : 0, t + 0.3);
+    },
     set(m) {
       if (m === cur) return; cur = m;
       const t = ctx.currentTime;
-      master.gain.cancelScheduledValues(t); master.gain.linearRampToValueAtTime(m ? (m === 'attack' ? 0.07 : 0.045) : 0, t + 3);
+      master.gain.cancelScheduledValues(t); master.gain.linearRampToValueAtTime(m ? (m === 'attack' ? 0.07 : 0.045) * scale : 0, t + 3);
       if (!m) return;
       const notes = SETS[m];
       voices.forEach((v, k) => { v.o.frequency.linearRampToValueAtTime(notes[k] * (m === 'attack' ? 0.5 : 0.5), t + 4); v.g.gain.linearRampToValueAtTime(k === 0 ? 0.5 : 0.25, t + 4); });

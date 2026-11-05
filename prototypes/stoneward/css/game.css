@@ -50,7 +50,9 @@ input, select { font: inherit; color: var(--ink); background: #120f0b; border: 1
 .stat { background: #000a; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-size: .82em; flex-shrink: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45vw; }
 .dock { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 8px max(8px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 6px; }
 .dock-tabs { display: flex; gap: 6px; }
-.dock-tabs button { flex: 1; background: #000b; }
+.dock-tabs button { flex: 1; background: #000b; min-width: 0; padding: 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 480px) { .dock-tabs { gap: 3px; } .dock-tabs button { font-size: 11.5px; padding: 0 1px; letter-spacing: -0.2px; } }
+.topbar .stat { cursor: pointer; }
 .dock-tabs button.on { background: #6b4b22; }
 .dock-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-wrap: wrap; gap: 6px; max-height: 40vh; overflow: hidden; }
 .dock-panel h3 { width: 100%; margin: 0; font-size: .95em; color: var(--gold); }
@@ -126,3 +128,30 @@ input, select { font: inherit; color: var(--ink); background: #120f0b; border: 1
   .topbar .stat { padding: 5px 6px; font-size: .78em; }
   .topbar .icon-btn { min-width: 40px; }
 }
+
+/* ---- info cards (owner 2026-11-04): hover on a computer, the small "i" on a phone ---- */
+.info-btn { flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; margin-left: 2px; border-radius: 50%; border: 1px solid var(--line); background: #0006; color: var(--gold); font: italic bold 13px/1 Georgia, serif; cursor: help; position: relative; }
+.info-btn::after { content: ''; position: absolute; inset: -10px; }   /* a finger-sized target around a small dot */
+.info-btn:hover { border-color: var(--gold); }
+.tipbox.sw-tip { max-width: 330px; }
+.info-card .tip-title { font-weight: 700; color: var(--gold); font-size: 1.05em; margin-bottom: 3px; }
+.info-card .info-text { color: var(--ink); }
+.info-card .tip-row { display: flex; justify-content: space-between; gap: 12px; }
+.info-card .tip-row span { color: var(--dim); white-space: nowrap; }
+.info-card .tip-row b { color: var(--ink); font-weight: 600; text-align: right; }
+.info-card .tip-sub { color: var(--dim); font-size: .92em; margin-top: 2px; }
+.info-card hr { border: 0; border-top: 1px solid var(--line); margin: 6px 0; }
+.item { position: relative; padding-right: 34px; }
+.item .info-btn { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); margin: 0; }
+/* the card opens at the TOP on a phone: the open dock panel covers the bottom of the screen */
+.sheet.info-sheet { top: 64px; bottom: auto; z-index: 30; background: var(--panel-solid); max-height: calc(100vh - 80px); overflow: hidden; cursor: pointer; }
+@media (min-width: 900px) { .sheet.info-sheet { width: 360px; top: 70px; } }
+#dock-panel .pw-grid button { position: relative; padding-right: 24px; }
+#dock-panel .pw-grid button .info-btn { position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; font-size: 11px; margin: 0; }
+
+/* ---- volume sliders in Settings ---- */
+.panel label.vol { color: var(--ink); font-size: 1em; }
+label.vol { display: flex; flex-direction: row; align-items: center; gap: 10px; min-height: var(--tap); padding: 0 4px; }
+label.vol span { width: 4.2em; }
+label.vol b { width: 3.2em; text-align: right; color: var(--gold); font-weight: 600; }
+label.vol input[type=range] { flex: 1; min-height: 0; height: 28px; padding: 0; background: transparent; border: 0; accent-color: var(--gold); }

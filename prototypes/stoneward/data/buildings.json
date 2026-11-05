@@ -1085,7 +1085,7 @@
   ],
   "taxPerHomeLevel": 2,
   "plotSearch": 70,
-  "plotSetback": 1,
+  "plotSetback": 2, "roadWidth": 3,
   "pathWear": 6,
   "builderCarry": 8,
   "haulAt": 6,
@@ -1155,6 +1155,8 @@
  },
  "townScan": 260,
  "scoutRadius": 110,
+ "settler": { "_doc": "Send a settler (Info tab): the wagon costs this much gold, takes this many free folk and this load from the nearest town, and founds a town hall where it stops — at least minGap m from any town.", "gold": 500, "people": 6, "cargo": { "log": 30, "stone": 15 }, "food": 30, "minGap": 110 },
+ "autoWall": { "_doc": "Towns wall themselves (play-test 2): from minPop people, a ring `margin` m outside the outermost building, built a stretch at a time while the stock keeps `reserve` of the material; wood first, stone once the town has `stoneAt` stone spare. A firebreak band is cleared just outside it. A town that outgrows its ring by `regrow` m rings itself again further out.", "minPop": 45, "margin": 9, "stretch": 14, "reserve": { "log": 40, "stone": 40 }, "stoneAt": 160, "regrow": 22, "firebreak": [3, 6] },
  "scoutCost": 20,
  "extras": [
   "buildings-trains.json",
@@ -1247,16 +1249,17 @@
   }
  },
  "walls": {
-  "_doc": "Drawn walls (js/sim/walls.js). tier: material, height, cost per cell, hit points per cell. Towers go at corners and every towerEvery cells, gates where a road crosses.",
+  "_doc": "Drawn walls (js/sim/walls.js). tier: material, height, cost per cell, hit points per cell. Towers go at corners and every towerEvery cells, gates where a road crosses. melee = how much of a sword or claw blow counts against this tier (blasts always count in full): stone is near-invincible to anything but explosions, wood is strong but burns (owner, play-test 2).",
   "tiers": {
    "wood": {
-    "name": "Palisade",
+    "name": "Wooden wall",
     "mat": "wall_wood",
     "tall": 4,
     "cost": {
      "log": 1
     },
-    "hp": 120
+    "hp": 200,
+    "melee": 1
    },
    "stone": {
     "name": "Stone wall",
@@ -1265,7 +1268,8 @@
     "cost": {
      "stone": 1
     },
-    "hp": 220
+    "hp": 255,
+    "melee": 0.04
    },
    "thick": {
     "name": "Thick wall",
@@ -1274,7 +1278,8 @@
     "cost": {
      "stone": 2
     },
-    "hp": 255
+    "hp": 255,
+    "melee": 0.03
    }
   },
   "towerEvery": 30,

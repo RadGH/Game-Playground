@@ -10,6 +10,20 @@
 //                   globe's circumference equals the flat map's width at the moment it fades in.
 // The x wrap: every chunk is drawn at the copy nearest the camera (wrapDelta), and the macro/globe
 // passes wrap in the shader.
+//
+// DEPTH (play-test 2: "people walk in front of buildings, multi-tile-high buildings should stay in
+// front"). The chunk painter stores, in each colour pixel's alpha, the cell ROW of whatever STANDING
+// thing painted it (js/render/paint.js: 160 + row; 255 = flat ground). The chunk pass turns that into
+// gl_FragDepth (further south = nearer the viewer; ground = far) while keeping painter's order (depth
+// func ALWAYS). Then sprites:
+//
+//   view.sprites = [[x, y, w, h, r, g, b, a, foot?], …]      (cells; x already the copy near the camera)
+//
+// A quad WITH a 9th element `foot` (the world y, in cells, where the thing stands — a person's or a
+// unit's y) is depth-tested at that row: any pixel painted by a building, wall or tree standing on a
+// row SOUTH of the foot (row > foot) hides it, so someone walking behind a house is hidden by its front
+// face and someone in front of it is drawn over it. Flat ground never hides a sprite. A quad WITHOUT a
+// foot is drawn on top of everything, as before. Overlay and screen quads ignore depth.
 
 const VS = `#version 300 es
 in vec2 aPos; out vec2 vUv;
@@ -22,29 +36,63 @@ in vec2 vUv; out vec4 o;
 uniform sampler2D uTex; uniform float uAlpha; uniform vec3 uTint; uniform float uWin;
 void main(){ vec4 c = texture(uTex, vec2(vUv.x, 1.0 - vUv.y)); if (c.a < 0.01) discard; float a = c.a; if (a < 0.6) { c.rgb *= uWin; a = 1.0; } o = vec4(c.rgb * uTint, a * uAlpha); }`;
 
-// shared: colour of the planet at a macro coordinate (cells/macroCell), with a jittered biome edge
+// shared: colour of the planet at a macro coordinate (cells/macroCell). The macro map is coarse (one
+// texel = 32 m: a Small world is 128 texels around), so the detail is made up per PIXEL, the same
+// every frame and wrapping with the planet (play-test 2: "the planet view looks incredibly low
+// resolution and blurry"):
+//   * uField (LINEAR) carries r = elevation, g = water (sea + lakes), b = rivers, a = good sites;
+//     sea vs land is decided per pixel from the smooth water field plus fbm, so coasts are ragged
+//     and detailed instead of 32 m squares;
+//   * the biome lookup is domain-warped (fbm), so biome borders are organic;
+//   * fine fbm speckle and hill shade on top; octaves finer than a pixel fade out (fw = macro cells
+//     per pixel), so nothing shimmers when zoomed out.
+// Noise is periodic in x (period = the planet), so there is no seam where the map wraps.
 const MACRO_FN = `
-uniform sampler2D uBiome; uniform sampler2D uElev; uniform vec2 uMacro; // mw, mh
-uniform float uShowSites; uniform sampler2D uSite; uniform float uSea;
-float hsh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
-  return mix(mix(hsh(i), hsh(i+vec2(1,0)), f.x), mix(hsh(i+vec2(0,1)), hsh(i+vec2(1,1)), f.x), f.y); }
-vec3 planet(vec2 m){                // m = macro coords, x may be any value (wraps)
-  vec2 j = vec2(vnoise(m*1.7) - 0.5, vnoise(m*1.7 + 19.3) - 0.5) * 0.9;
-  vec2 q = vec2(mod(m.x + j.x, uMacro.x), clamp(m.y + j.y, 0.0, uMacro.y - 0.01));
-  vec3 c = texelFetch(uBiome, ivec2(q), 0).rgb;
-  vec2 uv = vec2(m.x / uMacro.x, clamp(m.y / uMacro.y, 0.0, 1.0));
-  float e = texture(uElev, uv).r;
-  float ex = texture(uElev, uv + vec2(1.0/uMacro.x, 0.0)).r, ey = texture(uElev, uv + vec2(0.0, 1.0/uMacro.y)).r;
-  if (e > uSea) c *= 1.0 + clamp((e - ex) * 9.0 + (e - ey) * 9.0, -0.25, 0.25);
-  else {
-    // the same depth ramp the chunk painter uses, so loaded and unloaded sea match
-    float depth = clamp(1.1667 - e / uSea, 0.0, 1.0);
-    c = vec3(70.0 - depth * 46.0, 150.0 - depth * 92.0, 196.0 - depth * 92.0) / 255.0;
-    if (depth < 0.12) c += vec3(18.0, 14.0, 6.0) / 255.0;
+uniform sampler2D uBiome; uniform sampler2D uField; uniform vec2 uMacro; // mw, mh
+uniform float uShowSites; uniform float uSea;
+float h12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+float vn(vec2 p, float px){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
+  float x0 = mod(i.x, px), x1 = mod(i.x + 1.0, px);
+  return mix(mix(h12(vec2(x0, i.y)), h12(vec2(x1, i.y)), f.x), mix(h12(vec2(x0, i.y + 1.0)), h12(vec2(x1, i.y + 1.0)), f.x), f.y); }
+float fbm(vec2 m, float f, int n, float fw){
+  float s = 0.0, a = 0.5;
+  for (int k = 0; k < 5; k++) { if (k >= n) break; float vis = clamp(1.6 - fw * f * 1.6, 0.0, 1.0); s += a * vis * (vn(m * f, uMacro.x * f) - 0.5); f *= 2.0; a *= 0.5; }
+  return s; }
+vec3 seaCol(float depth){
+  vec3 c = vec3(70.0 - depth * 46.0, 150.0 - depth * 92.0, 196.0 - depth * 92.0) / 255.0;
+  if (depth < 0.12) c += vec3(18.0, 14.0, 6.0) / 255.0;
+  return c; }
+vec3 planet(vec2 m, float fw){      // m = macro coords, x may be any value (wraps); fw = macro cells per pixel
+  vec2 w = vec2(fbm(m, 1.0, 3, fw), fbm(m + vec2(37.0, 11.0), 1.0, 3, fw)) * 1.5;
+  vec2 mb = m + w + vec2(fbm(m, 8.0, 2, fw), fbm(m + vec2(5.0, 3.0), 8.0, 2, fw)) * 0.5;
+  vec2 q = vec2(mod(mb.x, uMacro.x), clamp(mb.y, 0.0, uMacro.y - 0.01));
+  vec4 bio = texelFetch(uBiome, ivec2(q), 0);
+  vec2 mf = m + w * 0.35;
+  vec2 uv = vec2(mf.x / uMacro.x, clamp(mf.y / uMacro.y, 0.0, 1.0));
+  vec4 F = texture(uField, uv);
+  // the water field softened over a texel (4 taps) so a coast is a curve, not a staircase of texels
+  vec2 hx = vec2(0.5 / uMacro.x, 0.0), hy = vec2(0.0, 0.5 / uMacro.y);
+  float wf = (texture(uField, uv + hx + hy).g + texture(uField, uv - hx + hy).g + texture(uField, uv + hx - hy).g + texture(uField, uv - hx - hy).g) * 0.25;
+  float wet = mix(F.g, wf, 0.7) + fbm(m + vec2(13.0, 7.0), 2.0, 5, fw) * 0.9;
+  vec3 sand = vec3(0.843, 0.769, 0.541);
+  vec3 c;
+  if (wet > 0.5) {
+    // the same depth ramp the chunk painter uses, so loaded and unloaded sea match; a lighter
+    // fringe along every coast
+    float depth = clamp(1.1667 - F.r / uSea, 0.0, 1.0) * smoothstep(0.5, 0.9, wet);
+    c = seaCol(depth);
+    c *= 0.97 + 0.06 * vn(m * 6.0, uMacro.x * 6.0) * clamp(1.6 - fw * 6.0, 0.0, 1.0);
+  } else {
+    c = bio.a > 0.5 ? bio.rgb : sand;
+    c = mix(c, sand, smoothstep(0.36, 0.5, wet) * 0.55);              // a beach along the water
+    vec2 tx = vec2(0.6 / uMacro.x, 0.0), ty = vec2(0.0, 0.6 / uMacro.y);
+    float e = F.r, ex = texture(uField, uv + tx).r, ey = texture(uField, uv + ty).r;
+    c *= 1.0 + clamp((e - ex) * 12.0 + (e - ey) * 12.0, -0.3, 0.3);
+    c *= 1.0 + fbm(m + vec2(3.0, 1.0), 4.0, 4, fw) * 0.45;          // speckle: woods, rocks, fields
+    float rv = F.b + fbm(m + vec2(5.0, 9.0), 4.0, 2, fw) * 0.35;
+    c = mix(c, vec3(0.25, 0.47, 0.72), smoothstep(0.5, 0.56, rv) * 0.9);
   }
-  c *= 0.94 + 0.12 * vnoise(m * 9.0);
-  if (uShowSites > 0.5) { float s = texture(uSite, uv).r; c = mix(c, vec3(1.0, 0.85, 0.3), smoothstep(0.62, 0.8, s) * 0.55); }
+  if (uShowSites > 0.5) c = mix(c, vec3(1.0, 0.85, 0.3), smoothstep(0.62, 0.8, F.a) * 0.55);
   return c;
 }`;
 
@@ -58,7 +106,9 @@ void main(){
   px.y = -px.y;
   vec2 cell = uCam + px / uPpc;
   if (cell.y < 0.0 || cell.y > uMacro.y * uCell) { o = vec4(0.04,0.05,0.08,1.0); return; }
-  o = vec4(planet(cell / uCell), uAlpha);
+  vec2 m = cell / uCell;
+  float fw = max(length(dFdx(m)), length(dFdy(m)));
+  o = vec4(planet(m, fw), uAlpha);
 }`;
 
 const FS_GLOBE = `#version 300 es
@@ -78,8 +128,14 @@ void main(){
   float lon = atan(a.x, a.z) + uLonLat.x;
   float lat = asin(clamp(a.y, -1.0, 1.0));
   vec2 m = vec2(lon / 6.2831853 * uMacro.x, (0.5 - lat / 3.14159265) * uMacro.y);
-  vec3 c = planet(m);
-  c = mix(c, vec3(0.93, 0.96, 0.98), smoothstep(1.2, 1.38, abs(lat)));   // the ice caps, without the pole pinch
+  float fw = min(4.0, max(length(dFdx(m)), length(dFdy(m))));
+  vec3 c = planet(m, fw);
+  // the ice caps: a crisp ragged edge (no pole pinch: the cap covers the stretched texels)
+  // edge noise from the point on the sphere, not from lon/lat (lon squeezes to spikes at the pole)
+  vec2 pp = a.xz * 9.0 + 40.0;
+  float en = (vn(pp, 1e6) - 0.5) * 0.6 + (vn(pp * 2.3, 1e6) - 0.5) * 0.3 + (vn(pp * 5.1, 1e6) - 0.5) * 0.15;
+  float ice = smoothstep(-0.012, 0.012, abs(lat) - 1.25 + en * 0.22);
+  c = mix(c, vec3(0.93, 0.96, 0.98) * (0.96 + 0.08 * vn(m * 6.0, uMacro.x * 6.0)), ice);
   // sun: fixed in screen space for now (upper left), dark side dimmed
   float lit = clamp(dot(n, normalize(uSun)) * 2.2 + 0.25, 0.0, 1.0);
   lit = mix(1.0, lit, uNight);
@@ -121,10 +177,26 @@ void main(){
 }`;
 
 // coloured quads in CELL coordinates (people, ghosts, selection, lines): one dynamic buffer a frame
+// depth of world row y: 0.5 at the camera's row, smaller = further south = nearer the viewer
 const VS_SPR = `#version 300 es
-in vec2 aCell; in vec4 aCol; out vec4 vCol;
+precision highp float;
+in vec2 aCell; in vec4 aCol; in float aFoot; out vec4 vCol;
 uniform vec2 uCam; uniform float uPpc; uniform vec2 uView;
-void main(){ vec2 p = (aCell - uCam) * uPpc / (uView * 0.5); gl_Position = vec4(p.x, -p.y, 0.0, 1.0); vCol = aCol; }`;
+void main(){
+  vec2 p = (aCell - uCam) * uPpc / (uView * 0.5);
+  float d = aFoot < -1.0e8 ? 0.0 : clamp(0.5 - (aFoot - uCam.y) / 16384.0, 0.0001, 0.9999);
+  gl_Position = vec4(p.x, -p.y, d * 2.0 - 1.0, 1.0); vCol = aCol; }`;
+// chunk colour images: alpha carries the depth row (see the top of this file)
+const FS_CHUNK = `#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 o;
+uniform sampler2D uTex; uniform float uAlpha; uniform vec3 uTint; uniform float uY0; uniform float uCamY;
+void main(){
+  vec4 c = texture(uTex, vec2(vUv.x, 1.0 - vUv.y)); if (c.a < 0.01) discard;
+  float a = floor(c.a * 255.0 + 0.5);
+  if (a > 254.5) gl_FragDepth = 1.0;
+  else gl_FragDepth = clamp(0.5 - (uY0 + (a - 160.0) - uCamY) / 16384.0, 0.0001, 0.9999);
+  o = vec4(c.rgb * uTint, uAlpha); }`;
 const FS_SPR = `#version 300 es
 precision mediump float; in vec4 vCol; out vec4 o; void main(){ o = vCol; }`;
 
@@ -147,34 +219,37 @@ export function createRenderer(canvas, opts = {}) {
   const sprP = (() => {
     const p = gl.createProgram();
     for (const [type, src] of [[gl.VERTEX_SHADER, VS_SPR], [gl.FRAGMENT_SHADER, FS_SPR]]) { const sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh)); gl.attachShader(p, sh); }
-    gl.bindAttribLocation(p, 1, 'aCell'); gl.bindAttribLocation(p, 2, 'aCol'); gl.linkProgram(p);
+    gl.bindAttribLocation(p, 1, 'aCell'); gl.bindAttribLocation(p, 2, 'aCol'); gl.bindAttribLocation(p, 3, 'aFoot'); gl.linkProgram(p);
     return { p, u: { uCam: gl.getUniformLocation(p, 'uCam'), uPpc: gl.getUniformLocation(p, 'uPpc'), uView: gl.getUniformLocation(p, 'uView') } };
   })();
   const sprVao = gl.createVertexArray(), sprBuf = gl.createBuffer();
   gl.bindVertexArray(sprVao); gl.bindBuffer(gl.ARRAY_BUFFER, sprBuf);
-  gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 24, 0);
-  gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 4, gl.FLOAT, false, 24, 8);
+  gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 28, 0);
+  gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 4, gl.FLOAT, false, 28, 8);
+  gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 1, gl.FLOAT, false, 28, 24);
   gl.bindVertexArray(null);
-  let sprData = new Float32Array(6 * 6 * 4096);
-  /** Draw quads: list of [x, y, w, h, r, g, b, a] in cells (x already the copy near the camera). */
+  let sprData = new Float32Array(6 * 7 * 4096);
+  /** Draw quads: list of [x, y, w, h, r, g, b, a, foot?] in cells (x already the copy near the camera).
+   *  `foot` (optional) = the world row the thing stands on, for the depth test (see the top). */
   function drawQuads(list, camX, camY, ppc, W, H) {
     if (!list.length) return;
-    if (sprData.length < list.length * 36) sprData = new Float32Array(list.length * 36 * 2);
+    if (sprData.length < list.length * 42) sprData = new Float32Array(list.length * 42 * 2);
     let o = 0;
-    for (const [x, y, w, h, r, g, b, a] of list) {
+    for (const q of list) {
+      const [x, y, w, h, r, g, b, a] = q, foot = q.length > 8 && q[8] != null ? q[8] : -2e9;
       for (const [vx, vy] of [[x, y], [x + w, y], [x, y + h], [x + w, y], [x + w, y + h], [x, y + h]]) {
-        sprData[o++] = vx; sprData[o++] = vy; sprData[o++] = r; sprData[o++] = g; sprData[o++] = b; sprData[o++] = a;
+        sprData[o++] = vx; sprData[o++] = vy; sprData[o++] = r; sprData[o++] = g; sprData[o++] = b; sprData[o++] = a; sprData[o++] = foot;
       }
     }
     gl.useProgram(sprP.p);
     gl.uniform2f(sprP.u.uCam, camX, camY); gl.uniform1f(sprP.u.uPpc, ppc); gl.uniform2f(sprP.u.uView, W, H);
     gl.bindVertexArray(sprVao); gl.bindBuffer(gl.ARRAY_BUFFER, sprBuf);
     gl.bufferData(gl.ARRAY_BUFFER, sprData.subarray(0, o), gl.STREAM_DRAW);
-    gl.drawArrays(gl.TRIANGLES, 0, o / 6);
+    gl.drawArrays(gl.TRIANGLES, 0, o / 7);
     gl.bindVertexArray(vao);
   }
 
-  const quad = prog(FS_QUAD), macroP = prog(FS_MACRO), globeP = prog(FS_GLOBE), blurP = prog(FS_BLUR), compP = prog(FS_COMP);
+  const quad = prog(FS_QUAD), chunkP = prog(FS_CHUNK), macroP = prog(FS_MACRO), globeP = prog(FS_GLOBE), blurP = prog(FS_BLUR), compP = prog(FS_COMP);
   const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
   const vb = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vb);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
@@ -189,34 +264,44 @@ export function createRenderer(canvas, opts = {}) {
     return t;
   };
 
-  let macro = null, biomeTex = null, elevTex = null, siteTex = null;
+  let macro = null, biomeTex = null, fieldTex = null;
+  const WATER_BIOMES = new Set([0, 1, 16]);      // deep sea, sea, lake (js/planet/biomes.js)
   /** Upload the macro map. biomeRgb: [[r,g,b], ...] per biome id. */
   function setMacro(m, biomeRgb) {
     macro = m;
-    const N = m.mw * m.mh, col = new Uint8Array(N * 4), el = new Uint8Array(N), si = new Uint8Array(N);
+    const N = m.mw * m.mh, col = new Uint8Array(N * 4), field = new Uint8Array(N * 4);
     for (let i = 0; i < N; i++) {
-      let [r, g, b] = biomeRgb[m.biome[i]];
-      if (m.river[i]) { r = 58; g = 112; b = 178; }
-      col[i * 4] = r; col[i * 4 + 1] = g; col[i * 4 + 2] = b; col[i * 4 + 3] = 255;
-      el[i] = Math.max(0, Math.min(255, Math.round(m.elev[i] / Math.max(m.top, 1e-6) * 255)));
-      si[i] = Math.round(m.site[i] * 255);
+      const [r, g, b] = biomeRgb[m.biome[i]];
+      const wet = WATER_BIOMES.has(m.biome[i]) || m.elev[i] < m.sea;
+      // biome colour + alpha 255 on land, 0 on water (rivers are drawn from the field, not the biome)
+      col[i * 4] = r; col[i * 4 + 1] = g; col[i * 4 + 2] = b; col[i * 4 + 3] = wet ? 0 : 255;
+      field[i * 4] = Math.max(0, Math.min(255, Math.round(m.elev[i] / Math.max(m.top, 1e-6) * 255)));
+      field[i * 4 + 1] = wet ? 255 : 0;
+      field[i * 4 + 2] = m.river[i] ? 255 : 0;
+      field[i * 4 + 3] = Math.round(m.site[i] * 255);
     }
     biomeTex = tex(m.mw, m.mh, col, gl.NEAREST);
-    elevTex = tex(m.mw, m.mh, el, gl.LINEAR, gl.RED);
-    siteTex = tex(m.mw, m.mh, si, gl.LINEAR, gl.RED);
+    fieldTex = tex(m.mw, m.mh, field, gl.LINEAR);
   }
 
   // off-screen targets: the scene at full size, light at half, bloom ping-pong at quarter
   const targets = {};
-  function target(name, w, h) {
+  function target(name, w, h, depth = false) {
     let t = targets[name];
     if (t && t.w === w && t.h === h) return t;
-    if (t) { gl.deleteTexture(t.tex); gl.deleteFramebuffer(t.fb); }
+    if (t) { gl.deleteTexture(t.tex); gl.deleteFramebuffer(t.fb); if (t.rb) gl.deleteRenderbuffer(t.rb); }
     const tx = tex(w, h, null, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     const fb = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tx, 0);
+    let rb = null;
+    if (depth) {
+      rb = gl.createRenderbuffer(); gl.bindRenderbuffer(gl.RENDERBUFFER, rb);
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, w, h);
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rb);
+      gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    return (targets[name] = { tex: tx, fb, w, h });
+    return (targets[name] = { tex: tx, fb, w, h, rb });
   }
   function bindTarget(t) { gl.bindFramebuffer(gl.FRAMEBUFFER, t ? t.fb : null); gl.viewport(0, 0, t ? t.w : canvas.width, t ? t.h : canvas.height); }
 
@@ -237,8 +322,7 @@ export function createRenderer(canvas, opts = {}) {
 
   function bindMacro(P) {
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, biomeTex); gl.uniform1i(P.u.uBiome, 0);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, elevTex); gl.uniform1i(P.u.uElev, 1);
-    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, siteTex); gl.uniform1i(P.u.uSite, 2);
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, fieldTex); gl.uniform1i(P.u.uField, 1);
     gl.uniform2f(P.u.uMacro, macro.mw, macro.mh);
     gl.uniform1f(P.u.uSea, macro.sea / Math.max(macro.top, 1e-6));
   }
@@ -251,9 +335,10 @@ export function createRenderer(canvas, opts = {}) {
     const dpr = view.dpr || 1;
     const W = canvas.width, H = canvas.height;
     const lighting = view.lighting !== false && (view.globe || 0) < 1;
-    const scene = lighting ? target('scene', W, H) : null;
+    const scene = lighting ? target('scene', W, H, true) : null;
     bindTarget(scene);
-    gl.clearColor(0.03, 0.035, 0.06, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.disable(gl.DEPTH_TEST); gl.depthMask(true); gl.clearDepth(1);
+    gl.clearColor(0.03, 0.035, 0.06, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     if (!macro) { bindTarget(null); gl.clear(gl.COLOR_BUFFER_BIT); return; }
     const { x: camX, y: camY } = view.cam;
     const ppc = view.cam.ppc * dpr;
@@ -269,21 +354,26 @@ export function createRenderer(canvas, opts = {}) {
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
       if (view.chunks?.length) {
-        gl.useProgram(quad.p); gl.activeTexture(gl.TEXTURE0); gl.uniform1i(quad.u.uTex, 0);
-        gl.uniform1f(quad.u.uAlpha, view.chunkAlpha ?? 1); gl.uniform1f(quad.u.uWin, 1);
-        const t = view.tint || [1, 1, 1]; gl.uniform3f(quad.u.uTint, t[0], t[1], t[2]);
+        // painter's order (north → south) as before, but each pixel also leaves its depth behind
+        gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.ALWAYS); gl.depthMask(true);
+        gl.useProgram(chunkP.p); gl.activeTexture(gl.TEXTURE0); gl.uniform1i(chunkP.u.uTex, 0);
+        gl.uniform1f(chunkP.u.uAlpha, view.chunkAlpha ?? 1); gl.uniform1f(chunkP.u.uCamY, camY);
+        const t = view.tint || [1, 1, 1]; gl.uniform3f(chunkP.u.uTint, t[0], t[1], t[2]);
         for (const c of view.chunks) {
           const e = chunkTex.get(c.key); if (!e) continue;
           const sx = (c.gx - camX) * ppc + W / 2, sy = (c.gy - camY) * ppc + H / 2;
           const sw = c.w * ppc, sh = c.h * ppc;
           if (sx > W || sy > H || sx + sw < 0 || sy + sh < 0) continue;
           gl.bindTexture(gl.TEXTURE_2D, e.t);
-          gl.uniform4f(quad.u.uRect, sx / W * 2 - 1, 1 - (sy + sh) / H * 2, sw / W * 2, sh / H * 2);
+          gl.uniform1f(chunkP.u.uY0, c.gy + c.h - 64);           // world row of the chunk's first cell row
+          gl.uniform4f(chunkP.u.uRect, sx / W * 2 - 1, 1 - (sy + sh) / H * 2, sw / W * 2, sh / H * 2);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
       }
     }
-    if (globe < 1 && view.sprites?.length) drawQuads(view.sprites, camX, camY, ppc, W, H);
+    // sprites: those with a foot are hidden behind anything standing further south (see the top)
+    if (globe < 1 && view.sprites?.length) { gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.depthMask(false); drawQuads(view.sprites, camX, camY, ppc, W, H); }
+    gl.disable(gl.DEPTH_TEST); gl.depthMask(true);
     if (lighting) {
       // light: every glowing chunk image, drawn additively at half size, then blurred twice
       const lw = Math.max(1, W >> 1), lh = Math.max(1, H >> 1);

@@ -1,5 +1,5 @@
 {
-  "_doc": "Guards, towers and monsters (js/sim/military/*.js). hp/dmg are plain numbers; range in cells; speed x a walker; cd = seconds between attacks. Guards are paid in gold only (owner): hire once, then a daily wage. Monsters list which group they belong to and what they go for. Original names only.",
+  "_doc": "Guards, towers and monsters (js/sim/military/*.js). hp/dmg are plain numbers; range in cells; speed x a walker; cd = seconds between attacks. Guards are raised by each town on its own and paid a daily wage from the treasury (play-test 2). Monsters list which group they belong to and what they go for. Original names only.",
   "guards": {
     "watchman":    { "name": "Watchman",    "hp": 30, "dmg": 4, "range": 1.6, "speed": 1.0, "cd": 1.0, "hire": 15, "wage": 1, "color": [0.55, 0.42, 0.3] },
     "spearman":    { "name": "Spearman",    "hp": 45, "dmg": 6, "range": 2.2, "speed": 0.95, "cd": 1.2, "hire": 25, "wage": 2, "big": 2, "color": [0.45, 0.5, 0.62] },
@@ -16,7 +16,8 @@
     "shield_tower":   { "range": 0, "shield": 18, "absorb": 400, "recharge": 4, "magic": true },
     "flame_tower":    { "range": 8, "dmg": 5, "cd": 0.6, "cone": true, "burn": true, "magic": true, "bonusVs": ["undead", "siege"] }
   },
-  "safety": { "tile": 8, "patrolFade": 2400, "postRadius": 22, "patrolRadius": 14, "callRadius": 30 },
+  "garrison": { "_doc": "Each town raises its own guards (play-test 2, owner: no micromanaging): base + one per `per` people + `barracks` per barracks, up to `max`; one new recruit every `every` ticks; `archers` = the share that are archers (they go up on wall towers and watchtowers first). Play-test 3: while a flag is up or enemies are in a ward the town raises a levy of `levy` x its people and recruits `warRecruit` times faster; `keepHome` = share kept home when a flag calls; street guards walk WARDS (clusters of buildings `wardGap` m apart, radius ~`wardR`) and only help next door within `wardHelp` m.", "base": 3, "per": 10, "barracks": 8, "max": 80, "every": 240, "archers": 0.4, "levy": 0.08, "warRecruit": 4, "keepHome": 0.2, "wardGap": 70, "wardR": 45, "wardHelp": 130 },
+  "safety": { "_lairGap": "a lair or camp nearer than this to a town lies quiet (play-test 3)", "lairGap": 240, "tile": 8, "patrolFade": 2400, "postRadius": 22, "patrolRadius": 14, "callRadius": 30 },
   "monsters": {
     "wolf":     { "name": "Wolf",          "group": "beast",  "hp": 18, "dmg": 3, "range": 1.4, "speed": 1.5, "cd": 0.9, "wants": "people", "color": [0.45, 0.45, 0.48], "size": 1 },
     "bear":     { "name": "Bear",          "group": "beast",  "hp": 60, "dmg": 8, "range": 1.6, "speed": 1.1, "cd": 1.4, "wants": "people", "color": [0.35, 0.24, 0.16], "size": 2, "big": true },
@@ -30,8 +31,8 @@
     "bandit":   { "name": "Bandit",        "group": "bandit", "hp": 26, "dmg": 4, "range": 1.5, "speed": 1.1, "cd": 1.1, "wants": "stores", "steal": 8, "color": [0.4, 0.32, 0.4], "size": 1 },
     "archer_bandit": { "name": "Bandit bowman", "group": "bandit", "hp": 20, "dmg": 3, "range": 12, "speed": 1.0, "cd": 1.6, "wants": "stores", "ranged": true, "steal": 4, "color": [0.35, 0.3, 0.38], "size": 1 },
     "soldier":  { "name": "Soldier",       "group": "army",   "hp": 40, "dmg": 6, "range": 1.8, "speed": 1.0, "cd": 1.2, "wants": "keep", "color": [0.6, 0.2, 0.2], "size": 1 },
-    "sapper":   { "name": "Sapper",        "group": "siege",  "hp": 30, "dmg": 3, "range": 1.4, "speed": 1.0, "cd": 1.0, "wants": "walls", "smash": 18, "fireWood": true, "color": [0.5, 0.3, 0.2], "size": 1 },
-    "catapult": { "name": "Catapult",      "group": "siege",  "hp": 80, "dmg": 30, "range": 38, "speed": 0.5, "cd": 7.0, "wants": "walls", "lob": true, "splash": 3, "color": [0.55, 0.4, 0.25], "size": 3, "big": true }
+    "sapper":   { "name": "Sapper",        "group": "siege",  "hp": 30, "dmg": 3, "range": 1.4, "speed": 1.0, "cd": 1.0, "wants": "walls", "smash": 18, "fireWood": true, "keg": true, "color": [0.5, 0.3, 0.2], "size": 1 },
+    "catapult": { "name": "Catapult",      "group": "siege",  "hp": 80, "dmg": 30, "range": 38, "speed": 0.5, "cd": 7.0, "wants": "walls", "lob": true, "splash": 3, "blast": 2.6, "color": [0.55, 0.4, 0.25], "size": 3, "big": true }
   },
   "lairs": {
     "den":      { "name": "Wolf den",      "spawn": ["wolf", "wolf", "boar", "bear", "spider"], "biomes": ["forest", "deepwood", "hills"], "every": 5, "group": [2, 5] },
@@ -40,5 +41,5 @@
     "nest":     { "name": "Drake nest",    "spawn": ["drake"], "biomes": ["volcanic", "peak", "mountain"], "every": 14, "group": [1, 1], "rare": true },
     "camp":     { "name": "Bandit camp",   "spawn": ["bandit", "bandit", "archer_bandit"], "biomes": ["forest", "grass", "hills", "meadow"], "every": 6, "group": [3, 6] }
   },
-  "raids": { "_doc": "Raiders grow with wealth and population; strength = (pop / 20 + gold / 400) x the world's raid setting. warn = seconds of warning.", "warn": 45, "firstDay": 2, "every": [1.5, 3], "levels": { "off": 0, "low": 0.6, "normal": 1, "high": 1.6 } }
+  "raids": { "_doc": "Raiders grow with wealth and population; strength = (pop / 20 + gold / 400) x the world's raid setting. warn = seconds of warning; spawnDist = how far from their target raiders appear (play-test 3: 110 m was too close to react).", "warn": 60, "spawnDist": 200, "firstDay": 2, "every": [1.5, 3], "levels": { "off": 0, "low": 0.6, "normal": 1, "high": 1.6 } }
 }

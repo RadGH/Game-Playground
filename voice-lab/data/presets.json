@@ -2,6 +2,7 @@
   "_doc": "Voice presets. 'voice' holds generic knobs (see README: pitch/speed/depth/tone 0..1, intonation 1-4) plus an engine recommendation and optional fx. A preset can be applied to any engine; engines ignore knobs they do not support.",
   "groups": [
     "Ours",
+    "Kokoro",
     "Human",
     "Age",
     "Fantasy",
@@ -9,6 +10,163 @@
     "Babble"
   ],
   "presets": [
+    {
+      "id": "kk_heart",
+      "name": "Heart (US f)",
+      "group": "Kokoro",
+      "desc": "Kokoro's best-trained voice. Warm, clear.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "af_heart",
+        "pitch": 0.5,
+        "speed": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "id": "kk_michael",
+      "name": "Michael (US m)",
+      "group": "Kokoro",
+      "desc": "Plain adult male.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "am_michael",
+        "pitch": 0.5,
+        "speed": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "id": "kk_emma",
+      "name": "Emma (UK f)",
+      "group": "Kokoro",
+      "desc": "British female, crisp.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "bf_emma",
+        "pitch": 0.5,
+        "speed": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "id": "kk_george",
+      "name": "George (UK m)",
+      "group": "Kokoro",
+      "desc": "British male, a touch formal — good narrator.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "bm_george",
+        "pitch": 0.5,
+        "speed": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "id": "kk_innkeeper",
+      "name": "Innkeeper",
+      "group": "Kokoro",
+      "desc": "Blend: Fenrir + Puck — friendly, quick.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "am_fenrir",
+        "pitch": 0.5,
+        "speed": 0.6,
+        "depth": 0.5,
+        "kokoroMix": "am_puck",
+        "kokoroMixAmt": 0.4
+      }
+    },
+    {
+      "id": "kk_wizard",
+      "name": "Old wizard",
+      "group": "Kokoro",
+      "desc": "Blend: George + Onyx, slower, a little deeper.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "bm_george",
+        "pitch": 0.42,
+        "speed": 0.35,
+        "depth": 0.6,
+        "kokoroMix": "am_onyx",
+        "kokoroMixAmt": 0.45
+      }
+    },
+    {
+      "id": "kk_merchant",
+      "name": "Sly merchant",
+      "group": "Kokoro",
+      "desc": "Blend: Lewis + Puck, fast.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "bm_lewis",
+        "pitch": 0.5,
+        "speed": 0.7,
+        "depth": 0.5,
+        "kokoroMix": "am_puck",
+        "kokoroMixAmt": 0.5
+      }
+    },
+    {
+      "id": "kk_queen",
+      "name": "Queen",
+      "group": "Kokoro",
+      "desc": "Blend: Emma + Isabella, measured.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "bf_emma",
+        "pitch": 0.5,
+        "speed": 0.4,
+        "depth": 0.5,
+        "kokoroMix": "bf_isabella",
+        "kokoroMixAmt": 0.4
+      }
+    },
+    {
+      "id": "kk_scout",
+      "name": "Young scout",
+      "group": "Kokoro",
+      "desc": "Blend: Bella + Sky, bright and quick.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "af_bella",
+        "pitch": 0.56,
+        "speed": 0.65,
+        "depth": 0.5,
+        "kokoroMix": "af_sky",
+        "kokoroMixAmt": 0.35
+      }
+    },
+    {
+      "id": "kk_child",
+      "name": "Child",
+      "group": "Kokoro",
+      "desc": "Nicole pushed up and made smaller with effects.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "af_nicole",
+        "pitch": 0.75,
+        "speed": 0.55,
+        "depth": 0.2,
+        "kokoroMix": "af_bella",
+        "kokoroMixAmt": 0.3
+      }
+    },
+    {
+      "id": "kk_giant",
+      "name": "Giant",
+      "group": "Kokoro",
+      "desc": "Onyx pushed down and made bigger with effects.",
+      "voice": {
+        "engine": "kokoro",
+        "variant": "am_onyx",
+        "pitch": 0.25,
+        "speed": 0.3,
+        "depth": 0.85,
+        "kokoroMix": "am_fenrir",
+        "kokoroMixAmt": 0.3
+      }
+    },
     {
       "id": "child_boy",
       "name": "Child (boy)",

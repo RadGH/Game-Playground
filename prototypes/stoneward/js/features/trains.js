@@ -23,22 +23,26 @@ function render(ui) {
   const icon = g => G[g]?.icon || g;
   const per = Object.entries(D.rail.cost).map(([g, n]) => `${icon(g)} ${n}`).join(' ');
   const st = D.kinds.station;
-  const p = ui.panel('<h3>Railways</h3>');
+  const p = ui.panel('<h3>Transport</h3>');
   const item = (name, cost, on, fn) => {
     const b = document.createElement('button'); b.className = 'item';
     b.innerHTML = `<span class="nm">${name}</span><span class="cost">${cost}</span>`;
     b.classList.toggle('on', on); b.addEventListener('click', fn); return b;
   };
   p.append(
-    item('Track', `${per} per ${D.rail.per} m`, tool?.kind === 'track', () => startTrack(ui)),
-    item(st.name, Object.entries(st.cost).map(([g, n]) => `${icon(g)} ${n}`).join(' '), tool?.kind === 'station', () => startStation(ui)),
+    ui.info(item('Track', `${per} per ${D.rail.per} m`, tool?.kind === 'track', () => startTrack(ui)), 'tool:track'),
+    ui.info(item(st.name, Object.entries(st.cost).map(([g, n]) => `${icon(g)} ${n}`).join(' '), tool?.kind === 'station', () => startStation(ui)), 'kind:station'),
   );
+  // boat docks (play-test 2: "add boat docks that auto create routes"): put one on the shore near a
+  // far mine or outpost and another in town — barges start carrying on their own once water joins them
+  const dk = D.kinds.dock;
+  if (dk) p.append(ui.info(item(`⚓ ${dk.name}`, Object.entries(dk.cost).map(([g, n]) => `${icon(g)} ${n}`).join(' '), false, () => { stopTool(ui); ui.place('dock'); }), 'kind:dock'));
   const have = town(ui)?.stock?.iron_ore || 0;
   p.append(ui.hint(tool?.kind === 'track' ? 'Drag to lay a straight run. Start on the end of a track to carry it on. Track can never be destroyed.'
     : tool?.kind === 'station' ? 'Tap beside the track. Any track joining two stations becomes a line (see Info → Lines).'
-    : have ? 'Trains are the fastest way to move goods and people between towns.' : 'Track needs iron ore: build an iron mine on a found seam first.'));
+    : (have ? 'Trains are the fastest way to move goods and people between towns.' : 'Track needs iron ore: build an iron mine on a found seam first.') + ' A dock on the shore by a far mine, and one in town, open a boat route by themselves.'));
 }
-hooks.tabs.push({ id: 'rails', label: 'Rails', tool: true, render });
+hooks.tabs.push({ id: 'rails', label: 'Transport', tool: true, render });
 
 function stopTool(ui) { tool = null; ui.camera()?.setTool(null); }
 

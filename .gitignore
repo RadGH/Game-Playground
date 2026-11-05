@@ -26,3 +26,7 @@ prototypes/thousandvale/tests/G/shots/
 **/tests/**/shots/**/*.jpeg
 **/tests/**/shots/**/*.webp
 **/tests/**/shots/**/*.cpuprofile
+
+# Kokoro model, voices and runtime wasm — downloaded by tools/fetch-kokoro.sh
+vendor/kokoro/models/
+voice-lab/server/cache/

@@ -24,12 +24,13 @@ stopAll();
 
 ```json
 {
-  "engine": "formant",         // formant (ours) | espeak | babble | piper | webspeech
+  "engine": "formant",         // formant (ours) | kokoro | espeak | babble | piper | webspeech
   "pitch": 0.5,   "speed": 0.3, "depth": 0.5, "tone": 0.5,   // 0..1 generic knobs (see table)
   "breath": 0.1,  "rough": 0.1, "flutter": 0.1, "intonation": 2, "wordgap": 0,
   "gender": "m",               // m | f | n  (espeak base pitch range)
   "accent": "en-us",           // espeak: en-us | en | en-rp | en-sc | en-n | en-wm
-  "variant": "custom",         // espeak: custom (use knobs) or built-in m1..m7 f1..f5 croak whisper whisperf klatt*; piper: voice id; webspeech: OS voice name
+  "variant": "custom",         // espeak: custom (use knobs) or built-in m1..m7 f1..f5 croak whisper whisperf klatt*; piper: voice id; kokoro: voice id (af_heart, bm_george…); webspeech: OS voice name
+  "kokoroMix": "am_onyx", "kokoroMixAmt": 0.45,   // kokoro only: blend a second voice in (0 = none, 1 = only the second)
   "babbleMode": "letters",     // babble: letters | syllables | simlish
   "fx": { "pitchShift": 0, "formant": 0, "robot": 0.8, "robotHz": 55 }   // see Effects
 }
@@ -67,6 +68,7 @@ The DSP is pure JS on `Float32Array` (`js/dsp.js`) so it can run in a worker: `r
 | `espeak` | meSpeak.js (espeak 1.47, asm.js). Custom voice-variant file generated from knobs. | **GPL-3.0** | yes | `[[h@l'oU]]` espeak ASCII | very cheap |
 | `babble` | Our own Animalese/Simlish gibberish synth (formant filters on a pulse) | ours | yes | n/a (letters) | near zero; hundreds at once |
 | `piper` | Piper VITS neural via ONNX Runtime Web (vits-web; `onnxruntime-web` resolved through an importmap to `vendor/onnxruntime-web/ort.min.mjs`; model cache patched to IndexedDB because the original OPFS cache only works on https/localhost, so over LAN http it re-downloaded every time) | MIT + per-voice | yes | no | seconds per line; not real-time |
+| `kokoro` | Kokoro-82M neural via kokoro-js 1.2.1 (transformers.js + ONNX Runtime Web) in a Web Worker (`js/engines/kokoro-worker.js`). Model, voices and runtime wasm load from `vendor/kokoro/models/` (git-ignored, `tools/fetch-kokoro.sh`), falling back to Hugging Face / jsDelivr. 28 English voices, blend any two. Speed is native; pitch/depth are gentle post-effects. CPU (wasm) or WebGPU (https only, falls back to CPU if no adapter) | Apache-2.0 model+code, **eSpeak NG phonemizer is GPL-3.0** | conditional | no | 5–10 s per 4 s line on the dev VM's CPU (single thread), ~5.5 s with threads; native fp32 ~1.5 s |
 | `webspeech` | Browser/OS voices | built-in | **no** | no | one at a time, no mixing |
 
 Each module exports `meta` (license, pros/cons, knob support), `load()`, and `synth(text, voice) → { samples, sampleRate, info }` (or `speakDirect` for Web Speech). Add an engine by dropping a module in `engines/` and registering it in `engines/index.js`.
@@ -105,6 +107,26 @@ Each module exports `meta` (license, pros/cons, knob support), `load()`, and `sy
 - `index.html`, `voice-lab.css`, `js/app.js` — demo UI
 - `js/voice.js` — public API (synthesize/play/say/cache)
 - `js/fx.js`, `js/dsp.js` — effects + DSP
-- `js/engines/{espeak,babble,piper,webspeech,index}.js`
+- `js/engines/{espeak,babble,piper,kokoro,kokoro-worker,webspeech,index}.js`
 - `data/presets.json`
 - `tests/voice-lab.spec.js`
+
+## Kokoro (neural, added 2026-11-04)
+
+**Default: the Kokoro voice service.** Running the model inside the browser turned out to be 10–35 s per line on plain-http pages and does not start at all on an iPhone (tested 2026-11-04, Radley's phone over the tailnet). So by default the page sends the text to a small service on the VM and plays back the WAV:
+
+- `voice-lab/server/kokoro-server.mjs` — Node + kokoro-js (native ONNX Runtime, fp32), listens on `127.0.0.1:8402`. `POST /tts {text, voice, mix, mixAmt, speed}` → 24 kHz WAV with `X-Synth-Ms` / `X-Cache` / `X-Phonemes` headers; `GET /health`. One request at a time; every clip is cached on disk in `voice-lab/server/cache/` (git-ignored, 5,000 files max), so a repeated line costs ~10 ms. Request checking lives in `server/request.mjs` (unit tests: `tests/kokoro-request.test.js`). `server/kokoro-node.js` is kokoro-js's node build with one extra export line (phonemize + voice cache, for blending).
+- `tools/serve.py` forwards `/api/kokoro/*` to it, so the page uses its own address and port (works over LAN, tailnet, http and https).
+- Runs as the user service `kokoro-tts` (`tools/kokoro-tts.service`; install steps at the top of that file). Setup on a fresh machine: `(cd voice-lab/server && npm install)`, `tools/fetch-kokoro.sh fp32`, then enable the service.
+- Speed measured 2026-11-04 on the busy dev VM: ~0.7–3 s for a new line (2.7 s for 8.9 s of speech), ~10 ms for a cached one; 0.7 s round trip from an emulated iPhone.
+- "Runs on" in Engine options switches back to in-browser (CPU / WebGPU) for comparison.
+
+In-browser mode (the original version, still available):
+
+The first engine in the lab that sounds like a real person rather than a synthesizer. Pick it in the engine list or use the **Kokoro** preset group (stock voices plus blends: Innkeeper, Old wizard, Sly merchant, Queen, Young scout, Child, Giant).
+
+- **Setup:** `tools/fetch-kokoro.sh` downloads the q8 model (~92 MB), the 28 English voices and the ONNX runtime wasm into `vendor/kokoro/models/` (`fp32` argument adds the 326 MB full model). Safe to run more than once. Without it the engine downloads the same files from Hugging Face on first use. The stable worktree gets a symlink to the dev copy.
+- **Speed (measured 2026-11-04 on the dev VM, 4 s line):** single-threaded wasm (any plain-http LAN page) ~7–10 s; multi-threaded wasm ~5.5 s; native node fp32 ~1.5 s. q8 and fp32 cost the same in the browser. Threads need a *cross-origin isolated* page: `tools/serve.py` sends `Cross-Origin-Opener-Policy: same-origin` + `Cross-Origin-Embedder-Policy: credentialless` for `/voice-lab/` and `/vendor/kokoro/` only, and the browser also requires a secure page (https ports 8441/8442, or localhost). WebGPU has the same https requirement.
+- **Voice blending:** a Kokoro voice is a table of style vectors; mixing two tables (`kokoroMix` + `kokoroMixAmt`) gives a new, stable voice, so every NPC can have its own without new model files. The vendored `vendor/kokoro/kokoro.web.js` is patched to export `transformersEnv`, `phonemize` and `voiceCache` for this.
+- **License:** model weights and kokoro-js are Apache-2.0. The text → phoneme step is eSpeak NG compiled to WebAssembly (GPL-3.0), so a closed-source commercial game should replace it (our CMU dictionary in `data/cmudict/` mapped to Kokoro's IPA is the obvious swap).
+- **Limits:** ~510 phoneme tokens per call (long text is split by sentence automatically); invented fantasy words are guessed by eSpeak's spelling rules.

@@ -80,7 +80,9 @@ export function createWalls(sim, data) {
     // drop duplicates
     const seen = new Set(); cells = cells.filter(([x, y]) => { const key = wrapX(x) + ',' + y; if (seen.has(key)) return false; seen.add(key); return true; });
     if (!cells.length) return null;
-    const tier = o.tier && CFG.tiers[o.tier] && payable(CFG.tiers[o.tier].cost, cells.length) ? o.tier : bestTier(cells.length);
+    // the Lines tab asks for a wooden or a stone wall by name (play-test 2: no more "best you can afford")
+    if (o.tier && CFG.tiers[o.tier] && !payable(CFG.tiers[o.tier].cost, cells.length)) { say(`Not enough ${o.tier === 'wood' ? 'logs' : 'stone'} for ${cells.length} m of ${CFG.tiers[o.tier].name.toLowerCase()}.`, 'bad', pts[0][0], pts[0][1]); return { error: 'cost' }; }
+    const tier = o.tier && CFG.tiers[o.tier] ? o.tier : bestTier(cells.length);
     if (!tier) { say('Not enough logs or stone for that wall.', 'bad', pts[0][0], pts[0][1]); return null; }
     const t = CFG.tiers[tier];
     const wall = { id: S.nextId++, tier, cells: [], towers: [], gates: [] };
@@ -121,7 +123,7 @@ export function createWalls(sim, data) {
   /** Upgrade every cell of a wall to the next tier, in place. */
   function upgradeWall(id) {
     const wall = S.list.find(w => w.id === id); if (!wall) return null;
-    const next = wall.tier === 'wood' ? 'stone' : wall.tier === 'stone' ? 'thick' : null;
+    const next = wall.tier === 'wood' ? 'stone' : null;     // wood → stone only (the thick tier is kept for old saves)
     if (!next) return null;
     const t = CFG.tiers[next];
     if (!payable(t.cost, wall.cells.length)) { say(`Not enough for a ${t.name.toLowerCase()}.`, 'bad'); return null; }
@@ -137,12 +139,16 @@ export function createWalls(sim, data) {
    * Hurt a built cell. `amount` in hit points of the cell's tier. Returns true if it broke.
    * Walls scale by their tier's hp; other built cells by their material hardness.
    */
-  function damage(x, y, amount) {
+  function damage(x, y, amount, opts = null) {
     const at = sim.cell(x, y); if (!at) return false;
     const { c, i } = at, m = c.mat[i];
     if (!m || !(M.built[m] || M.solid[m]) || M.flag.road[c.ground[i]] && !M.built[m]) return false;
     if (m === M.id.rail) return false;                            // track can never be damaged
     const tier = tierOfMat.get(m);
+    // play-test 2 (owner): a stone wall is "basically invincible except from explosions"; a wooden
+    // one is strong but burns. Clubs, claws and swords barely scratch stone; blasts (catapults,
+    // sappers' kegs, meteors) hit it in full.
+    if (!opts?.blast && CFG.tiers[tier]?.melee != null) amount *= CFG.tiers[tier].melee;
     const full = tier ? CFG.tiers[tier].hp : Math.max(20, M.hard[m]);
     const hp = c.hp[i] / 255 * full - amount;
     c.dirty = true; sim.store.markEdited(c);
@@ -234,26 +240,52 @@ export function createWalls(sim, data) {
     }
     return n;
   }
-  /** Firefighters and neighbours: idle townsfolk near a fire join a bucket line. Called by the town. */
+  /** Firefighters and neighbours (play-test 2: "they don't seem to be putting out fires"): every fire
+   *  in or near a town is answered — the fire station's crew from far off, and ANY townsfolk close
+   *  by drop what they are doing (a fire spreads faster than a woodpile waits). Up to a dozen per
+   *  blaze; each goes for the nearest burning cell. */
   function fireDuty() {
     const t = T(); if (!t) return;
+    const blazes = [];
     for (const b of t.buildings) {
-      if (b.state !== 'up') continue;
+      if (b.state !== 'up' || b.town < 0) continue;
       const k = data.kinds[b.kind];
-      const r = k.job?.kind === 'firefight' ? k.job.radius : k.home ? 18 : 0;
-      if (!r) continue;
+      const r = k.job?.kind === 'firefight' ? k.job.radius : Math.max(b.w, b.h) + 6;
       const fires = firesNear(b.x + (b.w >> 1), b.y + (b.h >> 1), r);
       if (!fires.length) continue;
       b.fireAlarm = sim.tick;
-      // who answers: the station's crew, and anyone resting near home
-      const crew = t.people.filter(p => (p.job === b.id && k.job?.kind === 'firefight') || (k.home && p.home === b.id && (!p.task || p.task.t === 'rest')));
-      for (const p of crew.slice(0, 4)) {
-        if (p.task?.t === 'douse') continue;
-        const [fx, fy] = fires[(sim.rng() * fires.length) | 0];
-        p.task = { t: 'douse', fx, fy, water: false, carry: 0 };
+      if (k.job?.kind !== 'firefight') blazes.push({ x: b.x + (b.w >> 1), y: b.y + (b.h >> 1), fires, town: b.town });
+      else for (const p of t.people) if (p.job === b.id && p.task?.t !== 'douse') { const [fx, fy] = fires[0]; p.task = { t: 'douse', fx, fy, water: false }; p.path = null; }
+    }
+    // a fire anywhere in or just around a town (a burning hedge, a garden, the wood at the edge of
+    // town) is answered too, before it can reach the houses
+    for (const town of t.towns) {
+      const R = (sim.town.radius?.(town) ?? 60) + 25;
+      const fires = firesNear(town.x, town.y, R);
+      if (fires.length) blazes.push({ x: fires[0][0], y: fires[0][1], fires, town: town.id });
+    }
+    for (const z of blazes) {
+      const busy = t.people.filter(p => p.task?.t === 'douse' && Math.hypot(wrapD(p.task.fx - z.x), p.task.fy - z.y) < 30).length;
+      if (busy >= 12) continue;
+      const near = t.people.filter(p => !p.boat && p.task?.t !== 'douse' && p.task?.t !== 'flee' && Math.hypot(wrapD(p.x - z.x), p.y - z.y) < 40)
+        .sort((a, b) => Math.hypot(wrapD(a.x - z.x), a.y - z.y) - Math.hypot(wrapD(b.x - z.x), b.y - z.y));
+      for (const p of near.slice(0, 12 - busy)) {
+        const [fx, fy] = z.fires[(sim.rng() * z.fires.length) | 0];
+        if (p.carry && p.task?.t !== 'drop') p.carry = null;
+        p.task = { t: 'douse', fx, fy, water: false };
         p.path = null;
       }
     }
+  }
+  const wrapD = d => { if (d > W / 2) d -= W; if (d < -W / 2) d += W; return d; };
+  /** The nearest burning cell to (x, y) within r, or null. */
+  function nearestFire(x, y, r = 8) {
+    let best = null, bd = Infinity;
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+      const d = dx * dx + dy * dy; if (d >= bd || d > r * r) continue;
+      const at = sim.cell(x + dx, y + dy); if (at && at.c.flag[at.i] & BURN) { bd = d; best = [Math.floor(x + dx), Math.floor(y + dy)]; }
+    }
+    return best;
   }
 
   // ------------------------------------------------------------------ painted areas + firebreaks
@@ -283,9 +315,125 @@ export function createWalls(sim, data) {
   /** Does a footprint touch a keep-clear area? (town.fits asks this) */
   function blocked(x, y, w, h) { return S.zones.some(z => z.kind === 'clear' && x < z.x1 && x + w > z.x0 && y < z.y1 && y + h > z.y0); }
 
+  // ------------------------------------------------------------------ towns wall themselves (play-test 2)
+  // "The city should automatically build its own roads, walls, gates, fire breaks, towers." A town
+  // big enough rings itself: a wall a few metres outside its outermost building, laid a stretch at a
+  // time while the stock can spare the logs (stone later), with a gate wherever a road crosses, a
+  // tower every 30 m, and a cleared firebreak band just outside. When the town outgrows the ring it
+  // builds a bigger one and takes the old one down once the new one is closed.
+  const AW = data.autoWall || { minPop: 45, margin: 9, stretch: 14, reserve: { log: 40, stone: 40 }, stoneAt: 160, regrow: 22, firebreak: [3, 6] };
+  S.rings ??= [];
+  function ringCells(cx, cy, R) {
+    const n = Math.max(16, Math.round(R / 5));
+    const pts = [];
+    for (let k = 0; k <= n; k++) { const a = k / n * Math.PI * 2; pts.push([Math.round(cx + Math.cos(a) * R), Math.round(cy + Math.sin(a) * R)]); }
+    const out = []; const seen = new Set();
+    for (let k = 0; k + 1 < pts.length; k++) for (const [x, y] of lineCells(pts[k][0], pts[k][1], pts[k + 1][0], pts[k + 1][1])) { const key = wrapX(x) + ',' + y; if (!seen.has(key)) { seen.add(key); out.push([wrapX(x), y]); } }
+    return out;
+  }
+  function autoWalls() {
+    const t = T(); if (!t?.towns?.length) return;
+    for (const town of t.towns) {
+      const pop = t.people.filter(p => p.town === town.id).length;
+      if (pop < AW.minPop || !sim.town.radius) continue;
+      const R = sim.town.radius(town) + AW.margin;
+      const mine = S.rings.filter(r => r.town === town.id);
+      const cur = mine.at(-1);
+      if (!cur || (cur.done && R > cur.R + AW.regrow && R < 320)) {
+        const wall = { id: S.nextId++, tier: 'wood', cells: [], towers: [], gates: [], town: town.id, auto: true };
+        S.list.push(wall);
+        S.rings.push({ town: town.id, R, cx: town.x, cy: town.y, wall: wall.id, plan: ringCells(town.x, town.y, R), next: 0, done: false });
+        continue;
+      }
+      if (!cur.done) buildStretch(town, cur);
+      else upgradeStretch(town, cur);
+    }
+  }
+  function buildStretch(town, ring) {
+    const wall = S.list.find(w => w.id === ring.wall); if (!wall) { ring.done = true; return; }
+    const st = sim.town.stock(town.id);
+    const t = CFG.tiers[wall.tier], mat = M.id[t.mat];
+    const costG = Object.keys(t.cost)[0];
+    let room = Math.floor(((st[costG] || 0) - (AW.reserve[costG] ?? 40)) / (t.cost[costG] || 1));
+    if (room <= 0) return;
+    let laid = 0;
+    while (ring.next < ring.plan.length && laid < AW.stretch && room > 0) {
+      const k = ring.next++;
+      const [x, y] = ring.plan[k];
+      const at = sim.cell(x, y); if (!at) continue;
+      const { c, i } = at;
+      if (c.part[i] || M.liquid[c.mat[i]] || c.mat[i] === M.id.rail) continue;          // a building or water: leave the gap
+      const road = M.flag.road[c.ground[i]] || c.mat[i] === M.id.bridge;
+      if (road) { if (c.mat[i] !== M.id.bridge && placeCell(x, y, M.id.gate, 0, 255, wall.id)) wall.gates.push([x, y]); continue; }
+      if (c.mat[i] && M.built[c.mat[i]]) continue;                                       // someone's wall already
+      const tower = k % CFG.towerEvery === 0;
+      if (placeCell(x, y, mat, t.tall + (tower ? CFG.towerExtra : 0), 255, wall.id)) { wall.cells.push([x, y, mat, t.tall + (tower ? CFG.towerExtra : 0)]); laid++; room--; }
+      if (tower) {
+        const r = CFG.towerSize >> 1;
+        for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
+          if (!dx && !dy) continue;
+          const a2 = sim.cell(x + dx, y + dy); if (!a2 || M.flag.road[a2.c.ground[a2.i]] || a2.c.part[a2.i] || M.liquid[a2.c.mat[a2.i]] || (a2.c.mat[a2.i] && M.built[a2.c.mat[a2.i]])) continue;
+          if (placeCell(x + dx, y + dy, mat, t.tall + CFG.towerExtra, 255, wall.id)) wall.cells.push([wrapX(x + dx), y + dy, mat, t.tall + CFG.towerExtra]);
+        }
+        wall.towers.push([x, y]);
+      }
+      firebreakOut(town, x, y);
+    }
+    pay(t.cost, laid, town.x, town.y);
+    if (ring.next >= ring.plan.length) {
+      ring.done = true;
+      // the old, smaller ring comes down (its stone and logs are not wasted: half go back to stock)
+      for (const old of S.rings.filter(r => r.town === town.id && r !== ring && !r.gone)) {
+        old.gone = true;
+        const w = S.list.find(x => x.id === old.wall); if (!w) continue;
+        for (const [x, y, m] of w.cells) { const a = sim.cell(x, y); if (a && a.c.mat[a.i] === m) { a.c.mat[a.i] = 0; a.c.tall[a.i] = 0; a.c.hp[a.i] = 0; a.c.dirty = true; sim.store.markEdited(a.c); } }
+        for (const [x, y] of w.gates) { const a = sim.cell(x, y); if (a && a.c.mat[a.i] === M.id.gate) { a.c.mat[a.i] = 0; a.c.dirty = true; sim.store.markEdited(a.c); } }
+        S.list.splice(S.list.indexOf(w), 1);
+      }
+      S.rings = S.rings.filter(r => !r.gone);
+      say(`${town.name} has closed its new wall: ${wall.towers.length} towers, ${wall.gates.length} gates.`, 'good', town.x, town.y);
+      sim.events.push({ t: 'walls' });
+    }
+  }
+  /** Rich in stone: the wooden ring becomes a stone one, a stretch at a time. */
+  function upgradeStretch(town, ring) {
+    const wall = S.list.find(w => w.id === ring.wall); if (!wall || wall.tier !== 'wood') return;
+    const st = sim.town.stock(town.id);
+    if ((st.stone || 0) < AW.stoneAt) return;
+    const t = CFG.tiers.stone, grow = t.tall - CFG.tiers.wood.tall;
+    ring.up ??= 0;
+    let n = 0;
+    while (ring.up < wall.cells.length && n < AW.stretch) {
+      const cell = wall.cells[ring.up++];
+      cell[2] = M.id[t.mat]; cell[3] += grow; placeCell(cell[0], cell[1], cell[2], cell[3], 255, wall.id); n++;
+    }
+    pay(t.cost, n, town.x, town.y);
+    if (ring.up >= wall.cells.length) { wall.tier = 'stone'; say(`${town.name}'s wall is stone now.`, 'good', town.x, town.y); }
+  }
+  /** Clear trees and brush in a short band outside a wall cell: a firebreak a forest fire cannot cross. */
+  function firebreakOut(town, x, y) {
+    let dx = x - town.x; if (dx > W / 2) dx -= W; if (dx < -W / 2) dx += W;
+    const dy = y - town.y, d = Math.hypot(dx, dy) || 1;
+    for (let k = AW.firebreak[0]; k <= AW.firebreak[1]; k++) {
+      const at = sim.cell(x + dx / d * k, y + dy / d * k); if (!at) continue;
+      const { c, i } = at;
+      if (c.part[i] || M.flag.road[c.ground[i]] || M.liquid[c.mat[i]] || (c.mat[i] && M.built[c.mat[i]])) continue;
+      if (c.mat[i] && !(M.tree[c.mat[i]] || c.mat[i] === M.id.bush || c.mat[i] === M.id.tallgrass || c.mat[i] === M.id.flowers || c.mat[i] === M.id.stump)) continue;
+      c.mat[i] = 0; c.tall[i] = 0; c.ground[i] = M.id.firebreak; c.flag[i] &= ~BURN;
+      c.dirty = true; sim.store.markEdited(c);
+    }
+  }
+  /** A road laid through a wall later on: the cell is a gate now; the wall forgets it as a wall cell. */
+  function addGate(x, y) {
+    x = wrapX(Math.floor(x)); y = Math.floor(y);
+    for (const w of S.list) { const k = w.cells.findIndex(c => c[0] === x && c[1] === y); if (k >= 0) { w.cells.splice(k, 1); w.gates.push([x, y]); return true; } }
+    return false;
+  }
+
   // ------------------------------------------------------------------ the system
   function step() {
     if (sim.tick % 20 === 3) fireDuty();
+    if (sim.tick % 60 === 29) autoWalls();
     if (sim.tick % 40 === 11) stepHeat();
     if (sim.tick % 100 === 13) stepRubble();
     if (sim.tick % CFG.repairEvery === 17) stepRepair();
@@ -303,5 +451,6 @@ export function createWalls(sim, data) {
   }
   sim.damage = damage;
   sim.douse = douse;
-  return { id: 'walls', step, order, view, damage, collapse, douse, inZone, blocked, lineCells, wallAt: (x, y) => S.list.find(w => w.cells.some(c => c[0] === wrapX(x) && c[1] === y)) };
+  sim.nearestFire = nearestFire;
+  return { id: 'walls', step, order, view, damage, collapse, douse, inZone, blocked, lineCells, addGate, nearestFire, wallAt: (x, y) => S.list.find(w => w.cells.some(c => c[0] === wrapX(x) && c[1] === y)) };
 }

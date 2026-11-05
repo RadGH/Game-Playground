@@ -13,7 +13,6 @@
 .pw-grid .nm { font-size: .88em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pw-grid .st { font-size: .76em; color: var(--dim); white-space: nowrap; }
 .pw-grid button.cant { opacity: .55; }
-.pw-grid button.cool .st { color: #9fb6d8; }
 @media (min-width: 700px) { .pw-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
 .pw-head .pw-fill { min-height: 28px; min-width: 0; padding: 0 8px; font-size: .85em; }
 .dock-panel .pw-hint { line-height: 1.25; }

@@ -23,6 +23,7 @@ let attackFlag = false, fightFlag = false;
 let sim = null, speed = 1, timer = null, lastSend = 0, tickMs = 0, settings = null, viewCells = null;
 const said = [];
 const sounds = [];
+const fells = [];          // trees felled since the last message: the page draws them toppling
 const pageHas = new Map();     // chunk key → version the page last got
 
 function payload(c, transfer) {
@@ -50,6 +51,10 @@ function loop() {
     else if (e.t === 'fire') { if (sounds.length < 40) sounds.push(['fire', e.c.cx * 64 + (e.i % 64), e.c.cy * 64 + ((e.i / 64) | 0)]); }
     else if (e.t === 'collapse' || e.t === 'enemyDown' || e.t === 'guardDown' || e.t === 'power') { if (sounds.length < 40) sounds.push([e.t, e.x, e.y]); }
     else if (e.t === 'node') sounds.push(['node']);
+    // explosions and power sounds, with their place so the page only plays what is on screen
+    else if (e.t === 'blast') { if (sounds.length < 40 && e.by !== 'firestorm' && e.by !== 'meteor' && (e.r >= 2.5 || e.power >= 2)) sounds.push([e.r >= 7 || e.power >= 5 ? 'blastBig' : 'blast', Math.round(e.x), Math.round(e.y)]); }
+    else if (e.t === 'fell') { if (fells.length < 30) fells.push([e.x, e.y, e.tall, e.dir, e.m === sim.M.id.pine ? 1 : 0]); }
+    else if (e.t === 'sfx') { if (sounds.length < 40) sounds.push(['sfx', Math.round(e.x), Math.round(e.y), e.id, e.big ? 1 : 0]); }
   }
   sim.events.length = 0;
   const now = performance.now();
@@ -62,7 +67,7 @@ function loop() {
     if (c.version !== v) { c.dirty = false; list.push(payload(c, transfer)); }
   }
   const town = viewOf(sim, viewCells);
-  self.postMessage({ t: 'tick', clock: { tick: sim.tick, daylight: sim.daylight(), tod: sim.timeOfDay(), wind: sim.wind, speed, ms: tickMs }, list, town, said: said.splice(0), attack: attackFlag, fighting: fightFlag, sounds: sounds.splice(0) }, transfer);
+  self.postMessage({ t: 'tick', clock: { tick: sim.tick, daylight: sim.daylight(), tod: sim.timeOfDay(), wind: sim.wind, speed, ms: tickMs }, list, town, said: said.splice(0), attack: attackFlag, fighting: fightFlag, sounds: sounds.splice(0), fells: fells.splice(0) }, transfer);
   attackFlag = false; fightFlag = false;
 }
 
@@ -107,7 +112,7 @@ self.onmessage = e => {
       let result = null;
       if (m.q === 'building') result = sim.town?.buildingAt(m.x, m.y) ?? null;
       if (m.q === 'save') result = saveSim(sim, settings);
-      if (m.q === 'wall') { const w = sim.walls?.wallAt(m.x, m.y); result = w ? { id: w.id, tier: w.tier, n: w.cells.length, towers: w.towers.length, gates: w.gates.length } : null; }
+      if (m.q === 'wall') { const w = sim.walls?.wallAt(m.x, m.y); result = w ? { id: w.id, tier: w.tier, n: w.cells.length, towers: w.towers.length, gates: w.gates.length, auto: !!w.auto } : null; }
       if (m.q === 'cell') { const at = sim.cell(m.x, m.y); result = at ? { mat: sim.M.list[at.c.mat[at.i]]?.id ?? null, ground: sim.M.list[at.c.ground[at.i]]?.id, height: at.c.height[at.i], life: at.c.life[at.i], part: at.c.part[at.i] } : null; }
       if (m.q === 'fits') result = sim.town?.fits(m.x, m.y, m.w, m.h, { margin: 0 }) ?? false;
       self.postMessage({ t: 'reply', id: m.reply, result });

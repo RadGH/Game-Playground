@@ -1,7 +1,11 @@
 // Ruler powers, faith and world disasters (M9). PURE, a sim system: { id, step, order, view }.
 //
-// Owner (2026-11-03): seven powers — Call Rain, Smite, Meteor, Tornado, Black Hole, Earthquake,
-// Firestorm — each small / medium / large, cost and cooldown growing with the size. They are
+// Owner (2026-11-03): ruler powers — Call Rain, Lightning Strike, Frost Nova, Meteor, Tornado,
+// Black Hole, Earthquake, Firestorm — each small / medium / large, the cost growing with the size.
+// Play-test 2 (2026-11-04): Smite became Lightning Strike (bolts that chain between enemies) and
+// Frost Nova was added; there are NO cooldowns any more (a power only costs faith); the meteor is a
+// Kindlewild-sized one with a fall you can watch, a warning ring and sound; world disasters no
+// longer start fires on their own (no lightning or forest fires). They are
 // disasters in the cell sim, so they work on anything: a fire, a forest, an enemy camp, your own
 // town. Paid in FAITH: churches x the content people living within their reach, up to a cap that
 // churches (most of all cathedrals) raise. World disasters also come on their own: Off / Rare /
@@ -11,7 +15,7 @@
 // chapel / church / cathedral kinds). The physics is the shared blast + debris modules
 // (js/sim/blast.js, js/sim/particles.js), which later milestones reuse.
 //
-// State (sim.state.powers, plain JSON, saved): faith, cooldowns by power id, the effects still
+// State (sim.state.powers, plain JSON, saved): faith, `cool` (unused since play-test 2, kept for old saves), the effects still
 // running (`active`: rain clouds, tornadoes, black holes, quakes, firestorms, meteors on their way),
 // and counts. Orders:
 //   { t: 'power', id, size: 'small'|'medium'|'large', x, y }  → { ok, id } or { error }
@@ -80,17 +84,15 @@ export function createPowers(sim, data) {
   // ------------------------------------------------------------------ casting
   function cast(o) {
     if (!on()) return { error: 'Ruler powers are off in this world.' };
+    if (o.id === 'smite') o = { ...o, id: 'lightning' };        // the old name (play-test 1 saves, old buttons)
     const p = PW[o.id]; if (!p) return { error: 'No such power.' };
     if (sim.unlocked?.('power:' + o.id) === false) return { error: 'Your kingdom does not know how to make that yet.' };
     const s = Math.max(0, SIZES.indexOf(o.size ?? 'small'));
     const y = Math.floor(o.y), x = wrapX(Math.floor(o.x));
     if (!(y >= 0 && y < H)) return { error: 'That is off the edge of the world.' };
-    const ready = S.cool[o.id] || 0;
-    if (ready > sim.tick) return { error: `${p.name} is ready in ${Math.ceil((ready - sim.tick) / SEC)} s.` };
     const cost = p.cost[s];
     if (S.faith < cost) return { error: `Not enough faith: ${p.name} (${SIZES[s]}) needs ${cost}.` };
     S.faith -= cost;
-    S.cool[o.id] = sim.tick + Math.round(p.cool[s] * SEC);
     S.cast++;
     const a = start(o.id, s, x + 0.5, y + 0.5, false);
     return { ok: true, id: a?.id ?? 0, x, y };
@@ -103,11 +105,19 @@ export function createPowers(sim, data) {
     let a = null;
     if (k === 'rain') {
       a = { ...base, r: p.r[s], until: sim.tick + p.secs[s] * SEC, dry: sim.tick + (p.secs[s] + (p.wetSecs ?? 60)) * SEC };
-    } else if (k === 'smite') {
-      B.lightning(x, y, p.power[s], p.r[s]);
-      addFx('bolt', x, y, { r: p.r[s] });
+    } else if (k === 'lightning' || k === 'smite') {
+      // bolts one after another (the first on the spot), then the shock jumps from enemy to enemy
+      const L = PW.lightning;
+      a = { ...base, k: 'lightning', r: L.r[s], left: L.bolts[s], next: sim.tick, hit: false };
+    } else if (k === 'frost') {
+      a = { ...base, r: p.r[s], until: sim.tick + (p.thaw ?? 90) * SEC, cells: [] };
+      frostNova(a, p);
     } else if (k === 'meteor') {
-      a = { ...base, r: p.r[s], hit: sim.tick + (p.fall ?? 30) };
+      // it comes in from high up and off to the east, at an angle, over `fall` ticks (Kindlewild's
+      // meteor: a warning ring on the ground, a fireball with a spark trail, then the blast)
+      const fall = p.fall ?? 50, z0 = 80;
+      a = { ...base, r: p.r[s], hit: sim.tick + fall, fall, fx: x + z0 * 0.55, fy: y - z0 * 0.18, z0 };
+      sim.events.push({ t: 'sfx', id: 'meteor.fall', x, y });
     } else if (k === 'tornado') {
       a = { ...base, r: p.r[s], h: rng() * TAU, until: sim.tick + p.secs[s] * SEC, picked: 0 };
     } else if (k === 'blackhole') {
@@ -153,17 +163,118 @@ export function createPowers(sim, data) {
     return true;
   }
 
+  /** Where a falling meteor is now: ground point + height. Old saves lack fx/fy: same path. */
+  function meteorAt(a, tick = sim.tick) {
+    const fall = a.fall ?? 30, z0 = a.z0 ?? 110;
+    const fx = a.fx ?? a.x + z0 * 0.55, fy = a.fy ?? a.y - z0 * 0.18;
+    const t = Math.max(0, Math.min(1, 1 - (a.hit - tick) / fall));
+    const e = t * t * 0.35 + t * 0.65;                       // it speeds up as it falls
+    return { x: fx + (a.x - fx) * e, y: fy + (a.y - fy) * e, z: z0 * (1 - e), t };
+  }
   function stepMeteor(a) {
-    if (sim.tick < a.hit) return true;
     const p = PW.meteor, s = a.s;
-    B.blast(a.x, a.y, a.r, p.power[s], { crater: p.crater[s], fire: true, debris: 0.35, throwScale: 1.3, by: 'meteor' });
-    lavaPool(a.x, a.y, Math.max(1.5, a.r * (p.lava ?? 0.35)));
-    // burning chunks of the rock itself
-    for (let k = 0; k < 6 + s * 8; k++) {
-      const ang = rng() * TAU, sp = 0.3 + rng() * 0.6;
-      D.spawn({ kind: P.debris, mat: ID.rubble, x: a.x, y: a.y, z: 1, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, vz: 0.8 + rng() * 0.8, grav: 0.05, life: 300, rgb: [255, 120, 40], glow: 1 });
+    if (sim.tick < a.hit) {
+      // the trail: glowing sparks and cinders shed along the path, so it streaks in for real
+      const m = meteorAt(a), size = 1 + s;
+      for (let k = 0; k < 3 + size * 2; k++) D.spawn({ kind: P.spark, x: m.x + (rng() - 0.5) * size, y: m.y + (rng() - 0.5) * size * 0.6, z: m.z + (rng() - 0.5) * size, vx: (rng() - 0.5) * 0.05, vy: (rng() - 0.5) * 0.05, vz: 0, grav: 0, life: 14 + size * 4 + ((rng() * 8) | 0), rgb: rng() < 0.5 ? [255, 210, 110] : [255, 120, 40], glow: 1.2 });
+      if (rng() < 0.5 + s * 0.2) D.spawn({ kind: P.dust, x: m.x, y: m.y, z: m.z + 1, vx: (rng() - 0.5) * 0.04, vy: (rng() - 0.5) * 0.04, vz: 0.01, grav: -0.002, life: 40, rgb: [70, 60, 55] });
+      return true;
     }
+    B.blast(a.x, a.y, a.r, p.power[s], { crater: p.crater[s], fire: true, debris: 0.4, throwScale: 1.5, heat: 1.3, by: 'meteor' });
+    lavaPool(a.x, a.y, Math.max(1.5, a.r * (p.lava ?? 0.3)));
+    // a glowing core of molten rock in the middle
+    for (let k = 0; k < a.r * 2; k++) {
+      const [px, py] = inCircle(a.x, a.y, a.r * 0.3);
+      const at = sim.cell(px, py); if (!at || at.c.mat[at.i]) continue;
+      sim.rules.setCell(at.c, at.i, rng() < 0.6 ? ID.crust : ID.lava, 6); at.c.temp[at.i] = 240; mark(at.c);
+    }
+    // burning chunks of the rock itself, thrown far
+    for (let k = 0; k < 10 + s * 14; k++) {
+      const ang = rng() * TAU, sp = 0.4 + rng() * (0.6 + s * 0.3);
+      D.spawn({ kind: P.debris, mat: ID.rubble, x: a.x, y: a.y, z: 1, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, vz: 0.9 + rng() * (0.9 + s * 0.3), grav: 0.05, life: 300, rgb: [255, 120, 40], glow: 1 });
+    }
+    // a fountain of embers
+    D.burst(rng, a.x, a.y, Math.min(160, Math.round(a.r * 4)), { kind: P.cinder, speed: 0.9 + s * 0.3, up: 1.6, grav: 0.04, life: 90, palette: [[255, 200, 80], [255, 120, 30], [255, 80, 20]], glow: 1.2, spread: 2 });
+    D.burst(rng, a.x, a.y, Math.min(120, Math.round(a.r * 3)), { kind: P.dust, speed: 0.5 + s * 0.15, up: 0.5, grav: 0.008, life: 140, palette: [[110, 100, 92], [80, 74, 70]], spread: a.r * 0.6 });
     addFx('flash', a.x, a.y, { r: a.r * 3, rgb: [255, 170, 80] });
+    addFx('shake', a.x, a.y, { mag: 1 + s, r: a.r });
+    addFx('sky', a.x, a.y, { mag: 0.35 + s * 0.15 });
+    sim.events.push({ t: 'sfx', id: 'explosion.large', x: a.x, y: a.y, big: true });
+    return false;
+  }
+
+  // ------------------------------------------------------------------ lightning + frost (play-test 2)
+  const enemies = () => (sim.state.military?.units || []).filter(u => u.side === 'enemy' && u.hp > 0);
+  function hitUnit(u, dmg, kind, freeze) {
+    const hits = sim.military?.strike?.(u.x, u.y, 1.2, dmg, { kind, freeze });
+    if (!hits) { u.hp -= dmg; if (freeze) u.frozen = Math.max(u.frozen || 0, freeze); }
+  }
+  function stepLightning(a) {
+    if (sim.tick < a.next) return true;
+    const L = PW.lightning, s = a.s;
+    let x = a.x, y = a.y;
+    if (a.hit) { const [px, py] = inCircle(a.x, a.y, L.spread[s] || 0); x = px; y = py; }
+    B.lightning(x, y, L.power[s], L.r[s]);
+    addFx('bolt', x, y, { r: L.r[s] });
+    sim.events.push({ t: 'sfx', id: 'thunder', x, y });
+    if (!a.hit) {
+      // the shock jumps between enemies near the spot: each hop a jagged arc and a hit
+      a.hit = true;
+      const hit = new Set(); let from = { x, y };
+      for (let k = 0; k < L.chain[s]; k++) {
+        let best = null, bd = k ? L.reach[s] * 0.6 : L.reach[s];
+        for (const u of enemies()) { if (hit.has(u)) continue; const d = dist(from.x, from.y, u.x, u.y); if (d < bd) { bd = d; best = u; } }
+        if (!best) break;
+        hit.add(best);
+        addFx('arc', from.x, from.y - (k ? 1 : 0), { x2: best.x, y2: best.y - 1 });
+        hitUnit(best, L.dmg[s] * (1 - k * 0.06), 'lightning');
+        from = { x: best.x, y: best.y };
+      }
+      a.chained = hit.size;
+    }
+    a.left--; a.next = sim.tick + 4 + ((rng() * 4) | 0);
+    return a.left > 0;
+  }
+  /** Freeze everything in a circle. What changed is listed on the effect so it thaws back later. */
+  function frostNova(a, p) {
+    const s = a.s, R = Math.ceil(a.r);
+    const snowable = new Set([ID.grass, ID.meadow, ID.dirt, ID.moorgrass, ID.farmland, ID.scorched].filter(v => v != null));
+    for (let yy = Math.floor(a.y) - R; yy <= Math.floor(a.y) + R; yy++) for (let xx = Math.floor(a.x) - R; xx <= Math.floor(a.x) + R; xx++) {
+      const d2 = (xx + 0.5 - a.x) ** 2 + (yy + 0.5 - a.y) ** 2; if (d2 > a.r * a.r) continue;
+      const at = sim.cell(xx, yy); if (!at) continue;
+      const { c, i } = at, m = c.mat[i];
+      let changed = false;
+      if (c.flag[i] & BURN) { c.flag[i] &= ~BURN; changed = true; }
+      if (m === ID.fire) { c.mat[i] = 0; c.tall[i] = 0; changed = true; }
+      else if (m === ID.water) { c.mat[i] = ID.ice; a.cells.push(xx, yy, 1); changed = true; }
+      else if (m === ID.lava) { const to = rng() < 0.5 ? ID.obsidian : ID.crust; c.mat[i] = to; c.tall[i] = to === ID.obsidian ? Math.min(1, M.tall[to] || 0) : 0; c.life[i] = 0; changed = true; }
+      if (!c.mat[i] && snowable.has(c.ground[i]) && !c.part[i] && !isRoad(c, i) && rng() < 0.75 && a.cells.length < 9000) { a.cells.push(xx, yy, 100 + c.ground[i]); c.ground[i] = ID.snow; changed = true; }
+      c.temp[i] = Math.min(c.temp[i], 4);
+      c.flag[i] |= WET;
+      if (changed) mark(c); else sim.store.markEdited(c);
+      sim.wake(c);
+    }
+    // the cold bites: enemies inside freeze in place for a few seconds; fiery ones take more
+    for (const u of enemies()) {
+      if (dist(a.x, a.y, u.x, u.y) > a.r) continue;
+      const fiery = sim.data.monsters?.[u.kind]?.fire || u.kind === 'drake';
+      hitUnit(u, p.dmg[s] * (fiery ? 3 : 1), 'frost', Math.round(p.freeze[s] * SEC));
+    }
+    D.burst(rng, a.x, a.y, Math.min(140, Math.round(a.r * 5)), { kind: P.spark, speed: 0.35 + a.r * 0.04, life: 26, palette: [[200, 245, 255], [140, 220, 255], [255, 255, 255]], glow: 0.9, spread: 1 });
+    addFx('nova', a.x, a.y, { r: a.r });
+    sim.events.push({ t: 'sfx', id: 'spell.ice.impact', x: a.x, y: a.y });
+  }
+  function stepFrost(a) {
+    if (sim.tick < a.until) return true;
+    // the thaw: ice back to water, snow back to the ground it was (one pass; a few may stay if built over)
+    const L = a.cells || [];
+    for (let k = 0; k < L.length; k += 3) {
+      const at = sim.cell(L[k], L[k + 1]); if (!at) continue;
+      const { c, i } = at;
+      if (L[k + 2] === 1) { if (c.mat[i] === ID.ice) c.mat[i] = ID.water; }
+      else if (c.ground[i] === ID.snow) c.ground[i] = L[k + 2] - 100;
+      mark(c);
+    }
     return false;
   }
 
@@ -316,7 +427,7 @@ export function createPowers(sim, data) {
     return true;
   });
 
-  const STEP = { rain: stepRain, meteor: stepMeteor, tornado: stepTornado, blackhole: stepBlackHole, earthquake: stepQuake, firestorm: stepFirestorm };
+  const STEP = { rain: stepRain, lightning: stepLightning, smite: stepLightning, frost: stepFrost, meteor: stepMeteor, tornado: stepTornado, blackhole: stepBlackHole, earthquake: stepQuake, firestorm: stepFirestorm };
 
   // ------------------------------------------------------------------ world disasters
   function disasters() {
@@ -383,13 +494,12 @@ export function createPowers(sim, data) {
 
   function view(rect) {
     const near = x => { if (!rect) return x; while (x < rect.x0 - 80) x += W; while (x > rect.x1 + 80) x -= W; return x; };
-    const cool = {};
-    for (const [k, t] of Object.entries(S.cool)) if (t > sim.tick) cool[k] = Math.ceil((t - sim.tick) / SEC);
     return {
-      on: on(), faith: Math.floor(S.faith), cap: faithView.cap, rate: +faithView.rate.toFixed(1), churches: faithView.churches, cool,
+      on: on(), faith: Math.floor(S.faith), cap: faithView.cap, rate: +faithView.rate.toFixed(1), churches: faithView.churches,
       act: S.active.map(a => ({ id: a.id, k: a.k, x: +near(a.x).toFixed(1), y: +a.y.toFixed(1), r: a.r, core: a.core, s: a.s, age: sim.tick - a.born,
-        left: Math.max(0, Math.ceil(((a.until ?? a.hit ?? sim.tick) - sim.tick) / SEC)), wet: a.k === 'rain' && sim.tick >= a.until ? 1 : 0 })),
-      fx: fx.map(f => ({ ...f, x: near(f.x) })),
+        left: Math.max(0, Math.ceil(((a.until ?? a.hit ?? sim.tick) - sim.tick) / SEC)), wet: a.k === 'rain' && sim.tick >= a.until ? 1 : 0,
+        ...(a.k === 'meteor' ? { fall: a.fall ?? 30, z0: a.z0 ?? 110 } : {}) })),
+      fx: fx.map(f => ({ ...f, x: near(f.x), ...(f.x2 != null ? { x2: near(f.x2) } : {}) })),
       ps: D.view(rect),
     };
   }

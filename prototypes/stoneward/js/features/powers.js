@@ -1,6 +1,8 @@
 // M9 on the page: the Powers dock tab, the faith counter in the top bar, aiming and casting, and
 // the drawings for each power (rain streaks, a tornado funnel, a black hole's swirl, a falling
-// meteor, lightning bolts, flying debris). The sim does all the work (js/sim/powers.js); this file
+// meteor, lightning bolts and the arcs that jump between enemies, the frost ring, flying debris).
+// Play-test 2: no cooldowns (a power costs faith and nothing else); a meteor falls in from high up
+// with a warning ring on the ground, then a flash, a screen shake and a sky flash. The sim does all the work (js/sim/powers.js); this file
 // only sends `{ t: 'power', id, size, x, y }` and draws what the sim's view says is happening.
 //
 // The world setting `powers: false` hides the tab and the faith counter (the sim refuses casts too).
@@ -25,6 +27,7 @@ let tool = null, panelRefs = null;
 const fxSeen = new Map();                  // fx id → { ...fx, t0 } (bolts and flashes, drawn for a moment)
 const actSeen = new Map();                 // active effect id → local time first seen (smooth meteors)
 let shake = { x: 0, y: 0 };
+let quake = { until: 0, mag: 0 }, sky = { t0: 0, mag: 0 };   // meteor impact: shake + whole-screen flash
 
 const P = () => ui.data.powers || {};
 const sizeIx = () => Math.max(0, SIZES.findIndex(s => s[0] === size));
@@ -52,7 +55,14 @@ hooks.tick.push(m => {
   // each bolt or flash is drawn once for a moment; the sim keeps sending it for 2 s, so remember it
   // until the sim drops it
   const ids = new Set();
-  for (const f of v.fx || []) { ids.add(f.id); if (!fxSeen.has(f.id)) fxSeen.set(f.id, { ...f, t0: performance.now() }); }
+  for (const f of v.fx || []) {
+    ids.add(f.id);
+    if (fxSeen.has(f.id)) continue;
+    const now = performance.now();
+    fxSeen.set(f.id, { ...f, t0: now });
+    if (f.k === 'shake' && onScreen(f.x, f.y, 120)) { quake.until = now + 500 + f.mag * 250; quake.mag = Math.max(quake.mag * (quake.until > now ? 1 : 0), f.mag); }
+    if (f.k === 'sky' && onScreen(f.x, f.y, 200)) { sky.t0 = now; sky.mag = f.mag; }
+  }
   for (const id of fxSeen.keys()) if (!ids.has(id)) fxSeen.delete(id);
   if (panelRefs?.root.isConnected) updatePanel();
 });
@@ -75,6 +85,7 @@ function renderPanel() {
     const b = document.createElement('button');
     b.innerHTML = `<span class="ic">${pw.icon}</span><span class="nm">${ui.esc(pw.name)}</span><span class="st"></span>`;
     b.addEventListener('click', () => choose(pick === id ? null : id));
+    ui.info(b, `power:${id}:${sizeIx()}`);
     buttons[id] = b; grid.append(b);
   }
   const hint = ui.hint(''); hint.classList.add('pw-hint');
@@ -97,13 +108,13 @@ function updatePanel() {
   const active = tool && ui.camera()?.tool === tool;
   if (!active && pick) pick = null;
   for (const [id, b] of Object.entries(R.buttons)) {
-    const pw = P()[id], cost = pw.cost[s], wait = V?.cool?.[id] || 0;
+    const pw = P()[id], cost = pw.cost[s];
     b.classList.toggle('on', pick === id);
-    b.classList.toggle('cant', faith < cost && !wait);
-    b.classList.toggle('cool', !!wait);
-    b.querySelector('.st').textContent = wait ? `ready in ${wait}s` : `✨ ${cost} · ${pw.cool[s]}s rest`;
+    b.classList.toggle('cant', faith < cost);
+    b.querySelector('.st').textContent = `✨ ${cost}`;
+    b.dataset.info = `power:${id}:${s}`;      // the card follows the chosen size
   }
-  R.hint.textContent = pick ? `${P()[pick].name}: tap the map to cast it.` : 'Pick a power, then tap the map.';
+  R.hint.textContent = pick ? `${P()[pick].about} Tap the map.` : 'Pick a power, then tap the map. Powers cost faith and nothing else.';
 }
 
 function choose(id) {
@@ -122,12 +133,16 @@ function choose(id) {
     cancel: () => { aim = null; },
   };
   ui.setTool(tool);
-  ui.toast(P()[id].about);
-  updatePanel();
+  updatePanel();          // what it does is in the panel's hint line (a toast covered the spot you aim at)
 }
 
 // ------------------------------------------------------------------ drawing helpers
 const near = x => ui.near(x, ui.camera().cam.x, ui.app.world.W);
+function onScreen(x, y, pad = 0) {
+  const c = ui.camera?.()?.cam; if (!c) return false;
+  const dx = near(x) - c.x, hw = innerWidth / 2 / c.ppc + pad, hh = innerHeight / 2 / c.ppc + pad;
+  return Math.abs(dx) < hw && Math.abs(y - c.y) < hh;
+}
 /** A filled circle as horizontal strips. */
 function disc(out, x, y, r, c, step = 1.5) {
   for (let dy = -r; dy < r; dy += step) {
@@ -210,19 +225,39 @@ hooks.overlay.push((cam, out) => {
       ring(out, x, y, a.core * 1.15 * grow + 0.3, 28, 0.9, [0.62, 0.38, 1, 0.85]);
       disc(out, x, y, a.core * grow + 0.2, [0.01, 0, 0.03, 0.97], 0.75);
     } else if (a.k === 'meteor') {
+      // the same path the sim uses (js/sim/powers.js meteorAt), stepped locally so it glides
       if (!actSeen.has(a.id)) actSeen.set(a.id, { at: now, age: a.age });
-      const s0 = actSeen.get(a.id);
-      const k = Math.min(1, (s0.age + (now - s0.at) / 50) / 30);
-      const hx = x + 40 * (1 - k), hy = y - 70 * (1 - k);
-      for (let j = 0; j < 14; j++) { const f = j / 14; out.push([hx + 40 * f * 0.25 - 1, hy - 70 * f * 0.25 - 1, 2 - f, 2 - f, 1, 0.75 - f * 0.4, 0.3, 0.9 - f * 0.8]); }
-      out.push([hx - 1.6, hy - 1.6, 3.2, 3.2, 1, 0.95, 0.75, 1]);
-      ring(out, x, y, a.r * (0.5 + 0.5 * k), 24, 0.6, [1, 0.4, 0.2, 0.25 + 0.5 * k]);
+      const s0 = actSeen.get(a.id), fall = a.fall || 30, z0 = a.z0 || 110;
+      const t = Math.min(1, (s0.age + (now - s0.at) / 50 * (ui.app.speed || 1)) / fall);
+      const e = t * t * 0.35 + t * 0.65;
+      const fx = x + z0 * 0.55, fy = y - z0 * 0.18;
+      const gx = fx + (x - fx) * e, gy = fy + (y - fy) * e, z = z0 * (1 - e);
+      const hx = gx, hy = gy - z;                                   // on screen: lifted by its height
+      const size = 2.2 + a.s * 1.4;
+      // the warning on the ground: a pulsing ring the size of the blast, and the shadow growing
+      const pulse = 0.55 + 0.45 * Math.sin(now / 90);
+      ring(out, x, y, a.r, Math.max(32, Math.round(a.r * 4)), Math.max(0.7, 2.2 / cam.ppc), [1, 0.35 + 0.2 * pulse, 0.15, 0.35 + 0.5 * t]);
+      ring(out, x, y, a.r * (1 - t) + 0.5, 28, Math.max(0.5, 1.5 / cam.ppc), [1, 0.8, 0.4, 0.5 * t]);
+      disc(out, gx, gy, size * (0.6 + t), [0, 0, 0, 0.18 + 0.3 * t], 0.8);
+      // the fireball: a hot white core inside orange layers, a smear back along its path
+      const back = [(fx - x) / Math.hypot(fx - x, fy - y - z0), (fy - z0 - y) / Math.hypot(fx - x, fy - y - z0)];
+      for (let j = 10; j >= 1; j--) { const d = j * size * 0.7; disc(out, hx + back[0] * d, hy + back[1] * d, size * (1 - j / 12), [1, 0.45 + 0.03 * (10 - j), 0.12, 0.05 + 0.05 * (10 - j)], 0.8); }
+      disc(out, hx, hy, size * 2.2, [1, 0.5, 0.15, 0.22], 1);
+      disc(out, hx, hy, size * 1.4, [1, 0.6, 0.2, 0.55], 0.8);
+      disc(out, hx, hy, size, [1, 0.85, 0.5, 0.95], 0.6);
+      disc(out, hx, hy, size * 0.55, [1, 1, 0.9, 1], 0.5);
+    } else if (a.k === 'frost') {
+      disc(out, x, y, a.r, [0.6, 0.85, 1, 0.08], 2);
     } else if (a.k === 'earthquake') {
       const v = cam.ppc > 0.8 ? 0.35 * (a.s + 1) / Math.max(1, cam.ppc / 3) : 0;
       shake.x = (Math.random() - 0.5) * v; shake.y = (Math.random() - 0.5) * v;
     }
   }
   for (const id of actSeen.keys()) if (!live.has(id)) actSeen.delete(id);
+  if (now < quake.until && cam.ppc > 0.8) {
+    const v = quake.mag * 1.6 * (quake.until - now) / 900 / Math.max(1, cam.ppc / 3);
+    shake.x += (Math.random() - 0.5) * v; shake.y += (Math.random() - 0.5) * v;
+  }
   cam.x += shake.x; cam.y += shake.y;
   // glowing particles: cinders, fire balls, burning debris, sparks
   const ps = V.ps || [];
@@ -250,11 +285,31 @@ hooks.overlay.push((cam, out) => {
         px = nx; py = ny;
       }
       disc(out, x, y, 3 + f.r * 2, [0.8, 0.88, 1, 0.35 * al]);
+    } else if (f.k === 'arc') {
+      // lightning jumping between two enemies: a jagged bright line that flickers out
+      const al = 1 - age / 0.5, x2 = near(f.x2), y2 = f.y2;
+      let px = x, py = y;
+      for (let s = 1; s <= 8; s++) {
+        const k = s / 8, nx = x + (x2 - x) * k + (s < 8 ? (hash(f.id * 17 + s + Math.floor(age * 20)) - 0.5) * 2.5 : 0), ny = y + (y2 - y) * k + (s < 8 ? (hash(f.id * 23 + s) - 0.5) * 2.5 : 0);
+        const steps = Math.ceil(Math.hypot(nx - px, ny - py) / 0.5);
+        for (let q = 0; q < steps; q++) { const qx = px + (nx - px) * q / steps, qy = py + (ny - py) * q / steps; out.push([qx - 0.3, qy - 0.3, 0.6, 0.6, 0.75, 0.88, 1, al]); }
+        px = nx; py = ny;
+      }
+      disc(out, x2, y2, 1.6, [0.7, 0.85, 1, 0.5 * al]);
+    } else if (f.k === 'nova') {
+      // an icy ring racing out to the edge, frost motes inside it
+      const k = Math.min(1, age / 0.45), al = 1 - age / 0.5;
+      ring(out, x, y, f.r * k, Math.max(24, Math.round(f.r * 5)), Math.max(0.7, 1.6 / cam.ppc), [0.75, 0.95, 1, 0.9 * al]);
+      ring(out, x, y, f.r * k * 0.8, Math.max(20, Math.round(f.r * 4)), Math.max(0.5, 1.2 / cam.ppc), [0.55, 0.85, 1, 0.6 * al]);
+      disc(out, x, y, f.r * k, [0.6, 0.85, 1, 0.18 * al], 2);
     } else if (f.k === 'flash') {
       const c = (f.rgb || [255, 220, 160]).map(v => v / 255);
       disc(out, x, y, f.r * (0.4 + age), [...c, 0.5 * (1 - age / 0.5)], 2);
     }
   }
+  // a meteor impact lights up the whole view for a moment
+  const sa = sky.mag * (1 - (now - sky.t0) / 600);
+  if (sa > 0) { const c = ui.camera().cam, hw = innerWidth / c.ppc, hh = innerHeight / c.ppc; out.push([c.x - hw, c.y - hh, hw * 2, hh * 2, 1, 0.85, 0.6, Math.min(0.7, sa)]); }
   // where the power will land, while the finger is down
   if (aim && pick) {
     const pw = P()[pick], s = sizeIx();

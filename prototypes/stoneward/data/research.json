@@ -10,7 +10,7 @@
     "smelting":    { "name": "Smelting",       "cost": 90,  "after": ["mining"],      "unlocks": ["smelter", "smithy", "oxcart"] },
     "arms":        { "name": "Arms",           "cost": 90,  "after": ["smelting"],    "unlocks": ["armourer", "barracks", "guard:spearman", "guard:crossbowman", "watchtower"] },
     "siegecraft":  { "name": "Siegecraft",     "cost": 150, "after": ["arms"],        "unlocks": ["ballista_tower", "catapult_tower", "wall:thick"] },
-    "faith":       { "name": "Faith",          "cost": 50,  "after": [],              "unlocks": ["chapel", "church", "power:rain", "power:smite"] },
+    "faith":       { "name": "Faith",          "cost": 50,  "after": [],              "unlocks": ["chapel", "church", "power:rain", "power:lightning", "power:frost"] },
     "cathedrals":  { "name": "Cathedrals",     "cost": 200, "after": ["faith", "masonry"], "unlocks": ["cathedral", "power:earthquake", "power:tornado"] },
     "arcana":      { "name": "Arcana",         "cost": 160, "after": ["faith", "mining"], "unlocks": ["crystal_mine", "mage_guild", "guard:mage", "lightning_tower", "arcane_tower", "shield_tower", "flame_tower"] },
     "wrath":       { "name": "Wrath of the crown", "cost": 300, "after": ["cathedrals", "arcana"], "unlocks": ["power:meteor", "power:firestorm", "power:blackhole"] },

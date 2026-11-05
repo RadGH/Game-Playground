@@ -1,5 +1,5 @@
 {
- "_doc": "M9 Powers and disasters. Faith buildings (group services, shape church: a nave with a bell tower), the seven ruler powers and the world disasters. faith on a kind = { rate: faith per content person per minute, reach: metres, cap: how much it adds to the faith cap }. A person counts once, for the best church that reaches them. Each power lists small / medium / large in that order: cost (faith), cool (seconds before it can be used again, shared by every size), r (radius in cells), secs (how long it lasts), power (how hard it hits). Read by js/sim/powers.js and js/features/powers.js.",
+ "_doc": "M9 Powers and disasters. Faith buildings (group services, shape church: a nave with a bell tower), the eight ruler powers and the world disasters. faith on a kind = { rate: faith per content person per minute, reach: metres, cap: how much it adds to the faith cap }. A person counts once, for the best church that reaches them. Each power lists small / medium / large in that order: cost (faith; there are no cooldowns since play-test 2), r (radius in cells), secs (how long it lasts), power (how hard it hits). Read by js/sim/powers.js and js/features/powers.js.",
  "kinds": {
   "chapel": {
    "name": "Chapel",
@@ -83,11 +83,6 @@
     35,
     70
    ],
-   "cool": [
-    15,
-    30,
-    50
-   ],
    "r": [
     14,
     24,
@@ -100,62 +95,103 @@
    ],
    "wetSecs": 90
   },
-  "smite": {
-   "name": "Smite",
+  "lightning": {
+   "name": "Lightning Strike",
    "icon": "⚡",
-   "about": "A bolt of lightning on one spot. Sets it alight and knocks things apart.",
+   "about": "Bolts from the sky. Sets the spot alight and the lightning jumps between enemies near it.",
    "cost": [
     10,
     25,
     50
    ],
-   "cool": [
-    5,
-    10,
-    18
-   ],
    "r": [
-    2,
     3,
-    5
+    4,
+    6
    ],
    "power": [
     1.4,
     2.2,
     3.2
+   ],
+   "bolts": [
+    1,
+    3,
+    5
+   ],
+   "spread": [
+    0,
+    6,
+    12
+   ],
+   "chain": [
+    3,
+    6,
+    10
+   ],
+   "reach": [
+    14,
+    20,
+    28
+   ],
+   "dmg": [
+    30,
+    45,
+    70
    ]
+  },
+  "frost": {
+   "name": "Frost Nova",
+   "icon": "❄",
+   "about": "A ring of bitter cold. Freezes water, puts out fire, hardens lava and freezes enemies in place.",
+   "cost": [
+    15,
+    35,
+    70
+   ],
+   "r": [
+    10,
+    18,
+    28
+   ],
+   "freeze": [
+    4,
+    6,
+    9
+   ],
+   "dmg": [
+    8,
+    14,
+    22
+   ],
+   "thaw": 90
   },
   "meteor": {
    "name": "Meteor",
    "icon": "☄",
-   "about": "A burning rock from the sky. Digs a crater, throws debris and leaves a pool of lava.",
+   "about": "A burning rock falls from the sky. A huge blast, a crater, debris everywhere and a pool of lava.",
    "cost": [
     40,
     100,
     220
    ],
-   "cool": [
-    20,
-    45,
-    90
-   ],
    "r": [
-    6,
-    10,
-    16
+    12,
+    20,
+    32
    ],
    "power": [
-    3,
-    5,
-    8
+    6,
+    9,
+    14
    ],
    "crater": [
-    6,
-    12,
-    20
+    8,
+    14,
+    24
    ],
-   "lava": 0.35,
-   "fall": 30
+   "lava": 0.3,
+   "fall": 50
   },
   "tornado": {
    "name": "Tornado",
@@ -165,11 +201,6 @@
     35,
     80,
     160
-   ],
-   "cool": [
-    25,
-    50,
-    90
    ],
    "r": [
     3,
@@ -201,11 +232,6 @@
     140,
     300
    ],
-   "cool": [
-    40,
-    80,
-    150
-   ],
    "r": [
     8,
     14,
@@ -235,11 +261,6 @@
     30,
     70,
     150
-   ],
-   "cool": [
-    30,
-    60,
-    120
    ],
    "r": [
     20,
@@ -271,11 +292,6 @@
     110,
     240
    ],
-   "cool": [
-    35,
-    70,
-    130
-   ],
    "r": [
     8,
     14,
@@ -295,12 +311,12 @@
   }
  },
  "disasters": {
-  "_doc": "World disasters on their own. perDay = how many to expect in a day (10 minutes at 1x) at each setting; graceDays = none before this; weights pick which kind; near = they land this far (min..max cells) from a random town.",
+  "_doc": "World disasters on their own. perDay = how many to expect in a day (10 minutes at 1x) at each setting; graceDays = none before this; weights pick which kind; near = they land this far (min..max cells) from a random town. No lightning or forest fires on their own (play-test 2: owner did not like fires starting at random).",
   "perDay": {
    "off": 0,
-   "rare": 0.4,
-   "normal": 1.2,
-   "frequent": 4
+   "rare": 0.3,
+   "normal": 0.7,
+   "frequent": 2.5
   },
   "graceDays": 2,
   "near": [
@@ -308,16 +324,6 @@
    260
   ],
   "kinds": {
-   "lightning": {
-    "weight": 45,
-    "size": 0,
-    "say": "Lightning struck near {town}."
-   },
-   "forestfire": {
-    "weight": 25,
-    "size": 1,
-    "say": "A forest fire has started near {town}!"
-   },
    "earthquake": {
     "weight": 12,
     "size": 1,

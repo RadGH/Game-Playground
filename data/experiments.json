@@ -728,6 +728,18 @@
    "statusNote": "M0-M12 built",
    "date": "2026-11-03",
    "tags": ["city sim", "pixel physics", "planet", "medieval"]
+  },
+  {
+   "id": "voidwright",
+   "group": "prototypes",
+   "title": "Voidwright",
+   "href": "prototypes/voidwright/",
+   "folder": "prototypes/voidwright",
+   "summary": "A 2D space game where you build your ship block by block: mine asteroids, trade between stations, fight pirates and four alien races, fit turrets, shields, drones and a harpoon, and grow from a tiny skiff into a dreadnought.",
+   "status": "prototype",
+   "statusNote": "M0-M8 in progress",
+   "date": "2026-11-06",
+   "tags": ["space", "ship builder", "shooter", "trading"]
   }
  ]
 }

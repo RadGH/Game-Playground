@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#05060c">
+<title>Voidwright</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Rajdhani:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../../shared/whats-new.css">
+<link rel="stylesheet" href="../../shared/credits.css">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<canvas id="view" aria-label="Space"></canvas>
+<canvas id="overlay" aria-hidden="true"></canvas>
+
+<!-- title -->
+<section id="title" class="screen">
+  <div class="title-card">
+    <h1>VOIDWRIGHT</h1>
+    <p class="tag">Build your ship block by block. Hunt, mine, trade. Grow from a speck into a dreadnought.</p>
+    <div class="col" id="title-buttons"></div>
+    <div class="row wrap center" id="title-extra"></div>
+  </div>
+</section>
+
+<!-- in-flight HUD -->
+<div id="hud" class="hidden">
+  <div class="topbar">
+    <button class="icon-btn" id="btn-menu" aria-label="Menu">☰</button>
+    <div class="stat" id="st-credits" title="Credits">0 cr</div>
+    <div class="grow"></div>
+    <div class="stat" id="st-system">—</div>
+  </div>
+  <div class="bars" id="bars">
+    <div class="bar hull"><i></i><span>Hull</span></div>
+    <div class="bar shield"><i></i><span>Shield</span></div>
+    <div class="bar boost"><i></i><span>Boost</span></div>
+    <div class="mini-stats" id="mini-stats"></div>
+  </div>
+  <div id="quest" class="quest hidden"></div>
+  <div id="target" class="target hidden"></div>
+  <div id="prompt" class="prompt hidden"></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="banner" class="banner hidden"></div>
+  <canvas id="minimap" width="180" height="180"></canvas>
+  <div id="touch" class="touch hidden">
+    <button data-act="missile" class="tbtn">Missiles</button>
+    <button data-act="harpoon" class="tbtn">Harpoon</button>
+    <button data-act="boost" class="tbtn" data-hold="1">Boost</button>
+    <button data-act="interact" class="tbtn">Dock</button>
+  </div>
+  <div id="sticks" class="sticks"></div>
+</div>
+
+<!-- full-screen panels (station, build, map, menu…) are created by the UI modules in here -->
+<div id="panels"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

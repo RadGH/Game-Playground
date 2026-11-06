@@ -9,7 +9,8 @@
     { "title": "Alegreya SC", "author": "Juan Pablo del Peral (Huerta Tipográfica)", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Alegreya+SC", "games": ["bannerline", "thousandvale"] },
     { "title": "Cinzel", "author": "Natanael Gama", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Cinzel", "games": ["emberveil", "lanternfall", "thousandvale"] },
     { "title": "Spectral", "author": "Production Type", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Spectral", "games": ["emberveil"] },
-    { "title": "Chakra Petch", "author": "Cadson Demak", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Chakra+Petch", "games": ["frontier-foundry"] }
+    { "title": "Chakra Petch", "author": "Cadson Demak", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Chakra+Petch", "games": ["frontier-foundry", "voidwright"] },
+    { "title": "Rajdhani", "author": "Indian Type Foundry", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Rajdhani", "games": ["voidwright"] }
    ]
   },
   {

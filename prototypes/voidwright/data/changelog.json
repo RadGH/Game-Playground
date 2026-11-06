@@ -1,5 +1,29 @@
-{ "entries": [
-  { "id": "2026-11-06", "date": "2026-11-06", "title": "First flight", "items": [
+{
+ "entries": [
+  {
+   "id": "2026-11-06b",
+   "date": "2026-11-06",
+   "title": "Fixes and louder lasers",
+   "items": [
+    "Laser turrets now sound like lasers — a sharp crack and a punchy zap instead of a thin beep. Heavy lasers got a deeper voice too, and laser hits land harder.",
+    "The parts hold no longer shows \"[object HTMLDivElement]\" after you switch tabs; parts show full cards with their numbers.",
+    "Part bonuses that did nothing now work: Tuned engines push harder, Efficient parts draw less power, Nimble gyros turn faster, and Overdrive engines boost faster and longer.",
+    "Friendly ships' shots no longer hit you.",
+    "Chunks blown off a ship keep their armour instead of falling apart at the first touch.",
+    "Letting go of a harpooned wreck lets it drift off and vanish like other wreckage.",
+    "The \"Repairs need ferrite\" warning goes away once you have ferrite again.",
+    "Ore scooped into a nearly full hold now counts toward your mining goal.",
+    "Rescued crew start helping your ship right away.",
+    "Enemy ships no longer pick fights with asteroids they bump into.",
+    "Erasing a destroyed stock part in Build mode no longer gives you a free new one.",
+    "Buying a good and selling it straight back no longer makes money."
+   ]
+  },
+  {
+   "id": "2026-11-06",
+   "date": "2026-11-06",
+   "title": "First flight",
+   "items": [
     "Build your ship from square blocks — hull, armour, guns, shields, engines, reactors, drone bays — and watch the hull smooth itself into slopes.",
     "Over 40 weapons: laser turrets, gatlings, homing missiles, dumb-fire rockets, aimed beams, railguns, plasma, lightning that leaps between ships, flak, mines, capital guns.",
     "Mine asteroids cell by cell, or hover low over a planet and cut ore from the ground.",
@@ -7,5 +31,7 @@
     "Harpoon rocks and ships and drag them around. Drones fly ahead of you into the fight.",
     "Seven factions including four alien races, a galaxy of 46 stars that gets more dangerous the further in you go, roaming giants, derelicts, distress calls and strongholds.",
     "A goal line that opens the game up one piece at a time — and parts you find can unlock things early."
-  ] }
-] }
+   ]
+  }
+ ]
+}

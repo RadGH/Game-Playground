@@ -45,10 +45,38 @@ function noise(dst, t, dur, type = 'bandpass', f = 1000, q = 1, peak = 1, f1 = n
   const g = ctx.createGain(); env(g, t, a, dur, peak); s.connect(fl); fl.connect(g); g.connect(dst); s.start(t, Math.random()); s.stop(t + a + dur + 0.05);
 }
 
+/** An oscillator through a resonant lowpass that sweeps with the pitch — the "zap" in a laser. */
+function zap(type, f0, f1, dur, dst, t, peak = 1, cut0 = 6000, cut1 = 600, q = 6, detune = 0) {
+  const o = ctx.createOscillator(); o.type = type; o.detune.value = detune;
+  o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+  const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.Q.value = q;
+  f.frequency.setValueAtTime(cut0, t); f.frequency.exponentialRampToValueAtTime(Math.max(40, cut1), t + dur);
+  const g = ctx.createGain(); env(g, t, 0.002, dur, peak);
+  o.connect(f); f.connect(g); g.connect(dst); o.start(t); o.stop(t + dur + 0.06);
+}
+
 /** Every weapon's voice. */
 const VOICES = {
-  laser_pulse: (d, t) => { osc('square', v(1800), 300, 0.11, d, t, 0.002, 0.35); osc('sine', v(2600), 900, 0.08, d, t, 0.002, 0.25); },
-  laser_heavy: (d, t) => { osc('sawtooth', v(900), 120, 0.22, d, t, 0.003, 0.4); osc('square', v(1400), 200, 0.16, d, t, 0.002, 0.25); noise(d, t, 0.1, 'highpass', 3000, 1, 0.15); },
+  // Lasers: a bright transient, two detuned saws diving through a resonant sweep (the "pew"),
+  // a sine body for punch and a faint shimmer tail. The old two thin beeps sounded like a toy.
+  laser_pulse: (d, t) => {
+    const f = v(1500);
+    noise(d, t, 0.025, 'highpass', 3000, 0.8, 0.5, null, 0.001);
+    zap('sawtooth', f, 170, 0.15, d, t, 0.5, 7000, 700, 7, -12);
+    zap('sawtooth', f * 1.01, 175, 0.15, d, t, 0.35, 7000, 700, 7, 12);
+    osc('sine', v(260), 55, 0.13, d, t, 0.002, 0.9);
+    osc('sine', v(3200), 1400, 0.2, d, t + 0.01, 0.004, 0.06);
+  },
+  laser_heavy: (d, t) => {
+    const f = v(900);
+    noise(d, t, 0.05, 'highpass', 2200, 0.7, 0.7, null, 0.001);
+    zap('sawtooth', f, 90, 0.3, d, t, 0.6, 5000, 300, 9, -15);
+    zap('sawtooth', f * 1.012, 92, 0.3, d, t, 0.45, 5000, 300, 9, 15);
+    zap('square', f * 0.5, 60, 0.26, d, t, 0.3, 2400, 200, 4);
+    osc('sine', v(150), 32, 0.32, d, t, 0.002, 1.2);
+    noise(d, t + 0.02, 0.25, 'bandpass', 1800, 1.2, 0.25, 400);
+    osc('sine', v(2400), 900, 0.3, d, t + 0.02, 0.006, 0.07);
+  },
   gatling: (d, t) => { noise(d, t, 0.035, 'bandpass', v(2200), 1.2, 0.8); osc('square', v(140), 60, 0.04, d, t, 0.001, 0.3); },
   cannon_light: (d, t) => { noise(d, t, 0.18, 'lowpass', 2400, 0.8, 0.9, 300); osc('sine', v(120), 40, 0.2, d, t, 0.002, 0.8); },
   cannon_heavy: (d, t) => { noise(d, t, 0.45, 'lowpass', 1800, 0.7, 1, 120); osc('sine', v(80), 28, 0.5, d, t, 0.003, 1); osc('triangle', v(200), 60, 0.2, d, t, 0.002, 0.3); },
@@ -83,7 +111,7 @@ const VOICES = {
   drone_pulse: (d, t) => { osc('square', v(3000), 2000, 0.03, d, t, 0.001, 0.1); },
   // impacts and other world sounds
   hit_kinetic: (d, t) => { noise(d, t, 0.05, 'bandpass', v(3200), 2, 0.5); osc('triangle', v(900), 500, 0.05, d, t, 0.001, 0.15); },
-  hit_laser: (d, t) => { noise(d, t, 0.06, 'highpass', 4000, 1, 0.3); },
+  hit_laser: (d, t) => { noise(d, t, 0.07, 'highpass', 3500, 1, 0.45); noise(d, t, 0.12, 'bandpass', v(1400), 2, 0.3, 500); osc('sine', v(500), 140, 0.08, d, t, 0.001, 0.3); },
   hit_plasma: (d, t) => { noise(d, t, 0.15, 'lowpass', 1200, 3, 0.4, 300); },
   hit_lightning: (d, t) => { noise(d, t, 0.04, 'highpass', 5000, 1, 0.4); },
   hit_explosive: (d, t) => { noise(d, t, 0.1, 'lowpass', 1500, 1, 0.5); },

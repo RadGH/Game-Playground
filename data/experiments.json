@@ -737,7 +737,7 @@
    "folder": "prototypes/voidwright",
    "summary": "A 2D space game where you build your ship block by block: mine asteroids, trade between stations, fight pirates and four alien races, fit turrets, shields, drones and a harpoon, and grow from a tiny skiff into a dreadnought.",
    "status": "prototype",
-   "statusNote": "M0-M8 in progress",
+   "statusNote": "Playable, live",
    "date": "2026-11-06",
    "tags": ["space", "ship builder", "shooter", "trading"]
   }

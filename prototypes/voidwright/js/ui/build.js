@@ -200,7 +200,8 @@ export function openBuild(app, { docked = false } = {}) {
     const i = entries.indexOf(e); if (i < 0) return;
     entries.splice(i, 1);
     const def = BLOCKS[e.id];
-    if (def.module) parts.push(e.item || makeItem(Math.random, e.id, 'common'));
+    // a module goes back to the hold; a DESTROYED stock module (no item of its own) is scrap, not a free new part
+    if (def.module) { if (e.item) parts.push(e.item); else if (e.alive) parts.push(makeItem(Math.random, e.id, 'common')); }
     else if (!e.alive) { /* a broken structure block: nothing comes back */ }
     else if (e.isNew) spend(def, -1);
     else spare[e.id] = (spare[e.id] || 0) + 1;

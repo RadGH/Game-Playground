@@ -11,15 +11,19 @@ import { GOODS } from '../sim/economy.js';
 import { itemValue } from '../sim/loot.js';
 import { cargoUsed, spawnPickup } from '../sim/world.js';
 
-let cardFn = null;
-import('./items.js').then(m => { cardFn = m.itemCardHTML || m.itemCard || null; }).catch(() => {});
+import { itemCard } from './items.js';
 
 function simpleCard(item) {
   const d = BLOCKS[item.block]; const R = RARITY_BY_ID[item.rarity];
   const mods = Object.entries(item.mods || {}).filter(([k]) => !['chain', 'splash', 'pierce', 'burn', 'leech', 'twin', 'bulwark', 'overdrive'].includes(k)).map(([k, v]) => `+${Math.round(v * 100)}% ${k}`).join(', ');
   return `<h4 style="color:${R.color}">${item.name}</h4><div class="hint">${R.name} · ${d.name} · ${d.size}×${d.size}</div><div>${d.blurb || ''}</div>${mods ? `<div class="good">${mods}</div>` : ''}<div class="hint">CPU ${d.cpu || 0} · Power ${d.power || 0} · Worth ~${fmt(itemValue(item))} cr</div>`;
 }
-const card = item => { try { return cardFn ? cardFn(item) : simpleCard(item); } catch { return simpleCard(item); } };
+// The shared item card is an ELEMENT; the plain HTML card is the fallback if it ever throws.
+// (It used to be loaded late and fed to innerHTML, which printed "[object HTMLDivElement]".)
+function card(item, actions) {
+  try { return itemCard(item, { actions, compact: true }); }
+  catch { const c = el('div', { class: 'card', html: simpleCard(item) }); c.append(el('div', { class: 'row end' }, ...actions)); return c; }
+}
 
 export function openHold(app, tab = 'parts') {
   const G = app.G;
@@ -37,13 +41,11 @@ export function openHold(app, tab = 'parts') {
       const sorted = [...G.parts].sort((a, b) => (RARITY_BY_ID[b.rarity].index - RARITY_BY_ID[a.rarity].index) || a.block.localeCompare(b.block));
       const grid = el('div', { class: 'cards' });
       for (const it of sorted) {
-        const c = el('div', { class: 'card', html: card(it) });
-        c.append(el('div', { class: 'row end' }, btn('Jettison', () => {
+        grid.append(card(it, [btn('Jettison', () => {
           G.parts.splice(G.parts.indexOf(it), 1);
           if (app.w && app.P && wasMode === 'fly') spawnPickup(app.w, { kind: 'item', item: it, rarity: it.rarity }, app.P.x - Math.cos(app.P.a) * (app.P.r + 30), app.P.y - Math.sin(app.P.a) * (app.P.r + 30), 0, 0, 10);
           draw();
-        }, 'small')));
-        grid.append(c);
+        }, 'small')]));
       }
       B.append(grid);
     } else if (tab === 'cargo') {

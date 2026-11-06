@@ -84,11 +84,16 @@ function tick(M, sys, now) {
 export function prices(M, id) {
   const base = M.base[id]; if (base == null) return null;
   const n = M.norm[id] || 50; const s = Math.max(0, M.stock[id]);
-  let k = clamp(Math.pow(n / Math.max(1, s), 0.35), 0.5, 2.6);
   const ev = M.event ? EVENTS[M.event] : null;
-  if (ev?.up?.includes(id)) k *= ev.k; if (ev?.down?.includes(id)) k *= ev.k;
-  const mid = base * k;
-  return { buy: Math.max(1, Math.round(mid * 1.06)), sell: Math.max(1, Math.round(mid * 0.94)), stock: Math.floor(s) };
+  // Price at a given stock level. Buying is priced at the stock AFTER the unit leaves and selling at the
+  // stock after it arrives, so buying one and selling it straight back always loses money (the curve
+  // moves faster than the 6% spread at low stock, which used to make that round trip pay).
+  const at = (st) => {
+    let k = clamp(Math.pow(n / Math.max(1, st), 0.35), 0.5, 2.6);
+    if (ev?.up?.includes(id)) k *= ev.k; if (ev?.down?.includes(id)) k *= ev.k;
+    return base * k;
+  };
+  return { buy: Math.max(1, Math.round(at(s - 1) * 1.06)), sell: Math.max(1, Math.round(at(s + 1) * 0.94)), stock: Math.floor(s) };
 }
 
 /** Buy n units. Returns the cost (or null if not possible). Mutates stock. */

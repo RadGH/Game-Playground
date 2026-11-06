@@ -70,8 +70,9 @@ export function fly(s, inp, dt) {
   const empSlow = s.emp > 0 ? 0.3 : 1;
   let mx = inp.mx || 0, my = inp.my || 0; const ml = Math.hypot(mx, my); if (ml > 1) { mx /= ml; my /= ml; }
   const boosting = inp.boost && (s.boostFuel ?? 1) > 0.05;
-  const boostMul = boosting ? 1.55 + st.boost * 0.3 : 1;
-  if (boosting) s.boostFuel = Math.max(0, (s.boostFuel ?? 1) - dt * 0.35); else s.boostFuel = Math.min(1, (s.boostFuel ?? 1) + dt * 0.18);
+  const od = st.overdrive || 0; // "of Overdrive" engines: boost goes faster and lasts longer
+  const boostMul = boosting ? 1.55 + st.boost * 0.3 + od * 0.25 : 1;
+  if (boosting) s.boostFuel = Math.max(0, (s.boostFuel ?? 1) - dt * 0.35 / (1 + od * 0.5)); else s.boostFuel = Math.min(1, (s.boostFuel ?? 1) + dt * 0.18);
   s.boosting = boosting;
   const vmax = st.maxSpeed * st.efficiency ** 0.5 * empSlow * boostMul * (s.slow > 0 ? 0.5 : 1);
   const dvx = mx * vmax - s.vx, dvy = my * vmax - s.vy; const dl = Math.hypot(dvx, dvy);
@@ -226,9 +227,11 @@ export function hitBlock(w, s, b, dmg, type, size, src, opts = {}) {
   const { dealt, killed } = damageBlock(s, b, dmg, type, size);
   s.lastHit = w.t;
   if (src && (s.kind === 'ship' || s.kind === 'station' || s.kind === 'ground')) {
-    s.lastAttacker = src;
+    // only a ship, station or ground base is an attacker; a rock or wreck you rammed is not something to fight
+    const actor = src.kind === 'ship' || src.kind === 'station' || src.kind === 'ground';
+    if (actor) s.lastAttacker = src;
     if (src.team === 'player' && s.team === 'friendly' && !s.angry) { s.angry = true; w.game && repChange(w, s.faction, -6, 'You fired on them'); }
-    if (s.ai && src.team !== s.team) s.ai.target = s.ai.target || src;
+    if (actor && s.ai && src.team !== s.team) s.ai.target = s.ai.target || src;
     if (src.team === 'player' || s.team === 'player') w.combatT = w.t;
   }
   if (src?.leech && src.stats) src.leechBank = (src.leechBank || 0) + dealt * 0.08;
@@ -529,6 +532,7 @@ function beam(w, s, t, pos, ang, range, dt, tgt) {
   for (const o of near(w, (x + ex) / 2, (y + ey) / 2, range / 2 + 40)) {
     if (o.dead || o === s) continue;
     const friendlyFire = !hostile(w, s, o) && o.kind !== 'rock' && o.kind !== 'wreck';
+    if (friendlyFire && s.team !== 'player') continue; // same rule as projectiles: NPC beams never hit friends
     if (friendlyFire && !(W.tool === 'mine' && o.kind === 'ship' && o.team !== s.team)) { if (W.tool === 'mine' || o.team === s.team) continue; }
     const tc = ((o.x - x) * (ex - x) + (o.y - y) * (ey - y)) / (range * range);
     if (tc < -0.1 || tc > 1.1) continue;
@@ -643,7 +647,8 @@ function shots(w, dt) {
     // bodies
     for (const o of near(w, p.x, p.y, 40)) {
       if (o.dead || o === p.owner || p.hitIds?.has(o.id)) continue;
-      if (!hostile(w, p.owner, o) && o.kind !== 'rock' && o.kind !== 'wreck') { if (o.team === p.team || o.kind === 'station' || o.team !== 'player') continue; }
+      // not an enemy: only the PLAYER's stray shots can hit (and anger) a friendly; NPC shots never hit the player
+      if (!hostile(w, p.owner, o) && o.kind !== 'rock' && o.kind !== 'wreck') { if (o.team === p.team || o.kind === 'station' || p.team !== 'player') continue; }
       if (p.kind === 'mine' && p.armed > 0) continue;
       const d2 = (o.x - p.x) ** 2 + (o.y - p.y) ** 2;
       const shR = o.shields?.length ? o.r + 3 * CELL : o.r;
@@ -713,11 +718,13 @@ export function repair(w, s, amt, free = false) {
   if (amt <= 0) return used;
   const cargo = s === w.player ? w.game?.cargo : null;
   const dead = s.grid.blocks.filter(b => !b.alive);
+  if (!dead.length) s.repairStarved = false;
   for (const b of dead) {
     if (amt <= 0) break;
     const near = neighbours(s.grid, b); if (!near.size) continue;
     const cost = Math.max(1, Math.round(b.maxHp / 60));
     if (!free && cargo) { if ((cargo.ferrite || 0) < cost) { s.repairStarved = true; break; } }
+    s.repairStarved = false; // the warning goes away once ferrite is back in the hold
     if (reviveBlock(s.grid, b, Math.min(b.maxHp, amt))) {
       if (!free && cargo) cargo.ferrite -= cost;
       amt -= b.maxHp * 0.5; used += b.maxHp;
@@ -821,9 +828,14 @@ function collect(w, p) {
   const G = w.game; if (!G) { p.dead = true; return; }
   p.dead = true;
   if (p.kind === 'cr') G.credits += p.n;
-  else if (p.kind === 'mat') { const room = Math.max(0, Math.floor(w.player.stats.cargo - cargoUsed(G))); const n = Math.min(room, p.n); G.cargo[p.mat] = (G.cargo[p.mat] || 0) + n; if (n < p.n) { p.dead = false; p.n -= n; return; } }
+  else if (p.kind === 'mat') { const room = Math.max(0, Math.floor(w.player.stats.cargo - cargoUsed(G))); const n = Math.min(room, p.n); G.cargo[p.mat] = (G.cargo[p.mat] || 0) + n; if (n < p.n) {
+      // part of the pile fits: count (and announce) what came aboard; the rest stays floating
+      p.dead = false; p.n -= n;
+      if (n > 0) { emit(w, { t: 'collect', x: p.x, y: p.y, kind: p.kind, mat: p.mat, n }); w.notes.push({ t: 'collect', kind: p.kind, mat: p.mat, n, ore: !!p.ore }); }
+      return;
+    } }
   else if (p.kind === 'item') G.parts.push(p.item);
-  else if (p.kind === 'pod') { const room = Math.max(0, w.player.stats.crewCap - w.player.crew); const n = Math.min(room, p.n); w.player.crew += n; G.rescued = (G.rescued || 0) + p.n; G.passengers = (G.passengers || 0) + (p.n - n); }
+  else if (p.kind === 'pod') { const room = Math.max(0, w.player.stats.crewCap - w.player.crew); const n = Math.min(room, p.n); w.player.crew += n; if (n) recompute(w.player); G.passengers = (G.passengers || 0) + (p.n - n); }
   else if (p.kind === 'specimen') { (G.specimens ||= []).push({ name: p.name, faction: p.faction, value: p.value }); }
   emit(w, { t: 'collect', x: p.x, y: p.y, kind: p.kind, mat: p.mat, n: p.n, rarity: p.rarity, item: p.item });
   w.notes.push({ t: 'collect', kind: p.kind, mat: p.mat, n: p.n, ore: !!p.ore, item: p.item, rarity: p.rarity, name: p.name });
@@ -831,7 +843,7 @@ function collect(w, p) {
 
 // ------------------------------------------------------------------ harpoon tethers
 export function fireHarpoon(w, s) {
-  if (s.tether) { s.tether.dead = true; s.tether = null; emit(w, { t: 'unhook', x: s.x, y: s.y }); return 'released'; }
+  if (s.tether) { s.tether.dead = true; if (s.tether.b) s.tether.b.harpooned = false; s.tether = null; emit(w, { t: 'unhook', x: s.x, y: s.y }); return 'released'; }
   const t = s.turrets.find(t => t.b.alive && t.w.tool === 'harpoon');
   if (!t) return 'none';
   if ((t.cd || 0) > 0) return 'cooldown';

@@ -37,10 +37,14 @@ export function recompute(s) {
     st.blocks++; st.hp += b.hp;
     const cx = b.x + n / 2, cy = b.y + n / 2, bm = d.mass;
     m += bm; mx += cx * bm; my += cy * bm;
-    if (d.power > 0) st.power += d.power; else st.powerUse -= d.power;
+    // part bonuses rolled on the item (loot.js AFFIX/POWERS): weapons read theirs in wStat, the rest here
+    const mo = b.item?.mods || {};
+    if (d.power > 0) st.power += d.power; else st.powerUse -= d.power * (1 - (mo.power || 0));
     st.cpu += d.cpu || 0; st.cpuCap += d.cpuCap || 0;
     st.crewNeed += d.crew || 0; st.crewCap += d.crewCap || 0;
-    st.thrust += d.thrust || 0; st.turn += d.turn || 0; st.cargo += d.cargo || 0;
+    st.thrust += (d.thrust || 0) * (1 + (mo.thrust || 0));
+    st.turn += (d.turn || 0) * (d.weapon ? 1 : 1 + (mo.turn || 0)); st.cargo += d.cargo || 0;
+    if (mo.overdrive) st.overdrive = (st.overdrive || 0) + 1;
     st.repair += d.repair || 0; st.scan += d.scan || 0; st.jump = Math.max(st.jump, d.jump || 0);
     st.magnet = Math.max(st.magnet, d.magnet || 0); st.drones += d.drones || 0; st.cloak = Math.max(st.cloak, d.cloak || 0);
     st.boost += d.boost || 0; st.regrow += d.regrow || 0;
@@ -161,8 +165,9 @@ export function splitOff(s) {
   const keep = mainHasCore ? groups[0] : (s.kind === 'ship' ? [] : groups.sort((a, b) => b.length - a.length)[0]);
   for (const grp of groups) {
     if (grp === keep) continue;
-    for (const b of grp) killBlock(s.grid, b);
+    // copy the piece BEFORE killing its blocks here — killBlock zeroes hp, and the debris would get 0 hp blocks
     const { grid, ox, oy } = cropToBlocks(grp);
+    for (const b of grp) killBlock(s.grid, b);
     const w = makeBody('wreck', grid, { team: 'neutral', cls: 'skiff', name: 'Debris' });
     // place the piece where it was, moving with the parent plus a push away from the centre
     const n = grid; void n;

@@ -46,8 +46,11 @@ export function createView(ctx) {
   // ---------------------------------------------------------------- dressing (a phone that plays)
   let tray = null, outfit = null, pose = 0, model = null, done = false, slot = 'hat', mine = null, myVote = null;
   let phase = 'dress', show = null, walk = -1, walkAt = 0, cards = [];
-  const baseOf = m => avatarOf({ race: RACES[m[0]] || 'human', seed: m[1] });
-  const doll = (m, list, w = 150) => { try { return renderSVG(dressedAvatar(baseOf(m), list), { width: w, height: Math.round(w * 4 / 3) }); } catch { return ''; } };
+  // report #45: dress and walk the player's OWN character (their look; the costume is swapped for the tray's pieces).
+  // A player with no look falls back to the random body the sim rolled.
+  const lookOf = (pid, m) => byPid.get(pid)?.look || { race: RACES[m[0]] || 'human', seed: m[1] };
+  const baseOf = (m, pid = me) => avatarOf(lookOf(pid, m));
+  const doll = (m, list, w = 150, pid = me) => { try { return renderSVG(dressedAvatar(baseOf(m, pid), list), { width: w, height: Math.round(w * 4 / 3) }); } catch { return ''; } };
   const sw = c => `<i class="ck-sw" style="background:${COLOURS[c]?.hex}"></i>`;
   function optHtml(s, i, [p, c]) {
     const pc = PIECES[p], fit = pc.tags.some(t => theme.likes.includes(t)), on = outfit?.[s] === i;
@@ -130,12 +133,12 @@ export function createView(ctx) {
   async function buildModels(list) {
     if (building) return; building = true;
     models = await Promise.all(list.map(async (s, i) => {
-      const look = { race: RACES[s.m[0]] || 'human', seed: s.m[1] };
-      const a = await ctx.createActor({ look });
+      const look = lookOf(s.pid, s.m), p = byPid.get(s.pid);
+      const a = await ctx.createActor({ look, seat: p?.seat });
       if (!a) return null;
       try { await a.body.setAvatar(dressedAvatar(avatarOf(look), s.o)); } catch (e) { console.error(e); }
       a.group.visible = false; a.place(0, 0.4, START_Z, 0);
-      tags[i] = ctx.stage.tag(a.group, { text: `Look ${i + 1}`, height: (a.height || 1.6) + 0.2, cls: 'ck-lt' });
+      tags[i] = ctx.stage.tag(a.group, { text: p ? `${i + 1} · ${p.name}` : `Look ${i + 1}`, height: (a.height || 1.6) + 0.2, cls: 'ck-lt' });
       return a;
     }));
   }
@@ -144,8 +147,8 @@ export function createView(ctx) {
   // ---------------------------------------------------------------- the vote / reveal cards
   function buildGallery(list) {
     $('.ck-cards').innerHTML = list.map((s, i) => `
-      <button class="ck-card" data-vote="${i}"><i class="ck-ribbon">Judge's ribbon</i><span class="ck-no">Look ${i + 1}</span>
-        <em class="ck-flag"></em><span class="ck-pic">${doll(s.m, s.o, 120)}</span>
+      <button class="ck-card" data-vote="${i}"><i class="ck-ribbon">Judge's ribbon</i><span class="ck-no">Look ${i + 1}${byPid.get(s.pid) ? ' · ' + esc(byPid.get(s.pid).name) : ''}</span>
+        <em class="ck-flag"></em><span class="ck-pic">${doll(s.m, s.o, 120, s.pid)}</span>
         <span class="ck-fits">${themeFit(theme, s.o)} fit · ${s.o.length} pieces</span>
         <span class="ck-by"></span><span class="ck-vt"></span><strong class="ck-pts"></strong></button>`).join('');
     cards = [...ui.querySelectorAll('.ck-card')];
@@ -180,7 +183,7 @@ export function createView(ctx) {
       if (init.solo) return 'Practice: 1 point a piece that fits the theme (★), +2 when three or more pieces share a colour.';
       return done ? 'Ready! Waiting for the others…' : rule;
     }
-    if (g.phase === 'runway') return 'Nobody knows whose outfit is whose. Remember your favourite!';
+    if (g.phase === 'runway') return 'Here they come! Remember your favourite look.';
     if (g.phase === 'vote') return watching ? `Vote on your phones! ${rule}` : myVote == null ? `Tap the best look (not your own). ${rule}` : `Vote in. You can still change it. ${rule}`;
     if (init.solo) { const s = g.scores && Object.values(g.scores)[0]; return `Practice score: ${s ?? 0} (1 a piece that fits the theme, +2 for three or more in one colour).`; }
     return `1 point for each vote. ${rule}`;
@@ -210,7 +213,7 @@ export function createView(ctx) {
         const isDone = g.done.includes(p.pid); r.classList.toggle('in', isDone); r.querySelector('.st').textContent = isDone ? 'ready!' : 'dressing…';
       }
       if (g.phase === 'runway' && show) {
-        $('.ck-runno').textContent = `Look ${walk + 1} of ${show.length}`;
+        $('.ck-runno').textContent = `Look ${walk + 1} of ${show.length}${byPid.get(show[walk].pid) ? ' · ' + byPid.get(show[walk].pid).name : ''}`;
         $('.ck-runpose').textContent = `${show[walk].o.length} pieces · ${themeFit(theme, show[walk].o)} fit the theme`;
       }
       $('.ck-ghead').textContent = g.phase === 'vote' ? (watching ? `${g.voted.length} of ${players.length} have voted` : 'Which look wins?') : g.phase === 'reveal' ? (init.solo ? 'The judge has scored your look' : 'The votes are in!') : '';

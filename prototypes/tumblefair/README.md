@@ -82,8 +82,8 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
   weapons, renamed for the fair, plus 35 written out slot by slot in round 5 — Pirate Captain, Lifeguard, Juggler,
   Rodeo Rider, Moon Walker, Tiger Cub, eight 'Spooky' ones for Halloween…; 10 free; `tests/costumes.test.js` checks
   every part id). Costumes never change how you play.
-- **Phones that drop** come back to the same seat and score (a token in localStorage; the room keeps a seat 90 s in a
-  match). Someone who joins mid-match watches until the next minigame and is seated then if a seat is free (the
+- **Phones that drop** come back to the same seat and score (a token in localStorage; the room keeps a seat 2 minutes in
+  a match, 5 in the lobby; meanwhile the player shows as **away** and the board plays their turns at once — report #40). Someone who joins mid-match watches until the next minigame and is seated then if a seat is free (the
   design doc's rule). The host leaving hands the room to the next player.
 
 ## Layout
@@ -1334,6 +1334,46 @@ and passwords included); each game keeps its own save on it.
 - Tests: `tests/accounts.test.js` (redeem against a pretend rgs-api, the move / keep rules, signing in and out on one
   socket and in a room, the admin feed's lock and the report action) and `tests/accounts.spec.js` (Playwright against the
   dev server + the VM's real rgs-api: the button shows, a guest can host, sign-up / out / in swaps the character).
+
+## Live reports #34-#44: room, board and screens (2026-11-06)
+
+(The minigame reports of the same batch — #35 #36 #37 #39 #41 #45 #46 — are written up with their games.)
+- **#34 Chat.** A 💬 button sits under the ☰ on every screen of a room (under it, not beside it, so the corner row of
+  ☰ and ! keeps its width and no score bar or title row loses room at 360 px). It opens a sheet: 14 one-tap quick lines
+  and reactions (`CHAT_QUICK` in `js/shared/protocol.js`), a text box (80 characters, `cleanChat`), and the last few
+  lines. A line pops up as a bubble (face, name in the seat colour) top-left on every screen in the room, the big screen
+  too, for 5 s, three at most; a red dot on 💬 while there is something unread. Server: `chat` message (1 a second,
+  burst 4), cast to the room, the last 12 kept and sent to a phone that joins or comes back (`chatlog`). Drawn with
+  textContent only. `js/client/chat.js`, `js/sim/room.js` `case 'chat'`. No word filter: a public room's host can still
+  kick, and the room vote-kick works as before.
+- **#38 The Wheel of Whatever is bigger.** On an upright phone the wheel fills the event card's width (up to 330 px,
+  was 168) with the name and STOP button in one row under it; drawn at 480 px so it stays sharp (`boardevents.js`
+  drawWheel, `css/board.css` `.ev-wheelbox`).
+- **#40 A player who left stays "in game".** Closing the page kept the seat for 5 minutes and the board waited out
+  every timer for them (9 s rolls, 4-5 s events). Now: their chip and board piece say **away**; the board answers for
+  an away player after 1.2 s (`BOARD.AWAY_MS`: roll, crossroads, any live event whose remaining players are all away,
+  `waitingOn()` in `js/sim/board.js`); in a match they leave for good after **2 minutes** (`TIMES.GONE_MATCH_MS`, was 5).
+  The gone clock only runs while someone is still playing, so a whole room that puts its phones down for a break keeps
+  everyone; a match nobody comes back to still closes (`emptySince` now starts on the last disconnect too).
+- **#42 Letter Shot: the hoop was under the bars.** The court was framed in the default band for screen games (10% from
+  the top) while the score bar, letters strip and pill reach ~110 px down on a phone. The view now measures the free
+  band between the lowest top bar and the HOLD panel / mark picker and frames the court in it (`fitSafe` in
+  `js/games/letter-shot/view.js`).
+- **#43 Two characters inside each other.** Two faults. (1) The line-up builds bodies asynchronously; the title
+  screen's own character (pid 0) was often still loading when the lobby's list arrived, and when it finished it was
+  checked against its OWN call's list, so it stayed, in the middle, on top of the player standing there.
+  `js/client/lineup.js` keeps a finished body only if the latest list has it and places everyone from the latest list.
+  (2) The same player in a second window (same account, or a second tab) took over the seat while the first window's
+  socket still thought it owned it, so the first window's later drop marked the seat gone. Now the new window takes the
+  seat, the old one is told ("You opened this game in another window…") and is ignored (`owns()` in `js/sim/hub.js`);
+  signing in as an account already seated in the room does the same (`room.rekey`).
+- **#44 "radley keeps beating me": a catch-up.** From round 2, whoever is furthest behind (tickets + 10 a ribbon), if
+  they trail the leader by at least a ribbon, gets **+3 tickets** as the round opens (ties share it; not counted for
+  Ticket Magnet). It pops over their piece and on the ticker. `BOARD.CATCHUP` / `CATCHUP_GAP`, `catchUp()` in board.js.
+- Tests: `tests/room-reports.test.js` (node: chat, both #43 paths, away timing on the board and in a live event, the
+  2-minute leave, a sleeping room, catch-up) and `tests/reports-ui.spec.js` (Playwright, own server: the line-up race,
+  the second-tab message, the 💬 position + bubbles + markup as text, the wheel's size at 402x684, the away badge, and
+  Letter Shot's hoop on screen between the bars and the panel).
 
 ## What worked / what didn't
 

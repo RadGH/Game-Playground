@@ -25,7 +25,9 @@ export function createHub({ now = () => Date.now(), data, profiles, build = 'dev
     const send = obj => conn.send(JSON.stringify(obj));
     const raw = s => conn.send(s);
     const me = () => ({ t: 'me', ...profiles.view(S.profile) });
-    function leave() { if (S.room && S.member) { S.room.remove(S.member); } S.room = null; S.member = null; }
+    /** Report #43: this socket still owns its seat (the same person opening the game in another window takes it over). */
+    function owns() { if (S.room && S.member && S.member.send === raw && S.room.members.get(S.member.pid) === S.member) return true; S.room = null; S.member = null; return false; }
+    function leave() { if (owns()) { S.room.remove(S.member); } S.room = null; S.member = null; }
     function enter(room, display) {
       leave();
       S.room = room;
@@ -36,7 +38,7 @@ export function createHub({ now = () => Date.now(), data, profiles, build = 'dev
     /** Moves this socket onto profile p, telling the room (name, look, costume) when it is in one. */
     function become(p) {
       S.profile = p;
-      if (S.room && S.member) { S.member.token = p.token; S.room.message(S.member, { t: 'profile', name: p.name, look: p.look, costume: p.costume }); }
+      if (owns()) { S.room.rekey(S.member, p.token); S.room.message(S.member, { t: 'profile', name: p.name, look: p.look, costume: p.costume }); }
     }
     /** Redeem a ticket (or none = guest), then answer with `reply(note)`. Frames that arrive meanwhile wait. */
     function settle(ticket, reply) {
@@ -99,18 +101,18 @@ export function createHub({ now = () => Date.now(), data, profiles, build = 'dev
         case 'profile': {
           const out = profiles.update(S.profile.token, msg);
           send(me());
-          if (S.room && S.member && out) S.room.message(S.member, { t: 'profile', ...out });
+          if (out && owns()) S.room.message(S.member, { t: 'profile', ...out });
           return;
         }
         case 'buy': { const r = profiles.buy(S.profile.token, msg.id); if (!r.ok) send({ t: 'err', code: 'buy', msg: r.msg }); return send(me()); }
         case 'equip': {
-          if (profiles.equip(S.profile.token, msg.id) && S.room && S.member) S.room.message(S.member, { t: 'profile', costume: S.profile.costume });
+          if (profiles.equip(S.profile.token, msg.id) && owns()) S.room.message(S.member, { t: 'profile', costume: S.profile.costume });
           return send(me());
         }
-        default: if (S.room && S.member && S.room.members.has(S.member.pid)) S.room.message(S.member, msg);
+        default: if (owns()) S.room.message(S.member, msg);
       }
     }
-    function close() { S.closed = true; if (S.room && S.member) S.room.disconnect(S.member); S.room = null; S.member = null; }
+    function close() { S.closed = true; if (owns()) S.room.disconnect(S.member); S.room = null; S.member = null; }
     return { message, close };
   }
   function tick() {

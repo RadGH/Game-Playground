@@ -7,14 +7,17 @@
 // judge scores you against the theme (1 a fitting piece, +2 when three or more pieces share a colour).
 //
 // The outfit is TEMPORARY: it is a list of [pieceIndex, colourIndex] from this game's tray, never written to the
-// player's look or costume. The model on the runway is a random body (race + seed rolled here) so the vote stays
-// anonymous; every browser rebuilds the same avatar from pieces.js `dressedAvatar`. Everything a phone sends is checked
+// player's look or costume. Since live report #45 ("this mini game should use the player's avatar") each player
+// dresses and walks as THEIR OWN character — the runway list carries the pid, and every browser rebuilds the same
+// avatar from the player's look + pieces.js `dressedAvatar`. (`model`, a random body rolled here, is only the fallback
+// for a player with no look.) So the vote is no longer anonymous: you know your friends — you still can't vote for
+// yourself. Everything a phone sends is checked
 // against the tray it was dealt.
 import { SLOTS, SLOT_IDS, PIECES, COLOURS, THEMES, POSES, RACES, JUDGE_RULES, worn, judgeScore, soloScore, themeFit } from './pieces.js';
 
 export const meta = {
   id: 'costume-catwalk', title: 'Costume Catwalk', blurb: 'Dress up for the theme, strut the runway, win the vote!',
-  how: ['Everyone gets a theme and a tray of random clothes.', 'Tap pieces to dress your model, then pick a pose.', 'Every outfit walks the runway (nobody knows whose is whose).', 'Vote for the best look (not your own!). The judge gives a ribbon too.'],
+  how: ['Everyone gets a theme and a tray of random clothes.', 'Tap pieces to dress your model, then pick a pose.', 'Everyone struts the runway as their own character.', 'Vote for the best look (not your own!). The judge gives a ribbon too.'],
   kind: 'ui', min: 1, max: 4, seconds: 92, scoring: 'vote', unit: 'points', tags: ['social'], card: 'card-costume-catwalk', css: true,
 };
 export const DRESS_S = 40, WALK_S = 5.5, VOTE_S = 15, REVEAL_S = 8;
@@ -58,7 +61,7 @@ export function create({ rng, players }) {
   const list = p => worn(tray[p], outfit[p]);
   function toRunway() {
     order = rng.shuffle(pids);
-    show = order.map(p => ({ m: model[p], o: list(p), pose: pose[p] }));
+    show = order.map(p => ({ pid: p, m: model[p], o: list(p), pose: pose[p] }));
     phase = 'runway'; walk = 0; left = WALK_S;
   }
   function settle() {
@@ -126,7 +129,7 @@ export function create({ rng, players }) {
     priv: pid => ({ tray: tray[pid], outfit: { ...outfit[pid] }, pose: pose[pid], model: model[pid], done: done.has(pid), mine: order ? order.indexOf(pid) : null, vote: votes[pid] ?? null }),
     get over() { return over; },
     result() {
-      if (!reveal) { if (!order) { order = pids.slice(); show = order.map(p => ({ m: model[p], o: list(p), pose: pose[p] })); } settle(); }
+      if (!reveal) { if (!order) { order = pids.slice(); show = order.map(p => ({ pid: p, m: model[p], o: list(p), pose: pose[p] })); } settle(); }
       const groups = new Map();
       for (const p of pids) { if (!groups.has(points[p])) groups.set(points[p], []); groups.get(points[p]).push(p); }
       return { order: [...groups.keys()].sort((a, b) => b - a).map(k => groups.get(k)), scores: { ...points }, unit: meta.unit };

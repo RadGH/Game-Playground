@@ -812,7 +812,7 @@ function pickups(w, dt) {
     if (!P || P.dead || p.age < 0.6) continue;
     const dx = P.x - p.x, dy = P.y - p.y; const d = Math.hypot(dx, dy);
     if (d < magnet) {
-      if (p.kind === 'mat' && G && cargoFull(w, p.n)) { if (!p.fullWarn) { p.fullWarn = true; w.notes.push({ t: 'full' }); } continue; }
+      if (p.kind === 'mat' && G && cargoFull(w, p.n)) { if (!p.fullWarn) { p.fullWarn = true; if (!(w.t < (w.fullWarnT ?? -1))) { w.fullWarnT = w.t + 20; w.notes.push({ t: 'full' }); } } continue; }
       const pull = 500 * (1 - d / magnet) + 120;
       p.vx += dx / d * pull * dt * 4; p.vy += dy / d * pull * dt * 4;
     }

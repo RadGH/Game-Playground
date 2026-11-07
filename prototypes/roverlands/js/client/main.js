@@ -105,6 +105,7 @@ function frame() {
     ui.hud.seatHint(hd.hint ? (ownKey ? `${KEYS[hd.device] || ownKey} — ${hd.hint.slice(4)}` : `${KEYNAME[hd.device] || 'E'} — ${hd.hint}`) : null);
     ui.touch.mode(hd.role === 'driver' ? 'drive' : hd.role === 'gunner' ? 'gunner' : hd.role ? 'passenger' : 'foot');
     ui.touch.hitchable?.(hd.hitch);
+    ui.touch.flippable?.(hd.tipped);
     const meM = hd.markers.find(m => m.kind === 'me');
     ui.markers({
       you: meM ? { x: meM.x, z: meM.z, dir: [Math.sin(session.cam.yaw), Math.cos(session.cam.yaw)] } : null,

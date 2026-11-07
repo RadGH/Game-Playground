@@ -210,8 +210,10 @@ export function createView(ctx) {
         const p = mode === 'power' ? pingPong(now() - t0, L.power) : lockedP;
         fill.style.width = (p * 100).toFixed(1) + '%'; mark.style.left = (lockedP * 100).toFixed(1) + '%'; mark.style.opacity = mode === 'acc' || mode === 'sent' ? 1 : 0;
         const a = mode === 'acc' ? needle(now() - t1, L.acc) : 0; ndl.style.left = (50 + a * 50).toFixed(1) + '%';
-        swingBtn.textContent = { power: 'TAP: POWER', acc: 'TAP: ACCURACY', sent: 'Swing!', flying: 'Watch it fly…', done: 'All done!', wait: 'Get ready…' }[mode];
-        swingBtn.disabled = !(mode === 'power' || mode === 'acc');
+        // only when the words change: iPhone drops a tap on a button whose text is rewritten under the finger (Pumpkin Fling, report #39)
+        const label = { power: 'TAP: POWER', acc: 'TAP: ACCURACY', sent: 'Swing!', flying: 'Watch it fly…', done: 'All done!', wait: 'Get ready…' }[mode], off = !(mode === 'power' || mode === 'acc');
+        if (swingBtn.textContent !== label) swingBtn.textContent = label;
+        if (swingBtn.disabled !== off) swingBtn.disabled = off;
       }
       // wind flag flaps toward where the wind blows (dir 0 = down the fairway, -z)
       const w = windFlag.userData.w; if (w) { windFlag.rotation.y = Math.PI / 2 - w.dir + Math.sin(t * 6) * 0.08 * (0.3 + w.mph / 18); }

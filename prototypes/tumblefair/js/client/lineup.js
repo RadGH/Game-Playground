@@ -22,26 +22,39 @@ export function createLineup(stage) {
     const p = a.group.position; stage.setView({ cx: p.x, cz: p.z, hw: 0.75, hd: 0.5, pitch: 8, tall: a.height + 0.25, yaw: 0 });
   }
   function slots(n) { const out = []; for (let i = 0; i < n; i++) out.push({ x: (i - (n - 1) / 2) * 1.9, z: Math.abs(i - (n - 1) / 2) * -0.35 }); return out; }
+  // Report #43 (2026-11-06, "two characters inside each other"): building a body is async, and the title screen's
+  // own character (pid 0) was often still loading when the lobby asked for the room's players. When it finished it was
+  // checked against the list of ITS OWN call (where it always belonged), so it was kept, at the one-player spot in the
+  // middle, on top of whoever else stood there — and two calls placed bodies from two different lists. Now a body that
+  // finishes loading is kept only if the LATEST list still has it, and every body is placed from the latest list.
+  function layout() {
+    const at = slots(lastShown.length);
+    lastShown.forEach((m, i) => { const a = actors.get(m.pid); if (a) { a.place(at[i].x, 0, at[i].z, 0); a.setPose(poses[m.pid] || 'idle'); } });
+  }
+  let lastShown = [];
   async function sync(list, { labels = true, me = null } = {}) {
     lastList = list; lastOpts = { labels, me };
     if (trial) list = list.map(m => (m.pid === trial.pid ? { ...m, costume: trial.costume } : m));   // the shop's try-on
+    lastShown = list;
     wantKey = JSON.stringify(list.map(m => [m.pid, m.seat]));
     for (const [pid, a] of actors) if (!list.some(m => m.pid === pid)) { a.dispose(); actors.delete(pid); tags.get(pid)?.remove(); tags.delete(pid); }
-    const at = slots(list.length);
-    await Promise.all(list.map(async (m, i) => {
+    await Promise.all(list.map(async m => {
       let a = actors.get(m.pid);
       if (!a) {
         if (busy.has(m.pid)) return; busy.add(m.pid);
         a = await createActor(m); busy.delete(m.pid);
-        if (!list.includes(m) && !wantKey.includes(`[${m.pid},`)) { a.dispose(); return; }
+        const now = lastShown.find(x => x.pid === m.pid);
+        if (!now) { a.dispose(); return; }                       // the room moved on while it loaded
         a.group.traverse(o => { if (o.isMesh) o.castShadow = true; });
         actors.set(m.pid, a); group.add(a.group); a.play('wave', 1400);
-        if (labels) tags.set(m.pid, stage.tag(a.group, { text: m.pid === me ? 'YOU' : m.name, seat: m.seat, height: a.height + 0.3, cls: m.pid === me ? 'me' : '' }));
+        if (lastOpts.labels) tags.set(m.pid, stage.tag(a.group, { text: m.pid === lastOpts.me ? 'YOU' : now.name, seat: now.seat, height: a.height + 0.3, cls: m.pid === lastOpts.me ? 'me' : '' }));
+        if (now !== m) a.setLook(now);
+        if (!shown) for (const t of tags.values()) t.el.style.visibility = 'hidden';
       } else { a.setLook(m); tags.get(m.pid)?.set(m.pid === me ? 'YOU' : m.name); }
-      a.place(at[i].x, 0, at[i].z, 0);
-      a.setPose(poses[m.pid] || 'idle');
+      layout();
     }));
-    rowView = { cx: 0, cz: 0, hw: Math.max(2.4, list.length * 1.05 + 0.6), hd: 1.6, pitch: 16, tall: 2.6, yaw: 0 };
+    layout();
+    rowView = { cx: 0, cz: 0, hw: Math.max(2.4, lastShown.length * 1.05 + 0.6), hd: 1.6, pitch: 16, tall: 2.6, yaw: 0 };
     if (focusPid != null && actors.has(focusPid)) applyFocus(); else stage.setView(rowView);
   }
   return {

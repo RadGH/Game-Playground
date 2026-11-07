@@ -19,7 +19,7 @@
 
 /* ---- the second row: round, bulletin tag, die */
 #screen.board { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding: 0 10px calc(var(--sb) + 10px); }
-.board-sub { position: absolute; top: calc(var(--st) + 50px); left: 8px; right: 78px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; pointer-events: none; }
+.board-sub { position: absolute; top: calc(var(--st) + 50px); left: 8px; right: 92px;   /* 92: the 💬 under the ☰ (report #34) */ display: flex; gap: 6px; align-items: center; flex-wrap: wrap; pointer-events: none; }
 .board-sub > * { pointer-events: auto; }
 .board-sub .round { background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 9px; font-size: 12px; font-weight: 800; }
 #screen.board .mods { position: static; font-size: 12px; padding: 3px 9px; border-width: 2px; max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -88,10 +88,19 @@
 .ev-meter i { position: absolute; left: 0; right: 0; bottom: 0; background: transparent; border-top: 4px solid var(--ink); box-shadow: 0 -200px 0 200px rgba(255, 255, 255, .55); }
 /* wheel */
 .ev-wheel { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; }
-.ev-wheelbox { position: relative; width: 168px; height: 168px; flex: none; }
-.ev-wheelbox canvas { width: 168px; height: 168px; display: block; }
+/* report #38 (2026-11-06): the wheel is the show — on an upright phone it fills the card's width (the button goes under
+   it), on a wide screen it is as tall as the board can spare */
+.ev-wheelbox { position: relative; width: min(44vh, 300px); height: min(44vh, 300px); flex: none; }
+.ev-wheelbox canvas { width: 100%; height: 100%; display: block; }
+@media (max-aspect-ratio: 1/1) {
+  .ev-wheel { flex-direction: column; gap: 6px; }
+  .ev-wheelbox { width: min(78vw, 46vh, 330px); height: min(78vw, 46vh, 330px); }
+  .ev-wheel .ev-side { width: 100%; max-width: 360px; flex: none; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .ev-wheel .ev-go { flex: 1; min-width: 0; }
+  .ev-dock[data-kind=wheel] .ev-head > span { flex-basis: auto; }
+}
 .ev-wheelbox canvas.stopped { filter: drop-shadow(0 0 6px #ffd23f); }
-.ev-pointer { position: absolute; top: -6px; left: 50%; margin-left: -11px; width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; border-top: 22px solid var(--ink); }
+.ev-pointer { position: absolute; top: -8px; left: 50%; margin-left: -15px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid var(--ink); filter: drop-shadow(0 2px 0 #ffd23f); }
 .ev-wheel .ev-side { margin-left: 0; }
 /* shell game */
 .ev-shell { display: grid; gap: 6px; width: 100%; justify-items: center; }

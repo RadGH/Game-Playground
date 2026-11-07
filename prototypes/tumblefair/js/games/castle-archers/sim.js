@@ -10,7 +10,7 @@ import { placeOrder, r1, r2 } from '../toss-kit.js';
 
 export const meta = {
   id: 'castle-archers', title: 'Castle Archers', blurb: 'Fire arrows over the wall together and keep the goblins from the gate!',
-  how: ['Drag BACK from anywhere and let go to shoot, like a bow string.', 'Further back = more power. The arrow flies in an arc and the wind pushes it.', 'Stop the goblins reaching the gate. Bruisers take 4 arrows!'],
+  how: ['Drag BACK from anywhere and let go to shoot, like a bow string.', 'Further back = more power. The arrow flies in an arc and the wind pushes it.', 'Goblin at the gate? Drag back and UP to shoot straight down over the wall.', 'Stop the goblins reaching the gate. Bruisers take 4 arrows!'],
   kind: 'ui', min: 1, max: 4, seconds: 80, scoring: 'coop', unit: 'points', tags: ['coop', 'action'], card: 'card-castle-archers', css: true,
   controls: { a: 'Shoot' },
 };
@@ -35,8 +35,15 @@ const WAVES = [
 ];
 /** Where archer `i` of `n` stands on the wall (x, y). */
 export const archerAt = (i, n) => ({ x: r2(1.2 + (n <= 1 ? 1.6 : i * 3.2 / (n - 1))), y: WALL_Y + 0.9 });
-/** An arrow from angle a (radians, up = +) and power p (0..1). */
-export function launch(a, p, at) { const v = VMIN + (VMAX - VMIN) * Math.max(0, Math.min(1, p)); return { x: at.x, y: at.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 0 }; }
+/** Aim limits (radians): straight-ish up, and steeply DOWN over the battlements at goblins bashing the gate. */
+export const A_MIN = -1.4, A_MAX = 1.5, LEAN = -0.25;
+/** An arrow from angle a (radians, up = +) and power p (0..1). A shot aimed downward is loosed leaning over the front
+ *  of the wall (live report #46: "can't attack when they get to the gate" — a goblin at the gate stands right under the
+ *  parapet, and an arrow from the archer's spot, at most 0.6 rad down, always sailed over its head). */
+export function launch(a, p, at) {
+  const v = VMIN + (VMAX - VMIN) * Math.max(0, Math.min(1, p)), x = a < LEAN ? Math.max(at.x, GATE_X - 0.15) : at.x;
+  return { x, y: at.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 0 };
+}
 /** One step of flight (gravity + wind as a sideways push). */
 export function stepArrow(A, wind, dt) { A.vx += wind * dt; A.vy -= G * dt; A.x += A.vx * dt; A.y += A.vy * dt; A.t += dt; return A; }
 /** Where a goblin is at time t (x, foot height). Kites bob in the air. */
@@ -58,7 +65,7 @@ export function makeGoblins(rng, n, L) {
   return out;
 }
 export const waveStarts = () => { const s = []; let t = 0; for (const W of WAVES) { s.push(t); t += W.len + WAVE_GAP; } return s; };
-export const valid = d => d && typeof d === 'object' && Number.isFinite(d.a) && Number.isFinite(d.p) && d.a >= -0.6 && d.a <= 1.5 && d.p >= 0 && d.p <= 1;
+export const valid = d => d && typeof d === 'object' && Number.isFinite(d.a) && Number.isFinite(d.p) && d.a >= A_MIN && d.a <= A_MAX && d.p >= 0 && d.p <= 1;
 
 export function create({ rng, players, difficulty = 'normal' }) {
   const L = LEVELS[difficulty] || LEVELS.normal, pids = players.map(p => p.pid), n = pids.length;
@@ -134,7 +141,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
 /** A good aim at goblin `gb` (a bot's or a test's eye): tries angles, finds the power whose arrow meets the goblin. */
 export function aimAt(gb, from, el, wind, L) {
   let best = null;
-  for (let a = -0.25; a <= 1.2; a += 0.05) for (let p = 0.05; p <= 1.001; p += 0.025) {
+  for (let a = A_MIN; a <= 1.2; a += 0.05) for (let p = 0.05; p <= 1.001; p += 0.025) {
     const A = launch(a, p, from); let miss = Infinity;
     for (let k = 0; k < 120 && A.y > -0.5; k++) {
       stepArrow(A, wind, 1 / 60); const at = goblinAt(gb, el + A.t, L), K = KINDS[gb.k];

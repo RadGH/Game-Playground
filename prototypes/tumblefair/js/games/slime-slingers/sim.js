@@ -22,7 +22,7 @@ export const RULES = {
   throwCool: 0.7, globSpeed: 13, globLife: 0.8, globR: 0.75,
   aimCone: { easy: 0.62, normal: 0.48, hard: 0.36 }, aimRange: 11,
   wear: { easy: 3.0, normal: 4.0, hard: 5.0 },       // one level of slime wears off after this long without a new hit
-  stuck: 2.0, safe: 1.2, finishBonus: 2,
+  stuck: 2.0, safe: 2.0, finishBonus: 2,      // safe: after wobbling free nobody can slime you for this long (was 1.2: two slingers re-stuck you at once, #37)
   pump: { x: 0, z: 0, r: 0.5, reach: 1.7, wash: 0.8 },   // stand this close: one level washes off every `wash` seconds (and you cannot throw while you wash)
   puddleR: 1.0, puddleLife: 6, puddles: 8,
   dodgeCool: 1.6, dodgeSpeed: 12, dodgeTime: 0.2,
@@ -69,7 +69,10 @@ export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
   function splat(s, by) {
     s.lvl = Math.min(3, s.lvl + 1); s.wear = RULES.wear[D]; s.hits++;
     const thrower = S.get(by); let pts = 1;
-    if (s.lvl >= 3) { s.stuck = RULES.stuck; s.stucks++; s.b.flags |= F.FROZEN | F.GHOST; s.b.vx = s.b.vz = 0; s.dodge = 0; pts += RULES.finishBonus; }
+    // live report #37 ("I got slimed then couldn't move"): a third glob landing DURING a dodge zeroed the dodge timer but
+    // left the dodge's STUN flag on, and only the dodge timer ever cleared it — so after the 2 s stuck the slinger had
+    // no control for the rest of the game. Being stuck now ends the dodge properly.
+    if (s.lvl >= 3) { s.stuck = RULES.stuck; s.stucks++; s.b.flags = (s.b.flags & ~F.STUN) | F.FROZEN | F.GHOST; s.b.vx = s.b.vz = 0; s.dodge = 0; pts += RULES.finishBonus; }
     if (thrower) thrower.pts += pts;
     events.push({ e: 'splat', id: s.id, by, lvl: s.lvl, pts, x: r2(s.b.x), z: r2(s.b.z) });
   }
@@ -149,6 +152,7 @@ export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
         if (s.throwCool > 0) s.throwCool -= dt;
         if (s.dodgeCool > 0) s.dodgeCool -= dt;
         if (s.dodge > 0) { s.dodge -= dt; if (s.dodge <= 0) b.flags &= ~F.STUN; }
+        else if (b.flags & F.STUN) b.flags &= ~F.STUN;          // nothing else here stuns: never let one linger (#37)
         if (s.safe > 0) { s.safe -= dt; if (s.safe <= 0) b.flags &= ~F.GHOST; }
         if (s.stuck > 0) {
           s.stuck -= dt;

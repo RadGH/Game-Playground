@@ -62,6 +62,21 @@ export function createView(ctx) {
   if (playing) ctx.ui.append(map);
   map.addEventListener('click', e => { const b = e.target.closest('.ls-spot'); if (!b || map.classList.contains('hidden')) return; ctx.send('pick', +b.dataset.i); ctx.sfx('tap'); map.classList.add('hidden'); });
   let last = null, myTurn = false, sentAt = -9;
+  // Report #42 (2026-11-06, "Can't see the hoop, ui covers it"): the camera framed the court in the room's default
+  // band for screen games (10% from the top), and on a phone the score bar, the letters strip and the pill reach
+  // ~110 px down — straight across the backboard and rim. The free band is now MEASURED: from the bottom of the lowest
+  // thing along the top to the top of the HOLD panel / mark picker, re-measured as those change size.
+  let safeAt = -1, safeKey = '';
+  function fitSafe(t) {
+    if (t - safeAt < 0.25) return; safeAt = t;
+    const H = innerHeight || 1; let top = 0, bottom = H;
+    for (const el of [bar.el, letters, pill]) { const r = el.getBoundingClientRect(); if (r.height > 0) top = Math.max(top, r.bottom); }
+    for (const el of [panel?.el, map]) { if (!el) continue; const r = el.getBoundingClientRect(); if (r.height > 0) bottom = Math.min(bottom, r.top); }
+    const s = { top: Math.min(0.45, (top + 8) / H), bottom: Math.min(0.6, Math.max(0.02, (H - bottom + 8) / H)) };
+    const key = `${s.top.toFixed(2)}:${s.bottom.toFixed(2)}`;
+    if (key !== safeKey) { safeKey = key; stage.setSafe?.(s); }
+  }
+  window.tumblefairLetterShot = { safe: () => safeKey, hoop: () => stage.toScreen(H.x, H.y + 0.6, H.z), rim: () => stage.toScreen(H.x, H.y, H.z) };   // specs (report #42)
   const panel = playing ? powerPanel(ctx, { period: L.period, label: 'HOLD to shoot', onShoot: p => { ctx.send('shoot', { p }); sentAt = performance.now() / 1000; A[myI].actor?.play('throw', 520); ctx.sfx('throw'); } }) : null;
   function place(g) {
     // who stands where: the setter on the mark while setting; everyone still in on the mark while copying
@@ -110,7 +125,7 @@ export function createView(ctx) {
       } else if (ev.e === 'end') { ctx.sfx('win'); if (ev.who >= 0) { showBanner(`${esc(nameOf(ev.who))} ${ev.who === myI ? 'win' : 'wins'}!<small>last one in</small>`, 'good', 3500); A[ev.who].actor?.play('cheer', 2500); } else showBanner('Time!<small>fewest letters wins</small>', 'good', 3000); }
     },
     frame(dt, t) {
-      frameCam();
+      fitSafe(t); frameCam();
       hoop.userData.frame(dt);
       for (const a of A) {
         const dx = a.to.x - a.pos.x, dz = a.to.z - a.pos.z, d = Math.hypot(dx, dz), sp = Math.min(d, dt * 5);
@@ -125,6 +140,6 @@ export function createView(ctx) {
       }
       panel?.frame(); void t;
     },
-    dispose() { clearTimeout(showBanner.t); bar.el.remove(); panel?.dispose(); for (const tg of tags) tg.remove(); art.dispose(); floorTex.dispose(); for (const t of numTex) t.dispose(); void marks; },
+    dispose() { if (window.tumblefairLetterShot) delete window.tumblefairLetterShot; stage.setSafe?.({ top: 0.1, bottom: 0.5 }); clearTimeout(showBanner.t); bar.el.remove(); panel?.dispose(); for (const tg of tags) tg.remove(); art.dispose(); floorTex.dispose(); for (const t of numTex) t.dispose(); void marks; },
   };
 }

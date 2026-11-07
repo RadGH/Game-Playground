@@ -8,9 +8,9 @@
 import { chip } from '../../client/gamehud.js';
 import { createTunes } from '../../client/tunes.js';
 import { createPhoneClock } from '../toss-kit.js';
-import { buildTrack, groundAt, stepBike, newBike, TRACK, DT } from './sim.js';
+import { buildTrack, groundAt, slopeAt, stepBike, newBike, wheelieRisk, landingNow, TRACK, DT } from './sim.js';
 
-const SAY = { loop: 'Flipped over! Tap LEAN', land: 'Crash! Land level!' };
+const SAY = { loop: 'Flipped over! Tap LEAN when the gauge goes red', land: 'Crash! Land when the ring is GREEN' };
 export function createView(ctx) {
   const { ui, players, me, init } = ctx, watching = me == null, HW = ctx.season === 'halloween', L = init.level;
   const byPid = new Map(players.map(p => [p.pid, p])), H = buildTrack(init.features);
@@ -19,7 +19,7 @@ export function createView(ctx) {
     <div class="dd-top"><span class="dd-title">${HW ? 'Night Ride' : 'Dirt Dash'}</span><span class="clock"><b>--</b></span></div>
     <div class="dd-board">${players.map(p => chip(p, '<em class="sc">0</em>')).join('')}</div>
     <div class="dd-track"><canvas></canvas><div class="dd-count"></div><div class="dd-say"></div></div>
-    <div class="dd-pads${watching ? ' hidden' : ''}"><button class="dd-pad dd-lean big-btn" data-k="l">◀ LEAN</button><button class="dd-pad dd-gas big-btn" data-k="g">GAS ▶</button></div>
+    <div class="dd-pads${watching ? ' hidden' : ''}"><button class="dd-pad dd-lean big-btn" data-k="l">◀ LEAN<small>nose down · air: front flip</small></button><button class="dd-pad dd-gas big-btn" data-k="g">GAS ▶<small>go · air: backflip</small></button></div>
     <p class="dd-note"></p>`;
   const $ = s => ui.querySelector(s);
   ui.classList.toggle('watching', watching); ui.dataset.phase = 'count';
@@ -45,6 +45,12 @@ export function createView(ctx) {
   // ---- my bike, simulated here; rolled back to the server's when they differ
   let phase = 'count', mine = newBike(), k = 0, hist = new Map(), lastSent = '', bikes = {}, shown = new Map(), sayT = 0, pops = [], fx = [];
   const copy = b => ({ ...b });
+  let warned = false;
+  function cue() {                                        // one buzz as the front wheel climbs into the red (#36)
+    const r = mine.air || mine.crash > 0 ? 0 : wheelieRisk(mine);
+    if (r >= 0.75 && !warned) { warned = true; tunes.fx('knock', 1.6); navigator.vibrate?.(25); }
+    else if (r < 0.5) warned = false;
+  }
   function tickMine() {
     const target = Math.floor(clock.t() / DT);
     let n = 0;
@@ -52,7 +58,7 @@ export function createView(ctx) {
       const inp = input(); hist.set(k, { b: copy(mine), inp });
       for (const ev of stepBike(mine, inp, H, L)) onMine(ev);
       const key = inp.g + ',' + inp.l; if (key !== lastSent || k % 4 === 0) { ctx.send('in', { k, ...inp }); lastSent = key; }
-      hist.delete(k - 80); k++;
+      hist.delete(k - 80); k++; cue();
     }
     if (k < target) k = target;                          // (a phone that stalled for a while: skip ahead, the server carried us)
   }
@@ -101,6 +107,7 @@ export function createView(ctx) {
     for (const P of players) { if (P.pid === focus) continue; const b = shown.get(P.pid); if (b) bike(X(b.x), Y(b.y), b.ang, k2, P, 0.35, b.flags); }
     const fb = focus === me ? { x: mine.x, y: mine.y, ang: mine.ang, flags: (mine.air ? 1 : 0) | (mine.crash > 0 ? 2 : 0) } : shown.get(focus);
     if (fb) bike(X(fb.x), Y(fb.y), fb.ang, k2, byPid.get(focus), 1, fb.flags);
+    if (focus === me && !watching && phase === 'play') guides(X, Y, k2, t);
     for (const f of fx) { const u = (nowS() - f.at) / 0.6; if (u >= 1) continue; g.fillStyle = `rgba(200,160,110,${0.7 * (1 - u)})`; for (let i = 0; i < f.n; i++) { const a = i * 2.4; g.beginPath(); g.arc(X(f.x) + Math.cos(a) * u * 26, Y(f.y) - Math.abs(Math.sin(a)) * u * 20, 4 * (1 - u) + 2, 0, Math.PI * 2); g.fill(); } }
     g.restore();
   }
@@ -118,6 +125,32 @@ export function createView(ctx) {
     const im = faces.get(P?.pid), hr = s * 0.5, hx = s * 0.3, hy = -s * 2.75;
     g.fillStyle = col; g.lineWidth = 2; g.beginPath(); g.arc(hx, hy, hr + 2.5, 0, Math.PI * 2); g.fill(); g.stroke();
     if (im?.complete && im.naturalWidth) { g.save(); g.beginPath(); g.arc(hx, hy, hr, 0, Math.PI * 2); g.clip(); g.drawImage(im, hx - hr, hy - hr, hr * 2, hr * 2); g.restore(); }
+    g.restore();
+  }
+  // ---- report #36 ("needs improvement"): the two things a rider has to judge, drawn where they look.
+  // On the ground, a WHEELIE GAUGE beside the bike (green -> yellow -> red, "LEAN!" when it is about to flip you).
+  // In the air, a LANDING GUIDE: a dashed line along the ground under you, and the bike's halo turns green when
+  // touching down now would be a clean landing, red when it would be a crash; plus a live flip counter.
+  function guides(X, Y, k2, t) {
+    const b = mine, bx = X(b.x), by = Y(b.y), s = k2 * 0.62;
+    if (b.crash > 0 || b.done) return;
+    g.save(); g.font = '900 15px system-ui, sans-serif'; g.textAlign = 'center'; g.lineJoin = 'round';
+    if (!b.air) {
+      const r = wheelieRisk(b), gx = bx - s * 2.6, gh = s * 3, gy0 = by - s * 0.4;
+      g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(gx - 5, gy0 - gh, 10, gh);
+      g.fillStyle = r < 0.55 ? '#8ff07a' : r < 0.8 ? '#ffd23f' : '#ff4a4a'; g.fillRect(gx - 4, gy0 - gh * r, 8, gh * r);
+      g.strokeStyle = C.line; g.lineWidth = 2; g.strokeRect(gx - 5, gy0 - gh, 10, gh);
+      if (r >= 0.7) { const a = 0.6 + 0.4 * Math.abs(Math.sin(t * 12)); g.globalAlpha = a; g.lineWidth = 4; g.strokeStyle = C.line; g.fillStyle = '#ff4a4a'; g.strokeText('LEAN!', gx, gy0 - gh - 8); g.fillText('LEAN!', gx, gy0 - gh - 8); g.globalAlpha = 1; }
+    } else {
+      const sl = slopeAt(H, b.x), gyy = Y(groundAt(H, b.x)), L2 = s * 3.2, c = Math.cos(sl), sn = Math.sin(sl), land = landingNow(b, H, L);
+      g.setLineDash([6, 6]); g.lineWidth = 3; g.strokeStyle = land.ok ? '#8ff07a' : '#ff6a6a';
+      g.beginPath(); g.moveTo(bx - c * L2, gyy + sn * L2); g.lineTo(bx + c * L2, gyy - sn * L2); g.stroke(); g.setLineDash([]);
+      g.lineWidth = 4; g.strokeStyle = land.ok ? 'rgba(143,240,122,.9)' : 'rgba(255,74,74,.9)';
+      g.beginPath(); g.arc(bx, by - s * 1.2, s * 2.3, 0, Math.PI * 2); g.stroke();
+      const turns = Math.floor(Math.abs(b.rot) / (Math.PI * 2) + 0.08), txt = turns ? `${turns} ${b.rot > 0 ? 'BACKFLIP' : 'FRONT FLIP'}${turns > 1 ? 'S' : ''}` : land.ok ? 'LEVEL ✓' : 'TILT!';
+      g.lineWidth = 4; g.strokeStyle = C.line; g.fillStyle = turns ? '#ffd23f' : land.ok ? '#8ff07a' : '#ff6a6a';
+      g.strokeText(txt, bx, by - s * 3.9); g.fillText(txt, bx, by - s * 3.9);
+    }
     g.restore();
   }
   function strip(t) {
@@ -139,7 +172,7 @@ export function createView(ctx) {
   function note(gs) {
     if (gs.phase === 'count') return watching ? 'Riders ready!' : 'GAS to go — tap LEAN when the front lifts!';
     if (gs.phase === 'end') return 'Race over!';
-    return watching ? '' : 'In the air: GAS = backflip · LEAN = front flip · land level!';
+    return watching ? '' : 'Ground: keep the gauge out of the red. Air: land when the ring turns GREEN.';
   }
   return {
     state(gs) {

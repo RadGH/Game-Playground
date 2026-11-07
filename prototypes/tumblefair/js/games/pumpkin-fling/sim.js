@@ -9,17 +9,21 @@
 // arm's angle in degrees), and the server works out the flight from those and that fling's wind. Solo: medals.
 export const meta = {
   id: 'pumpkin-fling', title: 'Pumpkin Fling', blurb: 'Catapult your pumpkin down the patch — but not over the graveyard wall!',
-  how: ['Tap to stop the POWER bar, then tap to LET GO as the arm swings up.', 'Halfway up throws furthest. Over the wall at the end = lost!', 'Land in the scarecrow\'s bucket for +20. Best of three flings.'],
+  how: ['Two taps. Tap 1 stops the POWER bar (it fills and empties).', 'Tap 2 LETS GO as the arm swings up — let go in the green middle!', 'Over the wall at the end = lost!', 'Land in the scarecrow\'s bucket for +20. Best of three flings.'],
   kind: 'ui', min: 1, max: 4, seconds: 66, scoring: 'points', unit: 'metres', tags: ['action', 'holiday'], season: 'halloween', card: 'card-pumpkin-fling', css: true,
 };
 export const FLINGS = 3, FLIGHT = 3.4, START_S = 1.4, G = 9.8, V_MAX = 37;
 export const WALL = 120, BUCKET_BONUS = 20, ARM_MIN = 10, ARM_MAX = 88;      // metres to the graveyard wall; arm angle range (degrees)
 export const MEDALS = [[115, 'gold'], [100, 'silver'], [80, 'bronze']];
 /** Meter speeds (seconds for a full power swing up and back; seconds for the arm to swing all the way up), wind, bucket reach. */
+// Live report #39 ("couldn't get it to work, too fast"): the power bar went up and back in 1.35 s and the arm swung
+// all the way up in 1.05 s (then flung a lob by itself) — on a phone that was over before you could react. Both
+// meters now run about half as fast. (The other half of that report was the phone itself: view.js rewrote the
+// button's text every frame, and iPhone drops a tap on a button whose text changes under the finger.)
 export const LEVELS = {
-  easy: { power: 1.8, arm: 1.5, wind: 2.5, bucket: 4.5 },
-  normal: { power: 1.35, arm: 1.05, wind: 4.5, bucket: 3.2 },
-  hard: { power: 1.0, arm: 0.75, wind: 6.5, bucket: 2.2 },
+  easy: { power: 2.8, arm: 2.5, wind: 2.5, bucket: 4.5 },
+  normal: { power: 2.3, arm: 2.0, wind: 4.5, bucket: 3.2 },
+  hard: { power: 1.8, arm: 1.5, wind: 6.5, bucket: 2.2 },
 };
 const r1 = v => Math.round(v * 10) / 10;
 /** A ping-pong meter t seconds after it started: 0 -> 1 -> 0 over one period. */

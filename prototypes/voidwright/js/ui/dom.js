@@ -18,9 +18,13 @@ export const pct = v => `${v >= 0 ? '+' : ''}${Math.round(v * 100)}%`;
 
 export function toast(text, kind = '', color = null) {
   const box = $('#toasts'); if (!box) return;
+  // the same message already on screen: keep the one card and restart its clock instead of stacking copies
+  const same = [...box.children].find(c => c.dataset.text === String(text));
+  if (same) { clearTimeout(same._t); same._t = setTimeout(() => same.remove(), 3700); box.append(same); same.style.animation = 'none'; void same.offsetWidth; same.style.animation = ''; return; }
   const t = el('div', { class: `toast ${kind}`, style: color ? `color:${color};border-color:${color}` : null }, text);
-  box.append(t); setTimeout(() => t.remove(), 3700);
-  while (box.children.length > 5) box.firstChild.remove();
+  t.dataset.text = String(text);
+  box.append(t); t._t = setTimeout(() => t.remove(), 3700);
+  while (box.children.length > 4) box.firstChild.remove();
 }
 let bannerT = null;
 export function banner(title, text = '', news = []) {

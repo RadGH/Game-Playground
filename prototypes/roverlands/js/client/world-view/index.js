@@ -123,7 +123,10 @@ export async function createWorldView({ THREE = THREE_NS, renderer, scene, camer
   function teardown() {
     for (const o of [ground?.group, water?.mesh, things?.group, grass?.mesh, tracks?.mesh, dust?.points]) if (o) scene.remove(o);
     ground?.dispose(); water?.dispose(); things?.dispose(); grass?.dispose(); tracks?.dispose(); dust?.dispose();
-    if (sky) { scene.remove(sky.group); scene.remove(sky.hemi); scene.remove(sky.fill); sky.dispose(); }
+    // the shadow rig's sun lights live in the scene, not in sky.group, and CSM.dispose() leaves them there: switching
+    // quality in a game kept the old suns and added new ones, so the picture washed out white (report #6, "hi gfx
+    // bloom" — it was never the bloom). remove() takes them out first.
+    if (sky) { sky.csm?.remove?.(); scene.remove(sky.group); scene.remove(sky.hemi); scene.remove(sky.fill); sky.dispose(); }
     composer?.dispose();
   }
 

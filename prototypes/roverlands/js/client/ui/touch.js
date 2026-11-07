@@ -3,13 +3,14 @@
 // Pinch on the right half moves the camera in / out.
 //
 //   const touch = createTouch({ settings });   touch.show(true|false)   touch.mode('all'|'foot'|'drive'|'gunner'|'passenger')
+//   touch.hitchable(bool) / touch.flippable(bool): the HITCH / FLIP buttons show only while they would do something
 //   touch.state() -> the held-state object js/game/input.js reads as its `touch` option:
 //     { active, mx, my (+1 = stick pushed up), lookX, lookY (radians since the last read), gas, brake, jump, boost, fire,
-//       use, swap, horn, camNear, camFar }       use / swap / camNear / camFar are true ONCE per press (cleared on read)
+//       use, swap, hitch, flip, horn, camNear, camFar }   use / swap / hitch / flip / camNear / camFar are true ONCE per press (cleared on read)
 import { el } from './dom.js';
 
 const BUTTONS = [
-  ['gas', 'GAS'], ['brake', 'BRAKE'], ['jump', 'JUMP'], ['use', 'ENTER'], ['fire', 'FIRE'], ['swap', 'SEAT'], ['hitch', 'HITCH'],
+  ['gas', 'GAS'], ['brake', 'BRAKE'], ['jump', 'JUMP'], ['use', 'ENTER'], ['fire', 'FIRE'], ['swap', 'SEAT'], ['hitch', 'HITCH'], ['flip', 'FLIP'],
 ];
 /** Which buttons each situation shows (the lead calls touch.mode() when the player gets in / out). */
 export const TOUCH_MODES = Object.freeze({
@@ -27,8 +28,8 @@ export function createTouch({ settings = () => ({}) } = {}) {
   zone.append(stick);
   const pad = el('div', 'rl-tbtns');
   root.append(look, zone, pad);
-  const st = { active: false, mx: 0, my: 0, lookX: 0, lookY: 0, gas: false, brake: false, jump: false, boost: false, fire: false, use: false, swap: false, hitch: false, horn: false, camNear: false, camFar: false };
-  const edgeKeys = new Set(['use', 'swap', 'hitch']);
+  const st = { active: false, mx: 0, my: 0, lookX: 0, lookY: 0, gas: false, brake: false, jump: false, boost: false, fire: false, use: false, swap: false, hitch: false, flip: false, horn: false, camNear: false, camFar: false };
+  const edgeKeys = new Set(['use', 'swap', 'hitch', 'flip']);
   const btn = {};
   for (const [k, label] of BUTTONS) {
     const b = el('button', 'rl-tbtn rl-t-' + k, label); b.type = 'button'; b.dataset.k = k; b.dataset.nonav = '1'; btn[k] = b; pad.append(b);
@@ -78,6 +79,10 @@ export function createTouch({ settings = () => ({}) } = {}) {
   look.addEventListener('pointerup', endLook); look.addEventListener('pointercancel', endLook); look.addEventListener('lostpointercapture', endLook);
   // no long-press menus / text selection over the controls
   for (const n of [root, zone, look]) { n.addEventListener('contextmenu', e => e.preventDefault()); n.addEventListener('selectstart', e => e.preventDefault()); }
+  // iPhone report #3: a held or double-tapped button raised the text-selection loupe / copy menu. Cancelling the
+  // touch itself (pointer events still arrive) stops iOS starting any of its long-press or double-tap gestures.
+  root.addEventListener('touchstart', e => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+  root.addEventListener('touchend', e => { if (e.cancelable) e.preventDefault(); }, { passive: false });
   // rotating the phone, switching apps or a lost finger: let go of everything and put the idle stick back where the
   // CSS puts it (its last pixel spot can be off-screen in the new orientation)
   function releaseAll() {
@@ -97,11 +102,16 @@ export function createTouch({ settings = () => ({}) } = {}) {
     curMode = TOUCH_MODES[m] ? m : 'all';
     for (const [k, b] of Object.entries(btn)) b.hidden = !TOUCH_MODES[curMode].includes(k);
     root.dataset.mode = curMode;
-    btn.hitch.hidden = !canHitch;
+    btn.hitch.hidden = !canHitch || canFlip;
+    btn.flip.hidden = !canFlip;
   }
   // HITCH shows only while driving something that can tow and a trailer is close enough (or one is on the hitch)
   let canHitch = false;
-  function hitchable(v) { canHitch = !!v && curMode === 'drive'; btn.hitch.hidden = !canHitch; }
+  function hitchable(v) { canHitch = !!v && curMode === 'drive'; btn.hitch.hidden = !canHitch || canFlip; }
+  // FLIP shows only while the vehicle you drive lies on its side or roof (report #5; it also rights itself after 3 s).
+  // It takes HITCH's spot in the corner — nothing hitches lying on its roof.
+  let canFlip = false;
+  function flippable(v) { canFlip = !!v && curMode === 'drive'; btn.flip.hidden = !canFlip; btn.hitch.hidden = !canHitch || canFlip; }
   mode('all');
   return {
     el: root,
@@ -110,11 +120,11 @@ export function createTouch({ settings = () => ({}) } = {}) {
       if (!shown) { for (const k of Object.keys(st)) st[k] = typeof st[k] === 'number' ? 0 : false; sid = null; fingers.clear(); stick.classList.remove('on'); for (const b of Object.values(btn)) b.classList.remove('down'); }
     },
     get shown() { return shown; },
-    mode, hitchable, get currentMode() { return curMode; },
+    mode, hitchable, flippable, get currentMode() { return curMode; },
     /** Read once a frame. Look deltas and one-press buttons are used up by the read. */
     state() {
       const out = { ...st };
-      st.lookX = 0; st.lookY = 0; st.use = false; st.swap = false; st.hitch = false; st.camNear = false; st.camFar = false;
+      st.lookX = 0; st.lookY = 0; st.use = false; st.swap = false; st.hitch = false; st.flip = false; st.camNear = false; st.camFar = false;
       out.active = shown && (st.active || out.use || out.swap);
       return out;
     },

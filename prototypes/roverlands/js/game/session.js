@@ -21,6 +21,7 @@ import { setDetail } from '../client/models/kit.js';
 import { createRider } from '../client/riders.js';
 import { createCamera } from './camera.js';
 import { createWheat } from './wheat.js';
+import { createRighting } from './righting.js';
 import { avatarOf } from '../../../knockabout/js/client/look.js';
 
 const INTERP_MS = 120;
@@ -43,7 +44,8 @@ export async function createSession(o) {
   let walker = spectate ? null : createWalker(phys, { p: startSpot() });
   let mySeat = null;             // [entId, seatIdx]
   let carrying = null, pendingPick = null;
-  let pendingHitch = null, hitchNear = null;   // a trailer I asked the room for so I can hitch it; the trailer my tow point is near
+  let pendingHitch = null, hitchNear = null, tipped = false;
+  const righting = createRighting();   // a trailer I asked the room for so I can hitch it; the trailer my tow point is near
   let pendingSeat = null, sendT = 0, flag = null, run = null, lastCrash = 0, resetHold = 0, bumpT = new Map(), lastDrive = null;
   let hostPid = net.room?.host, lastDev = 'keys', sleepCursor = 0;
   const brokenSet = new Set();
@@ -576,10 +578,12 @@ export async function createSession(o) {
         Object.assign(E.veh.input, inp);
         if (s.horn) { net.send({ t: 'horn', id: E.id }); sounds?.play('horn', { at: E.veh.rb.translation() }); }
         if (d.tow) { hitchNear = E.veh.towing ? 'on' : nearestTrailer(E); if (s.hitch) hitchPress(E); } else hitchNear = null;
-        // on its side or roof and not moving: after 3 s it is put back on its wheels by itself (phones have no R key)
+        // on its side or roof and not moving: after 3 s it is put back on its wheels by itself, at once with the
+        // phone's FLIP button (it shows only while tipped) — js/game/righting.js
         { const up = qrot(E.veh.rb.rotation(), { x: 0, y: 1, z: 0 }).y;
-          if (up < 0.55 && E.veh.speed() < 2) { frame.stuckFor = (frame.stuckFor || 0) + dt; if (frame.stuckFor > 3) { frame.stuckFor = 0; const t = E.veh.rb.translation(); E.veh.teleport([t.x, world.heightAt(t.x, t.z) + restLift(E.def) + 0.6, t.z], yawOf(E.veh.rb.rotation())); toast('Back on its wheels'); } }
-          else frame.stuckFor = 0; }
+          const r = righting.step({ up, speed: E.veh.speed(), dt, press: !!s.flip });
+          tipped = r.tipped;
+          if (r.right) { const t = E.veh.rb.translation(); E.veh.teleport([t.x, world.heightAt(t.x, t.z) + restLift(E.def) + 0.6, t.z], yawOf(E.veh.rb.rotation())); toast('Back on its wheels'); } }
         // stuck? hold R for a second to sit it back on its wheels where it is
         if (input.keys.has('KeyR')) { resetHold += dt; if (resetHold > 0.8) { const t = E.veh.rb.translation(); E.veh.teleport([t.x, world.heightAt(t.x, t.z) + restLift(E.def) + 0.6, t.z], yawOf(E.veh.rb.rotation())); resetHold = 0; toast('Back on its wheels'); } }
         else resetHold = 0;
@@ -662,7 +666,7 @@ export async function createSession(o) {
 
     // a hitch only lives while both ends are simulated on this machine (someone else took the trailer or the truck)
     for (const X of ents.values()) if (X.veh.towing && (!X.veh.local || !X.veh.towing.trailer.local)) X.veh.unhitch();
-    if (!mySeat || mySeat[1] !== 0) hitchNear = null;
+    if (!mySeat || mySeat[1] !== 0) { hitchNear = null; tipped = false; righting.reset(); }
 
     // ---- draw bodies
     for (const X of ents.values()) {
@@ -716,7 +720,14 @@ export async function createSession(o) {
     if (E) {
       const t = E.veh.rb.translation(), v = E.veh.rb.linvel();
       const cd = E.def.camera || { dist: 6, height: 2 };
-      cam.update(dt, { target: [t.x, t.y, t.z], height: seat?.gun ? cd.height + 0.5 : cd.height, dist: cd.dist, vel: [v.x, v.y, v.z], look: { x: s.lookX, y: s.lookY, active: s.lookActive || Math.abs(s.mx) > 0 && E.def.type === 'bike' && false }, follow: mySeat?.[1] === 0 && !seat?.gun, exclude: E.veh.rb });
+      // a seat that does not steer (gunner, passenger): the controller's LEFT stick aims / looks too, like the right
+      // one (report #2/#4 — the gunner's stick did nothing). The phone hides its stick there: the whole screen looks.
+      let lookX = s.lookX, lookY = s.lookY, lookActive = s.lookActive;
+      if (mySeat && mySeat[1] !== 0 && s.device === 'pad' && (Math.abs(s.mx) > 0 || Math.abs(s.my) > 0)) {
+        const st = settings() || {}, k = (st.padSens ?? 1) * 2.6 * dt;
+        lookX += s.mx * k; lookY += -s.my * k * (st.invertY ? -1 : 1); lookActive = true;
+      }
+      cam.update(dt, { target: [t.x, t.y, t.z], height: seat?.gun ? cd.height + 0.5 : cd.height, dist: cd.dist, vel: [v.x, v.y, v.z], look: { x: lookX, y: lookY, active: lookActive }, follow: mySeat?.[1] === 0 && !seat?.gun, exclude: E.veh.rb });
     } else if (walker) {
       const f = walker.feet;
       cam.update(dt, { target: f, height: 1.55, dist: 4.6, look: { x: s.lookX, y: s.lookY, active: s.lookActive }, exclude: null });
@@ -858,7 +869,7 @@ export async function createSession(o) {
       speed: E ? Math.abs(E.veh.forwardSpeed()) : walker ? Math.hypot(walker.vel[0], walker.vel[2]) : 0,
       kmh: E ? Math.round(Math.abs(E.veh.forwardSpeed()) * 3.6) : null,
       vehicle: E?.def.name || null, role: seat?.role || null, boost: E?.def.engine.boost ? E.veh.boostFuel : null,
-      hint, hitch: !!hitchNear, flag, run, grain: E?.def.harvest ? grain : null, runClock: run?.phase === 'go' && run.startedAt ? (net.serverNow() - run.startedAt) : run?.time ?? null,
+      hint, hitch: !!hitchNear, tipped, flag, run, grain: E?.def.harvest ? grain : null, runClock: run?.phase === 'go' && run.startedAt ? (net.serverNow() - run.startedAt) : run?.time ?? null,
       markers, toasts: toasts.filter(t => performance.now() - t.at < 4000).map(t => t.text),
       camYaw: cam.yaw, me: walker ? walker.feet : null, device: lastDev, mode: net.room?.mode, carrying: flag?.state === 'carried' && flag.by === me,
       biome: world.biomeAt?.(...(E ? [E.veh.rb.translation().x, E.veh.rb.translation().z] : walker ? [walker.feet[0], walker.feet[2]] : [0, 0])),

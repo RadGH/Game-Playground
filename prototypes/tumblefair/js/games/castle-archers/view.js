@@ -9,7 +9,7 @@
 import { chip, esc } from '../../client/gamehud.js';
 import { createTunes } from '../../client/tunes.js';
 import { createPhoneClock } from '../toss-kit.js';
-import { launch, stepArrow, goblinAt } from './sim.js';
+import { launch, stepArrow, goblinAt, A_MIN } from './sim.js';
 
 export function createView(ctx) {
   const { ui, players, me, init } = ctx, watching = me == null, HW = ctx.season === 'halloween', L = init.level, K = init.kinds;
@@ -37,7 +37,7 @@ export function createView(ctx) {
   const X = x => ox + x * k, Y = y => gy - y * k;
 
   // ---- aiming
-  const aimFromDrag = d => { const dx = d.sx - d.x, dy = d.y - d.sy, len = Math.hypot(dx, dy); return { a: Math.max(-0.5, Math.min(1.45, Math.atan2(dy, Math.max(0.01, dx)))), p: Math.min(1, len / Math.max(110, Math.min(W, H) * 0.45)), len }; };
+  const aimFromDrag = d => { const dx = d.sx - d.x, dy = d.y - d.sy, len = Math.hypot(dx, dy); return { a: Math.max(A_MIN, Math.min(1.45, Math.atan2(dy, Math.max(0.01, dx)))), p: Math.min(1, len / Math.max(110, Math.min(W, H) * 0.45)), len }; };
   const canShoot = () => !watching && phase === 'play' && clock.t() - lastShot >= init.cool;
   function shoot(a, p) {
     if (!canShoot()) return;
@@ -51,7 +51,7 @@ export function createView(ctx) {
   const onKey = e => {
     if (watching || /^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName || '')) return;
     const A = keyAim || (keyAim = { a: 0.45, p: 0.6 });
-    if (e.code === 'ArrowUp' || e.code === 'KeyW') A.a = Math.min(1.45, A.a + 0.04); else if (e.code === 'ArrowDown' || e.code === 'KeyS') A.a = Math.max(-0.5, A.a - 0.04);
+    if (e.code === 'ArrowUp' || e.code === 'KeyW') A.a = Math.min(1.45, A.a + 0.04); else if (e.code === 'ArrowDown' || e.code === 'KeyS') A.a = Math.max(A_MIN, A.a - 0.04);
     else if (e.code === 'ArrowRight' || e.code === 'KeyD') A.p = Math.min(1, A.p + 0.025); else if (e.code === 'ArrowLeft' || e.code === 'KeyA') A.p = Math.max(0, A.p - 0.025);
     else if ((e.code === 'Space' || e.code === 'Enter') && !e.repeat) shoot(A.a, A.p); else return;
     e.preventDefault();

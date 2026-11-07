@@ -110,10 +110,10 @@ gas/brake and steer unless noted. Fire = left click / RT; F = Y on a controller.
 
 | type | W / S | A / D | Space | Shift | fire | notes |
 |---|---|---|---|---|---|---|
-| car (jeep, sedan, trucks…) | gas / brake, then reverse | steer (or point the camera: look-to-steer) | handbrake (drift) / flip back when upside down | boost if it has one | — | hold R to sit it back on its wheels; in the air Q / Z or the stick's up / down lean it back / forward (gas no longer does — it flipped people holding gas over jumps); plane: stick = elevator |
+| car (jeep, sedan, trucks…) | gas / brake, then reverse | steer (or point the camera: look-to-steer) | handbrake (drift) / flip back when upside down | boost if it has one | — | hold R (d-pad right, phone FLIP — shown only while tipped) to sit it back on its wheels; it does so by itself after 3 s lying still on its side or roof (`js/game/righting.js`); in the air Q / Z or the stick's up / down lean it back / forward (gas no longer does — it flipped people holding gas over jumps); plane: stick = elevator |
 | bike (dirtbike, motorcycle) | gas / brake | steer (it leans itself) | rear brake | lean back (wheelie); Q / Z lean back / forward | — | controller / phone: left stick up / down leans forward / back (pitch): on the ground an angle target (`def.wheelie`, 0.45 rad), in the air (a 2.2 rad/s pitch-rate hold, `def.airPitch`); falls over if it goes too far over |
 | bicycle | **tap** gas to sprint (hold = cruise) | steer | brake | — | — | `pedal` in its data |
-| tank | both tracks | turn (on the spot with no gas) | — | — | gun (the driver aims with the camera) | no look-to-steer |
+| tank | both tracks | turn (on the spot with no gas) | — | — | gun (the driver aims with the camera) | no look-to-steer. Skid steering: the tracks only resist the hull sliding, and a yaw drive turns it toward `steer.turn` rad/s standing (1.3) down to `steer.turnFast` at top speed (0.7), limited by track grip × `steer.bite` (report #7: ten wheels' side grip had held it nearly straight) |
 | hover | thrust / reverse | turn | — | boost | gun | floats over water |
 | helicopter | tip forward / back | turn | climb | sink | — | controller / phone: stick tips, RT / GAS climbs, LT / BRAKE sinks; climb aims for `heli.climb` m/s (9); rotor spins up in ~1 s |
 | plane | throttle lever up / down (it stays) | roll + turn | pull up | push down | — | needs ~27 m/s to lift off (the runway) |
@@ -208,7 +208,12 @@ profiles.json, bests.json). Public: games.radgh.com via the RGS repo (`~/claude/
 * **Vehicle rating card** after leaving a vehicle you drove for 60 s+ (once per vehicle per visit): 👍/👎 + reasons
   that say what kind (Grippy, Fun to jump… / Floaty, Slides too much…) + "Tell us more" -> `{ t:'rate' }` -> insights.
 * **Phone controls** (`touch.js`): a stick under the left thumb, drag right to look, pinch for camera distance, GAS /
-  BRAKE / JUMP / ENTER / FIRE / SEAT buttons (which show depends on `ui.touch.mode()`).
+  BRAKE / JUMP / ENTER / FIRE / SEAT buttons (which show depends on `ui.touch.mode()`), HITCH and FLIP only while
+  they would do something (`ui.touch.hitchable()` / `flippable()`). A seat that does not steer (gunner, passenger) has
+  no stick: the whole screen aims / looks (a controller's left stick aims there too). Every button sits in the
+  bottom-right corner; the page cancels `touchstart` on the controls and has `user-select: none` +
+  `-webkit-touch-callout: none` so iPhone taps never raise the selection loupe or copy menu (`tests/ui.spec.js`
+  "phone controls").
 * **Controller in every menu**: Knockabout's `nav.js` focus ring; d-pad / stick moves, A presses, B backs, Start /
   Back open the menu / map in a game; arrows / Enter / Esc on a keyboard.
 * `dev.html` + `dev.js` — the screens on their own over a flat painted stand-in (no 3D), used by `tests/ui.spec.js`.

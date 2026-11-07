@@ -616,7 +616,7 @@ export const GAMES = Object.freeze({
    "how": [
     "Everyone gets a theme and a tray of random clothes.",
     "Tap pieces to dress your model, then pick a pose.",
-    "Every outfit walks the runway (nobody knows whose is whose).",
+    "Everyone struts the runway as their own character.",
     "Vote for the best look (not your own!). The judge gives a ribbon too."
    ],
    "kind": "ui",
@@ -3506,9 +3506,9 @@ export const GAMES = Object.freeze({
    "title": "Dirt Dash",
    "blurb": "Race your dirt bike over the jumps, flip in the air and land it!",
    "how": [
-    "Hold GAS to go. The front lifts as you speed up: tap LEAN to keep it down.",
+    "Hold GAS to go. The front lifts as you speed up: tap LEAN when the gauge goes red.",
     "In the air, GAS flips you back and LEAN flips you forward.",
-    "Land level with the ground or you crash! Flips, wheelies and distance all score."
+    "Touch down while the ring is GREEN or you crash! Flips, wheelies and distance all score."
    ],
    "kind": "ui",
    "min": 1,
@@ -3601,6 +3601,7 @@ export const GAMES = Object.freeze({
    "how": [
     "Drag BACK from anywhere and let go to shoot, like a bow string.",
     "Further back = more power. The arrow flies in an arc and the wind pushes it.",
+    "Goblin at the gate? Drag back and UP to shoot straight down over the wall.",
     "Stop the goblins reaching the gate. Bruisers take 4 arrows!"
    ],
    "kind": "ui",
@@ -3900,10 +3901,10 @@ export const GAMES = Object.freeze({
    "title": "Coffin Cart Rally",
    "blurb": "Race coffin carts round the crypt — hop the skeleton hands!",
    "how": [
+    "Follow the glowing arrows on the floor — only laps that way round count.",
     "Point the stick where you want to go — your cart turns that way.",
     "A purple crack = a hand is coming. Press A to HOP over it!",
-    "Roll through a candle gate while it is lit for a burst of speed.",
-    "B = lid slam: BOO the carts right beside you."
+    "Lit candle gate = speed burst. B = lid slam: BOO the carts beside you."
    ],
    "kind": "arena",
    "min": 1,
@@ -3995,8 +3996,9 @@ export const GAMES = Object.freeze({
    "title": "Pumpkin Fling",
    "blurb": "Catapult your pumpkin down the patch — but not over the graveyard wall!",
    "how": [
-    "Tap to stop the POWER bar, then tap to LET GO as the arm swings up.",
-    "Halfway up throws furthest. Over the wall at the end = lost!",
+    "Two taps. Tap 1 stops the POWER bar (it fills and empties).",
+    "Tap 2 LETS GO as the arm swings up — let go in the green middle!",
+    "Over the wall at the end = lost!",
     "Land in the scarecrow's bucket for +20. Best of three flings."
    ],
    "kind": "ui",

@@ -1,6 +1,15 @@
 {
  "entries": [
   {
+   "id": "2026-11-06e",
+   "date": "2026-11-06",
+   "title": "No more message pile-ups",
+   "items": [
+    "A full cargo hold now warns you once instead of stacking the same message down the screen for every rock you fly past.",
+    "The same message never shows twice at once anywhere in the game — a repeat just keeps the one already on screen."
+   ]
+  },
+  {
    "id": "2026-11-06d",
    "date": "2026-11-06",
    "title": "Star map fix",

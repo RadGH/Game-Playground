@@ -1,72 +1,85 @@
 {
-  "entries": [
-    {
-      "id": "2026-10-25f",
-      "date": "2026-10-25",
-      "title": "The harvester",
-      "items": [
-        "The Goldline Harvester is parked at Haystead Farms: drive it through the tall wheat and it cuts a path, counting the grain you've gathered. Other players see the cut fields too.",
-        "That's every vehicle on the list — 23 in all."
-      ]
-    },
-    {
-      "id": "2026-10-25e",
-      "date": "2026-10-25",
-      "title": "Six more vehicles and better handling",
-      "items": [
-        "New: the Meadowlark Sedan (with a trunk that really carries things), the Scramble Quad, the Sandhopper Buggy with huge springy suspension, the Roadrunner Motorcycle, the Pedalpush Bicycle (tap gas to pedal faster) and the Trailhauler Six army truck with an open back you can stand in.",
-        "The helicopter climbs much faster, and its rotor spins up quicker.",
-        "Lean forward and back with the left stick (Z and Q on a keyboard): bikes do wheelies and stoppies on the ground, and every vehicle can be tipped in the air to land a jump. Holding gas over a jump no longer tips you.",
-        "On a controller or phone the plane's nose follows the stick.",
-        "Helicopter on a controller or phone: the stick tips it, gas climbs and brake sinks.",
-        "Trailers hook onto many more vehicles now, including the forklift, tank, sedan, quad, buggy and army truck."
-      ]
-    },
-    {
-      "id": "2026-10-25d",
-      "date": "2026-10-25",
-      "title": "Big rigs and sirens",
-      "items": [
-        "The Longhaul Semi, with three trailers to hook on: a box trailer (open the back doors with F and drive a small vehicle up the ramp inside), a flatbed and a tanker.",
-        "Emergency vehicles: the Brightwater Fire Truck (a second player works the water cannon on the back), the Swiftcare Ambulance (back doors open into a ramp) and a Patrol Car. The driver's fire button turns the siren and flashing lights on and off.",
-        "The sandbox lot has a second row of parking spots, so every vehicle has a place."
-      ]
-    },
-    {
-      "id": "2026-10-25c",
-      "date": "2026-10-25",
-      "title": "Seven new vehicles",
-      "items": [
-        "New to drive: the Ironback Tank, a hover tank that floats over the river, a helicopter, a bush plane waiting at the end of the runway, a rocket car, a forklift whose forks really lift things, and a small utility trailer.",
-        "Trailers: back the Trail Jeep up to the trailer and press T (d-pad left on a controller, HITCH on a phone) to hook it on; press again to let it go.",
-        "Your character now runs by default; hold Shift (B on a controller) to walk.",
-        "A vehicle stuck on its side or roof puts itself back on its wheels after a few seconds.",
-        "Phones: the thumb stick no longer stops working after a long press or after turning the phone, and long presses no longer select text or open the copy menu."
-      ]
-    },
-    {
-      "id": "2026-10-25b",
-      "date": "2026-10-25",
-      "title": "iPhone fix",
-      "items": [
-        "The game no longer shows a black screen on iPhones (the 3D view now draws on every phone).",
-        "Crates and barrels no longer sit on the vehicle parking spots at home base."
-      ]
-    },
-    {
-      "id": "2026-10-25",
-      "date": "2026-10-25",
-      "title": "First test drive",
-      "items": [
-        "A big landscape to drive across: meadows, pine ridges, muddy bogs, a river with fords and a bridge, red-rock canyons, dunes, snowy uplands and farmland.",
-        "Two vehicles to try: the Trail Jeep (a driver, a gunner and a passenger) and the Dirtbike.",
-        "Flag Run: drive out, get out and grab the flag, then bring it home. The clock starts when you leave home, and your best time is kept.",
-        "Sandbox: every vehicle parked around — drive anything, anywhere.",
-        "Play solo in one tap, or host a room with a four-letter code, a QR code and an invite link. Public rooms show up in Find a game, and you can just watch too.",
-        "A map and a minimap with everyone's vehicles, the flag and home. Drop a pin on the map and everyone in the room sees it.",
-        "Make your driver in the look editor. Signing in is optional — it keeps your driver on every device.",
-        "Rate a vehicle after a minute of driving it, and use the ! button to report a bug."
-      ]
-    }
-  ]
+ "entries": [
+  {
+   "id": "2026-11-06",
+   "date": "2026-11-06",
+   "title": "Tank steering, FLIP button and phone fixes",
+   "items": [
+    "The Ironback Tank now turns properly — spin on the spot or steer while driving.",
+    "Tipped over? Tap FLIP to get back on your wheels (or wait 3 seconds). The HITCH button now shows up on phones too.",
+    "The seat button is bigger and stays in the corner, out of the way.",
+    "Tapping the phone buttons no longer brings up text selection or the copy menu.",
+    "Gunners and passengers can aim with either stick on a controller.",
+    "Changing graphics quality in a game no longer washes the screen out white."
+   ]
+  },
+  {
+   "id": "2026-10-25f",
+   "date": "2026-10-25",
+   "title": "The harvester",
+   "items": [
+    "The Goldline Harvester is parked at Haystead Farms: drive it through the tall wheat and it cuts a path, counting the grain you've gathered. Other players see the cut fields too.",
+    "That's every vehicle on the list — 23 in all."
+   ]
+  },
+  {
+   "id": "2026-10-25e",
+   "date": "2026-10-25",
+   "title": "Six more vehicles and better handling",
+   "items": [
+    "New: the Meadowlark Sedan (with a trunk that really carries things), the Scramble Quad, the Sandhopper Buggy with huge springy suspension, the Roadrunner Motorcycle, the Pedalpush Bicycle (tap gas to pedal faster) and the Trailhauler Six army truck with an open back you can stand in.",
+    "The helicopter climbs much faster, and its rotor spins up quicker.",
+    "Lean forward and back with the left stick (Z and Q on a keyboard): bikes do wheelies and stoppies on the ground, and every vehicle can be tipped in the air to land a jump. Holding gas over a jump no longer tips you.",
+    "On a controller or phone the plane's nose follows the stick.",
+    "Helicopter on a controller or phone: the stick tips it, gas climbs and brake sinks.",
+    "Trailers hook onto many more vehicles now, including the forklift, tank, sedan, quad, buggy and army truck."
+   ]
+  },
+  {
+   "id": "2026-10-25d",
+   "date": "2026-10-25",
+   "title": "Big rigs and sirens",
+   "items": [
+    "The Longhaul Semi, with three trailers to hook on: a box trailer (open the back doors with F and drive a small vehicle up the ramp inside), a flatbed and a tanker.",
+    "Emergency vehicles: the Brightwater Fire Truck (a second player works the water cannon on the back), the Swiftcare Ambulance (back doors open into a ramp) and a Patrol Car. The driver's fire button turns the siren and flashing lights on and off.",
+    "The sandbox lot has a second row of parking spots, so every vehicle has a place."
+   ]
+  },
+  {
+   "id": "2026-10-25c",
+   "date": "2026-10-25",
+   "title": "Seven new vehicles",
+   "items": [
+    "New to drive: the Ironback Tank, a hover tank that floats over the river, a helicopter, a bush plane waiting at the end of the runway, a rocket car, a forklift whose forks really lift things, and a small utility trailer.",
+    "Trailers: back the Trail Jeep up to the trailer and press T (d-pad left on a controller, HITCH on a phone) to hook it on; press again to let it go.",
+    "Your character now runs by default; hold Shift (B on a controller) to walk.",
+    "A vehicle stuck on its side or roof puts itself back on its wheels after a few seconds.",
+    "Phones: the thumb stick no longer stops working after a long press or after turning the phone, and long presses no longer select text or open the copy menu."
+   ]
+  },
+  {
+   "id": "2026-10-25b",
+   "date": "2026-10-25",
+   "title": "iPhone fix",
+   "items": [
+    "The game no longer shows a black screen on iPhones (the 3D view now draws on every phone).",
+    "Crates and barrels no longer sit on the vehicle parking spots at home base."
+   ]
+  },
+  {
+   "id": "2026-10-25",
+   "date": "2026-10-25",
+   "title": "First test drive",
+   "items": [
+    "A big landscape to drive across: meadows, pine ridges, muddy bogs, a river with fords and a bridge, red-rock canyons, dunes, snowy uplands and farmland.",
+    "Two vehicles to try: the Trail Jeep (a driver, a gunner and a passenger) and the Dirtbike.",
+    "Flag Run: drive out, get out and grab the flag, then bring it home. The clock starts when you leave home, and your best time is kept.",
+    "Sandbox: every vehicle parked around — drive anything, anywhere.",
+    "Play solo in one tap, or host a room with a four-letter code, a QR code and an invite link. Public rooms show up in Find a game, and you can just watch too.",
+    "A map and a minimap with everyone's vehicles, the flag and home. Drop a pin on the map and everyone in the room sees it.",
+    "Make your driver in the look editor. Signing in is optional — it keeps your driver on every device.",
+    "Rate a vehicle after a minute of driving it, and use the ! button to report a bug."
+   ]
+  }
+ ]
 }

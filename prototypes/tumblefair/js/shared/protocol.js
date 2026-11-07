@@ -13,6 +13,13 @@ export const newCode = rand => { let c = ''; for (let i = 0; i < CODE_LENGTH; i+
 /** A player's name: 1-14 visible characters, no control characters or markup, spaces collapsed. */
 export const cleanName = s => { const n = String(s ?? '').replace(/[\u0000-\u001f\u007f<>&"'`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, 14); return n.length ? n : null; };
 
+/** Report #34: a chat line — no control characters, spaces collapsed, 1-80 characters; null when nothing is left.
+ *  (Browsers draw it with textContent, so markup is harmless and an emoji or an apostrophe stays as typed.) */
+export const CHAT_MAX = 80;
+export const cleanChat = s => { const t = String(s ?? '').replace(/[\u0000-\u001f\u007f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, '').replace(/\s+/g, ' ').trim(); return t ? [...t].slice(0, CHAT_MAX).join('') : null; };
+/** The quick lines on the chat sheet (one tap; the emoji ones double as reactions). */
+export const CHAT_QUICK = Object.freeze(['👍', '😂', '😮', '😭', '🎉', '🔥', 'Good game!', 'Nice one!', 'So close!', 'Oops!', 'Ready!', 'One more?', 'Be right back', 'Rematch!']);
+
 /**
  * Round 7 (owner 2026-10-22): players rate a minigame after playing it — 👍 or 👎, then any of these reasons. The ids
  * travel comma-separated in `rate.why`; anything not on the list is dropped. The labels are what the buttons say.
@@ -64,6 +71,7 @@ export const CLIENT_MSGS = Object.freeze({
   buy:     { fields: { id: 'str:40' }, rate: 2, burst: 6 },
   equip:   { fields: { id: 'str:40' }, rate: 4, burst: 12 },
   emote:   { fields: { e: 'str:16' }, rate: 2, burst: 5 },
+  chat:    { fields: { text: 'str:120' }, rate: 1, burst: 4 },              // report #34 (2026-11-06): room chat (cleanChat: 1-80 characters)
   ping:    { fields: { at: 'num' }, rate: 2, burst: 6 },
   rate:    { fields: { game: 'str:40', v: 'int', why: '?str:120' }, rate: 2, burst: 10 },   // round 7: 👍/👎 a minigame you played (+ reasons)
   rooms:   { fields: {}, rate: 1, burst: 4 },                         // round 7: the public games list

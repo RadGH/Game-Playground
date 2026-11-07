@@ -31,6 +31,11 @@ export const BOARD = Object.freeze({
   SETTLE: { duel: 700, striker: 1100, wheel: 1200, shell: 600, pact: 600, crowd: 600, fortune: 800 },
   STRIKE_PERIOD: 1300, WHEEL_SEG_MS: 130, WHEEL_SEGS: 8, SHELL_SWAPS: 5, SHELL_SWAP_MS: 330, SHELL: 3, CROWD_BACK: 3, CROWD_TIP: 2,
   ITEMS: 2, TRAP: 4, TOLL: 3,
+  // report #40 (2026-11-06): a player whose phone has gone is played for after this long, not the full timer
+  AWAY_MS: 1200,
+  // report #44 (2026-11-06, "radley keeps beating me"): at the start of every round after the first, whoever is furthest
+  // behind gets a small catch-up gift, if they trail the leader by at least a ribbon (tickets + ribbons at 10 each)
+  CATCHUP: 3, CATCHUP_GAP: 10,
 });
 /** The live events, by space type (a space type not listed here does its effect at once). */
 export const EVENT_SPACES = Object.freeze({ duel: 'duel', striker: 'striker', chance: 'wheel', shell: 'shell', pact: 'pact', crowd: 'crowd', fortune: 'fortune' });
@@ -57,13 +62,13 @@ export function indexBoard(def) {
   return byId;
 }
 
-export function createBoardMatch({ def, chance, order, rng, names = {}, emit = () => {}, moves = 'dice' }) {
+export function createBoardMatch({ def, chance, order, rng, names = {}, emit = () => {}, moves = 'dice', away = () => false }) {
   const cards = moves === 'cards';
   const byId = indexBoard(def);
   const R = { ...DEFAULT_RULES, ...(chance.board || {}) };
   const S = {
     order: order.slice(), pos: {}, tickets: {}, ribbons: {},
-    turn: -1, pid: null, sub: 'idle', until: 0, left: 0, ask: null, rolled: 0, roundDone: false,
+    turn: -1, pid: null, sub: 'idle', until: 0, since: 0, left: 0, ask: null, rolled: 0, roundDone: false,
     boost: {}, stats: {}, bulletin: null, mods: {}, hands: {},
     ev: null, items: {}, traps: {}, used: false, after: null,
   };
@@ -107,6 +112,7 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
   /** A round: the Fair Bulletin (from round 2; the last round is Last Call), then everyone's turn. */
   function beginRound(now, round = 1, rounds = null) {
     S.roundDone = false; S.turn = -1; S.mods = {}; S.bulletin = null;
+    if (round > 1) catchUp();
     const list = chance.bulletins || [];
     let b = null;
     if (rounds != null && round >= rounds && round > 1) b = LAST_CALL;
@@ -121,6 +127,17 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
     Object.assign(ev, snap());
     emit(ev);
     S.sub = 'bulletin'; S.until = now + BOARD.BULLETIN_MS;
+  }
+  /** Report #44: a few tickets for whoever is furthest behind (ties share it), when they trail the leader by a ribbon. */
+  function catchUp() {
+    if (S.order.length < 2) return;
+    const worth = p => (S.ribbons[p] || 0) * BOARD.RIBBON_COST + (S.tickets[p] || 0);
+    const vals = S.order.map(worth), lo = Math.min(...vals), hi = Math.max(...vals);
+    if (hi - lo < BOARD.CATCHUP_GAP) return;
+    for (const p of S.order.filter(q => worth(q) === lo)) {
+      const d = give(p, BOARD.CATCHUP, false);             // a gift: not "picked up on the board" (Ticket Magnet)
+      emit({ ev: 'fx', pid: p, at: S.pos[p], kind: 'catchup', d, text: `Catch-up: ${name(p)} is furthest behind, so the fair slips them ${plural(d)}.`, ...snap() });
+    }
   }
   const standingsOf = () => S.order.map(pid => ({ pid, r: S.ribbons[pid], t: S.tickets[pid] })).sort((a, b) => b.r - a.r || b.t - a.t);
   /** Hop n spaces along the main way (passing the gate pays the lap bonus). -> the spaces walked. */
@@ -138,7 +155,7 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
   function nextTurn(now) {
     S.turn++; S.ask = null; S.ev = null; S.used = false; S.after = null;
     if (S.turn >= S.order.length) { S.sub = 'idle'; S.pid = null; S.roundDone = true; emit({ ev: 'roundEnd' }); return; }
-    S.pid = S.order[S.turn]; S.sub = 'roll'; S.until = now + BOARD.ROLL_MS;
+    S.pid = S.order[S.turn]; S.sub = 'roll'; S.until = now + BOARD.ROLL_MS; S.since = now;
     emit({ ev: 'turn', pid: S.pid, ms: BOARD.ROLL_MS, items: itemsView(), ...(cards ? { hands: handsView() } : {}) });
   }
   const handsView = () => Object.fromEntries(Object.entries(S.hands).map(([p, h]) => [p, h.slice()]));
@@ -230,7 +247,7 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
     if (S.ask && !S.ask.answered) { S.sub = 'walk-ask'; S.until = now + ms; }
     else { S.sub = 'walk'; S.until = now + ms + 120; }
   }
-  function openAsk(now) { S.sub = 'ask'; S.until = now + BOARD.ASK_MS; emit({ ev: 'ask', pid: S.pid, kind: S.ask.kind, options: S.ask.options, ms: BOARD.ASK_MS, at: S.ask.at }); }
+  function openAsk(now) { S.sub = 'ask'; S.until = now + BOARD.ASK_MS; S.since = now; emit({ ev: 'ask', pid: S.pid, kind: S.ask.kind, options: S.ask.options, ms: BOARD.ASK_MS, at: S.ask.at }); }
   function choose(pid, i, now) {
     if (!Number.isInteger(i)) return false;
     if (S.sub === 'event') return evInput(pid, i, now);
@@ -526,8 +543,17 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
     }
     return out;
   }
+  /** Report #40: who the board is waiting on right now, and since when (null when it is not waiting on anyone). */
+  function waitingOn() {
+    if (S.sub === 'roll' || S.sub === 'ask') return { pids: [S.pid], since: S.since };
+    const E = S.ev;
+    if (S.sub === 'event' && E && E.stage !== 'settle' && E.stage !== 'shuffle') return { pids: E.pids.filter(p => !(p in E.inp)), since: E.t0 };
+    return null;
+  }
+  /** Everyone it waits on has gone (their phone closed or slept): answer for them after AWAY_MS, not the whole timer. */
+  const awayDue = now => { const w = waitingOn(); return !!w && w.pids.length > 0 && w.pids.every(p => away(p)) && now >= w.since + BOARD.AWAY_MS; };
   function tick(now) {
-    if (S.sub === 'idle' || now < S.until) return;
+    if (S.sub === 'idle' || (now < S.until && !awayDue(now))) return;
     switch (S.sub) {
       case 'roll': if (cards) playCard(S.pid, 0, now); else roll(S.pid, now); break;   // the timer rolls (or plays your first card) for you
       case 'dice': walk(now); break;

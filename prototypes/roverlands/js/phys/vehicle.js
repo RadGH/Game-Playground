@@ -248,7 +248,10 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
       const gb = w.hitInfo?.body;
       const groundV = gb && gb.rb && gb !== self ? pointVel(gb.rb, at) : null;
       const rel = groundV ? sub(pv, groundV) : pv;
-      const vf = dot(rel, f), vs = dot(rel, s);
+      // a tank skids its tracks round when it turns, so its tracks only fight sliding and rolling of the HULL, not the
+      // hull's yaw — the yaw is set below by the steering (report #7: ten wheels' side grip held it nearly straight)
+      const relT = def.type === 'tank' ? sub(rel, cross(scale(up, dot(av, up)), r)) : rel;
+      const vf = dot(rel, f), vs = dot(relT, s), vfT = dot(relT, f);
 
       const surf = w.surface;
       const mu = (def.tyre.grip ?? 1.5) * (surf.grip ?? 1);
@@ -262,11 +265,11 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
       if (def.type === 'tank') {
         // tank controls: each track has its own throttle — forward/back on both, steer adds to one side and takes
         // from the other, so steer alone spins it on the spot. Letting go holds the tracks (they don't coast).
-        const fwdIn = input.throttle - input.brake;
-        const t = clamp(fwdIn + (w.side === 'L' ? -1 : 1) * -input.steer * (def.steer.pivot ?? 1), -1, 1);
+        // Both tracks push the same way here; turning (on the spot or on the move) is the yaw drive after this loop.
+        const t = clamp(input.throttle - input.brake, -1, 1);
         const top = def.engine.top * (t < 0 ? (def.engine.reverse / def.engine.top) : 1);
-        if (Math.abs(t) > 0.02) Fx += Math.sign(t) * def.engine.force * Math.abs(t) * (1 - 0.8 * clamp(Math.abs(vf) / top, 0, 1) ** 2) * (Math.sign(vf) === Math.sign(t) || Math.abs(vf) < 0.5 ? 1 : 1.6) / driven;
-        else Fx -= clamp(vf * perWheelMass / dt * 0.15, -maxF * 0.8, maxF * 0.8);
+        if (Math.abs(t) > 0.02) Fx += Math.sign(t) * def.engine.force * Math.abs(t) * (1 - 0.8 * clamp(Math.abs(vfT) / top, 0, 1) ** 2) * (Math.sign(vfT) === Math.sign(t) || Math.abs(vfT) < 0.5 ? 1 : 1.6) / driven;
+        else Fx -= clamp(vfT * perWheelMass / dt * 0.15, -maxF * 0.8, maxF * 0.8);
       } else if (w.def.drive) {
         Fx += engineForce(vf) / driven;
         // brake doubles as reverse once nearly stopped (the way every arcade car works)
@@ -276,7 +279,8 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
       if (def.type !== 'tank' && input.brake > 0.01 && (vf > 1.0 || vf < -def.engine.reverse * 1.1)) Fx -= Math.sign(vf) * maxF * 0.9 * input.brake * (w.def.brake ?? 1);
       if (def.type !== 'tank' && input.throttle > 0.01 && vf < -1.0) Fx += maxF * 0.8 * input.throttle;        // pressing gas while rolling back brakes
       // rolling drag: soft ground holds you back, hard roads barely
-      Fx -= vf * N * (0.001 + 0.008 * Math.max(0, (surf.drag ?? 1) - 1)) + Math.sign(vf) * Math.min(Math.abs(vf) * 50, N * 0.012 * (surf.drag ?? 1));
+      { const vd = def.type === 'tank' ? vfT : vf;
+        Fx -= vd * N * (0.001 + 0.008 * Math.max(0, (surf.drag ?? 1) - 1)) + Math.sign(vd) * Math.min(Math.abs(vd) * 50, N * 0.012 * (surf.drag ?? 1)); }
       if (handLocked) Fx = -Math.sign(vf) * Math.min(Math.abs(vf) * perWheelMass / dt, maxF * 0.75);
       // coasting with no input: a gentle engine brake so a parked car on a slope eventually stops
       if (input.throttle < 0.01 && input.brake < 0.01 && Math.abs(vf) < 1.5 && !self.driver) Fx -= vf * perWheelMass / dt * 0.25;
@@ -320,6 +324,22 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
       // stay level-ish: the pads do most of it, this stops a slow roll on water
       const tilt = cross(up, UP);
       rb.applyTorqueImpulse(scale(tilt, mass * 6 * dt), true);
+    }
+
+    if (def.type === 'tank' && grounded > 0) {
+      // skid steering: the tracks drive the hull toward a turn rate — the full rate on the spot, less at top speed —
+      // limited by how much grip the tracks have (ice turns lazily, mud a little slower). Backing up turns the way a
+      // car does, so left on the stick always swings the back end the same way.
+      const st2 = def.steer, e = def.engine;
+      const vfLin = dot(lv, fwd), frac = clamp(Math.abs(vfLin) / e.top, 0, 1);
+      const rate = (st2.turn ?? 1.3) + ((st2.turnFast ?? 0.7) - (st2.turn ?? 1.3)) * frac;
+      const wantYaw = -input.steer * rate * (vfLin < -1 && input.brake > input.throttle ? -1 : 1);
+      let mu = 0; for (const w of wheels) if (w.ground) mu += (def.tyre.grip ?? 1.3) * (w.surface?.grip ?? 1);
+      mu /= wheels.length;
+      const halfTrack = Math.max(...wheels.map(w => Math.abs(w.p.x)));
+      const maxT = mu * mass * 9.81 * halfTrack * (st2.bite ?? 0.6) * dt;
+      const yawRate = dot(av, up);
+      rb.applyTorqueImpulse(scale(up, clamp((wantYaw - yawRate) * iy * 6 * dt, -maxT, maxT)), true);
     }
 
     if (def.type === 'heli') flyHeli(dt, q, lv, av, fwd, up);

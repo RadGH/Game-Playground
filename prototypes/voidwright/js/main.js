@@ -293,7 +293,7 @@ function handleNotes(notes) {
         }
         break;
       }
-      case 'full': toast('Cargo hold full — tap Cargo (or Menu → Parts hold) to see it; sell at a station market or dump some.', 'bad'); break;
+      case 'full': toast('Cargo full — tap Cargo to see it. Sell at a market or dump some.', 'bad'); break;
       case 'rep': toast(`${FACTIONS[n.faction].short}: ${n.why} (${n.d > 0 ? '+' : ''}${n.d})`, n.d < 0 ? 'bad' : 'good'); break;
       case 'enrage': banner(`${n.name} is enraged!`); play('warn'); break;
     }

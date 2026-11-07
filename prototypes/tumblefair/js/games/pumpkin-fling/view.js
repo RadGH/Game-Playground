@@ -27,7 +27,8 @@ export function createView(ctx) {
   ui.append(wrap);
   const $ = s => wrap.querySelector(s);
   const canvas = $('canvas'), g = canvas.getContext('2d');
-  const fill = $('.pf-fill'), mark = $('.pf-mark'), ndl = $('.pf-needle'), btn = $('.pf-go'), lastTx = $('.pf-last');
+  const BTN = { power: 'TAP 1: STOP THE POWER', arm: 'TAP 2: LET GO! (green)', sent: 'Fling!', flying: 'Watch it fly…', done: 'All done!', wait: 'Get ready…' };
+  const panel = $('.pf-panel'), fill = $('.pf-fill'), mark = $('.pf-mark'), ndl = $('.pf-needle'), btn = $('.pf-go'), lastTx = $('.pf-last');
   // the sweet part of the arm gauge: 38-52 degrees (where the best throws are), as a share of the gauge
   const [A0, A1] = init.arm, at = a => (a - A0) / (A1 - A0);
   $('.pf-sweet').style.left = (at(38) * 100) + '%'; $('.pf-sweet').style.width = ((at(52) - at(38)) * 100) + '%';
@@ -170,13 +171,16 @@ export function createView(ctx) {
     },
     frame(dt, t) {
       if (playing) {
-        $('.pf-panel').dataset.mode = mode;
+        if (panel.dataset.mode !== mode) panel.dataset.mode = mode;
         const p = mode === 'power' ? pingPong(now() - t0, L.power) : lockedP;
         fill.style.width = (p * 100).toFixed(1) + '%'; mark.style.left = (lockedP * 100).toFixed(1) + '%'; mark.style.opacity = mode === 'arm' || mode === 'sent' ? 1 : 0;
         const a = mode === 'arm' ? armAt(now() - t1, L.arm) : A0; ndl.style.left = (at(a) * 100).toFixed(1) + '%';
         if (mode === 'arm' && now() - t1 > L.arm + 0.05) tap();          // never let go: it springs up at the top by itself
-        btn.textContent = { power: 'TAP: POWER!', arm: 'TAP: LET GO!', sent: 'Fling!', flying: 'Watch it fly…', done: 'All done!', wait: 'Get ready…' }[mode];
-        btn.disabled = !(mode === 'power' || mode === 'arm');
+        // only touch the button when its words change: iPhone drops a tap on a button whose text is rewritten under
+        // the finger, and this used to run every frame (live report #39: "couldn't get it to work")
+        const label = BTN[mode], off = !(mode === 'power' || mode === 'arm');
+        if (btn.textContent !== label) btn.textContent = label;
+        if (btn.disabled !== off) btn.disabled = off;
       }
       draw(t);
     },

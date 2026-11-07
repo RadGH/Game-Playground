@@ -16,7 +16,7 @@ import { IN } from '../../shared/protocol.js';
 
 export const meta = {
   id: 'coffin-cart-rally', title: 'Coffin Cart Rally', blurb: 'Race coffin carts round the crypt — hop the skeleton hands!',
-  how: ['Point the stick where you want to go — your cart turns that way.', 'A purple crack = a hand is coming. Press A to HOP over it!', 'Roll through a candle gate while it is lit for a burst of speed.', 'B = lid slam: BOO the carts right beside you.'],
+  how: ['Follow the glowing arrows on the floor — only laps that way round count.', 'Point the stick where you want to go — your cart turns that way.', 'A purple crack = a hand is coming. Press A to HOP over it!', 'Lit candle gate = speed burst. B = lid slam: BOO the carts beside you.'],
   kind: 'arena', min: 1, max: 4, seconds: 75, scoring: 'points', unit: 'laps', tags: ['action', 'holiday'], season: 'halloween',
   controls: { stick: true, a: 'Hop', b: 'Lid slam' },
   move: { mode: 'car', speed: 7.0, accel: 3.2, turn: 3.7, grip: 7, boostMul: 1.5, slowMul: 0.55, stunDrag: 2.4 },
@@ -43,7 +43,9 @@ export const RULES = {
   gates: [0.22, 0.7], gateBoost: 1.1, gatePeriod: 2.6, gateLit: 1.3,
   slamR: 1.8, slamSpin: 0.7, slamPush: 4, slamCool: 3.0, slamSelf: 0.3,
   cpuPace: { easy: 0.84, normal: 0.92, hard: 0.99 },
+  wrongSpeed: 0.8, wrongTime: 0.6,      // driving backwards along the track faster than this for this long = WRONG WAY
 };
+const DT_IN = 0.05;
 const r2 = v => Math.round(v * 100) / 100;
 
 /** Round the corners of a polygon and sample the loop every `ds` metres (the same rounding Wobblewheel Rally uses). */
@@ -120,7 +122,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
     const row = Math.floor(i / 2), lat = (i % 2 ? -0.85 : 0.85), k = N - 2 - row * 2, [x, z] = at(k, lat);
     const b = makeBody(r2(x), r2(z), r2(yaw0)); b.flags = F.FROZEN;
     if (!r.cpu) bodies.set(r.pid, b);
-    R.set(r.id, { ...r, b, k, prog: k - N, prevB: 0, boost: 0, slow: 0, spin: 0, safe: 0, hop: 0, hopCool: 0, slamCool: 0, fin: -1, finAt: 0, lapShown: 0, stuck: 0, hops: 0, grabs: 0, gates: 0, slams: 0, think: rng.range(0.3, 1) });
+    R.set(r.id, { ...r, b, k, prog: k - N, prevB: 0, boost: 0, slow: 0, spin: 0, safe: 0, hop: 0, hopCool: 0, slamCool: 0, fin: -1, finAt: 0, lapShown: 0, stuck: 0, wrongT: 0, hops: 0, grabs: 0, gates: 0, slams: 0, think: rng.range(0.3, 1) });
   });
   const cpuMove = { ...meta.move, speed: meta.move.speed * (RULES.cpuPace[difficulty] ?? RULES.cpuPace.normal) };
   let time = meta.seconds, countdown = RULES.countdown, race = 0, finishLeft = -1, endIn = -1, over = false, finCount = 0;
@@ -132,6 +134,12 @@ export function create({ rng, players, difficulty = 'normal' }) {
     for (let d = -6; d <= 6; d++) { const k = ((r.k + d) % N + N) % N, dd = (b.x - loop.cx[k]) ** 2 + (b.z - loop.cz[k]) ** 2; if (dd < bestD) { bestD = dd; bestK = k; } }
     let delta = bestK - r.k; if (delta > N / 2) delta -= N; if (delta < -N / 2) delta += N;
     const before = r.prog; r.prog += delta; r.k = bestK;
+    // wrong way (live report #41: "says 0 laps even though I did a bunch"): only laps the RIGHT way round count, and
+    // nothing told you which way that was, so a cart could lap the crypt backwards and finish on 0. Driving against the
+    // track for a moment now flags the cart (the HUD shouts WRONG WAY and arrows on the floor point the way round).
+    const vt = b.vx * loop.tx[bestK] + b.vz * loop.tz[bestK];
+    if (racing() && r.fin < 0 && r.spin <= 0 && vt < -RULES.wrongSpeed) r.wrongT = Math.min(RULES.wrongTime + 1, r.wrongT + DT_IN);
+    else if (vt > RULES.wrongSpeed || !racing()) r.wrongT = Math.max(0, r.wrongT - DT_IN * 2);
     // candle gates: crossing one (going forward) while its candles are lit gives a burst of speed
     if (delta > 0 && racing() && r.fin < 0) for (const g of gates) {
       const gk = g.k, crossed = Math.floor((r.prog - gk) / N) > Math.floor((before - gk) / N);
@@ -240,7 +248,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
     },
     state() {
       const pl = places(), rs = {};
-      for (const r of R.values()) rs[r.id] = [Math.max(1, Math.min(LAPS, Math.floor(r.prog / N) + 1)), pl.get(r.id), r.fin, r.slamCool > 0 ? 1 : 0];
+      for (const r of R.values()) rs[r.id] = [Math.max(1, Math.min(LAPS, Math.floor(r.prog / N) + 1)), pl.get(r.id), r.fin, r.slamCool > 0 ? 1 : 0, r.wrongT >= RULES.wrongTime ? 1 : 0];
       const g = { rs, h: spots.map(s => handAt(s.ph, period, race)).join(''), gl: gates.map(x => (gateLit(x.ph, race) ? 1 : 0)).join(''), t: r2(race), left: Math.ceil(time) };
       if (countdown > 0) g.cd = Math.ceil(countdown);
       if (finishLeft > 0) g.fw = Math.ceil(finishLeft);
@@ -251,6 +259,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
     get over() { return over; },
     get race() { return race; },
     handAhead: id => handAhead(R.get(id)),
+    wrongWay: id => R.get(id).wrongT >= RULES.wrongTime,
     track, racers: R, spots, gates, period,
     result() {
       const scores = {}, groups = new Map();

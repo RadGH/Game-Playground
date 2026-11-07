@@ -17,7 +17,8 @@ import { btnText } from './buttons.js';
 import { createPadNav } from './padnav.js';
 import { createSounds } from './sounds.js';
 import { installFeedback } from './feedback.js';
-import { createMyGames } from './mygames.js';              // round 10 (#28/#29): ☰ → My games
+import { createMyGames } from './mygames.js';
+import { createChat } from './chat.js';                     // report #34 (2026-11-06): room chat beside the ☰              // round 10 (#28/#29): ☰ → My games
 import { gameScoreText, awardText, finalScoreText, finalHowText, resultsKeyText } from './scoretext.js';   // round 10 (#21): what each number on the cards counts
 import { SEATS, cleanCode, CODE_LENGTH, RATE_REASONS, FAVOUR } from '../shared/protocol.js';
 import { tally, deviceKind } from './tally.js';
@@ -102,7 +103,10 @@ const newsBtn = news.button({ label: "✨ What's new", className: 'btn small gho
 news.onUnread(n => { if (n && !S.newsToldFor) { S.newsToldFor = true; setTimeout(() => { if (!S.room) toast(`The fair was updated — tap ✨ What's new to see ${n > 1 ? `the ${n} updates` : 'what changed'}.`); }, 1500); } });
 function toast(text, cls = '') { const e = h('div', 'toast ' + cls); e.textContent = text; toasts.append(e); setTimeout(() => e.classList.add('out'), 2600); setTimeout(() => e.remove(), 3100); }
 const face = m => `<i class="face">${m?.look ? `<img src="${portrait(m)}" alt="">` : ''}</i>`;
-const chipOf = (m, extra = '') => { const s = seatOf(m); return `<span class="chip${m.pid === S.room?.you ? ' me' : ''}${m.on === false ? ' off' : ''}" data-pid="${m.pid}" ${s ? `data-shape="${s.shape}" style="--seat:${s.color};--seat-dark:${s.dark}"` : ''}>${face(m)}<b class="nm">${esc(m.name)}</b>${extra}</span>`; };
+// report #40: a seated player whose phone has gone is marked "away" (the board plays their turns until they are back,
+// and after 2 minutes in a match they leave it)
+const awayTag = m => (m.on === false && m.seat != null && !m.display ? '<em class="away" title="Their phone has left the game">away</em>' : '');
+const chipOf = (m, extra = '') => { const s = seatOf(m); return `<span class="chip${m.pid === S.room?.you ? ' me' : ''}${m.on === false ? ' off' : ''}" data-pid="${m.pid}" ${s ? `data-shape="${s.shape}" style="--seat:${s.color};--seat-dark:${s.dark}"` : ''}>${face(m)}<b class="nm">${esc(m.name)}</b>${awayTag(m)}${extra}</span>`; };
 const DUCK = `<svg viewBox="0 0 64 56" class="duck-svg" aria-hidden="true"><ellipse cx="30" cy="38" rx="24" ry="14" fill="currentColor" stroke="#12222a" stroke-width="3"/><circle cx="44" cy="20" r="12" fill="currentColor" stroke="#12222a" stroke-width="3"/><path d="M54 20 l9 3 -9 4z" fill="#ff8a1a" stroke="#12222a" stroke-width="2"/><circle cx="47" cy="17" r="2.6" fill="#12222a"/><path d="M14 34 q10 -8 20 2" fill="none" stroke="#12222a" stroke-width="2.5" opacity=".5"/></svg>`;
 const ICON = {
   ticket: '<svg class="ic" viewBox="0 0 24 24"><path fill="currentColor" d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/></svg>',
@@ -530,7 +534,7 @@ net.on('left', () => {
   if (sw) { S.asDisplay = sw.watch; net.join(sw.code, sw.watch); return; }       // "Just watch instead" / "Play instead": rejoin the same room the other way
   showTitle();
 });
-net.on('kicked', m => { S.room = null; dropPlay(); dropBoard(); S.err = m?.why === 'vote' ? 'The other players voted you out of the room.' : 'You were removed from the room.'; showTitle(); });
+net.on('kicked', m => { S.room = null; dropPlay(); dropBoard(); S.err = m?.why === 'vote' ? 'The other players voted you out of the room.' : m?.why === 'elsewhere' ? 'You opened this game in another window or on another device, so this one left the room. Carry on over there.' : 'You were removed from the room.'; showTitle(); });
 net.on('err', m => { if (!S.room) { S.err = m.msg; showTitle(); } else toast(m.msg, 'bad'); });
 net.on('bd', onBoard);
 net.on('votes', m => { S.votes = m.votes; if (S.phase === 'vote') showVote(); else if (S.phase === 'continue') showContinue(); });
@@ -787,7 +791,15 @@ function openMenu() {
   });
   document.body.append(el); S.modal = { el, refresh: () => {} };
 }
-function drawMenuBtn() { menuBtn.hidden = !(S.room || S.inviting); }
+function drawMenuBtn() { menuBtn.hidden = !(S.room || S.inviting); chat.show(!!S.room); }
+
+// ------------------------------------------------------------------ chat (report #34, 2026-11-06)
+const chat = createChat({ net, members, me: () => S.room?.you, faceSrc: m => (m?.look ? portrait(m) : null), seatOf, sfx: n => sfx(n),
+  openSheet: (el, onClose) => { closeBigQr(); closeModal(); document.body.append(el); S.modal = { el, onClose, refresh: () => {} }; setTimeout(() => { if (!isTouch()) el.querySelector('.chat-input')?.focus(); }, 0); },
+  closeSheet: () => closeModal() });
+net.on('chat', m => { chat.onChat(m); lineup.play(m.pid, 'wave', 1200); });
+net.on('chatlog', m => chat.onLog(m));
+window.tumblefairChat = chat;                                       // specs
 
 // ------------------------------------------------------------------ the big QR code (owner 2026-10-22)
 // "Add a QR code button to join from. Useful with a TV and several people on phones." A full-screen code anyone in the

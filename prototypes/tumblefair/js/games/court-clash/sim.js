@@ -28,11 +28,17 @@ export const hoopFor = t => (t === 0 ? { x: RIM.x, y: RIM.y, z: 0, r: HOOP_R, nx
 export const HOOPS = [hoopFor(0), hoopFor(1)];
 export const teamOf = seat => seat % 2;
 /** Meter period, the green band, how good / grabby the CPU is, by lobby difficulty. */
+// Live report #35 ("the computer is too fast and aggressive and steals the ball when powering up a shot"): the CPU ran
+// at full player speed, reached in the moment it was in range, and a shooter charging the meter was EASIER to rob
+// (+15%) while they were slowed to under half speed by the wind-up. Now the CPU is slower than you (cpuSpeed), has to
+// be in reach for a moment before it tries (cpuReact), tries less often, and the first WINDUP_SAFE s of a wind-up can't
+// be stolen at all — only a jumping defender can swat the shot.
 export const LEVELS = {
-  easy:   { period: 1.7, tol: 0.1, cpuAim: 1.7, cpuSteal: 0.35, cpuBlock: 0.25, steal: 0.3 },
-  normal: { period: 1.4, tol: 0.08, cpuAim: 1.15, cpuSteal: 0.7, cpuBlock: 0.45, steal: 0.25 },
-  hard:   { period: 1.15, tol: 0.065, cpuAim: 0.75, cpuSteal: 1.2, cpuBlock: 0.65, steal: 0.2 },
+  easy:   { period: 1.7, tol: 0.1, cpuAim: 1.7, cpuSteal: 0.2, cpuBlock: 0.2, steal: 0.3, cpuSpeed: 0.72, cpuReact: 0.9 },
+  normal: { period: 1.4, tol: 0.08, cpuAim: 1.15, cpuSteal: 0.4, cpuBlock: 0.35, steal: 0.25, cpuSpeed: 0.82, cpuReact: 0.6 },
+  hard:   { period: 1.15, tol: 0.065, cpuAim: 0.75, cpuSteal: 0.8, cpuBlock: 0.55, steal: 0.2, cpuSpeed: 0.92, cpuReact: 0.35 },
 };
+export const WINDUP_SAFE = 1.2;                                     // charging a shot: nobody can steal it for this long
 export const CPU_NAMES = [['Dunk', 'Hopper'], ['Swish', 'Hopper']];
 const r2 = v => Math.round(v * 100) / 100;
 
@@ -51,6 +57,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
     a.held = 0; a.prevB = 0; a.stealCd = 0; a.safe = 0; a.jump = 0; a.stun = 0; a.noGrab = 0; a.pts = 0; a.plan = null; a.carry = 0; a.call = 0;
     if (a.pid != null) bodies.set(a.pid, a.body);
   });
+  const cpuMove = { ...meta.move, speed: meta.move.speed * L.cpuSpeed };     // the CPU is a step slower than you (#35)
   const byPid = new Map(A.filter(a => a.pid != null).map(a => [a.pid, a]));
   const mateOf = a => A.find(b => b !== a && b.team === a.team) || null;
   const score = [0, 0];
@@ -94,11 +101,11 @@ export function create({ rng, players, difficulty = 'normal' }) {
   }
   function trySteal(a) {
     const h = holderA(); if (!h || h.team === a.team || a.stealCd > 0) return;
-    if (h.safe > 0) { a.stealCd = 0.4; return; }
+    if (h.safe > 0 || (h.held > 0 && h.held < WINDUP_SAFE)) { a.stealCd = 0.4; return; }   // just caught it, or winding up a shot (#35)
     const dx = a.body.x - h.body.x, dz = a.body.z - h.body.z, d = Math.hypot(dx, dz); if (d > STEAL_R) return;
     a.stealCd = 0.9;
     const behind = (Math.sin(h.body.yaw) * dx + Math.cos(h.body.yaw) * dz) < 0;
-    if (rng() < L.steal + (behind ? 0.45 : 0) + (h.held > 0.15 ? 0.15 : 0)) { loose(h, 0.7); take(a); events.push({ e: 'steal', by: a.i, from: h.i }); }
+    if (rng() < L.steal + (behind ? 0.45 : 0)) { loose(h, 0.7); take(a); events.push({ e: 'steal', by: a.i, from: h.i }); }
     else { a.stun = 0.4; a.body.flags |= F.STUN; a.body.vx *= 0.3; a.body.vz *= 0.3; events.push({ e: 'reach', by: a.i }); }
   }
   /** One agent's buttons + movement for this tick (players from input(), CPUs from their brain). */
@@ -116,7 +123,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
       }
     } else { a.held = 0; a.body.flags &= ~F.CARRY; if (down && !was) { const h = holderA(); if (h && h.cpu && h.team === a.team) h.call = 0.6; } }
     if (pb) { if (a.jump <= 0) { a.jump = JUMP_S; events.push({ e: 'jump', by: a.i }); } if (!mine) trySteal(a); }
-    stepBody(a.body, inp, meta.move, meta.arena);
+    stepBody(a.body, inp, a.cpu ? cpuMove : meta.move, meta.arena);
   }
   // ---- the CPU (also what the tests' bots use, with their own skill)
   function brain(a, aim = L.cpuAim, grab = L.cpuSteal, block = L.cpuBlock) {
@@ -147,7 +154,8 @@ export function create({ rng, players, difficulty = 'normal' }) {
     // defend: stand between the ball and our hoop; reach in now and then, jump at a shooter
     const hx = h.body.x, hz = h.body.z, dx = O.x - hx, dz = O.z - hz, dd = Math.hypot(dx, dz) || 1, gx = hx + dx / dd * 0.95, gz = hz + dz / dd * 0.95;
     const dist = Math.hypot(hx - b.x, hz - b.z), inp = toward(gx, gz);
-    if (dist < STEAL_R && a.stealCd <= 0 && h.safe <= 0 && rng() < grab * 0.04) inp.b = IN.B;
+    a.near = dist < STEAL_R ? (a.near || 0) + 0.05 : 0;                 // a moment in reach before it reacts (#35)
+    if (dist < STEAL_R && a.near >= L.cpuReact && a.stealCd <= 0 && h.safe <= 0 && !(h.held > 0 && h.held < WINDUP_SAFE) && rng() < grab * 0.04) inp.b = IN.B;
     if (dist < BLOCK_R && h.held > 0.12 && a.jump <= 0 && rng() < block * 0.25) inp.b = IN.B;
     return inp;
   }

@@ -126,6 +126,8 @@ export async function createBoardView({ stage, def, members, me, assetBase, seas
   function sync(view) {
     for (const pid of view.order) { if (!queue.length && !cur) at.set(pid, view.pos[pid]); else if (!at.has(pid)) at.set(pid, view.pos[pid]); ensure(pid, view.pos[pid]); const a = actors.get(pid); if (a && !queue.length && !cur) { const p = spot(pid, view.pos[pid]); a.place(p.x, 0.31, p.z); } }
     for (const [pid, a] of actors) if (!view.order.includes(pid) && a) { a.dispose(); actors.delete(pid); tags.get(pid)?.remove(); tags.delete(pid); }
+    // report #40: a piece whose player's phone has gone says so (the board plays their turns until they are back)
+    for (const [pid, T] of tags) { const m = members().find(x => x.pid === pid); if (m) T.set((pid === me ? 'YOU' : m.name) + (m.on === false ? ' · away' : '')); }
     if (view.traps) setTraps(view.traps);
     if (view.pid != null && !cur && !queue.length) look(view.pid);
   }

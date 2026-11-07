@@ -21,6 +21,7 @@
 .dd-pads { width: min(560px, 100%); display: grid; grid-template-columns: 1fr 1.25fr; gap: 10px; }
 .dd-pads.hidden { display: none; }
 .dd-pad { min-height: 96px; font-size: 26px; touch-action: none; cursor: pointer; -webkit-touch-callout: none; transition: transform .05s; }
+.dd-pad small { display: block; font: 800 12px/1.2 var(--font); opacity: .8; margin-top: 2px; }
 .dd-lean { background: #9fd3ff; } .dd-gas { background: #8ff07a; }
 .dd-pad.on { transform: translateY(4px) scale(.98); box-shadow: 0 2px 0 var(--ink); filter: brightness(1.1); }
 .dd-note { margin: 0; text-align: center; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 0 var(--ink), 0 0 4px var(--ink); }

@@ -64,6 +64,7 @@ export const CONTROLS = [
   ['Fire (gunner) / horn', 'Left click / H', 'RT (gunner) / R3', 'FIRE'],
   ['Change seat', 'F', 'Y (Triangle)', 'SEAT'],
   ['Hitch / unhitch a trailer (back up to it)', 'T', 'D-pad left', 'HITCH'],
+  ['Back on its wheels (tipped over; also happens by itself after 3 s)', 'Hold R', 'D-pad right', 'FLIP'],
   ['Camera distance', 'Mouse wheel / V', 'D-pad up / down', 'Pinch'],
   ['Map / menu', 'M / Esc', 'Back / Start', '☰'],
 ];
@@ -657,7 +658,7 @@ export function createUI(opts = {}) {
   tally('page_view', { device: isTouch() ? 'touch' : 'desktop' });
 
   const ui = {
-    hud: hudApi, touch: { mode: m => touch.mode(m), show: v => touch.show(v) },
+    hud: hudApi, touch: { mode: m => touch.mode(m), show: v => touch.show(v), hitchable: v => touch.hitchable(v), flippable: v => touch.flippable(v) },
     touchState: () => touch.state(),
     settings: () => settings.get(), onSettings: f => settings.on(f), setSetting: patch => settings.set(patch),
     setFlagSites(list) { S.flagSites = (list || []).map(f => ({ id: String(f.id), name: f.name || String(f.id) })); },

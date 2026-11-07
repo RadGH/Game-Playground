@@ -281,5 +281,7 @@ input, textarea, [contenteditable] { -webkit-user-select: text; user-select: tex
 .rl-touch[data-mode=gunner] .rl-t-use { right: 96px; bottom: 6px; width: 70px; height: 70px; }
 .rl-touch[data-mode=gunner] .rl-t-swap, .rl-touch[data-mode=passenger] .rl-t-swap { right: 0; bottom: 96px; width: 62px; height: 62px; }
 .rl-touch[data-mode=passenger] .rl-t-use { right: 0; bottom: 0; width: 84px; height: 84px; }
-.rl-touch[data-mode=drive] .rl-t-swap { right: 0; bottom: 166px; }
+.rl-touch[data-mode=drive] .rl-t-swap { right: 0; bottom: 166px; width: 62px; height: 62px; }  /* 52 px became 43 px in the scaled-down landscape pad */
 .rl-t-hitch { right: 92px; bottom: 166px; width: 62px; height: 62px; font-size: 12px; background: rgba(140, 200, 255, .9); }
+/* FLIP: only while the vehicle lies tipped over (report #5); HITCH's spot (HITCH hides then), in the corner, away from the play area */
+.rl-t-flip { right: 92px; bottom: 166px; width: 62px; height: 62px; font-size: 12px; background: rgba(255, 214, 92, .95); }

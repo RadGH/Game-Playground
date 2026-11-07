@@ -478,7 +478,9 @@
    },
    "steer": {
     "max": 0,
-    "pivot": 0.9,
+    "turn": 1.3,
+    "turnFast": 0.7,
+    "bite": 0.6,
     "rate": 4
    },
    "tyre": {

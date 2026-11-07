@@ -2,6 +2,26 @@
  "_doc": "Player-facing changelog for Tumblefair, newest first (shared/whats-new.js reads it). Append one entry at EVERY publish: plain language, what players will notice, no file names. `id` is stable and unique (date, plus a letter for a second publish that day).",
  "entries": [
   {
+   "id": "2026-11-06",
+   "date": "2026-11-06",
+   "title": "Chat, catch-up and nine game fixes",
+   "items": [
+    "Chat with the room: tap 💬 under the menu button for quick reactions or a short message, and everyone sees it pop up.",
+    "A little help for whoever's last: from round 2, the player furthest behind gets 3 catch-up tickets.",
+    "If someone's phone leaves the game, they're shown as away and their turns are played for them; after 2 minutes they leave the board.",
+    "Opening the game in a second window now moves you there instead of making a copy, and two characters no longer stand inside each other in the lobby.",
+    "The Wheel of Whatever is much bigger on phones.",
+    "Letter Shot: the hoop is no longer hidden behind the scores on phones.",
+    "Court Clash: the computer player is a step slower, waits a moment before going for the ball, and can't steal it while you're winding up a shot.",
+    "Dirt Dash: a gauge warns you before you flip over, a ring turns green when it's safe to land, and you can watch your flips count up.",
+    "Slime Slingers: getting slimed while dodging no longer leaves you stuck for the rest of the game.",
+    "Pumpkin Fling: the power bar and arm move about half as fast, the button tells you which tap is next, and taps work on iPhone. Long Drive's swing button works reliably on iPhone too.",
+    "Coffin Cart Rally: arrows on the floor show the way round, and a big WRONG WAY sign appears if you drive backwards.",
+    "Costume Catwalk: everyone dresses up and walks the runway as their own character.",
+    "Castle Archers: drag back and up to shoot straight down at goblins bashing the gate."
+   ]
+  },
+  {
    "id": "2026-11-03",
    "date": "2026-11-03",
    "title": "New character bodies",

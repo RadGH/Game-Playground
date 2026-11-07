@@ -40,6 +40,17 @@ export function createView(ctx) {
   const checker = tex(canvasTexture(256, 64, (c) => { for (let i = 0; i < 16; i++) for (let j = 0; j < 4; j++) { c.fillStyle = (i + j) % 2 ? '#2a1840' : '#f4ecd8'; c.fillRect(i * 16, j * 16, 16, 16); } }));
   { const a = segs[0], b = segs[N], len = Math.hypot(a.ax - b.ax, a.az - b.az);
     const line = new THREE.Mesh(geo(new THREE.PlaneGeometry(len, 0.6).rotateX(-Math.PI / 2)), basic({ map: checker })); line.position.set((a.ax + b.ax) / 2, 0.015, (a.az + b.az) / 2); line.rotation.y = -Math.atan2(b.az - a.az, b.ax - a.ax); group.add(line); }
+  // ---- glowing arrows down the middle of the track, pointing the way round (report #41: a cart could lap the crypt
+  // backwards and score 0 laps without ever being told). They pulse brighter while YOU are driving the wrong way.
+  const arrowTex = tex(canvasTexture(64, 64, (c, w) => { c.fillStyle = '#ffc04a'; c.strokeStyle = '#2a1840'; c.lineWidth = 4; c.beginPath(); c.moveTo(32, 6); c.lineTo(58, 34); c.lineTo(44, 34); c.lineTo(44, 58); c.lineTo(20, 58); c.lineTo(20, 34); c.lineTo(6, 34); c.closePath(); c.fill(); c.stroke(); }));
+  const ARROW_EVERY = 7, nArrows = Math.floor(N / ARROW_EVERY), arrowMat = basic({ map: arrowTex, transparent: true, opacity: 0.55, depthWrite: false });
+  const arrowsMesh = new THREE.InstancedMesh(geo(new THREE.PlaneGeometry(1.2, 1.2).rotateX(-Math.PI / 2)), arrowMat, nArrows);
+  const mid = k => { k = ((k % N) + N) % N; const a = segs[k], b = segs[N + k]; return [(a.ax + b.ax) / 2, (a.az + b.az) / 2]; };
+  for (let i = 0; i < nArrows; i++) {
+    const k = i * ARROW_EVERY + 3, [x, z] = mid(k), [x2, z2] = mid(k + 1), [x0, z0] = mid(k - 1), dx = x2 - x0, dz = z2 - z0;
+    m4.compose(v.set(x, 0.02, z), q.setFromEuler(e3.set(0, Math.atan2(-dx, -dz), 0)), sc.set(1, 1, 1)); arrowsMesh.setMatrixAt(i, m4);
+  }
+  group.add(arrowsMesh);
   // ---- stone walls (one block per wall segment) with a candle on every fourth
   const walls = new THREE.InstancedMesh(geo(new THREE.BoxGeometry(1, 0.34, 0.34)), std('#ffffff', { roughness: 0.9 }), segs.length), C1 = new THREE.Color('#857c96'), C2 = new THREE.Color('#6b6380');
   const candleSpots = [];
@@ -127,6 +138,8 @@ export function createView(ctx) {
   ctx.ui.append(banner, sub);
   hud.innerHTML = `<span class="cc-place"><b>-</b></span><span class="cc-lap">Lap <b>1</b>/${T.laps}</span><span class="cc-slam" data-ready="1">B Lid slam</span>`;
   const hPlace = hud.querySelector('.cc-place b'), hLap = hud.querySelector('.cc-lap b'), hSlam = hud.querySelector('.cc-slam');
+  const wrong = h('div', 'cc-wrong'); wrong.innerHTML = '<b>WRONG WAY!</b><span>Turn round — follow the arrows</span>'; if (ctx.me != null) ctx.ui.append(wrong);
+  let wrongNow = false;
   let bannerT = 0;
   function show(text, cls = '', ms = 1100) { banner.textContent = text; banner.className = 'cc-banner show ' + cls; bannerT = ms / 1000; }
   sub.textContent = T.name + ' · ' + T.laps + ' laps'; sub.classList.add('show');
@@ -145,6 +158,7 @@ export function createView(ctx) {
         const pl = ord(mine[1]); if (hPlace.textContent !== pl) hPlace.textContent = pl;
         const lp = String(mine[0]); if (hLap.textContent !== lp) hLap.textContent = lp;
         const rd = mine[3] ? '0' : '1'; if (hSlam.dataset.ready !== rd) hSlam.dataset.ready = rd;
+        const ww = !!mine[4] && mine[2] < 0; if (ww !== wrongNow) { wrongNow = ww; wrong.classList.toggle('show', ww); if (ww) { ctx.sfx('bad'); navigator.vibrate?.(80); } }
       }
       if (g.cd) sub.classList.add('show'); else sub.classList.remove('show');
       if (g.fw && !(mine && mine[2] >= 0)) { const s = `Finish in ${g.fw}`; if (bannerT <= 0) { banner.textContent = s; banner.className = 'cc-banner show small'; } }
@@ -179,6 +193,7 @@ export function createView(ctx) {
     pose(pid, flags) { flagsOf.set(pid, flags); return 'sitGround'; },
     frame(dt, t) {
       juice.frame(dt, t);
+      arrowMat.opacity = wrongNow ? 0.6 + 0.4 * Math.abs(Math.sin(t * 6)) : 0.55;
       if (bannerT > 0) { bannerT -= dt; if (bannerT <= 0) banner.classList.remove('show'); }
       if (performance.now() - lastInputAt > 90) lastBits = 0;
       const rt = going ? race + Math.min(0.25, nowS() - raceAt) : race;           // race time, carried on between updates
@@ -230,7 +245,7 @@ export function createView(ctx) {
       }
     },
     dispose() {
-      juice.dispose(); bar.el.remove(); hud.remove(); banner.remove(); sub.remove(); prompt.remove();
+      juice.dispose(); bar.el.remove(); hud.remove(); wrong.remove(); banner.remove(); sub.remove(); prompt.remove();
       for (const t2 of cpuTags) t2.remove();
       for (const K of carts.values()) if (!K.cpu) { K.cart.removeFromParent(); if (K.actor) { K.actor.body.group.position.y = 0; K.actor.body.group.scale.setScalar(1); K.actor.group.rotation.y = 0; } }
       for (const t2 of texs) t2.dispose(); for (const m of mats) m.dispose(); for (const g2 of geos) g2.dispose();

@@ -92,7 +92,7 @@ export function createEventDock({ me, nameOf, faceOf, send, sfx = () => {} }) {
         return `<div class="ev-striker"><div class="ev-tower">${tiers}<div class="ev-bell"></div><div class="ev-puck"></div></div>
           <div class="ev-side">${who(E.pid)}<div class="ev-meter"><i></i></div>${go('SWING!')}</div></div>`;
       }
-      case 'wheel': return `<div class="ev-wheel"><div class="ev-wheelbox"><canvas width="240" height="240"></canvas><i class="ev-pointer"></i></div><div class="ev-side">${who(E.pid)}${go('STOP!')}</div></div>`;
+      case 'wheel': return `<div class="ev-wheel"><div class="ev-wheelbox"><canvas width="480" height="480"></canvas><i class="ev-pointer"></i></div><div class="ev-side">${who(E.pid)}${go('STOP!')}</div></div>`;
       case 'shell': {
         const hider = E.pid, guesser = E.with, res = E.result;
         const cups = [0, 1, 2].map(k => `<button class="cup" data-cup="${k}" ${(E.stage === 'hide' && mine()) || (E.stage === 'guess' && mine()) ? `data-ev="${k}"` : 'disabled'}><span></span></button>`).join('');
@@ -155,18 +155,20 @@ export function createEventDock({ me, nameOf, faceOf, send, sfx = () => {} }) {
       if (E.wFrom == null) { E.wFrom = (E.stopAt - E.t0); const base = Math.ceil((E.wFrom / segMs + n) / n) * n; E.wTo = (base + got.seg + 0.5) * segMs; }
       const k = Math.min(1, (t - E.stopAt) / 1100), e = 1 - Math.pow(1 - k, 3); ms = E.wFrom + (E.wTo - E.wFrom) * e;
     } else if (E.result) ms = (E.wTo ?? ms);
-    const c = E.canvas, g = c.getContext('2d'), W = c.width, R = W / 2 - 6, rot = -(ms / segMs) * segA;
+    // report #38 (2026-11-06, "make the wheel bigger"): drawn at 480 px and shown up to 320 px wide, so everything is
+    // sized off W (it was a 168 px wheel beside the button on a phone)
+    const c = E.canvas, g = c.getContext('2d'), W = c.width, u = W / 240, R = W / 2 - 6 * u, rot = -(ms / segMs) * segA;
     g.clearRect(0, 0, W, W); g.save(); g.translate(W / 2, W / 2);
     // pointer at the top: segment k spans [k, k+1) * segA measured clockwise from the top in wheel space
     g.rotate(rot - Math.PI / 2);
     for (let k = 0; k < n; k++) {
       g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, R, k * segA, (k + 1) * segA); g.closePath();
-      g.fillStyle = COLOURS[k % COLOURS.length]; g.fill(); g.lineWidth = 3; g.strokeStyle = '#12222a'; g.stroke();
-      g.save(); g.rotate((k + 0.5) * segA); g.fillStyle = '#12222a'; g.font = '900 15px system-ui, sans-serif'; g.textAlign = 'right'; g.textBaseline = 'middle';
-      g.fillText(String(segs[k]?.label || '?').slice(0, 11), R - 8, 0); g.restore();
+      g.fillStyle = COLOURS[k % COLOURS.length]; g.fill(); g.lineWidth = 3 * u; g.strokeStyle = '#12222a'; g.stroke();
+      g.save(); g.rotate((k + 0.5) * segA); g.fillStyle = '#12222a'; g.font = `900 ${Math.round(15 * u)}px system-ui, sans-serif`; g.textAlign = 'right'; g.textBaseline = 'middle';
+      g.fillText(String(segs[k]?.label || '?').slice(0, 11), R - 8 * u, 0); g.restore();
     }
     g.restore();
-    g.beginPath(); g.arc(W / 2, W / 2, 16, 0, 7); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 4; g.strokeStyle = '#12222a'; g.stroke();
+    g.beginPath(); g.arc(W / 2, W / 2, 16 * u, 0, 7); g.fillStyle = '#fff'; g.fill(); g.lineWidth = 4 * u; g.strokeStyle = '#12222a'; g.stroke();
     if (E.result && !E.flash) { E.flash = true; c.classList.add('stopped'); }
   }
   function drawShell(t) {

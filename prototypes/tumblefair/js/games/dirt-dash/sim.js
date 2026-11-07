@@ -16,12 +16,13 @@ import { placeOrder, r2 } from '../toss-kit.js';
 
 export const meta = {
   id: 'dirt-dash', title: 'Dirt Dash', blurb: 'Race your dirt bike over the jumps, flip in the air and land it!',
-  how: ['Hold GAS to go. The front lifts as you speed up: tap LEAN to keep it down.', 'In the air, GAS flips you back and LEAN flips you forward.', 'Land level with the ground or you crash! Flips, wheelies and distance all score.'],
+  how: ['Hold GAS to go. The front lifts as you speed up: tap LEAN when the gauge goes red.', 'In the air, GAS flips you back and LEAN flips you forward.', 'Touch down while the ring is GREEN or you crash! Flips, wheelies and distance all score.'],
   kind: 'ui', min: 1, max: 4, seconds: 62, scoring: 'points', unit: 'points', tags: ['action'], card: 'card-dirt-dash', css: true,
   controls: { a: 'Gas', b: 'Lean' },
 };
 export const DT = 0.05, TRACK = 500, STEP = 0.5, COUNT_S = 3, PLAY_S = 52, END_S = 3, LAG_T = 24, AHEAD_T = 3;
-export const BIKE = { acc: 7.2, coast: 2.4, vmax: 17, grav: 9.8, lift: 0.62, drop: 2.4, push: 3.4, loop: 1.12, spin: 5.6, follow: 14, land: 0.6, perfect: 0.16, crash: 1.2 };
+// crash: 1.2 -> 0.9 s (round 13, live report #36 "needs improvement": a spill parked you for too long)
+export const BIKE = { acc: 7.2, coast: 2.4, vmax: 17, grav: 9.8, lift: 0.62, drop: 2.4, push: 3.4, loop: 1.12, spin: 5.6, follow: 14, land: 0.6, perfect: 0.16, crash: 0.9 };
 export const PTS = { flip: 10, front: 12, perfect: 2, air: 3, wheelie: 3, finish: [12, 7, 4, 2] };
 export const LEVELS = { easy: { land: 1.2, lift: 0.85, ramp: 0.85 }, normal: { land: 1, lift: 1, ramp: 1 }, hard: { land: 0.85, lift: 1.12, ramp: 1.15 } };
 
@@ -54,6 +55,11 @@ export function buildTrack(features) {
 export function groundAt(H, x) { const f = Math.max(0, x) / STEP, i = Math.min(H.length - 2, Math.floor(f)), t = Math.min(1, f - i); return H[i] + (H[i + 1] - H[i]) * t; }
 export function slopeAt(H, x) { return Math.atan2(groundAt(H, x + 0.25) - groundAt(H, x - 0.25), 0.5); }
 const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
+/** How far the front wheel is up, 0 (down) .. 1 (you flip over backwards). The phone draws it as the wheelie gauge. */
+export const wheelieRisk = b => Math.max(0, Math.min(1, b.w / BIKE.loop));
+/** In the air: how crooked the bike is against the ground under it (radians), and would touching down now be a safe
+ *  landing (the very test stepBike uses) — the phone colours its landing guide by this. */
+export function landingNow(b, H, L = LEVELS.normal) { const off = Math.abs(wrap(b.ang - slopeAt(H, b.x))); return { off, ok: off <= BIKE.land * L.land, perfect: off < BIKE.perfect }; }
 export const newBike = () => ({ x: 2, y: 0, vx: 0, vy: 0, v: 0, ang: 0, av: 0, rot: 0, air: false, airT: 0, w: 0, wt: 0, crash: 0, done: false, pts: 0, flips: 0, crashes: 0 });
 /** One 50 ms tick of a bike. inp = { g: 0|1, l: 0|1 }. Returns the tick's happenings: [{ e, pts?, ... }]. */
 export function stepBike(b, inp, H, L = LEVELS.normal, dt = DT) {

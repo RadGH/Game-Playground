@@ -109,7 +109,7 @@ input[type=text], input:not([type]) { user-select: text; -webkit-user-select: te
 .mode b { font-size: 16px; } .mode span { font-size: 12px; font-weight: 600; color: #47606a; } .mode.on { background: var(--sun); } .mode[disabled] { opacity: .8; }
 .opts span { font-size: 14px; } .opts .est { color: #47606a; margin-left: auto; }
 @media (min-aspect-ratio: 1/1) {     /* landscape: the code sits top-left and the panel down the right half */
-  #screen.lobby { align-items: flex-end; }
+  #screen.lobby { align-items: flex-end; padding-right: calc(var(--sr) + 92px); }   /* the panel clears the ! / ☰ / 💬 corner (its top-right × sat under ☰) */
   #screen.lobby > * { width: min(46vw, 520px); }
   #screen.lobby > .lobby-main { margin-top: auto; margin-bottom: auto; }
   .lobby-code { position: absolute; top: calc(var(--st) + 8px); left: calc(var(--sl) + 10px); width: auto !important; padding-right: 60px; }
@@ -428,3 +428,31 @@ body[data-phase=results] #game-ui > .game > * { visibility: hidden; }
 .tv-qr { width: min(22vw, 48vh); }
 #screen.tv-lobby > .panel { width: 100%; max-width: none; box-sizing: border-box; margin: 0; }
 .tv-code { font-size: clamp(48px, 7vw, 140px); }
+
+/* ---- report #40 (2026-11-06): a player whose phone has gone is marked away */
+.chip .away { font-style: normal; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .3px; background: var(--ink); color: #fff; border-radius: 999px; padding: 1px 6px; margin-left: 2px; }
+.chip.off { opacity: .55; filter: grayscale(.8); }
+
+/* ---- report #34 (2026-11-06): room chat. The 💬 sits UNDER the ☰ (the corner row of ☰ and ! keeps its width, so no
+   score bar or title row loses room); bubbles stack top-left under the score bar and fade. js/client/chat.js */
+.chat-btn { position: fixed; z-index: 45; top: calc(var(--st) + 50px); right: calc(var(--sr) + 50px); width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--ink); background: #fff; color: var(--ink); font: 400 16px/1 var(--font); box-shadow: 0 3px 0 var(--ink); opacity: .8; cursor: pointer; padding: 0; }
+.chat-btn:hover { opacity: 1; } .chat-btn[hidden] { display: none; }
+body[data-phase=game] .chat-btn { width: 28px; height: 28px; font-size: 13px; opacity: .6; top: calc(var(--st) + 40px); right: calc(var(--sr) + 42px); }
+.chat-dot { position: absolute; top: -4px; right: -4px; width: 11px; height: 11px; border-radius: 50%; background: #e84a4a; border: 2px solid var(--ink); pointer-events: none; }
+.chat-dot[hidden] { display: none; }
+.chat-feed { position: fixed; z-index: 58; top: calc(var(--st) + 96px); left: calc(var(--sl) + 8px); width: min(76vw, 340px); display: flex; flex-direction: column; align-items: flex-start; gap: 5px; pointer-events: none; }
+.chat-bubble, .chat-line { display: flex; align-items: center; gap: 6px; max-width: 100%; background: rgba(255, 248, 231, .95); color: var(--ink); border: 2px solid var(--ink); border-left: 6px solid var(--seat, #9aa); border-radius: 14px; padding: 3px 10px 3px 4px; font-size: 14px; box-shadow: 0 3px 0 rgba(13, 34, 40, .5); animation: chatin .25s cubic-bezier(.2, 1.4, .4, 1); transition: opacity .4s, transform .4s; }
+.chat-bubble.out { opacity: 0; transform: translateX(-12px); }
+.chat-face { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--ink); background: #999; flex: none; object-fit: cover; }
+.chat-name { font-weight: 900; white-space: nowrap; flex: none; max-width: 7em; overflow: hidden; text-overflow: ellipsis; }
+.chat-text { font-weight: 700; overflow-wrap: anywhere; min-width: 0; }
+@keyframes chatin { from { transform: translateX(-20px) scale(.9); opacity: 0; } }
+.modal.chat-sheet { padding-top: calc(var(--st) + 60px); }
+.chat-sheet .row.head { display: flex; align-items: center; gap: 8px; }
+.chat-history { display: grid; gap: 4px; }
+.chat-history .chat-line { animation: none; box-shadow: none; }
+.chat-quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.chat-quick .btn { min-height: 44px; padding: 6px 10px; font-size: 14px; }
+.chat-quick .btn.emo { font-size: 22px; min-width: 48px; padding: 4px 6px; }
+.chat-say { display: flex; gap: 6px; }
+.chat-input { flex: 1; min-width: 0; border: 3px solid var(--ink); border-radius: 12px; padding: 8px 10px; font: 700 16px var(--font); background: #fff; }   /* 16px: iOS does not zoom into it */

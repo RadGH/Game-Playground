@@ -6,7 +6,7 @@
 // Phases:  lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobby
 //          (the Minigame Marathon mode skips `board`; Custom swaps the vote for `pick`, the host choosing each minigame;
 //          Golf plays the golf minigames one after another, a course of holes)
-import { MAX_SEATS, cleanName, IN, cleanReasons } from '../shared/protocol.js';
+import { MAX_SEATS, cleanName, IN, cleanReasons, cleanChat } from '../shared/protocol.js';
 import { DT, packBody } from '../shared/arena.js';
 import { makeRng } from '../shared/rng.js';
 import { GAMES, eligible } from '../games/index.js';
@@ -14,7 +14,7 @@ import { createBoardMatch, boardStandings, BOARD } from './board.js';
 import { hasKind } from '../games/tags.js';
 import { SEASON_IDS, effectiveSeason, seasonByDate, inSeason } from '../shared/seasons.js';
 
-export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 25000, KICKVOTE_MS: 45000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 300000, GONE_MATCH_MS: 300000, EMPTY_MS: 300000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
+export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 25000, KICKVOTE_MS: 45000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 300000, GONE_MATCH_MS: 120000, EMPTY_MS: 300000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
 export const OPTS = Object.freeze({
   mode: { values: ['board', 'marathon', 'endless', 'custom', 'golf'], def: 'board' },   // round 10: Custom (the host picks each minigame), Golf
   board: { values: ['fairground', 'pier'], def: 'fairground' },          // round 5: the Moonlit Pier
@@ -73,6 +73,10 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const costumeOk = id => inSeason(data.cosmetics?.items?.find(c => c.id === id), seasonByDate(date()));   // costumes: the date only
   let match = null;                    // { mode, round, rounds, points, wins, played, board, lastGame }
   let vote = null, game = null, lastPhaseMsg = null, tickNo = 0;
+  let prevTickAt = null;
+  const chatLog = [];                  // report #34: the last few chat lines, for a phone that joins or comes back
+  /** Report #40: a seated player whose phone has gone (closed, or asleep). The board plays their turns for them at once. */
+  const away = pid => { const m = members.get(pid); return !!m && !m.connected; };
 
   // ---------------------------------------------------------------- people
   const seated = () => [...members.values()].filter(m => m.seat != null).sort((a, b) => a.seat - b.seat);
@@ -94,7 +98,11 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     // the same person coming back (a refresh, a phone that slept): same seat, same score
     // a TV that owns the room (2026-10-24) coming back after a wifi blip: still the owner
     for (const m of members.values()) if (display && m.display && m.pid === ownerPid && m.token === token) { m.send = sendFn; m.connected = true; m.goneAt = null; emptySince = null; resync(m); syncRoom(); return m; }
-    for (const m of members.values()) if (m.token === token && !display && !m.display) { m.send = sendFn; m.connected = true; m.goneAt = null; m.name = name; m.look = look; m.costume = costume; emptySince = null; resync(m); syncRoom(); return m; }
+    // Report #43 (2026-11-06): the same person can also arrive while their first window is still connected (signed in on
+    // a phone, then the same account in an incognito window; or two tabs of one browser). It is still one seat: the new
+    // window takes it over and the old one is told so and leaves (before, the old socket kept the member and its later
+    // drop marked the NEW window's seat as gone). js/sim/hub.js only acts for a socket that still owns its member.
+    for (const m of members.values()) if (m.token === token && !display && !m.display) { if (m.connected && m.send && m.send !== sendFn) { try { m.send(JSON.stringify({ t: 'kicked', why: 'elsewhere' })); } catch { /* gone */ } } m.send = sendFn; m.connected = true; m.goneAt = null; m.name = name; m.look = look; m.costume = costume; emptySince = null; resync(m); syncRoom(); return m; }
     const m = { pid: nextPid++, token, name, look, costume, send: sendFn, connected: true, goneAt: null, ready: false, display, seat: null, queue: [], lastIn: null, starve: 0, ack: 0, skip: false };
     if (!display && phase === 'lobby') m.seat = freeSeat();           // mid-match joiners watch until the next minigame
     members.set(m.pid, m); emptySince = null;
@@ -103,15 +111,30 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     resync(m); syncRoom();
     return m;
   }
+  /**
+   * Report #43: a member signs in (js/sim/hub.js become) as an account that is already sitting in this room from another
+   * window. One person, one seat: the other window is told and leaves, this one keeps its own seat.
+   */
+  function rekey(m, token) {
+    if (!members.has(m.pid)) return;
+    for (const x of [...members.values()]) if (x !== m && x.token === token && !x.display && !m.display) { send(x, { t: 'kicked', why: 'elsewhere' }); x.connected = false; x.send = null; remove(x); }
+    m.token = token;
+  }
   /** Everything a client needs to draw the present moment from nothing. */
   function resync(m) {
     send(m, roomMsg(m));
+    if (chatLog.length) send(m, { t: 'chatlog', list: chatLog });
     if (phase === 'lobby') return;
     if (phase === 'game' && game) { send(m, { ...game.introMsg, phase: 'intro', ms: 0, init: game.inst.init(), b: bodiesOf(game.inst), resume: true }); }
     if (lastPhaseMsg) send(m, { ...lastPhaseMsg, ms: until ? Math.max(0, until - now()) : 0, ...(phase === 'vote' || phase === 'continue' ? { votes: vote?.votes || {} } : {}) });
     if (phase === 'game' && game?.inst.priv && m.seat != null) send(m, { t: 'gp', d: { ...game.inst.priv(m.pid), ...(game.inst.restore?.(m.pid) || {}) } });   // restore: what a returning phone had made (its drawing)
   }
-  function disconnect(m) { if (!members.has(m.pid)) return; m.connected = false; m.send = null; m.goneAt = now(); m.queue.length = 0; if ((m.display && m.pid !== ownerPid) || (!m.display && m.seat == null)) return remove(m); syncRoom(); pickHost(); }
+  function disconnect(m) {
+    if (!members.has(m.pid)) return; m.connected = false; m.send = null; m.goneAt = now(); m.queue.length = 0;
+    if ((m.display && m.pid !== ownerPid) || (!m.display && m.seat == null)) return remove(m);
+    if (![...members.values()].some(x => x.connected)) emptySince = emptySince ?? now();   // a match nobody comes back to still closes (EMPTY_MS)
+    syncRoom(); pickHost();
+  }
   function remove(m) {
     if (!members.delete(m.pid)) return;
     if (match?.board && m.seat != null) match.board.dropPlayer(m.pid);
@@ -174,7 +197,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     if (match.mode === 'board') {
       const names = new Proxy({}, { get: (_, pid) => members.get(+pid)?.name });
       match.boardId = data.boards[opts.board] ? opts.board : 'fairground';
-      match.board = createBoardMatch({ def: data.boards[match.boardId], chance: seasonal(data.chance, season()), order: players.map(m => m.pid), rng: rng.fork(), names, moves: opts.moves, emit: ev => cast({ t: 'bd', ...ev }) });
+      match.board = createBoardMatch({ def: data.boards[match.boardId], chance: seasonal(data.chance, season()), order: players.map(m => m.pid), rng: rng.fork(), names, moves: opts.moves, away, emit: ev => cast({ t: 'bd', ...ev }) });
     }
     log('match', { code, mode: match.mode, players: players.length });
     report('match', { mode: match.mode, players: players.length, teams: !!opts.teams, board: match.boardId || null, rounds: match.rounds, difficulty: opts.difficulty, pool: opts.pool.length, public: !!opts.public });
@@ -444,6 +467,12 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
         report('rate', { game: msg.game, v: msg.v, why, change: !!prev, players: playedBy.get(msg.game).size, difficulty: opts.difficulty, mode: match?.mode || null, voter: `${code}:${m.pid}` });
         return send(m, { t: 'rated', game: msg.game, v: msg.v, why });
       }
+      case 'chat': {                                      // report #34: anyone in the room, shown to everyone in it
+        const text = cleanChat(msg.text); if (!text) return;
+        const line = { t: 'chat', pid: m.pid, name: m.name, seat: m.seat, text };
+        chatLog.push(line); while (chatLog.length > 12) chatLog.shift();
+        return cast(line);
+      }
       case 'emote': if (m.seat != null) cast({ t: 'emote', pid: m.pid, e: String(msg.e).replace(/[^a-z]/gi, '').slice(0, 12) }); return;
     }
   }
@@ -452,7 +481,15 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   function tick() {
     tickNo++;
     const t = now();
-    for (const m of [...members.values()]) if (!m.connected && m.goneAt != null && t - m.goneAt > (phase === 'lobby' ? TIMES.GONE_LOBBY_MS : TIMES.GONE_MATCH_MS)) remove(m);
+    // Report #40: in a match a player gone for GONE_MATCH_MS (2 min, was 5) leaves the board for good; until then they are
+    // shown as away and the board plays their turns at once. A match whose phones are ALL asleep (a break) loses nobody:
+    // the gone clock only runs while someone is still playing (the hold below), so everyone comes back to their seats.
+    const someoneHere = [...members.values()].some(m => m.connected && !m.display), lastTickAt = prevTickAt ?? t; prevTickAt = t;
+    for (const m of [...members.values()]) {
+      if (m.connected || m.goneAt == null) continue;
+      if (phase !== 'lobby' && !someoneHere) { m.goneAt += t - lastTickAt; continue; }
+      if (t - m.goneAt > (phase === 'lobby' ? TIMES.GONE_LOBBY_MS : TIMES.GONE_MATCH_MS)) remove(m);
+    }
     if (kickVote && (t >= kickVote.until || !members.has(kickVote.target))) { kickVote = null; syncRoom(); }
     if (phase === 'lobby') return;
     if (![...members.values()].some(m => m.connected && !m.display)) return;                       // every phone is asleep: hold everything where it is
@@ -476,7 +513,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     return { code, host: host?.name || 'Someone', players: seatedN, seats: MAX_SEATS, phase: phase === 'lobby' ? 'lobby' : 'playing', mode: opts.mode, board: opts.mode === 'board' ? opts.board : null, round: match?.round || 0, rounds: match?.rounds || null, season: season() };
   }
   return {
-    code, join, disconnect, remove, message, tick, listing,
+    code, join, disconnect, remove, message, tick, listing, rekey,
     /** Round 12 (owner): a TV that made the room owns it — no seat, never waited for, keeps the room open. */
     setOwner(m, { public: pub = false, guestHost: gh = true } = {}) { if (!m?.display) return; ownerPid = m.pid; opts.public = !!pub; guestHost = gh !== false; if (hostPid === m.pid) hostPid = null; pickHost(true); syncRoom(); },
     get owner() { return ownerPid; },

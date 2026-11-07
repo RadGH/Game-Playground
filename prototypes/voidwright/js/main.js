@@ -293,7 +293,7 @@ function handleNotes(notes) {
         }
         break;
       }
-      case 'full': toast('Cargo hold full — sell, refine or dump something.', 'bad'); break;
+      case 'full': toast('Cargo hold full — tap Cargo (or Menu → Parts hold) to see it; sell at a station market or dump some.', 'bad'); break;
       case 'rep': toast(`${FACTIONS[n.faction].short}: ${n.why} (${n.d > 0 ? '+' : ''}${n.d})`, n.d < 0 ? 'bad' : 'good'); break;
       case 'enrage': banner(`${n.name} is enraged!`); play('warn'); break;
     }
@@ -386,9 +386,11 @@ function nearestInteract() {
 }
 function prompts() {
   const it = nearestInteract(); const pr = $('#prompt');
-  if (it) { pr.textContent = `${app.input.device === 'pad' ? 'Y' : app.input.device === 'touch' ? '' : 'E'} — ${it.label}`.replace(/^ — /, ''); pr.classList.remove('hidden'); }
+  // Only touch the DOM when the words change: rewriting a button's text every frame replaces the node
+  // under the finger, and iPhone Safari then drops the tap (the Dock button could not be pressed).
+  if (it) { const t = `${app.input.device === 'pad' ? 'Y' : app.input.device === 'touch' ? '' : 'E'} — ${it.label}`.replace(/^ — /, ''); if (pr.textContent !== t) pr.textContent = t; pr.classList.remove('hidden'); }
   else pr.classList.add('hidden');
-  const tb = $('#touch [data-act=interact]'); if (tb) tb.textContent = it ? (it.kind === 'dock' ? 'Dock' : 'Use') : 'Use';
+  const tb = $('#touch [data-act=interact]'); const tt = it ? (it.kind === 'dock' ? 'Dock' : 'Use') : 'Use'; if (tb && tb.textContent !== tt) tb.textContent = tt;
 }
 function interact() {
   const it = nearestInteract(); if (!it) return;
@@ -517,7 +519,7 @@ function updateHud() {
   mini.push(`Power <b class="${st.powerRatio < 1 ? 'bad' : ''}">${st.power}/${st.powerUse}</b>`);
   if (P.stats.droneCap) mini.push(`Drones <b>${app.w.drones.filter(d => !d.dead && d.owner === P).length}/${P.stats.droneCap}</b>`);
   if (P.repairStarved) mini.push('<b class="bad">Repairs need ferrite</b>');
-  $('#mini-stats').innerHTML = mini.join(' ');
+  const ms = $('#mini-stats'), mh = mini.join(' '); if (ms.dataset.h !== mh) { ms.innerHTML = mh; ms.dataset.h = mh; }
   // target panel: the locked/hovered ship
   const T = app.lock && !app.lock.dead ? app.lock : null; const tp = $('#target');
   if (T && T.kind !== 'rock') {
@@ -585,6 +587,12 @@ function drawOverlay(c, o) {
   for (const t of [tL, tR]) if (t) { c.strokeStyle = 'rgba(95,216,255,0.4)'; c.lineWidth = 2 * o.ok; c.beginPath(); c.arc(t.x0 * o.ok, t.y0 * o.ok, 55 * o.ok, 0, 7); c.stroke(); c.fillStyle = 'rgba(95,216,255,0.35)'; const dx = clamp(t.x - t.x0, -55, 55), dy = clamp(t.y - t.y0, -55, 55); c.beginPath(); c.arc((t.x0 + dx) * o.ok, (t.y0 + dy) * o.ok, 22 * o.ok, 0, 7); c.fill(); }
 }
 
+// the "Dock at …" pill is a button too (it looked like one, and on a phone it is where the thumb goes)
+{ const pr = $('#prompt'); const go = e => { e.preventDefault(); e.stopPropagation(); if (app.mode === 'fly') app.input.press('interact'); };
+  pr.addEventListener('touchstart', go, { passive: false }); pr.addEventListener('click', go); }
+// the stats under the bars open the hold on the cargo tab (where your cargo list lives)
+{ const ms = $('#mini-stats'); const go = e => { e.preventDefault(); e.stopPropagation(); if (app.mode === 'fly') openHold('cargo'); };
+  ms.addEventListener('touchstart', go, { passive: false }); ms.addEventListener('click', go); }
 // touch buttons
 for (const b of document.querySelectorAll('#touch .tbtn')) {
   const act = b.dataset.act;
@@ -601,7 +609,7 @@ function openMenu() {
     const add = (label, fn, cls) => m.append(btn(label, () => { close(); fn(); }, cls));
     add('Resume', () => {}, 'primary');
     if (G.unlocked.build) add('Build mode (B)', openBuild);
-    add('Parts hold & drones', () => openHold());
+    add('Parts hold, cargo & drones', () => openHold());
     if (G.unlocked.galaxy) add('Star map (M)', openMap);
     add('Goals', openQuests);
     add('Settings', settingsDialog);

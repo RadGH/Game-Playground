@@ -1,6 +1,16 @@
 {
  "entries": [
   {
+   "id": "2026-11-06c",
+   "date": "2026-11-06",
+   "title": "Phone fixes",
+   "items": [
+    "The Dock button works on iPhone again.",
+    "The \"Dock at …\" sign is a button too — tap it to dock.",
+    "Tap the Cargo / CPU / Crew numbers under your health bar to open your hold on the Cargo tab. The menu entry is now called \"Parts hold, cargo & drones\"."
+   ]
+  },
+  {
    "id": "2026-11-06b",
    "date": "2026-11-06",
    "title": "Fixes and louder lasers",

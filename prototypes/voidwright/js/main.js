@@ -673,7 +673,7 @@ function openBuild() {
 app.combatOK = () => Math.max(app.P?.lastHit ?? -99, app.w?.combatT ?? -99);
 app.openBuild = openBuild;
 function openMap() {
-  if (!app.G.unlocked.galaxy) { toast('The star map unlocks as you progress (see Goals).'); return; }
+  if (!app.G.unlocked.galaxy) { const ch = CHAPTERS.find(c => c.unlock.includes('galaxy')); toast(`The star map opens when you finish the goal "${ch?.title || 'ahead'}".`); return; }
   import('./ui/galaxy.js').then(m => m.openGalaxy(app)).catch(e => console.error(e));
 }
 function openQuests() { import('./ui/quests-ui.js').then(m => m.openQuests(app)).catch(e => console.error(e)); }

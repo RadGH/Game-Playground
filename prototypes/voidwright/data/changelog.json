@@ -1,6 +1,15 @@
 {
  "entries": [
   {
+   "id": "2026-11-06d",
+   "date": "2026-11-06",
+   "title": "Star map fix",
+   "items": [
+    "The star map now opens when you finish \"Make it yours\", so you can actually do \"Further out\" — before, the map stayed locked behind the very goal that asked you to use it. If you were stuck there, it is open now.",
+    "Drone shops open after \"Buy low, sell high\", ready for the drone goal that follows."
+   ]
+  },
+  {
    "id": "2026-11-06c",
    "date": "2026-11-06",
    "title": "Phone fixes",

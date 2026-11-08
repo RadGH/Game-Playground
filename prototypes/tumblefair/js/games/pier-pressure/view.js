@@ -2,7 +2,7 @@
 // player below it — each lane has the player's chip on the boards, a line down to a bobber, and the deep water under
 // it where shapes swim up. Fish and junk come up as dark silhouettes (a fish shape that wiggles; a boot, a kettle or a
 // clump of weed that tumbles slowly) so reading the SHAPE is the skill. The script for each lane comes from the server
-// (pier-pressure/sim.js) and is played on this device's own clock: little bobber twitches for the nibbles, a deep
+// (pier-pressure/sim.js) as it happens (never ahead: no bite time until the bite) and is played on this device's own clock: little bobber twitches for the nibbles, a deep
 // plunge with a "!" for the bite. One huge button (also Space / Enter / a controller's A) sends `tap { t }`, and the
 // same rule the server uses (tapResult) gives instant feedback on your own lane. A landed fish jumps up onto the pier
 // with its name and points. Halloween: a night pier, orange bunting, the fish's Halloween names.
@@ -49,7 +49,7 @@ export function createView(ctx) {
     ctx.send('tap', { t: Math.round(t * 100) / 100 });
     btn.classList.remove('hit'); void btn.offsetWidth; btn.classList.add('hit');
     const L = lane.get(String(me)), row = L?.row;
-    if (row && row[0] === 1 && row[6]) { const [, , from, arrive, fakes, bite, end] = row[6]; if (t >= from) { const r = tapResult({ junk: BY_ID[row[6][1]]?.junk, from, arrive, fakes, bite, end }, t); if (r !== 'hook' && r !== 'snag' && r !== 'late') say(me, SAY[r], r); } }
+    if (row && row[0] === 1 && row[6]) { const [, , from, arrive, fakes, bite, end] = row[6]; if (t >= from) { const r = tapResult({ junk: BY_ID[row[6][1]]?.junk, from, arrive, fakes, bite: bite ?? Infinity, end: end ?? Infinity }, t); if (r !== 'hook' && r !== 'snag' && r !== 'late') say(me, SAY[r], r); } }
     ctx.sfx('tap');
   }
   btn.addEventListener('pointerdown', e => { e.preventDefault(); clickGuard = nowS(); press(); });
@@ -105,8 +105,8 @@ export function createView(ctx) {
       for (const L of lane.values()) {
         const row = L.row; let show = false, y = 100, x = 50, rot = 0, bob = 0, bang = false, wig = 0;
         if (row && row[0] === 1 && row[6] && phase !== 'count') {
-          const [, sp, from, arrive, fakes, bite, end] = row[6], junk = !!BY_ID[sp]?.junk;
-          if (T >= from) {
+          const [, sp, from, arrive, fakes, bite0, end0] = row[6], junk = !!BY_ID[sp]?.junk, bite = bite0 ?? Infinity, end = end0 ?? Infinity;   // the bite is only sent once it has happened
+          if (T >= from && sp) {
             show = true;
             if (T < arrive) { const f = (T - from) / (arrive - from); y = 100 - (100 - 44) * f; x = 50 + Math.sin(T * (junk ? 1.2 : 4) + L.vid) * (junk ? 6 : 10) * (1 - f * 0.6); rot = junk ? Math.sin(T * 1.5 + L.vid) * 25 : Math.sin(T * 8) * 6; wig = junk ? 0 : 1; }
             else if (!junk) { y = 44 + Math.sin(T * 3) * 2; x = 50 + Math.sin(T * 2.2 + L.vid) * 8; rot = Math.sin(T * 9) * 8; wig = 1; if (fakes.some(f => T >= f && T < f + 0.18)) bob = 6; if (T >= bite && T <= end) { bob = 20 + Math.sin(T * 40) * 3; bang = true; y = 38; x = 50; } }

@@ -23,13 +23,15 @@ function cellPic(P, i) {
   if (odd && P.k === 'flip') tf = 'scaleX(-1)';
   return `<svg class="oo-pic" viewBox="0 0 10 10" ${tf ? `style="transform:${tf}"` : ''} aria-hidden="true"><use href="#${symId(key)}" x="0.6" y="0.6" width="8.8" height="8.8"/></svg>`;
 }
-export function gridHtml(P, cls = '') {
+export function gridHtml(P, cls = '', k = '') {
   if (!P) return '';
-  return `<div class="oo-grid ${cls}" style="--n:${P.n};color:${PALETTE[P.c % PALETTE.length]}">${Array.from({ length: P.n * P.n }, (_, i) => `<button class="oo-cell" data-i="${i}" aria-label="Picture ${i + 1}">${cellPic(P, i)}</button>`).join('')}</div>`;
+  return `<div class="oo-grid ${cls}" data-k="${k}" style="--n:${P.n};color:${PALETTE[P.c % PALETTE.length]}">${Array.from({ length: P.n * P.n }, (_, i) => `<button class="oo-cell" data-i="${i}" aria-label="Picture ${i + 1}">${cellPic(P, i)}</button>`).join('')}</div>`;
 }
 
 export function createView(ctx) {
-  const { ui, players, me, init } = ctx, watching = me == null, P = init.puzzles;
+  const { ui, me, init } = ctx, watching = me == null, P = init.puzzles;
+  // alone, Spotty Sue (CPU) races you through the same grids
+  const players = init.cpu ? [...ctx.players, { pid: 'cpu', name: init.cpu, color: '#9fb6c2', dark: '#5a7080', shape: 'diamond', portrait: '' }] : ctx.players;
   ui.innerHTML = `${symbols()}
     <div class="oo-top"><span class="oo-title">Odd One Out</span><span class="clock"><b>--</b></span></div>
     <div class="oo-players">${players.map(p => chip(p, '<em class="sc">0</em><strong class="oo-st"></strong>')).join('')}</div>
@@ -48,7 +50,7 @@ export function createView(ctx) {
 
   function drawMine() {
     const Q = P[mine]; if (!Q) return;
-    $('.oo-board').innerHTML = gridHtml(Q);
+    $('.oo-board').innerHTML = gridHtml(Q, '', mine);
     $('.oo-num').textContent = `Grid ${mine + 1}`;
     $('.oo-worth').textContent = `${Q.n}×${Q.n} · worth ${pointsFor(Q.n)}`;
   }
@@ -60,7 +62,7 @@ export function createView(ctx) {
     const b = e.target.closest('.oo-board .oo-cell'); if (!b || watching || phase !== 'play') return;
     e.preventDefault();
     const now = performance.now() / 1000, Q = P[mine], i = +b.dataset.i;
-    if (!Q) return;
+    if (!Q || +b.closest('.oo-grid').dataset.k !== mine) return;     // a second tap on the grid you just solved (the next one is still drawing)
     if (now < lockT) { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); return; }
     ctx.send('tap', { k: mine, i }); lastSend = now;
     if (i === Q.o) {
@@ -76,17 +78,18 @@ export function createView(ctx) {
   function note(g) {
     if (g.phase === 'ready') return watching ? 'Find the one picture that is different!' : 'Get ready… find the one that is different!';
     if (g.phase === 'end') {
-      if (init.solo) { const s = g.scores[players[0].pid], m = init.medals, got = s >= m[2] ? 'GOLD' : s >= m[1] ? 'SILVER' : s >= m[0] ? 'BRONZE' : ''; return got ? `${got}! ${s} points.` : `${s} points. Bronze at ${m[0]}!`; }
+      if (init.solo) { const s = g.scores[players[0].pid], m = init.medals, got = s >= m[2] ? 'GOLD' : s >= m[1] ? 'SILVER' : s >= m[0] ? 'BRONZE' : ''; const sue = g.scores.cpu ?? 0, vs = s > sue ? ` You beat ${init.cpu}!` : s === sue ? ` A tie with ${init.cpu}!` : ` ${init.cpu} got ${sue}.`; return (got ? `${got}! ${s} points.` : `${s} points. Bronze at ${m[0]}!`) + vs; }
       return 'Time! Most points wins.';
     }
     if (watching) return 'Who can spot them fastest?';
-    return init.solo ? `Score attack! Bronze ${init.medals[0]} · Silver ${init.medals[1]} · Gold ${init.medals[2]}` : 'Tap the odd one out!';
+    return init.solo ? `Race ${init.cpu}! Bronze ${init.medals[0]} · Silver ${init.medals[1]} · Gold ${init.medals[2]}` : 'Tap the odd one out!';
   }
   return {
     state(g) {
+      if (g.cpu) g = { ...g, scores: { ...g.scores, cpu: g.cpu.score }, at: { ...g.at, cpu: g.cpu.at } };
       lastG = g;
       if (g.phase !== phase) {
-        if (g.phase === 'play') { mine = Math.max(mine, g.at[me] ?? 0); drawMine(); ctx.sfx('open'); }
+        if (g.phase === 'play') { mine = Math.max(mine, g.at[me] ?? 0); drawMine(); ctx.sfx('pick'); }
         if (g.phase === 'end') { ctx.sfx('win'); ui.classList.remove('frozen'); }
       }
       phase = g.phase; ui.dataset.phase = g.phase;
@@ -94,7 +97,7 @@ export function createView(ctx) {
       if (me != null && g.phase === 'play') {
         const s = g.at[me];
         if (s > mine) { mine = s; drawMine(); }
-        else if (s < mine && performance.now() / 1000 - lastSend > 2) { mine = s; drawMine(); }   // the server never saw a tap: go back to where it is
+        else if (s < mine && performance.now() / 1000 - lastSend > 2) { mine = s; drawMine(); }   // (the 'sync' event normally does this at once)
       }
       const best = Math.max(1, ...Object.values(g.at));
       for (const p of players) {
@@ -115,6 +118,7 @@ export function createView(ctx) {
       $('.oo-note').textContent = note(g);
     },
     event(ev) {
+      if (ev.e === 'sync') { if (!watching && ev.k !== mine) { mine = ev.k; drawMine(); } return; }
       if (!watching && ev.pid === me) return;
       const lane = ui.querySelector(`.oo-lane[data-pid="${ev.pid}"]`); if (!lane) return;
       const cls = ev.e === 'found' ? 'flash' : 'shake';

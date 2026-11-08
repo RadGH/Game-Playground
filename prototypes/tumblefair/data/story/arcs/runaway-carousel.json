@@ -1,0 +1,253 @@
+{
+  "id": "runaway-carousel",
+  "title": "The Runaway Carousel",
+  "blurb": "The carousel horses have galloped off into the night. Bring them home before the fair opens!",
+  "icon": "🎠",
+  "cast": {
+    "villain": ["Captain Clank", "the Brass Bandleader", "Sir Sprocket"],
+    "ally": ["Old Nell the organ keeper", "Pip the balloon seller", "Granny Gears"],
+    "place": ["the Midway", "the Duck Pond", "the Hay Maze"],
+    "prize": ["the Golden Mare", "the Silver Stallion", "the Painted Pony"]
+  },
+  "hooks": [
+    {
+      "id": "rc-hook-empty", "weight": 2, "title": "An Empty Carousel",
+      "text": ["The carousel spins with no horses on it.", "Hoofprints of brass lead off toward {place}."],
+      "who": "active",
+      "choices": [
+        { "label": "Follow the hoofprints", "mood": "bold", "stars": 1, "flags": ["tracks"], "text": "{hero} kneels by the prints. They are still warm!", "deed": { "text": "found the brass hoofprints", "tags": ["tracks", "clue"] } },
+        { "label": "Ask for help", "mood": "clever", "stars": 1, "flags": ["ally_help"], "text": "{ally} whispers: {villain} wound them up and set them loose.", "deed": { "text": "got the first clue from {ally}", "tags": ["clue", "ally"] } }
+      ]
+    },
+    {
+      "id": "rc-hook-music", "weight": 1, "title": "Music at Midnight",
+      "text": ["The carousel organ starts playing at midnight.", "Then every horse jumps off and gallops away!"],
+      "who": "vote",
+      "choices": [
+        { "label": "Chase them now!", "mood": "bold", "party": 1, "flags": ["tracks"], "text": "Everyone runs after the clatter of brass hooves.", "deed": { "text": "chased the horses into the night", "tags": ["chase"], "party": true } },
+        { "label": "Switch off the organ", "mood": "clever", "stars": 1, "flags": ["organ_off"], "text": "{hero} pulls the big lever. The music stops. The horses slow down.", "deed": { "text": "switched off the runaway organ", "tags": ["organ", "clever"] } }
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "id": "rc-duck-pond", "act": 1, "weight": 2, "title": "Splash at the Duck Pond",
+      "text": ["A brass horse is paddling round the duck pond.", "The ducks are not happy about it."],
+      "callbacks": [{ "tags": ["tracks"], "text": "After {who} {deed}, the trail leads straight here." }],
+      "who": "active",
+      "choices": [
+        { "label": "Wade in after it", "mood": "bold", "stars": 1, "text": "{hero} wades in, boots and all.",
+          "game": { "kinds": ["race", "collect"], "intro": "Catch the horse before it swims off!", "lead": "winner",
+            "win": { "text": "{winner} grabs the reins and leads the horse to dry land.", "stars": 1, "flags": ["horse_1"], "deed": { "text": "pulled a horse out of the duck pond", "tags": ["horse", "water"] } },
+            "lose": { "text": "{loser} ends up with a duck sitting on their head.", "deed": { "text": "wore a duck as a hat", "tags": ["silly", "duck"] } } } },
+        { "label": "Lure it with carrots", "mood": "clever", "stars": 1, "text": "{hero} waves a bunch of carrots. The horse sniffs the air.",
+          "game": { "kinds": ["aim", "reaction"], "intro": "Toss the carrots right on target!", "lead": "winner",
+            "win": { "text": "{winner} lands the perfect carrot. The horse trots out happily.", "stars": 1, "flags": ["horse_1"], "deed": { "text": "tricked a horse with a carrot", "tags": ["horse", "clever"] } },
+            "lose": { "text": "{loser} throws a carrot into the pond. A duck eats it.", "deed": { "text": "fed a duck by mistake", "tags": ["duck", "silly"] } } } }
+      ]
+    },
+    {
+      "id": "rc-hay-maze", "act": 1, "weight": 2, "title": "Lost in the Hay Maze",
+      "text": ["Neighing echoes from inside the hay maze.", "Every path looks the same."],
+      "who": "vote",
+      "choices": [
+        { "label": "Split up and search", "mood": "bold", "party": 1, "text": "Everyone dives into a different tunnel of hay.",
+          "game": { "kinds": ["memory", "logic"], "intro": "Remember the way through!", "lead": "winner",
+            "win": { "text": "{winner} finds the horse munching hay in the middle.", "stars": 1, "flags": ["horse_1"], "deed": { "text": "solved the hay maze", "tags": ["maze", "horse", "clever"] } },
+            "lose": { "text": "{loser} pops out of the maze covered in straw.", "deed": { "text": "came out of the maze looking like a scarecrow", "tags": ["silly", "hay"] } } } },
+        { "label": "Climb on top", "mood": "clever", "stars": 1, "text": "From up high, {hero} spots the horse at once.",
+          "game": { "kinds": ["dodge", "race"], "intro": "Hop across the bales without falling!", "lead": "winner",
+            "win": { "text": "{winner} leaps the last bale and lands right on the horse.", "stars": 1, "flags": ["horse_1"], "deed": { "text": "hopped across the hay bales", "tags": ["hay", "horse", "bold"] } },
+            "lose": { "text": "{loser} slides down a bale like a slide. Wheee!", "deed": { "text": "slid down a hay bale", "tags": ["silly", "hay"] } } } }
+      ]
+    },
+    {
+      "id": "rc-dodgems", "act": 1, "weight": 1, "title": "Dodgem Stampede",
+      "text": ["Two brass horses are racing the dodgem cars!", "They keep bumping into each other on purpose."],
+      "who": "active",
+      "choices": [
+        { "label": "Jump in a dodgem", "mood": "bold", "stars": 1, "text": "{hero} hops in a dodgem and stamps on the pedal.",
+          "game": { "kinds": ["brawl", "race"], "intro": "Bump your way to the horses!", "lead": "winner",
+            "win": { "text": "{winner} herds both horses into the corner. Beep beep!", "stars": 2, "flags": ["horse_1", "horse_2"], "deed": { "text": "rounded up two horses in a dodgem", "tags": ["horse", "dodgem", "bold"] } },
+            "lose": { "text": "{loser} spins round and round in circles.", "deed": { "text": "spun in circles in a dodgem", "tags": ["silly", "dodgem"] } } } },
+        { "label": "Cut the power", "mood": "clever", "party": 1, "text": "The dodgems stop. The horses look around, confused.",
+          "game": { "kinds": ["collect", "reaction"], "intro": "Grab the horses before they wake up!", "coop": true,
+            "win": { "text": "Together you catch both horses while they are still dizzy.", "stars": 2, "flags": ["horse_1", "horse_2"], "deed": { "text": "caught two dizzy horses together", "tags": ["horse", "team"] } },
+            "lose": { "text": "One horse slips away, but the other is caught.", "stars": 1, "flags": ["horse_1"], "deed": { "text": "caught one dizzy horse", "tags": ["horse"] } } } }
+      ]
+    },
+    {
+      "id": "rc-clockwork-guard", "act": 2, "weight": 2, "title": "The Clockwork Guard",
+      "text": ["A clockwork guard stands at the gate, ticking loudly.", "Behind it, three horses are tied to a post."],
+      "callbacks": [{ "tags": ["organ"], "text": "Since {who} {deed}, the guard is ticking very slowly." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Outrun it!", "mood": "bold", "stars": 1, "text": "Everyone takes a deep breath and gets ready to run.",
+          "game": { "kinds": ["race", "dodge"], "intro": "Run past the guard!", "lead": "winner",
+            "win": { "text": "{winner} outruns the guard and unties the horses.", "stars": 2, "flags": ["horse_2", "guard_beaten"], "deed": { "text": "outran the clockwork guard", "tags": ["guard", "chase", "bold"] } },
+            "lose": { "text": "{loser} gets a gentle bonk on the head from the guard.", "deed": { "text": "was bonked by a clockwork guard", "tags": ["guard", "silly"] } } } },
+        { "label": "Wind it backwards", "mood": "clever", "stars": 1, "text": "{hero} creeps up to the big key in its back.",
+          "game": { "kinds": ["rhythm", "reaction"], "intro": "Turn the key in time with the ticks!", "lead": "winner",
+            "win": { "text": "{winner} winds it down. The guard yawns and sits.", "stars": 2, "flags": ["horse_2", "guard_beaten"], "deed": { "text": "wound the clockwork guard to sleep", "tags": ["guard", "clever"] } },
+            "lose": { "text": "{loser} winds it the wrong way. It does a little dance.", "deed": { "text": "made the clockwork guard dance", "tags": ["guard", "silly"] } } } }
+      ]
+    },
+    {
+      "id": "rc-shooting-gallery", "act": 2, "weight": 2, "title": "The Shooting Gallery",
+      "text": ["{villain} has hidden a horse's key in the shooting gallery.", "Only a perfect shot will knock it loose."],
+      "who": "active",
+      "choices": [
+        { "label": "Take aim", "mood": "bold", "stars": 1, "text": "{hero} picks up a cork popper and squints.",
+          "game": { "kinds": ["aim"], "intro": "Hit the targets!", "lead": "winner",
+            "win": { "text": "PLINK! {winner} knocks the key into the air and catches it.", "stars": 2, "flags": ["brass_key"], "deed": { "text": "shot the brass key off the shelf", "tags": ["key", "aim"] } },
+            "lose": { "text": "{loser} hits the bell, the lamp and a very surprised owl.", "deed": { "text": "startled an owl at the gallery", "tags": ["silly", "aim"] } } } },
+        { "label": "Look for a trick", "mood": "clever", "stars": 1, "text": "{hero} notices the targets move in a pattern.",
+          "game": { "kinds": ["memory", "guess"], "intro": "Spot the pattern!", "lead": "winner",
+            "win": { "text": "{winner} works out the pattern and lifts the key free.", "stars": 2, "flags": ["brass_key"], "deed": { "text": "cracked the shooting gallery's pattern", "tags": ["key", "clever"] } },
+            "lose": { "text": "{loser} guesses wrong and gets a squirt of water.", "deed": { "text": "got squirted at the gallery", "tags": ["silly", "water"] } } } }
+      ]
+    },
+    {
+      "id": "rc-ghost-train", "act": 2, "weight": 1, "title": "Ghost Train Tunnel",
+      "text": ["Hoofbeats rattle through the ghost train tunnel.", "Paper bats flap in the dark."],
+      "who": "vote",
+      "choices": [
+        { "label": "Ride the ghost train", "mood": "bold", "party": 1, "text": "Everyone squeezes into one little cart. Off you go!",
+          "game": { "kinds": ["dodge", "reaction"], "intro": "Dodge the spooky surprises!", "lead": "winner",
+            "win": { "text": "{winner} spots a horse hiding behind a cardboard ghost.", "stars": 2, "flags": ["horse_2"], "deed": { "text": "found a horse on the ghost train", "tags": ["horse", "brave"] } },
+            "lose": { "text": "{loser} screams so loudly that the cardboard ghost falls over.", "deed": { "text": "out-screamed a cardboard ghost", "tags": ["silly", "brave"] } } } },
+        { "label": "Turn on the lights", "mood": "clever", "stars": 1, "text": "{hero} finds the switch. The tunnel is not scary at all now.",
+          "game": { "kinds": ["collect"], "intro": "Gather up the loose horseshoes!", "lead": "winner",
+            "win": { "text": "{winner} collects the most horseshoes. A horse trots over to say thanks.", "stars": 2, "flags": ["horse_2"], "deed": { "text": "collected the lost horseshoes", "tags": ["horse", "collect"] } },
+            "lose": { "text": "{loser} trips over a rubber skeleton.", "deed": { "text": "tripped over a rubber skeleton", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "rc-bandstand", "act": 2, "weight": 1, "title": "Battle of the Bands",
+      "text": ["{villain} is playing a tuba on the bandstand.", "Every horse that hears it dances away!"],
+      "who": "active",
+      "choices": [
+        { "label": "Play louder!", "mood": "bold", "stars": 1, "text": "{hero} grabs a drum and starts bashing away.",
+          "game": { "kinds": ["rhythm"], "intro": "Keep the beat!", "lead": "winner",
+            "win": { "text": "{winner} drowns out the tuba. The horses stop dancing.", "stars": 2, "flags": ["horse_2", "tuba_stopped"], "deed": { "text": "out-played the tuba on the bandstand", "tags": ["music", "bold"] } },
+            "lose": { "text": "{loser} drums so wildly the drum rolls away.", "deed": { "text": "lost a drum down the hill", "tags": ["silly", "music"] } } } },
+        { "label": "Hide the sheet music", "mood": "clever", "stars": 1, "text": "{hero} sneaks up behind the music stand.",
+          "game": { "kinds": ["bluff", "guess", "dodge"], "intro": "Do not get spotted!", "lead": "winner",
+            "win": { "text": "{winner} swaps the music for a shopping list. The tuba squeaks and stops.", "stars": 2, "flags": ["horse_2", "tuba_stopped"], "deed": { "text": "swapped the villain's music for a shopping list", "tags": ["music", "sneaky"] } },
+            "lose": { "text": "{loser} gets caught and has to sing a song.", "deed": { "text": "sang a song for {villain}", "tags": ["silly", "music"] } } } }
+      ]
+    },
+    {
+      "id": "rc-workshop", "act": 3, "weight": 2, "title": "The Clockwork Workshop",
+      "text": ["The trail ends at {villain}'s workshop.", "Gears whirr. Something big is being built inside."],
+      "callbacks": [{ "tags": ["key"], "text": "{who} {deed}, so the workshop door clicks open." }],
+      "extra": [{ "requires": ["horse_2"], "text": "The rescued horses neigh. They want to help." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Storm the door", "mood": "bold", "party": 1, "text": "Everyone charges in together!",
+          "game": { "kinds": ["brawl"], "intro": "Push through the clockwork crowd!", "lead": "winner",
+            "win": { "text": "{winner} bursts through first and grabs the master key.", "stars": 2, "flags": ["master_key"], "deed": { "text": "stormed the clockwork workshop", "tags": ["workshop", "bold"] } },
+            "lose": { "text": "{loser} gets tangled in a spring. Boing!", "deed": { "text": "got tangled in a giant spring", "tags": ["silly"] } } } },
+        { "label": "Fix the machines", "mood": "clever", "stars": 1, "text": "{hero} rolls up both sleeves.",
+          "game": { "kinds": ["logic", "memory"], "intro": "Put the gears in the right order!", "lead": "winner",
+            "win": { "text": "{winner} fixes the gears. The machines start building horse stables instead.", "stars": 2, "flags": ["master_key", "machines_fixed"], "deed": { "text": "fixed {villain}'s machines", "tags": ["workshop", "clever"] } },
+            "lose": { "text": "{loser} builds a tiny clockwork mouse by accident. It is adorable.", "deed": { "text": "built a clockwork mouse by accident", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "rc-ferris", "act": 3, "weight": 2, "title": "Top of the Ferris Wheel",
+      "text": ["The last horse is stuck at the very top of the Ferris wheel.", "The wheel is turning faster and faster."],
+      "callbacks": [{ "tags": ["bold", "chase"], "text": "{who} {deed}. Climbing a wheel is nothing after that." }],
+      "who": "active",
+      "choices": [
+        { "label": "Climb up", "mood": "bold", "stars": 1, "text": "{hero} starts climbing, one seat at a time.",
+          "game": { "kinds": ["dodge", "reaction"], "intro": "Hold on and dodge the swinging seats!", "lead": "winner",
+            "win": { "text": "{winner} reaches the top and rides the horse down the spokes!", "stars": 2, "flags": ["horse_3"], "deed": { "text": "rode a horse down the Ferris wheel", "tags": ["horse", "bold", "high"] } },
+            "lose": { "text": "{loser} gets dizzy and has to hug a seat for a while.", "deed": { "text": "hugged a Ferris wheel seat", "tags": ["silly", "high"] } } } },
+        { "label": "Throw a rope", "mood": "clever", "stars": 1, "text": "{hero} ties a lasso from bunting.",
+          "game": { "kinds": ["aim"], "intro": "Throw the lasso!", "lead": "winner",
+            "win": { "text": "{winner} lassos the horse and lowers it gently down.", "stars": 2, "flags": ["horse_3"], "deed": { "text": "lassoed a horse off the Ferris wheel", "tags": ["horse", "aim", "high"] } },
+            "lose": { "text": "{loser} lassos a hot dog stand instead.", "deed": { "text": "lassoed a hot dog stand", "tags": ["silly", "food"] } } } }
+      ]
+    },
+    {
+      "id": "rc-stampede", "act": 3, "weight": 1, "title": "The Big Stampede",
+      "text": ["Every runaway horse is galloping straight at the party!", "{villain} is riding at the front."],
+      "callbacks": [{ "tags": ["music"], "text": "{who} {deed}, and the horses still remember the beat." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Stand together", "mood": "bold", "party": 1, "text": "Everyone links arms and plants their feet.",
+          "game": { "kinds": ["dodge", "brawl"], "intro": "Stay standing in the stampede!", "lead": "winner",
+            "win": { "text": "{winner} is the last one standing. The horses stop and stare.", "stars": 2, "flags": ["horse_3"], "deed": { "text": "stood firm in the great stampede", "tags": ["bold", "horse", "chase"] } },
+            "lose": { "text": "{loser} gets carried along on a horse's back for a while.", "deed": { "text": "rode the stampede by accident", "tags": ["silly", "horse"] } } } },
+        { "label": "Ring the dinner bell", "mood": "clever", "stars": 1, "text": "{hero} rings the bell at the hay barn. Dinner time!",
+          "game": { "kinds": ["collect", "race"], "intro": "Fill the feed buckets!", "lead": "winner",
+            "win": { "text": "{winner} fills the most buckets. Every horse stops to eat.", "stars": 2, "flags": ["horse_3"], "deed": { "text": "fed the whole stampede", "tags": ["kind", "horse", "food"] } },
+            "lose": { "text": "{loser} spills a bucket of oats down their own shirt.", "deed": { "text": "wore a shirt full of oats", "tags": ["silly", "food"] } } } }
+      ]
+    }
+  ],
+  "interludes": [
+    {
+      "id": "rc-int-shoe", "weight": 2, "title": "A Golden Horseshoe",
+      "text": ["A golden horseshoe glints in the grass.", "It is still warm from galloping."],
+      "who": "active",
+      "choices": [
+        { "label": "Keep it for luck", "mood": "bold", "stars": 2, "flags": ["gold_shoe"], "text": "{hero} pockets the horseshoe. It hums softly.", "deed": { "text": "found a golden horseshoe", "tags": ["lucky", "horse"] } },
+        { "label": "Hang it over the gate", "mood": "kind", "party": 1, "text": "{hero} hangs it up. Luck for everyone!", "deed": { "text": "hung a lucky horseshoe for everyone", "tags": ["kind", "lucky"] } }
+      ]
+    },
+    {
+      "id": "rc-int-ally", "weight": 1, "title": "{ally} Waves",
+      "text": ["{ally} hurries over with a flask of cocoa.", "\"You look frozen! Have a sip.\""],
+      "who": "vote",
+      "choices": [
+        { "label": "Sit for a minute", "mood": "kind", "party": 1, "text": "Warm cocoa, warm hands. Everyone feels ready again.", "deed": { "text": "shared cocoa with {ally}", "tags": ["kind", "ally"], "party": true } },
+        { "label": "No time, run!", "mood": "bold", "stars": 1, "text": "{hero} gulps the cocoa on the move and dashes off.", "deed": { "text": "drank cocoa at a full sprint", "tags": ["silly", "chase"] } }
+      ]
+    }
+  ],
+  "climax": [
+    {
+      "id": "rc-climax-giant", "weight": 2, "title": "The Clockwork Colossus",
+      "text": ["{villain} climbs into a giant clockwork horse.", "\"No one rides my carousel but ME!\""],
+      "callbacks": [{ "tags": ["guard", "workshop", "key"], "text": "After {who} {deed}, you know its weak spots." }],
+      "extra": [{ "requires": ["machines_fixed"], "text": "The fixed machines whirr to help you!" }],
+      "who": "vote",
+      "choices": [
+        { "label": "Fight it together", "mood": "bold", "party": 1, "text": "Everyone gets ready. This is it!",
+          "game": { "kinds": ["boss"], "coop": true, "intro": "Beat the Colossus together!",
+            "win": { "text": "The Colossus wobbles, clanks and falls apart! {villain} climbs out, sorry.", "stars": 3, "flags": ["won"], "deed": { "text": "beat the Clockwork Colossus", "tags": ["boss", "team"] } },
+            "lose": { "text": "The Colossus gallops off into the sunrise. It will be back.", "stars": 1, "deed": { "text": "fought the Clockwork Colossus", "tags": ["boss", "team"] } } } },
+        { "label": "Race it round the fair", "mood": "clever", "stars": 1, "text": "{hero} shouts: \"Bet you can't beat us round the fair!\"",
+          "game": { "kinds": ["race"], "intro": "Race the Colossus!",
+            "win": { "text": "{winner} wins the race! {villain} hands back {prize}.", "stars": 3, "flags": ["won"], "deed": { "text": "won the great race against {villain}", "tags": ["boss", "race"] } },
+            "lose": { "text": "{loser} takes a wrong turn into the candy floss tent.", "deed": { "text": "raced into the candy floss tent", "tags": ["silly", "food"] } } } }
+      ]
+    },
+    {
+      "id": "rc-climax-ring", "weight": 1, "title": "The Last Ride",
+      "text": ["{villain} has {prize}, the fastest horse of all.", "It is galloping round the empty carousel ring."],
+      "callbacks": [{ "tags": ["horse"], "text": "{who} {deed}. The other horses cheer you on." }],
+      "who": "active",
+      "choices": [
+        { "label": "Hop on and catch up", "mood": "bold", "stars": 1, "text": "{hero} jumps onto the spinning carousel.",
+          "game": { "kinds": ["race", "dodge"], "intro": "Catch {prize}!",
+            "win": { "text": "{winner} catches {prize}! The carousel music plays a happy tune.", "stars": 3, "flags": ["won"], "deed": { "text": "caught {prize}", "tags": ["boss", "horse"] } },
+            "lose": { "text": "{loser} goes round and round and round.", "deed": { "text": "rode the carousel forty times", "tags": ["silly"] } } } },
+        { "label": "Stop the whole ride", "mood": "clever", "party": 1, "text": "Everyone grabs the brake lever together.",
+          "game": { "kinds": ["boss", "brawl"], "coop": true, "intro": "Hold the carousel still!",
+            "win": { "text": "The carousel stops. {prize} trots home to its pole.", "stars": 3, "flags": ["won"], "deed": { "text": "stopped the runaway carousel", "tags": ["boss", "team"] } },
+            "lose": { "text": "The brake snaps! {villain} rides off laughing.", "stars": 1, "deed": { "text": "nearly stopped the carousel", "tags": ["boss", "team"] } } } }
+      ]
+    }
+  ],
+  "epilogue": {
+    "win": { "any": [["The horses are home and the carousel spins again.", "{villain} now sweeps the stables every morning."], ["Sunrise. Every horse is back on its pole.", "The first ride of the day is free, thanks to you."]] },
+    "lose": { "any": [["Most horses are home, but {prize} is still out there.", "Maybe next fair night…"], ["The carousel is quiet. {villain} got away this time.", "But you saved the fair's music!"]] },
+    "lines": [
+      { "requires": ["gold_shoe"], "text": "The golden horseshoe now hangs over the carousel gate." },
+      { "requires": ["machines_fixed"], "text": "The clockwork machines build a brand-new stable." }
+    ]
+  }
+}

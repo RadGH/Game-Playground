@@ -126,8 +126,13 @@ export function createView(ctx) {
   ctx.ui.append(pill, banner);
   let bannerT = 0;
   function show(text, cls = '', ms = 1100) { banner.textContent = text; banner.className = 'tpt-banner show ' + cls; bannerT = ms / 1000; }
-  const PILL = { ready: ['⏳', 'Get ready…'], sing: ['🎵', 'Creep forward!'], tell: ['🐯', 'FREEZE!'], look: ['👀', 'Don’t move!'], fake: ['😅', 'Phew — go!'], done: ['🔔', 'Done!'] };
-  const nameOf = pid => (pid === ctx.me ? 'You' : ctx.players.find(p => p.pid === pid)?.name || '?');
+  const PILL = { ready: ['⏳', 'Get ready…'], sing: ['🎵', 'Creep forward!'], tell: ['🐯', 'FREEZE!'], look: ['👀', 'Don’t move!'], fake: ['😅', 'Phew — go!'], ring: ['🔔', 'DING!'], done: ['🔔', 'Done!'] };
+  const BELLS = ctx.init.bells || 3, CPU = ctx.init.cpu;
+  const nameOf = pid => (pid === ctx.me ? 'You' : pid === 'cpu' ? CPU : ctx.players.find(p => p.pid === pid)?.name || '?');
+  // Pip, the computer fairgoer who races you when you play alone
+  let pip = null, pipTag = null, pipAt = null, pipDraw = null;
+  if (CPU) ctx.createActor({ look: { race: 'halfling', seed: 6120 }, costume: 'cos_none' }, { scale: 1 }).then(a => { if (!a) return; pip = a; pipTag = stage.tag(a.group, { text: CPU + ' (CPU)', height: (a.height || 1.6) + 0.3 }); const z = ctx.init.startZ, x = (ctx.init.lanes.find(l => l[0] === 'cpu') || [0, 0])[1]; pipDraw = { x, z, y: 0, yaw: Math.PI }; a.place(x, 0, z, Math.PI); });
+  let pipBells = 0;
   let ph = 'ready', phT = 0, watch = 0, winner = null, roaring = 0, bellSwing = 0, lastPill = '';
   function setPhase(next) {
     if (next === ph) return;
@@ -135,17 +140,22 @@ export function createView(ctx) {
     if (next === 'sing') { tunes.start('sing'); if (prev === 'ready') show('GO!', 'go', 800); else if (prev === 'look') show('Creep!', 'go small', 700); }
     else if (next === 'tell') { tunes.stop(true); show('FREEZE!', 'freeze', 1500); ctx.sfx('status.stun.apply'); }
     else if (next === 'fake') show('Fooled you!', 'small', 900);
+    else if (next === 'ring') tunes.stop(false);
+    else if (next === 'ready' && prev !== 'ready') show('Back to the start!', 'small', 1200);
     else if (next === 'done') tunes.stop(false);
   }
   return {
     state(g) {
       setPhase(g.ph); watch = g.w; winner = g.win;
       bar.set(g.sc, g.left);
-      const mine = ctx.me != null ? g.sc[ctx.me] : null;
+      if (g.cpu) { pipAt = g.cpu; pipBells = g.cpu[4]; }
+      const mine = ctx.me != null && g.m ? g.m[ctx.me] : null;
       const [icon, text] = PILL[g.ph] || PILL.ready;
       const togo = mine != null && g.ph !== 'done' && g.ph !== 'ready' ? `<b>${Math.max(0, Math.round(RULES.startZ - RULES.bellZ - mine))} m</b>` : '';
-      const s = `${icon}|${text}${togo}`;
-      if (s !== lastPill) { lastPill = s; pill.dataset.ph = g.ph; pill.innerHTML = `<i>${icon}</i><span>${text}</span>${togo}`; }
+      const bells = ctx.me != null && g.sc[ctx.me] != null ? `<em>🔔 ${g.sc[ctx.me]}/${BELLS}</em>` : '';
+      const vs = CPU ? `<em class="cpu">${CPU} 🔔 ${pipBells}</em>` : '';
+      const s = `${icon}|${text}${togo}${bells}${vs}`;
+      if (s !== lastPill) { lastPill = s; pill.dataset.ph = g.ph; pill.innerHTML = `<i>${icon}</i><span>${text}</span>${togo}${bells}${vs}`; }
     },
     event(ev) {
       if (ev.e === 'roar') {
@@ -153,8 +163,9 @@ export function createView(ctx) {
         floatText(stage, ev.x, 2.2, ev.z, ev.pid === ctx.me ? 'ROAR! Back you go!' : `ROAR! ${nameOf(ev.pid)}`, 'bad');
         if (ev.pid === ctx.me) show('ROAR!', 'freeze', 1200);
       } else if (ev.e === 'bell') {
-        bellSwing = 1; tunes.fx('ding'); ctx.sfx('win');
-        show(ev.pid === ctx.me ? 'DING! You win!' : `DING! ${nameOf(ev.pid)}!`, 'go', 2600);
+        bellSwing = 1; tunes.fx('ding'); ctx.sfx(ev.n >= BELLS ? 'win' : 'good');
+        if (ev.n >= BELLS) show(ev.pid === ctx.me ? 'You win!' : `${nameOf(ev.pid)} wins!`, 'go', 2600);
+        else show(ev.pid === ctx.me ? `DING! ${ev.n}/${BELLS}` : `${nameOf(ev.pid)} ${ev.n}/${BELLS}`, 'go small', 1700);
       } else if (ev.e === 'time') { show('Time!', 'small', 2000); ctx.sfx('bad'); }
     },
     pose(pid, flags, b) {
@@ -188,6 +199,15 @@ export function createView(ctx) {
         n.s.position.set(side * (0.9 + n.t * 1.1) + Math.sin(n.t * 9) * 0.2, RULES.stageTop + 4.4 + n.t * 2.2, RULES.tigerZ + 0.3);
         n.s.material.opacity = n.t < 0.15 ? n.t / 0.15 : 1 - (n.t - 0.15) / 0.85;
       }
+      if (pip && pipAt && pipDraw) {
+        const [x, z, y, yaw, , moving] = pipAt, k = Math.min(1, dt * 14);
+        if (Math.hypot(x - pipDraw.x, z - pipDraw.z) > 4) { pipDraw.x = x; pipDraw.z = z; } else { pipDraw.x += (x - pipDraw.x) * k; pipDraw.z += (z - pipDraw.z) * k; }
+        pipDraw.y += (y - pipDraw.y) * k;
+        pip.place(pipDraw.x, pipDraw.y, pipDraw.z, yaw); pip.setSpeed(moving ? 2.7 : 0);
+        pip.setPose(pipAt[6] ? 'hit' : winner === 'cpu' ? 'cheer' : ph === 'ready' ? 'ready' : 'idle');
+        pip.body.group.rotation.x = pipDraw.y > 0.05 ? -pipDraw.y * 0.6 : 0;
+        pip.update(dt);
+      }
       if (bellSwing > 0) { bellSwing = Math.max(0, bellSwing - dt * 0.35); bellPivot.rotation.z = Math.sin(t * 16) * 0.5 * bellSwing; }
       glow.material.opacity = 0.35 + Math.sin(t * 4) * 0.2;
       glow.scale.setScalar(1 + Math.sin(t * 4) * 0.05);
@@ -195,7 +215,7 @@ export function createView(ctx) {
       for (const p of ctx.players) { const a = ctx.actor(p.pid), at = ctx.pos(p.pid); if (a && at) a.body.group.rotation.x = at.y > 0.05 ? -at.y * 0.6 : 0; }
     },
     dispose() {
-      tunes.dispose(); bar.el.remove(); pill.remove(); banner.remove();
+      tunes.dispose(); bar.el.remove(); pill.remove(); banner.remove(); pipTag?.remove?.();
       for (const p of ctx.players) { const a = ctx.actor(p.pid); if (a) a.body.group.rotation.x = 0; }
       for (const t of texs) t.dispose();
       for (const m of mats) m.dispose();

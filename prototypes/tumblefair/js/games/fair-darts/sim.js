@@ -7,17 +7,26 @@
 // TIMING (Ring Toss / Apple Bobbing): every aim path is a fixed function of the play clock (in init, the same on the
 // phone and the server). The phone sends `throw` { t } — WHEN it let go — and the server works out where the ring was
 // then (toss-kit.js phoneTime checks t is not in the future and not too old).
+//
+// Expansion 1 (M4, "buggy"): a phone whose clock had slipped more than a second behind the server (slow wifi, a hiccup)
+// had its throw thrown away in silence — the dart flew on screen, then vanished 2 s later and the dart count went
+// back. A late throw now counts at the oldest moment allowed (LAG_S, 2 s) instead of disappearing. Everyone also throws
+// at the SAME nine aim paths now (on their own board), so nobody gets an easier wobble by luck. Alone you play against
+// Dead-Eye Dot, a computer darts player (her board is not drawn; her score and darts left are in the chip row).
 import { phoneTime, placeOrder, r1, r2 } from '../toss-kit.js';
 
 export const meta = {
   id: 'fair-darts', title: 'Fair Darts', blurb: 'Steady your wobbly aim and land darts on the bullseye!',
-  how: ['Your aim ring wanders and breathes in and out.', 'Tap THROW when it drifts in close to the gold bullseye.', 'Bullseye 10, then 5, 3, 2, 1. The last three darts count DOUBLE!'],
-  kind: 'ui', min: 1, max: 4, seconds: 54, scoring: 'points', unit: 'points', tags: ['action'], card: 'card-fair-darts', css: true,
+  how: ['Tap THROW when your wandering aim ring drifts in over the gold bullseye.', 'Bullseye 10, then 5, 3, 2, 1. The last three darts count DOUBLE!', 'Everyone gets the same wobble: best timing wins.'],
+  kind: 'ui', min: 1, max: 4, seconds: 54, scoring: 'points', unit: 'points', tags: ['action'], card: 'card-fair-darts', css: true, rival: true,
   controls: { a: 'Throw' },
 };
 export const R = 50;                                   // board radius, in board units (the board is drawn 0..100 across)
 export const RINGS = [{ r: 4.5, pts: 10 }, { r: 12, pts: 5 }, { r: 22, pts: 3 }, { r: 34, pts: 2 }, { r: R, pts: 1 }];
-export const COUNT_S = 3, PLAY_S = 44, END_S = 3, DARTS = 9, SET = 3, COOL_S = 0.6, LAG_S = 1.0, AHEAD_S = 0.15;
+export const COUNT_S = 3, PLAY_S = 44, END_S = 3, DARTS = 9, SET = 3, COOL_S = 0.6, LAG_S = 2.0, AHEAD_S = 0.15;
+export const CPU = 'cpu', CPU_NAME = 'Dead-Eye Dot';
+/** Dot's hand: how far (seconds) her throw lands from the calm moment, and how long she looks for it. */
+export const CPU_HAND = { easy: { miss: 0.2, look: 1.6 }, normal: { miss: 0.12, look: 2.2 }, hard: { miss: 0.06, look: 2.6 } };
 export const MEDALS = [30, 55, 80];
 export const LEVELS = {
   easy: { amax: 38, calm: 0.07, wb: 1.3, w: [1.1, 1.6] },
@@ -32,28 +41,34 @@ export function aimAt(path, t) {
 /** Points for a dart at (x, y) from the centre (before the double), and which ring (0 = bullseye, 5 = off the board). */
 export function ringOf(x, y) { const d = Math.hypot(x, y); const i = RINGS.findIndex(q => d <= q.r); return i < 0 ? { ring: RINGS.length, pts: 0 } : { ring: i, pts: RINGS[i].pts }; }
 export const isDouble = k => k >= DARTS - SET;
-/** The aim path for each dart (one list per player, in seat order). */
+/** The aim path for each dart: ONE list of nine, the same for every player (fair), repeated per seat so the browser
+ *  format stays `paths[seat][dart]`. */
 export function makePaths(rng, n, L) {
-  return Array.from({ length: n }, () => Array.from({ length: DARTS }, () => ({
+  const one = Array.from({ length: DARTS }, () => ({
     a: L.amax, c: L.calm, wb: r2(L.wb * rng.range(0.92, 1.08)), pb: r2(rng.range(0, 3.14)),
     w1: r2(L.w[0] * rng.range(0.9, 1.1)), w2: r2(L.w[1] * rng.range(0.9, 1.1)), p1: r2(rng.range(0, 6.28)), p2: r2(rng.range(0, 6.28)),
-  })));
+  }));
+  return Array.from({ length: n }, () => one);
 }
-export const valid = d => d && typeof d === 'object' && Number.isFinite(d.t);
+export const valid = d => d && typeof d === 'object' && Number.isFinite(d.t) && d.t >= 0;
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
   const L = LEVELS[difficulty] || LEVELS.normal, pids = players.map(p => p.pid), solo = pids.length === 1;
   const paths = makePaths(rng, pids.length, L), idx = new Map(pids.map((p, i) => [p, i]));
   const S = Object.fromEntries(pids.map(p => [p, { pts: 0, n: 0, last: null, darts: [], bulls: 0 }]));
   let phase = 'count', left = COUNT_S, el = 0, over = false;
   const events = [];
+  // Dead-Eye Dot (alone only): she aims for the calm moment of each dart, a little off by difficulty
+  const hand = CPU_HAND[difficulty] || CPU_HAND.normal, dot = solo && rivals !== false ? { pts: 0, n: 0, at: null, darts: [] } : null;
+  const dotPaths = dot ? paths[0] : null;
   return {
     events,
-    init: () => ({ paths, rings: RINGS, r: R, darts: DARTS, set: SET, cool: COOL_S, play: PLAY_S, count: COUNT_S, solo, medals: MEDALS, order: pids }),
+    init: () => ({ paths, rings: RINGS, r: R, darts: DARTS, set: SET, cool: COOL_S, play: PLAY_S, count: COUNT_S, solo, medals: MEDALS, order: pids, cpu: dot ? CPU_NAME : null }),
     act(pid, a, d) {
       if (a !== 'throw' || !S[pid] || phase !== 'play' || over || !valid(d)) return;
       const s = S[pid]; if (s.n >= DARTS) return;
-      const t = phoneTime(d, el, s.last, { ahead: AHEAD_S, lag: LAG_S, gap: COOL_S, max: PLAY_S });
+      const late = Math.max(d.t, el - LAG_S, s.last != null ? s.last + COOL_S : 0);     // a late phone's throw still counts
+      const t = phoneTime({ t: late }, el, s.last, { ahead: AHEAD_S, lag: LAG_S + 0.01, gap: COOL_S, max: PLAY_S });
       if (t == null) return;
       const k = s.n, [x, y] = aimAt(paths[idx.get(pid)][k], t), { ring, pts: base } = ringOf(x, y), pts = base * (isDouble(k) ? 2 : 1);
       s.n++; s.last = t; s.pts += pts; if (ring === 0) s.bulls++;
@@ -66,18 +81,29 @@ export function create({ rng, players, difficulty = 'normal' }) {
       if (phase === 'count') { left -= dt; if (left <= 0) { phase = 'play'; el = 0; } return; }
       if (phase === 'play') {
         el += dt;
-        if (el >= PLAY_S || pids.every(p => S[p].n >= DARTS)) { phase = 'end'; left = END_S; events.push({ e: 'end' }); }
+        if (dot && dot.n < DARTS) {
+          if (dot.at == null) dot.at = Math.min(PLAY_S - 0.5, bestTime(dotPaths[dot.n], el + 1.6, el + 1.6 + hand.look) + rng.range(-hand.miss, hand.miss));
+          if (el >= dot.at) {
+            const k = dot.n, [x, y] = aimAt(dotPaths[k], dot.at), { ring, pts: base } = ringOf(x, y), pts = base * (isDouble(k) ? 2 : 1);
+            dot.n++; dot.pts += pts; dot.at = null; if (k % SET === 0) dot.darts = []; dot.darts.push([r1(x), r1(y)]);
+            events.push({ e: 'dart', pid: CPU, k, x: r1(x), y: r1(y), ring, pts });
+          }
+        }
+        if (el >= PLAY_S || (pids.every(p => S[p].n >= DARTS) && (!dot || dot.n >= DARTS))) { phase = 'end'; left = END_S; events.push({ e: 'end' }); }
       } else { left -= dt; if (left <= 0) over = true; }
     },
     state() {
       const sc = {}, n = {}, dts = {}; for (const p of pids) { sc[p] = S[p].pts; n[p] = S[p].n; dts[p] = S[p].darts; }
-      return { phase, left: phase === 'count' ? Math.max(0, Math.ceil(left)) : phase === 'end' ? 0 : Math.max(0, Math.ceil(PLAY_S - el)), el: Math.floor(el * 2) / 2, sc, n, dt: dts };
+      const g = { phase, left: phase === 'count' ? Math.max(0, Math.ceil(left)) : phase === 'end' ? 0 : Math.max(0, Math.ceil(PLAY_S - el)), el: Math.floor(el * 2) / 2, sc, n, dt: dts };
+      if (dot) g.cpu = [dot.pts, dot.n];
+      return g;
     },
     get over() { return over; },
     result() {
       const scores = Object.fromEntries(pids.map(p => [p, S[p].pts]));
       return { order: placeOrder(pids, p => S[p].pts), scores, unit: meta.unit, ...(solo ? { medal: MEDALS.filter(m => S[pids[0]].pts >= m).length } : {}) };
     },
+    get dot() { return dot; },
     get _el() { return el; }, get _phase() { return phase; }, _stats: S, _paths: paths, _idx: idx, _level: L,
   };
 }

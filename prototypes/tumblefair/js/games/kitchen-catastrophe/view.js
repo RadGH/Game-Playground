@@ -5,7 +5,7 @@
 // orders over their heads. Whatever you carry floats in front of you. The order cards sit under the score bar: the
 // front order big, its recipe as steps (done ✓ / NEXT / later) with who owns each; on your phone a line says what
 // to do next, and says YOU when the next part is yours.
-import { RECIPES, ITEMS } from './sim.js';
+import { RECIPES, ITEMS, CPU, CPU_NAME } from './sim.js';
 import { scoreBar, h, esc } from '../../client/gamehud.js';
 import { canvasTexture } from '../../client/stage.js';
 
@@ -15,9 +15,13 @@ const COL = { cup: '#f4f4f4', lemon: '#ffe14d', ice: '#a8e6ff', sausage: '#c4553
 export function createView(ctx) {
   const { THREE, group, stage, init } = ctx, A = ctx.arena;
   const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.7, ...extra });
-  const who = pid => ctx.player(pid), name = pid => pid === ctx.me ? 'You' : (who(pid)?.name || '?');
+  // Chef Crumb (the computer cook) gets a shape no player has and a white-and-red colour
+  const freeShape = ['triangle', 'diamond', 'square', 'circle'].find(sh => !ctx.players.some(p => p.shape === sh)) || 'triangle';
+  const CHEF = { pid: CPU, name: CPU_NAME, color: '#f2f2f2', dark: '#b8343b', shape: freeShape, seat: null };
+  const who = pid => (pid === CPU ? CHEF : ctx.player(pid)), name = pid => pid === ctx.me ? 'You' : (who(pid)?.name || '?');
   const mark = pid => { const p = who(pid); return p ? `<i class="kc-mark" style="--seat:${p.color}"><svg viewBox="-10 -10 20 20">${SHAPE[p.shape] || SHAPE.circle}</svg></i>` : ''; };
   const ownerOf = new Map(init.stations.map(s => [s.item, s.own]));
+  let panelDirty = false;
   // ---- floor, walls, outside
   const tiles = canvasTexture(128, 128, (g, w) => { for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) { g.fillStyle = (x + y) % 2 ? '#f6efe2' : '#e46a5c'; g.fillRect(x * w / 2, y * w / 2, w / 2, w / 2); } });
   tiles.wrapS = tiles.wrapT = THREE.RepeatWrapping; tiles.repeat.set(A.hw, A.hd);
@@ -54,7 +58,17 @@ export function createView(ctx) {
     g.scale.setScalar(s); return g;
   }
   // ---- stations: counter, the ingredient on top, the owner's mat and tag
-  const counterMat = std('#c98a4b'), topMat = std('#f3e4c8'), tags = [];
+  const counterMat = std('#c98a4b'), topMat = std('#f3e4c8'), tags = [], dressed = new Map();   // spot -> { mat, it, tag }
+  const tagFor = (s, it) => { const p = who(s.own); return stage.tag(it, { text: (s.own === ctx.me ? '★ ' : '') + ITEMS[s.item].name, seat: p?.seat ?? null, height: 0.75, cls: 'kc-st' + (s.own === ctx.me ? ' me' : '') + (s.own === CPU ? ' chef' : '') }); };
+  /** Counters change hands when someone drops out (Chef Crumb takes them) or comes back. */
+  function reown(own) {
+    init.stations.forEach((s, k) => {
+      if (s.own === own[k]) return; s.own = own[k]; ownerOf.set(s.item, s.own);
+      const d = dressed.get(s.spot); if (!d) return;
+      d.mat.material.color.set(who(s.own)?.color || '#888'); d.tag.remove(); d.tag = tagFor(s, d.it);
+    });
+    panelDirty = true;
+  }
   for (const s of init.stations) {
     const spot = init.spots[s.spot], side = !!spot.face[0], p = who(s.own);
     const c = new THREE.Mesh(new THREE.BoxGeometry(side ? 1 : 1.5, 0.9, side ? 1.5 : 1), counterMat); c.position.set(spot.x, 0.45, spot.z); c.castShadow = true; c.receiveShadow = true; group.add(c);
@@ -64,7 +78,7 @@ export function createView(ctx) {
     const ring = new THREE.Mesh(new THREE.RingGeometry(0.7, 0.8, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#2b1d0e' })); ring.position.set(spot.use.x, 0.013, spot.use.z); group.add(ring);
     // round 12: just the ingredient's name ("Sausage (you)" was three labels' worth of width); your own counters are the
     // white tags with a star, which the job line below also says
-    tags.push(stage.tag(it, { text: (s.own === ctx.me ? '★ ' : '') + ITEMS[s.item].name, seat: p?.seat ?? null, height: 0.75, cls: 'kc-st' + (s.own === ctx.me ? ' me' : '') }));
+    dressed.set(s.spot, { mat, it, tag: tagFor(s, it) });
   }
   // ---- the hatch and the tray
   const T = init.tray;
@@ -96,6 +110,14 @@ export function createView(ctx) {
     c.a.play?.(mood === 'happy' ? 'cheer' : 'hit', 700); c.tag?.remove();
     setTimeout(() => c.a.dispose(), 900);
   }
+  // ---- Chef Crumb, the computer cook (alone, or standing in for someone who dropped out)
+  const chef = { a: null, x: 2.2, z: 1.2, tx: 2.2, tz: 1.2, yaw: Math.PI, on: !!init.stations.some(s => s.own === CPU), seen: false, hold: -1, m: null, tag: null };
+  ctx.createActor({ look: { race: 'dwarf', seed: 2718 } }, { scale: 1 }).then(a => { if (!a) return; chef.a = a; a.place(chef.x, 0, chef.z, chef.yaw); chef.tag = stage.tag(a.group, { text: CPU_NAME, height: 2.2, cls: 'kc-st chef' }); a.group.visible = chef.on; });
+  function setChefCarry(item) {
+    if (chef.hold === item) return; chef.hold = item;
+    if (chef.m) { chef.m.removeFromParent(); chef.m = null; }
+    if (item >= 0 && chef.a) { chef.m = itemMesh(item, 1.1); chef.m.position.set(0, 0.85, 0.42); chef.a.body.group.add(chef.m); }
+  }
   // ---- what each player carries, in front of them
   const carried = new Map();   // pid -> { item, m }
   function setCarry(pid, item) {
@@ -124,12 +146,15 @@ export function createView(ctx) {
       for (const [pid, it] of Object.entries(g.hold)) setCarry(+pid, it);
       // customers follow the open orders
       const open = new Set(g.o.map(o => o[0]));
-      g.o.forEach(([id, r], i) => { const c = customers.get(id); if (!c) addCustomer(id, r, [1, 0, 2][i] ?? i); });
+      g.o.forEach(([id, r], i) => { const slot = [1, 0, 2][i] ?? i, c = customers.get(id); if (!c) addCustomer(id, r, slot); else if (c.slot !== slot) { c.slot = slot; c.a?.place(-1.1 + slot * 1.1, 0, -A.hd - 0.9, 0); } });   // M4: they shuffle up when the front one is served (two used to stand in one spot)
+      // Chef Crumb
+      if (g.cpu) { chef.on = true; const [x, z, yaw, hold] = g.cpu; chef.tx = x; chef.tz = z; chef.yaw = yaw; if (!chef.seen) { chef.x = x; chef.z = z; chef.seen = true; } if (chef.a) setChefCarry(hold); } else chef.on = false;
       for (const [id, c] of [...customers]) { if (open.has(id)) c.miss = 0; else if (++c.miss > 3) dropCustomer(id, 'sad'); }   // events say happy/sad first
       // order cards
       const front = g.o[0], rec = front ? RECIPES[front[1]] : null;
       const key = JSON.stringify([g.o.map(o => [o[0], o[2]]), g.tray, g.served]);
-      if (key !== panelKey) {
+      if (key !== panelKey || panelDirty) {
+        panelDirty = false;
         panelKey = key;
         // round 12: ONE tidy block under the score bar — a top line (served count, then the waiting orders as small
         // pills) and the front order's card under it — instead of cards wrapping wherever they fit over the stalls
@@ -146,7 +171,7 @@ export function createView(ctx) {
         let text, cls = '';
         if (!rec) text = 'Waiting for an order…';
         else if (mine === need) { text = `Take the ${ITEMS[need].name} to the TRAY!`; cls = 'go'; }
-        else if (owner === ctx.me) { text = `NEXT: ${ITEMS[need].name} — that's YOU! Grab it.`; cls = 'go'; }
+        else if (owner === ctx.me) { text = `NEXT: ${ITEMS[need].name} — YOU! Grab it at a ★`; cls = 'go'; }
         else { const later = rec.steps.slice(g.tray.length + 1).find(it => ownerOf.get(it) === ctx.me);
           text = `NEXT: ${ITEMS[need].name} (${name(owner)})` + (later != null ? (mine === later ? ` · then your ${ITEMS[later].name}` : ` · get your ${ITEMS[later].name} ready`) : ''); }
         if (mine >= 0 && mine !== need && cls !== 'go') text += ` · holding ${ITEMS[mine].name}`;
@@ -161,17 +186,23 @@ export function createView(ctx) {
       const mine = ev.pid === ctx.me, a = ev.pid != null ? ctx.actor(ev.pid) : null;
       if (ev.e === 'grab') { if (mine) ctx.sfx('pick'); a?.play('throw', 250); }
       else if (ev.e === 'add') { ctx.sfx(mine ? 'good' : 'tap'); shout(`+ ${ITEMS[ev.item].name} on the tray`, 'good'); }
-      else if (ev.e === 'spoil') { ctx.sfx('splat'); shout(`Spoiled! It needed ${ITEMS[ev.want].name}`, 'bad'); a?.play('hit', 500); }
+      else if (ev.e === 'spoil') { if (mine) ctx.sfx('bad'); shout(`Not yet! ${ITEMS[ev.want].name} goes on first`, 'bad'); a?.play('hit', 500); }
       else if (ev.e === 'serve') { ctx.sfx('coins'); dropCustomer(ev.id, 'happy'); shout(`${RECIPES[ev.r].name} served!`, 'good'); }
-      else if (ev.e === 'gone') { ctx.sfx('bad'); shout('Too slow! A customer left', 'bad'); }
-      else if (ev.e === 'nope') { if (mine) shout(`That's ${name(ev.own)}'s counter!`, 'bad'); ctx.sfx('bad'); }
+      else if (ev.e === 'gone') { ctx.sfx('bad'); shout(ev.front ? 'Too slow! A customer left (tray cleared)' : 'Too slow! A customer left', 'bad'); }
+      else if (ev.e === 'nope') { if (mine) { shout(`That's ${name(ev.own)}'s counter! Find a ★`, 'bad'); ctx.sfx('bad'); } }
+      else if (ev.e === 'own') { reown(ev.own); if (ev.own.includes(CPU)) shout(`${CPU_NAME} is covering for a missing cook`, 'good'); }
       else if (ev.e === 'order') { ctx.sfx('tap'); }
       else if (ev.e === 'end') { showBanner(ev.ok ? 'Kitchen saved!' : 'Closing time!', ev.ok ? 'win' : ''); ctx.sfx(ev.ok ? 'win' : 'out'); }
     },
     frame(dt, t) {
       for (const c of customers.values()) if (c.a) { c.a.update?.(dt); }
+      if (chef.a) {
+        chef.a.group.visible = chef.on;
+        if (chef.on) { const k = Math.min(1, dt * 10), ox = chef.x, oz = chef.z; chef.x += (chef.tx - chef.x) * k; chef.z += (chef.tz - chef.z) * k;
+          chef.a.place(chef.x, 0, chef.z, chef.yaw); chef.a.setSpeed(Math.hypot(chef.x - ox, chef.z - oz) / Math.max(dt, 1e-3)); chef.a.update(dt); }
+      }
       onTray.position.y = 1.08 + Math.sin(t * 3) * 0.01;
     },
-    dispose() { removeEventListener('resize', onResize); if (panel._safe) stage.setSafe?.({ top: 0.13 }); bar.el.remove(); panel.remove(); foot.remove(); banner.remove(); clearTimeout(shout.t); trayTag.remove(); for (const t of tags) t.remove(); for (const c of customers.values()) c.tag?.remove(); clearTimeout(showBanner.t); tiles.dispose(); stripe.dispose(); sign.dispose(); },
+    dispose() { removeEventListener('resize', onResize); if (panel._safe) stage.setSafe?.({ top: 0.13 }); bar.el.remove(); panel.remove(); foot.remove(); banner.remove(); clearTimeout(shout.t); trayTag.remove(); for (const t of tags) t.remove(); for (const d of dressed.values()) d.tag.remove(); chef.tag?.remove(); for (const c of customers.values()) c.tag?.remove(); clearTimeout(showBanner.t); tiles.dispose(); stripe.dispose(); sign.dispose(); },
   };
 }

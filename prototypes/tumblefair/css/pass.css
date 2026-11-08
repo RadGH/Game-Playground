@@ -1,0 +1,64 @@
+/* The Fair Pass (Expansion 1, M7): its screen, the pop-ups, the final-screen block, the chip badge + name plate.
+   The modal scrolls, never a box inside it (a scrolling box blanks the 3D canvas behind it on phones). */
+.modal.passbook { padding-top: calc(var(--st) + 16px); align-items: start; }
+.passbook .pass-head { display: flex; align-items: center; gap: 8px; }
+.passbook h3 { margin: 6px 0 0; font-size: 17px; display: flex; align-items: baseline; gap: 8px; }
+.passbook h3 small { font-size: 13px; color: #47606a; }
+.passbook h4 { margin: 4px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #47606a; }
+.pass-body { display: grid; gap: 8px; }
+.pass-level { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 10px; align-items: center; }
+.lv-big { display: grid; place-items: center; width: 70px; height: 70px; border-radius: 50%; background: var(--sun); border: 4px solid var(--ink); font: 900 30px/1 var(--font, system-ui); box-shadow: 0 4px 0 var(--ink); }
+.lv-big small { font-size: 10px; letter-spacing: .08em; margin-bottom: -10px; }
+.lv-bar { display: grid; gap: 3px; min-width: 0; }
+.lv-bar small { font-weight: 800; } .lv-bar small.how { font-weight: 600; color: #47606a; font-size: 12px; }
+.pass-body .bar, .pass-title .bar, .pass-final .bar { display: block; height: 14px; border-radius: 999px; border: 3px solid var(--ink); background: #fff; overflow: hidden; }
+.pass-body .bar i, .pass-title .bar i { display: block; height: 100%; background: linear-gradient(90deg, #3ecf5a, #ffd23f); }
+.pass-daily { display: flex; gap: 10px; align-items: center; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 8px 10px; }
+.pass-daily > i { font-style: normal; font-size: 26px; } .pass-daily span { display: grid; } .pass-daily small { font-weight: 700; color: #47606a; }
+.pass-daily.done { background: #eaffe3; }
+.pass-plates { display: flex; flex-wrap: wrap; gap: 6px; }
+.plate-pick { min-height: 40px; border: 3px solid var(--ink); border-radius: 10px; background: var(--plate, #fff); color: var(--plate-ink, var(--ink)); font: 800 13px/1.1 var(--font, system-ui); padding: 4px 10px; cursor: pointer; display: grid; place-items: center; }
+.plate-pick small { font-size: 10px; } .plate-pick.on { outline: 3px solid var(--pop); outline-offset: 2px; }
+.plate-pick:disabled { opacity: .45; filter: grayscale(.7); cursor: default; }
+.pass-sel { margin: 0; display: flex; gap: 8px; align-items: center; background: #fff3b8; border: 3px solid var(--ink); border-radius: 12px; padding: 6px 10px; font-size: 14px; }
+.pass-sel i { font-style: normal; font-size: 28px; } .pass-sel b { display: block; }
+.pass-sel.note { background: none; border: 0; padding: 0; }
+.pass-book { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 6px; }
+.stk { position: relative; width: 100%; min-height: 76px; display: grid; justify-items: center; align-content: center; gap: 2px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; padding: 4px 2px; cursor: pointer; font: 800 11px/1.1 var(--font, system-ui); color: var(--ink); }
+.stk i { font-style: normal; font-size: 28px; line-height: 1; }
+.stk span { text-align: center; overflow-wrap: anywhere; }
+.stk em { position: absolute; top: 2px; right: 4px; font-style: normal; font-size: 9px; color: #47606a; }
+.stk.have { background: #fff3b8; box-shadow: 0 3px 0 var(--ink); }
+.stk:not(.have) i { filter: grayscale(1); opacity: .35; } .stk:not(.have) span { color: #6a7d84; }
+.stk.secret i { filter: none; opacity: .6; font-weight: 900; } .stk.off { border-style: dashed; }
+.stk.sel { outline: 3px solid var(--pop); outline-offset: 1px; }
+.pass-next { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 4px; }
+.pass-next li { background: #fff; border: 2px solid var(--ink); border-radius: 10px; padding: 4px 8px; font-weight: 700; font-size: 14px; }
+.pass-next b { display: inline-block; min-width: 46px; }
+
+/* title button */
+.pass-title { display: grid !important; grid-template-columns: auto minmax(40px, 1fr); align-items: center; gap: 4px 10px; text-align: left; }
+.pass-title .pt-daily { grid-column: 1 / -1; font-size: 12px; font-weight: 700; color: #47606a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pass-title .bar { height: 10px; border-width: 2px; }
+
+/* pop-ups: small, top-middle, under the score bar; never takes a tap */
+.pass-pops { position: fixed; z-index: 58; left: 0; right: 0; top: calc(var(--st, 0px) + 58px); display: flex; justify-content: center; pointer-events: none; }
+.pass-pop { display: flex; gap: 8px; align-items: center; max-width: min(86vw, 340px); background: #fff8e7; color: var(--ink, #0d2228); border: 3px solid var(--ink, #0d2228); border-radius: 14px; box-shadow: 0 4px 0 var(--ink, #0d2228); padding: 5px 12px 5px 8px; animation: pass-in .35s cubic-bezier(.2, 1.5, .4, 1); transition: opacity .35s, transform .35s; }
+.pass-pop i { font-style: normal; font-size: 26px; }
+.pass-pop span { display: grid; min-width: 0; } .pass-pop b { font-size: 14px; } .pass-pop small { font-size: 11px; font-weight: 700; color: #47606a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pass-pop.level { background: #fff3b8; } .pass-pop.daily { background: #eaffe3; }
+.pass-pop.out { opacity: 0; transform: translateY(-8px); }
+@keyframes pass-in { from { transform: scale(.6); opacity: 0; } }
+
+/* final screen block */
+.pass-final { display: grid; gap: 6px; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 6px 10px; }
+.pass-final .pf-head { display: flex; align-items: center; gap: 8px; } .pass-final .pf-head span { flex: 1; font-weight: 700; color: #47606a; font-size: 13px; }
+.pass-final .note { margin: 0; font-size: 13px; }
+.pf-stickers { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.pf-stickers li { display: flex; align-items: center; gap: 4px; background: #fff3b8; border: 2px solid var(--ink); border-radius: 999px; padding: 2px 10px 2px 4px; font-weight: 800; font-size: 13px; animation: pass-in .4s backwards; }
+.pf-stickers i { font-style: normal; font-size: 20px; }
+
+/* the chip: level badge on the face, name on its plate colour */
+.chip { position: relative; }
+.chip .lv-tag { position: absolute; left: 24px; bottom: -5px; font: 900 9px/1 system-ui, sans-serif; font-style: normal; padding: 2px 4px; border-radius: 6px; background: var(--sun, #ffd23f); color: var(--ink, #222); border: 2px solid var(--ink, #222); pointer-events: none; }
+.chip[data-plate] .nm { background: var(--plate); color: var(--plate-ink); border-radius: 7px; padding: 0 5px; }

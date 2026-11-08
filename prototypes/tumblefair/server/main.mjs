@@ -9,6 +9,7 @@
 // https://games.radgh.com/api) and RGS_ADMIN_SECRET (switches on GET /internal/admin/feed + POST /internal/admin/action).
 import http from 'node:http';
 import { randomBytes } from 'node:crypto';
+import { loadStoryData } from '../js/sim/story-data.js';
 import { readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
@@ -28,12 +29,13 @@ const arg = (name, def) => { const i = process.argv.indexOf('--' + name); return
 const port = +arg('port', process.env.PORT || 8480), host = arg('host', '0.0.0.0'), publicDir = arg('public', null);
 const build = arg('build', 'dev'), dataDir = resolve(arg('data', join(GAME, '.data')));
 const json = p => JSON.parse(readFileSync(join(GAME, p), 'utf8'));
-const data = { boards: { fairground: json('data/boards/fairground.json'), pier: json('data/boards/pier.json') }, chance: json('data/chance.json'), cosmetics: json('data/cosmetics.json') };
+const data = { boards: { fairground: json('data/boards/fairground.json'), pier: json('data/boards/pier.json') }, chance: json('data/chance.json'), cosmetics: json('data/cosmetics.json'), story: loadStoryData(json) };   // story: Expansion 1 M8
 
 mkdirSync(dataDir, { recursive: true });
 const profileFile = join(dataDir, 'profiles.json');
 let initial = {}; try { initial = JSON.parse(readFileSync(profileFile, 'utf8')); } catch { /* first run */ }
 const profiles = createProfiles({ initial, cosmetics: data.cosmetics, cleanLook, randomToken: () => randomBytes(18).toString('base64url'),
+  passData: json('data/pass.json'), stickers: json('data/stickers.json').stickers,   // Expansion 1 M7: the Fair Pass
   persist: all => { const tmp = profileFile + '.tmp'; writeFileSync(tmp, JSON.stringify(all)); renameSync(tmp, profileFile); } });
 const insights = createInsights(dataDir, { build });      // round 7: ratings, plays, votes + cookie-free page counts (tools/insights-report.mjs)
 const log = (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d));

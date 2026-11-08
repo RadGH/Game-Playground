@@ -86,3 +86,8 @@
 .theme-pirate .mh-slam b { background: radial-gradient(circle, #a67844 0 30%, #7a5432 31%); color: #f4e2b8; }
 .theme-toys .mh-slam b { background: radial-gradient(circle, #ffd23f 0 30%, #f28fb0 31%); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; }
 .mh-opt { overflow: visible; }
+/* Winter Fair (M6): the Gift Vault — a wrapped-present door, frosty blue cells */
+.theme-winter .mh-vault { background: #2f6fb0; box-shadow: inset 0 0 0 6px #bfe3ff, 0 8px 0 var(--ink); }
+.theme-winter .mh-cell { background: radial-gradient(circle at 50% 40%, #3a6a9e, #1a3a5e); }
+.theme-winter .mh-door { background: linear-gradient(90deg, transparent 44%, #ffd23f 44% 56%, transparent 56%), repeating-linear-gradient(45deg, #e8322a 0 18px, #c8221c 18px 36px); }
+.theme-winter .mh-door b { color: #fff; }

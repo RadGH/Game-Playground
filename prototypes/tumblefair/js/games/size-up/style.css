@@ -81,3 +81,5 @@
 .su-pop.tag { top: 50%; font-size: 20px; color: var(--sun); animation-delay: .12s; animation-fill-mode: both; }
 @keyframes su-float { 0% { transform: translate(-50%, 10px) scale(.5); opacity: 0; } 20% { transform: translate(-50%, -6px) scale(1.15); opacity: 1; } 100% { transform: translate(-50%, -50px); opacity: 0; } }
 .game-size-up.streak .su-note { color: var(--sun); animation: bob .5s 2; }
+/* Winter Fair (M6): a snowy night sky behind the cards, snowflakes drifting over (view.js snowOverlay) */
+.game-size-up.season-winter { background: radial-gradient(circle at 20% 0%, rgba(255, 255, 255, .35), transparent 40%), radial-gradient(ellipse at 50% 115%, #fff 0 32%, transparent 33%), linear-gradient(#1f4a78, #2f6fb0); }

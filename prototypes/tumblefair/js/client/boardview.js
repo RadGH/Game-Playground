@@ -8,6 +8,7 @@
 import * as THREE from 'three';
 import { createActor } from './avatars.js';
 import { canvasTexture, loadTexture } from './stage.js';
+import { boardSnow } from './winter.js';
 
 export const SPACE_LOOK = {
   start: { color: '#3ecf5a', label: 'GO' }, ticket: { color: '#ffd23f', label: '+3' }, join: { color: '#ffd23f', label: '+3' },
@@ -18,6 +19,8 @@ export const SPACE_LOOK = {
   striker: { color: '#ff3d5a', label: '', draw: 'striker' }, shell: { color: '#f2c38b', label: '', draw: 'cups' }, pact: { color: '#b6f0a0', label: '', draw: 'pact' },
   crowd: { color: '#ffb0a0', label: '', draw: 'tomato' }, fortune: { color: '#6b4bd6', label: '', draw: 'card' }, cannon: { color: '#5a6a78', label: '', draw: 'cannon' },
 };
+/** Winter Fair (M6): the puddle is a snowdrift (icy blue, still "-3"). */
+const WINTER_LOOK = { pit: { color: '#9cc9ec', label: '-3' } };
 const OFFS = [[-0.5, -0.38], [0.5, -0.38], [-0.5, 0.48], [0.5, 0.48]];
 const INK = '#12222a';
 
@@ -68,10 +71,15 @@ export async function createBoardView({ stage, def, members, me, assetBase, seas
   const group = new THREE.Group(); group.name = 'board'; stage.root.add(group);
   const byId = new Map(def.spaces.map(s => [s.id, s]));
   // a holiday repaint of the same board (same paths, round 6) when there is one, else the usual picture
-  const tex = (season && def.seasonBackdrops?.[season] && await loadTexture(`${assetBase}${def.seasonBackdrops[season]}.webp`).catch(() => null)) || await loadTexture(`${assetBase}${def.backdrop}.webp`);
+  const painted = (season && def.seasonBackdrops?.[season] && await loadTexture(`${assetBase}${def.seasonBackdrops[season]}.webp`).catch(() => null)) || null;
+  const tex = painted || await loadTexture(`${assetBase}${def.backdrop}.webp`);
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(def.size, def.size).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: tex, color: tex ? '#ffffff' : '#3f8f5a', roughness: 1 }));
   ground.receiveShadow = true; group.add(ground);
-  const skirt = new THREE.Mesh(new THREE.PlaneGeometry(400, 400).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#12323a' })); skirt.position.y = -0.05; group.add(skirt);
+  // Winter Fair (M6): snowfall + snowy evergreens round the board; a board with no winter repaint also gets a dusting
+  // of snow over its picture and a cooler tint, so every board looks wintry
+  const snow = season === 'winter' ? boardSnow(THREE, group, def.size, { painted: !!painted }) : null;
+  if (snow && !painted) ground.material.color.set('#e4eefa');
+  const skirt = new THREE.Mesh(new THREE.PlaneGeometry(400, 400).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: season === 'winter' ? '#cfdff0' : '#12323a' })); skirt.position.y = -0.05; group.add(skirt);
   // paths
   const pathMat = new THREE.MeshStandardMaterial({ color: '#fff3d6', roughness: 1 });
   for (const s of def.spaces) for (const n of s.next) {
@@ -89,7 +97,7 @@ export async function createBoardView({ stage, def, members, me, assetBase, seas
   const padGeo = new THREE.CylinderGeometry(1.05, 1.15, 0.3, 28), topGeo = new THREE.CircleGeometry(0.98, 28).rotateX(-Math.PI / 2);
   const topTex = new Map(), tops = new Map();
   for (const s of def.spaces) {
-    const L = SPACE_LOOK[s.type] || SPACE_LOOK.ticket;
+    const L = (season === 'winter' && WINTER_LOOK[s.type]) || SPACE_LOOK[s.type] || SPACE_LOOK.ticket;
     const pad = new THREE.Mesh(padGeo, new THREE.MeshStandardMaterial({ color: '#12222a', roughness: 0.7 })); pad.position.set(s.x, 0.15, s.z); pad.castShadow = pad.receiveShadow = true; group.add(pad);
     if (!topTex.has(s.type)) topTex.set(s.type, canvasTexture(128, 128, (g, w) => {
       g.fillStyle = L.color; g.fillRect(0, 0, w, w);
@@ -120,7 +128,7 @@ export async function createBoardView({ stage, def, members, me, assetBase, seas
     if (disposed) return a.dispose();
     a.group.traverse(o => { if (o.isMesh) o.castShadow = true; });
     const p = spot(pid, at.get(pid) || id); a.place(p.x, 0.31, p.z, 0); group.add(a.group); actors.set(pid, a);
-    tags.set(pid, stage.tag(a.group, { text: pid === me ? 'YOU' : m.name, seat: m.seat, height: a.height + 0.3, cls: pid === me ? 'me' : '' }));
+    tags.set(pid, stage.tag(a.group, { text: pid === me ? 'YOU' : m.cpu ? `${m.name} · CPU` : m.name, seat: m.seat, height: a.height + 0.3, cls: pid === me ? 'me' : '' }));
   }
   /** Put everyone where the server says (a fresh page, or after a swap). */
   function sync(view) {
@@ -194,6 +202,7 @@ export async function createBoardView({ stage, def, members, me, assetBase, seas
     }
   }
   function frame(dt) {
+    snow?.frame(performance.now() / 1000, stage.camera);
     for (const a of actors.values()) a?.update(dt);
     ring.rotation.y += dt * 1.5; ring.scale.setScalar(1 + Math.sin(performance.now() / 180) * 0.05);
     // a long queue (a phone that slept, a slow one) catches up by playing faster

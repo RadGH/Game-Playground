@@ -1,0 +1,55 @@
+/* Twinkle Tree — a snowy night at the Winter Fair: deep blue sky with stars, a white snow bank, a big friendly
+   evergreen whose lights glow when lit (dim, never hidden, when not), and six chunky light buttons under it. */
+.game-twinkle-tree { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: calc(var(--st) + 6px) calc(var(--sr) + 10px) calc(var(--sb) + 12px) calc(var(--sl) + 10px);
+  background: linear-gradient(#0f1f45 0%, #1b3466 55%, #dfeefa 55%, #ffffff 100%); color: #fff; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-twinkle-tree > * { flex: none; position: relative; }
+.tw-sky { position: absolute; inset: 0 0 45% 0; pointer-events: none;
+  background: radial-gradient(1.5px 1.5px at 10% 14%, #fff 50%, transparent 51%), radial-gradient(2px 2px at 24% 34%, #fff9 50%, transparent 51%), radial-gradient(1.5px 1.5px at 44% 8%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 64% 24%, #fffa 50%, transparent 51%), radial-gradient(1.5px 1.5px at 84% 12%, #fff 50%, transparent 51%), radial-gradient(2px 2px at 92% 40%, #fff8 50%, transparent 51%); }
+.tw-top { display: flex; gap: 6px 10px; align-items: center; justify-content: center; flex-wrap: wrap; width: 100%; padding: 0 80px 0 4px; min-height: 44px; }
+.tw-title { font: 900 clamp(20px, 5.6vw, 26px)/1.1 var(--font); color: #ffd23f; -webkit-text-stroke: 1.4px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.tw-round { font-weight: 900; font-size: 12px; text-transform: uppercase; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; }
+.tw-round:empty { display: none; }
+.game-twinkle-tree .scorebar { position: static; display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.game-twinkle-tree .scorebar .chip { font-size: 13px; padding-right: 8px; color: var(--ink); } .game-twinkle-tree .scorebar .chip .face { width: 26px; height: 26px; }
+.game-twinkle-tree .scorebar .chip .nm { max-width: 5em; }
+.game-twinkle-tree .scorebar .sc { font-style: normal; background: #fff3c4; border-radius: 8px; padding: 0 6px; }
+.tw-prog { font-size: 12px; border-radius: 8px; padding: 0 5px; background: #e6f4ff; }
+.tw-prog:empty { display: none; } .tw-prog.st1 { background: var(--mint); color: #fff; } .tw-prog.st2 { background: #ff8080; }
+.tw-sprite { background: radial-gradient(circle at 50% 58%, #fff3c4 30%, transparent 32%), conic-gradient(from 0deg, #ffd23f, #4fe07a, #4da6ff, #c27bff, #ff4d4d, #ffd23f) !important; }
+
+/* ---- the tree ---- */
+.tw-stage { position: relative; width: min(100%, 420px); display: grid; place-items: center; }
+.tw-tree { height: clamp(170px, calc(100dvh - 430px), 360px); aspect-ratio: 200 / 240; }
+.tw-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.tw-light { transition: opacity .12s; opacity: .42; filter: saturate(.55); }
+.tw-light .tw-glow { opacity: 0; transition: opacity .12s; }
+.tw-light.on { opacity: 1; filter: none; } .tw-light.on .tw-glow { opacity: .55; }
+.tw-light.on path, .tw-light.on circle:not(.tw-glow) { transform-box: fill-box; transform-origin: center; animation: tw-pop .25s ease-out; }
+@keyframes tw-pop { 40% { transform: scale(1.35); } }
+.tw-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 72px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.tw-count:empty { display: none; }
+.tw-banner { position: absolute; top: 4px; left: 50%; transform: translateX(-50%) rotate(-3deg); background: var(--sun); color: var(--ink); border: 3px solid var(--ink); border-radius: 12px; padding: 3px 12px; font: 900 18px/1.1 var(--font); white-space: nowrap; pointer-events: none; }
+.tw-banner:empty { display: none; } .tw-banner.show { background: #fff; } .tw-banner.play { background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+
+/* ---- the pattern dots ---- */
+.tw-dots { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; min-height: 22px; }
+.tw-dots i { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); display: block; }
+.tw-dots i.on { background: var(--mint); }
+.tw-dots i.ans { width: 26px; height: 26px; border: 0; background: none; } .tw-dots i svg { width: 100%; height: 100%; display: block; }
+.tw-dots.slip i:not(.on):not(.ans) { background: #ffb3b3; }
+
+/* ---- the light buttons ---- */
+.tw-pad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: min(100%, 460px); }
+.tw-btn { min-height: 66px; border: 4px solid var(--ink); border-radius: 18px; background: #fff; color: var(--ink); box-shadow: 0 4px 0 var(--ink), inset 0 -6px 0 color-mix(in srgb, var(--c) 35%, transparent);
+  display: grid; justify-items: center; align-content: center; gap: 1px; padding: 4px 2px; font: 800 11px/1.05 var(--font); touch-action: none; -webkit-tap-highlight-color: transparent; }
+.tw-btn svg { width: 40px; height: 40px; display: block; }
+.tw-btn span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tw-btn:disabled { opacity: .55; cursor: default; }
+.tw-btn.hit { animation: tw-press .18s ease-out; }
+@keyframes tw-press { 0% { transform: translateY(4px); box-shadow: 0 0 0 var(--ink); background: color-mix(in srgb, var(--c) 45%, #fff); } }
+.game-twinkle-tree.watching .tw-pad { display: none; }
+.game-twinkle-tree.watching .tw-tree { height: clamp(220px, calc(100dvh - 260px), 640px); }
+.tw-note { margin: 0; text-align: center; font: 900 16px/1.25 var(--font); color: var(--ink); min-height: 1.25em; max-width: 640px; }
+@media (prefers-reduced-motion: reduce) { .tw-light.on path, .tw-light.on circle, .tw-btn.hit { animation: none; } }

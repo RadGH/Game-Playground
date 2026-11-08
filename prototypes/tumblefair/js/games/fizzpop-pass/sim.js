@@ -18,7 +18,7 @@ export const meta = {
   kind: 'arena', min: 1, max: 4, seconds: 100, scoring: 'points', unit: 'pts', tags: ['action'],
   controls: { stick: true, a: 'Pass' }, move: { speed: 5.0, accel: 20, stunDrag: 2.5, boostMul: 1.17 },
   arena: { shape: 'circle', r: 6.6, wall: true, posts: [{ x: 0, z: 0.3, r: 0.65 }], blocks: [{ x: -3.2, z: -2.1, hw: 1.0, hd: 0.55 }, { x: 3.2, z: 2.3, hw: 1.0, hd: 0.55 }] },
-  pitch: 58, card: 'card-fizzpop-pass', css: true,
+  pitch: 58, card: 'card-fizzpop-pass', css: true, rival: 'needed',   // alone with 'Rival when alone' off it is not worth playing: not offered then
 };
 
 export const RULES = {
@@ -33,8 +33,9 @@ const READY = 0, LIVE = 1, POP = 2, DONE = 3;
 export const PHASES = ['ready', 'live', 'pop', 'done'];
 const r2 = v => Math.round(v * 100) / 100;
 
-export function create({ rng, players }) {
-  const n = players.length, solo = n === 1, spawns = spawnRing(solo ? 3 : n, 3.9);
+export function create({ rng, players, rivals = true }) {
+  // solo = alone WITH Dot and Pip; "Rival when alone" off (rivals false): no picnickers, the pie is yours until it pops
+  const n = players.length, solo = n === 1 && rivals !== false, spawns = spawnRing(solo ? 3 : n, 3.9);
   const bodies = new Map();
   // everyone who can hold the pie: the players, plus two CPU picnickers when alone (negative ids)
   const R = new Map();

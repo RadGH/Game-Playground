@@ -1,0 +1,107 @@
+/* Funhouse Mirrors — a carnival hall of mirrors: striped tent wall, wavy gold mirror frames, chunky − / + knobs.
+   The whole `ui` scrolls if it must; nothing scrolls inside it. */
+.game-funhouse-mirrors { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 40px) calc(var(--sl) + 10px);
+  background: repeating-linear-gradient(100deg, #5a2a8a 0 40px, #7a3aaa 40px 80px); }
+.game-funhouse-mirrors > * { flex: none; }
+.fm-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding-right: 36px; }
+.fm-title { font: 900 24px/1.1 var(--font); color: #ffd23f; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+
+/* ---- the mirror ---- */
+.fm-mirror { position: relative; width: var(--mw, 180px); aspect-ratio: 4 / 5; flex: none; isolation: isolate; }
+.fm-glass { position: absolute; inset: 0; border-radius: 46% 46% 44% 44% / 40% 40% 50% 50%; overflow: hidden; isolation: isolate;
+  background: radial-gradient(ellipse at 40% 30%, #f4fbff, #b8d4e4 70%, #8fb0c4);
+  border: 9px solid #e8a920; box-shadow: 0 0 0 4px var(--ink), inset 0 0 0 3px #fff3b0, 0 6px 0 4px rgba(13,34,40,.4); }
+.fm-mirror::before { content: ''; position: absolute; inset: -9px; border-radius: 46% 46% 44% 44% / 40% 40% 50% 50%; z-index: -1;
+  background: repeating-conic-gradient(from 0deg, #ffd23f 0 10deg, #ff5f9e 10deg 20deg); filter: blur(.3px); }
+.fm-wob { position: absolute; inset: 0; display: grid; place-items: center; }
+.fm-mirror.wob .fm-wob { animation: fm-wobble var(--wd) ease-in-out infinite alternate; }
+@keyframes fm-wobble { from { transform: rotate(calc(var(--wa) * -1)) scale(calc(1 - var(--ws)), calc(1 + var(--ws))); } to { transform: rotate(var(--wa)) scale(calc(1 + var(--ws)), calc(1 - var(--ws))); } }
+.fm-warp { position: relative; width: 84%; aspect-ratio: 1; transform: scale(var(--sx), var(--sy)) skewX(var(--sk)) rotate(var(--rt)); transition: transform .25s cubic-bezier(.3, 1.6, .5, 1); }
+.fm-sl { position: absolute; left: 0; width: 100%; height: 33.6%; overflow: hidden; transition: transform .25s cubic-bezier(.3, 1.6, .5, 1); }
+.fm-sl img { position: absolute; left: 0; width: 100%; height: 300%; display: block; pointer-events: none; }
+.fm-sl.s0 { top: 0; transform: scaleX(var(--k0)); } .fm-sl.s0 img { top: 0; }
+.fm-sl.s1 { top: 33.2%; transform: scaleX(var(--k1)); } .fm-sl.s1 img { top: -98.8%; }
+.fm-sl.s2 { top: 66.4%; transform: scaleX(var(--k2)); } .fm-sl.s2 img { top: -197.6%; }
+.fm-prop { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.fm-tint { position: absolute; inset: 0; mix-blend-mode: multiply; opacity: .5; pointer-events: none; }
+.fm-tint.t0 { display: none; } .fm-tint.t1 { background: #8cf03c; } .fm-tint.t2 { background: #ff6ec0; } .fm-tint.t3 { background: #3cb4ff; }
+.fm-tint.t4 { background: #ff9a2a; } .fm-tint.t5 { background: #a46cff; }
+.fm-shine { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,.45) 26%, transparent 34%, transparent 60%, rgba(255,255,255,.25) 64%, transparent 70%); }
+.fm-tag { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); }
+
+/* ---- warping (a phone that plays) ---- */
+.fm-work, .fm-wait, .fm-show, .fm-gallery { display: none; }
+.game-funhouse-mirrors[data-phase=warp]:not(.watching) .fm-work { display: grid; gap: 6px; justify-items: center; width: min(100%, 460px); }
+.fm-who { margin: 0; color: #fff; font: 800 17px/1.2 var(--font); text-align: center; text-shadow: 0 2px 0 var(--ink); }
+.fm-who b { color: #ffd23f; }
+.fm-stage { --mw: min(46vw, 25vh, 200px); padding: 6px 0 4px; }
+.fm-ctl { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+.fm-row { display: grid; grid-template-columns: 46px 1fr 46px; align-items: center; background: var(--paper); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 0 3px 0 var(--ink); }
+.fm-row.on { background: #fff3b8; }
+.fm-lab { display: grid; justify-items: center; line-height: 1.05; min-width: 0; }
+.fm-lab b { font-size: 14px; } .fm-lab em { font-style: normal; font-size: 12px; font-weight: 800; color: #7a3aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.fm-b { height: 46px; border: 0; background: none; font: 900 28px/1 var(--font); color: var(--ink); touch-action: manipulation; }
+.fm-b:active { background: rgba(0,0,0,.08); }
+.fm-b:disabled { opacity: .25; }
+.fm-rand { min-height: 46px; border: 3px solid var(--ink); border-radius: 14px; background: #39d0e0; font: 900 16px/1 var(--font); box-shadow: 0 3px 0 var(--ink); color: var(--ink); }
+.fm-done { width: 100%; background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; padding: 10px 18px; }
+.fm-done.on { background: #fff; color: var(--ink); -webkit-text-stroke: 0; font-size: 17px; }
+.is-done .fm-ctl { opacity: .7; }
+
+/* ---- a screen that only watches, while everyone warps ---- */
+.game-funhouse-mirrors[data-phase=warp].watching .fm-wait { display: grid; justify-items: center; gap: 8px; margin-top: 18vh; }
+.fm-shout { margin: 0; color: #fff; font: 900 24px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-align: center; }
+.fm-workers { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.fm-workers .st { font-style: normal; font-size: 12px; } .fm-workers .chip.in .st { color: #1d8a37; }
+
+/* ---- the show: one mirror big, the plain face beside it ---- */
+.game-funhouse-mirrors[data-phase=show] .fm-show { display: grid; justify-items: center; gap: 8px; margin-top: 2vh; }
+.fm-pair { display: flex; align-items: center; gap: 12px; }
+.fm-before { display: grid; justify-items: center; gap: 2px; color: #fff; font-weight: 800; }
+.fm-plain { width: 72px; height: 72px; border-radius: 50%; border: 4px solid var(--ink); background: #fff; overflow: hidden; display: block; }
+.fm-plain img { width: 100%; height: 100%; display: block; }
+.fm-big { --mw: min(58vw, 44vh, 300px); }
+.fm-big.in .fm-mirror { animation: fm-in .7s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes fm-in { from { transform: scale(.2) rotate(-25deg); opacity: 0; } 60% { transform: scale(1.08) rotate(4deg); opacity: 1; } }
+.fm-cap { font: 900 22px/1.1 var(--font); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-align: center; margin-top: 10px; }
+.fm-words { font-size: 14px; font-weight: 800; background: var(--paper); border: 3px solid var(--ink); border-radius: 12px; padding: 2px 10px; text-align: center; }
+
+/* ---- vote and reveal ---- */
+.game-funhouse-mirrors:is([data-phase=vote], [data-phase=reveal]) .fm-gallery { display: grid; gap: 6px; justify-items: center; width: min(100%, 760px); }
+.fm-ghead { margin: 0; padding: 0 44px; text-align: center; color: #fff; font: 900 20px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.fm-ghead:empty { display: none; }
+.fm-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; }
+.fm-card { position: relative; display: grid; justify-items: center; gap: 6px; border: 4px solid var(--ink); border-radius: 16px; background: var(--paper); padding: 6px 4px 8px; box-shadow: 0 4px 0 var(--ink); min-height: 44px; color: var(--ink); font: inherit; }
+.fm-card .fm-mirror { --mw: min(34vw, 19vh, 165px); margin: 4px 0; }
+.fm-no { font: 900 15px/1 var(--font); }
+.fm-flag { font-style: normal; font-size: 12px; font-weight: 900; color: #1d7a37; } .fm-flag:empty { display: none; }
+.fm-card.mine { opacity: .6; } .fm-card.mine .fm-flag { color: #7a3aaa; }
+.fm-card.picked { outline: 5px solid var(--sun); background: #fff3b8; }
+.fm-by:empty, .fm-vt:empty, .fm-pts:empty { display: none; }
+.fm-by { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 800; }
+.fm-vt { display: flex; gap: 3px; } .fm-vt em { font-size: 12px; color: #6a5a70; font-style: normal; }
+.fm-pts { font: 900 22px/1 var(--font); color: #1d8a37; animation: fm-pts .6s backwards .3s; }
+@keyframes fm-pts { from { transform: scale(2.2); opacity: 0; } }
+.fm-face { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; }
+.fm-face img { width: 100%; height: 100%; display: block; }
+.fm-card.silliest::after { content: 'Silliest!'; position: absolute; top: -10px; right: -6px; transform: rotate(6deg); background: #ff5f9e; color: #fff; font: 900 12px/1 var(--font); padding: 4px 7px; border: 3px solid var(--ink); border-radius: 10px; }
+.fm-card.best { padding-bottom: 18px; box-shadow: 0 0 0 5px var(--sun), 0 6px 0 var(--ink); animation: bob .6s 3; }
+.fm-card.best::before { content: 'Funniest!'; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%) rotate(-3deg); z-index: 2; background: var(--sun);
+  font: 900 13px/1 var(--font); padding: 4px 9px; border: 3px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.game-funhouse-mirrors:is(.watching, [data-phase=reveal]) .fm-card { pointer-events: none; }
+.solo .fm-cards { grid-template-columns: 1fr; justify-items: center; } .solo .fm-card .fm-mirror { --mw: min(44vw, 30vh, 220px); }
+
+.fm-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: auto; }
+.fm-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.fm-players .chip.in { outline: 4px solid var(--mint); }
+.game-funhouse-mirrors[data-phase=warp]:not(.watching) .fm-players { display: none; }
+.fm-note { margin: 0; text-align: center; font: 800 15px/1.25 var(--font); color: var(--ink); background: rgba(255, 255, 255, .88); border-radius: 12px; padding: 4px 12px; max-width: 560px; }
+.fm-note:empty { display: none; }
+
+@media (min-aspect-ratio: 1/1) {
+  .game-funhouse-mirrors[data-phase=warp]:not(.watching) .fm-work { grid-template-columns: auto minmax(0, 380px); grid-template-areas: 'who who' 'stage ctl' 'stage done'; width: min(100%, 820px); align-items: center; }
+  .fm-who { grid-area: who; } .fm-stage { grid-area: stage; --mw: min(36vw, 52vh, 300px); } .fm-ctl { grid-area: ctl; } .fm-done { grid-area: done; }
+  .fm-cards { grid-template-columns: repeat(auto-fit, minmax(150px, 210px)); justify-content: center; }
+  .fm-card .fm-mirror { --mw: min(18vw, 30vh, 170px); }
+}

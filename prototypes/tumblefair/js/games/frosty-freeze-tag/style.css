@@ -1,0 +1,24 @@
+/* Frosty Freeze Tag: the "what are you" pill, round banners, Frost / frozen marks on score chips, the solo snowflakes. */
+.game-frosty-freeze-tag .ft-banner { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center; max-width: 94vw;
+  font: 900 clamp(30px, 8.5vw, 72px)/1.05 var(--font); color: #ffd23f; -webkit-text-stroke: 2px #17324a; paint-order: stroke fill; text-shadow: 0 4px 0 #17324a; transition: transform .15s, opacity .15s; }
+.ft-banner small { display: block; font-size: .5em; color: #fff; margin-bottom: 4px; }
+.ft-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.ft-banner.ice { color: #dff4ff; }
+.ft-banner.round { color: #bfe3ff; }
+.ft-banner.go { color: #8ff07a; }
+.game-frosty-freeze-tag .ft-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; pointer-events: none; max-width: 96vw;
+  padding: 4px 14px; border-radius: 999px; background: rgba(240, 249, 255, .95); border: 3px solid #17324a; box-shadow: 0 3px 0 #17324a; font: 800 16px/1.2 var(--font); white-space: nowrap; transition: background .15s; }
+.ft-pill span { overflow: hidden; text-overflow: ellipsis; }
+.ft-pill i { font-style: normal; font-size: 20px; }
+.ft-pill.frost { background: #cfe6ff; }
+.ft-pill.runner { background: #ffe3a8; }
+.ft-pill.ice { background: #dff4ff; }
+.ft-pill.warn { background: #ffc4c4; }
+.game-frosty-freeze-tag .scorebar .chip { position: relative; }
+.scorebar .chip.ft-frost { background: #cfe6ff; }
+.scorebar .chip.ft-frost::after { content: '❄️'; position: absolute; right: -6px; top: -9px; font-size: 16px; line-height: 1; }
+.scorebar .chip.ft-frozen::after { content: '🧊'; position: absolute; right: -6px; top: -9px; font-size: 16px; line-height: 1; }
+.game-frosty-freeze-tag .ft-lives { position: absolute; top: calc(var(--st) + 98px); left: 50%; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; pointer-events: none;
+  padding: 2px 12px; border-radius: 999px; background: rgba(23, 50, 74, .75); color: #fff; font: 900 16px/1.4 var(--font); }
+.ft-lives span.gone { filter: grayscale(1); opacity: .35; }
+@media (max-width: 520px) { .game-frosty-freeze-tag .ft-pill { top: calc(var(--st) + 52px); font-size: 13px; } .game-frosty-freeze-tag .ft-lives { top: calc(var(--st) + 86px); } }

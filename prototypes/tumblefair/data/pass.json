@@ -1,0 +1,63 @@
+{
+  "about": "Fair Pass (Expansion 1, M7): XP for playing, the level curve, what each level unlocks, and the daily challenges. Read by js/sim/pass.js (server) and js/client/pass-screen.js (the Fair Pass screen). Power-neutral: rewards are costumes, name-plate colours and coins (coins only buy costumes).",
+  "xp": {
+    "played": 10, "won": 10,
+    "shortSeconds": 45, "shortFloor": 0.3,
+    "matchDone": 40, "matchWon": 20,
+    "sticker": 15, "daily": 25
+  },
+  "levels": { "first": 60, "step": 20, "max": 40 },
+  "plates": [
+    { "id": "plain", "name": "Plain", "color": "", "ink": "", "level": 1 },
+    { "id": "mint", "name": "Mint", "color": "#9ff0c8", "ink": "#0d2a20", "level": 2 },
+    { "id": "sky", "name": "Sky", "color": "#9fd8ff", "ink": "#0d2235", "level": 4 },
+    { "id": "candy", "name": "Candy Floss", "color": "#ffb0dc", "ink": "#3a0d26", "level": 7 },
+    { "id": "lemon", "name": "Lemonade", "color": "#fff06a", "ink": "#2e2a00", "level": 10 },
+    { "id": "grape", "name": "Grape", "color": "#b49bff", "ink": "#1c1040", "level": 14 },
+    { "id": "tangerine", "name": "Tangerine", "color": "#ffa24a", "ink": "#2e1600", "level": 18 },
+    { "id": "night", "name": "Night Sky", "color": "#24305e", "ink": "#ffe680", "level": 22 },
+    { "id": "rainbow", "name": "Rainbow", "color": "linear-gradient(90deg,#ff8a8a,#ffd36a,#9ff09a,#8ad0ff,#c49bff)", "ink": "#111111", "level": 26 },
+    { "id": "gold", "name": "Gold", "color": "linear-gradient(180deg,#fff2a8,#e8b830)", "ink": "#3a2600", "level": 30 }
+  ],
+  "rewards": [
+    { "level": 2, "plate": "mint" },
+    { "level": 3, "costume": "cos_pass_ticket" },
+    { "level": 4, "plate": "sky" },
+    { "level": 5, "coins": 50 },
+    { "level": 6, "costume": "cos_pass_balloon" },
+    { "level": 7, "plate": "candy" },
+    { "level": 8, "coins": 60 },
+    { "level": 9, "costume": "cos_pass_ringmaster" },
+    { "level": 10, "plate": "lemon" },
+    { "level": 12, "costume": "cos_pass_stilts" },
+    { "level": 13, "coins": 80 },
+    { "level": 14, "plate": "grape" },
+    { "level": 16, "costume": "cos_pass_lantern" },
+    { "level": 18, "plate": "tangerine" },
+    { "level": 20, "costume": "cos_pass_starlight" },
+    { "level": 22, "plate": "night" },
+    { "level": 24, "coins": 100 },
+    { "level": 25, "costume": "cos_pass_carousel" },
+    { "level": 26, "plate": "rainbow" },
+    { "level": 30, "costume": "cos_pass_golden" },
+    { "level": 30, "plate": "gold" },
+    { "level": 35, "coins": 150 },
+    { "level": 40, "coins": 200 }
+  ],
+  "daily": [
+    { "id": "win-guess", "text": "Win a guessing game", "rule": { "stat": "wins_guess", "n": 1 }, "coins": 30 },
+    { "id": "win-race", "text": "Win a racing game", "rule": { "stat": "wins_race", "n": 1 }, "coins": 30 },
+    { "id": "win-brawl", "text": "Win a brawling game", "rule": { "stat": "wins_brawl", "n": 1 }, "coins": 30 },
+    { "id": "win-aim", "text": "Win an aim and timing game", "rule": { "stat": "wins_aim", "n": 1 }, "coins": 30 },
+    { "id": "win-memory", "text": "Win a memory game", "rule": { "stat": "wins_memory", "n": 1 }, "coins": 30 },
+    { "id": "win-two", "text": "Win 2 minigames", "rule": { "stat": "wins", "n": 2 }, "coins": 30 },
+    { "id": "play-five", "text": "Play 5 minigames", "rule": { "stat": "games", "n": 5 }, "coins": 25 },
+    { "id": "tickets-30", "text": "Hold 30 tickets in one match", "rule": { "match": "tickets", "n": 30 }, "coins": 30 },
+    { "id": "ribbons-2", "text": "Hold 2 ribbons in one match", "rule": { "match": "ribbons", "n": 2 }, "coins": 30 },
+    { "id": "finish-match", "text": "Finish a match", "rule": { "stat": "matches", "n": 1 }, "coins": 25 },
+    { "id": "coop-win", "text": "Win a team-up game together", "rule": { "stat": "coopWins", "n": 1 }, "coins": 30 },
+    { "id": "spin-two", "text": "Spin the Wheel of Whatever twice", "rule": { "stat": "spins", "n": 2 }, "coins": 25 },
+    { "id": "buy-ribbon", "text": "Buy a ribbon at the Prize Booth", "rule": { "stat": "ribbonsBought", "n": 1 }, "coins": 25 },
+    { "id": "two-wins-match", "text": "Win 2 minigames in one match", "rule": { "match": "wins", "n": 2 }, "coins": 35 }
+  ]
+}

@@ -21,7 +21,8 @@ import { strikePower, wheelSeg, shellAfter, cleanTapMs } from '../shared/board-r
 export const BOARD = Object.freeze({
   // round 12 pacing: ROLL 12000 -> 9000, DICE 1100 -> 700, STEP 330 -> 270, ASK 8000 -> 6000, FX 1700 -> 1300,
   // plain spaces 500 -> 300, BULLETIN 4200 -> 2600 (the bulletin stays up as a small tag after)
-  ROLL_MS: 9000, DICE_MS: 700, STEP_MS: 270, ASK_MS: 6000, FX_MS: 1300, PLAIN_MS: 300, CHANCE_MS: 2400, BULLETIN_MS: 2600, DUEL_MS: 2000,
+  // Expansion 1 M2 ("Finish the night"): STEP 270 -> 230, plain spaces 300 -> 250 (a quicker walk, same board)
+  ROLL_MS: 9000, DICE_MS: 700, STEP_MS: 230, ASK_MS: 6000, FX_MS: 1300, PLAIN_MS: 250, CHANCE_MS: 2400, BULLETIN_MS: 2600, DUEL_MS: 2000,
   RIBBON_MS: 900, TRAP_MS: 1300, CANNON_MS: 1700, REVEAL_MS: 1700,
   HAND: 4, RIBBON_COST: 10, LAP_BONUS: 5, DIE: 6, TICKET: 3, JACKPOT: 8, PIT: 3, DUEL: 4, BUMPER: 3,
   DUCKS: [1, 2, 3, 4, 6, 8, 10],               // what a duck can hide (three are drawn each time)
@@ -62,7 +63,9 @@ export function indexBoard(def) {
   return byId;
 }
 
-export function createBoardMatch({ def, chance, order, rng, names = {}, emit = () => {}, moves = 'dice', away = () => false }) {
+export function createBoardMatch({ def, chance, order, rng, names = {}, emit = () => {}, moves = 'dice', away = () => false, slow = 1 }) {
+  // Expansion 1 M3: the host's Relaxed timers stretch the decisions (roll, crossroads) and the bulletin, never a live event's timed tap
+  const ROLL_MS = Math.round(BOARD.ROLL_MS * slow), ASK_MS = Math.round(BOARD.ASK_MS * slow), BULLETIN_MS = Math.round(BOARD.BULLETIN_MS * slow);
   const cards = moves === 'cards';
   const byId = indexBoard(def);
   const R = { ...DEFAULT_RULES, ...(chance.board || {}) };
@@ -126,7 +129,7 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
     if (S.mods.cards) { ev.cards = {}; for (const pid of S.order) ev.cards[pid] = giveItem(pid); ev.items = itemsView(); }
     Object.assign(ev, snap());
     emit(ev);
-    S.sub = 'bulletin'; S.until = now + BOARD.BULLETIN_MS;
+    S.sub = 'bulletin'; S.until = now + BULLETIN_MS;
   }
   /** Report #44: a few tickets for whoever is furthest behind (ties share it), when they trail the leader by a ribbon. */
   function catchUp() {
@@ -155,8 +158,8 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
   function nextTurn(now) {
     S.turn++; S.ask = null; S.ev = null; S.used = false; S.after = null;
     if (S.turn >= S.order.length) { S.sub = 'idle'; S.pid = null; S.roundDone = true; emit({ ev: 'roundEnd' }); return; }
-    S.pid = S.order[S.turn]; S.sub = 'roll'; S.until = now + BOARD.ROLL_MS; S.since = now;
-    emit({ ev: 'turn', pid: S.pid, ms: BOARD.ROLL_MS, items: itemsView(), ...(cards ? { hands: handsView() } : {}) });
+    S.pid = S.order[S.turn]; S.sub = 'roll'; S.until = now + ROLL_MS; S.since = now;
+    emit({ ev: 'turn', pid: S.pid, ms: ROLL_MS, items: itemsView(), ...(cards ? { hands: handsView() } : {}) });
   }
   const handsView = () => Object.fromEntries(Object.entries(S.hands).map(([p, h]) => [p, h.slice()]));
   const itemsView = () => Object.fromEntries(Object.entries(S.items).map(([p, h]) => [p, h.slice()]));
@@ -247,7 +250,7 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
     if (S.ask && !S.ask.answered) { S.sub = 'walk-ask'; S.until = now + ms; }
     else { S.sub = 'walk'; S.until = now + ms + 120; }
   }
-  function openAsk(now) { S.sub = 'ask'; S.until = now + BOARD.ASK_MS; S.since = now; emit({ ev: 'ask', pid: S.pid, kind: S.ask.kind, options: S.ask.options, ms: BOARD.ASK_MS, at: S.ask.at }); }
+  function openAsk(now) { S.sub = 'ask'; S.until = now + ASK_MS; S.since = now; emit({ ev: 'ask', pid: S.pid, kind: S.ask.kind, options: S.ask.options, ms: ASK_MS, at: S.ask.at }); }
   function choose(pid, i, now) {
     if (!Number.isInteger(i)) return false;
     if (S.sub === 'event') return evInput(pid, i, now);

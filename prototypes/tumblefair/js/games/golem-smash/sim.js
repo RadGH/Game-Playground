@@ -38,7 +38,11 @@ export const RULES = {
   start: 2.2, golemR: 1.3,
   walk: { easy: 2.4, normal: 2.0, hard: 1.6 }, speed: { easy: 1.5, normal: 1.9, hard: 2.3 },
   warn: { easy: 1.5, normal: 1.25, hard: 1.0 }, open: { easy: 4.4, normal: 3.7, hard: 3.0 },
-  cracks: { easy: 6, normal: 8, hard: 10 }, hitsPer: n => (n === 1 ? 3 : 2 + n),
+  cracks: { easy: 6, normal: 10, hard: 10 }, hitsPer: n => (n === 1 ? 3 : 2 + n),
+  // M2 bug (2026-11-07): an all-Family CPU team broke every crack at every difficulty. Easy keeps hitsPer; Normal and
+  // Tricky read hits per crack by team size (a big team lands hits much faster), measured with tools/cpu-bench.mjs so a
+  // Normal team usually wins and a Family team usually does not (tests/coop-difficulty.test.js). Normal cracks 8 -> 10.
+  hitsBySize: { normal: [3, 8, 13, 18], hard: [4, 9, 14, 19] },
   slamR: 2.1, slamAhead: 2.6, pebbleR: 1.05, pebbleWarn: 1.35, reach: 1.25, cool: 0.28,
   hurtStun: 0.8, invuln: 1.4, knock: 6.5, stagger: 0.8,
   // jumping (B) and landing on heads
@@ -56,7 +60,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
   const spawns = spawnRing(n, n === 1 ? 0 : 2.2, Math.PI / 4);
   players.forEach((p, i) => { const s = spawns[i]; bodies.set(p.pid, makeBody(s.x, s.z * 0.5 + 3.8, Math.PI)); });
   const P = new Map(pids.map(pid => [pid, { stun: 0, inv: 0, cool: 0, hits: 0, smashed: 0, hop: 0, hopT: 0, hopCool: 0 }]));
-  const K = byDiff(difficulty, RULES.cracks), H = RULES.hitsPer(n), hpMax = K * H;
+  const K = byDiff(difficulty, RULES.cracks), H = RULES.hitsBySize[difficulty]?.[Math.min(4, n) - 1] ?? RULES.hitsPer(n), hpMax = K * H;
   const G = { x: 0, z: -2.2, yaw: 0 };
   let time = meta.seconds, phase = 'ready', left = RULES.start, cyc = -1, over = false, success = false;
   let rings = [], rid = 0, crack = null, broken = 0, target = pids[0], hp = hpMax;

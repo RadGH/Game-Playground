@@ -1,0 +1,262 @@
+{
+  "id": "midnight-big-top",
+  "title": "The Midnight Big Top",
+  "blurb": "A circus tent has appeared at midnight and its ringmaster is missing. Help the acts put on the show before dawn!",
+  "icon": "🎪",
+  "cast": {
+    "villain": ["the Shadow Juggler", "Count Curtain", "the Velvet Prowler"],
+    "ally": ["Old Gus the ticket taker", "Nana Spangle", "Tiko the tiny clown"],
+    "place": ["the Big Top", "the sawdust ring", "the high wire"],
+    "prize": ["the Ringmaster's Hat", "the Golden Whistle", "the Star Spotlight"]
+  },
+  "hooks": [
+    {
+      "id": "bt-hook-tent", "weight": 2, "title": "A Tent at Midnight",
+      "text": { "any": [
+        ["At the stroke of midnight, a striped tent appears.", "A sign says: SHOW AT DAWN. RINGMASTER MISSING."],
+        ["Music drifts from a tent that wasn't there before.", "Inside, the acts are wringing their hands."]
+      ] },
+      "who": "active",
+      "choices": [
+        { "label": "Step inside", "mood": "bold", "stars": 1, "flags": ["tent_in"], "text": "{hero} lifts the flap. The whole circus looks up hopefully.", "deed": { "text": "stepped into the midnight tent", "tags": ["brave"] } },
+        { "label": "Read the poster", "mood": "clever", "stars": 1, "flags": ["poster"], "text": "The poster lists every act. One face is scribbled out: {villain}!", "deed": { "text": "read the old circus poster", "tags": ["clue", "clever"] } }
+      ]
+    },
+    {
+      "id": "bt-hook-hat", "weight": 1, "title": "The Empty Top Hat",
+      "text": ["A tall top hat sits alone on the tent steps.", "The ringmaster is nowhere to be seen."],
+      "who": "vote",
+      "choices": [
+        { "label": "Blow the whistle", "mood": "bold", "party": 1, "flags": ["whistle"], "text": "TWEEEET! Every act comes running to the ring.", "deed": { "text": "blew the ringmaster's whistle", "tags": ["whistle", "music"], "party": true } },
+        { "label": "Peek in the hat", "mood": "silly", "stars": 1, "flags": ["rabbit_friend"], "text": "{hero} peeks in. A sleepy rabbit yawns and hops out.", "deed": { "text": "found a rabbit in a top hat", "tags": ["animal", "hat"] } }
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "id": "bt-jugglers", "act": 1, "weight": 2, "title": "The Jugglers' Muddle",
+      "text": ["The jugglers have dropped every pin, ball and ring.", "\"Someone swapped all our things!\" they wail."],
+      "callbacks": [{ "tags": ["clue"], "text": "{who} {deed}, so you know who to blame." }],
+      "who": "active",
+      "choices": [
+        { "label": "Learn to juggle", "mood": "bold", "stars": 1, "text": "{hero} picks up three balls. How hard can it be?",
+          "game": { "kinds": ["rhythm", "reaction"], "intro": "Keep the balls in the air!", "lead": "winner",
+            "win": { "text": "{winner} juggles so well the jugglers cheer and join in.", "stars": 1, "flags": ["jugglers_ready"], "deed": { "text": "juggled with the jugglers", "tags": ["juggle", "bold"] } },
+            "lose": { "text": "{loser} juggles one ball. Then zero balls. Bonk.", "deed": { "text": "juggled one ball onto their head", "tags": ["silly", "juggle"] } } } },
+        { "label": "Sort the pins", "mood": "clever", "stars": 1, "text": "{hero} lays every pin and ring out in rows.",
+          "game": { "kinds": ["memory", "collect"], "intro": "Match each act with its props!", "lead": "winner",
+            "win": { "text": "{winner} gives every juggler the right props back.", "stars": 1, "flags": ["jugglers_ready"], "deed": { "text": "sorted out the jugglers' props", "tags": ["juggle", "clever"] } },
+            "lose": { "text": "{loser} hands a juggler a rubber chicken. It goes in the act.", "deed": { "text": "added a rubber chicken to the act", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "bt-seal", "act": 1, "weight": 2, "title": "The Balancing Seal",
+      "text": ["A seal on a stool honks sadly.", "Its striped ball is gone, and it has nothing to balance."],
+      "callbacks": [{ "tags": ["animal", "whistle"], "text": "Since {who} {deed}, the seal trusts you." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Toss it a ball", "mood": "kind", "party": 1, "text": "Everyone hunts for something round and bouncy.",
+          "game": { "kinds": ["basketball", "aim"], "intro": "Land the ball on the seal's nose!", "lead": "winner",
+            "win": { "text": "{winner} lands it right on the seal's nose. HONK!", "stars": 1, "flags": ["seal_ready"], "deed": { "text": "tossed a ball onto a seal's nose", "tags": ["seal", "aim"] } },
+            "lose": { "text": "{loser} gets the ball bounced straight back by the seal.", "deed": { "text": "played catch with a seal and lost", "tags": ["silly", "seal"] } } } },
+        { "label": "Fetch it a snack", "mood": "kind", "stars": 1, "text": "{hero} grabs a little net. The seal looks very interested.",
+          "game": { "kinds": ["fishing"], "intro": "Catch a fish for the seal!", "lead": "winner",
+            "win": { "text": "{winner} lands a fat fish. The happy seal balances it!", "stars": 1, "flags": ["seal_ready"], "deed": { "text": "caught a fish for the circus seal", "tags": ["seal", "kind"] } },
+            "lose": { "text": "{loser} catches an old boot. The seal balances that instead.", "deed": { "text": "fished up a boot for a seal", "tags": ["silly", "seal"] } } } }
+      ]
+    },
+    {
+      "id": "bt-tumblers", "act": 1, "weight": 1, "title": "The Tumbling Troupe",
+      "text": ["The tumbling troupe can't finish their human tower.", "They need just one more on the very top."],
+      "who": "active",
+      "choices": [
+        { "label": "Climb to the top", "mood": "bold", "stars": 1, "text": "{hero} steps onto the first pair of shoulders.",
+          "game": { "kinds": ["dodge", "reaction"], "intro": "Balance on the wobbly tower!", "lead": "winner",
+            "win": { "text": "{winner} stands tall at the top and waves. Ta-da!", "stars": 1, "flags": ["tumblers_ready"], "deed": { "text": "topped the human tower", "tags": ["tumble", "bold"] } },
+            "lose": { "text": "{loser} wobbles and lands softly in a pile of tumblers.", "deed": { "text": "toppled a human tower", "tags": ["silly", "tumble"] } } } },
+        { "label": "Hold the mat", "mood": "kind", "party": 1, "text": "Everyone grabs a corner of the big crash mat.",
+          "game": { "kinds": ["collect", "reaction"], "coop": true, "intro": "Catch every tumbler safely!",
+            "win": { "text": "Every flip lands safe. The troupe tries even bigger tricks!", "stars": 2, "flags": ["tumblers_ready"], "deed": { "text": "caught every tumbler on the mat", "tags": ["tumble", "team"] } },
+            "lose": { "text": "One tumbler lands in the popcorn, but they love it.", "stars": 1, "deed": { "text": "held the crash mat together", "tags": ["tumble", "team"] } } } }
+      ]
+    },
+    {
+      "id": "bt-strongman", "act": 2, "weight": 2, "title": "The Sleepy Strongman",
+      "text": ["The strongman has dozed off under his giant barbell.", "He snores so loudly the tent poles shake."],
+      "callbacks": [{ "tags": ["music", "whistle"], "text": "Not even {who} {deed} woke him up!" }],
+      "who": "vote",
+      "choices": [
+        { "label": "Wake him gently", "mood": "kind", "stars": 1, "text": "{hero} tiptoes over with a feather and a kazoo.",
+          "game": { "kinds": ["rhythm"], "intro": "Play a soft wake-up tune!", "lead": "winner",
+            "win": { "text": "{winner} plays so gently he wakes up smiling.", "stars": 2, "flags": ["strongman_ready"], "deed": { "text": "woke the strongman with a song", "tags": ["strong", "kind"] } },
+            "lose": { "text": "{loser} toots too loud and gets a sleepy bear hug.", "deed": { "text": "got a sleepy strongman hug", "tags": ["silly", "strong"] } } } },
+        { "label": "Lift the barbell", "mood": "bold", "stars": 1, "text": "{hero} rubs both hands together and grabs the bar.",
+          "game": { "kinds": ["brawl", "reaction"], "intro": "Heave! Heave!", "lead": "winner",
+            "win": { "text": "{winner} lifts it an inch. He wakes up, very impressed.", "stars": 2, "flags": ["strongman_ready"], "deed": { "text": "lifted the strongman's barbell", "tags": ["strong", "bold"] } },
+            "lose": { "text": "{loser} finds the barbell is painted foam. Oops, wrong one.", "deed": { "text": "lifted a foam barbell proudly", "tags": ["silly", "strong"] } } } }
+      ]
+    },
+    {
+      "id": "bt-costumes", "act": 2, "weight": 2, "title": "The Costume Trunk",
+      "text": ["The costume trunk is a jumble of sequins and feathers.", "Nobody can find anything to wear!"],
+      "callbacks": [{ "tags": ["hat", "juggle"], "text": "{who} {deed}. Clearly a born circus star." }],
+      "who": "active",
+      "choices": [
+        { "label": "Design new outfits", "mood": "silly", "stars": 1, "text": "{hero} grabs scissors, glue and every feather in sight.",
+          "game": { "kinds": ["create"], "intro": "Make the most dazzling costume!", "lead": "winner",
+            "win": { "text": "{winner} makes a cape so sparkly the whole tent gasps.", "stars": 2, "flags": ["costumes"], "deed": { "text": "made a dazzling sparkly cape", "tags": ["costume", "create"] } },
+            "lose": { "text": "{loser} glues a feather boa to their own elbow.", "deed": { "text": "wore a feather boa on one elbow", "tags": ["silly", "costume"] } } } },
+        { "label": "Find the pairs", "mood": "clever", "stars": 1, "text": "{hero} starts matching shoes, gloves and hats.",
+          "game": { "kinds": ["memory"], "intro": "Find every matching pair!", "lead": "winner",
+            "win": { "text": "{winner} finds every pair. The acts are dressed in a flash.", "stars": 2, "flags": ["costumes"], "deed": { "text": "matched every circus costume", "tags": ["costume", "clever"] } },
+            "lose": { "text": "{loser} ends up in two left clown shoes. Honk honk.", "deed": { "text": "wore two left clown shoes", "tags": ["silly", "costume"] } } } }
+      ]
+    },
+    {
+      "id": "bt-shadow", "act": 2, "weight": 1, "title": "Shadows on the Tent",
+      "text": ["Giant shadow puppets dance across the canvas.", "{villain} has stolen the spotlight to make them!"],
+      "callbacks": [{ "tags": ["brave", "bold"], "text": "{who} {deed}. Shadows don't scare you now." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Chase the shadow", "mood": "bold", "party": 1, "text": "Everyone runs after the darting shadow.",
+          "game": { "kinds": ["race", "dodge"], "intro": "Catch the shadow!", "lead": "winner",
+            "win": { "text": "{winner} grabs the spotlight back. Light floods the ring!", "stars": 2, "flags": ["spotlight_back"], "deed": { "text": "won the spotlight back", "tags": ["spotlight", "bold"] } },
+            "lose": { "text": "{loser} chases their OWN shadow round a tent pole.", "deed": { "text": "chased their own shadow", "tags": ["silly"] } } } },
+        { "label": "Spot the real one", "mood": "clever", "stars": 1, "text": "Lots of shadows, but only one is holding the spotlight.",
+          "game": { "kinds": ["bluff", "guess"], "intro": "Which shadow is the real one?", "lead": "winner",
+            "win": { "text": "{winner} points right at the real one. Caught!", "stars": 2, "flags": ["spotlight_back"], "deed": { "text": "spotted the real shadow", "tags": ["spotlight", "clever"] } },
+            "lose": { "text": "{loser} grabs a shadow bunny. It was made by a clown.", "deed": { "text": "caught a shadow bunny", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "bt-tickets", "act": 2, "weight": 1, "title": "The Ticket Booth",
+      "text": ["People are already queuing for the dawn show!", "But the wind has scattered every ticket."],
+      "who": "active",
+      "choices": [
+        { "label": "Sell them fast", "mood": "bold", "stars": 1, "text": "{hero} jumps into the booth. \"Roll up, roll up!\"",
+          "game": { "kinds": ["reaction", "words"], "intro": "Call out the tickets!", "lead": "winner",
+            "win": { "text": "{winner} sells every seat. The queue cheers!", "stars": 2, "flags": ["crowd"], "deed": { "text": "sold out the midnight show", "tags": ["crowd", "bold"] } },
+            "lose": { "text": "{loser} sells a ticket to a very polite goose.", "deed": { "text": "sold a ticket to a goose", "tags": ["silly", "animal"] } } } },
+        { "label": "Gather the tickets", "mood": "kind", "party": 1, "text": "Everyone chases tickets across the grass.",
+          "game": { "kinds": ["collect"], "intro": "Grab the flying tickets!", "lead": "winner",
+            "win": { "text": "{winner} gathers the most. Every seat is filled!", "stars": 2, "flags": ["crowd"], "deed": { "text": "rounded up every flying ticket", "tags": ["crowd", "kind"] } },
+            "lose": { "text": "{loser} ends up with a ticket stuck to their forehead.", "deed": { "text": "wore a ticket on their forehead", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "bt-highwire", "act": 3, "weight": 2, "title": "The High Wire",
+      "text": ["{prize} hangs from the very middle of the high wire.", "{villain} put it there to stop the show!"],
+      "callbacks": [{ "tags": ["tumble", "seal"], "text": "{who} {deed}. Balancing is in your blood now." }],
+      "who": "active",
+      "choices": [
+        { "label": "Walk the wire", "mood": "bold", "stars": 1, "text": "{hero} takes the long pole and steps out. Wobble…",
+          "game": { "kinds": ["dodge", "reaction"], "intro": "Keep your balance!", "lead": "winner",
+            "win": { "text": "{winner} tiptoes all the way and unhooks {prize}.", "stars": 2, "flags": ["wire_done"], "deed": { "text": "walked the high wire", "tags": ["wire", "bold"] } },
+            "lose": { "text": "{loser} bounces into the safety net. Again! Again!", "deed": { "text": "bounced in the safety net", "tags": ["silly", "wire"] } } } },
+        { "label": "Hold the net", "mood": "kind", "party": 1, "text": "Everyone stretches the net wide and tight.",
+          "game": { "kinds": ["collect", "reaction"], "coop": true, "intro": "Catch {prize} when it drops!",
+            "win": { "text": "The wire twangs, {prize} drops, and the net catches it!", "stars": 2, "flags": ["wire_done"], "deed": { "text": "caught the prize in the net", "tags": ["wire", "team"] } },
+            "lose": { "text": "It bounces off the net and lands in a clown's pocket.", "stars": 1, "deed": { "text": "nearly netted the prize", "tags": ["wire", "team"] } } } }
+      ]
+    },
+    {
+      "id": "bt-rehearsal", "act": 3, "weight": 2, "title": "The Big Rehearsal",
+      "text": ["One quick rehearsal before the doors open.", "Everyone is nervous. Who will lead the parade?"],
+      "extra": [{ "requires": ["jugglers_ready"], "text": "The jugglers toss pins in a perfect rainbow." }],
+      "callbacks": [{ "tags": ["costume", "strong"], "text": "{who} {deed}, and the acts are buzzing." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Lead the parade", "mood": "bold", "party": 1, "text": "Everyone lines up behind a big bass drum.",
+          "game": { "kinds": ["rhythm"], "intro": "March on the beat!", "lead": "winner",
+            "win": { "text": "{winner} leads the best parade the ring has ever seen.", "stars": 2, "flags": ["rehearsed"], "deed": { "text": "led the circus parade", "tags": ["parade", "music"] } },
+            "lose": { "text": "{loser} marches the wrong way and leads a lone llama out.", "deed": { "text": "led a llama the wrong way", "tags": ["silly", "animal"] } } } },
+        { "label": "Write the show", "mood": "clever", "stars": 1, "text": "{hero} grabs a chalkboard and starts planning.",
+          "game": { "kinds": ["words", "logic"], "intro": "Put the acts in the best order!", "lead": "winner",
+            "win": { "text": "{winner} writes a running order that makes everyone grin.", "stars": 2, "flags": ["rehearsed"], "deed": { "text": "wrote the running order", "tags": ["parade", "clever"] } },
+            "lose": { "text": "{loser} writes \"seal, seal, seal, seal\". The seal approves.", "deed": { "text": "gave the seal every act", "tags": ["silly", "seal"] } } } }
+      ]
+    },
+    {
+      "id": "bt-curtain", "act": 3, "weight": 1, "title": "Curtain Trouble",
+      "text": ["{villain} has tied the big red curtain in knots!", "The show can't start if no one can see it."],
+      "callbacks": [{ "tags": ["strong", "clever"], "text": "{who} {deed}. A few knots won't stop you." }],
+      "who": "active",
+      "choices": [
+        { "label": "Untie the knots", "mood": "clever", "stars": 1, "text": "{hero} studies the tangle like a puzzle.",
+          "game": { "kinds": ["logic", "memory"], "intro": "Untangle the curtain!", "lead": "winner",
+            "win": { "text": "{winner} pulls one rope and every knot falls away.", "stars": 2, "flags": ["curtain_open"], "deed": { "text": "untied the curtain's knots", "tags": ["curtain", "clever"] } },
+            "lose": { "text": "{loser} ties themself into the curtain like a sausage roll.", "deed": { "text": "got wrapped up in the curtain", "tags": ["silly", "curtain"] } } } },
+        { "label": "Heave it open", "mood": "bold", "party": 1, "text": "Everyone grabs a rope and leans back.",
+          "game": { "kinds": ["brawl", "race"], "intro": "Pull, pull, pull!", "lead": "winner",
+            "win": { "text": "{winner} gives the last tug. SWOOSH! The curtain flies open.", "stars": 2, "flags": ["curtain_open"], "deed": { "text": "heaved the big curtain open", "tags": ["curtain", "strong"] } },
+            "lose": { "text": "{loser} sits down hard in the sawdust. Applause anyway!", "deed": { "text": "landed in the sawdust", "tags": ["silly"] } } } }
+      ]
+    }
+  ],
+  "interludes": [
+    {
+      "id": "bt-int-popcorn", "weight": 2, "title": "The Popcorn Cart",
+      "text": ["A popcorn cart is popping all by itself.", "Warm, buttery popcorn spills onto the sawdust."],
+      "who": "active",
+      "choices": [
+        { "label": "Hand it to the acts", "mood": "kind", "party": 1, "flags": ["popcorn"], "text": "{hero} fills a bag for every act. Happy crunching!", "deed": { "text": "fed popcorn to the whole circus", "tags": ["kind", "food"] } },
+        { "label": "Catch it in your mouth", "mood": "silly", "stars": 2, "text": "{hero} catches eleven in a row. A new circus act!", "deed": { "text": "caught popcorn eleven times in a row", "tags": ["silly", "food"] } }
+      ]
+    },
+    {
+      "id": "bt-int-ally", "weight": 1, "title": "{ally} Waves",
+      "text": ["{ally} shuffles over with warm milk and honey.", "\"You look like you need a little rest.\""],
+      "who": "vote",
+      "choices": [
+        { "label": "Sit for a minute", "mood": "kind", "party": 1, "text": "Warm mugs, tired feet. Everyone feels ready again.", "deed": { "text": "shared warm milk in the wings", "tags": ["kind"], "party": true } },
+        { "label": "No time, showtime!", "mood": "bold", "stars": 1, "text": "{hero} gulps it down and cartwheels away.", "deed": { "text": "cartwheeled off with a milk moustache", "tags": ["silly", "tumble"] } }
+      ]
+    }
+  ],
+  "climax": [
+    {
+      "id": "bt-climax-shadow", "weight": 2, "title": "The Show Stealer",
+      "text": ["The crowd is seated. Then the lights go out!", "{villain} juggles the spotlights high above the ring."],
+      "callbacks": [{ "tags": ["spotlight", "juggle", "curtain"], "text": "After {who} {deed}, you know every trick." }],
+      "extra": [{ "requires": ["spotlight_back"], "text": "One spotlight is already yours. It shines bright!" }],
+      "who": "vote",
+      "choices": [
+        { "label": "Catch the lights", "mood": "bold", "party": 1, "text": "Everyone takes their places around the ring. Ready!",
+          "game": { "kinds": ["boss"], "coop": true, "intro": "Win the spotlights back together!",
+            "win": { "text": "Every light snaps back on! {villain} bows and joins the show.", "stars": 3, "flags": ["won"], "deed": { "text": "saved the midnight show", "tags": ["boss", "team"] } },
+            "lose": { "text": "{villain} slips off into the dark with {prize}.", "stars": 1, "deed": { "text": "fought for the spotlights", "tags": ["boss", "team"] } } } },
+        { "label": "Out-juggle them", "mood": "clever", "stars": 1, "text": "{hero} shouts: \"Bet you can't juggle better than us!\"",
+          "game": { "kinds": ["rhythm", "reaction"], "intro": "Juggle-off!",
+            "win": { "text": "{winner} out-juggles {villain}, who hands back {prize}.", "stars": 3, "flags": ["won"], "deed": { "text": "won the great juggle-off", "tags": ["boss", "juggle"] } },
+            "lose": { "text": "{loser} juggles a pie, which ends up on their face.", "deed": { "text": "got a pie in the face", "tags": ["silly", "food"] } } } }
+      ]
+    },
+    {
+      "id": "bt-climax-dawn", "weight": 1, "title": "Showtime Before Dawn",
+      "text": ["The sky is turning pink. Dawn is coming!", "But {villain} has hidden {prize}, and the show can't start."],
+      "callbacks": [{ "tags": ["seal", "wire", "parade"], "text": "{who} {deed}. The whole circus has your back." }],
+      "extra": [{ "requires": ["crowd"], "text": "Out front, the full crowd starts to clap and stamp." }],
+      "who": "active",
+      "choices": [
+        { "label": "Find {prize}", "mood": "clever", "stars": 1, "text": "{hero} looks behind every hoop and drum.",
+          "game": { "kinds": ["guess", "memory"], "intro": "Where is {prize} hidden?",
+            "win": { "text": "{winner} finds {prize} in a cannon! The show begins!", "stars": 3, "flags": ["won"], "deed": { "text": "found the hidden prize", "tags": ["boss", "clever"] } },
+            "lose": { "text": "{loser} looks inside a drum and gets stuck for a bit.", "deed": { "text": "got stuck inside a drum", "tags": ["silly"] } } } },
+        { "label": "Put on the show anyway", "mood": "kind", "party": 1, "text": "Everyone takes a deep breath and steps into the light.",
+          "game": { "kinds": ["boss", "dodge"], "coop": true, "intro": "Perform together and win the crowd!",
+            "win": { "text": "The crowd roars! {villain} is so moved, they give back {prize}.", "stars": 3, "flags": ["won"], "deed": { "text": "put on the dawn show together", "tags": ["boss", "team"] } },
+            "lose": { "text": "The show goes on, but {villain} sneaks off with {prize}.", "stars": 1, "deed": { "text": "put on a brave show", "tags": ["boss", "team"] } } } }
+      ]
+    }
+  ],
+  "epilogue": {
+    "win": { "any": [["The sun comes up on the best show ever.", "{villain} now juggles in the opening act."], ["Dawn. The crowd goes home humming.", "The ringmaster turns up, amazed: \"Who did all this?\""]] },
+    "lose": { "any": [["The tent fades with the morning mist.", "But the acts will never forget you."], ["{villain} got away with {prize} this time.", "The circus promises to come back next midnight."]] },
+    "lines": [
+      { "requires": ["seal_ready"], "text": "The seal balances a ball with your name on it." },
+      { "requires": ["strongman_ready"], "text": "The strongman lifts the whole party up for a photo." },
+      { "requires": ["rabbit_friend"], "text": "The sleepy rabbit hops into your pocket for good." },
+      { "requires": ["popcorn"], "not": ["rabbit_friend"], "text": "Everyone goes home smelling of popcorn." }
+    ]
+  }
+}

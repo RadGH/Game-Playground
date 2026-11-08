@@ -6,6 +6,8 @@
 //   juice.frame(dt, t)             call from the view's frame()
 //   juice.dispose()                call from the view's dispose()
 // The flash layer has pointer-events: none (a full-screen overlay must never eat taps, see docs/MINIGAMES.md).
+// Comfort (Expansion 1 M3): with Less motion on (body.calm, js/client/comfort.js) flash() and shake() do nothing.
+const calm = () => typeof document !== 'undefined' && document.body?.classList.contains('calm');
 export function createJuice(ctx) {
   const el = document.createElement('div');
   Object.assign(el.style, { position: 'absolute', inset: '0', pointerEvents: 'none', opacity: '0', transition: 'opacity .25s ease-out', zIndex: '5' });
@@ -15,11 +17,12 @@ export function createJuice(ctx) {
   let shakeT = 0, shakeDur = 1, shakeA = 0, fadeT = 0;
   return {
     flash(color = '#ffffff', ms = 200) {
+      if (calm()) return;
       el.style.transition = 'none';
       el.style.boxShadow = `inset 0 0 70px 24px ${color}`;
       el.style.opacity = '0.85'; fadeT = ms / 1000;
     },
-    shake(amp = 0.12, s = 0.25) { if (amp >= shakeA * (shakeT / shakeDur)) { shakeA = amp; shakeT = shakeDur = s; } },
+    shake(amp = 0.12, s = 0.25) { if (calm()) return; if (amp >= shakeA * (shakeT / shakeDur)) { shakeA = amp; shakeT = shakeDur = s; } },
     say(text, ms = 1400, cls = '') {
       const b = document.createElement('div'); b.className = 'banner fx juice-say ' + cls; b.textContent = text; b.style.pointerEvents = 'none';
       ctx.ui.append(b); says.push(b); setTimeout(() => { b.remove(); says.splice(says.indexOf(b), 1); }, ms);

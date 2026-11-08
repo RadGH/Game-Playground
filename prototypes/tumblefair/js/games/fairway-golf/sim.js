@@ -26,7 +26,7 @@ import { HOLES, LIES, buildLayout, hydrate, lieAt, holeNumber, pickHoles, treesN
 
 export const meta = {
   id: 'fairway-golf', title: 'Fairway Golf', blurb: 'Real golf holes — tee off, find the green and hole out in as few strokes as you can!',
-  how: ['Aim with ◀ ▶ or drag. The best club is picked for you — B changes it.', 'Tap to stop the POWER bar, then tap as the needle hits the middle.', 'On the green, one tap putts. Mind the wind, the bunkers and the water!'],
+  how: ['Aim with ◀ ▶ or drag. The best club is picked for you — tap the club to change it.', 'Tap to stop the POWER bar, then tap as the needle hits the middle.', 'On the green, one tap putts. Mind the wind, the bunkers and the water!'],
   kind: 'ui', mode: 'golf', min: 1, max: 4, seconds: 150, scoring: 'points', unit: 'strokes', tags: ['action'], card: 'card-fairway-golf', css: true,
 };
 

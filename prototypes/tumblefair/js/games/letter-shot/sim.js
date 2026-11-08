@@ -12,7 +12,7 @@ import { flyShot, release, qualityOf, idealPower, tolFor, HOOP_R } from '../hoop
 export const meta = {
   id: 'letter-shot', title: 'Letter Shot', blurb: 'Call your shot — if it drops, everyone must copy it or take a letter!',
   how: ['The setter taps a mark, then HOLDS and lets go in the green.', 'If it goes in, everyone else shoots that mark. Miss = a letter of FAIR.', 'Spell FAIR and you are out. Last one in wins!', 'Second half: a missed copy costs TWO letters.'],
-  kind: 'ui', min: 1, max: 4, seconds: 90, scoring: 'survival', unit: 'letters', tags: ['action'], card: 'card-letter-shot', css: true,
+  kind: 'ui', min: 1, max: 4, seconds: 90, scoring: 'survival', unit: 'letters', tags: ['action'], card: 'card-letter-shot', css: true, rival: 'needed',   // alone with 'Rival when alone' off it is not worth playing: not offered then
 };
 
 export const WORD = 'FAIR', OUT_AT = WORD.length;
@@ -37,11 +37,12 @@ const r2 = v => Math.round(v * 100) / 100;
 export const PH = { START: 0, PICK: 1, SET: 2, SETFLY: 3, COPY: 4, COPYFLY: 5, END: 6 };
 export const validShot = d => d && typeof d === 'object' && Number.isFinite(d.p) && d.p >= 0 && d.p <= 1;
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
   const L = LEVELS[difficulty] || LEVELS.normal, events = [];
   // everyone who shoots: the players in seat order, plus Rimsby when you play alone
   const E = players.map(p => ({ pid: p.pid, name: p.name, letters: 0, out: false, outAt: 0, shot: 0, timer: 0, makes: 0 }));
-  if (E.length === 1) E.push({ pid: null, name: CPU_NAME, letters: 0, out: false, outAt: 0, shot: 0, timer: 0, makes: 0, cpu: true });
+  // "Rival when alone" off (rivals false): no Rimsby — you set marks on your own until the bell (shooting practice; makes are counted)
+  if (E.length === 1 && rivals !== false) E.push({ pid: null, name: CPU_NAME, letters: 0, out: false, outAt: 0, shot: 0, timer: 0, makes: 0, cpu: true });
   const byPid = new Map(E.map((e, i) => [e.pid, i]));
   let time = 0, ph = PH.START, tl = TIMES.start, setter = 0, spot = -1, over = false, outs = 0, flyLeft = 0;
   const alive = () => E.map((e, i) => i).filter(i => !E[i].out);
@@ -56,7 +57,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
     events.push({ e: 'shot', who: i, path: f.path, T: f.T, made: f.made ? 1 : 0, auto: auto ? 1 : 0, q: r2(q) });
   }
   function startPick() {
-    if (alive().length <= 1 || (E.length === 2 && E.some(e => e.out)) || time >= lastTurnAt) return finish();
+    if ((E.length > 1 && alive().length <= 1) || (E.length === 2 && E.some(e => e.out)) || time >= lastTurnAt) return finish();
     ph = PH.PICK; tl = E[setter].cpu ? TIMES.cpuPick : TIMES.pick; spot = -1; for (const e of E) e.shot = 0;
     events.push({ e: 'turn', who: setter });
   }

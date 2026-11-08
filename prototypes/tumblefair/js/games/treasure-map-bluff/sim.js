@@ -11,7 +11,7 @@
 export const meta = {
   id: 'treasure-map-bluff', title: 'Treasure Map Bluff', blurb: 'You each hold a piece of the map: share it, or lie about it!',
   how: ['You can see what is on two of the four routes.', 'Post claims for everyone ("Route B is safe!") — true or false.', 'Secretly pick a route. Treasure is split between everyone who finds it; traps cost 4.', 'The reveal shows who told the truth!'],
-  kind: 'ui', min: 1, max: 4, seconds: 90, scoring: 'points', unit: 'gold', tags: ['social', 'chance'], card: 'card-treasure-map-bluff', css: true,
+  kind: 'ui', min: 1, max: 4, seconds: 90, scoring: 'points', unit: 'gold', tags: ['social', 'chance'], card: 'card-treasure-map-bluff', css: true, rival: true,
 };
 export const ROUTES = 4, ROUNDS = 5, POT = 12, TRAP = 4, MAX_CLAIMS = 3, START_S = 2, PLAN_S = 12, REVEAL_S = 4, END_S = 3;
 export const CPU = 'cpu', CPU_NAME = 'Captain Squawk';
@@ -44,8 +44,9 @@ export function settleRound(content, picks) {
   return { gain, finders };
 }
 
-export function create({ rng, players }) {
-  const pids = players.map(p => p.pid), solo = pids.length === 1, n = pids.length;
+export function create({ rng, players, rivals = true }) {
+  // solo = alone WITH the parrot; "Rival when alone" off (rivals false): you read your two routes and pick alone
+  const pids = players.map(p => p.pid), solo = pids.length === 1 && rivals !== false, n = pids.length;
   const plans = Array.from({ length: ROUNDS }, (_, r) => planRound(rng, r, n));
   // the parrot (solo only): sees the routes the player does not; claim time, honesty and its pick are rolled now
   const parrot = solo ? plans.map(P => {

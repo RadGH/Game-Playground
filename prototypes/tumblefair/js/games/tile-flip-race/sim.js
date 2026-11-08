@@ -16,7 +16,7 @@
 export const meta = {
   id: 'tile-flip-race', title: 'Tile Flip Race', blurb: 'Grab the tiles next to yours, every two seconds, before your rivals do!',
   how: ['Tap any tile: every 2 seconds your land grows one tile toward it.', 'Stars are worth 2, gems 3. You can steal a rival\'s tile too.', 'Pick the same tile as someone else and you both bounce off.', 'Your biggest joined-up patch scores a bonus point per tile.'],
-  kind: 'ui', min: 1, max: 4, seconds: 45, scoring: 'points', unit: 'points', tags: ['puzzle', 'action'], card: 'card-tile-flip-race', css: true,
+  kind: 'ui', min: 1, max: 4, seconds: 45, scoring: 'points', unit: 'points', tags: ['puzzle', 'action'], card: 'card-tile-flip-race', css: true, rival: true,
 };
 export const W = 7, H = 7, TICK_S = 2, FLIPS = 20, START_S = 2, END_S = 3;
 export const CPU = 'cpu', CPU_NAME = 'Tumbleweed';
@@ -101,8 +101,9 @@ export function cpuPick(values, owner, homes, who, rng, difficulty = 'normal') {
   opts.sort((a, b) => b.s - a.s); return opts[0].i;
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
-  const pids = players.map(p => p.pid), solo = pids.length === 1;
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
+  // solo = alone WITH Tumbleweed; "Rival when alone" off (rivals false): the whole board is yours to grow over
+  const pids = players.map(p => p.pid), solo = pids.length === 1 && rivals !== false;
   const values = makeBoard(rng);
   // who: index into this list is what the owner array holds
   const used = new Set(players.map(p => p.seat));

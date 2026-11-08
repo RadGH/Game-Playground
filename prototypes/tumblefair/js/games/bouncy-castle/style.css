@@ -1,0 +1,11 @@
+/* Bouncy Castle: 3-2-1 + call-outs, and a pill with the two buttons and the scoring rule (glows in MEGA BOUNCE). */
+.game-bouncy-castle .bc-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center;
+  font: 900 clamp(40px, 12vw, 92px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .15s, opacity .15s; }
+.bc-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.bc-banner.go { color: #8ff07a; } .bc-banner.small { font-size: clamp(26px, 7.5vw, 46px); }
+.game-bouncy-castle .bc-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; pointer-events: none;
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 14px/1.2 var(--font); white-space: nowrap; }
+.bc-pill b { display: inline-grid; place-items: center; min-width: 1.5em; padding: 0 4px; border-radius: 8px; background: var(--ink); color: #fff; font-size: 12px; }
+.bc-pill.mega { background: var(--sun); animation: bob .5s infinite alternate; }
+@media (max-width: 520px) { .game-bouncy-castle .bc-pill { top: calc(var(--st) + 52px); font-size: 13px; gap: 7px; padding: 3px 10px; } }
+.tag.bc-cpu { background: #e8394a; }

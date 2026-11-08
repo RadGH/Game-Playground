@@ -265,6 +265,21 @@ body[data-season=halloween] #screen.title::before, body[data-season=halloween] #
 body[data-phase=game] .bats, body[data-phase=board] .bats, body[data-phase=intro] .bats { display: none; }
 .costume { margin-top: 6px; } .costume .tag { top: -9px; right: auto; left: 50%; transform: translateX(-50%); font-size: 9px; padding: 2px 6px; white-space: nowrap; }
 .costume .tag.t-halloween { background: #ff8a1a; }
+/* ---- Winter Fair (Expansion 1, M6): menus in snow (body[data-season=winter]); .snowfall reuses the bats' layer rules ---- */
+body[data-season=winter] { --bg: #1f4a78; }
+body[data-season=winter] .panel { background: #f6fbff; border-color: #16324f; box-shadow: 0 7px 0 #16324f; }
+body[data-season=winter] .btn.primary { background: #e8322a; color: #fff; }
+body[data-season=winter] .pill.on, body[data-season=winter] .mode.on { background: #bfe3ff; }
+body[data-season=winter] #screen.title::before, body[data-season=winter] #screen.lobby::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+  background: radial-gradient(ellipse at 50% 120%, rgba(255, 255, 255, .5) 0 30%, transparent 31%), linear-gradient(180deg, rgba(10, 30, 60, .45), rgba(31, 74, 120, 0) 50%); }
+.bats.snowfall i { width: 9px; height: 9px; border-radius: 50%; background: #fff; clip-path: none; opacity: .85; top: -12px; left: calc(var(--x, 50) * 1%); animation: snowfall 11s linear infinite; }
+.bats.snowfall i:nth-child(1) { --x: 4; } .bats.snowfall i:nth-child(2) { --x: 12; animation-delay: -3s; width: 6px; height: 6px; } .bats.snowfall i:nth-child(3) { --x: 19; animation-delay: -7s; }
+.bats.snowfall i:nth-child(4) { --x: 27; animation-delay: -1s; width: 7px; height: 7px; } .bats.snowfall i:nth-child(5) { --x: 34; animation-delay: -9s; } .bats.snowfall i:nth-child(6) { --x: 42; animation-delay: -5s; width: 5px; height: 5px; }
+.bats.snowfall i:nth-child(7) { --x: 50; animation-delay: -2s; } .bats.snowfall i:nth-child(8) { --x: 57; animation-delay: -8s; width: 6px; height: 6px; } .bats.snowfall i:nth-child(9) { --x: 64; animation-delay: -4s; }
+.bats.snowfall i:nth-child(10) { --x: 71; animation-delay: -10s; width: 7px; height: 7px; } .bats.snowfall i:nth-child(11) { --x: 79; animation-delay: -6s; } .bats.snowfall i:nth-child(12) { --x: 86; animation-delay: -3.5s; width: 5px; height: 5px; }
+.bats.snowfall i:nth-child(13) { --x: 92; animation-delay: -7.5s; } .bats.snowfall i:nth-child(14) { --x: 97; animation-delay: -0.5s; width: 6px; height: 6px; }
+@keyframes snowfall { from { transform: translate(0, 0); } 50% { transform: translate(18px, 52vh); } to { transform: translate(-6px, 106vh); } }
+.costume .tag.t-winter { background: #2f8ad8; }
 /* ---- the look editor (round 6): a side panel / bottom sheet; the camera frames your character in the rest ---- */
 .modal.editor, .modal.side { padding: 0; background: none; display: block; overscroll-behavior: contain; }
 .modal.side .panel.sheet, .modal.editor .panel.sheet { min-height: 100%; box-shadow: none; display: grid; align-content: start; gap: 8px; }
@@ -456,3 +471,31 @@ body[data-phase=game] .chat-btn { width: 28px; height: 28px; font-size: 13px; op
 .chat-quick .btn.emo { font-size: 22px; min-width: 48px; padding: 4px 6px; }
 .chat-say { display: flex; gap: 6px; }
 .chat-input { flex: 1; min-width: 0; border: 3px solid var(--ink); border-radius: 12px; padding: 8px 10px; font: 700 16px var(--font); background: #fff; }   /* 16px: iOS does not zoom into it */
+
+/* Expansion 1 M1: CPU fairgoers wear a small badge on their face, wherever a chip is drawn */
+.chip.cpu { position: relative; }
+.chip .cpu-tag { position: absolute; left: -3px; bottom: -5px; font: 900 9px/1 system-ui, sans-serif; font-style: normal; letter-spacing: .04em; padding: 2px 4px; border-radius: 6px; background: var(--ink, #222); color: #fff; border: 2px solid #fff; pointer-events: none; }
+.cpu-row .pill[disabled] { opacity: .45; }
+
+/* ---- Expansion 1, M2 "Finish the night" (2026-11-07) ---- */
+/* how long each choice takes, in the lobby */
+.mode .mins { font-style: normal; font-size: 11px; font-weight: 800; color: #2f6f7d; }
+.pill .mins { display: block; font-size: 10px; font-weight: 700; color: #47606a; line-height: 1; margin-top: 1px; }
+.pill.on .mins { color: inherit; }
+.lobby-go .go-row { display: grid; grid-template-columns: 1fr 1.3fr; gap: 8px; width: 100%; }
+.lobby-go .go-row .btn.big { width: 100%; display: grid; justify-items: center; line-height: 1.1; padding-left: 8px; padding-right: 8px; }
+.lobby-go .go-row .btn small { font-size: 11px; font-weight: 700; opacity: .85; }
+.btn.quick { background: var(--sun); }
+/* the match clock: its own row under the score bar (never a pill in the top bar), and the intro's note */
+.match-clock { position: absolute; top: calc(var(--st) + 52px); left: 8px; right: calc(var(--sr, 0px) + 92px); text-align: center; font-size: 13px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+body.has-clock #screen.vote, body.has-clock #screen.results { padding-top: calc(var(--st) + 80px); }
+.match-clock-note { font-weight: 800; }
+/* the highlight reel on the final card */
+.reel { list-style: none; margin: 2px 0; padding: 0; display: grid; gap: 5px; width: 100%; text-align: left; }
+.reel-card { display: flex; gap: 8px; align-items: center; background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 5px 9px; font-size: 13px; line-height: 1.25; opacity: 0; animation: reel-in .35s ease-out forwards; }
+.reel-card i { font-style: normal; font-size: 20px; flex: none; }
+@keyframes reel-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .reel-card { animation: none; opacity: 1; } }
+.final-go { display: grid; grid-template-columns: 1.4fr 1fr; gap: 8px; width: 100%; }
+.final-go .btn.big { width: 100%; }
+.again-line:empty { display: none; }

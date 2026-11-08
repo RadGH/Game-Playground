@@ -13,7 +13,7 @@ import { IN } from '../../shared/protocol.js';
 
 export function createView(ctx) {
   const { THREE, group, stage, init, meta } = ctx;
-  const { hw, hd } = meta.arena, HW = ctx.season === 'halloween';
+  const hw = RULES.edgeX, hd = RULES.edgeZ, HW = ctx.season === 'halloween';     // the bed (meta.arena is a step wider: its wall stops your walking at the bed's edge)
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), e3 = new THREE.Euler();
   const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, ...extra });
   const box = (w, hh, d, mat, x, y, z, parent = group) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, hh, d), mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; parent.add(m); return m; };

@@ -1,6 +1,8 @@
 # Writing a Tumblefair minigame
 
-A minigame is one folder, `js/games/<id>/`, with two files and one line in `js/games/index.js` — then run
+A minigame is one folder, `js/games/<id>/`, with two files and one line in `js/games/index.js`, plus one row in
+`js/games/howto.js` (Expansion 1 M3: a goal line and a controls line like `[stick] walk to paint · [A] grab a bomb`;
+`tests/howto.test.js` checks it against `meta.controls`) — then run
 `node tools/build-metas.mjs` (the browser loads only the metas, `js/games/metas.js`; `tests/metas.test.js` fails until you do). The room does
 everything else: it seats the players, shows the vote card and the intro card, starts and stops the clock, turns
 your result into tickets or points, and handles phones that drop and come back. **A game never touches scores,
@@ -57,6 +59,17 @@ The object `create` returns:
 
 A game must work for **every** player count from `meta.min` to `meta.max`, including one (solo practice), and must
 end by itself within `meta.seconds`.
+The solo version is also what each phone runs as its **practice copy** during the intro (Expansion 1 M3,
+`js/client/practice.js`: the game's own sim + view, alone, on Easy, nothing sent to the server) — keep `sim.js` free of
+anything browser-unsafe and `tests/practice.test.js` green.
+
+## cpu.js (Expansion 1, M1)
+
+`js/games/<id>/cpu.js` gives the game a computer player for CPU fairgoers: `export function createCpu(c) { return { tick(v) {...} } }`,
+built with `js/games/cpu-kit.js` (its header is the contract). It sees only what a phone sees, moves through the same
+input (arena: return `{ mx, mz, b }`) and taps through `v.act(a, d)`. No registration: the server finds the file. A
+game without one is not offered while CPUs are seated (or set `meta.cpu: false` if it can never have one). Check it
+with `node tools/cpu-bench.mjs <id> --seeds 20` (Family rarely beats a Normal player, Tricky usually does).
 
 ## view.js
 
@@ -116,6 +129,10 @@ gets the same value as `ctx.season`; the game's `ui` element also carries the cl
   y: groundHeight, mist: false }` from `createView`, or `halloween: false` to dress the arena yourself.
 - **A holiday-only game**: `meta.season: 'halloween'` (it is offered only while the season is on) and `tags: [..., 'holiday']`.
 - Family friendly: spooky-cute, never scary (round faces, smiles, no teeth or blood).
+- **Winter** (Expansion 1 M6): `season === 'winter'` (December 1 - January 6, or `?holiday=winter` to preview). Kit:
+  `js/client/winter.js` — `dressWinter` (automatic for arena games; steer with `winter: {…}` or `winter: false` from
+  createView), `snowfall`, `snowOverlay(ui)` for screen games, `snowmanGeo`, `treeGeo`, `giftGeo`. A winter-only game:
+  `meta.season: 'winter'`. Add a reskinned game's season check to `tests/winter.test.js`.
 
 ## Testing
 

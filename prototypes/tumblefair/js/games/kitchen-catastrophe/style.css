@@ -49,3 +49,5 @@
 @media (min-width: 900px) { .kc-foot { bottom: calc(var(--sb) + 62px); }
   .kc-panel { left: 8px; transform: none; width: 215px; align-items: stretch; } .kc-line { justify-content: flex-start; } .kc-queue { flex-direction: column; align-items: stretch; } }
 @media (max-width: 520px) { .kc-panel { top: calc(var(--st) + 50px); gap: 4px; } .kc-order { font-size: 11px; padding: 3px 6px 5px; } .kc-oh b { font-size: 13px; } .kc-step { padding: 0 5px; } .kc-goal { font-size: 13px; } }
+/* Expansion 1 (M4): Chef Crumb, the computer cook, and the counters he looks after */
+.tag.kc-st.chef { background: #fff; color: #b8343b; text-shadow: none; box-shadow: 0 0 0 3px #b8343b; font-weight: 900; }

@@ -1,0 +1,4 @@
+{
+  "about": "Story Night (Expansion 1, M8): the story arcs, in the order the lobby lists them. One file per arc in arcs/. Schema: README 'Story Night'.",
+  "arcs": ["runaway-carousel", "hall-of-mirrors", "lost-prize-pony", "balloon-getaway", "midnight-big-top"]
+}

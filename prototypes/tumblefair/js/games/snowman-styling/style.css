@@ -1,0 +1,99 @@
+/* Snowman Styling — a snowy fairground yard: pale winter-blue sky, soft drifting flakes, a white snowfield with a
+   wooden fence line; the snowman stands on a little snow mound; the voting row is a line of snowmen on the field. */
+.game-snowman-styling { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: calc(var(--st) + 6px) calc(var(--sr) + 10px) calc(var(--sb) + 12px) calc(var(--sl) + 10px);
+  background: linear-gradient(#bfe2ff 0%, #e6f4ff 46%, #f8fcff 46%, #ffffff 100%); color: var(--ink); user-select: none; -webkit-user-select: none; }
+.game-snowman-styling > * { flex: none; position: relative; }
+.sm-flakes { position: absolute; inset: 0; pointer-events: none; flex: none;
+  background: radial-gradient(3px 3px at 10% 20%, #fff 50%, transparent 51%), radial-gradient(2px 2px at 30% 8%, #fff 50%, transparent 51%), radial-gradient(3px 3px at 70% 14%, #fff 50%, transparent 51%),
+    radial-gradient(2px 2px at 88% 30%, #fff 50%, transparent 51%), radial-gradient(2.5px 2.5px at 52% 34%, #fff 50%, transparent 51%), radial-gradient(2px 2px at 18% 40%, #fff 50%, transparent 51%);
+  background-size: 100% 60%; animation: sm-snow 9s linear infinite; opacity: .9; }
+@keyframes sm-snow { from { background-position: 0 -60%; } to { background-position: 30px 0; } }
+
+.sm-top { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; width: 100%; padding: 0 80px 0 4px; min-height: 44px; }
+.sm-title { font: 900 clamp(20px, 5.6vw, 26px)/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.4px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.game-snowman-styling .scorebar { position: static; display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.game-snowman-styling .scorebar .chip { font-size: 13px; padding-right: 8px; } .game-snowman-styling .scorebar .chip .face { width: 26px; height: 26px; }
+.game-snowman-styling .scorebar .chip .nm { max-width: 5.5em; }
+.game-snowman-styling .scorebar .sc { font-style: normal; background: #e6f4ff; border-radius: 8px; padding: 0 6px; }
+.sm-theme { margin: 0; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; justify-content: center; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 4px 12px; box-shadow: 0 3px 0 var(--ink); max-width: 100%; text-align: center; }
+.sm-theme small { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #5a7a96; }
+.sm-theme b { font: 900 18px/1.1 var(--font); color: #2a4fa8; } .sm-theme em { font-size: 13px; color: #47606a; }
+
+.sm-dress, .sm-yard, .sm-gallery { display: none; width: 100%; }
+.game-snowman-styling[data-phase=dress]:not(.watching) .sm-dress { display: grid; }
+.game-snowman-styling[data-phase=dress].watching .sm-yard { display: flex; }
+.game-snowman-styling:not([data-phase=dress]) .sm-gallery { display: block; }
+.game-snowman-styling:not([data-phase=dress]) .sm-theme em { display: none; }
+
+/* ---- dressing ---- */
+.sm-dress { justify-items: center; gap: 6px; max-width: 520px; margin: 0 auto; }
+.sm-me { height: clamp(150px, calc(100dvh - 470px), 300px); aspect-ratio: 200 / 248; background: radial-gradient(ellipse 60% 14% at 50% 94%, #e3eef8 70%, transparent 72%); transform-origin: 50% 92%; }
+.sm-me svg { width: 100%; height: 100%; display: block; }
+.sm-me.wob { animation: sm-wob .35s ease-out; }
+@keyframes sm-wob { 30% { transform: rotate(-3deg) scale(1.02); } 65% { transform: rotate(2deg); } }
+.sm-tabs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; }
+.sm-tab { min-height: 46px; padding: 2px 0; border: 3px solid var(--ink); border-radius: 12px; background: #fff; color: var(--ink); font: 800 11px/1 var(--font); display: grid; place-items: center; align-content: center; gap: 3px; box-shadow: 0 3px 0 var(--ink); }
+.sm-tab i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #9fb7cc; display: block; }
+.sm-tab.set i { background: var(--mint); border-color: var(--ink); }
+.sm-tab.on { background: #2a4fa8; color: #fff; transform: translateY(-2px); }
+.sm-opts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; width: 100%; }
+.sm-opt { min-height: 70px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; color: var(--ink); display: grid; justify-items: center; align-content: center; gap: 2px; padding: 3px 2px; box-shadow: 0 3px 0 var(--ink); font: 800 11px/1.05 var(--font); }
+.sm-opt svg { width: 100%; height: 40px; display: block; }
+.sm-opt span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.sm-opt.on { background: #ffe9a8; outline: 3px solid #2a4fa8; transform: translateY(-2px); }
+.sm-swatch { display: block; width: 36px; height: 36px; border-radius: 50%; background: var(--c); border: 3px solid var(--ink); margin: 2px 0; }
+.sm-done { width: min(100%, 340px); min-height: 50px; padding: 8px 14px; background: var(--mint); color: var(--ink); }
+.sm-done.on { background: #fff; font-size: 16px; }
+.is-done .sm-opts, .is-done .sm-tabs { opacity: .75; }
+
+/* ---- watch-only yard ---- */
+.sm-yard { flex-direction: column; align-items: center; gap: 14px; margin-top: 4vh; }
+.sm-yard .shout { font-size: clamp(24px, 5vw, 48px); color: #fff; }
+.sm-patch { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.sm-blank { display: grid; justify-items: center; gap: 4px; }
+.sm-blank svg { width: clamp(90px, 15vw, 190px); height: auto; transform-origin: 50% 92%; }
+.sm-blank.wob svg { animation: sm-wob .45s ease-out; }
+.sm-blank .st { font-style: normal; font-size: 13px; background: #e6f4ff; border-radius: 8px; padding: 1px 8px; }
+.sm-blank.in .st { background: var(--mint); color: #fff; }
+
+/* ---- the row of snowmen ---- */
+.sm-ghead { margin: 0 0 4px; text-align: center; min-height: 1.1em; font-weight: 800; }
+.sm-ghead:empty { display: none; }
+.sm-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 10px; width: min(100%, 1100px); margin: 0 auto; }
+.sm-cards.n3 .sm-card:last-child { grid-column: 1 / -1; width: calc(50% - 5px); justify-self: center; }
+.sm-card { position: relative; display: grid; gap: 2px; justify-items: center; align-content: start; padding: 4px 4px 8px; background: rgba(255, 255, 255, .7); border: 3px solid #9fb7cc; border-radius: 18px; color: var(--ink); cursor: pointer; min-height: 44px; }
+.sm-frame { position: relative; display: block; width: 100%; height: clamp(120px, calc((100dvh - 330px) / 2), 230px); }
+.sm-frame svg { width: 100%; height: 100%; display: block; animation: sm-pop .5s var(--d, 0s) backwards ease-out; }
+@keyframes sm-pop { from { transform: translateY(18px) scale(.8); opacity: 0; } }
+.sm-num { position: absolute; left: 4px; top: 4px; width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); display: grid; place-items: center; font-size: 15px; }
+.sm-empty { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-weight: 900; color: #5a7a96; }
+.sm-by:empty, .sm-vt:empty, .sm-pts:empty { display: none; }
+.sm-by .chip { font-size: 12px; } .sm-by .chip .face { width: 24px; height: 24px; } .sm-by .you { font-style: normal; font-size: 10px; background: var(--ink); color: #fff; border-radius: 6px; padding: 0 5px; }
+.sm-cpu { display: inline-block; background: #fff; border: 3px solid var(--ink); border-radius: 999px; padding: 2px 10px; font-weight: 800; font-size: 13px; }
+.sm-cpu small { font-size: 10px; background: var(--ink); color: #fff; border-radius: 999px; padding: 1px 5px; }
+.sm-vt { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; align-items: center; min-height: 26px; }
+.sm-vt em { font-style: normal; font-size: 12px; color: #5a7a96; }
+.sm-judge { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #2a4fa8; color: #fff; font: 900 13px/1 var(--font); font-style: normal; border: 2px solid var(--ink); }
+.game-snowman-styling .vface { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; box-shadow: 0 0 0 2px var(--ink); }
+.game-snowman-styling .vface img { width: 100%; height: 100%; display: block; }
+.sm-pts { position: absolute; top: -10px; right: -6px; background: var(--sun); color: var(--ink); border: 3px solid var(--ink); border-radius: 999px; padding: 2px 10px; font-size: 18px; animation: sm-pts .6s backwards .3s; }
+@keyframes sm-pts { from { transform: scale(2.2); opacity: 0; } }
+.sm-ribbon { display: none; position: absolute; left: -4px; bottom: 4px; background: #2a8ff0; color: #fff; font-style: normal; font-size: 12px; font-weight: 900; padding: 2px 10px 2px 8px; border-radius: 0 10px 10px 0; border: 2px solid var(--ink); transform: rotate(-4deg); }
+.sm-card.ribbon .sm-ribbon { display: block; }
+.sm-card.mine { cursor: default; opacity: .8; }
+.sm-card.mine::after { content: 'Yours'; position: absolute; top: 8px; right: 8px; background: #e6f4ff; font-size: 12px; padding: 1px 8px; border-radius: 8px; border: 2px solid var(--ink); }
+.sm-card.blank { cursor: default; }
+.game-snowman-styling[data-phase=reveal] .sm-card.mine { opacity: 1; } .game-snowman-styling[data-phase=reveal] .sm-card.mine::after { display: none; }
+.game-snowman-styling[data-phase=vote]:not(.watching) .sm-card.picked:not(.mine) { background: #fff3c4; border-color: var(--sun); outline: 4px solid #2a4fa8; transform: translateY(-3px); }
+.game-snowman-styling[data-phase=vote]:not(.watching) .sm-card.picked:not(.mine)::before { content: 'My vote'; position: absolute; z-index: 1; bottom: -12px; background: var(--mint); color: #fff; border: 3px solid var(--ink); border-radius: 10px; padding: 0 10px; font-size: 14px; }
+.game-snowman-styling:is([data-phase=reveal], .watching) .sm-card { pointer-events: none; }
+.sm-card.best { border-color: var(--sun); box-shadow: 0 0 22px rgba(255, 210, 63, .8); }
+.sm-card.best::before { content: 'Best snowman!'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%) rotate(-3deg); z-index: 3; background: var(--sun); font: 900 13px/1 var(--font); padding: 4px 9px; border: 3px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.sm-note { margin: 0; text-align: center; min-height: 1.2em; max-width: 640px; font-size: 14px; font-weight: 700; color: #2b4258; }
+@media (min-aspect-ratio: 1/1) {
+  .sm-cards { grid-template-columns: repeat(var(--cols, 4), minmax(0, 260px)); justify-content: center; }
+  .sm-cards.n2 { --cols: 2; } .sm-cards.n3 { --cols: 3; } .sm-cards.n3 .sm-card:last-child { grid-column: auto; width: auto; }
+  .sm-frame { height: clamp(150px, calc(100dvh - 300px), 360px); }
+}
+@media (prefers-reduced-motion: reduce) { .sm-flakes, .sm-me.wob, .sm-blank.wob svg, .sm-frame svg { animation: none; } }

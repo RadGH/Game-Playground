@@ -1,0 +1,261 @@
+{
+  "id": "hall-of-mirrors",
+  "title": "The Haunted Hall of Mirrors",
+  "blurb": "Reflections have stepped out of the mirrors and are swapping places with fairgoers. Put everyone back the right way round!",
+  "icon": "🪞",
+  "cast": {
+    "villain": ["the Mirror Marquis", "Lady Lookglass", "Count Shimmerby"],
+    "ally": ["Polly the polisher", "Old Grimsby", "Wink the clown"],
+    "place": ["the Crooked Corridor", "the Wobbly Room", "the Glass Garden"],
+    "prize": ["the Silver Hand Mirror", "the Moonglass Mirror", "the Twinkle Glass"]
+  },
+  "hooks": [
+    {
+      "id": "hm-hook-wave", "weight": 2, "title": "Who Waved First?",
+      "text": ["{hero} waves at a funhouse mirror.", "The reflection waves back... a whole second later."],
+      "who": "active",
+      "choices": [
+        { "label": "Wave again, slowly", "mood": "clever", "stars": 1, "flags": ["spotted_fake"], "text": "The reflection copies badly. It is not a reflection at all!", "deed": { "text": "caught a reflection waving late", "tags": ["clue", "mirror"] } },
+        { "label": "Ask {ally}", "mood": "kind", "stars": 1, "flags": ["ally_help"], "text": "{ally} gasps: {villain} has let the reflections out!", "deed": { "text": "heard the whole story from {ally}", "tags": ["clue", "ally"] } }
+      ]
+    },
+    {
+      "id": "hm-hook-swap", "weight": 1, "title": "Backwards Day",
+      "text": ["Fairgoers walk out of the mirror hall backwards.", "Their hats are on their feet. Their socks are on their ears."],
+      "who": "vote",
+      "choices": [
+        { "label": "Charge into the hall!", "mood": "bold", "party": 1, "flags": ["charged_in"], "text": "Everyone marches in. Every mirror turns to stare.", "deed": { "text": "marched into the haunted hall", "tags": ["bold", "mirror"], "party": true } },
+        { "label": "Polish a mirror", "mood": "clever", "stars": 1, "flags": ["truth_lens"], "text": "{hero} rubs a mirror clean. Now it shows only the truth!", "deed": { "text": "polished a mirror until it told the truth", "tags": ["polish", "clever"] } }
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "id": "hm-funhouse-faces", "act": 1, "weight": 2, "title": "Funny Faces",
+      "text": ["Six reflections are pulling faces at the crowd.", "Nobody can tell which faces are the real ones."],
+      "callbacks": [{ "tags": ["clue"], "text": "{who} {deed}, so you know to watch for slow copycats." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Pull a sillier face", "mood": "silly", "party": 1, "text": "Everyone scrunches up their best silly face.",
+          "game": { "kinds": ["reaction", "rhythm"], "intro": "Copy the faces faster than the mirrors!", "lead": "winner",
+            "win": { "text": "{winner} pulls a face so silly a reflection laughs and pops back in.", "stars": 1, "flags": ["freed_1"], "deed": { "text": "out-sillied a reflection", "tags": ["silly", "mirror"] } },
+            "lose": { "text": "{loser}'s face gets stuck for a moment. Everyone giggles.", "deed": { "text": "got a funny face stuck for a minute", "tags": ["silly"] } } } },
+        { "label": "Spot the real ones", "mood": "clever", "stars": 1, "text": "{hero} squints. Real faces blink. Reflections forget to.",
+          "game": { "kinds": ["memory", "guess"], "intro": "Find the fakes!", "lead": "winner",
+            "win": { "text": "{winner} points out every fake. They sulk back into the glass.", "stars": 1, "flags": ["freed_1"], "deed": { "text": "spotted every fake face", "tags": ["clue", "clever"] } },
+            "lose": { "text": "{loser} points at their own reflection. It points back.", "deed": { "text": "pointed at their own reflection", "tags": ["silly", "mirror"] } } } }
+      ]
+    },
+    {
+      "id": "hm-wobbly-room", "act": 1, "weight": 2, "title": "The Wobbly Room",
+      "text": ["In the Wobbly Room, every mirror makes you tall or wide.", "A stretchy reflection is bouncing off the walls!"],
+      "who": "active",
+      "choices": [
+        { "label": "Bounce after it", "mood": "bold", "stars": 1, "text": "{hero} boings off the springy floor.",
+          "game": { "kinds": ["dodge", "race"], "intro": "Bounce through the wobbly mirrors!", "lead": "winner",
+            "win": { "text": "{winner} catches the stretchy one mid-boing and pops it home.", "stars": 1, "flags": ["freed_1"], "deed": { "text": "caught a stretchy reflection mid-bounce", "tags": ["bold", "mirror"] } },
+            "lose": { "text": "{loser} looks three metres tall for a while. Nice view!", "deed": { "text": "was stretched three metres tall", "tags": ["silly", "mirror"] } } } },
+        { "label": "Tilt the mirrors", "mood": "clever", "stars": 1, "text": "{hero} turns the mirrors so they all face one corner.",
+          "game": { "kinds": ["logic", "aim"], "intro": "Bounce the light into the corner!", "lead": "winner",
+            "win": { "text": "{winner} traps it in a beam of light. It sighs and steps back in.", "stars": 1, "flags": ["freed_1", "light_trick"], "deed": { "text": "trapped a reflection with a beam of light", "tags": ["light", "clever"] } },
+            "lose": { "text": "{loser} shines the light right into their own eyes. Sparkly!", "deed": { "text": "dazzled themselves with a mirror", "tags": ["silly", "light"] } } } }
+      ]
+    },
+    {
+      "id": "hm-glass-garden", "act": 1, "weight": 1, "title": "The Glass Garden",
+      "text": ["Glass flowers chime in {place}.", "A reflection is picking them all for {villain}."],
+      "who": "vote",
+      "choices": [
+        { "label": "Catch it red-handed", "mood": "bold", "party": 1, "text": "Everyone tiptoes in a line through the chiming flowers.",
+          "game": { "kinds": ["dodge", "reaction"], "intro": "Do not make a single chime!", "lead": "winner",
+            "win": { "text": "{winner} taps it on the shoulder. Caught! Back in the mirror it goes.", "stars": 1, "flags": ["freed_1"], "deed": { "text": "crept through the glass garden", "tags": ["sneaky", "mirror"] } },
+            "lose": { "text": "{loser} sneezes. Every flower rings like a bell.", "deed": { "text": "sneezed in the glass garden", "tags": ["silly"] } } } },
+        { "label": "Plant them back", "mood": "kind", "stars": 1, "text": "{hero} kneels down and starts replanting the flowers.",
+          "game": { "kinds": ["collect", "create"], "intro": "Put the flowers back in bloom!", "lead": "winner",
+            "win": { "text": "{winner} plants the last flower. The reflection is so touched it goes home.", "stars": 1, "flags": ["freed_1", "garden_saved"], "deed": { "text": "replanted the glass garden", "tags": ["kind", "garden"] } },
+            "lose": { "text": "{loser} plants a flower upside down. It chimes a little tune anyway.", "deed": { "text": "planted a glass flower upside down", "tags": ["silly", "garden"] } } } }
+      ]
+    },
+    {
+      "id": "hm-twin-trouble", "act": 2, "weight": 2, "title": "Double Trouble",
+      "text": ["A second {hero} walks out of a mirror, grinning.", "Now there are two. Which one is real?"],
+      "callbacks": [{ "tags": ["polish"], "text": "{who} {deed}. That mirror is about to help." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Ask a tricky question", "mood": "clever", "stars": 1, "text": "\"What did you have for breakfast?\" Both say \"toast\".",
+          "game": { "kinds": ["bluff", "guess"], "intro": "Find out which one is fibbing!", "lead": "winner",
+            "win": { "text": "{winner} asks about socks. The fake one has no idea. Back you go!", "stars": 2, "flags": ["freed_2", "twin_caught"], "deed": { "text": "unmasked a sneaky twin", "tags": ["twin", "clever"] } },
+            "lose": { "text": "{loser} asks the real one by mistake. Very awkward hug.", "deed": { "text": "hugged the wrong twin", "tags": ["silly", "twin"] } } } },
+        { "label": "Race them both", "mood": "bold", "party": 1, "text": "Reflections run backwards. That is the trick!",
+          "game": { "kinds": ["race"], "intro": "Race the twins!", "lead": "winner",
+            "win": { "text": "{winner} spots the one running backwards and tags it out.", "stars": 2, "flags": ["freed_2", "twin_caught"], "deed": { "text": "outran a backwards twin", "tags": ["twin", "chase", "bold"] } },
+            "lose": { "text": "{loser} tries running backwards too and bumps into a bin.", "deed": { "text": "ran backwards into a bin", "tags": ["silly"] } } } },
+        { "label": "Hold up the true mirror", "mood": "clever", "requires": ["truth_lens"], "stars": 1, "text": "{hero} holds up the polished mirror. One twin has no reflection!",
+          "game": { "kinds": ["reaction", "aim"], "intro": "Flash the true mirror at the fake!", "lead": "winner",
+            "win": { "text": "{winner} flashes the mirror. The fake twin squeaks and vanishes home.", "stars": 2, "flags": ["freed_2", "twin_caught"], "deed": { "text": "showed a fake twin the truth", "tags": ["twin", "polish"] } },
+            "lose": { "text": "{loser} flashes the mirror at a passing goose. It honks.", "deed": { "text": "dazzled a goose", "tags": ["silly", "animal"] } } } }
+      ]
+    },
+    {
+      "id": "hm-candle-maze", "act": 2, "weight": 2, "title": "The Candle Maze",
+      "text": ["A maze of mirrors, lit by one little candle.", "A hundred candles flicker back. Which way is out?"],
+      "callbacks": [{ "tags": ["light"], "text": "{who} {deed}, so this maze holds no fear." }],
+      "who": "active",
+      "choices": [
+        { "label": "Follow the real flame", "mood": "clever", "stars": 1, "text": "{hero} holds the candle up high.",
+          "game": { "kinds": ["memory", "logic"], "intro": "Find the path out!", "lead": "winner",
+            "win": { "text": "{winner} finds the way out, and a reflection hiding in a dead end.", "stars": 2, "flags": ["freed_2", "maze_map"], "deed": { "text": "found the way through the candle maze", "tags": ["maze", "light", "clever"] } },
+            "lose": { "text": "{loser} walks into a mirror and says sorry to it.", "deed": { "text": "said sorry to a mirror", "tags": ["silly", "kind"] } } } },
+        { "label": "Feel along the walls", "mood": "bold", "party": 1, "text": "Everyone holds hands and shuffles forward in a line.",
+          "game": { "kinds": ["dodge", "collect"], "intro": "Gather the dropped candles!", "lead": "winner",
+            "win": { "text": "{winner} gathers the most candles. Suddenly the maze is bright!", "stars": 2, "flags": ["freed_2", "lamp_lit"], "deed": { "text": "lit up the whole candle maze", "tags": ["light", "bold"] } },
+            "lose": { "text": "{loser} grabs a candle that turns out to be a carrot.", "deed": { "text": "tried to light a carrot", "tags": ["silly", "food"] } } } }
+      ]
+    },
+    {
+      "id": "hm-parade", "act": 2, "weight": 1, "title": "The Reflection Parade",
+      "text": ["A parade of reflections dances down the midway.", "They are copying everyone's dance moves. Badly."],
+      "who": "vote",
+      "choices": [
+        { "label": "Out-dance them!", "mood": "silly", "party": 1, "text": "Everyone starts a wild wiggle.",
+          "game": { "kinds": ["rhythm"], "intro": "Keep the beat!", "lead": "winner",
+            "win": { "text": "{winner}'s moves are too fancy to copy. Three reflections give up and go home.", "stars": 2, "flags": ["freed_2"], "deed": { "text": "won the dance-off with the reflections", "tags": ["dance", "silly"] } },
+            "lose": { "text": "{loser} invents a brand-new dance called The Flop.", "deed": { "text": "invented a dance called The Flop", "tags": ["dance", "silly"] } } } },
+        { "label": "Lead them home", "mood": "kind", "stars": 1, "text": "{hero} starts a conga line toward the mirror hall.",
+          "game": { "kinds": ["race", "collect"], "intro": "Lead the conga line home!", "lead": "winner",
+            "win": { "text": "{winner} conga-dances every reflection back into its frame.", "stars": 2, "flags": ["freed_2"], "deed": { "text": "led a conga line of reflections home", "tags": ["dance", "kind"] } },
+            "lose": { "text": "{loser} ends up at the back of the conga, facing the wrong way.", "deed": { "text": "led the conga backwards", "tags": ["silly", "dance"] } } } }
+      ]
+    },
+    {
+      "id": "hm-whisper-glass", "act": 2, "weight": 1, "not": ["twin_caught"], "title": "The Whispering Glass",
+      "text": ["A tall mirror whispers secrets about {villain}.", "\"I know where the Marquis keeps the key...\""],
+      "who": "active",
+      "choices": [
+        { "label": "Answer its riddle", "mood": "clever", "stars": 1, "text": "\"What has a face but never smiles?\" {hero} thinks hard.",
+          "game": { "kinds": ["words", "logic"], "intro": "Solve the mirror's riddles!", "lead": "winner",
+            "win": { "text": "{winner} answers: a clock! The mirror hands over a tiny glass key.", "stars": 2, "flags": ["glass_key"], "deed": { "text": "solved the whispering mirror's riddle", "tags": ["key", "clever"] } },
+            "lose": { "text": "{loser} answers \"a potato\". The mirror laughs for a full minute.", "deed": { "text": "made a mirror laugh with a potato", "tags": ["silly", "food"] } } } },
+        { "label": "Tell it a secret back", "mood": "kind", "party": 1, "text": "Everyone leans in and whispers their best secret.",
+          "game": { "kinds": ["bluff", "guess"], "intro": "Whose secret is real?", "lead": "winner",
+            "win": { "text": "{winner}'s secret is so lovely the mirror gives up the glass key.", "stars": 2, "flags": ["glass_key"], "deed": { "text": "swapped secrets with a magic mirror", "tags": ["key", "kind"] } },
+            "lose": { "text": "{loser} admits they still sleep with a teddy. The mirror says \"aww\".", "deed": { "text": "told a mirror about their teddy", "tags": ["silly", "kind"] } } } }
+      ]
+    },
+    {
+      "id": "hm-portrait-gallery", "act": 3, "weight": 2, "title": "The Portrait Gallery",
+      "text": ["Painted portraits of {villain} line the walls.", "Their eyes follow you. One portrait winks."],
+      "callbacks": [{ "tags": ["twin"], "text": "{who} {deed}. These painted eyes do not scare you." }],
+      "extra": [{ "requires": ["glass_key"], "text": "The tiny glass key fits a frame. It swings open!" }],
+      "who": "vote",
+      "choices": [
+        { "label": "Paint some moustaches", "mood": "silly", "party": 1, "text": "Everyone grabs a paintbrush. Hee hee.",
+          "game": { "kinds": ["create", "race"], "intro": "Give the portraits silly faces!", "lead": "winner",
+            "win": { "text": "{winner}'s curly moustache is the best. The portrait giggles and drops a clue.", "stars": 2, "flags": ["portrait_clue"], "deed": { "text": "painted a curly moustache on {villain}", "tags": ["paint", "silly"] } },
+            "lose": { "text": "{loser} paints a moustache on their own face instead.", "deed": { "text": "painted their own moustache", "tags": ["silly", "paint"] } } } },
+        { "label": "Find the odd one out", "mood": "clever", "stars": 1, "text": "{hero} walks the gallery slowly, looking at every frame.",
+          "game": { "kinds": ["memory", "guess"], "intro": "Spot what changed!", "lead": "winner",
+            "win": { "text": "{winner} spots the portrait that moved. Behind it: a secret door!", "stars": 2, "flags": ["portrait_clue", "secret_door"], "deed": { "text": "found the secret door in the gallery", "tags": ["clue", "clever"] } },
+            "lose": { "text": "{loser} stares at a portrait so long it looks away first.", "deed": { "text": "won a staring contest with a painting", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "hm-shard-bridge", "act": 3, "weight": 2, "title": "The Shiny Bridge",
+      "text": ["A bridge of mirror tiles stretches over a ball pit.", "Some tiles are only reflections of tiles."],
+      "callbacks": [{ "tags": ["maze", "light"], "text": "Since {who} {deed}, you can tell real tiles from fake." }],
+      "who": "active",
+      "choices": [
+        { "label": "Hop across", "mood": "bold", "stars": 1, "text": "{hero} takes a big breath and hops onto the first tile.",
+          "game": { "kinds": ["dodge", "memory"], "intro": "Only step on the real tiles!", "lead": "winner",
+            "win": { "text": "{winner} hops across without a single plop.", "stars": 2, "flags": ["bridge_crossed"], "deed": { "text": "hopped across the mirror bridge", "tags": ["bold", "bridge"] } },
+            "lose": { "text": "{loser} plops into the ball pit and comes up wearing balls like a hat.", "deed": { "text": "swam in the ball pit by mistake", "tags": ["silly", "bridge"] } } } },
+        { "label": "Roll a marble first", "mood": "clever", "stars": 1, "text": "{hero} rolls a marble. It drops through the fake tiles!",
+          "game": { "kinds": ["aim", "logic"], "intro": "Test the tiles with marbles!", "lead": "winner",
+            "win": { "text": "{winner} maps every safe tile. Everyone strolls across.", "stars": 2, "flags": ["bridge_crossed"], "deed": { "text": "tested the bridge with marbles", "tags": ["clever", "bridge"] } },
+            "lose": { "text": "{loser} rolls a marble into {ally}'s pocket.", "deed": { "text": "lost a marble in {ally}'s pocket", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "hm-ballroom", "act": 3, "weight": 1, "title": "The Mirror Ballroom",
+      "text": ["A giant mirror ball spins over an empty ballroom.", "Every sparkle is a tiny reflection, waltzing."],
+      "callbacks": [{ "tags": ["dance"], "text": "{who} {deed}. The sparkles want to dance with you!" }],
+      "extra": [{ "requires": ["garden_saved"], "text": "A glass flower in your pocket chimes: they like you." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Join the waltz", "mood": "kind", "party": 1, "text": "Everyone bows and takes a sparkle by the hand.",
+          "game": { "kinds": ["rhythm"], "intro": "Waltz in time!", "lead": "winner",
+            "win": { "text": "{winner} waltzes so well the sparkles float home happy.", "stars": 2, "flags": ["ballroom_won"], "deed": { "text": "waltzed with the mirror sparkles", "tags": ["dance", "kind"] } },
+            "lose": { "text": "{loser} steps on a sparkle's toes. It says it is fine.", "deed": { "text": "stepped on a sparkle's toes", "tags": ["silly", "dance"] } } } },
+        { "label": "Stop the mirror ball", "mood": "bold", "stars": 1, "text": "{hero} reaches for the rope that spins the ball.",
+          "game": { "kinds": ["reaction", "brawl"], "intro": "Grab the rope and pull!", "lead": "winner",
+            "win": { "text": "{winner} stops the ball. Every sparkle zips home in one big flash.", "stars": 2, "flags": ["ballroom_won"], "deed": { "text": "stopped the giant mirror ball", "tags": ["bold", "light"] } },
+            "lose": { "text": "{loser} spins round with the ball and gets very dizzy.", "deed": { "text": "spun around under the mirror ball", "tags": ["silly"] } } } }
+      ]
+    }
+  ],
+  "interludes": [
+    {
+      "id": "hm-int-shard", "weight": 2, "title": "A Sparkly Shard",
+      "text": ["A tiny mirror shard twinkles on the floor.", "It shows a sunny day, even though it is night."],
+      "who": "active",
+      "choices": [
+        { "label": "Keep it for luck", "mood": "bold", "stars": 2, "flags": ["sunny_shard"], "text": "{hero} tucks the shard away. It feels warm, like sunshine.", "deed": { "text": "found a shard full of sunshine", "tags": ["lucky", "light"] } },
+        { "label": "Give it away", "mood": "kind", "party": 1, "text": "{ally} beams. \"This will fix my favourite mirror!\"", "deed": { "text": "gave a sunny shard to {ally}", "tags": ["kind", "ally"] } }
+      ]
+    },
+    {
+      "id": "hm-int-own", "weight": 1, "title": "A Friendly Reflection",
+      "text": { "any": [["{hero}'s own reflection taps the glass.", "\"I did not run away! Can I help?\""], ["A small shy reflection peeks out of a spoon.", "It waves at {hero} hopefully."]] },
+      "who": "vote",
+      "choices": [
+        { "label": "Welcome aboard!", "mood": "kind", "party": 1, "flags": ["mirror_friend"], "text": "The reflection joins the party, copying everyone's smiles.", "deed": { "text": "made friends with a kind reflection", "tags": ["kind", "mirror"], "party": true } },
+        { "label": "Play copy-cat", "mood": "silly", "stars": 1, "text": "{hero} hops on one leg. The reflection hops too. Best game ever.", "deed": { "text": "played copy-cat with a reflection", "tags": ["silly", "mirror"] } }
+      ]
+    }
+  ],
+  "climax": [
+    {
+      "id": "hm-climax-marquis", "weight": 2, "title": "The Marquis Steps Out",
+      "text": ["{villain} steps out of the biggest mirror of all.", "\"Everyone should look like ME! Starting now!\""],
+      "callbacks": [{ "tags": ["clue", "twin", "key"], "text": "{who} {deed}. No trick can fool you now." }],
+      "extra": [{ "requires": ["mirror_friend"], "text": "Your friendly reflection stands right beside you." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Face it together", "mood": "bold", "party": 1, "text": "Everyone stands shoulder to shoulder. No more swapping!",
+          "game": { "kinds": ["boss"], "coop": true, "intro": "Beat {villain} together!",
+            "win": { "text": ["{villain} trips on a cape and tumbles into the glass!", "{prize} is yours!"], "stars": 3, "flags": ["won"], "deed": { "text": "sent {villain} back into the mirror", "tags": ["boss", "team"] } },
+            "lose": { "text": "{villain} slips away through a mirror, still admiring that hair.", "stars": 1, "deed": { "text": "faced {villain} in the hall", "tags": ["boss", "team"] } } } },
+        { "label": "Challenge to a pose-off", "mood": "silly", "stars": 1, "text": "{hero} strikes a pose. {villain} cannot resist a contest.",
+          "game": { "kinds": ["boss", "reaction"], "intro": "Strike the grandest pose!",
+            "win": { "text": "{winner}'s pose is so grand {villain} faints, and drops {prize}.", "stars": 3, "flags": ["won"], "deed": { "text": "out-posed {villain}", "tags": ["boss", "silly"] } },
+            "lose": { "text": "{loser} poses like a teapot. It is honestly quite good.", "deed": { "text": "posed like a teapot", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "hm-climax-hand-mirror", "weight": 1, "title": "The Last Reflection",
+      "text": ["{villain} holds up {prize} and laughs.", "\"One look in this, and you will all be MY reflections!\""],
+      "callbacks": [{ "tags": ["polish", "light"], "text": "{who} {deed}. Light and truth are on your side." }],
+      "extra": [{ "requires": ["secret_door"], "text": "You sneak in through the secret door. Surprise!" }],
+      "who": "active",
+      "choices": [
+        { "label": "Bounce the light back", "mood": "clever", "party": 1, "text": "Everyone grabs a mirror and aims it at {villain}.",
+          "game": { "kinds": ["boss", "aim"], "coop": true, "intro": "Turn the mirror magic back!",
+            "win": { "text": ["The magic bounces back! {villain} turns into a statue.", "{prize} is safe!"], "stars": 3, "flags": ["won"], "deed": { "text": "bounced the mirror magic back", "tags": ["boss", "team", "light"] } },
+            "lose": { "text": "Too slow! {villain} vanishes in a puff of glitter.", "stars": 1, "deed": { "text": "nearly bounced the magic back", "tags": ["boss", "team"] } } } },
+        { "label": "Grab the mirror!", "mood": "bold", "stars": 1, "text": "{hero} shuts both eyes tight and dives for {prize}.",
+          "game": { "kinds": ["boss", "race"], "intro": "Snatch {prize}!",
+            "win": { "text": "{winner} snatches {prize}! Every reflection zips home at once.", "stars": 3, "flags": ["won"], "deed": { "text": "snatched {prize} from {villain}", "tags": ["boss", "bold"] } },
+            "lose": { "text": "{loser} grabs a hairbrush instead. Still, very shiny.", "deed": { "text": "grabbed a hairbrush by mistake", "tags": ["silly"] } } } }
+      ]
+    }
+  ],
+  "epilogue": {
+    "win": { "any": [["Every reflection is back where it belongs.", "{villain} now polishes mirrors and smiles at other people."], ["The hall of mirrors shines like new.", "And everyone's socks are back on their feet."]] },
+    "lose": { "any": [["Most reflections are home, but {villain} kept {prize}.", "Wave at a mirror. If it waves late... watch out!"], ["{villain} got away into the glass this time.", "But the fair is the right way round again!"]] },
+    "lines": [
+      { "requires": ["sunny_shard"], "text": "The sunny shard lights the mirror hall every night now." },
+      { "requires": ["garden_saved"], "text": "The glass garden chimes a thank-you song." },
+      { "requires": ["mirror_friend"], "text": "Your friendly reflection still waves on time." }
+    ]
+  }
+}

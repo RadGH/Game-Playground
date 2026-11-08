@@ -7,6 +7,7 @@
 import { esc, chip } from '../../client/gamehud.js';
 import { avatarOf } from '../../client/avatars.js';
 import { canvasTexture } from '../../client/stage.js';
+import { snowfall } from '../../client/winter.js';
 import { renderSVG } from '../../../../../avatar-2d/js/render.js';
 import { SLOTS, PIECES, COLOURS, TAGS, POSES, RACES, dressedAvatar, worn, themeFit, colourMatch, soloScore } from './pieces.js';
 
@@ -103,13 +104,14 @@ export function createView(ctx) {
   // ---------------------------------------------------------------- the 3D runway
   const G = ctx.group;
   const mat = c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 });
-  const floor = new THREE.Mesh(new THREE.BoxGeometry(14, 0.2, 14), mat('#2a1f3a')); floor.position.set(0, -0.1, -1.5); G.add(floor);
+  const WN = ctx.season === 'winter';             // Winter Fair (M6): a snowy stage, a red-and-white curtain, coloured lights, snowfall (looks only)
+  const floor = new THREE.Mesh(new THREE.BoxGeometry(14, 0.2, 14), mat(WN ? '#dfeaf6' : '#2a1f3a')); floor.position.set(0, -0.1, -1.5); G.add(floor);
   const back = new THREE.Mesh(new THREE.BoxGeometry(7.4, 0.4, 2.4), mat('#f2e6d0')); back.position.set(0, 0.2, -4.6); G.add(back);
   const walkway = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.4, 7.2), mat('#f7efe0')); walkway.position.set(0, 0.2, -1.2); G.add(walkway);
   const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.02, 7.2), new THREE.MeshStandardMaterial({ color: '#d0304a', roughness: 0.8 })); stripe.position.set(0, 0.41, -1.2); G.add(stripe);
   const curtainTex = canvasTexture(256, 128, (c, w, h) => {
     const g = c.createLinearGradient(0, 0, w, 0);
-    const [c1, c2] = CURTAIN[theme.likes[0]] || CURTAIN.fancy;
+    const [c1, c2] = WN ? ['#c8221c', '#f4f4f4'] : CURTAIN[theme.likes[0]] || CURTAIN.fancy;
     for (let i = 0; i <= 16; i++) g.addColorStop(i / 16, i % 2 ? c1 : c2);
     c.fillStyle = g; c.fillRect(0, 0, w, h); c.fillStyle = '#f2c033'; c.fillRect(0, 0, w, 10);
   });
@@ -120,6 +122,8 @@ export function createView(ctx) {
   for (let x = -3.6; x <= 3.61; x += 0.6) if (Math.abs(x) > 1) bulbAt.push([x, -3.35]);
   const bulbs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.06, 8, 6), new THREE.MeshBasicMaterial({ color: '#ffe48a' }), bulbAt.length);
   const M4 = new THREE.Matrix4(); bulbAt.forEach(([x, z], i) => bulbs.setMatrixAt(i, M4.makeTranslation(x, 0.45, z))); G.add(bulbs);
+  if (WN) { bulbs.material.color.set('#ffffff'); const bc = new THREE.Color(); bulbAt.forEach((_, i) => bulbs.setColorAt(i, bc.set(['#ff4a4a', '#4aff7a', '#4ab0ff', '#ffd23f'][i % 4]))); }
+  const flakes = WN ? snowfall(THREE, 90, 4.5, 4.5, 5) : null; if (flakes) { flakes.mesh.position.z = -1.5; G.add(flakes.mesh); }
   // a fake spotlight (a soft cone and a bright floor disc) that follows whoever is walking; never a real light toggled
   const cone = new THREE.Mesh(new THREE.ConeGeometry(0.85, 4.4, 24, 1, true), new THREE.MeshBasicMaterial({ color: '#fff3c0', transparent: true, opacity: 0.13, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
   const spot = new THREE.Mesh(new THREE.CircleGeometry(0.8, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#fff6d0', transparent: true, opacity: 0.45, depthWrite: false }));
@@ -226,6 +230,7 @@ export function createView(ctx) {
     },
     frame(dt) {
       const now = performance.now() / 1000;
+      flakes?.frame(now, ctx.stage.camera.quaternion);
       let lit = null;
       models.forEach((a, i) => {
         if (!a) return;

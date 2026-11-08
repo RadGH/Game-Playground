@@ -6,7 +6,7 @@ export const h = (tag, cls = '', html = '') => { const e = document.createElemen
 export const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 export function chip(p, extra = '') {
-  return `<span class="chip" data-pid="${p.pid}" data-shape="${p.shape}" style="--seat:${p.color};--seat-dark:${p.dark}"><i class="face">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i><b class="nm">${esc(p.name)}</b>${extra}</span>`;
+  return `<span class="chip${p.cpu ? ' cpu' : ''}" data-pid="${p.pid}" data-shape="${p.shape}" style="--seat:${p.color};--seat-dark:${p.dark}"><i class="face">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>${p.cpu ? '<em class="cpu-tag" title="Computer player">CPU</em>' : ''}<b class="nm">${esc(p.name)}</b>${extra}</span>`;
 }
 export function scoreBar(ctx, { unit = '', clock = true } = {}) {
   const el = h('div', 'scorebar');

@@ -105,6 +105,10 @@ export function createHub({ now = () => Date.now(), data, profiles, build = 'dev
           return;
         }
         case 'buy': { const r = profiles.buy(S.profile.token, msg.id); if (!r.ok) send({ t: 'err', code: 'buy', msg: r.msg }); return send(me()); }
+        case 'plate': {                                   // Expansion 1 M7: a Fair Pass name-plate colour (the room redraws the chip)
+          if (profiles.setPlate?.(S.profile.token, msg.id) && owns()) S.room.message(S.member, { t: 'profile' });
+          return send(me());
+        }
         case 'equip': {
           if (profiles.equip(S.profile.token, msg.id) && owns()) S.room.message(S.member, { t: 'profile', costume: S.profile.costume });
           return send(me());

@@ -3,7 +3,8 @@
 // striped awning and a curtain, and hay stacks. A hider in a spot is not drawn at all (on every screen, yours too —
 // your spot wears a "🙈 You" tag instead); a hider PEEKING is drawn standing in it, so their head pops out over the
 // top, with a "!" over it. The seeker carries a lantern and a soft yellow fan of light on the ground shows the beam.
-// While the seeker counts, their own screen goes dark ("Eyes shut!"). Halloween: pumpkin barrels, purple stalls,
+// While the seeker counts, their own screen goes dark ("Eyes shut!"). Nobody's spot is in the public state (only WHO
+// is hidden); your own spot comes in your private state. Halloween: pumpkin barrels, purple stalls,
 // a green lantern glow (the arena dressing adds the bats and ghosts).
 import { scoreBar, floatText, h } from '../../client/gamehud.js';
 import { createJuice } from '../../client/juice.js';
@@ -79,23 +80,24 @@ export function createView(ctx) {
   const juice = createJuice(ctx);
   const myTag = stage.tag(spotMeshes[0] || group, { text: '🙈 You', height: 1.6, cls: 'hs-me', declutter: false }); myTag.el.style.visibility = 'hidden';
   const peekTags = new Map();
-  let G = null, lastSeeker = undefined;
+  let G = null, lastSeeker = undefined, mySpot = -1;          // my own spot comes in my private state (nobody else's is sent)
   function say(text, cls = '', ms = 1500) { juice.say(text, ms, cls); }
   function myLine(g) {
-    if (me == null) return g.ph === 'hide' ? 'The hiders are hiding…' : g.ph === 'seek' ? (g.sk != null ? `${nameOf(g.sk)} is seeking!` : 'Lamplighter Lou is seeking!') : 'Round over';
+    if (me == null) return g.ph === 'hide' ? 'The hiders are hiding…' : g.ph === 'seek' ? (g.sk != null ? `${nameOf(g.sk)} is seeking!` : g.np ? 'Lamplighter Lou is seeking!' : 'Peek out for points!') : 'Round over';
     const seeking = g.sk === me;
     if (g.ph === 'reveal') return 'Round over!';
     if (seeking) return g.ph === 'hide' ? 'You are the SEEKER — eyes shut…' : '🏮 SEEK! Lantern finds anyone in the open · A = look inside';
     if (g.fd.includes(me)) return 'Found! Watch the others…';
-    if (g.hd[me] != null) return g.pk.includes(me) ? '👀 Peeking… duck back down!' : g.ph === 'hide' ? 'Hidden! Stay still…' : 'Hidden · B = peek for +1';
+    if (g.hid.includes(me)) return g.pk.includes(me) ? '👀 Peeking… duck back down!' : g.ph === 'hide' ? 'Hidden! Stay still…' : 'Hidden · B = peek for +1';
     return g.ph === 'hide' ? `HIDE! Run to a barrel or crate · A = climb in (${g.left})` : 'You are in the open! Hide (A at a spot)';
   }
   return {
     halloween: { y: 0, mist: true, spots: [[-W - 1.6, 0, -D + 1.2], [W + 1.6, 0, -D + 1.2], [-W - 1.6, 0, D - 1.2], [W + 1.6, 0, D - 1.2]] },
+    priv(d) { mySpot = d?.spot ?? -1; },
     state(g) {
       G = g; bar.set(g.sc, g.ph === 'hide' ? null : g.left);
       const line = myLine(g); if (pill.textContent !== line) pill.textContent = line;
-      pill.className = 'hs-pill ' + (g.sk === me ? 'seek' : g.hd[me] != null ? 'hid' : g.fd.includes(me) ? 'found' : 'open');
+      pill.className = 'hs-pill ' + (g.sk === me ? 'seek' : g.hid.includes(me) ? 'hid' : g.fd.includes(me) ? 'found' : 'open');
       shut.classList.toggle('on', g.ph === 'hide' && g.sk === me && me != null);
       shut.querySelector('em').textContent = g.ph === 'hide' ? g.left : '';
       if (g.sk !== lastSeeker) {
@@ -114,7 +116,7 @@ export function createView(ctx) {
       } else if (npcs.size) { for (const N of npcs.values()) { N.tag?.remove(); N.a?.dispose(); } npcs.clear(); }
     },
     event(ev) {
-      if (ev.e === 'round') { say(ev.npc ? `Round ${ev.r}: hide from Lamplighter Lou!` : ev.seeker === me ? `Round ${ev.r}: YOU seek!` : `Round ${ev.r}: ${nameOf(ev.seeker)} seeks — HIDE!`, ev.seeker === me ? 'good' : '', 2000); ctx.sfx('pick'); }
+      if (ev.e === 'round') { say(ev.npc ? `Round ${ev.r}: hide from Lamplighter Lou!` : ev.seeker == null ? 'Hide, then peek out for points!' : ev.seeker === me ? `Round ${ev.r}: YOU seek!` : `Round ${ev.r}: ${nameOf(ev.seeker)} seeks — HIDE!`, ev.seeker === me ? 'good' : '', 2000); ctx.sfx('pick'); }
       else if (ev.e === 'seek') { say(ev.seeker === me ? 'Ready or not… GO!' : 'Here they come!', '', 1300); ctx.sfx('trap'); }
       else if (ev.e === 'in') { if (ev.pid === me) ctx.sfx('pick'); }
       else if (ev.e === 'nospot') { if (ev.pid === me) { ctx.sfx('bad'); say('Get right next to a spot', 'bad', 1000); } }
@@ -146,9 +148,9 @@ export function createView(ctx) {
       let mine = -1;
       for (const p of ctx.players) {
         const a = ctx.actor(p.pid); if (!a) continue;
-        const spot = G.hd[p.pid], peeking = G.pk.includes(p.pid);
-        if (spot != null && !peeking) a.group.visible = false;
-        if (spot != null && p.pid === me) mine = spot;
+        const hidden = G.hid.includes(p.pid), peeking = G.pk.includes(p.pid);
+        if (hidden && !peeking) a.group.visible = false;
+        if (hidden && p.pid === me && mySpot >= 0) mine = mySpot;
         let tg = peekTags.get(p.pid);
         if (peeking && !tg) { tg = stage.tag(a.group, { text: '!', height: 2.15, cls: 'hs-peek' }); peekTags.set(p.pid, tg); }
         if (!peeking && tg) { tg.remove(); peekTags.delete(p.pid); }
@@ -160,7 +162,7 @@ export function createView(ctx) {
         const dx = N.tx - N.x, dz = N.tz - N.z, d = Math.hypot(dx, dz);
         if (d > 3) { N.x = N.tx; N.z = N.tz; } else { const k = Math.min(1, dt * 10); N.x += dx * k; N.z += dz * k; }
         N.a.place(N.x, 0, N.z, N.yaw); N.a.setSpeed(d > 0.05 ? 4 : 0);
-        N.a.group.visible = !(N.spot >= 0 && !N.peek);
+        N.a.group.visible = !(N.spot !== -1 && !N.peek);        // -2 = hidden (no place is sent)
         N.a.setPose(N.found ? 'sitGround' : N.role === 0 && G.ph === 'hide' ? 'pray' : 'idle');
         N.a.update(dt);
       }

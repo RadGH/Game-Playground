@@ -13,7 +13,7 @@ export { ITEMS };
 export const meta = {
   id: 'auction-of-chaos', title: 'Auction of Chaos', blurb: 'Bid on wonderful curios… each one hides a twist!',
   how: ['15 chips for the whole auction. Bid in secret on six curios.', 'Highest bid wins the lot and pays. Chips left over are worth nothing.', 'Every curio hides a twist: read the clue!', 'At the end the twists are revealed. Biggest haul wins.'],
-  kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'points', tags: ['chance', 'social'], card: 'card-auction-of-chaos', css: true,
+  kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'points', tags: ['chance', 'social'], card: 'card-auction-of-chaos', css: true, rival: true,
 };
 export const CHIPS = 15, LOTS = 6, START_S = 2, BID_S = 5.5, SOLD_S = 2.2, FINALE_S = 6.5, END_S = 1.5;
 export const CPU = 'cpu', CPU_NAME = 'Baron Bidwell';
@@ -93,8 +93,9 @@ export function cpuBid(rng, item, chips, lotsLeft, difficulty = 'normal') {
   return Math.max(0, Math.min(chips, Math.round(want)));
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
-  const pids = players.map(p => p.pid), solo = pids.length === 1, ids = solo ? [...pids, CPU] : pids;
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
+  // solo = alone WITH Baron Bidwell; "Rival when alone" off (rivals false) = you bid by yourself for the best haul
+  const pids = players.map(p => p.pid), solo = pids.length === 1 && rivals !== false, ids = solo ? [...pids, CPU] : pids;
   const lots = pickLots(rng);
   const chips = Object.fromEntries(ids.map(k => [k, CHIPS])), hauls = Object.fromEntries(ids.map(k => [k, []]));
   let phase = 'ready', lot = -1, left = START_S, over = false, bids = {}, locked = new Set(), sold = null, final = null;

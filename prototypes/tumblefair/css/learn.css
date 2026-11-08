@@ -1,0 +1,93 @@
+/* Learn by doing (Expansion 1 M3): the intro card's goal + controls lines, the practice bar and hints
+   (js/client/learn.js), and the comfort settings (js/client/comfort.js: body.big-text, body.calm). Phone first. */
+
+/* ---- the intro card: one goal line, one controls line with a picture of each control ---- */
+.intro-card .goal-line { margin: 0; font: 800 19px/1.25 var(--font); }
+.intro-card .ctl-line { margin: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 12px; background: var(--paper2); border-radius: 12px; padding: 8px 10px; font-size: 15px; font-weight: 700; }
+.ctl-seg { display: inline-flex; align-items: center; gap: 6px; text-align: left; }
+.ci { display: inline-grid; place-items: center; flex: none; font-style: normal; box-sizing: border-box; }
+.ci-stick { width: 34px; height: 34px; border-radius: 50%; background: rgba(8, 28, 34, .55); border: 2px solid #fff; box-shadow: 0 0 0 2px var(--ink); }
+.ci-stick b { width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, .35); }
+.ci-a, .ci-b { min-width: 34px; height: 34px; padding: 0 6px; border-radius: 999px; border: 3px solid var(--ink); color: var(--ink); font: 900 11px/1 var(--font); box-shadow: 0 2px 0 var(--ink); }
+.ci-a { background: var(--sun); } .ci-b { background: #fff; }
+.ci-a.long, .ci-b.long { font-size: 9px; }
+.ci-tap, .ci-drag, .ci-hold, .ci-type { width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); font-size: 17px; line-height: 1; }
+.ci-key { display: inline-block; padding: 3px 7px; border-radius: 6px; background: #fff; border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink); color: var(--ink); font: 800 12px/1.2 var(--font); }
+.intro-card .more-rules { width: 100%; text-align: left; }
+.intro-card .more-rules summary { cursor: pointer; font-weight: 800; text-align: center; min-height: 32px; line-height: 32px; color: #3a5a62; }
+.intro-card .more-rules .blurb { text-align: center; }
+.practice-row { display: flex; align-items: center; gap: 10px; background: #e3f8e6; border: 2px dashed var(--mint); border-radius: 12px; padding: 6px 8px; width: 100%; box-sizing: border-box; }
+.practice-row .btn { flex: none; }
+.practice-note { margin: 0; font-size: 14px; text-align: left; flex: 1; }
+
+/* While the card is open over a practice game it sits ABOVE the controls (they are live underneath: a keyboard or a pad
+   can already play, and "Try it" uncovers the stick and buttons), so nothing on the card is ever under the stick zone. */
+body.practicing:not(.practice-small) #screen.intro { z-index: 32; }
+
+/* ---- practising: the card steps aside to a slim bar at the top; the game below it is this phone's own copy ---- */
+#screen.intro.small { pointer-events: none; background: none; display: block; align-content: start; place-items: normal; padding: calc(var(--st) + 6px) calc(var(--sr) + 88px) 0 calc(var(--sl) + 8px); overflow: visible; }
+.practice-bar { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 16px; border-width: 3px; box-shadow: 0 4px 0 var(--ink); max-width: 520px; }
+.practice-bar .pb-text { flex: 1; min-width: 0; font-size: 13px; line-height: 1.2; }
+.practice-bar .pb-text b { color: #1d7a34; text-transform: uppercase; letter-spacing: .04em; }
+.practice-bar .pb-text small { display: block; color: #3a5a62; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.practice-bar .btn { min-height: 44px; padding: 6px 10px; font-size: 14px; flex: none; }
+body.practice-small #game-ui { top: calc(var(--st) + 90px); }        /* the practice game sits under the bar, never behind it */
+body.practicing #game-ui .game::after { content: 'PRACTICE'; position: absolute; left: 50%; bottom: calc(var(--sb) + 6px); transform: translateX(-50%); padding: 2px 10px; border-radius: 999px; background: rgba(29, 122, 52, .85); color: #fff; font: 900 11px/1.4 var(--font); letter-spacing: .12em; pointer-events: none; z-index: 40; }
+
+/* ---- hints: a ghost thumb on the stick, a ring on the button, a finger at the first thing to tap ---- */
+.learn-hints { position: fixed; inset: 0; z-index: 31; pointer-events: none; }
+.learn-hints .lh { position: absolute; display: none; }
+.learn-hints .lh.on { display: block; }
+.learn-hints .lh > span { position: absolute; left: 50%; bottom: 100%; transform: translate(var(--lx, -50%), var(--ly, -14px)); white-space: nowrap; max-width: 46vw; overflow: hidden; text-overflow: ellipsis; background: var(--paper); color: var(--ink); border: 3px solid var(--ink); border-radius: 12px; padding: 3px 9px; font: 800 13px/1.25 var(--font); box-shadow: 0 3px 0 var(--ink); }
+.lh-stick .lh-ghost { position: absolute; left: -24px; top: -24px; width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 255, 255, .75); box-shadow: 0 0 0 4px rgba(255, 210, 63, .9); animation: lh-orbit 2.2s ease-in-out infinite; }
+.lh-stick { --ly: -78px; }
+.learn-hints .lh.edge-l > span { left: -18px; --lx: 0px; } .learn-hints .lh.edge-r > span { left: auto; right: -18px; --lx: 0px; }   /* near a side: the label hangs inward, never off the screen */
+.lh-a .lh-ring, .lh-b .lh-ring { position: absolute; left: -62px; top: -62px; width: 124px; height: 124px; border-radius: 50%; border: 5px solid var(--sun); box-sizing: border-box; animation: lh-pulse 1.2s ease-out infinite; }
+.lh-b .lh-ring { left: -48px; top: -48px; width: 96px; height: 96px; border-color: #fff; }
+.lh-a { --ly: -72px; } .lh-b { --ly: -58px; }
+.lh-tap .lh-finger { position: absolute; left: -6px; top: 4px; font-size: 34px; font-style: normal; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .4)); animation: lh-bob .9s ease-in-out infinite; }
+.lh-tap { --ly: -10px; }
+.learn-hints .lh-light { position: absolute; left: 50%; top: 52%; display: none; }
+.learn-hints .lh-light.on { display: block; }
+.lh-dir { position: absolute; left: 0; top: 0; width: 90px; height: 26px; transform: translate(-50%, -50%); opacity: .3; background: linear-gradient(90deg, transparent 40%, var(--sun) 40%) ; clip-path: polygon(50% 30%, 78% 30%, 78% 0, 100% 50%, 78% 100%, 78% 70%, 50% 70%); }
+.lh-dir.on { opacity: 1; }
+.lh-btns { position: absolute; left: -40px; top: 34px; display: flex; gap: 8px; }
+.lh-btns b { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; border: 3px solid var(--ink); background: #fff; color: var(--ink); font: 900 14px/1 var(--font); opacity: .45; }
+.lh-btns.a .la { background: var(--sun); opacity: 1; transform: scale(1.15); } .lh-btns.b .lb { opacity: 1; transform: scale(1.15); }
+.key-hint.learn-pulse { box-shadow: 0 0 0 3px var(--sun); animation: lh-pulse-soft 1.2s ease-in-out infinite; }
+@keyframes lh-orbit { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(30px, -18px); } 50% { transform: translate(0, -32px); } 75% { transform: translate(-30px, -18px); } }
+@keyframes lh-pulse { 0% { transform: scale(.8); opacity: 1; } 100% { transform: scale(1.25); opacity: 0; } }
+@keyframes lh-pulse-soft { 50% { box-shadow: 0 0 0 6px rgba(255, 210, 63, .5); } }
+@keyframes lh-bob { 50% { transform: translateY(10px); } }
+
+/* ---- comfort sheet ---- */
+.comfort-sheet .panel { width: min(100%, 440px); display: grid; gap: 10px; }
+.comfort-sheet h2 { margin: 0; } .comfort-sheet .note { margin: 0; }
+.comfort-row { display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 6px 10px; border-radius: 14px; background: var(--paper2); cursor: pointer; }
+.comfort-row.static { cursor: default; }
+.comfort-row > span { flex: 1; display: grid; gap: 2px; text-align: left; } .comfort-row small { font-size: 13px; color: #3a5a62; }
+.comfort-row input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.comfort-row .switch { flex: none; width: 52px; height: 30px; border-radius: 999px; background: #c9bfa6; border: 3px solid var(--ink); position: relative; box-sizing: border-box; }
+.comfort-row .switch::after { content: ''; position: absolute; left: 2px; top: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); box-sizing: border-box; transition: left .15s; }
+.comfort-row input:checked + .switch { background: var(--mint); } .comfort-row input:checked + .switch::after { left: 24px; }
+.comfort-row input:focus-visible + .switch { outline: 3px solid var(--sky); outline-offset: 2px; }
+
+/* ---- Bigger text (body.big-text): the room's cards and sheets, chips, name tags and screen games' words ---- */
+body.big-text #screen > .panel, body.big-text #screen .panel, body.big-text .modal .panel { zoom: 1.14; }
+body.big-text #screen .shout { zoom: 1; }
+body.big-text #game-ui .game.kind-ui { zoom: 1.12; }
+body.big-text #game-ui .scorebar, body.big-text #hud > * { zoom: 1.12; }
+body.big-text .tag { font-size: 16px; } body.big-text .float-text { font-size: 1.25em; }
+body.big-text .key-hint { font-size: 15px; }
+body.big-text .ph-btn { font-size: 18px; } body.big-text .ph-a { font-size: 20px; }
+body.big-text .intro-card .goal-line { font-size: 22px; }
+
+/* ---- Less motion (body.calm): nothing bounces, flashes or drifts; the camera eases (stage.js) and juice.js skips shakes ---- */
+/* Only the room's own screens, sheets and pop-ups are stilled: inside a minigame an animation can BE the game (a
+   wobbling mirror, a timing bar), so there only the screen-wide flashes and confetti go. */
+:is(body.calm #screen, body.calm #hud, body.calm #toasts, body.calm .modal, body.calm .learn-hints, body.calm .qr-big) :is(*, *::before, *::after) { animation-duration: .01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+body.calm .ck-flash, body.calm .pb-flash, body.calm .dt-confetti, body.calm .banner.fx { animation: none !important; }
+body.calm .ck-flash, body.calm .pb-flash, body.calm .dt-confetti { display: none !important; }
+body.calm .bats, body.calm .wf-snow, body.calm .snowfall { display: none !important; }
+body.calm .learn-hints .lh-ghost { box-shadow: 0 0 0 4px rgba(255, 210, 63, .9); transform: translate(0, -16px); }
+body.calm .learn-hints .lh-ring { transform: scale(1); opacity: 1; }

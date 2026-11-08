@@ -58,6 +58,8 @@ export const CLIENT_MSGS = Object.freeze({
   opt:     { fields: { key: 'str:24', value: 'obj|num|str:64|bool' }, rate: 6, burst: 12 },
   start:   { fields: {}, rate: 1, burst: 3 },
   end:     { fields: {}, rate: 1, burst: 3 },                       // host: back to the lobby
+  quick:   { fields: {}, rate: 1, burst: 3 },                       // Expansion 1 M2: host — Quick Match (a ~10 minute board match, started at once)
+  again:   { fields: {}, rate: 1, burst: 3 },                       // Expansion 1 M2: final screen — play the same match again
   kick:    { fields: { pid: 'int' }, rate: 1, burst: 4 },
   votekick: { fields: { pid: 'int' }, rate: 1, burst: 4 },              // round 10 (#26): vote to remove someone
   pick:    { fields: { id: 'str:40' }, rate: 2, burst: 4 },              // round 10: Custom mode — the host picks the next minigame ('finish' ends)
@@ -76,6 +78,7 @@ export const CLIENT_MSGS = Object.freeze({
   rate:    { fields: { game: 'str:40', v: 'int', why: '?str:120' }, rate: 2, burst: 10 },   // round 7: 👍/👎 a minigame you played (+ reasons)
   rooms:   { fields: {}, rate: 1, burst: 4 },                         // round 7: the public games list
   mygames: { fields: {}, rate: 1, burst: 4 },                         // round 10 (#28/#29): my play counts + ratings
+  plate:   { fields: { id: 'str:24' }, rate: 2, burst: 6 },             // Expansion 1 M7: wear a Fair Pass name-plate colour
 });
 
 function typeOk(v, type) {

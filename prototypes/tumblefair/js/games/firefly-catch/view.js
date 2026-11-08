@@ -105,9 +105,18 @@ export function createView(ctx) {
   frameCam(0, true);
   // ---- HUD
   const bar = scoreBar(ctx, { unit: 'pts' });
-  const medals = init.solo ? h('div', 'fc-medals', init.medals.map((m, i) => `<span>${['🥉', '🥈', '🥇'][i]} ${m}</span>`).join('')) : null; if (medals) ctx.ui.append(medals);
-  const tip = h('div', 'fc-tip', '✨ A = net · B by a bush = shake'); ctx.ui.append(tip); setTimeout(() => tip.classList.add('gone'), 5000);
-  const nameOf = pid => (pid === ctx.me ? 'You' : ctx.players.find(p => p.pid === pid)?.name || '?');
+  // Wren, the computer fairgoer who races you when you play alone: her score sits where the medals used to
+  const medals = init.cpu ? h('div', 'fc-medals', `<span>🦗 ${init.cpu} (CPU) <b>0</b></span>`) : null; if (medals) ctx.ui.append(medals);
+  const tip = h('div', 'fc-tip', '✨ Walk up to a firefly · tap NET'); ctx.ui.append(tip); setTimeout(() => tip.classList.add('gone'), 5000);
+  const nameOf = pid => (pid === ctx.me ? 'You' : pid === 'cpu' ? init.cpu : ctx.players.find(p => p.pid === pid)?.name || '?');
+  let wren = null, wrenTag = null, wrenAt = null; const wrenDraw = { x: 3, z: 0 };
+  if (init.cpu) ctx.createActor({ look: { race: 'elf', seed: 4417 }, costume: 'cos_none' }).then(a => {
+    if (!a) return; wren = a; wrenTag = stage.tag(a.group, { text: init.cpu + ' (CPU)', height: (a.height || 1.6) + 0.3 });
+    const net = new THREE.Group(); net.add(new THREE.Mesh(handleGeo, woodM)); const hoop = new THREE.Mesh(hoopGeo, std('#8ad06a')); hoop.position.y = 1.1; hoop.rotation.y = Math.PI / 2; net.add(hoop);
+    const bag = new THREE.Mesh(bagGeo, netMat); bag.position.set(0.18, 1.1, 0); bag.rotation.z = Math.PI / 2; net.add(bag);
+    const hand = a.body?.parts?.handR; if (hand) { net.position.set(0, -0.05, 0); net.rotation.x = 1.2; hand.add(net); } else { net.position.set(0.3, 0.6, 0.2); a.body.group.add(net); }
+  });
+  const actorOf = pid => (pid === 'cpu' ? wren : ctx.actor(pid));
   let prevB = 0, prevS = -9;
   attach();
   return {
@@ -117,28 +126,28 @@ export function createView(ctx) {
       for (const id of [...flies.keys()]) if (!seen.has(id)) flies.delete(id);
       g.bu.forEach((full, i) => { const B = bushes[i]; if (!B || B.full === full) return; B.full = full; for (const m of B.parts) m.material = full ? leaf : leafDull; for (const gl of B.glints) gl.visible = !!full; });
       bar.set(g.sc, g.left);
-      if (medals) medals.querySelectorAll('span').forEach((s, i) => s.classList.toggle('won', (g.sc[ctx.players[0].pid] || 0) >= init.medals[i]));
+      if (g.cpu) { wrenAt = g.cpu; const b = medals?.querySelector('b'); if (b && b.textContent !== String(g.cpu[3])) b.textContent = g.cpu[3]; }
     },
     input(inp) {
       const fresh = bit => (inp.b & bit) && (!(prevB & bit) || inp.s !== prevS + 1);
       if (fresh(IN.A)) ctx.actor(ctx.me)?.play('attack', 360);
-      if (fresh(IN.B)) ctx.actor(ctx.me)?.play('cast', 360);
       prevB = inp.b; prevS = inp.s;
     },
     event(ev) {
       if (ev.e === 'catch') {
-        if (ev.pid !== ctx.me) ctx.actor(ev.pid)?.play('attack', 360);
+        if (ev.pid !== ctx.me) actorOf(ev.pid)?.play('attack', 360);
         sparkle(ev.x, ev.z, 10 + ev.n * 4); ctx.sfx(ev.gold ? 'coins' : 'pick');
         floatText(stage, ev.x, 1.6, ev.z, `+${ev.add}${ev.gold ? ' ★' : ''}`, ev.pid === ctx.me ? 'good' : '');
         for (const id of ev.ids) flies.delete(id);
-      } else if (ev.e === 'swish') { if (ev.pid !== ctx.me) ctx.actor(ev.pid)?.play('attack', 360); if (ev.pid === ctx.me) ctx.sfx('throw'); }
-      else if (ev.e === 'shake') { const B = bushes[ev.bush]; if (B) { B.shake = 0.6; sparkle(B.g.position.x, B.g.position.z, 12, 0.8); } if (ev.pid !== ctx.me) ctx.actor(ev.pid)?.play('cast', 360); ctx.sfx('tap'); }
+      } else if (ev.e === 'swish') { if (ev.pid !== ctx.me) actorOf(ev.pid)?.play('attack', 360); if (ev.pid === ctx.me) ctx.sfx('throw'); }
+      else if (ev.e === 'shake') { const B = bushes[ev.bush]; if (B) { B.shake = 0.6; sparkle(B.g.position.x, B.g.position.z, 12, 0.8); } ctx.sfx('tap'); }
       else if (ev.e === 'empty') { const B = bushes[ev.bush]; if (B) B.shake = 0.25; if (ev.to === ctx.me) floatText(stage, B.g.position.x, 1.6, B.g.position.z, 'Empty — wait a bit', 'bad'); }
       void nameOf;
     },
     pose(pid, flags) { if (flags & F.FROZEN) return 'cheer'; return undefined; },
     frame(dt, t) {
       frameCam(dt);
+      if (wren && wrenAt) { const [x, z, yaw, , moving] = wrenAt, k = Math.min(1, dt * 12); wrenDraw.x += (x - wrenDraw.x) * k; wrenDraw.z += (z - wrenDraw.z) * k; wren.place(wrenDraw.x, 0, wrenDraw.z, yaw); wren.setSpeed(moving ? 4 : 0); wren.update(dt); }
       if (nets.size < ctx.players.length) attach();
       const k = 1 - Math.exp(-dt * 10);
       let ip = 0, ig = 0; const pp = plain.geometry.attributes.position, pc = plain.geometry.attributes.color, gp = golden.geometry.attributes.position, gc = golden.geometry.attributes.color;
@@ -160,6 +169,6 @@ export function createView(ctx) {
       // my net's reach wedge
       if (wedge.visible) { const p = ctx.pos(ctx.me); if (p) { wedge.position.x = p.x; wedge.position.z = p.z; wedge.rotation.y = p.yaw + Math.PI; } }
     },
-    dispose() { bar.el.remove(); restore?.(); glow.dispose(); grassTex.dispose(); },
+    dispose() { bar.el.remove(); wrenTag?.remove?.(); restore?.(); glow.dispose(); grassTex.dispose(); },
   };
 }

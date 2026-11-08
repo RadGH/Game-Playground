@@ -13,7 +13,7 @@ import { STANCE, ST, levelOf, scoreName } from './golf-putt.js';
 import { heightAt, spinnerArms, assistYaw, charge, BALL_R } from './golf-kit.js';
 import { scoreBar, floatText, h, esc } from '../client/gamehud.js';
 
-export function createPuttView(ctx, { theme = {}, decorate = null, onState = null, onFrame = null, onEvent = null, around = null } = {}) {
+export function createPuttView(ctx, { theme = {}, decorate = null, onState = null, onFrame = null, onEvent = null, around = null, aimDot = 0.05 } = {}) {
   const { THREE, group, stage, players, me, init } = ctx;
   const T = { field: '#6cc95c', felt: '#3fae4f', rail: '#fff3e0', railTop: '#e8434f', bumper: '#ff5a7a', bumperTop: '#fff3e0', block: '#c9b48a', ramp: '#58c26a', tee: '#2c7a3a', flag: '#ffd23f', ...theme };
   const L = init.level || levelOf('normal'), holes = init.holes;
@@ -116,7 +116,8 @@ export function createPuttView(ctx, { theme = {}, decorate = null, onState = nul
     const shaft = new THREE.Mesh(clubGeo, clubMat), head = new THREE.Mesh(headGeo, headMat); pivot.add(shaft, head);
     pivot.rotation.x = 0.62; a.group.add(pivot); R.club = pivot; return pivot;
   }
-  const NDOT = 14, dots = new THREE.InstancedMesh(new THREE.SphereGeometry(0.05, 8, 6), basic('#ffffff', { transparent: true, opacity: 0.95, depthWrite: false }), NDOT);
+  const NDOT = 14, dots = new THREE.InstancedMesh(new THREE.SphereGeometry(aimDot, 8, 6),          // aimDot: Mini Golf's whole-hole camera wants bigger dots (M4)
+    basic('#ffffff', { transparent: true, opacity: 0.95, depthWrite: false }), NDOT);
   dots.count = 0; dots.renderOrder = 3; group.add(dots);
 
   // ---------------------------------------------------------------- HUD

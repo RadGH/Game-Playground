@@ -11,6 +11,7 @@
 // into the ropes bounces back off them. Solo: a CPU sparring partner, "Bolster", who fights back.
 import { makeBody, stepBody, separate, spawnRing, F, BODY_R } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { makeRng, hashStr } from '../../shared/rng.js';
 
 export const meta = {
   id: 'ring-a-ding-rumble', title: 'Ring-a-Ding Rumble', blurb: 'Box everyone in the ring — knock them down and be the last one standing!',
@@ -18,7 +19,7 @@ export const meta = {
   kind: 'arena', min: 1, max: 4, seconds: 70, scoring: 'points', unit: 'points', tags: ['action'],
   controls: { stick: true, a: 'Punch', b: 'Block' },
   move: { speed: 4.6, accel: 24, stunDrag: 3.2, slowMul: 0.45, boostMul: 2.3 },
-  arena: { shape: 'rect', hw: 4, hd: 4, wall: true }, pitch: 56, card: 'card-ring-a-ding-rumble', css: true,
+  arena: { shape: 'rect', hw: 4, hd: 4, wall: true }, pitch: 56, card: 'card-ring-a-ding-rumble', css: true, rival: 'needed',   // alone with 'Rival when alone' off it is not worth playing: not offered then
 };
 
 export const RULES = {
@@ -38,13 +39,18 @@ const r2 = v => Math.round(v * 100) / 100;
 // Round 12: which hall the bout is in (looks only: the mat, ropes, skirt and crowd colours) — from the seed, so the rng and
 // the rules are untouched. The names and colours live in view.js VENUES; the sim only says which one.
 export const VENUE_COUNT = 5;
-export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
-  const solo = players.length === 1, A = meta.arena;
+export function create({ seed = 0, rng, players, difficulty = 'normal', rivals = true }) {
+  // solo = alone WITH Bolster; "Rival when alone" off (rivals false): nobody to box, so the bout ends at once
+  const solo = players.length === 1 && rivals !== false, A = meta.arena;
   const ids = players.map(p => p.pid); if (solo) ids.push(-1);
   const spots = ids.length === 2 ? [{ x: -1.8, z: 0, yaw: Math.PI / 2 }, { x: 1.8, z: 0, yaw: -Math.PI / 2 }] : spawnRing(ids.length, 2.5);
   const bodies = new Map(), Fs = new Map();
+  // Its own random stream from the seed (the game's rng is untouched): which corner each fighter starts in, and the
+  // order punches land in on one tick. Corners used to go by seat, so seat 0 always started in the same corner — and in
+  // a 4-way the first two corners are each other's nearest, so they drew all the fire (seats 2-3 won 3 in 4).
+  const turn = makeRng(hashStr('ring-turn:' + seed)), corner = turn.shuffle(ids.map((_, i) => i));
   ids.forEach((id, i) => {
-    const s = spots[i], b = makeBody(r2(s.x), r2(s.z), r2(s.yaw));
+    const s = spots[corner[i]], b = makeBody(r2(s.x), r2(s.z), r2(s.yaw));
     if (id >= 0) bodies.set(id, b);
     Fs.set(id, { id, cpu: id < 0, b, hp: RULES.hp, puff: RULES.puff, downs: 0, out: false, outAt: 0, pts: 0, prevB: 0, held: 0, punch: null, rec: 0, queue: 0, block: false, dodge: 0, dodgeCool: 0, inv: 0, stun: 0, down: 0, mx: 0, mz: 0,
       ai: { t: 0, hold: 0, bits: 0, strafe: rng.chance(0.5) ? 1 : -1 } });
@@ -82,9 +88,9 @@ export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
     events.push({ e: kind, id: f.id });
     return true;
   }
-  function land(f) {
-    const { kind, charge } = f.punch, P = RULES[kind], b = f.b, fx = Math.sin(b.yaw), fz = Math.cos(b.yaw);
-    f.punch = null;
+  function land(f, punch) {
+    const { kind, charge } = punch, P = RULES[kind], b = f.b, fx = Math.sin(b.yaw), fz = Math.cos(b.yaw);
+    if (f.punch === punch) f.punch = null;
     let hit = false;
     for (const g of Fs.values()) {
       if (g === f || g.out || g.down > 0 || g.inv > 0) continue;
@@ -182,9 +188,10 @@ export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
       elapsed += dt; time -= dt;
       for (const f of Fs.values()) if (f.cpu) drive(f, f.out ? null : cpuInput(f));
       separate([...Fs.values()].filter(f => !f.out && f.down <= 0).map(f => f.b));
+      const due = [];
       for (const f of Fs.values()) {
         if (f.out) { setFlags(f); continue; }
-        if (f.punch) { f.punch.t -= dt; if (f.punch.t <= 0) land(f); }
+        if (f.punch) { f.punch.t -= dt; if (f.punch.t <= 0) due.push([f, f.punch]); }
         if (f.rec > 0) f.rec -= dt;
         if (f.queue > 0) f.queue -= dt;
         if (f.stun > 0) f.stun -= dt;
@@ -195,6 +202,10 @@ export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
         else f.puff = Math.min(RULES.puff, f.puff + (f.block ? RULES.regenBlock : RULES.regen) * dt);
         setFlags(f);
       }
+      // Punches due on the same tick all land, in a shuffled order. They used to land seat by seat, and a clean hit
+      // cancels the other fighter's punch — so in a trade, seat 0 always hit and seat 1 always whiffed (seat 0 won 70%
+      // of even bouts). Now a trade is a trade: both land.
+      for (const [f, punch] of turn.shuffle(due)) { land(f, punch); setFlags(f); }
       const left = standing().length;                                  // solo: you and Bolster — either one out ends it
       if (endIn < 0 && left < 2) endIn = RULES.endPause;
       if (endIn > 0) endIn = Math.max(0, endIn - dt);

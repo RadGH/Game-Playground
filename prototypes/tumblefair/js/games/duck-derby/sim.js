@@ -12,7 +12,7 @@
 export const meta = {
   id: 'duck-derby', title: 'Duck Derby', blurb: 'Paddle your rubber duck down the stream: a steady beat beats mashing!',
   how: ['Tap LEFT, RIGHT, LEFT, RIGHT in a steady beat to paddle.', 'Rapids push you sideways: an extra tap on one side steers.', 'Both buttons at once = SPLASH the duck just ahead!'],
-  kind: 'ui', min: 1, max: 4, seconds: 62, scoring: 'points', unit: 'm', tags: ['action'], card: 'card-duck-derby', css: true,
+  kind: 'ui', min: 1, max: 4, seconds: 62, scoring: 'points', unit: 'm', tags: ['action'], card: 'card-duck-derby', css: true, rival: true,
   controls: { a: 'Left paddle', b: 'Right paddle' },
 };
 export const LEN = 100, HALF = 0.8;                     // the course (metres), half a lane's width
@@ -78,8 +78,9 @@ export function move(d, course, dt) {
   return null;
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
-  const L = LEVELS[difficulty] || LEVELS.normal, pids = players.map(p => p.pid), solo = pids.length === 1;
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
+  // solo = alone WITH Puddles; "Rival when alone" off (rivals false): you race the river and the clock on your own
+  const L = LEVELS[difficulty] || LEVELS.normal, pids = players.map(p => p.pid), solo = pids.length === 1 && rivals !== false;
   const course = makeCourse(rng, difficulty);
   const ducks = new Map(pids.map(p => [p, newDuck()]));
   const cpuRng = rng.fork();

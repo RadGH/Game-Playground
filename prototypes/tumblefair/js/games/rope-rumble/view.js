@@ -25,7 +25,7 @@ export function createView(ctx) {
   const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, ...extra });
   const player = pid => ctx.players.find(p => p.pid === pid);
   const sideColor = s => (s.pids[0] === CPU ? '#b5743a' : player(s.pids[0])?.color || '#888');
-  const sideName = s => s.pids.map(pid => (pid === CPU ? 'Big Barnaby' : pid === ctx.me ? 'You' : player(pid)?.name || '?')).join(' + ');
+  const sideName = s => (s.pids.length ? s.pids.map(pid => (pid === CPU ? 'Big Barnaby' : pid === ctx.me ? 'You' : player(pid)?.name || '?')).join(' + ') : 'The stake');
   const mySide = sides.findIndex(s => s.pids.includes(ctx.me));
   const G = GROUNDS[(init.ground | 0) % GROUNDS.length], juice = createJuice(ctx);
   // ---- the green

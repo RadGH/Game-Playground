@@ -9,7 +9,7 @@ import { makeBody, stepBody, separate, clampToArena, collideObstacles, F } from 
 export const meta = {
   id: 'bumper-bash', title: 'Bumper Bash', blurb: 'Bash the other bumper cars — hits from behind score the most!',
   how: ['Point the stick where you want to drive.', 'Ram a car: from behind 3, side 2, nose to nose 1.', 'Grab ★ stars for points and ⚡ bolts for a turbo.', 'The walls are bouncy!'],
-  kind: 'arena', min: 1, max: 4, seconds: 75,   // 70 s of play + the 3 s countdown + the end pause (the room cuts off at seconds + 3) scoring: 'points', unit: 'pts', tags: ['action'],
+  kind: 'arena', min: 1, max: 4, seconds: 75, scoring: 'points', unit: 'pts', tags: ['action'],   // 70 s of play + the 3 s countdown + the end pause (the room cuts off at seconds + 3)
   controls: { stick: true },
   move: { mode: 'car', speed: 6.3, accel: 3.6, turn: 3.9, grip: 4.5, boostMul: 1.5, stunDrag: 1.7 },
   arena: { shape: 'rect', hw: 8, hd: 8, wall: true, posts: [{ x: 0, z: 0, r: 0.75 }] }, pitch: 64, card: 'card-bumper-bash', css: true,

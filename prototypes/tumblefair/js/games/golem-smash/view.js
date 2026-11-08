@@ -91,7 +91,7 @@ export function createView(ctx) {
       if (g.ph !== ph) { if (g.ph === 'open') slamT = 0; ph = g.ph; }
       K.rings(g.rg, { onAdd: R => { if (R.r < 1.5) { R.peb = mesh(pebGeo, dark, R.x, 9, R.z); R.peb.castShadow = true; } }, onDrop: R => { if (R.peb) group.remove(R.peb); } });
       K.hp(g.hp, init.hpMax); syncRubs(g.mn);
-      const pips = g.ck ? Array.from({ length: init.hitsPer }, (_, i) => `<i class="bk-pip${i < init.hitsPer - g.ck[1] ? ' on' : ''}">${i < init.hitsPer - g.ck[1] ? '✓' : ''}</i>`).join('') : '';
+      const pips = g.ck && init.hitsPer > 8 ? `<span class="bk-tag">${g.ck[1]} hits to go</span>` : g.ck ? Array.from({ length: init.hitsPer }, (_, i) => `<i class="bk-pip${i < init.hitsPer - g.ck[1] ? ' on' : ''}">${i < init.hitsPer - g.ck[1] ? '✓' : ''}</i>`).join('') : '';
       K.row(`<span class="bk-tag">Cracks ${g.br}/${init.cracks}</span>${g.ck ? `<span class="bk-tag hot">${LIMBS[g.ck[0]].name}!</span>${pips}` : ''}`);
       bar.set(g.sc, g.left);
     },

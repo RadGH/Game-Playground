@@ -12,7 +12,7 @@ import { WORDS } from './words.js';
 export const meta = {
   id: 'word-relay', title: 'Word Relay', blurb: 'Chain words that start with the last letter and obey the rule!',
   how: ['Type a word that starts with the big letter AND obeys the rule.', 'Longer words score more. The first good word scores +3 and sets the next letter.', 'The rule changes every two words. No word may be used twice!'],
-  kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'points', tags: ['puzzle'], card: 'card-word-relay', css: true,
+  kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'points', tags: ['puzzle'], card: 'card-word-relay', css: true, rival: true,
 };
 export const GAME_S = 60, LINK_MAX_S = 14, SHOW_S = 1.4, FIRST_BONUS = 3, RULE_EVERY = 2, MIN_OPTIONS = 20, MAX_LEN = 16, COOLDOWN_STEPS = 8;
 export const GRACE = { easy: 4, normal: 3, hard: 2 };
@@ -56,8 +56,9 @@ export function options(letter, rule, used, cap = Infinity) {
   return n;
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
-  const pids = players.map(p => p.pid), solo = pids.length === 1;
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
+  // solo = alone WITH Quill; "Rival when alone" off (rivals false): every link is yours to score
+  const pids = players.map(p => p.pid), solo = pids.length === 1 && rivals !== false;
   const ids = solo ? [...pids, 'cpu'] : pids.slice();
   const grace = GRACE[difficulty] ?? GRACE.normal;
   const pts = Object.fromEntries(ids.map(k => [k, 0])), count = Object.fromEntries(ids.map(k => [k, 0]));

@@ -1,133 +1,108 @@
-// TWO TRUTHS, ONE GOBLIN — one player is the TELLER each round (it rotates). The game deals them claims about
-// themselves that it actually knows (round 10: "My colour is Red.", "My name has 4 letters.", "Last round I caught the
-// Goblin." — cards.js): two TRUTHS, and two possible GOBLINS, the same kind of fact with one thing changed. Guessers
-// can check the on-screen ones against the Teller's chip and must remember the rest. While the others wait, the Teller privately:
-//   * plants ONE of the two Goblins (the other goes back in the deck),
-//   * picks a wording for each card (plain or dramatic),
-//   * puts the three cards in any order.
-// Then the three claims go up for everyone and the other players tap the one they think is the Goblin (they can
-// change their mind until the clock runs out — watch the Teller's face!).
-// Scoring: catch the Goblin +2; with two or more guessers, the fastest catch is a Sharp Eye, +1; the Teller gets +2
-// for every guesser who picked a truth. No guess earns nobody anything. Ties go to the quicker detective: less total
-// time spent on your catches (printed on the card) — this is what settles a 2-player game, where the points can match.
-// Solo: the House is the Teller for five rounds and you guess. The House has a tell, printed on the intro: its Goblin
-// is usually its longest claim (3 times in 4). Your catches are your score.
-// Every deal, every truth/lie and the House's choices come from the seeded rng.
-import { dealFacts } from './cards.js';
-import { SEATS } from '../../shared/protocol.js';
+// TWO TRUTHS, ONE GOBLIN — Expansion 1 M4 (2026-11-07) rebuild. Live ratings: "unplayable". The round 10 version dealt
+// claims about the Teller themselves (letters in their name, how many times they had been the Teller) and asked the
+// Teller to plant, re-word and re-order cards before anyone could guess — three screens of rules for a coin toss.
+//
+// Now there is one idea: LOOK at the prize stall, then spot the lie.
+//   * show:   everyone sees the same prize stall (three shelves of prizes) for a few seconds.
+//   * guess:  the stall is covered and the Goblin makes three claims about it — two true, one a lie. Tap the lie.
+//   * reveal: the stall comes back with the lie stamped GOBLIN.
+// With two or more players the Goblin takes turns being a player (the Teller): while the stall is shown, the Teller is
+// offered two lies and taps the sneakier one to plant (one tap; if they do not choose, the first is used). The Teller
+// does not guess that round. Alone, Fib the Goblin (the computer) plants the lies and keeps its own score.
+// Scoring: catch the lie +2; with two or more guessers, the fastest catch +1; the Teller (or Fib) +2 for each guesser who
+// picked a truth. Ties go to the quicker detective. Everything comes from the seeded rng.
+import { makeStall, dealClaims, SIZE } from './cards.js';
 
 export const meta = {
-  id: 'two-truths-one-goblin', title: 'Two Truths, One Goblin', blurb: 'Two claims are true and one is a Goblin. Spot the lie!',
-  how: ['Each round one player is the Teller. Three facts about them go up: two are true, one is a lie (the Goblin).', 'Check their name, colour and points on the chips, and remember what happened earlier.', 'Tap the fact you think is the lie. Catch it: +2. The Teller gets +2 for each player fooled.'],
-  kind: 'ui', min: 1, max: 4, seconds: 120, scoring: 'points', unit: 'points', tags: ['social'], card: 'card-two-truths-one-goblin', css: true,
+  id: 'two-truths-one-goblin', title: 'Two Truths, One Goblin', blurb: 'Look at the prize stall, then spot the one claim that is a lie!',
+  how: ['Look hard at the prize stall — it is only shown for a few seconds.', 'Then the Goblin makes three claims about it. Two are true, one is a lie.', 'Tap the lie: +2. Your turn as the Goblin? Pick the sneakier lie and fool them!'],
+  kind: 'ui', min: 1, max: 4, seconds: 120, scoring: 'points', unit: 'points', tags: ['social', 'puzzle'], card: 'card-two-truths-one-goblin', css: true, rival: true,
 };
-export const HOUSE = 'house', HOUSE_NAME = 'The House';
+export const FIB = 'fib', FIB_NAME = 'Fib the Goblin';
 export const CATCH = 2, FOOL = 2, SHARP = 1, READY_S = 1.5;
-/** Rounds and phase lengths for n players (prep = the Teller arranging, guess, reveal). */
-// round 10 (report #22, "not enough time"): about half as long again to read, arrange and look at the reveal
-export function timing(n) {
-  if (n === 1) return { rounds: 5, prep: 0, guess: 14, reveal: 5 };
-  if (n === 3) return { rounds: 3, prep: 12, guess: 16, reveal: 6 };
-  return { rounds: 4, prep: 10, guess: 14, reveal: 5 };
+/** Rounds and phase lengths for n players (show = the stall on screen, guess, reveal). */
+export function timing(n, difficulty = 'normal') {
+  const show = (SIZE[difficulty] || SIZE.normal).show;
+  return { rounds: n === 1 ? 5 : n === 3 ? 3 : 4, show, guess: 11, reveal: 4 };
 }
 
-export function create({ rng, players }) {
-  const pids = players.map(p => p.pid), n = pids.length, solo = n === 1, T = timing(n);
-  const ids = solo ? [...pids, HOUSE] : pids;
-  const info = new Map(players.map(p => [p.pid, { name: p.name, colour: SEATS[p.seat]?.name || 'Red' }]));
-  info.set(HOUSE, { name: HOUSE_NAME, colour: 'Purple' });
-  // what each player has done so far, for the "from earlier in this game" facts
-  const hist = Object.fromEntries(ids.map(k => [k, { caught: 0, fooled: 0, turns: 0, last: null }]));
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
+  const pids = players.map(p => p.pid), n = pids.length, solo = n === 1, T = timing(n, difficulty);
+  const rival = solo && rivals !== false;            // "Rival when alone" off: the Goblin still lies, but Fib keeps no score
+  const ids = rival ? [...pids, FIB] : pids;
   const score = Object.fromEntries(ids.map(k => [k, 0])), speed = Object.fromEntries(pids.map(p => [p, 0]));
   let phase = 'ready', round = -1, left = READY_S, over = false, t = 0;
-  let hand = [], alt = null, teller = null, guesses = {}, at = {}, reveal = null, readyEarly = false;
+  let stall = null, deal = null, planted = 0, order = null, cards = null, teller = null, guesses = {}, at = {}, reveal = null;
 
-  const card = (t, gob) => ({ t, w: 0, gob });
-  function deal() {
-    round++; guesses = {}; at = {}; reveal = null; readyEarly = false; t = 0;
-    teller = solo ? HOUSE : pids[round % n];
-    const h = hist[teller]; h.turns++;
-    const who = { ...info.get(teller), points: score[teller], caught: h.caught, fooled: h.fooled, tellerTurn: h.turns, last: h.last, house: teller === HOUSE };
-    const dealt = dealFacts(who, rng);
-    const truths = dealt.truths.map(x => card(x, false)), gobs = dealt.gobs.map(x => card(x, true));
-    hand = rng.shuffle([...truths, gobs[0]]); alt = gobs[1];
-    if (solo) houseArranges();
-    phase = solo ? 'guess' : 'prep'; left = solo ? T.guess : T.prep;
+  function next() {
+    round++; guesses = {}; at = {}; reveal = null; t = 0; planted = 0;
+    teller = solo ? FIB : pids[round % n];
+    stall = makeStall(rng, difficulty);
+    deal = dealClaims(stall, rng);
+    order = rng.shuffle([0, 1, 2]);                 // where the lie goes among the three cards (drawn now, so a plant never moves the rng)
+    if (solo) planted = rng.int(0, 1);              // Fib picks one of its two lies
+    phase = 'show'; left = T.show;
   }
-  /** The House's tell: 3 times in 4 its Goblin is its longest claim (longest candidate, long wording, short truths). */
-  function houseArranges() {
-    const long = rng.chance(0.75), gi = hand.findIndex(c => c.gob);
-    const best = c => Math.max(c.t[0].length, c.t[1].length), worst = c => Math.min(c.t[0].length, c.t[1].length);
-    if (long ? best(alt) > best(hand[gi]) : worst(alt) < worst(hand[gi])) [hand[gi], alt] = [alt, hand[gi]];
-    for (const c of hand) { const longer = c.t[1].length > c.t[0].length ? 1 : 0; c.w = (c.gob === long) ? longer : 1 - longer; }
-    hand = rng.shuffle(hand);
+  function startGuess() {
+    const pool = [deal.truths[0], deal.truths[1], deal.lies[planted]];
+    cards = order.map(i => pool[i]);
+    phase = 'guess'; left = T.guess; t = 0;
   }
+  const guessers = () => solo ? pids : pids.filter(p => p !== teller);
   function settle() {
-    const gob = hand.findIndex(c => c.gob), gain = Object.fromEntries(ids.map(k => [k, 0]));
-    const guessers = solo ? pids : pids.filter(p => p !== teller);
-    const right = guessers.filter(p => guesses[p] === gob);
+    const gob = order.indexOf(2), gain = Object.fromEntries(ids.map(k => [k, 0]));
+    const right = guessers().filter(p => guesses[p] === gob);
     for (const p of right) { gain[p] += CATCH; speed[p] += at[p]; }
     let sharp = null;
-    if (right.length && guessers.length >= 2) { sharp = right.slice().sort((a, b) => at[a] - at[b] || pids.indexOf(a) - pids.indexOf(b))[0]; gain[sharp] += SHARP; }
-    gain[teller] += FOOL * guessers.filter(p => guesses[p] != null && guesses[p] !== gob).length;
+    if (right.length && guessers().length >= 2) { sharp = right.slice().sort((a, b) => at[a] - at[b] || pids.indexOf(a) - pids.indexOf(b))[0]; gain[sharp] += SHARP; }
+    if (teller in gain) gain[teller] += FOOL * guessers().filter(p => guesses[p] != null && guesses[p] !== gob).length;
     for (const k of ids) score[k] += gain[k];
-    for (const k of ids) { const hk = hist[k]; if (k === teller) { hk.last = 'teller'; hk.fooled += gain[k] / FOOL; } else if (guesses[k] == null) hk.last = 'missed'; else if (guesses[k] === gob) { hk.last = 'caught'; hk.caught++; } else hk.last = 'fooled'; }
-    reveal = { gob, guesses: { ...guesses }, gain, sharp, cards: hand.map(c => c.t[c.w]) };
+    reveal = { gob, guesses: { ...guesses }, gain, sharp, cards: cards.slice() };
     phase = 'reveal'; left = T.reveal;
   }
 
   return {
-    init: () => ({ rounds: T.rounds, solo, catch: CATCH, fool: FOOL, sharp: SHARP, ...(solo ? { house: { pid: HOUSE, name: HOUSE_NAME } } : {}) }),
+    init: () => ({ rounds: T.rounds, solo, catch: CATCH, fool: FOOL, sharp: SHARP, show: T.show, ...(rival ? { fib: { pid: FIB, name: FIB_NAME } } : {}) }),
     act(pid, a, d) {
       if (!pids.includes(pid) || over) return;
-      if (phase === 'prep' && pid === teller) {
-        if (a === 'plant') {                                   // d = 0: keep the Goblin in the hand, 1: swap in the other
-          if (d !== 1) return;
-          const gi = hand.findIndex(c => c.gob); [hand[gi], alt] = [alt, hand[gi]]; hand[gi].w = 0;
-        } else if (a === 'word') {
-          if (!Number.isInteger(d) || d < 0 || d > 2) return;
-          hand[d].w = 1 - hand[d].w;
-        } else if (a === 'up') {
-          if (!Number.isInteger(d) || d < 1 || d > 2) return;
-          [hand[d - 1], hand[d]] = [hand[d], hand[d - 1]];
-        } else if (a === 'ready') { readyEarly = true; left = Math.min(left, 0.3); }
-        return;
-      }
-      if (phase === 'guess' && a === 'guess' && pid !== teller) {
+      if (a === 'plant' && phase === 'show' && pid === teller) { if (d === 0 || d === 1) planted = d; return; }
+      if (a === 'guess' && phase === 'guess' && pid !== teller) {
         if (!Number.isInteger(d) || d < 0 || d > 2) return;
         guesses[pid] = d; at[pid] = t;
-        if (pids.every(p => p === teller || p in guesses)) left = Math.min(left, 2);
+        if (guessers().every(p => p in guesses)) left = Math.min(left, 1.5);
       }
     },
     step(dt) {
       if (over) return;
       left -= dt; t += dt;
       if (left > 1e-9) return;
-      if (phase === 'ready') deal();
-      else if (phase === 'prep') { phase = 'guess'; left = T.guess; t = 0; }
+      if (phase === 'ready') next();
+      else if (phase === 'show') startGuess();
       else if (phase === 'guess') settle();
-      else if (round + 1 < T.rounds) deal();
+      else if (round + 1 < T.rounds) next();
       else over = true;
     },
     state() {
       const g = { phase, round, left: Math.max(0, Math.ceil(left)), teller, scores: { ...score } };
-      if (phase === 'guess') { g.cards = hand.map(c => c.t[c.w]); g.guessed = Object.keys(guesses).map(Number); }
-      if (phase === 'prep') g.ready = readyEarly;
+      if (phase === 'show' || phase === 'reveal') g.stall = stall.slots;
+      if (phase === 'guess') { g.cards = cards; g.guessed = Object.keys(guesses).map(Number); }
       if (phase === 'reveal') g.reveal = reveal;
       return g;
     },
     priv(pid) {
       if (!pids.includes(pid)) return {};
-      if (phase === 'prep' && pid === teller) return { teller: true, hand: hand.map(c => ({ t: c.t, w: c.w, gob: c.gob })), alt: alt.t };
-      if (phase === 'guess' && pid !== teller) return { guess: guesses[pid] ?? null };
-      return {};
+      if (phase === 'show' && pid === teller) return { teller: true, lies: deal.lies, planted, round };
+      if (phase === 'guess' && pid !== teller) return { guess: guesses[pid] ?? null, round };
+      return { round };
     },
     get over() { return over; },
+    /** For tests and bots. */
+    get stall() { return stall; }, get deal() { return deal; },
     result() {
       const ranked = pids.slice().sort((a, b) => score[b] - score[a] || speed[a] - speed[b]);
-      const order = [];
-      for (const p of ranked) { const g = order[order.length - 1]; if (g && score[g[0]] === score[p] && speed[g[0]] === speed[p]) g.push(p); else order.push([p]); }
-      return { order, scores: Object.fromEntries(pids.map(p => [p, score[p]])), unit: meta.unit };
+      const out = [];
+      for (const p of ranked) { const g = out[out.length - 1]; if (g && score[g[0]] === score[p] && speed[g[0]] === speed[p]) g.push(p); else out.push([p]); }
+      return { order: out, scores: Object.fromEntries(pids.map(p => [p, score[p]])), unit: meta.unit };
     },
   };
 }

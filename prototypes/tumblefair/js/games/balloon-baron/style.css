@@ -1,0 +1,13 @@
+/* Balloon Baron: this game's bits of the boss-kit row — team hearts and YOUR darts (dots + a number, so colour is never
+   the only cue), the balloons left — and the "DARTS" tags over the buckets. Nothing here is tappable. */
+.game-balloon-baron > * { pointer-events: none !important; }
+.bb-hearts { color: #ff3b5c; font-size: 17px; letter-spacing: 1px; -webkit-text-stroke: .6px var(--ink); white-space: nowrap; }
+.bb-hearts small, .bb-left small, .bb-darts small { color: var(--ink); -webkit-text-stroke: 0; font-size: 11px; margin-left: 2px; }
+.bb-hearts.low { animation: bb-throb .6s infinite; }
+@keyframes bb-throb { 50% { opacity: .45; } }
+.bb-darts { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.bb-darts i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--ink); background: transparent; }
+.bb-darts i.on { background: #ffd23f; }
+.bb-darts.empty small { color: #d0342c; font-weight: 900; }
+.bb-left { white-space: nowrap; font-size: 14px; }
+.tag.bb-bucket { background: #fff8e7; color: var(--ink); text-shadow: none; font-size: 12px; }

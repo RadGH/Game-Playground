@@ -3,7 +3,7 @@
 // stripe painted on the floor under it so you can read where it is from above, and a HOP / DUCK label riding on one
 // post. LOW beams are orange at shin height, HIGH beams purple at head height (height and label as well as colour).
 // A spinner glows faintly round a centre pivot before it goes live. A zap throws a white-yellow flash and sparks.
-import { LOW, SWEEP, incoming } from './sim.js';
+import { LOW, SWEEP, incoming, RULES } from './sim.js';
 import { scoreBar, floatText, h } from '../../client/gamehud.js';
 import { F } from '../../shared/arena.js';
 
@@ -25,7 +25,7 @@ export function createView(ctx) {
   top.position.y = -0.05; top.receiveShadow = true; group.add(top);
   const RINGS = ['#5ff0ff', '#ffe14d', '#5ff0ff'];
   [2.2, 4.4, R - 0.5].forEach((r, i) => { const ring = new THREE.Mesh(new THREE.RingGeometry(r - 0.12, r + 0.12, 64).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: RINGS[i], transparent: true, opacity: 0.55, depthWrite: false })); ring.position.y = 0.006; group.add(ring); });
-  const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 0.16, 20), new THREE.MeshStandardMaterial({ color: '#ffe14d', roughness: 0.4 })); hub.position.y = 0.05; group.add(hub);
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.95, 0.22, 24), new THREE.MeshStandardMaterial({ color: '#ffe14d', roughness: 0.4 })); hub.position.y = 0.05; group.add(hub);
   const NB = 36, bumpers = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.42, 0.42, 0.5, 14), new THREE.MeshStandardMaterial({ roughness: 0.4 }), NB);
   const BUMP = [new THREE.Color('#ffd23f'), new THREE.Color('#ff5fa2')];
   for (let i = 0; i < NB; i++) { const a = i / NB * Math.PI * 2; m4.compose(v.set(Math.sin(a) * (R + 0.35), 0.05, Math.cos(a) * (R + 0.35)), q.identity(), sc.set(1, 1, 1)); bumpers.setMatrixAt(i, m4); bumpers.setColorAt(i, BUMP[i % 2]); }
@@ -90,11 +90,16 @@ export function createView(ctx) {
     const next = incoming([...beams.values()].map(B => ({ k: B.k, h: B.h, a: B.a, s: B.s, v: B.vel, warn: B.warn })), p.x, p.z);
     cueAnchor.visible = !!next;
     if (!next) return;
-    const now = next.t < 0.38, key = next.beam.h + (now ? 'n' : '');
-    if (key !== cueKey) { cueKey = key; cue.set(next.beam.h === LOW ? (now ? '▲ HOP NOW!' : '▲ hop') : (now ? '▼ DUCK NOW!' : '▼ duck')); cue.el.className = 'tag ll-cue ' + (next.beam.h === LOW ? 'll-low' : 'll-high') + (now ? ' now' : ''); }
+    // M4: the sim holds an early press for you, so the whole last second before a beam is the time to press
+    const now = next.t <= RULES.press, key = next.beam.h + (now ? 'n' : '');
+    if (key !== cueKey) { cueKey = key; cue.set(next.beam.h === LOW ? (now ? '▲ PRESS to hop' : '▲ hop') : (now ? '▼ PRESS to duck' : '▼ duck')); cue.el.className = 'tag ll-cue ' + (next.beam.h === LOW ? 'll-low' : 'll-high') + (now ? ' now' : ''); }
   }
+  // Sparky, the computer player who dodges beside you when you play alone
+  let spark = null, sparkTag = null, sparkAt = null, sparkLv = -1; const sparkDraw = { x: 0, z: 0, y: 0 };
+  if (ctx.init.cpu) ctx.createActor({ look: { race: 'dwarf', seed: 8822 }, costume: 'cos_none' }).then(a => { if (!a) return; spark = a; sparkTag = stage.tag(a.group, { text: ctx.init.cpu + ' (CPU)', height: (a.height || 1.6) + 0.3 }); if (sparkAt) { sparkDraw.x = sparkAt[0]; sparkDraw.z = sparkAt[1]; } });
   return {
     state(g) {
+      if (g.cpu) { sparkAt = g.cpu; if (sparkTag && g.cpu[4] !== sparkLv) { sparkLv = g.cpu[4]; sparkTag.set(`${ctx.init.cpu} (CPU) ${sparkLv ? '♥'.repeat(sparkLv) : '— out'}`); } }
       for (const B of beams.values()) B.seen = false;
       for (const row of g.bm) {
         const [id, , , a, s, vel, warn] = row, B = beams.get(id);
@@ -130,6 +135,14 @@ export function createView(ctx) {
         B.mats[1].opacity *= B.warn > 0 ? 1 : 0.85 + 0.15 * Math.sin(t * 30 + B.id);
       }
       hub.rotation.y += dt * 2;
+      if (spark && sparkAt) {
+        const [x, z, y, yaw, lv, st, blink, moving] = sparkAt, k = Math.min(1, dt * 14);
+        sparkDraw.x += (x - sparkDraw.x) * k; sparkDraw.z += (z - sparkDraw.z) * k; sparkDraw.y += (y - sparkDraw.y) * Math.min(1, dt * 25);
+        spark.place(sparkDraw.x, sparkDraw.y, sparkDraw.z, yaw); spark.setSpeed(moving ? 2.5 : 0);
+        spark.setPose(!lv ? 'dead' : st === 2 ? 'jump' : st === 1 ? 'kneel' : 'idle');
+        spark.group.visible = !blink || Math.sin(t * 30) > -0.3;
+        spark.update(dt);
+      }
       cueFrame();
       for (const pid of ctx.players?.map(p => p.pid) || []) { const a = ctx.actor(pid); if (a && !outSet.has(pid)) a.group.visible = !safe.has(pid) || Math.sin(t * 30) > -0.3; }
       for (let i = fx.length - 1; i >= 0; i--) {
@@ -139,6 +152,6 @@ export function createView(ctx) {
         if (f.t > 0.8) { group.remove(f.flash); f.flash.material.dispose(); for (const b of f.bits) group.remove(b); fx.splice(i, 1); }
       }
     },
-    dispose() { bar.el.remove(); for (const B of beams.values()) B.label.remove(); cue?.remove(); },
+    dispose() { bar.el.remove(); for (const B of beams.values()) B.label.remove(); cue?.remove(); sparkTag?.remove?.(); },
   };
 }

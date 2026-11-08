@@ -30,7 +30,11 @@ export const RULES = {
   reach: 1.35, reload: 0.9, cone: 0.52, range: 13, speed: 17, life: 0.85, turn: 3.2, hitR: 1.35, segs: [0, 1.3, 2.6, 3.9],
   dash: 0.32, dashCool: 1.3, hurtStun: 1.0, invuln: 1.4, knock: 6.5,
 };
-export const hpFor = (n, d) => Math.round(byDiff(d, RULES.hp) * (1 + RULES.hpPer * (n - 1)));
+// M2 bug (2026-11-07): an all-Family CPU team beat it at every difficulty. Easy keeps the old formula; Normal and Tricky
+// read a health bar per team size (the damage a team does grows faster than one cannon per player), measured with
+// tools/cpu-bench.mjs so a Normal team usually wins and a Family team usually does not (tests/coop-difficulty.test.js).
+export const HP_BY_SIZE = { normal: [33, 42, 72, 104], hard: [37, 47, 77, 108] };
+export const hpFor = (n, d) => (HP_BY_SIZE[d] ? HP_BY_SIZE[d][Math.min(4, Math.max(1, n)) - 1] : Math.round(byDiff(d, RULES.hp) * (1 + RULES.hpPer * (n - 1))));
 /** The cannon a body is standing at (index), or -1. */
 export const cannonAt = (x, z) => CANNONS.findIndex(c => Math.hypot(x - c.x, z - c.z) <= RULES.reach);
 

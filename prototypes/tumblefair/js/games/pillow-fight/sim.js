@@ -7,15 +7,22 @@
 // edge makes you teeter on it instead of falling, and a fall no longer costs a point. Before, most falls were someone
 // walking or hopping off by themselves, nobody scored, the -1 floored at 0, and whole games ended 0-0-0. Solo: sleepwalkers in nightcaps climb onto the bed and shuffle at you with their arms out
 // — a sleepwalker bump wobbles you too. Bop them off the bed for points.
+// Expansion 1 / M4 (2026-11-07, "buggy"): the bed had no wall, so your own phone (which predicts your walking with
+// the same movement rules) let you stroll off the edge and hover over the rug until the server's answer dragged you
+// back — a rubber-band on every edge, which is where a pillow fight happens. The arena's wall now stands exactly at
+// the bed's edge, so walking and hopping stop there on both sides; a body that has just been bopped slides with no
+// wall (and falls), and a falling body is FROZEN so the phone stops second-guessing it. The sleepwalkers are the
+// computer players when you are alone (they also count your knock-offs).
 import { makeBody, stepBody, separate, spawnRing, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { makeRng, hashStr } from '../../shared/rng.js';
 
 export const meta = {
   id: 'pillow-fight', title: 'Pillow Fight', blurb: 'Bop everyone off the giant bed with your pillow — the more they are hit, the further they fly!',
   how: ['A swings your pillow at whoever is in front.', 'Every bop raises their wobble %: they fly further.', 'Bop someone off the bed: +1. Only a bop sends you over.', 'B hops out of the way.'],
-  kind: 'arena', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'pts', tags: ['action'],
+  kind: 'arena', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'pts', tags: ['action'], rival: true,
   controls: { stick: true, a: 'Swing', b: 'Hop' }, move: { speed: 5.6, accel: 18, stunDrag: 1.5 },
-  arena: { shape: 'rect', hw: 6.5, hd: 4.6, wall: false }, pitch: 56, card: 'card-pillow-fight', css: true,
+  arena: { shape: 'rect', hw: 6.95, hd: 5.05, wall: true }, pitch: 56, card: 'card-pillow-fight', css: true,     // hw/hd = the bed's edge + a body radius: walking stops at the edge
 };
 
 export const BED_Y = 0, FLOOR_Y = -1.6;
@@ -33,12 +40,15 @@ export const RULES = {
 };
 const r2 = v => Math.round(v * 100) / 100;
 const knockSpeed = w => RULES.push * (1 + RULES.pushPer * w);
+const OPEN = { ...meta.arena, wall: false };          // how a bopped (or falling) body moves: nothing stops it at the edge
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ seed = 0, rng, players, difficulty = 'normal', rivals = true }) {
   const D = RULES.wobble[difficulty] ? difficulty : 'normal';
-  const n = players.length, solo = n === 1, bodies = new Map(), spawns = spawnRing(n, solo ? 0 : 2.6);
+  const n = players.length, solo = n === 1, sleepy = solo && rivals !== false, bodies = new Map(),   // sleepy: "Rival when alone" off = no sleepwalkers
+    spawns = spawnRing(n, solo ? 0 : 2.6);
   players.forEach((p, i) => bodies.set(p.pid, makeBody(spawns[i].x, spawns[i].z, spawns[i].yaw)));
   const P = new Map(players.map(p => [p.pid, { prevB: 0, cool: 0, hopCool: 0, hop: 0, stun: 0, wob: 0, pts: 0, kos: 0, falls: 0, falling: false, vy: 0, back: 0, ghost: 0, by: -1, byAt: -99, teeter: 0 }]));
+  const turn = makeRng(hashStr('pillow-turn:' + seed));      // who goes first when swings land on the same tick (its own stream: the game's rng is untouched)
   let sleepers = [], sid = 0, sleepIn = RULES.sleep.first, time = meta.seconds, el = 0, over = false;
   const events = [];
   const onBed = (x, z) => Math.abs(x) <= RULES.edgeX && Math.abs(z) <= RULES.edgeZ;
@@ -64,11 +74,46 @@ export function create({ rng, players, difficulty = 'normal' }) {
   }
   function startFall(pid) {
     const s = P.get(pid), b = bodies.get(pid);
-    s.falling = true; s.vy = 1.5; s.back = RULES.out; b.flags |= F.STUN; s.hop = 0;
+    s.falling = true; s.vy = 1.5; s.back = RULES.out; b.flags |= F.STUN | F.FROZEN; s.hop = 0;
+    s.fvx = b.vx; s.fvz = b.vz;
     const credit = s.by >= 0 && el - s.byAt <= RULES.credit && s.by !== pid ? s.by : -1;
     if (credit >= 0) { const c = P.get(credit); c.pts++; c.kos++; }
     s.falls++;
     events.push({ e: 'fall', pid, by: credit, x: r2(b.x), z: r2(b.z) });
+  }
+  // Every swing pressed this tick lands here, together, in a shuffled order. They used to land inside input(), which the
+  // room calls seat by seat — so when two players swung on the same tick, seat 0's bop stunned seat 1 first and seat
+  // 1's swing never happened (seat 0 won ~2 in 3 of even games). Now both bops land: nobody wins a tie by their seat.
+  function swingAll() {
+    const who = turn.shuffle(players.map(p => p.pid).filter(pid => P.get(pid).swing));
+    for (const pid of who) {
+      const s = P.get(pid), b = bodies.get(pid); s.swing = false;
+      if (s.falling) continue;
+      // targets: players and sleepwalkers. Aim help: turn to the nearest one within reach and the wide aim angle.
+      const cands = [];
+      for (const [qid, c] of bodies) if (qid !== pid && hittable(qid)) cands.push({ kind: 'p', id: qid, x: c.x, z: c.z });
+      for (const sl of sleepers) if (!sl.falling) cands.push({ kind: 's', id: sl.id, x: sl.x, z: sl.z, sl });
+      const ang = c => { let da = Math.atan2(c.x - b.x, c.z - b.z) - b.yaw; return Math.abs(Math.atan2(Math.sin(da), Math.cos(da))); };
+      let near = null, nd = 99;
+      for (const c of cands) { const d = Math.hypot(c.x - b.x, c.z - b.z); if (d <= RULES.reach && ang(c) <= RULES.aim && d < nd) { nd = d; near = c; } }
+      if (near) b.yaw = Math.atan2(near.x - b.x, near.z - b.z);
+      const hits = [];
+      for (const c of cands) {
+        if (Math.hypot(c.x - b.x, c.z - b.z) > RULES.reach || ang(c) > RULES.cone) continue;
+        if (c.kind === 'p') {
+          const q = P.get(c.id), cb = bodies.get(c.id), tgt = { x: cb.x, z: cb.z, wob: q.wob, vx: 0, vz: 0 };
+          const st = knock(tgt, b.x, b.z, RULES.wobble[D], pid);
+          q.wob = tgt.wob; cb.vx = tgt.vx; cb.vz = tgt.vz; cb.flags |= F.STUN; q.stun = st; q.hop = 0; q.by = pid; q.byAt = el;
+          hits.push(c.id);
+          events.push({ e: 'bop', pid, to: c.id, wob: Math.round(q.wob), x: r2(cb.x), z: r2(cb.z) });
+        } else {
+          const st = knock(c.sl, b.x, b.z, RULES.wobble[D] + 2, pid, true); c.sl.stun = st;
+          events.push({ e: 'bop', pid, sl: c.id, wob: Math.round(c.sl.wob), x: r2(c.sl.x), z: r2(c.sl.z) });
+          hits.push('s' + c.id);
+        }
+      }
+      if (!hits.length) events.push({ e: 'swing', pid });
+    }
   }
   return {
     bodies, events,
@@ -77,33 +122,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
       const b = bodies.get(pid), s = P.get(pid); if (!b || over) return;
       const bits = inp?.b | 0, pa = (bits & IN.A) && !(s.prevB & IN.A), pb = (bits & IN.B) && !(s.prevB & IN.B); s.prevB = bits;
       const ready = !s.falling && !(b.flags & F.STUN);
-      if (pa && ready && s.cool <= 0) {
-        s.cool = RULES.swingCool;
-        // targets: players and sleepwalkers. Aim help: turn to the nearest one within reach and the wide aim angle.
-        const cands = [];
-        for (const [qid, c] of bodies) if (qid !== pid && hittable(qid)) cands.push({ kind: 'p', id: qid, x: c.x, z: c.z });
-        for (const sl of sleepers) if (!sl.falling) cands.push({ kind: 's', id: sl.id, x: sl.x, z: sl.z, sl });
-        const ang = c => { let da = Math.atan2(c.x - b.x, c.z - b.z) - b.yaw; return Math.abs(Math.atan2(Math.sin(da), Math.cos(da))); };
-        let near = null, nd = 99;
-        for (const c of cands) { const d = Math.hypot(c.x - b.x, c.z - b.z); if (d <= RULES.reach && ang(c) <= RULES.aim && d < nd) { nd = d; near = c; } }
-        if (near) b.yaw = Math.atan2(near.x - b.x, near.z - b.z);
-        const hits = [];
-        for (const c of cands) {
-          if (Math.hypot(c.x - b.x, c.z - b.z) > RULES.reach || ang(c) > RULES.cone) continue;
-          if (c.kind === 'p') {
-            const q = P.get(c.id), cb = bodies.get(c.id), tgt = { x: cb.x, z: cb.z, wob: q.wob, vx: 0, vz: 0 };
-            const st = knock(tgt, b.x, b.z, RULES.wobble[D], pid);
-            q.wob = tgt.wob; cb.vx = tgt.vx; cb.vz = tgt.vz; cb.flags |= F.STUN; q.stun = st; q.hop = 0; q.by = pid; q.byAt = el;
-            hits.push(c.id);
-            events.push({ e: 'bop', pid, to: c.id, wob: Math.round(q.wob), x: r2(cb.x), z: r2(cb.z) });
-          } else {
-            const st = knock(c.sl, b.x, b.z, RULES.wobble[D] + 2, pid, true); c.sl.stun = st;
-            events.push({ e: 'bop', pid, sl: c.id, wob: Math.round(c.sl.wob), x: r2(c.sl.x), z: r2(c.sl.z) });
-            hits.push('s' + c.id);
-          }
-        }
-        if (!hits.length) events.push({ e: 'swing', pid });
-      }
+      if (pa && ready && s.cool <= 0) { s.cool = RULES.swingCool; s.swing = true; }   // the swing lands in step(), all at once (see swingAll)
       if (pb && ready && s.hopCool <= 0) {
         let mx = +inp?.mx || 0, mz = +inp?.mz || 0; const m = Math.hypot(mx, mz);
         if (m > 0.2) { mx /= m; mz /= m; } else { mx = Math.sin(b.yaw); mz = Math.cos(b.yaw); }
@@ -111,11 +130,14 @@ export function create({ rng, players, difficulty = 'normal' }) {
         s.hopCool = RULES.hopCool; s.hop = RULES.hopTime; s.stun = RULES.hopTime; b.flags |= F.STUN; b.vx = mx * RULES.hopSpeed; b.vz = mz * RULES.hopSpeed; b.yaw = Math.atan2(mx, mz);
         events.push({ e: 'hop', pid });
       }
-      stepBody(b, inp, meta.move, meta.arena);
+      // just bopped and still reeling: slide with no wall, so the bop can carry you over the edge
+      const reeling = !s.falling && (b.flags & F.STUN) && el - s.byAt <= RULES.credit;
+      if (!s.falling) stepBody(b, inp, meta.move, reeling ? OPEN : meta.arena);
     },
     step(dt) {
       if (over) return;
       el += dt; time -= dt;
+      swingAll();
       separate([...bodies].filter(([pid]) => free(pid)).map(([, b]) => b));
       for (const [pid, b] of bodies) {
         const s = P.get(pid);
@@ -126,7 +148,8 @@ export function create({ rng, players, difficulty = 'normal' }) {
         if (s.falling) {
           // drop to the rug, sit a moment, climb back on somewhere safe
           if (b.y > FLOOR_Y) { s.vy -= 22 * dt; b.y = Math.max(FLOOR_Y, r2(b.y + s.vy * dt)); }
-          b.vx *= 0.8; b.vz *= 0.8;
+          if (b.y > FLOOR_Y) { b.x = r2(b.x + (s.fvx || 0) * dt); b.z = r2(b.z + (s.fvz || 0) * dt); }       // carried on by the bop until it lands
+          b.vx = b.vz = 0;
           s.back -= dt;
           if (s.back <= 0) {
             const at = safeSpot(); s.falling = false; s.stun = 0; s.wob = 0; s.by = -1; s.byAt = -99; s.ghost = RULES.ghost;
@@ -150,7 +173,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
         }
       }
       // solo: sleepwalkers climb on and shuffle at you
-      if (solo) {
+      if (sleepy) {
         const me = players[0].pid, b = bodies.get(me), s = P.get(me), S = RULES.sleep;
         sleepIn -= dt;
         if (sleepIn <= 0 && sleepers.filter(x => !x.falling).length < S.max[D]) {
@@ -198,7 +221,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
       const sc = {}, wb = {};
       for (const p of players) { const s = P.get(p.pid); sc[p.pid] = s.pts; wb[p.pid] = Math.round(s.wob); }
       const g = { sc, wb, left: Math.ceil(time) };
-      if (solo) g.sl = sleepers.map(s => [s.id, r2(s.x), r2(s.z), r2(s.y), r2(s.yaw), Math.round(s.wob), s.stun > 0 ? 1 : 0]);
+      if (sleepy) g.sl = sleepers.map(s => [s.id, r2(s.x), r2(s.z), r2(s.y), r2(s.yaw), Math.round(s.wob), s.stun > 0 ? 1 : 0]);
       return g;
     },
     get over() { return over; },

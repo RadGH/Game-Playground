@@ -14,7 +14,7 @@ import { placeOrder, r1 } from '../toss-kit.js';
 
 export const meta = {
   id: 'crane-claw', title: 'Claw Machine', blurb: 'Steer the claw over a prize, let the swing settle and DROP — grab the most points!',
-  how: ['Drag anywhere to move the claw, then tap DROP.', 'The claw swings: let it settle over the MIDDLE of a prize for a strong grip.', 'Ball 1 · duck 2 · bear 3 · star 4 · golden egg 8. Five grabs each!'],
+  how: ['Drag anywhere to move the claw, then tap DROP.', 'The claw swings: let it settle over the MIDDLE of a prize for a strong grip.', 'Ball 1 · duck 2 · bear 3 · star 4 · golden egg 8. Five grabs each (four on hard)!'],
   kind: 'ui', min: 1, max: 4, seconds: 52, scoring: 'points', unit: 'points', tags: ['action'], card: 'card-crane-claw', css: true,
   controls: { a: 'Drop' },
 };

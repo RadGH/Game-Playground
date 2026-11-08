@@ -8,8 +8,9 @@
 // The broom is a pure function of the game clock (angle + speed table built at the start from the seed), so a test
 // can say exactly when it passes any spot. A jump is 0.62 s in the air; the arm is thin, so a jump timed anywhere in
 // the half second before it reaches you clears it.
-import { makeBody, stepBody, separate, spawnRing, F } from '../../shared/arena.js';
+import { makeBody, stepBody, separate, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { makeRng, hashStr } from '../../shared/rng.js';
 
 export const meta = {
   id: 'witchs-sweep', title: "Witch's Sweep", blurb: 'Grab the candy and JUMP the giant sweeping broom!',
@@ -63,12 +64,14 @@ export function broomAt(plan, t) {
   return { a: wrap(a), w: dir * speed(t), warn: false };
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
   const plan = makePlan(rng, difficulty), D = plan.D;
   const n = players.length, solo = n === 1, bodies = new Map(), R = meta.arena.r;
-  // start on the side away from the broom
-  const spawns = spawnRing(n, solo ? 4 : 4.4, plan.a0 + Math.PI - (n - 1) * 0.35);
-  players.forEach((p, i) => bodies.set(p.pid, makeBody(spawns[i].x, spawns[i].z, spawns[i].yaw)));
+  // Start in a row on the side away from the broom, in shuffled spots (its own stream from the seed: the game's rng is
+  // untouched). It used to be spawnRing(n) turned round to face away — but a ring spreads the seats right round the
+  // circle, so with 2 players seat 1 stood a hand's width from the broom (seat 0 won 72%), and with 4 seat 3 did.
+  const turn = makeRng(hashStr('sweep-turn:' + seed)), slot = turn.shuffle(players.map((_, i) => i)), rr = solo ? 4 : 4.4;
+  players.forEach((p, i) => { const a = plan.a0 + Math.PI + (slot[i] - (n - 1) / 2) * 0.7, x = Math.sin(a) * rr, z = Math.cos(a) * rr; bodies.set(p.pid, makeBody(x, z, Math.atan2(-x, -z))); });
   const P = new Map(players.map(p => [p.pid, { prevB: 0, candy: 0, air: 0, jumpCool: 0, daze: 0, safe: 0, hits: 0, jumps: 0 }]));
   let candy = [], cid = 0, dropIn = 1.0, el = 0, time = meta.seconds, over = false, prevArms = null, flipWarned = -1;
   const events = [];
@@ -101,8 +104,8 @@ export function create({ rng, players, difficulty = 'normal' }) {
       const t0 = el; el += dt; time -= dt;
       separate([...bodies.values()]);
       for (const b of bodies.values()) { const d = Math.hypot(b.x, b.z), lim = R - 0.45; if (d > lim) { b.x *= lim / d; b.z *= lim / d; } }
-      for (const [pid, b] of bodies) {
-        const s = P.get(pid);
+      for (const pid of turn.shuffle([...bodies.keys()])) {          // shuffled: two reaching one sweet on the same tick is a coin toss, not the lower seat
+        const s = P.get(pid), b = bodies.get(pid);
         if (s.jumpCool > 0) s.jumpCool -= dt;
         if (s.air > 0) { s.air -= dt; const k = 1 - Math.max(0, s.air) / RULES.jumpTime; b.y = r2(Math.sin(k * Math.PI) * RULES.jumpH); if (s.air <= 0) { s.air = 0; b.y = 0; b.flags &= ~F.AIR; s.jumpCool = RULES.jumpCool; } }
         if (s.safe > 0) { s.safe -= dt; if (s.safe <= 0) b.flags &= ~F.GHOST; }

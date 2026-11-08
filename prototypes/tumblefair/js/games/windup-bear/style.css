@@ -1,0 +1,12 @@
+/* Wind-Up Bear: the bits of the boss-kit row that are this game's own — team hearts (with a number, so colour is
+   never the only cue) and the key meter (a key, a bar and n/need). Nothing here is tappable. */
+.game-windup-bear > * { pointer-events: none !important; }
+.wb-hearts { color: #ff3b5c; font-size: 17px; letter-spacing: 1px; -webkit-text-stroke: .6px var(--ink); white-space: nowrap; }
+.wb-hearts small { color: var(--ink); -webkit-text-stroke: 0; font-size: 11px; margin-left: 2px; }
+.wb-hearts.low { animation: wb-throb .6s infinite; }
+@keyframes wb-throb { 50% { opacity: .45; } }
+.wb-key { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.wb-key b { font-size: 14px; }
+.wb-key small { font-size: 11px; }
+.wb-meter { width: 56px; height: 10px; border-radius: 6px; background: #d8cdb6; border: 2px solid var(--ink); overflow: hidden; }
+.wb-meter i { display: block; height: 100%; background: linear-gradient(#ffe27a, #e6a400); transition: width .15s; }

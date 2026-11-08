@@ -12,7 +12,7 @@
 .mm-wish { font-style: normal; font: 900 15px/1 var(--font); background: #fff; border: 3px solid var(--ink); border-radius: 10px; padding: 4px 8px; }
 .mm-wish::before { content: '○ '; }
 .mm-wish.met { background: #b9f5c4; } .mm-wish.met::before { content: '✔ '; color: #138a2c; }
-.mm-style { font: 800 14px/1.1 var(--font); } .mm-style b { font-weight: 900; color: #8a2f9a; } .mm-styled { font-style: normal; color: #5a4a60; }
+.mm-style { font: 800 13px/1.15 var(--font); text-align: center; } .mm-style:empty { display: none; }
 .mm-stage { position: relative; display: grid; justify-items: center; }
 .mm-mirror { width: min(56vw, 210px); aspect-ratio: 200 / 230; border-radius: 48% 48% 18px 18px; background: radial-gradient(circle at 50% 40%, #f4e8ff, #c9b6e8 70%); border: 6px solid #e8b04a;
   box-shadow: 0 0 0 4px var(--ink), 0 0 22px 6px rgba(255, 200, 90, .45); display: grid; place-items: center; overflow: hidden; }
@@ -37,6 +37,8 @@
 .mm-sw { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--ink); flex: none; }
 .mm-done { min-height: 56px; font-size: 24px; background: #3ecf8a; cursor: pointer; }
 .mm-done.on { background: #ffd23f; font-size: 16px; }
+.mm-done.all:not(.on) { animation: mm-pop .8s ease-in-out infinite alternate; }
+.mm-tab.wish::before { content: '★'; position: absolute; top: -9px; left: -3px; font-size: 13px; color: #ffd23f; -webkit-text-stroke: 1px var(--ink); }
 .mm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: min(100%, 640px); }
 .mm-grid:empty { display: none; }
 .mm-look { border: 4px solid var(--ink); border-radius: 18px; background: #f4e8ff; box-shadow: 0 4px 0 var(--ink); padding: 4px 4px 8px; display: grid; justify-items: center; gap: 2px; color: var(--ink); font: inherit; cursor: pointer; }
@@ -54,7 +56,6 @@
 .game-monster-makeover:not([data-phase=dress]) .mm-dress { display: none; }
 .game-monster-makeover.watching .mm-dress { display: none; }
 .game-monster-makeover:is([data-phase=vote], [data-phase=reveal]) .mm-stage { display: none; }
-.game-monster-makeover:not([data-phase=dress]) .mm-styled { display: none; }
 .game-monster-makeover[data-phase=dress] .mm-grid, .game-monster-makeover[data-phase=show] .mm-grid { display: none; }
 @media (max-height: 700px) { .mm-mirror { width: min(42vw, 160px); } .mm-part { min-height: 44px; } }
 @media (min-aspect-ratio: 1/1) { .mm-grid[data-n="3"], .mm-grid[data-n="4"] { grid-template-columns: repeat(var(--c, 4), minmax(0, 1fr)); width: min(100%, 980px); } }

@@ -6,7 +6,8 @@ import * as THREE from 'three';
 import { randomAvatar, makeRng } from '../../../../avatar-2d/js/random.js';
 import { partIds } from '../../../../avatar-2d/js/parts/index.js';
 import { randomChibi2 } from '../../../../avatar-3d/js/chibi2-races.js';
-import { inSeason, seasonByDate } from '../shared/seasons.js';
+import { inSeason, seasonByDate, previewFromUrl } from '../shared/seasons.js';
+const PREVIEW = previewFromUrl(globalThis.location?.search || '');   // M6: ?holiday=winter draws that season's costumes (try-on only)
 import { loadClassOutfits, dressAs } from '../../../../avatar-3d/js/class-outfits.js';
 import { CHIBI2_ANIMS } from '../../../../avatar-3d/js/chibi2.js';
 import { createTvBody } from '../../../thousandvale/js/client/chibi-version.js';   // Chibi 2.5 bodies, baked in slices (no long stall); ?chibi=2 for the old ones
@@ -38,7 +39,7 @@ export function avatarOf(look, costume = 'cos_none') {
   const race = RACES.includes(look?.race) ? look.race : 'human', seed = (look?.seed >>> 0) || 1;
   let av = applyCustom(tidyFace(randomChibi2(randomAvatar, presets, { race, seed, makeRng, known: (slot, id) => partIds(slot).includes(id) }), seed), look?.custom || null);   // tidied: round 6
   av.held = { id: 'none' }; av.offhand = { id: 'none' };                       // nobody carries a sword round the fair
-  if (!inSeason(costumeOf(costume), seasonByDate())) costume = 'cos_none';     // a holiday costume out of season: own clothes
+  if (!inSeason(costumeOf(costume), seasonByDate()) && !(PREVIEW && costumeOf(costume).season === PREVIEW)) costume = 'cos_none';     // a holiday costume out of season: own clothes
   const outfit = costumeOf(costume).outfit;
   if (typeof outfit === 'string' && outfits[outfit]) av = dressAs(av, outfits[outfit], { hands: false });
   else if (outfit && typeof outfit === 'object') {                          // round 5: a costume written out slot by slot

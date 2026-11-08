@@ -13,6 +13,7 @@
 // Solo: two CPU carts, quicker at harder settings. Difficulty also changes how many cracks there are and their beat.
 import { makeBody, stepBody, separate, F, BODY_R } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { makeRng, hashStr } from '../../shared/rng.js';
 
 export const meta = {
   id: 'coffin-cart-rally', title: 'Coffin Cart Rally', blurb: 'Race coffin carts round the crypt — hop the skeleton hands!',
@@ -20,7 +21,7 @@ export const meta = {
   kind: 'arena', min: 1, max: 4, seconds: 75, scoring: 'points', unit: 'laps', tags: ['action', 'holiday'], season: 'halloween',
   controls: { stick: true, a: 'Hop', b: 'Lid slam' },
   move: { mode: 'car', speed: 7.0, accel: 3.2, turn: 3.7, grip: 7, boostMul: 1.5, slowMul: 0.55, stunDrag: 2.4 },
-  arena: { shape: 'rect', hw: 11, hd: 10, wall: true }, pitch: 70, card: 'card-coffin-cart-rally', css: true,
+  arena: { shape: 'rect', hw: 11, hd: 10, wall: true }, pitch: 70, card: 'card-coffin-cart-rally', css: true, rival: true,
 };
 
 /** The crypt layouts: a polygon whose corners are rounded off by `r` (metres, before SCALE). Start = middle of the longest side. */
@@ -106,20 +107,26 @@ export function handAt(ph, period, t) {
   return u < RULES.warn ? 1 : u < RULES.warn + RULES.up ? 2 : 0;
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ seed = 0, rng, players, difficulty = 'normal', rivals = true }) {
   const track = makeTrack(rng.int(0, VARIANTS - 1), difficulty), { loop, at } = track, { N } = loop, LAPS = track.laps, W = RULES.W;
   const arena = { shape: 'rect', hw: track.hw, hd: track.hd, wall: true, segs: track.segs };
   const period = RULES.period[difficulty] ?? RULES.period.normal;
   // every crack's beat: its own phase, so the hands never all come up at once
   const spots = track.spots.map((s, i) => ({ ...s, ph: r2(rng.range(0, period) + i * 0.37) }));
   const gates = track.gates.map((g, i) => ({ ...g, ph: r2(rng.range(0, RULES.gatePeriod) + i * 0.9) }));
-  const solo = players.length === 1;
+  // solo = alone WITH Rattles and Mossy; "Rival when alone" off (rivals false): you race the clock on your own
+  const solo = players.length === 1 && rivals !== false;
   const racers = players.map(p => ({ id: p.pid, pid: p.pid, cpu: false }));
   if (solo) racers.push({ id: -1, cpu: true, name: 'Rattles', lane: 0.7 }, { id: -2, cpu: true, name: 'Mossy', lane: -0.7 });
   const bodies = new Map(), R = new Map();
   const yaw0 = Math.atan2(loop.tx[0], loop.tz[0]);
-  racers.forEach((r, i) => {
-    const row = Math.floor(i / 2), lat = (i % 2 ? -0.85 : 0.85), k = N - 2 - row * 2, [x, z] = at(k, lat);
+  // Its own stream from the seed (the game's rng is untouched): the starting grid and the order lid slams land in. The
+  // grid went by seat — seat 0 always on pole, seats 2-3 always on the second row. Now the people's grid spots are
+  // shuffled (alone, you keep pole ahead of Rattles and Mossy, as before).
+  const turn = makeRng(hashStr('cart-turn:' + seed)), people = racers.filter(r => !r.cpu).length;
+  const grid = [...turn.shuffle([...Array(people).keys()]), ...racers.slice(people).map((_, j) => people + j)];
+  racers.forEach((r, j) => {
+    const i = grid[j], row = Math.floor(i / 2), lat = (i % 2 ? -0.85 : 0.85), k = N - 2 - row * 2, [x, z] = at(k, lat);
     const b = makeBody(r2(x), r2(z), r2(yaw0)); b.flags = F.FROZEN;
     if (!r.cpu) bodies.set(r.pid, b);
     R.set(r.id, { ...r, b, k, prog: k - N, prevB: 0, boost: 0, slow: 0, spin: 0, safe: 0, hop: 0, hopCool: 0, slamCool: 0, fin: -1, finAt: 0, lapShown: 0, stuck: 0, wrongT: 0, hops: 0, grabs: 0, gates: 0, slams: 0, think: rng.range(0.3, 1) });
@@ -169,8 +176,13 @@ export function create({ rng, players, difficulty = 'normal' }) {
     const pa = (bits & IN.A) && !(r.prevB & IN.A), pb = (bits & IN.B) && !(r.prevB & IN.B); r.prevB = bits;
     if (!racing() || r.fin >= 0 || r.spin > 0) return;
     if (pa && r.hop <= 0 && r.hopCool <= 0) { r.hop = RULES.hopTime; r.hopCool = RULES.hopCool; r.b.flags |= F.AIR; r.hops++; events.push({ e: 'hop', id: r.id }); }
-    if (pb && r.slamCool <= 0) {
-      r.slamCool = RULES.slamCool; r.slow = Math.max(r.slow, RULES.slamSelf); r.slams++;
+    if (pb && r.slamCool <= 0) { r.slamCool = RULES.slamCool; r.slow = Math.max(r.slow, RULES.slamSelf); r.slams++; r.slamQ = true; }
+  }
+  /** Every lid slam pressed this tick goes off here, together, in a shuffled order. They went off inside input(), seat
+   *  by seat, so when two carts slammed each other at once seat 0's BOO spun seat 1 out first and seat 1's never went. */
+  function slamAll() {
+    for (const r of turn.shuffle([...R.values()].filter(q => q.slamQ))) {
+      r.slamQ = false;
       const hit = [];
       for (const q of R.values()) {
         if (q === r || q.fin >= 0 || q.b.flags & F.AIR) continue;
@@ -213,6 +225,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
         if (countdown <= 0) for (const r of R.values()) r.b.flags &= ~F.FROZEN;
       } else race += dt;
       for (const r of R.values()) if (r.cpu) moveRacer(r, r.fin >= 0 || !racing() ? null : cpuInput(r));
+      slamAll();
       separate([...R.values()].filter(r => !(r.b.flags & F.AIR)).map(r => r.b));
       const hands = spots.map(s => handAt(s.ph, period, race));
       for (const r of R.values()) {

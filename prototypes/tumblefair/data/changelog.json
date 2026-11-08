@@ -2,6 +2,24 @@
  "_doc": "Player-facing changelog for Tumblefair, newest first (shared/whats-new.js reads it). Append one entry at EVERY publish: plain language, what players will notice, no file names. `id` is stable and unique (date, plus a letter for a second publish that day).",
  "entries": [
   {
+   "id": "2026-11-07",
+   "date": "2026-11-07",
+   "title": "Expansion: The Fair Comes Alive",
+   "items": [
+    "🤖 Computer fairgoers (optional): the host can fill empty seats with computer players (Family, Normal or Tricky). They play every minigame and step aside when a friend joins. A \"Rival when alone\" switch turns solo opponents on or off.",
+    "⚡ Quick Match: a full board game in about ten minutes, with one tap. Every lobby choice now says about how long it takes, and a clock under the scores shows how far through you are.",
+    "🔁 Play again on the final screen starts a rematch with the same players, and a highlight reel shows the night's biggest win, closest finish and luckiest spin.",
+    "📖 New mode, Story Night: five fairground adventures where your choices and minigame wins change the story, ending with a Hero of the Night.",
+    "🎟️ The Fair Pass: earn stickers, level up, unlock costumes and name colours, and take on a new daily challenge every day.",
+    "🎮 Try before it counts: while the rules are up you can already play. Nothing counts until you tap I'm ready. Every game now explains itself in one line with pictures of its buttons.",
+    "⚙️ Comfort settings: bigger text, less motion, and Relaxed timers for the host.",
+    "🎪 10 new games: Bouncy Castle, Seesaw Shove, Candy Floss Frenzy, Big Ball Bop, Funhouse Mirrors, Mystic Fortunes, Tip the Scales, Merry-Go-Guess, and two team bosses: the Wind-Up Bear and the Balloon Baron.",
+    "🔧 16 games rebuilt from your ratings, including Defuse Together, Meteor Dash, Tiptoe Tiger, Safecracker, Laser Limbo, Firefly Catch and Mini Golf.",
+    "⚖️ Fairer starts in seven games, no peeking at hidden answers in three, and tougher team games on Normal and Tricky.",
+    "❄️ Coming December 1: the Winter Fair, with a snowy board, 8 winter games (including the Frost Giant boss), winter versions of favourites and 12 winter costumes."
+   ]
+  },
+  {
    "id": "2026-11-06",
    "date": "2026-11-06",
    "title": "Chat, catch-up and nine game fixes",

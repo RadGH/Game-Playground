@@ -5,7 +5,8 @@
 // between every shot. Balls, clubs, aim line, power meter and the in-hole HUD are the shared js/games/golf-view.js; this
 // file swaps its pill, banner and scorecard for ones that know the round ("Hole 2 of 3", the whole card with totals).
 import { createPuttView } from '../golf-view.js';
-import { esc } from '../../client/gamehud.js';
+import { esc, floatText } from '../../client/gamehud.js';
+import { scoreName } from '../golf-putt.js';
 
 export function createView(ctx) {
   const { THREE, init, players, me } = ctx;
@@ -15,6 +16,10 @@ export function createView(ctx) {
   const waterMat = new THREE.MeshStandardMaterial({ color: '#3d8bd9', roughness: 0.25, metalness: 0.1 });
   mats.push(feltMat, waterMat);
   const mine = {};                                         // this hole's strokes, as they come in
+  // Par Pete (alone only): a see-through ghost ball and his strokes in the pill
+  const pete = { m: null, x: 0, z: 0, tx: 0, tz: 0, st: 0, strokes: 0, seen: false };
+  const peteMat = new THREE.MeshStandardMaterial({ color: '#b48cff', transparent: true, opacity: 0.6, roughness: 0.4 }); mats.push(peteMat);
+  const peteGeo = new THREE.SphereGeometry(0.13, 14, 10); geos.push(peteGeo);
 
   /** The felt in the hole's shape (an outer outline with its counters cut out); Island Green gets its pond. */
   function decorate(H, g) {
@@ -36,15 +41,28 @@ export function createView(ctx) {
 
   // the whole hole is the shot: never let golf-view zoom a tall phone onto the ball (play.js already framed init.arena)
   const view = createPuttView({ ...ctx, camera: () => {} }, {
+    aimDot: 0.12,                                           // M4: the aim line was dots too small to see with the whole hole on a phone
     theme: { field: '#d9c89c', felt: '#35b04f', rail: '#ffffff', railTop: '#e8434f', bumper: '#ff5a7a', bumperTop: '#ff8fb0', block: '#8e6b4a', ramp: '#7fd36b', tee: '#1f7a35', flag: '#ffd23f' },
     decorate,
     onState: g => {
+      if (g.cpu) {
+        const [x, z, st, strokes] = g.cpu; pete.tx = x; pete.tz = z; pete.st = st; pete.strokes = strokes;
+        if (!pete.m) { pete.m = new THREE.Mesh(peteGeo, peteMat); pete.m.position.y = 0.13; ctx.group.add(pete.m); pete.tag = ctx.stage.tag(pete.m, { text: 'Par Pete', height: 0.5, cls: 'mg-pete' }); }
+        if (!pete.seen) { pete.x = x; pete.z = z; pete.seen = true; }
+      }
       const pill = ctx.ui.querySelector('.gp-pill'); if (!pill) return;
-      pill.innerHTML = g.ph === 'end' ? `<b>Hole ${R.at + 1} of ${R.of} done</b>` : `<b>Hole ${R.at + 1}/${R.of}</b> <span>${esc(H0.name)}</span> <em>Par ${H0.par}</em> <span class="gp-hl${g.hl <= 10 && g.ph === 'play' ? ' hurry' : ''}">${g.ph === 'play' ? g.hl + 's' : '…'}</span>`;
+      const vs = g.cpu ? ` <i class="mg-vs">Pete ${g.cpu[3]}</i>` : '';
+      pill.innerHTML = g.ph === 'end' ? `<b>Hole ${R.at + 1} of ${R.of} done</b>${vs}` : `<b>Hole ${R.at + 1}/${R.of}</b> <span>${esc(H0.name)}</span> <em>Par ${H0.par}</em>${vs} <span class="gp-hl${g.hl <= 10 && g.ph === 'play' ? ' hurry' : ''}">${g.ph === 'play' ? g.hl + 's' : '…'}</span>`;
+    },
+    onFrame: dt => {
+      if (!pete.m) return;
+      const k = Math.min(1, (dt || 0.016) * 14); pete.x += (pete.tx - pete.x) * k; pete.z += (pete.tz - pete.z) * k;
+      pete.m.position.x = pete.x; pete.m.position.z = pete.z; pete.m.visible = pete.st < 2;
     },
     onEvent: ev => {
       if (ev.e === 'hole') { const b = ctx.ui.querySelector('.gp-banner'); if (b) b.innerHTML = `Hole ${R.at + 1}<small>${esc(H0.name)} · Par ${H0.par}</small>`; }
       if (ev.e === 'in' && mine[ev.pid] == null) mine[ev.pid] = ev.strokes;
+      if (ev.e === 'cpuIn' && pete.m) floatText(ctx.stage, pete.x, 0.6, pete.z, ev.pickup ? 'Pete picks up' : `Pete: ${scoreName(ev.strokes, ev.par)}`, 'good');
       if (ev.e === 'holeEnd') Object.assign(mine, ev.cards);
       if (ev.e === 'holeEnd' || ev.e === 'end') drawCard();
     },
@@ -70,7 +88,7 @@ export function createView(ctx) {
   drawCard(R.at > 0);                                      // from the second hole on: the card so far, until the putting starts
 
   const dispose = view.dispose;
-  view.dispose = () => { dispose(); for (const m of mats) m.dispose(); for (const g of geos) g.dispose(); };
+  view.dispose = () => { dispose(); pete.tag?.remove(); for (const m of mats) m.dispose(); for (const g of geos) g.dispose(); };
   view.halloween = false;                                   // never dressed for a holiday (owner: no Halloween in Golf mode)
   return view;
 }

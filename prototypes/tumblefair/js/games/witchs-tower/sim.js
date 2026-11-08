@@ -28,7 +28,11 @@ export const RULES = {
   cone: 0.62, overhead: 2.6, flight: 0.6, missDist: 5, dizzy: 1.0,
   puddleR: 1.15, puddleLife: 7, maxPuddles: 7, splashStun: 0.45, knock: 3,
 };
-export const hpFor = (n, d) => Math.round(byDiff(d, RULES.hp) * (1 + RULES.hpPer * (n - 1)));
+// M2 bug (2026-11-07): an all-Family CPU team beat her at every difficulty. Easy keeps the old formula; Normal and
+// Tricky read a health bar per team size, measured with tools/cpu-bench.mjs so a Normal team usually wins and a Family
+// team usually does not (tests/coop-difficulty.test.js).
+export const HP_BY_SIZE = { normal: [44, 62, 76, 86], hard: [52, 72, 88, 98] };
+export const hpFor = (n, d) => (HP_BY_SIZE[d] ? HP_BY_SIZE[d][Math.min(4, Math.max(1, n)) - 1] : Math.round(byDiff(d, RULES.hp) * (1 + RULES.hpPer * (n - 1))));
 /** Where the witch flies at time t: a figure-eight over the tower top. */
 export const witchAt = (t, w, ph) => ({ x: 4.0 * Math.sin(w * t), z: 2.8 * Math.sin(2 * w * t + ph) - 0.4 });
 

@@ -22,7 +22,7 @@ export const meta = {
   how: ['Tap PULL once on every drum beat — on the beat is strongest.', 'Mashing is weaker than a steady rhythm!', 'Drag the red ribbon over your line to win the pull.', 'Best of three pulls.'],
   kind: 'arena', min: 1, max: 4, seconds: 62, scoring: 'points', unit: 'pulls', tags: ['action'],
   controls: { stick: false, a: 'PULL' }, move: { speed: 1, accel: 10 },       // everyone holds the rope (F.FROZEN)
-  arena: { shape: 'rect', hw: 5.4, hd: 2.6, wall: true }, pitch: 50, card: 'card-rope-rumble', css: true,   // init() sends the frame for the actual rope layout
+  arena: { shape: 'rect', hw: 5.4, hd: 2.6, wall: true }, pitch: 50, card: 'card-rope-rumble', css: true, rival: true,   // init() sends the frame for the actual rope layout
 };
 
 export const RULES = {
@@ -40,9 +40,9 @@ export const RULES = {
 export const CPU = -1;
 const r2 = v => Math.round(v * 100) / 100;
 /** The sides for n players: [{ pids: [...], dir: [x, z] }] (pid CPU = the strongman). */
-export function sidesFor(players) {
+export function sidesFor(players, rivals = true) {
   const ps = [...players].sort((a, b) => a.seat - b.seat).map(p => p.pid), n = ps.length;
-  if (n === 1) return [{ pids: ps, dir: [-1, 0] }, { pids: [CPU], dir: [1, 0] }];
+  if (n === 1) return [{ pids: ps, dir: [-1, 0] }, { pids: rivals === false ? [] : [CPU], dir: [1, 0] }];   // rivals off: the far end is tied to a stake
   if (n === 2) return [{ pids: [ps[0]], dir: [-1, 0] }, { pids: [ps[1]], dir: [1, 0] }];
   if (n === 3) return [0, 1, 2].map(i => { const a = Math.PI + i * Math.PI * 2 / 3; return { pids: [ps[i]], dir: [r2(Math.sin(a)), r2(Math.cos(a))] }; });
   return [{ pids: [ps[0], ps[1]], dir: [-1, 0] }, { pids: [ps[2], ps[3]], dir: [1, 0] }];
@@ -51,9 +51,10 @@ export function sidesFor(players) {
 // Round 12: where the tug of war is (looks only — the green, the puddle in the middle, the bales round the edge), from the
 // seed so the rng and the rules are untouched. Names and colours: view.js GROUNDS.
 export const GROUND_COUNT = 5;
-export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
-  const S = RULES, n = players.length, solo = n === 1, bps = (S.bpm[difficulty] || S.bpm.normal) / 60;
-  const sides = sidesFor(players).map(s => ({ ...s, wins: 0, power: 0 }));
+export function create({ seed = 0, rng, players, difficulty = 'normal', rivals = true }) {
+  // solo = alone WITH Big Barnaby; "Rival when alone" off (rivals false): no Barnaby, the far end is tied to a stake
+  const S = RULES, n = players.length, solo = n === 1 && rivals !== false, bps = (S.bpm[difficulty] || S.bpm.normal) / 60;
+  const sides = sidesFor(players, rivals).map(s => ({ ...s, wins: 0, power: 0 }));
   const sideOf = new Map(); sides.forEach((s, i) => s.pids.forEach(pid => sideOf.set(pid, i)));
   const bodies = new Map(), events = [];
   const P = new Map(players.map(p => [p.pid, { prevB: 0, last: -99, pend: null, pulls: 0, perfects: 0, power: 0 }]));

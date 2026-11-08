@@ -297,6 +297,77 @@
    "season": "halloween",
    "short": "Cushion",
    "text": "A bat drops a Whoopee Cushion card at {p}'s feet."
+  },
+  {
+   "id": "w_gift",
+   "w": 3,
+   "season": "winter",
+   "do": "tickets",
+   "n": 4,
+   "text": "A jolly gift-giver in a red coat hands {p} a present. Inside: 4 tickets!",
+   "short": "+4"
+  },
+  {
+   "id": "w_slip",
+   "w": 2,
+   "season": "winter",
+   "do": "tickets",
+   "n": -2,
+   "text": "{p} slips on an icy patch and 2 tickets skate away.",
+   "short": "−2"
+  },
+  {
+   "id": "w_sled",
+   "w": 2,
+   "season": "winter",
+   "do": "allmove",
+   "n": 1,
+   "text": "Everyone piles onto a big toboggan! All slide 1 space forward.",
+   "short": "All fwd 1"
+  },
+  {
+   "id": "w_snowball_swap",
+   "w": 2,
+   "season": "winter",
+   "do": "swap",
+   "text": "Snowball fight! {p} and {o} dive for cover and land in each other's places.",
+   "short": "Swap"
+  },
+  {
+   "id": "w_reindeer",
+   "w": 2,
+   "season": "winter",
+   "do": "boost",
+   "boost": "gold",
+   "text": "A friendly reindeer gives {p} a ride. Next roll uses two dice!",
+   "short": "2 dice"
+  },
+  {
+   "id": "w_cocoa",
+   "w": 2,
+   "season": "winter",
+   "do": "pinata",
+   "n": 3,
+   "m": 1,
+   "text": "{p} opens the hot cocoa stand: +3 for {p}, +1 for everyone else.",
+   "short": "Cocoa"
+  },
+  {
+   "id": "w_snowman",
+   "w": 1,
+   "season": "winter",
+   "do": "ribbonother",
+   "text": "The great snowman contest! The judges pick {o}'s snowman: a ribbon for {o}!",
+   "short": "Raffle"
+  },
+  {
+   "id": "w_stocking_card",
+   "w": 2,
+   "do": "item",
+   "item": "double",
+   "season": "winter",
+   "short": "Double Die",
+   "text": "{p} finds a Double Die card tucked in a stocking."
   }
  ],
  "bulletins": [
@@ -487,6 +558,53 @@
    "mods": {
     "pot": 12
    }
+  },
+  {
+   "id": "w_gift_night",
+   "w": 4,
+   "season": "winter",
+   "title": "Gift Night!",
+   "text": "Every ticket stand is wrapped up with a bow: they pay 5 this round.",
+   "mods": {
+    "ticket": 5
+   },
+   "short": "Stands pay 5"
+  },
+  {
+   "id": "w_blizzard",
+   "w": 3,
+   "season": "winter",
+   "title": "Blizzard!",
+   "text": "Snowdrifts everywhere: puddles are deep snow and cost 4 this round.",
+   "mods": {
+    "pit": 4
+   },
+   "short": "Puddles −4"
+  },
+  {
+   "id": "w_parade",
+   "w": 3,
+   "season": "winter",
+   "title": "Lantern Parade!",
+   "text": "Everyone marches 2 spaces forward with a lantern.",
+   "mods": {
+    "parade": 2
+   },
+   "short": "Everyone +2 spaces"
+  },
+  {
+   "id": "w_snowfall",
+   "w": 2,
+   "season": "winter",
+   "title": "Ticket Snow",
+   "text": "It is snowing tickets! Everyone catches a few.",
+   "mods": {
+    "pinata": [
+     2,
+     4
+    ]
+   },
+   "short": "Free tickets!"
   }
  ],
  "board": {

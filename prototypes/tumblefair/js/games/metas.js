@@ -63,21 +63,23 @@ export const GAMES = Object.freeze({
   "meta": {
    "id": "meteor-dash",
    "title": "Meteor Dash",
-   "blurb": "Dodge the falling meteors and be the last one standing!",
+   "blurb": "Stay on the crumbling island while meteors fall — most seconds standing wins!",
    "how": [
-    "A red ring means a meteor is about to land there. Get out!",
-    "Blasts knock you back and smash the floor. Holes drop you in the lava.",
-    "Press HOP to jump over cracks and blasts."
+    "Stay on the island: every second standing is a point.",
+    "A red ring = a meteor lands there. Step out of it!",
+    "Fall in a hole and you pop back a few seconds later.",
+    "HOP floats you over holes and blasts."
    ],
    "kind": "arena",
    "min": 1,
    "max": 4,
    "seconds": 60,
-   "scoring": "survival",
+   "scoring": "points",
    "unit": "sec",
    "tags": [
     "action"
    ],
+   "rival": true,
    "controls": {
     "stick": true,
     "a": "Hop"
@@ -251,9 +253,9 @@ export const GAMES = Object.freeze({
    "title": "Laser Limbo",
    "blurb": "Jump and duck the sweeping lasers — last one standing!",
    "how": [
-    "Lasers sweep the stage: press DODGE just before one reaches you.",
-    "You hop the orange low beams and duck the purple high ones by yourself.",
-    "You have 3 lives. Last one standing wins!"
+    "Lasers sweep the stage. When one is coming, tap DODGE.",
+    "It hops the orange low beams and ducks the purple high ones for you, at the right moment.",
+    "Tap when the label says PRESS (the last second). 3 lives — last one standing wins!"
    ],
    "kind": "arena",
    "min": 1,
@@ -264,6 +266,7 @@ export const GAMES = Object.freeze({
    "tags": [
     "action"
    ],
+   "rival": true,
    "controls": {
     "stick": true,
     "a": "Dodge"
@@ -277,7 +280,14 @@ export const GAMES = Object.freeze({
    "arena": {
     "shape": "circle",
     "r": 7,
-    "wall": true
+    "wall": true,
+    "posts": [
+     {
+      "x": 0,
+      "z": 0,
+      "r": 0.9
+     }
+    ]
    },
    "pitch": 58,
    "card": "card-laser-limbo",
@@ -562,7 +572,8 @@ export const GAMES = Object.freeze({
    },
    "pitch": 70,
    "card": "card-wobblewheel-rally",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "ring-a-ding-rumble": {
@@ -605,7 +616,8 @@ export const GAMES = Object.freeze({
    },
    "pitch": 56,
    "card": "card-ring-a-ding-rumble",
-   "css": true
+   "css": true,
+   "rival": "needed"
   }
  },
  "costume-catwalk": {
@@ -678,7 +690,8 @@ export const GAMES = Object.freeze({
     "social"
    ],
    "card": "card-going-going-gone",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "tile-flip-race": {
@@ -703,7 +716,8 @@ export const GAMES = Object.freeze({
     "action"
    ],
    "card": "card-tile-flip-race",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "monster-forecast": {
@@ -858,24 +872,25 @@ export const GAMES = Object.freeze({
   "meta": {
    "id": "portal-routing",
    "title": "Portal Routing",
-   "blurb": "Flip your gates to roll the marble through the portals to the goal!",
+   "blurb": "Race to roll your marble through the portals to the flag — flip your gates fast!",
    "how": [
-    "A marble rolls by itself. Gates with your colour and shape are yours: tap to flip them.",
-    "The glowing trail shows where it will go: flip until it reaches the flag ✓.",
-    "Each stage is faster. Clear the goal number of stages together in time!"
+    "Everyone gets the same boards. Tap a gate to flip which way it points.",
+    "The glowing trail shows where your marble will roll — up to the next portal.",
+    "Reach the flag to go on to the next board. Most boards cleared wins!"
    ],
    "kind": "ui",
    "min": 1,
    "max": 4,
    "seconds": 60,
-   "scoring": "coop",
-   "unit": "stages",
+   "scoring": "points",
+   "unit": "boards",
    "tags": [
-    "coop",
-    "puzzle"
+    "puzzle",
+    "action"
    ],
    "card": "card-portal-routing",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "word-relay": {
@@ -898,31 +913,32 @@ export const GAMES = Object.freeze({
     "puzzle"
    ],
    "card": "card-word-relay",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "safecracker": {
   "meta": {
    "id": "safecracker",
    "title": "Safecracker",
-   "blurb": "Crack the codes from the clues before anyone else!",
+   "blurb": "Turn the dial until it clicks, then press SET. Open the most safes!",
    "how": [
-    "Punch in a guess. RIGHT = right number, right place. MOVED = in the code, wrong place.",
-    "Crack it before your tries run out, or the safe jams.",
-    "Stuck? After 2 guesses you may LISTEN once a safe: one number, but it costs 6 points and 4 s.",
-    "First to open each safe gets a bonus!"
+    "◀ ▶ turn the dial. The lamp gets hotter as you get close.",
+    "When it says CLICK!, press SET. Three numbers open a safe.",
+    "Wrong SET jams the dial for a second."
    ],
    "kind": "ui",
    "min": 1,
    "max": 4,
-   "seconds": 60,
+   "seconds": 50,
    "scoring": "points",
-   "unit": "points",
+   "unit": "safes",
    "tags": [
-    "puzzle"
+    "action"
    ],
    "card": "card-safecracker",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "treasure-map-bluff": {
@@ -947,7 +963,8 @@ export const GAMES = Object.freeze({
     "chance"
    ],
    "card": "card-treasure-map-bluff",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "auction-of-chaos": {
@@ -972,7 +989,8 @@ export const GAMES = Object.freeze({
     "social"
    ],
    "card": "card-auction-of-chaos",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "alibi-assembly": {
@@ -1030,11 +1048,11 @@ export const GAMES = Object.freeze({
   "meta": {
    "id": "two-truths-one-goblin",
    "title": "Two Truths, One Goblin",
-   "blurb": "Two claims are true and one is a Goblin. Spot the lie!",
+   "blurb": "Look at the prize stall, then spot the one claim that is a lie!",
    "how": [
-    "Each round one player is the Teller. Three facts about them go up: two are true, one is a lie (the Goblin).",
-    "Check their name, colour and points on the chips, and remember what happened earlier.",
-    "Tap the fact you think is the lie. Catch it: +2. The Teller gets +2 for each player fooled."
+    "Look hard at the prize stall — it is only shown for a few seconds.",
+    "Then the Goblin makes three claims about it. Two are true, one is a lie.",
+    "Tap the lie: +2. Your turn as the Goblin? Pick the sneakier lie and fool them!"
    ],
    "kind": "ui",
    "min": 1,
@@ -1043,10 +1061,12 @@ export const GAMES = Object.freeze({
    "scoring": "points",
    "unit": "points",
    "tags": [
-    "social"
+    "social",
+    "puzzle"
    ],
    "card": "card-two-truths-one-goblin",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "dragons-weak-spot": {
@@ -1097,9 +1117,9 @@ export const GAMES = Object.freeze({
    "title": "Kitchen Catastrophe",
    "blurb": "Grab your ingredients and build every order on the tray, in the right order!",
    "how": [
-    "Stations with YOUR colour and shape are yours: press A there to grab.",
-    "Press A at the tray to add it. Follow the recipe order!",
-    "A wrong step spoils the tray. Fill enough orders together!"
+    "Counters with a ★ are yours: stand on the mat, press A to grab.",
+    "Bring it to the TRAY and press A when it is NEXT on the order card.",
+    "Fill enough orders together before the bell!"
    ],
    "kind": "arena",
    "min": 1,
@@ -1113,6 +1133,7 @@ export const GAMES = Object.freeze({
    ],
    "card": "card-kitchen-catastrophe",
    "css": true,
+   "rival": true,
    "controls": {
     "stick": true,
     "a": "Grab / Add"
@@ -1176,16 +1197,16 @@ export const GAMES = Object.freeze({
   "meta": {
    "id": "defuse-together",
    "title": "Defuse Together",
-   "blurb": "One holds the confetti cannon, the others hold the rule book — shout out the right wire before it blows!",
+   "blurb": "One phone holds the confetti cannon, the others hold the rule book — pass the right wire before it pops!",
    "how": [
-    "The DEVICE moves round the team: its holder says the CLUE out loud.",
-    "The others hold the RULE BOOK: \"clue → cut the RED wire\". Shout it!",
+    "Holding the DEVICE? Tap CALL OUT, then cut the wire your team sends.",
+    "Holding the RULE BOOK? Find the clue on your page and tap that line to send it.",
     "A wrong wire burns the fuse. Cut all 5 in time!"
    ],
    "kind": "ui",
    "min": 1,
    "max": 4,
-   "seconds": 80,
+   "seconds": 90,
    "scoring": "coop",
    "unit": "points",
    "tags": [
@@ -1194,7 +1215,8 @@ export const GAMES = Object.freeze({
     "social"
    ],
    "card": "card-defuse-together",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "ghost-photographer": {
@@ -1247,9 +1269,8 @@ export const GAMES = Object.freeze({
    "blurb": "Keep the shelter warm, dry and fed until the storm passes!",
    "how": [
     "Each beat the storm shows what it will hit: \"−2 Roof\".",
-    "Play ONE card from your hand to cover it before the beat ends.",
-    "Talk it over: a meter tops out at 10, and if any hits 0 you lose!",
-    "Survive all 13 beats."
+    "Tap ONE card that covers it — the ones that do say \"covers it\".",
+    "If any meter hits 0 you all lose. Survive all 10 beats!"
    ],
    "kind": "ui",
    "min": 1,
@@ -1262,7 +1283,8 @@ export const GAMES = Object.freeze({
     "puzzle"
    ],
    "card": "card-storm-shelter",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "jellybean-jar": {
@@ -1322,7 +1344,7 @@ export const GAMES = Object.freeze({
    "how": [
     "A picture shows where its tail goes (the glowing star) — or its horn, its nose, the candle… Remember it!",
     "Then it hides. Tap where it goes. You can tap again to move your pin.",
-    "Closest pin wins the round. Each round has a trick: slides, spins and swaps!",
+    "Closer = more points, and the closest pin gets +3. Each round has a trick: slides, spins and swaps!",
     "Five rounds."
    ],
    "kind": "ui",
@@ -1368,22 +1390,23 @@ export const GAMES = Object.freeze({
   "meta": {
    "id": "tiptoe-tiger",
    "title": "Tiptoe Tiger",
-   "blurb": "Creep up while the tiger sings — freeze when it turns, and ring its bell first!",
+   "blurb": "Creep up while the tiger sings, freeze when it turns — first to ring its bell 3 times wins!",
    "how": [
-    "Walk forward while the tiger has its back to you.",
-    "Its tail twitches and FREEZE! pops up — let go of the stick!",
+    "Walk up the field while the tiger has its back to you.",
+    "FREEZE! pops up: let go of the stick (or hold A).",
     "Moving while it looks = ROAR, back to the start.",
-    "Hold A to stand like a statue. Ring the bell to win!"
+    "Ring the bell = 1 point. First to 3 bells wins!"
    ],
    "kind": "arena",
    "min": 1,
    "max": 4,
    "seconds": 75,
    "scoring": "points",
-   "unit": "m",
+   "unit": "bells",
    "tags": [
     "action"
    ],
+   "rival": true,
    "controls": {
     "stick": true,
     "a": "Statue"
@@ -1525,7 +1548,8 @@ export const GAMES = Object.freeze({
    },
    "pitch": 58,
    "card": "card-fizzpop-pass",
-   "css": true
+   "css": true,
+   "rival": "needed"
   }
  },
  "bumper-bash": {
@@ -1543,6 +1567,11 @@ export const GAMES = Object.freeze({
    "min": 1,
    "max": 4,
    "seconds": 75,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
    "controls": {
     "stick": true
    },
@@ -1619,10 +1648,9 @@ export const GAMES = Object.freeze({
    "title": "Mole Mallet",
    "blurb": "Bonk the moles as they pop up — but not the bombs!",
    "how": [
-    "Moles pop out of the holes: run up to one and press BONK!",
+    "Run up to a mole and press BONK! Your ring turns gold when one is in reach.",
     "Golden moles are worth 3, but they are quick.",
-    "A mole in a black helmet is a BOMB — bonk it and you get dizzy.",
-    "Bonk a player to make them dizzy too. Most bonks wins!"
+    "Black ball with a fuse = BOMB. Bonk it and you get dizzy."
    ],
    "kind": "arena",
    "min": 1,
@@ -1633,6 +1661,7 @@ export const GAMES = Object.freeze({
    "tags": [
     "action"
    ],
+   "rival": true,
    "controls": {
     "stick": true,
     "a": "BONK!"
@@ -1688,7 +1717,8 @@ export const GAMES = Object.freeze({
    },
    "pitch": 50,
    "card": "card-rope-rumble",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "lantern-leap": {
@@ -2292,6 +2322,7 @@ export const GAMES = Object.freeze({
    "tags": [
     "action"
    ],
+   "rival": true,
    "controls": {
     "stick": true,
     "a": "Swing",
@@ -2304,9 +2335,9 @@ export const GAMES = Object.freeze({
    },
    "arena": {
     "shape": "rect",
-    "hw": 6.5,
-    "hd": 4.6,
-    "wall": false
+    "hw": 6.95,
+    "hd": 5.05,
+    "wall": true
    },
    "pitch": 56,
    "card": "card-pillow-fight",
@@ -2335,7 +2366,8 @@ export const GAMES = Object.freeze({
     "action"
    ],
    "card": "card-odd-one-out",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "crow-count": {
@@ -2497,10 +2529,9 @@ export const GAMES = Object.freeze({
    "title": "Firefly Catch",
    "blurb": "Swing your net and catch the most fireflies before the night falls!",
    "how": [
-    "A swings your net at the fireflies in front of you.",
+    "Walk near a firefly and tap NET: you turn and swing.",
     "Golden fireflies are worth 3!",
-    "B by a bush shakes it: more fireflies pop out.",
-    "Fireflies dart away if you rush them."
+    "Swing by a glowing bush: more fireflies pop out."
    ],
    "kind": "arena",
    "min": 1,
@@ -2511,10 +2542,10 @@ export const GAMES = Object.freeze({
    "tags": [
     "action"
    ],
+   "rival": true,
    "controls": {
     "stick": true,
-    "a": "Net",
-    "b": "Shake"
+    "a": "Net"
    },
    "move": {
     "speed": 5.6,
@@ -2874,7 +2905,8 @@ export const GAMES = Object.freeze({
     "action"
    ],
    "card": "card-pier-pressure",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "net-gains": {
@@ -2885,7 +2917,7 @@ export const GAMES = Object.freeze({
    "how": [
     "You and a teammate hold one net. Walk it through the fish!",
     "Too close or too far apart and the net does not catch.",
-    "Touch your dock with a full net to bank the fish.",
+    "Touch your own dock to bank what is in the net (it holds 8).",
     "A splashes: fish dart away from you."
    ],
    "kind": "arena",
@@ -3003,7 +3035,8 @@ export const GAMES = Object.freeze({
     "action"
    ],
    "card": "card-letter-shot",
-   "css": true
+   "css": true,
+   "rival": "needed"
   }
  },
  "court-clash": {
@@ -3045,7 +3078,8 @@ export const GAMES = Object.freeze({
    },
    "pitch": 42,
    "card": "card-court-clash",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "balloon-darts": {
@@ -3121,6 +3155,7 @@ export const GAMES = Object.freeze({
    ],
    "card": "card-duck-derby",
    "css": true,
+   "rival": true,
    "controls": {
     "a": "Left paddle",
     "b": "Right paddle"
@@ -3275,7 +3310,8 @@ export const GAMES = Object.freeze({
    },
    "pitch": 46,
    "card": "card-downhill-derby",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "carousel-recall": {
@@ -3415,6 +3451,7 @@ export const GAMES = Object.freeze({
    ],
    "card": "card-hide-and-seek",
    "css": true,
+   "rival": true,
    "controls": {
     "stick": true,
     "a": "Hide / Look",
@@ -3455,7 +3492,8 @@ export const GAMES = Object.freeze({
     "action"
    ],
    "card": "card-jousting",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "floor-is-lava": {
@@ -3627,9 +3665,9 @@ export const GAMES = Object.freeze({
    "title": "Fair Darts",
    "blurb": "Steady your wobbly aim and land darts on the bullseye!",
    "how": [
-    "Your aim ring wanders and breathes in and out.",
-    "Tap THROW when it drifts in close to the gold bullseye.",
-    "Bullseye 10, then 5, 3, 2, 1. The last three darts count DOUBLE!"
+    "Tap THROW when your wandering aim ring drifts in over the gold bullseye.",
+    "Bullseye 10, then 5, 3, 2, 1. The last three darts count DOUBLE!",
+    "Everyone gets the same wobble: best timing wins."
    ],
    "kind": "ui",
    "min": 1,
@@ -3642,6 +3680,7 @@ export const GAMES = Object.freeze({
    ],
    "card": "card-fair-darts",
    "css": true,
+   "rival": true,
    "controls": {
     "a": "Throw"
    }
@@ -3697,7 +3736,7 @@ export const GAMES = Object.freeze({
    "how": [
     "Drag anywhere to move the claw, then tap DROP.",
     "The claw swings: let it settle over the MIDDLE of a prize for a strong grip.",
-    "Ball 1 · duck 2 · bear 3 · star 4 · golden egg 8. Five grabs each!"
+    "Ball 1 · duck 2 · bear 3 · star 4 · golden egg 8. Five grabs each (four on hard)!"
    ],
    "kind": "ui",
    "min": 1,
@@ -3940,7 +3979,8 @@ export const GAMES = Object.freeze({
    },
    "pitch": 70,
    "card": "card-coffin-cart-rally",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "witchs-sweep": {
@@ -4046,17 +4086,16 @@ export const GAMES = Object.freeze({
   "meta": {
    "id": "monster-makeover",
    "title": "Monster Makeover",
-   "blurb": "Give the monster the makeover it asked for — then vote for the best look!",
+   "blurb": "Give the monster every wish on its card — fastest full makeover wins the ribbon!",
    "how": [
-    "A monster wants a makeover: read its request card.",
-    "Tap parts onto it: fur, eyes, horns, hat, mouth and more.",
-    "It gives a star for each wish, and more for its style.",
-    "Then vote for your favourite look (not your own!)."
+    "Read the wish card. Tap parts onto the monster until every wish is ticked.",
+    "Press DONE. First with every wish met wins the Quick ribbon (+1).",
+    "One star per wish. With 3 or more players, vote for a favourite look (not your own!)."
    ],
    "kind": "ui",
    "min": 1,
    "max": 4,
-   "seconds": 72,
+   "seconds": 84,
    "scoring": "vote",
    "unit": "points",
    "tags": [
@@ -4065,7 +4104,8 @@ export const GAMES = Object.freeze({
    ],
    "season": "halloween",
    "card": "card-monster-makeover",
-   "css": true
+   "css": true,
+   "rival": true
   }
  },
  "slime-slingers": {
@@ -4306,6 +4346,7 @@ export const GAMES = Object.freeze({
    },
    "pitch": 64,
    "css": true,
+   "rival": true,
    "card": "card-putt-party"
   }
  },
@@ -4315,7 +4356,7 @@ export const GAMES = Object.freeze({
    "title": "Fairway Golf",
    "blurb": "Real golf holes — tee off, find the green and hole out in as few strokes as you can!",
    "how": [
-    "Aim with ◀ ▶ or drag. The best club is picked for you — B changes it.",
+    "Aim with ◀ ▶ or drag. The best club is picked for you — tap the club to change it.",
     "Tap to stop the POWER bar, then tap as the needle hits the middle.",
     "On the green, one tap putts. Mind the wind, the bunkers and the water!"
    ],
@@ -4331,6 +4372,671 @@ export const GAMES = Object.freeze({
    ],
    "card": "card-fairway-golf",
    "css": true
+  }
+ },
+ "frost-giant": {
+  "meta": {
+   "id": "frost-giant",
+   "title": "Frost Giant's Weak Spot",
+   "blurb": "Grab snowballs, dodge the giant, and hit its crystals in the secret order!",
+   "how": [
+    "Stand in a snow pile to scoop up snowballs (3 at most).",
+    "Icicles: get out of the ring. Freeze wave: HOP as it reaches you.",
+    "When it gets dizzy, your phone shows PART of the secret order. Call it out!",
+    "Stand on the right pad and THROW. Beat it before the bell!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 90,
+   "scoring": "coop",
+   "unit": "damage",
+   "tags": [
+    "coop",
+    "action",
+    "holiday"
+   ],
+   "season": "winter",
+   "rival": true,
+   "controls": {
+    "stick": true,
+    "a": "Throw",
+    "b": "Hop"
+   },
+   "move": {
+    "speed": 6.2,
+    "accel": 24,
+    "stunDrag": 3
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8,
+    "hd": 5.5,
+    "wall": true
+   },
+   "pitch": 52,
+   "card": "card-frost-giant",
+   "css": true
+  }
+ },
+ "cocoa-pour": {
+  "meta": {
+   "id": "cocoa-pour",
+   "title": "Cocoa Pour",
+   "blurb": "Hold to pour the cocoa and let go right on the line. Don't spill!",
+   "how": [
+    "HOLD the pour button. Let go when the cocoa reaches the dotted line.",
+    "The steam hides the top bit, so judge it!",
+    "Each pot pours differently: steady, speeding up, or in glugs.",
+    "Spill over the top and the round scores nothing."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 75,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "winter",
+   "card": "card-cocoa-pour",
+   "css": true,
+   "rival": true
+  }
+ },
+ "snowman-styling": {
+  "meta": {
+   "id": "snowman-styling",
+   "title": "Snowman Styling",
+   "blurb": "Dress your snowman for the theme, then vote for the best in the snow!",
+   "how": [
+    "A theme card shows what the judges love.",
+    "Dress your snowman: hat, scarf, nose, eyes, buttons, arms.",
+    "Vote for the best snowman (not your own!).",
+    "Votes are points. The best fit for the theme gets the Frost Ribbon."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 72,
+   "scoring": "vote",
+   "unit": "points",
+   "tags": [
+    "social",
+    "holiday"
+   ],
+   "season": "winter",
+   "card": "card-snowman-styling",
+   "css": true,
+   "rival": true
+  }
+ },
+ "present-peek": {
+  "meta": {
+   "id": "present-peek",
+   "title": "Present Peek",
+   "blurb": "Guess the toy under the wrapping paper before it is all torn off!",
+   "how": [
+    "A present unwraps strip by strip.",
+    "Tap the toy you think is inside: sooner = more points.",
+    "A wrong guess locks you out for that present.",
+    "First right answer gets +2!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 74,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "holiday"
+   ],
+   "season": "winter",
+   "card": "card-present-peek",
+   "css": true,
+   "rival": true
+  }
+ },
+ "twinkle-tree": {
+  "meta": {
+   "id": "twinkle-tree",
+   "title": "Twinkle Tree",
+   "blurb": "Watch the tree twinkle, then tap the lights back in the same order!",
+   "how": [
+    "The tree blinks a pattern of lights.",
+    "Tap the same lights in the same order.",
+    "Every right tap scores. A whole pattern is +2!",
+    "The pattern grows by one light every round."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 90,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "holiday"
+   ],
+   "season": "winter",
+   "card": "card-twinkle-tree",
+   "css": true,
+   "rival": true
+  }
+ },
+ "sled-bash": {
+  "meta": {
+   "id": "sled-bash",
+   "title": "Sled Bash",
+   "blurb": "Slide your sled across the frozen pond and bump everyone into the snowdrifts!",
+   "how": [
+    "The ice is slippery — you slide!",
+    "A = BOOST: lunge into someone to send them spinning.",
+    "Knock a sled into the snow +2. Last on the ice +3.",
+    "The snowdrifts creep in every round."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 75,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "winter",
+   "rival": true,
+   "controls": {
+    "stick": true,
+    "a": "Boost"
+   },
+   "move": {
+    "speed": 5.2,
+    "accel": 2.6,
+    "stunDrag": 0.75
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 7.4,
+    "wall": false
+   },
+   "pitch": 62,
+   "card": "card-sled-bash",
+   "css": true
+  }
+ },
+ "sleigh-loading": {
+  "meta": {
+   "id": "sleigh-loading",
+   "title": "Sleigh Loading",
+   "blurb": "Catch the presents falling from the sky and load them onto your sleigh!",
+   "how": [
+    "Presents fall from the sky — watch for the shadows!",
+    "A = pick up. Carry it to YOUR sleigh to load it.",
+    "Small 1, big 2 (heavy!), gold 3.",
+    "B = tackle: make a carrier drop their present."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 64,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "winter",
+   "rival": true,
+   "controls": {
+    "stick": true,
+    "a": "Pick up",
+    "b": "Tackle"
+   },
+   "move": {
+    "speed": 5.4,
+    "accel": 22,
+    "carryMul": 0.85,
+    "slowMul": 0.72,
+    "stunDrag": 2.4
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 7,
+    "hd": 7,
+    "wall": true,
+    "blocks": [
+     {
+      "x": -6.25,
+      "z": 0,
+      "hw": 0.75,
+      "hd": 1.3
+     },
+     {
+      "x": 6.25,
+      "z": 0,
+      "hw": 0.75,
+      "hd": 1.3
+     },
+     {
+      "x": 0,
+      "z": -6.25,
+      "hw": 1.3,
+      "hd": 0.75
+     },
+     {
+      "x": 0,
+      "z": 6.25,
+      "hw": 1.3,
+      "hd": 0.75
+     }
+    ]
+   },
+   "pitch": 60,
+   "card": "card-sleigh-loading",
+   "css": true
+  }
+ },
+ "frosty-freeze-tag": {
+  "meta": {
+   "id": "frosty-freeze-tag",
+   "title": "Frosty Freeze Tag",
+   "blurb": "Run from the Frost — get tagged and you freeze solid until a friend thaws you!",
+   "how": [
+    "Runner? Run! A touch from the Frost freezes you.",
+    "Stand next to a frozen friend to thaw them (+2).",
+    "The Frost scores for every freeze. A = dash / frost breath.",
+    "Everyone is the Frost once."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 90,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "winter",
+   "rival": true,
+   "controls": {
+    "stick": true,
+    "a": "Dash / Breath"
+   },
+   "move": {
+    "speed": 5.2,
+    "accel": 26,
+    "stunDrag": 3,
+    "boostMul": 1.05,
+    "slowMul": 0.55
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 6,
+    "wall": true
+   },
+   "pitch": 58,
+   "card": "card-frosty-freeze-tag",
+   "css": true
+  }
+ },
+ "bouncy-castle": {
+  "meta": {
+   "id": "bouncy-castle",
+   "title": "Bouncy Castle",
+   "blurb": "Bounce, land next to your friends and fling them off the castle!",
+   "how": [
+    "Fling everyone else off the bouncy castle.",
+    "A = BIG BOUNCE (land near someone to fling them). B = belly bump.",
+    "Hop when someone lands next to you — in the air you are safe.",
+    "Off the edge = -1, flinging someone off = +3."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 68,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Bounce",
+    "b": "Bump"
+   },
+   "move": {
+    "speed": 5.6,
+    "accel": 9,
+    "stunDrag": 0.9
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 6.5,
+    "hd": 5,
+    "wall": false
+   },
+   "pitch": 56,
+   "card": "card-bouncy-castle",
+   "css": true
+  }
+ },
+ "windup-bear": {
+  "meta": {
+   "id": "windup-bear",
+   "title": "Wind-Up Bear",
+   "blurb": "Lure the giant prize teddy, sneak behind it and crank its wind-up key!",
+   "how": [
+    "Stand behind the bear and press A to crank its key. Crank fast and it goes floppy!",
+    "Rings and glowing wedges = a belly-flop, a paw swipe or a sit-down is coming. Get out!",
+    "B rolls: roll through its spin. The bear chases its favourite — lure it!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 85,
+   "scoring": "coop",
+   "unit": "damage",
+   "tags": [
+    "coop",
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Crank",
+    "b": "Roll"
+   },
+   "move": {
+    "speed": 6.2,
+    "accel": 30,
+    "stunDrag": 3,
+    "boostMul": 1.9
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8.5,
+    "hd": 6,
+    "wall": true
+   },
+   "pitch": 56,
+   "card": "card-windup-bear",
+   "css": true
+  }
+ },
+ "seesaw-shove": {
+  "meta": {
+   "id": "seesaw-shove",
+   "title": "Seesaw Shove",
+   "blurb": "Stay on the giant tipping seesaw — and shove everyone else in the pond!",
+   "how": [
+    "Stay on the tipping seesaw: +1 every 2 seconds, +3 for shoving someone in.",
+    "A = shove, B = hop (hop over barrels; in the air you do not slide).",
+    "The low end slides you down — run uphill to stay dry!",
+    "Watch out for barrels and the big seagull."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 68,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Shove",
+    "b": "Hop"
+   },
+   "move": {
+    "speed": 5.2,
+    "accel": 5,
+    "stunDrag": 1
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 6.5,
+    "hd": 1.6,
+    "wall": false
+   },
+   "pitch": 34,
+   "card": "card-seesaw-shove",
+   "css": true
+  }
+ },
+ "balloon-baron": {
+  "meta": {
+   "id": "balloon-baron",
+   "title": "Balloon Baron",
+   "blurb": "Pop the Balloon Baron’s crown balloons, then jump on him while he’s flat!",
+   "how": [
+    "Walk into a dart bucket for darts. A throws a dart at his crown balloons.",
+    "Pop them ALL and he goes flat: run onto him and press B to jump on him!",
+    "Rings = he lands there. Glowing wedge = a big puff of air. Get out!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 88,
+   "scoring": "coop",
+   "unit": "damage",
+   "tags": [
+    "coop",
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Throw",
+    "b": "Jump"
+   },
+   "move": {
+    "speed": 6.2,
+    "accel": 30,
+    "stunDrag": 2.6
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8.5,
+    "hd": 6,
+    "wall": true
+   },
+   "pitch": 56,
+   "card": "card-balloon-baron",
+   "css": true
+  }
+ },
+ "candy-floss": {
+  "meta": {
+   "id": "candy-floss",
+   "title": "Candy Floss Frenzy",
+   "blurb": "Grab the floating candy floss, grow a giant cloud and bank it before someone bonks it off!",
+   "how": [
+    "Walk into floss puffs to grow your cloud. Gold = 3.",
+    "A = bonk the one in front: half their floss flies off.",
+    "Bring it to your own tub at the edge to bank it safe.",
+    "Big clouds are slow — bank often!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 62,
+   "scoring": "points",
+   "unit": "floss",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Bonk"
+   },
+   "move": {
+    "speed": 6,
+    "accel": 26,
+    "carryMul": 0.72,
+    "stunDrag": 2.5
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 7,
+    "wall": true,
+    "posts": [
+     {
+      "x": 0,
+      "z": 0,
+      "r": 0.95
+     }
+    ]
+   },
+   "pitch": 58,
+   "card": "card-candy-floss",
+   "css": true
+  }
+ },
+ "funhouse-mirrors": {
+  "meta": {
+   "id": "funhouse-mirrors",
+   "title": "Funhouse Mirrors",
+   "blurb": "Warp a friend's face in a funhouse mirror and win the giggle vote!",
+   "how": [
+    "Make a friend's face as funny as you can in the funhouse mirror.",
+    "Tap − and + to stretch, bulge, twist and wobble. Add a tint and a prop!",
+    "Every mirror is shown off, then vote for the funniest (not your own).",
+    "3 points a vote. Alone: the sillier the better."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 80,
+   "scoring": "vote",
+   "unit": "points",
+   "tags": [
+    "social"
+   ],
+   "card": "card-funhouse-mirrors",
+   "css": true
+  }
+ },
+ "mystic-fortunes": {
+  "meta": {
+   "id": "mystic-fortunes",
+   "title": "Mystic Fortunes",
+   "blurb": "Fill in a friend's fortune with silly cards and win the crystal ball vote!",
+   "how": [
+    "Write a friend's fortune: tap a blank, then tap a card for it.",
+    "Mystic Mabel loves cards that suit her mood: +2 for the best fortune.",
+    "The crystal ball reads them all out, then vote for the funniest (not your own).",
+    "3 points a vote."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 84,
+   "scoring": "vote",
+   "unit": "points",
+   "tags": [
+    "social"
+   ],
+   "card": "card-mystic-fortunes",
+   "css": true
+  }
+ },
+ "tip-the-scales": {
+  "meta": {
+   "id": "tip-the-scales",
+   "title": "Tip the Scales",
+   "blurb": "How many ducks does a piano weigh? Balance the scales to win!",
+   "how": [
+    "Guess how many ducks (1.5 kg each) balance the mystery thing.",
+    "Slide to guess, nudge with − and +, then press OK.",
+    "Use the hint! Closest guess wins the round.",
+    "Four rounds, from tiny to enormous."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 90,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "social"
+   ],
+   "card": "card-tip-the-scales",
+   "css": true
+  }
+ },
+ "merry-go-guess": {
+  "meta": {
+   "id": "merry-go-guess",
+   "title": "Merry-Go-Guess",
+   "blurb": "The lights go out — ring the bell just as the golden horse comes round!",
+   "how": [
+    "Watch how fast the golden horse goes round. Then the lights go out.",
+    "Tap RING when you think it is passing the bell again.",
+    "Closest ring wins the round. Some rounds speed up or slow down!",
+    "Five rounds."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 92,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "action"
+   ],
+   "card": "card-merry-go-guess",
+   "css": true
+  }
+ },
+ "big-ball-bop": {
+  "meta": {
+   "id": "big-ball-bop",
+   "title": "Big Ball Bop",
+   "blurb": "Bump the giant beach ball into the other team’s goal!",
+   "how": [
+    "Bop the giant beach ball into the other goal!",
+    "Run into it to push it. A: belly-bump (near the ball: a big bop). B: hop.",
+    "Red + green score on the RIGHT, blue + pink on the LEFT."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 75,
+   "scoring": "points",
+   "unit": "goals",
+   "tags": [
+    "action",
+    "social"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Bump",
+    "b": "Hop"
+   },
+   "move": {
+    "speed": 6,
+    "accel": 22,
+    "stunDrag": 2.2,
+    "boostMul": 1.7
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 10,
+    "hd": 6,
+    "wall": true
+   },
+   "pitch": 50,
+   "card": "card-big-ball-bop",
+   "css": true,
+   "rival": true
   }
  }
 });

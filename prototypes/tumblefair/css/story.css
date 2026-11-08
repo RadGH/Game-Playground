@@ -1,0 +1,40 @@
+/* Story Night (Expansion 1, M8): the story card. On a phone it is the main screen — big words, big buttons, no
+   scroller inside a panel (the whole #screen scrolls if it must). The 3D line-up stands in the top part. */
+#screen.story { pointer-events: auto; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; align-items: center;   /* flex + margin-top:auto: a tall card scrolls, it is never pushed off the top */
+  padding: calc(var(--st, 0px) + 56px) 12px calc(var(--sb, 0px) + 12px); background: linear-gradient(to bottom, rgba(13, 34, 40, 0) 0%, rgba(13, 34, 40, .35) 45%, rgba(13, 34, 40, .7) 100%); }
+.story-card { margin-top: auto; flex: none; width: min(100%, 560px); box-sizing: border-box; display: grid; gap: 8px; text-align: center; background: #fff8e7; animation: st-in .35s ease-out; }
+@keyframes st-in { from { transform: translateY(18px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+.story-card .st-top { margin: 0; font-size: 14px; font-weight: 800; color: #6a5a3a; } .story-card .st-top span { font-weight: 700; }
+.story-card .st-title { font-size: clamp(24px, 7vw, 38px); color: var(--sun); }
+.story-card .st-lines { display: grid; gap: 6px; }
+.story-card .st-line { margin: 0; font-size: clamp(19px, 5vw, 24px); line-height: 1.22; font-weight: 700; color: var(--ink); }
+.story-card .st-line.recall { font-size: clamp(16px, 4.2vw, 19px); font-style: italic; color: #7a4a14; background: #ffe9b8; border-radius: 12px; padding: 4px 8px; }
+.story-card .st-who { margin: 2px 0 0; font-size: 18px; font-weight: 900; color: #3b6f7a; } .story-card .st-who.you { color: #c0392b; } .story-card .st-who.game { color: #2a8a46; }
+.story-card .st-choices { display: grid; gap: 8px; }
+.story-card .st-choice { display: flex; align-items: center; gap: 10px; text-align: left; font-size: 21px; min-height: 60px; position: relative; }
+.story-card .st-choice .mood { font-style: normal; font-size: 24px; } .story-card .st-choice span { flex: 1; }
+.story-card .st-choice .who { text-decoration: none; display: flex; gap: 2px; }
+.story-card .st-choice.mine { background: var(--sun); } .story-card .st-choice.won { outline: 5px solid var(--mint); }
+.story-card .st-choice[disabled] { opacity: .78; }
+.story-card .st-stars { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0; }
+.story-card .st-star { display: inline-flex; align-items: center; gap: 4px; } .story-card .st-star b { color: #b8860b; font-size: 18px; }
+.story-card .st-timer { margin: 0; font-size: 15px; color: #555; }
+.story-card .st-next { justify-self: center; min-width: 60%; }
+.story-card.end .st-hero { margin: 0; font-size: 20px; }
+.story-card .st-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; text-align: left; }
+.story-card .st-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 8px; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 6px 8px; }
+.story-card .st-row.hero { background: #fff2b3; }
+.story-card .st-title-tag { font-weight: 900; color: #7a3a9a; font-size: 16px; } .story-card .st-n { font-size: 18px; color: #b8860b; }
+.story-card .st-deeds { grid-column: 1 / -1; color: #444; font-size: 13px; line-height: 1.2; }
+.story-card.end { gap: 6px; } .story-card.end .st-line { font-size: clamp(17px, 4.6vw, 22px); } .story-card.end .st-row { padding: 4px 8px; }
+.final-card .story-line { margin: 0; font-weight: 800; color: #6a3a8a; text-align: center; }
+/* the lobby's story picker */
+.story-arcs { display: flex; flex-wrap: wrap; gap: 6px; }
+/* a TV: the same card, bigger */
+@media (min-width: 1100px) and (min-height: 650px) {
+  .story-card { width: min(100%, 860px); padding: 16px 28px; }
+  .story-card .st-line { font-size: 30px; } .story-card .st-line.recall { font-size: 24px; }
+  .story-card .st-title { font-size: 44px; } .story-card .st-choice { font-size: 26px; min-height: 62px; }
+  .story-card .st-choices { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .story-card .st-top, .story-card .st-timer { font-size: 20px; }
+}

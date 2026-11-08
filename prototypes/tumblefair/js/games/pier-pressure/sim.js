@@ -11,13 +11,17 @@
 // every screen draws the same fish at the same moment. A phone counts its own clock and sends `tap` { t: the time it
 // pressed }; the server takes t only if it is not in the future (AHEAD_S) or too old (LAG_S) and judges the tap at t,
 // so lag never decides a bite. A tap with no t (a keyboard bot) is judged on the server's clock.
+// SECRETS (bug fix 2026-11-07): the script used to be sent whole, so a phone held the exact bite time before the bite.
+// Now a lane's row only carries what has HAPPENED on the server's clock: the shape once it starts swimming up, each
+// nibble once it twitched, the bite (and its end) once it bit. A phone's clock runs a little behind the server's
+// (it lines up to the half-seconds in the state, plus the trip), so the news is there before the phone needs to draw it.
 import { pickSpecies } from '../fish-kit.js';
 import { BY_ID, speciesIn } from '../fish-species.js';
 
 export const meta = {
   id: 'pier-pressure', title: 'Pier Pressure', blurb: 'Hook the fish, dodge the junk, and land the most before the whistle!',
   how: ['Tap to cast. A fish nibbles, then BITES: tap then!', 'Tap too soon and it swims off.', 'Junk floating up? Tap before it reaches your hook!', 'Snagged? Tap tap tap to untangle.'],
-  kind: 'ui', min: 1, max: 4, seconds: 62, scoring: 'points', unit: 'pts', tags: ['action'], card: 'card-pier-pressure', css: true,
+  kind: 'ui', min: 1, max: 4, seconds: 62, scoring: 'points', unit: 'pts', tags: ['action'], card: 'card-pier-pressure', css: true, rival: true,
 };
 export const COUNT_S = 3, PLAY_S = 55, END_S = 2;
 export const LAG_S = 0.7, AHEAD_S = 0.15;
@@ -50,9 +54,10 @@ export function tapResult(v, t) {
 export const newLane = () => ({ st: 0, v: null, vid: 0, until: 0, taps: 0, pts: 0, n: 0, junk: 0, streak: 0, best: null, last: -9 });
 // st: 0 ready to cast, 1 line in (waiting on v), 2 snagged (taps to go), 3 a short pause (just landed / freed / scared)
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
   const D = LEVELS[difficulty] ? difficulty : 'normal', L = LEVELS[D];
-  const pids = players.map(p => p.pid), solo = pids.length === 1, ids = solo ? [...pids, CPU] : pids;
+  // solo = alone WITH Skipper Pebble; "Rival when alone" off (rivals false): your lane only, for the most points
+  const pids = players.map(p => p.pid), solo = pids.length === 1 && rivals !== false, ids = solo ? [...pids, CPU] : pids;
   const lanes = new Map(ids.map(id => [id, newLane()])), events = [];
   const cpuRng = rng.fork();                     // Skipper Pebble's choices never shift the players' fish
   let phase = 'count', left = COUNT_S, el = 0, over = false, cpuAt = null;
@@ -105,6 +110,8 @@ export function create({ rng, players, difficulty = 'normal' }) {
     if (lane.st === 2) { if (cpuRng.chance(L.cpu.taps * 0.05)) tap(CPU, r2(el)); return; }
     if (lane.st === 1 && cpuAt != null && el >= cpuAt) { const t = cpuAt; cpuAt = null; tap(CPU, t); }
   }
+  /** What a lane's visitor has shown so far: [id, species|null, from, arrive, nibbles so far, bite|null, end|null]. */
+  const seen = v => { const bit = el >= v.bite; return [v.id, el >= v.from ? v.sp : null, v.from, v.arrive, v.fakes.filter(f => f <= el), bit ? v.bite : null, bit ? v.end : null]; };
   return {
     events,
     init: () => ({ play: PLAY_S, count: COUNT_S, lag: LAG_S, solo, cpu: solo ? { id: CPU, name: CPU_NAME } : null, tangle: L.tangle, window: L.window, streak: STREAK, d: D }),
@@ -128,10 +135,12 @@ export function create({ rng, players, difficulty = 'normal' }) {
     },
     state() {
       const g = { phase, left: phase === 'count' ? Math.max(0, Math.ceil(left)) : Math.max(0, Math.ceil(PLAY_S - el)), el: Math.floor(el * 2) / 2 };
-      g.l = Object.fromEntries(ids.map(id => { const x = lanes.get(id), v = x.v; return [id, [x.st, x.pts, x.n, x.streak, x.st === 2 ? x.taps : 0, x.until, v && x.st === 1 ? [v.id, v.sp, v.from, v.arrive, v.fakes, v.bite, v.end] : null]]; }));
+      g.l = Object.fromEntries(ids.map(id => { const x = lanes.get(id), v = x.v; return [id, [x.st, x.pts, x.n, x.streak, x.st === 2 ? x.taps : 0, x.until, v && x.st === 1 ? seen(v) : null]]; }));
       return g;
     },
     get over() { return over; },
+    /** Tests only (never sent): a lane's whole script. */
+    _script: id => lanes.get(id)?.v || null,
     result() {
       const groups = new Map();
       for (const p of pids) { const x = lanes.get(p), k = x.pts * 1000 + x.n; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p); }

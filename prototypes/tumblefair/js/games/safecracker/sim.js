@@ -1,112 +1,82 @@
-// SAFECRACKER — every player cracks their own row of safes (same kind of lock for everyone, different numbers, so
-// nobody can copy a neighbour's phone). Punch in a guess at the code; the safe answers with two counts:
-//   RIGHT  how many numbers are right AND in the right place
-//   MOVED  how many more are in the code but in a different place
-// Work it out within the tries the safe allows. Out of tries: the safe jams (a few seconds' lockout) and you get a
-// fresh code for it. The risky shortcut: LISTEN to the tumblers — it shows you one number in its place, but locks you
-// out for a moment and knocks points off what this safe pays. Round 10 (report #24, "Listening is OP"): it used to work
-// up to len-1 times a safe from the very first second, for 3 points each, so listening twice and guessing the rest beat
-// every honest player. Now it is ONCE a safe, only after LISTEN_AFTER guesses of your own, costs LISTEN_COST (6) and
-// locks you out LISTEN_S (4 s) — a choice to make when you are stuck, not the way to play. Safes get harder (more digits, then repeats allowed);
-// the first player to open each safe gets a bonus. Alone you race Nimble Nell, a CPU safecracker who opens at set times.
+// SAFECRACKER (Expansion 1, M4 rework) — ONE idea: turn the dial until the safe CLICKS, then press SET.
+// The old game was a code-breaking puzzle (guess a code, read "right / moved" counts, tries, jams, a LISTEN shortcut,
+// a first-to-open bonus): live ratings called it confusing, long and unfair. Now every safe is three numbers on a dial
+// of 0-39. Turn the dial with the arrow buttons; a lamp tells you how close you are (cold, warm, hot, CLICK!). On the
+// click, press SET and that number is in; set all three and the safe opens. A SET on the wrong number jams the dial for
+// a moment. Most safes opened wins.
+// Fair: every player's codes are the SAME distances apart (shared turns, per-player starting point), so everyone has
+// exactly as much dialling to do, but no two phones show the same numbers. Alone you race Nimble Nell (CPU), whose speed
+// follows the room's difficulty.
 export const meta = {
-  id: 'safecracker', title: 'Safecracker', blurb: 'Crack the codes from the clues before anyone else!',
-  how: ['Punch in a guess. RIGHT = right number, right place. MOVED = in the code, wrong place.', 'Crack it before your tries run out, or the safe jams.', 'Stuck? After 2 guesses you may LISTEN once a safe: one number, but it costs 6 points and 4 s.', 'First to open each safe gets a bonus!'],
-  kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'points', tags: ['puzzle'], card: 'card-safecracker', css: true,
+  id: 'safecracker', title: 'Safecracker', blurb: 'Turn the dial until it clicks, then press SET. Open the most safes!',
+  how: ['◀ ▶ turn the dial. The lamp gets hotter as you get close.', 'When it says CLICK!, press SET. Three numbers open a safe.', 'Wrong SET jams the dial for a second.'],
+  kind: 'ui', min: 1, max: 4, seconds: 50, scoring: 'points', unit: 'safes', tags: ['action'], card: 'card-safecracker', css: true, rival: true,
 };
-export const LEVELS = [
-  { len: 3, sym: 5, rep: false, tries: 7, pts: 10 },
-  { len: 4, sym: 6, rep: false, tries: 8, pts: 15 },
-  { len: 4, sym: 6, rep: true, tries: 9, pts: 20 },
-  { len: 4, sym: 6, rep: true, tries: 8, pts: 25 },
-  { len: 5, sym: 6, rep: true, tries: 10, pts: 30 },
-];
-export const GAME_S = 60, FIRST_BONUS = 5, TRY_BONUS = 1, LISTEN_COST = 6, LISTEN_S = 4, LISTEN_MAX = 1, LISTEN_AFTER = 2, JAM_S = 3, MIN_PAY = 3;
+export const DIAL = 40, LEN = 3, GAME_S = 50, JAM_S = 1.2, MAX_TURN = 5;
 export const CPU_NAME = 'Nimble Nell';
-export const CPU_TIMES = [[9, 14], [11, 16], [13, 19], [15, 22], [18, 26]];      // seconds to open each safe, rolled per game
+// Nell: seconds per number = REACT + distance / SPEED + a little (by difficulty). A thumb on the buttons does about
+// 10 notches a second with the hold-to-repeat, plus the ±5 jumps.
+export const CPU_SPEED = { easy: 5, normal: 8, hard: 12 }, CPU_REACT = { easy: 1.6, normal: 1.1, hard: 0.7 };
 
-/** A code for a level: `len` numbers from 1..sym (no repeats unless the level allows them). */
-export function makeCode(rng, L) {
-  if (L.rep) return Array.from({ length: L.len }, () => rng.int(1, L.sym));
-  return rng.shuffle([...Array(L.sym).keys()].map(i => i + 1)).slice(0, L.len);
-}
-/** The safe's answer to a guess: { hit: right number right place, near: right number wrong place }. */
-export function score(code, guess) {
-  let hit = 0; const a = {}, b = {};
-  for (let i = 0; i < code.length; i++) { if (code[i] === guess[i]) hit++; else { a[code[i]] = (a[code[i]] || 0) + 1; b[guess[i]] = (b[guess[i]] || 0) + 1; } }
-  let near = 0; for (const k in b) near += Math.min(b[k], a[k] || 0);
-  return { hit, near };
-}
-/** What a safe pays when opened. */
-export const payOf = (L, triesLeft, listens, first) => Math.max(MIN_PAY, L.pts + triesLeft * TRY_BONUS - listens * LISTEN_COST) + (first ? FIRST_BONUS : 0);
+/** Shortest way round the dial between two numbers. */
+export const dist = (a, b) => { const d = Math.abs(((a - b) % DIAL + DIAL) % DIAL); return Math.min(d, DIAL - d); };
+/** How the lamp reads at a distance: 4 = CLICK (exactly on it), 3 hot, 2 warm, 1 cool, 0 cold. */
+export const heatOf = d => d === 0 ? 4 : d <= 2 ? 3 : d <= 5 ? 2 : d <= 9 ? 1 : 0;
+export const HEAT_WORDS = ['Cold', 'Cool', 'Warm', 'Hot!', 'CLICK!'];
 
-export function create({ rng, players }) {
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
   const pids = players.map(p => p.pid), solo = pids.length === 1;
-  const me = new Map(pids.map(p => [p, { lvl: 0, code: null, guesses: [], seen: {}, listens: 0, lock: 0, jams: 0, pts: 0, opened: [] }]));
-  const firsts = LEVELS.map(() => null);                    // who opened each safe first: pid or 'cpu'
+  // shared turns: the k-th number is this far (and this way) from the one before, for everyone
+  const turns = Array.from({ length: 80 }, () => rng.int(7, 19) * (rng.chance(0.5) ? 1 : -1));
+  const numAt = (rot, k) => { let v = rot; for (let i = 0; i <= k; i++) v += turns[i % turns.length]; return ((v % DIAL) + DIAL) % DIAL; };
+  const me = new Map(pids.map(pid => { const rot = rng.int(0, DIAL - 1); return [pid, { rot, k: 0, dial: rot, safes: 0, lock: 0, misses: 0, lastAt: 0 }]; }));
   const events = [];
   let left = GAME_S, over = false, t = 0;
-  const cpu = solo ? { at: [], lvl: 0, pts: 0 } : null;
-  if (cpu) { let s = 0; for (const [a, b] of CPU_TIMES) { s += rng.range(a, b); cpu.at.push(s); } }
-  for (const p of me.values()) p.code = makeCode(rng, LEVELS[0]);
-  const L = p => LEVELS[p.lvl];
-  function newSafe(p) { p.code = makeCode(rng, L(p)); p.guesses = []; p.seen = {}; p.listens = 0; }
-  function open(pid, p) {
-    const lv = p.lvl, first = firsts[lv] == null, pay = payOf(L(p), L(p).tries - p.guesses.length, p.listens, first);
-    if (first) firsts[lv] = pid;
-    p.pts += pay; p.opened.push({ lvl: lv, t: Math.round(t * 10) / 10, pay });
-    events.push({ e: 'open', pid, lvl: lv, pay, first });
-    p.lvl++;
-    if (p.lvl < LEVELS.length) newSafe(p); else { p.code = null; p.guesses = []; p.seen = {}; }
-    if ([...me.values()].every(q => q.lvl >= LEVELS.length)) over = true;
-  }
+  const cpu = solo && rivals !== false ? { k: 0, safes: 0, next: 0 } : null;   // "Rival when alone" off: no Nell
+  const cpuTime = k => (CPU_REACT[difficulty] ?? 1.1) + Math.abs(turns[k % turns.length]) / (CPU_SPEED[difficulty] ?? 8) + rng.range(0, 0.8);
+  if (cpu) cpu.next = cpuTime(0);
+  const target = p => numAt(p.rot, p.k);
   return {
     events,
-    init: () => ({ levels: LEVELS, seconds: GAME_S, solo, cpu: solo ? CPU_NAME : null, bonus: FIRST_BONUS, listenCost: LISTEN_COST, listenS: LISTEN_S, listenMax: LISTEN_MAX, listenAfter: LISTEN_AFTER, jamS: JAM_S }),
+    init: () => ({ dial: DIAL, len: LEN, seconds: GAME_S, solo, cpu: cpu ? CPU_NAME : null, jamS: JAM_S, maxTurn: MAX_TURN }),
     act(pid, a, d) {
-      const p = me.get(pid); if (over || !p || p.lvl >= LEVELS.length || p.lock > 0) return;
-      const lv = L(p);
-      if (a === 'guess') {
-        if (!Array.isArray(d) || d.length !== lv.len || !d.every(v => Number.isInteger(v) && v >= 1 && v <= lv.sym)) return;
-        const r = score(p.code, d);
-        p.guesses.push({ g: d.slice(), ...r });
-        if (r.hit === lv.len) return open(pid, p);
-        if (p.guesses.length >= lv.tries) {                  // jammed: lock out, then a fresh code for this safe
-          p.jams++; p.lock = JAM_S; events.push({ e: 'jam', pid });
-          p.jammed = p.code; newSafe(p);
-        }
-      } else if (a === 'listen') {
-        if (p.listens >= Math.min(LISTEN_MAX, lv.len - 1) || p.guesses.length < LISTEN_AFTER) return;
-        const hidden = [...Array(lv.len).keys()].filter(i => !(i in p.seen)); if (!hidden.length) return;
-        const i = rng.pick(hidden); p.seen[i] = p.code[i]; p.listens++; p.lock = LISTEN_S;
-        events.push({ e: 'listen', pid });
+      const p = me.get(pid); if (over || !p || p.lock > 0) return;
+      if (a === 'turn') {
+        if (!Number.isInteger(d) || d === 0 || Math.abs(d) > MAX_TURN) return;
+        p.dial = ((p.dial + d) % DIAL + DIAL) % DIAL;
+      } else if (a === 'set') {
+        if (p.dial === target(p)) {
+          p.k++;
+          if (p.k % LEN === 0) { p.safes++; p.lastAt = t; events.push({ e: 'open', pid, safes: p.safes }); }
+          else events.push({ e: 'num', to: pid });
+        } else { p.lock = JAM_S; p.misses++; events.push({ e: 'jam', to: pid }); }
       }
     },
     step(dt) {
       if (over) return;
       t += dt; left -= dt;
       if (left <= 0) { left = 0; over = true; return; }
-      for (const p of me.values()) if (p.lock > 0) { p.lock = Math.max(0, p.lock - dt); if (!p.lock) p.jammed = null; }
-      if (cpu && cpu.lvl < LEVELS.length && t >= cpu.at[cpu.lvl]) {
-        const lv = cpu.lvl, first = firsts[lv] == null; if (first) firsts[lv] = 'cpu';
-        const pay = payOf(LEVELS[lv], 1, 0, first); cpu.pts += pay; cpu.lvl++;
-        events.push({ e: 'open', pid: 'cpu', lvl: lv, pay, first });
-      }
+      for (const p of me.values()) if (p.lock > 0) p.lock = Math.max(0, p.lock - dt);
+      if (cpu && t >= cpu.next) { cpu.k++; if (cpu.k % LEN === 0) { cpu.safes++; events.push({ e: 'open', pid: 'cpu', safes: cpu.safes }); } cpu.next = t + cpuTime(cpu.k); }
     },
     state: () => ({
-      left: Math.max(0, Math.ceil(left)), firsts,
-      p: Object.fromEntries([...me].map(([pid, p]) => [pid, { lvl: p.lvl, n: p.guesses.length, pegs: p.guesses.map(x => x.hit * 10 + x.near), pts: p.pts, lock: p.lock > 0 ? Math.ceil(p.lock) : 0, listens: p.listens, opened: p.opened.length }])),
-      ...(cpu ? { cpu: { lvl: cpu.lvl, pts: cpu.pts } } : {}),
+      left: Math.max(0, Math.ceil(left)),
+      p: Object.fromEntries([...me].map(([pid, p]) => [pid, { safes: p.safes, step: p.k % LEN, lock: p.lock > 0 ? 1 : 0 }])),
+      ...(cpu ? { cpu: { safes: cpu.safes, step: cpu.k % LEN } } : {}),
     }),
     priv(pid) {
       const p = me.get(pid); if (!p) return {};
-      return { lvl: p.lvl, guesses: p.guesses.map(x => [x.g.join(''), x.hit, x.near]), seen: p.seen, lock: p.lock > 0, jammed: p.jammed ? p.jammed.join('') : null };
+      const step = p.k % LEN, set = []; for (let i = p.k - step; i < p.k; i++) set.push(numAt(p.rot, i));
+      return { dial: p.dial, heat: heatOf(dist(p.dial, target(p))), step, set, safes: p.safes, lock: p.lock > 0 };
     },
     get over() { return over; },
     result() {
-      const sorted = pids.slice().sort((a, b) => me.get(b).pts - me.get(a).pts || me.get(b).lvl - me.get(a).lvl), groups = new Map();
-      for (const pid of sorted) { const k = `${me.get(pid).pts}|${me.get(pid).lvl}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(pid); }
-      return { order: [...groups.values()], scores: Object.fromEntries(pids.map(p => [p, me.get(p).pts])), unit: meta.unit };
+      // most safes; a tie goes to whoever is further into the next safe, then whoever opened their last safe sooner
+      const key = pid => { const p = me.get(pid); return [p.safes, p.k % LEN, -p.lastAt]; };
+      const cmp = (a, b) => { const x = key(a), y = key(b); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return y[i] - x[i]; return 0; };
+      const sorted = pids.slice().sort(cmp), order = [];
+      for (const pid of sorted) { const g = order[order.length - 1]; if (g && cmp(g[0], pid) === 0) g.push(pid); else order.push([pid]); }
+      return { order, scores: Object.fromEntries(pids.map(p => [p, me.get(p).safes])), unit: meta.unit };
     },
   };
 }

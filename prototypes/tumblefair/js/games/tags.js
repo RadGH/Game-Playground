@@ -39,6 +39,19 @@ export const GAME_KINDS = Object.freeze({
   'pumpkin-fling': ['aim'], 'monster-line-up': ['reaction', 'guess'], 'monster-makeover': ['create'],
   'broomstick-bumpers': ['brawl'], 'witchs-sweep': ['collect', 'dodge'], 'slime-slingers': ['aim', 'brawl'],
   'prize-shelf': ['memory'], 'pair-panic': ['memory', 'reaction'], 'order-up': ['memory'],
+  // Winter Fair (Expansion 1, M6)
+  'frost-giant': ['boss', 'dodge'], 'cocoa-pour': ['aim'], 'snowman-styling': ['create'], 'present-peek': ['guess', 'reaction'], 'twinkle-tree': ['memory'],
+  'sled-bash': ['brawl'], 'sleigh-loading': ['collect'], 'frosty-freeze-tag': ['dodge'],
+  'bouncy-castle': ['brawl'],  // Expansion 1 M5
+  'windup-bear': ['boss','dodge'],  // Expansion 1 M5
+  'seesaw-shove': ['brawl', 'dodge'],  // Expansion 1 M5
+  'balloon-baron': ['boss','aim'],  // Expansion 1 M5
+  'candy-floss': ['collect', 'brawl'],  // Expansion 1 M5
+  'funhouse-mirrors': ['create'],  // Expansion 1 M5
+  'mystic-fortunes': ['words'],  // Expansion 1 M5
+  'tip-the-scales': ['guess'],  // Expansion 1 M5
+  'merry-go-guess': ['guess', 'reaction'],  // Expansion 1 M5
+  'big-ball-bop': ['brawl'],  // Expansion 1 M5
 });
 
 export const kindsOf = id => GAME_KINDS[id] || [];

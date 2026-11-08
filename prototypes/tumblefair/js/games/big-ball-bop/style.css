@@ -1,0 +1,20 @@
+/* Big Ball Bop: the team scoreboard pill under the score bar (seat shapes + numbers, so colour is never the only cue),
+   the GOAL! banner, and the goal / Gus tags in team colours. Nothing here is tappable. */
+.game-big-ball-bop > * { pointer-events: none !important; }
+.game-big-ball-bop .bbb-board { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px;
+  padding: 3px 14px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 900 18px/1.2 var(--font); color: var(--ink); white-space: nowrap; }
+.bbb-board b { font-size: 22px; }
+.bbb-board em { font-style: normal; color: #a85a00; }
+.bbb-t { padding: 0 8px; border-radius: 10px; color: #fff; text-shadow: 0 1px 0 rgba(0, 0, 0, .5); }
+.bbb-t.t0 { background: linear-gradient(90deg, #ff4d4d, #3ecf5a); }
+.bbb-t.t1 { background: linear-gradient(90deg, #3d8bff, #f04fd8); }
+.bbb-t.mine { outline: 3px solid var(--sun); }
+.game-big-ball-bop .bbb-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0; text-align: center; max-width: 94vw;
+  font: 900 clamp(30px, 9vw, 64px)/1.05 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); transition: transform .25s, opacity .25s; }
+.bbb-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.bbb-banner.good { color: #8ff07a; } .bbb-banner.bad { color: #ff7a7a; }
+.tag.bbb-goal { font-size: 11px; padding: 0 7px; }
+.tag.bbb-goal.mine { font-size: 13px; background: var(--sun); color: var(--ink); text-shadow: none; }
+.tag.bbb-t0 { background: #d8402f; } .tag.bbb-t1 { background: #2f6fd8; }
+.tag.bbb-gus { font-size: 11px; }
+@media (max-width: 520px) { .game-big-ball-bop .bbb-board { top: calc(var(--st) + 52px); font-size: 15px; } .bbb-board b { font-size: 19px; } }

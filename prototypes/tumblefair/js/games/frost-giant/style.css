@@ -1,0 +1,44 @@
+/* Frost Giant: the giant's health + team hearts + window pips under the score bar, the banner, and the phone's
+   private card with its steps of the secret order. Nothing here is tappable (the stick and buttons are the controls). */
+.game-frost-giant > * { pointer-events: none !important; }
+.game-frost-giant .fg-hud { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); width: min(440px, calc(100% - 16px));
+  display: flex; flex-direction: column; gap: 3px; padding: 5px 12px; border-radius: 16px; background: rgba(255, 248, 231, .94); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 14px/1.2 var(--font); }
+.fg-hp { display: flex; align-items: center; gap: 8px; }
+.fg-hp b { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; opacity: .75; }
+.fg-hp em { order: 1; font-style: normal; font-weight: 900; min-width: 2.2em; text-align: left; }
+.fg-hp .fg-bar { order: 2; margin-right: 34px; }
+.fg-bar { flex: 1; height: 14px; border-radius: 8px; background: #2b3a3e; border: 2px solid var(--ink); overflow: hidden; }
+.fg-bar i { display: block; height: 100%; width: 100%; background: linear-gradient(#bfe6ff, #4aa8e8); transition: width .25s; }
+.fg-row { display: flex; align-items: center; gap: 8px; min-height: 22px; }
+.fg-hearts { color: #ff3b5c; font-size: 18px; letter-spacing: 1px; -webkit-text-stroke: .6px var(--ink); }
+.fg-hearts.low { animation: fg-throb .6s infinite; }
+@keyframes fg-throb { 50% { opacity: .45; } }
+.fg-pips { display: flex; gap: 4px; }
+.fg-pips i { font-style: normal; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; background: #fff; border: 2px solid var(--ink); }
+.fg-pips i.done { background: #8ff07a; }
+.fg-pips i.now { background: var(--sun); transform: scale(1.15); }
+.fg-wbar { flex: 1; height: 8px; border-radius: 5px; background: #d8cdb6; overflow: hidden; visibility: hidden; }
+.fg-hud[data-ph=window] .fg-wbar { visibility: visible; }
+.fg-wbar i { display: block; height: 100%; background: #7fd0ff; }
+.game-frost-giant .fg-banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(.6); opacity: 0;
+  font: 900 clamp(28px, 8vw, 60px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .25s, opacity .25s; }
+.fg-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.fg-banner.good { color: #8ff07a; } .fg-banner.bad { color: #ff7a7a; } .fg-banner.warn { color: #ffb04a; }
+/* the private card: one row under the hud, out of the way of the stick and buttons */
+.game-frost-giant .fg-card { position: absolute; top: calc(var(--st) + 126px); left: 50%; transform: translateX(-50%) translateY(-8px); opacity: 0; transition: opacity .2s, transform .2s;
+  display: flex; align-items: center; gap: 8px; max-width: calc(100% - 16px); padding: 5px 10px; border-radius: 14px; background: #1d2b30; color: #fff; border: 3px solid var(--sun); box-shadow: 0 3px 0 var(--ink); font: 800 14px/1.2 var(--font); white-space: nowrap; }
+.fg-card.show { opacity: 1; transform: translateX(-50%); }
+.fg-card small { font-size: 11px; opacity: .9; text-align: left; }
+.fg-card p { margin: 0; font-size: 13px; text-align: center; }
+.fg-step { display: flex; align-items: center; gap: 4px; padding: 2px 8px 2px 4px; border-radius: 10px; background: #fff8e7; color: var(--ink); }
+.fg-step u { text-decoration: none; font-size: 13px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; }
+.fg-step b { font-size: 13px; text-transform: uppercase; }
+.fg-step.now { outline: 3px solid var(--sun); }
+.fg-step.done { opacity: .45; }
+@media (max-width: 520px) { .game-frost-giant .fg-hud { top: calc(var(--st) + 52px); padding: 4px 10px; } .game-frost-giant .fg-card { top: calc(var(--st) + 114px); gap: 5px; padding: 4px 8px; } .fg-step { padding: 2px 6px 2px 3px; } .fg-step b { font-size: 12px; } }
+/* the snowballs you carry (Winter Fair M6): three dots + a word, so the count never relies on colour */
+.fg-ammo { display: flex; align-items: center; gap: 3px; }
+.fg-ammo i { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--ink); background: transparent; }
+.fg-ammo i.on { background: #fff; box-shadow: inset -2px -2px 0 #bcd3e8; }
+.fg-ammo small { font-size: 11px; margin-left: 2px; }
+.fg-ammo.empty small { color: #d0342c; }

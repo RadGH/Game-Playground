@@ -220,7 +220,7 @@ a second set).
 | `haunted-hole` | arena | **Halloween, Oct only** (golf, 2026-10-23, `meta.season`). Putt Party's rules on a moonlit graveyard course (iron fence, big moon, the shared dusk dressing): Tombstone Row (round-topped smiling lavender tombstones as bumpers, and a friendly sheet ghost drifting across the green that says "Boo!" and puffs any rolling ball it touches off its line, par 3), Pumpkin Tunnel (a hedge across the green; putt into the giant jack-o'-lantern's glowing grin and the ball pops out of a little pumpkin by the cup — or go the long way round, par 2), Coffin Cup (the cup sits in a coffin whose lid creaks, then swings shut for a moment, again and again: shut = no cup and the lid knocks you back; open 2.6/2.1/1.6 s by difficulty, par 3). Fewest strokes wins; same ties and solo medals as Putt Party |
 | `reel-rumble` | arena | fishing (2026-10-23). Everyone fishes one lake from their own peg on a dock. Stick aims, hold A charges the cast (the golf power swing; a ring + dotted arc show where the bobber lands, 2.2-9.6 m out), let go to cast. Fish are shadows under the water — a bigger shadow is a bigger fish and the big ones keep to the far water (a long cast biases the species pick toward fighters; a Moonscale's shadow glints gold). A free fish near a resting bobber may swim over, nibble (the bobber twitches) and BITE (it plunges): press A inside the window (1.15/0.85/0.6 s by difficulty) to hook it; A before a bite reels the bobber back in. The fight is the kit's reel model: HOLD A to wind in (the line tightens), LET GO to ease it (the fish swims off a little); full tension = SNAP, too far out = it got away; the fish surges now and then (pulls ~2x — let go) and tires on a tight line. A tension meter with a red zone and a distance bar float by you. Points by species (Tiddler 1 … Old Gilbert 20; boots and weed 0, never snap); ties by catches then kilos. Halloween: a purple moonlit lake and the fish's Halloween names (looks only). Solo: medals 8 / 18 / 30 |
 | `pier-pressure` | screen | fishing (2026-10-23). One lane of sea per player off a fairground pier and ONE big button. Tap to CAST, then read the silhouette that swims up: a FISH nibbles (twitches — tapping now scares it off) then BITES with a plunge and "!" — tap then (window 0.9/0.65/0.48 s); JUNK (boot, kettle, weed — drawn as their own shapes) must be dodged by tapping BEFORE it reaches the hook, or it snags and you tap tap tap to untangle (4/6/8 taps). Three fish in a row without a slip get +1 each. Timing is Apple Bobbing's: each lane's visitor is a script on the game clock sent in the state, the phone draws it on its own clock and sends `tap { t }`, the server judges at t (not in the future, not older than 0.7 s). Space / Enter / a controller's A work too. Halloween: a night pier, orange bunting, Halloween names. Solo: you race Skipper Pebble, a CPU fisher in the next lane (reaction, fooled-by-a-twitch and dodge odds by difficulty) |
-| `net-gains` | arena | fishing (2026-10-23), teams. Red + green against blue + pink (seats 0 + 2 vs 1 + 3, like the lobby's teams), wading in a lagoon with one net per team strung between its two holders; a team of one gets a CPU deckhand (Finn / Marlo) who keeps a net's width (3.4 m) to your side. Fish touching the mesh are scooped — only while the net is stretched 1.4-5.6 m (bunched or pulled tight = red and slack, catches nothing). 8 fish fill a net, 5 make it heavy (you wade slower); nothing counts until either holder touches your own dock. A = splash: fish within ~3 m dart away (herd them in, or out of the other net). At 35 s left Old Gilbert (20) cruises in and only a net stretched 3.6 m+ holds him. Fish flee harder and swim faster on hard. Team mates share the score and the place. Solo: you + Finn, medals 45 / 90 / 140 |
+| `net-gains` | arena | fishing (2026-10-23), teams. With the lobby's Teams on: red + green against blue + pink (seats 0 + 2 vs 1 + 3); with Teams off, partners are drawn from the seed each game (M2, 2026-11-07), wading in a lagoon with one net per team strung between its two holders; a team of one gets a CPU deckhand (Finn / Marlo) who keeps a net's width (3.4 m) to your side, stretching to 4.4 m while Old Gilbert swims (M2: it could never hold him). Fish touching the mesh are scooped — only while the net is stretched 1.4-5.6 m (bunched or pulled tight = red and slack, catches nothing). 8 fish fill a net, 5 make it heavy (you wade slower); nothing counts until either holder touches your own dock. A = splash: fish within ~3 m dart away (herd them in, or out of the other net). At 35 s left Old Gilbert (20) cruises in and only a net stretched 3.6 m+ holds him. Fish flee harder and swim faster on hard. Team mates share the score and the place. Solo: you + Finn, medals 45 / 90 / 140 |
 | `glimmer-ice` | arena | fishing (2026-10-23). A frozen pond at night under the northern lights with 8-11 holes. Fish swim under the ice and are only visible when they GLIMMER — each on its own fixed schedule (0.65-1.25 s every 2.6-5.8 s by difficulty; Aurora Chars glow longer) and only glimmering fish are sent to phones at all. A at an open hole drops your line (you sit, frozen in place); a fish that swims near may come, nibble and bite: A again inside the window to pull it up; A with no bite pulls the line up. Every hole freezes over (sealed in 24/17/12 s from open); a sealed hole cannot be fished and one that seals with your line in freezes it in. B chips the ice of the hole you stand at (-0.36 a chip). Slippery ice (low accel). Your nearest hole gets a ring: green = fish here, blue = chip first. Halloween: purple night and Halloween names. Solo: medals 8 / 16 / 26 |
 
 Known gap: a phone that reconnects mid-drawing sees a blank canvas (its strokes are kept on the server and appear in the gallery).
@@ -1375,6 +1375,378 @@ and passwords included); each game keeps its own save on it.
   the second-tab message, the 💬 position + bubbles + markup as text, the wheel's size at 402x684, the away badge, and
   Letter Shot's hoop on screen between the bars and the panel).
 
+## CPU Fairgoers (Expansion 1, M1, 2026-11-07)
+
+A person alone, or two people, can have a whole match: named computer fairgoers sit in the empty seats. **Optional**
+(owner 2026-11-07): there are none unless the host adds them, and a room without them plays exactly as it did before.
+
+- **Lobby:** *Computer players* None / 1 / 2 / 3 (only as many as there are empty seats) and *CPU skill* Family / Normal
+  / Tricky (a separate setting from the game Difficulty, which changes the games themselves). Options `cpus` and
+  `cpuSkill` in `room.js` OPTS. The host's × removes one CPU (and lowers the count). Each CPU gets a name from
+  `CPU_NAMES`, a random look and an in-season costume, all from the room's own seed.
+- **Marked everywhere:** a small dark **CPU** badge on the face of every chip (lobby, board strip, top bar, results,
+  final, the in-game score bar — it stays when narrow phones hide names) and "Name · CPU" over its character.
+- **People come first:** someone joining the lobby takes a CPU's seat at once (it comes back if they leave). Someone
+  joining mid-match waits as before and, at the next minigame, **takes over a CPU seat whole** — its pid, so its
+  tickets, ribbons, board space, points and team carry on under their name (`takeOver` in room.js). People choose the
+  minigame: CPU votes only break a tie among what people voted for. CPUs never host, never count for "everyone
+  skipped / voted", never keep a room open, cannot be vote-kicked (the host removes them), get no coins, never rate.
+- **The board:** `boardMove()` in `js/sim/cpu.js` rolls (or plays a move card / prize card), picks a way at a
+  crossroads (the paid shortcut more often when it is better), and plays every live event at a person's pace: the
+  High Striker is a timed tap with skill-sized error, the shell game is "did it follow the cups" (a skill roll), the
+  tomato toss votes for the leader. It sends the same messages a phone does.
+- **Minigames:** a game has a CPU when its folder has `cpu.js` (`createCpu(c) -> { tick(v) }`; `js/sim/cpu.js` finds it,
+  nothing to register). `createCpuDriver` runs it every 50 ms with exactly what a phone is shown (`g` the public state,
+  `priv` its own private state, the events, `init`, the arena bodies): arena input is queued like a phone's and goes
+  through `stepBody`; ui taps go through `act`. A CPU that throws is benched for that game and logged (`cpu.error`).
+  With CPUs seated, only games that have a CPU are offered (`hasCpu`; `meta.cpu: false` opts a game out).
+- **The kit** `js/games/cpu-kit.js`: `SKILLS` (reaction time, thinking pace, stick push ≤ a person's, aim spread,
+  slip chance, tap timing error, how often it takes the best option), `by(skill, [f, n, t])` for per-game tuning,
+  `thinker` (a held stick and single presses at a human pace), steering (`stickTo`, `stickFrom`, `blend`, `nearest`,
+  `lead`, `wander`), timing (`reacted`, `later`, `readDelay`, `tapTime`, `every`, `once`), error (`noisy`, `slip`,
+  `pickBest`) and social stock (`CAPTIONS`, `WORDS`, `DRAWINGS`/`drawingFor`, `voteFor`). The rule for every CPU: never
+  read what a phone could not see, never be faster than a sharp person (live report #35).
+- **Balance:** `tools/cpu-bench.mjs [ids] --seeds 20` plays each game headless (`simulateGame`, the same driver) with a
+  Normal CPU standing in for a person against CPUs of each skill and prints how often the CPU side wins. Aim: Family
+  ~0.05-0.35, Normal ~0.5, Tricky ~0.6-0.88; co-op games print a success rate that should rise with skill.
+  `tests/cpu-balance.test.js` checks every game (plays to the end at every table size, no errors, Family never beats
+  the reference more than 60%, Tricky not worse than Family) and the averages; `tests/cpu.test.js` checks the room
+  (seating, the board match, the takeover, the vote, and that a no-CPU room is unchanged).
+- **Rival when alone** (owner: every computer player optional): ~40 games give a player who is alone a named computer
+  rival of their own (`meta.rival`; e.g. Hopper, Tumbleweed, Quill, Baron Bidwell, Gizmo, Pip, Par Pete). The lobby
+  toggle (shown when no CPUs are seated; option `rivals`, default on = as before) is passed to every game as
+  `create({ …, rivals })`; off, a lone player plays for a score with no rival. Three games that are no game without
+  one (`meta.rival: 'needed'`: Fizzpop Pass, Ring-a-Ding Rumble, Letter Shot) are then not offered. With CPU seats
+  filled nobody is alone, so the private rivals step aside for the CPU fairgoers by themselves. A rival that only fills
+  an uneven TEAM (Court Clash's third, Net Gains' deckhand) or covers a dropped player stays. `tests/rivals.test.js`.
+- Insights: the `match` report carries `cpus` and `cpuSkill`, so the owner can see how often CPUs are used.
+
+## Finish the night (Expansion 1, M2, 2026-11-07)
+
+Live numbers: 74 matches started, 31 finished. Read back from the insights log (`match` / `played` / `final` lines in
+order), the unfinished ones were mostly **matches with no end** (The Fair Never Closes, Custom, "first to X tickets":
+16 of 43), **matches restarted or left before the first minigame** (17), and **a player alone leaving after one or two
+games**. Fixed-length board matches nearly always finished, in 5-11 minutes. So the fix is to say how long things take,
+offer a short match, show how far through you are, and make the next match one tap.
+
+- **Measured lengths** (`tools/match-length.mjs`, bots on the test server; "waits" = nobody taps ready, "taps" =
+  everyone does): default board match, 4 rounds, 1 person + 3 CPUs: **8.1 min waits / 5.8 min taps** before M2, same
+  after (the walk trim saves ~2 s a round). 4 people: 7.0 / 4.8. Live: 2 players, 6 rounds took 9.3-10.7 min.
+- **Estimates from the real timers** (`js/sim/match-time.js`): a round = board turns (BOARD.DICE/STEP + a measured
+  landing time) + vote + intro + the pool's average minigame clock × 0.67 (live: games run 67% of their clock) +
+  results; golf holes × 0.3 (live). No table of minutes: change a timer and the estimate moves. `tests/finish-night.test.js`
+  plays matches with bots and fails if the estimate leaves the taps-to-waits range. The room sends `est` in the lobby
+  (minutes for every mode, rounds, holes and ticket goal, for the seated count and the host's pool).
+- **Lobby:** every mode card says "~7 min" (or "no end · ~1 min a game"), every Rounds / Holes / First-to pill has its
+  minutes under it, the Start button says "about N min". The old hard-coded `rounds × 2.6` is gone.
+- **⚡ Quick Match** (host, next to Start): a board match of as many rounds as fit in ten minutes (`quickRounds`: 5 at
+  4 players, 6 alone), started at once with the other settings as they are. Measured 10.3 min waits / 7.5 taps.
+- **Trimmed:** board walk `STEP_MS` 270 → 230, plain spaces 300 → 250. The 25 s intro already ends 0.4 s after every
+  person taps ready (CPUs don't count); votes close 0.7 s after the last vote; results/bonus/final end when everyone taps.
+- **Match clock:** "Round 3 of 5 · ~6 min left" (room sends `match.left`, ms; the phone counts down). On the board it is
+  the round tag in the row under the score strip; on vote / results / pick its own `.match-clock` row UNDER the score
+  bar (the round pill left the top bar); on the intro card a note. "Almost done" under 45 s; open-ended modes show only
+  the game number.
+- **Play again** on the final screen: the host's tap (or every person's) starts the same match straight away (no lobby
+  stop) — same seats, CPUs and settings; anyone whose phone has gone is dropped (`rematch()` in room.js); a guest's tap
+  shows "X wants to play again". The final screen stays 30 s (was 20).
+- **Highlight reel** (`js/sim/highlights.js`): up to five cards — biggest win, photo/closest finish, biggest board swing
+  in a round, wheel luck (or woe), a co-op win, one silly stat (on a roll / comfy shoes / dice champion). Built only from
+  `match.reel` (every minigame result, each round's swing in tickets + ribbons × 10, every wheel result); no record, no card.
+- **Insights:** `match` and `final` carry `quick` / `again`, `final` the minutes taken; a host's **End** writes a `quit`
+  line (mode, round, minutes, phase) so the next read can tell abandoned from ended. Page counts: `quick_match`, `play_again`.
+- Tests: `tests/finish-night.test.js` (node), `tests/finish-night.spec.js` (Playwright, 402x684 + 360 wide: lobby
+  estimates, Quick Match, clock row under the bar, final reel + Play again with no lobby trip).
+
+## Winter Fair (Expansion 1, M6, 2026-11-07)
+
+Why: visits fell from ~21 a day to 1-4 once Halloween ended (EXPANSION-1.md). A second holiday, built the same way.
+
+- **The season:** `js/shared/seasons.js` has a `winter` row, "Winter Fair", **December 1 to January 6** (the range wraps
+  past New Year; `seasonByDate` already handled that). Halloween is unchanged (October 1-31).
+- **The host's holiday box:** the old "Halloween mode" box is now "<holiday> mode" for whichever holiday is on — the date's
+  one, or a forced one (`r.season || r.dateSeason`), so in December it reads "Winter Fair mode". Ticked = only that
+  holiday's minigames; unticked = they are mixed in.
+- **How the owner previews winter on any day:** open the page with **`?holiday=winter`** (or `?holiday=halloween`,
+  `?holiday=off`; `previewFromUrl` in seasons.js). The page's menus go wintry at once. When that page hosts a room, it
+  sets the room's `holiday` option to that season (the dev/test option that already existed) and shows a **Holiday
+  preview** row in the lobby (By the date / Halloween / Winter Fair / Off), so the whole room — games, reskins, board,
+  intro ribbon — is winter. The costume shop on that page also lets you TRY ON the winter costumes; buying and wearing
+  them still follows the date (the server refuses outside December 1 - January 6). Example:
+  `http://<LAN-IP>:8483/prototypes/tumblefair/?holiday=winter`. Joiners need no flag.
+- **The board:** in winter (`js/client/boardview.js` + `js/client/winter.js` `boardSnow`) snow falls over the board,
+  snowy evergreens stand round its edge, the skirt is snow, and the Mud Puddle pads are icy blue. A board with a painted
+  winter picture uses it (`seasonBackdrops.winter`, same paths as the plain one: the Fairground Loop has a snowy repaint by Codex, `assets/art/board-fairground-loop-winter.webp`); one without (the Moonlit Pier) gets a dusting of snow over
+  its picture and a cooler tint. The feed says it the winter way (`js/client/winter-words.js`: "Whumph! Into a
+  snowdrift", "Sled ride!", "the snow cannon"). 8 winter Wheel of Whatever results and 4 Fair Bulletins
+  (`data/chance.json`, `season: 'winter'`: a jolly gift-giver's present, an icy slip, a toboggan, a snowball swap, a
+  reindeer ride, the cocoa stand, the snowman contest, a Double Die in a stocking; Gift Night, Blizzard, Lantern Parade,
+  Ticket Snow).
+- **Menus:** `body[data-season=winter]` (css/tumblefair.css): a deep winter blue, red buttons, a snowdrift glow and CSS
+  snowflakes (the `.bats.snowfall` layer, hidden in games and with reduced motion). The intro card says "Winter Fair
+  edition" for regular games.
+- **Arena dressing (automatic):** play.js calls `dressWinter` (js/client/winter.js) for every arena game in winter — a
+  pale sky and cold light (tinted, never switched off, restored after), a snow blanket outside the play area, snowmen
+  and snowy evergreens round the edge, instanced snowfall. A view steers it with `winter: { spots, blanket, flakes, y }`
+  or opts out with `winter: false` (the twin of `halloween`).
+- **8 winter-only minigames** (`meta.season: 'winter'`, tag `holiday`, 1-4 players, a computer player when alone):
+  | id | kind | what |
+  |---|---|---|
+  | `frost-giant` | co-op boss (Dragon's Weak Spot family) | Fetch snowballs from the piles, dodge icicles, hop the freeze wave; when it is dizzy each phone shows part of the secret crystal order — call it out and throw. Solo: Pip the snow sprite tosses a snowball at the right crystal now and then (often on Family, rarely on Tricky). |
+  | `cocoa-pour` | timing | Hold to pour, let go on the line; steam hides the last stretch; pots pour steady, speeding up or in glugs; a spill scores 0. Solo: Mallow the cat. |
+  | `snowman-styling` | dress-up + vote | Dress a snowman for the theme card (7 slots x 5), then vote. CPU builders and judges fill small rooms. |
+  | `present-peek` | guessing | A toy under wrapping paper torn off strip by strip; first right answers score most, a wrong tap locks you out. Solo: Pip the elf. |
+  | `twinkle-tree` | memory | Repeat the tree's light pattern (colour + shape + number); it grows each round. Solo: Twinkle. |
+  | `sled-bash` | funny physics | Bump each other off a frozen pond on round sleds. Solo: CPU sledders. |
+  | `sleigh-loading` | grab & collect | Catch falling gifts, carry them to your sleigh, tackle carriers. Solo: a CPU elf. |
+  | `frosty-freeze-tag` | tag | The Frost freezes people into ice statues; friends thaw them. Solo: a CPU Frost. |
+- **Computer players:** every winter game has a room CPU (`js/games/<id>/cpu.js`, M1's contract) and `meta.rival: true`:
+  with the lobby's "Rival when alone" off, a lone player gets no in-game rival (no Pip / Mallow / Twinkle / CPU
+  sledders / elf / CPU Frost; Snowman Styling alone then skips the vote and scores 1 point per piece that fits the
+  theme). `tests/rivals.test.js` checks each.
+- **Winter reskins (looks only; the plain game is unchanged):** Pin the Tail (snow over every scene, a red frame,
+  flakes), Bumper Bash (an ice rink with candy-cane tubes), Costume Catwalk (snowy stage, red-and-white curtain,
+  coloured lights, snowfall), Size Up (snowy night sky, flakes), Long Drive (snowy course, snow-capped trees, frozen
+  pond, snowfall) and Memory Heist -> **Gift Heist** (the Gift Vault: twelve wintry treasures — the one sim change, a
+  name list chosen by `season`, same rng calls). Apple Bobbing and Bat Swarm were on the wish-list but are
+  Halloween-only games (never offered in winter), so Long Drive and Memory Heist took their places.
+- **12 winter costumes** (`data/cosmetics.json`, tag Winter, `season: 'winter'`, 4 free): Jolly Gift-Giver, Reindeer
+  Romp, Snow Buddy, Workshop Helper, Ice Skater, Cocoa Cozy, Wrapped Present, Snowflake Sparkle, Sled Racer, Holiday
+  Pyjamas, Lantern Caroler, Frost Monarch. Two new hats, `antler_band` and `gift_bow` (avatar-3d/js/chibi2-hats.js,
+  registered as bespoke in avatar-2d/js/parts/chibi2-parts.js so the seeded random roll never hands them out).
+- **Shared winter kit** `js/client/winter.js`: `dressWinter`, `boardSnow`, `snowfall` (3D flakes), `snowOverlay` (DOM
+  flakes for screen games, css/games.css `.wf-snow`), `snowmanGeo`, `treeGeo`, `giftGeo`, `flakeTexture`, `PALETTE`.
+- **Tests:** `tests/winter.test.js` (dates incl. New Year, the preview flag, all 8 games winter-only, costumes
+  date-only, chance + wording, Gift Heist = same game), one test file per new game, and the existing seasons /
+  costumes / halloween-reskins / room tests.
+
+## Expansion 1, M4: reworked games (2026-11-07)
+
+The sixteen lowest-rated or "buggy"-flagged minigames from the 2026-11-07 live ratings were played headless and reworked: each now has one clear idea, a one-line goal, thumb-sized phone controls, fair scoring and a computer player (solo rivals or helpers written inside each game, since no shared CPU kit existed when this was built). Each has a test in `tests/<id>.test.js` covering the bug fixed and a bot finishing it.
+
+**Defuse Together** (`defuse-together`). Rated 0 ("confusing", "controls"). The whole game leaned on talking out loud: a reader's phone had no button at all, and in an online room with no voices nothing could happen. Now every step is a tap that works with or without voices: the device holder taps **Call out the clue** (the clue appears on every reader's phone), a reader taps the matching line of their rule book to **Send** it, and it lands on the holder's device ("Wren says: ORANGE → cut RED") with that wire glowing. The reader who sent the right line gets +1. Alone you team up with **Gizmo**, a computer partner who takes every other turn holding the device and reads the book for you on yours. Fuse 78 s, clock 90 s. Test: `tests/defuse-together.test.js` (tap-only team wins at 1-4 players, a reader's Send only works after the call, Gizmo's turns).
+
+**Two Truths, One Goblin** (`two-truths-one-goblin`). Rated "unplayable". The claims were facts about the Teller themselves (letters in their name, how many times they had been the Teller), which nobody could check, and the Teller had to plant, re-word and re-order cards before anyone could guess. Rebuilt around one idea: **look at the prize stall, then spot the lie**. A stall with three shelves of prizes is shown for 6-8 s, then covered; the Goblin makes three claims about it ("There were two 🥁 drums", "A ⭐ star was on the bottom shelf", "There was no 🧸 teddy at all"), two true and one false; tap the lie. With friends, one player a round is the Goblin and taps which of two lies to plant (one tap); alone, **Fib the Goblin** plants them and scores when it fools you. Every claim is checked against the stall by a test. Test: `tests/two-truths-one-goblin.test.js`.
+
+**Storm Shelter** (`storm-shelter`). Rated "confusing" + "controls", and the average game lasted 18 s of its 75: the shelter fell in the third beat. Five-second beats with the full wind from the first beat left a new team no time to read a card, and solo asked for two cards a beat. Now beats are 7 s, the wind builds up over the first three beats, meters start at 7, everyone (solo too) plays one card a beat (tap another to switch), cards that cover the incoming hit wear a green **covers it** tag, and a solo player has **Bramble**, a computer shelter-mate who plays a card after seeing yours. Wind re-tuned so a team that covers the hits nearly always survives and a random one rarely does. Test: `tests/storm-shelter.test.js` (incl. "nobody playing still lasts past beat 3").
+
+**Portal Routing** (`portal-routing`). Rated "confusing", "too easy" and "unfair". Gates were split between owners, so some players had nothing to tap while one did everything, the full trail made each stage a single flip-until-green, and everyone got the same score whatever they did. Now it is a **race**: everyone gets the same ten boards on their own phone, every gate is theirs, and the first to roll their marble home moves on; score = boards cleared (ties to whoever got there first). On normal and hard the glowing trail stops at the next portal (with a "?" in the portal's colour) so you work out where it comes out; on easy it shows the whole way. Alone you race **Pip**, a computer racer who flips one gate at a time at a steady pace (about 4.5 / 5.4 / 6.8 boards a minute on easy / normal / hard). Test: `tests/portal-routing.test.js`.
+
+**Safecracker.** Rated unfair, confusing and long: it was a code-breaking puzzle (guess a code, read "right / moved" counts, limited tries, jams, a once-a-safe LISTEN shortcut that cost points and seconds, a first-to-open bonus). Now it has one idea: turn the dial with big ◀ ▶ buttons (hold to keep turning, ±5 jumps) until the lamp goes from Cold to Warm to Hot to CLICK!, then press SET; three numbers open a safe and the most safes in 50 s wins. A wrong SET jams the dial for a second. Every player's numbers are the same distances apart (shared turns, different starting point), so everyone has the same dialling to do but no two phones show the same numbers. Alone you race Nimble Nell, whose speed follows the difficulty.
+
+**Odd One Out.** Flagged buggy. Two real bugs: a quick second tap on the grid you had just solved (the next grid draws 120 ms later) was judged against the NEW grid and froze you for a "wrong" tap; and a correct tap that reached the server a moment before its own lockout ended was dropped without a word, leaving the phone a grid ahead of the server so every later tap was ignored. Each tap is now tied to its grid, the server allows 0.35 s for the trip, and a phone that is out of step is told where it really is at once. Alone you now race Spotty Sue (CPU) through the same grids.
+
+**Mole Mallet.** Thumbs down and last in its group. The mallet also bonked PLAYERS dizzy, so the lawn turned into a brawl where whoever got bopped stood still while their mole ducked away, and brown moles lasted 1.5-2.3 s, about the time it takes to run two holes over. Player bonks are gone (one idea: bonk the moles, not the bombs), moles stay up 2.0-2.8 s, more pop up with more players, and alone you share the lawn with Gardener Gus (CPU, a dwarf with a green mallet) who goes for the same moles and never bonks a bomb.
+
+**Monster Makeover.** Rated confusing and short. The card asked for wishes AND a style (cute / spooky / fancy) scored as "3 pieces in the style = +1 star, 5 = +2", every part carried style badges, each player got a different random tray and the dressing clock was 24-32 s. Now it is wishes only: everyone gets the same tray with every part, each wish met is a star, and the first to press DONE with every wish ticked wins the Quick ribbon (+1); the vote (3+ players) stays. The dressing clock is 36-40 s, the wish tabs carry a ★ and the next unmet wish opens by itself. Alone you race Stylist Stitch (CPU) for the ribbon.
+
+**Tiptoe Tiger** (`tiptoe-tiger`). What was wrong: the first bell ended the whole game, and a careful player rang it in about 20 s, so most games stopped a quarter of the way through the 75 s clock (the live average was 21 s) and felt broken. A roared player could also land on the start line and walk on while the tiger was still looking. Alone there was nobody to race. What changed: each bell is now one point. Everyone walks back to the start, and each round the tiger gets a little quicker and fakes out more often. The first to ring 3 bells wins; if time runs out, most bells wins, and distance up the field breaks a tie. A roared player waits until the tiger sings again. Alone you race Pip, a computer player who sometimes reacts too slowly to stop. The status pill shows your bells (and Pip's). Tests: `tests/tiptoe-tiger.test.js`.
+
+**Laser Limbo** (`laser-limbo`). What was wrong: the single DODGE button still had a 0.4 s window that the server judged. On a phone a beat behind, you pressed when it said HOP NOW! and got zapped anyway, and an early press hopped and landed before the beam arrived. A spinner's line runs through the middle of the stage, and solo games started you there, so a low spinner was impossible to clear. What changed: the game now holds an early press for you. Press at any point in the last second (the label over your head says PRESS) and the hop goes off at the right moment. A duck stays down until the beam has passed, and pressing while crouched hops the low beam that comes next. The middle is now a solid hub, so nobody can stand on a spinner's pivot. Alone, Sparky (a computer player) dodges beside you and sometimes fluffs one. Tests: `tests/laser-limbo.test.js`.
+
+**Firefly Catch** (`firefly-catch`). What was wrong: fireflies ran away from 2.4 m but the net only reached 2.0 m, so walking up to one pushed it just out of reach and the swing missed every time. The aim help only turned you toward a fly that was already roughly in front of you. Fireflies drifted into bushes, where no net could reach them. Shaking a bush needed a second button. What changed: one button. Fireflies now start to run only once you are inside the net's reach, the aim help turns you to the nearest firefly in any direction, fireflies keep out of bushes, and swinging next to a glowing bush shakes it. Alone you race Wren, a computer player with her own net (her score replaces the old medal targets). Tests: `tests/firefly-catch.test.js`.
+
+**Pillow Fight** (`pillow-fight`). What was wrong: the bed had no wall. Your phone predicts your own walking with the arena rules, so it let you walk off the edge and hover over the rug until the server pulled you back. That rubber-banding happened at every edge, which is exactly where a pillow fight happens. What changed: the arena wall now stands exactly at the bed's edge, so walking and hopping stop there on both the phone and the server. A player who has just been bopped slides with no wall and can still go over. A falling player is frozen for the phone, so it stops guessing. Alone, the sleepwalkers are the computer players. Tests: `tests/pillow-fight.test.js`.
+
+**Meteor Dash** — *Was:* last one standing, with a blast that threw you about 5 m, often into the hole it had just made. Even a bot that dodged every ring was out in about 5 s, and in a two-player match the first fall ended the game for both (live average 7 s of 60, "confusing"). *Now:* one idea, "stay on the island": every second you stand on it is a point. A fall into the lava costs 3 s, then you pop back up on a safe tile inside a gold shield ring. Everyone plays the whole minute. Blasts are softer, holes crust over after 10 s, and the edge crumbles to a small middle by the end. A goal line shows at the start. Alone you race Cinder Sam, a computer fairgoer whose noticing, pace and missed rings follow the difficulty. `steer()` in sim.js drives both him and the test bot. Test: `tests/meteor-dash.test.js` covers that a fall no longer ends the game, that holes heal, and that a dodging bot beats easy Sam while standing still loses.
+
+**Kitchen Catastrophe** — *Was:* each counter belongs to one player, so when a player dropped out (the live data shows one drop-out) their counters stayed locked and every order needing them could never be finished ("buggy"). One wrong part also wiped the whole tray, queued orders ran out while you could not work on them yet, and two customers could stand on one spot. Everyone heard the "wrong counter" sound when anyone pressed at someone else's counter. *Now:* Chef Crumb, a computer cook, takes over the counters of anyone with no input for 3 s and hands them back when they return. Alone, the counters are split between you and him, so it is still a team game. A part that is not next is handed back ("Not yet! Cup goes on first") and costs the order 2 s; the tray is kept. Only the front order counts down at full speed. Customers shuffle up when one is served. Test: `tests/kitchen-catastrophe.test.js` covers that a team with a dropped player still wins with Chef Crumb, that counters come back, the tray rule and the queue rule.
+
+**Fair Darts** — *Was ("buggy"):* a phone whose clock had slipped more than 1 s behind the server had its throw thrown away in silence. The dart flew on screen, then vanished and the dart count went back. Each player also had their own random aim wobble, so one could simply be luckier. *Now:* a late throw counts at the oldest allowed moment (2 s), everyone throws at the same nine aim paths, and alone you play Dead-Eye Dot, a computer darts player in the chip row. The end line says who won. Test: `tests/fair-darts.test.js` covers that a 3.5 s-late dart counts, that paths are equal, and that a sharp bot beats easy Dot while blind throwing loses.
+
+**Mini Golf** — *Was ("buggy", Golf mode only):* the aim line was a row of 5 cm dots. With the whole hole on a phone screen it was nearly invisible, so you could not tell where a putt would go. There was no one to play alone against. *Now:* the aim dots are 2.4 times bigger (an opt-in `aimDot` option in `golf-view.js`; Putt Party and the others are unchanged). Alone you play each hole against Par Pete, a see-through ghost ball that never knocks yours. He putts with the real physics and measures distance by the path round the walls, not in a straight line (straight-line distance sent him up the U's dead end). His look-ahead is spread over server ticks, and his strokes show in the hole pill. Test: `tests/mini-golf.test.js` covers that Pete holes all 18 within budget with no slow ticks, and the path-distance check on the U.
+
+## Expansion 1, M5: new games (2026-11-07)
+
+Ten new all-season minigames built after studying the top of the 2026-11-07 ratings (Pin the Tail, Bumper Bash, Costume Catwalk, Apple Bobbing, Jellybean Jar, Dragon's Weak Spot): one simple verb, silly physics or a funny reveal, short, big phone controls. Mix: four arena games with silly physics (one of them the team game), two judge-and-vote games, two guessing games, two co-op bosses on the boss kit. Every one has a `cpu.js` (room CPUs, built on `cpu-kit.js`; checked with `tools/cpu-bench.mjs`), a tag row in `js/games/tags.js`, a test file, and was looked at on a 402x684 phone. UI games have a bot in `tests/helpers.js` `UI_BOTS`. No card pictures yet (`assets/art/card-<id>.webp`), so their vote/intro cards show without art.
+
+**Bouncy Castle** (`bouncy-castle`, arena). A raised striped bouncy floor with puffy turrets and no walls. A = BIG BOUNCE: where you land the floor heaves and everyone standing within 2.7 m is flung away (harder the closer they are); B = a short belly bump. Fly off the edge and you flop onto the lawn (-1, never below 0) and bounce back on 1.8 s later; whoever flung or bumped you in the last 3 s gets +3. Being in the air when someone lands keeps you safe, so a well-timed hop is a dodge. The last 15 s are MEGA BOUNCE (landings 30% bigger). Alone or with two, bop-bag clowns wobble about to be bounced off too. Bodies' heights come from the sim (`b.y`), and a fallen player's body sits on the grass below the castle (y -0.9). Test: `tests/bouncy-castle.test.js`.
+
+**Seesaw Shove** (`seesaw-shove`, arena). One long waxed plank on a barrel over a duck pond. The sim owns the tilt: torque from everyone standing on it (plus barrels and a seagull that lands on one end every ~11 s) springs the plank toward an angle up to 18°, and everyone on it slides downhill (extra velocity after `stepBody`, which the phone's prediction catches up with like any knock-back). Each body's height on the slope is the sim's (`plankY`), so every screen draws the same slope; a little seesaw in the HUD pill tips with it and arrows glow on the low side. +1 every 2 s on the plank, +3 for shoving someone in (A); B hops (no sliding in the air, barrels roll under you). A plank end that swings up fast catapults whoever is on it toward the middle. Test: `tests/seesaw-shove.test.js`.
+
+**Candy Floss Frenzy** (`candy-floss`, arena). The machine in the middle spits floss puffs that drift and bounce off the fence; walk into one and your cloud grows (it visibly swells on your stick; 6+ and you carry it at 72% speed). A = bonk the one in front: half their floss flies off as puffs anyone can grab. Bank at your own striped tub at the edge. Score = banked + held at the bell; gold puffs are 3; the last 15 s are a sugar rush (twice the puffs). Test: `tests/candy-floss.test.js`.
+
+**Merry-Go-Guess** (`merry-go-guess`, ui). A top-down merry-go-round with one golden horse; it turns for 4.2 s with the lights on and the horse passes the bell, then the lights go out and you ring when you think it is passing again (1 or 2 more laps). Rounds: steady, fast (2 laps), slowing down, speeding up (2 laps), slow. Up to 10 points by how close (`slackMs` = 0.65 s + 0.09 s per second of wait), +3 for the closest ring. The ride's numbers (start, speed, change) are in the state because that is what everyone watches; the answer is not, and the clock is left out of the state in the dark (it runs out answer + 2.2 s later, which would give it away). A phone's ring carries its own time since the lights went out, kept within 0.7 s of the server's (`judgeMs`). Planned rounds re-roll until the wait is 1.3-8 s. Test: `tests/merry-go-guess.test.js` (300 seeds of plans land on the bell, nothing leaked, worst-case game fits the clock).
+
+**Funhouse Mirrors** (`funhouse-mirrors`, ui, vote). Each player gets ANOTHER player's portrait (solo: your own) in a wavy mirror and warps it with seven big - / + controls: Tall, Wide, Bulge (the face is cut in three slices so the middle swells or pinches), Twist, Wobble, Tint and a hand-drawn SVG prop (moustache, glasses, party hat, clown nose, bow tie, unibrow, star shades). CSS transforms only; every value is a small integer the server validates. The reveal wobbles each mirror in big beside the plain face, then everyone votes (not their own); who made which stays hidden until the reveal. 3 points a vote, +1 for a finished mirror, +1 for the silliest; solo scores the silliness (0-18). Test: `tests/funhouse-mirrors.test.js`.
+
+**Mystic Fortunes** (`mystic-fortunes`, ui, vote, no typing). You fill in a friend's fortune: tap a blank, then one of six cards for it. 16 templates with 2-3 blanks, 44-45 original cards for each of four blank kinds. Mystic Mabel's mood (food, animals, fancy, messy, music) shows from the start and every hand holds at least two ★ cards that suit it. A crystal ball reads each fortune with the cards flipping in, then everyone votes. 3 a vote, +1 for filling every blank yourself, +2 for Mabel's favourite; solo: 2 per blank + 3 per ★ card (out of 15). Test: `tests/mystic-fortunes.test.js`.
+
+**Tip the Scales** (`tip-the-scales`, ui, estimating). How many farm ducks (1.5 kg each) balance a mystery thing? 33 things, one per size band from small to huge, with a hint comparison chosen so it never gives the answer away; icons are Font Awesome Pro generated into `icons.js`. Guess with a log-scale slider plus 5% - / + nudges and OK. The reveal rains ducks onto the other pan with a counter until the beam levels, every guess on a meter. Up to 10 points by ratio (double and half count the same), +3 within 10%, +4 for the closest. Four rounds. Test: `tests/tip-the-scales.test.js`.
+
+**Wind-Up Bear** (`windup-bear`, co-op boss on the boss kit). A giant prize teddy chases its "favourite" (the player nearest its nose: a heart balloon and a pink ring). It telegraphs a belly-flop ring, a paw-swipe wedge, a spin (from its third move) and a sit-down ring behind it. A in the gold wedge behind it cranks its wind-up key; crank fast enough and it goes floppy, when every A next to it does double damage. B is a roll that dodges hits. It is dizzy after a swipe or a spin, which is how one player alone gets behind it. Team hearts as in Dragon's Weak Spot. Test: `tests/windup-bear.test.js`.
+
+**Balloon Baron** (`balloon-baron`, co-op boss on the boss kit). Walk into a dart bucket for darts (3 at most); A throws one, snapping toward the nearest balloon in front (`aimHelp`). Pop all his crown balloons and he goes flat: B jumps on him for big stomps. He comes back with one more balloon each time. Attacks: landing rings (never landing so close to a corner that there is no way out), a puff-of-air wedge, confetti-cannon rings from the third bounce. Test: `tests/balloon-baron.test.js`.
+
+**Big Ball Bop** (`big-ball-bop`, team arena). A giant floaty beach ball and a goal at each end; teams are seat % 2 (red + green shoot right, blue + pink left). A next to the ball is a big bop, away from it a lunge that knocks over whoever is in front; B hops (and heads the ball). Pushes on the ball are summed before they are applied, so the order players are listed in never decides a shove (it did: 84-31 in a 1v1), and two players shoving from opposite sides squeeze it up into the air. Goalie Gus keeps goal for the short side with 3 players and is the rival alone (`meta.rival: true`; with Rival when alone off you shoot at an empty goal); he slaps at most once every 0.8 s. Everyone's score is their team's goals, so teammates always share a group. Test: `tests/big-ball-bop.test.js`.
+
+CPU bench (2 players unless noted; competitive = share of games won against a Normal player, co-op = team success): Bouncy Castle 0.13 / 0.63 / 0.67, Seesaw Shove 0.17 / 0.63 / 0.75, Candy Floss 0.00 / 0.42 / 1.00, Merry-Go-Guess 0.00 / 0.31 / 0.78, Funhouse Mirrors 0.22 / 0.46 / 0.71, Mystic Fortunes 0.20 / 0.60 / 0.75, Tip the Scales 0.20 / 0.41 / 0.68, Big Ball Bop 0.00 / 0.40 / 0.95 (a small skill gap snowballs in 1v1); Wind-Up Bear success 0.05 / 0.80 / 1.00 (Normal alone 0.80), Balloon Baron 0.80 / 1.00 / 1.00 (Normal alone 0.85).
+
+## Story Night (Expansion 1, M8, 2026-11-07)
+
+The design doc's "RPG one-shot" as a main mode: a short story adventure for 1-4 players (CPU fairgoers welcome) where
+choices and minigame results are remembered and called back later ("After Mabel outran the clockwork guard, …").
+Lobby: mode **Story Night**, a **Story** row (Surprise me + the 5 arcs, option `arc`) and **Length** Short / Normal /
+Long = 3 / 4 / 5 beats (option `rounds`), each with its minutes from the real timers (about 7 / 9 / 11 minutes).
+
+- **How a story runs** (`js/sim/story.js`, pure): hook (a choice, no minigame) → beats, each a **scene card** where the
+  leader picks for the party (`who: active`) or everyone votes (`who: vote`), the choice's outcome, then a minigame
+  **encounter**; its winner (or loser) can lead the next beat (`lead`), its result picks the outcome text and flags →
+  **interludes** (a quick choice, no minigame; arc ones + `common.json` ones) between beats → the **climax** (a co-op
+  boss, `kinds: ["boss"], coop: true`, or a competitive final) → the **epilogue**: how it ended, a Hero of the Night,
+  a fun title for everyone (`common.json` `titles`, by stat: stars, encounters won, times led, choice moods, last
+  places, fallbacks) and each player's last two deeds. Beats are drawn by act (1 → 2 → 3), weighted, never twice, and
+  must pass their `requires` / `not` flags, so two runs of one arc differ.
+- **Memory and callbacks:** every choice / encounter with a `deed` is remembered (`{ who, deed, tags }`, the name as it
+  was then through `safeName`: no braces or tags, 16 characters). A card's `callbacks` (by tag) — or, with a 60% chance,
+  a general line from `common.json` `recall` — call back ONLY a memory recorded earlier in this story; a card is at most
+  3 lines. A deed may name the cast ("caught {prize}"), never a player.
+- **Text** (`js/sim/story-text.js`, our own 20-line template, not Lingo — Lingo's dictionary + dark tone is more than a
+  card needs): `{hero} {winner} {loser} {villain} {ally} {place} {prize} {who} {deed}`; text = a line, a list of lines,
+  or `{ "any": [alt, alt] }`. One pass, so a player called "{villain}" stays that; a line whose placeholder has no value
+  (a `{loser}` line with one player) is dropped, never printed with a hole.
+- **On the room's clock** (`js/sim/story-run.js`): phase `story` with `{ card, votes, ready }`; a choice card waits 15 s
+  (then picks), a CPU leader answers after 1.5-3.5 s, a leader whose phone has gone after 1.2 s; votes: people first,
+  CPUs only break a tie; a card to read ends when every person taps Next. Phones answer with the messages they already
+  had: `vote {i}` and `skip`. Updates go out as `{ t: 'sv', votes, ready, pick }`. Encounters pick a minigame from the
+  room's own list (`gamesFor`: the host's pool, the season, CPU seats, rivals), not played yet in this story, matching
+  the hook's `prefer` / `kinds` / `coop`. The room's results card shows **stars** (the marathon's 4/3/2/1, co-op 3/1);
+  choices and outcomes add their own stars; stars are the match points, so coins are paid as in other modes.
+- **room.js hooks** (all marked `M8`): `OPTS.mode` gains `story`, `OPTS.arc`; `startMatch` makes the run; `nextRound`
+  hands over to it; `tick` case `story`; `message` sends `vote` / `skip` to it in phase `story`; `endGame` gives it the
+  result; `finish` adds `story` (the epilogue) to the final message; `timeLeft` and the lobby `est.story` come from it.
+  The server loads `data/story/` with `js/sim/story-data.js` (a missing arc file is skipped, never a crash).
+- **Screens** (`js/client/story.js`, `css/story.css`): the card over the 3D line-up (people who just earned stars cheer,
+  the leader stands ready), a big title, 1-3 big lines (a callback line in a warm box), big choice buttons with a mood
+  icon and voters' dots, the timer, Next; the epilogue card; one line on the final screen; the score bar counts ★ and the
+  clock says "Chapter 2 of 5". A TV shows the same card larger.
+- **Data** `data/story/`: `index.json` (the arcs, = `STORY_ARCS`), `common.json` (recall lines, fallback lines,
+  interludes, titles), `arcs/<id>.json`: `{ id, title, blurb, icon, cast: { villain, ally, place, prize: [names] },
+  hooks, beats (with act 1-3), interludes, climax, epilogue: { win, lose, lines: [{ requires, text }] } }`. An event:
+  `{ id, weight, act, requires, not, title, text, callbacks: [{ tags, text }], extra: [{ requires, text }], who,
+  choices: [{ label, mood, stars, party, flags, unflags, requires, deed: { text, tags, party }, text, game }], game }`;
+  a game hook: `{ kinds, prefer, coop, intro, lead, win: { text, stars, flags, deed }, lose: {…} }` (competitive: `win`
+  names `{winner}`, `lose` is a line about the last place naming `{loser}`; co-op: success / failure for everyone).
+- **The 5 arcs** (original names): 🎠 **The Runaway Carousel** (Captain Clank's clockwork horses), 🪞 **The Haunted Hall
+  of Mirrors** (reflections swapping places; the Mirror Marquis), 🦄 **The Lost Prize Pony** (the giant plush from the
+  top shelf; Sneaky Sid), 🎈 **The Great Balloon Getaway** (Captain Gusty's runaway balloon), 🎪 **The Midnight Big Top**
+  (a midnight circus with no ringmaster; the Shadow Juggler). Each: 2 hooks, 10 beats over three acts, 2 interludes,
+  2 climaxes, 3 cast picks per role, flag-driven extras and epilogue lines, 7-10 callbacks.
+- **Tests:** `tests/story.test.js` (every arc linted: placeholders only where they may be, every beat/climax path leads
+  to a minigame, line and button lengths, flags needed are set, banned words; 600 random stories per arc for 1-4
+  players with and without CPUs and awkward names: every choice of every event played to the end, both endings,
+  callbacks only from earlier memories, no `{` left, 1-3 lines a card, titles unique), `tests/story-room.test.js` (whole
+  bot matches 1-4 players, 1 person + 3 CPUs, a phone that never answers, a drop + rejoin mid-story, the clock, no story
+  data), `tests/story.spec.js` (402x684 phone + TV: lobby rows, a real scene card and its outcome, the epilogue and the
+  final screen; screenshots `tests/shots/m8-story-*.png`).
+- **Not done / to decide:** the design doc's figure was 15-20 minutes; with one minigame a beat the real timers say 7-11
+  minutes (Long = 5 beats). A longer story needs more minigames per beat or an "Epic" length — easy to add (`planFor`),
+  left for the owner since M2 found long matches are the ones people leave.
+
+## Fair Pass (Expansion 1, M7, 2026-11-07)
+
+Live numbers: costume buying was almost nil (≈10 purchases in 30 days) — nothing to work toward between matches. The
+Fair Pass is a power-neutral progression layer: a **sticker book**, a **fairgoer level** and a **daily challenge**.
+Nothing in it changes how anyone plays; the rewards are costumes, name-plate colours and coins (which only buy costumes).
+
+- **Sticker book** (`data/stickers.json`, 52 stickers in 9 groups: Getting started, Keep playing, Try everything,
+  Together, On the board, Ways to play, Secret, Winter Fair, Halloween). Each row: `id`, `name`, `pic` (an emoji),
+  `how` (the hint), `group`, `rule`, optional `hidden` (shown as "?" until earned) and `season` (only earnable while that
+  holiday is on, `js/shared/seasons.js` ids). A rule is `{ stat, n }` — a lifetime count — or `{ match, n }` — a value
+  inside one match (most tickets held at once, ribbons, minigames won, people playing). Every stat and who writes it is
+  listed at the top of `js/sim/pass.js`; they come only from what the room really records: board fx events (jackpot,
+  Hall of Mirrors swap, wheel spin, ribbon bought, duck pond, dice duel won, cannon, High Striker bell, mud, shell game,
+  both sharing), each minigame's result (played, won, won per kind from `js/games/tags.js`, team-up win, boss beaten as
+  a team, placed above a Tricky CPU) and the final standings (match finished / won / won in teams, per mode, Quick
+  Match, Play again). "Different games played" and "games rated" are read from the profile's My games list.
+- **Fairgoer level** (`data/pass.json`): XP per minigame played (10) and won (+10), scaled down for very short games
+  (`seconds / 45`, never below 0.3), +40 a finished match, +20 a match won, +15 a sticker, +25 the daily challenge.
+  Level L→L+1 costs `60 + 20·(L−1)` XP, top level 40 (a typical evening is about two levels for a newcomer). The
+  `rewards` table unlocks 8 Fair Pass costumes (`cosmetics.json` rows with `pass: <level>`, price 0 but never free and
+  never sold — `profiles.buy` refuses them, the shop shows "🎟️ Lv N"), 9 name-plate colours (`plates`) and coins. A
+  player's level sits as a small yellow badge on the face of their chip (lobby, board strip, results, final), and the
+  chosen plate colours the name (`badge` → the room's `pub()` adds `lv` / `plate`; CPUs have neither).
+- **Daily challenge** (`pass.json` `daily`, 14 small goals): picked from the UTC date by a hash (`dailyFor`), the same
+  for everyone that day and never the same two days running. Progress counts only what happens on that day; finishing
+  pays its coins + 25 XP once (`pass.daily.done`). Shown on the title's Fair Pass button and the Fair Pass screen.
+- **Where it lives:** `p.pass = { v, xp, st, got, daily, plate }` on the profile (`js/sim/profiles.js`), so a guest keeps
+  it under their token and a signed-in player under `acct:<id>` — and a guest's first sign-in moves it with the rest of
+  the profile. `profiles.progress(token, delta, { season })` applies what happened (`applyProgress` in `pass.js`, pure);
+  `view()` carries `pass` (passView: level, XP into the level, stickers, stats for the "3/10" hints, today's challenge,
+  plate). Without `passData` (older tools/tests) it is all off. The server reads `data/pass.json` + `data/stickers.json`.
+- **Room hooks** (tiny, in `room.js`): `createPassMatch` is made at the start of a match; `noteBoard` hands it every
+  board event, `endGame` each minigame result, `finish` the standings. It sends the person (never a CPU or the big
+  screen) a `{ t: 'pass', stickers, levelUp, rewards, daily, view, coinsNow }` message when something happened; the last
+  one of a match has `final: true` and `match` (the stickers won in it).
+- **On the phone** (`js/client/pass.js`, `css/pass.css`): the **Fair Pass screen** from the title's Fair Pass button,
+  the ☰ menu, the final screen's block and the shop — level + bar, today's challenge, name colours (locked ones say
+  their level), the sticker book (earned in colour, others grey with the hint on tap and "3/10" progress, secret ones
+  "?", holiday ones dashed out of season), and what the next five levels unlock. The modal scrolls, never a box inside
+  it (a scrolling box blanks the 3D canvas). A **pop-up** (one at a time, ~2.8 s, top-middle under the score bar,
+  `pointer-events: none`) for each sticker, level and finished daily; the **final screen** gets its own Fair Pass block
+  (inserted above Play again; the M2 card is untouched).
+- **Message:** `plate { id }` — wear a name-plate colour the pass has reached (refused below its level).
+- Tests: `tests/pass.test.js` (node: every sticker earned by its recorded events on exactly the nth and told once,
+  holiday stickers only in season, people vs CPUs, CPUs earn nothing, the XP curve + short-game scaling + reward table,
+  level-up coins/costumes/plates, the daily seeding + paid once a day + next day resets, save/restart/sign-in move, a
+  full bot match through the real hub and room earns what it really happened to give, the plate on the chip) and
+  `tests/pass.spec.js` (Playwright at 402x684: the title button, the screen with no inner scroller, a real minigame's
+  "First Ride" pop-up clear of the bar and buttons, the final block, the book in colour afterwards; shots in
+  `tests/shots/m7-*.png`).
+
+## Learn by doing (Expansion 1, M3, 2026-11-07)
+
+"Confusing" and "controls" were the most common thumbs-down reasons in the 2026-11-07 ratings. Three answers: you can
+play a game before it counts, every game says what it is in two short lines with pictures of its controls, and a few
+comfort settings.
+
+- **Practice in the intro** (`js/client/practice.js`, `js/client/learn.js`, pure half `js/shared/practice-rules.js`).
+  While the intro card is up, each player's phone runs **its own copy of the minigame**: the game's own `sim.js` (pure,
+  already loaded by the browser for the view) and its own `view.js`, through the same `createPlay()` a real game uses,
+  with a local stand-in for the network. It is the solo version (only you, plus the game's own computer rival if it has
+  one) on Easy. **Nothing is sent to the server**, so nothing in practice can touch a score, a ticket or another phone;
+  when the copy ends it starts again. The card opens as before but with a green "Practice now: your controls already
+  work. Nothing counts." row and **Try it ▸**; Try it (or moving / pressing with a keyboard or pad) shrinks the card to
+  a slim bar at the top (**PRACTICE — nothing counts**, the countdown, **Rules**, **I'm ready**) and the practice game
+  sits under it. The open card sits above the controls (`z-index`), so its buttons are never under the stick zone.
+  **Ready ends it**: "I'm ready" (or 2.5 s before the intro runs out, or the game starting) frees the copy and builds the
+  real game behind the card exactly as before; the room's rule is unchanged (starts 0.4 s after every person is ready).
+  A screen that only watches (TV, spectators) never practises, nor does a phone rejoining mid-game.
+- **Hints**: a ghost thumb circling on the stick, then a pulsing ring on the big button (and the small one), each
+  labelled with its words from the controls line, until you have used it; on a screen game a pointing finger at the
+  first thing on the screen that can be tapped; on a keyboard the key strip pulses. Labels near a screen edge hang inward.
+- **Which games get full practice**: all 147 (`tests/practice.test.js` builds every game's solo practice copy and plays
+  it to the end with the game's CPU or a wandering stick, no errors). **The lighter version** exists as a fallback only:
+  if a copy cannot load or throws, the real game is built behind the card as before and the controls panel is live
+  (the buttons light up, an arrow in the arena follows the stick, nothing moves) — no game uses it today.
+  Device setting **Practice in the intro** turns practice off (the old card only).
+- **How-to audit** (`js/games/howto.js`, grammar + checks in `js/games/howto-kit.js`). Every game has ONE goal line
+  (≤ 60 characters) and ONE controls line (≤ 70 characters of words) written against what its rules really do (the
+  sim, not the old text). Controls lines are segments of a token + words: `[stick] walk to paint · [A] grab a paint
+  bomb`; tokens `[stick] [A] [B] [tap] [drag] [hold] [type]` are drawn as pictures of the real controls (the stick, the
+  big yellow button with ITS label, the small white one; on a keyboard the keys WASD / Space / E, on a pad A / B). The
+  intro card shows the goal line big, the controls line under it, and the old blurb + rule lines folded under **More
+  rules**. Five old rule lines were wrong and were fixed in their `sim.js` meta: **crane-claw** ("five grabs" — four on
+  hard), **fairway-golf** ("B changes the club" — the phone taps the club, there is no B), **monster-makeover** (the
+  vote is 3+ players only), **net-gains** (any catch banks at your dock, not only a full net), **pin-the-tail** (every
+  pin scores by closeness; the closest gets +3). `tests/howto.test.js`: every game has a row, within the limits, every
+  `[A]`/`[B]`/`[stick]` exists in the game's control layout, an arena game names every control it shows, a screen game
+  says what to tap. **A new game adds its row to howto.js** (until then the card builds one from its meta).
+- **Comfort settings** (`js/client/comfort.js`, `css/learn.css`; ⚙️ Comfort on the title screen and in the ☰ menu),
+  saved on the device: **Bigger text** (the room's cards and sheets, score chips, name tags and screen games' words
+  are drawn larger — CSS `zoom` on panels, never on the 3D layer), **Less motion** (on by default when the phone asks
+  for reduced motion: `js/client/juice.js` skips screen shakes and flashes, the stage camera eases at half speed, the
+  bats / snowfall / confetti / camera-flash layers are hidden, and the room's own screens stop bouncing — animations
+  INSIDE a minigame are left alone because there an animation can be the game, e.g. a wobbling mirror), **Practice in
+  the intro**. **Longer timers** belong to the room: the host's lobby row **Timers: Normal / Relaxed** (`opts.timers`,
+  `RELAXED` = 1.6 in `room.js`) stretches the vote, the intro (so practice too), results, bonus ribbons, the board's
+  roll / crossroads / bulletin (`createBoardMatch({ slow })`) and Story Night's cards (`createStoryRun` `slow`). A
+  minigame's own clock and the board's timed live events are never stretched; the lobby's minute estimates include it.
+- Tests: `tests/practice.test.js`, `tests/howto.test.js`, `tests/comfort.test.js` (node); `tests/learn.spec.js`
+  (Playwright, 402x684 + 360 wide: the card's lines and pictures, practising Paint Panic with keys and the stick
+  without the room noticing, Ready → the real game, Trapdoor Treasury's finger, Balloon Stampede's ghost thumb and A
+  ring, the lighter version, the comfort sheet saved across a reload, a Relaxed 40 s intro with big text at 360 px).
+
 ## What worked / what didn't
 
 - **Round 4 (2026-10-21):** the lobby on a phone could not reach "Change look"/"Costumes" — the join-code box was pinned
@@ -1407,8 +1779,8 @@ From the design document, deliberately left for a later round:
   Endless and Teams are built.)
 - **Host settings in the lobby:** choosing the minigame pool (the server already accepts `opt pool`), vote shortlist
   size and difficulty are not on the lobby screen yet; only mode, rounds and teams are.
-- **Accessibility options:** low motion, adjustable timers, larger text.
+- ~~**Accessibility options:** low motion, adjustable timers, larger text.~~ — built 2026-11-07, see "Learn by doing (Expansion 1, M3)".
 - ~~Accounts~~ — built 2026-10-23, see "Accounts (2026-10-23)".
-- **Bots** to fill empty seats for one- or two-player groups.
-- **More boards** (one starter board), seasonal costumes, achievements.
+- ~~**Bots** to fill empty seats~~ — built 2026-11-07, see "CPU Fairgoers (Expansion 1, M1)".
+- **More boards** (one starter board), seasonal costumes, achievements (achievements done 2026-11-07 as the Fair Pass sticker book, Expansion 1 M7).
 - Tuning after real play: Cannonball Catch's difficulty, Meteor Dash's pace, ticket and coin amounts.

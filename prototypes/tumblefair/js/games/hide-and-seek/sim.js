@@ -7,6 +7,10 @@
 //   peek          a hider in a spot presses B to peek out for a moment: +1 if the lantern does not catch you at it.
 // Found = +2 to the seeker. Still hidden at the bell = +3. A round ends early when everyone is found.
 // Rounds: 3 for 3-4 players, 2 for two. Solo: round 1 you hide from Lamplighter Lou, round 2 you find three Peekers.
+// SECRETS (bug fix 2026-11-07): where each hider is hiding is never in the public state. The state says WHO is hidden
+// (`hid`), never where; each phone's private state carries only its own spot; 'in' / 'out' during the count go only to
+// the hider; and a hidden body is PARKED at the middle of the yard (bodies go to every phone), standing in its spot
+// only while it peeks out. A hidden Peeker (solo) is sent with no place at all.
 import { makeBody, stepBody, separate, F, BODY_R } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
 
@@ -14,7 +18,7 @@ const HW = 9, HD = 7;
 export const meta = {
   id: 'hide-and-seek', title: 'Hide & Peek', blurb: 'Climb into a barrel and stay hidden — or carry the lantern and find everyone!',
   how: ['Hiders: run to a barrel, crate or stall and press A to climb in.', 'B peeks out for +1 — if the lantern does not catch you.', 'Seeker: the lantern spots anyone out in the open. A looks inside a spot.', 'Found: +2 to the seeker. Hidden at the bell: +3.'],
-  kind: 'arena', min: 1, max: 4, seconds: 86, scoring: 'points', unit: 'points', tags: ['action'], card: 'card-hide-and-seek', css: true,
+  kind: 'arena', min: 1, max: 4, seconds: 86, scoring: 'points', unit: 'points', tags: ['action'], card: 'card-hide-and-seek', css: true, rival: true,
   controls: { stick: true, a: 'Hide / Look', b: 'Peek' }, move: { speed: 5.4, accel: 30, stunDrag: 4 },
   arena: { shape: 'rect', hw: HW, hd: HD, wall: true }, pitch: 60,
 };
@@ -34,6 +38,9 @@ export const SPOT_KINDS = [
 ];
 const MIX = [0, 0, 0, 1, 1, 2, 2, 3, 3, 0, 1, 0, 1, 3];
 const r2 = v => Math.round(v * 100) / 100;
+/** Where a hidden body is kept (it is frozen, not drawn, and ignored by every rule): the same place for everyone. */
+export const PARK = { x: 0, z: 0 };
+const park = b => { b.x = PARK.x; b.z = PARK.z; b.vx = b.vz = 0; };
 const ext = k => k.r || Math.max(k.hw, k.hd);
 /** Distance from (x, z) to the edge of spot s (0 = touching it). */
 export function edgeDist(s, x, z) {
@@ -61,13 +68,15 @@ export function inBeam(sx, sz, yaw, x, z, len, half) {
 /** Who seeks next: fewest turns seeking, then fewest points, then seat order. */
 export const nextSeeker = (players, turns, pts) => [...players].sort((a, b) => (turns[a.pid] - turns[b.pid]) || (pts[a.pid] - pts[b.pid]) || (a.seat - b.seat))[0].pid;
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
   const D = RULES.beam[difficulty] ? difficulty : 'normal', [BEAM, HALF] = RULES.beam[D];
   const n = players.length, solo = n === 1, { spots, arena } = makeLayout(rng);
   const bodies = new Map(), events = [];
   players.forEach(p => bodies.set(p.pid, makeBody(0, 0, 0)));
   const P = new Map(players.map(p => [p.pid, { prevB: 0, pts: 0, turns: 0, role: 'hide', spot: -1, peek: 0, peekCool: 0, beamT: 0, found: false, stun: 0, lookCool: 0, peeks: 0, finds: 0, hidden: 0 }]));
-  const rounds = solo ? 2 : n === 2 ? 2 : 3;
+  // "Rival when alone" off (rivals false): no Lou and no Peekers — one round of hiding and peeking for points
+  const stand = !solo || rivals !== false;
+  const rounds = solo ? (stand ? 2 : 1) : n === 2 ? 2 : 3;
   // solo stand-ins: Lamplighter Lou seeks in round 1, three Peekers hide in round 2. Same shape as a player.
   let npcs = [];
   let round = 0, phase = 'hide', left = RULES.hide, seeker = null, over = false, el = 0, order = [];
@@ -88,18 +97,23 @@ export function create({ rng, players, difficulty = 'normal' }) {
       else { const a = Math.PI / 4 + k * Math.PI * 2 / Math.max(1, ring.length); b.x = r2(Math.sin(a) * 1.6); b.z = r2(Math.cos(a) * 1.6); b.yaw = Math.atan2(b.x, b.z); b.flags = 0; }
       b.vx = b.vz = 0; b.y = 0;
     });
-    if (solo && round === 1) npcs.push({ id: 1, role: 'seek', x: 0, z: 0, y: 0, vx: 0, vz: 0, yaw: 0, flags: F.FROZEN, lookCool: 0, stun: 0, plan: rng.shuffle(spots.map(s => s.i)), looked: new Set() });
-    if (solo && round === 2) {
+    if (solo && stand && round === 1) npcs.push({ id: 1, role: 'seek', x: 0, z: 0, y: 0, vx: 0, vz: 0, yaw: 0, flags: F.FROZEN, lookCool: 0, stun: 0, plan: rng.shuffle(spots.map(s => s.i)), looked: new Set() });
+    if (solo && stand && round === 2) {
       const free = rng.shuffle(spots.map(s => s.i)).slice(0, 3);
       free.forEach((i, k) => npcs.push({ id: 10 + k, role: 'hide', x: spots[i].x, z: spots[i].z, y: 0, vx: 0, vz: 0, yaw: 0, flags: F.FROZEN, spot: i, peek: 0, peekCool: 1 + k * 1.3, beamT: 0, found: false, hidden: 1, next: 2 + rng.range(0, 3) }));
     }
-    events.push({ e: 'round', r: round, seeker, npc: seeker == null });
+    events.push({ e: 'round', r: round, seeker, npc: seeker == null && npcs.length > 0 });
   }
-  function climbIn(h, i) { const sp = spots[i]; h.s.spot = i; h.b.x = sp.x; h.b.z = sp.z; h.b.vx = h.b.vz = 0; h.b.flags |= F.FROZEN; h.s.peek = 0; events.push({ e: 'in', pid: h.pid, npc: h.npc?.id, i }); }
+  function climbIn(h, i) {
+    h.s.spot = i; h.b.flags |= F.FROZEN; h.s.peek = 0; park(h.b);
+    events.push({ e: 'in', pid: h.pid, npc: h.npc?.id, i, ...(phase === 'hide' && h.pid != null ? { to: h.pid } : {}) });   // during the count only the hider hears where
+  }
+  /** A peek: the body stands in its spot (everyone sees the head pop out); back in the park when it ducks down. */
+  const standIn = h => { const sp = spots[h.s.spot]; h.b.x = sp.x; h.b.z = sp.z; };
   function climbOut(h) {
     const sp = spots[h.s.spot], K = SPOT_KINDS[sp.k], away = Math.atan2(sp.x, sp.z) + Math.PI, d = ext(K) + BODY_R + 0.15;
     h.b.x = r2(Math.max(-HW + 0.5, Math.min(HW - 0.5, sp.x + Math.sin(away) * d))); h.b.z = r2(Math.max(-HD + 0.5, Math.min(HD - 0.5, sp.z + Math.cos(away) * d)));
-    h.b.flags &= ~F.FROZEN; events.push({ e: 'out', pid: h.pid, npc: h.npc?.id, i: h.s.spot }); h.s.spot = -1; h.s.peek = 0;
+    h.b.flags &= ~F.FROZEN; events.push({ e: 'out', pid: h.pid, npc: h.npc?.id, i: h.s.spot, ...(phase === 'hide' && h.pid != null ? { to: h.pid } : {}) }); h.s.spot = -1; h.s.peek = 0;
   }
   function find(h, how) {
     if (h.s.found) return;
@@ -138,10 +152,10 @@ export function create({ rng, players, difficulty = 'normal' }) {
             else {
               let best = null, bd = RULES.enter;
               for (const sp of spots) { const d = edgeDist(sp, b.x, b.z); if (d <= bd && !occupied(sp.i)) { bd = d; best = sp; } }
-              if (best) climbIn(h, best.i); else events.push({ e: 'nospot', pid });
+              if (best) climbIn(h, best.i); else events.push({ e: 'nospot', pid, to: pid });
             }
           }
-          if (pb && s.spot >= 0 && s.peek <= 0 && s.peekCool <= 0 && phase === 'seek') { s.peek = RULES.peekT; s.peekCool = RULES.peekCool; s.beamT = 0; events.push({ e: 'peek', pid, i: s.spot }); }
+          if (pb && s.spot >= 0 && s.peek <= 0 && s.peekCool <= 0 && phase === 'seek') { s.peek = RULES.peekT; s.peekCool = RULES.peekCool; s.beamT = 0; standIn(h); events.push({ e: 'peek', pid, i: s.spot }); }
         } else if (s.role === 'seek' && phase === 'seek' && pa && s.lookCool <= 0 && !(b.flags & F.STUN)) { s.lookCool = RULES.look; look(b, s); }
       }
       stepBody(b, inp, meta.move, arena);
@@ -197,7 +211,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
           if (sb && (open || peeking) && inBeam(sb.x, sb.z, sb.yaw, h.b.x, h.b.z, BEAM, HALF)) { h.s.beamT += dt; if (h.s.beamT >= (open ? RULES.spot : RULES.spotPeek)) { find(h, peeking ? 'peek' : 'beam'); continue; } }
           else h.s.beamT = Math.max(0, h.s.beamT - dt * 2);
           if (sb && open && Math.hypot(h.b.x - sb.x, h.b.z - sb.z) < RULES.touch) { find(h, 'touch'); continue; }
-          if (h.s.peek > 0) { h.s.peek -= dt; if (h.s.peek <= 0) { h.s.peek = 0; if (h.pid != null) { h.s.pts += RULES.peekPts; h.s.peeks++; } events.push({ e: 'peeked', pid: h.pid, npc: h.npc?.id, i: h.s.spot }); } }
+          if (h.s.peek > 0) { h.s.peek -= dt; if (h.s.peek <= 0) { h.s.peek = 0; if (h.pid != null) { h.s.pts += RULES.peekPts; h.s.peeks++; park(h.b); } events.push({ e: 'peeked', pid: h.pid, npc: h.npc?.id, i: h.s.spot }); } }
         }
         const still = hiders().filter(h => !h.s.found);
         if (left <= 0 || !still.length) {
@@ -213,19 +227,25 @@ export function create({ rng, players, difficulty = 'normal' }) {
       }
     },
     state() {
-      const sc = {}, hd = {}, pk = [], fd = [];
-      for (const [pid, s] of P) { sc[pid] = s.pts; if (s.spot >= 0) hd[pid] = s.spot; if (s.peek > 0) pk.push(pid); if (s.found) fd.push(pid); }
-      const g = { sc, ph: phase, r: round, sk: seeker, hd, pk, fd, left: Math.max(0, Math.ceil(left)) };
-      // a stand-in: [id, x, z, yaw, role (0 seek / 1 hide), spot (-1 = in the open), peeking, found]
-      if (npcs.length) g.np = npcs.map(c => [c.id, r2(c.x), r2(c.z), r2(c.yaw), c.role === 'seek' ? 0 : 1, c.spot ?? -1, c.peek > 0 ? 1 : 0, c.found ? 1 : 0]);
+      // hid: who is in a spot (never which one); pk: who is peeking out; ps: the spot of each peeker (a peek shows it)
+      const sc = {}, hid = [], pk = [], ps = {}, fd = [];
+      for (const [pid, s] of P) { sc[pid] = s.pts; if (s.spot >= 0) hid.push(pid); if (s.peek > 0) { pk.push(pid); ps[pid] = s.spot; } if (s.found) fd.push(pid); }
+      const g = { sc, ph: phase, r: round, sk: seeker, hid, pk, ps, fd, left: Math.max(0, Math.ceil(left)) };
+      // a stand-in: [id, x, z, yaw, role (0 seek / 1 hide), spot (-1 = in the open, -2 = hidden: no place sent), peeking, found]
+      if (npcs.length) g.np = npcs.map(c => (c.role === 'hide' && c.spot >= 0 && !(c.peek > 0) && !c.found ? [c.id, 0, 0, 0, 1, -2, 0, 0]
+        : [c.id, r2(c.x), r2(c.z), r2(c.yaw), c.role === 'seek' ? 0 : 1, c.spot ?? -1, c.peek > 0 ? 1 : 0, c.found ? 1 : 0]));
       return g;
     },
+    /** Private: only your own spot (-1 = not hiding). */
+    priv: pid => ({ spot: P.get(pid)?.spot ?? -1 }),
     get over() { return over; },
     result() {
       const scores = {}, groups = new Map();
       for (const p of players) { const s = P.get(p.pid); scores[p.pid] = s.pts; if (!groups.has(s.pts)) groups.set(s.pts, []); groups.get(s.pts).push(p.pid); }
       return { order: [...groups.keys()].sort((a, b) => b - a).map(k => groups.get(k)), scores, unit: meta.unit };
     },
+    /** M2 (room hook): while the seeker counts, the seeker's phone is not sent where the hiders are going. */
+    bodiesHiddenFrom(viewer) { return phase === 'hide' && viewer != null && viewer === seeker ? [...P.entries()].filter(([, s]) => s.role === 'hide').map(([pid]) => pid) : []; },
     get _phase() { return phase; }, get _round() { return round; }, get _seeker() { return seeker; }, _P: P, _spots: spots, get _npcs() { return npcs; }, _arena: arena,
   };
 }

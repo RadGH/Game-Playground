@@ -15,7 +15,7 @@
 // `tail` is simply "the spot", and `part` says what goes there.
 export const meta = {
   id: 'pin-the-tail', title: 'Pin the Tail', blurb: 'Remember where the tail goes, then pin it with your eyes shut!',
-  how: ['A picture shows where its tail goes (the glowing star) — or its horn, its nose, the candle… Remember it!', 'Then it hides. Tap where it goes. You can tap again to move your pin.', 'Closest pin wins the round. Each round has a trick: slides, spins and swaps!', 'Five rounds.'],
+  how: ['A picture shows where its tail goes (the glowing star) — or its horn, its nose, the candle… Remember it!', 'Then it hides. Tap where it goes. You can tap again to move your pin.', 'Closer = more points, and the closest pin gets +3. Each round has a trick: slides, spins and swaps!', 'Five rounds.'],
   kind: 'ui', min: 1, max: 4, seconds: 84, scoring: 'points', unit: 'points', tags: ['puzzle', 'action'], card: 'card-pin-the-tail', css: true,
 };
 export const BW = 160, BH = 120;

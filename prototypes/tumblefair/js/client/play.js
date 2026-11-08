@@ -12,6 +12,7 @@ import { GAMES, loadView } from '../games/metas.js';
 import { createActor, portrait } from './avatars.js';
 import { createServerClock, createTrack } from './interp.js';
 import { dressArena } from './halloween.js';
+import { dressWinter } from './winter.js';
 import { btnText } from './buttons.js';
 
 
@@ -25,7 +26,7 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
   const group = new THREE.Group(); group.name = 'game-' + meta.id; stage.root.add(group);
   const ui = document.createElement('div'); ui.className = `game game-${meta.id} kind-${meta.kind}${intro.season ? ' season-' + intro.season : ''}`; uiRoot.append(ui);
   const memberOf = pid => members().find(m => m.pid === pid) || intro.players.find(p => p.pid === pid) || { pid, name: '?', seat: 0 };
-  const players = intro.players.map(p => { const m = memberOf(p.pid); return { pid: p.pid, seat: p.seat, name: m.name || p.name, color: SEATS[p.seat].color, dark: SEATS[p.seat].dark, shape: SEATS[p.seat].shape, portrait: m.look ? portrait(m) : '', look: m.look || null, costume: m.costume }; });
+  const players = intro.players.map(p => { const m = memberOf(p.pid); return { pid: p.pid, seat: p.seat, name: m.name || p.name, color: SEATS[p.seat].color, dark: SEATS[p.seat].dark, shape: SEATS[p.seat].shape, portrait: m.look ? portrait(m) : '', look: m.look || null, costume: m.costume, cpu: m.cpu || null }; });   // cpu: Expansion 1 M1 (a computer fairgoer: badge it)
   const playing = me != null && players.some(p => p.pid === me);
   const actors = new Map(), tags = [], tracks = new Map(), npcs = new Set(), clock = createServerClock({ tickMs: TICK_MS });
   let live = false, disposed = false, acc = 0, seq = 0, mine = null, pending = [], rx = 0, rz = 0, lastG = null;
@@ -37,7 +38,7 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
       const b = intro.b?.[p.pid] ? unpackBody(intro.b[p.pid]) : { x: 0, z: 0, y: 0, yaw: 0, flags: 0, vx: 0, vz: 0 };
       a.place(b.x, b.y, b.z, b.yaw); group.add(a.group); actors.set(p.pid, a);
       a.group.traverse(o => { if (o.isMesh) o.castShadow = true; });
-      tags.push(stage.tag(a.group, { text: p.pid === me ? 'YOU' : p.name, seat: p.seat, height: a.height + 0.35, cls: p.pid === me ? 'me' : '' }));
+      tags.push(stage.tag(a.group, { text: p.pid === me ? 'YOU' : p.cpu ? `${p.name} · CPU` : p.name, seat: p.seat, height: a.height + 0.35, cls: p.pid === me ? 'me' : '' }));
       const tr = { buf: createTrack({ tickMs: TICK_MS }), b, yaw: b.yaw }; tr.buf.push(-1e9, b); tracks.set(p.pid, tr);
       if (p.pid === me) { mine = { ...b }; rx = b.x; rz = b.z; }
     }));
@@ -68,7 +69,8 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
   const view = mod.createView(ctx) || {};
   if (disposed) { view.dispose?.(); }
   // a season's shared arena dressing (js/client/halloween.js); a view may steer it with `halloween: {…}` or opt out with `false`
-  const dress = arena && ctx.season === 'halloween' && view.halloween !== false && !disposed ? dressArena(ctx, view.halloween || {}) : null;
+  const dress = !arena || disposed ? null : ctx.season === 'halloween' && view.halloween !== false ? dressArena(ctx, view.halloween || {})
+    : ctx.season === 'winter' && view.winter !== false ? dressWinter(ctx, view.winter || {}) : null;   // M6: snow, snowmen and snowfall (js/client/winter.js)
 
   function start() { live = true; if (arena && playing) controls.set({ stick: true, ...meta.controls }); view.start?.(); }
   function snap(msg) {

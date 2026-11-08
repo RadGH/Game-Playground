@@ -1,0 +1,64 @@
+{
+  "about": "Fair Pass sticker book (Expansion 1, M7). Each sticker is earned by a rule on what the room really recorded: {stat, n} = a lifetime count on the player's pass (js/sim/pass.js STATS lists every stat and who writes it), {match, n} = a value inside one match (tickets held, ribbons, minigames won, people playing). season = only earnable while that holiday is on. hidden = shown as ? until earned. Power-neutral: stickers only give Fair Pass XP.",
+  "stickers": [
+    { "id": "first-ride", "name": "First Ride", "pic": "🎟️", "how": "Play your first minigame", "group": "Getting started", "rule": { "stat": "games", "n": 1 } },
+    { "id": "first-win", "name": "Beginner's Ribbon", "pic": "🏅", "how": "Win a minigame", "group": "Getting started", "rule": { "stat": "wins", "n": 1 } },
+    { "id": "closing-time", "name": "Closing Time", "pic": "🎪", "how": "Finish a whole match", "group": "Getting started", "rule": { "stat": "matches", "n": 1 } },
+    { "id": "fair-champion", "name": "Fair Champion", "pic": "🏆", "how": "Win a match", "group": "Getting started", "rule": { "stat": "matchWins", "n": 1 } },
+
+    { "id": "regular", "name": "Regular", "pic": "🎠", "how": "Play 25 minigames", "group": "Keep playing", "rule": { "stat": "games", "n": 25 } },
+    { "id": "season-ticket", "name": "Season Ticket", "pic": "🎡", "how": "Play 100 minigames", "group": "Keep playing", "rule": { "stat": "games", "n": 100 } },
+    { "id": "handful", "name": "Handful of Wins", "pic": "✋", "how": "Win 10 minigames", "group": "Keep playing", "rule": { "stat": "wins", "n": 10 } },
+    { "id": "prize-hoarder", "name": "Prize Hoarder", "pic": "💰", "how": "Win 50 minigames", "group": "Keep playing", "rule": { "stat": "wins", "n": 50 } },
+    { "id": "night-owl", "name": "Night Owl", "pic": "🦉", "how": "Finish 10 matches", "group": "Keep playing", "rule": { "stat": "matches", "n": 10 } },
+    { "id": "five-time", "name": "Five-Time Champ", "pic": "👑", "how": "Win 5 matches", "group": "Keep playing", "rule": { "stat": "matchWins", "n": 5 } },
+
+    { "id": "taste-tester", "name": "Taste Tester", "pic": "🍭", "how": "Play 10 different minigames", "group": "Try everything", "rule": { "stat": "distinct", "n": 10 } },
+    { "id": "explorer", "name": "Fair Explorer", "pic": "🧭", "how": "Play 30 different minigames", "group": "Try everything", "rule": { "stat": "distinct", "n": 30 } },
+    { "id": "seen-it-all", "name": "Seen It All", "pic": "🔭", "how": "Play 60 different minigames", "group": "Try everything", "rule": { "stat": "distinct", "n": 60 } },
+    { "id": "speedy", "name": "Speedy", "pic": "🏁", "how": "Win a racing game", "group": "Try everything", "rule": { "stat": "wins_race", "n": 1 } },
+    { "id": "good-guesser", "name": "Good Guesser", "pic": "🤔", "how": "Win a guessing game", "group": "Try everything", "rule": { "stat": "wins_guess", "n": 1 } },
+    { "id": "pillow-champ", "name": "Pillow Champ", "pic": "🥊", "how": "Win a brawling game", "group": "Try everything", "rule": { "stat": "wins_brawl", "n": 1 } },
+    { "id": "elephant", "name": "Elephant Memory", "pic": "🐘", "how": "Win a memory game", "group": "Try everything", "rule": { "stat": "wins_memory", "n": 1 } },
+    { "id": "style-star", "name": "Style Star", "pic": "🎨", "how": "Win a draw or dress-up game", "group": "Try everything", "rule": { "stat": "wins_create", "n": 1 } },
+    { "id": "sharp-shooter", "name": "Sharp Shooter", "pic": "🎯", "how": "Win an aim and timing game", "group": "Try everything", "rule": { "stat": "wins_aim", "n": 1 } },
+
+    { "id": "better-together", "name": "Better Together", "pic": "🤝", "how": "Win a team-up game together", "group": "Together", "rule": { "stat": "coopWins", "n": 1 } },
+    { "id": "giant-slayers", "name": "Giant Topplers", "pic": "🐉", "how": "Beat a boss as a team", "group": "Together", "rule": { "stat": "bossWins", "n": 1 } },
+    { "id": "boss-busters", "name": "Boss Busters", "pic": "⚔️", "how": "Beat 5 bosses as a team", "group": "Together", "rule": { "stat": "bossWins", "n": 5 } },
+    { "id": "team-spirit", "name": "Team Spirit", "pic": "🚩", "how": "Win a match in teams", "group": "Together", "rule": { "stat": "teamWins", "n": 1 } },
+    { "id": "bring-a-friend", "name": "Bring a Friend", "pic": "👋", "how": "Play a match with another person", "group": "Together", "rule": { "match": "people", "n": 2 } },
+    { "id": "full-house", "name": "Full House", "pic": "🏠", "how": "Play with 3 friends (4 people)", "group": "Together", "rule": { "match": "people", "n": 4 } },
+    { "id": "outfoxed", "name": "Outfoxed", "pic": "🦊", "how": "Beat a Tricky computer player in a minigame", "group": "Together", "rule": { "stat": "trickyBeaten", "n": 1 } },
+
+    { "id": "jackpot", "name": "Jackpot!", "pic": "💎", "how": "Land on the jackpot", "group": "On the board", "rule": { "stat": "jackpots", "n": 1 } },
+    { "id": "mirror-mixup", "name": "Mirror Mix-Up", "pic": "🪞", "how": "Swap places in the Hall of Mirrors", "group": "On the board", "rule": { "stat": "mirrors", "n": 1 } },
+    { "id": "wheel-fan", "name": "Wheel Whirler", "pic": "🌀", "how": "Spin the Wheel of Whatever 10 times", "group": "On the board", "rule": { "stat": "spins", "n": 10 } },
+    { "id": "ribbon-buyer", "name": "Ribbon Buyer", "pic": "🎀", "how": "Buy a ribbon at the Prize Booth", "group": "On the board", "rule": { "stat": "ribbonsBought", "n": 1 } },
+    { "id": "ribbon-rack", "name": "Ribbon Rack", "pic": "🎗️", "how": "Hold 3 ribbons in one match", "group": "On the board", "rule": { "match": "ribbons", "n": 3 } },
+    { "id": "ticket-tower", "name": "Ticket Tower", "pic": "🎫", "how": "Hold 50 tickets at once", "group": "On the board", "rule": { "match": "tickets", "n": 50 } },
+    { "id": "lucky-duck", "name": "Lucky Duck", "pic": "🦆", "how": "Fish a duck at the Duck Pond", "group": "On the board", "rule": { "stat": "ducks", "n": 1 } },
+    { "id": "dice-duelist", "name": "Dice Duelist", "pic": "🎲", "how": "Win a dice duel", "group": "On the board", "rule": { "stat": "duelsWon", "n": 1 } },
+    { "id": "cannonball", "name": "Human Cannonball", "pic": "💥", "how": "Ride the cannon", "group": "On the board", "rule": { "stat": "cannon", "n": 1 } },
+    { "id": "ring-the-bell", "name": "Ring the Bell", "pic": "🔔", "how": "Ring the High Striker bell", "group": "On the board", "rule": { "stat": "bells", "n": 1 } },
+
+    { "id": "hat-trick", "name": "Hat Trick", "pic": "🎩", "how": "Win 3 minigames in one match", "group": "Ways to play", "rule": { "match": "wins", "n": 3 } },
+    { "id": "marathon", "name": "Marathon Runner", "pic": "🏃", "how": "Finish a Minigame Marathon", "group": "Ways to play", "rule": { "stat": "done_marathon", "n": 1 } },
+    { "id": "hole-in-fun", "name": "Hole in Fun", "pic": "⛳", "how": "Finish a Golf match", "group": "Ways to play", "rule": { "stat": "done_golf", "n": 1 } },
+    { "id": "quick-fix", "name": "Quick Fix", "pic": "⚡", "how": "Finish a Quick Match", "group": "Ways to play", "rule": { "stat": "quickDone", "n": 1 } },
+    { "id": "encore", "name": "Encore!", "pic": "🔁", "how": "Finish a Play again match", "group": "Ways to play", "rule": { "stat": "againDone", "n": 1 } },
+    { "id": "daily-doer", "name": "Daily Doer", "pic": "📅", "how": "Finish 5 daily challenges", "group": "Ways to play", "rule": { "stat": "dailies", "n": 5 } },
+
+    { "id": "mud-lover", "name": "Mud Lover", "pic": "🐷", "how": "Splash into 5 mud puddles", "group": "Secret", "hidden": true, "rule": { "stat": "mud", "n": 5 } },
+    { "id": "fair-critic", "name": "Fair Critic", "pic": "📝", "how": "Rate 10 different minigames", "group": "Secret", "hidden": true, "rule": { "stat": "rated", "n": 10 } },
+    { "id": "eagle-eye", "name": "Eagle Eye", "pic": "🥜", "how": "Find the pea in the shell game", "group": "Secret", "hidden": true, "rule": { "stat": "shellFinds", "n": 1 } },
+    { "id": "good-sport", "name": "Good Sport", "pic": "🤲", "how": "Both share in Steal or Share", "group": "Secret", "hidden": true, "rule": { "stat": "shares", "n": 1 } },
+
+    { "id": "first-frost", "name": "First Frost", "pic": "❄️", "how": "Play a minigame during the Winter Fair", "group": "Winter Fair", "season": "winter", "rule": { "stat": "games_winter", "n": 1 } },
+    { "id": "snow-day", "name": "Snow Day", "pic": "⛄", "how": "Play 10 minigames during the Winter Fair", "group": "Winter Fair", "season": "winter", "rule": { "stat": "games_winter", "n": 10 } },
+    { "id": "ice-cold", "name": "Ice Cold", "pic": "🧊", "how": "Win 3 minigames during the Winter Fair", "group": "Winter Fair", "season": "winter", "rule": { "stat": "wins_winter", "n": 3 } },
+    { "id": "winter-fairgoer", "name": "Winter Fairgoer", "pic": "🎄", "how": "Finish a match during the Winter Fair", "group": "Winter Fair", "season": "winter", "rule": { "stat": "matches_winter", "n": 1 } },
+    { "id": "trick-or-treat", "name": "Trick or Treat", "pic": "🎃", "how": "Play a minigame at Halloween", "group": "Halloween", "season": "halloween", "rule": { "stat": "games_halloween", "n": 1 } },
+    { "id": "spook-champ", "name": "Spook Champ", "pic": "👻", "how": "Win 3 minigames at Halloween", "group": "Halloween", "season": "halloween", "rule": { "stat": "wins_halloween", "n": 3 } }
+  ]
+}

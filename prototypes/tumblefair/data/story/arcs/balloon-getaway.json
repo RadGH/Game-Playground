@@ -1,0 +1,261 @@
+{
+  "id": "balloon-getaway",
+  "title": "The Great Balloon Getaway",
+  "blurb": "The fair's giant balloon has floated off with every prize balloon tied under it. Chase it across the sky!",
+  "icon": "🎈",
+  "cast": {
+    "villain": ["Captain Gusty", "Baron Breezewell", "Madame Puff"],
+    "ally": ["Tilly the kite maker", "Old Moss the weatherman", "Wren the windmill keeper"],
+    "place": ["the rooftops", "the lily pond", "the old windmill"],
+    "prize": ["the Rainbow Bunch", "the Big Red Balloon", "the Fair Lantern"]
+  },
+  "hooks": [
+    {
+      "id": "bg-hook-lift", "weight": 2, "title": "Up, Up and Away",
+      "text": { "any": [
+        ["The giant balloon slips its ropes and rises into the night.", "Every prize balloon is tied underneath it!"],
+        ["The prize booth is empty. Not one balloon left.", "High above, the giant balloon drifts off with all of them."]
+      ] },
+      "who": "active",
+      "choices": [
+        { "label": "Grab the trailing rope", "mood": "bold", "stars": 1, "flags": ["rope_end"], "text": "{hero} grabs the rope's end. It tugs toward {place}!", "deed": { "text": "grabbed the balloon's trailing rope", "tags": ["rope", "bold"] } },
+        { "label": "Ask a friend", "mood": "clever", "stars": 1, "flags": ["ally_help"], "text": "{ally} sniffs the air: \"{villain}. I'd know that breeze anywhere.\"", "deed": { "text": "got the first clue about the wind", "tags": ["clue", "wind"] } }
+      ]
+    },
+    {
+      "id": "bg-hook-note", "weight": 1, "title": "A Note on the Breeze",
+      "text": ["A paper note flutters down from the sky.", "It says: CATCH ME IF YOU CAN! Love, {villain}."],
+      "who": "vote",
+      "choices": [
+        { "label": "Chase the shadow!", "mood": "bold", "party": 1, "flags": ["tracks"], "text": "Everyone runs after the big round shadow on the grass.", "deed": { "text": "chased the balloon's shadow", "tags": ["chase"], "party": true } },
+        { "label": "Test the wind", "mood": "clever", "stars": 1, "flags": ["wind_read"], "text": "{hero} licks a finger and holds it up. \"It's going east!\"", "deed": { "text": "worked out which way the wind blew", "tags": ["wind", "clever"] } }
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "id": "bg-rooftops", "act": 1, "weight": 2, "title": "Over the Rooftops",
+      "text": ["The balloon bumps along the rooftops.", "Loose balloons are snagging on every chimney."],
+      "callbacks": [{ "tags": ["rope", "chase"], "text": "After {who} {deed}, the trail leads up here." }],
+      "who": "active",
+      "choices": [
+        { "label": "Hop the roofs", "mood": "bold", "stars": 1, "text": "{hero} climbs a drainpipe and scampers along the tiles.",
+          "game": { "kinds": ["dodge", "race"], "intro": "Leap from roof to roof!", "lead": "winner",
+            "win": { "text": "{winner} unhooks a whole bunch of balloons from a chimney.", "stars": 1, "flags": ["balloons_1"], "deed": { "text": "hopped across the rooftops", "tags": ["roof", "bold"] } },
+            "lose": { "text": "{loser} sits on a chimney and pops out a bit sooty.", "deed": { "text": "got sooty in a chimney", "tags": ["silly", "roof"] } } } },
+        { "label": "Use a long pole", "mood": "clever", "stars": 1, "text": "{hero} finds a window pole with a hook on the end.",
+          "game": { "kinds": ["aim", "collect"], "intro": "Hook the balloon strings!", "lead": "winner",
+            "win": { "text": "{winner} hooks string after string. What a haul!", "stars": 1, "flags": ["balloons_1"], "deed": { "text": "hooked balloons off the chimneys", "tags": ["roof", "clever"] } },
+            "lose": { "text": "{loser} hooks a pair of socks off a washing line.", "deed": { "text": "fished socks off a washing line", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "bg-pond", "act": 1, "weight": 2, "title": "Splashdown at the Pond",
+      "text": ["A cloud of balloons bobs low over the lily pond.", "A very proud swan is guarding them."],
+      "who": "vote",
+      "choices": [
+        { "label": "Row out fast", "mood": "bold", "party": 1, "text": "Everyone piles into a little rowing boat.",
+          "game": { "kinds": ["race", "collect"], "intro": "Row to the balloons!", "lead": "winner",
+            "win": { "text": "{winner} rows the fastest and scoops up the balloons.", "stars": 1, "flags": ["balloons_1"], "deed": { "text": "rowed across the lily pond", "tags": ["water", "bold"] } },
+            "lose": { "text": "{loser} rows in a perfect circle. The swan claps.", "deed": { "text": "rowed in circles for a swan", "tags": ["silly", "water"] } } } },
+        { "label": "Fish for strings", "mood": "clever", "stars": 1, "text": "{hero} ties a hook to a stick. The strings dangle in the water.",
+          "game": { "kinds": ["fishing"], "intro": "Reel in the balloon strings!", "lead": "winner",
+            "win": { "text": "{winner} reels in a whole bouquet of balloons.", "stars": 1, "flags": ["balloons_1"], "deed": { "text": "fished balloons out of the pond", "tags": ["water", "clever"] } },
+            "lose": { "text": "{loser} catches a lily pad and wears it as a hat.", "deed": { "text": "wore a lily pad as a hat", "tags": ["silly", "water"] } } } }
+      ]
+    },
+    {
+      "id": "bg-kites", "act": 1, "weight": 1, "title": "Kite Hill",
+      "text": ["Kite Hill is windy and full of kites.", "Balloons are tangled up with the kite tails!"],
+      "callbacks": [{ "tags": ["wind", "clue"], "text": "{who} {deed}, so you knew to come here." }],
+      "who": "active",
+      "choices": [
+        { "label": "Fly a kite up", "mood": "bold", "stars": 1, "text": "{hero} grabs a kite and runs into the wind.",
+          "game": { "kinds": ["aim", "reaction"], "intro": "Steer your kite to the balloons!", "lead": "winner",
+            "win": { "text": "{winner} flies right through the tangle and frees them.", "stars": 1, "flags": ["balloons_1"], "deed": { "text": "untangled balloons with a kite", "tags": ["kite", "bold"] } },
+            "lose": { "text": "{loser} gets lifted onto tiptoe by a big kite. Wheee!", "deed": { "text": "was nearly flown by a kite", "tags": ["silly", "kite"] } } } },
+        { "label": "Build one huge kite", "mood": "kind", "party": 1, "text": "Everyone ties their kites into one giant kite.",
+          "game": { "kinds": ["create", "collect"], "coop": true, "intro": "Build the giant kite together!",
+            "win": { "text": "The giant kite soars up and drags every balloon back down.", "stars": 2, "flags": ["balloons_1", "big_kite"], "deed": { "text": "built a giant kite together", "tags": ["kite", "team"] } },
+            "lose": { "text": "The kite wobbles, but it still brings a few balloons down.", "stars": 1, "flags": ["balloons_1"], "deed": { "text": "built a wobbly giant kite", "tags": ["kite", "team"] } } } }
+      ]
+    },
+    {
+      "id": "bg-windmill", "act": 2, "weight": 2, "title": "The Whirling Windmill",
+      "text": ["The balloon's anchor is caught on the windmill sails.", "Round and round it goes, faster and faster!"],
+      "callbacks": [{ "tags": ["wind"], "text": "{who} {deed}. The windmill turns just as you said." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Ride the sails", "mood": "bold", "stars": 1, "text": "{hero} times a jump onto the passing sail.",
+          "game": { "kinds": ["rhythm", "dodge"], "intro": "Hop on in time with the sails!", "lead": "winner",
+            "win": { "text": "{winner} rides up top and unhooks the anchor.", "stars": 2, "flags": ["windmill_free"], "deed": { "text": "rode the windmill sails", "tags": ["windmill", "bold"] } },
+            "lose": { "text": "{loser} goes round three times and lands in the flour.", "deed": { "text": "landed in a sack of flour", "tags": ["silly", "windmill"] } } } },
+        { "label": "Find the brake", "mood": "clever", "stars": 1, "text": "{hero} slips inside. Gears and levers everywhere!",
+          "game": { "kinds": ["logic", "memory"], "intro": "Pull the levers in the right order!", "lead": "winner",
+            "win": { "text": "{winner} pulls the right lever. The sails creak to a stop.", "stars": 2, "flags": ["windmill_free"], "deed": { "text": "stopped the whirling windmill", "tags": ["windmill", "clever"] } },
+            "lose": { "text": "{loser} pulls the wrong lever and grinds some porridge oats.", "deed": { "text": "made porridge by mistake", "tags": ["silly", "food"] } } } }
+      ]
+    },
+    {
+      "id": "bg-bellows", "act": 2, "weight": 2, "title": "The Gust Machine",
+      "text": ["{villain} leans over the basket with giant bellows.", "WHOOSH! A gust sends everyone's hats flying."],
+      "who": "active",
+      "choices": [
+        { "label": "Push into the wind", "mood": "bold", "stars": 1, "text": "{hero} leans forward and marches, step by step.",
+          "game": { "kinds": ["brawl", "dodge"], "intro": "Push through the gusts!", "lead": "winner",
+            "win": { "text": "{winner} reaches the rope and gives the bellows a big tug. Squeak!", "stars": 2, "flags": ["bellows_broken"], "deed": { "text": "marched straight into a gale", "tags": ["bellows", "bold"] } },
+            "lose": { "text": "{loser} is blown backwards into a haystack.", "deed": { "text": "was blown into a haystack", "tags": ["silly", "wind"] } } } },
+        { "label": "Fill it with bubbles", "mood": "silly", "stars": 1, "text": "{hero} pours bubble mix into the bellows' nose.",
+          "game": { "kinds": ["bluff", "guess"], "intro": "Sneak the bubble mix past them!", "lead": "winner",
+            "win": { "text": "{winner} does it! The next gust is all bubbles. Pop pop pop!", "stars": 2, "flags": ["bellows_broken"], "deed": { "text": "filled the bellows with bubbles", "tags": ["bellows", "sneaky"] } },
+            "lose": { "text": "{loser} gets spotted and blown a big bubble right on the nose.", "deed": { "text": "wore a bubble on the nose", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "bg-sheep", "act": 2, "weight": 1, "title": "A Floating Sheep",
+      "text": ["A fluffy sheep drifts past, tied to three balloons.", "\"Baa?\" it says, quite calmly."],
+      "who": "vote",
+      "choices": [
+        { "label": "Bring it down gently", "mood": "kind", "party": 1, "text": "Everyone reaches up for the dangling strings.",
+          "game": { "kinds": ["collect", "reaction"], "intro": "Catch the strings before it floats off!", "lead": "winner",
+            "win": { "text": "{winner} pulls the sheep down for a cuddle. It follows you now.", "stars": 2, "flags": ["sheep_friend", "balloons_2"], "deed": { "text": "rescued a floating sheep", "tags": ["animal", "kind"] } },
+            "lose": { "text": "{loser} gets a woolly bump on the head. Soft, at least.", "deed": { "text": "was bumped by a flying sheep", "tags": ["silly", "animal"] } } } },
+        { "label": "Count the balloons", "mood": "clever", "stars": 1, "text": "{hero} works out how many to pop to land it softly.",
+          "game": { "kinds": ["memory", "guess"], "intro": "Pick the right balloons!", "lead": "winner",
+            "win": { "text": "{winner} pops just one. The sheep drifts down like a feather.", "stars": 2, "flags": ["sheep_friend", "balloons_2"], "deed": { "text": "landed a sheep as soft as a feather", "tags": ["animal", "clever"] } },
+            "lose": { "text": "{loser} pops the wrong one and the sheep spins like a top.", "deed": { "text": "made a sheep spin like a top", "tags": ["silly", "animal"] } } } }
+      ]
+    },
+    {
+      "id": "bg-weathervane", "act": 2, "weight": 1, "title": "The Spinning Weathervanes",
+      "text": ["Every weathervane in town is pointing a different way.", "{villain} has spun them all to fool you!"],
+      "callbacks": [{ "tags": ["clue", "clever"], "text": "Luckily, {who} {deed}." }],
+      "who": "active",
+      "choices": [
+        { "label": "Read the clouds", "mood": "clever", "stars": 1, "text": "{hero} squints at the clouds. They know the truth.",
+          "game": { "kinds": ["guess", "logic"], "intro": "Which way is the wind really blowing?", "lead": "winner",
+            "win": { "text": "{winner} reads the clouds and points. \"That way!\"", "stars": 2, "flags": ["balloons_2"], "deed": { "text": "read the clouds like a map", "tags": ["wind", "clever"] } },
+            "lose": { "text": "{loser} sees a cloud shaped like a duck and gets distracted.", "deed": { "text": "spotted a duck-shaped cloud", "tags": ["silly"] } } } },
+        { "label": "Race every way", "mood": "bold", "party": 1, "text": "Everyone picks a weathervane and runs where it points.",
+          "game": { "kinds": ["race"], "intro": "Run, run, run!", "lead": "winner",
+            "win": { "text": "{winner} picks the right one and finds dropped balloons.", "stars": 2, "flags": ["balloons_2"], "deed": { "text": "guessed the right weathervane", "tags": ["chase", "bold"] } },
+            "lose": { "text": "{loser} runs the wrong way and finds a nice bakery.", "deed": { "text": "found a bakery by accident", "tags": ["silly", "food"] } } } }
+      ]
+    },
+    {
+      "id": "bg-clouds", "act": 3, "weight": 2, "title": "Into the Clouds",
+      "text": ["The balloon climbs into the clouds.", "The clouds here are soft and bouncy, like pillows."],
+      "extra": [{ "requires": ["sheep_friend"], "text": "The fluffy sheep bounces ahead to show the way. Baa!" }],
+      "callbacks": [{ "tags": ["roof", "kite"], "text": "{who} {deed}. Clouds are easy after that." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Bounce cloud to cloud", "mood": "bold", "party": 1, "text": "Everyone takes a run-up and jumps. Boing!",
+          "game": { "kinds": ["dodge", "race"], "intro": "Bounce to the top!", "lead": "winner",
+            "win": { "text": "{winner} bounces highest and grabs the anchor rope.", "stars": 2, "flags": ["cloud_top"], "deed": { "text": "bounced up through the clouds", "tags": ["cloud", "bold"] } },
+            "lose": { "text": "{loser} sinks into a cloud and comes out damp.", "deed": { "text": "fell into a soggy cloud", "tags": ["silly", "cloud"] } } } },
+        { "label": "Build a cloud stair", "mood": "clever", "stars": 1, "text": "{hero} pats the clouds into neat little steps.",
+          "game": { "kinds": ["create", "logic"], "intro": "Shape the best stairs!", "lead": "winner",
+            "win": { "text": "{winner} builds a staircase right up to the basket.", "stars": 2, "flags": ["cloud_top"], "deed": { "text": "built a staircase out of clouds", "tags": ["cloud", "clever"] } },
+            "lose": { "text": "{loser} builds a cloud sofa instead and has a little sit.", "deed": { "text": "built a comfy cloud sofa", "tags": ["silly", "cloud"] } } } }
+      ]
+    },
+    {
+      "id": "bg-basket", "act": 3, "weight": 2, "title": "Toss in the Sandbags",
+      "text": ["The basket hangs just out of reach.", "If it gets heavier, it will sink down to you!"],
+      "callbacks": [{ "tags": ["bold", "chase"], "text": "{who} {deed}. A little sandbag is nothing!" }],
+      "who": "active",
+      "choices": [
+        { "label": "Shoot the sandbags", "mood": "bold", "stars": 1, "text": "{hero} picks up a sandbag and lines up the throw.",
+          "game": { "kinds": ["basketball", "aim"], "intro": "Get the sandbags in the basket!", "lead": "winner",
+            "win": { "text": "Swish! {winner} sinks the last bag. The basket drops lower.", "stars": 2, "flags": ["basket_low"], "deed": { "text": "sank a sandbag into the basket", "tags": ["basket", "aim"] } },
+            "lose": { "text": "{loser} throws a sandbag straight up. It lands with a flump.", "deed": { "text": "got flumped by a sandbag", "tags": ["silly"] } } } },
+        { "label": "Jump for it", "mood": "bold", "stars": 1, "text": "{hero} crouches low, ready to spring.",
+          "game": { "kinds": ["reaction", "race"], "intro": "Jump at just the right moment!", "lead": "winner",
+            "win": { "text": "{winner} catches the basket's edge and pulls it down.", "stars": 2, "flags": ["basket_low"], "deed": { "text": "leapt up and caught the basket", "tags": ["basket", "bold"] } },
+            "lose": { "text": "{loser} jumps a moment late and does a lovely twirl.", "deed": { "text": "did a twirl in mid-air", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "bg-tickle-storm", "act": 3, "weight": 1, "title": "The Tickle Storm",
+      "text": ["A small grey cloud rolls in, rumbling.", "It is not raining. It is tickling!"],
+      "callbacks": [{ "tags": ["kind", "animal"], "text": "{who} {deed}, so the cloud is a bit shy of you." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Hold on together", "mood": "kind", "party": 1, "text": "Everyone links arms and tries very hard not to giggle.",
+          "game": { "kinds": ["dodge"], "coop": true, "intro": "Dodge the tickles together!",
+            "win": { "text": "Nobody giggles! The little cloud gives up and drifts off.", "stars": 2, "flags": ["storm_calm"], "deed": { "text": "kept a straight face in a tickle storm", "tags": ["storm", "team"] } },
+            "lose": { "text": "Everyone giggles so hard the cloud giggles too.", "stars": 1, "deed": { "text": "got the giggles in a tickle storm", "tags": ["storm", "silly"] } } } },
+        { "label": "Sing it to sleep", "mood": "clever", "stars": 1, "text": "{hero} starts humming a lullaby.",
+          "game": { "kinds": ["rhythm"], "intro": "Keep the lullaby steady!", "lead": "winner",
+            "win": { "text": "{winner} hums so sweetly the storm cloud starts to snore.", "stars": 2, "flags": ["storm_calm"], "deed": { "text": "sang a storm cloud to sleep", "tags": ["storm", "music"] } },
+            "lose": { "text": "{loser} sings a wobbly note and the cloud sneezes on them.", "deed": { "text": "got sneezed on by a cloud", "tags": ["silly", "storm"] } } } }
+      ]
+    }
+  ],
+  "interludes": [
+    {
+      "id": "bg-int-feather", "weight": 2, "title": "A Lucky Feather",
+      "text": ["A shiny gold feather spins down from the sky.", "It glitters and floats like it weighs nothing."],
+      "who": "active",
+      "choices": [
+        { "label": "Tuck it in your hat", "mood": "bold", "stars": 2, "flags": ["gold_feather"], "text": "{hero} tucks the feather in a hat. Feels lucky!", "deed": { "text": "found a golden feather", "tags": ["lucky"] } },
+        { "label": "Let it fly on", "mood": "kind", "party": 1, "text": "{hero} blows it gently. It floats off to bring luck to all.", "deed": { "text": "sent a lucky feather on its way", "tags": ["kind", "lucky"] } }
+      ]
+    },
+    {
+      "id": "bg-int-ally", "weight": 1, "title": "{ally} Waves",
+      "text": ["{ally} runs up with a jug of cold lemonade.", "\"Chasing balloons is thirsty work!\""],
+      "who": "vote",
+      "choices": [
+        { "label": "Take a quick sip", "mood": "kind", "party": 1, "text": "Fizzy, sweet and cold. Everyone feels light as air.", "deed": { "text": "shared lemonade on the hill", "tags": ["kind"], "party": true } },
+        { "label": "Drink it on the run", "mood": "silly", "stars": 1, "text": "{hero} gulps lemonade at a sprint. Hic!", "deed": { "text": "got hiccups from sprinting lemonade", "tags": ["silly", "chase"] } }
+      ]
+    }
+  ],
+  "climax": [
+    {
+      "id": "bg-climax-gust", "weight": 2, "title": "The Great Gust",
+      "text": ["{villain} stands in the basket, hugging {prize}.", "\"These balloons are MINE! Feel my mightiest gust!\""],
+      "callbacks": [{ "tags": ["bellows", "windmill", "basket"], "text": "After {who} {deed}, {villain} looks worried." }],
+      "extra": [{ "requires": ["bellows_broken"], "text": "The bellows only wheeze now. Ha!" }],
+      "who": "vote",
+      "choices": [
+        { "label": "Pull it down together", "mood": "bold", "party": 1, "text": "Everyone grabs the anchor rope. One, two, three, PULL!",
+          "game": { "kinds": ["boss"], "coop": true, "intro": "Beat the gusts and haul it down!",
+            "win": { "text": "The balloon lands with a soft bump. {villain} hands back {prize}.", "stars": 3, "flags": ["won"], "deed": { "text": "pulled the runaway balloon down", "tags": ["boss", "team"] } },
+            "lose": { "text": "A big gust snatches the rope away. Up it goes again!", "stars": 1, "deed": { "text": "nearly caught the runaway balloon", "tags": ["boss", "team"] } } } },
+        { "label": "Pop the knot first", "mood": "clever", "stars": 1, "text": "{hero} spots the one knot holding {prize}.",
+          "game": { "kinds": ["aim", "reaction"], "intro": "Untie the knot before the gust!",
+            "win": { "text": "{winner} flicks the knot loose. {prize} floats right down!", "stars": 3, "flags": ["won"], "deed": { "text": "freed the prize with one flick", "tags": ["boss", "aim"] } },
+            "lose": { "text": "{loser} ties their own shoelaces together by mistake.", "deed": { "text": "tied their own shoelaces together", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "bg-climax-sky", "weight": 1, "title": "Race Across the Sky",
+      "text": ["{villain} cuts {prize} loose to escape faster!", "It drifts toward the moon. Somebody grab it!"],
+      "callbacks": [{ "tags": ["cloud", "kite"], "text": "{who} {deed}. The sky feels like home now." }],
+      "extra": [{ "requires": ["big_kite"], "text": "The giant kite swoops in to help!" }],
+      "who": "active",
+      "choices": [
+        { "label": "Out-fly them", "mood": "bold", "stars": 1, "text": "{hero} grabs a bunch of balloons and floats up after it.",
+          "game": { "kinds": ["race", "dodge"], "intro": "Float to {prize} first!",
+            "win": { "text": "{winner} catches {prize} and floats down, waving.", "stars": 3, "flags": ["won"], "deed": { "text": "caught the prize in the sky", "tags": ["boss", "cloud"] } },
+            "lose": { "text": "{loser} floats sideways and lands in a tree. Comfy.", "deed": { "text": "floated into a tree", "tags": ["silly"] } } } },
+        { "label": "Blow it home together", "mood": "kind", "party": 1, "text": "Everyone takes the biggest breath ever.",
+          "game": { "kinds": ["boss", "rhythm"], "coop": true, "intro": "Blow together, on the beat!",
+            "win": { "text": "WHOOSH! {prize} sails home and {villain} lands, red-faced.", "stars": 3, "flags": ["won"], "deed": { "text": "blew the prize home together", "tags": ["boss", "team"] } },
+            "lose": { "text": "Everyone runs out of puff. {villain} floats away, laughing.", "stars": 1, "deed": { "text": "puffed and puffed at the sky", "tags": ["boss", "team"] } } } }
+      ]
+    }
+  ],
+  "epilogue": {
+    "win": { "any": [["The balloons are home and tied to the prize booth.", "{villain} now blows up balloons for the children."], ["The giant balloon lands back on the fairground.", "Every child gets a free balloon in the morning!"]] },
+    "lose": { "any": [["Most balloons are home, but {prize} is still up there.", "Watch the sky next fair night…"], ["{villain} drifts away over the hills.", "But the fair still has plenty of balloons, thanks to you!"]] },
+    "lines": [
+      { "requires": ["gold_feather"], "text": "The golden feather now sits in the prize booth's window." },
+      { "requires": ["windmill_free"], "text": "The windmill turns happily again." },
+      { "requires": ["sheep_friend"], "text": "The fluffy sheep wears a balloon on its tail now." },
+      { "requires": ["storm_calm"], "not": ["sheep_friend"], "text": "A sleepy little cloud follows the fair around." }
+    ]
+  }
+}

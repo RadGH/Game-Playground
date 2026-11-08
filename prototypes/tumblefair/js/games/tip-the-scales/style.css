@@ -1,0 +1,83 @@
+/* Tip the Scales — a weigh-in booth at the fair: sky-blue bunting, a big brass-and-wood balance, a chunky slider. */
+.game-tip-the-scales { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 40px) calc(var(--sl) + 10px);
+  background: linear-gradient(#bfeefa, #e8fbff 60%, #cfe9b0 60%, #b6dc8e); }
+.game-tip-the-scales > * { flex: none; }
+.ts-top { display: flex; gap: 8px; align-items: center; justify-content: center; width: 100%; padding-right: 36px; }
+.ts-title { white-space: nowrap; font: 900 20px/1.1 var(--font); color: #ffd23f; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.ts-round { font-weight: 900; font-size: 12px; text-transform: uppercase; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.ts-ask { margin: 0; font: 800 17px/1.2 var(--font); text-align: center; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 4px 12px; box-shadow: 0 3px 0 var(--ink); max-width: 560px; }
+.ts-ask b { color: #c04a12; } .ts-ask small { display: block; font-size: 12px; font-weight: 800; color: #5a6a70; }
+
+.ts-stage { position: relative; width: min(100%, 40vh, 460px); }
+.game-tip-the-scales:is(.watching, [data-phase=reveal]) .ts-stage { width: min(100%, 50vh, 520px); }
+.ts-svg { width: 100%; display: block; overflow: visible; }
+.ts-duck { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; }
+.ts-duck.on { opacity: 1; animation: ts-drop .35s ease-out; }
+@keyframes ts-drop { from { transform: translateY(-40px); opacity: 0; } 70% { transform: translateY(2px); } }
+.ts-q { font: 900 30px var(--font); fill: #0d2228; opacity: .45; }
+.game-tip-the-scales:is([data-phase=reveal]) .ts-q { display: none; }
+.ts-count { position: absolute; right: 0; bottom: 0; display: grid; justify-items: center; background: var(--paper); border: 4px solid var(--ink); border-radius: 14px; padding: 0 10px 2px; box-shadow: 0 4px 0 var(--ink); }
+.ts-count b { font: 900 28px/1.05 var(--font); min-width: 2.2ch; text-align: center; } .ts-count span { font-size: 11px; font-weight: 800; }
+.game-tip-the-scales:not([data-phase=reveal]) .ts-count { display: none; }
+.counted .ts-count { background: var(--sun); animation: bob .5s 2; }
+
+.ts-hint { margin: 0; display: flex; align-items: center; gap: 6px; justify-content: center; font-weight: 800; font-size: 14px; line-height: 1.15; background: #fff8d8; border: 3px dashed var(--ink); border-radius: 14px; padding: 2px 10px; }
+.ts-hint b { color: #1d6a8a; white-space: nowrap; } .ts-hint svg { flex: none; }
+.game-tip-the-scales[data-phase=end] :is(.ts-stage, .ts-ask, .ts-hint) { display: none; }
+
+/* ---- the guess ---- */
+.ts-guess { display: grid; gap: 8px; width: min(100%, 380px); justify-items: center; }
+.game-tip-the-scales:is(.watching, :not([data-phase=guess])) .ts-guess { display: none; }
+.ts-entry { position: relative; display: flex; align-items: baseline; gap: 6px; }
+.ts-disp { min-width: 4ch; text-align: center; font: 900 34px/1 var(--font); background: #fff; border: 4px solid var(--ink); border-radius: 16px; padding: 4px 14px; box-shadow: inset 0 -4px 0 #dde8ec; }
+.ts-disp.empty { color: #9ab0b8; }
+.ts-entry small { font-weight: 900; font-size: 16px; }
+.ts-sent { position: absolute; left: calc(100% + 6px); top: 50%; transform: translateY(-50%); font-style: normal; font-weight: 900; color: #1d8a37; white-space: nowrap; font-size: 14px; }
+.is-ok .ts-disp { background: #d9f8df; border-color: #1d8a37; }
+.ts-entry.nudge .ts-disp { animation: shake .4s 2; }
+.ts-slide { -webkit-appearance: none; appearance: none; width: 100%; height: 48px; background: transparent; margin: 0; touch-action: none; }
+.ts-slide::-webkit-slider-runnable-track { height: 18px; border: 3px solid var(--ink); border-radius: 10px; background: linear-gradient(90deg, #fff, #ffd23f 60%, #ff9a2a); }
+.ts-slide::-moz-range-track { height: 12px; border: 3px solid var(--ink); border-radius: 10px; background: linear-gradient(90deg, #fff, #ffd23f 60%, #ff9a2a); }
+.ts-slide::-webkit-slider-thumb { -webkit-appearance: none; width: 44px; height: 44px; margin-top: -16px; border-radius: 50%; background: #ffd23f; border: 4px solid var(--ink); box-shadow: 0 3px 0 var(--ink); }
+.ts-slide::-moz-range-thumb { width: 36px; height: 36px; border-radius: 50%; background: #ffd23f; border: 4px solid var(--ink); }
+.ts-btns { display: grid; grid-template-columns: 64px 1fr 64px; gap: 8px; width: 100%; }
+.ts-btns button { min-height: 50px; border: 4px solid var(--ink); border-radius: 16px; background: #fff; font: 900 28px/1 var(--font); box-shadow: 0 4px 0 var(--ink); color: var(--ink); touch-action: manipulation; }
+.ts-btns button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.ts-btns .ts-ok { background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.ts-btns .ts-ok:disabled { opacity: .45; } .ts-btns .ts-ok.on { background: #1d8a37; }
+
+/* ---- the meter (reveal) ---- */
+.ts-meter { width: min(100%, 560px); padding: 6px 4px 0; display: none; }
+.game-tip-the-scales[data-phase=reveal] .ts-meter { display: block; }
+.ts-track { position: relative; height: 16px; border: 3px solid var(--ink); border-radius: 10px; background: linear-gradient(90deg, #fff, #bfeefa); margin: 0 18px; }
+.ts-needle { position: absolute; top: -10px; bottom: -10px; left: 0; width: 6px; margin-left: -3px; background: #e8a920; border: 2px solid var(--ink); border-radius: 4px; }
+.ts-pins { position: relative; height: 50px; margin: 0 18px; isolation: isolate; }
+.ts-none { display: block; text-align: center; padding-top: 30px; font-weight: 800; color: #4a5a60; }
+.ts-pin { position: absolute; left: var(--x); top: calc(8px + var(--row) * 42px); transform: translateX(-50%); display: grid; grid-template-columns: auto auto; align-items: center; gap: 0 4px;
+  background: #fff; border: 3px solid var(--ink); border-radius: 12px; padding: 2px 6px 2px 2px; opacity: .55; transition: opacity .2s, transform .2s; white-space: nowrap; }
+.ts-pin::before { content: ''; position: absolute; left: 50%; top: calc(-14px - var(--row) * 42px); height: calc(11px + var(--row) * 42px); z-index: -1; width: 3px; margin-left: -1.5px; background: var(--ink); }
+.ts-pin b { font: 900 17px/1 var(--font); } .ts-pin small { grid-column: 2; font-size: 11px; font-weight: 700; max-width: 6em; overflow: hidden; text-overflow: ellipsis; }
+.ts-pin .ts-face { grid-row: span 2; }
+.ts-face { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; }
+.ts-face img { width: 100%; height: 100%; display: block; }
+.ts-pin.passed { opacity: 1; transform: translateX(-50%) scale(1.05); }
+.ts-pin.best { background: var(--sun); transform: translateX(-50%) scale(1.15); z-index: 2; }
+.ts-pin.best::after { content: 'CLOSEST'; position: absolute; top: -14px; right: -8px; background: var(--pop); color: #fff; font: 900 10px/1 var(--font); padding: 3px 5px; border-radius: 6px; border: 2px solid var(--ink); }
+.ts-pin.exact::after { content: 'SPOT ON!'; background: #1d8a37; }
+
+.ts-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.ts-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.ts-st { font-size: 12px; color: #4a5a60; } .ts-st:empty { display: none; }
+.game-tip-the-scales[data-phase=guess]:not(.watching) .ts-st { display: none; }
+.ts-st.in { color: #1d8a37; } .ts-st.best { color: #b06000; } .ts-st.exact { color: #1d8a37; }
+.ts-players .chip.in { outline: 4px solid var(--mint); }
+.ts-note { margin: 0; text-align: center; font: 800 16px/1.25 var(--font); color: var(--ink); background: rgba(255, 255, 255, .88); border-radius: 12px; padding: 4px 12px; max-width: 560px; }
+.ts-note:empty { display: none; }
+.game-tip-the-scales[data-phase=end] .ts-players { margin-top: 14vh; }
+.game-tip-the-scales[data-phase=end] .ts-players .chip { font-size: 20px; }
+
+@media (min-aspect-ratio: 1/1) {
+  .ts-stage { width: min(100%, 58vh, 520px); }
+  .watching .ts-pin b { font-size: 21px; }
+}

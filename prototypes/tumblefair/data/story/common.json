@@ -1,0 +1,259 @@
+{
+  "about": "Story Night: lines and events every arc shares. recall = general callback lines ({who} {deed} = a memory that really happened earlier in this story). fallback = lines used when an outcome has nothing that fits (say a co-op minigame on a competitive encounter). interludes = quick choices with no minigame. titles = the epilogue's fun titles (stat: stars | led | wins | lasts | deeds | mood:<bold|kind|clever|silly> | fallback).",
+  "party": "the whole party",
+  "recall": [
+    "After {who} {deed}, nothing seems quite so scary.",
+    "Everyone still remembers how {who} {deed}.",
+    "{who} {deed} earlier tonight. That gives everyone courage.",
+    "Not long ago, {who} {deed}. The fair is still talking about it.",
+    "Since {who} {deed}, the party walks a little taller."
+  ],
+  "fallback": {
+    "win": [
+      "Together, you pull it off!",
+      "What a team!"
+    ],
+    "lose": [
+      "Not quite, but nobody gives up.",
+      "Close! The story goes on."
+    ],
+    "say": [
+      "On you go!"
+    ]
+  },
+  "interludes": [
+    {
+      "id": "c-candy-floss",
+      "weight": 2,
+      "title": "Candy Floss Cart",
+      "text": [
+        "A candy floss cart is still spinning, all on its own.",
+        "There is just enough for one huge cloud."
+      ],
+      "who": "active",
+      "choices": [
+        {
+          "label": "Share it with everyone",
+          "mood": "kind",
+          "party": 1,
+          "text": "{hero} tears the cloud into fluffy pieces. Sticky smiles all round!",
+          "deed": {
+            "text": "shared the last candy floss",
+            "tags": [
+              "kind",
+              "food"
+            ]
+          }
+        },
+        {
+          "label": "Eat it all, fast",
+          "mood": "silly",
+          "stars": 2,
+          "text": "{hero} eats the whole cloud in four bites. Pink face, big grin.",
+          "deed": {
+            "text": "ate a whole cloud of candy floss",
+            "tags": [
+              "silly",
+              "food"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "c-fortune-cat",
+      "weight": 2,
+      "title": "The Fortune Cat",
+      "text": [
+        "A stripy cat sits on a fortune-teller's table.",
+        "It blinks slowly. It wants something."
+      ],
+      "who": "vote",
+      "choices": [
+        {
+          "label": "Scratch its chin",
+          "mood": "kind",
+          "stars": 1,
+          "text": "The cat purrs and knocks a lucky token off the table.",
+          "flags": [
+            "lucky_token"
+          ],
+          "deed": {
+            "text": "made friends with the fortune cat",
+            "tags": [
+              "animal",
+              "kind"
+            ]
+          }
+        },
+        {
+          "label": "Ask it a question",
+          "mood": "clever",
+          "stars": 1,
+          "text": "The cat thinks very hard, then falls asleep. Probably a yes.",
+          "deed": {
+            "text": "asked a cat for advice",
+            "tags": [
+              "silly"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "c-lost-hat",
+      "weight": 1,
+      "title": "A Lost Hat",
+      "text": [
+        "A tall striped hat lies in a puddle.",
+        "Someone will miss it."
+      ],
+      "who": "active",
+      "choices": [
+        {
+          "label": "Wear it proudly",
+          "mood": "silly",
+          "stars": 1,
+          "text": "{hero} puts on the soggy hat. It drips, but it looks grand.",
+          "deed": {
+            "text": "wore a soggy striped hat",
+            "tags": [
+              "silly",
+              "hat"
+            ]
+          }
+        },
+        {
+          "label": "Hang it on a lamp post",
+          "mood": "kind",
+          "party": 1,
+          "text": "{hero} hangs the hat up high where its owner will see it.",
+          "deed": {
+            "text": "rescued a lost hat",
+            "tags": [
+              "kind",
+              "hat"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "c-strongman-bell",
+      "weight": 1,
+      "title": "The High Striker",
+      "text": [
+        "The High Striker bell is glowing.",
+        "A sign says: RING ME FOR LUCK."
+      ],
+      "who": "vote",
+      "choices": [
+        {
+          "label": "Swing the mallet!",
+          "mood": "bold",
+          "stars": 2,
+          "text": "DONG! The bell rings so loud a pigeon faints. It is fine.",
+          "deed": {
+            "text": "rang the High Striker bell",
+            "tags": [
+              "strong",
+              "bold"
+            ]
+          }
+        },
+        {
+          "label": "Tiptoe past it",
+          "mood": "clever",
+          "party": 1,
+          "text": "Better not wake the whole fair. Everyone sneaks by.",
+          "deed": {
+            "text": "sneaked past the glowing bell",
+            "tags": [
+              "sneaky"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "titles": [
+    {
+      "id": "hero",
+      "title": "Hero of the Night",
+      "text": "Most story stars",
+      "stat": "stars"
+    },
+    {
+      "id": "champ",
+      "title": "Champion of the Midway",
+      "text": "Won the most encounters",
+      "stat": "wins"
+    },
+    {
+      "id": "decider",
+      "title": "The Decider",
+      "text": "Led the party most often",
+      "stat": "led"
+    },
+    {
+      "id": "daredevil",
+      "title": "Daredevil",
+      "text": "Picked the boldest choices",
+      "stat": "mood:bold"
+    },
+    {
+      "id": "heart",
+      "title": "Big Heart",
+      "text": "Picked the kindest choices",
+      "stat": "mood:kind"
+    },
+    {
+      "id": "brain",
+      "title": "Clever Clogs",
+      "text": "Picked the cleverest choices",
+      "stat": "mood:clever"
+    },
+    {
+      "id": "giggles",
+      "title": "Chief of Giggles",
+      "text": "Picked the silliest choices",
+      "stat": "mood:silly"
+    },
+    {
+      "id": "faller",
+      "title": "Bravest Tumbler",
+      "text": "Came last the most, and kept smiling",
+      "stat": "lasts"
+    },
+    {
+      "id": "doer",
+      "title": "Busy Bee",
+      "text": "Did the most things",
+      "stat": "deeds"
+    },
+    {
+      "id": "sidekick",
+      "title": "Trusty Sidekick",
+      "text": "Always there when it counted",
+      "stat": "fallback"
+    },
+    {
+      "id": "cheer",
+      "title": "Cheer Captain",
+      "text": "Cheered the loudest",
+      "stat": "fallback"
+    },
+    {
+      "id": "snack",
+      "title": "Snack Scout",
+      "text": "Knew where the snacks were",
+      "stat": "fallback"
+    },
+    {
+      "id": "lamp",
+      "title": "Lantern Bearer",
+      "text": "Lit the way home",
+      "stat": "fallback"
+    }
+  ]
+}

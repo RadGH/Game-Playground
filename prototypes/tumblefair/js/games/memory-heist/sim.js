@@ -45,6 +45,14 @@ export const TREASURES_HW = [
   { id: 'bat', name: 'Bat', many: 'bats' }, { id: 'ghost', name: 'Ghost', many: 'ghosts' }, { id: 'cauldron', name: 'Cauldron', many: 'cauldrons' },
   { id: 'moon', name: 'Moon', many: 'moons' }, { id: 'lolly', name: 'Lollipop', many: 'lollipops' }, { id: 'cat', name: 'Cat', many: 'cats' },
 ];
+/** Winter Fair (Expansion 1 M6): the same twelve slots, wintry things (looks only: same count, same rules). */
+export const THEME_WN = { id: 'winter', title: 'The Gift Vault', door: 'GIFTS', set: null };
+export const TREASURES_WN = [
+  { id: 'gift', name: 'Gift', many: 'gifts' }, { id: 'snowman', name: 'Snowman', many: 'snowmen' }, { id: 'mitten', name: 'Mitten', many: 'mittens' },
+  { id: 'candycane', name: 'Candy Cane', many: 'candy canes' }, { id: 'bell', name: 'Bell', many: 'bells' }, { id: 'sled', name: 'Sled', many: 'sleds' },
+  { id: 'snowflake', name: 'Snowflake', many: 'snowflakes' }, { id: 'cocoa', name: 'Cocoa Mug', many: 'cocoa mugs' }, { id: 'stocking', name: 'Stocking', many: 'stockings' },
+  { id: 'pine', name: 'Pine Tree', many: 'pine trees' }, { id: 'bauble', name: 'Bauble', many: 'baubles' }, { id: 'star', name: 'Star', many: 'stars' },
+];
 export const COLOURS = [
   { id: 'gold', name: 'Gold', hex: '#f4c430' }, { id: 'red', name: 'Red', hex: '#e8383d' }, { id: 'blue', name: 'Blue', hex: '#2f7ff0' },
   { id: 'green', name: 'Green', hex: '#2fbf57' }, { id: 'purple', name: 'Purple', hex: '#9b4fe0' }, { id: 'silver', name: 'Silver', hex: '#b8c4cc' },
@@ -132,7 +140,7 @@ export function makeQuestions(rng, vault, w, h, TREASURES = PLAIN) {
 }
 
 export function create({ seed = 1, rng, players, difficulty = 'normal', season = null }) {
-  const theme = season === 'halloween' ? { ...THEME_HW, set: TREASURES_HW } : themeFor(seed), T = theme.set;
+  const theme = season === 'halloween' ? { ...THEME_HW, set: TREASURES_HW } : season === 'winter' ? { ...THEME_WN, set: TREASURES_WN } : themeFor(seed), T = theme.set;
   const pids = players.map(p => p.pid);
   const [w, h] = SIZES[difficulty] || SIZES.normal;
   const vault = makeVault(rng, w, h), qs = makeQuestions(rng, vault, w, h, T);

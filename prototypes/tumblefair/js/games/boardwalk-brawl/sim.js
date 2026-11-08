@@ -11,6 +11,7 @@
 // so your phone predicts the edge of the screen exactly as the server does. Levels are data (levels.js).
 import { makeBody, stepBody, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { makeRng, hashStr } from '../../shared/rng.js';
 import { LEVELS, FOES, BOSSES } from './levels.js';
 
 export const W = 14, HD = 3.5;                                     // the screen window is W metres of street; the lane is 2*HD deep
@@ -46,7 +47,14 @@ export function create({ seed, rng, players, difficulty = 'normal' }) {
   const setWalls = () => { walls[0].x = r2(win0 - 2); walls[1].x = r2(win0 + W + 2); };
   setWalls();
   const bodies = new Map(), P = new Map();
-  players.forEach((p, i) => {
+  // Its own stream from the seed (the game's rng is untouched): each player's start spot in the line-up, and the order
+  // punches, kicks and pick-ups are worked out in each step. All of these went by seat, and with four players seat 0
+  // won 84% of games: its punch landed first in every scrum (so the knock-out and its points were its own, and a
+  // finisher sent the roughneck flying before anyone else's punch arrived), its kick was checked first, and it was the
+  // one credited for a pick-up. Now ties go round at random.
+  const turn = makeRng(hashStr('brawl-turn:' + seed)), slot = turn.shuffle(players.map((_, i) => i));
+  players.forEach((p, k) => {
+    const i = slot[k];
     bodies.set(p.pid, makeBody(-hw + 3 + (i % 2) * 0.8, r2((i - (n - 1) / 2) * 1.4), Math.PI / 2));
     P.set(p.pid, { prevB: 0, hp: RULES.hp, down: false, rev: 0, combo: 0, comboT: 0, cool: 0, kick: 0, kickCool: 0, kickHit: new Set(), vy: 0, stun: 0, inv: 0, score: 0, kos: 0, downs: 0 });
   });
@@ -188,7 +196,7 @@ export function create({ seed, rng, players, difficulty = 'normal' }) {
       const b = bodies.get(pid), s = P.get(pid); if (!b || over) return;
       const bits = inp?.b | 0, pa = (bits & IN.A) && !(s.prevB & IN.A), pb = (bits & IN.B) && !(s.prevB & IN.B); s.prevB = bits;
       const free = !s.down && !(b.flags & F.STUN) && s.kick <= 0;
-      if (pa && free && s.cool <= 0) punch(pid, b, s);
+      if (pa && free && s.cool <= 0) s.punchQ = true;                // it lands at the start of step(), with everyone else's
       else if (pb && free && s.kickCool <= 0) {
         const fx = Math.sin(b.yaw), fz = Math.cos(b.yaw);
         s.kick = 1; s.kickCool = RULES.kickCool; s.vy = RULES.kickVy; s.kickHit.clear(); s.combo = 0;
@@ -200,8 +208,10 @@ export function create({ seed, rng, players, difficulty = 'normal' }) {
     step(dt) {
       if (over) return;
       elapsed += dt; time -= dt;
+      const order = turn.shuffle(players);
+      for (const p of order) { const s = P.get(p.pid); if (s.punchQ) { s.punchQ = false; punch(p.pid, bodies.get(p.pid), s); } }
       // players: timers, the jump kick's arc, revives
-      for (const p of players) {
+      for (const p of order) {
         const s = P.get(p.pid), b = bodies.get(p.pid);
         if (s.cool > 0) s.cool -= dt; if (s.kickCool > 0) s.kickCool -= dt; if (s.comboT > 0) { s.comboT -= dt; if (s.comboT <= 0) s.combo = 0; }
         if (s.inv > 0) { s.inv -= dt; if (s.inv <= 0) b.flags &= ~F.GHOST; }
@@ -215,7 +225,7 @@ export function create({ seed, rng, players, difficulty = 'normal' }) {
         } else if (s.stun > 0) { s.stun -= dt; if (s.stun <= 0) b.flags &= ~F.STUN; }
         if (s.down) {
           let helper = null;
-          for (const q of players) { if (q.pid === p.pid || !up(q.pid)) continue; const c = bodies.get(q.pid); if (Math.hypot(c.x - b.x, c.z - b.z) < RULES.reviveR) { helper = q.pid; break; } }
+          for (const q of order) { if (q.pid === p.pid || !up(q.pid)) continue; const c = bodies.get(q.pid); if (Math.hypot(c.x - b.x, c.z - b.z) < RULES.reviveR) { helper = q.pid; break; } }
           if (helper != null) { s.rev += dt; if (s.rev >= RULES.reviveT) getUp(p.pid, RULES.reviveHp, helper); }
           else s.rev = Math.max(0, s.rev - dt * 0.5);
         }

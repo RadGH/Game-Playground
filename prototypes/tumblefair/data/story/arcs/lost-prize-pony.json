@@ -1,0 +1,261 @@
+{
+  "id": "lost-prize-pony",
+  "title": "The Lost Prize Pony",
+  "blurb": "The giant plush pony from the top shelf of the prize booth has gone missing. Follow the fluff and bring it home!",
+  "icon": "🦄",
+  "cast": {
+    "villain": ["Sneaky Sid", "the Ring-Toss Rascal", "Baroness Fluffwhistle"],
+    "ally": ["Mo the booth keeper", "Tilly the toffee seller", "Grandpa Hops"],
+    "place": ["the Toffee Stand", "the Big Slide", "the Petting Pen"],
+    "prize": ["Sir Sprinkles", "Princess Buttercup", "Captain Cuddles"]
+  },
+  "hooks": [
+    {
+      "id": "pp-hook-shelf", "weight": 2, "title": "An Empty Top Shelf",
+      "text": ["The top shelf of the prize booth is empty!", "{prize}, the giant plush pony, is gone."],
+      "who": "active",
+      "choices": [
+        { "label": "Look for clues", "mood": "clever", "stars": 1, "flags": ["fluff_trail"], "text": "{hero} finds a trail of pink fluff leading out the back.", "deed": { "text": "found the trail of pink fluff", "tags": ["clue", "fluff"] } },
+        { "label": "Give a big hug", "mood": "kind", "stars": 1, "flags": ["ally_help"], "text": "{ally} sniffles: \"I saw {villain} hanging around all day!\"", "deed": { "text": "cheered up {ally} with a big hug", "tags": ["kind", "ally"] } }
+      ]
+    },
+    {
+      "id": "pp-hook-note", "weight": 1, "title": "A Cheeky Note",
+      "text": ["Where the pony used to sit, there is a note.", "\"Too fluffy to give away. Signed, a secret.\""],
+      "who": "vote",
+      "choices": [
+        { "label": "After the thief!", "mood": "bold", "party": 1, "flags": ["fluff_trail"], "text": "Everyone dashes off before the ink is even dry.", "deed": { "text": "dashed off after the pony thief", "tags": ["chase", "bold"], "party": true } },
+        { "label": "Study the handwriting", "mood": "clever", "stars": 1, "flags": ["handwriting"], "text": "{hero} squints. Those loopy letters belong to {villain}!", "deed": { "text": "matched the thief's loopy handwriting", "tags": ["clue", "clever"] } }
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "id": "pp-toffee-stand", "act": 1, "weight": 2, "title": "Sticky Hoofprints",
+      "text": ["Sticky little hoofprints lead through the toffee stand.", "Someone dragged a very big pony through here."],
+      "callbacks": [{ "tags": ["fluff"], "text": "{who} {deed}, and it leads straight to the toffee." }],
+      "who": "active",
+      "choices": [
+        { "label": "Follow the stickiness", "mood": "bold", "stars": 1, "text": "{hero} follows the prints. Squelch, squelch.",
+          "game": { "kinds": ["race", "dodge"], "intro": "Do not get stuck in the toffee!", "lead": "winner",
+            "win": { "text": "{winner} finds a golden pony shoe stuck in the toffee.", "stars": 1, "flags": ["pony_shoe"], "deed": { "text": "pulled a pony shoe out of the toffee", "tags": ["clue", "toffee"] } },
+            "lose": { "text": "{loser} gets one shoe stuck and hops out on the other.", "deed": { "text": "lost a shoe in the toffee", "tags": ["silly", "toffee"] } } } },
+        { "label": "Help clean up", "mood": "kind", "stars": 1, "text": "{hero} grabs a mop. {ally} is very grateful.",
+          "game": { "kinds": ["collect", "reaction"], "intro": "Mop up the sticky mess!", "lead": "winner",
+            "win": { "text": "{winner} mops the floor and finds a ticket stub signed by {villain}.", "stars": 1, "flags": ["ticket_stub"], "deed": { "text": "mopped up the toffee stand", "tags": ["kind", "toffee"] } },
+            "lose": { "text": "{loser} gets the mop stuck to the ceiling. Somehow.", "deed": { "text": "stuck a mop to the ceiling", "tags": ["silly", "toffee"] } } } }
+      ]
+    },
+    {
+      "id": "pp-petting-pen", "act": 1, "weight": 2, "title": "Hide in the Petting Pen",
+      "text": ["In the petting pen, there is one goat too many.", "It is pink, fluffy and very, very big."],
+      "who": "vote",
+      "choices": [
+        { "label": "Check every goat", "mood": "clever", "party": 1, "text": "Everyone tiptoes from goat to goat.",
+          "game": { "kinds": ["memory", "guess"], "intro": "Which goat is not a goat?", "lead": "winner",
+            "win": { "text": "{winner} finds it! Just a goat in a pink wig. But it has a clue in its mouth.", "stars": 1, "flags": ["goat_clue"], "deed": { "text": "unmasked a goat in a pink wig", "tags": ["clue", "animal"] } },
+            "lose": { "text": "{loser} gets their hat eaten by a goat. It was a nice hat.", "deed": { "text": "fed their hat to a goat", "tags": ["silly", "animal"] } } } },
+        { "label": "Hand out carrots", "mood": "kind", "stars": 1, "text": "{hero} offers carrots. The goats crowd round, happy.",
+          "game": { "kinds": ["aim", "collect"], "intro": "Feed every hungry goat!", "lead": "winner",
+            "win": { "text": "{winner} feeds them all. One goat coughs up a clue. Lovely.", "stars": 1, "flags": ["goat_clue", "goat_pals"], "deed": { "text": "fed every goat in the petting pen", "tags": ["kind", "animal"] } },
+            "lose": { "text": "{loser} is chased round the pen by a very keen goat.", "deed": { "text": "was chased by a keen goat", "tags": ["silly", "animal", "chase"] } } } }
+      ]
+    },
+    {
+      "id": "pp-big-slide", "act": 1, "weight": 1, "title": "Down the Big Slide",
+      "text": ["A pink blur whooshes down the Big Slide.", "Someone at the top shouts \"Wheee!\" and runs off."],
+      "who": "active",
+      "choices": [
+        { "label": "Slide after it!", "mood": "bold", "stars": 1, "text": "{hero} grabs a sack and leaps onto the slide.",
+          "game": { "kinds": ["race"], "intro": "Fastest slider wins!", "lead": "winner",
+            "win": { "text": "{winner} lands first and catches a fluffy pony tail.", "stars": 1, "flags": ["pony_tail"], "deed": { "text": "zoomed down the Big Slide", "tags": ["bold", "slide", "chase"] } },
+            "lose": { "text": "{loser} slides down backwards, waving the whole way.", "deed": { "text": "slid down the Big Slide backwards", "tags": ["silly", "slide"] } } } },
+        { "label": "Climb to the top", "mood": "clever", "stars": 1, "text": "From the top, {hero} can see the whole fair.",
+          "game": { "kinds": ["dodge", "reaction"], "intro": "Climb past the sliders!", "lead": "winner",
+            "win": { "text": "{winner} spots {villain} sneaking off with something pink.", "stars": 1, "flags": ["saw_villain"], "deed": { "text": "spotted the thief from the top of the slide", "tags": ["clue", "high"] } },
+            "lose": { "text": "{loser} gets bumped by a sack and slides down anyway.", "deed": { "text": "slid down the slide by surprise", "tags": ["silly", "slide"] } } } }
+      ]
+    },
+    {
+      "id": "pp-ring-toss", "act": 2, "weight": 2, "title": "The Ring-Toss Trick",
+      "text": ["At the ring toss, every bottle is a little too wide.", "\"Win a ring, win a clue!\" grins the stall cat."],
+      "callbacks": [{ "tags": ["clue"], "text": "{who} {deed}. Every clue points to this stall." }],
+      "who": "active",
+      "choices": [
+        { "label": "Toss the rings", "mood": "bold", "stars": 1, "text": "{hero} rolls up both sleeves and picks up the rings.",
+          "game": { "kinds": ["aim"], "intro": "Ring the bottles!", "lead": "winner",
+            "win": { "text": "CLINK! {winner} rings the big bottle. Inside: a map of the fair.", "stars": 2, "flags": ["fair_map"], "deed": { "text": "won the ring toss fair and square", "tags": ["aim", "map"] } },
+            "lose": { "text": "{loser} rings the stall cat. It purrs and keeps the ring.", "deed": { "text": "put a ring on the stall cat", "tags": ["silly", "animal"] } } } },
+        { "label": "Point out the trick", "mood": "clever", "stars": 1, "text": "{hero} measures a bottle with a pencil. Too wide!",
+          "game": { "kinds": ["logic", "guess"], "intro": "Find the honest bottles!", "lead": "winner",
+            "win": { "text": "{winner} proves the trick. The cat gives up the map, embarrassed.", "stars": 2, "flags": ["fair_map", "trick_exposed"], "deed": { "text": "caught the ring-toss trick", "tags": ["clever", "map"] } },
+            "lose": { "text": "{loser} measures the cat by mistake. It is one pencil long.", "deed": { "text": "measured a cat with a pencil", "tags": ["silly", "animal"] } } } }
+      ]
+    },
+    {
+      "id": "pp-bumper-boats", "act": 2, "weight": 2, "title": "Bumper Boat Chase",
+      "text": ["{villain} zooms off in a bumper boat.", "The pony is sitting in the back, wearing a life ring!"],
+      "callbacks": [{ "tags": ["chase"], "text": "{who} {deed}. This chase is nothing new." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Jump in a boat!", "mood": "bold", "party": 1, "text": "Everyone piles into bumper boats. Splash!",
+          "game": { "kinds": ["brawl", "race"], "intro": "Bump your way across the pond!", "lead": "winner",
+            "win": { "text": ["{winner} bumps {villain}'s boat into the reeds!", "The thief hops out and runs."], "stars": 2, "flags": ["boat_bumped"], "deed": { "text": "bumped the thief's boat into the reeds", "tags": ["bold", "water", "chase"] } },
+            "lose": { "text": "{loser} goes round in circles, very happily.", "deed": { "text": "steered a bumper boat in circles", "tags": ["silly", "water"] } } } },
+        { "label": "Fish out a clue", "mood": "clever", "stars": 1, "text": "Something floats behind the thief's boat. {hero} grabs a net.",
+          "game": { "kinds": ["fishing"], "intro": "Fish out the floating clues!", "lead": "winner",
+            "win": { "text": "{winner} nets a soggy note: \"Meet at the Ferris wheel. Bring the pony.\"", "stars": 2, "flags": ["meeting_note"], "deed": { "text": "fished a secret note out of the pond", "tags": ["clue", "water"] } },
+            "lose": { "text": "{loser} catches an old boot. It fits, too.", "deed": { "text": "fished up an old boot", "tags": ["silly", "water"] } } } }
+      ]
+    },
+    {
+      "id": "pp-hoop-court", "act": 2, "weight": 1, "title": "Hoops for Hints",
+      "text": ["{ally} runs the hoop-shot stall tonight.", "\"Score big and I will tell you what I saw!\""],
+      "who": "active",
+      "choices": [
+        { "label": "Shoot some hoops", "mood": "bold", "stars": 1, "text": "{hero} bounces the ball twice. Swish time.",
+          "game": { "kinds": ["basketball", "aim"], "intro": "Sink the most shots!", "lead": "winner",
+            "win": { "text": ["{winner} scores big!", "{ally} whispers: the pony went to the Ferris wheel!"], "stars": 2, "flags": ["ally_tip"], "deed": { "text": "sank the winning hoop shot", "tags": ["sport", "bold"] } },
+            "lose": { "text": "{loser}'s ball bounces off a hot dog stand and comes right back.", "deed": { "text": "bounced a ball off a hot dog stand", "tags": ["silly", "food"] } } } },
+        { "label": "Help run the stall", "mood": "kind", "party": 1, "text": "Everyone helps hand out balls to the queue.",
+          "game": { "kinds": ["collect", "reaction"], "intro": "Catch the loose balls!", "lead": "winner",
+            "win": { "text": "{winner} catches the most. {ally} grins and tells you everything.", "stars": 2, "flags": ["ally_tip"], "deed": { "text": "helped {ally} run the hoop stall", "tags": ["kind", "ally"] } },
+            "lose": { "text": "{loser} is buried under a heap of bouncy balls.", "deed": { "text": "got buried in bouncy balls", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "pp-costume-tent", "act": 2, "weight": 1, "not": ["trick_exposed"], "title": "The Costume Tent",
+      "text": ["The costume tent is full of pony costumes.", "One of them is walking around by itself!"],
+      "who": "vote",
+      "choices": [
+        { "label": "Dress up and blend in", "mood": "silly", "party": 1, "text": "Everyone pulls on a pony costume. Neigh!",
+          "game": { "kinds": ["bluff", "create"], "intro": "Be the most convincing pony!", "lead": "winner",
+            "win": { "text": ["{winner} neighs so well the walking costume trots over.", "It is {villain}'s helper!"], "stars": 2, "flags": ["helper_caught"], "deed": { "text": "fooled a pony thief with a perfect neigh", "tags": ["costume", "silly"] } },
+            "lose": { "text": "{loser} puts the costume on back to front. A pony with two tails!", "deed": { "text": "wore a pony costume back to front", "tags": ["silly", "costume"] } } } },
+        { "label": "Count the costumes", "mood": "clever", "stars": 1, "text": "{hero} counts. Twelve hooks, thirteen costumes. Hmm.",
+          "game": { "kinds": ["memory", "logic"], "intro": "Find the costume that does not belong!", "lead": "winner",
+            "win": { "text": "{winner} pulls off the extra costume. It is {villain}'s helper, giggling.", "stars": 2, "flags": ["helper_caught"], "deed": { "text": "counted the costumes and caught a helper", "tags": ["costume", "clever"] } },
+            "lose": { "text": "{loser} counts themselves as a costume. Fourteen!", "deed": { "text": "counted themselves as a costume", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "pp-ferris", "act": 3, "weight": 2, "title": "Over the Ferris Wheel",
+      "text": ["At the very top of the Ferris wheel, something pink.", "{prize}'s fluffy head is peeking out of a seat!"],
+      "callbacks": [{ "tags": ["map", "clue"], "text": "{who} {deed}, so you knew to come straight here." }],
+      "extra": [{ "requires": ["ally_tip"], "text": "{ally} waves from below: \"Told you!\"" }],
+      "who": "vote",
+      "choices": [
+        { "label": "Ride up and grab it", "mood": "bold", "party": 1, "text": "Everyone squeezes into one seat. Up you go!",
+          "game": { "kinds": ["reaction", "dodge"], "intro": "Jump seats at just the right time!", "lead": "winner",
+            "win": { "text": "{winner} leaps across and hugs the pony. But it is only a pony-shaped pillow!", "stars": 2, "flags": ["decoy_found"], "deed": { "text": "rescued a pony-shaped pillow", "tags": ["bold", "high"] } },
+            "lose": { "text": "{loser} rides round three times waving at everyone.", "deed": { "text": "waved from the Ferris wheel three times", "tags": ["silly", "high"] } } } },
+        { "label": "Stop the wheel", "mood": "clever", "stars": 1, "text": "{hero} finds the big wheel's control box.",
+          "game": { "kinds": ["logic", "rhythm"], "intro": "Press the buttons in order!", "lead": "winner",
+            "win": { "text": "{winner} stops the wheel. It was a decoy! But the stuffing points to the Big Top.", "stars": 2, "flags": ["decoy_found"], "deed": { "text": "worked the Ferris wheel controls", "tags": ["clever", "high"] } },
+            "lose": { "text": "{loser} presses the music button. The wheel plays a polka.", "deed": { "text": "made the Ferris wheel play a polka", "tags": ["silly", "music"] } } } }
+      ]
+    },
+    {
+      "id": "pp-funhouse-floor", "act": 3, "weight": 2, "title": "The Wobbly Funhouse",
+      "text": ["Giggles echo from inside the funhouse.", "The floor wobbles. The pony's hooves stick out of a barrel."],
+      "callbacks": [{ "tags": ["slide", "toffee"], "text": "{who} {deed}. A wobbly floor will not stop you now." }],
+      "who": "active",
+      "choices": [
+        { "label": "Run the rolling barrel", "mood": "bold", "stars": 1, "text": "{hero} hops into the spinning barrel.",
+          "game": { "kinds": ["dodge", "race"], "intro": "Stay on your feet!", "lead": "winner",
+            "win": { "text": "{winner} rolls out holding a fistful of pony mane. Getting close!", "stars": 2, "flags": ["mane_found"], "deed": { "text": "ran the rolling barrel", "tags": ["bold", "funhouse"] } },
+            "lose": { "text": "{loser} rolls out the other end like a sausage.", "deed": { "text": "rolled out of the barrel like a sausage", "tags": ["silly", "funhouse"] } } } },
+        { "label": "Ask it nicely", "mood": "kind", "party": 1, "text": "\"Whoever is in there, we just want to talk!\"",
+          "game": { "kinds": ["words", "guess"], "intro": "Find the kindest words!", "lead": "winner",
+            "win": { "text": ["{winner}'s kind words work!", "{villain}'s helper waves a sock and points the way."], "stars": 2, "flags": ["mane_found", "helper_caught"], "deed": { "text": "talked a helper out of the funhouse", "tags": ["kind", "funhouse"] } },
+            "lose": { "text": "{loser} says \"please\" so many times it becomes a song.", "deed": { "text": "turned \"please\" into a song", "tags": ["silly", "music"] } } } },
+        { "label": "Send in the goats", "mood": "silly", "requires": ["goat_pals"], "stars": 1, "text": "The goats from the petting pen trot in, very curious.",
+          "game": { "kinds": ["collect", "race"], "intro": "Follow the goats!", "lead": "winner",
+            "win": { "text": "{winner} follows the goats to a hidden room full of pony fluff.", "stars": 2, "flags": ["mane_found"], "deed": { "text": "led a goat search through the funhouse", "tags": ["animal", "funhouse"] } },
+            "lose": { "text": "{loser} ends up wearing a goat. Well, holding one.", "deed": { "text": "carried a goat around the funhouse", "tags": ["silly", "animal"] } } } }
+      ]
+    },
+    {
+      "id": "pp-prize-wagon", "act": 3, "weight": 1, "title": "The Getaway Wagon",
+      "text": ["A wagon piled with prizes creaks toward the gate.", "On top sits a heap of teddies. And one pink ear."],
+      "callbacks": [{ "tags": ["costume", "animal"], "text": "{who} {deed}. Disguises do not fool you anymore." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Chase the wagon", "mood": "bold", "party": 1, "text": "Everyone sprints after the creaking wagon.",
+          "game": { "kinds": ["race", "dodge"], "intro": "Dodge the falling teddies!", "lead": "winner",
+            "win": { "text": "{winner} catches up and puts on the brake. Creeeak. Stop!", "stars": 2, "flags": ["wagon_stopped"], "deed": { "text": "stopped the getaway wagon", "tags": ["bold", "chase"] } },
+            "lose": { "text": "{loser} is bopped by a falling teddy. Soft, at least.", "deed": { "text": "was bopped by a flying teddy", "tags": ["silly"] } } } },
+        { "label": "Sort the prizes", "mood": "clever", "stars": 1, "text": "{hero} starts handing prizes back to kids in the crowd.",
+          "game": { "kinds": ["memory", "collect"], "intro": "Give each prize to the right owner!", "lead": "winner",
+            "win": { "text": "{winner} returns every prize. The wagon is empty, except for a trail of pink fluff.", "stars": 2, "flags": ["wagon_stopped", "prizes_returned"], "deed": { "text": "returned every stolen prize", "tags": ["kind", "clever"] } },
+            "lose": { "text": "{loser} gives a goldfish to a grandad. He loves it.", "deed": { "text": "gave a grandad a goldfish", "tags": ["silly", "kind"] } } } }
+      ]
+    }
+  ],
+  "interludes": [
+    {
+      "id": "pp-int-sprinkle", "weight": 2, "title": "A Rainbow Sprinkle",
+      "text": ["A single rainbow sprinkle sparkles on the path.", "It smells just like {prize}."],
+      "who": "active",
+      "choices": [
+        { "label": "Keep it for luck", "mood": "bold", "stars": 2, "flags": ["lucky_sprinkle"], "text": "{hero} pockets the sprinkle. It tingles.", "deed": { "text": "found a lucky rainbow sprinkle", "tags": ["lucky", "fluff"] } },
+        { "label": "Share a snack", "mood": "kind", "party": 1, "text": "Sprinkles on everyone's ice cream!", "deed": { "text": "shared rainbow sprinkles with everyone", "tags": ["kind", "food"], "party": true } }
+      ]
+    },
+    {
+      "id": "pp-int-ally", "weight": 1, "title": "A Helpful Idea",
+      "text": { "any": [["{ally} runs up holding a giant carrot.", "\"Ponies love carrots. Even plush ones!\""], ["{ally} hands out paper party hats.", "\"For the celebration. You WILL find it!\""]] },
+      "who": "vote",
+      "choices": [
+        { "label": "Take it along", "mood": "kind", "party": 1, "flags": ["ally_gift"], "text": "Everyone thanks {ally}. Onward!", "deed": { "text": "took a gift from {ally}", "tags": ["kind", "ally"], "party": true } },
+        { "label": "Wear it on your head", "mood": "silly", "stars": 1, "text": "{hero} balances it on their head like a crown.", "deed": { "text": "wore {ally}'s gift as a crown", "tags": ["silly", "hat"] } }
+      ]
+    }
+  ],
+  "climax": [
+    {
+      "id": "pp-climax-big-top", "weight": 2, "title": "Showdown in the Big Top",
+      "text": ["Under the Big Top, {villain} hugs {prize} tight.", "\"It's MINE! I never win anything at the ring toss!\""],
+      "callbacks": [{ "tags": ["clue", "map", "costume"], "text": "{who} {deed}, so {villain} has nowhere left to hide." }],
+      "extra": [{ "requires": ["helper_caught"], "text": "{villain}'s helper waves at you. They are on your side now." }],
+      "who": "vote",
+      "choices": [
+        { "label": "Tug-of-war together", "mood": "bold", "party": 1, "text": "Everyone grabs the pony's tail. Ready, heave!",
+          "game": { "kinds": ["boss"], "coop": true, "intro": "Pull together!",
+            "win": { "text": "Pop! {prize} comes free and {villain} lands in the sawdust, laughing.", "stars": 3, "flags": ["won"], "deed": { "text": "won the great pony tug-of-war", "tags": ["boss", "team"] } },
+            "lose": { "text": "{villain} hangs on and bounces away on the trampolines.", "stars": 1, "deed": { "text": "pulled hard on a pony's tail", "tags": ["boss", "team"] } } } },
+        { "label": "Win one for them", "mood": "kind", "stars": 1, "text": "{hero} says: \"Let's win YOU a prize, fair and square.\"",
+          "game": { "kinds": ["boss", "aim"], "intro": "Win {villain} a prize of their own!",
+            "win": { "text": ["{winner} wins {villain} a tiny pony. Happy tears!", "{prize} goes home."], "stars": 3, "flags": ["won", "villain_happy"], "deed": { "text": "won {villain} a prize of their own", "tags": ["boss", "kind"] } },
+            "lose": { "text": "{loser} wins a rubber chicken. {villain} loves it anyway.", "deed": { "text": "won a rubber chicken", "tags": ["silly"] } } } }
+      ]
+    },
+    {
+      "id": "pp-climax-balloon", "weight": 1, "title": "Up, Up and Away",
+      "text": ["{villain} ties {prize} to a bunch of balloons!", "The pony starts floating up over the fair."],
+      "callbacks": [{ "tags": ["high", "slide"], "text": "{who} {deed}. Heights are no problem for this party." }],
+      "extra": [{ "requires": ["lucky_sprinkle"], "text": "The lucky sprinkle tingles. The wind is on your side!" }],
+      "who": "active",
+      "choices": [
+        { "label": "Pop the balloons", "mood": "clever", "party": 1, "text": "Everyone grabs a pea-shooter. Gently now!",
+          "game": { "kinds": ["boss", "aim"], "coop": true, "intro": "Pop the balloons one by one!",
+            "win": { "text": "Pop, pop, pop! {prize} floats down softly into everyone's arms.", "stars": 3, "flags": ["won"], "deed": { "text": "floated {prize} gently back to the ground", "tags": ["boss", "team", "high"] } },
+            "lose": { "text": "{prize} drifts off over the trees. {villain} waves bye-bye.", "stars": 1, "deed": { "text": "almost caught a flying pony", "tags": ["boss", "team"] } } } },
+        { "label": "Climb the tent pole", "mood": "bold", "stars": 1, "text": "{hero} starts shinning up the tallest tent pole.",
+          "game": { "kinds": ["boss", "race"], "intro": "Race to the top!",
+            "win": { "text": "{winner} grabs the string at the top and lowers {prize} down safe.", "stars": 3, "flags": ["won"], "deed": { "text": "caught {prize} from the top of the Big Top", "tags": ["boss", "high", "bold"] } },
+            "lose": { "text": "{loser} grabs a balloon and floats up a little. Then down. Boing.", "deed": { "text": "floated on a balloon for a bit", "tags": ["silly", "high"] } } } }
+      ]
+    }
+  ],
+  "epilogue": {
+    "win": { "any": [["{prize} is back on the top shelf, fluffier than ever.", "{villain} now helps out at the prize booth."], ["Hooray! The giant pony is home.", "Everyone gets a ride on its back before the fair opens."]] },
+    "lose": { "any": [["{villain} got away with {prize} this time.", "But the prize booth has a new sign: WATCH THIS SHELF."], ["The top shelf is still empty tonight.", "Somewhere, a giant pony is having a lovely adventure."]] },
+    "lines": [
+      { "requires": ["villain_happy"], "text": "{villain} carries that tiny pony everywhere now." },
+      { "requires": ["goat_pals"], "text": "The petting pen goats get carrots every Sunday." },
+      { "requires": ["prizes_returned"], "text": "Every kid at the fair has their prize back, too." },
+      { "requires": ["ally_gift"], "text": "{ally} throws a party in your honour." }
+    ]
+  }
+}

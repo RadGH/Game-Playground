@@ -28,6 +28,16 @@ export const LEVELS = {
   normal: { count: 1, speed: 1, wind: 2, dps: 1 },
   hard: { count: 1.25, speed: 1.12, wind: 2.8, dps: 1.25 },
 };
+/** M2 bug (2026-11-07): an all-Family CPU team held the gate at every difficulty. Easy is unchanged; Normal and Tricky
+ *  take [count, dps] by team size (index = archers - 1; a big team clears goblins much faster than one archer more),
+ *  measured with tools/cpu-bench.mjs so a Normal team usually holds and a Family team usually does not
+ *  (tests/coop-difficulty.test.js). */
+export const BY_SIZE = { normal: [[1.45, 1.1], [2.35, 2.8], [2.45, 2.8], [2.75, 3.2]], hard: [[1.55, 1.7], [2.3, 2.6], [2.4, 2.75], [2.7, 3.1]] };
+/** The level a match plays at: the difficulty's row, with the team-size numbers on top for Normal and Tricky. */
+export function levelFor(difficulty, n) {
+  const L = LEVELS[difficulty] || LEVELS.normal, row = BY_SIZE[LEVELS[difficulty] ? difficulty : 'normal']?.[Math.min(4, Math.max(1, n)) - 1];
+  return row ? { ...L, count: row[0], dps: row[1] } : L;
+}
 const WAVES = [
   { len: 12, mix: { grunt: 6, runner: 1 } },
   { len: 13, mix: { grunt: 4, runner: 2, shield: 2, kite: 2 } },
@@ -68,7 +78,7 @@ export const waveStarts = () => { const s = []; let t = 0; for (const W of WAVES
 export const valid = d => d && typeof d === 'object' && Number.isFinite(d.a) && Number.isFinite(d.p) && d.a >= A_MIN && d.a <= A_MAX && d.p >= 0 && d.p <= 1;
 
 export function create({ rng, players, difficulty = 'normal' }) {
-  const L = LEVELS[difficulty] || LEVELS.normal, pids = players.map(p => p.pid), n = pids.length;
+  const pids = players.map(p => p.pid), n = pids.length, L = levelFor(difficulty, n);
   const goblins = makeGoblins(rng, n, L), starts = waveStarts();
   const winds = WAVES.map((_, i) => r1((i === 0 ? 0.4 : 1) * L.wind * rng.range(0.4, 1) * (rng.chance(0.5) ? 1 : -1)));
   const posOf = new Map(pids.map((p, i) => [p, archerAt(i, n)]));

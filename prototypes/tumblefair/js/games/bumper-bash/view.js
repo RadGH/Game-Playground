@@ -14,7 +14,7 @@ import { createJuice } from '../../client/juice.js';
 const SHAPE_CH = { circle: '●', square: '■', triangle: '▲', diamond: '◆' };
 const SEAT_Y = 0.32, CAR_SCALE = 1.0;
 export function createView(ctx) {
-  const { THREE, group, stage, arena: A, init } = ctx;
+  const { THREE, group, stage, arena: A, init } = ctx, WN = ctx.season === 'winter';   // Winter Fair (M6): an ice rink with candy-cane tubes (looks only)
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), e3 = new THREE.Euler(), col = new THREE.Color();
   const mats = [], geos = [], texs = [];
   const std = (color, extra = {}) => { const m = new THREE.MeshStandardMaterial({ color, roughness: 0.6, ...extra }); mats.push(m); return m; };
@@ -25,9 +25,9 @@ export function createView(ctx) {
   const tunes = createTunes({ volume: 0.22 }), juice = createJuice(ctx);
 
   // ---- floor, painted circles, outside ground
-  const outside = new THREE.Mesh(geo(new THREE.PlaneGeometry(90, 90).rotateX(-Math.PI / 2)), std('#6fbf5a', { roughness: 1 })); outside.position.y = -0.03; outside.receiveShadow = true; group.add(outside);
+  const outside = new THREE.Mesh(geo(new THREE.PlaneGeometry(90, 90).rotateX(-Math.PI / 2)), std(WN ? '#eef5fc' : '#6fbf5a', { roughness: 1 })); outside.position.y = -0.03; outside.receiveShadow = true; group.add(outside);
   const deck = new THREE.Mesh(geo(new THREE.BoxGeometry(A.hw * 2 + 2.4, 0.2, A.hd * 2 + 2.4)), std('#8a5a32', { roughness: 0.9 })); deck.position.y = -0.11; deck.receiveShadow = true; group.add(deck);
-  const floorTex = tex(canvasTexture(256, 256, (c, w) => { c.fillStyle = init.floor || '#2f4c8f'; c.fillRect(0, 0, w, w); c.strokeStyle = 'rgba(255,255,255,.08)'; c.lineWidth = 2; for (let i = 0; i <= 8; i++) { c.beginPath(); c.moveTo(i * 32, 0); c.lineTo(i * 32, w); c.stroke(); c.beginPath(); c.moveTo(0, i * 32); c.lineTo(w, i * 32); c.stroke(); } }));
+  const floorTex = tex(canvasTexture(256, 256, (c, w) => { c.fillStyle = WN ? '#bfe3ff' : init.floor || '#2f4c8f'; c.fillRect(0, 0, w, w); c.strokeStyle = WN ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.08)'; c.lineWidth = 2; for (let i = 0; i <= 8; i++) { c.beginPath(); c.moveTo(i * 32, 0); c.lineTo(i * 32, w); c.stroke(); c.beginPath(); c.moveTo(0, i * 32); c.lineTo(w, i * 32); c.stroke(); } }));
   floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(3, 3);
   const floor = new THREE.Mesh(geo(new THREE.PlaneGeometry(A.hw * 2, A.hd * 2).rotateX(-Math.PI / 2)), std('#ffffff', { map: floorTex, roughness: 0.25, metalness: 0.15 })); floor.position.y = 0.005; floor.receiveShadow = true; group.add(floor);
   for (const [x, z, r, c] of [[0, 0, 3.2, '#9fd3ff'], [-5.2, 4, 1.4, '#ffd23f'], [5.2, -4, 1.4, '#ff7ab8'], [5.4, 4.2, 1, '#8ff07a'], [-5.4, -4.2, 1, '#b48cff']]) {
@@ -39,13 +39,13 @@ export function createView(ctx) {
   for (const sx of [-1, 1]) for (let z = -A.hd + SEG / 2; z < A.hd; z += SEG) segs.push({ x: sx * (A.hw + 0.2), z, rot: Math.PI / 2 });
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) segs.push({ x: sx * (A.hw + 0.2), z: sz * (A.hd + 0.2), rot: 0, corner: true });
   const tubes = new THREE.InstancedMesh(geo(new THREE.CylinderGeometry(0.3, 0.3, SEG + 0.02, 12).rotateZ(Math.PI / 2)), std('#ffffff', { roughness: 0.45 }), segs.length);
-  segs.forEach((s, i) => { tubes.setColorAt(i, col.set(i % 2 ? '#ffd23f' : '#e8394a')); s.squish = 0; });
+  segs.forEach((s, i) => { tubes.setColorAt(i, col.set(i % 2 ? (WN ? '#ffffff' : '#ffd23f') : '#e8394a')); s.squish = 0; });
   tubes.castShadow = true; group.add(tubes);
   function placeTubes() { segs.forEach((s, i) => { const k = 1 - s.squish * 0.35; m4.compose(v.set(s.x, 0.3 * k, s.z), q.setFromEuler(e3.set(0, s.rot, 0)), sc.set(s.corner ? 0.6 : 1, k, 1 + s.squish * 0.3)); tubes.setMatrixAt(i, m4); }); tubes.instanceMatrix.needsUpdate = true; }
   placeTubes();
   // ---- the posts in the middle (round 12: the rink comes from the seed — one pole, two, four bumpers, a bandstand…)
   const poleTex = tex(canvasTexture(64, 256, (c, w, hh) => { for (let i = 0; i < 16; i++) { c.fillStyle = i % 2 ? '#ffffff' : '#e8394a'; c.save(); c.translate(0, i * 16); c.transform(1, 0.4, 0, 1, 0, 0); c.fillRect(-40, 0, w + 80, 16); c.restore(); } }));
-  const poleMat = std('#ffffff', { map: poleTex }), padMat = std('#3d8bff', { roughness: 0.45 }), capMat = std('#ffd23f', { roughness: 0.4 });
+  const poleMat = std('#ffffff', { map: poleTex }), padMat = std(WN ? '#2f9a4a' : '#3d8bff', { roughness: 0.45 }), capMat = std(WN ? '#ffffff' : '#ffd23f', { roughness: 0.4 });
   const postParts = [];        // [{ pad, o }] — a pad squishes when a car bounces off it
   for (const o of A.posts || []) {
     if (o.r > 1.2) {           // a bandstand: a padded drum with a little roof on poles

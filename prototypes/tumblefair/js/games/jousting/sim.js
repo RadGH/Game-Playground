@@ -14,7 +14,7 @@ import { phoneTime, r2 } from '../toss-kit.js';
 export const meta = {
   id: 'jousting', title: 'Tilt & Lance', blurb: 'Steady your wobbling lance, strike as you cross, and knock the other knight off their horse!',
   how: ['HOLD to steady your wobbling lance on the target shield.', 'LET GO right at the NOW mark as the knights cross.', 'A crack (3) while they only glance UNHORSES them!', 'Not riding? Cheer for a knight before the charge: right = +2.'],
-  kind: 'ui', min: 1, max: 4, seconds: 78, scoring: 'points', unit: 'points', tags: ['action'], card: 'card-jousting', css: true,
+  kind: 'ui', min: 1, max: 4, seconds: 78, scoring: 'points', unit: 'points', tags: ['action'], card: 'card-jousting', css: true, rival: true,
 };
 export const COUNT_S = 3, INTRO_S = 2.6, READY_S = 1.1, RESULT_S = 1.5, END_S = 3.5, PASSES = 3;
 export const LEVELS = {
@@ -23,6 +23,8 @@ export const LEVELS = {
   hard: { charge: 2.8, min: 0.32, speed: 1.2, cpu: 0.74 },
 };
 export const CPUS = [{ pid: -1, name: 'Sir Wobbleton' }, { pid: -2, name: 'Dame Clatter' }];
+// "Rival when alone" off: a straw knight on a post instead of the two CPU knights — it never strikes back
+export const DUMMY = { pid: -3, name: 'Straw Knight' };
 export const PTS = { crack: 3, solid: 2, glance: 1, unhorse: 3, bout: 3, cheer: 2 }, MEDALS = [8, 14, 20];
 /** How far the wobble swings after holding the button for `held` seconds: steadier, then tired. */
 export function amp(held, L) {
@@ -46,20 +48,20 @@ export function strike(x, y, dt) {
 export const grade = q => (q >= 0.85 ? 'crack' : q >= 0.55 ? 'solid' : q > 0 ? 'glance' : 'miss');
 export const gradePts = q => PTS[grade(q)] || 0;
 
-export function create({ rng, players, difficulty = 'normal' }) {
-  const L = LEVELS[difficulty] || LEVELS.normal, n = players.length, solo = n === 1;
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
+  const L = LEVELS[difficulty] || LEVELS.normal, n = players.length, solo = n === 1, straw = solo && rivals === false;
   const ids = players.map(p => p.pid), seeded = n >= 3 ? rng.shuffle(ids) : ids.slice();
   // wobble phases for every pass slot (bout b, pass k, side s), drawn up front so the rng never depends on play
   const wob = Array.from({ length: 3 * PASSES * 2 }, () => [r2(rng.range(0, 6.28)), r2(rng.range(0, 6.28)), r2(rng.range(0, 6.28)), r2(rng.range(0, 6.28))]);
   const cpuRoll = Array.from({ length: 3 * PASSES }, () => rng());
   const coin = Array.from({ length: 3 }, () => rng.chance(0.5) ? 0 : 1);
-  const plan = solo ? [[ids[0], -1], [ids[0], -2]] : n === 2 ? [[ids[0], ids[1]], [ids[1], ids[0]], [ids[0], ids[1]]] : n === 3 ? [[seeded[0], seeded[1]], ['W0', seeded[2]]] : [[seeded[0], seeded[1]], [seeded[2], seeded[3]], ['W0', 'W1']];
+  const plan = straw ? [[ids[0], DUMMY.pid], [ids[0], DUMMY.pid]] : solo ? [[ids[0], -1], [ids[0], -2]] : n === 2 ? [[ids[0], ids[1]], [ids[1], ids[0]], [ids[0], ids[1]]] : n === 3 ? [[seeded[0], seeded[1]], ['W0', seeded[2]]] : [[seeded[0], seeded[1]], [seeded[2], seeded[3]], ['W0', 'W1']];
   const bouts = [];                                        // { a, b, pts: [0, 0], best: [0, 0], win, un }
   const S = Object.fromEntries(ids.map(p => [p, { pts: 0, cracks: 0, wins: 0, cheers: 0, sent: false, h: 0, t: 0 }]));
   const events = [];
   let phase = 'count', left = COUNT_S, el = 0, bi = -1, k = 0, t0 = 0, cross = 0, over = false, last = null;
   let ch = {}, sent = {};                                  // cheers this bout { pid: side }; lances this pass { pid: [h, t] }
-  const cpuName = pid => CPUS.find(c => c.pid === pid)?.name;
+  const cpuName = pid => [...CPUS, DUMMY].find(c => c.pid === pid)?.name;
   const riders = () => (bi >= 0 && bouts[bi] ? [bouts[bi].a, bouts[bi].b] : []);
   function startBout() {
     bi++; k = 0; ch = {};
@@ -70,6 +72,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
   function startPass() { phase = 'ready'; left = READY_S; sent = {}; t0 = r2(el + READY_S); cross = r2(t0 + L.charge); events.push({ e: 'pass', b: bi, k, t0, cross }); }
   function qOf(side) {
     const B = bouts[bi], pid = side ? B.b : B.a;
+    if (pid === DUMMY.pid) return 0;                     // the straw knight never strikes
     if (pid < 0) { const r = cpuRoll[bi * PASSES + k], q = Math.max(0, Math.min(1, L.cpu + (r - 0.5) * 0.7)); return q < 0.12 ? 0 : r2(q); }
     const ln = sent[pid]; if (!ln) return 0;
     const w = wob[(bi * PASSES + k) * 2 + side], p = wobble(w, ln[1] - t0, ln[0] == null ? null : ln[0] - t0, L);
@@ -96,7 +99,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
   }
   return {
     events,
-    init: () => ({ solo, cpus: CPUS, wob, level: L, passes: PASSES, plan: plan.map(p => p.map(x => typeof x === 'string' ? -9 : x)), medals: MEDALS, pts: PTS }),
+    init: () => ({ solo, cpus: straw ? [...CPUS, DUMMY] : CPUS, wob, level: L, passes: PASSES, plan: plan.map(p => p.map(x => typeof x === 'string' ? -9 : x)), medals: MEDALS, pts: PTS }),
     act(pid, a, d) {
       if (!S[pid] || over) return;
       if (a === 'cheer') {

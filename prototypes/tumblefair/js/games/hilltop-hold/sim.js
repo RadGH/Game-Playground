@@ -5,6 +5,7 @@
 // clear the hill. Solo: the zone hops every few seconds to a hill far from you — chase it and beat the medal scores.
 import { makeBody, stepBody, separate, spawnRing, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { makeRng, hashStr } from '../../shared/rng.js';
 
 export const meta = {
   id: 'hilltop-hold', title: 'Hilltop Hold', blurb: 'Stand alone in the glowing zone to score — shove everyone else off the hill!',
@@ -35,10 +36,13 @@ export const RULES = {
 };
 const r2 = v => Math.round(v * 100) / 100;
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
   const D = RULES.zoneR[difficulty] ? difficulty : 'normal';
   const n = players.length, solo = n === 1, bodies = new Map(), spawns = spawnRing(n, solo ? 6.4 : 6.6, Math.PI / 5);
-  players.forEach((p, i) => { const b = makeBody(spawns[i].x, spawns[i].z, spawns[i].yaw); b.y = r2(groundAt(b.x, b.z)); bodies.set(p.pid, b); });
+  // Its own stream from the seed (the game's rng is untouched): which spot round the meadow each player starts on, and
+  // the order shoves land in on one tick. See shoveAll for why.
+  const turn = makeRng(hashStr('hill-turn:' + seed)), spot = turn.shuffle(players.map((_, i) => i));
+  players.forEach((p, i) => { const b = makeBody(spawns[spot[i]].x, spawns[spot[i]].z, spawns[spot[i]].yaw); b.y = r2(groundAt(b.x, b.z)); bodies.set(p.pid, b); });
   const P = new Map(players.map(p => [p.pid, { prevB: 0, cool: 0, stun: 0, held: 0 }]));
   const zoneR = RULES.zoneR[D], every = solo ? RULES.soloEvery[D] : RULES.every[D], warn = solo ? RULES.soloWarn : RULES.warn;
   let zone = -1, next = -1, hopIn = RULES.firstHop, time = meta.seconds, over = false, owner = -1, hops = 0;
@@ -51,36 +55,43 @@ export function create({ rng, players, difficulty = 'normal' }) {
     return rng.pick(options);
   }
   const inZone = b => zone >= 0 && Math.hypot(b.x - HILLS[zone][0], b.z - HILLS[zone][1]) <= zoneR;
+  // Every shove pressed this tick lands here, together, in a shuffled order. They used to land inside input(), which
+  // the room calls seat by seat, so in a shoving match seat 0's shove stunned seat 1 first and seat 1's never happened
+  // (seat 0 won 65% of even games). Now both land.
+  function shoveAll() {
+    for (const pid of turn.shuffle(players.map(p => p.pid).filter(q => P.get(q).shove))) {
+      const b = bodies.get(pid); P.get(pid).shove = false;
+      // the nearest player in front (a wide cone, plus aim help a little wider) gets pushed straight away from you
+      let best = null, bd = 99;
+      for (const [qid, c] of bodies) {
+        if (qid === pid) continue;
+        const dx = c.x - b.x, dz = c.z - b.z, d = Math.hypot(dx, dz); if (d > RULES.shoveR || d >= bd) continue;
+        let da = Math.atan2(dx, dz) - b.yaw; da = Math.abs(Math.atan2(Math.sin(da), Math.cos(da)));
+        if (da <= RULES.shoveAim) { best = qid; bd = d; }
+      }
+      if (best != null) {
+        const c = bodies.get(best), q = P.get(best), dx = c.x - b.x, dz = c.z - b.z, d = Math.hypot(dx, dz) || 1;
+        b.yaw = Math.atan2(dx, dz);
+        c.vx = dx / d * RULES.shovePush; c.vz = dz / d * RULES.shovePush; c.flags |= F.STUN; q.stun = RULES.shoveStun;
+        events.push({ e: 'shove', pid, to: best, x: r2(c.x), z: r2(c.z) });
+      } else events.push({ e: 'whiff', pid });
+    }
+  }
   return {
     bodies, events,
     init: () => ({ solo, hills: HILLS, hillH: HILL_H, hillR: HILL_R, zoneR, medals: solo ? RULES.medals[D] : null, left: Math.ceil(time) }),
     input(pid, inp) {
       const b = bodies.get(pid), s = P.get(pid); if (!b || over) return;
       const bits = inp?.b | 0, pa = (bits & IN.A) && !(s.prevB & IN.A); s.prevB = bits;
-      if (pa && !(b.flags & F.STUN) && s.cool <= 0) {
-        s.cool = RULES.shoveCool;
-        // the nearest player in front (a wide cone, plus aim help a little wider) gets pushed straight away from you
-        let best = null, bd = 99;
-        for (const [qid, c] of bodies) {
-          if (qid === pid) continue;
-          const dx = c.x - b.x, dz = c.z - b.z, d = Math.hypot(dx, dz); if (d > RULES.shoveR || d >= bd) continue;
-          let da = Math.atan2(dx, dz) - b.yaw; da = Math.abs(Math.atan2(Math.sin(da), Math.cos(da)));
-          if (da <= RULES.shoveAim) { best = qid; bd = d; }
-        }
-        if (best != null) {
-          const c = bodies.get(best), q = P.get(best), dx = c.x - b.x, dz = c.z - b.z, d = Math.hypot(dx, dz) || 1;
-          b.yaw = Math.atan2(dx, dz);
-          c.vx = dx / d * RULES.shovePush; c.vz = dz / d * RULES.shovePush; c.flags |= F.STUN; q.stun = RULES.shoveStun;
-          events.push({ e: 'shove', pid, to: best, x: r2(c.x), z: r2(c.z) });
-        } else events.push({ e: 'whiff', pid });
-      }
+      if (pa && !(b.flags & F.STUN) && s.cool <= 0) { s.cool = RULES.shoveCool; s.shove = true; }   // it lands in step(), with everyone else's (shoveAll)
       stepBody(b, inp, meta.move, meta.arena);
       b.y = r2(groundAt(b.x, b.z));
     },
     step(dt) {
       if (over) return;
       time -= dt;
-      separate(bodies.values());
+      shoveAll();
+      separate(turn.shuffle([...bodies.values()]));          // shuffled too: in a scrum the pair sorted last is the one pushed cleanly apart
       for (const [pid, b] of bodies) {
         const s = P.get(pid);
         if (s.cool > 0) s.cool -= dt;

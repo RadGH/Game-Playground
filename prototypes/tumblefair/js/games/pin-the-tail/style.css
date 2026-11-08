@@ -44,3 +44,7 @@
 /* round 12: title, round and clock on one line at phone width, clear of ☰ / ! */
 .pt-title, .pt-round { white-space: nowrap; }
 @media (max-width: 460px) { .pt-top { gap: 6px; padding-right: 76px; } .pt-title { font-size: 18px; } .pt-round { font-size: 12px; padding: 2px 8px; } }
+/* Winter Fair (M6): a frosty frame and a snowy sky round the board (the board itself gets snow in view.js) */
+.game-pin-the-tail.season-winter { background: linear-gradient(#bcd8f0, #e9f3fb 40%, #dceaf6); }
+.game-pin-the-tail.season-winter .pt-boardwrap { border-color: #e8322a; background: #e8322a; box-shadow: 0 6px 0 var(--ink), inset 0 0 0 3px var(--ink); }
+.game-pin-the-tail.season-winter .pt-title { color: #e8322a; }

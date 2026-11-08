@@ -15,27 +15,25 @@
 .tg-face img, .tg-face svg { width: 100%; height: 100%; display: block; }
 .tg-note { margin: 0; color: #f0e2ff; text-align: center; font-size: 15px; max-width: 620px; min-height: 1.3em; }
 
-/* ---- the Teller arranging (their phone only) ---- */
-.tg-prep, .tg-wait, .tg-cards { display: none; width: min(100%, 620px); }
-.game-two-truths-one-goblin[data-phase=prep][data-role=teller]:not(.watching) .tg-prep { display: grid; gap: 10px; }
-.game-two-truths-one-goblin[data-phase=prep]:is([data-role=guesser], .watching) .tg-wait { display: grid; justify-items: center; }
+/* ---- the prize stall (show + reveal) and the Teller's two lies (show, their phone only) ---- */
+.tg-stall, .tg-plant, .tg-cards { display: none; width: min(100%, 560px); }
+.game-two-truths-one-goblin:is([data-phase=show], [data-phase=reveal]) .tg-stall { display: grid; gap: 0; }
+.game-two-truths-one-goblin[data-phase=show] .tg-plant:not(:empty) { display: grid; gap: 8px; }
 .game-two-truths-one-goblin:is([data-phase=guess], [data-phase=reveal]) .tg-cards { display: grid; gap: 12px; }
-.tg-hand { display: grid; gap: 10px; }
-.tg-hc { position: relative; background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; padding: 10px 12px 10px 46px; display: grid; gap: 6px; box-shadow: 0 4px 0 var(--ink); }
-.tg-hc.gob { background: #e6f9df; border-color: #1d6a2a; }
-.tg-hc q { font: 800 17px/1.2 var(--font); }
-.tg-badge { display: flex; align-items: center; gap: 4px; font: 900 13px/1 var(--font); letter-spacing: .5px; }
-.tg-badge svg { width: 26px; height: 26px; }
-.tg-hc.true .tg-badge { color: #1d5a8a; } .tg-hc.gob .tg-badge { color: #1d6a2a; }
-.tg-hb { display: flex; gap: 6px; flex-wrap: wrap; }
-.tg-hb button { min-height: 44px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; font: 800 14px/1 var(--font); padding: 4px 10px; box-shadow: 0 3px 0 var(--ink); }
-.tg-l { position: absolute; left: -2px; top: -2px; width: 38px; height: 38px; display: grid; place-items: center; background: var(--sun); border: 3px solid var(--ink); border-radius: 12px 0 12px 0; font: 900 20px/1 var(--font); }
-.tg-plant { background: #c9f5d2; font-size: 16px; line-height: 1.2; text-align: left; }
-.tg-plant small { display: block; font-size: 13px; font-weight: 700; }
-.tg-ready { background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
-.tg-wait svg { width: 120px; height: 120px; animation: tg-bob 1.2s ease-in-out infinite; }
-.tg-wait p { margin: 0; color: #fff; font: 900 22px/1.1 var(--font); }
-@keyframes tg-bob { 50% { transform: translateY(-8px) rotate(4deg); } }
+.tg-stall { position: relative; background: #8a5225; border: 4px solid var(--ink); border-radius: 14px; padding: 0 8px 10px; box-shadow: 0 6px 0 var(--ink); }
+.tg-roof { height: 26px; margin: 0 -8px 8px; border-radius: 10px 10px 0 0; border-bottom: 4px solid var(--ink);
+  background: repeating-linear-gradient(90deg, #ff4d6d 0 32px, #fff 32px 64px); }
+.tg-shelf { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px 4px 4px 4px; margin-top: 18px;
+  border-bottom: 8px solid #f3c27a; box-shadow: 0 4px 0 var(--ink); }
+.tg-shelf:first-of-type { margin-top: 12px; }
+.tg-sl { position: absolute; left: 0; top: -17px; font: 900 11px/1 var(--font); text-transform: uppercase; letter-spacing: 1px; color: #ffe9c4; }
+.tg-slot { display: grid; place-items: center; height: clamp(46px, 13vw, 70px); font-size: clamp(34px, 10vw, 54px); line-height: 1; }
+.game-two-truths-one-goblin[data-phase=reveal] .tg-slot { height: 40px; font-size: 30px; }
+.tg-plant p { margin: 0; color: #fff; font: 800 15px/1.3 var(--font); text-align: center; }
+.tg-lie { display: grid; gap: 4px; text-align: left; min-height: 56px; padding: 8px 12px; border: 4px solid var(--ink); border-radius: 14px; background: var(--paper); box-shadow: 0 4px 0 var(--ink); cursor: pointer; }
+.tg-lie b { font: 900 13px/1 var(--font); color: #1d6a2a; text-transform: uppercase; }
+.tg-lie q { font: 800 16px/1.25 var(--font); }
+.tg-lie.on { background: #dff7d6; outline: 4px solid #5fbf4a; }
 
 /* ---- the three claims ---- */
 .tg-card { position: relative; display: grid; gap: 6px; justify-items: center; min-height: 84px; padding: 16px 14px 12px 50px; background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; box-shadow: 0 5px 0 var(--ink); text-align: center; cursor: pointer; }
@@ -58,3 +56,11 @@
 /* round 10 (report #22): the line that says what to do right now */
 .tg-do { margin: 0; width: min(100%, 520px); box-sizing: border-box; padding: 8px 12px; background: #fff6cf; color: var(--ink); border: 3px solid var(--ink); border-radius: 14px; text-align: center; font: 800 16px/1.3 var(--font); }
 .tg-do:empty { display: none; } .tg-do b { color: #7a2fc0; }
+/* M4: on the reveal the claims come first (the lie is stamped), compact, with the stall under them */
+.game-two-truths-one-goblin[data-phase=reveal] .tg-cards { order: 1; gap: 8px; }
+.game-two-truths-one-goblin[data-phase=reveal] .tg-stall { order: 2; }
+.game-two-truths-one-goblin[data-phase=reveal] .tg-note { order: 3; }
+.game-two-truths-one-goblin[data-phase=reveal] .tg-card { min-height: 0; padding: 8px 12px 8px 50px; gap: 4px; }
+.game-two-truths-one-goblin[data-phase=reveal] .tg-card q { font-size: 17px; }
+.game-two-truths-one-goblin[data-phase=reveal] .tg-stamp { font-size: 14px; padding: 2px 8px; } .game-two-truths-one-goblin[data-phase=reveal] .tg-stamp svg { width: 22px; height: 22px; }
+.tg-l { position: absolute; left: -2px; top: -2px; width: 38px; height: 38px; display: grid; place-items: center; background: var(--sun); border: 3px solid var(--ink); border-radius: 12px 0 12px 0; font: 900 20px/1 var(--font); }

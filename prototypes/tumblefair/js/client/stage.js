@@ -114,7 +114,7 @@ export function createStage(canvas, { quality = pickQuality() } = {}) {
   function toScreen(x, y, z) { v3.set(x, y, z).project(camera); return { x: (v3.x + 1) / 2 * canvas.clientWidth, y: (1 - v3.y) / 2 * canvas.clientHeight }; }
 
   function render(dt) {
-    const k = 1 - Math.exp(-dt * 5);
+    const k = 1 - Math.exp(-dt * (document.body.classList.contains('calm') ? 2.6 : 5));   // M3 comfort: Less motion = a calmer camera
     for (const key of Object.keys(cur)) cur[key] += (want[key] - cur[key]) * k;
     camera.position.set(cur.x, cur.y, cur.z); camera.lookAt(cur.tx, cur.ty, cur.tz);
     const cw = canvas.clientWidth || innerWidth, ch = canvas.clientHeight || innerHeight; camera.setViewOffset(cw, ch, cur.ox, cur.oy, cw, ch);

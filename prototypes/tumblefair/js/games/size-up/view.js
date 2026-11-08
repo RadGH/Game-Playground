@@ -6,6 +6,7 @@ import { hashStr } from '../../shared/rng.js';
 import { ITEMS, PALETTE } from './items.js';
 import { ICONS } from './icons.js';
 import { QUESTIONS, Q_S, RIGHT, QUICK } from './sim.js';
+import { snowOverlay } from '../../client/winter.js';
 const RIGHT_MAX = RIGHT + QUICK;
 
 const byId = new Map(ITEMS.map(t => [t.id, t]));
@@ -30,7 +31,7 @@ export function createView(ctx) {
   const { ui, players, me, init } = ctx, watching = me == null;
   const byPid = new Map(players.map(p => [p.pid, p]));
   ui.innerHTML = `
-    <div class="su-top"><span class="su-title">Size Up</span><span class="su-round"></span><span class="clock"><b>--</b></span></div>
+    <div class="su-top"><span class="su-title">Size Up${ctx.season === 'winter' ? ' ❄' : ''}</span><span class="su-round"></span><span class="clock"><b>--</b></span></div>
     <div class="su-q"></div>
     <div class="su-bar"><i></i></div>
     <div class="su-cards"></div>
@@ -39,6 +40,7 @@ export function createView(ctx) {
     <p class="su-note"></p>`;
   const $ = s => ui.querySelector(s);
   ui.classList.toggle('watching', watching); ui.dataset.phase = 'ready';
+  if (ctx.season === 'winter') snowOverlay(ui);                     // Winter Fair (M6): looks only
   if (me != null) ui.querySelector(`.su-players [data-pid="${me}"]`)?.classList.add('me');
   let phase = '', round = -1, shownAt = 0, mine = null, ids = [], q = null, streak = 0, lastLeft = null;
   /** Round 12: a number that floats up off a card and fades. */

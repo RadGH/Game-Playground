@@ -5,7 +5,8 @@
 // Below / right: the three meters (picture + name + number, never colour alone, and during a beat where each one is
 // heading: "6 → 4"), the beat clock, the event card with what it will hit (storm + wind added up per meter), and
 // your private hand of action cards — tap to play (tap again to take it back). After each beat the meters show what
-// changed. (Round 12: the event's vote is gone; playing a card is the only thing to do.)
+// changed. (Round 12: the event's vote is gone; playing a card is the only thing to do. M4: one card each, solo too —
+// Bramble, the computer shelter-mate, plays its own after yours — and a card that covers what is coming says so.)
 import { RULES, EVENTS, CARDS, METERS } from './sim.js';
 import { METER_NAMES } from './deck.js';
 import { scoreBar, h, esc } from '../../client/gamehud.js';
@@ -70,7 +71,6 @@ export function createView(ctx) {
   const $ = s => panel.querySelector(s);
   const meterEls = Object.fromEntries(METERS.map(k => [k, panel.querySelector(`.ss-meter[data-k=${k}]`)]));
   let G = null, mine = { hand: [], play: [] }, evKey = '', handKey = '', beatStart = 0, curBeat = -1;
-  const per = init.per;
   /** What the storm will hit this beat, per meter (event + wind), and where each meter is heading with my own picks. */
   const incoming = () => { if (G?.ph !== 'beat') return null; const ev = EVENTS[G.ev]; return METERS.map((k, i) => (ev.hit[k] || 0) + (G.wind[i] || 0)); };
   function heading() {
@@ -99,16 +99,18 @@ export function createView(ctx) {
   }
   function drawHand() {
     if (watching) return;
-    const key = JSON.stringify(mine) + (G?.ph || '');
+    const key = JSON.stringify(mine) + (G?.ph || '') + (G?.ph === 'beat' ? G.ev + '|' + G.wind.join() : '');
     if (key === handKey) return; handKey = key;
     const open = G?.ph === 'beat';
-    $('.ss-handh').innerHTML = open ? (mine.play.length >= per ? `✓ Played! Tap it again to change your mind.` : `<b>Your turn:</b> tap ${per === 2 ? 'TWO cards' : 'ONE card'} to cover what is coming (${mine.play.length}/${per})`) : 'Your hand';
-    $('.ss-hand').innerHTML = mine.hand.map((id, i) => { const c = CARDS[id], on = mine.play.includes(i); return `<button class="ss-cardbtn${on ? ' on' : ''}" data-i="${i}" ${open ? '' : 'disabled'}><span class="ss-art">${c.a}</span><b>${esc(c.n)}</b><span>${fxChips(c.fx)}</span>${on ? '<em>PLAYED ✓</em>' : ''}</button>`; }).join('');
+    $('.ss-handh').innerHTML = open ? (mine.play.length ? `✓ Played!${init.cpu ? ` ${esc(init.cpu)} plays after you.` : ''} Tap another card to switch.` : `<b>Your turn:</b> tap ONE card to cover what is coming`) : 'Your hand';
+    const inc = incoming();
+    const covers = c => !!inc && Object.entries(c.fx).some(([k, v]) => v > 0 && (k === 'low' || inc[METERS.indexOf(k)] < 0));
+    $('.ss-hand').innerHTML = mine.hand.map((id, i) => { const c = CARDS[id], on = mine.play.includes(i), fit = open && covers(c); return `<button class="ss-cardbtn${on ? ' on' : ''}${fit ? ' fits' : ''}" data-i="${i}" ${open ? '' : 'disabled'}>${fit ? '<i class="ss-fits">covers it</i>' : ''}<span class="ss-art">${c.a}</span><b>${esc(c.n)}</b><span>${fxChips(c.fx)}</span>${on ? '<em>PLAYED ✓</em>' : ''}</button>`; }).join('');
   }
   panel.addEventListener('click', e => {
     const cd = e.target.closest('.ss-cardbtn');
     if (watching || G?.ph !== 'beat') return;
-    if (cd && !cd.disabled) { const i = +cd.dataset.i; const at = mine.play.indexOf(i); if (at >= 0) mine.play.splice(at, 1); else { mine.play.push(i); if (mine.play.length > per) mine.play.shift(); } ctx.send('play', i); ctx.sfx('pick'); drawHand(); if (G) drawMeters(G.m); }
+    if (cd && !cd.disabled) { const i = +cd.dataset.i; mine.play = mine.play[0] === i ? [] : [i]; ctx.send('play', i); ctx.sfx('pick'); drawHand(); if (G) drawMeters(G.m); }
   });
   drawMeters([RULES.begin, RULES.begin, RULES.begin]); drawEvent();
 
@@ -134,7 +136,7 @@ export function createView(ctx) {
     event(ev) {
       if (ev.e === 'resolve') {
         METERS.forEach((k, i) => { const el = meterEls[k].querySelector('.ss-d'), d = ev.d[i]; el.textContent = d ? (d > 0 ? '+' : '−') + Math.abs(d) : '±0'; el.className = 'ss-d show ' + (d > 0 ? 'up' : d < 0 ? 'down' : ''); clearTimeout(el.t); el.t = setTimeout(() => { el.className = 'ss-d'; }, 1600); });
-        const who = pid => pid === me ? 'You' : (players.find(p => p.pid === pid)?.name || '?');
+        const who = pid => pid === me ? 'You' : pid === 'cpu' ? (init.cpu || 'Bramble') : (players.find(p => p.pid === pid)?.name || '?');
         $('.ss-last').innerHTML = ev.played.length ? 'Last beat: ' + ev.played.map(([pid, id, got]) => `${esc(who(pid))} ${CARDS[id].a} ${esc(CARDS[id].n)}${got ? ` (+${got})` : ' (wasted)'}`).join(' · ') : 'Last beat: nobody played a card!';
         ctx.sfx(ev.d.reduce((a, b) => a + b, 0) >= 0 ? 'good' : 'bad');
       } else if (ev.e === 'end') ctx.sfx(ev.ok ? 'win' : 'bad');
@@ -145,7 +147,7 @@ export function createView(ctx) {
       rain.instanceMatrix.needsUpdate = true;
       for (const { a } of actors) { a.update?.(dt); }
       // the clock bar for this beat
-      if (G?.ph === 'beat') { const k = Math.max(0, 1 - (performance.now() - beatStart) / (RULES.beat * 1000)); const el = $('.ss-tbar i'); el.style.width = (k * 100).toFixed(1) + '%'; }
+      if (G?.ph === 'beat') { const k = Math.max(0, 1 - (performance.now() - beatStart) / ((init.beat || RULES.beat) * 1000)); const el = $('.ss-tbar i'); el.style.width = (k * 100).toFixed(1) + '%'; }
       for (const [i, { a, x }] of actors.entries()) { a.setPose?.(G?.ph === 'end' ? (G.ok ? 'cheer' : 'sitGround') : heat <= 3 ? 'hit' : 'idle'); a.group.position.x = x + (heat <= 3 ? Math.sin(t * 40 + i) * 0.03 : 0); }
     },
     dispose() { bar.el.remove(); removeEventListener('resize', frame); for (const m of mats) m.dispose(); },

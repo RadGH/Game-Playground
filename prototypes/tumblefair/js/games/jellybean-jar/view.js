@@ -2,9 +2,11 @@
 // round's seed. A phone that plays gets a big number pad under it (DEL / OK); every digit is sent as a draft, so a
 // number typed but never OK'd still counts when time runs out. The reveal dims every thing, then lights them up one
 // by one as a big counter climbs (fast at first, slowing near the end), while each player's guess waits on the
-// guess-o-meter and pops when the counter passes it.
+// guess-o-meter and pops when the counter passes it. While guessing, the picture is the server's GUESSING picture (a
+// label across the middle, only the things you can see; the count is never sent until the reveal), and the reveal
+// redraws the whole pile from (thing, n, look, fill) with the label gone.
 import { esc, chip } from '../../client/gamehud.js';
-import { svg, NAMES as PLAIN_NAMES, NAMES_HW, MANY_HW } from './jar-art.js';
+import { svg, svgOf, NAMES as PLAIN_NAMES, NAMES_HW, MANY_HW } from './jar-art.js';
 
 const COUNT_MS = 3600;
 
@@ -44,8 +46,10 @@ export function createView(ctx) {
     else if (b.dataset.k === 'ok' && entry) { ctx.sfx('good'); sendEntry(true); }
   });
 
+  let drawn = '';
   function drawPicture(g) {
-    $('.jj-pic').innerHTML = svg(g.thing, g.n, g.look, g.fill, ctx.season);
+    const key = g.round + ':' + (g.pic ? 'pic' : 'all'); if (key === drawn && items.length) return; drawn = key;
+    $('.jj-pic').innerHTML = g.pic ? svgOf(g.thing, { r: g.pic.r, items: g.pic.items.map(([x, y, c, a]) => ({ x, y, c, a })) }, ctx.season, g.pic.band) : svg(g.thing, g.n, g.look, g.fill, ctx.season);
     items = [...ui.querySelectorAll('.jj-it')];
     $('.jj-count span').textContent = NAMES[g.thing];
     $('.jj-ask').innerHTML = `How many <b>${esc(NAMES[g.thing])}</b>?`;
@@ -106,7 +110,7 @@ export function createView(ctx) {
     priv(d) { if (phase === 'guess' && d.guess != null && !entry) { entry = String(d.guess); ok = d.ok; paintEntry(); } },
     state(g) {
       lastG = g;
-      if (g.phase !== 'end' && (g.round !== round || !items.length)) { round = g.round; drawPicture(g); }
+      if (g.phase !== 'end' && (g.pic || g.n != null)) { round = g.round; drawPicture(g); }
       if (g.phase !== phase) {
         if (g.phase === 'guess') { entry = ''; ok = false; paintEntry(); counting = null; ui.classList.remove('counting', 'counted'); $('.jj-count b').textContent = '?'; items.forEach(el => el.classList.remove('lit')); ctx.sfx('open'); }
         if (g.phase === 'reveal') startReveal(g.reveal);

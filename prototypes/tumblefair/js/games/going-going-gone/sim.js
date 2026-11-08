@@ -13,7 +13,7 @@
 export const meta = {
   id: 'going-going-gone', title: 'Going, Going, Gone!', blurb: 'Bid your energy in secret and win the best lots!',
   how: ['Five lots, one pool of 20 energy for the whole auction.', 'Set a secret bid and lock it in. Highest bid wins the lot and pays.', 'Mash RUMMAGE for a little more energy, but everyone hears you.', 'Beware the cursed lot: the LOWEST bid gets stuck with it!'],
-  kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'points', tags: ['chance', 'social'], card: 'card-going-going-gone', css: true,
+  kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'points', tags: ['chance', 'social'], card: 'card-going-going-gone', css: true, rival: true,
 };
 export const ENERGY = 20, ROUNDS = 5, TAPS_PER = 4, MASH_CAP = 3, CURSE = -4;
 export const SHOW_S = 2.5, BID_S = 7, REVEAL_S = 3.2, END_S = 3;
@@ -43,8 +43,9 @@ export function settleLot(lot, bids) {
   return { win, gain, pay };
 }
 
-export function create({ rng, players }) {
-  const pids = players.map(p => p.pid), solo = pids.length === 1;
+export function create({ rng, players, rivals = true }) {
+  // solo = alone WITH Auntie Gavel; "Rival when alone" off (rivals false): you bid by yourself for the most points
+  const pids = players.map(p => p.pid), solo = pids.length === 1 && rivals !== false;
   // the five lots: three normal (different worths), one mystery, one cursed (never first or last)
   const vals = rng.shuffle([2, 3, 4, 5, 6, 7]).slice(0, 3);
   const names = rng.shuffle(LOTS.normal);

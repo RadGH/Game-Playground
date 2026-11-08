@@ -17,10 +17,17 @@
 // at a glance, no tracing rails by eye. (2) It is a race now: ten stages, the marble rolls faster each stage, the
 // "get ready" pause is shorter, and the goal is 4 / 6 / 8 stages (easy / normal / hard) in the minute, so the team
 // has to flip fast and the marble is never a long wait.
+//
+// Expansion 1 M4 (2026-11-07): rated "confusing", "too easy" and "unfair". Shared gates split by owner left some
+// players with nothing to tap while one flipped everything, the full trail made each stage a single flip-until-green,
+// and everyone got the same score whatever they did. Now it is a RACE: every player gets the SAME ten stages on their
+// own board, every gate on it is theirs, and the first to roll their marble home moves on — score = stages cleared.
+// The trail shows only as far as the next portal on normal and hard (you work out where the portal comes out), the
+// whole way on easy. Alone you race Pip, a computer marble-roller who flips one gate at a time at a steady pace.
 export const meta = {
-  id: 'portal-routing', title: 'Portal Routing', blurb: 'Flip your gates to roll the marble through the portals to the goal!',
-  how: ['A marble rolls by itself. Gates with your colour and shape are yours: tap to flip them.', 'The glowing trail shows where it will go: flip until it reaches the flag ✓.', 'Each stage is faster. Clear the goal number of stages together in time!'],
-  kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'coop', unit: 'stages', tags: ['coop', 'puzzle'], card: 'card-portal-routing', css: true,
+  id: 'portal-routing', title: 'Portal Routing', blurb: 'Race to roll your marble through the portals to the flag — flip your gates fast!',
+  how: ['Everyone gets the same boards. Tap a gate to flip which way it points.', 'The glowing trail shows where your marble will roll — up to the next portal.', 'Reach the flag to go on to the next board. Most boards cleared wins!'],
+  kind: 'ui', min: 1, max: 4, seconds: 60, scoring: 'points', unit: 'boards', tags: ['puzzle', 'action'], card: 'card-portal-routing', css: true, rival: true,
 };
 export const W = 7, H = 6;
 export const DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];              // sides: 0 N, 1 E, 2 S, 3 W
@@ -32,7 +39,8 @@ export const STAGES = [
   { gates: 5, portals: 2, speed: 6.1 },
 ];
 export const GAME_S = 60, FIRST_READY_S = 3, READY_S = 1.0, DROP_S = 0.9, CLEAR_S = 1.1;
-export const TARGET = { easy: 4, normal: 6, hard: 8 };
+/** Pip, the computer racer: seconds between its gate flips (and before its first one on a new board). */
+export const CPU = 'cpu', CPU_NAME = 'Pip', CPU_FLIP = { easy: 3.0, normal: 2.2, hard: 1.5 };   // ~4.5 / 5.4 / 6.8 boards a minute
 
 const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H) ? -1 : y * W + x;
 const step = (i, d) => at(i % W + DX[d], ((i / W) | 0) + DY[d]);
@@ -71,13 +79,13 @@ export function runBall(stage, st) {
  * `st`: the cells it passes, in order, as [cell, side in, side out] (a portal jump starts a new run at the twin), and
  * how it ends. The browser draws this as the "where it goes now" trail. -> { path: [[c, in, out]…], end }
  */
-export function trace(stage, st, c = stage.start, inD = -1) {
+export function trace(stage, st, c = stage.start, inD = -1, stopAtPortal = false) {
   const { cells } = stage, path = [], seen = new Set();
   for (let n = 0; n < 400; n++) {
     const cell = cells[c];
     if (cell.k === 'G') { path.push([c, inD, -1]); return { path, end: 'goal' }; }
     if (cell.k === 'x') { path.push([c, inD, -1]); return { path, end: 'drop' }; }
-    if (cell.k === 'p' && inD >= 0) { path.push([c, inD, -1]); c = cell.twin; inD = -1; continue; }
+    if (cell.k === 'p' && inD >= 0) { path.push([c, inD, -1]); if (stopAtPortal) return { path, end: 'portal' }; c = cell.twin; inD = -1; continue; }
     const key = c * 5 + inD + 1; if (seen.has(key)) return { path, end: 'loop' }; seen.add(key);
     const o = cell.k === 'p' ? sides(cell.m)[0] : exitOf(cell, inD, st), j = step(c, o);
     path.push([c, inD, o]);
@@ -184,70 +192,89 @@ function decoy(rng, cells, i, inD, newPair) {
   return true;
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
-  const pids = players.map(p => p.pid), seatOf = Object.fromEntries(players.map(p => [p.pid, p.seat])), seats = players.map(p => p.seat);
-  const target = Math.max(1, (TARGET[difficulty] || TARGET.normal) - (pids.length === 1 ? 1 : 0));
-  const stages = STAGES.map(def => makeStage(rng, def, seats));
-  let si = 0, st = stages[0].st.slice(), phase = 'ready', left = GAME_S, wait = FIRST_READY_S, cleared = 0, drops = 0, over = false;
-  let ball = { c: stages[0].start, i: -1, o: 1, t: 0.5 };
-  const flips = Object.fromEntries(pids.map(p => [p, 0]));
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
+  const pids = players.map(p => p.pid), solo = pids.length === 1, pip = solo && rivals !== false;   // "Rival when alone" off: no Pip
+  const racers = pip ? [...pids, CPU] : pids.slice();
+  const stages = STAGES.map(def => makeStage(rng, def, [0]));
+  const cpuFlip = CPU_FLIP[difficulty] || CPU_FLIP.normal, peek = difficulty === 'easy' ? 'all' : 'portal';
+  let left = GAME_S, over = false, clock = 0;
   const events = [];
-  const S = () => stages[si];
-  function reset() { const s = S(); ball = { c: s.start, i: -1, o: exitOf(s.cells[s.start], -1, st), t: 0.5 }; }
-  function begin(n) { si = n; st = stages[si].st.slice(); phase = 'ready'; wait = READY_S; reset(); }
-  reset();
+  /** One racer's own board: which stage, its gate settings, its marble. */
+  function newRunner() { const r = { si: 0, st: stages[0].st.slice(), phase: 'ready', wait: FIRST_READY_S, cleared: 0, drops: 0, at: 0, flips: 0, think: cpuFlip + 0.6 }; reset(r); return r; }
+  function reset(r) { const s = stages[r.si]; r.ball = { c: s.start, i: -1, o: exitOf(s.cells[s.start], -1, r.st), t: 0.5 }; }
+  function begin(r, n) { r.si = n; r.st = stages[n].st.slice(); r.phase = 'ready'; r.wait = READY_S; r.think = cpuFlip + 0.4; reset(r); }
+  const runners = new Map(racers.map(p => [p, newRunner()]));
   /** The marble reaches the middle of its cell. */
-  function middle() {
-    const s = S(), cell = s.cells[ball.c];
-    if (cell.k === 'G') { cleared++; phase = 'clear'; wait = CLEAR_S; events.push({ e: 'goal' }); return false; }
-    if (cell.k === 'x') { drops++; phase = 'drop'; wait = DROP_S; events.push({ e: 'drop', c: ball.c }); return false; }
-    if (cell.k === 'p' && ball.i >= 0) { events.push({ e: 'warp', a: ball.c, b: cell.twin }); ball = { c: cell.twin, i: -1, o: sides(s.cells[cell.twin].m)[0], t: 0.5 }; }
+  function middle(r, pid) {
+    const s = stages[r.si], cell = s.cells[r.ball.c];
+    if (cell.k === 'G') { r.cleared++; r.at = clock; r.phase = 'clear'; r.wait = CLEAR_S; events.push({ e: 'goal', pid, n: r.cleared }); return false; }
+    if (cell.k === 'x') { r.drops++; r.phase = 'drop'; r.wait = DROP_S; events.push({ e: 'drop', pid, c: r.ball.c }); return false; }
+    if (cell.k === 'p' && r.ball.i >= 0) { events.push({ e: 'warp', pid, a: r.ball.c, b: cell.twin }); r.ball = { c: cell.twin, i: -1, o: sides(s.cells[cell.twin].m)[0], t: 0.5 }; }
     return true;
   }
   /** The marble reaches the edge of its cell: into the next one, or off the end of the track. */
-  function edge() {
-    const s = S(), j = step(ball.c, ball.o);
-    if (j < 0 || !s.cells[j] || !(s.cells[j].m & (1 << opp(ball.o)))) { drops++; phase = 'drop'; wait = DROP_S; events.push({ e: 'drop', c: ball.c }); return false; }
-    const inD = opp(ball.o), o = exitOf(s.cells[j], inD, st);
-    if (s.cells[j].k === 'g' && o === inD) events.push({ e: 'bonk', c: j });
-    ball = { c: j, i: inD, o, t: 0 };
+  function edge(r, pid) {
+    const s = stages[r.si], j = step(r.ball.c, r.ball.o);
+    if (j < 0 || !s.cells[j] || !(s.cells[j].m & (1 << opp(r.ball.o)))) { r.drops++; r.phase = 'drop'; r.wait = DROP_S; events.push({ e: 'drop', pid, c: r.ball.c }); return false; }
+    const inD = opp(r.ball.o), o = exitOf(s.cells[j], inD, r.st);
+    if (s.cells[j].k === 'g' && o === inD) events.push({ e: 'bonk', pid, c: j });
+    r.ball = { c: j, i: inD, o, t: 0 };
     return true;
   }
-  function roll(dist) {
+  function roll(r, pid, dist) {
     for (let guard = 0; dist > 1e-9 && guard < 20; guard++) {
-      const target = ball.t < 0.5 ? 0.5 : 1, need = target - ball.t;
-      if (dist < need) { ball.t += dist; return; }
-      ball.t = target; dist -= need;
-      if (!(target === 0.5 ? middle() : edge())) return;
+      const target = r.ball.t < 0.5 ? 0.5 : 1, need = target - r.ball.t;
+      if (dist < need) { r.ball.t += dist; return; }
+      r.ball.t = target; dist -= need;
+      if (!(target === 0.5 ? middle(r, pid) : edge(r, pid))) return;
     }
+  }
+  /** Pip: once every cpuFlip seconds, flips the first gate of its board that is set wrong. Never peeks ahead of the rules. */
+  function cpuStep(r, dt) {
+    if (r.phase === 'clear') return;
+    r.think -= dt; if (r.think > 0) return;
+    r.think = cpuFlip;
+    const s = stages[r.si], n = s.ok.findIndex((ok, k) => r.st[k] !== ok);
+    if (n >= 0) { r.st[n] = 1 - r.st[n]; r.flips++; }
+  }
+  function stepRunner(pid, r, dt) {
+    if (pid === CPU) cpuStep(r, dt);
+    if (r.phase === 'roll') { roll(r, pid, stages[r.si].speed * dt); return; }
+    r.wait -= dt; if (r.wait > 0) return;
+    if (r.phase === 'ready') r.phase = 'roll';
+    else if (r.phase === 'drop') { reset(r); r.phase = 'roll'; }
+    else if (r.phase === 'clear') { if (r.si + 1 >= stages.length) r.phase = 'done'; else begin(r, r.si + 1); }
   }
   return {
     events,
-    init: () => ({ w: W, h: H, target, seconds: GAME_S, stages: stages.map(s => ({
+    init: () => ({ w: W, h: H, seconds: GAME_S, peek, solo, cpu: pip ? CPU_NAME : null, stages: stages.map(s => ({
       speed: s.speed, start: s.start, goal: s.goal, gates: s.gates,
-      cells: s.cells.map(c => c && { k: c.k, m: c.m, ...(c.k === 'g' ? { gate: c.gate, stem: c.stem, arms: c.arms, own: c.own } : {}), ...(c.k === 'p' ? { twin: c.twin, pair: c.pair } : {}) }),
+      cells: s.cells.map(c => c && { k: c.k, m: c.m, ...(c.k === 'g' ? { gate: c.gate, stem: c.stem, arms: c.arms } : {}), ...(c.k === 'p' ? { twin: c.twin, pair: c.pair } : {}) }),
     })) }),
     act(pid, a, d) {
-      if (over || a !== 'flip' || !pids.includes(pid) || phase === 'clear') return;
-      const s = S();
-      if (!Number.isInteger(d) || d < 0 || d >= s.gates.length || s.cells[s.gates[d]].own !== seatOf[pid]) return;
-      st[d] = 1 - st[d]; flips[pid]++;
+      if (over || a !== 'flip' || !pids.includes(pid)) return;
+      const r = runners.get(pid), s = stages[r.si];
+      if (r.phase === 'clear' || r.phase === 'done' || !Number.isInteger(d) || d < 0 || d >= s.gates.length) return;
+      r.st[d] = 1 - r.st[d]; r.flips++;
       // a marble sitting in this gate already chose its way out on the way in: it keeps it
     },
     step(dt) {
       if (over) return;
-      left -= dt;
+      left -= dt; clock += dt;
       if (left <= 0) { left = 0; over = true; return; }
-      if (phase === 'roll') { roll(S().speed * dt); return; }
-      wait -= dt; if (wait > 0) return;
-      if (phase === 'ready') phase = 'roll';
-      else if (phase === 'drop') { reset(); phase = 'roll'; }
-      else if (phase === 'clear') { if (si + 1 >= stages.length) over = true; else begin(si + 1); }
+      for (const [pid, r] of runners) stepRunner(pid, r, dt);
+      if ([...runners.values()].every(r => r.phase === 'done')) over = true;
     },
-    state: () => ({ phase, left: Math.max(0, Math.ceil(left)), stage: si, cleared, target, drops, st: st.join(''), b: [ball.c, ball.i, ball.o, Math.round(ball.t * 100)] }),
+    state: () => ({ left: Math.max(0, Math.ceil(left)), r: Object.fromEntries([...runners].map(([p, r]) => [p, [r.si, r.phase, r.st.join(''), r.ball.c, r.ball.i, r.ball.o, Math.round(r.ball.t * 100), r.cleared]])) }),
     get over() { return over; },
+    /** For tests. */
+    stages, runners,
     result() {
-      return { coop: { success: cleared >= target }, order: [pids.slice()], scores: Object.fromEntries(pids.map(p => [p, cleared])), unit: meta.unit };
+      const key = p => runners.get(p);
+      const ranked = pids.slice().sort((a, b) => key(b).cleared - key(a).cleared || key(a).at - key(b).at);
+      const order = [];
+      for (const p of ranked) { const g = order[order.length - 1], q = g && key(g[0]); if (q && q.cleared === key(p).cleared && (q.cleared === 0 || q.at === key(p).at)) g.push(p); else order.push([p]); }
+      return { order, scores: Object.fromEntries(pids.map(p => [p, key(p).cleared])), unit: meta.unit };
     },
   };
 }

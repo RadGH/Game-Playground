@@ -8,34 +8,42 @@
 import { pingPong, needle } from './sim.js';
 import { scoreBar, h } from '../../client/gamehud.js';
 import { pumpkinGeo, stemGeo, faceTexture, spriteTexture, PALETTE } from '../../client/halloween.js';
+import { snowfall } from '../../client/winter.js';
 
 const S = 0.3;                                             // metres per yard in the scene
 const LIE_TEXT = { fairway: '', rough: 'Rough', pond: 'Pond!', trees: 'Trees' };
 export function createView(ctx) {
   const { THREE, group, stage, players, me, init, ui } = ctx;
-  const L = init.level, n = players.length, HW = ctx.season === 'halloween';
+  const L = init.level, n = players.length, HW = ctx.season === 'halloween', WN = ctx.season === 'winter';   // WN: Winter Fair (M6), a snowy course (looks only)
   const mats = [], std = (color, extra = {}) => { const m = new THREE.MeshStandardMaterial({ color, roughness: 0.85, ...extra }); mats.push(m); return m; };
   const basic = (color, extra = {}) => { const m = new THREE.MeshBasicMaterial({ color, ...extra }); mats.push(m); return m; };
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), col = new THREE.Color();
   const teeX = i => (i - (n - 1) / 2) * 3.2, LEN = 360 * S;
   const tags = [];
   // ---- the course
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(160, 200).rotateX(-Math.PI / 2), std(HW ? '#221a38' : '#4f9e45', { roughness: 1 })); ground.position.set(0, -0.03, -60); ground.receiveShadow = true; group.add(ground);
-  const rough = new THREE.Mesh(new THREE.PlaneGeometry(init.rough * 2 * S, LEN).rotateX(-Math.PI / 2), std(HW ? '#3a5e3c' : '#5fb653')); rough.position.set(0, -0.01, -LEN / 2 + 6); group.add(rough);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(160, 200).rotateX(-Math.PI / 2), std(HW ? '#221a38' : WN ? '#eef5fc' : '#4f9e45', { roughness: 1 })); ground.position.set(0, -0.03, -60); ground.receiveShadow = true; group.add(ground);
+  const rough = new THREE.Mesh(new THREE.PlaneGeometry(init.rough * 2 * S, LEN).rotateX(-Math.PI / 2), std(HW ? '#3a5e3c' : WN ? '#d6e6f4' : '#5fb653')); rough.position.set(0, -0.01, -LEN / 2 + 6); group.add(rough);
   const NS = 12, fw = new THREE.InstancedMesh(new THREE.PlaneGeometry(init.fairway * 2 * S, LEN / NS).rotateX(-Math.PI / 2), std('#ffffff'), NS);
-  for (let i = 0; i < NS; i++) { m4.makeTranslation(0, 0, 6 - (i + 0.5) * LEN / NS); fw.setMatrixAt(i, m4); fw.setColorAt(i, col.set(HW ? (i % 2 ? '#4f8a52' : '#5a9a5c') : (i % 2 ? '#7fd66c' : '#8fe07a'))); }
+  for (let i = 0; i < NS; i++) { m4.makeTranslation(0, 0, 6 - (i + 0.5) * LEN / NS); fw.setMatrixAt(i, m4); fw.setColorAt(i, col.set(HW ? (i % 2 ? '#4f8a52' : '#5a9a5c') : WN ? (i % 2 ? '#6fae74' : '#7dbb80') : (i % 2 ? '#7fd66c' : '#8fe07a'))); }
   fw.receiveShadow = true; group.add(fw);
-  const tee = new THREE.Mesh(new THREE.BoxGeometry(Math.max(6, n * 3.4), 0.12, 3), std(HW ? '#3f6e45' : '#9be88a')); tee.position.set(0, 0.06, 0.4); tee.receiveShadow = true; group.add(tee);
-  const P0 = init.pond, pond = new THREE.Mesh(new THREE.CircleGeometry(1, 32).rotateX(-Math.PI / 2), std(HW ? '#3a3a8a' : '#3aa6e8', { roughness: 0.15, metalness: 0.1 }));
+  const tee = new THREE.Mesh(new THREE.BoxGeometry(Math.max(6, n * 3.4), 0.12, 3), std(HW ? '#3f6e45' : WN ? '#8fc896' : '#9be88a')); tee.position.set(0, 0.06, 0.4); tee.receiveShadow = true; group.add(tee);
+  const P0 = init.pond, pond = new THREE.Mesh(new THREE.CircleGeometry(1, 32).rotateX(-Math.PI / 2), std(HW ? '#3a3a8a' : WN ? '#bfe3ff' : '#3aa6e8', { roughness: 0.15, metalness: 0.1 }));
   pond.scale.set((P0.x1 - P0.x0) / 2 * S, 1, (P0.y1 - P0.y0) / 2 * S); pond.position.set((P0.x0 + P0.x1) / 2 * S, 0.012, -(P0.y0 + P0.y1) / 2 * S); group.add(pond);
   // trees: two rows each side past the rough
-  const NT = 64, trees = new THREE.InstancedMesh(new THREE.ConeGeometry(1.4, 3.6, 8), std(HW ? '#2a2342' : '#2f8a3e'), NT), trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.22, 0.28, 1, 6), std('#6a4a2a'), NT);
+  const NT = 64, trees = new THREE.InstancedMesh(new THREE.ConeGeometry(1.4, 3.6, 8), std(HW ? '#2a2342' : WN ? '#3a8a5a' : '#2f8a3e'), NT), trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.22, 0.28, 1, 6), std('#6a4a2a'), NT);
   for (let i = 0; i < NT; i++) {
     const side = i % 2 ? 1 : -1, row = (i >> 1) % 2, k = i >> 2, x = side * (init.rough * S + 2.2 + row * 2.6 + (k % 3) * 0.4), z = 4 - k * 7.4 - row * 3.6, s = 0.85 + ((i * 37) % 10) / 25;
     m4.compose(v.set(x, 1 + 1.8 * s, z), q.identity(), sc.setScalar(s)); trees.setMatrixAt(i, m4);
     m4.compose(v.set(x, 0.5, z), q.identity(), sc.set(1, 1, 1)); trunks.setMatrixAt(i, m4);
   }
   trees.castShadow = true; group.add(trees, trunks);
+  // Winter Fair (M6): a cap of snow on every tree (same instances, one more mesh) and snow falling round the tee
+  const flakes = WN ? snowfall(THREE, 120, 12, 14, 9) : null;
+  if (WN) {
+    const caps = new THREE.InstancedMesh(new THREE.ConeGeometry(0.75, 1.3, 8), std('#ffffff'), NT);
+    for (let i = 0; i < NT; i++) { trees.getMatrixAt(i, m4); m4.decompose(v, q, sc); m4.compose(v.set(v.x, v.y + 1.25 * sc.y, v.z), q, sc); caps.setMatrixAt(i, m4); }
+    group.add(caps); flakes.mesh.position.z = -6; group.add(flakes.mesh);
+  }
   // ---- round 12 (report #31, "what's halloween edition about it"): the Halloween edition is a night course — a
   // purple night sky with a big moon and stars across the top of the screen (.ld-night), a graveyard of smiling tombstones down both edges of
   // the rough, jack-o'-lanterns on the yardage boards, pumpkin balls with a band in the player's colour (and a
@@ -228,7 +236,7 @@ export function createView(ctx) {
         if (F.t >= F.T + 0.95) { r.fly = null; r.pin.visible = true; r.pin.position.set(F.stop.x, 0, F.stop.z); r.tg.setDrawRange(0, 0); if (F.lie === 'pond') r.ball.visible = false; }
       }
       for (const r of R.values()) { r.actor?.update(dt); if (r.fade > 0 && (r.fade -= dt) <= 0) r.pinTag.el.classList.add('faded'); }
-      hw?.frame(t);
+      hw?.frame(t); flakes?.frame(t, stage.camera.quaternion);
     },
     dispose() { removeEventListener('keydown', onKey); clearTimeout(showBanner.t); clearTimeout(showLast.t); bar.el.remove(); for (const tg of tags) tg.remove(); for (const m of mats) m.dispose(); for (const x of hw?.own || []) x.dispose(); },
   };

@@ -54,6 +54,9 @@ export const CHIBI2_2D = {
     visor: { ...alias(hat, 'cap', 'Visor'), bespoke: true },
     bobble_hat: { ...alias(hat, 'cap', 'Bobble hat'), bespoke: true },
     ear_muffs: { ...alias(hat, 'cap', 'Ear muffs'), bespoke: true },
+    // Tumblefair Winter Fair (Expansion 1 M6, 2026-11-07): 3D models in avatar-3d/js/chibi2-hats.js; bespoke (never rolled)
+    antler_band: { ...alias(hat, 'headband', 'Antler headband'), bespoke: true },
+    gift_bow: { ...alias(hat, 'headband', 'Gift bow'), bespoke: true },
   },
   top: {
     gi: alias(top, 'sash_robe', 'Fitted wrap jacket (gi)'),

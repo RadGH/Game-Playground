@@ -65,3 +65,13 @@
 .pr-end.goal circle { fill: #2a9e45; } .pr-end.drop circle, .pr-end.loop circle { fill: #d6203a; }
 .pr-end { animation: pr-endpop .35s ease-out; transform-box: fill-box; transform-origin: center; }
 @keyframes pr-endpop { from { opacity: 0; } }
+/* Expansion 1 M4: the race strip, and the "?" where the trail goes into a portal */
+.pr-race { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.pr-racer { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; border-radius: 999px; background: #fff; border: 3px solid var(--ink); font: 800 14px/1 var(--font); color: var(--ink);
+  box-shadow: inset 6px 0 0 var(--seat); }
+.pr-racer em { font-style: normal; font-weight: 900; min-width: 24px; text-align: center; padding: 3px 6px; border-radius: 999px; background: var(--seat); color: #fff; -webkit-text-stroke: .6px var(--ink); paint-order: stroke fill; }
+.pr-racer.lead { outline: 3px solid var(--sun); }
+.pr-racer.lead b::before { content: '👑 '; }
+.pr-end.portal circle { fill: var(--pc); stroke: var(--ink); stroke-width: 5; }
+.pr-end.portal text { fill: #fff; font: 900 22px/1 var(--font); stroke: var(--ink); stroke-width: 1.2; paint-order: stroke fill; }
+.pr-path.portal { stroke: #ffe680; filter: drop-shadow(0 0 6px #ffd23f); }

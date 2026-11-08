@@ -96,7 +96,29 @@ export const NAMES_HW = { beans: 'candy corns in the jar', gumballs: 'eyeball gu
 export const MANY_HW = { beans: 'candy corns', gumballs: 'eyeballs', ducks: 'pumpkins', balloons: 'ghosts' };
 export const NAMES = { beans: 'jellybeans in the jar', gumballs: 'gumballs in the machine', ducks: 'rubber ducks in the pool', balloons: 'balloons in the bunch' };
 export const ONE = { beans: 'jellybean', gumballs: 'gumball', ducks: 'duck', balloons: 'balloon' };
-export function svg(thing, n, look, fill, season = null) {
-  const L = layout(thing, n, look, fill), hw = season === 'halloween', one = hw ? itemHW : item;
-  return `<svg class="jj-svg jj-${thing}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-label="${(hw ? NAMES_HW : NAMES)[thing] || ''}">${(hw ? BACK_HW : BACK)[thing] || ''}<g class="jj-items">${L.items.map((it, i) => one(thing, it, L.r, i)).join('')}</g>${FRONT[thing] || ''}</svg>`;
+export function svg(thing, n, look, fill, season = null) { return svgOf(thing, layout(thing, n, look, fill), season); }
+/** Draw a laid-out picture ({ r, items }); `band` [y0, y1] adds the label across the middle (the guessing picture). */
+export function svgOf(thing, L, season = null, band = null) {
+  const hw = season === 'halloween', one = hw ? itemHW : item;
+  const label = band ? `<g class="jj-label"><rect x="6" y="${band[0]}" width="${W - 12}" height="${(band[1] - band[0]).toFixed(1)}" rx="10" fill="${hw ? '#ff8a1a' : '#fff6e0'}" ${S} stroke-width="4"/><text x="${W / 2}" y="${((band[0] + band[1]) / 2 + 9).toFixed(1)}" text-anchor="middle" font-size="26" font-weight="900" fill="${INK}">How many?</text></g>` : '';
+  return `<svg class="jj-svg jj-${thing}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-label="${(hw ? NAMES_HW : NAMES)[thing] || ''}">${(hw ? BACK_HW : BACK)[thing] || ''}<g class="jj-items">${L.items.map((it, i) => one(thing, it, L.r, i)).join('')}</g>${FRONT[thing] || ''}${label}</svg>`;
+}
+/** How far a thing reaches from its centre (in units of r): the bean's long side is the biggest. */
+export const REACH = 1.15;
+/** The GUESSING picture (bug fix 2026-11-07: the real count used to be in every phone's state). A label is stuck
+ *  across the middle of the pile; only the things you can at least partly SEE are sent and drawn, so the phone never
+ *  holds the answer — a player (or a CPU) estimates the hidden part from the rows around the label, as by eye.
+ *  -> { r, items: [[x, y, c, a]] (visible, any order), band: [y0, y1] }. Same arguments, same picture. */
+export function coveredPicture(thing, n, look, fill = 0.8) {
+  const L = layout(thing, n, look, fill), ys = L.items.map(it => it.y), lo = Math.min(...ys), hi = Math.max(...ys), span = hi - lo;
+  const rng = makeRng((look ^ 0x2c1b3c6d) >>> 0), h = Math.max(L.r * 4.4, span * rng.range(0.3, 0.38)), mid = lo + span * rng.range(0.38, 0.6);
+  const y0 = +(mid - h / 2).toFixed(1), y1 = +(mid + h / 2).toFixed(1), k = L.r * REACH;
+  const items = L.items.filter(it => !(it.y - k >= y0 && it.y + k <= y1)).map(it => [it.x, it.y, it.c, it.a]);
+  return { r: +L.r.toFixed(3), items, band: [y0, y1] };
+}
+/** An eye's estimate from the guessing picture: what you see plus the label's height at the density just around it. */
+export function eyeEstimate(pic) {
+  const { r, items, band: [y0, y1] } = pic, k = r * REACH, a = y0 + k, b = y1 - k, w = r * 2.6;
+  const near = items.filter(([, y]) => (y < a && y >= a - w) || (y > b && y <= b + w)).length;
+  return items.length + Math.max(0, b - a) * near / (2 * w);
 }

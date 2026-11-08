@@ -1,0 +1,10 @@
+/* Sled Bash: 3-2-1-GO and call-outs in icy blue, the round pill under the score bar, the CPU sledders' name tags. */
+.game-sled-bash .sb-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center; max-width: 94vw;
+  font: 900 clamp(44px, 13vw, 96px)/1 var(--font); color: #e9f7ff; -webkit-text-stroke: 2.5px #17324a; paint-order: stroke fill; text-shadow: 0 5px 0 #17324a; white-space: nowrap; transition: transform .15s, opacity .15s; }
+.sb-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.sb-banner.go { color: #8ff07a; } .sb-banner.small { font-size: clamp(26px, 7.5vw, 46px); }
+.game-sled-bash .sb-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; pointer-events: none; max-width: calc(100vw - 24px);
+  padding: 4px 14px; border-radius: 999px; background: rgba(233, 247, 255, .95); border: 3px solid #17324a; box-shadow: 0 3px 0 #17324a; font: 800 15px/1.2 var(--font); white-space: nowrap; }
+.sb-pill i { font-style: normal; font-size: 20px; } .sb-pill span { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 520px) { .game-sled-bash .sb-pill { top: calc(var(--st) + 52px); font-size: 13px; } }
+.tag.sb-cpu { background: #ff8a1f; }

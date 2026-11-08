@@ -5,12 +5,15 @@
 // Pure: the server gives it `initial` (read from disk) and `persist(all)` (write to disk); tests give it neither.
 import { inSeason, seasonByDate, seasonName } from '../shared/seasons.js';
 import { cleanName } from '../shared/protocol.js';
+import { newPass, applyProgress, passView as passViewOf, plateOk, passCostumes, badge as passBadge } from './pass.js';   // Expansion 1 M7: the Fair Pass
 
 export const ACCT = 'acct:';
-export function createProfiles({ initial = {}, persist = null, randomToken, now = () => Date.now(), cosmetics, cleanLook }) {
+// `passData` (data/pass.json) + `stickers` (data/stickers.json `stickers`): the Fair Pass (Expansion 1 M7). Without them
+// the pass is off (progress() answers null) — older tests and tools build profiles without it.
+export function createProfiles({ initial = {}, persist = null, randomToken, now = () => Date.now(), cosmetics, cleanLook, passData = null, stickers = [] }) {
   const all = new Map(Object.entries(initial));
   const byId = new Map(cosmetics.items.map(c => [c.id, c]));
-  const free = cosmetics.items.filter(c => !c.price).map(c => c.id);
+  const free = cosmetics.items.filter(c => !c.price && !c.pass).map(c => c.id);   // a Fair Pass costume (`pass: level`) is unlocked by level, not free
   let dirty = false;
   const touch = () => { dirty = true; };
   const NAMES = ['Pip', 'Dot', 'Juno', 'Ziggy', 'Mabel', 'Otto', 'Bix', 'Wren', 'Fitz', 'Lulu', 'Gus', 'Posy', 'Moss', 'Tilly', 'Rex', 'Nell'];
@@ -37,11 +40,12 @@ export function createProfiles({ initial = {}, persist = null, randomToken, now 
     const p = create(); all.delete(p.token); p.token = key; p.account = userId; all.set(key, p); touch();
     return { profile: p, note: 'new' };
   }
-  const owns = (p, id) => free.includes(id) || p.owned.includes(id);
+  const unlocked = p => (passData ? passCostumes(p.pass, cosmetics, passData) : []);
+  const owns = (p, id) => free.includes(id) || p.owned.includes(id) || unlocked(p).includes(id);
   /** What the owner's own browser is told. */
   // `ready`: this player has chosen a name or a look at least once (or has played) — a newcomer who opens an invite link is
   // shown "pick a name and a look" before joining, instead of walking in as a random Pip or Dot (2026-10-20)
-  const view = p => ({ name: p.name, look: p.look, costume: p.costume, coins: p.coins, owned: [...free, ...p.owned], matches: p.matches, wins: p.wins, ready: !!p.ready || p.matches > 0 });
+  const view = p => ({ name: p.name, look: p.look, costume: p.costume, coins: p.coins, owned: [...free, ...p.owned, ...unlocked(p)], matches: p.matches, wins: p.wins, ready: !!p.ready || p.matches > 0, ...(passData ? { pass: passViewOf(p.pass, { now: now(), data: passData, games: p.games }) } : {}) });
   function update(token, { name, look }) {
     const p = get(token); if (!p) return null;
     const out = {};
@@ -56,6 +60,7 @@ export function createProfiles({ initial = {}, persist = null, randomToken, now 
     if (!p || !c) return { ok: false, msg: 'No such costume.' };
     if (!inSeason(c, seasonByDate(new Date(now())))) return { ok: false, msg: `${c.name} is only in the shop for ${seasonName(c.season)}.` };
     if (owns(p, id)) return { ok: false, msg: 'You already own that.' };
+    if (c.pass) return { ok: false, msg: `${c.name} is a Fair Pass reward: it unlocks at level ${c.pass}.` };   // M7: never sold
     if (p.coins < c.price) return { ok: false, msg: `That costs ${c.price} coins. You have ${p.coins}.` };
     p.coins -= c.price; p.owned.push(id); touch();
     return { ok: true };
@@ -80,6 +85,20 @@ export function createProfiles({ initial = {}, persist = null, randomToken, now 
     const p = get(token); if (!p?.games) return [];
     return Object.entries(p.games).map(([id, g]) => ({ id, n: g.n || 0, last: g.last || g.at || 0, v: g.v || 0, why: g.why || [] })).sort((a, b) => b.last - a.last);
   }
+  // ---- Expansion 1 M7: the Fair Pass. The room reports what happened (js/sim/pass.js createPassMatch); this applies it.
+  /** -> applyProgress's answer (stickers, XP, levels, rewards, daily), or null (no such profile / pass off). Coins it pays go on the wallet. */
+  function progress(token, delta, { season = null } = {}) {
+    const p = get(token); if (!p || !passData) return null;
+    p.pass ||= newPass();
+    const out = applyProgress(p.pass, delta, { now: now(), season, stickers, data: passData, games: p.games });
+    if (out.coins) p.coins += out.coins;
+    touch(); return out;
+  }
+  const passView = token => { const p = get(token); return p && passData ? passViewOf(p.pass, { now: now(), data: passData, games: p.games }) : null; };
+  /** Wear a name-plate colour the pass has reached. */
+  function setPlate(token, id) { const p = get(token); if (!p || !passData) return false; p.pass ||= newPass(); if (!plateOk(p.pass, id, passData)) return false; p.pass.plate = id; touch(); return true; }
+  /** Without touching `seen`: the level + plate on a player's chip. */
+  const badge = token => { const p = token && all.get(token); return p && passData ? passBadge(p.pass, passData) : null; };
   function flush() { if (!dirty || !persist) return; dirty = false; persist(Object.fromEntries(all)); }
-  return { create, get, guest, signIn, view, update, reward, buy, equip, played, rated, history, flush, get size() { return all.size; } };
+  return { create, get, guest, signIn, view, update, reward, buy, equip, played, rated, history, progress, passView, setPlate, badge, passData, flush, get size() { return all.size; } };
 }

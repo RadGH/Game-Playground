@@ -5,7 +5,10 @@
 //   Closeness: up to 10 points (10 * (1 - 2 x how far off, as a share of the real number)); within half the real
 //   number scores something. Exact guess: +5 more. Closest guess of the round (2+ players, ties share): +5.
 // Alone, it is the same without the "closest" bonus: a score out of 45.
-// The drawing comes from (thing, count, look seed) in the state; jar-art.js lays it out the same on every screen.
+// The drawing: while guessing, the state carries only the GUESSING picture (jar-art.js coveredPicture: a label across
+// the middle, and only the things you can see) — never the count. The reveal carries (thing, n, look, fill) and every
+// screen lays out the whole pile the same way. (Bug fix 2026-11-07: `n` used to be in every phone's state.)
+import { coveredPicture } from './jar-art.js';
 export const meta = {
   id: 'jellybean-jar', title: 'Jellybean Jar', blurb: 'How many are in there? The closest guess wins!',
   how: ['Look at the jar (or the pool, or the balloons) and guess how many.', 'Type your number on the pad and press OK. You can change it until time is up.', 'Closest guess wins the round. Spot on = big bonus!', 'Three rounds, and the piles get bigger.'],
@@ -41,6 +44,7 @@ export function create({ rng, players }) {
   const plan = RANGES.map(([lo, hi], i) => ({ thing: kinds[i], n: rng.int(lo, hi), look: rng.int(1, 2 ** 30), fill: Math.round(rng.range(0.62, 0.9) * 100) / 100 }));
   const total = Object.fromEntries(pids.map(p => [p, 0]));
   let phase = 'ready', round = -1, left = START_S, over = false, guesses = {}, locked = new Set(), reveal = null;
+  const pics = new Map(), picOf = P => { if (!pics.has(P)) pics.set(P, coveredPicture(P.thing, P.n, P.look, P.fill)); return pics.get(P); };
   function next() { round++; phase = 'guess'; left = GUESS_S; guesses = {}; locked = new Set(); reveal = null; }
   function settle() {
     const P = plan[round], r = settleRound(guesses, P.n, pids);
@@ -70,13 +74,16 @@ export function create({ rng, players }) {
     state() {
       const g = { phase, round, left: Math.max(0, Math.ceil(left)), scores: { ...total } };
       const P = plan[Math.max(0, Math.min(round, ROUNDS - 1))];
-      if (phase !== 'end') { g.thing = P.thing; g.n = P.n; g.look = P.look; g.fill = P.fill; }
+      if (phase === 'ready' || phase === 'guess') { g.thing = P.thing; g.pic = picOf(P); }
+      else if (phase === 'reveal') { g.thing = P.thing; g.n = P.n; g.look = P.look; g.fill = P.fill; }
       if (phase === 'guess') { g.in = pids.filter(p => locked.has(p)); g.typing = pids.filter(p => guesses[p] != null && !locked.has(p)); }
       if (phase === 'reveal') g.reveal = reveal;
       return g;
     },
     priv: pid => ({ guess: phase === 'guess' ? guesses[pid] ?? null : null, ok: locked.has(pid) }),
     get over() { return over; },
+    /** Tests only (never sent): the real count of the round on show. */
+    get _n() { return plan[Math.max(0, Math.min(round, ROUNDS - 1))].n; },
     result() {
       const groups = new Map();
       for (const p of pids) { if (!groups.has(total[p])) groups.set(total[p], []); groups.get(total[p]).push(p); }

@@ -14,7 +14,7 @@ export function createView(ctx) {
   const byPid = new Map(players.map(p => [p.pid, p])), seatIdx = new Map(init.order.map((p, i) => [p, i]));
   ui.innerHTML = `
     <div class="fd-top"><span class="fd-title">${HW ? 'Spooky Darts' : 'Fair Darts'}</span><span class="clock"><b>--</b></span></div>
-    <div class="fd-board">${players.map(p => chip(p, '<em class="sc">0</em><i class="fd-pips"></i>')).join('')}</div>
+    <div class="fd-board">${players.map(p => chip(p, '<em class="sc">0</em><i class="fd-pips"></i>')).join('')}${init.cpu ? chip({ pid: 'cpu', shape: 'diamond', color: '#8a5cf6', dark: '#4b2a99', name: init.cpu }, '<em class="sc">0</em><i class="fd-pips"></i>') : ''}</div>
     <div class="fd-stall"><canvas></canvas><div class="fd-count"></div><div class="fd-say"></div></div>
     <div class="fd-panel${watching ? ' hidden' : ''}">
       <div class="fd-row"><b class="fd-n">Dart 1/${init.darts}</b><span class="fd-x2">Last 3 darts: DOUBLE</span></div>
@@ -128,10 +128,12 @@ export function createView(ctx) {
   function note(gs) {
     if (gs.phase === 'count') return watching ? 'Step up to the oche!' : 'Wait for the ring to drift in close… then THROW!';
     if (gs.phase === 'end') {
-      if (init.solo && me != null) { const s = gs.sc[me] ?? 0, m = init.medals; return `${s} points — ${s >= m[2] ? 'GOLD medal!' : s >= m[1] ? 'SILVER medal!' : s >= m[0] ? 'BRONZE medal!' : `bronze needs ${m[0]}`}`; }
+      if (init.solo && me != null) { const s = gs.sc[me] ?? 0, m = init.medals, d = gs.cpu?.[0];
+        const vs = d == null ? '' : s >= d ? `You beat ${init.cpu} ${s}–${d}! ` : `${init.cpu} wins ${d}–${s}. `;
+        return `${vs}${s >= m[2] ? 'GOLD medal!' : s >= m[1] ? 'SILVER medal!' : s >= m[0] ? 'BRONZE medal!' : `Bronze needs ${m[0]}`}`; }
       return 'Every dart thrown!';
     }
-    if (init.solo) return `Medals: bronze ${init.medals[0]}, silver ${init.medals[1]}, gold ${init.medals[2]}.`;
+    if (init.solo) return `Beat ${init.cpu || 'the target'}! Medals: bronze ${init.medals[0]}, silver ${init.medals[1]}, gold ${init.medals[2]}.`;
     return watching ? '' : 'Bullseye 10 · then 5, 3, 2, 1';
   }
   const SAY = ['BULLSEYE!', 'Great shot!', 'Nice!', 'OK', 'Edge', 'Off the board!'];
@@ -149,11 +151,13 @@ export function createView(ctx) {
       Object.assign(lastN, gs.n || {}); darts = gs.dt || darts; showN();
       $('.clock b').textContent = gs.left; $('.clock').classList.toggle('hurry', gs.phase === 'play' && gs.left <= 10);
       $('.fd-count').textContent = gs.phase === 'count' ? gs.left : '';
-      const best = Math.max(0, ...Object.values(gs.sc));
-      for (const [pid, n] of Object.entries(gs.sc)) {
+      const all = { ...gs.sc }, darts0 = { ...(gs.n || {}) };
+      if (gs.cpu) { all.cpu = gs.cpu[0]; darts0.cpu = gs.cpu[1]; }
+      const best = Math.max(0, ...Object.values(all));
+      for (const [pid, n] of Object.entries(all)) {
         const c = ui.querySelector(`.fd-board [data-pid="${pid}"]`); if (!c) continue;
         c.querySelector('.sc').textContent = n; c.classList.toggle('lead', n === best && best > 0);
-        const left = init.darts - (gs.n?.[pid] || 0), pips = '•'.repeat(Math.max(0, left)); const pe = c.querySelector('.fd-pips'); if (pe.textContent !== pips) pe.textContent = pips;
+        const left = init.darts - (darts0[pid] || 0), pips = '•'.repeat(Math.max(0, left)); const pe = c.querySelector('.fd-pips'); if (pe.textContent !== pips) pe.textContent = pips;
       }
       $('.fd-note').textContent = note(gs);
     },

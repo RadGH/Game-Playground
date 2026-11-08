@@ -9,12 +9,13 @@
 // him (20 points). Most points banked wins. Solo: you and Finn against the clock, with medal scores.
 import { makeBody, stepBody, separate, clampToArena, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { makeRng, hashStr } from '../../shared/rng.js';
 import { pickSpecies, wander, groupBy } from '../fish-kit.js';
 import { speciesIn, BY_ID } from '../fish-species.js';
 
 export const meta = {
   id: 'net-gains', title: 'Net Gains', blurb: 'Stretch a net with your teammate and scoop up the most fish!',
-  how: ['You and a teammate hold one net. Walk it through the fish!', 'Too close or too far apart and the net does not catch.', 'Touch your dock with a full net to bank the fish.', 'A splashes: fish dart away from you.'],
+  how: ['You and a teammate hold one net. Walk it through the fish!', 'Too close or too far apart and the net does not catch.', 'Touch your own dock to bank what is in the net (it holds 8).', 'A splashes: fish dart away from you.'],
   kind: 'arena', min: 1, max: 4, seconds: 70, scoring: 'points', unit: 'pts', tags: ['action', 'coop'],
   controls: { stick: true, a: 'Splash' },
   move: { speed: 4.6, accel: 12, carryMul: 0.72, stunDrag: 1.6 },
@@ -23,7 +24,7 @@ export const meta = {
 
 export const NET = { min: 1.4, max: 5.6, wide: 3.6, reach: 0.42, cap: 8, heavy: 5 };
 export const DOCK = { x: 9.3, hd: 2.4 };          // a team's dock: |x| beyond DOCK.x on its own side, |z| < hd
-export const DECK = { gap: 3.4, speed: 4.9, names: ['Finn', 'Marlo'] };
+export const DECK = { gap: 3.4, wideGap: 4.4, speed: 4.9, names: ['Finn', 'Marlo'] };   // wideGap: while Old Gilbert swims (he needs NET.wide)
 export const LEVELS = {
   easy:   { fish: 3, flee: 0.7, fleeR: 1.7, splash: 3.6, big: 0.7, swim: 0.6 },
   normal: { fish: 1, flee: 1.3, fleeR: 2.1, splash: 3.2, big: 1, swim: 0.75 },
@@ -36,6 +37,19 @@ const LAGOON = speciesIn('lagoon', { junk: false }).filter(s => s.id !== 'old-gi
 export const SPECIES_LIST = [...LAGOON.map(s => s.id), 'old-gilbert'];      // state rows send an index into this
 /** Team of a seat: 0 = red + green (left dock), 1 = blue + pink (right dock). */
 export const teamOf = seat => seat % 2;
+/**
+ * Who holds a net with whom -> Map(pid -> 0 | 1). M2 bugs (2026-11-07): the game ignored the room's Teams setting.
+ *   teams on (true, or not given)  the room's own teams, by seat colour (red + green vs blue + pink) — the same teams the
+ *                                  room's scoreboard adds up, so they must match exactly.
+ *   teams off (false)              there are no fixed teams, so the partners are drawn from the seed: who you share a net
+ *                                  with changes from game to game, and both sides always have someone (two people
+ *                                  sitting in seats 0 and 2 used to share one net with nobody to play against).
+ */
+export function pairUp(players, teams, seed = 0) {
+  if (teams !== false) return new Map(players.map(p => [p.pid, teamOf(p.seat)]));
+  const mix = makeRng(hashStr('net-pairs:' + seed)).shuffle(players), first = mix.length ? Math.floor(makeRng(hashStr('net-side:' + seed))() * 2) : 0;
+  return new Map(mix.map((p, i) => [p.pid, (i + first) % 2]));
+}
 /** Distance from point (x, z) to segment a-b, and how far along it (0..1). */
 export function segDist(x, z, a, b) {
   const ex = b.x - a.x, ez = b.z - a.z, L = ex * ex + ez * ez || 1e-9, t = Math.max(0, Math.min(1, ((x - a.x) * ex + (z - a.z) * ez) / L));
@@ -43,17 +57,18 @@ export function segDist(x, z, a, b) {
 }
 export const atDock = (b, team) => (team === 0 ? b.x <= -DOCK.x : b.x >= DOCK.x) && Math.abs(b.z) <= DOCK.hd;
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ seed = 0, rng, players, difficulty = 'normal', teams: roomTeams }) {
   const D = LEVELS[difficulty] ? difficulty : 'normal', L = LEVELS[D], { hw, hd } = meta.arena;
   const n = players.length, solo = n === 1, bodies = new Map(), events = [];
-  const teams = [0, 1].map(t => ({ t, pids: players.filter(p => teamOf(p.seat) === t).map(p => p.pid), score: 0, load: 0, count: 0, active: false, len: 0, deck: null, side: t ? 1 : -1, big: 0 }));
+  const side = pairUp(players, roomTeams, seed), sideOf = p => side.get(p.pid);
+  const teams = [0, 1].map(t => ({ t, pids: players.filter(p => sideOf(p) === t).map(p => p.pid), score: 0, load: 0, count: 0, active: false, len: 0, deck: null, side: t ? 1 : -1, big: 0 }));
   // start: each team near its own dock, the pair side by side facing the middle
   for (const T of teams) {
     const sx = T.t ? 1 : -1;
     T.pids.forEach((pid, i) => bodies.set(pid, makeBody(sx * 7.2, (i ? 1 : -1) * 1.7, sx > 0 ? -Math.PI / 2 : Math.PI / 2)));
     if (T.pids.length === 1) { T.deck = makeBody(sx * 7.2, 1.7, sx > 0 ? -Math.PI / 2 : Math.PI / 2); T.deck.name = DECK.names[T.t]; }
   }
-  const P = new Map(players.map(p => [p.pid, { prevB: 0, splash: 0, team: teamOf(p.seat), got: 0 }]));
+  const P = new Map(players.map(p => [p.pid, { prevB: 0, splash: 0, team: sideOf(p), got: 0 }]));
   const ends = T => { if (!T.pids.length) return null; const a = bodies.get(T.pids[0]), b = T.deck || bodies.get(T.pids[1]); return [a, b]; };
   let fish = [], fid = 0, time = meta.seconds, over = false, bigDone = false;
   function addFish(sp, edge = false) {
@@ -68,8 +83,11 @@ export function create({ rng, players, difficulty = 'normal' }) {
     const d = T.deck, me = bodies.get(T.pids[0]); if (!d || !me) return;
     const fx = Math.sin(me.yaw), fz = Math.cos(me.yaw), rx = fz, rz = -fx;            // right of the way you face
     const cur = (d.x - me.x) * rx + (d.z - me.z) * rz; if (Math.abs(cur) > 0.6) T.side = Math.sign(cur);
-    let tx = me.x + rx * T.side * DECK.gap - fx * 0.3, tz = me.z + rz * T.side * DECK.gap - fz * 0.3;
-    if (Math.abs(tx) > hw - 0.5 || Math.abs(tz) > hd - 0.5) { T.side = -T.side; tx = me.x + rx * T.side * DECK.gap; tz = me.z + rz * T.side * DECK.gap; }
+    // M2 bugs: the deckhand always kept 3.4 m, and Old Gilbert only goes in a net stretched NET.wide (3.6 m) — so a team
+    // with a deckhand could never catch him. While he swims, the deckhand stretches the net wider.
+    const gap = fish.some(f => f.big) ? DECK.wideGap : DECK.gap;
+    let tx = me.x + rx * T.side * gap - fx * 0.3, tz = me.z + rz * T.side * gap - fz * 0.3;
+    if (Math.abs(tx) > hw - 0.5 || Math.abs(tz) > hd - 0.5) { T.side = -T.side; tx = me.x + rx * T.side * gap; tz = me.z + rz * T.side * gap; }
     const dx = tx - d.x, dz = tz - d.z, dist = Math.hypot(dx, dz), sp = DECK.speed * (T.count >= NET.heavy ? meta.move.carryMul : 1) * Math.min(1, dist / 0.8);
     const k = Math.min(1, 10 * dt), vx = dist > 0.05 ? dx / dist * sp : 0, vz = dist > 0.05 ? dz / dist * sp : 0;
     d.vx += (vx - d.vx) * k; d.vz += (vz - d.vz) * k; d.x += d.vx * dt; d.z += d.vz * dt;
@@ -138,7 +156,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
       if (time <= 0) { time = 0; over = true; for (const b of bodies.values()) { b.flags |= F.FROZEN; b.vx = b.vz = 0; } events.push({ e: 'end' }); }
     },
     state() {
-      const sc = {}; for (const p of players) sc[p.pid] = teams[teamOf(p.seat)].score;
+      const sc = {}; for (const p of players) sc[p.pid] = teams[sideOf(p)].score;
       return {
         sc, left: Math.ceil(time),
         t: teams.map(T => [T.score, T.load, T.count, T.active ? 1 : 0, T.len]),
@@ -148,7 +166,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
     },
     get over() { return over; },
     result() {
-      const scores = {}; for (const p of players) scores[p.pid] = teams[teamOf(p.seat)].score;
+      const scores = {}; for (const p of players) scores[p.pid] = teams[sideOf(p)].score;
       const order = groupBy(players.map(p => ({ pid: p.pid, key: scores[p.pid] })));
       return { order, scores, unit: meta.unit, teams: teams.filter(T => T.pids.length).map(T => ({ team: T.t, pids: T.pids, score: T.score })), got: Object.fromEntries(players.map(p => [p.pid, P.get(p.pid).got])) };
     },

@@ -22,7 +22,7 @@ export const meta = {
   kind: 'arena', min: 1, max: 4, seconds: 90, scoring: 'points', unit: 'laps', tags: ['action'],
   controls: { stick: true, a: 'Item', b: 'Hop' },
   move: { mode: 'car', speed: 7.2, accel: 3.2, turn: 3.7, grip: 7, boostMul: 1.55, slowMul: 0.5, stunDrag: 2.4 },
-  arena: { shape: 'rect', hw: 11, hd: 10, wall: true }, pitch: 70, card: 'card-wobblewheel-rally', css: true,
+  arena: { shape: 'rect', hw: 11, hd: 10, wall: true }, pitch: 70, card: 'card-wobblewheel-rally', css: true, rival: true,
 };
 
 /** The layouts: a polygon whose corners are rounded off by `r` (metres, before SCALE). Start line = middle of the longest side. */
@@ -104,10 +104,11 @@ export function makeTrack(variant) {
 
 const inRect = (o, x, z, pad = 0) => { const dx = x - o.x, dz = z - o.z, s = Math.sin(o.yaw), c = Math.cos(o.yaw); return Math.abs(dx * s + dz * c) <= o.hl + pad && Math.abs(dx * c - dz * s) <= o.hw + pad; };
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
   const track = makeTrack(rng.int(0, VARIANTS - 1)), { loop, at } = track, { N } = loop, LAPS = track.laps, W = RULES.W;
   const arena = { shape: 'rect', hw: track.hw, hd: track.hd, wall: true, segs: track.segs };
-  const solo = players.length === 1;
+  // solo = alone WITH Dot and Pip; "Rival when alone" off (rivals false): you race the clock on your own
+  const solo = players.length === 1 && rivals !== false;
   // racers: every player, plus two CPU karts when alone (negative ids)
   const racers = players.map(p => ({ id: p.pid, pid: p.pid, cpu: false }));
   if (solo) racers.push({ id: -1, cpu: true, name: 'Dot', lane: 0.7 }, { id: -2, cpu: true, name: 'Pip', lane: -0.7 });

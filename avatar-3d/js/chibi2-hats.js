@@ -406,6 +406,27 @@ export function buildExtraHat(a, c) {
       head(new THREE.SphereGeometry(1, 10, 6), '#1a1a28', { position: [0, 0.2, 0.42], scale: [0.04, 0.03, 0.015] });       // a little 'oo' mouth
       return;
     }
+    case 'antler_band': {
+      // Tumblefair Winter Fair (M6): a headband over the top of the head with two little branching antlers (felt, not bone)
+      const band = a.hat.color || '#c8221c', ant = a.hat.color2 || '#a0703a';
+      head(new THREE.TorusGeometry(0.385, 0.022, 5, 18, Math.PI), band, { position: [0, 0.27, 0], scale: [1, 0.98, 1] });
+      for (const s of [-1, 1]) {
+        head(taperedCurve([[s * 0.2, 0.6, 0.0], [s * 0.26, 0.76, -0.02], [s * 0.34, 0.9, -0.05]], [0.04, 0.032, 0.012], 5, 6), ant);
+        head(taperedCurve([[s * 0.25, 0.74, -0.02], [s * 0.15, 0.84, 0.0], [s * 0.12, 0.92, 0.0]], [0.026, 0.02, 0.008], 5, 5), ant);
+        head(taperedCurve([[s * 0.3, 0.82, -0.04], [s * 0.42, 0.86, -0.04], [s * 0.47, 0.93, -0.05]], [0.024, 0.018, 0.007], 5, 5), ant);
+      }
+      return;
+    }
+    case 'gift_bow': {
+      // Tumblefair Winter Fair (M6): a big satin bow sitting on top of the head, like the bow on a present
+      const bow = a.hat.color || '#e8322a', knot = a.hat.color2 || lift(bow, 0.2);
+      head(new THREE.SphereGeometry(0.075, 8, 6), knot, { position: [0, 0.64, 0.02] });
+      for (const s of [-1, 1]) {
+        head(new THREE.SphereGeometry(1, 10, 7), bow, { position: [s * 0.16, 0.66, 0.0], scale: [0.15, 0.1, 0.06], rotation: [0, 0, s * 0.35] });
+        head(new THREE.BoxGeometry(0.06, 0.2, 0.025), bow, { position: [s * 0.06, 0.55, 0.06], rotation: [0.3, 0, s * 0.45] });
+      }
+      return;
+    }
     case 'bolt_crown': {
       // the bolt-neck monster: a tall flat-top of dark hair, a stitched brow and a bolt either side of the neck
       const hair = a.hat.color || '#1a1a20', metal = a.hat.color2 || '#9aa0a8';

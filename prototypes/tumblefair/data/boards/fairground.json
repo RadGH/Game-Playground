@@ -3,7 +3,8 @@
  "title": "The Fairground Loop",
  "backdrop": "board-fairground-loop",
  "seasonBackdrops": {
-  "halloween": "board-fairground-loop-halloween"
+  "halloween": "board-fairground-loop-halloween",
+  "winter": "board-fairground-loop-winter"
  },
  "size": 40,
  "start": "s0",

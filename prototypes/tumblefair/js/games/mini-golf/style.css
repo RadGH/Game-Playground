@@ -5,3 +5,6 @@
 .game-mini-golf .gp-card tr.par td { opacity: .65; font-size: .85em; }
 .game-mini-golf .gp-card th small { font-size: 10px; }
 @media (max-width: 520px) { .game-mini-golf .gp-card table { font-size: 12px; } .game-mini-golf .gp-card th, .game-mini-golf .gp-card td { padding: 1px 3px; } .game-mini-golf .gp-card td:first-child { max-width: 5.5em; } }
+/* M4: Par Pete, the computer golfer you play alone against */
+.gp-pill .mg-vs { font-style: normal; padding: 0 8px; border-radius: 999px; background: #b48cff; color: #1b0f33; font-weight: 900; }
+.tag.mg-pete { background: #b48cff; color: #1b0f33; text-shadow: none; font-size: 11px; }

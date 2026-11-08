@@ -33,7 +33,7 @@ const COMMON_TYPES = {
 
 const BOARDS = [
   {
-    id: 'fairground', title: 'The Fairground Loop', backdrop: 'board-fairground-loop', seasonBackdrops: { halloween: 'board-fairground-loop-halloween' }, N: 24, RX: 15.5, RZ: 11.5, sq: 0.72,
+    id: 'fairground', title: 'The Fairground Loop', backdrop: 'board-fairground-loop', seasonBackdrops: { halloween: 'board-fairground-loop-halloween', winter: 'board-fairground-loop-winter' }, N: 24, RX: 15.5, RZ: 11.5, sq: 0.72,
     about: 'Starter board. Walk the loop, pick up tickets, buy prize ribbons at the two booths. The shortcut through the middle saves six spaces and has two puddles and the jackpot on it.',
     // the loop, clockwise from the gate at the bottom (round 5: five ticket stands became a duck pond, dice duels and a bumper cart)
     // round 12: a High Striker, Fortune Teller, Shell Game, Steal or Share and Tomato Toss took over passive spaces, the

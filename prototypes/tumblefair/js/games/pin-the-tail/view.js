@@ -6,6 +6,7 @@
 // move it, DONE to lock. Reveal: the animal is back WITH its tail, and every pin in its seat colour with its name.
 import { esc, chip } from '../../client/gamehud.js';
 import { ANIMALS, BW, BH } from './sim.js';
+import { snowOverlay } from '../../client/winter.js';
 
 const INK = '#0d2228';
 const O = (w = 1.4) => `stroke="${INK}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
@@ -111,6 +112,10 @@ const SCENE = {
   garden: { ground: '#2f5e48', sky: '#1d2550', line: '#23473a', edge: 'stars', night: true },
   snow: { ground: '#eef5fb', sky: '#bcd9ee', line: '#cfe1ef', edge: 'pines' },
 };
+/** Winter Fair (M6): snow over any scene — a frosty wash, snow along the top strip, drifts in the corners. Looks only. */
+const FROST = `<rect width="${BW}" height="${BH}" fill="#f4f9ff" opacity=".42"/><path d="M0 10 ${Array.from({ length: 16 }, (_, i) => `q5 ${i % 2 ? 3 : 2} 10 0`).join(' ')} V13 H0 Z" fill="#fff"/>
+  <path d="M0 ${BH} V${BH - 12} q14 -6 30 2 q10 6 20 10 Z M${BW} ${BH} V${BH - 14} q-16 -6 -34 4 q-8 5 -16 10 Z" fill="#fff" opacity=".9"/>
+  ${Array.from({ length: 26 }, (_, i) => `<circle cx="${(i * 47) % BW + 3}" cy="${(i * 29) % (BH - 16) + 14}" r="${0.6 + (i % 3) * 0.35}" fill="#fff"/>`).join('')}`;
 function sceneSvg(id) {
   const S = SCENE[id] || SCENE.paddock, n = Math.ceil(BW / 10);
   let edge = '';
@@ -148,7 +153,8 @@ function animalSvg(a, i, withTail = false, starred = false) {
 
 export function createView(ctx) {
   const { ui, players, me, init } = ctx, watching = me == null;
-  const byPid = new Map(players.map(p => [p.pid, p]));
+  const byPid = new Map(players.map(p => [p.pid, p])), WN = ctx.season === 'winter';
+  const scene = id => sceneSvg(id) + (WN ? FROST : '');
   ui.innerHTML = `
     <div class="pt-top"><span class="pt-title">Pin the Tail</span><span class="pt-round"></span><span class="clock"><b>--</b></span></div>
     <div class="pt-banner"></div>
@@ -157,7 +163,7 @@ export function createView(ctx) {
         <defs><filter id="pt-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.4"/></filter>
           <radialGradient id="pt-glow"><stop offset="0" stop-color="#fff7b0"/><stop offset=".6" stop-color="#ffd23f" stop-opacity=".7"/><stop offset="1" stop-color="#ffd23f" stop-opacity="0"/></radialGradient></defs>
         <g class="pt-world" style="transform-origin:${BW / 2}px ${BH / 2}px">
-          <g class="pt-scene">${sceneSvg('paddock')}</g>
+          <g class="pt-scene">${scene('paddock')}</g>
           <g class="pt-deco"></g><g class="pt-animals"></g><g class="pt-star"></g>
         </g>
         <g class="pt-marks"></g>
@@ -169,6 +175,7 @@ export function createView(ctx) {
     <p class="pt-note"></p>`;
   const $ = s => ui.querySelector(s);
   const svg = $('.pt-board'), world = $('.pt-world');
+  if (WN) snowOverlay(ui);
   ui.classList.toggle('watching', watching); ui.dataset.phase = 'ready';
   if (me != null) ui.querySelector(`.pt-players [data-pid="${me}"]`)?.classList.add('me');
   let phase = '', round = -1, myPin = null, done = false, timers = [];
@@ -199,7 +206,7 @@ export function createView(ctx) {
   }
   let sceneId = 'paddock';
   function drawDeco(deco, scene) {
-    if (scene && scene !== sceneId) { sceneId = scene; $('.pt-scene').innerHTML = sceneSvg(scene); ui.dataset.scene = scene; }
+    if (scene && scene !== sceneId) { sceneId = scene; $('.pt-scene').innerHTML = sceneSvg(scene) + (WN ? FROST : ''); ui.dataset.scene = scene; }
     $('.pt-deco').innerHTML = (deco || []).map(d => (DECO[d.k] || DECO.flower)(d.x, d.y)).join('');
   }
 

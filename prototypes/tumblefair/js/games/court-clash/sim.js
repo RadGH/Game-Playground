@@ -17,7 +17,7 @@ export const meta = {
   kind: 'arena', min: 1, max: 4, seconds: 75, scoring: 'points', unit: 'points', tags: ['action', 'coop'],
   controls: { stick: true, a: 'Shoot / pass', b: 'Steal / jump' },
   move: { speed: 5.4, accel: 24, carryMul: 0.45, stunDrag: 2.2 },
-  arena: { shape: 'rect', hw: 9, hd: 5.2, wall: true }, pitch: 42, card: 'card-court-clash', css: true,
+  arena: { shape: 'rect', hw: 9, hd: 5.2, wall: true }, pitch: 42, card: 'card-court-clash', css: true, rival: true,
 };
 
 export const RIM = { x: 7.9, y: 2.75 }, REL_Y = 1.75, THREE_R = 5.2, LAYUP_R = 1.7, TAP = 0.22;
@@ -42,14 +42,15 @@ export const WINDUP_SAFE = 1.2;                                     // charging 
 export const CPU_NAMES = [['Dunk', 'Hopper'], ['Swish', 'Hopper']];
 const r2 = v => Math.round(v * 100) / 100;
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
   const L = LEVELS[difficulty] || LEVELS.normal, { hw, hd } = meta.arena, events = [], bodies = new Map();
   const n = players.length;
   // everyone on the court: the players, plus CPU fill-ins (solo: one opponent; 3 players: a teammate for the lone one)
   const A = [];
   for (const p of players) A.push({ pid: p.pid, team: teamOf(p.seat), name: p.name });
   const count = t => A.filter(a => a.team === t).length;
-  if (n === 1) A.push({ pid: null, team: 1 - A[0].team, name: CPU_NAMES[1 - A[0].team][1], cpu: true });
+  // "Rival when alone" off (rivals false): no Hopper — you shoot on your own for the most points
+  if (n === 1) { if (rivals !== false) A.push({ pid: null, team: 1 - A[0].team, name: CPU_NAMES[1 - A[0].team][1], cpu: true }); }
   else for (const t of [0, 1]) if (count(t) === 1 && count(1 - t) === 2) A.push({ pid: null, team: t, name: CPU_NAMES[t][0], cpu: true });
   A.forEach((a, i) => {
     const mates = A.filter(b => b.team === a.team), k = mates.indexOf(a), sx = a.team === 0 ? -1 : 1;
@@ -161,7 +162,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
   }
   function score_(team, pts, by) {
     score[team] += pts; if (by >= 0 && A[by].team === team) A[by].pts += pts;
-    ball.dead = AFTER; ball.shot = null; ball.give = 1 - team;
+    ball.dead = AFTER; ball.shot = null; ball.give = A.some(a => a.team === 1 - team) ? 1 - team : team;     // alone with no rival: the ball comes back to you
     events.push({ e: 'score', team, pts, by });
   }
   return {

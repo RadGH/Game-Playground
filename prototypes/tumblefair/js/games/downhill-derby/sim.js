@@ -16,7 +16,7 @@ export const meta = {
   kind: 'arena', min: 1, max: 4, seconds: 64, scoring: 'points', unit: 'metres', tags: ['action'],
   controls: { stick: true, a: 'Tuck' },
   move: { mode: 'car', speed: 7.2, accel: 2.4, turn: 3.0, grip: 6.5, boostMul: 1.42, slowMul: 0.5, stunDrag: 2.2 },
-  arena: { shape: 'rect', hw: 6.5, hd: 150, wall: true }, pitch: 46, card: 'card-downhill-derby', css: true,
+  arena: { shape: 'rect', hw: 6.5, hd: 150, wall: true }, pitch: 46, card: 'card-downhill-derby', css: true, rival: true,
 };
 export const RULES = {
   startZ: 144, finishZ: -140, countdown: 3, finishWindow: 12, endPause: 1.5,
@@ -67,12 +67,13 @@ export function driver(course, b, { pace = 1, sloppy = 0, tuck = true, t = 0 } =
   return { mx: mx * s, mz: mz * s, b: tuck && straight && pace >= 0.9 ? IN.A : 0 };
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
   const n = players.length, LV = RULES.levels[difficulty] || RULES.levels.normal, course = makeCourse(rng, LV.gap);
   const arena = { ...meta.arena, blocks: course.blocks };
   const bodies = new Map(), carts = new Map();
   const lane = (i, k) => (i - (k - 1) / 2) * 2.5;
-  const nCpu = n === 1 ? 2 : 0, total = n + nCpu;
+  // "Rival when alone" off (rivals false): no CPU carts, you race the hill alone
+  const nCpu = n === 1 && rivals !== false ? 2 : 0, total = n + nCpu;
   players.forEach((p, i) => { const b = makeBody(lane(i, total), RULES.startZ, r2(Math.PI)); b.flags = F.FROZEN; bodies.set(p.pid, b); carts.set(p.pid, { id: p.pid, b, cpu: false }); });
   for (let j = 0; j < nCpu; j++) { const b = makeBody(lane(n + j, total), RULES.startZ, r2(Math.PI)); b.flags = F.FROZEN; carts.set(-1 - j, { id: -1 - j, b, cpu: true, name: RULES.cpu.names[j], pace: LV.cpu - j * 0.04 }); }
   for (const c of carts.values()) Object.assign(c, { wob: 0, stun: 0, air: 0, airT: 0, boost: 0, best: 0, fin: null, wet: false, lastYaw: c.b.yaw, tuck: false });

@@ -10,15 +10,23 @@
 // is a metre away — was the complaint. DODGE (A) now looks at the beam that will reach you first (`incoming`, shared
 // with the view, which shows ▲ HOP / ▼ DUCK over your head for it) and does the right thing: hops a low one, crouches
 // under a high one (0.7 s, longer while held). The skill left is WHEN. B still crouches for keyboards and pads.
+// Expansion 1 / M4 (2026-11-07, still "controls", avg 25 s of 60): the WHEN was a 0.4 s window judged on the server,
+// so a phone 150 ms behind saw HOP NOW! and was zapped anyway, and an early press hopped and landed before the beam came.
+// Now a press is held for you: press any time in the last second before a beam (the cue says PRESS) and the hop goes
+// off at the right moment, a duck stays down until the beam has passed, and a press while crouched hops a low beam
+// that comes next. The skill is reading the pairs and not pressing too early. The middle of the stage is now a solid
+// hub: a spinner's line runs through it, so a player standing there (where a solo game started you!) was touched for
+// the spinner's whole turn and no hop could clear it. Alone, Sparky (a computer player) dodges
+// beside you, and sometimes fluffs one.
 import { makeBody, stepBody, separate, spawnRing, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
 
 export const meta = {
   id: 'laser-limbo', title: 'Laser Limbo', blurb: 'Jump and duck the sweeping lasers — last one standing!',
-  how: ['Lasers sweep the stage: press DODGE just before one reaches you.', 'You hop the orange low beams and duck the purple high ones by yourself.', 'You have 3 lives. Last one standing wins!'],
-  kind: 'arena', min: 1, max: 4, seconds: 60, scoring: 'survival', unit: 'sec', tags: ['action'],
+  how: ['Lasers sweep the stage. When one is coming, tap DODGE.', 'It hops the orange low beams and ducks the purple high ones for you, at the right moment.', 'Tap when the label says PRESS (the last second). 3 lives — last one standing wins!'],
+  kind: 'arena', min: 1, max: 4, seconds: 60, scoring: 'survival', unit: 'sec', tags: ['action'], rival: true,
   controls: { stick: true, a: 'Dodge' }, move: { speed: 5.6, accel: 30, carryMul: 0.4, stunDrag: 3 },
-  arena: { shape: 'circle', r: 7, wall: true }, pitch: 58, card: 'card-laser-limbo', css: true,
+  arena: { shape: 'circle', r: 7, wall: true, posts: [{ x: 0, z: 0, r: 0.9 }] }, pitch: 58, card: 'card-laser-limbo', css: true,
 };
 
 export const LOW = 0, HIGH = 1, SWEEP = 0, SPIN = 1;
@@ -27,6 +35,8 @@ export const RULES = {
   clear: 0.28,
   duckMin: 0.3,                            // a tap of DUCK still crouches you this long
   duckTap: 0.7, look: 1.4,                 // DODGE under a high beam crouches you this long; it looks this far ahead (s)
+  press: 1.0,                              // M4: a press this long (or less) before a beam counts: the dodge is held for it
+  hopAt: 0.2, duckPast: 0.4, duckMax: 1.9, // a held hop goes off when the beam is this far (s) away; a duck lasts until it is past
   beamW: 0.32,                             // how close (centre of body to the beam's line) counts as touching
   start: 1.6,                              // the first beam (s)
   everyStart: 2.7, everyEnd: 1.05,         // seconds between beams at the start / at the end
@@ -37,9 +47,13 @@ export const RULES = {
   spinFrom: 9,                             // spinners join in after 9 s
   edge: 1.3,                               // a sweep starts and ends this far past the rim
   lives: 3, safe: 1.6,                     // zaps you can take; seconds of blinking safety after one
+  // Sparky, the computer player (alone only): presses this long before a beam, and misses this share of them
+  cpu: { lead: [0.25, 0.8], miss: { easy: 0.3, normal: 0.17, hard: 0.08 } },
 };
+export const CPU_NAME = 'Sparky';
 const SPEED = { easy: 0.85, normal: 1, hard: 1.15 };
 const r2 = v => Math.round(v * 100) / 100;
+const DT_ = 0.05;
 /** How hard the lasers are `t` seconds in: seconds between beams, sweep speed (m/s), spinner speed (rad/s). */
 export function pace(t, difficulty = 'normal') {
   const k = Math.min(1, Math.max(0, t / meta.seconds)), mul = SPEED[difficulty] ?? 1, L = (a, b) => a + (b - a) * k;
@@ -78,21 +92,28 @@ export function incoming(list, x, z, horizon = RULES.look) {
   return best;
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
-  const n = players.length, bodies = new Map(), spawns = spawnRing(n, n === 1 ? 0 : 3.4), R = meta.arena.r;
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
+  const n = players.length, solo = n === 1, sparky = solo && rivals !== false, bodies = new Map(), spawns = spawnRing(sparky ? 2 : n, solo ? 2.8 : 3.4), R = meta.arena.r;   // "Rival when alone" off: no Sparky
+  const D = RULES.cpu.miss[difficulty] != null ? difficulty : 'normal';
   players.forEach((p, i) => bodies.set(p.pid, makeBody(spawns[i].x, spawns[i].z, spawns[i].yaw)));
-  const P = new Map(players.map(p => [p.pid, { prevB: 0, hop: 0, cool: 0, duck: 0, aDuck: false, out: false, outStep: -1, alive: 0, lives: RULES.lives, safe: 0 }]));
+  const fresh = () => ({ prevB: 0, hop: 0, cool: 0, duck: 0, aDuck: false, out: false, outStep: -1, alive: 0, lives: RULES.lives, safe: 0, hopIn: -1 });
+  const P = new Map(players.map(p => [p.pid, fresh()]));
+  // Sparky: a body of its own, zapped by the same beams, pressing the same DODGE (never in `bodies`: the room sends those)
+  const cpu = sparky ? { body: makeBody(spawns[1].x, spawns[1].z, spawns[1].yaw), s: fresh(), plan: new Map(), wander: 0, tx: spawns[1].x, tz: spawns[1].z } : null;
+  const bodyOf = id => (id === 'cpu' ? cpu.body : bodies.get(id));
+  const stOf = id => (id === 'cpu' ? cpu.s : P.get(id));
+  const allIds = () => [...players.map(p => p.pid), ...(cpu ? ['cpu'] : [])];
   let beams = [], bid = 0, next = RULES.start, time = meta.seconds, elapsed = 0, stepNo = 0, over = false;
   const events = [];
-  const standing = pid => !P.get(pid).out;
+  const standing = pid => !stOf(pid).out;
   const living = () => players.filter(p => standing(p.pid));
 
   function zap(pid, beam) {
-    const s = P.get(pid), b = bodies.get(pid);
+    const s = stOf(pid), b = bodyOf(pid);
     if (s.safe > 0) return;
     s.lives--;
     if (s.lives > 0) { s.safe = RULES.safe; events.push({ e: 'zap', pid, h: beam.h, x: r2(b.x), z: r2(b.z), lv: s.lives }); return; }
-    s.out = true; s.outStep = stepNo; s.hop = 0; s.duck = 0;
+    s.out = true; s.outStep = stepNo; s.hop = 0; s.duck = 0; s.hopIn = -1;
     b.flags = F.OUT; b.y = 0; b.vx = b.vz = 0;
     events.push({ e: 'zap', pid, h: beam.h, x: r2(b.x), z: r2(b.z), lv: 0 });
   }
@@ -108,35 +129,59 @@ export function create({ rng, players, difficulty = 'normal' }) {
     const a = addBeam(kind, h);
     if (elapsed >= RULES.pairFrom && rng.chance(RULES.pairChance)) addBeam(SWEEP, rng.chance(0.6) ? 1 - h : h, a);
   }
+  const hopNow = (pid, s, b) => { s.hop = RULES.hop; s.hopIn = -1; b.flags |= F.AIR; b.flags &= ~F.CARRY; s.duck = 0; s.aDuck = false; events.push({ e: 'hop', pid }); };
+  const crouch = (pid, b) => { if (!(b.flags & F.CARRY)) events.push({ e: 'duck', pid }); b.flags |= F.CARRY; };
+  /** DODGE: the beam that reaches you first decides. A high one: duck, and stay down until it has passed. A low one:
+   *  hop now if it is close, else hold the hop and let it go off when the beam is RULES.hopAt away. */
+  function dodge(pid, s, b) {
+    const nx = incoming(beams, b.x, b.z, Math.max(RULES.look, RULES.press));
+    if (nx?.beam.h === HIGH) {
+      if (b.flags & F.AIR) return;
+      crouch(pid, b); s.duck = Math.min(RULES.duckMax, Math.max(RULES.duckTap, nx.t + RULES.duckPast)); s.aDuck = true; s.hopIn = -1;
+    } else if (nx && nx.t > RULES.hopAt + 0.15 && nx.t <= RULES.press) { s.hopIn = nx.t - RULES.hopAt; events.push({ e: 'ready', pid, to: pid }); }
+    else if (!(b.flags & F.AIR) && s.cool <= 0 && (nx || !(b.flags & F.CARRY))) hopNow(pid, s, b);    // crouched with nothing coming: stay down
+  }
+  function control(pid, inp) {
+    const b = bodyOf(pid), s = stOf(pid);
+    const bits = inp?.b | 0, pressA = (bits & IN.A) && !(s.prevB & IN.A); s.prevB = bits;
+    if (!s.out) {
+      const air = !!(b.flags & F.AIR);
+      if (bits & IN.B && !air) { crouch(pid, b); s.duck = Math.max(s.duck, RULES.duckMin); s.hopIn = -1; }
+      if (bits & IN.A && !pressA && s.aDuck && (b.flags & F.CARRY)) s.duck = Math.max(s.duck, RULES.duckMin);    // DODGE held under a high beam: stay down
+      if (pressA) dodge(pid, s, b);
+      if (!(b.flags & F.CARRY)) s.aDuck = false;
+    }
+    stepBody(b, inp, meta.move, meta.arena);
+  }
+  // Sparky: once per beam, decide whether it will dodge it (and how early); amble about between beams
+  function cpuInput() {
+    const c = cpu, b = c.body; if (c.s.out) return null;
+    let press = false;
+    const nx = incoming(beams, b.x, b.z, RULES.press);
+    if (nx) {
+      let plan = c.plan.get(nx.beam.id);
+      if (!plan) { plan = { lead: rng.range(RULES.cpu.lead[0], RULES.cpu.lead[1]), miss: rng.chance(RULES.cpu.miss[D]), done: false }; c.plan.set(nx.beam.id, plan); }
+      if (!plan.done && !plan.miss && nx.t <= plan.lead) { press = true; plan.done = true; }
+    }
+    c.wander -= DT_;
+    if (c.wander <= 0 || Math.hypot(c.tx - b.x, c.tz - b.z) < 0.4) { c.wander = rng.range(1.5, 3.5); const a = rng.range(0, Math.PI * 2), r = rng.range(2, R - 2.2); c.tx = Math.cos(a) * r; c.tz = Math.sin(a) * r; }
+    const dx = c.tx - b.x, dz = c.tz - b.z, d = Math.hypot(dx, dz) || 1, k = d > 0.4 ? 0.45 : 0;
+    return { mx: dx / d * k, mz: dz / d * k, b: press ? IN.A : 0 };
+  }
   return {
     bodies, events,
-    init: () => ({ r: R, left: Math.ceil(time) }),
-    input(pid, inp) {
-      const b = bodies.get(pid), s = P.get(pid); if (!b || over) return;
-      const bits = inp?.b | 0, pressA = (bits & IN.A) && !(s.prevB & IN.A); s.prevB = bits;
-      if (!s.out) {
-        const air = !!(b.flags & F.AIR);
-        const crouch = () => { if (!(b.flags & F.CARRY)) events.push({ e: 'duck', pid }); b.flags |= F.CARRY; };
-        if (bits & IN.B && !air) { crouch(); s.duck = Math.max(s.duck, RULES.duckMin); }
-        if (bits & IN.A && !pressA && s.aDuck && (b.flags & F.CARRY)) s.duck = Math.max(s.duck, RULES.duckMin);    // DODGE held under a high beam: stay down
-        if (pressA && !air && !(b.flags & F.CARRY) && s.cool <= 0) {
-          // DODGE: the beam that reaches you first decides — duck a high one, hop anything else (or nothing coming)
-          const next = incoming(beams, b.x, b.z);
-          if (next?.beam.h === HIGH) { crouch(); s.duck = RULES.duckTap; s.aDuck = true; }
-          else { s.hop = RULES.hop; b.flags |= F.AIR; events.push({ e: 'hop', pid }); }
-        }
-        if (!(b.flags & F.CARRY)) s.aDuck = false;
-      }
-      stepBody(b, inp, meta.move, meta.arena);
-    },
+    init: () => ({ r: R, cpu: cpu ? CPU_NAME : null, left: Math.ceil(time) }),
+    input(pid, inp) { if (!bodies.has(pid) || over) return; control(pid, inp); },
     step(dt) {
       if (over) return;
       stepNo++; elapsed += dt;
-      separate([...bodies].filter(([pid]) => standing(pid)).map(([, b]) => b));
+      if (cpu) control('cpu', cpuInput());
+      separate(allIds().filter(standing).map(bodyOf));
       // bodies: hops and crouches (crouch = F.CARRY, which stepBody slows by move.carryMul)
-      for (const p of players) {
-        const s = P.get(p.pid), b = bodies.get(p.pid); if (s.out) continue;
+      for (const pid of allIds()) {
+        const s = stOf(pid), b = bodyOf(pid); if (s.out) continue;
         if (s.cool > 0) s.cool -= dt;
+        if (s.hopIn >= 0) { s.hopIn -= dt; if (s.hopIn <= 0 && !(b.flags & F.AIR)) hopNow(pid, s, b); }
         if (s.safe > 0) s.safe -= dt;
         if (s.hop > 0) {
           s.hop -= dt; const t = 1 - Math.max(0, s.hop) / RULES.hop; b.y = r2(4 * RULES.hopH * t * (1 - t));
@@ -148,11 +193,11 @@ export function create({ rng, players, difficulty = 'normal' }) {
       // beams: move, then zap anyone the line touched or passed over this step
       for (const beam of beams) {
         if (beam.warn > 0) { beam.warn -= dt; continue; }
-        const before = new Map(); for (const p of players) if (standing(p.pid)) { const b = bodies.get(p.pid); before.set(p.pid, beamDist(beam, b.x, b.z)); }
+        const before = new Map(); for (const pid of allIds()) if (standing(pid)) { const b = bodyOf(pid); before.set(pid, beamDist(beam, b.x, b.z)); }
         if (beam.k === SWEEP) { beam.s += beam.v * dt; if (beam.s > R + RULES.edge) beam.left = 0; }
         else { beam.a += beam.v * dt; beam.left -= Math.abs(beam.v) * dt; }
         for (const [pid, d0] of before) {
-          const b = bodies.get(pid), d1 = beamDist(beam, b.x, b.z);
+          const b = bodyOf(pid), d1 = beamDist(beam, b.x, b.z);
           if ((Math.abs(d1) <= RULES.beamW || Math.sign(d0) !== Math.sign(d1)) && catches(beam.h, b, !!(b.flags & F.CARRY))) zap(pid, beam);
         }
       }
@@ -164,17 +209,21 @@ export function create({ rng, players, difficulty = 'normal' }) {
       const left = living().length;
       if ((n > 1 && left <= 1) || left === 0 || time <= 0) {
         time = Math.max(0, time); over = true;
-        for (const b of bodies.values()) { b.flags |= F.FROZEN; b.vx = b.vz = 0; }
+        for (const b of allIds().map(bodyOf)) { b.flags |= F.FROZEN; b.vx = b.vz = 0; }
         for (const p of living()) events.push({ e: 'win', pid: p.pid });
       }
     },
     state() {
       const sc = {}; for (const p of players) sc[p.pid] = Math.floor(P.get(p.pid).alive);
       // a beam: [id, kind, height, angle, offset, speed, warning left] — the view moves it between updates with the speed
-      return { bm: beams.map(b => [b.id, b.k, b.h, r3(b.a), r2(b.s), r3(b.v), r2(Math.max(0, b.warn))]), sc, out: players.filter(p => !standing(p.pid)).map(p => p.pid), lv: players.map(p => P.get(p.pid).lives), sf: players.filter(p => P.get(p.pid).safe > 0).map(p => p.pid), left: Math.ceil(time) };
+      const g = { bm: beams.map(b => [b.id, b.k, b.h, r3(b.a), r2(b.s), r3(b.v), r2(Math.max(0, b.warn))]), sc, out: players.filter(p => !standing(p.pid)).map(p => p.pid), lv: players.map(p => P.get(p.pid).lives), sf: players.filter(p => P.get(p.pid).safe > 0).map(p => p.pid), left: Math.ceil(time) };
+      // Sparky: [x, z, y, yaw, lives, 1 ducking / 2 hopping, 1 blinking]
+      if (cpu) { const b = cpu.body, s = cpu.s; g.cpu = [r2(b.x), r2(b.z), r2(b.y), r2(b.yaw), s.lives, b.flags & F.AIR ? 2 : b.flags & F.CARRY ? 1 : 0, s.safe > 0 ? 1 : 0, Math.hypot(b.vx, b.vz) > 0.3 ? 1 : 0]; }
+      return g;
     },
     get over() { return over; },
     _setBeams: list => { beams = list; }, _incoming: (x, z) => incoming(beams, x, z),    // tests
+    get cpu() { return cpu && { ...cpu.s, body: cpu.body }; },
     result() {
       const scores = {}, groups = new Map();
       for (const p of players) { const s = P.get(p.pid); scores[p.pid] = Math.floor(s.alive); const k = s.out ? s.outStep : 1e9 + s.lives; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p.pid); }

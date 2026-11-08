@@ -3,7 +3,7 @@
 // fellow with a pink nose, black eyes and pale paws on the rim; a golden mole shines; a BOMB mole is a black ball with
 // a lit fuse on top and angry red eyes. Every player carries a big mallet whose head is their seat colour; BONK swings
 // it down in front. Your own aim spot is a white ring in front of you that turns gold when a mole is under it. Dizzy
-// players have yellow stars circling their heads.
+// players have yellow stars circling their heads. Alone, Gardener Gus (CPU) runs the lawn with a green mallet.
 import { RULES, KIND, aimAt } from './sim.js';
 import { SEATS } from '../../shared/protocol.js';
 import { scoreBar, floatText } from '../../client/gamehud.js';
@@ -56,16 +56,19 @@ export function createView(ctx) {
   // ---- mallets on every player
   const mallets = new Map();
   const handleGeo = new THREE.CylinderGeometry(0.05, 0.05, 1.0, 8).translate(0, 0.5, 0), headGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.55, 14).rotateZ(Math.PI / 2), bandGeo = new THREE.CylinderGeometry(0.235, 0.235, 0.07, 14).rotateZ(Math.PI / 2);
-  for (const p of ctx.players) {
-    const a = ctx.actor(p.pid); if (!a) continue;
+  function giveMallet(pid, a, color) {
     const H = a.height || 1.4, pivot = new THREE.Group(); pivot.position.set(-0.32 * H / 1.4, 0.62 * H / 1.4, 0);
-    const handle = new THREE.Mesh(handleGeo, std('#c98b4a')), head = new THREE.Mesh(headGeo, std(p.color, { roughness: 0.45 }));
+    const handle = new THREE.Mesh(handleGeo, std('#c98b4a')), head = new THREE.Mesh(headGeo, std(color, { roughness: 0.45 }));
     head.position.y = 1.0; head.rotation.y = Math.PI / 2;
     for (const off of [-0.2, 0.2]) { const band = new THREE.Mesh(bandGeo, std('#ffffff')); band.position.set(0, 1.0, off); band.rotation.y = Math.PI / 2; pivot.add(band); }
     pivot.add(handle, head); handle.castShadow = head.castShadow = true;
-    a.body.group.add(pivot); mallets.set(p.pid, { pivot, t: 9 });
+    a.body.group.add(pivot); mallets.set(pid, { pivot, t: 9 });
   }
-  const swingMallet = pid => { const m = mallets.get(pid); if (m) m.t = 0; ctx.actor(pid)?.play('attack', 320); };
+  for (const p of ctx.players) { const a = ctx.actor(p.pid); if (a) giveMallet(p.pid, a, p.color); }
+  // ---- Gardener Gus (solo CPU): a dwarf in a sun hat with a green mallet, drawn from the state's [x, z, yaw, score, speed, dizzy]
+  let gus = null, gusS = null, gusTag = null; const gusP = { x: 0, z: 0, yaw: 0 };
+  if (ctx.init.cpu) ctx.createActor({ look: { race: 'dwarf', seed: 4417 }, costume: 'cos_none', seat: 3 }, { scale: 1 }).then(a => { if (!a) return; gus = a; giveMallet('cpu', a, '#3fae4a'); if (gusS) { gusP.x = gusS[0]; gusP.z = gusS[1]; } gusTag = stage.tag(a.group, { text: ctx.init.cpu, seat: 3 }); });
+  const swingMallet = pid => { const m = mallets.get(pid); if (m) m.t = 0; (pid === 'cpu' ? gus : ctx.actor(pid))?.play('attack', 320); };
   // ---- my aim ring, dizzy stars, effects
   const aim = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.66, 28).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.75, depthWrite: false })); aim.position.y = 0.04; aim.visible = false; group.add(aim);
   const stars = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.12, 0), new THREE.MeshBasicMaterial({ color: '#ffe14d' }), 12); stars.count = 0; group.add(stars);
@@ -73,6 +76,8 @@ export function createView(ctx) {
   const burstGeo = new THREE.IcosahedronGeometry(0.5, 0);
   function burst(x, z, color, size = 1) { const m = new THREE.Mesh(burstGeo, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9, depthWrite: false })); m.position.set(x, 0.6, z); group.add(m); fx.push({ m, t: 0, size }); }
   const bar = scoreBar(ctx, { unit: 'points' });
+  let gusChip = null;
+  if (ctx.init.cpu) { const c = document.createElement('span'); c.className = 'chip'; c.style.cssText = `--seat:${SEATS[3].color};--seat-dark:${SEATS[3].dark || '#333'}`; c.innerHTML = `<i class="face" style="display:grid;place-items:center;font-style:normal;font-weight:900;font-size:12px">GG</i><b class="nm">${ctx.init.cpu}</b><em class="sc">0</em>`; bar.el.insertBefore(c, bar.el.querySelector('.clock')); gusChip = c.querySelector('.sc'); }
   let myCool = 0;
   return {
     state(g) {
@@ -80,6 +85,7 @@ export function createView(ctx) {
       for (const [id, hole, kind, hgt, bonk] of g.ml) { seen.add(id); const m = moles.get(id); if (m) { m.th = hgt; if (bonk && !m.bonk) m.bonk = 1; } else moles.set(id, { hole, kind, h: 0, th: hgt, bonk, squash: bonk ? 1 : 0 }); }
       for (const id of moles.keys()) if (!seen.has(id)) moles.delete(id);
       bar.set(g.sc, g.left);
+      if (g.cpu) { gusS = g.cpu; if (gusChip) gusChip.textContent = g.cpu[3]; }
     },
     input(inp) { if (inp.b & 1 && myCool <= 0 && !(flags.get(ctx.me) & F.STUN)) { myCool = RULES.cool; swingMallet(ctx.me); } },
     event(ev) {
@@ -93,13 +99,16 @@ export function createView(ctx) {
         const m = moles.get(ev.id); if (m) m.bonk = 1;
         burst(ev.x, ev.z, HW ? '#7dff5a' : '#ff8a1f', 2.2); burst(ev.x, ev.z, HW ? '#9b5be0' : '#333333', 1.6);
         floatText(stage, ev.x, 1.6, ev.z, HW ? 'TRICK!' : 'BOOM!', 'bad'); ctx.sfx(ev.pid === ctx.me ? 'out' : 'trap');
-      } else if (ev.e === 'bop') {
-        burst(ev.x, ev.z, '#ffffff', 0.8); floatText(stage, ev.x, 2.2, ev.z, 'BONK!', 'bad'); ctx.sfx('hit');
       }
     },
     pose(pid, f) { flags.set(pid, f); if (f & F.STUN) return 'hit'; return undefined; },
     frame(dt, t) {
       if (myCool > 0) myCool -= dt;
+      if (gus && gusS) {
+        const kk = 1 - Math.exp(-dt * 12); gusP.x += (gusS[0] - gusP.x) * kk; gusP.z += (gusS[1] - gusP.z) * kk;
+        let dy = gusS[2] - gusP.yaw; while (dy > Math.PI) dy -= Math.PI * 2; while (dy < -Math.PI) dy += Math.PI * 2; gusP.yaw += dy * kk;
+        gus.place(gusP.x, 0, gusP.z, gusP.yaw); gus.setSpeed(gusS[4]); gus.setPose(gusS[5] ? 'hit' : 'idle'); gus.update(dt);
+      }
       const k = 1 - Math.exp(-dt * 20), cnt = [0, 0, 0];
       let ni = 0, nb = 0, nr = 0, ne = 0, nh = 0;
       for (const m of moles.values()) {
@@ -147,9 +156,10 @@ export function createView(ctx) {
         const p = ctx.pos(pid); if (!p) continue; const top = (a?.height || 1.4) + 0.2;
         for (let s = 0; s < 3; s++) { const ang = t * 5 + s * 2.09; m4.compose(v.set(p.x + Math.sin(ang) * 0.42, top + Math.sin(ang * 2) * 0.05, p.z + Math.cos(ang) * 0.42), q.setFromEuler(e3.set(0, ang, 0)), sc.setScalar(1)); stars.setMatrixAt(si++, m4); }
       }
+      if (gus && gusS?.[5] && si <= 9) for (let s2 = 0; s2 < 3; s2++) { const ang = t * 5 + s2 * 2.09; m4.compose(v.set(gusP.x + Math.sin(ang) * 0.42, (gus.height || 1.4) + 0.2, gusP.z + Math.cos(ang) * 0.42), q.setFromEuler(e3.set(0, ang, 0)), sc.setScalar(1)); stars.setMatrixAt(si++, m4); }
       stars.count = si; stars.instanceMatrix.needsUpdate = true;
       for (let i = fx.length - 1; i >= 0; i--) { const f = fx[i]; f.t += dt * 3; f.m.scale.setScalar((0.4 + f.t * 1.4) * f.size); f.m.material.opacity = Math.max(0, 0.9 - f.t); if (f.t >= 1) { group.remove(f.m); f.m.material.dispose(); fx.splice(i, 1); } }
     },
-    dispose() { bar.el.remove(); },
+    dispose() { bar.el.remove(); gusTag?.remove(); },
   };
 }

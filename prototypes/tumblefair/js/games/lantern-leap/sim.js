@@ -6,8 +6,9 @@
 //   the water           step (or get sunk) into it and you splash back to the dock: your STREAK is lost
 //   streak              every pickup in a row without a splash; at 4+ each pickup is worth 1 more, at 8+ 2 more
 // You ride along on the pad you stand on. Most points at the bell wins. Solo: the same pond as a score attack.
-import { makeBody, stepBody, spawnRing, F } from '../../shared/arena.js';
+import { makeBody, stepBody, F } from '../../shared/arena.js';
 import { IN } from '../../shared/protocol.js';
+import { makeRng, hashStr } from '../../shared/rng.js';
 
 export const meta = {
   id: 'lantern-leap', title: 'Lantern Leap', blurb: 'Hop across the sinking lily pads and grab the coins!',
@@ -31,12 +32,16 @@ export const RULES = {
 const r2 = v => Math.round(v * 100) / 100;
 export const bonusFor = streak => Math.min(RULES.streakMax, Math.floor(streak / RULES.streakStep));
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ seed = 0, rng, players, difficulty = 'normal' }) {
   const n = players.length, solo = n === 1, S = RULES, { hw } = meta.arena, [drift, timer] = S.pace[difficulty] ?? S.pace.normal;
   const bodies = new Map(), events = [];
   const dockX = i => (n === 1 ? 0 : -4.5 + i * 9 / (n - 1));
-  players.forEach((p, i) => bodies.set(p.pid, makeBody(dockX(i), 5.7, Math.PI)));
-  const P = new Map(players.map((p, i) => [p.pid, { i, prevB: 0, air: 0, fall: 0, ghost: 0, streak: 0, best: 0, score: 0, splashes: 0, pad: -1 }]));
+  // Each player's spot on the dock is shuffled (its own stream from the seed: the game's rng is untouched). It went by
+  // seat, so seat 0 always stood at the far left, where the first lane's pads drift in toward you (seat 0 won 63% of
+  // even games). s.i is the dock spot, used again when you splash back.
+  const turn = makeRng(hashStr('leap-turn:' + seed)), spot = turn.shuffle(players.map((_, i) => i));
+  players.forEach((p, i) => bodies.set(p.pid, makeBody(dockX(spot[i]), 5.7, Math.PI)));
+  const P = new Map(players.map((p, i) => [p.pid, { i: spot[i], prevB: 0, air: 0, fall: 0, ghost: 0, streak: 0, best: 0, score: 0, splashes: 0, pad: -1 }]));
   const pads = [], coins = [];
   let pid_ = 0, cid = 0, time = meta.seconds, over = false, coinT = 0.3;
   const lanes = S.lanes.map(l => ({ z: l.z, v: l.v * drift }));
@@ -109,8 +114,8 @@ export function create({ rng, players, difficulty = 'normal' }) {
       for (let i = pads.length - 1; i >= 0; i--) { const p = pads[i]; if ((p.y < -1.3 && !p.rise) || Math.abs(p.x) > hw + 3.5) pads.splice(i, 1); }
       feedLanes();
       // people: ride your pad, leap, land, splash, come back
-      for (const [pid, b] of bodies) {
-        const s = P.get(pid);
+      for (const pid of turn.shuffle([...bodies.keys()])) {         // shuffled: two reaching one coin on the same tick is a coin toss, not the lower seat
+        const s = P.get(pid), b = bodies.get(pid);
         if (s.ghost > 0) { s.ghost -= dt; if (s.ghost <= 0) b.flags &= ~F.GHOST; }
         if (s.fall > 0) {
           s.fall -= dt; b.y = Math.max(-1.1, b.y - 2.4 * dt);

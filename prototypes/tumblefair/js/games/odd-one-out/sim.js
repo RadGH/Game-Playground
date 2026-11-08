@@ -3,16 +3,23 @@
 // mirrored, smaller, drawn in outline, or a look-alike (a half star among stars). Tap it and the next, bigger grid appears.
 // A wrong tap freezes you for a second. A puzzle is worth (grid side - 2) points: 3x3 = 1, 4x4 = 2, 5x5 = 3…
 // The odd one is never told apart by colour: every picture in a grid is the same colour.
-// Alone it is a score attack with bronze / silver / gold marks.
+// Alone it is a score attack with bronze / silver / gold marks, against Spotty Sue (CPU), who works the same list.
+// M4 (Expansion 1, "buggy"): a second tap while the found grid was still on screen (the next one draws 120 ms later)
+// was judged against the NEW grid and froze you for a "wrong" tap; and a correct tap that reached the server a moment
+// before its own lockout ended was dropped without a word, leaving the phone a grid ahead of the server, so every tap
+// after it was ignored. The server now allows LOCK_SLACK for the trip, and the phone ties every tap to its grid.
 //
 // The whole puzzle list goes out in init(), so a phone shows the next grid the moment you tap (no round trip); the
 // server checks every tap ({ k: puzzle number, i: cell }) against the same list and keeps the score.
 export const meta = {
   id: 'odd-one-out', title: 'Odd One Out', blurb: 'One picture is different. Spot it and tap it, fast!',
   how: ['Every grid has ONE picture that is a little different.', 'It might be turned, flipped, smaller, an outline, or a look-alike.', 'Tap it to get the next grid. Grids grow as you go!', 'A wrong tap freezes you for a second. Most points wins.'],
-  kind: 'ui', min: 1, max: 4, seconds: 48, scoring: 'points', unit: 'points', tags: ['puzzle', 'action'], card: 'card-odd-one-out', css: true,
+  kind: 'ui', min: 1, max: 4, seconds: 48, scoring: 'points', unit: 'points', tags: ['puzzle', 'action'], card: 'card-odd-one-out', css: true, rival: true,
 };
 export const READY_S = 3, PLAY_S = 40, END_S = 3, WRONG_S = 1, PUZZLES = 150;
+export const LOCK_SLACK = 0.35, CPU_NAME = 'Spotty Sue';
+/** Spotty Sue's seconds to find the odd one in a grid of side n: base + n*n * perCell + up to `jit` more. */
+export const CPU = { easy: { base: 1.6, perCell: 0.1, jit: 1.2 }, normal: { base: 1.1, perCell: 0.075, jit: 1 }, hard: { base: 0.7, perCell: 0.05, jit: 0.8 } };
 export const MEDALS = { easy: [8, 18, 30], normal: [10, 25, 40], hard: [14, 32, 50] };
 /** Pictures the grids are made of (Font Awesome names). The ones in SYMMETRIC look the same mirrored, so never 'flip'. */
 export const BASES = ['cat', 'dog', 'fish', 'frog', 'crow', 'dove', 'horse', 'rabbit', 'hippo', 'otter', 'turtle', 'squirrel', 'kiwi-bird', 'duck', 'pig', 'cow', 'sheep', 'spider', 'bee', 'ice-cream', 'apple-whole', 'lemon', 'mushroom', 'umbrella', 'rocket', 'kite', 'hat-wizard', 'tree', 'leaf', 'feather', 'key', 'bell', 'music', 'anchor', 'balloon'];
@@ -73,7 +80,7 @@ const groupsOf = (pids, score) => {
   return [...groups.keys()].sort((a, b) => b - a).map(k => groups.get(k));
 };
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ rng, players, difficulty = 'normal', rivals = true }) {
   const pids = players.map(p => p.pid), solo = pids.length === 1;
   const diff = KINDS[difficulty] ? difficulty : 'normal';
   const puzzles = makePuzzles(rng, diff);
@@ -81,26 +88,33 @@ export function create({ rng, players, difficulty = 'normal' }) {
   const lockUntil = Object.fromEntries(pids.map(p => [p, 0])), misses = Object.fromEntries(pids.map(p => [p, 0]));
   let phase = 'ready', left = READY_S, t = 0, over = false;
   const events = [];
+  const C = CPU[diff], cpuIn = n => C.base + n * n * C.perCell + rng.range(0, C.jit);
+  const cpu = solo && rivals !== false ? { at: 0, score: 0, next: cpuIn(puzzles[0].n) } : null;
   return {
     events,
-    init: () => ({ puzzles, solo, diff, play: PLAY_S, wrong: WRONG_S, medals: MEDALS[diff] }),
+    init: () => ({ puzzles, solo, diff, play: PLAY_S, wrong: WRONG_S, medals: MEDALS[diff], cpu: cpu ? CPU_NAME : null }),
     act(pid, a, d) {
       if (a !== 'tap' || phase !== 'play' || !pids.includes(pid) || !d || typeof d !== 'object') return;
       const { k, i } = d, P = puzzles[at[pid]];
-      if (k !== at[pid] || !P || !Number.isInteger(i) || i < 0 || i >= P.n * P.n) return;
-      if (t < lockUntil[pid] - 0.15) return;                  // frozen (a little slack for the phone's own clock)
+      if (!P || !Number.isInteger(i) || i < 0 || i >= P.n * P.n) return;
+      // a phone that is on another grid than the server (a tap was dropped) is told where it really is
+      if (k !== at[pid]) { if (Number.isInteger(k) && k > at[pid]) events.push({ e: 'sync', to: pid, k: at[pid] }); return; }
+      if (t < lockUntil[pid] - LOCK_SLACK) { events.push({ e: 'sync', to: pid, k: at[pid] }); return; }   // frozen (slack for the trip)
       if (i === P.o) { score[pid] += pointsFor(P.n); at[pid]++; events.push({ e: 'found', pid, k }); }
       else { lockUntil[pid] = t + WRONG_S; misses[pid]++; events.push({ e: 'miss', pid, k, i }); }
     },
     step(dt) {
       if (over) return;
-      if (phase === 'play') t += dt;
+      if (phase === 'play') {
+        t += dt;
+        if (cpu && t >= cpu.next) { cpu.score += pointsFor(puzzles[cpu.at].n); events.push({ e: 'found', pid: 'cpu', k: cpu.at }); cpu.at++; cpu.next = t + cpuIn(puzzles[cpu.at].n); }
+      }
       left -= dt; if (left > 1e-9) return;
       if (phase === 'ready') { phase = 'play'; left = PLAY_S; }
       else if (phase === 'play') { phase = 'end'; left = END_S; }
       else over = true;
     },
-    state: () => ({ phase, left: Math.max(0, Math.ceil(left)), scores: { ...score }, at: { ...at }, lock: phase === 'play' ? pids.filter(p => t < lockUntil[p]) : [] }),
+    state: () => ({ phase, left: Math.max(0, Math.ceil(left)), scores: { ...score }, at: { ...at }, lock: phase === 'play' ? pids.filter(p => t < lockUntil[p]) : [], ...(cpu ? { cpu: { at: cpu.at, score: cpu.score } } : {}) }),
     get over() { return over; },
     result: () => ({ order: groupsOf(pids, score), scores: { ...score }, unit: meta.unit }),
     _debug: { puzzles, at, misses },

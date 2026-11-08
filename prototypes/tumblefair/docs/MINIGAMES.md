@@ -129,7 +129,7 @@ gets the same value as `ctx.season`; the game's `ui` element also carries the cl
   y: groundHeight, mist: false }` from `createView`, or `halloween: false` to dress the arena yourself.
 - **A holiday-only game**: `meta.season: 'halloween'` (it is offered only while the season is on) and `tags: [..., 'holiday']`.
 - Family friendly: spooky-cute, never scary (round faces, smiles, no teeth or blood).
-- **Winter** (Expansion 1 M6): `season === 'winter'` (December 1 - January 6, or `?holiday=winter` to preview). Kit:
+- **Winter** (Expansion 1 M6): `season === 'winter'` (November 1 - January 6, or `?holiday=winter` to preview). Kit:
   `js/client/winter.js` — `dressWinter` (automatic for arena games; steer with `winter: {…}` or `winter: false` from
   createView), `snowfall`, `snowOverlay(ui)` for screen games, `snowmanGeo`, `treeGeo`, `giftGeo`. A winter-only game:
   `meta.season: 'winter'`. Add a reskinned game's season check to `tests/winter.test.js`.

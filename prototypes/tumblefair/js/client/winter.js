@@ -1,5 +1,5 @@
 // Winter Fair (Expansion 1, M6, 2026-11-07): the shared snowy kit, used only while ctx.season === 'winter'
-// (December 1 to January 6 in js/shared/seasons.js, or a host's preview). The winter twin of js/client/halloween.js.
+// (November 1 to January 6 in js/shared/seasons.js, or a host's preview). The winter twin of js/client/halloween.js.
 //   * dressWinter(ctx, opts) — the dressing every ARENA game gets for free (play.js calls it): a crisp cold light (the
 //     stage's two lights are TINTED and nudged, never switched off, and put back exactly on dispose), a pale winter sky,
 //     a snow blanket that only lies OUTSIDE the play area, little snowmen and snowy evergreens round the edges, and

@@ -2,6 +2,14 @@
  "_doc": "Player-facing changelog for Tumblefair, newest first (shared/whats-new.js reads it). Append one entry at EVERY publish: plain language, what players will notice, no file names. `id` is stable and unique (date, plus a letter for a second publish that day).",
  "entries": [
   {
+   "id": "2026-11-08",
+   "date": "2026-11-08",
+   "title": "The Winter Fair is open early",
+   "items": [
+    "❄️ The Winter Fair starts now instead of December 1: the snowy board, 8 winter games (including the Frost Giant boss), winter versions of favourites and 12 winter costumes in the shop. It runs until January 6."
+   ]
+  },
+  {
    "id": "2026-11-07",
    "date": "2026-11-07",
    "title": "Expansion: The Fair Comes Alive",

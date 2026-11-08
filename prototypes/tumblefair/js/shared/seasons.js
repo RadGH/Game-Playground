@@ -7,14 +7,14 @@
 //   * every minigame is created with `season` (null or an id) and may reskin itself (pumpkins for balloons…);
 //     the browser gets the same value as `ctx.season`, and the page sets body[data-season] for themed menus.
 // To add a holiday: add a row here, give its content `season: '<id>'`, add its body[data-season] styles.
-// Winter Fair (Expansion 1, M6, 2026-11-07): `winter`, December 1 to January 6 (the range wraps past New Year).
+// Winter Fair (Expansion 1, M6, 2026-11-07): `winter`, November 1 to January 6 (the range wraps past New Year; owner 2026-11-08 moved the start from Dec 1 to Nov 1).
 // Preview (owner): open the page with `?holiday=winter` (or any season id, or `off`): the host's lobby then shows a
 // "Holiday preview" row that forces that season for the room (games, reskins, board, menus) on any day of the year,
 // and the costume shop lets you TRY ON that season's costumes (buying and wearing them still follows the date).
 // Dates are month/day, inclusive, in the SERVER's local time for the room (the browser's for its own menus).
 export const SEASONS = [
   { id: 'halloween', name: 'Halloween', from: [10, 1], to: [10, 31] },
-  { id: 'winter', name: 'Winter Fair', from: [12, 1], to: [1, 6] },
+  { id: 'winter', name: 'Winter Fair', from: [11, 1], to: [1, 6] },
   // planned, not built yet:
   // { id: 'valentines', name: "Valentine's", from: [2, 7], to: [2, 14] },
 ];

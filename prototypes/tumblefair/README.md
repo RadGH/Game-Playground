@@ -1462,17 +1462,17 @@ offer a short match, show how far through you are, and make the next match one t
 
 Why: visits fell from ~21 a day to 1-4 once Halloween ended (EXPANSION-1.md). A second holiday, built the same way.
 
-- **The season:** `js/shared/seasons.js` has a `winter` row, "Winter Fair", **December 1 to January 6** (the range wraps
+- **The season:** `js/shared/seasons.js` has a `winter` row, "Winter Fair", **November 1 to January 6** (the range wraps
   past New Year; `seasonByDate` already handled that). Halloween is unchanged (October 1-31).
 - **The host's holiday box:** the old "Halloween mode" box is now "<holiday> mode" for whichever holiday is on — the date's
-  one, or a forced one (`r.season || r.dateSeason`), so in December it reads "Winter Fair mode". Ticked = only that
+  one, or a forced one (`r.season || r.dateSeason`), so from November it reads "Winter Fair mode". Ticked = only that
   holiday's minigames; unticked = they are mixed in.
 - **How the owner previews winter on any day:** open the page with **`?holiday=winter`** (or `?holiday=halloween`,
   `?holiday=off`; `previewFromUrl` in seasons.js). The page's menus go wintry at once. When that page hosts a room, it
   sets the room's `holiday` option to that season (the dev/test option that already existed) and shows a **Holiday
   preview** row in the lobby (By the date / Halloween / Winter Fair / Off), so the whole room — games, reskins, board,
   intro ribbon — is winter. The costume shop on that page also lets you TRY ON the winter costumes; buying and wearing
-  them still follows the date (the server refuses outside December 1 - January 6). Example:
+  them still follows the date (the server refuses outside November 1 - January 6). Example:
   `http://<LAN-IP>:8483/prototypes/tumblefair/?holiday=winter`. Joiners need no flag.
 - **The board:** in winter (`js/client/boardview.js` + `js/client/winter.js` `boardSnow`) snow falls over the board,
   snowy evergreens stand round its edge, the skirt is snow, and the Mud Puddle pads are icy blue. A board with a painted

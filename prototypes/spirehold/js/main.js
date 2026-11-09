@@ -190,7 +190,6 @@ function spellButton(id) {
   if (id === 'ward' || id === 'quake') return tryCast(id, 0, 0);
   if (app.aiming === id) { app.aiming = null; app.R.aim = null; const at = autoTarget(G, B, id) || densest(B, S.radius || 70) || { x: 0, y: -200 }; return tryCast(id, at.x, at.y); }
   app.aiming = id; app.R.aim = { x: app.mouse?.x ?? 0, y: app.mouse?.y ?? -200, r: S.radius || 40, color: '#ffd080' };
-  toast(COARSE ? `Tap the field to cast ${S.name} (tap the button again to aim at the thickest crowd).` : `Click to cast ${S.name}. Right-click to cancel.`);
 }
 function tryCast(id, x, y) {
   const why = castSpell(app.G, app.B, id, x, y);

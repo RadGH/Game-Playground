@@ -3,7 +3,7 @@
 
 import { NAME_PARTS, REALMS, LEGACY, RESEARCH } from './data.js';
 import { rng, hash } from './rand.js';
-import { touch, bon, wallMax } from './rules.js';
+import { touch, bon, wallMax, slotsOf } from './rules.js';
 
 export const SAVE_KEY = 'spirehold.save';
 export const SAVE_VERSION = 1;
@@ -26,6 +26,7 @@ export function newGame({ seed = 1, now = Date.now(), name = null, realm = 'gree
     rates: { gold: 0, lore: 0, xp: 0, kills: 0 },
     deeds: keep.deeds || {},
     news: [],
+    spread: 1,
   };
   // Kept Notes: a share of research ranks carries into each new realm.
   if (keep.research) {
@@ -54,6 +55,12 @@ export function foundRealm(G, { realm, crowns, seed, now = Date.now() }) {
   return N;
 }
 
+/** Space the towers evenly round the wall. */
+export function evenOutTowers(G) {
+  const n = slotsOf(G); const ts = [...G.towers].sort((a, b) => a.slot - b.slot); if (!ts.length) return;
+  ts.forEach((t, i) => { t.slot = Math.round(i * n / ts.length) % n; });
+}
+
 /** Remove runtime-only fields before writing. */
 export function serialize(G) { return JSON.stringify(G); }
 export function deserialize(text) {
@@ -63,6 +70,8 @@ export function deserialize(text) {
   const d = newGame({ seed: G.seed || 1, now: G.lastSeen || Date.now() });
   for (const k of Object.keys(d)) if (G[k] === undefined) G[k] = d[k];
   for (const k of ['totals', 'city', 'wall', 'wave', 'guild', 'spells', 'rates']) G[k] = { ...d[k], ...G[k] };
+  // Saves from before towers kept their bearing when the wall widened have them bunched at the top: space them out once.
+  if (!G.spread) { evenOutTowers(G); G.spread = 1; }
   G.v = SAVE_VERSION; touch(G);
   return G;
 }

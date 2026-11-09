@@ -2,6 +2,7 @@
 // Each sheet is built once and then refreshed in place; it is rebuilt only when its shape changes (sig()).
 
 import { TOWERS, LANDMARKS, SCHOOLS, RESEARCH, RELICS, RARITY, RARITY_COLOR, LEGACY, REALMS, CLASSES, RACES, TRAITS, LENGTHS, RANK_NAMES, DMG_INFO, SPELLS, SPELL_ORDER, CITY_TITLES } from '../sim/data.js';
+import { researchEffect } from '../sim/research-fx.js';
 import {
   towerStats, towerCost, towerUnlocked, branchDue, slotsOf, wallCost, wallMax, wallRegen, landmarkCost, popCap, taxRate, cityXpNeed, ringOf,
   mageSlots, mageHireCost, mageLvlCost, mageDmg, researchCost, researchOpen, legacyCost, crownsFor, bon, questOdds, oddsWord, questReward, advPower, advXpNeed, TAG_WORDS,
@@ -9,6 +10,7 @@ import {
 } from '../sim/rules.js';
 import {
   buildTower, upgradeTower, chooseBranch, sellTower, upgradeWall, upgradeLandmark, hireMage, levelMage, dismissMage, buyResearch, buyLegacy, levelRelic, newRealm, realmOpen, cityTitle, maxAffordable,
+  bestEmptySlot,
 } from '../sim/game.js';
 import { suggestParty, sendQuest, recallQuest, hire, hireCost, dismiss, revive, reviveCost, rosterCap, isFree, refreshBoard, rerollCost, relicLevelCost, lenOdds, questDuration } from '../sim/guild.js';
 import { el, btn, fmt, pct, dur, toast, modal, tip } from './dom.js';
@@ -90,7 +92,7 @@ function defend(app, body, ups) {
     row.append(buyBtn(ups, '+1', () => branchDue(t) >= 0 ? null : '◉ ' + fmt(towerCost(t.type, t.lvl + 1, G)), () => branchDue(t) < 0 && G.gold >= towerCost(t.type, t.lvl + 1, G), () => upgradeTower(G, t.slot, 1), 'small good'));
     body.append(row);
   }
-  if (empty) body.append(el('div', { class: 'row' }, btn('Build in the next empty spot', () => { for (let s = 0; s < slotsOf(G); s++) if (!G.towers.some(t => t.slot === s)) { app.sel = s; app.sheetDirty = true; return; } }, 'primary')));
+  if (empty) body.append(el('div', { class: 'row' }, btn('Build in the widest gap', () => { const s = bestEmptySlot(G); if (s !== null) { app.sel = s; app.sheetDirty = true; } }, 'primary')));
 }
 
 // ---------------------------------------------------------------- City
@@ -256,6 +258,7 @@ function research(app, body, ups) {
     const card = el('div', { class: 'card' + (open ? '' : ' dim') }, el('h3', {}, r.name), el('div', {}, r.desc));
     if (!open) { card.append(el('div', { class: 'meta' }, 'Needs: ' + r.req.map(id => RESEARCH.find(x => x.id === id).name).join(', '))); body.append(card); continue; }
     card.append(live(ups, () => r.max === 1 ? (rank() ? '<span class="good">Learned</span>' : '') : `Rank <b>${rank()}</b> / ${r.max}`, 'div', { class: 'meta' }));
+    card.append(live(ups, () => { const f = researchEffect(G, r); if (!f) return ''; return (r.max === 1 && !rank() ? '' : `Now: <b>${f.now}</b>`) + (f.next ? `${r.max === 1 && !rank() ? '' : '<br>'}${r.max === 1 ? 'Learn it' : 'Next rank'}: <span class="good">${f.next}</span>` : ''); }, 'div', { class: 'meta fxline' }));
     card.append(buyBtn(ups, () => rank() >= r.max ? 'Done' : r.max === 1 ? 'Learn' : `Study ${bulkName(app.bulk)}`, () => { if (rank() >= r.max) return null; const n = r.max === 1 ? 1 : app.bulk === Infinity ? Math.max(1, affordN(G.lore, i => researchCost(r, rank() + i), r.max - rank()).n) : Math.min(app.bulk, r.max - rank()); return '✎ ' + fmt(bulkCost(n, i => researchCost(r, rank() + i))); }, () => rank() < r.max && G.lore >= researchCost(r, rank()), () => { const w = buyResearch(G, r.id, app.bulk === Infinity ? 1e9 : app.bulk); if (!w) app.sheetDirty = true; return w; }));
     body.append(card);
   }

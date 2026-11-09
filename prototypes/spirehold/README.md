@@ -29,9 +29,9 @@ pacing bot run the real rules.
 ## Pacing (the bot)
 
 `node tools/sim.mjs <hours> [dt] [seed]` plays with a bot (builds, upgrades cheapest, researches, hires, sends quests at
-≥55% odds, casts). `PRESTIGE=1` founds a new realm after an hour without a new best. Results, 2026-11-08: wave ~45 at 1 h,
-~120 at 3 h, the first wall at ~150 around 6–7 h, first realm founded ~7 h; each later realm pushes further thanks to
-multiplying Legacy (realm 2 reached 187). Tune in `TUNE` (rules.js) and `data.js`, then rerun the bot.
+≥55% odds, casts). `PRESTIGE=1` founds a new realm after an hour without a new best. Results, 2026-11-08 (40 h run):
+wave ~97 at 1 h, the first wall around wave 150 at 4–5 h; realm bests then climb 150 → 200 → 250 → 212+ by hour 24,
+each realm faster than the last thanks to multiplying Legacy. Tune in `TUNE` (rules.js) and `data.js`, then rerun the bot.
 
 ## Things worth knowing
 
@@ -42,6 +42,15 @@ multiplying Legacy (realm 2 reached 187). Tune in `TUNE` (rules.js) and `data.js
 - Wave count × `TUNE.crowd` (2): twice the foes at half the health, so a siege looks like a siege. A crowded field
   sends newcomers in bundles (`stack`, drawn ×N) — `B.cap` is 800, 450 on the Light graphics setting.
 - `G._rev` (the bonus cache key) is non-enumerable so it never lands in a save.
+- **Research cards measure, they do not describe.** `js/sim/research-fx.js` `researchEffect(G, r)` gives "Now" and
+  "Next rank" by running the game's own formulas (`wallRegen`, `ditchDps`, `popCap`…) on a read-only stand-in of `G`
+  whose bonus table has that research one rank higher (`atRank`) — so relics, landmarks and Legacy are included and
+  a formula change can never leave a card lying. A new ranked research needs a row in its `SHOW` table (a test fails).
+- **Tower spots keep their bearing.** A tower's position is `slot / slots` round the wall, so when a ring adds spots
+  `keepTowerAngles` rescales every slot (the new spots land in the gaps); `bestEmptySlot` fills the widest gap first
+  (Steward + the Defend button). Saves without `G.spread` are spaced out once on load (`evenOutTowers`).
+- **Sound off closes the AudioContext** (`js/audio.js`): on iPhone a silent-but-open context still stops the
+  player's music. `navigator.audioSession.type = 'ambient'` makes sound-on mix with music too.
 - Player-facing text avoids the banned list (`docs/banned-names.md`): waves are sieges, never "Horde".
 
 ## Tests

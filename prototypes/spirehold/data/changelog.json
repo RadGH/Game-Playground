@@ -1,17 +1,31 @@
 {
- "entries": [
-  {
-   "id": "2026-11-08a",
-   "date": "2026-11-08",
-   "title": "Spirehold opens its gates",
-   "items": [
-    "Found a city that grows by itself and hold its walls against ever bigger sieges.",
-    "Nine kinds of tower, each with two choices of path at levels 10 and 30, and damage that doubles every 25 levels.",
-    "Cast Fireball, Chain Lightning, Frost Bloom, Meteor, Earthshake, Aegis Ward, Arcane Barrage and Skyfall — or let apprentices cast them for you.",
-    "Hire court mages who cast on their own, and adventuring parties who stop at the tavern. Send heroes on quests from five minutes to eight hours: win and they bring back gold, lore, starshards and relics; lose and they come home empty-handed.",
-    "Leave it running on another screen, or close it: the city keeps earning while you are away.",
-    "From wave 100, found a city in a new realm and earn Crowns for bonuses that last forever."
-   ]
-  }
- ]
+  "entries": [
+    {
+      "id": "2026-11-09-research-numbers",
+      "date": "2026-11-09",
+      "title": "Clearer research, tidier screen, quieter phones",
+      "items": [
+        "Every research card now says exactly what it gives a rank, like how much wall mends each second or how much damage the ditch does.",
+        "Each card shows what you have now and what the next rank will give, measured with your relics, landmarks and Legacy included.",
+        "When the wall grows wider, your towers keep their place and the new spots open in the gaps between them, so coverage stays even. Towers in older saves are spaced out once.",
+        "\"Build in the next empty spot\" is now \"Build in the widest gap\", and the Royal Steward builds there too.",
+        "The boss health bar sits under your mana bar instead of over it.",
+        "No more pop-up hint each time you pick a spell.",
+        "With sound off, the game no longer stops music playing on your phone. With sound on, it plays alongside your music."
+      ]
+    },
+    {
+      "id": "2026-11-08a",
+      "date": "2026-11-08",
+      "title": "Spirehold opens its gates",
+      "items": [
+        "Found a city that grows by itself and hold its walls against ever bigger sieges.",
+        "Nine kinds of tower, each with two choices of path at levels 10 and 30, and damage that doubles every 25 levels.",
+        "Cast Fireball, Chain Lightning, Frost Bloom, Meteor, Earthshake, Aegis Ward, Arcane Barrage and Skyfall — or let apprentices cast them for you.",
+        "Hire court mages who cast on their own, and adventuring parties who stop at the tavern. Send heroes on quests from five minutes to eight hours: win and they bring back gold, lore, starshards and relics; lose and they come home empty-handed.",
+        "Leave it running on another screen, or close it: the city keeps earning while you are away.",
+        "From wave 100, found a city in a new realm and earn Crowns for bonuses that last forever."
+      ]
+    }
+  ]
 }

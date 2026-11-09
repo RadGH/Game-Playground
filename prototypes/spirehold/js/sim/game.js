@@ -1,7 +1,7 @@
 // Spirehold — the whole game's tick and every action the player can take.
 // Pure: dt (seconds) and now (ms) are passed in. The UI calls these and draws the result.
 
-import { TOWERS, LANDMARKS, RESEARCH, LEGACY, SCHOOLS, NAME_PARTS, REALMS, RELICS, CITY_TITLES } from './data.js';
+import { TOWERS, LANDMARKS, RESEARCH, LEGACY, SCHOOLS, NAME_PARTS, REALMS, RELICS, CITY_TITLES, ringSlots } from './data.js';
 import { rng, hash } from './rand.js';
 import {
   touch, bon, cityXpNeed, popCap, taxRate, landmarkCost, wallCost, wallMax, towerCost, towerCostN, towerUnlocked, branchDue, ringOf, slotsOf,
@@ -30,11 +30,27 @@ export function tick(G, B, dt, now) {
   G.rates.lore += ((G.lore - before.lore) / dt - G.rates.lore) * k;
   G.lastSeen = now;
 }
+/** A wider wall has more spots: every tower keeps its compass bearing, so the new spots fall in the gaps between them. */
+export function keepTowerAngles(G, oldN, newN) {
+  if (newN <= oldN) return;
+  for (const t of G.towers) t.slot = Math.round(t.slot * newN / oldN) % newN;
+}
+/** The empty spot furthest from any tower (null when the wall is full). */
+export function bestEmptySlot(G) {
+  const n = slotsOf(G); let best = null, bd = -1;
+  for (let s = 0; s < n; s++) {
+    if (G.towers.some(t => t.slot === s)) continue;
+    const d = G.towers.length ? Math.min(...G.towers.map(t => { const k = Math.abs(t.slot - s); return Math.min(k, n - k); })) : n;
+    if (d > bd) { bd = d; best = s; }
+  }
+  return best;
+}
 export function addCityXp(G, xp) {
   G.city.xp += xp;
   while (G.city.xp >= cityXpNeed(G.city.level)) {
     G.city.xp -= cityXpNeed(G.city.level); const ringBefore = ringOf(G.city.level); G.city.level++;
     const ring = ringOf(G.city.level);
+    if (ring > ringBefore) keepTowerAngles(G, ringSlots(ringBefore), slotsOf(G));
     const news = [];
     if (ring > ringBefore) news.push(`The walls are rebuilt wider: ${slotsOf(G)} tower spots.`);
     for (const id in LANDMARKS) if (LANDMARKS[id].city === G.city.level) news.push(`New landmark: ${LANDMARKS[id].name}.`);
@@ -150,11 +166,11 @@ const STEWARD_ORDER = ['archer', 'ballista', 'bombard', 'frost', 'brazier', 'sto
 export function stewardSpend(G, maxBuys = 200) {
   const keep = G.gold * 0.1; let bought = 0;
   const n = slotsOf(G);
-  for (let s = 0; s < n; s++) {
-    if (G.towers.some(t => t.slot === s)) continue;
+  for (let i = 0; i < n; i++) {
+    const s = bestEmptySlot(G); if (s === null) break;
     const counts = {}; for (const t of G.towers) counts[t.type] = (counts[t.type] || 0) + 1;
     const type = STEWARD_ORDER.filter(t => towerUnlocked(G, t)).sort((a, b) => (counts[a] || 0) - (counts[b] || 0))[0];
-    if (type && G.gold - towerCost(type, 1, G) >= keep) { buildTower(G, s, type); bought++; }
+    if (type && G.gold - towerCost(type, 1, G) >= keep) { buildTower(G, s, type); bought++; } else break;
   }
   if (G.stewardPaths !== false) for (const t of G.towers) { const d = branchDue(t); if (d >= 0) chooseBranch(G, t.slot, (t.slot + d) % 2); }
   while (bought < maxBuys) {

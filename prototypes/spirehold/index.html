@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#120e0a">
+<title>Spirehold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Spectral:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../../shared/whats-new.css">
+<link rel="stylesheet" href="../../shared/credits.css">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<canvas id="view" aria-label="The city and the field around it"></canvas>
+
+<section id="title" class="screen hidden">
+  <div class="title-card">
+    <h1>SPIREHOLD</h1>
+    <p class="tag">Your city grows on its own. You hold the walls.</p>
+    <div class="col" id="title-buttons"></div>
+    <div class="row wrap center" id="title-extra"></div>
+  </div>
+</section>
+
+<div id="hud" class="hidden">
+  <div class="topbar">
+    <button class="icon-btn" id="btn-menu" aria-label="Menu">☰</button>
+    <div class="stat gold" id="st-gold" title="Gold">0</div>
+    <div class="stat lore" id="st-lore" title="Lore (for research)">0</div>
+    <div class="stat shard" id="st-shards" title="Starshards">0</div>
+    <div class="grow"></div>
+  </div>
+  <div class="row2">
+    <div class="wavebox" id="wavebox"><b id="wave-name">Wave 1</b><span id="wave-sub"></span><i class="wprog"><i id="wave-prog"></i></i></div>
+    <button class="small" id="btn-auto" title="Push on to the next wave, or hold here and gather gold">Push on</button>
+    <button class="small" id="btn-speed" title="Game speed">1×</button>
+  </div>
+  <div class="bars">
+    <div class="bar wall"><i id="bar-wall"></i><span id="txt-wall">Wall</span></div>
+    <div class="bar mana"><i id="bar-mana"></i><span id="txt-mana">Mana</span></div>
+  </div>
+  <div id="bossbar" class="bossbar hidden"><b id="boss-name"></b><i><i id="boss-hp"></i></i></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="banner" class="banner hidden"></div>
+  <div id="spells" class="spells"></div>
+  <nav id="tabs" class="tabs"></nav>
+  <aside id="sheet" class="sheet hidden"><div class="sheet-head"><h2 id="sheet-title"></h2><div class="grow"></div><button class="small" id="sheet-close" aria-label="Close">✕</button></div><div id="sheet-body" class="sheet-body"></div></aside>
+</div>
+
+<div id="panels"></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

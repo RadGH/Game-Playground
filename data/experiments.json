@@ -740,6 +740,18 @@
    "statusNote": "Playable, live",
    "date": "2026-11-06",
    "tags": ["space", "ship builder", "shooter", "trading"]
+  },
+  {
+   "id": "spirehold",
+   "group": "prototypes",
+   "title": "Spirehold",
+   "href": "prototypes/spirehold/",
+   "folder": "prototypes/spirehold",
+   "summary": "A semi-idle city defence game: the city grows by itself while you hold the walls against ever bigger sieges with towers, court mages and your own spells (meteors, chain lightning, frost), and send hired adventuring parties on quests for gold, lore and relics.",
+   "status": "prototype",
+   "statusNote": "Playable",
+   "date": "2026-11-08",
+   "tags": ["idle", "tower defence", "city", "spells", "adventurers"]
   }
  ]
 }

@@ -251,6 +251,107 @@ the one it drives waits for it (90 s in play, 5 min in the lobby), then everythi
 closes after 5 minutes. A drive of 5 s or more is logged to insights as `played` (key `vehicle`) — the admin feed's ratings
 key is `vehicle`. HTTP: `GET /rooms` (the public list), `/status`, `/healthz`.
 
+## Net contract additions, Expansion 1 M2 "Co-op backbone" (2026-11-09) — nothing above changes meaning
+Spec: docs/EXPANSION-1.md "Contracts (added)". Code: `js/game/profile.js` (pure profile helpers), `js/net/places.js`
+(places, who may go where, shared pay), `js/net/room-core.js`, `server/profiles.mjs` (the server's store), `data/shop.json`.
+Tests: `tests/profile.test.js`, `tests/room-coop.test.js`, the two-client test in `tests/net-room.test.js`.
+
+**Mode `county`** (first in `MODES`; the title's solo chips are County / Flag Run / Sandbox, County on by default).
+`mapFor(mode)` = `'county'` for County, `'classic'` for Flag Run + Sandbox; main.js and the server build the world with
+`generateWorld({ seed, map })` (until the county map lands worldgen ignores `map`). The lobby only offers modes on the
+room's own map (the room refuses `opt mode` across maps: "County is a different map — make a new room for it.").
+
+**Profile** — `{ v:1, gold, owned:{ vehicles, clothes, items, kits }, look, jobs, ach, stats, seen:{ jobs } }`. A new player:
+200 gold, `trail_jeep`, clothes `top:tshirt`, `bottom:jeans`, `shoes:sneakers`, `hat:ball_cap` (clothes are owned as
+`slot:partId`). Keyed `acct:<rgs user id>` (hello carried a ticket the server redeemed), else `dev:<device id>` (hello's
+`device`, the browser's lasting id in localStorage `roverlands.device`), else the tab token; the key is remembered per tab
+token so a reconnect (ticket already spent) keeps it. A guest's device profile MOVES to their account on first sign-in
+when the account has none (never copied: gold cannot be spent twice). Server: one live object per key shared by every
+room, written to `<data>/profiles.json` (`rover` field beside accounts.js's name/look) within 2 s of a change, temp file +
+rename. Solo: localStorage `roverlands.profile`, written at once. Only the room changes it.
+
+Client → server, added:
+* `{ t:'hello', …, device? }` the browser's lasting id (guest profile key).
+* `{ t:'buy', item }` buy one thing; priced by the room from `data/shop.json` (ids unique across the file; `soon: true` = listed,
+  not for sale). Refusals: `deny what:'buy'` with "That is not for sale." / "You already own that." / "You need N more gold." /
+  "Not for sale yet — coming soon." Rate 2/s.
+* `{ t:'go', place, at? }` move to another place (`county | sandbox | moon | station | sky`). County rooms: county <-> sky
+  freely; moon / station only after `core.launch(pid)` (TODO M11: the rocket's referee calls it); Flag Run / Sandbox rooms
+  stay in `sandbox`. Going: out of your seat, the flag dropped, your un-driven bodies handed to someone still in the old
+  place (or nobody — the next to touch them takes them), pin cleared there. Rate 1/s.
+* `{ t:'summon', vehicle, p, yaw? }` call an OWNED vehicle to `p` (within 25 m of you — the client proposes the spot on a
+  road / flat ground). One summoned vehicle per player: the last one is removed if nobody is in it, else it just stays as an
+  ordinary vehicle. Not in Flag Run. Cleared by a reset. Rate 1/s.
+
+Server → client, added:
+* `{ t:'profile', profile, why?, gold?, item? }` to its owner only: on join / reconnect, and on every change (`gold` = the
+  change: +N paid, −price bought; `why` = the job step's words, or `'buy'` with `item`). `net.last.profile` keeps the newest.
+* `{ t:'go', place, at? }` you moved: rebuild the world for `mapOfPlace(place)`; a fresh picture of that place follows
+  (`ents`, a `full` `state`, `broken`, `cut`, flag, pins).
+* `{ t:'summoned', id, vehicle }` your vehicle is out (its `ents` row is already sent).
+* `room.players[]` carry `place`; `ents` rows carry `place`, `pose: { p, q }` for a body with no pad (spawned / summoned — a
+  client that never saw it can put it in the right spot) and `sum: pid` for a summoned one.
+* **Places filter everything**: `state`, `ents`, `broken`, `cut`, `fire`, `horn`, `act`, `crash`, `pin`, `bump` and the flag
+  only reach players who can see that place (`sharesView`: the same place, or county <-> sky — "the sky is the county with
+  you high up"). An `ents` list is only sent to a player when what THEY can see changed. Seats in a body in another place
+  are refused ("That vehicle is somewhere else."). Broken objects and cut wheat are kept per world.
+
+Referee API for later milestones (job referees, M4+): `core.grant(pid, gold, why)` -> gold paid (whole, > 0, at most
+100 000 a grant); `core.payJob({ place, at, vehicle, gold, why })` -> pids paid: everyone seated in the job vehicle or
+within 30 m of the step, in a place that sees it, no watchers — each gets the WHOLE amount (`places.js payees`).
+Test hook: env `ROVERLANDS_TEST_HOOKS=1` opens every place and adds `POST /internal/test/pay`.
+
+## Net contract additions, Expansion 1 M4 "Phone, gold, shops, wardrobe, job registry" (2026-11-09) — nothing above changes meaning
+Spec: docs/EXPANSION-1.md M4 + "Phone". Code: `js/game/jobs/registry.js` (jobs: levels, unlocks, hidden jobs, pay, upgrades,
+the checklist, where "Start" points), `js/game/achievements.js` (check / record / view, the hidden rule),
+`js/game/profile.js` (`stripLook`, `ownedIn`, `CLOTHING_SLOTS`), `js/game/summon-spot.js` (the Garage's spot finder),
+`js/net/room-core.js`; screens `js/client/ui/phone.js`, `js/client/ui/shop.js`; `js/client/thumbs.js`, `js/client/shop-signs.js`.
+Tests: `tests/m4.test.js` (node), `tests/phone.spec.js` (Playwright). The room is handed `jobs` (data/jobs.json) and
+`achievements` (data/achievements.json): the server reads both (and re-reads them every 30 s), solo play passes them
+through `connect({ jobs, achievements })` -> the loopback.
+
+Client → server, added:
+* `{ t:'upgrade', id }` buy a job upgrade (ids unique across data/jobs.json). Refusals `deny what:'upgrade'`: "There is no
+  such upgrade." / "You have not found that job yet." (hidden job not revealed) / "You already have that upgrade." /
+  "You need N more gold." Kept in `profile.jobs[jobId].upgrades` forever. Rate 2/s.
+* `{ t:'stats', metres }` metres DRIVEN (as the driver) since the last report; the page sends one every ~10 s. The room
+  clamps it to 0 .. 120 m/s × the seconds since the last report (the first report may cover 10 s), adds it to
+  `profile.stats.metres` (`moon_metres` on the Moon), and notes every city whose box (`sites.cities[]`: id, x, z, hx, hz)
+  you are standing in (`profile.seen.cities`). Rate 0.25/s, burst 2.
+* `{ t:'me', look }` in a **County** room: the look is worn with OWNED clothes only — never refused: every piece in a
+  clothing slot (`hat top bottom shoes cape accessory decor`) the player does not own (`owned.clothes` 'slot:id') is
+  swapped for one they do (hat / cape / accessory / decor -> 'none'; top / bottom / shoes -> the starting tshirt / jeans /
+  sneakers, or the first owned one), colours kept; a look with no `wear` (the seed's own clothes) gets the plain owned
+  set. Face marks, ears, the face, hair, skin and every colour are free. The same on join. `profile.look` keeps the worn
+  look. Flag Run and Sandbox rooms keep the old free looks.
+
+Server → client, added:
+* `{ t:'ach', ids }` achievements just earned (the profile that follows / came with it has them in `ach`). The room checks
+  after every grant (event `job_paid`, + `coop_pay` when more than one player was paid, + `job_done` from jobDone), buy
+  (`bought_vehicle` / `bought_rocket` / `bought_clothes` / `bought_<kind>`), summon (`summoned`), go (`place_<place>`)
+  and stats report; counts (`gold`, `cities`, `metres`…) are read from the profile. An achievement that is the `reveal` of
+  a hidden job marks that job found (`profile.seen.jobs`).
+* `{ t:'look', look, stripped: ['slot:id'] }` (County) the room swapped those pieces out of your look; `net.last.look`.
+* `{ t:'profile', …, why, gold, item?, job?, level?, first?, ach? }`: `why: 'upgrade'` (with `item` + `job`), `why: 'stats'`
+  (a quiet refresh after a stats report), a job level paid has `job`, `level`, `first: true` the first time.
+
+Referee API, added: `core.jobDone(pid, jobId, level, { at, vehicle, place, gold })` -> `{ ok, paid: [pids] }` |
+`{ ok: false, why }` ("Finish level N-1 first."). Refused when that level is not unlocked for `pid`. Otherwise every payee
+(the same rule as `payJob`: in the job vehicle or within 30 m of `at`, default `pid`'s position; `pid` always included)
+gets the level's pay (`gold`, else `registry.levelPay`: the level's `pay`, the job's `pay.base`, the sum of `steps`, else
+50) with `why` "<Job> · <level title>"; the level is RECORDED for each payee who has it unlocked (each player's own
+progress; a friend helping on a level they have not reached is paid but their ladder does not move). `core.award(pid,
+event)` runs the achievement check by hand (later referees: `{ when: 'fire_out' }`, `{ when: 'patient' }`…).
+
+Levels (registry): level 1 is always open; level N opens once N-1 is done once; `profile.jobs[id] = { level, done,
+upgrades, best }` (`level` = the highest unlocked). Hidden jobs (`hidden: 'Requires: …'`, `reveal: <achievement id>` or
+`'found'`) show as `???` + their `hidden` line until the reveal achievement is earned or the job is done once.
+
+The phone and the shops are client-only screens over these messages (README "Phone + shops"). Keys: **P** / controller
+**LB** / the phone button beside the gold; at a shop door **E** (controller X, phone ENTER) — the seat hint says
+"E — Open the Dealer". (EXPANSION-1.md's "controller Back-hold" became LB: Back is the map, and a press-and-hold is slow
+to find; LB was the one free button.)
+
 ## World contract additions (2026-10-25, world agent) — nothing above changes meaning
 Full detail in `js/world/README-world.md`; the header of `js/world/worldgen.js` is the reference.
 * **`y` is the BASE** of every object (where it meets the ground). The collider centre is `y + lift`, with

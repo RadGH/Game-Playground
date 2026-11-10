@@ -1,4 +1,4 @@
 {
- "_doc": "Vehicles being built for the next batches: physics numbers are tested here (tests/phys-next.test.js) and move to vehicles.json once they have a model. Same format as vehicles.json.",
+ "_doc": "Vehicles being built for the next batches: physics numbers are tested here (tests/phys-next.test.js) and move to vehicles.json once they have a model AND the lead moves them (Expansion 1 M5's batch — tractor, seed_drill, water_bowser, produce_trailer, tow_truck, delivery_van — moved to vehicles.json in M6 Farming; the rocket, landing pod and moon rover in M11; the Scrapper Buggy (raider_buggy) in M8 Rustwild — the list is empty until the next batch). Same format as vehicles.json, plus: tyre.soft, mower, work, towAny (README \"Farm and work vehicles\").",
  "vehicles": []
 }

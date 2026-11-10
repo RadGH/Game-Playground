@@ -6,27 +6,37 @@
 //
 // The token is only a "this is the same browser tab as before" key, so a phone that slept or a refreshed page gets its
 // seat back. Nothing is stored with it; the room forgets it when it closes.
+//
+// Expansion 1 M2: hello also says who the player IS, for their saved profile (gold, what they own): a games.radgh.com
+// ticket (swapped for the user by `redeem`, so the key is `acct:<id>`) or else the browser's lasting `device` id
+// (`dev:<id>`). The key is remembered per tab token, so a reconnect (whose ticket is already used up) keeps the same
+// profile. `profiles` = server/profiles.mjs, `shop` = data/shop.json (or a function returning it).
 import { PROTOCOL, MODES, EMPTY_ROOM_MS, parseFrame, createBuckets, cleanCode, newCode } from '../js/net/protocol.js';
 import { createRoomCore } from '../js/net/room-core.js';
+import { mapFor } from '../js/net/places.js';
 
 export const PUBLIC_LIST_MAX = 30;
 
 /**
- * sitesFor(seed) -> world.sites for that seed (may return a promise: the server builds the world once per seed).
+ * sitesFor(seed, map) -> world.sites for that seed + map ('county' | 'classic'; may return a promise: the server builds
+ * each world once).
  * vehicles = data/vehicles.json (any shape js/net/room-core.js vehicleTable() reads). bests = { 'seed:site': ms }.
  */
 export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.now(), maxRooms = 60, randomToken, log = () => {}, report = () => {},
-  sitesFor = () => ({}), vehicles = {}, bests = {}, defaultSeed = 7 } = {}) {
+  sitesFor = () => ({}), vehicles = {}, bests = {}, defaultSeed = 7, profiles = null, redeem = null, shop = {}, openPlaces = false, jobs = {}, achievements = {} } = {}) {
   const rooms = new Map();                 // code -> { core, conns: Map(pid -> send), made }
   let seedN = seed >>> 0;
   const stats = { sockets: 0, bad: 0, limited: 0, roomsMade: 0 };
   const rand = () => { seedN = (Math.imul(seedN, 1664525) + 1013904223) >>> 0; return seedN / 4294967296; };
+  const keyOfToken = new Map();            // tab token -> profile key (a reconnect's ticket is already spent)
   const token = randomToken || (() => { let s = ''; for (let i = 0; i < 24; i++) s += 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(rand() * 36)]; return s; });
 
   function makeRoom(code, msg, sites) {
     const R = { conns: new Map(), made: now(), core: null, joining: null };
     R.core = createRoomCore({ code, mode: MODES.includes(msg.mode) ? msg.mode : 'flag', seed: msg.seed ?? defaultSeed, flagId: msg.flagId || null, public: !!msg.public, now,
       sites, vehicles: typeof vehicles === 'function' ? vehicles() : vehicles, bests, report,
+      profiles, shop: typeof shop === 'function' ? shop() : shop, openPlaces,
+      jobs: typeof jobs === 'function' ? jobs() : jobs, achievements: typeof achievements === 'function' ? achievements() : achievements,
       // a player who is joining right now has no line registered yet: R.joining carries it for that one call
       send: (pid, m) => { const s = R.conns.get(pid) || R.joining; if (s) s(JSON.stringify(m)); } });
     return R;
@@ -35,14 +45,14 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
   function accept(conn) {
     stats.sockets++;
     const buckets = createBuckets(now);
-    const S = { token: null, code: null, pid: null, busy: false };
+    const S = { token: null, code: null, pid: null, busy: false, key: null };
     const send = obj => conn.send(JSON.stringify(obj));
     const room = () => (S.code ? rooms.get(S.code) : null);
     function enter(R, msg) {
       if (S.code && S.code !== R.core.code) leave();
       const line = d => conn.send(d);
       R.joining = line;
-      let r; try { r = R.core.join({ token: S.token, name: msg.name, look: msg.look, spectate: !!msg.spectate }); } finally { R.joining = null; }
+      let r; try { r = R.core.join({ token: S.token, name: msg.name, look: msg.look, spectate: !!msg.spectate, profileKey: S.key }); } finally { R.joining = null; }
       if (r.err) return send({ t: 'err', code: r.err, msg: r.msg });
       S.code = R.core.code; S.pid = r.pid;
       R.conns.set(r.pid, line);
@@ -60,6 +70,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
       if (msg.t === 'hello') {
         if (msg.v !== PROTOCOL) return send({ t: 'err', code: 'version', msg: 'This page is out of date. Reload it.' });
         S.token = msg.token && /^[A-Za-z0-9_-]{16,64}$/.test(msg.token) ? msg.token : token();
+        S.key = await profileKey(msg, S.token);
         return send({ t: 'welcome', token: S.token, build });
       }
       if (!S.token) return send({ t: 'err', code: 'hello', msg: 'Say hello first.' });
@@ -70,7 +81,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
           let code; do { code = newCode(rand); } while (rooms.has(code));
           S.busy = true;
           let sites;
-          try { sites = await sitesFor(msg.seed ?? defaultSeed); } catch (e) { log('sites.fail', { msg: String(e?.message || e).slice(0, 200) }); sites = {}; }
+          try { sites = await sitesFor(msg.seed ?? defaultSeed, mapFor(msg.mode)); } catch (e) { log('sites.fail', { msg: String(e?.message || e).slice(0, 200) }); sites = {}; }
           S.busy = false;
           const R = makeRoom(code, msg, sites || {});
           rooms.set(code, R); stats.roomsMade++;
@@ -97,6 +108,20 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
       S.code = null; S.pid = null;
     }
     return { message, close, get pid() { return S.pid; }, get code() { return S.code; } };
+  }
+  /** Who this hello is, for the saved profile: the account (a good ticket), else the device, else this tab. */
+  async function profileKey(msg, tok) {
+    const device = typeof msg.device === 'string' && /^[A-Za-z0-9_-]{16,64}$/.test(msg.device) ? 'dev:' + msg.device : null;
+    let key = null;
+    if (msg.ticket && redeem) {
+      let user = null;
+      try { user = await redeem(msg.ticket); } catch { user = null; }
+      if (user?.id) { key = 'acct:' + user.id; profiles?.adopt?.(key, device); }
+    }
+    key ||= keyOfToken.get(tok) || device || 'tok:' + tok;
+    keyOfToken.set(tok, key);
+    if (keyOfToken.size > 5000) keyOfToken.delete(keyOfToken.keys().next().value);
+    return key;
   }
   /** STATE_HZ times a second. Rooms with nobody in them close after EMPTY_ROOM_MS. */
   function step() {

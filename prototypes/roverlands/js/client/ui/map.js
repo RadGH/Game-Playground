@@ -22,12 +22,23 @@ function paintMarkers(c, M, toScreen, { rot = 0, scale = 1, names = {}, clampTo 
   const clamp = clampTo ? (([x, y]) => { const dx = x - clampTo.cx, dy = y - clampTo.cy, m = Math.hypot(dx, dy); return m > clampTo.r ? [clampTo.cx + dx / m * clampTo.r, clampTo.cy + dy / m * clampTo.r, true] : [x, y, false]; }) : (p => [p[0], p[1], false]);
   c.save();
   c.lineJoin = 'round';
+  // combat zones (M8: the Rustwild), a red wash with a dashed edge, under everything else
+  for (const zn of M.zones || []) {
+    if (!zn.poly?.length) continue;
+    c.beginPath(); zn.poly.forEach(([x, z], i) => { const [sx, sy] = P(x, z); if (i) c.lineTo(sx, sy); else c.moveTo(sx, sy); }); c.closePath();
+    c.fillStyle = 'rgba(214, 70, 44, .16)'; c.fill();
+    c.setLineDash([7, 5]); c.lineWidth = 2; c.strokeStyle = 'rgba(232, 96, 60, .85)'; c.stroke(); c.setLineDash([]);
+  }
   // home ring
   if (M.home) {
     const [hx, hy] = P(M.home.x, M.home.z), [sx, sy, out] = clamp([hx, hy]);
     if (!out) { c.beginPath(); c.arc(hx, hy, Math.max(5, M.home.r * scale), 0, Math.PI * 2); c.fillStyle = 'rgba(90,210,120,.22)'; c.fill(); c.lineWidth = 2; c.strokeStyle = '#5ad27a'; c.stroke(); }
     glyph(c, sx, sy, 'home');
   }
+  // shops in the towns (County, M4): a lettered disc per kind
+  for (const sh of M.shops || []) { const [sx, sy, out] = clamp(P(sh.x, sh.z)); if (!out || !clampTo) glyph(c, sx, sy, 'shop', SHOP_COLORS[sh.kind], SHOP_LETTER[sh.kind]); }
+  // job spots (M6): where produce sells ('M', gold) and the farm's water point ('W', blue)
+  for (const sp of M.spots || []) { const [sx, sy, out] = clamp(P(sp.x, sp.z)); if (!out || !clampTo) glyph(c, sx, sy, 'shop', sp.color || SPOT_COLORS[sp.kind] || '#ccc', sp.letter || SPOT_LETTER[sp.kind] || '?'); }      // M10: a spot may bring its own colour + letter (survey kits)
   // the flag's site (where it starts)
   if (M.site) { const [sx, sy] = clamp(P(M.site.x, M.site.z)); glyph(c, sx, sy, 'site'); }
   // pins
@@ -62,11 +73,23 @@ function paintMarkers(c, M, toScreen, { rot = 0, scale = 1, names = {}, clampTo 
   }
   c.restore();
 }
-function glyph(c, x, y, kind, color) {
+export const SHOP_COLORS = { dealer: '#e8a33c', outfitter: '#c47bd6', supply: '#6fb86a' };
+const SHOP_LETTER = { dealer: 'D', outfitter: 'O', supply: 'S' };
+export const SPOT_COLORS = { sell: '#d9c45a', water: '#5aa7e8', jump: '#f0973a', target: '#e8505b',     // M9: Jump Point, landing rings
+  camp: '#e0503a', campDone: '#7d8790', garage: '#b8c2cc' };                                                // M8: raider camps (grey = cleared), the gate garage
+const SPOT_LETTER = { sell: 'M', water: 'W', jump: 'J', target: 'T', camp: 'R', campDone: 'R', garage: 'G' };
+// M7: a fire, a patient, the hospitals, the runaway, a wreck, the tow yards, a load's destination, parcel stops
+Object.assign(SPOT_COLORS, { fire: '#ff6a2a', patient: '#ff4d6d', hospital: '#ff4d6d', runaway: '#4d8dff', wreck: '#c8a24a', yard: '#c8a24a', dest: '#8fd05a', stop: '#f2d04a' });
+Object.assign(SPOT_LETTER, { fire: 'F', patient: '+', hospital: 'H', runaway: '!', wreck: 'X', yard: 'Y', dest: 'D', stop: 'P' });
+// M12 (Moon Work): sample sites (rare ones gold), the Sample Drop, the supply yards, the jump ramps, a crate that bounced out
+Object.assign(SPOT_COLORS, { msample: '#8ff4ff', mrare: '#ffcf4a', mdrop: '#ffb347', myard: '#d8b07a', mramp: '#f0973a', mcrate: '#ff9a2e' });
+Object.assign(SPOT_LETTER, { msample: 'S', mrare: 'S', mdrop: 'D', myard: 'C', mramp: 'J', mcrate: '!' });
+function glyph(c, x, y, kind, color, letter = '') {
   c.save(); c.translate(x, y); c.lineWidth = 2; c.strokeStyle = '#101418';
   if (kind === 'flag') { c.fillStyle = '#ff3b3b'; c.beginPath(); c.moveTo(-3, 8); c.lineTo(-3, -9); c.lineTo(8, -5); c.lineTo(-3, -1); c.closePath(); c.fill(); c.stroke(); c.beginPath(); c.moveTo(-3, 8); c.lineTo(-3, -9); c.stroke(); }
   else if (kind === 'home') { c.fillStyle = '#5ad27a'; c.beginPath(); c.moveTo(0, -8); c.lineTo(7, -1); c.lineTo(5, -1); c.lineTo(5, 6); c.lineTo(-5, 6); c.lineTo(-5, -1); c.lineTo(-7, -1); c.closePath(); c.fill(); c.stroke(); }
   else if (kind === 'site') { c.beginPath(); c.arc(0, 0, 7, 0, Math.PI * 2); c.fillStyle = 'rgba(255,59,59,.25)'; c.fill(); c.strokeStyle = '#ff3b3b'; c.stroke(); c.beginPath(); c.arc(0, 0, 2.5, 0, Math.PI * 2); c.fillStyle = '#ff3b3b'; c.fill(); }
+  else if (kind === 'shop') { c.fillStyle = color || '#ccc'; c.beginPath(); c.roundRect(-7, -7, 14, 14, 4); c.fill(); c.stroke(); c.fillStyle = '#101418'; c.font = '800 10px system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(letter, 0, 0.5); }
   else if (kind === 'pin') { c.fillStyle = color || '#ffcf3a'; c.beginPath(); c.moveTo(0, 9); c.bezierCurveTo(-8, -1, -6, -10, 0, -10); c.bezierCurveTo(6, -10, 8, -1, 0, 9); c.fill(); c.stroke(); c.beginPath(); c.arc(0, -4, 2.2, 0, Math.PI * 2); c.fillStyle = '#101418'; c.fill(); }
   c.restore();
 }
@@ -129,7 +152,7 @@ export function openMapScreen({ model, layers, getData, names, onPin, legendExtr
     <div class="rl-map-top"><button class="rl-btn" data-back>‹ Back</button><b class="rl-map-title">Map</b>
       <span class="rl-map-tools"><button class="rl-btn small" data-zin aria-label="Zoom in">+</button><button class="rl-btn small" data-zout aria-label="Zoom out">−</button>
       <button class="rl-btn small" data-me>On me</button><button class="rl-btn small" data-pinmode>Place pin</button><button class="rl-btn small" data-clearpin>Clear pin</button></span></div>
-    <div class="rl-map-legend"><span><i class="lg you"></i>You</span><span><i class="lg pl"></i>Drivers</span><span><i class="lg veh"></i>Vehicles</span><span><i class="lg flag"></i>Flag</span><span><i class="lg home"></i>Home</span><span><i class="lg site"></i>Flag site</span><span><i class="lg pin"></i>Pins</span>${legendExtra}</div>
+    <div class="rl-map-legend"><span><i class="lg you"></i>You</span><span><i class="lg pl"></i>Drivers</span><span><i class="lg veh"></i>Vehicles</span><span><i class="lg flag"></i>Flag</span><span><i class="lg home"></i>Home</span><span><i class="lg site"></i>Flag site</span><span><i class="lg pin"></i>Pins</span>${getData().shops?.length ? '<span><i class="lg shop"></i>Shops</span>' : ''}${getData().spots?.length ? '<span><i class="lg sell"></i>Sell produce</span><span><i class="lg water"></i>Water</span>' : ''}${getData().zones?.length ? '<span><i class="lg zone"></i>Rustwild</span><span><i class="lg camp"></i>Raider camps</span>' : ''}${legendExtra}</div>
     <div class="rl-map-hint"></div><div class="rl-map-cross" hidden></div>`);
   const cv = node.querySelector('canvas'), hint = node.querySelector('.rl-map-hint'), cross = node.querySelector('.rl-map-cross');
   let zoom = 1, cx = 0, cz = 0, pinMode = false, raf = 0, closed = false;

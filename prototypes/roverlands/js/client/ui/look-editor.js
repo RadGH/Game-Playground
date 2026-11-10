@@ -3,13 +3,14 @@
 // own behind the builder sheet, made when the editor opens and thrown away when it closes (the game's renderer is
 // never touched). The body is built by Knockabout's puppet.js, which is Thousandvale's createTvBody (Chibi 2.5).
 //
-//   openLookEditor({ layers, nav, me, account }) -> Promise (resolves when closed)
+//   openLookEditor({ layers, nav, me, account, limit?, look? }) -> Promise (resolves when closed)
+//   limit / look (M4, the phone's Wardrobe): only owned clothes (builder.js `limit`), starting from the look worn now
 import * as THREE from 'three';
 import { openBuilder } from '../../../../knockabout/js/client/builder.js';
 import { el } from './dom.js';
 import { lookReady } from './me.js';
 
-export async function openLookEditor({ layers, nav, me, account = null, color = '#f2a33a' }) {
+export async function openLookEditor({ layers, nav, me, account = null, color = '#f2a33a', limit = null, look = null }) {
   await lookReady;
   const node = el('div', 'rl-looked');
   const cv = el('canvas', 'rl-looked-cv'); node.append(cv);
@@ -32,7 +33,7 @@ export async function openLookEditor({ layers, nav, me, account = null, color = 
   const rec = layers.push(node, { kind: 'look', onBack: () => b.close(), ownPad: false });
   rec.onEdges = e => { pending = e; return true; };
   const b = openBuilder({
-    player: { look: cur.look, name: cur.name, color, dev: null }, view, nav, root: node, sounds: null, account: account ? account.button('builder') : null,
+    player: { look: look || cur.look, name: cur.name, color, dev: null }, view, nav, root: node, sounds: null, account: account ? account.button('builder') : null, limit, races: ['human'],
     onChange: ({ look, name }) => { me.set({ look, ...(name && name.trim() ? { name: name.trim() } : {}) }); },
     onClose: () => { closed = true; cancelAnimationFrame(raf); rec.close(); try { renderer?.dispose(); renderer?.forceContextLoss?.(); } catch { /* gone */ } done(); },
   });

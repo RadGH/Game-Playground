@@ -76,7 +76,7 @@ export function createTracks(world, quality, { csm }) {
     const lift = [0.035 + 0.05 * rut, 0.02, 0.02, 0.035 + 0.05 * rut];
     const pts = [], nrm = [], cols = [];
     const trough = TINT[name] || TINT.dirt, lip = LIP[name] || trough.map(v => v * 1.4);
-    const aTrough = name === 'road' ? 0.22 : name === 'rock' || name === 'ice' ? 0.15 : name === 'grass' ? 0.45 : 0.55 + 0.4 * rut;
+    const aTrough = name === 'road' || name === 'asphalt' || name === 'concrete' ? 0.22 : name === 'rock' || name === 'ice' ? 0.15 : name === 'grass' ? 0.45 : 0.55 + 0.4 * rut;
     for (let q = 0; q < 4; q++) {
       const px = x + sx * off[q], pz = z + sz * off[q];
       const gy = Math.max(world.heightAt(px, pz), y - 0.06);

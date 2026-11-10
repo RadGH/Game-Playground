@@ -7,8 +7,9 @@
 //   import { createUI } from './ui/index.js';
 //   const ui = createUI({
 //     canvas,                         // the game's <canvas> (report pictures; pointer lock is released when a menu opens)
-//     prepare: async (seed, progress) => ({ sites, vehicles }),   // build the world for this seed (called before every game;
-//                                     //   progress(0..1) moves the loading bar). sites = world.sites, vehicles = vehicles.json
+//     prepare: async (seed, progress, map) => ({ sites, vehicles, shop }),   // build the world for this seed + map ('county' |
+//                                     //   'classic', js/net/places.js mapFor(mode); called before every game; progress(0..1)
+//                                     //   moves the loading bar). sites = world.sites, vehicles = vehicles.json, shop = data/shop.json
 //     onGame: (net, { solo, spectate, mode, seed }) => {},        // the game starts: drive! (net = the room)
 //     onLeave: () => {},              // the game ended (left, kicked, room gone): stop drawing it; the title is showing
 //     onFollow: pid|null => {},       // spectating: follow this player (null = free camera)
@@ -33,10 +34,18 @@
 //   ui.blocking()                     // true while any menu / screen is up (and for 250 ms after): ignore game input then
 //   ui.screen                         // 'title' | 'lobby' | 'loading' | 'game'
 //   ui.net  ui.me()  ui.state()       // the room, { name, look }, a plain snapshot for game-eye / tests
+//   ui.profile()                      // the newest saved profile the room sent (gold, owned…; Expansion 1 M2), or null
+// Expansion 1 M4 — the phone (js/client/ui/phone.js) and the town shops (js/client/ui/shop.js):
+//   ui.setGame({ summonSpot(vehicleId) -> { p, yaw } | null, canSummon() -> null | why, thumb(vehicleId) -> Promise<url> })
+//                                     // main.js: where a summoned vehicle may go, whether now is a good moment, pictures
+//   ui.openPhone(app?)  ui.closePhone()   // P / controller LB / the phone button on the HUD open it too
+//   ui.nearShop([x, y, z]) -> shop | null // a shop door within reach (world.sites.shops); main.js shows "E — Open the Dealer"
+//   ui.openShop(shop)                 // the Dealer / Outfitter / Supply screen
 // The UI itself handles Esc / Start (menu) and M / Back (map) while in a game, and listens to the room for the flag,
 // the run clock, pins, toasts, refusals ('deny' -> a toast), kicks and best times — the game does not need to.
 import { connect, serverAvailable, listRooms, lastRoom, forgetRoom } from '../../net/client.js';
 import { cleanCode } from '../../net/protocol.js';
+import { mapFor } from '../../net/places.js';
 import { createNav } from '../../../../knockabout/js/client/nav.js';
 import { qrSvg, joinUrl } from '../../../../tumblefair/js/client/qr.js';
 import { createWhatsNew } from '../../../../../shared/whats-new.js';
@@ -50,9 +59,17 @@ import { createRating } from './rating.js';
 import { createTouch } from './touch.js';
 import { createMapModel, createMinimap, openMapScreen, pinColor } from './map.js';
 import { openLookEditor } from './look-editor.js';
+import { openPhone } from './phone.js';
+import { openShop } from './shop.js';
+import { jobTable, jobSpot } from '../../game/jobs/registry.js';
+import { achTable } from '../../game/achievements.js';
+import { stripLook, ownedIn, CLOTHING_SLOTS, cleanProfile } from '../../game/profile.js';
+import { PROFILE_KEY } from '../../net/loopback.js';
+import { partName } from '../../../../knockabout/js/client/look.js';
+import { doorOf } from '../shop-signs.js';
 
 const CSS = ['../../../css/roverlands.css', '../../../../../shared/whats-new.css'];
-const MODES = { flag: { name: 'Flag Run', blurb: 'Drive out, grab the flag, bring it home. Fastest time wins.' }, sandbox: { name: 'Sandbox', blurb: 'Every vehicle parked around. Drive anything, anywhere.' } };
+const MODES = { county: { name: 'County', blurb: 'The big map: drive anywhere, earn gold, buy vehicles and clothes. Best with friends.' }, flag: { name: 'Flag Run', blurb: 'Drive out, grab the flag, bring it home. Fastest time wins.' }, sandbox: { name: 'Sandbox', blurb: 'Every vehicle parked around. Drive anything, anywhere.' } };
 export const CONTROLS = [
   ['Drive / walk', 'W A S D', 'Left stick (steer) + RT gas / LT brake', 'Stick + GAS / BRAKE'],
   ['Look around', 'Mouse (click to grab it)', 'Right stick', 'Drag on the right side'],
@@ -67,6 +84,8 @@ export const CONTROLS = [
   ['Back on its wheels (tipped over; also happens by itself after 3 s)', 'Hold R', 'D-pad right', 'FLIP'],
   ['Camera distance', 'Mouse wheel / V', 'D-pad up / down', 'Pinch'],
   ['Map / menu', 'M / Esc', 'Back / Start', '☰'],
+  ['Phone (garage, wardrobe, jobs, awards)', 'P', 'LB', 'Phone button'],
+  ['Shop (at a shop door)', 'E', 'X (Square)', 'ENTER'],
 ];
 
 export function createUI(opts = {}) {
@@ -81,12 +100,21 @@ export function createUI(opts = {}) {
   const me = createMe();
   const history = createHistory();
   const model = createMapModel();
-  const S = { net: null, solo: false, spectate: false, flagSites: [], sites: null, flag: null, run: null, pins: new Map(), names: {}, markers: {}, follow: null, flagOverride: null, entered: false, online: false };
+  const S = { profile: null, net: null, solo: false, spectate: false, flagSites: [], sites: null, flag: null, run: null, pins: new Map(), names: {}, markers: {}, follow: null, flagOverride: null, entered: false, online: false, jobProg: {} };
   const news = createWhatsNew({ url: new URL('../../../data/changelog.json', import.meta.url), key: 'roverlands', title: "What's new" });
+  // M4: the job + achievement tables and the shop (the phone and the shops read them; solo play hands them to the room)
+  const D = { jobsRaw: {}, achRaw: {}, shop: {}, jobs: new Map(), ach: [] };
+  const getJson = u => fetch(new URL(u, import.meta.url)).then(r => r.json()).catch(() => ({}));
+  const dataReady = Promise.all([getJson('../../../data/jobs.json'), getJson('../../../data/achievements.json'), getJson('../../../data/shop.json')]).then(([j, a, sh]) => {
+    D.jobsRaw = j; D.achRaw = a; D.shop = sh; D.jobs = jobTable(j); D.ach = achTable(a);
+  });
+  const profSubs = new Set();
+  let game = {}, phoneRec = null, lookWarned = false;
 
   // ------------------------------------------------------------------------------------------ fixed chrome: corner + HUD
   const hud = el('div', 'rl-hud'); hud.hidden = true;
   hud.innerHTML = `<div class="rl-tl"><div class="rl-flagbox"><div class="rl-flagline"></div><div class="rl-clock"></div></div>
+    <div class="rl-goldrow"><div class="rl-gold" hidden title="Gold"><i aria-hidden="true"></i><b>0</b></div><button class="rl-phone-btn" type="button" hidden aria-label="Phone" title="Phone (P)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 18h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>
     <div class="rl-speed" hidden><b>0</b><span>km/h</span><i></i></div></div>
     <div class="rl-seathint" hidden></div><div class="rl-toasts"></div><div class="rl-banner" hidden></div>
     <div class="rl-spectate" hidden></div><div class="rl-netdot" title="Connection"></div>`;
@@ -95,11 +123,12 @@ export function createUI(opts = {}) {
   const corner = el('div', 'rl-cornerbar');
   const menuBtn = el('button', 'rl-corner rl-menu-btn', '☰'); menuBtn.type = 'button'; menuBtn.title = 'Menu'; menuBtn.setAttribute('aria-label', 'Menu');
   const report = installReport({ layers, shot: takeShot, debug: debugInfo, nameOf: () => me.get().name });
-  corner.append(menuBtn, report.button);
+  corner.append(menuBtn);   // the report form lives in the ☰ menu only (no floating ! button)
   const touch = createTouch({ settings: () => settings.get() });
   const rating = createRating({ root: hud, send: m => S.net?.send(m), vehicleName, onRated: r => history.addRating(r) });
   document.body.append(hud, touch.el, corner);
   menuBtn.addEventListener('click', () => openMenu());
+  hud.querySelector('.rl-phone-btn').addEventListener('click', () => togglePhone());
   const acct = installAccount({ me, toast: t => toast(t) });
   me.on(cur => { if (S.net) S.net.send({ t: 'me', name: cur.name, look: cur.look }); if (screen === 'title') drawTitle(); });
 
@@ -137,7 +166,16 @@ export function createUI(opts = {}) {
     const box = hud.hidden ? toastRoot() : hud.querySelector('.rl-toasts');
     const t = el('div', 'rl-toast ' + kind, esc(text)); box.append(t);
     while (box.children.length > 3) box.firstChild.remove();
-    setTimeout(() => t.classList.add('out'), 3200); setTimeout(() => t.remove(), 3700);
+    t.keep = () => { clearTimeout(t.t1); clearTimeout(t.t2); t.classList.remove('out'); t.t1 = setTimeout(() => t.classList.add('out'), 3200); t.t2 = setTimeout(() => t.remove(), 3700); };
+    t.keep();
+    return t;
+  }
+  // M6: a job paying again and again (a field being cut, batch after batch) adds up in ONE toast instead of a stream
+  let goldRun = null;
+  function goldToast(gold, why) {
+    const t = performance.now();
+    if (goldRun && goldRun.why === why && t - goldRun.at < 3000 && goldRun.el.isConnected) { goldRun.sum += gold; goldRun.at = t; goldRun.el.textContent = `+${goldRun.sum.toLocaleString()} gold — ${why}`; goldRun.el.keep(); return; }
+    goldRun = { why, sum: gold, at: t, el: toast(`+${gold.toLocaleString()} gold — ${why}`, 'gold') };
   }
   let toastBox = null;
   function toastRoot() { if (!toastBox) { toastBox = el('div', 'rl-toasts rl-toasts-top'); document.body.append(toastBox); } return toastBox; }
@@ -167,6 +205,7 @@ export function createUI(opts = {}) {
     let text;
     if (S.flagOverride) text = S.flagOverride;
     else if (room.mode === 'sandbox') text = 'Sandbox — drive anything';
+    else if (room.mode === 'county') text = 'Wayfare County';
     else if (!S.flag) text = 'Flag Run';
     else {
       const f = S.flag;
@@ -178,6 +217,13 @@ export function createUI(opts = {}) {
     line.textContent = text;
     box.classList.toggle('carry', S.flag?.state === 'carried' && S.flag?.by === S.net?.you);
   }
+  function drawGold() {
+    const g = hud.querySelector('.rl-gold');
+    g.hidden = !S.profile || S.spectate;
+    hud.querySelector('.rl-phone-btn').hidden = !S.profile || S.spectate;
+    if (S.profile) g.querySelector('b').textContent = Number(S.profile.gold || 0).toLocaleString();
+  }
+  const shopName = id => vehicles.find(v => v.id === id)?.name || String(id || '').replace(/^[a-z]+:/, '').replace(/_/g, ' ');
   function drawClock() {
     const c = hud.querySelector('.rl-clock'), R = S.run, room = S.net?.room;
     if (!room || room.mode !== 'flag' || !R) { c.textContent = ''; return; }
@@ -213,8 +259,26 @@ export function createUI(opts = {}) {
       }
     });
     net.on('reset', () => { S.flagOverride = null; if (screen === 'game') banner('New run', 'Everything is back at home.'); });
+    net.on('profile', m => {
+      S.profile = m.profile; drawGold();
+      for (const f of profSubs) { try { f(m); } catch (e) { console.error(e); } }
+      if (screen !== 'game') return;
+      if (m.gold > 0) goldToast(m.gold, m.why || 'paid');
+      else if (m.why === 'buy') toast(`Bought: ${shopName(m.item)}`, 'gold');
+      else if (m.why === 'upgrade') toast(`Upgrade bought: ${D.jobs.get(m.job)?.upgrades.find(u => u.id === m.item)?.name || m.item}`, 'gold');
+    });
+    net.on('ach', m => {
+      if (screen !== 'game') return;
+      for (const id of m.ids || []) { const a = D.ach.find(x => x.id === id); if (a) toast(`Achievement: ${a.name} — ${a.text}`, 'gold ach'); }
+    });
+    net.on('look', m => {
+      // County: the room swapped out clothes you do not own (your saved look is kept for Sandbox and Flag Run)
+      if (screen === 'game' && !lookWarned && m.stripped?.length) { lookWarned = true; toast('Wearing your own clothes — buy more at an Outfitter.'); }
+    });
     net.on('pin', m => { if (m.p) S.pins.set(m.pid, { pid: m.pid, x: m.p[0], z: m.p[1] }); else S.pins.delete(m.pid); });
     net.on('toast', m => toast(m.text));
+    // M6: a job's goal + progress (farming 'prog') for the phone's Jobs app
+    net.on('job', m => { if (m.k !== 'prog') return; S.jobProg[m.id] = m; for (const f of profSubs) { try { f({ t: 'jobprog', id: m.id }); } catch (e) { console.error(e); } } });
     net.on('deny', m => { if (m.why) toast(m.why, 'deny'); });
     net.on('kicked', m => { endGame(false); message('Removed from the room', m.by === 'vote' ? 'The other players voted to remove you.' : 'The host removed you from the room.'); });
     net.on('err', m => { if (m.code === 'noroom') { endGame(false); message('Room closed', 'That room is not there any more.'); } });
@@ -245,11 +309,12 @@ export function createUI(opts = {}) {
     if (busy) return; busy = true;
     const L = loading('Building the world…');
     try {
-      const seed = defaultSeed, w = (await prepare(seed, f => L.progress(f))) || {};
+      const seed = defaultSeed, w = (await prepare(seed, f => L.progress(f), mapFor(mode))) || {};
       if (L.cancelled) return;
       if (w.vehicles) vehicles = Array.isArray(w.vehicles) ? w.vehicles : w.vehicles.vehicles || vehicles;
       const cur = me.get(), flagId = store.get('roverlands.soloFlag', 'random');
-      const net = await connect({ online: false, create: { mode, seed, flagId, start: true }, name: cur.name, look: cur.look, sites: w.sites || {}, vehicles: w.vehicles || vehicles });
+      await dataReady;
+      const net = await connect({ online: false, create: { mode, seed, flagId, start: true }, name: cur.name, look: cur.look, sites: w.sites || {}, vehicles: w.vehicles || vehicles, shop: w.shop || D.shop, jobs: w.jobs || D.jobsRaw, achievements: w.achievements || D.achRaw });
       S.solo = true; S.spectate = false; S.online = false; useNet(net);
       L.close();
       enterGame({ prepared: true });
@@ -262,7 +327,9 @@ export function createUI(opts = {}) {
     const L = loading(create ? 'Making a room…' : spectate ? `Joining room ${code} to watch…` : `Joining room ${code}…`);
     try {
       const cur = me.get();
-      const net = await connect({ online: true, create, code, spectate, name: cur.name, look: cur.look });
+      // signed in: a one-time ticket says whose saved profile (gold, vehicles) this is; a guest's is kept by this device
+      const ticket = acct.on ? await acct.account.ticket('roverlands').catch(() => null) : null;
+      const net = await connect({ online: true, create, code, spectate, name: cur.name, look: cur.look, ticket });
       if (L.cancelled) { net.close(); return; }
       S.solo = false; S.spectate = spectate; S.online = true; useNet(net);
       L.close();
@@ -277,7 +344,7 @@ export function createUI(opts = {}) {
   }
   const history_replace = u => { try { window.history.replaceState(null, '', u.pathname + (u.search || '') + u.hash); } catch { /* fine */ } };
   function useNet(net) {
-    S.net = net; S.flag = null; S.run = null; S.pins.clear(); S.entered = false; S.leaving = false; S.flagOverride = null;
+    S.net = net; S.flag = null; S.run = null; S.profile = net.last?.profile?.profile || null; S.pins.clear(); S.entered = false; S.leaving = false; S.flagOverride = null;
     S.names = Object.fromEntries((net.room?.players || []).map(p => [p.pid, p.name]));
     // what the room said while connect() was still settling (js/net/client.js net.last)
     S.flag = net.last?.flag || null; S.run = net.last?.run || null;
@@ -289,16 +356,17 @@ export function createUI(opts = {}) {
     S.entered = true;
     if (!prepared) {
       const L = loading('Building the world…');
-      try { await prepare(net.room.seed, f => L.progress(f)); } catch (e) { console.error(e); }
+      try { await prepare(net.room.seed, f => L.progress(f), mapFor(net.room.mode)); } catch (e) { console.error(e); }
       L.close();
       if (S.net !== net) return;
     }
     layers.closeAll();
     screen = 'game'; hud.hidden = false;
     touch.show(isTouch() && !S.spectate);
-    drawFlag(); drawSpectate();
+    drawFlag(); drawSpectate(); drawGold();
     try { onGame(net, { solo: S.solo, spectate: S.spectate, mode: net.room.mode, seed: net.room.seed }); } catch (e) { console.error('[roverlands] onGame', e); }
     if (net.room.mode === 'flag' && !S.spectate) banner('Flag Run', `Grab the flag at ${siteName(net.room.flagId)} and bring it home.`, 4000);
+    else if (net.room.mode === 'county' && !S.spectate) banner('Wayfare County', 'Drive anywhere. Your phone (P) calls your vehicles; shops are in every town.', 3800);
     else if (!S.spectate) banner('Sandbox', 'Every vehicle is yours to try.', 3000);
   }
   function endGame(toTitle = true) {
@@ -306,7 +374,7 @@ export function createUI(opts = {}) {
     S.leaving = true;
     if (net) { try { net.close(); } catch { /* closed */ } }
     const was = screen === 'game';
-    S.net = null; S.entered = false; S.solo = false; S.spectate = false;
+    S.net = null; S.entered = false; S.solo = false; S.spectate = false; S.profile = null; lookWarned = false;
     hud.hidden = true; touch.show(false); rating.close();
     if (was) { try { onLeave(); } catch (e) { console.error('[roverlands] onLeave', e); } }
     showTitle();
@@ -317,6 +385,8 @@ export function createUI(opts = {}) {
   // ------------------------------------------------------------------------------------------ title
   let titleRec = null, online = false;
   serverAvailable().then(ok => { online = ok; if (screen === 'title') drawTitle(); });
+  /** The solo mode chip that is on (County first, and the default for a new player). */
+  const soloModeNow = () => { const m = store.get('roverlands.soloMode', 'county'); return MODES[m] ? m : 'county'; };
   function showTitle() {
     layers.closeAll();
     screen = 'title'; hud.hidden = true;
@@ -326,11 +396,14 @@ export function createUI(opts = {}) {
   }
   function drawTitle() {
     if (!titleRec || titleRec.closed) return;
-    const node = titleRec.el, cur = me.get(), soloMode = store.get('roverlands.soloMode', 'flag');
+    const node = titleRec.el, cur = me.get(), soloMode = soloModeNow();
+    // County wears only owned clothes (M4): the title shows what solo County will put on — this browser's solo profile,
+    // or the starter set for a new player — not the random clothes the look was rolled with
+    const titleLook = soloMode === 'county' ? stripLook(cur.look, cleanProfile(store.get(PROFILE_KEY, null))).look : cur.look;
     node.innerHTML = `<div class="rl-title-wrap">
       <h1 class="rl-logo">Roverlands</h1>
-      <p class="rl-tagline">Drive anywhere. Bring the flag home.</p>
-      <div class="rl-panel rl-mecard"><img class="rl-face" src="${portrait(cur.look)}" alt="">
+      <p class="rl-tagline">Drive anywhere. Work for gold, race for the flag.</p>
+      <div class="rl-panel rl-mecard"><img class="rl-face" src="${portrait(titleLook)}" alt="">
         <div class="rl-me"><label class="rl-lbl" for="rl-name">Your name</label><input id="rl-name" class="rl-input" maxlength="14" value="${esc(cur.name)}" autocomplete="off" data-nav="1">
         <button class="rl-btn small" data-look>Edit look</button></div></div>
       <div class="rl-play">
@@ -348,7 +421,7 @@ export function createUI(opts = {}) {
     name.addEventListener('keydown', e => { if (e.key === 'Enter') name.blur(); });
     node.onclick = e => {
       const t = e.target;
-      if (t.closest('[data-solo]')) return playSolo(store.get('roverlands.soloMode', 'flag'));
+      if (t.closest('[data-solo]')) return playSolo(soloModeNow());
       const sm = t.closest('[data-solomode]'); if (sm) { store.set('roverlands.soloMode', sm.dataset.solomode); return drawTitle(); }
       if (t.closest('[data-look]')) return editLook();
       if (t.closest('[data-host]')) return hostDialog();
@@ -361,7 +434,7 @@ export function createUI(opts = {}) {
   }
   async function editLook() { await openLookEditor({ layers, nav, me, account: acct }); if (screen === 'title') drawTitle(); if (screen === 'lobby') drawLobby(); }
   function hostDialog() {
-    let mode = store.get('roverlands.hostMode', 'flag'), pub = store.get('roverlands.hostPublic', false), flagId = 'random';
+    let mode = store.get('roverlands.hostMode', 'county'), pub = store.get('roverlands.hostPublic', false), flagId = 'random';
     const rec = modal('', { kind: 'host' });
     const panel = rec.el.querySelector('.rl-panel');
     const draw = () => {
@@ -462,7 +535,7 @@ export function createUI(opts = {}) {
       ${inviteBlock(room)}
       <div class="rl-panel"><h3>Drivers <span class="rl-note">${drivers.length}</span></h3><div class="rl-plist">${drivers.map(row).join('')}</div>
         ${watchers.length ? `<h3>Watching</h3><div class="rl-plist">${watchers.map(row).join('')}</div>` : ''}</div>
-      <div class="rl-panel"><h3>Mode</h3><div class="rl-row wrap">${Object.entries(MODES).map(([id, m]) => opt('mode', id, m.name, room.mode === id)).join('')}</div>
+      <div class="rl-panel"><h3>Mode</h3><div class="rl-row wrap">${Object.entries(MODES).filter(([id]) => mapFor(id) === mapFor(room.mode)).map(([id, m]) => opt('mode', id, m.name, room.mode === id)).join('')}</div>
         <p class="rl-note">${esc(MODES[room.mode]?.blurb || '')}</p>
         <h3>Who can join</h3><div class="rl-row wrap">${opt('public', true, 'Public', room.public)}${opt('public', false, 'Invite only', !room.public)}</div>
         ${room.mode === 'flag' ? `<h3>Flag site</h3><div class="rl-row wrap">${opt('flagId', 'random', 'Random', room.flagPick === 'random')}${flags.map(f => opt('flagId', f.id, f.name, room.flagPick === f.id)).join('')}</div>` : ''}
@@ -492,6 +565,7 @@ export function createUI(opts = {}) {
       inGame || screen === 'lobby' ? ['resume', inGame ? 'Back to driving' : 'Back'] : ['resume', 'Back'],
       room && !S.solo ? ['invite', 'Invite friends'] : null,
       inGame ? ['map', 'Map'] : null,
+      inGame && !S.spectate && S.profile ? ['phone', 'Phone'] : null,
       inGame && amHost && room.mode === 'flag' ? ['reset', 'New run'] : null,
       inGame && S.spectate && room ? ['play', 'Play instead of watching'] : null,
       ['howto', 'How to drive'], ['settings', 'Settings'], ['news', "What's new"], ['report', 'Report a bug'],
@@ -505,6 +579,7 @@ export function createUI(opts = {}) {
       const id = b.dataset.m; rec.close();
       if (id === 'invite') return inviteModal();
       if (id === 'map') return openMap();
+      if (id === 'phone') return openPhoneApp();
       if (id === 'reset') return S.net?.send({ t: 'reset' });
       if (id === 'play') { const code = room.code; endGame(false); return goOnline({ code }); }
       if (id === 'howto') return howTo();
@@ -552,11 +627,89 @@ export function createUI(opts = {}) {
     draw();
   }
 
+  // ------------------------------------------------------------------------------------------ the phone + the shops (M4)
+  const youAt = () => S.markers?.you || null;
+  /** The look worn now: in County rooms only owned clothes (the room strips the rest the same way). */
+  function wornLook() {
+    const look = me.get().look;
+    return S.net?.room?.mode === 'county' && S.profile ? stripLook(look, S.profile).look : look;
+  }
+  const clothName = id => D.shop.clothes?.find(r => r.id === id)?.name || partName(id.split(':')[0], id.split(':')[1]);
+  function pinAt(x, z) { S.net?.send({ t: 'pin', p: [Math.round(x), Math.round(z)] }); }
+  function nearestShop(kind) {
+    const y = youAt() || { x: 0, z: 0 };
+    let best = null, bd = Infinity;
+    for (const sh of S.sites?.shops || []) if (sh.kind === kind) { const d = Math.hypot(sh.x - y.x, sh.z - y.z); if (d < bd) { bd = d; best = sh; } }
+    return best;
+  }
+  const phoneCtx = {
+    profile: () => S.profile, onProfile: f => { profSubs.add(f); return () => profSubs.delete(f); },
+    get shop() { return D.shop; }, get jobs() { return D.jobs; }, get ach() { return D.ach; },
+    vehicleName, thumb: id => game.thumb?.(id) || null, send: m => S.net?.send(m), toast, mode: () => S.net?.room?.mode || null,
+    canSummon() {
+      if (!S.net || screen !== 'game') return 'Your phone works once you are in a game.';
+      if (S.spectate) return 'Watchers cannot call vehicles.';
+      if (S.net.room?.mode === 'flag') return 'Vehicles cannot be called in Flag Run — use the ones at home.';
+      return game.canSummon?.() || null;
+    },
+    summon(id) {
+      const spot = game.summonSpot?.(id);
+      if (!spot || spot.why) return { why: spot?.why || 'No clear, flat spot near you — try somewhere more open.' };
+      S.net.send({ t: 'summon', vehicle: id, p: spot.p, yaw: spot.yaw });
+      return { ok: true };
+    },
+    openMap: () => openMap(), openSettings: () => settingsModal(),
+    openWardrobe: () => wardrobe(), wornLook, portrait, clothName,
+    tryOn: (look, id) => { const [slot, part] = id.split(':'); return { ...look, wear: { ...(look?.wear || {}), [slot]: { ...(look?.wear?.[slot] || {}), id: part } } }; },
+    jobProgress: id => S.jobProg[id] || null,
+    spawnKit(id) { if (!S.net || screen !== 'game') return { why: 'Your phone works once you are in a game.' }; return game.spawnKit?.(id) || { why: 'Survey kits are set up in Wayfare County.' }; },      // M10
+    startJob(job) { const y = youAt(); const spot = jobSpot(job, S.sites, y ? [y.x, y.z] : [0, 0]); if (spot) pinAt(spot.x, spot.z); return spot; },
+    pinShop(kind) { const sh = nearestShop(kind); if (!sh) return null; const d = doorOf(sh, S.sites); pinAt(d.x, d.z); return sh; },
+    cityName: id => S.sites?.cities?.find(c => c.id === id)?.name || '',
+  };
+  function openPhoneApp(app = 'home') {
+    if (screen !== 'game' || S.spectate) return null;
+    if (phoneRec && !phoneRec.closed) { phoneRec.show(app); return phoneRec; }
+    if (layers.top()) return null;                     // another screen is up (menu, map…)
+    phoneRec = openPhone({ layers, nav, ctx: phoneCtx, app });
+    tally('phone', {});
+    return phoneRec;
+  }
+  function closePhone() { phoneRec?.close(); phoneRec = null; }
+  function togglePhone() { if (phoneRec && !phoneRec.closed) closePhone(); else openPhoneApp(); }
+  /** The Wardrobe: the look editor with only owned clothes in the clothing slots (face, hair, skin, colours all free). */
+  async function wardrobe() {
+    const P = S.profile; if (!P) return;
+    const county = S.net?.room?.mode === 'county';
+    const limit = county ? { wearIds: slot => (CLOTHING_SLOTS.includes(slot) ? ownedIn(S.profile || P, slot) : null), slots: [...CLOTHING_SLOTS, 'extras', 'ears'], title: 'Your clothes',
+      note: 'Only clothes you own are here — the Outfitter in every town sells more.' } : null;
+    await openLookEditor({ layers, nav, me, account: acct, limit, look: wornLook() });
+  }
+  /** A shop door within reach of these feet (County towns), or null. */
+  function nearShop(feet) {
+    if (!feet || screen !== 'game' || S.spectate || layers.top()) return null;
+    for (const sh of S.sites?.shops || []) {
+      const d = doorOf(sh, S.sites), r = Math.max(4.5, sh.r || 0);
+      if (Math.hypot(feet[0] - sh.x, feet[2] - sh.z) <= r || Math.hypot(feet[0] - d.x, feet[2] - d.z) <= 4.5) return sh;
+    }
+    return null;
+  }
+  let shopRec = null;
+  function openShopScreen(sh) {
+    if (!sh || layers.top()) return null;
+    shopRec = openShop({ layers, nav, ctx: phoneCtx, shop: sh });
+    tally('shop', { kind: sh.kind });
+    return shopRec;
+  }
+
   // ------------------------------------------------------------------------------------------ maps + markers
   function markerData() {
     const M = S.markers || {}, room = S.net?.room, sites = S.sites || {};
     const out = { you: M.you || null, camDir: M.camDir || null, players: M.players || [], vehicles: M.vehicles || [], labels: sites.labels || [], pins: [...S.pins.values()] };
     if (sites.home) out.home = sites.home;
+    if (sites.shops?.length) out.shops = sites.shops.filter(s => s.kind !== 'market').map(s => ({ x: s.x, z: s.z, kind: s.kind }));
+    if (M.spots?.length) out.spots = M.spots;          // M6: the farming job's sell points + water point
+    if (sites.rustwild?.poly?.length) out.zones = [{ kind: 'combat', poly: sites.rustwild.poly }];     // M8: the Rustwild, tinted red
     if (room?.mode === 'flag') {
       const f = S.flag, siteId = f?.site ?? room.flagId, site = (sites.flags || []).find(x => String(x.id) === String(siteId));
       if (site) out.site = { x: site.x, z: site.z };
@@ -594,13 +747,13 @@ export function createUI(opts = {}) {
   const padPrev = new Map(); let stickHeld = { dir: null, at: 0 };
   function padEdges() {
     const pads = navigator.getGamepads ? [...navigator.getGamepads()].filter(Boolean) : [];
-    const E = { up: false, down: false, left: false, right: false, a: false, b: false, x: false, y: false, start: false, back: false };
+    const E = { up: false, down: false, left: false, right: false, a: false, b: false, x: false, y: false, start: false, back: false, lb: false };
     const t = performance.now();
     for (const p of pads) {
       const b = p.buttons.map(x => !!x?.pressed), prev = padPrev.get(p.index) || b.map(() => true);   // first sight: nothing is "new"
       const ed = i => b[i] && !prev[i];
       if (ed(12)) E.up = true; if (ed(13)) E.down = true; if (ed(14)) E.left = true; if (ed(15)) E.right = true;
-      if (ed(0)) E.a = true; if (ed(1)) E.b = true; if (ed(2)) E.x = true; if (ed(3)) E.y = true; if (ed(9)) E.start = true; if (ed(8)) E.back = true;
+      if (ed(0)) E.a = true; if (ed(1)) E.b = true; if (ed(2)) E.x = true; if (ed(3)) E.y = true; if (ed(9)) E.start = true; if (ed(8)) E.back = true; if (ed(4)) E.lb = true;
       const ax = p.axes[0] || 0, ay = p.axes[1] || 0, dir = Math.abs(ax) > 0.6 ? (ax > 0 ? 'right' : 'left') : Math.abs(ay) > 0.6 ? (ay > 0 ? 'down' : 'up') : null;
       if (dir && (stickHeld.dir !== dir || t - stickHeld.at > 260)) { E[dir] = true; stickHeld = { dir, at: t }; } else if (!dir && stickHeld.dir) stickHeld = { dir: null, at: 0 };
       padPrev.set(p.index, b);
@@ -611,12 +764,13 @@ export function createUI(opts = {}) {
   function frame() {
     const t = performance.now(); lastFrame = t;
     const E = padEdges(), top = layers.top();
-    if (top && !top.ownPad && (E.up || E.down || E.left || E.right || E.a || E.b || E.x || E.y || E.start || E.back)) {
+    if (top && !top.ownPad && (E.up || E.down || E.left || E.right || E.a || E.b || E.x || E.y || E.start || E.back || E.lb)) {
       if (top.onEdges && top.onEdges(E)) { /* the layer took them */ }
+      else if (E.lb && top.kind === 'phone') closePhone();
       else if (E.start && top.kind === 'menu') top.onBack?.();
       else if (!nav.handle(E) && E.b) top.onBack?.();
     } else if (!top && screen === 'game') {
-      if (E.start) openMenu(); else if (E.back) openMap();
+      if (E.start) openMenu(); else if (E.back) openMap(); else if (E.lb) openPhoneApp();
     }
     if (screen === 'game') {
       if (t - lastClock > 90) { drawClock(); lastClock = t; }
@@ -633,11 +787,13 @@ export function createUI(opts = {}) {
       if (screen === 'game' && !typing) {
         if (e.code === 'Escape') { openMenu(); e.stopImmediatePropagation(); e.preventDefault(); }
         else if (e.code === 'KeyM') { openMap(); e.stopImmediatePropagation(); }
+        else if (e.code === 'KeyP' && !e.repeat) { openPhoneApp(); e.stopImmediatePropagation(); }
       }
       return;
     }
     if (top.foreign) { if (e.code === 'Escape') { /* the dialog closes itself */ } return; }
     if (e.code === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); top.onBack?.(); return; }
+    if (e.code === 'KeyP' && top.kind === 'phone' && !typing) { e.preventDefault(); e.stopImmediatePropagation(); closePhone(); return; }
     if (top.ownPad || typing) return;            // the map reads its own keys; typing goes to the box (the game is blocked anyway)
     const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
     if (map[e.code]) { if (top.onEdges?.({ [map[e.code]]: true })) { e.preventDefault(); } else if (nav.handle({ [map[e.code]]: true })) e.preventDefault(); e.stopImmediatePropagation(); return; }
@@ -667,9 +823,12 @@ export function createUI(opts = {}) {
     markers(m) { S.markers = m || {}; },
     vehicleLeft: (kind, secs) => (S.spectate ? false : rating.vehicleLeft(kind, secs)),
     openMenu, closeMenu, openMap, showTitle, leave, toast,
+    setGame(g) { game = g || {}; }, openPhone: openPhoneApp, closePhone, nearShop, openShop: openShopScreen,
+    get phone() { return phoneRec && !phoneRec.closed ? phoneRec.app : null; },
     blocking: () => layers.blocking() || performance.now() - lastClosed < 250,
     get screen() { return screen; }, get net() { return S.net; }, me: () => me.get(),
-    state: () => ({ screen, layers: layers.stack.map(l => l.kind), room: S.net?.room ? { code: S.net.room.code, phase: S.net.room.phase, mode: S.net.room.mode, you: S.net.you, host: S.net.room.host, players: S.net.room.players.map(p => ({ pid: p.pid, name: p.name, spec: !!p.spec })) } : null, flag: S.flag, run: S.run, net: S.net?.status || null, touch: touch.shown }),
+    profile: () => S.profile,
+    state: () => ({ gold: S.profile ? S.profile.gold : null, phone: phoneRec && !phoneRec.closed ? phoneRec.app : null, screen, layers: layers.stack.map(l => l.kind), room: S.net?.room ? { code: S.net.room.code, phase: S.net.room.phase, mode: S.net.room.mode, you: S.net.you, host: S.net.room.host, players: S.net.room.players.map(p => ({ pid: p.pid, name: p.name, spec: !!p.spec })) } : null, flag: S.flag, run: S.run, net: S.net?.status || null, touch: touch.shown }),
     // tests + debugging
     _layers: layers, _nav: nav, playSolo, goOnline,
   };

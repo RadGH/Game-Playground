@@ -2,7 +2,7 @@
 // right half to look around, and big named buttons — GAS, BRAKE, JUMP, ENTER, FIRE, SEAT (all ≥ 44 px, 60+ in fact).
 // Pinch on the right half moves the camera in / out.
 //
-//   const touch = createTouch({ settings });   touch.show(true|false)   touch.mode('all'|'foot'|'drive'|'gunner'|'passenger')
+//   const touch = createTouch({ settings });   touch.show(true|false)   touch.mode('all'|'foot'|'drive'|'drivegun'|'gunner'|'passenger')
 //   touch.hitchable(bool) / touch.flippable(bool): the HITCH / FLIP buttons show only while they would do something
 //   touch.state() -> the held-state object js/game/input.js reads as its `touch` option:
 //     { active, mx, my (+1 = stick pushed up), lookX, lookY (radians since the last read), gas, brake, jump, boost, fire,
@@ -17,6 +17,7 @@ export const TOUCH_MODES = Object.freeze({
   all: ['gas', 'brake', 'jump', 'use', 'fire', 'swap'],
   foot: ['jump', 'use'],
   drive: ['gas', 'brake', 'jump', 'use', 'swap'],
+  drivegun: ['gas', 'brake', 'jump', 'use', 'fire', 'swap'],     // M8: the tank / hover tank driver fires the main gun
   gunner: ['fire', 'use', 'swap'],
   passenger: ['use', 'swap'],
 });
@@ -107,11 +108,11 @@ export function createTouch({ settings = () => ({}) } = {}) {
   }
   // HITCH shows only while driving something that can tow and a trailer is close enough (or one is on the hitch)
   let canHitch = false;
-  function hitchable(v) { canHitch = !!v && curMode === 'drive'; btn.hitch.hidden = !canHitch || canFlip; }
+  function hitchable(v) { canHitch = !!v && (curMode === 'drive' || curMode === 'drivegun'); btn.hitch.hidden = !canHitch || canFlip; }
   // FLIP shows only while the vehicle you drive lies on its side or roof (report #5; it also rights itself after 3 s).
   // It takes HITCH's spot in the corner — nothing hitches lying on its roof.
   let canFlip = false;
-  function flippable(v) { canFlip = !!v && curMode === 'drive'; btn.flip.hidden = !canFlip; btn.hitch.hidden = !canHitch || canFlip; }
+  function flippable(v) { canFlip = !!v && (curMode === 'drive' || curMode === 'drivegun'); btn.flip.hidden = !canFlip; btn.hitch.hidden = !canHitch || canFlip; }
   mode('all');
   return {
     el: root,

@@ -1,4 +1,4 @@
-// The ground: chunked terrain with four detail levels, twelve blended surface textures, triplanar rock.
+// The ground: chunked terrain with four detail levels, fourteen blended surface textures, triplanar rock.
 //
 // Built on highdef-3d/js/terrain.js's ideas (skirts instead of edge stitching, splat weights worked out per vertex on
 // the processor, triplanar rock, screen-space tangent frame) but it is its own module because that one is welded to
@@ -7,11 +7,11 @@
 //
 //   * The finest level is exactly the 2 m physics grid — a vertex on every height sample. What you see is what the
 //     tyres touch (the coarser levels only ever draw far away).
-//   * All twelve ground textures live in ONE texture array (WebGL2 sampler2DArray): layer i = one surface, painted
+//   * All fourteen ground textures live in ONE texture array (WebGL2 sampler2DArray): layer i = one surface, painted
 //     by highdef's kit/textures.js. Colour in RGB with roughness in A; normal in RGB with occlusion in A. A pixel
-//     only samples the layers whose weight is above a hair, so the cost is "how many surfaces meet here", not twelve.
+//     only samples the layers whose weight is above a hair, so the cost is "how many surfaces meet here", not fourteen.
 //   * Weights come from the world's per-sample surface ids, blurred over a 3x3 tent so borders are soft, plus rock
-//     wherever the ground is steep. 12 weights travel as three normalised-byte vec4s.
+//     wherever the ground is steep. 14 weights travel as four normalised-byte vec4s (the last two slots unused).
 
 import * as THREE from 'three';
 import { enhance } from '../../../../../highdef-3d/js/materials.js';
@@ -24,31 +24,53 @@ export const LAYERS = [
   { key: 'forest', recipe: 'forest_floor', scale: 0.13, rough: 1.00 },
   { key: 'dirt',   recipe: 'dirt',         scale: 0.14, rough: 1.00 },
   { key: 'mud',    recipe: 'mud',          scale: 0.11, rough: 0.55 },   // wet: glossy in the low spots
-  { key: 'sand',   recipe: 'sand',         scale: 0.13, rough: 1.00 },
+  { key: 'sand',   recipe: 'sand',         scale: 0.13, rough: 1.00, moon: { recipe: 'dirt', seed: 21, contrast: 0.9, flat: 0.45 } },   // = regolith on the Moon (no dune ripples)
   { key: 'gravel', recipe: 'gravel',       scale: 0.17, rough: 1.00, bright: 1.2 },
-  { key: 'rock',   recipe: 'rock',         scale: 0.055, rough: 1.00, triplanar: true, bright: 0.72 },
+  // rock: `lift` softens the kit recipe's crack strokes. They are drawn in texture pixels for highdef's close-up cliffs, and
+  // laid flat on a plateau at this scale they read as black marker squiggles metres long (the County 'hairpin' view,
+  // 2026-11-09): every pixel darker than `below` (luminance 0..1) keeps only `keep` of its distance below it, and within
+  // `grow` px of one the relief and occlusion are flattened by `flatten`, so a crack is a faint seam instead of ink
+  { key: 'rock',   recipe: 'rock',         scale: 0.055, rough: 1.00, triplanar: true, bright: 0.72, lift: { below: 0.3, keep: 0.3, grow: 3, flatten: 0.85 }, moon: { contrast: 0.7 } },
   { key: 'snow',   recipe: 'snow',         scale: 0.09, rough: 0.85, bright: 0.84 },
   { key: 'road',   recipe: 'dirt',         scale: 0.20, rough: 0.95, tint: '#d9ccb2', seed: 5, bright: 1.15 },
   { key: 'ice',    recipe: 'snow',         scale: 0.05, rough: 0.16, tint: '#9cc2dc', seed: 9, bright: 0.8 },
   { key: 'farm',   recipe: 'dirt',         scale: 0.10, rough: 1.00, tint: '#b08c62', seed: 4, furrows: true },
   { key: 'bed',    recipe: 'cobble',       scale: 0.16, rough: 0.70, seed: 3 },
+  // Wayfare County's paved ground (the classic map never paints these, so its look is unchanged). `paved`: the
+  // recipe is turned grey at `lum` with `contrast` of its own variation kept, its relief flattened by `flat`, and
+  // `joints` slab lines drawn across the tile.
+  { key: 'asphalt',  recipe: 'gravel', scale: 0.30, rough: 0.82, seed: 12, paved: { lum: 0.23, contrast: 0.42, flat: 0.75, warm: 0.012 } },
+  { key: 'concrete', recipe: 'sand',   scale: 0.125, rough: 0.9, seed: 13, paved: { lum: 0.58, contrast: 0.30, flat: 0.85, warm: 0.02, joints: 2 }, moon: { recipe: 'dirt', seed: 22 } },
 ];
 const L = LAYERS.length;
 /** SURFACES id -> layer index */
-const SURF_LAYER = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+const SURF_LAYER = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 4, 6];   // ... regolith -> the sand layer, moonrock -> rock (the Moon greys both)
 const ROCK = 6, FOREST = 1, GRASS = 0;
 
-/** Paint every layer with the highdef kit and pack them into two texture arrays. */
-export function buildGroundTextures(size, anisotropy = 8) {
+/** Paint every layer with the highdef kit and pack them into two texture arrays.
+ *  palette 'moon': every layer turned grey (its own light and dark kept, a touch cool) — the Moon's regolith is the
+ *  sand layer and its bare rock the rock layer, so nothing new is painted. Any other palette: the normal colours. */
+export function buildGroundTextures(size, anisotropy = 8, palette = 'earth') {
   const N = size * size * 4;
   const alb = new Uint8Array(N * L), nrm = new Uint8Array(N * L);
   const cv = document.createElement('canvas'); cv.width = cv.height = size;
   const g = cv.getContext('2d', { willReadFrequently: true });
   const read = (tex) => { g.clearRect(0, 0, size, size); g.drawImage(tex.image, 0, 0, size, size); return g.getImageData(0, 0, size, size).data; };
   LAYERS.forEach((layer, li) => {
-    const s = makeSurface(layer.recipe, { size, seed: layer.seed ?? 7, tint: layer.tint || null });
+    const mo = palette === 'moon' ? layer.moon || {} : null;   // the Moon may paint a layer from another recipe
+    const s = makeSurface(mo?.recipe || layer.recipe, { size, seed: mo?.seed ?? layer.seed ?? 7, tint: mo ? null : layer.tint || null });
     const c = read(s.map), r = read(s.roughnessMap), n = read(s.normalMap), o = read(s.aoMap);
     const base = li * N;
+    // `lift` (rock): where the recipe drew a crack — dark pixels, widened by a few pixels so the groove's edges count too
+    let crack = null;
+    if (layer.lift && !mo) {
+      const { below, grow = 3 } = layer.lift, a = new Float32Array(size * size), b = new Float32Array(size * size);
+      for (let i = 0; i < size * size; i++) { const l = (0.3 * c[i * 4] + 0.59 * c[i * 4 + 1] + 0.11 * c[i * 4 + 2]) / 255; a[i] = Math.max(0, Math.min(1, (below - l) / (below * 0.5))); }
+      const g = Math.max(1, Math.round(grow * size / 512));
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) { let m = 0; for (let d = -g; d <= g; d++) m = Math.max(m, a[y * size + ((x + d + size) % size)]); b[y * size + x] = m; }
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) { let m = 0; for (let d = -g; d <= g; d++) m = Math.max(m, b[((y + d + size) % size) * size + x]); a[y * size + x] = m; }
+      crack = a;
+    }
     for (let y = 0; y < size; y++) {
       // a canvas is top row first; three flips canvas textures on upload and the kit's normal maps expect that,
       // so flip the rows here (a DataArrayTexture is not flipped)
@@ -57,6 +79,21 @@ export function buildGroundTextures(size, anisotropy = 8) {
         const si = (sy * size + x) * 4, di = base + (y * size + x) * 4;
         let cr = c[si], cg = c[si + 1], cb = c[si + 2];
         let nx = n[si], ny = n[si + 1];
+        if (layer.paved) {
+          // grey it, keep a little of the recipe's variation, flatten its relief
+          const P = layer.paved;
+          const l = (0.3 * cr + 0.59 * cg + 0.11 * cb) / 255;
+          let v = P.lum + (l - 0.45) * P.contrast;
+          if (P.joints) {
+            // saw-cut joints: dark hairlines `joints` times across the tile each way
+            const fx = (x / size) * P.joints, fy = (y / size) * P.joints;
+            const dx = Math.min(fx - Math.floor(fx), Math.ceil(fx) - fx) * size / P.joints, dy = Math.min(fy - Math.floor(fy), Math.ceil(fy) - fy) * size / P.joints;
+            if (Math.min(dx, dy) < size / 512 * 1.5) v *= 0.72;
+          }
+          v = Math.max(0, Math.min(1, v)) * 255;
+          cr = v * (1 + P.warm); cg = v; cb = v * (1 - P.warm);
+          nx = 128 + (nx - 128) * (1 - P.flat); ny = 128 + (ny - 128) * (1 - P.flat);
+        }
         if (layer.furrows) {
           // ploughed rows across the tile: darker in the trough, a slope in the normal
           const t = (y / size) * 12 * Math.PI * 2;
@@ -64,6 +101,21 @@ export function buildGroundTextures(size, anisotropy = 8) {
           const k = 0.84 + 0.16 * f;
           cr *= k; cg *= k; cb *= k;
           ny = Math.max(0, Math.min(255, ny + df * 55));
+        }
+        if (crack) {
+          // a crack: its colour brought most of the way up to the stone round it, and its groove (the normal map, wider
+          // than the drawn line because the kit strokes the height 1.2x wide plus a lit lip) and occlusion mostly flattened
+          const { below, keep } = layer.lift, l = (0.3 * cr + 0.59 * cg + 0.11 * cb) / 255;
+          if (l < below && l > 0) { const k = (below - (below - l) * keep) / l; cr = Math.min(255, cr * k); cg = Math.min(255, cg * k); cb = Math.min(255, cb * k); }
+          const t = crack[sy * size + x] * (layer.lift.flatten ?? 0.85);
+          nx = nx + (128 - nx) * t; ny = ny + (128 - ny) * t;
+          o[si] = o[si] + (255 - o[si]) * t;
+        }
+        if (mo && !layer.paved) {
+          const l = (0.3 * cr + 0.59 * cg + 0.11 * cb) / 255;
+          const v = Math.max(0, Math.min(1, 0.56 + (l - 0.45) * (mo.contrast ?? 1.2))) * 255;
+          cr = v * 0.985; cg = v * 0.99; cb = v;
+          if (mo.flat) { nx = 128 + (nx - 128) * (1 - mo.flat); ny = 128 + (ny - 128) * (1 - mo.flat); }
         }
         alb[di] = cr; alb[di + 1] = cg; alb[di + 2] = cb; alb[di + 3] = r[si];
         nrm[di] = nx; nrm[di + 1] = ny; nrm[di + 2] = n[si + 2]; nrm[di + 3] = o[si];
@@ -95,7 +147,7 @@ export function createGround(world, quality, { csm, textures }) {
   const { dim, heights, surface, biome } = world;
   const cell = world.cell;
 
-  // --- per-sample layer weights, blurred, as 12 bytes per sample (built once) -----------------------------------
+  // --- per-sample layer weights, blurred, as 14 bytes per sample (built once) -----------------------------------
   const W = buildSampleWeights(world);
 
   const uniforms = {
@@ -110,11 +162,11 @@ export function createGround(world, quality, { csm, textures }) {
     csm, fog: true, wind: false, uniforms, defines: { RL_GROUND: '' },
     vertex: {
       pars: /* glsl */`
-        attribute vec4 aW0; attribute vec4 aW1; attribute vec4 aW2;
-        varying vec4 vW0; varying vec4 vW1; varying vec4 vW2;
+        attribute vec4 aW0; attribute vec4 aW1; attribute vec4 aW2; attribute vec4 aW3;
+        varying vec4 vW0; varying vec4 vW1; varying vec4 vW2; varying vec4 vW3;
         varying vec3 vRlWorld; varying float vRlDist;`,
       main: /* glsl */`
-        vW0 = aW0; vW1 = aW1; vW2 = aW2;
+        vW0 = aW0; vW1 = aW1; vW2 = aW2; vW3 = aW3;
         vec4 rlWp = modelMatrix * vec4( transformed, 1.0 );
         vRlWorld = rlWp.xyz; vRlDist = length( rlWp.xyz - cameraPosition );`,
     },
@@ -126,7 +178,7 @@ export function createGround(world, quality, { csm, textures }) {
         uniform float uRough[ ${L} ];
         uniform float uBright[ ${L} ];
         uniform float uDetailFade;
-        varying vec4 vW0; varying vec4 vW1; varying vec4 vW2;
+        varying vec4 vW0; varying vec4 vW1; varying vec4 vW2; varying vec4 vW3;
         varying vec3 vRlWorld; varying float vRlDist;
         float rlHash( vec2 p ) { return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453123 ); }
         float rlNoise( vec2 p ) {
@@ -153,6 +205,7 @@ export function createGround(world, quality, { csm, textures }) {
           w[0] = vW0.x; w[1] = vW0.y; w[2] = vW0.z; w[3] = vW0.w;
           w[4] = vW1.x; w[5] = vW1.y; w[6] = vW1.z; w[7] = vW1.w;
           w[8] = vW2.x; w[9] = vW2.y; w[10] = vW2.z; w[11] = vW2.w;
+          w[12] = vW3.x; w[13] = vW3.y;
           vec2 p = vRlWorld.xz;
           // break the soft vertex blend up with a little noise so borders are ragged, not blurred
           // each layer gets its own noise, so where two meet one wins in ragged patches
@@ -219,7 +272,7 @@ export function createGround(world, quality, { csm, textures }) {
     const ox = -half + cx * CHUNK, oz = -half + cz * CHUNK;
     const vc = n * n + n * 4;
     const pos = new Float32Array(vc * 3), nor = new Float32Array(vc * 3), col = new Float32Array(vc * 3);
-    const w0 = new Uint8Array(vc * 4), w1 = new Uint8Array(vc * 4), w2 = new Uint8Array(vc * 4);
+    const w0 = new Uint8Array(vc * 4), w1 = new Uint8Array(vc * 4), w2 = new Uint8Array(vc * 4), w3 = new Uint8Array(vc * 4);
     const tint = [0, 0, 0];
     let v = 0;
     const sstep = step / cell;      // samples per vertex step
@@ -235,6 +288,7 @@ export function createGround(world, quality, { csm, textures }) {
       const o = k * L;
       if (sstep <= 1) {
         for (let q = 0; q < 4; q++) { w0[v * 4 + q] = W[o + q]; w1[v * 4 + q] = W[o + 4 + q]; w2[v * 4 + q] = W[o + 8 + q]; }
+        for (let q = 12; q < L; q++) w3[v * 4 + q - 12] = W[o + q];
       } else {
         const acc = new Float32Array(L);
         let c = 0;
@@ -246,6 +300,7 @@ export function createGround(world, quality, { csm, textures }) {
           c++;
         }
         for (let q = 0; q < 4; q++) { w0[v * 4 + q] = acc[q] / c; w1[v * 4 + q] = acc[4 + q] / c; w2[v * 4 + q] = acc[8 + q] / c; }
+        for (let q = 12; q < L; q++) w3[v * 4 + q - 12] = acc[q] / c;
       }
       vertexColour(world, si, sj, x, z, y, tint);
       col[v * 3] = tint[0]; col[v * 3 + 1] = tint[1]; col[v * 3 + 2] = tint[2];
@@ -260,7 +315,7 @@ export function createGround(world, quality, { csm, textures }) {
     for (const s of rim) {
       for (let q = 0; q < 3; q++) { pos[v * 3 + q] = pos[s * 3 + q]; nor[v * 3 + q] = nor[s * 3 + q]; col[v * 3 + q] = col[s * 3 + q]; }
       pos[v * 3 + 1] -= SKIRT;
-      for (let q = 0; q < 4; q++) { w0[v * 4 + q] = w0[s * 4 + q]; w1[v * 4 + q] = w1[s * 4 + q]; w2[v * 4 + q] = w2[s * 4 + q]; }
+      for (let q = 0; q < 4; q++) { w0[v * 4 + q] = w0[s * 4 + q]; w1[v * 4 + q] = w1[s * 4 + q]; w2[v * 4 + q] = w2[s * 4 + q]; w3[v * 4 + q] = w3[s * 4 + q]; }
       v++;
     }
     const idx = new Uint32Array(res * res * 6 + rim.length * 6);
@@ -280,6 +335,7 @@ export function createGround(world, quality, { csm, textures }) {
     geo.setAttribute('aW0', new THREE.BufferAttribute(w0, 4, true));
     geo.setAttribute('aW1', new THREE.BufferAttribute(w1, 4, true));
     geo.setAttribute('aW2', new THREE.BufferAttribute(w2, 4, true));
+    geo.setAttribute('aW3', new THREE.BufferAttribute(w3, 4, true));
     geo.setIndex(new THREE.BufferAttribute(idx.subarray(0, p), 1));
     geo.computeBoundingSphere();
     if (geoCache.size > 300) { const old = geoCache.keys().next().value; geoCache.get(old).dispose(); geoCache.delete(old); }
@@ -337,47 +393,60 @@ export function createGround(world, quality, { csm, textures }) {
   };
 }
 
-/** Layer weights per height sample (bytes, 12 per sample), blurred over a 3x3 tent so surface borders are soft. */
+/** Layer weights per height sample (bytes, 12 per sample), blurred over a 3x3 tent so surface borders are soft.
+ *  Unblurred weights are kept for three rows at a time only (the county's 1537 x 1537 samples would otherwise need a
+ *  113 MB float scratch array). */
 function buildSampleWeights(world) {
   const { dim, surface, biome, heights } = world;
   const N = dim * dim;
-  const raw = new Float32Array(N * L);
-  for (let j = 0; j < dim; j++) for (let i = 0; i < dim; i++) {
-    const k = j * dim + i, o = k * L;
-    const s = surface[k];
-    let li = SURF_LAYER[s];
-    if (s === SURF.shallows && (biome[k] === BIOME.bog || biome[k] === BIOME.river)) li = biome[k] === BIOME.bog ? 3 : 5;
-    if (s === SURF.grass) {
-      const b = biome[k];
-      const f = b === BIOME.pine ? 0.75 : b === BIOME.birch ? 0.45 : b === BIOME.bog ? 0.35 : 0;
-      raw[o + FOREST] += f; raw[o + GRASS] += 1 - f;
-    } else raw[o + li] += 1;
-    // steep ground shows rock whatever it is "made of"
-    if (s !== SURF.road && i > 0 && j > 0 && i < dim - 1 && j < dim - 1) {
-      const gx = heights[k + 1] - heights[k - 1], gz = heights[k + dim] - heights[k - dim];
-      const g = Math.sqrt(gx * gx + gz * gz) / (4 * world.cell);
-      const r = Math.min(1, Math.max(0, (g - 0.6) / 0.5));
-      if (r > 0) { for (let q = 0; q < L; q++) raw[o + q] *= 1 - r; raw[o + ROCK] += r; }
+  const rows = [new Float32Array(dim * L), new Float32Array(dim * L), new Float32Array(dim * L)];
+  const rowOf = new Int32Array(3).fill(-1);
+  function rawRow(j) {
+    const slot = j % 3;
+    if (rowOf[slot] === j) return rows[slot];
+    const raw = rows[slot];
+    raw.fill(0);
+    rowOf[slot] = j;
+    for (let i = 0; i < dim; i++) {
+      const k = j * dim + i, o = i * L;
+      const s = surface[k];
+      let li = SURF_LAYER[s];
+      if (s === SURF.shallows && (biome[k] === BIOME.bog || biome[k] === BIOME.river)) li = biome[k] === BIOME.bog ? 3 : 5;
+      if (s === SURF.grass) {
+        const b = biome[k];
+        const f = BIOMES[b].forest ?? (b === BIOME.pine ? 0.75 : b === BIOME.birch ? 0.45 : b === BIOME.bog ? 0.35 : 0);
+        raw[o + FOREST] += f; raw[o + GRASS] += 1 - f;
+      } else raw[o + li] += 1;
+      // steep ground shows rock whatever it is "made of"
+      if (s !== SURF.road && s !== SURF.asphalt && s !== SURF.concrete && i > 0 && j > 0 && i < dim - 1 && j < dim - 1) {
+        const gx = heights[k + 1] - heights[k - 1], gz = heights[k + dim] - heights[k - dim];
+        const g = Math.sqrt(gx * gx + gz * gz) / (4 * world.cell);
+        const r = Math.min(1, Math.max(0, (g - 0.6) / 0.5));
+        if (r > 0) { for (let q = 0; q < L; q++) raw[o + q] *= 1 - r; raw[o + ROCK] += r; }
+      }
     }
+    return raw;
   }
   const out = new Uint8Array(N * L);
   const acc = new Float32Array(L);
-  for (let j = 0; j < dim; j++) for (let i = 0; i < dim; i++) {
-    acc.fill(0);
-    let tw = 0;
-    for (let dj = -1; dj <= 1; dj++) {
-      const jj = j + dj; if (jj < 0 || jj >= dim) continue;
-      for (let di = -1; di <= 1; di++) {
-        const ii = i + di; if (ii < 0 || ii >= dim) continue;
-        const wgt = (dj === 0 ? 2 : 1) * (di === 0 ? 2 : 1);
-        const o = (jj * dim + ii) * L;
-        for (let q = 0; q < L; q++) acc[q] += raw[o + q] * wgt;
-        tw += wgt;
+  for (let j = 0; j < dim; j++) {
+    const rr = [j > 0 ? rawRow(j - 1) : null, rawRow(j), j < dim - 1 ? rawRow(j + 1) : null];
+    for (let i = 0; i < dim; i++) {
+      acc.fill(0);
+      let tw = 0;
+      for (let dj = -1; dj <= 1; dj++) {
+        const raw = rr[dj + 1]; if (!raw) continue;
+        for (let di = -1; di <= 1; di++) {
+          const ii = i + di; if (ii < 0 || ii >= dim) continue;
+          const wgt = (dj === 0 ? 2 : 1) * (di === 0 ? 2 : 1);
+          const o = ii * L;
+          for (let q = 0; q < L; q++) acc[q] += raw[o + q] * wgt;
+          tw += wgt;
+        }
       }
+      const o = (j * dim + i) * L;
+      for (let q = 0; q < L; q++) out[o + q] = Math.round(Math.min(1, acc[q] / tw) * 255);
     }
-    // roads keep a crisp edge: no blur for a road sample's own weight
-    const o = (j * dim + i) * L;
-    for (let q = 0; q < L; q++) out[o + q] = Math.round(Math.min(1, acc[q] / tw) * 255);
   }
   return out;
 }
@@ -387,7 +456,7 @@ function vertexColour(world, si, sj, x, z, y, out) {
   const { dim, heights, biome, water } = world;
   const k = sj * dim + si;
   const t = BIOMES[biome[k]].tint;
-  const strong = biome[k] === BIOME.canyon ? 0.95 : 0.55;
+  const strong = BIOMES[biome[k]].tintK ?? (biome[k] === BIOME.canyon ? 0.95 : 0.55);
   const r = 2;
   const kk = (a, b) => Math.min(dim - 1, Math.max(0, sj + b)) * dim + Math.min(dim - 1, Math.max(0, si + a));
   const around = (heights[kk(r, 0)] + heights[kk(-r, 0)] + heights[kk(0, r)] + heights[kk(0, -r)]) / 4;

@@ -2,7 +2,7 @@
 // stacks behind the cab, chrome fuel tanks, a black frame with a fifth-wheel plate and flat black fenders over the
 // tandem drive axles. The reference is a long-nose truck, but the physics puts the cab right over the front axle
 // (cab collider z 0.95 .. 2.85, seats at z 1.9), so this is drawn as a short-snout cab-over: same parts and colours,
-// a cab that sits where its collider is. Head clearance: seat 0.9 + 1.13 = 2.03 under a 2.07 ceiling.
+// a cab that sits where its collider is. Head clearance: a seated Chibi 2.6 (hips 0.9 + ~0.95) under a 2.07 ceiling.
 // The fifth-wheel plate is drawn 15 cm under the tow point (def.tow) so a hitched trailer's floor rests on it
 // instead of sinking into it; the walkway behind the cab is at the chassis collider's top (0.47).
 import { createKit } from './kit.js';

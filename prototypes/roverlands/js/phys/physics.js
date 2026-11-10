@@ -45,7 +45,9 @@ export function heightfieldArray(world) {
 }
 
 export function createPhysics(RAPIER, world, opts = {}) {
-  const rw = new RAPIER.World({ x: 0, y: -9.81, z: 0 });
+  // gravity (m/s², down): opts.gravity, else the world's own (the Moon: 1.62), else Earth's
+  const gravity = opts.gravity ?? world.gravity ?? 9.81;
+  const rw = new RAPIER.World({ x: 0, y: -gravity, z: 0 });
   rw.timestep = DT;
   // A few more solver passes keep stacked cargo and trailer joints calm.
   try { rw.integrationParameters.numSolverIterations = opts.solverIterations ?? 6; } catch { /* older builds */ }
@@ -194,7 +196,7 @@ export function createPhysics(RAPIER, world, opts = {}) {
   }
 
   return {
-    RAPIER, rw, world, ground, events,
+    RAPIER, rw, world, ground, events, gravity,
     step, tick, get ticks() { return ticks; },
     onTick(f) { tickers.add(f); return () => tickers.delete(f); },
     afterTick(f) { after.add(f); return () => after.delete(f); },

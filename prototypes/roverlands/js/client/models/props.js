@@ -22,6 +22,13 @@ export function buildProp(THREE, def, opts = {}) {
     k.box('orange', [0.36, 0.3, 0.14], [0, 0.05, 0.12], { bevel: 0.04 });
     const flame = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.5, 8).rotateX(Math.PI), k.mat('flame'));
     flame.position.set(0, -0.6, 0); flame.visible = false; g.add(flame); g.userData.flame = flame;
+  } else if (def.kind === 'kit_crate') {
+    // M10: a survey kit's case — olive with steel corners and two latches (survey-play.js adds the kit's coloured band)
+    k.box('olive', [sh.hx * 2, sh.hy * 2, sh.hz * 2], [0, 0, 0], { bevel: 0.04 });
+    k.box('oliveDark', [sh.hx * 2.04, 0.06, sh.hz * 2.04], [0, sh.hy * 0.35, 0], { bevel: 0.01 });
+    for (const sx of [1, -1]) for (const sz of [1, -1]) k.box('steel', [0.1, sh.hy * 2.02, 0.1], [sx * (sh.hx - 0.03), 0, sz * (sh.hz - 0.03)], { bevel: 0.01 });
+    for (const sx of [1, -1]) k.box('metal', [0.1, 0.12, 0.04], [sx * sh.hx * 0.5, sh.hy * 0.35, sh.hz + 0.02], { bevel: 0.01 });
+    k.box('black', [sh.hx * 0.8, 0.05, 0.08], [0, sh.hy + 0.03, 0], { bevel: 0.02 });
   } else k.box('crateWood', [sh.hx * 2 || 0.5, sh.hy * 2 || 0.5, sh.hz * 2 || 0.5], [0, 0, 0], {});
   k.finish(g);
   return { group: g, wheels: [], update(st) { if (g.userData.flame) { g.userData.flame.visible = !!st?.flame; g.userData.flame.scale.y = 0.8 + Math.random() * 0.5; } } };

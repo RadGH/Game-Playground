@@ -51,6 +51,7 @@ export function cleanLook(look) {
     return undefined;
   };
   const out = walk(look, 0);
+  if (out && typeof out === 'object') out.race = 'human';     // Roverlands is people only: humans (owner 2026-11-09)
   return out && JSON.stringify(out).length <= 4096 ? out : null;
 }
 
@@ -106,7 +107,7 @@ export function isEnt(e) {
 // 'a|b' = either. A message's `rate` is how many a second it may come, `burst` how many in a row.
 export const CLIENT_MSGS = Object.freeze({
   // ---- the front desk (server/hub.js; the loopback answers the same way)
-  hello:   { fields: { v: 'int', token: '?str:64', ticket: '?str:200' }, rate: 2, burst: 4 },
+  hello:   { fields: { v: 'int', token: '?str:64', ticket: '?str:200', device: '?str:64' }, rate: 2, burst: 4 },   // device: this browser's lasting id (a guest's profile key)
   create:  { fields: { mode: 'str:10', public: '?bool', start: '?bool', seed: '?int', flagId: '?str:40', name: '?str:40', look: '?look' }, rate: 0.5, burst: 3 },
   join:    { fields: { code: 'str:8', spectate: '?bool', name: '?str:40', look: '?look' }, rate: 1, burst: 6 },
   leave:   { fields: {}, rate: 1, burst: 3 },
@@ -134,6 +135,20 @@ export const CLIENT_MSGS = Object.freeze({
   rate:    { fields: { what: 'str:32', up: 'bool', reasons: '?list:8', note: '?str:400' }, rate: 0.5, burst: 4 },
   reset:   { fields: { flagId: '?str:40' }, rate: 0.5, burst: 2 },                       // host: a new run
   ping:    { fields: { c: 'num' }, rate: 2, burst: 6 },
+  // ---- Expansion 1 M2: the profile, places, summoning (docs/EXPANSION-1.md "Contracts (added)")
+  buy:     { fields: { item: 'str:48' }, rate: 2, burst: 4 },                              // buy one thing from data/shop.json
+  go:      { fields: { place: 'str:10', at: '?v3' }, rate: 1, burst: 3 },                   // move to another place (county, sky, moon…)
+  summon:  { fields: { vehicle: 'str:32', p: 'v3', yaw: '?num' }, rate: 1, burst: 3 },      // call an owned vehicle to a spot near you
+  // ---- Expansion 1 M11: space (js/game/space.js) — step 'launch' (id = the rocket, at orbit height), 'touchdown' (my
+  //      pod is down), 'bail' (I jumped out of it in the air), 'lap' (a lap of Lantern Station)
+  space:   { fields: { step: 'str:12', id: '?id' }, rate: 2, burst: 4 },
+  // ---- Expansion 1 M4: job upgrades, driving stats (docs/PLAN.md "Net contract additions (M4)")
+  upgrade: { fields: { id: 'str:40' }, rate: 2, burst: 4 },                                 // buy a job upgrade (data/jobs.json)
+  stats:   { fields: { metres: 'num' }, rate: 0.25, burst: 2 },                             // metres driven since the last report (~every 10 s)
+  // ---- Expansion 1 M6: a job step for the job referee (js/net/jobs-core.js; docs/EXPANSION-1.md "Jobs")
+  //      id = the job, step = what was done (farming: cut / plant / water / refill / sell / sync), cells = the field cells
+  //      worked, veh = the machine that did it, to = where the crop went (a towed produce trailer), p = where, n / on spare
+  job:     { fields: { id: 'str:24', step: 'str:16', cells: '?ids:400', veh: '?id', to: '?id', p: '?v3', n: '?int', on: '?bool', kit: '?str:24' }, rate: 14, burst: 28 },     // kit (M10): a survey kit id
 });
 
 function typeOk(v, type) {
@@ -184,4 +199,4 @@ export function createBuckets(now) {
     if (s.n < 1) return false; s.n -= 1; return true;
   } };
 }
-export const MODES = Object.freeze(['flag', 'sandbox']);
+export const MODES = Object.freeze(['county', 'flag', 'sandbox']);

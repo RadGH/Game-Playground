@@ -11,6 +11,10 @@
 // Extras (docs/PLAN.md "Net contract additions"): net.on('status', s => …) 'online' | 'reconnecting' | 'closed';
 // net.on('<type>', fn) for one message type; net.off(type, fn); net.status, net.online, net.code, net.ping (ms),
 // net.serverNow() (the room's clock, for the run timer), net.stats().
+// Expansion 1 M2: `net.last.profile` = the newest `{ t:'profile', profile }` (gold, what you own); `ticket` (signed in)
+// or this browser's lasting `device` id says whose profile it is online. `shop` (data/shop.json) is for solo only.
+// M4: `jobs` / `achievements` (data/jobs.json, data/achievements.json) are for solo only too; `net.last.look` = the newest
+// `{ t:'look' }` (the room swapped clothes you do not own out of your look, County rooms).
 // `sites` + `vehicles` are only read for solo play (the server builds its own from the seed and data/vehicles.json).
 //
 // A dropped line comes back by itself (a phone that slept, a wifi hiccup): it says hello with this tab's token and asks
@@ -51,18 +55,34 @@ export async function listRooms() {
   try { const r = await fetch(apiRoot() + 'rooms', { cache: 'no-store' }); if (!r.ok) return []; return (await r.json()).list || []; } catch { return []; }
 }
 
-export function connect({ online = true, url = null, code = null, create = null, spectate = false, name = null, look = null, ticket = null, sites = {}, vehicles = {}, socket = null } = {}) {
+/** This browser's lasting id (localStorage): a guest's saved profile (gold, what they own) is kept under it on the server. */
+const DEVICE_KEY = 'roverlands.device';
+export function deviceId() {
+  try {
+    let d = localStorage.getItem(DEVICE_KEY);
+    if (!d || !/^[A-Za-z0-9_-]{16,64}$/.test(d)) {
+      const b = new Uint8Array(18); crypto.getRandomValues(b);
+      d = btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      localStorage.setItem(DEVICE_KEY, d);
+    }
+    return d;
+  } catch { return null; }
+}
+
+export function connect({ online = true, url = null, code = null, create = null, spectate = false, name = null, look = null, ticket = null, device = undefined, sites = {}, vehicles = {}, shop = {}, jobs = {}, achievements = {}, socket = null } = {}) {
   const handlers = new Map();
   const net = { you: null, room: null, code: null, status: 'connecting', online: !!online, ping: 0, build: null };
   let ws = null, tries = 0, wanted = true, joined = false, offset = 0, bytesIn = 0, bytesOut = 0, since = Date.now();
   let settle = null, token = ss.get(TOKEN_KEY);
+  const dev = online ? (device === undefined ? deviceId() : device) : null;
   const ready = new Promise((res, rej) => { settle = { res, rej }; });
   // the newest copy of every "picture of the room" message, so a game that starts listening after joining can catch
   // up (net.last.ents, net.last.flag…; `broken` accumulates; the last FULL state is kept as net.last.state)
-  const KEEP = new Set(['ents', 'flag', 'run', 'room']);
+  const KEEP = new Set(['ents', 'flag', 'run', 'room', 'profile', 'look']);
   // pins accumulate too: net.last.pins = { pid: [x, z] }
   net.last = { broken: { t: 'broken', objs: [] }, cut: { t: 'cut', cells: [] }, pins: {} };
-  const keep = m => { if (KEEP.has(m.t)) net.last[m.t] = m; else if (m.t === 'broken') net.last.broken.objs.push(...(m.objs || [])); else if (m.t === 'cut') { for (const c of m.cells || []) net.last.cut.cells.push(c); } else if (m.t === 'state' && m.full) net.last.state = m; else if (m.t === 'pin') { if (m.p) net.last.pins[m.pid] = m.p; else delete net.last.pins[m.pid]; } };
+  // a change of place (M11: `go`) starts the picture again: the room sends the new place's bodies, breaks and pins next
+  const keep = m => { if (m.t === 'go') { net.last.go = m; net.last.broken = { t: 'broken', objs: [] }; net.last.cut = { t: 'cut', cells: [] }; net.last.pins = {}; delete net.last.state; } else if (KEEP.has(m.t)) net.last[m.t] = m; else if (m.t === 'broken') net.last.broken.objs.push(...(m.objs || [])); else if (m.t === 'cut') { for (const c of m.cells || []) net.last.cut.cells.push(c); } else if (m.t === 'state' && m.full) net.last.state = m; else if (m.t === 'pin') { if (m.p) net.last.pins[m.pid] = m.p; else delete net.last.pins[m.pid]; } };
   const fire = (t, m) => { for (const fn of (handlers.get(t) || []).slice()) { try { fn(m); } catch (e) { console.error('[roverlands] net handler', t, e); } } };
   net.on = (t, fn) => { if (!handlers.has(t)) handlers.set(t, []); handlers.get(t).push(fn); return net; };
   net.off = (t, fn) => { const L = handlers.get(t); if (L) { const i = L.indexOf(fn); if (i >= 0) L.splice(i, 1); } return net; };
@@ -111,14 +131,15 @@ export function connect({ online = true, url = null, code = null, create = null,
   }
   function open() {
     if (!online) {
-      ws = socket || createLoopback({ sites, vehicles });
+      ws = socket || createLoopback({ sites, vehicles, shop, jobs, achievements });
       ws.onmessage = onText;
       ws.onclose = () => setStatus('closed');
       queueMicrotask(() => raw({ t: 'hello', v: PROTOCOL }));
       return;
     }
     try { ws = socket || new WebSocket(url || wsUrlFor()); } catch (e) { setStatus('closed'); settle.rej(Object.assign(new Error('Could not reach the server.'), { code: 'network' })); return; }
-    ws.onopen = () => raw({ t: 'hello', v: PROTOCOL, ...(token ? { token } : {}), ...(ticket ? { ticket } : {}) });
+    // the ticket is good once: only the first hello carries it (a reconnect is known by its token)
+    ws.onopen = () => { raw({ t: 'hello', v: PROTOCOL, ...(token ? { token } : {}), ...(ticket ? { ticket } : {}), ...(dev ? { device: dev } : {}) }); ticket = null; };
     ws.onmessage = e => { if (typeof e.data === 'string') onText(e.data); };
     ws.onclose = () => {
       if (!wanted) return setStatus('closed');
@@ -142,6 +163,8 @@ export function connect({ online = true, url = null, code = null, create = null,
     try { ws?.close(); } catch { /* closed */ }
     setStatus('closed');
   };
+  /** Tests (M12): solo play's room in this page (the loopback socket; its `.core` is the room) — null online. */
+  Object.defineProperty(net, 'loop', { get: () => (online ? null : ws) });
   /** Tests and the debug menu: drop the line as if the phone slept (no "leave"); it comes back by itself. */
   net.drop = () => { try { ws?.close(); } catch { /* closed */ } };
   open();

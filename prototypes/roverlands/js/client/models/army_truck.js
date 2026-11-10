@@ -1,5 +1,5 @@
 // Trailhauler Six (reference: assets/ref/army_truck.webp). A six-wheel olive cargo truck: a flat-fronted cab (its
-// box = the cab collider, roof 2.11 over seated heads at 1.98) with round lamps, a slatted grille and tall mirrors;
+// box = the cab collider, roof 1.98 over a seated Chibi 2.6 adult: hips 0.9 + ~0.95) with round lamps, a slatted grille and tall mirrors;
 // an open bed whose floor is the chassis top (0.45), plank-topped benches along both sides and slatted side rails,
 // all where their colliders are. No markings or insignia. The tailgate (`tailgate` node) is hinged at the bed's rear
 // edge and swings down from st.acts.door_tailgate to the open collider's slope, a ramp plate sliding out of it to
@@ -85,6 +85,8 @@ export function build(THREE, def, opts = {}) {
   steer.add(new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.024, 5, 14), k.mat(T)));
   steer.traverse(o => { o.userData.detail = true; });
   k.tube(T, [[wheelAt[0], wheelAt[1] - 0.04, wheelAt[2] + 0.04], [wheelAt[0], belt - 0.2, cabZ1 - 0.3]], 0.03, { seg: 6 });
+  // grab rail on the back of the cab for the standing rider in the bed (their hands: that seat's grips)
+  k.tube(T, [[0.5, 1.4, cabZ0], [0.5, 1.56, cabZ0 - 0.08], [-0.5, 1.56, cabZ0 - 0.08], [-0.5, 1.4, cabZ0]], 0.025, { seg: 5 });
   // exhaust stack + air intake behind the cab
   k.cyl('darkMetal', 0.07, 1.9, [-(cx + 0.1), 1.4, cabZ0 - 0.04], { seg: 8 });
   k.cyl(K, 0.08, 0.2, [-(cx + 0.1), 2.3, cabZ0 - 0.04], { seg: 8 });

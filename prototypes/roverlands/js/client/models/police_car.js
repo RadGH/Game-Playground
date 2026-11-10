@@ -10,11 +10,12 @@ export function build(THREE, def, opts = {}) {
   const k = createKit(THREE, opts);
   const group = new THREE.Group();
   const N = 'navy', W = 'hullWhite', K = 'black', T = 'trim';
-  const belt = 0.58, roofY = 1.62, floorY = -0.08;
+  // Chibi 2.6 fit: a real-car cabin — hips 0.07, footwell 0.27 under them, roof underside hips + 1.0 (1.7 m off the ground)
+  const belt = 0.58, roofY = 1.1, floorY = -0.2;
   const zA = 1.1, zAt = 0.62, zC = -1.18, zCt = -0.76;   // windscreen foot/top, rear window foot/top
 
   // --- floor pan + engine bay (hidden mass that fills the body between the wheels) -----------------------------
-  k.box(N, [1.36, 0.24, 4.1], [0, floorY - 0.12, 0], { bevel: 0.03 });
+  k.box(N, [1.36, floorY + 0.32, 4.1], [0, (floorY - 0.32) / 2, 0], { bevel: 0.03 });
   k.box('seat', [1.3, 0.02, 2.0], [0, floorY + 0.01, -0.15], { bevel: 0 });             // floor mat
   k.box('darkMetal', [1.3, 0.5, 0.95], [0, 0.18, 1.55], { bevel: 0.03 });                // engine bay
 

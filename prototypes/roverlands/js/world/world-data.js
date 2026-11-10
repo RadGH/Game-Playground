@@ -19,6 +19,12 @@ export const SURFACES = [
   { id: 8, name: 'ice',      grip: 0.25, sink: 0.00, drag: 0.9, rut: 0.05, dust: '#dfeefa' },
   { id: 9, name: 'farm',     grip: 0.90, sink: 0.03, drag: 1.3, rut: 0.55, dust: '#9a7a4a' },
   { id: 10, name: 'shallows', grip: 0.70, sink: 0.05, drag: 2.0, rut: 0.30, dust: '#9ab8c8' },
+  // Wayfare County only (the classic world never paints them): the same grip as `road`, a paved look
+  { id: 11, name: 'asphalt',  grip: 1.15, sink: 0.00, drag: 0.9, rut: 0.05, dust: '#5e5d5a' },
+  { id: 12, name: 'concrete', grip: 1.15, sink: 0.00, drag: 0.9, rut: 0.04, dust: '#a8a49c' },
+  // The Moon only (map 'moon', moon/): loose grey dust over rock, and bare rock on steep walls and fresh rims
+  { id: 13, name: 'regolith', grip: 0.78, sink: 0.04, drag: 1.25, rut: 0.85, dust: '#9c9a96' },
+  { id: 14, name: 'moonrock', grip: 1.00, sink: 0.00, drag: 1.0, rut: 0.02, dust: '#7a7876' },
 ];
 export const SURF = Object.fromEntries(SURFACES.map(s => [s.name, s.id]));
 
@@ -35,6 +41,27 @@ export const BIOMES = [
   { id: 7, key: 'snow',   label: 'Snowy uplands',    map: '#e4eaee', tint: [0.98, 1.00, 1.04] },
   { id: 8, key: 'farm',   label: 'Farmland',         map: '#b5a160', tint: [1.04, 1.00, 0.86] },
   { id: 9, key: 'lot',    label: 'Sandbox lot',      map: '#9a8a6a', tint: [1.00, 0.96, 0.90] },
+  // Wayfare County (map 'county', js/world/county/). Appended: classic worlds never use these ids.
+  // forest = how much of a grass sample the ground draws as forest floor; tintK = how strongly the tint shows.
+  { id: 10, key: 'c_vale',      label: 'Wayfare Vale',        map: '#86a052', tint: [1.00, 1.00, 0.92] },
+  { id: 11, key: 'c_forest',    label: 'Pinefold Forest',     map: '#3f6a3a', tint: [0.86, 0.94, 0.86], forest: 0.75 },
+  { id: 12, key: 'c_giantwood', label: 'Elderwood',           map: '#2c5230', tint: [0.80, 0.92, 0.80], forest: 0.92 },
+  { id: 13, key: 'c_mountain',  label: 'Greyspine Mountains', map: '#8e8b84', tint: [0.96, 0.96, 0.97] },
+  { id: 14, key: 'c_plateau',   label: 'Highgate Plateau',    map: '#97a55c', tint: [1.03, 1.00, 0.88] },
+  { id: 15, key: 'c_badlands',  label: 'Rustwild',            map: '#b8703f', tint: [1.34, 0.82, 0.58], tintK: 0.95 },
+  { id: 16, key: 'c_hills',     label: 'Copper Hills',        map: '#9c9a52', tint: [1.08, 0.98, 0.84], tintK: 0.7 },
+  { id: 17, key: 'c_farm',      label: 'Marrow Flats farms',  map: '#bba564', tint: [1.04, 1.00, 0.86] },
+  { id: 18, key: 'c_city',      label: 'Town',                map: '#a8a092', tint: [1.00, 0.98, 0.95] },
+  { id: 19, key: 'c_shore',     label: 'Lakeshore',           map: '#8fae6a', tint: [0.96, 1.02, 0.94] },
+  { id: 20, key: 'c_gorge',     label: 'Tollen Gorge',        map: '#8c6a52', tint: [1.18, 0.90, 0.74], tintK: 0.85 },
+  { id: 21, key: 'c_airfield',  label: 'Wayfare Field',       map: '#93a45c', tint: [1.00, 1.00, 0.92] },
+  // The Moon (map 'moon', moon/) and Lantern Station (map 'station', station/). Appended: no other map uses them.
+  { id: 22, key: 'm_mare',      label: 'Hush Sea',            map: '#6c6c70', tint: [0.86, 0.86, 0.88], tintK: 1 },
+  { id: 23, key: 'm_highland',  label: 'Moon highlands',      map: '#9a9894', tint: [1.04, 1.03, 1.00], tintK: 1 },
+  { id: 24, key: 'm_crater',    label: 'Crater',              map: '#85837f', tint: [0.96, 0.95, 0.93], tintK: 1 },
+  { id: 25, key: 'm_rille',     label: 'Silverthread Rille',  map: '#5e5e62', tint: [0.80, 0.80, 0.82], tintK: 1 },
+  { id: 26, key: 'm_base',      label: 'Greywatch Base',      map: '#b4b2ac', tint: [1.00, 1.00, 1.00], tintK: 1 },
+  { id: 27, key: 's_station',   label: 'Lantern Station',     map: '#2a3140', tint: [1.00, 1.00, 1.00] },
 ];
 export const BIOME = Object.fromEntries(BIOMES.map(b => [b.key, b.id]));
 
@@ -92,6 +119,12 @@ export const ROAD_CLASSES = {
   road:   { halfW: 3.6, shoulder: 7, maxGrade: 0.40, clamp: 0.18, surface: 7, smooth: 7 },
   gravel: { halfW: 2.7, shoulder: 6, maxGrade: 0.45, clamp: 0.19, surface: 4, smooth: 6 },
   track:  { halfW: 1.9, shoulder: 4, maxGrade: 0.60, clamp: 0.34, surface: 1, smooth: 3 },
+  // Wayfare County classes (classic worlds never use them). The county holds every road to a gentler grade.
+  highway:  { halfW: 4.6, shoulder: 10, maxGrade: 0.20, clamp: 0.07, surface: 11, smooth: 12 },   // asphalt
+  lane:     { halfW: 3.6, shoulder: 7, maxGrade: 0.26, clamp: 0.11, surface: 11, smooth: 8 },
+  street:   { halfW: 4.2, shoulder: 3, maxGrade: 0.30, clamp: 0.10, surface: 11, smooth: 2 },
+  mountain: { halfW: 3.0, shoulder: 7, maxGrade: 0.15, clamp: 0.12, surface: 4, smooth: 5 },
+  dirt:     { halfW: 2.0, shoulder: 4, maxGrade: 0.32, clamp: 0.22, surface: 1, smooth: 3 },
 };
 
 /**
@@ -121,6 +154,12 @@ export const KINDS = {
   bridge_rail: { breakAt: null },
   bridge_pier: { breakAt: null },
   shed:        { breakAt: null },
+  // Wayfare County
+  tree_giant:  { h: 50, r: 1.72, colH: 30, mass: 90000, breakAt: null, fall: 'topple' },   // r = h / 29: 2.8-4.1 m across
+  building:    { breakAt: null },   // box collider, sized per object; role/roof/colour carried on the object
+  guard_post:  { r: 0.12, colH: 1.0, mass: 45, breakAt: 7000, fall: 'topple' },   // white posts round the switchback's hairpins
+  // Lantern Station (map 'station'): a wall / floor / ceiling panel of a module (box collider; `glass: true` = a window)
+  hull:        { breakAt: null },
 };
 
 /**

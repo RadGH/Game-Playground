@@ -6,6 +6,12 @@
 // The character stands in the 3D view in the space the panel leaves (panel on the right in landscape, a bottom sheet
 // held upright), turning slowly, rebuilt a moment after each change. Nothing inside the panel scrolls on its own: the
 // panel is the only scroller (a nested scroller blanks the WebGL canvas on phones).
+//
+// `races` (optional): which peoples the Face & body tab offers (Roverlands: humans only); one = no row.
+// `limit` (optional, Roverlands' phone Wardrobe): { wearIds(slot) -> ids | null, slots?: [slot…], title?, note? } —
+// each costume slot steps only through the ids it returns (null = every part), only `slots` are listed, and the
+// whole-costume presets and "Surprise me" are hidden (they would put on things the player does not have). Without it
+// the builder is exactly as before.
 import { FACE_SLOTS, BODY_DIALS, BODY_PICKS, PALETTES, PART_NAMES, slotIds, customFrom } from '../../../thousandvale/js/client/ui/appearance-core.js';
 import { WEAR_SLOTS, wearIds, wearHasColour, partName, CLOTH, RACES, RACE_NAMES, presets, withPreset, avatarOf, randomLook, wearOf } from './look.js';
 import { createModel } from './puppet.js';
@@ -14,7 +20,9 @@ import { esc } from './feedback.js';
 const FACE_ONLY = FACE_SLOTS.filter(s => !['accessory', 'extras', 'ears'].includes(s.slot));
 const niceFace = (slot, id) => PART_NAMES[slot]?.[id] || partName(slot, id);
 
-export function openBuilder({ player, view, nav, root, onChange, onClose, sounds, account = null }) {
+export function openBuilder({ player, view, nav, root, onChange, onClose, sounds, account = null, limit = null, races = RACES }) {
+  const idsFor = slot => (limit?.wearIds?.(slot) || wearIds(slot));
+  const slotsShown = limit?.slots ? WEAR_SLOTS.filter(s => limit.slots.includes(s.slot)) : WEAR_SLOTS;
   let look = JSON.parse(JSON.stringify(player.look)), tab = 'costume', model = null, closed = false, rebuild = 0, name = player.name;
   const el = document.createElement('div'); el.className = 'builder'; root.append(el);
   const sheet = document.createElement('div'); sheet.className = 'panel bsheet'; el.append(sheet);
@@ -30,18 +38,18 @@ export function openBuilder({ player, view, nav, root, onChange, onClose, sounds
     const P = presets(), cur = look.preset ? P.find(p => p.id === look.preset) : null;
     const wear = look.wear || {};
     const costume = `
-      <div class="b-row b-preset"><span>Whole costume</span>${stepper('data-preset', cur ? cur.name : 'Pick one…')}</div>
-      <p class="note">A costume fills every piece below. Then change any piece on its own.</p>
-      ${WEAR_SLOTS.map(({ slot, label }) => { const part = wear[slot] || { id: 'none' }; return `<div class="b-row"><span>${label}</span>${stepper(`data-wear="${slot}"`, partName(slot, part.id))}${wearHasColour(slot) && part.id !== 'none' ? `<div class="sws">${swatches(CLOTH, part.color, `data-wearc="${slot}"`)}</div>` : ''}</div>`; }).join('')}`;
+      ${limit ? `<p class="note">${esc(limit.note || '')}</p>` : `<div class="b-row b-preset"><span>Whole costume</span>${stepper('data-preset', cur ? cur.name : 'Pick one…')}</div>
+      <p class="note">A costume fills every piece below. Then change any piece on its own.</p>`}
+      ${slotsShown.map(({ slot, label }) => { const part = wear[slot] || { id: 'none' }; return `<div class="b-row"><span>${label}</span>${stepper(`data-wear="${slot}"`, partName(slot, part.id))}${wearHasColour(slot) && part.id !== 'none' ? `<div class="sws">${swatches(CLOTH, part.color, `data-wearc="${slot}"`)}</div>` : ''}</div>`; }).join('')}`;
     const face = `
-      <div class="b-row"><span>People</span><div class="pills">${RACES.map(r => `<button class="pill${look.race === r ? ' on' : ''}" data-race="${r}">${RACE_NAMES[r]}</button>`).join('')}</div></div>
+      ${races.length > 1 ? `<div class="b-row"><span>People</span><div class="pills">${races.map(r => `<button class="pill${look.race === r ? ' on' : ''}" data-race="${r}">${RACE_NAMES[r]}</button>`).join('')}</div></div>` : ''}
       <div class="b-row"><span>Skin</span><div class="sws">${swatches(PALETTES.skin, custom.body?.skin, 'data-skin')}</div></div>
       ${FACE_ONLY.map(s => { const ids = slotIds(s, look.race), v = s.slot === 'headShape' ? custom.headShape : custom[s.slot]?.id; return `<div class="b-row"><span>${s.label}</span>${stepper(`data-face="${s.slot}"`, niceFace(s.slot, v || ids[0]))}${s.color ? `<div class="sws">${swatches(PALETTES[s.color], custom[s.slot]?.color, `data-facec="${s.slot}"`)}</div>` : ''}</div>`; }).join('')}
       ${BODY_PICKS.map(p => `<div class="b-row"><span>${p.label}</span>${stepper(`data-pick="${p.key}"`, p.names?.[custom.body?.[p.key] ?? p.ids[0]] || custom.body?.[p.key] || p.ids[0])}</div>`).join('')}
       ${BODY_DIALS.map(d => `<label class="b-row"><span>${d.label}</span><input type="range" min="${d.min}" max="${d.max}" step="0.01" value="${custom.body?.[d.key] ?? (d.min + d.max) / 2}" data-dial="${d.key}"></label>`).join('')}`;
     sheet.innerHTML = `
-      <div class="b-head" style="--seat:${player.color}"><i class="b-dot"></i><input class="b-name" maxlength="14" value="${esc(name)}" aria-label="Name" data-nav="1"><button class="btn small" data-random="1">Surprise me</button><button class="btn small primary" data-back="1" data-done="1">Done</button></div>
-      <div class="tabs"><button class="tab${tab === 'costume' ? ' on' : ''}" data-tab="costume">Costume</button><button class="tab${tab === 'face' ? ' on' : ''}" data-tab="face">Face &amp; body</button></div>
+      <div class="b-head" style="--seat:${player.color}"><i class="b-dot"></i><input class="b-name" maxlength="14" value="${esc(name)}" aria-label="Name" data-nav="1">${limit ? '' : '<button class="btn small" data-random="1">Surprise me</button>'}<button class="btn small primary" data-back="1" data-done="1">Done</button></div>
+      <div class="tabs"><button class="tab${tab === 'costume' ? ' on' : ''}" data-tab="costume">${limit?.title || 'Costume'}</button><button class="tab${tab === 'face' ? ' on' : ''}" data-tab="face">Face &amp; body</button></div>
       <div class="b-body">${tab === 'costume' ? costume : face}</div>
       <p class="note hint">${player.dev && player.dev !== 'touch' && player.dev !== 'mouse' ? 'Move with the stick / d-pad, A to pick, B when done.' : 'Tap a piece to change it.'}</p>
       ${account ? '<div class="b-acct"><span>Optional: sign in to keep this fighter on every device</span></div>' : ''}`;
@@ -58,7 +66,7 @@ export function openBuilder({ player, view, nav, root, onChange, onClose, sounds
     const pr = t.closest('[data-preset]');
     if (pr) { const P = presets(); if (!P.length) return; const ids = P.map(p => p.id); const id = look.preset ? step(ids, look.preset, +pr.dataset.d) : ids[pr.dataset.d > 0 ? 0 : ids.length - 1]; look = withPreset({ ...look, custom }, id); return commit(); }
     const w = t.closest('[data-wear]');
-    if (w) { const slot = w.dataset.wear, ids = wearIds(slot), part = look.wear?.[slot] || { id: 'none' }; look = { ...look, wear: { ...(look.wear || {}), [slot]: { ...part, id: step(ids, part.id, +w.dataset.d) } } }; return commit(); }
+    if (w) { const slot = w.dataset.wear, ids = idsFor(slot), part = look.wear?.[slot] || { id: 'none' }; look = { ...look, wear: { ...(look.wear || {}), [slot]: { ...part, id: step(ids, part.id, +w.dataset.d) } } }; return commit(); }
     const wc = t.closest('[data-wearc]');
     if (wc) { const slot = wc.dataset.wearc, part = look.wear?.[slot] || { id: 'none' }; look = { ...look, wear: { ...(look.wear || {}), [slot]: { ...part, color: wc.dataset.c } } }; return commit(); }
     const race = t.closest('[data-race]');

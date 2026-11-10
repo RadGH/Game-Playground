@@ -34,10 +34,9 @@ export function tally(name, props) {
 }
 addEventListener('pagehide', flush);
 
-/** The ! button + its form. `shot()` -> a JPEG data URL or null; `debug()` -> a plain object. */
+/** The report form, opened from the ☰ menu's "Report a bug" (game standards: no floating "!" button on screen).
+ *  `shot()` -> a JPEG data URL or null; `debug()` -> a plain object. */
 export function installReport({ layers, shot, debug, nameOf = () => '' }) {
-  const btn = el('button', 'rl-corner rl-report-btn', '!'); btn.type = 'button';
-  btn.title = 'Report a bug or suggest something'; btn.setAttribute('aria-label', btn.title);
   let open = null;
   function show({ kind = 'bug', text = '' } = {}) {
     if (open) return;
@@ -69,6 +68,5 @@ export function installReport({ layers, shot, debug, nameOf = () => '' }) {
       } catch (x) { err.textContent = x.message || 'Could not send it. Try again in a moment.'; send.disabled = false; send.textContent = 'Send'; }
     });
   }
-  btn.addEventListener('click', () => show());
-  return { button: btn, open: show, get isOpen() { return !!open; } };
+  return { open: show, get isOpen() { return !!open; } };
 }

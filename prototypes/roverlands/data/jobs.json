@@ -1,0 +1,207 @@
+{
+  "_doc": "Every job in Wayfare County (docs/EXPANSION-1.md 'Jobs'). A level unlocks when the one before it has been done once. `pay` is per step (steps) or per run; `hidden` jobs show obscured in the Jobs checklist until `reveal` happens (an achievement id or 'found' = reach the job's place). Upgrades are bought once, kept forever, and change how the job plays. `vehicles` = the vehicles the job is done with (any one of them).",
+  "jobs": [
+    {
+      "id": "farming", "name": "Farming", "place": "county", "where": "Marrow Flats farm belt",
+      "vehicles": ["tractor", "harvester", "seed_drill", "water_bowser", "produce_trailer"],
+      "blurb": "Cut the crop, plant it again, water it, and repeat. Every step pays. Sell the harvest at the market.",
+      "_doc": "M6 (js/game/jobs/farming.js). steps = gold per batch of `batch` field cells (4 x 4 m) cut / planted / watered; selling pays deliver_per_unit per cell of crop plus deliver_per_km per cell per km carried. level.fields = how many fields that level opens (nearest the farm yard first); level.need = the goal the referee checks (farming.js goalMet); level.pay = the bonus when the goal is first met.",
+      "batch": 10,
+      "steps": { "cut": 12, "plant": 8, "water": 6, "deliver_per_unit": 3, "deliver_per_km": 2 },
+      "levels": [
+        { "n": 1, "title": "One field", "goal": "Cut, plant and water most of field 1 (wheat)", "fields": 1, "crops": ["wheat"], "pay": 150, "need": { "cycle": 0.7, "crop": "wheat" } },
+        { "n": 2, "title": "Market run", "goal": "Sell a full trailer (or hopper) of produce at the Marrow Flats market", "fields": 2, "crops": ["wheat"], "pay": 250, "need": { "fullLoad": 1 } },
+        { "n": 3, "title": "Root crops", "goal": "Harvest and sell most of a field of carrots", "fields": 3, "crops": ["wheat", "carrot"], "pay": 400, "need": { "sell": { "carrot": 0.7 } } },
+        { "n": 4, "title": "Big order", "goal": "Sell 3 loads at the Port Lindell depot within 30 minutes", "fields": 4, "crops": ["wheat", "carrot", "pumpkin"], "pay": 600, "need": { "loads": 3, "city": "port_lindell", "within": 1800, "part": 0.5 } },
+        { "n": 5, "title": "Whole belt", "goal": "Have every field replanted at once", "fields": 10, "crops": ["wheat", "carrot", "pumpkin", "sunflower"], "pay": 1000, "need": { "replanted": 0.6 } }
+      ],
+      "upgrades": [
+        { "id": "farm_wide_drill", "name": "Wide seed drill", "cost": 900, "effect": "The seed drill plants a strip twice as wide" },
+        { "id": "farm_big_tank", "name": "Big water tank", "cost": 700, "effect": "The bowser holds twice the water before refilling" },
+        { "id": "farm_quick_grow", "name": "Rich soil", "cost": 1500, "effect": "Crops grow in half the time" },
+        { "id": "farm_tall_sides", "name": "Tall trailer sides", "cost": 600, "effect": "The produce trailer holds 50% more" }
+      ]
+    },
+    {
+      "id": "fire", "name": "Firefighting", "place": "county", "where": "Fire stations in Marrow Flats and Port Lindell",
+      "vehicles": ["fire_truck"],
+      "blurb": "Something is burning. Drive there, spray it out. Pay grows with the distance and how bad the fire got.",
+      "_doc": "M7 (js/game/jobs/fire.js). A fire's severity (1-10) climbs one step every 45 s nobody sprays it; grass fires spread. Water from a fire truck's cannon that lands in it puts it out; pay = pay.base + km from the nearest fire station x pay.per_km + the highest severity it reached x pay.per_severity, to everyone who sprayed it, everyone in their trucks and anyone within 30 m. level.need = the goal (fire.js fireMeets): kind, maxR (its radius when it went out), minSev (level 5's fire starts at that severity). level.pay = the bonus when it is first met. level.kinds = the fires a call may be once every level is done.",
+      "pay": { "base": 60, "per_km": 40, "per_severity": 25 },
+      "levels": [
+        { "n": 1, "title": "Hay fire", "goal": "Put out a burning hay stack", "kinds": ["hay"], "pay": 120, "need": { "kind": "hay" } },
+        { "n": 2, "title": "Barn fire", "goal": "Save a burning barn", "kinds": ["hay", "barn"], "pay": 200, "need": { "kind": "barn" } },
+        { "n": 3, "title": "Grass fire", "goal": "Stop a grass fire before it spreads past 40 m", "kinds": ["hay", "barn", "grass"], "pay": 300, "need": { "kind": "grass", "maxR": 40 } },
+        { "n": 4, "title": "House fire", "goal": "Put out a house fire in town", "kinds": ["barn", "grass", "house"], "pay": 450, "need": { "kind": "house" } },
+        { "n": 5, "title": "Big one", "goal": "Put out a severity 8 fire", "kinds": ["grass", "house", "warehouse"], "pay": 700, "need": { "minSev": 8 } }
+      ],
+      "upgrades": [
+        { "id": "fire_long_hose", "name": "Long-reach cannon", "cost": 800, "effect": "The water cannon reaches 40% further" },
+        { "id": "fire_big_tank", "name": "Bigger water tank", "cost": 700, "effect": "Spray twice as long before refilling at a hydrant" },
+        { "id": "fire_foam", "name": "Foam mix", "cost": 1600, "effect": "Water puts fires out twice as fast" }
+      ]
+    },
+    {
+      "id": "ambulance", "name": "Ambulance", "place": "county", "where": "Hospitals in Port Lindell and Highgate",
+      "vehicles": ["ambulance", "helicopter"],
+      "blurb": "Pick someone up and get them to hospital. Quick pays more. Gentle driving pays a bonus.",
+      "_doc": "M7 (js/game/jobs/ambulance.js). Load a patient into an ambulance or the helicopter (stop beside them; stay at the wheel or hold E beside them), drop them at a hospital. pay = pay.base + km (patient -> hospital) x pay.per_km, +25% when quick, + pay.gentle_bonus x that x (1 - hard bumps / 3). level.need (ambulance.js ambMeets): gentle (most hard bumps allowed), spot (crash / farm / hiker / gorge), by (the vehicle kind). level.spots = where a call may be.",
+      "pay": { "base": 50, "per_km": 45, "gentle_bonus": 0.5 },
+      "levels": [
+        { "n": 1, "title": "Twisted ankle", "goal": "Bring a patient to hospital", "spots": ["crash", "farm"], "pay": 120, "need": {} },
+        { "n": 2, "title": "Gentle ride", "goal": "Deliver a patient without a hard bump", "spots": ["crash", "farm"], "pay": 200, "need": { "gentle": 0 } },
+        { "n": 3, "title": "Mountain rescue", "goal": "Fetch a hiker from the Highgate switchbacks", "pay": 350, "need": { "spot": "hiker" } },
+        { "n": 4, "title": "Air rescue", "goal": "Fly a patient from the gorge by helicopter", "pay": 600, "need": { "spot": "gorge", "by": "helicopter" } }
+      ],
+      "upgrades": [
+        { "id": "amb_soft_ride", "name": "Soft suspension", "cost": 600, "effect": "Bumps count less against the gentle bonus" },
+        { "id": "amb_two_beds", "name": "Second stretcher", "cost": 900, "effect": "Carry two patients at once" }
+      ]
+    },
+    {
+      "id": "patrol", "name": "Highway Patrol", "place": "county", "where": "Garages in every city",
+      "vehicles": ["police_car", "motorcycle"],
+      "blurb": "A runaway car is speeding through the county. Catch it and bump it to a stop.",
+      "_doc": "M7 (js/game/jobs/patrol.js). A runaway car drives a county road; hits from a patrol car or motorcycle with its siren on fill its stop meter. pay = pay.base + pay.per_speed x every second under 120 the chase took, to everyone who hit it, their passengers and anyone within 30 m. level.need (patrol.js patrolMeets): route (vale / mountain / highway), convoy (cars in one chase), fast (a runaway 30% faster).",
+      "pay": { "base": 80, "per_speed": 4 },
+      "levels": [
+        { "n": 1, "title": "Speeder", "goal": "Stop a speeding car", "pay": 150, "need": {} },
+        { "n": 2, "title": "Mountain chase", "goal": "Stop a runaway on the switchbacks", "pay": 300, "need": { "route": "mountain" } },
+        { "n": 3, "title": "Convoy", "goal": "Stop two cars in one chase", "pay": 450, "need": { "convoy": 2 } },
+        { "n": 4, "title": "Night chase", "goal": "Stop a fast car at night", "pay": 650, "need": { "fast": true, "route": "highway" } }
+      ],
+      "upgrades": [
+        { "id": "patrol_engine", "name": "Pursuit engine", "cost": 1200, "effect": "The patrol car's top speed goes up" },
+        { "id": "patrol_spikes", "name": "Stinger strip", "cost": 900, "effect": "Drop a strip that slows the runaway" }
+      ]
+    },
+    {
+      "id": "tow", "name": "Tow Truck", "place": "county", "where": "Tow yards",
+      "vehicles": ["tow_truck"],
+      "blurb": "Wrecks and broken-down cars all over the county. Hook them up and bring them to the yard.",
+      "_doc": "M7 (js/game/jobs/tow.js). Back the tow truck up to a wreck's front, T to lift it (hold T further off to winch it in), drop it in a tow yard. pay = pay.base + km (wreck -> yard) x pay.per_km. level.need.spot: shoulder / ditch / cliff / heavy (a broken-down semi: the tow truck crawls with it unless you have the Heavy hitch).",
+      "pay": { "base": 40, "per_km": 50 },
+      "levels": [
+        { "n": 1, "title": "Flat tyre", "goal": "Tow a car to the yard", "pay": 120, "need": { "spot": "shoulder" } },
+        { "n": 2, "title": "In the ditch", "goal": "Pull a car out of a ditch and tow it", "pay": 220, "need": { "spot": "ditch" } },
+        { "n": 3, "title": "Cliff edge", "goal": "Recover a wreck from a mountain road", "pay": 380, "need": { "spot": "cliff" } },
+        { "n": 4, "title": "Heavy lift", "goal": "Tow a broken-down truck", "pay": 600, "need": { "spot": "heavy" } }
+      ],
+      "upgrades": [
+        { "id": "tow_winch", "name": "Strong winch", "cost": 700, "effect": "The winch pulls twice as hard" },
+        { "id": "tow_heavy", "name": "Heavy hitch", "cost": 1400, "effect": "Tow a broken-down truck at full speed (without it you crawl)" }
+      ]
+    },
+    {
+      "id": "haul", "name": "Hauling", "place": "county", "where": "Depots in every city",
+      "vehicles": ["semi_truck", "army_truck", "delivery_van"],
+      "blurb": "Cargo between the cities. Bigger loads, longer roads, better pay. Arrive with the cargo in one piece.",
+      "_doc": "M7 (js/game/jobs/haul.js). Stop in a depot yard with the right rig to load: Parcel Van = parcels to stops in that town; semi + box trailer (or the Trailhauler) = to another town's depot; semi + tanker = to Highgate; semi + flatbed = to the Skyreach launch site. pay = (pay.base + km x pay.per_km + tonnes x pay.per_tonne) x (0.6 + 0.4 x condition) (x1.3 on a long haul). level.need: cargo (parcels / box / tanker / machine / rocket).",
+      "pay": { "base": 40, "per_km": 35, "per_tonne": 15 },
+      "levels": [
+        { "n": 1, "title": "Parcels", "goal": "Deliver parcels around one city in the van", "pay": 150, "need": { "cargo": "parcels" } },
+        { "n": 2, "title": "Box trailer", "goal": "Haul a box trailer between two cities", "pay": 250, "need": { "cargo": "box" } },
+        { "n": 3, "title": "Tanker", "goal": "Haul a tanker over the mountain road", "pay": 400, "need": { "cargo": "tanker" } },
+        { "n": 4, "title": "Wide load", "goal": "Haul a machine on the flatbed to the launch site", "pay": 550, "need": { "cargo": "machine" } },
+        { "n": 5, "title": "Rocket parts", "goal": "Deliver rocket parts to Skyreach", "unlocks": "rocket_discount", "pay": 800, "need": { "cargo": "rocket" } }
+      ],
+      "upgrades": [
+        { "id": "haul_air_ride", "name": "Air-ride trailer", "cost": 1000, "effect": "Cargo takes less damage on bumps" },
+        { "id": "haul_sleeper", "name": "Long-haul cab", "cost": 1500, "effect": "Longer routes appear, paying more" }
+      ]
+    },
+    {
+      "id": "combat", "name": "Rustwild Raids", "place": "county", "where": "The Rustwild badlands (Rustwild Gate Garage)",
+      "vehicles": ["trail_jeep", "tank", "hover_tank", "raider_buggy"],
+      "blurb": "Raider camps hold the badlands. Clear them out with a weapons vehicle. They come back.",
+      "_doc": "M8 (js/game/jobs/combat.js, js/game/combat.js, js/game/combat-data.js). A camp is cleared when every raider AND its generator are down; it pays pay.base + pay.per_enemy per defender (+ pay.fortress for the fortress) to everyone who hit it in the last 3 minutes, everyone riding with them, and anyone within 30 m of the last kill — each the whole amount. Camps come back 4 minutes later. level.need = the goal the referee checks (combat.js goalMet): clears (+ within s), clean (no wreck in that fight), camp, distinct (+ within s). level.pay = the bonus when it is first met.",
+      "pay": { "base": 120, "per_enemy": 25, "fortress": 200 },
+      "levels": [
+        { "n": 1, "title": "Scrap camp", "goal": "Clear any raider camp (Redcut Camp is the smallest)", "pay": 200, "need": { "clears": 1 } },
+        { "n": 2, "title": "Clean sweep", "goal": "Clear a camp without your vehicle being wrecked", "pay": 300, "need": { "clean": true } },
+        { "n": 3, "title": "Three in a row", "goal": "Clear 3 camps within 30 minutes", "pay": 450, "need": { "clears": 3, "within": 1800 } },
+        { "n": 4, "title": "The fortress", "goal": "Clear the Ironbluff Camp fortress", "pay": 700, "need": { "camp": "camp_ironbluff" } },
+        { "n": 5, "title": "Rustwild run", "goal": "Clear all 5 camps within 45 minutes", "pay": 1200, "need": { "distinct": 5, "within": 2700 } }
+      ],
+      "upgrades": [
+        { "id": "combat_armour", "name": "Armour plating", "cost": 1200, "effect": "The vehicle you drive has half as much hp again in the Rustwild" },
+        { "id": "combat_fast_guns", "name": "Quick loader", "cost": 1400, "effect": "Every gun you fire shoots half as fast again" },
+        { "id": "combat_twin_gun", "name": "Second gun mount", "cost": 1600, "effect": "A forward machine gun for the driver of any combat vehicle with no gun of its own — fire it yourself, no friend needed" },
+        { "id": "combat_repair", "name": "Field repair kit", "cost": 800, "effect": "Once per camp, put 60% of your vehicle's hp back — even on a wreck (G / d-pad right / REPAIR)" }
+      ]
+    },
+    {
+      "id": "skydive", "name": "Skydiving", "place": "sky", "where": "Wayfare Field jump point",
+      "vehicles": ["cargo_plane", "glider"],
+      "blurb": "Jump from the cargo plane, fall, open your parachute and land on the target.",
+      "_doc": "M9 (js/game/jobs/skydive.js, js/game/sky.js). Every safe landing (under 9 m/s) pays pay.base; a parachute landing inside the 30 m target ring adds up to pay.target_bonus (more the closer, half again for a bullseye within 5 m); a glider landed on Highgate Plateau adds target_bonus. level.need = the goal the referee checks (sky.js landingMeets); level.pay = the bonus when it is first met.",
+      "pay": { "base": 40, "target_bonus": 80 },
+      "levels": [
+        { "n": 1, "title": "First jump", "goal": "Jump from the plane and land safely (open your parachute in time)", "pay": 120, "need": { "safe": true } },
+        { "n": 2, "title": "On target", "goal": "Land within 30 m of the target ring", "pay": 200, "need": { "within": 30 } },
+        { "n": 3, "title": "Glider", "goal": "Take the glider from the plane and land it on Highgate Plateau", "pay": 300, "need": { "glider": "plateau" } },
+        { "n": 4, "title": "Bullseye", "goal": "Land within 5 m of the middle of the target", "pay": 400, "need": { "within": 5 } }
+      ],
+      "upgrades": [
+        { "id": "sky_steer_chute", "name": "Sport parachute", "cost": 600, "effect": "Turns twice as fast, flies faster and sinks slower — a stronger flare for soft landings" },
+        { "id": "sky_high_drop", "name": "High drop", "cost": 900, "effect": "The plane flies twice as high: a much longer free fall" },
+        { "id": "sky_long_wing", "name": "Long-span glider wing", "cost": 750, "effect": "Your glider sinks slower and glides further" }
+      ]
+    },
+    {
+      "id": "survey", "name": "Survey", "place": "county", "where": "Highgate Survey Office",
+      "vehicles": ["trail_jeep", "army_truck", "helicopter", "quad", "dune_buggy"],
+      "blurb": "Buy a survey kit at a Supply store, carry its crate to a spot that suits it, set it up, then drive back to the Survey Office to report.",
+      "_doc": "M10 (js/game/jobs/survey.js, pure rules js/game/survey.js, kits js/game/survey-kits.js). A kit set up at a good spot pays at the Survey Office: (kit.pay.base + kit.pay.per_km x km from the office) x (0.75 + 0.5 x spot quality), once per set-up kit. level.need = { kits: { <kitId>: n }, apart? } counted over the player's REPORTED kits still standing; level.pay = the bonus when it is first met (at the office).",
+      "pay": { "base": 100, "per_km": 30 },
+      "levels": [
+        { "n": 1, "title": "First reading", "goal": "Set up a Weather Mast somewhere high, then report at the Survey Office", "pay": 150, "need": { "kits": { "weather_mast": 1 } } },
+        { "n": 2, "title": "Quiet ground", "goal": "Set up a Seismic Probe on flat ground far from the roads, and report it", "pay": 220, "need": { "kits": { "seismic_probe": 1 } } },
+        { "n": 3, "title": "Three masts", "goal": "Have three Weather Masts reported at once, each 400 m from the others", "pay": 320, "need": { "kits": { "weather_mast": 3 }, "apart": 400 } },
+        { "n": 4, "title": "Radar network", "goal": "Have two Radar Dishes reported on two hilltops", "pay": 450, "need": { "kits": { "radar_dish": 2 } } },
+        { "n": 5, "title": "Field lab", "goal": "Set up a Field Lab by water or in the Elderwood, and report it", "pay": 550, "need": { "kits": { "field_lab": 1 } } },
+        { "n": 6, "title": "Full survey", "goal": "Have one of every kit reported at once, a Signal Relay too", "pay": 1000, "need": { "kits": { "weather_mast": 1, "seismic_probe": 1, "radar_dish": 1, "field_lab": 1, "signal_relay": 1 } } }
+      ],
+      "upgrades": [
+        { "id": "survey_quick_setup", "name": "Quick setup", "cost": 700, "effect": "Kits unfold in half the time" },
+        { "id": "survey_scanner", "name": "Site scanner", "cost": 900, "effect": "The map and minimap mark good spots for the kit you carry" },
+        { "id": "survey_twin_crates", "name": "Second crate slot", "cost": 800, "effect": "Have two kit crates out at once — carry two kits on one trip" },
+        { "id": "survey_long_sling", "name": "Long sling", "cost": 1100, "effect": "The helicopter's sling rope is 16 m instead of 6 m: hook and drop crates from higher up" }
+      ]
+    },
+    {
+      "id": "moon", "name": "Moon Work", "place": "moon", "where": "Greywatch Base on the Moon", "hidden": "Requires: launch the rocket", "reveal": "launch_rocket",
+      "vehicles": ["moon_rover"],
+      "blurb": "Sample runs, crater jumps, supply runs to Farside and survey kits on the Moon — all in the Crater Crawler.",
+      "_doc": "M12 (js/game/jobs/moon.js). Samples: (pay.sample + km x pay.per_km) x rarity (common 1, uncommon 1.6, rare 2.6 = a steep crater floor), km = site to the Sample Drop. Jumps: (jump.base + air s x jump.per_s + m x jump.per_m) x 1.5 upright + jump.ring in the landing ring; the same ramp within a minute pays half. Crates: (pay.crate + km x pay.crate_per_km) each. level.need: samples / rare / jump (m) / ring / crates + to (farside | greywatch) + round (a clean round trip) / kit (a survey kit set up on the Moon).",
+      "pay": { "sample": 30, "per_km": 70, "crate": 70, "crate_per_km": 80, "jump": { "base": 10, "per_s": 8, "per_m": 0.5, "ring": 50 } },
+      "levels": [
+        { "n": 1, "title": "Rock samples", "goal": "Collect three glowing rock samples and bring them to the Sample Drop at Greywatch", "pay": 250, "need": { "samples": 3 } },
+        { "n": 2, "title": "Crater jump", "goal": "Jump the rover 40 m off a ramp", "pay": 300, "need": { "jump": 40 } },
+        { "n": 3, "title": "Supply run", "goal": "Take a supply crate from Greywatch to Farside Depot, over the rille and the ridge", "pay": 400, "need": { "crates": 1, "to": "farside" } },
+        { "n": 4, "title": "Moon survey", "goal": "Set up a survey kit at one of the Moon's survey spots", "pay": 500, "need": { "kit": 1 } },
+        { "n": 5, "title": "Deep find", "goal": "Bring a sample up from the floor of a steep crater (Orrin or Vandry)", "pay": 650, "need": { "rare": 1 } },
+        { "n": 6, "title": "Hole in one", "goal": "Jump into a crater and land upright inside its landing ring", "pay": 800, "need": { "ring": true } },
+        { "n": 7, "title": "There and back", "goal": "Supplies to Farside, ice cores back to Greywatch, without dropping a crate", "pay": 1000, "need": { "crates": 1, "to": "greywatch", "round": true } }
+      ],
+      "upgrades": [
+        { "id": "moon_bin", "name": "Big sample bin", "cost": 1500, "effect": "Carry six samples a run instead of three" },
+        { "id": "moon_motor", "name": "Crater lamp and strong motor", "cost": 2500, "effect": "More power to climb crater walls, a spotlight for the dark side of craters, and a longer sample arm" },
+        { "id": "moon_big_wheels", "name": "Mesh wheels", "cost": 2000, "effect": "The rover grips loose dust better: tighter turns, less sliding" },
+        { "id": "moon_thrusters", "name": "Jump booster", "cost": 3000, "effect": "One extra push in the air on every jump (Space / A / JUMP)" },
+        { "id": "moon_rack", "name": "Crate rack", "cost": 1800, "effect": "Carry three supply crates, strapped down so they bounce out far less" }
+      ]
+    },
+    {
+      "id": "station", "name": "Station Chores", "place": "station", "where": "Lantern Station", "hidden": "Requires: launch the rocket", "reveal": "launch_rocket",
+      "vehicles": [],
+      "blurb": "Float around the station fixing things. The one job you do on foot (in zero gravity).",
+      "pay": { "base": 150 },
+      "levels": [
+        { "n": 1, "title": "Loose panel", "goal": "Fix three loose panels" },
+        { "n": 2, "title": "Grab the cargo", "goal": "Catch a drifting crate and bring it to the dock" }
+      ],
+      "upgrades": []
+    }
+  ]
+}

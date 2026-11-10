@@ -48,6 +48,9 @@ import { SURFACES, SURF, BIOMES, BIOME, ANCHORS, PLACES, PLACE_NAMES, ROAD_CLASS
 import { dsin, dcos, clamp, lerp, smoothstep, fbm, ridged, makeRng, hash01 } from './wmath.js';
 import { createRouter, chaikin, resample, profile, createCarve } from './roads.js';
 import { scatterObjects } from './scatter.js';
+import { generateCountySteps } from './county/countygen.js';
+import { generateMoonSteps } from './moon/moongen.js';
+import { generateStationSteps } from './station/stationgen.js';
 
 export { SURFACES, BIOMES };
 
@@ -63,8 +66,14 @@ export function generateWorld(opts = {}) {
   return last.world;
 }
 
-/** The same, a step at a time: yields { progress 0..1, label } and finally { progress: 1, label, world }. */
+/** The same, a step at a time: yields { progress 0..1, label } and finally { progress: 1, label, world }.
+ *  opts.map: 'classic' (default — the Sandbox / Flag Run world, unchanged) | 'county' (Wayfare County, county/)
+ *            | 'moon' (the Moon, moon/) | 'station' (Lantern Station's interior, station/). */
 export function* generateWorldSteps(opts = {}) {
+  if (opts.map === 'county') return yield* generateCountySteps(opts);
+  if (opts.map === 'moon') return yield* generateMoonSteps(opts);
+  if (opts.map === 'station') return yield* generateStationSteps(opts);
+  if (opts.map && opts.map !== 'classic') throw new Error(`generateWorld: unknown map "${opts.map}"`);
   const t0 = now();
   const seed = (Number(opts.seed) || 0) >>> 0;
   const vehicles = opts.vehicles && opts.vehicles.length ? opts.vehicles : ['trail_jeep', 'dirtbike', 'tank', 'hover_tank', 'helicopter', 'rocket_car', 'forklift', 'trailer_utility',
@@ -923,6 +932,17 @@ function switchbackTrack(M) {
   const prof = new Float32Array(pts.length);
   for (let i = 0; i < pts.length; i++) prof[i] = FLOOR + (M.top - FLOOR) * (along[i] / total);
   return { pts, prof };
+}
+
+/** Gravity on a world, m/s^2 (down). The classic world and the county carry no field (9.81); the Moon says 1.62 and
+ *  Lantern Station 0. Physics should read this rather than a constant. */
+export function worldGravity(world) {
+  return world && Number.isFinite(world.gravity) ? world.gravity : 9.81;
+}
+
+/** What the sky over a world is: 'day' (the classic world and the county), 'black' (the Moon and the station). */
+export function worldSky(world) {
+  return (world && world.sky) || 'day';
 }
 
 /** A stable hash of a world, for the determinism test and for "are we all on the same map?" checks online. */

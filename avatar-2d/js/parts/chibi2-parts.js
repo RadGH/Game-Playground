@@ -44,16 +44,17 @@ export const CHIBI2_2D = {
     // Oddhaven M4, modern work clothes: 3D models in avatar-3d/js/chibi2-hats.js. Bespoke, so no seeded roll hands one out
     hard_hat: { ...alias(hat, 'helmet', 'Hard hat'), bespoke: true },
     ball_cap: { ...alias(hat, 'cap', 'Ball cap'), bespoke: true },
-    beanie: { ...alias(hat, 'cap', 'Beanie'), bespoke: true },
-    // Oddhaven M7
+    beanie: { name: 'Beanie', bespoke: true, pieces: [{ layer: 'hat', svg: `<path d="M78 118 C74 58 110 40 150 40 C190 40 226 58 222 118 Z" fill="var(--hat)"/><path d="M110 50 Q104 80 104 104 M150 42 L150 102 M190 50 Q196 80 196 104" stroke="rgba(0,0,0,.22)" stroke-width="3" fill="none"/><path d="M72 102 Q150 88 228 102 L228 126 Q150 112 72 126 Z" fill="var(--hat)"/><path d="M72 102 Q150 88 228 102 L228 126 Q150 112 72 126 Z" fill="rgba(0,0,0,.14)"/><path d="M88 100 L88 122 M104 97 L104 119 M120 95 L120 117 M136 94 L136 116 M150 93 L150 115 M164 94 L164 116 M180 95 L180 117 M196 97 L196 119 M212 100 L212 122" stroke="rgba(0,0,0,.22)" stroke-width="3"/>` }] },
+    // Oddhaven M7 (beanie, bucket hat, sun hat, visor, bobble hat, ear muffs drawn as themselves 2026-11-09 for the
+    // Roverlands Outfitter — they were all the grey cap)
     police_cap: { ...alias(hat, 'cap', 'Police cap'), bespoke: true },
     warden_cap: { ...alias(hat, 'cap', 'Warden cap'), bespoke: true },
     chef_hat: { ...alias(hat, 'cap', 'Chef hat'), bespoke: true },
-    bucket_hat: { ...alias(hat, 'cap', 'Bucket hat'), bespoke: true },
-    sun_hat: { ...alias(hat, 'cap', 'Sun hat'), bespoke: true },
-    visor: { ...alias(hat, 'cap', 'Visor'), bespoke: true },
-    bobble_hat: { ...alias(hat, 'cap', 'Bobble hat'), bespoke: true },
-    ear_muffs: { ...alias(hat, 'cap', 'Ear muffs'), bespoke: true },
+    bucket_hat: { name: 'Bucket hat', bespoke: true, pieces: [{ layer: 'hat', svg: `<path d="M96 104 C94 62 120 46 150 46 C180 46 206 62 204 104 Z" fill="var(--hat)"/><path d="M96 98 L204 98 L240 130 Q150 142 60 130 Z" fill="var(--hat)"/><path d="M96 98 L204 98 L240 130 Q150 142 60 130 Z" fill="rgba(0,0,0,.12)"/><path d="M96 98 L204 98" stroke="rgba(0,0,0,.3)" stroke-width="5"/><path d="M74 124 Q150 134 226 124" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-dasharray="6 5" fill="none"/><path d="M110 60 Q150 52 190 60" stroke="rgba(0,0,0,.22)" stroke-width="2" stroke-dasharray="6 5" fill="none"/>` }] },
+    sun_hat: { name: 'Sun hat', bespoke: true, pieces: [{ layer: 'hat', svg: `<path d="M52 112 Q54 94 84 92 Q150 82 216 92 Q246 94 248 112 Q242 124 222 120 Q186 130 150 128 Q114 130 78 120 Q58 124 52 112 Z" fill="var(--hat)"/><path d="M64 112 Q150 98 236 112" stroke="rgba(0,0,0,.22)" stroke-width="2" fill="none"/><path d="M102 98 C100 60 122 46 150 46 C178 46 200 60 198 98 Z" fill="var(--hat)"/><path d="M101 82 Q150 74 199 82 L199 96 Q150 88 101 96 Z" fill="#c8486a"/><path d="M196 88 L222 80 L216 96 Z M196 90 L214 108 L200 106 Z" fill="#c8486a"/>` }] },
+    visor: { name: 'Visor', bespoke: true, pieces: [{ layer: 'hat', svg: `<path d="M76 104 Q150 88 224 104 L224 118 Q150 102 76 118 Z" fill="var(--hat)"/><path d="M86 114 Q150 98 214 114 Q204 142 150 144 Q96 142 86 114 Z" fill="var(--hat)"/><path d="M86 114 Q150 98 214 114 Q204 142 150 144 Q96 142 86 114 Z" fill="rgba(0,0,0,.25)"/><path d="M96 118 Q150 106 204 118" stroke="rgba(255,255,255,.3)" stroke-width="2" fill="none"/>` }] },
+    bobble_hat: { name: 'Bobble hat', bespoke: true, pieces: [{ layer: 'hat', svg: `<path d="M78 118 C76 74 110 58 150 58 C190 58 224 74 222 118 Z" fill="var(--hat)"/><path d="M80 86 Q150 72 220 86 L221 98 Q150 84 79 98 Z" fill="rgba(255,255,255,.45)"/><path d="M72 102 Q150 88 228 102 L228 126 Q150 112 72 126 Z" fill="var(--hat)"/><path d="M72 102 Q150 88 228 102 L228 126 Q150 112 72 126 Z" fill="rgba(0,0,0,.14)"/><circle cx="150" cy="56" r="15" fill="var(--hat)"/><circle cx="150" cy="56" r="15" fill="rgba(255,255,255,.3)"/><path d="M141 48 L159 64 M159 48 L141 64 M150 42 L150 70 M136 56 L164 56" stroke="rgba(0,0,0,.22)" stroke-width="2"/>` }] },
+    ear_muffs: { name: 'Ear muffs', bespoke: true, pieces: [{ layer: 'hat', svg: `<path d="M78 140 C70 70 104 46 150 46 C196 46 230 70 222 140" stroke="rgba(0,0,0,.45)" stroke-width="9" fill="none"/><ellipse cx="74" cy="146" rx="20" ry="25" fill="var(--hat)"/><ellipse cx="226" cy="146" rx="20" ry="25" fill="var(--hat)"/><ellipse cx="70" cy="140" rx="9" ry="12" fill="rgba(255,255,255,.35)"/><ellipse cx="222" cy="140" rx="9" ry="12" fill="rgba(255,255,255,.35)"/>` }] },
     // Tumblefair Winter Fair (Expansion 1 M6, 2026-11-07): 3D models in avatar-3d/js/chibi2-hats.js; bespoke (never rolled)
     antler_band: { ...alias(hat, 'headband', 'Antler headband'), bespoke: true },
     gift_bow: { ...alias(hat, 'headband', 'Gift bow'), bespoke: true },

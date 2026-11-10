@@ -1,5 +1,5 @@
 // Trail Jeep — the open infantry jeep (reference: assets/ref/trail_jeep.webp). Olive tub, flared fenders, blocky
-// grille, a pipe roll cage tall enough for Chibi heads, driver + passenger buckets, and a twin-barrel turret on a ring
+// grille, a pipe roll cage tall enough for a seated adult (Chibi 2.6: hips + 1.0), driver + passenger buckets, and a twin-barrel turret on a ring
 // behind them for a standing gunner. Ground sits ~0.6 m under the body origin at rest; hubs at y ≈ -0.16.
 import { createKit } from './kit.js';
 
@@ -40,7 +40,7 @@ export function build(THREE, def, opts = {}) {
   }
 
   // --- cabin: two buckets, steering wheel ----------------------------------------------------------------------
-  for (const s of def.seats.filter(s => s.pose === 'sit')) {
+  for (const s of def.seats.filter(s => !s.stand)) {
     const [x, y, z] = s.p;
     k.box('seat', [0.5, 0.12, 0.5], [x, y - 0.06, z + 0.04], { bevel: 0.04 });
     k.box('seat', [0.5, 0.62, 0.12], [x, y + 0.26, z - 0.26], { rot: [-0.12, 0, 0], bevel: 0.04 });
@@ -59,8 +59,8 @@ export function build(THREE, def, opts = {}) {
   steer.traverse(o => { o.userData.detail = true; });
   k.tube(T, [[wheelAt[0], wheelAt[1] - 0.04, wheelAt[2] + 0.06], [wheelAt[0], 0.42, wheelAt[2] + 0.28]], 0.025);
 
-  // --- roll cage (head clearance: seat + 1.25) ----------------------------------------------------------------
-  const top = 1.5, C = 'black', rc = 0.045;
+  // --- roll cage (head clearance: hips + 1.0; 1.8 m off the ground) -------------------------------------------
+  const top = 1.2, C = 'black', rc = 0.045;
   for (const sx of [1, -1]) {
     k.tube(C, [[sx * 0.74, 0.36, 0.86], [sx * 0.72, top - 0.05, 0.45], [sx * 0.72, top, -0.05], [sx * 0.72, top - 0.08, -0.55], [sx * 0.74, 0.36, -0.75]], rc);
     k.tube(C, [[sx * 0.72, top - 0.08, -0.55], [sx * 0.66, 0.78, -1.7], [sx * 0.7, 0.36, -1.9]], rc);   // down to the tail

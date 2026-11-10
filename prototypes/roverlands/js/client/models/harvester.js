@@ -2,7 +2,7 @@
 // green/yellow of the sheet). A combine: a wide cutting header out front (drawn inside its collider, def.parts[1],
 // x ±2.9, y -0.7..0, z 3.0..4.2, with cream pointed crop dividers, a toothed cutter bar and a cross auger), a feeder
 // house up to the body, a glass cab on a deck over the big front drive wheels (its box = the cab collider; roof
-// underside 2.99 — a seated head is 1.57 + 1.13 = 2.70, and the tallest Chibi hats measured reach ~3.0), a grain tank with a flared hopper behind the cab (its box
+// underside 2.65 — a seated Chibi 2.6 head is 1.57 + ~0.95 = 2.52, the tallest hats ~2.6), a grain tank with a flared hopper behind the cab (its box
 // = def.parts[2]), the engine at the back, small steering rear wheels and a folded unloading auger along the right.
 // Moving nodes: `reel` (spins about x, driven by how far the front wheels rolled, so it turns while driving and stops
 // when the machine stops — in the game AND in the garage), `headerAuger` (same, faster), `auger` (the unloading
@@ -19,7 +19,7 @@ export function build(THREE, def, opts = {}) {
   const cab = def.parts[0];
   const [cx, cy, cz] = cab.box;
   const cabZ0 = cab.p[2] - cz, cabZ1 = cab.p[2] + cz;                      // 0.4 .. 2.2
-  const cabY0 = cab.p[1] - cy, roofY = cab.p[1] + cy;                      // 1.3 .. 2.9
+  const cabY0 = cab.p[1] - cy, roofY = cab.p[1] + cy;                      // 1.3 .. 2.71
   const hd = def.parts[1];
   const hx = hd.box[0], hy0 = hd.p[1] - hd.box[1], hy1 = hd.p[1] + hd.box[1];   // ±2.9, -0.7 .. 0
   const hz0 = hd.p[2] - hd.box[2], hz1 = hd.p[2] + hd.box[2];              // 3.0 .. 4.2
@@ -28,7 +28,7 @@ export function build(THREE, def, opts = {}) {
   const tTop = tankP.p[1] + tankP.box[1];                                  // 2.45
   const fw = def.wheels.find(w => w.p[2] > 0), rw = def.wheels.find(w => w.p[2] < 0);
   const drv = def.seats.find(s => s.role === 'driver');
-  const deckY = drv.p[1] - 0.41;                                           // cab floor 1.16 = the seated driver's feet
+  const deckY = drv.p[1] - 0.45;                                           // cab floor 1.12 = the seated driver's feet (2.6 `drive`)
   const rearZ = -ch.hz, noseZ = ch.hz - 0.2;                               // -2.6 .. 2.4
 
   // --- lower body: a narrow core between the tyres, full width above the rear wheels ------------------------------
@@ -56,7 +56,7 @@ export function build(THREE, def, opts = {}) {
   }
 
   // --- cab: lower shell, rear wall, pillars, cream roof, glass -----------------------------------------------------
-  const belt = deckY + 0.42, ceil = roofY - 0.06;                          // 1.67 sill, 2.84 roof underside
+  const belt = deckY + 0.42, ceil = roofY - 0.06;                          // 1.54 sill, 2.65 roof underside
   k.box(R, [cx * 2, belt - deckY, 0.1], [0, (belt + deckY) / 2, cabZ1 - 0.05], { bevel: 0.03 });                       // front panel
   for (const sx of [1, -1]) {
     k.box(R, [0.08, belt - deckY, cz * 2], [sx * (cx - 0.04), (belt + deckY) / 2, cab.p[2]], { bevel: 0.02 });          // side panels

@@ -58,7 +58,8 @@ export function build(THREE, def, opts = {}) {
   }
 
   // --- cab: van front, hollow behind glass ------------------------------------------------------------------------
-  const cx = 0.98, cBelt = 1.05, cRoof = 1.96, zWs = 2.1, zWt = 1.8, cFl = 0.17, nose = 2.72;
+  // Chibi 2.6 fit: cab roof 1.68 = hips 0.6 + 1.08 (2.5 m off the ground), floor 0.43 under the hips
+  const cx = 0.98, cBelt = 1.05, cRoof = 1.68, zWs = 2.1, zWt = 1.8, cFl = 0.17, nose = 2.72;
   k.box(T, [cx * 2 - 0.1, 0.04, zWs - bF], [0, cFl - 0.02, (zWs + bF) / 2], { bevel: 0 });          // cab floor
   k.box(W, [1.5, cFl - low, zWs - bF], [0, (cFl + low) / 2, (zWs + bF) / 2], { bevel: 0.02 });
   for (const sx of [1, -1]) {

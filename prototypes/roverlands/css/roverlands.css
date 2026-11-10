@@ -67,7 +67,6 @@ textarea { width: 100%; border: 2px solid var(--rl-edge); border-radius: 12px; b
 /* ---------------------------------------------------------------- corner buttons (☰ and !) own the top-right corner */
 .rl-cornerbar { position: fixed; top: calc(var(--st) + 10px); right: calc(var(--sr) + 10px); z-index: 70; display: flex; gap: 8px; }
 .rl-corner { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--rl-edge); background: rgba(22, 30, 34, .92); color: var(--rl-ink); font: 800 20px/1 var(--rl-font); cursor: pointer; box-shadow: 0 3px 10px rgba(0, 0, 0, .3); }
-.rl-report-btn { background: var(--rl-red); border-color: #9c2f28; color: #fff; }
 
 /* ---------------------------------------------------------------- title */
 .rl-title-wrap { max-width: 520px; margin: 0 auto; display: grid; gap: 14px; justify-items: stretch; }
@@ -139,6 +138,11 @@ textarea { width: 100%; border: 2px solid var(--rl-edge); border-radius: 12px; b
 .rl-clock { font-size: 13px; color: var(--rl-dim); margin-top: 2px; font-variant-numeric: tabular-nums; }
 .rl-clock.live { font-size: 22px; color: var(--rl-amber2); font-weight: 800; }
 .rl-clock:empty { display: none; }
+/* gold (Expansion 1 M2): its own small row under the flag box, never in the top bar */
+.rl-gold { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 6px; border-radius: 999px; background: rgba(14, 19, 22, .72); border: 2px solid rgba(60, 78, 88, .8); font-size: 15px; font-variant-numeric: tabular-nums; color: var(--rl-amber2); }
+.rl-gold i { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe7a3, var(--rl-amber) 60%, #b5701a); box-shadow: inset 0 0 0 1.5px #8a5512; }
+.rl-gold[hidden] { display: none; }
+.rl-toast.gold { border-color: #b5701a; color: var(--rl-amber2); }
 .rl-minimap { position: absolute; top: calc(var(--st) + 64px); right: calc(var(--sr) + 10px); width: 168px; height: 168px; border-radius: 50%; pointer-events: auto; cursor: pointer; box-shadow: 0 4px 16px rgba(0, 0, 0, .4); }
 .rl-minimap canvas { width: 100%; height: 100%; display: block; border-radius: 50%; }
 .rl-mm-north { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: var(--rl-red); color: #fff; font: 800 11px/18px var(--rl-font); text-align: center; pointer-events: none; }
@@ -176,6 +180,9 @@ textarea { width: 100%; border: 2px solid var(--rl-edge); border-radius: 12px; b
 .rl-map-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .lg { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #101418; }
 .lg.you { background: #fff; border-radius: 2px; transform: rotate(45deg); } .lg.pl { background: #5ad1ff; } .lg.veh { background: #e8a33c; border-radius: 3px; }
+.lg.shop { background: #e8a33c; border-radius: 3px; }
+.lg.sell { background: #d9c45a; border-radius: 3px; } .lg.water { background: #5aa7e8; border-radius: 3px; }   /* M6 farming spots */
+.lg.camp { background: #e0503a; border-radius: 3px; } .lg.zone { background: rgba(214, 70, 44, .35); border: 1px dashed #e8603c; }   /* M8 the Rustwild */
 .lg.flag { background: #ff3b3b; border-radius: 2px; } .lg.home { background: #5ad27a; border-radius: 3px; } .lg.site { background: transparent; border-color: #ff3b3b; } .lg.pin { background: #ffcf3a; }
 .rl-map-hint { position: absolute; left: 50%; bottom: calc(var(--sb) + 92px); transform: translateX(-50%); padding: 6px 12px; border-radius: 10px; background: rgba(14, 19, 22, .72); font-size: 14px; pointer-events: none; text-align: center; max-width: 90vw; }
 .rl-map-cross { position: absolute; left: 50%; top: 50%; width: 28px; height: 28px; margin: -14px 0 0 -14px; border: 2px solid #fff; border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 1px #000; }
@@ -281,7 +288,98 @@ input, textarea, [contenteditable] { -webkit-user-select: text; user-select: tex
 .rl-touch[data-mode=gunner] .rl-t-use { right: 96px; bottom: 6px; width: 70px; height: 70px; }
 .rl-touch[data-mode=gunner] .rl-t-swap, .rl-touch[data-mode=passenger] .rl-t-swap { right: 0; bottom: 96px; width: 62px; height: 62px; }
 .rl-touch[data-mode=passenger] .rl-t-use { right: 0; bottom: 0; width: 84px; height: 84px; }
-.rl-touch[data-mode=drive] .rl-t-swap { right: 0; bottom: 166px; width: 62px; height: 62px; }  /* 52 px became 43 px in the scaled-down landscape pad */
+.rl-touch[data-mode=drive] .rl-t-swap, .rl-touch[data-mode=drivegun] .rl-t-swap { right: 0; bottom: 166px; width: 62px; height: 62px; }  /* 52 px became 43 px in the scaled-down landscape pad */
 .rl-t-hitch { right: 92px; bottom: 166px; width: 62px; height: 62px; font-size: 12px; background: rgba(140, 200, 255, .9); }
 /* FLIP: only while the vehicle lies tipped over (report #5); HITCH's spot (HITCH hides then), in the corner, away from the play area */
 .rl-t-flip { right: 92px; bottom: 166px; width: 62px; height: 62px; font-size: 12px; background: rgba(255, 214, 92, .95); }
+
+/* ---------------------------------------------------------------- the phone + the town shops (Expansion 1 M4)
+   Phone first: on a phone the phone IS the screen; on a desktop it is a phone-shaped panel. The LAYER scrolls
+   (.rl-phonelayer / .rl-shoplayer are .rl-modal scrollers); nothing inside them sets overflow. */
+.rl-goldrow { display: flex; gap: 8px; align-items: center; }
+.rl-phone-btn { pointer-events: auto; width: 44px; height: 44px; border-radius: 12px; border: 2px solid rgba(60, 78, 88, .9); background: rgba(14, 19, 22, .78); color: var(--rl-ink); display: grid; place-items: center; cursor: pointer; padding: 0; box-shadow: 0 3px 10px rgba(0, 0, 0, .3); }
+.rl-phone-btn svg { width: 24px; height: 24px; }
+.rl-phone-btn:hover { border-color: var(--rl-amber); }
+.rl-phone-btn[hidden] { display: none; }
+.rl-coin { display: inline-block; width: 13px; height: 13px; margin-right: 4px; vertical-align: -1px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe7a3, var(--rl-amber) 60%, #b5701a); box-shadow: inset 0 0 0 1.5px #8a5512; }
+.rl-toast.ach { border-color: #f2c94c; }
+
+.rl-phonelayer { background: rgba(8, 12, 14, .55); }
+.rl-phonelayer > .rl-phone { flex: none; width: 380px; max-width: 100%; min-height: min(740px, calc(100dvh - 90px)); margin: auto 0; padding: 10px 14px 18px; border-radius: 34px; border: 3px solid #2b363d;
+  background: linear-gradient(180deg, #1b252b, #141c20); box-shadow: 0 0 0 6px #0b1013, 0 18px 50px rgba(0, 0, 0, .55); display: flex; flex-direction: column; }
+.rl-ph-status { display: flex; justify-content: space-between; align-items: center; padding: 2px 10px 8px; font-size: 13px; color: var(--rl-dim); font-variant-numeric: tabular-nums; }
+.rl-ph-gold { color: var(--rl-amber2); font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rl-ph-hello { display: grid; justify-items: center; padding: 18px 0 14px; }
+.rl-ph-hello b { font-size: 30px; color: var(--rl-amber2); letter-spacing: .02em; }
+.rl-ph-hello span { font-size: 13px; letter-spacing: .3em; text-transform: uppercase; color: var(--rl-dim); }
+.rl-ph-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.rl-ph-head h2 { margin: 0; font-size: 22px; }
+.rl-ph-head .rl-btn { width: 44px; padding: 0; font-size: 24px; }
+.rl-ph-body { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.rl-ph-body h3 { margin: 10px 0 2px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--rl-dim); }
+.rl-ph-apps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 10px; padding: 6px 4px 16px; }
+.rl-ph-app { appearance: none; border: 0; background: none; color: var(--rl-ink); display: grid; justify-items: center; gap: 6px; padding: 6px 0; cursor: pointer; border-radius: 16px; min-height: 44px; font-weight: 700; font-size: 14px; }
+.rl-ph-app i { width: 62px; height: 62px; border-radius: 18px; background: var(--ac); display: grid; place-items: center; box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .18), 0 4px 10px rgba(0, 0, 0, .3); }
+.rl-ph-app svg { width: 32px; height: 32px; }
+.rl-ph-app:hover i { filter: brightness(1.12); }
+.rl-ph-list { display: grid; gap: 6px; }
+.rl-ph-row, .rl-ph-job, .rl-ph-level, .rl-ph-check, .rl-ph-ach { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; background: rgba(255, 255, 255, .04); border: 2px solid transparent; min-height: 56px; }
+.rl-ph-row:not(:has(> .rl-vpic, > .rl-face, > .rl-swatch)) { grid-template-columns: 1fr auto; }
+.rl-ph-row.soon { opacity: .75; }
+.rl-ph-job { appearance: none; color: var(--rl-ink); font: inherit; text-align: left; cursor: pointer; grid-template-columns: 1fr auto; border-color: var(--rl-edge); }
+.rl-ph-job:hover { border-color: var(--rl-amber); }
+.rl-ph-job.locked { cursor: default; opacity: .7; border-style: dashed; }
+.rl-ph-name { display: grid; min-width: 0; }
+.rl-ph-name b { overflow: hidden; text-overflow: ellipsis; }
+.rl-ph-name i { font-style: normal; font-size: 13px; color: var(--rl-dim); font-weight: 500; }
+.rl-ph-lvl { display: grid; justify-items: end; font-size: 14px; color: var(--rl-amber2); } .rl-ph-lvl small { color: var(--rl-dim); font-size: 12px; }
+.rl-ph-level { grid-template-columns: 34px 1fr; }
+.rl-ph-level > i { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-weight: 800; background: var(--rl-panel2); border: 2px solid var(--rl-edge); }
+.rl-ph-level.done > i { background: var(--rl-green); border-color: #2e8a4a; color: #0d2414; }
+.rl-ph-level.open > i { background: var(--rl-amber); border-color: #c97f1d; color: #21160a; }
+.rl-ph-level.locked { opacity: .55; }
+.rl-ph-level small.rl-ph-prog { display: block; margin-top: 3px; color: var(--rl-amber); font-weight: 700; }   /* M6: the room's progress line */
+.rl-ph-level span { display: grid; } .rl-ph-level small { font-size: 13px; color: var(--rl-dim); font-weight: 500; }
+.rl-ph-check { grid-template-columns: 1fr auto; } .rl-ph-check.locked { opacity: .6; }
+.rl-ph-pips { display: flex; gap: 4px; } .rl-ph-pips i { width: 12px; height: 12px; border-radius: 50%; background: var(--rl-panel2); border: 2px solid var(--rl-edge); }
+.rl-ph-pips i.on { background: var(--rl-green); border-color: #2e8a4a; }
+.rl-ph-ach { grid-template-columns: 34px 1fr; } .rl-ph-ach > i { font-style: normal; font-size: 22px; text-align: center; color: var(--rl-dim); }
+.rl-ph-ach.got { border-color: rgba(242, 201, 76, .5); } .rl-ph-ach.got > i { color: #f2c94c; } .rl-ph-ach.locked { opacity: .6; }
+.rl-ph-owned { color: var(--rl-green); font-weight: 800; font-size: 14px; white-space: nowrap; }
+.rl-ph-soon { color: var(--rl-dim); font-size: 13px; white-space: nowrap; }
+.rl-ph-warn { margin: 0; padding: 8px 10px; border-radius: 12px; background: rgba(242, 163, 58, .14); border: 2px solid rgba(242, 163, 58, .6); font-size: 14px; }
+.rl-ph-foot { margin-top: auto; padding-top: 10px; display: grid; gap: 6px; justify-items: start; }
+.rl-ph-empty { display: grid; gap: 4px; padding: 16px 10px; text-align: center; justify-items: center; }
+.rl-ph-me { display: grid; grid-template-columns: 72px 1fr; gap: 10px; align-items: center; }
+.rl-ph-me .rl-face { width: 72px; height: 72px; }
+.rl-ph-chips, .rl-ph-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.rl-ph-chip { padding: 4px 10px; border-radius: 999px; border: 2px solid var(--rl-edge); font-size: 13px; }
+.rl-ph-chip.on { border-color: var(--rl-amber); color: var(--rl-amber2); }
+.rl-ph-blurb { margin: 0; font-size: 15px; }
+.rl-ph-row [aria-disabled=true] { opacity: .6; }
+.rl-vpic { width: 64px; height: 48px; border-radius: 10px; display: grid; place-items: center; background: hsl(var(--h) 35% 32%); border: 2px solid hsl(var(--h) 35% 45%); overflow: hidden; flex: none; }
+.rl-vpic b { font-size: 16px; color: hsl(var(--h) 60% 85%); }
+.rl-vpic.pic { background: radial-gradient(circle at 50% 60%, #3b4c55, #1f2a30); border-color: var(--rl-edge); }
+.rl-vpic img { width: 100%; height: 100%; object-fit: contain; display: block; transform: scale(1.25); }
+.rl-swatch { width: 48px; height: 48px; border-radius: 12px; background: repeating-linear-gradient(45deg, #3a4a54 0 6px, #2c3a42 6px 12px); border: 2px solid var(--rl-edge); }
+.rl-swatch[data-slot=shoes] { background: radial-gradient(ellipse at 50% 75%, #6b5240 0 40%, transparent 42%), #2c3a42; }
+.rl-swatch[data-slot=bottom] { background: linear-gradient(90deg, transparent 22%, #4b6a8a 22% 47%, transparent 47% 53%, #4b6a8a 53% 78%, transparent 78%), #2c3a42; }
+.rl-swatch[data-slot=decor] { background: radial-gradient(circle at 50% 55%, #8a6a3a 0 30%, transparent 32%), #2c3a42; }
+
+.rl-shoplayer > .rl-shop { flex: none; width: min(560px, 100%); margin: auto 0; display: grid; gap: 8px; }
+.rl-shop-head { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+.rl-shop-head h2 { margin: 0; font-size: 21px; }
+.rl-shop h3 { margin: 10px 0 2px; }
+.rl-shop .rl-face.sm { width: 48px; height: 48px; }
+.rl-pill.small { min-height: 36px; padding: 4px 12px; font-size: 14px; }
+/* the phone fills a phone; HUD phone button sits next to the gold on the row under the flag box */
+@media (max-width: 560px) {
+  .rl-phonelayer { padding: 0; background: #141c20; }
+  /* (the top 60 px stay clear: the ☰ and ! corner buttons own that corner) */
+  .rl-phonelayer > .rl-phone { width: 100%; min-height: 100%; border-radius: 0; border: 0; box-shadow: none; padding: calc(var(--st) + 60px) calc(var(--sr) + 14px) calc(var(--sb) + 16px) calc(var(--sl) + 14px); }
+  .rl-shoplayer { padding-left: calc(var(--sl) + 8px); padding-right: calc(var(--sr) + 8px); }
+  .rl-shop-head { grid-template-columns: auto 1fr; } .rl-shop-head .rl-ph-gold { grid-column: 1 / -1; justify-self: end; margin-top: -6px; }
+  /* a shop scrolls under the fixed ☰ button and its filters ended up behind it: while a shop is open on a phone the
+     ☰ steps aside (the shop's own "‹ Leave" is the way out, Back / Esc still work) */
+  body:has(.rl-shoplayer) .rl-cornerbar { visibility: hidden; }
+}

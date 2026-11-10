@@ -13,7 +13,11 @@ export function build(THREE, def, opts = {}) {
   const zb = -0.65, zf = 1.4;                                    // cabin back / windscreen foot
 
   // --- fuselage: the cabin box, the windscreen, the cowl, the tapering tail ----------------------------------------
-  k.box(C, [1.12, 0.5, zf - zb + 0.5], [0, fl + 0.12, (zf + zb) / 2 + 0.25], { bevel: 0.1 });     // belly
+  // the belly is a tub, not a block (Chibi 2.6 fit): the riders' feet rest on its floor at fl, under the belt line
+  k.box(C, [1.12, 0.16, zf - zb + 0.5], [0, fl - 0.05, (zf + zb) / 2 + 0.25], { bevel: 0.06 });   // belly floor
+  for (const sx of [1, -1]) k.box(C, [0.08, 0.4, zf - zb + 0.5], [sx * 0.52, fl + 0.17, (zf + zb) / 2 + 0.25], { bevel: 0.03 });   // belly sides
+  k.box(C, [1.12, 0.5, 0.56], [0, fl + 0.12, zf + 0.22], { bevel: 0.08 });                         // under the panel
+  k.box(C, [1.12, 0.5, 0.08], [0, fl + 0.12, zb], { bevel: 0.02 });                                 // behind the back seat
   // the cabin is hollow (you see the riders through the glass): a belt band, a roof band, pillars, windows
   const belt = fl + 0.37, wLo = belt + 0.16, wHi = roof - 0.08, L = zf - zb;
   for (const sx of [1, -1]) {
@@ -25,7 +29,7 @@ export function build(THREE, def, opts = {}) {
   }
   k.box(T, [1.14, roof - belt, 0.06], [0, (roof + belt) / 2, zb], { bevel: 0.01 });              // back wall
   k.box(T, [1.14, 0.05, L], [0, roof - 0.025, (zf + zb) / 2], { bevel: 0.01 });                   // roof
-  k.box('seat', [1.04, 0.03, L], [0, belt - 0.01, (zf + zb) / 2], { bevel: 0 });                  // floor mat
+  k.box('seat', [1.0, 0.03, L], [0, fl + 0.045, (zf + zb) / 2], { bevel: 0 });                    // floor mat
   k.box(TD, [1.16, 0.06, zf - zb + 0.5], [0, belt, (zf + zb) / 2 + 0.25], { bevel: 0.01 });     // belt line
   for (const sx of [1, -1]) k.wedge(T, [0.06, roof - 0.62, 0.0, 0.6], [sx * 0.54, 0.62, zf + 0.29]);   // windscreen side frames
   k.box(T, [1.12, 0.06, 0.1], [0, roof - 0.03, zf], { bevel: 0.01 });

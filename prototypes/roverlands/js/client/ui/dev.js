@@ -6,7 +6,12 @@ const cv = document.getElementById('view'), g = cv.getContext('2d');
 const SIZE = 1536;
 const SITES = { home: { x: 0, z: 0, r: 22 }, flags: [{ id: 'f1', x: 420, z: -260, name: 'Red Rock Gap' }, { id: 'f2', x: -380, z: 300, name: 'Bog End' }, { id: 'f3', x: 120, z: 520, name: 'Frost Tarn' }],
   pads: [{ x: 6, z: 4, yaw: 0, vehicle: 'trail_jeep' }, { x: 12, z: 4, yaw: 0, vehicle: 'dirtbike' }, { x: 300, z: 300, yaw: 0, vehicle: 'trail_jeep' }],
-  labels: [{ x: 420, z: -300, text: 'Red Rock Gap' }, { x: -380, z: 340, text: 'Bog End' }, { x: 0, z: 40, text: 'Home' }] };
+  labels: [{ x: 420, z: -300, text: 'Red Rock Gap' }, { x: -380, z: 340, text: 'Bog End' }, { x: 0, z: 40, text: 'Home' }],
+  // County shops + places (M4: the phone's "Mark the nearest…", Start a job, the shop screens)
+  shops: [{ id: 'mf_garage', kind: 'dealer', place: 'mf_garage', city: 'mf', name: 'Marrow Flats Garage', x: 20, z: 30, r: 14 }, { id: 'mf_out', kind: 'outfitter', place: 'mf_out', city: 'mf', name: 'Marrow Flats Outfitter', x: -40, z: 30, r: 7 },
+    { id: 'mf_sup', kind: 'supply', place: 'mf_sup', city: 'mf', name: 'Marrow Flats Supply Store', x: -80, z: 30, r: 7 }],
+  places: [{ id: 'mf_out', kind: 'outfitter', x: -40, z: 30, door: { x: -40, z: 26 } }, { id: 'pl_fire', kind: 'fire_station', name: 'Port Lindell Fire Station', x: 200, z: -120 }, { id: 'mf_market', kind: 'market', name: 'Marrow Flats Produce Market', x: 60, z: 60 }],
+  cities: [{ id: 'mf', name: 'Marrow Flats', x: 0, z: 30, hx: 120, hz: 90 }] };
 const VEH = [{ id: 'trail_jeep', name: 'Trail Jeep', seats: [{}, {}, {}] }, { id: 'dirtbike', name: 'Dirtbike', seats: [{}, {}] }];
 function mapImage(n = 512) {
   const c = document.createElement('canvas'); c.width = c.height = n; const x = c.getContext('2d'), img = x.createImageData(n, n);
@@ -30,14 +35,17 @@ function paint() {
 }
 paint();
 
+const SHOP = await fetch(new URL('../../../data/shop.json', import.meta.url)).then(r => r.json()).catch(() => ({}));
 const ui = createUI({
   canvas: cv, vehicles: VEH, defaultSeed: 7,
-  prepare: async (seed, progress) => { for (let i = 1; i <= 4; i++) { progress(i / 4); await new Promise(r => setTimeout(r, 60)); } ui.setWorld({ size: SIZE, sites: SITES, mapImage: mapImage() }); return { sites: SITES, vehicles: VEH }; },
+  prepare: async (seed, progress) => { for (let i = 1; i <= 4; i++) { progress(i / 4); await new Promise(r => setTimeout(r, 60)); } ui.setWorld({ size: SIZE, sites: SITES, mapImage: mapImage() }); return { sites: SITES, vehicles: VEH, shop: SHOP }; },
   onGame: (net, info) => { playing = { net, info, a: 0 }; window.devGame = playing; },
   onLeave: () => { playing = null; },
   getDebug: () => ({ stand: 'dev page', pos: playing ? [Math.cos(playing.a) * 60, 0, Math.sin(playing.a) * 60] : null }),
 });
 ui.setFlagSites(SITES.flags);
+// the phone's Garage: a flat stand-in world, so any spot 6 m ahead of you is fine
+ui.setGame({ canSummon: () => null, summonSpot: () => { const p = playing; if (!p) return null; const x = Math.cos(p.a) * 60 + 6, z = Math.sin(p.a) * 60; return { p: [x, 1, z], yaw: 0 }; }, thumb: () => null });
 window.rlui = ui;
 // the pretend drive: in a circle round home, sending poses like the real game
 setInterval(() => {

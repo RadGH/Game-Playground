@@ -22,7 +22,7 @@ await RAPIER.init();
 let seed = +(Q.get('seed') || 7);
 const defs = (await (await fetch('data/vehicles.json')).json()).vehicles;
 await loadLookData();
-const look = randomLook();
+let look = randomLook(); for (let i = 0; i < 40 && look.race !== 'human'; i++) look = randomLook();     // humans only
 const online = Q.get('online') === '1';
 const code = Q.get('code');
 // solo: the world first (the in-page referee needs its sites); online: the room first (the world comes from its seed)

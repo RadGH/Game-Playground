@@ -19,7 +19,7 @@ export function build(THREE, def, opts = {}) {
   const head = [0, 0.36, 0.36];                        // top of the head tube = the steering pivot
   const headLo = [0, 0.22, 0.4];
   const bb = [0, -0.1, -0.02];                         // bottom bracket (cranks), feet 0.6 under the hips
-  const crankLen = Math.min(0.16, bb[1] - (seat.p[1] - 0.6) + 0.01);
+  const crankLen = 0.16;                               // the rider's feet follow the pedals (seat.feet 'pedals', riders.js)
   const stTop = [0, 0.19, -0.13];                      // top of the seat tube
   const r = 0.024;
 
@@ -101,8 +101,9 @@ export function build(THREE, def, opts = {}) {
 
   k.finish(group);
   group.add(steer);
+  group.userData.pedals = pedals;                      // riders.js puts the soles on these when seat.feet is 'pedals'
   return {
-    group, steer, cranks,
+    group, steer, cranks, pedals,
     wheels: [front, rear].map((t, i) => ({ ...t, base: def.wheels[i].p })),
     update(st) {
       const [wf, wr] = st.wheels;

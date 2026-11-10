@@ -11,7 +11,7 @@ export function build(THREE, def, opts = {}) {
   const Y = 'yellow', YD = 'yellowDark', K = 'black', T = 'trim';
   const F = def.forks;
   const [ax, ay, az] = F.anchor;
-  const floor = -0.08;                         // operator's floor (the Chibi's feet: hips 0.35 - 0.41)
+  const floor = -0.08;                         // operator's floor (a Chibi 2.6's feet: hips 0.35 - 0.43)
 
   // --- body: low front step, raised sides, the counterweight ---------------------------------------------------
   k.box(Y, [1.12, 0.32, 1.7], [0, -0.22, -0.22], { bevel: 0.06 });            // lower tub, z -1.07 .. 0.63
@@ -55,13 +55,13 @@ export function build(THREE, def, opts = {}) {
   steer.traverse(o => { o.userData.detail = true; });
   k.tube(T, [[wheelAt[0], wheelAt[1] - 0.05, wheelAt[2] + 0.05], [wheelAt[0], 0.3, 0.42]], 0.025);
 
-  // --- overhead guard: four posts, a frame and slats (head top = seat + 1.13 = 1.48) --------------------------
-  const top = 1.98, gx = 0.5, zf = 0.5, zb = -0.8;
+  // --- overhead guard: four posts, a frame and slats (2.6 head top = hips + ~0.95 = 1.3; 2.1 m off the ground) --
+  const top = 1.58, gx = 0.5, zf = 0.5, zb = -0.8;
   for (const s of [1, -1]) {
     k.tube(K, [[s * gx, 0.0, zf - 0.02], [s * gx, top, zf + 0.04]], 0.04, { seg: 6 });
     k.tube(K, [[s * gx, 0.46, zb], [s * gx, top, zb + 0.06]], 0.04, { seg: 6 });
     k.box(K, [0.08, 0.06, zf - zb + 0.12], [s * gx, top, (zf + zb) / 2 + 0.04], { bevel: 0.01 });
-    k.box('lamp', [0.08, 0.08, 0.04], [s * gx, 1.55, zf + 0.07], { bevel: 0.01 });
+    k.box('lamp', [0.08, 0.08, 0.04], [s * gx, top - 0.12, zf + 0.07], { bevel: 0.01 });
   }
   for (let i = 0; i <= 5; i++) k.box(K, [1.08, 0.05, 0.05], [0, top + 0.01, zb + 0.06 + i * ((zf - zb) / 5)], { bevel: 0 });
 

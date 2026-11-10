@@ -1,0 +1,37 @@
+/* Roverlands M8 — the Rustwild HUD (js/client/combat-hud.js). Loaded by that module, on top of roverlands.css. */
+.rl-cbhud { position: fixed; inset: 0; z-index: 11; pointer-events: none; font: 600 15px/1.35 var(--rl-font); color: var(--rl-ink); }
+.rl-cbhud * { box-sizing: border-box; }
+.rl-cbhud [hidden] { display: none !important; }
+/* the zone notice: middle of the screen, a third of the way down, then it fades */
+.rl-cb-notice { position: absolute; left: 50%; top: 24%; transform: translateX(-50%); display: grid; gap: 2px; justify-items: center; text-align: center;
+  padding: 10px 22px; border-radius: 14px; background: rgba(30, 12, 8, .78); border: 2px solid #c8502c; max-width: 90vw; }
+.rl-cb-notice b { font-size: 24px; letter-spacing: .06em; color: #ffb27a; text-transform: uppercase; }
+.rl-cb-notice span { font-size: 14px; color: #f1d9c8; font-weight: 500; }
+.rl-cb-notice.go { animation: rl-cb-fade 4.2s ease forwards; }
+@keyframes rl-cb-fade { 0% { opacity: 0; transform: translate(-50%, 8px); } 8% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; } 100% { opacity: 0; } }
+/* the left column, under the skydiving / health readouts (css/sky.css .rl-sky-top) */
+/* (below the vehicle rating card that shows after you get out, top left on a desktop) */
+.rl-cb-left { position: absolute; top: calc(var(--st) + 206px); left: calc(var(--sl) + 10px); display: grid; gap: 6px; justify-items: start; max-width: min(320px, 62vw); }
+.rl-cb-vhp { padding: 5px 10px 7px; border-radius: 12px; background: rgba(14, 19, 22, .78); border: 1px solid rgba(200, 80, 44, .55); min-width: 168px; }
+.rl-cb-row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; }
+.rl-cb-row em { font-style: normal; color: var(--rl-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rl-cb-row span { font-variant-numeric: tabular-nums; }
+.rl-cb-bar { margin-top: 4px; width: 100%; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, .15); overflow: hidden; }
+.rl-cb-bar i { display: block; height: 100%; background: linear-gradient(90deg, #ffb24a, var(--rl-green)); transition: width .2s; }
+.rl-cb-vhp.low .rl-cb-bar i { background: var(--rl-red); }
+.rl-cb-vhp.wreck { border-color: var(--rl-red); }
+.rl-cb-vhp.wreck span { color: var(--rl-red); font-weight: 800; }
+.rl-cb-camp { padding: 4px 10px; border-radius: 12px; background: rgba(14, 19, 22, .74); font-size: 13px; }
+/* REPAIR: right edge, low enough to clear the minimap, high enough to clear the touch buttons */
+.rl-cb-repair { position: absolute; right: calc(var(--sr) + 18px); top: 30%; width: 78px; height: 78px; border-radius: 50%; pointer-events: auto;
+  border: 3px solid #2f8a4a; background: var(--rl-green); color: #0e2214; font: 900 15px/1 var(--rl-font); letter-spacing: .04em;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .45); touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
+.rl-cb-repair.down { transform: scale(.94); filter: brightness(1.15); }
+.rl-cb-card { position: absolute; left: 50%; top: 34%; transform: translateX(-50%); padding: 10px 18px; border-radius: 14px; background: rgba(14, 19, 22, .86);
+  border: 2px solid var(--rl-amber); font-size: 18px; text-align: center; max-width: 88vw; }
+@media (max-width: 560px) {
+  .rl-cb-left { top: calc(var(--st) + 140px); }
+  .rl-cb-notice b { font-size: 19px; }
+  .rl-cb-vhp { min-width: 140px; }
+  .rl-cb-repair { width: 70px; height: 70px; top: 32%; right: calc(var(--sr) + 14px); }
+}

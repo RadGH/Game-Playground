@@ -18,10 +18,19 @@ import { buildProp } from '../client/models/props.js';
 import { qrot, qslerp, yawOf } from '../phys/vmath.js';
 import { buildModel } from '../client/models/index.js';
 import { setDetail } from '../client/models/kit.js';
-import { createRider } from '../client/riders.js';
+import { createRider, handTargets as riderHands } from '../client/riders.js';
 import { createCamera } from './camera.js';
 import { createWheat } from './wheat.js';
+import { createFarmPlay } from './farm-play.js';
 import { createRighting } from './righting.js';
+import { createHealth } from './health.js';
+import { createSkyPlay } from './sky-play.js';
+import { createSkyHud } from '../client/sky-hud.js';
+import { createSpacePlay } from './space-play.js';
+import { createCombatPlay } from './combat-play.js';
+import { createWorkPlay } from './work-play.js';
+import { createSurveyPlay } from './survey-play.js';
+import { createMoonPlay } from './moon-play.js';
 import { avatarOf } from '../../../knockabout/js/client/look.js';
 
 const INTERP_MS = 120;
@@ -30,7 +39,11 @@ const ENTER_RANGE = 3.6;
 const MAX_SEND = 20;          // bodies per `pos` message (js/net/protocol.js allows 24)
 
 export async function createSession(o) {
-  const { THREE, RAPIER, scene, camera, world, view, net, defs, input, settings = () => ({}), spectate = false, sounds = null } = o;
+  const { THREE, RAPIER, scene, camera, world, view, defs, input, settings = () => ({}), spectate = false, sounds = null } = o;
+  // every net.on this session (and what it builds) makes is taken off again at dispose: a change of place (M11) builds a
+  // new session on the SAME connection, and the old one must not keep drawing bodies into a world that is gone
+  const offs = [];
+  const net = new Proxy(o.net, { get: (t, k) => k === 'on' ? (type, fn) => { t.on(type, fn); offs.push([type, fn]); return net; } : Reflect.get(t, k) });
   const defOf = Object.fromEntries(defs.map(d => [d.id, d]));
   const phys = createPhysics(RAPIER, world);
   const cam = createCamera(THREE, camera, phys);
@@ -47,15 +60,54 @@ export async function createSession(o) {
   let pendingHitch = null, hitchNear = null, tipped = false;
   const righting = createRighting();   // a trailer I asked the room for so I can hitch it; the trailer my tow point is near
   let pendingSeat = null, sendT = 0, flag = null, run = null, lastCrash = 0, resetHold = 0, bumpT = new Map(), lastDrive = null;
-  let hostPid = net.room?.host, lastDev = 'keys', sleepCursor = 0;
+  let hostPid = net.room?.host, lastDev = 'keys', sleepCursor = 0, awakeCursor = 0;
   const brokenSet = new Set();
   // tall wheat on the farm fields (drawn near the camera; the harvester cuts it, the room remembers the cut)
-  let wheat = null;
-  try { if (world.surface && o.wheat !== false) wheat = createWheat({ THREE, scene, world, enhance, quality: settings().quality || 'medium' }); } catch (e) { console.warn('[roverlands] wheat', e); }
+  // Wayfare County (M6): the farm belt is the farming job's fields instead (js/game/farm-play.js: crops in every state,
+  // the machines working them, the room refereeing it); the old world keeps its plain wheat
+  let wheat = null, farm = null;
+  try { if (world.sites?.farms?.plots?.length && o.wheat !== false && !spectate) farm = createFarmPlay({ THREE, scene, world, net, enhance, quality: settings().quality || 'medium', job: o.jobs?.get?.('farming') || null, toast: t => toast(t), sounds }); } catch (e) { console.warn('[roverlands] farming', e); }
+  try { if (!farm && world.surface && o.wheat !== false) wheat = createWheat({ THREE, scene, world, enhance, quality: settings().quality || 'medium' }); } catch (e) { console.warn('[roverlands] wheat', e); }
   let cutQueue = [], cutT = 0, grain = 0;
+  // M9: health on foot (fall damage everywhere) and skydiving at Wayfare Field (County only) — js/game/health.js, sky-play.js
+  const health = createHealth();
+  const skyHud = spectate || typeof document === 'undefined' ? null : createSkyHud();
+  let sky = null;
+  try { if (world.sites?.airport?.jumpPoint && !spectate) sky = createSkyPlay({ THREE, scene, world, net, defOf: k => defOf[k] || null, phys, enhance, sounds, toast: t => toast(t), hud: skyHud,
+    S: { walker: () => walker, mySeat: () => mySeat, standUp: t => standUp(t), ents, people, cam, me, land: v => landed(v) } }); } catch (e) { console.warn('[roverlands] skydiving', e); }
+  // M11: the rocket, Lantern Station's zero-g, the landing pod, the travel menus (js/game/space-play.js)
+  let space = null;
+  try { if (!spectate && (world.station || world.sites?.launch || world.map === 'moon')) space = createSpacePlay({ THREE, scene, world, net, phys, camera, sounds, toast: t => toast(t), openDealer: o.openDealer, arrive: o.arrive,
+    S: { walker: () => walker, mySeat: () => mySeat, ents, cam, me } }); } catch (e) { console.warn('[roverlands] space', e); }
+  // M8: the Rustwild — raider camps the room runs, vehicle hp in the zone, my guns' hits (js/game/combat-play.js)
+  let combat = null;
+  try { if (world.sites?.rustwild?.camps?.length && !spectate) combat = createCombatPlay({ THREE, scene, world, net, phys, defOf: k => defOf[k] || null, enhance, sounds, toast: t => toast(t),
+    S: { ents, mySeat: () => mySeat, walker: () => walker, health, teleport: (x, z) => teleport(x, z), keys: input.keys, tipped: () => tipped,
+      shoot: (p, d, kind, id) => { spawnShot(p, d, true, kind); net.send({ t: 'fire', id, p: p.map(r2), d: d.map(v => Math.round(v * 1000) / 1000), kind }); sounds?.play('shot', { at: { x: p[0], y: p[1], z: p[2] } }); } } }); } catch (e) { console.warn('[roverlands] combat', e); }
+  // M7: the emergency + haul jobs — fire, ambulance, patrol, tow, haul (js/game/work-play.js; County only)
+  let work = null;
+  try { if (world.sites?.jobSpots && !spectate) work = createWorkPlay({ THREE, scene, world, net, enhance, sounds, toast: t => toast(t), jobs: o.jobs, S: { ents, mySeat: () => mySeat, walker: () => walker, towedEnt: A => towedEnt(A), hitch: A => hitchPress(A) } }); } catch (e) { console.warn('[roverlands] work', e); }
+  // M12: Moon Work — sample runs, crater jumps, supply runs in the Crater Crawler (js/game/moon-play.js; the Moon only)
+  let moon = null;
+  try { if (world.map === 'moon' && !spectate) moon = createMoonPlay({ THREE, scene, world, net, view, enhance, sounds, toast: t => toast(t), quality: settings().quality || 'medium', S: { ents, mySeat: () => mySeat, walker: () => walker } }); } catch (e) { console.warn('[roverlands] moon', e); }
+  // M10: survey kits — crates you load and sling, hold E to set up, report at the Survey Office (js/game/survey-play.js; County only)
+  let survey = null;
+  try { if (world.sites?.surveyGrid && !spectate) survey = createSurveyPlay({ THREE, scene, world, net, enhance, sounds, toast: t => toast(t),
+    S: { ents, mySeat: () => mySeat, walker: () => walker, carrying: () => carrying, grab: E => grab(E), placeCarried: (p, v, q) => placeCarried(p, v, q), keys: input.keys, cam } }); } catch (e) { console.warn('[roverlands] survey', e); }
+  /** A landing on foot at v m/s (into the ground): fall damage, knocked down / out (forgiving: never gold or progress). */
+  function landed(v) {
+    const r = health.land(v); if (!r) return;
+    if (r.out) toast('Knocked out! You will be back up in a moment');
+    else if (r.knock) toast('Knocked down!');
+    else toast(`Ouch! −${r.dmg} health`);
+    sounds?.play('thud', { at: walker ? { x: walker.feet[0], y: walker.feet[1], z: walker.feet[2] } : null });
+  }
   const stat = { ticks: 0, sent: 0 };
 
   function startSpot() {
+    // M11: arriving in a place (the Moon's landing pad; the station floats you instead) stands you where the room put you
+    const ar = o.arrive?.at;
+    if (ar && !o.arrive.pod) return [ar[0], world.heightAt(ar[0], ar[2]) + 0.3, ar[2]];
     const h = world.sites?.home || { x: 0, z: 0 };
     const a = (me * 2.4) % (Math.PI * 2), r = 6 + (me % 3);
     const x = h.x + Math.cos(a) * r, z = h.z + Math.sin(a) * r;
@@ -71,11 +123,13 @@ export async function createSession(o) {
     return { p: [p.x, world.heightAt(p.x, p.z) + restLift(def), p.z], yaw: p.yaw || 0 };
   }
   async function addEnt(row) {
-    const def = defOf[row.kind];
+    const def0 = sky?.defFor(row, defOf[row.kind]) || defOf[row.kind];     // M9: my own glider may carry an upgrade
+    const def = work?.defFor(row, def0) || moon?.defFor(row, def0) || def0;   // M7: a patrol car's own engine (Pursuit engine); M12: a rover's motor + wheels
     if (!def) return;
     const E = { id: row.id, kind: row.kind, def, owner: row.owner, seats: row.seats.slice(), idle: row.idle, pad: row.pad, buf: [], model: null, veh: null, acts: { ...(row.acts || {}) } };
     ents.set(row.id, E);
     const start = row.pose ? { p: row.pose.p, yaw: yawOf({ x: row.pose.q[0], y: row.pose.q[1], z: row.pose.q[2], w: row.pose.q[3] }) } : placeForPad(def, row.pad);
+    if (start.p[1] == null) start.p = [start.p[0], world.heightAt(start.p[0], start.p[2]) + restLift(def), start.p[2]];   // M11: the Moon's rovers (the room knows no height)
     if (isPropDef(def)) {
       // a loose prop (crate, bag, barrel, ball) or something you wear (the jetpack)
       E.isProp = true;
@@ -132,19 +186,24 @@ export async function createSession(o) {
     const tp = A.veh.towPointWorld?.(); if (!tp) return null;
     let best = null, bd = HITCH_RANGE;
     for (const X of ents.values()) {
-      if (X === A || X.isProp || !X.def.hitch || X.veh.towedBy || X.veh.towing === A.veh) continue;
-      const hp = X.veh.hitchPointWorld(); const d = Math.hypot(hp.x - tp.x, hp.y - tp.y, hp.z - tp.z);
+      // a trailer's tongue, or (tow truck: `towAny`) any car's front bumper — vehicle.js frontHitch
+      if (X === A || X.isProp || !A.veh.canTow?.(X.veh) || X.veh.towedBy || X.veh.towing === A.veh || X.veh.towing) continue;
+      const hp = X.def.hitch ? X.veh.hitchPointWorld() : X.veh.frontHitchWorld(); const d = Math.hypot(hp.x - tp.x, hp.y - tp.y, hp.z - tp.z);
       if (d < bd) { bd = d; best = X; }
     }
     return best;
   }
+  const towedEnt = A => { const t = A?.veh.towing?.trailer; return t ? [...ents.values()].find(X => X.veh === t) : null; };
+  const WORK_ON = { door_sow: 'seed drill on', door_spray: 'spray on', door_bed: 'tip the trailer' }, WORK_OFF = { door_sow: 'seed drill off', door_spray: 'spray off', door_bed: 'lower the bed' };
+  // vehicles batch B: what fire does in a seat whose switch is a door (cargo plane ramp, rocket stage, pod parachute)
+  const ACT_HINT = { door_ramp: on => on ? 'raise the ramp' : 'lower the ramp', door_stage: on => on ? 'booster separated' : 'separate the booster', door_chute: on => on ? 'cut the parachute away' : 'open the parachute' };
   function doHitch(A, T) {
     if (A.veh.hitch(T.veh)) { toast(`Hitched the ${T.def.name}`); sounds?.play('door', { at: T.veh.rb.translation() }); }
   }
   function hitchPress(A) {
     if (A.veh.towing) { const t = A.veh.unhitch(); const T = t && [...ents.values()].find(X => X.veh === t); toast(`Unhitched the ${T?.def.name || 'trailer'}`); return; }
     const T = nearestTrailer(A);
-    if (!T) { toast('Back up to a trailer\'s tongue first'); return; }
+    if (!T) { if (work?.winch(A)) return; toast('Back up to a trailer\'s tongue first'); return; }     // M7: the tow truck's winch
     if (T.veh.local) doHitch(A, T); else { pendingHitch = { from: A.id, to: T.id }; net.send({ t: 'own', id: T.id }); }
   }
 
@@ -155,13 +214,25 @@ export async function createSession(o) {
     const info = net.room?.players?.find(p => p.pid === pid);
     P = { pid, name: info?.name || 'Driver', look: info?.look, rider: null, buf: [], last: null };
     people.set(pid, P);
-    try { P.rider = await createRider(avatarOf(info?.look || { race: 'human', seed: pid * 77 })); scene.add(P.rider.group); P.rider.group.add(nameTag(P.name, pid === me)); } catch (e) { console.warn('[roverlands] rider', e); }
+    try { P.rider = await createRider(avatarOf({ ...(info?.look || { seed: pid * 77 }), race: 'human' })); scene.add(P.rider.group); P.rider.group.add(nameTag(P.name, pid === me)); } catch (e) { console.warn('[roverlands] rider', e); }
     return P;
   }
   function syncRoom(room) {
     hostPid = room.host;
     for (const p of room.players) if (!p.spec) personFor(p.pid);
+    // a new look (the phone's Wardrobe, M4): rebuild that person's body, keep where it stands
+    for (const p of room.players) { const P = people.get(p.pid); if (P?.rider && p.look && JSON.stringify(p.look) !== JSON.stringify(P.look)) reLook(P, p.look); }
     for (const pid of [...people.keys()]) if (!room.players.some(p => p.pid === pid)) { people.get(pid)?.rider?.dispose(); people.delete(pid); }
+  }
+  async function reLook(P, look) {
+    P.look = look;
+    const want = JSON.stringify(look);
+    let R; try { R = await createRider(avatarOf({ ...look, race: 'human' })); } catch (e) { console.warn('[roverlands] rider', e); return; }
+    if (JSON.stringify(P.look) !== want || people.get(P.pid) !== P || !P.rider) { R.dispose(); return; }
+    const old = P.rider;
+    R.group.position.copy(old.group.position); R.group.quaternion.copy(old.group.quaternion); R.group.visible = old.group.visible;
+    R.group.add(nameTag(P.name, P.pid === me));            // the name tag is the group's last child (the seat code hides it)
+    scene.add(R.group); P.rider = R; old.dispose();
   }
   function nameTag(text, mine) {
     const c = document.createElement('canvas'); c.width = 256; c.height = 64;
@@ -216,7 +287,7 @@ export async function createSession(o) {
     const s = E?.def.seats[mySeat[1]];
     let p = startSpot(), yaw = cam.yaw;
     if (E && s) {
-      const w = E.veh.toWorld({ x: s.exit[0], y: s.exit[1] + s.p[1], z: s.exit[2] + s.p[2] });
+      const w = E.veh.toWorld({ x: s.exit[0], y: s.exit[1] + s.p[1], z: s.exit[2] });     // exit x, z: vehicle frame; y: from the seat
       p = [w.x, w.y, w.z];
       // somewhere solid: never into a rock or under water if the other side is free
       const hit = phys.raycast([p[0], p[1] + 2, p[2]], [0, -1, 0], 6, { exclude: E.veh.rb });
@@ -249,7 +320,7 @@ export async function createSession(o) {
     for (const E of ents.values()) {
       if (E.isProp || !E.def.parts) continue;
       for (const part of E.def.parts) {
-        if (!part.door) continue;
+        if (!part.door || part.seatOnly) continue;      // seatOnly (batch B: the rocket's stage) is never a door on foot
         const w = E.veh.toWorld({ x: part.p[0], y: part.p[1], z: part.p[2] });
         const d = Math.hypot(w.x - feet[0], w.z - feet[2]);
         if (d < 3.2 && (!best || d < best.d)) best = { E, name: part.door, d };
@@ -264,6 +335,14 @@ export async function createSession(o) {
     E.veh.carry(walker, { wear });
     if (wear) { walker.jetpack = { fuel: 1, ...E.def.jetpack }; toast('Jetpack on — hold jump in the air to fly'); }
   }
+  /** M10: pick a prop up — asking the room for it first when it is not mine (the survey's tap-E on a kit crate). */
+  function grab(E) { if (E.owner === me) pickUp(E); else { pendingPick = E.id; net.send({ t: 'own', id: E.id }); } }
+  /** M10: let go of what I carry at p (a vehicle's crate slot), moving with v, turned like q. */
+  function placeCarried(p, v = [0, 0, 0], q = null) {
+    const E = carrying; if (!E) return;
+    carrying = null;
+    E.veh.drop(v); E.veh.rb.setTranslation({ x: p[0], y: p[1], z: p[2] }, true); if (q) E.veh.rb.setRotation(q, true);
+  }
   function putDown(throwIt = false) {
     const E = carrying; if (!E) return;
     carrying = null;
@@ -275,6 +354,7 @@ export async function createSession(o) {
   // ---------------------------------------------------------------------------------------------- crashes
   function onImpact(E, dv, info) {
     if (!E.veh.local) return;
+    combat?.impact(E, dv);                // M8: a hard hit costs hp in the Rustwild
     const open = !E.def.enclosed;
     const thr = E.def.eject?.threshold ?? 12;
     const flipped = info.upright < -0.15 && E.def.eject?.upsideDown;
@@ -307,6 +387,7 @@ export async function createSession(o) {
       trackStep.set(key, pt);
       if (speed > 0.4 || slide > 0.2) view.tracks?.add(key, pt[0], pt[1], pt[2], n[0], n[1], n[2], w.def.w ?? 0.3, surf.id ?? 0, dir[0], dir[2]);
     }
+    if (moon?.wheel(E, w, pt, n, surf, slide, dir, speed)) return;      // M12: the Moon's dust arcs up and hangs
     const soft = (surf.rut || 0) > 0.4;
     if ((slide > 0.35 && speed > 2) || (soft && speed > 6 && Math.random() < 0.25)) view.dust?.(pt[0], pt[1] + 0.1, pt[2], surf.id ?? 0, Math.min(1, slide + speed / 30));
     const water = world.waterAt?.(pt[0], pt[2]);
@@ -384,6 +465,12 @@ export async function createSession(o) {
   /** Switches that change the physics: doors and lids (`door_<name>` -> vehicle.setDoor(name)). */
   function applyActs(E) { for (const [k, on] of Object.entries(E.acts || {})) if (k.startsWith('door_')) E.veh.setDoor?.(k.slice(5), on); }
   net.on('cut', m => wheat?.cut(m.cells));
+  net.on('job', m => farm?.onMsg(m));
+  net.on('job', m => sky?.onMsg(m));
+  net.on('job', m => combat?.onMsg(m));
+  net.on('job', m => work?.onMsg(m));
+  net.on('job', m => survey?.onMsg(m));
+  net.on('job', m => moon?.onMsg(m));
   net.on('toast', m => toast(m.text));
   net.on('deny', m => { if (m.what === 'seat') { pendingSeat = null; toast(m.why || 'That seat is taken.'); } });
   const nameOf = pid => people.get(pid)?.name || net.room?.players?.find(p => p.pid === pid)?.name || 'Someone';
@@ -437,6 +524,7 @@ export async function createSession(o) {
   function spawnShot(p, d, mine, kind = 'pellet') {
     const K = SHOT[kind] || SHOT.pellet;
     const n = K.spray || 1;
+    combat?.fx.flash(p, kind);            // M8: a muzzle flash
     for (let i = 0; i < n; i++) {
       const jit = n > 1 ? 0.05 : 0;
       const dd = [d[0] + (Math.random() - 0.5) * jit, d[1] + (Math.random() - 0.5) * jit, d[2] + (Math.random() - 0.5) * jit];
@@ -446,7 +534,7 @@ export async function createSession(o) {
       m.position.set(...p);
       scene.add(m);
       const sp = K.speed * (1 - Math.random() * (n > 1 ? 0.15 : 0));
-      shots.push({ p: [...p], v: [dd[0] * sp, dd[1] * sp, dd[2] * sp], m, life: K.life, mine, K, kind });
+      shots.push({ p: [...p], v: [dd[0] * sp, dd[1] * sp, dd[2] * sp], m, life: (mine && K.wet && work?.waterLife()) || K.life, mine, K, kind });     // M7: the cannon's reach
     }
   }
   function stepShots(dt) {
@@ -456,8 +544,13 @@ export async function createSession(o) {
       s.v[1] -= s.K.gravity * dt;
       const sp = Math.hypot(...s.v), step = sp * dt, d = [s.v[0] / sp, s.v[1] / sp, s.v[2] / sp];
       const hit = phys.raycast(s.p, d, step, { exclude: myE?.veh.rb });
+      // M8: my shot meets a raider (the room checks the gun, the range and the rate)
+      const foe = s.mine && combat ? combat.shotTest(s.p, d, step) : null;
+      if (foe && (!hit || foe.t <= hit.t + 0.6)) { combat.shotHit(foe, s.kind); s.m.removeFromParent(); shots.splice(i, 1); continue; }
+      if (hit && s.K.blast) { if (s.mine) combat?.shellLanded(hit.point); else combat?.fx.boom(hit.point, 1); }
       const water = !hit && world.waterAt?.(s.p[0], s.p[2]);
       if (hit || (s.life -= dt) <= 0 || (water != null && s.p[1] < water)) {
+        if (s.mine && s.K.wet) work?.water(hit ? hit.point : s.p);       // M7: where my water landed (a fire?)
         if (hit && s.mine) shotHit(hit, d, s.K);
         if (hit) view?.[s.K.wet ? 'splash' : 'dust']?.(hit.point[0], hit.point[1], hit.point[2], s.K.wet ? 0.3 : (world.surfaceAt?.(hit.point[0], hit.point[2])?.id ?? 1), s.K.blast ? 1 : 0.6);
         if (hit && s.K.blast) { sounds?.play('crash', { at: { x: hit.point[0], y: hit.point[1], z: hit.point[2] } }); for (let k = 0; k < 6; k++) view?.dust?.(hit.point[0] + (Math.random() - 0.5) * 3, hit.point[1], hit.point[2] + (Math.random() - 0.5) * 3, 1, 1); }
@@ -516,18 +609,25 @@ export async function createSession(o) {
     if (s.camNear) cam.distScale = Math.max(0.55, cam.distScale - 0.12);
     if (s.camFar) cam.distScale = Math.min(1.8, cam.distScale + 0.12);
     for (const X of ents.values()) if (X.veh.local && !X.isProp && !(E === X && mySeat[1] === 0)) Object.assign(X.veh.input, { throttle: 0, brake: 0, steer: 0, handbrake: X.seats[0] == null, boost: false, pitch: 0, lean: 0, flip: false, elev: undefined });
-    if (walker && !mySeat) {
+    // M9: in the jump plane / falling / under the canopy, sky-play takes the controls; knocked down, nobody does
+    const knocked = health.down && walker && !mySeat && !sky?.active;
+    if (knocked) Object.assign(walker.input, { mx: 0, mz: 0, jump: false, run: false });
+    if (sky?.active && !mySeat) sky.control(dt, s);
+    else if (space?.active) space.control(dt, s);
+    else if (knocked) { /* lying there */ }
+    else if (walker && !mySeat) {
       const fx = Math.sin(cam.yaw), fz = Math.cos(cam.yaw);
       walker.input.mx = fx * s.my - fz * s.mx;
       walker.input.mz = fz * s.my + fx * s.mx;
       walker.input.run = !s.boost;          // run by default; hold Shift (B / L3) to walk
       walker.input.jump = s.jump;
       if (s.use && !pendingSeat && !walker.isRag()) {
-        if (carrying) putDown(s.boost);
+        if (carrying) { if (!survey?.load(carrying)) putDown(s.boost); }      // M10: a kit crate goes into a vehicle's slot
         else {
-          const ns = nearestSeat(walker.feet);
-          if (ns) { pendingSeat = [ns.E.id, ns.i]; net.send({ t: 'seat', id: ns.E.id, seat: ns.i }); }
-          else { const np = nearestProp(walker.feet); if (np) { if (np.owner === me) pickUp(np); else { pendingPick = np.id; net.send({ t: 'own', id: np.id }); } } }
+          const ns = nearestSeat(walker.feet), kc = survey?.closeCrate(walker.feet);     // M10: a kit crate at my feet beats a seat (unloading a jeep)
+          if (kc && survey.press(kc)) { /* tap picks it up, hold sets it up */ }
+          else if (ns) { pendingSeat = [ns.E.id, ns.i]; net.send({ t: 'seat', id: ns.E.id, seat: ns.i }); }
+          else { const np = nearestProp(walker.feet); if (np) { if (survey?.press(np)) { /* M10: a kit crate — tap picks up, hold sets up */ } else if (np.owner === me) pickUp(np); else { pendingPick = np.id; net.send({ t: 'own', id: np.id }); } } else (sky?.nearSpot(walker.feet) || space?.nearSpot(walker.feet) || work?.nearSpot(walker.feet) || survey?.nearSpot(walker.feet) || moon?.nearSpot(walker.feet) || o.nearSpot?.(walker.feet))?.use(); }
         }
       }
       if (carrying?.def.jetpack) carrying.veh.flame = walker.thrusting;
@@ -573,9 +673,14 @@ export async function createSession(o) {
         if (d.type === 'heli' && s.device !== 'keys') { inp.throttle = Math.max(0, s.my || 0); inp.brake = Math.max(0, -(s.my || 0)); inp.handbrake = s.jump || s.gas > 0.1; inp.boost = s.boost || s.brake > 0.1; }
         if (d.pedal) { inp.pedalTap = s.gas > 0.5 && !(frame.gasWas > 0.5); inp.pitch = 0; }
         if (d.rocket) { inp.jump = jumpEdge; inp.handbrake = false; inp.flip = false; inp.lean = s.mx; }
-        if (d.forks) { inp.lift = (s.jump ? 1 : 0) - (s.boost ? 1 : 0); inp.handbrake = false; inp.boost = false; inp.flip = false; }
+        if (d.forks || d.mower) { inp.lift = (s.jump ? 1 : 0) - (s.boost ? 1 : 0); inp.handbrake = false; inp.boost = false; inp.flip = false; }
+        // the tractor's mower: the room's `mower` switch follows the deck (on once it is down, off once it is half up),
+        // so farming (M6) and everyone else's copy know it is cutting
+        if (d.mower) { const md = E.veh.mowerDown(), want = md > 0.9 ? true : md < 0.5 ? false : !!E.acts.mower; if (want !== !!E.acts.mower && frame.mowerSent !== want) { frame.mowerSent = want; net.send({ t: 'act', id: E.id, what: 'mower', on: want }); } else if (want === !!E.acts.mower) frame.mowerSent = null; }
         if (d.type === 'heli' || d.type === 'plane') inp.flip = false;
         Object.assign(E.veh.input, inp);
+        combat?.control(E, mySeat[1]);    // M8: a wreck does not go
+        space?.drive(E, s, dt);           // M11: the rocket's countdown + launch assist, the pod's parachute
         if (s.horn) { net.send({ t: 'horn', id: E.id }); sounds?.play('horn', { at: E.veh.rb.translation() }); }
         if (d.tow) { hitchNear = E.veh.towing ? 'on' : nearestTrailer(E); if (s.hitch) hitchPress(E); } else hitchNear = null;
         // on its side or roof and not moving: after 3 s it is put back on its wheels by itself, at once with the
@@ -599,12 +704,25 @@ export async function createSession(o) {
     }
 
     // ---- physics
+    work?.control(dt);                    // M7: the runaway's driver, the winch, a towed wreck's brakes
+    moon?.control(dt, s);                 // M12: the rover's motor / wheel upgrades, the Jump booster's push
     const n = phys.step(dt);
     stat.ticks += n;
     if (n) bumpRemotes();
+    // M9: a hard landing on foot (a jump, a cliff, thrown out of a vehicle) hurts; the skydive / glider / high fall
+    { const lv = walker?.takeLanding?.() || 0; if (lv && !mySeat) landed(lv); }
+    if (health.tick(dt) === 'up') toast('Back on your feet');
+    sky?.frame(dt, s);
+    space?.frame(dt, s);
 
     // ---- a seat's switch (siren, light bar…): the fire button flips it
-    if (E && seat?.act && !seat.gun && s.fire && !frame.fireWas) net.send({ t: 'act', id: E.id, what: seat.act, on: !E.acts[seat.act] });
+    // `tow_work` (tractor): fire flips the work switch of the implement it tows (seed drill `door_sow`, bowser
+    // `door_spray`, produce trailer `door_bed`: trailer def.work). Acts named door_* are the ones the room accepts from
+    // a player standing (or sitting) within reach of the vehicle, so the tractor driver may flip them on the trailer.
+    if (E && seat?.act && !seat.gun && s.fire && !frame.fireWas) {
+      if (seat.act === 'tow_work') { const T = towedEnt(E); if (T?.def.work) net.send({ t: 'act', id: T.id, what: T.def.work, on: !T.acts[T.def.work] }); else toast('Hitch a seed drill, sprayer or trailer first (T)'); }
+      else if (!(seat.act === 'door_stage' && E.acts.door_stage)) net.send({ t: 'act', id: E.id, what: seat.act, on: !E.acts[seat.act] });   // batch B: staging is one way
+    }
     frame.fireWas = s.fire;
 
     // ---- turret + shooting (gunner)
@@ -615,7 +733,7 @@ export async function createSession(o) {
       const target = aimHit ? new THREE.Vector3(...aimHit.point) : camRay.ray.origin.clone().addScaledVector(camRay.ray.direction, 300);
       aimTurret(E, target);
       if (s.fire && fireCd <= 0) {
-        fireCd = 1 / (seat.gun.rate || 6);
+        fireCd = 1 / ((seat.gun.rate || 6) * (combat?.rateScale() || 1));     // M8: the Quick loader
         E.model.turret.muzzle.updateMatrixWorld(true);
         const mp = new THREE.Vector3().setFromMatrixPosition(E.model.turret.muzzle.matrixWorld);
         const d = target.clone().sub(mp).normalize();
@@ -639,6 +757,12 @@ export async function createSession(o) {
         if (Math.random() < 0.5) view?.dust?.(hp.x, hp.y, hp.z, 9, 0.8);
       }
     }
+    // ---- farming (M6): the machine I drive (and what it tows) works the fields; selling, filling the tank
+    farm?.frame(dt, { E, seat: mySeat?.[1] ?? null, towed: E ? towedEnt(E) : null, ents });
+    combat?.frame(dt, s);                 // M8: the border, my forward gun, the repair kit, waking up at the gate garage
+    work?.frame(dt, s);                   // M7: loading, jolts, drop-offs, refills, runaway hits, the station signs
+    survey?.frame(dt, s);                 // M10: the E hold on a kit crate, the helicopter sling (T), reporting at the office
+    moon?.frame(dt, s);                   // M12: jumps, the sample arm (T), the drop / yards / loose crates, jolts
     cutT += dt;
     if (cutQueue.length && (cutT > 0.3 || cutQueue.length >= 380)) { cutT = 0; while (cutQueue.length) net.send({ t: 'cut', cells: cutQueue.splice(0, 400) }); }
 
@@ -650,8 +774,12 @@ export async function createSession(o) {
       // before the rest), then parked, sleeping ones a few at a time in turn — they are not changing anyway
       const awake = [], asleep = [];
       for (const X of ents.values()) if (X.veh.local) (X.veh.rb.isSleeping() && !X.veh.carriedBy ? asleep : awake).push(X);
-      if (E) awake.sort((a, b) => (b === E) - (a === E));
-      const pick = awake.slice(0, MAX_SEND);
+      // the one I'm in and what it tows go every time; when more are awake than fit, the rest take turns (M6: with the
+      // County's ~50 parked bodies on this machine, a tractor I had moved and left was never sent, so the room kept its
+      // old spot and refused my seat in it: "Get closer to it first")
+      const T = E ? towedEnt(E) : null, first = awake.filter(X => X === E || X === T), rest = awake.filter(X => X !== E && X !== T);
+      let pick = first.concat(rest);
+      if (pick.length > MAX_SEND) { const n = MAX_SEND - first.length, at = (awakeCursor += n) % rest.length; pick = first.concat(Array.from({ length: n }, (_, k) => rest[(at + k) % rest.length])); }
       for (let k = 0; k < Math.min(asleep.length, MAX_SEND - pick.length, 4); k++) pick.push(asleep[(sleepCursor++) % asleep.length]);
       const owned = [];
       for (const X of pick) {
@@ -659,7 +787,7 @@ export async function createSession(o) {
         if (X.turretAim) st.x.push(r2(X.turretAim[0]), r2(X.turretAim[1]));
         owned.push({ id: X.id, ...st });
       }
-      const meState = mySeat ? { p: seatWorld(E, mySeat[1]).map(r2), yaw: r2(yawOf(E.veh.rb.rotation())), a: 'sit', seat: mySeat.slice() } : walker ? walker.state() : { p: [0, 0, 0], yaw: 0, a: 'idle' };
+      const meState = mySeat ? { p: seatWorld(E, mySeat[1]).map(r2), yaw: r2(yawOf(E.veh.rb.rotation())), a: 'sit', seat: mySeat.slice() } : sky?.active ? sky.meState() : space?.active ? space.meState() : walker ? { ...walker.state(), ...(health.down ? { a: 'down' } : {}) } : { p: [0, 0, 0], yaw: 0, a: 'idle' };
       net.send({ t: 'pos', me: meState, ents: owned });
       stat.sent++;
     }
@@ -674,7 +802,7 @@ export async function createSession(o) {
       const t = X.veh.rb.translation(), q = X.veh.rb.rotation();
       X.model.group.position.set(t.x, t.y, t.z);
       X.model.group.quaternion.set(q.x, q.y, q.z, q.w);
-      X.model.update(X.veh.look ? { ...X.veh.look(), acts: X.acts, t: performance.now() / 1000 } : { flame: X.veh.flame });
+      X.model.update(X.veh.look ? { ...X.veh.look(), acts: X.acts, load: X.load ?? 0, t: performance.now() / 1000 } : { flame: X.veh.flame });   // load 0..1: a produce trailer's heap (farming sets E.load)
       if (X.model.forks && X.def.forks) X.model.forks.position.y = X.def.forks.anchor[1] + X.veh.look().forks;
       if (!X.veh.local && X.model.turret && !(mySeat && mySeat[0] === X.id)) {
         const last = X.buf[X.buf.length - 1];
@@ -698,14 +826,16 @@ export async function createSession(o) {
       for (const X of ents.values()) X.seats.forEach((pid, i) => { if (pid === P.pid) seatOf = [X, i]; });
       if (P.pid === me) {
         if (mySeat && E?.model) { P.rider.seated(E.model.group, seat, handsFor(E, seat)); P.rider.group.children.at(-1).visible = false; }
-        else if (walker) P.rider.onFoot(walker.feet, walker.yaw, walker.anim, walker.anim === 'rag' ? (walker.ragQ ? [walker.ragQ.x, walker.ragQ.y, walker.ragQ.z, walker.ragQ.w] : null) : null);
+        else if (sky?.active) sky.drawMe(P.rider);
+        else if (space?.active) space.drawMe(P.rider);
+        else if (walker) P.rider.onFoot(walker.feet, walker.yaw, health.down && walker.anim !== 'rag' ? 'down' : walker.anim, walker.anim === 'rag' ? (walker.ragQ ? [walker.ragQ.x, walker.ragQ.y, walker.ragQ.z, walker.ragQ.w] : null) : null);
       } else if (seatOf && seatOf[0].model) {
         P.rider.seated(seatOf[0].model.group, seatOf[0].def.seats[seatOf[1]], handsFor(seatOf[0], seatOf[0].def.seats[seatOf[1]]));
       } else {
         const smp = sample(P.buf, rt);
         if (smp) {
           let feet = smp.p, yaw = smp.yaw;
-          const on = smp.on != null ? ents.get(smp.on) : null;
+          const on = smp.on != null ? (ents.get(smp.on) || sky?.platform(smp.on)) : null;     // M9: or standing in a jump plane
           if (on && smp.rel) {      // standing on a vehicle: place them in that vehicle's frame as it is drawn now
             const w = on.veh.toWorld({ x: smp.rel[0], y: smp.rel[1], z: smp.rel[2] });
             feet = [w.x, w.y, w.z]; yaw = (smp.ryaw || 0) + yawOf(on.veh.rb.rotation());
@@ -728,9 +858,13 @@ export async function createSession(o) {
         lookX += s.mx * k; lookY += -s.my * k * (st.invertY ? -1 : 1); lookActive = true;
       }
       cam.update(dt, { target: [t.x, t.y, t.z], height: seat?.gun ? cd.height + 0.5 : cd.height, dist: cd.dist, vel: [v.x, v.y, v.z], look: { x: lookX, y: lookY, active: lookActive }, follow: mySeat?.[1] === 0 && !seat?.gun, exclude: E.veh.rb });
+    } else if (sky?.active) {
+      const c = sky.cam(); cam.snap(); cam.update(dt, { ...c, look: { x: s.lookX, y: s.lookY, active: s.lookActive } });
+    } else if (space?.active) {
+      cam.update(dt, { ...space.cam(), look: { x: s.lookX, y: s.lookY, active: s.lookActive } });
     } else if (walker) {
       const f = walker.feet;
-      cam.update(dt, { target: f, height: 1.55, dist: 4.6, look: { x: s.lookX, y: s.lookY, active: s.lookActive }, exclude: null });
+      cam.update(dt, { target: f, height: 1.2, dist: 5.4, look: { x: s.lookX, y: s.lookY, active: s.lookActive }, exclude: null });
     } else {
       // spectator: follow whoever is driving the flag run, else the host
       const P = [...people.values()].find(p => p.rider) || null;
@@ -751,7 +885,15 @@ export async function createSession(o) {
       sounds.engines(list, { x: camera.position.x, y: camera.position.y, z: camera.position.z, rx: fwd.z >= 0 ? -1 : 1 });
     }
     view?.update?.(dt, camera);
+    sky?.update(camera);
+    space?.update(camera);
+    skyHud?.update({ sky: sky?.hud() || null, hp: health.shown ? health.hp : null, down: health.state, wait: health.wait });
     wheat?.update(camera.position);
+    farm?.update(camera);
+    work?.update(camera, dt);             // M7: flames, smoke, beacons, patients, strips
+    survey?.update(camera, dt);           // M10: set-up kits, crate bands, the ring, the sling rope, the readout
+    moon?.update(camera, dt);             // M12: glowing samples, cargo on the rovers, rings, beacons, the lamp
+    combat?.update(camera, dt);
     frame.jumpWas = jumpWasNow;
     frame.gasWas = s.gas;
     if (s.map) o.onMap?.();
@@ -767,18 +909,7 @@ export async function createSession(o) {
     tm.yaw.rotation.y = Math.atan2(d.x, d.z);
     tm.pitch.rotation.x = Math.max(-0.6, Math.min(0.35, -Math.atan2(d.y, Math.hypot(d.x, d.z))));
   }
-  function handsFor(E, seat) {
-    const m = E.model;
-    if (!m) return null;
-    if (seat.hands === 'wheel' && m.steer) { m.steer.updateMatrixWorld(true); return [new THREE.Vector3(0.14, 0, 0).applyMatrix4(m.steer.matrixWorld), new THREE.Vector3(-0.14, 0, 0).applyMatrix4(m.steer.matrixWorld)]; }
-    if (seat.hands === 'bars' && m.steer) {
-      m.steer.updateMatrixWorld(true);
-      const b = m.steer.children.find(c => c.isGroup && c.position.y > 0.1) || m.steer;
-      return [new THREE.Vector3(0.3, 0.035, -0.02).applyMatrix4(b.matrixWorld), new THREE.Vector3(-0.3, 0.035, -0.02).applyMatrix4(b.matrixWorld)];
-    }
-    if (seat.gun && m.turret) { m.turret.pitch.updateMatrixWorld(true); return [new THREE.Vector3(0.2, -0.05, -0.25).applyMatrix4(m.turret.pitch.matrixWorld), new THREE.Vector3(-0.2, -0.05, -0.25).applyMatrix4(m.turret.pitch.matrixWorld)]; }
-    return null;
-  }
+  function handsFor(E, seat) { return riderHands(E.model, seat); }     // one rule with the Garage (riders.js)
 
   // two machines' bodies touching: I tell the other owner how hard my body hit theirs
   function bumpRemotes() {
@@ -852,13 +983,28 @@ export async function createSession(o) {
     const E = mySeat ? ents.get(mySeat[0]) : null;
     const seat = E ? E.def.seats[mySeat[1]] : null;
     let hint = null;
-    if (!E && walker && !walker.isRag()) {
+    if (!E && walker && !walker.isRag() && !sky?.active && !space?.active) {     // (falling / floating: no seats to offer)
       const ns = nearestSeat(walker.feet);
       if (ns) hint = `Get in ${ns.E.def.name} (${ns.E.def.seats[ns.i].role})`;
       else if (carrying) hint = carrying.def.jetpack ? 'Take off the jetpack' : `Put down the ${carrying.def.name} (Shift: throw)`;
       else { const np = nearestProp(walker.feet); if (np) hint = np.def.jetpack ? 'Put on the jetpack' : `Pick up the ${np.def.name}`; }
       if (!hint) { const nd = nearestDoor(walker.feet); if (nd) hint = `F — ${nd.E.acts['door_' + nd.name] ? 'Close' : 'Open'} the ${nd.name === 'rear' ? 'back doors' : nd.name}`; }
-    } else if (E) hint = seat.act ? `Fire: ${seat.act === 'siren' ? 'siren and lights' : seat.act} ${E.acts[seat.act] ? 'off' : 'on'}` : mySeat[1] === 0 ? (hitchNear === 'on' ? 'T — Unhitch the trailer' : hitchNear ? `T — Hitch the ${hitchNear.def.name}` : null) : seat.gun ? 'Gunner — aim and fire' : 'Passenger — look around';
+      if (!hint) hint = sky?.nearSpot(walker.feet)?.hint || space?.nearSpot(walker.feet)?.hint || work?.nearSpot(walker.feet)?.hint || survey?.nearSpot(walker.feet)?.hint || moon?.nearSpot(walker.feet)?.hint || o.nearSpot?.(walker.feet)?.hint || null;      // a shop door (M4: js/client/main.js)
+    } else if (E) hint = seat.act === 'tow_work' ? (() => { const T = towedEnt(E); return T?.def.work ? `Fire: ${T.acts[T.def.work] ? WORK_OFF[T.def.work] : WORK_ON[T.def.work]} · T — Unhitch` : hitchNear === 'on' ? 'T — Unhitch the trailer' : hitchNear ? `T — Hitch the ${hitchNear.def.name}` : 'Space / Shift — mower up / down'; })()
+      : seat.act && ACT_HINT[seat.act] ? `Fire: ${ACT_HINT[seat.act](!!E.acts[seat.act])}`
+      : seat.act ? `Fire: ${seat.act === 'siren' ? 'siren and lights' : seat.act} ${E.acts[seat.act] ? 'off' : 'on'}` : mySeat[1] === 0 ? (hitchNear === 'on' ? 'T — Unhitch the trailer' : hitchNear ? `T — Hitch the ${hitchNear.def.name}` : null) : seat.gun ? 'Gunner — aim and fire' : 'Passenger — look around';
+    // farming (M6): a line about the field / load / tank, and a hint that beats the generic one when it matters
+    if (space?.active) hint = space.hint();
+    if (E && space) { const h = space.seatHint(E, mySeat[1]); if (h !== undefined) hint = h; }      // M11: rocket / pod words
+    const fh = farm?.hud({ E, seat: mySeat?.[1] ?? null, towed: E ? towedEnt(E) : null, feet: walker?.feet }) || null;
+    if (fh?.hint) hint = fh.hint;
+    const jh = work?.hud({ E, seat: mySeat?.[1] ?? null, feet: walker?.feet }) || moon?.hud({ E, seat: mySeat?.[1] ?? null, feet: walker?.feet }) || null;     // M7: my call + what to do next; M12: the Moon's
+    if (jh?.hint && (!hint || !fh?.hint)) hint = jh.hint;
+    const ch = combat?.hud() || null;     // M8: a wreck says so; the forward gun says how to fire it
+    if (ch?.hint && (!hint || /wrecked/.test(ch.hint))) hint = ch.hint;
+    const svh = survey?.hud() || null;     // M10: load / sling / hold-to-set-up words beat the generic ones
+    if (svh?.hint) hint = svh.hint;
+    if (health.down && !mySeat) hint = null;     // M9: knocked down, nothing to press
     const markers = [];
     for (const P of people.values()) if (P.rider) { const g = P.rider.group.position; markers.push({ kind: P.pid === me ? 'me' : 'player', x: g.x, z: g.z, label: P.name, yaw: P.pid === me ? cam.yaw : 0 }); }
     for (const X of ents.values()) { if (X.isProp) continue; const t = X.veh.rb.translation(); markers.push({ kind: 'vehicle', vehicle: X.kind, x: t.x, z: t.z, label: X.def.name, busy: X.seats.some(p => p != null) }); }
@@ -867,9 +1013,10 @@ export async function createSession(o) {
     if (flag && flag.state !== 'carried') { const site = world.sites?.flags?.find(f => String(f.id) === String(flag.site)); if (site) markers.push({ kind: 'site', x: site.x, z: site.z, label: site.name }); }
     return {
       speed: E ? Math.abs(E.veh.forwardSpeed()) : walker ? Math.hypot(walker.vel[0], walker.vel[2]) : 0,
-      kmh: E ? Math.round(Math.abs(E.veh.forwardSpeed()) * 3.6) : null,
-      vehicle: E?.def.name || null, role: seat?.role || null, boost: E?.def.engine.boost ? E.veh.boostFuel : null,
-      hint, hitch: !!hitchNear, tipped, flag, run, grain: E?.def.harvest ? grain : null, runClock: run?.phase === 'go' && run.startedAt ? (net.serverNow() - run.startedAt) : run?.time ?? null,
+      kmh: E ? Math.round((E.def.type === 'rocket' || E.def.type === 'pod' ? E.veh.speed() : Math.abs(E.veh.forwardSpeed())) * 3.6) : null,   // M11: up is speed too
+      vehicle: E?.def.name || null, role: seat?.role || null, gun: !!(seat?.gun || (E && combat && mySeat?.[1] === 0 && combat.hud().hint === 'Fire: forward gun')), boost: E?.def.engine.boost ? E.veh.boostFuel : null,
+      hint, hitch: !!hitchNear || !!jh?.hitch, tipped, flag, run, grain: E?.def.harvest && !farm ? grain : null, farm: jh?.line || fh?.line || svh?.line || null, spots: [...(farm?.spots() || []), ...(combat?.spots() || []), ...(work?.spots() || []), ...(survey?.spots() || []), ...(moon?.spots() || [])], runClock: run?.phase === 'go' && run.startedAt ? (net.serverNow() - run.startedAt) : run?.time ?? null,
+      hp: health.shown ? health.hp : null, sky: sky?.hud() || null, skySpots: sky?.spots() || null,
       markers, toasts: toasts.filter(t => performance.now() - t.at < 4000).map(t => t.text),
       camYaw: cam.yaw, me: walker ? walker.feet : null, device: lastDev, mode: net.room?.mode, carrying: flag?.state === 'carried' && flag.by === me,
       biome: world.biomeAt?.(...(E ? [E.veh.rb.translation().x, E.veh.rb.translation().z] : walker ? [walker.feet[0], walker.feet[2]] : [0, 0])),
@@ -878,7 +1025,7 @@ export async function createSession(o) {
   function debug() {
     return { me, seat: mySeat, ents: [...ents.values()].map(E => ({ id: E.id, kind: E.kind, owner: E.owner, local: E.veh.local, seats: E.seats, p: Object.values(E.veh.rb.translation()).map(v => Math.round(v * 10) / 10), yaw: Math.round(yawOf(E.veh.rb.rotation()) * 100) / 100, up: Math.round(qrot(E.veh.rb.rotation(), { x: 0, y: 1, z: 0 }).y * 100) / 100, speed: Math.round(E.veh.speed() * 10) / 10 })),
       walker: walker ? { feet: walker.feet.map(v => Math.round(v * 100) / 100), anim: walker.anim, on: walker.platform?.id ?? null } : null,
-      flag, run, broken: brokenSet.size, ticks: stat.ticks, sent: stat.sent, people: people.size };
+      flag, run, broken: brokenSet.size, ticks: stat.ticks, sent: stat.sent, sky: sky?.debug() || null, space: space?.debug() || null, place: o.arrive?.place || null, health: { hp: health.hp, state: health.state }, people: people.size, farm: farm?.debug() || null, combat: combat?.debug() || null, work: work?.debug() || null, survey: survey?.debug() || null, moon: moon?.debug() || null };
   }
   function dispose() {
     for (const id of [...ents.keys()]) removeEnt(id);
@@ -886,10 +1033,20 @@ export async function createSession(o) {
     for (const pc of pieces) dropPiece(pc);
     flagMesh?.removeFromParent();
     walker?.dispose();
+    space?.dispose();
+    for (const [t, fn] of offs) o.net.off(t, fn);
+    sky?.dispose(); skyHud?.dispose();
     wheat?.dispose();
+    farm?.dispose();
+    combat?.dispose();
+    work?.dispose();
+    survey?.dispose();
+    moon?.dispose();
   }
   /** Tests / debug: put me (on foot) somewhere. */
   function teleport(x, z) { if (mySeat) standUp(true); walker?.enable([x, world.heightAt(x, z) + 0.2, z]); }
-  return { phys, frame, hud, debug, dispose, cam, teleport, ents, people, get mySeat() { return mySeat; }, get walker() { return walker; }, standUp, toast };
+  return { phys, frame, hud, debug, dispose, cam, teleport, ents, people, get sky() { return sky; }, get space() { return space; }, health, get farm() { return farm; }, get combat() { return combat; }, get work() { return work; }, get survey() { return survey; }, get moon() { return moon; }, get mySeat() { return mySeat; }, get walker() { return walker; }, standUp, toast,
+    /** M4 (the phone's Garage): how high a vehicle's middle rests above the ground, and its definition. */
+    restLift: kind => (defOf[kind] ? restLift(defOf[kind]) : 1), defOf: kind => defOf[kind] || null };
 }
 export function fmtTime(ms) { const s = ms / 1000; const m = Math.floor(s / 60); return `${m}:${(s - m * 60).toFixed(1).padStart(4, '0')}`; }

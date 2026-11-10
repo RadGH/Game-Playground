@@ -2,16 +2,26 @@
 // one terrain mesh coloured by surface, flat-shaded instanced shapes for the objects, a water sheet, tyre tracks and
 // dust. It is the fallback when the full view fails to load, the "Simple" graphics setting for weak phones, and what
 // the lead tuned the driving on before the full view existed. `?view=simple` forces it.
+// The Moon (world.sky === 'black'): black sky, stars and the planet, a hard sun, no fog. Lantern Station
+// (world.map === 'station'): the interior from world-view/station.js with point lights off.
+import { createSpaceBackdrop } from './world-view/space.js';
+import { buildStation, drawStationMap } from './world-view/station.js';
+
 export function createSimpleView({ THREE, renderer, scene, camera, world }) {
-  const SURF_COL = ['#6f8f3e', '#8a6a44', '#4a3a28', '#d8c08a', '#9a948a', '#8a8580', '#eef2f6', '#5d5a55', '#cfe6f5', '#9a7a4a', '#7fa0aa'];
-  scene.background = new THREE.Color('#a9c6e0');
-  scene.fog = new THREE.Fog('#b8cde0', 120, 700);
-  const hemi = new THREE.HemisphereLight('#dfeeff', '#5a5a40', 1.1); scene.add(hemi);
-  const sun = new THREE.DirectionalLight('#fff4e0', 2.0);
+  if (world.map === 'station') return simpleStation({ THREE, scene, world });
+  const black = world.sky === 'black';
+  const SURF_COL = ['#6f8f3e', '#8a6a44', '#4a3a28', '#d8c08a', '#9a948a', '#8a8580', '#eef2f6', '#5d5a55', '#cfe6f5', '#9a7a4a', '#7fa0aa', '#4a4a4c', '#b4b0a8',   // ... asphalt, concrete (county)
+    '#8f8d8a', '#6c6a68'];   // regolith, moonrock (the Moon)
+  scene.background = new THREE.Color(black ? '#000000' : '#a9c6e0');
+  scene.fog = black ? null : new THREE.Fog('#b8cde0', 120, 700);
+  const hemi = new THREE.HemisphereLight(black ? '#8c96a8' : '#dfeeff', black ? '#3a3a3c' : '#5a5a40', black ? 0.25 : 1.1); scene.add(hemi);
+  const sun = new THREE.DirectionalLight(black ? '#ffffff' : '#fff4e0', black ? 3.2 : 2.0);
+  const space = black ? createSpaceBackdrop(THREE, world.space, { stars: 1500 }) : null;
+  if (space) scene.add(space.group);
   sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
   Object.assign(sun.shadow.camera, { left: -60, right: 60, top: 60, bottom: -60, near: 1, far: 400 });
   scene.add(sun, sun.target);
-  const sunDir = new THREE.Vector3(0.45, 0.8, 0.35).normalize();
+  const sunDir = space ? space.sunDir.clone() : new THREE.Vector3(0.45, 0.8, 0.35).normalize();
 
   // terrain: every second sample (4 m), coloured by the surface under each vertex
   const step = 2, n = Math.floor((world.dim - 1) / step) + 1, half = world.size / 2, cs = world.cell * step;
@@ -29,7 +39,8 @@ export function createSimpleView({ THREE, renderer, scene, camera, world }) {
   const ground = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true }));
   ground.receiveShadow = true; scene.add(ground);
 
-  // water: a sheet wherever the world says there is water
+  // water: a sheet wherever the world says there is water (none on the Moon)
+  if (!black) {
   const wgeo = new THREE.PlaneGeometry(world.size, world.size, n - 1, n - 1); wgeo.rotateX(-Math.PI / 2);
   const wp = wgeo.attributes.position;
   for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
@@ -39,10 +50,11 @@ export function createSimpleView({ THREE, renderer, scene, camera, world }) {
   }
   wgeo.computeVertexNormals();
   scene.add(new THREE.Mesh(wgeo, new THREE.MeshStandardMaterial({ color: '#3d7896', transparent: true, opacity: 0.72, roughness: 0.15, metalness: 0.1 })));
+  }
 
   // objects: instanced by shape + kind colour
   const KCOL = { tree: '#3c5e2e', sapling: '#5a8a3a', bush: '#4e7a36', fern: '#5e8f40', reeds: '#8a9a50', fence: '#8a6a44', post: '#6a5034', log: '#6b4a30',
-    rock: '#7d7a76', boulder: '#6e6b67', ramp: '#9a7a50', crate: '#a07a44', barrel: '#7a3a2a', hay: '#d0b060', sign: '#8a6a44', bridge: '#7a5a3a', default: '#888' };
+    building: '#ffffff', rock: '#7d7a76', boulder: '#6e6b67', ramp: '#9a7a50', crate: '#a07a44', barrel: '#7a3a2a', hay: '#d0b060', sign: '#8a6a44', bridge: '#7a5a3a', default: '#888' };
   const kc = kind => KCOL[Object.keys(KCOL).find(k => kind?.startsWith(k)) || 'default'];
   const groups = new Map();
   const objs = world.objects || [];
@@ -71,7 +83,10 @@ export function createSimpleView({ THREE, renderer, scene, camera, world }) {
   for (const [key, list] of groups) {
     const [t, colr] = key.split(':');
     const mesh = new THREE.InstancedMesh(GEO[t], new THREE.MeshLambertMaterial({ color: colr, flatShading: true }), list.length);
-    list.forEach((o, i) => { mesh.setMatrixAt(i, shapeMat(o)); index.set(o.id, [mesh, i]); if (o.kind?.startsWith('tree')) crowns.push(o); });
+    list.forEach((o, i) => {
+      mesh.setMatrixAt(i, shapeMat(o)); index.set(o.id, [mesh, i]); if (o.kind?.startsWith('tree')) crowns.push(o);
+      if (o.kind === 'building') mesh.setColorAt(i, new THREE.Color(...(o.colour || [0.8, 0.78, 0.72])));   // Wayfare County towns
+    });
     mesh.castShadow = true; mesh.receiveShadow = true;
     mesh.computeBoundingSphere();
     scene.add(mesh);
@@ -104,7 +119,7 @@ export function createSimpleView({ THREE, renderer, scene, camera, world }) {
         const o = (tq % MAXQ) * 18, oc = (tq % MAXQ) * 24;
         const quad = [prev.a, prev.b, b, prev.a, b, a];
         quad.forEach((v, i) => { tpos[o + i * 3] = v[0]; tpos[o + i * 3 + 1] = v[1]; tpos[o + i * 3 + 2] = v[2]; });
-        const rut = [0.15, 0.45, 1, 0.7, 0.3, 0, 0.8, 0.05, 0.05, 0.55, 0.3][surf] ?? 0.2;
+        const rut = [0.15, 0.45, 1, 0.7, 0.3, 0, 0.8, 0.05, 0.05, 0.55, 0.3, 0.05, 0.04][surf] ?? 0.2;
         for (let i = 0; i < 6; i++) { tcol[oc + i * 4] = 0.12; tcol[oc + i * 4 + 1] = 0.1; tcol[oc + i * 4 + 2] = 0.08; tcol[oc + i * 4 + 3] = 0.25 + rut * 0.5; }
         tq++;
         tg.attributes.position.needsUpdate = true; tg.attributes.color.needsUpdate = true;
@@ -131,6 +146,7 @@ export function createSimpleView({ THREE, renderer, scene, camera, world }) {
     sunDir, csm: null,
     enhance: m => m,
     update(dt, cam) {
+      space?.update(cam);
       sun.position.copy(cam.position).addScaledVector(sunDir, 120);
       sun.target.position.copy(cam.position);
       for (let i = puffs.length - 1; i >= 0; i--) {
@@ -163,6 +179,7 @@ export function createSimpleView({ THREE, renderer, scene, camera, world }) {
       return g;
     },
     tracks, dust, splash: (x, y, z, a) => dust(x, y, z, 10, a),
+    kick: (x, y, z, vx, vy, vz, surf, a) => { if (Math.random() < 0.12) dust(x, y, z, surf, a * 0.15); },     // M12: the Moon's wheel dust (a few puffs)
     mapImage(size = 512) {
       const cv = document.createElement('canvas'); cv.width = cv.height = size;
       const g = cv.getContext('2d'), img = g.createImageData(size, size);
@@ -178,6 +195,25 @@ export function createSimpleView({ THREE, renderer, scene, camera, world }) {
       g.putImageData(img, 0, 0);
       return cv;
     },
+    setQuality() {},
+  };
+}
+
+/** Lantern Station in the plain view: the same interior meshes, hemisphere light only, the space backdrop. */
+function simpleStation({ THREE, scene, world }) {
+  scene.background = new THREE.Color('#000000');
+  scene.fog = null;
+  const built = buildStation(THREE, world, { pointLights: false });
+  scene.add(built.group);
+  const space = createSpaceBackdrop(THREE, world.space, { stars: 1200 });
+  scene.add(space.group);
+  const noop = () => {};
+  return {
+    sunDir: space.sunDir, csm: null, enhance: m => m,
+    update(dt, cam) { space.update(cam); },
+    breakObject: noop, objectPiece: () => null,
+    tracks: { add: noop, lift: noop }, dust: noop, splash: noop,
+    mapImage: (size = 512) => drawStationMap(world, size),
     setQuality() {},
   };
 }

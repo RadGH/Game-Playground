@@ -1,5 +1,5 @@
 // Bounder Rocket Car (reference: assets/ref/rocket_car.webp). A faceted blue wedge with a black splitter and skirts,
-// fat block-tread tyres sticking out of the body, a clear bubble canopy tall enough for a Chibi head, a rear wing on
+// fat block-tread tyres sticking out of the body, a clear bubble canopy over a seated Chibi 2.6 adult, a rear wing on
 // two struts and a rocket nozzle whose flame (`flame` node) grows with st.boost 0..1 (idle: a small pilot flicker).
 import { createKit } from './kit.js';
 
@@ -41,11 +41,11 @@ export function build(THREE, def, opts = {}) {
   const sk = createKit(THREE, opts); sk.box('trim', [0.26, 0.03, 0.025], [0, 0, 0], { bevel: 0 }); sk.finish(steer);
   steer.traverse(o => { o.userData.detail = true; });
   k.tube('trim', [[0, wheelAt[1] - 0.03, wheelAt[2] + 0.05], [0, 0.22, wheelAt[2] + 0.38]], 0.025);
-  // the bubble: the top part of an ellipsoid (head top = seat + 1.13 = 1.28; the dome tops out at ~1.62, room for hats)
+  // the bubble: the top part of an ellipsoid (2.6 head top = hips + ~0.95 = 1.07; the dome tops out at 1.26)
   const dome = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), k.mat('glass'));
-  dome.scale.set(0.54, 1.36, 0.84); dome.position.set(0, 0.26, -0.04);
+  dome.scale.set(0.54, 1.0, 0.84); dome.position.set(0, 0.26, -0.04);
   group.add(dome);
-  k.tube(K, [[0, 0.24, 0.78], [0, 1.05, 0.46], [0, 1.62, -0.04], [0, 1.1, -0.64], [0, 0.26, -0.8]], 0.022, { seg: 5 });   // a frame rib
+  k.tube(K, [[0, 0.24, 0.78], [0, 0.86, 0.46], [0, 1.26, -0.04], [0, 0.9, -0.64], [0, 0.26, -0.8]], 0.022, { seg: 5 });   // a frame rib
 
   // --- rear wing + rocket nozzle -------------------------------------------------------------------------------
   for (const sx of [1, -1]) k.box(K, [0.06, 0.62, 0.14], [sx * 0.5, 0.56, -1.2], { rot: [-0.45, 0, 0], bevel: 0.01 });

@@ -88,7 +88,22 @@ export async function createSounds({ volume = 0.8 } = {}) {
       const d = Math.hypot(at.x - listener.x, at.z - listener.z);
       v.g.gain.setTargetAtTime(0.12 * Math.max(0, 1 - d / 150), ctx.currentTime, 0.1);
     },
-    stopAll() { for (const v of sirens.values()) v.stop(); sirens.clear(); for (const v of voices.values()) v.stop(); voices.clear(); },
+    /** Air rushing past (M9 skydiving): level 0 = silent .. 1 = full free fall. Low-passed noise that opens up with speed. */
+    wind(level) {
+      if (!ctx || !master) return;
+      if (!self._wind) {
+        if (level <= 0.01) return;
+        const n = ctx.createBufferSource(); n.buffer = noiseBuffer(); n.loop = true;
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 0.7; lp.frequency.value = 300;
+        const g = ctx.createGain(); g.gain.value = 0;
+        n.connect(lp).connect(g).connect(master); n.start();
+        self._wind = { n, lp, g };
+      }
+      const W = self._wind, t = ctx.currentTime, L = Math.max(0, Math.min(1, level));
+      W.g.gain.setTargetAtTime(L * 0.32, t, 0.25);
+      W.lp.frequency.setTargetAtTime(250 + L * 1500, t, 0.3);
+    },
+    stopAll() { for (const v of sirens.values()) v.stop(); sirens.clear(); for (const v of voices.values()) v.stop(); voices.clear(); if (self._wind) { try { self._wind.n.stop(); } catch { /* done */ } self._wind = null; } },
   };
   function noiseBuffer() {
     if (noiseBuffer.b) return noiseBuffer.b;

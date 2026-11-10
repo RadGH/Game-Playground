@@ -20,7 +20,8 @@ export function build(THREE, def, opts = {}) {
   const cabP = def.parts[0];
   const cx = cabP.box[0], cB = cabP.p[2] - cabP.box[2] - 0.05, nose = def.chassis.hz - 0.08;
   const drv = def.seats.find(s => s.role === 'driver');
-  const cFl = drv.p[1] - 0.41, belt = 1.12, roof = drv.p[1] + 1.3, zWs = nose - 0.06, zWt = nose - 0.2;
+  // Chibi 2.6 fit: the floor is 0.45 under the hips (the `drive` pose), the roof 1.05 over them (2.87 m off the ground)
+  const cFl = drv.p[1] - 0.45, belt = 1.12, roof = drv.p[1] + 1.05, zWs = nose - 0.06, zWt = nose - 0.2;
   k.box(T, [cx * 2 - 0.12, 0.04, zWs - cB], [0, cFl - 0.02, (zWs + cB) / 2], { bevel: 0 });              // cab floor
   k.box(R, [inner * 2, cFl - low, zWs - cB], [0, (cFl + low) / 2, (zWs + cB) / 2], { bevel: 0.02 });     // under the floor
   for (const sx of [1, -1]) {
@@ -63,7 +64,7 @@ export function build(THREE, def, opts = {}) {
   }
   const glass = new THREE.Mesh(mergeAll(THREE, glassGeo), k.mat('glass'));
   glass.name = 'part:glass';
-  for (const s of def.seats.filter(s => s.pose === 'sit')) {
+  for (const s of def.seats.filter(s => !s.stand)) {
     const [x, y, z] = s.p;
     k.box('seat', [0.52, 0.12, 0.5], [x, y - 0.06, z + 0.04], { bevel: 0.04 });
     k.box('seat', [0.52, 0.68, 0.12], [x, y + 0.28, z - 0.26], { rot: [-0.1, 0, 0], bevel: 0.04 });
@@ -90,7 +91,7 @@ export function build(THREE, def, opts = {}) {
   k.box(R, [inner * 2, top - low, wB - bB], [0, (top + low) / 2, (wB + bB) / 2], { bevel: 0.02 });
   k.box(R, [wX * 2, wFl - low, wF - wB], [0, (wFl + low) / 2, (wF + wB) / 2], { bevel: 0.02 });
   for (const sx of [1, -1]) k.box(R, [inner - wX, top - low, wF - wB], [sx * (wX + inner) / 2, (top + low) / 2, (wF + wB) / 2], { bevel: 0.02 });
-  k.box(G, [wX * 2 - 0.04, 0.03, wF - wB - 0.04], [0, wFl + 0.015, (wF + wB) / 2], { bevel: 0 });          // well floor plate
+  k.box(G, [wX * 2 - 0.04, 0.03, wF - wB - 0.04], [0, wFl - 0.015, (wF + wB) / 2], { bevel: 0 });          // well floor plate (top = the gunner's soles)
   for (const sx of [1, -1]) {
     const so = sx * (inner + bx) / 2, sw = bx - inner;
     // side blocks: ahead of the bay, the bay's lower half, ahead of the arch, over it, behind it

@@ -9,8 +9,8 @@ export function build(THREE, def, opts = {}) {
   const k = createKit(THREE, opts);
   const group = new THREE.Group();
   const R = 'red', RD = 'redDark', C = 'cream', K = 'trim';
-  const fl = -0.27;                     // cabin floor (feet of a seated Chibi: 0.15 - 0.41)
-  const roof = 1.5;                     // head top = 0.15 + 1.13 = 1.28
+  const fl = -0.27;                     // cabin floor (a seated Chibi 2.6's feet: hips 0.15 - 0.42)
+  const roof = 1.24;                    // 2.6 head top = hips + ~0.95 = 1.1; underside 1.18
 
   // --- cabin -------------------------------------------------------------------------------------------------
   k.box(C, [1.7, 0.22, 2.4], [0, fl - 0.11, 0.35], { bevel: 0.06 });          // floor pan / belly, z -0.85 .. 1.55
@@ -18,8 +18,8 @@ export function build(THREE, def, opts = {}) {
   k.wedge(C, [1.5, 0.3, 0.12, 0.45], [0, fl - 0.22, 1.75]);                  // chin under the bubble
   // rear wall + engine bay behind it
   k.box(R, [1.7, roof - fl, 0.16], [0, (roof + fl) / 2, -0.8], { bevel: 0.05 });
-  k.box(R, [1.3, 0.9, 1.1], [0, 0.85, -1.35], { bevel: 0.14 });
-  k.box(RD, [1.32, 0.08, 1.12], [0, 0.5, -1.35], { bevel: 0.02 });
+  k.box(R, [1.3, 0.9, 1.1], [0, 0.75, -1.35], { bevel: 0.14 });
+  k.box(RD, [1.32, 0.08, 1.12], [0, 0.4, -1.35], { bevel: 0.02 });
   // roof + the four pillars that hold it (the sides stay open)
   k.box(R, [1.66, 0.12, 2.2], [0, roof, 0.3], { bevel: 0.05 });
   k.box(C, [1.68, 0.05, 2.22], [0, roof - 0.08, 0.3], { bevel: 0.01 });
@@ -28,12 +28,12 @@ export function build(THREE, def, opts = {}) {
     k.box(R, [0.08, roof - fl, 0.12], [sx * 0.8, (roof + fl) / 2, -0.7], { bevel: 0.02 });
     k.box(R, [0.06, roof - fl - 0.1, 0.08], [sx * 0.8, (roof + fl) / 2, 0.42], { bevel: 0.02 });   // door pillar
     k.box('tail', [0.04, 0.08, 0.12], [sx * 0.86, roof - 0.04, -0.6], { bevel: 0 });
-    // grab rail for the rear riders
-    k.tube(K, [[sx * 0.84, 0.55, -0.6], [sx * 0.84, 0.55, 0.32]], 0.018, { seg: 4 });
+    // grab rail for the rear riders (overhead)
+    k.tube(K, [[sx * 0.8, roof - 0.14, -0.6], [sx * 0.8, roof - 0.14, 0.32]], 0.018, { seg: 4 });   // overhead, clear of 2.6 faces
   }
   // nose bubble: the front of an ellipsoid, see-through
   const bubble = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 10, 0, Math.PI, 0.05, Math.PI * 0.62), k.mat('glass'));
-  bubble.scale.set(0.8, 1.2, 0.78); bubble.position.set(0, 0.3, 1.25);
+  bubble.scale.set(0.8, 0.95, 0.78); bubble.position.set(0, 0.3, 1.25);
   group.add(bubble);
   k.box(K, [1.3, 0.14, 0.36], [0, 0.22, 1.55], { rot: [-0.4, 0, 0], bevel: 0.03 });   // instrument panel
   k.box('lamp', [0.14, 0.06, 0.04], [0, fl - 0.12, 2.18], { bevel: 0 });

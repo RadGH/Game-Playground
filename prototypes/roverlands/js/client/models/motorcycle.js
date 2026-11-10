@@ -14,7 +14,7 @@ export function build(THREE, def, opts = {}) {
   const barsAt = seat.barsAt;
   const head = [0, 0.5, 0.5];                  // steering head
   const pivot = [0, 0.0, -0.18];              // swingarm pivot
-  const pegY = seat.p[1] - 0.6 + 0.02;        // the ride pose's feet: 0.6 under the hips
+  const pegY = seat.feet ? seat.feet[1] - 0.015 : seat.p[1] - 0.6 + 0.02;   // the pegs: where seat.feet puts the soles
 
   // --- frame ------------------------------------------------------------------------------------------------------
   k.tube(K, [head, [0, 0.2, 0.36], [0, -0.12, 0.2], [0, -0.16, -0.05], pivot], 0.032, { seg: 6 });

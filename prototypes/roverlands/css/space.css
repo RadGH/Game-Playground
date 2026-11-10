@@ -1,0 +1,61 @@
+/* Roverlands M11 — rocket / station / pod HUD (js/client/space-hud.js) and the orbit screen (js/client/orbit-screen.js).
+   Loaded by those modules, on top of roverlands.css. */
+.rl-spacehud { position: fixed; inset: 0; z-index: 11; pointer-events: none; font: 600 16px/1.35 var(--rl-font); color: var(--rl-ink); }
+.rl-spacehud * { box-sizing: border-box; }
+.rl-spacehud [hidden], .rl-orbit [hidden] { display: none !important; }
+/* reentry: the screen edges glow orange-white, strongest at the bottom (the shield is under you) */
+.rl-space-heat { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 120%, rgba(255, 236, 190, .9) 0%, rgba(255, 140, 40, .55) 32%, rgba(220, 60, 20, .18) 62%, rgba(0, 0, 0, 0) 78%);
+  mix-blend-mode: screen; animation: rl-flicker .12s infinite alternate; }
+@keyframes rl-flicker { from { filter: brightness(.92); } to { filter: brightness(1.08); } }
+.rl-space-read { position: absolute; top: calc(var(--st) + 108px); left: calc(var(--sl) + 10px); padding: 6px 14px; border-radius: 14px; background: rgba(14, 19, 22, .74);
+  font-variant-numeric: tabular-nums; min-width: 150px; }
+.rl-space-alt { display: flex; align-items: baseline; gap: 6px; }
+.rl-space-alt b { font-size: 30px; line-height: 1.1; }
+.rl-space-alt span, .rl-space-sub { font-size: 13px; color: var(--rl-dim); }
+.rl-space-sub { display: flex; gap: 10px; }
+.rl-space-sub em { font-style: normal; color: var(--rl-amber2); }
+.rl-space-lever { margin-top: 5px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .15); overflow: hidden; }
+.rl-space-lever i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--rl-amber), #ffe0a0); }
+.rl-space-count { position: absolute; left: 50%; top: 26%; transform: translateX(-50%); font: 900 96px/1 var(--rl-font); color: #fff;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, .6), 0 0 30px rgba(255, 160, 60, .7); }
+.rl-space-banner { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); padding: 10px 18px; border-radius: 14px; background: rgba(14, 19, 22, .84);
+  border: 2px solid var(--rl-amber); font-size: 18px; text-align: center; max-width: 88vw; }
+.rl-space-btn, .rl-space-btn2 { position: absolute; right: calc(var(--sr) + 18px); top: 40%; width: 92px; height: 92px; border-radius: 50%; pointer-events: auto;
+  border: 3px solid #c97f1d; background: var(--rl-amber); color: #21160a; font: 900 17px/1 var(--rl-font); letter-spacing: .03em;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .45); touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
+.rl-space-btn[data-kind="launch"] { background: #e8504a; border-color: #a72d28; color: #fff; }
+.rl-space-btn[data-kind="push"] { background: var(--rl-sky); border-color: #3a9cc4; }
+.rl-space-btn2 { top: calc(40% + 104px); width: 70px; height: 70px; font-size: 14px; background: #d6dde2; border-color: #8a979f; }
+.rl-space-btn.down, .rl-space-btn2.down { transform: scale(.94); filter: brightness(1.15); }
+.rl-spacemenu { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(380px, 92vw); padding: 16px; border-radius: 16px;
+  background: var(--rl-panel, rgba(22, 30, 34, .94)); border: 2px solid var(--rl-edge, #3c4e58); pointer-events: auto; display: grid; gap: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); }
+.rl-spacemenu h3, .rl-orbit h2 { margin: 0; font-size: 20px; color: var(--rl-amber2); }
+.rl-spacemenu p, .rl-orbit p { margin: 0; font-size: 14px; color: var(--rl-dim); font-weight: 500; }
+.rl-spacemenu-list, .rl-orbit-list { display: grid; gap: 8px; }
+.rl-spacemenu .rl-btn, .rl-orbit .rl-btn { display: grid; justify-items: start; gap: 2px; text-align: left; font: inherit; font-weight: 700; min-height: 52px; }
+.rl-spacemenu .rl-btn small, .rl-orbit .rl-btn small { font-size: 12px; color: var(--rl-dim); font-weight: 600; }
+.rl-spacemenu .rl-btn.primary small, .rl-orbit .rl-btn.primary small { color: inherit; opacity: .8; }
+.rl-spacemenu .rl-btn.ghost { background: transparent; justify-items: center; min-height: 0; }
+
+/* the orbit screen: the planet fills the view (a 3D scene drawn behind), the choice panel over it */
+.rl-orbit { position: fixed; inset: 0; z-index: 30; pointer-events: none; font: 600 16px/1.35 var(--rl-font); color: var(--rl-ink);
+  display: flex; align-items: flex-end; justify-content: center; padding: 0 12px calc(var(--sb, 0px) + 18px); animation: rl-fadein 1.2s ease both; }
+.rl-orbit-fade { position: fixed; inset: 0; z-index: 29; background: #000; pointer-events: none; opacity: 0; transition: opacity .9s; }
+.rl-orbit-fade.on { opacity: 1; }
+/* the vehicle rating card ("How did the rocket feel?") waits until you are somewhere: not over the orbit choices */
+body:has(.rl-orbit) .rl-rate { display: none; }
+.rl-orbit-panel { pointer-events: auto; width: min(420px, 100%); padding: 16px; border-radius: 18px; background: rgba(12, 18, 26, .95); border: 2px solid #33506a;
+  display: grid; gap: 10px; box-shadow: 0 10px 40px rgba(0, 0, 0, .6); }
+.rl-orbit-alt { font-size: 13px; color: #9fc6ec; font-variant-numeric: tabular-nums; }
+@keyframes rl-fadein { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 560px) {
+  /* phones: one compact line under the speed box (which sits in the top-left column here), clear of the toasts below */
+  .rl-space-read { top: calc(var(--st) + 146px); min-width: 0; max-width: 62vw; padding: 3px 10px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; }
+  .rl-space-alt b { font-size: 20px; }
+  .rl-space-sub .kmh { display: none; }
+  .rl-space-lever { flex-basis: 100%; height: 6px; margin-top: 3px; }
+  .rl-space-count { font-size: 72px; }
+  .rl-space-btn { width: 84px; height: 84px; top: 40%; right: calc(var(--sr) + 14px); }
+  .rl-space-btn2 { top: calc(40% + 94px); right: calc(var(--sr) + 21px); }
+  .rl-orbit-panel { padding: 12px; }
+}

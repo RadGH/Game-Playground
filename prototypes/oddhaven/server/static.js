@@ -11,7 +11,7 @@ import { gzipSync } from 'node:zlib';
 export const HOME = 'prototypes/oddhaven';
 /** Playground paths the page loads from. tests/room-server.test.js walks the page's real imports and fails if one is missing here; tools/publish-oddhaven.sh copies exactly these. */
 export const ALLOW = Object.freeze([HOME, 'prototypes/roverlands/js', 'prototypes/roverlands/data', 'prototypes/thousandvale/js/client/ui', 'prototypes/thousandvale/js/client/chars-mode.js',
-  'prototypes/tumblefair/js/client', 'shared', 'avatar-3d/js', 'avatar-3d/data', 'avatar-2d', 'voice-lab/js', 'voice-lab/data', 'vendor/three', 'vendor/rapier', 'vendor/pluralize', 'vendor/qrcode-generator', 'vendor/mespeak', 'vendor/vits-web',
+  'prototypes/tumblefair/js/client', 'shared', 'avatar-3d/js', 'avatar-3d/data', 'avatar-2d', 'voice-lab/js', 'voice-lab/data', 'vendor/three', 'vendor/rapier', 'vendor/pluralize', 'vendor/qrcode-generator', 'vendor/mespeak', 'vendor/vits-web', 'vendor/kokoro/kokoro.web.js',
   'sfx', 'lingo', 'namegen', 'highdef-3d/js/noise.js']);
 export const DENY = Object.freeze(['server', 'ops', 'tests', 'tools', 'docs', 'package.json', 'package-lock.json'].map(p => `${HOME}/${p}`));
 

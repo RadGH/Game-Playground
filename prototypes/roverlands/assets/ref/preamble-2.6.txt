@@ -1,0 +1,9 @@
+You are making a REFERENCE SHEET (a model turnaround for a 3D modeller, not game art) for an original vehicle in a stylised low-poly video game. Use your image generation tool to create ONE image, landscape 1536x1024 PNG, and save it in the current working directory as ID.png. Do nothing else.
+
+Layout: a turnaround sheet with FOUR views of the same vehicle arranged in a 2x2 grid: top-left SIDE view (true side elevation, facing left), top-right FRONT view (straight on), bottom-left TOP view (straight down, plan view), bottom-right a 3/4 perspective view. Plain flat light-grey background, flat even studio lighting, no shadows on the background, no scenery. Optional tiny view labels SIDE / FRONT / TOP / 3/4 are the ONLY text allowed: no logos, no brand names, no numbers, no writing on the vehicle.
+
+Style: stylised low-poly toy-like 3D look — chunky, simple, readable shapes, flat-shaded facets, few small details. Clear base colour with darker trim, as described below.
+
+Scale: show a stylised cartoon ADULT person in or beside the vehicle in every view, for scale. The person is 1.74 m tall with realistic-cartoon proportions: five heads tall (head about 0.35 m), hips at 0.9 m, normal adult-length arms and legs. Seated in a car seat the hips sit about 0.45 m above the floor and the eyes about 1.1 m above the floor. Keep the vehicle proportions consistent across all four views and believable for real adults. The design is original (not a copy of any real or famous game vehicle).
+
+The vehicle:

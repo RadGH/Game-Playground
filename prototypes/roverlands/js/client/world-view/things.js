@@ -35,6 +35,7 @@ const UNIQUE = new Set(['bridge_deck', 'bridge_rail', 'bridge_pier', 'shed']);
 
 /** Which drawing category an object kind belongs to (sets its distances). */
 function category(kind) {
+  if (kind === 'tree_giant') return 'giant';
   if (kind === 'tree_pine' || kind === 'tree_birch' || kind === 'tree_oak') return 'tree';
   if (kind === 'sapling' || kind === 'bush' || kind === 'reeds') return 'small';
   if (kind.startsWith('rock') || kind === 'boulder') return 'rock';
@@ -103,7 +104,13 @@ export async function createThings({ world, quality, csm, scene }) {
     const rng = Trees.makeRng(seedOf(look, v));
     const pair = (b, bm, f) => ({ parts: [b && { geo: b, mat: bm }, f && { geo: f, mat: M.foliage }].filter(Boolean) });
     let out;
-    if (TREE_SPECIES.has(look)) {
+    if (look.startsWith('giant_') && TREE_SPECIES.has(look.slice(6))) {
+      // Wayfare County giants: the kit's conifer at its tallest, scaled up whole to 40-60 m (matrixFor) — the trunk keeps
+      // its h/28 thickness, so it comes out 3-4 m across. (Built at 50 m directly the needle sprays stay their normal
+      // size and the giant looks bare.)
+      const r = Trees.buildTree(look.slice(6), { rng, lod, height: Trees.SPECIES[look.slice(6)].maxHeight });
+      out = pair(r.bark, M.bark, r.foliage);
+    } else if (TREE_SPECIES.has(look)) {
       const sp = Trees.SPECIES[look];
       const r = Trees.buildTree(look, { rng, lod, height: (sp.minHeight + sp.maxHeight) / 2 });
       out = pair(r.bark, M.bark, r.foliage);
@@ -125,6 +132,14 @@ export async function createThings({ world, quality, csm, scene }) {
       g.computeBoundingBox(); g.translate(0, -g.boundingBox.min.y, 0);
       out = { parts: [{ geo: g, mat: M.hay }] };
     } else if (look === 'fence_post') out = { parts: [{ geo: boxGeometry(0.16, 1.25, 0.16, [0.55, 0.45, 0.34]), mat: M.wood }] };
+    else if (look === 'guard_post') {
+      // a white roadside post with a red reflector band near the top (Wayfare County hairpins)
+      const b = new Builder();
+      b.box(0, 0.37, 0, 0.1, 0.37, 0.1, [0.92, 0.92, 0.88]);
+      b.box(0, 0.8, 0, 0.1, 0.06, 0.1, [0.78, 0.1, 0.08]);
+      b.box(0, 0.93, 0, 0.1, 0.07, 0.1, [0.92, 0.92, 0.88]);
+      out = { parts: [{ geo: b.build(), mat: M.prop }] };
+    }
     else return null;
     const box = new THREE.Box3();
     for (const p of out.parts) { p.geo.computeBoundingBox(); box.union(p.geo.boundingBox); }
@@ -145,6 +160,7 @@ export async function createThings({ world, quality, csm, scene }) {
   const cellOf = (x, z) => Math.min(per - 1, Math.max(0, Math.floor((z + half) / CELL))) * per + Math.min(per - 1, Math.max(0, Math.floor((x + half) / CELL)));
   const uniques = [];
   for (const o of objs) {
+    if (o.kind === 'building') continue;            // drawn by buildings.js (merged per cell, never breaks)
     if (UNIQUE.has(o.kind)) { uniques.push(o); continue; }
     const look = o.look && o.look !== o.kind ? o.look : o.kind;
     info[o.id] = { look, variant: o.id % VARIANTS, cat: category(o.kind) };
@@ -179,6 +195,7 @@ export async function createThings({ world, quality, csm, scene }) {
   // distances per category: [lod0 within, lod1 within (= the ring), far bake within]
   const R = {
     tree: [quality.treeNear, quality.treeMid, quality.treeDistance],
+    giant: [quality.treeNear * 1.6, quality.treeMid * 1.5, quality.treeDistance * 1.5],
     small: [quality.treeNear * 0.6, quality.treeMid * 0.75, 0],
     rock: [quality.treeNear, quality.treeMid * 1.3, quality.treeDistance * 0.8],
     log: [quality.treeNear, quality.treeMid * 1.2, quality.treeDistance * 0.6],
@@ -323,8 +340,8 @@ export async function createThings({ world, quality, csm, scene }) {
       const cd = cellDist(ci, cam);
       // which categories this cell bakes at this distance — the key changes only when a category crosses over
       let key = '';
-      for (const c of ['tree', 'rock', 'log']) key += cd >= R[c][1] && cd < R[c][2] ? '1' : '0';
-      if (key === '000') { dropBake(cell); continue; }
+      for (const c of ['tree', 'giant', 'rock', 'log']) key += cd >= R[c][1] && cd < R[c][2] ? '1' : '0';
+      if (!key.includes('1')) { dropBake(cell); continue; }
       if (cell.bakeKey === key && cell.bake) continue;
       if (baked >= budget) continue;
       dropBake(cell);
@@ -348,7 +365,7 @@ export async function createThings({ world, quality, csm, scene }) {
   const pieces = new Map();
   function breakObject(id, opts = {}) {
     const o = objs[id];
-    if (!o || UNIQUE.has(o.kind) || state[id] === 1) return null;
+    if (!o || UNIQUE.has(o.kind) || o.kind === 'building' || state[id] === 1) return null;
     state[id] = o.fall === 'flatten' && !opts.instant ? 2 : 1;
     if (opts.instant && o.fall === 'flatten') state[id] = 2;
     dirty = true;

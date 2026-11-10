@@ -10,7 +10,10 @@ export function build(THREE, def, opts = {}) {
   const k = createKit(THREE, opts);
   const group = new THREE.Group();
   const B = '#74a6dc', BD = '#5d8cc2', T = 'trim', K = 'black';
-  const belt = 0.7, roofY = 1.52;                      // roof underside; the cabin collider tops out at the roof top (1.58)
+  // Chibi 2.6 fit (Expansion 1 M1): a real-car cabin — footwell floor at FLOOR (0.36 m off the ground), hips 0.24 above it,
+  // roof underside 1.08 (the roof top is 1.63 m off the ground). The chassis collider (the floor pan) is unchanged;
+  // the footwell is drawn inside it, where nothing physical ever goes.
+  const belt = 0.62, roofY = 1.1, FLOOR = -0.12;       // roof underside; the cabin collider tops out at the roof top (1.15)
   const zA = 1.0, zAt = 0.42, zC = -1.22, zCt = -0.74;   // windscreen foot/top, rear window foot/top
   const fw = def.wheels.find(w => w.p[2] > 0), rw = def.wheels.find(w => w.p[2] < 0);
   const fa = [fw.p[2] - fw.r - 0.08, fw.p[2] + fw.r + 0.08], ra = [rw.p[2] - rw.r - 0.08, rw.p[2] + rw.r + 0.08];
@@ -19,8 +22,11 @@ export function build(THREE, def, opts = {}) {
   const hinge = [0, lid.p[1] + 0.02, lid.p[2] + lid.box[2]];   // front edge of the lid: y 0.84, z -1.22
 
   // --- floor pan (= the chassis box, y -0.18 .. 0.22) and engine bay --------------------------------------------
-  k.box(T, [1.3, 0.4, 4.1], [0, 0.02, 0], { bevel: 0.03 });
-  k.box('seat', [1.3, 0.02, 2.1], [0, 0.225, -0.1], { bevel: 0 });                        // cabin carpet
+  k.box(T, [1.3, FLOOR + 0.18, 4.1], [0, (FLOOR - 0.18) / 2, 0], { bevel: 0.03 });           // under the footwell
+  k.box(T, [1.3, 0.22 - FLOOR, 2.14 - zA + 0.06], [0, (0.22 + FLOOR) / 2, (2.14 + zA) / 2 - 0.03], { bevel: 0.02 });   // under the engine
+  k.box(T, [1.3, 0.22 - FLOOR, 2.14 + zC + 0.02], [0, (0.22 + FLOOR) / 2, (zC - 2.14) / 2 + 0.01], { bevel: 0.02 });   // under the trunk
+  k.box('seat', [1.4, 0.02, zA - zC], [0, FLOOR + 0.01, (zA + zC) / 2], { bevel: 0 });         // cabin carpet
+  k.box(T, [1.5, 0.22 - FLOOR, 0.06], [0, (0.22 + FLOOR) / 2, zA - 0.02], { bevel: 0 });          // firewall foot
   k.box('darkMetal', [1.3, 0.3, 0.95], [0, 0.36, 1.55], { bevel: 0.03 });                 // engine bay under the hood
 
   // --- sides: door panels between the arches, corners, the part over each arch ---------------------------------
@@ -48,7 +54,9 @@ export function build(THREE, def, opts = {}) {
     // pillars: A (along the windscreen edge), B (between the doors), C (rear window edge)
     k.tube(B, [[sx * 0.8, belt, zA], [sx * 0.77, roofY, zAt]], 0.045, { seg: 5 });
     k.box(K, [0.05, roofY - belt, 0.09], [sx * 0.79, (roofY + belt) / 2, -0.18], { bevel: 0.01 });
-    k.box(B, [0.06, Math.hypot(roofY - lidTop, zCt - zC), 0.2], [sx * 0.79, (roofY + lidTop) / 2, (zC + zCt) / 2 - 0.04], { rot: [Math.atan2(zCt - zC, roofY - lidTop), 0, 0], bevel: 0.01 });
+    // C pillar (a tube: the roof is low now). Both ends sit INSIDE what they meet: the top inside the roof slab (it used to
+    // end 0.04 behind the roof and poke out past its back edge), the foot inside the rear-deck strip just below (the trunk line)
+    k.tube(B, [[sx * 0.79, lidTop + 0.06, zC + 0.16], [sx * 0.78, roofY + 0.025, zCt + 0.12]], 0.05, { seg: 5 });
     k.box(B, [0.06, 0.14, 0.42], [sx * 0.79, lidTop + 0.05, -1.05], { bevel: 0.01 });
   }
   // roof (sits on the cabin collider's top), front + rear roof rails
@@ -85,13 +93,13 @@ export function build(THREE, def, opts = {}) {
   // --- interior: four seats, dash, steering wheel --------------------------------------------------------------
   for (const s of def.seats) {
     const [x, y, z] = s.p;
-    k.box('seat', [0.52, y - 0.27, 0.5], [x, (y - 0.05 + 0.22) / 2, z + 0.06], { bevel: 0.04 });
-    k.box('seat', [0.52, 0.62, 0.12], [x, y + 0.26, z - 0.25], { rot: [-0.14, 0, 0], bevel: 0.04 });
-    k.box('seat', [0.26, 0.14, 0.09], [x, y + 0.66, z - 0.31], { bevel: 0.03 });            // headrest
+    k.box('seat', [0.52, y - 0.06 - FLOOR, 0.5], [x, (y - 0.06 + FLOOR) / 2, z + 0.04], { bevel: 0.04 });
+    k.box('seat', [0.52, 0.62, 0.12], [x, y + 0.26, z - 0.22], { rot: [-0.14, 0, 0], bevel: 0.04 });
+    k.box('seat', [0.26, 0.14, 0.09], [x, y + 0.64, z - 0.28], { bevel: 0.03 });            // headrest
   }
-  k.box(T, [1.5, 0.22, 0.34], [0, 0.6, 0.86], { bevel: 0.04 });                            // dash
-  k.box(K, [1.4, 0.04, 0.3], [0, 0.72, 0.9], { rot: [0.25, 0, 0], bevel: 0.01 });
-  k.box(T, [0.14, 0.2, 0.7], [0, 0.32, 0.15], { bevel: 0.03 });                            // centre console
+  k.box(T, [1.5, 0.22, 0.34], [0, belt - 0.12, 0.86], { bevel: 0.04 });                     // dash
+  k.box(K, [1.4, 0.04, 0.3], [0, belt, 0.9], { rot: [0.25, 0, 0], bevel: 0.01 });
+  k.box(T, [0.14, 0.3 - FLOOR, 0.7], [0, (0.3 + FLOOR) / 2, 0.15], { bevel: 0.03 });        // centre console
   const drv = def.seats.find(s => s.role === 'driver');
   const wheelAt = drv.wheelAt;
   const steer = new THREE.Group();
@@ -103,7 +111,7 @@ export function build(THREE, def, opts = {}) {
   sk.finish(steer);
   steer.add(new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.022, 5, 12), k.mat(T)));
   steer.traverse(o => { o.userData.detail = true; });
-  k.tube(T, [[wheelAt[0], wheelAt[1] - 0.03, wheelAt[2] + 0.05], [wheelAt[0], 0.58, wheelAt[2] + 0.22]], 0.025);
+  k.tube(T, [[wheelAt[0], wheelAt[1] - 0.03, wheelAt[2] + 0.05], [wheelAt[0], belt - 0.1, wheelAt[2] + 0.22]], 0.025);
 
   // --- glass: one see-through mesh (windscreen, rear window, four side windows) ---------------------------------
   const gl = [];

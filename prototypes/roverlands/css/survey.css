@@ -1,0 +1,34 @@
+/* Roverlands M10 — the survey HUD (js/client/survey-hud.js). Loaded by that module, on top of roverlands.css. */
+.rl-svhud { position: fixed; inset: 0; z-index: 11; pointer-events: none; font: 600 15px/1.35 var(--rl-font); color: var(--rl-ink); }
+.rl-svhud * { box-sizing: border-box; }
+.rl-svhud [hidden] { display: none !important; }
+/* the readout: top middle, under the top bar */
+.rl-sv-read { position: absolute; left: 50%; top: calc(var(--st) + 10px); transform: translateX(-50%); display: grid; grid-template-columns: auto 1fr; gap: 4px 10px;
+  align-items: center; padding: 7px 14px 8px 10px; border-radius: 14px; background: rgba(14, 19, 22, .82); border: 2px solid var(--kit, #8fd05a);
+  width: max-content; max-width: min(440px, calc(100vw - 32px)); }
+.rl-sv-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--rl-red); box-shadow: 0 0 0 3px rgba(255, 255, 255, .12); }
+.rl-sv-read.ok .rl-sv-dot { background: var(--rl-green); }
+.rl-sv-read span { display: grid; gap: 1px; min-width: 0; }
+.rl-sv-read b { font-size: 13px; color: var(--rl-dim); letter-spacing: .02em; }
+.rl-sv-read em { font-style: normal; font-size: 16px; font-weight: 800; }
+.rl-sv-read.ok em { color: #b7f28a; }
+.rl-sv-read.bad em { color: #ffb3a6; }
+.rl-sv-read small { font-size: 12.5px; color: var(--rl-dim); font-weight: 500; }
+.rl-sv-bar { grid-column: 1 / -1; height: 9px; border-radius: 5px; background: rgba(255, 255, 255, .15); overflow: hidden; }
+.rl-sv-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--kit, #8fd05a), var(--rl-green)); }
+/* HOLD TO SET UP: right edge (touch), level with the M8 repair button's spot (they never show together) */
+.rl-sv-btn { position: absolute; right: calc(var(--sr) + 18px); top: 30%; width: 86px; height: 86px; border-radius: 50%; pointer-events: auto;
+  border: 3px solid #2f8a4a; background: var(--rl-green); color: #0e2214; font: 900 13px/1.1 var(--rl-font); letter-spacing: .03em;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .45); touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
+.rl-sv-btn.down { transform: scale(.94); filter: brightness(1.15); }
+.rl-sv-card { position: absolute; left: 50%; top: 36%; transform: translateX(-50%); padding: 10px 18px; border-radius: 14px; background: rgba(14, 19, 22, .88);
+  border: 2px solid var(--rl-amber); font-size: 17px; text-align: center; max-width: min(520px, calc(100vw - 32px)); }
+@media (max-width: 560px) {
+  .rl-sv-read { top: auto; bottom: calc(var(--sb) + 300px); padding: 6px 10px 7px 8px; }
+  .rl-sv-read em { font-size: 14px; }
+  .rl-sv-read small { font-size: 11.5px; }
+  .rl-sv-btn { width: 76px; height: 76px; top: 32%; right: calc(var(--sr) + 14px); font-size: 12px; }
+  .rl-sv-card { font-size: 15px; }
+}
+/* a mouse and keyboard hold E instead: the button is for touch screens */
+@media (hover: hover) and (pointer: fine) { .rl-sv-btn { display: none !important; } }

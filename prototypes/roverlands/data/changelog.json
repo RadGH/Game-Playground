@@ -1,6 +1,118 @@
 {
  "entries": [
   {
+   "id": "2026-11-10-moon-work",
+   "date": "2026-11-10",
+   "title": "Work on the Moon",
+   "items": [
+    "A new job once you have flown the rocket: Moon Work, all done in the Crater Crawler.",
+    "Sample runs: glowing rocks wait at seven sites. Stop beside one and press T (HITCH on a phone) — the arm drops it in the bin behind your seats. Hand the bin in at the Sample Drop at Greywatch. Gold ones from the bottom of the steep craters are worth the most.",
+    "Crater jumps: take a run at a ramp. The further and longer you fly, the more it pays; land upright for a bonus, and land in the glowing ring down in the crater for more.",
+    "Supply runs: stop by the Rover Garage to load crates and drive them over the rille to Farside Depot, then bring ice cores back. Land a jump too hard and a crate bounces out — just stop beside it to load it again.",
+    "Survey kits work on the Moon too: set one up at a survey spot and report at Greywatch Base.",
+    "Seven Moon Work levels, new Moon achievements, and upgrades: a bigger sample bin, a crater lamp with a stronger motor, mesh wheels, a jump booster (one extra push in the air) and a crate rack.",
+    "The Crater Crawler is a little faster now, and its wheels throw up dust that hangs in the low gravity."
+   ]
+  },
+  {
+   "id": "2026-11-10-survey",
+   "date": "2026-11-10",
+   "title": "Survey kits",
+   "items": [
+    "A new job: Survey. Every Supply store now sells five survey kits — a Weather Mast, a Seismic Probe, a Radar Dish, a Field Lab and a Signal Relay. Buy one once and it is yours for good.",
+    "Open Items on your phone and tap Spawn: the kit's crate lands beside you. Carry it, load it into the back of a jeep, truck, quad, buggy or trailer — or hook it under the helicopter with T. Drive wild and it can fall out; just pick it up again.",
+    "Each kit wants its own kind of spot: the mast high up, the probe on flat ground far from the roads, the dish on a hilltop, the lab by water or among the giant trees. A ring and a readout tell you live if the spot is good — and if not, why.",
+    "Put the crate down and hold E (or the HOLD TO SET UP button) and it unfolds. It stays where you put it, your friends see it, and it is still there next time you play. E beside it packs it up again.",
+    "Drive back to the Survey Office in Highgate to report: each kit pays once, more for a better spot further out, and everyone who helped gets the full amount.",
+    "Six survey levels, from your first weather reading to a full survey, and upgrades: quick setup, a site scanner that marks good spots on the map, a second crate slot and a longer helicopter sling."
+   ]
+  },
+  {
+   "id": "2026-11-10-rescue",
+   "date": "2026-11-10",
+   "title": "Fire, rescue, patrol, tow and haul",
+   "items": [
+    "New jobs: Firefighting, Ambulance, Highway Patrol, Tow Truck and Hauling. Start one from your phone's Jobs app, or walk up to the job's sign at a fire station, hospital, garage, tow yard or freight depot and press E (in the job's vehicle, stop beside the sign and press T).",
+    "Fires break out at barns, hay stacks, grass and houses and get worse the longer they burn. Drive the fire truck there, climb up to the water cannon and spray it out. Fill the tank at any hydrant by a town gate.",
+    "Ambulance calls: stop beside the hurt person (or get out and press E beside them) and drive them to a hospital. Quick pays more, and a gentle ride pays a bonus. The climber in Tollen Gorge needs the helicopter.",
+    "Highway Patrol: a runaway car speeds along a county road. Turn the siren on and bump it until it pulls over.",
+    "Tow Truck: back up to a broken-down car and press T to lift it, or use the winch from further away, then drop it at a tow yard. Hauling: parcels around town in the van, and goods, fuel and big machines between towns on the semi. Drive gently or crates fall off.",
+    "Every one of these jobs pays everyone helping with it, and each has levels and upgrades: a longer water cannon, a second stretcher, a stinger strip, a stronger winch, an air-ride trailer and more."
+   ]
+  },
+  {
+   "id": "2026-11-10-rustwild",
+   "date": "2026-11-10",
+   "title": "Raids in the Rustwild",
+   "items": [
+    "The badlands in the south-east are the Rustwild — red on the map. Raiders hold five camps there, and inside the Rustwild your vehicle has a health bar.",
+    "Each camp has turrets, and some have drones or raider buggies that chase you down. Their shots are slow and glowing: keep moving and most of them miss.",
+    "Knock out every raider and the camp's generator to clear it. Everyone who helped — and everyone riding with them — gets the full pay. Camps come back a few minutes later.",
+    "The Ironback Tank's driver fires the main gun and can take a small camp alone. The Trail Jeep and the new Scrapper Buggy need a friend on the gun. On a phone, a tank driver gets a FIRE button.",
+    "Wrecked? Your vehicle smokes and stops — get out and call another from your phone. Nothing is lost. Knocked out on foot, you wake up at the Rustwild Gate Garage, where two Scrapper Buggies and a Trail Jeep are waiting.",
+    "Five Rustwild Raids levels, up to clearing all five camps in one run, and upgrades: armour plating, a quick loader, a second gun mount for the driver, and a field repair kit you can use once per camp.",
+    "The Scrapper Buggy is for sale at the Dealer."
+   ]
+  },
+  {
+   "id": "2026-11-09-space",
+   "date": "2026-11-09",
+   "title": "To orbit and back",
+   "items": [
+    "The Skyreach Rocket is for sale — the biggest purchase in the game. Buy it at any Dealer or at the sales desk by the Skyreach Launch Site, and the Homeward Pod comes with it.",
+    "Call the rocket from your phone at the launch site and it stands on the pad. Climb in (a friend can ride along), press W or LAUNCH for the countdown, and hold on: smoke, shaking, the booster dropping away, and a long climb into the dark.",
+    "At orbit height the view opens on the planet below: dock at Lantern Station, land on the Moon, or head straight home.",
+    "Lantern Station has no gravity. Float with W and S, push off walls with Space, grab the rails with E, and drift through the lab, the greenhouse, the bunkroom and the cupola with the planet in its window. Float through every room for a new achievement.",
+    "On the Moon you land beside a Crater Crawler at Greywatch Landing. Everything is light up there — a jump goes four metres high.",
+    "Coming home is a ride in the Homeward Pod: it glows white-hot through reentry, you nudge it with small thrusters, and the parachute opens by itself in time for a soft landing. You can jump out on the way down too — you'll get a parachute.",
+    "New achievements for docking at the station and floating a lap of it; the launch, orbit, Moon and pod achievements can now be earned."
+   ]
+  },
+  {
+   "id": "2026-11-09-skydiving",
+   "date": "2026-11-09",
+   "title": "Skydiving at Wayfare Field",
+   "items": [
+    "Wayfare Field has come alive: the Big Sky Lifter cargo plane and two Soarwing Gliders wait on the apron beside the plane and the helicopter, and the Dealer now sells both.",
+    "Find the orange Jump Point sign at the airport (J on the map) and press E: you're standing in the hold of the jump plane, high over the county. Friends who board within a few seconds fly with you.",
+    "When the ramp opens and the light turns green, run out the back. Steer your free fall, then open your parachute with Space, A or the big OPEN button — or it opens by itself if you forget.",
+    "Steer the canopy down onto a target ring (T on the map) and hold S, LT or FLARE just before the ground for a soft landing. Closer to the middle pays more — a bullseye pays the most.",
+    "Own a glider? Pick Glider at the Jump Point and you leave the plane already flying it. Land it on Highgate Plateau.",
+    "Four skydiving levels, and upgrades: a sport parachute that turns faster and lands softer, a higher drop, and a longer glider wing.",
+    "Watch your step: landing hard now hurts, and a big enough fall knocks you out for a few seconds. You always get back up with full health — falls never cost gold or progress. Falling off something really high gives you a parachute."
+   ]
+  },
+  {
+   "id": "2026-11-09-farming",
+   "date": "2026-11-09",
+   "title": "Farming in Wayfare County",
+   "items": [
+    "The fields south of Marrow Barn are ready to farm: cut the crop, plant it again, water it, and watch it grow back. Every step pays gold.",
+    "The farm's own tractors wait in the yard with a seed drill, a water bowser and a produce trailer. Back up to one and press T to hitch it, then fire to switch it on.",
+    "Lower the tractor's mower (Shift) to cut, or bring the Goldline Harvester. The crop fills your trailer — tip it at the Marrow Flats Produce Market to sell. The further it came, the more it pays.",
+    "The bowser runs dry: fill it at the blue water tank in the farm yard.",
+    "Five farming levels open more fields and new crops — carrots, pumpkins and sunflowers. Upgrades: a wider seed drill, a bigger tank, rich soil that grows twice as fast, and taller trailer sides.",
+    "Farm with friends: everyone riding along or helping nearby gets the full pay.",
+    "The tractor, seed drill, water bowser, produce trailer, tow truck and parcel van are now for sale at every Dealer.",
+    "Phone → Jobs → Farming → Start puts a pin on the farm yard, and shows how far along your level is."
+   ]
+  },
+  {
+   "id": "2026-11-09-county",
+   "date": "2026-11-09",
+   "title": "Welcome to Wayfare County",
+   "items": [
+    "A whole new map: Wayfare County. Four towns joined by winding roads, switchbacks up to Highgate Plateau, a deep gorge, giant trees, a river and lake, the Marrow Flats farm belt, an airport and a launch site.",
+    "The old world is still here as Sandbox, and Flag Run still uses it.",
+    "Earn gold by working jobs, and spend it on vehicles, clothes and equipment. Everything you buy is yours to keep.",
+    "Your phone (P, LB, or the phone button) has your Garage — call any vehicle you own to your side, any time — plus Wardrobe, Items, Jobs, Map and Achievements.",
+    "Every town has a Dealer, an Outfitter for clothes and a Supply store for equipment. You start with a few basic clothes and the Trail Jeep.",
+    "Play with friends: your gold, vehicles and clothes follow you into any room, and everyone helping with a job gets the full pay.",
+    "Drivers have new, more grown-up proportions, and every vehicle was refitted so hands reach the wheel and feet reach the floor.",
+    "The bug report button has moved into the ☰ menu."
+   ]
+  },
+  {
    "id": "2026-11-06",
    "date": "2026-11-06",
    "title": "Tank steering, FLIP button and phone fixes",

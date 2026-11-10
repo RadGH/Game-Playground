@@ -50,6 +50,14 @@ export function createParticles(quality) {
       for (let k = 0; k < n; k++) spawn(x + rnd() * 0.6, y + 0.1, z + rnd() * 0.6, rnd() * 1.4, 0.4 + Math.random() * 0.9, rnd() * 1.4,
         1.2 + Math.random() * 1.4, 0.5 + Math.random() * 0.5 * amount, -0.15, _c, 1.2);
     },
+    /** M12 (the Moon): dust thrown off a wheel at (vx, vy, vz) that arcs up and falls slowly under gravity `g`. */
+    kick(x, y, z, vx, vy, vz, surf, amount = 1, g = 1.62) {
+      const s = SURFACES[surf] || SURFACES[1];
+      _c.set(s.dust).convertSRGBToLinear();
+      const n = Math.max(1, Math.round(amount * 2));
+      for (let k = 0; k < n; k++) spawn(x + rnd() * 0.4, y + 0.05, z + rnd() * 0.4, vx + rnd() * 1.6, vy * (0.6 + Math.random() * 0.7), vz + rnd() * 1.6,
+        1.6 + Math.random() * 1.4, 0.16 + Math.random() * 0.22 * amount, g, _c, 0.25);
+    },
     splash(x, y, z, amount = 1) {
       _c.setRGB(0.82, 0.9, 0.95);
       const n = Math.max(2, Math.round(amount * 6));

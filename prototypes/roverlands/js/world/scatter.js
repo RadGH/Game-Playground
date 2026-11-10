@@ -12,12 +12,15 @@ import { SCATTER, BIOMES, KINDS, SURF } from './world-data.js';
 import { fbm, hash01, smoothstep, lerp, dsin, dcos, TAU } from './wmath.js';
 
 const MAX_SLOPE = { tree_pine: 0.5, tree_birch: 0.5, tree_oak: 0.42, sapling: 0.6, bush: 0.65, reeds: 0.35,
-  rock_s: 0.9, rock_m: 0.95, rock_l: 1.0, boulder: 1.1, log: 0.28 };
+  rock_s: 0.9, rock_m: 0.95, rock_l: 1.0, boulder: 1.1, log: 0.28, tree_giant: 0.35 };
 const RED = [1.28, 0.82, 0.62], COLD = [0.92, 0.96, 1.04];
 
 /**
  * @param world  the world under construction (heightAt, slopeAt, water, roadDist, biome, surface, size)
- * @param ctx    { S, addObj, objects, exclusions:[{x,z,hx,hz}], discs:[{x,z,r}], nearestK }
+ * @param ctx    { S, addObj, objects, exclusions:[{x,z,hx,hz}], discs:[{x,z,r}], nearestK,
+ *                 + optional (Wayfare County): rules / decorRules (tables keyed by biome key, default SCATTER's),
+ *                   density, step, decorStep. A rule may also carry `space` (extra crowding radius, m),
+ *                   `maxSlope` and `tint` ([r,g,b] for rocks). Leaving them out gives the classic scatter exactly. }
  * @returns {{ decor: Array }}
  */
 export function scatterObjects(world, ctx) {
@@ -60,7 +63,9 @@ export function scatterObjects(world, ctx) {
   }
 
   // --- the collidable scatter -----------------------------------------------------------------------------------------
-  const step = SCATTER.step;
+  const RULES = ctx.rules || SCATTER.biomes, DECOR = ctx.decorRules || SCATTER.decor;
+  const DENSITY = ctx.density ?? SCATTER.density ?? 1;
+  const step = ctx.step || SCATTER.step;
   const G = Math.floor(world.size / step);
   const clumpCache = new Map();
   const clumpAt = (rule, ri, b, x, z) => {
@@ -74,12 +79,12 @@ export function scatterObjects(world, ctx) {
     const z = -half + (gj + 0.5 + (hash01(gi, gj, S + 4) - 0.5) * 0.92) * step;
     const k = nearestK(x, z);
     const b = biome[k];
-    const rules = SCATTER.biomes[BIOMES[b].key];
+    const rules = RULES[BIOMES[b].key];
     if (!rules || !rules.length) continue;
     const roll = hash01(gi, gj, S + 5);
     let acc = 0, rule = null, ri = -1;
     for (let q = 0; q < rules.length; q++) {
-      acc += rules[q].p * (SCATTER.density ?? 1) * clumpAt(rules[q], q, b, x, z);
+      acc += rules[q].p * DENSITY * clumpAt(rules[q], q, b, x, z);
       if (roll < acc) { rule = rules[q]; ri = q; break; }
     }
     if (!rule) continue;
@@ -97,13 +102,13 @@ export function scatterObjects(world, ctx) {
     const roadMargin = isTree ? 2.2 + rad : kind === 'log' ? 2.5 : kind.startsWith('rock') || kind === 'boulder' ? 1.2 + rad : 0.6 + rad;
     if (roadDist[k] < roadMargin) continue;
     if (excluded(x, z, isTree ? 4 : 2)) continue;
-    if (world.slopeAt(x, z) > (MAX_SLOPE[kind] ?? 0.6)) continue;
+    if (world.slopeAt(x, z) > (rule.maxSlope ?? MAX_SLOPE[kind] ?? 0.6)) continue;
     if (kind === 'reeds') {
       if (depthAt(x, z) > 0.35) continue;
     } else if (!dryAround(x, z, Math.max(1, rad))) continue;
-    if (surface[k] === SURF.road || surface[k] === SURF.ice) continue;
+    if (surface[k] === SURF.road || surface[k] === SURF.ice || surface[k] >= SURF.asphalt) continue;   // asphalt / concrete: county only
 
-    const spacing = isTree ? rad + 1.4 : kind === 'boulder' || kind === 'rock_l' ? rad + 0.6 : rad + 0.3;
+    const spacing = (isTree ? rad + 1.4 : kind === 'boulder' || kind === 'rock_l' ? rad + 0.6 : rad + 0.3) + (rule.space || 0);
     let o;
     if (kind === 'log') {
       const len = (5 + 3 * hash01(gi, gj, S + 9)) * s;
@@ -139,7 +144,7 @@ export function scatterObjects(world, ctx) {
       shape = { t: 'cyl', r: round3(K.r * s), h: round3(K.colH * s) };
       mass = Math.round(mass * s * s);
     }
-    const tint = b === 3 ? undefined : (BIOMES[b].key === 'canyon' && (kind.startsWith('rock') || kind === 'boulder')) ? RED
+    const tint = rule.tint && (kind.startsWith('rock') || kind === 'boulder') ? rule.tint : b === 3 ? undefined : (BIOMES[b].key === 'canyon' && (kind.startsWith('rock') || kind === 'boulder')) ? RED
       : (BIOMES[b].key === 'snow' && (kind.startsWith('rock') || kind === 'boulder')) ? COLD : undefined;
     o = addObj({ kind, x: round3(x), y: round3(y - sink), z: round3(z), yaw: round3(yaw), s: round3(s), look,
       shape, breakAt, mass, fall: K.fall || 'topple', ...(tint ? { tint } : {}) });
@@ -148,13 +153,13 @@ export function scatterObjects(world, ctx) {
 
   // --- decor: drawn, never simulated -------------------------------------------------------------------------------
   const decor = [];
-  const ds = SCATTER.decorStep;
+  const ds = ctx.decorStep || SCATTER.decorStep;
   const DG = Math.floor(world.size / ds);
   for (let gj = 0; gj < DG; gj++) for (let gi = 0; gi < DG; gi++) {
     const x = -half + (gi + 0.5 + (hash01(gi, gj, S + 13) - 0.5) * 0.95) * ds;
     const z = -half + (gj + 0.5 + (hash01(gi, gj, S + 14) - 0.5) * 0.95) * ds;
     const k = nearestK(x, z);
-    const rules = SCATTER.decor[BIOMES[biome[k]].key];
+    const rules = DECOR[BIOMES[biome[k]].key];
     if (!rules || !rules.length) continue;
     const roll = hash01(gi, gj, S + 15);
     let acc = 0, rule = null;
@@ -165,7 +170,7 @@ export function scatterObjects(world, ctx) {
     if (isReed ? depthAt(x, z) > 0.3 : wetAt(x, z)) continue;
     if (excluded(x, z, 1)) continue;
     if (world.slopeAt(x, z) > 0.7) continue;
-    if (surface[k] === SURF.road || surface[k] === SURF.ice || (surface[k] === SURF.mud && !isReed && rule.kind !== 'debris')) continue;
+    if (surface[k] === SURF.road || surface[k] === SURF.ice || surface[k] >= SURF.asphalt || (surface[k] === SURF.mud && !isReed && rule.kind !== 'debris')) continue;
     const look = rule.look[Math.floor(hash01(gi, gj, S + 16) * rule.look.length) % rule.look.length];
     decor.push({ kind: rule.kind, look, x: round3(x), y: round3(world.heightAt(x, z) - 0.02), z: round3(z),
       yaw: round3(hash01(gi, gj, S + 17) * TAU), s: round3(0.75 + 0.6 * hash01(gi, gj, S + 18)) });

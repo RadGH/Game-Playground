@@ -20,6 +20,7 @@ import { qrot, qrotInv, sub, add, yawOf, wrapAngle } from './vmath.js';
 export const WALK = { walk: 2.4, run: 5.2, swim: 1.6, jump: 5.2, gravity: 20, radius: 0.3, half: 0.52, airControl: 0.35 };
 
 export function createWalker(phys, { p = [0, 2, 0], yaw = 0 } = {}) {
+  const gScale = (phys.gravity ?? 9.81) / 9.81;           // M11: the Moon (1.62) — a long, floaty fall and a big jump
   const { RAPIER, rw, world } = phys;
   const lift = WALK.radius + WALK.half;          // capsule centre above the feet
   const rb = rw.createRigidBody(RAPIER.RigidBodyDesc.kinematicPositionBased().setTranslation(p[0], p[1] + lift, p[2]));
@@ -95,7 +96,7 @@ export function createWalker(phys, { p = [0, 2, 0], yaw = 0 } = {}) {
     } else if (self.grounded) {
       self.vy = -1;
       if (inp.jump && !jumpHeld) { self.vy = WALK.jump; self.grounded = false; self.platform = null; }
-    } else self.vy -= WALK.gravity * dt;
+    } else self.vy -= WALK.gravity * gScale * dt;
     jumpHeld = inp.jump;
 
     const want = { x: vx * dt, y: self.vy * dt, z: vz * dt };
@@ -109,6 +110,7 @@ export function createWalker(phys, { p = [0, 2, 0], yaw = 0 } = {}) {
     const wasGround = self.grounded;
     self.grounded = kcc.computedGrounded() && self.vy <= 0.1;
     if (self.grounded && !wasGround && self.vy < -12) self.landHard = -self.vy;
+    if (self.grounded && !wasGround && self.vy < -2) self.landV = Math.max(self.landV, -self.vy);     // M9: fall damage reads it
 
     // what am I standing on?
     let plat = null;
@@ -138,6 +140,9 @@ export function createWalker(phys, { p = [0, 2, 0], yaw = 0 } = {}) {
   // --- thrown out of a vehicle ------------------------------------------------------------------------------------
   function tickRag(dt) {
     const t = rag.rb.translation(), v = rag.rb.linvel();
+    // a tumbling body that was falling fast and has just been stopped hit the ground (M9: fall damage)
+    if (rag.vy < -9 && v.y - rag.vy > 6) self.landV = Math.max(self.landV, -rag.vy);
+    rag.vy = v.y;
     self.feet = [t.x, t.y - 0.35, t.z];
     self.vel = [v.x, v.y, v.z];
     self.ragdoll -= dt;
@@ -167,7 +172,7 @@ export function createWalker(phys, { p = [0, 2, 0], yaw = 0 } = {}) {
       .setLinvel(vel[0], vel[1], vel[2]).setAngvel({ x: spin[0], y: spin[1], z: spin[2] }).setCcdEnabled(true).setAngularDamping(0.8).setLinearDamping(0.15));
     const c = rw.createCollider(RAPIER.ColliderDesc.capsule(0.35, 0.33).setMass(60).setFriction(0.9).setRestitution(0.2).setCollisionGroups(GROUPS.ragdoll), body);
     phys.tagCollider(c, { walker: self, rag: true });
-    rag = { rb: body, col: c };
+    rag = { rb: body, col: c, vy: vel[1] };
     self.ragdoll = 1.4;
     self.enabled = true;
     self.platform = null;
@@ -183,6 +188,9 @@ export function createWalker(phys, { p = [0, 2, 0], yaw = 0 } = {}) {
   };
   self.teleport = p => self.enable(p);
   self.isRag = () => !!rag;
+  /** M9: the speed of the hardest landing since the last call (m/s, into the ground; 0 = none) — and forget it. */
+  self.landV = 0;
+  self.takeLanding = () => { const v = self.landV; self.landV = 0; return v; };
   self.state = () => {
     const s = { p: self.feet.map(r3), yaw: r3(self.yaw), a: self.anim };
     if (self.platform && self.rel && self.platform.id != null) {

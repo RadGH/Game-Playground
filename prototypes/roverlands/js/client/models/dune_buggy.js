@@ -1,6 +1,6 @@
 // Sandhopper Buggy (reference: assets/ref/dune_buggy.webp). An open sand buggy: ochre-yellow angular tub with brown
 // lower panels, a brown tube roll cage whose posts and roof frame sit exactly on their colliders (the roof frame at
-// 1.58, heads at 1.43), two buckets, a bare engine out the back (on the engine-block collider) with chrome pipes,
+// 1.30, seated Chibi 2.6 heads at ~1.2), two buckets, a bare engine out the back (on the engine-block collider) with chrome pipes,
 // lamp pods on the front posts, wheels far out on long arms. Long-travel suspension: every wheel has two arms and a
 // tall coil-over (yellow coil + chrome body) re-aimed each frame, so the 0.75 m of travel is visible.
 // Ground sits ~0.74 m under the body origin at rest; hubs at y ≈ -0.36 front / -0.28 rear.
@@ -12,7 +12,7 @@ export function build(THREE, def, opts = {}) {
   const Y = '#d8aa3a', YD = '#a9822a', BR = '#4c3b2b', C = 'gunDark', K = 'black', T = 'trim';
   const ch = def.chassis;
   const bot = ch.p[1] - ch.hy, top = ch.p[1] + ch.hy;                  // -0.05 .. 0.35
-  const roof = def.parts[0], roofY = roof.p[1];                        // 1.58
+  const roof = def.parts[0], roofY = roof.p[1];                        // 1.30
   const posts = def.parts.slice(1, 5).map(p => p.p);                   // (±0.68, z 0.6) and (±0.68, z -0.9)
   const eng = def.parts[5];
   const zF = posts[0][2], zB = posts[2][2], px = Math.abs(posts[0][0]);
@@ -69,7 +69,7 @@ export function build(THREE, def, opts = {}) {
     k.tube(C, [[x, roofY, zF + 0.05], [x, roofY, zB - 0.05]], R, { seg: 6 });               // roof side
     k.tube(C, [[x, roofY, zF], [sx * 0.42, top + 0.2, 1.5]], R * 0.85, { seg: 6 });         // down to the nose
     k.tube(C, [[x, roofY, zB], [sx * 0.42, eng.p[1] + 0.3, -1.65]], R * 0.85, { seg: 6 });  // down to the tail
-    k.tube(C, [[x, 0.8, zF], [x, 0.8, zB]], R * 0.7, { seg: 6 });                          // shoulder bar
+    k.tube(C, [[x, 0.72, zF], [x, 0.72, zB]], R * 0.7, { seg: 6 });                        // shoulder bar
     k.tube(C, [[sx * 0.62, bot + 0.05, -1.65], [sx * 0.42, eng.p[1] + 0.3, -1.65]], R * 0.8, { seg: 6 });   // rear frame upright
     k.tube(C, [[sx * 0.62, bot + 0.05, zB], [sx * 0.62, bot + 0.05, -1.65]], R * 0.8, { seg: 6 });          // rear frame rail
     // lamp pod on the front post

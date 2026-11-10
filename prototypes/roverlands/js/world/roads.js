@@ -100,15 +100,25 @@ export function createRouter(w, fields) {
 
   /**
    * @returns {Array<[x,z]>} grid points from a to b (inclusive of the exact end points) or null.
-   * opts: { cls, allowWater: (x,z)=>bool, reuse = 0.45, maxGrade, biomeMul }
+   * opts: { cls, allowWater: (x,z)=>bool, reuse = 0.45, maxGrade, biomeMul, heur = reuse }
+   *   heur: how much the straight-line distance to the goal counts (higher = faster search, less perfect path)
+   *   box: if set, the search stays inside the two ends' bounding box grown by this many metres (a route that
+   *        cannot be found then fails in milliseconds instead of searching the whole map)
    */
   function route(ax, az, bx, bz, opts = {}) {
     const cls = ROAD_CLASSES[opts.cls || 'road'];
     const maxG = opts.maxGrade ?? cls.maxGrade;
     const reuse = opts.reuse ?? 0.45;
     const biomeMul = opts.biomeMul ?? 1;
+    const heur = opts.heur ?? reuse;
     const start = toIdx(ax, az), goal = toIdx(bx, bz);
     const gi = goal % n, gj = (goal / n) | 0;
+    let bi0 = 1, bj0 = 1, bi1 = n - 2, bj1 = n - 2;
+    if (opts.box != null) {
+      const si = start % n, sj = (start / n) | 0, m = Math.ceil(opts.box / GRID);
+      bi0 = Math.max(1, Math.min(si, gi) - m); bi1 = Math.min(n - 2, Math.max(si, gi) + m);
+      bj0 = Math.max(1, Math.min(sj, gj) - m); bj1 = Math.min(n - 2, Math.max(sj, gj) + m);
+    }
     g.fill(Infinity); closed.fill(0); heap.clear();
     // the start has no heading yet: seed every heading at cost 0
     for (let d = 0; d < ND; d++) { const st = start * ND + d; g[st] = 0; f[st] = 0; came[st] = -1; heap.push(st, f); }
@@ -125,7 +135,7 @@ export function createRouter(w, fields) {
         const cosT = first ? 1 : COS[cd * ND + q];
         if (cosT < -0.17) continue;
         const ni = ci + NB[q][0], nj = cj + NB[q][1];
-        if (ni < 1 || nj < 1 || ni >= n - 1 || nj >= n - 1) continue;
+        if (ni < bi0 || nj < bj0 || ni > bi1 || nj > bj1) continue;
         const nk = nj * n + ni;
         const ns = nk * ND + q;
         if (closed[ns]) continue;
@@ -147,7 +157,7 @@ export function createRouter(w, fields) {
         if (ng < g[ns]) {
           g[ns] = ng; came[ns] = curS;
           const di = ni - gi, dj = nj - gj;
-          f[ns] = ng + Math.sqrt(di * di + dj * dj) * GRID * reuse;
+          f[ns] = ng + Math.sqrt(di * di + dj * dj) * GRID * heur;
           heap.push(ns, f);
         }
       }
@@ -224,7 +234,9 @@ export function resample(pts, step = 2) {
  * The height of the road along its length.
  * @param {Array<[x,z]>} pts resampled every `ds` metres
  * @param {Function} groundAt (x,z) => metres
- * @param {object} o { pinA, pinB, smooth (samples), clamp (grade), floorAt?: (x,z)=>min height or -Infinity, fixed?: Float32Array|null }
+ * @param {object} o { pinA, pinB, smooth (samples), clamp (grade), floorAt?: (x,z)=>min height or -Infinity, fixed?: Float32Array|null,
+ *                     cones?: true = first keep every sample within reach of BOTH pins at the clamp grade, so the
+ *                     clamp passes can never drag a pin off its height (Wayfare County; classic leaves it off) }
  */
 export function profile(pts, groundAt, o) {
   const n = pts.length;
@@ -256,6 +268,10 @@ export function profile(pts, groundAt, o) {
   // grade clamp: forward then backward. After the backward pass every neighbouring pair is within the limit.
   const ds = o.ds || 2;
   const G = o.clamp * ds;
+  if (o.cones && o.pinA != null && o.pinB != null) for (let i = 0; i < n; i++) {
+    h[i] = clamp(h[i], o.pinA - G * i, o.pinA + G * i);
+    h[i] = clamp(h[i], o.pinB - G * (n - 1 - i), o.pinB + G * (n - 1 - i));
+  }
   for (let i = 1; i < n; i++) h[i] = clamp(h[i], h[i - 1] - G, h[i - 1] + G);
   for (let i = n - 2; i >= 0; i--) h[i] = clamp(h[i], h[i + 1] - G, h[i + 1] + G);
   return Float32Array.from(h);

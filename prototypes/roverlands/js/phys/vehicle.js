@@ -40,6 +40,10 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
   const rb = rw.createRigidBody(bodyDesc);
   const self = { id, def, rb, local, kind: def.id };
   const info = { body: self };
+  // Expansion 1 batch B: the world's gravity (createPhysics opts.gravity / world.gravity; 9.81 everywhere before), and
+  // the two vertical fliers that have no wheels to drive and no air control: the rocket and the landing pod
+  const grav = phys.gravity ?? 9.81;
+  const FLIER = def.type === 'rocket' || def.type === 'pod';
 
   // Colliders: the chassis box carries ALL the mass (with a lowered centre and a slightly fattened inertia — real cars
   // keep their weight low and between the wheels; a plain box's inertia makes them twitchy), extra parts are massless.
@@ -55,6 +59,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
   // doors: a part with `door: '<name>'` is solid while closed; its `open` shape (a ramp, a lid swung up) is solid
   // while open. setDoor(name, open) swaps which of the two collides.
   const doors = new Map();     // name -> { closed: [colliders], open: [colliders], isOpen }
+  const tipParts = [];         // parts with `tip: true` (a tipping bed), turned about def.tip.pivot below
   for (const part of def.parts || []) {
     let d;
     if (part.box) d = RAPIER.ColliderDesc.cuboid(...part.box);
@@ -65,6 +70,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     if (part.rot) d.setRotation(eulerQ(part.rot));
     const c = rw.createCollider(d, rb);
     colliders.push(c);
+    if (part.tip) tipParts.push({ c, part });
     if (part.door) {
       if (!doors.has(part.door)) doors.set(part.door, { closed: [], open: [], isOpen: false });
       const D = doors.get(part.door);
@@ -78,6 +84,8 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
       }
     }
   }
+  // a parachute (landing pod) is a switch with no collider: register its door so setDoor() / the door_* act reach it
+  if (def.chute && !doors.has(def.chute.door)) doors.set(def.chute.door, { closed: [], open: [], isOpen: false });
   for (const c of colliders) phys.tagCollider(c, info);
   // the space swept for smashable things ahead (physics.js smashAhead): the chassis box plus the wheels' reach
   self.smash = new RAPIER.Cuboid(ch.hx + 0.25, ch.hy + 0.25, ch.hz + 0.3);
@@ -92,6 +100,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     shape: new RAPIER.Ball(w.r * 0.92),
   }));
   const driven = wheels.filter(w => w.def.drive).length || 1;
+  const softTyre = Math.max(0, Math.min(1, def.tyre?.soft ?? 0));
   const pairs = [];   // anti-roll: wheels on the same axle
   for (const a of wheels) for (const b of wheels) if (a.i < b.i && a.axle === b.axle && a.side !== b.side) pairs.push([a, b]);
 
@@ -217,7 +226,6 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
       arForce.set(a, (arForce.get(a) || 0) + d); arForce.set(b, (arForce.get(b) || 0) - d);
     }
 
-    const g = 9.81;
     const perWheelMass = mass / Math.max(1, grounded);
     for (const w of wheels) {
       if (!w.ground) {
@@ -253,7 +261,8 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
       const relT = def.type === 'tank' ? sub(rel, cross(scale(up, dot(av, up)), r)) : rel;
       const vf = dot(rel, f), vs = dot(relT, s), vfT = dot(relT, f);
 
-      const surf = w.surface;
+      // lugged tyres (def.tyre.soft 0..1, the tractor) shrug off that share of a soft surface's grip loss and drag
+      const surf = softTyre && (w.surface.sink || 0) > 0 ? { ...w.surface, grip: 1 - (1 - (w.surface.grip ?? 1)) * (1 - softTyre), drag: 1 + ((w.surface.drag ?? 1) - 1) * (1 - softTyre) } : w.surface;
       const mu = (def.tyre.grip ?? 1.5) * (surf.grip ?? 1);
       const N = Math.max(Fs, 0);
       const maxF = mu * N;
@@ -344,6 +353,8 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
 
     if (def.type === 'heli') flyHeli(dt, q, lv, av, fwd, up);
     if (def.type === 'plane') flyPlane(dt, q, lv, av, fwd, up, grounded);
+    if (def.type === 'rocket') flyRocket(dt, q, lv, av, fwd, up);
+    if (def.type === 'pod') flyPod(dt, q, lv, av, fwd, up);
 
     // ground reaction on what we're standing on (a car on a trailer bed pushes the trailer down)
     for (const w of wheels) {
@@ -353,7 +364,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
 
     // air: steer the car's attitude like the old arcade jeeps — pitch with the lean (stick / Q / Z), yaw with steer, lean with roll
     const air = def.air || {};
-    if (grounded === 0 && def.type !== 'heli' && def.type !== 'plane') {
+    if (grounded === 0 && def.type !== 'heli' && def.type !== 'plane' && !FLIER) {
       self.airTime += dt;
       const right = qrot(q, { x: -1, y: 0, z: 0 });
       const k = (air.control ?? 0.6) * mass * 4;     // x4 once the push stopped being wiped out (2026-10-25)
@@ -402,7 +413,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
 
     // upside down: the old trick — hold jump (flip) to roll it back on its wheels
     if (up.y < 0.55 && speed < 3) self.upsideDownFor += dt; else self.upsideDownFor = 0;   // on its side counts too
-    if (input.flip && self.upsideDownFor > 0.6 && def.type !== 'bike') {
+    if (input.flip && self.upsideDownFor > 0.6 && def.type !== 'bike' && !FLIER) {
       const side = qrot(q, { x: 1, y: 0, z: 0 });
       const axis = norm(cross(up, UP));
       const amt = len(cross(up, UP)) < 0.05 ? side : axis;
@@ -413,7 +424,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     // crashes: compare this tick's velocity change with what gravity alone would do
     const v = rb.linvel();
     if (vPrev) {
-      const dv = Math.hypot(v.x - vPrev.x, v.y - vPrev.y + g * dt, v.z - vPrev.z);
+      const dv = Math.hypot(v.x - vPrev.x, v.y - vPrev.y + grav * dt, v.z - vPrev.z);
       if (dv > 4 && self.onImpact) self.onImpact(dv, { from: vPrev, to: { x: v.x, y: v.y, z: v.z }, upright: up.y });
     }
     vPrev = { x: v.x, y: v.y, z: v.z };
@@ -482,7 +493,13 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     const roll = self.driver ? input.steer : 0;
     const Ip = mass * (a.inertia ?? 4);
     const pr = dot(av, right), rr = dot(av, fwd), yr = dot(av, up);
-    rb.applyTorqueImpulse(scale(right, (stick * (a.pitchRate ?? 0.55) - pr) * Ip * 6 * authority * dt), true);
+    // aero.trim (batch B: glider, cargo plane): with the stick centred the nose drifts back to the trim angle of attack
+    // (aero.trimAoa, default the incidence) — a pendulum-stable glider comes out of a dive by itself. Unset = as before.
+    // aero.pathHold (glider): also steer the nose toward a steady glide path (aero.glidePath rad, below the horizon),
+    // which damps the long climb-dive-stall swing a let-go glider would otherwise ride for a minute
+    const trimW = (a.trim ? a.trim * ((a.trimAoa ?? a.incidence ?? 0.05) - aoa) : 0)
+      + (a.pathHold ? a.pathHold * ((a.glidePath ?? -0.08) - Math.asin(clamp(lv.y / speed, -1, 1))) : 0);
+    rb.applyTorqueImpulse(scale(right, (stick * (a.pitchRate ?? 0.55) + trimW - pr) * Ip * 6 * authority * dt), true);
     rb.applyTorqueImpulse(scale(fwd, (roll * (a.rollRate ?? 1.3) - rr) * Ip * 5 * authority * dt), true);
     // coordinated turn: a banked plane's nose follows the bank (yaw toward the low wing)
     const bank = Math.asin(clamp(-dot(right, UP), -1, 1));
@@ -491,6 +508,76 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     const side = dot(vdir, right), vert = dot(vdir, up);
     rb.applyTorqueImpulse(scale(add(scale(UP, -side * (a.vane ?? 5) * qd), scale(right, vert * (a.vane ?? 5) * qd * 0.3)), dt), true);
     self.aoa = aoa; self.stalled = Math.abs(aoa) > stall && grounded === 0;
+  }
+
+  // --- rocket (Expansion 1 batch B, def.thrust): thrust along the body's up from a throttle LEVER (W/S move it and it
+  // stays, like the plane's), and gentle steering — an attitude hold that tips the nose at most `thrust.tilt` rad toward
+  // where the stick asks (A/D sideways, input.pitch forward / back) and otherwise holds it straight up. Quadratic air
+  // drag (thrust.cda m²). Staging: `thrust.stage` { door, mass, com, force } — the booster is extra mass (setAdditional-
+  // MassProperties) and parts with `door: <stage door>` (its colliders); opening that door (the seat's act) drops both
+  // and the upper stage's own engine (`stage.force`) takes over. The launch / orbit flow is a later milestone (M11).
+  self.staged = false;
+  const RK = def.thrust;
+  const stageMass = (on) => {
+    const S = RK?.stage; if (!S) return;
+    const m = on ? S.mass : 0, c = fromArr(S.com || [0, 0, 0]);
+    const I = m / 12 * ((S.r ?? 1.5) ** 2 * 3 + (S.h ?? 4) ** 2);
+    rb.setAdditionalMassProperties(m, c, { x: I, y: m * (S.r ?? 1.5) ** 2 / 2, z: I }, { x: 0, y: 0, z: 0, w: 1 }, true);
+  };
+  if (RK?.stage) stageMass(true);
+  function flyRocket(dt, q, lv, av, fwd, up) {
+    const S = RK.stage, staged = !!(S && doors.get(S.door)?.isOpen);
+    if (staged !== self.staged) { self.staged = staged; stageMass(!staged); }
+    if (self.driver) self.lever = clamp(self.lever + (input.throttle - input.brake) * dt * (RK.leverRate ?? 0.7), 0, 1); else self.lever = 0;
+    const force = self.lever * (staged ? S.force : RK.force);
+    if (force > 0) rb.applyImpulse(scale(up, force * dt), true);
+    const speed = len(lv);
+    if (speed > 0.5) rb.applyImpulse(scale(lv, -0.6 * (RK.cda ?? 4) * speed * dt), true);
+    if (!self.driver) return;
+    // attitude hold: aim the body's up at UP tipped by the stick, damp every turn but a slow roll about the long axis
+    const right = qrot(q, { x: -1, y: 0, z: 0 });
+    const fH = norm({ x: fwd.x, y: 0, z: fwd.z }), rH = norm({ x: right.x, y: 0, z: right.z });
+    const tilt = RK.tilt ?? 0.3;
+    const want = norm(add(UP, add(scale(fH, clamp(input.pitch || 0, -1, 1) * tilt), scale(rH, clamp(input.steer, -1, 1) * tilt))));
+    const err = cross(up, want);                    // axis * sin(angle)
+    const spin = sub(av, scale(up, dot(av, up) * 0.7));
+    const I = (RK.inertia ?? 1) * rb.mass() * (ch.hy * ch.hy + ch.hx * ch.hx) / 3;
+    const k = RK.hold ?? 3;
+    rb.applyTorqueImpulse(scale(sub(scale(err, k * k), scale(spin, 2 * k)), I * dt), true);
+  }
+
+  // --- landing pod (Expansion 1 batch B, def.pod + def.chute): falls heat shield first — its drag (pod.cda m²) acts at
+  // pod.cp, above the centre of mass, so a tumbling pod turns its shield into the airflow like a shuttlecock. Small
+  // steering thrusters (pod.thrust N) push it sideways with W/S/A/D while someone is in it, and a reaction wheel holds
+  // it upright (pod.hold). The parachute (def.chute { door, cda, open s, at }) is a door with no collider: open, it
+  // unfurls over `open` seconds (drag grows with the square of how far open) and pulls at chute.at, above the pod.
+  self.chute = 0;
+  function flyPod(dt, q, lv, av, fwd, up) {
+    const P = def.pod || {}, C = def.chute;
+    const speed = len(lv), rho = 1.2;
+    if (C) {
+      const want = doors.get(C.door)?.isOpen ? 1 : 0;
+      self.chute = want ? Math.min(1, self.chute + dt / (C.open ?? 2.5)) : 0;
+    }
+    if (speed > 0.3) {
+      const dir = scale(lv, -1 / speed), q2 = 0.5 * rho * speed * speed;
+      const body = q2 * (P.cda ?? 3);
+      rb.applyImpulseAtPoint(scale(dir, body * dt), self.toWorld(fromArr(P.cp || [0, 1, 0])), true);
+      if (C && self.chute > 0) {
+        // the canopy hangs ABOVE the pod on its lines, so it pulls along the airflow at the attach point
+        // capped at chute.maxG x weight: a canopy opening at reentry speed jolts, it does not stop the pod dead
+        const pull = Math.min(q2 * C.cda * self.chute * self.chute, (C.maxG ?? 4) * rb.mass() * grav);
+        rb.applyImpulseAtPoint(scale(dir, pull * dt), self.toWorld(fromArr(C.at || [0, 2, 0])), true);
+      }
+    }
+    if (!self.driver) return;
+    const right = qrot(q, { x: -1, y: 0, z: 0 });
+    const fH = norm({ x: fwd.x, y: 0, z: fwd.z }), rH = norm({ x: right.x, y: 0, z: right.z });
+    const push = add(scale(fH, input.throttle - input.brake), scale(rH, input.steer));
+    if (len(push) > 0.01) rb.applyImpulse(scale(push, (P.thrust ?? 0) * dt / Math.max(1, len(push))), true);
+    const I = rb.mass() * (ch.hx * ch.hx + ch.hy * ch.hy) / 3, k = P.hold ?? 2;
+    const err = cross(up, UP), spin = sub(av, scale(up, dot(av, up) * 0.5));
+    rb.applyTorqueImpulse(scale(sub(scale(err, k * k), scale(spin, 2 * k)), I * dt), true);
   }
 
   function balanceBike(dt, q, lv, av, fwd, up, grounded) {
@@ -569,7 +656,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     self.steer = x[0] || 0;
     wheels.forEach((w, i) => { w.comp = x[1 + i * 2] ?? w.comp; w.spin = x[2 + i * 2] ?? w.spin; w.steer = w.def.steer ? self.steer * w.def.steer : 0; });
     const e = 1 + wheels.length * 2;
-    self.remoteForks = x[e] ?? 0; self.rotor = x[e + 1] ?? self.rotor; self.lever = x[e + 2] ?? self.lever; self.flame = x[e + 3] ?? 0;
+    self.remoteForks = x[e] ?? 0; if (def.mower) self.mower = self.remoteForks; self.rotor = x[e + 1] ?? self.rotor; self.lever = x[e + 2] ?? self.lever; self.flame = x[e + 3] ?? 0;
   };
   /** Index in state().x where anything the session appends (turret aim) starts. */
   self.extrasEnd = () => 1 + wheels.length * 2 + 4;
@@ -593,11 +680,20 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
   self.towing = null; self.towedBy = null;
   self.towPointWorld = () => def.tow ? self.toWorld(fromArr(def.tow)) : null;
   self.hitchPointWorld = () => def.hitch ? self.toWorld(fromArr(def.hitch)) : null;
+  // a vehicle with `towAny` (the tow truck) can also take any car with no tongue by its front bumper: the middle of the
+  // chassis box's front face. Its tow point sits higher than that, so hitching lifts the car's front wheels off the
+  // ground (an under-lift), and the towed car rolls on its back wheels like a trailer.
+  self.frontHitch = def.type === 'car' && !def.hitch ? [0, ch.p?.[1] ?? 0, (ch.p?.[2] ?? 0) + ch.hz] : null;
+  self.frontHitchWorld = () => self.frontHitch ? self.toWorld(fromArr(self.frontHitch)) : null;
+  self.canTow = (trailer) => !!(def.tow && trailer && trailer !== self && (trailer.def.hitch || (def.towAny && trailer.frontHitch)));
   self.hitch = (trailer) => {
-    if (!def.tow || !trailer?.def.hitch || self.towing || trailer.towedBy) return false;
-    const jd = RAPIER.JointData.spherical(fromArr(def.tow), fromArr(trailer.def.hitch));
+    if (!self.canTow(trailer) || self.towing || trailer.towedBy) return false;
+    const byFront = !trailer.def.hitch;
+    const jd = RAPIER.JointData.spherical(fromArr(def.tow), fromArr(byFront ? trailer.frontHitch : trailer.def.hitch));
     const joint = rw.createImpulseJoint(jd, rb, trailer.rb, true);
-    if (trailer.def.fifthWheel) joint.setContactsEnabled(false);   // a semi-trailer's nose rides over the tractor's back: those two never collide
+    // a semi-trailer's nose rides over the tractor's back, and a car on the under-lift sits right against it: those
+    // pairs never collide
+    if (trailer.def.fifthWheel || byFront) joint.setContactsEnabled(false);
     self.towing = { trailer, joint };
     trailer.towedBy = self;
     trailer.driver = true;        // a hitched trailer never parks itself to sleep
@@ -632,7 +728,7 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     colliders.push(...fcs);
   }
   self.forkHeight = () => {
-    if (!self.forks) return 0;
+    if (!self.forks) return def.mower ? self.mower : 0;
     const lp = qrotInv(rb.rotation(), sub(self.forks.rb.translation(), rb.translation()));
     return lp.y - def.forks.anchor[1];
   };
@@ -644,6 +740,33 @@ export function createVehicle(phys, def, { id = 0, p = [0, 2, 0], yaw = 0, local
     if (input.lift) { F.rb.wakeUp(); rb.wakeUp(); }
   };
   phys.onTick(tickForks);
+  // --- tipping bed (produce trailer): every part with `tip: true` turns about the x axis through def.tip.pivot toward
+  // def.tip.angle (negative = nose up) while door def.tip.door is open, and back down when it shuts, at def.tip.speed
+  // rad/s. The colliders are moved a little each tick (never swapped in one go: a bed that appears tipped under a load
+  // shoves the crates through it), so the load is lifted and slides out the back. Runs on every copy, local or remote
+  // (the door state comes from the room's acts), so everyone's bed is where the model draws it.
+  self.tipAngle = 0;
+  if (def.tip && tipParts.length) {
+    const T = def.tip, [, py, pz] = T.pivot;
+    phys.onTick(dt => {
+      const want = doors.get(T.door)?.isOpen ? T.angle : 0;
+      if (self.tipAngle === want) return;
+      self.tipAngle += clamp(want - self.tipAngle, -(T.speed ?? 0.4) * dt, (T.speed ?? 0.4) * dt);
+      const a = self.tipAngle, c = Math.cos(a), s = Math.sin(a), q = eulerQ([a, 0, 0]);
+      for (const { c: col, part } of tipParts) {
+        const dy = part.p[1] - py, dz = part.p[2] - pz;
+        col.setTranslationWrtParent({ x: part.p[0], y: py + dy * c - dz * s, z: pz + dy * s + dz * c });
+        col.setRotationWrtParent(q);
+      }
+      rb.wakeUp();
+    });
+  }
+  // --- mower (tractor): a deck under the belly, 0 = raised .. 1 = down on the ground. No body of its own (it only
+  // cuts); input.lift +1 (Space) raises it, -1 (Shift) lowers it. It rides in the fork-height slot of state().x, so a
+  // remote copy draws it and look().forks reads it either way.
+  self.mower = 0;
+  self.mowerDown = () => self.mower;
+  if (def.mower) phys.onTick(dt => { if (self.local && input.lift) self.mower = clamp(self.mower - input.lift * (def.mower.speed ?? 1.4) * dt, 0, 1); });
   self.applyBump = (j, at) => { if (self.local) rb.applyImpulseAtPoint({ x: j[0], y: j[1], z: j[2] }, { x: at[0], y: at[1], z: at[2] }, true); };
   self.teleport = (p, yaw = 0) => {
     rb.setTranslation({ x: p[0], y: p[1], z: p[2] }, true);

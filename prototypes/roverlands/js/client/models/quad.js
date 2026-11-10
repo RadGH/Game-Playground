@@ -20,7 +20,7 @@ export function build(THREE, def, opts = {}) {
   k.cyl('engine', 0.1, 0.3, [0, 0.12, 0.0], { axis: 'x', seg: 10 });
   k.tube('chrome', [[0.12, 0.1, -0.12], [0.18, 0.2, -0.45], [0.2, 0.3, -0.8]], 0.03, { seg: 6 });   // exhaust
   k.cyl('steel', 0.045, 0.16, [0.2, 0.31, -0.86], { axis: 'z', seg: 8 });
-  const footY = drv.p[1] - 0.6 - 0.02;                                            // the ride pose stands 0.6 under the hips
+  const footY = drv.feet ? drv.feet[1] - 0.02 : drv.p[1] - 0.6 - 0.02;            // the footboards: where seat.feet puts the soles
   for (const sx of [1, -1]) {
     k.box(K, [0.26, 0.04, 0.46], [sx * 0.32, footY, -0.08], { bevel: 0.01 });
     for (let i = 0; i < 4; i++) k.box(T, [0.24, 0.02, 0.025], [sx * 0.32, footY + 0.03, -0.26 + i * 0.12], { bevel: 0 });

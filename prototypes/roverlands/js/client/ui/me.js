@@ -12,7 +12,9 @@ const KEY = 'roverlands.me';
 export const NAMES = ['Rusty', 'Dash', 'Gravel', 'Juniper', 'Skid', 'Marlo', 'Pebble', 'Tamsin', 'Rook', 'Bramble', 'Quill', 'Sorrel', 'Tumble', 'Wren'];
 let ready = false;
 export const lookReady = loadLookData().then(() => { ready = true; });
-export const avatarFor = look => avatarOf(look);
+/** A random human look (Roverlands has humans only, owner 2026-11-09). */
+export function humanLook() { for (let i = 0; i < 40; i++) { const l = randomLook(); if (l.race === 'human') return l; } return { race: 'human', seed: (Math.random() * 2 ** 31) >>> 0, v: 1 }; }
+export const avatarFor = look => avatarOf({ ...(look || {}), race: 'human' });     // humans only (owner 2026-11-09)
 const pcache = new Map();
 /** A head-and-shoulders picture (data: URL). Before the part lists load, or if a look cannot be drawn, a plain silhouette (never cached). */
 const BLANK = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#2a3a44"/><circle cx="5" cy="4" r="2.2" fill="#4a5e6a"/><rect x="1.8" y="7" width="6.4" height="4" rx="2" fill="#4a5e6a"/></svg>');
@@ -35,7 +37,7 @@ export function createMe() {
   if (fresh) guest = { name: NAMES[Math.floor(Math.random() * NAMES.length)], look: { race: 'human', seed: (Math.random() * 2 ** 31) >>> 0, v: 1 } };
   let acct = null;            // { data, save(data) } while signed in
   const subs = new Set();
-  if (fresh) lookReady.then(() => { if (!store.get(KEY, null)) { try { guest = { ...guest, look: randomLook() }; } catch { /* keep the plain one */ } tell(); } });
+  if (fresh) lookReady.then(() => { if (!store.get(KEY, null)) { try { guest = { ...guest, look: humanLook() }; } catch { /* keep the plain one */ } tell(); } });
   const cur = () => (acct?.data || guest);
   const tell = () => { for (const f of subs) { try { f(cur()); } catch (e) { console.error(e); } } };
   return {

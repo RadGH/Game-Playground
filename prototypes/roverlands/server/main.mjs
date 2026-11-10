@@ -11,6 +11,10 @@
 // GET /healthz ("ok"), GET /status (JSON with build), GET /rooms (the public list for "Find a game"), WebSocket at /ws.
 // POST /feedback (the ! button: Tumblefair's server/feedback.mjs), POST /tally (cookie-free counts: Tumblefair's
 // server/insights.mjs). The rooms' ratings, drives and runs go to the same insights log (tools/insights-report.mjs).
+// Profiles (Expansion 1 M2): server/profiles.mjs keeps every player's gold + what they own in <data>/profiles.json,
+// keyed by account or device (server/hub.js works out which from hello). Env ROVERLANDS_TEST_HOOKS=1 (tests only) opens
+// every place to `go` (the Moon and the station otherwise need the rocket, M11) and adds POST /internal/test/pay
+// { code, place?, at?, vehicle?, gold, why? } -> { paid: [pids] }, which pays a job step through the room's own payJob().
 // Accounts: POST /account (Knockabout's server/accounts.js — a signed-in player's name + look, <data>/profiles.json) and
 // the admin feed GET /internal/admin/feed + POST /internal/admin/action (Tumblefair's server/rgs.mjs). Env vars: RGS_API
 // (where tickets are redeemed, default https://games.radgh.com/api) and RGS_ADMIN_SECRET (switches the admin feed on).
@@ -27,8 +31,11 @@ import { createFeedback } from '../../tumblefair/server/feedback.mjs';
 import { createInsights } from '../../tumblefair/server/insights.mjs';
 import { createRedeemer, createAdminFeed } from '../../tumblefair/server/rgs.mjs';
 import { createAccounts } from '../../knockabout/server/accounts.js';
+import { createProfileStore } from './profiles.mjs';
 import { MAX_FRAME, STATE_HZ } from '../js/net/protocol.js';
 import { vehicleTable } from '../js/net/room-core.js';
+import { surveyGrid } from '../js/game/survey.js';
+import { moonJobSites } from '../js/game/jobs/moon.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url)), GAME = resolve(HERE, '..'), PLAY = resolve(GAME, '..', '..');
 const arg = (name, def) => { const i = process.argv.indexOf('--' + name); return i > 0 ? process.argv[i + 1] : def; };
@@ -43,10 +50,14 @@ const feedback = createFeedback(dataDir, { build });
 const saveJson = (file, obj) => { const tmp = file + '.tmp'; writeFileSync(tmp, JSON.stringify(obj)); renameSync(tmp, file); };
 const readJson = (file, def) => { try { return JSON.parse(readFileSync(file, 'utf8')); } catch { return def; } };
 
-// ---- accounts (optional sign-in): a player's name + look on the server
+// ---- accounts (optional sign-in): a player's name + look on the server; and every player's saved profile (gold, what
+// they own — Expansion 1 M2), keyed by account or device, in the same file. server/profiles.mjs is the one writer.
 const profileFile = join(dataDir, 'profiles.json');
-const accounts = createAccounts({ redeem: createRedeemer({ game: 'roverlands', log }), initial: readJson(profileFile, {}), log, persist: all => saveJson(profileFile, all) });
-setInterval(() => accounts.flush(), 5000).unref();
+const profileRows = readJson(profileFile, {});
+const profiles = createProfileStore({ initial: profileRows, log, persist: all => saveJson(profileFile, all) });
+const redeem = createRedeemer({ game: 'roverlands', log });
+const accounts = createAccounts({ redeem, initial: profileRows, log, persist: all => profiles.accountsPersist(all) });
+setInterval(() => { accounts.flush(); profiles.flush(); }, 2000).unref();
 
 // ---- best Flag Run times, per world seed + flag site, kept across rooms and restarts
 const bestsFile = join(dataDir, 'bests.json');
@@ -57,14 +68,17 @@ setInterval(() => { const s = JSON.stringify(bests); if (s !== bestsSaved) { try
 // ---- the game's data: vehicles (seats per kind) and the world's sites (built once per seed, by the same pure worldgen
 // the browsers run, so the server's home ring and flag sites are exactly where everyone draws them)
 let vehicles = readJson(process.env.ROVERLANDS_TEST_VEHICLES || join(GAME, 'data/vehicles.json'), []);
+let shop = readJson(join(GAME, 'data/shop.json'), {});
+let jobs = readJson(join(GAME, 'data/jobs.json'), {}), achievements = readJson(join(GAME, 'data/achievements.json'), {});
 const VEHICLE_NAMES = () => Object.fromEntries(Object.entries(vehicleTable(vehicles)).map(([id, v]) => [id, v.name]));
 const sitesCache = new Map();
 let worldgen = null;
 // tests: ROVERLANDS_TEST_SITES=<file.json> gives every room those sites instead of building the world
 const TEST_SITES = process.env.ROVERLANDS_TEST_SITES ? readJson(process.env.ROVERLANDS_TEST_SITES, null) : null;
-async function sitesFor(seed) {
+async function sitesFor(seed, map = 'classic') {
   if (TEST_SITES) return TEST_SITES;
-  if (sitesCache.has(seed)) return sitesCache.get(seed);
+  const key = seed + ':' + map;
+  if (sitesCache.has(key)) return sitesCache.get(key);
   if (!worldgen) {
     // not cached while it fails: the world module may still be being written (a later room tries again)
     const f = join(GAME, 'js/world/worldgen.js');
@@ -74,16 +88,33 @@ async function sitesFor(seed) {
   let sites = {};
   if (typeof worldgen.generateWorld === 'function') {
     const t0 = Date.now();
-    try { const w = worldgen.generateWorld({ seed }); sites = { home: w.sites?.home, flags: w.sites?.flags || [], pads: w.sites?.pads || [] }; }
+    try { const w = worldgen.generateWorld({ seed, map }); sites = { home: w.sites?.home, flags: w.sites?.flags || [], pads: w.sites?.pads || [], cities: (w.sites?.cities || []).map(c => ({ id: c.id, x: c.x, z: c.z, hx: c.hx, hz: c.hz })),
+      // M6: the farm plots + yard (the farming referee's fields) and the places produce sells at
+      farms: w.sites?.farms ? { plots: w.sites.farms.plots, yard: w.sites.farms.yard, barn: w.sites.farms.barn } : null,
+      // M11: the Skyreach launch pad (the rocket stands only there; orbit is measured from its height)
+      launch: w.sites?.launch ? { x: w.sites.launch.x, z: w.sites.launch.z, y: w.sites.launch.y, pad: w.sites.launch.pad } : null,
+      // M8: the Rustwild (zone outline, the camps, the gate garage, the coarse height grid the raiders drive on)
+      rustwild: w.sites?.rustwild ? { name: w.sites.rustwild.name, poly: w.sites.rustwild.poly, gate: w.sites.rustwild.gate, garage: w.sites.rustwild.garage || null,
+        grid: w.sites.rustwild.grid || null, camps: (w.sites.rustwild.camps || []).map(c => ({ id: c.id, name: c.name, x: c.x, z: c.z, y: c.y, r: c.r, cover: c.cover || [] })) } : null,
+      // M9's skydiving referee reads these too (it had nothing to referee online without them)
+      airport: w.sites?.airport ? { y: w.sites.airport.y, apron: w.sites.airport.apron, jumpPoint: w.sites.airport.jumpPoint } : null,
+      skyTargets: w.sites?.skyTargets || null, plateau: w.sites?.plateau || null,
+      // M10: the survey grid (8 m: heights, road + water distance, ground, the Survey Office) the kit referee judges spots on
+      surveyGrid: w.map === 'county' ? surveyGrid(w) : null,
+      places: (w.sites?.places || []).map(p => ({ id: p.id, kind: p.kind, city: p.city, name: p.name, x: p.x, z: p.z, ...(p.yard ? { yard: p.yard } : {}) })) }; }
     catch (e) { log('worldgen.error', { seed, msg: String(e?.message || e).slice(0, 300) }); }
-    log('world.sites', { seed, ms: Date.now() - t0, flags: sites.flags?.length || 0, pads: sites.pads?.length || 0 });
+    // M12: the Moon's job sites (samples, ramps, yards, survey spots) for the Moon Work referee — the same seed's Moon
+    if (map === 'county' && sites.home) { try { sites.moon = moonJobSites(worldgen.generateWorld({ seed, map: 'moon' })); } catch (e) { log('worldgen.error', { seed, map: 'moon', msg: String(e?.message || e).slice(0, 300) }); } }
+    log('world.sites', { seed, map, ms: Date.now() - t0, flags: sites.flags?.length || 0, pads: sites.pads?.length || 0 });
   }
-  if (sites.home) sitesCache.set(seed, sites);
+  if (sites.home) sitesCache.set(key, sites);
   if (sitesCache.size > 6) sitesCache.delete(sitesCache.keys().next().value);
   return sites;
 }
 
-const hub = createHub({ build, log, report: (kind, d) => insights.report(kind, d), randomToken: () => randomBytes(18).toString('base64url'), sitesFor, vehicles: () => vehicles, bests });
+const TEST_HOOKS = process.env.ROVERLANDS_TEST_HOOKS === '1';
+const hub = createHub({ build, log, report: (kind, d) => insights.report(kind, d), randomToken: () => randomBytes(18).toString('base64url'), sitesFor, vehicles: () => vehicles, bests,
+  profiles, redeem, shop: () => shop, jobs: () => jobs, achievements: () => achievements, openPlaces: TEST_HOOKS });
 
 // The visitor's address: behind a proxy on this machine (Caddy on the droplet sends X-Forwarded-For) every peer is
 // loopback, so the proxy's header is believed — but only from loopback.
@@ -106,6 +137,13 @@ function onRequest(req, res) {
     return json(res, 200, { server: 'roverlands', build, uptime: Math.round(up), cpuPct: Math.round((c.user + c.system) / 1e4 / Math.max(1, up) * 10) / 10, rssMB: Math.round(process.memoryUsage().rss / 1048576), ...hub.status() });
   }
   if (path === '/rooms' && req.method === 'GET') return json(res, 200, { list: hub.publicList() });
+  if (TEST_HOOKS && path === '/internal/test/pay' && req.method === 'POST') {
+    let body = ''; req.on('data', c => { body += c; }); req.on('end', () => {
+      try { const b = JSON.parse(body), R = hub.rooms.get(b.code); if (!R) return json(res, 404, { paid: [] }); json(res, 200, { paid: R.core.payJob({ place: b.place, at: b.at || null, vehicle: b.vehicle ?? null, gold: b.gold, why: b.why || 'test' }) }); }
+      catch (e) { json(res, 400, { error: String(e?.message || e) }); }
+    });
+    return;
+  }
   if (path.startsWith('/internal/') && admin.handle(req, res, path)) return;
   if (path === '/account' && req.method === 'POST') { accounts.http(req, res); return; }
   if (path === '/feedback' && req.method === 'POST') { feedback.handle(req, ipOf(req), (code, body) => json(res, code, body)); return; }
@@ -152,6 +190,7 @@ setInterval(() => hub.step(), 1000 / STATE_HZ);
 // the default world's sites, ready before the first room asks (a world takes a second or so to build)
 setTimeout(() => sitesFor(7).catch(() => {}), 200);
 // vehicles.json is the lead's file: pick up a change without a restart
-setInterval(() => { const v = readJson(process.env.ROVERLANDS_TEST_VEHICLES || join(GAME, 'data/vehicles.json'), null); if (v) vehicles = v; }, 30000).unref();
-const bye = () => { try { accounts.flush(); } catch { /* disk */ } try { insights.flush(); } catch { /* disk */ } try { saveJson(bestsFile, bests); } catch { /* disk */ } process.exit(0); };
+setInterval(() => { const v = readJson(process.env.ROVERLANDS_TEST_VEHICLES || join(GAME, 'data/vehicles.json'), null); if (v) vehicles = v; const s = readJson(join(GAME, 'data/shop.json'), null); if (s) shop = s;
+  const j = readJson(join(GAME, 'data/jobs.json'), null); if (j) jobs = j; const a = readJson(join(GAME, 'data/achievements.json'), null); if (a) achievements = a; }, 30000).unref();
+const bye = () => { try { accounts.flush(); profiles.flush(); } catch { /* disk */ } try { insights.flush(); } catch { /* disk */ } try { saveJson(bestsFile, bests); } catch { /* disk */ } process.exit(0); };
 process.on('SIGTERM', bye); process.on('SIGINT', bye);

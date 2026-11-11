@@ -5,6 +5,8 @@ import { dropsFor, chestDrops } from '../rules/loot.js';
 import { itemName } from '../rules/items.js';
 import { isPotion, toBelt, beltSlots, potionName } from '../rules/potions.js';
 import { findSpot } from '../rules/bag.js';
+import { currencyDrop, shardName } from '../rules/crafting.js';
+import { addCurrency } from './craft.js';
 
 export const PICKUP_RANGE = 3.2, GOLD_RANGE = 1.6, GROUND_LIFE = 300;
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
@@ -15,8 +17,8 @@ export function dropAt(w, owner, x, z, thing) {
   const g = { gid: 'g' + (w.nextId++), owner, x: x + Math.cos(a) * r, z: z + Math.sin(a) * r, born: w.time, ...thing };
   w.ground.set(g.gid, g);
   const D = w.content.items, P = w.content.potions;
-  const label = g.gold ? `${g.gold} gold` : g.potion ? potionName(P, g.potion) : itemName(D, g.item);
-  w.events.push({ k: 'drop', to: owner, gid: g.gid, x: +g.x.toFixed(2), z: +g.z.toFixed(2), what: g.gold ? 'gold' : g.potion ? 'potion' : 'item', r: g.item ? (g.item.ided === false ? 'unid' : g.item.rarity) : null, b: g.item?.base || g.potion?.kind || null, name: label, real: g.item?.rarity || null });
+  const label = g.gold ? `${g.gold} gold` : g.potion ? potionName(P, g.potion) : g.currency ? shardName(w.content.currency, g.currency) : itemName(D, g.item);
+  w.events.push({ k: 'drop', to: owner, gid: g.gid, x: +g.x.toFixed(2), z: +g.z.toFixed(2), what: g.gold ? 'gold' : g.potion ? 'potion' : g.currency ? 'shard' : 'item', r: g.item ? (g.item.ided === false ? 'unid' : g.item.rarity) : null, b: g.item?.base || g.potion?.kind || null, name: label, real: g.item?.rarity || null });
   return g;
 }
 /** A monster died: every hero near it rolls their own drops. */
@@ -24,10 +26,11 @@ export function lootFoe(w, f, heroes) {
   const D = w.content.items; if (!D?.bases) return;
   const kind = f.def.boss ? (f.def.raw?.actBoss ? 'actBoss' : 'boss') : f.rank === 'normal' ? 'normal' : f.rank;
   for (const p of heroes) {
-    const r = dropsFor(D, w.content.potions, w.rng, { level: f.level, kind, players: heroes.length, mf: p.st.magicFind || 0, gf: p.st.goldFind || 0, ch: p.char });
+    const r = dropsFor(D, w.content.potions, w.rng, { level: f.level, kind, players: heroes.length, mf: p.st.magicFind || 0, gf: p.st.goldFind || 0, ch: p.char, minFirst: f.rank === 'rare' ? 'rare' : f.rank === 'champion' ? (w.content.champions?.championStats?.minDropRarity || 'magic') : null });
     if (r.gold) dropAt(w, p.id, f.x, f.z, { gold: r.gold });
     for (const it of r.items) dropAt(w, p.id, f.x, f.z, { item: it });
     for (const pt of r.potions) dropAt(w, p.id, f.x, f.z, { potion: pt });
+    if (w.content.currency) { const c = currencyDrop(w.content.currency, w.rng, f.level, kind); if (c) dropAt(w, p.id, f.x, f.z, { currency: c }); }
   }
 }
 export function stepLoot(w) {
@@ -50,6 +53,9 @@ export function pickup(w, p, gid) {
     let bag = ch.bag;
     if (r.rest) { const pos = findSpot(D, bag, r.rest); if (!pos) return { err: 'Your bag is full.' }; bag = [...bag, { ...r.rest, pos }]; }
     p.char = { ...ch, belt: r.belt, bag };
+  } else if (g.currency) {
+    const bag = addCurrency(w, ch.bag || [], g.currency); if (!bag) return { err: 'Your bag is full.' };
+    p.char = { ...ch, bag };
   } else {
     const pos = findSpot(D, ch.bag || [], g.item); if (!pos) return { err: 'Your bag is full.' };
     p.char = { ...ch, bag: [...(ch.bag || []), { ...g.item, pos }] };
@@ -73,6 +79,7 @@ export function openChest(w, p, id) {
   if (r.gold) dropAt(w, p.id, c.x, c.z, { gold: r.gold });
   for (const it of r.items) dropAt(w, p.id, c.x, c.z, { item: it });
   for (const pt of r.potions) dropAt(w, p.id, c.x, c.z, { potion: pt });
+  if (w.content.currency) { const cur = currencyDrop(w.content.currency, w.rng, c.level, c.tier === 'lockedChest' ? 'lockedChest' : 'chest'); if (cur) dropAt(w, p.id, c.x, c.z, { currency: cur }); }
   w.events.push({ k: 'chest', to: p.id, id });
   return { ok: true };
 }

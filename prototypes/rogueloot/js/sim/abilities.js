@@ -9,6 +9,7 @@ import { hurt, aggro } from './fight.js';
 import { addFx, dmgFactor } from './status.js';
 import { resolve } from './move.js';
 import { makeFoe } from './actors.js';
+import { bossMechanic } from './bosses.js';
 
 export const KIND_MULT = { melee: 1.5, melee_aoe: 1.3, melee_cc: 1.2, melee_debuff: 1.2, debuff_melee: 1.2, bolt: 1.5, projectile: 1.4, ground: 2.0, cone: 1.8, line: 1.9,
   channel: 0.45, charge: 1.4, gap_closer: 1.3, burrow_strike: 1.6, lurk: 1.8, debuff: 0.6, pull: 0.5 };
@@ -16,7 +17,7 @@ const SKIP = new Set(['passive', 'flee_call', 'taunt']);
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
 export function readyAbility(w, f, filter = () => true) {
-  for (const ab of f.def.abilities) {
+  for (const ab of (f.abilities || f.def.abilities)) {
     if (SKIP.has(ab.kind) || !filter(ab)) continue;
     if ((f.abilityAt[ab.id] || 0) > w.time) continue;
     if (f.silencedUntil > w.time) return null;
@@ -66,6 +67,7 @@ function finish(w, f, t) {
   f.nextSwing = w.time + 1 / (f.attackSpeed || 0.5);
   const fx = parseEffect(ab.effect);
   const k = ab.kind, tele = ab.telegraph || { shape: 'none' };
+  if (f.def.boss && bossMechanic(w, f, t, ab, makeFoe)) return;
   w.events.push({ k: 'fability', s: f.id, sk: ab.name || ab.id });
   if (k === 'heal') { const who = w.foes.get(c.target) || f; const n = Math.round(who.maxHp * ((fx.pct || 25) / 100)); who.hp = Math.min(who.maxHp, who.hp + n); w.events.push({ k: 'heal', s: f.id, t: who.id, n }); return; }
   if (k === 'buff' || k === 'pack_buff') { for (const o of w.foes.values()) if (!o.dead && (o === f || (f.pack && o.pack === f.pack)) && dist(o, f) < 14) addFx(w, o, { id: ab.id, kind: 'dmgUp', pct: fx.pct || 20, secs: fx.secs || 10, src: f.id }); return; }
@@ -87,7 +89,7 @@ const rider = (ab, fx) => (fx.slow || fx.stun || fx.dot || fx.silence) ? { id: a
 /** Land a telegraphed shape: every hero inside takes the hit. */
 function landShape(w, f, ab, aim, mult, quiet = false) {
   const tele = ab.telegraph, size = +tele.size || 3, fx = parseEffect(ab.effect);
-  for (const p of w.players.values()) {
+  for (const p of [...w.players.values(), ...(w.allies?.values() || [])]) {
     if (p.dead || !inside(tele.shape, f, aim, tele, size, p)) continue;
     strike(w, f, p, ab, mult, fx, quiet);
   }

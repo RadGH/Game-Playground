@@ -1,6 +1,21 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-brightwater",
+      "date": "2026-11-11",
+      "title": "Brightwater, the first zones, champions and crafting",
+      "items": [
+        "You now start in Brightwater, a harbour town. Visit the trader, potion seller, gambler, crafter, stash, trainer and the mercenary hall.",
+        "The first real zones are open: Saltgrass Shore (levels 1-3) through the town portals, and Windmill Fields (levels 3-5) beyond it. Walk onto a waypoint to remember it; press M for the map.",
+        "Press T anywhere for your own recall portal to town. Walk back into it to return to the same spot.",
+        "Champions: tougher monsters with a coloured ring and special powers (thorns, burning trails, wards, summoners and more). Each one tells you what it is in its name. Named rares turn up some days and not others.",
+        "Crafting shards drop from monsters. Select one in your bag and tap an item to reshape it, or break unwanted items into shards. The crafter can upgrade shards.",
+        "Hire a mercenary (shield-bearer, archer or hedge-mage) who levels with you and wears gear you give them.",
+        "Trade with friends anywhere: tap their name on the left.",
+        "Bosses have phases and an enrage timer; the dungeons that hold them open soon."
+      ]
+    },
+    {
       "id": "2026-11-10-paths-loot-world",
       "date": "2026-11-10",
       "title": "Paths, loot and a real meadow",

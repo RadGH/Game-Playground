@@ -23,10 +23,15 @@ const STAT_TEXT = {
   cooldownReduction: v => `Cooldowns ${v}% shorter`, potionPower: v => `Potions ${v}% stronger`, threat: v => `+${v}% threat`, staggerChance: v => `+${v}% chance to stagger`, lightRadius: v => `+${v} light`, potionSlots: v => `${v} potion slots`,
 };
 export const rarityClass = it => 'r-' + (it.ided === false ? 'unid' : it.rarity);
-export const glyph = (items, it) => it.base === 'potion' ? (it.kind === 'mana' ? '💧' : '❤') : GLYPH[items.bases[it.base]?.kind] || GLYPH[items.bases[it.base]?.slot] || '◆';
+export const glyph = (items, it) => it.base === 'shard' ? '◈' : it.base === 'dust' ? '✧' : it.base === 'potion' ? (it.kind === 'mana' ? '💧' : '❤') : GLYPH[items.bases[it.base]?.kind] || GLYPH[items.bases[it.base]?.slot] || '◆';
 
 /** Tooltip HTML for an item, with requirement colours for `ch` and a comparison against `worn` (the item in that slot). */
-export function itemTip(items, it, ch, worn = null, potions = null) {
+export function itemTip(items, it, ch, worn = null, potions = null, currency = null) {
+  if (it.base === 'shard' || it.base === 'dust') {
+    const C = currency || {}; const S = C.shards?.find(x => x.id === it.shard), G = C.grades?.[(it.grade || 1) - 1];
+    if (it.base === 'dust') return `<div class="tip r-normal"><h4>Shard Dust ×${it.n}</h4><div>The crafter in town turns ${C.convert?.dustToGlimmer || 20} dust into a Glimmer Shard.</div></div>`;
+    return `<div class="tip r-magic"><h4>${esc(G?.name || '')} ${esc(S?.name || it.shard)} ×${it.n}</h4><div class="big">${esc(S?.does || '')}</div><div class="sub">${esc(G?.name || '')} shards roll as if the item were at most item level ${G?.rollCap ?? '?'}.</div><div class="req">Select it, then tap an item. Or drag it onto the item.</div></div>`;
+  }
   if (it.base === 'potion') { const z = potions?.sizes?.[it.size] || {}; return `<div class="tip r-normal"><h4>${esc(z.name || '')} ${it.kind === 'mana' ? 'Mana' : 'Healing'} Potion</h4><div class="sub">${it.n} in this stack</div><div class="big">Restores ${z[it.kind] || '?'} ${it.kind === 'mana' ? 'mana' : 'health'} over ${z.secs || '?'} seconds</div><div>Drinking another adds a second refill on top.</div><div class="req">${it.kind === 'mana' ? 'E' : 'Q'} drinks one from your belt</div></div>`; }
   const b = items.bases[it.base] || {}, req = itemReq(items, it), st = ch ? sheet(ch, items) : null;
   const lines = [];
@@ -60,7 +65,8 @@ function compare(items, it, worn) {
 }
 const delta = (label, d, dp = 0) => `<div class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲ +' : '▼ '}${d.toFixed(dp)} ${esc(label)}</div>`;
 
-export function createSheetUI({ items, send, getChar, nope, potions = null, onSkills = () => {} }) {
+export function createSheetUI({ items, send, getChar, nope, potions = null, currency = null, onSkills = () => {} }) {
+  let pendingShard = null;
   const root = document.createElement('div'); root.className = 'sheet-ui'; root.hidden = true;
   document.body.append(root);
   let sel = null, tipEl = null;
@@ -81,7 +87,7 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, onSk
             <div>Critical <b>${st.crit}%</b></div><div>Dodge <b>${st.dodge}%</b></div>${st.block ? `<div>Block <b>${st.block.chance}%</b></div>` : ''}
             <div class="res">Resist: ${['fire', 'frost', 'storm', 'poison', 'shadow'].map(t => `<span class="ty-${t}">${t[0].toUpperCase() + t.slice(1)} ${st.resists[t]}%</span>`).join(' ')}</div></div></section>
       </div>
-      <section class="bag" style="--w:${BAG_W};--h:${BAG_H}">${(ch.bag || []).map(it => { const g = items.bases[it.base]?.grid || { w: 1, h: 1 }; return `<button class="item ${rarityClass(it)}${sel === it.uid ? ' sel' : ''}" data-uid="${it.uid}" style="grid-column:${it.pos.x + 1}/span ${g.w};grid-row:${it.pos.y + 1}/span ${g.h}">${glyph(items, it)}</button>`; }).join('')}${cells()}</section>
+      <section class="bag" style="--w:${BAG_W};--h:${BAG_H}">${(ch.bag || []).map(it => { const g = items.bases[it.base]?.grid || { w: 1, h: 1 }; return `<button class="item ${rarityClass(it)}${it.base === 'shard' ? ' g' + it.grade : ''}${sel === it.uid ? ' sel' : ''}" data-uid="${it.uid}" style="grid-column:${it.pos.x + 1}/span ${g.w};grid-row:${it.pos.y + 1}/span ${g.h}">${glyph(items, it)}${it.n > 1 ? `<b class="cnt">${it.n}</b>` : ''}</button>`; }).join('')}${cells()}</section>
       <div class="belt-row"><span>Belt</span>${beltRow(ch, st)}</div>
       <div class="gold">🪙 ${ch.gold || 0} gold</div>
       <div class="actions"></div>
@@ -92,7 +98,9 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, onSk
     root.querySelector('[data-swap]').onclick = () => send({ do: 'swap' });
     root.querySelectorAll('.item').forEach(b => {
       const it = ch.bag.find(i => i.uid === b.dataset.uid);
-      b.onclick = e => { e.stopPropagation(); if (dragged) return; sel = it.uid; showActions(ch, it); showTip(b, it, ch); root.querySelectorAll('.item.sel').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); };
+      b.onclick = e => { e.stopPropagation(); if (dragged) return;
+        if (pendingShard && it.base !== 'shard' && it.base !== 'dust' && it.base !== 'potion') { send({ do: 'craft', shard: pendingShard, item: it.uid }); pendingShard = null; root.classList.remove('shaping'); return; }
+        sel = it.uid; showActions(ch, it); showTip(b, it, ch); root.querySelectorAll('.item.sel').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); };
       b.oncontextmenu = e => { e.preventDefault(); if (it.base === 'potion') send({ do: 'belt', uid: it.uid }); else if (it.ided === false) send({ do: 'identify', uid: it.uid }); else send({ do: 'equip', uid: it.uid }); };
       b.addEventListener('pointerdown', e => startDrag(e, b, it));
       b.ondblclick = () => send({ do: 'equip', uid: it.uid });
@@ -101,7 +109,7 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, onSk
     });
     root.querySelectorAll('.eq').forEach(b => {
       const it = ch.equip?.[b.dataset.slot]; if (!it) return;
-      b.onclick = () => { sel = null; showTip(b, it, ch, true); root.querySelector('.actions').innerHTML = `<button data-off>Take off</button>`; root.querySelector('[data-off]').onclick = () => send({ do: 'unequip', slot: b.dataset.slot }); };
+      b.onclick = () => { if (pendingShard) { send({ do: 'craft', shard: pendingShard, item: it.uid }); pendingShard = null; root.classList.remove('shaping'); return; } sel = null; showTip(b, it, ch, true); root.querySelector('.actions').innerHTML = `<button data-off>Take off</button>`; root.querySelector('[data-off]').onclick = () => send({ do: 'unequip', slot: b.dataset.slot }); };
       b.onpointerenter = e => { if (e.pointerType === 'mouse') showTip(b, it, ch, true); };
       b.onpointerleave = e => { if (e.pointerType === 'mouse') hideTip(); };
     });
@@ -136,6 +144,9 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, onSk
   function target(e) {
     drag.ghost && (drag.ghost.style.display = 'none'); const under = document.elementFromPoint(e.clientX, e.clientY); drag.ghost && (drag.ghost.style.display = '');
     const eq = under?.closest?.('.eq'), cell = under?.closest?.('.cell, .bag .item'), belt = under?.closest?.('.belt-row');
+    const onItem = under?.closest?.('.bag .item');
+    if (drag.it.base === 'shard' && onItem && onItem.dataset.uid !== drag.it.uid) return { el: onItem, act: { do: 'craft', shard: drag.it.uid, item: onItem.dataset.uid } };
+    if (drag.it.base === 'shard' && eq && getChar()?.equip?.[eq.dataset.slot]) return { el: eq, act: { do: 'craft', shard: drag.it.uid, item: getChar().equip[eq.dataset.slot].uid } };
     if (eq) return { el: eq, act: { do: 'equip', uid: drag.it.uid, slot: eq.dataset.slot } };
     if (belt && drag.it.base === 'potion') return { el: belt, act: { do: 'belt', uid: drag.it.uid } };
     if (cell?.classList.contains('cell')) return { el: cell, act: { do: 'move', uid: drag.it.uid, x: +cell.dataset.x - drag.offX, y: +cell.dataset.y - drag.offY } };
@@ -149,8 +160,11 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, onSk
   }
   function showActions(ch, it) {
     const a = root.querySelector('.actions');
+    if (it.base === 'shard') { a.innerHTML = `<button class="primary" data-use>Use on an item…</button>`; a.querySelector('[data-use]').onclick = () => { pendingShard = it.uid; root.classList.add('shaping'); a.innerHTML = '<em>Now tap the item to shape (or the shard again to stop).</em>'; }; return; }
+    if (it.base === 'dust') { a.innerHTML = '<em>The crafter in town turns dust into Glimmer Shards.</em>'; return; }
     if (it.base === 'potion') { a.innerHTML = `<button class="primary" data-blt>To belt</button><button data-drink>Drink</button>`; a.querySelector('[data-blt]').onclick = () => send({ do: 'belt', uid: it.uid }); a.querySelector('[data-drink]').onclick = () => send({ do: 'drink', kind: it.kind }); return; }
-    a.innerHTML = it.ided === false ? `<button class="primary" data-id>Identify</button>` : `<button class="primary" data-eq>Equip</button>`;
+    a.innerHTML = (it.ided === false ? `<button class="primary" data-id>Identify</button>` : `<button class="primary" data-eq>Equip</button>`) + `<button data-salv>Break for shards</button>`;
+    a.querySelector('[data-salv]').onclick = () => { if (confirm('Break this item into dust and shards? It is gone for good.')) send({ do: 'salvage', uid: it.uid }); };
     a.querySelector('[data-id]')?.addEventListener('click', () => send({ do: 'identify', uid: it.uid }));
     a.querySelector('[data-eq]')?.addEventListener('click', () => send({ do: 'equip', uid: it.uid }));
   }
@@ -158,7 +172,7 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, onSk
     hideTip();
     const b = items.bases[it.base], slot = b?.slot === 'ring' ? 'ring1' : b?.slot;
     tipEl = document.createElement('div'); tipEl.className = 'tip-float';
-    tipEl.innerHTML = itemTip(items, it, ch, isWorn ? null : ch.equip?.[slot], potions);
+    tipEl.innerHTML = itemTip(items, it, ch, isWorn ? null : ch.equip?.[slot], potions, currency);
     document.body.append(tipEl);
     const r = anchor.getBoundingClientRect(), tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
     let x = r.right + 8, y = r.top; if (x + tw > innerWidth - 8) x = Math.max(8, r.left - tw - 8); if (y + th > innerHeight - 8) y = Math.max(8, innerHeight - th - 8);

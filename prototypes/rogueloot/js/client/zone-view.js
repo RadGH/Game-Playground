@@ -46,6 +46,8 @@ export function buildZoneView(view, area, { quality = 'high' } = {}) {
       }
     }
   }
+  // underground: dark sky, near fog, dim daylight, the torches carry the scene
+  const under = ['cave', 'crypt', 'catacomb', 'mine', 'cellar'].includes(area.theme);
   // props, instanced per kind x part
   const byKind = {}; for (const p of area.props) (byKind[p.k] ||= []).push(p);
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), v = new THREE.Vector3(), sc = new THREE.Vector3();
@@ -58,10 +60,13 @@ export function buildZoneView(view, area, { quality = 'high' } = {}) {
     }
   }
   // a few real lights (every light costs every pixel on a phone): the ones nearest the start
-  const lit = area.props.filter(p => LIGHTS[p.k]).sort((a, b) => Math.hypot(a.x - area.spawn.x, a.z - area.spawn.z) - Math.hypot(b.x - area.spawn.x, b.z - area.spawn.z)).slice(0, quality === 'low' ? 2 : 6);
+  const lit = area.props.filter(p => LIGHTS[p.k]).sort((a, b) => Math.hypot(a.x - area.spawn.x, a.z - area.spawn.z) - Math.hypot(b.x - area.spawn.x, b.z - area.spawn.z)).slice(0, quality === 'low' ? 2 : under ? 10 : 6);
   for (const p of lit) { const L = LIGHTS[p.k], l = new THREE.PointLight(L.color, L.i, L.d, 1.6); l.position.set(p.x, heightAt(zone, p.x, p.z) + L.y * (p.s || 1), p.z); g.add(l); }
   // the sky + fog by theme
-  const sky = { shore: '#a8dcef', meadow: '#9fd2e8', forest: '#8ec8c0', marsh: '#a8b8a8', highland: '#b8d0e8', ruins: '#c8c0b0', grave: '#8a90a8', cave: '#202028' }[area.theme] || '#9fd2e8';
+  if (view.sun) view.sun.intensity = under ? 0.35 : 2.1;
+  if (view.hemi) { view.hemi.intensity = under ? 0.5 : 1.25; view.hemi.color.set(under ? '#9aa8c8' : '#fff6dc'); }
+  view.dark = under;
+  const sky = { shore: '#a8dcef', meadow: '#9fd2e8', forest: '#8ec8c0', marsh: '#a8b8a8', highland: '#b8d0e8', ruins: '#c8c0b0', grave: '#8a90a8', cave: '#121218', crypt: '#141018', catacomb: '#141018', mine: '#18140f', cellar: '#16120e' }[area.theme] || '#9fd2e8';
   view.scene.background = new THREE.Color(sky); view.scene.fog.color.set(sky);
   view.scene.add(g);
   view.groundY = (x, z) => heightAt(zone, x, z);

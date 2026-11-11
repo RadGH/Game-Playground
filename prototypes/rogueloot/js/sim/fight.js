@@ -6,6 +6,8 @@ import { partyShares } from '../rules/progression.js';
 import { has } from './status.js';
 import { applyRider } from './abilities.js';
 import { lootFoe } from './loot.js';
+import { wireChampions, modsHitTaken, modsDeath, soakWard } from './champions.js';
+import { makeFoe } from './actors.js';
 import { rankOf, castSkill, stepSkillCast, wireSkills, fxPct, markOf, armourAfter, gain } from './skills.js';
 
 export const KEEP_CORPSE = 10;           // seconds a dead monster lies there
@@ -15,7 +17,7 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const gap = (a, b) => dist(a, b) - (a.r || 0) - (b.r || 0);
 const face = (a, b) => { a.yaw = Math.atan2(b.x - a.x, b.z - a.z); };
 
-export const actorById = (w, id) => w.players.get(id) || w.foes.get(id) || null;
+export const actorById = (w, id) => w.players.get(id) || w.foes.get(id) || w.allies?.get(id) || null;
 const alive = a => a && !a.dead;
 /** Which skills a hero has: everyone's, their Path's and (M20+) their spec's. */
 export function knows(p, skill) {
@@ -112,6 +114,11 @@ export function hurt(w, src, t, r, type, threatMult = 1) {
   if (!r.amount) { if (t.team === 'foe') aggro(w, t, src, 1); return; }
   // a shield soaks first
   for (const f of t.fx || []) if (f.kind === 'shield' && f.left > 0 && r.amount > 0) { const k = Math.min(f.left, r.amount); f.left -= k; r.amount -= k; if (f.left <= 0) f.until = 0; }
+  if (t.team === 'foe') {
+    if (t.physTaken && type === 'physical') r.amount = Math.round(r.amount * t.physTaken);
+    modsHitTaken(w, t, src, r);                       // thorns etc. answer the blow as dealt, before a ward soaks it
+    r.amount = soakWard(w, t, r.amount);
+  }
   if (t.team === 'hero' && t.char?.path === 'fighter') gain(t, 'rage', (w.content.resources?.rage?.perHitTaken ?? 3) * (1 + (t.st.rageGen || 0) / 100), w.content.resources);
   t.hp -= r.amount;
   if (t.team === 'foe') aggro(w, t, src, r.amount * THREAT.damage * threatMult);
@@ -133,10 +140,17 @@ function die(w, t, killer) {
   if (t.team === 'foe') {
     // experience to every living hero nearby, split by level (ruling 12)
     const near = [...w.players.values()].filter(p => !p.dead && dist(p, t) < 60);
-    const shares = partyShares(t.level, near.map(p => p.level), t.rank === 'normal' ? (t.def.boss ? 'boss' : 'normal') : t.rank, t.def.xp || 1);
+    modsDeath(w, t);
+    const kind = t.def.boss ? 'boss' : t.xpMult ? 'normal' : t.rank === 'normal' ? 'normal' : t.rank;
+    const shares = partyShares(t.level, near.map(p => p.level), kind, (t.def.xp || 1) * (t.xpMult || 1));
     near.forEach((p, i) => { if (shares[i] > 0) giveXp(w, p, shares[i]); });
     lootFoe(w, t, near);
     for (const p of near) if (p.st.manaOnKill) p.mana = Math.min(p.maxMana, p.mana + p.st.manaOnKill);
+  } else if (t.kind === 'ally') {
+    // a companion falls: mercenaries wait in town to be revived for gold; pets come back when called again
+    for (const f of w.foes.values()) { f.threat.delete(t.id); if (f.target === t.id) f.target = null; }
+    const owner = w.players.get(t.owner);
+    if (owner && t.akind === 'merc' && owner.char.merc) { owner.char = { ...owner.char, merc: { ...owner.char.merc, dead: true } }; w.charDirty.add(owner.id); }
   } else {
     t.autoOn = false; t.target = null; t.queue.length = 0;
     // soft death (ruling 7): every worn item loses a tenth of its durability; nothing drops
@@ -223,3 +237,4 @@ export function startRevive(w, p, id) {
 }
 
 wireSkills({ hurt, weaponHit: (w, p, t, mult, o) => weaponHit(w, p, t, mult, { threat: o?.threat }) });
+wireChampions({ hurt, makeFoe });

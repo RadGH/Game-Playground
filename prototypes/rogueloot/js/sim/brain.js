@@ -17,17 +17,22 @@ import { hurt } from './fight.js';
 import { flowTo, downhill, clearLine } from './paths.js';
 import { speedFactor, dmgFactor, stepFx, has, addFx } from './status.js';
 import { readyAbility, startAbility, stepAbility } from './abilities.js';
+import { modsTick, modsHitDealt } from './champions.js';
+import { bossTick } from './bosses.js';
+import { heroLike } from './allies.js';
 
 export const AGGRO = 9, LEASH = 36, SEP = 0.35;
 const RANGED = new Set(['archer', 'caster', 'shaman']);
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
 export function stepBrains(w, dt) {
-  const heroes = [...w.players.values()].filter(p => !p.dead);
+  const heroes = [...w.players.values(), ...(w.allies?.values() || [])].filter(p => !p.dead);
   for (const f of w.foes.values()) {
     if (f.dead) continue;
     stepFx(w, f, (src, t, n, type) => hurt(w, w.players.get(src) || f, t, { result: 'hit', amount: Math.max(1, Math.round(n)), mitigated: 0 }, type));
     if (f.dead) continue;
+    if (f.mods) modsTick(w, f);
+    if (f.def.boss) bossTick(w, f);
     if (has(f, 'stun')) continue;
     // notice: sight radius, line of sight; a pack wakes together
     if (f.state === 'idle' || f.state === 'wander' || f.state === 'patrol') {
@@ -38,12 +43,13 @@ export function stepBrains(w, dt) {
     if (f.state === 'return') { goHome(w, f, dt); continue; }
     if (f.state === 'flee') { flee(w, f, dt); continue; }
     const ranged = RANGED.has(f.def.role);
-    let tid = pickTarget(f.threat, f.target, id => { const a = w.players.get(id); return !!a && !a.dead; }, ranged);
+    let tid = pickTarget(f.threat, f.target, id => { const a = heroLike(w, id); return !!a && !a.dead; }, ranged);
     if (f.def.role === 'skirmisher' && tid) tid = softestInReach(w, f) || tid;
     if (!tid) { f.state = 'return'; f.target = null; f.cast = null; continue; }
     f.target = tid;
-    const t = w.players.get(tid);
-    if (dist(f, f.home) > (f.def.ai.leash || LEASH) + 10 || (dist(f, f.home) > (f.def.ai.leash || LEASH) && dist(f, t) > 6)) { f.state = 'return'; f.threat.clear(); f.target = null; f.cast = null; continue; }
+    const t = heroLike(w, tid);
+    const leash = f.leashBig ? 70 : (f.def.ai.leash || LEASH);
+    if (dist(f, f.home) > leash + 10 || (dist(f, f.home) > leash && dist(f, t) > 6)) { f.state = 'return'; f.threat.clear(); f.target = null; f.cast = null; continue; }
     // leader: run for help at 25%
     if (f.def.role === 'leader' && !f.fled && f.hp < f.maxHp * 0.25) { startFlee(w, f); continue; }
     if (f.cast) { f.yaw = Math.atan2(t.x - f.x, t.z - f.z); stepAbility(w, f, t); continue; }
@@ -218,7 +224,7 @@ function cohesion(w, f) {
 function attack(w, f, t) {
   f.nextSwing = w.time + 1 / (f.attackSpeed || 0.5);
   const ab = readyAbility(w, f, a => a.kind !== 'heal' && a.kind !== 'buff' && a.kind !== 'pack_buff' && a.kind !== 'passive' && a.kind !== 'flee_call');
-  if (ab && w.rng() < 0.45) return startAbility(w, f, t, ab);
+  if (ab && w.rng() < (f.def.boss ? 0.8 : 0.45)) return startAbility(w, f, t, ab);
   const amount = f.dmg * dmgFactor(f) * (0.85 + w.rng() * 0.3);
   if (RANGED.has(f.def.role) && f.def.attackRange > 4) {
     w.shots.push({ id: 's' + (w.nextId++), from: f.id, to: t.id, x: f.x, z: f.z, speed: 18, type: f.def.damageType, amount, spell: f.def.role !== 'archer', foeShot: true });
@@ -226,6 +232,7 @@ function attack(w, f, t) {
   } else {
     const r = resolveHit(f, t, { amount, type: f.def.damageType, spell: false }, w.rng);
     hurt(w, f, t, r, f.def.damageType);
+    if (f.mods) modsHitDealt(w, f, t, r);
     w.events.push({ k: 'swing', s: f.id });
     if (f.def.role === 'skirmisher' && ++f.hits % 2 === 0) { f.flankUntil = w.time + 3; f.flankSide = w.rng() < 0.5 ? 1 : -1; }
   }

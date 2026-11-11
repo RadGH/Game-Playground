@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 
 const flat = c => new THREE.MeshLambertMaterial({ color: c, flatShading: true });
+const MOD_COLOR = { thorned: '#6aff4a', hasted: '#ffffff', brawny: '#c87a2a', stonehide: '#a0a0a0', burning: '#ff6a1a', rimed: '#9fe0ff', stormtouched: '#c0c8ff', venomous: '#8aff2a', shrouded: '#7a3ab0', warded: '#4ab8ff', summoning: '#b070ff', shifting: '#e0a0ff', leeching: '#d01a3a', cursing: '#5a1a6a', volatile: '#ff3a1a', anchored: '#5a4a3a', hale: '#3ecf5a', twinned: '#ffd040' };
 const ROLE_COLORS = { brute: ['#6b8f3a', '#5a3a22', '#9c9c9c'], skirmisher: ['#8a7a3a', '#3a2a1a', '#c9b37a'], archer: ['#5f7f4a', '#6a4a2a', '#d8c9a0'], caster: ['#7a3a3a', '#2a1a2a', '#ff8a3a'], shaman: ['#4a6a7a', '#3a2a1a', '#7affd8'], leader: ['#7a5a2a', '#8a1a1a', '#ffd040'] };
 
 /** Build a body: a chunky squat creature with a role-coloured outfit and a prop (club / bow / staff / banner). */
@@ -64,7 +65,12 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
       const f = list.get(s.id) || add(s);
       f.buf.push({ at: now, x: s.x, z: s.z, yaw: s.yaw }); if (f.buf.length > 8) f.buf.shift();
       if (s.st === 'dead' && f.st !== 'dead') f.deadAt = now;
-      f.st = s.st; f.hp = s.hp; f.mhp = s.mhp; f.lvl = s.lvl; f.cast = s.cast || null; f.rk = s.rk; f.tg = s.tg;
+      f.st = s.st; f.hp = s.hp; f.mhp = s.mhp; f.lvl = s.lvl; f.cast = s.cast || null; f.rk = s.rk; f.tg = s.tg; f.ward = s.ward;
+      // champions and rares wear their modifiers: a coloured ring underfoot (the tell), the name plate says which
+      const modKey = (s.mods || []).join(',');
+      if (modKey !== f.modKey) { f.modKey = modKey; if (f.aura) { f.group.remove(f.aura); f.aura = null; } if (s.mods?.length || s.rk) { const c = MOD_COLOR[s.mods?.[0]] || (s.rk === 'rare' ? '#ffd040' : '#6ab8ff'); f.aura = new THREE.Mesh(new THREE.RingGeometry(0.75, 1.05, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.7, depthWrite: false })); f.aura.position.y = 0.05; f.group.add(f.aura); } }
+      if (s.n !== f.name) { f.name = s.n; f.tag.querySelector('.nm').textContent = s.n; }
+      f.tag.className = 'foe-tag' + (s.rk ? ' rk-' + s.rk : '') + (f.tag.classList.contains('tg') ? ' tg' : '');
     }
     for (const [id, f] of list) if (!seen.has(id)) { view.scene.remove(f.group); f.tag.remove(); list.delete(id); }
   }
@@ -96,10 +102,12 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
       // name + health over the head
       const show = f.st !== 'dead' && (f.hp < f.mhp || f.id === targetId || f.rk || f.st === 'attack' || f.st === 'chase');
       f.tag.hidden = !show;
+      if (f.aura) f.aura.rotation.y += dt * 1.2;
       if (show) {
         v.set(f.x, gy + (g.userData.height || 1.6) + 0.35, f.z).project(view.camera);
         f.tag.style.transform = `translate(-50%, -100%) translate(${(v.x * 0.5 + 0.5) * W}px, ${(-v.y * 0.5 + 0.5) * H}px)`;
         f.tag.querySelector('b').style.width = Math.max(0, f.hp / f.mhp * 100) + '%';
+        f.tag.classList.toggle('warded', !!f.ward);
         f.tag.classList.toggle('tg', f.id === targetId);
       }
     }

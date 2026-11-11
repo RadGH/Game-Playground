@@ -23,7 +23,7 @@ export function potionDrop(R, P, rng, level) {
 }
 
 /** One player's drops from one kill. kind: normal | champion | rare | boss | actBoss. */
-export function dropsFor(items, P, rng, { level, kind = 'normal', players = 1, mf = 0, gf = 0, ch = null, firstKill = false }) {
+export function dropsFor(items, P, rng, { level, kind = 'normal', players = 1, mf = 0, gf = 0, ch = null, firstKill = false, minFirst = null }) {
   const R = items.rarity, D = R.itemDrops?.[kind] || R.itemDrops?.normal || { chancePct: [[1, 16]], count: [93, 6, 1] };
   const ilvl = Math.min(R.ilvlCap || 65, level + (R.ilvlBonus?.[kind] ?? 0));
   const out = { items: [], gold: goldFor(R, rng, level, kind, gf, players), potions: [] };
@@ -35,6 +35,7 @@ export function dropsFor(items, P, rng, { level, kind = 'normal', players = 1, m
       let r = rollRarity(items, rng, ilvl, kind, mf);
       if (D.guaranteedMinRarity) r = atLeast(r, D.guaranteedMinRarity);
       if (rares > 0) { r = atLeast(r, 'rare'); rares--; }
+      if (i === 0 && minFirst) r = atLeast(r, minFirst);           // champions: a guaranteed magic+, rares: a guaranteed rare+
       if (firstKill && D.firstKillUniqueChancePct && i === 0 && rng() * 100 < D.firstKillUniqueChancePct) r = 'unique';
       out.items.push(makeItem(items, rng, ilvl, { rarity: r, ch }));
     }

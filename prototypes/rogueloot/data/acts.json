@@ -1,0 +1,50 @@
+{
+  "_doc": "The world map (PLAN §0 ruling 33: hub + story-gated portals + a PoE-style map of nodes). One act = a town, its outdoor zones and its dungeons. `x`/`y` are 0-100 map-screen coordinates (y grows DOWN the screen, so the town is at the bottom and the act climbs toward the top right); they are a layout, not geography. `links` are the lines drawn between nodes AND the walkable connections (a zone's `exit` / `entrance` markers must match them). `portalAfter` is the story gate: the town portal to that node opens when the named node has been COMPLETED (a zone is complete when its far `exit` was reached; a dungeon when its boss died); `null` = open from the start. Dungeons have no portal of their own — they are entered from their zone's `entrance` marker, and `portalAfter` on a dungeon gates the entrance instead. `order` is the main-quest order (docs/ZONES.md). `built: true` = the JSON exists in data/zones (dungeons get data/dungeons later). `table` = the spawn table in data/monsters.json (same as the id). `floors` from the spawn tables. `rare` is the zone's named rare (data/monsters.json rares).",
+  "acts": [
+    {
+      "id": "act1",
+      "name": "Act 1 — The Bright Coast",
+      "town": "brightwater",
+      "story": "The Hollowhorn warband came down from the hills to raid the Brightwater coast, but their warlord Ruhk is only here to dig: under the Gravewatch hills lies the sealed catacomb of a king who never quite died. The diggers reached him first and became the Gravesworn. You follow the warband inland from the shore, dungeon by dungeon, until the warband is a sideshow and the dead king's household is waking up one hall at a time.",
+      "mainQuests": [
+        { "step": 1, "id": "crabs_on_the_landing", "name": "Crabs on the Landing", "node": "saltgrass_shore", "text": "Elder Maudry Tern: the fisherfolk have fled Saltgrass Landing. Clear the beach and find out what drove them off." },
+        { "step": 2, "id": "beach_gate", "name": "The Beach Gate", "node": "saltgrass_shore", "text": "Hill-folk have built a gate across the north beach. Reach it and see whose banner it flies." },
+        { "step": 3, "id": "under_the_headland", "name": "Under the Headland", "node": "tidecaves", "text": "Something in the tidecaves is pulling the drowned back up. Kill Clatterjaw at the bottom of the pools." },
+        { "step": 4, "id": "millers_cellar", "name": "The Miller's Cellar", "node": "mill_cellars", "text": "The mill's stones have stood up and walked. Put Gristmaul down and open the road east." },
+        { "step": 5, "id": "brood_below", "name": "The Brood Below", "node": "thornwood_hollow", "text": "The wood road is webbed shut. Burn the egg sacs and kill Mother Thrum." },
+        { "step": 6, "id": "toll_road", "name": "Toll Road", "node": "kings_road", "text": "The warband has made the King's Road a chain of toll camps. Break every camp between here and the glade." },
+        { "step": 7, "id": "hall_of_records", "name": "The Hall of Records", "node": "old_barrow", "text": "The diggers went into the Old Barrow and did not come back as diggers. Find their camp and the clerk who keeps the names." },
+        { "step": 8, "id": "wilted_verse", "name": "The Wilted Verse", "node": "elder_roots", "text": "Ildreth's song keeps the fen gate shut. Interrupt the Last Verse." },
+        { "step": 9, "id": "drowned_bell", "name": "The Drowned Bell", "node": "mire_crypt", "text": "The Gravesworn are opening doors under the fen. Stop Sister Vennel ringing the bell." },
+        { "step": 10, "id": "over_the_pass", "name": "Over the Pass", "node": "highcairn_pass", "text": "The only way to the warband's heights is Highcairn Pass, and the drakes have it." },
+        { "step": 11, "id": "black_stag", "name": "The Black Stag", "node": "warband_mine", "text": "Warlord Ruhk is in the mine's deep gallery. End the warband." },
+        { "step": 12, "id": "sealed_lord", "name": "The Sealed Lord", "node": "deep_catacomb", "text": "Four chanters are unsealing Harrowmund. Go down and stop the king getting up." }
+      ],
+      "nodes": [
+        { "id": "brightwater", "name": "Brightwater", "kind": "town", "levels": [1, 20], "x": 50, "y": 93, "links": ["saltgrass_shore"], "portalAfter": null, "order": 0, "built": true },
+
+        { "id": "saltgrass_shore", "name": "Saltgrass Shore", "kind": "zone", "levels": [1, 3], "x": 30, "y": 82, "links": ["brightwater", "tidecaves", "windmill_fields"], "portalAfter": null, "order": 1, "rare": "old_pincer", "built": true },
+        { "id": "tidecaves", "name": "The Tidecaves", "kind": "dungeon", "levels": [3, 4], "floors": 2, "boss": "clatterjaw", "x": 12, "y": 74, "links": ["saltgrass_shore"], "portalAfter": null, "order": 2, "built": false },
+        { "id": "windmill_fields", "name": "Windmill Fields", "kind": "zone", "levels": [3, 5], "x": 42, "y": 69, "links": ["saltgrass_shore", "mill_cellars", "thornwood"], "portalAfter": "saltgrass_shore", "order": 3, "rare": "whistler_jack", "built": true },
+        { "id": "mill_cellars", "name": "Mill Cellars", "kind": "dungeon", "levels": [5, 5], "floors": 1, "boss": "gristmaul", "x": 58, "y": 74, "links": ["windmill_fields"], "portalAfter": null, "order": 4, "built": false },
+
+        { "id": "thornwood", "name": "Thornwood", "kind": "zone", "levels": [5, 7], "x": 32, "y": 56, "links": ["windmill_fields", "thornwood_hollow", "kings_road"], "portalAfter": "mill_cellars", "order": 5, "rare": "grandmother_root", "built": false },
+        { "id": "thornwood_hollow", "name": "Thornwood Hollow", "kind": "dungeon", "levels": [7, 7], "floors": 2, "boss": "mother_thrum", "x": 16, "y": 50, "links": ["thornwood"], "portalAfter": null, "order": 6, "built": false },
+        { "id": "kings_road", "name": "King's Road", "kind": "zone", "levels": [7, 9], "x": 50, "y": 48, "links": ["thornwood", "old_barrow", "elderglade", "mirefen"], "portalAfter": "thornwood_hollow", "order": 7, "rare": "sergeant_krull", "built": false },
+        { "id": "old_barrow", "name": "Old Barrow", "kind": "dungeon", "levels": [9, 10], "floors": 3, "boss": "reeve_oswin", "x": 64, "y": 58, "links": ["kings_road"], "portalAfter": "kings_road", "order": 9, "rare": "the_lamplighter", "built": false },
+
+        { "id": "elderglade", "name": "Elderglade", "kind": "zone", "levels": [9, 11], "x": 32, "y": 36, "links": ["kings_road", "elder_roots"], "portalAfter": "kings_road", "order": 8, "rare": "velka_thricewed", "built": false },
+        { "id": "elder_roots", "name": "Elder Roots", "kind": "dungeon", "levels": [12, 12], "floors": 2, "boss": "ildreth", "x": 16, "y": 28, "links": ["elderglade"], "portalAfter": "old_barrow", "order": 10, "built": false },
+        { "id": "mirefen", "name": "Mirefen", "kind": "zone", "levels": [11, 13], "x": 56, "y": 32, "links": ["kings_road", "mire_crypt", "highcairn_pass"], "portalAfter": "elder_roots", "order": 11, "rare": "bogmother_sulk", "built": false },
+        { "id": "mire_crypt", "name": "Mire Crypt", "kind": "dungeon", "levels": [14, 14], "floors": 2, "boss": "sister_vennel", "x": 72, "y": 38, "links": ["mirefen"], "portalAfter": null, "order": 12, "built": false },
+
+        { "id": "highcairn_pass", "name": "Highcairn Pass", "kind": "zone", "levels": [13, 15], "x": 46, "y": 18, "links": ["mirefen", "redcliff_heights"], "portalAfter": "mire_crypt", "order": 13, "rare": "hoarfang", "built": false },
+        { "id": "redcliff_heights", "name": "Redcliff Heights", "kind": "zone", "levels": [15, 17], "x": 64, "y": 12, "links": ["highcairn_pass", "warband_mine", "sunken_ruins"], "portalAfter": "highcairn_pass", "order": 14, "rare": "captain_vosk", "built": false },
+        { "id": "warband_mine", "name": "Warband Mine", "kind": "dungeon", "levels": [16, 17], "floors": 2, "boss": "warlord_ruhk", "x": 78, "y": 22, "links": ["redcliff_heights"], "portalAfter": null, "order": 15, "built": false },
+        { "id": "sunken_ruins", "name": "Sunken Ruins", "kind": "zone", "levels": [17, 18], "x": 82, "y": 6, "links": ["redcliff_heights", "gravewatch_hills"], "portalAfter": "warband_mine", "order": 16, "rare": "the_kept_bride", "built": false },
+        { "id": "gravewatch_hills", "name": "Gravewatch Hills", "kind": "zone", "levels": [18, 20], "x": 92, "y": 18, "links": ["sunken_ruins", "deep_catacomb"], "portalAfter": "sunken_ruins", "order": 17, "rare": "morrow_the_unburied", "built": false },
+        { "id": "deep_catacomb", "name": "Deep Catacomb", "kind": "dungeon", "levels": [19, 20], "floors": 3, "boss": "harrowmund", "actBoss": true, "x": 96, "y": 34, "links": ["gravewatch_hills"], "portalAfter": null, "order": 18, "built": false }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { resolveHit, addThreat, taunt as tauntTable, GCD, THREAT } from '../rule
 import { addFx } from './status.js';
 import { resolve } from './move.js';
 import { inside } from './abilities.js';
+import { summon } from './allies.js';
 
 export const RES_OF = { fighter: 'rage', rogue: 'energy' };          // everyone else: mana
 export const resourceOf = ch => RES_OF[ch?.path] || 'mana';
@@ -40,7 +41,9 @@ export function synergyOf(skills, ch, id) {
 /** What a skill costs this hero, in which resource. */
 export function costOf(skills, resources, ch, sk, rank) {
   const res = resourceOf(ch);
-  let [kind, n] = Object.entries(sk.cost || {})[0] || ['mana', 0];
+  // a hybrid spec's skills carry the other Path's price too (altCost): use whichever matches this hero's resource
+  const alt = sk.altCost && Object.keys(sk.altCost)[0] === res ? sk.altCost : null;
+  let [kind, n] = Object.entries(alt || sk.cost || {})[0] || ['mana', 0];
   n = (n || 0) + (sk.costPerRank || 0) * (rank - 1);
   if ((sk.owner === 'wanderer' || sk.owner === 'all') && kind === 'mana' && res !== 'mana') { const m = resources?.wandererSkillsAfterPath?.[ch.path]; kind = res; n *= m?.mult ?? 1; }
   return { kind, n: Math.round(n) };
@@ -151,6 +154,7 @@ function apply(w, p, e, t, at, ctx) {
     case 'cleanse': if (t?.fx) t.fx = t.fx.filter(f => !['slow', 'stun', 'dot', 'root', 'silence'].includes(f.kind)); return;
     case 'revive': if (t && t.dead && w.time - (p.lastFight || -99) > 5) { t.dead = false; t.hp = Math.round(t.maxHp * (e.hpPct || 40) / 100); w.events.push({ k: 'revive', s: p.id, t: t.id }); } return;
     case 'mark': if (t && !t.dead) addFx(w, t, { id: ctx.sk.id + ':mark', kind: 'mark', pct: e.pct || 10, secs: e.secs || 8, src: p.id }); return;
+    case 'summon': summon(w, p.id, e); return;
     case 'stance': p.fx = (p.fx || []).filter(f => f.kind !== 'stance'); addFx(w, p, { id: 'stance:' + e.id, kind: 'stance', stats: e.stats || {}, secs: 1e6, src: p.id }); return;
   }
 }
@@ -213,4 +217,38 @@ export function defaultBar(skills, ch) {
   known.sort((a, b) => (a.owner === 'wanderer') - (b.owner === 'wanderer') || (a.reqLevel || 1) - (b.reqLevel || 1));
   const bar = known.slice(0, 6).map(s => s.id); while (bar.length < 6) bar.push(null);
   return bar;
+}
+
+/** The spec pick at level 10 (ruling 2/29): the spec must belong to the hero's Path; its armour comes with it. */
+export function pickSpec(w, p, spec) {
+  const S = w.content.specs?.[spec], ch = p.char;
+  if (!S) return { err: 'No such specialization.' };
+  if (!ch.path) return { err: 'Choose a Path first.' };
+  if (ch.spec) return { err: 'You already have a specialization. The trainer in town can change it.' };
+  if (ch.level < 10) return { err: 'Specializations open at level 10.' };
+  if (!(S.paths || []).includes(ch.path)) return { err: `${S.name} is not open to your Path.` };
+  p.char = { ...ch, spec };
+  return { ok: true };
+}
+export const respecPointsCost = L => Math.round(20 + 12 * L * L / 4);
+export const respecSpecCost = L => Math.round(500 + 60 * L * L);
+/** At the trainer (town): refund every skill point, or change specialization (points reset too). */
+export function respec(w, p, a) {
+  const ch = p.char, near = (w.area.markers || []).some(m => m.kind === 'npc' && m.id === 'trainer' && Math.hypot(p.x - m.x, p.z - m.z) < 5);
+  if (!near) return { err: 'The trainer in town does that.' };
+  const refunded = Object.entries(ch.skills || {}).reduce((n, [id, r]) => { const s = w.content.skills[id]; if (!s || s.owner === 'wanderer') return n; const free = (w.content.paths?.[ch.path]?.starter || []).includes(id) ? 1 : 0; return n + Math.max(0, r - free); }, 0);
+  const keep = Object.fromEntries((w.content.paths?.[ch.path]?.starter || []).map(id => [id, 1]));
+  if (a.op === 'points') {
+    const cost = respecPointsCost(ch.level); if ((ch.gold || 0) < cost) return { err: `It costs ${cost} gold.` };
+    p.char = { ...ch, gold: ch.gold - cost, skills: keep, skillPoints: (ch.skillPoints || 0) + refunded, bar: defaultBar(w.content.skills, { ...ch, skills: keep }) };
+    return { ok: true };
+  }
+  if (a.op === 'spec') {
+    const S = w.content.specs?.[a.spec]; if (!S || !(S.paths || []).includes(ch.path)) return { err: 'That specialization is not open to your Path.' };
+    if (a.spec === ch.spec) return { err: 'You already follow it.' };
+    const cost = respecSpecCost(ch.level); if ((ch.gold || 0) < cost) return { err: `Changing costs ${cost} gold.` };
+    p.char = { ...ch, gold: ch.gold - cost, spec: a.spec, skills: keep, skillPoints: (ch.skillPoints || 0) + refunded, bar: defaultBar(w.content.skills, { ...ch, spec: a.spec, skills: keep }) };
+    return { ok: true };
+  }
+  return { err: 'unknown' };
 }

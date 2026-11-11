@@ -1,0 +1,16 @@
+{
+  "_doc": "Hired companions (ruling 31): three kinds, hired at the mercenary hall in town. A mercenary levels with its hero (its level = the hero's), wears the weapon / chest / head its hero gives it, has 3-4 skills of its own, and if it falls it waits in town until revived for gold. One per hero. Numbers multiply the same hero-like baseline as a hero of that level (hp = 70 + 18 x (L-1)). AI (js/sim/allies.js, shared with pets and summons): keeps near its hero, defends first (whatever is hitting its hero), then the hero's target, never stacks, walks round things on the walk grid.",
+  "kinds": {
+    "shieldbearer": { "name": "Shield-bearer", "blurb": "Stands in front, holds their attention, and takes the hits.", "role": "tank", "hpMult": 1.5, "dmgMult": 0.8, "armour": 40, "armourPerLevel": 9, "range": 1.8, "speed": 4.4, "attackSecs": 1.8, "weapon": "melee", "price": [60, 30],
+      "skills": [ { "id": "merc_taunt", "name": "Shield Clang", "kind": "taunt", "cd": 8, "radius": 6 }, { "id": "merc_bash", "name": "Bash", "kind": "strike", "cd": 10, "mult": 1.4, "interrupt": true }, { "id": "merc_brace", "name": "Brace", "kind": "self", "cd": 20, "pct": 30, "secs": 6 } ],
+      "outfit": { "hat": "helm", "top": "mail" } },
+    "archer": { "name": "Archer", "blurb": "Shoots from behind you and picks off what you have marked.", "role": "ranged", "hpMult": 0.9, "dmgMult": 1.1, "armour": 15, "armourPerLevel": 4, "range": 14, "speed": 4.6, "attackSecs": 1.6, "weapon": "bow", "price": [55, 28],
+      "skills": [ { "id": "merc_volley", "name": "Volley", "kind": "aoe", "cd": 12, "mult": 0.8, "radius": 3.5 }, { "id": "merc_pin", "name": "Pinning Shot", "kind": "strike", "cd": 9, "mult": 1.2, "slow": 40, "secs": 3 }, { "id": "merc_step", "name": "Step Back", "kind": "kite", "cd": 6 } ],
+      "outfit": { "hat": "hood", "top": "leather" } },
+    "hedgemage": { "name": "Hedge-mage", "blurb": "Throws fire, mends your cuts between fights, and keeps a ward on you.", "role": "caster", "hpMult": 0.8, "dmgMult": 1.2, "armour": 8, "armourPerLevel": 3, "range": 12, "speed": 4.4, "attackSecs": 2.2, "weapon": "staff", "type": "fire", "price": [65, 32],
+      "skills": [ { "id": "merc_fire", "name": "Fire Pip", "kind": "bolt", "cd": 0, "mult": 1.0, "type": "fire" }, { "id": "merc_mend", "name": "Hedge Mend", "kind": "heal", "cd": 9, "pct": 18 }, { "id": "merc_ward", "name": "Little Ward", "kind": "shield", "cd": 25, "pct": 15, "secs": 8 }, { "id": "merc_flare", "name": "Flare", "kind": "aoe", "cd": 14, "mult": 0.9, "radius": 3, "type": "fire" } ],
+      "outfit": { "hat": "wizard", "top": "robe" } }
+  },
+  "revive": [20, 12],
+  "names": ["Bran", "Tilda", "Osk", "Merrin", "Hal", "Yeva", "Corran", "Pell", "Wynna", "Dace", "Ruel", "Sefa", "Garrow", "Ilsa", "Tamsin", "Odo"]
+}

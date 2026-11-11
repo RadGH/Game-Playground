@@ -17,6 +17,11 @@ import { createHud } from './hud.js';
 import { createFx } from './fx.js';
 import { createSheetUI } from './sheet-ui.js';
 import { createSkillsUI } from './skills-ui.js';
+import { createTravelUI } from './travel-ui.js';
+import { createTownUI } from './town-ui.js';
+import { createPartyUI } from './party-ui.js';
+import { randomLook } from '../../../knockabout/js/client/look.js';
+import { makeRng, hashStr } from '../sim/rng.js';
 import { createGround } from './ground.js';
 import { play, LOOT_SOUND } from './sound.js';
 import { loadContentAsync } from '../sim/content.js';
@@ -42,8 +47,13 @@ function goAndDo(x, z, msg) {
   G.goto = { x, z, msg };
 }
 const heroes = createHeroes({ root: $('#heroes'), onChange: () => {}, items: content.items });
-const sheetUI = createSheetUI({ onSkills: () => skillsUI.toggle(true), potions: content.potions, items: content.items, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
+const sheetUI = createSheetUI({ onSkills: () => skillsUI.toggle(true), potions: content.potions, currency: content.currency, items: content.items, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
 const skillsUI = createSkillsUI({ content, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
+const sendAct = a => G.link?.send({ t: 'act', ...a });
+const townUI = createTownUI({ content, send: sendAct, getChar: () => heroes.current() });
+const travelUI = createTravelUI({ view, content, labelRoot: $('#tags'), send: sendAct, getChar: () => heroes.current(), getMe: () => actors.get(G.me), getArea: () => G.area,
+  onNpc: (id) => { if (id === 'stash') townUI.openStash(); else sendAct({ do: 'shop', npc: id }); } });
+const partyUI = createPartyUI({ content, send: sendAct, getChar: () => heroes.current(), zoneName: id => content.zones?.[id]?.name || id || '' });
 const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }) });
 const input = createInput();
 const touch = createTouch($('#touch'), input);
@@ -86,12 +96,13 @@ function onMessage(m) {
   if (m.t === 'err') { titleMsg(m.msg); if (G.me == null && G.link?.kind === 'solo') { G.link.close(); G.link = null; } return; }
   if (m.t === 'resume') { if (!G.me) start(online(), { t: 'join', code: m.code, character: character() }); return; }
   if (m.t === 'joined') return enterGame(m);
-  if (m.t === 'snap') return onSnap(m);
+  if (m.t === 'snap') { if (m.area && G.area && m.area !== G.area.id) return; return onSnap(m); }
+  if (m.t === 'area') { showArea(m.area, m.seed); townUI.close(); travelUI.closeMap(); return; }
   if (m.t === 'left') { actors.remove(m.id); return; }
-  if (m.t === 'roster') { G.roster = new Map(m.players.map(p => [p.id, p])); G.host = m.host; G.isPublic = m.public; for (const p of m.players) actors.get(p.id)?.tag.classList.toggle('away', !!p.away); refreshInvite(); return; }
+  if (m.t === 'roster') { G.roster = new Map(m.players.map(p => [p.id, p])); partyUI.setRoster(m.players, G.me); G.host = m.host; G.isPublic = m.public; for (const p of m.players) actors.get(p.id)?.tag.classList.toggle('away', !!p.away); refreshInvite(); return; }
   if (m.t === 'list') return showList(m.rooms);
   if (m.t === 'nope') return hud.nope(m.msg);
-  if (m.t === 'char') { const cur = heroes.current(); if (cur && m.character?.id === cur.id) { heroes.save({ ...cur, ...m.character }); sheetUI.refresh(); skillsUI.check(heroes.current()); } return; }
+  if (m.t === 'char') { const cur = heroes.current(); if (cur && m.character?.id === cur.id) { heroes.save({ ...cur, ...m.character }); sheetUI.refresh(); skillsUI.check(heroes.current()); if (townUI.open) townUI.refresh(); } return; }
   if (m.t === 'pong') { G.ping = performance.now() - m.at; return; }
   if (m.t === 'removed') { leaveGame(); titleMsg(m.msg); return; }
   if (m.t === 'closed') {
@@ -143,14 +154,25 @@ function refreshInvite() {
 }
 setInterval(() => { if (G.me && G.link?.kind === 'online' && G.link.alive) G.link.send({ t: 'ping', at: performance.now() }); }, 3000);
 
+/** Draw an area (on joining, and every time the sim moves you to another one). */
+function showArea(areaId, seed) {
+  G.area = content.zones?.[areaId] ? buildArea(content.zones[areaId]) : testField(seed);
+  if (G.areaGroup) view.scene.remove(G.areaGroup);
+  G.areaGroup = G.area.zone ? buildZoneView(view, G.area, { quality }) : buildTestArea(view, G.area);
+  for (const id of [...foes.list.keys()]) { const f = foes.get(id); view.scene.remove(f.group); f.tag.remove(); foes.list.delete(id); }
+  for (const id of [...actors.list.keys()]) if (id !== G.me) actors.remove(id);
+  ground.clear(); G.goto = null; G.pending = []; G.jump = true; G.target = null;
+  $('.hud-area').textContent = G.area.name;
+  travelUI.enterArea(G.area);
+  // the town's people stand at their markers (Chibi 2.6 bodies, a look seeded from who they are)
+  for (const m of G.area.markers || []) if (m.kind === 'npc') { const rng = makeRng(hashStr(m.id + ':' + areaId)); const a = actors.add('npc:' + m.id, { name: m.label || m.id, look: randomLook(rng) }); a.x = m.x; a.z = m.z; a.yaw = Math.atan2((G.area.spawn.x - m.x), (G.area.spawn.z - m.z)); a.npc = true; }
+}
 function enterGame(m) {
   if (G.retry) { clearInterval(G.retry); G.retry = null; banner(null); }
   const again = G.me === m.you && G.area;
   G.me = m.you; G.code = G.link.kind === 'online' ? m.code : null; G.host = m.host; G.pending = [];
   if (again) return;
-  G.area = content.zones?.[m.area] ? buildArea(content.zones[m.area]) : testField(m.seed);
-  if (G.areaGroup) view.scene.remove(G.areaGroup);
-  G.areaGroup = G.area.zone ? buildZoneView(view, G.area, { quality }) : buildTestArea(view, G.area);
+  showArea(m.area, m.seed);
   $('#title').hidden = true; $('#hud').hidden = false; $('#fight').hidden = false; document.body.classList.add('in-game');
   $('.hud-area').textContent = G.area.name;
   const codeEl = $('.hud-code'); codeEl.hidden = !G.code; codeEl.textContent = G.code ? `Code ${G.code}` : ''; codeEl.onclick = openInvite;
@@ -186,9 +208,18 @@ function onSnap(s) {
       if (err > 1.5) { a.x = ghost.x; a.z = ghost.z; } else if (err > 0.02) { a.x += (ghost.x - a.x) * 0.3; a.z += (ghost.z - a.z) * 0.3; }
     } else actors.push(p.id, p, now);
   }
-  for (const id of [...actors.list.keys()]) if (!seen.has(id)) actors.remove(id);
+  // companions (mercenaries now, pets later): Chibi 2.6 bodies like heroes, interpolated the same way
+  for (const a of s.allies || []) {
+    seen.add(a.id);
+    let x = actors.get(a.id);
+    if (!x) { const rng = makeRng(hashStr(a.id + (a.n || ''))); x = actors.add(a.id, { name: `${a.n} · ${content.mercs?.kinds?.[a.k]?.name || a.k}`, look: a.look || randomLook(rng) }); x.x = a.x; x.z = a.z; x.tag.classList.add('ally'); }
+    actors.push(a.id, a, now); x.tag.classList.toggle('away', !!a.dead); x.group.visible = !a.dead;
+  }
+  for (const id of [...actors.list.keys()]) if (!seen.has(id) && !id.startsWith('npc:')) actors.remove(id);
+  if (G.jump) { const me = actors.get(G.me), sp = s.players.find(p => p.id === G.me); if (me && sp) { me.x = sp.x; me.z = sp.z; view.snapTo(sp.x, sp.z); G.jump = false; } }
   foes.sync(s.foes || [], now);
   ground.syncChests(s.chests, G.me);
+  partyUI.update(G.snapPlayers, G.area?.id);
   fx.syncShots(s.shots);
   G.meSnap = s.players.find(p => p.id === G.me) || null;
   if (G.meSnap) G.target = G.meSnap.tg ?? (G.pendingTarget || G.target);
@@ -200,9 +231,20 @@ const worldAt = (x, z, y = 1.6) => { const v = new view.THREE.Vector3(x, y, z).p
 function posOf(id) { const f = foes.get(id); if (f) return [f.x, f.z, (f.group.userData.height || 1.5)]; const a = actors.get(id); return a ? [a.x, a.z, 2] : null; }
 function onEvent(e, now) {
   if (e.k === 'tele') { fx.tele(e, now); return; }
-  if (e.k === 'drop') { ground.add(e); if (e.what === 'item') play(LOOT_SOUND[e.real] || 'loot.normal'); else if (e.what === 'gold') play('loot.common'); return; }
+  if (e.k?.startsWith('trade') && partyUI.onEvent(e)) return;
+  if (e.k === 'drop') { ground.add(e); if (e.what === 'shard') play('loot.uncommon'); else if (e.what === 'item') play(LOOT_SOUND[e.real] || 'loot.normal'); else if (e.what === 'gold') play('loot.common'); return; }
   if (e.k === 'gone') { const it = ground.items.get(e.gid); if (it && e.got) { const [x, y] = worldAt(it.x, it.z, 0.6); hud.float(x, y, e.got, 'gold'); } if (it && it.what === 'gold') play('loot.common'); ground.remove(e.gid); return; }
   if (e.k === 'chest') { play('ui.open'); return; }
+  if (e.k === 'shop') { townUI.onShop(e); play('ui.open'); return; }
+  if (e.k === 'stashed') { townUI.onStashed(e.item); return; }
+  if (e.k === 'unstashed') { townUI.onUnstashed(e.uid); return; }
+  if (e.k === 'sold') { play('loot.common'); return; }
+  if (e.k === 'crafted') { play('loot.magic'); return; }
+  if (e.k === 'salvaged') { play('ui.click'); return; }
+  if (e.k === 'phase') { banner2(e.name); play('ui.open'); return; }
+  if (e.k === 'enrage') { banner2('Enraged!'); return; }
+  if (e.k === 'burst' || e.k === 'area') { fx.burst?.(e); return; }
+  if (e.k === 'waypoint') { banner2(`Waypoint found: ${e.name}`); play('ui.open'); return; }
   if (e.k === 'fability' || e.k === 'fcast') { const at = posOf(e.s); if (at && e.k === 'fability') { const [x, y] = worldAt(at[0], at[1], at[2] + 0.6); hud.float(x, y, e.sk, 'ab'); } return; }
   if (e.k === 'fx' && e.t === G.me) { hud.nope({ slow: 'Slowed!', stun: 'Stunned!', silence: 'Silenced!', dot: 'Poisoned!' }[e.kind] || ''); return; }
   if (e.k === 'dmg') {
@@ -264,16 +306,18 @@ view.renderer.domElement.addEventListener('contextmenu', e => e.preventDefault()
 const ray = new view.THREE.Raycaster(), plane = new view.THREE.Plane(new view.THREE.Vector3(0, 1, 0), 0), hitP = new view.THREE.Vector3();
 view.renderer.domElement.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = view.renderer.domElement.getBoundingClientRect(); ray.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -((e.clientY - r.top) / r.height * 2 - 1) }, view.camera); if (ray.ray.intersectPlane(plane, hitP)) G.mouse = { x: +hitP.x.toFixed(2), z: +hitP.z.toFixed(2) }; });
 addEventListener('keydown', e => {
-  if (!G.me || e.target?.tagName === 'INPUT' || document.querySelector('.modal')) return;
+  if (!G.me || e.target?.tagName === 'INPUT' || document.querySelector('.modal:not([hidden])')) return;
   if (e.code === 'Tab') { e.preventDefault(); targetNext(); }
-  if (e.code === 'Space') { e.preventDefault(); const me = actors.get(G.me), n = me && ground.nearest(me.x, me.z, 6); if (n) goAndDo(n.x, n.z, n.kind === 'chest' ? { t: 'act', do: 'open', id: n.id } : { t: 'act', do: 'pickup', gid: n.id }); }
+  if (e.code === 'Space') { e.preventDefault(); const me = actors.get(G.me), n = me && ground.nearest(me.x, me.z, 6); if (n) goAndDo(n.x, n.z, n.kind === 'chest' ? { t: 'act', do: 'open', id: n.id } : { t: 'act', do: 'pickup', gid: n.id }); else travelUI.use(); }
+  if (e.code === 'KeyM') { if (travelUI.mapOpen) travelUI.closeMap(); else travelUI.openMap(false); }
+  if (e.code === 'KeyT') sendAct({ do: 'travel', via: 'recall' });
   if (e.code === 'KeyC' || e.code === 'KeyI' || e.code === 'KeyB') sheetUI.toggle();
   if (e.code === 'KeyX') G.link?.send({ t: 'act', do: 'swap' });
   if (e.code === 'KeyQ' && !e.repeat) G.link?.send({ t: 'act', do: 'drink', kind: 'health' });
   if (e.code === 'KeyE' && !e.repeat) G.link?.send({ t: 'act', do: 'drink', kind: 'mana' });
   const n = /^Digit([1-6])$/.exec(e.code)?.[1];
   if (n) { const id = barOf()[+n - 1]; if (id) useSkill(id); }
-  if (e.code === 'KeyK' || e.code === 'KeyT') skillsUI.toggle();
+  if (e.code === 'KeyK') skillsUI.toggle();
   if (e.code === 'KeyF') useSkill('attack');
   if (e.code === 'KeyR' && !e.repeat) { const me = actors.get(G.me); for (const a of actors.list.values()) { if (a.id !== G.me && G.snapPlayers?.get(a.id)?.dead && Math.hypot(a.x - me.x, a.z - me.z) < 3) { G.link?.send({ t: 'act', do: 'revive', target: a.id }); break; } } }
 });
@@ -305,6 +349,7 @@ function frame(t) {
   foes.update(dt, t - 110, t, G.target);
   fx.update(dt, t);
   ground.update(dt, t);
+  travelUI.update(dt, t);
   padCombat();
   view.render();
 }
@@ -315,13 +360,15 @@ const menu = createMenu([
   { label: 'Invite friends', when: () => !!G.code, act: () => openInvite() },
   { label: 'Character and bag (C)', when: () => !!G.me, act: () => sheetUI.toggle(true) },
   { label: 'Skills (K)', when: () => !!G.me, act: () => skillsUI.toggle(true) },
+  { label: 'Map (M)', when: () => !!G.me, act: () => travelUI.openMap(false) },
+  { label: 'Recall portal (T)', when: () => !!G.me, act: () => sendAct({ do: 'travel', via: 'recall' }) },
   { label: "What's new", act: () => news.open() },
   { label: 'Report a bug', act: () => openReport({ debug, shot }) },
   { label: `Graphics: ${quality === 'low' ? 'Low' : 'High'} (tap to switch, reloads)`, act: () => { store.set('quality', quality === 'low' ? 'high' : 'low'); location.reload(); } },
   { label: 'Credits', act: () => credits.open() },
   { label: 'Leave game', when: () => !!G.me, act: leaveGame },
 ]);
-addEventListener('keydown', e => { if (e.key !== 'Escape' || document.querySelector('.modal')) return; if (sheetUI.open) { sheetUI.toggle(false); return; } if (G.me && G.target) { setTarget(null); return; } menu.open(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && townUI.open) { townUI.close(); return; } if (e.key !== 'Escape' || document.querySelector('.modal:not([hidden])')) return; if (sheetUI.open) { sheetUI.toggle(false); return; } if (G.me && G.target) { setTarget(null); return; } menu.open(); });
 
 function shot() {
   try { view.render(); const src = view.renderer.domElement, k = Math.min(1, 900 / Math.max(src.width, src.height)); const c = document.createElement('canvas'); c.width = src.width * k; c.height = src.height * k; c.getContext('2d').drawImage(src, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', 0.72); } catch { return null; }
@@ -332,7 +379,7 @@ function debug() { return { screen: G.me ? 'game' : 'title', link: G.link?.kind 
 window.gameEye = {
   state: () => {
     const me = actors.get(G.me);
-    return { ground: [...ground.items.values()].map(g => ({ gid: g.gid, what: g.what, r: g.real || g.r, name: g.name, x: +g.x.toFixed(1), z: +g.z.toFixed(1) })), chests: [...ground.chests.values()].map(c => ({ id: c.id, x: c.x, z: c.z, open: c.open })), gold: heroes.current()?.gold, target: G.target || null, foes: [...foes.list.values()].map(f => ({ id: f.id, name: f.name, x: +f.x.toFixed(1), z: +f.z.toFixed(1), hp: f.hp, mhp: f.mhp, st: f.st })), hero: heroes.current() && { level: heroes.current().level, xp: heroes.current().xp }, me2: G.meSnap && { hp: G.meSnap.hp, mhp: G.meSnap.mhp, mp: G.meSnap.mp, dead: !!G.meSnap.dead }, screen: G.me ? 'game' : 'title', link: G.link?.kind || null, code: G.code, host: G.host === G.me, ping: G.ping && Math.round(G.ping), reconnecting: !!G.retry, area: G.area?.id || null, me: me ? { x: +me.x.toFixed(2), z: +me.z.toFixed(2), yaw: +me.yaw.toFixed(2), moving: !!me.moving, bodyReady: !!me.body } : null, players: [...actors.list.values()].map(a => ({ id: a.id, x: +a.x.toFixed(2), z: +a.z.toFixed(2) })), server: G.snap ? G.snap.players.map(p => ({ id: p.id, x: p.x, z: p.z })) : null, fps: Math.round(G.fps || 0) };
+    return { area: G.area?.id || null, prompt: travelUI.current ? { kind: travelUI.current.kind, to: travelUI.current.to || travelUI.current.id } : null, waypoints: heroes.current()?.waypoints, ground: [...ground.items.values()].map(g => ({ gid: g.gid, what: g.what, r: g.real || g.r, name: g.name, x: +g.x.toFixed(1), z: +g.z.toFixed(1) })), chests: [...ground.chests.values()].map(c => ({ id: c.id, x: c.x, z: c.z, open: c.open })), gold: heroes.current()?.gold, target: G.target || null, foes: [...foes.list.values()].map(f => ({ id: f.id, name: f.name, x: +f.x.toFixed(1), z: +f.z.toFixed(1), hp: f.hp, mhp: f.mhp, st: f.st })), hero: heroes.current() && { level: heroes.current().level, xp: heroes.current().xp }, me2: G.meSnap && { hp: G.meSnap.hp, mhp: G.meSnap.mhp, mp: G.meSnap.mp, dead: !!G.meSnap.dead }, screen: G.me ? 'game' : 'title', link: G.link?.kind || null, code: G.code, host: G.host === G.me, ping: G.ping && Math.round(G.ping), reconnecting: !!G.retry, area: G.area?.id || null, me: me ? { x: +me.x.toFixed(2), z: +me.z.toFixed(2), yaw: +me.yaw.toFixed(2), moving: !!me.moving, bodyReady: !!me.body } : null, players: [...actors.list.values()].map(a => ({ id: a.id, x: +a.x.toFixed(2), z: +a.z.toFixed(2) })), server: G.snap ? G.snap.players.map(p => ({ id: p.id, x: p.x, z: p.z })) : null, fps: Math.round(G.fps || 0) };
   },
   health: () => ({ ok: true, errors: 0 }),
 };
@@ -344,6 +391,7 @@ function padCombat() {
   const g = navigator.getGamepads ? [...navigator.getGamepads()].find(Boolean) : null; if (!g) return;
   const now = { a: g.buttons[0]?.pressed, b: g.buttons[1]?.pressed, x: g.buttons[2]?.pressed, y: g.buttons[3]?.pressed, lb: g.buttons[4]?.pressed, rb: g.buttons[5]?.pressed, lt: g.buttons[6]?.pressed, rt: g.buttons[7]?.pressed, back: g.buttons[8]?.pressed };
   const tap = k => now[k] && !padPrev[k];
+  if (tap('a') && travelUI.current && !(G.target && foes.get(G.target)?.st === 'attack')) { travelUI.use(); padPrev = now; return; }
   if (tap('a')) { const me = actors.get(G.me), n = me && ground.nearest(me.x, me.z, 3); if (n && !(G.target && foes.get(G.target)?.st === 'attack')) { goAndDo(n.x, n.z, n.kind === 'chest' ? { t: 'act', do: 'open', id: n.id } : { t: 'act', do: 'pickup', gid: n.id }); } else { if (!G.target || !foes.get(G.target)) { const t = nearestFoe(); if (t) setTarget(t); } useSkill('attack'); } }
   const bb = barOf(); if (tap('x')) useSkill(bb[0]); if (tap('y')) useSkill(bb[1]); if (tap('b')) useSkill(bb[2]); if (tap('rb')) useSkill(bb[3]);
   if (tap('lb')) targetNext();

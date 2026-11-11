@@ -10,6 +10,7 @@
 //   * An empty room closes after EMPTY_KEEP_MS (everyone dropped at once — e.g. a phone network blip — can come back).
 import { PROTOCOL, parseFrame, createBuckets, cleanCode, newCode, SNAP_EVERY } from './protocol.js';
 import * as World from '../sim/world.js';
+import { createRealm } from '../sim/realm.js';
 
 export const MAX_PLAYERS = 4;
 export const SEAT_KEEP_MS = 90_000;
@@ -25,7 +26,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
   function makeRoom(isPublic, zone = null) {
     const code = newCode(rand, c => rooms.has(c)); if (!code) return null;
     const z = zone && content?.zones?.[zone] ? zone : null;           // only zones the game has
-    const room = { code, world: World.createWorld({ seed: (rand() * 2 ** 31) >>> 0, content, zone: z }), seats: new Map(), host: null, made: now(), public: !!isPublic, banned: new Set(), emptySince: null };
+    const room = { code, realm: createRealm({ seed: (rand() * 2 ** 31) >>> 0, content, start: z }), tick: 0, seats: new Map(), host: null, made: now(), public: !!isPublic, banned: new Set(), emptySince: null };
     rooms.set(code, room); log('room', { code, public: room.public });
     return room;
   }
@@ -34,7 +35,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
   /** Who is here and what they look like: sent whenever someone joins, drops, comes back or leaves. */
   function roster(room) {
     broadcast(room, { t: 'roster', code: room.code, host: room.host, public: room.public,
-      players: [...room.seats.values()].map(x => { const p = room.world.players.get(x.id); return { id: x.id, name: p?.name, look: p?.look, away: !x.conn }; }) });
+      players: [...room.seats.values()].map(x => { const p = room.realm.worldOf(x.id)?.players.get(x.id); return { id: x.id, name: p?.name, look: p?.look, away: !x.conn, area: room.realm.where.get(x.id) }; }) });
   }
   function pickHost(room) {
     if (room.host && room.seats.has(room.host) && room.seats.get(room.host).conn) return;
@@ -42,7 +43,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
     room.host = next ? next.id : null;
   }
   function dropSeat(room, id, why = 'left') {
-    room.seats.delete(id); World.removePlayer(room.world, id);
+    room.seats.delete(id); room.realm.leave(id);
     pickHost(room);
     broadcast(room, { t: 'left', id, host: room.host, why });
     roster(room);
@@ -64,7 +65,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
       const seat = seatOf(); S.room = null; S.id = null;
       if (!seat) return;
       seat.conn = null; seat.awaySince = now();
-      World.setInput(room.world, seat.id, { mx: 0, mz: 0 });     // no seq: stop at once
+      const sw = room.realm.worldOf(seat.id); if (sw) World.setInput(sw, seat.id, { mx: 0, mz: 0 });     // no seq: stop at once
       pickHost(room); roster(room);
     }
     function sit(room, seat) {
@@ -72,7 +73,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
       S.room = room; S.id = seat.id;
       room.emptySince = null;
       pickHost(room);
-      send({ t: 'joined', code: room.code, you: seat.id, host: room.host, public: room.public, seed: room.world.seed, area: room.world.area.id });
+      const w = room.realm.worldOf(seat.id); send({ t: 'joined', code: room.code, you: seat.id, host: room.host, public: room.public, seed: w.seed, area: w.area.id });
       roster(room);
     }
     function enter(room, character) {
@@ -86,7 +87,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
       leave();
       const seat = { id: 'p' + (++serial), token: S.token, conn: null, awaySince: null };
       room.seats.set(seat.id, seat);
-      World.addPlayer(room.world, seat.id, chk.character || {});
+      room.realm.join(seat.id, chk.character || {});
       sit(room, seat);
     }
     function message(frame) {
@@ -110,8 +111,16 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
         case 'join': { const r = rooms.get(cleanCode(msg.code)); if (!r) return send({ t: 'err', code: 'nocode', msg: 'No game with that code. It may have ended.' }); return enter(r, msg.character); }
         case 'list': return send({ t: 'list', rooms: publicList() });
         case 'leave': return leave();
-        case 'input': if (S.room) World.setInput(S.room.world, S.id, msg); return;
-        case 'act': { if (!S.room) return; const r = World.act(S.room.world, S.id, msg); if (r?.err) send({ t: 'nope', msg: r.err, n: msg.n }); return; }
+        case 'input': { const w = S.room?.realm.worldOf(S.id); if (w) World.setInput(w, S.id, msg); return; }
+        case 'act': {
+          if (!S.room) return;
+          const realm = S.room.realm, before = realm.where.get(S.id);
+          const r = msg.do === 'travel' ? realm.travel(S.id, msg) : msg.do === 'trade' ? realm.trades.act(S.id, msg) : World.act(realm.worldOf(S.id), S.id, msg);
+          if (r?.err) send({ t: 'nope', msg: r.err, n: msg.n });
+          const after = realm.where.get(S.id);
+          if (after !== before) { const w = realm.worldOf(S.id); send({ t: 'area', area: after, seed: w.seed }); roster(S.room); }
+          return;
+        }
         case 'host': {
           const room = S.room; if (!room || room.host !== S.id) return;
           if (typeof msg.public === 'boolean') { room.public = msg.public; roster(room); }
@@ -132,8 +141,8 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
     const out = [];
     for (const r of rooms.values()) {
       if (!r.public || r.seats.size >= MAX_PLAYERS || !present(r).length) continue;
-      const host = r.world.players.get(r.host);
-      out.push({ code: r.code, host: host?.name || '?', players: r.seats.size, area: r.world.area.name });
+      const host = r.realm.worldOf(r.host)?.players.get(r.host);
+      out.push({ code: r.code, host: host?.name || '?', players: r.seats.size, area: r.realm.worldOf(r.host)?.area.name || '' });
       if (out.length >= PUBLIC_LIST_MAX) break;
     }
     return out;
@@ -148,16 +157,19 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
         room.emptySince ??= t;
         if (!room.seats.size || t - room.emptySince > EMPTY_KEEP_MS) { rooms.delete(room.code); log('room-closed', { code: room.code }); continue; }
       }
-      World.step(room.world);
-      // a hero's saved sheet changed (experience, levels): hand it back to its own browser, which saves it (ruling 1)
-      for (const id of room.world.charDirty) { const p = room.world.players.get(id), seat = room.seats.get(id); if (p && seat?.conn) seat.conn.send(JSON.stringify({ t: 'char', character: p.char })); }
-      room.world.charDirty.clear();
-      if (room.world.tick % SNAP_EVERY === 0) {
-        // events marked `to` (personal loot) go only to that player; everything else to everyone
-        const snap = World.snapshot(room.world), pub = snap.events.filter(e => !e.to), mine = snap.events.filter(e => e.to);
-        if (!mine.length) broadcast(room, { t: 'snap', ...snap });
-        else for (const seat of room.seats.values()) seat.conn?.send(JSON.stringify({ t: 'snap', ...snap, events: [...pub, ...mine.filter(e => e.to === seat.id)] }));
-      }
+      room.realm.step(); room.tick++;
+      room.realm.forEachWorld(w => {
+        // a hero's saved sheet changed (experience, levels): hand it back to its own browser, which saves it (ruling 1)
+        for (const id of w.charDirty) { const p = w.players.get(id), seat = room.seats.get(id); if (p && seat?.conn) seat.conn.send(JSON.stringify({ t: 'char', character: p.char })); }
+        w.charDirty.clear();
+      });
+      if (room.tick % SNAP_EVERY === 0) room.realm.forEachWorld((w, area) => {
+        if (!w.players.size) { w.events.length = 0; return; }
+        // each area's snapshot goes to the heroes in it; events marked `to` (personal loot) only to that hero
+        const snap = World.snapshot(w), pub = snap.events.filter(e => !e.to), mine = snap.events.filter(e => e.to);
+        const d = mine.length ? null : JSON.stringify({ t: 'snap', area, ...snap });
+        for (const seat of room.seats.values()) if (room.realm.where.get(seat.id) === area) seat.conn?.send(d || JSON.stringify({ t: 'snap', area, ...snap, events: [...pub, ...mine.filter(e => e.to === seat.id)] }));
+      });
     }
   }
   const status = () => ({ rooms: rooms.size, players: [...rooms.values()].reduce((n, r) => n + present(r).length, 0), public: [...rooms.values()].filter(r => r.public).length });

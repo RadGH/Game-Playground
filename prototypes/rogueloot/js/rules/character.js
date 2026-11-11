@@ -17,7 +17,7 @@ export function newCharacter({ name, look, id = null, now = Date.now(), kit = nu
     level: 1, xp: 0,
     attrs: Object.fromEntries(ATTRS.map(a => [a, START_ATTR])), unspent: 0, bonusAttr: 0,
     path: null, spec: null,
-    skills: {}, skillPoints: 0, questPoints: 0, bar: [],
+    skills: {}, skillPoints: 0, questPoints: 0, bar: ['sure_strike', 'spark', 'field_mend', 'shove', null, null],
     gold: 0, equip: kit || {}, bag: [], belt: [],
     quests: {}, waypoints: ['brightwater'], difficulty: 'normal',
   };

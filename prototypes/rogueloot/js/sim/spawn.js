@@ -6,6 +6,7 @@
 import { makeFoe } from './actors.js';
 import { monsterDef } from './content.js';
 import { resolve } from './move.js';
+import { rollMods, makeChampion, spawnRares } from './champions.js';
 
 export const FALLBACK = {
   test_raider: monsterDef('test_raider', { name: 'Hill Raider', role: 'brute', levelRange: [1, 3], size: 1.3, hp: 1, damage: 1, speed: 3.4 }),
@@ -17,18 +18,33 @@ const defOf = (w, id) => w.content.monsters?.[id] || FALLBACK[id] || null;
 const clampLevel = (def, L) => Math.max(def.levelRange[0], Math.min(def.levelRange[1], L));
 
 export function spawnArea(w) {
+  spawnPacks(w); spawnRares(w);
+}
+function spawnPacks(w) {
   let packN = 0;
   for (const sp of w.area.spawns || []) {
+    if (sp.boss) {                                         // a dungeon boss's marker: { x, z, boss: '<id>' }
+      const def = w.content.monsters[sp.boss]; if (!def) continue;
+      const f = makeFoe(w, def, def.raw?.level || sp.level || def.levelRange[0], sp.x, sp.z, { rank: 'boss', pack: 'boss-' + sp.boss });
+      f.leashBig = true; continue;
+    }
     const ids = sp.pack || pickPack(w, sp);
     const pack = 'k' + (++packN);
     const n = ids.length, ring = n > 6 ? 2.6 : 1.5;
+    const table = w.content.spawnTables?.[sp.table || w.area.table || w.area.id];
+    const champ = sp.tag !== 'swarm' && (sp.rank === 'champion' || w.rng() < (table?.champion ?? 0));
+    const mods = champ ? rollMods(w, sp.level || 1) : null;
+    const made = [];
     ids.forEach((id, i) => {
       const def = defOf(w, id); if (!def) return;
       const a = (i / n) * Math.PI * 2, r = n > 1 ? ring * (0.6 + 0.4 * ((i * 7) % 3) / 2) : 0;
       const [x, z] = resolve(w.area, sp.x + Math.cos(a) * r, sp.z + Math.sin(a) * r, def.radius);      // never inside a tree
       const f = makeFoe(w, def, clampLevel(def, sp.level || def.levelRange[0]), x, z, { pack, rank: sp.rank || 'normal' });
       if (sp.route) { f.route = sp.route; f.leg = 0; }
+      made.push(f);
     });
+    // a champion pack: the first is the champion (all its mods), the rest share the pack-wide ones; twinned = two
+    if (mods && made.length) { made.forEach((f, i) => makeChampion(w, f, mods, { leader: i === 0 || (i === 1 && mods.includes('twinned')) })); }
   }
 }
 /** Roll one composition from a table list: [{ w, of: { id: n | [min, max] }, minLevel }]. */

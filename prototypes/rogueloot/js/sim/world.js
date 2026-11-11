@@ -12,8 +12,13 @@ import { stepBrains } from './brain.js';
 import { spawnArea } from './spawn.js';
 import { speedFactor, stepFx } from './status.js';
 import { hurt } from './fight.js';
+import { stepPending } from './champions.js';
+import { stepAllies, spawnAlly } from './allies.js';
+import { mercAct } from './mercs.js';
 import { inventoryAct } from './inventory.js';
-import { pickPath, learn, setBar, resourceOf } from './skills.js';
+import { townAct } from './town.js';
+import { craftAct } from './craft.js';
+import { pickPath, learn, setBar, resourceOf, pickSpec, respec } from './skills.js';
 import { refreshHero } from './actors.js';
 import { stepLoot, pickup, openChest, placeChests } from './loot.js';
 
@@ -36,10 +41,12 @@ export function addPlayer(w, id, character = {}) {
   rescaleFoes(w, n + 1);
   p.x = s.x + (n % 2 ? 1.2 : -1.2) * Math.ceil(n / 2); p.z = s.z; p.yaw = Math.PI;
   w.players.set(id, p);
+  if (character.merc && !character.merc.dead) spawnAlly(w, id, character.merc);
   return p;
 }
 export function removePlayer(w, id) {
   w.players.delete(id);
+  if (w.allies) for (const [k, a] of w.allies) if (a.owner === id) w.allies.delete(k);
   rescaleFoes(w, w.players.size);
   for (const f of w.foes.values()) { f.threat.delete(id); if (f.target === id) f.target = null; }
 }
@@ -70,12 +77,17 @@ export function act(w, id, a) {
   switch (a.do) {
     case 'use': return useSkill(w, p, String(a.skill || ''), a.target ?? p.target, a.at && Number.isFinite(a.at.x) && Number.isFinite(a.at.z) ? { x: +a.at.x, z: +a.at.z } : null);
     case 'path': { const r = pickPath(w, p, String(a.path || '')); if (r.ok) { w.charDirty.add(p.id); refreshHero(w, p); initResource(w, p); } return r; }
+    case 'spec': { const r = pickSpec(w, p, String(a.spec || '')); if (r.ok) { w.charDirty.add(p.id); refreshHero(w, p); } return r; }
+    case 'respec': { const r = respec(w, p, a); if (r.ok) { w.charDirty.add(p.id); refreshHero(w, p); } return r; }
     case 'learn': { const r = learn(w, p, String(a.skill || '')); if (r.ok) { w.charDirty.add(p.id); refreshHero(w, p); } return r; }
     case 'bar': { const r = setBar(w, p, a.i | 0, a.skill ? String(a.skill) : null); if (r.ok) w.charDirty.add(p.id); return r; }
     case 'target': return setTarget(w, p, a.target ?? null);
     case 'release': return release(w, p);
     case 'revive': return startRevive(w, p, a.target);
     case 'equip': case 'unequip': case 'move': case 'identify': case 'spend': case 'swap': case 'drink': case 'belt': case 'unbelt': return inventoryAct(w, p, a);
+    case 'shop': case 'buy': case 'buyPotion': case 'sell': case 'repair': case 'gamble': case 'stash': case 'unstash': return townAct(w, p, a);
+    case 'craft': case 'salvage': case 'convert': return craftAct(w, p, a);
+    case 'merc': return mercAct(w, p, a);
     case 'pickup': return pickup(w, p, String(a.gid || ''));
     case 'open': return openChest(w, p, String(a.id || ''));
     case 'stop': p.autoOn = false; if (p.cast) { p.cast = null; w.events.push({ k: 'cancel', s: p.id }); } return { ok: true };
@@ -98,10 +110,12 @@ export function step(w) {
     stepResource(w, p, DT);
   }
   stepBrains(w, DT);
+  stepAllies(w, DT);
   stepCasts(w);
   stepAuto(w);
   stepShots(w, DT);
   stepLoot(w);
+  stepPending(w);
   // corpses fade, then go (fresh each game session: nothing respawns, ruling 25)
   for (const f of [...w.foes.values()]) if (f.dead && w.time - f.diedAt > KEEP_CORPSE) w.foes.delete(f.id);
 }
@@ -117,12 +131,13 @@ export function snapshot(w) {
     cds: Object.keys(p.cds).length ? Object.fromEntries(Object.entries(p.cds).filter(([, t]) => t > w.time).map(([k, t]) => [k, r2(t - w.time)])) : undefined });
   for (const f of w.foes.values()) foes.push({ id: f.id, d: f.def.id, n: f.name, x: r2(f.x), z: r2(f.z), yaw: r2(f.yaw), lvl: f.level, hp: Math.round(f.hp), mhp: f.maxHp,
     st: f.dead ? 'dead' : f.state, rk: f.rank !== 'normal' ? f.rank : undefined,
-    fx: f.fx?.length ? f.fx.map(x => x.kind) : undefined,
+    fx: f.fx?.length ? f.fx.map(x => x.kind) : undefined, mods: f.mods?.length ? f.mods : undefined, ward: f.ward ? Math.round(f.ward / f.wardMax * 100) : undefined,
     cast: f.cast ? { sk: f.cast.name, t: r2(f.cast.end - f.cast.start), left: r2(f.cast.end - w.time), int: f.cast.interruptible || undefined } : undefined, tg: f.target || undefined });
+  const allies = [...(w.allies?.values() || [])].map(a => ({ id: a.id, o: a.owner, n: a.name, x: r2(a.x), z: r2(a.z), yaw: r2(a.yaw), moving: a.moving, hp: Math.round(a.hp), mhp: a.maxHp, dead: a.dead || undefined, k: a.mercKind || a.akind, look: a.look }));
   const chests = [...(w.chests?.values() || [])].map(c => ({ id: c.id, x: c.x, z: c.z, tier: c.tier, by: c.openedBy.size ? [...c.openedBy] : undefined }));
   const shots = w.shots.map(s => ({ id: s.id, x: r2(s.x), z: r2(s.z), ty: s.type }));
   const events = w.events; w.events = [];
-  return { tick: w.tick, time: w.time, players, foes, shots, chests, events };
+  return { tick: w.tick, time: w.time, players, foes, allies, shots, chests, events };
 }
 
 /** More heroes, tougher monsters (ruling 5): health follows the bestiary's playersScaling; a hurt monster keeps its share. */
@@ -132,7 +147,9 @@ export function rescaleFoes(w, n) {
   for (const f of w.foes.values()) {
     if (f.dead) continue;
     const base = f.maxHp / (f.crowd || 1), frac = f.hp / f.maxHp;
-    f.crowd = want; f.maxHp = Math.round(base * want); f.hp = Math.max(1, Math.round(f.maxHp * frac));
+    const own = f.def.boss && f.def.raw?.scaling ? f.def.raw.scaling[Math.max(0, Math.min(f.def.raw.scaling.length - 1, Math.max(1, n) - 1))] : null;
+    f.crowd = own ?? want;
+    f.maxHp = Math.round(base * f.crowd); f.hp = Math.max(1, Math.round(f.maxHp * frac));
   }
   w.crowd = want;
 }

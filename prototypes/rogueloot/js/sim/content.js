@@ -6,22 +6,26 @@
 import { monsterBaseline } from '../rules/combat.js';
 import { itemData } from '../rules/items.js';
 
-export const FILES = ['monsters.json', 'skills.json', 'skills-paths.json', 'item-bases.json', 'balance.json', 'affixes.json', 'rarity.json', 'uniques.json', 'legendaries.json', 'potions.json'];
+export const FILES = ['monsters.json', 'skills.json', 'skills-paths.json', 'item-bases.json', 'balance.json', 'affixes.json', 'rarity.json', 'uniques.json', 'legendaries.json', 'potions.json', 'acts.json', 'currency.json', 'mercenaries.json', 'specs.json', 'skills-specs-index.json'];
 
 export function buildContent(raw) {
   const monsters = {};
   const src = raw['monsters.json']?.monsters || {};
-  for (const [id, m] of Object.entries(src)) monsters[id] = monsterDef(id, m);
-  for (const [id, m] of Object.entries(raw['monsters.json']?.bosses || {})) monsters[id] = monsterDef(id, { ...m, boss: true });
+  for (const [id, m] of Object.entries(src)) if (!id.startsWith('_')) monsters[id] = monsterDef(id, m);
+  for (const [id, m] of Object.entries(raw['monsters.json']?.bosses || {})) if (!id.startsWith('_')) monsters[id] = monsterDef(id, { ...m, boss: true });
   const skills = {};
   for (const [id, s] of Object.entries(raw['skills.json']?.skills || {})) skills[id] = { id, ...s };
   // the Path skills (and the Wanderer's, rewritten in the same vocabulary) win over the M4 file
   for (const [id, s] of Object.entries(raw['skills-paths.json']?.skills || {})) skills[id] = { id, ...s };
+  for (const f of raw['skills-specs-index.json']?.files || []) for (const [id, s] of Object.entries(raw[f]?.skills || {})) skills[id] = { id, ...s };
   const bases = {};
   for (const b of raw['item-bases.json']?.bases || []) bases[b.id] = b;
   const mj = raw['monsters.json'] || {};
+  const specs = raw['specs.json']?.specs || {};
   const items = itemData({ bases: raw['item-bases.json'], affixes: raw['affixes.json'], rarity: raw['rarity.json'], uniques: raw['uniques.json'], legendaries: raw['legendaries.json'] });
-  return { paths: raw['skills-paths.json']?.paths || {}, resources: raw['skills-paths.json']?.resources || {}, potions: raw['potions.json'] || { stack: 4, sizes: {} }, items, balance: raw['balance.json'] || {}, monsters, skills, bases, spawnTables: mj.spawnTables || {}, champions: mj.champions || {}, rares: mj.rares || {}, families: mj.families || {}, baseline: baselineFrom(mj.baseline) };
+  // a spec's armour and weapons join its Path's at level 10 (rules/items.js profOf reads proficiency[spec])
+  for (const [id, sp] of Object.entries(specs)) items.proficiency[id] = { armour: sp.armour || [], weapons: sp.weapons || [], offhand: sp.offhand || [] };
+  return { specs, mercs: raw['mercenaries.json'] || null, currency: raw['currency.json'] || null, acts: raw['acts.json']?.acts || [], paths: raw['skills-paths.json']?.paths || {}, resources: raw['skills-paths.json']?.resources || {}, potions: raw['potions.json'] || { stack: 4, sizes: {} }, items, balance: raw['balance.json'] || {}, monsters, skills, bases, spawnTables: mj.spawnTables || {}, champions: mj.champions || {}, rares: mj.rares || {}, families: mj.families || {}, baseline: baselineFrom(mj.baseline) };
 }
 
 /** The bestiary's per-level baseline: formulas in L ("48 + 26*L + 1.4*L*L") compiled once, safely (digits, L, + - * / ( ) . only). */
@@ -41,12 +45,14 @@ export function baselineFrom(b) {
 }
 export function loadContent(readJson) {
   const raw = {}; for (const f of FILES) { try { raw[f] = readJson(f); } catch { raw[f] = null; } }
+  for (const f of raw['skills-specs-index.json']?.files || []) { try { raw[f] = readJson(f); } catch { raw[f] = null; } }
   const c = buildContent(raw); c.zones = {};
   try { for (const id of readJson('zones/index.json').zones) c.zones[id] = readJson(`zones/${id}.json`); } catch { /* no zones yet */ }
   return c;
 }
 export async function loadContentAsync(readJson) {
   const raw = {}; await Promise.all(FILES.map(async f => { try { raw[f] = await readJson(f); } catch { raw[f] = null; } }));
+  await Promise.all((raw['skills-specs-index.json']?.files || []).map(async f => { try { raw[f] = await readJson(f); } catch { raw[f] = null; } }));
   const c = buildContent(raw); c.zones = {};
   try { const idx = await readJson('zones/index.json'); await Promise.all(idx.zones.map(async id => { c.zones[id] = await readJson(`zones/${id}.json`); })); } catch { /* no zones yet */ }
   return c;
@@ -89,6 +95,7 @@ export function monsterStats(def, level, { hpMult = 1, dmgMult = 1, base = null,
 }
 
 import { isPotion, checkPotion } from '../rules/potions.js';
+import { isCurrency, checkCurrency } from '../rules/crafting.js';
 import { checkItem } from '../rules/items.js';
 /** The server's light check for anything a hero carries (ruling 8): items and potions. */
-export const checkAny = (content, it) => isPotion(it) ? checkPotion(content.potions, it) : checkItem(content.items, it);
+export const checkAny = (content, it) => isPotion(it) ? checkPotion(content.potions, it) : isCurrency(it) ? checkCurrency(content.currency, it) : checkItem(content.items, it);

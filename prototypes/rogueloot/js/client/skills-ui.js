@@ -26,12 +26,16 @@ export function skillText(sk, rank, level, ch = null, skills = null) {
 
 export function createSkillsUI({ content, send, getChar, nope }) {
   const S = content.skills, root = document.createElement('div'); root.className = 'skills-ui'; root.hidden = true; document.body.append(root);
-  let pathAsked = false;
+  let pathAsked = false, specAsked = false, tab = 'path';
   function toggle(force) { root.hidden = force != null ? !force : !root.hidden; if (!root.hidden) draw(); }
   function draw(ch = getChar()) {
     if (root.hidden || !ch) return;
     if (!ch.path && ch.level >= 3) return drawPaths(ch);
-    const own = Object.values(S).filter(s => s.owner === ch.path && s.tree);
+    if (ch.path && !ch.spec && ch.level >= 10 && tab !== 'path' && Object.keys(content.specs || {}).length) return drawSpecs(ch);
+    const specTrees = ch.spec ? (content.specs?.[ch.spec]?.trees || []) : [];
+    const tabs = [['path', content.paths[ch.path]?.tree?.name || 'Path'], ...specTrees.map(t => [t.id, t.name])];
+    if (!tabs.some(t => t[0] === tab)) tab = specTrees[0]?.id || 'path';
+    const own = Object.values(S).filter(s => tab === 'path' ? (s.owner === ch.path && s.tree) : (s.owner === ch.spec && s.tree === tab));
     const wand = Object.values(S).filter(s => s.owner === 'wanderer');
     const P = content.paths[ch.path];
     const node = s => {
@@ -46,16 +50,29 @@ export function createSkillsUI({ content, send, getChar, nope }) {
         ${s.kind === 'active' && rank ? `<button class="tobar" data-bar="${s.id}" title="Put on the action bar">⇩</button>` : ''}</div>`;
     };
     const rows = {}; for (const s of own) (rows[s.reqLevel || 3] ||= []).push(s);
-    root.innerHTML = `<div class="skills-panel"><header><h2>${esc(P?.tree?.name || 'Skills')}</h2><span>${ch.path ? esc(P?.name) : 'Wanderer'} · ${ch.skillPoints || 0} skill point${ch.skillPoints === 1 ? '' : 's'} to spend</span><button class="x" data-close aria-label="Close">×</button></header>
+    root.innerHTML = `<div class="skills-panel"><header><h2>${esc(tab === 'path' ? (P?.tree?.name || 'Skills') : (specTrees.find(t => t.id === tab)?.name || 'Skills'))}</h2><span>${ch.path ? esc(P?.name) : 'Wanderer'} · ${ch.skillPoints || 0} skill point${ch.skillPoints === 1 ? '' : 's'} to spend</span><button class="x" data-close aria-label="Close">×</button></header>
+      ${tabs.length > 1 ? `<div class="tabs">${tabs.map(([id, name]) => `<button data-tab="${id}" class="${id === tab ? 'on' : ''}">${esc(name)}</button>`).join('')}</div>` : ''}
+      ${ch.path && !ch.spec && ch.level >= 10 ? '<button class="primary pickspec" data-pickspec>Choose your specialization</button>' : ''}
       ${ch.path ? `<div class="tree">${Object.keys(rows).sort((a, b) => a - b).map(L => `<div class="tier"><span class="lv">${L}</span><div class="nodes">${rows[L].map(node).join('')}</div></div>`).join('')}</div>` : `<p class="hint">At level 3 you choose a Path: Fighter, Rogue, Mage or Healer. Until then you fight as a Wanderer.</p>`}
       <h3>Wanderer</h3><div class="nodes wand">${wand.map(node).join('')}</div>
       <h3>Action bar</h3><div class="barset">${[0, 1, 2, 3, 4, 5].map(i => { const id = ch.bar?.[i]; return `<button class="bslot2" data-slot="${i}">${id ? skillIcon(S[id]) + '<small>' + esc(S[id]?.name || '') + '</small>' : '<small>empty</small>'}<b>${i + 1}</b></button>`; }).join('')}</div>
       <p class="hint">Tap ⇩ on a skill, then a slot, to put it there.</p></div>`;
     root.querySelector('[data-close]').onclick = () => toggle(false);
+    root.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; draw(); });
+    root.querySelector('[data-pickspec]')?.addEventListener('click', () => { tab = 'spec'; draw(); });
     root.querySelectorAll('[data-learn]').forEach(b => b.onclick = () => send({ do: 'learn', skill: b.dataset.learn }));
     let pending = null;
     root.querySelectorAll('[data-bar]').forEach(b => b.onclick = () => { pending = b.dataset.bar; root.querySelectorAll('.bslot2').forEach(x => x.classList.add('pick')); });
     root.querySelectorAll('.bslot2').forEach(b => b.onclick = () => { if (pending) send({ do: 'bar', i: +b.dataset.slot, skill: pending }); else send({ do: 'bar', i: +b.dataset.slot, skill: null }); pending = null; });
+  }
+  function drawSpecs(ch) {
+    const list = Object.entries(content.specs || {}).filter(([, sp]) => (sp.paths || []).includes(ch.path));
+    root.innerHTML = `<div class="skills-panel paths"><header><h2>Choose your specialization</h2><span>Level ${ch.level}: three new skill trees, and new armour for some. The trainer in town can change it later, for a price.</span><button class="x" data-close aria-label="Close">×</button></header>
+      <div class="path-cards">${list.map(([id, sp]) => `<button class="path-card" data-spec="${id}"><b>${esc(sp.name)}</b><small>${(sp.paths || []).length > 1 ? 'Hybrid · ' : ''}${esc((sp.armour || []).join(', ') || 'no new armour')}</small><p>${esc(sp.blurb || sp.fantasy || '')}</p><span class="starters">${(sp.trees || []).map(t => esc(t.name)).join(' · ')}</span>${S && Object.values(S).some(s => s.owner === id) ? '' : '<em class="soon">(its trees arrive in a later update)</em>'}</button>`).join('')}</div>
+      <button data-later>Not yet</button></div>`;
+    root.querySelector('[data-close]').onclick = () => toggle(false);
+    root.querySelector('[data-later]').onclick = () => { tab = 'path'; draw(); };
+    root.querySelectorAll('[data-spec]').forEach(b => b.onclick = () => { if (confirm(`Become a ${content.specs[b.dataset.spec].name}?`)) send({ do: 'spec', spec: b.dataset.spec }); });
   }
   function drawPaths(ch) {
     const P = content.paths;
@@ -68,6 +85,7 @@ export function createSkillsUI({ content, send, getChar, nope }) {
   /** Called on every character update: at level 3 with no Path, offer the choice once. */
   function check(ch) {
     if (ch && !ch.path && ch.level >= 3 && !pathAsked) { pathAsked = true; toggle(true); }
+    if (ch && ch.path && !ch.spec && ch.level >= 10 && !specAsked && Object.keys(content.specs || {}).length) { specAsked = true; tab = 'spec'; toggle(true); }
     if (!root.hidden) draw(ch);
   }
   void nope;

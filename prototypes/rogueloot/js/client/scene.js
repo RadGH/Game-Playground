@@ -28,7 +28,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     const h = Math.sin(CAM.pitch) * CAM.dist, back = Math.cos(CAM.pitch) * CAM.dist;
     camera.position.set(focus.x - Math.sin(CAM.yaw) * back, h, focus.z + Math.cos(CAM.yaw) * back);
     const gy = view.groundY ? view.groundY(focus.x, focus.z) : 0;
-    scene.fog.near = CAM.dist + 16; scene.fog.far = CAM.dist + 52;
+    scene.fog.near = CAM.dist + (view.dark ? 2 : 16); scene.fog.far = CAM.dist + (view.dark ? 26 : 52);
     camera.position.y += gy; camera.lookAt(focus.x, gy + 0.8, focus.z);
     sun.position.set(focus.x - 14, 26, focus.z + 10); sun.target.position.set(focus.x, 0, focus.z);
   }
@@ -53,7 +53,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   canvas.addEventListener('pointermove', e => { if (!touches.has(e.pointerId)) return; touches.set(e.pointerId, [e.clientX, e.clientY]); if (touches.size === 2 && pinch0) { const [a, b] = [...touches.values()]; setZoom(dist0 * pinch0 / Math.max(20, Math.hypot(a[0] - b[0], a[1] - b[1]))); } });
   const lift = e => { touches.delete(e.pointerId); if (touches.size < 2) pinch0 = 0; };
   canvas.addEventListener('pointerup', lift); canvas.addEventListener('pointercancel', lift);
-  const view = { THREE, renderer, scene, camera, sun, follow, snapTo, screenToWorld, resize, render: () => renderer.render(scene, camera), groundY: null };
+  const view = { THREE, renderer, scene, camera, sun, hemi, follow, snapTo, screenToWorld, resize, render: () => renderer.render(scene, camera), groundY: null };
   return view;
 }
 

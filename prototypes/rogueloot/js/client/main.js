@@ -20,10 +20,12 @@ import { createSkillsUI } from './skills-ui.js';
 import { createTravelUI } from './travel-ui.js';
 import { createTownUI } from './town-ui.js';
 import { createPartyUI } from './party-ui.js';
+import { activeStep } from '../sim/quests.js';
 import { randomLook } from '../../../knockabout/js/client/look.js';
 import { makeRng, hashStr } from '../sim/rng.js';
 import { createGround } from './ground.js';
-import { play, LOOT_SOUND } from './sound.js';
+import { play, LOOT_SOUND, soundFor, ambience, setVolume, getVolume } from './sound.js';
+import { maybeRate, tally } from './rate.js';
 import { loadContentAsync } from '../sim/content.js';
 import { cleanCode } from '../net/protocol.js';
 import { qrSvg, joinUrl } from '../../../tumblefair/js/client/qr.js';
@@ -31,6 +33,7 @@ import { qrSvg, joinUrl } from '../../../tumblefair/js/client/qr.js';
 const $ = s => document.querySelector(s);
 const store = { get(k, d) { try { const v = localStorage.getItem('rogueloot.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem('rogueloot.' + k, JSON.stringify(v)); } catch { /* private */ } } };
 const ONLINE = serverAvailable();
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 document.body.classList.toggle('no-server', !ONLINE);
 
 const quality = store.get('quality', isTouch() ? 'low' : 'high');
@@ -52,9 +55,10 @@ const skillsUI = createSkillsUI({ content, send: a => G.link?.send({ t: 'act', .
 const sendAct = a => G.link?.send({ t: 'act', ...a });
 const townUI = createTownUI({ content, send: sendAct, getChar: () => heroes.current() });
 const travelUI = createTravelUI({ view, content, labelRoot: $('#tags'), send: sendAct, getChar: () => heroes.current(), getMe: () => actors.get(G.me), getArea: () => G.area,
-  onNpc: (id) => { if (id === 'stash') townUI.openStash(); else sendAct({ do: 'shop', npc: id }); } });
+  onNpc: (id) => { if (id === 'stash') townUI.openStash(); else if (id === 'elder') { const q = activeStep(content, heroes.current() || {}); if (q) showQuest(q.name, q.text); else showQuest('The coast is safe', 'For now. Rest in Brightwater, hero.'); } else sendAct({ do: 'shop', npc: id }); } });
 const partyUI = createPartyUI({ content, send: sendAct, getChar: () => heroes.current(), zoneName: id => content.zones?.[id]?.name || id || '' });
-const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }) });
+const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }),
+  quest: ch => { const q = activeStep(content, ch, G.difficulty); if (!q) return null; const r = q.rule || {}; const n = ch.quests?.[q.id]?.n || 0; return { name: q.name, progress: r.kind === 'kill' ? `Defeat foes in ${content.zones?.[r.node]?.name || r.node}: ${n} / ${r.n}` : r.kind === 'boss' ? `Defeat ${content.monsters?.[r.boss]?.name || 'the boss'}` : r.kind === 'reach' ? `Reach ${content.zones?.[r.to]?.name || content.acts?.[0]?.nodes?.find(x => x.id === r.to)?.name || r.to}` : '' }; } });
 const input = createInput();
 const touch = createTouch($('#touch'), input);
 
@@ -85,8 +89,15 @@ function start(link, first) {
   link.ready.then(() => link.send(first)).catch(e => titleMsg(e.message));
 }
 const wantZone = new URLSearchParams(location.search).get('zone');
-$('#solo').onclick = () => start(openSolo(), { t: 'create', character: character(), ...(wantZone ? { zone: wantZone } : {}) });
-$('#host').onclick = () => start(online(), { t: 'create', public: $('#host-public').checked, character: character() });
+const diffOf = () => $('#difficulty').value || 'normal';
+function refreshDifficulty() {
+  const ch = heroes.current(), have = ch?.difficulties || ['normal'], T = content.difficulty?.tiers || {};
+  $('#difficulty').innerHTML = Object.entries(T).filter(([id]) => have.includes(id)).map(([id, t]) => `<option value="${id}">${t.name}</option>`).join('');
+  $('.diff-row').hidden = have.length < 2;
+}
+setInterval(refreshDifficulty, 1500); refreshDifficulty();
+$('#solo').onclick = () => start(openSolo(), { t: 'create', difficulty: diffOf(), character: character(), ...(wantZone ? { zone: wantZone } : {}) });
+$('#host').onclick = () => start(online(), { t: 'create', difficulty: diffOf(), public: $('#host-public').checked, character: character() });
 $('#join').onclick = () => { const code = cleanCode($('#code').value); if (code.length !== 4) return titleMsg('Type the 4-letter code.'); start(online(), { t: 'join', code, character: character() }); };
 $('#code').addEventListener('keydown', e => { if (e.key === 'Enter') $('#join').click(); });
 $('#find').onclick = () => { const l = online(); G.link = l; l.ready.then(() => l.send({ t: 'list' })); };
@@ -125,7 +136,7 @@ function reconnect() {
 function banner(text) { let b = $('#banner'); if (!b) { b = document.createElement('div'); b.id = 'banner'; document.body.append(b); } b.textContent = text || ''; b.hidden = !text; }
 function showList(rooms) {
   const root = document.createElement('div'); root.className = 'modal';
-  root.innerHTML = `<div class="panel"><h2>Find a game</h2>${rooms.length ? `<div class="menu-list">${rooms.map(r => `<button data-code="${r.code}">${esc(r.host)}'s game · ${r.players}/4 · ${esc(r.area)}</button>`).join('')}</div>` : '<p>No public games right now. Host one and tick “List it publicly”.</p>'}<div class="btns" style="margin-top:12px"><button data-close>Close</button></div></div>`;
+  root.innerHTML = `<div class="panel"><h2>Find a game</h2>${rooms.length ? `<div class="menu-list">${rooms.map(r => `<button data-code="${r.code}">${esc(r.host)}'s game · ${r.players}/4 · ${esc(r.area)}${r.difficulty && r.difficulty !== 'normal' ? ' · ' + esc(content.difficulty.tiers[r.difficulty]?.name) : ''}</button>`).join('')}</div>` : '<p>No public games right now. Host one and tick “List it publicly”.</p>'}<div class="btns" style="margin-top:12px"><button data-close>Close</button></div></div>`;
   root.addEventListener('click', e => { const c = e.target.closest('[data-code]')?.dataset.code; if (c) { root.remove(); start(online(), { t: 'join', code: c, character: character() }); } else if (e.target === root || e.target.closest('[data-close]')) root.remove(); });
   document.body.append(root); root.querySelector('button')?.focus();
 }
@@ -156,25 +167,31 @@ setInterval(() => { if (G.me && G.link?.kind === 'online' && G.link.alive) G.lin
 
 /** Draw an area (on joining, and every time the sim moves you to another one). */
 function showArea(areaId, seed) {
+  // leaving a zone or dungeon for the first time: ask how it was (once per place per device)
+  const prev = G.area; if (prev?.zone && prev.id !== areaId && prev.id !== 'brightwater' && prev.id !== 'proving_meadow') maybeRate(prev.id, prev.name, { level: heroes.current()?.level, players: G.roster?.size || 1 });
+  tally('zone', { z: areaId });
   G.area = content.zones?.[areaId] ? buildArea(content.zones[areaId]) : testField(seed);
   if (G.areaGroup) view.scene.remove(G.areaGroup);
   G.areaGroup = G.area.zone ? buildZoneView(view, G.area, { quality }) : buildTestArea(view, G.area);
   for (const id of [...foes.list.keys()]) { const f = foes.get(id); view.scene.remove(f.group); f.tag.remove(); foes.list.delete(id); }
   for (const id of [...actors.list.keys()]) if (id !== G.me) actors.remove(id);
   ground.clear(); G.goto = null; G.pending = []; G.jump = true; G.target = null;
-  $('.hud-area').textContent = G.area.name;
+  $('.hud-area').textContent = G.area.name + (G.difficulty && G.difficulty !== 'normal' ? ` · ${content.difficulty.tiers[G.difficulty]?.name}` : '');
   travelUI.enterArea(G.area);
+  ambience(G.area.theme);
   // the town's people stand at their markers (Chibi 2.6 bodies, a look seeded from who they are)
   for (const m of G.area.markers || []) if (m.kind === 'npc') { const rng = makeRng(hashStr(m.id + ':' + areaId)); const a = actors.add('npc:' + m.id, { name: m.label || m.id, look: randomLook(rng) }); a.x = m.x; a.z = m.z; a.yaw = Math.atan2((G.area.spawn.x - m.x), (G.area.spawn.z - m.z)); a.npc = true; }
 }
 function enterGame(m) {
+  tally('play', { solo: G.link?.kind === 'solo' ? 1 : 0 });
   if (G.retry) { clearInterval(G.retry); G.retry = null; banner(null); }
   const again = G.me === m.you && G.area;
   G.me = m.you; G.code = G.link.kind === 'online' ? m.code : null; G.host = m.host; G.pending = [];
   if (again) return;
+  G.difficulty = m.difficulty || 'normal';
   showArea(m.area, m.seed);
   $('#title').hidden = true; $('#hud').hidden = false; $('#fight').hidden = false; document.body.classList.add('in-game');
-  $('.hud-area').textContent = G.area.name;
+  $('.hud-area').textContent = G.area.name + (G.difficulty && G.difficulty !== 'normal' ? ` · ${content.difficulty.tiers[G.difficulty]?.name}` : '');
   const codeEl = $('.hud-code'); codeEl.hidden = !G.code; codeEl.textContent = G.code ? `Code ${G.code}` : ''; codeEl.onclick = openInvite;
   touch.show(isTouch());
   if (G.code) history.replaceState(null, '', `?code=${G.code}`);
@@ -230,6 +247,7 @@ function onSnap(s) {
 const worldAt = (x, z, y = 1.6) => { const v = new view.THREE.Vector3(x, y, z).project(view.camera); const c = view.renderer.domElement; return [(v.x * 0.5 + 0.5) * c.clientWidth, (-v.y * 0.5 + 0.5) * c.clientHeight]; };
 function posOf(id) { const f = foes.get(id); if (f) return [f.x, f.z, (f.group.userData.height || 1.5)]; const a = actors.get(id); return a ? [a.x, a.z, 2] : null; }
 function onEvent(e, now) {
+  soundFor(e, id => posOf(id), actors.get(G.me), G.me);
   if (e.k === 'tele') { fx.tele(e, now); return; }
   if (e.k?.startsWith('trade') && partyUI.onEvent(e)) return;
   if (e.k === 'drop') { ground.add(e); if (e.what === 'shard') play('loot.uncommon'); else if (e.what === 'item') play(LOOT_SOUND[e.real] || 'loot.normal'); else if (e.what === 'gold') play('loot.common'); return; }
@@ -241,6 +259,11 @@ function onEvent(e, now) {
   if (e.k === 'sold') { play('loot.common'); return; }
   if (e.k === 'crafted') { play('loot.magic'); return; }
   if (e.k === 'salvaged') { play('ui.click'); return; }
+  if (e.k === 'difficulty-unlocked') { banner2(`${e.name} unlocked!`); return; }
+  if (e.k === 'quest-done') { banner2(`Quest complete: ${e.name}`); play('loot.rare'); return; }
+  if (e.k === 'quest-new') { setTimeout(() => showQuest(e.name, e.text), 2400); return; }
+  if (e.k === 'quest-progress') { hud.nope(`${e.n} / ${e.of}`); return; }
+  if (e.k === 'die' && foes.get(e.t)?.rk === 'boss') { const f = foes.get(e.t); setTimeout(() => maybeRate('boss_' + (content.monsters[[...Object.keys(content.monsters)].find(k => content.monsters[k].name === f.name)]?.id || 'boss'), f.name, { level: heroes.current()?.level }), 3000); }
   if (e.k === 'phase') { banner2(e.name); play('ui.open'); return; }
   if (e.k === 'enrage') { banner2('Enraged!'); return; }
   if (e.k === 'burst' || e.k === 'area') { fx.burst?.(e); return; }
@@ -252,16 +275,31 @@ function onEvent(e, now) {
     const [x, y] = worldAt(at[0], at[1], at[2]);
     const mine = e.s === G.me, onMe = e.t === G.me;
     const text = e.r === 'miss' ? 'Miss' : e.r === 'dodge' ? 'Dodge' : e.r === 'resist' ? 'Resist' : (e.r === 'block' ? `${e.n} (blocked)` : String(e.n));
+    if (onMe && e.n > (G.meSnap?.mhp || 100) * 0.12) shake(0.25);
     if (mine || onMe || G.target === e.t) hud.float(x + (Math.random() * 30 - 15), y, text + (e.r === 'crit' ? '!' : ''), (onMe ? 'hurt' : 'deal') + (e.r === 'crit' ? ' crit' : '') + ' ty-' + e.ty);
     const f = foes.get(e.t); if (f && e.n > 0) f.hitAt = now;
   } else if (e.k === 'heal') { const at = posOf(e.t); if (at) { const [x, y] = worldAt(at[0], at[1], at[2]); hud.float(x, y, '+' + e.n, 'heal'); } }
   else if (e.k === 'swing') { const f = foes.get(e.s); if (f) f.swingAt = now; else actors.get(e.s)?.swing?.(); }
   else if (e.k === 'drink' && e.t === G.me) { const a = actors.get(G.me); if (a) { const [x, y] = worldAt(a.x, a.z, 2.2); hud.float(x, y, e.kind === 'mana' ? '💧' : '❤', e.kind === 'mana' ? 'xp' : 'heal'); } }
   else if (e.k === 'xp' && e.t === G.me) { const a = actors.get(G.me); if (a) { const [x, y] = worldAt(a.x, a.z, 2.3); hud.float(x, y - 20, `+${e.n} xp`, 'xp'); } }
-  else if (e.k === 'level' && e.t === G.me) banner2(`Level ${e.lvl}!`);
+  else if (e.k === 'level' && e.t === G.me) { banner2(`Level ${e.lvl}!`); tally('level', { l: e.lvl }); }
   else if (e.k === 'interrupt') { const at = posOf(e.t); if (at) { const [x, y] = worldAt(at[0], at[1], at[2] + 0.4); hud.float(x, y, 'Interrupted!', 'int'); } }
   else if (e.k === 'die' && e.t === G.target && foes.get(e.t)) { /* keep the target until it fades so the last number reads */ }
 }
+/** The quest text in a small card (the Elder's words, the quest log). */
+function showQuest(name, text) {
+  const el = document.createElement('div'); el.className = 'modal quest-card';
+  el.innerHTML = `<div class="panel"><h2>${esc(name)}</h2><p>${esc(text)}</p><div class="btns"><button data-close class="primary">On my way</button></div></div>`;
+  el.addEventListener('click', e => { if (e.target === el || e.target.closest('[data-close]')) el.remove(); }); document.body.append(el);
+}
+function openQuestLog() {
+  const ch = heroes.current(); if (!ch) return; const steps = content.acts?.[0]?.mainQuests || [], cur = activeStep(content, ch);
+  const el = document.createElement('div'); el.className = 'modal quest-card';
+  el.innerHTML = `<div class="panel"><h2>Quests</h2>${steps.map(q => { const done = ch.quests?.[q.id]?.done, now = cur?.id === q.id; return done || now ? `<div class="ql ${done ? 'done' : 'now'}"><b>${done ? '✔' : '◆'} ${esc(q.name)}</b>${now ? `<p>${esc(q.text)}</p>` : ''}</div>` : ''; }).join('')}<p class="sub">${esc(content.acts?.[0]?.story || '')}</p><div class="btns"><button data-close class="primary">Close</button></div></div>`;
+  el.addEventListener('click', e => { if (e.target === el || e.target.closest('[data-close]')) el.remove(); }); document.body.append(el);
+}
+let shakeT = 0;
+function shake(k) { shakeT = Math.max(shakeT, k); document.body.classList.add('hurt-flash'); setTimeout(() => document.body.classList.remove('hurt-flash'), 140); }
 function banner2(text) { const b = document.createElement('div'); b.className = 'big-banner'; b.textContent = text; document.body.append(b); setTimeout(() => b.remove(), 2200); }
 
 // ---- targeting + skills ---------------------------------------------------------------------------------------------
@@ -309,6 +347,7 @@ addEventListener('keydown', e => {
   if (!G.me || e.target?.tagName === 'INPUT' || document.querySelector('.modal:not([hidden])')) return;
   if (e.code === 'Tab') { e.preventDefault(); targetNext(); }
   if (e.code === 'Space') { e.preventDefault(); const me = actors.get(G.me), n = me && ground.nearest(me.x, me.z, 6); if (n) goAndDo(n.x, n.z, n.kind === 'chest' ? { t: 'act', do: 'open', id: n.id } : { t: 'act', do: 'pickup', gid: n.id }); else travelUI.use(); }
+  if (e.code === 'KeyJ' || e.code === 'KeyL') openQuestLog();
   if (e.code === 'KeyM') { if (travelUI.mapOpen) travelUI.closeMap(); else travelUI.openMap(false); }
   if (e.code === 'KeyT') sendAct({ do: 'travel', via: 'recall' });
   if (e.code === 'KeyC' || e.code === 'KeyI' || e.code === 'KeyB') sheetUI.toggle();
@@ -344,9 +383,10 @@ function frame(t) {
     G.acc += dt;
     while (G.acc >= DT) { G.acc -= DT; fixedStep(); }
     const me = actors.get(G.me); if (me) view.follow(me.x, me.z, dt);
+    if (shakeT > 0 && !reduceMotion) { shakeT = Math.max(0, shakeT - dt); view.camera.position.x += (Math.random() - 0.5) * shakeT * 0.6; view.camera.position.y += (Math.random() - 0.5) * shakeT * 0.4; }
   }
   actors.update(dt, t - 110);
-  foes.update(dt, t - 110, t, G.target);
+  foes.update(dt, t - 110, t, G.target, actors.get(G.me));
   fx.update(dt, t);
   ground.update(dt, t);
   travelUI.update(dt, t);
@@ -361,10 +401,12 @@ const menu = createMenu([
   { label: 'Character and bag (C)', when: () => !!G.me, act: () => sheetUI.toggle(true) },
   { label: 'Skills (K)', when: () => !!G.me, act: () => skillsUI.toggle(true) },
   { label: 'Map (M)', when: () => !!G.me, act: () => travelUI.openMap(false) },
+  { label: 'Quests (J)', when: () => !!G.me, act: () => openQuestLog() },
   { label: 'Recall portal (T)', when: () => !!G.me, act: () => sendAct({ do: 'travel', via: 'recall' }) },
   { label: "What's new", act: () => news.open() },
   { label: 'Report a bug', act: () => openReport({ debug, shot }) },
   { label: `Graphics: ${quality === 'low' ? 'Low' : 'High'} (tap to switch, reloads)`, act: () => { store.set('quality', quality === 'low' ? 'high' : 'low'); location.reload(); } },
+  { label: `Sound: ${Math.round(getVolume() * 100)}% (tap to change)`, act: () => { const v = getVolume(); setVolume(v >= 0.8 ? 0 : v >= 0.4 ? 0.8 : 0.4); location.reload(); } },
   { label: 'Credits', act: () => credits.open() },
   { label: 'Leave game', when: () => !!G.me, act: leaveGame },
 ]);

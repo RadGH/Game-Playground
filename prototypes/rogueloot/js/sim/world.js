@@ -26,10 +26,10 @@ export const STEP_HZ = 20;
 export const DT = 1 / STEP_HZ;
 
 export const START_ZONE = 'proving_meadow';
-export function createWorld({ seed = 1, area = null, content = null, zone = null } = {}) {
+export function createWorld({ seed = 1, area = null, content = null, zone = null, difficulty = 'normal' } = {}) {
   const z = content?.zones?.[zone || START_ZONE];
   const w = { seed, rng: makeRng(seed), tick: 0, time: 0, area: area || (z ? buildArea(z) : testField(seed)), content: content || { monsters: {}, skills: {}, bases: {} },
-    players: new Map(), foes: new Map(), shots: [], events: [], nextId: 1, charDirty: new Set() };
+    players: new Map(), foes: new Map(), shots: [], events: [], nextId: 1, charDirty: new Set(), difficulty, tier: content?.difficulty?.tiers?.[difficulty] || { levelAdd: 0, resistPenalty: 0 } };
   spawnArea(w); placeChests(w);
   return w;
 }

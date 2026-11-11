@@ -76,10 +76,17 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
   }
   const lerpAngle = (a, b, t) => { const d = ((b - a + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI; return a + d * t; };
   const v = new THREE.Vector3();
-  function update(dt, renderAt, now, targetId) {
+  function update(dt, renderAt, now, targetId, focus = null) {
     const W = view.renderer.domElement.clientWidth, H = view.renderer.domElement.clientHeight;
     ring.visible = false;
+    const far = 46;                                   // past the fog: not drawn, not animated (phones, ruling 14)
     for (const f of list.values()) {
+      if (focus && Math.hypot(f.x - focus.x, f.z - focus.z) > far && f.id !== targetId) {
+        if (f.group.visible) { f.group.visible = false; f.tag.hidden = true; }
+        const b = f.buf; if (b.length) { const p1 = b[b.length - 1]; f.x = p1.x; f.z = p1.z; }
+        continue;
+      }
+      f.group.visible = true;
       const b = f.buf; if (b.length) {
         let i = b.length - 1; while (i > 0 && b[i - 1].at > renderAt) i--;
         const p1 = b[i], p0 = b[Math.max(0, i - 1)], k = p1.at === p0.at ? 1 : Math.max(0, Math.min(1, (renderAt - p0.at) / (p1.at - p0.at)));

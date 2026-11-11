@@ -52,10 +52,28 @@ function onRequest(req, res) {
   }
   if (path.startsWith('/internal/') && admin.handle(req, res, path)) return;
   if (path === '/editor/save' && req.method === 'POST') { editorSave(req, res); return; }
+  if (path === '/rate' && req.method === 'POST') { rate(req, res); return; }
   if (path === '/feedback' && req.method === 'POST') { feedback.handle(req, ipOf(req), (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); }); return; }
   if (path === '/tally' && req.method === 'POST') { insights.handle(req, ipOf(req), req.headers['user-agent'], code => { res.writeHead(code); res.end(); }); return; }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); res.end(); return; }
   if (!serveStatic(req, res)) { res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('not found'); }
+}
+
+// Ratings (M32, game standards §5): 👍/👎 + reasons for a zone, dungeon or boss, from solo and online games alike.
+// Rate-limited per address; stored through the shared insights log (the admin feed summarises them by 'zone').
+const RATE_REASONS = new Set(['fun', 'pretty', 'tense', 'loot', 'again', 'buggy', 'unfair', 'boring', 'confusing', 'hard', 'easy', 'laggy', 'long', 'empty']);
+const rateSeen = new Map();
+async function rate(req, res) {
+  const done = code => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: code === 200 })); };
+  const ip = ipOf(req), t = Date.now(), list = (rateSeen.get(ip) || []).filter(x => t - x < 3600e3);
+  if (list.length > 40) return done(429);
+  let body = ''; for await (const c of req) { body += c; if (body.length > 2000) return done(413); }
+  let m; try { m = JSON.parse(body); } catch { return done(400); }
+  const zone = String(m.zone || '').slice(0, 40); if (!/^[a-z0-9_]+$/.test(zone) || !(m.v === 1 || m.v === -1)) return done(400);
+  const why = String(m.why || '').split(',').filter(x => RATE_REASONS.has(x)).slice(0, 4).join(',');
+  list.push(t); rateSeen.set(ip, list);
+  insights.report('rate', { zone, v: m.v, why, text: String(m.text || '').slice(0, 300), level: Math.max(1, Math.min(99, +m.level || 1)), players: Math.max(1, Math.min(4, +m.players || 1)) });
+  done(200);
 }
 
 // The zone editor's Save (M11): DEV server only (the working tree), from this machine's network only, writes

@@ -8,15 +8,16 @@
 import { createWorld, addPlayer, removePlayer, rescaleFoes, step as stepWorld, initResource } from './world.js';
 import { hashStr } from './rng.js';
 import { createTrades } from './trade.js';
+import { questReach } from './quests.js';
 
 export const TOWN = 'brightwater', REACH = 4.5;
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
-export function createRealm({ seed = 1, content, start = null }) {
+export function createRealm({ seed = 1, content, start = null, difficulty = 'normal' }) {
   const worlds = new Map(), where = new Map();
   const startArea = start || (content?.zones?.[TOWN] ? TOWN : Object.keys(content?.zones || {})[0] || null);
   function world(area) {
-    if (!worlds.has(area)) worlds.set(area, createWorld({ seed: (seed ^ hashStr(area || 'none')) >>> 0, content, zone: area }));
+    if (!worlds.has(area)) worlds.set(area, createWorld({ seed: (seed ^ hashStr(area || 'none')) >>> 0, content, zone: area, difficulty }));
     return worlds.get(area);
   }
   const worldOf = pid => worlds.get(where.get(pid)) || null;
@@ -64,7 +65,11 @@ export function createRealm({ seed = 1, content, start = null }) {
     if (area === TOWN || area === startArea) return true;
     const order = content.acts?.[0]?.nodes?.filter(n => n.kind === 'zone').map(n => n.id) || Object.keys(content.zones || {});
     if (order[0] === area) return true;
-    return (ch.waypoints || []).includes(area) || (ch.unlocked || []).includes(area);
+    if ((ch.waypoints || []).includes(area) || (ch.unlocked || []).includes(area)) return true;
+    const node = content.acts?.[0]?.nodes?.find(n => n.id === area), after = node?.portalAfter;
+    if (!after) return false;
+    const steps = (content.acts?.[0]?.mainQuests || []).filter(q => q.node === after || q.node?.startsWith(after));
+    return steps.length > 0 && steps.every(q => ch.quests?.[q.id]?.done);
   }
   /** a.via: waypoint | portal | exit | recall. */
   function travel(pid, a) {
@@ -100,6 +105,7 @@ export function createRealm({ seed = 1, content, start = null }) {
       const m = near('exit') || near('entrance'); if (!m) return { err: 'Nothing leads on from here.' };
       const to = m.to; if (!content.zones?.[to]) return { err: 'That way is not open yet.' };
       p.char = { ...ch, unlocked: [...new Set([...(ch.unlocked || []), to])] }; w.charDirty.add(pid);
+      questReach(w, p, here, to);
       return move(pid, to, arrival(to, here));
     }
     return { err: 'unknown travel' };
@@ -116,7 +122,7 @@ export function createRealm({ seed = 1, content, start = null }) {
     }
   }
   const forEachWorld = fn => { for (const [area, w] of worlds) fn(w, area); };
-  const self = { seed, content, worlds, where, world, worldOf, join, leave, travel, move, step, forEachWorld, unlocked, recallSpot, get startArea() { return startArea; } };
+  const self = { difficulty, seed, content, worlds, where, world, worldOf, join, leave, travel, move, step, forEachWorld, unlocked, recallSpot, get startArea() { return startArea; } };
   const trades = createTrades(self); self.trades = trades;
   return self;
 }

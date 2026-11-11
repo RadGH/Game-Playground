@@ -6,6 +6,7 @@ import { partyShares } from '../rules/progression.js';
 import { has } from './status.js';
 import { applyRider } from './abilities.js';
 import { lootFoe } from './loot.js';
+import { questKill } from './quests.js';
 import { wireChampions, modsHitTaken, modsDeath, soakWard } from './champions.js';
 import { makeFoe } from './actors.js';
 import { rankOf, castSkill, stepSkillCast, wireSkills, fxPct, markOf, armourAfter, gain } from './skills.js';
@@ -145,6 +146,7 @@ function die(w, t, killer) {
     const shares = partyShares(t.level, near.map(p => p.level), kind, (t.def.xp || 1) * (t.xpMult || 1));
     near.forEach((p, i) => { if (shares[i] > 0) giveXp(w, p, shares[i]); });
     lootFoe(w, t, near);
+    questKill(w, t);
     for (const p of near) if (p.st.manaOnKill) p.mana = Math.min(p.maxMana, p.mana + p.st.manaOnKill);
   } else if (t.kind === 'ally') {
     // a companion falls: mercenaries wait in town to be revived for gold; pets come back when called again

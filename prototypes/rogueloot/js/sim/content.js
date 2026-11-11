@@ -6,7 +6,7 @@
 import { monsterBaseline } from '../rules/combat.js';
 import { itemData } from '../rules/items.js';
 
-export const FILES = ['monsters.json', 'skills.json', 'skills-paths.json', 'item-bases.json', 'balance.json', 'affixes.json', 'rarity.json', 'uniques.json', 'legendaries.json', 'potions.json', 'acts.json', 'currency.json', 'mercenaries.json', 'specs.json', 'skills-specs-index.json'];
+export const FILES = ['monsters.json', 'skills.json', 'skills-paths.json', 'item-bases.json', 'balance.json', 'affixes.json', 'rarity.json', 'uniques.json', 'legendaries.json', 'potions.json', 'acts.json', 'currency.json', 'mercenaries.json', 'specs.json', 'skills-specs-index.json', 'quests.json', 'difficulty.json'];
 
 export function buildContent(raw) {
   const monsters = {};
@@ -25,7 +25,7 @@ export function buildContent(raw) {
   const items = itemData({ bases: raw['item-bases.json'], affixes: raw['affixes.json'], rarity: raw['rarity.json'], uniques: raw['uniques.json'], legendaries: raw['legendaries.json'] });
   // a spec's armour and weapons join its Path's at level 10 (rules/items.js profOf reads proficiency[spec])
   for (const [id, sp] of Object.entries(specs)) items.proficiency[id] = { armour: sp.armour || [], weapons: sp.weapons || [], offhand: sp.offhand || [] };
-  return { specs, mercs: raw['mercenaries.json'] || null, currency: raw['currency.json'] || null, acts: raw['acts.json']?.acts || [], paths: raw['skills-paths.json']?.paths || {}, resources: raw['skills-paths.json']?.resources || {}, potions: raw['potions.json'] || { stack: 4, sizes: {} }, items, balance: raw['balance.json'] || {}, monsters, skills, bases, spawnTables: mj.spawnTables || {}, champions: mj.champions || {}, rares: mj.rares || {}, families: mj.families || {}, baseline: baselineFrom(mj.baseline) };
+  return { difficulty: raw['difficulty.json'] || { tiers: { normal: { name: 'Normal', levelAdd: 0, resistPenalty: 0 } } }, quests: raw['quests.json'] || null, specs, mercs: raw['mercenaries.json'] || null, currency: raw['currency.json'] || null, acts: raw['acts.json']?.acts || [], paths: raw['skills-paths.json']?.paths || {}, resources: raw['skills-paths.json']?.resources || {}, potions: raw['potions.json'] || { stack: 4, sizes: {} }, items, balance: raw['balance.json'] || {}, monsters, skills, bases, spawnTables: mj.spawnTables || {}, champions: mj.champions || {}, rares: mj.rares || {}, families: mj.families || {}, baseline: baselineFrom(mj.baseline) };
 }
 
 /** The bestiary's per-level baseline: formulas in L ("48 + 26*L + 1.4*L*L") compiled once, safely (digits, L, + - * / ( ) . only). */

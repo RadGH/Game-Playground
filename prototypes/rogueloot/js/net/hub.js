@@ -23,10 +23,10 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
   const rand = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
   const token = () => { let t = ''; for (let i = 0; i < 24; i++) t += 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(rand() * 36)]; return t; };
 
-  function makeRoom(isPublic, zone = null) {
+  function makeRoom(isPublic, zone = null, difficulty = 'normal') {
     const code = newCode(rand, c => rooms.has(c)); if (!code) return null;
     const z = zone && content?.zones?.[zone] ? zone : null;           // only zones the game has
-    const room = { code, realm: createRealm({ seed: (rand() * 2 ** 31) >>> 0, content, start: z }), tick: 0, seats: new Map(), host: null, made: now(), public: !!isPublic, banned: new Set(), emptySince: null };
+    const room = { code, realm: createRealm({ seed: (rand() * 2 ** 31) >>> 0, content, start: z, difficulty }), tick: 0, seats: new Map(), host: null, made: now(), public: !!isPublic, banned: new Set(), emptySince: null };
     rooms.set(code, room); log('room', { code, public: room.public });
     return room;
   }
@@ -73,7 +73,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
       S.room = room; S.id = seat.id;
       room.emptySince = null;
       pickHost(room);
-      const w = room.realm.worldOf(seat.id); send({ t: 'joined', code: room.code, you: seat.id, host: room.host, public: room.public, seed: w.seed, area: w.area.id });
+      const w = room.realm.worldOf(seat.id); send({ t: 'joined', code: room.code, you: seat.id, host: room.host, public: room.public, seed: w.seed, area: w.area.id, difficulty: room.realm.difficulty });
       roster(room);
     }
     function enter(room, character) {
@@ -82,6 +82,8 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
       // the same browser coming back (a refresh, a new tab) takes its own seat back
       for (const seat of room.seats.values()) if (seat.token === S.token) { if (S.room && S.room !== room) leave(); return sit(room, seat); }
       if (room.seats.size >= MAX_PLAYERS) return send({ t: 'err', code: 'full', msg: 'That game is full (4 players).' });
+      const d = room.realm.difficulty || 'normal';
+      if (d !== 'normal' && !(character?.difficulties || []).includes(d)) return send({ t: 'err', code: 'difficulty', msg: `That game is on ${content?.difficulty?.tiers?.[d]?.name || d}, which your hero has not unlocked yet.` });
       const chk = checkCharacter(character);
       if (!chk.ok) return send({ t: 'err', code: 'character', msg: chk.msg || 'That character could not join.' });
       leave();
@@ -106,7 +108,9 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
       switch (msg.t) {
         case 'create': {
           if (rooms.size >= maxRooms) return send({ t: 'err', code: 'busy', msg: 'The server is full right now. Try again soon.' });
-          const r = makeRoom(msg.public, typeof msg.zone === 'string' ? msg.zone : null); if (r) enter(r, msg.character); return;
+          const diff = content?.difficulty?.tiers?.[msg.difficulty] ? msg.difficulty : 'normal';
+          if (diff !== 'normal' && !(msg.character?.difficulties || []).includes(diff)) return send({ t: 'err', code: 'difficulty', msg: 'Your hero has not unlocked that difficulty yet.' });
+          const r = makeRoom(msg.public, typeof msg.zone === 'string' ? msg.zone : null, diff); if (r) enter(r, msg.character); return;
         }
         case 'join': { const r = rooms.get(cleanCode(msg.code)); if (!r) return send({ t: 'err', code: 'nocode', msg: 'No game with that code. It may have ended.' }); return enter(r, msg.character); }
         case 'list': return send({ t: 'list', rooms: publicList() });
@@ -142,7 +146,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
     for (const r of rooms.values()) {
       if (!r.public || r.seats.size >= MAX_PLAYERS || !present(r).length) continue;
       const host = r.realm.worldOf(r.host)?.players.get(r.host);
-      out.push({ code: r.code, host: host?.name || '?', players: r.seats.size, area: r.realm.worldOf(r.host)?.area.name || '' });
+      out.push({ code: r.code, host: host?.name || '?', players: r.seats.size, area: r.realm.worldOf(r.host)?.area.name || '', difficulty: r.realm.difficulty });
       if (out.length >= PUBLIC_LIST_MAX) break;
     }
     return out;

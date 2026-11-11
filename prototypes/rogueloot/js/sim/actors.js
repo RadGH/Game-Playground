@@ -6,6 +6,7 @@ import { monsterStats } from './content.js';
 const MELEE_REACH = 1.9;           // metres of reach a one-handed weapon gives, beyond both bodies
 
 export function makeHero(w, id, ch) {
+  const penalty = w.tier?.resistPenalty || 0;
   const st = sheet(ch, w.content.items?.bases ? w.content.items : null, w.content.skills);
   const h = {
     id, kind: 'hero', team: 'hero', name: String(ch.name || 'Wanderer').slice(0, 20), look: cleanLook(ch.look), char: ch,
@@ -13,7 +14,7 @@ export function makeHero(w, id, ch) {
     input: { mx: 0, mz: 0, seq: 0 }, queue: [], seq: 0,
     hp: st.maxHp, maxHp: st.maxHp, mana: st.maxMana, maxMana: st.maxMana,
     target: null, autoOn: false, nextSwing: 0,
-    cast: null, gcdUntil: 0, cds: {}, dead: false, diedAt: 0, lastHurt: -99, lastFight: -99,
+    cast: null, gcdUntil: 0, cds: {}, dead: false, diedAt: 0, lastHurt: -99, lastFight: -99, tierPenalty: penalty,
   };
   applySheet(h, st);
   return h;
@@ -22,7 +23,7 @@ export function makeHero(w, id, ch) {
 export function applySheet(h, st) {
   const fh = h.maxHp ? h.hp / h.maxHp : 1, fm = h.maxMana ? h.mana / h.maxMana : 1;
   h.st = st; h.maxHp = st.maxHp; h.maxMana = st.maxMana; h.hp = Math.max(h.dead ? 0 : 1, Math.round(st.maxHp * fh)); h.mana = Math.round(st.maxMana * fm);
-  h.crit = st.crit; h.dodge = st.dodge; h.armour = st.armour; h.resists = st.resists; h.block = st.block;
+  h.crit = st.crit; h.dodge = st.dodge; h.armour = st.armour; h.resists = st.resists; h.block = st.block; h.resistPenalty = h.tierPenalty || 0;
   const wp = st.weapon;
   h.weapon = { min: wp.min, max: wp.max, speed: wp.speed, ranged: !!wp.ranged, reach: wp.ranged ? 24 : (wp.hands === 2 ? 2.4 : MELEE_REACH), type: 'physical' };
   h.speed = WALK_SPEED * (1 + (st.moveSpeed || 0) / 100);
@@ -32,7 +33,8 @@ export function refreshHero(w, h) { applySheet(h, sheet(h.char, w.content.items?
 export function cleanLook(l) { if (!l || typeof l !== 'object') return null; const s = JSON.stringify(l); return s.length > 4000 ? null : JSON.parse(s); }
 
 export function makeFoe(w, def, level, x, z, { rank = 'normal', pack = null, hpMult = 1, dmgMult = 1, name = null } = {}) {
-  const crowd = w.crowd || 1;                                            // more players -> tougher monsters (ruling 5, world.rescaleFoes)
+  const crowd = w.crowd || 1, T = w.tier || {};
+  level += T.levelAdd || 0; hpMult *= T.hpMult || 1; dmgMult *= T.dmgMult || 1;      // Veteran / Legend                                            // more players -> tougher monsters (ruling 5, world.rescaleFoes)
   const s = monsterStats(def, level, { hpMult: hpMult * crowd, dmgMult, base: w.content.baseline, balance: w.content.balance });
   const id = 'm' + (w.nextId++);
   const f = {

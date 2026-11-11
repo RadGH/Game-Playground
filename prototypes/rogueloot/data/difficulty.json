@@ -1,0 +1,9 @@
+{
+  "_doc": "Difficulty tiers (ruling 7): beat the act on one to unlock the next. A tier lifts every monster's level, takes a penalty off heroes' resists (ruling 41), and with higher monster levels come higher item levels, so the strong affix tiers start to drop. Quests are tracked per tier. Chosen by the host when the game is created; every hero joining must have it unlocked.",
+  "tiers": {
+    "normal": { "name": "Normal", "levelAdd": 0, "resistPenalty": 0, "unlockAfter": null },
+    "veteran": { "name": "Veteran", "levelAdd": 20, "resistPenalty": 30, "unlockAfter": "normal", "hpMult": 1.1, "dmgMult": 1.05 },
+    "legend": { "name": "Legend", "levelAdd": 40, "resistPenalty": 60, "unlockAfter": "veteran", "hpMult": 1.2, "dmgMult": 1.1 }
+  },
+  "unlockQuest": "sealed_lord"
+}

@@ -21,6 +21,14 @@ export const PROP_KIT = {
   // small things
   torch: { r: 0.2, name: 'Torch', group: 'small' }, campfire: { r: 0.6, name: 'Campfire', group: 'small' }, banner: { r: 0.2, name: 'Banner', group: 'small' },
   crate: { r: 0.5, name: 'Crate', group: 'small' }, barrel: { r: 0.4, name: 'Barrel', group: 'small' }, bones: { r: 0, name: 'Bones', group: 'small' },
+  // caves, crypts and the things the bestiary asked for (2026-11-11)
+  stalagmite: { r: 0.6, name: 'Stalagmite', group: 'cave' }, cave_pillar: { r: 1.1, name: 'Cave pillar', group: 'cave' }, crystal: { r: 0.4, name: 'Crystal cluster', group: 'cave' },
+  cobweb: { r: 0, name: 'Cobweb', group: 'cave' }, egg_sac: { r: 0.5, name: 'Egg sac', group: 'cave' }, leech_pool: { r: 0, name: 'Leech pool', group: 'cave' },
+  coffin: { r: 0.6, name: 'Coffin', group: 'crypt' }, sarcophagus: { r: 1.0, name: 'Sarcophagus', group: 'crypt' }, brazier: { r: 0.4, name: 'Brazier', group: 'crypt' },
+  bone_pile: { r: 0.5, name: 'Bone pile', group: 'crypt' }, crypt_wall: { r: 1.0, name: 'Crypt wall', group: 'crypt' }, niche: { r: 0.6, name: 'Burial niche', group: 'crypt' },
+  boat_wreck: { r: 2.2, name: 'Wrecked boat', group: 'built' }, lighthouse: { r: 2.6, name: 'Lighthouse', group: 'built' }, grain_sacks: { r: 0.6, name: 'Grain sacks', group: 'small' },
+  market_stall: { r: 1.2, name: 'Market stall', group: 'built' }, lantern_post: { r: 0.2, name: 'Lantern post', group: 'small' }, burrow_mound: { r: 0.5, name: 'Burrow', group: 'plants' },
+  gate: { r: 0, name: 'Open gate', group: 'built' }, rope_bridge: { r: 0, name: 'Rope bridge', group: 'built' }, mine_cart: { r: 0.7, name: 'Mine cart', group: 'small' }, timber_frame: { r: 0.3, name: 'Timber prop', group: 'cave' },
   // markers drawn in the world (portals, waypoints)
   waypoint_stone: { r: 0.8, name: 'Waypoint', group: 'marker' }, portal_ring: { r: 1.2, name: 'Portal', group: 'marker' }, cave_mouth: { r: 0, name: 'Cave mouth', group: 'marker' },
 };

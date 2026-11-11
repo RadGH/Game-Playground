@@ -1,0 +1,17 @@
+{
+  "_doc": "What finishes each main-quest step of data/acts.json (the text lives there). kind: kill (n monsters in node), boss (the boss of a dungeon node), reach (walk through an exit or entrance whose `to` is `to`, from node). Rewards: every step gives +1 skill point (ruling 29) plus xp (a share of the level's xp) and gold. js/sim/quests.js runs it; party members in the same area all progress (ruling 13).",
+  "steps": {
+    "crabs_on_the_landing": { "kind": "kill", "node": "saltgrass_shore", "n": 15, "xpPct": 40, "gold": 25 },
+    "beach_gate": { "kind": "reach", "node": "saltgrass_shore", "to": "windmill_fields", "xpPct": 30, "gold": 30 },
+    "under_the_headland": { "kind": "boss", "node": "tidecaves_2", "boss": "clatterjaw", "xpPct": 60, "gold": 60 },
+    "millers_cellar": { "kind": "boss", "node": "mill_cellars", "boss": "gristmaul", "xpPct": 60, "gold": 80 },
+    "brood_below": { "kind": "boss", "node": "thornwood_hollow", "boss": "mother_thrum", "xpPct": 60, "gold": 100 },
+    "toll_road": { "kind": "kill", "node": "kings_road", "n": 30, "xpPct": 40, "gold": 120 },
+    "hall_of_records": { "kind": "boss", "node": "old_barrow", "boss": "reeve_oswin", "xpPct": 60, "gold": 150 },
+    "wilted_verse": { "kind": "boss", "node": "elder_roots", "boss": "ildreth", "xpPct": 60, "gold": 180 },
+    "drowned_bell": { "kind": "boss", "node": "mire_crypt", "boss": "sister_vennel", "xpPct": 60, "gold": 210 },
+    "over_the_pass": { "kind": "reach", "node": "highcairn_pass", "to": "redcliff_heights", "xpPct": 30, "gold": 220 },
+    "black_stag": { "kind": "boss", "node": "warband_mine", "boss": "warlord_ruhk", "xpPct": 70, "gold": 300 },
+    "sealed_lord": { "kind": "boss", "node": "deep_catacomb", "boss": "harrowmund", "xpPct": 100, "gold": 500 }
+  }
+}

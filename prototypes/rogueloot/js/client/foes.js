@@ -80,7 +80,8 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
         f.x = p0.x + (p1.x - p0.x) * k; f.z = p0.z + (p1.z - p0.z) * k; f.yaw = lerpAngle(p0.yaw, p1.yaw, k);
       }
       const g = f.group, body = g.userData.body;
-      g.position.set(f.x, 0, f.z); g.rotation.y = lerpAngle(g.rotation.y, f.yaw, 1 - Math.exp(-dt * 12));
+      const gy = view.groundY ? view.groundY(f.x, f.z) : 0;
+      g.position.set(f.x, gy, f.z); g.rotation.y = lerpAngle(g.rotation.y, f.yaw, 1 - Math.exp(-dt * 12));
       const t = now / 1000;
       if (f.st === 'dead') { const k = Math.min(1, (now - f.deadAt) / 400); body.rotation.x = -k * Math.PI / 2; body.position.y = -k * 0.2; }
       else {
@@ -91,12 +92,12 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
         if (g.userData.arm) g.userData.arm.rotation.x = -Math.sin(sw * Math.PI) * 1.6 + (f.cast ? -0.9 + Math.sin(t * 12) * 0.2 : 0);
         const hit = Math.max(0, 1 - (now - f.hitAt) / 180); body.scale.setScalar(1 + hit * 0.12);
       }
-      if (f.id === targetId && f.st !== 'dead') { ring.visible = true; ring.position.set(f.x, 0.04, f.z); ring.scale.setScalar(Math.max(0.8, g.scale.x)); }
+      if (f.id === targetId && f.st !== 'dead') { ring.visible = true; ring.position.set(f.x, gy + 0.04, f.z); ring.scale.setScalar(Math.max(0.8, g.scale.x)); }
       // name + health over the head
       const show = f.st !== 'dead' && (f.hp < f.mhp || f.id === targetId || f.rk || f.st === 'attack' || f.st === 'chase');
       f.tag.hidden = !show;
       if (show) {
-        v.set(f.x, (g.userData.height || 1.6) + 0.35, f.z).project(view.camera);
+        v.set(f.x, gy + (g.userData.height || 1.6) + 0.35, f.z).project(view.camera);
         f.tag.style.transform = `translate(-50%, -100%) translate(${(v.x * 0.5 + 0.5) * W}px, ${(-v.y * 0.5 + 0.5) * H}px)`;
         f.tag.querySelector('b').style.width = Math.max(0, f.hp / f.mhp * 100) + '%';
         f.tag.classList.toggle('tg', f.id === targetId);

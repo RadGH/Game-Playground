@@ -1,7 +1,7 @@
 // The D2-style bag (ruling 11): a 10 x 4 grid; every item covers its base's grid { w, h } cells at item.pos { x, y }.
 // Pure. Belts hold potions in their own row (M7). The shared stash uses the same grid code at another size.
 export const BAG_W = 10, BAG_H = 4;
-const sizeOf = (data, it) => data.bases[it.base]?.grid || { w: 1, h: 1 };
+const sizeOf = (data, it) => data.bases[it.base]?.grid || { w: 1, h: 1 };     // potions (base 'potion') are 1 x 1
 /** Do the cells of `it` at (x, y) fall inside the grid and clear of every other item? */
 export function fits(data, list, it, x, y, W = BAG_W, H = BAG_H) {
   const { w, h } = sizeOf(data, it);

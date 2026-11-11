@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rogueloot Zone Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Spectral:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/editor.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<header id="bar">
+  <b>Zone Editor</b>
+  <select id="zone-pick" aria-label="Zone"></select>
+  <button id="new">New</button>
+  <button id="undo" title="Undo (Ctrl+Z)">↶</button><button id="redo" title="Redo (Ctrl+Y)">↷</button>
+  <button id="check">Check</button>
+  <button id="download">Download</button>
+  <button id="save" class="primary">Save</button>
+  <button id="play">Play-test</button>
+  <span id="status"></span>
+</header>
+<nav id="tools"></nav>
+<main id="stage"><canvas id="view"></canvas><div id="marks"></div></main>
+<aside id="panel"></aside>
+<script type="module" src="js/editor/editor.js"></script>
+</body>
+</html>

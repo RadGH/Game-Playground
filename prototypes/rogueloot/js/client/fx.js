@@ -21,7 +21,7 @@ export function createFx(view) {
     if (geo.isGroup) geo.children.forEach(c => { c.material = mat('#ff3020', 0.28); });
     const fill = geo.isGroup ? null : new THREE.Mesh(geo, mat('#ff6a2a', 0.45));
     g.add(edge); if (fill) g.add(fill);
-    g.position.set(e.x, 0.05, e.z);
+    g.position.set(e.x, (view.groundY ? view.groundY(e.x, e.z) : 0) + 0.06, e.z);
     if (e.shape !== 'circle' && e.shape !== 'ring') g.rotation.y = (e.yaw || 0) + Math.PI;
     scene.add(g);
     teles.push({ g, fill, born: now, life: (e.t || 1) * 1000, shape: e.shape });

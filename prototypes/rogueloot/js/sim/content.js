@@ -6,7 +6,7 @@
 import { monsterBaseline } from '../rules/combat.js';
 import { itemData } from '../rules/items.js';
 
-export const FILES = ['monsters.json', 'skills.json', 'item-bases.json', 'balance.json', 'affixes.json', 'rarity.json', 'uniques.json', 'legendaries.json'];
+export const FILES = ['monsters.json', 'skills.json', 'skills-paths.json', 'item-bases.json', 'balance.json', 'affixes.json', 'rarity.json', 'uniques.json', 'legendaries.json', 'potions.json'];
 
 export function buildContent(raw) {
   const monsters = {};
@@ -15,11 +15,13 @@ export function buildContent(raw) {
   for (const [id, m] of Object.entries(raw['monsters.json']?.bosses || {})) monsters[id] = monsterDef(id, { ...m, boss: true });
   const skills = {};
   for (const [id, s] of Object.entries(raw['skills.json']?.skills || {})) skills[id] = { id, ...s };
+  // the Path skills (and the Wanderer's, rewritten in the same vocabulary) win over the M4 file
+  for (const [id, s] of Object.entries(raw['skills-paths.json']?.skills || {})) skills[id] = { id, ...s };
   const bases = {};
   for (const b of raw['item-bases.json']?.bases || []) bases[b.id] = b;
   const mj = raw['monsters.json'] || {};
   const items = itemData({ bases: raw['item-bases.json'], affixes: raw['affixes.json'], rarity: raw['rarity.json'], uniques: raw['uniques.json'], legendaries: raw['legendaries.json'] });
-  return { items, balance: raw['balance.json'] || {}, monsters, skills, bases, spawnTables: mj.spawnTables || {}, champions: mj.champions || {}, rares: mj.rares || {}, families: mj.families || {}, baseline: baselineFrom(mj.baseline) };
+  return { paths: raw['skills-paths.json']?.paths || {}, resources: raw['skills-paths.json']?.resources || {}, potions: raw['potions.json'] || { stack: 4, sizes: {} }, items, balance: raw['balance.json'] || {}, monsters, skills, bases, spawnTables: mj.spawnTables || {}, champions: mj.champions || {}, rares: mj.rares || {}, families: mj.families || {}, baseline: baselineFrom(mj.baseline) };
 }
 
 /** The bestiary's per-level baseline: formulas in L ("48 + 26*L + 1.4*L*L") compiled once, safely (digits, L, + - * / ( ) . only). */
@@ -37,8 +39,18 @@ export function baselineFrom(b) {
     attackSpeed: +b.attackSpeed || 2, playersScaling: b.playersScaling || { hp: [1, 1.75, 2.5, 3.2], damage: [1, 1.1, 1.2, 1.3], drops: [1, 1.4, 1.8, 2.2] },
   };
 }
-export function loadContent(readJson) { const raw = {}; for (const f of FILES) { try { raw[f] = readJson(f); } catch { raw[f] = null; } } return buildContent(raw); }
-export async function loadContentAsync(readJson) { const raw = {}; await Promise.all(FILES.map(async f => { try { raw[f] = await readJson(f); } catch { raw[f] = null; } })); return buildContent(raw); }
+export function loadContent(readJson) {
+  const raw = {}; for (const f of FILES) { try { raw[f] = readJson(f); } catch { raw[f] = null; } }
+  const c = buildContent(raw); c.zones = {};
+  try { for (const id of readJson('zones/index.json').zones) c.zones[id] = readJson(`zones/${id}.json`); } catch { /* no zones yet */ }
+  return c;
+}
+export async function loadContentAsync(readJson) {
+  const raw = {}; await Promise.all(FILES.map(async f => { try { raw[f] = await readJson(f); } catch { raw[f] = null; } }));
+  const c = buildContent(raw); c.zones = {};
+  try { const idx = await readJson('zones/index.json'); await Promise.all(idx.zones.map(async id => { c.zones[id] = await readJson(`zones/${id}.json`); })); } catch { /* no zones yet */ }
+  return c;
+}
 
 const num = (v, d) => (Number.isFinite(+v) ? +v : d);
 const pickNum = (...vs) => { for (const v of vs) if (Number.isFinite(+v) && v !== null && v !== '') return +v; return undefined; };
@@ -75,3 +87,8 @@ export function monsterStats(def, level, { hpMult = 1, dmgMult = 1, base = null,
   const secs = def.attackSecs || base?.attackSpeed || 2;
   return { maxHp: Math.max(1, Math.round(b.hp * def.hp * hpMult)), dmg: +(b.dmg * def.dmg * dmgMult).toFixed(1), armour: Math.round(b.armour * def.armour), attackSpeed: 1 / secs };
 }
+
+import { isPotion, checkPotion } from '../rules/potions.js';
+import { checkItem } from '../rules/items.js';
+/** The server's light check for anything a hero carries (ruling 8): items and potions. */
+export const checkAny = (content, it) => isPotion(it) ? checkPotion(content.potions, it) : checkItem(content.items, it);

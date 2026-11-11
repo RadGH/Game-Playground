@@ -7,9 +7,12 @@ import { ATTRS } from './progression.js';
 export const FISTS = { min: 1, max: 3, speed: 1.0, ranged: false, hands: 1 };
 const DMG = ['fire', 'frost', 'storm', 'poison', 'shadow'];
 
-export function sheet(ch, data) {
+export function sheet(ch, data, skills = null) {
   const g = data ? gearTotals(data, ch.equip || {}) : { mods: {}, armour: 0, block: null };
-  const m = g.mods, attrs = {};
+  const m = { ...g.mods }, attrs = {};
+  // passive skills (data/skills-paths.json): { stat, value, perRank } added like gear
+  const P = { armourPct: 'armourPctPassive', crit: 'critChance', dodge: 'dodge', manaRegen: 'manaRegen', castSpeed: 'castSpeed', healPower: 'healingPower', spellPower: 'spellPower', attackSpeed: 'attackSpeed', maxHp: 'health', maxMana: 'mana', hpRegen: 'healthRegen', moveSpeed: 'moveSpeed', threat: 'threat', critDamage: 'critDamage', lifeOnHit: 'lifeOnHit', resistAll: 'allResist', blockChance: 'blockChance', rageGen: 'rageGen', energyRegen: 'energyRegen', meleePower: 'meleePowerPct', rangedPower: 'rangedPowerPct' };
+  if (skills) for (const [id, r] of Object.entries(ch.skills || {})) { const s = skills[id]; if (s?.kind === 'passive' && r > 0 && s.passive) { const k = P[s.passive.stat] || s.passive.stat; m[k] = (m[k] || 0) + s.passive.value + (s.passive.perRank || 0) * (r - 1); } }
   for (const a of ATTRS) attrs[a] = (ch.attrs?.[a] || 12) + (m[a] || 0);
   const d = derived({ ...ch, attrs });
   const allRes = m.allResist || 0;
@@ -19,11 +22,11 @@ export function sheet(ch, data) {
     attrs, level: ch.level,
     maxHp: Math.round(d.maxHp + (m.health || 0)), maxMana: Math.round(d.maxMana + (m.mana || 0)),
     hpRegen: +(d.hpRegen + (m.healthRegen || 0)).toFixed(2), manaRegen: +(d.manaRegen + (m.manaRegen || 0)).toFixed(2),
-    meleePower: d.meleePower, rangedPower: d.rangedPower,
+    meleePower: +(d.meleePower * (1 + (m.meleePowerPct || 0) / 100)).toFixed(3), rangedPower: +(d.rangedPower * (1 + (m.rangedPowerPct || 0) / 100)).toFixed(3), rageGen: m.rageGen || 0, energyRegen: m.energyRegen || 0,
     spellPower: +(d.spellPower * (1 + pct(m.spellPower || 0))).toFixed(3), healPower: +(d.healPower * (1 + pct(m.healingPower || 0))).toFixed(3),
     attackPower: m.attackPower || 0,                                    // added per hit as attackPower / 14 (docs/ITEMS.md)
     crit: +(d.crit + (m.critChance || 0)).toFixed(2), critDamage: m.critDamage || 0, dodge: +(d.dodge + (m.dodge || 0)).toFixed(2),
-    armour: g.armour, block: g.block, resists,
+    armour: Math.round(g.armour * (1 + (m.armourPctPassive || 0) / 100)), block: g.block, resists,
     elemFlat: Object.fromEntries(DMG.map(t => [t, m[t + 'DamageFlat'] || (t === 'poison' ? m.poisonDamageOverTime || 0 : 0)])),
     elemPct: Object.fromEntries(DMG.map(t => [t, m[t + 'DamagePct'] || 0])),
     castSpeed: m.castSpeed || 0, cooldownReduction: m.cooldownReduction || 0, moveSpeed: Math.min(30, m.moveSpeed || 0),

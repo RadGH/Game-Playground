@@ -5,6 +5,8 @@ import { gainXp } from '../rules/character.js';
 import { partyShares } from '../rules/progression.js';
 import { has } from './status.js';
 import { applyRider } from './abilities.js';
+import { lootFoe } from './loot.js';
+import { rankOf, castSkill, stepSkillCast, wireSkills, fxPct, markOf, armourAfter, gain } from './skills.js';
 
 export const KEEP_CORPSE = 10;           // seconds a dead monster lies there
 export const REVIVE_TIME = 3;            // seconds a friend channels to bring you back
@@ -18,6 +20,7 @@ const alive = a => a && !a.dead;
 /** Which skills a hero has: everyone's, their Path's and (M20+) their spec's. */
 export function knows(p, skill) {
   if (!skill) return false;
+  if (skill.effects) return rankOf(p.char, skill) > 0;
   if (skill.owner === 'all' || skill.owner === 'wanderer') return true;
   const ch = p.char || {};
   return skill.owner === ch.path || skill.owner === ch.spec;
@@ -31,16 +34,17 @@ export function setTarget(w, p, id) {
 }
 
 /** Use a skill. Returns { ok } or { err: 'player text' } (the browser shows the reason). */
-export function useSkill(w, p, skillId, targetId) {
+export function useSkill(w, p, skillId, targetId, point = null) {
   if (p.dead) return { err: 'You are dead.' };
   if (has(p, 'stun')) return { err: 'You are stunned.' };
   const sk = w.content.skills?.[skillId];
-  if (sk && sk.kind !== 'auto' && sk.kind !== 'melee' && has(p, 'silence')) return { err: 'You are silenced.' };
-  if (!sk || !knows(p, sk)) return { err: "You don't know that." };
+  if (sk && sk.kind !== 'auto' && sk.kind !== 'melee' && !(sk.effects?.every(e => e.do === 'weapon')) && has(p, 'silence')) return { err: 'You are silenced.' };
+  if (!sk || (!sk.effects && !knows(p, sk))) return { err: "You don't know that." };
   if (sk.kind === 'auto') {
     const t = actorById(w, targetId); if (!alive(t) || t.team !== 'foe') return { err: 'No enemy targeted.' };
     p.target = t.id; p.autoOn = true; return { ok: true };
   }
+  if (sk.effects) return castSkill(w, p, sk, targetId, point);        // the M9 engine (data/skills-paths.json)
   if (p.cast) return { err: 'Already casting.' };
   if ((sk.gcd ?? true) && w.time < p.gcdUntil - 1e-6) return { err: 'Not ready yet.' };
   if ((p.cds[skillId] || 0) > w.time + 1e-6) return { err: 'Not ready yet.' };
@@ -87,8 +91,9 @@ function fire(w, p, sk, t) {
 /** One weapon blow (auto-attack or a weapon skill). */
 function weaponHit(w, p, t, mult, sk = null) {
   const wpn = p.weapon, roll = wpn.min + w.rng() * (wpn.max - wpn.min) + (p.st.attackPower || 0) / 14;
-  const power = wpn.ranged ? p.st.rangedPower : p.st.meleePower;
-  const r = resolveHit(p, t, { amount: roll * mult * power, type: 'physical', critBonus: 0 }, w.rng);
+  const power = (wpn.ranged ? p.st.rangedPower : p.st.meleePower) * (1 + fxPct(p, 'damage') / 100) * markOf(t);
+  const r = resolveHit({ ...p, crit: p.crit + fxPct(p, 'crit') }, armourAfter(t), { amount: roll * mult * power, type: 'physical', critBonus: 0 }, w.rng);
+  if (r.amount > 0 && p.char?.path === 'fighter') gain(p, 'rage', (w.content.resources?.rage?.perWeaponHitDealt ?? 4) * (1 + (p.st.rageGen || 0) / 100), w.content.resources);
   // elemental damage on the weapon lands with the blow, each against its own resist
   if (r.amount > 0 && p.st.elemFlat) for (const [ty, n] of Object.entries(p.st.elemFlat)) if (n > 0) { const e = n * (1 + (p.st.elemPct?.[ty] || 0) / 100) * mult * (1 - Math.min(75, t.resists?.[ty] || 0) / 100); r.amount += Math.round(e); }
   if (r.amount > 0 && p.st.lifeOnHit) p.hp = Math.min(p.maxHp, p.hp + p.st.lifeOnHit);
@@ -105,6 +110,9 @@ export function hurt(w, src, t, r, type, threatMult = 1) {
   if (t.dead) return;
   w.events.push({ k: 'dmg', s: src.id, t: t.id, n: r.amount, r: r.result, ty: type });
   if (!r.amount) { if (t.team === 'foe') aggro(w, t, src, 1); return; }
+  // a shield soaks first
+  for (const f of t.fx || []) if (f.kind === 'shield' && f.left > 0 && r.amount > 0) { const k = Math.min(f.left, r.amount); f.left -= k; r.amount -= k; if (f.left <= 0) f.until = 0; }
+  if (t.team === 'hero' && t.char?.path === 'fighter') gain(t, 'rage', (w.content.resources?.rage?.perHitTaken ?? 3) * (1 + (t.st.rageGen || 0) / 100), w.content.resources);
   t.hp -= r.amount;
   if (t.team === 'foe') aggro(w, t, src, r.amount * THREAT.damage * threatMult);
   else { t.lastHurt = w.time; t.lastFight = w.time; }
@@ -127,6 +135,8 @@ function die(w, t, killer) {
     const near = [...w.players.values()].filter(p => !p.dead && dist(p, t) < 60);
     const shares = partyShares(t.level, near.map(p => p.level), t.rank === 'normal' ? (t.def.boss ? 'boss' : 'normal') : t.rank, t.def.xp || 1);
     near.forEach((p, i) => { if (shares[i] > 0) giveXp(w, p, shares[i]); });
+    lootFoe(w, t, near);
+    for (const p of near) if (p.st.manaOnKill) p.mana = Math.min(p.maxMana, p.mana + p.st.manaOnKill);
   } else {
     t.autoOn = false; t.target = null; t.queue.length = 0;
     // soft death (ruling 7): every worn item loses a tenth of its durability; nothing drops
@@ -148,6 +158,7 @@ import { refreshHero } from './actors.js';
 
 export function stepCasts(w) {
   for (const p of w.players.values()) {
+    if (p.cast && p.cast.skill !== 'revive' && w.content.skills[p.cast.skill]?.effects) { stepSkillCast(w, p); continue; }
     const c = p.cast; if (!c || w.time < c.end - 1e-6) continue;
     p.cast = null;
     const sk = w.content.skills[c.skill], t = actorById(w, c.target);
@@ -210,3 +221,5 @@ export function startRevive(w, p, id) {
   w.events.push({ k: 'cast', s: p.id, sk: 'revive', t: REVIVE_TIME });
   return { ok: true };
 }
+
+wireSkills({ hurt, weaponHit: (w, p, t, mult, o) => weaponHit(w, p, t, mult, { threat: o?.threat }) });

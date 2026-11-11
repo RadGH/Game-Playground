@@ -23,10 +23,11 @@ const STAT_TEXT = {
   cooldownReduction: v => `Cooldowns ${v}% shorter`, potionPower: v => `Potions ${v}% stronger`, threat: v => `+${v}% threat`, staggerChance: v => `+${v}% chance to stagger`, lightRadius: v => `+${v} light`, potionSlots: v => `${v} potion slots`,
 };
 export const rarityClass = it => 'r-' + (it.ided === false ? 'unid' : it.rarity);
-export const glyph = (items, it) => GLYPH[items.bases[it.base]?.kind] || GLYPH[items.bases[it.base]?.slot] || '◆';
+export const glyph = (items, it) => it.base === 'potion' ? (it.kind === 'mana' ? '💧' : '❤') : GLYPH[items.bases[it.base]?.kind] || GLYPH[items.bases[it.base]?.slot] || '◆';
 
 /** Tooltip HTML for an item, with requirement colours for `ch` and a comparison against `worn` (the item in that slot). */
-export function itemTip(items, it, ch, worn = null) {
+export function itemTip(items, it, ch, worn = null, potions = null) {
+  if (it.base === 'potion') { const z = potions?.sizes?.[it.size] || {}; return `<div class="tip r-normal"><h4>${esc(z.name || '')} ${it.kind === 'mana' ? 'Mana' : 'Healing'} Potion</h4><div class="sub">${it.n} in this stack</div><div class="big">Restores ${z[it.kind] || '?'} ${it.kind === 'mana' ? 'mana' : 'health'} over ${z.secs || '?'} seconds</div><div>Drinking another adds a second refill on top.</div><div class="req">${it.kind === 'mana' ? 'E' : 'Q'} drinks one from your belt</div></div>`; }
   const b = items.bases[it.base] || {}, req = itemReq(items, it), st = ch ? sheet(ch, items) : null;
   const lines = [];
   const wd = weaponDamage(items, it); if (wd) lines.push(`<div class="big">${wd.min}–${wd.max} damage · ${wd.speed} attacks a second</div>`);
@@ -59,17 +60,18 @@ function compare(items, it, worn) {
 }
 const delta = (label, d, dp = 0) => `<div class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲ +' : '▼ '}${d.toFixed(dp)} ${esc(label)}</div>`;
 
-export function createSheetUI({ items, send, getChar, nope }) {
+export function createSheetUI({ items, send, getChar, nope, potions = null, onSkills = () => {} }) {
   const root = document.createElement('div'); root.className = 'sheet-ui'; root.hidden = true;
   document.body.append(root);
   let sel = null, tipEl = null;
   function toggle(force) { root.hidden = force != null ? !force : !root.hidden; sel = null; if (!root.hidden) refresh(); hideTip(); }
   function refresh(ch = getChar()) {
     if (root.hidden || !ch) return;
+    hideTip();
     const st = sheet(ch, items), base = xpAtLevel(ch.level), need = xpToNext(ch.level);
     const slot = s => { const it = ch.equip?.[s]; return `<button class="eq ${it ? rarityClass(it) : 'empty'}${it?.dur?.[0] <= 0 ? ' broken' : ''}" data-slot="${s}" title="${SLOT_LABEL[s]}">${it ? glyph(items, it) : ''}<small>${SLOT_LABEL[s]}</small></button>`; };
     root.innerHTML = `<div class="sheet-panel">
-      <header><h2>${esc(ch.name)}</h2><span>Level ${ch.level} ${esc(ch.spec || ch.path || 'Wanderer')} · Gear score ${st.gearScore}</span><button class="x" data-close aria-label="Close">×</button></header>
+      <header><h2>${esc(ch.name)}</h2><span>Level ${ch.level} ${esc(ch.spec || ch.path || 'Wanderer')} · Gear score ${st.gearScore}</span><button class="skills-open" data-skills>${ch.skillPoints ? `Skills (${ch.skillPoints})` : 'Skills'}</button><button class="x" data-close aria-label="Close">×</button></header>
       <div class="cols">
         <section class="equip">${['head', 'neck', 'chest', 'weapon', 'offhand', 'hands', 'belt', 'feet', 'ring1', 'ring2'].map(slot).join('')}<button class="swap" data-swap title="Swap weapon sets (X)">⇄ Weapon set ${ch.equip?.weapon2 || ch.equip?.offhand2 ? '' : '(empty)'}</button></section>
         <section class="attrs"><div class="xp">Experience ${Math.max(0, ch.xp - base)} / ${Number.isFinite(need) ? need : '—'}</div>
@@ -80,16 +82,19 @@ export function createSheetUI({ items, send, getChar, nope }) {
             <div class="res">Resist: ${['fire', 'frost', 'storm', 'poison', 'shadow'].map(t => `<span class="ty-${t}">${t[0].toUpperCase() + t.slice(1)} ${st.resists[t]}%</span>`).join(' ')}</div></div></section>
       </div>
       <section class="bag" style="--w:${BAG_W};--h:${BAG_H}">${(ch.bag || []).map(it => { const g = items.bases[it.base]?.grid || { w: 1, h: 1 }; return `<button class="item ${rarityClass(it)}${sel === it.uid ? ' sel' : ''}" data-uid="${it.uid}" style="grid-column:${it.pos.x + 1}/span ${g.w};grid-row:${it.pos.y + 1}/span ${g.h}">${glyph(items, it)}</button>`; }).join('')}${cells()}</section>
+      <div class="belt-row"><span>Belt</span>${beltRow(ch, st)}</div>
       <div class="gold">🪙 ${ch.gold || 0} gold</div>
       <div class="actions"></div>
     </div>`;
     root.querySelector('[data-close]').onclick = () => toggle(false);
+    root.querySelector('[data-skills]').onclick = () => { toggle(false); onSkills(); };
     root.querySelectorAll('[data-spend]').forEach(b => b.onclick = () => send({ do: 'spend', attr: b.dataset.spend, n: 1 }));
     root.querySelector('[data-swap]').onclick = () => send({ do: 'swap' });
     root.querySelectorAll('.item').forEach(b => {
       const it = ch.bag.find(i => i.uid === b.dataset.uid);
-      b.onclick = e => { e.stopPropagation(); sel = it.uid; showActions(ch, it); showTip(b, it, ch); root.querySelectorAll('.item.sel').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); };
-      b.oncontextmenu = e => { e.preventDefault(); if (it.ided === false) send({ do: 'identify', uid: it.uid }); else send({ do: 'equip', uid: it.uid }); };
+      b.onclick = e => { e.stopPropagation(); if (dragged) return; sel = it.uid; showActions(ch, it); showTip(b, it, ch); root.querySelectorAll('.item.sel').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); };
+      b.oncontextmenu = e => { e.preventDefault(); if (it.base === 'potion') send({ do: 'belt', uid: it.uid }); else if (it.ided === false) send({ do: 'identify', uid: it.uid }); else send({ do: 'equip', uid: it.uid }); };
+      b.addEventListener('pointerdown', e => startDrag(e, b, it));
       b.ondblclick = () => send({ do: 'equip', uid: it.uid });
       b.onpointerenter = e => { if (e.pointerType === 'mouse') showTip(b, it, ch); };
       b.onpointerleave = e => { if (e.pointerType === 'mouse' && sel !== it.uid) hideTip(); };
@@ -100,12 +105,51 @@ export function createSheetUI({ items, send, getChar, nope }) {
       b.onpointerenter = e => { if (e.pointerType === 'mouse') showTip(b, it, ch, true); };
       b.onpointerleave = e => { if (e.pointerType === 'mouse') hideTip(); };
     });
+    root.querySelectorAll('[data-belt]').forEach(b => { const i = +b.dataset.belt, it = ch.belt?.[i]; if (!it) return; b.onclick = () => { showTip(b, it, ch); root.querySelector('.actions').innerHTML = `<button class="primary" data-drink>Drink</button><button data-unbelt>To bag</button>`; root.querySelector('[data-drink]').onclick = () => send({ do: 'drink', kind: it.kind }); root.querySelector('[data-unbelt]').onclick = () => send({ do: 'unbelt', i }); }; });
     // empty bag cells take a selected item (move)
     root.querySelectorAll('.cell').forEach(c => c.onclick = () => { if (sel) send({ do: 'move', uid: sel, x: +c.dataset.x, y: +c.dataset.y }); });
   }
+  function beltRow(ch, st) {
+    const n = Math.max(0, st.potionSlots || 0), b = ch.belt || [];
+    if (!n) return '<em>Wear a belt to carry potions.</em>';
+    let out = ''; for (let i = 0; i < n; i++) { const it = b[i]; out += `<button class="bslot ${it ? '' : 'empty'}" data-belt="${i}">${it ? glyph(items, it) + `<b>${it.n}</b>` : ''}</button>`; }
+    return out;
+  }
   const cells = () => { let s = ''; for (let y = 0; y < BAG_H; y++) for (let x = 0; x < BAG_W; x++) s += `<i class="cell" data-x="${x}" data-y="${y}" style="grid-column:${x + 1};grid-row:${y + 1}"></i>`; return s; };
+  // ---- drag and drop (mouse, touch, pen): bag cell = move, equipment slot = wear, belt = potions ----
+  let drag = null, dragged = false;
+  function startDrag(e, el, it) {
+    if (e.button === 2) return;
+    const r = el.getBoundingClientRect(), g = it.base === 'potion' ? { w: 1, h: 1 } : (items.bases[it.base]?.grid || { w: 1, h: 1 });
+    drag = { it, el, x0: e.clientX, y0: e.clientY, on: false, offX: Math.floor((e.clientX - r.left) / (r.width / g.w)), offY: Math.floor((e.clientY - r.top) / (r.height / g.h)), ghost: null };
+    dragged = false;
+    addEventListener('pointermove', moveDrag); addEventListener('pointerup', endDrag, { once: true });
+  }
+  function moveDrag(e) {
+    if (!drag) return;
+    if (!drag.on && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 8) return;
+    if (!drag.on) { drag.on = true; dragged = true; hideTip(); drag.ghost = document.createElement('div'); drag.ghost.className = 'drag-ghost'; drag.ghost.textContent = glyph(items, drag.it); document.body.append(drag.ghost); drag.el.style.opacity = 0.35; }
+    drag.ghost.style.left = e.clientX + 'px'; drag.ghost.style.top = e.clientY + 'px';
+    root.querySelectorAll('.drop-ok').forEach(x => x.classList.remove('drop-ok'));
+    const t = target(e); if (t) t.el.classList.add('drop-ok');
+  }
+  function target(e) {
+    drag.ghost && (drag.ghost.style.display = 'none'); const under = document.elementFromPoint(e.clientX, e.clientY); drag.ghost && (drag.ghost.style.display = '');
+    const eq = under?.closest?.('.eq'), cell = under?.closest?.('.cell, .bag .item'), belt = under?.closest?.('.belt-row');
+    if (eq) return { el: eq, act: { do: 'equip', uid: drag.it.uid, slot: eq.dataset.slot } };
+    if (belt && drag.it.base === 'potion') return { el: belt, act: { do: 'belt', uid: drag.it.uid } };
+    if (cell?.classList.contains('cell')) return { el: cell, act: { do: 'move', uid: drag.it.uid, x: +cell.dataset.x - drag.offX, y: +cell.dataset.y - drag.offY } };
+    if (cell) { const bag = root.querySelector('.bag').getBoundingClientRect(), cw = bag.width / BAG_W, chh = bag.height / BAG_H; const x = Math.floor((e.clientX - bag.left) / cw), y = Math.floor((e.clientY - bag.top) / chh); return { el: cell, act: { do: 'move', uid: drag.it.uid, x: x - drag.offX, y: y - drag.offY } }; }
+    return null;
+  }
+  function endDrag(e) {
+    removeEventListener('pointermove', moveDrag);
+    if (drag?.on) { const t = target(e); drag.ghost?.remove(); drag.el.style.opacity = ''; if (t) send(t.act); setTimeout(() => { dragged = false; }, 50); }
+    drag = null;
+  }
   function showActions(ch, it) {
     const a = root.querySelector('.actions');
+    if (it.base === 'potion') { a.innerHTML = `<button class="primary" data-blt>To belt</button><button data-drink>Drink</button>`; a.querySelector('[data-blt]').onclick = () => send({ do: 'belt', uid: it.uid }); a.querySelector('[data-drink]').onclick = () => send({ do: 'drink', kind: it.kind }); return; }
     a.innerHTML = it.ided === false ? `<button class="primary" data-id>Identify</button>` : `<button class="primary" data-eq>Equip</button>`;
     a.querySelector('[data-id]')?.addEventListener('click', () => send({ do: 'identify', uid: it.uid }));
     a.querySelector('[data-eq]')?.addEventListener('click', () => send({ do: 'equip', uid: it.uid }));
@@ -114,7 +158,7 @@ export function createSheetUI({ items, send, getChar, nope }) {
     hideTip();
     const b = items.bases[it.base], slot = b?.slot === 'ring' ? 'ring1' : b?.slot;
     tipEl = document.createElement('div'); tipEl.className = 'tip-float';
-    tipEl.innerHTML = itemTip(items, it, ch, isWorn ? null : ch.equip?.[slot]);
+    tipEl.innerHTML = itemTip(items, it, ch, isWorn ? null : ch.equip?.[slot], potions);
     document.body.append(tipEl);
     const r = anchor.getBoundingClientRect(), tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
     let x = r.right + 8, y = r.top; if (x + tw > innerWidth - 8) x = Math.max(8, r.left - tw - 8); if (y + th > innerHeight - 8) y = Math.max(8, innerHeight - th - 8);

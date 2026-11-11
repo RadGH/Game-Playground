@@ -33,6 +33,8 @@ export function testField(seed = 7) {
     area.spawns.push({ x, z, level: 1 + (i % 3), tag: i === 4 ? 'swarm' : i === 7 ? 'patrol' : 'pack',
       ...(i === 7 ? { route: [{ x, z }, { x: x * 0.5, z: 6 + (z - 6) * 0.5 }, { x: -x * 0.4, z: 6 - (z - 6) * 0.6 }] } : {}) });
   }
+  area.chests = [{ x: 9, z: -4, tier: 'chest', level: 2 }, { x: -14, z: 18, tier: 'crate', level: 1 }, { x: 24, z: 26, tier: 'lockedChest', level: 3 }];
+  for (const c of area.chests) area.blockers.push({ x: c.x, z: c.z, r: 0.5, kind: 'chest' });
   for (let i = -6; i <= 6; i++) area.props.push({ kind: 'flowers', x: (rng() * 2 - 1) * 20, z: (rng() * 2 - 1) * 20, r: 0, yaw: rng() * 6, s: 1 });
   return area;
 }

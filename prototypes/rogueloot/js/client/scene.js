@@ -2,7 +2,8 @@
 // The camera looks NORTH (-z) from the south, tilted down ~55°, so screen-up is always world north (W = north).
 import * as THREE from 'three';
 
-export const CAM = { pitch: 0.84, dist: 14.5, fov: 36, yaw: 0 };     // yaw 0 = looking toward -z
+export const CAM = { pitch: 0.84, dist: 14.5, fov: 36, yaw: 0, min: 9, max: 26 };
+try { const z = +new URLSearchParams(location.search).get('zoom'); if (z) CAM.dist = z; else { const s = +localStorage.getItem('rogueloot.zoom'); if (s) CAM.dist = s; } } catch { /* node or private */ }     // yaw 0 = looking toward -z
 
 export function createScene(canvas, { quality = 'high' } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: quality !== 'low', powerPreference: 'high-performance', preserveDrawingBuffer: false });
@@ -17,7 +18,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   const hemi = new THREE.HemisphereLight('#fff6dc', '#4b6a3a', 1.25); scene.add(hemi);
   const sun = new THREE.DirectionalLight('#ffe2b0', 2.1);
   sun.position.set(-14, 26, 10); sun.castShadow = renderer.shadowMap.enabled;
-  sun.shadow.mapSize.set(1024, 1024); const sc = sun.shadow.camera; sc.left = -24; sc.right = 24; sc.top = 24; sc.bottom = -24; sc.far = 80;
+  sun.shadow.mapSize.set(1024, 1024); const sc = sun.shadow.camera; sc.left = -30; sc.right = 30; sc.top = 30; sc.bottom = -30; sc.far = 90;
   sun.shadow.bias = -0.0008; scene.add(sun, sun.target);
 
   const focus = new THREE.Vector3();
@@ -26,7 +27,9 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     focus.x += (x - focus.x) * k; focus.z += (z - focus.z) * k;
     const h = Math.sin(CAM.pitch) * CAM.dist, back = Math.cos(CAM.pitch) * CAM.dist;
     camera.position.set(focus.x - Math.sin(CAM.yaw) * back, h, focus.z + Math.cos(CAM.yaw) * back);
-    camera.lookAt(focus.x, 0.8, focus.z);
+    const gy = view.groundY ? view.groundY(focus.x, focus.z) : 0;
+    scene.fog.near = CAM.dist + 16; scene.fog.far = CAM.dist + 52;
+    camera.position.y += gy; camera.lookAt(focus.x, gy + 0.8, focus.z);
     sun.position.set(focus.x - 14, 26, focus.z + 10); sun.target.position.set(focus.x, 0, focus.z);
   }
   function snapTo(x, z) { focus.set(x, 0, z); follow(x, z, 100); }
@@ -42,7 +45,16 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     camera.fov = w < h ? CAM.fov * 1.6 : CAM.fov; camera.updateProjectionMatrix();
   }
   addEventListener('resize', resize); resize();
-  return { THREE, renderer, scene, camera, sun, follow, snapTo, screenToWorld, resize, render: () => renderer.render(scene, camera) };
+  // zoom: mouse wheel, or two fingers on a phone (kept between visits)
+  const setZoom = d => { CAM.dist = Math.max(CAM.min, Math.min(CAM.max, d)); try { localStorage.setItem('rogueloot.zoom', CAM.dist.toFixed(1)); } catch { /* */ } };
+  canvas.addEventListener('wheel', e => { e.preventDefault(); setZoom(CAM.dist * (1 + Math.sign(e.deltaY) * 0.08)); }, { passive: false });
+  const touches = new Map(); let pinch0 = 0, dist0 = CAM.dist;
+  canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { touches.set(e.pointerId, [e.clientX, e.clientY]); if (touches.size === 2) { const [a, b] = [...touches.values()]; pinch0 = Math.hypot(a[0] - b[0], a[1] - b[1]); dist0 = CAM.dist; } } });
+  canvas.addEventListener('pointermove', e => { if (!touches.has(e.pointerId)) return; touches.set(e.pointerId, [e.clientX, e.clientY]); if (touches.size === 2 && pinch0) { const [a, b] = [...touches.values()]; setZoom(dist0 * pinch0 / Math.max(20, Math.hypot(a[0] - b[0], a[1] - b[1]))); } });
+  const lift = e => { touches.delete(e.pointerId); if (touches.size < 2) pinch0 = 0; };
+  canvas.addEventListener('pointerup', lift); canvas.addEventListener('pointercancel', lift);
+  const view = { THREE, renderer, scene, camera, sun, follow, snapTo, screenToWorld, resize, render: () => renderer.render(scene, camera), groundY: null };
+  return view;
 }
 
 // ---- the area: ground + props ----------------------------------------------------------------------------------------

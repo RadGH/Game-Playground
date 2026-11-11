@@ -45,3 +45,15 @@ x, z, yaw, moving, seq}]}` at 10 Hz, `left {id, host}`, `err {code, msg}`.
 Third-party things this game uses are listed in `shared/credits.json` (`games` includes `rogueloot`) and shown by the
 Credits button. Add a row whenever something made by someone else comes in (ruling 49).
 - **Codex art (2026-11-10):** `assets/art/key-art.webp` (title backdrop) and the games.radgh.com card are one Codex image (prompt in the M1 commit notes; original design).
+
+## Zones and the editor (M10-M11)
+
+- A zone is `data/zones/<id>.json`: readable SHAPES (surfaces, hills, water, cliffs, props, seeded scatter, spawns,
+  chests, markers), listed in `data/zones/index.json`. `js/world/zone.js` turns it into the sim's area;
+  `js/client/zone-view.js` draws it from the same samplers. Prop kinds: `js/world/props.js` (collision radius) +
+  `js/client/prop-meshes.js` (mesh); a test fails if the two lists differ.
+- `node tools/zone-check.mjs [id]`: everything reachable from the start, no unknown props, a start marker.
+- **Editor:** `editor.html` (`http://<LAN IP>:8581/prototypes/rogueloot/editor.html`). Tools 1-9 (select, prop, paint,
+  hill, water, cliff, scatter, spawn, patrol, chest, marker), right-drag pans, wheel zooms, Enter finishes a shape,
+  Ctrl+Z/Y, Delete, R turns a prop. **Save** writes the file through the DEV server only (`POST /editor/save`,
+  LAN addresses only); **Download** works anywhere; **Play-test** opens the game in that zone (`index.html?zone=<id>`).

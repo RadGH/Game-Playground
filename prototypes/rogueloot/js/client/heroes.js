@@ -3,6 +3,7 @@
 //   const heroes = createHeroes({ root, onChange })   heroes.current() -> character   heroes.save(ch)
 import { newCharacter, cleanName, STARTER_KIT } from '../rules/character.js';
 import { makeItem } from '../rules/items.js';
+import { makePotion } from '../rules/potions.js';
 import { loadLookData, randomLook, RACES, RACE_NAMES, avatarOf } from '../../../knockabout/js/client/look.js';
 import { svgPortrait } from '../../../../avatar-3d/js/chibi26-portrait.js';
 
@@ -47,7 +48,7 @@ export function createHeroes({ root, onChange = () => {}, items = null }) {
     root.querySelectorAll('[data-race]').forEach(b => b.onclick = () => { let l; for (let i = 0; i < 40; i++) { l = randomLook(); if (l.race === b.dataset.race) break; } draft.look = l; drawCreate(); });
     root.querySelector('[data-reroll]').onclick = () => { const race = draft.look.race; let l; for (let i = 0; i < 40; i++) { l = randomLook(); if (l.race === race) break; } draft.look = l; drawCreate(); };
     root.querySelector('[data-cancel]')?.addEventListener('click', () => { draft = null; draw(); });
-    root.querySelector('[data-make]').onclick = () => { const ch = newCharacter({ name: cleanName(draft.name), look: draft.look, kit: starterKit() }); draft = null; save(ch); pick(ch.id); };
+    root.querySelector('[data-make]').onclick = () => { const ch = newCharacter({ name: cleanName(draft.name), look: draft.look, kit: starterKit() }); ch.belt = [makePotion(Math.random, 'health', 'minor', 3), makePotion(Math.random, 'mana', 'minor', 2)]; draft = null; save(ch); pick(ch.id); };
   }
 
   /** The Wanderer's starting gear, as real items (they pass the server's checks like anything else). */

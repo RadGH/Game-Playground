@@ -224,6 +224,7 @@ export function gearScore(data, equip) {
 export function gearTotals(data, equip) {
   const tot = {}, add = (k, v) => { tot[k] = (tot[k] || 0) + v; };
   let armour = 0, block = null;
+  void armour;
   for (const slot of WORN) {
     const it = equip?.[slot]; if (!it) continue;
     if (it.dur && it.dur[0] <= 0) continue;                         // broken gear gives nothing until repaired

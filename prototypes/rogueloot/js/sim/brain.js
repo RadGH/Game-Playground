@@ -106,8 +106,10 @@ function idle(w, f, dt) {
 /** Leashed: run home, healing on the way (no cheesy pulls to safety). */
 function goHome(w, f, dt) {
   f.hp = Math.min(f.maxHp, f.hp + f.maxHp * 0.25 * dt); f.cast = null;
-  if (dist(f, f.home) > 0.6) approachPoint(w, f, f.home.x, f.home.z, f.speed * 1.3, dt);
-  else { f.state = 'idle'; f.hp = f.maxHp; f.threat.clear(); }
+  const d = dist(f, f.home);
+  // home, or as near home as the ground allows (a stuck-but-close body counts as home, not a reason to shuffle forever)
+  if (d > 0.6 && !(d < 2.5 && f.stuck > 6)) approachPoint(w, f, f.home.x, f.home.z, f.speed * 1.3, dt);
+  else { f.state = 'idle'; f.hp = f.maxHp; f.threat.clear(); f.home = { x: f.x, z: f.z }; f.stuck = 0; }
 }
 
 // ---- the leader's run for help ---------------------------------------------------------------------------------------

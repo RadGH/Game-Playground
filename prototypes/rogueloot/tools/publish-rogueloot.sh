@@ -26,7 +26,7 @@ BAD=0; while IFS= read -r f; do node --check "$f" >/dev/null 2>&1 || { echo "   
 [[ $BAD == 0 ]] || { echo "refusing: that commit does not parse"; exit 1; }
 echo "== gate: unit tests"
 ln -s "$GAME/node_modules" "$TMP/prototypes/rogueloot/node_modules"
-(cd "$TMP/prototypes/rogueloot" && node --test tests/sim/*.test.js tests/rules/*.test.js > "$TMP/test.log" 2>&1) || { grep -E '^not ok|# (pass|fail)' "$TMP/test.log" | head; echo "refusing: unit tests fail"; exit 1; }
+(cd "$TMP/prototypes/rogueloot" && node --test tests/sim/*.test.js tests/rules/*.test.js tests/world/*.test.js > "$TMP/test.log" 2>&1) || { grep -E '^not ok|# (pass|fail)' "$TMP/test.log" | head; echo "refusing: unit tests fail"; exit 1; }
 grep -E '^# (pass|fail)' "$TMP/test.log" | sed 's/^/   /'; rm -f "$TMP/test.log" "$TMP/prototypes/rogueloot/node_modules"
 REL="$BASE/releases/$SHORT-$(date -u +%Y%m%dT%H%M%SZ)"; mkdir -p "$REL/app" "$REL/public" "$BASE/stable"
 cp -a "$TMP"/. "$REL/app/"; cp -a "$GAME/node_modules" "$REL/app/prototypes/rogueloot/node_modules"; echo "$SHORT" > "$REL/BUILD"

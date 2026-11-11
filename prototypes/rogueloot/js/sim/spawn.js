@@ -5,6 +5,7 @@
 // bestiary loaded (unit tests), a small built-in set of stand-ins.
 import { makeFoe } from './actors.js';
 import { monsterDef } from './content.js';
+import { resolve } from './move.js';
 
 export const FALLBACK = {
   test_raider: monsterDef('test_raider', { name: 'Hill Raider', role: 'brute', levelRange: [1, 3], size: 1.3, hp: 1, damage: 1, speed: 3.4 }),
@@ -24,7 +25,8 @@ export function spawnArea(w) {
     ids.forEach((id, i) => {
       const def = defOf(w, id); if (!def) return;
       const a = (i / n) * Math.PI * 2, r = n > 1 ? ring * (0.6 + 0.4 * ((i * 7) % 3) / 2) : 0;
-      const f = makeFoe(w, def, clampLevel(def, sp.level || def.levelRange[0]), sp.x + Math.cos(a) * r, sp.z + Math.sin(a) * r, { pack, rank: sp.rank || 'normal' });
+      const [x, z] = resolve(w.area, sp.x + Math.cos(a) * r, sp.z + Math.sin(a) * r, def.radius);      // never inside a tree
+      const f = makeFoe(w, def, clampLevel(def, sp.level || def.levelRange[0]), x, z, { pack, rank: sp.rank || 'normal' });
       if (sp.route) { f.route = sp.route; f.leg = 0; }
     });
   }

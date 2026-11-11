@@ -1,0 +1,1602 @@
+{
+ "_doc": "Path skills for levels 3-10 (Fable, 2026-11-10; design in docs/SKILLS.md). Everyone is a Wanderer at 1-2, picks a Path at 3 (ruling 2/29), a Spec at 10 that REPLACES these as the main kit (ruling 10) - so every Path skill here is also written to stay useful as a utility after 10 (an interrupt, a dash, a shield, a mark). FIELDS are exactly the M9 engine vocabulary: name, owner, tree, reqLevel, maxRank (1-10), prereq (ids that need rank >= 1 first), kind (active|passive|synergy), desc (player text; {mult} renders as the weapon multiplier in percent, {dmg} the damage/heal/absorb total at the player's level and rank, {secs} the main duration), cost ({mana|rage|energy: n}), costPerRank (added to the cost per rank above 1), cast (seconds; moving cancels), channel (seconds; one tick per second, moving cancels), cd (seconds), gcd (false = does not use nor trigger the 1.5 s global cooldown), range (metres; 0 = the equipped weapon's reach, so a bow user Notches from 25 m and a dagger user from 2), target, effects/passive/synergy. EFFECT CONVENTIONS: `perRank: { field: increment }` adds the increment per rank above 1; when the field is an array (`base`) the increment is added element-wise. `base: [a, b]` = a + b x level. `weapon` = one hit of the equipped weapon x mult (through melee/ranged power, hit, dodge, block, armour, crit). `damage`/`bolt`/`dot` are spells (x spellPower, through resist, 96% base hit). `heal`/`hot`/`shield` x healPower. `resource` effects always go to the CASTER (Headlong finds rage, Sunlash refunds mana). `area` applies its inner effects to every enemy (or ally, for heal/hot/shield/buff) in the shape at the moment it lands; the client draws the shape for the player too. `debuff` kinds: slow|stun|silence|root|armourDown|damageDown|weaken. `mark` = the target takes +pct% damage from EVERYONE for secs (a co-op setup). PASSIVE UNITS: crit/dodge/blockChance are whole percentage points; armourPct/attackSpeed/castSpeed/moveSpeed/threat/rageGen/energyRegen/resistAll/critDamage/spellPower/healPower/meleePower/rangedPower/maxHp/maxMana are percent (+5 = x1.05); hpRegen/manaRegen are per second; lifeOnHit is flat per hit. A SYNERGY node raises another skill's damage/heal/duration/radius by pctPerRank x its own rank. STARTERS are granted at rank 1 for free at the Path pick. Nothing here needs a field outside the vocabulary; the `wishlist` lists the engine additions that would make four skills better, each with the exact rule.",
+ "resources": {
+  "_doc": "Tuned for a 1.5 s GCD and 10-30 s fights. In a pack fight a sword Fighter gains ~9 rage a second (autos 4.8 + hits taken ~4), i.e. ~13 a GCD, so a 15-20 rage skill every GCD is sustainable and a 40-rage Breaker Blow lands every third or fourth. A Rogue gains 15 energy a GCD plus the 100 bar, so a 30 s fight has ~400 energy: Notch every 8 s, a finisher most GCDs, lean at the end. Mana has no Path bonus: the well comes from Intellect (5 mana a point) and Spirit (regen), which is what a caster spends attribute points on; a level-10 Mage with ~45 points in Intellect has ~300 mana and ~3.5 regen, which pays for ~20 casts in 30 s at the costs below and then runs lean (ruling 23: potions).",
+  "rage": {
+   "max": 100,
+   "start": 0,
+   "perWeaponHitDealt": 4,
+   "perHitTaken": 3,
+   "decayPerSecondOutOfCombat": 1,
+   "decayPerSecondInCombat": 0,
+   "rageGenPassiveScales": "both gains (rageGen +10% = 4.4 / 3.3)"
+  },
+  "energy": {
+   "max": 100,
+   "start": 100,
+   "regenPerSecond": 10,
+   "energyRegenPassiveScales": "regenPerSecond"
+  },
+  "mana": {
+   "max": "from js/rules/character.js derived().maxMana",
+   "regen": "derived().manaRegen, in and out of combat",
+   "pathBonus": 0
+  },
+  "wandererSkillsAfterPath": {
+   "_doc": "A Fighter has no mana bar and a Rogue has no mana bar, so their Wanderer skills (sure_strike, spark, field_mend, shove) are re-priced in the Path resource with the same number: mana n -> rage n, and mana n -> energy 2n. Mage and Healer keep the mana costs. Spark and Field Mend stay castable by everyone (a Fighter can still mend a friend out of combat), they are just slow.",
+   "fighter": {
+    "mana": "rage",
+    "mult": 1
+   },
+   "rogue": {
+    "mana": "energy",
+    "mult": 2
+   },
+   "mage": {
+    "mana": "mana",
+    "mult": 1
+   },
+   "healer": {
+    "mana": "mana",
+    "mult": 1
+   }
+  }
+ },
+ "paths": {
+  "fighter": {
+   "name": "Fighter",
+   "blurb": "The wall that hits back. Every blow you land or take puts temper in your blood; spend it on wide swings and one breaking blow. Mail now, plate at ten.",
+   "resource": "rage",
+   "tree": {
+    "id": "iron_line",
+    "name": "Iron Line"
+   },
+   "starter": [
+    "fighter_charge",
+    "fighter_rend"
+   ]
+  },
+  "rogue": {
+   "name": "Rogue",
+   "blurb": "Set it up, then finish it. Notch a target so everyone's blows go deeper, then cut from behind or draw a long shot. Energy comes back on its own; your job is to spend it well.",
+   "resource": "energy",
+   "tree": {
+    "id": "knifework",
+    "name": "Knifework"
+   },
+   "starter": [
+    "rogue_notch",
+    "rogue_backstab"
+   ]
+  },
+  "mage": {
+   "name": "Mage",
+   "blurb": "Cast, step, cast. A slow bolt that hurts, a ring of frost that slows the pack, a lance you throw on the move, and a wall of air when they get close. Cloth only - you are never where they are.",
+   "resource": "mana",
+   "tree": {
+    "id": "weatherwork",
+    "name": "Weatherwork"
+   },
+   "starter": [
+    "mage_firebolt",
+    "mage_frost_ring"
+   ]
+  },
+  "healer": {
+   "name": "Healer",
+   "blurb": "The light that bites. Mend one friend, bathe the party in Radiance, bless the ground they stand on - and lash the enemy with sunlight that pays for the next heal.",
+   "resource": "mana",
+   "tree": {
+    "id": "daylight",
+    "name": "Daylight"
+   },
+   "starter": [
+    "healer_mend",
+    "healer_smite"
+   ]
+  }
+ },
+ "skills": {
+  "sure_strike": {
+   "name": "Sure Strike",
+   "owner": "wanderer",
+   "tree": "wanderer",
+   "reqLevel": 1,
+   "maxRank": 1,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A careful blow for {mult} of your weapon's damage.",
+   "cost": {
+    "mana": 6
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.6
+    }
+   ]
+  },
+  "spark": {
+   "name": "Spark",
+   "owner": "wanderer",
+   "tree": "wanderer",
+   "reqLevel": 1,
+   "maxRank": 1,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Throw a crackling spark for {dmg} storm damage. Takes a moment to cast.",
+   "cost": {
+    "mana": 10
+   },
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 22,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "storm",
+     "base": [
+      9,
+      3.2
+     ],
+     "speed": 26
+    }
+   ]
+  },
+  "field_mend": {
+   "name": "Field Mend",
+   "owner": "wanderer",
+   "tree": "wanderer",
+   "reqLevel": 1,
+   "maxRank": 1,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Bind your own or a friend's wounds for {dmg}. Works on yourself if nobody is picked.",
+   "cost": {
+    "mana": 14
+   },
+   "cast": 2.0,
+   "cd": 8,
+   "gcd": true,
+   "range": 20,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      14,
+      4.5
+     ]
+    }
+   ]
+  },
+  "shove": {
+   "name": "Shove",
+   "owner": "wanderer",
+   "tree": "wanderer",
+   "reqLevel": 1,
+   "maxRank": 1,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Knock your target off balance for {mult} weapon damage, stopping whatever it is casting. Does not use the global cooldown.",
+   "cost": {
+    "mana": 4
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": false,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.4
+    },
+    {
+     "do": "interrupt",
+     "lock": 2
+    }
+   ]
+  },
+  "fighter_charge": {
+   "name": "Headlong",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 3,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Rush your target from up to 20 m, hit it for {mult} weapon damage and arrive with temper in your blood. Does not use the global cooldown.",
+   "cost": {
+    "rage": 0
+   },
+   "cast": 0,
+   "cd": 14,
+   "gcd": false,
+   "range": 20,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 20,
+     "to": "target"
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 15,
+     "perRank": {
+      "n": 3
+     }
+    },
+    {
+     "do": "weapon",
+     "mult": 0.5,
+     "perRank": {
+      "mult": 0.1
+     }
+    }
+   ]
+  },
+  "fighter_rend": {
+   "name": "Deep Gash",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 3,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Open a wound for {mult} weapon damage that keeps bleeding for {secs} seconds. Your bread and butter against anything with a big health bar.",
+   "cost": {
+    "rage": 15
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.7,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "dot",
+     "type": "physical",
+     "base": [
+      2.0,
+      0.9
+     ],
+     "secs": 9,
+     "perRank": {
+      "base": [
+       0.3,
+       0.08
+      ]
+     }
+    }
+   ]
+  },
+  "fighter_cleave": {
+   "name": "Wide Swing",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 4,
+   "maxRank": 10,
+   "prereq": [
+    "fighter_rend"
+   ],
+   "kind": "active",
+   "desc": "Swing through everything in front of you for {mult} weapon damage each. The answer to a pack.",
+   "cost": {
+    "rage": 20
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "cone",
+     "size": 4,
+     "angle": 90,
+     "at": "self",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 0.9,
+       "perRank": {
+        "mult": 0.06
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "fighter_shield_slam": {
+   "name": "Hard Stop",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 5,
+   "maxRank": 5,
+   "prereq": [
+    "fighter_charge"
+   ],
+   "kind": "active",
+   "desc": "Slam your shield boss (or your pommel) into the target for {mult} weapon damage: it stops whatever it was casting for {secs} seconds and turns on you. Does not use the global cooldown.",
+   "cost": {
+    "rage": 10
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": false,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.8,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    },
+    {
+     "do": "taunt"
+    }
+   ]
+  },
+  "fighter_scar_tissue": {
+   "name": "Scar Tissue",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 5,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Old wounds make hard skin. Your armour counts for more.",
+   "passive": {
+    "stat": "armourPct",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "fighter_war_cry": {
+   "name": "Rallying Roar",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 6,
+   "maxRank": 5,
+   "prereq": [
+    "fighter_shield_slam"
+   ],
+   "kind": "active",
+   "desc": "A roar that puts heart into your friends (+damage for {secs} seconds) and takes it out of every enemy within 8 m (they hit softer for 6 seconds).",
+   "cost": {
+    "rage": 0
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 8,
+     "secs": 10,
+     "who": "party",
+     "perRank": {
+      "pct": 2
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "damageDown",
+       "pct": 10,
+       "secs": 6,
+       "perRank": {
+        "pct": 2
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "fighter_breaker_blow": {
+   "name": "Breaker Blow",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 7,
+   "maxRank": 10,
+   "prereq": [
+    "fighter_cleave"
+   ],
+   "kind": "active",
+   "desc": "Pour your temper into one blow for {mult} weapon damage that cracks the target's armour for {secs} seconds. The thing you have been building up to.",
+   "cost": {
+    "rage": 40
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 3.0,
+     "perRank": {
+      "mult": 0.15
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "armourDown",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "fighter_long_grudge": {
+   "name": "Long Grudge",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 8,
+   "maxRank": 10,
+   "prereq": [
+    "fighter_rend"
+   ],
+   "kind": "passive",
+   "desc": "You hold on to anger. Every hit you land or take gives more temper.",
+   "passive": {
+    "stat": "rageGen",
+    "value": 10,
+    "perRank": 5
+   }
+  },
+  "fighter_follow_through": {
+   "name": "Follow Through",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 9,
+   "maxRank": 10,
+   "prereq": [
+    "fighter_cleave"
+   ],
+   "kind": "synergy",
+   "desc": "Wide Swing carries through with the whole shoulder: more damage per rank.",
+   "synergy": {
+    "skill": "fighter_cleave",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "fighter_dig_in": {
+   "name": "Dig In",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 10,
+   "maxRank": 5,
+   "prereq": [
+    "fighter_scar_tissue"
+   ],
+   "kind": "active",
+   "desc": "Plant your feet: +armour and a shield of {dmg} for {secs} seconds, and you find 20 temper. The button for when the fight goes wrong. Does not use the global cooldown.",
+   "cost": {
+    "rage": 0
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 40,
+     "secs": 8,
+     "who": "self",
+     "perRank": {
+      "pct": 5
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      12,
+      3.0
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       2,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 20
+    }
+   ]
+  },
+  "rogue_notch": {
+   "name": "Notch",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 3,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A quick cut for {mult} weapon damage that notches the target: for {secs} seconds it takes more damage from everyone. Set it up, then finish it.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.9,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "mark",
+     "stat": "damageTaken",
+     "pct": 12,
+     "secs": 8,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "rogue_backstab": {
+   "name": "Back Cut",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 3,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A deep cut from behind for {mult} weapon damage. Only works when you are behind the target - let the brute face your friend, or circle it.",
+   "cost": {
+    "energy": 35
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2.2,
+     "perRank": {
+      "mult": 0.12
+     }
+    }
+   ]
+  },
+  "rogue_slip_step": {
+   "name": "Slip Step",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 4,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Spring 6 m back and dodge better for 3 seconds. Does not use the global cooldown.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 6,
+     "to": "back",
+     "perRank": {
+      "dist": 0.5
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "dodge",
+     "pct": 30,
+     "secs": 3,
+     "who": "self",
+     "perRank": {
+      "pct": 5
+     }
+    }
+   ]
+  },
+  "rogue_aimed_shot": {
+   "name": "Long Draw",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 5,
+   "maxRank": 10,
+   "prereq": [
+    "rogue_notch"
+   ],
+   "kind": "active",
+   "desc": "Draw to the ear and loose for {mult} weapon damage. Needs a bow or crossbow; takes a moment, and moving spoils it.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2.4,
+     "perRank": {
+      "mult": 0.12
+     }
+    }
+   ]
+  },
+  "rogue_poison_coat": {
+   "name": "Poison Coat",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 6,
+   "maxRank": 10,
+   "prereq": [
+    "rogue_notch"
+   ],
+   "kind": "active",
+   "desc": "Coat the edge and drive it in: {mult} weapon damage, then poison for {secs} seconds. Stack it on the brute while you work the rest of the pack.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.6
+    },
+    {
+     "do": "dot",
+     "type": "poison",
+     "base": [
+      1.6,
+      0.75
+     ],
+     "secs": 12,
+     "perRank": {
+      "base": [
+       0.25,
+       0.07
+      ]
+     }
+    }
+   ]
+  },
+  "rogue_hush_knife": {
+   "name": "Hush Knife",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 6,
+   "maxRank": 5,
+   "prereq": [
+    "rogue_slip_step"
+   ],
+   "kind": "active",
+   "desc": "A thrown knife from the belt for {mult} weapon damage that stops a cast for {secs} seconds. Works at 20 m with any weapon. Does not use the global cooldown.",
+   "cost": {
+    "energy": 10
+   },
+   "cast": 0,
+   "cd": 14,
+   "gcd": false,
+   "range": 20,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.5,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    }
+   ]
+  },
+  "rogue_light_feet": {
+   "name": "Light Feet",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 7,
+   "maxRank": 10,
+   "prereq": [
+    "rogue_slip_step"
+   ],
+   "kind": "passive",
+   "desc": "You are not where the blow lands. More dodge.",
+   "passive": {
+    "stat": "dodge",
+    "value": 2,
+    "perRank": 1.5
+   }
+  },
+  "rogue_knife_fan": {
+   "name": "Knife Fan",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 8,
+   "maxRank": 10,
+   "prereq": [
+    "rogue_poison_coat"
+   ],
+   "kind": "active",
+   "desc": "Fling a fan of knives across everything in front of you for {mult} weapon damage each. The swarm answer.",
+   "cost": {
+    "energy": 35
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 8,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "cone",
+     "size": 8,
+     "angle": 120,
+     "at": "self",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 0.7,
+       "perRank": {
+        "mult": 0.05
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "rogue_keen_edge": {
+   "name": "Keen Edge",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 9,
+   "maxRank": 10,
+   "prereq": [
+    "rogue_notch"
+   ],
+   "kind": "passive",
+   "desc": "You know where the gaps are. More critical hits.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "rogue_deeper_cut": {
+   "name": "Deeper Cut",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [
+    "rogue_backstab"
+   ],
+   "kind": "synergy",
+   "desc": "Back Cut goes in to the hilt: more damage per rank.",
+   "synergy": {
+    "skill": "rogue_backstab",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "rogue_fletchers_eye": {
+   "name": "Fletcher's Eye",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [
+    "rogue_aimed_shot"
+   ],
+   "kind": "synergy",
+   "desc": "Long Draw finds the seam in the armour: more damage per rank.",
+   "synergy": {
+    "skill": "rogue_aimed_shot",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "mage_firebolt": {
+   "name": "Cinder Bolt",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 3,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A slow, heavy bolt of fire for {dmg} damage. Your biggest hit; cast it when nothing is in your face.",
+   "cost": {
+    "mana": 14
+   },
+   "costPerRank": 1,
+   "cast": 2.0,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "fire",
+     "base": [
+      10,
+      6.0
+     ],
+     "speed": 30,
+     "perRank": {
+      "base": [
+       0.8,
+       0.4
+      ]
+     }
+    }
+   ]
+  },
+  "mage_frost_ring": {
+   "name": "Frost Ring",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 3,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Frost bursts out of you: {dmg} frost damage to everything within 6 m and they move at half speed for {secs} seconds. Then walk away and cast.",
+   "cost": {
+    "mana": 20
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "frost",
+       "base": [
+        5,
+        2.5
+       ],
+       "perRank": {
+        "base": [
+         0.5,
+         0.2
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "pct": 50,
+       "secs": 5,
+       "perRank": {
+        "secs": 0.3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "mage_shift": {
+   "name": "Shift",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 4,
+   "maxRank": 3,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Step 8 m through the air in the direction you are moving. Does not use the global cooldown.",
+   "cost": {
+    "mana": 8
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 8,
+     "to": "forward",
+     "perRank": {
+      "dist": 1
+     }
+    }
+   ]
+  },
+  "mage_storm_lance": {
+   "name": "Storm Lance",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 5,
+   "maxRank": 10,
+   "prereq": [
+    "mage_firebolt"
+   ],
+   "kind": "active",
+   "desc": "Hurl a lance of lightning for {dmg} storm damage. Instant - throw it while you walk.",
+   "cost": {
+    "mana": 16
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "storm",
+     "base": [
+      7,
+      3.4
+     ],
+     "speed": 45,
+     "perRank": {
+      "base": [
+       0.6,
+       0.3
+      ]
+     }
+    }
+   ]
+  },
+  "mage_stifle": {
+   "name": "Stifle",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 5,
+   "maxRank": 3,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Snatch the air out of a caster's mouth: stops its cast and keeps it quiet for {secs} seconds. Does not use the global cooldown.",
+   "cost": {
+    "mana": 10
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": false,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 4,
+     "perRank": {
+      "lock": 1
+     }
+    }
+   ]
+  },
+  "mage_ward": {
+   "name": "Ward",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 6,
+   "maxRank": 10,
+   "prereq": [
+    "mage_frost_ring"
+   ],
+   "kind": "active",
+   "desc": "A wall of still air absorbs {dmg} damage for {secs} seconds - about one point of damage per point of mana. Your armour, since cloth is not.",
+   "cost": {
+    "mana": 35
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      25,
+      1.0
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       1.2,
+       0.1
+      ]
+     }
+    }
+   ]
+  },
+  "mage_thunderhead": {
+   "name": "Thunderhead",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 7,
+   "maxRank": 10,
+   "prereq": [
+    "mage_storm_lance"
+   ],
+   "kind": "active",
+   "desc": "Call a storm cloud over a spot and hold it there for {secs} seconds: lightning for {dmg} storm damage a second to everything within 5 m. Moving lets the cloud go.",
+   "cost": {
+    "mana": 32
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "channel": 3,
+   "cd": 14,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        4,
+        2.2
+       ],
+       "perRank": {
+        "base": [
+         0.4,
+         0.15
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "mage_deep_study": {
+   "name": "Deep Study",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 8,
+   "maxRank": 10,
+   "prereq": [
+    "mage_ward"
+   ],
+   "kind": "passive",
+   "desc": "Mana comes back faster, in and out of a fight.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "mage_hotter_fire": {
+   "name": "Hotter Fire",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 9,
+   "maxRank": 10,
+   "prereq": [
+    "mage_firebolt"
+   ],
+   "kind": "synergy",
+   "desc": "Cinder Bolt burns whiter: more damage per rank.",
+   "synergy": {
+    "skill": "mage_firebolt",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "mage_quick_hands": {
+   "name": "Quick Hands",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [
+    "mage_storm_lance"
+   ],
+   "kind": "passive",
+   "desc": "Shorter casts. Every bolt lands sooner, every cast bar is a smaller window for a skirmisher.",
+   "passive": {
+    "stat": "castSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "healer_mend": {
+   "name": "Mend",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 3,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Close a friend's wounds for {dmg}. Works on yourself if nobody is picked. Your steady heal.",
+   "cost": {
+    "mana": 16
+   },
+   "costPerRank": 1,
+   "cast": 2.0,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      12,
+      4.8
+     ],
+     "perRank": {
+      "base": [
+       1.0,
+       0.4
+      ]
+     }
+    }
+   ]
+  },
+  "healer_smite": {
+   "name": "Sunlash",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 3,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A lash of sunlight for {dmg} fire damage. Landing it gives back 5 mana, so the light pays for the next heal.",
+   "cost": {
+    "mana": 12
+   },
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "fire",
+     "base": [
+      8,
+      4.5
+     ],
+     "speed": 35,
+     "perRank": {
+      "base": [
+       0.7,
+       0.35
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 5
+    }
+   ]
+  },
+  "healer_radiance": {
+   "name": "Radiance",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 4,
+   "maxRank": 10,
+   "prereq": [
+    "healer_mend"
+   ],
+   "kind": "active",
+   "desc": "A pulse of warm light heals every friend within 8 m of you for {dmg}, at once. The pack-fight heal.",
+   "cost": {
+    "mana": 30
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        9,
+        3.6
+       ],
+       "perRank": {
+        "base": [
+         0.8,
+         0.3
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "healer_rebuke": {
+   "name": "Rebuke",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 5,
+   "maxRank": 5,
+   "prereq": [
+    "healer_smite"
+   ],
+   "kind": "active",
+   "desc": "A sharp word of light for {dmg} fire damage that stops a cast for {secs} seconds. 12 m, no cast time. Does not use the global cooldown.",
+   "cost": {
+    "mana": 10
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 12,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      4,
+      1.5
+     ],
+     "perRank": {
+      "base": [
+       0.5,
+       0.15
+      ]
+     }
+    },
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    }
+   ]
+  },
+  "healer_sanctify": {
+   "name": "Sanctify",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 6,
+   "maxRank": 10,
+   "prereq": [
+    "healer_radiance"
+   ],
+   "kind": "active",
+   "desc": "Bless a patch of ground: friends standing in it when the light lands mend for {secs} seconds. Put it where the tank stands.",
+   "cost": {
+    "mana": 30
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "hot",
+       "base": [
+        2.5,
+        1.0
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.25,
+         0.08
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "healer_clear_water": {
+   "name": "Clear Water",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 6,
+   "maxRank": 5,
+   "prereq": [
+    "healer_mend"
+   ],
+   "kind": "active",
+   "desc": "Wash a slow, a stun or a poison off a friend and heal them a little ({dmg}).",
+   "cost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "cleanse"
+    },
+    {
+     "do": "heal",
+     "base": [
+      5,
+      1.5
+     ],
+     "perRank": {
+      "base": [
+       1,
+       0.3
+      ]
+     }
+    }
+   ]
+  },
+  "healer_shelter": {
+   "name": "Shelter",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 7,
+   "maxRank": 10,
+   "prereq": [
+    "healer_radiance"
+   ],
+   "kind": "active",
+   "desc": "Throw a shield of light over a friend that absorbs {dmg} damage for {secs} seconds. Instant - the button for the one who just pulled three.",
+   "cost": {
+    "mana": 22
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      14,
+      5.5
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       1.2,
+       0.4
+      ]
+     }
+    }
+   ]
+  },
+  "healer_quiet_prayer": {
+   "name": "Quiet Prayer",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 7,
+   "maxRank": 10,
+   "prereq": [
+    "healer_smite"
+   ],
+   "kind": "passive",
+   "desc": "Mana comes back faster, in and out of a fight.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "healer_noon_flare": {
+   "name": "Noon Flare",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 8,
+   "maxRank": 10,
+   "prereq": [
+    "healer_smite"
+   ],
+   "kind": "active",
+   "desc": "Call the noon sun down on a target: {dmg} fire damage to it and everything within 6 m of it. For swarms, and for playing alone.",
+   "cost": {
+    "mana": 24
+   },
+   "costPerRank": 1,
+   "cast": 1.5,
+   "cd": 8,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        5,
+        2.2
+       ],
+       "perRank": {
+        "base": [
+         0.5,
+         0.2
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "healer_steady_light": {
+   "name": "Steady Light",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 9,
+   "maxRank": 10,
+   "prereq": [
+    "healer_mend"
+   ],
+   "kind": "synergy",
+   "desc": "Mend heals for more per rank.",
+   "synergy": {
+    "skill": "healer_mend",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "healer_bright_faith": {
+   "name": "Bright Faith",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [
+    "healer_radiance"
+   ],
+   "kind": "passive",
+   "desc": "All your healing is stronger.",
+   "passive": {
+    "stat": "healPower",
+    "value": 3,
+    "perRank": 2
+   }
+  }
+ },
+ "wishlist": [
+  {
+   "field": "cond",
+   "on": "rogue_backstab",
+   "rule": "`cond: \"behind\"` on an active: the skill is only usable while the player stands in the target's rear 120-degree arc (the angle between the target's facing and the vector target->player is more than 120 degrees). The button is drawn dimmed otherwise and a press says 'Get behind it.' Back Cut needs this; the legendary Twinning Spine (`skillCondition { relax: behind, frontMult: 0.6 }`) relaxes it to any side at 60% damage. Until the engine has it, Back Cut works from any side at full damage and Twinning Spine is inert."
+  },
+  {
+   "field": "weaponOnly",
+   "on": "rogue_aimed_shot",
+   "rule": "`weaponOnly: \"ranged\"` (or \"melee\") on an active: usable only while the equipped main hand is of that class (bow/crossbow = ranged). The button is drawn dimmed otherwise and a press says 'Needs a bow.' Long Draw needs this; without it a dagger rogue pressing Long Draw at 25 m should be refused with 'Out of reach' by the normal range check, which is acceptable but less clear."
+  },
+  {
+   "field": "spendAll",
+   "on": "fighter_breaker_blow",
+   "rule": "`cost: { rage: 40 }, spendAll: true, perResourceSpent: { mult: 0.02 }`: the skill needs at least `cost` to press, then spends the WHOLE bar; each point spent above the cost adds `perResourceSpent.mult` to the weapon multiplier (so 100 rage = x3.0 + 60 x 0.02 = x4.2). This makes Breaker Blow a true rage dump. Until then it is a flat 40-rage hit, which still reads as the dump because the bar visibly empties."
+  },
+  {
+   "field": "coat",
+   "on": "rogue_poison_coat",
+   "rule": "`{ do: \"coat\", type: \"poison\", base: [a, b], secs, duration }`: a self-buff for `duration` seconds; every weapon hit the player lands applies (or refreshes) a `dot` of that type/base/secs on the thing hit. With it, Poison Coat becomes a 20 s coat (cost 25 energy, cd 0) instead of a single poisoned strike, and the legendary Hemlock Cord's `skillShareBuff` (coats allies' weapons within 6 m at half duration) works as written. Until then Hemlock Cord needs the text and rule change listed in docs/SKILLS.md."
+  },
+  {
+   "field": "charges",
+   "on": "fighter_charge, mage_shift",
+   "rule": "`charges: n` on an active: the cooldown is per charge (n presses available, each recovering one `cd` at a time, one at a time). The base skills do not use it, but the legendaries Chaser's Greaves and Hourglass Band (`skillCharges`) do, so the engine needs it for the legendaries to work at all."
+  },
+  {
+   "field": "who",
+   "on": "healer_smite",
+   "rule": "`who: \"self\"` allowed on `heal` inside an enemy-target skill (the heal lands on the caster, scaled by healPower). Optional: it would let Sunlash heal the caster for a small amount at high rank; the legendary Dawnbreak already covers the 'smite that heals' fantasy, so this is a nice-to-have, not needed."
+  },
+  {
+   "field": "zone",
+   "on": "healer_sanctify, mage_thunderhead",
+   "rule": "`{ do: \"zone\", shape, size, secs, tick: 1, effects }`: a ground shape that stays for `secs` seconds and applies its inner effects to whoever is INSIDE on each tick, not only at the moment it lands. Optional: Sanctify would become 'stand in the light' (it heals friends who step in later), and Thunderhead would not need a channel. Both skills are written for the instantaneous `area` so they work today."
+  },
+  {
+   "field": "weapon normalise",
+   "on": "every `weapon` effect",
+   "rule": "`{ do: \"weapon\", mult, normalise: true }`: the hit is `mult x weapon dps x 1.5` (one GCD's worth of the weapon) instead of `mult x one swing`. A maul swings 0.7 a second and a dagger 1.6, so a per-swing skill is 2.3x stronger on a maul than a dagger for the same mult, exactly as in vanilla WoW. Not needed for M9 - the balance targets in docs/SKILLS.md are computed per swing on a sword - but the bot sim will show mauls on top, and this is the one-line fix if the owner does not want that."
+  }
+ ]
+}

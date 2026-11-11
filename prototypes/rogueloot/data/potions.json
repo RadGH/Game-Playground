@@ -1,0 +1,11 @@
+{
+  "_doc": "D2-style potions (ruling 23): a potion refills over `secs` and drinking another stacks a second refill on top (chug them back to back in an emergency). Sizes by area level come from rarity.json `potions`. Belts hold potions in `potionSlots` slots (the belt's implicit), each slot a stack of up to `stack` of the same potion; Q drinks the first health potion, E the first mana potion. In the bag a potion stack takes one cell. `price` is the vendor's (M13).",
+  "stack": 4,
+  "sizes": {
+    "minor":   { "name": "Minor",   "health": 40,  "mana": 25,  "secs": 6, "price": 6,  "level": 1 },
+    "light":   { "name": "Light",   "health": 90,  "mana": 55,  "secs": 6, "price": 15, "level": 7 },
+    "full":    { "name": "Full",    "health": 170, "mana": 100, "secs": 5, "price": 32, "level": 13 },
+    "greater": { "name": "Greater", "health": 320, "mana": 190, "secs": 5, "price": 70, "level": 21 },
+    "grand":   { "name": "Grand",   "health": 600, "mana": 350, "secs": 4, "price": 150, "level": 41 }
+  }
+}

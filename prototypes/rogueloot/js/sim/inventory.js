@@ -6,6 +6,8 @@ import { fits, findSpot } from '../rules/bag.js';
 import { spendAttr } from '../rules/character.js';
 import { refreshHero } from './actors.js';
 import { sheet } from '../rules/sheet.js';
+import { isPotion, toBelt, takeFromBelt, beltSlots } from '../rules/potions.js';
+import { addFx } from './status.js';
 
 const data = w => w.content.items;
 const done = (w, p) => { w.charDirty.add(p.id); refreshHero(w, p); return { ok: true }; };
@@ -19,7 +21,7 @@ export function inventoryAct(w, p, a) {
       const it = fromBag(ch, a.uid); if (!it) return { err: 'That is not in your bag.' };
       if (p.cast) return { err: 'Not while casting.' };
       const b = D.bases[it.base]; let slot = a.slot || defaultSlot(ch, b);
-      const st = sheet(ch, D);
+      const st = sheet(ch, D, w.content.skills);
       const r = canEquip(D, ch, it, slot, st.attrs); if (!r.ok) return { err: r.why };
       if (it.ided === false) return { err: 'Identify it first (right-click).' };
       // whatever was there goes into the item's old bag spot (or anywhere it fits)
@@ -60,6 +62,32 @@ export function inventoryAct(w, p, a) {
     case 'spend': {
       const r = spendAttr(ch, a.attr, Math.max(1, Math.min(50, a.n | 0 || 1))); if (r.err) return r;
       p.char = r; return done(w, p);
+    }
+    case 'drink': {
+      if (p.dead) return { err: 'You are dead.' };
+      const kind = a.kind === 'mana' ? 'mana' : 'health';
+      let got = takeFromBelt(ch.belt || [], kind), bag = ch.bag;
+      if (!got) { const it = (ch.bag || []).find(i => isPotion(i) && i.kind === kind); if (!it) return { err: kind === 'mana' ? 'No mana potions.' : 'No healing potions.' }; bag = ch.bag.map(i => i.uid === it.uid ? { ...i, n: i.n - 1 } : i).filter(i => !isPotion(i) || i.n > 0); got = { belt: ch.belt, potion: it }; }
+      const P = w.content.potions, size = P.sizes[got.potion.size] || { health: 40, mana: 25, secs: 6 };
+      const power = 1 + (p.st.potionPower || 0) / 100;
+      // D2 style: each potion is its own refill, so drinking two stacks two (stack: true)
+      addFx(w, p, { id: 'potion:' + kind, kind: kind === 'mana' ? 'mot' : 'hot', per: size[kind] * power / size.secs, secs: size.secs, src: p.id, stack: true });
+      p.char = { ...ch, belt: got.belt, bag }; w.charDirty.add(p.id);
+      w.events.push({ k: 'drink', t: p.id, kind });
+      return { ok: true };
+    }
+    case 'belt': {                       // move a potion stack from the bag into the belt
+      const it = fromBag(ch, a.uid); if (!isPotion(it)) return { err: 'Only potions go in the belt.' };
+      const slots = beltSlots(sheet(ch, D)); if (!slots) return { err: 'Wear a belt to carry potions in it.' };
+      const { pos: _, ...clean } = it; const r = toBelt(w.content.potions, ch.belt || [], slots, clean);
+      const bag = ch.bag.filter(i => i.uid !== it.uid); if (r.rest) bag.push({ ...r.rest, pos: it.pos });
+      p.char = { ...ch, belt: r.belt, bag }; w.charDirty.add(p.id); return { ok: true };
+    }
+    case 'unbelt': {
+      const i = a.i | 0, s = (ch.belt || [])[i]; if (!s) return { err: 'Empty.' };
+      const pos = findSpot(D, ch.bag, s); if (!pos) return { err: 'No room in your bag.' };
+      const belt = ch.belt.slice(); belt[i] = null;
+      p.char = { ...ch, belt, bag: [...ch.bag, { ...s, pos }] }; w.charDirty.add(p.id); return { ok: true };
     }
     case 'swap': {
       if (p.cast) return { err: 'Not while casting.' };

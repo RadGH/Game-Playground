@@ -1,0 +1,65 @@
+{
+  "id": "proving_meadow",
+  "name": "Proving Meadow",
+  "levels": [1, 3],
+  "table": "saltgrass_shore",
+  "theme": "meadow",
+  "bounds": [-70, -70, 70, 70],
+  "base": "grass",
+  "surfaces": [
+    { "s": "meadow", "circle": [-30, 25, 22] },
+    { "s": "grass2", "poly": [[20, -70], [70, -70], [70, 10], [35, 0], [25, -30]] },
+    { "s": "sand", "circle": [-36, -28, 17] },
+    { "s": "wetsand", "circle": [-36, -28, 13.5] },
+    { "s": "path", "path": [[0, 70], [2, 40], [-3, 15], [0, 6], [4, -20], [-2, -45], [3, -70]], "width": 4.5 },
+    { "s": "path", "path": [[0, 6], [22, 2], [44, 10], [70, 8]], "width": 3.2 },
+    { "s": "dirt", "circle": [0, 6, 6.5] },
+    { "s": "stone", "circle": [30, 34, 7] },
+    { "s": "dirt", "circle": [-38, 38, 5] }
+  ],
+  "heights": [
+    { "hill": [45, -40, 18, 3.5] }, { "hill": [-52, 50, 14, 2.6] }, { "hill": [52, 48, 12, 2] },
+    { "ridge": [[-70, -62], [-30, -66], [10, -64]], "width": 16, "h": 3 }
+  ],
+  "water": [ { "poly": [[-46, -32], [-40, -40], [-30, -40], [-24, -32], [-27, -22], [-36, -18], [-45, -22]] } ],
+  "cliffs": [ { "path": [[60, -10], [58, -30], [62, -55]], "h": 5 } ],
+  "props": [
+    { "k": "waypoint_stone", "x": 4, "z": 12 },
+    { "k": "signpost", "x": 3, "z": 3, "yaw": 0.6 },
+    { "k": "campfire", "x": -5, "z": 8 },
+    { "k": "tent", "x": -9, "z": 11, "yaw": 0.8 },
+    { "k": "torch", "x": 5, "z": 1 }, { "k": "torch", "x": -5, "z": 1 }, { "k": "torch", "x": 5, "z": 11 }, { "k": "torch", "x": -5, "z": 14 },
+    { "k": "crate", "x": -10, "z": 5, "yaw": 0.3 }, { "k": "barrel", "x": -11, "z": 6.5 },
+    { "k": "ruin_pillar", "x": 26, "z": 30 }, { "k": "ruin_pillar", "x": 34, "z": 30, "s": 0.85 }, { "k": "ruin_arch", "x": 30, "z": 38, "yaw": 0.1 },
+    { "k": "ruin_wall", "x": 24, "z": 37, "yaw": 1.5 }, { "k": "standing_stone", "x": 36, "z": 37 },
+    { "k": "dock", "x": -27, "z": -27, "yaw": 2.2 },
+    { "k": "fence", "x": 10, "z": -10, "yaw": 0 }, { "k": "fence", "x": 12.2, "z": -10, "yaw": 0 }, { "k": "fence", "x": 14.4, "z": -10, "yaw": 0 },
+    { "k": "haystack", "x": 13, "z": -14 }, { "k": "scarecrow", "x": 17, "z": -16 }, { "k": "cart", "x": 9, "z": -16, "yaw": 0.9 },
+    { "k": "banner", "x": 44, "z": 12 }, { "k": "palisade", "x": 48, "z": 16, "yaw": 0.2 }, { "k": "palisade", "x": 50, "z": 4, "yaw": -0.3 },
+    { "k": "boulder", "x": -18, "z": 46 }, { "k": "cairn", "x": -38, "z": 38 }, { "k": "tree_big", "x": -30, "z": 25 },
+    { "k": "dead_tree", "x": 46, "z": -38 }, { "k": "bones", "x": 48, "z": -35 }, { "k": "log", "x": -12, "z": -50, "yaw": 0.7 }
+  ],
+  "scatter": [
+    { "k": ["tree", "tree", "pine", "birch"], "poly": [[-70, 70], [-20, 70], [-14, 52], [-50, 48], [-70, 30]], "n": 34 },
+    { "k": ["pine", "pine", "tree"], "poly": [[20, -70], [56, -70], [54, -50], [30, -48], [22, -30]], "n": 26 },
+    { "k": ["tree", "birch", "bush"], "poly": [[40, 25], [70, 22], [70, 70], [40, 70]], "n": 22 },
+    { "k": ["bush", "fern", "flowers", "grass"], "circle": [-30, 25, 20], "n": 40, "minGap": 1.4 },
+    { "k": ["flowers", "grass", "rock_small"], "poly": [[-70, -10], [-10, -10], [-10, 0], [-70, 0]], "n": 25, "minGap": 1.6 },
+    { "k": ["rock", "rock", "boulder"], "poly": [[-70, -70], [10, -70], [10, -58], [-70, -58]], "n": 12, "minGap": 4 },
+    { "k": ["reeds"], "circle": [-36, -28, 15], "n": 18, "minGap": 1 },
+    { "k": ["palm"], "circle": [-36, -28, 18], "n": 5, "minGap": 4 },
+    { "k": ["tree", "pine", "bush", "rock"], "poly": [[-70, -55], [-70, -45], [-55, -45], [-55, -10], [-70, -10]], "n": 14 }
+  ],
+  "spawns": [
+    { "x": -32, "z": -14, "level": 1 }, { "x": -20, "z": -36, "level": 1 }, { "x": -50, "z": -38, "level": 2 },
+    { "x": 18, "z": 22, "level": 1 }, { "x": 30, "z": 44, "level": 2, "tag": "pack" }, { "x": -28, "z": 30, "level": 2, "tag": "swarm" },
+    { "x": 12, "z": -30, "level": 2 }, { "x": 40, "z": -28, "level": 3 }, { "x": 46, "z": 10, "level": 3 },
+    { "x": 2, "z": -52, "level": 3, "tag": "patrol", "route": [[2, -52], [0, -30], [-4, -12], [0, -30]] },
+    { "x": -45, "z": 55, "level": 3 }, { "x": 58, "z": 58, "level": 3 }
+  ],
+  "chests": [ { "x": 9, "z": -4, "tier": "chest", "level": 2 }, { "x": -14, "z": 18, "tier": "crate", "level": 1 }, { "x": 30, "z": 34, "tier": "lockedChest", "level": 3 }, { "x": 48, "z": -36, "tier": "chest", "level": 3 } ],
+  "markers": [
+    { "kind": "start", "x": 0, "z": 6 },
+    { "kind": "waypoint", "id": "proving_meadow", "x": 4, "z": 12, "label": "Proving Meadow" }
+  ]
+}

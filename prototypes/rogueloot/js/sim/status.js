@@ -3,8 +3,8 @@
 // The browser predicts its own walking, so a hero's speed factor rides in the snapshot (`spd`) and the client walks with it.
 export function addFx(w, a, fx) {
   a.fx ||= [];
-  const same = a.fx.find(f => f.id === fx.id && (f.src === fx.src || !fx.stack));
-  if (same && !fx.stack) { Object.assign(same, fx, { until: Math.max(same.until, w.time + fx.secs) }); return same; }
+  const same = fx.stack ? null : a.fx.find(f => f.id === fx.id);
+  if (same) { Object.assign(same, fx, { until: Math.max(same.until, w.time + fx.secs) }); return same; }
   const f = { ...fx, until: w.time + fx.secs, next: w.time + 1 };
   a.fx.push(f);
   w.events.push({ k: 'fx', t: a.id, id: fx.id, kind: fx.kind, secs: fx.secs });

@@ -22,9 +22,10 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
   const rand = () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
   const token = () => { let t = ''; for (let i = 0; i < 24; i++) t += 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(rand() * 36)]; return t; };
 
-  function makeRoom(isPublic) {
+  function makeRoom(isPublic, zone = null) {
     const code = newCode(rand, c => rooms.has(c)); if (!code) return null;
-    const room = { code, world: World.createWorld({ seed: (rand() * 2 ** 31) >>> 0, content }), seats: new Map(), host: null, made: now(), public: !!isPublic, banned: new Set(), emptySince: null };
+    const z = zone && content?.zones?.[zone] ? zone : null;           // only zones the game has
+    const room = { code, world: World.createWorld({ seed: (rand() * 2 ** 31) >>> 0, content, zone: z }), seats: new Map(), host: null, made: now(), public: !!isPublic, banned: new Set(), emptySince: null };
     rooms.set(code, room); log('room', { code, public: room.public });
     return room;
   }
@@ -104,7 +105,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
       switch (msg.t) {
         case 'create': {
           if (rooms.size >= maxRooms) return send({ t: 'err', code: 'busy', msg: 'The server is full right now. Try again soon.' });
-          const r = makeRoom(msg.public); if (r) enter(r, msg.character); return;
+          const r = makeRoom(msg.public, typeof msg.zone === 'string' ? msg.zone : null); if (r) enter(r, msg.character); return;
         }
         case 'join': { const r = rooms.get(cleanCode(msg.code)); if (!r) return send({ t: 'err', code: 'nocode', msg: 'No game with that code. It may have ended.' }); return enter(r, msg.character); }
         case 'list': return send({ t: 'list', rooms: publicList() });
@@ -151,7 +152,12 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
       // a hero's saved sheet changed (experience, levels): hand it back to its own browser, which saves it (ruling 1)
       for (const id of room.world.charDirty) { const p = room.world.players.get(id), seat = room.seats.get(id); if (p && seat?.conn) seat.conn.send(JSON.stringify({ t: 'char', character: p.char })); }
       room.world.charDirty.clear();
-      if (room.world.tick % SNAP_EVERY === 0) broadcast(room, { t: 'snap', ...World.snapshot(room.world) });
+      if (room.world.tick % SNAP_EVERY === 0) {
+        // events marked `to` (personal loot) go only to that player; everything else to everyone
+        const snap = World.snapshot(room.world), pub = snap.events.filter(e => !e.to), mine = snap.events.filter(e => e.to);
+        if (!mine.length) broadcast(room, { t: 'snap', ...snap });
+        else for (const seat of room.seats.values()) seat.conn?.send(JSON.stringify({ t: 'snap', ...snap, events: [...pub, ...mine.filter(e => e.to === seat.id)] }));
+      }
     }
   }
   const status = () => ({ rooms: rooms.size, players: [...rooms.values()].reduce((n, r) => n + present(r).length, 0), public: [...rooms.values()].filter(r => r.public).length });

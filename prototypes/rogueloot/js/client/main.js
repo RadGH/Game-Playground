@@ -1,12 +1,14 @@
 // Rogueloot page: title -> game. Solo runs the room code in a Worker; online talks to the room server. Either way the
 // page sends inputs and draws snapshots, predicting its own walking with the SAME rule the sim uses (js/sim/move.js).
-import { createScene, buildArea } from './scene.js';
+import { createScene, buildArea as buildTestArea } from './scene.js';
 import { createActors } from './actors.js';
 import { createInput } from './input.js';
 import { createTouch, isTouch } from './touch.js';
 import { openSolo, openOnline, serverAvailable } from './link.js';
 import { createMenu, openReport, news, credits } from './menu.js';
 import { testField } from '../sim/area.js';
+import { buildArea } from '../world/zone.js';
+import { buildZoneView } from './zone-view.js';
 import { walk, PLAYER_RADIUS, WALK_SPEED } from '../sim/move.js';
 import { DT } from '../sim/world.js';
 import { createHeroes } from './heroes.js';
@@ -14,6 +16,9 @@ import { createFoes } from './foes.js';
 import { createHud } from './hud.js';
 import { createFx } from './fx.js';
 import { createSheetUI } from './sheet-ui.js';
+import { createSkillsUI } from './skills-ui.js';
+import { createGround } from './ground.js';
+import { play, LOOT_SOUND } from './sound.js';
 import { loadContentAsync } from '../sim/content.js';
 import { cleanCode } from '../net/protocol.js';
 import { qrSvg, joinUrl } from '../../../tumblefair/js/client/qr.js';
@@ -29,9 +34,17 @@ const actors = createActors(view, $('#tags'));
 const content = await loadContentAsync(f => fetch(new URL('../../data/' + f, import.meta.url)).then(r => r.json()));
 const foes = createFoes(view, $('#tags'), { content });
 const fx = createFx(view);
+const ground = createGround(view, $('#tags'), { onPick: (gid, x, z) => goAndDo(x, z, { t: 'act', do: 'pickup', gid }), onOpen: (id, x, z) => goAndDo(x, z, { t: 'act', do: 'open', id }) });
+/** Walk to a spot and then send an action (click a drop or a chest from further away). Any manual move cancels it. */
+function goAndDo(x, z, msg) {
+  const me = actors.get(G.me); if (!me) return;
+  if (Math.hypot(me.x - x, me.z - z) < 2.8) { G.link?.send(msg); return; }
+  G.goto = { x, z, msg };
+}
 const heroes = createHeroes({ root: $('#heroes'), onChange: () => {}, items: content.items });
-const sheetUI = createSheetUI({ items: content.items, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
-const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle() });
+const sheetUI = createSheetUI({ onSkills: () => skillsUI.toggle(true), potions: content.potions, items: content.items, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
+const skillsUI = createSkillsUI({ content, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
+const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }) });
 const input = createInput();
 const touch = createTouch($('#touch'), input);
 
@@ -61,7 +74,8 @@ function start(link, first) {
   G.link = link; link.on = onMessage;
   link.ready.then(() => link.send(first)).catch(e => titleMsg(e.message));
 }
-$('#solo').onclick = () => start(openSolo(), { t: 'create', character: character() });
+const wantZone = new URLSearchParams(location.search).get('zone');
+$('#solo').onclick = () => start(openSolo(), { t: 'create', character: character(), ...(wantZone ? { zone: wantZone } : {}) });
 $('#host').onclick = () => start(online(), { t: 'create', public: $('#host-public').checked, character: character() });
 $('#join').onclick = () => { const code = cleanCode($('#code').value); if (code.length !== 4) return titleMsg('Type the 4-letter code.'); start(online(), { t: 'join', code, character: character() }); };
 $('#code').addEventListener('keydown', e => { if (e.key === 'Enter') $('#join').click(); });
@@ -77,7 +91,7 @@ function onMessage(m) {
   if (m.t === 'roster') { G.roster = new Map(m.players.map(p => [p.id, p])); G.host = m.host; G.isPublic = m.public; for (const p of m.players) actors.get(p.id)?.tag.classList.toggle('away', !!p.away); refreshInvite(); return; }
   if (m.t === 'list') return showList(m.rooms);
   if (m.t === 'nope') return hud.nope(m.msg);
-  if (m.t === 'char') { const cur = heroes.current(); if (cur && m.character?.id === cur.id) { heroes.save({ ...cur, ...m.character }); sheetUI.refresh(); } return; }
+  if (m.t === 'char') { const cur = heroes.current(); if (cur && m.character?.id === cur.id) { heroes.save({ ...cur, ...m.character }); sheetUI.refresh(); skillsUI.check(heroes.current()); } return; }
   if (m.t === 'pong') { G.ping = performance.now() - m.at; return; }
   if (m.t === 'removed') { leaveGame(); titleMsg(m.msg); return; }
   if (m.t === 'closed') {
@@ -134,9 +148,9 @@ function enterGame(m) {
   const again = G.me === m.you && G.area;
   G.me = m.you; G.code = G.link.kind === 'online' ? m.code : null; G.host = m.host; G.pending = [];
   if (again) return;
-  G.area = testField(m.seed);
+  G.area = content.zones?.[m.area] ? buildArea(content.zones[m.area]) : testField(m.seed);
   if (G.areaGroup) view.scene.remove(G.areaGroup);
-  G.areaGroup = buildArea(view, G.area);
+  G.areaGroup = G.area.zone ? buildZoneView(view, G.area, { quality }) : buildTestArea(view, G.area);
   $('#title').hidden = true; $('#hud').hidden = false; $('#fight').hidden = false; document.body.classList.add('in-game');
   $('.hud-area').textContent = G.area.name;
   const codeEl = $('.hud-code'); codeEl.hidden = !G.code; codeEl.textContent = G.code ? `Code ${G.code}` : ''; codeEl.onclick = openInvite;
@@ -148,9 +162,10 @@ function leaveGame() {
   if (G.link?.kind === 'solo') G.link.close();
   G.link = null; G.me = null; G.code = null; G.area = null;
   for (const id of [...actors.list.keys()]) actors.remove(id);
-  sheetUI.toggle(false);
+  sheetUI.toggle(false); skillsUI.toggle(false);
   $('#title').hidden = false; $('#hud').hidden = true; $('#fight').hidden = true; document.body.classList.remove('in-game'); touch.show(false);
   for (const id of [...foes.list.keys()]) { const f = foes.get(id); view.scene.remove(f.group); f.tag.remove(); foes.list.delete(id); }
+  ground.clear(); G.goto = null;
   history.replaceState(null, '', location.pathname);
 }
 function onSnap(s) {
@@ -173,6 +188,7 @@ function onSnap(s) {
   }
   for (const id of [...actors.list.keys()]) if (!seen.has(id)) actors.remove(id);
   foes.sync(s.foes || [], now);
+  ground.syncChests(s.chests, G.me);
   fx.syncShots(s.shots);
   G.meSnap = s.players.find(p => p.id === G.me) || null;
   if (G.meSnap) G.target = G.meSnap.tg ?? (G.pendingTarget || G.target);
@@ -184,6 +200,9 @@ const worldAt = (x, z, y = 1.6) => { const v = new view.THREE.Vector3(x, y, z).p
 function posOf(id) { const f = foes.get(id); if (f) return [f.x, f.z, (f.group.userData.height || 1.5)]; const a = actors.get(id); return a ? [a.x, a.z, 2] : null; }
 function onEvent(e, now) {
   if (e.k === 'tele') { fx.tele(e, now); return; }
+  if (e.k === 'drop') { ground.add(e); if (e.what === 'item') play(LOOT_SOUND[e.real] || 'loot.normal'); else if (e.what === 'gold') play('loot.common'); return; }
+  if (e.k === 'gone') { const it = ground.items.get(e.gid); if (it && e.got) { const [x, y] = worldAt(it.x, it.z, 0.6); hud.float(x, y, e.got, 'gold'); } if (it && it.what === 'gold') play('loot.common'); ground.remove(e.gid); return; }
+  if (e.k === 'chest') { play('ui.open'); return; }
   if (e.k === 'fability' || e.k === 'fcast') { const at = posOf(e.s); if (at && e.k === 'fability') { const [x, y] = worldAt(at[0], at[1], at[2] + 0.6); hud.float(x, y, e.sk, 'ab'); } return; }
   if (e.k === 'fx' && e.t === G.me) { hud.nope({ slow: 'Slowed!', stun: 'Stunned!', silence: 'Silenced!', dot: 'Poisoned!' }[e.kind] || ''); return; }
   if (e.k === 'dmg') {
@@ -195,6 +214,7 @@ function onEvent(e, now) {
     const f = foes.get(e.t); if (f && e.n > 0) f.hitAt = now;
   } else if (e.k === 'heal') { const at = posOf(e.t); if (at) { const [x, y] = worldAt(at[0], at[1], at[2]); hud.float(x, y, '+' + e.n, 'heal'); } }
   else if (e.k === 'swing') { const f = foes.get(e.s); if (f) f.swingAt = now; else actors.get(e.s)?.swing?.(); }
+  else if (e.k === 'drink' && e.t === G.me) { const a = actors.get(G.me); if (a) { const [x, y] = worldAt(a.x, a.z, 2.2); hud.float(x, y, e.kind === 'mana' ? '💧' : '❤', e.kind === 'mana' ? 'xp' : 'heal'); } }
   else if (e.k === 'xp' && e.t === G.me) { const a = actors.get(G.me); if (a) { const [x, y] = worldAt(a.x, a.z, 2.3); hud.float(x, y - 20, `+${e.n} xp`, 'xp'); } }
   else if (e.k === 'level' && e.t === G.me) banner2(`Level ${e.lvl}!`);
   else if (e.k === 'interrupt') { const at = posOf(e.t); if (at) { const [x, y] = worldAt(at[0], at[1], at[2] + 0.4); hud.float(x, y, 'Interrupted!', 'int'); } }
@@ -204,10 +224,12 @@ function banner2(text) { const b = document.createElement('div'); b.className = 
 
 // ---- targeting + skills ---------------------------------------------------------------------------------------------
 function setTarget(id) { G.target = id; G.pendingTarget = id; G.link?.send({ t: 'act', do: 'target', target: id }); }
+const barOf = () => { const c = heroes.current(); return c?.bar?.length ? c.bar : ['sure_strike', 'spark', 'field_mend', 'shove', null, null]; };
 function useSkill(id) {
-  if (!G.me) return;
+  if (!G.me || !id) return;
   const sk = content.skills[id]; if (!sk) return;
   let t = G.target;
+  if (sk.target === 'ground') { const me = actors.get(G.me); const at = !isTouch() && G.mouse ? G.mouse : (t && foes.get(t) ? { x: foes.get(t).x, z: foes.get(t).z } : null); G.link?.send({ t: 'act', do: 'use', skill: id, target: t, at }); return; }
   if (sk.target === 'enemy' && (!t || !foes.get(t) || foes.get(t).st === 'dead')) { t = nearestFoe(); if (t) setTarget(t); else { hud.nope('No enemy targeted.'); return; } }
   // a press in the last half second of the global cooldown is held and sent the moment it ends (spell queue)
   const left = sk.kind !== 'auto' && (sk.gcd ?? true) ? (G.meSnap?.gcd || 0) : 0;
@@ -238,19 +260,29 @@ view.renderer.domElement.addEventListener('pointerdown', e => {
   for (const a of actors.list.values()) { if (a.id === G.me) continue; const snap = G.snapPlayers?.get(a.id); if (!snap?.dead) continue; const [x, y] = worldAt(a.x, a.z, 0.5); if ((x - e.clientX) ** 2 + (y - e.clientY) ** 2 < 50 * 50) { G.link?.send({ t: 'act', do: 'revive', target: a.id }); return; } }
 });
 view.renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+// where the mouse points on the ground (ground-targeted skills land there)
+const ray = new view.THREE.Raycaster(), plane = new view.THREE.Plane(new view.THREE.Vector3(0, 1, 0), 0), hitP = new view.THREE.Vector3();
+view.renderer.domElement.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = view.renderer.domElement.getBoundingClientRect(); ray.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -((e.clientY - r.top) / r.height * 2 - 1) }, view.camera); if (ray.ray.intersectPlane(plane, hitP)) G.mouse = { x: +hitP.x.toFixed(2), z: +hitP.z.toFixed(2) }; });
 addEventListener('keydown', e => {
   if (!G.me || e.target?.tagName === 'INPUT' || document.querySelector('.modal')) return;
   if (e.code === 'Tab') { e.preventDefault(); targetNext(); }
+  if (e.code === 'Space') { e.preventDefault(); const me = actors.get(G.me), n = me && ground.nearest(me.x, me.z, 6); if (n) goAndDo(n.x, n.z, n.kind === 'chest' ? { t: 'act', do: 'open', id: n.id } : { t: 'act', do: 'pickup', gid: n.id }); }
   if (e.code === 'KeyC' || e.code === 'KeyI' || e.code === 'KeyB') sheetUI.toggle();
   if (e.code === 'KeyX') G.link?.send({ t: 'act', do: 'swap' });
-  const n = /^Digit([1-9])$/.exec(e.code)?.[1];
-  if (n) { const id = ['sure_strike', 'spark', 'field_mend', 'shove'][+n - 1]; if (id) useSkill(id); }
+  if (e.code === 'KeyQ' && !e.repeat) G.link?.send({ t: 'act', do: 'drink', kind: 'health' });
+  if (e.code === 'KeyE' && !e.repeat) G.link?.send({ t: 'act', do: 'drink', kind: 'mana' });
+  const n = /^Digit([1-6])$/.exec(e.code)?.[1];
+  if (n) { const id = barOf()[+n - 1]; if (id) useSkill(id); }
+  if (e.code === 'KeyK' || e.code === 'KeyT') skillsUI.toggle();
   if (e.code === 'KeyF') useSkill('attack');
   if (e.code === 'KeyR' && !e.repeat) { const me = actors.get(G.me); for (const a of actors.list.values()) { if (a.id !== G.me && G.snapPlayers?.get(a.id)?.dead && Math.hypot(a.x - me.x, a.z - me.z) < 3) { G.link?.send({ t: 'act', do: 'revive', target: a.id }); break; } } }
 });
 function fixedStep() {
   const a = actors.get(G.me); if (!a || !G.area) return;
-  const mv = input.move(), [mx, mz] = view.screenToWorld(mv.x, mv.y);
+  const mv = input.move();
+  let [mx, mz] = view.screenToWorld(mv.x, mv.y);
+  if (mv.x || mv.y) G.goto = null;
+  else if (G.goto) { const dx = G.goto.x - a.x, dz = G.goto.z - a.z, d = Math.hypot(dx, dz); if (d < 2.6) { G.link.send(G.goto.msg); G.goto = null; mx = mz = 0; } else { mx = dx / d; mz = dz / d; } }
   G.seq++;
   G.link.send({ t: 'input', mx: +mx.toFixed(3), mz: +mz.toFixed(3), seq: G.seq });
   const spd = WALK_SPEED * (G.meSnap?.spd ?? 1);
@@ -272,6 +304,7 @@ function frame(t) {
   actors.update(dt, t - 110);
   foes.update(dt, t - 110, t, G.target);
   fx.update(dt, t);
+  ground.update(dt, t);
   padCombat();
   view.render();
 }
@@ -281,6 +314,7 @@ const menu = createMenu([
   { label: 'Resume', act: () => {} , when: () => !!G.me },
   { label: 'Invite friends', when: () => !!G.code, act: () => openInvite() },
   { label: 'Character and bag (C)', when: () => !!G.me, act: () => sheetUI.toggle(true) },
+  { label: 'Skills (K)', when: () => !!G.me, act: () => skillsUI.toggle(true) },
   { label: "What's new", act: () => news.open() },
   { label: 'Report a bug', act: () => openReport({ debug, shot }) },
   { label: `Graphics: ${quality === 'low' ? 'Low' : 'High'} (tap to switch, reloads)`, act: () => { store.set('quality', quality === 'low' ? 'high' : 'low'); location.reload(); } },
@@ -298,7 +332,7 @@ function debug() { return { screen: G.me ? 'game' : 'title', link: G.link?.kind 
 window.gameEye = {
   state: () => {
     const me = actors.get(G.me);
-    return { target: G.target || null, foes: [...foes.list.values()].map(f => ({ id: f.id, name: f.name, x: +f.x.toFixed(1), z: +f.z.toFixed(1), hp: f.hp, mhp: f.mhp, st: f.st })), hero: heroes.current() && { level: heroes.current().level, xp: heroes.current().xp }, me2: G.meSnap && { hp: G.meSnap.hp, mhp: G.meSnap.mhp, mp: G.meSnap.mp, dead: !!G.meSnap.dead }, screen: G.me ? 'game' : 'title', link: G.link?.kind || null, code: G.code, host: G.host === G.me, ping: G.ping && Math.round(G.ping), reconnecting: !!G.retry, area: G.area?.id || null, me: me ? { x: +me.x.toFixed(2), z: +me.z.toFixed(2), yaw: +me.yaw.toFixed(2), moving: !!me.moving, bodyReady: !!me.body } : null, players: [...actors.list.values()].map(a => ({ id: a.id, x: +a.x.toFixed(2), z: +a.z.toFixed(2) })), server: G.snap ? G.snap.players.map(p => ({ id: p.id, x: p.x, z: p.z })) : null, fps: Math.round(G.fps || 0) };
+    return { ground: [...ground.items.values()].map(g => ({ gid: g.gid, what: g.what, r: g.real || g.r, name: g.name, x: +g.x.toFixed(1), z: +g.z.toFixed(1) })), chests: [...ground.chests.values()].map(c => ({ id: c.id, x: c.x, z: c.z, open: c.open })), gold: heroes.current()?.gold, target: G.target || null, foes: [...foes.list.values()].map(f => ({ id: f.id, name: f.name, x: +f.x.toFixed(1), z: +f.z.toFixed(1), hp: f.hp, mhp: f.mhp, st: f.st })), hero: heroes.current() && { level: heroes.current().level, xp: heroes.current().xp }, me2: G.meSnap && { hp: G.meSnap.hp, mhp: G.meSnap.mhp, mp: G.meSnap.mp, dead: !!G.meSnap.dead }, screen: G.me ? 'game' : 'title', link: G.link?.kind || null, code: G.code, host: G.host === G.me, ping: G.ping && Math.round(G.ping), reconnecting: !!G.retry, area: G.area?.id || null, me: me ? { x: +me.x.toFixed(2), z: +me.z.toFixed(2), yaw: +me.yaw.toFixed(2), moving: !!me.moving, bodyReady: !!me.body } : null, players: [...actors.list.values()].map(a => ({ id: a.id, x: +a.x.toFixed(2), z: +a.z.toFixed(2) })), server: G.snap ? G.snap.players.map(p => ({ id: p.id, x: p.x, z: p.z })) : null, fps: Math.round(G.fps || 0) };
   },
   health: () => ({ ok: true, errors: 0 }),
 };
@@ -308,10 +342,12 @@ let padPrev = {};
 function padCombat() {
   if (!G.me) return;
   const g = navigator.getGamepads ? [...navigator.getGamepads()].find(Boolean) : null; if (!g) return;
-  const now = { a: g.buttons[0]?.pressed, b: g.buttons[1]?.pressed, x: g.buttons[2]?.pressed, y: g.buttons[3]?.pressed, lb: g.buttons[4]?.pressed, rb: g.buttons[5]?.pressed };
+  const now = { a: g.buttons[0]?.pressed, b: g.buttons[1]?.pressed, x: g.buttons[2]?.pressed, y: g.buttons[3]?.pressed, lb: g.buttons[4]?.pressed, rb: g.buttons[5]?.pressed, lt: g.buttons[6]?.pressed, rt: g.buttons[7]?.pressed, back: g.buttons[8]?.pressed };
   const tap = k => now[k] && !padPrev[k];
-  if (tap('a')) { if (!G.target || !foes.get(G.target)) { const t = nearestFoe(); if (t) setTarget(t); } useSkill('attack'); }
-  if (tap('x')) useSkill('sure_strike'); if (tap('y')) useSkill('spark'); if (tap('b')) useSkill('field_mend'); if (tap('rb')) useSkill('shove');
+  if (tap('a')) { const me = actors.get(G.me), n = me && ground.nearest(me.x, me.z, 3); if (n && !(G.target && foes.get(G.target)?.st === 'attack')) { goAndDo(n.x, n.z, n.kind === 'chest' ? { t: 'act', do: 'open', id: n.id } : { t: 'act', do: 'pickup', gid: n.id }); } else { if (!G.target || !foes.get(G.target)) { const t = nearestFoe(); if (t) setTarget(t); } useSkill('attack'); } }
+  const bb = barOf(); if (tap('x')) useSkill(bb[0]); if (tap('y')) useSkill(bb[1]); if (tap('b')) useSkill(bb[2]); if (tap('rb')) useSkill(bb[3]);
   if (tap('lb')) targetNext();
+  if (tap('lt')) G.link?.send({ t: 'act', do: 'drink', kind: 'health' }); if (tap('rt')) G.link?.send({ t: 'act', do: 'drink', kind: 'mana' });
+  if (tap('back')) sheetUI.toggle();
   padPrev = now;
 }

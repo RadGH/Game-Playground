@@ -6,7 +6,7 @@ import { monsterStats } from './content.js';
 const MELEE_REACH = 1.9;           // metres of reach a one-handed weapon gives, beyond both bodies
 
 export function makeHero(w, id, ch) {
-  const st = sheet(ch, w.content.items?.bases ? w.content.items : null);
+  const st = sheet(ch, w.content.items?.bases ? w.content.items : null, w.content.skills);
   const h = {
     id, kind: 'hero', team: 'hero', name: String(ch.name || 'Wanderer').slice(0, 20), look: cleanLook(ch.look), char: ch,
     level: ch.level || 1, x: 0, z: 0, yaw: 0, r: PLAYER_RADIUS, speed: WALK_SPEED, moving: false,
@@ -27,7 +27,7 @@ export function applySheet(h, st) {
   h.weapon = { min: wp.min, max: wp.max, speed: wp.speed, ranged: !!wp.ranged, reach: wp.ranged ? 24 : (wp.hands === 2 ? 2.4 : MELEE_REACH), type: 'physical' };
   h.speed = WALK_SPEED * (1 + (st.moveSpeed || 0) / 100);
 }
-export function refreshHero(w, h) { applySheet(h, sheet(h.char, w.content.items?.bases ? w.content.items : null)); h.level = h.char.level; }
+export function refreshHero(w, h) { applySheet(h, sheet(h.char, w.content.items?.bases ? w.content.items : null, w.content.skills)); h.level = h.char.level; }
 /** A look is drawn by other browsers: keep it small and plain. */
 export function cleanLook(l) { if (!l || typeof l !== 'object') return null; const s = JSON.stringify(l); return s.length > 4000 ? null : JSON.parse(s); }
 
@@ -51,6 +51,8 @@ export function makeFoe(w, def, level, x, z, { rank = 'normal', pack = null, hpM
 export function heroRegen(w, p, dt) {
   if (p.dead) return;
   const calm = w.time - p.lastFight > 5;
-  p.hp = Math.min(p.maxHp, p.hp + p.st.hpRegen * (calm ? 3 : 1) * dt);
-  p.mana = Math.min(p.maxMana, p.mana + p.st.manaRegen * (calm ? 2 : 1) * dt);
+  let hot = 0, mot = 0;
+  for (const f of p.fx || []) { if (f.kind === 'hot') hot += f.per; if (f.kind === 'mot') mot += f.per; }   // potions refill smoothly
+  p.hp = Math.min(p.maxHp, p.hp + (p.st.hpRegen * (calm ? 3 : 1) + hot) * dt);
+  p.mana = Math.min(p.maxMana, p.mana + (p.st.manaRegen * (calm ? 2 : 1) + mot) * dt);
 }

@@ -1,1 +1,1 @@
-{ "name": "rogueloot", "private": true, "type": "module", "scripts": { "test": "node --test tests/sim/*.test.js tests/rules/*.test.js", "serve": "node server/main.mjs --port 8581" }, "dependencies": { "ws": "^8.18.0" } }
+{ "name": "rogueloot", "private": true, "type": "module", "scripts": { "test": "node --test tests/sim/*.test.js tests/rules/*.test.js tests/world/*.test.js", "serve": "node server/main.mjs --port 8581" }, "dependencies": { "ws": "^8.18.0" } }

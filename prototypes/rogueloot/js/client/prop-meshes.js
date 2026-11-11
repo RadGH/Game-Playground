@@ -1,0 +1,72 @@
+// The prop kit, drawn: one builder per kind (same ids as js/world/props.js). Stylised flat-shaded low-poly (ruling 14).
+// A builder returns parts [[geometry, colour], ...] in the prop's own space (y up, facing +z, 1 unit = 1 m at scale 1);
+// zone-view.js instances every part of every kind, so a forest of 400 trees is a handful of draw calls.
+import * as THREE from 'three';
+
+const C = (r, h, n = 6, y = 0) => new THREE.CylinderGeometry(r, r * 1.1, h, n).translate(0, y + h / 2, 0);
+const T = (r1, r2, h, n = 6, y = 0) => new THREE.CylinderGeometry(r1, r2, h, n).translate(0, y + h / 2, 0);
+const K = (r, h, n = 7, y = 0) => new THREE.ConeGeometry(r, h, n).translate(0, y + h / 2, 0);
+const B = (w, h, d, x = 0, y = 0, z = 0) => new THREE.BoxGeometry(w, h, d).translate(x, y + h / 2, z);
+const I = (r, x = 0, y = 0, z = 0, d = 0) => jitter(new THREE.IcosahedronGeometry(r, d), r * 0.22, Math.round(r * 997 + x * 31 + y * 17)).translate(x, y, z);
+const D = (r, x = 0, y = 0, z = 0) => jitter(new THREE.DodecahedronGeometry(r, 0), r * 0.25, Math.round(r * 613 + x * 7)).translate(x, y, z);
+function jitter(geo, amt, seed) {
+  const p = geo.attributes.position, seen = new Map(); let s = seed || 1;
+  const r = () => { s = (s * 16807) % 2147483647; return s / 2147483647 - 0.5; };
+  for (let i = 0; i < p.count; i++) { const k = `${p.getX(i).toFixed(3)},${p.getY(i).toFixed(3)},${p.getZ(i).toFixed(3)}`; if (!seen.has(k)) seen.set(k, [r() * amt, r() * amt, r() * amt]); const d = seen.get(k); p.setXYZ(i, p.getX(i) + d[0], p.getY(i) + d[1], p.getZ(i) + d[2]); }
+  geo.computeVertexNormals(); return geo;
+}
+const rot = (g, y = 0, x = 0, z = 0) => { g.rotateX(x); g.rotateY(y); g.rotateZ(z); return g; };
+const WOOD = '#7a4f2e', DWOOD = '#5a3a22', LEAF = '#5fae3d', LEAF2 = '#79c24a', PINE = '#2f7d47', STONE = '#9a958c', STONE2 = '#b8b2a6', ROOF = '#b5523a', THATCH = '#c9a050', PLASTER = '#efe2c4';
+
+export const PROP_MESHES = {
+  tree: () => [[C(0.18, 1.7), WOOD], [I(1.25, 0, 2.5, 0), LEAF], [I(0.85, 0.55, 3.2, 0.2), LEAF2], [I(0.7, -0.5, 2.9, -0.3), LEAF]],
+  tree_big: () => [[T(0.3, 0.45, 2.4), WOOD], [I(2.0, 0, 3.6, 0), LEAF], [I(1.4, 1.1, 4.6, 0.4), LEAF2], [I(1.2, -1.0, 4.2, -0.6), LEAF]],
+  pine: () => [[C(0.13, 1), WOOD], [K(1.15, 1.8, 7, 0.7), PINE], [K(0.85, 1.5, 7, 1.6), PINE], [K(0.5, 1.1, 7, 2.5), PINE]],
+  palm: () => { const parts = [[rot(T(0.12, 0.18, 3.4), 0, 0, 0.15), '#8a6a3a']]; for (let i = 0; i < 6; i++) parts.push([rot(B(0.35, 0.06, 1.8, 0, 0, 0.9), i * 1.05, -0.35).translate(0.5, 3.35, 0), '#4f9a3a']); return parts; },
+  birch: () => [[C(0.12, 2.4), '#e8e4d8'], [I(0.9, 0, 2.9, 0), '#8fcf5a'], [I(0.6, 0.35, 3.5, 0.1), '#a5dc6a']],
+  dead_tree: () => [[T(0.12, 0.22, 2.6), '#6a5a48'], [rot(T(0.05, 0.08, 1.2), 0, 0, 0.9).translate(0.5, 1.8, 0), '#6a5a48'], [rot(T(0.05, 0.08, 1.0), 2, 0, -0.8).translate(-0.4, 2.1, 0.1), '#6a5a48']],
+  elder_tree: () => [[T(0.7, 1.1, 4.5), '#6a4a2e'], [I(3.4, 0, 6.2, 0, 1), '#3f8a5a'], [I(2.2, 2.0, 7.4, 0.5), '#5aa86a'], [I(2.0, -1.8, 6.8, -1.0), '#3f8a5a'], [rot(T(0.25, 0.4, 2.2), 0, 0, 1.2).translate(1.4, 0.4, 0), '#6a4a2e']],
+  bush: () => [[I(0.65, 0, 0.45, 0), '#4f9a34'], [I(0.45, 0.45, 0.35, 0.2), '#62b040']],
+  fern: () => { const p = []; for (let i = 0; i < 5; i++) p.push([rot(B(0.14, 0.03, 0.7, 0, 0, 0.35), i * 1.25, -0.6).translate(0, 0.15, 0), '#3f8a34']); return p; },
+  flowers: () => ['#f06aa8', '#fff3a0', '#ffffff', '#b78cff', '#ff8a4a'].map((c, i) => [new THREE.IcosahedronGeometry(0.09, 0).translate(Math.cos(i * 1.7) * 0.45, 0.14, Math.sin(i * 1.7) * 0.45), c]),
+  grass: () => { const p = []; for (let i = 0; i < 6; i++) p.push([rot(K(0.06, 0.55), 0, 0.2 * Math.cos(i), 0.2 * Math.sin(i)).translate(Math.cos(i * 2.1) * 0.25, 0, Math.sin(i * 2.1) * 0.25), '#6aaa3a']); return p; },
+  reeds: () => { const p = []; for (let i = 0; i < 7; i++) p.push([C(0.025, 1.1 + (i % 3) * 0.2, 4).translate(Math.cos(i * 2.4) * 0.3, 0, Math.sin(i * 2.4) * 0.3), '#8aa04a']); return p; },
+  mushroom: () => [[C(0.05, 0.22, 5), '#f0e6d0'], [new THREE.SphereGeometry(0.16, 6, 3, 0, 6.3, 0, 1.6).translate(0, 0.22, 0), '#d8402a'], [C(0.04, 0.15, 5).translate(0.25, 0, 0.1), '#f0e6d0'], [new THREE.SphereGeometry(0.11, 6, 3, 0, 6.3, 0, 1.6).translate(0.25, 0.15, 0.1), '#c8a050']],
+  stump: () => [[T(0.38, 0.45, 0.45), WOOD], [T(0.36, 0.36, 0.02, 8, 0.45), '#d8b880']],
+  log: () => [[rot(C(0.28, 2.4, 7), 0, 0, Math.PI / 2).translate(1.2, 0.28, 0), WOOD]],
+  rock: () => [[D(0.95, 0, 0.35, 0).scale(1, 0.7, 1), STONE], [D(0.5, 0.75, 0.2, 0.45), STONE2]],
+  boulder: () => [[D(1.7, 0, 0.9, 0).scale(1, 0.75, 1), STONE], [D(0.8, 1.3, 0.4, 0.7), STONE2], [D(0.5, -1.2, 0.3, -0.8), STONE]],
+  rock_small: () => [[D(0.18, 0, 0.08, 0), STONE2], [D(0.12, 0.3, 0.06, 0.2), STONE], [D(0.1, -0.25, 0.05, 0.25), STONE2]],
+  standing_stone: () => [[jitter(B(0.7, 2.6, 0.45), 0.08, 3), '#8a8a90']],
+  ruin_pillar: () => [[T(0.38, 0.45, 2.4, 8), STONE2], [B(1.0, 0.25, 1.0, 0, 2.4, 0), STONE], [D(0.3, 0.5, 0.15, 0.6), STONE2]],
+  ruin_wall: () => [[jitter(B(3.0, 1.6, 0.7), 0.12, 5), STONE2], [jitter(B(1.2, 0.8, 0.7, 0.9, 1.6, 0), 0.1, 6), STONE2]],
+  ruin_arch: () => [[B(0.6, 3.0, 0.6, -1.3), STONE2], [B(0.6, 3.0, 0.6, 1.3), STONE2], [B(3.2, 0.6, 0.7, 0, 3.0, 0), STONE]],
+  gravestone: () => [[B(0.5, 0.75, 0.15), '#8a8a90'], [rot(C(0.25, 0.15, 8), 0, Math.PI / 2).translate(0, 0.75, 0), '#8a8a90']],
+  cairn: () => [[D(0.6, 0, 0.3, 0), STONE], [D(0.45, 0, 0.75, 0), STONE2], [D(0.3, 0, 1.1, 0), STONE]],
+  fence: () => [[B(0.12, 1.0, 0.12, -1.0), WOOD], [B(0.12, 1.0, 0.12, 1.0), WOOD], [B(2.2, 0.1, 0.06, 0, 0.75, 0), WOOD], [B(2.2, 0.1, 0.06, 0, 0.4, 0), WOOD]],
+  wall_stone: () => [[jitter(B(2.0, 1.4, 0.9), 0.06, 9), '#a8a090'], [B(2.1, 0.2, 1.0, 0, 1.4, 0), '#8a8274']],
+  house: () => [[B(5, 3, 4.4), PLASTER], [rot(K(4.2, 2.4, 4, 3), Math.PI / 4).scale(1.05, 1, 0.85), ROOF], [B(1.1, 1.9, 0.1, 0, 0, 2.2), DWOOD], [B(0.9, 0.9, 0.1, 1.6, 1.4, 2.21), '#7ab0d8'], [B(0.5, 1.2, 0.5, 1.5, 4.2, -0.8), STONE]],
+  hut: () => [[C(1.8, 1.8, 8), '#b08a5a'], [K(2.4, 2.0, 8, 1.8), THATCH], [B(0.9, 1.4, 0.1, 0, 0, 1.8), DWOOD]],
+  tent: () => [[rot(K(1.5, 1.9, 4), Math.PI / 4).scale(1, 1, 1.4), '#c8b080'], [B(0.08, 2.0, 0.08, 0, 0, 1.5), WOOD]],
+  windmill: () => { const p = [[T(1.6, 2.2, 6, 8), '#e8dcc0'], [K(2.0, 1.8, 8, 6), ROOF]]; for (let i = 0; i < 4; i++) p.push([rot(B(0.5, 3.4, 0.08, 0, 0, 0), 0, 0, i * Math.PI / 2).translate(0, 6, 2.0), '#d8c8a0']); return p; },
+  well: () => [[T(0.85, 0.9, 0.8, 10), STONE2], [B(0.1, 1.6, 0.1, -0.75, 0.8, 0), WOOD], [B(0.1, 1.6, 0.1, 0.75, 0.8, 0), WOOD], [rot(K(1.1, 0.7, 4, 2.3), Math.PI / 4), ROOF]],
+  dock: () => [[B(3, 0.15, 6, 0, 0.1, 0), '#9a6a3a'], [C(0.12, 1.1, 5).translate(-1.4, -0.6, 2.8), DWOOD], [C(0.12, 1.1, 5).translate(1.4, -0.6, 2.8), DWOOD], [C(0.12, 1.1, 5).translate(-1.4, -0.6, -1), DWOOD], [C(0.12, 1.1, 5).translate(1.4, -0.6, -1), DWOOD]],
+  bridge: () => [[B(2.8, 0.2, 8, 0, 0.35, 0), '#9a6a3a'], [B(0.12, 0.8, 8, -1.35, 0.5, 0), DWOOD], [B(0.12, 0.8, 8, 1.35, 0.5, 0), DWOOD]],
+  cart: () => [[B(1.4, 0.5, 2.2, 0, 0.5, 0), '#8a5a2a'], [rot(C(0.42, 0.12, 10), 0, 0, Math.PI / 2).translate(-0.75, 0.0, 0.5), DWOOD], [rot(C(0.42, 0.12, 10), 0, 0, Math.PI / 2).translate(0.75, 0.0, 0.5), DWOOD], [B(0.1, 0.1, 1.6, 0, 0.6, 1.8), WOOD]],
+  haystack: () => [[T(0.6, 1.1, 1.2, 8), '#d8b850'], [K(0.65, 0.6, 8, 1.2), '#e8c860']],
+  scarecrow: () => [[C(0.06, 1.9, 5), WOOD], [B(1.3, 0.08, 0.08, 0, 1.4, 0), WOOD], [I(0.22, 0, 1.95, 0), '#d8b850'], [K(0.3, 0.35, 6, 2.05), '#5a3a22'], [B(0.6, 0.6, 0.2, 0, 1.05, 0), '#7a6a9a']],
+  signpost: () => [[C(0.07, 1.8, 5), WOOD], [B(0.9, 0.25, 0.06, 0.3, 1.4, 0), '#a07040'], [B(0.8, 0.22, 0.06, -0.25, 1.05, 0), '#a07040']],
+  palisade: () => { const p = []; for (let i = 0; i < 5; i++) p.push([K(0.16, 0.5, 5, 2.0).translate((i - 2) * 0.42, 0, 0), WOOD], [C(0.16, 2.0, 6).translate((i - 2) * 0.42, 0, 0), WOOD]); return p; },
+  watchtower: () => [[B(0.2, 4, 0.2, -1, 0, -1), WOOD], [B(0.2, 4, 0.2, 1, 0, -1), WOOD], [B(0.2, 4, 0.2, -1, 0, 1), WOOD], [B(0.2, 4, 0.2, 1, 0, 1), WOOD], [B(2.6, 0.2, 2.6, 0, 4, 0), '#9a6a3a'], [rot(K(2.1, 1.4, 4, 5.2), Math.PI / 4), THATCH], [B(2.6, 0.8, 0.1, 0, 4.2, 1.3), WOOD]],
+  torch: () => [[T(0.06, 0.08, 1.5, 5), DWOOD], [K(0.16, 0.38, 5, 1.55), '#ffb240']],
+  campfire: () => { const p = [[K(0.35, 0.7, 6), '#ff9a2a'], [K(0.2, 0.45, 5, 0.1).translate(0.12, 0, 0.05), '#ffd24a']]; for (let i = 0; i < 6; i++) p.push([D(0.16, Math.cos(i) * 0.55, 0.08, Math.sin(i) * 0.55), STONE]); return p; },
+  banner: () => [[C(0.05, 2.6, 5), DWOOD], [B(0.8, 1.1, 0.04, 0.42, 1.3, 0), '#8a1a1a'], [B(0.9, 0.06, 0.06, 0.42, 2.45, 0), DWOOD]],
+  crate: () => [[B(0.9, 0.9, 0.9), '#a07a48'], [B(0.95, 0.12, 0.95, 0, 0.4, 0), '#7a5a30']],
+  barrel: () => [[T(0.38, 0.32, 0.95, 9), '#8a5a2a'], [T(0.4, 0.4, 0.06, 9, 0.2), '#5a5a5a'], [T(0.4, 0.4, 0.06, 9, 0.7), '#5a5a5a']],
+  bones: () => [[rot(C(0.04, 0.5, 5), 0, 0, 1.4).translate(0.2, 0.05, 0), '#e8e0c8'], [rot(C(0.04, 0.4, 5), 1, 0, 1.5).translate(-0.1, 0.05, 0.2), '#e8e0c8'], [I(0.13, -0.3, 0.1, -0.1), '#e8e0c8']],
+  waypoint_stone: () => [[T(0.9, 1.1, 0.3, 8), STONE], [jitter(B(0.5, 1.8, 0.5, 0, 0.3, 0), 0.04, 2), '#8a8aa0'], [new THREE.OctahedronGeometry(0.28).translate(0, 2.5, 0), '#7ae0ff']],
+  portal_ring: () => [[new THREE.TorusGeometry(1.4, 0.18, 6, 18).translate(0, 1.6, 0), STONE2], [T(1.2, 1.4, 0.2, 10), STONE]],
+  cave_mouth: () => [[D(2.0, -2.2, 1.0, 0), '#6a6660'], [D(2.0, 2.2, 1.0, 0), '#6a6660'], [D(1.8, 0, 2.8, -0.4), '#5a5650'], [B(2.4, 0.02, 2.0, 0, 0.01, 0.6), '#1a1612']],
+};
+/** Kinds that give off light (torches, campfires; capped per zone). */
+export const LIGHTS = { torch: { color: '#ffae55', y: 1.8, i: 5, d: 7 }, campfire: { color: '#ff9a3a', y: 0.8, i: 7, d: 9 }, waypoint_stone: { color: '#7ae0ff', y: 2.5, i: 3, d: 5 } };

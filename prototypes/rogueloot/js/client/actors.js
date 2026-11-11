@@ -37,10 +37,11 @@ export function createActors(view, tagRoot) {
     const w = view.renderer.domElement.clientWidth, h = view.renderer.domElement.clientHeight;
     for (const a of list.values()) {
       if (!a.me) sample(a, renderAt);
-      a.group.position.set(a.x, 0, a.z);
+      const gy = view.groundY ? view.groundY(a.x, a.z) : 0;
+      a.group.position.set(a.x, gy, a.z);
       const turn = 1 - Math.exp(-dt * 14); a.group.rotation.y = lerpAngle(a.group.rotation.y, a.yaw, turn);
       if (a.body) { const want = a.moving ? 'walk' : 'idle'; if (want !== a.anim) { a.anim = want; a.body.setAnim(want, 0.18); } a.body.update(dt); }
-      v.set(a.x, 2.15, a.z).project(view.camera);
+      v.set(a.x, gy + 2.15, a.z).project(view.camera);
       a.tag.style.transform = `translate(-50%, -100%) translate(${(v.x * 0.5 + 0.5) * w}px, ${(-v.y * 0.5 + 0.5) * h}px)`;
     }
   }

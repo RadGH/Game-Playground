@@ -1,0 +1,26 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; font: 14px Spectral, Georgia, serif; background: #2b2216; color: #f0e6d0; }
+body { display: grid; grid-template: "bar bar bar" auto "tools stage panel" 1fr / 120px 1fr 300px; height: 100vh; }
+@media (max-width: 760px) { body { grid-template: "bar" auto "tools" auto "stage" 1fr "panel" 40vh / 1fr; } #tools { display: flex; overflow-x: auto; } }
+button, select, input, textarea { font: inherit; }
+button { background: #4a3a26; color: #f0e6d0; border: 1px solid #8a7a5a; border-radius: 6px; padding: 6px 10px; cursor: pointer; min-height: 36px; }
+button.primary { background: #c98a2a; color: #1a1006; border-color: #f0c060; } button.on { background: #e8b64a; color: #1a1006; }
+#bar { grid-area: bar; display: flex; gap: 6px; align-items: center; padding: 6px 10px; background: #1e170e; flex-wrap: wrap; }
+#bar b { font: 800 16px Cinzel, serif; color: #ffd890; margin-right: 6px; }
+#status { margin-left: auto; opacity: .8; font-size: 13px; }
+#tools { grid-area: tools; display: grid; align-content: start; gap: 4px; padding: 6px; background: #241c12; }
+#tools button { text-align: left; }
+#stage { grid-area: stage; position: relative; overflow: hidden; }
+#view { width: 100%; height: 100%; display: block; touch-action: none; }
+#marks { position: absolute; inset: 0; pointer-events: none; }
+.mk { position: absolute; transform: translate(-50%, -150%); background: rgba(0,0,0,.6); padding: 1px 5px; border-radius: 4px; font-size: 11px; white-space: nowrap; }
+.mk.on { background: #e8b64a; color: #000; }
+#panel { grid-area: panel; overflow: auto; padding: 8px 10px; background: #241c12; }
+#panel h3 { font: 700 14px Cinzel, serif; color: #ffd890; margin: 10px 0 6px; }
+#panel label { display: grid; gap: 2px; margin: 6px 0; font-size: 13px; }
+#panel input, #panel select, #panel textarea { background: #fff8e8; color: #1a1006; border: 1px solid #8a7a5a; border-radius: 4px; padding: 4px 6px; }
+#panel textarea { width: 100%; min-height: 140px; font: 12px monospace; }
+.palette { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+.palette button { font-size: 12px; padding: 4px; min-height: 28px; text-align: left; }
+.palette i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.row { display: flex; gap: 6px; } #check-out ul { padding-left: 18px; margin: 4px 0; }

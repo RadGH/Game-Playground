@@ -1,6 +1,20 @@
 {
   "entries": [
     {
+      "id": "2026-11-10-paths-loot-world",
+      "date": "2026-11-10",
+      "title": "Paths, loot and a real meadow",
+      "items": [
+        "At level 3 choose your Path: Fighter, Rogue, Mage or Healer. Each has its own skill tree to spend a point in every level, and its own way to fight. Fighters build Temper by hitting and getting hit; Rogues spend Energy that refills fast.",
+        "Six skill slots: keys 1-6, the buttons, or the arc on a phone. Press K for your skills; tap the arrow on a skill, then a slot, to put it on your bar.",
+        "Monsters drop loot now: gold, potions and gear. Everyone gets their own drops. Good items stand in a beam of light. Click or tap a drop to pick it up (Space picks up the nearest one), and open chests the same way.",
+        "Potions refill over a few seconds, and drinking two at once doubles the refill. Q drinks a healing potion, E a mana potion, straight from your belt.",
+        "Drag items around your bag and onto your body. Right-click identifies an unidentified item, for free.",
+        "Proving Meadow has been rebuilt: a road and a camp, a pond with a dock, a farm, old ruins, woods, a cliff, and four chests to find.",
+        "Zoom in and out with the mouse wheel, or pinch on a phone."
+      ]
+    },
+    {
       "id": "2026-11-10-fights-and-gear",
       "date": "2026-11-10",
       "title": "Monsters, fights and gear",

@@ -5,14 +5,14 @@
 // counts), admin feed GET /internal/admin/feed + POST /internal/admin/action (env RGS_ADMIN_SECRET switches it on).
 import http from 'node:http';
 import https from 'node:https';
-import { readFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, writeFileSync, renameSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
 import { WebSocketServer } from 'ws';
 import { createStaticHandler } from './static.js';
 import { createHub } from '../js/net/hub.js';
 import { validateCharacter } from '../js/rules/validate.js';
-import { loadContent } from '../js/sim/content.js';
+import { loadContent, checkAny } from '../js/sim/content.js';
 import { checkItem } from '../js/rules/items.js';
 import { createFeedback } from '../../tumblefair/server/feedback.mjs';
 import { createInsights } from '../../tumblefair/server/insights.mjs';
@@ -31,7 +31,7 @@ const log = (what, d) => console.log(new Date().toISOString(), what, JSON.string
 const insights = createInsights(dataDir, { build });
 const feedback = createFeedback(dataDir, { build });
 const content = loadContent(f => JSON.parse(readFileSync(join(GAME, 'data', f), 'utf8')));
-const hub = createHub({ build, log, content, checkCharacter: ch => validateCharacter(ch, { items: { checkItem: it => checkItem(content.items, it) } }) });
+const hub = createHub({ build, log, content, checkCharacter: ch => validateCharacter(ch, { items: { checkItem: it => checkAny(content, it) } }) });
 const started = Date.now();
 const admin = createAdminFeed({ game: 'rogueloot', build, dataDir, started, online: () => hub.status(), ratingKey: 'zone', names: {} });
 
@@ -51,10 +51,30 @@ function onRequest(req, res) {
     return;
   }
   if (path.startsWith('/internal/') && admin.handle(req, res, path)) return;
+  if (path === '/editor/save' && req.method === 'POST') { editorSave(req, res); return; }
   if (path === '/feedback' && req.method === 'POST') { feedback.handle(req, ipOf(req), (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); }); return; }
   if (path === '/tally' && req.method === 'POST') { insights.handle(req, ipOf(req), req.headers['user-agent'], code => { res.writeHead(code); res.end(); }); return; }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); res.end(); return; }
   if (!serveStatic(req, res)) { res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('not found'); }
+}
+
+// The zone editor's Save (M11): DEV server only (the working tree), from this machine's network only, writes
+// data/zones/<id>.json and adds it to the index. The published copies never have it (build !== 'dev').
+async function editorSave(req, res) {
+  const done = (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); };
+  if (build !== 'dev' || publicDir) return done(404, { ok: false, msg: 'Saving is only on the dev server. Use Download instead.' });
+  const ip = ipOf(req); if (!/^(127\.|::1|::ffff:127\.|192\.168\.|10\.|::ffff:192\.168\.|::ffff:10\.)/.test(ip)) return done(403, { ok: false, msg: 'Only from this network.' });
+  let body = ''; for await (const c of req) { body += c; if (body.length > 4e6) return done(413, { ok: false, msg: 'Too big.' }); }
+  let zone; try { zone = JSON.parse(body); } catch { return done(400, { ok: false, msg: 'Not JSON.' }); }
+  if (!/^[a-z][a-z0-9_]{1,40}$/.test(zone?.id || '')) return done(400, { ok: false, msg: 'Zone id must be lower_case letters, digits and _.' });
+  const { checkZone } = await import('../js/world/check.js');
+  const r = checkZone(zone);
+  const dir = join(GAME, 'data', 'zones'), file = join(dir, zone.id + '.json');
+  writeFileSync(file + '.tmp', JSON.stringify(zone, null, 1) + '\n'); renameSync(file + '.tmp', file);
+  const idxFile = join(dir, 'index.json'), idx = JSON.parse(readFileSync(idxFile, 'utf8'));
+  if (!idx.zones.includes(zone.id)) { idx.zones.push(zone.id); writeFileSync(idxFile, JSON.stringify(idx, null, 1) + '\n'); }
+  log('editor-save', { zone: zone.id, problems: r.problems.length });
+  done(200, { ok: true, problems: r.problems, stats: r.stats });
 }
 
 const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_FRAME, perMessageDeflate: false });

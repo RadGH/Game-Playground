@@ -38,12 +38,12 @@
         { "id": "mirefen", "name": "Mirefen", "kind": "zone", "levels": [11, 13], "x": 56, "y": 32, "links": ["kings_road", "mire_crypt", "highcairn_pass"], "portalAfter": "elder_roots", "order": 11, "rare": "bogmother_sulk", "built": true },
         { "id": "mire_crypt", "name": "Mire Crypt", "kind": "dungeon", "levels": [14, 14], "floors": 2, "boss": "sister_vennel", "x": 72, "y": 38, "links": ["mirefen"], "portalAfter": null, "order": 12, "built": true },
 
-        { "id": "highcairn_pass", "name": "Highcairn Pass", "kind": "zone", "levels": [13, 15], "x": 46, "y": 18, "links": ["mirefen", "redcliff_heights"], "portalAfter": "mire_crypt", "order": 13, "rare": "hoarfang", "built": false },
-        { "id": "redcliff_heights", "name": "Redcliff Heights", "kind": "zone", "levels": [15, 17], "x": 64, "y": 12, "links": ["highcairn_pass", "warband_mine", "sunken_ruins"], "portalAfter": "highcairn_pass", "order": 14, "rare": "captain_vosk", "built": false },
-        { "id": "warband_mine", "name": "Warband Mine", "kind": "dungeon", "levels": [16, 17], "floors": 2, "boss": "warlord_ruhk", "x": 78, "y": 22, "links": ["redcliff_heights"], "portalAfter": null, "order": 15, "built": false },
-        { "id": "sunken_ruins", "name": "Sunken Ruins", "kind": "zone", "levels": [17, 18], "x": 82, "y": 6, "links": ["redcliff_heights", "gravewatch_hills"], "portalAfter": "warband_mine", "order": 16, "rare": "the_kept_bride", "built": false },
-        { "id": "gravewatch_hills", "name": "Gravewatch Hills", "kind": "zone", "levels": [18, 20], "x": 92, "y": 18, "links": ["sunken_ruins", "deep_catacomb"], "portalAfter": "sunken_ruins", "order": 17, "rare": "morrow_the_unburied", "built": false },
-        { "id": "deep_catacomb", "name": "Deep Catacomb", "kind": "dungeon", "levels": [19, 20], "floors": 3, "boss": "harrowmund", "actBoss": true, "x": 96, "y": 34, "links": ["gravewatch_hills"], "portalAfter": null, "order": 18, "built": false }
+        { "id": "highcairn_pass", "name": "Highcairn Pass", "kind": "zone", "levels": [13, 15], "x": 46, "y": 18, "links": ["mirefen", "redcliff_heights"], "portalAfter": "mire_crypt", "order": 13, "rare": "hoarfang", "built": true },
+        { "id": "redcliff_heights", "name": "Redcliff Heights", "kind": "zone", "levels": [15, 17], "x": 64, "y": 12, "links": ["highcairn_pass", "warband_mine", "sunken_ruins"], "portalAfter": "highcairn_pass", "order": 14, "rare": "captain_vosk", "built": true },
+        { "id": "warband_mine", "name": "Warband Mine", "kind": "dungeon", "levels": [16, 17], "floors": 2, "boss": "warlord_ruhk", "x": 78, "y": 22, "links": ["redcliff_heights"], "portalAfter": null, "order": 15, "built": true },
+        { "id": "sunken_ruins", "name": "Sunken Ruins", "kind": "zone", "levels": [17, 18], "x": 82, "y": 6, "links": ["redcliff_heights", "gravewatch_hills"], "portalAfter": "warband_mine", "order": 16, "rare": "the_kept_bride", "built": true },
+        { "id": "gravewatch_hills", "name": "Gravewatch Hills", "kind": "zone", "levels": [18, 20], "x": 92, "y": 18, "links": ["sunken_ruins", "deep_catacomb"], "portalAfter": "sunken_ruins", "order": 17, "rare": "morrow_the_unburied", "built": true },
+        { "id": "deep_catacomb", "name": "Deep Catacomb", "kind": "dungeon", "levels": [19, 20], "floors": 3, "boss": "harrowmund", "actBoss": true, "x": 96, "y": 34, "links": ["gravewatch_hills"], "portalAfter": null, "order": 18, "built": true }
       ]
     }
   ]

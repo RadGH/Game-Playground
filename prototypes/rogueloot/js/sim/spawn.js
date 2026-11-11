@@ -70,7 +70,9 @@ function pickPack(w, sp) {
   const t = w.content.spawnTables?.[sp.table || w.area.table || w.area.id.replace(/_\d+$/, '')];
   const rows = sp.tag === 'patrol' ? t?.patrols : sp.tag === 'swarm' ? t?.swarms : t?.packs;
   const floor = +(/_(\d+)$/.exec(w.area.id)?.[1] || 1);            // tidecaves_2 is floor 2
-  const got = rollComposition(w, rows, sp.level || 1, floor);
+  // a marked spot (perch, burrow, egg_sac, door…) prefers the table rows written for it, and falls back to any
+  const fit = sp.marker && rows?.some(r => r.marker === sp.marker) ? rows.filter(r => r.marker === sp.marker) : rows?.filter(r => !r.marker || !sp.marker) || rows;
+  const got = rollComposition(w, fit?.length ? fit : rows, sp.level || 1, floor);
   if (got?.length) return got;
   const n = 2 + Math.floor(w.rng() * 3), out = [];
   for (let i = 0; i < n; i++) out.push(i === 0 && sp.level >= 2 && w.rng() < 0.5 ? 'test_hexer' : w.rng() < 0.3 ? 'test_slinger' : 'test_raider');

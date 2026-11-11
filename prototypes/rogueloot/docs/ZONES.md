@@ -682,3 +682,184 @@ nook is north of the hall through a 5.5 m corridor.
   over a gorge (r 0, like the fen's boardwalks), drakes' landing rocks as `boulder`s.
 - **Redcliff Heights (15-17)** and the **Warband Mine**: the mine is the third dungeon recipe (crypt walls as `timber_frame`
   shoring + cliffs for rock), with `mine_cart` rails on the floor for Ruhk's gallery.
+
+## Act 1, part 4: Highcairn Pass, Redcliff Heights and the Warband Mine
+
+Written by Fable, 2026-11-11, to the same rulings and checks as parts 2 and 3. Three nodes, four files: `highcairn_pass`,
+`redcliff_heights`, `warband_mine` + `_2`. Eleven kinds added to the kit for the three looks (`js/world/props.js` +
+`js/client/prop-meshes.js`): the pass's `snow_pine` (a pine with a white cap), `drake_nest` (a ring of bones with eggs)
+and `flag_line` (a rope of three prayer flags, r 0, strung over the road); the warband's `war_tent` (a big dark tent with
+a red pennant), `drake_post` (a post with an iron ring and a chain), `skull_pole`, `firepot_stack` and `red_spire` (a
+tall red pinnacle); the mine's `rail` (6 m of track on a sleeper board, r 0), `ore_rock` (grey rock with gold ore) and
+`powder_keg`. Draw-call floors at Low: Pass 87, Redcliff 106, Mine 48 / 54. Since 2026-11-11 painted `mud` slows
+walkers to 0.7x, so the rams' wallow is mud on purpose.
+
+### Highcairn Pass (levels 13-15, 300 x 300 m, table `highcairn_pass`, theme `highland`)
+
+A mountainside climbed in **four switchback legs** (west, east, west, east) with a **cliff cut along the uphill side of
+each leg** (`cliffBeside` in the generator: 16 m beside the leg, with gaps only where a lane leaves it), so the only way
+up is the road, and a big ridge table under it so each leg stands higher than the last. Arrive from Mirefen's north-west
+exit, so the gate is the SOUTH edge; the Redcliff exit is the north-east corner. From the bottom: the **ramherds'
+pasture** (three `cairn_ram`s in a mud wallow - the mud slows you while the rams charge in sequence; a fence, a tarn)
+and the **ramherd's hut** (a lynx on the boulder above the lane, `marker: "perch"` - the surprise opener) -> leg A with
+the `switchbacks` patrol of three rams -> the west hairpin (cairns, prayer flags) -> leg B: the **High Cairn** waypoint on
+its flagstones (quiet 25 m), a lynx ledge, three kites over the drop, two drakes on the rocks -> the east hairpin at the
+snowline -> leg C: the `pass_road` warband patrol, a lynx ledge, the **Drakes' Roost** up a side lane under the cliff
+(three drakes on `drake_nest`s), the first breaker pack -> the snowline hairpin, **Hoarfang's rock** (a lynx pinned with
+`rare: "hoarfang"`, the locked chest behind the boulders) -> leg D in the snow: rams on the narrow road, the **gorge**
+(four short cliff walls either side of the road, a `rope_bridge` across, kites over it), the **warband's watch** above the
+road (a `war_tent`, a palisade arc, skull poles, the breaker pack) and the warcaller's band at the Redcliff gate. 28
+spawns (2 patrols), 8 chests, 13 pinned. Pines below the snowline, snow pines above, cairns everywhere.
+
+### Redcliff Heights (levels 15-17, 320 x 320 m, table `redcliff_heights`, theme `highland`)
+
+The warband's country: red earth (`farmland` paint) under **red mesas** (cliffs with `color: "#a04a3a"` and ridges) with
+`red_spire`s and boulders between. Arrive from the Pass's north-east exit, so the gate is the SOUTH-WEST corner. The road
+runs north-east past the **West Outpost** (a palisade arc on the far side from the road, a warcaller's six-strong band at
+the fire, a sapper's crew on the rocks across the road), the **Kennels** west (a fence ring, three warhounds and two
+cutthroats), the **Red Shrine** waypoint (the stone in a ring of five red spires) to the **war camp**: a `palisade` ring of
+radius 40 with three gates (west, east, north; 8-degree gaps with a `gate` prop and banners), a **ring road** of radius
+30 inside it that the `camp_ring` patrol (warcaller, raiders, warhounds) walks - so every flee-call in the camp lands -
+four `war_tent`s with a pinned pack at each (breaker + bonechanter; the sapper's crew; hounds + cutthroats; and the
+**Warlord's great tent** with the full war-tent row, the minLevel-16 one), a watchtower, two `drake_post`s in the north
+quarter with two chained drakes (`marker: "drake_post"`). East: a toll on the mine road, the **mine mouth** in a red
+cliff (a `cave_mouth` facing west with the breaker pack on the door), the **Powder Works** south-east (a palisade square
+with a gate, firepot stacks and kegs; the sapper pack pinned with `rare: "captain_vosk"`, the locked chest in his tent).
+North: a toll on the Ruins road and the exit to the Sunken Ruins (not built). 28 spawns, 8 chests, 13 pinned.
+
+### Warband Mine (levels 16-17, two floors, theme `mine`, table `warband_mine`)
+
+The cave recipe with grey-brown walls, `timber_frame` shoring along the corridor walls (alternating sides, as the Barrow
+did - a frame on the centreline blocks the lane), a **rail line** of `rail` props down the middle with `mine_cart`s in the
+rooms, `ore_rock` in the walls, `lantern_post`s for light. **Floor 1, the Upper Workings (16)**: the mouth -> the **Rail
+Gallery** (a sapper with three raiders between the shoring; the `rail_line` patrol walking the rails) -> the **Hub** (the
+breaker by the powder kegs) -> the **Diggers' Cut** west (a `crypt_door` in the north wall with a chanter party,
+`marker: "door"`; the diggers' camp beyond - the Gravesworn working alongside the warband) -> the **Powder Store** east
+(the sapper among the kegs) -> the **Borer Holes** south-west (two borers, `marker: "burrow"`) -> the **Winch Shaft**
+north with the breaker guarding the drop. **Floor 2, the Deep Gallery (17)**: the landing -> the **Chokepoint**, a 5 m
+throat with the `cairn_sentinel` pinned in it (`marker: "chokepoint"`, the floor-2 row; kegs and rune stones either
+side) -> the **Door Hub** (the last sealed door, the sapper's crew) -> the **Barracks** west (breaker and bonechanter at
+the fire) -> the hallway (diggers laying rail) -> **Ruhk's hall**: a 28 x 20 m room with two rail lines crossing it
+(`rail` props, drawn on the floor), four `brazier`s, skull poles at the two **side-tunnel** mouths, the war tent and the
+Black Stag standard in the nook beyond and the hoard behind that. The boss marker carries `chutes` (the two tunnel
+mouths - the Clan's packs and the bannerbearers come from there) and `spots` (the tunnel ends where the sappers stand),
+plus `rails`, `braziers` and `tent` positions nothing reads yet.
+
+### For the programmer (part 4)
+
+- **Boss helper lists**: Warlord Ruhk has `chutes` (2) + `spots` (2). `rails` (two lines), `braziers` (4) and `tent` are
+  hints for Rail Carts, the knock-over braziers and the Stag's entrance.
+- **Snow does not slow** (only `mud` is in `SLOW_GROUND`); the pass uses mud for the rams' wallow only. If deep snow
+  should slow, add `snow` to that table - the pass's snowfield is painted `snow` already.
+- **`marker` values** this round: `perch`, `drake_post`, `door`, `chokepoint`, `burrow`; `rare` spots `hoarfang` (the
+  snowline hairpin) and `captain_vosk` (the Powder Works). Still unread, as before.
+- **Tents as destructible loot props** (the Redcliff table's note) do not exist; `war_tent` and `tent` are plain props.
+- **Redcliff's exit to `sunken_ruins`** points at a zone not built yet, as Mirefen's does to the pass.
+- A timber frame's blocker is its middle (r 0.3), so shoring must stand against the walls; the first pass put frames
+  across every corridor and the strict checker reported every lane at 0 m.
+
+### Notes for the next zones
+
+- **Sunken Ruins (17-18)**: arrive from Redcliff's north exit (its marker at (0, -150), arrival southward). The sea on the
+  map edge (water polygons, as the shore did); `ruin_wall`/`ruin_pillar`/`ruin_arch` for the drowned city; shades walk
+  through walls, so leave open floor between the ruins.
+- **Gravewatch Hills (18-20)** and the **Deep Catacomb**: the catacomb is the crypt recipe at its biggest; four seal points
+  for Harrowmund's chanters as `spots`, niches for the Ossuary Knights as `coffins`.
+
+## Act 1, part 5: the Sunken Ruins, Gravewatch Hills and the Deep Catacomb
+
+Written by Fable, 2026-11-11, to the same rulings and checks as parts 2-4. Three nodes, five files: `sunken_ruins`,
+`gravewatch_hills`, `deep_catacomb` + `_2` + `_3`. With these every node in `acts.json` is `built`. Ten kinds added to the
+kit: the ruins' `altar` (lit), `drowned_statue` and `kelp` (r 0) and the `seal_sigil` (a gold ring on the floor, r 0);
+the hills' `barrow_mound` (a grassed mound with a stone door, r 3) and `obelisk` (black, gold-tipped, lit); the catacomb's
+`bone_cage`, `throne`, `bone_pillar` and `candle_cluster` (lit, r 0). Draw-call floors at Low: Ruins 70, Hills 86,
+Catacomb 28 / 29 / 29.
+
+### Sunken Ruins (levels 17-18, 320 x 320 m, table `sunken_ruins`, theme `ruins`)
+
+A drowned city. The **sea** is two big water polygons on the north and west edges (the world's edge, as the shore did);
+the **drowned quarters are painted `mud`**, so wading slows, and the **causeway is `cobble`** above the flood. Arrive
+from Redcliff's north exit, so the gate is the SOUTH edge; the exit to Gravewatch is on the east. The Landward Gate (a
+ruined arch beside the road - an arch OVER a road blocks the lane with its centre circle, so no arch stands on one) ->
+the **Flooded Halls** west (a roofless hall of walls and pillars in the water: two tide wardens pinned - Whirlpool pulls
+you into mud that slows you; a `rune_watcher` on a pillar with `marker: "perch"`; the `flooded_halls` patrol wading a
+loop) -> the **Drowned Plaza** waypoint (the stone on a raised square, a ring of statues, a cracked seal) -> the
+**Drowned Market** east (stalls fallen in the water, four shades, a warden at the wreck) -> the **Drowned Altar**
+north-west (the Bride's altar on its island, statues of the wedding party, kelp; the shade pack pinned with
+`rare: "the_kept_bride"`) -> the **Sea Temple** north (a pillar ring on the last dry stone, a sealed door in its back
+wall: the candlebearer's procession in the forecourt - the Gravesworn's leader - and keeper + two chanters at the door,
+`marker: "door"`; the locked chest beside it) -> the **causeway east** (the `causeway` patrol: a candlebearer leading
+three diggers) -> the **Watergate** (two short cliff walls flanking the road, a seal in the paving, the `cairn_sentinel`
++ `rune_watcher` pinned with `marker: "chokepoint"`). 28 spawns (2 patrols), 8 chests, 11 pinned.
+
+### Gravewatch Hills (levels 18-20, 320 x 320 m, table `gravewatch_hills`, theme `grave`)
+
+Barrow country under a dusk sky: a **`barrow_mound` on its own hill** at each landmark (door, two obelisks, a ring of
+gravestones), dead trees and gravestones everywhere, the burnt north painted `ash`. Arrive from the Ruins' east exit,
+so the gate is the WEST edge; the **Cairn Road** (`cobble`) runs east to the Great Barrow in the north-east. The
+**First Cairn** (husks out of the door with archers on the hill) -> the **Gravewatch Stones** waypoint (a standing-stone
+ring north of the road, candles kept lit) with the `cairn_road` patrol (a knight and two hounds) walking the road past
+it -> the **Reeve's Barrow** south-west (the reeve's pack; the `cairn_to_cairn` patrol rides between it and the Shroud
+Hollow and back) -> the **Shroud Hollow** south (a shroudmother at her loom - a `bone_cage` - among dug-up coffins) ->
+the **Knights' Field** north (four rows of gravestones; two knights and a gravecandle, the minLevel-19 row; a knight's
+pack at the far cairn) -> the **Gravesworn's tower** north-east (a watchtower, tents, the procession camped: keeper,
+chanter, candlebearer at once) -> **Morrow's barrow** south-east (the knight pack pinned with
+`rare: "morrow_the_unburied"`, the locked chest behind his obelisk) -> the **obelisk road** and the **Great Barrow**: a
+rock face with the catacomb door (`cave_mouth` + `crypt_door`), a seal in the ground, the Gravesworn's last camp and two
+knights on the seal. 28 spawns (2 patrols), 8 chests, 10 pinned.
+
+### Deep Catacomb (levels 19-20, three floors, theme `catacomb`, table `deep_catacomb`)
+
+**Floors 1 and 2 are the crypt recipe at its biggest**: `crypt_wall` runs round wide halls with `niche`s, `bone_pillar`s,
+`bone_cage`s, `sconce`s and `candle_cluster`s. **Floor 1, the Ossuary Galleries (19)**: the mouth -> the **Gallery** (a
+68 x 20 m hall of niches: a knight's pack; the `galleries` patrol of two knights and two hounds walking it end to end)
+-> the **Weaver's Dais** west (a stone dais in a bone-pillar ring, cages round it; the first `boneweaver` pinned with
+`marker: "dais"` - it weaves NEW adds) -> the **Keeper's Door** (keeper + two chanters, `marker: "door"`) -> the
+**Knights' Hall** -> the **Kennels** east (a shroudmother with four husks and two hounds - seven) -> the stair. **Floor
+2, the Hall of Knights (19-20)**: the landing -> the **Knights' Hall** (two rows of four bone pillars; a knight's pack
+west, two `rune_watcher`s on the pillars with `marker: "perch"` - the floor-2/3 row; the patrol between the rows) ->
+the **Candle Chapel** west (an altar and candles everywhere; a reeve's court) -> the **second dais** east (the boneweaver
+among four cages) -> the **last door** -> the shroudmother's pack at the stair. **Floor 3, the Sealed Throne (20)** is
+the cave recipe in black stone (`color: "#3a3440"`) so the throne room can be ROUND: the Procession (bone pillars, candles)
+-> the **Antechamber** (the floor-3 row: a reeve's court; the last chanters at the last door in the west wall; two
+obelisks at the Seal Walk) -> **the throne room**, 26 m across: the `seal_sigil` on the floor (Harrowmund stands on it,
+6.5 m before his `throne`), **twelve `coffin`s standing in the wall** as the niches, **four `bone_pillar`s** with a
+`sconce` beside each, candles. Behind the throne a 5 m passage leads east to **the Vault Below**: a 34 x 30 m hall with a
+**bone-river of painted `mud`** (3 m, north to south; it slows 0.7x), six bone pillars round the rim, his true throne at
+the far end and the hoard nook north of it. The boss marker carries `spots` (the four seal points at 7 m: the Four
+Chanters), `coffins` (the floor before each of the twelve niches: Coffin Knights), `pillars` (the feet of the four
+pillars: cover for Grave Wave), the hints `sconces`, `throne`, `seal`, and `vault` (its centre, six pillar positions,
+the river's line, the true throne) for the arena change, which the engine does not do yet - the Vault is reachable on
+foot so the hoard can be opened.
+
+### For the programmer (part 5)
+
+- **Harrowmund's helper lists**: `spots` (4), `coffins` (12), `pillars` (4) - all read; `sconces`, `throne`, `seal` and
+  `vault` are not. The arena change (ruling 46) needs a teleport of everyone to `vault.x/z` at 40% and the river's
+  widening + shadow tick; the slow is already real through the mud paint.
+- **Shallow water for wading is mud paint** (the Ruins' quarters, the bone-river). If a `shallows` surface with its own
+  colour is wanted, add it to `SURFACES` (zone.js) and `SLOW_GROUND` (move.js); the Ruins would read better in blue-grey.
+- **An arch over a road** (`ruin_arch`, r 0.6) blocks the lane's centre; every arch in parts 2-5 stands beside a road.
+  A walk-through arch needs two leg blockers instead of one centre circle.
+- **Barrow doors** face +z local (yaw 0 = south); the generator's `barrow()` takes the facing and puts the obelisks and
+  the gravestone gap in front of the door.
+- Every `acts.json` node is now `built: true`; the index lists 29 zone files in map order.
+
+### Engine hints still unread, across all parts (ranked by what each would add)
+
+1. **Spawn `marker` values** (`perch`, `bush`, `burrow`, `egg_sac`, `crossfire`, `markers`, `clearing`, `log`,
+   `leech_pool`, `door`, `drake_post`, `chokepoint`, `dais`) - the table rows carry the same key and `spawn.js` ignores
+   it, so a `perch` marker can roll wolves and a `door` marker can roll husks. Reading it (prefer rows whose `marker`
+   matches, fall back to any) would make every unpinned spawn fit its spot; it is one filter in `pickPack`. Biggest win.
+2. **`rare` spots** (`old_pincer`, `grandmother_root`, `sergeant_krull`, `the_lamplighter`, `velka_thricewed`,
+   `bogmother_sulk`, `hoarfang`, `captain_vosk`, `the_kept_bride`, `morrow_the_unburied`) - `spawnRares` places rares on
+   its own; using the marked spot would put each rare where its lore says, with its signature's arena around it.
+3. **Boss arena hints**: Mother Thrum's `doors` (web walls that seal), Reeve Oswin's `braziers` / `lectern` / `dais`,
+   Ildreth's `well` (melee reach), Sister Vennel's `sconces` + `bell`, Ruhk's `rails` + `braziers` + `tent`,
+   Harrowmund's `sconces` / `throne` / `seal` / `vault` (the arena change). The sconces matter twice (Vennel's
+   Lights Out, Harrowmund's Crown of Candles): an interactable `sconce` prop with a lit state would serve both.
+4. **The Redcliff table's destructible tents** ("tents are destructible props that drop loot") - `war_tent` / `tent`
+   are plain props; a prop with hit points and a loot table is new engine work, and only the warband's zones use it.
+5. **Breakable egg sacs** (the Hollow's `sacs`, read for spawn points but not breakable) and **web-wall doors** - a prop
+   with a radius and hit points, like the tents.
+6. **`note` strings** on spawns - documentation only; nothing should read them.

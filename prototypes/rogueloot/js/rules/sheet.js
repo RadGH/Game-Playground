@@ -8,7 +8,7 @@ export const FISTS = { min: 1, max: 3, speed: 1.0, ranged: false, hands: 1 };
 const DMG = ['fire', 'frost', 'storm', 'poison', 'shadow'];
 
 /** The melee Paths stand in the hits casters keep away from, so they are built sturdier (balance bot, 2026-11-11). */
-export const PATH_BONUS = { fighter: { hpPct: 25, armourPct: 15 }, rogue: { hpPct: 15, dodge: 4 } };
+export const PATH_BONUS = { fighter: { hpPct: 25, armourPct: 15 }, rogue: { hpPct: 25, dodge: 8 } };
 
 export function sheet(ch, data, skills = null) {
   const pb = PATH_BONUS[ch.path] || {};

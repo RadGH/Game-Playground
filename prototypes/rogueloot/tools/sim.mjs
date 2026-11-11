@@ -19,7 +19,7 @@ import { clearLine, flowTo, downhill } from '../js/sim/paths.js';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const MINUTES = +arg('minutes', 60), SEEDS = +arg('seeds', 2), ZONE = arg('zone', 'proving_meadow'), START = +arg('level', 1);
-const PATHS = arg('paths', 'fighter,rogue,mage,healer').split(',');
+const PATHS = arg('paths', 'fighter,rogue,mage,healer').split(','), SPEC = arg('spec', null);
 const content = loadContent(f => JSON.parse(readFileSync(new URL('../data/' + f, import.meta.url))));
 const D = content.items, S = content.skills;
 const MAIN = { fighter: 'str', rogue: 'agi', mage: 'int', healer: 'spi', wanderer: 'str' };
@@ -28,7 +28,16 @@ function freshHero(rng, path) {
   const kit = Object.fromEntries(Object.entries(STARTER_KIT).map(([s, b]) => [s, makeItem(D, rng, 1, { base: b })]));
   const c = newCharacter({ name: path, kit }); c.belt = [makePotion(rng, 'health', 'minor', 3), makePotion(rng, 'mana', 'minor', 2)];
   c.wantPath = path;
-  if (START > 1) { const g = gainXp(c, xpAtLevel(START)); delete g.levelled; return g; }
+  if (START > 1) {
+    const g = gainXp(c, xpAtLevel(START)); delete g.levelled;
+    // a hero arriving at level N has found gear on the way: magic items, the best base this Path can wear at N
+    const WEAPON = { fighter: 'sword', rogue: 'dagger', mage: 'staff', healer: 'mace' };
+    const asPath = { ...g, path }, big = { str: 99, agi: 99, int: 99, vit: 99, spi: 99 };
+    const best = slot => Object.values(D.bases).filter(b => b.slot === slot && (slot !== 'weapon' || b.kind === WEAPON[path]) && (b.levelReq || 1) <= START)
+      .filter(b => canEquip(D, asPath, { base: b.id, affixes: [], ilvl: START }, slot, big).ok).sort((a, b) => (b.levelReq || 1) - (a.levelReq || 1) || (b.armour || b.damage?.dps || 0) - (a.armour || a.damage?.dps || 0))[0];
+    for (const slot of ['weapon', 'chest', 'head', 'hands', 'feet', 'belt']) { const b = best(slot); if (b) g.equip = { ...g.equip, [slot]: makeItem(D, rng, START, { base: b.id, rarity: 'magic' }) }; }
+    return g;
+  }
   return c;
 }
 const score = (ch, it) => { const st = sheet({ ...ch, equip: { ...ch.equip, [slotOf(it)]: it } }, D); return st.weapon.max + st.weapon.min + st.armour * 0.5 + st.maxHp * 0.3 + st.maxMana * 0.1 + (st.attrs[MAIN[ch.path || 'wanderer']] * 1.5); };
@@ -39,6 +48,8 @@ function play(path, seed) {
   const rng = makeRng(seed * 7919 + path.length);
   let ch = freshHero(rng, path), w = null, p = null, seq = 0, sessions = 0;
   const R = { path, seed, levelAt: { 1: 0 }, deaths: 0, kills: 0, drops: { normal: 0, magic: 0, rare: 0, unique: 0, legendary: 0 }, gold: 0, potions: 0, sessions: 0, gsAt: {}, timeouts: 0 };
+  const avoid = new Map();          // packs that killed us: a player gives them a wide berth for a while
+  const avoided = f => (avoid.get(f.pack || f.id) || 0) > (w ? w.time : 0) && !(f.state === 'chase' || f.state === 'attack');
   const newSession = () => { w = createWorld({ seed: seed * 1000 + sessions++, content, zone: ZONE }); p = addPlayer(w, 'bot', ch); R.sessions++; };
   newSession();
   const steps = MINUTES * 60 / DT; let lastLevel = ch.level, stuckT = 0, lastPos = [p.x, p.z];
@@ -52,7 +63,7 @@ function play(path, seed) {
       if (e.k === 'die' && e.s === 'bot' && w.foes.has(e.t)) R.kills++;
       if (e.k === 'dmg' && e.s === 'bot') R.dealt = (R.dealt || 0) + e.n;
       if (e.k === 'dmg' && e.t === 'bot') R.taken = (R.taken || 0) + e.n;
-      if (e.k === 'die' && e.t === 'bot') { R.deaths++; if (process.env.TRACE) console.log('death', (t / 60).toFixed(1), 'by', w.foes.get(e.s)?.def.id, 'attackers', [...w.foes.values()].filter(f => !f.dead && f.target === 'bot').length, 'at', p.x.toFixed(0), p.z.toFixed(0), 'level', ch.level, ch.path); }
+      if (e.k === 'die' && e.t === 'bot') { R.deaths++; const k = w.foes.get(e.s); if (k) avoid.set(k.pack || k.id, w.time + 300); if (process.env.TRACE) console.log('death', (t / 60).toFixed(1), 'by', w.foes.get(e.s)?.def.id, 'attackers', [...w.foes.values()].filter(f => !f.dead && f.target === 'bot').length, 'at', p.x.toFixed(0), p.z.toFixed(0), 'level', ch.level, ch.path); }
       if (e.k === 'drop' && e.to === 'bot' && e.what === 'item') R.drops[e.real]++;
     }
     w.events.length = 0;
@@ -74,8 +85,10 @@ function play(path, seed) {
     if (p.dead) { act(w, 'bot', { do: 'release' }); return; }
     // housekeeping: path, points, skills, gear, identify
     if (!ch.path && ch.level >= 3) act(w, 'bot', { do: 'path', path });
+    // a spec at 10: --spec <id>, or the first wave-1 spec open to this Path (so spec skills are played, not only the Path's)
+    if (ch.path && !ch.spec && ch.level >= 10) { const pick = SPEC && content.specs[SPEC]?.paths?.includes(ch.path) ? SPEC : Object.entries(content.specs).find(([, s]) => s.paths?.includes(ch.path) && s.wave === 1)?.[0]; if (pick) act(w, 'bot', { do: 'spec', spec: pick }); }
     if (ch.unspent > 0) act(w, 'bot', { do: 'spend', attr: ch.unspent % 5 === 0 ? 'vit' : MAIN[ch.path || 'wanderer'], n: 1 });
-    if (ch.skillPoints > 0 && ch.path) { const opts = Object.values(S).filter(s => s.owner === ch.path && (rankOf(ch, s) < (s.maxRank || 1)) && ch.level >= (s.reqLevel || 1) && (s.prereq || []).every(x => ch.skills?.[x] > 0)); opts.sort((a, b) => (b.kind === 'active') - (a.kind === 'active') || rankOf(ch, a) - rankOf(ch, b)); if (opts[0]) act(w, 'bot', { do: 'learn', skill: opts[0].id }); }
+    if (ch.skillPoints > 0 && ch.path) { const opts = Object.values(S).filter(s => (s.owner === ch.path || (ch.spec && s.owner === ch.spec)) && s.tree && (rankOf(ch, s) < (s.maxRank || 1)) && ch.level >= (s.reqLevel || 1) && (s.prereq || []).every(x => ch.skills?.[x] > 0)); opts.sort((a, b) => (b.kind === 'active') - (a.kind === 'active') || rankOf(ch, a) - rankOf(ch, b)); if (opts[0]) act(w, 'bot', { do: 'learn', skill: opts[0].id }); }
     for (const it of ch.bag || []) {
       if (it.base === 'potion') { act(w, 'bot', { do: 'belt', uid: it.uid }); continue; }
       if (it.ided === false) { act(w, 'bot', { do: 'identify', uid: it.uid }); continue; }
@@ -95,7 +108,7 @@ function play(path, seed) {
     if (!hunted && (p.hp < p.maxHp * 0.6 || ((ch.path === 'mage' || ch.path === 'healer') && p.mana < p.maxMana * 0.3))) { R.rest = (R.rest || 0) + 4 * DT; if (p.hp < p.maxHp * 0.6) R.restHp = (R.restHp || 0) + 4 * DT; p.target = null; p.autoOn = false; return; }
     // fight: the target, else the nearest living foe, else loot, else wander toward the nearest foe anywhere
     let tg = p.target && w.foes.get(p.target);
-    if (!tg || tg.dead) { tg = nearest([...w.foes.values()].filter(f => !f.dead && (f.state === 'chase' || f.state === 'attack') && f.target === 'bot')) || nearest([...w.foes.values()].filter(f => !f.dead)); if (tg) act(w, 'bot', { do: 'target', target: tg.id }); }
+    if (!tg || tg.dead) { tg = nearest([...w.foes.values()].filter(f => !f.dead && (f.state === 'chase' || f.state === 'attack') && f.target === 'bot')) || nearest([...w.foes.values()].filter(f => !f.dead && !avoided(f))); if (tg) act(w, 'bot', { do: 'target', target: tg.id }); }
     const loot = nearest([...(w.ground?.values() || [])].filter(g => g.owner === 'bot' && !g.gold));
     const fighting = tg && (tg.state === 'chase' || tg.state === 'attack');
     if (loot && !fighting && Math.hypot(loot.x - p.x, loot.z - p.z) < 20) return goTo(loot.x, loot.z);

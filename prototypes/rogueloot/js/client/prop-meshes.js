@@ -99,9 +99,32 @@ export const PROP_MESHES = {
   crypt_door: () => [[B(2.4, 3.0, 0.6), '#6a6258'], [B(1.4, 2.4, 0.2, 0, 0, 0.3), '#3a2e2a'], [new THREE.OctahedronGeometry(0.2).translate(0, 1.5, 0.45), '#d9b04a']],
   bell: () => [[B(0.3, 4.2, 0.3, -1.5), DWOOD], [B(0.3, 4.2, 0.3, 1.5), DWOOD], [B(3.4, 0.3, 0.3, 0, 4.2, 0), DWOOD], [T(0.95, 1.3, 1.8, 10, 2.2), '#b08a3a']],
   sconce: () => [[T(0.08, 0.16, 1.4, 5), '#3a3a3a'], [C(0.26, 0.32, 6, 1.4), '#e8d8a8'], [K(0.12, 0.32, 5, 1.72), '#ffd080']],
+  // Highcairn Pass (snow, nests, prayer flags), Redcliff Heights (the warband's country in red rock) and the Warband Mine (rails, ore, powder)
+  snow_pine: () => [[C(0.13, 1), WOOD], [K(1.1, 2.6, 7, 0.6), PINE], [K(0.6, 0.9, 7, 2.6), '#eef4f8']],
+  drake_nest: () => [[T(1.4, 1.7, 0.55, 9), '#8a7a60'], [I(0.32, 0.3, 0.55, 0.2), '#c8b890'], [I(0.28, -0.4, 0.55, -0.1), '#d8c8a0']],
+  flag_line: () => [[B(6.4, 0.05, 0.05, 0, 2.7, 0), '#c8a870'], [B(0.5, 0.42, 0.03, -2.2, 2.25, 0), '#b8352a'], [B(0.5, 0.42, 0.03, 0, 2.25, 0), '#e0a84a'], [B(0.5, 0.42, 0.03, 2.2, 2.25, 0), '#3a6aa8']],
+  war_tent: () => [[rot(K(3.0, 3.4, 4), Math.PI / 4).scale(1, 1, 1.5), '#5a3230'], [B(0.14, 4.2, 0.14), DWOOD], [B(0.9, 0.6, 0.04, 0.45, 3.5, 0), '#b8352a']],
+  drake_post: () => [[C(0.2, 2.6, 6), WOOD], [new THREE.TorusGeometry(0.28, 0.06, 5, 10).translate(0, 2.3, 0), '#5a5a5a'], [rot(C(0.05, 2.0, 4), 0, 0, 1.25).translate(0.9, 1.4, 0), '#5a5a5a']],
+  skull_pole: () => [[C(0.12, 3.0, 5), DWOOD], [I(0.26, 0, 3.15, 0), '#e8e0c8'], [I(0.2, 0.05, 2.45, 0.1), '#e8e0c8']],
+  firepot_stack: () => [[I(0.32, 0, 0.3, 0), '#6a4a3a'], [I(0.3, 0.55, 0.3, 0.2), '#7a5a4a'], [I(0.28, 0.25, 0.8, 0.1), '#6a4a3a']],
+  red_spire: () => [[jitter(K(1.3, 6.5, 6), 0.25, 31), '#a04a3a'], [D(0.8, 0.9, 0.5, 0.4), '#b85a48']],
+  rail: () => [[B(0.1, 0.1, 6, -0.75, 0.12, 0), '#5a5a5a'], [B(0.1, 0.1, 6, 0.75, 0.12, 0), '#5a5a5a'], [B(2.0, 0.08, 5.8, 0, 0.02, 0), '#4a3a2a']],
+  ore_rock: () => [[D(0.95, 0, 0.35, 0).scale(1, 0.7, 1), '#5a5048'], [new THREE.OctahedronGeometry(0.26).translate(0.35, 0.6, 0.3), '#e0a84a'], [new THREE.OctahedronGeometry(0.2).translate(-0.4, 0.5, -0.2), '#e0a84a']],
+  powder_keg: () => [[T(0.36, 0.3, 0.8, 8), '#4a3a2a'], [T(0.38, 0.38, 0.06, 8, 0.42), '#8a8a8a'], [C(0.03, 0.3, 4).translate(0.1, 0.8, 0), '#e8e0c8']],
+  // the Sunken Ruins (drowned stone, kelp, the Bride's altar), Gravewatch Hills (barrows, obelisks) and the Deep Catacomb (bone, gold, candles)
+  altar: () => [[B(2.2, 1.0, 1.0), '#8a8a90'], [B(2.4, 0.15, 1.2, 0, 1.0, 0), '#a8a8b0'], [C(0.06, 0.4, 5).translate(-0.8, 1.15, 0), '#f0e8c8'], [C(0.06, 0.4, 5).translate(0.8, 1.15, 0), '#f0e8c8']],
+  drowned_statue: () => [[B(1.0, 0.5, 1.0), '#7a7a82'], [T(0.3, 0.38, 1.6, 7, 0.5), '#8a8a90'], [I(0.25, 0, 2.35, 0), '#8a8a90'], [rot(B(0.9, 0.14, 0.14, 0, 0, 0), 0, 0, 0.35).translate(0.2, 1.75, 0), '#8a8a90']],
+  kelp: () => [[rot(C(0.05, 1.8, 4), 0, 0, 0.12), '#2f6a4a'], [rot(C(0.05, 1.4, 4), 0, 0, -0.18).translate(0.35, 0, 0.2), '#3a7a52'], [rot(C(0.05, 1.6, 4), 0, 0.3, 0.08).translate(-0.3, 0, -0.2), '#2f6a4a']],
+  seal_sigil: () => [[new THREE.RingGeometry(3.2, 3.8, 24).rotateX(-Math.PI / 2).translate(0, 0.04, 0), '#d9b04a'], [new THREE.RingGeometry(1.2, 1.6, 16).rotateX(-Math.PI / 2).translate(0, 0.04, 0), '#d9b04a'], [new THREE.CircleGeometry(0.6, 8).rotateX(-Math.PI / 2).translate(0, 0.04, 0), '#d9b04a']],
+  barrow_mound: () => [[new THREE.SphereGeometry(3.4, 10, 6, 0, 6.3, 0, 1.5).scale(1, 0.55, 1), '#5a7a3a'], [B(1.4, 1.8, 0.4, 0, 0, 3.0), '#3a3430'], [B(2.2, 0.4, 0.6, 0, 1.8, 3.0), '#7a7268']],
+  obelisk: () => [[B(1.1, 0.4, 1.1), '#3a3440'], [T(0.3, 0.45, 3.6, 4, 0.4), '#3a3440'], [K(0.3, 0.5, 4, 4.0), '#d9b04a']],
+  bone_cage: () => [[T(0.75, 0.8, 0.12, 8), '#e8e0c8'], [new THREE.TorusGeometry(0.7, 0.05, 5, 12).rotateX(Math.PI / 2).translate(0, 2.0, 0), '#e8e0c8'], [T(0.72, 0.72, 2.0, 8).translate(0, 0.1, 0), '#d8d0b8']],
+  throne: () => [[B(1.8, 0.9, 1.4), '#3a3440'], [B(1.8, 2.6, 0.4, 0, 0.9, -0.5), '#3a3440'], [B(0.3, 0.6, 1.2, -0.75, 0.9, 0.1), '#d9b04a'], [B(0.3, 0.6, 1.2, 0.75, 0.9, 0.1), '#d9b04a'], [K(0.5, 0.7, 4, 3.5).translate(0, 0, -0.5), '#d9b04a']],
+  bone_pillar: () => [[jitter(T(0.7, 0.9, 4.6, 7), 0.15, 41), '#d8d0b8'], [T(1.0, 1.0, 0.3, 8), '#c8c0a8'], [T(1.0, 1.0, 0.3, 8, 4.6), '#c8c0a8']],
+  candle_cluster: () => [[C(0.07, 0.5, 5), '#f0e8c8'], [C(0.06, 0.35, 5).translate(0.22, 0, 0.1), '#f0e8c8'], [C(0.06, 0.28, 5).translate(-0.18, 0, 0.15), '#f0e8c8'], [K(0.08, 0.2, 5, 0.5), '#ffd080']],
   waypoint_stone: () => [[T(0.9, 1.1, 0.3, 8), STONE], [jitter(B(0.5, 1.8, 0.5, 0, 0.3, 0), 0.04, 2), '#8a8aa0'], [new THREE.OctahedronGeometry(0.28).translate(0, 2.5, 0), '#7ae0ff']],
   portal_ring: () => [[new THREE.TorusGeometry(1.4, 0.18, 6, 18).translate(0, 1.6, 0), STONE2], [T(1.2, 1.4, 0.2, 10), STONE]],
   cave_mouth: () => [[D(2.0, -2.2, 1.0, 0), '#6a6660'], [D(2.0, 2.2, 1.0, 0), '#6a6660'], [D(1.8, 0, 2.8, -0.4), '#5a5650'], [B(2.4, 0.02, 2.0, 0, 0.01, 0.6), '#1a1612']],
 };
 /** Kinds that give off light (torches, campfires; capped per zone). */
-export const LIGHTS = { brazier: { color: '#ff9a3a', y: 1.3, i: 6, d: 8 }, lantern_post: { color: '#ffd27a', y: 2.0, i: 4, d: 7 }, crystal: { color: '#7ae0ff', y: 0.6, i: 2, d: 4 }, lighthouse: { color: '#ffe8a0', y: 9.5, i: 8, d: 16 }, torch: { color: '#ffae55', y: 1.8, i: 5, d: 7 }, campfire: { color: '#ff9a3a', y: 0.8, i: 7, d: 9 }, waypoint_stone: { color: '#7ae0ff', y: 2.5, i: 3, d: 5 }, moon_well: { color: '#bfe8ff', y: 1.0, i: 5, d: 10 }, rune_stone: { color: '#bfe8ff', y: 2.3, i: 2, d: 5 }, sconce: { color: '#ffd080', y: 1.8, i: 5, d: 7 } };
+export const LIGHTS = { brazier: { color: '#ff9a3a', y: 1.3, i: 6, d: 8 }, lantern_post: { color: '#ffd27a', y: 2.0, i: 4, d: 7 }, crystal: { color: '#7ae0ff', y: 0.6, i: 2, d: 4 }, lighthouse: { color: '#ffe8a0', y: 9.5, i: 8, d: 16 }, torch: { color: '#ffae55', y: 1.8, i: 5, d: 7 }, campfire: { color: '#ff9a3a', y: 0.8, i: 7, d: 9 }, waypoint_stone: { color: '#7ae0ff', y: 2.5, i: 3, d: 5 }, moon_well: { color: '#bfe8ff', y: 1.0, i: 5, d: 10 }, rune_stone: { color: '#bfe8ff', y: 2.3, i: 2, d: 5 }, sconce: { color: '#ffd080', y: 1.8, i: 5, d: 7 }, candle_cluster: { color: '#ffd080', y: 0.7, i: 2, d: 4 }, altar: { color: '#ffd080', y: 1.4, i: 3, d: 6 }, obelisk: { color: '#d9b04a', y: 4.2, i: 2, d: 6 } };

@@ -146,7 +146,7 @@
    ],
    "ilvlMin": 8,
    "weight": 10,
-   "text": "Back Cut hits for full damage from any side (without it, a cut from the front does 60%).",
+   "text": "Back Cut hits for full damage from any side (without it, a cut from the front does 75%).",
    "rule": {
     "type": "skillCondition",
     "relax": "behind",

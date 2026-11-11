@@ -162,7 +162,7 @@ export function weaponDamage(data, it) {
   const m = itemMods(data, it), hands2 = b.hands === 2 || data.kinds?.[b.kind]?.hands === 2;
   const flat = (m.physDamageFlat?.value || 0) * (hands2 ? 1.5 : 1), mult = 1 + pct((m.physDamagePct?.value || 0) + (it.quality || 0));
   const spd = b.damage.speed * (1 + pct(m.attackSpeed?.value || 0));
-  return { min: Math.round((b.damage.min + flat) * mult), max: Math.round((b.damage.max + flat) * mult), speed: +spd.toFixed(2), ranged: !!b.ranged, hands: hands2 ? 2 : 1, type: b.type, finesse: b.type === 'dagger' || b.type === 'sword' || undefined };
+  return { min: Math.round((b.damage.min + flat) * mult), max: Math.round((b.damage.max + flat) * mult), speed: +spd.toFixed(2), ranged: !!b.ranged, hands: hands2 ? 2 : 1, type: b.class || b.kind, finesse: ['dagger', 'sword'].includes(b.kind) || undefined };
 }
 export function itemArmour(data, it) {
   const b = data.bases[it.base]; if (!b?.armour) return 0;

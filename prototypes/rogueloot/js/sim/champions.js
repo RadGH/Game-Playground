@@ -73,7 +73,8 @@ export function spawnRares(w) {
     const base = w.content.monsters[r.base]; if (!base || !marks.length) continue;
     // its spot: a pack marker far from the start, chosen by the rare's own id so it is always the same place
     const far = [...marks].sort((a, b) => Math.hypot(b.x - w.area.spawn.x, b.z - w.area.spawn.z) - Math.hypot(a.x - w.area.spawn.x, a.z - w.area.spawn.z));
-    const sp = far[[...id].reduce((s, c) => s + c.charCodeAt(0), 0) % Math.max(1, Math.ceil(far.length / 2))];
+    // its spot: the one the zone marks for it (rare: '<id>'), else a far pack marker chosen by its own id
+    const sp = (w.area.spawns || []).find(s => s.rare === id) || far[[...id].reduce((s, c) => s + c.charCodeAt(0), 0) % Math.max(1, Math.ceil(far.length / 2))];
     const def = { ...base, abilities: [...base.abilities, ...(r.signature ? [r.signature] : [])], size: base.size * 1.6, radius: base.radius * 1.5 };
     const f = makeFoeFn(w, def, r.level || sp.level || base.levelRange[0], sp.x + 2, sp.z + 2, { rank: 'rare', name: r.name, hpMult: 5, dmgMult: 1.5 });
     f.xpMult = 8; f.rareId = id; f.mods = rollMods(w, f.level, r.fixedMods || []).slice(0, (r.fixedMods || []).length + 1);

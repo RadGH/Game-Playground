@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-act1-complete",
+      "date": "2026-11-11",
+      "title": "All of Act I is open",
+      "items": [
+        "The rest of the act is here: Highcairn Pass, Redcliff Heights and the Warband Mine (Warlord Ruhk), the Sunken Ruins, Gravewatch Hills, and the Deep Catacomb, three floors down to Harrowmund at the end of the act.",
+        "Monsters fit their places better: birds on perches, burrowers at burrows, spiders by egg sacs. Named rares wait where their stories say.",
+        "Rogues are tougher (+25% health, +8 dodge), Back Cut from the front now does 75%, and daggers and one-hand swords really do use Agility now."
+      ]
+    },
+    {
       "id": "2026-11-11-wave5",
       "date": "2026-11-11",
       "title": "Every specialization is here",

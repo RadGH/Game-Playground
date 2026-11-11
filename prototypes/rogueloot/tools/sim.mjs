@@ -94,7 +94,7 @@ function play(path, seed) {
     if (++barTick % 100 === 0 && ch.path) {
       const own = Object.keys(ch.skills || {}).map(id => S[id]).filter(s => s && s.kind === 'active' && !s.hidden && (s.owner === (ch.spec || ch.path)) && (s.reqLevel || 1) <= ch.level)
         .sort((a, b) => (b.reqLevel || 1) - (a.reqLevel || 1));
-      const heal = own.find(s => s.target === 'ally' || s.effects?.some(e => e.do === 'heal'));
+      const heal = own.find(s => s.target === 'ally' || s.effects?.some(e => e.do === 'heal')) || own.find(s => s.target === 'self' && /"stat":"(armour|dodge)"|"do":"shield"/.test(JSON.stringify(s.effects || [])));
       const dmg = own.filter(s => s !== heal && s.target !== 'ally').slice(0, heal ? 5 : 6);
       const want = [...dmg, ...(heal ? [heal] : [])].map(s => s.id);
       for (const id of ['sure_strike', 'spark', 'field_mend', 'shove']) if (want.length < 6) want.push(id);
@@ -138,6 +138,8 @@ function play(path, seed) {
     const bar = (ch.bar?.length ? ch.bar : ['sure_strike', 'spark', 'field_mend', 'shove']).filter(Boolean);
     const heal = bar.find(id => S[id]?.effects?.some(e => e.do === 'heal' || e.do === 'hot' || e.do === 'shield'));
     if (heal && p.hp < p.maxHp * 0.55) { act(w, 'bot', { do: 'use', skill: heal, target: 'bot' }); return; }
+    // under pressure: a defensive skill first (armour/dodge buff, ward, shield), as a player would
+    if (p.hp < p.maxHp * 0.7) for (const id of bar) { const s = S[id]; if (!s || s.target !== 'self') continue; const defensive = JSON.stringify(s.effects || []).match(/"stat":"(armour|dodge)"|"do":"shield"|"do":"shieldPct"/); if (defensive && act(w, 'bot', { do: 'use', skill: id, target: 'bot' }).ok) return; }
     if (!caster && d > reach + 1) return;           // walk in before spending anything
     for (const id of bar) { const s = S[id]; if (!s || s.target === 'ally') continue; if (s.effects?.some(e => e.do === 'mark' || e.do === 'dot') && (tg.fx || []).some(f => String(f.id).startsWith(id + ':'))) continue; const r = act(w, 'bot', { do: 'use', skill: id, target: tg.id, at: { x: tg.x, z: tg.z } }); if (r.ok) break; }
   }

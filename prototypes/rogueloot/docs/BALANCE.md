@@ -103,3 +103,6 @@ healer              6      70          18      138          8      118
   and Rattlebone Rain. Before touching numbers, teach the bot to use defensive skills (Vanguard's armour buffs, wards)
   when hunted — its bar is sorted by skill level, so it plays melee as pure offence. Kiting casters made things WORSE
   (they back into the next camp) — reverted.
+- Bot now uses a defensive self skill under 70% health (and keeps one on its bar): Gravewatch L19 Fighter 76 -> 50
+  deaths/h, kills 102 -> 156. Rogue (Assassin) 86 deaths/h, 18 kills/h: its defensive skill pushed a damage skill off a
+  short bar — the late-act Rogue is the one open balance item.

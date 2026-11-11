@@ -18,7 +18,7 @@ import { PROP_KIT } from './props.js';
 
 export const SURFACES = {
   grass: '#79bf4f', grass2: '#62a83f', meadow: '#8fcf5a', dirt: '#c79a63', path: '#d4ad74', sand: '#e8d29a', wetsand: '#c9b07a', rock: '#9a958c', stone: '#b4ada0',
-  mud: '#7a5a3a', forest: '#4f8a34', moss: '#5f9a3a', snow: '#eef4f8', cobble: '#a49a8a', ash: '#6a6460', farmland: '#9a6a3a', reeds: '#8aa04a',
+  flowers: '#8fae4e', mud: '#7a5a3a', forest: '#4f8a34', moss: '#5f9a3a', snow: '#eef4f8', cobble: '#a49a8a', ash: '#6a6460', farmland: '#9a6a3a', reeds: '#8aa04a',
 };
 
 const inPoly = (x, z, poly) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, zi] = poly[i], [xj, zj] = poly[j]; if ((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) c = !c; } return c; };

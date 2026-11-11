@@ -11,7 +11,7 @@ export const REACH = 4.2;
 export function createTravelUI({ view, content, labelRoot, send, getChar, getMe, getArea, onNpc, getDifficulty = () => 'normal' }) {
   const prompt = document.createElement('button'); prompt.className = 'prompt'; prompt.hidden = true; document.body.append(prompt);
   let current = null, plates = [], portalMesh = null, swirls = [];
-  const swirlGeo = new THREE.CircleGeometry(1.0, 24), ringGeo = new THREE.TorusGeometry(1.15, 0.1, 6, 24);
+  const swirlGeo = new THREE.CircleGeometry(1.25, 28), ringGeo = new THREE.TorusGeometry(1.4, 0.2, 6, 28);   // the stone portal_ring is r 1.4 at 1.6 m (js/client/prop-meshes.js)
   const openNow = id => { const ch = getChar(); return portalOpen(content, { ...ch, quests: ch?.[questKey(getDifficulty())] || {} }, id); };
   /** What opens a locked portal: the act step that names its portalAfter zone. */
   const opensAfter = id => { const after = content.acts?.[0]?.nodes?.find(n => n.id === id)?.portalAfter; return after ? (content.zones?.[after]?.name || content.acts[0].nodes.find(n => n.id === after)?.name || after) : null; };
@@ -23,7 +23,16 @@ export function createTravelUI({ view, content, labelRoot, send, getChar, getMe,
     if (portalMesh) { view.scene.remove(portalMesh); portalMesh = null; }
     for (const sw of swirls) view.scene.remove(sw.g); swirls = [];
     for (const m of area.markers || []) {
-      if (m.kind === 'portal') { const g = new THREE.Group(); const disc = new THREE.Mesh(swirlGeo, new THREE.MeshBasicMaterial({ color: '#58b8ff', transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false })); const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: '#bfe6ff' })); disc.position.y = ring.position.y = 1.5; g.add(disc, ring); g.position.set(m.x, view.groundY?.(m.x, m.z) || 0, m.z); g.rotation.y = Math.atan2(-m.x, -m.z); view.scene.add(g); swirls.push({ g, m, disc }); }
+      if (m.kind === 'portal') {
+        // the swirl fills the stone ring itself (the marker is where you STAND, a few metres in front of it)
+        let ring = null, bd = 6; for (const pr of area.props || area.zone?.props || []) { if (pr.k !== 'portal_ring') continue; const d = Math.hypot(pr.x - m.x, pr.z - m.z); if (d < bd) { bd = d; ring = pr; } }
+        const at = ring || m, sc = ring?.s || 1, g = new THREE.Group();
+        const disc = new THREE.Mesh(swirlGeo, new THREE.MeshBasicMaterial({ color: '#58b8ff', transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false }));
+        const glow = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: '#bfe6ff', transparent: true, opacity: 0.85 }));
+        disc.position.y = glow.position.y = 1.6; g.add(disc, glow); g.scale.setScalar(sc);
+        g.position.set(at.x, view.groundY?.(at.x, at.z) || 0, at.z); g.rotation.y = ring ? (ring.yaw || 0) : Math.atan2(-m.x, -m.z);
+        view.scene.add(g); swirls.push({ g, m, disc }); m.ringAt = { x: at.x, z: at.z };   // label and guide beam go on the ring
+      }
       const text = m.kind === 'exit' || m.kind === 'entrance' ? `To ${zoneName(m.to)}` : m.kind === 'portal' ? `Portal: ${zoneName(m.to)}` : m.kind === 'waypoint' ? 'Waypoint' : null;          // (an NPC's name rides on its body's own tag)
       if (!text) continue;
       const el = document.createElement('div'); el.className = 'plate pl-' + m.kind; el.textContent = text; labelRoot.append(el);
@@ -71,7 +80,7 @@ export function createTravelUI({ view, content, labelRoot, send, getChar, getMe,
     const W = view.renderer.domElement.clientWidth, H = view.renderer.domElement.clientHeight;
     for (const sw of swirls) { const open = openNow(sw.m.to); sw.g.visible = open; if (open) { sw.disc.rotation.z += dt * 1.5; sw.disc.material.opacity = 0.5 + Math.sin(now / 300) * 0.15; } }
     for (const p of plates) if (p.m.kind === 'portal') { const open = openNow(p.m.to); if (p.open !== open) { p.open = open; p.el.classList.toggle('locked', !open); p.el.classList.toggle('open', open); const a = opensAfter(p.m.to); p.el.textContent = open ? `✦ ${zoneName(p.m.to)}` : `🔒 ${zoneName(p.m.to)}${a ? ` · after ${a}` : ''}`; } }
-    for (const p of plates) { const y = (view.groundY?.(p.m.x, p.m.z) || 0) + (p.m.kind === 'npc' ? 2.4 : 2.8); v.set(p.m.x, y, p.m.z).project(view.camera); const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H; p.el.hidden = v.z > 1 || sx < -60 || sx > W + 60 || sy < -30 || sy > H + 30; p.el.style.transform = `translate(-50%, -100%) translate(${sx}px, ${sy}px)`; }
+    for (const p of plates) { const P = p.m.ringAt || p.m, y = (view.groundY?.(P.x, P.z) || 0) + (p.m.kind === 'npc' ? 2.4 : p.m.ringAt ? 3.6 : 2.8); v.set(P.x, y, P.z).project(view.camera); const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H; p.el.hidden = v.z > 1 || sx < -60 || sx > W + 60 || sy < -30 || sy > H + 30; p.el.style.transform = `translate(-50%, -100%) translate(${sx}px, ${sy}px)`; }
     // your recall portal in town
     const want = ch?.recall && area.id === 'brightwater';
     if (want && !portalMesh) { const s = recallSpot(area); portalMesh = new THREE.Group(); const ring = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.12, 8, 24), new THREE.MeshBasicMaterial({ color: '#6ab8ff' })); ring.position.y = 1.4; const disc = new THREE.Mesh(new THREE.CircleGeometry(1.0, 24), new THREE.MeshBasicMaterial({ color: '#3a7aff', transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false })); disc.position.y = 1.4; portalMesh.add(ring, disc); portalMesh.position.set(s.x, view.groundY?.(s.x, s.z) || 0, s.z); view.scene.add(portalMesh); }

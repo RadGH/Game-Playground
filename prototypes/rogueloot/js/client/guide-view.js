@@ -7,7 +7,7 @@ export function createGuideView(view) {
   const arrow = new THREE.Group();
   const shape = new THREE.Shape(); shape.moveTo(0, 0.55); shape.lineTo(0.32, 0.05); shape.lineTo(0.12, 0.05); shape.lineTo(0.12, -0.3); shape.lineTo(-0.12, -0.3); shape.lineTo(-0.12, 0.05); shape.lineTo(-0.32, 0.05); shape.closePath();
   const mat = new THREE.MeshBasicMaterial({ color: '#ffd040', transparent: true, opacity: 0.85, depthWrite: false });
-  const head = new THREE.Mesh(new THREE.ShapeGeometry(shape).rotateX(-Math.PI / 2), mat); head.position.z = -1.6; head.rotation.y = Math.PI; arrow.add(head);
+  const head = new THREE.Mesh(new THREE.ShapeGeometry(shape).rotateX(-Math.PI / 2), mat); head.position.z = 1.6; head.rotation.y = Math.PI; arrow.add(head);
   arrow.visible = false; arrow.renderOrder = 5; view.scene.add(arrow);
   const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.3, 14, 16, 1, true), new THREE.MeshBasicMaterial({ color: '#ffe27a', transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
   beam.visible = false; view.scene.add(beam);
@@ -21,7 +21,8 @@ export function createGuideView(view) {
       const gy = view.groundY?.(me.x, me.z) || 0;
       arrow.position.set(me.x, gy + 0.06, me.z); arrow.rotation.y = Math.atan2(target.x - me.x, target.z - me.z);
       mat.opacity = 0.6 + Math.sin(now / 220) * 0.25;
-      beam.position.set(target.x, (view.groundY?.(target.x, target.z) || 0) + 7, target.z);
+      const B = area?.markers?.find(m => m.kind === target.kind && m.to === target.to && m.ringAt)?.ringAt || target;   // a portal's beam stands in its ring
+      beam.position.set(B.x, (view.groundY?.(B.x, B.z) || 0) + 7, B.z);
       beam.material.opacity = 0.16 + Math.sin(now / 400) * 0.06;
     }
     return target;

@@ -50,8 +50,15 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
     const mk = cls => { const b = document.createElement('button'); b.className = cls + ' pot pot-' + kind; b.innerHTML = `<span class="ic">${ic}</span><span class="key">${key}</span><b class="n">0</b><small>${kind === 'mana' ? 'Mana' : 'Healing'}</small>`; b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onDrink(kind); }); return b; };
     const a = mk('slot'), c = mk('arc-btn'); bar.append(a); arc.append(c); pots[kind] = [a, c];
   }
-  const next = document.createElement('button'); next.className = 'arc-btn next'; next.innerHTML = '<span class="ic">⟳</span><small>Next</small>';
-  next.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onTargetNext(); }); arc.append(next);
+  // phone skill arc (owner 2026-11-11: buttons overlapped and were out of line): every button on one of two rings round
+  // Attack, placed from angles so they cannot overlap. Inner ring: skills 1-4; outer ring: potions, then skills 5-6.
+  // (The old "Next target" button is gone: on a phone you tap the monster you want.)
+  // 180 deg = straight to the LEFT of Attack, 90 = straight above it
+  const C = 54, place = (el, r, deg, size) => { const a = deg * Math.PI / 180; el.style.right = Math.round(C - r * Math.cos(a) - size / 2) + 'px'; el.style.bottom = Math.round(C + r * Math.sin(a) - size / 2) + 'px'; };
+  [180, 150, 120, 90].forEach((deg, k) => place(btns[k + 1][1], 104, deg, 52));
+  place(pots.health[1], 156, 172, 48); place(pots.mana[1], 156, 147, 48);
+  place(btns[5][1], 156, 122, 52); place(btns[6][1], 156, 97, 52);
+  void onTargetNext;
   $('.rel').onclick = onRelease;
   $('.bag-btn').onclick = onBag;
   root.classList.toggle('touch', !!isTouch);

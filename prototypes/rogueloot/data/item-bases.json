@@ -1,0 +1,3150 @@
+{
+  "_doc": "Rogueloot item bases. Every row is hand-specified (kind, drop level, grid, reqs, look); the damage and armour NUMBERS come from the two ladders below so the whole game scales from one place. Weapon dps ladder: refDps(L) = 4 + 1.5*L + 0.02*L*L for a ONE-HANDED weapon at drop level L; a kind multiplies it (`kinds[kind].dps`: two-handers 1.35, bows 1.2, wands 0.6 + spell power). damage.min/max = refDps*dpsMult/speed * [0.75, 1.25]. speed = attacks per second. Monster health should be tuned so a same-level normal monster dies to ~6-10 weapon hits. Armour ladder: damage reduction = armour / (armour + K) with K = 10*attackerLevel + 50 (that is ruling 41, armour diminishing against attacker level). A full plate set at level L sums to 1.5*K(L) = 60% reduction against a same-level attacker; cloth 0.45x, leather 0.6x, mail 0.8x of plate. Slot shares: chest 35%, head 20%, feet 15%, hands 12%, belt 8%, shield 10%. The percentages a tooltip prints must be computed against the PLAYER level (what you would feel against a same-level monster). Block: chance is whole PERCENT (24 = 24%), amount is FLAT damage removed from a blocked hit. Tiers: plain (drops 1-20, Act 1 Normal), fine (21-40, Act 2 / Veteran), masterwork (41-60, Act 3 / Legend). Tiers are the D2 normal/exceptional/elite ladder: same shapes, bigger numbers. levelReq: the character level needed = max(base.levelReq, ceil(0.8 * ilvlMin of the item's highest affix tier)) — see affixes.json. req: minimum ATTRIBUTES (str/agi/int/spi). proficiency: the armour weight or weapon class the character's Path must allow (`proficiency` table below). dropLevel: the lowest ITEM LEVEL at which this base can be rolled (rarity.json `basePick` says how a base is chosen). Units: every `pct` value is whole percentage points (4 = +4%). Code converts with /100 in ONE place. Never store fractions. grid: w x h cells in the 10x4 bag (ruling 11). hands: 2 = takes the off-hand slot too. offhandOk: may be held in the off hand by a dual-wielding Path (Rogue). pairsWith: a quiver only works with a bow or crossbow in the main hand. look: a hint for the Chibi 2.6 model (avatar-3d gear-catalog kinds first: dagger/sword/axe/mace/bow/crossbow/staff/wand, hood/cap/helm, robe/jerkin/hauberk/cuirass, gloves, shoes/boots, shield/focus/quiver, belt, ring/amulet). Counts: 169 bases, 93 droppable in Act 1 (dropLevel <= 20).",
+  "ladders": {
+    "weaponDps": "4 + 1.5*L + 0.02*L*L",
+    "armourK": "10*attackerLevel + 50",
+    "fullSetArmour": "1.5 * armourK(L) * profMult * slotShare",
+    "profMult": {
+      "cloth": 0.45,
+      "leather": 0.6,
+      "mail": 0.8,
+      "plate": 1
+    },
+    "slotShare": {
+      "chest": 0.35,
+      "head": 0.2,
+      "feet": 0.15,
+      "hands": 0.12,
+      "belt": 0.08,
+      "shield": 0.1
+    },
+    "spellPowerImplicit": "wand/sceptre 2 + 1.2*L; staff x1.6; focus x0.7",
+    "attributeReq": "characters start at 12 in each attribute (+5 a level). weapons: primary attribute 8 + 2.5*L; leather agi 8 + 2L; mail str 8 + 2L; plate str 12 + 2L; cloth int 5 + L"
+  },
+  "kinds": {
+    "dagger": {
+      "class": "dagger",
+      "hands": 1,
+      "speed": 1.6,
+      "dpsMult": 0.9,
+      "grid": { "w": 1, "h": 2 },
+      "ranged": false,
+      "offhandOk": true,
+      "caster": false,
+      "primary": "agi"
+    },
+    "sword": {
+      "class": "sword",
+      "hands": 1,
+      "speed": 1.2,
+      "dpsMult": 1,
+      "grid": { "w": 1, "h": 3 },
+      "ranged": false,
+      "offhandOk": true,
+      "caster": false,
+      "primary": "str"
+    },
+    "axe": {
+      "class": "axe",
+      "hands": 1,
+      "speed": 1.1,
+      "dpsMult": 1,
+      "grid": { "w": 2, "h": 3 },
+      "ranged": false,
+      "offhandOk": true,
+      "caster": false,
+      "primary": "str"
+    },
+    "mace": {
+      "class": "mace",
+      "hands": 1,
+      "speed": 1,
+      "dpsMult": 1,
+      "grid": { "w": 1, "h": 3 },
+      "ranged": false,
+      "offhandOk": false,
+      "caster": false,
+      "primary": "str"
+    },
+    "sceptre": {
+      "class": "mace",
+      "hands": 1,
+      "speed": 1,
+      "dpsMult": 0.8,
+      "grid": { "w": 1, "h": 3 },
+      "ranged": false,
+      "offhandOk": false,
+      "caster": true,
+      "primary": "spi"
+    },
+    "greatsword": {
+      "class": "sword",
+      "hands": 2,
+      "speed": 0.8,
+      "dpsMult": 1.35,
+      "grid": { "w": 2, "h": 4 },
+      "ranged": false,
+      "offhandOk": false,
+      "caster": false,
+      "primary": "str"
+    },
+    "greataxe": {
+      "class": "axe",
+      "hands": 2,
+      "speed": 0.75,
+      "dpsMult": 1.35,
+      "grid": { "w": 2, "h": 4 },
+      "ranged": false,
+      "offhandOk": false,
+      "caster": false,
+      "primary": "str"
+    },
+    "maul": {
+      "class": "mace",
+      "hands": 2,
+      "speed": 0.7,
+      "dpsMult": 1.35,
+      "grid": { "w": 2, "h": 4 },
+      "ranged": false,
+      "offhandOk": false,
+      "caster": false,
+      "primary": "str"
+    },
+    "spear": {
+      "class": "polearm",
+      "hands": 2,
+      "speed": 1,
+      "dpsMult": 1.25,
+      "grid": { "w": 1, "h": 4 },
+      "ranged": false,
+      "offhandOk": false,
+      "caster": false,
+      "primary": "str"
+    },
+    "polearm": {
+      "class": "polearm",
+      "hands": 2,
+      "speed": 0.75,
+      "dpsMult": 1.35,
+      "grid": { "w": 1, "h": 4 },
+      "ranged": false,
+      "offhandOk": false,
+      "caster": false,
+      "primary": "str"
+    },
+    "bow": {
+      "class": "bow",
+      "hands": 2,
+      "speed": 1.1,
+      "dpsMult": 1.2,
+      "grid": { "w": 2, "h": 3 },
+      "ranged": true,
+      "offhandOk": false,
+      "caster": false,
+      "primary": "agi"
+    },
+    "crossbow": {
+      "class": "crossbow",
+      "hands": 2,
+      "speed": 0.7,
+      "dpsMult": 1.25,
+      "grid": { "w": 2, "h": 3 },
+      "ranged": true,
+      "offhandOk": false,
+      "caster": false,
+      "primary": "agi"
+    },
+    "staff": {
+      "class": "staff",
+      "hands": 2,
+      "speed": 0.9,
+      "dpsMult": 0.9,
+      "grid": { "w": 1, "h": 4 },
+      "ranged": false,
+      "offhandOk": false,
+      "caster": true,
+      "primary": "int"
+    },
+    "wand": {
+      "class": "wand",
+      "hands": 1,
+      "speed": 1.3,
+      "dpsMult": 0.6,
+      "grid": { "w": 1, "h": 2 },
+      "ranged": true,
+      "offhandOk": false,
+      "caster": true,
+      "primary": "int"
+    }
+  },
+  "proficiency": {
+    "_doc": "Which armour weights and weapon classes each Path (and the two first hybrid specs) may use. Wanderer is level 1-2. A spec ADDS to its Path (plate at the spec pick, ruling 2). Mage stays cloth so cloth never becomes pointless; the Spellblade hybrid gets leather at 10. Healer hybrids (Paladin) get mail then plate at 10.",
+    "wanderer": {
+      "armour": ["cloth", "leather"],
+      "weapons": ["dagger", "sword", "mace", "bow", "wand", "staff"],
+      "offhand": ["shield", "focus", "quiver"],
+      "dualWield": false
+    },
+    "fighter": {
+      "armour": ["cloth", "leather", "mail"],
+      "weapons": ["dagger", "sword", "axe", "mace", "polearm", "crossbow"],
+      "offhand": ["shield", "quiver"],
+      "dualWield": false
+    },
+    "rogue": {
+      "armour": ["cloth", "leather"],
+      "weapons": ["dagger", "sword", "axe", "bow", "crossbow", "polearm"],
+      "offhand": ["quiver", "shield"],
+      "dualWield": true,
+      "dualWieldClasses": ["dagger", "sword", "axe"]
+    },
+    "mage": {
+      "armour": ["cloth"],
+      "weapons": ["wand", "staff", "dagger"],
+      "offhand": ["focus"],
+      "dualWield": false
+    },
+    "healer": {
+      "armour": ["cloth", "leather"],
+      "weapons": ["mace", "staff", "wand", "sword"],
+      "offhand": ["shield", "focus"],
+      "dualWield": false
+    },
+    "specAdds": {
+      "_doc": "Spec picks at level 10 add these. Fighter specs are the only way to plate besides the Paladin hybrid.",
+      "fighter_any": {
+        "armour": ["plate"]
+      },
+      "paladin": {
+        "armour": ["mail", "plate"],
+        "weapons": ["mace", "sword", "axe", "polearm"]
+      },
+      "spellblade": {
+        "armour": ["leather"],
+        "weapons": ["sword", "dagger"],
+        "dualWield": false
+      }
+    }
+  },
+  "slots": ["head", "chest", "hands", "belt", "feet", "neck", "ring1", "ring2", "weapon", "offhand", "weapon2", "offhand2"],
+  "bases": [
+    {
+      "id": "skinning_knife",
+      "name": "Skinning Knife",
+      "slot": "weapon",
+      "kind": "dagger",
+      "class": "dagger",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "dagger",
+      "levelReq": 1,
+      "req": {
+        "agi": 11
+      },
+      "dropLevel": 1,
+      "damage": { "min": 2, "max": 4, "speed": 1.6, "dps": 5 },
+      "offhandOk": true,
+      "look": "dagger: short plain blade, wood grip"
+    },
+    {
+      "id": "stiletto",
+      "name": "Stiletto",
+      "slot": "weapon",
+      "kind": "dagger",
+      "class": "dagger",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "dagger",
+      "levelReq": 6,
+      "req": {
+        "agi": 23
+      },
+      "dropLevel": 6,
+      "damage": { "min": 6, "max": 10, "speed": 1.6, "dps": 12.3 },
+      "offhandOk": true,
+      "look": "dagger: needle blade, round guard"
+    },
+    {
+      "id": "hooked_dirk",
+      "name": "Hooked Dirk",
+      "slot": "weapon",
+      "kind": "dagger",
+      "class": "dagger",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "dagger",
+      "levelReq": 13,
+      "req": {
+        "agi": 41
+      },
+      "dropLevel": 13,
+      "damage": { "min": 11, "max": 19, "speed": 1.6, "dps": 24.2 },
+      "offhandOk": true,
+      "look": "dagger: curved tip, bone handle"
+    },
+    {
+      "id": "glass_fang",
+      "name": "Glass Fang",
+      "slot": "weapon",
+      "kind": "dagger",
+      "class": "dagger",
+      "hands": 1,
+      "tier": "fine",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "dagger",
+      "levelReq": 24,
+      "req": {
+        "agi": 68
+      },
+      "dropLevel": 24,
+      "damage": { "min": 22, "max": 36, "speed": 1.6, "dps": 46.4 },
+      "offhandOk": true,
+      "look": "dagger: translucent green blade"
+    },
+    {
+      "id": "widow_needle",
+      "name": "Widow Needle",
+      "slot": "weapon",
+      "kind": "dagger",
+      "class": "dagger",
+      "hands": 1,
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "dagger",
+      "levelReq": 44,
+      "req": {
+        "agi": 118
+      },
+      "dropLevel": 44,
+      "damage": { "min": 46, "max": 76, "speed": 1.6, "dps": 97.8 },
+      "offhandOk": true,
+      "look": "dagger: black thin blade, silver wire grip"
+    },
+    {
+      "id": "footman_sword",
+      "name": "Footman Sword",
+      "slot": "weapon",
+      "kind": "sword",
+      "class": "sword",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "sword",
+      "levelReq": 1,
+      "req": {
+        "str": 11
+      },
+      "dropLevel": 1,
+      "damage": { "min": 3, "max": 6, "speed": 1.2, "dps": 5.5 },
+      "offhandOk": true,
+      "look": "sword: straight short blade, cross guard"
+    },
+    {
+      "id": "river_sabre",
+      "name": "River Sabre",
+      "slot": "weapon",
+      "kind": "sword",
+      "class": "sword",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "sword",
+      "levelReq": 7,
+      "req": {
+        "str": 26
+      },
+      "dropLevel": 7,
+      "damage": { "min": 10, "max": 16, "speed": 1.2, "dps": 15.5 },
+      "offhandOk": true,
+      "look": "sword: curved single edge, brass guard"
+    },
+    {
+      "id": "warden_blade",
+      "name": "Warden Blade",
+      "slot": "weapon",
+      "kind": "sword",
+      "class": "sword",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "sword",
+      "levelReq": 14,
+      "req": {
+        "str": 43
+      },
+      "dropLevel": 14,
+      "damage": { "min": 18, "max": 30, "speed": 1.2, "dps": 28.9 },
+      "offhandOk": true,
+      "look": "sword: long straight blade, blue grip wrap"
+    },
+    {
+      "id": "heron_sword",
+      "name": "Heron Sword",
+      "slot": "weapon",
+      "kind": "sword",
+      "class": "sword",
+      "hands": 1,
+      "tier": "fine",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "sword",
+      "levelReq": 23,
+      "req": {
+        "str": 66
+      },
+      "dropLevel": 23,
+      "damage": { "min": 31, "max": 51, "speed": 1.2, "dps": 49.1 },
+      "offhandOk": true,
+      "look": "sword: slim blade, upswept guard"
+    },
+    {
+      "id": "kingfisher",
+      "name": "Kingfisher",
+      "slot": "weapon",
+      "kind": "sword",
+      "class": "sword",
+      "hands": 1,
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "sword",
+      "levelReq": 45,
+      "req": {
+        "str": 121
+      },
+      "dropLevel": 45,
+      "damage": { "min": 70, "max": 117, "speed": 1.2, "dps": 112 },
+      "offhandOk": true,
+      "look": "sword: pale blade, gold and teal hilt"
+    },
+    {
+      "id": "hand_axe",
+      "name": "Hand Axe",
+      "slot": "weapon",
+      "kind": "axe",
+      "class": "axe",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "axe",
+      "levelReq": 2,
+      "req": {
+        "str": 13
+      },
+      "dropLevel": 2,
+      "damage": { "min": 5, "max": 8, "speed": 1.1, "dps": 7.1 },
+      "offhandOk": true,
+      "look": "axe: woodcutter head, ash haft"
+    },
+    {
+      "id": "bearded_axe",
+      "name": "Bearded Axe",
+      "slot": "weapon",
+      "kind": "axe",
+      "class": "axe",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "axe",
+      "levelReq": 9,
+      "req": {
+        "str": 31
+      },
+      "dropLevel": 9,
+      "damage": { "min": 13, "max": 22, "speed": 1.1, "dps": 19.1 },
+      "offhandOk": true,
+      "look": "axe: long bearded blade"
+    },
+    {
+      "id": "cleaver_axe",
+      "name": "Cleaver Axe",
+      "slot": "weapon",
+      "kind": "axe",
+      "class": "axe",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "axe",
+      "levelReq": 16,
+      "req": {
+        "str": 48
+      },
+      "dropLevel": 16,
+      "damage": { "min": 23, "max": 38, "speed": 1.1, "dps": 33.1 },
+      "offhandOk": true,
+      "look": "axe: broad square head"
+    },
+    {
+      "id": "moon_axe",
+      "name": "Moon Axe",
+      "slot": "weapon",
+      "kind": "axe",
+      "class": "axe",
+      "hands": 1,
+      "tier": "fine",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "axe",
+      "levelReq": 26,
+      "req": {
+        "str": 73
+      },
+      "dropLevel": 26,
+      "damage": { "min": 39, "max": 64, "speed": 1.1, "dps": 56.5 },
+      "offhandOk": true,
+      "look": "axe: crescent blade, dark steel"
+    },
+    {
+      "id": "raven_axe",
+      "name": "Raven Axe",
+      "slot": "weapon",
+      "kind": "axe",
+      "class": "axe",
+      "hands": 1,
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "axe",
+      "levelReq": 47,
+      "req": {
+        "str": 126
+      },
+      "dropLevel": 47,
+      "damage": { "min": 81, "max": 135, "speed": 1.1, "dps": 118.7 },
+      "offhandOk": true,
+      "look": "axe: black head with a beak-shaped back spike"
+    },
+    {
+      "id": "cudgel",
+      "name": "Cudgel",
+      "slot": "weapon",
+      "kind": "mace",
+      "class": "mace",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "mace",
+      "levelReq": 1,
+      "req": {
+        "str": 11
+      },
+      "dropLevel": 1,
+      "damage": { "min": 4, "max": 7, "speed": 1, "dps": 5.5 },
+      "look": "mace: knotted wooden club"
+    },
+    {
+      "id": "iron_mace",
+      "name": "Iron Mace",
+      "slot": "weapon",
+      "kind": "mace",
+      "class": "mace",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "mace",
+      "levelReq": 8,
+      "req": {
+        "str": 28
+      },
+      "dropLevel": 8,
+      "damage": { "min": 13, "max": 22, "speed": 1, "dps": 17.3 },
+      "look": "mace: flanged iron head"
+    },
+    {
+      "id": "morningstar",
+      "name": "Morningstar",
+      "slot": "weapon",
+      "kind": "mace",
+      "class": "mace",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "mace",
+      "levelReq": 15,
+      "req": {
+        "str": 46
+      },
+      "dropLevel": 15,
+      "damage": { "min": 23, "max": 39, "speed": 1, "dps": 31 },
+      "look": "mace: spiked ball head"
+    },
+    {
+      "id": "bell_mace",
+      "name": "Bell Mace",
+      "slot": "weapon",
+      "kind": "mace",
+      "class": "mace",
+      "hands": 1,
+      "tier": "fine",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "mace",
+      "levelReq": 25,
+      "req": {
+        "str": 71
+      },
+      "dropLevel": 25,
+      "damage": { "min": 41, "max": 68, "speed": 1, "dps": 54 },
+      "look": "mace: bronze bell-shaped head"
+    },
+    {
+      "id": "sunder_mace",
+      "name": "Sunder Mace",
+      "slot": "weapon",
+      "kind": "mace",
+      "class": "mace",
+      "hands": 1,
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "mace",
+      "levelReq": 46,
+      "req": {
+        "str": 123
+      },
+      "dropLevel": 46,
+      "damage": { "min": 86, "max": 144, "speed": 1, "dps": 115.3 },
+      "look": "mace: wide steel head with four fins"
+    },
+    {
+      "id": "prayer_rod",
+      "name": "Prayer Rod",
+      "slot": "weapon",
+      "kind": "sceptre",
+      "class": "mace",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "mace",
+      "levelReq": 3,
+      "req": {
+        "spi": 16
+      },
+      "dropLevel": 3,
+      "damage": { "min": 5, "max": 9, "speed": 1, "dps": 6.9 },
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 6 },
+      "look": "sceptre: short rod with a wooden disc"
+    },
+    {
+      "id": "hallow_sceptre",
+      "name": "Hallow Sceptre",
+      "slot": "weapon",
+      "kind": "sceptre",
+      "class": "mace",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "mace",
+      "levelReq": 11,
+      "req": {
+        "spi": 36
+      },
+      "dropLevel": 11,
+      "damage": { "min": 14, "max": 23, "speed": 1, "dps": 18.3 },
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 15 },
+      "look": "sceptre: silver rod, sun disc"
+    },
+    {
+      "id": "bishop_sceptre",
+      "name": "Bishop Sceptre",
+      "slot": "weapon",
+      "kind": "sceptre",
+      "class": "mace",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "mace",
+      "levelReq": 18,
+      "req": {
+        "spi": 53
+      },
+      "dropLevel": 18,
+      "damage": { "min": 22, "max": 37, "speed": 1, "dps": 30 },
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 24 },
+      "look": "sceptre: gilded, ring-shaped head"
+    },
+    {
+      "id": "dawn_sceptre",
+      "name": "Dawn Sceptre",
+      "slot": "weapon",
+      "kind": "sceptre",
+      "class": "mace",
+      "hands": 1,
+      "tier": "fine",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "mace",
+      "levelReq": 28,
+      "req": {
+        "spi": 78
+      },
+      "dropLevel": 28,
+      "damage": { "min": 37, "max": 62, "speed": 1, "dps": 49.3 },
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 36 },
+      "look": "sceptre: white gold, radiant head"
+    },
+    {
+      "id": "choir_sceptre",
+      "name": "Choir Sceptre",
+      "slot": "weapon",
+      "kind": "sceptre",
+      "class": "mace",
+      "hands": 1,
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "mace",
+      "levelReq": 48,
+      "req": {
+        "spi": 128
+      },
+      "dropLevel": 48,
+      "damage": { "min": 73, "max": 122, "speed": 1, "dps": 97.7 },
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 60 },
+      "look": "sceptre: tall, three-ringed head, soft glow"
+    },
+    {
+      "id": "bastard_sword",
+      "name": "Bastard Sword",
+      "slot": "weapon",
+      "kind": "greatsword",
+      "class": "sword",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "sword",
+      "levelReq": 4,
+      "req": {
+        "str": 18
+      },
+      "dropLevel": 4,
+      "damage": { "min": 13, "max": 22, "speed": 0.8, "dps": 13.9 },
+      "look": "greatsword: hand-and-a-half, plain guard"
+    },
+    {
+      "id": "claymore",
+      "name": "Claymore",
+      "slot": "weapon",
+      "kind": "greatsword",
+      "class": "sword",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "sword",
+      "levelReq": 12,
+      "req": {
+        "str": 38
+      },
+      "dropLevel": 12,
+      "damage": { "min": 31, "max": 52, "speed": 0.8, "dps": 33.6 },
+      "look": "greatsword: long blade, down-turned quillons"
+    },
+    {
+      "id": "headsman",
+      "name": "Headsman",
+      "slot": "weapon",
+      "kind": "greatsword",
+      "class": "sword",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "sword",
+      "levelReq": 19,
+      "req": {
+        "str": 56
+      },
+      "dropLevel": 19,
+      "damage": { "min": 50, "max": 84, "speed": 0.8, "dps": 53.6 },
+      "look": "greatsword: heavy wide blade, square tip"
+    },
+    {
+      "id": "flamberge",
+      "name": "Flamberge",
+      "slot": "weapon",
+      "kind": "greatsword",
+      "class": "sword",
+      "hands": 2,
+      "tier": "fine",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "sword",
+      "levelReq": 29,
+      "req": {
+        "str": 81
+      },
+      "dropLevel": 29,
+      "damage": { "min": 81, "max": 136, "speed": 0.8, "dps": 86.8 },
+      "look": "greatsword: wavy blade"
+    },
+    {
+      "id": "king_cleaver",
+      "name": "King Cleaver",
+      "slot": "weapon",
+      "kind": "greatsword",
+      "class": "sword",
+      "hands": 2,
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "sword",
+      "levelReq": 49,
+      "req": {
+        "str": 131
+      },
+      "dropLevel": 49,
+      "damage": { "min": 159, "max": 265, "speed": 0.8, "dps": 169.5 },
+      "look": "greatsword: enormous dark blade, gold pommel"
+    },
+    {
+      "id": "splitting_axe",
+      "name": "Splitting Axe",
+      "slot": "weapon",
+      "kind": "greataxe",
+      "class": "axe",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "axe",
+      "levelReq": 5,
+      "req": {
+        "str": 21
+      },
+      "dropLevel": 5,
+      "damage": { "min": 16, "max": 27, "speed": 0.75, "dps": 16.2 },
+      "look": "greataxe: single heavy head on a long haft"
+    },
+    {
+      "id": "war_axe",
+      "name": "War Axe",
+      "slot": "weapon",
+      "kind": "greataxe",
+      "class": "axe",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "axe",
+      "levelReq": 13,
+      "req": {
+        "str": 41
+      },
+      "dropLevel": 13,
+      "damage": { "min": 36, "max": 60, "speed": 0.75, "dps": 36.3 },
+      "look": "greataxe: double-bitted head"
+    },
+    {
+      "id": "reaver_axe",
+      "name": "Reaver Axe",
+      "slot": "weapon",
+      "kind": "greataxe",
+      "class": "axe",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "axe",
+      "levelReq": 20,
+      "req": {
+        "str": 58
+      },
+      "dropLevel": 20,
+      "damage": { "min": 57, "max": 95, "speed": 0.75, "dps": 56.7 },
+      "look": "greataxe: crescent double head, spiked top"
+    },
+    {
+      "id": "giant_axe",
+      "name": "Giant Axe",
+      "slot": "weapon",
+      "kind": "greataxe",
+      "class": "axe",
+      "hands": 2,
+      "tier": "fine",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "axe",
+      "levelReq": 30,
+      "req": {
+        "str": 83
+      },
+      "dropLevel": 30,
+      "damage": { "min": 90, "max": 151, "speed": 0.75, "dps": 90.5 },
+      "look": "greataxe: oversized head, iron-banded haft"
+    },
+    {
+      "id": "doom_axe",
+      "name": "Doom Axe",
+      "slot": "weapon",
+      "kind": "greataxe",
+      "class": "axe",
+      "hands": 2,
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "axe",
+      "levelReq": 50,
+      "req": {
+        "str": 133
+      },
+      "dropLevel": 50,
+      "damage": { "min": 174, "max": 290, "speed": 0.75, "dps": 174.2 },
+      "look": "greataxe: black double head, red runes"
+    },
+    {
+      "id": "sledge",
+      "name": "Sledge",
+      "slot": "weapon",
+      "kind": "maul",
+      "class": "mace",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "mace",
+      "levelReq": 3,
+      "req": {
+        "str": 16
+      },
+      "dropLevel": 3,
+      "damage": { "min": 13, "max": 21, "speed": 0.7, "dps": 11.7 },
+      "look": "maul: square iron sledgehammer"
+    },
+    {
+      "id": "war_maul",
+      "name": "War Maul",
+      "slot": "weapon",
+      "kind": "maul",
+      "class": "mace",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "mace",
+      "levelReq": 11,
+      "req": {
+        "str": 36
+      },
+      "dropLevel": 11,
+      "damage": { "min": 33, "max": 55, "speed": 0.7, "dps": 30.9 },
+      "look": "maul: long haft, round head"
+    },
+    {
+      "id": "ogre_maul",
+      "name": "Ogre Maul",
+      "slot": "weapon",
+      "kind": "maul",
+      "class": "mace",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "mace",
+      "levelReq": 18,
+      "req": {
+        "str": 53
+      },
+      "dropLevel": 18,
+      "damage": { "min": 54, "max": 90, "speed": 0.7, "dps": 50.6 },
+      "look": "maul: huge stone head"
+    },
+    {
+      "id": "thunder_maul",
+      "name": "Thunder Maul",
+      "slot": "weapon",
+      "kind": "maul",
+      "class": "mace",
+      "hands": 2,
+      "tier": "fine",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "mace",
+      "levelReq": 27,
+      "req": {
+        "str": 76
+      },
+      "dropLevel": 27,
+      "damage": { "min": 85, "max": 142, "speed": 0.7, "dps": 79.8 },
+      "look": "maul: steel head with lightning engraving"
+    },
+    {
+      "id": "mountain_maul",
+      "name": "Mountain Maul",
+      "slot": "weapon",
+      "kind": "maul",
+      "class": "mace",
+      "hands": 2,
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 4 },
+      "proficiency": "mace",
+      "levelReq": 48,
+      "req": {
+        "str": 128
+      },
+      "dropLevel": 48,
+      "damage": { "min": 177, "max": 294, "speed": 0.7, "dps": 164.8 },
+      "look": "maul: obsidian head, gold bands"
+    },
+    {
+      "id": "boar_spear",
+      "name": "Boar Spear",
+      "slot": "weapon",
+      "kind": "spear",
+      "class": "polearm",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "polearm",
+      "levelReq": 2,
+      "req": {
+        "str": 13
+      },
+      "dropLevel": 2,
+      "damage": { "min": 7, "max": 11, "speed": 1, "dps": 8.9 },
+      "look": "spear: leaf head with crossbar"
+    },
+    {
+      "id": "long_spear",
+      "name": "Long Spear",
+      "slot": "weapon",
+      "kind": "spear",
+      "class": "polearm",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "polearm",
+      "levelReq": 10,
+      "req": {
+        "str": 33
+      },
+      "dropLevel": 10,
+      "damage": { "min": 20, "max": 33, "speed": 1, "dps": 26.3 },
+      "look": "spear: narrow head, long shaft"
+    },
+    {
+      "id": "trident",
+      "name": "Trident",
+      "slot": "weapon",
+      "kind": "spear",
+      "class": "polearm",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "polearm",
+      "levelReq": 17,
+      "req": {
+        "str": 51
+      },
+      "dropLevel": 17,
+      "damage": { "min": 33, "max": 55, "speed": 1, "dps": 44.1 },
+      "look": "spear: three-pronged head"
+    },
+    {
+      "id": "pike",
+      "name": "Pike",
+      "slot": "weapon",
+      "kind": "spear",
+      "class": "polearm",
+      "hands": 2,
+      "tier": "fine",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "polearm",
+      "levelReq": 26,
+      "req": {
+        "str": 73
+      },
+      "dropLevel": 26,
+      "damage": { "min": 53, "max": 88, "speed": 1, "dps": 70.6 },
+      "look": "spear: very long, small steel head"
+    },
+    {
+      "id": "star_spear",
+      "name": "Star Spear",
+      "slot": "weapon",
+      "kind": "spear",
+      "class": "polearm",
+      "hands": 2,
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "polearm",
+      "levelReq": 46,
+      "req": {
+        "str": 123
+      },
+      "dropLevel": 46,
+      "damage": { "min": 108, "max": 180, "speed": 1, "dps": 144.1 },
+      "look": "spear: silver head, blue tassel"
+    },
+    {
+      "id": "bill_hook",
+      "name": "Bill Hook",
+      "slot": "weapon",
+      "kind": "polearm",
+      "class": "polearm",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "polearm",
+      "levelReq": 4,
+      "req": {
+        "str": 18
+      },
+      "dropLevel": 4,
+      "damage": { "min": 14, "max": 23, "speed": 0.75, "dps": 13.9 },
+      "look": "polearm: hooked blade on a pole"
+    },
+    {
+      "id": "halberd",
+      "name": "Halberd",
+      "slot": "weapon",
+      "kind": "polearm",
+      "class": "polearm",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "polearm",
+      "levelReq": 12,
+      "req": {
+        "str": 38
+      },
+      "dropLevel": 12,
+      "damage": { "min": 34, "max": 56, "speed": 0.75, "dps": 33.6 },
+      "look": "polearm: axe blade plus spike"
+    },
+    {
+      "id": "glaive",
+      "name": "Glaive",
+      "slot": "weapon",
+      "kind": "polearm",
+      "class": "polearm",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "polearm",
+      "levelReq": 19,
+      "req": {
+        "str": 56
+      },
+      "dropLevel": 19,
+      "damage": { "min": 54, "max": 89, "speed": 0.75, "dps": 53.6 },
+      "look": "polearm: single long curved blade"
+    },
+    {
+      "id": "bardiche",
+      "name": "Bardiche",
+      "slot": "weapon",
+      "kind": "polearm",
+      "class": "polearm",
+      "hands": 2,
+      "tier": "fine",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "polearm",
+      "levelReq": 28,
+      "req": {
+        "str": 78
+      },
+      "dropLevel": 28,
+      "damage": { "min": 83, "max": 139, "speed": 0.75, "dps": 83.3 },
+      "look": "polearm: long crescent blade"
+    },
+    {
+      "id": "sky_scythe",
+      "name": "Sky Scythe",
+      "slot": "weapon",
+      "kind": "polearm",
+      "class": "polearm",
+      "hands": 2,
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "polearm",
+      "levelReq": 49,
+      "req": {
+        "str": 131
+      },
+      "dropLevel": 49,
+      "damage": { "min": 169, "max": 282, "speed": 0.75, "dps": 169.5 },
+      "look": "polearm: sweeping scythe blade, pale steel"
+    },
+    {
+      "id": "hunting_bow",
+      "name": "Hunting Bow",
+      "slot": "weapon",
+      "kind": "bow",
+      "class": "bow",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "bow",
+      "levelReq": 1,
+      "req": {
+        "agi": 11
+      },
+      "dropLevel": 1,
+      "damage": { "min": 5, "max": 8, "speed": 1.1, "dps": 6.6 },
+      "ranged": true,
+      "look": "bow: short plain self bow"
+    },
+    {
+      "id": "long_bow",
+      "name": "Long Bow",
+      "slot": "weapon",
+      "kind": "bow",
+      "class": "bow",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "bow",
+      "levelReq": 8,
+      "req": {
+        "agi": 28
+      },
+      "dropLevel": 8,
+      "damage": { "min": 14, "max": 24, "speed": 1.1, "dps": 20.7 },
+      "ranged": true,
+      "look": "bow: tall yew bow"
+    },
+    {
+      "id": "recurve_bow",
+      "name": "Recurve Bow",
+      "slot": "weapon",
+      "kind": "bow",
+      "class": "bow",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "bow",
+      "levelReq": 15,
+      "req": {
+        "agi": 46
+      },
+      "dropLevel": 15,
+      "damage": { "min": 25, "max": 42, "speed": 1.1, "dps": 37.2 },
+      "ranged": true,
+      "look": "bow: recurved limbs, horn tips"
+    },
+    {
+      "id": "composite_bow",
+      "name": "Composite Bow",
+      "slot": "weapon",
+      "kind": "bow",
+      "class": "bow",
+      "hands": 2,
+      "tier": "fine",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "bow",
+      "levelReq": 24,
+      "req": {
+        "agi": 68
+      },
+      "dropLevel": 24,
+      "damage": { "min": 42, "max": 70, "speed": 1.1, "dps": 61.8 },
+      "ranged": true,
+      "look": "bow: layered horn and sinew"
+    },
+    {
+      "id": "wyvern_bow",
+      "name": "Wyvern Bow",
+      "slot": "weapon",
+      "kind": "bow",
+      "class": "bow",
+      "hands": 2,
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "bow",
+      "levelReq": 45,
+      "req": {
+        "agi": 121
+      },
+      "dropLevel": 45,
+      "damage": { "min": 92, "max": 153, "speed": 1.1, "dps": 134.4 },
+      "ranged": true,
+      "look": "bow: bone limbs, green string glow"
+    },
+    {
+      "id": "light_crossbow",
+      "name": "Light Crossbow",
+      "slot": "weapon",
+      "kind": "crossbow",
+      "class": "crossbow",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "crossbow",
+      "levelReq": 3,
+      "req": {
+        "agi": 16
+      },
+      "dropLevel": 3,
+      "damage": { "min": 12, "max": 19, "speed": 0.7, "dps": 10.9 },
+      "ranged": true,
+      "look": "crossbow: wooden stock, short prod"
+    },
+    {
+      "id": "heavy_crossbow",
+      "name": "Heavy Crossbow",
+      "slot": "weapon",
+      "kind": "crossbow",
+      "class": "crossbow",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "crossbow",
+      "levelReq": 11,
+      "req": {
+        "agi": 36
+      },
+      "dropLevel": 11,
+      "damage": { "min": 31, "max": 51, "speed": 0.7, "dps": 28.7 },
+      "ranged": true,
+      "look": "crossbow: steel prod, stirrup"
+    },
+    {
+      "id": "arbalest",
+      "name": "Arbalest",
+      "slot": "weapon",
+      "kind": "crossbow",
+      "class": "crossbow",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "crossbow",
+      "levelReq": 19,
+      "req": {
+        "agi": 56
+      },
+      "dropLevel": 19,
+      "damage": { "min": 53, "max": 89, "speed": 0.7, "dps": 49.7 },
+      "ranged": true,
+      "look": "crossbow: windlass, thick steel prod"
+    },
+    {
+      "id": "siege_crossbow",
+      "name": "Siege Crossbow",
+      "slot": "weapon",
+      "kind": "crossbow",
+      "class": "crossbow",
+      "hands": 2,
+      "tier": "fine",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "crossbow",
+      "levelReq": 29,
+      "req": {
+        "agi": 81
+      },
+      "dropLevel": 29,
+      "damage": { "min": 86, "max": 144, "speed": 0.7, "dps": 80.4 },
+      "ranged": true,
+      "look": "crossbow: double prod"
+    },
+    {
+      "id": "gale_crossbow",
+      "name": "Gale Crossbow",
+      "slot": "weapon",
+      "kind": "crossbow",
+      "class": "crossbow",
+      "hands": 2,
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "crossbow",
+      "levelReq": 50,
+      "req": {
+        "agi": 133
+      },
+      "dropLevel": 50,
+      "damage": { "min": 173, "max": 288, "speed": 0.7, "dps": 161.3 },
+      "ranged": true,
+      "look": "crossbow: silver prod, swept stock"
+    },
+    {
+      "id": "walking_staff",
+      "name": "Walking Staff",
+      "slot": "weapon",
+      "kind": "staff",
+      "class": "staff",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "staff",
+      "levelReq": 1,
+      "req": {
+        "int": 11
+      },
+      "dropLevel": 1,
+      "damage": { "min": 4, "max": 7, "speed": 0.9, "dps": 5 },
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 5 },
+      "look": "staff: plain wooden pole"
+    },
+    {
+      "id": "gnarled_staff",
+      "name": "Gnarled Staff",
+      "slot": "weapon",
+      "kind": "staff",
+      "class": "staff",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "staff",
+      "levelReq": 7,
+      "req": {
+        "int": 26
+      },
+      "dropLevel": 7,
+      "damage": { "min": 12, "max": 19, "speed": 0.9, "dps": 13.9 },
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 16 },
+      "look": "staff: twisted wood, knot at the top"
+    },
+    {
+      "id": "lens_staff",
+      "name": "Lens Staff",
+      "slot": "weapon",
+      "kind": "staff",
+      "class": "staff",
+      "hands": 2,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "staff",
+      "levelReq": 14,
+      "req": {
+        "int": 43
+      },
+      "dropLevel": 14,
+      "damage": { "min": 22, "max": 36, "speed": 0.9, "dps": 26 },
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 30 },
+      "look": "staff: crystal lens in a bronze ring"
+    },
+    {
+      "id": "spire_staff",
+      "name": "Spire Staff",
+      "slot": "weapon",
+      "kind": "staff",
+      "class": "staff",
+      "hands": 2,
+      "tier": "fine",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "staff",
+      "levelReq": 23,
+      "req": {
+        "int": 66
+      },
+      "dropLevel": 23,
+      "damage": { "min": 37, "max": 61, "speed": 0.9, "dps": 44.2 },
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 48 },
+      "look": "staff: tall steel spire, blue stone"
+    },
+    {
+      "id": "halo_staff",
+      "name": "Halo Staff",
+      "slot": "weapon",
+      "kind": "staff",
+      "class": "staff",
+      "hands": 2,
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 4 },
+      "proficiency": "staff",
+      "levelReq": 44,
+      "req": {
+        "int": 118
+      },
+      "dropLevel": 44,
+      "damage": { "min": 82, "max": 136, "speed": 0.9, "dps": 97.8 },
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 88 },
+      "look": "staff: floating ring of light at the top"
+    },
+    {
+      "id": "willow_wand",
+      "name": "Willow Wand",
+      "slot": "weapon",
+      "kind": "wand",
+      "class": "wand",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "wand",
+      "levelReq": 1,
+      "req": {
+        "int": 11
+      },
+      "dropLevel": 1,
+      "damage": { "min": 2, "max": 3, "speed": 1.3, "dps": 3.3 },
+      "ranged": true,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 3 },
+      "look": "wand: slim pale stick"
+    },
+    {
+      "id": "bone_wand",
+      "name": "Bone Wand",
+      "slot": "weapon",
+      "kind": "wand",
+      "class": "wand",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "wand",
+      "levelReq": 6,
+      "req": {
+        "int": 23
+      },
+      "dropLevel": 6,
+      "damage": { "min": 5, "max": 8, "speed": 1.3, "dps": 8.2 },
+      "ranged": true,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 9 },
+      "look": "wand: carved bone, dark tip"
+    },
+    {
+      "id": "fork_wand",
+      "name": "Fork Wand",
+      "slot": "weapon",
+      "kind": "wand",
+      "class": "wand",
+      "hands": 1,
+      "tier": "plain",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "wand",
+      "levelReq": 13,
+      "req": {
+        "int": 41
+      },
+      "dropLevel": 13,
+      "damage": { "min": 9, "max": 16, "speed": 1.3, "dps": 16.1 },
+      "ranged": true,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 18 },
+      "look": "wand: two-pronged tip holding a stone"
+    },
+    {
+      "id": "hoop_wand",
+      "name": "Hoop Wand",
+      "slot": "weapon",
+      "kind": "wand",
+      "class": "wand",
+      "hands": 1,
+      "tier": "fine",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "wand",
+      "levelReq": 25,
+      "req": {
+        "int": 71
+      },
+      "dropLevel": 25,
+      "damage": { "min": 19, "max": 31, "speed": 1.3, "dps": 32.4 },
+      "ranged": true,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 32 },
+      "look": "wand: small hoop at the tip, gold"
+    },
+    {
+      "id": "bell_wand",
+      "name": "Bell Wand",
+      "slot": "weapon",
+      "kind": "wand",
+      "class": "wand",
+      "hands": 1,
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "wand",
+      "levelReq": 46,
+      "req": {
+        "int": 123
+      },
+      "dropLevel": 46,
+      "damage": { "min": 40, "max": 67, "speed": 1.3, "dps": 69.2 },
+      "ranged": true,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 57 },
+      "look": "wand: tiny silver bell, violet glow"
+    },
+    {
+      "id": "linen_hood",
+      "name": "Linen Hood",
+      "slot": "head",
+      "kind": "head",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 1,
+      "req": {
+        "int": 6
+      },
+      "dropLevel": 1,
+      "armour": 8,
+      "look": "hood: loose linen hood"
+    },
+    {
+      "id": "scholar_cap",
+      "name": "Scholar Cap",
+      "slot": "head",
+      "kind": "head",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 9,
+      "req": {
+        "int": 14
+      },
+      "dropLevel": 9,
+      "armour": 19,
+      "look": "cap: soft round cap with a tassel"
+    },
+    {
+      "id": "linen_robe",
+      "name": "Linen Robe",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "cloth",
+      "levelReq": 1,
+      "req": {
+        "int": 6
+      },
+      "dropLevel": 1,
+      "armour": 14,
+      "look": "robe: plain belted robe"
+    },
+    {
+      "id": "quilted_robe",
+      "name": "Quilted Robe",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "cloth",
+      "levelReq": 9,
+      "req": {
+        "int": 14
+      },
+      "dropLevel": 9,
+      "armour": 33,
+      "look": "robe: padded diamond-stitched robe"
+    },
+    {
+      "id": "wool_mitts",
+      "name": "Wool Mitts",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 1,
+      "req": {
+        "int": 6
+      },
+      "dropLevel": 1,
+      "armour": 5,
+      "look": "gloves: short wool mitts"
+    },
+    {
+      "id": "scribe_gloves",
+      "name": "Scribe Gloves",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 9,
+      "req": {
+        "int": 14
+      },
+      "dropLevel": 9,
+      "armour": 11,
+      "look": "gloves: thin leather-palmed cloth gloves"
+    },
+    {
+      "id": "cloth_shoes",
+      "name": "Cloth Shoes",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 1,
+      "req": {
+        "int": 6
+      },
+      "dropLevel": 1,
+      "armour": 6,
+      "look": "shoes: soft slippers"
+    },
+    {
+      "id": "pilgrim_shoes",
+      "name": "Pilgrim Shoes",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 9,
+      "req": {
+        "int": 14
+      },
+      "dropLevel": 9,
+      "armour": 14,
+      "look": "shoes: wrapped travelling shoes"
+    },
+    {
+      "id": "sage_cowl",
+      "name": "Sage Cowl",
+      "slot": "head",
+      "kind": "head",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 22,
+      "req": {
+        "int": 27
+      },
+      "dropLevel": 22,
+      "armour": 36,
+      "look": "hood: deep cowl with silver edging"
+    },
+    {
+      "id": "sage_vestment",
+      "name": "Sage Vestment",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "cloth",
+      "levelReq": 22,
+      "req": {
+        "int": 27
+      },
+      "dropLevel": 22,
+      "armour": 64,
+      "look": "robe: layered vestment, runic hem"
+    },
+    {
+      "id": "sage_gloves",
+      "name": "Sage Gloves",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 22,
+      "req": {
+        "int": 27
+      },
+      "dropLevel": 22,
+      "armour": 22,
+      "look": "gloves: embroidered cuffs"
+    },
+    {
+      "id": "sage_slippers",
+      "name": "Sage Slippers",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 22,
+      "req": {
+        "int": 27
+      },
+      "dropLevel": 22,
+      "armour": 27,
+      "look": "shoes: curl-toed slippers"
+    },
+    {
+      "id": "archon_crown",
+      "name": "Archon Crown",
+      "slot": "head",
+      "kind": "head",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 42,
+      "req": {
+        "int": 47
+      },
+      "dropLevel": 42,
+      "armour": 63,
+      "look": "hood: circlet over a hood, floating gems"
+    },
+    {
+      "id": "archon_robe",
+      "name": "Archon Robe",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "cloth",
+      "levelReq": 42,
+      "req": {
+        "int": 47
+      },
+      "dropLevel": 42,
+      "armour": 111,
+      "look": "robe: flowing robe with glowing seams"
+    },
+    {
+      "id": "archon_gloves",
+      "name": "Archon Gloves",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 42,
+      "req": {
+        "int": 47
+      },
+      "dropLevel": 42,
+      "armour": 38,
+      "look": "gloves: long gloves with rune bands"
+    },
+    {
+      "id": "archon_shoes",
+      "name": "Archon Shoes",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "cloth",
+      "levelReq": 42,
+      "req": {
+        "int": 47
+      },
+      "dropLevel": 42,
+      "armour": 48,
+      "look": "shoes: silk boots with gold toes"
+    },
+    {
+      "id": "hide_cap",
+      "name": "Hide Cap",
+      "slot": "head",
+      "kind": "head",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 2,
+      "req": {
+        "agi": 12
+      },
+      "dropLevel": 2,
+      "armour": 13,
+      "look": "cap: stitched hide skullcap"
+    },
+    {
+      "id": "ranger_hood",
+      "name": "Ranger Hood",
+      "slot": "head",
+      "kind": "head",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 11,
+      "req": {
+        "agi": 30
+      },
+      "dropLevel": 11,
+      "armour": 29,
+      "look": "hood: leather hood with a brim"
+    },
+    {
+      "id": "hide_jerkin",
+      "name": "Hide Jerkin",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "leather",
+      "levelReq": 2,
+      "req": {
+        "agi": 12
+      },
+      "dropLevel": 2,
+      "armour": 22,
+      "look": "jerkin: sleeveless hide"
+    },
+    {
+      "id": "studded_jerkin",
+      "name": "Studded Jerkin",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "leather",
+      "levelReq": 11,
+      "req": {
+        "agi": 30
+      },
+      "dropLevel": 11,
+      "armour": 50,
+      "look": "jerkin: riveted leather"
+    },
+    {
+      "id": "hide_gloves",
+      "name": "Hide Gloves",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 2,
+      "req": {
+        "agi": 12
+      },
+      "dropLevel": 2,
+      "armour": 8,
+      "look": "gloves: plain hide gloves"
+    },
+    {
+      "id": "bracer_gloves",
+      "name": "Bracer Gloves",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 11,
+      "req": {
+        "agi": 30
+      },
+      "dropLevel": 11,
+      "armour": 17,
+      "look": "gloves: gloves with laced bracers"
+    },
+    {
+      "id": "hide_boots",
+      "name": "Hide Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 2,
+      "req": {
+        "agi": 12
+      },
+      "dropLevel": 2,
+      "armour": 9,
+      "look": "boots: soft ankle boots"
+    },
+    {
+      "id": "tracker_boots",
+      "name": "Tracker Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 11,
+      "req": {
+        "agi": 30
+      },
+      "dropLevel": 11,
+      "armour": 22,
+      "look": "boots: knee-high laced boots"
+    },
+    {
+      "id": "drake_cap",
+      "name": "Drake Cap",
+      "slot": "head",
+      "kind": "head",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 23,
+      "req": {
+        "agi": 54
+      },
+      "dropLevel": 23,
+      "armour": 50,
+      "look": "cap: scaled leather cap"
+    },
+    {
+      "id": "drake_coat",
+      "name": "Drake Coat",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "leather",
+      "levelReq": 23,
+      "req": {
+        "agi": 54
+      },
+      "dropLevel": 23,
+      "armour": 88,
+      "look": "jerkin: scaled hide long coat"
+    },
+    {
+      "id": "drake_gloves",
+      "name": "Drake Gloves",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 23,
+      "req": {
+        "agi": 54
+      },
+      "dropLevel": 23,
+      "armour": 30,
+      "look": "gloves: scaled knuckles"
+    },
+    {
+      "id": "drake_boots",
+      "name": "Drake Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 23,
+      "req": {
+        "agi": 54
+      },
+      "dropLevel": 23,
+      "armour": 38,
+      "look": "boots: scaled shin guards"
+    },
+    {
+      "id": "shade_mask",
+      "name": "Shade Mask",
+      "slot": "head",
+      "kind": "head",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 43,
+      "req": {
+        "agi": 94
+      },
+      "dropLevel": 43,
+      "armour": 86,
+      "look": "cap: dark half-mask hood"
+    },
+    {
+      "id": "shade_harness",
+      "name": "Shade Harness",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "leather",
+      "levelReq": 43,
+      "req": {
+        "agi": 94
+      },
+      "dropLevel": 43,
+      "armour": 151,
+      "look": "jerkin: black strapped harness"
+    },
+    {
+      "id": "shade_gloves",
+      "name": "Shade Gloves",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 43,
+      "req": {
+        "agi": 94
+      },
+      "dropLevel": 43,
+      "armour": 52,
+      "look": "gloves: clawed dark gloves"
+    },
+    {
+      "id": "shade_boots",
+      "name": "Shade Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 43,
+      "req": {
+        "agi": 94
+      },
+      "dropLevel": 43,
+      "armour": 65,
+      "look": "boots: silent dark boots"
+    },
+    {
+      "id": "mail_coif",
+      "name": "Mail Coif",
+      "slot": "head",
+      "kind": "head",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 4,
+      "req": {
+        "str": 16
+      },
+      "dropLevel": 4,
+      "armour": 22,
+      "look": "helm: ring-mail coif"
+    },
+    {
+      "id": "nasal_helm",
+      "name": "Nasal Helm",
+      "slot": "head",
+      "kind": "head",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 13,
+      "req": {
+        "str": 34
+      },
+      "dropLevel": 13,
+      "armour": 43,
+      "look": "helm: conical helm with nose bar"
+    },
+    {
+      "id": "mail_shirt",
+      "name": "Mail Shirt",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "mail",
+      "levelReq": 4,
+      "req": {
+        "str": 16
+      },
+      "dropLevel": 4,
+      "armour": 38,
+      "look": "hauberk: short ring-mail shirt"
+    },
+    {
+      "id": "mail_hauberk",
+      "name": "Mail Hauberk",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "mail",
+      "levelReq": 13,
+      "req": {
+        "str": 34
+      },
+      "dropLevel": 13,
+      "armour": 76,
+      "look": "hauberk: knee-length mail"
+    },
+    {
+      "id": "mail_gloves",
+      "name": "Mail Gloves",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 4,
+      "req": {
+        "str": 16
+      },
+      "dropLevel": 4,
+      "armour": 13,
+      "look": "gloves: ring-mail mittens"
+    },
+    {
+      "id": "mail_gauntlets",
+      "name": "Mail Gauntlets",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 13,
+      "req": {
+        "str": 34
+      },
+      "dropLevel": 13,
+      "armour": 26,
+      "look": "gloves: mail with steel cuffs"
+    },
+    {
+      "id": "mail_boots",
+      "name": "Mail Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 4,
+      "req": {
+        "str": 16
+      },
+      "dropLevel": 4,
+      "armour": 16,
+      "look": "boots: mail-wrapped boots"
+    },
+    {
+      "id": "splint_boots",
+      "name": "Splint Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 13,
+      "req": {
+        "str": 34
+      },
+      "dropLevel": 13,
+      "armour": 32,
+      "look": "boots: boots with steel splints"
+    },
+    {
+      "id": "scale_helm",
+      "name": "Scale Helm",
+      "slot": "head",
+      "kind": "head",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 24,
+      "req": {
+        "str": 56
+      },
+      "dropLevel": 24,
+      "armour": 70,
+      "look": "helm: scale-covered helm"
+    },
+    {
+      "id": "scale_hauberk",
+      "name": "Scale Hauberk",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "mail",
+      "levelReq": 24,
+      "req": {
+        "str": 56
+      },
+      "dropLevel": 24,
+      "armour": 122,
+      "look": "hauberk: overlapping steel scales"
+    },
+    {
+      "id": "scale_gauntlets",
+      "name": "Scale Gauntlets",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 24,
+      "req": {
+        "str": 56
+      },
+      "dropLevel": 24,
+      "armour": 42,
+      "look": "gloves: scaled gauntlets"
+    },
+    {
+      "id": "scale_boots",
+      "name": "Scale Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 24,
+      "req": {
+        "str": 56
+      },
+      "dropLevel": 24,
+      "armour": 52,
+      "look": "boots: scaled boots"
+    },
+    {
+      "id": "wyrm_helm",
+      "name": "Wyrm Helm",
+      "slot": "head",
+      "kind": "head",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 44,
+      "req": {
+        "str": 96
+      },
+      "dropLevel": 44,
+      "armour": 118,
+      "look": "helm: crested scale helm"
+    },
+    {
+      "id": "wyrm_hauberk",
+      "name": "Wyrm Hauberk",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "mail",
+      "levelReq": 44,
+      "req": {
+        "str": 96
+      },
+      "dropLevel": 44,
+      "armour": 206,
+      "look": "hauberk: dark scales with gold edging"
+    },
+    {
+      "id": "wyrm_gauntlets",
+      "name": "Wyrm Gauntlets",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 44,
+      "req": {
+        "str": 96
+      },
+      "dropLevel": 44,
+      "armour": 71,
+      "look": "gloves: clawed scale gauntlets"
+    },
+    {
+      "id": "wyrm_boots",
+      "name": "Wyrm Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 44,
+      "req": {
+        "str": 96
+      },
+      "dropLevel": 44,
+      "armour": 88,
+      "look": "boots: scaled greaves"
+    },
+    {
+      "id": "kettle_helm",
+      "name": "Kettle Helm",
+      "slot": "head",
+      "kind": "head",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 10,
+      "req": {
+        "str": 32
+      },
+      "dropLevel": 10,
+      "armour": 45,
+      "look": "helm: wide-brimmed iron helm"
+    },
+    {
+      "id": "great_helm",
+      "name": "Great Helm",
+      "slot": "head",
+      "kind": "head",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 17,
+      "req": {
+        "str": 46
+      },
+      "dropLevel": 17,
+      "armour": 66,
+      "look": "helm: full-face barrel helm"
+    },
+    {
+      "id": "breastplate",
+      "name": "Breastplate",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "plate",
+      "levelReq": 10,
+      "req": {
+        "str": 32
+      },
+      "dropLevel": 10,
+      "armour": 79,
+      "look": "cuirass: plain steel breastplate"
+    },
+    {
+      "id": "field_plate",
+      "name": "Field Plate",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "plate",
+      "levelReq": 17,
+      "req": {
+        "str": 46
+      },
+      "dropLevel": 17,
+      "armour": 115,
+      "look": "cuirass: full plate with pauldrons"
+    },
+    {
+      "id": "plate_gauntlets",
+      "name": "Plate Gauntlets",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 10,
+      "req": {
+        "str": 32
+      },
+      "dropLevel": 10,
+      "armour": 27,
+      "look": "gloves: articulated steel gauntlets"
+    },
+    {
+      "id": "war_gauntlets",
+      "name": "War Gauntlets",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 17,
+      "req": {
+        "str": 46
+      },
+      "dropLevel": 17,
+      "armour": 40,
+      "look": "gloves: heavy gauntlets with knuckle spikes"
+    },
+    {
+      "id": "plate_boots",
+      "name": "Plate Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 10,
+      "req": {
+        "str": 32
+      },
+      "dropLevel": 10,
+      "armour": 34,
+      "look": "boots: steel sabatons"
+    },
+    {
+      "id": "war_boots",
+      "name": "War Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 17,
+      "req": {
+        "str": 46
+      },
+      "dropLevel": 17,
+      "armour": 50,
+      "look": "boots: sabatons with greaves"
+    },
+    {
+      "id": "bastion_helm",
+      "name": "Bastion Helm",
+      "slot": "head",
+      "kind": "head",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 25,
+      "req": {
+        "str": 62
+      },
+      "dropLevel": 25,
+      "armour": 90,
+      "look": "helm: visored helm with a crest"
+    },
+    {
+      "id": "bastion_plate",
+      "name": "Bastion Plate",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "plate",
+      "levelReq": 25,
+      "req": {
+        "str": 62
+      },
+      "dropLevel": 25,
+      "armour": 158,
+      "look": "cuirass: fluted plate"
+    },
+    {
+      "id": "bastion_gauntlets",
+      "name": "Bastion Gauntlets",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 25,
+      "req": {
+        "str": 62
+      },
+      "dropLevel": 25,
+      "armour": 54,
+      "look": "gloves: fluted gauntlets"
+    },
+    {
+      "id": "bastion_boots",
+      "name": "Bastion Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 25,
+      "req": {
+        "str": 62
+      },
+      "dropLevel": 25,
+      "armour": 68,
+      "look": "boots: fluted sabatons"
+    },
+    {
+      "id": "titan_helm",
+      "name": "Titan Helm",
+      "slot": "head",
+      "kind": "head",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 45,
+      "req": {
+        "str": 102
+      },
+      "dropLevel": 45,
+      "armour": 150,
+      "look": "helm: horned great helm, gold inlay"
+    },
+    {
+      "id": "titan_plate",
+      "name": "Titan Plate",
+      "slot": "chest",
+      "kind": "chest",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "plate",
+      "levelReq": 45,
+      "req": {
+        "str": 102
+      },
+      "dropLevel": 45,
+      "armour": 263,
+      "look": "cuirass: massive dark plate, gold trim"
+    },
+    {
+      "id": "titan_gauntlets",
+      "name": "Titan Gauntlets",
+      "slot": "hands",
+      "kind": "hands",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 45,
+      "req": {
+        "str": 102
+      },
+      "dropLevel": 45,
+      "armour": 90,
+      "look": "gloves: huge gauntlets"
+    },
+    {
+      "id": "titan_boots",
+      "name": "Titan Boots",
+      "slot": "feet",
+      "kind": "feet",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "plate",
+      "levelReq": 45,
+      "req": {
+        "str": 102
+      },
+      "dropLevel": 45,
+      "armour": 113,
+      "look": "boots: thick armoured boots"
+    },
+    {
+      "id": "rope_sash",
+      "name": "Rope Sash",
+      "slot": "belt",
+      "kind": "belt",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 1 },
+      "proficiency": "cloth",
+      "levelReq": 1,
+      "req": {},
+      "dropLevel": 1,
+      "armour": 3,
+      "implicit": { "stat": "potionSlots", "units": "flat", "value": 2 },
+      "look": "belt: knotted rope"
+    },
+    {
+      "id": "leather_belt",
+      "name": "Leather Belt",
+      "slot": "belt",
+      "kind": "belt",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 1 },
+      "proficiency": "leather",
+      "levelReq": 5,
+      "req": {},
+      "dropLevel": 5,
+      "armour": 7,
+      "implicit": { "stat": "potionSlots", "units": "flat", "value": 3 },
+      "look": "belt: buckled leather belt with loops"
+    },
+    {
+      "id": "war_belt",
+      "name": "War Belt",
+      "slot": "belt",
+      "kind": "belt",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 1 },
+      "proficiency": "mail",
+      "levelReq": 12,
+      "req": {},
+      "dropLevel": 12,
+      "armour": 16,
+      "implicit": { "stat": "potionSlots", "units": "flat", "value": 4 },
+      "look": "belt: wide belt with steel plates and pouches"
+    },
+    {
+      "id": "champion_girdle",
+      "name": "Champion Girdle",
+      "slot": "belt",
+      "kind": "belt",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 1 },
+      "proficiency": "mail",
+      "levelReq": 26,
+      "req": {},
+      "dropLevel": 26,
+      "armour": 30,
+      "implicit": { "stat": "potionSlots", "units": "flat", "value": 4 },
+      "look": "belt: broad girdle with a lion buckle"
+    },
+    {
+      "id": "titan_girdle",
+      "name": "Titan Girdle",
+      "slot": "belt",
+      "kind": "belt",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 1 },
+      "proficiency": "plate",
+      "levelReq": 46,
+      "req": {},
+      "dropLevel": 46,
+      "armour": 61,
+      "implicit": { "stat": "potionSlots", "units": "flat", "value": 5 },
+      "look": "belt: heavy plated girdle, gold clasp"
+    },
+    {
+      "id": "buckler",
+      "name": "Buckler",
+      "slot": "offhand",
+      "kind": "shield",
+      "class": "shield",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "leather",
+      "levelReq": 1,
+      "req": {
+        "str": 10
+      },
+      "dropLevel": 1,
+      "armour": 5,
+      "block": {
+        "chance": 15,
+        "amount": 5
+      },
+      "look": "shield: small round buckler"
+    },
+    {
+      "id": "round_shield",
+      "name": "Round Shield",
+      "slot": "offhand",
+      "kind": "shield",
+      "class": "shield",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 2 },
+      "proficiency": "mail",
+      "levelReq": 3,
+      "req": {
+        "str": 15
+      },
+      "dropLevel": 3,
+      "armour": 10,
+      "block": {
+        "chance": 20,
+        "amount": 10
+      },
+      "look": "shield: painted round wooden shield"
+    },
+    {
+      "id": "kite_shield",
+      "name": "Kite Shield",
+      "slot": "offhand",
+      "kind": "shield",
+      "class": "shield",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "mail",
+      "levelReq": 8,
+      "req": {
+        "str": 26
+      },
+      "dropLevel": 8,
+      "armour": 16,
+      "block": {
+        "chance": 24,
+        "amount": 24
+      },
+      "look": "shield: tall kite shield"
+    },
+    {
+      "id": "tower_shield",
+      "name": "Tower Shield",
+      "slot": "offhand",
+      "kind": "shield",
+      "class": "shield",
+      "tier": "plain",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "plate",
+      "levelReq": 15,
+      "req": {
+        "str": 47
+      },
+      "dropLevel": 15,
+      "armour": 30,
+      "block": {
+        "chance": 30,
+        "amount": 49
+      },
+      "look": "shield: rectangular tower shield"
+    },
+    {
+      "id": "heater_shield",
+      "name": "Heater Shield",
+      "slot": "offhand",
+      "kind": "shield",
+      "class": "shield",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "mail",
+      "levelReq": 24,
+      "req": {
+        "str": 61
+      },
+      "dropLevel": 24,
+      "armour": 35,
+      "block": {
+        "chance": 24,
+        "amount": 59
+      },
+      "look": "shield: heater shape, heraldic paint"
+    },
+    {
+      "id": "pavise",
+      "name": "Pavise",
+      "slot": "offhand",
+      "kind": "shield",
+      "class": "shield",
+      "tier": "fine",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "plate",
+      "levelReq": 30,
+      "req": {
+        "str": 80
+      },
+      "dropLevel": 30,
+      "armour": 53,
+      "block": {
+        "chance": 32,
+        "amount": 94
+      },
+      "look": "shield: huge pavise with a prop"
+    },
+    {
+      "id": "aegis_shield",
+      "name": "Aegis Shield",
+      "slot": "offhand",
+      "kind": "shield",
+      "class": "shield",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "mail",
+      "levelReq": 44,
+      "req": {
+        "str": 105
+      },
+      "dropLevel": 44,
+      "armour": 59,
+      "block": {
+        "chance": 26,
+        "amount": 113
+      },
+      "look": "shield: gold-rimmed with a glowing boss"
+    },
+    {
+      "id": "rampart_shield",
+      "name": "Rampart Shield",
+      "slot": "offhand",
+      "kind": "shield",
+      "class": "shield",
+      "tier": "masterwork",
+      "grid": { "w": 2, "h": 3 },
+      "proficiency": "plate",
+      "levelReq": 50,
+      "req": {
+        "str": 124
+      },
+      "dropLevel": 50,
+      "armour": 83,
+      "block": {
+        "chance": 34,
+        "amount": 157
+      },
+      "look": "shield: wall-like, iron-studded"
+    },
+    {
+      "id": "charm_bundle",
+      "name": "Charm Bundle",
+      "slot": "offhand",
+      "kind": "focus",
+      "class": "focus",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "focus",
+      "levelReq": 1,
+      "req": {
+        "int": 10
+      },
+      "dropLevel": 1,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 2 },
+      "implicit2": { "stat": "manaRegen", "units": "flat", "value": 1 },
+      "look": "focus: bundle of charms on a cord"
+    },
+    {
+      "id": "bound_tome",
+      "name": "Bound Tome",
+      "slot": "offhand",
+      "kind": "focus",
+      "class": "focus",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "focus",
+      "levelReq": 4,
+      "req": {
+        "int": 16
+      },
+      "dropLevel": 4,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 5 },
+      "implicit2": { "stat": "mana", "units": "flat", "value": 10 },
+      "look": "focus: small leather book"
+    },
+    {
+      "id": "glass_orb",
+      "name": "Glass Orb",
+      "slot": "offhand",
+      "kind": "focus",
+      "class": "focus",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "focus",
+      "levelReq": 9,
+      "req": {
+        "int": 26
+      },
+      "dropLevel": 9,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 9 },
+      "implicit2": { "stat": "castSpeed", "units": "pct", "value": 4 },
+      "look": "focus: glass sphere in a claw mount"
+    },
+    {
+      "id": "saint_idol",
+      "name": "Saint Idol",
+      "slot": "offhand",
+      "kind": "focus",
+      "class": "focus",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "focus",
+      "levelReq": 14,
+      "req": {
+        "int": 36
+      },
+      "dropLevel": 14,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 13 },
+      "implicit2": { "stat": "healingPower", "units": "pct", "value": 6 },
+      "look": "focus: small carved saint"
+    },
+    {
+      "id": "star_glass",
+      "name": "Star Glass",
+      "slot": "offhand",
+      "kind": "focus",
+      "class": "focus",
+      "tier": "fine",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "focus",
+      "levelReq": 25,
+      "req": {
+        "int": 58
+      },
+      "dropLevel": 25,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 22 },
+      "implicit2": { "stat": "castSpeed", "units": "pct", "value": 6 },
+      "look": "focus: lens with a star etched in it"
+    },
+    {
+      "id": "reliquary",
+      "name": "Reliquary",
+      "slot": "offhand",
+      "kind": "focus",
+      "class": "focus",
+      "tier": "fine",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "focus",
+      "levelReq": 30,
+      "req": {
+        "int": 68
+      },
+      "dropLevel": 30,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 27 },
+      "implicit2": { "stat": "healingPower", "units": "pct", "value": 9 },
+      "look": "focus: gold box with a window"
+    },
+    {
+      "id": "void_lens",
+      "name": "Void Lens",
+      "slot": "offhand",
+      "kind": "focus",
+      "class": "focus",
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "focus",
+      "levelReq": 44,
+      "req": {
+        "int": 96
+      },
+      "dropLevel": 44,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 39 },
+      "implicit2": { "stat": "castSpeed", "units": "pct", "value": 8 },
+      "look": "focus: black disc with a white rim"
+    },
+    {
+      "id": "seraph_idol",
+      "name": "Seraph Idol",
+      "slot": "offhand",
+      "kind": "focus",
+      "class": "focus",
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 2 },
+      "proficiency": "focus",
+      "levelReq": 50,
+      "req": {
+        "int": 108
+      },
+      "dropLevel": 50,
+      "implicit": { "stat": "spellPower", "units": "flat", "value": 43 },
+      "implicit2": { "stat": "healingPower", "units": "pct", "value": 12 },
+      "look": "focus: winged figure, warm glow"
+    },
+    {
+      "id": "hip_quiver",
+      "name": "Hip Quiver",
+      "slot": "offhand",
+      "kind": "quiver",
+      "class": "quiver",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "quiver",
+      "levelReq": 1,
+      "req": {
+        "agi": 10
+      },
+      "dropLevel": 1,
+      "pairsWith": ["bow", "crossbow"],
+      "implicit": { "stat": "attackSpeed", "units": "pct", "value": 5 },
+      "look": "quiver: small leather quiver at the hip"
+    },
+    {
+      "id": "back_quiver",
+      "name": "Back Quiver",
+      "slot": "offhand",
+      "kind": "quiver",
+      "class": "quiver",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "quiver",
+      "levelReq": 10,
+      "req": {
+        "agi": 28
+      },
+      "dropLevel": 10,
+      "pairsWith": ["bow", "crossbow"],
+      "implicit": { "stat": "attackSpeed", "units": "pct", "value": 8 },
+      "look": "quiver: tall quiver on the back"
+    },
+    {
+      "id": "horn_quiver",
+      "name": "Horn Quiver",
+      "slot": "offhand",
+      "kind": "quiver",
+      "class": "quiver",
+      "tier": "fine",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "quiver",
+      "levelReq": 26,
+      "req": {
+        "agi": 60
+      },
+      "dropLevel": 26,
+      "pairsWith": ["bow", "crossbow"],
+      "implicit": { "stat": "attackSpeed", "units": "pct", "value": 10 },
+      "look": "quiver: horn-tipped quiver"
+    },
+    {
+      "id": "storm_quiver",
+      "name": "Storm Quiver",
+      "slot": "offhand",
+      "kind": "quiver",
+      "class": "quiver",
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 3 },
+      "proficiency": "quiver",
+      "levelReq": 46,
+      "req": {
+        "agi": 100
+      },
+      "dropLevel": 46,
+      "pairsWith": ["bow", "crossbow"],
+      "implicit": { "stat": "attackSpeed", "units": "pct", "value": 12 },
+      "look": "quiver: bone quiver, blue-fletched arrows"
+    },
+    {
+      "id": "copper_ring",
+      "name": "Copper Ring",
+      "slot": "ring",
+      "kind": "ring",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 1 },
+      "proficiency": "any",
+      "levelReq": 1,
+      "req": {},
+      "dropLevel": 1,
+      "look": "ring: plain copper band"
+    },
+    {
+      "id": "silver_ring",
+      "name": "Silver Ring",
+      "slot": "ring",
+      "kind": "ring",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 1 },
+      "proficiency": "any",
+      "levelReq": 8,
+      "req": {},
+      "dropLevel": 8,
+      "look": "ring: silver band with a small stone"
+    },
+    {
+      "id": "gold_signet",
+      "name": "Gold Signet",
+      "slot": "ring",
+      "kind": "ring",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 1 },
+      "proficiency": "any",
+      "levelReq": 16,
+      "req": {},
+      "dropLevel": 16,
+      "look": "ring: gold signet"
+    },
+    {
+      "id": "opal_ring",
+      "name": "Opal Ring",
+      "slot": "ring",
+      "kind": "ring",
+      "tier": "fine",
+      "grid": { "w": 1, "h": 1 },
+      "proficiency": "any",
+      "levelReq": 28,
+      "req": {},
+      "dropLevel": 28,
+      "look": "ring: opal in a twisted setting"
+    },
+    {
+      "id": "star_ring",
+      "name": "Star Ring",
+      "slot": "ring",
+      "kind": "ring",
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 1 },
+      "proficiency": "any",
+      "levelReq": 48,
+      "req": {},
+      "dropLevel": 48,
+      "look": "ring: a ring with a tiny orbiting light"
+    },
+    {
+      "id": "bead_necklace",
+      "name": "Bead Necklace",
+      "slot": "neck",
+      "kind": "neck",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 1 },
+      "proficiency": "any",
+      "levelReq": 1,
+      "req": {},
+      "dropLevel": 1,
+      "look": "amulet: wooden beads"
+    },
+    {
+      "id": "silver_amulet",
+      "name": "Silver Amulet",
+      "slot": "neck",
+      "kind": "neck",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 1 },
+      "proficiency": "any",
+      "levelReq": 8,
+      "req": {},
+      "dropLevel": 8,
+      "look": "amulet: silver disc on a chain"
+    },
+    {
+      "id": "jade_pendant",
+      "name": "Jade Pendant",
+      "slot": "neck",
+      "kind": "neck",
+      "tier": "plain",
+      "grid": { "w": 1, "h": 1 },
+      "proficiency": "any",
+      "levelReq": 16,
+      "req": {},
+      "dropLevel": 16,
+      "look": "amulet: jade teardrop"
+    },
+    {
+      "id": "sun_amulet",
+      "name": "Sun Amulet",
+      "slot": "neck",
+      "kind": "neck",
+      "tier": "fine",
+      "grid": { "w": 1, "h": 1 },
+      "proficiency": "any",
+      "levelReq": 28,
+      "req": {},
+      "dropLevel": 28,
+      "look": "amulet: gold sunburst"
+    },
+    {
+      "id": "eclipse_amulet",
+      "name": "Eclipse Amulet",
+      "slot": "neck",
+      "kind": "neck",
+      "tier": "masterwork",
+      "grid": { "w": 1, "h": 1 },
+      "proficiency": "any",
+      "levelReq": 48,
+      "req": {},
+      "dropLevel": 48,
+      "look": "amulet: black disc ringed with light"
+    }
+  ]
+}

@@ -1,0 +1,1068 @@
+{
+  "_doc": "Rogueloot affixes. prefixes = power (damage, armour, health, speed); suffixes = utility (attributes, resists, regen, finds). An item holds at most 3 prefixes and 3 suffixes, and only ONE affix per `group` (so an item cannot roll two different flat elemental damages, but can roll +fire% AND +fire flat since those are different groups). UNITS: `units: \"flat\"` is a plain number added to the stat. `units: \"pct\"` is WHOLE PERCENTAGE POINTS: 12 means +12%. There are NO fractions anywhere in this file. The sheet converts once, in one function (pct -> x/100). Past games shipped two readers disagreeing on 0.02 vs 2 — do not add a third. TIERS count UP with power: tier 1 is the weakest and is open from item level 1; `ilvlMin` says the lowest ITEM LEVEL (not character level) that can roll that tier. The ladder is [1,8,15,23,32,42,52,62] which puts tiers 1-3 in Act 1 Normal (ilvl <= 22), 4-5 in Veteran / Act 2, 6-7 in Legend / Act 3, and tier 8 only at the very top (ilvl 62+, boss drops in Legend at area level 60). `min`/`max` is the roll range inside the tier. TIER PICK: eligible tiers are those with ilvlMin <= ilvl. Each eligible tier's pick weight = `weight` * fade, where fade = 1 when (ilvl - ilvlMin) <= 10, else max(0.2, 1 - (ilvl - ilvlMin - 10) / 30). Base weights fall with the tier ([100,80,62,48,36,26,17,10]) so the newest tier is never the most likely one, but old tiers fade so an ilvl-40 item is not full of tier-1 rolls. Worked example at ilvl 20: tier 1 (gap 19) 100*0.7 = 70, tier 2 (gap 12) 80*0.93 = 74.7, tier 3 (gap 5) 62*1 = 62 -> 34% / 36% / 30%. AFFIX PICK: among affixes whose `kinds` include the item's kind (weapons use their kind id, armour uses the slot, shield/focus/quiver use that word, rings \"ring\", amulets \"neck\") and whose `proficiency` list (if any) includes the base's proficiency, excluding groups already on the item, pick uniformly by affix (then a tier by the rule above). Prefix or suffix is chosen first: an item with room on both sides picks prefix 50/50. COUNT per rarity (rarity.json `affixCount` holds the same numbers): magic 1-2 (one prefix and/or one suffix, 60% one, 40% two), rare 3-6 where the share of 5s and 6s grows with ilvl, legendary = 3-5 affixes rolled like a rare PLUS one legendary power (legendaries.json), unique = fixed (uniques.json). LEVEL REQUIREMENT of a finished item: max(base.levelReq, ceil(0.8 * highest ilvlMin among its affix tiers)). A tier-3 roll (ilvlMin 15) on a level-1 ring makes it a level-12 ring. DAMAGE ORDER on a weapon hit: (base min..max + physDamageFlat [x1.5 on two-handers] + attackPower/14) * (1 + physDamagePct/100) -> plus each elemental flat * (1 + thatElementPct/100) -> crit -> target armour / resist. SMART ROLL (personal loot only): when the roll is for a specific player, affixes useless to their Path are given weight 0.25 instead of being removed (mana on a Fighter, attack speed on a Mage): drops stay surprising, mostly useful.",
+  "tierLadder": {
+    "ilvlMin": [1, 8, 15, 23, 32, 42, 52, 62],
+    "weight": [100, 80, 62, 48, 36, 26, 17, 10],
+    "fade": "gap = ilvl - ilvlMin; gap <= 10 ? 1 : max(0.2, 1 - (gap - 10) / 30)"
+  },
+  "maxPerItem": {
+    "prefixes": 3,
+    "suffixes": 3
+  },
+  "affixCount": {
+    "magic": {
+      "one": 60,
+      "two": 40
+    },
+    "rare": {
+      "_doc": "weights for 3/4/5/6 affixes by ilvl band (whole percent)",
+      "bands": [
+        {
+          "ilvlMin": 1,
+          "w": [60, 30, 9, 1]
+        },
+        {
+          "ilvlMin": 10,
+          "w": [40, 35, 18, 7]
+        },
+        {
+          "ilvlMin": 30,
+          "w": [30, 33, 24, 13]
+        },
+        {
+          "ilvlMin": 50,
+          "w": [22, 32, 28, 18]
+        }
+      ]
+    },
+    "legendary": {
+      "_doc": "affixes rolled like a rare, then capped at 5 (the power takes a slot), plus one power",
+      "bands": [
+        {
+          "ilvlMin": 1,
+          "w": [60, 30, 10, 0]
+        },
+        {
+          "ilvlMin": 30,
+          "w": [40, 35, 25, 0]
+        }
+      ]
+    }
+  },
+  "smartRoll": {
+    "uselessWeight": 0.25
+  },
+  "prefixes": [
+    {
+      "id": "honed",
+      "name": "Honed",
+      "stat": "physDamageFlat",
+      "units": "flat",
+      "kinds": ["dagger", "sword", "axe", "mace", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow"],
+      "group": "physFlat",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 2, "max": 4, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 3, "max": 7, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 5, "max": 11, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 8, "max": 16, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 12, "max": 24, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 18, "max": 34, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 26, "max": 48, "weight": 10 }
+      ],
+      "desc": "+X physical damage per hit (added to min and max). The two-handed bonus: a 2h weapon multiplies this by 1.5 (code: kinds[kind].hands === 2)."
+    },
+    {
+      "id": "brutal",
+      "name": "Brutal",
+      "stat": "physDamagePct",
+      "units": "pct",
+      "kinds": ["dagger", "sword", "axe", "mace", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow"],
+      "group": "physPct",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 8, "max": 15, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 16, "max": 25, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 26, "max": 38, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 39, "max": 52, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 53, "max": 68, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 69, "max": 85, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 86, "max": 105, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 106, "max": 130, "weight": 10 }
+      ],
+      "desc": "+X% physical weapon damage (applied after flat added damage)."
+    },
+    {
+      "id": "searing",
+      "name": "Searing",
+      "stat": "fireDamageFlat",
+      "units": "flat",
+      "kinds": ["dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand"],
+      "group": "elemFlat",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 3, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 2, "max": 6, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 4, "max": 10, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 6, "max": 15, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 9, "max": 22, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 13, "max": 31, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 19, "max": 43, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 27, "max": 60, "weight": 10 }
+      ],
+      "desc": "+X fire damage per hit. One elemental flat affix per weapon (group elemFlat)."
+    },
+    {
+      "id": "rimed",
+      "name": "Rimed",
+      "stat": "frostDamageFlat",
+      "units": "flat",
+      "kinds": ["dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand"],
+      "group": "elemFlat",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 3, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 2, "max": 6, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 4, "max": 10, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 6, "max": 15, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 9, "max": 22, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 13, "max": 31, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 19, "max": 43, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 27, "max": 60, "weight": 10 }
+      ],
+      "desc": "+X frost damage per hit; frost hits slow 15% for 2 s."
+    },
+    {
+      "id": "crackling",
+      "name": "Crackling",
+      "stat": "stormDamageFlat",
+      "units": "flat",
+      "kinds": ["dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand"],
+      "group": "elemFlat",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 5, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 1, "max": 9, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 2, "max": 15, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 3, "max": 23, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 5, "max": 33, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 7, "max": 46, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 10, "max": 64, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 14, "max": 90, "weight": 10 }
+      ],
+      "desc": "+X storm damage per hit (wide range, low floor: storm is swingy)."
+    },
+    {
+      "id": "venomed",
+      "name": "Venomed",
+      "stat": "poisonDamageOverTime",
+      "units": "flat",
+      "kinds": ["dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand"],
+      "group": "elemFlat",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 3, "max": 6, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 6, "max": 12, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 10, "max": 20, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 16, "max": 30, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 24, "max": 44, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 34, "max": 62, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 48, "max": 86, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 66, "max": 120, "weight": 10 }
+      ],
+      "desc": "+X poison damage over 4 seconds per hit (total, dealt in 1 s ticks, stacks refresh)."
+    },
+    {
+      "id": "duskbitten",
+      "name": "Duskbitten",
+      "stat": "shadowDamageFlat",
+      "units": "flat",
+      "kinds": ["dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand"],
+      "group": "elemFlat",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 3, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 2, "max": 6, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 4, "max": 10, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 6, "max": 15, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 9, "max": 22, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 13, "max": 31, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 19, "max": 43, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 27, "max": 60, "weight": 10 }
+      ],
+      "desc": "+X shadow damage per hit."
+    },
+    {
+      "id": "vicious",
+      "name": "Vicious",
+      "stat": "attackPower",
+      "units": "flat",
+      "kinds": ["dagger", "sword", "axe", "mace", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "ring", "neck", "hands", "belt"],
+      "group": "attackPower",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 2, "max": 4, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 5, "max": 9, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 10, "max": 16, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 17, "max": 25, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 26, "max": 38, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 39, "max": 54, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 55, "max": 75, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 76, "max": 100, "weight": 10 }
+      ],
+      "desc": "+X attack power (14 attack power = +1 weapon damage per hit; the sheet does that once)."
+    },
+    {
+      "id": "attuned",
+      "name": "Attuned",
+      "stat": "spellPower",
+      "units": "flat",
+      "kinds": ["wand", "staff", "sceptre", "focus", "ring", "neck", "head", "hands"],
+      "group": "spellPower",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 2, "max": 4, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 5, "max": 9, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 10, "max": 16, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 17, "max": 25, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 26, "max": 38, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 39, "max": 54, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 55, "max": 75, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 76, "max": 100, "weight": 10 }
+      ],
+      "desc": "+X spell power (added to the spell's base damage/heal before % modifiers)."
+    },
+    {
+      "id": "blazing",
+      "name": "Blazing",
+      "stat": "fireDamagePct",
+      "units": "pct",
+      "kinds": ["wand", "staff", "sceptre", "focus", "neck", "ring"],
+      "group": "elemPct",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 5, "max": 9, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 10, "max": 14, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 15, "max": 20, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 21, "max": 27, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 28, "max": 35, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 36, "max": 44, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 45, "max": 54, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 55, "max": 65, "weight": 10 }
+      ],
+      "desc": "+X% fire damage (spells and weapon fire). One elemental % affix per item (group elemPct)."
+    },
+    {
+      "id": "glacial",
+      "name": "Glacial",
+      "stat": "frostDamagePct",
+      "units": "pct",
+      "kinds": ["wand", "staff", "sceptre", "focus", "neck", "ring"],
+      "group": "elemPct",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 5, "max": 9, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 10, "max": 14, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 15, "max": 20, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 21, "max": 27, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 28, "max": 35, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 36, "max": 44, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 45, "max": 54, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 55, "max": 65, "weight": 10 }
+      ],
+      "desc": "+X% frost damage."
+    },
+    {
+      "id": "thundering",
+      "name": "Thundering",
+      "stat": "stormDamagePct",
+      "units": "pct",
+      "kinds": ["wand", "staff", "sceptre", "focus", "neck", "ring"],
+      "group": "elemPct",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 5, "max": 9, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 10, "max": 14, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 15, "max": 20, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 21, "max": 27, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 28, "max": 35, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 36, "max": 44, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 45, "max": 54, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 55, "max": 65, "weight": 10 }
+      ],
+      "desc": "+X% storm damage."
+    },
+    {
+      "id": "festering",
+      "name": "Festering",
+      "stat": "poisonDamagePct",
+      "units": "pct",
+      "kinds": ["wand", "staff", "sceptre", "focus", "neck", "ring"],
+      "group": "elemPct",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 5, "max": 9, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 10, "max": 14, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 15, "max": 20, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 21, "max": 27, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 28, "max": 35, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 36, "max": 44, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 45, "max": 54, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 55, "max": 65, "weight": 10 }
+      ],
+      "desc": "+X% poison damage."
+    },
+    {
+      "id": "gloaming",
+      "name": "Gloaming",
+      "stat": "shadowDamagePct",
+      "units": "pct",
+      "kinds": ["wand", "staff", "sceptre", "focus", "neck", "ring"],
+      "group": "elemPct",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 5, "max": 9, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 10, "max": 14, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 15, "max": 20, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 21, "max": 27, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 28, "max": 35, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 36, "max": 44, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 45, "max": 54, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 55, "max": 65, "weight": 10 }
+      ],
+      "desc": "+X% shadow damage."
+    },
+    {
+      "id": "mending",
+      "name": "Mending",
+      "stat": "healingPower",
+      "units": "pct",
+      "kinds": ["wand", "staff", "sceptre", "focus", "neck", "ring", "chest"],
+      "group": "healingPct",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 4, "max": 7, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 8, "max": 11, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 12, "max": 16, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 17, "max": 22, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 23, "max": 28, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 29, "max": 35, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 36, "max": 42, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 43, "max": 50, "weight": 10 }
+      ],
+      "desc": "+X% healing done."
+    },
+    {
+      "id": "keen",
+      "name": "Keen",
+      "stat": "critChance",
+      "units": "pct",
+      "kinds": ["dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand", "ring", "neck", "hands", "quiver"],
+      "group": "critChance",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 2, "max": 3, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 3, "max": 4, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 4, "max": 5, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 5, "max": 6, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 6, "max": 7, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 7, "max": 8, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 8, "max": 10, "weight": 10 }
+      ],
+      "desc": "+X% critical strike chance (additive to the sheet; base crit 5%, soft cap 50%)."
+    },
+    {
+      "id": "quick",
+      "name": "Quick",
+      "stat": "attackSpeed",
+      "units": "pct",
+      "kinds": ["dagger", "sword", "axe", "mace", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "hands", "quiver", "ring"],
+      "group": "attackSpeed",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 3, "max": 5, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 6, "max": 8, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 9, "max": 11, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 12, "max": 14, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 15, "max": 17, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 18, "max": 20, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 21, "max": 24, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 25, "max": 28, "weight": 10 }
+      ],
+      "desc": "+X% attack speed (multiplies attacks per second; cap +60% total)."
+    },
+    {
+      "id": "fluent",
+      "name": "Fluent",
+      "stat": "castSpeed",
+      "units": "pct",
+      "kinds": ["wand", "staff", "sceptre", "focus", "hands", "neck", "ring"],
+      "group": "castSpeed",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 3, "max": 5, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 6, "max": 8, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 9, "max": 11, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 12, "max": 14, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 15, "max": 17, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 18, "max": 20, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 21, "max": 24, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 25, "max": 28, "weight": 10 }
+      ],
+      "desc": "+X% cast speed (shortens cast bars; does not shorten the 1.5 s global cooldown below 1.0 s)."
+    },
+    {
+      "id": "sturdy",
+      "name": "Sturdy",
+      "stat": "armourFlat",
+      "units": "flat",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield"],
+      "group": "armourFlat",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 3, "max": 6, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 7, "max": 14, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 15, "max": 26, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 27, "max": 44, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 45, "max": 70, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 71, "max": 105, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 106, "max": 150, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 151, "max": 210, "weight": 10 }
+      ],
+      "desc": "+X armour (flat, added before armourPct)."
+    },
+    {
+      "id": "reinforced",
+      "name": "Reinforced",
+      "stat": "armourPct",
+      "units": "pct",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield"],
+      "group": "armourPct",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 10, "max": 18, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 19, "max": 28, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 29, "max": 40, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 41, "max": 54, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 55, "max": 70, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 71, "max": 88, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 89, "max": 108, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 109, "max": 130, "weight": 10 }
+      ],
+      "desc": "+X% armour of this item (the base armour plus its flat affix)."
+    },
+    {
+      "id": "stout",
+      "name": "Stout",
+      "stat": "health",
+      "units": "flat",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "neck", "ring"],
+      "group": "health",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 5, "max": 10, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 11, "max": 20, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 21, "max": 34, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 35, "max": 52, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 53, "max": 76, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 77, "max": 108, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 109, "max": 150, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 151, "max": 200, "weight": 10 }
+      ],
+      "desc": "+X maximum health. (Level-1 health is ~100; +10 is a tenth of a life.)"
+    },
+    {
+      "id": "clear",
+      "name": "Clear",
+      "stat": "mana",
+      "units": "flat",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "neck", "ring", "wand", "staff", "sceptre", "focus"],
+      "group": "mana",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 5, "max": 10, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 11, "max": 20, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 21, "max": 34, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 35, "max": 52, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 53, "max": 76, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 77, "max": 108, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 109, "max": 150, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 151, "max": 200, "weight": 10 }
+      ],
+      "desc": "+X maximum mana (Mage/Healer resource). On a rage/energy character this affix is still legal but useless — the rarity roller skips it when the dropper is a personal-loot roll for a non-mana player (rarity.json `smartLoot`)."
+    },
+    {
+      "id": "bracing",
+      "name": "Bracing",
+      "stat": "blockChance",
+      "units": "pct",
+      "kinds": ["shield"],
+      "group": "blockChance",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 3, "max": 4, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 5, "max": 6, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 7, "max": 8, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 9, "max": 10, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 11, "max": 12, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 13, "max": 14, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 15, "max": 16, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 17, "max": 18, "weight": 10 }
+      ],
+      "desc": "+X% block chance (additive with the shield's own; cap 75%)."
+    },
+    {
+      "id": "bulwark",
+      "name": "Bulwark",
+      "stat": "blockAmount",
+      "units": "pct",
+      "kinds": ["shield"],
+      "group": "blockAmount",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 10, "max": 18, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 19, "max": 28, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 29, "max": 40, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 41, "max": 54, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 55, "max": 70, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 71, "max": 88, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 89, "max": 108, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 109, "max": 130, "weight": 10 }
+      ],
+      "desc": "+X% block amount of this shield."
+    }
+  ],
+  "suffixes": [
+    {
+      "id": "of_strength",
+      "name": "of Strength",
+      "stat": "str",
+      "units": "flat",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck", "dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand"],
+      "group": "attrStr",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 3, "max": 4, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 5, "max": 7, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 8, "max": 10, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 11, "max": 14, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 15, "max": 18, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 19, "max": 23, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 24, "max": 30, "weight": 10 }
+      ],
+      "desc": "+X Strength (each point: +1 attack power with str weapons, +0.5 armour)."
+    },
+    {
+      "id": "of_agility",
+      "name": "of Agility",
+      "stat": "agi",
+      "units": "flat",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck", "dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand"],
+      "group": "attrAgi",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 3, "max": 4, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 5, "max": 7, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 8, "max": 10, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 11, "max": 14, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 15, "max": 18, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 19, "max": 23, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 24, "max": 30, "weight": 10 }
+      ],
+      "desc": "+X Agility (+1 attack power with agi weapons, +0.05% dodge, +0.04% crit)."
+    },
+    {
+      "id": "of_intellect",
+      "name": "of Intellect",
+      "stat": "int",
+      "units": "flat",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck", "dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand"],
+      "group": "attrInt",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 3, "max": 4, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 5, "max": 7, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 8, "max": 10, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 11, "max": 14, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 15, "max": 18, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 19, "max": 23, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 24, "max": 30, "weight": 10 }
+      ],
+      "desc": "+X Intellect (+1 spell power, +5 mana)."
+    },
+    {
+      "id": "of_vitality",
+      "name": "of Vitality",
+      "stat": "vit",
+      "units": "flat",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck", "dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand"],
+      "group": "attrVit",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 3, "max": 4, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 5, "max": 7, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 8, "max": 10, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 11, "max": 14, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 15, "max": 18, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 19, "max": 23, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 24, "max": 30, "weight": 10 }
+      ],
+      "desc": "+X Vitality (+8 health each)."
+    },
+    {
+      "id": "of_spirit",
+      "name": "of Spirit",
+      "stat": "spi",
+      "units": "flat",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck", "dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand"],
+      "group": "attrSpi",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 3, "max": 4, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 5, "max": 7, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 8, "max": 10, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 11, "max": 14, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 15, "max": 18, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 19, "max": 23, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 24, "max": 30, "weight": 10 }
+      ],
+      "desc": "+X Spirit (+0.5 healing power, +0.3 mana regen per 5 s, +0.1 health regen per 5 s)."
+    },
+    {
+      "id": "of_cinders",
+      "name": "of Cinders",
+      "stat": "fireResist",
+      "units": "pct",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck"],
+      "group": "resFire",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 4, "max": 7, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 8, "max": 11, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 12, "max": 15, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 16, "max": 19, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 20, "max": 23, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 24, "max": 27, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 28, "max": 31, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 32, "max": 36, "weight": 10 }
+      ],
+      "desc": "+X% fire resistance (cap 75%, ruling 41)."
+    },
+    {
+      "id": "of_rime",
+      "name": "of Rime",
+      "stat": "frostResist",
+      "units": "pct",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck"],
+      "group": "resFrost",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 4, "max": 7, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 8, "max": 11, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 12, "max": 15, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 16, "max": 19, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 20, "max": 23, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 24, "max": 27, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 28, "max": 31, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 32, "max": 36, "weight": 10 }
+      ],
+      "desc": "+X% frost resistance."
+    },
+    {
+      "id": "of_the_gale",
+      "name": "of the Gale",
+      "stat": "stormResist",
+      "units": "pct",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck"],
+      "group": "resStorm",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 4, "max": 7, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 8, "max": 11, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 12, "max": 15, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 16, "max": 19, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 20, "max": 23, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 24, "max": 27, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 28, "max": 31, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 32, "max": 36, "weight": 10 }
+      ],
+      "desc": "+X% storm resistance."
+    },
+    {
+      "id": "of_the_adder",
+      "name": "of the Adder",
+      "stat": "poisonResist",
+      "units": "pct",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck"],
+      "group": "resPoison",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 4, "max": 7, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 8, "max": 11, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 12, "max": 15, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 16, "max": 19, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 20, "max": 23, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 24, "max": 27, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 28, "max": 31, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 32, "max": 36, "weight": 10 }
+      ],
+      "desc": "+X% poison resistance."
+    },
+    {
+      "id": "of_lanterns",
+      "name": "of Lanterns",
+      "stat": "shadowResist",
+      "units": "pct",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck"],
+      "group": "resShadow",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 4, "max": 7, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 8, "max": 11, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 12, "max": 15, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 16, "max": 19, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 20, "max": 23, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 24, "max": 27, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 28, "max": 31, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 32, "max": 36, "weight": 10 }
+      ],
+      "desc": "+X% shadow resistance."
+    },
+    {
+      "id": "of_warding",
+      "name": "of Warding",
+      "stat": "allResist",
+      "units": "pct",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck"],
+      "group": "resAll",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 2, "max": 3, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 4, "max": 5, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 6, "max": 7, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 8, "max": 9, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 10, "max": 11, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 12, "max": 13, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 14, "max": 15, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 16, "max": 18, "weight": 10 }
+      ],
+      "desc": "+X% to all five resistances (its own group, so it stacks with one single resist of each element)."
+    },
+    {
+      "id": "of_the_oak",
+      "name": "of the Oak",
+      "stat": "healthRegen",
+      "units": "flat",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck"],
+      "group": "healthRegen",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 3, "max": 4, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 5, "max": 7, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 8, "max": 11, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 12, "max": 16, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 17, "max": 22, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 23, "max": 30, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 31, "max": 40, "weight": 10 }
+      ],
+      "desc": "+X health per 5 seconds (always on; natural regen is slow per ruling 23 so this is a real stat)."
+    },
+    {
+      "id": "of_the_spring",
+      "name": "of the Spring",
+      "stat": "manaRegen",
+      "units": "flat",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck", "wand", "staff", "sceptre", "focus"],
+      "group": "manaRegen",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 3, "max": 4, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 5, "max": 7, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 8, "max": 11, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 12, "max": 16, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 17, "max": 22, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 23, "max": 30, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 31, "max": 40, "weight": 10 }
+      ],
+      "desc": "+X mana per 5 seconds."
+    },
+    {
+      "id": "of_the_leech",
+      "name": "of the Leech",
+      "stat": "lifeOnHit",
+      "units": "flat",
+      "kinds": ["dagger", "sword", "axe", "mace", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "ring", "hands"],
+      "group": "lifeOnHit",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 2, "max": 3, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 3, "max": 5, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 5, "max": 8, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 8, "max": 12, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 12, "max": 17, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 17, "max": 24, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 24, "max": 32, "weight": 10 }
+      ],
+      "desc": "+X health per weapon hit (melee and ranged auto-attacks and weapon skills, not spells)."
+    },
+    {
+      "id": "of_the_well",
+      "name": "of the Well",
+      "stat": "manaOnKill",
+      "units": "flat",
+      "kinds": ["wand", "staff", "sceptre", "focus", "ring", "neck"],
+      "group": "manaOnKill",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 2, "max": 3, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 4, "max": 6, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 7, "max": 10, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 11, "max": 15, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 16, "max": 22, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 23, "max": 30, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 31, "max": 40, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 41, "max": 52, "weight": 10 }
+      ],
+      "desc": "+X mana when you kill an enemy."
+    },
+    {
+      "id": "of_the_fox",
+      "name": "of the Fox",
+      "stat": "dodge",
+      "units": "pct",
+      "kinds": ["feet", "hands", "head", "chest", "ring"],
+      "group": "dodge",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 2, "max": 3, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 3, "max": 4, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 4, "max": 5, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 5, "max": 6, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 6, "max": 7, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 7, "max": 8, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 8, "max": 10, "weight": 10 }
+      ],
+      "desc": "+X% dodge (cloth and leather only: the roller skips it on mail/plate; cap 40%).",
+      "proficiency": ["cloth", "leather", "any"]
+    },
+    {
+      "id": "of_the_hare",
+      "name": "of the Hare",
+      "stat": "moveSpeed",
+      "units": "pct",
+      "kinds": ["feet"],
+      "group": "moveSpeed",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 4, "max": 6, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 7, "max": 9, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 10, "max": 12, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 13, "max": 15, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 16, "max": 18, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 19, "max": 21, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 22, "max": 24, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 25, "max": 28, "weight": 10 }
+      ],
+      "desc": "+X% movement speed (feet only; cap +40%)."
+    },
+    {
+      "id": "of_precision",
+      "name": "of Precision",
+      "stat": "hitChance",
+      "units": "pct",
+      "kinds": ["dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand", "ring", "neck", "hands", "quiver"],
+      "group": "hitChance",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 2, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 2, "max": 3, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 3, "max": 4, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 4, "max": 5, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 5, "max": 6, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 6, "max": 7, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 7, "max": 8, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 8, "max": 10, "weight": 10 }
+      ],
+      "desc": "+X% chance to hit (counters the level-gap miss chance of ruling 41)."
+    },
+    {
+      "id": "of_ruin",
+      "name": "of Ruin",
+      "stat": "critDamage",
+      "units": "pct",
+      "kinds": ["dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand", "ring", "neck", "hands"],
+      "group": "critDamage",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 5, "max": 8, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 9, "max": 13, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 14, "max": 19, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 20, "max": 26, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 27, "max": 34, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 35, "max": 43, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 44, "max": 54, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 55, "max": 70, "weight": 10 }
+      ],
+      "desc": "+X% critical strike damage (base crit = 150%)."
+    },
+    {
+      "id": "of_the_purse",
+      "name": "of the Purse",
+      "stat": "goldFind",
+      "units": "pct",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck"],
+      "group": "goldFind",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 5, "max": 10, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 11, "max": 18, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 19, "max": 26, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 27, "max": 35, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 36, "max": 45, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 46, "max": 56, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 57, "max": 68, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 69, "max": 80, "weight": 10 }
+      ],
+      "desc": "+X% gold dropped (your own drops only)."
+    },
+    {
+      "id": "of_fortune",
+      "name": "of Fortune",
+      "stat": "magicFind",
+      "units": "pct",
+      "kinds": ["head", "chest", "hands", "feet", "belt", "shield", "ring", "neck"],
+      "group": "magicFind",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 3, "max": 5, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 6, "max": 9, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 10, "max": 13, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 14, "max": 18, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 19, "max": 23, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 24, "max": 29, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 30, "max": 35, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 36, "max": 42, "weight": 10 }
+      ],
+      "desc": "+X% better rarity (see rarity.json `magicFind`: diminishing, never changes drop COUNT)."
+    },
+    {
+      "id": "of_thorns",
+      "name": "of Thorns",
+      "stat": "thorns",
+      "units": "flat",
+      "kinds": ["chest", "shield", "head"],
+      "group": "thorns",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 2, "max": 4, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 5, "max": 8, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 9, "max": 14, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 15, "max": 22, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 23, "max": 32, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 33, "max": 46, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 47, "max": 64, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 65, "max": 90, "weight": 10 }
+      ],
+      "desc": "Melee attackers take X physical damage per hit on you."
+    },
+    {
+      "id": "of_ease",
+      "name": "of Ease",
+      "stat": "reqReduce",
+      "units": "pct",
+      "kinds": ["dagger", "sword", "axe", "mace", "sceptre", "greatsword", "greataxe", "maul", "spear", "polearm", "bow", "crossbow", "staff", "wand", "head", "chest", "hands", "feet", "belt", "shield", "shield"],
+      "group": "reqReduce",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 5, "max": 10, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 11, "max": 15, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 16, "max": 20, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 21, "max": 25, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 26, "max": 30, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 31, "max": 35, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 36, "max": 40, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 41, "max": 45, "weight": 10 }
+      ],
+      "desc": "-X% attribute requirements of this item (not the level requirement)."
+    },
+    {
+      "id": "of_haste",
+      "name": "of Haste",
+      "stat": "cooldownReduction",
+      "units": "pct",
+      "kinds": ["ring", "neck", "head", "hands"],
+      "group": "cdr",
+      "tiers": [
+        { "tier": 2, "ilvlMin": 8, "min": 4, "max": 5, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 6, "max": 7, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 8, "max": 9, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 10, "max": 11, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 12, "max": 13, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 14, "max": 15, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 16, "max": 18, "weight": 10 }
+      ],
+      "desc": "-X% skill cooldowns (not the global cooldown; cap 40%). Starts at ilvl 8: no tier 1."
+    },
+    {
+      "id": "of_draughts",
+      "name": "of Draughts",
+      "stat": "potionPower",
+      "units": "pct",
+      "kinds": ["belt"],
+      "group": "potionPower",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 8, "max": 12, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 13, "max": 18, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 19, "max": 25, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 26, "max": 32, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 33, "max": 40, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 41, "max": 48, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 49, "max": 56, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 57, "max": 65, "weight": 10 }
+      ],
+      "desc": "+X% potion healing / mana restored (belt only)."
+    },
+    {
+      "id": "of_menace",
+      "name": "of Menace",
+      "stat": "threat",
+      "units": "pct",
+      "kinds": ["shield", "chest", "head"],
+      "group": "threat",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 8, "max": 12, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 13, "max": 18, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 19, "max": 25, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 26, "max": 32, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 33, "max": 40, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 41, "max": 48, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 49, "max": 56, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 57, "max": 65, "weight": 10 }
+      ],
+      "desc": "+X% threat generated (tanks). Mail/plate/shield only.",
+      "proficiency": ["mail", "plate"]
+    },
+    {
+      "id": "of_quiet",
+      "name": "of Quiet",
+      "stat": "threat",
+      "units": "pct",
+      "kinds": ["chest", "head", "feet", "hands"],
+      "group": "threat",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": -8, "max": -5, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": -13, "max": -9, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": -19, "max": -14, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": -25, "max": -20, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": -32, "max": -26, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": -40, "max": -33, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": -48, "max": -41, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": -56, "max": -49, "weight": 10 }
+      ],
+      "desc": "-X% threat generated. Cloth/leather only (same group as of Menace).",
+      "proficiency": ["cloth", "leather"]
+    },
+    {
+      "id": "of_staggering",
+      "name": "of Staggering",
+      "stat": "staggerChance",
+      "units": "pct",
+      "kinds": ["mace", "maul", "axe", "greataxe", "hands"],
+      "group": "stagger",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 3, "max": 4, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 5, "max": 6, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 7, "max": 8, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 9, "max": 10, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 11, "max": 12, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 13, "max": 14, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 15, "max": 16, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 17, "max": 18, "weight": 10 }
+      ],
+      "desc": "X% chance per weapon hit to stagger (0.6 s stun; bosses: 0.3 s and only every 8 s)."
+    },
+    {
+      "id": "of_the_watch",
+      "name": "of the Watch",
+      "stat": "lightRadius",
+      "units": "flat",
+      "kinds": ["head", "neck", "ring"],
+      "group": "light",
+      "tiers": [
+        { "tier": 1, "ilvlMin": 1, "min": 1, "max": 1, "weight": 100 },
+        { "tier": 2, "ilvlMin": 8, "min": 1, "max": 2, "weight": 80 },
+        { "tier": 3, "ilvlMin": 15, "min": 2, "max": 2, "weight": 62 },
+        { "tier": 4, "ilvlMin": 23, "min": 2, "max": 3, "weight": 48 },
+        { "tier": 5, "ilvlMin": 32, "min": 3, "max": 3, "weight": 36 },
+        { "tier": 6, "ilvlMin": 42, "min": 3, "max": 4, "weight": 26 },
+        { "tier": 7, "ilvlMin": 52, "min": 4, "max": 4, "weight": 17 },
+        { "tier": 8, "ilvlMin": 62, "min": 4, "max": 5, "weight": 10 }
+      ],
+      "desc": "+X metres of light radius in dark dungeons (a comfort stat; cheap, common)."
+    }
+  ]
+}

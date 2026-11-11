@@ -519,6 +519,20 @@
    "readme": "prototypes/thousandvale/docs/PLAN.md"
   },
   {
+   "id": "rogueloot",
+   "group": "prototypes",
+   "title": "Rogueloot",
+   "folder": "prototypes/rogueloot",
+   "summary": "A co-op action RPG for 1 to 4 heroes under an angled top-down camera, with slower, deliberate combat. Start as a Wanderer, choose a Path, then a specialization with three skill trees; chase stingy, carefully tiered loot through Act 1's outdoor zones, caves and catacombs.",
+   "status": "prototype",
+   "statusNote": "M1: walk a meadow together; own server",
+   "date": "2026-11-10",
+   "isNew": true,
+   "tags": ["rpg", "loot", "multiplayer", "co-op", "3d"],
+   "server": { "port": 8580, "path": "prototypes/rogueloot/" },
+   "live": "rogueloot"
+  },
+  {
    "id": "roverlands",
    "group": "prototypes",
    "title": "Roverlands",

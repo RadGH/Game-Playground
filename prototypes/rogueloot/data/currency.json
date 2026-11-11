@@ -1,0 +1,328 @@
+{
+  "_doc": "Currency shards (ruling 9): each does ONE thing, PoE-style. No gathering. They drop from monsters and chests (`drop`), come back from salvaging gear (`salvage`), and a few are sold (`vendor`). GRADES are the heart of the gating. Every shard has a grade 1-4 (`grades`), the grade a drop gets is set by the AREA level and the grade salvage gives is set by the ITEM level of what you break. A shard's grade caps the roll: when a shard rerolls or adds affixes, the affix tiers are rolled at rollIlvl = min(item.ilvl, grade.rollCap). So a Rough (grade 1) Churn Shard on an ilvl-40 rare rolls as if the item were ilvl 14: tiers 1-2 only. To get tier-5 affixes you need an ilvl-32+ ITEM and a Keen (grade 3) or better shard, and both only exist past area level 28. That is the owner's rule in one line: low-level materials only touch low-tier affixes. NOT SET FOR LIFE: (1) the item's own ilvl is a hard ceiling nothing raises — there is no \"raise item level\" shard on purpose; (2) shard grades are a second ceiling; (3) the affix level requirement (affixes.json) means a low-level character cannot even WEAR a tier-5 roll; (4) crafting at ilvl 12 produces an item a level-20 zone out-drops by itself (see docs/ITEMS.md worked example); (5) converting grades up costs 5:1 plus gold and never skips a grade; (6) salvage of a unique/legendary gives shards, never the item back. VENDOR: only the cheap shaping shards (Glimmer, Tangle, Bloom, Blank, Whet) are sold, at grade 1 only; grade 2+ must drop or be salvaged. Every price is gold at grade 1; `vendorGradeMult` says what a higher grade would cost if a future act sells it. Buying is capped at `vendorDailyCap` per shard per game day so gold cannot replace drops. CONVERT (at the crafter): 5 shards of one id and grade -> 1 of the same id one grade up, for `convertGoldPerGrade` gold; 1 -> 3 one grade down, free. 20 Dust of a grade -> 1 Glimmer of that grade. DUST: `shard_dust` is the small change. Salvage always gives some; 20 dust of a grade make one Glimmer of that grade at the crafter, and that is all it does. It carries a grade like a shard.",
+  "grades": [
+    {
+      "grade": 1,
+      "name": "Rough",
+      "ilvlMin": 1,
+      "ilvlMax": 14,
+      "rollCap": 14,
+      "colour": "#9aa",
+      "dropAreaMin": 1
+    },
+    {
+      "grade": 2,
+      "name": "Cut",
+      "ilvlMin": 15,
+      "ilvlMax": 29,
+      "rollCap": 29,
+      "colour": "#6cf",
+      "dropAreaMin": 13
+    },
+    {
+      "grade": 3,
+      "name": "Keen",
+      "ilvlMin": 30,
+      "ilvlMax": 44,
+      "rollCap": 44,
+      "colour": "#fc6",
+      "dropAreaMin": 28
+    },
+    {
+      "grade": 4,
+      "name": "Flawless",
+      "ilvlMin": 45,
+      "ilvlMax": 65,
+      "rollCap": 65,
+      "colour": "#f6c",
+      "dropAreaMin": 43
+    }
+  ],
+  "shards": [
+    {
+      "id": "glimmer",
+      "name": "Glimmer Shard",
+      "does": "Turns a NORMAL item into a MAGIC item with 1-2 affixes.",
+      "fromAreaLevel": 1,
+      "dropWeight": 100,
+      "vendorPriceGrade1": 60,
+      "rule": {
+        "target": "normal",
+        "result": "magic",
+        "affixes": "affixCount.magic"
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "tangle",
+      "name": "Tangle Shard",
+      "does": "Rerolls every affix on a MAGIC item (new affixes, new tiers, new values; 1-2 affixes again).",
+      "fromAreaLevel": 2,
+      "dropWeight": 90,
+      "vendorPriceGrade1": 40,
+      "rule": {
+        "target": "magic",
+        "result": "magic",
+        "reroll": "all"
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "bloom",
+      "name": "Bloom Shard",
+      "does": "Adds one affix to a MAGIC item that has only one.",
+      "fromAreaLevel": 3,
+      "dropWeight": 60,
+      "vendorPriceGrade1": 120,
+      "rule": {
+        "target": "magic",
+        "requires": "affixCount == 1",
+        "add": 1
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "crown",
+      "name": "Crown Shard",
+      "does": "Turns a MAGIC item into a RARE: keeps its affixes and adds one more.",
+      "fromAreaLevel": 5,
+      "dropWeight": 45,
+      "vendorPriceGrade1": null,
+      "rule": {
+        "target": "magic",
+        "result": "rare",
+        "add": 1
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "blank",
+      "name": "Blank Shard",
+      "does": "Strips an item back to NORMAL (same base, same item level, quality kept). Never works on a unique or a legendary.",
+      "fromAreaLevel": 4,
+      "dropWeight": 70,
+      "vendorPriceGrade1": 50,
+      "rule": {
+        "target": ["magic", "rare"],
+        "result": "normal"
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "polish",
+      "name": "Polish Shard",
+      "does": "Rerolls the NUMBERS of every affix on the item inside their current tiers (the affixes and tiers stay). Works on uniques and legendaries too.",
+      "fromAreaLevel": 6,
+      "dropWeight": 40,
+      "vendorPriceGrade1": null,
+      "rule": {
+        "target": ["magic", "rare", "unique", "legendary"],
+        "reroll": "values"
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "churn",
+      "name": "Churn Shard",
+      "does": "Rerolls every affix on a RARE item (3-6 new affixes at the roll level). The bread and butter of rare crafting.",
+      "fromAreaLevel": 8,
+      "dropWeight": 50,
+      "vendorPriceGrade1": null,
+      "rule": {
+        "target": "rare",
+        "result": "rare",
+        "reroll": "all"
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "graft",
+      "name": "Graft Shard",
+      "does": "Adds one affix to a RARE item with fewer than 6.",
+      "fromAreaLevel": 12,
+      "dropWeight": 14,
+      "vendorPriceGrade1": null,
+      "rule": {
+        "target": "rare",
+        "requires": "affixCount < 6",
+        "add": 1
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "pare",
+      "name": "Pare Shard",
+      "does": "Removes ONE random affix from a magic or rare item.",
+      "fromAreaLevel": 14,
+      "dropWeight": 16,
+      "vendorPriceGrade1": null,
+      "rule": {
+        "target": ["magic", "rare"],
+        "remove": 1
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "wager",
+      "name": "Wager Shard",
+      "does": "Turns a NORMAL item into a random rarity: magic 70%, rare 25%, unique 4.5%, legendary 0.5% (the unique must exist for that base; otherwise rare).",
+      "fromAreaLevel": 7,
+      "dropWeight": 30,
+      "vendorPriceGrade1": null,
+      "rule": {
+        "target": "normal",
+        "result": {
+          "magic": 70,
+          "rare": 25,
+          "unique": 4.5,
+          "legendary": 0.5
+        }
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "whet",
+      "name": "Whet Shard",
+      "does": "Raises an item's QUALITY by 5% (weapon damage or armour / block amount), to a maximum of 20%. Quality survives every other shard.",
+      "fromAreaLevel": 5,
+      "dropWeight": 55,
+      "vendorPriceGrade1": 80,
+      "rule": {
+        "quality": 5,
+        "qualityMax": 20
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    },
+    {
+      "id": "anchor",
+      "name": "Anchor Shard",
+      "does": "Locks ONE affix you choose: the next Tangle or Churn used on this item keeps it. The lock is spent by that one reroll. The meta-crafting shard — rare, never sold.",
+      "fromAreaLevel": 18,
+      "dropWeight": 4,
+      "vendorPriceGrade1": null,
+      "rule": {
+        "lock": 1,
+        "consumedBy": ["tangle", "churn"]
+      },
+      "grid": { "w": 1, "h": 1 },
+      "stack": 50
+    }
+  ],
+  "dust": {
+    "id": "shard_dust",
+    "name": "Shard Dust",
+    "grid": { "w": 1, "h": 1 },
+    "stack": 200,
+    "toGlimmer": 20
+  },
+  "drop": {
+    "_doc": "per kill per player: chance (whole percent, keyframes by area level) that ONE currency item drops; then pick a shard by dropWeight among those with fromAreaLevel <= area level; the grade is the one whose [ilvlMin, ilvlMax] holds the area level (dropAreaMin lets the next grade appear a couple of levels early at `earlyGradePct`). Monster kinds multiply the chance.",
+    "chancePct": [
+      [1, 5],
+      [10, 7],
+      [20, 9],
+      [40, 11],
+      [60, 13]
+    ],
+    "rankMult": {
+      "normal": 1,
+      "champion": 3,
+      "rare": 5,
+      "boss": 10,
+      "actBoss": 20,
+      "chest": 2,
+      "lockedChest": 5
+    },
+    "earlyGradePct": 15,
+    "dustChancePct": 6
+  },
+  "salvage": {
+    "_doc": "Break an item at the crafter (or from the bag, with a confirm). Grade = the grade whose ilvl range holds the ITEM level. Yields are [min, max] counts; `pick` lists which shards can come out and their weights — salvage can never give Anchor. A unique or legendary salvages into its listed shards plus one guaranteed Polish.",
+    "byRarity": {
+      "normal": {
+        "dust": [1, 3],
+        "shards": [0, 0]
+      },
+      "magic": {
+        "dust": [2, 4],
+        "shards": [0, 1],
+        "pick": {
+          "glimmer": 50,
+          "tangle": 30,
+          "blank": 20
+        }
+      },
+      "rare": {
+        "dust": [3, 6],
+        "shards": [1, 2],
+        "pick": {
+          "tangle": 20,
+          "bloom": 15,
+          "crown": 20,
+          "churn": 25,
+          "polish": 10,
+          "pare": 5,
+          "whet": 5
+        }
+      },
+      "unique": {
+        "dust": [5, 10],
+        "shards": [2, 3],
+        "pick": {
+          "churn": 35,
+          "polish": 25,
+          "graft": 15,
+          "wager": 15,
+          "pare": 10
+        },
+        "guaranteed": ["polish"]
+      },
+      "legendary": {
+        "dust": [5, 10],
+        "shards": [2, 3],
+        "pick": {
+          "churn": 30,
+          "graft": 30,
+          "polish": 20,
+          "pare": 20
+        },
+        "guaranteed": ["polish"]
+      }
+    },
+    "qualityBonus": "each 5% quality on the salvaged item adds +1 dust",
+    "goldPerSalvage": 0
+  },
+  "vendor": {
+    "vendorGradeMult": [1, 4, 12, 30],
+    "vendorDailyCap": 10,
+    "sellBackPct": 25
+  },
+  "convert": {
+    "up": {
+      "ratio": 5,
+      "convertGoldPerGrade": [100, 400, 1500]
+    },
+    "down": {
+      "ratio": 3,
+      "gold": 0
+    },
+    "dustToGlimmer": 20
+  },
+  "crafterNpc": {
+    "_doc": "In town. Screens: Apply shard (drag shard onto item, shows the roll level = min(ilvl, grade cap) BEFORE you confirm, and lists which tiers are reachable), Salvage (with the yields shown), Convert, Buy. Every shard action is logged (item before/after) so a bug report can show what happened."
+  },
+  "antiSetForLife": {
+    "rules": ["ilvl never rises; rollIlvl = min(item.ilvl, grade.rollCap)", "grade drops follow the AREA level, grade salvage follows the ITEM level; neither follows the character level", "a finished item's level requirement rises with its best affix tier, so a level-6 character cannot wear a tier-4 roll (ilvlMin 23 -> level 19) even if a friend gives one", "Anchor never drops below area 18 and is never sold; Graft needs area 12", "vendor stock is grade 1, 10 a day, 5 shaping shards only", "convert up is 5:1 with a gold fee and one grade at a time", "uniques and legendaries cannot be Blanked or Crowned, only Polished (numbers) — their power stays what it dropped as"]
+  }
+}

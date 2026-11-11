@@ -1,0 +1,318 @@
+{
+  "_doc": "Drop rules. Everything here is read by js/rules/loot.js (pure, seeded). All chances are WHOLE PERCENT unless the key says `weight`. ITEM LEVEL: ilvl = area level of the dropper + rank bonus (`ilvlBonus`), capped at `ilvlCap`. Chests use the area level + their tier bonus. An item's base is chosen from bases with dropLevel <= ilvl (see basePick). Item level is NOT the character level: a level-20 player farming a level-8 zone gets ilvl-8 items, and ilvl drives the affix tiers (affixes.json) and the salvage grade (currency.json). DROP FLOW per kill, per player (personal loot, ruling 5): 1) roll `itemDrops` for how many equipment items (normal monsters mostly drop nothing), 2) for each item roll a rarity from the `rarityByLevel` weights interpolated at the area level, multiplied by the monster kind's `rarityMult` and the player's magic find, 3) roll gold (`gold`), potions and currency (currency.json) separately — they never compete with items. STINGY ON PURPOSE: a normal monster drops an item 16-24% of the time in Act 1; most of them are white. Rares are ~0.5% of items at level 1 and ~3.4% at level 20; champions, rare monsters, bosses and locked chests multiply that. The `expected` table below is COMPUTED from these weights (scratch sim over 150 kills, 6 champions, 2 rare monsters, 0.5 bosses, 3 chests per solo hour): rares per hour 0.9 at level 1, 1.8 at 10, 3.4 at 20; uniques one per ~7 h at level 1, ~2.4 h at 10, ~1.2 h at 20; legendaries one per ~24 h at level 1, ~6 h at 10, ~2.7 h at 20, about one an hour in Legend. Over an 8-12 hour Act 1 at ~30 min a level that is roughly 18-22 rares, 4 uniques and 2 legendaries: enough that every clear has a story, few enough that each one matters. tools/sim must keep its report inside +-30% of `expected`. MAGIC FIND: `magicFind` percent from gear is turned into a multiplier on the rare/unique/legendary WEIGHTS: mult = 1 + (mf / 100) / (1 + mf / 250). 50% mf -> x1.42, 100% -> x1.71, 200% -> x2.11. Never changes how many items drop. EXTRA PLAYERS: each player rolls their own loot, so a full party already sees four times the items. On top of that each extra player in the area adds `perExtraPlayer.itemChancePct` to everyone's item drop chance and `goldPct` to gold, because monsters are tougher (ruling 5). GEAR SCORE (ruling 38): the weighted average of (ilvl + rarityBonus) over the equipped slots, empty slots counting as 0. A two-hander fills both weapon weights. Shown as a whole number; the sim reports it against the zone level, and a zone's `recommendedGearScore` is its level - 2. GOLD: amount = (base + perLevel * L) * [0.6, 1.4] * (1 + goldFind/100), dropped with `chancePct`. Item sell value = kindValue * (1 + ilvl * 0.35) * rarityMult; vendors buy at sellPct and sell at 100%.",
+  "ilvlCap": 65,
+  "ilvlBonus": {
+    "normal": 0,
+    "champion": 1,
+    "rare": 2,
+    "boss": 3,
+    "actBoss": 4
+  },
+  "itemDrops": {
+    "_doc": "How many equipment items a kill gives one player. `chancePct` interpolates by area level (keyframes), `count` is weights for 1/2/3 items once something drops. Chests are in `chests`.",
+    "normal": {
+      "chancePct": [
+        [1, 16],
+        [10, 20],
+        [20, 24],
+        [40, 27],
+        [60, 30]
+      ],
+      "count": [93, 6, 1]
+    },
+    "champion": {
+      "chancePct": [
+        [1, 100]
+      ],
+      "count": [70, 25, 5]
+    },
+    "rare": {
+      "chancePct": [
+        [1, 100]
+      ],
+      "count": [30, 50, 20],
+      "guaranteedMinRarity": "magic"
+    },
+    "boss": {
+      "chancePct": [
+        [1, 100]
+      ],
+      "count": [0, 30, 70],
+      "extra": 2,
+      "guaranteedMinRarity": "rare",
+      "guaranteedRares": 1
+    },
+    "actBoss": {
+      "chancePct": [
+        [1, 100]
+      ],
+      "count": [0, 10, 90],
+      "extra": 3,
+      "guaranteedMinRarity": "rare",
+      "guaranteedRares": 2,
+      "firstKillUniqueChancePct": 50
+    }
+  },
+  "rarityByLevel": {
+    "_doc": "weights per equipment item at an area level; linear interpolation between keyframes [level, normal, magic, rare, unique, legendary]",
+    "keys": [
+      [1, 86, 13, 0.55, 0.2, 0.06],
+      [5, 80, 18, 0.9, 0.35, 0.12],
+      [10, 74, 22, 1.7, 0.55, 0.22],
+      [15, 68, 26, 2.5, 0.75, 0.33],
+      [20, 62, 30, 3.4, 1, 0.45],
+      [30, 55, 34, 5, 1.4, 0.65],
+      [40, 48, 37, 7, 1.8, 0.85],
+      [50, 42, 39, 9.5, 2.2, 1.05],
+      [60, 36, 40, 12, 2.6, 1.3]
+    ]
+  },
+  "rarityMult": {
+    "_doc": "multiplies the rare/unique/legendary weights (and `minRarity` lifts normals to magic) for the monster kind that dropped it",
+    "normal": {
+      "rare": 1,
+      "unique": 1,
+      "legendary": 1
+    },
+    "champion": {
+      "rare": 2,
+      "unique": 2,
+      "legendary": 2
+    },
+    "rare": {
+      "rare": 3,
+      "unique": 3,
+      "legendary": 3,
+      "minRarity": "magic"
+    },
+    "boss": {
+      "rare": 5,
+      "unique": 4,
+      "legendary": 4,
+      "minRarity": "magic"
+    },
+    "actBoss": {
+      "rare": 6,
+      "unique": 6,
+      "legendary": 5,
+      "minRarity": "magic"
+    },
+    "chest": {
+      "rare": 1.5,
+      "unique": 1.2,
+      "legendary": 1.2
+    },
+    "lockedChest": {
+      "rare": 3,
+      "unique": 2.5,
+      "legendary": 2.5,
+      "minRarity": "magic"
+    }
+  },
+  "magicFind": {
+    "formula": "1 + (mf/100) / (1 + mf/250)",
+    "appliesTo": ["rare", "unique", "legendary"]
+  },
+  "basePick": {
+    "_doc": "Which base: first a slot group by weight, then a base among that group whose dropLevel <= ilvl and whose proficiency the player can use (personal loot; 20% of the time ignore proficiency so trade bait exists), weighted 1 when dropLevel is within `freshLevels` of ilvl, else `oldWeight`. Two-handers and off-hands count in `weapon`/`offhand`.",
+    "groups": {
+      "weapon": 34,
+      "armour": 40,
+      "offhand": 12,
+      "jewellery": 10,
+      "belt": 4
+    },
+    "freshLevels": 10,
+    "oldWeight": 0.3,
+    "ignoreProficiencyPct": 20
+  },
+  "affixCount": "see affixes.json affixCount",
+  "uniques": {
+    "_doc": "When the roll says unique: pick among uniques.json entries whose base dropLevel <= ilvl and levelReq <= ilvl + 2, weighted by their `weight`; none eligible -> downgrade to rare. Legendary: same with legendaries.json powers filtered by slot/kind and ilvlMin, on a base rolled like a rare."
+  },
+  "unidentified": {
+    "_doc": "rare, unique and legendary drop unidentified (ruling 40): name shows as \"Unidentified <base>\"; right-click identifies free; trading an unidentified item is allowed (a gamble for the buyer).",
+    "rarities": ["rare", "unique", "legendary"]
+  },
+  "perExtraPlayer": {
+    "itemChancePct": 3,
+    "goldPct": 15,
+    "_doc": "per extra player present in the same area; with 4 players a normal monster drops something 18+9 = 27% of the time for EACH player"
+  },
+  "gold": {
+    "chancePct": [
+      [1, 35],
+      [20, 40],
+      [60, 45]
+    ],
+    "amount": {
+      "base": 2,
+      "perLevel": 1.2,
+      "spread": [0.6, 1.4]
+    },
+    "rankMult": {
+      "normal": 1,
+      "champion": 3,
+      "rare": 5,
+      "boss": 12,
+      "actBoss": 25,
+      "chest": 4,
+      "lockedChest": 10
+    },
+    "sellPct": 20,
+    "kindValue": {
+      "weapon": 12,
+      "chest": 10,
+      "head": 7,
+      "hands": 5,
+      "feet": 5,
+      "belt": 5,
+      "shield": 8,
+      "focus": 8,
+      "quiver": 4,
+      "ring": 9,
+      "neck": 10
+    },
+    "rarityValueMult": {
+      "normal": 1,
+      "magic": 2.5,
+      "rare": 6,
+      "unique": 12,
+      "legendary": 20
+    },
+    "identifyCost": 0,
+    "_doc": "A level-10 kill pays 14 gold on average when it pays; a plain ilvl-10 sword sells for 12*(1+3.5)*0.2 = 10.8 gold; a rare one for 65. Vendor gear costs the full value and is normal/magic only (the gambler sells unidentified items for 3x at a flat rarity table: magic 78, rare 20, unique 1.6, legendary 0.4)."
+  },
+  "potions": {
+    "_doc": "potion drops are separate from items: chance per kill (whole percent) and which size by area level",
+    "chancePct": [
+      [1, 14],
+      [20, 10]
+    ],
+    "sizes": [
+      {
+        "id": "minor",
+        "levelMax": 6
+      },
+      {
+        "id": "light",
+        "levelMax": 12
+      },
+      {
+        "id": "full",
+        "levelMax": 20
+      },
+      {
+        "id": "greater",
+        "levelMax": 40
+      },
+      {
+        "id": "grand",
+        "levelMax": 65
+      }
+    ],
+    "healthWeight": 70,
+    "manaWeight": 30
+  },
+  "chests": {
+    "_doc": "tier by what the zone places; `items` = weights for 0/1/2/3 items; ilvl = area level + bonus",
+    "crate": {
+      "items": [92, 8, 0, 0],
+      "ilvlBonus": 0,
+      "gold": "chest",
+      "mult": "chest",
+      "potionChancePct": 25
+    },
+    "chest": {
+      "items": [15, 60, 22, 3],
+      "ilvlBonus": 0,
+      "gold": "chest",
+      "mult": "chest",
+      "potionChancePct": 40
+    },
+    "lockedChest": {
+      "items": [0, 20, 55, 25],
+      "ilvlBonus": 2,
+      "gold": "lockedChest",
+      "mult": "lockedChest",
+      "minRarity": "magic"
+    },
+    "bossHoard": {
+      "items": [0, 0, 40, 60],
+      "ilvlBonus": 3,
+      "gold": "boss",
+      "mult": "boss",
+      "minRarity": "magic",
+      "guaranteedRares": 1,
+      "oncePerSession": true
+    }
+  },
+  "gearScore": {
+    "formula": "round( sum(slotWeight * (ilvl + rarityBonus)) / sum(slotWeight) ) over equipped slots; empty slot contributes 0 but keeps its weight",
+    "slotWeights": {
+      "weapon": 2,
+      "offhand": 1,
+      "chest": 1.5,
+      "head": 1,
+      "hands": 0.75,
+      "feet": 0.75,
+      "belt": 0.5,
+      "neck": 0.75,
+      "ring1": 0.5,
+      "ring2": 0.5
+    },
+    "twoHander": "contributes weapon + offhand weights with its own ilvl",
+    "rarityBonus": {
+      "normal": 0,
+      "magic": 1,
+      "rare": 3,
+      "unique": 4,
+      "legendary": 5
+    },
+    "recommended": "zone level - 2"
+  },
+  "expected": {
+    "_doc": "targets for tools/sim (per solo player-hour at ~150 kills, ~6 champions, ~2 rare monsters, ~3 chests an hour)",
+    "itemsPerHour": [
+      [1, 44],
+      [10, 50],
+      [20, 57],
+      [40, 62],
+      [60, 67]
+    ],
+    "raresPerHour": [
+      [1, 0.9],
+      [5, 1.2],
+      [10, 1.8],
+      [15, 2.5],
+      [20, 3.4],
+      [30, 4.8],
+      [40, 6.6],
+      [50, 9],
+      [60, 11.5]
+    ],
+    "uniquesPerHour": [
+      [1, 0.14],
+      [5, 0.25],
+      [10, 0.41],
+      [15, 0.58],
+      [20, 0.81],
+      [30, 1.16],
+      [40, 1.52],
+      [50, 1.9],
+      [60, 2.3]
+    ],
+    "legendariesPerHour": [
+      [1, 0.04],
+      [5, 0.085],
+      [10, 0.16],
+      [15, 0.26],
+      [20, 0.36],
+      [30, 0.54],
+      [40, 0.72],
+      [50, 0.91],
+      [60, 1.15]
+    ],
+    "tolerancePct": 30
+  }
+}

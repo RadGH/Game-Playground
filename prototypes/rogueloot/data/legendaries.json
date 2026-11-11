@@ -1,0 +1,401 @@
+{
+  "_doc": "Legendary powers (ruling 18: the loot chase, no sockets). A LEGENDARY ITEM = a random base rolled like a rare (3-5 affixes, affixes.json) plus ONE power from this list whose `kinds` includes the item's kind (weapons by kind id, armour by slot, \"ring\"/\"neck\"/\"shield\"/\"focus\"/\"quiver\"/\"belt\") and whose ilvlMin <= ilvl. The power shows as an orange line on the tooltip and the item name is \"<power name> <base>\" (e.g. \"Oxhide Grip Hide Gloves\"). Each `rule` is an object a programmer implements in js/rules/effects.js: `type` is the hook, the rest are its numbers. Every power changes HOW a skill works or a playstyle, never just a number. A power for a Path a player has not chosen still drops (trade bait, 20% off-Path per rarity.json basePick) but is down-weighted 0.25 by the personal-loot smart roll. SKILL IDS: these name Path skills M9 will build (fighter_cleave, fighter_shield_slam, fighter_war_cry, fighter_charge, fighter_rend; rogue_slip_step, rogue_backstab, rogue_aimed_shot, rogue_poison_coat, rogue_knife_fan; mage_firebolt, mage_frost_ring, mage_storm_lance, mage_shift, mage_ward; healer_mend, healer_radiance, healer_smite, healer_rebuke, healer_sanctify). If M9 names a skill differently, change the id HERE; nothing else couples to it. A power whose skill the player does not have does nothing (the tooltip says so in grey). Spec skills replace Path skills (ruling 10), so each power also lists `specAlso`: the spec skills that inherit it (fill in as specs land; empty = Path skill only).",
+  "powers": [
+    {
+      "id": "oxhide_grip",
+      "name": "Oxhide Grip",
+      "path": "fighter",
+      "skill": "fighter_cleave",
+      "kinds": ["hands", "greatsword", "greataxe", "maul"],
+      "ilvlMin": 6,
+      "weight": 10,
+      "text": "Cleave strikes all enemies around you (a full circle instead of a cone) for 85% of its damage.",
+      "rule": {
+        "type": "skillShape",
+        "shape": "circle",
+        "radiusFromCone": true,
+        "damageMult": 0.85
+      },
+      "look": "glow: brown leather with a glowing ox-horn stamp",
+      "specAlso": []
+    },
+    {
+      "id": "ramhorn",
+      "name": "Ramhorn",
+      "path": "fighter",
+      "skill": "fighter_shield_slam",
+      "kinds": ["shield"],
+      "ilvlMin": 8,
+      "weight": 10,
+      "text": "Shield Slam knocks the target back 3 m and stuns it for 1 s; its cooldown is 2 s longer.",
+      "rule": {
+        "type": "skillAdd",
+        "knockback": 3,
+        "stun": 1,
+        "cooldownAdd": 2
+      },
+      "look": "glow: curled ram horns on the shield boss",
+      "specAlso": []
+    },
+    {
+      "id": "standard_of_the_wall",
+      "name": "Standard of the Wall",
+      "path": "fighter",
+      "skill": "fighter_war_cry",
+      "kinds": ["chest", "head"],
+      "ilvlMin": 10,
+      "weight": 10,
+      "text": "War Cry also gives allies within 10 m +20% armour for 8 s.",
+      "rule": {
+        "type": "skillAllyBuff",
+        "range": 10,
+        "buff": {
+          "armourPct": 20,
+          "seconds": 8
+        }
+      },
+      "look": "glow: a banner motif across the chest",
+      "specAlso": []
+    },
+    {
+      "id": "chasers_greaves",
+      "name": "Chaser's Greaves",
+      "path": "fighter",
+      "skill": "fighter_charge",
+      "kinds": ["feet", "belt"],
+      "ilvlMin": 8,
+      "weight": 10,
+      "text": "Charge has 2 charges, and a kill within 3 s of a Charge restores one.",
+      "rule": {
+        "type": "skillCharges",
+        "charges": 2,
+        "refundOnKillWithin": 3
+      },
+      "look": "glow: boots with a running-hound stamp",
+      "specAlso": []
+    },
+    {
+      "id": "grudge_edge",
+      "name": "Grudge Edge",
+      "path": "fighter",
+      "skill": "fighter_rend",
+      "kinds": ["sword", "axe", "greatsword", "greataxe", "polearm"],
+      "ilvlMin": 12,
+      "weight": 10,
+      "text": "Rend lasts twice as long, and when a rended enemy dies the bleed jumps to the nearest enemy within 6 m with its remaining time.",
+      "rule": {
+        "type": "skillDot",
+        "durationMult": 2,
+        "spreadOnDeath": {
+          "range": 6,
+          "count": 1
+        }
+      },
+      "look": "glow: a dark red line down the blade",
+      "specAlso": []
+    },
+    {
+      "id": "night_soil",
+      "name": "Night Soil",
+      "path": "rogue",
+      "skill": "rogue_slip_step",
+      "kinds": ["feet"],
+      "ilvlMin": 6,
+      "weight": 10,
+      "text": "Slip Step leaves a smoke cloud (3 m, 3 s) where you were; enemies inside have -50% chance to hit.",
+      "rule": {
+        "type": "skillLeaveGround",
+        "radius": 3,
+        "seconds": 3,
+        "enemyDebuff": {
+          "hitChancePct": -50
+        }
+      },
+      "look": "glow: boots that trail dark smoke",
+      "specAlso": []
+    },
+    {
+      "id": "twinning_spine",
+      "name": "Twinning Spine",
+      "path": "rogue",
+      "skill": "rogue_backstab",
+      "kinds": ["dagger", "sword"],
+      "ilvlMin": 8,
+      "weight": 10,
+      "text": "Backstab works from any side at 60% damage (full damage from behind as before).",
+      "rule": {
+        "type": "skillCondition",
+        "relax": "behind",
+        "frontMult": 0.6
+      },
+      "look": "glow: a blade with a second ghost edge",
+      "specAlso": []
+    },
+    {
+      "id": "brace_of_sparrows",
+      "name": "Brace of Sparrows",
+      "path": "rogue",
+      "skill": "rogue_aimed_shot",
+      "kinds": ["bow", "crossbow", "quiver"],
+      "ilvlMin": 10,
+      "weight": 10,
+      "text": "Aimed Shot fires two arrows, each for 65% damage; each can crit on its own.",
+      "rule": {
+        "type": "skillMultiHit",
+        "hits": 2,
+        "damageMult": 0.65
+      },
+      "look": "glow: twin sparrow feathers on the fletching",
+      "specAlso": []
+    },
+    {
+      "id": "hemlock_cord",
+      "name": "Hemlock Cord",
+      "path": "rogue",
+      "skill": "rogue_poison_coat",
+      "kinds": ["belt", "hands"],
+      "ilvlMin": 10,
+      "weight": 10,
+      "text": "Poison Coat also coats the weapons of allies within 6 m (same poison, half duration).",
+      "rule": {
+        "type": "skillShareBuff",
+        "range": 6,
+        "durationMult": 0.5
+      },
+      "look": "glow: a belt of braided pale-green cord",
+      "specAlso": []
+    },
+    {
+      "id": "jugglers_band",
+      "name": "Juggler's Band",
+      "path": "rogue",
+      "skill": "rogue_knife_fan",
+      "kinds": ["ring", "neck"],
+      "ilvlMin": 12,
+      "weight": 10,
+      "text": "Each Knife Fan knife that kills refunds 10 energy; each that crits refunds 3.",
+      "rule": {
+        "type": "skillRefund",
+        "resource": "energy",
+        "onKill": 10,
+        "onCrit": 3
+      },
+      "look": "glow: a ring of tiny spinning knives",
+      "specAlso": []
+    },
+    {
+      "id": "tallow_crown",
+      "name": "Tallow Crown",
+      "path": "mage",
+      "skill": "mage_firebolt",
+      "kinds": ["head", "wand", "staff"],
+      "ilvlMin": 6,
+      "weight": 10,
+      "text": "Firebolt leaves burning ground (2 m, 3 s) where it lands: 20% of the bolt's damage per second as fire.",
+      "rule": {
+        "type": "skillLeaveGround",
+        "radius": 2,
+        "seconds": 3,
+        "dps": {
+          "pctOfHit": 20,
+          "element": "fire"
+        }
+      },
+      "look": "glow: a dripping wax crown with lit wicks",
+      "specAlso": []
+    },
+    {
+      "id": "frostweft",
+      "name": "Frostweft",
+      "path": "mage",
+      "skill": "mage_frost_ring",
+      "kinds": ["chest", "focus"],
+      "ilvlMin": 8,
+      "weight": 10,
+      "text": "Frost Ring also wraps you in a frost shell that absorbs 15% of your maximum health for 6 s.",
+      "rule": {
+        "type": "skillSelfShield",
+        "pctMaxHealth": 15,
+        "seconds": 6
+      },
+      "look": "glow: a robe woven with frost thread",
+      "specAlso": []
+    },
+    {
+      "id": "forked_lance",
+      "name": "Forked Lance",
+      "path": "mage",
+      "skill": "mage_storm_lance",
+      "kinds": ["wand", "staff", "focus"],
+      "ilvlMin": 10,
+      "weight": 10,
+      "text": "Storm Lance chains to up to 2 more enemies within 6 m, each for 50% damage.",
+      "rule": {
+        "type": "skillChain",
+        "count": 2,
+        "range": 6,
+        "damageMult": 0.5
+      },
+      "look": "glow: a forked blue arc along the shaft",
+      "specAlso": []
+    },
+    {
+      "id": "hourglass_band",
+      "name": "Hourglass Band",
+      "path": "mage",
+      "skill": "mage_shift",
+      "kinds": ["ring", "neck"],
+      "ilvlMin": 8,
+      "weight": 10,
+      "text": "Shift has 2 charges, and a kill restores one.",
+      "rule": {
+        "type": "skillCharges",
+        "charges": 2,
+        "refundOnKill": true
+      },
+      "look": "glow: a ring with sand running inside it",
+      "specAlso": []
+    },
+    {
+      "id": "deep_well",
+      "name": "Deep Well",
+      "path": "mage",
+      "skill": "mage_ward",
+      "kinds": ["focus", "chest"],
+      "ilvlMin": 12,
+      "weight": 10,
+      "text": "Ward absorbs 2 damage per point of mana instead of 1, but Ward cannot be cast below 30% mana.",
+      "rule": {
+        "type": "skillRate",
+        "absorbPerMana": 2,
+        "minManaPct": 30
+      },
+      "look": "glow: a dark glass focus with a point of light far inside",
+      "specAlso": []
+    },
+    {
+      "id": "dawnbreak",
+      "name": "Dawnbreak",
+      "path": "healer",
+      "skill": "healer_smite",
+      "kinds": ["sceptre", "mace", "staff"],
+      "ilvlMin": 6,
+      "weight": 10,
+      "text": "Smite heals the most injured ally within 12 m for 40% of the damage it dealt.",
+      "rule": {
+        "type": "skillHealFromDamage",
+        "target": "lowestAllyInRange",
+        "range": 12,
+        "pct": 40
+      },
+      "look": "glow: a sceptre head like a rising sun",
+      "specAlso": []
+    },
+    {
+      "id": "lichen_robe",
+      "name": "Lichen Robe",
+      "path": "healer",
+      "skill": "healer_mend",
+      "kinds": ["chest", "head"],
+      "ilvlMin": 8,
+      "weight": 10,
+      "text": "Mend leaves a heal over time for 30% of its amount over 6 s.",
+      "rule": {
+        "type": "skillHot",
+        "pct": 30,
+        "seconds": 6
+      },
+      "look": "glow: a robe grown over with soft green lichen",
+      "specAlso": []
+    },
+    {
+      "id": "beacon_amulet",
+      "name": "Beacon Amulet",
+      "path": "healer",
+      "skill": "healer_radiance",
+      "kinds": ["neck", "ring"],
+      "ilvlMin": 10,
+      "weight": 10,
+      "text": "Radiance reaches 50% further and pulses once more, 2 s after it ends, for 50%.",
+      "rule": {
+        "type": "skillArea",
+        "radiusMult": 1.5,
+        "extraPulse": {
+          "delay": 2,
+          "pct": 50
+        }
+      },
+      "look": "glow: an amulet that pulses with warm light",
+      "specAlso": []
+    },
+    {
+      "id": "shieldbearers_rebuke",
+      "name": "Shieldbearer's Rebuke",
+      "path": "healer",
+      "skill": "healer_rebuke",
+      "kinds": ["shield", "hands"],
+      "ilvlMin": 10,
+      "weight": 10,
+      "text": "Rebuke taunts every enemy within 8 m and gives you +30% block chance for 4 s.",
+      "rule": {
+        "type": "skillTauntArea",
+        "range": 8,
+        "selfBuff": {
+          "blockChancePct": 30,
+          "seconds": 4
+        }
+      },
+      "look": "glow: a shield with an open hand sigil",
+      "specAlso": []
+    },
+    {
+      "id": "sanctum_band",
+      "name": "Sanctum Band",
+      "path": "healer",
+      "skill": "healer_sanctify",
+      "kinds": ["ring", "belt"],
+      "ilvlMin": 12,
+      "weight": 10,
+      "text": "Sanctify also removes one poison or shadow effect from each ally it touches.",
+      "rule": {
+        "type": "skillCleanse",
+        "elements": ["poison", "shadow"],
+        "count": 1
+      },
+      "look": "glow: a plain white band that hums",
+      "specAlso": []
+    },
+    {
+      "id": "hungering_band",
+      "name": "Hungering Band",
+      "path": "any",
+      "skill": null,
+      "kinds": ["ring", "neck"],
+      "ilvlMin": 8,
+      "weight": 10,
+      "text": "Your auto-attacks heal you for 2% of the damage they deal; skills do not.",
+      "rule": {
+        "type": "autoAttackLeech",
+        "pct": 2
+      },
+      "look": "glow: a ring with a tiny open mouth",
+      "specAlso": []
+    },
+    {
+      "id": "packrats_sash",
+      "name": "Packrat's Sash",
+      "path": "any",
+      "skill": null,
+      "kinds": ["belt"],
+      "ilvlMin": 6,
+      "weight": 10,
+      "text": "Potions you drink from the belt have a 25% chance not to be used up.",
+      "rule": {
+        "type": "potionRefundChance",
+        "pct": 25
+      },
+      "look": "glow: a sash crowded with tiny pockets",
+      "specAlso": []
+    }
+  ]
+}

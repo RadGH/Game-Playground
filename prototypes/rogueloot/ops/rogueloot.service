@@ -1,0 +1,12 @@
+# Rogueloot STABLE server: the published copy (tools/publish-rogueloot.sh) on port 8580 (+ https 8582). User unit.
+# LAN testing copy. The public game runs on the games.radgh.com droplet (https://rogueloot.games.radgh.com/).
+[Unit]
+Description=Rogueloot stable server (published copy) on :8580
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/rogueloot/ops/start.sh stable
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=default.target

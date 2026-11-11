@@ -1,0 +1,487 @@
+{
+  "_doc": "Act 1 uniques (ruling 38: scarce, never zero). `base` is an item-bases.json id (the unique keeps the base's damage/armour and grid; `baseMult` scales the base damage or armour). `stats` are rolled once inside [min, max] at drop and may be re-rolled by a Polish Shard. `rule` is a special that no affix gives (plain text + an object a programmer can implement). `weight` is the pick weight among eligible uniques (rarity.json `uniques`). Units follow affixes.json: pct = whole percentage points. levelReq overrides the base. A unique never gets random affixes.",
+  "items": [
+    {
+      "id": "toll_ring",
+      "name": "Toll Ring",
+      "base": "copper_ring",
+      "levelReq": 2,
+      "weight": 100,
+      "stats": [
+        { "stat": "goldFind", "units": "pct", "min": 15, "max": 25 },
+        { "stat": "vit", "units": "flat", "min": 2, "max": 3 },
+        { "stat": "lightRadius", "units": "flat", "min": 1, "max": 1 }
+      ],
+      "lore": "Every traveller paid it once.",
+      "look": "ring: dull copper with a coin set in it"
+    },
+    {
+      "id": "hollow_reed",
+      "name": "Hollow Reed",
+      "base": "willow_wand",
+      "levelReq": 3,
+      "weight": 90,
+      "stats": [
+        { "stat": "spellPower", "units": "flat", "min": 5, "max": 8 },
+        { "stat": "castSpeed", "units": "pct", "min": 10, "max": 15 },
+        { "stat": "manaOnKill", "units": "flat", "min": 3, "max": 5 }
+      ],
+      "baseMult": 1.1,
+      "lore": "Whistles when it is pointed at something that should not be there.",
+      "look": "wand: pale hollow reed with a green glow inside"
+    },
+    {
+      "id": "brindlecoat",
+      "name": "Brindlecoat",
+      "base": "hide_jerkin",
+      "levelReq": 4,
+      "weight": 90,
+      "stats": [
+        { "stat": "armourPct", "units": "pct", "min": 35, "max": 50 },
+        { "stat": "health", "units": "flat", "min": 10, "max": 16 },
+        { "stat": "poisonResist", "units": "pct", "min": 8, "max": 12 },
+        { "stat": "dodge", "units": "pct", "min": 3, "max": 5 }
+      ],
+      "lore": "Stitched from a hound that would not die.",
+      "look": "jerkin: mottled brown-and-black hide, fur collar"
+    },
+    {
+      "id": "quiet_hatchet",
+      "name": "The Quiet Hatchet",
+      "base": "hand_axe",
+      "levelReq": 5,
+      "weight": 80,
+      "stats": [
+        { "stat": "physDamagePct", "units": "pct", "min": 50, "max": 70 },
+        { "stat": "threat", "units": "pct", "min": -40, "max": -30 },
+        { "stat": "staggerChance", "units": "pct", "min": 5, "max": 5 }
+      ],
+      "lore": "The woodcutter never heard it either.",
+      "look": "axe: small dark head, leather-wrapped haft"
+    },
+    {
+      "id": "moth_eaten_hood",
+      "name": "Moth-Eaten Hood",
+      "base": "linen_hood",
+      "levelReq": 5,
+      "weight": 80,
+      "stats": [
+        { "stat": "int", "units": "flat", "min": 2, "max": 3 },
+        { "stat": "shadowResist", "units": "pct", "min": 8, "max": 12 },
+        { "stat": "mana", "units": "flat", "min": 12, "max": 18 },
+        { "stat": "shadowDamagePct", "units": "pct", "min": 10, "max": 15 }
+      ],
+      "lore": "The holes are where the moths got in. Or out.",
+      "look": "hood: grey ragged hood, holes with a faint purple shimmer"
+    },
+    {
+      "id": "candlewick_gloves",
+      "name": "Candlewick Gloves",
+      "base": "wool_mitts",
+      "levelReq": 6,
+      "weight": 80,
+      "stats": [
+        { "stat": "castSpeed", "units": "pct", "min": 6, "max": 9 },
+        { "stat": "fireDamageFlat", "units": "flat", "min": 3, "max": 6 },
+        { "stat": "mana", "units": "flat", "min": 8, "max": 12 }
+      ],
+      "rule": {
+        "text": "Your fire spells light the target for 3 s (+2 m light radius around it).",
+        "effect": "onFireSpellHit",
+        "apply": {
+          "status": "lit",
+          "seconds": 3,
+          "lightRadius": 2
+        }
+      },
+      "lore": "Warm. Always warm.",
+      "look": "gloves: cream wool with scorched fingertips"
+    },
+    {
+      "id": "thornwall",
+      "name": "Thornwall",
+      "base": "round_shield",
+      "levelReq": 6,
+      "weight": 80,
+      "stats": [
+        { "stat": "blockChance", "units": "pct", "min": 10, "max": 14 },
+        { "stat": "thorns", "units": "flat", "min": 8, "max": 14 },
+        { "stat": "str", "units": "flat", "min": 2, "max": 3 }
+      ],
+      "lore": "A hedge, hammered flat.",
+      "look": "shield: round shield wrapped in dried briar"
+    },
+    {
+      "id": "pennyweight_belt",
+      "name": "Pennyweight Belt",
+      "base": "leather_belt",
+      "levelReq": 6,
+      "weight": 70,
+      "stats": [
+        { "stat": "potionPower", "units": "pct", "min": 18, "max": 25 },
+        { "stat": "goldFind", "units": "pct", "min": 8, "max": 12 }
+      ],
+      "rule": {
+        "text": "+1 potion slot (4 on this belt).",
+        "effect": "potionSlots",
+        "add": 1
+      },
+      "lore": "Weighs exactly what it says.",
+      "look": "belt: leather belt hung with small brass weights"
+    },
+    {
+      "id": "longstride_boots",
+      "name": "Longstride Boots",
+      "base": "hide_boots",
+      "levelReq": 7,
+      "weight": 80,
+      "stats": [
+        { "stat": "moveSpeed", "units": "pct", "min": 10, "max": 14 },
+        { "stat": "dodge", "units": "pct", "min": 3, "max": 4 },
+        { "stat": "agi", "units": "flat", "min": 2, "max": 3 }
+      ],
+      "lore": "Made for someone with somewhere to be.",
+      "look": "boots: tall soft boots with a red stripe"
+    },
+    {
+      "id": "shepherds_crook",
+      "name": "Shepherd's Crook",
+      "base": "prayer_rod",
+      "levelReq": 7,
+      "weight": 80,
+      "stats": [
+        { "stat": "healingPower", "units": "pct", "min": 12, "max": 16 },
+        { "stat": "manaRegen", "units": "flat", "min": 3, "max": 5 },
+        { "stat": "spi", "units": "flat", "min": 2, "max": 3 }
+      ],
+      "rule": {
+        "text": "Your single-target heals also heal the ally nearest the target for 25%.",
+        "effect": "healSplash",
+        "nearest": 1,
+        "pct": 25
+      },
+      "lore": "Keeps the flock together.",
+      "look": "sceptre: wooden crook with a bell"
+    },
+    {
+      "id": "redcaps_needle",
+      "name": "Redcap's Needle",
+      "base": "stiletto",
+      "levelReq": 8,
+      "weight": 70,
+      "stats": [
+        { "stat": "critChance", "units": "pct", "min": 8, "max": 10 },
+        { "stat": "poisonDamageOverTime", "units": "flat", "min": 6, "max": 12 },
+        { "stat": "attackSpeed", "units": "pct", "min": 8, "max": 12 }
+      ],
+      "lore": "Dipped in something, long ago.",
+      "look": "dagger: thin rusty-red blade"
+    },
+    {
+      "id": "bellwether_amulet",
+      "name": "Bellwether Amulet",
+      "base": "silver_amulet",
+      "levelReq": 8,
+      "weight": 70,
+      "stats": [
+        { "stat": "threat", "units": "pct", "min": 20, "max": 30 },
+        { "stat": "armourFlat", "units": "flat", "min": 25, "max": 40 },
+        { "stat": "str", "units": "flat", "min": 4, "max": 6 }
+      ],
+      "lore": "Where it goes, they follow.",
+      "look": "amulet: a small brass bell on a leather cord"
+    },
+    {
+      "id": "scriveners_tome",
+      "name": "Scrivener's Tome",
+      "base": "bound_tome",
+      "levelReq": 9,
+      "weight": 70,
+      "stats": [
+        { "stat": "spellPower", "units": "flat", "min": 10, "max": 14 },
+        { "stat": "int", "units": "flat", "min": 2, "max": 3 },
+        { "stat": "stormDamagePct", "units": "pct", "min": 10, "max": 15 }
+      ],
+      "rule": {
+        "text": "Casting the same spell twice in a row costs 20% less mana the second time.",
+        "effect": "repeatCastDiscount",
+        "pct": 20
+      },
+      "lore": "Every page is a correction.",
+      "look": "focus: ink-stained book with loose pages"
+    },
+    {
+      "id": "burrow_gloves",
+      "name": "Burrow Gloves",
+      "base": "mail_gloves",
+      "levelReq": 10,
+      "weight": 70,
+      "stats": [
+        { "stat": "attackSpeed", "units": "pct", "min": 8, "max": 10 },
+        { "stat": "str", "units": "flat", "min": 4, "max": 6 },
+        { "stat": "lifeOnHit", "units": "flat", "min": 2, "max": 4 }
+      ],
+      "lore": "Dug out of a grave that dug itself.",
+      "look": "gloves: mail gloves caked with dry earth"
+    },
+    {
+      "id": "foxfire_bow",
+      "name": "Foxfire Bow",
+      "base": "long_bow",
+      "levelReq": 10,
+      "weight": 70,
+      "stats": [
+        { "stat": "fireDamageFlat", "units": "flat", "min": 6, "max": 12 },
+        { "stat": "attackSpeed", "units": "pct", "min": 12, "max": 16 },
+        { "stat": "fireDamagePct", "units": "pct", "min": 10, "max": 15 }
+      ],
+      "baseMult": 1.15,
+      "rule": {
+        "text": "30% of this bow's physical damage is dealt as fire instead.",
+        "effect": "convertDamage",
+        "from": "physical",
+        "to": "fire",
+        "pct": 30
+      },
+      "lore": "The string burns and never burns through.",
+      "look": "bow: dark wood with a thin orange-glowing string"
+    },
+    {
+      "id": "owlbone_staff",
+      "name": "Owlbone Staff",
+      "base": "gnarled_staff",
+      "levelReq": 11,
+      "weight": 60,
+      "stats": [
+        { "stat": "spellPower", "units": "flat", "min": 14, "max": 20 },
+        { "stat": "frostDamagePct", "units": "pct", "min": 20, "max": 28 },
+        { "stat": "mana", "units": "flat", "min": 20, "max": 30 }
+      ],
+      "rule": {
+        "text": "Frost spell hits have 15% chance to freeze the target for 1 s (bosses: slow 30% instead).",
+        "effect": "onFrostSpellHit",
+        "chancePct": 15,
+        "status": "freeze",
+        "seconds": 1,
+        "bossFallback": {
+          "status": "slow",
+          "pct": 30,
+          "seconds": 1
+        }
+      },
+      "lore": "Hoots in the cold.",
+      "look": "staff: pale bone staff topped with an owl skull"
+    },
+    {
+      "id": "millstone_cuirass",
+      "name": "Millstone Cuirass",
+      "base": "breastplate",
+      "levelReq": 12,
+      "weight": 60,
+      "stats": [
+        { "stat": "armourPct", "units": "pct", "min": 50, "max": 70 },
+        { "stat": "health", "units": "flat", "min": 25, "max": 40 },
+        { "stat": "moveSpeed", "units": "pct", "min": -8, "max": -5 },
+        { "stat": "allResist", "units": "pct", "min": 4, "max": 6 }
+      ],
+      "lore": "Two parts of a mill wheel, hinged.",
+      "look": "cuirass: grey stone-like plate, round and heavy"
+    },
+    {
+      "id": "chanters_beads",
+      "name": "Chanter's Beads",
+      "base": "silver_amulet",
+      "levelReq": 12,
+      "weight": 60,
+      "stats": [
+        { "stat": "castSpeed", "units": "pct", "min": 10, "max": 14 },
+        { "stat": "mana", "units": "flat", "min": 15, "max": 25 },
+        { "stat": "healingPower", "units": "pct", "min": 8, "max": 12 }
+      ],
+      "rule": {
+        "text": "Spells cost 10% less mana.",
+        "effect": "manaCostPct",
+        "pct": -10
+      },
+      "lore": "One bead per verse.",
+      "look": "amulet: long loop of red wooden beads"
+    },
+    {
+      "id": "sunder_pick",
+      "name": "Sunder Pick",
+      "base": "war_axe",
+      "levelReq": 13,
+      "weight": 60,
+      "stats": [
+        { "stat": "physDamagePct", "units": "pct", "min": 80, "max": 100 },
+        { "stat": "str", "units": "flat", "min": 5, "max": 8 },
+        { "stat": "hitChance", "units": "pct", "min": 4, "max": 6 }
+      ],
+      "rule": {
+        "text": "Hits reduce the target's armour by 10% for 4 s, stacking to 3.",
+        "effect": "onWeaponHit",
+        "status": "sundered",
+        "armourPct": -10,
+        "seconds": 4,
+        "maxStacks": 3
+      },
+      "lore": "A miner's answer to a locked door.",
+      "look": "greataxe: pick-headed axe, one blade one spike"
+    },
+    {
+      "id": "black_loam_boots",
+      "name": "Black Loam Boots",
+      "base": "mail_boots",
+      "levelReq": 13,
+      "weight": 60,
+      "stats": [
+        { "stat": "poisonResist", "units": "pct", "min": 20, "max": 28 },
+        { "stat": "moveSpeed", "units": "pct", "min": 6, "max": 9 },
+        { "stat": "vit", "units": "flat", "min": 4, "max": 6 }
+      ],
+      "rule": {
+        "text": "You take no damage from poison pools and poison ground effects.",
+        "effect": "immuneGround",
+        "element": "poison"
+      },
+      "lore": "The mud never dried.",
+      "look": "boots: mail boots stained black to the shin"
+    },
+    {
+      "id": "rimehorn",
+      "name": "Rimehorn",
+      "base": "iron_mace",
+      "levelReq": 14,
+      "weight": 55,
+      "stats": [
+        { "stat": "frostDamageFlat", "units": "flat", "min": 8, "max": 16 },
+        { "stat": "physDamagePct", "units": "pct", "min": 40, "max": 60 },
+        { "stat": "frostResist", "units": "pct", "min": 10, "max": 15 }
+      ],
+      "rule": {
+        "text": "Every hit slows the target 20% for 3 s.",
+        "effect": "onWeaponHit",
+        "status": "slow",
+        "pct": 20,
+        "seconds": 3
+      },
+      "lore": "A ram's horn, iron-shod, cold to hold.",
+      "look": "mace: curled horn head rimed with frost"
+    },
+    {
+      "id": "catacomb_keyring",
+      "name": "Catacomb Keyring",
+      "base": "silver_ring",
+      "levelReq": 15,
+      "weight": 50,
+      "stats": [
+        { "stat": "magicFind", "units": "pct", "min": 20, "max": 28 },
+        { "stat": "goldFind", "units": "pct", "min": 10, "max": 15 },
+        { "stat": "physDamagePct", "units": "pct", "min": -12, "max": -8 }
+      ],
+      "lore": "Opens doors you would rather stayed shut.",
+      "look": "ring: iron ring with three tiny keys"
+    },
+    {
+      "id": "lantern_jaw",
+      "name": "Lantern Jaw",
+      "base": "kettle_helm",
+      "levelReq": 16,
+      "weight": 50,
+      "stats": [
+        { "stat": "armourPct", "units": "pct", "min": 30, "max": 45 },
+        { "stat": "allResist", "units": "pct", "min": 8, "max": 11 },
+        { "stat": "vit", "units": "flat", "min": 5, "max": 8 },
+        { "stat": "lightRadius", "units": "flat", "min": 3, "max": 3 }
+      ],
+      "lore": "The visor glows from the inside.",
+      "look": "helm: kettle helm with a lit grille visor"
+    },
+    {
+      "id": "wayfarers_crossbow",
+      "name": "Wayfarer's Crossbow",
+      "base": "heavy_crossbow",
+      "levelReq": 18,
+      "weight": 45,
+      "stats": [
+        { "stat": "physDamagePct", "units": "pct", "min": 100, "max": 130 },
+        { "stat": "critChance", "units": "pct", "min": 6, "max": 8 },
+        { "stat": "agi", "units": "flat", "min": 6, "max": 9 }
+      ],
+      "rule": {
+        "text": "Bolts pierce through the first enemy to hit one more behind it (at 60%).",
+        "effect": "pierce",
+        "count": 1,
+        "pct": 60
+      },
+      "lore": "Nobody walks the whole road.",
+      "look": "crossbow: travel-worn crossbow, a map case under the stock"
+    },
+    {
+      "id": "stormcrow_band",
+      "name": "Stormcrow Band",
+      "base": "gold_signet",
+      "levelReq": 19,
+      "weight": 45,
+      "stats": [
+        { "stat": "stormDamagePct", "units": "pct", "min": 22, "max": 30 },
+        { "stat": "castSpeed", "units": "pct", "min": 6, "max": 8 },
+        { "stat": "stormResist", "units": "pct", "min": 10, "max": 15 }
+      ],
+      "rule": {
+        "text": "Storm spell crits chain to one extra enemy within 5 m for 40%.",
+        "effect": "onStormSpellCrit",
+        "chain": 1,
+        "range": 5,
+        "pct": 40
+      },
+      "lore": "It was on the bird's leg.",
+      "look": "ring: black band with a blue stone"
+    },
+    {
+      "id": "kingsmoot",
+      "name": "Kingsmoot",
+      "base": "claymore",
+      "levelReq": 24,
+      "weight": 35,
+      "stats": [
+        { "stat": "physDamagePct", "units": "pct", "min": 120, "max": 150 },
+        { "stat": "str", "units": "flat", "min": 10, "max": 14 },
+        { "stat": "threat", "units": "pct", "min": 20, "max": 30 },
+        { "stat": "health", "units": "flat", "min": 40, "max": 60 }
+      ],
+      "baseMult": 1.1,
+      "rule": {
+        "text": "Killing a champion or rare monster gives you and allies within 10 m +15% damage for 10 s.",
+        "effect": "onRankKill",
+        "buff": {
+          "damagePct": 15,
+          "seconds": 10,
+          "range": 10
+        }
+      },
+      "lore": "Twelve chiefs swore on it. Eleven lied.",
+      "look": "greatsword: broad blade with twelve notches"
+    },
+    {
+      "id": "cinder_idol",
+      "name": "Cinder Idol",
+      "base": "saint_idol",
+      "levelReq": 28,
+      "weight": 35,
+      "stats": [
+        { "stat": "spellPower", "units": "flat", "min": 30, "max": 40 },
+        { "stat": "fireDamagePct", "units": "pct", "min": 25, "max": 35 },
+        { "stat": "fireResist", "units": "pct", "min": 15, "max": 20 }
+      ],
+      "rule": {
+        "text": "Fire damage over time you apply ticks 25% faster.",
+        "effect": "dotTickRate",
+        "element": "fire",
+        "pct": 25
+      },
+      "lore": "Still warm after a hundred years.",
+      "look": "focus: blackened wooden saint with glowing cracks"
+    }
+  ]
+}

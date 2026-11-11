@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Rogueloot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Spectral:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/whats-new.css">
+<link rel="stylesheet" href="../../shared/credits.css">
+<link rel="stylesheet" href="css/game.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="tags"></div>
+<div id="hud" hidden><div class="hud-code" hidden></div><div class="hud-area"></div></div>
+<div id="fight" hidden></div>
+<div id="touch"></div>
+<section id="title" class="screen">
+  <div class="title-card">
+    <h1>Rogueloot</h1>
+    <p class="tag-line">A co-op adventure for one to four heroes.</p>
+    <div id="heroes"></div>
+    <div class="btns col">
+      <button id="solo" class="primary">Play solo</button>
+      <button id="host" class="online-only">Host an online game</button>
+      <label class="row online-only small"><input type="checkbox" id="host-public"> List it publicly</label>
+      <div class="join-row online-only"><input id="code" maxlength="4" placeholder="CODE" autocomplete="off"><button id="join">Join</button></div>
+      <button id="find" class="online-only">Find a game</button>
+    </div>
+    <p class="msg" id="title-msg"></p>
+    <div class="small-btns"><span id="news-slot"></span><button id="credits">Credits</button><span id="account-slot"></span></div>
+  </div>
+</section>
+<script type="module" src="js/client/main.js"></script>
+</body>
+</html>

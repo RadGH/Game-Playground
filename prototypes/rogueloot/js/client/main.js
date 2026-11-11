@@ -27,6 +27,7 @@ import { makeRng, hashStr } from '../sim/rng.js';
 import { createGround } from './ground.js';
 import { play, LOOT_SOUND, soundFor, ambience, setVolume, getVolume } from './sound.js';
 import { maybeRate, tally } from './rate.js';
+import { createPadNav } from './padnav.js';
 import { loadContentAsync } from '../sim/content.js';
 import { cleanCode } from '../net/protocol.js';
 import { qrSvg, joinUrl } from '../../../tumblefair/js/client/qr.js';
@@ -466,7 +467,7 @@ window.gameEye = {
 // controller: A = attack (targets the nearest), X/Y/B/RB = skills 1-4, LB = next target (game standards §1)
 let padPrev = {};
 function padCombat() {
-  if (!G.me) return;
+  if (!G.me || anyMenu()) return;
   const g = navigator.getGamepads ? [...navigator.getGamepads()].find(Boolean) : null; if (!g) return;
   const now = { a: g.buttons[0]?.pressed, b: g.buttons[1]?.pressed, x: g.buttons[2]?.pressed, y: g.buttons[3]?.pressed, lb: g.buttons[4]?.pressed, rb: g.buttons[5]?.pressed, lt: g.buttons[6]?.pressed, rt: g.buttons[7]?.pressed, back: g.buttons[8]?.pressed };
   const tap = k => now[k] && !padPrev[k];
@@ -478,3 +479,8 @@ function padCombat() {
   if (tap('back')) sheetUI.toggle();
   padPrev = now;
 }
+
+// controller in menus (game standards §1): the d-pad / stick walk a highlight, A presses, B goes back. While you are
+// playing with no menu open, the pad drives the hero instead.
+const anyMenu = () => !!document.querySelector('.modal:not([hidden]), .sheet-ui:not([hidden]), .skills-ui:not([hidden])');
+createPadNav({ busy: () => !!G.me && !anyMenu(), back: () => { if (townUI.open) { townUI.close(); return true; } if (skillsUI.open) { skillsUI.toggle(false); return true; } if (sheetUI.open) { sheetUI.toggle(false); return true; } const m = [...document.querySelectorAll('.modal:not([hidden])')].pop(); if (m) { m.remove(); return true; } return false; } });

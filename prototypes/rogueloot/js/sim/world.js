@@ -18,7 +18,7 @@ import { mercAct } from './mercs.js';
 import { inventoryAct } from './inventory.js';
 import { townAct } from './town.js';
 import { craftAct } from './craft.js';
-import { pickPath, learn, setBar, resourceOf, pickSpec, respec } from './skills.js';
+import { pickPath, learn, setBar, resourceOf, pickSpec, respec, stepZones } from './skills.js';
 import { refreshHero } from './actors.js';
 import { stepLoot, pickup, openChest, placeChests } from './loot.js';
 
@@ -116,6 +116,7 @@ export function step(w) {
   stepShots(w, DT);
   stepLoot(w);
   stepPending(w);
+  stepZones(w);
   // corpses fade, then go (fresh each game session: nothing respawns, ruling 25)
   for (const f of [...w.foes.values()]) if (f.dead && w.time - f.diedAt > KEEP_CORPSE) w.foes.delete(f.id);
 }

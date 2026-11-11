@@ -3,10 +3,11 @@
 import { resolveHit, addThreat, GCD, THREAT } from '../rules/combat.js';
 import { gainXp } from '../rules/character.js';
 import { partyShares } from '../rules/progression.js';
-import { has, withArmour, dmgFactor } from './status.js';
+import { has, withArmour, dmgFactor, addFx } from './status.js';
 import { applyRider } from './abilities.js';
 import { lootFoe } from './loot.js';
 import { questKill } from './quests.js';
+import { leechPct } from './legendary.js';
 import { wireChampions, modsHitTaken, modsDeath, soakWard } from './champions.js';
 import { makeFoe } from './actors.js';
 import { rankOf, castSkill, stepSkillCast, wireSkills, fxPct, markOf, armourAfter, gain } from './skills.js';
@@ -102,11 +103,14 @@ function weaponHit(w, p, t, mult, sk = null) {
   if (r.amount > 0 && p.st.elemFlat) for (const [ty, n] of Object.entries(p.st.elemFlat)) if (n > 0) { const e = n * (1 + (p.st.elemPct?.[ty] || 0) / 100) * mult * (1 - Math.min(75, t.resists?.[ty] || 0) / 100); r.amount += Math.round(e); }
   if (r.amount > 0 && p.st.lifeOnHit) p.hp = Math.min(p.maxHp, p.hp + p.st.lifeOnHit);
   hurt(w, p, t, r, sk?.type || 'physical', (sk?.threat ?? 1));
+  // a weapon coat (Poison Coat): every hit leaves its dot
+  if (r.amount > 0) for (const c of p.fx || []) if (c.kind === 'coat' && !t.dead) addFx(w, t, { id: c.id + ':dot', kind: 'dot', per: c.per, type: c.type, secs: c.dot, src: p.id });
   if (sk?.interrupts && t.cast && r.amount > 0 && t.cast.interruptible !== false) {
     w.events.push({ k: 'interrupt', s: p.id, t: t.id, sk: t.cast.name });
     t.silencedUntil = w.time + (+t.cast.ab?.interruptLock || 2);          // the bestiary's lockout after a kick
     t.cast = null; t.nextSwing = w.time + 1;
   }
+  return r;
 }
 
 /** Apply a resolved blow: hp, threat, events, death. */
@@ -114,6 +118,8 @@ export function hurt(w, src, t, r, type, threatMult = 1) {
   if (t.dead) return;
   w.events.push({ k: 'dmg', s: src.id, t: t.id, n: r.amount, r: r.result, ty: type });
   if (!r.amount) { if (t.team === 'foe') aggro(w, t, src, 1); return; }
+  // a ward that strikes back (thorns on a shield): the attacker takes spell damage while it holds
+  if (src?.team === 'foe' && t.team === 'hero') for (const f of t.fx || []) if (f.kind === 'shield' && f.thorns && f.left > 0 && !src.dead) hurt(w, t, src, { result: 'hit', amount: Math.max(1, Math.round(f.thorns.n)) }, f.thorns.type);
   // a shield soaks first
   for (const f of t.fx || []) if (f.kind === 'shield' && f.left > 0 && r.amount > 0) { const k = Math.min(f.left, r.amount); f.left -= k; r.amount -= k; if (f.left <= 0) f.until = 0; }
   if (t.team === 'foe') {
@@ -195,7 +201,7 @@ export function stepAuto(w) {
     face(p, t);
     p.nextSwing = w.time + 1 / p.weapon.speed;
     if (p.weapon.ranged) { const roll = p.weapon.min + w.rng() * (p.weapon.max - p.weapon.min); w.shots.push({ id: 's' + (w.nextId++), from: p.id, to: t.id, x: p.x, z: p.z, speed: 30, type: 'physical', amount: roll * p.st.rangedPower, spell: false }); w.events.push({ k: 'shoot', s: p.id, t: t.id, ty: 'arrow' }); }
-    else { weaponHit(w, p, t, 1); w.events.push({ k: 'swing', s: p.id }); }
+    else { const r = weaponHit(w, p, t, 1); w.events.push({ k: 'swing', s: p.id }); const lp = leechPct(w, p); if (lp && r?.amount > 0) p.hp = Math.min(p.maxHp, p.hp + r.amount * lp / 100); }
     p.lastFight = w.time;
   }
 }

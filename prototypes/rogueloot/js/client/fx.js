@@ -50,10 +50,10 @@ export function createFx(view) {
     const m = new THREE.Mesh(e.shape && e.shape !== 'circle' ? shapeGeo({ ...e, len: e.r, w: e.w || 1.6, ang: e.ang }) : new THREE.CircleGeometry(r, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }));
     if (m.geometry.isGroup) return;
     m.position.set(e.x, (view.groundY?.(e.x, e.z) || 0) + 0.08, e.z); if (e.shape && e.shape !== 'circle' && e.shape !== 'ring') m.rotation.y = (e.yaw || 0) + Math.PI;
-    scene.add(m); flashes.push({ m, born: performance.now() });
+    scene.add(m); flashes.push({ m, born: performance.now(), life: e.zone ? e.zone * 1000 : 450, zone: !!e.zone });
   }
   const flashes = [];
   const baseUpdate = update;
-  function update2(dt, now) { baseUpdate(dt, now); for (let i = flashes.length - 1; i >= 0; i--) { const f = flashes[i], k = (now - f.born) / 450; if (k >= 1) { scene.remove(f.m); f.m.geometry.dispose(); f.m.material.dispose(); flashes.splice(i, 1); continue; } f.m.material.opacity = 0.55 * (1 - k); f.m.scale.setScalar(0.85 + k * 0.25); } }
+  function update2(dt, now) { baseUpdate(dt, now); for (let i = flashes.length - 1; i >= 0; i--) { const f = flashes[i], k = (now - f.born) / f.life; if (k >= 1) { scene.remove(f.m); f.m.geometry.dispose(); f.m.material.dispose(); flashes.splice(i, 1); continue; } f.m.material.opacity = f.zone ? 0.32 + Math.sin(now / 160) * 0.08 : 0.55 * (1 - k); if (!f.zone) f.m.scale.setScalar(0.85 + k * 0.25); } }
   return { tele, syncShots, update: update2, burst, count: () => teles.length };
 }

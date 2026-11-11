@@ -322,12 +322,12 @@ const BUILD = {
     part(T, lump(1, 1, 11, 0.1), shell, 0, 0, 0, { sx: 0.45, sy: 0.24, sz: 0.36 });
     for (const [x, z] of [[-0.15, 0.1], [0.2, -0.05], [0.0, -0.2]]) part(T, cone(0.05, 0.08, 5), pale, x, 0.2, z);          // barnacles
     u.legs = bugLegs(c, T, { n: 6, len: 0.16, r: 0.025, y: -0.05, x: 0.38, zFrom: 0.2, zTo: -0.2, lift: 0.35, m: dark });
-    const big = limb(T, 0.3, 0.02, 0.28, 0.22, 0.05, 0.06, shell, { rz: -1.4, rx: 1.0 }); u.arm = big;
+    const big = limb(T, 0.3, 0.02, 0.28, 0.22, 0.05, 0.06, shell, { rz: 0.6, rx: -1.25 }); u.arm = big;
     const pin = pivot(big, 0, -0.22, 0); part(pin, box(0.12, 0.3, 0.1), shell, 0.03, -0.14, 0, { rz: 0.3 }); u.claw = pivot(pin, -0.03, 0, 0);
     part(u.claw, box(0.08, 0.24, 0.07), dark, -0.06, -0.12, 0, { rz: -0.3 });                                                 // the moving pincer half
-    const small = limb(T, -0.3, 0.0, 0.26, 0.14, 0.035, 0.04, shell, { rz: 1.3, rx: 0.9 }); u.armL = small;
+    const small = limb(T, -0.3, 0.0, 0.26, 0.14, 0.035, 0.04, shell, { rz: -0.6, rx: -1.2 }); u.armL = small;
     part(small, box(0.07, 0.14, 0.05), shell, 0, -0.18, 0); part(small, box(0.04, 0.1, 0.04), dark, -0.04, -0.17, 0, { rz: -0.4 });
-    u.stalks = [-1, 1].map(s => { const st = limb(T, s * 0.1, 0.12, 0.3, 0.14, 0.015, 0.015, dark, { rx: -0.6, rz: -s * 0.3, n: 4 }); eye(c, st, 0, -0.15, 0, 0.035); st.rotation.x = -2.5; return st; });
+    u.stalks = [-1, 1].map(s => { const st = limb(T, s * 0.1, 0.1, 0.36, 0.18, 0.015, 0.015, dark, { rx: -2.4, rz: -s * 0.3, n: 4 }); eye(c, st, 0, -0.19, 0, 0.04); return st; });
     u.fit = 'z'; u.death = 'flip'; u.gait = { f: 11, sidle: true };
   },
   shoal_snapper(c) {   // "a fish standing up on fins, mouth open; the dorsal fin is a flag"
@@ -401,7 +401,7 @@ const BUILD = {
     const [dark, brown, pink] = c.P, u = c.u;
     quadRig(c, { len: 1.3, chest: 0.3, legH: 0.18, legR: 0.06, headR: 0.2, neck: -0.05, bodyM: dark, legM: dark, headM: dark, body: 'barrel', jaw: false, spread: 0.22, headUp: 0, legSet: -0.3 });
     u.legs.splice(2, 2).forEach(L => L.parent.remove(L));                                                                  // the back pair only
-    for (const s of [-1, 1]) { const a = limb(u.torso, s * 0.3, -0.05, 0.4, 0.22, 0.07, 0.07, dark, { rz: -s * 0.5, rx: -0.9 }); part(a, box(0.16, 0.24, 0.05), brown, 0, -0.3, 0.02, { rz: s * 0.1 }); u.legs.push(a); if (s > 0) u.arm = a; else u.armL = a; }
+    for (const s of [-1, 1]) { const a = limb(u.torso, s * 0.3, -0.05, 0.4, 0.22, 0.07, 0.07, dark, { rz: s * 0.5, rx: -0.9 }); part(a, box(0.16, 0.24, 0.05), brown, 0, -0.3, 0.02, { rz: s * 0.1 }); u.legs.push(a); if (s > 0) u.arm = a; else u.armL = a; }
     for (let i = 0; i < 5; i++) { const a = i / 5 * TAU; part(u.head, cone(0.02, 0.06, 4), pink, Math.cos(a) * 0.05, 0.02 + Math.sin(a) * 0.05, 0.3, { rx: HALF }); }   // star nose
     u.eyes = eyes(c, u.head, 0.1, 0.12, 0.2, 0.02);
     for (const [x, z] of [[0.1, 0.2], [-0.15, -0.1], [0.05, -0.4]]) part(u.torso, lump(0.09, 0, 4), brown, x, 0.27, z);         // dirt clods
@@ -983,9 +983,9 @@ const BUILD = {
     for (const [x, z, a] of [[-0.5, -0.2, 0.5], [0.4, 0.4, -0.4], [0.1, -0.6, 0.8]]) { part(T, cyl(0.03, 0.03, 1.4, 5), WOOD, x, 0.9, z, { rz: a, rx: 0.4 }); part(T, cone(0.07, 0.2, 4), '#8a3020', x - Math.sin(a) * 0.6, 1.45, z - 0.25, { rz: a, rx: 0.4 }); }   // three harpoons
     for (let i = 0; i < 5; i++) part(T, cyl(0.012, 0.012, 2.2, 3), WOOD, -0.3, 0.3 + i * 0.1, 0.1, { rz: HALF, ry: i * 0.6, shadow: false });   // the fisher's net
     u.legs = bugLegs(c, T, { n: 8, len: 0.55, r: 0.08, y: -0.2, x: 1.3, zFrom: 0.8, zTo: -0.9, lift: 0.4, m: '#8a3020', n2: 5 });
-    const big = limb(T, 1.0, -0.1, 0.9, 0.7, 0.16, 0.18, shell, { rz: -1.5, rx: 0.9 }); u.arm = big;
+    const big = limb(T, 1.0, -0.1, 0.9, 0.7, 0.16, 0.18, shell, { rz: 0.6, rx: -1.25 }); u.arm = big;
     const pin = pivot(big, 0, -0.7, 0); part(pin, box(0.4, 0.9, 0.3), shell, 0.1, -0.45, 0, { rz: 0.3 }); u.claw = pivot(pin, -0.1, 0, 0); part(u.claw, box(0.25, 0.75, 0.22), '#8a3020', -0.2, -0.38, 0, { rz: -0.3 });
-    const small = limb(T, -1.0, -0.15, 0.85, 0.4, 0.1, 0.12, shell, { rz: 1.3, rx: 0.9 }); u.armL = small; part(small, box(0.2, 0.4, 0.15), shell, 0, -0.5, 0); part(small, box(0.12, 0.3, 0.12), '#8a3020', -0.12, -0.5, 0, { rz: -0.4 });
+    const small = limb(T, -1.0, -0.15, 0.85, 0.4, 0.1, 0.12, shell, { rz: -0.6, rx: -1.2 }); u.armL = small; part(small, box(0.2, 0.4, 0.15), shell, 0, -0.5, 0); part(small, box(0.12, 0.3, 0.12), '#8a3020', -0.12, -0.5, 0, { rz: -0.4 });
     u.stalks = [-1, 1].map(s => { const st = limb(T, s * 0.3, 0.4, 1.0, 0.4, 0.04, 0.04, '#8a3020', { rx: -2.4, rz: -s * 0.3, n: 4 }); eye(c, st, 0, -0.42, 0, 0.1); return st; });
     u.fit = 'z'; u.death = 'sink'; u.gait = { f: 8, sidle: true };
   },
@@ -1254,7 +1254,7 @@ export function animateMonster(group, state, t, dt = 0.016, o = {}) {
     });
     if (u.stalks) for (const st of u.stalks) st.rotation.y += Math.sin(t * 1.3 + ph + st.position.x) * 0.45;
     if (u.claw) { const open = swing > 0 ? (p < 0.4 ? p / 0.4 : Math.max(0, 1 - (p - 0.4) / 0.12)) : 0.4 + Math.sin(t * 1.2 + ph) * 0.3; u.claw.rotation.z -= open * 0.7; }
-    if (u.arm && swing > 0) u.arm.rotation.x -= bump(p) * 0.6;
+    if (u.arm && swing > 0) u.arm.rotation.x -= bump(p) * 0.9;
     if (u.spin && (swing > 0 || cast)) u.spin.rotation.z += t * 30;
     if (swing > 0 && !u.claw) { if (u.shootsBackward) u.torso.rotation.y += bump(p) * PI * 0.9; else { body.position.z += bump(p) * 0.2; if (u.head) u.head.rotation.x -= bump(p) * 0.4; } }
     if (cast) { u.torso.rotation.x -= 0.25; body.position.y += 0.05; }

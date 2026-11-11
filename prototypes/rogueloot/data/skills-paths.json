@@ -464,7 +464,11 @@
       "pct": 1
      }
     }
-   ]
+   ],
+   "spendAll": true,
+   "perResourceSpent": {
+    "mult": 0.02
+   }
   },
   "fighter_long_grudge": {
    "name": "Long Grudge",
@@ -612,7 +616,8 @@
       "mult": 0.12
      }
     }
-   ]
+   ],
+   "cond": "behind"
   },
   "rogue_slip_step": {
    "name": "Slip Step",
@@ -679,7 +684,8 @@
       "mult": 0.12
      }
     }
-   ]
+   ],
+   "weaponOnly": "ranged"
   },
   "rogue_poison_coat": {
    "name": "Poison Coat",
@@ -699,20 +705,17 @@
    "cd": 0,
    "gcd": true,
    "range": 0,
-   "target": "enemy",
+   "target": "self",
    "effects": [
     {
-     "do": "weapon",
-     "mult": 0.6
-    },
-    {
-     "do": "dot",
+     "do": "coat",
      "type": "poison",
      "base": [
       1.6,
       0.75
      ],
      "secs": 12,
+     "duration": 20,
      "perRank": {
       "base": [
        0.25,
@@ -1098,17 +1101,17 @@
    },
    "costPerRank": 1,
    "cast": 0,
-   "channel": 3,
    "cd": 14,
    "gcd": true,
    "range": 25,
    "target": "ground",
    "effects": [
     {
-     "do": "area",
+     "do": "zone",
      "shape": "circle",
      "size": 5,
-     "at": "ground",
+     "secs": 3,
+     "tick": 1,
      "effects": [
       {
        "do": "damage",
@@ -1362,22 +1365,22 @@
    "target": "ground",
    "effects": [
     {
-     "do": "area",
+     "do": "zone",
      "shape": "circle",
      "size": 5,
-     "at": "ground",
+     "secs": 8,
+     "tick": 1,
      "effects": [
       {
-       "do": "hot",
+       "do": "heal",
        "base": [
-        2.5,
-        1.0
+        1.2,
+        0.45
        ],
-       "secs": 8,
        "perRank": {
         "base": [
-         0.25,
-         0.08
+         0.12,
+         0.04
         ]
        }
       }

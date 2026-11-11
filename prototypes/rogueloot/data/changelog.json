@@ -1,6 +1,17 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-legendaries",
+      "date": "2026-11-11",
+      "title": "Legendary powers and sharper skills",
+      "items": [
+        "Legendary items now do what they say: each carries a power that reshapes one of your skills (Wide Swing in a full circle, Cinder Bolt leaving fire on the ground, a Long Draw that fires twice, and more).",
+        "Back Cut only lands from behind, and Long Draw needs a bow. Breaker Blow pours your whole Temper bar into one hit, so the more you have, the harder it lands.",
+        "Poison Coat now coats your weapon for 20 seconds. Sanctify and Thunderhead leave a lasting patch on the ground.",
+        "Controllers work in every menu: the d-pad moves a highlight, A presses, B goes back."
+      ]
+    },
+    {
       "id": "2026-11-10-specs-dungeons",
       "date": "2026-11-10",
       "title": "Specializations and the first dungeons",

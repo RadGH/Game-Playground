@@ -8,6 +8,7 @@ import { refreshHero } from './actors.js';
 import { sheet } from '../rules/sheet.js';
 import { isPotion, toBelt, takeFromBelt, beltSlots } from '../rules/potions.js';
 import { addFx } from './status.js';
+import { potionRefund } from './legendary.js';
 
 const data = w => w.content.items;
 const done = (w, p) => { w.charDirty.add(p.id); refreshHero(w, p); return { ok: true }; };
@@ -72,6 +73,8 @@ export function inventoryAct(w, p, a) {
       const power = 1 + (p.st.potionPower || 0) / 100;
       // D2 style: each potion is its own refill, so drinking two stacks two (stack: true)
       addFx(w, p, { id: 'potion:' + kind, kind: kind === 'mana' ? 'mot' : 'hot', per: size[kind] * power / size.secs, secs: size.secs, src: p.id, stack: true });
+      // legendary (Packrat's Sash): sometimes the potion is not used up
+      if (potionRefund(w, p) && w.rng() * 100 < potionRefund(w, p)) { w.events.push({ k: 'drink', t: p.id, kind, free: true }); return { ok: true }; }
       p.char = { ...ch, belt: got.belt, bag }; w.charDirty.add(p.id);
       w.events.push({ k: 'drink', t: p.id, kind });
       return { ok: true };

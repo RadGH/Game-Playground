@@ -269,7 +269,12 @@ export function learn(w, p, id) {
   if (ch.level < (sk.reqLevel || 1)) return { err: `Needs level ${sk.reqLevel}.` };
   for (const pre of sk.prereq || []) if (!(ch.skills?.[pre] > 0)) return { err: `Learn ${w.content.skills[pre]?.name || pre} first.` };
   const skills = { ...(ch.skills || {}), [id]: now + 1 };
-  let bar = ch.bar || []; if (sk.kind === 'active' && !bar.includes(id) && bar.filter(Boolean).length < 6) bar = [...bar.filter(Boolean), id];
+  let bar = ch.bar || [];
+  if (sk.kind === 'active' && !sk.hidden && !bar.includes(id) && now === 0) {
+    // a new skill goes on the bar: an empty slot, else over the last Wanderer skill (players rarely think to swap them)
+    if (bar.filter(Boolean).length < 6) bar = [...bar.filter(Boolean), id];
+    else { let k = -1; for (let i = bar.length - 1; i >= 0; i--) if (w.content.skills[bar[i]]?.owner === 'wanderer') { k = i; break; } if (k >= 0) { bar = [...bar]; bar[k] = id; } }
+  }
   p.char = { ...ch, skills, skillPoints: ch.skillPoints - 1, bar };
   return { ok: true };
 }

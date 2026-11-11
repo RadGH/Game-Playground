@@ -2,7 +2,7 @@
 // player-facing text of a skill at a rank ({mult} {dmg} {secs} filled in from the rank's numbers).
 import { atRank, rankOf, costOf, synergyOf } from '../sim/skills.js';
 import { PATH_BONUS } from '../rules/sheet.js';
-const bonusText = id => { const b = PATH_BONUS[id]; if (!b) return ''; return [b.hpPct && `+${b.hpPct}% health`, b.armourPct && `+${b.armourPct}% armour`, b.dodge && `+${b.dodge}% dodge`].filter(Boolean).join(', '); };
+const bonusText = id => { const b = PATH_BONUS[id]; if (!b) return ''; return [b.hpPct && `+${b.hpPct}% health`, b.armourPct && `+${b.armourPct}% armour`, b.dodge && `+${b.dodge}% dodge`, b.dr && `${b.dr}% less damage taken`].filter(Boolean).join(', '); };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const RES_NAME = { rage: 'Temper', energy: 'Energy', mana: 'Mana', health: '% health' };

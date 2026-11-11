@@ -123,6 +123,7 @@ export function hurt(w, src, t, r, type, threatMult = 1) {
   if (t.fx?.length && t.fx.some(f => f.kind === 'sleep' || (f.kind === 'charm' && src?.team !== 'foe'))) t.fx = t.fx.filter(f => f.kind !== 'sleep' && !(f.kind === 'charm' && src?.team !== 'foe'));
   // a ward that strikes back (thorns on a shield): the attacker takes spell damage while it holds
   if (src?.team === 'foe' && t.team === 'hero') for (const f of t.fx || []) if (f.kind === 'shield' && f.thorns && f.left > 0 && !src.dead) hurt(w, t, src, { result: 'hit', amount: Math.max(1, Math.round(f.thorns.n)) }, f.thorns.type);
+  if (t.team === 'hero' && t.st?.dr && r.amount > 0) r = { ...r, amount: Math.max(1, Math.round(r.amount * (1 - t.st.dr / 100))) };
   // a link (Sworn Guard, Thread of Fate): a share of the hit goes to the friend who took the oath, after their armour
   if (t.team === 'hero' && r.amount > 0) for (const f of t.fx || []) if (f.kind === 'link') {
     const g = w.players.get(f.src); if (!g || g.dead || g === t) continue;

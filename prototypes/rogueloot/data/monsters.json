@@ -8795,7 +8795,7 @@
     {
      "w": 25,
      "of": {
-      "hollowhorn_raider": 3,
+      "hollowhorn_raider": 2,
       "hollowhorn_slinger": 1
      }
     },
@@ -8803,7 +8803,7 @@
      "w": 22,
      "of": {
       "hollowhorn_warcaller": 1,
-      "hollowhorn_raider": 3,
+      "hollowhorn_raider": 2,
       "hollowhorn_slinger": 1
      }
     },
@@ -8811,7 +8811,7 @@
      "w": 18,
      "of": {
       "hollowhorn_bonechanter": 1,
-      "hollowhorn_raider": 3
+      "hollowhorn_raider": 2
      }
     },
     {

@@ -8,7 +8,7 @@ export const FISTS = { min: 1, max: 3, speed: 1.0, ranged: false, hands: 1 };
 const DMG = ['fire', 'frost', 'storm', 'poison', 'shadow'];
 
 /** The melee Paths stand in the hits casters keep away from, so they are built sturdier (balance bot, 2026-11-11). */
-export const PATH_BONUS = { fighter: { hpPct: 25, armourPct: 15 }, rogue: { hpPct: 25, dodge: 8 } };
+export const PATH_BONUS = { fighter: { hpPct: 25, armourPct: 15, dr: 10 }, rogue: { hpPct: 25, dodge: 8, dr: 10 } };
 
 export function sheet(ch, data, skills = null) {
   const pb = PATH_BONUS[ch.path] || {};
@@ -23,7 +23,7 @@ export function sheet(ch, data, skills = null) {
   const resists = {}; for (const t of DMG) resists[t] = (m[t + 'Resist'] || 0) + allRes;
   const wpn = (data && ch.equip?.weapon && (!ch.equip.weapon.dur || ch.equip.weapon.dur[0] > 0)) ? weaponDamage(data, ch.equip.weapon) : null;
   return {
-    attrs, level: ch.level,
+    attrs, level: ch.level, dr: pb.dr || 0,                             // damage reduction, percent (melee Paths)
     maxHp: Math.round((d.maxHp + (m.health || 0)) * (1 + (pb.hpPct || 0) / 100)), maxMana: Math.round(d.maxMana + (m.mana || 0)),
     hpRegen: +(d.hpRegen + (m.healthRegen || 0)).toFixed(2), manaRegen: +(d.manaRegen + (m.manaRegen || 0)).toFixed(2),
     meleePower: +(d.meleePower * (1 + (m.meleePowerPct || 0) / 100)).toFixed(3), rangedPower: +(d.rangedPower * (1 + (m.rangedPowerPct || 0) / 100)).toFixed(3), rageGen: m.rageGen || 0, energyRegen: m.energyRegen || 0,

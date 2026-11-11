@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-bar-balance",
+      "date": "2026-11-11",
+      "title": "New skills go straight on your bar",
+      "items": [
+        "When you learn a new skill it now goes on your action bar for you, replacing one of the Wanderer's starting skills.",
+        "Fighters and Rogues take 10% less damage from every hit.",
+        "The King's Road warband packs are one raider smaller."
+      ]
+    },
+    {
       "id": "2026-11-11-act1-complete",
       "date": "2026-11-11",
       "title": "All of Act I is open",

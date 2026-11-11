@@ -67,3 +67,39 @@ rogue       42 deaths/h   90 kills/h       36 deaths/h  104 kills/h   <- still d
 mage        4.5           89 -> 222 (mana fix)
 healer      0             198
 ```
+
+## 2026-11-11 — mid act (the bot now arrives with gear for its level, picks a spec at 10, and avoids a pack that killed it)
+
+Earlier mid-act runs gave the bot only its starter sword at levels 6-10, which made every weapon Path look hopeless
+(spells grow with level; weapon hits only grow with better weapons). With magic gear of its level:
+```
+                 Thornwood L6          King's Road L8 (packs 3->2 raiders)   Elderglade L10
+                 deaths/h  kills/h     deaths/h  kills/h                     deaths/h  kills/h
+fighter           13.5     167          28.5     125                            9      120
+rogue             12       174          40.5      63                           15       83
+mage              33       152          60       114                            9      131
+healer             4.5     195           4.5     113                            3      152
+```
+- Fixed on the way: daggers/one-hand swords never used Agility (the base field is `kind`, not `type`).
+- Rogue: +25% health, +8 dodge; Back Cut from the front 75%.
+- King's Road is the act's first warband country and still the spike; the Mage bot stands and casts while a warband
+  charges it (a player steps back) — look at mage kiting in the bot before blaming the numbers.
+
+## 2026-11-11 — late act (L14-19), bot with a full bar
+
+The bot never put learned skills on its bar, so at level 16 it still fought with two starter skills (Mage 20 kills/h).
+Fixed in the bot AND in the game: a newly learned skill now goes on the bar over a Wanderer skill (a new hero's bar is
+never empty, so the old "fill an empty slot" rule never fired). The bot's Rogue picks the Assassin (not the bow Ranger).
+```
+                 Highcairn L14       Redcliff L16        Gravewatch L19 (+10% melee damage reduction, bot dodges telegraphs)
+                 deaths/h kills/h    deaths/h kills/h    deaths/h kills/h
+fighter            18      36          38      118         76      102
+rogue              16      64          42      140        116       64
+mage               32     148          50      172          6      158
+healer              6      70          18      138          8      118
+```
+- Melee Paths now take 10% less damage (`PATH_BONUS.dr`, shown on the Path cards).
+- OPEN: late-act melee still dies far more than casters in the bot. Causes seen: Barrow Husks' grab (root 2 s + damage)
+  and Rattlebone Rain. Before touching numbers, teach the bot to use defensive skills (Vanguard's armour buffs, wards)
+  when hunted — its bar is sorted by skill level, so it plays melee as pure offence. Kiting casters made things WORSE
+  (they back into the next camp) — reverted.

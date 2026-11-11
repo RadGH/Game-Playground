@@ -48,7 +48,7 @@ function play(path, seed) {
   const rng = makeRng(seed * 7919 + path.length);
   let ch = freshHero(rng, path), w = null, p = null, seq = 0, sessions = 0;
   const R = { path, seed, levelAt: { 1: 0 }, deaths: 0, kills: 0, drops: { normal: 0, magic: 0, rare: 0, unique: 0, legendary: 0 }, gold: 0, potions: 0, sessions: 0, gsAt: {}, timeouts: 0 };
-  const avoid = new Map();          // packs that killed us: a player gives them a wide berth for a while
+  let barTick = 0; const avoid = new Map();          // packs that killed us: a player gives them a wide berth for a while
   const avoided = f => (avoid.get(f.pack || f.id) || 0) > (w ? w.time : 0) && !(f.state === 'chase' || f.state === 'attack');
   const newSession = () => { w = createWorld({ seed: seed * 1000 + sessions++, content, zone: ZONE }); p = addPlayer(w, 'bot', ch); R.sessions++; };
   newSession();
@@ -86,9 +86,20 @@ function play(path, seed) {
     // housekeeping: path, points, skills, gear, identify
     if (!ch.path && ch.level >= 3) act(w, 'bot', { do: 'path', path });
     // a spec at 10: --spec <id>, or the first wave-1 spec open to this Path (so spec skills are played, not only the Path's)
-    if (ch.path && !ch.spec && ch.level >= 10) { const pick = SPEC && content.specs[SPEC]?.paths?.includes(ch.path) ? SPEC : Object.entries(content.specs).find(([, s]) => s.paths?.includes(ch.path) && s.wave === 1)?.[0]; if (pick) act(w, 'bot', { do: 'spec', spec: pick }); }
+    if (ch.path && !ch.spec && ch.level >= 10) { const DEF_SPEC = { fighter: 'vanguard', rogue: 'assassin', mage: 'pyromancer', healer: 'cleric' };   // fits the bot's gear (no bow for a dagger rogue)
+      const pick = SPEC && content.specs[SPEC]?.paths?.includes(ch.path) ? SPEC : DEF_SPEC[ch.path]; if (pick) act(w, 'bot', { do: 'spec', spec: pick }); }
     if (ch.unspent > 0) act(w, 'bot', { do: 'spend', attr: ch.unspent % 5 === 0 ? 'vit' : MAIN[ch.path || 'wanderer'], n: 1 });
     if (ch.skillPoints > 0 && ch.path) { const opts = Object.values(S).filter(s => (s.owner === ch.path || (ch.spec && s.owner === ch.spec)) && s.tree && (rankOf(ch, s) < (s.maxRank || 1)) && ch.level >= (s.reqLevel || 1) && (s.prereq || []).every(x => ch.skills?.[x] > 0)); opts.sort((a, b) => (b.kind === 'active') - (a.kind === 'active') || rankOf(ch, a) - rankOf(ch, b)); if (opts[0]) act(w, 'bot', { do: 'learn', skill: opts[0].id }); }
+    // keep the bar full of the best actives it knows (a player puts new skills on the bar); highest level first, Wanderer skills last
+    if (++barTick % 100 === 0 && ch.path) {
+      const own = Object.keys(ch.skills || {}).map(id => S[id]).filter(s => s && s.kind === 'active' && !s.hidden && (s.owner === (ch.spec || ch.path)) && (s.reqLevel || 1) <= ch.level)
+        .sort((a, b) => (b.reqLevel || 1) - (a.reqLevel || 1));
+      const heal = own.find(s => s.target === 'ally' || s.effects?.some(e => e.do === 'heal'));
+      const dmg = own.filter(s => s !== heal && s.target !== 'ally').slice(0, heal ? 5 : 6);
+      const want = [...dmg, ...(heal ? [heal] : [])].map(s => s.id);
+      for (const id of ['sure_strike', 'spark', 'field_mend', 'shove']) if (want.length < 6) want.push(id);
+      want.forEach((id, k) => { if (ch.bar?.[k] !== id) act(w, 'bot', { do: 'bar', i: k, skill: id }); });
+    }
     for (const it of ch.bag || []) {
       if (it.base === 'potion') { act(w, 'bot', { do: 'belt', uid: it.uid }); continue; }
       if (it.ided === false) { act(w, 'bot', { do: 'identify', uid: it.uid }); continue; }
@@ -106,6 +117,12 @@ function play(path, seed) {
     // rest after a respawn or a hard fight: nothing hunting us and health low -> stand still and let it come back
     const hunted = [...w.foes.values()].some(f => !f.dead && f.target === 'bot' && (f.state === 'chase' || f.state === 'attack'));
     if (!hunted && (p.hp < p.maxHp * 0.6 || ((ch.path === 'mage' || ch.path === 'healer') && p.mana < p.maxMana * 0.3))) { R.rest = (R.rest || 0) + 4 * DT; if (p.hp < p.maxHp * 0.6) R.restHp = (R.restHp || 0) + 4 * DT; p.target = null; p.autoOn = false; return; }
+    // step out of a telegraphed attack about to land (a player watches the ground; standing in it is the bot's fault)
+    for (const f of w.foes.values()) {
+      const c = f.cast, tele = c?.ab?.telegraph; if (f.dead || !tele || !tele.shape || tele.shape === 'none' || !c.aim) continue;
+      const size = +tele.size || 3, cx = tele.shape === 'circle' ? c.aim.x : f.x, cz = tele.shape === 'circle' ? c.aim.z : f.z, d = Math.hypot(p.x - cx, p.z - cz);
+      if (d < size + 1) { const l = d || 1; move = { mx: (p.x - cx) / l || 1, mz: (p.z - cz) / l }; return; }
+    }
     // fight: the target, else the nearest living foe, else loot, else wander toward the nearest foe anywhere
     let tg = p.target && w.foes.get(p.target);
     if (!tg || tg.dead) { tg = nearest([...w.foes.values()].filter(f => !f.dead && (f.state === 'chase' || f.state === 'attack') && f.target === 'bot')) || nearest([...w.foes.values()].filter(f => !f.dead && !avoided(f))); if (tg) act(w, 'bot', { do: 'target', target: tg.id }); }

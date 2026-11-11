@@ -119,6 +119,7 @@ export function createPhysics(RAPIER, world, opts = {}) {
   // --- stepping ---------------------------------------------------------------------------------------------------
   const tickers = new Set();    // fn(dt) before every tick (vehicles add forces here)
   const after = new Set();      // fn(dt) after every tick
+  const before = new Set();     // fn() just before every tick (the drawing code keeps the pose a tick started from)
   const breakers = new Set();
   let acc = 0, ticks = 0;
   // Smashing: a solver stops a car dead on a fixed collider in the SAME tick it reports the contact, so breaking the
@@ -154,6 +155,7 @@ export function createPhysics(RAPIER, world, opts = {}) {
     }
   }
   function tick() {
+    for (const f of before) f();
     for (const f of tickers) f(DT);
     smashAhead();
     rw.step(events);
@@ -200,6 +202,9 @@ export function createPhysics(RAPIER, world, opts = {}) {
     step, tick, get ticks() { return ticks; },
     onTick(f) { tickers.add(f); return () => tickers.delete(f); },
     afterTick(f) { after.add(f); return () => after.delete(f); },
+    beforeTick(f) { before.add(f); return () => before.delete(f); },
+    /** How far the clock is into the next tick, 0..1: draw bodies that far between their last two poses. */
+    get alpha() { return Math.min(1, acc / DT); },
     onBreak(f) { breakers.add(f); return () => breakers.delete(f); },
     removeObject, hasObject: id => objColliders.has(id),
     addSmasher(b) { smashers.add(b); return () => smashers.delete(b); },

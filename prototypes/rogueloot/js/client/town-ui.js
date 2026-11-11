@@ -6,6 +6,7 @@ import { sellPrice } from '../rules/loot.js';
 import { fits, findSpot } from '../rules/bag.js';
 import { hirePrice, revivePrice } from '../sim/mercs.js';
 import { respecPointsCost, respecSpecCost } from '../sim/skills.js';
+import { ask, tell, askText } from '../../../../shared/dialog.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const STASH_KEY = 'rogueloot.stash.v1', STASH_W = 10, STASH_H = 8;
@@ -66,15 +67,15 @@ export function createTownUI({ content, send, getChar }) {
     root.innerHTML = `<div class="panel town-panel">${body}<div class="btns"><button data-close class="primary">Done</button></div></div>`;
     root.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => send({ do: 'buy', uid: b.dataset.buy }));
     root.querySelectorAll('[data-act="sell"]').forEach(b => b.onclick = () => send({ do: 'sell', uid: b.dataset.uid }));
-    root.querySelector('[data-respec-points]')?.addEventListener('click', () => { if (confirm('Unlearn every skill point?')) send({ do: 'respec', op: 'points' }); });
-    root.querySelectorAll('[data-respec-spec]').forEach(b => b.onclick = () => { if (confirm(`Become a ${content.specs[b.dataset.respecSpec].name} instead?`)) send({ do: 'respec', op: 'spec', spec: b.dataset.respecSpec }); });
+    root.querySelector('[data-respec-points]')?.addEventListener('click', () => { ask({ title: 'Unlearn every skill?', text: 'Your skill points come back to spend again.', ok: 'Unlearn' }).then(y => y && send({ do: 'respec', op: 'points' })); });
+    root.querySelectorAll('[data-respec-spec]').forEach(b => b.onclick = () => { ask({ title: `Become a ${content.specs[b.dataset.respecSpec].name}?`, ok: 'Change' }).then(y => y && send({ do: 'respec', op: 'spec', spec: b.dataset.respecSpec })); });
     root.querySelectorAll('[data-hire]').forEach(b => b.onclick = () => send({ do: 'merc', op: 'hire', kind: b.dataset.hire, name: root.querySelector('.mname')?.value || '' }));
     root.querySelector('[data-revive]')?.addEventListener('click', () => send({ do: 'merc', op: 'revive' }));
-    root.querySelector('[data-dismiss]')?.addEventListener('click', () => { if (confirm('Let them go? Their gear comes back to your bag.')) send({ do: 'merc', op: 'dismiss' }); });
+    root.querySelector('[data-dismiss]')?.addEventListener('click', () => { ask({ title: 'Dismiss your mercenary?', text: 'Their gear comes back to your bag.', ok: 'Dismiss', danger: true }).then(y => y && send({ do: 'merc', op: 'dismiss' })); });
     root.querySelectorAll('[data-give]').forEach(b => b.onclick = () => send({ do: 'merc', op: 'give', uid: b.dataset.give, slot: b.dataset.slot }));
     root.querySelectorAll('[data-take]').forEach(b => b.onclick = () => send({ do: 'merc', op: 'take', slot: b.dataset.take }));
     root.querySelectorAll('[data-conv]').forEach(b => b.onclick = () => send({ do: 'convert', uid: b.dataset.conv }));
-    root.querySelectorAll('[data-act="salvage"]').forEach(b => b.onclick = () => { if (confirm('Break it for dust and shards?')) send({ do: 'salvage', uid: b.dataset.uid }); });
+    root.querySelectorAll('[data-act="salvage"]').forEach(b => b.onclick = () => { ask({ title: 'Salvage this item?', text: 'It breaks into crafting materials and is gone for good.', ok: 'Salvage', danger: true }).then(y => y && send({ do: 'salvage', uid: b.dataset.uid })); });
     root.querySelectorAll('[data-act="stash"]').forEach(b => b.onclick = () => send({ do: 'stash', uid: b.dataset.uid }));
     root.querySelectorAll('[data-out]').forEach(b => b.onclick = () => { const it = readStash().find(i => i.uid === b.dataset.out); if (it) send({ do: 'unstash', item: it }); });
     root.querySelectorAll('[data-pot]').forEach(b => b.onclick = () => { const [kind, size] = b.dataset.pot.split(':'); send({ do: 'buyPotion', kind, size }); });

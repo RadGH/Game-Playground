@@ -125,7 +125,7 @@ const r2 = v => Math.round(v * 100) / 100;
 export function snapshot(w) {
   const players = [], foes = [];
   for (const p of w.players.values()) players.push({ id: p.id, name: p.name, x: r2(p.x), z: r2(p.z), yaw: r2(p.yaw), moving: p.moving, seq: p.seq,
-    lvl: p.level, hp: Math.round(p.hp), mhp: p.maxHp, mp: Math.round(p.mana), mmp: p.maxMana, res: p.res, rv: p.res === 'mana' ? undefined : Math.round(p.res === 'rage' ? p.rage : p.energy), dead: p.dead || undefined, tg: p.target || undefined,
+    lvl: p.level, hp: Math.round(p.hp), mhp: p.maxHp, mp: Math.round(p.mana), mmp: p.maxMana, res: p.res, rv: p.res === 'mana' ? undefined : Math.round(p.res === 'rage' ? p.rage : p.energy), dead: p.dead || undefined, tg: p.target || undefined, ao: p.autoOn || undefined,
     cast: p.cast ? { sk: p.cast.skill, t: r2(p.cast.end - p.cast.start), left: r2(p.cast.end - w.time) } : undefined,
     gcd: p.gcdUntil > w.time ? r2(p.gcdUntil - w.time) : undefined, spd: speedFactor(p) !== 1 ? r2(speedFactor(p)) : undefined,
     fx: p.fx?.length ? p.fx.map(f => ({ k: f.kind, left: r2(f.until - w.time), id: f.id })) : undefined, sb: p.fx?.find(f => f.kind === 'stance' && f.bar)?.bar || undefined,

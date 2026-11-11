@@ -14,7 +14,7 @@ import { clearLine, flowTo, downhill } from '../sim/paths.js';
 import { DT } from '../sim/world.js';
 import { createHeroes } from './heroes.js';
 import { createFoes } from './foes.js';
-import { createHud } from './hud.js';
+import { setAttackSkill, createHud } from './hud.js';
 import { createFx } from './fx.js';
 import { createSheetUI } from './sheet-ui.js';
 import { createSkillsUI } from './skills-ui.js';
@@ -78,7 +78,7 @@ const guide = createGuideView(view);
 const travelUI = createTravelUI({ view, content, labelRoot: $('#tags'), send: sendAct, getChar: () => heroes.current(), getMe: () => actors.get(G.me), getArea: () => G.area, getDifficulty: () => G.difficulty,
   onNpc: (id) => { if (id === 'stash') townUI.openStash(); else if (id === 'elder') { const q = activeStep(content, heroes.current() || {}, G.difficulty); if (q) showQuest(q.name, q.text); else showQuest('The coast is safe', 'For now. Rest in Brightwater, hero.'); } else sendAct({ do: 'shop', npc: id }); } });
 const partyUI = createPartyUI({ content, send: sendAct, getChar: () => heroes.current(), zoneName: id => content.zones?.[id]?.name || id || '' });
-const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }),
+const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }), onRecall: () => sendAct({ do: 'travel', via: 'recall' }),
   quest: ch => { const q = activeStep(content, ch, G.difficulty); if (!q) return null; const r = q.rule || {}; const n = ch[questKey(G.difficulty)]?.[q.id]?.n || 0; return { name: q.name, hint: guide.target?.hint || '', progress: r.kind === 'kill' ? `Defeat foes in ${content.zones?.[r.node]?.name || r.node}: ${n} / ${r.n}` : r.kind === 'boss' ? `Defeat ${content.monsters?.[r.boss]?.name || 'the boss'}` : r.kind === 'reach' ? `Reach ${content.zones?.[r.to]?.name || content.acts?.[0]?.nodes?.find(x => x.id === r.to)?.name || r.to}` : '' }; } });
 const input = createInput();
 const touch = createTouch($('#touch'), input);
@@ -238,13 +238,16 @@ function onSnap(s) {
     seen.add(p.id);
     let a = actors.get(p.id);
     if (!a) { a = actors.add(p.id, { name: p.name, look: (p.id === G.me ? heroes.current()?.look : null) || G.roster?.get(p.id)?.look || null, me: p.id === G.me }); a.x = p.x; a.z = p.z; a.yaw = p.yaw; if (p.id === G.me) view.snapTo(p.x, p.z); }
+    a.casting = !!p.cast;
     if (p.id === G.me) {
       // reconcile: start from the server's answer, re-walk the inputs it has not applied yet
       const ghost = { x: p.x, z: p.z, yaw: p.yaw, r: PLAYER_RADIUS };
       G.pending = G.pending.filter(i => i.seq > p.seq);
       for (const i of G.pending) walk(G.area, ghost, i.mx, i.mz, DT, i.spd);
       const err = Math.hypot(ghost.x - a.x, ghost.z - a.z);
-      if (err > 1.5) { a.x = ghost.x; a.z = ghost.z; } else if (err > 0.02) { a.x += (ghost.x - a.x) * 0.3; a.z += (ghost.z - a.z) * 0.3; }
+      // take the server's answer at once in the sim, but hide the jump: the drawn hero keeps its spot and the gap fades
+      if (err > 1.5) { a.x = a.px = ghost.x; a.z = a.pz = ghost.z; a.ox = a.oz = 0; }
+      else if (err > 0.005) { const dx = ghost.x - a.x, dz = ghost.z - a.z; a.x += dx; a.z += dz; a.px = (a.px ?? a.x) + dx; a.pz = (a.pz ?? a.z) + dz; a.ox = (a.ox || 0) - dx; a.oz = (a.oz || 0) - dz; }
     } else actors.push(p.id, p, now);
   }
   // companions (mercenaries now, pets later): Chibi 2.6 bodies like heroes, interpolated the same way
@@ -301,7 +304,10 @@ function onEvent(e, now) {
     if (mine || onMe || G.target === e.t) hud.float(x + (Math.random() * 30 - 15), y, text + (e.r === 'crit' ? '!' : ''), (onMe ? 'hurt' : 'deal') + (e.r === 'crit' ? ' crit' : '') + ' ty-' + e.ty);
     const f = foes.get(e.t); if (f && e.n > 0) f.hitAt = now;
   } else if (e.k === 'heal') { const at = posOf(e.t); if (at) { const [x, y] = worldAt(at[0], at[1], at[2]); hud.float(x, y, '+' + e.n, 'heal'); } }
-  else if (e.k === 'swing') { const f = foes.get(e.s); if (f) f.swingAt = now; else actors.get(e.s)?.swing?.(); }
+  else if (e.k === 'swing') { const f = foes.get(e.s); if (f) f.swingAt = now; else { const tg = G.snapPlayers?.get(e.s)?.tg; actors.get(e.s)?.swing?.(tg ? (foes.get(tg) || actors.get(tg)) : null); } }
+  // a hero's skill hit also swings / casts and faces what it hit (skills send dmg / shoot / area, not swing)
+  if (e.k === 'dmg' && actors.get(e.s) && e.r !== 'link' && e.t !== e.s) { const t = foes.get(e.t) || actors.get(e.t); if (e.ty === 'physical') actors.get(e.s).swing(t); else actors.get(e.s).face(t); }
+  if (e.k === 'shoot' && actors.get(e.s)) { const t = foes.get(e.t) || actors.get(e.t); actors.get(e.s).swing(t, 'cast'); }
   else if (e.k === 'drink' && e.t === G.me) { const a = actors.get(G.me); if (a) { const [x, y] = worldAt(a.x, a.z, 2.2); hud.float(x, y, e.kind === 'mana' ? '💧' : '❤', e.kind === 'mana' ? 'xp' : 'heal'); } }
   else if (e.k === 'xp' && e.t === G.me) { const a = actors.get(G.me); if (a) { const [x, y] = worldAt(a.x, a.z, 2.3); hud.float(x, y - 20, `+${e.n} xp`, 'xp'); } }
   else if (e.k === 'level' && e.t === G.me) { banner2(`Level ${e.lvl}!`); tally('level', { l: e.lvl }); }
@@ -385,20 +391,32 @@ view.renderer.domElement.addEventListener('pointermove', e => { if (e.pointerTyp
 addEventListener('keydown', e => {
   if (!G.me || e.target?.tagName === 'INPUT' || document.querySelector('.modal:not([hidden])')) return;
   if (e.code === 'Tab') { e.preventDefault(); targetNext(); }
-  if (e.code === 'Space') { e.preventDefault(); const me = actors.get(G.me), n = me && ground.nearest(me.x, me.z, 6); if (n) goAndDo(n.x, n.z, n.kind === 'chest' ? { t: 'act', do: 'open', id: n.id } : { t: 'act', do: 'pickup', gid: n.id }); else travelUI.use(); }
+  // E = interact (owner 2026-11-11): revive a fallen friend beside you, else pick up / open, else portal / talk
+  if ((e.code === 'KeyE' || e.code === 'Space') && !e.repeat) { e.preventDefault(); interact(); }
   if (e.code === 'KeyJ' || e.code === 'KeyL') openQuestLog();
   if (e.code === 'KeyM') { if (travelUI.mapOpen) travelUI.closeMap(); else travelUI.openMap(false); }
   if (e.code === 'KeyT') sendAct({ do: 'travel', via: 'recall' });
   if (e.code === 'KeyC' || e.code === 'KeyI' || e.code === 'KeyB') sheetUI.toggle();
   if (e.code === 'KeyX') G.link?.send({ t: 'act', do: 'swap' });
-  if (e.code === 'KeyQ' && !e.repeat) G.link?.send({ t: 'act', do: 'drink', kind: 'health' });
-  if (e.code === 'KeyE' && !e.repeat) G.link?.send({ t: 'act', do: 'drink', kind: 'mana' });
-  const n = /^Digit([1-6])$/.exec(e.code)?.[1];
-  if (n) { const id = barOf()[+n - 1]; if (id) useSkill(id); }
+  if (e.code === 'KeyR' && !e.repeat) G.link?.send({ t: 'act', do: 'drink', kind: 'health' });     // R health, F mana (owner 2026-11-11)
+  if (e.code === 'KeyF' && !e.repeat) G.link?.send({ t: 'act', do: 'drink', kind: 'mana' });
+  // 1 = Attack (or your class's own auto-attack), 2-7 = the six skills on your bar
+  const n = /^Digit([1-7])$/.exec(e.code)?.[1];
+  if (n === '1') useSkill(attackId()); else if (n) { const id = barOf()[+n - 2]; if (id) useSkill(id); }
   if (e.code === 'KeyK') skillsUI.toggle();
-  if (e.code === 'KeyF') useSkill('attack');
-  if (e.code === 'KeyR' && !e.repeat) { const me = actors.get(G.me); for (const a of actors.list.values()) { if (a.id !== G.me && G.snapPlayers?.get(a.id)?.dead && Math.hypot(a.x - me.x, a.z - me.z) < 3) { G.link?.send({ t: 'act', do: 'revive', target: a.id }); break; } } }
 });
+/** E: the nearest thing you can use, in this order: a fallen friend (revive), loot or a chest, a portal / person / sign. */
+function interact() {
+  const me = actors.get(G.me); if (!me) return;
+  for (const a of actors.list.values()) if (a.id !== G.me && G.snapPlayers?.get(a.id)?.dead && Math.hypot(a.x - me.x, a.z - me.z) < 3) { G.link?.send({ t: 'act', do: 'revive', target: a.id }); return; }
+  const n = ground.nearest(me.x, me.z, 6);
+  if (n) { goAndDo(n.x, n.z, n.kind === 'chest' ? { t: 'act', do: 'open', id: n.id } : { t: 'act', do: 'pickup', gid: n.id }); return; }
+  travelUI.use();
+}
+setAttackSkill(() => attackId());
+/** the Attack slot: your class's own auto-attack once learned (data: skill `autoAttack: true`), else plain Attack */
+function attackId() { const ch = heroes.current(); const S = content.skills; const own = Object.keys(ch?.skills || {}).filter(id => S[id]?.autoAttack && (S[id].owner === ch.spec || S[id].owner === ch.path)); return own.sort((a, b) => (S[b].reqLevel || 1) - (S[a].reqLevel || 1))[0] || 'attack'; }
+
 function fixedStep() {
   const a = actors.get(G.me); if (!a || !G.area) return;
   const mv = input.move();
@@ -409,7 +427,19 @@ function fixedStep() {
   G.link.send({ t: 'input', mx: +mx.toFixed(3), mz: +mz.toFixed(3), seq: G.seq });
   const spd = WALK_SPEED * (G.meSnap?.spd ?? 1);
   G.pending.push({ seq: G.seq, mx, mz, spd }); if (G.pending.length > 60) G.pending.shift();
+  a.px = a.x; a.pz = a.z;                                 // where this step starts: frames draw between here and the step's end
   if (!G.meSnap?.dead) walk(G.area, a, mx, mz, DT, spd);
+}
+/**
+ * Where to DRAW your hero this frame (owner 2026-11-11: "the character jitters and blurs while the world moves smooth").
+ * The sim walks in 50 ms steps; a 144 Hz screen draws ~7 frames per step. Drawing the hero at its last step made it jump
+ * forward every step while the camera glided, and server corrections pulled it back. Now: draw at the exact fraction of
+ * the way through the current step, and let a correction fade out over ~0.1 s instead of moving the hero at once.
+ */
+function smoothMe(a, dt) {
+  const k = Math.min(1, G.acc / DT), px = a.px ?? a.x, pz = a.pz ?? a.z;
+  const fade = Math.exp(-dt * 14); a.ox = (a.ox || 0) * fade; a.oz = (a.oz || 0) * fade;
+  a.rx = px + (a.x - px) * k + a.ox; a.rz = pz + (a.z - pz) * k + a.oz;
 }
 
 let last = performance.now();
@@ -421,7 +451,7 @@ function frame(t) {
   if (G.me && G.link) {
     G.acc += dt;
     while (G.acc >= DT) { G.acc -= DT; fixedStep(); }
-    const me = actors.get(G.me); if (me) view.follow(me.x, me.z, dt);
+    const me = actors.get(G.me); if (me) { smoothMe(me, dt); view.follow(me.rx, me.rz, dt); }
     if (shakeT > 0 && !reduceMotion) { shakeT = Math.max(0, shakeT - dt); view.camera.position.x += (Math.random() - 0.5) * shakeT * 0.6; view.camera.position.y += (Math.random() - 0.5) * shakeT * 0.4; }
   }
   actors.update(dt, t - 110);
@@ -429,7 +459,7 @@ function frame(t) {
   fx.update(dt, t);
   ground.update(dt, t);
   travelUI.update(dt, t);
-  { const ch = heroes.current(), me = actors.get(G.me); if (ch && G.area) guide.update(content, { ...ch, quests: ch[questKey(G.difficulty)] || {} }, G.area, activeStep(content, ch, G.difficulty), me, t); }
+  { const ch = heroes.current(), me = actors.get(G.me); if (ch && G.area) guide.update(content, { ...ch, quests: ch[questKey(G.difficulty)] || {} }, G.area, activeStep(content, ch, G.difficulty), me && { x: me.rx ?? me.x, z: me.rz ?? me.z }, t); }
   padCombat();
   view.render();
 }
@@ -464,6 +494,8 @@ window.gameEye = {
     return { guide: guide.target ? { x: guide.target.x, z: guide.target.z, to: guide.target.to, hint: guide.target.hint } : null, area: G.area?.id || null, prompt: travelUI.current ? { kind: travelUI.current.kind, to: travelUI.current.to || travelUI.current.id } : null, waypoints: heroes.current()?.waypoints, ground: [...ground.items.values()].map(g => ({ gid: g.gid, what: g.what, r: g.real || g.r, name: g.name, x: +g.x.toFixed(1), z: +g.z.toFixed(1) })), chests: [...ground.chests.values()].map(c => ({ id: c.id, x: c.x, z: c.z, open: c.open })), gold: heroes.current()?.gold, target: G.target || null, foes: [...foes.list.values()].map(f => ({ id: f.id, name: f.name, x: +f.x.toFixed(1), z: +f.z.toFixed(1), hp: f.hp, mhp: f.mhp, st: f.st })), hero: heroes.current() && { level: heroes.current().level, xp: heroes.current().xp }, me2: G.meSnap && { hp: G.meSnap.hp, mhp: G.meSnap.mhp, mp: G.meSnap.mp, dead: !!G.meSnap.dead }, screen: G.me ? 'game' : 'title', link: G.link?.kind || null, code: G.code, host: G.host === G.me, ping: G.ping && Math.round(G.ping), reconnecting: !!G.retry, area: G.area?.id || null, me: me ? { x: +me.x.toFixed(2), z: +me.z.toFixed(2), yaw: +me.yaw.toFixed(2), moving: !!me.moving, bodyReady: !!me.body } : null, players: [...actors.list.values()].map(a => ({ id: a.id, x: +a.x.toFixed(2), z: +a.z.toFixed(2) })), server: G.snap ? G.snap.players.map(p => ({ id: p.id, x: p.x, z: p.z })) : null, fps: Math.round(G.fps || 0) };
   },
   health: () => ({ ok: true, errors: 0 }),
+  /** hero's drawn position on screen, per frame, for the smoothness test */
+  heroScreen: () => { const a = actors.get(G.me); if (!a) return null; const [x, y] = worldAt(a.group.position.x, a.group.position.z, 1); return { x, y, t: performance.now() }; },
   screenOfPoint: (x, z) => { const [sx, sy] = worldAt(x, z, 0); return { x: sx, y: sy }; },
   screenOf: id => { const f = foes.get(id) || actors.get(id); if (!f) return null; const [x, y] = worldAt(f.x, f.z, 0.8); return { x, y }; },
   perf: () => ({ fps: Math.round(G.fps || 0), calls: view.renderer.info.render.calls, triangles: view.renderer.info.render.triangles, foes: foes.list.size, drawnFoes: [...foes.list.values()].filter(f => f.group.visible).length }),

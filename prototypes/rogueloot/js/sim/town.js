@@ -21,7 +21,7 @@ function stockFor(w, p) {
   const key = p.id + ':' + p.char.level;
   if (w.shops.has(key)) return w.shops.get(key);
   const D = w.content.items, rng = makeRng((w.seed ^ hashStr(key)) >>> 0), L = p.char.level, items = [];
-  for (let i = 0; i < 10; i++) items.push(makeItem(D, rng, Math.max(1, L - 1 + Math.floor(rng() * 3)), { rarity: rng() < 0.3 ? 'magic' : 'normal', ch: p.char }));
+  for (let i = 0; i < 10; i++) { const it = makeItem(D, rng, Math.max(1, L - 1 + Math.floor(rng() * 3)), { rarity: rng() < 0.3 ? 'magic' : 'normal', ch: p.char }); if (it) items.push(it); }
   for (const it of items) it.ided = true;
   const shop = { items }; w.shops.set(key, shop);
   return shop;
@@ -81,7 +81,7 @@ export function townAct(w, p, a) {
       const kind = GAMBLE_KINDS.includes(a.kind) ? a.kind : 'weapon', price = gamblePrice(D, ch.level);
       if ((ch.gold || 0) < price) return { err: 'Not enough gold.' };
       const base = pickGambleBase(D, w.rng, ch.level, kind, ch); if (!base) return { err: 'Nothing like that on the table today.' };
-      const it = gamble(D, w.rng, ch.level, base.id, ch);
+      const it = gamble(D, w.rng, ch.level, base.id, ch); if (!it) return { err: 'Nothing like that on the table today.' };
       if (!findSpot(D, ch.bag || [], it)) return { err: 'No room in your bag.' };
       pay(price); stow(it);
       return done();

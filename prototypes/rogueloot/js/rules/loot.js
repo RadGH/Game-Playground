@@ -37,7 +37,7 @@ export function dropsFor(items, P, rng, { level, kind = 'normal', players = 1, m
       if (rares > 0) { r = atLeast(r, 'rare'); rares--; }
       if (i === 0 && minFirst) r = atLeast(r, minFirst);           // champions: a guaranteed magic+, rares: a guaranteed rare+
       if (firstKill && D.firstKillUniqueChancePct && i === 0 && rng() * 100 < D.firstKillUniqueChancePct) r = 'unique';
-      out.items.push(makeItem(items, rng, ilvl, { rarity: r, ch }));
+      { const it = makeItem(items, rng, ilvl, { rarity: r, ch }); if (it) out.items.push(it); }
     }
   }
   const pot = potionDrop(R, P, rng, level); if (pot) out.potions.push(pot);
@@ -55,7 +55,7 @@ export function chestDrops(items, P, rng, { level, tier = 'chest', mf = 0, gf = 
     let r = rollRarity(items, rng, ilvl, C.mult || 'chest', mf);
     if (C.minRarity) r = atLeast(r, C.minRarity);
     if (rares > 0) { r = atLeast(r, 'rare'); rares--; }
-    out.items.push(makeItem(items, rng, ilvl, { rarity: r, ch }));
+    { const it = makeItem(items, rng, ilvl, { rarity: r, ch }); if (it) out.items.push(it); }
   }
   if (rng() * 100 < (C.potionChancePct || 0)) { const p = potionDrop({ ...R, potions: { ...R.potions, chancePct: [[1, 100]] } }, P, rng, level); if (p) out.potions.push(p); }
   return out;
@@ -73,7 +73,8 @@ export const buyPrice = (items, it) => itemValue(items, it);
 /** The gambler: an unidentified item for 3x a normal one's value, rarity from a flat table. */
 export function gamble(items, rng, level, base, ch = null) {
   const r = (() => { const t = { magic: 78, rare: 20, unique: 1.6, legendary: 0.4 }; let k = rng() * 100; for (const [id, w] of Object.entries(t)) { k -= w; if (k <= 0) return id; } return 'magic'; })();
-  const it = makeItem(items, rng, level, { rarity: r, base, ch });
+  const it = makeItem(items, rng, level, { rarity: r, base, ch }) || makeItem(items, rng, level, { rarity: 'magic', base, ch });
+  if (!it) return null;
   it.ided = false;
   return it;
 }

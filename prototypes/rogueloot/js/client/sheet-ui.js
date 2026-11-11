@@ -6,6 +6,7 @@ import { sheet } from '../rules/sheet.js';
 import { itemName, itemMods, itemReq, weaponDamage, itemArmour, canEquip, profOf } from '../rules/items.js';
 import { ATTRS, ATTR_NAMES, ATTR_HELP, xpAtLevel, xpToNext } from '../rules/progression.js';
 import { BAG_W, BAG_H } from '../rules/bag.js';
+import { ask, tell, askText } from '../../../../shared/dialog.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const GLYPH = { sword: '🗡', dagger: '🔪', axe: '🪓', mace: '🔨', sceptre: '⚚', greatsword: '⚔', greataxe: '🪓', maul: '🔨', spear: '🔱', polearm: '🔱', bow: '🏹', crossbow: '🏹', staff: '⚕', wand: '🪄',
@@ -164,7 +165,7 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, curr
     if (it.base === 'dust') { a.innerHTML = '<em>The crafter in town turns dust into Glimmer Shards.</em>'; return; }
     if (it.base === 'potion') { a.innerHTML = `<button class="primary" data-blt>To belt</button><button data-drink>Drink</button>`; a.querySelector('[data-blt]').onclick = () => send({ do: 'belt', uid: it.uid }); a.querySelector('[data-drink]').onclick = () => send({ do: 'drink', kind: it.kind }); return; }
     a.innerHTML = (it.ided === false ? `<button class="primary" data-id>Identify</button>` : `<button class="primary" data-eq>Equip</button>`) + `<button data-salv>Break for shards</button>`;
-    a.querySelector('[data-salv]').onclick = () => { if (confirm('Break this item into dust and shards? It is gone for good.')) send({ do: 'salvage', uid: it.uid }); };
+    a.querySelector('[data-salv]').onclick = () => { ask({ title: 'Salvage this item?', text: 'It breaks into crafting materials and is gone for good.', ok: 'Salvage', danger: true }).then(y => y && send({ do: 'salvage', uid: it.uid })); };
     a.querySelector('[data-id]')?.addEventListener('click', () => send({ do: 'identify', uid: it.uid }));
     a.querySelector('[data-eq]')?.addEventListener('click', () => send({ do: 'equip', uid: it.uid }));
   }

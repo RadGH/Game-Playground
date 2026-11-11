@@ -47,7 +47,7 @@ export function applyShard(data, C, rng, it, shardIt) {
   const anchored = () => (out.anchor ? out.affixes.filter(a => a.id === out.anchor) : []);
   if (R.result && typeof R.result === 'object') {                                   // Wager: a random rarity
     const r = pickW(rng, Object.entries(R.result));
-    const made = makeItem(data, rng, it.ilvl, { base: it.base, rarity: r });
+    const made = makeItem(data, rng, it.ilvl, { base: it.base, rarity: r }) || makeItem(data, rng, it.ilvl, { base: it.base, rarity: 'magic' }) || it;
     if (r === 'unique' && made.rarity !== 'unique') return { item: { ...made, ided: true, quality: it.quality, uid: it.uid } };
     return { item: { ...made, ided: true, quality: it.quality, uid: it.uid } };
   }

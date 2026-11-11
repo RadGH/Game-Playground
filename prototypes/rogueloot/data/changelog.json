@@ -1,6 +1,19 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-smooth-keys",
+      "date": "2026-11-11",
+      "title": "Smooth movement, real attacks, new keys",
+      "items": [
+        "Your hero no longer jitters or doubles up while moving: it now glides at your screen's full speed.",
+        "Your hero swings with each blow, casts while casting, and turns to face what it is hitting. The Attack button glows while you are auto-attacking.",
+        "New keys: 1 is Attack, 2-7 are your skills, E uses things (portals, people, loot, reviving a friend), R and F drink health and mana potions, and T opens your portal home from its own button on the bar.",
+        "Each Path learns its own attack at level 4 that replaces Attack: Hewing Blows, Quick Cuts, Arcane Dart (from range) or Sunlit Strike (from range). They cost nothing.",
+        "Rings and amulets always carry at least one magic property; an item with nothing on it no longer drops.",
+        "Questions like salvaging an item now appear as the game's own window instead of a browser pop-up."
+      ]
+    },
+    {
       "id": "2026-11-11-phone-ground",
       "date": "2026-11-11",
       "title": "Sharper ground, tidier phone buttons",

@@ -2,6 +2,7 @@
 // player-facing text of a skill at a rank ({mult} {dmg} {secs} filled in from the rank's numbers).
 import { atRank, rankOf, costOf, synergyOf } from '../sim/skills.js';
 import { PATH_BONUS } from '../rules/sheet.js';
+import { ask, tell, askText } from '../../../../shared/dialog.js';
 const bonusText = id => { const b = PATH_BONUS[id]; if (!b) return ''; return [b.hpPct && `+${b.hpPct}% health`, b.armourPct && `+${b.armourPct}% armour`, b.dodge && `+${b.dodge}% dodge`, b.dr && `${b.dr}% less damage taken`].filter(Boolean).join(', '); };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -74,7 +75,7 @@ export function createSkillsUI({ content, send, getChar, nope }) {
       <button data-later>Not yet</button></div>`;
     root.querySelector('[data-close]').onclick = () => toggle(false);
     root.querySelector('[data-later]').onclick = () => { tab = 'path'; draw(); };
-    root.querySelectorAll('[data-spec]').forEach(b => b.onclick = () => { if (confirm(`Become a ${content.specs[b.dataset.spec].name}?`)) send({ do: 'spec', spec: b.dataset.spec }); });
+    root.querySelectorAll('[data-spec]').forEach(b => b.onclick = () => { ask({ title: `Become a ${content.specs[b.dataset.spec].name}?`, text: 'The trainer in Brightwater can change it later, for gold.', ok: 'Choose' }).then(y => y && send({ do: 'spec', spec: b.dataset.spec })); });
   }
   function drawPaths(ch) {
     const P = content.paths;
@@ -82,7 +83,7 @@ export function createSkillsUI({ content, send, getChar, nope }) {
       <div class="path-cards">${Object.entries(P).map(([id, p]) => `<button class="path-card pc-${id}" data-path="${id}"><b>${esc(p.name)}</b><small>${esc(RES_NAME[p.resource] || 'Mana')} · ${esc(p.tree?.name || '')}</small><p>${esc(p.blurb)}</p>${bonusText(id) ? `<small class="bonus">Built to take hits: ${esc(bonusText(id))}</small>` : ''}
         <span class="starters">${(p.starter || []).map(s => `${skillIcon(S[s])} ${esc(S[s]?.name || s)}`).join(' · ')}</span></button>`).join('')}</div></div>`;
     root.querySelector('[data-close]').onclick = () => toggle(false);
-    root.querySelectorAll('[data-path]').forEach(b => b.onclick = () => { if (confirm(`Walk the ${P[b.dataset.path].name}'s Path? This is for good.`)) send({ do: 'path', path: b.dataset.path }); });
+    root.querySelectorAll('[data-path]').forEach(b => b.onclick = () => { ask({ title: `The ${P[b.dataset.path].name}'s Path?`, text: 'This choice is for good.', ok: 'Walk it' }).then(y => y && send({ do: 'path', path: b.dataset.path })); });
   }
   /** Called on every character update: at level 3 with no Path, offer the choice once. */
   function check(ch) {

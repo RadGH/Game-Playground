@@ -8,6 +8,7 @@ import { applyRider } from './abilities.js';
 import { lootFoe } from './loot.js';
 import { questKill } from './quests.js';
 import { leechPct } from './legendary.js';
+import { runAutoSkill } from './skills.js';
 import { wireChampions, modsHitTaken, modsDeath, soakWard } from './champions.js';
 import { makeFoe } from './actors.js';
 import { rankOf, castSkill, stepSkillCast, wireSkills, fxPct, markOf, armourAfter, gain } from './skills.js';
@@ -44,9 +45,11 @@ export function useSkill(w, p, skillId, targetId, point = null) {
   const sk = w.content.skills?.[skillId];
   if (sk && sk.kind !== 'auto' && sk.kind !== 'melee' && !(sk.effects?.every(e => e.do === 'weapon')) && has(p, 'silence')) return { err: 'You are silenced.' };
   if (!sk || (!sk.effects && !knows(p, sk))) return { err: "You don't know that." };
-  if (sk.kind === 'auto') {
+  if (sk.kind === 'auto' || sk.autoAttack) {
+    // plain Attack, or a class's own auto-attack (owner 2026-11-11): it repeats on its own, costs nothing, no global cooldown
+    if (sk.autoAttack && !knows(p, sk)) return { err: "You don't know that." };
     const t = actorById(w, targetId); if (!alive(t) || t.team !== 'foe') return { err: 'No enemy targeted.' };
-    p.target = t.id; p.autoOn = true; return { ok: true };
+    p.target = t.id; p.autoOn = true; p.autoSkill = sk.autoAttack ? sk.id : null; return { ok: true };
   }
   if (sk.effects) return castSkill(w, p, sk, targetId, point);        // the M9 engine (data/skills-paths.json)
   if (p.cast) return { err: 'Already casting.' };
@@ -208,6 +211,15 @@ export function stepAuto(w) {
     if (!p.autoOn || p.dead || p.cast || has(p, 'stun')) continue;
     const t = actorById(w, p.target);
     if (!alive(t) || t.team !== 'foe') { p.autoOn = false; continue; }
+    const own = p.autoSkill && w.content.skills[p.autoSkill];
+    if (own) {                                          // a class auto-attack: its own reach and pace, its own effects
+      const reach = own.range > 0 ? own.range : p.weapon.reach;
+      if (gap(p, t) > reach || w.time < p.nextSwing) continue;
+      face(p, t); p.nextSwing = w.time + (own.every || 1 / p.weapon.speed);
+      runAutoSkill(w, p, own, t);
+      if (own.effects?.some(e => e.do === 'weapon')) w.events.push({ k: 'swing', s: p.id });
+      p.lastFight = w.time; continue;
+    }
     if (gap(p, t) > p.weapon.reach || w.time < p.nextSwing) continue;
     face(p, t);
     p.nextSwing = w.time + 1 / p.weapon.speed;

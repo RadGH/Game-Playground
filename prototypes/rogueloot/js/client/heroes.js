@@ -6,6 +6,7 @@ import { makeItem } from '../rules/items.js';
 import { makePotion } from '../rules/potions.js';
 import { loadLookData, randomLook, RACES, RACE_NAMES, avatarOf } from '../../../knockabout/js/client/look.js';
 import { svgPortrait } from '../../../../avatar-3d/js/chibi26-portrait.js';
+import { askText } from '../../../../shared/dialog.js';
 
 export const KEY = 'rogueloot.heroes.v1', PICK = 'rogueloot.hero';
 const read = () => { try { const d = JSON.parse(localStorage.getItem(KEY) || '{}'); return d && typeof d === 'object' && d.list ? d : { list: [] }; } catch { return { list: [] }; } };
@@ -34,8 +35,8 @@ export function createHeroes({ root, onChange = () => {}, items = null }) {
     root.querySelectorAll('[data-id]').forEach(b => b.onclick = () => pick(b.dataset.id));
     root.querySelector('[data-new]').onclick = startCreate;
     root.querySelector('[data-del]').onclick = () => {
-      const typed = prompt(`Delete ${cur.name} for good? Their gear goes too. Type the name to confirm:`);
-      if (typed != null && typed.trim().toLowerCase() === cur.name.toLowerCase()) remove(cur.id);
+      askText({ title: `Delete ${cur.name}?`, text: `Gone for good, with all their gear. Type ${cur.name} to confirm.`, placeholder: cur.name, confirmMatch: cur.name, ok: 'Delete', danger: true })
+        .then(typed => { if (typed != null) remove(cur.id); });
     };
   }
   function startCreate() { draft = { name: '', look: randomLook() }; draw(); }

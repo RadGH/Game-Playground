@@ -50,6 +50,12 @@ export async function createSession(o) {
   const enhance = view?.enhance || (m => m);
   const me = net.you;
   const ents = new Map();        // id -> E
+  // the pose each local body starts a physics tick from, so drawing can blend between ticks (see '---- draw bodies')
+  const _qa = new THREE.Quaternion(), _qb = new THREE.Quaternion();
+  phys.beforeTick(() => { for (const X of ents.values()) if (X.veh?.local) { X.pt = X.veh.rb.translation(); X.pq = X.veh.rb.rotation(); } if (walker) walkerFrom = [...walker.feet]; });
+  let walkerFrom = null;
+  /** my feet as drawn this frame: between where the last tick started and where it ended (same reason as the bodies) */
+  const drawnFeet = () => { if (!walker || !walkerFrom) return walker?.feet; const k = phys.alpha, f = walker.feet; if (Math.hypot(f[0] - walkerFrom[0], f[2] - walkerFrom[2]) > 3) return f; return [walkerFrom[0] + (f[0] - walkerFrom[0]) * k, walkerFrom[1] + (f[1] - walkerFrom[1]) * k, walkerFrom[2] + (f[2] - walkerFrom[2]) * k]; };
   const people = new Map();      // pid -> P (everyone, me included: P.rider)
   const pieces = [];             // falling bits of broken world
   const shots = [];              // pellets in flight
@@ -799,9 +805,12 @@ export async function createSession(o) {
     // ---- draw bodies
     for (const X of ents.values()) {
       if (!X.model) continue;
+      // drawn between the pose the last tick started from and where it ended (owner 2026-11-11: vehicles jittered and
+      // doubled while the world moved smoothly: physics ticks at 60 Hz, a 144 Hz screen drew the same pose 2-3 frames
+      // running and then jumped). Remote bodies are already smoothed by their snapshot buffer, so only local ones blend.
       const t = X.veh.rb.translation(), q = X.veh.rb.rotation();
-      X.model.group.position.set(t.x, t.y, t.z);
-      X.model.group.quaternion.set(q.x, q.y, q.z, q.w);
+      if (X.veh.local && X.pt) { const k = phys.alpha; X.model.group.position.set(X.pt.x + (t.x - X.pt.x) * k, X.pt.y + (t.y - X.pt.y) * k, X.pt.z + (t.z - X.pt.z) * k); _qa.set(X.pq.x, X.pq.y, X.pq.z, X.pq.w); _qb.set(q.x, q.y, q.z, q.w); X.model.group.quaternion.slerpQuaternions(_qa, _qb, k); }
+      else { X.model.group.position.set(t.x, t.y, t.z); X.model.group.quaternion.set(q.x, q.y, q.z, q.w); }
       X.model.update(X.veh.look ? { ...X.veh.look(), acts: X.acts, load: X.load ?? 0, t: performance.now() / 1000 } : { flame: X.veh.flame });   // load 0..1: a produce trailer's heap (farming sets E.load)
       if (X.model.forks && X.def.forks) X.model.forks.position.y = X.def.forks.anchor[1] + X.veh.look().forks;
       if (!X.veh.local && X.model.turret && !(mySeat && mySeat[0] === X.id)) {
@@ -828,7 +837,7 @@ export async function createSession(o) {
         if (mySeat && E?.model) { P.rider.seated(E.model.group, seat, handsFor(E, seat)); P.rider.group.children.at(-1).visible = false; }
         else if (sky?.active) sky.drawMe(P.rider);
         else if (space?.active) space.drawMe(P.rider);
-        else if (walker) P.rider.onFoot(walker.feet, walker.yaw, health.down && walker.anim !== 'rag' ? 'down' : walker.anim, walker.anim === 'rag' ? (walker.ragQ ? [walker.ragQ.x, walker.ragQ.y, walker.ragQ.z, walker.ragQ.w] : null) : null);
+        else if (walker) P.rider.onFoot(drawnFeet(), walker.yaw, health.down && walker.anim !== 'rag' ? 'down' : walker.anim, walker.anim === 'rag' ? (walker.ragQ ? [walker.ragQ.x, walker.ragQ.y, walker.ragQ.z, walker.ragQ.w] : null) : null);
       } else if (seatOf && seatOf[0].model) {
         P.rider.seated(seatOf[0].model.group, seatOf[0].def.seats[seatOf[1]], handsFor(seatOf[0], seatOf[0].def.seats[seatOf[1]]));
       } else {
@@ -848,7 +857,7 @@ export async function createSession(o) {
 
     // ---- camera
     if (E) {
-      const t = E.veh.rb.translation(), v = E.veh.rb.linvel();
+      const t = E.model && E.veh.local ? E.model.group.position : E.veh.rb.translation(), v = E.veh.rb.linvel();   // follow the body as DRAWN
       const cd = E.def.camera || { dist: 6, height: 2 };
       // a seat that does not steer (gunner, passenger): the controller's LEFT stick aims / looks too, like the right
       // one (report #2/#4 — the gunner's stick did nothing). The phone hides its stick there: the whole screen looks.
@@ -863,7 +872,7 @@ export async function createSession(o) {
     } else if (space?.active) {
       cam.update(dt, { ...space.cam(), look: { x: s.lookX, y: s.lookY, active: s.lookActive } });
     } else if (walker) {
-      const f = walker.feet;
+      const f = drawnFeet();
       cam.update(dt, { target: f, height: 1.2, dist: 5.4, look: { x: s.lookX, y: s.lookY, active: s.lookActive }, exclude: null });
     } else {
       // spectator: follow whoever is driving the flag run, else the host

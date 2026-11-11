@@ -65,7 +65,7 @@ export function openWelcome(ch, { touch }) {
   try { if (localStorage.getItem(key)) return; localStorage.setItem(key, '1'); } catch { /* private window: show it anyway */ }
   const how = touch
     ? '<li>Move with the stick on the left. Tap a monster to fight it; the buttons on the right are your skills.</li><li>Tap the glowing prompt that appears beside portals and people.</li>'
-    : '<li><b>Click the ground</b> to walk there (hold to keep walking). <b>Click a monster</b> to walk up and fight it.</li><li><b>1-6</b> use your skills, <b>right-click</b> uses the first one at the pointer. <b>Space</b> uses a portal or talks to someone when the prompt shows.</li>';
+    : '<li><b>Click the ground</b> to walk there (hold to keep walking). <b>Click a monster</b> to walk up and fight it.</li><li><b>1</b> attacks, <b>2-7</b> use your skills, <b>right-click</b> uses the first skill at the pointer. <b>E</b> uses a portal, talks or picks up. <b>R</b> / <b>F</b> drink a health / mana potion, <b>T</b> opens your portal home.</li>';
   modal(`<h2>Welcome to Brightwater</h2>
     <p>The road out of town is through the <b>portals north of the square</b>. Only the one that glows is open to you: <b>Saltgrass Shore</b>. The others open as you travel.</p>
     <p>Follow the <b style="color:#ffd040">gold arrow</b> at your feet and the beam of light. It always points to your next step, and the box at the top right says what that step is.</p>

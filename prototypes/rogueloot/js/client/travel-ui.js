@@ -76,7 +76,7 @@ export function createTravelUI({ view, content, labelRoot, send, getChar, getMe,
   function update(dt, now) {
     const me = getMe(), area = getArea(), ch = getChar(); if (!me || !area) { prompt.hidden = true; return; }
     const near = nearby(me, area, ch); current = near[0] || null;
-    prompt.hidden = !current; if (current) prompt.textContent = textFor(current, ch) + (matchMedia('(pointer: coarse)').matches ? '' : '  (Space)');
+    prompt.hidden = !current; if (current) prompt.textContent = textFor(current, ch) + (matchMedia('(pointer: coarse)').matches ? '' : '  (E)');
     const W = view.renderer.domElement.clientWidth, H = view.renderer.domElement.clientHeight;
     for (const sw of swirls) { const open = openNow(sw.m.to); sw.g.visible = open; if (open) { sw.disc.rotation.z += dt * 1.5; sw.disc.material.opacity = 0.5 + Math.sin(now / 300) * 0.15; } }
     for (const p of plates) if (p.m.kind === 'portal') { const open = openNow(p.m.to); if (p.open !== open) { p.open = open; p.el.classList.toggle('locked', !open); p.el.classList.toggle('open', open); const a = opensAfter(p.m.to); p.el.textContent = open ? `✦ ${zoneName(p.m.to)}` : `🔒 ${zoneName(p.m.to)}${a ? ` · after ${a}` : ''}`; } }

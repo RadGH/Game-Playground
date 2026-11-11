@@ -234,6 +234,8 @@ export const markOf = t => { let k = 1; for (const f of t.fx || []) if (f.kind =
 function aggroOn(w, f, p, n) { if (f.team !== 'foe') return; addThreat(f.threat, p.id, n * (1 + (p.st.threat || 0) / 100 + fxPct(p, 'threat') / 100)); if (f.state === 'idle' || f.state === 'wander' || f.state === 'patrol') f.state = 'chase'; }
 let hurtFn = null, weaponFn = null, healMostHurtFn = () => {};
 /** fight.js hands in its damage functions (avoids an import cycle). */
+/** One swing of a class auto-attack (no cost, no global cooldown): its effects at its rank, like a cast that lands now. */
+export function runAutoSkill(w, p, sk, t) { const rank = Math.max(1, rankOf(p.char, sk)); run(w, p, sk, rank, t, { x: t.x, z: t.z }, false, 0, shapeSkill(w, p, sk, atRank(sk, rank))); }
 export function wireSkills({ hurt, weaponHit, healMostHurt }) { hurtFn = hurt; weaponFn = weaponHit; healMostHurtFn = healMostHurt; }
 function weaponBlow(w, p, t, mult, ctx) { return weaponFn(w, p, t, mult * (1 + fxPct(p, 'damage') / 100) * markOf(t), { threat: ctx.row.threat ?? 1 }); }
 function spellHit(w, p, t, amount, type, ctx) {
@@ -270,7 +272,7 @@ export function learn(w, p, id) {
   for (const pre of sk.prereq || []) if (!(ch.skills?.[pre] > 0)) return { err: `Learn ${w.content.skills[pre]?.name || pre} first.` };
   const skills = { ...(ch.skills || {}), [id]: now + 1 };
   let bar = ch.bar || [];
-  if (sk.kind === 'active' && !sk.hidden && !bar.includes(id) && now === 0) {
+  if (sk.kind === 'active' && !sk.hidden && !sk.autoAttack && !bar.includes(id) && now === 0) {   // a class auto-attack lives in slot 1
     // a new skill goes on the bar: an empty slot, else over the last Wanderer skill (players rarely think to swap them)
     if (bar.filter(Boolean).length < 6) bar = [...bar.filter(Boolean), id];
     else { let k = -1; for (let i = bar.length - 1; i >= 0; i--) if (w.content.skills[bar[i]]?.owner === 'wanderer') { k = i; break; } if (k >= 0) { bar = [...bar]; bar[k] = id; } }
@@ -289,7 +291,7 @@ export function setBar(w, p, i, id) {
   return { ok: true };
 }
 export function defaultBar(skills, ch) {
-  const known = Object.values(skills).filter(s => s.kind === 'active' && rankOf(ch, s) > 0 && s.owner !== 'all');
+  const known = Object.values(skills).filter(s => s.kind === 'active' && !s.autoAttack && rankOf(ch, s) > 0 && s.owner !== 'all');
   known.sort((a, b) => (a.owner === 'wanderer') - (b.owner === 'wanderer') || (a.reqLevel || 1) - (b.reqLevel || 1));
   const bar = known.slice(0, 6).map(s => s.id); while (bar.length < 6) bar.push(null);
   return bar;

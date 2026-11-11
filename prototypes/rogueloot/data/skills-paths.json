@@ -1559,6 +1559,143 @@
     "value": 3,
     "perRank": 2
    }
+  },
+  "fighter_hewing": {
+   "name": "Hewing Blows",
+   "owner": "fighter",
+   "tree": "iron_line",
+   "reqLevel": 4,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "autoAttack": true,
+   "desc": "Your attack: {mult} weapon damage, and every blow builds Temper.",
+   "cost": {},
+   "cast": 0,
+   "cd": 0,
+   "gcd": false,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.12,
+     "perRank": {
+      "mult": 0.03
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 2
+    }
+   ]
+  },
+  "rogue_quick_cuts": {
+   "name": "Quick Cuts",
+   "owner": "rogue",
+   "tree": "knifework",
+   "reqLevel": 4,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "autoAttack": true,
+   "desc": "Your attack: {mult} weapon damage and 3 Energy back each blow.",
+   "cost": {},
+   "cast": 0,
+   "cd": 0,
+   "gcd": false,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.1,
+     "perRank": {
+      "mult": 0.03
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "energy",
+     "n": 3
+    }
+   ]
+  },
+  "mage_arcane_dart": {
+   "name": "Arcane Dart",
+   "owner": "mage",
+   "tree": "weatherwork",
+   "reqLevel": 4,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "autoAttack": true,
+   "desc": "Your attack: a dart for {dmg} storm damage from 18 m, every 1.4 seconds, free.",
+   "cost": {},
+   "cast": 0,
+   "cd": 0,
+   "gcd": false,
+   "range": 18,
+   "every": 1.4,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "storm",
+     "base": [
+      3,
+      1.6
+     ],
+     "speed": 30,
+     "perRank": {
+      "base": [
+       0.3,
+       0.15
+      ]
+     }
+    }
+   ]
+  },
+  "healer_sunlit_strike": {
+   "name": "Sunlit Strike",
+   "owner": "healer",
+   "tree": "daylight",
+   "reqLevel": 4,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "autoAttack": true,
+   "desc": "Your attack: a ray for {dmg} fire damage from 16 m every 1.5 seconds, free, and 1 Mana back.",
+   "cost": {},
+   "cast": 0,
+   "cd": 0,
+   "gcd": false,
+   "range": 16,
+   "every": 1.5,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "fire",
+     "base": [
+      3,
+      1.5
+     ],
+     "speed": 32,
+     "perRank": {
+      "base": [
+       0.3,
+       0.14
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 1
+    }
+   ]
   }
  },
  "wishlist": [

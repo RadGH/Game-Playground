@@ -2,6 +2,7 @@
 // they don't; tap one to trade (ruling 5: anywhere). The trade window and the "X wants to trade" ask.
 import { itemName } from '../rules/items.js';
 import { glyph, rarityClass, itemTip } from './sheet-ui.js';
+import { ask, tell, askText } from '../../../../shared/dialog.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export function createPartyUI({ content, send, getChar, zoneName }) {
@@ -15,12 +16,12 @@ export function createPartyUI({ content, send, getChar, zoneName }) {
     frames.hidden = !others.length;
     frames.innerHTML = others.map(p => { const s = snapPlayers?.get(p.id); const here = p.area === myArea && s;
       return `<button class="pf ${s?.dead ? 'dead' : ''} ${p.away ? 'away' : ''}" data-pid="${p.id}"><b>${esc(p.name)}</b><small>${here ? `Level ${s.lvl}` : esc(zoneName(p.area))}${p.away ? ' · away' : ''}</small>${here ? `<i class="hp"><b style="width:${Math.max(0, s.hp / s.mhp * 100)}%"></b></i>` : ''}</button>`; }).join('');
-    frames.querySelectorAll('[data-pid]').forEach(b => b.onclick = () => { if (confirm(`Ask ${roster.find(r => r.id === b.dataset.pid)?.name} to trade?`)) send({ do: 'trade', op: 'ask', to: b.dataset.pid }); });
+    frames.querySelectorAll('[data-pid]').forEach(b => b.onclick = () => { ask({ title: `Trade with ${roster.find(r => r.id === b.dataset.pid)?.name}?`, ok: 'Ask' }).then(y => y && send({ do: 'trade', op: 'ask', to: b.dataset.pid })); });
   }
   function onEvent(e) {
-    if (e.k === 'trade-ask') { if (confirm(`${e.name} wants to trade with you. Open a trade?`)) send({ do: 'trade', op: 'accept', from: e.from }); else send({ do: 'trade', op: 'cancel' }); return true; }
+    if (e.k === 'trade-ask') { ask({ title: `${e.name} wants to trade`, ok: 'Open trade', cancel: 'No thanks' }).then(y => send(y ? { do: 'trade', op: 'accept', from: e.from } : { do: 'trade', op: 'cancel' })); return true; }
     if (e.k === 'trade') { trade = e; draw(); return true; }
-    if (e.k === 'trade-end') { trade = null; win.hidden = true; if (e.why !== 'done' && e.why !== 'cancelled') alert(e.why); return true; }
+    if (e.k === 'trade-end') { trade = null; win.hidden = true; if (e.why !== 'done' && e.why !== 'cancelled') tell({ title: 'Trade ended', text: e.why }); return true; }
     return false;
   }
   function draw() {

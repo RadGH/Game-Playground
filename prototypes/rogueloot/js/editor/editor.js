@@ -13,6 +13,7 @@ import { checkZone } from '../world/check.js';
 import { PROP_KIT } from '../world/props.js';
 import { SURFACES } from '../world/zone.js';
 import { buildZoneView } from '../client/zone-view.js';
+import { ask, askText } from '../../../../shared/dialog.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -173,8 +174,8 @@ function panel() {
 const dataUrl = f => new URL('../../data/' + f, import.meta.url);
 async function open(id) { zone = await (await fetch(dataUrl(`zones/${id}.json`), { cache: 'no-cache' })).json(); undo = []; redo = []; sel = null; dirty = false; const [x0, z0, x1, z1] = zone.bounds; panX = (x0 + x1) / 2; panZ = (z0 + z1) / 2; zoom = Math.max(x1 - x0, z1 - z0) * 0.55; resize(); rebuild(); history.replaceState(null, '', '?zone=' + id); }
 async function list() { const idx = await (await fetch(dataUrl('zones/index.json'), { cache: 'no-cache' })).json(); $('#zone-pick').innerHTML = idx.zones.map(z => `<option>${z}</option>`).join(''); return idx.zones; }
-$('#zone-pick').onchange = e => { if (!dirty || confirm('Drop unsaved changes?')) open(e.target.value); };
-$('#new').onclick = () => { const id = prompt('New zone id (lower_case):', 'new_zone'); if (!id) return; zone = { id: id.toLowerCase().replace(/[^a-z0-9_]/g, '_'), name: id, levels: [1, 3], table: '', theme: 'meadow', bounds: [-80, -80, 80, 80], base: 'grass', surfaces: [], heights: [], water: [], cliffs: [], props: [], scatter: [], spawns: [], chests: [], markers: [{ kind: 'start', x: 0, z: 0 }] }; undo = []; redo = []; dirty = true; panX = panZ = 0; zoom = 90; resize(); rebuild(); };
+$('#zone-pick').onchange = async e => { if (!dirty || await ask({ title: 'Drop unsaved changes?', ok: 'Drop them', danger: true })) open(e.target.value); };
+$('#new').onclick = async () => { const id = await askText({ title: 'New zone', text: 'Its id, in lower_case.', value: 'new_zone' }); if (!id) return; zone = { id: id.toLowerCase().replace(/[^a-z0-9_]/g, '_'), name: id, levels: [1, 3], table: '', theme: 'meadow', bounds: [-80, -80, 80, 80], base: 'grass', surfaces: [], heights: [], water: [], cliffs: [], props: [], scatter: [], spawns: [], chests: [], markers: [{ kind: 'start', x: 0, z: 0 }] }; undo = []; redo = []; dirty = true; panX = panZ = 0; zoom = 90; resize(); rebuild(); };
 $('#undo').onclick = doUndo; $('#redo').onclick = doRedo;
 $('#check').onclick = () => { const r = checkZone(zone); $('#check-out').innerHTML = `<h3>${r.ok ? '✅ All good' : '⚠ ' + r.problems.length + ' problem(s)'}</h3><ul>${r.problems.map(p => `<li>${esc(p)}</li>`).join('')}</ul><small>${esc(JSON.stringify(r.stats))}</small>`; };
 $('#download').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(zone, null, 1)], { type: 'application/json' })); a.download = zone.id + '.json'; a.click(); };

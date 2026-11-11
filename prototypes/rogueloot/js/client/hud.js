@@ -8,7 +8,12 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const ICONS = { attack: '⚔', sword: '🗡', bolt: '⚡', heal: '✚', shove: '✋', potion: '⚗' };
 export const BAR = ['sure_strike', 'spark', 'field_mend', 'shove', null, null];        // a hero with no bar yet
 
-export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouch, onBag = () => {}, onDrink = () => {}, quest = null }) {
+const ATK_NONE = () => 'attack';
+let ATK = ATK_NONE;
+/** main.js tells the HUD which skill fills the Attack slot (a class auto-attack once learned) */
+export function setAttackSkill(fn) { ATK = fn || ATK_NONE; }
+
+export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouch, onBag = () => {}, onDrink = () => {}, onRecall = () => {}, quest = null }) {
   root.innerHTML = `
     <div class="me-frame"><div class="lvl"></div><div class="bars"><div class="nm"></div><i class="hp"><b></b><span></span></i><i class="mp"><b></b><span></span></i><i class="rp" hidden><b></b><span></span></i></div></div>
     <div class="tg-frame" hidden><div class="nm"></div><i class="hp"><b></b><span></span></i><div class="tcast" hidden><i><b></b></i><span></span></div></div>
@@ -26,27 +31,27 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
   const btns = [];
   for (let i = 0; i < 7; i++) {
     const b = document.createElement('button'); b.className = 'slot'; b.dataset.i = i;
-    b.innerHTML = `<span class="ic"></span><span class="key">${i ? i : 'F'}</span><i class="cd"></i><small></small>`;
-    b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onUse(i ? curBar[i - 1] : 'attack'); });
+    b.innerHTML = `<span class="ic"></span><span class="key">${i + 1}</span><i class="cd"></i><small></small>`;   // 1 = Attack, 2-7 = skills
+    b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onUse(i ? curBar[i - 1] : attackSkill); });
     bar.append(b);
     const a = b.cloneNode(true); a.className = 'arc-btn arc-' + i + (i === 0 ? ' big' : '');
-    a.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onUse(i ? curBar[i - 1] : 'attack'); });
+    a.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onUse(i ? curBar[i - 1] : attackSkill); });
     arc.append(a);
     btns.push([b, a]);
   }
-  let curBar = [], barKey = '';
+  let curBar = [], barKey = '', attackSkill = 'attack';
   let barLevel = 99;
-  function fillBar(list, level = barLevel) {
-    barLevel = level; curBar = list; barKey = JSON.stringify(list) + '@' + level;
+  function fillBar(list, level = barLevel, atk = attackSkill) {
+    barLevel = level; curBar = list; attackSkill = atk; barKey = JSON.stringify(list) + '@' + level + '@' + atk;
     btns.forEach(([b, a], i) => {
-      const id = i ? list[i - 1] : 'attack', sk = id ? skills[id] : null;
+      const id = i ? list[i - 1] : attackSkill, sk = id ? skills[id] : null;
       for (const el of [b, a]) { el.querySelector('.ic').textContent = id === 'attack' ? '⚔' : sk ? skillIcon(sk) : ''; el.querySelector('small').textContent = sk?.name || ''; el.classList.toggle('empty', !sk); el.title = sk ? `${sk.name}${sk.desc ? ' — ' + sk.desc.replace(/\{\w+\}/g, '…') : ''}` : ''; el.dataset.skill = id || ''; const early = sk && (sk.reqLevel || 1) > level; el.classList.toggle('early', !!early); if (early) el.title = `${sk.name}: at level ${sk.reqLevel}`; }
     });
   }
   fillBar([]);
   // potions (ruling 21's potion button; health and mana)
   const pots = {};
-  for (const [kind, key, ic] of [['health', 'Q', '❤'], ['mana', 'E', '💧']]) {
+  for (const [kind, key, ic] of [['health', 'R', '❤'], ['mana', 'F', '💧']]) {
     const mk = cls => { const b = document.createElement('button'); b.className = cls + ' pot pot-' + kind; b.innerHTML = `<span class="ic">${ic}</span><span class="key">${key}</span><b class="n">0</b><small>${kind === 'mana' ? 'Mana' : 'Healing'}</small>`; b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onDrink(kind); }); return b; };
     const a = mk('slot'), c = mk('arc-btn'); bar.append(a); arc.append(c); pots[kind] = [a, c];
   }
@@ -59,6 +64,9 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
   place(pots.health[1], 156, 172, 48); place(pots.mana[1], 156, 147, 48);
   place(btns[5][1], 156, 122, 52); place(btns[6][1], 156, 97, 52);
   void onTargetNext;
+  // your portal home (T): on the bar with its key (owner 2026-11-11: "nothing on the bar to indicate its hotkey")
+  { const mk = cls => { const b = document.createElement('button'); b.className = cls + ' recall'; b.innerHTML = '<span class="ic">🌀</span><span class="key">T</span><small>Portal</small>'; b.title = ''; b.dataset.tip = 'Portal home: opens a way back to Brightwater, and back again'; b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onRecall(); }); return b; };
+    const a = mk('slot'), c = mk('arc-btn'); bar.append(a); arc.append(c); place(c, 212, 90, 44); }
   $('.rel').onclick = onRelease;
   $('.bag-btn').onclick = onBag;
   root.classList.toggle('touch', !!isTouch);
@@ -75,7 +83,9 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
     const rp = $('.me-frame .rp'), mp = $('.me-frame .mp'), other = me.res && me.res !== 'mana';
     mp.hidden = !!other; rp.hidden = !other;
     if (other) { bars(rp, me.rv, 100); rp.className = 'rp res-' + me.res; rp.querySelector('span').textContent = `${RES_NAME[me.res]} ${me.rv}`; } else bars(mp, me.mp, me.mmp);
-    if (ch) { const want = JSON.stringify((me.sb || (ch.bar && ch.bar.length ? ch.bar : BAR)).slice(0, 6)); if (want + '@' + ch.level !== barKey) fillBar(JSON.parse(want), ch.level); }
+    if (ch) { const want = JSON.stringify((me.sb || (ch.bar && ch.bar.length ? ch.bar : BAR)).slice(0, 6)), atk = ATK(ch); if (want + '@' + ch.level + '@' + atk !== barKey) fillBar(JSON.parse(want), ch.level, atk); }
+    // Attack lights up while auto-attack is running (owner 2026-11-11)
+    for (const el of btns[0]) el.classList.toggle('auto', !!me.ao);
     if (ch) { const base = xpAtLevel(ch.level), need = xpToNext(ch.level); $('.xp-bar b').style.width = (Number.isFinite(need) ? Math.min(100, (ch.xp - base) / need * 100) : 100) + '%'; }
     const tf = $('.tg-frame');
     tf.hidden = !tg;

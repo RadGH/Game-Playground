@@ -107,6 +107,9 @@ function affixCountFor(data, rng, rarity, ilvl) {
 }
 
 /** Make an item. opts: { base, rarity, ch (for smart roll + proficiency), quality } */
+/** Does this base give a stat by itself (weapon damage, armour, block)? Jewellery does not. */
+export const hasBaseStat = b => !!(b && (b.damage || b.armour || b.block || b.implicit));
+
 export function makeItem(data, rng, ilvl, opts = {}) {
   ilvl = Math.max(1, Math.min(data.rarity.ilvlCap || 65, Math.round(ilvl)));
   let rarity = opts.rarity || 'normal';
@@ -119,6 +122,10 @@ export function makeItem(data, rng, ilvl, opts = {}) {
   }
   if (!item.base) { b ||= pickBase(data, rng, ilvl, opts.ch); item.base = b.id; }
   b = data.bases[item.base];
+  // an item must have at least one stat (owner 2026-11-11: "a necklace dropped with no modifiers… if it has no stats it
+  // should not drop"). Weapons carry damage, armour carries armour; a ring or amulet has nothing of its own, so it is
+  // never a plain item (as in Diablo 2: jewellery is always at least magic).
+  if (rarity === 'normal' && !hasBaseStat(b)) rarity = item.rarity = 'magic';
   if (rarity === 'legendary') {
     const pw = pickW(rng, Object.values(data.powers).filter(p => (p.ilvlMin || 1) <= ilvl && p.kinds?.includes(affixKind(b))), p => p.weight || 10);
     if (pw) item.power = pw.id; else rarity = item.rarity = 'rare';
@@ -127,8 +134,9 @@ export function makeItem(data, rng, ilvl, opts = {}) {
     const useful = opts.ch ? usefulFor(opts.ch) : null;
     const n = affixCountFor(data, rng, rarity, ilvl);
     for (let i = 0; i < n; i++) if (!addAffix(data, rng, item, { useful })) break;
-    if (rarity === 'magic' && !item.affixes.length) item.rarity = 'normal';
+    if (rarity === 'magic' && !item.affixes.length && hasBaseStat(b)) item.rarity = 'normal';
   }
+  if (!hasBaseStat(b) && !item.affixes.length && !item.unique && !item.power) return null;     // nothing on it: no item
   if ((data.rarity.unidentified?.rarities || ['rare', 'unique', 'legendary']).includes(item.rarity)) item.ided = false;
   if (item.rarity === 'rare' || item.rarity === 'legendary') item.name = rareName(rng);
   const dmax = durabilityMax(b); if (dmax) item.dur = [dmax, dmax];

@@ -272,3 +272,9 @@ body.hurt-flash #fight::before { content: ''; position: fixed; inset: 0; box-sha
 .plate.pl-portal.open { color: #fff6c8; border-color: #ffd040; background: rgba(40, 70, 120, .85); box-shadow: 0 0 10px rgba(120, 190, 255, .6); }
 .plate.pl-portal.locked { opacity: .62; filter: grayscale(.8); font-size: .85em; }
 .bslot.early, .early { opacity: .4; filter: grayscale(1); }
+/* Attack glows while auto-attack is running (owner 2026-11-11: "highlight the attack ability when attacking is enabled") */
+.slot.auto, .arc-btn.auto { border-color: #ffe27a; box-shadow: 0 0 0 2px rgba(255, 226, 122, .55), 0 0 14px rgba(255, 200, 80, .7); animation: autoPulse 1.2s ease-in-out infinite; }
+@keyframes autoPulse { 50% { box-shadow: 0 0 0 2px rgba(255, 226, 122, .3), 0 0 6px rgba(255, 200, 80, .35); } }
+@media (prefers-reduced-motion: reduce) { .slot.auto, .arc-btn.auto { animation: none; } }
+.slot.recall { background: linear-gradient(#2a3a5a, #141e33); }
+#fight.touch .arc-btn.recall { width: 44px; height: 44px; } #fight.touch .arc-btn.recall .ic { font-size: 16px; line-height: 28px; }

@@ -121,6 +121,13 @@ export function hurt(w, src, t, r, type, threatMult = 1) {
   if (!r.amount) { if (t.team === 'foe') aggro(w, t, src, 1); return; }
   // a ward that strikes back (thorns on a shield): the attacker takes spell damage while it holds
   if (src?.team === 'foe' && t.team === 'hero') for (const f of t.fx || []) if (f.kind === 'shield' && f.thorns && f.left > 0 && !src.dead) hurt(w, t, src, { result: 'hit', amount: Math.max(1, Math.round(f.thorns.n)) }, f.thorns.type);
+  // a link (Sworn Guard, Thread of Fate): a share of the hit goes to the friend who took the oath, after their armour
+  if (t.team === 'hero' && r.amount > 0) for (const f of t.fx || []) if (f.kind === 'link') {
+    const g = w.players.get(f.src); if (!g || g.dead || g === t) continue;
+    const share = r.amount * f.pct / 100, paid = share * Math.max(0.25, 1 - (g.armour || 0) / ((g.armour || 0) + 400));
+    r = { ...r, amount: r.amount - share }; g.hp -= paid; w.events.push({ k: 'dmg', s: src?.id, t: g.id, n: Math.round(paid), r: 'link', ty: type });
+    if (g.hp <= 0) { g.hp = 0; die(w, g, src); }
+  }
   // a shield soaks first
   for (const f of t.fx || []) if (f.kind === 'shield' && f.left > 0 && r.amount > 0) { const k = Math.min(f.left, r.amount); f.left -= k; r.amount -= k; if (f.left <= 0) f.until = 0; }
   if (t.team === 'foe') {
@@ -217,6 +224,12 @@ export function stepShots(w, dt) {
         const r = resolveHit(src, s.foeShot ? withArmour(t) : armourAfter(t), { amount: s.amount * (s.foeShot ? dmgFactor(src) : 1), type: s.type, spell: s.spell }, w.rng);
         hurt(w, src, t, r, s.type, s.threat ?? 1);
         if (s.onHit && r.amount > 0) applyRider(w, src, t, { id: s.onHit.id, damageType: s.type }, s.onHit.fx);
+        // a bolt that jumps on: nearest foe not hit yet, each jump weaker
+        if (s.chain && s.chain.jumps > 0) {
+          const hit = new Set([...(s.chain.hit || []), t.id]); let best = null, bd = s.chain.range || 6;
+          for (const o of w.foes.values()) { if (o.dead || hit.has(o.id)) continue; const dd = dist(o, t); if (dd < bd) { bd = dd; best = o; } }
+          if (best) { keep.push({ ...s, id: 's' + (w.nextId++), x: t.x, z: t.z, to: best.id, amount: s.amount * (s.chain.falloff ?? 0.7), chain: { ...s.chain, jumps: s.chain.jumps - 1, hit: [...hit] } }); w.events.push({ k: 'shoot', s: src.id, t: best.id, ty: s.type, from: t.id }); }
+        }
       }
       continue;
     }

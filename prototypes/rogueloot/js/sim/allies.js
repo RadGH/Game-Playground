@@ -47,7 +47,7 @@ export function summon(w, owner, e) {
     while (mine.length >= MAX_MINIONS) w.allies.delete(mine.shift().id);
     made.push(spawnAlly(w, owner, { def, name: e.name || 'Minion' }, 'minion', `a:min:${owner}:${w.nextId++}`));
   }
-  for (const a of made) { if (!a) continue; a.born = w.time; a.until = e.secs ? w.time + e.secs : 0; const g = w.rng() * 6.283; a.x = p.x + Math.cos(g) * 1.6; a.z = p.z + Math.sin(g) * 1.6; }
+  for (const a of made) { if (!a) continue; a.born = w.time; a.until = e.secs ? w.time + e.secs : 0; const g = w.rng() * 6.283, c = e.at || p; a.x = c.x + Math.cos(g) * 1.6; a.z = c.z + Math.sin(g) * 1.6; if (e.at) a.stay = { x: a.x, z: a.z }; }
   w.events.push({ k: 'summon', s: owner, n: made.length, name: e.name });
   return made.filter(Boolean);
 }
@@ -64,6 +64,7 @@ export function stepAllies(w, dt) {
     if (w.time - a.lastFight > 5) a.hp = Math.min(a.maxHp, a.hp + a.maxHp * 0.04 * dt);
     if (a.fx?.length) a.fx = a.fx.filter(f => f.until > w.time);
     // too far behind (a different screen): catch up at once, like a D2 hireling
+    if (a.stay) { const t = choose(w, a, a.stay); a.target = t?.id || null; if (t && dist(a, t) < (a.range || 1.7) + (t.r || 0) + 0.6) fight(w, a, t, dt); continue; }   // a decoy stands where it was dropped
     if (dist(a, p) > 30) { [a.x, a.z] = resolve(w.area, p.x + 1.5, p.z + 1.5, a.r); a.target = null; }
     const t = choose(w, a, p);
     a.target = t?.id || null;

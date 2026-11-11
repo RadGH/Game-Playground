@@ -3,6 +3,7 @@
 //   const foes = createFoes(view, labelRoot);  foes.sync(snapshotFoes, now);  foes.update(dt, renderAt);  foes.pick(x, y)
 import * as THREE from 'three';
 import { buildMonster, animateMonster } from './bestiary-kit.js';
+import { mergeStatic } from './mesh-merge.js';
 
 // the raw bestiary (monsters / rares / bosses rows with their full `look`), loaded once for the 3D kit
 let RAW = null; const rawReady = fetch(new URL('../../data/monsters.json', import.meta.url)).then(r => r.json()).then(j => { RAW = j; }).catch(() => {});
@@ -15,7 +16,7 @@ function rawRow(s) {
 }
 function kitBody(s, phase = 0) {
   const row = rawRow(s); if (!row) return null;
-  try { const g = buildMonster(row, { content: RAW, rank: s.rk, level: s.lvl, phase }); g.userData.kit = true; return g; } catch (e) { console.warn('bestiary-kit', s.d, e.message); return null; }
+  try { const g = mergeStatic(buildMonster(row, { content: RAW, rank: s.rk, level: s.lvl, phase })); g.userData.kit = true; return g; } catch (e) { console.warn('bestiary-kit', s.d, e.message); return null; }
 }
 
 const flat = c => new THREE.MeshLambertMaterial({ color: c, flatShading: true });
@@ -60,6 +61,9 @@ export function buildFoeBody(row) {
   return g;
 }
 
+/** Free what only this body owns (merged pieces; the kit's shared geometry and materials stay cached). */
+function freeBody(g) { g.traverse(o => { if (o.name === 'merged') o.geometry.dispose(); }); }
+
 export function createFoes(view, labelRoot, { content = null } = {}) {
   const list = new Map();
   const ring = new THREE.Mesh(new THREE.RingGeometry(0.62, 0.78, 28).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ff3b2f', transparent: true, opacity: 0.85, depthWrite: false }));
@@ -81,7 +85,7 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
       f.buf.push({ at: now, x: s.x, z: s.z, yaw: s.yaw }); if (f.buf.length > 8) f.buf.shift();
       if (s.st === 'dead' && f.st !== 'dead') f.deadAt = now;
       // the kit arrived after this body was built, or a boss changed phase: rebuild the body
-      if ((!f.kit && RAW) || (f.kit && (s.ph || 0) !== f.ph)) { const ng = kitBody(s, s.ph || 0); if (ng) { if (f.aura) { f.group.remove(f.aura); ng.add(f.aura); } ng.position.copy(f.group.position); ng.rotation.y = f.group.rotation.y; view.scene.remove(f.group); view.scene.add(ng); f.group = ng; f.kit = true; f.ph = s.ph || 0; } else f.kit = true; }
+      if ((!f.kit && RAW) || (f.kit && (s.ph || 0) !== f.ph)) { const ng = kitBody(s, s.ph || 0); if (ng) { if (f.aura) { f.group.remove(f.aura); ng.add(f.aura); } ng.position.copy(f.group.position); ng.rotation.y = f.group.rotation.y; view.scene.remove(f.group); freeBody(f.group); view.scene.add(ng); f.group = ng; f.kit = true; f.ph = s.ph || 0; } else f.kit = true; }
       f.st = s.st; f.hp = s.hp; f.mhp = s.mhp; f.lvl = s.lvl; f.cast = s.cast || null; f.rk = s.rk; f.tg = s.tg; f.ward = s.ward;
       // champions and rares wear their modifiers: a coloured ring underfoot (the tell), the name plate says which
       const modKey = (s.mods || []).join(',');
@@ -89,7 +93,7 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
       if (s.n !== f.name) { f.name = s.n; f.tag.querySelector('.nm').textContent = s.n; }
       f.tag.className = 'foe-tag' + (s.rk ? ' rk-' + s.rk : '') + (f.tag.classList.contains('tg') ? ' tg' : '');
     }
-    for (const [id, f] of list) if (!seen.has(id)) { view.scene.remove(f.group); f.tag.remove(); list.delete(id); }
+    for (const [id, f] of list) if (!seen.has(id)) { view.scene.remove(f.group); freeBody(f.group); f.tag.remove(); list.delete(id); }
   }
   const lerpAngle = (a, b, t) => { const d = ((b - a + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI; return a + d * t; };
   const v = new THREE.Vector3();

@@ -28,10 +28,10 @@
         { "id": "windmill_fields", "name": "Windmill Fields", "kind": "zone", "levels": [3, 5], "x": 42, "y": 69, "links": ["saltgrass_shore", "mill_cellars", "thornwood"], "portalAfter": "saltgrass_shore", "order": 3, "rare": "whistler_jack", "built": true },
         { "id": "mill_cellars", "name": "Mill Cellars", "kind": "dungeon", "levels": [5, 5], "floors": 1, "boss": "gristmaul", "x": 58, "y": 74, "links": ["windmill_fields"], "portalAfter": null, "order": 4, "built": true },
 
-        { "id": "thornwood", "name": "Thornwood", "kind": "zone", "levels": [5, 7], "x": 32, "y": 56, "links": ["windmill_fields", "thornwood_hollow", "kings_road"], "portalAfter": "mill_cellars", "order": 5, "rare": "grandmother_root", "built": false },
-        { "id": "thornwood_hollow", "name": "Thornwood Hollow", "kind": "dungeon", "levels": [7, 7], "floors": 2, "boss": "mother_thrum", "x": 16, "y": 50, "links": ["thornwood"], "portalAfter": null, "order": 6, "built": false },
-        { "id": "kings_road", "name": "King's Road", "kind": "zone", "levels": [7, 9], "x": 50, "y": 48, "links": ["thornwood", "old_barrow", "elderglade", "mirefen"], "portalAfter": "thornwood_hollow", "order": 7, "rare": "sergeant_krull", "built": false },
-        { "id": "old_barrow", "name": "Old Barrow", "kind": "dungeon", "levels": [9, 10], "floors": 3, "boss": "reeve_oswin", "x": 64, "y": 58, "links": ["kings_road"], "portalAfter": "kings_road", "order": 9, "rare": "the_lamplighter", "built": false },
+        { "id": "thornwood", "name": "Thornwood", "kind": "zone", "levels": [5, 7], "x": 32, "y": 56, "links": ["windmill_fields", "thornwood_hollow", "kings_road"], "portalAfter": "mill_cellars", "order": 5, "rare": "grandmother_root", "built": true },
+        { "id": "thornwood_hollow", "name": "Thornwood Hollow", "kind": "dungeon", "levels": [7, 7], "floors": 2, "boss": "mother_thrum", "x": 16, "y": 50, "links": ["thornwood"], "portalAfter": null, "order": 6, "built": true },
+        { "id": "kings_road", "name": "King's Road", "kind": "zone", "levels": [7, 9], "x": 50, "y": 48, "links": ["thornwood", "old_barrow", "elderglade", "mirefen"], "portalAfter": "thornwood_hollow", "order": 7, "rare": "sergeant_krull", "built": true },
+        { "id": "old_barrow", "name": "Old Barrow", "kind": "dungeon", "levels": [9, 10], "floors": 3, "boss": "reeve_oswin", "x": 64, "y": 58, "links": ["kings_road"], "portalAfter": "kings_road", "order": 9, "rare": "the_lamplighter", "built": true },
 
         { "id": "elderglade", "name": "Elderglade", "kind": "zone", "levels": [9, 11], "x": 32, "y": 36, "links": ["kings_road", "elder_roots"], "portalAfter": "kings_road", "order": 8, "rare": "velka_thricewed", "built": false },
         { "id": "elder_roots", "name": "Elder Roots", "kind": "dungeon", "levels": [12, 12], "floors": 2, "boss": "ildreth", "x": 16, "y": 28, "links": ["elderglade"], "portalAfter": "old_barrow", "order": 10, "built": false },

@@ -53,6 +53,11 @@
        "do": "taunt"
       }
      ]
+    },
+    {
+     "do": "link",
+     "pct": 30,
+     "secs": 8
     }
    ]
   },
@@ -267,6 +272,11 @@
        "do": "taunt"
       }
      ]
+    },
+    {
+     "do": "link",
+     "pct": 30,
+     "secs": 8
     }
    ]
   },
@@ -357,6 +367,11 @@
      "do": "resource",
      "kind": "rage",
      "n": 30
+    },
+    {
+     "do": "link",
+     "pct": 50,
+     "secs": 10
     }
    ]
   },
@@ -1801,7 +1816,8 @@
      "perRank": {
       "hpMult": 0.08,
       "secs": 0.5
-     }
+     },
+     "stay": true
     }
    ]
   },
@@ -3120,29 +3136,12 @@
        0.7,
        0.35
       ]
+     },
+     "chain": {
+      "jumps": 2,
+      "range": 6,
+      "falloff": 0.7
      }
-    },
-    {
-     "do": "area",
-     "shape": "circle",
-     "size": 4,
-     "at": "target",
-     "effects": [
-      {
-       "do": "damage",
-       "type": "storm",
-       "base": [
-        4,
-        2
-       ],
-       "perRank": {
-        "base": [
-         0.3,
-         0.15
-        ]
-       }
-      }
-     ]
     }
    ]
   },
@@ -3397,6 +3396,11 @@
        1.5,
        0.6
       ]
+     },
+     "chain": {
+      "jumps": 4,
+      "range": 7,
+      "falloff": 0.8
      }
     },
     {
@@ -3405,20 +3409,6 @@
      "size": 6,
      "at": "target",
      "effects": [
-      {
-       "do": "damage",
-       "type": "storm",
-       "base": [
-        14,
-        7
-       ],
-       "perRank": {
-        "base": [
-         1,
-         0.45
-        ]
-       }
-      },
       {
        "do": "debuff",
        "kind": "stun",
@@ -4411,6 +4401,11 @@
      "perRank": {
       "pct": 1
      }
+    },
+    {
+     "do": "link",
+     "pct": 30,
+     "secs": 10
     }
    ]
   },
@@ -6278,64 +6273,14 @@
  },
  "wishlist": [
   {
-   "field": "link (damage taken for a friend)",
-   "on": "kni_sworn_guard, kni_bodyguard, kni_unbreakable_vow, ora_thread_of_fate",
-   "rule": "`link: { pct: 50, secs: 8 }` on an ally-target skill: while it holds, that share of every hit the friend takes is paid by the caster instead (after the caster's own armour). Written today as a ward on the friend + a taunt circle at their feet (Knight) or a ward + heal (Oracle), which the engine runs and which already reads as \"I take it for them\"."
-  },
-  {
    "field": "flair (variety counter)",
    "on": "swb_grandeur",
    "rule": "`flair: { perSkill: 0.15, max: 5, window: 8 }` on a weapon effect: +perSkill x the number of DISTINCT skills the caster used in the last `window` seconds (capped). Today every Swashbuckler skill writes its own +4% damage buff for 8 s (fx id = skill id + \":damage\", so they stack and a repeat only refreshes), which is the same counter at a flat 4% a skill; Grandeur reads it through fxPct like every other weapon hit."
   },
   {
-   "field": "chain (a bolt that jumps)",
-   "on": "sto_forked_bolt, sto_chain_tempest",
-   "rule": "`chain: { jumps: 3, range: 6, falloff: 0.7 }` on a bolt: after landing, the bolt jumps to the nearest unhit foe within range up to `jumps` times, each at falloff x the last. Written today as a small circle at the target (4 m / 6 m), which reads as a fork."
-  },
-  {
-   "field": "cond: slowed (the shatter)",
-   "on": "fro_rime_spear",
-   "rule": "`cond: { slowed: true, mult: 1.5 }` on a damage effect: x mult when the target carries a slow, root or stun. Flat today; Rime Spear is sized so it is still the right spell on a slowed target."
-  },
-  {
-   "field": "cond: lowHp",
-   "on": "asn_execution",
-   "rule": "`cond: { targetHpBelow: 0.35, mult: 1.5 }` (an execute). Written today as a flat x4.0 on a 20 s cooldown."
-  },
-  {
-   "field": "cond: behind",
-   "on": "asn_gutting_strike",
-   "rule": "The Path wishlist's `cond: behind` (Back Cut) - Gutting Strike wants the same gate and the same relaxation by a legendary. Works from any side today."
-  },
-  {
-   "field": "perDot",
-   "on": "asn_fester",
-   "rule": "`perDot: { mult: 0.3, max: 1.2 }`: +mult x the number of dot fx on the target. Flat today (12 + 6L poison)."
-  },
-  {
    "field": "wall (a line that blocks)",
    "on": "fro_ice_wall",
    "rule": "`wall: { secs: 4 }` on a line area: a temporary blocker along the line (walkers path round it). Written today as a 2 s root on everything standing in the line, which holds the pack as a wall would."
-  },
-  {
-   "field": "dodge / moveSpeed buffs on heroes",
-   "on": "(avoided here)",
-   "rule": "A `buff` with stat `dodge` or `moveSpeed` is read nowhere (resolveHit reads p.dodge from the sheet; speedFactor reads only slow/stun/root). The Path's Slip Step carries a dodge buff that does nothing. Rule: fxPct(p, \"dodge\") added in the hero's resolveHit call and a positive speed factor from buff:moveSpeed. Every wave-2 \"parry\" or \"step\" is a ward instead."
-  },
-  {
-   "field": "summon ranks through synergies",
-   "on": "sto_storm_orbs, asn_decoy",
-   "rule": "perRank on hpMult/dmgMult/secs works through atRank; a synergy node cannot feed a summon (synergyOf is read only by damage/heal/duration/radius effects), so neither has one."
-  },
-  {
-   "field": "a minion that stays put",
-   "on": "asn_decoy",
-   "rule": "`stay: true` on a summon: the minion does not follow its owner (a decoy should stand where it was dropped; today it walks after the Assassin, taunting as it goes, which still pulls the pack off)."
-  },
-  {
-   "field": "who: self on a heal inside an enemy skill",
-   "on": "ora_last_page, swb_mocking_parry",
-   "rule": "As wave 1: written as a helpful circle at self (1.5-6 m) so the caster is healed or warded, which the engine runs."
   }
  ]
 }

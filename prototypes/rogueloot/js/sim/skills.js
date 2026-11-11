@@ -132,7 +132,7 @@ function run(w, p, sk, rank, t, at, tick = false, extraMult = 0, shaped = null) 
   for (const e of row.effects || []) apply(w, p, e, t, at, { sk, syn, rank, tick, row, extraMult, crowd: 0, L: shaped?.ctx || {} });
   w.events.push({ k: 'skill', s: p.id, sk: sk.id, t: t?.id, x: at?.x, z: at?.z });
 }
-const HELPFUL = new Set(['heal', 'hot', 'shield', 'buff', 'cleanse', 'revive']);
+const HELPFUL = new Set(['heal', 'hot', 'shield', 'buff', 'cleanse', 'revive', 'link']);
 function apply(w, p, e, t, at, ctx) {
   const L = p.level, sp = (p.st.spellPower || 1) * (1 + fxPct(p, 'damage') / 100), hp = (p.st.healPower || 1);
   const base = b => b ? (b[0] + b[1] * L) : 0;
@@ -147,7 +147,7 @@ function apply(w, p, e, t, at, ctx) {
     case 'shieldPct': addFx(w, p, { id: ctx.sk.id + ':pshield', kind: 'shield', left: p.maxHp * (e.pct || 15) / 100, secs: e.secs || 6, src: p.id }); return;
     case 'damage': {
       if (!t || t.team !== 'foe' || t.dead) return;
-      const amt = base(e.base) * sp * ctx.syn.damage * lowHp(e, t) * (1 + (ctx.crowd || 0)) * perDot(e, t);
+      const amt = base(e.base) * sp * ctx.syn.damage * lowHp(e, t) * (1 + (ctx.crowd || 0)) * perDot(e, t) * slowedMult(e, t);
       const r = spellHit(w, p, t, amt, e.type || 'storm', ctx);
       // legendary: chain to more foes nearby; turn damage into healing for the hurt friend
       if (ctx.L.chain && !ctx.chained) { let n = 0; for (const o of w.foes.values()) { if (n >= ctx.L.chain.count) break; if (o === t || o.dead || Math.hypot(o.x - t.x, o.z - t.z) > ctx.L.chain.range) continue; spellHit(w, p, o, amt * ctx.L.chain.mult, e.type || 'storm', { ...ctx, chained: true }); n++; } }
@@ -161,7 +161,7 @@ function apply(w, p, e, t, at, ctx) {
       return;
     }
     case 'zone': { w.zones ||= []; w.zones.push({ owner: p.id, sk: ctx.sk.id, shape: e.shape || 'circle', x: (at || t || p).x, z: (at || t || p).z, size: (e.size || 4) * ctx.syn.radius, until: w.time + (e.secs || 6) * ctx.syn.duration, next: w.time, tick: e.tick || 1, effects: e.effects || [], ctx: { ...ctx, tick: true } }); w.events.push({ k: 'area', s: p.id, shape: 'circle', x: +(at || t || p).x.toFixed(2), z: +(at || t || p).z.toFixed(2), r: (e.size || 4), zone: e.secs || 6, help: (e.effects || []).every(x => HELPFUL.has(x.do)) || undefined }); return; }
-    case 'bolt': if (t && !t.dead) { w.shots.push({ id: 's' + (w.nextId++), from: p.id, to: t.id, x: p.x, z: p.z, speed: e.speed || 24, type: e.type || 'storm', amount: base(e.base) * sp * ctx.syn.damage * markOf(t), spell: (e.type || 'storm') !== 'physical' }); w.events.push({ k: 'shoot', s: p.id, t: t.id, ty: e.type }); } return;
+    case 'bolt': if (t && !t.dead) { w.shots.push({ id: 's' + (w.nextId++), chain: e.chain ? { ...e.chain } : ctx.L.chain ? { jumps: ctx.L.chain.count, range: ctx.L.chain.range, falloff: ctx.L.chain.mult } : undefined, from: p.id, to: t.id, x: p.x, z: p.z, speed: e.speed || 24, type: e.type || 'storm', amount: base(e.base) * sp * ctx.syn.damage * markOf(t) * slowedMult(e, t), spell: (e.type || 'storm') !== 'physical' }); w.events.push({ k: 'shoot', s: p.id, t: t.id, ty: e.type }); } return;
     case 'area': {
       const helpful = (e.effects || []).every(x => HELPFUL.has(x.do));
       const centre = e.at === 'ground' ? at : e.at === 'target' && t ? t : p;
@@ -190,7 +190,8 @@ function apply(w, p, e, t, at, ctx) {
     case 'cleanse': if (t?.fx) t.fx = t.fx.filter(f => !['slow', 'stun', 'dot', 'root', 'silence'].includes(f.kind)); return;
     case 'revive': if (t && t.dead && w.time - (p.lastFight || -99) > 5) { t.dead = false; t.hp = Math.round(t.maxHp * (e.hpPct || 40) / 100); w.events.push({ k: 'revive', s: p.id, t: t.id }); } return;
     case 'mark': if (t && !t.dead) addFx(w, t, { id: ctx.sk.id + ':mark', kind: 'mark', pct: e.pct || 10, secs: e.secs || 8, src: p.id }); return;
-    case 'summon': summon(w, p.id, { ...e, dmgMult: (e.dmgMult || 0.6) * ctx.syn.damage }); return;
+    case 'summon': summon(w, p.id, { ...e, dmgMult: (e.dmgMult || 0.6) * ctx.syn.damage, at: e.stay ? (at || t || p) : null }); return;
+    case 'link': if (t && !t.dead && t !== p) addFx(w, t, { id: ctx.sk.id + ':link', kind: 'link', pct: Math.min(80, e.pct || 50), secs: e.secs || 8, src: p.id }); return;
     case 'stance': {
       // the same stance pressed again leaves it; a stance with `bar` swaps the six slots while it holds
       const was = (p.fx || []).find(f => f.kind === 'stance');
@@ -201,6 +202,7 @@ function apply(w, p, e, t, at, ctx) {
     }
   }
 }
+const slowedMult = (e, t) => e.cond?.slowed && (t.fx || []).some(f => f.kind === 'slow' || f.kind === 'root' || f.kind === 'stun') ? (e.cond.mult || 1.5) : 1;
 const lowHp = (e, t) => e.cond?.targetHpBelow && t.hp / t.maxHp < e.cond.targetHpBelow ? (e.cond.mult || 1.5) : 1;
 const perDot = (e, t) => e.perDot ? 1 + Math.min(e.perDot.max ?? 1, (e.perDot.mult || 0.25) * (t.fx || []).filter(f => f.kind === 'dot').length) : 1;
 /** Lasting ground zones (Sanctify, Thunderhead…): apply their inner effects to whoever stands inside, each tick. */
@@ -295,8 +297,11 @@ export const respecSpecCost = L => Math.round(500 + 60 * L * L);
 export function respec(w, p, a) {
   const ch = p.char, near = (w.area.markers || []).some(m => m.kind === 'npc' && m.id === 'trainer' && Math.hypot(p.x - m.x, p.z - m.z) < 5);
   if (!near) return { err: 'The trainer in town does that.' };
-  const refunded = Object.entries(ch.skills || {}).reduce((n, [id, r]) => { const s = w.content.skills[id]; if (!s || s.owner === 'wanderer') return n; const free = (w.content.paths?.[ch.path]?.starter || []).includes(id) ? 1 : 0; return n + Math.max(0, r - free); }, 0);
-  const keep = Object.fromEntries((w.content.paths?.[ch.path]?.starter || []).map(id => [id, 1]));
+  // the Path's and the spec's starter skills were free (rank 1): they are not refunded, and stay (or swap to the new spec's)
+  const freeIds = new Set([...(w.content.paths?.[ch.path]?.starter || []), ...(w.content.specs?.[ch.spec]?.starter || [])]);
+  const refunded = Object.entries(ch.skills || {}).reduce((n, [id, r]) => { const s = w.content.skills[id]; if (!s || s.owner === 'wanderer') return n; return n + Math.max(0, r - (freeIds.has(id) ? 1 : 0)); }, 0);
+  const startersOf = spec => Object.fromEntries([...(w.content.paths?.[ch.path]?.starter || []), ...(w.content.specs?.[spec]?.starter || [])].filter(id => w.content.skills[id]).map(id => [id, 1]));
+  const keep = startersOf(ch.spec);
   if (a.op === 'points') {
     const cost = respecPointsCost(ch.level); if ((ch.gold || 0) < cost) return { err: `It costs ${cost} gold.` };
     p.char = { ...ch, gold: ch.gold - cost, skills: keep, skillPoints: (ch.skillPoints || 0) + refunded, bar: defaultBar(w.content.skills, { ...ch, skills: keep }) };
@@ -306,7 +311,8 @@ export function respec(w, p, a) {
     const S = w.content.specs?.[a.spec]; if (!S || !(S.paths || []).includes(ch.path)) return { err: 'That specialization is not open to your Path.' };
     if (a.spec === ch.spec) return { err: 'You already follow it.' };
     const cost = respecSpecCost(ch.level); if ((ch.gold || 0) < cost) return { err: `Changing costs ${cost} gold.` };
-    p.char = { ...ch, gold: ch.gold - cost, spec: a.spec, skills: keep, skillPoints: (ch.skillPoints || 0) + refunded, bar: defaultBar(w.content.skills, { ...ch, spec: a.spec, skills: keep }) };
+    const fresh = startersOf(a.spec);
+    p.char = { ...ch, gold: ch.gold - cost, spec: a.spec, skills: fresh, skillPoints: (ch.skillPoints || 0) + refunded, bar: defaultBar(w.content.skills, { ...ch, spec: a.spec, skills: fresh }) };
     return { ok: true };
   }
   return { err: 'unknown' };

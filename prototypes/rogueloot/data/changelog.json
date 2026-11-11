@@ -1,6 +1,17 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-oaths-forks",
+      "date": "2026-11-11",
+      "title": "Skills that do what they say",
+      "items": [
+        "Forked Bolt and Chain Tempest now jump from enemy to enemy. The Assassin's Decoy stands where you drop it. A Knight's oath takes a share of the hits meant for the friend they guard.",
+        "Skills that raise your dodge or your speed now really do.",
+        "Changing your specialization at the trainer gives back every point you spent and hands you the new one's starting skills.",
+        "Smoother on phones: monsters are drawn with fewer pieces."
+      ]
+    },
+    {
       "id": "2026-11-11-bestiary-specs2",
       "date": "2026-11-11",
       "title": "Every monster has its own look, and six more specializations",

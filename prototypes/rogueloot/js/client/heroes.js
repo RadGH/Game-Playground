@@ -1,7 +1,8 @@
 // Heroes on this device (ruling 1): a list in localStorage, picked on the title screen, carried into any game.
 // Optional cloud backup through the games.radgh.com account (ruling 44, shared/rgs-cloudsave.js).
 //   const heroes = createHeroes({ root, onChange })   heroes.current() -> character   heroes.save(ch)
-import { newCharacter, cleanName } from '../rules/character.js';
+import { newCharacter, cleanName, STARTER_KIT } from '../rules/character.js';
+import { makeItem } from '../rules/items.js';
 import { loadLookData, randomLook, RACES, RACE_NAMES, avatarOf } from '../../../knockabout/js/client/look.js';
 import { svgPortrait } from '../../../../avatar-3d/js/chibi26-portrait.js';
 
@@ -12,7 +13,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 export const titleOf = ch => `Level ${ch.level} ${ch.spec ? cap(ch.spec) : ch.path ? cap(ch.path) : 'Wanderer'}`;
 const cap = s => String(s).replace(/(^|_)(\w)/g, (_, a, b) => (a ? ' ' : '') + b.toUpperCase());
 
-export function createHeroes({ root, onChange = () => {} }) {
+export function createHeroes({ root, onChange = () => {}, items = null }) {
   let data = read(), picked = null; try { picked = localStorage.getItem(PICK); } catch { /* */ }
   let draft = null;              // the create form's hero while it is open
   const portraits = new Map();
@@ -46,9 +47,17 @@ export function createHeroes({ root, onChange = () => {} }) {
     root.querySelectorAll('[data-race]').forEach(b => b.onclick = () => { let l; for (let i = 0; i < 40; i++) { l = randomLook(); if (l.race === b.dataset.race) break; } draft.look = l; drawCreate(); });
     root.querySelector('[data-reroll]').onclick = () => { const race = draft.look.race; let l; for (let i = 0; i < 40; i++) { l = randomLook(); if (l.race === race) break; } draft.look = l; drawCreate(); };
     root.querySelector('[data-cancel]')?.addEventListener('click', () => { draft = null; draw(); });
-    root.querySelector('[data-make]').onclick = () => { const ch = newCharacter({ name: cleanName(draft.name), look: draft.look }); draft = null; save(ch); pick(ch.id); };
+    root.querySelector('[data-make]').onclick = () => { const ch = newCharacter({ name: cleanName(draft.name), look: draft.look, kit: starterKit() }); draft = null; save(ch); pick(ch.id); };
   }
 
+  /** The Wanderer's starting gear, as real items (they pass the server's checks like anything else). */
+  function starterKit() {
+    if (!items?.bases) return {};
+    const kit = {}; for (const [slot, base] of Object.entries(STARTER_KIT)) if (items.bases[base]) kit[slot] = makeItem(items, Math.random, 1, { base, rarity: 'normal' });
+    return kit;
+  }
+  // heroes made before items existed get the kit once (M6)
+  for (const c of data.list) if (!c.equip || !Object.keys(c.equip).length) { c.equip = starterKit(); c.bag ||= []; }
   let cloud = null;
   (async () => {
     try {

@@ -9,6 +9,9 @@ import { makeHero, makeFoe, heroRegen } from './actors.js';
 import { useSkill, stepCasts, stepAuto, stepShots, setTarget, release, startRevive, KEEP_CORPSE } from './fight.js';
 import { stepBrains } from './brain.js';
 import { spawnArea } from './spawn.js';
+import { speedFactor, stepFx } from './status.js';
+import { hurt } from './fight.js';
+import { inventoryAct } from './inventory.js';
 
 export const STEP_HZ = 20;
 export const DT = 1 / STEP_HZ;
@@ -23,12 +26,14 @@ export function createWorld({ seed = 1, area = null, content = null, players = 1
 export function addPlayer(w, id, character = {}) {
   const s = w.area.spawn, n = w.players.size;
   const p = makeHero(w, id, character);
+  rescaleFoes(w, n + 1);
   p.x = s.x + (n % 2 ? 1.2 : -1.2) * Math.ceil(n / 2); p.z = s.z; p.yaw = Math.PI;
   w.players.set(id, p);
   return p;
 }
 export function removePlayer(w, id) {
   w.players.delete(id);
+  rescaleFoes(w, w.players.size);
   for (const f of w.foes.values()) { f.threat.delete(id); if (f.target === id) f.target = null; }
 }
 
@@ -60,6 +65,7 @@ export function act(w, id, a) {
     case 'target': return setTarget(w, p, a.target ?? null);
     case 'release': return release(w, p);
     case 'revive': return startRevive(w, p, a.target);
+    case 'equip': case 'unequip': case 'move': case 'identify': case 'spend': case 'swap': return inventoryAct(w, p, a);
     case 'stop': p.autoOn = false; if (p.cast) { p.cast = null; w.events.push({ k: 'cancel', s: p.id }); } return { ok: true };
   }
   return { err: 'unknown action' };
@@ -71,8 +77,11 @@ export function step(w) {
     const list = p.dead ? [] : inputsThisStep(p);
     if (p.dead) { p.queue.length = 0; p.moving = false; continue; }
     if (!list.length) p.moving = false;
-    for (const i of list) walk(w.area, p, i.mx, i.mz, DT, p.speed);
-    if (p.moving && p.cast) { w.events.push({ k: 'cancel', s: p.id, why: 'moved' }); p.cast = null; }
+    const spd = p.speed * speedFactor(p);
+    for (const i of list) walk(w.area, p, i.mx, i.mz, DT, spd);
+    stepFx(w, p, (src, t, n, type) => hurt(w, w.foes.get(src) || t, t, { result: 'hit', amount: Math.max(1, Math.round(n)), mitigated: 0 }, type));
+    if (p.dead) continue;
+    if (p.cast && (p.moving || p.fx?.some(f => f.kind === 'stun'))) { w.events.push({ k: 'cancel', s: p.id, why: 'moved' }); p.cast = null; }
     heroRegen(w, p, DT);
   }
   stepBrains(w, DT);
@@ -89,12 +98,26 @@ export function snapshot(w) {
   for (const p of w.players.values()) players.push({ id: p.id, name: p.name, x: r2(p.x), z: r2(p.z), yaw: r2(p.yaw), moving: p.moving, seq: p.seq,
     lvl: p.level, hp: Math.round(p.hp), mhp: p.maxHp, mp: Math.round(p.mana), mmp: p.maxMana, dead: p.dead || undefined, tg: p.target || undefined,
     cast: p.cast ? { sk: p.cast.skill, t: r2(p.cast.end - p.cast.start), left: r2(p.cast.end - w.time) } : undefined,
-    gcd: p.gcdUntil > w.time ? r2(p.gcdUntil - w.time) : undefined,
+    gcd: p.gcdUntil > w.time ? r2(p.gcdUntil - w.time) : undefined, spd: speedFactor(p) !== 1 ? r2(speedFactor(p)) : undefined,
+    fx: p.fx?.length ? p.fx.map(f => ({ k: f.kind, left: r2(f.until - w.time), id: f.id })) : undefined,
     cds: Object.keys(p.cds).length ? Object.fromEntries(Object.entries(p.cds).filter(([, t]) => t > w.time).map(([k, t]) => [k, r2(t - w.time)])) : undefined });
   for (const f of w.foes.values()) foes.push({ id: f.id, d: f.def.id, n: f.name, x: r2(f.x), z: r2(f.z), yaw: r2(f.yaw), lvl: f.level, hp: Math.round(f.hp), mhp: f.maxHp,
     st: f.dead ? 'dead' : f.state, rk: f.rank !== 'normal' ? f.rank : undefined,
+    fx: f.fx?.length ? f.fx.map(x => x.kind) : undefined,
     cast: f.cast ? { sk: f.cast.name, t: r2(f.cast.end - f.cast.start), left: r2(f.cast.end - w.time), int: f.cast.interruptible || undefined } : undefined, tg: f.target || undefined });
   const shots = w.shots.map(s => ({ id: s.id, x: r2(s.x), z: r2(s.z), ty: s.type }));
   const events = w.events; w.events = [];
   return { tick: w.tick, time: w.time, players, foes, shots, events };
+}
+
+/** More heroes, tougher monsters (ruling 5): health follows the bestiary's playersScaling; a hurt monster keeps its share. */
+export function rescaleFoes(w, n) {
+  const sc = w.content.baseline?.playersScaling, k = i => (sc?.hp?.[Math.max(0, Math.min(3, i - 1))] ?? (1 + 0.6 * (i - 1)));
+  const want = k(Math.max(1, n));
+  for (const f of w.foes.values()) {
+    if (f.dead) continue;
+    const base = f.maxHp / (f.crowd || 1), frac = f.hp / f.maxHp;
+    f.crowd = want; f.maxHp = Math.round(base * want); f.hp = Math.max(1, Math.round(f.maxHp * frac));
+  }
+  w.crowd = want;
 }

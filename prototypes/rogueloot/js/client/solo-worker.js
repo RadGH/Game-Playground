@@ -4,12 +4,13 @@ import { createHub } from '../net/hub.js';
 import { STEP_HZ } from '../sim/world.js';
 import { validateCharacter } from '../rules/validate.js';
 import { loadContentAsync } from '../sim/content.js';
+import { checkItem } from '../rules/items.js';
 
 const early = [];
 let conn = null;
 onmessage = e => (conn ? conn.message(e.data) : early.push(e.data));
 const content = await loadContentAsync(f => fetch(new URL('../../data/' + f, import.meta.url)).then(r => { if (!r.ok) throw new Error(f); return r.json(); }));
-const hub = createHub({ seed: (Math.random() * 2 ** 31) >>> 0, build: 'solo', content, checkCharacter: ch => validateCharacter(ch) });
+const hub = createHub({ seed: (Math.random() * 2 ** 31) >>> 0, build: 'solo', content, checkCharacter: ch => validateCharacter(ch, { items: { checkItem: it => checkItem(content.items, it) } }) });
 conn = hub.accept({ send: d => postMessage(d) });
 for (const m of early.splice(0)) conn.message(m);
 let last = performance.now(), owed = 0;

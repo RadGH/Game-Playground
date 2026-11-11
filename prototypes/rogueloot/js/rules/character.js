@@ -8,7 +8,9 @@ export const CHAR_VERSION = 1;
 export const NAME_MAX = 20;
 export const cleanName = n => String(n || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX) || 'Wanderer';
 
-export function newCharacter({ name, look, id = null, now = Date.now() } = {}) {
+/** The kit every Wanderer starts with (bases from data/item-bases.json): a short sword, a linen robe, a rope sash. */
+export const STARTER_KIT = { weapon: 'footman_sword', chest: 'linen_robe', belt: 'rope_sash' };
+export function newCharacter({ name, look, id = null, now = Date.now(), kit = null } = {}) {
   return {
     v: CHAR_VERSION, id: id || 'c' + now.toString(36) + Math.floor(Math.random() * 1e6).toString(36),
     name: cleanName(name), look: look || null, created: now, played: 0,
@@ -16,7 +18,7 @@ export function newCharacter({ name, look, id = null, now = Date.now() } = {}) {
     attrs: Object.fromEntries(ATTRS.map(a => [a, START_ATTR])), unspent: 0, bonusAttr: 0,
     path: null, spec: null,
     skills: {}, skillPoints: 0, questPoints: 0, bar: [],
-    gold: 0, equip: {}, bag: [], belt: [],
+    gold: 0, equip: kit || {}, bag: [], belt: [],
     quests: {}, waypoints: ['brightwater'], difficulty: 'normal',
   };
 }
@@ -37,7 +39,7 @@ export function gainXp(ch, amount) {
 export function derived(ch) {
   const a = ch.attrs, L = ch.level;
   return {
-    maxHp: Math.round(56 + 14 * L + 6 * (a.vit - START_ATTR) + (a.str - START_ATTR)),
+    maxHp: Math.round(70 + 18 * (L - 1) + 6 * (a.vit - START_ATTR) + (a.str - START_ATTR)),
     maxMana: Math.round(30 + 6 * L + 5 * (a.int - START_ATTR) + 2 * (a.spi - START_ATTR)),
     hpRegen: +(0.4 + 0.08 * L + 0.12 * (a.spi - START_ATTR)).toFixed(2),          // per second, slow (ruling 23)
     manaRegen: +(1 + 0.15 * L + 0.25 * (a.spi - START_ATTR)).toFixed(2),

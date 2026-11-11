@@ -3,6 +3,8 @@
 import { resolveHit, addThreat, GCD, THREAT } from '../rules/combat.js';
 import { gainXp } from '../rules/character.js';
 import { partyShares } from '../rules/progression.js';
+import { has } from './status.js';
+import { applyRider } from './abilities.js';
 
 export const KEEP_CORPSE = 10;           // seconds a dead monster lies there
 export const REVIVE_TIME = 3;            // seconds a friend channels to bring you back
@@ -31,7 +33,9 @@ export function setTarget(w, p, id) {
 /** Use a skill. Returns { ok } or { err: 'player text' } (the browser shows the reason). */
 export function useSkill(w, p, skillId, targetId) {
   if (p.dead) return { err: 'You are dead.' };
+  if (has(p, 'stun')) return { err: 'You are stunned.' };
   const sk = w.content.skills?.[skillId];
+  if (sk && sk.kind !== 'auto' && sk.kind !== 'melee' && has(p, 'silence')) return { err: 'You are silenced.' };
   if (!sk || !knows(p, sk)) return { err: "You don't know that." };
   if (sk.kind === 'auto') {
     const t = actorById(w, targetId); if (!alive(t) || t.team !== 'foe') return { err: 'No enemy targeted.' };
@@ -82,11 +86,18 @@ function fire(w, p, sk, t) {
 
 /** One weapon blow (auto-attack or a weapon skill). */
 function weaponHit(w, p, t, mult, sk = null) {
-  const wpn = p.weapon, roll = wpn.min + w.rng() * (wpn.max - wpn.min);
+  const wpn = p.weapon, roll = wpn.min + w.rng() * (wpn.max - wpn.min) + (p.st.attackPower || 0) / 14;
   const power = wpn.ranged ? p.st.rangedPower : p.st.meleePower;
-  const r = resolveHit(p, t, { amount: roll * mult * power, type: 'physical' }, w.rng);
+  const r = resolveHit(p, t, { amount: roll * mult * power, type: 'physical', critBonus: 0 }, w.rng);
+  // elemental damage on the weapon lands with the blow, each against its own resist
+  if (r.amount > 0 && p.st.elemFlat) for (const [ty, n] of Object.entries(p.st.elemFlat)) if (n > 0) { const e = n * (1 + (p.st.elemPct?.[ty] || 0) / 100) * mult * (1 - Math.min(75, t.resists?.[ty] || 0) / 100); r.amount += Math.round(e); }
+  if (r.amount > 0 && p.st.lifeOnHit) p.hp = Math.min(p.maxHp, p.hp + p.st.lifeOnHit);
   hurt(w, p, t, r, sk?.type || 'physical', (sk?.threat ?? 1));
-  if (sk?.interrupts && t.cast && r.amount > 0 && t.cast.interruptible !== false) { w.events.push({ k: 'interrupt', s: p.id, t: t.id, sk: t.cast.name }); t.cast = null; t.nextSwing = w.time + 1; }
+  if (sk?.interrupts && t.cast && r.amount > 0 && t.cast.interruptible !== false) {
+    w.events.push({ k: 'interrupt', s: p.id, t: t.id, sk: t.cast.name });
+    t.silencedUntil = w.time + (+t.cast.ab?.interruptLock || 2);          // the bestiary's lockout after a kick
+    t.cast = null; t.nextSwing = w.time + 1;
+  }
 }
 
 /** Apply a resolved blow: hp, threat, events, death. */
@@ -118,6 +129,8 @@ function die(w, t, killer) {
     near.forEach((p, i) => { if (shares[i] > 0) giveXp(w, p, shares[i]); });
   } else {
     t.autoOn = false; t.target = null; t.queue.length = 0;
+    // soft death (ruling 7): every worn item loses a tenth of its durability; nothing drops
+    const eq = t.char?.equip; if (eq) { for (const it of Object.values(eq)) if (it?.dur) it.dur = [Math.max(0, it.dur[0] - Math.ceil(it.dur[1] * 0.1)), it.dur[1]]; w.charDirty.add(t.id); refreshHero(w, t); t.hp = 0; }
     for (const f of w.foes.values()) { f.threat.delete(t.id); if (f.target === t.id) f.target = null; }
   }
 }
@@ -128,12 +141,10 @@ export function giveXp(w, p, n) {
   if (ups > 0) {
     p.level = ch.level;
     w.events.push({ k: 'level', t: p.id, lvl: ch.level });
-    const keepHp = p.hp / p.maxHp;
-    Object.assign(p, refreshStats(p)); p.hp = p.maxHp; p.mana = p.maxMana; void keepHp;
+    refreshHero(w, p); p.hp = p.maxHp; p.mana = p.maxMana;
   }
 }
-import { derived } from '../rules/character.js';
-export function refreshStats(p) { const st = derived(p.char); return { st, maxHp: st.maxHp, maxMana: st.maxMana, crit: st.crit, dodge: st.dodge }; }
+import { refreshHero } from './actors.js';
 
 export function stepCasts(w) {
   for (const p of w.players.values()) {
@@ -149,7 +160,7 @@ export function stepCasts(w) {
 }
 export function stepAuto(w) {
   for (const p of w.players.values()) {
-    if (!p.autoOn || p.dead || p.cast) continue;
+    if (!p.autoOn || p.dead || p.cast || has(p, 'stun')) continue;
     const t = actorById(w, p.target);
     if (!alive(t) || t.team !== 'foe') { p.autoOn = false; continue; }
     if (gap(p, t) > p.weapon.reach || w.time < p.nextSwing) continue;
@@ -170,6 +181,7 @@ export function stepShots(w, dt) {
       if (src) {
         const r = s.foeShot ? resolveHit(src, t, { amount: s.amount, type: s.type, spell: s.spell }, w.rng) : resolveHit(src, t, { amount: s.amount, type: s.type, spell: s.spell }, w.rng);
         hurt(w, src, t, r, s.type, s.threat ?? 1);
+        if (s.onHit && r.amount > 0) applyRider(w, src, t, { id: s.onHit.id, damageType: s.type }, s.onHit.fx);
       }
       continue;
     }

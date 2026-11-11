@@ -1,0 +1,5 @@
+{
+  "_doc": "THE balance knobs (owned by the bot sim, tools/sim.mjs from M12). The bestiary's formulas (monsters.json baseline) and the item ladders (item-bases.json) were designed separately; these multipliers reconcile them without editing either file. monster.hp/damage multiply every monster; `early` eases the first levels: below `untilLevel`, monster hp and damage are multiplied by `from` rising linearly to 1.",
+  "monster": { "hp": 0.62, "damage": 0.7, "early": { "untilLevel": 6, "from": 0.75 } },
+  "hero": { "hpBase": 70, "hpPerLevel": 18 }
+}

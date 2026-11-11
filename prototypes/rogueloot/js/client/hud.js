@@ -7,7 +7,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const ICONS = { attack: '⚔', sword: '🗡', bolt: '⚡', heal: '✚', shove: '✋', potion: '⚗' };
 export const BAR = ['sure_strike', 'spark', 'field_mend', 'shove'];        // M9 makes the bar the player's own
 
-export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouch }) {
+export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouch, onBag = () => {} }) {
   root.innerHTML = `
     <div class="me-frame"><div class="lvl"></div><div class="bars"><div class="nm"></div><i class="hp"><b></b><span></span></i><i class="mp"><b></b><span></span></i></div></div>
     <div class="tg-frame" hidden><div class="nm"></div><i class="hp"><b></b><span></span></i><div class="tcast" hidden><i><b></b></i><span></span></div></div>
@@ -16,6 +16,7 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
     <div class="xp-bar"><b></b></div>
     <div class="action-bar"></div>
     <div class="arc"></div>
+    <button class="bag-btn" aria-label="Character and bag">🎒<i class="dot" hidden></i></button>
     <div class="dead-panel" hidden><h2>You have fallen</h2><p>A friend can bring you back, or return to the waypoint.</p><button class="primary rel">Return to the waypoint</button></div>`;
   const $ = s => root.querySelector(s);
   const bar = $('.action-bar'), arc = $('.arc');
@@ -35,6 +36,7 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
   const next = document.createElement('button'); next.className = 'arc-btn next'; next.innerHTML = '<span class="ic">⟳</span><small>Next</small>';
   next.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onTargetNext(); }); arc.append(next);
   $('.rel').onclick = onRelease;
+  $('.bag-btn').onclick = onBag;
   root.classList.toggle('touch', !!isTouch);
 
   let nopeT = 0;
@@ -66,6 +68,7 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
       }
     }
     $('.dead-panel').hidden = !me.dead;
+    $('.bag-btn .dot').hidden = !(ch?.unspent > 0);
   }
   const bars = (el, v, m) => { el.querySelector('b').style.width = Math.max(0, Math.min(100, v / m * 100)) + '%'; el.querySelector('span').textContent = `${Math.max(0, Math.round(v))} / ${m}`; };
 

@@ -1,6 +1,19 @@
 {
   "entries": [
     {
+      "id": "2026-11-10-fights-and-gear",
+      "date": "2026-11-10",
+      "title": "Monsters, fights and gear",
+      "items": [
+        "The meadow has monsters now: tideling crabs, shoal snappers, gullhawks and more, in packs, patrols and swarms. Each kind fights its own way: brutes close in, archers keep their distance, shamans heal their friends, and leaders run for help when they're losing.",
+        "Fight with Attack, Sure Strike, Spark, Field Mend and Shove (keys F and 1-4, or the buttons). Skills share a short global cooldown, and spells have a cast bar that moving cancels.",
+        "Watch the ground: a red shape shows where a big attack will land, so step out of it. Shove stops an enemy's spell.",
+        "Fall in battle and a friend can bring you back (stand next to you and press R), or return to the waypoint. Your gear wears down a little each time.",
+        "Press C for your character: equipment, attribute points to spend every level, and your bag. Right-click an item to identify or equip it.",
+        "Every hero starts with a short sword, a linen robe and a rope sash."
+      ]
+    },
+    {
       "id": "2026-11-10-first-steps",
       "date": "2026-11-10",
       "title": "First steps",

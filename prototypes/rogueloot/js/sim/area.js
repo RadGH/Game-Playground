@@ -6,7 +6,7 @@ import { makeRng } from './rng.js';
 export function testField(seed = 7) {
   const rng = makeRng(seed);
   const half = 60;
-  const area = { id: 'test_field', name: 'Proving Meadow', level: 1, bounds: { x0: -half, z0: -half, x1: half, z1: half }, spawn: { x: 0, z: 6 }, blockers: [], props: [] };
+  const area = { id: 'test_field', table: 'saltgrass_shore', name: 'Proving Meadow', level: 1, bounds: { x0: -half, z0: -half, x1: half, z1: half }, spawn: { x: 0, z: 6 }, blockers: [], props: [] };
   const clear = (x, z) => Math.hypot(x, z - 6) > 7 && Math.abs(x) > 2.5;     // keep the start and the north road clear
   const kinds = [['tree', 0.55, 0.7], ['pine', 0.35, 0.6], ['rock', 0.1, 0.9]];
   for (let i = 0; i < 140; i++) {
@@ -30,7 +30,8 @@ export function testField(seed = 7) {
     const a = i / 9 * Math.PI * 2 + 0.3, d = 20 + (i % 3) * 11;
     let x = Math.cos(a) * d, z = 6 + Math.sin(a) * d;
     for (const b of area.blockers) if (Math.hypot(x - b.x, z - b.z) < b.r + 2) { x += 2.5; }
-    area.spawns.push({ x, z, level: 1 + (i % 3) });
+    area.spawns.push({ x, z, level: 1 + (i % 3), tag: i === 4 ? 'swarm' : i === 7 ? 'patrol' : 'pack',
+      ...(i === 7 ? { route: [{ x, z }, { x: x * 0.5, z: 6 + (z - 6) * 0.5 }, { x: -x * 0.4, z: 6 - (z - 6) * 0.6 }] } : {}) });
   }
   for (let i = -6; i <= 6; i++) area.props.push({ kind: 'flowers', x: (rng() * 2 - 1) * 20, z: (rng() * 2 - 1) * 20, r: 0, yaw: rng() * 6, s: 1 });
   return area;

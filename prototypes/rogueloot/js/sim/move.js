@@ -4,7 +4,7 @@
 // An area's blockers are circles { x, z, r } plus the area's rectangle bounds. A walker is a circle of radius `r`.
 // Movement slides along blockers (push-out after the step), so walking diagonally into a rock glides round it.
 
-export const WALK_SPEED = 5.2;          // m/s — a measured pace for slower, WoW-like combat
+export const WALK_SPEED = 4.6;          // m/s — a measured pace for slower, WoW-like combat (bestiary brutes 3.2, skirmishers 4.6)
 export const PLAYER_RADIUS = 0.45;
 
 /** Normalise a stick/keys vector to length <= 1. */

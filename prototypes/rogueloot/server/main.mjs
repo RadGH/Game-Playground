@@ -13,6 +13,7 @@ import { createStaticHandler } from './static.js';
 import { createHub } from '../js/net/hub.js';
 import { validateCharacter } from '../js/rules/validate.js';
 import { loadContent } from '../js/sim/content.js';
+import { checkItem } from '../js/rules/items.js';
 import { createFeedback } from '../../tumblefair/server/feedback.mjs';
 import { createInsights } from '../../tumblefair/server/insights.mjs';
 import { createAdminFeed } from '../../tumblefair/server/rgs.mjs';
@@ -30,7 +31,7 @@ const log = (what, d) => console.log(new Date().toISOString(), what, JSON.string
 const insights = createInsights(dataDir, { build });
 const feedback = createFeedback(dataDir, { build });
 const content = loadContent(f => JSON.parse(readFileSync(join(GAME, 'data', f), 'utf8')));
-const hub = createHub({ build, log, content, checkCharacter: ch => validateCharacter(ch) });
+const hub = createHub({ build, log, content, checkCharacter: ch => validateCharacter(ch, { items: { checkItem: it => checkItem(content.items, it) } }) });
 const started = Date.now();
 const admin = createAdminFeed({ game: 'rogueloot', build, dataDir, started, online: () => hub.status(), ratingKey: 'zone', names: {} });
 

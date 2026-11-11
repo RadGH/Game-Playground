@@ -7,11 +7,13 @@ import { createTouch, isTouch } from './touch.js';
 import { openSolo, openOnline, serverAvailable } from './link.js';
 import { createMenu, openReport, news, credits } from './menu.js';
 import { testField } from '../sim/area.js';
-import { walk, PLAYER_RADIUS } from '../sim/move.js';
+import { walk, PLAYER_RADIUS, WALK_SPEED } from '../sim/move.js';
 import { DT } from '../sim/world.js';
 import { createHeroes } from './heroes.js';
 import { createFoes } from './foes.js';
 import { createHud } from './hud.js';
+import { createFx } from './fx.js';
+import { createSheetUI } from './sheet-ui.js';
 import { loadContentAsync } from '../sim/content.js';
 import { cleanCode } from '../net/protocol.js';
 import { qrSvg, joinUrl } from '../../../tumblefair/js/client/qr.js';
@@ -26,12 +28,15 @@ const view = createScene($('#view'), { quality });
 const actors = createActors(view, $('#tags'));
 const content = await loadContentAsync(f => fetch(new URL('../../data/' + f, import.meta.url)).then(r => r.json()));
 const foes = createFoes(view, $('#tags'), { content });
-const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }) });
+const fx = createFx(view);
+const heroes = createHeroes({ root: $('#heroes'), onChange: () => {}, items: content.items });
+const sheetUI = createSheetUI({ items: content.items, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
+const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle() });
 const input = createInput();
 const touch = createTouch($('#touch'), input);
 
 // ---- title -----------------------------------------------------------------------------------------------------------
-const heroes = createHeroes({ root: $('#heroes'), onChange: () => {} });
+
 $('#news-slot').append(news.button({ label: "What's new" }));
 $('#credits').onclick = () => credits.open();
 const character = () => heroes.current();
@@ -72,7 +77,7 @@ function onMessage(m) {
   if (m.t === 'roster') { G.roster = new Map(m.players.map(p => [p.id, p])); G.host = m.host; G.isPublic = m.public; for (const p of m.players) actors.get(p.id)?.tag.classList.toggle('away', !!p.away); refreshInvite(); return; }
   if (m.t === 'list') return showList(m.rooms);
   if (m.t === 'nope') return hud.nope(m.msg);
-  if (m.t === 'char') { const cur = heroes.current(); if (cur && m.character?.id === cur.id) heroes.save({ ...cur, ...m.character }); return; }
+  if (m.t === 'char') { const cur = heroes.current(); if (cur && m.character?.id === cur.id) { heroes.save({ ...cur, ...m.character }); sheetUI.refresh(); } return; }
   if (m.t === 'pong') { G.ping = performance.now() - m.at; return; }
   if (m.t === 'removed') { leaveGame(); titleMsg(m.msg); return; }
   if (m.t === 'closed') {
@@ -143,6 +148,7 @@ function leaveGame() {
   if (G.link?.kind === 'solo') G.link.close();
   G.link = null; G.me = null; G.code = null; G.area = null;
   for (const id of [...actors.list.keys()]) actors.remove(id);
+  sheetUI.toggle(false);
   $('#title').hidden = false; $('#hud').hidden = true; $('#fight').hidden = true; document.body.classList.remove('in-game'); touch.show(false);
   for (const id of [...foes.list.keys()]) { const f = foes.get(id); view.scene.remove(f.group); f.tag.remove(); foes.list.delete(id); }
   history.replaceState(null, '', location.pathname);
@@ -160,13 +166,14 @@ function onSnap(s) {
       // reconcile: start from the server's answer, re-walk the inputs it has not applied yet
       const ghost = { x: p.x, z: p.z, yaw: p.yaw, r: PLAYER_RADIUS };
       G.pending = G.pending.filter(i => i.seq > p.seq);
-      for (const i of G.pending) walk(G.area, ghost, i.mx, i.mz, DT);
+      for (const i of G.pending) walk(G.area, ghost, i.mx, i.mz, DT, i.spd);
       const err = Math.hypot(ghost.x - a.x, ghost.z - a.z);
       if (err > 1.5) { a.x = ghost.x; a.z = ghost.z; } else if (err > 0.02) { a.x += (ghost.x - a.x) * 0.3; a.z += (ghost.z - a.z) * 0.3; }
     } else actors.push(p.id, p, now);
   }
   for (const id of [...actors.list.keys()]) if (!seen.has(id)) actors.remove(id);
   foes.sync(s.foes || [], now);
+  fx.syncShots(s.shots);
   G.meSnap = s.players.find(p => p.id === G.me) || null;
   if (G.meSnap) G.target = G.meSnap.tg ?? (G.pendingTarget || G.target);
   for (const e of s.events || []) onEvent(e, now);
@@ -176,6 +183,9 @@ function onSnap(s) {
 const worldAt = (x, z, y = 1.6) => { const v = new view.THREE.Vector3(x, y, z).project(view.camera); const c = view.renderer.domElement; return [(v.x * 0.5 + 0.5) * c.clientWidth, (-v.y * 0.5 + 0.5) * c.clientHeight]; };
 function posOf(id) { const f = foes.get(id); if (f) return [f.x, f.z, (f.group.userData.height || 1.5)]; const a = actors.get(id); return a ? [a.x, a.z, 2] : null; }
 function onEvent(e, now) {
+  if (e.k === 'tele') { fx.tele(e, now); return; }
+  if (e.k === 'fability' || e.k === 'fcast') { const at = posOf(e.s); if (at && e.k === 'fability') { const [x, y] = worldAt(at[0], at[1], at[2] + 0.6); hud.float(x, y, e.sk, 'ab'); } return; }
+  if (e.k === 'fx' && e.t === G.me) { hud.nope({ slow: 'Slowed!', stun: 'Stunned!', silence: 'Silenced!', dot: 'Poisoned!' }[e.kind] || ''); return; }
   if (e.k === 'dmg') {
     const at = posOf(e.t); if (!at) return;
     const [x, y] = worldAt(at[0], at[1], at[2]);
@@ -231,18 +241,21 @@ view.renderer.domElement.addEventListener('contextmenu', e => e.preventDefault()
 addEventListener('keydown', e => {
   if (!G.me || e.target?.tagName === 'INPUT' || document.querySelector('.modal')) return;
   if (e.code === 'Tab') { e.preventDefault(); targetNext(); }
+  if (e.code === 'KeyC' || e.code === 'KeyI' || e.code === 'KeyB') sheetUI.toggle();
+  if (e.code === 'KeyX') G.link?.send({ t: 'act', do: 'swap' });
   const n = /^Digit([1-9])$/.exec(e.code)?.[1];
   if (n) { const id = ['sure_strike', 'spark', 'field_mend', 'shove'][+n - 1]; if (id) useSkill(id); }
-  if (e.code === 'KeyF' || e.code === 'KeyR') useSkill('attack');
-  if (e.code === 'KeyE') { const me = actors.get(G.me); for (const a of actors.list.values()) { if (a.id !== G.me && G.snapPlayers?.get(a.id)?.dead && Math.hypot(a.x - me.x, a.z - me.z) < 3) { G.link?.send({ t: 'act', do: 'revive', target: a.id }); break; } } }
+  if (e.code === 'KeyF') useSkill('attack');
+  if (e.code === 'KeyR' && !e.repeat) { const me = actors.get(G.me); for (const a of actors.list.values()) { if (a.id !== G.me && G.snapPlayers?.get(a.id)?.dead && Math.hypot(a.x - me.x, a.z - me.z) < 3) { G.link?.send({ t: 'act', do: 'revive', target: a.id }); break; } } }
 });
 function fixedStep() {
   const a = actors.get(G.me); if (!a || !G.area) return;
   const mv = input.move(), [mx, mz] = view.screenToWorld(mv.x, mv.y);
   G.seq++;
   G.link.send({ t: 'input', mx: +mx.toFixed(3), mz: +mz.toFixed(3), seq: G.seq });
-  G.pending.push({ seq: G.seq, mx, mz }); if (G.pending.length > 60) G.pending.shift();
-  walk(G.area, a, mx, mz, DT);
+  const spd = WALK_SPEED * (G.meSnap?.spd ?? 1);
+  G.pending.push({ seq: G.seq, mx, mz, spd }); if (G.pending.length > 60) G.pending.shift();
+  if (!G.meSnap?.dead) walk(G.area, a, mx, mz, DT, spd);
 }
 
 let last = performance.now();
@@ -258,6 +271,7 @@ function frame(t) {
   }
   actors.update(dt, t - 110);
   foes.update(dt, t - 110, t, G.target);
+  fx.update(dt, t);
   padCombat();
   view.render();
 }
@@ -266,13 +280,14 @@ requestAnimationFrame(frame);
 const menu = createMenu([
   { label: 'Resume', act: () => {} , when: () => !!G.me },
   { label: 'Invite friends', when: () => !!G.code, act: () => openInvite() },
+  { label: 'Character and bag (C)', when: () => !!G.me, act: () => sheetUI.toggle(true) },
   { label: "What's new", act: () => news.open() },
   { label: 'Report a bug', act: () => openReport({ debug, shot }) },
   { label: `Graphics: ${quality === 'low' ? 'Low' : 'High'} (tap to switch, reloads)`, act: () => { store.set('quality', quality === 'low' ? 'high' : 'low'); location.reload(); } },
   { label: 'Credits', act: () => credits.open() },
   { label: 'Leave game', when: () => !!G.me, act: leaveGame },
 ]);
-addEventListener('keydown', e => { if (e.key !== 'Escape' || document.querySelector('.modal')) return; if (G.me && G.target) { setTarget(null); return; } menu.open(); });
+addEventListener('keydown', e => { if (e.key !== 'Escape' || document.querySelector('.modal')) return; if (sheetUI.open) { sheetUI.toggle(false); return; } if (G.me && G.target) { setTarget(null); return; } menu.open(); });
 
 function shot() {
   try { view.render(); const src = view.renderer.domElement, k = Math.min(1, 900 / Math.max(src.width, src.height)); const c = document.createElement('canvas'); c.width = src.width * k; c.height = src.height * k; c.getContext('2d').drawImage(src, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', 0.72); } catch { return null; }

@@ -8,7 +8,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createWorld, addPlayer, setInput, step, act, DT } from '../js/sim/world.js';
 import { loadContent } from '../js/sim/content.js';
-import { newCharacter, STARTER_KIT } from '../js/rules/character.js';
+import { newCharacter, STARTER_KIT, gainXp } from '../js/rules/character.js';
+import { xpAtLevel } from '../js/rules/progression.js';
 import { makeItem, canEquip, weaponDamage, itemArmour, itemMods } from '../js/rules/items.js';
 import { makePotion } from '../js/rules/potions.js';
 import { sheet } from '../js/rules/sheet.js';
@@ -17,7 +18,7 @@ import { rankOf, costOf, atRank } from '../js/sim/skills.js';
 import { clearLine, flowTo, downhill } from '../js/sim/paths.js';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
-const MINUTES = +arg('minutes', 60), SEEDS = +arg('seeds', 2), ZONE = arg('zone', 'proving_meadow');
+const MINUTES = +arg('minutes', 60), SEEDS = +arg('seeds', 2), ZONE = arg('zone', 'proving_meadow'), START = +arg('level', 1);
 const PATHS = arg('paths', 'fighter,rogue,mage,healer').split(',');
 const content = loadContent(f => JSON.parse(readFileSync(new URL('../data/' + f, import.meta.url))));
 const D = content.items, S = content.skills;
@@ -26,7 +27,9 @@ const MAIN = { fighter: 'str', rogue: 'agi', mage: 'int', healer: 'spi', wandere
 function freshHero(rng, path) {
   const kit = Object.fromEntries(Object.entries(STARTER_KIT).map(([s, b]) => [s, makeItem(D, rng, 1, { base: b })]));
   const c = newCharacter({ name: path, kit }); c.belt = [makePotion(rng, 'health', 'minor', 3), makePotion(rng, 'mana', 'minor', 2)];
-  c.wantPath = path; return c;
+  c.wantPath = path;
+  if (START > 1) { const g = gainXp(c, xpAtLevel(START)); delete g.levelled; return g; }
+  return c;
 }
 const score = (ch, it) => { const st = sheet({ ...ch, equip: { ...ch.equip, [slotOf(it)]: it } }, D); return st.weapon.max + st.weapon.min + st.armour * 0.5 + st.maxHp * 0.3 + st.maxMana * 0.1 + (st.attrs[MAIN[ch.path || 'wanderer']] * 1.5); };
 const slotOf = it => { const b = D.bases[it.base]; return b?.slot === 'ring' ? 'ring1' : b?.slot; };
@@ -47,7 +50,9 @@ function play(path, seed) {
     step(w);
     for (const e of w.events) {
       if (e.k === 'die' && e.s === 'bot' && w.foes.has(e.t)) R.kills++;
-      if (e.k === 'die' && e.t === 'bot') R.deaths++;
+      if (e.k === 'dmg' && e.s === 'bot') R.dealt = (R.dealt || 0) + e.n;
+      if (e.k === 'dmg' && e.t === 'bot') R.taken = (R.taken || 0) + e.n;
+      if (e.k === 'die' && e.t === 'bot') { R.deaths++; if (process.env.TRACE) console.log('death', (t / 60).toFixed(1), 'by', w.foes.get(e.s)?.def.id, 'attackers', [...w.foes.values()].filter(f => !f.dead && f.target === 'bot').length, 'at', p.x.toFixed(0), p.z.toFixed(0), 'level', ch.level, ch.path); }
       if (e.k === 'drop' && e.to === 'bot' && e.what === 'item') R.drops[e.real]++;
     }
     w.events.length = 0;
@@ -57,6 +62,7 @@ function play(path, seed) {
     if (i % 200 === 0 && ![...w.foes.values()].some(f => !f.dead)) { ch = p.char; newSession(); }
     if (i % 100 === 0) { if (Math.hypot(p.x - lastPos[0], p.z - lastPos[1]) < 0.5 && !p.target) stuckT += 5; else stuckT = 0; lastPos = [p.x, p.z]; if (stuckT > 60) { R.timeouts++; ch = p.char; newSession(); stuckT = 0; } }
   }
+  if (process.env.TRACE) console.log('dmg', path, 'dealt', Math.round(R.dealt), 'taken', Math.round(R.taken), 'skills', JSON.stringify(ch.skills), 'attrs', JSON.stringify(ch.attrs), 'pts', ch.attrPoints);
   R.final = { level: ch.level, xp: ch.xp, gold: ch.gold, gearScore: sheet(ch, D).gearScore, path: ch.path, skills: Object.keys(ch.skills || {}).length };
   return R;
 
@@ -102,7 +108,7 @@ function play(path, seed) {
     const heal = bar.find(id => S[id]?.effects?.some(e => e.do === 'heal' || e.do === 'hot' || e.do === 'shield'));
     if (heal && p.hp < p.maxHp * 0.55) { act(w, 'bot', { do: 'use', skill: heal, target: 'bot' }); return; }
     if (!caster && d > reach + 1) return;           // walk in before spending anything
-    for (const id of bar) { const s = S[id]; if (!s || s.target === 'ally') continue; const r = act(w, 'bot', { do: 'use', skill: id, target: tg.id, at: { x: tg.x, z: tg.z } }); if (r.ok) break; }
+    for (const id of bar) { const s = S[id]; if (!s || s.target === 'ally') continue; if (s.effects?.some(e => e.do === 'mark' || e.do === 'dot') && (tg.fx || []).some(f => String(f.id).startsWith(id + ':'))) continue; const r = act(w, 'bot', { do: 'use', skill: id, target: tg.id, at: { x: tg.x, z: tg.z } }); if (r.ok) break; }
   }
   function nearest(list) { let b = null, bd = Infinity; for (const x of list) { const d = Math.hypot(x.x - p.x, x.z - p.z); if (d < bd) { bd = d; b = x; } } return b; }
   function goTo(x, z) {

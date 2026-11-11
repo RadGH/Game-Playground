@@ -1,6 +1,7 @@
 {
  "_doc": "Which spec skill files exist (js/sim/content.js loads exactly these, so a file that is not written yet is never asked for). Add one when a wave of spec trees lands.",
  "files": [
-  "skills-specs-1.json"
+  "skills-specs-1.json",
+  "skills-specs-2.json"
  ]
 }

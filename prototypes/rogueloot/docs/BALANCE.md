@@ -34,3 +34,19 @@ healer   level 4.0  deaths/h 0.0  kills/h 173  reached 2:2  3:6  4:18
 ```
 Early levels are quick (fine, D2-like); no deaths in the first zone at monster damage 0.6 — likely a touch easy now.
 Re-tune when Thornwood / King's Road exist (the act's pace shows past level 6). Fighters now open a fight with 15 Temper.
+
+## 2026-11-11 — Rogue fix, Windmill Fields
+
+The bot found a solo Rogue dying 114 times an hour at level 3. Three causes:
+1. **Back Cut needed you behind the target**, and a monster fighting you alone always faces you. Now it lands from any side: full power from behind, 60% from the front. (The Twinning Spine legendary now makes front cuts full power.)
+2. **Agility did nothing for melee damage.** Daggers and swords now use whichever is higher, Strength or Agility.
+3. Energy regen 10 → 13 a second, Notch 20 → 15 Energy, Back Cut 2.2x → 2.6x.
+
+The bot also now skips a mark or damage-over-time that is already on the target (a player keeps them up rather than spamming them).
+
+Windmill Fields from level 5 (where a player arrives), 20 minutes:
+```
+fighter  deaths/h 6  kills/h 78    rogue  deaths/h 0  kills/h 156
+mage     deaths/h 3  kills/h 75    healer deaths/h 3  kills/h 303   <- the Healer is strongest; look again in the full pass (M33)
+```
+From level 3 with only starter gear the zone is too hard for anyone (a 3-raider pack beats every Path in a bare duel), as it should be.

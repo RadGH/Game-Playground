@@ -360,3 +360,291 @@ today, which the engine runs), synergies feeding a pet's `dmgMult`, and a bar sw
 **For the spec pick itself** (M20's `pickSpec`): mirror `pickPath` — level 10, `ch.path` must be in
 `specs[id].paths`, grant `starter` at rank 1, set `ch.spec`, and `defaultBar` already prefers spec actives
 over Path ones by `reqLevel`. Respec in town resets `skills` to the Path starters and refunds the points.
+
+---
+
+# Wave 2 (M22) — Knight, Assassin, Frostbinder, Stormcaller, Oracle, Swashbuckler
+
+Design by Fable, 2026-11-10. The data is `data/skills-specs-2.json` (listed in `data/skills-specs-index.json`);
+the six `starter` arrays in `data/specs.json` are filled. 178 nodes: 28 for the Knight, 30 for each of the other
+five, three trees each, every tree with a node at every gate 10/11/12/14/16/18/20, 101 actives, 46 passives, 31
+synergies. No hybrids in this wave, so nothing carries `altCost`; the Swashbuckler is a pure Rogue in the roster.
+
+Same standard as wave 1: a filler at 10 in each of the two trees the spec is about (both granted at the pick), an
+interrupt of its own off the global cooldown, a defensive, an area answer, a signature, and a capstone at 20 on a
+20–90 s cooldown; fillers at 1.1–1.3× a swing or ~1.4× a Path bolt, big hits 2.5–4× on 8–25 s. The engine fixes
+from wave 1 are in (armour buffs on heroes count against monster hits; damageDown / weaken lower a monster's
+damage), so the Knight's armour and every "hits softer" debuff below is live, not a placeholder.
+
+**Three things that run on the engine as it stands and are worth knowing about:**
+
+- **Flair is real without a counter.** Every Swashbuckler skill ends with a `buff damage 4% 8 s`. The engine files
+  a buff under `<skill id>:damage`, so three different skills give three buffs (+12%) and the same skill twice only
+  refreshes its own — that is a "reward variety" counter with no new code, and Grandeur reads it the way every
+  weapon hit reads `fxPct(p, 'damage')`. Checked: Flourish → Feint → Pinning Thrust → Flourish leaves +12%.
+- **"Take a friend's hits" is a taunt circle at the friend's feet.** `area at: target` with a taunt inside, on an
+  ally-target skill, reaches the foes round the ALLY (wave 1's Daybreak Descent proved it). Sworn Guard, Intercept,
+  Bodyguard and Unbreakable Vow all put a ward on the friend and pull whatever is on them onto the Knight.
+- **Short-lived minions make an orb and a decoy.** Storm Orbs are three `caster` minions (type storm, 15 s) that
+  shoot whatever you fight (12 bolts in the first 6 s in the sim); the Assassin's Decoy is a `tank` minion with a
+  3 s taunt that lives 8 s. Both count toward the eight-minion cap and are the only summons in this wave.
+
+One engine fact shaped every skill: **a skill carries at most one dot** (the fx id is `<skill id>:dot`, so a second
+dot in the same skill overwrites the first). Where a design wanted "poison and bleed" they are two skills (Venom
+Strike + Blood and Bile) and stack across skills. And `buff` stats the engine reads are damage, crit, castSpeed,
+armour, healTaken and threat — dodge and moveSpeed buffs are read nowhere, so every "parry" and "step" here is a
+ward, and the dodge/moveSpeed read is on the wishlist with the one-line rule.
+
+## Numbers in one table
+
+Rank 1, level 20, before attribute multipliers; baseline 132 per global, a sword swing 35, autos ~63 a global.
+
+| | Per enemy | Per global | Notes |
+|---|---|---|---|
+| Knight: autos + Shield Blow | 63 + 42 | ~105 | a tank's filler at triple threat; Rim Strike 52 + 1.5 s stun every 12 s |
+| Knight: Sworn Guard | ward 94 + 20% armour on the friend | — | and the pack round them is on you; Shared Shield 70 on everyone every 20 s |
+| Assassin: autos + Venom Strike + its poison | 63 + 38.5 + 27 | ~128 | Gutting Strike 84 every 6 s, ×1.2 through Grave Mark → ~150 |
+| Assassin: Knife Storm vs 4 | 42 each | 168 + autos | Thousand Cuts 31.5 × 3 ticks each + bleed, every 25 s |
+| Frostbinder: Frost Shard | 141 per 1.8 s + 30% slow | ~117 | Rime Burst 99 instant on the move; Rime Spear 242 per 2 s cast (×1.5 on the slowed when `cond` lands) |
+| Frostbinder: Whiteout vs 4 | 48 × 3 ticks each + 40% slow | 96 per enemy per global | Blizzard 110 + 20/s, half speed on a 7 m circle |
+| Stormcaller: Forked Bolt | 130 + 44 to each within 4 m | ~130–174 | Thunder Ring 88 to everything within 5 m, instant, every 8 s |
+| Stormcaller: Storm Orbs | ~10 a shot × 3 orbs every 1.8 s | ~25/s for 15 s | a third of a pet, for 15 s, every 20 s |
+| Oracle: Fate Bolt | 120 per 1.5 s, refunds 6 | ~120 | the Sunlance rule: a solo Oracle still clears |
+| Oracle: Foresight | ward 114, instant, every 6 s | 95/s of absorb | Kind Omen 112 + 22/s × 8 + a 34 ward per 1.5 s |
+| Swashbuckler: autos + Flourish with 3 flairs | 63 + 42, ×1.12 | ~118 | Grandeur 105 + 35 to everything within 5 m, every 20 s |
+
+---
+
+## Knight — Fighter → the Knight
+
+**Fantasy.** The purest tank. You do not out-damage anything; you decide who gets hit. Three trees:
+
+- **Sworn Guard** (linked protection): Sworn Guard (10, a ward + 20% armour on a friend and everything within 5 m
+  of them turns on you — the opener on whoever the pack will pick), Steel Vow (11), Intercept (12, a 20 m leap to
+  a friend with a ward and a taunt, off-GCD), Vigil Plate (12), Shared Shield (14, a ward on everyone within
+  10 m), Steadfast Vow (14, synergy), Bodyguard (16, heal + ward + heals land harder on them + the taunt), Oath of
+  Iron (18, life on hit), **Unbreakable Vow** (20: heal, a great ward, +20% heals, the taunt, and 30 temper).
+- **Challenge** (taunts and the rim): Challenge (10, a 10 m area taunt + hit 12% softer + 10 temper, off-GCD),
+  Loud Steel (11, threat), Shield Blow (12, 120% + taunt at triple threat — the filler, no shield needed), Rim
+  Strike (14, 150% + a 1.5 s stun + taunt), Bellow (14, the interrupt from 12 m with a silence and a taunt,
+  off-GCD), Heavy Hand (16, synergy), Unbowed (16), Sweeping Challenge (18, a 120° arc: hit, taunt, −10% armour),
+  **Iron Summons** (20: everything within 10 m dragged 3 m in, 220%, 1.5 s stun, taunted).
+- **Banner** (the party's standing): Raise the Banner (10, a ground circle: +20% armour and mending for 12 s to
+  whoever stands in it), Banner Bearer (11), Stand Together (12, a ward on everyone within 10 m + heals land 20%
+  harder on the party), Heavy Standard (12), Hold Fast (14, +50% armour + ward + 20 temper, off-GCD — the Dig In),
+  Wide Banner (14, synergy), Guardian Banner (16, a second ground circle: heal + cleanse + armour), Steel Cadence
+  (18), Long Standing (18, synergy), **Unbroken Banner** (20: heal, ward, cleanse, +40% armour, +20% heals on
+  everyone within 12 m, and 30 temper).
+
+**Rotation at 15** (Sworn Guard, Shield Blow, Rim Strike, Challenge, Intercept, Bellow): Sworn Guard on the Mage
+before the pull (whatever reaches them comes to you) → Headlong (Path) → Challenge (free of the global, they are all
+on you) → Shield Blow, Shield Blow → Rim Strike the brute → Bellow the shaman from 12 m. Intercept to whoever the
+skirmisher picked anyway.
+
+**Rotation at 20** (add Shared Shield, Hold Fast, Sweeping Challenge, Iron Summons / Unbroken Banner by tree):
+Raise the Banner where the party will stand → Sworn Guard the healer → pull → Iron Summons when the second pack
+arrives (everything within 10 m is in one spot, stunned, on you) → Sweeping Challenge → Shield Blow. Hold Fast
+under the shaman's pack; Unbroken Banner when two friends are under half.
+
+**Phone (6):** Shield Blow, Rim Strike, Challenge, Sworn Guard, Intercept, Bellow. Off-GCD Challenge and Bellow at
+the ends of the arc; a banner Knight swaps Rim Strike for Stand Together.
+
+---
+
+## Assassin — Rogue → the Rogue
+
+**Fantasy.** Set it up, then cash in. Poisons and bleeds first, a stun, a mark that pays twice, a cut that ends it.
+Three trees:
+
+- **Venoms**: Venom Strike (10, 110% + an 8 s poison — the filler), Quick Poisons (11), Blackroot Dart (12, a 20 m
+  dart with a 10 s poison — for the thing on the perch), Lingering (12, synergy), Fester (14, a flat poison hit
+  that becomes "per dot" when `perDot` lands), Steady Hand (14), Blood and Bile (16, 140% + a 6 s bleed — the
+  second dot, from a second skill), Spreading Rot (16, poison on everything within 5 m of the target), Virulence
+  (18, synergy), **Plague Knife** (20: 250% to the target, a poison hit and a 10 s plague on everything within 6 m).
+- **The Set-up**: Grave Mark (10, 80% + a 20% mark for 8 s — longer and deeper than Notch), Cold Eye (11), Gutting
+  Strike (12, 240% — the cash-in), Sap (12, a 2 s stun, off-GCD), The Opening (14, synergy), Throat Cut (14, the
+  interrupt + silence, off-GCD), Exposed (16, −20% armour), Deadly Patience (16), Second Mark (18, synergy),
+  **Execution** (20: 400%, with the `cond: lowHp` execute rule written on it).
+- **Slip Away**: Vanish Step (10, 8 m back + a ward + crit, off-GCD), Soft Boots (11), Decoy (12, a straw-and-cloak
+  minion that shouts the pack onto itself for 8 s), Smoke Pouch (12, a 4 m cloud: half speed and 20% softer),
+  Hush (14, a 3 s silence from 20 m, off-GCD), Thicker Smoke (14, synergy), Knife Storm (16, 120% to everything
+  within 6 m — the pack answer), Shadow Sense (18, dodge), Storm Edge (18, synergy), **Thousand Cuts** (20: a 3 s
+  spin of knives, 90% a second to everything within 6 m, all of it bleeding).
+
+**Rotation at 15** (Venom Strike, Gutting Strike, Grave Mark, Sap, Throat Cut, Vanish Step): Grave Mark the brute
+→ Venom Strike (poison up) → Gutting Strike → Gutting Strike at 6 s → Venom Strike while the energy comes back →
+Grave Mark again at 8 s. Sap the skirmisher that turned on you, Throat Cut the shaman's heal, Vanish Step when the
+lynx has a hand on you. ~400 energy over 30 s; the bar is dry on the second Gutting Strike.
+
+**Rotation at 20** (add Blood and Bile, Exposed, Knife Storm, Execution / Plague Knife): Decoy on the pull (the pack
+goes for the straw man) → Spreading Rot on the brute (everything near it is poisoned) → Knife Storm → Grave Mark →
+Exposed → Gutting Strike → Blood and Bile. Execution on the champion under a third; Plague Knife when the second
+pack arrives on the first.
+
+**Phone (6):** Venom Strike, Gutting Strike, Grave Mark, Knife Storm, Sap, Throat Cut. Vanish Step takes Sap's slot
+for the player who runs more than they stun (both off-GCD).
+
+---
+
+## Frostbinder — Mage → the Mage
+
+**Fantasy.** Frost then shatter. Everything you touch is slower afterwards, and the big spells are for the things
+you already slowed. Three trees:
+
+- **Rime** (shards, bursts, the shatter): Frost Shard (10, a 1.8 s bolt with a 30% slow — the filler), Cold Study
+  (11), Rime Burst (12, instant, cast on the move, a 40% slow), Deep Cold (12), Rime Spear (14, 2 s, the big
+  single hit, written with `cond: slowed ×1.5`), Sharper Shards (14, synergy), Shatter (16, everything within 5 m of
+  the target + a 1 s stagger), Brittle (16), Keen Spear (18, synergy), **Stillfrost** (20: freeze the target 2 s and
+  break it for 34 + 16L).
+- **Whiteout** (ground that slows and holds): Whiteout (10, a 3 s blizzard on a 5 m circle, 40% slow), Banked Cold
+  (11), Ice Wall (12, an 8 m line in front of you that roots — a wall until `wall` lands), Frostbitten (12),
+  Blizzard (14, a 7 m circle: hit, 6 s cold, half speed), Wider White (14, synergy), Glacier (16, a 4 m root
+  circle), Lasting Cold (18, synergy), Snowblind (18, the control tool: 20% softer and 30% slower on a 6 m circle),
+  **Endless Winter** (20: 4 s of winter on an 8 m circle at 40% speed).
+- **Stillness** (Spellrush, wards, the freeze, the escape): Ice Ward (10, a ward whose cold slows everything within
+  4 m), Winter Skin (11), Spellrush (12, +60% cast speed for 6 s and 20 mana — three fast casts, free, off-GCD),
+  Cold Focus (12), Freeze (14, one target solid for 3 s from 25 m), Frost Step (14, 8 m back leaving the ground you
+  stood on frozen, off-GCD), Stifling Cold (16, the interrupt + a half-speed slow, off-GCD), Thicker Ice (16,
+  synergy), Deep Well (18), **Absolute Zero** (20: a ward, everything within 8 m frozen 2.5 s and bitten, 50 mana;
+  off-GCD — the "everything stops but me" button).
+
+**Rotation at 15** (Frost Shard, Rime Burst, Rime Spear, Whiteout, Ice Wall, Stifling Cold): Whiteout on the spot
+the pack will cross → Ice Wall across the row as they come through it (the whole line roots) → Frost Shard the
+brute → Rime Burst while walking away from the skirmisher → Rime Spear the slowed brute → Frost Ring (Path) when
+it closes anyway. Stifling Cold the caster from 25 m.
+
+**Rotation at 20** (add Blizzard, Shatter, Freeze, Spellrush, Stillfrost / Endless Winter): Blizzard → Spellrush →
+three Frost Shards in the time of two → Shatter once the pack is bunched and slowed → Freeze the champion → Rime
+Spear it → Stillfrost it. Endless Winter on the second pack; Absolute Zero when the first reaches you.
+
+**Phone (6):** Frost Shard, Rime Burst, Rime Spear, Whiteout, Spellrush, Stifling Cold. Ground spells land on the
+mouse on desktop and on the target's feet on the phone (the Thunderhead rule).
+
+---
+
+## Stormcaller — Mage → the Stormcaller
+
+**Fantasy.** Shocked targets take more from everything; bolts fork between enemies; orbs circle you; you leave
+trouble as a line of lightning. Three trees:
+
+- **Forked** (bolts that chain, the shock mark, the beam): Forked Bolt (10, a 1.5 s bolt that forks into everything
+  within 4 m of the target — a pack spell at a bolt's price; `chain` is the wishlist's better form), Charged Mind
+  (11), Shock Mark (12, a 15% mark for 8 s), Static (12), Arc Lash (14, instant on the move, the target hits 10%
+  softer), Wider Fork (14, synergy), Storm Beam (16, a 3 s beam on one target with a slow), Conductor (16, synergy),
+  Overcharge (18), **Chain Tempest** (20: a bolt that jumps the whole pack within 6 m with a stagger).
+- **Thunder** (rings, orbs, the tempest): Thunder Ring (10, everything within 5 m hit and staggered half a second —
+  the thing to press when they reach you), Long Breath (11), Storm Orbs (12, three storm casters circle you for
+  15 s), Thunderhide (12), Thunderclap (14, a 5 m circle with a 1 s stun, lands where you point), Wider Ring (14,
+  synergy), Rolling Thunder (16, 3 s on a 6 m circle), Louder Clap (16, synergy), Deep Sky (18), **Eye of the
+  Tempest** (20: 4 s of storm on an 8 m circle, 40% slow and a mark).
+- **Bolt Step** (mobility, wards of wind, the stunning strike): Bolt Step (10, become the lightning along a 10 m
+  line and arrive at the end of it, off-GCD), Light Feet (11), Wind Ward (12, a ward and +15% cast speed while it
+  holds), Stormhardy (12), Crackle (14, the interrupt + silence from 25 m, off-GCD), Thunder Fist (14, the stunning
+  strike from 8 m), Gale (16, a 5 m circle: half speed and 15% softer), Sure Footing (16, synergy), Hotter Step (18,
+  synergy), **Lightning Form** (20: +25% damage, +40% cast speed, a ward, 50 mana, and a stunning burst round you;
+  off-GCD).
+
+**Rotation at 15** (Forked Bolt, Shock Mark, Arc Lash, Thunder Ring, Thunderclap, Crackle): Storm Orbs out on the
+pull. Thunderclap where the pack will be in two seconds → Shock Mark the brute → Forked Bolt into the middle of the
+pack (it forks into all of them) → Arc Lash while walking → Thunder Ring the moment the skirmisher reaches you →
+Forked Bolt. Crackle the caster from 25 m.
+
+**Rotation at 20** (add Storm Beam, Rolling Thunder, Thunder Fist, Chain Tempest / Eye of the Tempest): Eye of the
+Tempest on the Fighter's spot → Shock Mark → Chain Tempest (it jumps everything standing in the Eye) → Forked Bolt
+×2 → Storm Beam the champion → Thunder Fist what reaches you. Lightning Form on the boss; Bolt Step out through
+the pack rather than away from it.
+
+**Phone (6):** Forked Bolt, Shock Mark, Thunder Ring, Thunderclap, Bolt Step, Crackle.
+
+---
+
+## Oracle — Healer → the Oracle
+
+**Fantasy.** Sees it coming. The Cleric heals what happened; the Oracle wards what is about to. Three trees:
+
+- **Foresight** (wards before the hit): Foresight (10, an instant ward on one friend every 6 s — the filler),
+  Clear Sight (11), Shared Vision (12, a ward on everyone within 10 m), Calm Mind (12), Second Sight (14, synergy),
+  Warding Glyph (14, a ground circle that wards and mends whoever stands in it — lands where you point), Thread of
+  Fate (16, a big ward + heal + heals land 15% harder on one friend — "takes their damage" when `link` lands), Far
+  Sight (16), Lasting Sight (18, synergy), **Seen and Spared** (20: a great ward, +30% armour and a cleanse on
+  everyone within 12 m).
+- **Omens** (heals that arrive early, cleansing, the revive): Kind Omen (10, heal + 8 s of mending + the overflow
+  as a ward), Quick Omen (11), Good Omen (12, an instant mending — cast it before the hit, not after), Steady Hands
+  (12), Clear the Fog (14, cleanse + heal, off-GCD), Long Omen (14, synergy), Circle of Omens (16, an instant party
+  heal with mending), Read the Bones (16, the revive, 3 s, not mid-fight), Unshaken (18), **Fate Rewritten** (20:
+  heal, ward, mending, cleanse, +20% heals on one friend).
+- **Prophecy** (bolts of fate, marks, a slow on what is coming): Fate Bolt (10, a 1.5 s shadow bolt that refunds 6
+  mana — attacking pays for the wards), Far Seeing (11), Prophecy (12, a 5 m circle where you say the blast falls:
+  hit + a 12% mark), Portent (12, the interrupt + silence from 25 m, off-GCD), Sure Doom (14, synergy), What Is
+  Coming (14, a 6 m circle: 40% slower and 15% softer), Doom Spoken (16, a 2 s hit that makes the target hit
+  softer), Keen Eye (16), Omen of Ruin (18, a 5 m circle of shadow with a withering), **The Last Page** (20: 30 +
+  14L shadow, a 1.5 s stun, and a heal round you).
+
+**Rotation at 15, party** (Foresight, Kind Omen, Good Omen, Shared Vision, Clear the Fog, Portent): Shared Vision
+before the pull (four wards). Good Omen on the Fighter as Headlong lands. Fate Bolt, Fate Bolt while nobody is
+hurt. Foresight on whoever the skirmisher turned toward — before it reaches them. Kind Omen the tank. Portent the
+shaman's heal; Clear the Fog the Mage out of the net.
+
+**Rotation at 20, solo** (Fate Bolt, Prophecy, Doom Spoken, Omen of Ruin, The Last Page, Foresight): Prophecy on
+the spot the pack reaches → Fate Bolt the brute (marked, so +12%) → What Is Coming when they close → Doom Spoken
+the champion → Omen of Ruin → The Last Page the boss. Foresight yourself every 6 s; Shelter (Path) for the
+skirmisher that healing threat sends your way.
+
+**Phone (6):** Foresight, Kind Omen, Good Omen, Shared Vision, Clear the Fog, Portent. Solo: Fate Bolt, Prophecy,
+Doom Spoken, Omen of Ruin, Foresight, Portent. Ally wards default to the most hurt friend in range when an enemy is
+targeted (the Field Mend rule).
+
+---
+
+## Swashbuckler — Rogue → the Swashbuckler
+
+**Fantasy.** Flair rewards variety. Every skill adds its own +4% damage for 8 s and they stack, so the player who
+cycles five skills hits 20% harder than the one who mashes one; Grandeur spends the show. Three trees:
+
+- **Flourish** (the thrusts and the sweep): Flourish (10, 120% — the filler), Quick Wrist (11), Pinning Thrust (12,
+  180% + a 2 s root), Keen Point (12), Deeper Thrust (14, synergy), Double Thrust (14, two hits of 100%), Sweep (16, a
+  120° arc — the pack answer), Showmanship (16, energy), Wider Sweep (18, synergy), **Grand Sweep** (20: 240% to
+  everything within 6 m with a stagger, +10% damage after).
+- **Panache** (leaps, parries, the turn, the escape): Daring Leap (10, a 12 m leap onto the target, off-GCD),
+  Light Boots (11), Mocking Parry (12, a riposte, everything within 6 m comes for you, and you catch the next hits
+  on a ward — the Swashbuckler can hold a pack for a few seconds), Nimble (12), Matador's Turn (14, the target
+  passes you at half speed and you are 3 m clear), Sure Parry (14, synergy), Cutting Remark (16, a thrown knife and
+  a word: the interrupt from 15 m, off-GCD), Bold Front (16), The Exit (18, 10 m back with a ward, off-GCD), **En
+  Garde** (20: ward, +50% armour, +15% damage, the pack on you slowed, 40 energy; off-GCD).
+- **Grandeur** (variety pays): Feint (10, 90% and −12% armour), Crowd Pleaser (11), Cape Flick (12, 80% and the
+  target hits 15% softer), Bravado (12, life on hit), Thrown Dagger (14, 120% from 12 m with a slow), Longer Show
+  (14, synergy: Flourish's flair lasts longer), Encore (16, 160% and 15 energy back), Steady Nerve (16), Standing
+  Ovation (18, synergy), **Grandeur** (20: 300% to the target and 100% to everything within 5 m with a stagger —
+  every flair you carry adds to it).
+
+**Rotation at 15** (Flourish, Pinning Thrust, Feint, Cape Flick, Daring Leap, Mocking Parry): Daring Leap onto the
+brute (flair 1) → Feint (2) → Pinning Thrust (3) → Cape Flick (4) → Flourish at +16% (5) → Pinning Thrust again
+as it comes off cooldown. Mocking Parry when the skirmishers turn on the Mage: they come to you and the ward takes
+the first of it. Cutting Remark the shaman from 15 m. Never the same skill twice in a row — that is the whole class.
+
+**Rotation at 20** (add Sweep, Thrown Dagger, Encore, Matador's Turn, Grandeur / Grand Sweep): Thrown Dagger the
+archer → Daring Leap → Feint → Sweep → Cape Flick → Encore (15 energy back) → Matador's Turn out of the brute's
+swing → Grandeur at +28%. En Garde when the second pack lands on you; Grand Sweep when they are all inside 6 m.
+
+**Phone (6):** Flourish, Pinning Thrust, Feint, Sweep, Daring Leap, Mocking Parry. The arc is the point: six
+different buttons is six flairs.
+
+---
+
+## What the engine must have for wave 2 (and what it has)
+
+Everything in `skills-specs-2.json` runs today; the file's `wishlist` lists twelve items with an exact rule each.
+None is a bug this time — the two inherited Path bugs from wave 1 are fixed. The ones worth doing first:
+
+1. **`link`** (Sworn Guard, Bodyguard, Unbreakable Vow, Thread of Fate): a share of the friend's damage paid by the
+   caster. Today a ward + taunt circle at the friend (Knight) or ward + heal (Oracle) — both read right.
+2. **`flair`** on Grandeur: +15% per distinct skill in the last 8 s, max 5. Today the per-skill +4% buffs do the same
+   job at a flat rate.
+3. **`chain`** on Forked Bolt / Chain Tempest: a bolt that jumps. Today a 4 m / 6 m circle at the target.
+4. **`cond: slowed`** on Rime Spear (the shatter ×1.5), **`cond: lowHp`** on Execution, **`cond: behind`** on
+   Gutting Strike, **`perDot`** on Fester — all flat today and sized to be fine flat.
+5. **`wall`** on Ice Wall (a line that blocks; a 2 s root today), **`stay`** on the Decoy (it follows the Assassin
+   today, taunting as it goes).
+6. **dodge / moveSpeed buffs on heroes are read nowhere** — not used in this wave (every parry is a ward), but the
+   Path's Slip Step carries a dodge buff that does nothing; one `fxPct(p, 'dodge')` in the hero's resolveHit call.
+7. A synergy cannot feed a summon (Storm Orbs, Decoy have none); `who: self` on a heal is still the helpful circle.

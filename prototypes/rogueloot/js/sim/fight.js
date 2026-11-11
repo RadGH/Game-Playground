@@ -95,7 +95,8 @@ function fire(w, p, sk, t) {
 /** One weapon blow (auto-attack or a weapon skill). */
 function weaponHit(w, p, t, mult, sk = null) {
   const wpn = p.weapon, roll = wpn.min + w.rng() * (wpn.max - wpn.min) + (p.st.attackPower || 0) / 14;
-  const power = (wpn.ranged ? p.st.rangedPower : p.st.meleePower) * (1 + fxPct(p, 'damage') / 100) * markOf(t);
+  // light blades (daggers, swords) take whichever of Strength or Agility is higher, so a Rogue's Agility counts
+  const power = (wpn.ranged ? p.st.rangedPower : wpn.finesse ? Math.max(p.st.meleePower, p.st.rangedPower) : p.st.meleePower) * (1 + fxPct(p, 'damage') / 100) * markOf(t);
   const r = resolveHit({ ...p, crit: p.crit + fxPct(p, 'crit') }, armourAfter(t), { amount: roll * mult * power, type: 'physical', critBonus: 0 }, w.rng);
   if (r.amount > 0 && p.char?.path === 'fighter') gain(p, 'rage', (w.content.resources?.rage?.perWeaponHitDealt ?? 4) * (1 + (p.st.rageGen || 0) / 100), w.content.resources);
   if (p.char?.path === 'fighter' && w.time - (p.lastFight ?? -99) > 5) gain(p, 'rage', 15, w.content.resources);      // the opening blow of a fight sets the temper going

@@ -15,8 +15,9 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const gap = (a, b) => dist(a, b) - (a.r || 0) - (b.r || 0);
 
 /** The rank a hero has in a skill (Wanderer skills: 1 for everyone; 0 = not known). */
-export function rankOf(ch, sk) {
+export function rankOf(ch, sk, stanceBar = null) {
   if (!sk) return 0;
+  if (stanceBar?.includes(sk.id)) return Math.max(1, ch?.skills?.[sk.id] || 1);
   if (sk.owner === 'wanderer' || sk.owner === 'all') return Math.max(1, ch?.skills?.[sk.id] || 1);
   if (sk.owner !== ch?.path && sk.owner !== ch?.spec) return 0;
   return ch?.skills?.[sk.id] || 0;
@@ -59,7 +60,7 @@ export function gain(p, kind, n, R) {
 
 /** Use a skill: checks, cost, cooldowns, then a cast / channel / instant. Returns { ok } or { err }. */
 export function castSkill(w, p, sk, targetId, point) {
-  const ch = p.char, rank = rankOf(ch, sk);
+  const ch = p.char, rank = rankOf(ch, sk, (p.fx || []).find(f => f.kind === 'stance')?.bar);
   if (!rank) return { err: "You don't know that." };
   if (sk.kind !== 'active') return { err: 'That one works on its own.' };
   const S = w.content.skills, R = w.content.resources;
@@ -77,7 +78,8 @@ export function castSkill(w, p, sk, targetId, point) {
   if (row.target === 'enemy') {
     t = w.foes.get(targetId); if (!t || t.dead) return { err: 'No enemy targeted.' };
     if (gap(p, t) > reach) return { err: 'Too far away.' };
-    if (lctx.frontMult) { const back = Math.atan2(p.x - t.x, p.z - t.z) - t.yaw, a = Math.abs(((back + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI); if (a < 120 * Math.PI / 180) lctx.weaponScale = lctx.frontMult; }
+    if (row.cond === 'behindBonus' && !lctx.frontMult) lctx.frontMult = row.frontMult ?? 0.6;
+    if (lctx.frontMult && lctx.frontMult < 1) { const back = Math.atan2(p.x - t.x, p.z - t.z) - t.yaw, a = Math.abs(((back + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI); if (a < 120 * Math.PI / 180) lctx.weaponScale = lctx.frontMult; }
     if (row.cond === 'behind') { const back = Math.atan2(p.x - t.x, p.z - t.z) - t.yaw, a = Math.abs(((back + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI); if (a < (120 * Math.PI / 180)) return { err: 'Get behind it.' }; }
     p.target = t.id;
   } else if (row.target === 'ally') {
@@ -189,7 +191,14 @@ function apply(w, p, e, t, at, ctx) {
     case 'revive': if (t && t.dead && w.time - (p.lastFight || -99) > 5) { t.dead = false; t.hp = Math.round(t.maxHp * (e.hpPct || 40) / 100); w.events.push({ k: 'revive', s: p.id, t: t.id }); } return;
     case 'mark': if (t && !t.dead) addFx(w, t, { id: ctx.sk.id + ':mark', kind: 'mark', pct: e.pct || 10, secs: e.secs || 8, src: p.id }); return;
     case 'summon': summon(w, p.id, { ...e, dmgMult: (e.dmgMult || 0.6) * ctx.syn.damage }); return;
-    case 'stance': p.fx = (p.fx || []).filter(f => f.kind !== 'stance'); addFx(w, p, { id: 'stance:' + e.id, kind: 'stance', stats: e.stats || {}, secs: 1e6, src: p.id }); return;
+    case 'stance': {
+      // the same stance pressed again leaves it; a stance with `bar` swaps the six slots while it holds
+      const was = (p.fx || []).find(f => f.kind === 'stance');
+      p.fx = (p.fx || []).filter(f => f.kind !== 'stance');
+      if (was?.id === 'stance:' + e.id) { w.events.push({ k: 'stance', s: p.id, id: null }); return; }
+      addFx(w, p, { id: 'stance:' + e.id, kind: 'stance', stats: e.stats || {}, bar: Array.isArray(e.bar) ? e.bar.slice(0, 6) : null, secs: e.secs || 1e6, src: p.id });
+      w.events.push({ k: 'stance', s: p.id, id: e.id }); return;
+    }
   }
 }
 const lowHp = (e, t) => e.cond?.targetHpBelow && t.hp / t.maxHp < e.cond.targetHpBelow ? (e.cond.mult || 1.5) : 1;

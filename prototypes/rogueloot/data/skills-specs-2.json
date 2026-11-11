@@ -1,0 +1,6341 @@
+{
+ "_doc": "Wave-2 Specialization trees (Fable, 2026-11-10; design in docs/SPECS.md \"Wave 2\"; the roster in data/specs.json). Six pure specs - Knight (Fighter), Assassin and Swashbuckler (Rogue), Frostbinder and Stormcaller (Mage), Oracle (Healer) - three trees each, 9-10 nodes a tree, levels 10/11/12/14/16/18/20, ranks to 10 (short utilities 3-5). SAME SCHEMA as skills-specs-1.json (owner = the spec id, tree = the tree id in specs.json). No hybrids in this wave, so no altCost. NEW IDEAS THAT RUN ON THE ENGINE AS IT IS: the Swashbuckler's flair is a +damage buff written by EVERY one of its skills under that skill's own fx id (ctx.sk.id + \":damage\"), so different skills stack through fxPct and the same skill twice only refreshes - a variety counter with no new code (the `flair` key on Grandeur is the wishlist's better form); the Knight's \"take a friend's hits\" is a ward on the friend plus a taunt circle at THEIR feet (`area at: target` with a taunt reaches foes round an ally target, as Daybreak Descent proved in wave 1); the Assassin's Decoy and the Stormcaller's Storm Orbs are short-lived minions (a tank with a 3 s taunt, three storm casters) through the summon effect. ENGINE FACTS THIS LEANS ON: one dot per skill per target (fx id = skill id + \":dot\", so a second dot in the same skill would overwrite the first - every skill here carries at most one); a `buff` with `stat: armour` on a hero and `damageDown`/`weaken` on a foe both work since the wave-1 fixes; `buff` stats the engine reads are damage, crit, castSpeed, armour, healTaken, threat (dodge and moveSpeed buffs are NOT read - every \"parry\" here is a ward). NUMBERS as wave 1: a spec filler is 1.1-1.3x a swing or ~1.4x a Path bolt, big hits 2.5-4x on 8-25 s cooldowns, capstones at 20 on 20-90 s; costs sit where a Path runs flat out ~30 s then lean (temper 15-50, energy 20-50, mana 14-60).",
+ "skills": {
+  "kni_sworn_guard": {
+   "name": "Sworn Guard",
+   "owner": "knight",
+   "tree": "sworn_guard",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Swear yourself to a friend within 20 m: a {dmg} ward and +20% armour on them for 8 seconds, and everything within 5 m of them turns on you instead. Your opener on whoever the pack will pick.",
+   "cost": {
+    "rage": 15
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 20,
+   "target": "ally",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      14,
+      4
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       1.2,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 20,
+     "secs": 8,
+     "perRank": {
+      "pct": 2
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "taunt"
+      }
+     ]
+    }
+   ]
+  },
+  "kni_steel_vow": {
+   "name": "Steel Vow",
+   "owner": "knight",
+   "tree": "sworn_guard",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "A vow is a heavier thing than plate. More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "kni_intercept": {
+   "name": "Intercept",
+   "owner": "knight",
+   "tree": "sworn_guard",
+   "reqLevel": 12,
+   "maxRank": 3,
+   "prereq": [
+    "kni_sworn_guard"
+   ],
+   "kind": "active",
+   "desc": "Throw yourself 20 m between a friend and what is coming: a {dmg} ward on them, and everything within 4 m of them turns on you. Does not use the global cooldown.",
+   "cost": {
+    "rage": 0
+   },
+   "cast": 0,
+   "cd": 18,
+   "gcd": false,
+   "range": 20,
+   "target": "ally",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 20,
+     "to": "target"
+    },
+    {
+     "do": "shield",
+     "base": [
+      10,
+      3
+     ],
+     "secs": 6,
+     "perRank": {
+      "base": [
+       3,
+       0.6
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      }
+     ]
+    }
+   ]
+  },
+  "kni_vigil_plate": {
+   "name": "Vigil Plate",
+   "owner": "knight",
+   "tree": "sworn_guard",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Your plate was made for standing still in. Your armour counts for more.",
+   "passive": {
+    "stat": "armourPct",
+    "value": 6,
+    "perRank": 3
+   }
+  },
+  "kni_shared_shield": {
+   "name": "Shared Shield",
+   "owner": "knight",
+   "tree": "sworn_guard",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "kni_sworn_guard"
+   ],
+   "kind": "active",
+   "desc": "Raise the shield over everyone: a {dmg} ward on every friend within 10 m for 8 seconds.",
+   "cost": {
+    "rage": 25
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "shield",
+       "base": [
+        10,
+        3
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.8,
+         0.25
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "kni_steadfast_vow": {
+   "name": "Steadfast Vow",
+   "owner": "knight",
+   "tree": "sworn_guard",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "kni_sworn_guard"
+   ],
+   "kind": "synergy",
+   "desc": "Sworn Guard wards for more per rank.",
+   "synergy": {
+    "skill": "kni_sworn_guard",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "kni_bodyguard": {
+   "name": "Bodyguard",
+   "owner": "knight",
+   "tree": "sworn_guard",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "kni_intercept"
+   ],
+   "kind": "active",
+   "desc": "Stand over a friend within 20 m: heal them for {dmg}, ward them, heals land 15% harder on them for 8 seconds, and everything within 6 m of them turns on you.",
+   "cost": {
+    "rage": 20
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 20,
+   "target": "ally",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      10,
+      4
+     ],
+     "perRank": {
+      "base": [
+       0.8,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      16,
+      5
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       1.2,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "healTaken",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 1
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "target",
+     "effects": [
+      {
+       "do": "taunt"
+      }
+     ]
+    }
+   ]
+  },
+  "kni_oath_of_iron": {
+   "name": "Oath of Iron",
+   "owner": "knight",
+   "tree": "sworn_guard",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "kni_steel_vow"
+   ],
+   "kind": "passive",
+   "desc": "Every blow you land mends you a little. Life on hit.",
+   "passive": {
+    "stat": "lifeOnHit",
+    "value": 3,
+    "perRank": 1.5
+   }
+  },
+  "kni_unbreakable_vow": {
+   "name": "Unbreakable Vow",
+   "owner": "knight",
+   "tree": "sworn_guard",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "kni_bodyguard",
+    "kni_steadfast_vow"
+   ],
+   "kind": "active",
+   "desc": "The vow made whole: a friend within 20 m is healed for {dmg}, wrapped in a great ward for 10 seconds with heals landing 20% harder, everything within 8 m of them turns on you, and you have 30 temper to hold them with. The Sworn Guard capstone.",
+   "cost": {
+    "rage": 30
+   },
+   "cast": 0,
+   "cd": 60,
+   "gcd": true,
+   "range": 20,
+   "target": "ally",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      20,
+      8
+     ],
+     "perRank": {
+      "base": [
+       5,
+       2
+      ]
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      40,
+      12
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       8,
+       2.5
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "healTaken",
+     "pct": 20,
+     "secs": 10
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "target",
+     "effects": [
+      {
+       "do": "taunt"
+      }
+     ]
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 30
+    }
+   ]
+  },
+  "kni_challenge": {
+   "name": "Challenge",
+   "owner": "knight",
+   "tree": "challenge",
+   "reqLevel": 10,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Bang the shield: everything within 10 m comes for you and hits 12% softer for {secs} seconds, and you take 10 temper from the noise. Does not use the global cooldown.",
+   "cost": {
+    "rage": 5
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      },
+      {
+       "do": "debuff",
+       "kind": "damageDown",
+       "secs": 8,
+       "pct": 12,
+       "perRank": {
+        "pct": 2
+       }
+      }
+     ]
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 10
+    }
+   ]
+  },
+  "kni_loud_steel": {
+   "name": "Loud Steel",
+   "owner": "knight",
+   "tree": "challenge",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "They cannot ignore you. Everything you do draws more threat.",
+   "passive": {
+    "stat": "threat",
+    "value": 10,
+    "perRank": 5
+   }
+  },
+  "kni_shield_blow": {
+   "name": "Shield Blow",
+   "owner": "knight",
+   "tree": "challenge",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "kni_challenge"
+   ],
+   "kind": "active",
+   "desc": "Drive the rim into your target for {mult} weapon damage, and it comes for you. Three times the threat of a normal blow; needs no shield. The tank's filler.",
+   "cost": {
+    "rage": 15
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.2,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "taunt"
+    }
+   ]
+  },
+  "kni_rim_strike": {
+   "name": "Rim Strike",
+   "owner": "knight",
+   "tree": "challenge",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "kni_shield_blow"
+   ],
+   "kind": "active",
+   "desc": "Crack the rim across its jaw for {mult} weapon damage and a {secs} second stun, and it comes for you when it wakes.",
+   "cost": {
+    "rage": 25
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.5,
+     "perRank": {
+      "mult": 0.08
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 1.5,
+     "perRank": {
+      "secs": 0.1
+     }
+    },
+    {
+     "do": "taunt"
+    }
+   ]
+  },
+  "kni_bellow": {
+   "name": "Bellow",
+   "owner": "knight",
+   "tree": "challenge",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "kni_challenge"
+   ],
+   "kind": "active",
+   "desc": "A shout that breaks a cast from 12 m: it stops, the caster is silenced for a moment and cannot start another for {secs} seconds, and it comes for you. Does not use the global cooldown.",
+   "cost": {
+    "rage": 10
+   },
+   "cast": 0,
+   "cd": 14,
+   "gcd": false,
+   "range": 12,
+   "target": "enemy",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.25
+     }
+    },
+    {
+     "do": "taunt"
+    }
+   ]
+  },
+  "kni_heavy_hand": {
+   "name": "Heavy Hand",
+   "owner": "knight",
+   "tree": "challenge",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "kni_shield_blow"
+   ],
+   "kind": "synergy",
+   "desc": "Shield Blow lands harder: more damage per rank.",
+   "synergy": {
+    "skill": "kni_shield_blow",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "kni_unbowed": {
+   "name": "Unbowed",
+   "owner": "knight",
+   "tree": "challenge",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "kni_loud_steel"
+   ],
+   "kind": "passive",
+   "desc": "Fire, frost, storm, poison and shadow all find you harder to hurt. Resist all.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "kni_sweeping_challenge": {
+   "name": "Sweeping Challenge",
+   "owner": "knight",
+   "tree": "challenge",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "kni_rim_strike"
+   ],
+   "kind": "active",
+   "desc": "A wide swing of the rim: {mult} weapon damage to everything in a 120 degree arc 5 m deep, each one comes for you, and their armour is cracked by 10% for 6 seconds.",
+   "cost": {
+    "rage": 25
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "area",
+     "shape": "cone",
+     "size": 5,
+     "at": "self",
+     "angle": 120,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.1,
+       "perRank": {
+        "mult": 0.06
+       }
+      },
+      {
+       "do": "taunt"
+      },
+      {
+       "do": "debuff",
+       "kind": "armourDown",
+       "secs": 6,
+       "pct": 10,
+       "perRank": {
+        "pct": 1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "kni_iron_summons": {
+   "name": "Iron Summons",
+   "owner": "knight",
+   "tree": "challenge",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "kni_sweeping_challenge",
+    "kni_bellow"
+   ],
+   "kind": "active",
+   "desc": "Everything within 10 m is dragged 3 m toward you, struck for {mult} weapon damage, stunned for 1.5 seconds and wants only you when it wakes. The Challenge capstone.",
+   "cost": {
+    "rage": 45
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "pull",
+       "dist": 3
+      },
+      {
+       "do": "weapon",
+       "mult": 2.2,
+       "perRank": {
+        "mult": 0.12
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1.5,
+       "perRank": {
+        "secs": 0.1
+       }
+      },
+      {
+       "do": "taunt"
+      }
+     ]
+    }
+   ]
+  },
+  "kni_raise_banner": {
+   "name": "Raise the Banner",
+   "owner": "knight",
+   "tree": "banner",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Plant the banner on a spot up to 15 m away: every friend standing within 8 m of it gets +20% armour and mends {dmg} a second for {secs} seconds.",
+   "cost": {
+    "rage": 20
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 15,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "buff",
+       "stat": "armour",
+       "pct": 20,
+       "secs": 12,
+       "perRank": {
+        "pct": 2
+       }
+      },
+      {
+       "do": "hot",
+       "base": [
+        1.5,
+        0.6
+       ],
+       "secs": 12,
+       "perRank": {
+        "base": [
+         0.15,
+         0.05
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "kni_banner_bearer": {
+   "name": "Banner Bearer",
+   "owner": "knight",
+   "tree": "banner",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Carrying the standard into a fight feeds the temper. More temper from every hit landed or taken.",
+   "passive": {
+    "stat": "rageGen",
+    "value": 10,
+    "perRank": 4
+   }
+  },
+  "kni_stand_together": {
+   "name": "Stand Together",
+   "owner": "knight",
+   "tree": "banner",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "kni_raise_banner"
+   ],
+   "kind": "active",
+   "desc": "Every friend within 10 m gets a {dmg} ward for 8 seconds, and heals land 20% harder on the whole party for 10 seconds.",
+   "cost": {
+    "rage": 20
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "shield",
+       "base": [
+        8,
+        2.5
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.6,
+         0.2
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "do": "buff",
+     "stat": "healTaken",
+     "pct": 20,
+     "secs": 10,
+     "who": "party",
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "kni_heavy_standard": {
+   "name": "Heavy Standard",
+   "owner": "knight",
+   "tree": "banner",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "The arm that carries the banner swings the sword. More melee power.",
+   "passive": {
+    "stat": "meleePower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "kni_hold_fast": {
+   "name": "Hold Fast",
+   "owner": "knight",
+   "tree": "banner",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "kni_raise_banner"
+   ],
+   "kind": "active",
+   "desc": "Brace: +50% armour and a {dmg} ward for 10 seconds, and 20 temper to spend. Does not use the global cooldown.",
+   "cost": {
+    "rage": 0
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 50,
+     "secs": 10,
+     "perRank": {
+      "pct": 8
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      15,
+      3
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       3,
+       0.5
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 20
+    }
+   ]
+  },
+  "kni_wide_banner": {
+   "name": "Wide Banner",
+   "owner": "knight",
+   "tree": "banner",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "kni_raise_banner"
+   ],
+   "kind": "synergy",
+   "desc": "The banner reaches further: a wider circle per rank.",
+   "synergy": {
+    "skill": "kni_raise_banner",
+    "stat": "radius",
+    "pctPerRank": 8
+   }
+  },
+  "kni_guardian_banner": {
+   "name": "Guardian Banner",
+   "owner": "knight",
+   "tree": "banner",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "kni_stand_together"
+   ],
+   "kind": "active",
+   "desc": "Plant a second standard up to 15 m away: every friend within 8 m of it is healed for {dmg}, shakes off slows, roots, stuns and poisons, and gets +15% armour for 10 seconds.",
+   "cost": {
+    "rage": 30
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 15,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        10,
+        4
+       ],
+       "perRank": {
+        "base": [
+         0.8,
+         0.3
+        ]
+       }
+      },
+      {
+       "do": "cleanse"
+      },
+      {
+       "do": "buff",
+       "stat": "armour",
+       "pct": 15,
+       "secs": 10,
+       "perRank": {
+        "pct": 1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "kni_steel_cadence": {
+   "name": "Steel Cadence",
+   "owner": "knight",
+   "tree": "banner",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "kni_heavy_standard"
+   ],
+   "kind": "passive",
+   "desc": "A drumbeat in the swing. More attack speed.",
+   "passive": {
+    "stat": "attackSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "kni_long_standing": {
+   "name": "Long Standing",
+   "owner": "knight",
+   "tree": "banner",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "kni_stand_together"
+   ],
+   "kind": "synergy",
+   "desc": "Stand Together lasts longer: more seconds per rank.",
+   "synergy": {
+    "skill": "kni_stand_together",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "kni_unbroken_banner": {
+   "name": "Unbroken Banner",
+   "owner": "knight",
+   "tree": "banner",
+   "reqLevel": 20,
+   "maxRank": 5,
+   "prereq": [
+    "kni_guardian_banner",
+    "kni_long_standing"
+   ],
+   "kind": "active",
+   "desc": "Raise the banner over everyone: every friend within 12 m is healed for {dmg}, wrapped in a ward, cleansed, and gets +40% armour with heals landing 20% harder for 10 seconds; you take 30 temper. The Banner capstone.",
+   "cost": {
+    "rage": 40
+   },
+   "cast": 0,
+   "cd": 90,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 12,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        25,
+        10
+       ],
+       "perRank": {
+        "base": [
+         4,
+         1.2
+        ]
+       }
+      },
+      {
+       "do": "shield",
+       "base": [
+        30,
+        8
+       ],
+       "secs": 10,
+       "perRank": {
+        "base": [
+         4,
+         1
+        ]
+       }
+      },
+      {
+       "do": "cleanse"
+      },
+      {
+       "do": "buff",
+       "stat": "armour",
+       "pct": 40,
+       "secs": 10,
+       "perRank": {
+        "pct": 4
+       }
+      },
+      {
+       "do": "buff",
+       "stat": "healTaken",
+       "pct": 20,
+       "secs": 10
+      }
+     ]
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 30
+    }
+   ]
+  },
+  "asn_venom_strike": {
+   "name": "Venom Strike",
+   "owner": "assassin",
+   "tree": "venoms",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A cut with a coated blade for {mult} weapon damage, and poison for {secs} seconds after. Your filler; keep the poison up on everything that will live long enough.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.1,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "dot",
+     "type": "poison",
+     "base": [
+      1.8,
+      0.8
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       0.2,
+       0.07
+      ]
+     }
+    }
+   ]
+  },
+  "asn_quick_poisons": {
+   "name": "Quick Poisons",
+   "owner": "assassin",
+   "tree": "venoms",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Fast hands at the vial. Energy comes back faster.",
+   "passive": {
+    "stat": "energyRegen",
+    "value": 8,
+    "perRank": 4
+   }
+  },
+  "asn_blackroot_dart": {
+   "name": "Blackroot Dart",
+   "owner": "assassin",
+   "tree": "venoms",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "asn_venom_strike"
+   ],
+   "kind": "active",
+   "desc": "A dart from 20 m for {dmg} poison damage and a slow poison for {secs} seconds. For the thing you cannot reach yet.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 20,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "poison",
+     "base": [
+      6,
+      3
+     ],
+     "speed": 30,
+     "perRank": {
+      "base": [
+       0.5,
+       0.2
+      ]
+     }
+    },
+    {
+     "do": "dot",
+     "type": "poison",
+     "base": [
+      2.2,
+      1
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       0.25,
+       0.08
+      ]
+     }
+    }
+   ]
+  },
+  "asn_lingering": {
+   "name": "Lingering",
+   "owner": "assassin",
+   "tree": "venoms",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "asn_venom_strike"
+   ],
+   "kind": "synergy",
+   "desc": "Venom Strike's poison lasts longer: more seconds per rank.",
+   "synergy": {
+    "skill": "asn_venom_strike",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "asn_fester": {
+   "name": "Fester",
+   "owner": "assassin",
+   "tree": "venoms",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "asn_blackroot_dart"
+   ],
+   "kind": "active",
+   "desc": "Press on the wound: {dmg} poison damage at once. Throw it when the target is carrying poison and bleed.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "poison",
+     "base": [
+      12,
+      6
+     ],
+     "perRank": {
+      "base": [
+       1,
+       0.4
+      ]
+     },
+     "perDot": {
+      "mult": 0.3,
+      "max": 1.2
+     }
+    }
+   ]
+  },
+  "asn_steady_hand": {
+   "name": "Steady Hand",
+   "owner": "assassin",
+   "tree": "venoms",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "A knife-hand that does not shake. More attack speed.",
+   "passive": {
+    "stat": "attackSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "asn_blood_and_bile": {
+   "name": "Blood and Bile",
+   "owner": "assassin",
+   "tree": "venoms",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "asn_fester"
+   ],
+   "kind": "active",
+   "desc": "A deep cut for {mult} weapon damage that bleeds for {secs} seconds on top of whatever poison it carries.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.4,
+     "perRank": {
+      "mult": 0.08
+     }
+    },
+    {
+     "do": "dot",
+     "type": "physical",
+     "base": [
+      3,
+      1.2
+     ],
+     "secs": 6,
+     "perRank": {
+      "base": [
+       0.3,
+       0.1
+      ]
+     }
+    }
+   ]
+  },
+  "asn_spreading_rot": {
+   "name": "Spreading Rot",
+   "owner": "assassin",
+   "tree": "venoms",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "asn_blackroot_dart"
+   ],
+   "kind": "active",
+   "desc": "The poison jumps: {dmg} poison damage to everything within 5 m of your target and a rot for {secs} seconds on all of it.",
+   "cost": {
+    "energy": 35
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "poison",
+       "base": [
+        5,
+        2.5
+       ],
+       "perRank": {
+        "base": [
+         0.4,
+         0.2
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "poison",
+       "base": [
+        2,
+        0.9
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.2,
+         0.08
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "asn_virulence": {
+   "name": "Virulence",
+   "owner": "assassin",
+   "tree": "venoms",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "asn_venom_strike"
+   ],
+   "kind": "synergy",
+   "desc": "Venom Strike bites deeper and its poison burns hotter: more damage per rank.",
+   "synergy": {
+    "skill": "asn_venom_strike",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "asn_plague_knife": {
+   "name": "Plague Knife",
+   "owner": "assassin",
+   "tree": "venoms",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "asn_spreading_rot",
+    "asn_blood_and_bile"
+   ],
+   "kind": "active",
+   "desc": "One knife, every vial: {mult} weapon damage to the target, {dmg} poison damage to everything within 6 m of it, and a plague on all of them for {secs} seconds. The Venoms capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2.5,
+     "perRank": {
+      "mult": 0.12
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "poison",
+       "base": [
+        10,
+        5
+       ],
+       "perRank": {
+        "base": [
+         0.8,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "poison",
+       "base": [
+        4,
+        1.8
+       ],
+       "secs": 10,
+       "perRank": {
+        "base": [
+         0.4,
+         0.15
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "asn_grave_mark": {
+   "name": "Grave Mark",
+   "owner": "assassin",
+   "tree": "the_setup",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A cut for {mult} weapon damage that marks the target: it takes +20% damage from everyone for {secs} seconds. Longer and deeper than a Notch. It pays twice: once for you, once for the party.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.8,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "mark",
+     "pct": 20,
+     "secs": 8,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "asn_cold_eye": {
+   "name": "Cold Eye",
+   "owner": "assassin",
+   "tree": "the_setup",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "You see where the blade should go. More critical chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "asn_gutting_strike": {
+   "name": "Gutting Strike",
+   "owner": "assassin",
+   "tree": "the_setup",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "asn_grave_mark"
+   ],
+   "kind": "active",
+   "desc": "The cash-in: {mult} weapon damage in one cut. Best from behind.",
+   "cost": {
+    "energy": 40
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2.4,
+     "perRank": {
+      "mult": 0.12
+     }
+    }
+   ]
+  },
+  "asn_sap": {
+   "name": "Sap",
+   "owner": "assassin",
+   "tree": "the_setup",
+   "reqLevel": 12,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A pommel to the back of the head: {mult} weapon damage and the target is out for {secs} seconds. Does not use the global cooldown.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.5,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 2,
+     "perRank": {
+      "secs": 0.2
+     }
+    }
+   ]
+  },
+  "asn_opening": {
+   "name": "The Opening",
+   "owner": "assassin",
+   "tree": "the_setup",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "asn_gutting_strike"
+   ],
+   "kind": "synergy",
+   "desc": "Gutting Strike cuts deeper: more damage per rank.",
+   "synergy": {
+    "skill": "asn_gutting_strike",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "asn_throat_cut": {
+   "name": "Throat Cut",
+   "owner": "assassin",
+   "tree": "the_setup",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "asn_sap"
+   ],
+   "kind": "active",
+   "desc": "A cut across the throat for {mult} weapon damage: the cast stops, the caster is silenced for a moment and cannot start another for {secs} seconds. Does not use the global cooldown.",
+   "cost": {
+    "energy": 10
+   },
+   "cast": 0,
+   "cd": 14,
+   "gcd": false,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.7,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1.5,
+     "perRank": {
+      "secs": 0.2
+     }
+    }
+   ]
+  },
+  "asn_exposed": {
+   "name": "Exposed",
+   "owner": "assassin",
+   "tree": "the_setup",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "asn_grave_mark"
+   ],
+   "kind": "active",
+   "desc": "Cut the straps: {mult} weapon damage and the target's armour is down 20% for {secs} seconds.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.2,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "armourDown",
+     "secs": 8,
+     "pct": 20,
+     "perRank": {
+      "pct": 1.5
+     }
+    }
+   ]
+  },
+  "asn_deadly_patience": {
+   "name": "Deadly Patience",
+   "owner": "assassin",
+   "tree": "the_setup",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "asn_cold_eye"
+   ],
+   "kind": "passive",
+   "desc": "Wait, then cut. More melee power.",
+   "passive": {
+    "stat": "meleePower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "asn_second_mark": {
+   "name": "Second Mark",
+   "owner": "assassin",
+   "tree": "the_setup",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "asn_grave_mark"
+   ],
+   "kind": "synergy",
+   "desc": "Grave Mark lasts longer: more seconds per rank.",
+   "synergy": {
+    "skill": "asn_grave_mark",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "asn_execution": {
+   "name": "Execution",
+   "owner": "assassin",
+   "tree": "the_setup",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "asn_exposed",
+    "asn_opening"
+   ],
+   "kind": "active",
+   "desc": "It ends here: {mult} weapon damage in one stroke. Save it for the one you set up. The Set-up capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 4,
+     "perRank": {
+      "mult": 0.2
+     },
+     "cond": {
+      "targetHpBelow": 0.35,
+      "mult": 1.5
+     }
+    }
+   ]
+  },
+  "asn_vanish_step": {
+   "name": "Vanish Step",
+   "owner": "assassin",
+   "tree": "slip_away",
+   "reqLevel": 10,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Gone: 8 m back in a blink, a {dmg} ward for 4 seconds, and your next cuts are +15% likely to crit for 5 seconds. Does not use the global cooldown.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 8,
+     "to": "back"
+    },
+    {
+     "do": "shield",
+     "base": [
+      8,
+      2.5
+     ],
+     "secs": 4,
+     "perRank": {
+      "base": [
+       1.5,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "crit",
+     "pct": 15,
+     "secs": 5,
+     "perRank": {
+      "pct": 3
+     }
+    }
+   ]
+  },
+  "asn_soft_boots": {
+   "name": "Soft Boots",
+   "owner": "assassin",
+   "tree": "slip_away",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster on your feet.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "asn_decoy": {
+   "name": "Decoy",
+   "owner": "assassin",
+   "tree": "slip_away",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "asn_vanish_step"
+   ],
+   "kind": "active",
+   "desc": "Leave a straw-and-cloak decoy that shouts at the pack: it draws everything within 6 m onto itself for {secs} seconds or until it is cut down. Ranks make it tougher.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "minion",
+     "id": "assassin_decoy",
+     "name": "Decoy",
+     "role": "tank",
+     "count": 1,
+     "secs": 8,
+     "hpMult": 0.5,
+     "dmgMult": 0.1,
+     "skills": [
+      {
+       "id": "decoy_shout",
+       "name": "Shout",
+       "kind": "taunt",
+       "cd": 3,
+       "radius": 6
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.08,
+      "secs": 0.5
+     }
+    }
+   ]
+  },
+  "asn_smoke_pouch": {
+   "name": "Smoke Pouch",
+   "owner": "assassin",
+   "tree": "slip_away",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Throw a pouch up to 15 m: a 4 m cloud where everything moves at half speed and hits 20% softer for {secs} seconds.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 15,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 4,
+       "pct": 50,
+       "perRank": {
+        "secs": 0.3
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "damageDown",
+       "secs": 4,
+       "pct": 20,
+       "perRank": {
+        "secs": 0.3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "asn_hush": {
+   "name": "Hush",
+   "owner": "assassin",
+   "tree": "slip_away",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "asn_smoke_pouch"
+   ],
+   "kind": "active",
+   "desc": "A needle from 20 m: {dmg} poison damage and the target cannot cast for {secs} seconds. Does not use the global cooldown.",
+   "cost": {
+    "energy": 10
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": false,
+   "range": 20,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "poison",
+     "base": [
+      4,
+      2
+     ],
+     "perRank": {
+      "base": [
+       0.5,
+       0.2
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 3,
+     "perRank": {
+      "secs": 0.3
+     }
+    }
+   ]
+  },
+  "asn_thicker_smoke": {
+   "name": "Thicker Smoke",
+   "owner": "assassin",
+   "tree": "slip_away",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "asn_smoke_pouch"
+   ],
+   "kind": "synergy",
+   "desc": "Smoke Pouch covers more ground: a wider cloud per rank.",
+   "synergy": {
+    "skill": "asn_smoke_pouch",
+    "stat": "radius",
+    "pctPerRank": 8
+   }
+  },
+  "asn_knife_storm": {
+   "name": "Knife Storm",
+   "owner": "assassin",
+   "tree": "slip_away",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "asn_decoy"
+   ],
+   "kind": "active",
+   "desc": "Every knife you carry, all at once: {mult} weapon damage to everything within 6 m and each one slowed by 30% for 3 seconds. The pack answer.",
+   "cost": {
+    "energy": 40
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.2,
+       "perRank": {
+        "mult": 0.06
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 3,
+       "pct": 30
+      }
+     ]
+    }
+   ]
+  },
+  "asn_shadow_sense": {
+   "name": "Shadow Sense",
+   "owner": "assassin",
+   "tree": "slip_away",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "asn_soft_boots"
+   ],
+   "kind": "passive",
+   "desc": "You feel the swing before it lands. More dodge.",
+   "passive": {
+    "stat": "dodge",
+    "value": 2,
+    "perRank": 1.5
+   }
+  },
+  "asn_storm_edge": {
+   "name": "Storm Edge",
+   "owner": "assassin",
+   "tree": "slip_away",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "asn_knife_storm"
+   ],
+   "kind": "synergy",
+   "desc": "Knife Storm throws sharper: more damage per rank.",
+   "synergy": {
+    "skill": "asn_knife_storm",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "asn_thousand_cuts": {
+   "name": "Thousand Cuts",
+   "owner": "assassin",
+   "tree": "slip_away",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "asn_knife_storm",
+    "asn_hush"
+   ],
+   "kind": "active",
+   "desc": "Three seconds of knives: {mult} weapon damage every second to everything within 6 m, and all of it bleeds for {secs} seconds after. Moving stops it. The Slip Away capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "channel": 3,
+   "cd": 25,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 0.9,
+       "perRank": {
+        "mult": 0.05
+       }
+      },
+      {
+       "do": "dot",
+       "type": "physical",
+       "base": [
+        3,
+        1.2
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.3,
+         0.1
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "fro_frost_shard": {
+   "name": "Frost Shard",
+   "owner": "frostbinder",
+   "tree": "rime",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A shard of ice for {dmg} frost damage from 25 m that slows the target by 30% for 4 seconds. Your filler: everything you hit is slower afterwards.",
+   "cost": {
+    "mana": 16
+   },
+   "costPerRank": 1,
+   "cast": 1.8,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "frost",
+     "base": [
+      11,
+      6.5
+     ],
+     "speed": 26,
+     "perRank": {
+      "base": [
+       0.8,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 4,
+     "pct": 30,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "fro_cold_study": {
+   "name": "Cold Study",
+   "owner": "frostbinder",
+   "tree": "rime",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Years with the frost. More spell power.",
+   "passive": {
+    "stat": "spellPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "fro_rime_burst": {
+   "name": "Rime Burst",
+   "owner": "frostbinder",
+   "tree": "rime",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "fro_frost_shard"
+   ],
+   "kind": "active",
+   "desc": "Rime bursts off the target for {dmg} frost damage, instant, and it moves at 60% speed for 3 seconds. Cast on the move.",
+   "cost": {
+    "mana": 18
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 5,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "frost",
+     "base": [
+      9,
+      4.5
+     ],
+     "perRank": {
+      "base": [
+       0.6,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 3,
+     "pct": 40
+    }
+   ]
+  },
+  "fro_deep_cold": {
+   "name": "Deep Cold",
+   "owner": "frostbinder",
+   "tree": "rime",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "A deeper well. More mana.",
+   "passive": {
+    "stat": "maxMana",
+    "value": 5,
+    "perRank": 3
+   }
+  },
+  "fro_rime_spear": {
+   "name": "Rime Spear",
+   "owner": "frostbinder",
+   "tree": "rime",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "fro_rime_burst"
+   ],
+   "kind": "active",
+   "desc": "A spear of ice for {dmg} frost damage. The shatter: throw it at something already slowed.",
+   "cost": {
+    "mana": 30
+   },
+   "costPerRank": 1,
+   "cast": 2,
+   "cd": 8,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "frost",
+     "base": [
+      22,
+      11
+     ],
+     "perRank": {
+      "base": [
+       1.6,
+       0.7
+      ]
+     },
+     "cond": {
+      "slowed": true,
+      "mult": 1.5
+     }
+    }
+   ]
+  },
+  "fro_sharper_shards": {
+   "name": "Sharper Shards",
+   "owner": "frostbinder",
+   "tree": "rime",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "fro_frost_shard"
+   ],
+   "kind": "synergy",
+   "desc": "Frost Shard cuts deeper: more damage per rank.",
+   "synergy": {
+    "skill": "fro_frost_shard",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "fro_shatter": {
+   "name": "Shatter",
+   "owner": "frostbinder",
+   "tree": "rime",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "fro_rime_spear"
+   ],
+   "kind": "active",
+   "desc": "Everything within 5 m of your target shatters for {dmg} frost damage and staggers for a second.",
+   "cost": {
+    "mana": 32
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "frost",
+       "base": [
+        12,
+        6
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      }
+     ]
+    }
+   ]
+  },
+  "fro_brittle": {
+   "name": "Brittle",
+   "owner": "frostbinder",
+   "tree": "rime",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "fro_cold_study"
+   ],
+   "kind": "passive",
+   "desc": "Cold things break along their cracks. More critical chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "fro_keen_spear": {
+   "name": "Keen Spear",
+   "owner": "frostbinder",
+   "tree": "rime",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "fro_rime_spear"
+   ],
+   "kind": "synergy",
+   "desc": "Rime Spear hits harder: more damage per rank.",
+   "synergy": {
+    "skill": "fro_rime_spear",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "fro_stillfrost": {
+   "name": "Stillfrost",
+   "owner": "frostbinder",
+   "tree": "rime",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "fro_shatter",
+    "fro_keen_spear"
+   ],
+   "kind": "active",
+   "desc": "Freeze the target solid for {secs} seconds and break it: {dmg} frost damage. The Rime capstone.",
+   "cost": {
+    "mana": 48
+   },
+   "costPerRank": 1,
+   "cast": 2.5,
+   "cd": 25,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 2,
+     "perRank": {
+      "secs": 0.1
+     }
+    },
+    {
+     "do": "damage",
+     "type": "frost",
+     "base": [
+      34,
+      16
+     ],
+     "perRank": {
+      "base": [
+       2.2,
+       0.9
+      ]
+     }
+    }
+   ]
+  },
+  "fro_whiteout": {
+   "name": "Whiteout",
+   "owner": "frostbinder",
+   "tree": "whiteout",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Call a blizzard onto a 5 m circle up to 25 m away for three seconds: {dmg} frost damage a second and everything in it moves at 60% speed. Moving stops it.",
+   "cost": {
+    "mana": 34
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "channel": 3,
+   "cd": 14,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "frost",
+       "base": [
+        4,
+        2.2
+       ],
+       "perRank": {
+        "base": [
+         0.35,
+         0.15
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 3,
+       "pct": 40
+      }
+     ]
+    }
+   ]
+  },
+  "fro_banked_cold": {
+   "name": "Banked Cold",
+   "owner": "frostbinder",
+   "tree": "whiteout",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "The cold keeps. Mana comes back faster.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "fro_ice_wall": {
+   "name": "Ice Wall",
+   "owner": "frostbinder",
+   "tree": "whiteout",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "fro_whiteout"
+   ],
+   "kind": "active",
+   "desc": "Raise a wall of ice along an 8 m line in front of you: everything in it takes {dmg} frost damage and is frozen to the spot for {secs} seconds.",
+   "cost": {
+    "mana": 26
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "line",
+     "size": 8,
+     "at": "self",
+     "width": 2,
+     "effects": [
+      {
+       "do": "damage",
+       "type": "frost",
+       "base": [
+        6,
+        3
+       ],
+       "perRank": {
+        "base": [
+         0.5,
+         0.2
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "root",
+       "secs": 2,
+       "perRank": {
+        "secs": 0.15
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "fro_frostbitten": {
+   "name": "Frostbitten",
+   "owner": "frostbinder",
+   "tree": "whiteout",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Numb to it. More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "fro_blizzard": {
+   "name": "Blizzard",
+   "owner": "frostbinder",
+   "tree": "whiteout",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "fro_whiteout"
+   ],
+   "kind": "active",
+   "desc": "A storm on a 7 m circle up to 25 m away: {dmg} frost damage, the cold bites for {secs} seconds after, and everything in it moves at half speed.",
+   "cost": {
+    "mana": 38
+   },
+   "costPerRank": 1,
+   "cast": 2,
+   "cd": 16,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 7,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "frost",
+       "base": [
+        10,
+        5
+       ],
+       "perRank": {
+        "base": [
+         0.8,
+         0.35
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "frost",
+       "base": [
+        2,
+        0.9
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.2,
+         0.08
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 5,
+       "pct": 50
+      }
+     ]
+    }
+   ]
+  },
+  "fro_wider_white": {
+   "name": "Wider White",
+   "owner": "frostbinder",
+   "tree": "whiteout",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "fro_whiteout"
+   ],
+   "kind": "synergy",
+   "desc": "Whiteout covers more ground: a wider circle per rank.",
+   "synergy": {
+    "skill": "fro_whiteout",
+    "stat": "radius",
+    "pctPerRank": 6
+   }
+  },
+  "fro_glacier": {
+   "name": "Glacier",
+   "owner": "frostbinder",
+   "tree": "whiteout",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "fro_ice_wall"
+   ],
+   "kind": "active",
+   "desc": "Ice heaves up through a 4 m circle up to 25 m away: {dmg} frost damage and everything in it is held for {secs} seconds. Ground that holds.",
+   "cost": {
+    "mana": 34
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 18,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "frost",
+       "base": [
+        14,
+        7
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "root",
+       "secs": 2.5,
+       "perRank": {
+        "secs": 0.15
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "fro_lasting_cold": {
+   "name": "Lasting Cold",
+   "owner": "frostbinder",
+   "tree": "whiteout",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "fro_blizzard"
+   ],
+   "kind": "synergy",
+   "desc": "Blizzard's cold lingers: more seconds per rank.",
+   "synergy": {
+    "skill": "fro_blizzard",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "fro_snowblind": {
+   "name": "Snowblind",
+   "owner": "frostbinder",
+   "tree": "whiteout",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "fro_blizzard"
+   ],
+   "kind": "active",
+   "desc": "Driven snow on a 6 m circle up to 25 m away: everything in it hits 20% softer and moves at 70% speed for {secs} seconds. The control tool.",
+   "cost": {
+    "mana": 28
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "damageDown",
+       "secs": 6,
+       "pct": 20,
+       "perRank": {
+        "pct": 1
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 6,
+       "pct": 30,
+       "perRank": {
+        "secs": 0.2
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "fro_endless_winter": {
+   "name": "Endless Winter",
+   "owner": "frostbinder",
+   "tree": "whiteout",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "fro_glacier",
+    "fro_snowblind"
+   ],
+   "kind": "active",
+   "desc": "Four seconds of winter on an 8 m circle up to 25 m away: {dmg} frost damage a second and everything in it crawls at 40% speed. Moving stops it. The Whiteout capstone.",
+   "cost": {
+    "mana": 60
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "channel": 4,
+   "cd": 40,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "frost",
+       "base": [
+        8,
+        4
+       ],
+       "perRank": {
+        "base": [
+         0.6,
+         0.3
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 3,
+       "pct": 60
+      }
+     ]
+    }
+   ]
+  },
+  "fro_ice_ward": {
+   "name": "Ice Ward",
+   "owner": "frostbinder",
+   "tree": "stillness",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Ice over your skin: a ward that soaks {dmg} for 8 seconds, and the cold off it slows everything within 4 m by 40% for 3 seconds.",
+   "cost": {
+    "mana": 24
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      16,
+      4
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       1.5,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "self",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 3,
+       "pct": 40
+      }
+     ]
+    }
+   ]
+  },
+  "fro_winter_skin": {
+   "name": "Winter Skin",
+   "owner": "frostbinder",
+   "tree": "stillness",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "What the frost cannot touch, nothing else touches easily. Resist all.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "fro_spellrush": {
+   "name": "Spellrush",
+   "owner": "frostbinder",
+   "tree": "stillness",
+   "reqLevel": 12,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Stillness between the heartbeats: your casts are 60% faster for {secs} seconds and you take 20 mana. Three fast casts, free. Does not use the global cooldown.",
+   "cost": {
+    "mana": 0
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "castSpeed",
+     "pct": 60,
+     "secs": 6,
+     "perRank": {
+      "pct": 10
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 20
+    }
+   ]
+  },
+  "fro_cold_focus": {
+   "name": "Cold Focus",
+   "owner": "frostbinder",
+   "tree": "stillness",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Nothing hurries you. Faster casts.",
+   "passive": {
+    "stat": "castSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "fro_freeze": {
+   "name": "Freeze",
+   "owner": "frostbinder",
+   "tree": "stillness",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "fro_ice_ward"
+   ],
+   "kind": "active",
+   "desc": "Freeze one target solid from 25 m for {secs} seconds, for {dmg} frost damage. The hold.",
+   "cost": {
+    "mana": 28
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 3,
+     "perRank": {
+      "secs": 0.2
+     }
+    },
+    {
+     "do": "damage",
+     "type": "frost",
+     "base": [
+      6,
+      3
+     ],
+     "perRank": {
+      "base": [
+       0.5,
+       0.2
+      ]
+     }
+    }
+   ]
+  },
+  "fro_frost_step": {
+   "name": "Frost Step",
+   "owner": "frostbinder",
+   "tree": "stillness",
+   "reqLevel": 14,
+   "maxRank": 3,
+   "prereq": [
+    "fro_spellrush"
+   ],
+   "kind": "active",
+   "desc": "Step 8 m back and leave everything within 3 m of where you stood frozen to the spot for {secs} seconds. Does not use the global cooldown.",
+   "cost": {
+    "mana": 10
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 3,
+     "at": "self",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "root",
+       "secs": 1.5,
+       "perRank": {
+        "secs": 0.5
+       }
+      }
+     ]
+    },
+    {
+     "do": "dash",
+     "dist": 8,
+     "to": "back"
+    }
+   ]
+  },
+  "fro_stifling_cold": {
+   "name": "Stifling Cold",
+   "owner": "frostbinder",
+   "tree": "stillness",
+   "reqLevel": 16,
+   "maxRank": 5,
+   "prereq": [
+    "fro_freeze"
+   ],
+   "kind": "active",
+   "desc": "Cold in the throat from 25 m: the cast stops, the caster cannot start another for {secs} seconds, and it moves at half speed for 3 seconds. Does not use the global cooldown.",
+   "cost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 16,
+   "gcd": false,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 3,
+     "pct": 50
+    },
+    {
+     "do": "damage",
+     "type": "frost",
+     "base": [
+      4,
+      2
+     ]
+    }
+   ]
+  },
+  "fro_thicker_ice": {
+   "name": "Thicker Ice",
+   "owner": "frostbinder",
+   "tree": "stillness",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "fro_ice_ward"
+   ],
+   "kind": "synergy",
+   "desc": "Ice Ward soaks more: a bigger ward per rank.",
+   "synergy": {
+    "skill": "fro_ice_ward",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "fro_deep_well": {
+   "name": "Deep Well",
+   "owner": "frostbinder",
+   "tree": "stillness",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "fro_winter_skin"
+   ],
+   "kind": "passive",
+   "desc": "Mana comes back faster.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "fro_absolute_zero": {
+   "name": "Absolute Zero",
+   "owner": "frostbinder",
+   "tree": "stillness",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "fro_stifling_cold",
+    "fro_frost_step"
+   ],
+   "kind": "active",
+   "desc": "Everything stops but you: a {dmg} ward for 8 seconds, everything within 8 m frozen for 2.5 seconds and bitten for frost damage, and 50 mana. Does not use the global cooldown. The Stillness capstone.",
+   "cost": {
+    "mana": 0
+   },
+   "cast": 0,
+   "cd": 90,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      30,
+      6
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       8,
+       2
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 2.5,
+       "perRank": {
+        "secs": 0.25
+       }
+      },
+      {
+       "do": "damage",
+       "type": "frost",
+       "base": [
+        12,
+        6
+       ],
+       "perRank": {
+        "base": [
+         3,
+         1
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 50
+    }
+   ]
+  },
+  "sto_forked_bolt": {
+   "name": "Forked Bolt",
+   "owner": "stormcaller",
+   "tree": "forked",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A bolt for {dmg} storm damage from 25 m that forks on landing into everything within 4 m of the target. Your filler: it is a pack spell that costs what a bolt costs.",
+   "cost": {
+    "mana": 16
+   },
+   "costPerRank": 1,
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "storm",
+     "base": [
+      10,
+      6
+     ],
+     "speed": 32,
+     "perRank": {
+      "base": [
+       0.7,
+       0.35
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        4,
+        2
+       ],
+       "perRank": {
+        "base": [
+         0.3,
+         0.15
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "sto_charged_mind": {
+   "name": "Charged Mind",
+   "owner": "stormcaller",
+   "tree": "forked",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Static in the thoughts. More spell power.",
+   "passive": {
+    "stat": "spellPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "sto_shock_mark": {
+   "name": "Shock Mark",
+   "owner": "stormcaller",
+   "tree": "forked",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "sto_forked_bolt"
+   ],
+   "kind": "active",
+   "desc": "Shock the target for {dmg} storm damage: shocked things take +15% damage from everything for {secs} seconds.",
+   "cost": {
+    "mana": 18
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      5,
+      2.5
+     ],
+     "perRank": {
+      "base": [
+       0.4,
+       0.2
+      ]
+     }
+    },
+    {
+     "do": "mark",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "sto_static": {
+   "name": "Static",
+   "owner": "stormcaller",
+   "tree": "forked",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "A charge waiting to jump. More critical chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "sto_arc_lash": {
+   "name": "Arc Lash",
+   "owner": "stormcaller",
+   "tree": "forked",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "sto_shock_mark"
+   ],
+   "kind": "active",
+   "desc": "A whip of lightning for {dmg} storm damage, instant, cast on the move, and the target's arms are numb: it hits 10% softer for 4 seconds.",
+   "cost": {
+    "mana": 16
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 4,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      8,
+      4
+     ],
+     "perRank": {
+      "base": [
+       0.6,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "damageDown",
+     "secs": 4,
+     "pct": 10,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "sto_wider_fork": {
+   "name": "Wider Fork",
+   "owner": "stormcaller",
+   "tree": "forked",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "sto_forked_bolt"
+   ],
+   "kind": "synergy",
+   "desc": "Forked Bolt reaches further: a wider fork per rank.",
+   "synergy": {
+    "skill": "sto_forked_bolt",
+    "stat": "radius",
+    "pctPerRank": 8
+   }
+  },
+  "sto_storm_beam": {
+   "name": "Storm Beam",
+   "owner": "stormcaller",
+   "tree": "forked",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "sto_arc_lash"
+   ],
+   "kind": "active",
+   "desc": "Hold a beam on the target for three seconds: {dmg} storm damage a second and it moves at 70% speed. Moving stops it.",
+   "cost": {
+    "mana": 36
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "channel": 3,
+   "cd": 12,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      7,
+      3.5
+     ],
+     "perRank": {
+      "base": [
+       0.6,
+       0.25
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 2,
+     "pct": 30
+    }
+   ]
+  },
+  "sto_conductor": {
+   "name": "Conductor",
+   "owner": "stormcaller",
+   "tree": "forked",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "sto_forked_bolt"
+   ],
+   "kind": "synergy",
+   "desc": "Forked Bolt hits harder: more damage per rank.",
+   "synergy": {
+    "skill": "sto_forked_bolt",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "sto_overcharge": {
+   "name": "Overcharge",
+   "owner": "stormcaller",
+   "tree": "forked",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "sto_charged_mind"
+   ],
+   "kind": "passive",
+   "desc": "Faster casts.",
+   "passive": {
+    "stat": "castSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "sto_chain_tempest": {
+   "name": "Chain Tempest",
+   "owner": "stormcaller",
+   "tree": "forked",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "sto_storm_beam",
+    "sto_conductor"
+   ],
+   "kind": "active",
+   "desc": "A bolt for {dmg} storm damage that jumps the whole pack: everything within 6 m of the target is struck and staggers for a second. The Forked capstone.",
+   "cost": {
+    "mana": 50
+   },
+   "costPerRank": 1,
+   "cast": 2,
+   "cd": 25,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "storm",
+     "base": [
+      20,
+      10
+     ],
+     "speed": 32,
+     "perRank": {
+      "base": [
+       1.5,
+       0.6
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        14,
+        7
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.45
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      }
+     ]
+    }
+   ]
+  },
+  "sto_thunder_ring": {
+   "name": "Thunder Ring",
+   "owner": "stormcaller",
+   "tree": "thunder",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A clap of thunder off you: {dmg} storm damage to everything within 5 m and each one staggers for half a second. The thing to press when they reach you.",
+   "cost": {
+    "mana": 24
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "self",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        8,
+        4
+       ],
+       "perRank": {
+        "base": [
+         0.6,
+         0.3
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 0.6,
+       "perRank": {
+        "secs": 0.05
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "sto_long_breath": {
+   "name": "Long Breath",
+   "owner": "stormcaller",
+   "tree": "thunder",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Mana comes back faster.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "sto_storm_orbs": {
+   "name": "Storm Orbs",
+   "owner": "stormcaller",
+   "tree": "thunder",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "sto_thunder_ring"
+   ],
+   "kind": "active",
+   "desc": "Three orbs of lightning circle you for {secs} seconds, each throwing bolts at whatever you fight. Ranks make them hit harder.",
+   "cost": {
+    "mana": 30
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "minion",
+     "id": "storm_orb",
+     "name": "Storm Orb",
+     "role": "caster",
+     "type": "storm",
+     "count": 3,
+     "secs": 15,
+     "hpMult": 0.3,
+     "dmgMult": 0.35,
+     "skills": [
+      {
+       "id": "orb_bolt",
+       "name": "Spark",
+       "kind": "bolt",
+       "cd": 2,
+       "mult": 1
+      }
+     ],
+     "perRank": {
+      "dmgMult": 0.04,
+      "secs": 1
+     }
+    }
+   ]
+  },
+  "sto_thunderhide": {
+   "name": "Thunderhide",
+   "owner": "stormcaller",
+   "tree": "thunder",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Resist all.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "sto_thunderclap": {
+   "name": "Thunderclap",
+   "owner": "stormcaller",
+   "tree": "thunder",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "sto_thunder_ring"
+   ],
+   "kind": "active",
+   "desc": "Thunder on a 5 m circle up to 25 m away: {dmg} storm damage and everything in it is stunned for {secs} seconds. Lands where you point.",
+   "cost": {
+    "mana": 32
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 14,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        12,
+        6
+       ],
+       "perRank": {
+        "base": [
+         0.9,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1,
+       "perRank": {
+        "secs": 0.05
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "sto_wider_ring": {
+   "name": "Wider Ring",
+   "owner": "stormcaller",
+   "tree": "thunder",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "sto_thunder_ring"
+   ],
+   "kind": "synergy",
+   "desc": "Thunder Ring reaches further: a wider circle per rank.",
+   "synergy": {
+    "skill": "sto_thunder_ring",
+    "stat": "radius",
+    "pctPerRank": 7
+   }
+  },
+  "sto_rolling_thunder": {
+   "name": "Rolling Thunder",
+   "owner": "stormcaller",
+   "tree": "thunder",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "sto_thunderclap"
+   ],
+   "kind": "active",
+   "desc": "Three seconds of thunder on a 6 m circle up to 25 m away: {dmg} storm damage a second and everything in it moves at 70% speed. Moving stops it.",
+   "cost": {
+    "mana": 38
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "channel": 3,
+   "cd": 15,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        5,
+        2.6
+       ],
+       "perRank": {
+        "base": [
+         0.4,
+         0.18
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 2,
+       "pct": 30
+      }
+     ]
+    }
+   ]
+  },
+  "sto_louder_clap": {
+   "name": "Louder Clap",
+   "owner": "stormcaller",
+   "tree": "thunder",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "sto_thunderclap"
+   ],
+   "kind": "synergy",
+   "desc": "Thunderclap hits harder: more damage per rank.",
+   "synergy": {
+    "skill": "sto_thunderclap",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "sto_deep_sky": {
+   "name": "Deep Sky",
+   "owner": "stormcaller",
+   "tree": "thunder",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "sto_long_breath"
+   ],
+   "kind": "passive",
+   "desc": "More mana.",
+   "passive": {
+    "stat": "maxMana",
+    "value": 5,
+    "perRank": 3
+   }
+  },
+  "sto_eye_of_tempest": {
+   "name": "Eye of the Tempest",
+   "owner": "stormcaller",
+   "tree": "thunder",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "sto_rolling_thunder",
+    "sto_storm_orbs"
+   ],
+   "kind": "active",
+   "desc": "Four seconds of storm on an 8 m circle up to 25 m away: {dmg} storm damage a second, everything in it crawls at 60% speed and takes +10% damage from everything. Moving stops it. The Thunder capstone.",
+   "cost": {
+    "mana": 60
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "channel": 4,
+   "cd": 40,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        9,
+        4.5
+       ],
+       "perRank": {
+        "base": [
+         0.7,
+         0.3
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 2,
+       "pct": 40
+      },
+      {
+       "do": "mark",
+       "pct": 10,
+       "secs": 3
+      }
+     ]
+    }
+   ]
+  },
+  "sto_bolt_step": {
+   "name": "Bolt Step",
+   "owner": "stormcaller",
+   "tree": "bolt_step",
+   "reqLevel": 10,
+   "maxRank": 3,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Become the lightning: everything along the 10 m line in front of you takes {dmg} storm damage and staggers, and you are at the far end of it. Does not use the global cooldown.",
+   "cost": {
+    "mana": 10
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "line",
+     "size": 10,
+     "at": "self",
+     "width": 2,
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        5,
+        2.5
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 0.5
+      }
+     ]
+    },
+    {
+     "do": "dash",
+     "dist": 10,
+     "to": "forward"
+    }
+   ]
+  },
+  "sto_light_feet": {
+   "name": "Light Feet",
+   "owner": "stormcaller",
+   "tree": "bolt_step",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster on your feet.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "sto_wind_ward": {
+   "name": "Wind Ward",
+   "owner": "stormcaller",
+   "tree": "bolt_step",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A wall of moving air: a ward that soaks {dmg} for 8 seconds, and your casts are 15% faster while it holds.",
+   "cost": {
+    "mana": 24
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      16,
+      4
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       1.5,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "castSpeed",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "sto_stormhardy": {
+   "name": "Stormhardy",
+   "owner": "stormcaller",
+   "tree": "bolt_step",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "sto_crackle": {
+   "name": "Crackle",
+   "owner": "stormcaller",
+   "tree": "bolt_step",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "sto_wind_ward"
+   ],
+   "kind": "active",
+   "desc": "A snap of lightning from 25 m: the cast stops, the caster is silenced for a moment and cannot start another for {secs} seconds, and it takes {dmg} storm damage. Does not use the global cooldown.",
+   "cost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.25
+     }
+    },
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      5,
+      2
+     ]
+    }
+   ]
+  },
+  "sto_thunder_fist": {
+   "name": "Thunder Fist",
+   "owner": "stormcaller",
+   "tree": "bolt_step",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "sto_bolt_step"
+   ],
+   "kind": "active",
+   "desc": "Close and strike: {dmg} storm damage from 8 m and the target is stunned for {secs} seconds. The stunning strike.",
+   "cost": {
+    "mana": 26
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 8,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      14,
+      7
+     ],
+     "perRank": {
+      "base": [
+       1,
+       0.45
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 1.5,
+     "perRank": {
+      "secs": 0.1
+     }
+    }
+   ]
+  },
+  "sto_gale": {
+   "name": "Gale",
+   "owner": "stormcaller",
+   "tree": "bolt_step",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "sto_wind_ward"
+   ],
+   "kind": "active",
+   "desc": "A gale over a 5 m circle up to 25 m away: {dmg} storm damage, everything in it moves at half speed and hits 15% softer for {secs} seconds.",
+   "cost": {
+    "mana": 24
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        4,
+        2
+       ],
+       "perRank": {
+        "base": [
+         0.3,
+         0.15
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 4,
+       "pct": 50,
+       "perRank": {
+        "secs": 0.3
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "damageDown",
+       "secs": 4,
+       "pct": 15,
+       "perRank": {
+        "secs": 0.3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "sto_sure_footing": {
+   "name": "Sure Footing",
+   "owner": "stormcaller",
+   "tree": "bolt_step",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "sto_wind_ward"
+   ],
+   "kind": "synergy",
+   "desc": "Wind Ward soaks more: a bigger ward per rank.",
+   "synergy": {
+    "skill": "sto_wind_ward",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "sto_hotter_step": {
+   "name": "Hotter Step",
+   "owner": "stormcaller",
+   "tree": "bolt_step",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "sto_bolt_step"
+   ],
+   "kind": "synergy",
+   "desc": "Bolt Step burns harder: more damage per rank.",
+   "synergy": {
+    "skill": "sto_bolt_step",
+    "stat": "damage",
+    "pctPerRank": 8
+   }
+  },
+  "sto_lightning_form": {
+   "name": "Lightning Form",
+   "owner": "stormcaller",
+   "tree": "bolt_step",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "sto_thunder_fist",
+    "sto_gale"
+   ],
+   "kind": "active",
+   "desc": "Be the storm for 10 seconds: +25% damage, casts 40% faster, a {dmg} ward, 50 mana, and everything within 6 m is struck and stunned as it begins. Does not use the global cooldown. The Bolt Step capstone.",
+   "cost": {
+    "mana": 0
+   },
+   "cast": 0,
+   "cd": 90,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 25,
+     "secs": 10,
+     "perRank": {
+      "pct": 5
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "castSpeed",
+     "pct": 40,
+     "secs": 10
+    },
+    {
+     "do": "shield",
+     "base": [
+      25,
+      6
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       6,
+       1.5
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 50
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        12,
+        6
+       ],
+       "perRank": {
+        "base": [
+         2,
+         0.8
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      }
+     ]
+    }
+   ]
+  },
+  "ora_foresight": {
+   "name": "Foresight",
+   "owner": "oracle",
+   "tree": "foresight",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "You saw it coming: a {dmg} ward on a friend within 25 m for 10 seconds, instant. Your filler: put it on whoever the next hit is for, before the hit.",
+   "cost": {
+    "mana": 22
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      14,
+      5
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       1.2,
+       0.4
+      ]
+     }
+    }
+   ]
+  },
+  "ora_clear_sight": {
+   "name": "Clear Sight",
+   "owner": "oracle",
+   "tree": "foresight",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More healing power.",
+   "passive": {
+    "stat": "healPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "ora_shared_vision": {
+   "name": "Shared Vision",
+   "owner": "oracle",
+   "tree": "foresight",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "ora_foresight"
+   ],
+   "kind": "active",
+   "desc": "Everyone sees it coming: a {dmg} ward on every friend within 10 m for 8 seconds.",
+   "cost": {
+    "mana": 34
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "shield",
+       "base": [
+        8,
+        3
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.6,
+         0.25
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "ora_calm_mind": {
+   "name": "Calm Mind",
+   "owner": "oracle",
+   "tree": "foresight",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Mana comes back faster.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "ora_second_sight": {
+   "name": "Second Sight",
+   "owner": "oracle",
+   "tree": "foresight",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "ora_foresight"
+   ],
+   "kind": "synergy",
+   "desc": "Foresight wards for more per rank.",
+   "synergy": {
+    "skill": "ora_foresight",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "ora_warding_glyph": {
+   "name": "Warding Glyph",
+   "owner": "oracle",
+   "tree": "foresight",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "ora_shared_vision"
+   ],
+   "kind": "active",
+   "desc": "Draw a glyph on a spot up to 25 m away: every friend within 5 m of it gets a {dmg} ward and mends for {secs} seconds. Lands where you point.",
+   "cost": {
+    "mana": 32
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 18,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "shield",
+       "base": [
+        10,
+        3.5
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.8,
+         0.3
+        ]
+       }
+      },
+      {
+       "do": "hot",
+       "base": [
+        2,
+        0.8
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.2,
+         0.08
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "ora_thread_of_fate": {
+   "name": "Thread of Fate",
+   "owner": "oracle",
+   "tree": "foresight",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "ora_warding_glyph"
+   ],
+   "kind": "active",
+   "desc": "Tie your fate to a friend within 25 m: a {dmg} ward on them for 10 seconds, a heal at once, and heals land 15% harder on them while the thread holds.",
+   "cost": {
+    "mana": 30
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      20,
+      7
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       1.5,
+       0.5
+      ]
+     }
+    },
+    {
+     "do": "heal",
+     "base": [
+      10,
+      4
+     ],
+     "perRank": {
+      "base": [
+       0.8,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "healTaken",
+     "pct": 15,
+     "secs": 10,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "ora_far_sight": {
+   "name": "Far Sight",
+   "owner": "oracle",
+   "tree": "foresight",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "ora_calm_mind"
+   ],
+   "kind": "passive",
+   "desc": "More mana.",
+   "passive": {
+    "stat": "maxMana",
+    "value": 5,
+    "perRank": 3
+   }
+  },
+  "ora_lasting_sight": {
+   "name": "Lasting Sight",
+   "owner": "oracle",
+   "tree": "foresight",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "ora_shared_vision"
+   ],
+   "kind": "synergy",
+   "desc": "Shared Vision wards for more per rank.",
+   "synergy": {
+    "skill": "ora_shared_vision",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "ora_seen_and_spared": {
+   "name": "Seen and Spared",
+   "owner": "oracle",
+   "tree": "foresight",
+   "reqLevel": 20,
+   "maxRank": 5,
+   "prereq": [
+    "ora_thread_of_fate",
+    "ora_lasting_sight"
+   ],
+   "kind": "active",
+   "desc": "The blow you foresaw never lands: every friend within 12 m gets a great ward for 10 seconds, +30% armour, and is cleansed. The Foresight capstone.",
+   "cost": {
+    "mana": 60
+   },
+   "costPerRank": 1,
+   "cast": 1.5,
+   "cd": 90,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 12,
+     "at": "self",
+     "effects": [
+      {
+       "do": "shield",
+       "base": [
+        35,
+        12
+       ],
+       "secs": 10,
+       "perRank": {
+        "base": [
+         5,
+         1.5
+        ]
+       }
+      },
+      {
+       "do": "buff",
+       "stat": "armour",
+       "pct": 30,
+       "secs": 10,
+       "perRank": {
+        "pct": 4
+       }
+      },
+      {
+       "do": "cleanse"
+      }
+     ]
+    }
+   ]
+  },
+  "ora_kind_omen": {
+   "name": "Kind Omen",
+   "owner": "oracle",
+   "tree": "omens",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A good sign: heal a friend for {dmg}, mend them for {secs} seconds after, and what is left over stays as a small ward.",
+   "cost": {
+    "mana": 20
+   },
+   "costPerRank": 1,
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      12,
+      5
+     ],
+     "perRank": {
+      "base": [
+       1,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "hot",
+     "base": [
+      2.5,
+      1
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       0.25,
+       0.08
+      ]
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      4,
+      1.5
+     ],
+     "secs": 6,
+     "perRank": {
+      "base": [
+       0.3,
+       0.1
+      ]
+     }
+    }
+   ]
+  },
+  "ora_quick_omen": {
+   "name": "Quick Omen",
+   "owner": "oracle",
+   "tree": "omens",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster casts.",
+   "passive": {
+    "stat": "castSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "ora_good_omen": {
+   "name": "Good Omen",
+   "owner": "oracle",
+   "tree": "omens",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "ora_kind_omen"
+   ],
+   "kind": "active",
+   "desc": "A heal that arrives early: instant, and a friend within 25 m mends {dmg} a second for {secs} seconds. Cast it before the hit, not after.",
+   "cost": {
+    "mana": 18
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "hot",
+     "base": [
+      4,
+      1.6
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       0.35,
+       0.14
+      ]
+     }
+    }
+   ]
+  },
+  "ora_steady_hands": {
+   "name": "Steady Hands",
+   "owner": "oracle",
+   "tree": "omens",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "ora_clear_the_fog": {
+   "name": "Clear the Fog",
+   "owner": "oracle",
+   "tree": "omens",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "ora_good_omen"
+   ],
+   "kind": "active",
+   "desc": "A friend within 25 m shakes off a slow, a root, a stun or a poison and is healed for {dmg}. Does not use the global cooldown.",
+   "cost": {
+    "mana": 16
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": false,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "cleanse"
+    },
+    {
+     "do": "heal",
+     "base": [
+      8,
+      3.5
+     ],
+     "perRank": {
+      "base": [
+       1,
+       0.3
+      ]
+     }
+    }
+   ]
+  },
+  "ora_long_omen": {
+   "name": "Long Omen",
+   "owner": "oracle",
+   "tree": "omens",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "ora_good_omen"
+   ],
+   "kind": "synergy",
+   "desc": "Good Omen mends for longer: more seconds per rank.",
+   "synergy": {
+    "skill": "ora_good_omen",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "ora_circle_of_omens": {
+   "name": "Circle of Omens",
+   "owner": "oracle",
+   "tree": "omens",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "ora_kind_omen"
+   ],
+   "kind": "active",
+   "desc": "Every friend within 10 m is healed for {dmg} and mends for {secs} seconds after. Instant.",
+   "cost": {
+    "mana": 36
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        9,
+        4
+       ],
+       "perRank": {
+        "base": [
+         0.7,
+         0.3
+        ]
+       }
+      },
+      {
+       "do": "hot",
+       "base": [
+        2,
+        0.8
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.2,
+         0.08
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "ora_read_the_bones": {
+   "name": "Read the Bones",
+   "owner": "oracle",
+   "tree": "omens",
+   "reqLevel": 16,
+   "maxRank": 5,
+   "prereq": [
+    "ora_clear_the_fog"
+   ],
+   "kind": "active",
+   "desc": "Read a fallen friend's fate again: they stand at 40% health inside a {dmg} ward. Three seconds; not in the middle of a fight.",
+   "cost": {
+    "mana": 60
+   },
+   "cast": 3,
+   "cd": 60,
+   "gcd": true,
+   "range": 20,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "revive",
+     "hpPct": 40,
+     "perRank": {
+      "hpPct": 5
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      20,
+      6
+     ],
+     "secs": 8
+    }
+   ]
+  },
+  "ora_unshaken": {
+   "name": "Unshaken",
+   "owner": "oracle",
+   "tree": "omens",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "ora_steady_hands"
+   ],
+   "kind": "passive",
+   "desc": "Resist all.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "ora_fate_rewritten": {
+   "name": "Fate Rewritten",
+   "owner": "oracle",
+   "tree": "omens",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "ora_circle_of_omens",
+    "ora_read_the_bones"
+   ],
+   "kind": "active",
+   "desc": "Tear the page out: a friend within 25 m is healed for {dmg}, warded, mends for {secs} seconds, is cleansed, and heals land 20% harder on them for 10 seconds. The Omens capstone.",
+   "cost": {
+    "mana": 48
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 30,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      40,
+      16
+     ],
+     "perRank": {
+      "base": [
+       3,
+       1
+      ]
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      25,
+      8
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       2,
+       0.5
+      ]
+     }
+    },
+    {
+     "do": "hot",
+     "base": [
+      5,
+      2
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       0.4,
+       0.15
+      ]
+     }
+    },
+    {
+     "do": "cleanse"
+    },
+    {
+     "do": "buff",
+     "stat": "healTaken",
+     "pct": 20,
+     "secs": 10
+    }
+   ]
+  },
+  "ora_fate_bolt": {
+   "name": "Fate Bolt",
+   "owner": "oracle",
+   "tree": "prophecy",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A bolt of what was always going to happen: {dmg} shadow damage from 25 m, and it gives 6 mana back. Attacking pays for the wards.",
+   "cost": {
+    "mana": 14
+   },
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "shadow",
+     "base": [
+      10,
+      5.5
+     ],
+     "speed": 28,
+     "perRank": {
+      "base": [
+       0.8,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 6
+    }
+   ]
+  },
+  "ora_far_seeing": {
+   "name": "Far Seeing",
+   "owner": "oracle",
+   "tree": "prophecy",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More spell power.",
+   "passive": {
+    "stat": "spellPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "ora_prophecy": {
+   "name": "Prophecy",
+   "owner": "oracle",
+   "tree": "prophecy",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "ora_fate_bolt"
+   ],
+   "kind": "active",
+   "desc": "Name the spot up to 25 m away where the blast will fall: {dmg} shadow damage on a 5 m circle and everything in it is marked to take +12% damage for {secs} seconds. Lands where you point.",
+   "cost": {
+    "mana": 28
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "shadow",
+       "base": [
+        10,
+        5
+       ],
+       "perRank": {
+        "base": [
+         0.8,
+         0.35
+        ]
+       }
+      },
+      {
+       "do": "mark",
+       "pct": 12,
+       "secs": 8,
+       "perRank": {
+        "pct": 1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "ora_portent": {
+   "name": "Portent",
+   "owner": "oracle",
+   "tree": "prophecy",
+   "reqLevel": 12,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A word of warning from 25 m: the cast stops, the caster is silenced for a moment and cannot start another for {secs} seconds, and it takes {dmg} shadow damage. Does not use the global cooldown.",
+   "cost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.25
+     }
+    },
+    {
+     "do": "damage",
+     "type": "shadow",
+     "base": [
+      4,
+      2
+     ]
+    }
+   ]
+  },
+  "ora_sure_doom": {
+   "name": "Sure Doom",
+   "owner": "oracle",
+   "tree": "prophecy",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "ora_fate_bolt"
+   ],
+   "kind": "synergy",
+   "desc": "Fate Bolt hits harder: more damage per rank.",
+   "synergy": {
+    "skill": "ora_fate_bolt",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "ora_what_is_coming": {
+   "name": "What Is Coming",
+   "owner": "oracle",
+   "tree": "prophecy",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "ora_prophecy"
+   ],
+   "kind": "active",
+   "desc": "Slow what is coming: everything on a 6 m circle up to 25 m away moves at 60% speed and hits 15% softer for {secs} seconds.",
+   "cost": {
+    "mana": 26
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 5,
+       "pct": 40,
+       "perRank": {
+        "secs": 0.3
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "damageDown",
+       "secs": 5,
+       "pct": 15,
+       "perRank": {
+        "secs": 0.3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "ora_doom_spoken": {
+   "name": "Doom Spoken",
+   "owner": "oracle",
+   "tree": "prophecy",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "ora_sure_doom"
+   ],
+   "kind": "active",
+   "desc": "Tell the target how it ends: {dmg} shadow damage and it hits 15% softer for 6 seconds.",
+   "cost": {
+    "mana": 30
+   },
+   "costPerRank": 1,
+   "cast": 2,
+   "cd": 10,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "shadow",
+     "base": [
+      18,
+      9
+     ],
+     "perRank": {
+      "base": [
+       1.4,
+       0.6
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "weaken",
+     "secs": 6,
+     "pct": 15,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "ora_keen_eye": {
+   "name": "Keen Eye",
+   "owner": "oracle",
+   "tree": "prophecy",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "ora_far_seeing"
+   ],
+   "kind": "passive",
+   "desc": "More critical chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "ora_omen_of_ruin": {
+   "name": "Omen of Ruin",
+   "owner": "oracle",
+   "tree": "prophecy",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "ora_doom_spoken"
+   ],
+   "kind": "active",
+   "desc": "Ruin on everything within 5 m of your target: {dmg} shadow damage and a withering for {secs} seconds.",
+   "cost": {
+    "mana": 34
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 14,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "shadow",
+       "base": [
+        12,
+        6
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "shadow",
+       "base": [
+        2,
+        0.9
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.2,
+         0.08
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "ora_last_page": {
+   "name": "The Last Page",
+   "owner": "oracle",
+   "tree": "prophecy",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "ora_omen_of_ruin",
+    "ora_what_is_coming"
+   ],
+   "kind": "active",
+   "desc": "Read the target its last page: {dmg} shadow damage and 1.5 seconds stunned by it, and the light that is left heals everyone within 6 m of you. The Prophecy capstone.",
+   "cost": {
+    "mana": 50
+   },
+   "costPerRank": 1,
+   "cast": 2.5,
+   "cd": 30,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "shadow",
+     "base": [
+      30,
+      14
+     ],
+     "perRank": {
+      "base": [
+       2,
+       0.8
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 1.5,
+     "perRank": {
+      "secs": 0.1
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        15,
+        6
+       ],
+       "perRank": {
+        "base": [
+         1.2,
+         0.5
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "swb_flourish": {
+   "name": "Flourish",
+   "owner": "swashbuckler",
+   "tree": "flourish",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A cut with a turn of the wrist for {mult} weapon damage. Flair: every different skill you use adds its own +4% damage for 8 seconds, and they stack; the same skill twice only refreshes its own. Your filler.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.2,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_quick_wrist": {
+   "name": "Quick Wrist",
+   "owner": "swashbuckler",
+   "tree": "flourish",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More attack speed.",
+   "passive": {
+    "stat": "attackSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "swb_pinning_thrust": {
+   "name": "Pinning Thrust",
+   "owner": "swashbuckler",
+   "tree": "flourish",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "swb_flourish"
+   ],
+   "kind": "active",
+   "desc": "Run the target through for {mult} weapon damage and pin it to the spot for {secs} seconds. Flair.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.8,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "root",
+     "secs": 2,
+     "perRank": {
+      "secs": 0.1
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_keen_point": {
+   "name": "Keen Point",
+   "owner": "swashbuckler",
+   "tree": "flourish",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More critical chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "swb_deeper_thrust": {
+   "name": "Deeper Thrust",
+   "owner": "swashbuckler",
+   "tree": "flourish",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "swb_pinning_thrust"
+   ],
+   "kind": "synergy",
+   "desc": "Pinning Thrust goes deeper: more damage per rank.",
+   "synergy": {
+    "skill": "swb_pinning_thrust",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "swb_double_thrust": {
+   "name": "Double Thrust",
+   "owner": "swashbuckler",
+   "tree": "flourish",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "swb_flourish"
+   ],
+   "kind": "active",
+   "desc": "Thrust, thrust: two hits of {mult} weapon damage each. Flair.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "weapon",
+     "mult": 1,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_sweep": {
+   "name": "Sweep",
+   "owner": "swashbuckler",
+   "tree": "flourish",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "swb_double_thrust"
+   ],
+   "kind": "active",
+   "desc": "A wide sweep across a 120 degree arc 5 m deep for {mult} weapon damage to each. The pack answer. Flair.",
+   "cost": {
+    "energy": 35
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "cone",
+     "size": 5,
+     "at": "self",
+     "angle": 120,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.1,
+       "perRank": {
+        "mult": 0.06
+       }
+      }
+     ]
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_showmanship": {
+   "name": "Showmanship",
+   "owner": "swashbuckler",
+   "tree": "flourish",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "swb_quick_wrist"
+   ],
+   "kind": "passive",
+   "desc": "The crowd feeds you. Energy comes back faster.",
+   "passive": {
+    "stat": "energyRegen",
+    "value": 8,
+    "perRank": 4
+   }
+  },
+  "swb_wider_sweep": {
+   "name": "Wider Sweep",
+   "owner": "swashbuckler",
+   "tree": "flourish",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "swb_sweep"
+   ],
+   "kind": "synergy",
+   "desc": "Sweep reaches further: a deeper arc per rank.",
+   "synergy": {
+    "skill": "swb_sweep",
+    "stat": "radius",
+    "pctPerRank": 6
+   }
+  },
+  "swb_grand_sweep": {
+   "name": "Grand Sweep",
+   "owner": "swashbuckler",
+   "tree": "flourish",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "swb_sweep",
+    "swb_deeper_thrust"
+   ],
+   "kind": "active",
+   "desc": "The whole circle in one turn: {mult} weapon damage to everything within 6 m and a 1 s stagger, and +10% damage for 10 seconds after. The Flourish capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 2.4,
+       "perRank": {
+        "mult": 0.12
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      }
+     ]
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 10,
+     "secs": 10,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "swb_daring_leap": {
+   "name": "Daring Leap",
+   "owner": "swashbuckler",
+   "tree": "panache",
+   "reqLevel": 10,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Leap 12 m onto your target for {mult} weapon damage. Flair. Does not use the global cooldown.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": false,
+   "range": 12,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 12,
+     "to": "target"
+    },
+    {
+     "do": "weapon",
+     "mult": 0.7,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_light_boots": {
+   "name": "Light Boots",
+   "owner": "swashbuckler",
+   "tree": "panache",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster on your feet.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "swb_mocking_parry": {
+   "name": "Mocking Parry",
+   "owner": "swashbuckler",
+   "tree": "panache",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "swb_daring_leap"
+   ],
+   "kind": "active",
+   "desc": "Turn the blow aside with a bow: {mult} weapon damage as the riposte, everything within 6 m comes for you, and you catch the next hits on a {dmg} ward for 5 seconds. Flair.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      }
+     ]
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 1.5,
+     "at": "self",
+     "effects": [
+      {
+       "do": "shield",
+       "base": [
+        12,
+        3
+       ],
+       "secs": 5,
+       "perRank": {
+        "base": [
+         1,
+         0.3
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_nimble": {
+   "name": "Nimble",
+   "owner": "swashbuckler",
+   "tree": "panache",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More dodge.",
+   "passive": {
+    "stat": "dodge",
+    "value": 2,
+    "perRank": 1.5
+   }
+  },
+  "swb_matadors_turn": {
+   "name": "Matador's Turn",
+   "owner": "swashbuckler",
+   "tree": "panache",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "swb_mocking_parry"
+   ],
+   "kind": "active",
+   "desc": "Let it charge, step aside: {mult} weapon damage as it passes, it limps at half speed for {secs} seconds, and you are 3 m clear. Flair.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.3,
+     "perRank": {
+      "mult": 0.07
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 3,
+     "pct": 50,
+     "perRank": {
+      "secs": 0.2
+     }
+    },
+    {
+     "do": "dash",
+     "dist": 3,
+     "to": "back"
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_sure_parry": {
+   "name": "Sure Parry",
+   "owner": "swashbuckler",
+   "tree": "panache",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "swb_mocking_parry"
+   ],
+   "kind": "synergy",
+   "desc": "Mocking Parry catches more: a bigger ward per rank.",
+   "synergy": {
+    "skill": "swb_mocking_parry",
+    "stat": "heal",
+    "pctPerRank": 8
+   }
+  },
+  "swb_cutting_remark": {
+   "name": "Cutting Remark",
+   "owner": "swashbuckler",
+   "tree": "panache",
+   "reqLevel": 16,
+   "maxRank": 5,
+   "prereq": [
+    "swb_matadors_turn"
+   ],
+   "kind": "active",
+   "desc": "A thrown knife and a word from 15 m: {mult} weapon damage, the cast stops, and the caster cannot start another for {secs} seconds. Does not use the global cooldown.",
+   "cost": {
+    "energy": 10
+   },
+   "cast": 0,
+   "cd": 14,
+   "gcd": false,
+   "range": 15,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.5,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.25
+     }
+    }
+   ]
+  },
+  "swb_bold_front": {
+   "name": "Bold Front",
+   "owner": "swashbuckler",
+   "tree": "panache",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "swb_nimble"
+   ],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "swb_the_exit": {
+   "name": "The Exit",
+   "owner": "swashbuckler",
+   "tree": "panache",
+   "reqLevel": 18,
+   "maxRank": 3,
+   "prereq": [
+    "swb_cutting_remark"
+   ],
+   "kind": "active",
+   "desc": "Bow, and leave: 10 m back, a {dmg} ward for 4 seconds, and everything within 3 m of where you stood is slowed by 40% for 3 seconds. Does not use the global cooldown.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 3,
+     "at": "self",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 3,
+       "pct": 40
+      }
+     ]
+    },
+    {
+     "do": "dash",
+     "dist": 10,
+     "to": "back"
+    },
+    {
+     "do": "shield",
+     "base": [
+      10,
+      3
+     ],
+     "secs": 4,
+     "perRank": {
+      "base": [
+       3,
+       0.6
+      ]
+     }
+    }
+   ]
+  },
+  "swb_en_garde": {
+   "name": "En Garde",
+   "owner": "swashbuckler",
+   "tree": "panache",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "swb_the_exit",
+    "swb_sure_parry"
+   ],
+   "kind": "active",
+   "desc": "Centre stage: a {dmg} ward, +50% armour and +15% damage for 8 seconds, everything within 8 m comes for you slowed, and 40 energy. Does not use the global cooldown. The Panache capstone.",
+   "cost": {
+    "energy": 0
+   },
+   "cast": 0,
+   "cd": 60,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      30,
+      7
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       8,
+       2
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 50,
+     "secs": 8,
+     "perRank": {
+      "pct": 10
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 15,
+     "secs": 8
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 4,
+       "pct": 30
+      }
+     ]
+    },
+    {
+     "do": "resource",
+     "kind": "energy",
+     "n": 40
+    }
+   ]
+  },
+  "swb_feint": {
+   "name": "Feint",
+   "owner": "swashbuckler",
+   "tree": "grandeur",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A feint and a cut for {mult} weapon damage that leaves the target's guard open: armour down 12% for {secs} seconds. Flair.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 5,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.9,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "armourDown",
+     "secs": 6,
+     "pct": 12,
+     "perRank": {
+      "pct": 1
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_crowd_pleaser": {
+   "name": "Crowd Pleaser",
+   "owner": "swashbuckler",
+   "tree": "grandeur",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More melee power.",
+   "passive": {
+    "stat": "meleePower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "swb_cape_flick": {
+   "name": "Cape Flick",
+   "owner": "swashbuckler",
+   "tree": "grandeur",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "swb_feint"
+   ],
+   "kind": "active",
+   "desc": "A cape across the eyes and a cut for {mult} weapon damage: the target hits 15% softer for {secs} seconds. Flair.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.8,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "damageDown",
+     "secs": 6,
+     "pct": 15,
+     "perRank": {
+      "pct": 1
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_bravado": {
+   "name": "Bravado",
+   "owner": "swashbuckler",
+   "tree": "grandeur",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Every blow you land mends you a little. Life on hit.",
+   "passive": {
+    "stat": "lifeOnHit",
+    "value": 3,
+    "perRank": 1.5
+   }
+  },
+  "swb_thrown_dagger": {
+   "name": "Thrown Dagger",
+   "owner": "swashbuckler",
+   "tree": "grandeur",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "swb_feint"
+   ],
+   "kind": "active",
+   "desc": "A dagger from the boot, thrown 12 m for {mult} weapon damage; the target limps at 70% speed for 3 seconds. Flair.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 12,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.2,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 3,
+     "pct": 30
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_longer_show": {
+   "name": "Longer Show",
+   "owner": "swashbuckler",
+   "tree": "grandeur",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "swb_feint"
+   ],
+   "kind": "synergy",
+   "desc": "Flourish's flair lasts longer: more seconds per rank.",
+   "synergy": {
+    "skill": "swb_flourish",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "swb_encore": {
+   "name": "Encore",
+   "owner": "swashbuckler",
+   "tree": "grandeur",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "swb_cape_flick"
+   ],
+   "kind": "active",
+   "desc": "They want to see it again: {mult} weapon damage, and the crowd gives you 15 energy back. Flair.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.6,
+     "perRank": {
+      "mult": 0.08
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "energy",
+     "n": 15
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 4,
+     "secs": 8
+    }
+   ]
+  },
+  "swb_steady_nerve": {
+   "name": "Steady Nerve",
+   "owner": "swashbuckler",
+   "tree": "grandeur",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "swb_crowd_pleaser"
+   ],
+   "kind": "passive",
+   "desc": "Resist all.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "swb_standing_ovation": {
+   "name": "Standing Ovation",
+   "owner": "swashbuckler",
+   "tree": "grandeur",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "swb_encore"
+   ],
+   "kind": "synergy",
+   "desc": "Grandeur lands harder: more damage per rank.",
+   "synergy": {
+    "skill": "swb_grandeur",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "swb_grandeur": {
+   "name": "Grandeur",
+   "owner": "swashbuckler",
+   "tree": "grandeur",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "swb_encore",
+    "swb_thrown_dagger"
+   ],
+   "kind": "active",
+   "desc": "Spend the show: {mult} weapon damage to the target, a full swing to everything within 5 m of it, and a 1 s stagger on all of them. Every flair you are carrying adds to it, so vary your skills first. The Grandeur capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 3,
+     "perRank": {
+      "mult": 0.15
+     },
+     "flair": {
+      "perSkill": 0.15,
+      "max": 5,
+      "window": 8
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1,
+       "perRank": {
+        "mult": 0.05
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "wishlist": [
+  {
+   "field": "link (damage taken for a friend)",
+   "on": "kni_sworn_guard, kni_bodyguard, kni_unbreakable_vow, ora_thread_of_fate",
+   "rule": "`link: { pct: 50, secs: 8 }` on an ally-target skill: while it holds, that share of every hit the friend takes is paid by the caster instead (after the caster's own armour). Written today as a ward on the friend + a taunt circle at their feet (Knight) or a ward + heal (Oracle), which the engine runs and which already reads as \"I take it for them\"."
+  },
+  {
+   "field": "flair (variety counter)",
+   "on": "swb_grandeur",
+   "rule": "`flair: { perSkill: 0.15, max: 5, window: 8 }` on a weapon effect: +perSkill x the number of DISTINCT skills the caster used in the last `window` seconds (capped). Today every Swashbuckler skill writes its own +4% damage buff for 8 s (fx id = skill id + \":damage\", so they stack and a repeat only refreshes), which is the same counter at a flat 4% a skill; Grandeur reads it through fxPct like every other weapon hit."
+  },
+  {
+   "field": "chain (a bolt that jumps)",
+   "on": "sto_forked_bolt, sto_chain_tempest",
+   "rule": "`chain: { jumps: 3, range: 6, falloff: 0.7 }` on a bolt: after landing, the bolt jumps to the nearest unhit foe within range up to `jumps` times, each at falloff x the last. Written today as a small circle at the target (4 m / 6 m), which reads as a fork."
+  },
+  {
+   "field": "cond: slowed (the shatter)",
+   "on": "fro_rime_spear",
+   "rule": "`cond: { slowed: true, mult: 1.5 }` on a damage effect: x mult when the target carries a slow, root or stun. Flat today; Rime Spear is sized so it is still the right spell on a slowed target."
+  },
+  {
+   "field": "cond: lowHp",
+   "on": "asn_execution",
+   "rule": "`cond: { targetHpBelow: 0.35, mult: 1.5 }` (an execute). Written today as a flat x4.0 on a 20 s cooldown."
+  },
+  {
+   "field": "cond: behind",
+   "on": "asn_gutting_strike",
+   "rule": "The Path wishlist's `cond: behind` (Back Cut) - Gutting Strike wants the same gate and the same relaxation by a legendary. Works from any side today."
+  },
+  {
+   "field": "perDot",
+   "on": "asn_fester",
+   "rule": "`perDot: { mult: 0.3, max: 1.2 }`: +mult x the number of dot fx on the target. Flat today (12 + 6L poison)."
+  },
+  {
+   "field": "wall (a line that blocks)",
+   "on": "fro_ice_wall",
+   "rule": "`wall: { secs: 4 }` on a line area: a temporary blocker along the line (walkers path round it). Written today as a 2 s root on everything standing in the line, which holds the pack as a wall would."
+  },
+  {
+   "field": "dodge / moveSpeed buffs on heroes",
+   "on": "(avoided here)",
+   "rule": "A `buff` with stat `dodge` or `moveSpeed` is read nowhere (resolveHit reads p.dodge from the sheet; speedFactor reads only slow/stun/root). The Path's Slip Step carries a dodge buff that does nothing. Rule: fxPct(p, \"dodge\") added in the hero's resolveHit call and a positive speed factor from buff:moveSpeed. Every wave-2 \"parry\" or \"step\" is a ward instead."
+  },
+  {
+   "field": "summon ranks through synergies",
+   "on": "sto_storm_orbs, asn_decoy",
+   "rule": "perRank on hpMult/dmgMult/secs works through atRank; a synergy node cannot feed a summon (synergyOf is read only by damage/heal/duration/radius effects), so neither has one."
+  },
+  {
+   "field": "a minion that stays put",
+   "on": "asn_decoy",
+   "rule": "`stay: true` on a summon: the minion does not follow its owner (a decoy should stand where it was dropped; today it walks after the Assassin, taunting as it goes, which still pulls the pack off)."
+  },
+  {
+   "field": "who: self on a heal inside an enemy skill",
+   "on": "ora_last_page, swb_mocking_parry",
+   "rule": "As wave 1: written as a helpful circle at self (1.5-6 m) so the caster is healed or warded, which the engine runs."
+  }
+ ]
+}

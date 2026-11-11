@@ -256,6 +256,10 @@
    "role": "tank",
    "blurb": "Takes the blows meant for others. A sworn guard on one friend, a challenge to the pack, a raised wall, a banner that keeps everyone standing.",
    "fantasy": "Thousandvale's Knight: the purest tank. Sworn Guard links you to a friend so their damage comes to you; Challenge and Rim Strike are taunts; Rampart is a wall; Unbroken Banner a party ward.",
+   "starter": [
+    "kni_sworn_guard",
+    "kni_challenge"
+   ],
    "trees": [
     {
      "id": "sworn_guard",
@@ -288,6 +292,10 @@
    "role": "melee damage",
    "blurb": "Set it up, then cash in. Poisons and bleeds first, a stun, a mark that pays twice, a cut from behind that ends it.",
    "fantasy": "Thousandvale's Rogue. Gutting Strike and the back-cut, poison darts, a Grave Mark that makes the target pay twice, Slip Away leaving a decoy, Knife Storm for the pack.",
+   "starter": [
+    "asn_venom_strike",
+    "asn_grave_mark"
+   ],
    "trees": [
     {
      "id": "venoms",
@@ -320,6 +328,10 @@
    "role": "ranged damage / control",
    "blurb": "Frost then shatter. Shards and blizzards slow and bite, a rime spear breaks what they left, and nothing in the pack moves at full speed.",
    "fantasy": "Thousandvale's Mage (frost artillery). Frost Shard, Rime Burst, Whiteout; the shatter (Rime Spear, Stillfrost) that does more to the slowed; Spellrush for three free fast casts.",
+   "starter": [
+    "fro_frost_shard",
+    "fro_whiteout"
+   ],
    "trees": [
     {
      "id": "rime",
@@ -352,6 +364,10 @@
    "role": "ranged damage",
    "blurb": "Shocked targets take more from everything. Bolts that fork between enemies, orbs that circle you, a step of lightning out of trouble.",
    "fantasy": "Thousandvale's Stormcaller. Forked Bolt jumps the pack, Thunder Ring, Storm Beam, Storm Orbs as a standing aura, Bolt Step as the dash, Eye of the Tempest as the long storm.",
+   "starter": [
+    "sto_forked_bolt",
+    "sto_thunder_ring"
+   ],
    "trees": [
     {
      "id": "forked",
@@ -384,6 +400,10 @@
    "role": "healer (wards)",
    "blurb": "Sees it coming. Wards everyone against the next big hit, marks where the blast will fall, and takes a friend's wound as its own.",
    "fantasy": "Thousandvale's Oracle: the ward healer. Foresight shields the party before the hit, Kind Omen heals and wards one, Thread of Fate takes damage for a friend, Prophecy marks the blast.",
+   "starter": [
+    "ora_foresight",
+    "ora_fate_bolt"
+   ],
    "trees": [
     {
      "id": "foresight",
@@ -416,6 +436,10 @@
    "role": "melee damage",
    "blurb": "Flair rewards variety. A leap, a mocking parry, a matador's turn, and one grand sweep that spends the show.",
    "fantasy": "Thousandvale's Swashbuckler. Flourish, Daring Leap, Mocking Parry (a taunt with a riposte), Pinning Thrust, Matador's Turn, Grandeur. The engine addition it wants is a Flair counter that rewards not repeating a skill.",
+   "starter": [
+    "swb_flourish",
+    "swb_daring_leap"
+   ],
    "trees": [
     {
      "id": "flourish",

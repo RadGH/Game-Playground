@@ -323,7 +323,7 @@ function banner2(text) { const b = document.createElement('div'); b.className = 
 
 // ---- targeting + skills ---------------------------------------------------------------------------------------------
 function setTarget(id) { G.target = id; G.pendingTarget = id; G.link?.send({ t: 'act', do: 'target', target: id }); }
-const barOf = () => { const c = heroes.current(); return c?.bar?.length ? c.bar : ['sure_strike', 'spark', 'field_mend', 'shove', null, null]; };
+const barOf = () => { if (G.meSnap?.sb) return G.meSnap.sb; const c = heroes.current(); return c?.bar?.length ? c.bar : ['sure_strike', 'spark', 'field_mend', 'shove', null, null]; };
 function useSkill(id) {
   if (!G.me || !id) return;
   const sk = content.skills[id]; if (!sk) return;

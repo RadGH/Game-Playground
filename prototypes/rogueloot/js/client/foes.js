@@ -2,6 +2,21 @@
 // one (bodyPlan, palette, size). M14 replaces the body builder with the full Rogueloot bestiary kit; the interface stays:
 //   const foes = createFoes(view, labelRoot);  foes.sync(snapshotFoes, now);  foes.update(dt, renderAt);  foes.pick(x, y)
 import * as THREE from 'three';
+import { buildMonster, animateMonster } from './bestiary-kit.js';
+
+// the raw bestiary (monsters / rares / bosses rows with their full `look`), loaded once for the 3D kit
+let RAW = null; const rawReady = fetch(new URL('../../data/monsters.json', import.meta.url)).then(r => r.json()).then(j => { RAW = j; }).catch(() => {});
+function rawRow(s) {
+  if (!RAW) return null;
+  if (s.ra && RAW.rares?.list?.[s.ra]) return { ...RAW.rares.list[s.ra], id: s.ra };
+  if (RAW.bosses?.[s.d]) return { ...RAW.bosses[s.d], id: s.d };
+  if (RAW.monsters?.[s.d]) return { ...RAW.monsters[s.d], id: s.d };
+  return null;
+}
+function kitBody(s, phase = 0) {
+  const row = rawRow(s); if (!row) return null;
+  try { const g = buildMonster(row, { content: RAW, rank: s.rk, level: s.lvl, phase }); g.userData.kit = true; return g; } catch (e) { console.warn('bestiary-kit', s.d, e.message); return null; }
+}
 
 const flat = c => new THREE.MeshLambertMaterial({ color: c, flatShading: true });
 const MOD_COLOR = { thorned: '#6aff4a', hasted: '#ffffff', brawny: '#c87a2a', stonehide: '#a0a0a0', burning: '#ff6a1a', rimed: '#9fe0ff', stormtouched: '#c0c8ff', venomous: '#8aff2a', shrouded: '#7a3ab0', warded: '#4ab8ff', summoning: '#b070ff', shifting: '#e0a0ff', leeching: '#d01a3a', cursing: '#5a1a6a', volatile: '#ff3a1a', anchored: '#5a4a3a', hale: '#3ecf5a', twinned: '#ffd040' };
@@ -51,10 +66,10 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
   ring.visible = false; view.scene.add(ring);
   function add(s) {
     const row = content?.monsters?.[s.d] || { role: guessRole(s.d), size: 1.3, look: {} };
-    const group = buildFoeBody(row); view.scene.add(group);
+    const group = kitBody(s) || buildFoeBody(row); view.scene.add(group);
     const tag = document.createElement('div'); tag.className = 'foe-tag' + (s.rk ? ' rk-' + s.rk : '');
     tag.innerHTML = `<span class="nm"></span><i class="bar"><b></b></i>`; labelRoot.append(tag);
-    const f = { id: s.id, group, tag, buf: [], x: s.x, z: s.z, yaw: s.yaw, st: s.st, hp: s.hp, mhp: s.mhp, row, deadAt: 0, swingAt: -9, hitAt: -9, name: s.n, lvl: s.lvl, cast: null };
+    const f = { ph: s.ph || 0, kit: !!group.userData.kit, id: s.id, group, tag, buf: [], x: s.x, z: s.z, yaw: s.yaw, st: s.st, hp: s.hp, mhp: s.mhp, row, deadAt: 0, swingAt: -9, hitAt: -9, name: s.n, lvl: s.lvl, cast: null };
     tag.querySelector('.nm').textContent = s.n;
     list.set(s.id, f); return f;
   }
@@ -65,6 +80,8 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
       const f = list.get(s.id) || add(s);
       f.buf.push({ at: now, x: s.x, z: s.z, yaw: s.yaw }); if (f.buf.length > 8) f.buf.shift();
       if (s.st === 'dead' && f.st !== 'dead') f.deadAt = now;
+      // the kit arrived after this body was built, or a boss changed phase: rebuild the body
+      if ((!f.kit && RAW) || (f.kit && (s.ph || 0) !== f.ph)) { const ng = kitBody(s, s.ph || 0); if (ng) { if (f.aura) { f.group.remove(f.aura); ng.add(f.aura); } ng.position.copy(f.group.position); ng.rotation.y = f.group.rotation.y; view.scene.remove(f.group); view.scene.add(ng); f.group = ng; f.kit = true; f.ph = s.ph || 0; } else f.kit = true; }
       f.st = s.st; f.hp = s.hp; f.mhp = s.mhp; f.lvl = s.lvl; f.cast = s.cast || null; f.rk = s.rk; f.tg = s.tg; f.ward = s.ward;
       // champions and rares wear their modifiers: a coloured ring underfoot (the tell), the name plate says which
       const modKey = (s.mods || []).join(',');
@@ -96,7 +113,9 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
       const gy = view.groundY ? view.groundY(f.x, f.z) : 0;
       g.position.set(f.x, gy, f.z); g.rotation.y = lerpAngle(g.rotation.y, f.yaw, 1 - Math.exp(-dt * 12));
       const t = now / 1000;
-      if (f.st === 'dead') { const k = Math.min(1, (now - f.deadAt) / 400); body.rotation.x = -k * Math.PI / 2; body.position.y = -k * 0.2; }
+      if (g.userData.kit) {
+        animateMonster(g, f.st, t, dt, { swing: Math.max(0, 1 - (now - f.swingAt) / 450), hit: Math.max(0, 1 - (now - f.hitAt) / 180), cast: !!f.cast, dead: f.st === 'dead', deadT: (now - f.deadAt) / 500, landed: f.st !== 'chase' && f.st !== 'attack' && f.st !== 'wander' });
+      } else if (f.st === 'dead') { const k = Math.min(1, (now - f.deadAt) / 400); body.rotation.x = -k * Math.PI / 2; body.position.y = -k * 0.2; }
       else {
         const moving = f.st === 'chase' || f.st === 'wander' || f.st === 'return';
         body.position.y = moving ? Math.abs(Math.sin(t * 9 + f.x)) * 0.12 : Math.sin(t * 2 + f.z) * 0.02;
@@ -105,7 +124,7 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
         if (g.userData.arm) g.userData.arm.rotation.x = -Math.sin(sw * Math.PI) * 1.6 + (f.cast ? -0.9 + Math.sin(t * 12) * 0.2 : 0);
         const hit = Math.max(0, 1 - (now - f.hitAt) / 180); body.scale.setScalar(1 + hit * 0.12);
       }
-      if (f.id === targetId && f.st !== 'dead') { ring.visible = true; ring.position.set(f.x, gy + 0.04, f.z); ring.scale.setScalar(Math.max(0.8, g.scale.x)); }
+      if (f.id === targetId && f.st !== 'dead') { ring.visible = true; ring.position.set(f.x, gy + 0.04, f.z); ring.scale.setScalar(g.userData.radius ? Math.max(0.8, g.userData.radius / 0.7) : Math.max(0.8, g.scale.x)); }
       // name + health over the head
       const show = f.st !== 'dead' && (f.hp < f.mhp || f.id === targetId || f.rk || f.st === 'attack' || f.st === 'chase');
       f.tag.hidden = !show;
@@ -125,14 +144,15 @@ export function createFoes(view, labelRoot, { content = null } = {}) {
     let best = null, bd = 48 * 48;
     for (const f of list.values()) {
       if (f.st === 'dead' && !includeDead) continue;
-      for (const hgt of [0.3, 0.8, 1.3]) {
-        v.set(f.x, hgt * (f.group.scale.x || 1), f.z).project(view.camera);
+      const H0 = f.group.userData.height || 1.3 * (f.group.scale.x || 1);
+      for (const k of [0.25, 0.6, 0.95]) {
+        v.set(f.x, k * H0, f.z).project(view.camera);
         const dx = (v.x * 0.5 + 0.5) * W - sx, dy = (-v.y * 0.5 + 0.5) * H - sy, d = dx * dx + dy * dy;
         if (d < bd) { bd = d; best = f.id; }
       }
     }
     return best;
   }
-  return { sync, update, pick, list, get: id => list.get(id) };
+  return { sync, update, pick, list, get: id => list.get(id), ready: rawReady };
 }
 const guessRole = id => /sling|archer|bow/.test(id) ? 'archer' : /hex|caster|mage/.test(id) ? 'caster' : 'brute';

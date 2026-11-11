@@ -128,10 +128,10 @@ export function snapshot(w) {
     lvl: p.level, hp: Math.round(p.hp), mhp: p.maxHp, mp: Math.round(p.mana), mmp: p.maxMana, res: p.res, rv: p.res === 'mana' ? undefined : Math.round(p.res === 'rage' ? p.rage : p.energy), dead: p.dead || undefined, tg: p.target || undefined,
     cast: p.cast ? { sk: p.cast.skill, t: r2(p.cast.end - p.cast.start), left: r2(p.cast.end - w.time) } : undefined,
     gcd: p.gcdUntil > w.time ? r2(p.gcdUntil - w.time) : undefined, spd: speedFactor(p) !== 1 ? r2(speedFactor(p)) : undefined,
-    fx: p.fx?.length ? p.fx.map(f => ({ k: f.kind, left: r2(f.until - w.time), id: f.id })) : undefined,
+    fx: p.fx?.length ? p.fx.map(f => ({ k: f.kind, left: r2(f.until - w.time), id: f.id })) : undefined, sb: p.fx?.find(f => f.kind === 'stance' && f.bar)?.bar || undefined,
     cds: Object.keys(p.cds).length ? Object.fromEntries(Object.entries(p.cds).filter(([, t]) => t > w.time).map(([k, t]) => [k, r2(t - w.time)])) : undefined });
   for (const f of w.foes.values()) foes.push({ id: f.id, d: f.def.id, n: f.name, x: r2(f.x), z: r2(f.z), yaw: r2(f.yaw), lvl: f.level, hp: Math.round(f.hp), mhp: f.maxHp,
-    st: f.dead ? 'dead' : f.state, rk: f.rank !== 'normal' ? f.rank : undefined,
+    st: f.dead ? 'dead' : f.state, rk: f.rank !== 'normal' ? f.rank : undefined, ra: f.rareId || undefined, ph: f.phase > 0 ? f.phase : undefined,
     fx: f.fx?.length ? f.fx.map(x => x.kind) : undefined, mods: f.mods?.length ? f.mods : undefined, ward: f.ward ? Math.round(f.ward / f.wardMax * 100) : undefined,
     cast: f.cast ? { sk: f.cast.name, t: r2(f.cast.end - f.cast.start), left: r2(f.cast.end - w.time), int: f.cast.interruptible || undefined } : undefined, tg: f.target || undefined });
   const allies = [...(w.allies?.values() || [])].map(a => ({ id: a.id, o: a.owner, n: a.name, x: r2(a.x), z: r2(a.z), yaw: r2(a.yaw), moving: a.moving, hp: Math.round(a.hp), mhp: a.maxHp, dead: a.dead || undefined, k: a.mercKind || a.akind, look: a.look }));

@@ -29,7 +29,7 @@ export function shapeSkill(w, p, sk, row) {
         if (R.enemyDebuff) row.effects.push({ do: 'zone', shape: 'circle', size: R.radius || 3, secs: R.seconds || 3, at: 'self', effects: [{ do: 'debuff', kind: 'damageDown', pct: Math.abs(R.enemyDebuff.hitChancePct || 40), secs: 1.2 }] });
         if (R.dps) { const b = row.effects.find(e => e.base); if (b) row.effects.push({ do: 'zone', shape: 'circle', size: R.radius || 2, secs: R.seconds || 3, effects: [{ do: 'damage', type: R.dps.element || 'fire', base: b.base.map(v => v * (R.dps.pctOfHit || 20) / 100) }] }); ctx.zoneAtTarget = true; }
         break;
-      case 'skillCondition': if (row.cond === R.relax) { delete row.cond; ctx.frontMult = R.frontMult || 0.6; } break;
+      case 'skillCondition': if (row.cond === R.relax || row.cond === R.relax + 'Bonus') { delete row.cond; ctx.frontMult = R.frontMult ?? 0.6; } break;
       case 'skillMultiHit': { const extra = []; walk(row.effects, e => { if (e.do === 'weapon') { e.mult *= R.damageMult || 0.65; for (let i = 1; i < (R.hits || 2); i++) extra.push({ ...e }); } }); row.effects.push(...extra); break; }
       case 'skillShareBuff': ctx.shareCoat = { range: R.range || 6, durationMult: R.durationMult || 0.5 }; break;
       case 'skillRefund': ctx.refund = { kind: R.resource || 'energy', onKill: R.onKill || 0, onCrit: R.onCrit || 0 }; break;

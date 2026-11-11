@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-bestiary-specs2",
+      "date": "2026-11-11",
+      "title": "Every monster has its own look, and six more specializations",
+      "items": [
+        "Every monster, rare and boss now has its own model and animations: crabs snap their claws, wasps buzz, Hollowhorn raiders wear their stag paint, ghosts drift and bosses change as they lose health.",
+        "Six more specializations at level 10: Knight, Assassin, Frostbinder, Stormcaller, Oracle and Swashbuckler, each with three trees of its own.",
+        "Rogues hit harder: Agility now raises dagger and sword damage, Energy comes back faster, and Back Cut lands from the front too (at 60%; full damage from behind)."
+      ]
+    },
+    {
       "id": "2026-11-11-legendaries",
       "date": "2026-11-11",
       "title": "Legendary powers and sharper skills",

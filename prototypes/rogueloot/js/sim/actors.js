@@ -25,7 +25,7 @@ export function applySheet(h, st) {
   h.st = st; h.maxHp = st.maxHp; h.maxMana = st.maxMana; h.hp = Math.max(h.dead ? 0 : 1, Math.round(st.maxHp * fh)); h.mana = Math.round(st.maxMana * fm);
   h.crit = st.crit; h.dodge = st.dodge; h.armour = st.armour; h.resists = st.resists; h.block = st.block; h.resistPenalty = h.tierPenalty || 0;
   const wp = st.weapon;
-  h.weapon = { min: wp.min, max: wp.max, speed: wp.speed, ranged: !!wp.ranged, reach: wp.ranged ? 24 : (wp.hands === 2 ? 2.4 : MELEE_REACH), type: 'physical' };
+  h.weapon = { min: wp.min, max: wp.max, speed: wp.speed, ranged: !!wp.ranged, reach: wp.ranged ? 24 : (wp.hands === 2 ? 2.4 : MELEE_REACH), type: 'physical', finesse: !!wp.finesse };
   h.speed = WALK_SPEED * (1 + (st.moveSpeed || 0) / 100);
 }
 export function refreshHero(w, h) { applySheet(h, sheet(h.char, w.content.items?.bases ? w.content.items : null, w.content.skills)); h.level = h.char.level; }

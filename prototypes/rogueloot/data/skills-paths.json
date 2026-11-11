@@ -14,7 +14,7 @@
   "energy": {
    "max": 100,
    "start": 100,
-   "regenPerSecond": 10,
+   "regenPerSecond": 13,
    "energyRegenPassiveScales": "regenPerSecond"
   },
   "mana": {
@@ -565,7 +565,7 @@
    "kind": "active",
    "desc": "A quick cut for {mult} weapon damage that notches the target: for {secs} seconds it takes more damage from everyone. Set it up, then finish it.",
    "cost": {
-    "energy": 20
+    "energy": 15
    },
    "cast": 0,
    "cd": 0,
@@ -599,7 +599,7 @@
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
-   "desc": "A deep cut from behind for {mult} weapon damage. Only works when you are behind the target - let the brute face your friend, or circle it.",
+   "desc": "A deep cut for {mult} weapon damage from behind. From the front it still lands, at 60% - let the brute face your friend, or circle it.",
    "cost": {
     "energy": 35
    },
@@ -611,13 +611,14 @@
    "effects": [
     {
      "do": "weapon",
-     "mult": 2.2,
+     "mult": 2.6,
      "perRank": {
       "mult": 0.12
      }
     }
    ],
-   "cond": "behind"
+   "cond": "behindBonus",
+   "frontMult": 0.6
   },
   "rogue_slip_step": {
    "name": "Slip Step",

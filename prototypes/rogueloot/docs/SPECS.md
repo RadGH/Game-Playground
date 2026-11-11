@@ -1191,3 +1191,232 @@ each. Worth doing first:
 6. A **stationary minion gets shoved** by separation steering when a pack walks through it (4 m in the check); a
    `stay` minion should hold its spot or step back to it, and a bait sentry should shout at its drum's radius, not
    its reach.
+
+---
+
+# Wave 5 (M28) — Runesmith, Scavenger, Starcaller, Sorcerer, Enchanter, Shade Dancer
+
+Design by Fable, 2026-11-11. The last wave: with it every one of the 31 specs has its trees (911 spec skills across
+`skills-specs-1..5.json`). The data is `data/skills-specs-5.json` (listed in `data/skills-specs-index.json`); the
+six `starter` arrays in `data/specs.json` are filled. 180 nodes: 30 a spec, three trees of 10, every tree with a
+node at every gate 10/11/12/14/16/18/20; 91 actives, 55 passives, 34 synergies. No hybrids (no `altCost`), no
+stances. Same standard as waves 1–4.
+
+**This wave's designs all wanted a counter, and none has one.** Each is written as something the engine already
+counts:
+
+- **A rune is a dot.** Rune Hammer's bleed, Searing Rune's burn and Forge Flame's coat are the runes the Runesmith
+  lays; Runebreaker and The Great Anvil count them with `perDot` (+30% a rune, to +120%).
+- **A star is a dot on the target.** Star Dart, Scattered Stars and Wheeling Stars lodge a 6 s star (a small storm
+  dot) in whatever they hit; Star Shard, Greater Star, Constellation, Heavens' Barrage and Skyfall spend them with
+  `perDot`. The one difference from the design: the constellation is on the TARGET, not a 5-point meter on the
+  caster, so stars on one foe do not pay off a big cast on another.
+- **Kinds of harm are dots too.** The Sorcerer's Arcane Burst is `perDot` ×0.35 to +140%; Sixfold Ruin is six typed
+  damage effects in one skill — fire, frost, storm, poison, shadow, physical — each resolved against its own
+  resistance, which runs today.
+- **Sleep is a stun, and the jolt knows.** Drowse is a 3 s stun; Arcane Jolt pays ×2 through `cond: { slowed }`
+  (stun, root and slow all count), Rude Awakening ×1.5. A real sleep that breaks on damage is the first thing on
+  the wishlist, because a stun is stronger in a fight and weaker as the "put the rest down, pick one" opener the
+  Enchanter is about.
+- **The afterimage is a second, lighter hit in the same skill** (Shade Cut 100% + 40%); the Shade Dancer's cuts
+  from the dark use the row-level `cond: 'behindBonus'` + `frontMult`.
+- **The gambles are crit bursts and executes.** Lucky Strike +12% crit, Double or Nothing ×1.5 under half, Big
+  Score `spendAll` + 1.5% a point, doubled under 35%. Random element, random multiplier and gold on a kill are on
+  the wishlist.
+- Phantasms and the Tin Can Trap are `stay` minions at the pointer with a taunt (and since 70dbc047 they snap back
+  to their spot when shoved).
+
+## Numbers in one table
+
+Rank 1, level 20, before attribute multipliers; baseline 132 per global, a sword swing 35, autos ~63 a global.
+
+| | Per enemy | Per global | Notes |
+|---|---|---|---|
+| Runesmith: Rune Hammer | 42 + 17.8/s bleed | ~105 + 18/s | Searing Rune 88 + 20/s; with three runes Runebreaker 77 + 132 × 1.9 = ~328 every 20 s |
+| Runesmith: The Great Anvil vs 4 with 3 runes each | 70 + 154 × 1.9 × 1.24 each | — | 1.5 s stun on all of it; Forge Flame's coat 40 fire a hit for 20 s |
+| Runesmith: Runeskin | ward 116 that hits back 33, +15% armour | — | Warding Glyph 94 + 15% armour on a friend; Runeward 190 ward, +40% armour, taunt 8 m |
+| Scavenger: Lucky Strike | 38.5 at +12% crit | ~102 | Double or Nothing 70 (105 under half) every 8 s; Jackpot 122 + 110 fire over 4 m + 30 energy |
+| Scavenger: Big Score at 100 energy | 87 × (1 + 1.05) = 179, ×2 under 35% = 358 | — | Pitch Bomb 99 + 15.5/s on 4 m; Caltrops hold + bleed; Tin Can Trap pulls 6 m for 8 s |
+| Starcaller: Star Dart | 109 per 1 s cast + a star | ~109 | Twin Stars 2 × 77 instant; Star Shard 110, ×2 with four stars on the target |
+| Starcaller: Called Star | 121 fire + stun over 4 m per 1.5 s | — | Greater Star 176 (×2 with four stars) over 5 m; Constellation 264 × 2.5 + 88 over 5 m |
+| Starcaller: Star Field | 27.5/s + 20% slow on 5 m for 8 s | — | Skyfall 198 (×2.5) + stun on 8 m, then 33/s for 6 s; Bright Field heals 18/s |
+| Sorcerer: Wild Bolt / Flux / Chaos Shard | 120 per 1.5 s; 88 + 15.5/s instant; 99 + slow instant | ~120 | Wild Surge 99 + poison on 5 m; Arcane Burst 286 × 2.4 with four kinds of harm |
+| Sorcerer: Mana Rend | 88 for 8 mana, +10 back | — | Rend Asunder 99 on 5 m, +20 mana; Sixfold Ruin 6 × 77 + 66 over 4 m |
+| Enchanter: Arcane Jolt on a sleeper | 99 × 2 = 198 per 1.5 s | ~198 | Drowse 3 s; Mass Drowse 2 s on 5 m; Deep Sleep 4 s on 8 m; Rude Awakening 110 × 1.5 on 5 m |
+| Enchanter: Beguile | 2 s daze then +20% taken for 6 s | — | Lethargy −40% speed −15% damage on 6 m; Puppet 4 s + 30% taken + 132 |
+| Shade Dancer: Shade Cut | 35 + 14 afterimage | ~112 | Dark Cut 70 (42 from the front) every 8 s; Assassinate 105, ×2 under 35% |
+| Shade Dancer: Host of Shades | 4 shades at 0.6 of a companion, 15 s, +20% damage | ~+60/s | Cutting Waltz 42 + 21 to everything in 6 m (+40% crowd) |
+
+---
+
+## Runesmith — Fighter → the Runesmith
+
+**Fantasy.** Hammer runes into them and into anything that hits you, light the weapon at the forge, and bring the
+anvil down on everything you have marked. A tank that counts. Three trees:
+
+- **The Hammer**: Rune Hammer (10, 120% + a rune that bleeds 17.8/s — the filler), Smith's Arm (11), Rend Plate
+  (12, 150% + −20% armour), Deeper Rune (12, synergy), Searing Rune (14, 88 fire + a burning rune, instant), True
+  Strike (14), Hammerfall (16, 130% + stun over 4 m), Lasting Rune (16, synergy), Forge Heart (18), **Runebreaker**
+  (20: 220% + 132 ×(1 + 0.3 a rune) + 1.5 s stun).
+- **Runeskin**: Runeskin (10, a 116 ward that strikes back + 15% armour), Iron Runes (11), Warding Glyph (12, the
+  same on a friend), Thick Plate (12), Harder Skin (14, synergy), Rune of Holding (14, taunt + slow on 8 m + 10
+  temper, off-GCD), Glyph Wall (16, a 68 ward on everyone in 10 m), Tempered (16), Brighter Glyph (18, synergy),
+  **Runeward** (20: 190 ward that hits back hard, +40% armour, taunt + −15% damage on 8 m, 30 temper).
+- **Forge**: Forge Flame (10, a 20 s weapon coat: 40 fire burning 6 s on every hit — a rune), Hot Iron (11), Hammer
+  Shout (12, the interrupt), Quick Hammer (12), Molten Strike (14, 160% + 66 fire), Hotter Forge (14, synergy),
+  Forge Blast (16, 99 fire + burn in a cone), Loud Forge (16), Molten Core (18, synergy), **The Great Anvil** (20:
+  200% then 154 ×(1 + 0.3 a rune) to everything in 6 m + 1.5 s stun).
+
+**Rotation at 15** (Rune Hammer, Rend Plate, Searing Rune, Runeskin, Rune of Holding, Forge Flame): Forge Flame
+before the pull → Rune of Holding as they arrive → Rend Plate the brute → Rune Hammer, Searing Rune (three runes on
+it now: bleed, burn, coat) → Runeskin under the pack → Hammerfall when they bunch.
+
+**Phone (6):** Rune Hammer, Rend Plate, Searing Rune, Runeskin, Rune of Holding, Hammer Shout.
+
+---
+
+## Scavenger — Rogue → the Scavenger
+
+**Fantasy.** Every strike is a gamble, every pocket has something in it, and the Big Score is everything on one
+roll. Three trees:
+
+- **Lucky**: Lucky Strike (10, 110% + 12% crit for 5 s — the filler), Rabbit's Foot (11), Loaded Dice (12, 90% + 55
+  storm + slow), Luckier (12, synergy), Double or Nothing (14, 200%, ×1.5 under half), Quick Fingers (14), Hot
+  Streak (16, +15% damage +15% crit + 20 energy, off-GCD), Bigger Bet (16, synergy), Fast Hands (18), **Jackpot**
+  (20: 350% + 110 fire over 4 m + 30 energy).
+- **Junk**: Junk Toss (10, 100% from 15 m + slow — the ranged filler), Light Load (11), Caltrop Scatter (12, hold
+  + bleed on 4 m), Slippery (12), Rag-and-Pitch Bomb (14, 99 fire + burn on 4 m), More Pitch (14, synergy), Tin
+  Can Trap (16, a rattling can that pulls everything in 6 m for 8 s), Tough Gut (16), Bottle Rocket (18, the
+  interrupt from 15 m), **Junk Avalanche** (20: 132 + stun + slow on 6 m, +40% crowd).
+- **Big Score**: Scrounge (10, 68 back + 15 energy, free), Waste Not (11), Pocket Sand (12, 60%, −20% damage on
+  them, hop 4 m back), Hard Living (12), Deeper Pockets (14, synergy), Sucker Punch (14, 180% + 1 s stun), Shiny
+  Things (16, +15% taken for 8 s from 15 m), Strong Back (16), Harder Punch (18, synergy), **Big Score** (20: spend
+  it all — 250% + 1.5% a point, DOUBLED under 35%).
+
+**Rotation at 15** (Lucky Strike, Loaded Dice, Double or Nothing, Junk Toss, Pitch Bomb, Scrounge): Pitch Bomb on
+the pack → Junk Toss the runner → Lucky Strike, Loaded Dice, Lucky Strike → Double or Nothing when the brute is
+under half → Scrounge when the bar is empty.
+
+**Phone (6):** Lucky Strike, Loaded Dice, Double or Nothing, Junk Toss, Pitch Bomb, Scrounge.
+
+---
+
+## Starcaller — Mage → the Starcaller
+
+**Fantasy.** Throw stars, call bigger ones down, lay fields of them. Every star that lands glows on its target, and
+the big casts pay for every one glowing. Three trees:
+
+- **Darts**: Star Dart (10, 109 storm in 1 s + a star — the filler), Starsight (11), Scattered Stars (12, 66 + a
+  star on everything in 5 m), Sharper Dart (12, synergy), Twin Stars (14, 2 × 77 instant), Keen Sky (14), Star
+  Shard (16, 110 fire, +25% a star to +100%), Longer Glow (16, synergy), Quick Sky (18), **Constellation** (20:
+  264 ×(1 + 0.3 a star, to 2.5) + 88 over 5 m).
+- **Called**: Called Star (10, 121 fire + stun on 4 m at the pointer — the other filler), Deep Sky (11), Falling
+  Star (12, ride one 8 m and land burning), Wide Sky (12), Bigger Star (14, synergy), Hush of Stars (14, the
+  interrupt), Greater Star (16, 176 ×(stars) + slow on 5 m, 2 s cast), Starhardy (16), Wider Star (18, synergy),
+  **Heavens' Barrage** (20: 4 s channel, 77 ×(stars) + slow on 6 m each second).
+- **Fields**: Star Field (10, 27.5/s + 20% slow on 5 m for 8 s), Starlit (11), Star Ward (12, a 96 ward that throws
+  storm back), Light Step (12), Lasting Field (14, synergy), Wheeling Stars (14, 88 + a star on everything in 6 m
+  round you), Bright Field (16, a field that heals 18/s, companions too), Swift Stars (16), Wider Wheel (18,
+  synergy), **Skyfall** (20: 198 ×(stars) + stun on 8 m, then 33/s for 6 s).
+
+**Rotation at 15** (Star Dart, Scattered Stars, Called Star, Twin Stars, Star Field, Star Ward): Star Field where
+they will walk → Scattered Stars as they arrive (a star on each) → Called Star on the pack → Star Dart, Star Dart on
+the brute → Star Shard at 16 with three stars glowing. Star Ward when they reach you.
+
+**Phone (6):** Star Dart, Scattered Stars, Called Star, Twin Stars, Star Field, Star Ward.
+
+---
+
+## Sorcerer — Mage → the Sorcerer
+
+**Fantasy.** Wild magic. Every element in the Wild tree, a burst that pays for every kind of harm the target
+carries, mana torn out of them to pay for the next one, and Sixfold Ruin. The random element and the health cost
+are on the wishlist. Three trees:
+
+- **Wild**: Wild Bolt (10, 120 storm in 1.5 s — the filler), Wild Mind (11), Flux (12, 88 fire + burn, instant),
+  Wilder Bolt (12, synergy), Chaos Shard (14, 99 frost + slow, instant), Lucky Spark (14), Wild Surge (16, 99 +
+  poison on 5 m, +40% crowd), Fast Tongue (16), Bigger Surge (18, synergy), **Arcane Burst** (20: 286 ×(1 + 0.35 a
+  kind of harm, to 2.4) + stun).
+- **Overchannel**: Mana Rend (10, 88 shadow for 8 mana and 10 back — the other filler), Deep Well (11), Overchannel
+  (12, +25% damage +20% cast speed for 10 s, free), Slow Leak (12), Deeper Rend (14, synergy), Blood Ward (14, a
+  116 ward + 20 mana, free), Rend Asunder (16, 99 on 5 m, −10% damage, +20 mana), Thick Blood (16), Scarred (18),
+  **Burning Veins** (20: +40% damage +40% cast speed, 60 mana, 132 fire on 6 m).
+- **Ruin**: Ruin Bolt (10, 109 shadow + −10% damage), Slippery (11), Transmute (12, 3 s out of the fight then −30%
+  damage for 6), Quick Feet (12), Longer Shape (14, synergy), Unmaking (14, the interrupt), Entropic Lash (16, 110
+  + a curse), Heavier Ruin (16, synergy), Hardy (18), **Sixfold Ruin** (20: 6 × 77 across every element + 66 storm
+  over 4 m).
+
+**Rotation at 15** (Wild Bolt, Flux, Chaos Shard, Mana Rend, Transmute, Overchannel): Transmute the shaman →
+Overchannel → Flux, Chaos Shard, Mana Rend on the brute (burn, slow, and the mana back) → Wild Bolt → Arcane Burst at
+20 with three kinds on it.
+
+**Phone (6):** Wild Bolt, Flux, Chaos Shard, Mana Rend, Transmute, Overchannel.
+
+---
+
+## Enchanter — Mage → the Enchanter
+
+**Fantasy.** Put the pack to sleep and pick the fight. A jolt that hits sleepers twice as hard, a foe dazed and
+marked, a phantasm that lulls whatever attacks it. The sleep that breaks on damage and the charm proper are the
+top of the wishlist; today sleep is a stun. Three trees:
+
+- **Drowse**: Drowse (10, 3 s sleep from 25 m, instant), Soft Voice (11), Arcane Jolt (12, 99 storm, ×2 on anything
+  asleep, held or slowed — the filler), Deeper Sleep (12, synergy), Mass Drowse (14, 2 s on 5 m at the pointer),
+  Keen Mind (14), Rude Awakening (16, 110 ×1.5 on sleepers + daze on 5 m), Sharper Jolt (16, synergy), Quick
+  Tongue (18), **Deep Sleep** (20: 4 s on 8 m + bad dreams).
+- **Beguile**: Beguile (10, 2 s daze + 20% taken for 6 s), Patient (11), Lethargy (12, −40% speed −15% damage on
+  6 m), Long Study (12), Longer Daze (14, synergy), Hush (14, the interrupt + 1.5 s silence), Befuddle (16, 88 +
+  −20% damage + slow), Unbothered (16), Wider Lethargy (18, synergy), **Puppet** (20: 4 s held + 30% taken for 8 s
+  + 132).
+- **Phantasm**: Phantasm (10, a shape of you at the pointer that lulls everything in 6 m for 10 s), Thick Dream
+  (11), Mirror Ward (12, a 94 ward + 15 dodge), Light Step (12), Truer Mirror (14, synergy), Slip Away (14, 10 m
+  with a ward, off-GCD), Twin Phantasms (16), Swift Dream (16), Longer Dream (18, synergy), **Grand Enthrallment**
+  (20: 3 s sleep + 88 on everything in 10 m, and three phantasms rise to hold whatever wakes).
+
+**Rotation at 15** (Drowse, Arcane Jolt, Mass Drowse, Beguile, Lethargy, Phantasm): Mass Drowse the pack → Drowse
+the brute → Phantasm between you and them → Arcane Jolt, Arcane Jolt on the sleeper (×2) → Beguile the caster when
+it wakes → Lethargy when they all do.
+
+**Phone (6):** Arcane Jolt, Drowse, Mass Drowse, Beguile, Lethargy, Phantasm.
+
+---
+
+## Shade Dancer — Rogue → the Shadow Dancer
+
+**Fantasy.** Every cut leaves an afterimage that cuts again. Step through the dark to the target's back, shroud a
+friend, finish the wounded, and dance with a host of shades. Three trees:
+
+- **Afterimage**: Shade Cut (10, 100% + 40% afterimage — the filler), Quick Blade (11), Twin Shade (12, 2 × 90%),
+  Darker Cut (12, synergy), Shade Lash (14, 80% + 40% through a 90° arc), Dark Eye (14), Lingering Shade (16, 120%
+  + 22/s shadow for 6 s), Second Shade (16, synergy), Shadow Arm (18), **Cutting Waltz** (20: 120% + 60% to
+  everything in 6 m, +40% crowd).
+- **Umbral Step**: Umbral Step (10, 10 m to the target + 80%, 70% from the front), Soft Step (11), Shroud (12, a 94
+  ward + 15 dodge on a friend), Hard to See (12), Thicker Shroud (14, synergy), Smother (14, the interrupt), Dark
+  Cut (16, 200% from behind, 60% of it from the front), Quiet Breath (16), Deeper Dark (18, synergy),
+  **Assassinate** (20: 300%, DOUBLED under 35%, 70% from the front).
+- **The Host**: Shade (10, a shade of you for 12 s), Thick Shadow (11), Sharper Shade (12, synergy), Veil (12, 6 m
+  back + ward + 15% crit), Shade Dance (14, +15% damage + 15 energy, off-GCD), Shadow Skin (14), Shade Pair (16),
+  Feeding Dark (16), Longer Pair (18, synergy), **Host of Shades** (20: four shades for 15 s and +20% damage).
+
+**Rotation at 15** (Shade Cut, Twin Shade, Umbral Step, Shade Lash, Shade, Shroud): Shade out → Umbral Step to the
+archer's back → Twin Shade → Shade Cut, Shade Cut → Shade Lash when the pack closes → Shroud the healer. Dark Cut at
+16 from behind; Assassinate at 20 on anything under 35%.
+
+**Phone (6):** Shade Cut, Twin Shade, Umbral Step, Shade Lash, Shade, Veil.
+
+---
+
+## What the engine must have for wave 5 (and what it has)
+
+Everything in `skills-specs-5.json` runs today; `tests/sim/paths.test.js` fires every active of the six. The
+file's `wishlist` has eleven items with a rule each. Worth doing first:
+
+1. **`sleep`** (a stun that breaks on damage) on Drowse / Mass Drowse / Deep Sleep / Grand Enthrallment — the one
+   that changes how the Enchanter plays, not just how hard it hits.
+2. **`charm`** on Beguile / Puppet (a foe turned on its friends; a stun + mark today).
+3. **A real counter** (`stack` / `perStack`): starlight on the CASTER, runes that only Runesmith skills lay. Dots
+   through `perDot` today — close for the Runesmith, further off for the Starcaller.
+4. **`randomType` / `randomMult` / `goldOnKill`** for the Scavenger and the Sorcerer's Wild Bolt — the gamble is
+   the whole fantasy and today it is a crit buff.
+5. **`afterimage`** (a delayed repeat) and **`copy`** (shades that repeat your last skill) for the Shade Dancer.
+6. **`perDebuffKind`** on Arcane Burst, **`polymorph`** on Transmute, **`healthCost`** again.

@@ -13,7 +13,7 @@ export function addFx(w, a, fx) {
 export const has = (a, kind) => !!a.fx?.some(f => f.kind === kind);
 export function speedFactor(a) {
   if (!a.fx?.length) return 1;
-  if (a.fx.some(f => f.kind === 'stun' || f.kind === 'root')) return 0;
+  if (a.fx.some(f => f.kind === 'stun' || f.kind === 'root' || f.kind === 'sleep')) return 0;
   let k = 1; for (const f of a.fx) { if (f.kind === 'slow') k *= 1 - Math.min(0.8, f.pct / 100); if (f.kind === 'buff' && f.stat === 'moveSpeed') k *= 1 + Math.min(100, f.pct) / 100; if (f.kind === 'stance' && f.stats?.moveSpeed) k *= 1 + f.stats.moveSpeed / 100; }
   return k;
 }

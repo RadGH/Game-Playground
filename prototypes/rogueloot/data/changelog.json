@@ -1,6 +1,17 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-wave5",
+      "date": "2026-11-11",
+      "title": "Every specialization is here",
+      "items": [
+        "The last six specializations: Runesmith, Scavenger, Starcaller, Sorcerer, Enchanter and Shade Dancer. All 31 now have three skill trees each.",
+        "The Enchanter's sleep holds until something hits the sleeper, and Beguile turns a monster on its own pack until you strike it.",
+        "Dusk Priests and Spirit Speakers heal whoever is most hurt by a share of the damage they deal.",
+        "Warlocks and Sorcerers pay for their strongest spells in health (never below 30%). The Chronomancer's hastes shorten cooldowns. The Sorcerer's Wild Bolt picks a new element every cast, and the Scavenger's Big Score and Jackpot are true gambles."
+      ]
+    },
+    {
       "id": "2026-11-11-elder-mire",
       "date": "2026-11-11",
       "title": "Elderglade, Mirefen and thirteen more specializations",

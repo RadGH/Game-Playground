@@ -34,7 +34,8 @@ export function stepBrains(w, dt) {
     if (f.dead) continue;
     if (f.mods) modsTick(w, f);
     if (f.def.boss) bossTick(w, f);
-    if (has(f, 'stun')) continue;
+    if (has(f, 'stun') || has(f, 'sleep')) continue;
+    if (has(f, 'charm')) { charmed(w, f, dt); continue; }
     // notice: sight radius, line of sight; a pack wakes together
     if (f.state === 'idle' || f.state === 'wander' || f.state === 'patrol') {
       const sight = (f.def.ai.aggro || AGGRO) * (f.rank !== 'normal' ? 1.2 : 1);
@@ -221,6 +222,19 @@ function cohesion(w, f) {
   return [dx / l * 0.3, dz / l * 0.3];
 }
 
+/** Charmed (Enchanter's Beguile / Puppet): fight the nearest other monster until a hero's hit breaks it. */
+function charmed(w, f, dt) {
+  let best = null, bd = 16;
+  for (const o of w.foes.values()) { if (o === f || o.dead || has(o, 'charm')) continue; const d = dist(f, o); if (d < bd) { bd = d; best = o; } }
+  if (!best) { f.state = 'idle'; return; }
+  f.state = 'attack'; f.target = null;
+  if (bd > (f.def.attackRange || 1.6) + (best.r || 0) + (f.r || 0)) { approachPoint(w, f, best.x, best.z, f.speed, dt); return; }
+  f.yaw = Math.atan2(best.x - f.x, best.z - f.z);
+  if (w.time < (f.nextSwing || 0)) return;
+  f.nextSwing = w.time + 1 / (f.attackSpeed || 0.5);
+  hurt(w, f, best, { result: 'hit', amount: Math.max(1, Math.round(f.dmg * (0.85 + w.rng() * 0.3))), mitigated: 0 }, f.def.damageType);
+  w.events.push({ k: 'swing', s: f.id });
+}
 // ---- attacking -------------------------------------------------------------------------------------------------------
 function attack(w, f, t) {
   f.nextSwing = w.time + 1 / (f.attackSpeed || 0.5);

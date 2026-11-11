@@ -993,6 +993,10 @@
    "role": "tank / melee damage",
    "blurb": "Hammers runes into enemies and into anything that hits you, rends their plate, lights your weapon with forge flame. The great anvil falls with every rune you laid.",
    "fantasy": "Thousandvale's Runesmith. Rune Hammer, Rend Plate, Runeskin, Forge Flame (a weapon coat), Warding Glyph (an ally ward), The Great Anvil. Wants a rune count on the target.",
+   "starter": [
+    "rns_rune_hammer",
+    "rns_runeskin"
+   ],
    "trees": [
     {
      "id": "the_hammer",
@@ -1027,6 +1031,10 @@
    "role": "melee / ranged damage",
    "blurb": "Every strike is a gamble: random elements, traps, pitch bombs, and a Big Score that can hit for a fifth or five times, and pays gold on a kill.",
    "fantasy": "Thousandvale's Scavenger. Lucky Strike, Junk Toss, Scrounge, Caltrop Scatter, Rag-and-Pitch Bomb, Big Score. Wants random element and random multiplier effects.",
+   "starter": [
+    "scv_lucky_strike",
+    "scv_junk_toss"
+   ],
    "trees": [
     {
      "id": "lucky",
@@ -1059,6 +1067,10 @@
    "role": "ranged damage",
    "blurb": "Throws golden stars, calls bigger ones down from the sky, lays fields of them. Stars that land fill the constellation; the big ones spend it.",
    "fantasy": "Thousandvale's Starcaller. Star Dart, Scattered Stars, Called Star, Star Field, Wheeling Stars, Heavens' Barrage. Wants a 5-point Starlight counter (gained per enemy hit, spent by the big casts).",
+   "starter": [
+    "str_star_dart",
+    "str_called_star"
+   ],
    "trees": [
     {
      "id": "darts",
@@ -1091,6 +1103,10 @@
    "role": "ranged damage",
    "blurb": "Wild magic. Each bolt a random element, a burst that hits harder the more kinds of harm the target carries, a foe turned into something harmless.",
    "fantasy": "Thousandvale's Sorcerer. Wild Bolt, Arcane Burst, Mana Rend, Overchannel (health for power), Transmute, Sixfold Ruin. Wants random element, a per-debuff-kind multiplier and a transmute.",
+   "starter": [
+    "sor_wild_bolt",
+    "sor_mana_rend"
+   ],
    "trees": [
     {
      "id": "wild",
@@ -1123,6 +1139,10 @@
    "role": "control",
    "blurb": "Puts whole packs to sleep so you pick the fight. A jolt that hits sleepers far harder, a foe turned on its friends, a decoy that lulls what attacks it.",
    "fantasy": "Thousandvale's Enchanter. Drowse (a sleep: a stun that breaks on damage), Arcane Jolt, Beguile (charm), Lethargy, Phantasm (a decoy minion), Grand Enthrallment. Wants a sleep that breaks on damage and a charm.",
+   "starter": [
+    "enc_arcane_jolt",
+    "enc_drowse"
+   ],
    "trees": [
     {
      "id": "drowse",
@@ -1155,6 +1175,10 @@
    "role": "melee damage, afterimages (minions)",
    "blurb": "Every cut and step leaves an afterimage that strikes again a moment later. Step behind them, shroud your friends, finish the wounded, and a host of shades copies everything you do.",
    "fantasy": "Thousandvale's Shadow Dancer, renamed. Shade Cut, Umbral Step, Shroud, Cutting Waltz, Assassinate, Host of Shades (short-lived minions). Wants an afterimage effect (a delayed repeat of the hit).",
+   "starter": [
+    "shd_shade_cut",
+    "shd_umbral_step"
+   ],
    "trees": [
     {
      "id": "afterimage",

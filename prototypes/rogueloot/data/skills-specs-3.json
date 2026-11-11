@@ -1466,7 +1466,7 @@
    "kind": "active",
    "desc": "Sign it in your own blood: for 12 seconds your spells hit 25% harder and cast 20% faster, 40 mana comes back, and every curse within 8 m of you flares for {dmg} shadow damage and keeps burning. The Gnawing Dark capstone.",
    "cost": {
-    "mana": 0
+    "health": 20
    },
    "cast": 0,
    "cd": 60,
@@ -1679,7 +1679,7 @@
    "kind": "active",
    "desc": "The fiend lends you its skin: a {dmg} ward for 8 seconds that burns whatever hits you, and 20 mana back. Does not use the global cooldown.",
    "cost": {
-    "mana": 0
+    "health": 20
    },
    "cast": 0,
    "cd": 25,
@@ -2232,7 +2232,7 @@
    "kind": "active",
    "desc": "Everything you have, through the rift at once: {dmg} shadow damage to the target, a burst over 6 m round it that stuns for a second, and a curse on everything the burst touched. The Rift capstone.",
    "cost": {
-    "mana": 60
+    "health": 20
    },
    "cast": 2,
    "cd": 30,
@@ -5712,28 +5712,11 @@
        0.7,
        0.35
       ]
+     },
+     "healFrom": {
+      "pct": 40,
+      "range": 20
      }
-    },
-    {
-     "do": "area",
-     "shape": "circle",
-     "size": 10,
-     "at": "self",
-     "effects": [
-      {
-       "do": "heal",
-       "base": [
-        3,
-        1.4
-       ],
-       "perRank": {
-        "base": [
-         0.3,
-         0.12
-        ]
-       }
-      }
-     ]
     }
    ]
   },
@@ -5784,28 +5767,11 @@
        0.6,
        0.3
       ]
+     },
+     "healFrom": {
+      "pct": 40,
+      "range": 20
      }
-    },
-    {
-     "do": "area",
-     "shape": "circle",
-     "size": 10,
-     "at": "self",
-     "effects": [
-      {
-       "do": "heal",
-       "base": [
-        5,
-        2.2
-       ],
-       "perRank": {
-        "base": [
-         0.4,
-         0.2
-        ]
-       }
-      }
-     ]
     }
    ]
   },
@@ -5865,6 +5831,10 @@
          0.5,
          0.25
         ]
+       },
+       "healFrom": {
+        "pct": 40,
+        "range": 20
        }
       },
       {
@@ -5874,27 +5844,6 @@
        "pct": 10,
        "perRank": {
         "pct": 1
-       }
-      }
-     ]
-    },
-    {
-     "do": "area",
-     "shape": "circle",
-     "size": 8,
-     "at": "self",
-     "effects": [
-      {
-       "do": "heal",
-       "base": [
-        4,
-        1.8
-       ],
-       "perRank": {
-        "base": [
-         0.3,
-         0.15
-        ]
        }
       }
      ]
@@ -6040,47 +5989,16 @@
        2,
        1
       ]
+     },
+     "healFrom": {
+      "pct": 40,
+      "range": 20
      }
     },
     {
      "do": "debuff",
      "kind": "stun",
      "secs": 1.5
-    },
-    {
-     "do": "area",
-     "shape": "circle",
-     "size": 12,
-     "at": "self",
-     "effects": [
-      {
-       "do": "heal",
-       "base": [
-        15,
-        6
-       ],
-       "perRank": {
-        "base": [
-         1.2,
-         0.5
-        ]
-       }
-      },
-      {
-       "do": "hot",
-       "base": [
-        3,
-        1.2
-       ],
-       "secs": 6,
-       "perRank": {
-        "base": [
-         0.02,
-         0.01
-        ]
-       }
-      }
-     ]
     }
    ]
   },
@@ -7977,19 +7895,9 @@
  },
  "wishlist": [
   {
-   "field": "healFrom (heal the most hurt friend by a share of the hit)",
-   "on": "dsk_shadow_lance, dsk_twinlight, dsk_dusk_wave, dsk_eventide",
-   "rule": "`healFrom: { pct: 40, range: 20 }` on a damage/bolt effect: the most hurt living friend within range is healed by pct of the damage dealt (the legendary ctx.L.healFrom rule already does exactly this; it wants to be a plain effect key). Written today as a helpful circle at self (8-12 m, a fixed heal) beside the damage, so the Dusk Priest's \"heals by striking\" reads right but heals everyone a little instead of the worst one a lot."
-  },
-  {
    "field": "cheatDeath (the pre-paid save)",
    "on": "dsk_vigil, dsk_night_vigil",
    "rule": "`cheatDeath: { hpPct: 25, secs: 10 }` on an ally-target skill: while it holds, the first blow that would kill the friend instead leaves them at hpPct and ends the effect. Written today as a ward + a small mend, which is the same money spent before the blow instead of after."
-  },
-  {
-   "field": "healthCost (health as fuel)",
-   "on": "wlk_soul_pact, wlk_blood_burst, wlk_sacrifice",
-   "rule": "`cost: { health: 20 }` (percent of max) beside or instead of mana, refused under 30% health. Written today as free (Soul Pact, Sacrifice: cd only) or mana 60 (Blood Burst)."
   },
   {
    "field": "grudge (hits taken as a counter)",

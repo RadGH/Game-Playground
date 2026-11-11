@@ -5,7 +5,7 @@ import { PATH_BONUS } from '../rules/sheet.js';
 const bonusText = id => { const b = PATH_BONUS[id]; if (!b) return ''; return [b.hpPct && `+${b.hpPct}% health`, b.armourPct && `+${b.armourPct}% armour`, b.dodge && `+${b.dodge}% dodge`].filter(Boolean).join(', '); };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export const RES_NAME = { rage: 'Temper', energy: 'Energy', mana: 'Mana' };
+export const RES_NAME = { rage: 'Temper', energy: 'Energy', mana: 'Mana', health: '% health' };
 /** An icon for a skill from what it does (until the art pass). */
 export function skillIcon(sk) {
   if (!sk) return '·';

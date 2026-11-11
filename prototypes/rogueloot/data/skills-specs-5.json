@@ -1,0 +1,5808 @@
+{
+ "_doc": "Wave-5 Specialization trees (Fable, 2026-11-11; design in docs/SPECS.md \"Wave 5\"; the roster in data/specs.json). The last wave: Runesmith (Fighter), Scavenger and Shade Dancer (Rogue), Starcaller, Sorcerer and Enchanter (Mage) - three trees each, 10 nodes a tree, levels 10/11/12/14/16/18/20, ranks to 10 (short utilities 3-5). SAME SCHEMA as skills-specs-1..4.json. No hybrids, so no altCost; no stance in this wave. HOW THE COUNTERS ARE WRITTEN WITHOUT A COUNTER: a Runesmith's rune is a dot (Rune Hammer's bleed, Searing Rune's burn, Forge Flame's coat), so Runebreaker and The Great Anvil count them with `perDot`; a Starcaller's star is a 6 s storm dot lodged in the target (Star Dart, Scattered Stars, Wheeling Stars) and the big casts (Star Shard, Greater Star, Constellation, Heavens' Barrage, Skyfall) spend them with `perDot` - the constellation is on the TARGET, not the caster, which is the one difference from the design; the Sorcerer's Arcane Burst counts kinds of harm with `perDot` too (every kind here is a dot), and Sixfold Ruin is six typed damage effects in one skill, each resolved against its own resistance. The Enchanter's sleep is a stun and Arcane Jolt pays x2 on it through `cond: { slowed }` (stun, root and slow all count). The Shade Dancer's afterimage is a second, lighter `weapon` hit in the same skill; its behind-the-target cuts use the row-level `cond: 'behindBonus'` + `frontMult`. The Scavenger's gambles are crit bursts, an under-half execute and the spendAll Big Score (doubled under 35%) until the dice exist. Phantasms and the Tin Can Trap are `stay` minions at the pointer with a taunt. NUMBERS as waves 1-4. Everything here runs on the engine today except the ideas in `wishlist`, each written as its fallback.",
+ "skills": {
+  "rns_rune_hammer": {
+   "name": "Rune Hammer",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Strike a rune into the target: {mult} weapon damage and the rune bleeds {dmg} a second for 8 seconds. Every rune on a target counts when the anvil falls. Your filler.",
+   "cost": {
+    "rage": 15
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.2,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "dot",
+     "type": "physical",
+     "base": [
+      1.8,
+      0.8
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       0.15,
+       0.07
+      ]
+     }
+    }
+   ]
+  },
+  "rns_smiths_arm": {
+   "name": "Smith's Arm",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More melee power.",
+   "passive": {
+    "stat": "meleePower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "rns_rend_plate": {
+   "name": "Rend Plate",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "rns_rune_hammer"
+   ],
+   "kind": "active",
+   "desc": "Peel the plate back: {mult} weapon damage and the target's armour down 20% for 8 seconds.",
+   "cost": {
+    "rage": 20
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.5,
+     "perRank": {
+      "mult": 0.08
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "armourDown",
+     "secs": 8,
+     "pct": 20,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "rns_deeper_rune": {
+   "name": "Deeper Rune",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "rns_rune_hammer"
+   ],
+   "kind": "synergy",
+   "desc": "Rune Hammer strikes deeper per rank.",
+   "synergy": {
+    "skill": "rns_rune_hammer",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "rns_searing_rune": {
+   "name": "Searing Rune",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "rns_rend_plate"
+   ],
+   "kind": "active",
+   "desc": "A rune of fire: {dmg} fire damage and it burns for 8 seconds. A second rune on the target. Instant.",
+   "cost": {
+    "rage": 20
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      8,
+      4
+     ],
+     "perRank": {
+      "base": [
+       0.6,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "dot",
+     "type": "fire",
+     "base": [
+      2,
+      0.9
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       0.18,
+       0.08
+      ]
+     }
+    }
+   ]
+  },
+  "rns_true_strike": {
+   "name": "True Strike",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "rns_hammerfall": {
+   "name": "Hammerfall",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "rns_searing_rune"
+   ],
+   "kind": "active",
+   "desc": "The hammer down on the ground: {mult} weapon damage to everything within 4 m of the target and a short stun.",
+   "cost": {
+    "rage": 30
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "target",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.3,
+       "perRank": {
+        "mult": 0.07
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 0.8,
+       "perRank": {
+        "secs": 0.05
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "rns_lasting_rune": {
+   "name": "Lasting Rune",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "rns_rune_hammer"
+   ],
+   "kind": "synergy",
+   "desc": "Rune Hammer's rune bleeds longer per rank.",
+   "synergy": {
+    "skill": "rns_rune_hammer",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "rns_forge_heart": {
+   "name": "Forge Heart",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Temper builds faster.",
+   "passive": {
+    "stat": "rageGen",
+    "value": 10,
+    "perRank": 5
+   }
+  },
+  "rns_runebreaker": {
+   "name": "Runebreaker",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "rns_hammerfall"
+   ],
+   "kind": "active",
+   "desc": "Break every rune on the target at once: {mult} weapon damage, then {dmg} more, +30% for every rune, poison or curse on it (up to +120%), and a 1.5 second stun. The Hammer capstone.",
+   "cost": {
+    "rage": 45
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2.2,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "damage",
+     "type": "physical",
+     "base": [
+      12,
+      6
+     ],
+     "perDot": {
+      "mult": 0.3,
+      "max": 1.2
+     },
+     "perRank": {
+      "base": [
+       1,
+       0.5
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 1.5
+    }
+   ]
+  },
+  "rns_runeskin": {
+   "name": "Runeskin",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Runes on your own skin: a {dmg} ward for 8 seconds that strikes back at whatever hits you, and +15% armour while it holds.",
+   "cost": {
+    "rage": 20
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      16,
+      5
+     ],
+     "secs": 8,
+     "thorns": {
+      "type": "physical",
+      "base": [
+       3,
+       1.5
+      ]
+     },
+     "perRank": {
+      "base": [
+       1.2,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 2
+     }
+    }
+   ]
+  },
+  "rns_iron_runes": {
+   "name": "Iron Runes",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Your armour counts for more.",
+   "passive": {
+    "stat": "armourPct",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "rns_warding_glyph": {
+   "name": "Warding Glyph",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "rns_runeskin"
+   ],
+   "kind": "active",
+   "desc": "A glyph on a friend within 20 m: a {dmg} ward and +15% armour for 8 seconds.",
+   "cost": {
+    "rage": 20
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 20,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      14,
+      4
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       1.2,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 2
+     }
+    }
+   ]
+  },
+  "rns_thick_plate": {
+   "name": "Thick Plate",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "rns_harder_skin": {
+   "name": "Harder Skin",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "rns_runeskin"
+   ],
+   "kind": "synergy",
+   "desc": "Runeskin wards for more per rank.",
+   "synergy": {
+    "skill": "rns_runeskin",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "rns_rune_of_holding": {
+   "name": "Rune of Holding",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "rns_runeskin"
+   ],
+   "kind": "active",
+   "desc": "A rune that pulls: everything within 8 m turns on you and is slowed 20% for 3 seconds, and 10 temper. Does not use the global cooldown.",
+   "cost": {
+    "rage": 0
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 3,
+       "pct": 20
+      }
+     ]
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 10
+    }
+   ]
+  },
+  "rns_glyph_wall": {
+   "name": "Glyph Wall",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "rns_warding_glyph"
+   ],
+   "kind": "active",
+   "desc": "Glyphs on everyone: a {dmg} ward on every friend within 10 m for 8 seconds.",
+   "cost": {
+    "rage": 30
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "shield",
+       "base": [
+        8,
+        3
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.7,
+         0.25
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "rns_tempered": {
+   "name": "Tempered",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More resistance to everything.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "rns_brighter_glyph": {
+   "name": "Brighter Glyph",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "rns_warding_glyph"
+   ],
+   "kind": "synergy",
+   "desc": "Warding Glyph wards for more per rank.",
+   "synergy": {
+    "skill": "rns_warding_glyph",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "rns_runeward": {
+   "name": "Runeward",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "rns_glyph_wall",
+    "rns_rune_of_holding"
+   ],
+   "kind": "active",
+   "desc": "Every rune you know, lit at once: a {dmg} ward that strikes back hard, +40% armour for 10 seconds, everything within 8 m turns on you and hits 15% softer, and 30 temper. The Runeskin capstone.",
+   "cost": {
+    "rage": 0
+   },
+   "cast": 0,
+   "cd": 60,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      30,
+      8
+     ],
+     "secs": 10,
+     "thorns": {
+      "type": "physical",
+      "base": [
+       6,
+       3
+      ]
+     },
+     "perRank": {
+      "base": [
+       4,
+       1.2
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 40,
+     "secs": 10,
+     "perRank": {
+      "pct": 5
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      },
+      {
+       "do": "debuff",
+       "kind": "damageDown",
+       "secs": 6,
+       "pct": 15
+      }
+     ]
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 30
+    }
+   ]
+  },
+  "rns_forge_flame": {
+   "name": "Forge Flame",
+   "owner": "runesmith",
+   "tree": "forge",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Light the weapon at the forge: for 20 seconds every hit you land leaves fire burning for 6. The burn counts as a rune.",
+   "cost": {
+    "rage": 15
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "coat",
+     "type": "fire",
+     "base": [
+      2,
+      1
+     ],
+     "secs": 6,
+     "duration": 20,
+     "perRank": {
+      "base": [
+       0.2,
+       0.08
+      ],
+      "duration": 1
+     }
+    }
+   ]
+  },
+  "rns_hot_iron": {
+   "name": "Hot Iron",
+   "owner": "runesmith",
+   "tree": "forge",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Life on hit.",
+   "passive": {
+    "stat": "lifeOnHit",
+    "value": 3,
+    "perRank": 1.5
+   }
+  },
+  "rns_hammer_shout": {
+   "name": "Hammer Shout",
+   "owner": "runesmith",
+   "tree": "forge",
+   "reqLevel": 12,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A shout off the anvil: stops what the target is casting, locks it for 3 seconds and silences it for one, with {mult} weapon damage. Does not use the global cooldown.",
+   "cost": {
+    "rage": 10
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.5,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "interrupt",
+     "lock": 3
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.2
+     }
+    }
+   ]
+  },
+  "rns_quick_hammer": {
+   "name": "Quick Hammer",
+   "owner": "runesmith",
+   "tree": "forge",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster swings.",
+   "passive": {
+    "stat": "attackSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "rns_molten_strike": {
+   "name": "Molten Strike",
+   "owner": "runesmith",
+   "tree": "forge",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "rns_forge_flame"
+   ],
+   "kind": "active",
+   "desc": "The hammer straight from the fire: {mult} weapon damage and {dmg} fire damage on top.",
+   "cost": {
+    "rage": 25
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.6,
+     "perRank": {
+      "mult": 0.08
+     }
+    },
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      6,
+      3
+     ],
+     "perRank": {
+      "base": [
+       0.5,
+       0.25
+      ]
+     }
+    }
+   ]
+  },
+  "rns_hotter_forge": {
+   "name": "Hotter Forge",
+   "owner": "runesmith",
+   "tree": "forge",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "rns_forge_flame"
+   ],
+   "kind": "synergy",
+   "desc": "Forge Flame burns harder per rank.",
+   "synergy": {
+    "skill": "rns_forge_flame",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "rns_forge_blast": {
+   "name": "Forge Blast",
+   "owner": "runesmith",
+   "tree": "forge",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "rns_molten_strike"
+   ],
+   "kind": "active",
+   "desc": "Open the furnace door: {dmg} fire damage to everything in a 90 degree cone, and all of it burns for 6 seconds.",
+   "cost": {
+    "rage": 30
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "cone",
+     "size": 5,
+     "at": "self",
+     "angle": 90,
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        9,
+        4.5
+       ],
+       "perRank": {
+        "base": [
+         0.7,
+         0.35
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "fire",
+       "base": [
+        1.5,
+        0.7
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.12,
+         0.06
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "rns_loud_forge": {
+   "name": "Loud Forge",
+   "owner": "runesmith",
+   "tree": "forge",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "You hold attention better.",
+   "passive": {
+    "stat": "threat",
+    "value": 10,
+    "perRank": 5
+   }
+  },
+  "rns_molten_core": {
+   "name": "Molten Core",
+   "owner": "runesmith",
+   "tree": "forge",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "rns_molten_strike"
+   ],
+   "kind": "synergy",
+   "desc": "Molten Strike hits harder per rank.",
+   "synergy": {
+    "skill": "rns_molten_strike",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "rns_great_anvil": {
+   "name": "The Great Anvil",
+   "owner": "runesmith",
+   "tree": "forge",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "rns_forge_blast",
+    "rns_hammer_shout"
+   ],
+   "kind": "active",
+   "desc": "The anvil falls: {mult} weapon damage to the target, then {dmg} to everything within 6 m of it, +30% for every rune, poison or curse each one carries (up to +120%) and more the more it hits, and a 1.5 second stun on all of it. The Forge capstone.",
+   "cost": {
+    "rage": 50
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2.0,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "target",
+     "perTargetHit": {
+      "mult": 0.08,
+      "max": 0.4
+     },
+     "effects": [
+      {
+       "do": "damage",
+       "type": "physical",
+       "base": [
+        14,
+        7
+       ],
+       "perDot": {
+        "mult": 0.3,
+        "max": 1.2
+       },
+       "perRank": {
+        "base": [
+         1.1,
+         0.55
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1.5
+      }
+     ]
+    }
+   ]
+  },
+  "scv_lucky_strike": {
+   "name": "Lucky Strike",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A swing with your eyes shut: {mult} weapon damage and +12% critical chance for 5 seconds. Your filler.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.1,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "crit",
+     "pct": 12,
+     "secs": 5,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "scv_rabbits_foot": {
+   "name": "Rabbit's Foot",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "scv_loaded_dice": {
+   "name": "Loaded Dice",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "scv_lucky_strike"
+   ],
+   "kind": "active",
+   "desc": "Whatever the dice say: {mult} weapon damage and a crackle of {dmg} storm damage that slows for 2 seconds.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.9,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "damage",
+     "type": "random",
+     "base": [
+      5,
+      2.5
+     ],
+     "perRank": {
+      "base": [
+       0.4,
+       0.2
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 2,
+     "pct": 20
+    }
+   ]
+  },
+  "scv_luckier": {
+   "name": "Luckier",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "scv_lucky_strike"
+   ],
+   "kind": "synergy",
+   "desc": "Lucky Strike hits harder per rank.",
+   "synergy": {
+    "skill": "scv_lucky_strike",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "scv_double_or_nothing": {
+   "name": "Double or Nothing",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "scv_loaded_dice"
+   ],
+   "kind": "active",
+   "desc": "Bet the hand: {mult} weapon damage, half again on anything under half health.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2.0,
+     "cond": {
+      "targetHpBelow": 0.5,
+      "mult": 1.5
+     },
+     "perRank": {
+      "mult": 0.1
+     }
+    }
+   ]
+  },
+  "scv_quick_fingers": {
+   "name": "Quick Fingers",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Energy comes back faster.",
+   "passive": {
+    "stat": "energyRegen",
+    "value": 8,
+    "perRank": 4
+   }
+  },
+  "scv_hot_streak": {
+   "name": "Hot Streak",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "reqLevel": 16,
+   "maxRank": 5,
+   "prereq": [
+    "scv_double_or_nothing"
+   ],
+   "kind": "active",
+   "desc": "The streak: +15% damage and +15% critical chance for 8 seconds, and 20 energy. Does not use the global cooldown.",
+   "cost": {
+    "energy": 0
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 2
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "crit",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 2
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "energy",
+     "n": 20
+    }
+   ]
+  },
+  "scv_bigger_bet": {
+   "name": "Bigger Bet",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "scv_double_or_nothing"
+   ],
+   "kind": "synergy",
+   "desc": "Double or Nothing hits harder per rank.",
+   "synergy": {
+    "skill": "scv_double_or_nothing",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "scv_fast_hands": {
+   "name": "Fast Hands",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster swings.",
+   "passive": {
+    "stat": "attackSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "scv_jackpot": {
+   "name": "Jackpot",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "scv_hot_streak"
+   ],
+   "kind": "active",
+   "desc": "All the bells at once: {mult} weapon damage, a burst of {dmg} fire over 4 m round the target, and 30 energy back. The Lucky capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 3.5,
+     "perRank": {
+      "mult": 0.15
+     },
+     "randomMult": {
+      "values": [
+       0.2,
+       0.6,
+       1,
+       2,
+       5
+      ],
+      "weights": [
+       1,
+       3,
+       4,
+       2,
+       1
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        10,
+        5
+       ],
+       "perRank": {
+        "base": [
+         0.8,
+         0.4
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "do": "resource",
+     "kind": "energy",
+     "n": 30
+    }
+   ]
+  },
+  "scv_junk_toss": {
+   "name": "Junk Toss",
+   "owner": "scavenger",
+   "tree": "junk",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Throw whatever is in your hand from 15 m: {mult} weapon damage and a 30% slow for 2 seconds. The filler at range.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 15,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.0,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 2,
+     "pct": 30
+    }
+   ]
+  },
+  "scv_light_load": {
+   "name": "Light Load",
+   "owner": "scavenger",
+   "tree": "junk",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster on your feet.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "scv_caltrops": {
+   "name": "Caltrop Scatter",
+   "owner": "scavenger",
+   "tree": "junk",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "scv_junk_toss"
+   ],
+   "kind": "active",
+   "desc": "Caltrops over 4 m where you point: everything in them is held for 1.5 seconds and bleeds for 4. Lands at the pointer.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 15,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "root",
+       "secs": 1.5,
+       "perRank": {
+        "secs": 0.1
+       }
+      },
+      {
+       "do": "dot",
+       "type": "physical",
+       "base": [
+        1.5,
+        0.7
+       ],
+       "secs": 4,
+       "perRank": {
+        "base": [
+         0.12,
+         0.06
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "scv_slippery": {
+   "name": "Slippery",
+   "owner": "scavenger",
+   "tree": "junk",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More dodge.",
+   "passive": {
+    "stat": "dodge",
+    "value": 2,
+    "perRank": 1.5
+   }
+  },
+  "scv_pitch_bomb": {
+   "name": "Rag-and-Pitch Bomb",
+   "owner": "scavenger",
+   "tree": "junk",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "scv_caltrops"
+   ],
+   "kind": "active",
+   "desc": "A bottle of pitch with a burning rag in it: {dmg} fire damage to everything within 4 m of where it lands, burning for 5 seconds. Lands at the pointer.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 15,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        9,
+        4.5
+       ],
+       "perRank": {
+        "base": [
+         0.7,
+         0.35
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "fire",
+       "base": [
+        1.5,
+        0.7
+       ],
+       "secs": 5,
+       "perRank": {
+        "base": [
+         0.12,
+         0.06
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "scv_more_pitch": {
+   "name": "More Pitch",
+   "owner": "scavenger",
+   "tree": "junk",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "scv_pitch_bomb"
+   ],
+   "kind": "synergy",
+   "desc": "The pitch bomb covers more ground per rank.",
+   "synergy": {
+    "skill": "scv_pitch_bomb",
+    "stat": "radius",
+    "pctPerRank": 8
+   }
+  },
+  "scv_tin_can_trap": {
+   "name": "Tin Can Trap",
+   "owner": "scavenger",
+   "tree": "junk",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "scv_caltrops"
+   ],
+   "kind": "active",
+   "desc": "A rattling can on a string where you point: everything within 6 m of it goes for the noise for {secs} seconds or until it is stamped flat. Counts as a minion.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 15,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "minion",
+     "id": "scavenger_can",
+     "name": "Tin Can",
+     "role": "tank",
+     "count": 1,
+     "secs": 8,
+     "hpMult": 0.5,
+     "dmgMult": 0.1,
+     "skills": [
+      {
+       "id": "can_rattle",
+       "name": "Rattle",
+       "kind": "taunt",
+       "cd": 3,
+       "radius": 6
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.08,
+      "secs": 0.5
+     },
+     "stay": true
+    }
+   ]
+  },
+  "scv_tough_gut": {
+   "name": "Tough Gut",
+   "owner": "scavenger",
+   "tree": "junk",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "scv_bottle_rocket": {
+   "name": "Bottle Rocket",
+   "owner": "scavenger",
+   "tree": "junk",
+   "reqLevel": 18,
+   "maxRank": 5,
+   "prereq": [
+    "scv_pitch_bomb"
+   ],
+   "kind": "active",
+   "desc": "A firework in the face: stops what the target is casting, locks it for 3 seconds and silences it for one, with {dmg} fire damage. From 15 m; does not use the global cooldown.",
+   "cost": {
+    "energy": 10
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 15,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 3
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.2
+     }
+    },
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      4,
+      2
+     ],
+     "perRank": {
+      "base": [
+       0.08,
+       0.04
+      ]
+     }
+    }
+   ]
+  },
+  "scv_junk_avalanche": {
+   "name": "Junk Avalanche",
+   "owner": "scavenger",
+   "tree": "junk",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "scv_tin_can_trap",
+    "scv_bottle_rocket"
+   ],
+   "kind": "active",
+   "desc": "The whole cart, tipped: {dmg} damage to everything within 6 m of where you point, more the more it hits (up to +40%), a 1 second stun and a 40% slow for 3. Lands at the pointer. The Junk capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": true,
+   "range": 15,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "ground",
+     "perTargetHit": {
+      "mult": 0.08,
+      "max": 0.4
+     },
+     "effects": [
+      {
+       "do": "damage",
+       "type": "physical",
+       "base": [
+        12,
+        6
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.5
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 3,
+       "pct": 40
+      }
+     ]
+    }
+   ]
+  },
+  "scv_scrounge": {
+   "name": "Scrounge",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Pick through the pockets: {dmg} health back and 15 energy. Instant.",
+   "cost": {
+    "energy": 0
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      8,
+      3
+     ],
+     "who": "self",
+     "perRank": {
+      "base": [
+       0.7,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "energy",
+     "n": 15
+    }
+   ]
+  },
+  "scv_waste_not": {
+   "name": "Waste Not",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Life on hit.",
+   "passive": {
+    "stat": "lifeOnHit",
+    "value": 3,
+    "perRank": 1.5
+   }
+  },
+  "scv_pocket_sand": {
+   "name": "Pocket Sand",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "reqLevel": 12,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Sand in the eyes: {mult} weapon damage, the target hits 20% softer for 5 seconds, and you hop 4 m back.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.6,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "damageDown",
+     "secs": 5,
+     "pct": 20,
+     "perRank": {
+      "pct": 2
+     }
+    },
+    {
+     "do": "dash",
+     "dist": 4,
+     "to": "back"
+    }
+   ]
+  },
+  "scv_hard_living": {
+   "name": "Hard Living",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More resistance to everything.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "scv_deeper_pockets": {
+   "name": "Deeper Pockets",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "scv_scrounge"
+   ],
+   "kind": "synergy",
+   "desc": "Scrounge finds more per rank.",
+   "synergy": {
+    "skill": "scv_scrounge",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "scv_sucker_punch": {
+   "name": "Sucker Punch",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "scv_pocket_sand"
+   ],
+   "kind": "active",
+   "desc": "The one they were not watching for: {mult} weapon damage and a 1 second stun.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.8,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.05
+     }
+    }
+   ]
+  },
+  "scv_shiny_things": {
+   "name": "Shiny Things",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "scv_sucker_punch"
+   ],
+   "kind": "active",
+   "desc": "Hang something shiny on the target: {dmg} damage, and it takes 15% more from everyone for 8 seconds. From 15 m.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 15,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "physical",
+     "base": [
+      3,
+      1.5
+     ],
+     "perRank": {
+      "base": [
+       0.3,
+       0.15
+      ]
+     }
+    },
+    {
+     "do": "mark",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "scv_strong_back": {
+   "name": "Strong Back",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More melee power.",
+   "passive": {
+    "stat": "meleePower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "scv_harder_punch": {
+   "name": "Harder Punch",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "scv_sucker_punch"
+   ],
+   "kind": "synergy",
+   "desc": "Sucker Punch hits harder per rank.",
+   "synergy": {
+    "skill": "scv_sucker_punch",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "scv_big_score": {
+   "name": "Big Score",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "scv_shiny_things",
+    "scv_scrounge"
+   ],
+   "kind": "active",
+   "desc": "Everything on one roll: spends every point of energy for {mult} weapon damage, +1.5% a point past the cost, DOUBLED on anything under 35% health. The Big Score capstone.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "spendAll": true,
+   "perResourceSpent": {
+    "mult": 0.015
+   },
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2.0,
+     "cond": {
+      "targetHpBelow": 0.35,
+      "mult": 2.0
+     },
+     "perRank": {
+      "mult": 0.12
+     },
+     "randomMult": {
+      "values": [
+       0.5,
+       1,
+       1.5,
+       2.5,
+       4
+      ],
+      "weights": [
+       2,
+       4,
+       3,
+       2,
+       1
+      ]
+     }
+    }
+   ],
+   "goldOnKill": {
+    "n": 25
+   }
+  },
+  "str_star_dart": {
+   "name": "Star Dart",
+   "owner": "starcaller",
+   "tree": "darts",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A thrown star for {dmg} storm damage that lodges in the target and glows for 6 seconds. Every star glowing on a target is one more for the big ones to spend. A one second cast; your filler.",
+   "cost": {
+    "mana": 14
+   },
+   "cast": 1,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "storm",
+     "base": [
+      9,
+      5
+     ],
+     "speed": 40,
+     "perRank": {
+      "base": [
+       0.7,
+       0.35
+      ]
+     }
+    },
+    {
+     "do": "dot",
+     "type": "storm",
+     "base": [
+      1,
+      0.5
+     ],
+     "secs": 6,
+     "perRank": {
+      "base": [
+       0.08,
+       0.04
+      ]
+     }
+    }
+   ]
+  },
+  "str_starsight": {
+   "name": "Starsight",
+   "owner": "starcaller",
+   "tree": "darts",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More spell power.",
+   "passive": {
+    "stat": "spellPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "str_scattered_stars": {
+   "name": "Scattered Stars",
+   "owner": "starcaller",
+   "tree": "darts",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "str_star_dart"
+   ],
+   "kind": "active",
+   "desc": "A handful at once: {dmg} storm damage to everything within 5 m of the target and a star lodged in each.",
+   "cost": {
+    "mana": 24
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        6,
+        3
+       ],
+       "perRank": {
+        "base": [
+         0.5,
+         0.25
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "storm",
+       "base": [
+        1,
+        0.5
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.08,
+         0.04
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "str_sharper_dart": {
+   "name": "Sharper Dart",
+   "owner": "starcaller",
+   "tree": "darts",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "str_star_dart"
+   ],
+   "kind": "synergy",
+   "desc": "Star Dart hits harder per rank.",
+   "synergy": {
+    "skill": "str_star_dart",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "str_twin_stars": {
+   "name": "Twin Stars",
+   "owner": "starcaller",
+   "tree": "darts",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "str_star_dart"
+   ],
+   "kind": "active",
+   "desc": "Two stars off the fingers for {dmg} storm damage each. Instant.",
+   "cost": {
+    "mana": 22
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "storm",
+     "base": [
+      7,
+      3.5
+     ],
+     "speed": 40,
+     "perRank": {
+      "base": [
+       0.55,
+       0.28
+      ]
+     }
+    },
+    {
+     "do": "bolt",
+     "type": "storm",
+     "base": [
+      7,
+      3.5
+     ],
+     "speed": 40,
+     "perRank": {
+      "base": [
+       0.55,
+       0.28
+      ]
+     }
+    }
+   ]
+  },
+  "str_keen_sky": {
+   "name": "Keen Sky",
+   "owner": "starcaller",
+   "tree": "darts",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "str_star_shard": {
+   "name": "Star Shard",
+   "owner": "starcaller",
+   "tree": "darts",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "str_twin_stars"
+   ],
+   "kind": "active",
+   "desc": "A shard of a bigger star: {dmg} fire damage, +25% for every star, poison or curse glowing on the target (up to +100%).",
+   "cost": {
+    "mana": 26
+   },
+   "cast": 1.5,
+   "cd": 8,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      10,
+      5
+     ],
+     "perDot": {
+      "mult": 0.25,
+      "max": 1.0
+     },
+     "perRank": {
+      "base": [
+       0.8,
+       0.4
+      ]
+     }
+    }
+   ]
+  },
+  "str_longer_glow": {
+   "name": "Longer Glow",
+   "owner": "starcaller",
+   "tree": "darts",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "str_star_dart"
+   ],
+   "kind": "synergy",
+   "desc": "Star Dart's star glows longer per rank.",
+   "synergy": {
+    "skill": "str_star_dart",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "str_quick_sky": {
+   "name": "Quick Sky",
+   "owner": "starcaller",
+   "tree": "darts",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster casting.",
+   "passive": {
+    "stat": "castSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "str_constellation": {
+   "name": "Constellation",
+   "owner": "starcaller",
+   "tree": "darts",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "str_star_shard",
+    "str_scattered_stars"
+   ],
+   "kind": "active",
+   "desc": "Join the stars on the target: {dmg} storm damage, +30% for every star, poison or curse on it (up to +150%), and a burst over 5 m round it. The Darts capstone.",
+   "cost": {
+    "mana": 50
+   },
+   "cast": 2,
+   "cd": 25,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      24,
+      12
+     ],
+     "perDot": {
+      "mult": 0.3,
+      "max": 1.5
+     },
+     "perRank": {
+      "base": [
+       1.8,
+       0.9
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        8,
+        4
+       ],
+       "perRank": {
+        "base": [
+         0.6,
+         0.3
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "str_called_star": {
+   "name": "Called Star",
+   "owner": "starcaller",
+   "tree": "called",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Call one down where you point: {dmg} fire damage to everything within 4 m and a short stun. Lands at the pointer; the other filler.",
+   "cost": {
+    "mana": 26
+   },
+   "cast": 1.5,
+   "cd": 10,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        11,
+        5.5
+       ],
+       "perRank": {
+        "base": [
+         0.8,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 0.5
+      }
+     ]
+    }
+   ]
+  },
+  "str_deep_sky": {
+   "name": "Deep Sky",
+   "owner": "starcaller",
+   "tree": "called",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Mana comes back faster.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "str_falling_star": {
+   "name": "Falling Star",
+   "owner": "starcaller",
+   "tree": "called",
+   "reqLevel": 12,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Ride a star 8 m forward and land burning: {dmg} fire damage to everything within 4 m of where you come down.",
+   "cost": {
+    "mana": 20
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 8,
+     "to": "forward"
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "self",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        8,
+        4
+       ],
+       "perRank": {
+        "base": [
+         0.6,
+         0.3
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "str_wide_sky": {
+   "name": "Wide Sky",
+   "owner": "starcaller",
+   "tree": "called",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More mana.",
+   "passive": {
+    "stat": "maxMana",
+    "value": 5,
+    "perRank": 3
+   }
+  },
+  "str_bigger_star": {
+   "name": "Bigger Star",
+   "owner": "starcaller",
+   "tree": "called",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "str_called_star"
+   ],
+   "kind": "synergy",
+   "desc": "Called Star hits harder per rank.",
+   "synergy": {
+    "skill": "str_called_star",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "str_hush_of_stars": {
+   "name": "Hush of Stars",
+   "owner": "starcaller",
+   "tree": "called",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "str_called_star"
+   ],
+   "kind": "active",
+   "desc": "A star in the mouth: stops what the target is casting, locks it for 3 seconds and silences it for one, with {dmg} storm damage. Does not use the global cooldown.",
+   "cost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 3
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.2
+     }
+    },
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      4,
+      2
+     ],
+     "perRank": {
+      "base": [
+       0.08,
+       0.04
+      ]
+     }
+    }
+   ]
+  },
+  "str_greater_star": {
+   "name": "Greater Star",
+   "owner": "starcaller",
+   "tree": "called",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "str_called_star"
+   ],
+   "kind": "active",
+   "desc": "A bigger one, slower to come: {dmg} fire damage to everything within 5 m of where you point, +25% for every star on each (up to +100%), and a 30% slow for 3 seconds.",
+   "cost": {
+    "mana": 36
+   },
+   "cast": 2,
+   "cd": 15,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        16,
+        8
+       ],
+       "perDot": {
+        "mult": 0.25,
+        "max": 1.0
+       },
+       "perRank": {
+        "base": [
+         1.2,
+         0.6
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 3,
+       "pct": 30
+      }
+     ]
+    }
+   ]
+  },
+  "str_starhardy": {
+   "name": "Starhardy",
+   "owner": "starcaller",
+   "tree": "called",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More resistance to everything.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "str_wider_star": {
+   "name": "Wider Star",
+   "owner": "starcaller",
+   "tree": "called",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "str_greater_star"
+   ],
+   "kind": "synergy",
+   "desc": "Greater Star covers more ground per rank.",
+   "synergy": {
+    "skill": "str_greater_star",
+    "stat": "radius",
+    "pctPerRank": 8
+   }
+  },
+  "str_heavens_barrage": {
+   "name": "Heavens' Barrage",
+   "owner": "starcaller",
+   "tree": "called",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "str_greater_star",
+    "str_hush_of_stars"
+   ],
+   "kind": "active",
+   "desc": "Four seconds of stars where you point: each second {dmg} fire damage to everything within 6 m, +20% for every star on each (up to +80%), and a slow. The Called capstone.",
+   "cost": {
+    "mana": 60
+   },
+   "cast": 0,
+   "cd": 40,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "channel": 4,
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        7,
+        3.5
+       ],
+       "perDot": {
+        "mult": 0.2,
+        "max": 0.8
+       },
+       "perRank": {
+        "base": [
+         0.55,
+         0.28
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 1.5,
+       "pct": 20
+      }
+     ]
+    }
+   ]
+  },
+  "str_star_field": {
+   "name": "Star Field",
+   "owner": "starcaller",
+   "tree": "fields",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Lay a field of stars 5 m across where you point: for 8 seconds everything in it is stung for {dmg} storm damage a second and slowed 20%. Lands at the pointer.",
+   "cost": {
+    "mana": 28
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "zone",
+     "shape": "circle",
+     "size": 5,
+     "secs": 8,
+     "tick": 1,
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        2.5,
+        1.2
+       ],
+       "perRank": {
+        "base": [
+         0.2,
+         0.1
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 1.5,
+       "pct": 20
+      }
+     ]
+    }
+   ]
+  },
+  "str_starlit": {
+   "name": "Starlit",
+   "owner": "starcaller",
+   "tree": "fields",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "str_star_ward": {
+   "name": "Star Ward",
+   "owner": "starcaller",
+   "tree": "fields",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Stars round you: a {dmg} ward for 8 seconds that throws storm back at whatever hits you.",
+   "cost": {
+    "mana": 24
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      16,
+      4
+     ],
+     "secs": 8,
+     "thorns": {
+      "type": "storm",
+      "base": [
+       3,
+       1.5
+      ]
+     },
+     "perRank": {
+      "base": [
+       1.2,
+       0.4
+      ]
+     }
+    }
+   ]
+  },
+  "str_light_step": {
+   "name": "Light Step",
+   "owner": "starcaller",
+   "tree": "fields",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More dodge.",
+   "passive": {
+    "stat": "dodge",
+    "value": 2,
+    "perRank": 1.5
+   }
+  },
+  "str_lasting_field": {
+   "name": "Lasting Field",
+   "owner": "starcaller",
+   "tree": "fields",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "str_star_field"
+   ],
+   "kind": "synergy",
+   "desc": "Star Field lasts longer per rank.",
+   "synergy": {
+    "skill": "str_star_field",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "str_wheeling_stars": {
+   "name": "Wheeling Stars",
+   "owner": "starcaller",
+   "tree": "fields",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "str_star_field"
+   ],
+   "kind": "active",
+   "desc": "Stars wheel round you: {dmg} storm damage to everything within 6 m and a star lodged in each.",
+   "cost": {
+    "mana": 30
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        8,
+        4
+       ],
+       "perRank": {
+        "base": [
+         0.6,
+         0.3
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "storm",
+       "base": [
+        1.2,
+        0.6
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.1,
+         0.05
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "str_bright_field": {
+   "name": "Bright Field",
+   "owner": "starcaller",
+   "tree": "fields",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "str_star_field"
+   ],
+   "kind": "active",
+   "desc": "A field of kind stars 6 m across where you point: everyone standing in it, companions too, is healed for {dmg} a second for 8 seconds.",
+   "cost": {
+    "mana": 30
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "zone",
+     "shape": "circle",
+     "size": 6,
+     "secs": 8,
+     "tick": 1,
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        2,
+        0.8
+       ],
+       "perRank": {
+        "base": [
+         0.2,
+         0.08
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "str_swift_stars": {
+   "name": "Swift Stars",
+   "owner": "starcaller",
+   "tree": "fields",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster on your feet.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "str_wider_wheel": {
+   "name": "Wider Wheel",
+   "owner": "starcaller",
+   "tree": "fields",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "str_wheeling_stars"
+   ],
+   "kind": "synergy",
+   "desc": "Wheeling Stars hits harder per rank.",
+   "synergy": {
+    "skill": "str_wheeling_stars",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "str_skyfall": {
+   "name": "Skyfall",
+   "owner": "starcaller",
+   "tree": "fields",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "str_wheeling_stars",
+    "str_bright_field"
+   ],
+   "kind": "active",
+   "desc": "The sky comes down 8 m across where you point: {dmg} fire damage to everything there, +30% for every star on each (up to +150%), more the more it hits, a 1 second stun, and a field that keeps stinging for 6 seconds. The Fields capstone.",
+   "cost": {
+    "mana": 60
+   },
+   "cast": 2,
+   "cd": 45,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "ground",
+     "perTargetHit": {
+      "mult": 0.08,
+      "max": 0.4
+     },
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        18,
+        9
+       ],
+       "perDot": {
+        "mult": 0.3,
+        "max": 1.5
+       },
+       "perRank": {
+        "base": [
+         1.4,
+         0.7
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      }
+     ]
+    },
+    {
+     "do": "zone",
+     "shape": "circle",
+     "size": 8,
+     "secs": 6,
+     "tick": 1,
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        3,
+        1.5
+       ],
+       "perRank": {
+        "base": [
+         0.25,
+         0.12
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "sor_wild_bolt": {
+   "name": "Wild Bolt",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A bolt of whatever came to hand, storm this time: {dmg} damage. A short cast; your filler.",
+   "cost": {
+    "mana": 14
+   },
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "random",
+     "base": [
+      10,
+      5.5
+     ],
+     "speed": 30,
+     "perRank": {
+      "base": [
+       0.8,
+       0.4
+      ]
+     }
+    }
+   ]
+  },
+  "sor_wild_mind": {
+   "name": "Wild Mind",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More spell power.",
+   "passive": {
+    "stat": "spellPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "sor_flux": {
+   "name": "Flux",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "sor_wild_bolt"
+   ],
+   "kind": "active",
+   "desc": "The fire kind: {dmg} fire damage and it burns for 5 seconds. Instant.",
+   "cost": {
+    "mana": 18
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      8,
+      4
+     ],
+     "perRank": {
+      "base": [
+       0.6,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "dot",
+     "type": "fire",
+     "base": [
+      1.5,
+      0.7
+     ],
+     "secs": 5,
+     "perRank": {
+      "base": [
+       0.12,
+       0.06
+      ]
+     }
+    }
+   ]
+  },
+  "sor_wilder_bolt": {
+   "name": "Wilder Bolt",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "sor_wild_bolt"
+   ],
+   "kind": "synergy",
+   "desc": "Wild Bolt hits harder per rank.",
+   "synergy": {
+    "skill": "sor_wild_bolt",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "sor_chaos_shard": {
+   "name": "Chaos Shard",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "sor_wild_bolt"
+   ],
+   "kind": "active",
+   "desc": "The cold kind: {dmg} frost damage and a 30% slow for 3 seconds. Instant.",
+   "cost": {
+    "mana": 18
+   },
+   "cast": 0,
+   "cd": 5,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "frost",
+     "base": [
+      9,
+      4.5
+     ],
+     "speed": 30,
+     "perRank": {
+      "base": [
+       0.7,
+       0.35
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 3,
+     "pct": 30,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "sor_lucky_spark": {
+   "name": "Lucky Spark",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "sor_wild_surge": {
+   "name": "Wild Surge",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "sor_flux",
+    "sor_chaos_shard"
+   ],
+   "kind": "active",
+   "desc": "All of it at once over 5 m round the target: {dmg} storm damage to everything there, more the more it hits (up to +40%), and poison seeping into each for 6 seconds.",
+   "cost": {
+    "mana": 32
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "perTargetHit": {
+      "mult": 0.08,
+      "max": 0.4
+     },
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        9,
+        4.5
+       ],
+       "perRank": {
+        "base": [
+         0.7,
+         0.35
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "poison",
+       "base": [
+        1.5,
+        0.7
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.12,
+         0.06
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "sor_fast_tongue": {
+   "name": "Fast Tongue",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster casting.",
+   "passive": {
+    "stat": "castSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "sor_bigger_surge": {
+   "name": "Bigger Surge",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "sor_wild_surge"
+   ],
+   "kind": "synergy",
+   "desc": "Wild Surge hits harder per rank.",
+   "synergy": {
+    "skill": "sor_wild_surge",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "sor_arcane_burst": {
+   "name": "Arcane Burst",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "sor_wild_surge"
+   ],
+   "kind": "active",
+   "desc": "Everything on the target goes off: {dmg} storm damage, +35% for every burn, poison or curse it carries (up to +140%), and a 1 second stun. The Wild capstone.",
+   "cost": {
+    "mana": 50
+   },
+   "cast": 2,
+   "cd": 25,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      26,
+      13
+     ],
+     "perDot": {
+      "mult": 0.35,
+      "max": 1.4
+     },
+     "perRank": {
+      "base": [
+       2,
+       1
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 1
+    }
+   ]
+  },
+  "sor_mana_rend": {
+   "name": "Mana Rend",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Tear the magic out of the target: {dmg} shadow damage and 10 mana into you. Instant; it pays for itself.",
+   "cost": {
+    "mana": 8
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "shadow",
+     "base": [
+      8,
+      4
+     ],
+     "perRank": {
+      "base": [
+       0.6,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 10
+    }
+   ]
+  },
+  "sor_deep_well": {
+   "name": "Deep Well",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More mana.",
+   "passive": {
+    "stat": "maxMana",
+    "value": 5,
+    "perRank": 3
+   }
+  },
+  "sor_overchannel": {
+   "name": "Overchannel",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "reqLevel": 12,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Pull more through than is safe: +25% damage and +20% cast speed for 10 seconds. Free; the price is on the wishlist.",
+   "cost": {
+    "health": 20
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 25,
+     "secs": 10,
+     "perRank": {
+      "pct": 3
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "castSpeed",
+     "pct": 20,
+     "secs": 10,
+     "perRank": {
+      "pct": 2
+     }
+    }
+   ]
+  },
+  "sor_slow_leak": {
+   "name": "Slow Leak",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Mana comes back faster.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "sor_deeper_rend": {
+   "name": "Deeper Rend",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "sor_mana_rend"
+   ],
+   "kind": "synergy",
+   "desc": "Mana Rend tears more per rank.",
+   "synergy": {
+    "skill": "sor_mana_rend",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "sor_blood_ward": {
+   "name": "Blood Ward",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "sor_overchannel"
+   ],
+   "kind": "active",
+   "desc": "A ward written in your own blood: {dmg} absorbed for 8 seconds and 20 mana back.",
+   "cost": {
+    "health": 20
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      16,
+      5
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       1.2,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 20
+    }
+   ]
+  },
+  "sor_rend_asunder": {
+   "name": "Rend Asunder",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "sor_mana_rend"
+   ],
+   "kind": "active",
+   "desc": "Tear it out of all of them: {dmg} shadow damage to everything within 5 m of the target, they hit 10% softer for 5 seconds, and 20 mana into you.",
+   "cost": {
+    "mana": 10
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "shadow",
+       "base": [
+        9,
+        4.5
+       ],
+       "perRank": {
+        "base": [
+         0.7,
+         0.35
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "weaken",
+       "secs": 5,
+       "pct": 10,
+       "perRank": {
+        "pct": 1
+       }
+      }
+     ]
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 20
+    }
+   ]
+  },
+  "sor_thick_blood": {
+   "name": "Thick Blood",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "sor_scarred": {
+   "name": "Scarred",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More resistance to everything.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "sor_burning_veins": {
+   "name": "Burning Veins",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "sor_blood_ward",
+    "sor_rend_asunder"
+   ],
+   "kind": "active",
+   "desc": "Open the veins: +40% damage and +40% cast speed for 8 seconds, 60 mana, and {dmg} fire damage to everything within 6 m as the magic comes out of you. The Overchannel capstone.",
+   "cost": {
+    "health": 20
+   },
+   "cast": 0,
+   "cd": 90,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 40,
+     "secs": 8,
+     "perRank": {
+      "pct": 5
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "castSpeed",
+     "pct": 40,
+     "secs": 8
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 60
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        12,
+        6
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.5
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "sor_ruin_bolt": {
+   "name": "Ruin Bolt",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A bolt that unmakes: {dmg} shadow damage, and the target hits 10% softer for 5 seconds. A short cast.",
+   "cost": {
+    "mana": 15
+   },
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "shadow",
+     "base": [
+      9,
+      5
+     ],
+     "speed": 30,
+     "perRank": {
+      "base": [
+       0.7,
+       0.35
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "weaken",
+     "secs": 5,
+     "pct": 10,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "sor_slippery": {
+   "name": "Slippery",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More dodge.",
+   "passive": {
+    "stat": "dodge",
+    "value": 2,
+    "perRank": 1.5
+   }
+  },
+  "sor_transmute": {
+   "name": "Transmute",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Turn the target into something harmless for 3 seconds; when it comes back it is shaken, hitting 30% softer for 6.",
+   "cost": {
+    "mana": 22
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 3,
+     "perRank": {
+      "secs": 0.1
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "weaken",
+     "secs": 6,
+     "pct": 30,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "sor_quick_feet": {
+   "name": "Quick Feet",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster on your feet.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "sor_longer_shape": {
+   "name": "Longer Shape",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "sor_transmute"
+   ],
+   "kind": "synergy",
+   "desc": "Transmute holds longer per rank.",
+   "synergy": {
+    "skill": "sor_transmute",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "sor_unmaking": {
+   "name": "Unmaking",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Unmake the words: stops what the target is casting, locks it for 3 seconds and silences it for one, with {dmg} shadow damage. Does not use the global cooldown.",
+   "cost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 3
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.2
+     }
+    },
+    {
+     "do": "damage",
+     "type": "shadow",
+     "base": [
+      4,
+      2
+     ],
+     "perRank": {
+      "base": [
+       0.08,
+       0.04
+      ]
+     }
+    }
+   ]
+  },
+  "sor_entropic_lash": {
+   "name": "Entropic Lash",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "sor_ruin_bolt"
+   ],
+   "kind": "active",
+   "desc": "A lash of ruin: {dmg} shadow damage now and a curse eating at the target for 6 seconds. Instant.",
+   "cost": {
+    "mana": 22
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "shadow",
+     "base": [
+      10,
+      5
+     ],
+     "perRank": {
+      "base": [
+       0.8,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "dot",
+     "type": "shadow",
+     "base": [
+      2,
+      0.9
+     ],
+     "secs": 6,
+     "perRank": {
+      "base": [
+       0.18,
+       0.08
+      ]
+     }
+    }
+   ]
+  },
+  "sor_heavier_ruin": {
+   "name": "Heavier Ruin",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "sor_ruin_bolt"
+   ],
+   "kind": "synergy",
+   "desc": "Ruin Bolt hits harder per rank.",
+   "synergy": {
+    "skill": "sor_ruin_bolt",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "sor_hardy": {
+   "name": "Hardy",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "sor_sixfold_ruin": {
+   "name": "Sixfold Ruin",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "sor_entropic_lash",
+    "sor_transmute"
+   ],
+   "kind": "active",
+   "desc": "Every kind of harm at once: {dmg} each of fire, frost, storm, poison, shadow and plain force, each against its own resistance, and a burst of storm over 4 m round the target. The Ruin capstone.",
+   "cost": {
+    "mana": 55
+   },
+   "cast": 2,
+   "cd": 30,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      7,
+      3.5
+     ],
+     "perRank": {
+      "base": [
+       0.55,
+       0.28
+      ]
+     }
+    },
+    {
+     "do": "damage",
+     "type": "frost",
+     "base": [
+      7,
+      3.5
+     ],
+     "perRank": {
+      "base": [
+       0.55,
+       0.28
+      ]
+     }
+    },
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      7,
+      3.5
+     ],
+     "perRank": {
+      "base": [
+       0.55,
+       0.28
+      ]
+     }
+    },
+    {
+     "do": "damage",
+     "type": "poison",
+     "base": [
+      7,
+      3.5
+     ],
+     "perRank": {
+      "base": [
+       0.55,
+       0.28
+      ]
+     }
+    },
+    {
+     "do": "damage",
+     "type": "shadow",
+     "base": [
+      7,
+      3.5
+     ],
+     "perRank": {
+      "base": [
+       0.55,
+       0.28
+      ]
+     }
+    },
+    {
+     "do": "damage",
+     "type": "physical",
+     "base": [
+      7,
+      3.5
+     ],
+     "perRank": {
+      "base": [
+       0.55,
+       0.28
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        6,
+        3
+       ],
+       "perRank": {
+        "base": [
+         0.5,
+         0.25
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "enc_drowse": {
+   "name": "Drowse",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Send the target to sleep for 3 seconds. Pick the fight: put one down, deal with the rest. Instant, from 25 m.",
+   "cost": {
+    "mana": 18
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "debuff",
+     "kind": "sleep",
+     "secs": 6,
+     "perRank": {
+      "secs": 0.1
+     }
+    }
+   ]
+  },
+  "enc_soft_voice": {
+   "name": "Soft Voice",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More spell power.",
+   "passive": {
+    "stat": "spellPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "enc_arcane_jolt": {
+   "name": "Arcane Jolt",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A jolt for {dmg} storm damage, DOUBLED on anything asleep, held or slowed. Your filler.",
+   "cost": {
+    "mana": 16
+   },
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      9,
+      4.5
+     ],
+     "cond": {
+      "slowed": true,
+      "mult": 2.0
+     },
+     "perRank": {
+      "base": [
+       0.7,
+       0.35
+      ]
+     }
+    }
+   ]
+  },
+  "enc_deeper_sleep": {
+   "name": "Deeper Sleep",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "enc_drowse"
+   ],
+   "kind": "synergy",
+   "desc": "Drowse holds longer per rank.",
+   "synergy": {
+    "skill": "enc_drowse",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "enc_mass_drowse": {
+   "name": "Mass Drowse",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "enc_drowse"
+   ],
+   "kind": "active",
+   "desc": "Everything within 5 m of where you point falls asleep for 2 seconds. Lands at the pointer.",
+   "cost": {
+    "mana": 32
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "sleep",
+       "secs": 4,
+       "perRank": {
+        "secs": 0.1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "enc_keen_mind": {
+   "name": "Keen Mind",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "enc_rude_awakening": {
+   "name": "Rude Awakening",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "enc_arcane_jolt"
+   ],
+   "kind": "active",
+   "desc": "A jolt through everything within 5 m of the target: {dmg} storm damage, half again on anything asleep, held or slowed, and a half-second daze.",
+   "cost": {
+    "mana": 30
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        10,
+        5
+       ],
+       "cond": {
+        "slowed": true,
+        "mult": 1.5
+       },
+       "perRank": {
+        "base": [
+         0.8,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 0.5
+      }
+     ]
+    }
+   ]
+  },
+  "enc_sharper_jolt": {
+   "name": "Sharper Jolt",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "enc_arcane_jolt"
+   ],
+   "kind": "synergy",
+   "desc": "Arcane Jolt hits harder per rank.",
+   "synergy": {
+    "skill": "enc_arcane_jolt",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "enc_quick_tongue": {
+   "name": "Quick Tongue",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster casting.",
+   "passive": {
+    "stat": "castSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "enc_deep_sleep": {
+   "name": "Deep Sleep",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "enc_mass_drowse",
+    "enc_rude_awakening"
+   ],
+   "kind": "active",
+   "desc": "Everything within 8 m of where you point sleeps for 4 seconds and dreams badly: {dmg} shadow damage. The Drowse capstone.",
+   "cost": {
+    "mana": 50
+   },
+   "cast": 1.5,
+   "cd": 45,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "sleep",
+       "secs": 8,
+       "perRank": {
+        "secs": 0.1
+       }
+      },
+      {
+       "do": "damage",
+       "type": "shadow",
+       "base": [
+        4,
+        2
+       ],
+       "perRank": {
+        "base": [
+         0.4,
+         0.2
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "enc_beguile": {
+   "name": "Beguile",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Turn the target's head: it stands dazed for 2 seconds and takes 20% more from everyone for 6. From 25 m.",
+   "cost": {
+    "mana": 20
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "debuff",
+     "kind": "charm",
+     "secs": 5.0,
+     "perRank": {
+      "secs": 0.3
+     }
+    }
+   ]
+  },
+  "enc_patient": {
+   "name": "Patient",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Mana comes back faster.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "enc_lethargy": {
+   "name": "Lethargy",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "enc_beguile"
+   ],
+   "kind": "active",
+   "desc": "Everything within 6 m of the target cannot be bothered: slowed 40% and hitting 15% softer for 5 seconds.",
+   "cost": {
+    "mana": 26
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "target",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 5,
+       "pct": 40,
+       "perRank": {
+        "pct": 1
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "damageDown",
+       "secs": 5,
+       "pct": 15,
+       "perRank": {
+        "pct": 1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "enc_long_study": {
+   "name": "Long Study",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More mana.",
+   "passive": {
+    "stat": "maxMana",
+    "value": 5,
+    "perRank": 3
+   }
+  },
+  "enc_longer_daze": {
+   "name": "Longer Daze",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "enc_beguile"
+   ],
+   "kind": "synergy",
+   "desc": "Beguile lasts longer per rank.",
+   "synergy": {
+    "skill": "enc_beguile",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "enc_hush": {
+   "name": "Hush",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A finger to the lips: stops what the target is casting, locks it for 3 seconds and silences it for 1.5, with {dmg} shadow damage. Does not use the global cooldown.",
+   "cost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 3
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1.5,
+     "perRank": {
+      "secs": 0.2
+     }
+    },
+    {
+     "do": "damage",
+     "type": "shadow",
+     "base": [
+      4,
+      2
+     ],
+     "perRank": {
+      "base": [
+       0.08,
+       0.04
+      ]
+     }
+    }
+   ]
+  },
+  "enc_befuddle": {
+   "name": "Befuddle",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "enc_lethargy"
+   ],
+   "kind": "active",
+   "desc": "Muddle the target: {dmg} shadow damage, it hits 20% softer for 8 seconds and is slowed 30% for 4. Instant.",
+   "cost": {
+    "mana": 22
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "shadow",
+     "base": [
+      8,
+      4
+     ],
+     "perRank": {
+      "base": [
+       0.6,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "weaken",
+     "secs": 8,
+     "pct": 20,
+     "perRank": {
+      "pct": 1
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 4,
+     "pct": 30
+    }
+   ]
+  },
+  "enc_unbothered": {
+   "name": "Unbothered",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More resistance to everything.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "enc_wider_lethargy": {
+   "name": "Wider Lethargy",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "enc_lethargy"
+   ],
+   "kind": "synergy",
+   "desc": "Lethargy covers more ground per rank.",
+   "synergy": {
+    "skill": "enc_lethargy",
+    "stat": "radius",
+    "pctPerRank": 8
+   }
+  },
+  "enc_puppet": {
+   "name": "Puppet",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "enc_befuddle",
+    "enc_hush"
+   ],
+   "kind": "active",
+   "desc": "Take the target's strings: it stands still for 4 seconds, takes 30% more from everyone for 8, and {dmg} shadow damage as you pull. The Beguile capstone; the charm proper is on the wishlist.",
+   "cost": {
+    "mana": 40
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "debuff",
+     "kind": "charm",
+     "secs": 10.0,
+     "perRank": {
+      "secs": 0.3
+     }
+    },
+    {
+     "do": "damage",
+     "type": "shadow",
+     "base": [
+      12,
+      6
+     ],
+     "perRank": {
+      "base": [
+       1,
+       0.5
+      ]
+     }
+    }
+   ]
+  },
+  "enc_phantasm": {
+   "name": "Phantasm",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A shape of you where you point that lulls whatever comes near: everything within 6 m of it goes for it for {secs} seconds or until it fades. Stands where it is put; counts as a minion.",
+   "cost": {
+    "mana": 25
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 20,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "minion",
+     "id": "enchanter_phantasm",
+     "name": "Phantasm",
+     "role": "tank",
+     "count": 1,
+     "secs": 10,
+     "hpMult": 0.6,
+     "dmgMult": 0.1,
+     "skills": [
+      {
+       "id": "ph_lull",
+       "name": "Lull",
+       "kind": "taunt",
+       "cd": 3,
+       "radius": 6
+      },
+      {
+       "id": "ph_shimmer",
+       "name": "Shimmer",
+       "kind": "self",
+       "pct": 30,
+       "secs": 6
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.08,
+      "secs": 1
+     },
+     "stay": true
+    }
+   ]
+  },
+  "enc_thick_dream": {
+   "name": "Thick Dream",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "enc_mirror_ward": {
+   "name": "Mirror Ward",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Hard to be sure which one is you: a {dmg} ward and +15 dodge for 8 seconds.",
+   "cost": {
+    "mana": 22
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      14,
+      4
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       1.2,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "dodge",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "enc_light_step": {
+   "name": "Light Step",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More dodge.",
+   "passive": {
+    "stat": "dodge",
+    "value": 2,
+    "perRank": 1.5
+   }
+  },
+  "enc_truer_mirror": {
+   "name": "Truer Mirror",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "enc_mirror_ward"
+   ],
+   "kind": "synergy",
+   "desc": "Mirror Ward wards for more per rank.",
+   "synergy": {
+    "skill": "enc_mirror_ward",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "enc_slip_away": {
+   "name": "Slip Away",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "reqLevel": 14,
+   "maxRank": 3,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Be 10 m further on with a {dmg} ward for 4 seconds. Does not use the global cooldown.",
+   "cost": {
+    "mana": 10
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 10,
+     "to": "forward"
+    },
+    {
+     "do": "shield",
+     "base": [
+      8,
+      3
+     ],
+     "secs": 4,
+     "perRank": {
+      "base": [
+       2,
+       0.6
+      ]
+     }
+    }
+   ]
+  },
+  "enc_twin_phantasms": {
+   "name": "Twin Phantasms",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "enc_phantasm"
+   ],
+   "kind": "active",
+   "desc": "Two shapes where you point, each lulling what comes within 5 m, for {secs} seconds. They count as minions.",
+   "cost": {
+    "mana": 36
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 20,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "minion",
+     "id": "enchanter_phantasm",
+     "name": "Phantasm",
+     "role": "tank",
+     "count": 2,
+     "secs": 10,
+     "hpMult": 0.5,
+     "dmgMult": 0.1,
+     "skills": [
+      {
+       "id": "ph_lull",
+       "name": "Lull",
+       "kind": "taunt",
+       "cd": 3,
+       "radius": 5
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.08,
+      "secs": 1
+     },
+     "stay": true
+    }
+   ]
+  },
+  "enc_swift_dream": {
+   "name": "Swift Dream",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster on your feet.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "enc_longer_dream": {
+   "name": "Longer Dream",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "enc_phantasm"
+   ],
+   "kind": "synergy",
+   "desc": "Phantasm lasts longer per rank.",
+   "synergy": {
+    "skill": "enc_phantasm",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "enc_grand_enthrallment": {
+   "name": "Grand Enthrallment",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "reqLevel": 20,
+   "maxRank": 5,
+   "prereq": [
+    "enc_twin_phantasms",
+    "enc_slip_away"
+   ],
+   "kind": "active",
+   "desc": "The whole room, taken: everything within 10 m of you sleeps for 3 seconds and takes {dmg} shadow damage, and three phantasms rise round you to hold whatever wakes. The Phantasm capstone.",
+   "cost": {
+    "mana": 60
+   },
+   "cast": 1.5,
+   "cd": 60,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "sleep",
+       "secs": 6,
+       "perRank": {
+        "secs": 0.1
+       }
+      },
+      {
+       "do": "damage",
+       "type": "shadow",
+       "base": [
+        8,
+        4
+       ],
+       "perRank": {
+        "base": [
+         0.7,
+         0.35
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "do": "summon",
+     "kind": "minion",
+     "id": "enchanter_phantasm",
+     "name": "Phantasm",
+     "role": "tank",
+     "count": 3,
+     "secs": 10,
+     "hpMult": 0.5,
+     "dmgMult": 0.1,
+     "skills": [
+      {
+       "id": "ph_lull",
+       "name": "Lull",
+       "kind": "taunt",
+       "cd": 3,
+       "radius": 6
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.1,
+      "secs": 1
+     }
+    }
+   ]
+  },
+  "shd_shade_cut": {
+   "name": "Shade Cut",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A cut for {mult} weapon damage, and your afterimage cuts again a moment later for 40% of it. Your filler.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.0,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "weapon",
+     "mult": 0.4,
+     "perRank": {
+      "mult": 0.03
+     }
+    }
+   ]
+  },
+  "shd_quick_blade": {
+   "name": "Quick Blade",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster swings.",
+   "passive": {
+    "stat": "attackSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "shd_twin_shade": {
+   "name": "Twin Shade",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "shd_shade_cut"
+   ],
+   "kind": "active",
+   "desc": "Two cuts, two shades: {mult} weapon damage twice.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.9,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "weapon",
+     "mult": 0.9,
+     "perRank": {
+      "mult": 0.05
+     }
+    }
+   ]
+  },
+  "shd_darker_cut": {
+   "name": "Darker Cut",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "shd_shade_cut"
+   ],
+   "kind": "synergy",
+   "desc": "Shade Cut cuts deeper per rank.",
+   "synergy": {
+    "skill": "shd_shade_cut",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "shd_shade_lash": {
+   "name": "Shade Lash",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "shd_twin_shade"
+   ],
+   "kind": "active",
+   "desc": "A lash through a 90 degree arc: {mult} weapon damage to everything in it, and the afterimage lashes again for 40%.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "cone",
+     "size": 4.5,
+     "at": "self",
+     "angle": 90,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 0.8,
+       "perRank": {
+        "mult": 0.05
+       }
+      },
+      {
+       "do": "weapon",
+       "mult": 0.4,
+       "perRank": {
+        "mult": 0.03
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "shd_dark_eye": {
+   "name": "Dark Eye",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "shd_lingering_shade": {
+   "name": "Lingering Shade",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "shd_shade_lash"
+   ],
+   "kind": "active",
+   "desc": "A cut for {mult} weapon damage whose afterimage keeps cutting: {dmg} shadow damage a second for 6 seconds.",
+   "cost": {
+    "energy": 25
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.2,
+     "perRank": {
+      "mult": 0.07
+     }
+    },
+    {
+     "do": "dot",
+     "type": "shadow",
+     "base": [
+      2,
+      0.9
+     ],
+     "secs": 6,
+     "perRank": {
+      "base": [
+       0.18,
+       0.08
+      ]
+     }
+    }
+   ]
+  },
+  "shd_second_shade": {
+   "name": "Second Shade",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "shd_twin_shade"
+   ],
+   "kind": "synergy",
+   "desc": "Twin Shade cuts deeper per rank.",
+   "synergy": {
+    "skill": "shd_twin_shade",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "shd_shadow_arm": {
+   "name": "Shadow Arm",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More melee power.",
+   "passive": {
+    "stat": "meleePower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "shd_cutting_waltz": {
+   "name": "Cutting Waltz",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "shd_lingering_shade"
+   ],
+   "kind": "active",
+   "desc": "Dance through everything within 6 m: {mult} weapon damage to each, more the more you hit (up to +40%), and the afterimage dances it again for half. The Afterimage capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "perTargetHit": {
+      "mult": 0.08,
+      "max": 0.4
+     },
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.2,
+       "perRank": {
+        "mult": 0.07
+       }
+      },
+      {
+       "do": "weapon",
+       "mult": 0.6,
+       "perRank": {
+        "mult": 0.04
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "shd_umbral_step": {
+   "name": "Umbral Step",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "reqLevel": 10,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Step 10 m through the dark to the target and cut for {mult} weapon damage: full from behind, 70% from the front.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 10,
+   "target": "enemy",
+   "cond": "behindBonus",
+   "frontMult": 0.7,
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 10,
+     "to": "target"
+    },
+    {
+     "do": "weapon",
+     "mult": 0.8,
+     "perRank": {
+      "mult": 0.08
+     }
+    }
+   ]
+  },
+  "shd_soft_step": {
+   "name": "Soft Step",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Faster on your feet.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "shd_shroud": {
+   "name": "Shroud",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Wrap a friend within 20 m in shadow: a {dmg} ward and +15 dodge for 8 seconds.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 20,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      14,
+      4
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       1.2,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "dodge",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "shd_hard_to_see": {
+   "name": "Hard to See",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More dodge.",
+   "passive": {
+    "stat": "dodge",
+    "value": 2,
+    "perRank": 1.5
+   }
+  },
+  "shd_thicker_shroud": {
+   "name": "Thicker Shroud",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "shd_shroud"
+   ],
+   "kind": "synergy",
+   "desc": "Shroud wards for more per rank.",
+   "synergy": {
+    "skill": "shd_shroud",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "shd_smother": {
+   "name": "Smother",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A hand of shadow over the mouth: stops what the target is casting, locks it for 3 seconds and silences it for one, with {mult} weapon damage. Does not use the global cooldown.",
+   "cost": {
+    "energy": 10
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.5,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "interrupt",
+     "lock": 3
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.2
+     }
+    }
+   ]
+  },
+  "shd_dark_cut": {
+   "name": "Dark Cut",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "shd_umbral_step"
+   ],
+   "kind": "active",
+   "desc": "The cut from the dark: {mult} weapon damage from behind, 60% of it from the front.",
+   "cost": {
+    "energy": 35
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "cond": "behindBonus",
+   "frontMult": 0.6,
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2.0,
+     "perRank": {
+      "mult": 0.1
+     }
+    }
+   ]
+  },
+  "shd_quiet_breath": {
+   "name": "Quiet Breath",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Energy comes back faster.",
+   "passive": {
+    "stat": "energyRegen",
+    "value": 8,
+    "perRank": 4
+   }
+  },
+  "shd_deeper_dark": {
+   "name": "Deeper Dark",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "shd_dark_cut"
+   ],
+   "kind": "synergy",
+   "desc": "Dark Cut cuts deeper per rank.",
+   "synergy": {
+    "skill": "shd_dark_cut",
+    "stat": "damage",
+    "pctPerRank": 7
+   }
+  },
+  "shd_assassinate": {
+   "name": "Assassinate",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "shd_dark_cut",
+    "shd_smother"
+   ],
+   "kind": "active",
+   "desc": "Finish it: {mult} weapon damage, DOUBLED on anything under 35% health, full from behind and 70% from the front. The Umbral Step capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "cond": "behindBonus",
+   "frontMult": 0.7,
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 3.0,
+     "cond": {
+      "targetHpBelow": 0.35,
+      "mult": 2.0
+     },
+     "perRank": {
+      "mult": 0.15
+     }
+    }
+   ]
+  },
+  "shd_shade": {
+   "name": "Shade",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Leave a shade of yourself that fights beside you for {secs} seconds, striking what you strike. Counts as a minion (up to eight).",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "minion",
+     "id": "shade_dancer_shade",
+     "name": "Shade",
+     "role": "melee",
+     "count": 1,
+     "secs": 12,
+     "hpMult": 0.4,
+     "dmgMult": 0.5,
+     "skills": [
+      {
+       "id": "shade_strike",
+       "name": "Shade Strike",
+       "kind": "strike",
+       "cd": 5,
+       "mult": 1.3
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.05,
+      "dmgMult": 0.05,
+      "secs": 1
+     }
+    }
+   ]
+  },
+  "shd_thick_shadow": {
+   "name": "Thick Shadow",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "shd_sharper_shade": {
+   "name": "Sharper Shade",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "shd_shade"
+   ],
+   "kind": "synergy",
+   "desc": "Shades strike harder per rank.",
+   "synergy": {
+    "skill": "shd_shade",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "shd_veil": {
+   "name": "Veil",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "reqLevel": 12,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Drop 6 m back behind a {dmg} ward, and the next 5 seconds crit 15% more.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 6,
+     "to": "back"
+    },
+    {
+     "do": "shield",
+     "base": [
+      12,
+      4
+     ],
+     "secs": 5,
+     "perRank": {
+      "base": [
+       1.5,
+       0.5
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "crit",
+     "pct": 15,
+     "secs": 5,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "shd_shade_dance": {
+   "name": "Shade Dance",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "shd_shade"
+   ],
+   "kind": "active",
+   "desc": "Dance with the shades: +15% damage for 8 seconds and 15 energy. Does not use the global cooldown.",
+   "cost": {
+    "energy": 0
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 15,
+     "secs": 8,
+     "perRank": {
+      "pct": 2
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "energy",
+     "n": 15
+    }
+   ]
+  },
+  "shd_shadow_skin": {
+   "name": "Shadow Skin",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More resistance to everything.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "shd_shade_pair": {
+   "name": "Shade Pair",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "shd_shade"
+   ],
+   "kind": "active",
+   "desc": "Two shades at once for {secs} seconds. They count as minions.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "minion",
+     "id": "shade_dancer_shade",
+     "name": "Shade",
+     "role": "melee",
+     "count": 2,
+     "secs": 12,
+     "hpMult": 0.4,
+     "dmgMult": 0.5,
+     "skills": [
+      {
+       "id": "shade_strike",
+       "name": "Shade Strike",
+       "kind": "strike",
+       "cd": 5,
+       "mult": 1.3
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.05,
+      "dmgMult": 0.05,
+      "secs": 1
+     }
+    }
+   ]
+  },
+  "shd_feeding_dark": {
+   "name": "Feeding Dark",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Life on hit.",
+   "passive": {
+    "stat": "lifeOnHit",
+    "value": 3,
+    "perRank": 1.5
+   }
+  },
+  "shd_longer_pair": {
+   "name": "Longer Pair",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "shd_shade_pair"
+   ],
+   "kind": "synergy",
+   "desc": "Shade Pair lasts longer per rank.",
+   "synergy": {
+    "skill": "shd_shade_pair",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "shd_host_of_shades": {
+   "name": "Host of Shades",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "reqLevel": 20,
+   "maxRank": 5,
+   "prereq": [
+    "shd_shade_pair",
+    "shd_shade_dance"
+   ],
+   "kind": "active",
+   "desc": "A host of four shades for {secs} seconds, each striking what you strike, and you hit 20% harder for 15 while they dance. They count as minions. The Host capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "cd": 60,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "minion",
+     "id": "shade_dancer_shade",
+     "name": "Shade",
+     "role": "melee",
+     "count": 4,
+     "secs": 15,
+     "hpMult": 0.5,
+     "dmgMult": 0.6,
+     "skills": [
+      {
+       "id": "shade_strike",
+       "name": "Shade Strike",
+       "kind": "strike",
+       "cd": 4,
+       "mult": 1.4
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.08,
+      "dmgMult": 0.06,
+      "secs": 1
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 20,
+     "secs": 15,
+     "perRank": {
+      "pct": 2
+     }
+    }
+   ]
+  }
+ },
+ "wishlist": [
+  {
+   "field": "counter: runes / starlight (a real stack on the target or caster)",
+   "on": "rns_runebreaker, rns_great_anvil, str_star_shard, str_constellation, str_skyfall, str_heavens_barrage",
+   "rule": "`stack: { id: 'rune', max: 5, secs: 8 }` on an effect adds one; `perStack: { id, mult, consume: true }` on another reads and spends them. Written today as dots counted by `perDot`, which already means \"one more thing on the target pays off the big hit\"; the difference is that a Starcaller's starlight was meant to be on the CASTER (any target's stars count) and that other dots (a Rogue's poison) count too."
+  },
+  {
+   "field": "perDebuffKind",
+   "on": "sor_arcane_burst",
+   "rule": "`perDebuffKind: { mult: 0.35, max: 1.4 }`: +mult per DISTINCT fx kind on the target (dot, slow, root, stun, silence, armourDown, mark...). perDot today counts dots only."
+  },
+  {
+   "field": "polymorph (turned into something harmless)",
+   "on": "sor_transmute",
+   "rule": "`polymorph: { secs: 4 }`: the target walks slowly, casts nothing, hits for nothing and breaks on damage; the browser swaps its look. Written today as a 3 s stun + 30% weaken."
+  },
+  {
+   "field": "afterimage (a delayed repeat of the hit)",
+   "on": "shd_shade_cut, shd_shade_lash, shd_cutting_waltz",
+   "rule": "`afterimage: { delay: 0.6, mult: 0.4 }` on a weapon effect: the same blow lands again after delay at mult (a queued event in w, with its own `k: 'shade'` event for the picture). Written today as a second weapon effect in the same skill, which lands at once."
+  },
+  {
+   "field": "copy (minions that copy the caster)",
+   "on": "shd_shade, shd_shade_pair, shd_host_of_shades",
+   "rule": "`copy: true` on a summon: the minion repeats the caster's last weapon skill at its own dmgMult instead of its own strike list. Today a shade is a melee minion with a 1.3x strike every 5 s."
+  }
+ ]
+}

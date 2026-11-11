@@ -2229,6 +2229,12 @@
      "perRank": {
       "pct": 2
      }
+    },
+    {
+     "do": "buff",
+     "stat": "cdRefund",
+     "pct": 30,
+     "secs": 10
     }
    ]
   },
@@ -2288,6 +2294,13 @@
      "perRank": {
       "pct": 1
      }
+    },
+    {
+     "do": "buff",
+     "stat": "cdRefund",
+     "pct": 30,
+     "secs": 10,
+     "who": "party"
     }
    ]
   },
@@ -2447,6 +2460,12 @@
        1
       ]
      }
+    },
+    {
+     "do": "buff",
+     "stat": "cdRefund",
+     "pct": 30,
+     "secs": 10
     }
    ]
   },
@@ -3558,28 +3577,11 @@
        0.8,
        0.4
       ]
+     },
+     "healFrom": {
+      "pct": 40,
+      "range": 20
      }
-    },
-    {
-     "do": "area",
-     "shape": "circle",
-     "size": 10,
-     "at": "self",
-     "effects": [
-      {
-       "do": "heal",
-       "base": [
-        3,
-        1.2
-       ],
-       "perRank": {
-        "base": [
-         0.3,
-         0.12
-        ]
-       }
-      }
-     ]
     }
    ]
   },
@@ -3770,6 +3772,10 @@
          0.7,
          0.35
         ]
+       },
+       "healFrom": {
+        "pct": 40,
+        "range": 20
        }
       },
       {
@@ -3777,27 +3783,6 @@
        "kind": "slow",
        "secs": 2,
        "pct": 30
-      }
-     ]
-    },
-    {
-     "do": "area",
-     "shape": "circle",
-     "size": 10,
-     "at": "self",
-     "effects": [
-      {
-       "do": "heal",
-       "base": [
-        4,
-        1.8
-       ],
-       "perRank": {
-        "base": [
-         0.35,
-         0.15
-        ]
-       }
       }
      ]
     }
@@ -3874,42 +3859,11 @@
        1.6,
        0.8
       ]
+     },
+     "healFrom": {
+      "pct": 40,
+      "range": 20
      }
-    },
-    {
-     "do": "area",
-     "shape": "circle",
-     "size": 12,
-     "at": "self",
-     "effects": [
-      {
-       "do": "heal",
-       "base": [
-        12,
-        5
-       ],
-       "perRank": {
-        "base": [
-         1,
-         0.4
-        ]
-       }
-      },
-      {
-       "do": "hot",
-       "base": [
-        2.5,
-        1.0
-       ],
-       "secs": 6,
-       "perRank": {
-        "base": [
-         0.2,
-         0.1
-        ]
-       }
-      }
-     ]
     }
    ]
   },
@@ -6289,11 +6243,6 @@
  },
  "wishlist": [
   {
-   "field": "cdRefund (cooldowns hastened)",
-   "on": "chr_quicken, chr_second_hand, chr_borrowed_time",
-   "rule": "`cdRefund: { pct: 30 }` on a buff: while it holds, every cooldown the hero (or the party, with who: party) starts is pct shorter. Written today as castSpeed + moveSpeed buffs, which the engine reads; the Chronomancer hastens casts, not cooldowns."
-  },
-  {
    "field": "rewind (back to where and how you were)",
    "on": "chr_rewind",
    "rule": "`rewind: { secs: 6 }`: the sim keeps a 6 s ring of (x, z, hp, mana) per hero and puts the caster back to the oldest entry. Written today as a self-heal + ward + cleanse + 6 m back, which reads as the same thing."
@@ -6317,11 +6266,6 @@
    "field": "flair / poise counter",
    "on": "mnk_ninefold_staff",
    "rule": "As wave 2's Grandeur: `flair: { perSkill: 0.15, max: 5, window: 8 }`. Poise today is the per-skill +3% damage buffs read through fxPct, which is the same counter at a flat rate."
-  },
-  {
-   "field": "healFrom",
-   "on": "spk_spirit_bolt, spk_spirit_storm, spk_thousand_spirits",
-   "rule": "As wave 3: `healFrom: { pct, range }` on a bolt/damage effect, healing the most hurt friend by a share of the hit (the legendary rule). A fixed helpful circle at self today."
   },
   {
    "field": "element switch on one skill",

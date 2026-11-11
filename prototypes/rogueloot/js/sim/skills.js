@@ -50,8 +50,8 @@ export function costOf(skills, resources, ch, sk, rank) {
   if ((sk.owner === 'wanderer' || sk.owner === 'all') && kind === 'mana' && res !== 'mana') { const m = resources?.wandererSkillsAfterPath?.[ch.path]; kind = res; n *= m?.mult ?? 1; }
   return { kind, n: Math.round(n) };
 }
-const have = (p, kind) => kind === 'mana' ? p.mana : kind === 'rage' ? p.rage || 0 : p.energy || 0;
-const spend = (p, kind, n) => { if (kind === 'mana') p.mana -= n; else if (kind === 'rage') p.rage = (p.rage || 0) - n; else p.energy = (p.energy || 0) - n; };
+const have = (p, kind) => kind === 'health' ? Math.max(0, p.hp / p.maxHp * 100 - 30) : kind === 'mana' ? p.mana : kind === 'rage' ? p.rage || 0 : p.energy || 0;   // health: percent of max, never below 30%
+const spend = (p, kind, n) => { if (kind === 'health') { p.hp -= p.maxHp * n / 100; return; } if (kind === 'mana') p.mana -= n; else if (kind === 'rage') p.rage = (p.rage || 0) - n; else p.energy = (p.energy || 0) - n; };
 export function gain(p, kind, n, R) {
   if (kind === 'rage') p.rage = Math.min(R?.rage?.max ?? 100, Math.max(0, (p.rage || 0) + n));
   else if (kind === 'energy') p.energy = Math.min(R?.energy?.max ?? 100, Math.max(0, (p.energy || 0) + n));
@@ -94,7 +94,7 @@ export function castSkill(w, p, sk, targetId, point) {
   if (row.spendAll) { extra = Math.max(0, have(p, cost.kind) - cost.n); spend(p, cost.kind, cost.n + extra); } else spend(p, cost.kind, cost.n);
   const extraMult = row.perResourceSpent?.mult ? extra * row.perResourceSpent.mult : 0;
   if (row.gcd ?? true) p.gcdUntil = w.time + GCD;
-  const cdSecs = (row.cd || 0) * (1 - Math.min(40, p.st.cooldownReduction || 0) / 100);
+  const cdSecs = (row.cd || 0) * (1 - Math.min(40, p.st.cooldownReduction || 0) / 100) * (1 - Math.min(50, fxPct(p, 'cdRefund')) / 100);
   if (lctx.charges) { if (cdSecs) { const used = p.charge[sk.id]; used.push(Math.max(w.time, ...used) + cdSecs); } }
   else if (row.cd) p.cds[sk.id] = w.time + cdSecs;
   lctx.costN = cost.n; lctx.skill = sk.id;
@@ -129,7 +129,8 @@ export function stepSkillCast(w, p) {
 function run(w, p, sk, rank, t, at, tick = false, extraMult = 0, shaped = null) {
   const row = shaped?.row || atRank(sk, rank), syn = synergyOf(w.content.skills, p.char, sk.id);
   p.lastFight = w.time;
-  for (const e of row.effects || []) apply(w, p, e, t, at, { sk, syn, rank, tick, row, extraMult, crowd: 0, L: shaped?.ctx || {} });
+  const EL = ['fire', 'frost', 'storm', 'poison', 'shadow'], rt = JSON.stringify(row.effects || []).includes('"random"') ? EL[Math.floor(w.rng() * EL.length)] : null;
+  for (const e of row.effects || []) apply(w, p, rt && e.type === 'random' ? { ...e, type: rt } : e, t, at, { sk, syn, rank, tick, row, extraMult, crowd: 0, rt, L: shaped?.ctx || {} });
   w.events.push({ k: 'skill', s: p.id, sk: sk.id, t: t?.id, x: at?.x, z: at?.z });
 }
 const HELPFUL = new Set(['heal', 'hot', 'shield', 'buff', 'cleanse', 'revive', 'link']);
@@ -139,7 +140,10 @@ function apply(w, p, e, t, at, ctx) {
   switch (e.do) {
     case 'weapon': {
       if (!t || t.team !== 'foe' || t.dead) return;
-      const r = weaponBlow(w, p, t, (e.mult + (ctx.extraMult || 0) + (ctx.crowd || 0)) * ctx.syn.damage * lowHp(e, t) * (ctx.L.weaponScale || 1), ctx);
+      const gamble = e.randomMult ? rollMult(w, e.randomMult) : 1;
+      if (e.randomMult) w.events.push({ k: 'gamble', s: p.id, x: +gamble.toFixed(2) });
+      const r = weaponBlow(w, p, t, (e.mult + (ctx.extraMult || 0) + (ctx.crowd || 0)) * gamble * ctx.syn.damage * lowHp(e, t) * (ctx.L.weaponScale || 1), ctx);
+      if (ctx.row.goldOnKill && t.dead) { p.char = { ...p.char, gold: (p.char.gold || 0) + ctx.row.goldOnKill.n }; w.charDirty.add(p.id); w.events.push({ k: 'gold', to: p.id, n: ctx.row.goldOnKill.n }); }
       if (ctx.L.refund && r) { if (r.result === 'crit') gain(p, ctx.L.refund.kind, ctx.L.refund.onCrit, w.content.resources); if (t.dead) gain(p, ctx.L.refund.kind, ctx.L.refund.onKill, w.content.resources); }
       if (ctx.L.chargeOnKill && t.dead && p.charge?.[ctx.L.skill]?.length) p.charge[ctx.L.skill].shift();
       return;
@@ -151,6 +155,7 @@ function apply(w, p, e, t, at, ctx) {
       const r = spellHit(w, p, t, amt, e.type || 'storm', ctx);
       // legendary: chain to more foes nearby; turn damage into healing for the hurt friend
       if (ctx.L.chain && !ctx.chained) { let n = 0; for (const o of w.foes.values()) { if (n >= ctx.L.chain.count) break; if (o === t || o.dead || Math.hypot(o.x - t.x, o.z - t.z) > ctx.L.chain.range) continue; spellHit(w, p, o, amt * ctx.L.chain.mult, e.type || 'storm', { ...ctx, chained: true }); n++; } }
+      if (e.healFrom && r?.amount > 0) healMostHurtFn(w, p, e.healFrom, r.amount);
       if (ctx.L.healFrom && r?.amount > 0) { const ally = [...w.players.values()].filter(x => !x.dead && Math.hypot(x.x - p.x, x.z - p.z) < ctx.L.healFrom.range).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0]; if (ally) healTarget(w, p, ally, r.amount * ctx.L.healFrom.pct / 100); }
       return;
     }
@@ -161,7 +166,7 @@ function apply(w, p, e, t, at, ctx) {
       return;
     }
     case 'zone': { w.zones ||= []; w.zones.push({ owner: p.id, sk: ctx.sk.id, shape: e.shape || 'circle', x: (at || t || p).x, z: (at || t || p).z, size: (e.size || 4) * ctx.syn.radius, until: w.time + (e.secs || 6) * ctx.syn.duration, next: w.time, tick: e.tick || 1, effects: e.effects || [], ctx: { ...ctx, tick: true } }); w.events.push({ k: 'area', s: p.id, shape: 'circle', x: +(at || t || p).x.toFixed(2), z: +(at || t || p).z.toFixed(2), r: (e.size || 4), zone: e.secs || 6, help: (e.effects || []).every(x => HELPFUL.has(x.do)) || undefined }); return; }
-    case 'bolt': if (t && !t.dead) { w.shots.push({ id: 's' + (w.nextId++), chain: e.chain ? { ...e.chain } : ctx.L.chain ? { jumps: ctx.L.chain.count, range: ctx.L.chain.range, falloff: ctx.L.chain.mult } : undefined, from: p.id, to: t.id, x: p.x, z: p.z, speed: e.speed || 24, type: e.type || 'storm', amount: base(e.base) * sp * ctx.syn.damage * markOf(t) * slowedMult(e, t), spell: (e.type || 'storm') !== 'physical' }); w.events.push({ k: 'shoot', s: p.id, t: t.id, ty: e.type }); } return;
+    case 'bolt': if (t && !t.dead) { w.shots.push({ id: 's' + (w.nextId++), healFrom: e.healFrom, goldOnKill: ctx.row.goldOnKill?.n, chain: e.chain ? { ...e.chain } : ctx.L.chain ? { jumps: ctx.L.chain.count, range: ctx.L.chain.range, falloff: ctx.L.chain.mult } : undefined, from: p.id, to: t.id, x: p.x, z: p.z, speed: e.speed || 24, type: e.type || 'storm', amount: base(e.base) * sp * ctx.syn.damage * markOf(t) * slowedMult(e, t), spell: (e.type || 'storm') !== 'physical' }); w.events.push({ k: 'shoot', s: p.id, t: t.id, ty: e.type }); } return;
     case 'area': {
       const helpful = (e.effects || []).every(x => HELPFUL.has(x.do));
       const centre = e.at === 'ground' ? at : e.at === 'target' && t ? t : p;
@@ -181,7 +186,7 @@ function apply(w, p, e, t, at, ctx) {
     case 'hot': if (t && !t.dead) addFx(w, t, { id: ctx.sk.id + ':hot', kind: 'hot', per: base(e.base) * hp * ctx.syn.heal, secs: (e.secs || 8) * ctx.syn.duration, src: p.id }); return;
     case 'shield': if (t && !t.dead) addFx(w, t, { id: ctx.sk.id + ':shield', kind: 'shield', left: base(e.base) * hp * ctx.syn.heal + (ctx.L.wardPerMana ? ctx.L.wardPerMana * (ctx.L.costN || 0) : 0), secs: e.secs || 8, src: p.id, thorns: e.thorns ? { type: e.thorns.type || 'storm', n: base(e.thorns.base) * sp } : undefined }); return;
     case 'buff': { const who = e.who === 'party' ? [...w.players.values()].filter(x => !x.dead && dist(x, p) < 30) : [t && t.team === 'hero' ? t : p]; for (const x of who) addFx(w, x, { id: ctx.sk.id + ':' + e.stat, kind: 'buff', stat: e.stat, pct: e.pct, secs: (e.secs || 10) * ctx.syn.duration, src: p.id }); return; }
-    case 'debuff': if (t && !t.dead && t.team === 'foe') { addFx(w, t, { id: ctx.sk.id + ':' + e.kind, kind: e.kind === 'armourDown' || e.kind === 'damageDown' || e.kind === 'weaken' ? 'buff' : e.kind, stat: e.kind === 'armourDown' ? 'armour' : 'damage', pct: e.kind === 'armourDown' || e.kind === 'damageDown' || e.kind === 'weaken' ? -(e.pct || 15) : e.pct, secs: e.secs || 3, src: p.id }); if (e.kind === 'silence') t.silencedUntil = Math.max(t.silencedUntil || 0, w.time + (e.secs || 2)); if (e.kind === 'stun' && t.cast?.interruptible !== false) t.cast = null; aggroOn(w, t, p, 5); } return;
+    case 'debuff': if (t && !t.dead && t.team === 'foe') { addFx(w, t, { id: ctx.sk.id + ':' + e.kind, kind: e.kind === 'armourDown' || e.kind === 'damageDown' || e.kind === 'weaken' ? 'buff' : e.kind, stat: e.kind === 'armourDown' ? 'armour' : 'damage', pct: e.kind === 'armourDown' || e.kind === 'damageDown' || e.kind === 'weaken' ? -(e.pct || 15) : e.pct, secs: e.secs || 3, src: p.id }); if (e.kind === 'silence') t.silencedUntil = Math.max(t.silencedUntil || 0, w.time + (e.secs || 2)); if ((e.kind === 'stun' || e.kind === 'sleep' || e.kind === 'charm') && t.cast?.interruptible !== false) t.cast = null; aggroOn(w, t, p, 5); } return;
     case 'taunt': if (t && t.team === 'foe' && !t.dead) { tauntTable(t.threat, p.id); t.target = p.id; if (t.state === 'idle' || t.state === 'wander') t.state = 'chase'; w.events.push({ k: 'taunt', s: p.id, t: t.id }); } return;
     case 'interrupt': if (t && t.team === 'foe' && t.cast && t.cast.interruptible !== false) { w.events.push({ k: 'interrupt', s: p.id, t: t.id, sk: t.cast.name }); t.silencedUntil = w.time + (e.lock || 2); t.cast = null; t.nextSwing = w.time + 1; } return;
     case 'dash': { const d = e.dist || 6; let dx = Math.sin(p.yaw), dz = Math.cos(p.yaw); if (e.to === 'back') { dx = -dx; dz = -dz; } let go = d; if (e.to === 'target' && t) { const l = dist(p, t) || 1; dx = (t.x - p.x) / l; dz = (t.z - p.z) / l; go = Math.max(0, Math.min(d, l - (t.r || 0) - p.r - 0.4)); } [p.x, p.z] = resolve(w.area, p.x + dx * go, p.z + dz * go, p.r); w.events.push({ k: 'dash', s: p.id }); return; }
@@ -203,6 +208,11 @@ function apply(w, p, e, t, at, ctx) {
     }
   }
 }
+/** a gamble (Scavenger): values + weights, or a spread from min to max with 1x the most likely */
+function rollMult(w, R) {
+  const vals = R.values || [R.min ?? 0.2, 0.5, 1, 2, R.max ?? 5], wts = R.weights || [2, 3, 4, 2, 1];
+  let k = w.rng() * wts.reduce((a, b) => a + b, 0); for (let i = 0; i < vals.length; i++) { k -= wts[i]; if (k <= 0) return vals[i]; } return vals[vals.length - 1];
+}
 const slowedMult = (e, t) => e.cond?.slowed && (t.fx || []).some(f => f.kind === 'slow' || f.kind === 'root' || f.kind === 'stun') ? (e.cond.mult || 1.5) : 1;
 const lowHp = (e, t) => e.cond?.targetHpBelow && t.hp / t.maxHp < e.cond.targetHpBelow ? (e.cond.mult || 1.5) : 1;
 const perDot = (e, t) => e.perDot ? 1 + Math.min(e.perDot.max ?? 1, (e.perDot.mult || 0.25) * (t.fx || []).filter(f => f.kind === 'dot').length) : 1;
@@ -222,9 +232,9 @@ export function stepZones(w) {
 export function fxPct(a, stat) { let k = 0; for (const f of a.fx || []) { if (f.kind === 'buff' && f.stat === stat) k += f.pct; if (f.kind === 'stance' && f.stats?.[stat]) k += f.stats[stat]; } return k; }
 export const markOf = t => { let k = 1; for (const f of t.fx || []) if (f.kind === 'mark') k *= 1 + f.pct / 100; return k; };
 function aggroOn(w, f, p, n) { if (f.team !== 'foe') return; addThreat(f.threat, p.id, n * (1 + (p.st.threat || 0) / 100 + fxPct(p, 'threat') / 100)); if (f.state === 'idle' || f.state === 'wander' || f.state === 'patrol') f.state = 'chase'; }
-let hurtFn = null, weaponFn = null;
+let hurtFn = null, weaponFn = null, healMostHurtFn = () => {};
 /** fight.js hands in its damage functions (avoids an import cycle). */
-export function wireSkills({ hurt, weaponHit }) { hurtFn = hurt; weaponFn = weaponHit; }
+export function wireSkills({ hurt, weaponHit, healMostHurt }) { hurtFn = hurt; weaponFn = weaponHit; healMostHurtFn = healMostHurt; }
 function weaponBlow(w, p, t, mult, ctx) { return weaponFn(w, p, t, mult * (1 + fxPct(p, 'damage') / 100) * markOf(t), { threat: ctx.row.threat ?? 1 }); }
 function spellHit(w, p, t, amount, type, ctx) {
   const r = resolveHit({ ...p, crit: p.crit + fxPct(p, 'crit') }, armourAfter(t), { amount: amount * markOf(t), type, spell: type !== 'physical' }, w.rng);

@@ -119,6 +119,8 @@ export function hurt(w, src, t, r, type, threatMult = 1) {
   if (t.dead) return;
   w.events.push({ k: 'dmg', s: src.id, t: t.id, n: r.amount, r: r.result, ty: type });
   if (!r.amount) { if (t.team === 'foe') aggro(w, t, src, 1); return; }
+  // sleep ends at the first damage; a charm ends when a hero (or their companion) hits it
+  if (t.fx?.length && t.fx.some(f => f.kind === 'sleep' || (f.kind === 'charm' && src?.team !== 'foe'))) t.fx = t.fx.filter(f => f.kind !== 'sleep' && !(f.kind === 'charm' && src?.team !== 'foe'));
   // a ward that strikes back (thorns on a shield): the attacker takes spell damage while it holds
   if (src?.team === 'foe' && t.team === 'hero') for (const f of t.fx || []) if (f.kind === 'shield' && f.thorns && f.left > 0 && !src.dead) hurt(w, t, src, { result: 'hit', amount: Math.max(1, Math.round(f.thorns.n)) }, f.thorns.type);
   // a link (Sworn Guard, Thread of Fate): a share of the hit goes to the friend who took the oath, after their armour
@@ -213,6 +215,14 @@ export function stepAuto(w) {
     p.lastFight = w.time;
   }
 }
+/** heal the most hurt living friend within range by a share of the damage just dealt (Dusk Priest, Spirit Speaker) */
+export function healMostHurt(w, p, rule, amount) {
+  let best = null, bk = 1;
+  for (const x of w.players.values()) { if (x.dead || Math.hypot(x.x - p.x, x.z - p.z) > (rule.range || 20)) continue; const k = x.hp / x.maxHp; if (k < bk) { bk = k; best = x; } }
+  if (!best) return;
+  const n = Math.round(amount * (rule.pct || 40) / 100), before = best.hp; best.hp = Math.min(best.maxHp, best.hp + n);
+  if (best.hp > before) w.events.push({ k: 'heal', s: p.id, t: best.id, n: Math.round(best.hp - before) });
+}
 export function stepShots(w, dt) {
   const keep = [];
   for (const s of w.shots) {
@@ -224,11 +234,13 @@ export function stepShots(w, dt) {
         const r = resolveHit(src, s.foeShot ? withArmour(t) : armourAfter(t), { amount: s.amount * (s.foeShot ? dmgFactor(src) : 1), type: s.type, spell: s.spell }, w.rng);
         hurt(w, src, t, r, s.type, s.threat ?? 1);
         if (s.onHit && r.amount > 0) applyRider(w, src, t, { id: s.onHit.id, damageType: s.type }, s.onHit.fx);
+        if (s.healFrom && r.amount > 0) healMostHurt(w, src, s.healFrom, r.amount);
+        if (s.goldOnKill && t.dead && src.char) { src.char = { ...src.char, gold: (src.char.gold || 0) + s.goldOnKill }; w.charDirty.add(src.id); w.events.push({ k: 'gold', to: src.id, n: s.goldOnKill }); }
         // a bolt that jumps on: nearest foe not hit yet, each jump weaker
         if (s.chain && s.chain.jumps > 0) {
           const hit = new Set([...(s.chain.hit || []), t.id]); let best = null, bd = s.chain.range || 6;
           for (const o of w.foes.values()) { if (o.dead || hit.has(o.id)) continue; const dd = dist(o, t); if (dd < bd) { bd = dd; best = o; } }
-          if (best) { keep.push({ ...s, id: 's' + (w.nextId++), x: t.x, z: t.z, to: best.id, amount: s.amount * (s.chain.falloff ?? 0.7), chain: { ...s.chain, jumps: s.chain.jumps - 1, hit: [...hit] } }); w.events.push({ k: 'shoot', s: src.id, t: best.id, ty: s.type, from: t.id }); }
+          if (best) { keep.push({ ...s, healFrom: undefined, id: 's' + (w.nextId++), x: t.x, z: t.z, to: best.id, amount: s.amount * (s.chain.falloff ?? 0.7), chain: { ...s.chain, jumps: s.chain.jumps - 1, hit: [...hit] } }); w.events.push({ k: 'shoot', s: src.id, t: best.id, ty: s.type, from: t.id }); }
         }
       }
       continue;
@@ -259,5 +271,5 @@ export function startRevive(w, p, id) {
   return { ok: true };
 }
 
-wireSkills({ hurt, weaponHit: (w, p, t, mult, o) => weaponHit(w, p, t, mult, { threat: o?.threat }) });
+wireSkills({ hurt, healMostHurt, weaponHit: (w, p, t, mult, o) => weaponHit(w, p, t, mult, { threat: o?.threat }) });
 wireChampions({ hurt, makeFoe });

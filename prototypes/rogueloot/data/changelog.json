@@ -1,6 +1,17 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-elder-mire",
+      "date": "2026-11-11",
+      "title": "Elderglade, Mirefen and thirteen more specializations",
+      "items": [
+        "Two new regions: Elderglade, a forest of giant old trees and standing stones, and Mirefen, a marsh of stilt huts and boardwalks. Each has a dungeon beneath it: the Elder Roots, where Ildreth waits, and the Mire Crypt, where Sister Vennel rings her bell.",
+        "Thirteen more specializations at level 10: Necromancer, Warlock, Druid, Weaponmaster, Reckoner, Dusk Priest, Bard, Wyrmblood, Tinker, Chronomancer, Spirit Speaker, Hexbreaker and Monk. Druid shapes, Weaponmaster stances, Bard songs and Wyrmblood tempers swap your whole action bar.",
+        "Mud and flood water slow everyone who wades through, you and the monsters alike.",
+        "Revive skills now bring a fallen friend back, even mid-fight. Skills you have not reached yet are dimmed on your bar."
+      ]
+    },
+    {
       "id": "2026-11-11-firststeps",
       "date": "2026-11-11",
       "title": "A guide for your first steps, and four new places",

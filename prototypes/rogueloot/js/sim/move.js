@@ -1,3 +1,4 @@
+import { inShape } from '../world/zone.js';
 // Walking: the ONE movement rule, used by the authoritative sim (server or solo worker) AND by the client's own
 // prediction, so the two agree to the centimetre. Pure: no clocks, no DOM.
 //
@@ -30,10 +31,31 @@ export function resolve(area, x, z, r) {
 }
 
 /** One step of walking. `a` = { x, z, yaw, r }, input already in WORLD space (+x east, -z north). Mutates `a`. */
+/** Ground that slows you (mud, shallow flood water): a 2 m grid built once per area, read by everyone who walks. */
+export const SLOW_GROUND = { mud: 0.7, bog: 0.6, shallows: 0.65 };
+const SLOW_CELL = 2;
+export function slowAt(area, x, z) {
+  if (!area?.zone?.surfaces) return 1;
+  let g = area._slow;
+  if (!g) {
+    const B = area.bounds, nx = Math.ceil((B.x1 - B.x0) / SLOW_CELL), nz = Math.ceil((B.z1 - B.z0) / SLOW_CELL), cells = new Float64Array(nx * nz).fill(1);
+    const shapes = area.zone.surfaces.map((sh, i) => [sh, i]), base = 1;   // a zone's base ground never slows (many dungeon floors are 'mud'); only painted patches do
+    for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
+      const cx = B.x0 + (i + 0.5) * SLOW_CELL, cz = B.z0 + (j + 0.5) * SLOW_CELL; let k = base;
+      for (const [sh] of shapes) if (inShape(sh, cx, cz)) k = SLOW_GROUND[sh.s] || 1;
+      cells[j * nx + i] = k;
+    }
+    g = area._slow = { nx, nz, cells };
+    Object.defineProperty(area, '_slow', { enumerable: false, value: g, writable: true });
+  }
+  const B = area.bounds, i = Math.floor((x - B.x0) / SLOW_CELL), j = Math.floor((z - B.z0) / SLOW_CELL);
+  return i < 0 || j < 0 || i >= g.nx || j >= g.nz ? 1 : g.cells[j * g.nx + i];
+}
 export function walk(area, a, mx, mz, dt, speed = WALK_SPEED) {
   [mx, mz] = clampInput(mx, mz);
   const moving = mx * mx + mz * mz > 0.0025;
   if (moving) {
+    speed *= slowAt(area, a.x, a.z);
     [a.x, a.z] = resolve(area, a.x + mx * speed * dt, a.z + mz * speed * dt, a.r ?? PLAYER_RADIUS);
     a.yaw = Math.atan2(mx, mz);
   }

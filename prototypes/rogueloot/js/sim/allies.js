@@ -1,3 +1,4 @@
+import { slowAt } from './move.js';
 // Companions (M19, ruling 19): mercenaries now; pets and summons (spec skills, M20+) use the same brain. Pure.
 // The rules the owner set: intelligent, proactively defend the player, never get stuck, never ignore combat, never
 // stack in a pile. So, each step a companion:
@@ -64,7 +65,8 @@ export function stepAllies(w, dt) {
     if (w.time - a.lastFight > 5) a.hp = Math.min(a.maxHp, a.hp + a.maxHp * 0.04 * dt);
     if (a.fx?.length) a.fx = a.fx.filter(f => f.until > w.time);
     // too far behind (a different screen): catch up at once, like a D2 hireling
-    if (a.stay) { const t = choose(w, a, a.stay); a.target = t?.id || null; if (t && dist(a, t) < (a.range || 1.7) + (t.r || 0) + 0.6) fight(w, a, t, dt); continue; }   // a decoy stands where it was dropped
+    if (a.stay) { if (Math.hypot(a.x - a.stay.x, a.z - a.stay.z) > 0.3) { a.x = a.stay.x; a.z = a.stay.z; }   // nothing shoves a post or a decoy off its spot
+      const t = choose(w, a, a.stay); a.target = t?.id || null; if (t && dist(a, t) < (a.range || 1.7) + (t.r || 0) + 0.6) fight(w, a, t, dt); continue; }   // a decoy stands where it was dropped
     if (dist(a, p) > 30) { [a.x, a.z] = resolve(w.area, p.x + 1.5, p.z + 1.5, a.r); a.target = null; }
     const t = choose(w, a, p);
     a.target = t?.id || null;
@@ -140,7 +142,7 @@ function steer(w, a, tx, tz, speed, dt, blocked = false) {
   if (blocked || !clearLine(w.area, a.x, a.z, tx, tz, a.r * 0.9)) { const n = downhill(w, flowTo(w, tx, tz), a.x, a.z); if (n) { tx = n[0]; tz = n[1]; } }
   let dx = tx - a.x, dz = tz - a.z; const d = Math.hypot(dx, dz) || 1; dx /= d; dz /= d;
   const [sx, sz] = sep(w, a); dx += sx * 1.6; dz += sz * 1.6;
-  const l = Math.hypot(dx, dz) || 1, step = Math.min(speed * dt, d), ox = a.x, oz = a.z;
+  const l = Math.hypot(dx, dz) || 1, step = Math.min(speed * slowAt(w.area, a.x, a.z) * dt, d), ox = a.x, oz = a.z;
   [a.x, a.z] = resolve(w.area, a.x + dx / l * step, a.z + dz / l * step, a.r);
   if (d > 0.05) a.yaw = Math.atan2(tx - a.x, tz - a.z);
   if (step > 0.01 && Math.hypot(a.x - ox, a.z - oz) < step * 0.2) { if (++a.stuck > 12) { const g = w.rng() * 6.283; [a.x, a.z] = resolve(w.area, a.x + Math.cos(g) * 0.8, a.z + Math.sin(g) * 0.8, a.r); a.stuck = 0; } } else a.stuck = 0;

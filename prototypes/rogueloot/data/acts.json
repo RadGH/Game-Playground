@@ -33,10 +33,10 @@
         { "id": "kings_road", "name": "King's Road", "kind": "zone", "levels": [7, 9], "x": 50, "y": 48, "links": ["thornwood", "old_barrow", "elderglade", "mirefen"], "portalAfter": "thornwood_hollow", "order": 7, "rare": "sergeant_krull", "built": true },
         { "id": "old_barrow", "name": "Old Barrow", "kind": "dungeon", "levels": [9, 10], "floors": 3, "boss": "reeve_oswin", "x": 64, "y": 58, "links": ["kings_road"], "portalAfter": "kings_road", "order": 9, "rare": "the_lamplighter", "built": true },
 
-        { "id": "elderglade", "name": "Elderglade", "kind": "zone", "levels": [9, 11], "x": 32, "y": 36, "links": ["kings_road", "elder_roots"], "portalAfter": "kings_road", "order": 8, "rare": "velka_thricewed", "built": false },
-        { "id": "elder_roots", "name": "Elder Roots", "kind": "dungeon", "levels": [12, 12], "floors": 2, "boss": "ildreth", "x": 16, "y": 28, "links": ["elderglade"], "portalAfter": "old_barrow", "order": 10, "built": false },
-        { "id": "mirefen", "name": "Mirefen", "kind": "zone", "levels": [11, 13], "x": 56, "y": 32, "links": ["kings_road", "mire_crypt", "highcairn_pass"], "portalAfter": "elder_roots", "order": 11, "rare": "bogmother_sulk", "built": false },
-        { "id": "mire_crypt", "name": "Mire Crypt", "kind": "dungeon", "levels": [14, 14], "floors": 2, "boss": "sister_vennel", "x": 72, "y": 38, "links": ["mirefen"], "portalAfter": null, "order": 12, "built": false },
+        { "id": "elderglade", "name": "Elderglade", "kind": "zone", "levels": [9, 11], "x": 32, "y": 36, "links": ["kings_road", "elder_roots"], "portalAfter": "kings_road", "order": 8, "rare": "velka_thricewed", "built": true },
+        { "id": "elder_roots", "name": "Elder Roots", "kind": "dungeon", "levels": [12, 12], "floors": 2, "boss": "ildreth", "x": 16, "y": 28, "links": ["elderglade"], "portalAfter": "old_barrow", "order": 10, "built": true },
+        { "id": "mirefen", "name": "Mirefen", "kind": "zone", "levels": [11, 13], "x": 56, "y": 32, "links": ["kings_road", "mire_crypt", "highcairn_pass"], "portalAfter": "elder_roots", "order": 11, "rare": "bogmother_sulk", "built": true },
+        { "id": "mire_crypt", "name": "Mire Crypt", "kind": "dungeon", "levels": [14, 14], "floors": 2, "boss": "sister_vennel", "x": 72, "y": 38, "links": ["mirefen"], "portalAfter": null, "order": 12, "built": true },
 
         { "id": "highcairn_pass", "name": "Highcairn Pass", "kind": "zone", "levels": [13, 15], "x": 46, "y": 18, "links": ["mirefen", "redcliff_heights"], "portalAfter": "mire_crypt", "order": 13, "rare": "hoarfang", "built": false },
         { "id": "redcliff_heights", "name": "Redcliff Heights", "kind": "zone", "levels": [15, 17], "x": 64, "y": 12, "links": ["highcairn_pass", "warband_mine", "sunken_ruins"], "portalAfter": "highcairn_pass", "order": 14, "rare": "captain_vosk", "built": false },

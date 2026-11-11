@@ -1,3 +1,4 @@
+import { slowAt } from './move.js';
 // Monster brains (rulings 16, 19, 45). Pure. Every foe each step:
 //   idle/wander/patrol -> notices a hero -> chase -> attack / ability -> home again if pulled too far.
 // Movement is steering: seek (along the walk-grid flow field when the straight line is blocked, so nothing gets stuck
@@ -182,7 +183,7 @@ export function steer(w, f, tx, tz, speed, dt, extra = null) {
   const [sx, sz] = separation(w, f);
   dx += sx * 1.6; dz += sz * 1.6;
   if (extra) { dx += extra[0]; dz += extra[1]; }
-  const l = Math.hypot(dx, dz) || 1, step = Math.min(speed * dt, d);
+  const l = Math.hypot(dx, dz) || 1, step = Math.min(speed * slowAt(w.area, f.x, f.z) * dt, d);
   const ox = f.x, oz = f.z;
   [f.x, f.z] = resolve(w.area, f.x + dx / l * step, f.z + dz / l * step, f.r);
   if (d > 0.05) f.yaw = Math.atan2(tx - f.x, tz - f.z);

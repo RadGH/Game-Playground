@@ -943,3 +943,251 @@ items with a rule each. Worth doing first:
 7. **Buffs that reach minions**: a party buff is read by no ally (Howl's +10% is party-only; Grave Mending is a zone
    because zones DO heal allies). A corpse count for the Necromancer, `wall` for Pyre Wall, and a dimmed stance-bar
    slot for a skill below the hero's level are the rest.
+
+---
+
+# Wave 4 (M26) — Wyrmblood, Tinker, Chronomancer, Spirit Speaker, Hexbreaker, Monk
+
+Design by Fable, 2026-11-11. The data is `data/skills-specs-4.json` (listed in `data/skills-specs-index.json`);
+the six `starter` arrays in `data/specs.json` are filled. 181 nodes: 180 tree nodes (30 a spec, three trees of 10,
+every tree with a node at every gate 10/11/12/14/16/18/20) plus one hidden stance-only active; 95 actives, 52
+passives, 34 synergies. Three hybrids: the **Hexbreaker** (Rogue OR Healer) carries `altCost` in mana and the
+**Monk** (Fighter OR Rogue) `altCost` in temper on every active; the **Spirit Speaker** (Healer OR Mage) does not,
+because both of its Paths pay mana (as the Druid).
+
+Same standard as waves 1–3: a filler at 10 in each of the two trees the spec is about (both granted at the pick),
+an interrupt of its own off the global cooldown, a defensive, an area answer, a signature, and a capstone at 20 on
+a 20–90 s cooldown.
+
+**What this wave leans on, all live:**
+
+- **Tempers are stances that swap the bar** (wave 3's engine). Fire Temper and Frost Temper each set the element
+  and put that temper's breath, rend and big hit on the six slots; Wyrmfall is on every bar; Wyrm Ascendant is a
+  15 s third temper (storm) with its own bar and one hidden Storm Breath. The Monk's Inner Stillness is a stance
+  with stats and no bar.
+- **Stationary minions.** `stay: true` on a ground-target summon drops the thing at the pointer and it stays there:
+  the Tinker's Sentry, Flame Sentry, Bait Sentry, Twin Sentries and Siege Engine (a pet, so the sentries stay) and
+  the Spirit Speaker's Striking Post and Great Post. Checked: a sentry shoots from where it was put while its
+  Tinker walks 20 m off (it drifts a few metres when a pack walks through it — separation steering, not following).
+  The healing posts are `zone`s, which already reach companions.
+- **Bolts that jump.** Spirit Bolt carries `chain: { jumps: 2, range: 6, falloff: 0.7 }` (checked: 156 → 109 →
+  76 on three brutes in a line), A Thousand Spirits five jumps at 0.8.
+- **`cond: { slowed }`** on Frost Rend, Winter Heart, Unravel and Heat Death — the Chronomancer and the frost
+  Wyrmblood pay off their own slows.
+- **Poise is the flair trick.** Every Monk strike ends with `buff damage 3% 8 s` under its own skill id, so
+  different strikes stack and the same one refreshes (checked: Open Palm → Sweeping Heel → Twin Palms → Open Palm
+  = +9%), and Ninefold Staff reads the sum the way every weapon hit does.
+
+## Numbers in one table
+
+Rank 1, level 20, before attribute multipliers; baseline 132 per global, a sword swing 35, autos ~63 a global.
+
+| | Per enemy | Per global | Notes |
+|---|---|---|---|
+| Wyrmblood: Fire Rend (fire temper) | 49 × 1.1 + 20/s burn | ~117 + 20/s | Fire Breath 88 + 15.5/s in a cone every 6 s; Pyre Heart 154 + 31/s on 6 m, +20% damage |
+| Wyrmblood: Frost Rend (frost temper) | 45 + 55 frost (×1.5 on the slowed = 83) | ~110 | Glacier Slam 70 + hold + 88 over 4 m; Winter Heart 132 (×1.5) + hold on 8 m + 185 ward |
+| Wyrmblood: Dragonscale | ward 116 that throws 33 storm back, +15% armour | — | Wyrmfall 42 to everything in 4 m where you land, every 15 s |
+| Tinker: Clockwork Bolt | 35 + 44 storm | ~79 | Overwound Bolt 2 × 42 + 66 every 10 s; Clockwork Barrage 3 × (28 + 55 + 66 over 3 m) |
+| Tinker: Sentry | 0.55 of a companion, a shot a swing, 30 s | ~12/s each | Twin Sentries two at once; Siege Engine 1.5× hp / 1.3× dmg with a fire shell |
+| Tinker: Flask Grenade | 99 fire + 15.5/s × 5 on 4 m | — | Frost Flask 77 + 40% slow; Smoke Canister −50% speed, −20% damage on 4 m |
+| Chronomancer: Quick Bolt | 109 per 1 s cast | ~109 (×1.25 under Quicken) | Double Time 2 × 88 instant every 8 s; Borrowed Time +50% cast speed for 10 s |
+| Chronomancer: Decay + Unravel | 22/s × 10 then 132 (×1.5 slowed = 198) | — | Entropy Field −40% speed + 22/s on 6 m for 8 s; Heat Death 176 (×1.5) on 8 m |
+| Chronomancer: Stasis Lock | 2 s stun then +25% taken for 6 s | — | Stop the Clock: 2.5 s stun + 110 on everything in 10 m, 40 mana back |
+| Spirit Speaker: Spirit Bolt | 120, then 84, then 59 on the jumps; 27 to every friend in 10 m | ~120–263 | A Thousand Spirits 242 jumping five times + 112 and 22.5/s to everyone in 12 m |
+| Spirit Speaker: Mending Post | 15.8/s to everyone within 6 m of it for 15 s | — | Striking Post 0.6 of a companion for 20 s; Great Post both, 25 s, bursts storm over 4 m |
+| Spirit Speaker: Spirit Mend | 112 + 18/s × 6 per 1.5 s | ~150/1.5 s | Call Back the Spirit: back at FULL health, 3 s, every 2 min |
+| Hexbreaker: Silver Edge | 42 + 33 silver | ~75 | Silver Bolt 45 + 44 + 1.5 s silence every 6 s; Silver Judgement 105 (×1.5 under 35%) + 132 + 2 s silence |
+| Hexbreaker: Null Circle | nothing in 6 m casts for 8 s, 10.5/s | — | Iron Net hold + silence 2 s on 4 m; Dead Silence 3 s silence + stun on 8 m + 140 ward |
+| Monk: Open Palm, three strikes of poise | 42 × 1.09 | ~109 | Mountain Fist 84 + 1.5 s stun every 12 s; Ninefold Staff 77 each in 6 m (+50% crowd) × poise |
+| Monk: Iron Body (stillness) | ward 116 that hits back 33, +20% armour | — | Inner Stillness +20% armour, +10 dodge held; Still Mountain 190 ward, +40% armour, taunt |
+
+---
+
+## Wyrmblood — Fighter → the Dragon Knight
+
+**Fantasy.** Pick a temper and everything follows it. Fire burns and hits harder; frost slows, holds and armours;
+the scales throw back what hits you; and at 20 a third temper, storm, for fifteen seconds. Three trees, two of
+them tempers:
+
+- **Fire Temper** (bar: Fire Temper, Fire Breath, Fire Rend, Wyrmfall, Cinder Rush, Pyre Heart): the temper (10:
+  +10% damage, +5% crit), Hot Blood (11), Fire Breath (12, 88 fire + a burn in a 90° cone), Hotter Breath (12,
+  synergy), Fire Rend (14, 140% + 20/s burn — the filler), Wyrm Eye (14), Cinder Rush (16, 10 m rush landing 88
+  fire over 4 m), Long Burn (16, synergy), Furnace (18), **Pyre Heart** (20: 154 + 31/s on everything in 6 m, +40%
+  crowd, +20% damage for 10 s).
+- **Frost Temper** (bar: Frost Temper, Frost Breath, Frost Rend, Wyrmfall, Glacier Slam, Winter Heart): the temper
+  (10: +15% armour, +5 dodge), Cold Scales (11), Frost Breath (12, 77 frost + 40% slow in a cone), Wider Breath
+  (12, synergy), Frost Rend (14, 130% + slow + 55 frost ×1.5 on the slowed — the filler), Thick Scales (14),
+  Glacier Slam (16, 200% + 2 s hold + ice over 4 m), Deeper Frost (16, synergy), Winter Hide (18), **Winter
+  Heart** (20: 132 frost ×1.5 on the slowed + a 2 s hold on everything in 8 m, and a 185 ward).
+- **Scales**: Dragonscale (10, a 116 ward that throws storm back, +15% armour — any temper), Wyrm Heart (11),
+  Wyrmfall (12, a 12 m leap: 120% + stun over 4 m — on every bar), Jaw Snap (12, the interrupt, off-GCD), Harder
+  Scales (14, synergy), Wyrm Hunger (14), Tail Sweep (16, 100% through 150° and 3 m of knockback), Quick Tail
+  (16), Heavier Fall (18, synergy), **Wyrm Ascendant** (20: the storm temper for 15 s — +15% damage, +8% crit,
+  +20% armour, 15% faster — on a bar of Storm Breath (hidden), both rends, Wyrmfall and Tail Sweep, opening with
+  132 storm + a stun on 8 m).
+
+**Rotation at 15** (Fire Temper, then the bar): Wyrmfall in → Fire Breath across the pack → Fire Rend, Fire Rend →
+Cinder Rush to the archer. Swap to Frost for the brute: Frost Breath → Frost Rend (the frost half pays ×1.5 on what
+the breath slowed) → Glacier Slam. Dragonscale from either bar before the pull is not possible — it is on the
+neutral bar, so raise it and THEN pick a temper.
+
+**Phone (6, no temper):** Fire Temper, Frost Temper, Dragonscale, Wyrmfall, Jaw Snap, Tail Sweep.
+
+---
+
+## Tinker — Rogue → the Tinker
+
+**Fantasy.** Gadgets. Bolts that go off twice, two flasks, sentries that stand where you drop them, a line to reel
+yourself in on, a watch that patches you up, and a battery for the party. Three trees:
+
+- **Clockwork**: Clockwork Bolt (10, 100% + 44 storm a moment later — the filler), Steady Hand (11), Flask Grenade
+  (12, 99 fire + burn on 4 m at the pointer), Tighter Spring (12, synergy), Frost Flask (14, 77 frost + 40% slow),
+  Keen Sight (14), Scattershot (16, 90% to everything in a 60° cone, ranged), Bigger Flask (16, synergy),
+  Overwound Bolt (18, 2 × 120% + 66 storm), **Clockwork Barrage** (20: 3 s channel of bolt + charge + a flask over
+  3 m each second).
+- **Sentries**: Deploy Sentry (10, a crossbow on legs where you point, 30 s — the opener), Spare Parts (11), Oil
+  Can (12, synergy → every Sentry), Flame Sentry (12, a burner that gouts over 3 m), Bait Sentry (14, a drum that
+  turns everything in 6 m on it for 10 s), Brass Ribs (14), Twin Sentries (16), Hotter Burner (16, synergy),
+  Insulation (18), **Siege Engine** (20: 1.5× hp / 1.3× dmg pet where you point, 30 s, with a fire shell — the
+  sentries stay because it is the pet slot).
+- **Contraptions**: Grapple Line (10, reel 12 m to the target + 70%), Spring Heels (11), Pocket Watch (12, 90 +
+  18/s × 8 on yourself, instant), Light Frame (12), Spring Battery (14, party +20% cast and move speed), Better
+  Watch (14, synergy), Smoke Canister (16, −50% speed −20% damage on 4 m), Jammer (16, the interrupt from 20 m),
+  Fast Crank (18), **Overclock** (20: +20% damage, +15% crit, +25% cast speed, 40 energy, a 140 ward).
+
+**Rotation at 15** (Deploy Sentry, Clockwork Bolt, Flask Grenade, Frost Flask, Bait Sentry, Pocket Watch): Sentry
+where the fight will be → Bait Sentry in front of it → Frost Flask on the pack → Flask Grenade on top → Clockwork
+Bolt, Clockwork Bolt → Pocket Watch when something gets through.
+
+**Phone (6):** Clockwork Bolt, Flask Grenade, Deploy Sentry, Bait Sentry, Pocket Watch, Grapple Line.
+
+---
+
+## Chronomancer — Mage → the Chronomancer
+
+**Fantasy.** Bends the clock: faster for you and the party, slower for them, a step back when it goes wrong, and a
+stopped clock when it all needs to land at once. Three trees:
+
+- **Quicken**: Quick Bolt (10, 109 storm in a 1 s cast — the filler), Fast Hands (11), Quicken (12, +25% cast
+  speed +20% move speed for 10 s), Sharper Tick (12, synergy), Second Hand (14, the same for the party at 15%),
+  Studied Clock (14), Double Time (16, 2 × 88 instant), Long Hours (16), Longer Quicken (18, synergy), **Borrowed
+  Time** (20: +50% cast speed, +20% damage, 50 mana, a ward).
+- **Entropy**: Decay (10, 22/s for 10 s + 20% slow, instant — the other filler), Deep Well (11), Entropy Field (12,
+  6 m at the pointer: −40% speed + 22/s for 8 s), Cold Eye (12), Unravel (14, 132 ×1.5 on the slowed), Wider
+  Field (14, synergy), Time Rot (16, 88 + slow + decay on 5 m), Faster Decay (16, synergy), Weathered (18),
+  **Heat Death** (20: 176 ×1.5 on the slowed on 8 m, −60% speed, −20% damage).
+- **Stasis**: Stasis Lock (10, 2 s stun then +25% taken for 6 s), Patient Heart (11), Rewind (12, 112 back + ward
+  + cleanse + 6 m back), Hiccup (12, the interrupt), Further Back (14, synergy), Slipped Second (14), Time Lock
+  (16, a 2 s hold on 5 m at the pointer), Echo (16, 110 now + 50/s × 4), Quick Step (18), **Stop the Clock** (20:
+  2.5 s stun + 110 on everything in 10 m, 40 mana back, +30% cast speed).
+
+**Rotation at 15** (Quick Bolt, Decay, Entropy Field, Unravel, Stasis Lock, Rewind): Entropy Field on the pack →
+Decay on the brute → Quicken → Quick Bolt, Quick Bolt → Unravel while the field holds them (×1.5) → Stasis Lock the
+caster → Rewind when they reach you.
+
+**Phone (6):** Quick Bolt, Decay, Entropy Field, Unravel, Stasis Lock, Rewind.
+
+---
+
+## Spirit Speaker — Healer OR Mage → the Shaman
+
+**Fantasy.** Plant spirit posts: one heals everyone near it, one strikes, the Great Post does both. Bolts that jump
+from foe to foe and put a little light on your friends as they leave. From Healer or Mage, mana either way. Three
+trees:
+
+- **Posts**: Mending Post (10, 6 m at the pointer, 15.8/s to everyone in it for 15 s, companions too — the
+  opener), Spirit Well (11), Striking Post (12, a caster minion that stands where it is put, 20 s), Old Songs
+  (12), Angrier Post (14, synergy), Rooting Post (14, −40% speed + 22/s on 5 m for 6 s), Cleansing Post (16,
+  heals and cleanses everyone in 6 m every 2 s), Deeper Roots (16, synergy), Wide Spirit (18), **The Great Post**
+  (20: a striking post that also bursts storm over 4 m AND a heal zone 8 m across, 25 s).
+- **Spirit Bolts**: Spirit Bolt (10, 120 storm jumping twice + 27 to every friend in 10 m — the filler), Loud
+  Spirit (11), Spirit Lash (12, 88 + heals you 44, instant), Sharper Bolt (12, synergy), Ancestor's Word (14, the
+  interrupt), Keen Spirit (14), Spirit Storm (16, 99 on 5 m + slow, friends in 10 m healed), Quick Words (16),
+  Kinder Bolt (18, synergy on the light), **A Thousand Spirits** (20: 242 jumping five times + 112 and 22.5/s to
+  everyone in 12 m).
+- **The Calling**: Warding Spirits (10, a 68 ward on everyone in 10 m), Stout Heart (11), Spirit Mend (12, 112 +
+  18/s × 6), Spirit Skin (12), Stronger Wards (14, synergy), Spirit Walk (14, 8 m with a ward, off-GCD),
+  Cleansing Spirit (16, cleanse + 78 + heals land harder), Call Back the Spirit (16, the revive — at FULL health,
+  3 s, 2 min), Longer Mend (18, synergy), **Ancestral Tide** (20: 178 + 36/s + 90 ward + cleanse on everyone in
+  12 m).
+
+**Rotation at 15** (Mending Post, Striking Post, Spirit Bolt, Spirit Lash, Spirit Mend, Ancestor's Word): Mending
+Post where the party will stand → Striking Post beside it → Spirit Bolt, Spirit Bolt (every one heals a little) →
+Spirit Lash when you are hit → Spirit Mend the tank → Ancestor's Word the shaman.
+
+**Phone (6):** Spirit Bolt, Spirit Mend, Mending Post, Striking Post, Spirit Lash, Warding Spirits.
+
+---
+
+## Hexbreaker — Rogue OR Healer → the Witch Hunter
+
+**Fantasy.** Silver strips magic. Pins that root, nets that silence, a circle no spell crosses, and a writ that
+sends the whole party after one target. Blade or crossbow; from Rogue on energy, from Healer on mana. The extra
+damage to the unholy is on the wishlist (`cond: family`); the silver burn is flat today. Three trees:
+
+- **Silver**: Silver Edge (10, 120% + 33 silver — the filler), True Eye (11), Silvered Pin (12, 100% + 2 s hold),
+  Keener Silver (12, synergy), Silver Bolt (14, 130% + 1.5 s silence + 44), Strong Arm (14), Quicksilver (16, 2 ×
+  80% + 10% crit), Longer Pin (16, synergy), Quick Hands (18), **Silver Judgement** (20: 300% ×1.5 under 35% +
+  2 s silence + 132).
+- **The Null**: Hush Bolt (10, the interrupt + 1.5 s silence from 15 m, off-GCD), Warded Skin (11), Iron Net (12,
+  hold + silence 2 s on 4 m at the pointer), Light Step (12), Null Circle (14, nothing in 6 m casts for 8 s), Wider
+  Circle (14, synergy), Silver Dart (16, 120% from 15 m, −15% damage), Iron Will (16), Tighter Net (18, synergy),
+  **Dead Silence** (20: 3 s silence + stun + 110 on everything in 8 m, a 140 ward).
+- **The Writ**: Writ of Guilt (10, +20% taken for 10 s), Long Road (11), Cleansing Rite (12, cleanse + 78 on a
+  friend from 20 m), Blood Price (12), Longer Writ (14, synergy), Silver Ward (14, a 94 ward that cuts back, +15%
+  armour), Hunter's Call (16, +10% taken on the target and +10% damage for the party), Mail and Faith (16), Kinder
+  Rite (18, synergy), **Rite of Purging** (20: 132 silver on every foe in 8 m + 2 s silence − 20% damage, and
+  every friend there healed and cleansed).
+
+**Rotation at 15** (Silver Edge, Silvered Pin, Hush Bolt, Iron Net, Null Circle, Writ of Guilt): Null Circle on the
+casters before the pull → Writ of Guilt on the brute → Silvered Pin the runner → Silver Edge, Silver Edge → Hush
+Bolt anything that starts a cast outside the circle → Iron Net when the second pack arrives.
+
+**Phone (6):** Silver Edge, Silvered Pin, Hush Bolt, Iron Net, Writ of Guilt, Cleansing Rite.
+
+---
+
+## Monk — Fighter OR Rogue → the Monk
+
+**Fantasy.** Every palm strike, step and sweep builds poise, and the staff spends it in a widening spin. From Rogue
+on energy, from Fighter on temper. Three trees:
+
+- **Open Palm**: Open Palm (10, 120% + poise — the filler), Quick Hands (11), Wind Step (12, 8 m to the target and
+  every hit a critical for 3 s), Firmer Palm (12, synergy), Twin Palms (14, 2 × 80%), Clear Eye (14), Flying Knee
+  (16, 160% + 1 s stun), Light Feet (16), Second Palm (18, synergy), **Hundred Palms** (20: 5 × 60% + 10% damage
+  for 10 s).
+- **Stillness**: Inner Stillness (10, a stance: +20% armour, +10 dodge, −5% damage; no bar), Rooted (11), Still
+  Breath (12, 90 back + cleanse, instant), Iron Skin (12), Iron Body (14, a 116 ward that hits back, +20% armour),
+  Harder Body (14, synergy), Calm Centre (16, the interrupt), Deep Lungs (16), Slow Pulse (18), **Still Mountain**
+  (20: 190 ward that hits back hard, +40% armour, a heal, taunt + slow on 6 m).
+- **Ninefold**: Sweeping Heel (10, 100% through 120° + slow), Hard Shin (11), Staff Line (12, 110% down an 8 m
+  line + a short stun), Steady Mind (12), Mountain Fist (14, 240% + 1.5 s stun), Wider Heel (14, synergy), Leg
+  Sweep (16, 90% + 1.5 s hold on 4 m), Heavier Fist (16, synergy), Longer Line (18, synergy), **Ninefold Staff**
+  (20: 220% to everything in 6 m, +50% crowd, stun — every strike of poise counts on each hit).
+
+Poise: every strike in Open Palm and Ninefold ends with +3% damage for 8 s under its own name, so Open Palm →
+Sweeping Heel → Twin Palms is +9% and a fourth Open Palm only refreshes the first. Variety is the rotation.
+
+**Rotation at 15** (Open Palm, Wind Step, Sweeping Heel, Staff Line, Mountain Fist, Twin Palms): Wind Step in (sure
+crits for 3 s) → Mountain Fist → Sweeping Heel → Staff Line → Twin Palms → Open Palm, with four strikes of poise on
+by the fifth global. Inner Stillness up for the brute.
+
+**Phone (6):** Open Palm, Twin Palms, Sweeping Heel, Mountain Fist, Wind Step, Inner Stillness.
+
+---
+
+## What the engine must have for wave 4 (and what it has)
+
+Everything in `skills-specs-4.json` runs today; `tests/sim/paths.test.js` fires every active of the six, and the
+stance-bar test now also covers the Wyrmblood's three tempers. The file's `wishlist` has nine items with a rule
+each. Worth doing first:
+
+1. **`cdRefund`** (Quicken, Second Hand, Borrowed Time): the Chronomancer hastens casts today, not cooldowns.
+2. **`rewind`** (a 6 s ring of position + health per hero) and **`stasis`** (bank the damage, land it when the hold
+   ends) — Rewind is heal + ward + cleanse + 6 m back today, Stasis Lock a stun + a mark.
+3. **`cond: family`** (silver ×1.3 against the Restless and casters) on the Hexbreaker's silver; flat today.
+4. **`nextHitCrit`** on Wind Step (one sure critical, not three seconds of them); **`flair`** for poise.
+5. **`healFrom`** again (Spirit Bolt, Spirit Storm, A Thousand Spirits), as waves 3's Dusk Priest.
+6. A **stationary minion gets shoved** by separation steering when a pack walks through it (4 m in the check); a
+   `stay` minion should hold its spot or step back to it, and a bait sentry should shout at its drum's radius, not
+   its reach.

@@ -748,6 +748,10 @@
    "role": "melee damage",
    "blurb": "Pick a temper (fire, frost or storm) and every breath, rend and leap follows it. Scales that throw back what hits you.",
    "fantasy": "Thousandvale's Dragon Knight, renamed. Wyrm Temper as a stance that sets the element, Wyrm's Breath (a cone), Scale Rend, Wyrmfall (a leap), Dragonscale, Wyrm Ascendant.",
+   "starter": [
+    "wyr_fire_temper",
+    "wyr_frost_temper"
+   ],
    "trees": [
     {
      "id": "fire_temper",
@@ -784,6 +788,10 @@
    "role": "ranged damage, turrets (minions)",
    "blurb": "Gadgets. Bolts that go off twice, grenades that change element, a sentry turret, a grappling line and a pocket watch that patches you up.",
    "fantasy": "Thousandvale's Tinker. Clockwork Bolt, Flask Grenade, Deploy Sentry (a stationary ranged minion), Pocket Watch, Grapple Line, Spring Battery (a party haste).",
+   "starter": [
+    "tnk_clockwork_bolt",
+    "tnk_deploy_sentry"
+   ],
    "trees": [
     {
      "id": "clockwork",
@@ -816,6 +824,10 @@
    "role": "ranged damage / control / support",
    "blurb": "Bends the clock: hastens you and your cooldowns, slows the pack to a crawl, puts you back where you were, and holds a foe still until all its damage lands at once.",
    "fantasy": "Thousandvale's Chronomancer. Quicken, Second Hand, Entropy Field (a slow zone), Rewind, Stasis Lock, Stop the Clock. Wants cooldown refunds and a rewind rule.",
+   "starter": [
+    "chr_quick_bolt",
+    "chr_decay"
+   ],
    "trees": [
     {
      "id": "quicken",
@@ -858,6 +870,10 @@
    "role": "healer / ranged damage, posts (minions)",
    "blurb": "Plants spirit posts: one heals everyone near it, one strikes, and the Great Post does both. Bolts that jump between foes and heal on the way.",
    "fantasy": "Thousandvale's Shaman, renamed (the bestiary already uses \"shaman\" for a monster role). Posts are stationary minions; Spirit Bolt, Warding Spirits, Call Back the Spirit (a full-health revive). From Healer OR Mage, both mana.",
+   "starter": [
+    "spk_spirit_bolt",
+    "spk_mending_post"
+   ],
    "trees": [
     {
      "id": "posts",
@@ -898,6 +914,10 @@
    "role": "melee / ranged damage, anti-caster",
    "blurb": "Silver strips magic. Pins that root, nets that silence, a circle no spell crosses, and a writ that sends the whole party after one target.",
    "fantasy": "Thousandvale's Witch Hunter, renamed. Silvered Pin, Silver Edge, Null Circle (silence in a zone), Writ of Guilt (a mark), Iron Net, Rite of Purging. Hits casters and the Restless hard. From Rogue on energy, from Healer on mana.",
+   "starter": [
+    "hex_silver_edge",
+    "hex_silvered_pin"
+   ],
    "trees": [
     {
      "id": "silver",
@@ -935,6 +955,10 @@
    "role": "melee damage",
    "blurb": "Every palm strike, step and stance builds poise, and the staff spends it in a widening spin. Light on the feet, hard on the shin.",
    "fantasy": "Thousandvale's Monk, from Fighter OR Rogue. Open Palm, Wind Step (the next hit a sure critical), Sweeping Heel, Inner Stillness, Mountain Fist, Ninefold Staff. From Rogue on energy, from Fighter on temper.",
+   "starter": [
+    "mnk_open_palm",
+    "mnk_wind_step"
+   ],
    "trees": [
     {
      "id": "open_palm",

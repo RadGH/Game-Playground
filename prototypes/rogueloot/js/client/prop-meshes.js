@@ -86,9 +86,22 @@ export const PROP_MESHES = {
   rope_bridge: () => [[B(2.0, 0.1, 9, 0, 0.3, 0), '#9a7a4a'], [B(0.05, 0.05, 9, -1, 1.1, 0), '#c8a870'], [B(0.05, 0.05, 9, 1, 1.1, 0), '#c8a870']],
   mine_cart: () => [[T(0.7, 0.55, 0.7, 4, 0.25), '#6a5a4a'], [rot(C(0.18, 0.1, 8), 0, 0, Math.PI / 2).translate(-0.5, 0.0, 0.35), '#3a3a3a'], [rot(C(0.18, 0.1, 8), 0, 0, Math.PI / 2).translate(0.5, 0.0, 0.35), '#3a3a3a'], [D(0.35, 0, 0.85, 0), '#6a6a72']],
   timber_frame: () => [[B(0.25, 2.8, 0.25, -1.3), '#6a4a2a'], [B(0.25, 2.8, 0.25, 1.3), '#6a4a2a'], [B(2.9, 0.3, 0.3, 0, 2.8, 0), '#6a4a2a']],
+  // the Elderglade / Elder Roots (pale elven stone, roots, moonlight) and the Mirefen / Mire Crypt (stilts, cypress, bronze and wax)
+  moon_well: () => [[T(2.3, 2.5, 0.5, 12), '#c8ccd8'], [new THREE.CircleGeometry(2.0, 14).rotateX(-Math.PI / 2).translate(0, 0.38, 0), '#bfe8ff'], [T(0.5, 0.6, 1.1, 6).translate(0, 0.5, -2.6), '#c8ccd8']],
+  root_pillar: () => [[jitter(T(0.75, 1.25, 5.2, 7), 0.2, 21), '#5a3a22'], [jitter(rot(T(0.3, 0.5, 3.2, 6), 0, 0, 0.5).translate(0.9, 0.2, 0.3), 0.08, 22), '#6a4a2e']],
+  root_arch: () => [[rot(T(0.32, 0.48, 3.6, 6), 0, 0, 0.42).translate(-1.75, 0, 0), '#5a3a22'], [rot(T(0.32, 0.48, 3.6, 6), 0, 0, -0.42).translate(1.75, 0, 0), '#5a3a22'], [rot(C(0.3, 3.0, 6), 0, 0, Math.PI / 2).translate(1.5, 3.35, 0), '#6a4a2e']],
+  rune_stone: () => [[jitter(B(0.9, 3.2, 0.5), 0.05, 4), '#9aa4b4'], [new THREE.TorusGeometry(0.34, 0.07, 5, 10).translate(0, 2.3, 0.28), '#bfe8ff']],
+  stilt_hut: () => [[B(0.25, 1.6, 3.6, -1.6), DWOOD], [B(0.25, 1.6, 3.6, 1.6), DWOOD], [B(4.2, 0.18, 4.2, 0, 1.5, 0), '#8a6a3a'], [B(3.2, 2.1, 3.0, 0, 1.68, -0.2), '#a08048'], [rot(K(2.9, 1.7, 4, 3.75), Math.PI / 4).scale(1, 1, 1.05), '#7a8a4a']],
+  boardwalk: () => [[B(2.4, 0.12, 6, 0, 0.3, 0), '#8a6a3a'], [B(0.14, 0.42, 6, 1.15, 0, 0), DWOOD]],
+  lily_pads: () => [[new THREE.CircleGeometry(0.55, 7).rotateX(-Math.PI / 2).translate(0, 0.5, 0), '#4a9a4a'], [new THREE.CircleGeometry(0.4, 7).rotateX(-Math.PI / 2).translate(0.8, 0.5, 0.5), '#5aa850']],
+  swamp_tree: () => [[T(0.22, 0.62, 3.8, 7), '#6a5a48'], [I(1.5, 0, 4.6, 0), '#5a8a4a'], [rot(K(1.0, 1.4, 5), 0, Math.PI).translate(0.6, 4.1, 0.3), '#8aa07a']],
+  totem: () => [[C(0.3, 3.0, 7), '#8a6a3a'], [I(0.45, 0, 3.1, 0), '#5a9a4a'], [B(1.3, 0.2, 0.2, 0, 2.3, 0), '#c8a050']],
+  crypt_door: () => [[B(2.4, 3.0, 0.6), '#6a6258'], [B(1.4, 2.4, 0.2, 0, 0, 0.3), '#3a2e2a'], [new THREE.OctahedronGeometry(0.2).translate(0, 1.5, 0.45), '#d9b04a']],
+  bell: () => [[B(0.3, 4.2, 0.3, -1.5), DWOOD], [B(0.3, 4.2, 0.3, 1.5), DWOOD], [B(3.4, 0.3, 0.3, 0, 4.2, 0), DWOOD], [T(0.95, 1.3, 1.8, 10, 2.2), '#b08a3a']],
+  sconce: () => [[T(0.08, 0.16, 1.4, 5), '#3a3a3a'], [C(0.26, 0.32, 6, 1.4), '#e8d8a8'], [K(0.12, 0.32, 5, 1.72), '#ffd080']],
   waypoint_stone: () => [[T(0.9, 1.1, 0.3, 8), STONE], [jitter(B(0.5, 1.8, 0.5, 0, 0.3, 0), 0.04, 2), '#8a8aa0'], [new THREE.OctahedronGeometry(0.28).translate(0, 2.5, 0), '#7ae0ff']],
   portal_ring: () => [[new THREE.TorusGeometry(1.4, 0.18, 6, 18).translate(0, 1.6, 0), STONE2], [T(1.2, 1.4, 0.2, 10), STONE]],
   cave_mouth: () => [[D(2.0, -2.2, 1.0, 0), '#6a6660'], [D(2.0, 2.2, 1.0, 0), '#6a6660'], [D(1.8, 0, 2.8, -0.4), '#5a5650'], [B(2.4, 0.02, 2.0, 0, 0.01, 0.6), '#1a1612']],
 };
 /** Kinds that give off light (torches, campfires; capped per zone). */
-export const LIGHTS = { brazier: { color: '#ff9a3a', y: 1.3, i: 6, d: 8 }, lantern_post: { color: '#ffd27a', y: 2.0, i: 4, d: 7 }, crystal: { color: '#7ae0ff', y: 0.6, i: 2, d: 4 }, lighthouse: { color: '#ffe8a0', y: 9.5, i: 8, d: 16 }, torch: { color: '#ffae55', y: 1.8, i: 5, d: 7 }, campfire: { color: '#ff9a3a', y: 0.8, i: 7, d: 9 }, waypoint_stone: { color: '#7ae0ff', y: 2.5, i: 3, d: 5 } };
+export const LIGHTS = { brazier: { color: '#ff9a3a', y: 1.3, i: 6, d: 8 }, lantern_post: { color: '#ffd27a', y: 2.0, i: 4, d: 7 }, crystal: { color: '#7ae0ff', y: 0.6, i: 2, d: 4 }, lighthouse: { color: '#ffe8a0', y: 9.5, i: 8, d: 16 }, torch: { color: '#ffae55', y: 1.8, i: 5, d: 7 }, campfire: { color: '#ff9a3a', y: 0.8, i: 7, d: 9 }, waypoint_stone: { color: '#7ae0ff', y: 2.5, i: 3, d: 5 }, moon_well: { color: '#bfe8ff', y: 1.0, i: 5, d: 10 }, rune_stone: { color: '#bfe8ff', y: 2.3, i: 2, d: 5 }, sconce: { color: '#ffd080', y: 1.8, i: 5, d: 7 } };

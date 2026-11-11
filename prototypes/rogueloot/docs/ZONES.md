@@ -561,3 +561,124 @@ Numbers: floor 1 — 11 spawns (10 packs incl. 5 pinned, 1 patrol), 4 chests, 46
   tree. Mirefen (11–13) arrives from the Mire Toll road — reeds, pools as walls, boardwalks (`dock` props, r 0).
 - Keep the camp recipe: dressing at ≥ 4.5 m from any road centreline, the pinned pack 5 m from its fire, perch rocks
   on the far side of the road from the tents.
+
+## Act 1, part 3: Elderglade, the Elder Roots, Mirefen and the Mire Crypt
+
+Written by Fable, 2026-11-11, to the same rulings and checks as part 2 (click-to-move markers on open ground, 4 m lanes on
+every road and corridor, open ground for every pack ring, patrol legs free of walls and water, no hand prop on a road,
+arrival points open). Four nodes, six files: `elderglade`, `elder_roots` + `_2`, `mirefen`, `mire_crypt` + `_2`. The owner
+asked that new places look NEW, so each region has its own silhouettes, added to the kit this round (`js/world/props.js`
++ `js/client/prop-meshes.js`): the Elderkin's `moon_well` (a pale stone rim round a pool of moonlight, lit), `rune_stone`
+(a tall grey slab with a glowing ring, lit), `root_pillar` and `root_arch` (walk-under); the Mirefolk's `stilt_hut`,
+`totem`, `boardwalk` (r 0, the causeway's planks), `swamp_tree` (a flared cypress with hanging moss), `lily_pads` (water
+only: it floats 0.5 m above the ground so it sits just over the water plane); the Gravesworn's `crypt_door` (a sealed
+door in a frame, gold sigil), `bell` (the great bell on its frame) and `sconce` (a candle stand, lit). Draw-call floors
+at Low graphics (one instanced draw per prop kind x part, whatever the camera sees): Elderglade 57, Roots 22 / 19,
+Mirefen 63, Crypt 24 / 21 - all under Thornwood's 94 and the King's Road's 128.
+
+### Elderglade (levels 9-11, 300 x 300 m, table `elderglade`, theme `forest`)
+
+A wood of **elder trees** (150 of them, 9 m apart, the walls) with ordinary oaks and birches between, on a `forest` base
+with `moss` glades. The gate is on the south edge (the King's Road's exit to here is on ITS north edge) and the road
+climbs north: the Road gate (two rune stones and a root arch over the road) -> the **Oathfield** east (rows of
+gravestones, the oath-bound archers' own graves: two archers behind a glade warden, pinned - formation fighting, nothing
+here flanks) -> the **waypoint glade** (the stone, a moon-well on flagstones, rune stones round the rim; quiet 25 m) ->
+the **Cantor's Walk** west (rune stones every few metres down the lane, a cantor pinned between them: the Unfinished
+Chorus is the interrupt exam, then a second cantor pack at the shrine) -> the **Hollow Elder's clearing** east (root
+arches ring the moss; the `hollow_elder` pinned with `marker: "clearing"`) -> **Velka's bank** (the river is a wall across
+the whole zone; the one gap is at the bridge, 18 m wide so a pack can fight on the ford; three standing stones for her
+three husbands; the cantor pack there carries `rare: "velka_thricewed"`) -> the north bank at level 11: the **Stone
+Ring** (ten standing stones on a 14 m ring, two wardens pinned on the flagstones with `marker: "markers"`, the `stone_markers`
+patrol walking the ring outside the stones, the locked chest in the north-east gap), the **Moon Shrine** north (the
+minLevel-11 row - cantor, warden, archer - pinned), and the **Roots mouth** in the north-west under the oldest tree (a
+`cave_mouth` facing its entrance marker, a sprite-and-bramblewight pack on the doorstep). 28 spawns, 8 chests, 10 pinned.
+
+### Elder Roots (level 12, two floors, theme `cave`, table `elder_roots`)
+
+The Hollow's cave recipe (the floor's contour traced into cliffs) but the cliffs carry `color: "#5a3a22"` so the walls are
+ROOT, and the dressing is root pillars, root arches across the corridors, rune stones for light and the Elderkin's
+moon-wells, with burrow mounds where the borers are. **Floor 1, the Grasping Dark**: the mouth under the tree -> the
+**Choke Run** (two moss patches with `root_choker`s pinned in them, two and then three: Drag in a corridor you cannot walk
+round - do not stand in a line) -> the **Hall of Roots** (a warden and two archers on the flagstones, egg sacs in the
+east nook for the spiderling swarm) -> the **Borer Warren** west (a `root_borer` under the pinch with `marker: "burrow"`
+and another in the den: Bore Through down the corridor) -> the **Sprite Nursery** east (two sprites over a moon-well with
+a choker in the moss) -> the **Descent** north (chokers at the stair). **Floor 2, the Heart of the Roots**: the Landing
+-> the **Pillar Walk** (two borer pinches) -> the **Choir** (the floor-2 row: a cantor on the flagstones with two chokers
+at her feet; the last Elderkin guard at the north gate; sacs east) -> the **Borer Holes** west (the big borer over the
+chest) -> the **Threshold** (sprites and a choker before a root-arch door) -> **Ildreth's chamber**: a round room 27 x 23 m
+with the moon-well as PAINTED moonlight (`snow`) at the centre so she can stand over it with nothing blocking, four
+`root_pillar`s at 7.6 m, a flagstone rim, moss floor, petals on it, the hoard nook through a second arch. The boss marker
+carries `pillars` (the floor at the foot of each pillar) and `spots` (the roots either side of the door): the engine
+spawns her helpers at those six points, which is where Seedfall's sprites drop.
+
+### Mirefen (levels 11-13, 320 x 320 m, table `mirefen`, theme `marsh`)
+
+The whole zone is `reeds`-coloured fen on a `mud` base; **23 pools are water** (walls, each with its own murky colour), and
+the **boardwalk is the road**: `path` surfaces with a `boardwalk` plank every 6 m (r 0, so the lane stays a lane; the
+strict checker's `roadProps` allows them). The gate is the south-west corner (the King's Road's Mire Toll leaves ITS
+north-east corner) and the causeway runs north-east: the Toll gate -> croakers on a perch rock (`marker: "perch"`) ->
+the **stilt village** west (six `stilt_hut`s on a 15 m ring with the gap facing the lane, totems, boardwalks between the
+huts; the mudwitch at the totem with croakers on the steps and a `mire_lurker` in the mud between you and her - the
+healer-first lesson; a leech pool under the west huts) -> the **Lurker Logs** south-east (logs in the shallows, two
+lurkers pinned with `marker: "log"`: Death Roll and the tail cone behind) -> the **waypoint islet** (the fen's one dry
+rock, cairns, a shrine totem) -> the **Marsh Lights' Mere** north (a 56 x 44 m pool, the mudwitch's hut on its south
+shore with two lights pinned: Lure walks you into the water; the `open_water` patrol of two lights on a 12-point loop
+round the shore; lily pads on the water; the locked chest on the far shore) -> the **pass lane** north-west at level 13
+(the drowned dead: `sludge_husk` packs, the minLevel-13 row; leeches at the bone pile; **Bogmother's pool**, the deepest
+and darkest, with the mudwitch pack that carries `rare: "bogmother_sulk"`; the exit to Highcairn Pass at the north edge,
+for the zone that is not built yet) -> the **east causeway** to the **diggers' halt** (three `gravesworn_digger`s pinned,
+crossing the fen toward the crypt: the Gravesworn before their dungeon) and the **crypt mound** (a `crypt_door` set in the
+rock behind a `cave_mouth`, both facing the entrance marker; husks that waded out of it on the doorstep). 31 spawns
+(5 leech swarms, 1 patrol), 8 chests, 11 pinned.
+
+### Mire Crypt (level 14, two floors, theme `crypt`, table `mire_crypt`)
+
+The Barrow's recipe (axis-aligned rooms and corridors, `crypt_wall` runs traced round their union) with the fen inside:
+flooded rooms are painted `mud` over the stone with `leech_pool`s and reeds, every room has candle `sconce`s at its
+corners (the lights), and the Gravesworn's **sealed doors** stand IN the corridor walls (`crypt_door` 0.8 m outside the
+wall line, facing in, r 1.0 - the lane keeps 4.7 m). **Floor 1, the Drowned Nave**: the mouth -> the flooded **nave**
+(three sludge husks in the water, pinned - they burst, kill them apart; leeches under the west niches) -> the **first
+door** (a chanter with two diggers, `marker: "door"`: Open the Door, 8 s, interrupt any time) -> the **Candle Hall**
+(a gravecandle over three husks between the coffins) -> the **Lurker Cistern** west (the floor-1 row: a mudwitch on her
+totem side with a lurker in the tank between you and her) and the **Ossuary** east (the second door in the corridor's
+north wall with another chanter party; a shroudmother stitching husks back together) -> the bone-hound patrol walking
+the hall and both corridors -> the stair. **Floor 2, the Bell Chamber**: the landing -> the **Keeper's Door** (the floor-2
+row: keeper, chanter and two diggers at the door - the interrupt ORDER, the keeper's ward first) -> the **Vestry**
+(gravecandle and husks, leeches in the dip) -> the **Shroud Cell** west (the shroudmother among her coffins, a sealed door
+in her north wall she has not opened) -> the **last door** (a chanter, the bell behind her) -> the **bell hall**: 24 m
+square, the east half painted `mud` with leech pools and reeds (the knee-deep water), the `bell` on its frame at the
+centre, a `sconce` at each corner, coffins along the dry west wall, Sister Vennel on the dry side 7 m from the bell. Her
+marker carries `spots` (three points on the water's edge, where the engine spawns her helpers: Husks from the Water)
+and two hints the engine does not read, `sconces` (the four to light) and `bell` (where she walks to ring it). The hoard
+nook is north of the hall through a 5.5 m corridor.
+
+### For the programmer (part 3)
+
+- **Boss helper lists** (read by the engine now): `elder_roots_2` Ildreth has `pillars` (4) + `spots` (2); `mire_crypt_2`
+  Sister Vennel has `spots` (3). Both also carry `well` / `sconces` / `bell` positions that nothing reads yet.
+- **The moon-well under Ildreth is paint, not a prop** (`snow` circle r 2.6): a prop with a radius would put her spawn
+  inside a blocker. The `moon_well` prop (r 2.3) is used everywhere else. If "out of melee reach" is ever enforced, the
+  painted circle is the area to make unreachable until a pillar falls.
+- **Water that slows** does not exist in the sim: the bell hall's flooded half, the nave and the cistern are `mud` paint.
+  A `slow` surface kind (`SURFACES` in `js/world/zone.js` + a reader in `move.js`) would make Vennel's and Bogmother's
+  mechanics real. `lily_pads` only belongs on real water polygons (it is built 0.5 m up).
+- **`marker` values** this round: `markers`, `clearing`, `burrow`, `egg_sac`, `perch`, `log`, `leech_pool`, `door` - the
+  table rows carry the same key and `spawn.js` still ignores it; the pinned packs make every lesson land regardless.
+- **`rare` spots**: `velka_thricewed` (Velka's bank, Elderglade) and `bogmother_sulk` (Bogmother's pool, Mirefen) - not
+  read yet, same as `old_pincer`.
+- **Mirefen's exit to `highcairn_pass`** points at a zone that is not built; acts.json lists the link, so the marker is
+  there (the King's Road did the same for these two zones before they existed).
+- **Cliff colour**: `cliffs[].color` was already read by `zone-view.js`; the Roots are the first zone to use it. The
+  Mirefen crypt mound uses `#6a6660`.
+- **The walk grid inflates every blocker by 0.5 m** (`INFLATE` in `js/sim/paths.js`), so a prop must stand about 3.8 m
+  from a spawn's centre for the 2.2 m pack ring to be free - 3 m is not enough. The burrow mounds beside the borer spawns
+  are placed at 3.8 m.
+- Draw calls measured at Low graphics are in the batch report; the floors above are the instanced minimum.
+
+### Notes for the next zones
+
+- **Highcairn Pass (13-15)**: arrive from Mirefen's north-west exit (its marker at (-100, -154), arrival southward).
+  A pass wants real height (`ridge` entries) and ledges for the lynx - cliffs with `color` for grey rock, `rope_bridge`
+  over a gorge (r 0, like the fen's boardwalks), drakes' landing rocks as `boulder`s.
+- **Redcliff Heights (15-17)** and the **Warband Mine**: the mine is the third dungeon recipe (crypt walls as `timber_frame`
+  shoring + cliffs for rock), with `mine_cart` rails on the floor for Ruhk's gallery.

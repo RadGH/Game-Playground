@@ -29,6 +29,11 @@ export const PROP_KIT = {
   boat_wreck: { r: 2.2, name: 'Wrecked boat', group: 'built' }, lighthouse: { r: 2.6, name: 'Lighthouse', group: 'built' }, grain_sacks: { r: 0.6, name: 'Grain sacks', group: 'small' },
   market_stall: { r: 1.2, name: 'Market stall', group: 'built' }, lantern_post: { r: 0.2, name: 'Lantern post', group: 'small' }, burrow_mound: { r: 0.5, name: 'Burrow', group: 'plants' },
   gate: { r: 0, name: 'Open gate', group: 'built' }, rope_bridge: { r: 0, name: 'Rope bridge', group: 'built' }, mine_cart: { r: 0.7, name: 'Mine cart', group: 'small' }, timber_frame: { r: 0.3, name: 'Timber prop', group: 'cave' },
+  // the Elderglade / Elder Roots and the Mirefen / Mire Crypt (2026-11-11): each region's own silhouettes
+  moon_well: { r: 2.3, name: 'Moon-well', group: 'stone' }, root_pillar: { r: 1.0, name: 'Root pillar', group: 'plants' }, root_arch: { r: 0, name: 'Root arch', group: 'plants' },
+  rune_stone: { r: 0.5, name: 'Rune stone', group: 'stone' }, stilt_hut: { r: 2.0, name: 'Stilt hut', group: 'built' }, boardwalk: { r: 0, name: 'Boardwalk', group: 'built' },
+  lily_pads: { r: 0, name: 'Lily pads', group: 'plants' }, swamp_tree: { r: 0.5, name: 'Swamp cypress', group: 'plants' }, totem: { r: 0.3, name: 'Totem', group: 'built' },
+  crypt_door: { r: 1.0, name: 'Sealed door', group: 'crypt' }, bell: { r: 1.2, name: 'Great bell', group: 'crypt' }, sconce: { r: 0.3, name: 'Candle sconce', group: 'crypt' },
   // markers drawn in the world (portals, waypoints)
   waypoint_stone: { r: 0.8, name: 'Waypoint', group: 'marker' }, portal_ring: { r: 1.2, name: 'Portal', group: 'marker' }, cave_mouth: { r: 0, name: 'Cave mouth', group: 'marker' },
 };

@@ -18,7 +18,7 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
     <div class="action-bar"></div>
     <div class="arc"></div>
     <button class="bag-btn" aria-label="Character and bag">🎒<i class="dot" hidden></i></button>
-    <div class="quest-track" hidden><b class="qn"></b><p class="qt"></p></div>
+    <div class="quest-track" hidden><b class="qn"></b><p class="qt"></p><p class="qg"></p></div>
     <div class="dead-panel" hidden><h2>You have fallen</h2><p>A friend can bring you back, or return to the waypoint.</p><button class="primary rel">Return to the waypoint</button></div>`;
   const $ = s => root.querySelector(s);
   const bar = $('.action-bar'), arc = $('.arc');
@@ -91,7 +91,7 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
       }
     }
     $('.dead-panel').hidden = !me.dead;
-    if (ch && quest) { const q = quest(ch); const el = $('.quest-track'); el.hidden = !q; if (q) { el.querySelector('.qn').textContent = q.name; el.querySelector('.qt').textContent = q.progress || q.short || ''; } }
+    if (ch && quest) { const q = quest(ch); const el = $('.quest-track'); el.hidden = !q; if (q) { el.querySelector('.qn').textContent = q.name; el.querySelector('.qt').textContent = q.progress || q.short || ''; const g = el.querySelector('.qg'); g.textContent = q.hint ? '➜ ' + q.hint : ''; g.hidden = !q.hint; } }
     $('.bag-btn .dot').hidden = !(ch?.unspent > 0 || ch?.skillPoints > 0 || (ch && !ch.path && ch.level >= 3));
     if (ch) for (const kind of ['health', 'mana']) { const n = (ch.belt || []).filter(x => x?.kind === kind).reduce((s, x) => s + x.n, 0) + (ch.bag || []).filter(x => x.base === 'potion' && x.kind === kind).reduce((s, x) => s + x.n, 0); for (const b of pots[kind]) { b.querySelector('.n').textContent = n; b.classList.toggle('poor', !n); } }
   }

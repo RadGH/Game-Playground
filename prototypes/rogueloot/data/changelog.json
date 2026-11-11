@@ -1,6 +1,18 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-firststeps",
+      "date": "2026-11-11",
+      "title": "A guide for your first steps, and four new places",
+      "items": [
+        "New heroes get a short welcome in Brightwater, and a gold arrow at your feet now always points to your next step: the right portal in town, the way out of a zone, the stairs down in a dungeon. The quest box says where to go too.",
+        "Portals you can use now glow and swirl. Locked ones are dark and say what opens them.",
+        "Four new places: Thornwood, the King's Road, Thornwood Hollow (Mother Thrum waits at the bottom) and the Old Barrow (three floors, and Reeve Oswin).",
+        "Boss helpers now come out of the room itself: crabs from behind the pillars, rats from the chutes, spiders from the egg sacs, the dead from the coffins.",
+        "Mages rest far less: Intellect now adds Mana regen, Mana comes back three times as fast between fights, and Cinder Bolt costs less. Fighters and Rogues are tougher."
+      ]
+    },
+    {
       "id": "2026-11-11-oaths-forks",
       "date": "2026-11-11",
       "title": "Skills that do what they say",

@@ -357,3 +357,207 @@ Numbers: 12 spawns (8 packs incl. 4 pinned, 3 rat swarms, the boss), 5 chests (2
 - The three files were generated from a room/corridor design script kept outside the repo (walls traced from the
   layout, then hand props nudged off the 4 m lanes). Editing the JSON by hand or in the editor is fine; the walls are
   plain `cliffs` / `crypt_wall` props like anywhere else.
+
+## Act 1, part 2: Thornwood, the King's Road, the Hollow and the Barrow
+
+Written by Fable, 2026-11-10, for the same rulings as above plus the click-to-move pass (every exit, entrance and quest
+marker stands on open ground with nothing that blocks within 2 m, so a click on its label walks you onto it; the one
+exception is the waypoint, which sits on its stone like every earlier zone and is reached at the 2.4 m click reach).
+Four new nodes, seven files: `thornwood`, `kings_road`, `thornwood_hollow` + `thornwood_hollow_2`, `old_barrow` + `_2` +
+`_3`. All seven pass `tools/zone-check.mjs` and a stricter checker (every road and corridor keeps a 4 m lane, every
+spawn has open ground for its pack ring, every patrol leg is free of walls and water, no hand prop stands on a road,
+every arrival point has 1.5 m of open ground). `acts.json` has `built: true` on the four nodes and every `links` entry
+has a matching `exit` / `entrance` marker.
+
+### Thornwood (levels 5–7, 300 × 300 m, table `thornwood`, theme `forest`)
+
+A dark wood with one road and tree walls (~1,280 trees placed off the roads and clearings; pines take over north of the
+middle) so the flankers always have cover. A brook runs down the west side with one ford, where the hollow lane crosses
+on a bridge. You come in from the fields at the **south-east** corner and leave for the King's Road at the
+**north-east**; the Hollow is under the hill in the **north-west**.
+
+Walked from start to exit:
+
+1. **The Fields gate** (start, south-east): a signpost, torches, a broken cart, the woodcutters' stumps. Two level-5
+   packs off the road either side, 30 m on.
+2. **The woodcutters' camp** (south, a lane off the first bend, `quest` marker): a hut, sawn timber, logs, a dead fire,
+   and the **cutthroats who looted it** (pinned, four) — the first go-behind-you lesson, in a dirt clearing ringed by
+   stumps. A crate by the cart. The `logging_road` patrol (cutthroats + raiders) walks the lane out and back.
+3. **The road north** (level 5 → 6): a pack at each bend, the brambles beginning east of the road.
+4. **The boar wallow** (west lane, level 6): a mud circle inside a grass clearing with **three rootboars** (pinned) —
+   the charge line, in the open, with a chest behind the boulder.
+5. **The bramble thicket** (east lane, level 6): thick bushes either side of the lane and **two bramblewights** (pinned,
+   `marker: bush`, a hand-placed bush 3.5 m from each so the "it was a bush" read works), wolves on the chest at the
+   thicket's heart.
+6. **The waypoint glade** (middle, moss, 0,0): the stone, four torches, a signpost, a cairn. Nothing within 25 m.
+7. **The hollow lane** (west, level 6 → 7): the **first web spinners** hang in a great oak (pinned, `marker: perch`),
+   a pack before the ford, the bridge, then cobwebs thickening across the lane, two more spinner pairs in the oaks
+   either side, egg sacs at the mouth, a chest in the webs, and the `cave_mouth` under the hill with the `entrance`
+   to `thornwood_hollow` 6 m in front of it (arrival 5 m east, on the lane).
+8. **Grandmother Root's clearing** (north off the hollow lane, level 7, `quest` marker): a ring of fallen logs with a
+   gap where the lane comes in, an elder tree, white blossom bushes, bones. Her spot is a pinned bramblewight with
+   `rare: "grandmother_root"`; the **locked chest** is behind her.
+9. **The deer glade** (east off the road, level 6–7): a meadow with narrow deer trails painted `path` (2.2 m) that the
+   `deer_trails` **wolf patrols** walk (one loop round the glade, one out-and-back on the north trail), a **den of five
+   wolves** under a boulder (pinned), a chest behind the den.
+10. **The hunter's stand** (north of the road, level 7): a watchtower the warband took, a tent, a fence, banners, and
+    the table's level-7 row pinned (two cutthroats, two slingers, a raider) — slingers on the doorstep of the exit.
+11. **The exit** to the King's Road (north-east): the warband's first marker stone and banners, 30 m past the last pack.
+
+Numbers: 32 spawns (29 packs incl. 9 pinned, 3 patrols with routes; the table has no swarm row), 8 chests (3 crates,
+4 chests, 1 locked), 857 hand props (~780 trees) + 610 scatter, brook in two pieces + bridge, 1 cliff, 8 hills/ridges,
+84,520 m² reachable, 58 KB.
+
+### King's Road (levels 7–9, 320 × 320 m, table `kings_road`, theme `ruins`)
+
+An old paved road (`cobble`, 7 m) across a meadow with the ruins of the king's milestones and a wayfort, a stream with
+one bridge, and **the warband's toll camps** on it — the quest step "Toll Road". You come in from Thornwood at the
+**west** edge; the road runs east to a **crossroads**, then forks **north-west to Elderglade** and **north-east to
+Mirefen** (both links are in acts.json, so both exits exist). The Old Barrow is a lane **south-east** off the
+crossroads.
+
+Five camps, each different, each with a perch rock for its slinger and its own fire:
+
+1. **The Westgate Toll** (level 7, 45 m from the start): a palisade across both verges with an open `gate` on the road,
+   a watchtower, two tents, and the **first warcaller with three raiders and a slinger** (pinned) — the LEADER lesson,
+   with the wall to flee behind. A second pack behind the wall; a chest by the tents.
+2. **The Milestone Camp** (level 7, 50 m on): no wall — a fence, three tents, the milestone, a haystack; a **bonechanter
+   and her raiders** at the fire (pinned) so the SHAMAN lesson is met twice (the wayfort has the other).
+3. **The Bridge Toll** (level 8): the stream's only crossing; palisade stubs on the east bank, tents, and **two warhounds
+   with two cutthroats** (pinned) — the pull-the-straggler lesson at a choke. A crate by the crates.
+4. **The Crossroads Toll** (level 8–9, `quest` marker "The Crossroads Toll" at the junction): two palisade arcs between
+   the four roads with gates on the north roads, a watchtower, six tents, two fires, carts and crates. **Sergeant
+   Krull's fire** is the pinned warcaller pack with his signature's roster (4 raiders, 2 slingers, a bonechanter) and
+   `rare: "sergeant_krull"`; a pack at the north fire, one on the east side, the **locked chest** beside the tower.
+5. **The Mire Toll** (level 9, on the Mirefen branch): the last palisade and gate, a tower, tents, a chest behind the
+   crates; the last warcaller pinned at the fire.
+
+Between the camps: the **`the_road` patrols** — four warcaller bands walking out-and-back stretches of road between
+camps 1–2, 2–bridge, crossroads–Mire Toll and down the glade road, 35–50 m apart so a fleeing warcaller always has a
+camp to run to; the **`verges` patrol** (three warhounds) on a narrow trail along the south verge past the burnt
+mile-house. Side trips: the **burnt mile-house** (south-west lane, ash circle, ruin walls, looters, a crate), the
+**wayfort ruin** on a knoll north of camp 2 (a pillar ring with a gap for the lane, braziers, the **first bonechanter**
+pinned, a chest under the arch), the **wayshrine** (the waypoint: a broken arch, two pillars, a cairn, 10 m off the
+road on the west bank between camps 2 and 3, nothing within 25 m), the **shepherd's fold** (a fenced pen with boars) and
+the **barrow lane**: the **diggers' camp** (`quest` marker — tents, mine carts, shoring timber, lanterns, nobody home,
+their crate) and the **barrow mound** (a hill with gravestones, dead trees, a cliff face, the `cave_mouth` facing west
+and the `entrance` to `old_barrow` 6 m before it). Milestones (small standing stones) every ~60 m on the right verge.
+
+Numbers: 34 spawns (29 packs incl. 6 pinned, 5 patrols), 8 chests (4 crates, 3 chests, 1 locked), 593 hand props (~300
+trees) + 512 scatter, stream in two pieces + bridge, 2 cliffs, 7 hills/ridges, 97,741 m² reachable, 52 KB.
+
+### Thornwood Hollow, floor 1 — the Webbed Gallery (level 7, 144 × 204 m, theme `cave`, table `thornwood_hollow`)
+
+Same construction as the Tidecaves (rooms + corridors first, the wall traced 1.4 m outside the floor, corridors 6.8–7.5 m
+nominal), lit crystal-blue with two hunters' torches at the mouth; webs everywhere, egg sacs where swarms come from.
+
+1. **The Mouth** (south): the exit back to Thornwood (arrive 6 m in), the `start`, the hunters' crate, webs.
+2. **The Silk Run** (50 m): the **first spinners** on a cave pillar in a bay off the corridor (pinned, `perch`) — Snare
+   Line where you cannot walk round it; a pack at the last bend.
+3. **The Nursery** (the big room, 44 m across): six egg sacs round the walls, the **first thistle sprite with a spinner**
+   (pinned — the giggle, then Pollen Cloud, with a snare to hold you in it), a pack west, the **first spiderling swarm**
+   (`tag: swarm`, `marker: egg_sac`) at the west sacs, the chest in the crystal nook past it.
+4. **The Pinch** (west, 6.8 m — the tight one): a **burrow spider** on a dirt disc mid-corridor (pinned, `burrow`), then
+   the Spinners' Nook (dead end) with a pack on a crate.
+5. **The Sprite Hollow** (east, dead end, moss and mushrooms): a corridor pack, then **two sprites** (pinned) over the
+   chest.
+6. **The North Run and the Drop**: a swarm between sacs either side of the corridor, a pack at the stair, the exit down.
+
+Numbers: 11 spawns (9 packs incl. 4 pinned, 2 swarms), 4 chests (2 crates, 2 chests), 96 hand props + 40 scatter, one
+wall loop of 237 points, 3,980 m² walkable, 33 KB.
+
+### Thornwood Hollow, floor 2 — the Brood Below (level 7, boss 8)
+
+1. **The Landing**: the exit up (arrive 6 m in), the `start`, crystals, bones.
+2. **The Trapdoor Run** (6.8 m): **two burrow spiders** on discs at the two pinches (pinned) — you know the disc now; a
+   crate against the wall between them.
+3. **The Hatchery** (40 m across): eight sacs, **two sprites** (pinned, the floor-2 row), **a burrow spider under a
+   spinner** (pinned, the other floor-2 row), two swarms at the east and west sacs, a chest on the east wall.
+4. **The Spinners' Loft** (west, dead end): a corridor pack, then **two spinners** on cave pillars over the chest.
+5. **The Threshold** (north): sacs on the walls, a swarm, and a **web-wall door** (three big cobwebs across the mouth).
+6. **Mother Thrum's cavern** (per the bestiary): an ellipse **26 × 18 m** floored `stone` (the web floor) with cobwebs,
+   **six egg sacs** at the walls (the boss marker's `sacs`), the two web-wall doors (`doors`: the south mouth and the
+   north nook), crystals at the long walls. She stands dead centre; the **boss hoard** is in the nook behind her past
+   the second web wall.
+
+Numbers: 11 spawns (7 packs incl. 5 pinned, 3 swarms, the boss), 4 chests (crate, 2 chests, bossHoard), 90 hand props +
+36 scatter, 204 wall points, 3,051 m² walkable, 29 KB.
+
+### The Old Barrow (levels 9–10, theme `crypt`, table `old_barrow`) — three floors of `crypt_wall`
+
+Built like the Mill Cellars: axis-aligned rooms and 7 m corridors, the walls are `crypt_wall` runs traced round the
+union of the rooms 0.5 m into the earth (361 / 377 / 226 pieces), floors `stone`, corridors `cobble`, niches 0.9 m inside
+the walls facing in, braziers for light (orange), the diggers' lantern posts at the mouth.
+
+**Floor 1 — the Diggers' Cut** (144 × 144 m, level 9): the barrow mouth (exit up, arrive 6 m in) opens into **the
+diggers' camp** — tents, mine carts, shoring, a dead fire, their crate, and **three diggers at the fire + two at the
+cut** (pinned, the floor-1 row) so the Gravesworn are met as people. **The Cut** north is a shored 7 m corridor where
+the **first husks** rise from the slabs (pinned, four — the slow wall). **The Niche Hall** (48 × 24): niches, coffins,
+four braziers, a pack west and the **first gravecandle** over its husks (pinned), a chest in the south-west corner.
+West: a corridor pack, then the **Crossfire Gallery** — a room with an archers' alcove at each end and the pinned
+crossfire pack (two archers, two husks), the chest in the north alcove. East: a corridor pack, the **Kennels** (bone
+piles, broken coffins) with a pack and the **bone hound patrol** walking kennels → hall → kennels. North: a corridor
+pack and the stair room with the exit down.
+
+**Floor 2 — the Lamplit Galleries** (152 × 162 m, levels 9–10): stair → corridor pack → the **Lamp Hall** (52 × 24, six
+braziers, niches, coffins) with **the Lamplighter's spot** in the middle (pinned gravecandle pack with `rare:
+"the_lamplighter"`) and packs at both ends. West: the **Coffin Rows** — three rows of coffins, a sarcophagus shrine and
+the **first Shroudmother** with her husks and a hound (pinned, the floor-2 row; the chest is behind her). East: a
+forced `gate`, then the **Sealed Vault** — two sarcophagi, archers on the **locked chest** (pinned crossfire). North: a
+corridor pack, the **Ossuary** (bone piles, niches on three walls, a pinned gravecandle pack, a chest) and the **hound
+patrol** between the Ossuary and the Lamp Hall; then the lower stair with a last pack in the corridor.
+
+**Floor 3 — the Hall of Records** (96 × 134 m, level 10): stair → corridor pack → the **Antechamber** (four sarcophagi,
+braziers) with the floor-3 row pinned (two candles, two archers); a side chapel each way (a pack and a chest / crate);
+then the reeve's doors (a `gate`) with the **last Shroudmother** pinned in front of them, and the **Hall of Records** per
+the bestiary: a long hall **18 × 31 m** (18 rather than 16 so the lanes outside the coffin rows stay 2.5 m wide) with
+**twelve stone coffins in two rows** (the boss marker's `coffins`), **four braziers** at the corners (`braziers`), the
+**dais** at the far end (a low hill, `dais: [x, z, r]`) with the **ledger-lectern** (a small standing stone, `lectern`).
+Reeve Oswin stands before the lectern, across the coffins from the doors. The **boss hoard** is in the nook behind the
+dais.
+
+Numbers: floor 1 — 11 spawns (10 packs incl. 5 pinned, 1 patrol), 4 chests, 461 hand props + 23 scatter, 3,904 m²,
+38 KB; floor 2 — 12 spawns (11 packs incl. 4 pinned, 1 patrol), 4 chests (crate, chest, locked, chest), 490 + 24,
+4,054 m², 41 KB; floor 3 — 6 spawns (5 packs incl. 2 pinned, the boss), 3 chests (chest, crate, bossHoard), 294 + 10,
+2,116 m², 25 KB.
+
+### For the programmer (part 2)
+
+- **Two onward exits on the King's Road** (`elderglade` and `mirefen`, both in its `links`). If "a zone is complete
+  when its far `exit` was reached" means one exit, make it either onward exit — or, better for the quest, complete
+  "Toll Road" when the five camp packs are dead (the pinned packs at the five fires).
+- **Boss marker hints** (not read yet): Mother Thrum's `sacs` (six positions — spawn Hatch's spiderlings there, and
+  make those egg_sac props the breakable ones) and `doors` (the two web walls); Reeve Oswin's `coffins` (twelve — Read
+  the Names rises from the nearest ones, Chain of Office shackles to one, and they should block line of sight),
+  `braziers` (four, the ones you light), `lectern` and `dais`.
+- **`rare` spots**: `grandmother_root` (Thornwood clearing), `sergeant_krull` (the crossroads fire, with his
+  signature's roster as the pinned pack), `the_lamplighter` (the Lamp Hall) — as with `old_pincer`, the sim does not
+  read `rare` yet.
+- **`marker` values** used: `perch`, `bush`, `burrow`, `egg_sac`, `crossfire` — the table rows carry the same key and
+  `spawn.js` ignores it, so a `perch` marker can roll wolves. The pinned packs make every lesson land regardless.
+- **`floor` on table rows** is still unfiltered, and the barrow table writes it as an array (`"floor": [2, 3]`), so the
+  one-line filter has to accept a number or a list.
+- **Egg sacs are decoration today** (`egg_sac` is a plain prop, r 0.5). The swarm markers next to them are what
+  actually spawns spiderlings; when a spawner prop exists, the `sacs` list on the boss and the sacs beside each swarm
+  marker are the ones to make live.
+- **The web-wall doors** are three `cobweb` props at scale 1.6 (r 0, walk-through). A sealing door needs a prop with a
+  radius and a way to break it.
+- **Yaw convention worth a comment in `props.js`**: pieces that span their local x axis (fence, palisade, crypt_wall,
+  gate, niche) take `yaw = atan2(-dz, dx)` of the run direction; pieces that run along local z (bridge, cave_mouth's
+  opening) take `atan2(dx, dz)`. I had the first one rotated 90° on the first pass and nothing complained — the
+  checker sees circles.
+- **Windmill Fields' cave mouth** at (-12, -30) has `yaw 2.36`, which opens it north-east while its entrance marker is
+  south-east of it; `yaw ≈ 0.45` would face the marker. Not touched (not in this batch's file list).
+- The editor's theme dropdown now lists `cellar` / `crypt` / `catacomb` / `mine`, so the earlier note about it
+  overwriting the theme on Save is resolved.
+- Same as before: the strict checker (4 m lanes along every `path`/`cobble` road and every corridor centreline, patrol
+  legs free, props on roads, arrival points open) is a scratchpad script, not in the repo — `tools/zone-check.mjs`
+  could grow it; `tests/world/zones.test.js` passes on all 14 files.
+
+### Notes for the next zones
+
+- **Elderglade (9–11)**: arrive from the King's Road's north-west exit; the glade should be the first zone with the
+  elder trees as walls and a river you cannot cross except at Velka's bridge; `elder_roots` entrance under the biggest
+  tree. Mirefen (11–13) arrives from the Mire Toll road — reeds, pools as walls, boardwalks (`dock` props, r 0).
+- Keep the camp recipe: dressing at ≥ 4.5 m from any road centreline, the pinned pack 5 m from its fire, perch rocks
+  on the far side of the road from the tents.

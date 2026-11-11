@@ -50,3 +50,20 @@ fighter  deaths/h 6  kills/h 78    rogue  deaths/h 0  kills/h 156
 mage     deaths/h 3  kills/h 75    healer deaths/h 3  kills/h 303   <- the Healer is strongest; look again in the full pass (M33)
 ```
 From level 3 with only starter gear the zone is too hard for anyone (a 3-raider pack beats every Path in a bare duel), as it should be.
+
+## 2026-11-11 — casters' mana, melee health
+
+The Mage bot spent 17 of every 20 minutes resting for Mana: regen came only from Spirit (the Healer's attribute).
+- Mana regen = 1 + 0.2 x level + 0.25 x Spirit + **0.12 x Intellect** (above 12); out of combat it is now **x3** (was x2).
+- Cinder Bolt 14 -> 10 Mana; Sunlash 8+4.5/level -> 7+3.6/level, refund 5 -> 3 Mana.
+- Melee Paths are built sturdier (`PATH_BONUS` in js/rules/sheet.js, shown on the Path cards): Fighter +25% health
+  +15% armour, Rogue +15% health +4 dodge.
+
+Windmill Fields from level 5, 20 min, 2 seeds:
+```
+            before                         after
+fighter     27 deaths/h   99 kills/h       12 deaths/h   93 kills/h
+rogue       42 deaths/h   90 kills/h       36 deaths/h  104 kills/h   <- still dies most: look again in M33
+mage        4.5           89 -> 222 (mana fix)
+healer      0             198
+```

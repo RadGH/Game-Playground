@@ -5,7 +5,7 @@ import { createActors } from './actors.js';
 import { createInput } from './input.js';
 import { createTouch, isTouch } from './touch.js';
 import { openSolo, openOnline, serverAvailable } from './link.js';
-import { createMenu, openReport, news, credits } from './menu.js';
+import { createMenu, openReport, news, credits, openWelcome } from './menu.js';
 import { testField } from '../sim/area.js';
 import { buildArea } from '../world/zone.js';
 import { buildZoneView } from './zone-view.js';
@@ -19,6 +19,7 @@ import { createFx } from './fx.js';
 import { createSheetUI } from './sheet-ui.js';
 import { createSkillsUI } from './skills-ui.js';
 import { createTravelUI } from './travel-ui.js';
+import { createGuideView } from './guide-view.js';
 import { createTownUI } from './town-ui.js';
 import { createPartyUI } from './party-ui.js';
 import { activeStep, questKey } from '../sim/quests.js';
@@ -73,11 +74,12 @@ const sheetUI = createSheetUI({ onSkills: () => skillsUI.toggle(true), potions: 
 const skillsUI = createSkillsUI({ content, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
 const sendAct = a => G.link?.send({ t: 'act', ...a });
 const townUI = createTownUI({ content, send: sendAct, getChar: () => heroes.current() });
-const travelUI = createTravelUI({ view, content, labelRoot: $('#tags'), send: sendAct, getChar: () => heroes.current(), getMe: () => actors.get(G.me), getArea: () => G.area,
+const guide = createGuideView(view);
+const travelUI = createTravelUI({ view, content, labelRoot: $('#tags'), send: sendAct, getChar: () => heroes.current(), getMe: () => actors.get(G.me), getArea: () => G.area, getDifficulty: () => G.difficulty,
   onNpc: (id) => { if (id === 'stash') townUI.openStash(); else if (id === 'elder') { const q = activeStep(content, heroes.current() || {}, G.difficulty); if (q) showQuest(q.name, q.text); else showQuest('The coast is safe', 'For now. Rest in Brightwater, hero.'); } else sendAct({ do: 'shop', npc: id }); } });
 const partyUI = createPartyUI({ content, send: sendAct, getChar: () => heroes.current(), zoneName: id => content.zones?.[id]?.name || id || '' });
 const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }),
-  quest: ch => { const q = activeStep(content, ch, G.difficulty); if (!q) return null; const r = q.rule || {}; const n = ch[questKey(G.difficulty)]?.[q.id]?.n || 0; return { name: q.name, progress: r.kind === 'kill' ? `Defeat foes in ${content.zones?.[r.node]?.name || r.node}: ${n} / ${r.n}` : r.kind === 'boss' ? `Defeat ${content.monsters?.[r.boss]?.name || 'the boss'}` : r.kind === 'reach' ? `Reach ${content.zones?.[r.to]?.name || content.acts?.[0]?.nodes?.find(x => x.id === r.to)?.name || r.to}` : '' }; } });
+  quest: ch => { const q = activeStep(content, ch, G.difficulty); if (!q) return null; const r = q.rule || {}; const n = ch[questKey(G.difficulty)]?.[q.id]?.n || 0; return { name: q.name, hint: guide.target?.hint || '', progress: r.kind === 'kill' ? `Defeat foes in ${content.zones?.[r.node]?.name || r.node}: ${n} / ${r.n}` : r.kind === 'boss' ? `Defeat ${content.monsters?.[r.boss]?.name || 'the boss'}` : r.kind === 'reach' ? `Reach ${content.zones?.[r.to]?.name || content.acts?.[0]?.nodes?.find(x => x.id === r.to)?.name || r.to}` : '' }; } });
 const input = createInput();
 const touch = createTouch($('#touch'), input);
 
@@ -197,6 +199,7 @@ function showArea(areaId, seed) {
   ground.clear(); G.goto = null; G.pending = []; G.jump = true; G.target = null;
   $('.hud-area').textContent = G.area.name + (G.difficulty && G.difficulty !== 'normal' ? ` · ${content.difficulty.tiers[G.difficulty]?.name}` : '');
   travelUI.enterArea(G.area);
+  { const ch = heroes.current(); if (ch && G.area.id === 'brightwater' && ch.level <= 2 && !Object.keys(ch[questKey(G.difficulty)] || {}).length) openWelcome(ch, { touch: isTouch() }); }
   ambience(G.area.theme);
   // the town's people stand at their markers (Chibi 2.6 bodies, a look seeded from who they are)
   for (const m of G.area.markers || []) if (m.kind === 'npc') { const rng = makeRng(hashStr(m.id + ':' + areaId)); const a = actors.add('npc:' + m.id, { name: m.label || m.id, look: randomLook(rng) }); a.x = m.x; a.z = m.z; a.yaw = Math.atan2((G.area.spawn.x - m.x), (G.area.spawn.z - m.z)); a.npc = true; }
@@ -426,6 +429,7 @@ function frame(t) {
   fx.update(dt, t);
   ground.update(dt, t);
   travelUI.update(dt, t);
+  { const ch = heroes.current(), me = actors.get(G.me); if (ch && G.area) guide.update(content, { ...ch, quests: ch[questKey(G.difficulty)] || {} }, G.area, activeStep(content, ch, G.difficulty), me, t); }
   padCombat();
   view.render();
 }
@@ -457,9 +461,10 @@ function debug() { return { screen: G.me ? 'game' : 'title', link: G.link?.kind 
 window.gameEye = {
   state: () => {
     const me = actors.get(G.me);
-    return { area: G.area?.id || null, prompt: travelUI.current ? { kind: travelUI.current.kind, to: travelUI.current.to || travelUI.current.id } : null, waypoints: heroes.current()?.waypoints, ground: [...ground.items.values()].map(g => ({ gid: g.gid, what: g.what, r: g.real || g.r, name: g.name, x: +g.x.toFixed(1), z: +g.z.toFixed(1) })), chests: [...ground.chests.values()].map(c => ({ id: c.id, x: c.x, z: c.z, open: c.open })), gold: heroes.current()?.gold, target: G.target || null, foes: [...foes.list.values()].map(f => ({ id: f.id, name: f.name, x: +f.x.toFixed(1), z: +f.z.toFixed(1), hp: f.hp, mhp: f.mhp, st: f.st })), hero: heroes.current() && { level: heroes.current().level, xp: heroes.current().xp }, me2: G.meSnap && { hp: G.meSnap.hp, mhp: G.meSnap.mhp, mp: G.meSnap.mp, dead: !!G.meSnap.dead }, screen: G.me ? 'game' : 'title', link: G.link?.kind || null, code: G.code, host: G.host === G.me, ping: G.ping && Math.round(G.ping), reconnecting: !!G.retry, area: G.area?.id || null, me: me ? { x: +me.x.toFixed(2), z: +me.z.toFixed(2), yaw: +me.yaw.toFixed(2), moving: !!me.moving, bodyReady: !!me.body } : null, players: [...actors.list.values()].map(a => ({ id: a.id, x: +a.x.toFixed(2), z: +a.z.toFixed(2) })), server: G.snap ? G.snap.players.map(p => ({ id: p.id, x: p.x, z: p.z })) : null, fps: Math.round(G.fps || 0) };
+    return { guide: guide.target ? { x: guide.target.x, z: guide.target.z, to: guide.target.to, hint: guide.target.hint } : null, area: G.area?.id || null, prompt: travelUI.current ? { kind: travelUI.current.kind, to: travelUI.current.to || travelUI.current.id } : null, waypoints: heroes.current()?.waypoints, ground: [...ground.items.values()].map(g => ({ gid: g.gid, what: g.what, r: g.real || g.r, name: g.name, x: +g.x.toFixed(1), z: +g.z.toFixed(1) })), chests: [...ground.chests.values()].map(c => ({ id: c.id, x: c.x, z: c.z, open: c.open })), gold: heroes.current()?.gold, target: G.target || null, foes: [...foes.list.values()].map(f => ({ id: f.id, name: f.name, x: +f.x.toFixed(1), z: +f.z.toFixed(1), hp: f.hp, mhp: f.mhp, st: f.st })), hero: heroes.current() && { level: heroes.current().level, xp: heroes.current().xp }, me2: G.meSnap && { hp: G.meSnap.hp, mhp: G.meSnap.mhp, mp: G.meSnap.mp, dead: !!G.meSnap.dead }, screen: G.me ? 'game' : 'title', link: G.link?.kind || null, code: G.code, host: G.host === G.me, ping: G.ping && Math.round(G.ping), reconnecting: !!G.retry, area: G.area?.id || null, me: me ? { x: +me.x.toFixed(2), z: +me.z.toFixed(2), yaw: +me.yaw.toFixed(2), moving: !!me.moving, bodyReady: !!me.body } : null, players: [...actors.list.values()].map(a => ({ id: a.id, x: +a.x.toFixed(2), z: +a.z.toFixed(2) })), server: G.snap ? G.snap.players.map(p => ({ id: p.id, x: p.x, z: p.z })) : null, fps: Math.round(G.fps || 0) };
   },
   health: () => ({ ok: true, errors: 0 }),
+  screenOfPoint: (x, z) => { const [sx, sy] = worldAt(x, z, 0); return { x: sx, y: sy }; },
   screenOf: id => { const f = foes.get(id) || actors.get(id); if (!f) return null; const [x, y] = worldAt(f.x, f.z, 0.8); return { x, y }; },
   perf: () => ({ fps: Math.round(G.fps || 0), calls: view.renderer.info.render.calls, triangles: view.renderer.info.render.triangles, foes: foes.list.size, drawnFoes: [...foes.list.values()].filter(f => f.group.visible).length }),
 };

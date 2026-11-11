@@ -878,7 +878,7 @@
    "kind": "active",
    "desc": "A slow, heavy bolt of fire for {dmg} damage. Your biggest hit; cast it when nothing is in your face.",
    "cost": {
-    "mana": 14
+    "mana": 10
    },
    "costPerRank": 1,
    "cast": 2.0,
@@ -1239,8 +1239,8 @@
      "do": "bolt",
      "type": "fire",
      "base": [
-      8,
-      4.5
+      7,
+      3.6
      ],
      "speed": 35,
      "perRank": {
@@ -1253,7 +1253,7 @@
     {
      "do": "resource",
      "kind": "mana",
-     "n": 5
+     "n": 3
     }
    ]
   },

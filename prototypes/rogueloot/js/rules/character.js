@@ -42,7 +42,7 @@ export function derived(ch) {
     maxHp: Math.round(70 + 18 * (L - 1) + 6 * (a.vit - START_ATTR) + (a.str - START_ATTR)),
     maxMana: Math.round(30 + 6 * L + 5 * (a.int - START_ATTR) + 2 * (a.spi - START_ATTR)),
     hpRegen: +(0.4 + 0.08 * L + 0.12 * (a.spi - START_ATTR)).toFixed(2),          // per second, slow (ruling 23)
-    manaRegen: +(1 + 0.15 * L + 0.25 * (a.spi - START_ATTR)).toFixed(2),
+    manaRegen: +(1 + 0.2 * L + 0.25 * (a.spi - START_ATTR) + 0.12 * (a.int - START_ATTR)).toFixed(2),
     meleePower: +(1 + 0.012 * (a.str - START_ATTR)).toFixed(3),                     // multipliers on weapon damage
     rangedPower: +(1 + 0.012 * (a.agi - START_ATTR)).toFixed(3),
     spellPower: +(1 + 0.012 * (a.int - START_ATTR)).toFixed(3),

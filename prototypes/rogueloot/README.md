@@ -57,3 +57,33 @@ Credits button. Add a row whenever something made by someone else comes in (ruli
   hill, water, cliff, scatter, spawn, patrol, chest, marker), right-drag pans, wheel zooms, Enter finishes a shape,
   Ctrl+Z/Y, Delete, R turns a prop. **Save** writes the file through the DEV server only (`POST /editor/save`,
   LAN addresses only); **Download** works anywhere; **Play-test** opens the game in that zone (`index.html?zone=<id>`).
+
+## Skills (M9, M20-M28)
+
+A skill is data: a row in `data/skills.json` (Wanderer), `skills-paths.json` (the four Paths) or `skills-specs-N.json`
+(specializations, one file per wave, listed in `skills-specs-index.json`). `js/sim/skills.js` runs every row through one
+vocabulary of effects; `tests/sim/paths.test.js` casts every active of every Path and spec and fails on an unknown `do`.
+
+Effects (`do`): `weapon` (x weapon damage), `damage` / `bolt` (spell, `base: [a, perLevel]`), `area` (circle / cone /
+line, `at: self|target|ground`, inner `effects`), `zone` (lasting ground that re-applies its effects each `tick`),
+`dot`, `heal` (`who: 'self'` inside an attack), `hot`, `shield` (`thorns` strikes back while it holds), `buff`
+(`stat`: damage, armour, dodge, moveSpeed, crit, healTaken…), `debuff` (stun, root, slow, damageDown…), `mark`,
+`taunt`, `interrupt`, `dash`, `pull` (negative = knock back), `resource`, `cleanse`, `revive`, `summon` (pet, or up to
+8 minions; `stay: true` stands where dropped), `coat` (every weapon hit leaves a dot), `link` (takes a share of a
+friend's hits), `stance` (`bar: [6 ids]` swaps the action bar while it holds; press again to leave).
+Modifiers: `cond: 'behindBonus'` + `frontMult`, `cond: { targetHpBelow, mult }`, `cond: { slowed, mult }`,
+`perDot`, `perTargetHit` (crowd bonus), bolt `chain: { jumps, range, falloff }`, `spendAll` + `perResourceSpent`,
+`weaponOnly: 'ranged'|'melee'`, `altCost` (hybrids), `perRank` on any number, `synergy` rows (also feed pets).
+
+**Legendary powers** (`js/sim/legendary.js`, data in `data/legendaries.json`): a worn, identified, unbroken legendary
+reshapes one skill at cast time (`shapeSkill` returns a changed copy of the row plus rules for this cast: charges,
+chains, refunds, damage turned to healing…) or a basic action (life leech on auto-attacks, free potions).
+`tests/sim/legendary.test.js` wears each power and casts its skill.
+
+## Monsters on screen (M14, M30)
+
+`js/client/bestiary-kit.js` (Fable) builds every monster, rare and boss (`buildMonster`) and animates it
+(`animateMonster`); `bestiary.html` is the gallery. `js/client/foes.js` loads the raw `data/monsters.json` once, builds
+each body with the kit, rebuilds a boss when its phase changes, and passes the body through `js/client/mesh-merge.js`
+(still parts under the same parent with the same material become one mesh: ~23 -> ~16 draws a monster).
+`tests/browser-perf.mjs` reads draws / triangles at phone size per zone.

@@ -56,5 +56,5 @@ export function heroRegen(w, p, dt) {
   let hot = 0, mot = 0;
   for (const f of p.fx || []) { if (f.kind === 'hot') hot += f.per; if (f.kind === 'mot') mot += f.per; }   // potions refill smoothly
   p.hp = Math.min(p.maxHp, p.hp + (p.st.hpRegen * (calm ? 3 : 1) + hot) * dt);
-  p.mana = Math.min(p.maxMana, p.mana + (p.st.manaRegen * (calm ? 2 : 1) + mot) * dt);
+  p.mana = Math.min(p.maxMana, p.mana + (p.st.manaRegen * (calm ? 3 : 1) + mot) * dt);
 }

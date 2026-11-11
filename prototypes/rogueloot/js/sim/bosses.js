@@ -40,7 +40,12 @@ export function bossMechanic(w, f, t, ab, makeFoe) {
     const fam = Object.values(w.content.monsters).filter(x => x.family === f.def.family && !x.boss);
     const def = fam.find(x => name && x.name.toLowerCase().startsWith(name.split(' ').slice(-2).join(' ').replace(/s$/, ''))) || fam.find(x => x.role === 'swarm') || fam.find(x => x.role === 'brute') || fam[0];
     if (!def) return true;
-    for (let k = 0; k < n; k++) { const a = (k / n) * Math.PI * 2; const o = makeFoe(w, def, f.level, f.x + Math.cos(a) * 5, f.z + Math.sin(a) * 5, { pack: f.pack || f.id }); for (const [id] of f.threat) o.threat.set(id, 2); o.state = 'chase'; o.owner = f.id; }
+    const spots = f.addSpots || [], start = (f.addTurn = (f.addTurn || 0) + 1) * 3;
+    for (let k = 0; k < n; k++) {
+      const a = (k / n) * Math.PI * 2, s = spots.length ? spots[(start + k) % spots.length] : null;
+      const x = s ? s.x + (w.rng() - 0.5) * 1.2 : f.x + Math.cos(a) * 5, z = s ? s.z + (w.rng() - 0.5) * 1.2 : f.z + Math.sin(a) * 5;
+      const o = makeFoe(w, def, f.level, x, z, { pack: f.pack || f.id }); for (const [id] of f.threat) o.threat.set(id, 2); o.state = 'chase'; o.owner = f.id;
+    }
     w.events.push({ k: 'fability', s: f.id, sk: ab.name || 'Calls for help' });
     return true;
   }

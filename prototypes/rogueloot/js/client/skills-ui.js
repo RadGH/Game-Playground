@@ -1,6 +1,8 @@
 // Skills on screen (M9): the Path choice at level 3, the skill tree (K), the six-slot action bar contents, and the
 // player-facing text of a skill at a rank ({mult} {dmg} {secs} filled in from the rank's numbers).
 import { atRank, rankOf, costOf, synergyOf } from '../sim/skills.js';
+import { PATH_BONUS } from '../rules/sheet.js';
+const bonusText = id => { const b = PATH_BONUS[id]; if (!b) return ''; return [b.hpPct && `+${b.hpPct}% health`, b.armourPct && `+${b.armourPct}% armour`, b.dodge && `+${b.dodge}% dodge`].filter(Boolean).join(', '); };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const RES_NAME = { rage: 'Temper', energy: 'Energy', mana: 'Mana' };
@@ -77,7 +79,7 @@ export function createSkillsUI({ content, send, getChar, nope }) {
   function drawPaths(ch) {
     const P = content.paths;
     root.innerHTML = `<div class="skills-panel paths"><header><h2>Choose your Path</h2><span>Level ${ch.level}: the Wanderer's road forks here. This choice is for good (a specialization comes at level 10).</span><button class="x" data-close aria-label="Close">×</button></header>
-      <div class="path-cards">${Object.entries(P).map(([id, p]) => `<button class="path-card pc-${id}" data-path="${id}"><b>${esc(p.name)}</b><small>${esc(RES_NAME[p.resource] || 'Mana')} · ${esc(p.tree?.name || '')}</small><p>${esc(p.blurb)}</p>
+      <div class="path-cards">${Object.entries(P).map(([id, p]) => `<button class="path-card pc-${id}" data-path="${id}"><b>${esc(p.name)}</b><small>${esc(RES_NAME[p.resource] || 'Mana')} · ${esc(p.tree?.name || '')}</small><p>${esc(p.blurb)}</p>${bonusText(id) ? `<small class="bonus">Built to take hits: ${esc(bonusText(id))}</small>` : ''}
         <span class="starters">${(p.starter || []).map(s => `${skillIcon(S[s])} ${esc(S[s]?.name || s)}`).join(' · ')}</span></button>`).join('')}</div></div>`;
     root.querySelector('[data-close]').onclick = () => toggle(false);
     root.querySelectorAll('[data-path]').forEach(b => b.onclick = () => { if (confirm(`Walk the ${P[b.dataset.path].name}'s Path? This is for good.`)) send({ do: 'path', path: b.dataset.path }); });

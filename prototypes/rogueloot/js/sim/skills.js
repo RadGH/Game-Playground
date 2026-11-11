@@ -17,7 +17,7 @@ const gap = (a, b) => dist(a, b) - (a.r || 0) - (b.r || 0);
 /** The rank a hero has in a skill (Wanderer skills: 1 for everyone; 0 = not known). */
 export function rankOf(ch, sk, stanceBar = null) {
   if (!sk) return 0;
-  if (stanceBar?.includes(sk.id)) return Math.max(1, ch?.skills?.[sk.id] || 1);
+  if (stanceBar?.includes(sk.id)) return (ch?.level || 1) >= (sk.reqLevel || 1) ? Math.max(1, ch?.skills?.[sk.id] || 1) : (ch?.skills?.[sk.id] || 0);   // a stance's bar grants its skills at rank 1, but not below their level
   if (sk.owner === 'wanderer' || sk.owner === 'all') return Math.max(1, ch?.skills?.[sk.id] || 1);
   if (sk.owner !== ch?.path && sk.owner !== ch?.spec) return 0;
   return ch?.skills?.[sk.id] || 0;

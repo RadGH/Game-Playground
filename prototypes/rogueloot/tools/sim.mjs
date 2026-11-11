@@ -62,6 +62,7 @@ function play(path, seed) {
     if (i % 200 === 0 && ![...w.foes.values()].some(f => !f.dead)) { ch = p.char; newSession(); }
     if (i % 100 === 0) { if (Math.hypot(p.x - lastPos[0], p.z - lastPos[1]) < 0.5 && !p.target) stuckT += 5; else stuckT = 0; lastPos = [p.x, p.z]; if (stuckT > 60) { R.timeouts++; ch = p.char; newSession(); stuckT = 0; } }
   }
+  if (process.env.TRACE) console.log('rest', path, 'minutes', ((R.rest || 0) / 60).toFixed(1), 'for health', ((R.restHp || 0) / 60).toFixed(1));
   if (process.env.TRACE) console.log('dmg', path, 'dealt', Math.round(R.dealt), 'taken', Math.round(R.taken), 'skills', JSON.stringify(ch.skills), 'attrs', JSON.stringify(ch.attrs), 'pts', ch.attrPoints);
   R.final = { level: ch.level, xp: ch.xp, gold: ch.gold, gearScore: sheet(ch, D).gearScore, path: ch.path, skills: Object.keys(ch.skills || {}).length };
   return R;
@@ -91,7 +92,7 @@ function play(path, seed) {
     for (const g of w.ground?.values() || []) if (g.owner === 'bot' && !g.gold && Math.hypot(g.x - p.x, g.z - p.z) < 3) { if (g.gold) R.gold += g.gold; act(w, 'bot', { do: 'pickup', gid: g.gid }); }
     // rest after a respawn or a hard fight: nothing hunting us and health low -> stand still and let it come back
     const hunted = [...w.foes.values()].some(f => !f.dead && f.target === 'bot' && (f.state === 'chase' || f.state === 'attack'));
-    if (!hunted && (p.hp < p.maxHp * 0.6 || ((ch.path === 'mage' || ch.path === 'healer') && p.mana < p.maxMana * 0.3))) { p.target = null; p.autoOn = false; return; }
+    if (!hunted && (p.hp < p.maxHp * 0.6 || ((ch.path === 'mage' || ch.path === 'healer') && p.mana < p.maxMana * 0.3))) { R.rest = (R.rest || 0) + 4 * DT; if (p.hp < p.maxHp * 0.6) R.restHp = (R.restHp || 0) + 4 * DT; p.target = null; p.autoOn = false; return; }
     // fight: the target, else the nearest living foe, else loot, else wander toward the nearest foe anywhere
     let tg = p.target && w.foes.get(p.target);
     if (!tg || tg.dead) { tg = nearest([...w.foes.values()].filter(f => !f.dead && (f.state === 'chase' || f.state === 'attack') && f.target === 'bot')) || nearest([...w.foes.values()].filter(f => !f.dead)); if (tg) act(w, 'bot', { do: 'target', target: tg.id }); }

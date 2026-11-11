@@ -276,3 +276,6 @@ body.hurt-flash #fight::before { content: ''; position: fixed; inset: 0; box-sha
 .rate-card .thumbs, .rate-card .why { display: flex; gap: 6px; flex-wrap: wrap; } .rate-card button { min-height: 36px; padding: 4px 10px; } .rate-card button.on { background: #ffe9b0; box-shadow: inset 0 0 0 2px #e8b64a; }
 .rate-card input { min-height: 36px; }
 .pad-focus { outline: 4px solid #ffd040 !important; outline-offset: 3px; box-shadow: 0 0 0 7px rgba(40,26,10,.55) !important; z-index: 3; }
+.quest-track .qg { color: #ffd040; font-weight: 600; margin-top: 2px; }
+.plate.pl-portal.open { color: #fff6c8; border-color: #ffd040; background: rgba(40, 70, 120, .85); box-shadow: 0 0 10px rgba(120, 190, 255, .6); }
+.plate.pl-portal.locked { opacity: .62; filter: grayscale(.8); font-size: .85em; }

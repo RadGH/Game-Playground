@@ -26,6 +26,9 @@ function spawnPacks(w) {
     if (sp.boss) {                                         // a dungeon boss's marker: { x, z, boss: '<id>' }
       const def = w.content.monsters[sp.boss]; if (!def) continue;
       const f = makeFoe(w, def, def.raw?.level || sp.level || def.levelRange[0], sp.x, sp.z, { rank: 'boss', pack: 'boss-' + sp.boss });
+      // where the boss's helpers come from (the room's own features: pillars, chutes, egg sacs, coffins)
+      const SPOTS = ['pillars', 'chutes', 'sacs', 'coffins', 'spots', 'adds'];
+      f.addSpots = SPOTS.flatMap(k => Array.isArray(sp[k]) ? sp[k].filter(v => Array.isArray(v) && v.length >= 2).map(([x, z]) => ({ x, z })) : []);
       f.leashBig = true; continue;
     }
     const ids = sp.pack || pickPack(w, sp);
@@ -49,7 +52,7 @@ function spawnPacks(w) {
 }
 /** Roll one composition from a table list: [{ w, of: { id: n | [min, max] }, minLevel }]. */
 export function rollComposition(w, rows, level, floor = 1) {
-  const ok = (rows || []).filter(r => !(r.minLevel > level) && (r.floor == null || r.floor === floor));
+  const ok = (rows || []).filter(r => !(r.minLevel > level) && (r.floor == null || (Array.isArray(r.floor) ? r.floor.includes(floor) : r.floor === floor)));
   if (!ok.length) return null;
   const tot = ok.reduce((s, r) => s + (+r.w || +r.weight || 1), 0); let k = w.rng() * tot;
   for (const r of ok) {

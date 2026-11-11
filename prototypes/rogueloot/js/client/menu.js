@@ -58,3 +58,17 @@ export function createMenu(items) {
   btn.onclick = open;
   return { open, btn };
 }
+
+/** First steps for a new hero (owner 2026-11-11: a first-time player could not tell where to go). Shown once per hero. */
+export function openWelcome(ch, { touch }) {
+  const key = 'rogueloot.welcomed.' + (ch.id || ch.name);
+  try { if (localStorage.getItem(key)) return; localStorage.setItem(key, '1'); } catch { /* private window: show it anyway */ }
+  const how = touch
+    ? '<li>Move with the stick on the left. Tap a monster to fight it; the buttons on the right are your skills.</li><li>Tap the glowing prompt that appears beside portals and people.</li>'
+    : '<li><b>Click the ground</b> to walk there (hold to keep walking). <b>Click a monster</b> to walk up and fight it.</li><li><b>1-6</b> use your skills, <b>right-click</b> uses the first one at the pointer. <b>Space</b> uses a portal or talks to someone when the prompt shows.</li>';
+  modal(`<h2>Welcome to Brightwater</h2>
+    <p>The road out of town is through the <b>portals north of the square</b>. Only the one that glows is open to you: <b>Saltgrass Shore</b>. The others open as you travel.</p>
+    <p>Follow the <b style="color:#ffd040">gold arrow</b> at your feet and the beam of light. It always points to your next step, and the box at the top right says what that step is.</p>
+    <ul>${how}<li><b>M</b> opens the map, <b>I</b> your bag and character, <b>K</b> your skills. At level 3 you choose a Path.</li></ul>
+    <div class="btns"><button class="primary" data-close>Let's go</button></div>`, 'welcome');
+}

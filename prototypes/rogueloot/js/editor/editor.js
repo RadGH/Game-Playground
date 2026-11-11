@@ -154,7 +154,7 @@ function panel() {
   if (sel) { const it = zone[listOf(sel.kind)][sel.i]; h += `<h3>Selected ${sel.kind}</h3><textarea id="sel-json" spellcheck="false">${esc(JSON.stringify(it, null, 1))}</textarea><div class="row"><button id="sel-apply">Apply</button><button id="sel-del">Delete</button></div>`; }
   h += `<h3>Zone</h3><label>Id <input id="z-id" value="${esc(zone.id)}"></label><label>Name <input id="z-name" value="${esc(zone.name)}"></label>
     <label>Levels <input id="z-lv" value="${(zone.levels || [1, 1]).join('-')}"></label><label>Spawn table <input id="z-table" value="${esc(zone.table || '')}"></label>
-    <label>Theme <select id="z-theme">${opt(['meadow', 'shore', 'forest', 'marsh', 'highland', 'ruins', 'grave', 'cave'], zone.theme)}</select></label><label>Bounds <input id="z-bounds" value="${zone.bounds.join(',')}"></label>
+    <label>Theme <select id="z-theme">${opt(['meadow', 'shore', 'forest', 'marsh', 'highland', 'ruins', 'grave', 'cave', 'cellar', 'crypt', 'catacomb', 'mine'], zone.theme)}</select></label><label>Bounds <input id="z-bounds" value="${zone.bounds.join(',')}"></label>
     <div id="check-out"></div>`;
   P.innerHTML = h;
   P.querySelectorAll('[data-prop]').forEach(b => b.onclick = () => { settings.prop = b.dataset.prop; panel(); });

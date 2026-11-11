@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rogueloot Bestiary</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Spectral:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/bestiary.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<header id="bar">
+  <h1>Bestiary</h1>
+  <label>Family <select id="f-family"><option value="">All</option></select></label>
+  <label>Role <select id="f-role"><option value="">All</option></select></label>
+  <label>Kind <select id="f-kind"><option value="">All</option><option value="monster">Monsters</option><option value="rare">Rares</option><option value="boss">Bosses</option></select></label>
+  <label>Camera <select id="f-cam"><option value="game">Game (angled top-down)</option><option value="front">Front</option><option value="top">Top</option></select></label>
+  <input id="f-search" type="search" placeholder="Search…" autocomplete="off">
+  <span id="count"></span>
+  <a href="index.html" class="back">Game</a>
+</header>
+<p id="intro">Every monster, rare and boss built in code from its <code>look</code> block in <code>data/monsters.json</code> by <code>js/client/bestiary-kit.js</code>. Click a card for the orbit view and the animation buttons.</p>
+<main id="grid"></main>
+<section id="big" hidden>
+  <div class="big-box">
+    <div class="big-stage"><canvas id="big-view"></canvas>
+      <div class="big-anims">
+        <button data-anim="idle" class="on">Idle</button><button data-anim="walk">Walk</button><button data-anim="attack">Attack</button><button data-anim="cast">Cast</button><button data-anim="hit">Hit</button><button data-anim="dead">Death</button>
+        <label class="landed"><input type="checkbox" id="big-landed"> Landed</label>
+        <label class="phase">Phase <select id="big-phase"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+        <label class="rank">Rank <select id="big-rank"><option value="">none</option><option value="champion">champion</option><option value="rare">rare</option></select></label>
+      </div>
+    </div>
+    <aside class="big-info">
+      <button id="big-close" aria-label="Close">×</button>
+      <h2 id="big-name"></h2>
+      <p id="big-meta"></p>
+      <p id="big-sil"></p>
+      <dl id="big-stats"></dl>
+      <h3>Parts</h3><ul id="big-parts"></ul>
+      <h3>Animation notes</h3><dl id="big-anim"></dl>
+      <p class="hint">Drag to turn, wheel to zoom.</p>
+    </aside>
+  </div>
+</section>
+<script type="module" src="js/client/bestiary-gallery.js"></script>
+</body>
+</html>

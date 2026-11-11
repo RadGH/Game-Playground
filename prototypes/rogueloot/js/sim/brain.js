@@ -15,7 +15,7 @@ import { resolve } from './move.js';
 import { resolveHit, pickTarget } from '../rules/combat.js';
 import { hurt } from './fight.js';
 import { flowTo, downhill, clearLine } from './paths.js';
-import { speedFactor, dmgFactor, stepFx, has, addFx } from './status.js';
+import { speedFactor, dmgFactor, stepFx, has, addFx, withArmour } from './status.js';
 import { readyAbility, startAbility, stepAbility } from './abilities.js';
 import { modsTick, modsHitDealt } from './champions.js';
 import { bossTick } from './bosses.js';
@@ -230,7 +230,7 @@ function attack(w, f, t) {
     w.shots.push({ id: 's' + (w.nextId++), from: f.id, to: t.id, x: f.x, z: f.z, speed: 18, type: f.def.damageType, amount, spell: f.def.role !== 'archer', foeShot: true });
     w.events.push({ k: 'shoot', s: f.id, t: t.id, ty: f.def.damageType });
   } else {
-    const r = resolveHit(f, t, { amount, type: f.def.damageType, spell: false }, w.rng);
+    const r = resolveHit(f, withArmour(t), { amount, type: f.def.damageType, spell: false }, w.rng);
     hurt(w, f, t, r, f.def.damageType);
     if (f.mods) modsHitDealt(w, f, t, r);
     w.events.push({ k: 'swing', s: f.id });

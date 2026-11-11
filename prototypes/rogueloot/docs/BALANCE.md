@@ -23,3 +23,14 @@ What it says, and what is queued (M13 town, M33 full pass):
 - **Rares are stingy as designed** (0-0.7 an hour at levels 1-3 vs the data's 0.9 target): fine at this sample size.
 - Fixed by this run: new heroes had an empty skill bar in the data (the screen hid it); casters before level 3 now
   fight up close like any Wanderer.
+
+## 2026-11-10 (evening) — Saltgrass Shore, bot fixed (it spent mana walking up and then rested forever)
+
+```
+fighter  level 4.0  deaths/h 0.0  kills/h 155  potions/h 19.5  reached 2:2  3:6  4:13 (minutes)
+rogue    level 3.0  deaths/h 0.0  kills/h 95   reached 2:2  3:6
+mage     level 3.0  deaths/h 0.0  kills/h 146  reached 2:2  3:6
+healer   level 4.0  deaths/h 0.0  kills/h 173  reached 2:2  3:6  4:18
+```
+Early levels are quick (fine, D2-like); no deaths in the first zone at monster damage 0.6 — likely a touch easy now.
+Re-tune when Thornwood / King's Road exist (the act's pace shows past level 6). Fighters now open a fight with 15 Temper.

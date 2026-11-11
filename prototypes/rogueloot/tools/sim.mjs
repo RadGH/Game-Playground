@@ -14,6 +14,7 @@ import { makePotion } from '../js/rules/potions.js';
 import { sheet } from '../js/rules/sheet.js';
 import { makeRng } from '../js/sim/rng.js';
 import { rankOf, costOf, atRank } from '../js/sim/skills.js';
+import { clearLine, flowTo, downhill } from '../js/sim/paths.js';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const MINUTES = +arg('minutes', 60), SEEDS = +arg('seeds', 2), ZONE = arg('zone', 'proving_meadow');
@@ -84,7 +85,7 @@ function play(path, seed) {
     for (const g of w.ground?.values() || []) if (g.owner === 'bot' && !g.gold && Math.hypot(g.x - p.x, g.z - p.z) < 3) { if (g.gold) R.gold += g.gold; act(w, 'bot', { do: 'pickup', gid: g.gid }); }
     // rest after a respawn or a hard fight: nothing hunting us and health low -> stand still and let it come back
     const hunted = [...w.foes.values()].some(f => !f.dead && f.target === 'bot' && (f.state === 'chase' || f.state === 'attack'));
-    if (!hunted && (p.hp < p.maxHp * 0.7 || (p.res === 'mana' && p.mana < p.maxMana * 0.4))) { p.target = null; p.autoOn = false; return; }
+    if (!hunted && (p.hp < p.maxHp * 0.6 || ((ch.path === 'mage' || ch.path === 'healer') && p.mana < p.maxMana * 0.3))) { p.target = null; p.autoOn = false; return; }
     // fight: the target, else the nearest living foe, else loot, else wander toward the nearest foe anywhere
     let tg = p.target && w.foes.get(p.target);
     if (!tg || tg.dead) { tg = nearest([...w.foes.values()].filter(f => !f.dead && (f.state === 'chase' || f.state === 'attack') && f.target === 'bot')) || nearest([...w.foes.values()].filter(f => !f.dead)); if (tg) act(w, 'bot', { do: 'target', target: tg.id }); }
@@ -100,10 +101,15 @@ function play(path, seed) {
     const bar = (ch.bar?.length ? ch.bar : ['sure_strike', 'spark', 'field_mend', 'shove']).filter(Boolean);
     const heal = bar.find(id => S[id]?.effects?.some(e => e.do === 'heal' || e.do === 'hot' || e.do === 'shield'));
     if (heal && p.hp < p.maxHp * 0.55) { act(w, 'bot', { do: 'use', skill: heal, target: 'bot' }); return; }
+    if (!caster && d > reach + 1) return;           // walk in before spending anything
     for (const id of bar) { const s = S[id]; if (!s || s.target === 'ally') continue; const r = act(w, 'bot', { do: 'use', skill: id, target: tg.id, at: { x: tg.x, z: tg.z } }); if (r.ok) break; }
   }
   function nearest(list) { let b = null, bd = Infinity; for (const x of list) { const d = Math.hypot(x.x - p.x, x.z - p.z); if (d < bd) { bd = d; b = x; } } return b; }
-  function goTo(x, z) { const dx = x - p.x, dz = z - p.z, l = Math.hypot(dx, dz) || 1; move = { mx: dx / l, mz: dz / l }; }
+  function goTo(x, z) {
+    // round cliffs and water on the walk grid, like a player's click-to-move
+    if (!clearLine(w.area, p.x, p.z, x, z, 0.4)) { const n = downhill(w, flowTo(w, x, z, 2), p.x, p.z); if (n) { x = n[0]; z = n[1]; } }
+    const dx = x - p.x, dz = z - p.z, l = Math.hypot(dx, dz) || 1; move = { mx: dx / l, mz: dz / l };
+  }
 }
 
 const runs = [];

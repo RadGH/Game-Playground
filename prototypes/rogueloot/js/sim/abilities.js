@@ -6,7 +6,7 @@
 //   width), ring (round the caster, innerSize..size), cross (two lines), none.
 import { resolveHit } from '../rules/combat.js';
 import { hurt, aggro } from './fight.js';
-import { addFx, dmgFactor } from './status.js';
+import { addFx, dmgFactor, withArmour } from './status.js';
 import { resolve } from './move.js';
 import { makeFoe } from './actors.js';
 import { bossMechanic } from './bosses.js';
@@ -108,7 +108,7 @@ export function inside(shape, f, aim, tele, size, p) {
 }
 function strike(w, f, p, ab, mult, fx, quiet = false) {
   const type = ab.damageType || f.def.damageType;
-  const r = resolveHit(f, p, { amount: f.dmg * mult * dmgFactor(f), type, spell: type !== 'physical' }, w.rng);
+  const r = resolveHit(f, withArmour(p), { amount: f.dmg * mult * dmgFactor(f), type, spell: type !== 'physical' }, w.rng);
   hurt(w, f, p, r, type);
   if (r.amount > 0) applyRider(w, f, p, ab, fx);
   void quiet;

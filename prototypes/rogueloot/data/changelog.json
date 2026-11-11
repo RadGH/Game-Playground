@@ -1,6 +1,17 @@
 {
   "entries": [
     {
+      "id": "2026-11-10-specs-dungeons",
+      "date": "2026-11-10",
+      "title": "Specializations and the first dungeons",
+      "items": [
+        "At level 10 choose a specialization with three skill trees of its own. The first six are here: Vanguard, Ranger, Pyromancer, Cleric, and two that bridge Paths, the Paladin (Fighter or Healer) and the Spellblade (Fighter or Mage). Rangers and Pyromancers bring a companion.",
+        "The trainer in Brightwater can unlearn your skills or change your specialization, for a price.",
+        "The first dungeons are open: the Tidecaves under the Saltgrass headland (two floors, and Clatterjaw waiting in his pool) and the Mill Cellars under the windmill (Gristmaul).",
+        "Fixed: armour from skills now protects you, and skills that make enemies hit softer now do."
+      ]
+    },
+    {
       "id": "2026-11-10-click-to-move",
       "date": "2026-11-10",
       "title": "Click to move",

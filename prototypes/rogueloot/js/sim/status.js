@@ -17,7 +17,9 @@ export function speedFactor(a) {
   let k = 1; for (const f of a.fx) if (f.kind === 'slow') k *= 1 - Math.min(0.8, f.pct / 100);
   return k;
 }
-export function dmgFactor(a) { let k = 1; for (const f of a.fx || []) { if (f.kind === 'dmgUp') k *= 1 + f.pct / 100; if (f.kind === 'dmgDown') k *= 1 - f.pct / 100; } return k; }
+export function dmgFactor(a) { let k = 1; for (const f of a.fx || []) { if (f.kind === 'dmgUp') k *= 1 + f.pct / 100; if (f.kind === 'dmgDown') k *= 1 - f.pct / 100; if (f.kind === 'buff' && f.stat === 'damage') k *= Math.max(0.1, 1 + f.pct / 100); } return k; }
+/** An actor with its armour buffs and debuffs applied (buff stat 'armour', in whole percent). */
+export function withArmour(t) { let k = 0; for (const f of t.fx || []) if (f.kind === 'buff' && f.stat === 'armour') k += f.pct; return k ? { ...t, armour: Math.max(0, t.armour * (1 + k / 100)) } : t; }
 /** Expire statuses; tick damage over time through `hurtFn(src, target, amount, type)`. */
 export function stepFx(w, a, hurtFn) {
   if (!a.fx?.length) return;

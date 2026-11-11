@@ -211,3 +211,149 @@ gullhawk flight on the hedgerow — and 2 rat swarms), 8 chests (4 crates, 3 che
   `cave`.
 - Keep the sea on the map edge in any coastal zone (the Sunken Ruins) — the water chain is cheap and reads as the
   world's edge.
+
+## Dungeons
+
+Written by Fable, 2026-11-11, for rulings 4, 16, 25, 32 and 46. Same JSON format as the outdoor zones; the sim is flat,
+so a cave is **rooms and corridors walled by `cliffs`** on a dark `mud` base (the editor's cliff tool draws the same
+thing). Built so far: **The Tidecaves** (two floors, levels 3–4, Clatterjaw) and the **Mill Cellars** (one floor,
+level 5, Gristmaul). Each floor was laid out as rooms + corridors first, the walls were *traced from that layout*,
+and the result was checked for a 4 m walkable lane along every corridor (heroes, a pack and a companion must pass)
+before any prop went in. Numbers at the end of each section.
+
+### How a dungeon floor is built (the rules behind the three files)
+
+- **A wall is a cliff path.** The collider chains 0.9 m circles along it and inflates them by the body (0.45 m), so a
+  cliff drawn *on* the edge of a floor eats 1.35 m of it; the renderer's rocks are 3.2 m wide and eat 1.6 m. The
+  cave contours therefore sit **1.4 m back** inside the rock from the floor I meant to leave open, and a corridor
+  is drawn **7–7.5 m nominal** to give ≥ 4 m of lane after the wobble in the walls (a tight passage, the Shellback
+  Narrows, is 6.8). A cave wall between two passages must stay ≥ 5 m thick or the two rooms fuse.
+- **The cellar is built from `crypt_wall` props** (484 of them, 2.2 m each, placed end to end along straight
+  contours 0.5 m into the earth), not cliffs, so it reads as a built room with square corners; corridors there are
+  7–7.5 m nominal (the wall's 1 m block + the body leaves ~4.6 m).
+- **Water is a wall.** A pool is a visual centrepiece a fight happens *around*: every pool is inside a room with a
+  ≥ 4 m dry lane all round, and the patrol routes run on that lane. The boss arenas have **no water inside the
+  fight circle** — Clatterjaw's "knee-deep middle" is `wetsand` + a `mud` centre, with real sea in three bays off
+  the rim (so the Claw Slam's "knockback into the water" has water to point at).
+- **Arrival**: the way-back `exit` marker carries `ax`/`az` so the hero lands 6 m into the room, past the marker's
+  4.5 m reach, facing in. The exit to the next floor is at the far end with the same rule on its twin.
+- **Lights**: only the 10 nearest the start are real lights underground, so the entries are lit by torches /
+  lanterns and the rest of the floor by crystals (blue) and braziers (orange) as colour, not light. Each floor
+  leans on one colour: the caves are crystal-blue with two fisherfolk torches at the mouth; the cellar is lantern
+  gold with torches at the doors and four braziers on the millstone floor.
+- **Spawns**: one new monster per floor is **pinned** (`pack: [...]`) at the spot where its lesson is clearest — the
+  first husks, the first brinewife, the first shellback, the first shambler, the looters at the stair. Everything
+  else rolls from the floor's table. Dungeon packs sit 20–30 m apart (closer than outdoors; the fights are the
+  floor). Nothing spawns within 20 m of a start.
+
+### The Tidecaves, floor 1 (levels 3–4, 140 × 200 m, theme `cave`, table `tidecaves`)
+
+The sea comes in under the headland. You enter from the shore's cave mouth at the **south** end and the floor climbs
+north-west through the cliff, then back east and down to the stair. The tide left boats in here; the drowned are
+walking back up through it.
+
+1. **The Mouth**: the exit back to the shore (arrive 6 m in), the `start`, two torches the fisherfolk left in the
+   rock, their nets (a crate chest), and a tide pool with reeds. Sand floor. Quiet.
+2. **The Drip Gallery** (level 3): a 60 m winding corridor of stalagmites and the first crystals. Two crab packs, the
+   first 28 m from the start, the second at the last bend before the hall.
+3. **The Flooded Hall** (level 3, the big room, 42 m across): a round pool in the middle, wet sand around it, two
+   **wrecked boats** the tide dumped on the shore and the chest in the west one's cargo. A crab pack on the west
+   shore, the **first drowned husks** (pinned, three) on the north shore, and the table's `flooded_hall` patrol —
+   three husks walking the pool's rim. Three ways out: west to the Bone Shelf, north to the Crystal Throat.
+4. **The Bone Shelf** (level 3, dead end west): a corridor fight, then a small round chamber of bone piles and a crate
+   chest with crabs feeding on what the sea left.
+5. **The Crystal Throat** (level 4, the climb): a 45 m corridor lined with crystals; the **first brinewife** (pinned,
+   with three crabs) stands mid-corridor — the interrupt lesson happens in a passage where you cannot walk round
+   the Drowning Song circle, which is the point. A crab pack at the top.
+6. **The Sump** (level 4, dead end east off the throat): a corridor pack, then a drowned pool with a boat half in
+   it, reeds, and **four husks** (pinned) round the water guarding the level-4 chest behind the pool.
+7. **The Drowned Stair** (level 4): the last corridor north-east with a pack on it, a round wet chamber with a pool, a
+   crab pack at the foot of the stair, and the exit down to floor 2, lit by two big crystals.
+
+Numbers: 13 spawns (12 packs incl. 3 pinned, 1 patrol with a 9-point ring route), 4 chests (2 crates, 2 chests),
+97 hand props + 39 scatter, one wall loop of 224 points, 4 pools, 3,177 m² walkable.
+
+### The Tidecaves, floor 2 — The Tyrant's Pool (level 4, 130 × 190 m)
+
+Arrive at the foot of the stair (south), climb north through the narrows, and the floor opens into the brinewives'
+chantry before the last corridor to Clatterjaw.
+
+1. **The Landing**: the exit up (arrive 6 m in), the `start`, two crystals, bones.
+2. **The Shellback Narrows** (6.8 m nominal, the tightest passage in the act): the **first barnacle shellback**
+   (pinned, with two crabs) 23 m from the start — Hunker in a corridor where melee cannot get behind it — and a
+   second pack at the bottom end.
+3. **The Chantry** (the big room, 30 m across): the brinewives' pool with **two braziers** at its edge, two wrecked
+   boats, the chest in the east wreck. A **brinewife and her three drowned** (pinned) at the fire, a pack on the
+   west shore, and the `flooded_hall` patrol walking the pool again.
+4. **The Fisher's Cache** (dead end east): what the drowned carried down — crates, barrels, a boat, a torch still
+   lit, a small pool — a corridor pack on the way and a **shellback** (pinned) on the chest.
+5. **The Threshold**: a corridor north-east to a small wet chamber where **two brinewives** (pinned, with two crabs)
+   sing at the arena mouth — interrupt both, or walk into the boss fight with the song still going.
+6. **The Tyrant's Pool** (the arena, per the bestiary): a 28 m round chamber whose middle 24 m is the pool — `sand`
+   rim 2 m wide, `wetsand` to 12 m, a `mud` centre 12 m across for the knee-deep middle — **four cave pillars** at
+   9 m on the diagonals (the Call the Tide crabs come out from behind them; the boss marker carries `pillars` with
+   their positions), three **sea bays** off the rim (west, north, south-east: real water, outside the fight), crystals
+   round the wall, and the **boss hoard** in a nook on the north-east, behind the boss as you enter from the
+   south-west. Clatterjaw's marker is dead centre, 7 m from the nearest pillar.
+
+Numbers: 9 spawns (7 packs incl. 4 pinned, 1 patrol, the boss), 3 chests (2 chests, 1 bossHoard), 82 hand props +
+29 scatter, 227 wall points, 5 pools, 2,418 m² walkable.
+
+### Mill Cellars (level 5, 140 × 135 m, theme `cellar`, table `mill_cellars`)
+
+Under the windmill. One floor of square stone rooms off a central grain hall; the miller's lanterns still burn. The
+cellar door is the `cave_mouth` on the windmill hill, so you arrive at the **south** stair and the mill's own
+stones are at the **north** end, straight up the spine of the plan.
+
+1. **The Stair Landing**: the exit up (arrive 6 m in), the `start`, two lantern posts, timber props, a barrel and a
+   crate.
+2. **The Sack Hall** (32 × 22 m): two rows of grain sacks, four lanterns, timber props along the walls, a cart, the
+   looters' mess. The **looters** (pinned: two raiders + a slinger, the table's "near the stair" row) stand in the
+   east half, the **first rat swarm** (`marker: grain_sacks`) in the south row of sacks; a crate chest on the west
+   wall. Doors west, east and north.
+3. **The Wet Store** (west, 24 × 30 m): the damp got in, then the mould — `mud` patches, moss, mushrooms, a sump pool
+   in the south-west corner, barrels gone soft, a bone pile. The **first mould shambler** (pinned, with two weevils)
+   on the mud, **two shamblers** (pinned) by the sump guarding the chest in the north-west corner. The lasting-ground
+   lesson (Bloom) in a room with corners to be cornered in.
+4. **The Cooperage** (east, 24 × 30 m): barrels in two rows, a cart, crates — two weevil packs (Bore, the armour
+   shred) and the **second rat nest** in the sacks by the south wall; a crate chest in the north-east corner.
+5. **The Rat Run** (north, 18 m): a 7 m corridor with a **grain chute alcove on each side** (sacks, flour on the
+   floor) and a **rat swarm** between them — the swarm lesson in a passage with no room to kite.
+6. **The Weevil Gallery** (40 × 16 m): the timber frames that hold the mill up, flour drifts (`snow` surfaces),
+   a cart, sacks — a weevil pack west and a **shambler + weevils** (pinned) east at the strongroom door.
+7. **The Strongroom** (east off the gallery): the miller's barred `gate` (open — the looters forced it), a torch, a
+   pack on the **locked chest**.
+8. **The Millstone Floor** (the arena, per the bestiary): a round stone room 20 m across up a 7.5 m corridor from
+   the gallery; the **great axle** in the centre (a `ruin_pillar` at scale 2 — a 2 m pillar that blocks the
+   boss's line and that he walks round), **four grain chutes** as alcoves in the wall (W, E, NW, NE — each with sacks
+   and a timber frame; the boss marker carries `chutes` with their mouths, for Rats in the Walls), four braziers,
+   four flour drifts, bones. Gristmaul's marker is 6 m north of the axle, so he stands across it from you as you
+   come in. The **boss hoard** is in a nook in the north wall behind him.
+
+Numbers: 12 spawns (8 packs incl. 4 pinned, 3 rat swarms, the boss), 5 chests (2 crates, 1 chest, 1 lockedChest,
+1 bossHoard), 628 hand props (484 crypt-wall pieces, 13 lanterns, 9 torches, 4 braziers) + 27 scatter, 1 pool,
+3,222 m² walkable.
+
+### For the programmer (dungeons)
+
+- **`floor` on a spawn-table row is not read** (`spawn.js` `rollComposition` only filters `minLevel`), so the
+  tidecaves table's two `floor: 2` rows (shellback + crabs, brinewife + husks) can roll on floor 1 and the floor-1
+  rows roll on floor 2. The pinned packs above make the lessons land in the right order regardless; the fix is a
+  one-line filter on `sp.floor ?? area.floor` when the sim gets a floor number (floor 1 is `tidecaves`, floor 2 is
+  `tidecaves_2`; the zone files carry no floor field yet — add `floor: 1 / 2` to the zone JSON when it is read).
+- **Boss markers carry hints the sim does not read yet**: `pillars` (Clatterjaw — where Call the Tide's crabs appear)
+  and `chutes` + `axle` (Gristmaul — where Rats in the Walls pour from, and the pillar he walks round). Spawn the
+  adds at those points rather than at the boss.
+- **The editor's theme list lacks `cellar`** (and `crypt`, `catacomb`, `mine`, which `zone-view.js` already draws
+  dark): the Mill Cellars file says `cellar` and draws dark in the game, but the editor's dropdown shows "meadow"
+  for it and would overwrite the theme on Save. `js/editor/editor.js` line ~152.
+- **The walk grid's "unreachable" count is the rock outside the walls** (22,491 cells on floor 1): the checker only
+  counts cells not inside a blocker, and the ground beyond a cave wall is open ground that nothing can get to. Fine
+  for play (flow fields stop at the wall); the number just is not a bug.
+- **`swarms: []` in the tidecaves table** means no swarm markers there (as on the shore); the Mill Cellars has three
+  swarm markers against its one rat row.
+- The two outdoor-side arrivals (shore `entrance` at (-80, -62), fields `entrance` at (-10, -26)) use the default
+  (0, +3) offset and both land on open ground — checked.
+- The three files were generated from a room/corridor design script kept outside the repo (walls traced from the
+  layout, then hand props nudged off the 4 m lanes). Editing the JSON by hand or in the editor is fine; the walls are
+  plain `cliffs` / `crypt_wall` props like anywhere else.

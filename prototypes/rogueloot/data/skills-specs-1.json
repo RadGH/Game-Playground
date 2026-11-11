@@ -1,0 +1,5654 @@
+{
+ "_doc": "Wave-1 Specialization trees (Fable, 2026-11-10; design in docs/SPECS.md; the roster in data/specs.json). Six specs - Vanguard, Ranger, Pyromancer, Cleric (one per Path) and the hybrids Paladin (Fighter OR Healer) and Spellblade (Fighter OR Mage) - three trees each, 8-9 nodes a tree, levels 10/11/12/14/16/18/20, ranks to 10 (short utilities 3-5). SAME SCHEMA as skills-paths.json (owner = the spec id, tree = the tree id in specs.json); rankOf() already answers a spec's skills through ch.spec. NEW HERE: `altCost` on every hybrid active (the other Path's price, used when the hero's resource matches it: a Paladin from Healer pays altCost.mana, from Fighter cost.rage) and `summon` (ruling 35: `kind: pet` = one strong pet replacing the last, `kind: minion` = up to 8, oldest replaced; `secs` 0 = stays; `skills` in the mercenary brain's vocabulary taunt|strike|self|aoe|kite|bolt|heal|shield; perRank on hpMult/dmgMult). `starter` in specs.json = granted at rank 1 at the spec pick, as the Path starters are. NUMBERS: a spec filler is 1.1-1.3x a swing or 1.4x a Path bolt, big hits 2.5-4x on 8-25 s cooldowns, capstones at 20 on 20-90 s; costs sit where a Path runs flat out ~30 s then lean (temper 15-50, energy 20-50, mana 14-60). Everything here runs on the engine today except the inert cases listed in `wishlist` (two of which are Path bugs this file inherits: armour buffs on heroes and damageDown on foes).",
+ "skills": {
+  "van_crowd_swing": {
+   "name": "Crowd Swing",
+   "owner": "vanguard",
+   "tree": "thick_of_it",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Swing all the way round for {mult} weapon damage to everything within 4.5 m. Your filler whenever two or more stand near you.",
+   "cost": {
+    "rage": 20
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4.5,
+     "at": "self",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1,
+       "perRank": {
+        "mult": 0.06
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "van_battle_hunger": {
+   "name": "Battle Hunger",
+   "owner": "vanguard",
+   "tree": "thick_of_it",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "A crowd feeds you. Every hit you land or take gives more temper.",
+   "passive": {
+    "stat": "rageGen",
+    "value": 10,
+    "perRank": 4
+   }
+  },
+  "van_iron_gyre": {
+   "name": "Iron Gyre",
+   "owner": "vanguard",
+   "tree": "thick_of_it",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "van_crowd_swing"
+   ],
+   "kind": "active",
+   "desc": "Spin for three seconds, striking everything within 5.5 m for {mult} weapon damage every second and dragging it half a metre closer. Moving stops the spin.",
+   "cost": {
+    "rage": 35
+   },
+   "cast": 0,
+   "channel": 3,
+   "cd": 12,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5.5,
+     "at": "self",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 0.9,
+       "perRank": {
+        "mult": 0.05
+       }
+      },
+      {
+       "do": "pull",
+       "dist": 0.5
+      }
+     ]
+    }
+   ]
+  },
+  "van_heavy_arms": {
+   "name": "Heavy Arms",
+   "owner": "vanguard",
+   "tree": "thick_of_it",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Plate on your shoulders and a heavier swing. More melee power.",
+   "passive": {
+    "stat": "meleePower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "van_open_wounds": {
+   "name": "Open Wounds",
+   "owner": "vanguard",
+   "tree": "thick_of_it",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "van_crowd_swing"
+   ],
+   "kind": "synergy",
+   "desc": "Crowd Swing bites deeper: more damage per rank.",
+   "synergy": {
+    "skill": "van_crowd_swing",
+    "stat": "damage",
+    "pctPerRank": 5
+   }
+  },
+  "van_hew": {
+   "name": "Hew",
+   "owner": "vanguard",
+   "tree": "thick_of_it",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "van_iron_gyre"
+   ],
+   "kind": "active",
+   "desc": "One great two-handed arc for {mult} weapon damage to everything within 4.5 m, leaving each one bleeding for {secs} seconds.",
+   "cost": {
+    "rage": 30
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4.5,
+     "at": "self",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.6,
+       "perRank": {
+        "mult": 0.08
+       }
+      },
+      {
+       "do": "dot",
+       "type": "physical",
+       "base": [
+        2.5,
+        1
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.3,
+         0.1
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "van_hard_grip": {
+   "name": "Hardened Grip",
+   "owner": "vanguard",
+   "tree": "thick_of_it",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "van_heavy_arms"
+   ],
+   "kind": "passive",
+   "desc": "You swing faster the longer the fight goes. More attack speed.",
+   "passive": {
+    "stat": "attackSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "van_whirl_on": {
+   "name": "Whirl On",
+   "owner": "vanguard",
+   "tree": "thick_of_it",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "van_iron_gyre"
+   ],
+   "kind": "synergy",
+   "desc": "Iron Gyre spins harder: more damage per rank.",
+   "synergy": {
+    "skill": "van_iron_gyre",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "van_avalanche": {
+   "name": "Avalanche",
+   "owner": "vanguard",
+   "tree": "thick_of_it",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "van_hew"
+   ],
+   "kind": "active",
+   "desc": "Bring the whole weight of the line down: {mult} weapon damage to everything within 6 m and a 1.5 s stun. The Vanguard's capstone.",
+   "cost": {
+    "rage": 50
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 2.5,
+       "perRank": {
+        "mult": 0.15
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1.5,
+       "perRank": {
+        "secs": 0.1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "van_hold_line": {
+   "name": "Hold the Line",
+   "owner": "vanguard",
+   "tree": "iron_will",
+   "reqLevel": 10,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A shout that makes everything within 8 m come for you and hit 10% softer for {secs} seconds. Does not use the global cooldown.",
+   "cost": {
+    "rage": 10
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      },
+      {
+       "do": "debuff",
+       "kind": "damageDown",
+       "secs": 6,
+       "pct": 10,
+       "perRank": {
+        "pct": 2
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "van_thick_plate": {
+   "name": "Thick Plate",
+   "owner": "vanguard",
+   "tree": "iron_will",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "You wear plate like skin. Your armour counts for more.",
+   "passive": {
+    "stat": "armourPct",
+    "value": 6,
+    "perRank": 3
+   }
+  },
+  "van_iron_resolve": {
+   "name": "Iron Resolve",
+   "owner": "vanguard",
+   "tree": "iron_will",
+   "reqLevel": 12,
+   "maxRank": 5,
+   "prereq": [
+    "van_hold_line"
+   ],
+   "kind": "active",
+   "desc": "Set your feet: +60% armour and a {dmg} ward for 10 seconds, and 20 temper to spend. Does not use the global cooldown.",
+   "cost": {
+    "rage": 0
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 60,
+     "secs": 10,
+     "perRank": {
+      "pct": 8
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      15,
+      3
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       3,
+       0.5
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 20
+    }
+   ]
+  },
+  "van_unmoved": {
+   "name": "Unmoved",
+   "owner": "vanguard",
+   "tree": "iron_will",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "van_thick_plate"
+   ],
+   "kind": "passive",
+   "desc": "More health. Simply more.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 5,
+    "perRank": 2
+   }
+  },
+  "van_bulwark_blow": {
+   "name": "Bulwark Blow",
+   "owner": "vanguard",
+   "tree": "iron_will",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "van_hold_line"
+   ],
+   "kind": "active",
+   "desc": "Smash your target for {mult} weapon damage, make it come for you and leave it hitting 15% softer for 6 seconds. Three times the threat of a normal blow.",
+   "cost": {
+    "rage": 15
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.5,
+     "perRank": {
+      "mult": 0.08
+     }
+    },
+    {
+     "do": "taunt"
+    },
+    {
+     "do": "debuff",
+     "kind": "damageDown",
+     "secs": 6,
+     "pct": 15
+    }
+   ]
+  },
+  "van_blood_price": {
+   "name": "Blood Price",
+   "owner": "vanguard",
+   "tree": "iron_will",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "van_unmoved"
+   ],
+   "kind": "passive",
+   "desc": "Every blow you land puts a little back. Life on hit.",
+   "passive": {
+    "stat": "lifeOnHit",
+    "value": 3,
+    "perRank": 1.5
+   }
+  },
+  "van_stand_fast": {
+   "name": "Stand Fast",
+   "owner": "vanguard",
+   "tree": "iron_will",
+   "reqLevel": 18,
+   "maxRank": 5,
+   "prereq": [
+    "van_iron_resolve"
+   ],
+   "kind": "active",
+   "desc": "The whole party takes heart: +25% armour and heals land 15% harder on everyone near you for 10 seconds.",
+   "cost": {
+    "rage": 20
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 25,
+     "secs": 10,
+     "who": "party",
+     "perRank": {
+      "pct": 5
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "healTaken",
+     "pct": 15,
+     "secs": 10,
+     "who": "party"
+    }
+   ]
+  },
+  "van_bastion": {
+   "name": "Bastion",
+   "owner": "vanguard",
+   "tree": "iron_will",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "van_stand_fast"
+   ],
+   "kind": "active",
+   "desc": "Become the wall: a {dmg} ward and double armour for 8 seconds, 40 temper at once, and everything within 10 m turns on you. Does not use the global cooldown.",
+   "cost": {
+    "rage": 0
+   },
+   "cast": 0,
+   "cd": 60,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      40,
+      8
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       10,
+       2
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 100,
+     "secs": 8
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 40
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      }
+     ]
+    }
+   ]
+  },
+  "van_shove": {
+   "name": "Breaching Shove",
+   "owner": "vanguard",
+   "tree": "breaking_line",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Drive your shoulder through everything in a short arc in front of you for {mult} weapon damage, stopping any cast and knocking them senseless for a moment.",
+   "cost": {
+    "rage": 15
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "cone",
+     "size": 3.5,
+     "at": "self",
+     "angle": 80,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.2,
+       "perRank": {
+        "mult": 0.07
+       }
+      },
+      {
+       "do": "interrupt",
+       "lock": 3
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 0.8,
+       "perRank": {
+        "secs": 0.05
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "van_keen_eye": {
+   "name": "Find the Gap",
+   "owner": "vanguard",
+   "tree": "breaking_line",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "You see where the armour is thin. More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "van_hammer_blow": {
+   "name": "Hammer Blow",
+   "owner": "vanguard",
+   "tree": "breaking_line",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "van_shove"
+   ],
+   "kind": "active",
+   "desc": "One heavy overhand for {mult} weapon damage that leaves the armour cracked (-12%) for 8 seconds. Your single-target filler.",
+   "cost": {
+    "rage": 25
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.9,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "armourDown",
+     "secs": 8,
+     "pct": 12,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "van_sunder": {
+   "name": "Sunder",
+   "owner": "vanguard",
+   "tree": "breaking_line",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "van_hammer_blow"
+   ],
+   "kind": "synergy",
+   "desc": "Hammer Blow lands with the whole body behind it: more damage per rank.",
+   "synergy": {
+    "skill": "van_hammer_blow",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "van_run_down": {
+   "name": "Run Them Down",
+   "owner": "vanguard",
+   "tree": "breaking_line",
+   "reqLevel": 14,
+   "maxRank": 3,
+   "prereq": [
+    "van_shove"
+   ],
+   "kind": "active",
+   "desc": "Rush 12 m at your target and pin its feet to the ground for {secs} seconds. The answer to a leader running for help. Does not use the global cooldown.",
+   "cost": {
+    "rage": 0
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": false,
+   "range": 12,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 12,
+     "to": "target"
+    },
+    {
+     "do": "debuff",
+     "kind": "root",
+     "secs": 2,
+     "perRank": {
+      "secs": 0.5
+     }
+    }
+   ]
+  },
+  "van_finishing_blow": {
+   "name": "Finishing Blow",
+   "owner": "vanguard",
+   "tree": "breaking_line",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "van_hammer_blow"
+   ],
+   "kind": "active",
+   "desc": "Put everything into one strike for {mult} weapon damage. Save it for what is nearly dead.",
+   "cost": {
+    "rage": 35
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 3,
+     "perRank": {
+      "mult": 0.15
+     }
+    }
+   ]
+  },
+  "van_shockwave": {
+   "name": "Shockwave",
+   "owner": "vanguard",
+   "tree": "breaking_line",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "van_run_down"
+   ],
+   "kind": "active",
+   "desc": "Stamp, and the ground splits in a 12 m line ahead: {mult} weapon damage, a short stun and half speed for 4 seconds on everything in it.",
+   "cost": {
+    "rage": 30
+   },
+   "cast": 0,
+   "cd": 14,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "line",
+     "size": 12,
+     "at": "self",
+     "width": 2.4,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.5,
+       "perRank": {
+        "mult": 0.08
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 4,
+       "pct": 50
+      }
+     ]
+    }
+   ]
+  },
+  "van_groundbreaker": {
+   "name": "Groundbreaker",
+   "owner": "vanguard",
+   "tree": "breaking_line",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "van_shockwave",
+    "van_finishing_blow"
+   ],
+   "kind": "active",
+   "desc": "Split the earth 18 m straight ahead for {mult} weapon damage and a 1.5 s stun on everything in the line. The Breaking Line capstone.",
+   "cost": {
+    "rage": 50
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "line",
+     "size": 18,
+     "at": "self",
+     "width": 2.4,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 4,
+       "perRank": {
+        "mult": 0.2
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1.5
+      }
+     ]
+    }
+   ]
+  },
+  "rgr_broadhead": {
+   "name": "Broadhead",
+   "owner": "ranger",
+   "tree": "far_shot",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A wide-bladed arrow for {mult} weapon damage. Instant, 25 m. The shot you fire between everything else.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.8,
+     "perRank": {
+      "mult": 0.1
+     }
+    }
+   ]
+  },
+  "rgr_steady_hand": {
+   "name": "Steady Hand",
+   "owner": "ranger",
+   "tree": "far_shot",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "A still hand and a still breath. More ranged power.",
+   "passive": {
+    "stat": "rangedPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "rgr_full_draw": {
+   "name": "Full Draw",
+   "owner": "ranger",
+   "tree": "far_shot",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_broadhead"
+   ],
+   "kind": "active",
+   "desc": "Draw to the ear and hold a moment: {mult} weapon damage from up to 30 m. Your biggest single arrow.",
+   "cost": {
+    "energy": 35
+   },
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 30,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 3,
+     "perRank": {
+      "mult": 0.15
+     }
+    }
+   ]
+  },
+  "rgr_quiver_ease": {
+   "name": "Easy Quiver",
+   "owner": "ranger",
+   "tree": "far_shot",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Nock, draw, loose, without a wasted motion. Energy comes back faster.",
+   "passive": {
+    "stat": "energyRegen",
+    "value": 8,
+    "perRank": 4
+   }
+  },
+  "rgr_piercing": {
+   "name": "Piercing Shot",
+   "owner": "ranger",
+   "tree": "far_shot",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_full_draw"
+   ],
+   "kind": "active",
+   "desc": "An arrow that goes through: {mult} weapon damage to everything in a 20 m line in front of you.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "line",
+     "size": 20,
+     "at": "self",
+     "width": 1.6,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.6,
+       "perRank": {
+        "mult": 0.08
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "rgr_true_aim": {
+   "name": "True Aim",
+   "owner": "ranger",
+   "tree": "far_shot",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_full_draw"
+   ],
+   "kind": "synergy",
+   "desc": "Full Draw flies truer: more damage per rank.",
+   "synergy": {
+    "skill": "rgr_full_draw",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "rgr_broadhead_fan": {
+   "name": "Broadhead Fan",
+   "owner": "ranger",
+   "tree": "far_shot",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_broadhead"
+   ],
+   "kind": "active",
+   "desc": "Three arrows at once across a 90 degree fan, 10 m deep: {mult} weapon damage to each enemy in it. The answer to a swarm pouring at you.",
+   "cost": {
+    "energy": 40
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "cone",
+     "size": 10,
+     "at": "self",
+     "angle": 90,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.1,
+       "perRank": {
+        "mult": 0.06
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "rgr_deadeye": {
+   "name": "Deadeye",
+   "owner": "ranger",
+   "tree": "far_shot",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_true_aim"
+   ],
+   "kind": "passive",
+   "desc": "You see the eye, the throat, the gap in the plate. More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 3,
+    "perRank": 1.5
+   }
+  },
+  "rgr_arrow_storm": {
+   "name": "Arrow Storm",
+   "owner": "ranger",
+   "tree": "far_shot",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_broadhead_fan"
+   ],
+   "kind": "active",
+   "desc": "Loose arrow after arrow into the sky over a spot 25 m away: {mult} weapon damage a second to everything in a 5 m circle for three seconds. Moving stops it. The Far Shot capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "channel": 3,
+   "cd": 20,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 0.8,
+       "perRank": {
+        "mult": 0.05
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "rgr_call_hound": {
+   "name": "Call the Hound",
+   "owner": "ranger",
+   "tree": "the_hunt",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Whistle, and your hound comes. It stays with you until it falls, bites what bites you, and harries anything you shoot at. Ranks make it tougher and sharper.",
+   "cost": {
+    "energy": 0
+   },
+   "cast": 1.5,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "pet",
+     "id": "ranger_hound",
+     "name": "Hound",
+     "role": "melee",
+     "count": 1,
+     "secs": 0,
+     "hpMult": 1.1,
+     "dmgMult": 0.9,
+     "skills": [
+      {
+       "id": "hound_bite",
+       "name": "Bite",
+       "kind": "strike",
+       "cd": 6,
+       "mult": 1.5
+      },
+      {
+       "id": "hound_harry",
+       "name": "Harry",
+       "kind": "strike",
+       "cd": 12,
+       "mult": 1,
+       "slow": 40,
+       "secs": 3
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.08,
+      "dmgMult": 0.06
+     }
+    }
+   ]
+  },
+  "rgr_quarry": {
+   "name": "Quarry",
+   "owner": "ranger",
+   "tree": "the_hunt",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Name your quarry from 30 m: it takes {secs} seconds of +15% damage from everyone in the party. Longer than a Notch, and from further away.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 30,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "mark",
+     "pct": 15,
+     "secs": 10,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "rgr_hunters_eye": {
+   "name": "Hunter's Eye",
+   "owner": "ranger",
+   "tree": "the_hunt",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_quarry"
+   ],
+   "kind": "passive",
+   "desc": "You have looked at a lot of animals. More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "rgr_savage": {
+   "name": "Savage Hound",
+   "owner": "ranger",
+   "tree": "the_hunt",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_call_hound"
+   ],
+   "kind": "active",
+   "desc": "Call a bigger, meaner hound in place of the first: more health, more bite, and a howl that pulls a pack onto it so you can shoot in peace.",
+   "cost": {
+    "energy": 0
+   },
+   "cast": 1.5,
+   "cd": 10,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "pet",
+     "id": "ranger_savage_hound",
+     "name": "Savage Hound",
+     "role": "tank",
+     "count": 1,
+     "secs": 0,
+     "hpMult": 1.4,
+     "dmgMult": 1.2,
+     "skills": [
+      {
+       "id": "hound_bite",
+       "name": "Bite",
+       "kind": "strike",
+       "cd": 5,
+       "mult": 1.6
+      },
+      {
+       "id": "hound_harry",
+       "name": "Harry",
+       "kind": "strike",
+       "cd": 12,
+       "mult": 1,
+       "slow": 40,
+       "secs": 3
+      },
+      {
+       "id": "hound_howl",
+       "name": "Howl",
+       "kind": "taunt",
+       "cd": 12,
+       "radius": 5
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.09,
+      "dmgMult": 0.07
+     }
+    }
+   ]
+  },
+  "rgr_shared_quarry": {
+   "name": "Shared Quarry",
+   "owner": "ranger",
+   "tree": "the_hunt",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_quarry"
+   ],
+   "kind": "synergy",
+   "desc": "Quarry lasts longer: more seconds per rank.",
+   "synergy": {
+    "skill": "rgr_quarry",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "rgr_run_quarry": {
+   "name": "Run Down the Quarry",
+   "owner": "ranger",
+   "tree": "the_hunt",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_hunters_eye"
+   ],
+   "kind": "active",
+   "desc": "The killing shot: {mult} weapon damage from 30 m. Fire it through a Quarry mark and the whole party gets the kill.",
+   "cost": {
+    "energy": 35
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 30,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2.2,
+     "perRank": {
+      "mult": 0.12
+     }
+    }
+   ]
+  },
+  "rgr_old_tracks": {
+   "name": "Old Tracks",
+   "owner": "ranger",
+   "tree": "the_hunt",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_savage"
+   ],
+   "kind": "passive",
+   "desc": "You walk like something that lives out here. More move speed.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "rgr_wild_call": {
+   "name": "Call of the Wild",
+   "owner": "ranger",
+   "tree": "the_hunt",
+   "reqLevel": 20,
+   "maxRank": 5,
+   "prereq": [
+    "rgr_savage",
+    "rgr_run_quarry"
+   ],
+   "kind": "active",
+   "desc": "Three wolves answer you for 20 seconds, and everyone in the party hits 10% harder for 15. The Hunt capstone.",
+   "cost": {
+    "energy": 40
+   },
+   "cast": 0,
+   "cd": 60,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "minion",
+     "id": "ranger_wolf",
+     "name": "Wolf",
+     "role": "melee",
+     "count": 3,
+     "secs": 20,
+     "hpMult": 0.6,
+     "dmgMult": 0.7,
+     "skills": [
+      {
+       "id": "wolf_bite",
+       "name": "Bite",
+       "kind": "strike",
+       "cd": 6,
+       "mult": 1.3
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.1,
+      "dmgMult": 0.08
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 10,
+     "secs": 15,
+     "who": "party",
+     "perRank": {
+      "pct": 2
+     }
+    }
+   ]
+  },
+  "rgr_hunters_snare": {
+   "name": "Hunter's Snare",
+   "owner": "ranger",
+   "tree": "snarework",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Throw a snare onto a spot up to 20 m away: everything in a 3 m circle is held by the feet for {secs} seconds and nicked for {mult} weapon damage. Lay it where the pack will run.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 20,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 3,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "root",
+       "secs": 2.5,
+       "perRank": {
+        "secs": 0.15
+       }
+      },
+      {
+       "do": "weapon",
+       "mult": 0.6
+      }
+     ]
+    }
+   ]
+  },
+  "rgr_light_step": {
+   "name": "Light Step",
+   "owner": "ranger",
+   "tree": "snarework",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Brush and scree do not slow you. More move speed.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 3,
+    "perRank": 1.5
+   }
+  },
+  "rgr_tracker_leap": {
+   "name": "Tracker's Leap",
+   "owner": "ranger",
+   "tree": "snarework",
+   "reqLevel": 12,
+   "maxRank": 3,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Spring 10 m back and land with your eye in: +20% critical chance for 5 seconds. Does not use the global cooldown.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 10,
+     "to": "back"
+    },
+    {
+     "do": "buff",
+     "stat": "crit",
+     "pct": 20,
+     "secs": 5,
+     "perRank": {
+      "pct": 5
+     }
+    }
+   ]
+  },
+  "rgr_hamstring": {
+   "name": "Hamstring Shot",
+   "owner": "ranger",
+   "tree": "snarework",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "An arrow through the back of the leg: {mult} weapon damage and half speed for 5 seconds. Brutes never reach you.",
+   "cost": {
+    "energy": 20
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1,
+     "perRank": {
+      "mult": 0.05
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 5,
+     "pct": 50
+    }
+   ]
+  },
+  "rgr_pinning": {
+   "name": "Pinning Shot",
+   "owner": "ranger",
+   "tree": "snarework",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "rgr_hamstring"
+   ],
+   "kind": "active",
+   "desc": "An arrow through the foot from 25 m: {mult} weapon damage, the cast it was making stops, and it stands pinned for 1.5 seconds. Does not use the global cooldown.",
+   "cost": {
+    "energy": 15
+   },
+   "cast": 0,
+   "cd": 14,
+   "gcd": false,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 0.6,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "root",
+     "secs": 1.5
+    }
+   ]
+  },
+  "rgr_caltrops": {
+   "name": "Caltrop Field",
+   "owner": "ranger",
+   "tree": "snarework",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_hunters_snare"
+   ],
+   "kind": "active",
+   "desc": "Scatter iron spikes on a spot: everything in a 4 m circle bleeds for {secs} seconds and limps at 60% speed.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 20,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "dot",
+       "type": "physical",
+       "base": [
+        2,
+        0.8
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.25,
+         0.08
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 6,
+       "pct": 40
+      }
+     ]
+    }
+   ]
+  },
+  "rgr_tight_snare": {
+   "name": "Tight Snare",
+   "owner": "ranger",
+   "tree": "snarework",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_hunters_snare"
+   ],
+   "kind": "synergy",
+   "desc": "Hunter's Snare holds longer: more seconds per rank.",
+   "synergy": {
+    "skill": "rgr_hunters_snare",
+    "stat": "duration",
+    "pctPerRank": 7
+   }
+  },
+  "rgr_netting": {
+   "name": "Netting Shot",
+   "owner": "ranger",
+   "tree": "snarework",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_pinning"
+   ],
+   "kind": "active",
+   "desc": "A weighted net over your target and everything within 3.5 m of it: held for {secs} seconds and cut for {mult} weapon damage.",
+   "cost": {
+    "energy": 30
+   },
+   "cast": 0,
+   "cd": 18,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 3.5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "root",
+       "secs": 3,
+       "perRank": {
+        "secs": 0.2
+       }
+      },
+      {
+       "do": "weapon",
+       "mult": 0.8,
+       "perRank": {
+        "mult": 0.05
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "rgr_killing_ground": {
+   "name": "Killing Ground",
+   "owner": "ranger",
+   "tree": "snarework",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "rgr_caltrops",
+    "rgr_netting"
+   ],
+   "kind": "active",
+   "desc": "Stakes, nets and a volley on one 6 m circle: {mult} weapon damage, held for 2 seconds and -20% armour for 8. The Snarework capstone.",
+   "cost": {
+    "energy": 50
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 2,
+       "perRank": {
+        "mult": 0.1
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "root",
+       "secs": 2
+      },
+      {
+       "do": "debuff",
+       "kind": "armourDown",
+       "secs": 8,
+       "pct": 20
+      }
+     ]
+    }
+   ]
+  },
+  "pyr_kindle": {
+   "name": "Kindle",
+   "owner": "pyromancer",
+   "tree": "kindling",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A bolt of fire for {dmg} that leaves the target burning for {secs} seconds. Takes a moment to cast. Everything else in this tree is about what you do to a thing that is already burning.",
+   "cost": {
+    "mana": 16
+   },
+   "costPerRank": 1,
+   "cast": 2,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "fire",
+     "base": [
+      12,
+      7.5
+     ],
+     "speed": 26,
+     "perRank": {
+      "base": [
+       0.8,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "dot",
+     "type": "fire",
+     "base": [
+      1.5,
+      0.6
+     ],
+     "secs": 6,
+     "perRank": {
+      "base": [
+       0.2,
+       0.06
+      ]
+     }
+    }
+   ]
+  },
+  "pyr_dry_tinder": {
+   "name": "Dry Tinder",
+   "owner": "pyromancer",
+   "tree": "kindling",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Everything you touch catches. More spell power.",
+   "passive": {
+    "stat": "spellPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "pyr_scorch": {
+   "name": "Scorch",
+   "owner": "pyromancer",
+   "tree": "kindling",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_kindle"
+   ],
+   "kind": "active",
+   "desc": "A snap of flame for {dmg} and a hotter burn for {secs} seconds. Instant: the one you throw while walking out of the pack.",
+   "cost": {
+    "mana": 18
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 5,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      8,
+      4
+     ],
+     "perRank": {
+      "base": [
+       0.6,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "dot",
+     "type": "fire",
+     "base": [
+      2,
+      0.9
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       0.25,
+       0.08
+      ]
+     }
+    }
+   ]
+  },
+  "pyr_quick_match": {
+   "name": "Quick Match",
+   "owner": "pyromancer",
+   "tree": "kindling",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "The words come faster. More cast speed.",
+   "passive": {
+    "stat": "castSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "pyr_fan_flames": {
+   "name": "Fan the Flames",
+   "owner": "pyromancer",
+   "tree": "kindling",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_kindle"
+   ],
+   "kind": "synergy",
+   "desc": "Kindle burns hotter: more damage per rank.",
+   "synergy": {
+    "skill": "pyr_kindle",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "pyr_flashover": {
+   "name": "Flashover",
+   "owner": "pyromancer",
+   "tree": "kindling",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_scorch"
+   ],
+   "kind": "active",
+   "desc": "Everything within 5 m of your target goes up at once for {dmg} fire damage. Throw it when the whole pack is burning.",
+   "cost": {
+    "mana": 30
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        10,
+        5
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.4
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "pyr_long_burn": {
+   "name": "Long Burn",
+   "owner": "pyromancer",
+   "tree": "kindling",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_scorch"
+   ],
+   "kind": "synergy",
+   "desc": "Scorch burns longer: more seconds per rank.",
+   "synergy": {
+    "skill": "pyr_scorch",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "pyr_hot_eye": {
+   "name": "Hot Eye",
+   "owner": "pyromancer",
+   "tree": "kindling",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_fan_flames"
+   ],
+   "kind": "passive",
+   "desc": "You see where the fire wants to go. More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "pyr_immolate": {
+   "name": "Immolate",
+   "owner": "pyromancer",
+   "tree": "kindling",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_flashover"
+   ],
+   "kind": "active",
+   "desc": "Make one enemy the fire: {dmg} at once and a burn of the same again over {secs} seconds. The Kindling capstone.",
+   "cost": {
+    "mana": 45
+   },
+   "costPerRank": 1,
+   "cast": 2.5,
+   "cd": 25,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      30,
+      14
+     ],
+     "perRank": {
+      "base": [
+       2,
+       0.8
+      ]
+     }
+    },
+    {
+     "do": "dot",
+     "type": "fire",
+     "base": [
+      5,
+      2.2
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       0.5,
+       0.2
+      ]
+     }
+    }
+   ]
+  },
+  "pyr_burning_line": {
+   "name": "Burning Line",
+   "owner": "pyromancer",
+   "tree": "wildfire",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A line of fire 14 m straight ahead: {dmg} to everything in it and a burn for {secs} seconds. Instant. Stand so the pack is in a row.",
+   "cost": {
+    "mana": 22
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "line",
+     "size": 14,
+     "at": "self",
+     "width": 2,
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        8,
+        4
+       ],
+       "perRank": {
+        "base": [
+         0.7,
+         0.35
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "fire",
+       "base": [
+        1.5,
+        0.6
+       ],
+       "secs": 5,
+       "perRank": {
+        "base": [
+         0.2,
+         0.06
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "pyr_banked_coals": {
+   "name": "Banked Coals",
+   "owner": "pyromancer",
+   "tree": "wildfire",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "A deeper well to draw on. More mana.",
+   "passive": {
+    "stat": "maxMana",
+    "value": 5,
+    "perRank": 3
+   }
+  },
+  "pyr_fallstone": {
+   "name": "Fallstone",
+   "owner": "pyromancer",
+   "tree": "wildfire",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_burning_line"
+   ],
+   "kind": "active",
+   "desc": "Call a burning rock down on a spot 25 m away: {dmg} to everything in a 4.5 m circle and a 1 s daze. Lands where the telegraph says, so throw it where they are GOING.",
+   "cost": {
+    "mana": 32
+   },
+   "costPerRank": 1,
+   "cast": 2,
+   "cd": 10,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4.5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        16,
+        8
+       ],
+       "perRank": {
+        "base": [
+         1.2,
+         0.5
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      }
+     ]
+    }
+   ]
+  },
+  "pyr_firestorm": {
+   "name": "Firestorm",
+   "owner": "pyromancer",
+   "tree": "wildfire",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_fallstone"
+   ],
+   "kind": "active",
+   "desc": "Hold a storm of fire over a 5 m circle for three seconds: {dmg} to everything in it every second. Moving lets it go.",
+   "cost": {
+    "mana": 36
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "channel": 3,
+   "cd": 14,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        5,
+        2.6
+       ],
+       "perRank": {
+        "base": [
+         0.4,
+         0.18
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "pyr_spreading": {
+   "name": "Spreading Fire",
+   "owner": "pyromancer",
+   "tree": "wildfire",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_burning_line"
+   ],
+   "kind": "synergy",
+   "desc": "Burning Line burns hotter: more damage per rank.",
+   "synergy": {
+    "skill": "pyr_burning_line",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "pyr_ash_cloud": {
+   "name": "Ash Cloud",
+   "owner": "pyromancer",
+   "tree": "wildfire",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_burning_line"
+   ],
+   "kind": "active",
+   "desc": "Choke a 5 m circle with hot ash for {dmg}: everything in it moves at 60% speed and hits 20% softer for {secs} seconds. The control tool.",
+   "cost": {
+    "mana": 24
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        4,
+        2
+       ]
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 5,
+       "pct": 40,
+       "perRank": {
+        "secs": 0.3
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "damageDown",
+       "secs": 5,
+       "pct": 20
+      }
+     ]
+    }
+   ]
+  },
+  "pyr_wide_fire": {
+   "name": "Wide Fire",
+   "owner": "pyromancer",
+   "tree": "wildfire",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_firestorm"
+   ],
+   "kind": "synergy",
+   "desc": "Firestorm covers more ground: a bigger circle per rank.",
+   "synergy": {
+    "skill": "pyr_firestorm",
+    "stat": "radius",
+    "pctPerRank": 5
+   }
+  },
+  "pyr_conflagration": {
+   "name": "Conflagration",
+   "owner": "pyromancer",
+   "tree": "wildfire",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_firestorm",
+    "pyr_ash_cloud"
+   ],
+   "kind": "active",
+   "desc": "Set a 7 m circle alight for {dmg}, a 1 s daze, and a burn for {secs} seconds on everything in it. The Wildfire capstone.",
+   "cost": {
+    "mana": 50
+   },
+   "costPerRank": 1,
+   "cast": 2.5,
+   "cd": 30,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 7,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        24,
+        12
+       ],
+       "perRank": {
+        "base": [
+         1.6,
+         0.7
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      },
+      {
+       "do": "dot",
+       "type": "fire",
+       "base": [
+        4,
+        1.8
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.4,
+         0.15
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "pyr_familiar": {
+   "name": "Stoke the Familiar",
+   "owner": "pyromancer",
+   "tree": "the_familiar",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Breathe life into a little fire. It follows you, throws flame at what you fight and flares when they bunch up. Stays until it is put out; ranks make it brighter.",
+   "cost": {
+    "mana": 30
+   },
+   "cast": 2,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "pet",
+     "id": "pyro_familiar",
+     "name": "Cinder Familiar",
+     "role": "caster",
+     "type": "fire",
+     "count": 1,
+     "secs": 0,
+     "hpMult": 0.7,
+     "dmgMult": 1,
+     "skills": [
+      {
+       "id": "fam_pip",
+       "name": "Flame Pip",
+       "kind": "bolt",
+       "cd": 0,
+       "mult": 1,
+       "type": "fire"
+      },
+      {
+       "id": "fam_flare",
+       "name": "Little Flare",
+       "kind": "aoe",
+       "cd": 12,
+       "mult": 0.9,
+       "radius": 3,
+       "type": "fire"
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.08,
+      "dmgMult": 0.07
+     }
+    }
+   ]
+  },
+  "pyr_warm_skin": {
+   "name": "Warm Skin",
+   "owner": "pyromancer",
+   "tree": "the_familiar",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Fire, frost, storm, poison and shadow all find you harder to touch. More resistance to everything.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "pyr_cinder_stride": {
+   "name": "Cinder Stride",
+   "owner": "pyromancer",
+   "tree": "the_familiar",
+   "reqLevel": 12,
+   "maxRank": 3,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Step 8 m through your own fire: the ground you cross burns everything on it for {dmg}. Does not use the global cooldown.",
+   "cost": {
+    "mana": 10
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "line",
+     "size": 8,
+     "at": "self",
+     "width": 2,
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        6,
+        3
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "fire",
+       "base": [
+        1.5,
+        0.6
+       ],
+       "secs": 4
+      }
+     ]
+    },
+    {
+     "do": "dash",
+     "dist": 8,
+     "to": "forward"
+    }
+   ]
+  },
+  "pyr_flame_shell": {
+   "name": "Flame Shell",
+   "owner": "pyromancer",
+   "tree": "the_familiar",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_warm_skin"
+   ],
+   "kind": "active",
+   "desc": "A skin of fire that soaks {dmg} damage for 10 seconds.",
+   "cost": {
+    "mana": 28
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      18,
+      3
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       1.5,
+       0.2
+      ]
+     }
+    }
+   ]
+  },
+  "pyr_snuff": {
+   "name": "Snuff",
+   "owner": "pyromancer",
+   "tree": "the_familiar",
+   "reqLevel": 16,
+   "maxRank": 3,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Pinch out a cast from 25 m: it stops, the caster cannot start another for {secs} seconds, and it takes {dmg}. Does not use the global cooldown.",
+   "cost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 18,
+   "gcd": false,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 4,
+     "perRank": {
+      "lock": 0.5
+     }
+    },
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      4,
+      1.5
+     ]
+    }
+   ]
+  },
+  "pyr_ashen": {
+   "name": "Ashen Familiar",
+   "owner": "pyromancer",
+   "tree": "the_familiar",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_familiar"
+   ],
+   "kind": "active",
+   "desc": "Bank the familiar into a slow, heavy thing of ash and coal: far more health, a slower swing, and a roar that makes a pack come for it instead of you. One familiar at a time.",
+   "cost": {
+    "mana": 30
+   },
+   "cast": 2,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "summon",
+     "kind": "pet",
+     "id": "pyro_ash_familiar",
+     "name": "Ashen Familiar",
+     "role": "tank",
+     "type": "fire",
+     "count": 1,
+     "secs": 0,
+     "hpMult": 1.6,
+     "dmgMult": 0.7,
+     "skills": [
+      {
+       "id": "ash_roar",
+       "name": "Coal Roar",
+       "kind": "taunt",
+       "cd": 10,
+       "radius": 5
+      },
+      {
+       "id": "ash_slam",
+       "name": "Slam",
+       "kind": "strike",
+       "cd": 8,
+       "mult": 1.3
+      },
+      {
+       "id": "ash_burst",
+       "name": "Ash Burst",
+       "kind": "aoe",
+       "cd": 14,
+       "mult": 0.8,
+       "radius": 3,
+       "type": "fire"
+      }
+     ],
+     "perRank": {
+      "hpMult": 0.1,
+      "dmgMult": 0.05
+     }
+    }
+   ]
+  },
+  "pyr_afterglow": {
+   "name": "Afterglow",
+   "owner": "pyromancer",
+   "tree": "the_familiar",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "pyr_flame_shell"
+   ],
+   "kind": "passive",
+   "desc": "The fire banks itself between casts. More mana a second.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "pyr_pyre_heart": {
+   "name": "Pyre Heart",
+   "owner": "pyromancer",
+   "tree": "the_familiar",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "pyr_ashen",
+    "pyr_afterglow"
+   ],
+   "kind": "active",
+   "desc": "Burn from the inside: mend yourself for {dmg}, wrap yourself in a ward, find 60 mana, hit 20% harder for 10 seconds, and scorch everything within 6 m. Does not use the global cooldown. The Familiar capstone.",
+   "cost": {
+    "mana": 0
+   },
+   "cast": 0,
+   "cd": 90,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      30,
+      10
+     ],
+     "perRank": {
+      "base": [
+       8,
+       2
+      ]
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      30,
+      6
+     ],
+     "secs": 8
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 60
+    },
+    {
+     "do": "buff",
+     "stat": "damage",
+     "pct": 20,
+     "secs": 10
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        15,
+        6
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "clr_brightmend": {
+   "name": "Brightmend",
+   "owner": "cleric",
+   "tree": "overflow",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Heal a friend for {dmg}; whatever light is left over stays on them as a small ward for 6 seconds. Faster than Mend and bigger.",
+   "cost": {
+    "mana": 20
+   },
+   "costPerRank": 1,
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      16,
+      6.5
+     ],
+     "perRank": {
+      "base": [
+       1.2,
+       0.5
+      ]
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      4,
+      1.6
+     ],
+     "secs": 6,
+     "perRank": {
+      "base": [
+       0.3,
+       0.1
+      ]
+     }
+    }
+   ]
+  },
+  "clr_deep_well": {
+   "name": "Deep Well",
+   "owner": "cleric",
+   "tree": "overflow",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More to draw on. More mana.",
+   "passive": {
+    "stat": "maxMana",
+    "value": 5,
+    "perRank": 3
+   }
+  },
+  "clr_guardian_light": {
+   "name": "Guardian Light",
+   "owner": "cleric",
+   "tree": "overflow",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "clr_brightmend"
+   ],
+   "kind": "active",
+   "desc": "An instant touch of light for {dmg} that keeps mending the friend for {secs} seconds. The one you press while the Fighter is Headlonging.",
+   "cost": {
+    "mana": 26
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      10,
+      4
+     ],
+     "perRank": {
+      "base": [
+       0.8,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "hot",
+     "base": [
+      2,
+      1
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       0.2,
+       0.08
+      ]
+     }
+    }
+   ]
+  },
+  "clr_kind_hands": {
+   "name": "Kind Hands",
+   "owner": "cleric",
+   "tree": "overflow",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Every heal lands a little fuller. More healing power.",
+   "passive": {
+    "stat": "healPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "clr_barrier": {
+   "name": "Barrier of Faith",
+   "owner": "cleric",
+   "tree": "overflow",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "clr_guardian_light"
+   ],
+   "kind": "active",
+   "desc": "A ward on a friend that soaks {dmg} damage for 10 seconds. Instant. Put it on whoever the skirmishers picked.",
+   "cost": {
+    "mana": 30
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      20,
+      7
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       1.5,
+       0.5
+      ]
+     }
+    }
+   ]
+  },
+  "clr_overflowing": {
+   "name": "Overflowing",
+   "owner": "cleric",
+   "tree": "overflow",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "clr_brightmend"
+   ],
+   "kind": "synergy",
+   "desc": "Brightmend heals for more: more per rank.",
+   "synergy": {
+    "skill": "clr_brightmend",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "clr_swift_word": {
+   "name": "Swift Word",
+   "owner": "cleric",
+   "tree": "overflow",
+   "reqLevel": 16,
+   "maxRank": 5,
+   "prereq": [
+    "clr_barrier"
+   ],
+   "kind": "active",
+   "desc": "One word: a friend is healed for {dmg} and shakes off a slow, a root, a stun or a poison. Does not use the global cooldown.",
+   "cost": {
+    "mana": 18
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": false,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      8,
+      3.5
+     ],
+     "perRank": {
+      "base": [
+       1,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "cleanse"
+    }
+   ]
+  },
+  "clr_unbroken": {
+   "name": "Unbroken",
+   "owner": "cleric",
+   "tree": "overflow",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "clr_barrier"
+   ],
+   "kind": "synergy",
+   "desc": "Barrier of Faith holds more: a bigger ward per rank.",
+   "synergy": {
+    "skill": "clr_barrier",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "clr_absolution": {
+   "name": "Absolution",
+   "owner": "cleric",
+   "tree": "overflow",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "clr_swift_word"
+   ],
+   "kind": "active",
+   "desc": "Everything at once on one friend: a {dmg} heal, a ward, and every heal lands 20% harder on them for 10 seconds. Instant. The Overflow capstone.",
+   "cost": {
+    "mana": 45
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 30,
+   "gcd": true,
+   "range": 25,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      40,
+      16
+     ],
+     "perRank": {
+      "base": [
+       3,
+       1
+      ]
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      25,
+      8
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       2,
+       0.5
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "healTaken",
+     "pct": 20,
+     "secs": 10
+    }
+   ]
+  },
+  "clr_sanctuary": {
+   "name": "Sanctuary",
+   "owner": "cleric",
+   "tree": "sanctuary",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Bless a 5 m circle up to 25 m away: friends standing in it when it lands are healed for {dmg}, keep mending for {secs} seconds and get a small ward. Lay it where the fight will be.",
+   "cost": {
+    "mana": 32
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        8,
+        3
+       ],
+       "perRank": {
+        "base": [
+         0.6,
+         0.25
+        ]
+       }
+      },
+      {
+       "do": "hot",
+       "base": [
+        2.5,
+        1
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.25,
+         0.08
+        ]
+       }
+      },
+      {
+       "do": "shield",
+       "base": [
+        6,
+        2
+       ],
+       "secs": 8
+      }
+     ]
+    }
+   ]
+  },
+  "clr_steady_faith": {
+   "name": "Steady Faith",
+   "owner": "cleric",
+   "tree": "sanctuary",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Prayer between the casts. More mana a second.",
+   "passive": {
+    "stat": "manaRegen",
+    "value": 0.6,
+    "perRank": 0.3
+   }
+  },
+  "clr_circle": {
+   "name": "Circle of Light",
+   "owner": "cleric",
+   "tree": "sanctuary",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "clr_sanctuary"
+   ],
+   "kind": "active",
+   "desc": "Every friend within 10 m of you is healed for {dmg}. Instant.",
+   "cost": {
+    "mana": 34
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 12,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        10,
+        4.5
+       ],
+       "perRank": {
+        "base": [
+         0.8,
+         0.35
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "clr_raise": {
+   "name": "Raise the Fallen",
+   "owner": "cleric",
+   "tree": "sanctuary",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "clr_circle"
+   ],
+   "kind": "active",
+   "desc": "Lift a fallen friend back to their feet at 40% health inside a {dmg} ward. Three seconds of prayer; not in the middle of a fight.",
+   "cost": {
+    "mana": 60
+   },
+   "cast": 3,
+   "cd": 60,
+   "gcd": true,
+   "range": 20,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "revive",
+     "hpPct": 40,
+     "perRank": {
+      "hpPct": 5
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      20,
+      6
+     ],
+     "secs": 8
+    }
+   ]
+  },
+  "clr_wider": {
+   "name": "Wider Ground",
+   "owner": "cleric",
+   "tree": "sanctuary",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "clr_sanctuary"
+   ],
+   "kind": "synergy",
+   "desc": "Sanctuary covers more ground: a bigger circle per rank.",
+   "synergy": {
+    "skill": "clr_sanctuary",
+    "stat": "radius",
+    "pctPerRank": 5
+   }
+  },
+  "clr_lasting_light": {
+   "name": "Lasting Light",
+   "owner": "cleric",
+   "tree": "sanctuary",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "clr_circle"
+   ],
+   "kind": "synergy",
+   "desc": "Circle of Light heals for more: more per rank.",
+   "synergy": {
+    "skill": "clr_circle",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "clr_hymn": {
+   "name": "Hymn of Rest",
+   "owner": "cleric",
+   "tree": "sanctuary",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "clr_circle"
+   ],
+   "kind": "active",
+   "desc": "Sing for three seconds: every friend within 8 m is healed for {dmg} each second and shakes off whatever is on them. Moving stops the song.",
+   "cost": {
+    "mana": 40
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "channel": 3,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        5,
+        2.2
+       ],
+       "perRank": {
+        "base": [
+         0.4,
+         0.18
+        ]
+       }
+      },
+      {
+       "do": "cleanse"
+      }
+     ]
+    }
+   ]
+  },
+  "clr_blessed_ground": {
+   "name": "Blessed Ground",
+   "owner": "cleric",
+   "tree": "sanctuary",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "clr_sanctuary"
+   ],
+   "kind": "active",
+   "desc": "Harden the ground under your friends: everyone in a 5 m circle gets +20% armour and keeps mending for {secs} seconds.",
+   "cost": {
+    "mana": 28
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "buff",
+       "stat": "armour",
+       "pct": 20,
+       "secs": 8,
+       "perRank": {
+        "pct": 2
+       }
+      },
+      {
+       "do": "hot",
+       "base": [
+        2,
+        0.8
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         0.2,
+         0.06
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "clr_daybreak": {
+   "name": "Daybreak",
+   "owner": "cleric",
+   "tree": "sanctuary",
+   "reqLevel": 20,
+   "maxRank": 5,
+   "prereq": [
+    "clr_hymn",
+    "clr_blessed_ground"
+   ],
+   "kind": "active",
+   "desc": "The sun comes up early: every friend within 12 m is healed for {dmg}, warded, and cleansed. The Sanctuary capstone.",
+   "cost": {
+    "mana": 60
+   },
+   "costPerRank": 1,
+   "cast": 2,
+   "cd": 90,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 12,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        30,
+        12
+       ],
+       "perRank": {
+        "base": [
+         4,
+         1.2
+        ]
+       }
+      },
+      {
+       "do": "shield",
+       "base": [
+        20,
+        6
+       ],
+       "secs": 10,
+       "perRank": {
+        "base": [
+         3,
+         0.6
+        ]
+       }
+      },
+      {
+       "do": "cleanse"
+      }
+     ]
+    }
+   ]
+  },
+  "clr_sunlance": {
+   "name": "Sunlance",
+   "owner": "cleric",
+   "tree": "falling_light",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A lance of sunlight for {dmg} fire damage that gives back 6 mana when it lands. Attacking is how a Cleric pays for healing.",
+   "cost": {
+    "mana": 14
+   },
+   "cast": 1.5,
+   "cd": 0,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "fire",
+     "base": [
+      10,
+      5.5
+     ],
+     "speed": 28,
+     "perRank": {
+      "base": [
+       0.8,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "mana",
+     "n": 6
+    }
+   ]
+  },
+  "clr_bright_mind": {
+   "name": "Bright Mind",
+   "owner": "cleric",
+   "tree": "falling_light",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More spell power.",
+   "passive": {
+    "stat": "spellPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "clr_falling_light": {
+   "name": "Falling Light",
+   "owner": "cleric",
+   "tree": "falling_light",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "clr_sunlance"
+   ],
+   "kind": "active",
+   "desc": "Light falls on your target and everything within 4 m of it for {dmg} fire damage, and the glow heals every friend within 6 m of you. The smite that heals.",
+   "cost": {
+    "mana": 26
+   },
+   "costPerRank": 1,
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "target",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        8,
+        4
+       ],
+       "perRank": {
+        "base": [
+         0.8,
+         0.3
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        6,
+        2.5
+       ],
+       "perRank": {
+        "base": [
+         0.5,
+         0.2
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "clr_censure": {
+   "name": "Censure",
+   "owner": "cleric",
+   "tree": "falling_light",
+   "reqLevel": 12,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A word that stops a cast from 20 m: {dmg} fire damage, the caster is silenced for a moment and cannot start another for {secs} seconds. Does not use the global cooldown.",
+   "cost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": false,
+   "range": 20,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    },
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      5,
+      2
+     ]
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1,
+     "perRank": {
+      "secs": 0.25
+     }
+    }
+   ]
+  },
+  "clr_zeal": {
+   "name": "Zeal",
+   "owner": "cleric",
+   "tree": "falling_light",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "clr_sunlance"
+   ],
+   "kind": "synergy",
+   "desc": "Sunlance hits harder: more damage per rank.",
+   "synergy": {
+    "skill": "clr_sunlance",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "clr_judgement": {
+   "name": "Judgement",
+   "owner": "cleric",
+   "tree": "falling_light",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "clr_falling_light"
+   ],
+   "kind": "active",
+   "desc": "Weigh one enemy and find it wanting: {dmg} fire damage and it hits 15% softer for 6 seconds.",
+   "cost": {
+    "mana": 30
+   },
+   "costPerRank": 1,
+   "cast": 2,
+   "cd": 10,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      20,
+      10
+     ],
+     "perRank": {
+      "base": [
+       1.5,
+       0.6
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "weaken",
+     "secs": 6,
+     "pct": 15
+    }
+   ]
+  },
+  "clr_sure_light": {
+   "name": "Sure Light",
+   "owner": "cleric",
+   "tree": "falling_light",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "clr_zeal"
+   ],
+   "kind": "passive",
+   "desc": "More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "clr_noonfire": {
+   "name": "Noonfire",
+   "owner": "cleric",
+   "tree": "falling_light",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "clr_judgement"
+   ],
+   "kind": "active",
+   "desc": "The noon sun on a 6 m circle: {dmg} fire damage to everything in it and a burn for {secs} seconds. The solo Cleric's pack answer.",
+   "cost": {
+    "mana": 36
+   },
+   "costPerRank": 1,
+   "cast": 1.5,
+   "cd": 14,
+   "gcd": true,
+   "range": 25,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        7,
+        3.5
+       ],
+       "perRank": {
+        "base": [
+         0.6,
+         0.3
+        ]
+       }
+      },
+      {
+       "do": "dot",
+       "type": "fire",
+       "base": [
+        1.5,
+        0.7
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.2,
+         0.06
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "clr_unbearable": {
+   "name": "Light Unbearable",
+   "owner": "cleric",
+   "tree": "falling_light",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "clr_noonfire"
+   ],
+   "kind": "active",
+   "desc": "A pillar of noon on one enemy: {dmg} fire damage and a 1.5 s daze, and every friend within 8 m of you is healed by the glow. The Falling Light capstone.",
+   "cost": {
+    "mana": 50
+   },
+   "costPerRank": 1,
+   "cast": 2.5,
+   "cd": 25,
+   "gcd": true,
+   "range": 25,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      36,
+      16
+     ],
+     "perRank": {
+      "base": [
+       2.5,
+       1
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 1.5
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        12,
+        5
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.4
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "pal_sanctified": {
+   "name": "Sanctified Blade",
+   "owner": "paladin",
+   "tree": "holy_blade",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A blessed cut for {mult} weapon damage; its light heals every friend within 6 m of you (you included) for a little. Your filler.",
+   "cost": {
+    "rage": 15
+   },
+   "altCost": {
+    "mana": 18
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.3,
+     "perRank": {
+      "mult": 0.07
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        4,
+        1.6
+       ],
+       "perRank": {
+        "base": [
+         0.4,
+         0.15
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "pal_devotion": {
+   "name": "Devotion",
+   "owner": "paladin",
+   "tree": "holy_blade",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Every heal lands fuller. More healing power.",
+   "passive": {
+    "stat": "healPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "pal_hammer": {
+   "name": "Hammer of Light",
+   "owner": "paladin",
+   "tree": "holy_blade",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "pal_sanctified"
+   ],
+   "kind": "active",
+   "desc": "An overhand blow for {mult} weapon damage plus a flash of fire, leaving the target dazed for a moment.",
+   "cost": {
+    "rage": 25
+   },
+   "altCost": {
+    "mana": 30
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.8,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      4,
+      2
+     ],
+     "perRank": {
+      "base": [
+       0.4,
+       0.15
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "stun",
+     "secs": 0.8,
+     "perRank": {
+      "secs": 0.05
+     }
+    }
+   ]
+  },
+  "pal_righteous": {
+   "name": "Righteous Arm",
+   "owner": "paladin",
+   "tree": "holy_blade",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More melee power.",
+   "passive": {
+    "stat": "meleePower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "pal_blessed_edge": {
+   "name": "Blessed Edge",
+   "owner": "paladin",
+   "tree": "holy_blade",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "pal_sanctified"
+   ],
+   "kind": "synergy",
+   "desc": "Sanctified Blade cuts deeper: more damage per rank.",
+   "synergy": {
+    "skill": "pal_sanctified",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "pal_radiant_sweep": {
+   "name": "Radiant Sweep",
+   "owner": "paladin",
+   "tree": "holy_blade",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "pal_hammer"
+   ],
+   "kind": "active",
+   "desc": "A wide blessed arc: {mult} weapon damage plus fire to everything in front of you, and every friend within 6 m is healed by the light.",
+   "cost": {
+    "rage": 30
+   },
+   "altCost": {
+    "mana": 36
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "cone",
+     "size": 4.5,
+     "at": "self",
+     "angle": 100,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.1,
+       "perRank": {
+        "mult": 0.06
+       }
+      },
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        3,
+        1.5
+       ],
+       "perRank": {
+        "base": [
+         0.3,
+         0.12
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        3,
+        1.2
+       ],
+       "perRank": {
+        "base": [
+         0.3,
+         0.1
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "pal_fervour": {
+   "name": "Fervour",
+   "owner": "paladin",
+   "tree": "holy_blade",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "pal_righteous"
+   ],
+   "kind": "passive",
+   "desc": "More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "pal_judging": {
+   "name": "Judging Hand",
+   "owner": "paladin",
+   "tree": "holy_blade",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "pal_hammer"
+   ],
+   "kind": "synergy",
+   "desc": "Hammer of Light falls harder: more damage per rank.",
+   "synergy": {
+    "skill": "pal_hammer",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "pal_daybreak_strike": {
+   "name": "Daybreak Strike",
+   "owner": "paladin",
+   "tree": "holy_blade",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "pal_radiant_sweep",
+    "pal_judging"
+   ],
+   "kind": "active",
+   "desc": "One blow with the sunrise in it: {mult} weapon damage plus fire, and every friend within 8 m is healed for {dmg} and warded. The Holy Blade capstone.",
+   "cost": {
+    "rage": 50
+   },
+   "altCost": {
+    "mana": 60
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 3.2,
+     "perRank": {
+      "mult": 0.16
+     }
+    },
+    {
+     "do": "damage",
+     "type": "fire",
+     "base": [
+      12,
+      6
+     ],
+     "perRank": {
+      "base": [
+       1,
+       0.4
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        15,
+        6
+       ],
+       "perRank": {
+        "base": [
+         1.2,
+         0.5
+        ]
+       }
+      },
+      {
+       "do": "shield",
+       "base": [
+        8,
+        3
+       ],
+       "secs": 8
+      }
+     ]
+    }
+   ]
+  },
+  "pal_mercy": {
+   "name": "Mercy's Touch",
+   "owner": "paladin",
+   "tree": "oath_of_mercy",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Lay a hand on a friend for {dmg}. Instant, because you are usually in the middle of something.",
+   "cost": {
+    "rage": 20
+   },
+   "altCost": {
+    "mana": 24
+   },
+   "cast": 0,
+   "cd": 6,
+   "gcd": true,
+   "range": 20,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "heal",
+     "base": [
+      12,
+      5
+     ],
+     "perRank": {
+      "base": [
+       1,
+       0.4
+      ]
+     }
+    }
+   ]
+  },
+  "pal_oathkeeper": {
+   "name": "Oathkeeper",
+   "owner": "paladin",
+   "tree": "oath_of_mercy",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More health.",
+   "passive": {
+    "stat": "maxHp",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "pal_martyr": {
+   "name": "Martyr's Vow",
+   "owner": "paladin",
+   "tree": "oath_of_mercy",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "pal_mercy"
+   ],
+   "kind": "active",
+   "desc": "Swear it, and every friend within 10 m gets a ward that soaks {dmg} for 8 seconds.",
+   "cost": {
+    "rage": 30
+   },
+   "altCost": {
+    "mana": 36
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "shield",
+       "base": [
+        10,
+        4
+       ],
+       "secs": 8,
+       "perRank": {
+        "base": [
+         1,
+         0.3
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "pal_descent": {
+   "name": "Daybreak Descent",
+   "owner": "paladin",
+   "tree": "oath_of_mercy",
+   "reqLevel": 14,
+   "maxRank": 3,
+   "prereq": [
+    "pal_mercy"
+   ],
+   "kind": "active",
+   "desc": "Leap up to 20 m to a friend in trouble, heal them for {dmg} on landing, and everything within 4 m of them turns on you instead. Does not use the global cooldown.",
+   "cost": {
+    "rage": 10
+   },
+   "altCost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": false,
+   "range": 20,
+   "target": "ally",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 20,
+     "to": "target"
+    },
+    {
+     "do": "heal",
+     "base": [
+      8,
+      3
+     ],
+     "perRank": {
+      "base": [
+       2,
+       0.5
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      }
+     ]
+    }
+   ]
+  },
+  "pal_gentle": {
+   "name": "Gentle Hand",
+   "owner": "paladin",
+   "tree": "oath_of_mercy",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "pal_mercy"
+   ],
+   "kind": "synergy",
+   "desc": "Mercy's Touch heals for more: more per rank.",
+   "synergy": {
+    "skill": "pal_mercy",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "pal_burden": {
+   "name": "Lay Down the Burden",
+   "owner": "paladin",
+   "tree": "oath_of_mercy",
+   "reqLevel": 16,
+   "maxRank": 5,
+   "prereq": [
+    "pal_descent"
+   ],
+   "kind": "active",
+   "desc": "A friend shakes off a slow, a root, a stun or a poison and is healed for {dmg}. Does not use the global cooldown.",
+   "cost": {
+    "rage": 12
+   },
+   "altCost": {
+    "mana": 14
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": false,
+   "range": 20,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "cleanse"
+    },
+    {
+     "do": "heal",
+     "base": [
+      5,
+      2
+     ],
+     "perRank": {
+      "base": [
+       1,
+       0.3
+      ]
+     }
+    }
+   ]
+  },
+  "pal_light_within": {
+   "name": "Light Within",
+   "owner": "paladin",
+   "tree": "oath_of_mercy",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "pal_oathkeeper"
+   ],
+   "kind": "passive",
+   "desc": "Every blow you land gives a little back. Life on hit.",
+   "passive": {
+    "stat": "lifeOnHit",
+    "value": 2,
+    "perRank": 1.5
+   }
+  },
+  "pal_vow_renewed": {
+   "name": "Vow Renewed",
+   "owner": "paladin",
+   "tree": "oath_of_mercy",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "pal_martyr"
+   ],
+   "kind": "synergy",
+   "desc": "Martyr's Vow wards for more: a bigger ward per rank.",
+   "synergy": {
+    "skill": "pal_martyr",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "pal_oathbound_rise": {
+   "name": "Oathbound Rise",
+   "owner": "paladin",
+   "tree": "oath_of_mercy",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "pal_burden",
+    "pal_vow_renewed"
+   ],
+   "kind": "active",
+   "desc": "Lift a fallen friend within 10 m back up at half health inside a {dmg} ward, and the light heals everyone near you. Two seconds; it works in a fight. The Oath of Mercy capstone.",
+   "cost": {
+    "rage": 40
+   },
+   "altCost": {
+    "mana": 48
+   },
+   "cast": 2,
+   "cd": 90,
+   "gcd": true,
+   "range": 10,
+   "target": "ally",
+   "effects": [
+    {
+     "do": "revive",
+     "hpPct": 50,
+     "perRank": {
+      "hpPct": 10
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      30,
+      8
+     ],
+     "secs": 10
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        10,
+        4
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "pal_call_account": {
+   "name": "Call to Account",
+   "owner": "paladin",
+   "tree": "bulwark",
+   "reqLevel": 10,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Everything within 8 m comes for you and hits 10% softer for {secs} seconds, and you take a small ward for the trouble. Does not use the global cooldown.",
+   "cost": {
+    "rage": 10
+   },
+   "altCost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      },
+      {
+       "do": "debuff",
+       "kind": "weaken",
+       "secs": 6,
+       "pct": 10,
+       "perRank": {
+        "pct": 2
+       }
+      }
+     ]
+    },
+    {
+     "do": "shield",
+     "base": [
+      8,
+      2.5
+     ],
+     "secs": 6,
+     "perRank": {
+      "base": [
+       2,
+       0.5
+      ]
+     }
+    }
+   ]
+  },
+  "pal_faith_plate": {
+   "name": "Faith in Plate",
+   "owner": "paladin",
+   "tree": "bulwark",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Your armour counts for more.",
+   "passive": {
+    "stat": "armourPct",
+    "value": 5,
+    "perRank": 3
+   }
+  },
+  "pal_blessed_earth": {
+   "name": "Blessed Earth",
+   "owner": "paladin",
+   "tree": "bulwark",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "pal_call_account"
+   ],
+   "kind": "active",
+   "desc": "Bless a 4.5 m circle up to 15 m away: enemies in it are scorched for {dmg} and slowed for 5 seconds, friends in it keep mending for {secs} seconds.",
+   "cost": {
+    "rage": 25
+   },
+   "altCost": {
+    "mana": 30
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 15,
+   "target": "ground",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4.5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "fire",
+       "base": [
+        6,
+        3
+       ],
+       "perRank": {
+        "base": [
+         0.5,
+         0.2
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 5,
+       "pct": 30
+      }
+     ]
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4.5,
+     "at": "ground",
+     "effects": [
+      {
+       "do": "hot",
+       "base": [
+        2,
+        0.8
+       ],
+       "secs": 6,
+       "perRank": {
+        "base": [
+         0.2,
+         0.06
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "pal_shield_faith": {
+   "name": "Shield of Faith",
+   "owner": "paladin",
+   "tree": "bulwark",
+   "reqLevel": 14,
+   "maxRank": 5,
+   "prereq": [
+    "pal_faith_plate"
+   ],
+   "kind": "active",
+   "desc": "Set your feet: +50% armour and a {dmg} ward for 10 seconds, and 15 temper. Does not use the global cooldown.",
+   "cost": {
+    "rage": 0
+   },
+   "altCost": {
+    "mana": 0
+   },
+   "cast": 0,
+   "cd": 30,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 50,
+     "secs": 10,
+     "perRank": {
+      "pct": 6
+     }
+    },
+    {
+     "do": "shield",
+     "base": [
+      12,
+      4
+     ],
+     "secs": 10,
+     "perRank": {
+      "base": [
+       3,
+       0.6
+      ]
+     }
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 15
+    }
+   ]
+  },
+  "pal_retort": {
+   "name": "Retort",
+   "owner": "paladin",
+   "tree": "bulwark",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "pal_call_account"
+   ],
+   "kind": "active",
+   "desc": "Answer a caster with the flat of the blade: {mult} weapon damage, the cast stops, and it comes for you. Three times the threat.",
+   "cost": {
+    "rage": 15
+   },
+   "altCost": {
+    "mana": 18
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.4,
+     "perRank": {
+      "mult": 0.08
+     }
+    },
+    {
+     "do": "taunt"
+    },
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    }
+   ]
+  },
+  "pal_stout_heart": {
+   "name": "Stout Heart",
+   "owner": "paladin",
+   "tree": "bulwark",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "pal_faith_plate"
+   ],
+   "kind": "passive",
+   "desc": "More resistance to everything.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "pal_aegis": {
+   "name": "Shared Aegis",
+   "owner": "paladin",
+   "tree": "bulwark",
+   "reqLevel": 18,
+   "maxRank": 5,
+   "prereq": [
+    "pal_shield_faith"
+   ],
+   "kind": "active",
+   "desc": "Everyone in the party takes +20% armour and heals land 15% harder on them for 10 seconds.",
+   "cost": {
+    "rage": 30
+   },
+   "altCost": {
+    "mana": 36
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 20,
+     "secs": 10,
+     "who": "party",
+     "perRank": {
+      "pct": 4
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "healTaken",
+     "pct": 15,
+     "secs": 10,
+     "who": "party"
+    }
+   ]
+  },
+  "pal_unyielding": {
+   "name": "Unyielding Oath",
+   "owner": "paladin",
+   "tree": "bulwark",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "pal_aegis",
+    "pal_retort"
+   ],
+   "kind": "active",
+   "desc": "You will not fall: a {dmg} ward, double armour for 8 seconds, a heal on yourself, and everything within 10 m turns on you. Does not use the global cooldown. The Bulwark capstone.",
+   "cost": {
+    "rage": 0
+   },
+   "altCost": {
+    "mana": 0
+   },
+   "cast": 0,
+   "cd": 60,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      45,
+      9
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       10,
+       2
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 100,
+     "secs": 8
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 1.5,
+     "at": "self",
+     "effects": [
+      {
+       "do": "heal",
+       "base": [
+        20,
+        8
+       ],
+       "perRank": {
+        "base": [
+         5,
+         1.5
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 10,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      }
+     ]
+    }
+   ]
+  },
+  "spb_starcut": {
+   "name": "Starcut",
+   "owner": "spellblade",
+   "tree": "edgework",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A cut for {mult} weapon damage with a crack of storm along the edge for {dmg}. Steel for the armoured, lightning for the stone-skinned: your filler.",
+   "cost": {
+    "rage": 15
+   },
+   "altCost": {
+    "mana": 18
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.1,
+     "perRank": {
+      "mult": 0.06
+     }
+    },
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      4,
+      2.2
+     ],
+     "perRank": {
+      "base": [
+       0.4,
+       0.15
+      ]
+     }
+    }
+   ]
+  },
+  "spb_edge_word": {
+   "name": "Edge and Word",
+   "owner": "spellblade",
+   "tree": "edgework",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More melee power.",
+   "passive": {
+    "stat": "meleePower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "spb_bright_arc": {
+   "name": "Bright Arc",
+   "owner": "spellblade",
+   "tree": "edgework",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "spb_starcut"
+   ],
+   "kind": "active",
+   "desc": "A sweep of charged steel: {mult} weapon damage plus {dmg} storm to everything in front of you.",
+   "cost": {
+    "rage": 25
+   },
+   "altCost": {
+    "mana": 30
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "cone",
+     "size": 4.5,
+     "at": "self",
+     "angle": 90,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 0.9,
+       "perRank": {
+        "mult": 0.05
+       }
+      },
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        3,
+        1.5
+       ],
+       "perRank": {
+        "base": [
+         0.3,
+         0.12
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "spb_spark_mind": {
+   "name": "Spark Mind",
+   "owner": "spellblade",
+   "tree": "edgework",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More spell power.",
+   "passive": {
+    "stat": "spellPower",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "spb_honed_star": {
+   "name": "Honed Star",
+   "owner": "spellblade",
+   "tree": "edgework",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "spb_starcut"
+   ],
+   "kind": "synergy",
+   "desc": "Starcut cuts deeper: more damage per rank.",
+   "synergy": {
+    "skill": "spb_starcut",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "spb_riven_star": {
+   "name": "Riven Star",
+   "owner": "spellblade",
+   "tree": "edgework",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "spb_bright_arc"
+   ],
+   "kind": "active",
+   "desc": "Drive the blade in and let the storm out: {mult} weapon damage, {dmg} storm, and the armour cracked (-15%) for 8 seconds.",
+   "cost": {
+    "rage": 30
+   },
+   "altCost": {
+    "mana": 36
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 2,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      8,
+      4
+     ],
+     "perRank": {
+      "base": [
+       0.7,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "armourDown",
+     "secs": 8,
+     "pct": 15,
+     "perRank": {
+      "pct": 1
+     }
+    }
+   ]
+  },
+  "spb_starlit_eye": {
+   "name": "Starlit Eye",
+   "owner": "spellblade",
+   "tree": "edgework",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "spb_spark_mind"
+   ],
+   "kind": "passive",
+   "desc": "More critical hit chance.",
+   "passive": {
+    "stat": "crit",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "spb_wider_arc": {
+   "name": "Wider Arc",
+   "owner": "spellblade",
+   "tree": "edgework",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "spb_bright_arc"
+   ],
+   "kind": "synergy",
+   "desc": "Bright Arc hits harder: more damage per rank.",
+   "synergy": {
+    "skill": "spb_bright_arc",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "spb_collapsing_star": {
+   "name": "Collapsing Star",
+   "owner": "spellblade",
+   "tree": "edgework",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "spb_riven_star"
+   ],
+   "kind": "active",
+   "desc": "Everything within 6 m is dragged two metres in, struck for {mult} weapon damage plus {dmg} storm, and stunned. The Edgework capstone.",
+   "cost": {
+    "rage": 50
+   },
+   "altCost": {
+    "mana": 60
+   },
+   "cast": 0,
+   "cd": 20,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 6,
+     "at": "self",
+     "effects": [
+      {
+       "do": "pull",
+       "dist": 2
+      },
+      {
+       "do": "weapon",
+       "mult": 2.2,
+       "perRank": {
+        "mult": 0.12
+       }
+      },
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        14,
+        7
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.45
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1.2,
+       "perRank": {
+        "secs": 0.08
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "spb_aegis": {
+   "name": "Star Aegis",
+   "owner": "spellblade",
+   "tree": "starward",
+   "reqLevel": 10,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Wrap yourself in starlight: a ward that soaks {dmg} for 8 seconds, and the flash of it scorches everything within 4 m.",
+   "cost": {
+    "rage": 20
+   },
+   "altCost": {
+    "mana": 24
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      16,
+      4
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       1.5,
+       0.3
+      ]
+     }
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "self",
+     "effects": [
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        5,
+        2.5
+       ],
+       "perRank": {
+        "base": [
+         0.4,
+         0.2
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "spb_mail_of_light": {
+   "name": "Mail of Light",
+   "owner": "spellblade",
+   "tree": "starward",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "Your armour counts for more.",
+   "passive": {
+    "stat": "armourPct",
+    "value": 4,
+    "perRank": 2
+   }
+  },
+  "spb_tether": {
+   "name": "Star Tether",
+   "owner": "spellblade",
+   "tree": "starward",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [
+    "spb_aegis"
+   ],
+   "kind": "active",
+   "desc": "Throw a thread of light 15 m, drag the target to you for {dmg}, and it limps at 60% speed for 3 seconds. The archer on the perch is now at your feet.",
+   "cost": {
+    "rage": 15
+   },
+   "altCost": {
+    "mana": 18
+   },
+   "cast": 0,
+   "cd": 10,
+   "gcd": true,
+   "range": 15,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "pull",
+     "dist": 10
+    },
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      5,
+      2.5
+     ],
+     "perRank": {
+      "base": [
+       0.4,
+       0.2
+      ]
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "slow",
+     "secs": 3,
+     "pct": 40
+    }
+   ]
+  },
+  "spb_binding": {
+   "name": "Binding Stars",
+   "owner": "spellblade",
+   "tree": "starward",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "spb_tether"
+   ],
+   "kind": "active",
+   "desc": "Stars pin everything within 5 m of you to the ground for {secs} seconds and burn it for {dmg}.",
+   "cost": {
+    "rage": 25
+   },
+   "altCost": {
+    "mana": 30
+   },
+   "cast": 0,
+   "cd": 16,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 5,
+     "at": "self",
+     "effects": [
+      {
+       "do": "debuff",
+       "kind": "root",
+       "secs": 2.5,
+       "perRank": {
+        "secs": 0.15
+       }
+      },
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        6,
+        3
+       ],
+       "perRank": {
+        "base": [
+         0.5,
+         0.2
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "spb_steady_star": {
+   "name": "Steady Star",
+   "owner": "spellblade",
+   "tree": "starward",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "spb_aegis"
+   ],
+   "kind": "synergy",
+   "desc": "Star Aegis holds more: a bigger ward per rank.",
+   "synergy": {
+    "skill": "spb_aegis",
+    "stat": "heal",
+    "pctPerRank": 6
+   }
+  },
+  "spb_null_word": {
+   "name": "Null Word",
+   "owner": "spellblade",
+   "tree": "starward",
+   "reqLevel": 16,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A word that unmakes a cast from 15 m: it stops, and the caster is silenced for {secs} seconds. Does not use the global cooldown.",
+   "cost": {
+    "rage": 10
+   },
+   "altCost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 16,
+   "gcd": false,
+   "range": 15,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "interrupt",
+     "lock": 3,
+     "perRank": {
+      "lock": 0.25
+     }
+    },
+    {
+     "do": "debuff",
+     "kind": "silence",
+     "secs": 1.5,
+     "perRank": {
+      "secs": 0.2
+     }
+    }
+   ]
+  },
+  "spb_starskin": {
+   "name": "Starskin",
+   "owner": "spellblade",
+   "tree": "starward",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "spb_mail_of_light"
+   ],
+   "kind": "passive",
+   "desc": "More resistance to everything.",
+   "passive": {
+    "stat": "resistAll",
+    "value": 2,
+    "perRank": 1
+   }
+  },
+  "spb_long_hold": {
+   "name": "Long Hold",
+   "owner": "spellblade",
+   "tree": "starward",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "spb_binding"
+   ],
+   "kind": "synergy",
+   "desc": "Binding Stars holds longer: more seconds per rank.",
+   "synergy": {
+    "skill": "spb_binding",
+    "stat": "duration",
+    "pctPerRank": 8
+   }
+  },
+  "spb_star_bastion": {
+   "name": "Star Bastion",
+   "owner": "spellblade",
+   "tree": "starward",
+   "reqLevel": 20,
+   "maxRank": 3,
+   "prereq": [
+    "spb_null_word",
+    "spb_long_hold"
+   ],
+   "kind": "active",
+   "desc": "The constellation closes round you: a {dmg} ward, +60% armour for 8 seconds, 30 temper, and everything within 8 m turns on you, slowed and scorched. Does not use the global cooldown. The Starward capstone.",
+   "cost": {
+    "rage": 0
+   },
+   "altCost": {
+    "mana": 0
+   },
+   "cast": 0,
+   "cd": 60,
+   "gcd": false,
+   "range": 0,
+   "target": "self",
+   "threat": 3,
+   "effects": [
+    {
+     "do": "shield",
+     "base": [
+      35,
+      8
+     ],
+     "secs": 8,
+     "perRank": {
+      "base": [
+       8,
+       2
+      ]
+     }
+    },
+    {
+     "do": "buff",
+     "stat": "armour",
+     "pct": 60,
+     "secs": 8
+    },
+    {
+     "do": "resource",
+     "kind": "rage",
+     "n": 30
+    },
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 8,
+     "at": "self",
+     "effects": [
+      {
+       "do": "taunt"
+      },
+      {
+       "do": "debuff",
+       "kind": "slow",
+       "secs": 4,
+       "pct": 50
+      },
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        10,
+        5
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "spb_comet_rush": {
+   "name": "Comet Rush",
+   "owner": "spellblade",
+   "tree": "comet",
+   "reqLevel": 10,
+   "maxRank": 5,
+   "prereq": [],
+   "kind": "active",
+   "desc": "Fly 15 m at your target in a streak of light: {mult} weapon damage plus {dmg} storm on arrival. Does not use the global cooldown.",
+   "cost": {
+    "rage": 10
+   },
+   "altCost": {
+    "mana": 12
+   },
+   "cast": 0,
+   "cd": 12,
+   "gcd": false,
+   "range": 15,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "dash",
+     "dist": 15,
+     "to": "target"
+    },
+    {
+     "do": "weapon",
+     "mult": 0.8,
+     "perRank": {
+      "mult": 0.1
+     }
+    },
+    {
+     "do": "damage",
+     "type": "storm",
+     "base": [
+      4,
+      2
+     ],
+     "perRank": {
+      "base": [
+       0.8,
+       0.3
+      ]
+     }
+    }
+   ]
+  },
+  "spb_light_foot": {
+   "name": "Light Foot",
+   "owner": "spellblade",
+   "tree": "comet",
+   "reqLevel": 11,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "passive",
+   "desc": "More move speed.",
+   "passive": {
+    "stat": "moveSpeed",
+    "value": 3,
+    "perRank": 1.5
+   }
+  },
+  "spb_thrown_star": {
+   "name": "Thrown Star",
+   "owner": "spellblade",
+   "tree": "comet",
+   "reqLevel": 12,
+   "maxRank": 10,
+   "prereq": [],
+   "kind": "active",
+   "desc": "A star thrown 20 m for {dmg} storm damage. The one spell a Spellblade keeps for what it cannot reach.",
+   "cost": {
+    "rage": 15
+   },
+   "altCost": {
+    "mana": 18
+   },
+   "cast": 0,
+   "cd": 0,
+   "gcd": true,
+   "range": 20,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "bolt",
+     "type": "storm",
+     "base": [
+      8,
+      4
+     ],
+     "speed": 30,
+     "perRank": {
+      "base": [
+       0.6,
+       0.3
+      ]
+     }
+    }
+   ]
+  },
+  "spb_bright_tail": {
+   "name": "Bright Tail",
+   "owner": "spellblade",
+   "tree": "comet",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "spb_comet_rush"
+   ],
+   "kind": "synergy",
+   "desc": "Comet Rush lands harder: more damage per rank.",
+   "synergy": {
+    "skill": "spb_comet_rush",
+    "stat": "damage",
+    "pctPerRank": 8
+   }
+  },
+  "spb_flicker_cut": {
+   "name": "Flicker Cut",
+   "owner": "spellblade",
+   "tree": "comet",
+   "reqLevel": 14,
+   "maxRank": 10,
+   "prereq": [
+    "spb_comet_rush"
+   ],
+   "kind": "active",
+   "desc": "Cut for {mult} weapon damage and be three metres back before the answer comes.",
+   "cost": {
+    "rage": 20
+   },
+   "altCost": {
+    "mana": 24
+   },
+   "cast": 0,
+   "cd": 8,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "weapon",
+     "mult": 1.6,
+     "perRank": {
+      "mult": 0.08
+     }
+    },
+    {
+     "do": "dash",
+     "dist": 3,
+     "to": "back"
+    }
+   ]
+  },
+  "spb_comet_fall": {
+   "name": "Comet Fall",
+   "owner": "spellblade",
+   "tree": "comet",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "spb_flicker_cut"
+   ],
+   "kind": "active",
+   "desc": "Bring the blade down like something from the sky: {mult} weapon damage plus {dmg} storm to your target and everything within 4 m of it, and a 1 s daze.",
+   "cost": {
+    "rage": 35
+   },
+   "altCost": {
+    "mana": 42
+   },
+   "cast": 0,
+   "cd": 15,
+   "gcd": true,
+   "range": 0,
+   "target": "enemy",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "circle",
+     "size": 4,
+     "at": "target",
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 1.2,
+       "perRank": {
+        "mult": 0.06
+       }
+      },
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        12,
+        6
+       ],
+       "perRank": {
+        "base": [
+         0.9,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      }
+     ]
+    }
+   ]
+  },
+  "spb_quickened": {
+   "name": "Quickened Edge",
+   "owner": "spellblade",
+   "tree": "comet",
+   "reqLevel": 16,
+   "maxRank": 10,
+   "prereq": [
+    "spb_light_foot"
+   ],
+   "kind": "passive",
+   "desc": "More attack speed.",
+   "passive": {
+    "stat": "attackSpeed",
+    "value": 3,
+    "perRank": 2
+   }
+  },
+  "spb_second_comet": {
+   "name": "Second Comet",
+   "owner": "spellblade",
+   "tree": "comet",
+   "reqLevel": 18,
+   "maxRank": 10,
+   "prereq": [
+    "spb_comet_fall"
+   ],
+   "kind": "synergy",
+   "desc": "Comet Fall hits harder: more damage per rank.",
+   "synergy": {
+    "skill": "spb_comet_fall",
+    "stat": "damage",
+    "pctPerRank": 6
+   }
+  },
+  "spb_heavens_edge": {
+   "name": "Heaven's Edge",
+   "owner": "spellblade",
+   "tree": "comet",
+   "reqLevel": 20,
+   "maxRank": 10,
+   "prereq": [
+    "spb_comet_fall",
+    "spb_second_comet"
+   ],
+   "kind": "active",
+   "desc": "Carve a 12 m line of light straight ahead for {mult} weapon damage plus {dmg} storm and a 1 s daze, and end up at the far end of it. The Comet capstone.",
+   "cost": {
+    "rage": 45
+   },
+   "altCost": {
+    "mana": 54
+   },
+   "cast": 0,
+   "cd": 25,
+   "gcd": true,
+   "range": 0,
+   "target": "self",
+   "effects": [
+    {
+     "do": "area",
+     "shape": "line",
+     "size": 12,
+     "at": "self",
+     "width": 2.4,
+     "effects": [
+      {
+       "do": "weapon",
+       "mult": 2.5,
+       "perRank": {
+        "mult": 0.12
+       }
+      },
+      {
+       "do": "damage",
+       "type": "storm",
+       "base": [
+        12,
+        6
+       ],
+       "perRank": {
+        "base": [
+         1,
+         0.4
+        ]
+       }
+      },
+      {
+       "do": "debuff",
+       "kind": "stun",
+       "secs": 1
+      }
+     ]
+    },
+    {
+     "do": "dash",
+     "dist": 12,
+     "to": "forward"
+    }
+   ]
+  }
+ },
+ "wishlist": [
+  {
+   "field": "armour buffs on heroes",
+   "on": "van_iron_resolve, van_stand_fast, van_bastion, pal_shield_faith, pal_aegis, pal_unyielding, spb_star_bastion, clr_blessed_ground (and the Path's fighter_dig_in)",
+   "rule": "A `buff` with stat `armour` on a hero is read nowhere when a MONSTER hits (abilities.js strike/shots use the raw player; only skills.js armourAfter reads it, and only for foes). Rule: `resolveHit(f, armourAfter(p), ...)` in abilities.js strike() and in the foe-shot landing, so +N% armour buffs on heroes work. Until then every armour buff above is inert and the wards/taunts in the same skills carry them."
+  },
+  {
+   "field": "damageDown / weaken on foes",
+   "on": "van_hold_line, van_bulwark_blow, pyr_ash_cloud, clr_judgement, pal_call_account (and the Path's fighter_war_cry)",
+   "rule": "A `debuff` damageDown/weaken writes an fx of kind `buff` stat `damage` pct negative on the foe, but a foe's damage reads status.dmgFactor (kinds dmgUp / dmgDown). Rule: write `{ kind: \"dmgDown\", pct }` for damageDown/weaken (or make dmgFactor also read buff:damage). Until then these debuffs are inert and the taunt/damage parts of the same skills carry them."
+  },
+  {
+   "field": "summon ranks",
+   "on": "every summon skill",
+   "rule": "perRank on the summon effect (hpMult / dmgMult increments) works today through atRank. Nice-to-have: synergyOf(...).damage applied to dmgMult so a synergy node can also feed a pet."
+  },
+  {
+   "field": "self-heal inside an enemy skill",
+   "on": "pal_sanctified, pal_radiant_sweep, pal_daybreak_strike, clr_falling_light, clr_unbearable, pyr_pyre_heart, pal_unyielding",
+   "rule": "Written as a helpful `area` circle at self (radius 1.5-8) so the caster and friends within it are healed, which the engine already runs. `who: \"self\"` on heal (Path wishlist 6) would be the cleaner form for the three that only want the caster."
+  },
+  {
+   "field": "perTargetHit",
+   "on": "van_crowd_swing, van_iron_gyre (the Warrior's \"stronger in a crowd\")",
+   "rule": "`perTargetHit: { mult: 0.08, max: 0.4 }` on an area: each enemy hit beyond the first adds mult to the inner weapon multiplier for everyone hit, capped. Until then Crowd Swing is flat per target (already 100%+ of a swing each, so it reads as a crowd skill without it)."
+  },
+  {
+   "field": "perDot (Flashover)",
+   "on": "pyr_flashover, pyr_immolate",
+   "rule": "`perDot: { mult: 0.25, max: 1.0 }` on a damage effect: +mult x the number of dot fx on the target (from any source). Makes Flashover \"sets off the burning\". Until then it is a flat area hit after the burns."
+  },
+  {
+   "field": "thorns on a ward",
+   "on": "spb_aegis, spb_star_bastion (Star Aegis \"strikes back\")",
+   "rule": "`shield.thorns: { type: \"storm\", base: [a, b] }`: while the ward holds, every melee hit on the wearer deals that spell damage to the attacker. Written today as a burst on cast."
+  },
+  {
+   "field": "cond: lowHp",
+   "on": "van_finishing_blow",
+   "rule": "`cond: { targetHpBelow: 0.35 }` x1.5 damage (an execute). Written today as a flat x3.0 on a 10 s cooldown, which is fine."
+  },
+  {
+   "field": "selfCost hp",
+   "on": "pal_martyr",
+   "rule": "`hpCost: 0.1` (a tenth of max health) for \"spends your own health\". Not needed; the ward is priced in temper/mana instead."
+  },
+  {
+   "field": "bar swap on a stance",
+   "on": "later waves (Druid shapes, Weaponmaster stances, Bard songs, Wyrmblood tempers)",
+   "rule": "`stance.bar: [ids]` swaps the six slots while the stance holds. Nothing in wave 1 needs it."
+  }
+ ]
+}

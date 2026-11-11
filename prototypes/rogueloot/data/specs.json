@@ -1,1 +1,1144 @@
-{ "_doc": "placeholder: the spec roster is being designed (docs/PLAN.md M20); this file is replaced when it lands", "specs": {}, "waves": {} }
+{
+ "_doc": "The Specialization roster (Fable, 2026-11-10; docs/SPECS.md). Rulings 2, 10, 29, 30, 35: Path at 3, Spec at 10, spec skills replace Path skills, 3 trees of 8-10 nodes each, rolled out in waves (wave 1 = one pure spec per Path + Paladin + Spellblade). FIELDS: paths (1 = pure, 2 = hybrid: pick it from either), resource (the PRIMARY resource its costs are written in) + altResource (the other Path's; hybrid actives carry `altCost` in it), armour/weapons/offhand ADDED to the Path's proficiency at 10 (content.js writes them to items.proficiency[spec]; every Fighter-reachable spec gets plate, the Paladin mail+plate, the Spellblade leather), starter (granted at rank 1 at the spec pick; wave 1 only until a wave's trees exist), tvClass (the Thousandvale class it carries over), wave (1-5), trees (3 ids - the tree field of its skills). 31 specs = Thousandvale's 32 minus the Tactician (owner: turn-based orders do not fit) and with the Star Blade FOLDED INTO the Spellblade (same fantasy - a sword with a spell on it, a star shield, tethers, a comet rush - so the owner's named hybrid carries a Thousandvale class instead of being a 33rd). RENAMED (other games' class names, a Path name clash, or a monster-role clash): Warrior -> Vanguard, Fighter -> Weaponmaster, Demon Hunter -> Reckoner, Shaman -> Spirit Speaker (the bestiary's shaman ROLE keeps the word), Witch Hunter -> Hexbreaker, Dragon Knight -> Wyrmblood, Shadow Dancer -> Shade Dancer, Mage -> Frostbinder, Rogue -> Assassin, Priest -> Dusk Priest. KEPT as generic words: Paladin, Knight, Ranger, Cleric, Bard, Monk, Druid, Necromancer, Warlock, Sorcerer, Enchanter, Oracle, Tinker, Scavenger, Swashbuckler, Pyromancer, Stormcaller, Starcaller, Chronomancer, Runesmith. HYBRIDS (7): Paladin F/H, Spellblade F/M, Druid H/M, Bard H/R, Monk F/R, Hexbreaker R/H, Spirit Speaker H/M. Waves 2-5 list fantasy + tree names only; their trees land with their milestone (M22/24/26/28).",
+ "specs": {
+  "vanguard": {
+   "name": "Vanguard",
+   "paths": [
+    "fighter"
+   ],
+   "resource": "rage",
+   "armour": [
+    "plate"
+   ],
+   "weapons": [],
+   "offhand": [],
+   "wave": 1,
+   "tvClass": "warrior",
+   "role": "melee damage / tank",
+   "blurb": "The front of the line. Stronger the more of them there are: spins, shoves and a stamp that splits the ground.",
+   "fantasy": "Thousandvale's Warrior. You walk into the middle of the pack on purpose. Crowd Swing and Iron Gyre are the filler, Hold the Line makes them all look at you, and Groundbreaker is a stunning line through everything in front of you. Plate at ten.",
+   "starter": [
+    "van_crowd_swing",
+    "van_hold_line"
+   ],
+   "trees": [
+    {
+     "id": "thick_of_it",
+     "name": "Thick of It",
+     "blurb": "Crowd damage: swings, spins and a two-handed bleed, ending in Avalanche."
+    },
+    {
+     "id": "iron_will",
+     "name": "Iron Will",
+     "blurb": "The tank: an area taunt, armour, wards for you and the party, ending in Bastion."
+    },
+    {
+     "id": "breaking_line",
+     "name": "Breaking Line",
+     "blurb": "One target and control: shoves, armour cracks, a chase, a finishing blow and the Groundbreaker line."
+    }
+   ]
+  },
+  "ranger": {
+   "name": "Ranger",
+   "paths": [
+    "rogue"
+   ],
+   "resource": "energy",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 1,
+   "tvClass": "ranger",
+   "role": "ranged damage, one pet",
+   "blurb": "A bow, a hound and a bag of snares. Name the quarry, hold them with nets, shoot from the perch the archers wanted.",
+   "fantasy": "Thousandvale's Ranger with its hound made real: a strong pet that bites what bites you, a Quarry mark the whole party kills through, and the bow kit (Broadhead, Full Draw, Piercing Shot, Arrow Storm). Snarework is the control tree: roots, caltrops, nets, a pinning interrupt.",
+   "starter": [
+    "rgr_broadhead",
+    "rgr_call_hound"
+   ],
+   "trees": [
+    {
+     "id": "far_shot",
+     "name": "Far Shot",
+     "blurb": "The bow: Broadhead filler, Full Draw, a piercing line, a fan, and Arrow Storm."
+    },
+    {
+     "id": "the_hunt",
+     "name": "The Hunt",
+     "blurb": "The hound (two kinds), the Quarry mark, the killing shot, and three wolves at twenty."
+    },
+    {
+     "id": "snarework",
+     "name": "Snarework",
+     "blurb": "Snares, caltrops, nets, a leap back and a pinning interrupt, ending in Killing Ground."
+    }
+   ]
+  },
+  "pyromancer": {
+   "name": "Pyromancer",
+   "paths": [
+    "mage"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 1,
+   "tvClass": "pyromancer",
+   "role": "ranged damage, one pet",
+   "blurb": "Everything burns. Kindle a target, scorch it hotter, set the whole pack off at once; a little fire follows you and throws itself at what you fight.",
+   "fantasy": "Thousandvale's Pyromancer. Burns are the whole kit: Kindle and Scorch stack them, Flashover and Immolate cash them in; Burning Line, Fallstone and Firestorm are the ground fire; the Familiar is a pet that is also your fire. Cloth, so Cinder Stride and Ash Cloud are how you stay alive.",
+   "starter": [
+    "pyr_kindle",
+    "pyr_burning_line"
+   ],
+   "trees": [
+    {
+     "id": "kindling",
+     "name": "Kindling",
+     "blurb": "Bolts and the burn: Kindle, Scorch, Flashover, Immolate."
+    },
+    {
+     "id": "wildfire",
+     "name": "Wildfire",
+     "blurb": "Lines, falling rock, firestorms and choking ash, ending in Conflagration."
+    },
+    {
+     "id": "the_familiar",
+     "name": "The Familiar",
+     "blurb": "A fire that follows you (two kinds), the skin that does not burn, a snuffing interrupt, and Pyre Heart."
+    }
+   ]
+  },
+  "cleric": {
+   "name": "Cleric",
+   "paths": [
+    "healer"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 1,
+   "tvClass": "cleric",
+   "role": "healer / ranged damage",
+   "blurb": "Heals that spill over into wards, a circle of safe ground, the fallen raised, and a lance of sunlight that pays for all of it.",
+   "fantasy": "Thousandvale's Cleric. Brightmend heals and leaves the overflow as a ward; Sanctuary and Circle of Light keep four people up; Raise the Fallen is the revive; Falling Light is the smite that also heals, so a Cleric alone clears a zone.",
+   "starter": [
+    "clr_brightmend",
+    "clr_sunlance"
+   ],
+   "trees": [
+    {
+     "id": "overflow",
+     "name": "Overflow",
+     "blurb": "One friend, kept standing: Brightmend, Guardian Light, wards, a cleansing word, Absolution."
+    },
+    {
+     "id": "sanctuary",
+     "name": "Sanctuary",
+     "blurb": "Ground and the whole party: Sanctuary, Circle of Light, the revive, a hymn, Daybreak."
+    },
+    {
+     "id": "falling_light",
+     "name": "Falling Light",
+     "blurb": "The light that bites: Sunlance, Falling Light, Censure, Judgement, Noonfire, Light Unbearable."
+    }
+   ]
+  },
+  "paladin": {
+   "name": "Paladin",
+   "paths": [
+    "fighter",
+    "healer"
+   ],
+   "resource": "rage",
+   "altResource": "mana",
+   "armour": [
+    "mail",
+    "plate"
+   ],
+   "weapons": [
+    "mace",
+    "sword",
+    "axe",
+    "polearm"
+   ],
+   "offhand": [
+    "shield"
+   ],
+   "wave": 1,
+   "tvClass": "paladin",
+   "role": "melee / tank / off-healer",
+   "blurb": "Every swing heals someone. A ward for the party sworn on your own life, a leap to the friend in trouble, and the fallen lifted back up.",
+   "fantasy": "Thousandvale's Paladin, reachable from Fighter OR Healer. Sanctified Blade heals everyone near you as it cuts; Mercy's Touch is an instant heal because you are in melee; Daybreak Descent jumps you onto a friend and takes what is on them; Bulwark is a full tank line. From Fighter it runs on temper (hits feed it); from Healer on mana (the same skills, priced in mana).",
+   "starter": [
+    "pal_sanctified",
+    "pal_mercy"
+   ],
+   "trees": [
+    {
+     "id": "holy_blade",
+     "name": "Holy Blade",
+     "blurb": "Melee that heals: Sanctified Blade, Hammer of Light, Radiant Sweep, Daybreak Strike."
+    },
+    {
+     "id": "oath_of_mercy",
+     "name": "Oath of Mercy",
+     "blurb": "The friend in trouble: an instant heal, a party ward, the leap, a cleanse, Oathbound Rise."
+    },
+    {
+     "id": "bulwark",
+     "name": "Bulwark",
+     "blurb": "The wall with a prayer behind it: area taunt, blessed ground, armour, a taunting interrupt, Unyielding Oath."
+    }
+   ]
+  },
+  "spellblade": {
+   "name": "Spellblade",
+   "paths": [
+    "fighter",
+    "mage"
+   ],
+   "resource": "rage",
+   "altResource": "mana",
+   "armour": [
+    "leather"
+   ],
+   "weapons": [
+    "sword",
+    "dagger"
+   ],
+   "offhand": [
+    "focus"
+   ],
+   "wave": 1,
+   "tvClass": "starblade",
+   "role": "melee damage / control",
+   "blurb": "A sword with a storm along the edge. Cut, shield, drag them in on threads of light, pin them, and arrive like a comet.",
+   "fantasy": "Thousandvale's Star Blade in a Spellblade's skin, reachable from Fighter OR Mage. Starcut is steel plus storm (armour or resist, whichever is weaker); Star Aegis is a ward that flashes outward; Star Tether drags an archer off its perch; Binding Stars pins a pack; Comet Rush and Heaven's Edge are the ways in and through. From Fighter on temper, from Mage on mana.",
+   "starter": [
+    "spb_starcut",
+    "spb_comet_rush"
+   ],
+   "trees": [
+    {
+     "id": "edgework",
+     "name": "Edgework",
+     "blurb": "The blade carries the spell: Starcut, Bright Arc, Riven Star, Collapsing Star."
+    },
+    {
+     "id": "starward",
+     "name": "Starward",
+     "blurb": "The star shield, the tether, the hold, a silencing interrupt, Star Bastion."
+    },
+    {
+     "id": "comet",
+     "name": "Comet",
+     "blurb": "Be somewhere else, hitting something: Comet Rush, Thrown Star, Flicker Cut, Comet Fall, Heaven's Edge."
+    }
+   ]
+  },
+  "knight": {
+   "name": "Knight",
+   "paths": [
+    "fighter"
+   ],
+   "resource": "rage",
+   "armour": [
+    "plate"
+   ],
+   "weapons": [],
+   "offhand": [],
+   "wave": 2,
+   "tvClass": "knight",
+   "role": "tank",
+   "blurb": "Takes the blows meant for others. A sworn guard on one friend, a challenge to the pack, a raised wall, a banner that keeps everyone standing.",
+   "fantasy": "Thousandvale's Knight: the purest tank. Sworn Guard links you to a friend so their damage comes to you; Challenge and Rim Strike are taunts; Rampart is a wall; Unbroken Banner a party ward.",
+   "trees": [
+    {
+     "id": "sworn_guard",
+     "name": "Sworn Guard",
+     "blurb": "Linked protection: take a friend's hits, wards, intercepts."
+    },
+    {
+     "id": "challenge",
+     "name": "Challenge",
+     "blurb": "Taunts, shield blows, a rim strike that stuns, the interrupt."
+    },
+    {
+     "id": "banner",
+     "name": "Banner",
+     "blurb": "Party-wide standing: armour, heals landing harder, Unbroken Banner."
+    }
+   ]
+  },
+  "assassin": {
+   "name": "Assassin",
+   "paths": [
+    "rogue"
+   ],
+   "resource": "energy",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 2,
+   "tvClass": "rogue",
+   "role": "melee damage",
+   "blurb": "Set it up, then cash in. Poisons and bleeds first, a stun, a mark that pays twice, a cut from behind that ends it.",
+   "fantasy": "Thousandvale's Rogue. Gutting Strike and the back-cut, poison darts, a Grave Mark that makes the target pay twice, Slip Away leaving a decoy, Knife Storm for the pack.",
+   "trees": [
+    {
+     "id": "venoms",
+     "name": "Venoms",
+     "blurb": "Poisons and bleeds that stack and spread."
+    },
+    {
+     "id": "the_setup",
+     "name": "The Set-up",
+     "blurb": "Marks, stuns and the cash-in from behind."
+    },
+    {
+     "id": "slip_away",
+     "name": "Slip Away",
+     "blurb": "Decoys, escapes, the hush and the knife storm."
+    }
+   ]
+  },
+  "frostbinder": {
+   "name": "Frostbinder",
+   "paths": [
+    "mage"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 2,
+   "tvClass": "mage",
+   "role": "ranged damage / control",
+   "blurb": "Frost then shatter. Shards and blizzards slow and bite, a rime spear breaks what they left, and nothing in the pack moves at full speed.",
+   "fantasy": "Thousandvale's Mage (frost artillery). Frost Shard, Rime Burst, Whiteout; the shatter (Rime Spear, Stillfrost) that does more to the slowed; Spellrush for three free fast casts.",
+   "trees": [
+    {
+     "id": "rime",
+     "name": "Rime",
+     "blurb": "Shards, bursts and the shatter."
+    },
+    {
+     "id": "whiteout",
+     "name": "Whiteout",
+     "blurb": "Blizzards, walls of ice, ground that holds."
+    },
+    {
+     "id": "stillness",
+     "name": "Stillness",
+     "blurb": "Spellrush, wards of ice, the freeze, the escape."
+    }
+   ]
+  },
+  "stormcaller": {
+   "name": "Stormcaller",
+   "paths": [
+    "mage"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 2,
+   "tvClass": "stormcaller",
+   "role": "ranged damage",
+   "blurb": "Shocked targets take more from everything. Bolts that fork between enemies, orbs that circle you, a step of lightning out of trouble.",
+   "fantasy": "Thousandvale's Stormcaller. Forked Bolt jumps the pack, Thunder Ring, Storm Beam, Storm Orbs as a standing aura, Bolt Step as the dash, Eye of the Tempest as the long storm.",
+   "trees": [
+    {
+     "id": "forked",
+     "name": "Forked",
+     "blurb": "Bolts that chain, shock marks, the beam."
+    },
+    {
+     "id": "thunder",
+     "name": "Thunder",
+     "blurb": "Rings, orbs and the tempest."
+    },
+    {
+     "id": "bolt_step",
+     "name": "Bolt Step",
+     "blurb": "Mobility, wards of wind, the stunning strike."
+    }
+   ]
+  },
+  "oracle": {
+   "name": "Oracle",
+   "paths": [
+    "healer"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 2,
+   "tvClass": "oracle",
+   "role": "healer (wards)",
+   "blurb": "Sees it coming. Wards everyone against the next big hit, marks where the blast will fall, and takes a friend's wound as its own.",
+   "fantasy": "Thousandvale's Oracle: the ward healer. Foresight shields the party before the hit, Kind Omen heals and wards one, Thread of Fate takes damage for a friend, Prophecy marks the blast.",
+   "trees": [
+    {
+     "id": "foresight",
+     "name": "Foresight",
+     "blurb": "Wards before the hit, on one and on all."
+    },
+    {
+     "id": "omens",
+     "name": "Omens",
+     "blurb": "Heals that arrive early, cleansing, the revive."
+    },
+    {
+     "id": "prophecy",
+     "name": "Prophecy",
+     "blurb": "Bolts of fate, marks, a slow on what is coming."
+    }
+   ]
+  },
+  "swashbuckler": {
+   "name": "Swashbuckler",
+   "paths": [
+    "rogue"
+   ],
+   "resource": "energy",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 2,
+   "tvClass": "swashbuckler",
+   "role": "melee damage",
+   "blurb": "Flair rewards variety. A leap, a mocking parry, a matador's turn, and one grand sweep that spends the show.",
+   "fantasy": "Thousandvale's Swashbuckler. Flourish, Daring Leap, Mocking Parry (a taunt with a riposte), Pinning Thrust, Matador's Turn, Grandeur. The engine addition it wants is a Flair counter that rewards not repeating a skill.",
+   "trees": [
+    {
+     "id": "flourish",
+     "name": "Flourish",
+     "blurb": "The thrusts and the sweep."
+    },
+    {
+     "id": "panache",
+     "name": "Panache",
+     "blurb": "Leaps, parries, the turn, the escape."
+    },
+    {
+     "id": "grandeur",
+     "name": "Grandeur",
+     "blurb": "Variety pays: the finisher and what feeds it."
+    }
+   ]
+  },
+  "necromancer": {
+   "name": "Necromancer",
+   "paths": [
+    "mage"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 3,
+   "tvClass": "necromancer",
+   "role": "summoner (up to 8 minions)",
+   "blurb": "Every kill is a body to use. Raise thralls, burn the rest in a pyre, drain life back, and march the buried out.",
+   "fantasy": "Thousandvale's Necromancer: the summoner. Raise Thrall (minions to the cap), Corpse Pyre, Marrow Lance, Grave Draught, Unquiet Return (a grave-touched revive), March of the Buried. The engine addition it wants is a corpse count from recent kills.",
+   "trees": [
+    {
+     "id": "thralls",
+     "name": "Thralls",
+     "blurb": "Raise, command and strengthen the dead."
+    },
+    {
+     "id": "marrow",
+     "name": "Marrow",
+     "blurb": "Bone lances, drains and curses."
+    },
+    {
+     "id": "the_pyre",
+     "name": "The Pyre",
+     "blurb": "Burn the bodies, the grave-touched revive, the march."
+    }
+   ]
+  },
+  "warlock": {
+   "name": "Warlock",
+   "paths": [
+    "mage"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 3,
+   "tvClass": "warlock",
+   "role": "ranged damage, one pet",
+   "blurb": "Health as fuel, curses that spread. A bound fiend fights for you, a rift drags the pack together and copies every curse onto it.",
+   "fantasy": "Thousandvale's Warlock: curses (dots) that spread, a Soul Pact that makes them tick faster, a bound imp pet, Void Rift as the pull. The engine additions it wants are a health cost and dot copying.",
+   "trees": [
+    {
+     "id": "gnawing_dark",
+     "name": "Gnawing Dark",
+     "blurb": "Curses, drains and their spread."
+    },
+    {
+     "id": "the_fiend",
+     "name": "The Fiend",
+     "blurb": "The bound pet and what it does for you."
+    },
+    {
+     "id": "the_rift",
+     "name": "The Rift",
+     "blurb": "Pulls, gates, and the health-fuelled burst."
+    }
+   ]
+  },
+  "druid": {
+   "name": "Druid",
+   "paths": [
+    "healer",
+    "mage"
+   ],
+   "resource": "mana",
+   "altResource": "mana",
+   "armour": [
+    "leather",
+    "mail"
+   ],
+   "weapons": [
+    "staff",
+    "mace"
+   ],
+   "offhand": [],
+   "wave": 3,
+   "tvClass": "druid",
+   "role": "shapeshifter: tank / melee / healer",
+   "blurb": "Change shape and every skill changes with you: a thorned bear-thing, a fast wolf, a spore-lobbing healer.",
+   "fantasy": "Thousandvale's Druid, from Healer OR Mage (both run on mana, so no altCost). Three shapes as stances, Thornlash, Greensap, Green Return as the revive. The engine addition it wants is a stance that swaps the action bar.",
+   "trees": [
+    {
+     "id": "briarback",
+     "name": "Briarback",
+     "blurb": "The thorned tank shape."
+    },
+    {
+     "id": "fenrunner",
+     "name": "Fenrunner",
+     "blurb": "The fast wolf shape."
+    },
+    {
+     "id": "sporecap",
+     "name": "Sporecap",
+     "blurb": "The healing shape: spores, greensap, the bloom revive."
+    }
+   ]
+  },
+  "weaponmaster": {
+   "name": "Weaponmaster",
+   "paths": [
+    "fighter"
+   ],
+   "resource": "rage",
+   "armour": [
+    "plate"
+   ],
+   "weapons": [],
+   "offhand": [],
+   "wave": 3,
+   "tvClass": "fighter",
+   "role": "melee damage / duelist",
+   "blurb": "An open stance and a closed one, and a riposte for whatever comes next. Lunge and flurry change with your stance.",
+   "fantasy": "Thousandvale's Fighter (the stance duelist), renamed because Fighter is a Path here. Open stance (faster, harder) and Closed (heavier armour) as stances; Riposte and Sweeping Guard answer the next blow.",
+   "trees": [
+    {
+     "id": "open_stance",
+     "name": "Open Stance",
+     "blurb": "Speed and precision."
+    },
+    {
+     "id": "closed_stance",
+     "name": "Closed Stance",
+     "blurb": "Guard, ripostes, the counter."
+    },
+    {
+     "id": "mastery",
+     "name": "Mastery",
+     "blurb": "Lunges, flurries, the stance-changing capstone."
+    }
+   ]
+  },
+  "reckoner": {
+   "name": "Reckoner",
+   "paths": [
+    "rogue"
+   ],
+   "resource": "energy",
+   "armour": [],
+   "weapons": [
+    "crossbow"
+   ],
+   "offhand": [],
+   "wave": 3,
+   "tvClass": "demon_hunter",
+   "role": "ranged / melee damage, one pet",
+   "blurb": "Every hit you take is a debt. Brand them, hook them in, tumble clear, set the hound on them, and settle it all in one shot.",
+   "fantasy": "Thousandvale's Demon Hunter, renamed. Brand Bolt, Chain Hook (a pull), Tumbling Shot, Unleash the Hound (a pet), Settle the Grudge (a shot that spends what you took), Night Hunt. Wants a grudge counter from hits taken.",
+   "trees": [
+    {
+     "id": "the_brand",
+     "name": "The Brand",
+     "blurb": "Marks and bolts."
+    },
+    {
+     "id": "the_hook",
+     "name": "The Hook",
+     "blurb": "Pulls, tumbles and the hound."
+    },
+    {
+     "id": "the_reckoning",
+     "name": "The Reckoning",
+     "blurb": "The debt and the settling of it."
+    }
+   ]
+  },
+  "dusk_priest": {
+   "name": "Dusk Priest",
+   "paths": [
+    "healer"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 3,
+   "tvClass": "priest",
+   "role": "healer / shadow damage",
+   "blurb": "Heals by striking. Every shadow lance mends the most hurt friend, a vigil saves everyone from one killing blow, and the fallen rise mid-fight.",
+   "fantasy": "Thousandvale's Priest (light and shadow), renamed. Shadow Lance and Twinlight heal the most hurt ally as they hit, Vigil (a pre-paid save), Mark the Killer, Second Dawn (a combat revive).",
+   "trees": [
+    {
+     "id": "twinlight",
+     "name": "Twinlight",
+     "blurb": "Shadow that heals as it hits."
+    },
+    {
+     "id": "vigil",
+     "name": "Vigil",
+     "blurb": "Pre-paid saves, wards, the mid-fight revive."
+    },
+    {
+     "id": "dawn",
+     "name": "Dawn",
+     "blurb": "Prayers, circles, the mark."
+    }
+   ]
+  },
+  "bard": {
+   "name": "Bard",
+   "paths": [
+    "healer",
+    "rogue"
+   ],
+   "resource": "mana",
+   "altResource": "energy",
+   "armour": [
+    "leather"
+   ],
+   "weapons": [
+    "dagger",
+    "wand",
+    "sword"
+   ],
+   "offhand": [
+    "focus"
+   ],
+   "wave": 3,
+   "tvClass": "bard",
+   "role": "support / healer",
+   "blurb": "One song at a time: valour speeds your friends, ruin curses your enemies, mending heals everyone near you. Switching songs plays its finale.",
+   "fantasy": "Thousandvale's Bard, from Healer OR Rogue. Songs as stances with party buffs, Discord Note, Mending Verse, Grand Finale. From Healer on mana, from Rogue on energy.",
+   "trees": [
+    {
+     "id": "valour",
+     "name": "Valour",
+     "blurb": "The song that speeds and strengthens."
+    },
+    {
+     "id": "ruin",
+     "name": "Ruin",
+     "blurb": "The song that curses, and the discord notes."
+    },
+    {
+     "id": "mending",
+     "name": "Mending",
+     "blurb": "The song that heals, verses, the finale."
+    }
+   ]
+  },
+  "wyrmblood": {
+   "name": "Wyrmblood",
+   "paths": [
+    "fighter"
+   ],
+   "resource": "rage",
+   "armour": [
+    "plate"
+   ],
+   "weapons": [],
+   "offhand": [],
+   "wave": 4,
+   "tvClass": "dragon_knight",
+   "role": "melee damage",
+   "blurb": "Pick a temper (fire, frost or storm) and every breath, rend and leap follows it. Scales that throw back what hits you.",
+   "fantasy": "Thousandvale's Dragon Knight, renamed. Wyrm Temper as a stance that sets the element, Wyrm's Breath (a cone), Scale Rend, Wyrmfall (a leap), Dragonscale, Wyrm Ascendant.",
+   "trees": [
+    {
+     "id": "fire_temper",
+     "name": "Fire Temper",
+     "blurb": "Burning breath and rends."
+    },
+    {
+     "id": "frost_temper",
+     "name": "Frost Temper",
+     "blurb": "Slowing breath and holds."
+    },
+    {
+     "id": "scales",
+     "name": "Scales",
+     "blurb": "Dragonscale, the leap, the ascendant capstone."
+    }
+   ]
+  },
+  "tinker": {
+   "name": "Tinker",
+   "paths": [
+    "rogue"
+   ],
+   "resource": "energy",
+   "armour": [
+    "mail"
+   ],
+   "weapons": [
+    "crossbow"
+   ],
+   "offhand": [],
+   "wave": 4,
+   "tvClass": "tinker",
+   "role": "ranged damage, turrets (minions)",
+   "blurb": "Gadgets. Bolts that go off twice, grenades that change element, a sentry turret, a grappling line and a pocket watch that patches you up.",
+   "fantasy": "Thousandvale's Tinker. Clockwork Bolt, Flask Grenade, Deploy Sentry (a stationary ranged minion), Pocket Watch, Grapple Line, Spring Battery (a party haste).",
+   "trees": [
+    {
+     "id": "clockwork",
+     "name": "Clockwork",
+     "blurb": "Bolts and grenades."
+    },
+    {
+     "id": "sentries",
+     "name": "Sentries",
+     "blurb": "Turrets and what feeds them."
+    },
+    {
+     "id": "contraptions",
+     "name": "Contraptions",
+     "blurb": "The grapple, the watch, the battery."
+    }
+   ]
+  },
+  "chronomancer": {
+   "name": "Chronomancer",
+   "paths": [
+    "mage"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 4,
+   "tvClass": "chronomancer",
+   "role": "ranged damage / control / support",
+   "blurb": "Bends the clock: hastens you and your cooldowns, slows the pack to a crawl, puts you back where you were, and holds a foe still until all its damage lands at once.",
+   "fantasy": "Thousandvale's Chronomancer. Quicken, Second Hand, Entropy Field (a slow zone), Rewind, Stasis Lock, Stop the Clock. Wants cooldown refunds and a rewind rule.",
+   "trees": [
+    {
+     "id": "quicken",
+     "name": "Quicken",
+     "blurb": "Haste for you and the party."
+    },
+    {
+     "id": "entropy",
+     "name": "Entropy",
+     "blurb": "Slows, fields and decay."
+    },
+    {
+     "id": "stasis",
+     "name": "Stasis",
+     "blurb": "Holds, rewinds, the stopped clock."
+    }
+   ]
+  },
+  "spirit_speaker": {
+   "name": "Spirit Speaker",
+   "paths": [
+    "healer",
+    "mage"
+   ],
+   "resource": "mana",
+   "altResource": "mana",
+   "armour": [
+    "leather",
+    "mail"
+   ],
+   "weapons": [
+    "staff",
+    "mace"
+   ],
+   "offhand": [
+    "shield"
+   ],
+   "wave": 4,
+   "tvClass": "shaman",
+   "role": "healer / ranged damage, posts (minions)",
+   "blurb": "Plants spirit posts: one heals everyone near it, one strikes, and the Great Post does both. Bolts that jump between foes and heal on the way.",
+   "fantasy": "Thousandvale's Shaman, renamed (the bestiary already uses \"shaman\" for a monster role). Posts are stationary minions; Spirit Bolt, Warding Spirits, Call Back the Spirit (a full-health revive). From Healer OR Mage, both mana.",
+   "trees": [
+    {
+     "id": "posts",
+     "name": "Posts",
+     "blurb": "The standing spirits."
+    },
+    {
+     "id": "spirit_bolts",
+     "name": "Spirit Bolts",
+     "blurb": "Bolts that jump and mend."
+    },
+    {
+     "id": "the_calling",
+     "name": "The Calling",
+     "blurb": "Wards, the revive, the Great Post."
+    }
+   ]
+  },
+  "hexbreaker": {
+   "name": "Hexbreaker",
+   "paths": [
+    "rogue",
+    "healer"
+   ],
+   "resource": "energy",
+   "altResource": "mana",
+   "armour": [
+    "mail"
+   ],
+   "weapons": [
+    "crossbow",
+    "sword",
+    "dagger"
+   ],
+   "offhand": [],
+   "wave": 4,
+   "tvClass": "witch_hunter",
+   "role": "melee / ranged damage, anti-caster",
+   "blurb": "Silver strips magic. Pins that root, nets that silence, a circle no spell crosses, and a writ that sends the whole party after one target.",
+   "fantasy": "Thousandvale's Witch Hunter, renamed. Silvered Pin, Silver Edge, Null Circle (silence in a zone), Writ of Guilt (a mark), Iron Net, Rite of Purging. Hits casters and the Restless hard. From Rogue on energy, from Healer on mana.",
+   "trees": [
+    {
+     "id": "silver",
+     "name": "Silver",
+     "blurb": "Pins, edges and the extra damage to the unholy."
+    },
+    {
+     "id": "the_null",
+     "name": "The Null",
+     "blurb": "Silences, nets, the circle."
+    },
+    {
+     "id": "the_writ",
+     "name": "The Writ",
+     "blurb": "Marks, cleansing rites, the purge."
+    }
+   ]
+  },
+  "monk": {
+   "name": "Monk",
+   "paths": [
+    "fighter",
+    "rogue"
+   ],
+   "resource": "energy",
+   "altResource": "rage",
+   "armour": [],
+   "weapons": [
+    "staff",
+    "polearm"
+   ],
+   "offhand": [],
+   "wave": 4,
+   "tvClass": "monk",
+   "role": "melee damage",
+   "blurb": "Every palm strike, step and stance builds poise, and the staff spends it in a widening spin. Light on the feet, hard on the shin.",
+   "fantasy": "Thousandvale's Monk, from Fighter OR Rogue. Open Palm, Wind Step (the next hit a sure critical), Sweeping Heel, Inner Stillness, Mountain Fist, Ninefold Staff. From Rogue on energy, from Fighter on temper.",
+   "trees": [
+    {
+     "id": "open_palm",
+     "name": "Open Palm",
+     "blurb": "Fast strikes and the sure critical."
+    },
+    {
+     "id": "stillness",
+     "name": "Stillness",
+     "blurb": "Guard, poise, the still centre."
+    },
+    {
+     "id": "ninefold",
+     "name": "Ninefold",
+     "blurb": "Sweeps, the line punch, the spin."
+    }
+   ]
+  },
+  "runesmith": {
+   "name": "Runesmith",
+   "paths": [
+    "fighter"
+   ],
+   "resource": "rage",
+   "armour": [
+    "plate"
+   ],
+   "weapons": [],
+   "offhand": [],
+   "wave": 5,
+   "tvClass": "runesmith",
+   "role": "tank / melee damage",
+   "blurb": "Hammers runes into enemies and into anything that hits you, rends their plate, lights your weapon with forge flame. The great anvil falls with every rune you laid.",
+   "fantasy": "Thousandvale's Runesmith. Rune Hammer, Rend Plate, Runeskin, Forge Flame (a weapon coat), Warding Glyph (an ally ward), The Great Anvil. Wants a rune count on the target.",
+   "trees": [
+    {
+     "id": "the_hammer",
+     "name": "The Hammer",
+     "blurb": "Runes struck in, plate rent."
+    },
+    {
+     "id": "runeskin",
+     "name": "Runeskin",
+     "blurb": "Runes on you, glyphs on friends."
+    },
+    {
+     "id": "forge",
+     "name": "Forge",
+     "blurb": "Forge flame and the anvil."
+    }
+   ]
+  },
+  "scavenger": {
+   "name": "Scavenger",
+   "paths": [
+    "rogue"
+   ],
+   "resource": "energy",
+   "armour": [],
+   "weapons": [
+    "mace"
+   ],
+   "offhand": [],
+   "wave": 5,
+   "tvClass": "scavenger",
+   "role": "melee / ranged damage",
+   "blurb": "Every strike is a gamble: random elements, traps, pitch bombs, and a Big Score that can hit for a fifth or five times, and pays gold on a kill.",
+   "fantasy": "Thousandvale's Scavenger. Lucky Strike, Junk Toss, Scrounge, Caltrop Scatter, Rag-and-Pitch Bomb, Big Score. Wants random element and random multiplier effects.",
+   "trees": [
+    {
+     "id": "lucky",
+     "name": "Lucky",
+     "blurb": "Gambles on every hit."
+    },
+    {
+     "id": "junk",
+     "name": "Junk",
+     "blurb": "Traps, bombs and thrown rubbish."
+    },
+    {
+     "id": "big_score",
+     "name": "Big Score",
+     "blurb": "The jackpot and the gold."
+    }
+   ]
+  },
+  "starcaller": {
+   "name": "Starcaller",
+   "paths": [
+    "mage"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 5,
+   "tvClass": "starcaller",
+   "role": "ranged damage",
+   "blurb": "Throws golden stars, calls bigger ones down from the sky, lays fields of them. Stars that land fill the constellation; the big ones spend it.",
+   "fantasy": "Thousandvale's Starcaller. Star Dart, Scattered Stars, Called Star, Star Field, Wheeling Stars, Heavens' Barrage. Wants a 5-point Starlight counter (gained per enemy hit, spent by the big casts).",
+   "trees": [
+    {
+     "id": "darts",
+     "name": "Darts",
+     "blurb": "Thrown stars that fill the constellation."
+    },
+    {
+     "id": "called",
+     "name": "Called",
+     "blurb": "Stars from the sky."
+    },
+    {
+     "id": "fields",
+     "name": "Fields",
+     "blurb": "Star fields and the barrage."
+    }
+   ]
+  },
+  "sorcerer": {
+   "name": "Sorcerer",
+   "paths": [
+    "mage"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 5,
+   "tvClass": "sorcerer",
+   "role": "ranged damage",
+   "blurb": "Wild magic. Each bolt a random element, a burst that hits harder the more kinds of harm the target carries, a foe turned into something harmless.",
+   "fantasy": "Thousandvale's Sorcerer. Wild Bolt, Arcane Burst, Mana Rend, Overchannel (health for power), Transmute, Sixfold Ruin. Wants random element, a per-debuff-kind multiplier and a transmute.",
+   "trees": [
+    {
+     "id": "wild",
+     "name": "Wild",
+     "blurb": "Random elements."
+    },
+    {
+     "id": "overchannel",
+     "name": "Overchannel",
+     "blurb": "Health for power, mana rends."
+    },
+    {
+     "id": "ruin",
+     "name": "Ruin",
+     "blurb": "Transmute and the sixfold strike."
+    }
+   ]
+  },
+  "enchanter": {
+   "name": "Enchanter",
+   "paths": [
+    "mage"
+   ],
+   "resource": "mana",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 5,
+   "tvClass": "enchanter",
+   "role": "control",
+   "blurb": "Puts whole packs to sleep so you pick the fight. A jolt that hits sleepers far harder, a foe turned on its friends, a decoy that lulls what attacks it.",
+   "fantasy": "Thousandvale's Enchanter. Drowse (a sleep: a stun that breaks on damage), Arcane Jolt, Beguile (charm), Lethargy, Phantasm (a decoy minion), Grand Enthrallment. Wants a sleep that breaks on damage and a charm.",
+   "trees": [
+    {
+     "id": "drowse",
+     "name": "Drowse",
+     "blurb": "Sleep and the jolt."
+    },
+    {
+     "id": "beguile",
+     "name": "Beguile",
+     "blurb": "Charms and lethargy."
+    },
+    {
+     "id": "phantasm",
+     "name": "Phantasm",
+     "blurb": "Decoys and the great enthrallment."
+    }
+   ]
+  },
+  "shade_dancer": {
+   "name": "Shade Dancer",
+   "paths": [
+    "rogue"
+   ],
+   "resource": "energy",
+   "armour": [],
+   "weapons": [],
+   "offhand": [],
+   "wave": 5,
+   "tvClass": "shadow_dancer",
+   "role": "melee damage, afterimages (minions)",
+   "blurb": "Every cut and step leaves an afterimage that strikes again a moment later. Step behind them, shroud your friends, finish the wounded, and a host of shades copies everything you do.",
+   "fantasy": "Thousandvale's Shadow Dancer, renamed. Shade Cut, Umbral Step, Shroud, Cutting Waltz, Assassinate, Host of Shades (short-lived minions). Wants an afterimage effect (a delayed repeat of the hit).",
+   "trees": [
+    {
+     "id": "afterimage",
+     "name": "Afterimage",
+     "blurb": "Cuts that strike twice."
+    },
+    {
+     "id": "umbral_step",
+     "name": "Umbral Step",
+     "blurb": "Steps, shrouds and the finish."
+    },
+    {
+     "id": "the_host",
+     "name": "The Host",
+     "blurb": "Shades that copy you."
+    }
+   ]
+  }
+ },
+ "waves": {
+  "1": [
+   "vanguard",
+   "ranger",
+   "pyromancer",
+   "cleric",
+   "paladin",
+   "spellblade"
+  ],
+  "2": [
+   "knight",
+   "assassin",
+   "frostbinder",
+   "stormcaller",
+   "oracle",
+   "swashbuckler"
+  ],
+  "3": [
+   "necromancer",
+   "warlock",
+   "druid",
+   "weaponmaster",
+   "reckoner",
+   "dusk_priest",
+   "bard"
+  ],
+  "4": [
+   "wyrmblood",
+   "tinker",
+   "chronomancer",
+   "spirit_speaker",
+   "hexbreaker",
+   "monk"
+  ],
+  "5": [
+   "runesmith",
+   "scavenger",
+   "starcaller",
+   "sorcerer",
+   "enchanter",
+   "shade_dancer"
+  ]
+ }
+}

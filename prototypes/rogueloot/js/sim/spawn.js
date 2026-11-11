@@ -48,8 +48,8 @@ function spawnPacks(w) {
   }
 }
 /** Roll one composition from a table list: [{ w, of: { id: n | [min, max] }, minLevel }]. */
-export function rollComposition(w, rows, level) {
-  const ok = (rows || []).filter(r => !(r.minLevel > level));
+export function rollComposition(w, rows, level, floor = 1) {
+  const ok = (rows || []).filter(r => !(r.minLevel > level) && (r.floor == null || r.floor === floor));
   if (!ok.length) return null;
   const tot = ok.reduce((s, r) => s + (+r.w || +r.weight || 1), 0); let k = w.rng() * tot;
   for (const r of ok) {
@@ -64,9 +64,10 @@ export function rollComposition(w, rows, level) {
   return null;
 }
 function pickPack(w, sp) {
-  const t = w.content.spawnTables?.[sp.table || w.area.table || w.area.id];
+  const t = w.content.spawnTables?.[sp.table || w.area.table || w.area.id.replace(/_\d+$/, '')];
   const rows = sp.tag === 'patrol' ? t?.patrols : sp.tag === 'swarm' ? t?.swarms : t?.packs;
-  const got = rollComposition(w, rows, sp.level || 1);
+  const floor = +(/_(\d+)$/.exec(w.area.id)?.[1] || 1);            // tidecaves_2 is floor 2
+  const got = rollComposition(w, rows, sp.level || 1, floor);
   if (got?.length) return got;
   const n = 2 + Math.floor(w.rng() * 3), out = [];
   for (let i = 0; i < n; i++) out.push(i === 0 && sp.level >= 2 && w.rng() < 0.5 ? 'test_hexer' : w.rng() < 0.3 ? 'test_slinger' : 'test_raider');

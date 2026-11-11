@@ -3,7 +3,7 @@
 import { resolveHit, addThreat, GCD, THREAT } from '../rules/combat.js';
 import { gainXp } from '../rules/character.js';
 import { partyShares } from '../rules/progression.js';
-import { has } from './status.js';
+import { has, withArmour, dmgFactor } from './status.js';
 import { applyRider } from './abilities.js';
 import { lootFoe } from './loot.js';
 import { questKill } from './quests.js';
@@ -207,7 +207,7 @@ export function stepShots(w, dt) {
     const d = dist(s, t), mv = s.speed * dt;
     if (d <= mv + (t.r || 0.4)) {
       if (src) {
-        const r = s.foeShot ? resolveHit(src, t, { amount: s.amount, type: s.type, spell: s.spell }, w.rng) : resolveHit(src, t, { amount: s.amount, type: s.type, spell: s.spell }, w.rng);
+        const r = resolveHit(src, s.foeShot ? withArmour(t) : armourAfter(t), { amount: s.amount * (s.foeShot ? dmgFactor(src) : 1), type: s.type, spell: s.spell }, w.rng);
         hurt(w, src, t, r, s.type, s.threat ?? 1);
         if (s.onHit && r.amount > 0) applyRider(w, src, t, { id: s.onHit.id, damageType: s.type }, s.onHit.fx);
       }

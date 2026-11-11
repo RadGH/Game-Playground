@@ -227,7 +227,8 @@ export function pickSpec(w, p, spec) {
   if (ch.spec) return { err: 'You already have a specialization. The trainer in town can change it.' };
   if (ch.level < 10) return { err: 'Specializations open at level 10.' };
   if (!(S.paths || []).includes(ch.path)) return { err: `${S.name} is not open to your Path.` };
-  p.char = { ...ch, spec };
+  const skills = { ...(ch.skills || {}) }; for (const id of S.starter || []) if (w.content.skills[id]) skills[id] = Math.max(1, skills[id] || 0);
+  p.char = { ...ch, spec, skills, bar: defaultBar(w.content.skills, { ...ch, spec, skills }) };
   return { ok: true };
 }
 export const respecPointsCost = L => Math.round(20 + 12 * L * L / 4);

@@ -97,6 +97,7 @@ function weaponHit(w, p, t, mult, sk = null) {
   const power = (wpn.ranged ? p.st.rangedPower : p.st.meleePower) * (1 + fxPct(p, 'damage') / 100) * markOf(t);
   const r = resolveHit({ ...p, crit: p.crit + fxPct(p, 'crit') }, armourAfter(t), { amount: roll * mult * power, type: 'physical', critBonus: 0 }, w.rng);
   if (r.amount > 0 && p.char?.path === 'fighter') gain(p, 'rage', (w.content.resources?.rage?.perWeaponHitDealt ?? 4) * (1 + (p.st.rageGen || 0) / 100), w.content.resources);
+  if (p.char?.path === 'fighter' && w.time - (p.lastFight ?? -99) > 5) gain(p, 'rage', 15, w.content.resources);      // the opening blow of a fight sets the temper going
   // elemental damage on the weapon lands with the blow, each against its own resist
   if (r.amount > 0 && p.st.elemFlat) for (const [ty, n] of Object.entries(p.st.elemFlat)) if (n > 0) { const e = n * (1 + (p.st.elemPct?.[ty] || 0) / 100) * mult * (1 - Math.min(75, t.resists?.[ty] || 0) / 100); r.amount += Math.round(e); }
   if (r.amount > 0 && p.st.lifeOnHit) p.hp = Math.min(p.maxHp, p.hp + p.st.lifeOnHit);

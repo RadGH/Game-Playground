@@ -1,6 +1,17 @@
 {
   "entries": [
     {
+      "id": "2026-11-10-click-to-move",
+      "date": "2026-11-10",
+      "title": "Click to move",
+      "items": [
+        "On a computer you can now play with the mouse: click the ground to walk there (hold the button to keep walking toward the pointer), and click a monster to walk up to it and fight.",
+        "Right-click uses the first skill on your bar on whatever is under the pointer. Keys 1-6 fire the rest; a skill that is out of reach walks you into range first.",
+        "Clicking a portal, exit, waypoint or townsperson walks you there and uses it. Your hero finds a way round rocks and walls.",
+        "WASD still works if you prefer it."
+      ]
+    },
+    {
       "id": "2026-11-11-brightwater",
       "date": "2026-11-11",
       "title": "Brightwater, the first zones, champions and crafting",

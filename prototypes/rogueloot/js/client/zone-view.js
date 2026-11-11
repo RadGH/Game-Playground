@@ -49,7 +49,9 @@ export function buildZoneView(view, area, { quality = 'high' } = {}) {
   // underground: dark sky, near fog, dim daylight, the torches carry the scene
   const under = ['cave', 'crypt', 'catacomb', 'mine', 'cellar'].includes(area.theme);
   // props, instanced per kind x part
-  const byKind = {}; for (const p of area.props) (byKind[p.k] ||= []).push(p);
+  // Low graphics (phones): the purely decorative small things are skipped; nothing that blocks you is
+  const DECOR = new Set(['flowers', 'grass', 'fern', 'rock_small', 'mushroom', 'reeds', 'cobweb', 'bones']);
+  const byKind = {}; for (const p of area.props) { if (quality === 'low' && DECOR.has(p.k)) continue; (byKind[p.k] ||= []).push(p); }
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), v = new THREE.Vector3(), sc = new THREE.Vector3();
   for (const [k, list] of Object.entries(byKind)) {
     for (const [pg, color] of partsOf(k)) {

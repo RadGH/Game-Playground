@@ -86,5 +86,7 @@ export function createTravelUI({ view, content, labelRoot, send, getChar, getMe,
     document.body.append(mapEl);
   }
   function closeMap() { mapEl?.remove(); mapEl = null; }
-  return { enterArea, update, use, openMap, closeMap, get current() { return current; }, get mapOpen() { return !!mapEl; } };
+  /** A usable marker near a ground point (click to walk there and use it). */
+  function markerNear(x, z, r) { const a = getArea(); let best = null, bd = r; for (const m of a?.markers || []) { if (!['exit', 'entrance', 'portal', 'waypoint', 'npc', 'stash', 'vendor'].includes(m.kind)) continue; const d = Math.hypot(m.x - x, m.z - z); if (d < bd) { bd = d; best = m; } } return best; }
+  return { markerNear, enterArea, update, use, openMap, closeMap, get current() { return current; }, get mapOpen() { return !!mapEl; } };
 }

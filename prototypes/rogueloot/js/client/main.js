@@ -10,6 +10,7 @@ import { testField } from '../sim/area.js';
 import { buildArea } from '../world/zone.js';
 import { buildZoneView } from './zone-view.js';
 import { walk, PLAYER_RADIUS, WALK_SPEED } from '../sim/move.js';
+import { clearLine, flowTo, downhill } from '../sim/paths.js';
 import { DT } from '../sim/world.js';
 import { createHeroes } from './heroes.js';
 import { createFoes } from './foes.js';
@@ -20,7 +21,7 @@ import { createSkillsUI } from './skills-ui.js';
 import { createTravelUI } from './travel-ui.js';
 import { createTownUI } from './town-ui.js';
 import { createPartyUI } from './party-ui.js';
-import { activeStep } from '../sim/quests.js';
+import { activeStep, questKey } from '../sim/quests.js';
 import { randomLook } from '../../../knockabout/js/client/look.js';
 import { makeRng, hashStr } from '../sim/rng.js';
 import { createGround } from './ground.js';
@@ -44,21 +45,38 @@ const foes = createFoes(view, $('#tags'), { content });
 const fx = createFx(view);
 const ground = createGround(view, $('#tags'), { onPick: (gid, x, z) => goAndDo(x, z, { t: 'act', do: 'pickup', gid }), onOpen: (id, x, z) => goAndDo(x, z, { t: 'act', do: 'open', id }) });
 /** Walk to a spot and then send an action (click a drop or a chest from further away). Any manual move cancels it. */
-function goAndDo(x, z, msg) {
+function goAndDo(x, z, msg, reach = 2.6) {
   const me = actors.get(G.me); if (!me) return;
-  if (Math.hypot(me.x - x, me.z - z) < 2.8) { G.link?.send(msg); return; }
-  G.goto = { x, z, msg };
+  if (Math.hypot(me.x - x, me.z - z) < reach + 0.2) { G.link?.send(msg); return; }
+  G.goto = { x, z, msg, reach };
 }
+// ---- click to move (desktop, like the old action RPGs): walk round things on the same walk grid the monsters use ----
+const pathW = { area: null, time: 0, _flows: new Map() };
+const ray = new view.THREE.Raycaster(), plane = new view.THREE.Plane(new view.THREE.Vector3(0, 1, 0), 0), hitP = new view.THREE.Vector3();
+function walkToward(a) {
+  const g = G.goto;
+  if (g.target) { const f = foes.get(g.target); if (!f || f.st === 'dead') { G.goto = null; return [0, 0]; } g.x = f.x; g.z = f.z; }
+  const d = Math.hypot(g.x - a.x, g.z - a.z), reach = g.reach ?? 0.35;
+  if (d <= reach) { if (g.msg) G.link.send(g.msg); if (g.use) setTimeout(() => travelUI.use(), 60); if (!G.mouseHeld || g.msg || g.use) G.goto = null; return [0, 0]; }
+  let tx = g.x, tz = g.z;
+  if (G.area && !clearLine(G.area, a.x, a.z, tx, tz, 0.4)) {
+    if (pathW.area !== G.area) { pathW.area = G.area; pathW._flows = new Map(); }
+    pathW.time = performance.now() / 1000;
+    const n = downhill(pathW, flowTo(pathW, tx, tz, 1.5), a.x, a.z); if (n) { tx = n[0]; tz = n[1]; }
+  }
+  const l = Math.hypot(tx - a.x, tz - a.z) || 1; return [(tx - a.x) / l, (tz - a.z) / l];
+}
+const meleeReach = () => { const b = content.items?.bases?.[heroes.current()?.equip?.weapon?.base]; return b?.ranged ? 20 : 2.1; };
 const heroes = createHeroes({ root: $('#heroes'), onChange: () => {}, items: content.items });
 const sheetUI = createSheetUI({ onSkills: () => skillsUI.toggle(true), potions: content.potions, currency: content.currency, items: content.items, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
 const skillsUI = createSkillsUI({ content, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
 const sendAct = a => G.link?.send({ t: 'act', ...a });
 const townUI = createTownUI({ content, send: sendAct, getChar: () => heroes.current() });
 const travelUI = createTravelUI({ view, content, labelRoot: $('#tags'), send: sendAct, getChar: () => heroes.current(), getMe: () => actors.get(G.me), getArea: () => G.area,
-  onNpc: (id) => { if (id === 'stash') townUI.openStash(); else if (id === 'elder') { const q = activeStep(content, heroes.current() || {}); if (q) showQuest(q.name, q.text); else showQuest('The coast is safe', 'For now. Rest in Brightwater, hero.'); } else sendAct({ do: 'shop', npc: id }); } });
+  onNpc: (id) => { if (id === 'stash') townUI.openStash(); else if (id === 'elder') { const q = activeStep(content, heroes.current() || {}, G.difficulty); if (q) showQuest(q.name, q.text); else showQuest('The coast is safe', 'For now. Rest in Brightwater, hero.'); } else sendAct({ do: 'shop', npc: id }); } });
 const partyUI = createPartyUI({ content, send: sendAct, getChar: () => heroes.current(), zoneName: id => content.zones?.[id]?.name || id || '' });
 const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }),
-  quest: ch => { const q = activeStep(content, ch, G.difficulty); if (!q) return null; const r = q.rule || {}; const n = ch.quests?.[q.id]?.n || 0; return { name: q.name, progress: r.kind === 'kill' ? `Defeat foes in ${content.zones?.[r.node]?.name || r.node}: ${n} / ${r.n}` : r.kind === 'boss' ? `Defeat ${content.monsters?.[r.boss]?.name || 'the boss'}` : r.kind === 'reach' ? `Reach ${content.zones?.[r.to]?.name || content.acts?.[0]?.nodes?.find(x => x.id === r.to)?.name || r.to}` : '' }; } });
+  quest: ch => { const q = activeStep(content, ch, G.difficulty); if (!q) return null; const r = q.rule || {}; const n = ch[questKey(G.difficulty)]?.[q.id]?.n || 0; return { name: q.name, progress: r.kind === 'kill' ? `Defeat foes in ${content.zones?.[r.node]?.name || r.node}: ${n} / ${r.n}` : r.kind === 'boss' ? `Defeat ${content.monsters?.[r.boss]?.name || 'the boss'}` : r.kind === 'reach' ? `Reach ${content.zones?.[r.to]?.name || content.acts?.[0]?.nodes?.find(x => x.id === r.to)?.name || r.to}` : '' }; } });
 const input = createInput();
 const touch = createTouch($('#touch'), input);
 
@@ -293,9 +311,9 @@ function showQuest(name, text) {
   el.addEventListener('click', e => { if (e.target === el || e.target.closest('[data-close]')) el.remove(); }); document.body.append(el);
 }
 function openQuestLog() {
-  const ch = heroes.current(); if (!ch) return; const steps = content.acts?.[0]?.mainQuests || [], cur = activeStep(content, ch);
+  const ch = heroes.current(); if (!ch) return; const steps = content.acts?.[0]?.mainQuests || [], cur = activeStep(content, ch, G.difficulty), Q = ch[questKey(G.difficulty)] || {};
   const el = document.createElement('div'); el.className = 'modal quest-card';
-  el.innerHTML = `<div class="panel"><h2>Quests</h2>${steps.map(q => { const done = ch.quests?.[q.id]?.done, now = cur?.id === q.id; return done || now ? `<div class="ql ${done ? 'done' : 'now'}"><b>${done ? '✔' : '◆'} ${esc(q.name)}</b>${now ? `<p>${esc(q.text)}</p>` : ''}</div>` : ''; }).join('')}<p class="sub">${esc(content.acts?.[0]?.story || '')}</p><div class="btns"><button data-close class="primary">Close</button></div></div>`;
+  el.innerHTML = `<div class="panel"><h2>Quests</h2>${steps.map(q => { const done = Q[q.id]?.done, now = cur?.id === q.id; return done || now ? `<div class="ql ${done ? 'done' : 'now'}"><b>${done ? '✔' : '◆'} ${esc(q.name)}</b>${now ? `<p>${esc(q.text)}</p>` : ''}</div>` : ''; }).join('')}<p class="sub">${esc(content.acts?.[0]?.story || '')}</p><div class="btns"><button data-close class="primary">Close</button></div></div>`;
   el.addEventListener('click', e => { if (e.target === el || e.target.closest('[data-close]')) el.remove(); }); document.body.append(el);
 }
 let shakeT = 0;
@@ -313,7 +331,9 @@ function useSkill(id) {
   if (sk.target === 'enemy' && (!t || !foes.get(t) || foes.get(t).st === 'dead')) { t = nearestFoe(); if (t) setTarget(t); else { hud.nope('No enemy targeted.'); return; } }
   // a press in the last half second of the global cooldown is held and sent the moment it ends (spell queue)
   const left = sk.kind !== 'auto' && (sk.gcd ?? true) ? (G.meSnap?.gcd || 0) : 0;
-  const send = () => G.link?.send({ t: 'act', do: 'use', skill: id, target: sk.target === 'ally' ? (G.target && actors.get(G.target) ? G.target : G.me) : t });
+  const msg = { t: 'act', do: 'use', skill: id, target: sk.target === 'ally' ? (G.target && actors.get(G.target) ? G.target : G.me) : t };
+  const send = () => G.link?.send(msg);
+  if (sk.target === 'enemy' && foes.get(t)) { const me = actors.get(G.me), f = foes.get(t), range = (sk.range > 0 ? sk.range : meleeReach()) - 0.4; if (me && Math.hypot(f.x - me.x, f.z - me.z) > range + 0.8) { G.goto = { target: t, reach: range, msg }; return; } }
   if (left > 0 && left < 0.5) { clearTimeout(G.queued); G.queued = setTimeout(send, left * 1000 + 30); return; }
   send();
 }
@@ -335,13 +355,28 @@ function targetNext() {
 view.renderer.domElement.addEventListener('pointerdown', e => {
   if (!G.me) return;
   const id = foes.pick(e.clientX, e.clientY);
-  if (id) { setTarget(id); if (e.button === 2 || !isTouch()) G.link?.send({ t: 'act', do: 'use', skill: 'attack', target: id }); return; }
+  // right mouse: the first skill on your bar, at whatever is under the cursor
+  if (e.pointerType === 'mouse' && e.button === 2) { if (id) setTarget(id); const at = groundAt(e); if (at) G.mouse = at; useSkill(barOf()[0]); return; }
+  if (id) {
+    setTarget(id);
+    if (e.pointerType === 'mouse') { G.link?.send({ t: 'act', do: 'use', skill: 'attack', target: id }); G.goto = { target: id, reach: meleeReach() }; }
+    return;
+  }
+  if (e.pointerType === 'mouse' && e.button === 0) {
+    const at = groundAt(e); if (!at) return;
+    // a marker under the click (portal, exit, waypoint, NPC): walk there and use it
+    const mk = travelUI.markerNear(at.x, at.z, 2.5);
+    if (mk) { G.goto = { x: mk.x, z: mk.z, reach: 2.4, use: true }; G.useMarker = true; return; }
+    G.mouseHeld = true; G.goto = { x: at.x, z: at.z, reach: 0.35 }; return;
+  }
   // a fallen friend under the tap: revive
   for (const a of actors.list.values()) { if (a.id === G.me) continue; const snap = G.snapPlayers?.get(a.id); if (!snap?.dead) continue; const [x, y] = worldAt(a.x, a.z, 0.5); if ((x - e.clientX) ** 2 + (y - e.clientY) ** 2 < 50 * 50) { G.link?.send({ t: 'act', do: 'revive', target: a.id }); return; } }
 });
 view.renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+const groundAt = e => { const r = view.renderer.domElement.getBoundingClientRect(); ray.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -((e.clientY - r.top) / r.height * 2 - 1) }, view.camera); return ray.ray.intersectPlane(plane, hitP) ? { x: +hitP.x.toFixed(2), z: +hitP.z.toFixed(2) } : null; };
+addEventListener('pointerup', () => { G.mouseHeld = false; });
+view.renderer.domElement.addEventListener('pointermove', e => { if (G.mouseHeld && e.pointerType === 'mouse' && G.goto && !G.goto.target && !G.goto.msg) { const at = groundAt(e); if (at) { G.goto.x = at.x; G.goto.z = at.z; } } });
 // where the mouse points on the ground (ground-targeted skills land there)
-const ray = new view.THREE.Raycaster(), plane = new view.THREE.Plane(new view.THREE.Vector3(0, 1, 0), 0), hitP = new view.THREE.Vector3();
 view.renderer.domElement.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = view.renderer.domElement.getBoundingClientRect(); ray.setFromCamera({ x: (e.clientX - r.left) / r.width * 2 - 1, y: -((e.clientY - r.top) / r.height * 2 - 1) }, view.camera); if (ray.ray.intersectPlane(plane, hitP)) G.mouse = { x: +hitP.x.toFixed(2), z: +hitP.z.toFixed(2) }; });
 addEventListener('keydown', e => {
   if (!G.me || e.target?.tagName === 'INPUT' || document.querySelector('.modal:not([hidden])')) return;
@@ -365,7 +400,7 @@ function fixedStep() {
   const mv = input.move();
   let [mx, mz] = view.screenToWorld(mv.x, mv.y);
   if (mv.x || mv.y) G.goto = null;
-  else if (G.goto) { const dx = G.goto.x - a.x, dz = G.goto.z - a.z, d = Math.hypot(dx, dz); if (d < 2.6) { G.link.send(G.goto.msg); G.goto = null; mx = mz = 0; } else { mx = dx / d; mz = dz / d; } }
+  else if (G.goto) { const v = walkToward(a); mx = v[0]; mz = v[1]; }
   G.seq++;
   G.link.send({ t: 'input', mx: +mx.toFixed(3), mz: +mz.toFixed(3), seq: G.seq });
   const spd = WALK_SPEED * (G.meSnap?.spd ?? 1);
@@ -424,6 +459,8 @@ window.gameEye = {
     return { area: G.area?.id || null, prompt: travelUI.current ? { kind: travelUI.current.kind, to: travelUI.current.to || travelUI.current.id } : null, waypoints: heroes.current()?.waypoints, ground: [...ground.items.values()].map(g => ({ gid: g.gid, what: g.what, r: g.real || g.r, name: g.name, x: +g.x.toFixed(1), z: +g.z.toFixed(1) })), chests: [...ground.chests.values()].map(c => ({ id: c.id, x: c.x, z: c.z, open: c.open })), gold: heroes.current()?.gold, target: G.target || null, foes: [...foes.list.values()].map(f => ({ id: f.id, name: f.name, x: +f.x.toFixed(1), z: +f.z.toFixed(1), hp: f.hp, mhp: f.mhp, st: f.st })), hero: heroes.current() && { level: heroes.current().level, xp: heroes.current().xp }, me2: G.meSnap && { hp: G.meSnap.hp, mhp: G.meSnap.mhp, mp: G.meSnap.mp, dead: !!G.meSnap.dead }, screen: G.me ? 'game' : 'title', link: G.link?.kind || null, code: G.code, host: G.host === G.me, ping: G.ping && Math.round(G.ping), reconnecting: !!G.retry, area: G.area?.id || null, me: me ? { x: +me.x.toFixed(2), z: +me.z.toFixed(2), yaw: +me.yaw.toFixed(2), moving: !!me.moving, bodyReady: !!me.body } : null, players: [...actors.list.values()].map(a => ({ id: a.id, x: +a.x.toFixed(2), z: +a.z.toFixed(2) })), server: G.snap ? G.snap.players.map(p => ({ id: p.id, x: p.x, z: p.z })) : null, fps: Math.round(G.fps || 0) };
   },
   health: () => ({ ok: true, errors: 0 }),
+  screenOf: id => { const f = foes.get(id) || actors.get(id); if (!f) return null; const [x, y] = worldAt(f.x, f.z, 0.8); return { x, y }; },
+  perf: () => ({ fps: Math.round(G.fps || 0), calls: view.renderer.info.render.calls, triangles: view.renderer.info.render.triangles, foes: foes.list.size, drawnFoes: [...foes.list.values()].filter(f => f.group.visible).length }),
 };
 
 // controller: A = attack (targets the nearest), X/Y/B/RB = skills 1-4, LB = next target (game standards §1)

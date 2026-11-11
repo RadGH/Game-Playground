@@ -24,9 +24,9 @@
         { "id": "brightwater", "name": "Brightwater", "kind": "town", "levels": [1, 20], "x": 50, "y": 93, "links": ["saltgrass_shore"], "portalAfter": null, "order": 0, "built": true },
 
         { "id": "saltgrass_shore", "name": "Saltgrass Shore", "kind": "zone", "levels": [1, 3], "x": 30, "y": 82, "links": ["brightwater", "tidecaves", "windmill_fields"], "portalAfter": null, "order": 1, "rare": "old_pincer", "built": true },
-        { "id": "tidecaves", "name": "The Tidecaves", "kind": "dungeon", "levels": [3, 4], "floors": 2, "boss": "clatterjaw", "x": 12, "y": 74, "links": ["saltgrass_shore"], "portalAfter": null, "order": 2, "built": false },
+        { "id": "tidecaves", "name": "The Tidecaves", "kind": "dungeon", "levels": [3, 4], "floors": 2, "boss": "clatterjaw", "x": 12, "y": 74, "links": ["saltgrass_shore"], "portalAfter": null, "order": 2, "built": true },
         { "id": "windmill_fields", "name": "Windmill Fields", "kind": "zone", "levels": [3, 5], "x": 42, "y": 69, "links": ["saltgrass_shore", "mill_cellars", "thornwood"], "portalAfter": "saltgrass_shore", "order": 3, "rare": "whistler_jack", "built": true },
-        { "id": "mill_cellars", "name": "Mill Cellars", "kind": "dungeon", "levels": [5, 5], "floors": 1, "boss": "gristmaul", "x": 58, "y": 74, "links": ["windmill_fields"], "portalAfter": null, "order": 4, "built": false },
+        { "id": "mill_cellars", "name": "Mill Cellars", "kind": "dungeon", "levels": [5, 5], "floors": 1, "boss": "gristmaul", "x": 58, "y": 74, "links": ["windmill_fields"], "portalAfter": null, "order": 4, "built": true },
 
         { "id": "thornwood", "name": "Thornwood", "kind": "zone", "levels": [5, 7], "x": 32, "y": 56, "links": ["windmill_fields", "thornwood_hollow", "kings_road"], "portalAfter": "mill_cellars", "order": 5, "rare": "grandmother_root", "built": false },
         { "id": "thornwood_hollow", "name": "Thornwood Hollow", "kind": "dungeon", "levels": [7, 7], "floors": 2, "boss": "mother_thrum", "x": 16, "y": 50, "links": ["thornwood"], "portalAfter": null, "order": 6, "built": false },

@@ -1,1 +1,1 @@
-{ "_doc": "Every zone file in this folder (js/sim/content.js loads these). Order = the order on the world map.", "zones": ["proving_meadow", "brightwater", "saltgrass_shore", "windmill_fields"] }
+{ "_doc": "Every zone file in this folder (js/sim/content.js loads these). Order = the order on the world map.", "zones": ["proving_meadow", "brightwater", "saltgrass_shore", "tidecaves", "tidecaves_2", "windmill_fields", "mill_cellars"] }

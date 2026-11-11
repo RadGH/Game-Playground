@@ -279,3 +279,4 @@ body.hurt-flash #fight::before { content: ''; position: fixed; inset: 0; box-sha
 .quest-track .qg { color: #ffd040; font-weight: 600; margin-top: 2px; }
 .plate.pl-portal.open { color: #fff6c8; border-color: #ffd040; background: rgba(40, 70, 120, .85); box-shadow: 0 0 10px rgba(120, 190, 255, .6); }
 .plate.pl-portal.locked { opacity: .62; filter: grayscale(.8); font-size: .85em; }
+.bslot.early, .early { opacity: .4; filter: grayscale(1); }

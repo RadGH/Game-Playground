@@ -1,6 +1,24 @@
 {
  "entries": [
   {
+   "id": "2026-11-11a",
+   "date": "2026-11-11",
+   "title": "Bigger systems, real fights, a local map",
+   "items": [
+    "Star systems are now huge. Asteroid clusters, enemy camps, alien swarms, wreck fields and trade convoys fill the space between planets as you fly, so there is always something nearby.",
+    "Cruise: when no enemy is close and you are out of combat, your engines open up so you can cross a system quickly.",
+    "New local map (N, or tap the radar): the whole system with stations, planets, asteroid clusters, enemy camps, ships and points of interest, with a key. Tap anything to set a course marker.",
+    "About three times as many enemies, and they are tougher: more hull, slower guns, and a missile blast can no longer erase a whole ship in one go. Fights last long enough for both sides to fight.",
+    "Every star is different: busier or quieter enemies, better or ordinary finds, more or fewer asteroids, its size and its economy. The star map shows it all.",
+    "Warp cores: your core decides how dangerous a star you can jump into (Class I reaches danger 2). Buy upgrades at any outfitter with credits and materials. Locked stars show a padlock; safer stars are always in reach.",
+    "Enemy bases carry a few big guns instead of a ring of them, and fire more slowly.",
+    "Safe launch: after you undock or arrive, you get a few seconds where nothing can hurt you, and enemies are moved off the station's doorstep. No more dying the moment you leave a station.",
+    "No friendly fire: your shots pass through allies, bumping into allies does nothing, and allies now steer around you. Only real fights with enemies count as combat, so building is no longer blocked by mistake. An \"In combat\" tag shows when you are.",
+    "Your guns never fire at friendly stations any more, and stations never turn on you over your standing. If an old fight had soured your standing with the traders or the navy, it is reset.",
+    "Power is shown and judged in whole numbers: 10 made and 10 used is enough."
+   ]
+  },
+  {
    "id": "2026-11-06e",
    "date": "2026-11-06",
    "title": "No more message pile-ups",

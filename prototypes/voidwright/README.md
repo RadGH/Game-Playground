@@ -22,7 +22,24 @@ ports (8442 stable / 8441 dev).
 - **Build mode** (B): place blocks on your hull — structure from materials, parts from your hold. Turret arcs and a
   coverage ring show where you can shoot. CPU is a hard limit; power and crew shortfalls slow your parts down.
 - **Star map** (M): jump to linked systems. Danger rises with distance from the start; so do loot quality, enemy
-  strength and what the shops sell.
+  strength and what the shops sell. Your **warp core** class caps the danger you can jump INTO (Class I = danger 2,
+  each class +2, `WARP_CORES` in `sim/galaxy.js`); upgrades are bought at outfitters for credits + materials; safer
+  stars are always reachable; locked stars show a padlock. Each star has **traits** (`systemTraits`: enemy density,
+  loot luck, asteroid richness, size, economy) that the star map spells out.
+- **Local map** (N, D-pad left, or tap the radar; `ui/localmap.js`): the whole system — sun, planets, stations,
+  belts, every sector inside sensor range, ships, POIs — with a key; tap anything to set a course marker.
+- **Big systems** (30-65 km across): `sim/sectors.js` cuts space into 4 km sectors whose contents (asteroid
+  cluster, rich cluster, wreck field, enemy camp, alien swarm, convoy) come from the star's seed alone;
+  `streamSectors` fills the ones near you (one per call) and drops far ones, remembering mined rocks and camp kills
+  for the visit. **Cruise**: out of combat with no enemy within 2.2 km, top speed ×2.4 (`inp.cruise`).
+- **Combat rules (2026-11-11 play-test)**: no friendly fire (shots/beams pass through non-hostiles), ally bumps do
+  no damage, allies steer around you (`ai.js avoid`); combat (which blocks building/docking) is only a real
+  exchange with an enemy (`world.js noteCombat`). Stations never turn hostile over reputation. **Safe launch**:
+  `P.grace` for 6 s after undocking/arriving — nothing can hurt or target you, your auto turrets hold fire, firing
+  yourself ends it; hostiles are moved off a friendly station's doorstep (`SAFE_RADIUS` 3.5 km, also kept free of
+  spawns/camps). Enemies are hardened (`shipgen.js hardenEnemy`: ×2+ hull, guns ×0.75 rate; hostile stations ×0.45
+  rate, ×0.6 damage, at most 3+danger big guns) and one blast deals at most 1.5× its damage to a body
+  (`SPLASH_CAP`), so missiles no longer erase a ship per volley.
 - The **quest line** (Goals, J/Tab) gives one vague goal at a time ("mine 25 ore", "make 3,000 profit trading") that
   can be done anywhere; each one unlocks the next part of the game (drip-feed). Finding certain parts unlocks their
   feature early.
@@ -34,9 +51,14 @@ No build step; ES modules. `index.html` → `js/main.js`.
 |---|---|
 | `js/core/` | `math.js` (seeded rng, noise, angles), `input.js` (keys/mouse, gamepad, two touch sticks → one input object), `audio.js` (a synthesized voice per weapon + the shared `sfx/` library for explosions/loot/UI; positional; beam/mining loops) |
 | `js/data/` | Plain data: `types.js` (5 damage types × 3 hit sizes, 14 armour materials, 17 materials, 6 rarities), `weapons.js` (36 weapons/tools incl. 13 alien), `blocks.js` (≈150 blocks: structure in 1×1/2×2/4×4, modules, rock/ore cells), `hulls.js` (8 hull classes + 13 shipyard ships), `factions.js` (3 human + 4 alien), `drones.js` |
-| `js/sim/` | The pure simulation (no DOM, no clock): `grid.js` (block grids, connectivity), `ship.js` (bodies, stats, damage, breaking apart), `world.js` (the step: flight, collisions, turrets, shots, beams, shields, splash, destruction, loot, drones, harpoon), `ai.js`, `shipgen.js` (procedural ships + stations from a seed), `galaxy.js` (galaxy, system population, asteroids, outposts, encounter groups), `loot.js`, `economy.js`, `quests.js`, `state.js` (the save), `rand.js` |
+| `js/sim/` | The pure simulation (no DOM, no clock): `grid.js` (block grids, connectivity), `ship.js` (bodies, stats, damage, breaking apart), `world.js` (the step: flight, collisions, turrets, shots, beams, shields, splash, destruction, loot, drones, harpoon), `ai.js`, `shipgen.js` (procedural ships + stations from a seed), `galaxy.js` (galaxy, star traits, warp cores, system population, asteroids, outposts, encounter groups), `sectors.js` (big systems filled in as you fly), `loot.js`, `economy.js`, `quests.js`, `state.js` (the save), `rand.js` |
 | `js/render/` | `post.js` (WebGL2: bloom, coloured light map, up to 16 shockwave ripples with colour split, vignette), `bake.js` (grid → hull picture with the cosmetic slope smoothing + a glow layer), `turret-art.js` (per-weapon turret drawings with recoil), `fx.js` (particles, lights, waves, shake; sim events → visuals), `draw.js` (the frame) |
-| `js/ui/` | `dom.js` helpers, `station.js`, `build.js`, `galaxy.js` (star map), `hold.js`, `quests-ui.js`, `minimap.js`, `items.js` |
+| `js/ui/` | `dom.js` helpers, `station.js`, `build.js`, `galaxy.js` (star map), `localmap.js` (local system map), `hold.js`, `quests-ui.js`, `minimap.js`, `items.js` |
+
+### Gotcha
+- A station body's `kind` is always `'station'`; what sort it is lives in `stationKind` (`trade`/`pirate`/`hive`).
+  Until 2026-11-11 `generateStation` passed `kind` in the makeBody options, which overwrote it — trade stations and
+  hives were never treated as stations (their guns never ran, the reputation rules missed them).
 
 ### Key ideas
 - **Everything is a block grid.** Ships, stations, ground bunkers, wrecks and asteroids share `makeBody(kind, grid)`.
@@ -61,5 +83,6 @@ No build step; ES modules. `index.html` → `js/main.js`.
 
 ## Tests
 `node --test prototypes/voidwright/tests/*.test.mjs` (rules: grids, premades fit CPU/power, scale ratio, armour,
-loot, shields, determinism, mining, harpoon, destruction, galaxy, economy, quests) and
+loot, shields, determinism, mining, harpoon, destruction, galaxy, economy, quests; `playtest-1110.test.mjs` = one
+test per play-test report 15-23) and
 `npx playwright test prototypes/voidwright/tests/game.spec.js` (desktop + phone, zero console errors).

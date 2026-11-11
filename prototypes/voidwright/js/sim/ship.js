@@ -80,7 +80,11 @@ export function recompute(s) {
     st.power *= bo.power || 1; st.cpuCap += bo.cpu || 0; st.crewCap += bo.crew || 0;
   }
   st.droneCap = Math.round(st.drones * (cls.droneBonus || 1)) + (bo?.drones && st.drones > 0 ? bo.drones : 0);
-  st.powerRatio = st.powerUse > 0 ? Math.min(1, st.power / st.powerUse) : 1;
+  // power is shown as whole numbers, so it is judged as whole numbers too: "10 made / 10 used" is enough
+  // (part bonuses leave fractions like 10.376, which used to read as "over power" while showing 10/10)
+  st.power = Math.round(st.power * 100) / 100; st.powerUse = Math.round(st.powerUse * 100) / 100;
+  st.powerOk = Math.round(st.power) >= Math.round(st.powerUse);
+  st.powerRatio = st.powerOk ? 1 : st.powerUse > 0 ? Math.min(1, st.power / st.powerUse) : 1;
   st.crewRatio = st.crewNeed > 0 ? Math.min(1, (s.crew ?? st.crewCap) / st.crewNeed) : 1;
   st.efficiency = Math.min(st.powerRatio, 0.35 + 0.65 * st.crewRatio);
   // arcade flight: top speed and acceleration from thrust per mass, turning from gyros per mass

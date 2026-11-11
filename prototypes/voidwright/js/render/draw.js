@@ -128,6 +128,8 @@ export function createRenderer(view, overlay, opts = {}) {
     return b;
   }
   R.forget = id => R.bakes.delete(id);
+  /** Drop hull pictures of bodies that are gone (sectors unload whole asteroid fields). */
+  R.prune = (w) => { const live = new Set(); for (const b of w.bodies) if (!b.dead) live.add(b.id); for (const id of R.bakes.keys()) if (!live.has(id)) R.bakes.delete(id); };
 
   // ---------------------------------------------------------- frame
   R.frame = (w, cam, fx, ui = {}) => {

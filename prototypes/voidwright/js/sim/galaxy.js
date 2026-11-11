@@ -5,7 +5,8 @@
 import { rng, hash, TAU } from '../core/math.js';
 import { createGrid, place } from './grid.js';
 import { makeBody, recompute } from './ship.js';
-import { generateShip, generateStation, TIER_DMG } from './shipgen.js';
+import { generateShip, generateStation, TIER_DMG, hardenEnemy } from './shipgen.js';
+import { ECONOMIES } from './economy.js';
 import { FACTIONS, factionsForTier } from '../data/factions.js';
 import { MATERIALS } from '../data/types.js';
 import { noise2 } from '../core/math.js';
@@ -92,8 +93,59 @@ export function generateGalaxy(seed) {
     s.nebula = sr.chance(0.35);
   }
   start.features = ['claimable', 'derelict'];
+  for (const s of systems) s.traits = systemTraits(s, s.id === start.id);
   return { seed, systems, start: start.id, maxTier: Math.max(...systems.map(s => s.tier)) };
 }
+
+/**
+ * What makes one star different from the next (play-test 2026-11-10: "different stars should offer
+ * different difficulty, economy, rarities"). Rolled from the star's own seed with its own stream, so
+ * nothing else about the galaxy moves. The star map shows all of it.
+ */
+export function systemTraits(s, isStart = false) {
+  const r = rng(hash('traits', s.seed));
+  // the station's economy — the same roll economy.js market() makes, so the map and the market agree
+  let econ = null;
+  if (s.station === 'trade' || s.station === 'pirate') {
+    const mr = rng(hash('market', s.seed));
+    econ = s.station === 'pirate' ? 'pirate' : s.tier <= 1 ? mr.pick(['mining', 'frontier', 'agricultural']) : mr.pick(Object.keys(ECONOMIES).filter(e => e !== 'pirate'));
+  }
+  const enemies = isStart ? 0.9 : r.pick([0.7, 0.85, 1, 1, 1.2, 1.4, 1.7]);
+  const luck = r.pick([0, 0, 0, 0.15, 0.3, 0.5]);              // rarity bonus on everything that drops here
+  const ore = r.pick([0.6, 0.85, 1, 1, 1.25, 1.6]);            // how many asteroid fields
+  const size = r.pick([0.85, 1, 1, 1.15, 1.3]);
+  const radius = Math.round((30000 + s.tier * 2500) * size);
+  return { econ, enemies, luck, ore, size, radius };
+}
+const pickLabel = (v, list) => list.find(([k]) => v <= k)?.[1] || list[list.length - 1][1];
+/** Plain words for the star map. */
+export function traitWords(t) {
+  return {
+    enemies: pickLabel(t.enemies, [[0.75, 'quiet'], [0.9, 'light'], [1.05, 'normal'], [1.25, 'busy'], [1.5, 'heavy'], [9, 'swarming']]),
+    luck: t.luck >= 0.5 ? 'treasure-rich (much better finds)' : t.luck >= 0.3 ? 'rich (better finds)' : t.luck > 0 ? 'good (slightly better finds)' : 'ordinary',
+    ore: pickLabel(t.ore, [[0.7, 'few asteroids'], [0.9, 'some asteroids'], [1.1, 'asteroids'], [1.3, 'many asteroids'], [9, 'dense asteroid fields']]),
+    size: pickLabel(t.size, [[0.9, 'compact'], [1.05, 'wide'], [1.2, 'vast'], [9, 'enormous']]),
+    econ: t.econ ? ECONOMIES[t.econ]?.name : null,
+  };
+}
+
+/**
+ * Warp cores (play-test 2026-11-10: "if danger 3 is higher level I shouldn't be able to get there yet —
+ * maybe different tier warp drives"). Your core's class caps the danger you can jump INTO; going back to
+ * safer stars is always allowed. Upgrades are bought at outfitters, built from credits and materials.
+ */
+export const WARP_CORES = [
+  { cls: 1, name: 'Class I warp core', reach: 2, cr: 0, mats: {} },
+  { cls: 2, name: 'Class II warp core', reach: 4, cr: 6000, mats: { cuprite: 20, titanium: 10 } },
+  { cls: 3, name: 'Class III warp core', reach: 6, cr: 30000, mats: { titanium: 30, cobalt: 20 } },
+  { cls: 4, name: 'Class IV warp core', reach: 8, cr: 120000, mats: { cobalt: 40, iridium: 20, helium3: 10 } },
+  { cls: 5, name: 'Class V warp core', reach: 10, cr: 400000, mats: { iridium: 50, exotic: 20 } },
+];
+export const warpCore = G => WARP_CORES[Math.max(1, Math.min(WARP_CORES.length, G.drive || 1)) - 1];
+/** Can this save's warp core take it into a star of this danger? */
+export const canWarpTo = (G, sys) => sys.tier <= warpCore(G).reach;
+/** The lowest core class that reaches a danger tier. */
+export const coreFor = tier => WARP_CORES.find(c => c.reach >= tier) || WARP_CORES[WARP_CORES.length - 1];
 
 function link(a, b) { if (a === b) return; if (!a.links.includes(b.id)) a.links.push(b.id); if (!b.links.includes(a.id)) b.links.push(a.id); }
 
@@ -165,6 +217,9 @@ export function makeOutpost(seed, faction, tier, kind = 'bunker') {
   return body;
 }
 
+/** Hostiles are kept this far from a friendly station (spawns, camps, roamers). */
+export const SAFE_RADIUS = 3500;
+
 // ------------------------------------------------------------------ fill a system
 /**
  * Put everything in a system into a world. `state` is the saved per-system memory
@@ -174,13 +229,17 @@ export function populate(w, sys, state = {}, opts = {}) {
   const r = rng(hash('pop', sys.seed));
   const tier = sys.tier;
   w.system = sys; w.tier = tier;
-  w.size = 9000 + tier * 600;
+  const T = sys.traits || systemTraits(sys);
+  // systems are huge now (play-test: "each star is only a very small map"); the space between the
+  // landmarks is filled in sectors as you fly (sectors.js), so a big system costs no more than a small one
+  w.size = T.radius; const R = T.radius, K = R / 9000;
+  w.belts = [];
   const SK = STAR_KINDS[sys.star];
   w.sun = { x: 0, y: 0, r: SK.r, color: SK.color, glow: SK.glow, binary: !!SK.binary };
   // planets on orbits around the sun
   w.planets = [];
   for (let i = 0; i < sys.planets; i++) {
-    const orbit = 2400 + i * 2300 + r.range(0, 900); const ang = r() * TAU;
+    const orbit = R * (0.13 + i * 0.17) + r.range(0, R * 0.04); const ang = r() * TAU;
     const kind = r.pick(Object.keys(PLANET_KINDS));
     const pk = PLANET_KINDS[kind];
     const pr = pk.gas ? r.range(1500, 2200) : r.range(700, 1400);
@@ -201,19 +260,20 @@ export function populate(w, sys, state = {}, opts = {}) {
       w.bodies.push(ob);
     }
   }
-  // asteroid belts
-  for (let b = 0; b < sys.belts; b++) {
-    const orbit = 3600 + b * 2600 + r.range(0, 1200); const width = r.range(500, 1100);
-    const count = 26 + Math.floor(r() * 18);
-    const a0 = r() * TAU, span = r.range(0.8, 2.4);
-    for (let k = 0; k < count; k++) {
-      const ang = a0 + r() * span, rad = orbit + r.range(-width, width);
-      const big = r() < 0.12; const rr = big ? r.range(8, 16) : r.range(2, 6);
-      const rock = makeRock(hash(sys.seed, 'rock', b, k), rr, tier, { rich: r() < 0.1 });
+  // asteroid belts: rings the sector streamer fills with fields (sectors.js); one small field sits near
+  // the middle so a new arrival can start mining straight away
+  for (let b = 0; b < sys.belts; b++) w.belts.push({ r: R * (0.3 + b * 0.22) + r.range(0, R * 0.05), width: R * r.range(0.04, 0.07) });
+  {
+    const a0 = r() * TAU;
+    for (let k = 0; k < 14; k++) {
+      const ang = a0 + r.range(-0.25, 0.25), rad = 4600 + r.range(-500, 500);
+      const big = r() < 0.12; const rr = big ? r.range(8, 14) : r.range(2, 6);
+      const rock = makeRock(hash(sys.seed, 'rock', 'home', k), rr, tier, { rich: r() < 0.1 });
       rock.x = Math.cos(ang) * rad; rock.y = Math.sin(ang) * rad; rock.a = r() * TAU;
       rock.vx = r.range(-6, 6); rock.vy = r.range(-6, 6);
       w.bodies.push(rock);
     }
+    w.homeField = { x: Math.cos(a0) * 4600, y: Math.sin(a0) * 4600 };
   }
   // stations
   w.stations = [];
@@ -226,7 +286,8 @@ export function populate(w, sys, state = {}, opts = {}) {
     st.services = sys.shops; st.dockable = kindS === 'trade' || kindS === 'pirate';
     st.invuln = kindS === 'trade';   // trade stations hold the economy together: they cannot be destroyed
     if (kindS === 'pirate') st.team = (w.game?.rep?.redfang ?? -50) > -20 ? 'neutral' : 'hostile';
-    if (kindS === 'hive') { st.team = 'hostile'; st.dockable = false; }
+    if (kindS === 'hive') { st.team = 'hostile'; st.dockable = false; hardenEnemy(st); }
+    if (kindS === 'pirate' && st.team === 'hostile') hardenEnemy(st);
     w.bodies.push(st); w.stations.push(st);
   }
   // derelict hulks to loot / salvage
@@ -238,28 +299,29 @@ export function populate(w, sys, state = {}, opts = {}) {
     for (const b of d.grid.blocks) if (b.alive) { const n = b.def.size || 1; for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) d.grid.cells[(b.y + j) * d.grid.w + b.x + i] = b.idx + 1; }
     recompute(d);
     d.kind = 'wreck'; d.team = 'neutral'; d.life = 1e9; d.derelict = true; d.name = `Derelict ${d.name}`;
-    const ang = r() * TAU; d.x = Math.cos(ang) * r.range(4000, 7000); d.y = Math.sin(ang) * r.range(4000, 7000); d.va = 0.02; d.lootKey = 'derelict';
+    const ang = r() * TAU; const dd = r.range(4000, 7000) * K; d.x = Math.cos(ang) * dd; d.y = Math.sin(ang) * dd; d.va = 0.02; d.lootKey = 'derelict';
     w.bodies.push(d);
     w.poi = w.poi || []; w.poi.push({ kind: 'derelict', x: d.x, y: d.y, body: d });
   }
   // a distress beacon (sometimes a trap)
   w.poi = w.poi || [];
   if (sys.features.includes('beacon') && !state.looted?.includes('beacon')) {
-    const ang = r() * TAU; const d = r.range(3500, 7500);
+    const ang = r() * TAU; const d = r.range(3500, 7500) * K;
     w.poi.push({ kind: 'beacon', x: Math.cos(ang) * d, y: Math.sin(ang) * d, trap: r() < 0.4, done: false, key: 'beacon' });
   }
   if (sys.features.includes('pirateBase') && !state.dead?.includes('pirateBase')) {
     const f = sys.owner === 'guild' || sys.owner === 'navy' ? 'redfang' : sys.owner;
     const base = generateStation({ seed: hash(sys.seed, 'base'), size: 48 + tier * 4, faction: f, kind: 'pirate', tier });
-    const ang = r() * TAU; base.x = Math.cos(ang) * r.range(5000, 8000); base.y = Math.sin(ang) * r.range(5000, 8000);
+    const ang = r() * TAU; const bd = r.range(5000, 8000) * K; base.x = Math.cos(ang) * bd; base.y = Math.sin(ang) * bd;
     base.static = true; base.team = 'hostile'; base.name = `${FACTIONS[f].short} stronghold`; base.gid = 'pirateBase'; base.boss = true; base.kind = 'station'; base.dockable = false; base.stronghold = true;
+    hardenEnemy(base);
     w.bodies.push(base);
     w.poi.push({ kind: 'stronghold', x: base.x, y: base.y, body: base });
     // guards
     spawnGroup(w, { x: base.x + 400, y: base.y }, f, tier, r, 'guard');
   }
   if (sys.features.includes('claimable')) {
-    const ang = r() * TAU; const d = r.range(3000, 6500);
+    const ang = r() * TAU; const d = r.range(3000, 6500) * K;
     w.poi.push({ kind: 'claim', x: Math.cos(ang) * d, y: Math.sin(ang) * d, key: 'claim', rich: oreTable(tier + 1, true).slice(-1)[0]?.mat || 'ferrite' });
     // a rich field around the claim spot
     for (let k = 0; k < 10; k++) {
@@ -272,17 +334,21 @@ export function populate(w, sys, state = {}, opts = {}) {
   if (w.stations[0] && w.stations[0].team !== 'hostile') {
     const st = w.stations[0];
     const owner = st.faction;
-    for (let k = 0; k < 2 + Math.floor(r() * 3); k++) {
+    for (let k = 0; k < 4 + Math.floor(r() * 4); k++) {
       const s = generateShip({ cls: r.pick(['corvette', 'skiff', tier >= 3 ? 'frigate' : 'corvette']), faction: FACTIONS[owner].human ? owner : 'guild', tier, seed: hash(sys.seed, 'traffic', k), role: r.pick(['trader', 'miner', 'escort']) });
       s.x = st.x + r.range(-1500, 1500); s.y = st.y + r.range(-1500, 1500);
       s.route = [{ x: st.x, y: st.y }, ...w.planets.map(p => ({ x: p.x, y: p.y }))];
       w.bodies.push(s);
     }
   }
-  // starting hostiles scattered about
-  const groups = Math.max(1, Math.round(1 + tier * 0.6 + (sys.owner !== 'guild' && sys.owner !== 'navy' ? 2 : 0)));
+  // roaming hostiles, about three times as many as before (play-test: "space is pretty empty"), spread
+  // over the whole system; sectors.js adds camps and swarms around you as you fly
+  const groups = Math.max(2, Math.round((3 + tier * 1.2 + (sys.owner !== 'guild' && sys.owner !== 'navy' ? 3 : 0)) * T.enemies));
+  const sx = w.stations[0]?.x ?? 0, sy = w.stations[0]?.y ?? 0;
   for (let k = 0; k < groups; k++) {
-    const ang = r() * TAU, d = r.range(3500, w.size * 0.9);
+    let ang = r() * TAU, d = r.range(6000, R * 0.85);
+    // never parked on the station's doorstep (play-test: "I exited a station and was immediately destroyed")
+    for (let tries = 0; tries < 6 && Math.hypot(Math.cos(ang) * d - sx, Math.sin(ang) * d - sy) < SAFE_RADIUS + 1500; tries++) { ang = r() * TAU; d = r.range(6000, R * 0.85); }
     const f = r.pick(factionsForTier(tier).concat(FACTIONS[sys.owner].hostile ? [sys.owner, sys.owner] : []));
     spawnGroup(w, { x: Math.cos(ang) * d, y: Math.sin(ang) * d }, f, tier, r);
   }
@@ -291,7 +357,8 @@ export function populate(w, sys, state = {}, opts = {}) {
     const b = opts.boss;
     const s = generateShip({ cls: b.cls, faction: b.faction, tier: Math.max(tier, b.tier), seed: b.seed, role: 'boss' });
     s.boss = true; s.name = b.name; s.bossId = b.id;
-    const ang = r() * TAU; s.x = Math.cos(ang) * r.range(5000, 8000); s.y = Math.sin(ang) * r.range(5000, 8000);
+    const ang = r() * TAU; const bd = r.range(5000, 8000) * K; s.x = Math.cos(ang) * bd; s.y = Math.sin(ang) * bd;
+    hardenEnemy(s);
     w.bodies.push(s);
     w.poi.push({ kind: 'boss', x: s.x, y: s.y, body: s, name: b.name });
   }
@@ -330,6 +397,7 @@ export function spawnGroup(w, at, faction, tier, r, mode = null) {
     const s = generateShip({ cls: e.cls, faction, tier, seed: hash(w.seed, at.x | 0, at.y | 0, i, w.t * 1000 | 0), role: e.role === 'trader' || e.role === 'miner' ? 'escort' : e.role });
     s.x = at.x + (i % 3 - 1) * (80 + s.r * 2); s.y = at.y + Math.floor(i / 3) * (80 + s.r * 2);
     if (kind === 'big') s.elite = true;
+    if (s.team === 'hostile') hardenEnemy(s);
     w.bodies.push(s); out.push(s);
   });
   return out;

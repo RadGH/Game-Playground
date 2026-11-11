@@ -15,6 +15,8 @@ import { researchLootBonus } from './research.js';
 import { think } from './ai.js';
 
 const HASH = 400;
+const SPLASH_CAP = 1.5;
+export const GRACE_SECONDS = 6;
 const SHIELD_MULT = { kinetic: 1, laser: 1.15, plasma: 0.85, explosive: 0.9, lightning: 1.6 };
 
 export function createWorld({ seed = 1, game = null } = {}) {
@@ -31,8 +33,14 @@ export function hostile(w, a, b) {
   if (!a || !b || a === b) return false;
   const ta = a.team, tb = b.team;
   if (ta === 'neutral' || tb === 'neutral') return false;
+  // a player just out of a station (or just arrived) is left alone for a few seconds: nobody may shoot
+  // them, but they may shoot back (which ends the grace — see hitBlock)
+  const P = w.player;
+  if (P && P.grace > w.t && b === P && ta !== 'player') return false;
   const rep = w.game?.rep || {};
-  const angryAtPlayer = s => s.angry || (s.faction && FACTIONS[s.faction] && !FACTIONS[s.faction].hostile && (rep[s.faction] ?? 0) <= -40);
+  // stations never turn on you over reputation (a bad standing used to make every Guild station open fire
+  // the moment you undocked); only a ship can hold a grudge
+  const angryAtPlayer = s => s.kind !== 'station' && (s.angry || (s.faction && FACTIONS[s.faction] && !FACTIONS[s.faction].hostile && (rep[s.faction] ?? 0) <= -60));
   if (ta === 'player') return tb === 'hostile' || (tb === 'friendly' && angryAtPlayer(b));
   if (tb === 'player') return ta === 'hostile' || (ta === 'friendly' && angryAtPlayer(a));
   if (ta === 'hostile' && tb === 'friendly') return true;
@@ -74,9 +82,11 @@ export function fly(s, inp, dt) {
   const boostMul = boosting ? 1.55 + st.boost * 0.3 + od * 0.25 : 1;
   if (boosting) s.boostFuel = Math.max(0, (s.boostFuel ?? 1) - dt * 0.35 / (1 + od * 0.5)); else s.boostFuel = Math.min(1, (s.boostFuel ?? 1) + dt * 0.18);
   s.boosting = boosting;
-  const vmax = st.maxSpeed * st.efficiency ** 0.5 * empSlow * boostMul * (s.slow > 0 ? 0.5 : 1);
+  // cruise: out of combat the engines open up so the (big) systems can be crossed (main.js sets inp.cruise)
+  const cruise = inp.cruise && !boosting ? 2.4 : 1;
+  const vmax = st.maxSpeed * st.efficiency ** 0.5 * empSlow * boostMul * cruise * (s.slow > 0 ? 0.5 : 1);
   const dvx = mx * vmax - s.vx, dvy = my * vmax - s.vy; const dl = Math.hypot(dvx, dvy);
-  const acc = st.accel * empSlow * (boosting ? 1.6 : 1) * dt;
+  const acc = st.accel * empSlow * (boosting ? 1.6 : cruise > 1 ? 1.8 : 1) * dt;
   if (dl > 0) { const k = Math.min(1, acc / dl); s.vx += dvx * k; s.vy += dvy * k; }
   s.thrusting = ml > 0.1;
   // nose follows travel; a stopped ship keeps its heading
@@ -131,7 +141,7 @@ export function step(w, dt, input) {
     if (s.dead || !s.dirty) continue;
     s.dirty = false;
     const { pieces, dead } = splitOff(s);
-    for (const p of pieces) { if (s.kind === 'rock') { p.kind = 'rock'; p.ore = s.ore; delete p.life; } w.bodies.push(p); }
+    for (const p of pieces) { if (s.kind === 'rock') { p.kind = 'rock'; p.ore = s.ore; delete p.life; } if (s.sector) p.sector = s.sector; w.bodies.push(p); }
     if (pieces.length) emit(w, { t: 'break', x: s.x, y: s.y, n: pieces.length });
     if (dead) destroy(w, s);
   }
@@ -173,18 +183,22 @@ function collide(w, dt) {
       const push = 60 * dt * 60;
       a.x -= nx * push * dt * ima / (ima + imb) * 2; a.y -= ny * push * dt * ima / (ima + imb) * 2;
       b.x += nx * push * dt * imb / (ima + imb) * 2; b.y += ny * push * dt * imb / (ima + imb) * 2;
+      // two ships on the same side only nudge each other: no damage, no grudge, no combat
+      const actorA = a.kind === 'ship' || a.kind === 'station' || a.kind === 'ground', actorB = b.kind === 'ship' || b.kind === 'station' || b.kind === 'ground';
+      const foes = actorA && actorB && hostile(w, a, b);
+      const friends = actorA && actorB && !foes;
       if (rv < 0) {
         const j = -(1.3) * rv / (ima + imb);
         a.vx -= nx * j * ima; a.vy -= ny * j * ima; b.vx += nx * j * imb; b.vy += ny * j * imb;
         const speed = -rv;
         w.clangT ||= new Map();
-        if (speed > 70 && (w.clangT.get(key) || -9) < w.t - 0.5) {
+        if (speed > 70 && !friends && (w.clangT.get(key) || -9) < w.t - 0.5) {
           w.clangT.set(key, w.t);
           // ramming: the lighter body takes more
           const mA = a.static ? 1e6 : a.stats.mass, mB = b.static ? 1e6 : b.stats.mass;
           const e = Math.min(600, speed * speed * 0.0009);
-          hitBlock(w, a, hit.mine.alive && sm === a ? hit.mine : hit.other.alive && bg === a ? hit.other : null, e * Math.min(4, mB / mA), 'kinetic', 'l', b);
-          hitBlock(w, b, hit.mine.alive && sm === b ? hit.mine : hit.other.alive && bg === b ? hit.other : null, e * Math.min(4, mA / mB), 'kinetic', 'l', a);
+          hitBlock(w, a, hit.mine.alive && sm === a ? hit.mine : hit.other.alive && bg === a ? hit.other : null, e * Math.min(4, mB / mA), 'kinetic', 'l', foes ? b : null);
+          hitBlock(w, b, hit.mine.alive && sm === b ? hit.mine : hit.other.alive && bg === b ? hit.other : null, e * Math.min(4, mA / mB), 'kinetic', 'l', foes ? a : null);
           emit(w, { t: 'clang', x: hit.x, y: hit.y, v: speed });
         }
       }
@@ -212,17 +226,30 @@ export function shieldAt(s, x, y) {
 }
 export function shieldRadius(s, sh) { return s.r + sh.pad * CELL; }
 
-function absorb(w, s, sh, dmg, type, x, y, mult = 1) {
+function absorb(w, s, sh, dmg, type, x, y, mult = 1, src = null) {
+  if (s.grace > w.t && s === w.player) return;
   const take = dmg * (SHIELD_MULT[type] || 1) * mult;
   sh.cur -= take; s.lastHit = w.t;
+  if (src) noteCombat(w, src, s);
   emit(w, { t: 'shieldhit', x, y, sx: s.x, sy: s.y, id: s.id, r: shieldRadius(s, sh), color: FACTIONS[s.faction]?.style.light || '#6fd0ff', amt: take, down: sh.cur <= 0 });
   if (sh.cur <= 0) { sh.cur = 0; emit(w, { t: 'shielddown', x: s.x, y: s.y, r: shieldRadius(s, sh) }); }
+}
+
+/** A hostile exchange involving the player: starts (or extends) combat, and ends any undock grace. */
+function noteCombat(w, src, s) {
+  if (!hostile(w, src, s)) return;
+  const P = w.player;
+  if (src === P || s === P || src.owner === P) {
+    w.combatT = w.t;
+    if (src === P && P.grace > w.t) P.grace = 0;   // you opened fire: the grace is over
+  }
 }
 
 /** Damage a specific block (already past shields). */
 export function hitBlock(w, s, b, dmg, type, size, src, opts = {}) {
   if (!b || !b.alive || s.dead) return 0;
   if (s.invuln) return 0;
+  if (s === w.player && s.grace > w.t) return 0;
   const before = b.hp;
   const { dealt, killed } = damageBlock(s, b, dmg, type, size);
   s.lastHit = w.t;
@@ -230,9 +257,12 @@ export function hitBlock(w, s, b, dmg, type, size, src, opts = {}) {
     // only a ship, station or ground base is an attacker; a rock or wreck you rammed is not something to fight
     const actor = src.kind === 'ship' || src.kind === 'station' || src.kind === 'ground';
     if (actor) s.lastAttacker = src;
-    if (src.team === 'player' && s.team === 'friendly' && !s.angry) { s.angry = true; w.game && repChange(w, s.faction, -6, 'You fired on them'); }
-    if (actor && s.ai && src.team !== s.team) s.ai.target = s.ai.target || src;
-    if (src.team === 'player' || s.team === 'player') w.combatT = w.t;
+    // only a real fight counts: friendly fire cannot happen any more (shots pass through friends), and a
+    // bump or a stray block is not combat — so nothing but enemies can lock you out of building
+    if (actor && hostile(w, src, s)) {
+      if (s.ai) s.ai.target = s.ai.target || src;
+      noteCombat(w, src, s);
+    }
   }
   if (src?.leech && src.stats) src.leechBank = (src.leechBank || 0) + dealt * 0.08;
   if (killed) {
@@ -260,7 +290,7 @@ function dropOre(w, s, b, x, y, mining) {
 /** A projectile / beam / arc reaches a body at (x,y). Handles shields, then the grid. */
 export function hitBody(w, s, x, y, dmg, type, size, src, opts = {}) {
   const sh = opts.ignoreShield ? null : shieldAt(s, x, y);
-  if (sh) { absorb(w, s, sh, dmg, type, x, y, opts.shieldMult || 1); return 'shield'; }
+  if (sh) { absorb(w, s, sh, dmg, type, x, y, opts.shieldMult || 1, src); return 'shield'; }
   let b = blockAtWorld(s, x, y);
   if (!b) {
     // nearest block within a cell
@@ -281,18 +311,22 @@ export function splash(w, x, y, R, dmg, type, size, src, opts = {}) {
     if (!opts.noTeam && src && !hostile(w, src, s) && s.kind !== 'rock' && s.kind !== 'wreck') continue;
     const d = Math.hypot(s.x - x, s.y - y); if (d > R + s.r) continue;
     const sh = shieldAt(s, x, y) || (d > s.r ? shieldAt(s, s.x + (x - s.x) * (s.r / d), s.y + (y - s.y) * (s.r / d)) : null);
-    if (sh && d > s.r * 0.6) { absorb(w, s, sh, dmg, type, x, y); continue; }
+    if (sh && d > s.r * 0.6) { absorb(w, s, sh, dmg, type, x, y, 1, src); continue; }
     // blocks within R, using the local grid window
     const [lx, ly] = toLocal(s, x, y); const rc = R / CELL;
     const x0 = Math.max(0, Math.floor(lx - rc)), x1 = Math.min(s.grid.w - 1, Math.ceil(lx + rc));
     const y0 = Math.max(0, Math.floor(ly - rc)), y1 = Math.min(s.grid.h - 1, Math.ceil(ly + rc));
-    const done = new Set();
+    const done = new Set(); const hits = []; let tot = 0;
     for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
       const b = blockAt(s.grid, cx, cy); if (!b || !b.alive || done.has(b)) continue;
       const dd = Math.hypot(cx + 0.5 - lx, cy + 0.5 - ly) / rc; if (dd > 1) continue;
       done.add(b);
-      hitBlock(w, s, b, dmg * (1 - dd * 0.7) * 0.5, type, size, src);   // each block in the blast takes up to half
+      const k = dmg * (1 - dd * 0.7) * 0.5; hits.push([b, k]); tot += k;   // each block in the blast takes up to half
     }
+    // ...but a blast never deals more than SPLASH_CAP x its damage to one body in total. Without this a
+    // missile hitting a tightly packed little ship hurt fifty blocks at once and one volley erased it.
+    const m = tot > dmg * SPLASH_CAP ? dmg * SPLASH_CAP / tot : 1;
+    for (const [b, k] of hits) hitBlock(w, s, b, k * m, type, size, src);
   }
   // flak / blasts also kill drones and missiles
   for (const dr of w.drones) if (!dr.dead && (!src || hostile(w, src, dr.owner)) && Math.hypot(dr.x - x, dr.y - y) < R) damageDrone(w, dr, dmg * 0.8);
@@ -329,7 +363,7 @@ function pickTarget(w, s, t, range, pos, arcC, arcH, pd) {
     if (best) return best;
   }
   for (const o of near(w, pos[0], pos[1], range)) {
-    if (o.dead || !hostile(w, s, o) || o.cloak > 0) continue;
+    if (o.dead || o.invuln || o.dockable || !hostile(w, s, o) || o.cloak > 0) continue;
     const d = Math.max(0, Math.hypot(o.x - pos[0], o.y - pos[1]) - o.r * 0.7); if (d > range) continue;
     const ang = Math.atan2(o.y - pos[1], o.x - pos[0]);
     if (Math.abs(angDiff(arcC, ang)) > arcH + Math.atan2(o.r, d + 1)) continue;
@@ -361,7 +395,7 @@ function turrets(w, s, dt) {
     if (!t.b.alive) continue;
     const W = t.w; const pos = toWorld(s, t.cx, t.cy);
     t.kick = Math.max(0, t.kick - dt * 3);
-    t.cd -= dt * Math.max(0.15, eff);
+    t.cd -= dt * Math.max(0.15, eff) * (s.fireMul ?? 1);
     if (W.mode === 'tool' && W.tool === 'harpoon') { t.aim = turnToward(t.aim, clampArc(t, localAim(s, pos, inp.ax, inp.ay)), wStat(t, 'turn') * dt); continue; }
     const arcC = s.a + t.b.rot * Math.PI / 4, arcH = W.arc >= 360 ? Math.PI * 1.01 : W.arc * Math.PI / 360;
     const range = wStat(t, 'range');
@@ -394,6 +428,9 @@ function turrets(w, s, dt) {
       fire = !!inp.missile && !!inp.lock; tgt = inp.lock ? { body: inp.lock } : null;
     }
     if (mode === 'fixed' && W.rear) wantWorld = arcC;
+    // during the undock grace your automatic guns hold fire (so the grace is not thrown away by a turret);
+    // firing a weapon yourself ends it
+    if (isPlayer && s.grace > w.t && (mode === 'auto' || mode === 'pd')) fire = false;
     if (wantWorld != null) {
       const local = clampArc(t, wantWorld - s.a);
       t.aim = turnToward(t.aim, local, wStat(t, 'turn') * dt);
@@ -413,7 +450,7 @@ function turrets(w, s, dt) {
       t.cd = 1 / rate;
       if (W.burst && W.count > 1) { t.burst = W.count - 1; t.burstT = W.burst; shoot(w, s, t, pos, worldAim, tgt, 1); }
       else shoot(w, s, t, pos, worldAim, tgt);
-      if (s.team === 'player') w.combatT = w.t;
+      if (s.team === 'player' && tgt?.body && hostile(w, s, tgt.body)) noteCombat(w, s, tgt.body);
       s.lastFire = w.t;
     }
   }
@@ -508,7 +545,7 @@ function railStrike(w, s, x, y, ang, range, dmg, W, mods) {
   for (const [, o] of cand) {
     if (pierce <= 0) break;
     const sh = (() => { const R = o.r + 30; for (let k = 0; k < 40; k++) { const tt = k / 40; const px = x + (ex - x) * tt, py = y + (ey - y) * tt; if (Math.hypot(px - o.x, py - o.y) < R) { const s2 = shieldAt(o, px, py); if (s2) return [s2, px, py, tt]; } } return null; })();
-    if (sh && W.proj !== 'lance') { absorb(w, o, sh[0], dmg, W.type, sh[1], sh[2]); endT = sh[3]; pierce = 0; break; }
+    if (sh && W.proj !== 'lance') { absorb(w, o, sh[0], dmg, W.type, sh[1], sh[2], 1, s); endT = sh[3]; pierce = 0; break; }
     // walk the line through the grid, hitting each block once
     const seen = new Set();
     const steps = Math.ceil(range / (CELL * 0.5));
@@ -532,8 +569,7 @@ function beam(w, s, t, pos, ang, range, dt, tgt) {
   for (const o of near(w, (x + ex) / 2, (y + ey) / 2, range / 2 + 40)) {
     if (o.dead || o === s) continue;
     const friendlyFire = !hostile(w, s, o) && o.kind !== 'rock' && o.kind !== 'wreck';
-    if (friendlyFire && s.team !== 'player') continue; // same rule as projectiles: NPC beams never hit friends
-    if (friendlyFire && !(W.tool === 'mine' && o.kind === 'ship' && o.team !== s.team)) { if (W.tool === 'mine' || o.team === s.team) continue; }
+    if (friendlyFire) continue; // beams pass through friends (no friendly fire for anyone)
     const tc = ((o.x - x) * (ex - x) + (o.y - y) * (ey - y)) / (range * range);
     if (tc < -0.1 || tc > 1.1) continue;
     const cx = x + (ex - x) * tc, cy = y + (ey - y) * tc;
@@ -549,7 +585,7 @@ function beam(w, s, t, pos, ang, range, dt, tgt) {
   }
   const hx = x + (ex - x) * hitT, hy = y + (ey - y) * hitT;
   const it = t.b.item; const rb = it?.rarity ? RARITY_BY_ID[it.rarity]?.bonus || 0 : 0;
-  const dps = W.dmg * (1 + rb + (it?.mods?.dmg || 0)) * t.beamOn * s.stats.efficiency * (s.dmgMul ?? 1);
+  const dps = W.dmg * (1 + rb + (it?.mods?.dmg || 0)) * t.beamOn * s.stats.efficiency * (s.dmgMul ?? 1) * (s.fireMul ?? 1);
   w.beams.push({ x, y, x2: hx, y2: hy, color: W.color, width: (W.size === 'l' ? 7 : W.size === 'm' ? 4 : 2.5) * t.beamOn * (t.n > 1 ? 1.6 : 1), hit: !!hitBodyRef, tool: W.tool || null, shield: hitShield, owner: s.id });
   if (hitBodyRef) {
     t.beamHeat = (t.beamHeat || 0) + dt;
@@ -557,7 +593,7 @@ function beam(w, s, t, pos, ang, range, dt, tgt) {
     let d = dps * dt * (W.tool === 'mine' ? (isRock ? W.mineMult || 4 : 0.35) : 1);
     if (W.race === 'ossari' || W.id === 'refractor') d *= 1 + Math.min(1.5, t.beamHeat * 0.4);
     if (W.tool === 'tractor') { tractorPull(w, s, hitBodyRef, dt); return; }
-    if (hitShield) { const sh = shieldAt(hitBodyRef, hx, hy); if (sh) absorb(w, hitBodyRef, sh, d, W.type, hx, hy); }
+    if (hitShield) { const sh = shieldAt(hitBodyRef, hx, hy); if (sh) absorb(w, hitBodyRef, sh, d, W.type, hx, hy, 1, s); }
     else {
       const b = blockAtWorld(hitBodyRef, hx + Math.cos(ang) * 2, hy + Math.sin(ang) * 2) || blockAtWorld(hitBodyRef, hx, hy);
       if (b) hitBlock(w, hitBodyRef, b, d, W.type, 'm', s, { mining: W.tool === 'mine' });
@@ -609,7 +645,7 @@ function shots(w, dt) {
         if (p.target && p.target.dead) p.target = null;
         if (!p.target) { // reacquire
           let best = null, bd = 900 * 900;
-          for (const o of near(w, p.x, p.y, 900)) if (!o.dead && hostile(w, p.owner, o) && o.kind !== 'rock' && o.cloak <= 0) { const d = (o.x - p.x) ** 2 + (o.y - p.y) ** 2; if (d < bd) { bd = d; best = o; } }
+          for (const o of near(w, p.x, p.y, 900)) if (!o.dead && !o.invuln && !o.dockable && hostile(w, p.owner, o) && o.kind !== 'rock' && o.cloak <= 0) { const d = (o.x - p.x) ** 2 + (o.y - p.y) ** 2; if (d < bd) { bd = d; best = o; } }
           p.target = best;
         }
         const sp = p.w.speed * (p.kind === 'torpedo' ? 1 : 1.0);
@@ -648,7 +684,9 @@ function shots(w, dt) {
     for (const o of near(w, p.x, p.y, 40)) {
       if (o.dead || o === p.owner || p.hitIds?.has(o.id)) continue;
       // not an enemy: only the PLAYER's stray shots can hit (and anger) a friendly; NPC shots never hit the player
-      if (!hostile(w, p.owner, o) && o.kind !== 'rock' && o.kind !== 'wreck') { if (o.team === p.team || o.kind === 'station' || p.team !== 'player') continue; }
+      // not an enemy: shots pass straight through (no friendly fire — a stray round used to anger allies,
+      // lock you out of building and, after a few, turn a whole faction's stations against you)
+      if (!hostile(w, p.owner, o) && o.kind !== 'rock' && o.kind !== 'wreck') continue;
       if (p.kind === 'mine' && p.armed > 0) continue;
       const d2 = (o.x - p.x) ** 2 + (o.y - p.y) ** 2;
       const shR = o.shields?.length ? o.r + 3 * CELL : o.r;
@@ -656,7 +694,7 @@ function shots(w, dt) {
       // shield bubble check at the current point
       const sh = shieldAt(o, p.x, p.y);
       if (sh && Math.hypot(p.px - o.x, p.py - o.y) > Math.hypot(p.x - o.x, p.y - o.y) - 1) {
-        absorb(w, o, sh, p.dmg, p.w.type, p.x, p.y, p.opt.shieldMult);
+        absorb(w, o, sh, p.dmg, p.w.type, p.x, p.y, p.opt.shieldMult, p.owner);
         p.dead = true;
         if (p.splash) emit(w, { t: 'boom', x: p.x, y: p.y, r: p.splash * 0.6, type: p.w.type });
         break;
@@ -774,7 +812,7 @@ export function destroy(w, s) {
   if (s === w.player) return;
   // loot fountain
   const r = rng((s.id * 7919) ^ Math.floor(w.t * 1000));
-  for (const l of rollLoot(r, s, w.game ? researchLootBonus(w.game) : 0)) {
+  for (const l of rollLoot(r, s, (w.game ? researchLootBonus(w.game) : 0) + (w.system?.traits?.luck || 0))) {
     const a = r() * TAU, sp = 60 + r() * 160;
     spawnPickup(w, l, s.x + Math.cos(a) * s.r * 0.3, s.y + Math.sin(a) * s.r * 0.3, s.vx * 0.5 + Math.cos(a) * sp, s.vy * 0.5 + Math.sin(a) * sp, 0);
   }

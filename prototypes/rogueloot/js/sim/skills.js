@@ -188,7 +188,8 @@ function apply(w, p, e, t, at, ctx) {
     case 'pull': if (t && t.team === 'foe' && !t.dead && !t.noKnock) { const l = dist(p, t) || 1, go = (e.dist || 4) < 0 ? e.dist : Math.min(e.dist || 4, l - (t.r || 0) - p.r - 0.5); if (go) [t.x, t.z] = resolve(w.area, t.x - (t.x - p.x) / l * go, t.z - (t.z - p.z) / l * go, t.r); } return;
     case 'resource': gain(p, e.kind, e.n, w.content.resources); return;
     case 'cleanse': if (t?.fx) t.fx = t.fx.filter(f => !['slow', 'stun', 'dot', 'root', 'silence'].includes(f.kind)); return;
-    case 'revive': if (t && t.dead && w.time - (p.lastFight || -99) > 5) { t.dead = false; t.hp = Math.round(t.maxHp * (e.hpPct || 40) / 100); w.events.push({ k: 'revive', s: p.id, t: t.id }); } return;
+    case 'revive': if (t && t.dead) {   // a skill revive has its own cast time and cooldown, so it works in a fight (the old out-of-combat gate could never pass: run() stamps lastFight first)
+       t.dead = false; t.hp = Math.round(t.maxHp * (e.hpPct || 40) / 100); w.events.push({ k: 'revive', s: p.id, t: t.id }); } return;
     case 'mark': if (t && !t.dead) addFx(w, t, { id: ctx.sk.id + ':mark', kind: 'mark', pct: e.pct || 10, secs: e.secs || 8, src: p.id }); return;
     case 'summon': summon(w, p.id, { ...e, dmgMult: (e.dmgMult || 0.6) * ctx.syn.damage, at: e.stay ? (at || t || p) : null }); return;
     case 'link': if (t && !t.dead && t !== p) addFx(w, t, { id: ctx.sk.id + ':link', kind: 'link', pct: Math.min(80, e.pct || 50), secs: e.secs || 8, src: p.id }); return;

@@ -648,3 +648,298 @@ None is a bug this time — the two inherited Path bugs from wave 1 are fixed. T
 6. **dodge / moveSpeed buffs on heroes are read nowhere** — not used in this wave (every parry is a ward), but the
    Path's Slip Step carries a dodge buff that does nothing; one `fxPct(p, 'dodge')` in the hero's resolveHit call.
 7. A synergy cannot feed a summon (Storm Orbs, Decoy have none); `who: self` on a heal is still the helpful circle.
+
+---
+
+# Wave 3 (M24) — Necromancer, Warlock, Druid, Weaponmaster, Reckoner, Dusk Priest, Bard
+
+Design by Fable, 2026-11-11. The data is `data/skills-specs-3.json` (listed in `data/skills-specs-index.json`);
+the seven `starter` arrays in `data/specs.json` are filled. 216 nodes: 210 tree nodes (30 a spec, three trees of
+10, every tree with a node at every gate 10/11/12/14/16/18/20) plus six hidden stance-only actives; 130 actives,
+48 passives, 38 synergies. Two hybrids: the **Bard** (Healer OR Rogue) carries `altCost` in energy on every active,
+as the Paladin and Spellblade do; the **Druid** (Healer OR Mage) does not, because both of its Paths pay mana and
+`costOf` would pick the same number either way.
+
+Same standard as waves 1–2: a filler at 10 in each of the two trees the spec is about (both granted at the pick), an
+interrupt of its own off the global cooldown, a defensive, an area answer, a signature, and a capstone at 20 on a
+20–90 s cooldown; fillers at 1.1–1.3× a swing or ~1.4× a Path bolt, big hits 2.5–4× on 8–25 s.
+
+**What is new in this wave is the stance that swaps the bar.** The Druid's three shapes, the Weaponmaster's two
+stances (and its capstone, a 15 s third stance) and the Bard's three songs are `stance` effects with `bar: [six
+ids]`. While one holds, the six action slots become that list (the HUD reads `sb` from the snapshot); the same
+stance pressed again leaves it; a skill on the bar counts as known at rank 1 (its learned rank if higher) **once
+the hero has reached its level** — `rankOf` gates the bar by `reqLevel`, so a level-10 Druid in Sporecap cannot use
+the level-20 Great Bloom just because the shape lists it. Every bar leads with its own stance (the way out). Six
+skills exist only on a bar (`hidden: true`, no `tree`, `maxRank` 1, owner and level like the rest): the Briarback's
+Maul, the Fenrunner's Rip, and the Weaponmaster's Open/Closed Flurry and Open/Closed Lunge — which is how "lunge and
+flurry change with your stance" is done: the neutral Lunge and Flurry sit in the Mastery tree, and each stance's bar
+carries its own version instead. A synergy node can still feed a hidden skill (Sharper Fangs → Rip). Stance `stats`
+the engine reads are damage, crit, castSpeed, healTaken, threat, armour, dodge and moveSpeed, and `stats.perRank`
+ranks them through `atRank` (checked: Briarback rank 5 = +46% armour, +80% threat).
+
+**Other engine features this wave leans on, all live:** `link` (Shared Vigil: a third of a friend's hits land on the
+priest — checked, 159 moved in six seconds), `cond: { targetHpBelow }` executes on five finishers, `perDot` on the
+Necromancer's lances and the Warlock's Agony, `perTargetHit` crowds, `zone` ground that heals **companions** too
+(Grave Mending, Spore Cloud, Circle of Dawn — the helpful zone pool is players + allies, so a thrall standing in it
+mends; checked), `heal who: self` drains, `shield.thorns` on every "it stabs back" ward, `spendAll` +
+`perResourceSpent` (Settle the Grudge), `weaponOnly: ranged` on the crossbow shots, `summon` pets and minions with
+synergy damage feeding them, and moveSpeed / dodge buffs now that they are read.
+
+## Numbers in one table
+
+Rank 1, level 20, before attribute multipliers; baseline 132 per global, a sword swing 35, autos ~63 a global.
+
+| | Per enemy | Per global | Notes |
+|---|---|---|---|
+| Necromancer: 8 thralls | ~7 a bite each (0.45 of a companion) | ~30/s standing | Bone Colossus 1.6× hp / 1.1× dmg pet on top; Grave Mending 18/s to every body in 6 m |
+| Necromancer: Marrow Lance | 120 per 1.5 s, +20% per curse | ~120–192 | Marrowburst 310, +30% per curse, ×1.5 under 35%, every 25 s |
+| Warlock: Gnaw + Blight ticking | 24/s + 20/s + 33 on cast | ~44/s + filler | Agony 154 +35% per curse (×2.4 with both); Soul Drain 53/s for 3 s and heals 44/s |
+| Warlock: Bound Fiend | 0.95 of a companion, rakes ×1.5 every 6 s | — | Void Hound 1.5/1.1 tank, Fiend Lord 1.8/1.4 with a fire breath |
+| Druid: Rip (wolf) | 40 + 18/s bleed | ~63 + 40 + 18/s | Savage Bite 77 (×1.5 under 35%) every 8 s; Fenrunner +25% speed, +10 crit |
+| Druid: Thornlash (thorned) | 42 + 46 ward that stabs | taunts every press | Bristle 116 ward +20% armour; Ancient Bark 190 ward, +40% armour, taunt 8 m |
+| Druid: Greensap | 112 + 18/s × 6 per 1.5 s | ~150/1.5 s | Spore Cloud 18/s to everyone in 5 m for 8 s; Great Bloom 180 + 27/s on 12 m |
+| Weaponmaster: Quick Cut (open) | 44 × 1.12 | ~112 | Open Flurry 3 × 30 every 6 s; Blade Dance 38 each in 5 m; Perfect Edge +25%/+20% crit |
+| Weaponmaster: Riposte (closed) | 38 × 0.9 + 68 ward that hits back 44 | ~95 | Iron Counter 77 + stun; Unbroken Guard 190 ward, +40% armour, taunt |
+| Reckoner: Brand Bolt + mark | 38, +12% to everything after | ~105 | Judgement Bolt 105 (×1.5 under 35%) + 132 fire in 4 m, every 20 s |
+| Reckoner: Settle the Grudge at 100 energy | 70 × (1 + 1.4) = 168 | — | Grudge Cut 42 + 27 self-heal; the hound 0.9 of a companion with an interrupting bite |
+| Dusk Priest: Shadow Lance | 109 per 1.5 s + 31 to every friend in 10 m | ~109 | Twinlight 88 + 49 to everyone in 10 m every 6 s; Eventide 288 + 135 heal |
+| Dusk Priest: Vigil | ward 114 + 13.5/s × 10, instant, every 6 s | ~100/s of absorb | Shared Vigil: a third of their hits on you; Night Vigil 230 wards on everyone in 12 m |
+| Bard: Discord Note | 88, −8% damage on it | ~88 | Ruin Finale 154 to everything in 8 m (+40% crowd) + stun + mark; Song of Ruin −8% on the pack |
+| Bard: Mending Verse | 101 + 13.5/s × 6 per 1.5 s | ~120/1.5 s | Soothing Note 46/s × 8 instant; Mending Finale 180 + 27/s + 90 ward on 12 m |
+
+---
+
+## Necromancer — Mage → the Necromancer
+
+**Fantasy.** Every kill is a body to use. Thralls to the eight cap, one colossus on top, bone and curses for your own
+hands, and the pyre for whatever is left. Three trees:
+
+- **Thralls**: Raise Thrall (10, two melee thralls that stay, 1.5 s cast, 4 s cooldown — the filler and the opener),
+  Dead Calm (11), Bone Warden (12, a tank thrall that rattles the pack onto itself every 6 s), Sharper Bones (12,
+  synergy), Grave Mending (14, a 6 m ground circle that heals thralls AND friends 18/s for 8 s), Command the Dead
+  (14, −18% armour on the target, off-GCD; the thralls go for whatever you fight), Plague Thrall (16, a thrall that
+  bursts poison over a crowd), Grave Hardy (16), Fouler Rot (18, synergy), **Bone Colossus** (20: a pet — not a
+  thrall — 1.6× health, 1.1× damage, taunts, crushes, hardens; one at a time).
+- **Marrow**: Marrow Lance (10, 120 shadow in 1.5 s, +20% per curse up to +60% — the spell filler), Cold Marrow (11),
+  Wither (12, 22/s for 10 s + hits 10% softer), Grave Draught (12, 88 and heal yourself 67), Deeper Marrow (14,
+  synergy), Bone Spur (14, the interrupt, off-GCD), Bone Storm (16, 99 to everything in 5 m + a curse on each,
+  +40% crowd), Lingering Curse (16, synergy), Siphon (18, 66 and 12 mana back), **Marrowburst** (20: 310, +30% per
+  curse to +120%, ×1.5 under 35%, 1.5 s stun).
+- **The Pyre**: Corpse Pyre (10, a 4 m ground fire 33/s for 6 s at the pointer), Ash Heart (11), Ember Bones (12,
+  110 fire over 5 m + a burn), Quick Rites (12), Unquiet Return (14, the grave-touched revive: back at 40% in a ward
+  hitting 15% harder), Hotter Pyre (14, synergy), Pyre Wall (16, a 10 m line of fire + 40% slow), Cinder Shroud
+  (16, a 116 ward that burns what hits you), Wider Pyre (18, synergy), **March of the Buried** (20: four of the
+  buried for 20 s and 110 fire + slow to everything in 8 m).
+
+**Rotation at 15** (Raise Thrall ×4 → 8 thralls, Bone Warden, Wither, Marrow Lance, Grave Draught, Corpse Pyre):
+Raise Thrall before the pull until there are eight → Warden → Corpse Pyre where they will stand → Wither the brute →
+Marrow Lance, Marrow Lance → Grave Draught when you are hit → Grave Mending if the thralls are dropping.
+
+**Rotation at 20** (add Plague Thrall, Bone Colossus / Marrowburst / March of the Buried by tree): Colossus up →
+Wither + Bone Storm on the pack → Marrow Lance until Marrowburst is worth it (two curses on the target, under 35%).
+
+**Phone (6):** Raise Thrall, Marrow Lance, Wither, Grave Draught, Corpse Pyre, Bone Warden.
+
+---
+
+## Warlock — Mage → the Warlock
+
+**Fantasy.** Curses that pay off the longer they run, a fiend that does the standing in front, and a rift that puts
+the pack where you want it. Three trees:
+
+- **Gnawing Dark**: Gnawing Curse (10, 24/s for 12 s + 33, instant — the filler), Dark Study (11), Blight (12, a
+  second curse, poison, hits 10% softer), Long Night (12, synergy), Soul Drain (14, 3 s channel: 53/s, heals you,
+  4 mana a tick), Patient Dark (14), Spreading Rot (16, 66 + a curse to everything in 6 m — the spread), Deeper
+  Gnaw (16, synergy), Agony (18, 154 +35% per curse to +140%), **Soul Pact** (20: +25% damage, +20% cast speed,
+  40 mana, and every curse within 8 m flares; free, 60 s — the health cost is on the wishlist).
+- **The Fiend**: Bind the Fiend (10, a melee pet that stays, rakes and howls), Fiend's Hide (11), Fouler Fiend (12,
+  synergy), Fiend Fire (12, 99 fire + a burn, instant), Sacrifice (14, a 147 ward that burns what hits you + 20
+  mana, off-GCD), Fiend's Hunger (14), Void Hound (16, a tank pet in its place), Imps (16, two fire casters for
+  20 s), Voidhide (18, synergy), **Fiend Lord** (20: 1.8× health, 1.4× damage, fire breath, taunt, and +15% damage
+  for you while it stands).
+- **The Rift**: Rift Bolt (10, 120 shadow in 1.5 s), Void Touched (11), Void Rift (12, 6 m at the pointer: pulled 5 m
+  to you, 66, slowed), Rift Step (12, a 10 m step with a ward, off-GCD), Wider Rift (14, synergy), Hush (14, the
+  interrupt), Collapse (16, 132 to everything in 5 m + 1 s stun, +40% crowd), Rift Sight (16), Deeper Collapse (18,
+  synergy), **Blood Burst** (20: 332 + 110 over 6 m + stun + a curse on all of it).
+
+**Rotation at 15** (Bind the Fiend, Gnawing Curse, Blight, Soul Drain, Void Rift, Fiend Fire): Fiend up → Void Rift
+on the pack → Gnaw and Blight on everything → Spreading Rot once the brute carries both → Soul Drain when hurt → Fiend
+Fire to fill.
+
+**Phone (6):** Gnawing Curse, Blight, Fiend Fire, Soul Drain, Void Rift, Bind the Fiend.
+
+---
+
+## Druid — Healer OR Mage → the Druid
+
+**Fantasy.** Three shapes, and the six slots change with you. Briarback holds the line, Fenrunner tears things
+apart, Sporecap heals and lobs spores. Greensap and Lunge work in any shape; Green Return wants your own. The two
+fighting shapes hit with your weapon (so a Druid who wants to bite stacks Strength and wears mail); Sporecap heals
+with Spirit. Three trees, one a shape:
+
+- **Briarback** (bar: Briarback, Maul, Thornlash, Bristle, Root Stomp, Ancient Bark): the shape (10: +30% armour,
+  far more attention, −10% damage and speed), Thick Hide (11), Thornlash (12, 120% + taunt + a small stabbing ward —
+  the filler), Bristle (12, a 116 ward that stabs back + 20% armour), Bark Roar (14, a 10 m taunt, hits 10% softer,
+  off-GCD), Deeper Thorns (14, synergy), Root Stomp (16, 110% + a 2 s hold on everything in 5 m), Old Growth (16),
+  Thornhide (18, synergy), **Ancient Bark** (20: 190 ward, +40% armour, a self-heal, taunt + slow on 8 m).
+- **Fenrunner** (bar: Fenrunner, Rip, Hamstring, Savage Bite, Howl, Wild Hunt): the shape (10: +25% speed, +10%
+  crit, +10 dodge), Light Paws (11), Lunge (12, 10 m + 80%, any shape), Hamstring (12, 100% + 40% slow), Savage
+  Bite (14, 220%, ×1.5 under 35%), Sharper Fangs (14, synergy → Rip), Howl (16, party +10% damage, pack −10%),
+  Keen Nose (16), Blood Scent (18, synergy), **Wild Hunt** (20: 160% + a bleed to everything in 6 m, +40% crowd).
+- **Sporecap** (bar: Sporecap, Greensap, Spore Cloud, Bloom, Sporeburst, Great Bloom): the shape (10: +15% cast
+  speed, +10% armour), Greensap (10, 112 + 18/s × 6 in 1.5 s — any shape), Deep Roots (11), Spore Cloud (12, 5 m
+  ground that heals everyone in it 18/s for 8 s, companions too), Mossheart (12), Bloom (14, 78 + cleanse on
+  everyone in 8 m), Richer Sap (14, synergy), Sporeburst (16, 88 poison over 5 m + slow + a choke), Green Return
+  (18, the revive), **Great Bloom** (20: 180 + 27/s + cleanse + heals land 15% harder on everyone in 12 m).
+
+**Rotation at 15 as a wolf** (Fenrunner, then the bar): Lunge in → Fenrunner → Rip, Rip → Hamstring the runner →
+Savage Bite anything under 35% → Fenrunner again to drop out, Greensap whoever is hurt, back in.
+
+**Rotation at 20 as a mushroom** (Sporecap, then the bar): Spore Cloud where the party stands → Sporeburst the pack →
+Greensap the tank → Bloom when the poison lands → Great Bloom when two are under half.
+
+**Phone (6, out of shape):** Fenrunner, Briarback, Sporecap, Greensap, Lunge, Green Return — the shapes fill the
+rest.
+
+---
+
+## Weaponmaster — Fighter → the Fighter
+
+**Fantasy.** An open stance and a closed one, and a bar that changes with them. Lunge and Flurry are in the Mastery
+tree for standing easy; in a stance the bar carries that stance's own Lunge and Flurry instead. Three trees:
+
+- **Open Stance** (bar: Open Stance, Open Flurry, Open Lunge, Quick Cut, Blade Dance, Perfect Edge): the stance (10:
+  +12% damage, +6% crit, −15% armour), Quick Hands (11), Quick Cut (12, 125% — the filler), Keen Edge (12), Pierce
+  (14, 180% + −15% armour, neutral), Sharper Cut (14, synergy), Blade Dance (16, 110% to everything in 5 m, +40%
+  crowd), Measured Breath (16), Faster Dance (18, synergy), **Perfect Edge** (20: +25% damage, +20% crit, 40 temper,
+  a 200% stunning sweep).
+- **Closed Stance** (bar: Closed Stance, Closed Flurry, Closed Lunge, Riposte, Iron Counter, Unbroken Guard): the
+  stance (10: +30% armour, +6 dodge, more attention, −10% damage), Steady Feet (11), Riposte (12, 110% + a ward that
+  hits back — the filler), Patience (12), Sweeping Guard (14, 100% in a 120° arc, −15% damage on them, a ward;
+  neutral), Sure Riposte (14, synergy), Iron Counter (16, 220% + 1 s stun + a ward), Shield Arm (16), Harder Counter
+  (18, synergy), **Unbroken Guard** (20: 190 ward that hits back hard, +40% armour, taunt + slow on 8 m, 30 temper).
+- **Mastery**: Lunge (10, 8 m + 100%), Footwork (11), Flurry (12, 3 × 70%), Disarming Cut (12, the interrupt,
+  off-GCD), Faster Hands (14, synergy), Weapon Bond (14), Finishing Overhead (16, 260%, ×1.5 under 35%), Second
+  Wind (16), Deeper Overhead (18, synergy), **Master of Stances** (20: both at once for 15 s — +15% damage, +8% crit,
+  +25% armour, +6 dodge — on a bar of the open flurry, the closed lunge, Quick Cut, Iron Counter and the Overhead).
+
+The hidden pairs: Open Flurry 3 × 85%; Closed Flurry 3 × 60% behind a 68 ward; Open Lunge 150% and −10% armour;
+Closed Lunge 90% with a stun and a taunt.
+
+**Rotation at 15** (Open Stance, then the bar): Open Lunge in → Quick Cut, Quick Cut → Open Flurry → Blade Dance
+when three are on you. Swap to Closed when the brute turns up: Closed Lunge (stun, taunt) → Riposte → Iron Counter.
+
+**Phone (6, standing easy):** Open Stance, Closed Stance, Lunge, Flurry, Pierce, Disarming Cut.
+
+---
+
+## Reckoner — Rogue → the Demon Hunter
+
+**Fantasy.** Every hit you take is a debt. Brand them, hook them in, tumble clear, set the hound on them, and settle
+it all in one blow. Crossbow or blades; the hound interrupts for you. Three trees:
+
+- **The Brand**: Brand Bolt (10, 110% + takes 12% more for 8 s — the filler at range), Hunter's Eye (11), Searing
+  Brand (12, 22/s fire for 8 s + 44, instant from 20 m), Long Brand (12, synergy), Double Shot (14, 2 × 90%, needs a
+  bow or crossbow), Steady Aim (14), Brand Burst (16, 110 fire over 5 m + slow, +40% crowd), Hotter Brand (16,
+  synergy), Pinning Shot (18, 120% + a 2 s hold, ranged), **Judgement Bolt** (20: 300%, ×1.5 under 35%, + 132 fire
+  over 4 m).
+- **The Hook**: Chain Hook (10, dragged 8 m to you + 80% + slow, from 15 m), Quick Feet (11), Tumbling Shot (12,
+  100% then 6 m back behind a ward, off-GCD), Unleash the Hound (12, a pet that bites, interrupts and harries), Hard
+  Bite (14, synergy), Snare (14, a 4 m hold at the pointer), Hook and Drag (16, everything in 6 m at the pointer
+  dragged to you + slowed), Thick Skin (16), Fury Hound (18, a bigger hound: interrupting bite, a lunge through a
+  crowd, a bay), **Night Hunt** (20: +20% damage, +15% crit, +30% speed, 40 energy, two night hounds for 15 s).
+- **The Reckoning**: Grudge Cut (10, 120% + a 27 self-heal — the filler up close), Long Memory (11), Take It (12, a
+  94 ward that cuts back + 10 energy, off-GCD), Debt Collector (12), Payback (14, 160% + hits 10% softer), Heavier
+  Debt (14, synergy), Reckoner's Word (16, the interrupt + a brand, from 15 m, off-GCD), Hard to Kill (16), Grim
+  Resolve (18, +30% armour, a heal, a cleanse), **Settle the Grudge** (20: spends every point of energy — 200%
+  +2% a point past the cost, ×1.5 under 35%; 3.4× at a full bar).
+
+**Rotation at 15** (Unleash the Hound, Brand Bolt, Searing Brand, Chain Hook, Grudge Cut, Take It): Hound out →
+Chain Hook the archer to you → Brand Bolt → Searing Brand → Grudge Cut, Grudge Cut → Take It when the pack turns →
+Tumbling Shot clear.
+
+**Phone (6):** Brand Bolt, Grudge Cut, Searing Brand, Chain Hook, Take It, Tumbling Shot.
+
+---
+
+## Dusk Priest — Healer → the Priest
+
+**Fantasy.** Heals by striking: every lance of dusk puts light on your friends, a vigil is paid before the blow, and
+the dawn comes for the fallen. Three trees:
+
+- **Twinlight**: Shadow Lance (10, 109 shadow in 1.5 s + 31 to every friend in 10 m — the filler; a solo priest
+  clears with it), Dusk Study (11), Twinlight (12, 88 + 49 to everyone in 10 m, instant), Gloaming (12, synergy),
+  Dusk Wave (14, 77 in a 90° cone, −10% damage on them, 44 to friends in 8 m), Evenfall (14), Shadow Word (16,
+  24/s for 10 s + friends in 10 m mend 11/s), Kindled Shade (16, synergy), Night and Day (18), **Eventide** (20:
+  288 + 1.5 s stun, 135 + 27/s to everyone in 12 m).
+- **Vigil**: Vigil (10, a 114 ward + 13.5/s for 10 s, instant — the filler), Long Watch (11), Shared Vigil (12,
+  `link`: a third of the friend's hits fall on you for 10 s, + a ward), Steady Candle (12), Keep Watch (14, synergy),
+  Lamplight (14, a 68 ward on everyone in 10 m), Second Dawn (16, the revive: 40% in a ward, 2 s), Dusk Ward (16,
+  cleanse + 78 + heals land 15% harder), Unsleeping (18), **Night Vigil** (20: 230 wards + 27/s + cleanse on
+  everyone in 12 m, +20% armour on the party).
+- **Dawn**: Dawn Prayer (10, 112 + a small ward in 1.5 s), Morning Calm (11), Mark the Killer (12, 55 + takes 15%
+  more for 8 s), Quiet Hands (12), Circle of Dawn (14, 6 m ground at the pointer, 20/s to everyone in it, companions
+  too), Brighter Prayer (14, synergy), Hush (16, the interrupt), Wider Circle (16, synergy), Daybreak (18, 89 +
+  cleanse on everyone in 10 m), **First Light** (20: 178 + 36/s on everyone in 12 m, and 132 shadow + stun on
+  everything in 8 m).
+
+**Rotation at 15** (Vigil, Shadow Lance, Twinlight, Mark the Killer, Shared Vigil, Hush): Vigil on the tank → Mark
+the Killer on the brute → Shadow Lance, Shadow Lance (every one heals the party a little) → Twinlight on cooldown →
+Shared Vigil when the tank is the one in trouble → Dawn Prayer only when the lances are not enough.
+
+**Phone (6):** Shadow Lance, Twinlight, Vigil, Dawn Prayer, Mark the Killer, Hush.
+
+---
+
+## Bard — Healer OR Rogue → the Bard
+
+**Fantasy.** One song at a time, and the six slots are that song's verses. Valour speeds and strengthens, Ruin curses,
+Mending heals everyone near you; each has a finale at 20 on its own bar. Discord Note and Mending Verse work in any
+song. From Healer on mana, from Rogue on energy (every active carries both prices). Three trees, one a song:
+
+- **Valour** (bar: Song of Valour, Bold Strike, Marching Verse, War Chorus, Valour Finale, Discord Note): the song
+  (10: party +8% damage for 20 s as it opens; you +10% damage, +10% speed while it holds), Quick Tongue (11), Bold
+  Strike (12, 120% + 10% crit — the filler), Strong Voice (12), Marching Verse (14, party +25% speed, +10% crit),
+  Louder Valour (14, synergy), War Chorus (16, party +15% damage + a ward on everyone in 8 m), Brave Heart (16),
+  Sharper Strike (18, synergy), **Valour Finale** (20: a heal, party +25% damage, +20% cast speed, a stunning chord).
+- **Ruin** (bar: Song of Ruin, Discord Note, Cursed Verse, Dirge, Ruin Finale, Bold Strike): the song (10: the pack
+  within 8 m hits 8% softer as it opens; you +8% crit, +10% cast speed), Discord Note (10, 88 storm + hits 8% softer,
+  instant — the filler in any song), Cruel Wit (11), Cursed Verse (12, 22/s shadow for 10 s + hits 10% softer),
+  Dirge (14, 77 over 6 m at the pointer + slow), Longer Curse (14, synergy), Jarring Note (16, the interrupt),
+  Sharper Note (16, synergy), Cold Reception (18), **Ruin Finale** (20: 154 to everything in 8 m, +40% crowd, stun,
+  takes 10% more).
+- **Mending** (bar: Song of Mending, Mending Verse, Soothing Note, Lullaby, Chorus of Life, Mending Finale): the song
+  (10: everyone in 10 m mends 13.5/s for 10 s as it opens; heals land 10% harder on you), Mending Verse (10, 101 +
+  13.5/s × 6 in 1.5 s — any song), Gentle Voice (11), Soothing Note (12, 46/s for 8 s, instant), Lullaby (14, a 2 s
+  stun), Kinder Verse (14, synergy), Chorus of Life (16, 89 + cleanse on everyone in 10 m), Steady Breath (16),
+  Lasting Chorus (18, synergy), **Mending Finale** (20: 180 + 27/s + a 90 ward + cleanse on everyone in 12 m).
+
+**Rotation at 15** (Song of Valour before the pull, then the bar): Marching Verse → Bold Strike, Bold Strike →
+Discord Note the caster → War Chorus when the second pack comes. Stop the song and start Mending when two are hurt:
+Mending Verse the tank, Soothing Note the rest, Lullaby the brute.
+
+**Phone (6, between songs):** Song of Valour, Song of Ruin, Song of Mending, Discord Note, Mending Verse, Lullaby.
+
+---
+
+## What the engine must have for wave 3 (and what it has)
+
+Everything in `skills-specs-3.json` runs today; `tests/sim/paths.test.js` fires every active of the seven, and a new
+test puts each stance up with NOTHING else learned, fires every skill on its bar, checks the bar is refused before
+the stance and after it ends, and checks a level-12 hero in the stance cannot use a bar skill that needs 20. One
+engine line changed for that: `rankOf` gates a stance-bar skill by its `reqLevel`. The file's `wishlist` has eleven
+items with a rule each. Worth doing first:
+
+1. **The skill-engine revive never fires** (every revive in waves 1–3: Raise the Fallen, Oathbound Rise, Read the
+   Bones, Unquiet Return, Green Return, Second Dawn). `run()` stamps `p.lastFight = w.time` before applying effects,
+   and `revive` asks `w.time - p.lastFight > 5`. Checked: Second Dawn casts `ok` and the friend stays dead. Rule: read
+   `lastFight` into the context before the stamp, or drop the gate for revives that carry a cast.
+2. **`healFrom`** as a plain effect key (the legendary rule already exists): Shadow Lance, Twinlight, Dusk Wave,
+   Eventide want "the most hurt friend by 40% of the hit"; today each heals everyone in 8–12 m a fixed amount.
+3. **`cheatDeath`** on Vigil / Night Vigil (the pre-paid save); a ward + mend today.
+4. **A health cost** (Soul Pact, Blood Burst, Sacrifice); free or mana today.
+5. **`grudge`** (hits taken as a counter) on Settle the Grudge / Payback; spendAll + 2% per energy today.
+6. **`spread`** (copy every dot on the target to the pack) on Spreading Rot / Bone Storm; one curse spreads today.
+7. **Buffs that reach minions**: a party buff is read by no ally (Howl's +10% is party-only; Grave Mending is a zone
+   because zones DO heal allies). A corpse count for the Necromancer, `wall` for Pyre Wall, and a dimmed stance-bar
+   slot for a skill below the hero's level are the rest.

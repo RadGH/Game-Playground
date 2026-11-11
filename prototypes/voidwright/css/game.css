@@ -252,3 +252,16 @@ table.grid.st-market tr.st-cat td { text-align: left; color: var(--cyan); font-f
 .bm-sel > b { white-space: nowrap; flex: none; max-width: 45%; overflow: hidden; text-overflow: ellipsis; }
 .bm-sel > .hint { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
 .bm-sel > .grow { display: none; }
+
+/* local map (js/ui/localmap.js) */
+.lm-info { position: absolute; right: 10px; bottom: 10px; width: min(300px, calc(100% - 20px)); max-height: 40%; overflow: auto; }
+.lm-key { position: absolute; left: 10px; top: 52px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 2px; max-width: calc(100% - 20px); }
+.lm-key i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.lm-key.hidden { display: none; }
+/* star map traits */
+.traits { margin-top: 6px; display: grid; gap: 1px; font-size: 0.9rem; }
+.trait.bad { color: var(--bad, #ff6a6a); } .trait.good { color: var(--good, #6aff9a); }
+.warp-card { margin-bottom: 10px; display: grid; gap: 4px; }
+#minimap { cursor: pointer; }
+.gx-key { position: absolute; left: 10px; right: 10px; top: 52px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; }
+.gx-key.hidden { display: none; }

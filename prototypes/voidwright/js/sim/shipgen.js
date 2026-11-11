@@ -16,6 +16,24 @@ const sized = (id, U) => {
   return BLOCKS[s] ? s : id;
 };
 export const TIER_DMG = [0.3, 0.3, 0.42, 0.55, 0.65, 0.74, 0.82, 0.9, 0.96, 1.02, 1.08];
+/**
+ * Enemy pacing (play-test 2026-11-10: "one or two missile bursts kill them before they fight back", and a
+ * danger-3 base "obliterated me immediately"). Enemy hulls get more health per block, and their guns cycle
+ * slower, so fights last long enough to be fights in both directions.
+ */
+export const ENEMY_HP = t => 2 + Math.min(10, t) * 0.12;
+export const ENEMY_FIRE = 0.75;      // ships
+export const STATION_FIRE = 0.45;    // hostile stations and strongholds: big, but they no longer shred you on sight
+export function hardenEnemy(body) {
+  if (!body || body.hardened) return body;
+  const k = ENEMY_HP(body.tier || 1);
+  for (const b of body.grid.blocks) { b.maxHp *= k; b.hp *= k; }
+  body.hardened = true;
+  body.fireMul = body.kind === 'station' ? STATION_FIRE : ENEMY_FIRE;
+  if (body.kind === 'station') body.dmgMul = (body.dmgMul ?? 1) * 0.6;
+  recompute(body);
+  return body;
+}
 const CORE = { 1: 'bridge', 2: 'command_deck', 4: 'flag_bridge' };
 const ENGINE = { 1: 'thruster', 2: 'thruster_2', 4: 'thruster_4' };
 const POWER = { 1: 'reactor', 2: 'reactor_2', 4: 'reactor_4' };
@@ -194,6 +212,7 @@ export function generateStation({ seed = 1, size = 80, faction = 'guild', kind =
   const ringR = c * r.range(0.6, 0.8), ringW = r.range(1.0, 1.8);
   const arms = r.int(3, 6), armW = 0.7;
   const weapons = F.style.weapons.l;
+  let guns = 0;
   for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
     const dx = x - c, dy = y - c; const d = Math.hypot(dx, dy), a = Math.atan2(dy, dx);
     const inRing = Math.abs(d - ringR) <= ringW;
@@ -204,13 +223,21 @@ export function generateStation({ seed = 1, size = 80, faction = 'guild', kind =
     let id = 'frame_4';
     if (inHub && d < 1) id = 'flag_bridge';
     else if (inHub) id = r.chance(0.3) ? 'reactor_4' : r.chance(0.3) ? 'cargo_4' : 'quarters_4';
-    else if (inRing && Math.abs(d - ringR) > ringW - 0.8) id = (kind !== 'trade' || r.chance(0.12)) && r.chance(0.35) ? r.pick(weapons) : arm;
+    else if (inRing && Math.abs(d - ringR) > ringW - 0.8) {
+      id = (kind !== 'trade' || r.chance(0.12)) && r.chance(0.35) ? r.pick(weapons) : arm;
+      // hostile bases carry a handful of big guns, not a ring of them (a danger-3 hive fired a wall of acid
+      // in every direction); the cap grows with danger
+      if (id !== arm && kind !== 'trade' && guns >= 3 + tier) id = arm;
+      if (id !== arm) guns++;
+    }
     else if (inArm && d > c - 1.5) id = 'shield_bubble_4';
     const def = BLOCKS[id];
     const rot = Math.round(((Math.atan2(dy, dx) + Math.PI * 2) % (Math.PI * 2)) / (Math.PI / 4)) & 7;
     if (def && canPlace(g, def, x * U, y * U)) place(g, id, x * U, y * U, rot, def.weapon ? { rarity: 'rare', mods: { dmg: tier * 0.15 } } : null);
   }
-  const body = makeBody('station', g, { cls: 'station', faction, team: F.hostile ? 'hostile' : 'friendly', tier, kind });
+  // `kind` must stay 'station' (an opts.kind here used to overwrite it with 'trade'/'hive', so trade stations and
+  // hives were never treated as stations: their guns never ran and reputation rules missed them)
+  const body = makeBody('station', g, { cls: 'station', faction, team: F.hostile ? 'hostile' : 'friendly', tier, stationKind: kind });
   body.va = r.range(-0.02, 0.02);
   body.crew = body.stats.crewCap; recompute(body);
   body.dmgMul = TIER_DMG[Math.min(10, tier)];

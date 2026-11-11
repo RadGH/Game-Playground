@@ -3,7 +3,7 @@
 
 import { panel, el, btn, toast, fmt } from './dom.js';
 import { FACTIONS } from '../data/factions.js';
-import { STAR_KINDS } from '../sim/galaxy.js';
+import { STAR_KINDS, traitWords, warpCore, canWarpTo, coreFor } from '../sim/galaxy.js';
 
 const tierColor = t => t >= 8 ? '#ff3b5c' : t >= 6 ? '#ff7a3a' : t >= 4 ? '#ffc45a' : t >= 2 ? '#9fe870' : '#5fd8ff';
 
@@ -18,8 +18,11 @@ export function openGalaxy(app) {
   const info = el('div', { class: 'card', style: 'position:absolute;right:10px;bottom:10px;width:min(320px,calc(100% - 20px));max-height:46%;overflow:auto' });
   const legend = el('div', { class: 'hint', style: 'position:absolute;left:12px;bottom:10px;max-width:46%' },
     el('div', {}, 'Colour = danger. Further in = tougher enemies, better loot and shops.'),
-    el('div', {}, `Your jump range: ${range} lane${range > 1 ? 's' : ''}${range < 2 ? ' (fit a jump drive for 2)' : ''}.`));
+    el('div', {}, `Your jump range: ${range} lane${range > 1 ? 's' : ''}${range < 2 ? ' (fit a jump drive for 2)' : ''}.`),
+    el('div', {}, `${warpCore(G).name}: reaches danger ${warpCore(G).reach}. 🔒 = needs a better warp core (outfitters).`));
   p.body.style.position = 'relative'; p.body.style.padding = '0'; p.body.append(cv, info, legend);
+  // phones: the key sits behind a button so it never covers the star card
+  const narrow = innerWidth < 640; if (narrow) { legend.classList.add('gx-key', 'hidden'); legend.style.cssText = ''; }
   let view = { x: here.x, y: here.y, k: 1.0 };
   const ctx = cv.getContext('2d');
   function size() { const r = cv.getBoundingClientRect(); const d = Math.min(2, devicePixelRatio || 1); cv.width = r.width * d; cv.height = r.height * d; return d; }
@@ -33,7 +36,7 @@ export function openGalaxy(app) {
     // lanes
     ctx.lineWidth = 1.2 * d;
     for (const s of gal.systems) for (const l of s.links) if (l > s.id && seen.has(s.id) && seen.has(l)) {
-      const o = gal.systems[l]; const inReach = (s.id === G.system && reach.has(l)) || (l === G.system && reach.has(s.id));
+      const o = gal.systems[l]; const inReach = ((s.id === G.system && reach.has(l)) || (l === G.system && reach.has(s.id))) && canWarpTo(G, s.id === G.system ? o : s);
       ctx.strokeStyle = inReach ? 'rgba(95,216,255,0.7)' : 'rgba(120,140,180,0.25)'; ctx.beginPath(); ctx.moveTo(X(s.x), Y(s.y)); ctx.lineTo(X(o.x), Y(o.y)); ctx.stroke();
     }
     for (const s of gal.systems) {
@@ -43,7 +46,9 @@ export function openGalaxy(app) {
       const col = tierColor(s.tier);
       ctx.fillStyle = STAR_KINDS[s.star].color; ctx.beginPath(); ctx.arc(x, y, r * 0.55, 0, 7); ctx.fill();
       ctx.strokeStyle = col; ctx.lineWidth = 2 * d; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke();
-      if (reach.has(s.id)) { ctx.strokeStyle = 'rgba(95,216,255,0.6)'; ctx.setLineDash([4 * d, 3 * d]); ctx.beginPath(); ctx.arc(x, y, r + 5 * d, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
+      const locked = !canWarpTo(G, s);
+      if (locked) { ctx.fillStyle = 'rgba(4,5,12,0.55)'; ctx.beginPath(); ctx.arc(x, y, r + 1 * d, 0, 7); ctx.fill(); ctx.font = `${10 * d}px system-ui`; ctx.textAlign = 'center'; ctx.fillStyle = '#ff9a6a'; ctx.fillText('🔒', x + r + 6 * d, y + 4 * d); }
+      if (reach.has(s.id) && !locked) { ctx.strokeStyle = 'rgba(95,216,255,0.6)'; ctx.setLineDash([4 * d, 3 * d]); ctx.beginPath(); ctx.arc(x, y, r + 5 * d, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
       if (s === sel) { ctx.strokeStyle = '#ffc45a'; ctx.lineWidth = 3 * d; ctx.beginPath(); ctx.arc(x, y, r + 9 * d, 0, 7); ctx.stroke(); }
       if (s.id === G.system) { ctx.fillStyle = '#ffd27a'; ctx.beginPath(); ctx.moveTo(x, y - r - 12 * d); ctx.lineTo(x - 5 * d, y - r - 20 * d); ctx.lineTo(x + 5 * d, y - r - 20 * d); ctx.fill(); }
       // markers: station, claim, boss rumour
@@ -60,7 +65,7 @@ export function openGalaxy(app) {
   }
   function showInfo(s) {
     info.innerHTML = '';
-    if (!s) { info.append(el('b', {}, here.name), el('div', { class: 'hint' }, 'Tap a star to see what is there.')); return; }
+    if (!s) { info.append(el('b', {}, here.name), el('div', { class: 'hint' }, 'Tap a star to see what is there.'), el('div', { class: 'hint' }, `${warpCore(G).name}: reaches danger ${warpCore(G).reach}.`)); return; }
     const F = FACTIONS[s.owner]; const rep = G.rep[s.owner] ?? 0;
     const boss = G.bosses.find(b => b.alive && b.system === s.id);
     info.append(
@@ -70,7 +75,18 @@ export function openGalaxy(app) {
       el('div', { class: 'hint' }, `${s.planets} planet${s.planets > 1 ? 's' : ''}, ${s.belts} asteroid belt${s.belts > 1 ? 's' : ''}${s.features.includes('derelict') ? ', a derelict' : ''}${s.features.includes('beacon') ? ', a distress signal' : ''}${s.features.includes('pirateBase') ? ', an enemy stronghold' : ''}${s.features.includes('claimable') ? ', a rich field' : ''}`),
       boss ? el('div', { class: 'bad' }, `Rumour: ${boss.name} (${boss.cls}) is here.`) : '',
     );
+    if (s.traits) {
+      const t = traitWords(s.traits);
+      const row = (k, v, cls = '') => el('div', { class: 'trait ' + cls }, el('span', { class: 'hint' }, k + ' '), v);
+      info.append(el('div', { class: 'traits' },
+        row('Enemies:', t.enemies, s.traits.enemies >= 1.25 ? 'bad' : s.traits.enemies <= 0.85 ? 'good' : ''),
+        row('Finds:', t.luck, s.traits.luck > 0 ? 'good' : ''),
+        row('Mining:', t.ore, s.traits.ore >= 1.25 ? 'good' : ''),
+        row('Size:', t.size),
+        t.econ ? row('Economy:', t.econ) : ''));
+    }
     if (s.id === G.system) info.append(el('div', { class: 'amber' }, 'You are here.'));
+    else if (!canWarpTo(G, s)) info.append(el('div', { class: 'bad' }, `🔒 Too dangerous for your ${warpCore(G).name}. You need a ${coreFor(s.tier).name} (outfitters sell upgrades).`));
     else if (reach.has(s.id)) {
       const warn = s.tier > G.stats.maxTier + 1 ? el('div', { class: 'bad' }, 'Much more dangerous than anywhere you have been.') : '';
       info.append(warn, btn(`Jump to ${s.name}`, () => {
@@ -94,7 +110,9 @@ export function openGalaxy(app) {
     sel = best; showInfo(best); draw();
   });
   cv.addEventListener('wheel', e => { view.k = Math.max(0.4, Math.min(5, view.k * (e.deltaY > 0 ? 0.88 : 1.13))); draw(); e.preventDefault(); }, { passive: false });
-  const zoomRow = el('div', { class: 'row', style: 'position:absolute;left:10px;top:10px' }, btn('+', () => { view.k = Math.min(5, view.k * 1.25); draw(); }, 'small'), btn('−', () => { view.k = Math.max(0.4, view.k / 1.25); draw(); }, 'small'), btn('Here', () => { view.x = here.x; view.y = here.y; draw(); }, 'small'));
+  const zoomRow = el('div', { class: 'row', style: 'position:absolute;left:10px;top:10px' }, btn('+', () => { view.k = Math.min(5, view.k * 1.25); draw(); }, 'small'), btn('−', () => { view.k = Math.max(0.4, view.k / 1.25); draw(); }, 'small'), btn('Here', () => { view.x = here.x; view.y = here.y; draw(); }, 'small'),
+    narrow ? btn('Key', () => legend.classList.toggle('hidden'), 'small') : '',
+    btn('Local map', () => { p.close(); app.openLocal?.(); }, 'small'));
   p.body.append(zoomRow);
   addEventListener('resize', draw);
 }

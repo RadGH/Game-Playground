@@ -19,6 +19,7 @@ import { DRONES } from '../data/drones.js';
 import { DAMAGE, MATERIALS, RARITY, RARITY_BY_ID } from '../data/types.js';
 import { FACTIONS, factionsForTier } from '../data/factions.js';
 import { buildPremade } from '../sim/shipgen.js';
+import { WARP_CORES, warpCore, canWarpTo } from '../sim/galaxy.js';
 import { gridToJSON, gridFromJSON } from '../sim/grid.js';
 import { makeBody } from '../sim/ship.js';
 import { bakeBody } from '../render/bake.js';
@@ -85,7 +86,7 @@ const stockCache = new Map();                      // key -> generated stock (so
 export function openStation(app, st, onUndock) {
   const G = app.G; const sys = app.galaxy.systems[G.system];
   G.costBasis ||= {}; G.research ||= { points: 0, done: [] }; G.research.seen ||= {}; G.hangar ||= []; G.bounties ||= [];
-  const pirate = st.kind === 'pirate' || sys.station === 'pirate';
+  const pirate = st.stationKind === 'pirate' || sys.station === 'pirate';
   const p = panel(st.name, () => onUndock(), { closeLabel: 'Undock', cls: 'station' });
   const info = el('div', { class: 'st-info' });
   p.head.insertBefore(info, p.head.children[1]);
@@ -331,8 +332,30 @@ function partsForSale(S, box, mult, label) {
 }
 
 // ================================================================== 2. outfitter
+/** Warp core upgrades (play-test: gate the dangerous stars behind better drives). Credits + materials. */
+function warpSection(S, box) {
+  const { G } = S; const cur = warpCore(G); const next = WARP_CORES[cur.cls];
+  section(box, 'Warp core', `Yours: ${cur.name} — jumps into stars up to danger ${cur.reach}. Safer stars are always in reach.`);
+  if (!next) { box.append(el('p', { class: 'good' }, 'The best warp core there is. Every star is open to you.')); return; }
+  const mats = Object.entries(next.mats);
+  const short = mats.filter(([m, n]) => (G.cargo[m] || 0) < n);
+  const can = G.credits >= next.cr && !short.length;
+  box.append(el('div', { class: 'card warp-card' },
+    el('b', {}, `${next.name}`), el('div', {}, `Reaches danger ${next.reach} (${next.reach - cur.reach} more).`),
+    el('div', { class: 'amber' }, `${fmt(next.cr)} cr`, mats.length ? ' + ' : '', ...mats.map(([m, n], i) => el('span', { class: (G.cargo[m] || 0) >= n ? 'good' : 'bad' }, `${i ? ', ' : ''}${n} ${MATERIALS[m]?.name || m} (${G.cargo[m] || 0})`))),
+    btn('Install', () => {
+      if (G.credits < next.cr) return toast('You cannot afford that.', 'bad');
+      if (short.length) return toast(`Bring ${short.map(([m, n]) => `${n - (G.cargo[m] || 0)} more ${MATERIALS[m]?.name || m}`).join(', ')}.`, 'bad');
+      G.credits -= next.cr; for (const [m, n] of mats) G.cargo[m] -= n;
+      G.drive = next.cls;
+      banner(`${next.name} installed`, `You can now jump into stars up to danger ${next.reach}.`);
+      S.done();
+    }, can ? 'primary' : '')));
+}
+
 function tabOutfitter(S, box) {
   const { G, sys } = S; const k = S.k();
+  warpSection(S, box);
   const { stock, key } = shopStock(S, 'outfit'); const gone = taken(G, key);
   const left = Math.ceil((DAY - (G.playTime % DAY)) / 60);
   section(box, 'For sale', `Danger ${sys.tier} system: shops further from home stock better parts. New stock in about ${left} min. Biggest parts offered: ${sizeLimit(G)}×${sizeLimit(G)}.`);
@@ -372,7 +395,7 @@ function shipStats(st) {
     ['Blocks', st.stats.blocks], ['Hull health', fmt(st.stats.maxHp)], ['Top speed', fmt(st.stats.maxSpeed)],
     ['Weapons', turrets], ['Shields', fmt(st.stats.shieldMax)], ['Cargo', fmt(st.stats.cargo)],
     ['CPU', `${fmt(st.stats.cpu)} / ${fmt(st.stats.cpuCap)}`], ['Crew', `${fmt(st.stats.crewNeed)} needed · ${fmt(st.stats.crewCap)} bunks`],
-    ['Power', `${fmt(st.stats.power)} made · ${fmt(st.stats.powerUse)} used`], ['Drones', st.stats.droneCap || 0],
+    ['Power', `${Math.round(st.stats.power)} made · ${Math.round(st.stats.powerUse)} used`], ['Drones', st.stats.droneCap || 0],
   ];
 }
 const kvEl = rows => el('div', { class: 'kv', html: rows.map(([a, b]) => `<span>${esc(a)}</span><span>${esc(String(b))}</span>`).join('') });
@@ -735,7 +758,7 @@ function tabBounty(S, box) {
   }
   // offers: systems up to two jumps away
   section(box, 'Wanted', 'Up to 5 bounties at a time. New offers come in later.');
-  const near = [sys.id]; for (let ring = 0; ring < 2; ring++) for (const id of [...near]) for (const l of app.galaxy.systems[id].links) if (!near.includes(l)) near.push(l);
+  const near = [sys.id]; for (let ring = 0; ring < 2; ring++) for (const id of [...near]) for (const l of app.galaxy.systems[id].links) if (!near.includes(l) && canWarpTo(G, app.galaxy.systems[l])) near.push(l);
   const r = rng(hash('bounty', sys.seed, d)); const cards = el('div', { class: 'cards' });
   for (let i = 0; i < 3; i++) {
     const t = app.galaxy.systems[r.pick(near)];

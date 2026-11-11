@@ -35,11 +35,12 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
     btns.push([b, a]);
   }
   let curBar = [], barKey = '';
-  function fillBar(list) {
-    curBar = list; barKey = JSON.stringify(list);
+  let barLevel = 99;
+  function fillBar(list, level = barLevel) {
+    barLevel = level; curBar = list; barKey = JSON.stringify(list) + '@' + level;
     btns.forEach(([b, a], i) => {
       const id = i ? list[i - 1] : 'attack', sk = id ? skills[id] : null;
-      for (const el of [b, a]) { el.querySelector('.ic').textContent = id === 'attack' ? '⚔' : sk ? skillIcon(sk) : ''; el.querySelector('small').textContent = sk?.name || ''; el.classList.toggle('empty', !sk); el.title = sk ? `${sk.name}${sk.desc ? ' — ' + sk.desc.replace(/\{\w+\}/g, '…') : ''}` : ''; el.dataset.skill = id || ''; }
+      for (const el of [b, a]) { el.querySelector('.ic').textContent = id === 'attack' ? '⚔' : sk ? skillIcon(sk) : ''; el.querySelector('small').textContent = sk?.name || ''; el.classList.toggle('empty', !sk); el.title = sk ? `${sk.name}${sk.desc ? ' — ' + sk.desc.replace(/\{\w+\}/g, '…') : ''}` : ''; el.dataset.skill = id || ''; const early = sk && (sk.reqLevel || 1) > level; el.classList.toggle('early', !!early); if (early) el.title = `${sk.name}: at level ${sk.reqLevel}`; }
     });
   }
   fillBar([]);
@@ -67,7 +68,7 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
     const rp = $('.me-frame .rp'), mp = $('.me-frame .mp'), other = me.res && me.res !== 'mana';
     mp.hidden = !!other; rp.hidden = !other;
     if (other) { bars(rp, me.rv, 100); rp.className = 'rp res-' + me.res; rp.querySelector('span').textContent = `${RES_NAME[me.res]} ${me.rv}`; } else bars(mp, me.mp, me.mmp);
-    if (ch) { const want = JSON.stringify((me.sb || (ch.bar && ch.bar.length ? ch.bar : BAR)).slice(0, 6)); if (want !== barKey) fillBar(JSON.parse(want)); }
+    if (ch) { const want = JSON.stringify((me.sb || (ch.bar && ch.bar.length ? ch.bar : BAR)).slice(0, 6)); if (want + '@' + ch.level !== barKey) fillBar(JSON.parse(want), ch.level); }
     if (ch) { const base = xpAtLevel(ch.level), need = xpToNext(ch.level); $('.xp-bar b').style.width = (Number.isFinite(need) ? Math.min(100, (ch.xp - base) / need * 100) : 100) + '%'; }
     const tf = $('.tg-frame');
     tf.hidden = !tg;

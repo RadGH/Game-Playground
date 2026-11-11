@@ -31,7 +31,9 @@ export function think(w, s, dt) {
       if (best) ai.target = best;
     }
   }
-  const T = ai.target && !ai.target.dead ? ai.target : null;
+  // a target that is no longer an enemy (made up, or the player is in their undock grace) is dropped at once
+  if (ai.target && (ai.target.dead || !hostile(w, s, ai.target))) ai.target = null;
+  const T = ai.target;
   // weapon reach
   let reach = 300, lockReach = 0;
   for (const t of s.turrets) { if (!t.b.alive) continue; if (t.w.mode === 'lock') lockReach = Math.max(lockReach, t.w.range); else if (t.w.mode !== 'tool' && t.w.mode !== 'pd') reach = Math.max(reach, t.w.range); }
@@ -56,6 +58,7 @@ export function think(w, s, dt) {
     }
     steer(inp, s, ai.wander.x, ai.wander.y, 0.45);
     if (s.role === 'miner') { inp.fire = true; inp.ax = ai.wander.x; inp.ay = ai.wander.y; }
+    avoid(w, s, inp);
     return inp;
   }
 
@@ -68,6 +71,7 @@ export function think(w, s, dt) {
   // run away when beaten (non-combat roles and badly hurt raiders)
   if (s.role === 'trader' || s.role === 'miner' || (hpRatio < 0.4 && !s.boss && s.faction === 'redfang' && s.cls === 'skiff' && ai.t % 20 < 4)) {
     inp.mx = -Math.cos(toT); inp.my = -Math.sin(toT); inp.boost = true; inp.fire = d < reach;
+    avoid(w, s, inp);
     return inp;
   }
   let keep;
@@ -90,7 +94,25 @@ export function think(w, s, dt) {
   if (rand() < dt * 0.15) ai.orbit *= -1;
   // bosses enrage below half health
   if (s.boss && hpRatio < 0.5 && !ai.enraged) { ai.enraged = true; w.notes.push({ t: 'enrage', name: s.name }); }
+  avoid(w, s, inp);
   return inp;
+}
+
+/**
+ * Steer around anything on our own side — above all the player. Allies used to fly straight through you
+ * and the bump read as an attack. Enemies are left out: swarms are meant to get close.
+ */
+export function avoid(w, s, inp) {
+  let ax = 0, ay = 0;
+  for (const o of near(w, s.x, s.y, s.r + 320)) {
+    if (o === s || o.dead || (o.kind !== 'ship' && o.kind !== 'station' && o.kind !== 'ground') || hostile(w, s, o)) continue;
+    const dx = s.x - o.x, dy = s.y - o.y; const d = Math.hypot(dx, dy) || 1;
+    const gap = d - s.r - o.r; const want = o === w.player ? 240 : 110;
+    if (gap >= want) continue;
+    const k = (1 - Math.max(0, gap) / want) * (o === w.player ? 2 : 0.8);
+    ax += dx / d * k; ay += dy / d * k;
+  }
+  if (ax || ay) { inp.mx += ax; inp.my += ay; }
 }
 
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);

@@ -315,7 +315,7 @@ export function openBuild(app, { docked = false } = {}) {
     const loose = disconnected();
     if (coreB && loose.size) out.push({ msg: `${loose.size} part${loose.size > 1 ? 's are' : ' is'} not joined to the bridge (shown in red). Join them with hull frame or remove them — loose parts would just fall off.`, stop: true });
     if (st.cpu > st.cpuCap) out.push({ msg: `Over the CPU limit (${st.cpu} used, ${st.cpuCap} available). Add CPU nodes or remove some weapons or shields.`, stop: true });
-    if (st.powerUse > st.power) out.push({ msg: `Not enough power (${fmt(st.power)} made, ${fmt(st.powerUse)} used): weapons fire slower and shields charge slower. Add fuel cells or reactors.` });
+    if (!st.powerOk) out.push({ msg: `Not enough power (${Math.round(st.power)} made, ${Math.round(st.powerUse)} used): weapons fire slower and shields charge slower. Add fuel cells or reactors.` });
     const have = Math.min(G.ship.crew ?? 0, st.crewCap);
     if ((G.ship.crew ?? 0) > st.crewCap) out.push({ msg: `Only ${st.crewCap} bunks: ${(G.ship.crew ?? 0) - st.crewCap} crew would have to leave. Add crew quarters to keep them.` });
     if (st.crewNeed > have) out.push({ msg: `Short of crew (${have} aboard, ${st.crewNeed} needed): parts run slower. Hire more at a crew hall.` });
@@ -442,7 +442,7 @@ export function openBuild(app, { docked = false } = {}) {
     else if (arm[worst] < 0.08) hint = `Little protection from ${DAMAGE[worst].name.toLowerCase()}.`;
     if (arm[best] >= 0.2) hint += ` Strong against ${DAMAGE[best].name.toLowerCase()}.`;
     if (!hint) hint = 'Even protection, nothing special.';
-    const cpuBad = st.cpu > st.cpuCap, powBad = st.powerUse > st.power, crewBad = st.crewNeed > have;
+    const cpuBad = st.cpu > st.cpuCap, powBad = !st.powerOk, crewBad = st.crewNeed > have;
     const shieldN = body.shields.length;
     const matLines = Object.entries(led.mats).filter(([, v]) => v).map(([m, v]) => `<span class="${v > 0 ? 'bad' : 'good'}">${v > 0 ? '−' : '+'}${Math.abs(v)} ${esc(matName(m))}</span>`);
     const spares = Object.entries(spare).filter(([, v]) => v > 0);
@@ -471,7 +471,7 @@ export function openBuild(app, { docked = false } = {}) {
       <h4>Budget</h4>
       <div class="kv">
         ${row('CPU', `${st.cpu} / ${st.cpuCap}`, cpuBad ? 'bad' : '')}
-        ${row('Power', `${fmt(st.power)} made / ${fmt(st.powerUse)} used`, powBad ? 'bad' : '')}
+        ${row('Power', `${Math.round(st.power)} made / ${Math.round(st.powerUse)} used`, powBad ? 'bad' : '')}
         ${row('Crew', `${have} aboard / ${st.crewNeed} needed <small class="hint">(${st.crewCap} bunks)</small>`, crewBad ? 'bad' : '')}
       </div>
       ${cpuBad ? '<p class="bad small">Over the CPU limit — you cannot finish until it fits.</p>' : ''}

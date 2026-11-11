@@ -19,7 +19,7 @@ export function newGame({ seed = (Math.random() * 1e9) | 0, slot = 0, name = 'Ca
   const r = rng(seed);
   const G = {
     v: SAVE_VERSION, seed, slot, name, created: Date.now(), playTime: 0,
-    credits: 400, cargo: { ferrite: 10 }, goods: {}, parts: [], specimens: [], passengers: 0,
+    credits: 400, cargo: { ferrite: 10 }, drive: 1, goods: {}, parts: [], specimens: [], passengers: 0,
     ship: { design: 'sparrow', cls: ship.cls, name: 'Sparrow', grid: gridToJSON(ship.grid), crew: ship.crew },
     hangar: [],                  // other owned ships: [{ design, cls, name, grid, crew }]
     designs: [],                 // saved build-mode layouts

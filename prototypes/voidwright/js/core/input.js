@@ -7,7 +7,7 @@ export function createInput(el) {
   const I = { mouse: { x: innerWidth / 2, y: innerHeight / 2, l: false, r: false, moved: 0 }, touch: { left: null, right: null, buttons: new Map() }, wheel: 0, padIndex: null, device: 'kb', enabled: true };
   const map = {
     KeyW: 'up', ArrowUp: 'up', KeyS: 'down', ArrowDown: 'down', KeyA: 'left', ArrowLeft: 'left', KeyD: 'right', ArrowRight: 'right',
-    Space: 'boost', ShiftLeft: 'boost', KeyF: 'harpoon', KeyR: 'reel', KeyQ: 'utility', KeyE: 'interact', KeyB: 'build', KeyM: 'map',
+    Space: 'boost', ShiftLeft: 'boost', KeyF: 'harpoon', KeyR: 'reel', KeyQ: 'utility', KeyE: 'interact', KeyB: 'build', KeyM: 'map', KeyN: 'local',
     KeyJ: 'quests', Tab: 'quests', Escape: 'menu', KeyI: 'hold', KeyG: 'missileKey', KeyC: 'drones', KeyZ: 'autofire', KeyX: 'fireKey',
   };
   addEventListener('keydown', e => {
@@ -67,7 +67,7 @@ export function createInput(el) {
         if (rx || ry) { const d = Math.hypot(rx, ry); out.aimStick = [rx / d, ry / d]; }
         out.fire = out.fire || btn(7); out.missile = out.missile || btn(6); out.boost = out.boost || btn(0); out.reel = out.reel || btn(5);
         const edge = (i, a) => { const k = 'p' + i; if (btn(i)) { if (!padPrev.has(k)) edges.add(a); padPrev.add(k); } else padPrev.delete(k); };
-        edge(2, 'harpoon'); edge(3, 'interact'); edge(4, 'utility'); edge(9, 'menu'); edge(8, 'map'); edge(1, 'build'); edge(12, 'quests'); edge(13, 'drones');
+        edge(2, 'harpoon'); edge(3, 'interact'); edge(4, 'utility'); edge(9, 'menu'); edge(8, 'map'); edge(1, 'build'); edge(12, 'quests'); edge(13, 'drones'); edge(14, 'local');
       }
     }
     for (const a of edges) out[a + 'Pressed'] = true;

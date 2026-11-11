@@ -472,6 +472,10 @@
    "role": "summoner (up to 8 minions)",
    "blurb": "Every kill is a body to use. Raise thralls, burn the rest in a pyre, drain life back, and march the buried out.",
    "fantasy": "Thousandvale's Necromancer: the summoner. Raise Thrall (minions to the cap), Corpse Pyre, Marrow Lance, Grave Draught, Unquiet Return (a grave-touched revive), March of the Buried. The engine addition it wants is a corpse count from recent kills.",
+   "starter": [
+    "nec_raise_thrall",
+    "nec_marrow_lance"
+   ],
    "trees": [
     {
      "id": "thralls",
@@ -504,6 +508,10 @@
    "role": "ranged damage, one pet",
    "blurb": "Health as fuel, curses that spread. A bound fiend fights for you, a rift drags the pack together and copies every curse onto it.",
    "fantasy": "Thousandvale's Warlock: curses (dots) that spread, a Soul Pact that makes them tick faster, a bound imp pet, Void Rift as the pull. The engine additions it wants are a health cost and dot copying.",
+   "starter": [
+    "wlk_gnaw",
+    "wlk_bind_fiend"
+   ],
    "trees": [
     {
      "id": "gnawing_dark",
@@ -544,6 +552,10 @@
    "role": "shapeshifter: tank / melee / healer",
    "blurb": "Change shape and every skill changes with you: a thorned bear-thing, a fast wolf, a spore-lobbing healer.",
    "fantasy": "Thousandvale's Druid, from Healer OR Mage (both run on mana, so no altCost). Three shapes as stances, Thornlash, Greensap, Green Return as the revive. The engine addition it wants is a stance that swaps the action bar.",
+   "starter": [
+    "dru_fenrunner",
+    "dru_greensap"
+   ],
    "trees": [
     {
      "id": "briarback",
@@ -578,6 +590,10 @@
    "role": "melee damage / duelist",
    "blurb": "An open stance and a closed one, and a riposte for whatever comes next. Lunge and flurry change with your stance.",
    "fantasy": "Thousandvale's Fighter (the stance duelist), renamed because Fighter is a Path here. Open stance (faster, harder) and Closed (heavier armour) as stances; Riposte and Sweeping Guard answer the next blow.",
+   "starter": [
+    "wpm_open_stance",
+    "wpm_closed_stance"
+   ],
    "trees": [
     {
      "id": "open_stance",
@@ -612,6 +628,10 @@
    "role": "ranged / melee damage, one pet",
    "blurb": "Every hit you take is a debt. Brand them, hook them in, tumble clear, set the hound on them, and settle it all in one shot.",
    "fantasy": "Thousandvale's Demon Hunter, renamed. Brand Bolt, Chain Hook (a pull), Tumbling Shot, Unleash the Hound (a pet), Settle the Grudge (a shot that spends what you took), Night Hunt. Wants a grudge counter from hits taken.",
+   "starter": [
+    "rck_brand_bolt",
+    "rck_grudge_cut"
+   ],
    "trees": [
     {
      "id": "the_brand",
@@ -644,6 +664,10 @@
    "role": "healer / shadow damage",
    "blurb": "Heals by striking. Every shadow lance mends the most hurt friend, a vigil saves everyone from one killing blow, and the fallen rise mid-fight.",
    "fantasy": "Thousandvale's Priest (light and shadow), renamed. Shadow Lance and Twinlight heal the most hurt ally as they hit, Vigil (a pre-paid save), Mark the Killer, Second Dawn (a combat revive).",
+   "starter": [
+    "dsk_shadow_lance",
+    "dsk_vigil"
+   ],
    "trees": [
     {
      "id": "twinlight",
@@ -686,6 +710,10 @@
    "role": "support / healer",
    "blurb": "One song at a time: valour speeds your friends, ruin curses your enemies, mending heals everyone near you. Switching songs plays its finale.",
    "fantasy": "Thousandvale's Bard, from Healer OR Rogue. Songs as stances with party buffs, Discord Note, Mending Verse, Grand Finale. From Healer on mana, from Rogue on energy.",
+   "starter": [
+    "brd_discord_note",
+    "brd_song_of_valour"
+   ],
    "trees": [
     {
      "id": "valour",

@@ -1,8 +1,9 @@
 // Voidwright — the app: title screen, the flight loop, camera, HUD, docking, jumping, death, saves.
 // The sim (js/sim) is pure; this file feeds it input and turns its events into pictures, sound and UI.
 
-import { createWorld, step, hostile, fireHarpoon, launchDrone, repair, spawnPickup, cargoUsed } from './sim/world.js';
-import { generateGalaxy, populate, spawnGroup } from './sim/galaxy.js';
+import { createWorld, step, hostile, fireHarpoon, launchDrone, repair, spawnPickup, cargoUsed, GRACE_SECONDS } from './sim/world.js';
+import { generateGalaxy, populate, spawnGroup, SAFE_RADIUS, canWarpTo, warpCore, coreFor } from './sim/galaxy.js';
+import { streamSectors } from './sim/sectors.js';
 import { newGame, playerShip, storeShip, save, load, slots, lastSlot, sysMem } from './sim/state.js';
 import { checkQuests, CHAPTERS, UNLOCK_NAMES, unlockFromFind } from './sim/quests.js';
 import { rollLoot, makeItem, rollRarity } from './sim/loot.js';
@@ -20,7 +21,7 @@ import { BLOCKS } from './data/blocks.js';
 import { $, el, btn, toast, banner, panel, modal, fmt } from './ui/dom.js';
 import { drawMinimap } from './ui/minimap.js';
 
-const BUILD = '2026-11-06';
+const BUILD = '2026-11-11';
 const COARSE = matchMedia?.('(pointer: coarse)').matches;
 const app = window.app = {
   G: null, w: null, P: null, galaxy: null, mode: 'title', cam: { x: 0, y: 0, zoom: 1, zoomMul: 1 }, fx: null, R: null, input: null,
@@ -96,11 +97,23 @@ function loadDialog() {
 function startGame(G) {
   if (!G) { toast('That save could not be read.', 'bad'); return; }
   app.G = G; app.galaxy = generateGalaxy(G.seed);
+  migrate(G);
   ensureBosses();
   $('#title').classList.add('hidden'); $('#hud').classList.remove('hidden');
   enterSystem(G.system, G.docked != null ? 'dock' : 'start');
   if (G.quest.chapter === 0 && !G.quest.seenIntro) { G.quest.seenIntro = true; setTimeout(() => banner(CHAPTERS[0].title, CHAPTERS[0].text), 900); }
   updateQuest();
+}
+
+/** Bring an older save up to date. */
+function migrate(G) {
+  G.drive ||= 1;   // warp core class (every save starts on Class I; safer stars are always reachable)
+  // 2026-11-11: friendly fire used to sour the Guild/Navy until their stations opened fire on sight. Friendly
+  // fire is gone, and so is that grudge.
+  if (!G.fixes?.repReset) {
+    for (const [f, F] of Object.entries(FACTIONS)) if (!F.hostile) G.rep[f] = Math.max(G.rep[f] ?? 0, 0);
+    (G.fixes ||= {}).repReset = true;
+  }
 }
 
 /** Roaming giants (PLAN §0 #18): a few huge ships that wander the galaxy; rumours on the star map. */
@@ -138,15 +151,19 @@ function enterSystem(id, how = 'jump', from = null) {
   if (how === 'dock' && st) { P.x = st.x + st.r + 200; P.y = st.y; }
   else if (how === 'start') { const a = st ? Math.atan2(st.y, st.x) : 0; P.x = (st ? st.x : 3000) + Math.cos(a) * ((st?.r || 0) + 500); P.y = (st ? st.y : 0) + Math.sin(a) * ((st?.r || 0) + 500); }
   else {
+    // arrive at the jump point on the side you came from, a short flight from the middle (systems are huge)
     const fromSys = from != null ? app.galaxy.systems[from] : null;
     const a = fromSys ? Math.atan2(fromSys.y - sys.y, fromSys.x - sys.x) : Math.random() * TAU;
-    P.x = Math.cos(a) * w.size * 0.75; P.y = Math.sin(a) * w.size * 0.75; P.a = a + Math.PI;
+    P.x = Math.cos(a) * 7000; P.y = Math.sin(a) * 7000; P.a = a + Math.PI;
   }
   w.bodies.push(P); w.player = P; app.w = w; app.P = P;
+  P.grace = w.t + GRACE_SECONDS;
+  if (st) clearDoorstep(w, st);
+  for (let i = 0; i < 9; i++) streamSectors(w, P.x, P.y);   // the sectors around you are ready on arrival
   for (const k of G.drones.slice(0, P.stats.droneCap)) launchDrone(w, P, k, 0);
   app.R.setSystem(sys);
   app.cam.x = P.x; app.cam.y = P.y;
-  app.mode = 'fly'; app.spawnT = 25 + Math.random() * 20; app.lock = null;
+  app.mode = 'fly'; app.spawnT = 12 + Math.random() * 10; app.lock = null; app.waypoint = null;
   $('#st-system').textContent = `${sys.name} · Danger ${sys.tier}`;
   $('#st-system').style.color = sys.tier >= 7 ? '#ff5a6a' : sys.tier >= 4 ? '#ffc45a' : '#8fd8ff';
   if (how === 'jump') {
@@ -179,6 +196,8 @@ function frame(dt, raw) {
     else { ax = (raw.aimX - vw / 2) / cam.zoom + cam.x; ay = (raw.aimY - vh / 2) / cam.zoom + cam.y; }
     if (!raw.aimStick && raw.device !== 'kb' && P.input) { ax = P.x + Math.cos(P.a) * 300; ay = P.y + Math.sin(P.a) * 300; }
     inp = { mx: raw.mx, my: raw.my, ax, ay, fire: raw.fire, missile: raw.missile && G.unlocked.missiles !== false, boost: raw.boost, reel: raw.reel };
+    // cruise: well away from any fight the engines open up, so the big systems are quick to cross
+    inp.cruise = app.cruise = cruiseOK();
     // missile lock: hostile nearest the aim point
     let lock = null, bd = (260 / cam.zoom) ** 2;
     for (const s of w.bodies) { if (s.dead || !hostile(w, P, s) || s.cloak > 0) continue; const d = (s.x - ax) ** 2 + (s.y - ay) ** 2 - s.r * s.r; if (d < bd) { bd = d; lock = s; } }
@@ -188,7 +207,8 @@ function frame(dt, raw) {
     if (raw.utilityPressed) useUtility();
     if (raw.interactPressed) interact();
     if (raw.buildPressed) openBuild();
-    if (raw.mapPressed) openMap();
+    if (raw.mapPressed) { if (G.unlocked.galaxy) openMap(); else openLocal(); }
+    if (raw.localPressed) openLocal();
     if (raw.questsPressed) openQuests();
     if (raw.dronesPressed) openHold('drones');
     if (raw.wheel) app.cam.zoomMul = clamp(app.cam.zoomMul * (raw.wheel > 0 ? 0.88 : 1.13), 0.3, 2.4);
@@ -219,7 +239,7 @@ function frame(dt, raw) {
   if (G) handleNotes(w.notes); w.notes.length = 0;
   if (app.mode === 'title') { const t = w.t * 0.05; app.cam.x = 2450 + Math.cos(t) * 300; app.cam.y = Math.sin(t) * 200; app.cam.zoom = 0.8; }
   else if (P) updateCamera(dt, inp);
-  if (live) { spawner(dt); prompts(); droneUpkeep(dt); weather(dt); }
+  if (live) { spawner(dt); prompts(); droneUpkeep(dt); weather(dt); stream(dt); }
   if (app.mode === 'dead') { app.deadT -= dt; if (app.deadT <= 0 && !app.deathShown) { app.deathShown = true; deathPanel(); } }
   if (app.mode === 'jumping') jumpTick(dt);
   if (P && P.dead && app.mode === 'fly') onPlayerDeath();
@@ -275,7 +295,7 @@ function handleNotes(notes) {
     switch (n.t) {
       case 'kill': {
         if (n.kind === 'ground') { const s = w.bodies.find(b => b.id === n.id); if (s?.gid) sysMem(G, G.system).dead.push(s.gid); }
-        if (n.kind === 'station') { G.stats.strongholds++; sysMem(G, G.system).dead.push('pirateBase'); banner('Stronghold destroyed', 'Its treasure is yours.'); }
+        if (n.kind === 'station') { const s = w.bodies.find(b => b.id === n.id); if (s?.stronghold) { G.stats.strongholds++; sysMem(G, G.system).dead.push('pirateBase'); banner('Stronghold destroyed', 'Its treasure is yours.'); } else if (s?.gid) sysMem(G, G.system).dead.push(s.gid); }
         G.stats.kills++; G.stats.killsBy[n.faction] = (G.stats.killsBy[n.faction] || 0) + 1; G.stats.killsCls[n.cls] = (G.stats.killsCls[n.cls] || 0) + 1;
         if (n.boss) { G.stats.bossKills++; const b = G.bosses.find(x => x.name === n.name); if (b) b.alive = false; banner(`${n.name} is destroyed`, 'The galaxy will be talking about this.'); }
         for (const bt of G.bounties) if (!bt.done && bt.faction === n.faction && (!bt.cls || bt.cls === n.cls) && bt.system === G.system) { bt.got = (bt.got || 0) + 1; if (bt.got >= bt.need) { bt.done = true; toast(`Bounty complete: ${bt.title} — collect at a bounty board`, 'good'); } }
@@ -323,11 +343,14 @@ if (innerWidth < 640) $('#quest').classList.add('min');   // phones: just the ti
 function spawner(dt) {
   const w = app.w, P = app.P, G = app.G; const sys = w.system;
   app.spawnT -= dt; if (app.spawnT > 0) return;
-  app.spawnT = Math.max(25, 70 - sys.tier * 4) + Math.random() * 40;
-  const near = w.bodies.filter(b => b.kind === 'ship' && b.team === 'hostile' && !b.dead && Math.hypot(b.x - P.x, b.y - P.y) < 3000).length;
-  if (near > 4 + sys.tier) return;
-  const safeZone = w.stations.some(s => s.team !== 'hostile' && Math.hypot(s.x - P.x, s.y - P.y) < s.r + 900);
-  if (safeZone && sys.tier <= 2) return;
+  // about three times as often as before (play-test: "no enemies, nothing to kill"), more in busy systems
+  const busy = sys.traits?.enemies ?? 1;
+  app.spawnT = (Math.max(12, 32 - sys.tier * 2) + Math.random() * 18) / busy;
+  const near = w.bodies.filter(b => b.kind === 'ship' && b.team === 'hostile' && !b.dead && Math.hypot(b.x - P.x, b.y - P.y) < 3500).length;
+  if (near > (5 + sys.tier) * busy) return;
+  // never near a friendly station, and never while you are in your undock grace
+  if (P.grace > w.t) return;
+  if (w.stations.some(s => s.team !== 'hostile' && Math.hypot(s.x - P.x, s.y - P.y) < s.r + SAFE_RADIUS)) return;
   const r = rng(hash(sys.seed, G.playTime | 0));
   const a = r() * TAU; const d = 1700 + r() * 600 + P.r * 3;
   const pool = ['redfang'].concat(sys.tier >= 2 ? ['vesh'] : [], sys.tier >= 3 ? ['lattice'] : [], sys.tier >= 4 ? ['ossari'] : [], sys.tier >= 5 ? ['kharr'] : []);
@@ -395,7 +418,7 @@ function prompts() {
 function interact() {
   const it = nearestInteract(); if (!it) return;
   const G = app.G, w = app.w, P = app.P;
-  if (it.kind === 'dock') { if (w.t - P.lastHit < 4) { toast('Cannot dock under fire.', 'bad'); return; } dockAt(it.s); }
+  if (it.kind === 'dock') { if (w.t - app.combatOK() < 4) { toast('Cannot dock under fire.', 'bad'); return; } dockAt(it.s); }
   else if (it.kind === 'beacon') {
     it.p.done = true; sysMem(G, G.system).looted.push('beacon');
     const r = rng(hash(G.seed, G.system, 'beacon', G.playTime | 0));
@@ -443,6 +466,8 @@ function undock(st) {
   app.w.bodies = app.w.bodies.filter(b => b !== old); old.dead = true; app.R.forget(old.id);
   app.w.drones = app.w.drones.filter(d => d.owner !== old);
   app.w.bodies.push(P); app.w.player = P; app.P = P;
+  // a few seconds of grace and a clear doorstep (play-test: "I exited a station and was immediately destroyed")
+  P.grace = app.w.t + GRACE_SECONDS; clearDoorstep(app.w, st); app.w.combatT = -99;
   for (const k of G.drones.slice(0, P.stats.droneCap)) { launchDrone(app.w, P, k, 0); G.stats.drones = Math.max(G.stats.drones, 1); }
   if (G.drones.length) G.stats.drones = Math.max(G.stats.drones, Math.min(G.drones.length, P.stats.droneCap));
   save(G); updateQuest();
@@ -489,6 +514,8 @@ app.rebuildCost = rebuildCost;
 // ------------------------------------------------------------------ jumping (galaxy map)
 app.startJump = (toId) => {
   const G = app.G; if (app.mode !== 'fly') return;
+  const to = app.galaxy.systems[toId];
+  if (!canWarpTo(G, to)) { toast(`Your ${warpCore(G).name} cannot reach danger ${to.tier}. You need a ${coreFor(to.tier).name}.`, 'bad'); return; }
   app.mode = 'jumping'; app.jump = { to: toId, t: 0, from: G.system };
   play('jump'); toast(`Jump drive charging…`);
 };
@@ -516,7 +543,10 @@ function updateHud() {
   if (G.unlocked.cargo) mini.push(`Cargo <b class="${used >= st.cargo ? 'bad' : ''}">${used}/${Math.floor(st.cargo)}</b>`);
   mini.push(`CPU <b class="${st.cpu > st.cpuCap ? 'bad' : ''}">${st.cpu}/${st.cpuCap}</b>`);
   mini.push(`Crew <b class="${st.crewRatio < 1 ? 'bad' : ''}">${P.crew}</b>${st.crewNeed ? `<span class="hint"> need ${st.crewNeed}</span>` : ''}`);
-  mini.push(`Power <b class="${st.powerRatio < 1 ? 'bad' : ''}">${st.power}/${st.powerUse}</b>`);
+  mini.push(`Power <b class="${st.powerOk ? '' : 'bad'}">${Math.round(st.power)}/${Math.round(st.powerUse)}</b>`);
+  if (P.grace > app.w.t) mini.push(`<b class="good">Safe launch ${Math.ceil(P.grace - app.w.t)}s</b>`);
+  else if (app.cruise && Math.hypot(P.vx, P.vy) > 40) mini.push('<b class="good">Cruise</b>');
+  else if (app.w.t - app.combatOK() < 5) mini.push('<b class="bad">In combat</b>');
   if (P.stats.droneCap) mini.push(`Drones <b>${app.w.drones.filter(d => !d.dead && d.owner === P).length}/${P.stats.droneCap}</b>`);
   if (P.repairStarved) mini.push('<b class="bad">Repairs need ferrite</b>');
   const ms = $('#mini-stats'), mh = mini.join(' '); if (ms.dataset.h !== mh) { ms.innerHTML = mh; ms.dataset.h = mh; }
@@ -570,6 +600,8 @@ function drawOverlay(c, o) {
   // off-screen markers: station, POIs, boss
   const marks = [];
   for (const s of w.stations || []) if (!s.dead) marks.push({ x: s.x, y: s.y, color: s.team === 'hostile' ? '#ff5a6a' : '#5fd8ff', label: s.name });
+  if (app.waypoint) { if (Math.hypot(app.waypoint.x - P.x, app.waypoint.y - P.y) < 400) { app.waypoint = null; toast('You have arrived.'); } else marks.push({ x: app.waypoint.x, y: app.waypoint.y, color: '#ffd27a', label: `Course: ${app.waypoint.label}` }); }
+  if (P.grace > w.t) { const k = Math.min(1, (P.grace - w.t) / 2); c.strokeStyle = `rgba(110,255,170,${0.25 + 0.35 * k})`; c.lineWidth = 2 * o.ok; c.setLineDash([6 * o.ok, 6 * o.ok]); c.beginPath(); c.arc(o.ox(P.x), o.oy(P.y), (P.r + 30) * o.oz, 0, 7); c.stroke(); c.setLineDash([]); }
   for (const p of w.poi || []) if (!p.done && !(p.body && p.body.dead)) marks.push({ x: p.body?.x ?? p.x, y: p.body?.y ?? p.y, color: p.kind === 'boss' ? '#ff3b5c' : p.kind === 'beacon' ? '#ffc45a' : p.kind === 'claim' ? '#5fff9a' : p.kind === 'stronghold' ? '#ff5a6a' : '#c48cff', label: p.kind === 'boss' ? p.name : p.kind === 'beacon' ? 'Distress call' : p.kind === 'claim' ? (app.G.unlocked.claims ? 'Rich field (claim)' : 'Rich field') : p.kind === 'stronghold' ? 'Stronghold' : 'Derelict' });
   c.font = `600 ${Math.round(11 * o.ok)}px Rajdhani, system-ui`; c.textAlign = 'center';
   for (const m of marks) {
@@ -610,6 +642,7 @@ function openMenu() {
     add('Resume', () => {}, 'primary');
     if (G.unlocked.build) add('Build mode (B)', openBuild);
     add('Parts hold, cargo & drones', () => openHold());
+    add('Local map (N)', openLocal);
     if (G.unlocked.galaxy) add('Star map (M)', openMap);
     add('Goals', openQuests);
     add('Settings', settingsDialog);
@@ -636,7 +669,7 @@ function controlsDialog() {
     m.append(el('div', { class: 'kv', html: [
       ['Fly', 'W A S D / left stick / left thumb'], ['Aim', 'Mouse / right stick / right thumb'], ['Fire manual weapons + mining lasers', 'Left mouse / RT / push right thumb'],
       ['Missiles at the marked target', 'Right mouse / LT / Missiles button'], ['Boost', 'Space or Shift / A'], ['Harpoon (again to let go)', 'F / X'], ['Reel the harpoon in', 'hold R / RB'],
-      ['Dock / use', 'E / Y'], ['Cloak', 'Q / LB'], ['Build mode', 'B / B button'], ['Star map', 'M / Back'], ['Goals', 'J or Tab'], ['Drones', 'C'], ['Zoom', 'Mouse wheel'], ['Menu', 'Esc / Start'],
+      ['Dock / use', 'E / Y'], ['Cloak', 'Q / LB'], ['Build mode', 'B / B button'], ['Local map (also: tap the radar)', 'N / D-pad left'], ['Star map', 'M / Back'], ['Goals', 'J or Tab'], ['Drones', 'C'], ['Zoom', 'Mouse wheel'], ['Menu', 'Esc / Start'],
     ].map(([a, b]) => `<span>${a}</span><span>${b}</span>`).join('') }), el('p', { class: 'hint' }, 'Turrets aim and fire on their own. Your ship\'s nose follows the way you fly, so fixed forward guns point where you travel.'), btn('Done', close, 'primary'));
   });
 }
@@ -670,12 +703,49 @@ function openBuild() {
   if (app.mode === 'fly' && app.w.t - app.combatOK() < 5) { toast('Too hot — get out of combat to rebuild.', 'bad'); return; }
   import('./ui/build.js').then(m => m.openBuild(app, { docked: app.mode === 'docked' })).catch(e => console.error(e));
 }
-app.combatOK = () => Math.max(app.P?.lastHit ?? -99, app.w?.combatT ?? -99);
+// combat = a real exchange with an enemy (world.js noteCombat). Bumps, rocks and stray shots no longer count.
+app.combatOK = () => app.w?.combatT ?? -99;
 app.openBuild = openBuild;
 function openMap() {
   if (!app.G.unlocked.galaxy) { const ch = CHAPTERS.find(c => c.unlock.includes('galaxy')); toast(`The star map opens when you finish the goal "${ch?.title || 'ahead'}".`); return; }
   import('./ui/galaxy.js').then(m => m.openGalaxy(app)).catch(e => console.error(e));
 }
+function openLocal() {
+  if (app.mode !== 'fly' || !app.P) return;
+  import('./ui/localmap.js').then(m => m.openLocalMap(app)).catch(e => console.error(e));
+}
+app.openLocal = openLocal;
+$('#minimap').addEventListener('click', () => openLocal());
+$('#minimap').addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); openLocal(); }, { passive: false });
+
+/** Out of combat, nothing hostile close, and you are flying somewhere: cruise. */
+function cruiseOK() {
+  const w = app.w, P = app.P;
+  if (w.t - app.combatOK() < 6) return false;
+  for (const b of w.bodies) if (b.kind === 'ship' && !b.dead && hostile(w, b, P) && Math.hypot(b.x - P.x, b.y - P.y) < 2200) return false;
+  return true;
+}
+
+/** Fill in the sectors around you as you fly; let go of the far ones (sim/sectors.js). */
+function stream(dt) {
+  app.streamT = (app.streamT || 0) - dt; if (app.streamT > 0) return; app.streamT = 0.25;
+  streamSectors(app.w, app.P.x, app.P.y);
+  app.pruneT = (app.pruneT || 0) - 0.25; if (app.pruneT <= 0) { app.pruneT = 10; app.R.prune?.(app.w); }
+}
+
+/** Hostile ships parked at a friendly station's door are moved off it. */
+function clearDoorstep(w, st) {
+  if (!st || st.team === 'hostile') return;
+  for (const b of w.bodies) {
+    if (b.dead || b.kind !== 'ship' || b.team !== 'hostile') continue;
+    const dx = b.x - st.x, dy = b.y - st.y; const d = Math.hypot(dx, dy) || 1;
+    const want = st.r + SAFE_RADIUS;
+    if (d < want) { b.x = st.x + dx / d * (want + 400); b.y = st.y + dy / d * (want + 400); if (b.ai) b.ai.target = null; }
+  }
+  // and any shots already in the air near the door fizzle
+  for (const p of w.shots) if (p.team !== 'player' && Math.hypot(p.x - st.x, p.y - st.y) < st.r + SAFE_RADIUS) p.dead = true;
+}
+
 function openQuests() { import('./ui/quests-ui.js').then(m => m.openQuests(app)).catch(e => console.error(e)); }
 function openHold(tab) { import('./ui/hold.js').then(m => m.openHold(app, tab)).catch(e => console.error(e)); }
 app.openHold = openHold; app.openMap = openMap; app.updateQuest = updateQuest; app.save = () => { if (app.P && app.mode !== 'docked') storeShip(app.G, app.P); return save(app.G); };
@@ -689,7 +759,7 @@ window.gameEye = {
       mode: app.mode, build: BUILD,
       player: P ? { x: Math.round(P.x), y: Math.round(P.y), hp: Math.round(P.stats.hp), maxHp: Math.round(P.stats.maxHp), blocks: P.stats.blocks, cls: P.cls, dead: P.dead, speed: Math.round(Math.hypot(P.vx, P.vy)), turrets: P.turrets.length } : null,
       game: G ? { credits: G.credits, cargo: G.cargo, parts: G.parts.length, chapter: G.quest.chapter, unlocked: Object.keys(G.unlocked), system: G.system, tier: w?.tier, stats: G.stats } : null,
-      world: w ? { bodies: w.bodies.length, ships: w.bodies.filter(b => b.kind === 'ship').length, hostiles: w.bodies.filter(b => b.kind === 'ship' && b.team === 'hostile').length, shots: w.shots.length, pickups: w.pickups.length, drones: w.drones.length, parts: app.fx.parts.length } : null,
+      world: w ? { size: w.size, sectors: w.sectors?.loaded.size || 0, grace: P ? Math.max(0, +(P.grace - w.t || 0).toFixed(1)) : 0, combat: +(w.t - (w.combatT ?? -99)).toFixed(1), drive: G?.drive || 1, bodies: w.bodies.length, ships: w.bodies.filter(b => b.kind === 'ship').length, hostiles: w.bodies.filter(b => b.kind === 'ship' && b.team === 'hostile').length, shots: w.shots.length, pickups: w.pickups.length, drones: w.drones.length, parts: app.fx.parts.length } : null,
       panels: [...$('#panels').children].map(p => p.querySelector('h2')?.textContent),
     };
   },

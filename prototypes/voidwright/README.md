@@ -1,5 +1,10 @@
 # Voidwright
 
+> **Status:** live on games.radgh.com · QA pass done 2026-11-11 (lint clean, every screen walked on desktop + phone) · enemy toughness taken back + gnat packs 2026-11-11 · checked 2026-11-11
+> **Play:** LAN `http://<LAN IP>:8400/prototypes/voidwright/` (stable; https 8442 for a controller) · public https://games.radgh.com/voidwright/
+> **Next:** the owner's next play-test — watch whether enemies now feel right and gnat packs are fun; tune `ENEMY_HP` / gnat numbers in `js/sim/shipgen.js` from what he reports
+> **Parked:** co-op (the input shape is ready, `docs/PLAN.md`); nothing else on hold
+
 A 2D top-down space game: **build your ship from blocks → kill things or work for things → upgrade → kill bigger
 things.** You start in a tiny mining skiff at the edge of a galaxy and can grow into a dreadnought about 100 times
 its mass. Started 2026-11-06 from the owner's brief (`docs/OWNER-BRIEF.md`); his 20 rulings are `docs/PLAN.md` §0 —
@@ -37,9 +42,15 @@ ports (8442 stable / 8441 dev).
   exchange with an enemy (`world.js noteCombat`). Stations never turn hostile over reputation. **Safe launch**:
   `P.grace` for 6 s after undocking/arriving — nothing can hurt or target you, your auto turrets hold fire, firing
   yourself ends it; hostiles are moved off a friendly station's doorstep (`SAFE_RADIUS` 3.5 km, also kept free of
-  spawns/camps). Enemies are hardened (`shipgen.js hardenEnemy`: ×2+ hull, guns ×0.75 rate; hostile stations ×0.45
-  rate, ×0.6 damage, at most 3+danger big guns) and one blast deals at most 1.5× its damage to a body
-  (`SPLASH_CAP`), so missiles no longer erase a ship per volley.
+  spawns/camps). Enemies are hardened (`shipgen.js hardenEnemy`: guns ×0.75 rate; hostile stations ×0.45
+  rate, ×0.6 damage, at most 3+danger big guns). One blast deals at most 1.5× its damage to YOUR ship
+  (`SPLASH_CAP`). The ×2+ enemy hull and the blast cap on enemies were taken back on 2026-11-11 (owner: "now they
+  are too strong") — `ENEMY_HP` is 1.
+- **Gnats** (2026-11-11, owner: "low level enemies easy to kill in small swarms without shields"): `generateShip({
+  gnat: true })` makes a 3-4 cell dart with one small gun, frame hull, no shield, 60% damage (Gnat-123 for human
+  factions, Mite-123 for aliens). `spawnGroup(..., 'gnats')` makes a pack of 5-9; about a quarter of roaming groups
+  near home are gnat packs (fewer further out), and the sector streamer adds **Gnat pack** sectors (orange on the
+  local map).
 - The **quest line** (Goals, J/Tab) gives one vague goal at a time ("mine 25 ore", "make 3,000 profit trading") that
   can be done anywhere; each one unlocks the next part of the game (drip-feed). Finding certain parts unlocks their
   feature early.
@@ -86,3 +97,12 @@ No build step; ES modules. `index.html` → `js/main.js`.
 loot, shields, determinism, mining, harpoon, destruction, galaxy, economy, quests; `playtest-1110.test.mjs` = one
 test per play-test report 15-23) and
 `npx playwright test prototypes/voidwright/tests/game.spec.js` (desktop + phone, zero console errors).
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Voidwright** (2026-11-06 →): 2D top-down space game — ships are grids of SQUARE blocks (slopes are a cosmetic smoothing pass in `js/render/bake.js`), arcade flight with the nose following travel, turrets with arcs, 41 weapons over 5 damage types × 3 hit sizes, bubble + deflector shields, 14 armour materials, mining asteroids cell by cell and planets from low orbit, harpoon tether, drones that fly ahead, 7 factions (3 human, 4 alien), a 46-star galaxy whose danger grows with distance, station shops (market with price memory, outfitter, shipyard, refinery, repair, crew, insurance, drones, research, salvage, bounties, black market), 8 hull classes up to a dreadnought ~100× the starter's mass, an 18-goal quest that drip-feeds features. Pure sim in `js/sim/` (seeded via `rand.js`), WebGL2 post pass (bloom, light map, shockwave ripples) in `js/render/post.js`. Read `README.md` + `docs/PLAN.md` §0 (owner's 20 rulings) first
+
+**Status / key files:** playable 2026-11-06

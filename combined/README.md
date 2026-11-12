@@ -28,3 +28,14 @@ Keep the three sections independent: a game that only wants portraits can drop `
 
 ## Tests
 `npm test -- combined` (Playwright): loads, speaks a line (voice synthesized headlessly), runs a conversation, screenshot in `test-results/combined.png`.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Character sheet: two full characters (avatar+voice+speech) in one 3D scene, talking with generated lines, their own voices and talk animation; scene picker + memory roller/clock feeding the conversation; random full characters; JSON round-trip
+
+**Status / key files:** done 2026-09-10
+
+**Status / key files:** `combined/README.md`, `js/app.js`, `data/characters.json`

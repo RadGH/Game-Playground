@@ -18,10 +18,11 @@ const sized = (id, U) => {
 export const TIER_DMG = [0.3, 0.3, 0.42, 0.55, 0.65, 0.74, 0.82, 0.9, 0.96, 1.02, 1.08];
 /**
  * Enemy pacing (play-test 2026-11-10: "one or two missile bursts kill them before they fight back", and a
- * danger-3 base "obliterated me immediately"). Enemy hulls get more health per block, and their guns cycle
- * slower, so fights last long enough to be fights in both directions.
+ * danger-3 base "obliterated me immediately"). Enemy guns cycle slower and bases carry fewer of them.
+ * The extra hull (x2.1-3.2 per block) that came with it was taken back on 2026-11-11 (owner: "now they
+ * are too strong"), so ENEMY_HP is 1 — the knob stays in case a later play-test wants a little more.
  */
-export const ENEMY_HP = t => 2 + Math.min(10, t) * 0.12;
+export const ENEMY_HP = () => 1;
 export const ENEMY_FIRE = 0.75;      // ships
 export const STATION_FIRE = 0.45;    // hostile stations and strongholds: big, but they no longer shred you on sight
 export function hardenEnemy(body) {
@@ -79,18 +80,21 @@ function profile(shape, len, half, r) {
  * Generate a ship body.
  * @param {object} o { cls, faction, tier, seed, role }
  */
-export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, seed = 1, role = null } = {}) {
+export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, seed = 1, role = null, gnat = false } = {}) {
   const r = rng(seed);
   const F = FACTIONS[faction] || FACTIONS.redfang; const style = F.style;
+  // a gnat: the smallest enemy there is — a 3-4 cell dart with one or two small guns, no shield, thin
+  // hull. They come in packs of 5-9 (galaxy.js spawnGroup 'gnats') as easy targets for any loadout.
+  if (gnat) { cls = 'skiff'; role = 'swarm'; }
   role = role || r.pick(style.roles);
-  const [len, wid, U] = dims(cls, r);
+  const [len, wid, U] = gnat ? [r.int(3, 4), 3, 1] : dims(cls, r);
   const half = (wid - 1) / 2;
   const hw = profile(style.shape, len, half, r);
   // occupancy mask in units, mirrored
   const mask = [];
   for (let y = 0; y < wid; y++) { mask.push([]); for (let x = 0; x < len; x++) mask[y][x] = Math.abs(y - half) <= hw[x]; }
   // wings: a pair of rectangles sticking out
-  const wings = r.int(0, cls === 'skiff' ? 1 : 2);
+  const wings = gnat ? 0 : r.int(0, cls === 'skiff' ? 1 : 2);
   for (let k = 0; k < wings; k++) {
     const wx = r.int(0, Math.max(0, len - 3)), wl = r.int(1, Math.max(1, Math.round(len / 3)));
     const reach = half;
@@ -149,7 +153,7 @@ export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, see
   set(coreX - 1, half, POWER[U]);
   pair(coreX, 1, r.chance(0.5) ? CPU[U] : GYRO[U]);
   pair(coreX - 1, 1, sized('quarters', U));
-  if (tier >= 2 || r.chance(0.5)) set(coreX + 1, half, r.chance(0.6) ? BUBBLE[U] : ARCSH[U]);
+  if (!gnat && (tier >= 2 || r.chance(0.5))) set(coreX + 1, half, r.chance(0.6) ? BUBBLE[U] : ARCSH[U]);
   if (role === 'carrier') { pair(coreX + 1, 1, BAY[U]); if (CLASSES[cls].rank >= 4) pair(coreX - 2, 1, BAY[U]); }
   if (role === 'trader' || role === 'miner') { for (let x = 1; x < len - 1; x++) pair(x, 1, sized('cargo', U)); }
   if (len > 6) set(coreX - 2, half, POWER[U]);
@@ -157,16 +161,16 @@ export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, see
   const nose = len - 1;
   if (role !== 'trader') set(nose, half, weaponFor(r.chance(0.5) ? 'fixed' : null), 0, itemFor());
   // turrets on the outer hull, armour everywhere else on the outside
-  const density = role === 'trader' ? 0.12 : role === 'capital' ? 0.4 : (U === 1 && tier <= 2 ? 0.16 : 0.26) + Math.min(0.2, tier * 0.02);
+  const density = gnat ? 0.15 : role === 'trader' ? 0.12 : role === 'capital' ? 0.4 : (U === 1 && tier <= 2 ? 0.16 : 0.26) + Math.min(0.2, tier * 0.02);
   for (let x = len - 1; x >= 0; x--) for (let d = 0; d <= half; d++) {
     const y = half - d;
     if (!isIn(x, y) || used.has(key(x, y))) continue;
-    if (outer(x, y) && r.chance(density)) {
+    if (outer(x, y) && r.chance(density) && !(gnat && gunCount >= 1)) {
       const wid0 = weaponFor(role === 'miner' ? null : null);
       const rotTop = x < len * 0.3 ? 5 : x > len * 0.7 ? 7 : 6;
       pair(x, d, role === 'miner' && r.chance(0.5) ? (U === 1 ? 'mining_laser' : 'big_mining_laser') : wid0, rotTop, (8 - rotTop) & 7, itemFor());
-    } else if (outer(x, y)) pair(x, d, armorId);
-    else pair(x, d, r.chance(0.15) ? sized('cargo', U) : r.chance(0.2) ? armorId : frameId);
+    } else if (outer(x, y)) pair(x, d, gnat ? frameId : armorId);
+    else pair(x, d, gnat ? frameId : r.chance(0.15) ? sized('cargo', U) : r.chance(0.2) ? armorId : frameId);
   }
   // give it enough CPU and power to run what it carries: swap interior frames for computers / reactors
   const fix = () => {
@@ -185,6 +189,7 @@ export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, see
   body.name = shipName(r, F, cls);
   // enemies near home hit softly; the far rim hits harder than the raw numbers
   body.dmgMul = TIER_DMG[Math.min(10, tier)];
+  if (gnat) { body.gnat = true; body.dmgMul *= 0.6; body.name = gnatName(r, F); }
   return body;
 }
 
@@ -194,6 +199,9 @@ const PREFIX = {
 };
 const WORDS = ['Ashfall', 'Brine', 'Corvid', 'Dusk', 'Ferris', 'Gale', 'Harrow', 'Ivory', 'Juniper', 'Krait', 'Lumen', 'Moth', 'Nadir', 'Onyx',
   'Pike', 'Quill', 'Rook', 'Sable', 'Thistle', 'Umber', 'Vane', 'Wick', 'Xylo', 'Yarrow', 'Zephyr', 'Cinder', 'Halberd', 'Gannet'];
+function gnatName(r, F) {
+  return `${F.human ? 'Gnat' : 'Mite'}-${r.int(10, 999)}`;
+}
 function shipName(r, F, cls) {
   const id = Object.keys(FACTIONS).find(k => FACTIONS[k] === F);
   if (!F.human) return `${r.pick(PREFIX[id])}-${r.int(10, 999)}`;

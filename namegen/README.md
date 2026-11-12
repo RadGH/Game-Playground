@@ -43,3 +43,14 @@ Results carry the race and its style tags (soft, harsh, cozy…) plus pattern ta
 
 ## Tests
 `node --test namegen/tests/*.test.js`: every race × category generates seeded, varied, well-formed names; translations stable; dwarves prefer stone/metal; gendered names and lingo export; faction forms; helpers.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Name Forge: per-race languages (phonology + concept dictionary, 12 races, 268 tagged concepts), pattern grammar for people/factions/regions/settlements/landmarks/artifacts/mottos, glosses, forms (member/members/adj/people/short/possessive), respell pronunciation, Lingo lexicon export
+
+**Status / key files:** done 2026-09-10
+
+**Status / key files:** `namegen/README.md`, `js/namegen.js`, `data/{languages,concepts,patterns}.json`

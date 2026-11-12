@@ -39,3 +39,14 @@ Lingo (items as `{item.a}`, `{item.pl}` with correct plurals via `toLexiconEntry
 
 ## Tests
 `node --test items/tests/*.test.js`: catalog integrity, race coverage, query semantics, seeded rolls with named epics, affinity shows in rolls. `npm test -- items` (Playwright): UI rolls, filters, catalog.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Item Vault: ~340-item tagged catalog with race affinity weights + exclusives, materials/qualities/enchants, loot roller with Name Forge artifact names and lore, Lingo export
+
+**Status / key files:** done 2026-09-10
+
+**Status / key files:** `items/README.md`, `js/items.js`, `data/{items,materials}.json`, `tools/build-items.py`

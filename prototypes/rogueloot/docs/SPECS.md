@@ -131,7 +131,7 @@ minion cap.
 - **Breaking Line** (one target and control): Breaching Shove (10, a cone that interrupts and dazes — the spec's
   interrupt), Find the Gap (11), Hammer Blow (12, 190% and −12% armour, the single-target filler), Sunder (14,
   synergy), Run Them Down (14, a 12 m rush that roots — the answer to a leader running for help), Finishing Blow
-  (16, 300%), Shockwave (18, a 12 m stunning line), **Groundbreaker** (20: 400% down an 18 m line and a stun).
+  (16, 300%), Shockwave (18, a 12 m stunning line), **Groundbreaker** (20: 400% down an 18 m line and a stun). **Doubled Grasp** (18, one rank, added 2026-11-11 for game standards §5b: a melee two-hander in each hand, the off one swinging at half damage; js/rules/hands.js).
 
 **Rotation at 15** (Crowd Swing, Iron Gyre, Hammer Blow, Breaching Shove, Hold the Line, Run Them Down): Headlong
 in (Path) → Hold the Line (free of the global; they are all on you now) → Iron Gyre while they are bunched → Crowd
@@ -671,7 +671,7 @@ stance pressed again leaves it; a skill on the bar counts as known at rank 1 (it
 the hero has reached its level** — `rankOf` gates the bar by `reqLevel`, so a level-10 Druid in Sporecap cannot use
 the level-20 Great Bloom just because the shape lists it. Every bar leads with its own stance (the way out). Six
 skills exist only on a bar (`hidden: true`, no `tree`, `maxRank` 1, owner and level like the rest): the Briarback's
-Maul, the Fenrunner's Rip, and the Weaponmaster's Open/Closed Flurry and Open/Closed Lunge — which is how "lunge and
+Bramble Paw (id dru_maul), the Fenrunner's Rip, and the Weaponmaster's Open/Closed Flurry and Open/Closed Lunge — which is how "lunge and
 flurry change with your stance" is done: the neutral Lunge and Flurry sit in the Mastery tree, and each stance's bar
 carries its own version instead. A synergy node can still feed a hidden skill (Sharper Fangs → Rip). Stance `stats`
 the engine reads are damage, crit, castSpeed, healTaken, threat, armour, dodge and moveSpeed, and `stats.perRank`
@@ -777,7 +777,7 @@ apart, Sporecap heals and lobs spores. Greensap and Lunge work in any shape; Gre
 fighting shapes hit with your weapon (so a Druid who wants to bite stacks Strength and wears mail); Sporecap heals
 with Spirit. Three trees, one a shape:
 
-- **Briarback** (bar: Briarback, Maul, Thornlash, Bristle, Root Stomp, Ancient Bark): the shape (10: +30% armour,
+- **Briarback** (bar: Briarback, Bramble Paw, Thornlash, Bristle, Root Stomp, Ancient Bark): the shape (10: +30% armour,
   far more attention, −10% damage and speed), Thick Hide (11), Thornlash (12, 120% + taunt + a small stabbing ward —
   the filler), Bristle (12, a 116 ward that stabs back + 20% armour), Bark Roar (14, a 10 m taunt, hits 10% softer,
   off-GCD), Deeper Thorns (14, synergy), Root Stomp (16, 110% + a 2 s hold on everything in 5 m), Old Growth (16),

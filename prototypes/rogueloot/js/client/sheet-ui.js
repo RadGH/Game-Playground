@@ -3,10 +3,13 @@
 // referee); the screen redraws from the character the sim sends back.
 //   const ui = createSheetUI({ items, send, getChar, nope });  ui.toggle();  ui.refresh(ch)
 import { sheet } from '../rules/sheet.js';
-import { itemName, itemMods, itemReq, weaponDamage, itemArmour, canEquip, profOf } from '../rules/items.js';
+import { itemName, itemMods, itemReq, weaponDamage, itemArmour, profOf } from '../rules/items.js';
+import { cardStats } from '../rules/card.js';
+import { gripOf, compareSlots, firstCompareSlot } from '../rules/hands.js';
 import { ATTRS, ATTR_NAMES, ATTR_HELP, xpAtLevel, xpToNext } from '../rules/progression.js';
 import { BAG_W, BAG_H } from '../rules/bag.js';
 import { ask, tell, askText } from '../../../../shared/dialog.js';
+import { itemIcon } from './icons.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const GLYPH = { sword: '🗡', dagger: '🔪', axe: '🪓', mace: '🔨', sceptre: '⚚', greatsword: '⚔', greataxe: '🪓', maul: '🔨', spear: '🔱', polearm: '🔱', bow: '🏹', crossbow: '🏹', staff: '⚕', wand: '🪄',
@@ -24,10 +27,11 @@ const STAT_TEXT = {
   cooldownReduction: v => `Cooldowns ${v}% shorter`, potionPower: v => `Potions ${v}% stronger`, threat: v => `+${v}% threat`, staggerChance: v => `+${v}% chance to stagger`, lightRadius: v => `+${v} light`, potionSlots: v => `${v} potion slots`,
 };
 export const rarityClass = it => 'r-' + (it.ided === false ? 'unid' : it.rarity);
-export const glyph = (items, it) => it.base === 'shard' ? '◈' : it.base === 'dust' ? '✧' : it.base === 'potion' ? (it.kind === 'mana' ? '💧' : '❤') : GLYPH[items.bases[it.base]?.kind] || GLYPH[items.bases[it.base]?.slot] || '◆';
+/** Potions, shards and dust are drawn art from the icon library; gear keeps its glyph until its 3D icons arrive. */
+export const glyph = (items, it) => (it.base === 'shard' || it.base === 'dust' || it.base === 'potion' ? itemIcon(it, null, 30) : null) || GLYPH[items.bases[it.base]?.kind] || GLYPH[items.bases[it.base]?.slot] || '◆';
 
 /** Tooltip HTML for an item, with requirement colours for `ch` and a comparison against `worn` (the item in that slot). */
-export function itemTip(items, it, ch, worn = null, potions = null, currency = null) {
+export function itemTip(items, it, ch, worn = null, potions = null, currency = null, label = '') {
   if (it.base === 'shard' || it.base === 'dust') {
     const C = currency || {}; const S = C.shards?.find(x => x.id === it.shard), G = C.grades?.[(it.grade || 1) - 1];
     if (it.base === 'dust') return `<div class="tip r-normal"><h4>Shard Dust ×${it.n}</h4><div>The crafter in town turns ${C.convert?.dustToGlimmer || 20} dust into a Glimmer Shard.</div></div>`;
@@ -35,12 +39,11 @@ export function itemTip(items, it, ch, worn = null, potions = null, currency = n
   }
   if (it.base === 'potion') { const z = potions?.sizes?.[it.size] || {}; return `<div class="tip r-normal"><h4>${esc(z.name || '')} ${it.kind === 'mana' ? 'Mana' : 'Healing'} Potion</h4><div class="sub">${it.n} in this stack</div><div class="big">Restores ${z[it.kind] || '?'} ${it.kind === 'mana' ? 'mana' : 'health'} over ${z.secs || '?'} seconds</div><div>Drinking another adds a second refill on top.</div><div class="req">${it.kind === 'mana' ? 'E' : 'Q'} drinks one from your belt</div></div>`; }
   const b = items.bases[it.base] || {}, req = itemReq(items, it), st = ch ? sheet(ch, items) : null;
-  const lines = [];
-  const wd = weaponDamage(items, it); if (wd) lines.push(`<div class="big">${wd.min}–${wd.max} damage · ${wd.speed} attacks a second</div>`);
-  const ar = itemArmour(items, it); if (ar) lines.push(`<div class="big">${ar} armour</div>`);
-  if (b.block) lines.push(`<div>${b.block.chance}% block · blocks ${b.block.amount}</div>`);
+  const lines = [], card = cardStats(items, it);
+  // one line per stat (game standards §5b): the base's own number with its affixes folded in, the split beside it
+  for (const l of card.lines) lines.push(`<div class="${l.key === 'speed' || l.key === 'block' ? 'line' : 'big'}">${esc(l.text)}${l.split ? ` <small class="split">(${esc(l.split)})</small>` : ''}</div>`);
   if (it.ided === false) lines.push('<div class="unid">Unidentified — right-click (or tap Identify) to reveal it. Free.</div>');
-  else for (const [stat, m] of Object.entries(itemMods(items, it))) lines.push(`<div class="mod">${esc((STAT_TEXT[stat] || (v => `+${v} ${stat}`))(m.value))}</div>`);
+  else for (const [stat, m] of Object.entries(card.mods)) lines.push(`<div class="mod">${esc((STAT_TEXT[stat] || (v => `+${v} ${stat}`))(m.value))}</div>`);
   if (it.power && it.ided !== false) { const pw = items.powers[it.power]; if (pw) lines.push(`<div class="power">★ ${esc(pw.name)}: ${esc(pw.text)}</div>`); }
   const reqs = [];
   const bad = (have, need) => have < need ? ' class="bad"' : '';
@@ -49,24 +52,35 @@ export function itemTip(items, it, ch, worn = null, potions = null, currency = n
   const prof = ch && b.slot && !canUseByPath(items, ch, b) ? `<div class="bad">Your Path can't use this.</div>` : '';
   const cmp = worn && worn.uid !== it.uid ? compare(items, it, worn) : '';
   const uniq = it.unique && it.ided !== false ? items.uniques[it.unique] : null;
-  return `<div class="tip ${rarityClass(it)}"><h4>${esc(itemName(items, it))}</h4><div class="sub">${esc(cap(it.rarity))} ${esc(b.name || '')} · item level ${it.ilvl}</div>
+  return `<div class="tip ${rarityClass(it)}">${label ? `<div class="worn-label">${esc(label)}</div>` : ''}<h4>${esc(itemName(items, it))}</h4>${card.hand ? `<div class="hand">${esc(card.hand)}</div>` : ''}<div class="sub">${esc(cap(it.rarity))} ${esc(b.name || '')} · item level ${it.ilvl}</div>
     ${lines.join('')}${uniq?.lore ? `<div class="lore">“${esc(uniq.lore)}”</div>` : ''}
     <div class="req">Requires ${reqs.join(' · ')}</div>${prof}${it.dur ? `<div class="dur${it.dur[0] <= 0 ? ' bad' : ''}">Durability ${it.dur[0]} / ${it.dur[1]}${it.dur[0] <= 0 ? ' — broken, repair in town' : ''}</div>` : ''}${cmp}</div>`;
 }
 const cap = s => String(s || '').replace(/^\w/, c => c.toUpperCase());
+const SLOT_NAME = { ...SLOT_LABEL, ring1: 'Ring 1', ring2: 'Ring 2' };
+/** Side by side (game standards §5b): the item with green/red differences, and what it would replace in `slot`. When
+ *  two slots could take it, the head names both and which one is compared (Shift, Y or the Compare button switches). */
+export function compareTipHtml(items, it, ch, slot, slots = [slot], potions = null, currency = null) {
+  const worn = ch?.equip?.[slot];
+  const head = slots.length > 1 ? `<div class="cmp-head">Compare: ${slots.map(s => `<b class="${s === slot ? 'on' : ''}">${esc(SLOT_NAME[s])}</b>`).join(' / ')} <small>Shift · Y · Compare button</small></div>` : '';
+  const right = worn ? itemTip(items, worn, ch, null, potions, currency, 'Equipped · ' + SLOT_NAME[slot]) : `<div class="tip empty"><div class="worn-label">Equipped · ${esc(SLOT_NAME[slot])}</div><p>Nothing there yet.</p></div>`;
+  return `<div class="cmp-view">${head}<div class="cmp-cards">${itemTip(items, it, ch, worn, potions, currency)}${right}</div></div>`;
+}
 const canUseByPath = (items, ch, b) => { const p = profOf(items, ch); if (b.slot === 'weapon') return (p.weapons || []).some(x => x === b.proficiency || x === b.kind || x === b.class); if (b.slot === 'offhand') return (p.offhand || []).some(x => x === b.kind || x === b.class); if (['head', 'chest', 'hands', 'feet'].includes(b.slot)) return (p.armour || []).includes(b.proficiency); return true; };
 function compare(items, it, worn) {
   const rows = [];
   const a = weaponDamage(items, it), b = weaponDamage(items, worn);
+  const bl = items.bases[it.base]?.block, bw = items.bases[worn.base]?.block;
+  if (bl || bw) { const c1 = (bl?.chance || 0) + (itemMods(items, it).blockChance?.value || 0), c2 = (bw?.chance || 0) + (itemMods(items, worn).blockChance?.value || 0); if (c1 !== c2) rows.push(delta('% block chance', c1 - c2)); }
   if (a && b) { const da = (a.min + a.max) / 2 * a.speed, db = (b.min + b.max) / 2 * b.speed; if (Math.abs(da - db) >= 0.05) rows.push(delta('damage a second', da - db, 1)); }
   const ar = itemArmour(items, it) - itemArmour(items, worn); if (ar) rows.push(delta('armour', ar));
-  const m1 = itemMods(items, it), m2 = itemMods(items, worn);
+  const m1 = cardStats(items, it).mods, m2 = cardStats(items, worn).mods;      // stats the damage/armour lines folded in are counted there, once
   for (const k of new Set([...Object.keys(m1), ...Object.keys(m2)])) { const d = (m1[k]?.value || 0) - (m2[k]?.value || 0); if (d) rows.push(delta((STAT_TEXT[k] ? STAT_TEXT[k](1).replace(/^\+?1%? ?/, '') : k), d)); }
   return rows.length ? `<div class="cmp"><b>Compared with ${esc(itemName(items, worn))}:</b>${rows.join('')}</div>` : '';
 }
-const delta = (label, d, dp = 0) => `<div class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲ +' : '▼ '}${d.toFixed(dp)} ${esc(label)}</div>`;
+const delta = (label, d, dp = 0) => `<div class="${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲ +' : '▼ '}${d.toFixed(dp)}${label.startsWith('%') ? '' : ' '}${esc(label)}</div>`;
 
-export function createSheetUI({ items, send, getChar, nope, potions = null, currency = null, onSkills = () => {} }) {
+export function createSheetUI({ items, send, getChar, nope, potions = null, currency = null, skills = null, onSkills = () => {} }) {
   let pendingShard = null;
   const root = document.createElement('div'); root.className = 'sheet-ui'; root.hidden = true;
   document.body.append(root);
@@ -76,15 +90,15 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, curr
     if (root.hidden || !ch) return;
     hideTip();
     const st = sheet(ch, items), base = xpAtLevel(ch.level), need = xpToNext(ch.level);
-    const slot = s => { const it = ch.equip?.[s]; return `<button class="eq ${it ? rarityClass(it) : 'empty'}${it?.dur?.[0] <= 0 ? ' broken' : ''}" data-slot="${s}" title="${SLOT_LABEL[s]}">${it ? glyph(items, it) : ''}<small>${SLOT_LABEL[s]}</small></button>`; };
+    const slot = s => { const it = ch.equip?.[s]; return `<button class="eq ${it ? rarityClass(it) : 'empty'}${it?.dur?.[0] <= 0 ? ' broken' : ''}" data-slot="${s}" aria-label="${SLOT_LABEL[s]}">${it ? glyph(items, it) : ''}<small>${SLOT_LABEL[s]}</small></button>`; };
     root.innerHTML = `<div class="sheet-panel">
       <header><h2>${esc(ch.name)}</h2><span>Level ${ch.level} ${esc(ch.spec || ch.path || 'Wanderer')} · Gear score ${st.gearScore}</span><button class="skills-open" data-skills>${ch.skillPoints ? `Skills (${ch.skillPoints})` : 'Skills'}</button><button class="x" data-close aria-label="Close">×</button></header>
       <div class="cols">
-        <section class="equip">${['head', 'neck', 'chest', 'weapon', 'offhand', 'hands', 'belt', 'feet', 'ring1', 'ring2'].map(slot).join('')}<button class="swap" data-swap title="Swap weapon sets (X)">⇄ Weapon set ${ch.equip?.weapon2 || ch.equip?.offhand2 ? '' : '(empty)'}</button></section>
+        <section class="equip">${['head', 'neck', 'chest', 'weapon', 'offhand', 'hands', 'belt', 'feet', 'ring1', 'ring2'].map(slot).join('')}<button class="swap" data-swap data-tip="Swap weapon sets (X)">⇄ Weapon set ${ch.equip?.weapon2 || ch.equip?.offhand2 ? '' : '(empty)'}</button></section>
         <section class="attrs"><div class="xp">Experience ${Math.max(0, ch.xp - base)} / ${Number.isFinite(need) ? need : '—'}</div>
           ${ch.unspent ? `<div class="pts">${ch.unspent} point${ch.unspent > 1 ? 's' : ''} to spend</div>` : ''}
-          ${ATTRS.map(a => `<div class="attr" title="${esc(ATTR_HELP[a])}"><span>${ATTR_NAMES[a]}</span><b>${st.attrs[a]}</b>${ch.unspent ? `<button data-spend="${a}" aria-label="Add a point to ${ATTR_NAMES[a]}">+</button>` : ''}</div>`).join('')}
-          <div class="nums"><div>Health <b>${st.maxHp}</b></div><div>Mana <b>${st.maxMana}</b></div><div>Damage <b>${st.weapon.min}–${st.weapon.max}</b></div><div>Armour <b>${st.armour}</b></div>
+          ${ATTRS.map(a => `<div class="attr" data-tip="${esc(ATTR_HELP[a])}"><span>${ATTR_NAMES[a]}</span><b>${st.attrs[a]}</b>${ch.unspent ? `<button data-spend="${a}" aria-label="Add a point to ${ATTR_NAMES[a]}">+</button>` : ''}</div>`).join('')}
+          <div class="nums"><div>Health <b>${st.maxHp}</b></div><div>Mana <b>${st.maxMana}</b></div><div>Damage <b>${st.weapon.min}–${st.weapon.max}</b></div>${st.offWeapon ? `<div>Off hand <b>${st.offWeapon.min}–${st.offWeapon.max}</b></div>` : ''}<div>Armour <b>${st.armour}</b></div>
             <div>Critical <b>${st.crit}%</b></div><div>Dodge <b>${st.dodge}%</b></div>${st.block ? `<div>Block <b>${st.block.chance}%</b></div>` : ''}
             <div class="res">Resist: ${['fire', 'frost', 'storm', 'poison', 'shadow'].map(t => `<span class="ty-${t}">${t[0].toUpperCase() + t.slice(1)} ${st.resists[t]}%</span>`).join(' ')}</div></div></section>
       </div>
@@ -102,9 +116,9 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, curr
       b.onclick = e => { e.stopPropagation(); if (dragged) return;
         if (pendingShard && it.base !== 'shard' && it.base !== 'dust' && it.base !== 'potion') { send({ do: 'craft', shard: pendingShard, item: it.uid }); pendingShard = null; root.classList.remove('shaping'); return; }
         sel = it.uid; showActions(ch, it); showTip(b, it, ch); root.querySelectorAll('.item.sel').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); };
-      b.oncontextmenu = e => { e.preventDefault(); if (it.base === 'potion') send({ do: 'belt', uid: it.uid }); else if (it.ided === false) send({ do: 'identify', uid: it.uid }); else send({ do: 'equip', uid: it.uid }); };
+      b.oncontextmenu = e => { e.preventDefault(); if (it.base === 'potion') send({ do: 'belt', uid: it.uid }); else if (it.ided === false) send({ do: 'identify', uid: it.uid }); else send({ do: 'equip', uid: it.uid, slot: slotFor(it) }); };
       b.addEventListener('pointerdown', e => startDrag(e, b, it));
-      b.ondblclick = () => send({ do: 'equip', uid: it.uid });
+      b.ondblclick = () => send({ do: 'equip', uid: it.uid, slot: slotFor(it) });
       b.onpointerenter = e => { if (e.pointerType === 'mouse') showTip(b, it, ch); };
       b.onpointerleave = e => { if (e.pointerType === 'mouse' && sel !== it.uid) hideTip(); };
     });
@@ -137,7 +151,7 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, curr
   function moveDrag(e) {
     if (!drag) return;
     if (!drag.on && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 8) return;
-    if (!drag.on) { drag.on = true; dragged = true; hideTip(); drag.ghost = document.createElement('div'); drag.ghost.className = 'drag-ghost'; drag.ghost.textContent = glyph(items, drag.it); document.body.append(drag.ghost); drag.el.style.opacity = 0.35; }
+    if (!drag.on) { drag.on = true; dragged = true; hideTip(); drag.ghost = document.createElement('div'); drag.ghost.className = 'drag-ghost'; drag.ghost.innerHTML = glyph(items, drag.it); document.body.append(drag.ghost); drag.el.style.opacity = 0.35; }
     drag.ghost.style.left = e.clientX + 'px'; drag.ghost.style.top = e.clientY + 'px';
     root.querySelectorAll('.drop-ok').forEach(x => x.classList.remove('drop-ok'));
     const t = target(e); if (t) t.el.classList.add('drop-ok');
@@ -164,23 +178,46 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, curr
     if (it.base === 'shard') { a.innerHTML = `<button class="primary" data-use>Use on an item…</button>`; a.querySelector('[data-use]').onclick = () => { pendingShard = it.uid; root.classList.add('shaping'); a.innerHTML = '<em>Now tap the item to shape (or the shard again to stop).</em>'; }; return; }
     if (it.base === 'dust') { a.innerHTML = '<em>The crafter in town turns dust into Glimmer Shards.</em>'; return; }
     if (it.base === 'potion') { a.innerHTML = `<button class="primary" data-blt>To belt</button><button data-drink>Drink</button>`; a.querySelector('[data-blt]').onclick = () => send({ do: 'belt', uid: it.uid }); a.querySelector('[data-drink]').onclick = () => send({ do: 'drink', kind: it.kind }); return; }
-    a.innerHTML = (it.ided === false ? `<button class="primary" data-id>Identify</button>` : `<button class="primary" data-eq>Equip</button>`) + `<button data-salv>Break for shards</button>`;
+    const c = cmpFor(ch, it);
+    a.innerHTML = (it.ided === false ? `<button class="primary" data-id>Identify</button>` : `<button class="primary" data-eq>Equip${c && c.slots.length > 1 ? ` in ${esc(SLOT_NAME[c.slot])}` : ''}</button>`)
+      + (c && c.slots.length > 1 ? `<button data-cmp>Compare: ${esc(SLOT_NAME[c.slot])} ⇄</button>` : '') + `<button data-salv>Break for shards</button>`;
+    a.querySelector('[data-cmp]')?.addEventListener('click', () => cycleCompare());
     a.querySelector('[data-salv]').onclick = () => { ask({ title: 'Salvage this item?', text: 'It breaks into crafting materials and is gone for good.', ok: 'Salvage', danger: true }).then(y => y && send({ do: 'salvage', uid: it.uid })); };
     a.querySelector('[data-id]')?.addEventListener('click', () => send({ do: 'identify', uid: it.uid }));
-    a.querySelector('[data-eq]')?.addEventListener('click', () => send({ do: 'equip', uid: it.uid }));
+    a.querySelector('[data-eq]')?.addEventListener('click', () => send({ do: 'equip', uid: it.uid, slot: slotFor(it) }));
   }
+  // ---- compare (game standards §5b): which worn slot the item in hand is set against; Shift, the controller's Y and
+  // the Compare button switch it when two slots could take the item, and Equip puts it in the slot being compared ----
+  let cmp = { uid: null, slot: null, slots: [] }, tipFor = null;
+  function cmpFor(ch, it) {
+    if (!items.bases[it.base] || it.base === 'potion' || it.base === 'shard' || it.base === 'dust') return null;
+    const slots = compareSlots(items, it, gripOf(items, ch, skills)); if (!slots.length) return null;
+    if (cmp.uid !== it.uid || !slots.includes(cmp.slot)) cmp = { uid: it.uid, slot: firstCompareSlot(slots, ch.equip), slots };
+    else cmp.slots = slots;
+    return cmp;
+  }
+  const slotFor = it => cmp.uid === it.uid ? cmp.slot : undefined;
+  function cycleCompare() {
+    if (root.hidden || !cmp.uid || cmp.slots.length < 2) return false;
+    cmp.slot = cmp.slots[(cmp.slots.indexOf(cmp.slot) + 1) % cmp.slots.length];
+    if (tipFor && tipFor[1].uid === cmp.uid) showTip(...tipFor);
+    const ch = getChar(), it = ch?.bag?.find(i => i.uid === cmp.uid); if (it && sel === it.uid) showActions(ch, it);
+    return true;
+  }
+  addEventListener('keydown', e => { if (e.key === 'Shift' && !e.repeat && !root.hidden && tipFor && cycleCompare()) e.preventDefault(); });
   function showTip(anchor, it, ch, isWorn = false) {
-    hideTip();
-    const b = items.bases[it.base], slot = b?.slot === 'ring' ? 'ring1' : b?.slot;
-    tipEl = document.createElement('div'); tipEl.className = 'tip-float';
-    tipEl.innerHTML = itemTip(items, it, ch, isWorn ? null : ch.equip?.[slot], potions, currency);
+    hideTip(); tipFor = [anchor, it, ch, isWorn];
+    const c = isWorn ? null : cmpFor(ch, it);
+    tipEl = document.createElement('div'); tipEl.className = 'tip-float' + (c ? ' wide' : '');
+    tipEl.innerHTML = c ? compareTipHtml(items, it, ch, c.slot, c.slots, potions, currency) : itemTip(items, it, ch, null, potions, currency, isWorn ? 'Equipped' : '');
     document.body.append(tipEl);
     const r = anchor.getBoundingClientRect(), tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
     let x = r.right + 8, y = r.top; if (x + tw > innerWidth - 8) x = Math.max(8, r.left - tw - 8); if (y + th > innerHeight - 8) y = Math.max(8, innerHeight - th - 8);
+    if (innerWidth < 600) { x = Math.max(4, (innerWidth - tw) / 2); y = 8; }                 // phone: top of the screen, the action row stays clear
     tipEl.style.left = x + 'px'; tipEl.style.top = y + 'px';
   }
-  function hideTip() { tipEl?.remove(); tipEl = null; }
+  function hideTip() { tipEl?.remove(); tipEl = null; tipFor = null; }
   root.addEventListener('click', e => { if (e.target === root) toggle(false); });
-  void canEquip; void nope;
-  return { toggle, refresh, get open() { return !root.hidden; } };
+  void nope;
+  return { toggle, refresh, cycleCompare, get open() { return !root.hidden; } };
 }

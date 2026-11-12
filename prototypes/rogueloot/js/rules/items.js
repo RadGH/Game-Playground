@@ -6,6 +6,7 @@
 //     power?, quality: 0-20, ided: bool, dur: [cur, max], name? (rare/legendary), pos?: { x, y } (bag grid) }
 // UNITS: every pct value is WHOLE PERCENTAGE POINTS (12 = 12%), exactly as the data writes it. pct() is the ONE place
 // that turns them into fractions.
+import { handRefusal, gripOf } from './hands.js';
 export const pct = v => (+v || 0) / 100;
 export const RARITIES = ['normal', 'magic', 'rare', 'unique', 'legendary'];
 export const SLOTS = ['head', 'chest', 'hands', 'belt', 'feet', 'neck', 'ring1', 'ring2', 'weapon', 'offhand', 'weapon2', 'offhand2'];
@@ -34,12 +35,17 @@ const pickW = (rng, list, w) => { const tot = list.reduce((s, x) => s + w(x), 0)
 const affixKind = b => b.slot === 'offhand' ? b.kind : b.slot === 'weapon' ? b.kind : b.kind === 'ring' || b.slot === 'ring' ? 'ring' : b.slot === 'neck' ? 'neck' : b.slot;
 
 // ---- who may use what -------------------------------------------------------------------------------------------------
-/** The Path/spec proficiency entry for a character (wanderer before level 3). */
+/** The Path/spec proficiency entry for a character (wanderer before level 3). A spec ADDS to its Path: the table's
+ *  `specAdds[spec]`, plus `specAdds.fighter_any` for every Fighter spec (plate at the spec pick, ruling 2). The last
+ *  entry that says `dualWield` decides it, with its own `dualWieldClasses`. */
 export function profOf(data, ch) {
   const P = data.proficiency || {}, path = P[ch?.path] || P.wanderer || { armour: ['cloth', 'leather'], weapons: [], offhand: [] };
-  const spec = ch?.spec && P[ch.spec];
-  if (!spec) return path;
-  return { armour: [...new Set([...(path.armour || []), ...(spec.armour || [])])], weapons: [...new Set([...(path.weapons || []), ...(spec.weapons || [])])], offhand: [...new Set([...(path.offhand || []), ...(spec.offhand || [])])], dualWield: path.dualWield || spec.dualWield };
+  if (!ch?.spec) return path;
+  const A = P.specAdds || {}, adds = [ch.path === 'fighter' ? A.fighter_any : null, A[ch.spec]].filter(Boolean);
+  if (!adds.length) return path;
+  const all = k => [...new Set([path, ...adds].flatMap(x => x[k] || []))];
+  const dw = [...adds].reverse().find(x => 'dualWield' in x) || path;
+  return { armour: all('armour'), weapons: all('weapons'), offhand: all('offhand'), dualWield: !!dw.dualWield, dualWieldClasses: dw.dualWield ? dw.dualWieldClasses : undefined };
 }
 export function canUseBase(data, ch, b) {
   const p = profOf(data, ch);
@@ -187,12 +193,16 @@ export function itemReq(data, it) {
   const req = {}; for (const [k, v] of Object.entries(b.req || {})) req[k] = Math.ceil(v * red);
   return { level: lvl, ...req };
 }
-/** Can this character wear this item in that slot? -> { ok } | { ok: false, why: 'player text' } */
-export function canEquip(data, ch, it, slot, attrsWithGear = null) {
+/** Can this character wear this item in that slot? -> { ok } | { ok: false, why: 'player text' }
+ *  opts: { equip (what is worn now, for a quiver's bow), grip (hands.js gripOf, for dual-wield and Doubled Grasp) } */
+export function canEquip(data, ch, it, slot, attrsWithGear = null, opts = {}) {
   const b = data.bases[it.base]; if (!b) return { ok: false, why: 'Unknown item.' };
+  const held = b.slot === 'weapon' || b.slot === 'offhand';
   const fits = slot === b.slot || (b.slot === 'ring' && (slot === 'ring1' || slot === 'ring2')) || (b.slot === 'weapon' && slot === 'weapon2') || (b.slot === 'offhand' && slot === 'offhand2')
-    || (b.slot === 'weapon' && slot === 'offhand' && b.offhandOk && profOf(data, ch).dualWield);
+    || (held && ['weapon', 'offhand', 'weapon2', 'offhand2'].includes(slot));
   if (!fits) return { ok: false, why: "That doesn't go there." };
+  const hand = held ? handRefusal(data, it, slot, opts.equip ?? ch.equip ?? {}, opts.grip || gripOf(data, ch)) : null;
+  if (hand) return { ok: false, why: hand };
   const r = itemReq(data, it), A = attrsWithGear || ch.attrs || {};
   if ((ch.level || 1) < r.level) return { ok: false, why: `Needs level ${r.level}.` };
   for (const k of ['str', 'agi', 'int', 'spi']) if (r[k] && (A[k] || 0) < r[k]) return { ok: false, why: `Needs ${r[k]} ${ATTR_WORD[k]}.` };

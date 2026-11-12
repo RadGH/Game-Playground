@@ -1,5 +1,7 @@
 # Roverlands
 
+> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh roverlands` from the playground and fix what it finds — game-lint (on 2026-11-11: 8 browser-tooltip, 1 browser-popup), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `roverlands` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass.
+
 A co-op vehicle game prototype: a big, varied landscape, vehicles that feel good to drive, and a goal to drive for.
 **Flag Run** — pick a vehicle at home base, cross the country, get out, grab the flag, get back in and bring it home
 (fastest time wins; drive together: one at the wheel, one on the gun, one riding along). **Sandbox** — every vehicle
@@ -749,3 +751,12 @@ page `?view=simple`: cut -> plant -> water -> sell with the yard's machines, wai
 look strip) and `tests/phone.spec.js` (Playwright, its own server on :8557: the phone at 1280, 402 and 360 wide, every
 app, a Dealer buy, the Wardrobe offering only owned clothes, hidden jobs obscured, keyboard + controller reaching every
 app; plus the real game page summoning the owned jeep beside you).
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Roverlands** (2026-10-25 →): co-op vehicle game — Flag Run (drive out, get out, grab the flag, drive it home, timed) + Sandbox, Chibi 2.5 drivers with vehicles sized to them, 1.5 km world (10 biomes, river with fords + bridge, switchback mesa, mud, dunes, snow, farm, runway). **Rapier 0.21** (`vendor/rapier/`); every body is simulated by its OWNER's browser, the server (stable :8550/https :8552, dev :8551/:8553) only relays + referees. LIVE at https://roverlands.games.radgh.com/ with all 23 vehicles (jeep, bikes, bicycle, quad, buggy, sedan, tank, hover tank, heli, plane, rocket car, forklift, army truck, fire truck, ambulance, patrol car, semi + 3 trailers + utility trailer, harvester); T hitches trailers. **Expansion 1 "Wayfare County" (2026-11-10, `docs/EXPANSION-1.md` M1-M13)**: Chibi 2.6 humans only, a 3 km county map (Sandbox kept), gold + phone + shops + wardrobe, farming, fire/ambulance/patrol/tow/haul, Rustwild raider camps, Wayfare Field skydiving + glider + fall damage, survey kits, rocket → orbit → Lantern Station (zero-g) → landing pod, the Moon + Crater Crawler + Moon jobs, 48 achievements + a Jobs checklist on the phone; pure job rules in `js/game/jobs/*.js`, one referee `js/net/jobs-core.js`. Read `docs/PLAN.md` + README first; checklists `~/claude/agent/roverlands-checklist.md`, `roverlands-expansion-checklist.md`
+
+**Status / key files:** all vehicles live 2026-10-25; Expansion 1 2026-11-10

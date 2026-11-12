@@ -1,6 +1,15 @@
 {
  "entries": [
   {
+   "id": "2026-11-11b",
+   "date": "2026-11-11",
+   "title": "Fairer enemies, and gnat packs",
+   "items": [
+    "Enemies are back to their old toughness: the extra hull from the last update is gone and your missiles hit them with full force again. They still keep the slower guns, and bases still carry fewer guns.",
+    "Gnats: new tiny enemy fighters with one small gun and no shields. They fly in packs of five to nine and go down fast, so a pack is a fun fight for any ship. Look for gnat packs (orange) on the local map."
+   ]
+  },
+  {
    "id": "2026-11-11a",
    "date": "2026-11-11",
    "title": "Bigger systems, real fights, a local map",
@@ -52,7 +61,7 @@
    "title": "Fixes and louder lasers",
    "items": [
     "Laser turrets now sound like lasers — a sharp crack and a punchy zap instead of a thin beep. Heavy lasers got a deeper voice too, and laser hits land harder.",
-    "The parts hold no longer shows \"[object HTMLDivElement]\" after you switch tabs; parts show full cards with their numbers.",
+    "The parts hold no longer shows a line of garbled text after you switch tabs; parts show full cards with their numbers.",
     "Part bonuses that did nothing now work: Tuned engines push harder, Efficient parts draw less power, Nimble gyros turn faster, and Overdrive engines boost faster and longer.",
     "Friendly ships' shots no longer hit you.",
     "Chunks blown off a ship keep their armour instead of falling apart at the first touch.",

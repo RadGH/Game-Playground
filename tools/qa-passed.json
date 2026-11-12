@@ -1,0 +1,7 @@
+{
+  "_doc": "Games that have had their QA pass (tools/prepublish-check.sh clean: game-lint, every module connected, tests/walk.mjs walks every screen clean, README status block). tests/game-quality.test.js holds only these games to it. Owner 2026-11-11: no sweep of every game \u2014 each game gets its pass the next time it is worked on (see the 'QA pass pending' note at the top of its README), then is added here.",
+  "games": [
+    "rogueloot",
+    "voidwright"
+  ]
+}

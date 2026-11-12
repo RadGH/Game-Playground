@@ -99,7 +99,7 @@ export function createTravelUI({ view, content, labelRoot, send, getChar, getMe,
       <div class="map"><svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines.join('')}</svg>${nodes.map(n => {
         const found = n.id === 'brightwater' || (ch?.waypoints || []).includes(n.id), open = isOpen(ch, n.id), here = area?.id === n.id, built = !!content.zones?.[n.id];
         return `<button class="mnode k-${n.kind} ${found ? 'found' : ''} ${open ? 'open' : ''} ${here ? 'here' : ''} ${built ? '' : 'unbuilt'}" style="left:${n.x}%;top:${n.y}%" data-id="${n.id}" ${atWaypoint && found && built && !here ? '' : 'disabled'}>
-          <b>${esc(n.name)}</b><small>${n.kind === 'town' ? 'Town' : `Levels ${n.levels?.[0]}-${n.levels?.[1]}`}${here ? ' · you are here' : ''}${built ? '' : ' · not built yet'}</small></button>`; }).join('')}</div>
+          <b>${esc(n.name)}</b><small>${n.kind === 'town' ? 'Town' : (n.levels?.[0] === n.levels?.[1] ? `Level ${n.levels?.[0]}` : `Levels ${n.levels?.[0]}–${n.levels?.[1]}`)}${here ? ' · you are here' : ''}${built ? '' : ' · not built yet'}</small></button>`; }).join('')}</div>
       <div class="btns"><button data-close class="primary">Close</button></div></div>`;
     mapEl.addEventListener('click', e => { const id = e.target.closest('[data-id]')?.dataset.id; if (id && !e.target.closest('[data-id]').disabled) { send({ do: 'travel', via: 'waypoint', to: id }); closeMap(); } else if (e.target === mapEl || e.target.closest('[data-close]')) closeMap(); });
     document.body.append(mapEl);

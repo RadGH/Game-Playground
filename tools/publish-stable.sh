@@ -64,6 +64,22 @@ if [ "$FORCE" -eq 0 ]; then
   ( cd "$TMP" && npm run test:unit --silent >/dev/null 2>&1 ) \
     || { echo "Refusing to publish: npm run test:unit fails at $SHA. Use --force if you really mean it."; exit 1; }
   echo "  …it parses and the tests pass."
+
+  # Every game that changed since the last stable passes tools/prepublish-check.sh (a game that has not had its QA
+  # pass yet gets it the first time it is published again — owner 2026-11-11, see tools/qa-passed.json): game-lint, every module
+  # connected, every screen walked on a desktop and a phone (owner 2026-11-11: "so the rules are enforced even
+  # when I forget them"). WALK=0 skips only the screen walk.
+  OLD="$(git -C "$STABLE_DIR" rev-parse HEAD 2>/dev/null || echo "")"
+  # Only games whose PLAYABLE files changed: README, docs/ and tests/ edits (the "QA pass pending" notes, a test
+  # moved to a new import) don't make a game go through its pass. SKIP_QA="game game" lets named games through for a
+  # change that isn't game work (say why in the commit), and is printed so it is never silent.
+  CHANGED="$( { [ -n "$OLD" ] && git diff --name-only "$OLD" "$SHA" -- prototypes || git ls-tree -r --name-only "$SHA" prototypes/; } \
+    | grep -v -E '(^|/)(README[^/]*|[^/]*\.md)$|/(docs|tests|research|tools)/' | awk -F/ 'NF>=3{print $2}' | sort -u)"
+  for g in $CHANGED; do
+    [ -f "prototypes/$g/index.html" ] || continue
+    if [[ " ${SKIP_QA:-} " == *" $g "* ]]; then echo "  SKIP_QA: $g's pre-publish checks skipped on request"; continue; fi
+    tools/prepublish-check.sh "$g" "$SHA" || { echo "Refusing to publish: $g fails its pre-publish checks (above). Do its QA pass (README note), or SKIP_QA=\"$g\" if this change is not game work."; exit 1; }
+  done
 fi
 
 # Move the branch from INSIDE the worktree. `git branch -f stable` from here refuses, and correctly

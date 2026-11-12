@@ -1,5 +1,7 @@
 # Tiny RTS
 
+> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh tinyrts` from the playground and fix what it finds — game-lint (on 2026-11-11: 2 browser-popup, 3 browser-tooltip, 1 banned-name, 1 no-whats-new), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `tinyrts` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass.
+
 A side-view, physics-driven real-time strategy / defense game in chunky pixels. Mine crystal, paint
 walls a cell at a time, light them up with laser turrets, and hold against waves of geometric
 void-creatures — or against a rival AI commander building its own fort across the map. Every wall

@@ -1,5 +1,7 @@
 # Stoneward
 
+> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh stoneward` from the playground and fix what it finds — game-lint (on 2026-11-11: 11 browser-tooltip, 1 muster), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `stoneward` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass.
+
 A medieval castle-era **city sim** on a whole generated planet, built on Kindlewild-style pixel physics (independent
 project by Radley Sustaire, sandbox). The map wraps east–west and zooms out to a spinning globe. Towns grow on their
 own; the player expands, connects and defends. Resources are found as nodes, mined, and hauled home along roads.
@@ -631,7 +633,7 @@ of its calculable stats listed… on mobile you should be able to click a button
 
 - `js/planet/`: `noise.js` (a copy of `worldgen/js/noise.js`, made to be copied), `macro.js`, `biomes.js`,
   `chunkgen.js`, `chunks.js`
-- `js/sim/`: `materials.js` (Kindlewild's compiler plus `tall`), `rng.js`
+- `js/sim/`: `materials.js` (Kindlewild's compiler plus `tall`) (seeded random lives in `js/planet/noise.js`)
 - `js/render/`: `paint.js`, `gl.js`
 - `js/client/`: `link.js` (talks to the worker), `stream.js` (decides which chunks to request and turns them into
   textures)
@@ -644,3 +646,12 @@ of its calculable stats listed… on mobile you should be able to click a button
 **Wildfires far from people** (`js/sim/wildfire.js`, PURE, play-test 1): a burning cell in a chunk with no town, building or rival town within 220 m is *wild*. It spreads at 0.55× heat and burns out twice as fast (cells.js `burn()` asks `sim.wildfire.isWild(c)`). A big wild fire (more than 120 burning cells on average over 5 s) brings natural Call Rain over its middle. Fires near towns are untouched.
 
 **Page helpers added in play-test 1**: `ui.pager(items, key, 'grid'|'list', maxRows)` and `ui.pagerOf(cards, key, per)` page any list (panels never scroll); `hooks.screen` draws quads in screen pixels on the flat map (enemy arrows); `ui.report()` opens the report box (from ☰); `ui.closeMenu()` closes the menu and restores the speed it paused. "Lost" buildings count only the cells their blueprint builds (`solidCells()` in town.js). See docs/PLAN.md §7.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Stoneward** (2026-11-03 →): a medieval castle-era city sim on a whole generated planet with Kindlewild-style pixel physics. The map wraps east-west (3D noise on a cylinder, so there is no seam) and zooms smoothly out to a globe; six sizes (1-32 km around, 1 cell = 1 m); ice caps at the poles. Macro map (`js/planet/macro.js`, 32 m cells) + 64x64 chunks generated on demand, same every time (`chunkgen.js`), only edited chunks saved (`chunks.js`); cells carry `tall` for the 3/4 view (columns stand UP; rows and chunks painted north to south = occlusion, `js/render/paint.js`); WebGL2 macro + chunk + globe passes (`js/render/gl.js`); sim in a Worker. Owner design from ~18 question rounds is `docs/PLAN.md` §1 (towns grow themselves, Sightseer-style nodes → road routes → global stock, guards + patrol safety, drawn walls with per-cell HP, rivals with rolled stances, 7 powers x 3 sizes paid in faith, trains). Read README + docs/PLAN.md first
+
+**Status / key files:** M0 2026-11-03

@@ -83,3 +83,14 @@ Slot rows with prev/next + dropdown + colour swatch; palettes for skin/hair/eyes
 - Front view only. A side/back view would need a second set of pieces per part (same JSON).
 - No animation; the SVG groups (`data-layer`, `data-slot`) are stable hooks for CSS/JS animation (e.g. bob the `head` group for talking).
 - Some hats do not hide long hair perfectly; hats draw above hairFront, hair back stays visible, which is usually what you want.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+SVG paper-doll builder, chibi, 148 + ~85 gear parts (`js/parts/gear.js`: helmets, armour, capes, held weapons, off-hand items) across 17 slots, Mii-style face sliders, body height/width/headSize via group transforms, CSS-variable recolour, seeded random with race rules (7 races), 15 presets, gallery, PNG/SVG/JSON export
+
+**Status / key files:** done 2026-09-09
+
+**Status / key files:** `avatar-2d/README.md`, `js/render.js`, `js/parts/*.js`, `js/random.js`, `data/presets.json`

@@ -1,5 +1,7 @@
 # Lodestar
 
+> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh lodestar` from the playground and fix what it finds — game-lint (on 2026-11-11: 8 browser-tooltip), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `lodestar` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass. Parked: `js/render/chart.js` (PLAN M2's outlined chart view at range ¼ and ½) is written and tested but not drawn; the far zoom uses `cells.glsl.js` instead.
+
 A pixel-physics city-and-defence game played from a commander's bunker (independent project by Radley Sustaire,
 sandbox). The spec is `docs/PLAN.md` (it overrides `docs/BRAINSTORM.md`); the owner's words are `docs/OWNER-BRIEF.md`.
 Each milestone appends its own section below.
@@ -722,3 +724,12 @@ has nothing left to heat, smoke is puffed one tick in four per cell, and idle ce
 
 Walls, roads, rails as drawn vectors with their own look (M3/M4/M10 — the rasteriser is ready), flow fields (M4),
 the console around the scope (M2), saves of chunks (M8). Breaching cliffs with blasts is cut by the PLAN.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Lodestar** (2026-10-28 →): a top-down pixel-physics strategy game played from a commander's bunker — every menu is a physical machine (CRT Tactical Scope seen only through sensors, knobs with detents, toggle switches, teletype, alarm lamps, gauges; phone drawer layout; touch/keys/gamepad on every knob). Flat world (no height; water/lava/cliffs are fixed edges), cell grid of one Uint32 per cell in 64×64 chunks with fire/smoke/blasts/debris/frost/lightning/rain rules and raw WebGL2 lighting (emitters light nearby pixels, relief is lighting only); sim in a worker, pure and deterministic, runs in node. Economy: HQ, limited surface outcrops, depots with shared yard rings, automatic dispatch where every load is carried (nothing teleports), refining, keep-in-stock, one road kind (bridge over shallow water). Owner rules in `docs/PLAN.md` §0 (one wall kind with planet-wide upgrade levels; enemies only attack production/military buildings, fighting units and travelling delivery vehicles; trains protected). Built in milestones M1–M16 — read `README.md` + `docs/PLAN.md` first; brief verbatim in `docs/OWNER-BRIEF.md`
+
+**Status / key files:** building 2026-10-28

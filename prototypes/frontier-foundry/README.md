@@ -1,5 +1,7 @@
 # Frontier Foundry (`prototypes/frontier-foundry/`)
 
+> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh frontier-foundry` from the playground and fix what it finds — game-lint (on 2026-11-11: 2 browser-tooltip, 1 browser-popup, 1 no-whats-new), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `frontier-foundry` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass.
+
 A 4X + RTS automation prototype: land on a planet, scan for what is under the ground, mine it, haul
 it, refine it, build a factory, research your way up the tree, hold off waves of local wildlife, and
 leave on a rocket carrying whatever you can fit in the hold. Then do it again on a world that breaks
@@ -357,3 +359,12 @@ for them.
 - Icons come from `assets/data/icons/foundry/`. `js/ui/icon-list.js` is generated from that folder by
   `tools/build-icon-list.mjs`; regenerate it after adding art so the page never asks for a file that
   is not there.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Frontier Foundry**: 4X + RTS automation, playable end to end. Land on a worldgen local tile, scan hidden resource nodes, mine, haul, refine, build (outline -> builders walk over -> done), research, defend tower-defence waves, launch satellites/probes/a rocket, carry the hold to the next planet; beacons on 3 worlds + an orbital station wins. Storage **pools** instead of belts (stores that reach each other share everything; further away needs a truck), a power grid with duty-cycled generators and load shedding, ten planet archetypes with eight rare elements and ten planet-only buildings. Data: 77 resources, 101 structures, 67 recipes, 82 techs, 10 vehicles, 22 units, 25 quests, 43 notification templates. **Interface** (`index.html` + `js/ui/*`, an 'operations console' in cyan and amber): title/system survey, canvas surface map with fog + build ghosts + route tool + minimap, research tree, planet map, 3D orbit screen, quest board and codex, save/load, `window.foundry` for tests. **The map streams**: the grid is a 5x5 block of worldgen cells (480x480 tiles, centre 3x3 warm at landfall) in one flat typed-array set, chunks generated around the camera one a frame, biome seams dithered; `chunks` defaults to 1 so the node tests and the sim are unchanged. `patch()` in `js/ui/dom.js` is the keyed DOM morph any live-redrawing panel must use instead of `fill()`. `js/planets.js` carries a ten-archetype stand-in **and** an adapter for `universe/` (`universePlanets`). `tools/sim-foundry.mjs --why` is the balance harness; its bot stalls mid-game on its own base layout and does not reach a rocket yet
+
+**Status / key files:** done 2026-09-14

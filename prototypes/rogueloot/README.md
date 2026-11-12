@@ -1,5 +1,11 @@
 # Rogueloot
 
+> **Status:** live on games.radgh.com · on hold since 2026-11-11 (owner), QA pass + loot-game hand/compare rules done 2026-11-11 · checked 2026-11-11
+> **Play:** LAN `http://<LAN IP>:8580/` (stable, own server; https 8582 for a controller) · public https://rogueloot.games.radgh.com/ (not updated while on hold)
+> **Next:** the overhaul list in `~/claude/agent/rogueloot-overhaul-checklist.md` (title/creator screens, gear on the body + gear icons, D2 skill trees and shop, PoE world map, river/bridge) and M33 balance (`tools/sim.mjs`)
+> **Parked:** the whole game is on hold until the owner asks; overhaul items C4-C23 + B1 in that checklist; skill-engine wishlists in each `data/skills-specs-*.json` `wishlist`
+> **Ask the owner when this game is next worked on:** `model-library/` has 12 Meshy-made rigged + animated enemy models (goblin warrior/shaman/shieldbearer ≈ Hollowhorn, skeletons ≈ Restless, zombie, orc, ogre, bandits, cultist ≈ Gravesworn, lizardfolk ≈ Mirefolk). Owner 2026-11-11: plan for it, but do not put them in until he decides.
+
 A co-op action RPG for 1–4 players: Thousandvale's items and mechanics under a Diablo-style angled camera, with combat
 paced like vanilla WoW (1.5 s global cooldown, cast bars). Act 1 covers levels 1–20. Chibi 2.6 characters, no voices.
 
@@ -11,11 +17,31 @@ everything else. §3 lists the 33 milestones. Checklist: `~/claude/agent/roguelo
 | What | Where |
 |---|---|
 | Dev server (working tree) | `node server/main.mjs --port 8581 --https-port 8583` → `http://<LAN IP>:8581/` |
-| Stable LAN copy | 8580 / https 8582 (publish script comes in M2) |
+| Stable LAN copy | 8580 / https 8582 — `tools/publish-rogueloot.sh` (runs the pre-publish checks) |
 | Live | https://rogueloot.games.radgh.com/ (`cd ~/claude/rads-game-server && tools/deploy.sh update playground rogueloot`, after `tools/publish-stable.sh` + `tools/publish-pages.sh` in the playground) |
-| Unit tests | `node --test tests/sim/*.test.js` |
+| Unit tests | `node --test tests/sim/*.test.js tests/rules/*.test.js tests/world/*.test.js` |
 
 `npm install` once in this folder for `ws` (or copy Knockabout's `node_modules`).
+
+## Hands, the off hand and item cards (game standards §5b, 2026-11-11)
+
+- **`hand` on every weapon/off-hand base** (`data/item-bases.json`) is the one field: `one` One-handed, `two` Two-handed,
+  `main` Main hand only (wands, sceptres), `off` Off hand only (shields, foci, quivers). `js/rules/hands.js` is the only
+  reader: `handOf`/`handText` (the item card's first line), `handRefusal` (the equip rule `canEquip` and the sim share),
+  `handsBumped` (what an equip sends to the bag), `compareSlots`/`firstCompareSlot`.
+- **Off hand:** a shield or focus beside a one-hander (a shield next to a bow sends the bow to the bag); a quiver only
+  beside a bow or crossbow and it stays when you swap bows (`pairsWith`).
+- **Dual wielding is data:** `proficiency.<path>.dualWield` + `dualWieldClasses` — the Rogue Path (daggers, swords,
+  axes) and the Weaponmaster spec (`specAdds.weaponmaster`, maces too). `profOf` now reads `specAdds` (it never did, so
+  Fighter specs had not been getting plate at 10 either). The off-hand weapon is `st.offWeapon` → `hero.offWeapon` and
+  swings on its own clock in `fight.js stepAuto` for `balance.json hero.offHandDamage` (0.5) of its damage.
+- **Doubled Grasp** (`van_doubled_grasp`, Vanguard, Breaking Line tree, level 18, one rank): `passive.stat: 'doubleGrip'`
+  lets a melee two-hander go in the off hand too (never a bow or crossbow).
+- **Item cards** (`js/rules/card.js cardStats`): the base's damage/armour/block line absorbs the same stat from its
+  affixes and quality ("+24 Armour (20 base +4)"), so no stat is listed twice. **Compare** (`sheet-ui.js
+  compareTipHtml`): the item and what it would replace side by side with green/red differences; when two slots could take
+  it (rings, a dual-wielder's hands) Shift, the controller's Y or the **Compare: …** button switch the slot, and Equip
+  uses the slot being compared. Tests: `tests/rules/hands.test.js`, `tests/rules/card.test.js`.
 
 ## How it fits together
 
@@ -87,3 +113,12 @@ chains, refunds, damage turned to healing…) or a basic action (life leech on a
 each body with the kit, rebuilds a boss when its phase changes, and passes the body through `js/client/mesh-merge.js`
 (still parts under the same parent with the same material become one mesh: ~23 -> ~16 draws a monster).
 `tests/browser-perf.mjs` reads draws / triangles at phone size per zone.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Rogueloot** (2026-11-10 →): co-op (1-4) action RPG under a Diablo-style angled camera with vanilla-WoW pacing (1.5 s global cooldown, cast bars), Thousandvale's items/mechanics, Act 1 levels 1-20; Wanderer → Path at 3 (Fighter/Rogue/Mage/Healer) → spec at 10 (~28 incl. hybrids, 3 trees each), D2 grid bags, stingy tiered loot (item level ≠ character level, gear score), PoE-style currency shards, Chibi 2.6, no voices. Pure sim `js/sim/` + pure room hub `js/net/hub.js` shared by the server and the solo Worker; own server stable :8580/https :8582, dev :8581/:8583 (units `rogueloot`, `rogueloot-dev`); public https://rogueloot.games.radgh.com/ (live from day one). Fable designed the bestiary and the item data. **Read `docs/PLAN.md` §0 (owner rulings) first**
+
+**Status / key files:** M1 2026-11-10

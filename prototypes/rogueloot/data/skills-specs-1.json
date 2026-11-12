@@ -723,6 +723,22 @@
     }
    ]
   },
+  "van_doubled_grasp": {
+   "name": "Doubled Grasp",
+   "owner": "vanguard",
+   "tree": "breaking_line",
+   "reqLevel": 18,
+   "maxRank": 1,
+   "prereq": [
+    "van_hammer_blow"
+   ],
+   "kind": "passive",
+   "desc": "The front of the line needs no shield: hold a two-handed weapon in each hand. The off-hand weapon swings on its own clock for half its damage (bows and crossbows still need both hands). A one-handed weapon can go in the off hand too.",
+   "passive": {
+    "stat": "doubleGrip",
+    "value": 1
+   }
+  },
   "van_shockwave": {
    "name": "Shockwave",
    "owner": "vanguard",

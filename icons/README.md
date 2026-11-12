@@ -86,3 +86,14 @@ model's metal and stone colours.
 Adding a picture: add an entry to the right file (same id as the game's item/button), run
 `node icons/tools/contact-sheet.mjs icons/data/game/<file>.js out.png`, look at it, then `node --test icons/tests/game-icons.test.js`
 (safe-SVG audit, every real item in Thousandvale's data has a picture, mana is blue, 30 distinct class palettes).
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Icon Library: 192 named, described and categorized SVG spell pictures for all 32 Thousandvale classes. Preserves Starcaller; 180 new pictures in six batches of five classes; batch 7 (play-test 11) is the Star Blade's six in star steel and gold. Search/filter, size previews and SVG download; shared by the action bar and Skills window. **Game icons (2026-10-14)**: `icons/game.html` + `js/game-icons.js` — every non-spell, non-gear picture in Thousandvale (buttons, menu bar, emotes, professions, potions — mana is blue — food, goods, tools, 55 materials, 78 fish, crates, junk) and `js/motifs.js` (three white spell-effect shapes + a palette per class), all Codex-drawn SVG under `data/game/` (contract `data/game/STYLE.md`, review with `tools/contact-sheet.mjs`)
+
+**Status / key files:** done 2026-10-11
+
+**Status / key files:** `icons/README.md`, `js/catalog.js`, `js/game-icons.js`, `data/batch-*.js`, `data/game/*.js`

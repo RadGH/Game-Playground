@@ -1,5 +1,7 @@
 # Bannerline
 
+> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh bannerline` from the playground and fix what it finds — game-lint (on 2026-11-11: 7 browser-tooltip, 39 browser-popup, 1 no-whats-new), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `bannerline` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass. Known: `js/sim/shop.js` (an older copy of `js/sim/ai/shop.js`) and `js/sim/adapters/affixes.js` are loaded by nothing — delete or wire.
+
 A couch-and-online **lane war** in the browser. Two teams each guard a **Keep** flying **banners**
 at the foot of their own walled field. You fight with a hero to stop whatever comes down your field,
 and you spend gold to **send** units into the enemy's field. A unit that reaches the enemy Keep
@@ -239,3 +241,12 @@ Tool pages: `bench.html`, `icons.html`, `structures.html`, `skillfx.html`, `hvf-
 - **Names:** no third-party game names in anything a player sees (playground convention 9); "the old
   lane-war maps" is how docs refer to the genre's origin. `docs/research.md` / `hvf-research.md` are the
   only pages that name them.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Bannerline** (2026-10-03..04): a sandbox RTS of game MODES over one deterministic lockstep sim (`js/sim/`, purity-scanned, seeded rng, mode registry `js/sim/modes/`). **Line War** (hero lane-wars): 4 races x 12 units, SPAM sends from the Barracks (owner: gold is the only limit — no stock, cooldowns or tier locks; sends leave at once; a full field queues at the gate), 5 Farhold heroes on Chibi 2 (Warrior, Ranger, Pyromancer, Druid with a wolf form, Engineer with 1/2/3 turrets), simple 6-slot stat items bought only standing at the Outfitter (copies each take a slot, rare uniqueEquipped), Drill Yard unit upgrades, Sanctum powers that only land in own/enemy/any field, a Keep that shoots swarms, AI Recruit/Veteran/Commander that differ in decisions, 1v1/2v2/3v3. **Hunters vs Farmers**: generated forest worlds (trails, cliffs, choppable tree walls, briar, hidden hollows), farmers build cookie-clicker style while wandering sheep give them away, hunters search under fog of war, AI both sides. **Campaign** 'Banners of the Vale' (Warrior chapter, 5 missions). Every mode: KB+M and gamepad (ready-up press claims the device; gamepads need the https ports 8442/8441), two-player split screen, online via PeerJS room codes (swappable transport; Cloudflare relay is the upgrade path), lobby -> match -> back to lobby. **Spectator mode** (2026-10-04, both modes): 'Watch AI match' in the Line War lobby / 'Watch the AI play' on the HvF card (and any online machine with no seat) — every seat AI, both sides drawn, HvF fog drawn 30% dark instead of hiding with a Farmers/Hunters/Both/Off choice (`world.useSpectator`, actor materials exempt), F / Shift+F / 1-9 follow a character alternating sides, free pan + 4-step zoom, 1x/2x/4x + pause, side panels per side; `js/ui/spectator.js` + the pure `js/ui/spectate-model.js` (never writes the sim; `tests/spectate.test.js` proves a watched match hashes the same). Never use 'muster'. Balance is deliberately deferred (owner). Read `prototypes/bannerline/README.md` first; parked ideas in `docs/SHELVED.md`; design in `docs/PLAN.md` + `docs/hvf-PLAN.md` (owner rulings in the README override PLAN.md)
+
+**Status / key files:** done 2026-10-04

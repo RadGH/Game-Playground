@@ -389,3 +389,14 @@ the same toxic world.
 
 Tests: `worldgen/tests/weather.test.js` (12 tests). A renderer built on this lives in
 `prototypes/farhold/js/weather.js`.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+World Forge: procedural world maps, macro→micro, three zoom levels. **Weather** (`js/weather.js`, 2026-09-15): 14 states chosen from a cell's climate (no snow in a desert, no rain on a dry world, storms need heat and water, volcanic ground throws ash, raw magic throws ion storms), a `WeatherClock` that crossfades between them, a `weather` map layer + legend + hover readout + per-world profile in the viewer, and `atmospherePalette()` which varies a planet's sky/sea/cloud colour by its own seed as far as that world's `extremity` allows. 7 continent methods (noise, plates, voronoi, diamond, archipelago, pangea, mixed), thermal + droplet erosion, percentile sea level, wind-swept rainfall with rain shadow, depression-filled drainage → rivers/lakes, 25-biome table with evil/good/magic aura biomes, cheapest-path named regions, named seas/ranges/rivers/lakes/forests, settlements by habitability + landmarks/dungeons/ports/passes, A* road network with bridges and sea lanes, region detail (6×) and 64×64 local tiles, canvas renderers + debug layers, JSON/PNG export, small history table; viewer with ~30 knobs, 5 presets and a Web Worker
+
+**Status / key files:** done 2026-09-12
+
+**Status / key files:** `worldgen/README.md`, `js/{noise,biomes,names,world,regions,nodes,roads,local,render,export,history,worker,app}.js`

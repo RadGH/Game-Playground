@@ -1,5 +1,7 @@
 # Spirehold
 
+> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh spirehold` from the playground and fix what it finds — game-lint (on 2026-11-11: 5 browser-tooltip, 1 root-path), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `spirehold` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass.
+
 A semi-idle city defence game (2026-11-08). Owner brief, verbatim in `docs/PLAN.md`: a city sim to play for ~40 hours
 and keep building bigger cities, **without micromanaging the city** — only the defence: huge sieges, spells, explosions
 and meteors from towers and mages, D&D-style adventuring parties sent on quests of varying difficulty (rewards on a win,
@@ -60,3 +62,12 @@ spells, meteor delay, quest odds, win/lose rewards, time away, save/export, new 
 every bonus stat is read). `npx playwright test prototypes/spirehold/tests/game.spec.js` (desktop + phone: found a city,
 tap the wall to build, cast, every tab, no sideways scroll, save/continue; hire a party and send a quest).
 `tools/shot.mjs` / `tools/shot2.mjs` take screenshots.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Spirehold** (2026-11-08 →): a semi-idle city defence game from the owner's 40-hour brief (`docs/PLAN.md`). The city grows by itself (people → taxes → city levels → wider walls with more tower spots, landmarks); you hold the walls: 9 towers with path choices at 10 and 30 and damage doubling every 25 levels, 7 schools of court mages who cast on their own, 8 spells (Fireball, Chain Lightning, Frost Bloom, Meteor, Earthshake, Aegis Ward, Arcane Barrage, Skyfall) with apprentice auto-cast, sieges every 10th wave with named leaders (never "Horde" — banned). Adventuring parties stop at the tavern; hire them and send them on 5 min–8 h real-time quests with odds in words; win = gold/lore/starshards/relics, lose = nothing. Time away pays 50%+ (capped 12 h); optional Royal Steward spends gold. From wave 100 found a new realm (6 realms) for Crowns → multiplying Legacy. Pure sim in `js/sim/` (all curves in `rules.js` `TUNE`), canvas 2D art drawn at load, pacing bot `tools/sim.mjs`. Read `README.md` first
+
+**Status / key files:** playable 2026-11-08

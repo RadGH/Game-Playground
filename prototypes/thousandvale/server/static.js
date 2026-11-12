@@ -18,7 +18,7 @@ export const ALLOW = Object.freeze([
   // shared code and art
   'shared', 'vendor', 'assets',
   // experiments
-  'armory', 'avatar-2d', 'avatar-3d', 'combined', 'conversations', 'highdef-3d', 'icons', 'items', 'library',
+  'armory', 'avatar-2d', 'avatar-3d', 'combined', 'conversations', 'highdef-3d', 'icons', 'items', 'library', 'model-library',
   'lingo', 'meters', 'namegen', 'proctown', 'sfx', 'universe', 'voice-lab', 'worldgen',
   // prototypes (prototypes/tinyrts is a symlink to another repo, so a published copy cannot hold it)
   'prototypes/thousandvale', 'prototypes/farhold', 'prototypes/emberveil', 'prototypes/bannerline',

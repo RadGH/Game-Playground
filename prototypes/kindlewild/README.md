@@ -1,5 +1,7 @@
 # Kindlewild
 
+> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh kindlewild` from the playground and fix what it finds — game-lint (on 2026-11-11: 2 browser-tooltip, 1 banned-name), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `kindlewild` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass.
+
 A pixel god-game sandbox in a medieval fantasy realm (independent project by Radley Sustaire, sandbox). You are the
 sky above a small realm: paint the land, drop creatures into it, and cast spells the world answers with real physics —
 fire that runs with the wind, lava that floods downhill and cools to stone, water that pools in craters, blasts that
@@ -239,3 +241,12 @@ score, label, essence })`; the best score per type goes to `save.records` and ev
     wave 1-3; **lazy (two Archers, upgraded) falls on wave 7-11 on Fair** (was 18) and 6-10 on Fierce; the crude bot (no spells,
     a little mazing, no upgrades) wins Gentle 20 about half the time and reaches 16-20 on Fair, 6-13 on Fierce. Fierce: 12 lives,
     gates on waves 1/6/12. `tests/td2.test.mjs` holds the rules and the two-Archer check.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Kindlewild** (2026-10-28 →): a pixel god-game sandbox in a medieval fantasy realm, from the owner's "like Lodestar M1, but fantasy" brief (`docs/OWNER-BRIEF.md`). Top-down cell world (`js/sim/`, pure): per-cell `mat`/`ground`/`height`/`temp`/`life`/`flag` with sleeping 16×16 chunks — fire that runs with the wind, liquids that flow by `height*LEVEL + amount` (steepest first; thin lava ROLLS and leaves crust), reactions table (`data/reactions.json`, each a discovery), blasts with debris arcs and craters, lightning through connected water, gas, growth, weather. 27 creatures (1×1 mites to a 15×11 dragon) with a life sim (hunger, grazing, hunting, breeding, fear, burning panic) and villages built of REAL cells (cottages burn, jobs by need, bucket brigades, beds cap births, faith). 24 spells, Act I (6 challenges, goals + stars, `data/levels.json`), Sandbox, Realm (saved world, faith → mana + Essence, omens), Grimoire unlock tiers + Empower + Boons. WebGL2 coloured light field + bloom + day/night; phone-first dock (tabs + paged tiles, one finger acts, two fingers move). `tools/bot.mjs` = every level must lose idle and win with the bot. **Custom Game (2026-10-30)**: replaces Realm on the title; types in `data/gamemodes.json` (Realm with Peaceful/Wave Defense/Disasters/Random events, Tower Defense with a Structures tab, Wildfire Watch, Rising Tide, Cataclysm, Wild Garden, Sandbox), `js/game/modes.js` + `towers.js` + `flowfield.js` + `scenarios.js`, 12 device-only save slots, Extra Large 512x512 (visible-box rebuild), choose your base; `tools/td-bot.mjs`. **2026-11-04**: Tower Defense on the title; every custom game opens on a map review (seed shown, type one, reroll; `s.reviewing`); finished games kept in `save.history` with their seed + Same map; TD has 21 enemy kinds with traits (`c.td`: armour, shields, healers, burrowers, brood, summoners, elites, rotating bosses), 6 new structures incl. road traps, upgrades to level 4, much harder waves (td-bot strategies idle/lazy/bot; two Archers fall ~wave 8 on Fair). Read README + docs/PLAN.md
+
+**Status / key files:** playable 2026-10-28

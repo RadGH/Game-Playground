@@ -1,5 +1,5 @@
 {
-  "_doc": "THE balance knobs (owned by the bot sim, tools/sim.mjs from M12). The bestiary's formulas (monsters.json baseline) and the item ladders (item-bases.json) were designed separately; these multipliers reconcile them without editing either file. monster.hp/damage multiply every monster; `early` eases the first levels: below `untilLevel`, monster hp and damage are multiplied by `from` rising linearly to 1.",
+  "_doc": "THE balance knobs (owned by the bot sim, tools/sim.mjs from M12). The bestiary's formulas (monsters.json baseline) and the item ladders (item-bases.json) were designed separately; these multipliers reconcile them without editing either file. monster.hp/damage multiply every monster; `early` eases the first levels: below `untilLevel`, monster hp and damage are multiplied by `from` rising linearly to 1. hero.offHandDamage: the share of its damage a weapon in the off hand swings for (dual-wield, Doubled Grasp; js/sim/fight.js).",
   "monster": { "hp": 0.62, "damage": 0.6, "early": { "untilLevel": 6, "from": 0.72 } },
-  "hero": { "hpBase": 70, "hpPerLevel": 18 }
+  "hero": { "hpBase": 70, "hpPerLevel": 18, "offHandDamage": 0.5 }
 }

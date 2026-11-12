@@ -2,6 +2,7 @@
 // The hero's character document (p.char) is changed and marked dirty; the owner's browser gets it back and saves it.
 //   equip { uid, slot }   unequip { slot }   move { uid, x, y }   identify { uid }   spend { attr, n }   swap (weapon sets)
 import { canEquip, identify as ided, WORN } from '../rules/items.js';
+import { gripOf, handsBumped, compareSlots, firstCompareSlot } from '../rules/hands.js';
 import { fits, findSpot } from '../rules/bag.js';
 import { spendAttr } from '../rules/character.js';
 import { refreshHero } from './actors.js';
@@ -21,18 +22,18 @@ export function inventoryAct(w, p, a) {
     case 'equip': {
       const it = fromBag(ch, a.uid); if (!it) return { err: 'That is not in your bag.' };
       if (p.cast) return { err: 'Not while casting.' };
-      const b = D.bases[it.base]; let slot = a.slot || defaultSlot(ch, b);
-      const st = sheet(ch, D, w.content.skills);
-      const r = canEquip(D, ch, it, slot, st.attrs); if (!r.ok) return { err: r.why };
+      const b = D.bases[it.base], grip0 = gripOf(D, ch, w.content.skills); const slot = WORN.includes(a.slot) || a.slot === 'weapon2' || a.slot === 'offhand2' ? a.slot : defaultSlot(ch, b, D, grip0);
+      const st = sheet(ch, D, w.content.skills), grip = gripOf(D, ch, w.content.skills);
+      const r = canEquip(D, ch, it, slot, st.attrs, { equip: ch.equip || {}, grip }); if (!r.ok) return { err: r.why };
       if (it.ided === false) return { err: 'Identify it first (right-click).' };
       // whatever was there goes into the item's old bag spot (or anywhere it fits)
       const old = (ch.equip || {})[slot];
       const bag = ch.bag.filter(i => i.uid !== it.uid);
       const extra = [];
       if (old) extra.push(old);
-      // a two-hander frees the off hand; an off hand next to a two-hander frees the main hand
-      if (b.hands === 2 && slot === 'weapon' && ch.equip?.offhand) extra.push(ch.equip.offhand);
-      if (slot === 'offhand' && ch.equip?.weapon && D.bases[ch.equip.weapon.base]?.hands === 2) extra.push(ch.equip.weapon);
+      // the hands must agree (js/rules/hands.js): a two-hander frees the off hand unless a quiver pairs with it (or
+      // Doubled Grasp holds a second one); a shield next to a two-hander frees the main hand; a quiver leaves with its bow
+      for (const k of handsBumped(D, it, slot, ch.equip || {}, grip)) if (ch.equip?.[k]) extra.push(ch.equip[k]);
       let nb = bag;
       for (const o of extra) { const { pos: _, ...clean } = o; const spot = o === old && fits(D, nb, clean, it.pos?.x ?? -1, it.pos?.y ?? -1) ? it.pos : findSpot(D, nb, clean); if (!spot) return { err: 'No room in your bag.' }; nb = [...nb, { ...clean, pos: spot }]; }
       const equip = { ...(ch.equip || {}) }; const { pos: _p, ...wear } = it; equip[slot] = wear;
@@ -102,8 +103,10 @@ export function inventoryAct(w, p, a) {
   }
   return { err: 'unknown action' };
 }
-function defaultSlot(ch, b) {
-  if (b.slot === 'ring') return ch.equip?.ring1 && !ch.equip?.ring2 ? 'ring2' : 'ring1';
+/** No slot asked for: the first free one this item could take (a free ring finger), else its own slot. */
+function defaultSlot(ch, b, D, grip) {
+  const slots = compareSlots(D, b, grip);
+  if (b.slot === 'ring' || b.slot === 'offhand') return firstCompareSlot(slots, ch.equip);
   return b.slot;
 }
 export { WORN };

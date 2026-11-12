@@ -29,6 +29,8 @@ import { createGround } from './ground.js';
 import { play, LOOT_SOUND, soundFor, ambience, setVolume, getVolume } from './sound.js';
 import { maybeRate, tally } from './rate.js';
 import { createPadNav } from './padnav.js';
+import { installTooltips } from '../../../../shared/tooltip.js';
+installTooltips();
 import { loadContentAsync } from '../sim/content.js';
 import { cleanCode } from '../net/protocol.js';
 import { qrSvg, joinUrl } from '../../../tumblefair/js/client/qr.js';
@@ -70,15 +72,16 @@ function walkToward(a) {
 }
 const meleeReach = () => { const b = content.items?.bases?.[heroes.current()?.equip?.weapon?.base]; return b?.ranged ? 20 : 2.1; };
 const heroes = createHeroes({ root: $('#heroes'), onChange: () => {}, items: content.items });
-const sheetUI = createSheetUI({ onSkills: () => skillsUI.toggle(true), potions: content.potions, currency: content.currency, items: content.items, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
+const sheetUI = createSheetUI({ onSkills: () => skillsUI.toggle(true), potions: content.potions, currency: content.currency, items: content.items, skills: content.skills, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
 const skillsUI = createSkillsUI({ content, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
 const sendAct = a => G.link?.send({ t: 'act', ...a });
 const townUI = createTownUI({ content, send: sendAct, getChar: () => heroes.current() });
 const guide = createGuideView(view);
 const travelUI = createTravelUI({ view, content, labelRoot: $('#tags'), send: sendAct, getChar: () => heroes.current(), getMe: () => actors.get(G.me), getArea: () => G.area, getDifficulty: () => G.difficulty,
-  onNpc: (id) => { if (id === 'stash') townUI.openStash(); else if (id === 'elder') { const q = activeStep(content, heroes.current() || {}, G.difficulty); if (q) showQuest(q.name, q.text); else showQuest('The coast is safe', 'For now. Rest in Brightwater, hero.'); } else sendAct({ do: 'shop', npc: id }); } });
+  onNpc: id => openNpc(id) });
+function openNpc(id) { if (id === 'stash') townUI.openStash(); else if (id === 'elder') { const q = activeStep(content, heroes.current() || {}, G.difficulty); if (q) showQuest(q.name, q.text); else showQuest('The coast is safe', 'For now. Rest in Brightwater, hero.'); } else sendAct({ do: 'shop', npc: id }); }
 const partyUI = createPartyUI({ content, send: sendAct, getChar: () => heroes.current(), zoneName: id => content.zones?.[id]?.name || id || '' });
-const hud = createHud($('#fight'), { skills: content.skills, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }), onRecall: () => sendAct({ do: 'travel', via: 'recall' }),
+const hud = createHud($('#fight'), { skills: content.skills, content, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }), onRecall: () => sendAct({ do: 'travel', via: 'recall' }),
   quest: ch => { const q = activeStep(content, ch, G.difficulty); if (!q) return null; const r = q.rule || {}; const n = ch[questKey(G.difficulty)]?.[q.id]?.n || 0; return { name: q.name, hint: guide.target?.hint || '', progress: r.kind === 'kill' ? `Defeat foes in ${content.zones?.[r.node]?.name || r.node}: ${n} / ${r.n}` : r.kind === 'boss' ? `Defeat ${content.monsters?.[r.boss]?.name || 'the boss'}` : r.kind === 'reach' ? `Reach ${content.zones?.[r.to]?.name || content.acts?.[0]?.nodes?.find(x => x.id === r.to)?.name || r.to}` : '' }; } });
 const input = createInput();
 const touch = createTouch($('#touch'), input);
@@ -480,7 +483,7 @@ const menu = createMenu([
   { label: 'Credits', act: () => credits.open() },
   { label: 'Leave game', when: () => !!G.me, act: leaveGame },
 ]);
-addEventListener('keydown', e => { if (e.key === 'Escape' && townUI.open) { townUI.close(); return; } if (e.key !== 'Escape' || document.querySelector('.modal:not([hidden])')) return; if (sheetUI.open) { sheetUI.toggle(false); return; } if (G.me && G.target) { setTarget(null); return; } menu.open(); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && townUI.open) { townUI.close(); return; } if (e.key === 'Escape' && travelUI.mapOpen) { travelUI.closeMap(); return; } if (e.key !== 'Escape' || document.querySelector('.modal:not([hidden])')) return; if (sheetUI.open) { sheetUI.toggle(false); return; } if (G.me && G.target) { setTarget(null); return; } menu.open(); });
 
 function shot() {
   try { view.render(); const src = view.renderer.domElement, k = Math.min(1, 900 / Math.max(src.width, src.height)); const c = document.createElement('canvas'); c.width = src.width * k; c.height = src.height * k; c.getContext('2d').drawImage(src, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', 0.72); } catch { return null; }
@@ -494,6 +497,9 @@ window.gameEye = {
     return { guide: guide.target ? { x: guide.target.x, z: guide.target.z, to: guide.target.to, hint: guide.target.hint } : null, area: G.area?.id || null, prompt: travelUI.current ? { kind: travelUI.current.kind, to: travelUI.current.to || travelUI.current.id } : null, waypoints: heroes.current()?.waypoints, ground: [...ground.items.values()].map(g => ({ gid: g.gid, what: g.what, r: g.real || g.r, name: g.name, x: +g.x.toFixed(1), z: +g.z.toFixed(1) })), chests: [...ground.chests.values()].map(c => ({ id: c.id, x: c.x, z: c.z, open: c.open })), gold: heroes.current()?.gold, target: G.target || null, foes: [...foes.list.values()].map(f => ({ id: f.id, name: f.name, x: +f.x.toFixed(1), z: +f.z.toFixed(1), hp: f.hp, mhp: f.mhp, st: f.st })), hero: heroes.current() && { level: heroes.current().level, xp: heroes.current().xp }, me2: G.meSnap && { hp: G.meSnap.hp, mhp: G.meSnap.mhp, mp: G.meSnap.mp, dead: !!G.meSnap.dead }, screen: G.me ? 'game' : 'title', link: G.link?.kind || null, code: G.code, host: G.host === G.me, ping: G.ping && Math.round(G.ping), reconnecting: !!G.retry, area: G.area?.id || null, me: me ? { x: +me.x.toFixed(2), z: +me.z.toFixed(2), yaw: +me.yaw.toFixed(2), moving: !!me.moving, bodyReady: !!me.body } : null, players: [...actors.list.values()].map(a => ({ id: a.id, x: +a.x.toFixed(2), z: +a.z.toFixed(2) })), server: G.snap ? G.snap.players.map(p => ({ id: p.id, x: p.x, z: p.z })) : null, fps: Math.round(G.fps || 0) };
   },
   health: () => ({ ok: true, errors: 0 }),
+  /** open a townsperson's window as if you had walked up to them (screen walk + tests) */
+  npc: id => openNpc(id),
+  quests: () => openQuestLog(),
   /** hero's drawn position on screen, per frame, for the smoothness test */
   heroScreen: () => { const a = actors.get(G.me); if (!a) return null; const [x, y] = worldAt(a.group.position.x, a.group.position.z, 1); return { x, y, t: performance.now() }; },
   screenOfPoint: (x, z) => { const [sx, sy] = worldAt(x, z, 0); return { x: sx, y: sy }; },
@@ -520,4 +526,4 @@ function padCombat() {
 // controller in menus (game standards §1): the d-pad / stick walk a highlight, A presses, B goes back. While you are
 // playing with no menu open, the pad drives the hero instead.
 const anyMenu = () => !!document.querySelector('.modal:not([hidden]), .sheet-ui:not([hidden]), .skills-ui:not([hidden])');
-createPadNav({ busy: () => !!G.me && !anyMenu(), back: () => { if (townUI.open) { townUI.close(); return true; } if (skillsUI.open) { skillsUI.toggle(false); return true; } if (sheetUI.open) { sheetUI.toggle(false); return true; } const m = [...document.querySelectorAll('.modal:not([hidden])')].pop(); if (m) { m.remove(); return true; } return false; } });
+createPadNav({ busy: () => !!G.me && !anyMenu(), onButton: i => { if (i === 3 && sheetUI.open) sheetUI.cycleCompare(); }, back: () => { if (townUI.open) { townUI.close(); return true; } if (skillsUI.open) { skillsUI.toggle(false); return true; } if (sheetUI.open) { sheetUI.toggle(false); return true; } const m = [...document.querySelectorAll('.modal:not([hidden])')].pop(); if (m) { m.remove(); return true; } return false; } });

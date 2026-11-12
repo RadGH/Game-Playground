@@ -2,6 +2,7 @@
 // don't round, NaN, code names ("dust"), "[object …]", leftover {placeholders}. Run it on every screen a test opens:
 //   import { screenTextProblems } from '../../../shared/test/screen-text.js';
 //   const bad = await page.evaluate(screenTextProblems, { allow: ['N/A'] });   assert.deepEqual(bad, []);
+// Also: a scroller nested in another scroller, and a page wider than the screen.
 // It reads only what is VISIBLE (display, visibility, size), so hidden templates don't count.
 export function screenTextProblems(opts = {}) {
   const allow = new Set(opts.allow || []);
@@ -25,5 +26,17 @@ export function screenTextProblems(opts = {}) {
   }
   // browser tooltips on anything visible
   for (const el of document.querySelectorAll('[title]')) if (el.getAttribute('title') && visible(el) && !el.closest('[data-lint-skip]')) out.push({ what: 'browser tooltip', text: (el.getAttribute('title') || '').slice(0, 60) });
+  // one scroller per screen (lessons rule 11): a visible scroller that can scroll, inside another one that can
+  const scrolls = el => { const s = getComputedStyle(el); return /(auto|scroll)/.test(s.overflowY) && el.scrollHeight > el.clientHeight + 2; };
+  for (const el of document.querySelectorAll('body *')) {
+    if (!visible(el) || !scrolls(el) || el.closest('[data-lint-skip]')) continue;
+    for (let up = el.parentElement; up && up !== document.body; up = up.parentElement) if (visible(up) && scrolls(up)) {
+      const name = e => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (e.classList[0] ? '.' + e.classList[0] : '');
+      out.push({ what: 'nested scroller', text: `${name(el)} inside ${name(up)}` }); break;
+    }
+  }
+  // no sideways page scroll on a phone (rule 11/14)
+  const over = document.documentElement.scrollWidth - window.innerWidth;
+  if (over > 2) out.push({ what: 'sideways scroll', text: `page is ${over}px wider than the screen` });
   return out;
 }

@@ -698,7 +698,7 @@
     "rogue_notch"
    ],
    "kind": "active",
-   "desc": "Coat the edge and drive it in: {mult} weapon damage, then poison for {secs} seconds. Stack it on the brute while you work the rest of the pack.",
+   "desc": "Coat your blade for {dur} seconds: every hit you land poisons for {secs} seconds, {dmg} poison damage a second. Stack it on the brute while you work the rest of the pack.",
    "cost": {
     "energy": 25
    },

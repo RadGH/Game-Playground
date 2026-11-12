@@ -60,6 +60,8 @@ done
 git archive "$SHA" -- "${PRESENT[@]}" | tar -x -C "$TMP"
 
 # ---- gate 1: every module parses (a half-written import is what takes a page down) ----
+echo "== gate: lint, connected modules, screen walk (tools/prepublish-check.sh)"
+"$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)/tools/prepublish-check.sh" thousandvale "$SHA" || { echo "refusing: thousandvale fails its pre-publish checks (above)"; exit 1; }
 echo "== gate: node --check"
 BAD=0
 while IFS= read -r f; do node --check "$f" >/dev/null 2>&1 || { echo "   syntax error: ${f#$TMP/}"; BAD=1; }; done \

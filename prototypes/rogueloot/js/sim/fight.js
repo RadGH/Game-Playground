@@ -12,6 +12,7 @@ import { runAutoSkill } from './skills.js';
 import { wireChampions, modsHitTaken, modsDeath, soakWard } from './champions.js';
 import { makeFoe } from './actors.js';
 import { rankOf, castSkill, stepSkillCast, wireSkills, fxPct, markOf, armourAfter, gain } from './skills.js';
+import { OFFHAND_DAMAGE } from '../rules/hands.js';
 
 export const KEEP_CORPSE = 10;           // seconds a dead monster lies there
 export const REVIVE_TIME = 3;            // seconds a friend channels to bring you back
@@ -96,8 +97,8 @@ function fire(w, p, sk, t) {
 }
 
 /** One weapon blow (auto-attack or a weapon skill). */
-function weaponHit(w, p, t, mult, sk = null) {
-  const wpn = p.weapon, roll = wpn.min + w.rng() * (wpn.max - wpn.min) + (p.st.attackPower || 0) / 14;
+function weaponHit(w, p, t, mult, sk = null, wpn = p.weapon) {
+  const roll = wpn.min + w.rng() * (wpn.max - wpn.min) + (p.st.attackPower || 0) / 14;
   // light blades (daggers, swords) take whichever of Strength or Agility is higher, so a Rogue's Agility counts
   const power = (wpn.ranged ? p.st.rangedPower : wpn.finesse ? Math.max(p.st.meleePower, p.st.rangedPower) : p.st.meleePower) * (1 + fxPct(p, 'damage') / 100) * markOf(t);
   const r = resolveHit({ ...p, crit: p.crit + fxPct(p, 'crit') }, armourAfter(t), { amount: roll * mult * power, type: 'physical', critBonus: 0 }, w.rng);
@@ -211,6 +212,13 @@ export function stepAuto(w) {
     if (!p.autoOn || p.dead || p.cast || has(p, 'stun')) continue;
     const t = actorById(w, p.target);
     if (!alive(t) || t.team !== 'foe') { p.autoOn = false; continue; }
+    // the off hand (a dual-wielder, or Doubled Grasp): its own weapon on its own clock, for a share of its damage,
+    // whichever auto-attack the main hand runs (game standards §5b: both weapons really swing)
+    const ow = p.offWeapon;
+    if (ow && !p.weapon.ranged && gap(p, t) <= ow.reach && w.time >= (p.nextOffSwing || 0)) {
+      if (!p.nextOffSwing || w.time - p.nextOffSwing > 1) p.nextOffSwing = w.time + 0.5 / ow.speed;     // first blow half a beat behind the main hand
+      else { p.nextOffSwing = w.time + 1 / ow.speed; face(p, t); const r = weaponHit(w, p, t, w.content.balance?.hero?.offHandDamage ?? OFFHAND_DAMAGE, null, ow); w.events.push({ k: 'swing', s: p.id, off: 1 }); const lp = leechPct(w, p); if (lp && r?.amount > 0) p.hp = Math.min(p.maxHp, p.hp + r.amount * lp / 100); }
+    }
     const own = p.autoSkill && w.content.skills[p.autoSkill];
     if (own) {                                          // a class auto-attack: its own reach and pace, its own effects
       const reach = own.range > 0 ? own.range : p.weapon.reach;

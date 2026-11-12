@@ -130,3 +130,14 @@ const grip = holdOf(piece, armed, 'gripR');     // { axis, length, palmAlong, of
   the game's business.
 * Flags live in one browser. Export them before clearing site data.
 * Emberveil's bestiary looks and Bannerline's units are characters, not gear, and are not listed here.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Armory**: THE page to review every wearable and holdable Chibi 2 model (swords, daggers, wands, staves, shields, foci, helms, chest, gloves, capes…). Rows come from the gear catalog (`avatar-3d/data/gear-catalog.json` via `avatar-3d/js/gear-catalog.js`) — add a model to the catalog and it is on the page. Grid of thumbnails (ONE shared renderer + queue + cached pictures: `createThumbnailer`) with filters by kind / slot / weapon type / archetype / game / hands / new this round / flagged; detail view with an orbit preview on a Chibi 2 body, **main hand / off hand / both hands**, every animation clip with slow-motion, race / height / build, piece-alone + wireframe; **source file and builder**; triangles, vertices, draw calls, materials, size in metres and bones **measured by building the same body with and without the piece** (`extractAdded` — gear is merged into the body's two meshes, so there is no object to ask, and a measured number cannot go stale); a **grip readout** per hand (`holdOf`: long axis, palm position, palm-to-handle distance, live angle to the forearm) that says when the two hands hold a weapon differently; the game items mapped to it; the bag icon drawn by Thousandvale's own `item-icons.js`; a flag note per model in localStorage with JSON export. Deep links `armory/#id=fh_daggers&hand=both&anim=flurry`. `avatar-3d/js/preview-kit.js` is the shared viewer helper it introduced (opt-in, any page may use it)
+
+**Status / key files:** done 2026-10-06
+
+**Status / key files:** `armory/README.md`, `js/{model,source,app}.js`, `avatar-3d/js/preview-kit.js`

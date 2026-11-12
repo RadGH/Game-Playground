@@ -249,3 +249,14 @@ searches it like any other section.
 * `universe/` — every space model: planets, stars, belts and the backdrop.
 
 Built by Claude for Radley Sustaire, 2026-09-11 (space models 2026-09-13).
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Shared art library: scenery backdrops (32 standalone `viewBox="0 0 100 100"` SVG scenes, day + already-dark ones, tagged by place/biome/act), 13 map node icons and **35 fx particle sprites** (`data/fx/*.svg`, 64×64 transparent: flames, shards, runes, claws, slashes, bolts and status glyphs) that `avatar-3d/js/spellfx.js` rasterizes to textures, indexed by `data/manifest.json`; loader with tag lookup, night wash, caching, `fxTexture()`/`fxTextures()` (Three.js passed in, so the loader stays 3D-free) and a never-throws fallback; gallery page. Used by both prototypes' stages
+
+**Status / key files:** done 2026-09-12
+
+**Status / key files:** `assets/README.md`, `js/assets.js`, `data/manifest.json`, `data/scenery/*.svg`, `data/icons/*.svg`, `data/fx/*.svg`

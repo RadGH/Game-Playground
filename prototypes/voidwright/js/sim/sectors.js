@@ -23,6 +23,7 @@ export const SECTOR_KINDS = {
   wrecks: { name: 'Wreck field', color: '#c48cff' },
   camp: { name: 'Enemy camp', color: '#ff5a6a' },
   swarm: { name: 'Alien swarm', color: '#a6ff4a' },
+  gnats: { name: 'Gnat pack', color: '#ffb35a' },
   convoy: { name: 'Trade convoy', color: '#5fa8ff' },
 };
 
@@ -44,6 +45,7 @@ export function sectorInfo(sys, sx, sy, w = null) {
     ['wrecks', 0.07],
     ['camp', nearStation ? 0 : 0.2 * foes],
     ['swarm', nearStation || sys.tier < 2 ? 0 : 0.08 * foes],
+    ['gnats', nearStation ? 0 : 0.14 * foes],   // packs of small, shieldless darts: easy kills
     ['convoy', 0.05],
     [null, 0.45],
   ];
@@ -54,7 +56,7 @@ export function sectorInfo(sys, sx, sy, w = null) {
   // where in the square, kept off the edges
   const x = sx * SEC + r.range(0.2, 0.8) * SEC, y = sy * SEC + r.range(0.2, 0.8) * SEC;
   const info = { kind, x, y, key: key(sx, sy), seed: hash(sys.seed, 'secfill', sx, sy) };
-  if (kind === 'camp' || kind === 'swarm') {
+  if (kind === 'camp' || kind === 'swarm' || kind === 'gnats') {
     const pool = kind === 'swarm' ? factionsForTier(sys.tier).filter(f => !FACTIONS[f].human) : factionsForTier(sys.tier).concat(FACTIONS[sys.owner]?.hostile ? [sys.owner] : []);
     info.faction = r.pick(pool.length ? pool : ['redfang']);
   }
@@ -105,9 +107,9 @@ function load(w, info) {
       recompute(s);
       w.bodies.push(tag(s));
     }
-  } else if (info.kind === 'camp' || info.kind === 'swarm') {
+  } else if (info.kind === 'camp' || info.kind === 'swarm' || info.kind === 'gnats') {
     if (info.kind === 'camp') rocks(6, false);
-    const list = spawnGroup(w, { x: info.x, y: info.y }, info.faction, tier, r, info.kind === 'swarm' ? 'pack' : null);
+    const list = spawnGroup(w, { x: info.x, y: info.y }, info.faction, tier, r, info.kind === 'swarm' ? 'pack' : info.kind === 'gnats' ? 'gnats' : null);
     // a cleared camp stays cleared for this visit: only the ships not yet killed come back
     list.slice(0, mem.killed).forEach(s => { s.dead = true; s.unloaded = true; s.counted = true; });
     for (const s of list) { tag(s); s.campKey = info.key; }

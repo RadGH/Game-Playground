@@ -1,0 +1,29 @@
+{
+  "_doc": "Modules that tools/game-reach.mjs finds no page, worker or server loading, reviewed one by one (2026-11-11). Each entry says why that is fine. tests/game-reach.test.js fails on a module missing from here, and on an entry here that is now loaded or gone.",
+  "bannerline": {
+    "js/net/loopback.js": "in-memory transport for the tests (tests/_net.mjs); real matches use PeerJS"
+  },
+  "frontier-foundry": {
+    "js/ai.js": "the balance bot that tools/sim-foundry.mjs and tests/sim.test.js drive; not a player feature"
+  },
+  "lanternfall": {
+    "js/ai/bosskit.js": "hook shapes for the boss scripts in js/ai/bosses/, which are all still Mother Tallow stand-ins (docs/HANDOFF.md)",
+    "js/world/reach.js": "the reachability bot behind tools/room-check.mjs and tools/kit-check.mjs"
+  },
+  "lodestar": {
+    "js/render/chart.js": "PLAN M2's outlined chart view; the scope's far zoom is drawn by cells.glsl.js instead. Parked in the README"
+  },
+  "thousandvale": {
+    "js/client/gallery/stage.js": "loaded by js/client/gallery/frame-boot.js with a script tag (ui-gallery.html)",
+    "js/client/gallery/fake-net.js": "part of the UI gallery (stage.js)",
+    "js/client/gallery/frame-chrome.js": "part of the UI gallery (frame-boot.js)",
+    "js/client/gallery/title-lite.js": "part of the UI gallery (stage.js)",
+    "js/sim/loopback.js": "in-process transport for the server tests (js/net/sockets.js 'loopback' mode)",
+    "js/sim/pack-routes.js": "used by tools/content-packs.mjs to bake data/provinces/*-pack-routes.json",
+    "ops/lib/offsite-upload.mjs": "run by ops/ shell scripts on the server (backups)",
+    "ops/lib/probe-public.mjs": "run by ops/ shell scripts on the server (health probe)"
+  },
+  "tumblefair": {
+    "js/shared/svg-raster.js": "test helper: tests/odd-one-out-looks.test.js draws each picture at phone size"
+  }
+}

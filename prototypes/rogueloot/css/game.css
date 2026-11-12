@@ -278,3 +278,38 @@ body.hurt-flash #fight::before { content: ''; position: fixed; inset: 0; box-sha
 @media (prefers-reduced-motion: reduce) { .slot.auto, .arc-btn.auto { animation: none; } }
 .slot.recall { background: linear-gradient(#2a3a5a, #141e33); }
 #fight.touch .arc-btn.recall { width: 44px; height: 44px; } #fight.touch .arc-btn.recall .ic { font-size: 16px; line-height: 28px; }
+
+/* Library icons (js/client/icons.js): every skill, potion, shard and button picture is an SVG from the playground's
+   icon set, sized by its box instead of by font-size */
+.slot .ic, .arc-btn .ic { display: grid; place-items: center; height: 40px; }
+.slot .ic svg, .arc-btn .ic svg { width: 36px; height: 36px; display: block; }
+#fight.touch .arc-btn .ic { height: 100%; }
+#fight.touch .arc-btn .ic svg { width: 70%; height: 70%; }
+#fight.touch .arc-btn.big .ic svg { width: 60%; height: 60%; }
+.slot.pot .ic svg, .slot.recall .ic svg { width: 30px; height: 30px; }
+.bag-btn { display: grid; place-items: center; } .bag-btn svg { width: 32px; height: 32px; }
+.node .ic { display: grid; place-items: center; } .node .ic svg { width: 34px; height: 34px; }
+.bslot2 svg { width: 28px; height: 28px; }
+.path-card .starters svg { width: 18px; height: 18px; vertical-align: -4px; }
+.bag .item svg, .eq svg, .belt-row .bslot svg { width: 80%; height: 80%; max-width: 40px; max-height: 40px; }
+.trow .g svg { width: 24px; height: 24px; vertical-align: middle; }
+.drag-ghost svg { width: 40px; height: 40px; }
+
+/* Item cards (game standards §5b): how it is held under the name, one line per stat with its split, and the side-by-side
+   compare against what it would replace */
+.tip .hand { font: 600 12px Cinzel, serif; color: #e8d8a8; letter-spacing: .04em; margin: 1px 0 2px; }
+.tip .split { font-size: 11px; opacity: .7; font-weight: 400; }
+.tip .worn-label { font: 600 11px Cinzel, serif; text-transform: uppercase; letter-spacing: .06em; color: #c8b890; margin-bottom: 2px; }
+.tip.empty { color: #c8bca0; } .tip.empty p { margin: 4px 0 0; font-size: 13px; }
+.tip-float.wide { width: min(660px, 96vw); max-width: none; }
+.cmp-view .cmp-head { background: rgba(20,14,8,.96); border: 2px solid #8a7a5a; border-radius: 10px; padding: 4px 10px; margin-bottom: 6px; font: 14px Spectral, serif; color: #f0e6d0; }
+.cmp-view .cmp-head b { opacity: .55; font-weight: 600; } .cmp-view .cmp-head b.on { opacity: 1; color: #ffd36a; text-decoration: underline; }
+.cmp-view .cmp-head small { opacity: .65; margin-left: 6px; }
+.cmp-cards { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+.cmp-cards > .tip { flex: 1 1 240px; min-width: 0; max-width: 320px; }
+/* phone: the two cards stay side by side (smaller type) and the card sits at the top, so Equip / Compare stay in view */
+@media (max-width: 600px) {
+  .cmp-cards { flex-wrap: nowrap; gap: 4px; }
+  .cmp-cards > .tip { flex: 1 1 0; padding: 6px 7px; font-size: 12px; }
+  .cmp-cards > .tip h4 { font-size: 13px; } .cmp-view .cmp-head { font-size: 13px; padding: 3px 8px; } .cmp-view .cmp-head small { display: block; margin: 0; }
+}

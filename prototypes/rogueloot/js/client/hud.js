@@ -2,10 +2,12 @@
 // your cast bar, the action bar (desktop) / skill arc (phone, ruling 21), floating numbers, the "why not" line, and the
 // death panel. Pure DOM; main.js feeds it snapshots and wires the buttons.
 import { xpAtLevel, xpToNext } from '../rules/progression.js';
-import { skillIcon, RES_NAME } from './skills-ui.js';
+import { RES_NAME, skillText } from './skills-ui.js';
+import { skillIcon, uiIcon, itemIcon } from './icons.js';
+import { rankOf } from '../sim/skills.js';
+import { registerTip } from '../../../../shared/tooltip.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const ICONS = { attack: '⚔', sword: '🗡', bolt: '⚡', heal: '✚', shove: '✋', potion: '⚗' };
 export const BAR = ['sure_strike', 'spark', 'field_mend', 'shove', null, null];        // a hero with no bar yet
 
 const ATK_NONE = () => 'attack';
@@ -13,7 +15,7 @@ let ATK = ATK_NONE;
 /** main.js tells the HUD which skill fills the Attack slot (a class auto-attack once learned) */
 export function setAttackSkill(fn) { ATK = fn || ATK_NONE; }
 
-export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouch, onBag = () => {}, onDrink = () => {}, onRecall = () => {}, quest = null }) {
+export function createHud(root, { skills, content = null, onUse, onTargetNext, onRelease, isTouch, onBag = () => {}, onDrink = () => {}, onRecall = () => {}, quest = null }) {
   root.innerHTML = `
     <div class="me-frame"><div class="lvl"></div><div class="bars"><div class="nm"></div><i class="hp"><b></b><span></span></i><i class="mp"><b></b><span></span></i><i class="rp" hidden><b></b><span></span></i></div></div>
     <div class="tg-frame" hidden><div class="nm"></div><i class="hp"><b></b><span></span></i><div class="tcast" hidden><i><b></b></i><span></span></div></div>
@@ -22,7 +24,7 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
     <div class="xp-bar"><b></b></div>
     <div class="action-bar"></div>
     <div class="arc"></div>
-    <button class="bag-btn" aria-label="Character and bag">🎒<i class="dot" hidden></i></button>
+    <button class="bag-btn" aria-label="Character and bag" data-tip="Character and bag (I)">${uiIcon('bag', 30)}<i class="dot" hidden></i></button>
     <div class="quest-track" hidden><b class="qn"></b><p class="qt"></p><p class="qg"></p></div>
     <div class="dead-panel" hidden><h2>You have fallen</h2><p>A friend can bring you back, or return to the waypoint.</p><button class="primary rel">Return to the waypoint</button></div>`;
   const $ = s => root.querySelector(s);
@@ -40,19 +42,35 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
     btns.push([b, a]);
   }
   let curBar = [], barKey = '', attackSkill = 'attack';
-  let barLevel = 99;
+  let barLevel = 99, lastCh = null;
+  // the skill's own text with its numbers filled in for this hero (never a bare placeholder)
+  const describe = (sk, level) => skillText(sk, lastCh ? Math.max(1, rankOf(lastCh, sk)) : 1, level, lastCh, skills);
+  // read live when the tooltip opens, so a new rank or level shows at once
+  registerTip('rl-skill', el => {
+    const sk = skills[el.dataset.skill]; if (!sk) return null;
+    const level = lastCh?.level ?? barLevel;
+    if ((sk.reqLevel || 1) > level) return `<b>${esc(sk.name)}</b><br>Learned at level ${sk.reqLevel}`;
+    const meta = [sk.cast ? `${sk.cast} s cast` : sk.channel ? `${sk.channel} s channel` : '', sk.cd ? `${sk.cd} s cooldown` : ''].filter(Boolean).join(' · ');
+    return `<b>${esc(sk.name)}</b>${sk.desc ? `<br>${esc(describe(sk, level))}` : ''}${meta ? `<br><small>${meta}</small>` : ''}`;
+  });
   function fillBar(list, level = barLevel, atk = attackSkill) {
     barLevel = level; curBar = list; attackSkill = atk; barKey = JSON.stringify(list) + '@' + level + '@' + atk;
     btns.forEach(([b, a], i) => {
       const id = i ? list[i - 1] : attackSkill, sk = id ? skills[id] : null;
-      for (const el of [b, a]) { el.querySelector('.ic').textContent = id === 'attack' ? '⚔' : sk ? skillIcon(sk) : ''; el.querySelector('small').textContent = sk?.name || ''; el.classList.toggle('empty', !sk); el.title = sk ? `${sk.name}${sk.desc ? ' — ' + sk.desc.replace(/\{\w+\}/g, '…') : ''}` : ''; el.dataset.skill = id || ''; const early = sk && (sk.reqLevel || 1) > level; el.classList.toggle('early', !!early); if (early) el.title = `${sk.name}: at level ${sk.reqLevel}`; }
+      const early = sk && (sk.reqLevel || 1) > level;
+      for (const el of [b, a]) {
+        el.querySelector('.ic').innerHTML = sk ? skillIcon(sk, content, i === 0 ? 44 : 36) : '';
+        el.querySelector('small').textContent = sk?.name || ''; el.classList.toggle('empty', !sk);
+        if (sk) el.dataset.tipRender = 'rl-skill'; else delete el.dataset.tipRender;
+        el.dataset.skill = id || ''; el.classList.toggle('early', !!early);
+      }
     });
   }
   fillBar([]);
   // potions (ruling 21's potion button; health and mana)
   const pots = {};
-  for (const [kind, key, ic] of [['health', 'R', '❤'], ['mana', 'F', '💧']]) {
-    const mk = cls => { const b = document.createElement('button'); b.className = cls + ' pot pot-' + kind; b.innerHTML = `<span class="ic">${ic}</span><span class="key">${key}</span><b class="n">0</b><small>${kind === 'mana' ? 'Mana' : 'Healing'}</small>`; b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onDrink(kind); }); return b; };
+  for (const [kind, key, ic] of [['health', 'R', itemIcon({ base: 'potion', kind: 'health' }, null, 30)], ['mana', 'F', itemIcon({ base: 'potion', kind: 'mana' }, null, 30)]]) {
+    const mk = cls => { const b = document.createElement('button'); b.className = cls + ' pot pot-' + kind; b.innerHTML = `<span class="ic">${ic}</span><span class="key">${key}</span><b class="n">0</b><small>${kind === 'mana' ? 'Mana' : 'Healing'}</small>`; b.dataset.tip = kind === 'mana' ? `Drink a mana potion (${key})` : `Drink a healing potion (${key})`; b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onDrink(kind); }); return b; };
     const a = mk('slot'), c = mk('arc-btn'); bar.append(a); arc.append(c); pots[kind] = [a, c];
   }
   // phone skill arc (owner 2026-11-11: buttons overlapped and were out of line): every button on one of two rings round
@@ -65,7 +83,7 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
   place(btns[5][1], 156, 122, 52); place(btns[6][1], 156, 97, 52);
   void onTargetNext;
   // your portal home (T): on the bar with its key (owner 2026-11-11: "nothing on the bar to indicate its hotkey")
-  { const mk = cls => { const b = document.createElement('button'); b.className = cls + ' recall'; b.innerHTML = '<span class="ic">🌀</span><span class="key">T</span><small>Portal</small>'; b.title = ''; b.dataset.tip = 'Portal home: opens a way back to Brightwater, and back again'; b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onRecall(); }); return b; };
+  { const mk = cls => { const b = document.createElement('button'); b.className = cls + ' recall'; b.innerHTML = `<span class="ic">${itemIcon({ base: 'shard' }, { currency: { shards: {} } }, 30) || ''}</span><span class="key">T</span><small>Portal</small>`; b.dataset.tip = 'Portal home: opens a way back to Brightwater, and back again'; b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onRecall(); }); return b; };
     const a = mk('slot'), c = mk('arc-btn'); bar.append(a); arc.append(c); place(c, 212, 90, 44); }
   $('.rel').onclick = onRelease;
   $('.bag-btn').onclick = onBag;
@@ -83,6 +101,7 @@ export function createHud(root, { skills, onUse, onTargetNext, onRelease, isTouc
     const rp = $('.me-frame .rp'), mp = $('.me-frame .mp'), other = me.res && me.res !== 'mana';
     mp.hidden = !!other; rp.hidden = !other;
     if (other) { bars(rp, me.rv, 100); rp.className = 'rp res-' + me.res; rp.querySelector('span').textContent = `${RES_NAME[me.res]} ${me.rv}`; } else bars(mp, me.mp, me.mmp);
+    if (ch) lastCh = ch;
     if (ch) { const want = JSON.stringify((me.sb || (ch.bar && ch.bar.length ? ch.bar : BAR)).slice(0, 6)), atk = ATK(ch); if (want + '@' + ch.level + '@' + atk !== barKey) fillBar(JSON.parse(want), ch.level, atk); }
     // Attack lights up while auto-attack is running (owner 2026-11-11)
     for (const el of btns[0]) el.classList.toggle('auto', !!me.ao);

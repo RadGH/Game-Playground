@@ -13,3 +13,14 @@ Two ways, both on the Library page (and the same buttons exist in the Character 
 1. **Sync to Claude**: POSTs the library to the dev server (`tools/serve.py`), which writes `library/synced/library.json` and a timestamped copy in `library/synced/inbox/`. Then tell Claude "read library/synced/library.json". Any page can also send arbitrary JSON with `Library.sendToClaude('name', obj)` → `library/synced/inbox/name-<time>.json` (saved games, feedback, screenshots as data URLs…).
 2. **Export JSON** and drop the file into the chat.
 `library/synced/` is git-ignored (it is your data, not the repo's).
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Blueprint library: characters/npcs/items/parties/enemies as JSON (kind `enemy` = the Emberveil bestiary, `npc` also holds its pets and companions), defaults seeded from the demos, localStorage for user entries, export/import, sync to Claude via the dev server
+
+**Status / key files:** done 2026-09-10
+
+**Status / key files:** `library/README.md`, `js/library.js`, `data/defaults.json`, `tools/serve.py`

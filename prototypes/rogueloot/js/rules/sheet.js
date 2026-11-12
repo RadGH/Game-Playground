@@ -22,6 +22,8 @@ export function sheet(ch, data, skills = null) {
   const allRes = m.allResist || 0;
   const resists = {}; for (const t of DMG) resists[t] = (m[t + 'Resist'] || 0) + allRes;
   const wpn = (data && ch.equip?.weapon && (!ch.equip.weapon.dur || ch.equip.weapon.dur[0] > 0)) ? weaponDamage(data, ch.equip.weapon) : null;
+  // a weapon in the off hand (a dual-wielder, or Doubled Grasp) swings on its own clock (js/sim/fight.js stepAuto)
+  const oh = ch.equip?.offhand, offWpn = (data && oh && data.bases[oh.base]?.damage && (!oh.dur || oh.dur[0] > 0)) ? weaponDamage(data, oh) : null;
   return {
     attrs, level: ch.level, dr: pb.dr || 0,                             // damage reduction, percent (melee Paths)
     maxHp: Math.round((d.maxHp + (m.health || 0)) * (1 + (pb.hpPct || 0) / 100)), maxMana: Math.round(d.maxMana + (m.mana || 0)),
@@ -37,6 +39,6 @@ export function sheet(ch, data, skills = null) {
     lifeOnHit: m.lifeOnHit || 0, manaOnKill: m.manaOnKill || 0, thorns: m.thorns || 0, magicFind: m.magicFind || 0, goldFind: m.goldFind || 0,
     potionPower: m.potionPower || 0, threat: m.threat || 0, hitChance: m.hitChance || 0, lightRadius: m.lightRadius || 0,
     potionSlots: m.potionSlots || 0,
-    weapon: wpn || FISTS, gearScore: data ? gearScore(data, ch.equip || {}) : 0,
+    weapon: wpn || FISTS, offWeapon: offWpn, doubleGrip: (m.doubleGrip || 0) > 0, gearScore: data ? gearScore(data, ch.equip || {}) : 0,
   };
 }

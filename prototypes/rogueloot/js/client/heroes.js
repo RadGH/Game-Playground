@@ -66,7 +66,11 @@ export function createHeroes({ root, onChange = () => {}, items = null }) {
       const { cloudSave } = await import('../../../../shared/rgs-cloudsave.js');
       cloud = cloudSave({ game: 'rogueloot', keys: { heroes: KEY }, onRestore: () => { data = read(); draw(); onChange(current()); }, canRestore: () => !document.body.classList.contains('in-game') });
       const { accountButton } = await import('../../../../shared/rgs-signin.js');
-      document.querySelector('#account-slot')?.append(accountButton({ game: 'rogueloot', gameName: 'Rogueloot', onChange: () => cloud?.sync?.() }));
+      const acct = accountButton({ game: 'rogueloot', gameName: 'Rogueloot', onChange: () => cloud?.sync?.() });
+      // the shared button labels itself with a browser tooltip; show it in the game's styled one instead
+      const tipify = () => { for (const b of acct.querySelectorAll('[title]')) { b.dataset.tip = b.getAttribute('title'); b.removeAttribute('title'); } };
+      new MutationObserver(tipify).observe(acct, { subtree: true, attributes: true, attributeFilter: ['title'] }); tipify();
+      document.querySelector('#account-slot')?.append(acct);
     } catch (e) { console.warn('cloud saves off', e); }
   })();
 

@@ -289,3 +289,14 @@ formant band — no sawtooth), `hvf.bell` (the farmer's handbell), `hvf.horn` (h
    really exists.
 4. Play it in the gallery and check where it lands in the loudness table; nudge `trim` if it is
    measurably on target but still feels wrong.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Sound Lab: sound effects over a catalog of 164 logical ids (11 elements × launch/travel/impact, 23 statuses × apply/tick, melee, deaths, loot by rarity, stings, interface, 8 ambience loops) with 4 interchangeable methods behind a dropdown + licence badges — `synth` (our layered Web Audio recipes, seeded variation), `library` (real recordings: **since 2026-10-29 every id has 1-3 CC0 freesound.org recordings** in `assets/fs/` — fetched by `tools/freesound.py`, mapped in `data/recordings/*.json`, credited in `data/credits.json` by `tools/build-credits.mjs` — plus Kenney CC0 packs in `assets/kenney/`; only ambience beds loop, `spell.*.travel` became one-shots after hanging forever in Kindlewild), `hybrid` (default), `retro` (chiptune); **loudness normalization**: K-weighted measurement, per-category targets owned by `js/loudness.js` (`CATEGORY_TARGETS`; ambience 10 dB under everything else, loops only ever cut, ambience bus capped), soft ceiling at −1 dBFS, per-id trim, sfx/ui/ambience buses + master limiter; gallery with level meters, A/B compare across methods and a before/after loudness table
+
+**Status / key files:** done 2026-09-13
+
+**Status / key files:** `sfx/README.md`, `js/sfx.js`, `js/loudness.js`, `js/methods/*.js`, `data/catalog.json`, `tools/build-catalog.py`, `assets/kenney/README.md`

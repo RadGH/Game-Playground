@@ -156,3 +156,12 @@ See `data/chibi3-verdict.html` (shown at the bottom of the page). Short version:
 clear step up in detail, materials, faces and motion, at about 3× the triangles, ~2–4× the animation
 CPU and a real build-time cost that baking hides. Use it for the next new game with a close camera;
 do not port Farhold or Emberveil until it has the part breadth and the build worker.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the "Chibi 3 prototype" section in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+### Chibi 3 prototype (2026-10-01)
+
+`avatar-3d/chibi3.html` + `avatar-3d/js/chibi3/` (read `avatar-3d/CHIBI3.md` first). Heroic-proportion characters meshed from blended signed distance fields; clothes and armour are the body pushed outward inside rig-derived regions (fit any race/dial); one PBR material with a generated 8-layer detail texture array; 66-bone rig; custom layered animator (32 clips, foot IK, two-hand grips, springs, morph faces, lip shapes); LOD 1/2 derived from the hero mesh; baked presets (`data/chibi3-baked/`, rebuild with `node --import ./avatar-3d/tests/three-register.mjs tools/bake-chibi3.mjs` after ANY change in `js/chibi3/`); IndexedDB cache for live builds. Reads the same avatar JSON (dials in `avatar.body.c3`; `normalizeForChibi3` keeps unknown ids). Prototype only — no game uses it; verdict in `data/chibi3-verdict.html` (keep it, use it for new games first, do not port Farhold/Emberveil yet). Node tests import Three.js through `avatar-3d/tests/three-register.mjs`.

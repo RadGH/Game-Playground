@@ -1,5 +1,7 @@
 # Kestrel — the next character system (trial)
 
+> **Not for games (owner 2026-11-11):** the Meshy male/female bodies made here are a trial only and must not be used in any game. Enemy models made the same way live in `model-library/`.
+
 **Codename Kestrel** (started 2026-10-27). The owner's brief: a modular character like Chibi 2.5, but with realistic
 proportions (~7 heads tall) and more detail, still low-poly enough for phones, and easy to swap into the old games.
 The owner's design is `ref/source/owner-mockup.png`: male and female base bodies in charcoal underwear, six
@@ -50,3 +52,14 @@ ignored, never an error.
 ## Results
 
 See each attempt's own `README.md` and the review page. The verdict for test 1 is written up below once both are in.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Kestrel** (2026-10-27 →): the next character system as a trial — realistic ~7-head proportions, more detail than Chibi 2.5, phone budget (≤ 12k triangles, ≤ 2 draw calls), modular (body + hair + garments, a garment hides the skin under it), and a drop-in for Chibi 2 games: every attempt implements `CONTRACT.md` (`createKestrelCharacter(look, opts)` returns `createChibi2Character`'s actor + `setExpression`/`setLod`; new look field `body.form: 'masc'\|'fem'`). Attempts in `data/attempts.json`: `opus/` and `fable/` (test 1: hand-coded procedural Three.js by each model, from the same `BRIEF.md`), AI services later (Tripo, Meshy, Rodin, Hunyuan3D, TRELLIS). Review page `index.html` (Codex reference beside every attempt per view, clips, expressions, outfit, numbers, crowd test, score sheet with Copy scores). Codex pictures in `ref/` (turnarounds, crops, single hi-res views, head sheets — `ref/README.md`). Old-game switch `js/swap.js` (`kestrelFactory`, `kestrelFromUrl`); Emberveil 2 takes `?chars=kestrel[-fable]`. Test `tests/contract.test.js`
+
+**Status / key files:** trial 2026-10-27
+
+**Status / key files:** `avatar-3d/kestrel/README.md`, `CONTRACT.md`, `js/swap.js`, `js/compare.js`

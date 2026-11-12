@@ -11,7 +11,7 @@ import { gzipSync } from 'node:zlib';
 export const HOME = 'prototypes/rogueloot';
 /** Playground paths the page loads from (checked against the client's real imports). tools/publish-rogueloot.sh copies exactly these. */
 export const ALLOW = Object.freeze([HOME, 'prototypes/knockabout/js/client/look.js', 'prototypes/tumblefair/js/client/look-tidy.js', 'prototypes/tumblefair/js/client/qr.js', 'prototypes/tumblefair/data/cosmetics.json',
-  'prototypes/thousandvale/js', 'shared', 'avatar-3d', 'avatar-2d', 'vendor/three', 'vendor/qrcode-generator', 'sfx', 'assets']);
+  'prototypes/thousandvale/js', 'shared', 'avatar-3d', 'avatar-2d', 'vendor/three', 'vendor/qrcode-generator', 'sfx', 'assets', 'icons/js', 'icons/data']);
 export const DENY = Object.freeze([...['server', 'ops', 'tests', 'tools', 'docs', 'package.json', 'package-lock.json'].map(p => `${HOME}/${p}`),
   'prototypes/thousandvale/js/sim', 'prototypes/thousandvale/js/net', 'avatar-3d/kestrel']);
 

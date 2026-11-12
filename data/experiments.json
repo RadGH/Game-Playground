@@ -47,6 +47,25 @@
    ]
   },
   {
+   "id": "model-library",
+   "group": "characters",
+   "title": "Model Library",
+   "href": "model-library/",
+   "folder": "model-library",
+   "summary": "Rigged and animated 3D enemy models made with the Meshy service from Codex reference sheets: goblins, skeletons, a zombie, an orc, an ogre, bandits, a cultist and a lizardfolk. Each one shows its reference sheet, the exact prompt, its height, triangles, file size, credits spent and every animation clip, in a 3D viewer you can orbit. Not used by any game yet.",
+   "status": "playable",
+   "statusNote": "models only, no game uses them yet",
+   "date": "2026-11-11",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "enemies",
+    "meshy",
+    "models",
+    "animation"
+   ]
+  },
+  {
    "id": "avatar-3d",
    "group": "characters",
    "title": "Avatar 3D",
@@ -97,29 +116,29 @@
     }
    ]
   },
-{
-  "id": "kestrel",
-  "group": "characters",
-  "title": "Kestrel",
-  "href": "avatar-3d/kestrel/",
-  "folder": "avatar-3d",
-  "summary": "The next character system, as a trial: realistic proportions (about seven heads tall), more detail than Chibi 2.5, still light enough for phones, built from swappable pieces, and a drop-in for games that use Chibi 2 today. Several attempts build the same male and female base bodies to one contract: hand-coded by Opus, hand-coded by Fable, and later AI 3D services, side by side with the Codex reference pictures, with numbers, a crowd test and a score sheet.",
-  "status": "prototype",
-  "statusNote": "test 1 (hand-coded) 2026-10-27",
-  "date": "2026-10-27",
-  "isNew": true,
-  "tags": [
-   "3d",
-   "character",
-   "three.js"
-  ],
-  "links": [
-   {
-    "label": "Reference pictures",
-    "href": "avatar-3d/kestrel/ref/"
-   }
-  ]
- },
+  {
+   "id": "kestrel",
+   "group": "characters",
+   "title": "Kestrel",
+   "href": "avatar-3d/kestrel/",
+   "folder": "avatar-3d",
+   "summary": "The next character system, as a trial: realistic proportions (about seven heads tall), more detail than Chibi 2.5, still light enough for phones, built from swappable pieces, and a drop-in for games that use Chibi 2 today. Several attempts build the same male and female base bodies to one contract: hand-coded by Opus, hand-coded by Fable, and later AI 3D services, side by side with the Codex reference pictures, with numbers, a crowd test and a score sheet.",
+   "status": "prototype",
+   "statusNote": "test 1 (hand-coded) 2026-10-27",
+   "date": "2026-10-27",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "character",
+    "three.js"
+   ],
+   "links": [
+    {
+     "label": "Reference pictures",
+     "href": "avatar-3d/kestrel/ref/"
+    }
+   ]
+  },
   {
    "id": "chibi4",
    "group": "characters",
@@ -528,8 +547,17 @@
    "statusNote": "M1: walk a meadow together; own server",
    "date": "2026-11-10",
    "isNew": true,
-   "tags": ["rpg", "loot", "multiplayer", "co-op", "3d"],
-   "server": { "port": 8580, "path": "prototypes/rogueloot/" },
+   "tags": [
+    "rpg",
+    "loot",
+    "multiplayer",
+    "co-op",
+    "3d"
+   ],
+   "server": {
+    "port": 8580,
+    "path": "prototypes/rogueloot/"
+   },
    "live": "rogueloot"
   },
   {
@@ -542,8 +570,17 @@
    "statusNote": "demo: 2 vehicles, own server",
    "date": "2026-10-25",
    "isNew": true,
-   "tags": ["vehicles", "physics", "multiplayer", "co-op", "3d"],
-   "server": { "port": 8550, "path": "prototypes/roverlands/" },
+   "tags": [
+    "vehicles",
+    "physics",
+    "multiplayer",
+    "co-op",
+    "3d"
+   ],
+   "server": {
+    "port": 8550,
+    "path": "prototypes/roverlands/"
+   },
    "live": "roverlands"
   },
   {
@@ -713,7 +750,11 @@
    "status": "prototype",
    "statusNote": "M1 the street lives",
    "date": "2026-10-30",
-   "tags": ["life sim", "god game", "driving"]
+   "tags": [
+    "life sim",
+    "god game",
+    "driving"
+   ]
   },
   {
    "id": "kindlewild",
@@ -741,7 +782,12 @@
    "status": "prototype",
    "statusNote": "M0-M12 built",
    "date": "2026-11-03",
-   "tags": ["city sim", "pixel physics", "planet", "medieval"]
+   "tags": [
+    "city sim",
+    "pixel physics",
+    "planet",
+    "medieval"
+   ]
   },
   {
    "id": "voidwright",
@@ -753,7 +799,12 @@
    "status": "prototype",
    "statusNote": "Playable, live",
    "date": "2026-11-06",
-   "tags": ["space", "ship builder", "shooter", "trading"]
+   "tags": [
+    "space",
+    "ship builder",
+    "shooter",
+    "trading"
+   ]
   },
   {
    "id": "spirehold",
@@ -765,7 +816,13 @@
    "status": "prototype",
    "statusNote": "Playable",
    "date": "2026-11-08",
-   "tags": ["idle", "tower defence", "city", "spells", "adventurers"]
+   "tags": [
+    "idle",
+    "tower defence",
+    "city",
+    "spells",
+    "adventurers"
+   ]
   }
  ]
 }

@@ -139,3 +139,14 @@ See **`MEMORY.md`** for the full design. In short: `js/memory.js` gives each cha
 ## Variety
 
 Custom slots (catchphrase/prefix/suffix) accept Lingo templates, so `{~a|b|c}` gives a character several sayings. The default speakers and the Emberveil classes each carry 5–6 variations; add more rather than repeating one line.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Text language system: `{placeholder.modifier}` templates with plural/select/random blocks, lexicon with explicit forms (sg/pl/adj/people/lang), pronoun sets, articles, verb agreement, pronunciation (respell → espeak phonemes), tag-scored grammar (~1080 phrases / 80 intents, dark tone; combat pools tagged by enemy family + hero role, session anti-repeat via `meta.noRepeat` so nothing repeats inside ~20 fights), 25 RimWorld-style traits, sliders, Tomodachi custom slots, 14 verbal tics, anti-repeat, conversation planner, dictionary editor; **memory system** (trait-weighted importance, half-life decay, merging, relevance-based recall, 16 event types), **scene awareness** (place/tags/threats/danger → observe/fear/plan lines, planner bias) and **relationships** (multi-factor feelings + knowledge, trait-scaled events, memory hook, tone tags)
+
+**Status / key files:** done 2026-09-10
+
+**Status / key files:** `lingo/README.md`, `lingo/MEMORY.md`, `lingo/RELATIONS.md`, `js/lingo.js`, `js/memory.js`, `js/context.js`, `js/relations.js`, `data/{lexicon,grammar,traits,speakers,events,scenes,relations}.json`

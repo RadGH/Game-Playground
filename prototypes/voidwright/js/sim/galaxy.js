@@ -382,9 +382,14 @@ const BIGGER = { skiff: 'corvette', corvette: 'frigate', frigate: 'destroyer', d
 
 export function spawnGroup(w, at, faction, tier, r, mode = null) {
   const pool = CLASS_BY_TIER[Math.min(10, tier)];
-  const kind = mode || (r() < 0.3 ? 'big' : 'pack');
+  // gnat packs (owner 2026-11-11: "low level enemies who are easy to kill in small swarms without
+  // shields"): about a quarter of roaming groups near home, fewer further out
+  const kind = mode || (r() < Math.max(0.1, 0.3 - tier * 0.02) ? 'gnats' : r() < 0.3 ? 'big' : 'pack');
   const list = [];
-  if (kind === 'big') {
+  if (kind === 'gnats') {
+    const n = 5 + Math.floor(r() * 5);
+    for (let i = 0; i < n; i++) list.push({ cls: 'skiff', role: 'swarm', gnat: true });
+  } else if (kind === 'big') {
     const cls = BIGGER[r.pick(pool)];
     list.push({ cls, role: r.pick(FACTIONS[faction].style.roles.filter(x => x !== 'swarm')) || 'capital' });
   } else {
@@ -394,7 +399,7 @@ export function spawnGroup(w, at, faction, tier, r, mode = null) {
   }
   const out = [];
   list.forEach((e, i) => {
-    const s = generateShip({ cls: e.cls, faction, tier, seed: hash(w.seed, at.x | 0, at.y | 0, i, w.t * 1000 | 0), role: e.role === 'trader' || e.role === 'miner' ? 'escort' : e.role });
+    const s = generateShip({ cls: e.cls, faction, tier, gnat: !!e.gnat, seed: hash(w.seed, at.x | 0, at.y | 0, i, w.t * 1000 | 0), role: e.role === 'trader' || e.role === 'miner' ? 'escort' : e.role });
     s.x = at.x + (i % 3 - 1) * (80 + s.r * 2); s.y = at.y + Math.floor(i / 3) * (80 + s.r * 2);
     if (kind === 'big') s.elite = true;
     if (s.team === 'hostile') hardenEnemy(s);

@@ -19,6 +19,8 @@ TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 PRESENT=(); for p in "${ALLOW[@]}"; do git cat-file -e "$SHA:$p" 2>/dev/null && PRESENT+=("$p"); done
 git archive "$SHA" -- "${PRESENT[@]}" | tar -x -C "$TMP"
 [[ -f "$TMP/prototypes/oddhaven/server/main.mjs" ]] || { echo "refusing: that commit has no Oddhaven server"; exit 1; }
+echo "== gate: lint, connected modules, screen walk (tools/prepublish-check.sh)"
+"$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)/tools/prepublish-check.sh" oddhaven "$SHA" || { echo "refusing: oddhaven fails its pre-publish checks (above)"; exit 1; }
 echo "== gate: node --check"
 BAD=0; while IFS= read -r f; do node --check "$f" >/dev/null 2>&1 || { echo "   syntax error: ${f#$TMP/}"; BAD=1; }; done < <(find "$TMP/prototypes/oddhaven" \( -name '*.js' -o -name '*.mjs' \) -not -path '*/node_modules/*')
 [[ $BAD == 0 ]] || { echo "refusing: that commit does not parse"; exit 1; }

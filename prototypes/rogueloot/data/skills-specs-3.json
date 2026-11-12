@@ -1564,7 +1564,7 @@
      "skills": [
       {
        "id": "fiend_claw",
-       "name": "Rake",
+       "name": "Hooked Claw",
        "kind": "strike",
        "cd": 6,
        "mult": 1.5
@@ -1888,7 +1888,7 @@
      "skills": [
       {
        "id": "lord_rake",
-       "name": "Rake",
+       "name": "Hooked Claw",
        "kind": "strike",
        "cd": 4,
        "mult": 1.7
@@ -2683,7 +2683,7 @@
    ]
   },
   "dru_maul": {
-   "name": "Maul",
+   "name": "Bramble Paw",
    "owner": "druid",
    "reqLevel": 10,
    "maxRank": 1,

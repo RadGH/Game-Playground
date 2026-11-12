@@ -12,7 +12,7 @@ REF="${1:-HEAD}"; SHA="$(git rev-parse --verify "$REF^{commit}")"; SHORT="${SHA:
 BASE="$HOME/.local/share/rogueloot"; PORT=8580
 # exactly what server/static.js ALLOWs, plus the server's own imports (Tumblefair's feedback, insights and rgs modules)
 ALLOW=(prototypes/rogueloot prototypes/knockabout/js/client/look.js prototypes/tumblefair/js/client/look-tidy.js prototypes/tumblefair/js/client/qr.js prototypes/tumblefair/data/cosmetics.json
-  prototypes/thousandvale/js shared avatar-3d avatar-2d vendor/three vendor/qrcode-generator sfx assets
+  prototypes/thousandvale/js shared avatar-3d avatar-2d vendor/three vendor/qrcode-generator sfx assets icons/js icons/data
   prototypes/tumblefair/server/feedback.mjs prototypes/tumblefair/server/insights.mjs prototypes/tumblefair/server/rgs.mjs)
 NOT_PUBLIC=(prototypes/rogueloot/server prototypes/rogueloot/ops prototypes/rogueloot/tests prototypes/rogueloot/tools prototypes/rogueloot/docs
   prototypes/rogueloot/package.json prototypes/rogueloot/package-lock.json prototypes/tumblefair/server prototypes/thousandvale/js/sim prototypes/thousandvale/js/net avatar-3d/kestrel)
@@ -21,6 +21,8 @@ TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 PRESENT=(); for p in "${ALLOW[@]}"; do git cat-file -e "$SHA:$p" 2>/dev/null && PRESENT+=("$p"); done
 git archive "$SHA" -- "${PRESENT[@]}" | tar -x -C "$TMP"
 [[ -f "$TMP/prototypes/rogueloot/server/main.mjs" ]] || { echo "refusing: that commit has no Rogueloot server"; exit 1; }
+echo "== gate: lint, connected modules, screen walk (tools/prepublish-check.sh)"
+"$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)/tools/prepublish-check.sh" rogueloot "$SHA" || { echo "refusing: rogueloot fails its pre-publish checks (above)"; exit 1; }
 echo "== gate: node --check"
 BAD=0; while IFS= read -r f; do node --check "$f" >/dev/null 2>&1 || { echo "   syntax error: ${f#$TMP/}"; BAD=1; }; done < <(find "$TMP/prototypes/rogueloot" \( -name '*.js' -o -name '*.mjs' \) -not -path '*/node_modules/*')
 [[ $BAD == 0 ]] || { echo "refusing: that commit does not parse"; exit 1; }

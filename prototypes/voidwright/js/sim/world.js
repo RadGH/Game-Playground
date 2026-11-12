@@ -323,9 +323,10 @@ export function splash(w, x, y, R, dmg, type, size, src, opts = {}) {
       done.add(b);
       const k = dmg * (1 - dd * 0.7) * 0.5; hits.push([b, k]); tot += k;   // each block in the blast takes up to half
     }
-    // ...but a blast never deals more than SPLASH_CAP x its damage to one body in total. Without this a
+    // ...but a blast never deals more than SPLASH_CAP x its damage to YOUR ship in total. Without this a
     // missile hitting a tightly packed little ship hurt fifty blocks at once and one volley erased it.
-    const m = tot > dmg * SPLASH_CAP ? dmg * SPLASH_CAP / tot : 1;
+    // Enemies take the full blast again (2026-11-11, owner: enemies were too strong with the cap on them).
+    const m = s === w.player && tot > dmg * SPLASH_CAP ? dmg * SPLASH_CAP / tot : 1;
     for (const [b, k] of hits) hitBlock(w, s, b, k * m, type, size, src);
   }
   // flak / blasts also kill drones and missiles

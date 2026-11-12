@@ -57,7 +57,7 @@ export async function makeActor(look = {}) {
   if (look.creature) {
     const actor = await createCreature(look.creature);
     actor.beast = true;
-    // R27 M8 — one draw call per moving part, not one per eye and toe (js/mesh-merge.js)
+    // R27 M8 — one draw call per moving part, not one per eye and toe (avatar-3d/js/mesh-merge.js)
     actor.compacted = compactCreature(actor);
     return actor;
   }

@@ -235,13 +235,13 @@ export function accountButton({ game = 'site', gameName = '', onChange } = {}) {
     if (!u) {
       btn.replaceChildren('Sign in');
       btn.setAttribute('aria-haspopup', 'false');
-      btn.title = 'Sign in (optional)';
+      btn.setAttribute('aria-label', 'Sign in (optional)');   // no title=: browser tooltips are banned (lessons-from-games)
       return;
     }
     const name = u.username || u.name || u.email || 'Account';
     btn.replaceChildren(h('span.rgs-dot', { 'aria-hidden': 'true', text: name.slice(0, 1).toUpperCase() }), h('span.rgs-name', { text: name }), h('span.rgs-caret', { 'aria-hidden': 'true', text: '▾' }));
     btn.setAttribute('aria-haspopup', 'menu');
-    btn.title = `Signed in as ${name}`;
+    btn.setAttribute('aria-label', `Signed in as ${name}`);
     menu.replaceChildren(
       h('p.rgs-acct-who', { text: `Signed in as ${name}` }),
       h('a.rgs-acct-item', { role: 'menuitem', href: account.accountUrl, target: '_blank', rel: 'noopener', text: 'Your account' }),

@@ -16,6 +16,7 @@ const KEY = [
   ['planet', '#8a9ab8', 'Planet (low orbit: mine from above)'], ['field', SECTOR_KINDS.field.color, 'Asteroid cluster'],
   ['rich', SECTOR_KINDS.rich.color, 'Rich asteroids / claim'], ['wrecks', SECTOR_KINDS.wrecks.color, 'Wrecks / derelict'],
   ['camp', SECTOR_KINDS.camp.color, 'Enemy camp / enemy ship'], ['swarm', SECTOR_KINDS.swarm.color, 'Alien swarm'],
+  ['gnats', SECTOR_KINDS.gnats.color, 'Gnat pack (small, easy kills)'],
   ['friend', '#5fa8ff', 'Friendly ship / convoy'], ['beacon', '#ffc45a', 'Distress call'], ['boss', '#ff3b5c', 'Something enormous'],
 ];
 
@@ -68,7 +69,7 @@ export function openLocalMap(app) {
       if (s.kind === 'field' || s.kind === 'rich') { ctx.fillStyle = K.color; for (let i = 0; i < 5; i++) { const a = i * 1.3 + s.x * 0.001, q = rr * (0.3 + (i % 3) * 0.25); ctx.beginPath(); ctx.arc(x + Math.cos(a) * q, y + Math.sin(a) * q, Math.max(1.5 * d, rr * 0.18), 0, 7); ctx.fill(); } }
       else { ctx.strokeStyle = K.color; ctx.lineWidth = 2 * d; ctx.beginPath(); ctx.arc(x, y, rr * 0.6, 0, 7); ctx.stroke(); ctx.fillStyle = K.color; ctx.beginPath(); ctx.arc(x, y, 2.5 * d, 0, 7); ctx.fill(); }
       ctx.globalAlpha = 1; ctx.lineWidth = 1;
-      picks.push({ x: s.x, y: s.y, label: K.name, what: s.kind === 'camp' ? 'Enemy camp — a pack waits here.' : s.kind === 'swarm' ? 'An alien swarm drifts here.' : s.kind === 'wrecks' ? 'Old wrecks — cut them up for salvage.' : s.kind === 'convoy' ? 'Friendly traders.' : s.kind === 'rich' ? 'Asteroids full of better ore.' : 'Asteroids to mine.' });
+      picks.push({ x: s.x, y: s.y, label: K.name, what: s.kind === 'camp' ? 'Enemy camp — a pack waits here.' : s.kind === 'swarm' ? 'An alien swarm drifts here.' : s.kind === 'gnats' ? 'A pack of gnats — small, unshielded, easy kills.' : s.kind === 'wrecks' ? 'Old wrecks — cut them up for salvage.' : s.kind === 'convoy' ? 'Friendly traders.' : s.kind === 'rich' ? 'Asteroids full of better ore.' : 'Asteroids to mine.' });
     }
     // live bodies within sensor range (ships, stations, wrecks); rocks are already shown as their cluster
     for (const s of w.bodies) {

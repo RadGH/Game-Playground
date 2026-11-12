@@ -1,6 +1,21 @@
 {
   "entries": [
     {
+      "id": "2026-11-11-hands-compare",
+      "date": "2026-11-11",
+      "title": "Two weapons, quivers and side-by-side compare",
+      "items": [
+        "Every weapon now says how it is held right under its name: One-handed, Two-handed, Main hand only or Off hand only.",
+        "Quivers go beside a bow or crossbow and stay when you swap bows; shields and foci go beside a one-handed weapon.",
+        "Rogues (daggers, swords, axes) and Weaponmasters (maces too) can hold a second weapon in the off hand, and it really swings, on its own beat, for half its damage.",
+        "New Vanguard skill, Doubled Grasp (level 18, Breaking Line): hold a two-handed weapon in each hand.",
+        "Item cards add up the same stat: a chest's base armour and its armour property are one line, like +24 Armour, with the split in small print beside it.",
+        "Hovering or tapping an item shows it next to what you wear, with gains in green and losses in red. When it could go in two places (two rings, two hands), Shift, the controller's Y button or the Compare button switches which one, and Equip puts it there.",
+        "Skill buttons and the skills window use the new painted spell medallions, and their tips show every number (no more 'A careful blow for … of your weapon's damage').",
+        "Two skills got new names: the druid's Bramble Paw and the bound fiend's Hooked Claw. Poison Coat's text now says what it really does."
+      ]
+    },
+    {
       "id": "2026-11-11-smooth-keys",
       "date": "2026-11-11",
       "title": "Smooth movement, real attacks, new keys",

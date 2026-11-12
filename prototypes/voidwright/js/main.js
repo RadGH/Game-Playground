@@ -686,12 +686,17 @@ function reportDialog() {
     setTimeout(() => text.focus(), 30);
   });
 }
+// Reports: on the LAN to the dev server's inbox (tools/serve.py POST /api/inbox/<name>), anywhere else to
+// games.radgh.com's report inbox (rgs-api POST /api/report/voidwright) — a relative link, so it also works
+// from GitHub Pages, which lives under /Game-Playground/.
+const REPORT_LAN = /^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname);
+const REPORT_URL = REPORT_LAN ? new URL('../../../api/inbox/voidwright-report', import.meta.url) : 'https://games.radgh.com/api/report/voidwright';
 async function sendReport(rep) {
   let list = []; try { list = JSON.parse(localStorage.getItem('voidwright.reports') || '[]'); } catch { /* */ }
   list.push(rep);
   const out = [];
   for (const r of list) {
-    try { const res = await fetch('/api/report/voidwright', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(r) }); if (!res.ok) out.push(r); } catch { out.push(r); }
+    try { const res = await fetch(REPORT_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(r) }); if (!res.ok) out.push(r); } catch { out.push(r); }
   }
   try { localStorage.setItem('voidwright.reports', JSON.stringify(out.slice(-10))); } catch { /* */ }
   toast('Thank you — report sent.', 'good');

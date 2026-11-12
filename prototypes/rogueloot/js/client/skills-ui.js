@@ -3,31 +3,28 @@
 import { atRank, rankOf, costOf, synergyOf } from '../sim/skills.js';
 import { PATH_BONUS } from '../rules/sheet.js';
 import { ask, tell, askText } from '../../../../shared/dialog.js';
+import { skillIcon as libSkillIcon } from './icons.js';
 const bonusText = id => { const b = PATH_BONUS[id]; if (!b) return ''; return [b.hpPct && `+${b.hpPct}% health`, b.armourPct && `+${b.armourPct}% armour`, b.dodge && `+${b.dodge}% dodge`, b.dr && `${b.dr}% less damage taken`].filter(Boolean).join(', '); };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const RES_NAME = { rage: 'Temper', energy: 'Energy', mana: 'Mana', health: '% health' };
-/** An icon for a skill from what it does (until the art pass). */
-export function skillIcon(sk) {
-  if (!sk) return '·';
-  const all = []; const walk = es => { for (const e of es || []) { all.push(e); walk(e.effects); } }; walk(sk.effects);
-  const has = d => all.some(e => e.do === d), ty = all.find(e => e.type)?.type;
-  if (has('interrupt')) return '✋'; if (has('taunt')) return '📣'; if (has('dash')) return '💨'; if (has('shield')) return '🛡';
-  if (has('heal') || has('hot')) return '✚'; if (has('buff') && !has('weapon')) return '✨'; if (has('mark')) return '🎯';
-  if (ty === 'fire') return '🔥'; if (ty === 'frost') return '❄'; if (ty === 'storm') return '⚡'; if (ty === 'poison') return '☠'; if (ty === 'shadow') return '🌑';
-  if (has('area')) return '🌀'; if (has('weapon')) return '🗡'; return '✦';
-}
-/** Fill {mult} {dmg} {secs} from the numbers at this rank and level. */
+/** Fill {mult} {dmg} {secs} {dur} from the numbers at this rank and level. Every placeholder gets a number: a second
+ *  {dmg} takes the skill's next damage/heal/ward amount, {secs} reads a duration or an interrupt's lockout. */
 export function skillText(sk, rank, level, ch = null, skills = null) {
   const r = atRank(sk, Math.max(1, rank)), all = [];
   const walk = es => { for (const e of es || []) { all.push(e); walk(e.effects); } }; walk(r.effects);
   const syn = ch && skills ? synergyOf(skills, ch, sk.id) : { damage: 1, heal: 1 };
-  const w = all.find(e => e.do === 'weapon'), d = all.find(e => e.base), s = all.find(e => e.secs);
-  const num = d ? Math.round((d.base[0] + d.base[1] * level) * (d.do === 'heal' || d.do === 'hot' || d.do === 'shield' ? syn.heal : syn.damage)) : null;
-  return String(sk.desc || '').replace('{mult}', w ? Math.round(w.mult * syn.damage * 100) + '%' : '').replace('{dmg}', num ?? '').replace('{secs}', s ? s.secs : '');
+  const w = all.find(e => e.do === 'weapon'), s = all.find(e => e.secs != null || e.lock != null), du = all.find(e => e.duration != null);
+  const nums = all.filter(e => e.base).map(d => Math.round((d.base[0] + d.base[1] * level) * (d.do === 'heal' || d.do === 'hot' || d.do === 'shield' ? syn.heal : syn.damage)));
+  const n2 = x => String(+(+x).toFixed(1));
+  let i = 0;
+  return String(sk.desc || '').replace(/\{mult\}/g, w ? Math.round(w.mult * syn.damage * 100) + '%' : '')
+    .replace(/\{dmg\}/g, () => nums.length ? nums[Math.min(i++, nums.length - 1)] : '')
+    .replace(/\{secs\}/g, s ? n2(s.secs ?? s.lock) : '').replace(/\{dur\}/g, du ? n2(du.duration) : '');
 }
 
 export function createSkillsUI({ content, send, getChar, nope }) {
+  const skillIcon = (sk, size = 34) => libSkillIcon(sk, content, size);
   const S = content.skills, root = document.createElement('div'); root.className = 'skills-ui'; root.hidden = true; document.body.append(root);
   let pathAsked = false, specAsked = false, tab = 'path';
   function toggle(force) { root.hidden = force != null ? !force : !root.hidden; if (!root.hidden) draw(); }
@@ -48,9 +45,9 @@ export function createSkillsUI({ content, send, getChar, nope }) {
       return `<div class="node ${rank ? 'known' : ''} ${locked ? 'locked' : ''} k-${s.kind}" data-id="${s.id}">
         <span class="ic">${skillIcon(s)}</span><div class="txt"><b>${esc(s.name)}</b> <small>${s.kind === 'active' ? '' : s.kind === 'passive' ? '(passive)' : '(boosts ' + esc(S[s.synergy?.skill]?.name || '') + ')'} ${rank}/${max}</small>
         <p>${esc(skillText(s, rank || 1, ch.level, ch, S))}</p>
-        <small class="meta">${s.reqLevel > 1 ? `Level ${s.reqLevel}` : ''}${(s.prereq || []).length ? ` · after ${s.prereq.map(p => esc(S[p]?.name || p)).join(', ')}` : ''}${cost && cost.n ? ` · ${cost.n} ${RES_NAME[cost.kind]}` : ''}${s.cast ? ` · ${s.cast}s cast` : s.channel ? ` · ${s.channel}s channel` : ''}${s.cd ? ` · ${s.cd}s cooldown` : ''}</small></div>
+        <small class="meta">${[s.reqLevel > 1 ? `Level ${s.reqLevel}` : '', (s.prereq || []).length ? `after ${s.prereq.map(p => esc(S[p]?.name || p)).join(', ')}` : '', cost && cost.n ? `${cost.n} ${RES_NAME[cost.kind]}` : '', s.cast ? `${s.cast}s cast` : s.channel ? `${s.channel}s channel` : '', s.cd ? `${s.cd}s cooldown` : ''].filter(Boolean).join(' · ')}</small></div>
         ${can ? `<button class="learn" data-learn="${s.id}" aria-label="Learn ${esc(s.name)}">+</button>` : ''}
-        ${s.kind === 'active' && rank ? `<button class="tobar" data-bar="${s.id}" title="Put on the action bar">⇩</button>` : ''}</div>`;
+        ${s.kind === 'active' && rank ? `<button class="tobar" data-bar="${s.id}" data-tip="Put on the action bar" aria-label="Put on the action bar">⇩</button>` : ''}</div>`;
     };
     const rows = {}; for (const s of own) (rows[s.reqLevel || 3] ||= []).push(s);
     root.innerHTML = `<div class="skills-panel"><header><h2>${esc(tab === 'path' ? (P?.tree?.name || 'Skills') : (specTrees.find(t => t.id === tab)?.name || 'Skills'))}</h2><span>${ch.path ? esc(P?.name) : 'Wanderer'} · ${ch.skillPoints || 0} skill point${ch.skillPoints === 1 ? '' : 's'} to spend</span><button class="x" data-close aria-label="Close">×</button></header>
@@ -58,7 +55,7 @@ export function createSkillsUI({ content, send, getChar, nope }) {
       ${ch.path && !ch.spec && ch.level >= 10 ? '<button class="primary pickspec" data-pickspec>Choose your specialization</button>' : ''}
       ${ch.path ? `<div class="tree">${Object.keys(rows).sort((a, b) => a - b).map(L => `<div class="tier"><span class="lv">${L}</span><div class="nodes">${rows[L].map(node).join('')}</div></div>`).join('')}</div>` : `<p class="hint">At level 3 you choose a Path: Fighter, Rogue, Mage or Healer. Until then you fight as a Wanderer.</p>`}
       <h3>Wanderer</h3><div class="nodes wand">${wand.map(node).join('')}</div>
-      <h3>Action bar</h3><div class="barset">${[0, 1, 2, 3, 4, 5].map(i => { const id = ch.bar?.[i]; return `<button class="bslot2" data-slot="${i}">${id ? skillIcon(S[id]) + '<small>' + esc(S[id]?.name || '') + '</small>' : '<small>empty</small>'}<b>${i + 1}</b></button>`; }).join('')}</div>
+      <h3>Action bar</h3><div class="barset">${[0, 1, 2, 3, 4, 5].map(i => { const id = ch.bar?.[i]; return `<button class="bslot2" data-slot="${i}">${id ? skillIcon(S[id], 28) + '<small>' + esc(S[id]?.name || '') + '</small>' : '<small>empty</small>'}<b>${i + 1}</b></button>`; }).join('')}</div>
       <p class="hint">Tap ⇩ on a skill, then a slot, to put it there.</p></div>`;
     root.querySelector('[data-close]').onclick = () => toggle(false);
     root.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; draw(); });
@@ -81,7 +78,7 @@ export function createSkillsUI({ content, send, getChar, nope }) {
     const P = content.paths;
     root.innerHTML = `<div class="skills-panel paths"><header><h2>Choose your Path</h2><span>Level ${ch.level}: the Wanderer's road forks here. This choice is for good (a specialization comes at level 10).</span><button class="x" data-close aria-label="Close">×</button></header>
       <div class="path-cards">${Object.entries(P).map(([id, p]) => `<button class="path-card pc-${id}" data-path="${id}"><b>${esc(p.name)}</b><small>${esc(RES_NAME[p.resource] || 'Mana')} · ${esc(p.tree?.name || '')}</small><p>${esc(p.blurb)}</p>${bonusText(id) ? `<small class="bonus">Built to take hits: ${esc(bonusText(id))}</small>` : ''}
-        <span class="starters">${(p.starter || []).map(s => `${skillIcon(S[s])} ${esc(S[s]?.name || s)}`).join(' · ')}</span></button>`).join('')}</div></div>`;
+        <span class="starters">${(p.starter || []).map(s => `${skillIcon(S[s], 18)} ${esc(S[s]?.name || s)}`).join(' · ')}</span></button>`).join('')}</div></div>`;
     root.querySelector('[data-close]').onclick = () => toggle(false);
     root.querySelectorAll('[data-path]').forEach(b => b.onclick = () => { ask({ title: `The ${P[b.dataset.path].name}'s Path?`, text: 'This choice is for good.', ok: 'Walk it' }).then(y => y && send({ do: 'path', path: b.dataset.path })); });
   }

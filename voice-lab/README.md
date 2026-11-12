@@ -130,3 +130,14 @@ The first engine in the lab that sounds like a real person rather than a synthes
 - **Voice blending:** a Kokoro voice is a table of style vectors; mixing two tables (`kokoroMix` + `kokoroMixAmt`) gives a new, stable voice, so every NPC can have its own without new model files. The vendored `vendor/kokoro/kokoro.web.js` is patched to export `transformersEnv`, `phonemize` and `voiceCache` for this.
 - **License:** model weights and kokoro-js are Apache-2.0. The text → phoneme step is eSpeak NG compiled to WebAssembly (GPL-3.0), so a closed-source commercial game should replace it (our CMU dictionary in `data/cmudict/` mapped to Kokoro's IPA is the obvious swap).
 - **Limits:** ~510 phoneme tokens per call (long text is split by sentence automatically); invented fantasy words are guessed by eSpeak's spelling rules.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Synthetic character voices: 5 engines (**our own formant synthesizer** `js/engines/formant/`, packaged as a versioned module: `js/formant-voice.js` + `engines/formant/module.json` + CHANGELOG, v1.1.0 with CMUdict + letter-to-sound rules, see `voice-lab/FORMANT.md`; espeak via meSpeak; our babble gibberish synth; Piper neural; Web Speech; SAM removed 2026-09-10) with license badges + pros/cons, Tomodachi-style generic knobs (pitch/speed/depth/tone/breath/rough/flutter/intonation/wordgap), pure-JS effects chain, 31 presets, engine compare, crowd stress test, phoneme input, voice JSON
+
+**Status / key files:** done 2026-09-09
+
+**Status / key files:** `voice-lab/README.md`, `voice-lab/FORMANT.md`, `js/voice.js` (API), `js/engines/*.js`, `js/engines/formant/{g2p,rules,phonemes,tracks,synth,index}.js`, `js/fx.js`, `js/dsp.js`, `data/presets.json`, `data/cmudict/`

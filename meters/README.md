@@ -36,3 +36,14 @@ Serialises with `JSON.stringify(meter)` / `Meter.fromJSON()` (last 2000 records 
 ## Ideas / limits
 - No per-round table yet; the sparkline is the only time view.
 - "Damage taken" attributes DoT ticks to the status source, so a dead caster's burn still credits them.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Skada-style damage meter: record every hit/heal/miss/absorb/status/death (source, target, via, type, crit, overkill, blocked/mitigated/absorbed, overheal, killing blow, item), drill down actor → source → hit with per-target totals and sparklines, damage/healing/taken/absorbs/statuses/deaths modes, per-fight or whole run, per-item kill counts; drop-in UI component
+
+**Status / key files:** done 2026-09-11
+
+**Status / key files:** `meters/README.md`, `js/meter.js`, `js/meter-ui.js`

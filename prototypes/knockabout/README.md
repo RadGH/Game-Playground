@@ -1,5 +1,7 @@
 # Knockabout
 
+> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh knockabout` from the playground and fix what it finds — game-lint (on 2026-11-11: 3 browser-tooltip, 1 no-whats-new), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `knockabout` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass.
+
 A floppy physics brawler for the couch: grab, punch, wobble, and toss your friends out of the arena or into its traps.
 Up to 8 fighters on one screen (each controller and each half of the keyboard is its own player, plus CPU players),
 three modes (Versus, Teams, Waves) and seven arenas, each with its own trick. Chibi 2.5 characters (the same avatars as
@@ -300,3 +302,12 @@ Optional games.radgh.com sign-in (Thousandvale accounts work as they are). Guest
 * Grabbing is shown by the hand being where the sim puts it and a spark, but there is no special "held" hand pose or
   outline on the grabbed thing.
 * No per-player split rating: one rating per screen after a match (the vote IS per player).
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Knockabout** (2026-10-23 →): a floppy physics brawler for 1-8 players — L1/R1 hold = grab, tap = punch, X/Y raise arms, A jump; lift and throw people out of the ring or into saws, spike floors, fire, crushers, spinners. 3 punches in 4 s = knocked down, 1.0 s +0.7 s per earlier knockdown (cap 5). Versus, Teams, Waves (co-op vs goons), CPU fillers, 7 arenas (`data/arenas.json`). Physics = **cannon-es** (`vendor/cannon-es/`, MIT) in a PURE sim (`js/sim/`) that runs in the browser for couch play AND on the server for online rooms; contract in `docs/PLAN.md`. Several controllers/keyboard halves on one device; Chibi 2.5 fighters posed from the sim's hands; builder = Tumblefair look + costume PIECE BY PIECE; arena ratings/votes/feedback like Tumblefair (its `server/feedback.mjs` + `insights.mjs` imported). Own server: stable :8470 (https :8472 for gamepads), dev :8471/:8473 (user units `knockabout`, `knockabout-dev`); public **https://knockabout.games.radgh.com/** (`rgs update knockabout`). Publish LAN: `tools/publish-knockabout.sh`. `window.gameEye.state()` for Claude's game-eye MCP. **Accounts (2026-10-23)**: optional games.radgh.com sign-in; slot 0's fighter saved as `acct:<id>` via `POST /account` + a one-time ticket; admin feed `/internal/admin/*` (env `RGS_API`, `RGS_ADMIN_SECRET`) — README "Accounts". Read README + docs/PLAN.md first
+
+**Status / key files:** playable 2026-10-23

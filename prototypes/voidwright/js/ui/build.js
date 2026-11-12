@@ -112,7 +112,7 @@ export function openBuild(app, { docked = false } = {}) {
   const sayEl = el('div', { class: 'bm-say' });
   const tools = {};
   const toolRow = el('div', { class: 'bm-tools' });
-  const mkTool = (id, label, icon, fn, tipText) => { const b = el('button', { class: 'bm-tool', title: tipText, onclick: (e) => { e.stopPropagation(); fn(); } }, el('b', {}, icon), el('span', {}, label)); tools[id] = b; toolRow.append(b); return b; };
+  const mkTool = (id, label, icon, fn, tipText) => { const b = el('button', { class: 'bm-tool', 'aria-label': tipText, onclick: (e) => { e.stopPropagation(); hideTip(); fn(); } }, el('b', {}, icon), el('span', {}, label)); if (tipText) { b.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') showTip(tipText, e); }); b.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') moveTip(e); }); b.addEventListener('pointerleave', hideTip); } tools[id] = b; toolRow.append(b); return b; };
   mkTool('place', 'Place', '▣', () => setTool('place'), 'Place the selected part (click or tap; drag to paint hull and armour)');
   mkTool('erase', 'Erase', '✕', () => setTool('erase'), 'Remove parts (or right-click). Modules go back to your parts hold.');
   mkTool('move', 'Move', '✥', () => setTool('move'), 'Drag to look around (two fingers always work too)');
@@ -343,7 +343,10 @@ export function openBuild(app, { docked = false } = {}) {
       const count = parts.filter(it => t.cats.includes(BLOCKS[it.block]?.cat)).length;
       const b = btn(t.name, () => { tab = t.id; dirty.palette = true; }, tab === t.id ? 'on' : '');
       if (count) b.append(el('i', { class: 'bm-badge' }, String(count)));
-      b.title = `${t.name} (${i + 1})`;
+      b.setAttribute('aria-label', `${t.name} (key ${i + 1})`);
+      b.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') showTip(`${t.name} <span class="meh">(key ${i + 1})</span>`, e); });
+      b.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') moveTip(e); });
+      b.addEventListener('pointerleave', hideTip);
       tabsEl.append(b);
     });
   }
@@ -368,9 +371,8 @@ export function openBuild(app, { docked = false } = {}) {
     const t = el('button', { class: 'bm-tile' + (off ? ' off' : '') + (selected ? ' on' : ''), 'data-key': key },
       c, el('span', { class: 'bm-tl' }, el('b', { class: rarity ? 'rar-' + rarity : '' }, label), el('small', {}, sub)),
       count != null ? el('i', { class: 'bm-cnt' }, '×' + count) : null);
-    if (why) t.title = why;
     t.addEventListener('click', e => { e.stopPropagation(); hideTip(); onPick(); });
-    t.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') showTip(tipHTML(), e); });
+    t.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') showTip(tipHTML() + (why ? `<div class="bad">${why}</div>` : ''), e); });
     t.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') moveTip(e); });
     t.addEventListener('pointerleave', hideTip);
     return t;

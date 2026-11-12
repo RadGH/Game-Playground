@@ -282,7 +282,7 @@ shield takes it to ~10. The level-10 zone recommends 8, the level-13 zone 11.
 ## 13. Decisions taken that the owner may want to overrule
 
 - Mage is cloth-only; Spellblade (hybrid) gets leather at 10.
-- Rogue is the only dual-wielder (daggers, swords, axes).
+- Dual wielders: the Rogue Path (daggers, swords, axes) and the Weaponmaster spec (also maces); the Vanguard's Doubled Grasp holds a melee two-hander in each hand. The `hand` field on each base says how it is held (js/rules/hands.js).
 - Rare monsters do not guarantee a rare item (that alone doubled the rare rate); bosses guarantee one, the act boss
   two, and the act boss's first kill has a 50% unique chance.
 - Potion belt slots are 2 / 3 / 4 / 4 / 5 by belt (the phone has one potion button; slots are how many are queued).

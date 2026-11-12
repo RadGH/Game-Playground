@@ -575,3 +575,12 @@ colliding inside a system or between the stars of a galaxy, and the JSON round t
   site on them.
 - Only the planet's *dominant* archetype drives the map. A living world does not get a desert belt
   because of its axial tilt — the tilt is recorded but unused.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+**Star Forge**: a seeded universe — `galaxy.js` (5 layouts: spiral arms/elliptical/cluster/ring/scattered, class-mix sliders, connected travel lanes), `stars.js` (11 classes incl. red dwarf, red giant, white dwarf, neutron star, binary pair, black hole with accretion disc; habitable zone + frost line from brightness), `system.js` (14 planet archetypes incl. the rare living world 3–8%, gas/ice giants, tidally locked, crystal, void-touched; rings, belts, comets; baseline resources + 1–2 rare elements per planet from `data/elements.json`; **orbit spacing** — a ratio ladder with a floor of 1.5× inside the frost line and 1.7× past it, plus `orbitLayout()`, the drawing ladder that keeps a minimum gap between rings and caps a planet's drawn size at a third of its gap), **moons as small planets** (4 kinds: barren, ice, volcanic from tidal heat, and the rare living moon of a giant in the water zone — each with a stable id `<planetId>m<i>`, its own seed, resources scaled by size, its own half-size surface map, selectable in the viewer and passed through Frontier Foundry's `universePlanets` adapter as a landing target), `planetmap.js` (planet *or moon* → World Forge knobs → a real surface map, single-biome bodies locked to one family, `moonMapSize`), `texture.js` (equirect surface/cloud/night-lights/glow canvases). Viewer with galaxy → system → planet → moon → map views. 3D models live in `assets/js/space-models.js`
+
+**Status / key files:** done 2026-09-14

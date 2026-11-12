@@ -34,3 +34,14 @@ party actually has the facts it talks about.
 ## Limits / next
 - Lines are English templates; a topic is 3–5 turns. Longer arcs (a topic that continues the next night) need a "thread" field — not built.
 - Callbacks need the host to call `rememberConversation()` (Emberveil 2 does) so a `conversation` memory exists; Party Quest does not record them yet.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the table row for this folder in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+Structured conversations on top of Lingo + memory (82 topics incl. callbacks, nemeses, companions, quests, revive thanks, 12 rare rewarding ones; 6 multi-day threads; variant generator): topics with asker/answerer/third roles, requirements (memories with `maxAgeHours`/`minAgeHours`/`bindingIs` — the last casts the person named in a memory, e.g. the healer who revived you — gear with kill counts from the meter, better/worse than the replaced item, bag items ignored, party facts, traits, relations), variant lines with conditions, spoken through Lingo so personality applies; `factsFrom()` adapts a game's data
+
+**Status / key files:** done 2026-09-11
+
+**Status / key files:** `conversations/README.md`, `js/conversations.js`, `data/topics.json`

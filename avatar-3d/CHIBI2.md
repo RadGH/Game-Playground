@@ -1214,3 +1214,22 @@ glove model covers the fingers.
 **Class outfits**: bard, demon hunter, scavenger, shadow dancer, swashbuckler and witch hunter have tier-1 outfits in
 `data/class-outfits.json` (32 now), so they appear in the outfit pickers, the tier-2 gallery's tier-1 column, and Farhold
 / Thousandvale dress those classes in them.
+
+
+## Project history (moved from playground CLAUDE.md, 2026-11-11)
+
+This was the "Chibi 2 milestone" section in `playground/CLAUDE.md`, kept word for word when that file was cut down to a short index. Newer notes belong in this README, not in CLAUDE.md.
+
+### Chibi 2 milestone
+
+**2026-10-21: the Avatar 3D page is Chibi 2 only and builds every look as 2.5 (`{ v25: true }`), as does the Armory; Chibi 1 (`mii.js`) is an archived showcase at `avatar-3d/chibi1.html`; Chibi 2 v2 is archived for comparison at `avatar-3d/chibi2-v2.html` (same page, `data-version="2"`); `quaternius.js` and `assets/quaternius/` are deleted (highdef-3d is world-only; Chibi 4's animation library moved to `avatar-3d/chibi4/assets/ual/`); Chibi 3/4 are on hold; the character material is double-sided.** (2026-09-24 overhaul — Chibi 2 is the flagship; build nothing new for Chibi 1.) Races (`avatar-3d/js/chibi2-races.js`, `body.race`), roundness (`body.round`), optional cheeks (`body.cheeks`), self-contained outfits (`chibi2-body.js`), a face placed on its own surface (`chibi2-face.js`), eleven new hats (`chibi2-hats.js`), grip bones + a solved wrist aim + follow-through + hold-aware clips + `CHIBI2_MELEE_ANIMS` / `CHIBI2_EMOTE_ANIMS` (`chibi2-motion.js`), hands-free emotes (`actor.setHandsFree`), strapped shields face-out, any weapon in the off hand. New part ids are registered in `avatar-2d/js/parts/chibi2-parts.js` — **a new Chibi 2 part id must be added there too, or the shared normaliser (which Farhold runs on every look) drops it**. Read `avatar-3d/CHIBI2.md` first.
+
+**2026-09-25 — class outfits**: `avatar-3d/data/class-outfits.json` + `js/class-outfits.js` (`dressAs(avatar, outfit)`) dress any body as any of the 30 classes; seven new headwear models (`CLASS_HATS` in chibi2-hats.js); and `profile()` now faces outward whichever way its rings run (legs, arms, hems and robes had been inside out in every game). See CHIBI2.md "Class outfits".
+
+**2026-10-16 — Chibi 2.5 (opt-in)**: `avatar.body.v = 2.5` (or `createChibi2Character(look, { v25: true })`) builds the improved head (part A: audited face/hair, blinking lids, `lookAt` pupils, new eyes/hair/brows/mouths/ears/beards/marks, hair fitted under every hat — `js/chibi25-face.js`, `chibi25-hair.js`, `chibi25-eyes.js`) and body (part B: `js/chibi25-body.js`). **A look without the flag must stay byte-identical** (the Chibi 2.5 unit tests were removed 2026-11-04 — owner: "we are on 2.6 now"; `tests/fixtures/chibi2-v2-hashes.json` remains); new face ids are `bespoke` in chibi2-parts.js so the seeded random roll never changes. Builder `avatar-3d/chibi25.html`; option lists for games `js/chibi25-options.js`; read CHIBI2.md "Chibi 2.5 contracts" first.
+
+`avatar-3d/chibi2.html` is the first Chibi 2 comparison: three humanoid presets, an 18-bone rig,
+two merged skinned meshes per character and 12 animations, with eight-fighter spell benchmarks.
+`avatar-3d/CHIBI2.md` documents the API, performance budgets and incomplete part mappings.
+`js/spellfx-batched.js` adds opt-in instanced sprite rendering without replacing `spellfx.js`.
+Emberveil uses Chibi 2 humanoids and batched sprites by default; `?renderer=chibi1` selects the original presentation.

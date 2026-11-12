@@ -6,7 +6,7 @@
 const FOCUSABLE = 'button:not([disabled]), [data-act]:not([disabled]), input:not([type=hidden]), select, textarea, a[href]';
 const visible = el => { const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return false; const s = getComputedStyle(el); return s.visibility !== 'hidden' && s.display !== 'none' && s.pointerEvents !== 'none'; };
 
-export function createPadNav({ busy = () => false, back = () => false } = {}) {
+export function createPadNav({ busy = () => false, back = () => false, onButton = () => {} } = {}) {
   let cur = null, curSig = '', held = new Map(), raf = 0, lastPad = 0;
   const sig = el => [el.tagName, el.id, el.dataset.act, el.dataset.key, el.dataset.value, el.dataset.num, el.dataset.bool, el.dataset.i, el.dataset.pid, el.textContent.trim().slice(0, 40)].join('|');
   const layer = () => [...document.querySelectorAll('.modal, .sheet-ui, .skills-ui')].filter(x => !x.hidden && visible(x)).pop() || document.body;
@@ -57,6 +57,7 @@ export function createPadNav({ busy = () => false, back = () => false } = {}) {
     for (const [id, down, dx, dy] of dirs) { if (edge(id, down, t, true)) { move(dx, dy); any = true; } }
     if (edge('a', B(0), t, false)) { press(); any = true; }
     if (edge('b', B(1), t, false)) { back(); mark(null); any = true; }
+    if (edge('y', B(3), t, false)) { onButton(3); any = true; }            // Y: the screen's own extra (the sheet: switch the compared slot)
     if (any) lastPad = t;
     if (cur && !cur.isConnected) {                 // the screen was redrawn under us: the same button again, if it is still there
       const same = items().find(el => sig(el) === curSig), keep = curSig;

@@ -1,6 +1,7 @@
 // Town windows (M13): the trader (buy, sell, mend), the potion seller, the gambler, and the stash — the stash is kept on
 // this device and shared by every hero here (ruling 11); items move through the sim (it checks anything coming out).
-import { itemTip, glyph, rarityClass } from './sheet-ui.js';
+import { itemTip, compareTipHtml, glyph, rarityClass } from './sheet-ui.js';
+import { gripOf, compareSlots, firstCompareSlot } from '../rules/hands.js';
 import { itemName } from '../rules/items.js';
 import { sellPrice } from '../rules/loot.js';
 import { fits, findSpot } from '../rules/bag.js';
@@ -91,7 +92,7 @@ export function createTownUI({ content, send, getChar }) {
   }
   const cells = (W, H) => { let s = ''; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) s += `<i class="cell" style="grid-column:${x + 1};grid-row:${y + 1}"></i>`; return s; };
   let tip = null;
-  function tipOn(anchor, it, ch) { tipOff(); tip = document.createElement('div'); tip.className = 'tip-float'; const b = D.bases[it.base]; tip.innerHTML = itemTip(D, it, ch, b ? ch.equip?.[b.slot === 'ring' ? 'ring1' : b.slot] : null, P); document.body.append(tip); const r = anchor.getBoundingClientRect(); let x = r.right + 8; if (x + tip.offsetWidth > innerWidth - 8) x = Math.max(8, r.left - tip.offsetWidth - 8); tip.style.left = x + 'px'; tip.style.top = Math.min(r.top, innerHeight - tip.offsetHeight - 8) + 'px'; }
+  function tipOn(anchor, it, ch) { tipOff(); tip = document.createElement('div'); tip.className = 'tip-float'; const b = D.bases[it.base]; const slots = b && it.base !== 'potion' ? compareSlots(D, it, gripOf(D, ch, content.skills)) : []; if (slots.length) tip.classList.add('wide'); tip.innerHTML = slots.length ? compareTipHtml(D, it, ch, firstCompareSlot(slots, ch.equip), slots, P) : itemTip(D, it, ch, null, P); document.body.append(tip); const r = anchor.getBoundingClientRect(); let x = r.right + 8; if (x + tip.offsetWidth > innerWidth - 8) x = Math.max(8, r.left - tip.offsetWidth - 8); tip.style.left = x + 'px'; tip.style.top = Math.min(r.top, innerHeight - tip.offsetHeight - 8) + 'px'; }
   function tipOff() { tip?.remove(); tip = null; }
   return { onShop, openStash, onStashed, onUnstashed, refresh: () => { if (state && state.npc !== 'stash' && state.data) send({ do: 'shop', npc: state.npc }); else draw(); }, close, get open() { return !root.hidden; }, get npc() { return state?.npc; } };
 }

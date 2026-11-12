@@ -23,18 +23,18 @@ export const GOODS = {
   biotech:    { name: 'Biotech samples', base: 380, cat: 'Science', vol: 1 },
 };
 // raw materials trade too
-for (const [id, m] of Object.entries(MATERIALS)) GOODS[id] = { name: m.name, base: m.price, cat: 'Raw', vol: 1, mat: true, tier: m.tier, alien: !!m.alien };
+for (const [id, m] of Object.entries(MATERIALS)) GOODS[id] = { name: m.name, base: m.price, cat: 'Raw', vol: 1, mat: true, tier: m.tier };
 export const GOOD_IDS = Object.keys(GOODS);
 
 /** What kind of economy a station runs: makes (cheap, lots) and needs (pricey, short). */
 export const ECONOMIES = {
-  mining:      { name: 'Mining colony', makes: ['ferrite', 'silicate', 'cuprite', 'titanium', 'ice', 'cobalt'], needs: ['food', 'water', 'machinery', 'medicine', 'fuel'] },
-  industrial:  { name: 'Industrial hub', makes: ['alloys', 'machinery', 'electronics', 'fuel'], needs: ['ferrite', 'silicate', 'cuprite', 'carbon', 'titanium', 'food'] },
+  mining:      { name: 'Mining colony', makes: ['rock', 'ferrite', 'carbon', 'titanium', 'cobalt', 'iridium'], needs: ['food', 'water', 'machinery', 'medicine', 'fuel'] },
+  industrial:  { name: 'Industrial hub', makes: ['alloys', 'machinery', 'electronics', 'fuel'], needs: ['ferrite', 'carbon', 'cobalt', 'titanium', 'helium3', 'food'] },
   agricultural:{ name: 'Farm world', makes: ['food', 'water', 'textiles', 'biotech'], needs: ['machinery', 'electronics', 'fuel', 'medicine'] },
   military:    { name: 'Navy depot', makes: ['munitions', 'armaments'], needs: ['alloys', 'electronics', 'food', 'fuel', 'iridium', 'titanium'] },
-  research:    { name: 'Research outpost', makes: ['data', 'medicine', 'biotech'], needs: ['electronics', 'quartz', 'exotic', 'chitin', 'nanite', 'lumen', 'relic'] },
+  research:    { name: 'Research outpost', makes: ['data', 'medicine', 'biotech'], needs: ['electronics', 'quartz', 'diamond', 'starglass', 'exotic', 'relic'] },
   luxury:      { name: 'Pleasure station', makes: ['luxury', 'art', 'textiles'], needs: ['food', 'water', 'medicine', 'biotech', 'quartz'] },
-  frontier:    { name: 'Frontier post', makes: ['ice', 'carbon', 'ferrite'], needs: ['food', 'munitions', 'medicine', 'machinery', 'alloys'] },
+  frontier:    { name: 'Frontier post', makes: ['rock', 'carbon', 'ferrite'], needs: ['food', 'munitions', 'medicine', 'machinery', 'alloys'] },
   pirate:      { name: 'Corsair den', makes: ['armaments', 'munitions', 'luxury'], needs: ['food', 'medicine', 'fuel', 'electronics', 'alloys'] },
 };
 export const EVENTS = {
@@ -42,7 +42,7 @@ export const EVENTS = {
   famine:  { name: 'Shortage', up: ['food', 'water'], k: 2.0, blurb: 'Supply ships were lost. Food is scarce.' },
   plague:  { name: 'Outbreak', up: ['medicine', 'biotech'], k: 2.2, blurb: 'Sickness on the station. Medicine wanted.' },
   boom:    { name: 'Boom times', up: ['luxury', 'art', 'electronics'], k: 1.5, blurb: 'Money is flowing. Luxuries sell high.' },
-  glut:    { name: 'Ore glut', down: ['ferrite', 'silicate', 'carbon', 'cuprite'], k: 0.55, blurb: 'Too much ore. Raw prices crashed.' },
+  glut:    { name: 'Ore glut', down: ['ferrite', 'carbon', 'titanium', 'cobalt'], k: 0.55, blurb: 'Too much ore. Raw prices crashed.' },
   strike:  { name: 'Dock strike', up: ['alloys', 'machinery'], k: 1.7, blurb: 'The refineries are idle.' },
   festival:{ name: 'Festival', up: ['food', 'luxury', 'textiles', 'art'], k: 1.4, blurb: 'A festival: food and finery in demand.' },
 };
@@ -56,8 +56,7 @@ export function market(G, sys, now) {
     M = { econ, stock: {}, base: {}, event: null, eventUntil: 0, t: now };
     for (const id of GOOD_IDS) {
       const g = GOODS[id];
-      if (g.mat && g.tier > sys.tier + 2) continue;
-      if (g.alien && !(ECONOMIES[econ].needs.includes(id) || r.chance(0.3))) continue;
+      if (g.mat && g.tier > Math.ceil(sys.tier / 2) + 1) continue;
       const makes = ECONOMIES[econ].makes.includes(id), needs = ECONOMIES[econ].needs.includes(id);
       M.base[id] = Math.round(g.base * (makes ? r.range(0.55, 0.75) : needs ? r.range(1.25, 1.6) : r.range(0.85, 1.15)) * (1 + (sys.tier - 1) * 0.04));
       M.stock[id] = Math.round((makes ? r.range(300, 600) : needs ? r.range(5, 40) : r.range(60, 160)) / Math.sqrt(g.base / 20));
@@ -124,11 +123,15 @@ export function remember(G, sys, M) {
 /** Refinery recipes: ore in, more valuable goods out. */
 export const RECIPES = [
   { id: 'alloys', name: 'Smelt alloy ingots', in: { ferrite: 4, carbon: 1 }, out: { alloys: 2 } },
-  { id: 'electronics', name: 'Fab electronics', in: { silicate: 3, cuprite: 2 }, out: { electronics: 1 } },
-  { id: 'fuel', name: 'Crack fuel cells', in: { ice: 3 }, out: { fuel: 2 } },
-  { id: 'water', name: 'Melt water', in: { ice: 2 }, out: { water: 3 } },
+  { id: 'electronics', name: 'Fab electronics', in: { quartz: 1, carbon: 3 }, out: { electronics: 1 } },
+  { id: 'fuel', name: 'Press fuel cells', in: { carbon: 4 }, out: { fuel: 2 } },
+  { id: 'water', name: 'Crack water from rock', in: { rock: 10 }, out: { water: 2 } },
   { id: 'machinery', name: 'Build machinery', in: { alloys: 2, electronics: 1 }, out: { machinery: 2 } },
   { id: 'munitions', name: 'Press munitions', in: { ferrite: 2, carbon: 2 }, out: { munitions: 1 } },
   { id: 'armaments', name: 'Forge armaments', in: { titanium: 2, alloys: 2, electronics: 1 }, out: { armaments: 2 } },
-  { id: 'biotech', name: 'Culture biotech', in: { chitin: 2, water: 2 }, out: { biotech: 2 } },
+  { id: 'biotech', name: 'Culture biotech', in: { cobalt: 1, water: 2 }, out: { biotech: 2 } },
+  // upgrade ore a tier: lots of the common stuff for a little of the next tier's
+  { id: 'up_tit', name: 'Refine titanium', in: { ferrite: 12, carbon: 4 }, out: { titanium: 2 } },
+  { id: 'up_cob', name: 'Refine cobalt', in: { carbon: 12, ferrite: 4 }, out: { cobalt: 2 } },
+  { id: 'up_dia', name: 'Press diamond', in: { quartz: 6, carbon: 8 }, out: { diamond: 1 } },
 ];

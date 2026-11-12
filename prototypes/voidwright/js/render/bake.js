@@ -35,6 +35,40 @@ function mix(a, b, t) {
 export function cellPx(g) { return Math.max(3, Math.min(16, Math.floor(1800 / Math.max(g.w, g.h)))); }
 
 /**
+ * Which corners get smoothed, as plain data (tested in tests/bake-corners.test.mjs).
+ *   fills: wedges added to EMPTY cell (x, y) at its corner toward (dx, dy), where both side neighbours are filled.
+ *   cuts:  triangles removed from FILLED cell (x, y) at its corner toward (dx, dy), where all three cells around
+ *          that corner are empty.
+ * A triangle sits at the cell corner on the (dx, dy) side, with legs of c cells running back along -dx and -dy, so
+ * every wedge and every cut faces away from the filled cells. Ships use half-cell legs everywhere so neighbouring
+ * slopes line up into one straight edge; a big block's own outer corner gets a full-cell cut only when no wedge
+ * touches either end of it (otherwise the two slopes would not line up and leave a notch). Rocks use the same sizes:
+ * their old lumpier ones (wedges 0.85, cuts 0.75) did not line up either, and every step of an asteroid's rim showed
+ * a little tooth jutting out (owner, iPhone, 2026-11-12).
+ */
+export function cornerPlan(g) {
+  const filled = (x, y) => { if (x < 0 || y < 0 || x >= g.w || y >= g.h) return 0; const v = g.cells[y * g.w + x]; return v ? g.blocks[v - 1] : 0; };
+  const DIRS = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+  const fills = [], cuts = [];
+  for (let y = -1; y <= g.h; y++) for (let x = -1; x <= g.w; x++) {
+    if (filled(x, y)) continue;
+    for (const [dx, dy] of DIRS) if (filled(x + dx, y) && filled(x, y + dy)) fills.push({ x, y, dx, dy, c: 0.5 });
+  }
+  for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) {
+    const b = filled(x, y); if (!b) continue;
+    for (const [dx, dy] of DIRS) {
+      if (filled(x + dx, y) || filled(x, y + dy) || filled(x + dx, y + dy)) continue;
+      const k = b.def.size || 1;
+      const atCorner = k > 1 && (dx < 0 ? x === b.x : x === b.x + k - 1) && (dy < 0 ? y === b.y : y === b.y + k - 1);
+      // a full-cell cut ends at the far corners of this cell; a wedge there would meet it at a different line
+      const clear = atCorner && !filled(x - dx, y + dy) && !filled(x + dx, y - dy);
+      cuts.push({ x, y, dx, dy, c: clear ? 1 : 0.5 });
+    }
+  }
+  return { fills, cuts };
+}
+
+/**
  * @returns {{ hull: Canvas, glow: Canvas, px: number, w: number, h: number }}
  *   drawn so that the grid's (0,0) corner is at (pad, pad).
  */
@@ -44,39 +78,23 @@ export function bakeBody(s, opts = {}) {
   const pal = paletteFor(s);
   const wreck = s.kind === 'wreck'; const rock = s.kind === 'rock';
   const filled = (x, y) => { if (x < 0 || y < 0 || x >= g.w || y >= g.h) return 0; const v = g.cells[y * g.w + x]; return v ? g.blocks[v - 1] : 0; };
-  const sizeAt = (x, y) => { const b = filled(x, y); return b ? (b.def.size || 1) : 1; };
 
   // --- silhouette mask with smoothed corners
+  // Cells are filled exactly (no overlap): the old "+0.5 px" overlap left a half-pixel strip past every right/bottom
+  // cut, which the dark outline pass then thickened into little square stubs sticking out of the slopes (report #30).
   const mask = mk(W, H); const m = mask.getContext('2d');
   m.fillStyle = '#fff';
-  for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) if (filled(x, y)) m.fillRect(pad + x * P, pad + y * P, P + 0.5, P + 0.5);
-  // inside corners: fill a 45° wedge into empty cells that sit in an L of filled ones
-  for (let y = -1; y <= g.h; y++) for (let x = -1; x <= g.w; x++) {
-    if (filled(x, y)) continue;
-    for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-      if (filled(x + dx, y) && filled(x, y + dy)) {
-        const k = Math.min(sizeAt(x + dx, y), sizeAt(x, y + dy));
-        const c = Math.min(1, k) * P * (rock ? 0.85 : 0.5);
-        const cx = pad + (x + (dx > 0 ? 1 : 0)) * P, cy = pad + (y + (dy > 0 ? 1 : 0)) * P;
-        m.beginPath(); m.moveTo(cx, cy); m.lineTo(cx - dx * c, cy); m.lineTo(cx, cy - dy * c); m.closePath(); m.fill();
-      }
-    }
-  }
+  for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) if (filled(x, y)) m.fillRect(pad + x * P, pad + y * P, P, P);
+  const plan = cornerPlan(g);
+  const tri = (x, y, dx, dy, c) => {
+    const cx = pad + (x + (dx > 0 ? 1 : 0)) * P, cy = pad + (y + (dy > 0 ? 1 : 0)) * P; const k = c * P;
+    m.beginPath(); m.moveTo(cx, cy); m.lineTo(cx - dx * k, cy); m.lineTo(cx, cy - dy * k); m.closePath(); m.fill();
+  };
+  // inside corners: a 45° wedge into empty cells that sit in an L of filled ones
+  for (const f of plan.fills) tri(f.x, f.y, f.dx, f.dy, f.c);
   // outside corners: cut them at 45°
   m.globalCompositeOperation = 'destination-out';
-  for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) {
-    const b = filled(x, y); if (!b) continue;
-    for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-      if (!filled(x + dx, y) && !filled(x, y + dy) && !filled(x + dx, y + dy)) {
-        const k = b.def.size || 1;
-        // big blocks: cut a bigger corner, but only at the block's own corner cell
-        const atCorner = (dx < 0 ? x === b.x : x === b.x + k - 1) && (dy < 0 ? y === b.y : y === b.y + k - 1);
-        const c = (atCorner ? Math.min(k, 2) : 1) * P * (rock ? 0.75 : 0.5);
-        const cx = pad + (x + (dx > 0 ? 1 : 0)) * P, cy = pad + (y + (dy > 0 ? 1 : 0)) * P;
-        m.beginPath(); m.moveTo(cx, cy); m.lineTo(cx - dx * c, cy); m.lineTo(cx, cy - dy * c); m.closePath(); m.fill();
-      }
-    }
-  }
+  for (const f of plan.cuts) tri(f.x, f.y, f.dx, f.dy, f.c);
   m.globalCompositeOperation = 'source-over';
 
   // --- block art

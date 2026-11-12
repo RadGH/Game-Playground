@@ -21,6 +21,7 @@ export function openQuests(app) {
     p.body.append(c);
   });
   const s = G.stats;
+  app.missionsSection?.(p.body);   // [encounters] your active jobs: set course / give up (ui/missions.js)
   p.body.append(el('h3', { style: 'margin-top:12px' }, 'Your record'), el('div', { class: 'kv', html: [
     ['Ships destroyed', s.kills], ['Ore mined', s.mined], ['Units sold', s.sold], ['Trade profit', fmt(s.tradeProfit) + ' cr'], ['Jumps', s.jumps], ['Furthest danger', s.maxTier],
     ['People rescued', s.rescued], ['Giants slain', s.bossKills], ['Strongholds razed', s.strongholds], ['Times destroyed', s.deaths], ['Time played', Math.floor(G.playTime / 60) + ' min'],

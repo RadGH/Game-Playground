@@ -33,6 +33,8 @@ export const WEAPONS = {
   mine_layer:  { name: 'Mine Layer', dmg: 50, type: 'explosive', size: 'l', mode: 'fixed', proj: 'mine', range: 200, rate: 0.5, speed: 60, arc: 360, turn: 0, color: '#ff5050', splash: 70, sound: 'mine', tier: 2, rear: true, blurb: 'Drops proximity mines behind you while you hold Fire.' },
   ion_pulse:   { name: 'Ion Pulse', dmg: 8, type: 'lightning', size: 'm', mode: 'manual', proj: 'pulse', range: 480, rate: 0.9, speed: 1100, arc: 140, turn: 4, color: '#8fb4ff', emp: 1.6, shieldMult: 3, recoil: 0.2, sound: 'ion', tier: 3, blurb: 'Knocks out the target\'s weapons and engines for a moment.' },
   tesla_coil:  { name: 'Tesla Coil', dmg: 14, type: 'lightning', size: 'm', mode: 'auto', proj: 'arc', range: 240, rate: 1.0, chain: 5, chainRange: 140, arc: 360, turn: 99, color: '#d7b4ff', shieldMult: 2, recoil: 0, sound: 'tesla', tier: 3, blurb: 'Zaps everything around your ship in a web of lightning.' },
+  sentry_gun:  { name: 'Sentry Gun', dmg: 6, type: 'kinetic', size: 's', mode: 'auto', autoOnly: true, proj: 'bullet', range: 480, rate: 6, speed: 1150, spread: 0.05, arc: 260, turn: 8, color: '#ffe08a', recoil: 0.1, sound: 'gatling', tier: 2, shells: true, blurb: 'A self-aiming gun. Always fires on its own and needs no targeting slot.' },
+  sentry_laser:{ name: 'Sentry Laser', dmg: 20, type: 'laser', size: 's', mode: 'auto', autoOnly: true, proj: 'bolt', range: 600, rate: 2, speed: 1600, spread: 0.01, arc: 260, turn: 7, color: '#ff6a9a', recoil: 0.15, sound: 'laser_pulse', tier: 3, blurb: 'A self-aiming laser. Always fires on its own and needs no targeting slot.' },
   // ---------------- medium (2x2, frigate class and up) ----------------
   heavy_laser: { name: 'Heavy Laser Turret', dmg: 46, type: 'laser', size: 'm', mode: 'auto', proj: 'bolt', range: 760, rate: 1.6, speed: 1700, spread: 0.01, arc: 220, turn: 3, color: '#ff3a6a', recoil: 0.3, sound: 'laser_heavy', count: 2, burst: 0.12, tier: 3, bsize: 2, blurb: 'Twin long-range laser bolts.' },
   flak_battery:{ name: 'Flak Battery', dmg: 14, type: 'explosive', size: 's', mode: 'pd', proj: 'flak', range: 560, rate: 4, speed: 1000, spread: 0.06, arc: 260, turn: 6, color: '#ffc36b', splash: 60, recoil: 0.2, sound: 'flak', tier: 3, bsize: 2, blurb: 'Fills the sky with bursts. Missiles and fighters beware.' },
@@ -46,6 +48,8 @@ export const WEAPONS = {
   storm_spire: { name: 'Storm Spire', dmg: 170, type: 'lightning', size: 'l', mode: 'auto', proj: 'arc', range: 600, rate: 1.2, chain: 8, chainRange: 260, arc: 360, turn: 99, color: '#c8a0ff', shieldMult: 2.4, sound: 'tesla', tier: 5, bsize: 4, blurb: 'A capital lightning tower that chains through whole squadrons.' },
   // ---------------- tools ----------------
   mining_laser:{ name: 'Mining Laser', dmg: 14, type: 'laser', size: 's', mode: 'tool', tool: 'mine', proj: 'beam', range: 300, arc: 200, turn: 5, color: '#7dff9a', sound: 'mining', tier: 1, mineMult: 7, blurb: 'Hold Fire on asteroids or a planet surface to cut ore. Weak against ships.' },
+  mining_laser_2:{ name: 'Mining Laser II', dmg: 26, type: 'laser', size: 's', mode: 'tool', tool: 'mine', proj: 'beam', range: 360, arc: 220, turn: 6, color: '#8dffb0', sound: 'mining', tier: 2, mineMult: 7, blurb: 'Cuts ore about twice as fast as the first mining laser, a bit further out.' },
+  mining_laser_3:{ name: 'Mining Laser III', dmg: 46, type: 'laser', size: 's', mode: 'tool', tool: 'mine', proj: 'beam', range: 420, arc: 240, turn: 7, color: '#b0ffd0', sound: 'mining', tier: 3, mineMult: 7, blurb: 'Three times the cutting speed of the first mining laser.' },
   big_mining_laser:{ name: 'Strip Miner', dmg: 70, type: 'laser', size: 'm', mode: 'tool', tool: 'mine', proj: 'beam', range: 480, arc: 200, turn: 3, color: '#9dffb0', sound: 'mining', tier: 3, bsize: 2, mineMult: 6, blurb: 'Industrial cutter for big rocks.' },
   harpoon:     { name: 'Harpoon', dmg: 10, type: 'kinetic', size: 'm', mode: 'tool', tool: 'harpoon', proj: 'harpoon', range: 520, speed: 900, arc: 220, turn: 6, color: '#d0d8e0', sound: 'harpoon', tier: 1, pull: 1.0, blurb: 'Press Harpoon to spear something, again to let go. Drag rocks and ships around.' },
   tractor:     { name: 'Tractor Beam', dmg: 0, type: 'lightning', size: 's', mode: 'tool', tool: 'tractor', proj: 'beam', range: 380, arc: 360, turn: 99, color: '#7fd0ff', sound: 'tractor', tier: 2, blurb: 'Pulls loot and ore to you from further away.' },
@@ -69,7 +73,11 @@ export const ALIEN_WEAPONS = {
 };
 
 export const ALL_WEAPONS = { ...WEAPONS, ...ALIEN_WEAPONS };
-for (const [id, w] of Object.entries(ALL_WEAPONS)) { w.id = id; w.bsize ??= 1; w.count ??= 1; w.spread ??= 0; w.pierce ??= 0; }
+for (const [id, w] of Object.entries(ALL_WEAPONS)) {
+  w.id = id; w.bsize ??= 1; w.count ??= 1; w.spread ??= 0; w.pierce ??= 0;
+  // point defence and coils always look after themselves (owner #26: "automated weapons that do not fire manually")
+  if (w.mode === 'pd' || (w.proj === 'arc' && w.arc >= 360)) w.autoOnly = true;
+}
 
 /** Damage per second, for cards and balance tests. */
 export function dps(w) {

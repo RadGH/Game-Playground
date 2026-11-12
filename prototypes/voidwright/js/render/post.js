@@ -32,6 +32,7 @@ precision highp float; in vec2 uv; out vec4 o;
 uniform sampler2D scene; uniform sampler2D light; uniform sampler2D bloom;
 uniform vec4 waves[16]; uniform vec2 wavesT[16]; uniform int nWaves; uniform vec2 aspect;
 uniform float ambient; uniform float bloomK; uniform float flash; uniform vec3 flashC; uniform float vig;
+uniform float boost; uniform vec2 boostC;
 void main(){
   vec2 p = uv; vec2 off = vec2(0.0); float split = 0.0;
   for (int i = 0; i < 16; i++) {
@@ -52,6 +53,16 @@ void main(){
   c.r = texture(scene, q + off * split * 0.6).r;
   c.g = texture(scene, q).g;
   c.b = texture(scene, q - off * split * 0.6).b;
+  // boost: a light radial (zoom) blur streaking out from the ship, stronger toward the screen edges, plus colour split
+  if (boost > 0.01) {
+    vec2 dir = (q - boostC); float edge = smoothstep(0.08, 0.6, length(dir * aspect));
+    vec2 st = dir * boost * 0.022 * edge;
+    vec3 acc = c;
+    acc.r += texture(scene, q - st * 1.0 + st * 0.35).r; acc.g += texture(scene, q - st * 1.0).g; acc.b += texture(scene, q - st * 1.0 - st * 0.35).b;
+    acc += texture(scene, q - st * 2.0).rgb;
+    acc += texture(scene, q - st * 3.0).rgb;
+    c = acc / 4.0;
+  }
   vec3 l = texture(light, q).rgb;
   vec3 b = texture(bloom, q).rgb;
   vec3 lit = c * (ambient + l * 1.1) + b * bloomK + l * 0.08;
@@ -147,6 +158,7 @@ export function createPost(canvas) {
       gl.uniform1f(fin.u.ambient, opts.ambient ?? 0.82); gl.uniform1f(fin.u.bloomK, opts.bloom ?? 1.0);
       gl.uniform1f(fin.u.flash, opts.flash || 0); gl.uniform3fv(fin.u.flashC, opts.flashColor || [1, 0.8, 0.6]);
       gl.uniform1f(fin.u.vig, opts.vignette ?? 0.9);
+      gl.uniform1f(fin.u.boost, opts.boost || 0); gl.uniform2fv(fin.u.boostC, opts.boostC || [0.5, 0.5]);
       draw();
     },
   };

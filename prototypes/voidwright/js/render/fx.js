@@ -25,6 +25,7 @@ export function lightSprite(color) {
   g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
   lightCache.set(color, c); return c;
 }
+const hexRgb = hex => { const n = parseInt(hex.slice(1, 7), 16); return [(n >> 16) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
 export function hexA(hex, a) {
   if (hex.startsWith('rgb')) return hex.replace('rgb(', 'rgba(').replace(')', `,${a})`);
   const n = parseInt(hex.slice(1, 7), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
@@ -93,14 +94,27 @@ export function bolt(fx, pts, color, life = 0.18, width = 2, branch = true) {
   add(fx, { k: 'bolt', x: 0, y: 0, vx: 0, vy: 0, pts: path, color, life, w: width, prio: 1 });
 }
 
+/** A strong projectile's impact (render/draw.js calls this when a vis 1+ shot vanishes early). */
+export function impactFx(fx, x, y, color, v, rc) {
+  const c = rc || color;
+  add(fx, { k: 'glow', x, y, vx: 0, vy: 0, life: 0.14 + v * 0.03, color: '#ffffff', size: 8 + v * 6, drag: 1, grow: 0.4 });
+  glows(fx, x, y, c, 1 + v, 6 + v * 2, 60 + v * 25, 0.3 + v * 0.05);
+  sparks(fx, x, y, c, 2 + v * 2, 200 + v * 50, 0.3);
+  light(fx, x, y, 60 + v * 35, c, 0.12 + v * 0.03, 1 + v * 0.15);
+  if (v >= 3) { ring(fx, x, y, 18 + v * 7, c, 0.25, 2); if (v >= 4) wave(fx, x, y, 60 + v * 15, 0.008, 0.3); }
+}
+
 /** Turn a sim event into visuals. `snd` is the sound player (may be null). */
 export function handleEvent(fx, e, ctx) {
   const q = fx.quality;
   switch (e.t) {
     case 'fire': {
-      const c = e.color; const big = (e.n || 1) >= 2;
-      add(fx, { k: 'glow', x: e.x, y: e.y, vx: 0, vy: 0, life: 0.08, color: c, size: big ? 26 : 12, drag: 1, grow: 0 });
-      light(fx, e.x, e.y, big ? 140 : 70, c, 0.08);
+      const c = e.color; const big = (e.n || 1) >= 2; const v = e.vis || 0;
+      add(fx, { k: 'glow', x: e.x, y: e.y, vx: 0, vy: 0, life: 0.08 + v * 0.015, color: c, size: (big ? 26 : 12) * (1 + v * 0.3), drag: 1, grow: 0 });
+      light(fx, e.x, e.y, (big ? 140 : 70) * (1 + v * 0.25), c, 0.08 + v * 0.02);
+      // stronger guns (higher tier / rarer part): a hotter muzzle flash, a spray of sparks, and a ring at 3+
+      if (v >= 1) { add(fx, { k: 'glow', x: e.x, y: e.y, vx: 0, vy: 0, life: 0.06, color: '#ffffff', size: 6 + v * 3, drag: 1, grow: 0 }); sparks(fx, e.x, e.y, e.rc || c, 1 + v, 220 + v * 40, 0.14, 0, 0, e.a, 0.35); }
+      if (v >= 3) ring(fx, e.x, e.y, 14 + v * 4, e.rc || c, 0.18, 1.5);
       if (e.w === 'gatling' || e.w === 'autocannon' || e.w === 'howitzer' || e.w === 'siege_cannon') {
         // spent casings fly out the side
         if (Math.random() < 0.5 * q) add(fx, { k: 'chip', x: e.x, y: e.y, vx: Math.cos(e.a + 1.6) * 80, vy: Math.sin(e.a + 1.6) * 80, life: 0.6, color: '#d8b060', size: 1.6, drag: 0.97, rot: 0, vr: 20 });
@@ -179,10 +193,23 @@ export function handleEvent(fx, e, ctx) {
     case 'pop': glows(fx, e.x, e.y, e.color || '#fff', 2, 8, 60, 0.2); light(fx, e.x, e.y, 40, e.color || '#fff', 0.08); break;
     case 'zap': add(fx, { k: 'line', x: e.x, y: e.y, x2: e.x2, y2: e.y2, vx: 0, vy: 0, life: 0.08, color: e.color, w: 1.5 }); break;
     case 'drop': {
+      // common/uncommon/rare stay modest so the big ones stand out (owner: "I want to be more impressed by rare loot")
       const R = RARITY_BY_ID[e.rarity]; if (!R || R.index < 1) break;
-      ring(fx, e.x, e.y, 30 + R.index * 18, R.color, 0.6, 3);
-      glows(fx, e.x, e.y, R.color, 4 + R.index * 3, 10, 120, 0.8);
-      if (R.index >= 3) { wave(fx, e.x, e.y, 140, 0.02, 0.6); light(fx, e.x, e.y, 260, R.color, 0.6); }
+      const i = R.index;
+      ring(fx, e.x, e.y, 24 + i * 14, R.color, 0.5, 2 + (i >= 3 ? 2 : 0));
+      glows(fx, e.x, e.y, R.color, 2 + i * 2, 8, 90, 0.7);
+      if (i >= 3) {
+        // epic and up: a white flash, a tall pillar of light shooting up, a double shockwave ripple and a spray of sparks
+        const k = i - 2;   // 1 epic, 2 legendary, 3 relic
+        add(fx, { k: 'glow', x: e.x, y: e.y, vx: 0, vy: 0, life: 0.3 + k * 0.08, color: '#ffffff', size: 28 + k * 16, drag: 1, grow: 0.5, prio: 1 });
+        add(fx, { k: 'pillar', x: e.x, y: e.y, vx: 0, vy: 0, life: 1.4 + k * 0.4, color: R.color, h: 420 + k * 260, w: 10 + k * 6, prio: 1 });
+        ring(fx, e.x, e.y, 120 + k * 70, R.color, 0.7, 4); ring(fx, e.x, e.y, 70 + k * 40, '#ffffff', 0.4, 2);
+        wave(fx, e.x, e.y, 220 + k * 120, 0.025 + k * 0.01, 0.7); if (k >= 2) wave(fx, e.x, e.y, 120 + k * 60, 0.02, 0.5);
+        sparks(fx, e.x, e.y, R.color, 14 + k * 10, 320 + k * 80, 0.9);
+        sparks(fx, e.x, e.y, '#ffffff', 6 + k * 4, 260, 0.6);
+        light(fx, e.x, e.y, 220 + k * 90, R.color, 1.0, 1.1);
+        fx.flash = Math.max(fx.flash, 0.03 + k * 0.03); fx.flashColor = hexRgb(R.color);
+      }
       break;
     }
     case 'collect': {
@@ -192,6 +219,7 @@ export function handleEvent(fx, e, ctx) {
       text(fx, e.x, e.y - 12, label, col || '#fff', e.kind === 'item' ? 15 : 12);
       break;
     }
+    case 'scanpulse': add(fx, { k: 'scan', x: e.x, y: e.y, vx: 0, vy: 0, life: 1.1, r: e.r || 1500, a0: Math.random() * 6, prio: 1 }); light(fx, e.x, e.y, 160, '#7af7ff', 0.3); break;
     case 'launch': ring(fx, e.x, e.y, 20, e.color, 0.3, 2); break;
     case 'hook': sparks(fx, e.x, e.y, '#ffffff', 10, 220, 0.3); ring(fx, e.x, e.y, 24, '#d0d8e0', 0.25, 2); fx.shake = Math.max(fx.shake, 3); break;
     case 'snap': sparks(fx, e.x, e.y, '#d0d8e0', 14, 260, 0.4); break;

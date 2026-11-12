@@ -5,7 +5,8 @@ import { rand, setRand } from './rand.js';
 import { CELL, blockAt, components, killBlock, cropToBlocks, gridFromRows } from './grid.js';
 import { CLASSES } from '../data/hulls.js';
 import { ALL_WEAPONS } from '../data/weapons.js';
-import { armorDamage, RARITY_BY_ID } from '../data/types.js';
+import { armorDamage } from '../data/types.js';
+import { partStat } from './partstats.js';
 
 let nextId = 1;
 export const newId = () => nextId++;
@@ -38,15 +39,19 @@ export function recompute(s) {
     const cx = b.x + n / 2, cy = b.y + n / 2, bm = d.mass;
     m += bm; mx += cx * bm; my += cy * bm;
     // part bonuses rolled on the item (loot.js AFFIX/POWERS): weapons read theirs in wStat, the rest here
-    const mo = b.item?.mods || {};
-    if (d.power > 0) st.power += d.power; else st.powerUse -= d.power * (1 - (mo.power || 0));
-    st.cpu += d.cpu || 0; st.cpuCap += d.cpuCap || 0;
-    st.crewNeed += d.crew || 0; st.crewCap += d.crewCap || 0;
-    st.thrust += (d.thrust || 0) * (1 + (mo.thrust || 0));
-    st.turn += (d.turn || 0) * (d.weapon ? 1 : 1 + (mo.turn || 0)); st.cargo += d.cargo || 0;
+    const it = b.item; const mo = it?.mods || {};
+    st.power += partStat(d, it, 'powerOut'); st.powerUse += partStat(d, it, 'powerUse');
+    st.cpu += partStat(d, it, 'cpu'); st.cpuCap += partStat(d, it, 'cpuCap');
+    st.crewNeed += d.crew || 0; st.crewCap += partStat(d, it, 'crewCap');
+    st.thrust += partStat(d, it, 'thrust');
+    if (!d.weapon) st.turn += partStat(d, it, 'turn');
+    st.cargo += partStat(d, it, 'cargo');
     if (mo.overdrive) st.overdrive = (st.overdrive || 0) + 1;
-    st.repair += d.repair || 0; st.scan += d.scan || 0; st.jump = Math.max(st.jump, d.jump || 0);
-    st.magnet = Math.max(st.magnet, d.magnet || 0); st.drones += d.drones || 0; st.cloak = Math.max(st.cloak, d.cloak || 0);
+    if (mo.motherlode) st.motherlode = true;
+    st.repair += partStat(d, it, 'repair'); st.scan = Math.max(st.scan, d.scan || 0); st.scanRange = Math.max(st.scanRange || 0, partStat(d, it, 'scanRange'));
+    st.jump = Math.max(st.jump, d.jump || 0); st.fab = Math.max(st.fab || 0, d.fab || 0);
+    st.autoSlots = (st.autoSlots || 0) + partStat(d, it, 'autoSlots') + (d.core && !d.enemyOnly ? (d.size >= 4 ? 10 : d.size >= 2 ? 4 : 2) : 0);
+    st.magnet = Math.max(st.magnet, d.magnet || 0); st.drones += partStat(d, it, 'drones'); st.cloak = Math.max(st.cloak, d.cloak || 0);
     st.boost += d.boost || 0; st.regrow += d.regrow || 0;
     if (d.core && !st.core) st.core = b;
     if (d.weapon) {
@@ -55,11 +60,22 @@ export function recompute(s) {
       const old = (s.turretState && s.turretState.get(b)) || { aim: b.rot * Math.PI / 4, cd: ((b.idx * 0.618) % 1) * 0.5, kick: 0, burst: 0, beamOn: 0, target: null, charge: 0 };
       s.turrets.push({ b, w, cx, cy, n, ...old, b, w, cx, cy, n });
     }
-    if (d.shield) s.shields.push({ b, cx, cy, n, ...d.shield });
+    if (d.shield) s.shields.push({ b, cx, cy, n, ...d.shield, regen: partStat(d, it, 'regen') });
     if (d.cat === 'engine') s.engines.push({ b, cx, cy, n });
     if (d.cat === 'power' || d.cat === 'core') s.lights.push({ b, cx, cy, n });
   }
   s.turretState = new Map(s.turrets.map(t => [t.b, t]));
+  // targeting slots (owner #26): sentries and point defence are always automatic; any other gun is
+  // automatic only when it is set to Auto (block.auto) AND a slot is free — first come, first served.
+  // A weapon nobody chose yet (old saves, premades) defaults to Auto if it was built as a turret.
+  let slots = st.autoSlots || 0; st.autoUsed = 0;
+  for (const t of s.turrets) {
+    if (t.w.autoOnly) { t.autoOn = true; continue; }
+    if (t.w.mode === 'tool') { t.autoOn = false; continue; }
+    const want = t.b.auto ?? (t.w.mode === 'auto');
+    t.autoOn = want && slots > 0; if (t.autoOn) { slots--; st.autoUsed++; }
+    t.wantsAuto = want;
+  }
   if (m > 0) { s.ox = mx / m; s.oy = my / m; }
   st.mass = Math.max(1, m);
   // radius = furthest alive cell from the centre of mass
@@ -85,6 +101,8 @@ export function recompute(s) {
   st.power = Math.round(st.power * 100) / 100; st.powerUse = Math.round(st.powerUse * 100) / 100;
   st.powerOk = Math.round(st.power) >= Math.round(st.powerUse);
   st.powerRatio = st.powerOk ? 1 : st.powerUse > 0 ? Math.min(1, st.power / st.powerUse) : 1;
+  // crew (owner #34): MIN to fly at all, NEED for full strength, ROOM (crewCap) is the most you can carry
+  st.crewMin = st.crewNeed > 0 ? Math.max(1, Math.ceil(st.crewNeed * 0.4)) : 1;
   st.crewRatio = st.crewNeed > 0 ? Math.min(1, (s.crew ?? st.crewCap) / st.crewNeed) : 1;
   st.efficiency = Math.min(st.powerRatio, 0.35 + 0.65 * st.crewRatio);
   // arcade flight: top speed and acceleration from thrust per mass, turning from gyros per mass
@@ -110,7 +128,7 @@ export function recompute(s) {
   return st;
 }
 
-const shieldBonus = b => 1 + (b.item?.rarity ? RARITY_BY_ID[b.item.rarity]?.bonus || 0 : 0) + (b.item?.mods?.shield || 0);
+const shieldBonus = b => partStat(b.def, b.item, 'shield') / Math.max(1, b.def.shield?.hp || 1);
 
 /** World position of a local cell coordinate (cx, cy in cells). */
 export function toWorld(s, cx, cy) {
@@ -187,7 +205,8 @@ export function splitOff(s) {
   recompute(s);
   // a ship is lost when its core goes, or when it is shot down to a wreck (critical damage)
   const crit = s.kind === 'ship' && s.stats.hp < s.stats.maxHp * (s.team === 'player' ? 0.12 : 0.25);
-  const dead = s.kind === 'ship' ? !mainHasCore || s.stats.blocks === 0 || crit : s.stats.blocks === 0;
+  // a ship shot down to one lonely block is finished too (play-test #24: "weird just one block is still able to fly around")
+  const dead = s.kind === 'ship' ? !mainHasCore || s.stats.blocks <= 1 || crit : s.stats.blocks === 0;
   return { pieces: out, dead };
 }
 

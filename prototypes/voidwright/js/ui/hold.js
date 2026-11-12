@@ -3,7 +3,9 @@
 
 import { panel, el, btn, toast, fmt, tip } from './dom.js';
 import { BLOCKS } from '../data/blocks.js';
-import { RARITY_BY_ID, MATERIALS } from '../data/types.js';
+import { RARITY_BY_ID, MATERIALS, MAT_ROLES } from '../data/types.js';
+import { fmt as fmtD } from '../../../../shared/format.js';
+import { UNIQUES } from '../data/uniques.js';
 import { DRONES } from '../data/drones.js';
 import { FACTIONS } from '../data/factions.js';
 import { CLASSES } from '../data/hulls.js';
@@ -30,7 +32,7 @@ export function openHold(app, tab = 'parts') {
   const wasMode = app.mode; if (app.mode === 'fly') app.mode = 'paused';
   const p = panel('Parts hold', () => { if (app.mode === 'paused') app.mode = wasMode === 'paused' ? 'fly' : wasMode; });
   const tabs = el('div', { class: 'tabs' }); p.head.insertBefore(tabs, p.head.children[1]);
-  const T = [['parts', 'Parts'], ['cargo', 'Cargo'], ['drones', 'Drones'], ['ships', 'Ships'], ['rep', 'Factions'], ['finds', 'Finds']];
+  const T = [['parts', 'Parts'], ['cargo', 'Cargo'], ['drones', 'Drones'], ['ships', 'Ships'], ['rep', 'Factions'], ['finds', 'Crew & finds']];
   const show = (id) => { tab = id; for (const b of tabs.children) b.classList.toggle('on', b.dataset.id === id); draw(); };
   for (const [id, label] of T) { const b = btn(label, () => show(id)); b.dataset.id = id; tabs.append(b); }
   function draw() {
@@ -50,25 +52,31 @@ export function openHold(app, tab = 'parts') {
       B.append(grid);
     } else if (tab === 'cargo') {
       const cap = app.P?.stats.cargo || 0;
-      B.append(el('p', {}, `Hold: ${cargoUsed(G)} / ${Math.floor(cap)} units`));
-      const t = el('table', { class: 'grid' }, el('tr', {}, el('th', {}, 'What'), el('th', {}, 'Units'), el('th', {}, 'About')), el('tr'));
-      const rows = [...Object.entries(G.cargo).map(([k, v]) => [k, v, MATERIALS[k]]), ...Object.entries(G.goods).map(([k, v]) => [k, v, GOODS[k]])].filter(r => r[1] > 0);
-      for (const [k, v, def] of rows) {
-        const tr = el('tr', {}, el('td', { style: `color:${def?.color || '#dfe8f6'}` }, def?.name || k), el('td', {}, String(v)), el('td', {}, el('span', { class: 'hint' }, `~${fmt((def?.price || def?.base || 0) * v)} cr`)));
+      B.append(el('p', {}, `Hold: ${fmt(cargoUsed(G))} / ${fmt(cap)} units`));
+      // Rock is the filler for hull frames and cargo bays; switch it off when you only want ore
+      const noRock = !!G.settings?.noRock;
+      B.append(el('div', { class: 'row wrap' }, el('span', {}, `Collect rock while mining: `), btn(noRock ? 'Off — turn on' : 'On — turn off', () => { (G.settings ||= {}).noRock = !noRock; draw(); }, 'small' + (noRock ? '' : ' on')),
+        el('span', { class: 'hint' }, ' Rock builds hull frames and cargo bays.')));
+      const t = el('table', { class: 'grid' }, el('tr', {}, el('th', {}, 'What'), el('th', {}, 'Kind'), el('th', {}, 'Units'), el('th', {}, 'About'), el('th', {}, '')));
+      const mats = Object.entries(G.cargo).filter(([, v]) => v > 0).sort((x, y) => (MATERIALS[x[0]]?.tier ?? 9) - (MATERIALS[y[0]]?.tier ?? 9) || (MATERIALS[x[0]]?.price || 0) - (MATERIALS[y[0]]?.price || 0));
+      const rows = [...mats.map(([k, v]) => [k, v, MATERIALS[k], MATERIALS[k] ? (MATERIALS[k].tier ? `Tier ${'I II III IV V'.split(' ')[MATERIALS[k].tier - 1]} ${MAT_ROLES[MATERIALS[k].role].toLowerCase()}` : 'Filler') : '']),
+        ...Object.entries(G.goods).filter(([, v]) => v > 0).map(([k, v]) => [k, v, GOODS[k], 'Trade goods'])];
+      for (const [k, v, def, kind] of rows) {
+        const tr = el('tr', {}, el('td', { style: `color:${def?.color || '#dfe8f6'}` }, def?.name || k), el('td', { class: 'hint' }, kind), el('td', {}, fmt(v)), el('td', {}, el('span', { class: 'hint' }, `~${fmt((def?.price || def?.base || 0) * v)} cr`)));
         tr.append(el('td', {}, btn('Dump', () => { if (G.cargo[k] != null) G.cargo[k] = 0; else G.goods[k] = 0; draw(); }, 'small')));
         t.append(tr);
       }
       if (!rows.length) B.append(el('p', { class: 'hint' }, 'Empty. Mine asteroids or buy goods at a market.')); else B.append(t);
     } else if (tab === 'drones') {
-      const cap = app.P?.stats.droneCap || 0;
-      B.append(el('p', {}, `Drone bays: ${cap} drone${cap === 1 ? '' : 's'} can fly with you.`));
-      if (!cap) B.append(el('p', { class: 'hint' }, 'Fit a drone bay to carry drones. Drones fly ahead of your ship, ready for action.'));
+      const cap = app.P?.stats.droneCap || 0; const fitted = new Set(G.ship.drones || []);
+      B.append(el('p', {}, `Drone ports: room for ${cap} drone${cap === 1 ? '' : 's'}. Fit drones in Build mode (Drones tab). A lost drone is rebuilt by its port, free, after a few seconds.`));
       const list = el('div', { class: 'cards' });
-      G.drones.forEach((k, i) => {
-        const D = DRONES[k]; if (!D) return;
-        list.append(el('div', { class: 'card' }, el('b', { style: `color:${D.color}` }, D.name), el('div', { class: 'hint' }, D.blurb || ''), el('div', { class: 'hint' }, i < cap ? 'Flies with you' : 'In storage (no bay space)')));
-      });
-      if (!G.drones.length) list.append(el('p', { class: 'hint' }, G.unlocked.drones ? 'Build drones at a drone shop.' : 'Drone shops unlock as you progress.'));
+      for (const d of G.droneItems || []) {
+        const D = DRONES[d.kind]; if (!D) continue; const R = RARITY_BY_ID[d.rarity || 'common'];
+        list.append(el('div', { class: 'card', style: `border-color:${R.color}55` }, el('b', { style: `color:${R.color}` }, `${R.index ? R.name + ' ' : ''}${D.name}`), el('div', { class: 'hint' }, D.blurb || ''),
+          R.bonus ? el('div', { class: 'good' }, `+${Math.round(R.bonus * 100)}% health and damage`) : '', el('div', { class: fitted.has(d.uid) ? 'good' : 'hint' }, fitted.has(d.uid) ? 'Fitted — flies with you' : 'In storage')));
+      }
+      if (!(G.droneItems || []).length) list.append(el('p', { class: 'hint' }, 'No drones yet. Drone shops sell them; fabricators craft them.'));
       B.append(list);
     } else if (tab === 'ships') {
       B.append(el('div', { class: 'card' }, el('b', {}, `${G.ship.name} — ${CLASSES[G.ship.cls].name} (flying)`), el('div', { class: 'hint' }, CLASSES[G.ship.cls].blurb)));
@@ -84,12 +92,30 @@ export function openHold(app, tab = 'parts') {
       }
       B.append(t);
     } else if (tab === 'finds') {
-      B.append(el('p', {}, `Rescued: ${G.stats.rescued} people · Passengers waiting for a bunk: ${G.passengers || 0}`));
-      if (!G.specimens.length) B.append(el('p', { class: 'hint' }, 'No alien specimens yet. Alien ships sometimes drop them; research labs pay well.'));
+      const P = app.P;
+      if (P) B.append(el('p', {}, `Crew ${P.crew} — ${P.stats.crewMin} needed to fly, ${P.stats.crewNeed} for full strength, room for ${P.stats.crewCap}.`));
+      B.append(el('p', { class: 'hint' }, `People rescued so far: ${fmt(G.stats.rescued)}. Sealed caches waiting to be opened: ${(G.caches || []).length} (any station workshop). Data cores: ${G.dataCores || 0} (research labs).`));
+      B.append(uniquesLog(G));
+      if (G.specimens.length) B.append(el('h3', {}, 'Alien specimens'));
       for (const s of G.specimens) B.append(el('div', { class: 'card' }, el('b', { style: `color:${FACTIONS[s.faction]?.color}` }, s.name), el('span', { class: 'hint' }, `Worth ~${fmt(s.value)} cr to a lab`)));
-      if (G.claims.length) { B.append(el('h3', {}, 'Mining claims')); for (const c of G.claims) B.append(el('div', {}, `${c.name}: ${MATERIALS[c.mat]?.name || c.mat}, about ${c.rate.toFixed(1)} a minute (${Math.floor(c.store || 0)} waiting)`)); }
+      if (G.claims.length) { B.append(el('h3', {}, 'Mining claims')); for (const c of G.claims) B.append(el('div', {}, `${c.name}: ${MATERIALS[c.mat]?.name || c.mat}, about ${fmtD(c.rate, { decimals: 1 })} a minute (${fmt(c.store || 0)} waiting)`)); }
     }
   }
   show(tab);
   void toast;
+}
+
+/** The collection log of named uniques (owner E4): found ones in colour, the rest as a hint of where to look. */
+function uniquesLog(G) {
+  const box = el('div', {});
+  const got = new Set(G.uniques || []);
+  box.append(el('h3', {}, `Named uniques — ${got.size} of ${UNIQUES.length} found`));
+  const list = el('div', { class: 'cards' });
+  for (const u of UNIQUES) {
+    const have = got.has(u.id);
+    list.append(el('div', { class: 'card uq' + (have ? ' got' : '') }, el('b', { style: have ? 'color:#ff9a1f' : '' }, have ? u.name : 'Unknown unique'),
+      el('div', { class: 'hint' }, have ? u.power : `Found: ${u.where}`)));
+  }
+  box.append(list);
+  return box;
 }

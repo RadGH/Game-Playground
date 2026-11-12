@@ -1,0 +1,65 @@
+/* Mercenaries board (js/ui/mercs.js) and outpost screen (js/ui/colony.js). Loaded by those modules. */
+.warn { color: var(--amber); }
+
+/* ---- mercenaries */
+.mc-sum { gap: 8px; }
+.mc-sum-row { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.mc-stat { display: flex; flex-direction: column; gap: 1px; min-width: 90px; }
+.mc-stat b { font-family: var(--head); font-size: 1.1rem; color: var(--ink); }
+.mc-empty { margin: 4px 0 2px; }
+.mc-cards { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; align-items: start; }
+.mc-card { gap: 8px; border-width: 1px; }
+.mc-head { display: flex; align-items: center; gap: 12px; }
+.mc-emblem { flex: 0 0 auto; filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.6)); }
+.mc-names { flex: 1; min-width: 0; }
+.mc-call { font-family: var(--head); font-size: 1.25rem; letter-spacing: 0.06em; line-height: 1.1; }
+.mc-chip { border: 1px solid; border-radius: 999px; padding: 2px 10px; font-size: 0.82rem; font-weight: 700; white-space: nowrap; }
+.mc-card .kv, .mc-modal .kv { grid-template-columns: 76px 1fr; gap: 3px 12px; }
+.mc-pick { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line); padding-top: 8px; }
+.mc-ship { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.03); }
+.mc-ship.refused { opacity: 0.8; }
+.mc-ship-name { flex: 1 1 140px; min-width: 0; }
+.mc-ship-need { display: flex; gap: 10px; font-size: 0.86rem; color: var(--dim); }
+.mc-why { font-size: 0.86rem; font-weight: 600; margin-left: auto; text-align: right; }
+.mc-hire { display: flex; flex-direction: column; gap: 8px; }
+.mc-row { flex-direction: row; align-items: center; gap: 12px; padding: 8px 12px; }
+.mc-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mc-row-text .mc-call { font-size: 1.1rem; }
+.mc-price { font-size: 0.9rem; font-weight: 600; }
+.mc-row-btns { justify-content: flex-end; }
+.mc-modal { width: min(520px, 100%); }
+@media (max-width: 640px) {
+  .mc-cards { grid-template-columns: 1fr; }
+  .mc-row { flex-wrap: wrap; }
+  .mc-row-btns { width: 100%; }
+  .mc-row-btns button { flex: 1; }
+  .mc-call { font-size: 1.1rem; }
+}
+
+/* ---- outposts */
+.co-content { gap: 10px; }
+.co-store { gap: 10px; }
+.co-bars { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px 16px; }
+.co-bar-top { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--dim); }
+.co-bar-top b { color: var(--ink); }
+.co-bar-track { height: 7px; border-radius: 4px; background: rgba(255, 255, 255, 0.07); overflow: hidden; margin-top: 3px; }
+.co-bar-track i { display: block; height: 100%; border-radius: 4px; box-shadow: 0 0 8px currentColor; }
+.co-chips, .co-costs { display: flex; flex-wrap: wrap; gap: 6px; }
+.co-chip, .co-cost { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; font-size: 0.86rem; background: rgba(0, 0, 0, 0.25); }
+.co-chip i, .co-cost i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+.co-cost.bad { border-color: var(--red); color: var(--red); }
+.co-mods { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.co-mod { gap: 6px; }
+.co-mod.built { border-color: rgba(95, 255, 154, 0.35); }
+.co-mod-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.co-mod-head b { font-family: var(--head); font-size: 1.05rem; }
+.co-mod .kv { grid-template-columns: 64px 1fr; }
+.co-mod > button { margin-top: auto; }
+.co-pips { display: inline-flex; gap: 4px; }
+.co-pips i { width: 14px; height: 6px; border-radius: 2px; background: rgba(255, 255, 255, 0.12); }
+.co-pips i.on { background: var(--green); box-shadow: 0 0 6px rgba(95, 255, 154, 0.6); }
+.co-found { width: min(480px, 100%); }
+@media (max-width: 640px) {
+  .co-mods { grid-template-columns: 1fr; }
+  .co-bars { grid-template-columns: 1fr 1fr; }
+}

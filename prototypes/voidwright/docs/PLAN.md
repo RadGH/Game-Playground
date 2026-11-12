@@ -30,6 +30,29 @@ kill bigger things.** Started 2026-11-06. Owner brief verbatim in `docs/OWNER-BR
 
 Also from the brief: bug report lives in the ☰ menu (no on-screen "!" button).
 
+## §E1 Expansion 1 "Shipwright" — owner answers (2026-11-12) — these never change without asking
+
+From the owner's request (2026-11-12: implement play-test reports #24-#41, more encounters/outposts/loot, rare loot that
+impresses, emphasis on growing a bigger ship by killing+buying OR mining+crafting, better visuals) and 10 questions:
+
+| # | Question | Answer |
+|---|---|---|
+| E1 | Main goal after hour one | **Flagship + small wing**: your own ship is the star, grows toward a dreadnought; 1-3 merc wingmen + drones back you up; outposts and crafting feed the flagship |
+| E2 | Mercenaries grow? | **Fixed stats — hire better ones**: better mercs at more dangerous stations, cost more; no levels |
+| E3 | Planet outposts attacked? | **Occasional warned raids**: announced with a timer; build outpost turrets; fight them off for loot; if you're away a weak outpost loses some stored goods, never destroyed |
+| E4 | Rare loot | **All four**: big reveal card + fanfare (compare with fitted), ~20 **named uniques** + collection log, **sealed caches** cracked at stations (guaranteed rare+), **treasure systems** for a while on the star map |
+| E5 | Bigger hull | **Grow your own hull** at a shipyard: next class, keeps every block; pay credits OR that tier's materials; premades still sold |
+| E6 | Encounters | **All four**: convoy under attack (help or join raiders), wandering merchant (dock mid-space), anomalies (rift, ion cloud, comet, derelict station, cache in the middle), wanted elites + ambushes |
+| E7 | Space outposts | **Friendly small outposts** (1-3 services + mission board), **pirate & alien outposts** (vault / nest that spawns swarms), **abandoned outposts** (search sections: caches, survivors, traps). Not capturable |
+| E8 | Missions | Harpoon **recovery** (asteroid / wreck / disabled ship), **delivery**, **clear a site**, **escort**, **survey** (scan), **acquisition** (bring something you must find yourself: mine, trade, craft) |
+| E9 | Crafting | Recipe in structural + energy ore; **adding exotic raises rarity odds**; Forge bay / outpost factory adds more; bonuses random; **re-roll one bonus** for exotic ore |
+| E10 | Extras | **Ship upgrades screen** (Ship power rating + next-step path: buy / kill / craft) and **galaxy events** (alien invasion, gold rush, pirate war — region-wide, on the star map with a timer) |
+
+Also from the play-test reports: materials are Rock + structural/energy/exotic per tier (tier = warp class);
+asteroids are typed, with the occasional mixed "cluster" rock (owner: allowed, not the norm); crew is a number
+(min / need / room, "+3 Crew"); every gun can be fired by hand, auto needs a targeting slot (sentries/point defence
+are always auto); drones are items fitted to drone ports, respawn for free; finishing "Further out" unlocks everything.
+
 ## §1 Pillars
 1. **The ship is the character.** Every block is real: it has hit points, it can be shot off, it can be repaired.
 2. **Scale like a living ocean.** You start ~5 blocks wide; stations are hundreds; a late battleship is ~100× your

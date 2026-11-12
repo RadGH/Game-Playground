@@ -4,22 +4,28 @@
 import { createWorld, step, hostile, fireHarpoon, launchDrone, repair, spawnPickup, cargoUsed, GRACE_SECONDS } from './sim/world.js';
 import { generateGalaxy, populate, spawnGroup, SAFE_RADIUS, canWarpTo, warpCore, coreFor } from './sim/galaxy.js';
 import { streamSectors } from './sim/sectors.js';
-import { newGame, playerShip, storeShip, save, load, slots, lastSlot, sysMem } from './sim/state.js';
+import { newGame, playerShip, storeShip, save, load, slots, lastSlot, sysMem, fittedDrones, makeDroneItem } from './sim/state.js';
 import { checkQuests, CHAPTERS, UNLOCK_NAMES, unlockFromFind } from './sim/quests.js';
 import { rollLoot, makeItem, rollRarity } from './sim/loot.js';
 import { recompute } from './sim/ship.js';
 import { createRenderer } from './render/draw.js';
-import { createFx, handleEvent, stepFx } from './render/fx.js';
+import { createFx, handleEvent, stepFx, ring, wave } from './render/fx.js';
+import { scanPulse, scanSummary, scanLabel } from './sim/scan.js';
+import { reveal, worthRevealing } from './ui/reveal.js';
+import { snapPrev, blendIn, blendOut } from './render/smooth.js';
 import { createInput } from './core/input.js';
-import { initAudio, resumeAudio, play, lib, loopLevel, setVolume, setMuted, ambience } from './core/audio.js';
+import { initAudio, resumeAudio, play, lib, loopLevel, setVolume, setMuted, ambience, boostSound } from './core/audio.js';
 import { rng, hash, clamp, TAU } from './core/math.js';
 import { FACTIONS } from './data/factions.js';
 import { CLASSES } from './data/hulls.js';
-import { DAMAGE_IDS, DAMAGE, ARMOR, MATERIALS, RARITY_BY_ID } from './data/types.js';
+import { DAMAGE_IDS, DAMAGE, ARMOR, MATERIALS, RARITY_BY_ID, OLD_MATERIALS } from './data/types.js';
 import { DRONES } from './data/drones.js';
 import { BLOCKS } from './data/blocks.js';
-import { $, el, btn, toast, banner, panel, modal, fmt } from './ui/dom.js';
+import { $, el, btn, toast, banner, panel, modal, fmt, km } from './ui/dom.js';
 import { drawMinimap } from './ui/minimap.js';
+// expansion: mercenary wingmen (sim/mercs.js) and planet outposts (sim/colony.js) — hooks marked [wing] / [outpost]
+import { spawnWing, storeWing, wingTick } from './sim/mercs.js';
+import { placeOutposts, colonyTick, planetInteract } from './sim/colony.js';
 
 const BUILD = '2026-11-11';
 const COARSE = matchMedia?.('(pointer: coarse)').matches;
@@ -108,6 +114,17 @@ function startGame(G) {
 /** Bring an older save up to date. */
 function migrate(G) {
   G.drive ||= 1;   // warp core class (every save starts on Class I; safer stars are always reachable)
+  // 2026-11-12 expansion: materials folded into rock + 3 per tier; drones became items; passengers gone
+  if (!G.fixes?.exp1) {
+    for (const bag of [G.cargo, G.goods]) for (const [k, v] of Object.entries(bag || {})) if (OLD_MATERIALS[k]) { bag[OLD_MATERIALS[k]] = (bag[OLD_MATERIALS[k]] || 0) + v; delete bag[k]; }
+    G.markets = {}; G.priceMemory = {};
+    G.droneItems ||= []; G.ship.drones ||= [];
+    for (const k of G.drones || []) { const d = makeDroneItem(k); G.droneItems.push(d); G.ship.drones.push(d.uid); }
+    delete G.drones; delete G.passengers;
+    G.caches ||= []; G.uniques ||= [];
+    for (const c of G.claims || []) if (OLD_MATERIALS[c.mat]) c.mat = OLD_MATERIALS[c.mat];
+    (G.fixes ||= {}).exp1 = true;
+  }
   // 2026-11-11: friendly fire used to sour the Guild/Navy until their stations opened fire on sight. Friendly
   // fire is gone, and so is that grudge.
   if (!G.fixes?.repReset) {
@@ -146,9 +163,10 @@ function enterSystem(id, how = 'jump', from = null) {
   const w = createWorld({ seed: hash(sys.seed, G.playTime | 0), game: G });
   const boss = G.bosses.find(b => b.alive && b.system === id);
   populate(w, sys, sysMem(G, id), { boss });
+  placeOutposts(G, w);   // [outpost] your outposts in this system
   const P = playerShip(G); P.x = 0; P.y = 0;
   const st = w.stations.find(s => s.dockable && s.team !== 'hostile');
-  if (how === 'dock' && st) { P.x = st.x + st.r + 200; P.y = st.y; }
+  if (how === 'dock' && st) { const da = G.dockAngle ?? 0; P.x = st.x + Math.cos(da) * (st.r + 200); P.y = st.y + Math.sin(da) * (st.r + 200); P.a = da; }
   else if (how === 'start') { const a = st ? Math.atan2(st.y, st.x) : 0; P.x = (st ? st.x : 3000) + Math.cos(a) * ((st?.r || 0) + 500); P.y = (st ? st.y : 0) + Math.sin(a) * ((st?.r || 0) + 500); }
   else {
     // arrive at the jump point on the side you came from, a short flight from the middle (systems are huge)
@@ -160,7 +178,8 @@ function enterSystem(id, how = 'jump', from = null) {
   P.grace = w.t + GRACE_SECONDS;
   if (st) clearDoorstep(w, st);
   for (let i = 0; i < 9; i++) streamSectors(w, P.x, P.y);   // the sectors around you are ready on arrival
-  for (const k of G.drones.slice(0, P.stats.droneCap)) launchDrone(w, P, k, 0);
+  launchWing(w, P);
+  spawnWing(app);   // [wing] mercenary wingmen arrive with you
   app.R.setSystem(sys);
   app.cam.x = P.x; app.cam.y = P.y;
   app.mode = 'fly'; app.spawnT = 12 + Math.random() * 10; app.lock = null; app.waypoint = null;
@@ -205,6 +224,7 @@ function frame(dt, raw) {
     app.lock = lock; inp.lock = lock;
     if (raw.harpoonPressed) { const r = fireHarpoon(w, P); if (r === 'none') toast('No harpoon fitted. Outfitters sell them.', 'bad'); else if (r === 'fired') play('harpoon', P.x, P.y, camAudio()); }
     if (raw.utilityPressed) useUtility();
+    if (raw.scanPressed) doScan();
     if (raw.interactPressed) interact();
     if (raw.buildPressed) openBuild();
     if (raw.mapPressed) { if (G.unlocked.galaxy) openMap(); else openLocal(); }
@@ -218,7 +238,7 @@ function frame(dt, raw) {
   const simOn = app.mode === 'fly' || app.mode === 'title' || app.mode === 'dead' || app.mode === 'jumping';
   if (simOn) {
     app.acc += dt; let n = 0;
-    while (app.acc >= 1 / 60 && n < 4) { step(w, 1 / 60, inp); app.acc -= 1 / 60; n++; }
+    while (app.acc >= 1 / 60 && n < 4) { snapPrev(w); step(w, 1 / 60, inp); app.acc -= 1 / 60; n++; }
     if (n === 4) app.acc = 0;
     if (G) G.playTime += dt;
   }
@@ -235,30 +255,43 @@ function frame(dt, raw) {
   // beam loops
   let beamN = 0, mineN = 0; for (const b of w.beams) { if (b.owner !== P?.id) continue; if (b.tool === 'mine') mineN++; else beamN++; }
   loopLevel('beam', beamN); loopLevel('mining', mineN);
+  // boost (report #36): one 0..1 number eases in/out and drives the flames, speed lines, camera pull-back, post blur and roar
+  const boostOn = !!(app.mode === 'fly' && P && !P.dead && P.boosting && Math.hypot(P.vx, P.vy) > 30);
+  app.boostFx = (app.boostFx || 0) + ((boostOn ? 1 : 0) - (app.boostFx || 0)) * (1 - Math.exp(-dt * (boostOn ? 6 : 3)));
+  boostSound(boostOn, boostOn ? 0.6 + 0.4 * (P.boostFuel ?? 1) : 0);
   // notes (kills, pickups, reputation…)
   if (G) handleNotes(w.notes); w.notes.length = 0;
-  if (app.mode === 'title') { const t = w.t * 0.05; app.cam.x = 2450 + Math.cos(t) * 300; app.cam.y = Math.sin(t) * 200; app.cam.zoom = 0.8; }
-  else if (P) updateCamera(dt, inp);
-  if (live) { spawner(dt); prompts(); droneUpkeep(dt); weather(dt); stream(dt); }
+  if (live) { spawner(dt); prompts(); droneUpkeep(dt); weather(dt); stream(dt); wingTick(app, dt); colonyTick(app, dt); app.encTick?.(dt); }   // [wing] [outpost] [encounters: ui/missions.js]
   if (app.mode === 'dead') { app.deadT -= dt; if (app.deadT <= 0 && !app.deathShown) { app.deathShown = true; deathPanel(); } }
   if (app.mode === 'jumping') jumpTick(dt);
-  if (P && P.dead && app.mode === 'fly') onPlayerDeath();
-  if (G && app.mode === 'fly') { app.saveT -= dt; if (app.saveT <= 0) { app.saveT = 60; storeShip(G, P); save(G); } moveBosses(); }
-  app.R.frame(w, app.cam, app.fx, { overlay: drawOverlay, worldOverlay: app.worldOverlay || null, ambient: 0.8, bloom: app.settings.quality >= 1 ? 0.75 : 0.5 });
+  // app.P, not the P read at the top of the frame: Escape / Start can undock mid-frame (closeTopPanel → undock), which
+  // retires the old ship (old.dead = true) — checking that one made "Undock with Escape" show Ship destroyed (2026-11-12)
+  if (app.P && app.P.dead && app.mode === 'fly') onPlayerDeath();
+  if (G && app.mode === 'fly') { app.saveT -= dt; if (app.saveT <= 0) { app.saveT = 60; storeWing(app); storeShip(G, P); save(G); } moveBosses(); }
+  // draw everything between the last two sim steps (report #35 judder), and point the camera at the DRAWN ship
+  blendIn(w, simOn ? app.acc * 60 : 1);
+  if (app.mode === 'title') { const t = w.t * 0.05; app.cam.x = 2450 + Math.cos(t) * 300; app.cam.y = Math.sin(t) * 200; app.cam.zoom = 0.8; }
+  else if (P) updateCamera(dt, inp);
+  try { app.R.frame(w, app.cam, app.fx, { overlay: drawOverlay, worldOverlay: app.worldOverlay || app.encOverlay || null, ambient: 0.8, bloom: app.settings.quality >= 1 ? 0.75 : 0.5, boost: app.boostFx || 0 }); }
+  finally { blendOut(w); }
   if (G && app.mode !== 'title') updateHud();
 }
 
+const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
 function camAudio() { return { x: app.cam.x, y: app.cam.y, zoom: app.cam.zoom, w: view.clientWidth }; }
 
 function updateCamera(dt, inp) {
   const P = app.P; const vw = view.clientWidth, vh = view.clientHeight;
   const base = clamp(Math.min(vw, vh) * (vw < 640 ? 0.19 : 0.15) / (P.r + 30), 0.07, 2.6);
-  const z = base * app.cam.zoomMul * (app.mode === 'jumping' ? 0.85 : 1);
-  app.cam.zoom += (z - app.cam.zoom) * Math.min(1, dt * 3);
+  // boosting pulls the camera back a little (a 'wider field of view' kick) and it eases back after
+  const z = base * app.cam.zoomMul * (app.mode === 'jumping' ? 0.85 : 1) * (1 - 0.14 * (app.boostFx || 0));
+  app.cam.zoom += (z - app.cam.zoom) * (1 - Math.exp(-dt * 3));
   const lookX = (inp.ax - P.x) * 0.18 + P.vx * 0.35, lookY = (inp.ay - P.y) * 0.18 + P.vy * 0.35;
   const lim = Math.min(vw, vh) * 0.3 / app.cam.zoom;
   const tx = P.x + clamp(lookX || 0, -lim, lim), ty = P.y + clamp(lookY || 0, -lim, lim);
-  app.cam.x += (tx - app.cam.x) * Math.min(1, dt * 5); app.cam.y += (ty - app.cam.y) * Math.min(1, dt * 5);
+  // frame-rate independent easing, so 60 Hz and 144 Hz screens follow the same curve
+  const k = 1 - Math.exp(-dt * 5);
+  app.cam.x += (tx - app.cam.x) * k; app.cam.y += (ty - app.cam.y) * k;
 }
 
 // ------------------------------------------------------------------ sound for events
@@ -292,6 +325,7 @@ const soundFor = id => WSOUND[id] || (id?.startsWith('drone_') ? id : null);
 function handleNotes(notes) {
   const G = app.G; const w = app.w;
   for (const n of notes) {
+    app.encNote?.(n);   // [encounters] wanted bounties + galaxy-event bounties (ui/missions.js)
     switch (n.t) {
       case 'kill': {
         if (n.kind === 'ground') { const s = w.bodies.find(b => b.id === n.id); if (s?.gid) sysMem(G, G.system).dead.push(s.gid); }
@@ -303,16 +337,21 @@ function handleNotes(notes) {
       }
       case 'collect': {
         if (n.kind === 'mat' && n.ore) G.stats.mined += n.n;
-        if (n.kind === 'pod') { G.stats.rescued += n.n; toast(`Escape pod: ${n.n} crew rescued${(G.passengers || 0) > 0 ? ' (some are passengers — no bunks)' : ''}`, 'good'); }
+        if (n.kind === 'drone') { const D = DRONES[n.item?.kind]; const R = RARITY_BY_ID[n.rarity || 'common']; toast(`Drone recovered: ${R.index ? R.name + ' ' : ''}${D?.name || 'drone'} — fit it in Build mode`, 'loot', R.color); }
+        if (n.kind === 'cache') toast('Sealed cache recovered — open it at any station workshop', 'good', '#ffd84a');
+        if (n.kind === 'data') toast(`+${n.n} data core${n.n > 1 ? 's' : ''} (research labs buy them)`, 'good', '#7af7ff');
         if (n.kind === 'specimen') { G.stats.specimens++; toast(`Recovered: ${n.name}`, 'good', '#c8ff6a'); }
         if (n.kind === 'item') {
           const R = RARITY_BY_ID[n.rarity];
-          toast(`${n.item.name}`, 'loot', R.color);
+          if (worthRevealing(n.item)) { reveal(app, n.item); if (n.item.unique || R.index >= 4) { play('legendary'); app.fx.flash = Math.max(app.fx.flash, 0.25); app.fx.flashColor = hexRgb(R.color); } }
+          else toast(`${n.item.name}`, 'loot', R.color);
           const u = unlockFromFind(G, n.item); if (u) banner('Found something new', '', [UNLOCK_NAMES[u]]);
           if (!G.unlocked.build && !app.toldHold) { app.toldHold = true; toast('Parts go to your parts hold (☰ menu). Build mode unlocks soon.', ''); }
         }
         break;
       }
+      case 'crew': G.stats.rescued += n.n + (n.full || 0); toast(n.n ? `+${n.n} Crew${n.full ? ` — no room for ${n.full} more` : ''}` : `Crew full — ${n.full} rescued and dropped off`, n.n ? 'good' : ''); break;
+      case 'crewlost': toast(`−${n.n} Crew`, 'bad'); break;
       case 'full': toast('Cargo full — tap Cargo to see it. Sell at a market or dump some.', 'bad'); break;
       case 'rep': toast(`${FACTIONS[n.faction].short}: ${n.why} (${n.d > 0 ? '+' : ''}${n.d})`, n.d < 0 ? 'bad' : 'good'); break;
       case 'enrage': banner(`${n.name} is enraged!`); play('warn'); break;
@@ -374,28 +413,33 @@ function weather(dt) {
   }
 }
 
-// drones that were shot down are rebuilt by the bay out of combat, for half their materials
+/** Launch every drone fitted to your drone ports (play-test #28/#31: drones are items you fit in build mode). */
+function launchWing(w, P) {
+  const G = app.G; app.droneDown = new Map();
+  const list = fittedDrones(G, P.stats.droneCap);
+  list.forEach((d, i) => launchDrone(w, P, d.kind, i, d));
+  if (list.length) G.stats.drones = Math.max(G.stats.drones || 0, list.length);
+}
+// a destroyed drone is never lost (owner #28): its port builds it again, free, after a short wait
 function droneUpkeep(dt) {
   const G = app.G, P = app.P, w = app.w;
-  app.droneT = (app.droneT || 0) - dt; if (app.droneT > 0) return; app.droneT = 6;
-  const cap = Math.min(G.drones.length, P.stats.droneCap); if (!cap) return;
-  const mine = w.drones.filter(d => !d.dead && d.owner === P);
-  if (mine.length >= cap || w.t - app.combatOK() < 4) return;
-  const have = new Map(); for (const d of mine) have.set(d.kind, (have.get(d.kind) || 0) + 1);
-  for (const k of G.drones.slice(0, cap)) {
-    if ((have.get(k) || 0) > 0) { have.set(k, have.get(k) - 1); continue; }
-    const cost = DRONES[k]?.cost?.mats || {};
-    if (Object.entries(cost).some(([m, n]) => (G.cargo[m] || 0) < Math.ceil(n / 2))) { toast(`Not enough materials to rebuild a ${DRONES[k].name} drone.`); return; }
-    for (const [m, n] of Object.entries(cost)) G.cargo[m] -= Math.ceil(n / 2);
-    launchDrone(w, P, k, 0); G.stats.drones++; toast(`${DRONES[k].name} drone rebuilt and launched.`); updateQuest();
-    return;
-  }
+  app.droneT = (app.droneT || 0) - dt; if (app.droneT > 0) return; app.droneT = 1;
+  const list = fittedDrones(G, P.stats.droneCap); if (!list.length) return;
+  const alive = new Set(w.drones.filter(d => !d.dead && d.owner === P).map(d => d.uid));
+  app.droneDown ||= new Map();
+  list.forEach((d, i) => {
+    if (alive.has(d.uid)) { app.droneDown.delete(d.uid); return; }
+    const since = app.droneDown.get(d.uid); if (since == null) { app.droneDown.set(d.uid, w.t); return; }
+    if (w.t - since >= DRONE_RESPAWN) { app.droneDown.delete(d.uid); launchDrone(w, P, d.kind, i, d); }
+  });
 }
+const DRONE_RESPAWN = 12;
 
 // ------------------------------------------------------------------ interact (dock, beacons, derelicts, claims)
 function nearestInteract() {
   const w = app.w, P = app.P; if (!P) return null;
   for (const s of w.stations || []) if (!s.dead && s.dockable && s.team !== 'hostile' && Math.hypot(s.x - P.x, s.y - P.y) < s.r + 260 + P.r) return { kind: 'dock', s, label: `Dock at ${s.name}` };
+  { const ex = app.encInteract?.(); if (ex) return ex; }   // [encounters] outposts, merchants, caches, vaults, ruins (sim/encounters.js)
   for (const p of w.poi || []) {
     const d = Math.hypot(p.x - P.x, p.y - P.y);
     if (p.kind === 'beacon' && !p.done && d < 320 + P.r) return { kind: 'beacon', p, label: 'Answer the distress call' };
@@ -405,7 +449,7 @@ function nearestInteract() {
       return { kind: 'claim', p, label: owned ? `Collect claim ore (${Math.floor(owned.store || 0)})` : 'Stake a mining claim (2,000 cr)' };
     }
   }
-  return null;
+  return planetInteract(app);   // [outpost] "Found an outpost" over a planet, else null
 }
 function prompts() {
   const it = nearestInteract(); const pr = $('#prompt');
@@ -419,6 +463,7 @@ function interact() {
   const it = nearestInteract(); if (!it) return;
   const G = app.G, w = app.w, P = app.P;
   if (it.kind === 'dock') { if (w.t - app.combatOK() < 4) { toast('Cannot dock under fire.', 'bad'); return; } dockAt(it.s); }
+  else if (it.kind === 'enc') it.run();   // [encounters]
   else if (it.kind === 'beacon') {
     it.p.done = true; sysMem(G, G.system).looted.push('beacon');
     const r = rng(hash(G.seed, G.system, 'beacon', G.playTime | 0));
@@ -436,11 +481,22 @@ function interact() {
     banner('Derelict searched', 'Its last cargo spills out. The hull can be cut for salvage.');
     const fake = { faction: it.p.body.fromFaction || 'guild', tier: w.tier + 1, cls: 'frigate', crew: 0, elite: true };
     for (const l of rollLoot(r, fake)) if (l.kind !== 'pod') spawnPickup(w, l, it.p.body.x, it.p.body.y, 0, 0, 160);
+  } else if (it.kind === 'found') { import('./ui/colony.js').then(m => m.foundDialog(app, it.p)).catch(e => console.error(e));   // [outpost]
   } else if (it.kind === 'claim') {
     const owned = G.claims.find(c => c.system === G.system);
     if (owned) { const n = Math.floor(owned.store || 0); if (!n) { toast('Nothing dug up yet. Claims fill slowly over time.'); return; } spawnPickup(w, { kind: 'mat', mat: owned.mat, n, ore: true }, P.x, P.y, 0, 0, 30); owned.store -= n; }
     else { if (G.credits < 2000) { toast('A claim costs 2,000 credits.', 'bad'); return; } G.credits -= 2000; G.claims.push({ system: G.system, mat: it.p.rich, rate: 1 + w.tier * 0.5, last: G.playTime, store: 0, name: w.system.name }); banner('Claim staked', `Drills now dig ${MATERIALS[it.p.rich]?.name || it.p.rich} here, even while you are away.`); }
   }
+}
+/** Scan pulse (V): marks asteroids by ore type around you (sim/scan.js). */
+function doScan() {
+  const res = scanPulse(app.w, app.P);
+  if (!res.ok) { toast(`Scanner recharging (${Math.ceil(res.wait)}s)`); return; }
+  ring(app.fx, app.P.x, app.P.y, res.range, '#7af7ff', 1.1, 4); wave(app.fx, app.P.x, app.P.y, res.range * 0.6, 0.02, 0.9);
+  play('lock');
+  const ore = res.found.filter(f => f.type !== 'rock');
+  toast(res.found.length ? `Scan (${km(res.range)}): ${scanSummary(res.found)}` : `Scan (${km(res.range)}): nothing new nearby`, ore.length ? 'good' : '', '#7af7ff');
+  if (!app.P.stats.scanRange && !app.toldScanner) { app.toldScanner = true; setTimeout(() => toast('A Scanner part reaches much further. Outfitters sell them.'), 2500); }
 }
 function repChangeLocal(f, d) { const G = app.G; G.rep[f] = clamp((G.rep[f] ?? 0) + d, -100, 100); }
 
@@ -453,30 +509,37 @@ function useUtility() {
 // ------------------------------------------------------------------ docking
 function dockAt(st) {
   const G = app.G; app.mode = 'docked'; G.docked = st.id; G.lastStation = { system: G.system };
+  // remember which side you came in from: undocking puts you back there (owner 2026-11-12), not always east
+  if (app.P) G.dockAngle = Math.atan2(app.P.y - st.y, app.P.x - st.x);
   G.stats.docks++; play('dock');
   // claims fill while you are away
   for (const c of G.claims) { c.store = Math.min(400, (c.store || 0) + (G.playTime - c.last) / 60 * c.rate); c.last = G.playTime; }
+  storeWing(app);   // [wing] wingmen's damage back into the hangar
   storeShip(G, app.P); save(G); updateQuest();
+  // [outpost] your own outpost opens its management screen instead of a station's shops
+  if (st.stationKind === 'colony') { import('./ui/colony.js').then(m => m.openColony(app, st, () => undock(st))).catch(e => { console.error(e); undock(st); }); return; }
   import('./ui/station.js').then(m => m.openStation(app, st, () => undock(st))).catch(e => { console.error(e); undock(st); });
 }
 function undock(st) {
   const G = app.G; G.docked = null; app.mode = 'fly';
   // the ship may have changed in the station (shipyard, outfitter, repairs)
-  const old = app.P; const P = playerShip(G); P.x = st.x + Math.cos(st.a) * (st.r + 160); P.y = st.y + Math.sin(st.a) * (st.r + 160); P.a = st.a;
+  const old = app.P; const P = playerShip(G); const da = G.dockAngle ?? st.a;
+  P.x = st.x + Math.cos(da) * (st.r + 160); P.y = st.y + Math.sin(da) * (st.r + 160); P.a = da;
   app.w.bodies = app.w.bodies.filter(b => b !== old); old.dead = true; app.R.forget(old.id);
   app.w.drones = app.w.drones.filter(d => d.owner !== old);
   app.w.bodies.push(P); app.w.player = P; app.P = P;
   // a few seconds of grace and a clear doorstep (play-test: "I exited a station and was immediately destroyed")
   P.grace = app.w.t + GRACE_SECONDS; clearDoorstep(app.w, st); app.w.combatT = -99;
-  for (const k of G.drones.slice(0, P.stats.droneCap)) { launchDrone(app.w, P, k, 0); G.stats.drones = Math.max(G.stats.drones, 1); }
-  if (G.drones.length) G.stats.drones = Math.max(G.stats.drones, Math.min(G.drones.length, P.stats.droneCap));
+  launchWing(app.w, P);
+  spawnWing(app, { fresh: true });   // [wing] relaunch from the hangar records (repairs / new ships)
   save(G); updateQuest();
 }
 app.rebuildPlayer = () => { // after build mode out in space
   const G = app.G; const old = app.P; const P = playerShip(G); Object.assign(P, { x: old.x, y: old.y, vx: old.vx, vy: old.vy, a: old.a });
   app.w.bodies = app.w.bodies.filter(b => b !== old); old.dead = true; app.R.forget(old.id); app.w.drones = app.w.drones.filter(d => d.owner !== old);
   app.w.bodies.push(P); app.w.player = P; app.P = P;
-  for (const k of G.drones.slice(0, P.stats.droneCap)) launchDrone(app.w, P, k, 0);
+  launchWing(app.w, P);
+  spawnWing(app);   // [wing] wing slots follow the flagship's class
 };
 
 // ------------------------------------------------------------------ death (insurance — PLAN §0 #3)
@@ -524,7 +587,7 @@ function jumpTick(dt) {
   // stretch of light + ripples while charging
   if (Math.random() < 0.5) app.fx.parts.push({ k: 'spark', x: P.x + (Math.random() - 0.5) * 2000, y: P.y + (Math.random() - 0.5) * 2000, vx: (P.x - app.cam.x) * 0, vy: 0, life: 0.3, age: 0, color: '#bfe0ff', w: 1.5, drag: 1 });
   if (J.t > 2.3 && !J.fired) { J.fired = true; app.fx.flash = 0.8; app.fx.flashColor = [0.7, 0.85, 1]; app.fx.waves.push({ x: P.x, y: P.y, maxR: 3000, strength: 0.06, life: 0.8, age: 0 }); }
-  if (J.t > 2.6) { storeShip(app.G, P); app.G.docked = null; enterSystem(J.to, 'jump', J.from); app.fx.flash = 0.5; app.fx.flashColor = [1, 0.85, 0.6]; save(app.G); updateQuest(); }
+  if (J.t > 2.6) { storeWing(app); storeShip(app.G, P); app.G.docked = null; enterSystem(J.to, 'jump', J.from); app.fx.flash = 0.5; app.fx.flashColor = [1, 0.85, 0.6]; save(app.G); updateQuest(); }
 }
 
 // ------------------------------------------------------------------ HUD
@@ -542,13 +605,14 @@ function updateHud() {
   const mini = [];
   if (G.unlocked.cargo) mini.push(`Cargo <b class="${used >= st.cargo ? 'bad' : ''}">${used}/${Math.floor(st.cargo)}</b>`);
   mini.push(`CPU <b class="${st.cpu > st.cpuCap ? 'bad' : ''}">${st.cpu}/${st.cpuCap}</b>`);
-  mini.push(`Crew <b class="${st.crewRatio < 1 ? 'bad' : ''}">${P.crew}</b>${st.crewNeed ? `<span class="hint"> need ${st.crewNeed}</span>` : ''}`);
+  mini.push(`Crew <b class="${P.crew < st.crewMin ? 'bad' : st.crewRatio < 1 ? 'warn' : ''}">${P.crew}/${st.crewCap}</b>${st.crewNeed > P.crew ? `<span class="hint"> need ${st.crewNeed}</span>` : ''}`);
   mini.push(`Power <b class="${st.powerOk ? '' : 'bad'}">${Math.round(st.power)}/${Math.round(st.powerUse)}</b>`);
   if (P.grace > app.w.t) mini.push(`<b class="good">Safe launch ${Math.ceil(P.grace - app.w.t)}s</b>`);
   else if (app.cruise && Math.hypot(P.vx, P.vy) > 40) mini.push('<b class="good">Cruise</b>');
   else if (app.w.t - app.combatOK() < 5) mini.push('<b class="bad">In combat</b>');
   if (P.stats.droneCap) mini.push(`Drones <b>${app.w.drones.filter(d => !d.dead && d.owner === P).length}/${P.stats.droneCap}</b>`);
-  if (P.repairStarved) mini.push('<b class="bad">Repairs need ferrite</b>');
+  if (P.repairStarved) mini.push('<b class="bad">Repairs need structural ore</b>');
+  if (app.hudWing) mini.push(app.hudWing); if (app.hudRaid) mini.push(app.hudRaid);   // [wing] [outpost]
   const ms = $('#mini-stats'), mh = mini.join(' '); if (ms.dataset.h !== mh) { ms.innerHTML = mh; ms.dataset.h = mh; }
   // target panel: the locked/hovered ship
   const T = app.lock && !app.lock.dead ? app.lock : null; const tp = $('#target');
@@ -602,8 +666,23 @@ function drawOverlay(c, o) {
   for (const s of w.stations || []) if (!s.dead) marks.push({ x: s.x, y: s.y, color: s.team === 'hostile' ? '#ff5a6a' : '#5fd8ff', label: s.name });
   if (app.waypoint) { if (Math.hypot(app.waypoint.x - P.x, app.waypoint.y - P.y) < 400) { app.waypoint = null; toast('You have arrived.'); } else marks.push({ x: app.waypoint.x, y: app.waypoint.y, color: '#ffd27a', label: `Course: ${app.waypoint.label}` }); }
   if (P.grace > w.t) { const k = Math.min(1, (P.grace - w.t) / 2); c.strokeStyle = `rgba(110,255,170,${0.25 + 0.35 * k})`; c.lineWidth = 2 * o.ok; c.setLineDash([6 * o.ok, 6 * o.ok]); c.beginPath(); c.arc(o.ox(P.x), o.oy(P.y), (P.r + 30) * o.oz, 0, 7); c.stroke(); c.setLineDash([]); }
-  for (const p of w.poi || []) if (!p.done && !(p.body && p.body.dead)) marks.push({ x: p.body?.x ?? p.x, y: p.body?.y ?? p.y, color: p.kind === 'boss' ? '#ff3b5c' : p.kind === 'beacon' ? '#ffc45a' : p.kind === 'claim' ? '#5fff9a' : p.kind === 'stronghold' ? '#ff5a6a' : '#c48cff', label: p.kind === 'boss' ? p.name : p.kind === 'beacon' ? 'Distress call' : p.kind === 'claim' ? (app.G.unlocked.claims ? 'Rich field (claim)' : 'Rich field') : p.kind === 'stronghold' ? 'Stronghold' : 'Derelict' });
+  for (const p of w.poi || []) if (!p.done && !(p.body && p.body.dead)) marks.push({ x: p.body?.x ?? p.x, y: p.body?.y ?? p.y, color: p.color || (p.kind === 'boss' ? '#ff3b5c' : p.kind === 'beacon' ? '#ffc45a' : p.kind === 'claim' ? '#5fff9a' : p.kind === 'stronghold' ? '#ff5a6a' : '#c48cff'), label: p.label || (p.kind === 'boss' ? p.name : p.kind === 'beacon' ? 'Distress call' : p.kind === 'claim' ? (app.G.unlocked.claims ? 'Rich field (claim)' : 'Rich field') : p.kind === 'stronghold' ? 'Stronghold' : 'Derelict') });   // [encounters] POIs may carry their own colour + label
   c.font = `600 ${Math.round(11 * o.ok)}px Rajdhani, system-ui`; c.textAlign = 'center';
+  // wingmen: their callsign and hull bar over the ship, in their emblem colour
+  for (const b of w.bodies) {
+    if (!b.wing || b.dead) continue;
+    const m = (app.G.mercs || []).find(x => x.id === b.merc); const x = o.ox(b.x), y = o.oy(b.y) - b.r * o.oz - 10 * o.ok;
+    if (x < -40 || y < -40 || x > o.ow + 40 || y > o.oh + 40) continue;
+    const col = m?.color || '#6ff0d0'; const k = Math.max(0, Math.min(1, b.stats.hp / Math.max(1, b.stats.maxHp)));
+    c.fillStyle = col; c.globalAlpha = 0.9; c.fillText(m?.callsign || b.name || 'Wingman', x, y);
+    c.globalAlpha = 0.5; c.fillRect(x - 18 * o.ok, y + 3 * o.ok, 36 * o.ok, 3 * o.ok); c.globalAlpha = 1; c.fillStyle = k < 0.35 ? '#ff6a6a' : col; c.fillRect(x - 18 * o.ok, y + 3 * o.ok, 36 * o.ok * k, 3 * o.ok);
+  }
+  // scanned asteroids: their ore type under them while on screen (plain rock stays quiet)
+  for (const b of w.bodies) {
+    if (!b.scanned || b.dead || b.kind !== 'rock' || b.oreType === 'rock') continue;
+    const x = o.ox(b.x), y = o.oy(b.y) + (b.r * o.oz) + 12 * o.ok; if (x < -50 || y < -50 || x > o.ow + 50 || y > o.oh + 50) continue;
+    const L = scanLabel(b); c.fillStyle = L.color; c.globalAlpha = 0.85; c.fillText(L.label, x, y); c.globalAlpha = 1;
+  }
   for (const m of marks) {
     const x = o.ox(m.x), y = o.oy(m.y);
     const pad = 30 * o.ok; const inside = x > pad && y > pad && x < o.ow - pad && y < o.oh - pad;
@@ -642,6 +721,8 @@ function openMenu() {
     add('Resume', () => {}, 'primary');
     if (G.unlocked.build) add('Build mode (B)', openBuild);
     add('Parts hold, cargo & drones', () => openHold());
+    if (app.P?.stats.fab) add('Fabricator (craft from ore)', () => import('./ui/workshop.js').then(m => m.openFabricator(app)));
+    add('Ship upgrades', () => import('./ui/upgrades.js').then(m => m.openUpgrades(app)));
     add('Local map (N)', openLocal);
     if (G.unlocked.galaxy) add('Star map (M)', openMap);
     add('Goals', openQuests);
@@ -669,7 +750,7 @@ function controlsDialog() {
     m.append(el('div', { class: 'kv', html: [
       ['Fly', 'W A S D / left stick / left thumb'], ['Aim', 'Mouse / right stick / right thumb'], ['Fire manual weapons + mining lasers', 'Left mouse / RT / push right thumb'],
       ['Missiles at the marked target', 'Right mouse / LT / Missiles button'], ['Boost', 'Space or Shift / A'], ['Harpoon (again to let go)', 'F / X'], ['Reel the harpoon in', 'hold R / RB'],
-      ['Dock / use', 'E / Y'], ['Cloak', 'Q / LB'], ['Build mode', 'B / B button'], ['Local map (also: tap the radar)', 'N / D-pad left'], ['Star map', 'M / Back'], ['Goals', 'J or Tab'], ['Drones', 'C'], ['Zoom', 'Mouse wheel'], ['Menu', 'Esc / Start'],
+      ['Dock / use', 'E / Y'], ['Scan for ore', 'V / D-pad right'], ['Cloak', 'Q / LB'], ['Build mode', 'B / B button'], ['Local map (also: tap the radar)', 'N / D-pad left'], ['Star map', 'M / Back'], ['Goals', 'J or Tab'], ['Drones', 'C'], ['Zoom', 'Mouse wheel'], ['Menu', 'Esc / Start'],
     ].map(([a, b]) => `<span>${a}</span><span>${b}</span>`).join('') }), el('p', { class: 'hint' }, 'Turrets aim and fire on their own. Your ship\'s nose follows the way you fly, so fixed forward guns point where you travel.'), btn('Done', close, 'primary'));
   });
 }
@@ -755,6 +836,9 @@ function openQuests() { import('./ui/quests-ui.js').then(m => m.openQuests(app))
 function openHold(tab) { import('./ui/hold.js').then(m => m.openHold(app, tab)).catch(e => console.error(e)); }
 app.openHold = openHold; app.openMap = openMap; app.updateQuest = updateQuest; app.save = () => { if (app.P && app.mode !== 'docked') storeShip(app.G, app.P); return save(app.G); };
 app.toast = toast; app.banner = banner;
+app.dockAt = dockAt;   // [encounters] friendly outposts dock through the same path
+// [encounters] missions, encounters, outposts and galaxy events hook in here (sets app.encTick / encNote / encInteract / encOverlay)
+import('./ui/missions.js').then(m => m.initExpansion(app)).catch(e => console.error(e));
 
 // ------------------------------------------------------------------ for Claude's game-eye and tests
 window.gameEye = {

@@ -4,6 +4,8 @@
 import { panel, el, btn, toast, fmt } from './dom.js';
 import { FACTIONS } from '../data/factions.js';
 import { STAR_KINDS, traitWords, warpCore, canWarpTo, coreFor } from '../sim/galaxy.js';
+import { drawEventHalos, eventLines, eventStrip } from './events.js';   // [encounters] galaxy events (E10) + treasure systems (E4)
+const SERVICE_NAMES = { market: 'Market', outfitter: 'Outfitter', shipyard: 'Shipyard', refinery: 'Refinery', repair: 'Repairs', crew: 'Crew hall', insurance: 'Insurance', drones: 'Drone shop', lab: 'Research lab', salvage: 'Salvage yard', bounty: 'Bounty board', blackmarket: 'Black market', workshop: 'Workshop', mercs: 'Mercenaries', missions: 'Missions' };
 
 const tierColor = t => t >= 8 ? '#ff3b5c' : t >= 6 ? '#ff7a3a' : t >= 4 ? '#ffc45a' : t >= 2 ? '#9fe870' : '#5fd8ff';
 
@@ -19,7 +21,8 @@ export function openGalaxy(app) {
   const legend = el('div', { class: 'hint', style: 'position:absolute;left:12px;bottom:10px;max-width:46%' },
     el('div', {}, 'Colour = danger. Further in = tougher enemies, better loot and shops.'),
     el('div', {}, `Your jump range: ${range} lane${range > 1 ? 's' : ''}${range < 2 ? ' (fit a jump drive for 2)' : ''}.`),
-    el('div', {}, `${warpCore(G).name}: reaches danger ${warpCore(G).reach}. 🔒 = needs a better warp core (outfitters).`));
+    el('div', {}, `${warpCore(G).name}: reaches danger ${warpCore(G).reach}. 🔒 = needs a better warp core (outfitters).`),
+    (G.colonies || []).length ? el('div', {}, '⌂ = your outpost (red: raiders on the way).') : '');
   p.body.style.position = 'relative'; p.body.style.padding = '0'; p.body.append(cv, info, legend);
   // phones: the key sits behind a button so it never covers the star card
   const narrow = innerWidth < 640; if (narrow) { legend.classList.add('gx-key', 'hidden'); legend.style.cssText = ''; }
@@ -33,6 +36,7 @@ export function openGalaxy(app) {
     // faint spiral glow
     const gr = ctx.createRadialGradient(X(0), Y(0), 0, X(0), Y(0), 520 * k); gr.addColorStop(0, 'rgba(160,120,255,0.25)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
     const seen = new Set(G.seenSystems);
+    drawEventHalos(ctx, X, Y, d, app);   // [encounters]
     // lanes
     ctx.lineWidth = 1.2 * d;
     for (const s of gal.systems) for (const l of s.links) if (l > s.id && seen.has(s.id) && seen.has(l)) {
@@ -57,8 +61,11 @@ export function openGalaxy(app) {
       const icons = [];
       if (s.station === 'trade') icons.push(['◆', '#5fd8ff']); if (s.station === 'pirate') icons.push(['◆', '#ff5a4a']);
       if (G.claims.some(c => c.system === s.id)) icons.push(['⛏', '#5fff9a']);
+      // your outposts (sim/colony.js); red while raiders are on the way
+      for (const c of (G.colonies || []).filter(c => c.system === s.id)) icons.push(['⌂', c.raid?.warned || c.raid?.live ? '#ff5a6a' : '#7dff9a']);
       if (G.bosses.some(b => b.alive && b.system === s.id) && (visited || reach.has(s.id) || s.tier <= G.stats.maxTier + 2)) icons.push(['☠', '#ff3b5c']);
       if (G.bounties?.some(b => !b.done && b.system === s.id)) icons.push(['✚', '#ffc45a']);
+      if (G.missions?.active?.some(m => m.system === s.id || m.to?.system === s.id)) icons.push(['◇', '#ffd27a']);   // [encounters] a job there
       icons.forEach(([ch, c], i) => { ctx.fillStyle = c; ctx.fillText(ch, x + (i - (icons.length - 1) / 2) * 12 * d, y - r - 4 * d); });
     }
     cv._X = X; cv._Y = Y;
@@ -71,9 +78,13 @@ export function openGalaxy(app) {
     info.append(
       el('h3', { style: `color:${tierColor(s.tier)}` }, `${s.name}`),
       el('div', {}, `Danger ${s.tier} · ${F.name}`, el('span', { class: rep < 0 ? 'bad' : 'good' }, ` (you: ${rep})`)),
-      el('div', { class: 'hint' }, s.station === 'trade' ? `Station: ${s.shops.length} services` : s.station === 'pirate' ? 'Corsair den (black market)' : s.station === 'hive' ? 'Alien hive — no docking' : 'No station'),
+      el('div', { class: 'hint' }, s.station === 'trade' ? 'Trade station' : s.station === 'pirate' ? 'Corsair den (black market)' : s.station === 'hive' ? 'Alien hive — no docking' : 'No station'),
+      // play-test #29: what you can do there, not just how many services
+      (s.station === 'trade' || s.station === 'pirate') && s.shops?.length ? el('div', { class: 'gx-svc' }, ...s.shops.filter(x => x !== 'blackmarket' || s.station === 'pirate').map(id => el('span', { class: 'chip' + (app.G.unlocked[id] === false || !app.G.unlocked[id] ? ' dim' : '') }, SERVICE_NAMES[id] || id))) : '',
       el('div', { class: 'hint' }, `${s.planets} planet${s.planets > 1 ? 's' : ''}, ${s.belts} asteroid belt${s.belts > 1 ? 's' : ''}${s.features.includes('derelict') ? ', a derelict' : ''}${s.features.includes('beacon') ? ', a distress signal' : ''}${s.features.includes('pirateBase') ? ', an enemy stronghold' : ''}${s.features.includes('claimable') ? ', a rich field' : ''}`),
       boss ? el('div', { class: 'bad' }, `Rumour: ${boss.name} (${boss.cls}) is here.`) : '',
+      ...(G.colonies || []).filter(c => c.system === s.id).map(c => el('div', { class: c.raid?.warned || c.raid?.live ? 'bad' : 'good' }, `Your outpost: ${c.name}${c.raid?.live ? ' — under attack' : c.raid?.warned ? ' — raiders on the way' : ''}`)),
+      ...eventLines(app, s),   // [encounters] galaxy events here, with timers
     );
     if (s.traits) {
       const t = traitWords(s.traits);
@@ -114,6 +125,7 @@ export function openGalaxy(app) {
     narrow ? btn('Key', () => legend.classList.toggle('hidden'), 'small') : '',
     btn('Local map', () => { p.close(); app.openLocal?.(); }, 'small'));
   p.body.append(zoomRow);
+  p.body.append(eventStrip(app, s => { sel = s; view.x = s.x; view.y = s.y; showInfo(s); draw(); }));   // [encounters]
   addEventListener('resize', draw);
 }
 

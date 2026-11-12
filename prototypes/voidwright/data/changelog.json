@@ -1,6 +1,29 @@
 {
  "entries": [
   {
+   "id": "2026-11-12",
+   "date": "2026-11-12",
+   "title": "Expansion: Shipwright",
+   "items": [
+    "Grow your ship: refit your own hull into the next class at any shipyard, keeping every block. Pay in credits, or in ore you mined yourself.",
+    "Crafting: every station has a Workshop where you turn ore into parts and drones. Add rare ore for better odds of a fine roll, re-roll one bonus on a part, and open sealed caches (always rare or better inside). A Fabricator part lets you craft out in space.",
+    "Simpler ore: each region has just Rock plus one structural, one energy and one rare ore. Asteroids now hold one kind of ore, with the odd mixed one. Press Scan (V) to find what is around you; a Scanner part reaches much further.",
+    "Rare loot that matters: a legendary part is now far stronger than a rare one, every kind of part can roll bonuses (CPU, crew room and cargo too), and epic or better finds get a big reveal with a comparison to what you have fitted. Twenty named uniques wait in special places — check the collection log in the parts hold.",
+    "Fire every gun yourself. A gun aims and fires on its own only when it holds a targeting slot (your bridge gives two; Targeting computers add more). Sentry guns and point defence always look after themselves.",
+    "Crew is just a number now: '+3 Crew'. Each ship shows the least crew it needs to fly, what it needs for full strength, and how many fit. Hire more or sell the extra at a crew hall.",
+    "Drones are their own items: buy, craft or find them, then fit them to drone ports in build mode. A lost drone is rebuilt for free after a few seconds. Mender drones patch your wingmen too.",
+    "Mercenaries: hire a pilot and give them a ship from your hangar. They fly beside you and fight for you. Better pilots wait at more dangerous stations.",
+    "Your own outposts: fly over a planet and found an outpost. Build ore sites, a research lab, a factory, a trade post and defence turrets — they keep working while you are away. Raiders sometimes come, with a warning.",
+    "Missions at station and outpost boards: tow things back with your harpoon, deliveries, clear a site, escort a freighter, survey asteroids, or find something they need.",
+    "More to run into: convoys under attack, wandering merchants, space rifts, ion clouds, comets, derelict stations, wanted captains, ambushes, small friendly outposts, corsair vaults, alien nests and abandoned outposts to search.",
+    "Galaxy events: alien invasions, gold rushes, pirate wars and treasure systems sweep across the star map for a while.",
+    "The outfitter is sorted by slot, the star map lists what each station offers, and a new Ship upgrades screen (menu) shows what to improve next.",
+    "Looks: brand-new planets with real lighting, air, clouds and city lights; stronger weapons glow brighter and beams spiral; much bigger boost flames with sound; rare drops light up a pillar you can see from afar.",
+    "Smoother: no more flicker or blur when flying fast. Ship and asteroid edges are clean, with no stray squares or backward corners.",
+    "Fixes: the title logo fits every screen; gnats no longer limp on as a single block; boost gives a real kick; undocking puts you back on the side you came in from; all features open after the 'Further out' goal, and the old harpoon goal is gone."
+   ]
+  },
+  {
    "id": "2026-11-11b",
    "date": "2026-11-11",
    "title": "Fairer enemies, and gnat packs",

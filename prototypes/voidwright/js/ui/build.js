@@ -20,6 +20,8 @@ import { makeBody, recompute } from '../sim/ship.js';
 import { bakeBody, PLAYER_PALETTE } from '../render/bake.js';
 import { drawTurret } from '../render/turret-art.js';
 import { makeItem } from '../sim/loot.js';
+import { DRONES } from '../data/drones.js';
+import { weaponStat } from '../sim/partstats.js';
 import { createPadNav } from './padnav.js';
 
 const TABS = [
@@ -60,7 +62,8 @@ export function openBuild(app, { docked = false } = {}) {
   const ox = Math.floor((W - sw) / 2) - sx0;
   let oy = Math.floor((H - sh) / 2) - sy0;
   if (coreRow) { const n = BLOCKS[coreRow[0]].size || 1; oy = clamp(Math.round(H / 2 - (coreRow[2] + n / 2)), -sy0, H - sh - sy0); }
-  let entries = src.b.filter(r => BLOCKS[r[0]]).map(([id, x, y, rot, hp, item]) => ({ id, x: x + ox, y: y + oy, rot: rot || 0, hp, item: item || null, isNew: false, alive: hp > 0, counted: false }));
+  let entries = src.b.filter(r => BLOCKS[r[0]]).map(([id, x, y, rot, hp, item, auto]) => ({ id, x: x + ox, y: y + oy, rot: rot || 0, hp, item: item || null, isNew: false, alive: hp > 0, counted: false, auto: auto == null ? undefined : !!auto }));
+  let fittedDr = (G.ship.drones || []).slice();          // drone item uids fitted to the ports (Drones tab)
   const startKeys = new Set(entries.map(e => `${e.id}@${e.x},${e.y},${e.rot}`));
   let parts = G.parts.slice();
   let led = { cr: 0, mats: {}, placed: 0 };
@@ -76,10 +79,10 @@ export function openBuild(app, { docked = false } = {}) {
   const startStats = {};
   function rebuild() {
     const g = createGrid(W, H);
-    for (const e of entries) if (e.alive) { const b = place(g, e.id, e.x, e.y, e.rot, e.item); e.b = b; if (b) { b.e = e; if (e.hp != null) b.hp = clamp(e.hp, 1, b.maxHp); } }
+    for (const e of entries) if (e.alive) { const b = place(g, e.id, e.x, e.y, e.rot, e.item); e.b = b; if (b) { b.e = e; b.auto = e.auto; if (e.hp != null) b.hp = clamp(e.hp, 1, b.maxHp); } }
     for (const e of entries) if (!e.alive) {
       const b = place(g, e.id, e.x, e.y, e.rot, e.item); e.b = b;
-      if (b) { b.e = e; killBlock(g, b); }
+      if (b) { b.e = e; b.auto = e.auto; killBlock(g, b); }
     }
     grid = g;
     if (!body) body = makeBody('ship', g, { cls, team: 'player', faction: 'player', crew: G.ship.crew ?? 0 });
@@ -271,11 +274,8 @@ export function openBuild(app, { docked = false } = {}) {
 
   // ---------------------------------------------------------------- numbers
   function wStat(b, key) {
-    const w = ALL_WEAPONS[b.def.weapon]; const it = b.item; const rb = it?.rarity ? RARITY_BY_ID[it.rarity]?.bonus || 0 : 0; const m = it?.mods || {};
-    if (key === 'dmg') return w.dmg * (1 + rb + (m.dmg || 0));
-    if (key === 'rate') return (w.rate || 0) * (1 + (m.rate || 0) + rb * 0.3);
-    if (key === 'range') return w.range * (1 + (m.range || 0) + rb * 0.15);
-    return w[key];
+    const w = ALL_WEAPONS[b.def.weapon];
+    return key === 'dmg' || key === 'rate' || key === 'range' ? weaponStat(w, b.item, key) : w[key];
   }
   function blockDps(b) {
     const w = ALL_WEAPONS[b.def.weapon]; if (!w || w.mode === 'tool') return 0;
@@ -382,7 +382,7 @@ export function openBuild(app, { docked = false } = {}) {
     listEl.innerHTML = '';
     const rows = [];
     // structure built from materials
-    const structs = Object.values(BLOCKS).filter(d => !d.module && !d.nature && T.cats.includes(d.cat) && (d.size || 1) <= maxB);
+    const structs = Object.values(BLOCKS).filter(d => !d.module && !d.nature && !d.enemyOnly && T.cats.includes(d.cat) && (d.size || 1) <= maxB);
     for (const d of structs) {
       const miss = missingFor(d); const sp = spare[d.id] || 0;
       rows.push(tile({
@@ -404,8 +404,52 @@ export function openBuild(app, { docked = false } = {}) {
         tipHTML: () => itemTipHTML(it),
       }));
     }
+    if (tab === 'weapon') listEl.append(fireModeSection());
+    if (tab === 'drone') listEl.append(droneSection());
     if (!rows.length) listEl.append(el('p', { class: 'hint bm-empty' }, T.cats.includes('weapon') || !structs.length ? 'No parts of this kind in your hold. Outfitters sell them, and wrecks drop them.' : 'Nothing here fits this hull.'));
     listEl.append(...rows);
+  }
+  // play-test #26: every gun can be fired by hand; Auto needs a targeting slot (bridge + Targeting computers)
+  function fireModeSection() {
+    const box = el('div', { class: 'bm-sec' });
+    const st = body.stats; const guns = body.turrets.filter(t => t.w.mode !== 'tool');
+    box.append(el('h4', {}, 'Fitted weapons', el('small', { class: 'hint' }, ` · auto slots ${st.autoUsed || 0} / ${st.autoSlots || 0}`)));
+    if (!guns.length) { box.append(el('p', { class: 'hint' }, 'No guns fitted yet.')); return box; }
+    for (const t of guns) {
+      const e = t.b.e; if (!e) continue;
+      const name = e.item?.name || BLOCKS[e.id].name;
+      let state, why = '';
+      if (t.w.autoOnly) { state = 'Always auto'; why = 'Sentry and point-defence guns always aim for themselves.'; }
+      else if (t.autoOn) state = 'Auto';
+      else if (t.wantsAuto) { state = 'Manual'; why = 'Set to Auto, but no targeting slot is free — fit a Targeting computer.'; }
+      else state = 'Manual';
+      const toggle = t.w.autoOnly ? null : btn(t.autoOn || t.wantsAuto ? 'Make manual' : 'Make auto', () => {
+        beginAction(); e.auto = !(t.autoOn || t.wantsAuto); rebuild(); touched();
+        const nt = body.turrets.find(x => x.b.e === e);
+        say(nt?.autoOn ? `${name} now aims and fires by itself.` : e.auto ? 'No free targeting slot — fit a Targeting computer for more.' : `${name} now fires where you aim, while Fire is held.`, e.auto && !nt?.autoOn ? 'bad' : '');
+        dirty.palette = true;
+      }, 'small');
+      box.append(el('div', { class: 'bm-row' }, el('b', { class: e.item ? 'rar-' + e.item.rarity : '' }, name), el('span', { class: state === 'Manual' ? 'hint' : 'good' }, ` ${state}`), el('div', { class: 'grow' }), toggle || ''),
+        why ? el('div', { class: 'hint bm-why' }, why) : '');
+    }
+    return box;
+  }
+  // play-test #28/#31: drones are items you fit to drone ports here; lost drones are rebuilt for free
+  function droneSection() {
+    const box = el('div', { class: 'bm-sec' });
+    const cap = body.stats.droneCap || 0; const own = G.droneItems || [];
+    fittedDr = fittedDr.filter(u => own.some(d => d.uid === u));
+    box.append(el('h4', {}, 'Drones', el('small', { class: 'hint' }, ` · fitted ${Math.min(fittedDr.length, cap)} / ${cap} port space`)));
+    if (!cap) box.append(el('p', { class: 'hint' }, 'Place a Drone port to carry drones.'));
+    if (!own.length) box.append(el('p', { class: 'hint' }, 'You own no drones yet. Drone shops sell them; fabricators craft them; wrecks sometimes drop them.'));
+    for (const d of own) {
+      const D = DRONES[d.kind]; if (!D) continue;
+      const on = fittedDr.includes(d.uid); const R = RARITY_BY_ID[d.rarity || 'common'];
+      const b = on ? btn('Remove', () => { fittedDr = fittedDr.filter(u => u !== d.uid); changed = true; dirty.palette = true; }, 'small')
+        : btn('Fit', () => { if (fittedDr.length >= cap) { say(cap ? 'Your drone ports are full.' : 'Place a Drone port first.', 'bad'); return; } fittedDr.push(d.uid); changed = true; dirty.palette = true; }, 'small' + (fittedDr.length >= cap ? ' off' : ''));
+      box.append(el('div', { class: 'bm-row' }, el('b', { style: `color:${R.color}` }, `${R.index ? R.name + ' ' : ''}${D.name}`), el('span', { class: 'hint' }, ` ${D.blurb}`), el('div', { class: 'grow' }), b));
+    }
+    return box;
   }
   function structTip(d) {
     return itemTipHTML(d.id) + `<div class="bm-tipcost">Costs ${esc(costText(d))}${(spare[d.id] || 0) ? ` — ${spare[d.id]} spare (free)` : ''}. Removing it later gives back half the materials.</div>`;
@@ -846,7 +890,7 @@ export function openBuild(app, { docked = false } = {}) {
     return {
       w: x1 - x0, h: y1 - y0,
       b: entries.map(e => withState
-        ? [e.id, e.x - x0, e.y - y0, e.rot, e.alive ? Math.round(e.b?.hp ?? e.hp ?? BLOCKS[e.id].hp) : 0, e.item || 0]
+        ? [e.id, e.x - x0, e.y - y0, e.rot, e.alive ? Math.round(e.b?.hp ?? e.hp ?? BLOCKS[e.id].hp) : 0, e.item || 0, e.auto == null ? (ALL_WEAPONS[BLOCKS[e.id].weapon]?.mode === 'auto' ? 1 : 0) : e.auto ? 1 : 0]
         : [e.id, e.x - x0, e.y - y0, e.rot]),
     };
   }
@@ -939,7 +983,7 @@ export function openBuild(app, { docked = false } = {}) {
     if (led.cr > G.credits) { say('Not enough credits.', 'bad'); return; }
     G.credits -= led.cr;
     for (const [m, v] of Object.entries(led.mats)) { G.cargo[m] = Math.max(0, (G.cargo[m] || 0) - v); if (!G.cargo[m]) delete G.cargo[m]; }
-    G.parts = parts;
+    G.parts = parts; G.ship.drones = fittedDr;
     G.ship.grid = cropped(true);
     // count blocks that are really new: not the same part already sitting in the same spot at the start
     G.stats.built = (G.stats.built || 0) + entries.filter(e => e.counted && !startKeys.has(`${e.id}@${e.x},${e.y},${e.rot}`)).length;

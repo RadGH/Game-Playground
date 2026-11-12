@@ -1,0 +1,36 @@
+/* Missions, encounters and galaxy events (js/ui/missions.js, merchant.js, events.js). Uses the tokens in game.css. */
+
+/* HUD: one line per job, under the goal box (top is set from the goal box's bottom edge in JS) */
+.ms-hud { position: absolute; top: calc(170px + var(--safe-t)); right: calc(8px + var(--safe-r)); width: min(270px, 48vw); display: flex; flex-direction: column; gap: 4px; }
+.ms-line { display: flex; flex-direction: column; align-items: flex-start; gap: 0; text-align: left; min-height: 0; padding: 4px 9px 5px; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--k, var(--cyan)); border-radius: 7px; font-size: 0.82rem; line-height: 1.15; }
+.ms-line b { color: var(--k, var(--ink)); font-family: var(--head); font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.ms-line span { color: var(--dim); font-weight: 600; }
+@media (max-width: 640px) { .ms-hud { width: 46vw; } .ms-line { font-size: 0.76rem; padding: 3px 7px; } .ms-line b { font-size: 0.76rem; } }
+
+/* board cards */
+.ms-card { border-left: 3px solid var(--k, var(--line)); gap: 6px; }
+.ms-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ms-kind { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--k, var(--dim)); }
+.ms-pay { font-family: var(--head); font-weight: 700; color: var(--amber); }
+.ms-title { font-family: var(--head); font-size: 1.02rem; line-height: 1.2; }
+.ms-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.86rem; font-weight: 600; color: var(--ink); }
+.ms-meta .good { color: var(--green); } .ms-meta .amber { color: var(--amber); }
+.ms-part { color: #4da6ff; }
+.ms-why { font-size: 0.86rem; color: var(--red); }
+.ms-card > button { align-self: flex-start; margin-top: 2px; }
+.ms-prog { height: 5px; background: #1a2238; border-radius: 3px; overflow: hidden; }
+.ms-prog i { display: block; height: 100%; background: var(--k, var(--amber)); }
+
+/* star map: events */
+.gx-events { position: absolute; top: 54px; left: 10px; width: min(300px, calc(100% - 20px)); display: flex; flex-direction: column; gap: 6px; z-index: 1; }
+.gx-events > button { align-self: flex-start; }
+.gx-ev-list { display: none; flex-direction: column; gap: 5px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px; max-height: 38vh; overflow: auto; }
+.gx-events.open .gx-ev-list { display: flex; }
+.gx-ev { display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 1px; min-height: 0; padding: 5px 8px; border-left: 3px solid var(--k); }
+.gx-ev b { color: var(--k); font-family: var(--head); font-size: 0.88rem; }
+.gx-ev span { font-size: 0.84rem; }
+.gx-ev small { color: var(--dim); font-weight: 500; font-size: 0.78rem; }
+.gx-ev-soon { font-size: 0.8rem; padding: 0 4px; }
+.gx-event { border-left: 3px solid var(--k); padding: 3px 0 3px 8px; margin: 4px 0; display: flex; flex-direction: column; }
+.gx-event b { color: var(--k); }
+.gx-event span { color: var(--dim); font-size: 0.88rem; }

@@ -6,9 +6,11 @@
 
 import { BLOCKS } from '../data/blocks.js';
 import { LEGEND } from '../data/hulls.js';
-import { RARITY_BY_ID } from '../data/types.js';
+import { partStat } from './partstats.js';
 
-export const CELL = 10;               // world units per cell
+export const CELL = 10;
+/** Block ids that changed name (old saves). */
+export const RENAMED = { ore_silicate: 'rock', ore_ice: 'ore_carbon', ore_cuprite: 'ore_cobalt' };               // world units per cell
 
 export function createGrid(w, h) {
   return { w, h, cells: new Int32Array(w * h), blocks: [], version: 0 };
@@ -31,8 +33,7 @@ export function canPlace(g, def, x, y) {
 export function place(g, id, x, y, rot = 0, item = null) {
   const def = BLOCKS[id];
   if (!def || !canPlace(g, def, x, y)) return null;
-  const bonus = item?.rarity ? (RARITY_BY_ID[item.rarity]?.bonus || 0) : 0;
-  const maxHp = Math.round(def.hp * (1 + (item?.mods?.hp || 0) + bonus * 0.5));
+  const maxHp = partStat(def, item, 'hp');
   const b = { id, def, x, y, rot: def.rot ? rot & 7 : 0, hp: maxHp, maxHp, item, alive: true, idx: g.blocks.length };
   g.blocks.push(b);
   const n = def.size || 1;
@@ -131,13 +132,16 @@ export function gridFromRows(rows, legend = LEGEND, pad = 0) {
 
 /** Serialise / restore (saves, designs). */
 export function gridToJSON(g) {
-  return { w: g.w, h: g.h, b: g.blocks.map(b => [b.id, b.x, b.y, b.rot, b.alive ? Math.round(b.hp) : 0, b.item || 0]) };
+  // 7th field: 1 = this weapon fires on its own (needs a targeting slot, sim/ship.js autoSlots)
+  return { w: g.w, h: g.h, b: g.blocks.map(b => [b.id, b.x, b.y, b.rot, b.alive ? Math.round(b.hp) : 0, b.item || 0, b.auto == null ? null : b.auto ? 1 : 0]) };
 }
 export function gridFromJSON(j) {
   const g = createGrid(j.w, j.h);
-  for (const [id, x, y, rot, hp, item] of j.b) {
+  for (const [id0, x, y, rot, hp, item, auto] of j.b) {
+    const id = RENAMED[id0] || id0;
     if (!BLOCKS[id]) continue;
     const b = place(g, id, x, y, rot, item || null);
+    if (b && auto != null) b.auto = !!auto;
     if (b && hp <= 0) killBlock(g, b); else if (b) b.hp = Math.min(b.maxHp, hp);
   }
   return g;

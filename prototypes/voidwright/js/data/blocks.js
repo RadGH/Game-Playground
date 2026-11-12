@@ -36,29 +36,33 @@ function structure(id, base) {
 }
 
 // ------------------------------------------------------------- frames and armour (built from materials)
-structure('frame', { name: 'Hull frame', cat: 'frame', hp: 40, mass: 1, armor: 'frame', cost: { cr: 2, mats: { ferrite: 2 } }, blurb: 'Cheap, light structure. Connects everything.' });
+structure('frame', { name: 'Hull frame', cat: 'frame', hp: 40, mass: 1, armor: 'frame', cost: { cr: 2, mats: { rock: 3, ferrite: 1 } }, blurb: 'Cheap, light structure built mostly from rock. Connects everything.' });
 structure('steel', { name: 'Steel armour', cat: 'armor', hp: 80, mass: 2.4, armor: 'steel', cost: { cr: 6, mats: { ferrite: 5 } }, blurb: 'Great against bullets and shells. Plasma melts it.' });
-structure('ceramic', { name: 'Ceramic armour', cat: 'armor', hp: 60, mass: 1.6, armor: 'ceramic', cost: { cr: 8, mats: { silicate: 5 } }, blurb: 'Shrugs off lasers and plasma. Cracks under shells.' });
+structure('ceramic', { name: 'Ceramic armour', cat: 'armor', hp: 60, mass: 1.6, armor: 'ceramic', cost: { cr: 8, mats: { rock: 3, carbon: 2 } }, blurb: 'Shrugs off lasers and plasma. Cracks under shells.' });
 structure('reactive', { name: 'Reactive armour', cat: 'armor', hp: 70, mass: 2.2, armor: 'reactive', tier: 2, cost: { cr: 14, mats: { ferrite: 3, carbon: 3 } }, blurb: 'Blows outward when hit. Halves explosions.' });
-structure('ablative', { name: 'Ablative armour', cat: 'armor', hp: 55, mass: 1.2, armor: 'ablative', tier: 2, cost: { cr: 12, mats: { carbon: 4, silicate: 2 } }, blurb: 'Boils away under lasers instead of the hull.' });
-structure('insulated', { name: 'Insulated armour', cat: 'armor', hp: 60, mass: 1.5, armor: 'insulated', tier: 2, cost: { cr: 14, mats: { cuprite: 3, carbon: 2 } }, blurb: 'Grounds lightning. Barely scratched by arcs.' });
+structure('ablative', { name: 'Ablative armour', cat: 'armor', hp: 55, mass: 1.2, armor: 'ablative', tier: 2, cost: { cr: 12, mats: { carbon: 4, rock: 2 } }, blurb: 'Boils away under lasers instead of the hull.' });
+structure('insulated', { name: 'Insulated armour', cat: 'armor', hp: 60, mass: 1.5, armor: 'insulated', tier: 2, cost: { cr: 14, mats: { cobalt: 2, carbon: 2 } }, blurb: 'Grounds lightning. Barely scratched by arcs.' });
 structure('titanium', { name: 'Titanium armour', cat: 'armor', hp: 120, mass: 1.8, armor: 'titanium', tier: 3, cost: { cr: 30, mats: { titanium: 4 } }, blurb: 'Good against everything. Not cheap.' });
-structure('iridium', { name: 'Iridium armour', cat: 'armor', hp: 220, mass: 4.5, armor: 'iridium', tier: 4, cost: { cr: 70, mats: { iridium: 4, ferrite: 4 } }, blurb: 'Capital-grade plate. Light guns do almost nothing.' });
-structure('neutronium', { name: 'Neutronium armour', cat: 'armor', hp: 420, mass: 9, armor: 'neutronium', tier: 6, cost: { cr: 200, mats: { neutronium: 2, iridium: 2 } }, blurb: 'The heaviest thing that flies.' });
-structure('chitin', { name: 'Grown chitin', cat: 'armor', hp: 90, mass: 1.6, armor: 'chitin', tier: 2, cost: { cr: 20, mats: { chitin: 3 } }, regrow: 1.5, blurb: 'Alien shell that slowly heals itself.' });
-structure('lattice', { name: 'Lattice plating', cat: 'armor', hp: 75, mass: 1.4, armor: 'lattice', tier: 2, cost: { cr: 22, mats: { nanite: 2, ferrite: 2 } }, regrow: 0.8, blurb: 'Machine alloy that grounds lightning and knits back together.' });
-structure('prism', { name: 'Prism plating', cat: 'armor', hp: 60, mass: 1.0, armor: 'prism', tier: 3, cost: { cr: 30, mats: { lumen: 2, silicate: 2 } }, blurb: 'Crystal that scatters almost any laser.' });
-structure('basalt', { name: 'Forge basalt', cat: 'armor', hp: 160, mass: 4, armor: 'basalt', tier: 3, cost: { cr: 30, mats: { basaltcore: 2, ferrite: 3 } }, blurb: 'Kharr heat-stone. Heavy and stubborn.' });
-structure('cargo', { name: 'Cargo bay', cat: 'cargo', hp: 40, mass: 1, armor: 'frame', cargo: 25, cost: { cr: 10, mats: { ferrite: 3 } }, blurb: 'Holds 25 units of ore or goods.' });
-structure('quarters', { name: 'Crew quarters', cat: 'crew', hp: 40, mass: 1.2, armor: 'frame', crewCap: 4, cost: { cr: 20, mats: { ferrite: 2, carbon: 2 } }, blurb: 'Bunks for 4 crew.' });
+structure('iridium', { name: 'Iridium armour', cat: 'armor', hp: 220, mass: 4.5, armor: 'iridium', tier: 4, cost: { cr: 70, mats: { iridium: 4, titanium: 2 } }, blurb: 'Capital-grade plate. Light guns do almost nothing.' });
+structure('neutronium', { name: 'Neutronium armour', cat: 'armor', hp: 420, mass: 9, armor: 'neutronium', tier: 6, cost: { cr: 200, mats: { neutronium: 2, osmium: 2 } }, blurb: 'The heaviest thing that flies.' });
+structure('chitin', { name: 'Grown chitin', cat: 'armor', hp: 90, mass: 1.6, armor: 'chitin', tier: 2, cost: { cr: 20, mats: { titanium: 3, cobalt: 1 } }, regrow: 1.5, blurb: 'Alien shell that slowly heals itself.' });
+structure('lattice', { name: 'Lattice plating', cat: 'armor', hp: 75, mass: 1.4, armor: 'lattice', tier: 2, cost: { cr: 22, mats: { cobalt: 2, titanium: 2 } }, regrow: 0.8, blurb: 'Machine alloy that grounds lightning and knits back together.' });
+structure('prism', { name: 'Prism plating', cat: 'armor', hp: 60, mass: 1.0, armor: 'prism', tier: 3, cost: { cr: 30, mats: { diamond: 1, titanium: 2 } }, blurb: 'Crystal that scatters almost any laser.' });
+structure('basalt', { name: 'Forge basalt', cat: 'armor', hp: 160, mass: 4, armor: 'basalt', tier: 3, cost: { cr: 30, mats: { iridium: 2, titanium: 3 } }, blurb: 'Kharr heat-stone. Heavy and stubborn.' });
+structure('cargo', { name: 'Cargo bay', cat: 'cargo', hp: 40, mass: 1, armor: 'frame', cargo: 40, cost: { cr: 6, mats: { rock: 3, ferrite: 1 } }, blurb: 'Holds 40 units of ore or goods. Built from rock you mine.' });
+structure('quarters', { name: 'Crew quarters', cat: 'crew', hp: 40, mass: 1.2, armor: 'frame', crewCap: 4, cost: { cr: 20, mats: { rock: 2, ferrite: 2, carbon: 1 } }, blurb: 'Room for 4 more crew.' });
+// play-test #25: "easier to use mined materials … to increase CPU" — CPU you build straight from ore
+structure('cpu_rack', { name: 'Logic rack', cat: 'cpu', hp: 30, mass: 0.6, armor: 'frame', cpuCap: 2, power: -1, cost: { cr: 10, mats: { quartz: 2, ferrite: 1 } }, blurb: '+2 CPU. Built from quartz as you place it.' });
 
 // ------------------------------------------------------------- modules (items in your parts hold)
 const mod = (id, def) => add(id, { module: true, ...def });
 
 // cores: losing the core loses the ship
-mod('bridge', { name: 'Bridge', cat: 'core', hp: 120, mass: 2, armor: 'steel', core: true, power: 4, cpuCap: 6, crewCap: 2, repair: 1.5, cost: { cr: 200 }, blurb: 'The heart of a small ship. Lose it and the ship is lost. Its crew patch the hull out of combat.' });
-mod('command_deck', { name: 'Command Deck', cat: 'core', size: 2, tier: 3, hp: 700, mass: 8, armor: 'titanium', core: true, power: 20, cpuCap: 30, crewCap: 10, repair: 10, cost: { cr: 6000 }, blurb: 'A frigate-class bridge.' });
-mod('flag_bridge', { name: 'Flag Bridge', cat: 'core', size: 4, tier: 5, hp: 4200, mass: 40, armor: 'iridium', core: true, power: 120, cpuCap: 160, crewCap: 40, repair: 60, cost: { cr: 90000 }, blurb: 'The command centre of a capital ship.' });
+mod('bridge', { name: 'Bridge', cat: 'core', hp: 120, mass: 2, armor: 'steel', core: true, power: 4, cpuCap: 6, crewCap: 2, repair: 1.5, cost: { cr: 200 }, blurb: 'The heart of a small ship. Lose it and the ship is lost. Gives 2 automatic weapon slots; its crew patch the hull out of combat.' });
+// enemy-only: the flimsy pilot pod of a gnat (play-test #24: "gnats final core block has too much hp")
+add('gnat_core', { name: 'Gnat pod', cat: 'core', hp: 30, mass: 0.8, armor: 'frame', core: true, power: 3, cpuCap: 3, crewCap: 1, enemyOnly: true, blurb: '' });
+mod('command_deck', { name: 'Command Deck', cat: 'core', size: 2, tier: 3, hp: 700, mass: 8, armor: 'titanium', core: true, power: 20, cpuCap: 30, crewCap: 10, repair: 10, cost: { cr: 6000 }, blurb: 'A frigate-class bridge. Gives 4 automatic weapon slots.' });
+mod('flag_bridge', { name: 'Flag Bridge', cat: 'core', size: 4, tier: 5, hp: 4200, mass: 40, armor: 'iridium', core: true, power: 120, cpuCap: 160, crewCap: 40, repair: 60, cost: { cr: 90000 }, blurb: 'The command centre of a capital ship. Gives 10 automatic weapon slots.' });
 
 // power
 mod('battery', { name: 'Fuel cell', cat: 'power', hp: 30, mass: 0.8, power: 6, cost: { cr: 120 }, explode: 20, blurb: '+6 power.' });
@@ -87,14 +91,24 @@ mod('shield_arc_2', { name: 'Bulwark projector', cat: 'shield', size: 2, tier: 3
 mod('shield_bubble_4', { name: 'Aegis lattice', cat: 'shield', size: 4, tier: 5, hp: 1600, mass: 30, power: -80, cpu: 40, crew: 6, shield: { kind: 'bubble', hp: 7000, regen: 420, delay: 5, pad: 3 }, cost: { cr: 70000 }, blurb: 'A capital shield.' });
 
 // utilities
-mod('repair_bay', { name: 'Repair drones', cat: 'utility', hp: 30, mass: 0.8, power: -2, cpu: 2, crew: 1, repair: 4, cost: { cr: 700 }, blurb: 'Rebuilds broken blocks out of combat. Uses ferrite.' });
+mod('repair_bay', { name: 'Repair rig', cat: 'utility', hp: 30, mass: 0.8, power: -2, cpu: 2, crew: 1, repair: 4, cost: { cr: 700 }, blurb: 'Rebuilds broken blocks out of combat, and patches allies near you. Uses structural ore.' });
 mod('repair_bay_2', { name: 'Repair yard', cat: 'utility', size: 2, tier: 3, hp: 220, mass: 5, power: -10, cpu: 6, crew: 3, repair: 40, cost: { cr: 7200 }, blurb: 'Fast repairs for big hulls.' });
-mod('scanner', { name: 'Scanner', cat: 'utility', hp: 25, mass: 0.5, power: -1, cpu: 1, scan: 1, cost: { cr: 300 }, blurb: 'Shows enemy armour and shields, and finds ore further away.' });
+mod('scanner', { name: 'Scanner', cat: 'utility', hp: 25, mass: 0.5, power: -1, cpu: 1, scan: 1, scanRange: 3500, cost: { cr: 300 }, blurb: 'Press Scan (V) to find asteroids by ore type within 3.5 km. Also reads enemy armour.' });
+mod('scanner_2', { name: 'Deep scanner', cat: 'utility', tier: 3, hp: 40, mass: 0.8, power: -3, cpu: 2, scan: 2, scanRange: 9000, cost: { cr: 4200 }, blurb: 'Scan (V) reaches 9 km and marks rich fields and hidden caches.' });
+mod('targeting', { name: 'Targeting computer', cat: 'cpu', hp: 25, mass: 0.4, power: -1, cpu: 1, autoSlots: 2, cost: { cr: 400 }, blurb: 'Lets 2 more weapons aim and fire on their own (set them to Auto in build mode).' });
+mod('targeting_2', { name: 'Fire-control suite', cat: 'cpu', size: 2, tier: 3, hp: 180, mass: 3, power: -5, cpu: 4, autoSlots: 6, cost: { cr: 5200 }, blurb: '6 more automatic weapons.' });
+mod('targeting_4', { name: 'Battle mind', cat: 'cpu', size: 4, tier: 5, hp: 1000, mass: 12, power: -20, cpu: 12, autoSlots: 18, cost: { cr: 52000 }, blurb: '18 more automatic weapons.' });
+mod('fabricator', { name: 'Fabricator', cat: 'utility', hp: 40, mass: 1.5, power: -2, cpu: 2, crew: 1, fab: 2, cost: { cr: 900 }, blurb: 'Craft parts from ore anywhere, out of combat (tier I-II parts).' });
+mod('fabricator_2', { name: 'Forge bay', cat: 'utility', size: 2, tier: 3, hp: 260, mass: 7, power: -10, cpu: 6, crew: 3, fab: 5, cost: { cr: 9000 }, blurb: 'Craft any part from ore, out of combat, with better odds of a fine roll.' });
+mod('hab', { name: 'Hab module', cat: 'crew', hp: 45, mass: 1.4, power: -1, crewCap: 6, cost: { cr: 260 }, blurb: 'Room for 6 crew.' });
+mod('hab_2', { name: 'Hab ring', cat: 'crew', size: 2, tier: 3, hp: 320, mass: 6, power: -4, crewCap: 30, cost: { cr: 3800 }, blurb: 'Room for 30 crew.' });
+mod('cargo_pod', { name: 'Cargo pod', cat: 'cargo', hp: 50, mass: 1.2, cargo: 70, cost: { cr: 220 }, blurb: 'Holds 70 units.' });
+mod('cargo_pod_2', { name: 'Bulk hold', cat: 'cargo', size: 2, tier: 3, hp: 300, mass: 5, cargo: 400, cost: { cr: 3000 }, blurb: 'Holds 400 units.' });
 mod('jump_drive', { name: 'Jump drive', cat: 'utility', hp: 40, mass: 1.2, power: -2, cpu: 1, jump: 2, cost: { cr: 900 }, blurb: 'Jump to star systems up to 2 links away.' });
 mod('loot_magnet', { name: 'Salvage magnet', cat: 'utility', hp: 25, mass: 0.6, power: -1, cpu: 1, magnet: 220, cost: { cr: 350 }, blurb: 'Pulls loot and ore in from further away.' });
 mod('cloak', { name: 'Cloak field', cat: 'utility', tier: 4, hp: 40, mass: 1.5, power: -12, cpu: 6, crew: 1, cloak: 6, cost: { cr: 9000 }, blurb: 'Vanish from enemy sensors for 6 seconds (Utility button).' });
-mod('drone_bay', { name: 'Drone bay', cat: 'drone', tier: 1, hp: 60, mass: 1.5, power: -3, cpu: 3, crew: 1, drones: 2, cost: { cr: 1200 }, blurb: 'Launches 2 drones that fly ahead of you.' });
-mod('drone_bay_2', { name: 'Hangar', cat: 'drone', size: 2, tier: 3, hp: 400, mass: 8, power: -12, cpu: 12, crew: 4, drones: 4, cost: { cr: 9000 }, blurb: 'Carries 4 drones.' });
+mod('drone_bay', { name: 'Drone port', cat: 'drone', tier: 1, hp: 60, mass: 1.5, power: -3, cpu: 3, crew: 1, drones: 2, cost: { cr: 1200 }, blurb: 'Carries 2 drones. Fit drones to it in build mode (Drones tab).' });
+mod('drone_bay_2', { name: 'Drone hangar', cat: 'drone', size: 2, tier: 3, hp: 400, mass: 8, power: -12, cpu: 12, crew: 4, drones: 4, cost: { cr: 9000 }, blurb: 'Carries 4 drones.' });
 mod('drone_bay_4', { name: 'Carrier deck', cat: 'drone', size: 4, tier: 5, hp: 2400, mass: 36, power: -40, cpu: 40, crew: 12, drones: 10, cost: { cr: 80000 }, blurb: 'A whole air wing: 10 drones.' });
 
 // weapon blocks: one per weapon
@@ -103,7 +117,7 @@ for (const w of Object.values(ALL_WEAPONS)) {
   const n2 = size * size;
   const cpu = Math.max(1, Math.round((w.mode === 'tool' ? 1 : 2) * n2 * (w.tier >= 3 ? 1.5 : 1)));
   mod(w.id, {
-    name: w.name, cat: 'weapon', size, tier: w.tier, weapon: w.id, rot: true, race: w.race,
+    name: w.name, cat: 'weapon', size, tier: w.tier, weapon: w.id, rot: true, race: w.race, autoOnly: !!w.autoOnly,
     hp: Math.round(45 * n2 * (size > 1 ? 1.3 : 1)), mass: +(1.2 * n2).toFixed(2), armor: 'steel',
     power: -Math.max(1, Math.round((w.dmg * (w.rate || 1) * (w.count || 1)) / 14 * (w.mode === 'beam' ? 1.6 : 1))),
     cpu, crew: size >= 2 ? size : (w.mode === 'tool' ? 0 : 0),
@@ -117,7 +131,7 @@ export const BLOCK_IDS = Object.keys(B);
 
 export const CATEGORIES = {
   frame: 'Hull', armor: 'Armour', core: 'Bridge', power: 'Power', engine: 'Engines', gyro: 'Gyros',
-  cpu: 'CPU', crew: 'Crew', cargo: 'Cargo', shield: 'Shields', weapon: 'Weapons', utility: 'Utility', drone: 'Drones',
+  cpu: 'Computing', crew: 'Crew', cargo: 'Cargo', shield: 'Shields', weapon: 'Weapons', utility: 'Utility', drone: 'Drones',
 };
 
 // ------------------------------------------------------------- asteroid and planet-crust cells (never placeable)
@@ -125,6 +139,6 @@ export const CATEGORIES = {
 import { MATERIALS } from './types.js';
 B.rock = { id: 'rock', name: 'Rock', cat: 'rock', size: 1, tier: 1, hp: 26, mass: 2, armor: 'rock', power: 0, cpu: 0, crew: 0, nature: true, ore: null, color: '#5d544c' };
 for (const [mid, m] of Object.entries(MATERIALS)) {
-  if (m.alien && mid !== 'relic') continue;
-  B['ore_' + mid] = { id: 'ore_' + mid, name: m.name + ' ore', cat: 'rock', size: 1, tier: m.tier, hp: 30 + m.tier * 22, mass: 2.4, armor: 'rock', power: 0, cpu: 0, crew: 0, nature: true, ore: mid, color: m.color };
+  if (mid === 'rock') continue;
+  B['ore_' + mid] = { id: 'ore_' + mid, name: m.name + ' ore', cat: 'rock', size: 1, tier: m.tier, hp: 30 + m.tier * 30 + (m.role === 'exotic' ? 30 : 0), mass: 2.4, armor: 'rock', power: 0, cpu: 0, crew: 0, nature: true, ore: mid, color: m.color };
 }

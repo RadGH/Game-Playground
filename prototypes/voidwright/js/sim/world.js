@@ -8,10 +8,12 @@ import { recompute, toWorld, toLocal, blockAtWorld, rayHit, damageBlock, splitOf
 import { ALL_WEAPONS } from '../data/weapons.js';
 import { FACTIONS } from '../data/factions.js';
 import { DRONES } from '../data/drones.js';
-import { RARITY_BY_ID, MATERIALS } from '../data/types.js';
+import { RARITY_BY_ID, MATERIALS, matTier, matOf } from '../data/types.js';
+import { weaponStat } from './partstats.js';
 import { rng, clamp, angDiff, turnToward, TAU } from '../core/math.js';
 import { rollLoot } from './loot.js';
 import { researchLootBonus } from './research.js';
+import { makeDroneItem } from './state.js';
 import { think } from './ai.js';
 
 const HASH = 400;
@@ -79,14 +81,16 @@ export function fly(s, inp, dt) {
   let mx = inp.mx || 0, my = inp.my || 0; const ml = Math.hypot(mx, my); if (ml > 1) { mx /= ml; my /= ml; }
   const boosting = inp.boost && (s.boostFuel ?? 1) > 0.05;
   const od = st.overdrive || 0; // "of Overdrive" engines: boost goes faster and lasts longer
-  const boostMul = boosting ? 1.55 + st.boost * 0.3 + od * 0.25 : 1;
+  // 2026-11-12 (report #36, "boosters don't do much"): +10% on the boost, and boosting no longer switches cruise off —
+  // out of combat it used to drop you from cruise (x2.4) to boost (x1.55), so pressing boost made you SLOWER.
+  const boostMul = boosting ? (1.55 + st.boost * 0.3 + od * 0.25) * 1.1 : 1;
   if (boosting) s.boostFuel = Math.max(0, (s.boostFuel ?? 1) - dt * 0.35 / (1 + od * 0.5)); else s.boostFuel = Math.min(1, (s.boostFuel ?? 1) + dt * 0.18);
   s.boosting = boosting;
   // cruise: out of combat the engines open up so the (big) systems can be crossed (main.js sets inp.cruise)
-  const cruise = inp.cruise && !boosting ? 2.4 : 1;
+  const cruise = inp.cruise ? 2.4 : 1;
   const vmax = st.maxSpeed * st.efficiency ** 0.5 * empSlow * boostMul * cruise * (s.slow > 0 ? 0.5 : 1);
   const dvx = mx * vmax - s.vx, dvy = my * vmax - s.vy; const dl = Math.hypot(dvx, dvy);
-  const acc = st.accel * empSlow * (boosting ? 1.6 : cruise > 1 ? 1.8 : 1) * dt;
+  const acc = st.accel * empSlow * (boosting ? (cruise > 1 ? 2.4 : 1.6) : cruise > 1 ? 1.8 : 1) * dt;
   if (dl > 0) { const k = Math.min(1, acc / dl); s.vx += dvx * k; s.vy += dvy * k; }
   s.thrusting = ml > 0.1;
   // nose follows travel; a stopped ship keeps its heading
@@ -268,8 +272,10 @@ export function hitBlock(w, s, b, dmg, type, size, src, opts = {}) {
   if (killed) {
     const n = b.def.size || 1; const [x, y] = toWorld(s, b.x + n / 2, b.y + n / 2);
     emit(w, { t: 'blockdie', x, y, size: n, color: b.def.color || FACTIONS[s.faction]?.style.hull || '#888', kind: s.kind, ore: b.def.ore, vx: s.vx, vy: s.vy });
-    if (b.def.ore || (s.kind === 'rock' && w.r() < 0.3) || (s.kind === 'wreck' && w.r() < 0.25)) dropOre(w, s, b, x, y, opts.mining);
-    if (b.def.explode) splash(w, x, y, b.def.explode * 0.6 + 20 * n, b.def.explode, 'explosive', 'l', null, { noTeam: true });
+    if (b.def.ore || (s.kind === 'rock' && w.r() < (opts.mining ? 0.35 : 0.15)) || (s.kind === 'wreck' && w.r() < 0.25)) dropOre(w, s, b, x, y, opts.mining);
+    // play-test #34: a small, forgiving chance to lose a crew member when a part with people in it is destroyed
+    if (s === w.player && (b.def.crew || b.def.crewCap) && s.crew > 1 && w.r() < 0.25) { s.crew--; w.notes.push({ t: 'crewlost', n: 1 }); }
+    if (b.def.explode && !b.item?.mods?.sun) splash(w, x, y, b.def.explode * 0.6 + 20 * n, b.def.explode, 'explosive', 'l', null, { noTeam: true });
     s.dirty = true;
     if (b.def.core && s.kind === 'ship') s.coreLost = true;
   } else if (dealt > 0 && w.r() < 0.4) {
@@ -282,8 +288,13 @@ export function hitBlock(w, s, b, dmg, type, size, src, opts = {}) {
 
 function dropOre(w, s, b, x, y, mining) {
   let mat = b.def.ore;
-  if (!mat) mat = s.kind === 'wreck' ? (w.r() < 0.6 ? 'ferrite' : 'carbon') : (w.r() < 0.6 ? 'ferrite' : 'silicate');
-  const n = Math.max(1, Math.round((b.def.ore ? 2 + w.r() * 3 : 1) * (mining ? 1 : 0.6)));
+  const t = matTier(s.fromTier || s.tier || w.tier || 1);
+  // plain rock cells give Rock (the filler for frames and cargo bays) — unless you switched it off in the hold
+  if (!mat) {
+    if (s.kind === 'wreck') mat = w.r() < 0.65 ? matOf('structural', t) : matOf('energy', t);
+    else { if (w.game?.settings?.noRock) return; mat = 'rock'; }
+  }
+  const n = Math.max(1, Math.round((b.def.ore ? 2 + w.r() * 3 : 1) * (mining ? 1 : 0.6) * (mining && b.def.ore && mining.motherlode ? 2 : 1)));
   spawnPickup(w, { kind: 'mat', mat, n, ore: s.kind === 'rock' }, x, y, s.vx, s.vy, 30);
 }
 
@@ -336,12 +347,9 @@ export function splash(w, x, y, R, dmg, type, size, src, opts = {}) {
 
 // ------------------------------------------------------------------ turrets
 const wStat = (t, key, s) => {
-  const w = t.w, it = t.b.item; const rb = it?.rarity ? (RARITY_BY_ID[it.rarity]?.bonus || 0) : 0;
-  const m = it?.mods || {};
-  if (key === 'dmg') return w.dmg * (1 + rb + (m.dmg || 0)) * (s?.dmgMul ?? 1);
-  if (key === 'rate') return (w.rate || 0) * (1 + (m.rate || 0) + rb * 0.3);
-  if (key === 'range') return w.range * (1 + (m.range || 0) + rb * 0.15);
-  if (key === 'turn') return (w.turn || 3) * (1 + (m.turn || 0));
+  const w = t.w, it = t.b.item;
+  if (key === 'dmg') return weaponStat(w, it, 'dmg') * (s?.dmgMul ?? 1);
+  if (key === 'rate' || key === 'range' || key === 'turn') return weaponStat(w, it, key);
   return w[key];
 };
 
@@ -403,7 +411,10 @@ function turrets(w, s, dt) {
     let wantWorld = null, fire = false, tgt = null;
     const isPlayer = s.team === 'player' && s === w.player;
     const mode = W.mode;
-    if (mode === 'auto' || mode === 'pd' || (!isPlayer && (mode === 'manual' || mode === 'beam' || mode === 'lock' || mode === 'tool'))) {
+    // the player chooses (owner #26): every gun fires by hand at your aim unless it holds a targeting slot
+    // (t.autoOn, ship.js) or is an always-automatic sentry / point-defence weapon
+    const autoAim = isPlayer ? (t.autoOn && mode !== 'tool') : (mode === 'auto' || mode === 'pd' || mode === 'manual' || mode === 'beam' || mode === 'lock' || mode === 'tool');
+    if (autoAim) {
       // automatic aim: hostile turrets use the AI's chosen target when it is in reach
       t.retarget = (t.retarget || 0) - dt;
       if (t.retarget <= 0 || !t.target || (t.target.body && t.target.body.dead) || (t.target.drone && t.target.drone.dead) || (t.target.shot && t.target.shot.dead)) {
@@ -415,10 +426,11 @@ function turrets(w, s, dt) {
         const d = Math.hypot(tp[0] - pos[0], tp[1] - pos[1]); const sp = W.speed || 1e9;
         const lead = d / sp; const lx = tp[0] + (tp[2] - s.vx) * lead, ly = tp[1] + (tp[3] - s.vy) * lead;
         wantWorld = Math.atan2(ly - pos[1], lx - pos[0]); tgt = t.target;
-        fire = mode === 'lock' ? (inp.missile !== false && d < range) : d < range + (tp[4]?.r || 0) * 0.7;
+        fire = mode === 'lock' ? (isPlayer || inp.missile !== false) && d < range : d < range + (tp[4]?.r || 0) * 0.7;
         if (!isPlayer && mode !== 'auto' && mode !== 'pd') fire = fire && (inp.fire || inp.missile);
+        if (isPlayer && W.tool === 'mine') fire = false;
       }
-    } else if (mode === 'manual' || mode === 'beam' || mode === 'tool') {
+    } else if (mode === 'manual' || mode === 'beam' || mode === 'tool' || mode === 'auto' || mode === 'pd') {
       wantWorld = Math.atan2(inp.ay - pos[1], inp.ax - pos[0]);
       fire = !!inp.fire;
     } else if (mode === 'fixed') {
@@ -431,7 +443,7 @@ function turrets(w, s, dt) {
     if (mode === 'fixed' && W.rear) wantWorld = arcC;
     // during the undock grace your automatic guns hold fire (so the grace is not thrown away by a turret);
     // firing a weapon yourself ends it
-    if (isPlayer && s.grace > w.t && (mode === 'auto' || mode === 'pd')) fire = false;
+    if (isPlayer && s.grace > w.t && autoAim) fire = false;
     if (wantWorld != null) {
       const local = clampArc(t, wantWorld - s.a);
       t.aim = turnToward(t.aim, local, wStat(t, 'turn') * dt);
@@ -478,12 +490,14 @@ function mineTarget(w, s, pos, range, arcC, arcH) {
 /** One shot (or one volley of `count`). */
 function shoot(w, s, t, pos, ang, tgt, volley) {
   const W = t.w; const it = t.b.item; const mods = it?.mods || {};
+  // how grand the shot LOOKS (report #40): weapon tier above 1 plus the part's rarity step; rc = the rarity colour
+  const RR = RARITY_BY_ID[it?.rarity]; const vis = Math.max(0, (W.tier || 1) - 1) + (RR?.index || 0); const rc = RR && RR.index >= 3 ? RR.color : null;
   const dmg = wStat(t, 'dmg', s); const range = wStat(t, 'range');
   const n = (volley ? 1 : W.count || 1) + (mods.twin ? 1 : 0);
   const muzzle = (t.n * CELL) * 0.55;
   const mx = pos[0] + Math.cos(ang) * muzzle, my = pos[1] + Math.sin(ang) * muzzle;
   t.kick = Math.min(1, t.kick + (W.recoil || 0.2) * 2);
-  emit(w, { t: 'fire', w: W.id, x: mx, y: my, a: ang, color: W.color, team: s.team, owner: s.id, n: t.n });
+  emit(w, { t: 'fire', w: W.id, x: mx, y: my, a: ang, color: W.color, team: s.team, owner: s.id, n: t.n, vis, rc });
   if (s.kind === 'ship' && W.recoil > 0.5) { s.vx -= Math.cos(ang) * W.recoil * 8 / Math.sqrt(s.stats.mass); s.vy -= Math.sin(ang) * W.recoil * 8 / Math.sqrt(s.stats.mass); }
   const opt = { burn: W.burn || (mods.burn ? 4 : 0), emp: W.emp, shieldMult: W.shieldMult || 1 };
   if (W.proj === 'arc') { arcStrike(w, s, mx, my, ang, range, dmg, W, tgt, mods); return; }
@@ -496,7 +510,7 @@ function shoot(w, s, t, pos, ang, tgt, volley) {
       w: W, dmg, team: s.team, owner: s, life: range / sp * (W.proj === 'mine' ? 40 : 1.15), age: 0,
       pierce: (W.pierce || 0) + (mods.pierce ? 2 : 0), splash: (W.splash || 0) * (mods.splash ? 1.6 : 1), opt, color: W.color, kind: W.proj,
       target: tgt?.body || (tgt?.drone ? null : null), homing: W.homing || 0, hp: (W.proj === 'missile' || W.proj === 'torpedo' || W.proj === 'rocket') ? (W.proj === 'torpedo' ? 60 : 4) : 0,
-      leech: !!mods.leech, size: W.size,
+      leech: !!mods.leech, size: W.size, vis, rc,
     };
     if (W.proj === 'mine') { p.vx = s.vx * 0.2 - Math.cos(s.a) * 40; p.vy = s.vy * 0.2 - Math.sin(s.a) * 40; p.armed = 0.8; }
     if (W.proj === 'missile' || W.proj === 'torpedo') p.launch = 0.25;
@@ -585,9 +599,10 @@ function beam(w, s, t, pos, ang, range, dt, tgt) {
     if (hit && hit.t * hitT < hitT) { hitT = hit.t * hitT; hitBodyRef = o; hitShield = false; }
   }
   const hx = x + (ex - x) * hitT, hy = y + (ey - y) * hitT;
-  const it = t.b.item; const rb = it?.rarity ? RARITY_BY_ID[it.rarity]?.bonus || 0 : 0;
-  const dps = W.dmg * (1 + rb + (it?.mods?.dmg || 0)) * t.beamOn * s.stats.efficiency * (s.dmgMul ?? 1) * (s.fireMul ?? 1);
-  w.beams.push({ x, y, x2: hx, y2: hy, color: W.color, width: (W.size === 'l' ? 7 : W.size === 'm' ? 4 : 2.5) * t.beamOn * (t.n > 1 ? 1.6 : 1), hit: !!hitBodyRef, tool: W.tool || null, shield: hitShield, owner: s.id });
+  const it = t.b.item;
+  const dps = weaponStat(W, it, 'dmg') * t.beamOn * s.stats.efficiency * (s.dmgMul ?? 1) * (s.fireMul ?? 1);
+  const BR = RARITY_BY_ID[it?.rarity]; const vis = Math.max(0, (W.tier || 1) - 1) + (BR?.index || 0);   // looks (report #40)
+  w.beams.push({ x, y, x2: hx, y2: hy, color: W.color, width: (W.size === 'l' ? 7 : W.size === 'm' ? 4 : 2.5) * t.beamOn * (t.n > 1 ? 1.6 : 1), hit: !!hitBodyRef, tool: W.tool || null, shield: hitShield, owner: s.id, vis, rc: BR && BR.index >= 3 ? BR.color : null, tid: t.b.idx ?? 0 });
   if (hitBodyRef) {
     t.beamHeat = (t.beamHeat || 0) + dt;
     const isRock = hitBodyRef.kind === 'rock' || hitBodyRef.kind === 'wreck';
@@ -597,7 +612,7 @@ function beam(w, s, t, pos, ang, range, dt, tgt) {
     if (hitShield) { const sh = shieldAt(hitBodyRef, hx, hy); if (sh) absorb(w, hitBodyRef, sh, d, W.type, hx, hy, 1, s); }
     else {
       const b = blockAtWorld(hitBodyRef, hx + Math.cos(ang) * 2, hy + Math.sin(ang) * 2) || blockAtWorld(hitBodyRef, hx, hy);
-      if (b) hitBlock(w, hitBodyRef, b, d, W.type, 'm', s, { mining: W.tool === 'mine' });
+      if (b) hitBlock(w, hitBodyRef, b, d, W.type, 'm', s, { mining: W.tool === 'mine' ? (it?.mods?.motherlode ? { motherlode: true } : true) : false });
       if (W.burn) { hitBodyRef.burn = Math.max(hitBodyRef.burn, 1); hitBodyRef.burnDps = Math.max(hitBodyRef.burnDps || 0, W.burn); }
       if (W.emp) hitBodyRef.emp = Math.max(hitBodyRef.emp, W.emp * dt * 2);
     }
@@ -722,8 +737,7 @@ function upkeep(w, s, dt) {
   s.emp = Math.max(0, s.emp - dt); s.cloak = Math.max(0, s.cloak - dt); s.slow = Math.max(0, (s.slow || 0) - dt);
   for (const sh of s.shields) {
     if (!sh.b.alive) { sh.cur = 0; continue; }
-    const bonus = sh.b.item?.mods?.bulwark ? 2 : 1;
-    if (w.t - s.lastHit > sh.delay && !w.storm) sh.cur = Math.min(sh.max, sh.cur + sh.regen * bonus * dt * st.efficiency);
+    if (w.t - s.lastHit > sh.delay && !w.storm && !s.ionized) sh.cur = Math.min(sh.max, sh.cur + sh.regen * dt * st.efficiency);   // s.ionized: inside an ion cloud (encounters.js)
   }
   if (s.burn > 0) {
     s.burn -= dt; s.burnTick = (s.burnTick || 0) - dt;
@@ -741,6 +755,18 @@ function upkeep(w, s, dt) {
   if (s.leechBank > 1) { healSome(w, s, s.leechBank); s.leechBank = 0; }
   // out-of-combat repair (PLAN: broken blocks repaired out of combat)
   if (s.kind === 'ship' && st.repair > 0 && w.t - s.lastHit > 6 && w.t - (s.lastFire || -99) > 3) repair(w, s, st.repair * dt * 8);
+  // Repair rigs (repair_bay blocks, not the bridge's own crew) also patch allied ships within 600 out of combat:
+  // your mercenary wingmen, or you from a wingman's rig (play-test #29). Free — the rig's owner pays no ore.
+  if (s.kind === 'ship' && s.team === 'player' && w.t - s.lastHit > 6 && w.t - (w.combatT ?? -99) > 6) {
+    if ((s.rigT = (s.rigT || 0) - dt) <= 0) {
+      s.rigT = 1; s.rig = 0;
+      for (const b of s.grid.blocks) if (b.alive && b.def.repair && !b.def.core) s.rig += b.def.repair;
+      if (s.rig > 0) for (const o of near(w, s.x, s.y, 600 + s.r)) {
+        if (o === s || o.dead || o.kind !== 'ship' || o.team !== s.team || o.stats.hp >= o.stats.maxHp) continue;
+        repair(w, o, s.rig * 8, true);
+      }
+    }
+  }
 }
 
 function healSome(w, s, amt) {
@@ -748,6 +774,7 @@ function healSome(w, s, amt) {
 }
 
 /** Repair: top up damaged blocks, then rebuild missing ones next to living ones. Costs ferrite for rebuilds. */
+const STRUCTURAL = Object.keys(MATERIALS).filter(m => MATERIALS[m].role === 'structural');
 export function repair(w, s, amt, free = false) {
   let used = 0;
   for (const b of s.grid.blocks) {
@@ -762,10 +789,12 @@ export function repair(w, s, amt, free = false) {
     if (amt <= 0) break;
     const near = neighbours(s.grid, b); if (!near.size) continue;
     const cost = Math.max(1, Math.round(b.maxHp / 60));
-    if (!free && cargo) { if ((cargo.ferrite || 0) < cost) { s.repairStarved = true; break; } }
-    s.repairStarved = false; // the warning goes away once ferrite is back in the hold
+    // rebuilding a block takes structural ore — any tier, cheapest first
+    const ore = cargo ? STRUCTURAL.find(m => (cargo[m] || 0) >= cost) : null;
+    if (!free && cargo && !ore) { s.repairStarved = true; break; }
+    s.repairStarved = false; // the warning goes away once ore is back in the hold
     if (reviveBlock(s.grid, b, Math.min(b.maxHp, amt))) {
-      if (!free && cargo) cargo.ferrite -= cost;
+      if (!free && cargo) cargo[ore] -= cost;
       amt -= b.maxHp * 0.5; used += b.maxHp;
       const n = b.def.size || 1; const [x, y] = toWorld(s, b.x + n / 2, b.y + n / 2);
       emit(w, { t: 'rebuilt', x, y });
@@ -810,10 +839,10 @@ export function destroy(w, s) {
     piece.life = 25 + w.r() * 25; piece.burnFx = 2 + w.r() * 3;
     w.bodies.push(piece);
   }
-  if (s === w.player) return;
+  if (s === w.player || s.wing) return;   // a mercenary wingman's ship drops no loot (it is yours)
   // loot fountain
   const r = rng((s.id * 7919) ^ Math.floor(w.t * 1000));
-  for (const l of rollLoot(r, s, (w.game ? researchLootBonus(w.game) : 0) + (w.system?.traits?.luck || 0))) {
+  for (const l of rollLoot(r, s, (w.game ? researchLootBonus(w.game) : 0) + (w.system?.traits?.luck || 0) + (w.eventLuck || 0))) {   // eventLuck: galaxy events / treasure systems (events.js via encounters.js)
     const a = r() * TAU, sp = 60 + r() * 160;
     spawnPickup(w, l, s.x + Math.cos(a) * s.r * 0.3, s.y + Math.sin(a) * s.r * 0.3, s.vx * 0.5 + Math.cos(a) * sp, s.vy * 0.5 + Math.sin(a) * sp, 0);
   }
@@ -838,7 +867,7 @@ export function repChange(w, faction, d, why) {
 export function spawnPickup(w, l, x, y, vx = 0, vy = 0, jitter = 40) {
   const a = w.r() * TAU, j = w.r() * jitter;
   w.pickups.push({ id: newId(), ...l, x, y, vx: vx + Math.cos(a) * j, vy: vy + Math.sin(a) * j, age: 0, spin: w.r() * TAU });
-  if (l.kind === 'item') emit(w, { t: 'drop', x, y, rarity: l.rarity });
+  if (l.kind === 'item' || l.kind === 'drone') emit(w, { t: 'drop', x, y, rarity: l.rarity });
 }
 
 function pickups(w, dt) {
@@ -847,7 +876,7 @@ function pickups(w, dt) {
   for (const p of w.pickups) {
     if (p.dead) continue;
     p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= Math.pow(0.4, dt); p.vy *= Math.pow(0.4, dt);
-    if (p.age > (p.kind === 'item' ? 240 : 120)) { p.dead = true; continue; }
+    if (p.age > (p.kind === 'item' || p.kind === 'cache' ? 240 : 120)) { p.dead = true; continue; }
     if (!P || P.dead || p.age < 0.6) continue;
     const dx = P.x - p.x, dy = P.y - p.y; const d = Math.hypot(dx, dy);
     if (d < magnet) {
@@ -873,8 +902,16 @@ function collect(w, p) {
       if (n > 0) { emit(w, { t: 'collect', x: p.x, y: p.y, kind: p.kind, mat: p.mat, n }); w.notes.push({ t: 'collect', kind: p.kind, mat: p.mat, n, ore: !!p.ore }); }
       return;
     } }
-  else if (p.kind === 'item') G.parts.push(p.item);
-  else if (p.kind === 'pod') { const room = Math.max(0, w.player.stats.crewCap - w.player.crew); const n = Math.min(room, p.n); w.player.crew += n; if (n) recompute(w.player); G.passengers = (G.passengers || 0) + (p.n - n); }
+  else if (p.kind === 'item') { G.parts.push(p.item); if (p.item.unique && !(G.uniques ||= []).includes(p.item.unique)) G.uniques.push(p.item.unique); }
+  else if (p.kind === 'cache') (G.caches ||= []).push({ tier: p.tier || 1 });
+  else if (p.kind === 'drone') { const d = makeDroneItem(p.drone, p.rarity); (G.droneItems ||= []).push(d); p.item = d; }
+  else if (p.kind === 'pod') {
+    // crew are just a number (owner #33): they fill empty room; with no room the pod is towed to safety
+    const room = Math.max(0, w.player.stats.crewCap - w.player.crew); const n = Math.min(room, p.n);
+    w.player.crew += n; if (n) recompute(w.player);
+    w.notes.push({ t: 'crew', n, full: p.n - n }); p.got = n;
+  }
+  else if (p.kind === 'data') G.dataCores = (G.dataCores || 0) + p.n;
   else if (p.kind === 'specimen') { (G.specimens ||= []).push({ name: p.name, faction: p.faction, value: p.value }); }
   emit(w, { t: 'collect', x: p.x, y: p.y, kind: p.kind, mat: p.mat, n: p.n, rarity: p.rarity, item: p.item });
   w.notes.push({ t: 'collect', kind: p.kind, mat: p.mat, n: p.n, ore: !!p.ore, item: p.item, rarity: p.rarity, name: p.name });
@@ -939,9 +976,11 @@ function tethers(w, dt) {
 }
 
 // ------------------------------------------------------------------ drones
-export function launchDrone(w, owner, kind, slot) {
+/** Launch a drone. `item` (a drone item from the save: { uid, kind, rarity }) lifts its health and damage by rarity. */
+export function launchDrone(w, owner, kind, slot, item = null) {
   const D = DRONES[kind]; if (!D) return null;
-  const dr = { id: newId(), kind, def: D, owner, x: owner.x, y: owner.y, vx: owner.vx, vy: owner.vy, a: owner.a, hp: D.hp, maxHp: D.hp, cd: rand(), slot, shield: D.shield || 0, team: owner.team, r: 8 };
+  const mul = 1 + (item?.rarity ? RARITY_BY_ID[item.rarity]?.bonus || 0 : 0);
+  const dr = { id: newId(), kind, def: D, owner, x: owner.x, y: owner.y, vx: owner.vx, vy: owner.vy, a: owner.a, hp: D.hp * mul, maxHp: D.hp * mul, cd: rand(), slot, shield: (D.shield || 0) * mul, team: owner.team, r: 8, mul, uid: item?.uid ?? null, rarity: item?.rarity || null };
   w.drones.push(dr);
   emit(w, { t: 'launch', x: owner.x, y: owner.y, color: D.color });
   return dr;
@@ -994,27 +1033,35 @@ function drones(w, dt) {
       dr.a = turnToward(dr.a, face, 8 * dt);
       // act
       dr.cd -= dt;
-      if (D.repairs && owner.stats) { if (w.t - (dr.healT || 0) > 0.5) { dr.healT = w.t; repair(w, owner, D.repairs * 0.5 * (w.t - owner.lastHit > 4 ? 3 : 1), true); dr.beam = owner; } continue; }
+      if (D.repairs && owner.stats) {
+        // menders patch you first, then the most damaged friendly ship near you (mercenary wingmen)
+        if (w.t - (dr.healT || 0) > 0.5) {
+          dr.healT = w.t; let tg = owner;
+          if (owner.stats.hp >= owner.stats.maxHp * 0.98) { let worst = 0.98; for (const o of near(w, owner.x, owner.y, 900)) if (!o.dead && o.kind === 'ship' && o !== owner && o.team === owner.team && o.stats.hp / o.stats.maxHp < worst) { worst = o.stats.hp / o.stats.maxHp; tg = o; } }
+          repair(w, tg, D.repairs * (dr.mul || 1) * 0.5 * (w.t - tg.lastHit > 4 ? 3 : 1), true); dr.beam = tg;
+        }
+        continue;
+      }
       if (D.interceptor) {
         let best = null, bd = (D.weapon.range) ** 2;
         for (const q of w.shots) if (q.hp && !q.dead && q.team !== dr.team) { const dd = (q.x - dr.x) ** 2 + (q.y - dr.y) ** 2; if (dd < bd) { bd = dd; best = q; } }
-        if (best && dr.cd <= 0) { dr.cd = 1 / D.weapon.rate; best.hp -= D.weapon.dmg; emit(w, { t: 'zap', x: dr.x, y: dr.y, x2: best.x, y2: best.y, color: D.color }); if (best.hp <= 0) killShot(w, best); continue; }
+        if (best && dr.cd <= 0) { dr.cd = 1 / D.weapon.rate; best.hp -= D.weapon.dmg * (dr.mul || 1); emit(w, { t: 'zap', x: dr.x, y: dr.y, x2: best.x, y2: best.y, color: D.color }); if (best.hp <= 0) killShot(w, best); continue; }
       }
       if (!T || !D.weapon) continue;
       const Wp = D.weapon; const dd = Math.hypot(T.x - dr.x, T.y - dr.y) - T.r;
       if (dd > Wp.range) continue;
       if (D.mines || Wp.proj === 'beam') {
         const hit = rayHit(T, dr.x, dr.y, T.x, T.y);
-        if (hit) { hitBlock(w, T, hit.b, Wp.dmg * dt * (D.mines ? 3 : 1), Wp.type, 's', owner, { mining: D.mines }); w.beams.push({ x: dr.x, y: dr.y, x2: hit.x, y2: hit.y, color: Wp.color, width: 1.6, hit: true, tool: D.mines ? 'mine' : null }); }
+        if (hit) { hitBlock(w, T, hit.b, Wp.dmg * (dr.mul || 1) * dt * (D.mines ? 3 : 1), Wp.type, 's', owner, { mining: D.mines }); w.beams.push({ x: dr.x, y: dr.y, x2: hit.x, y2: hit.y, color: Wp.color, width: 1.6, hit: true, tool: D.mines ? 'mine' : null }); }
         continue;
       }
       if (dr.cd > 0) continue;
       dr.cd = 1 / Wp.rate;
       const a = Math.atan2(T.y + T.vy * dd / (Wp.speed || 900) - dr.y, T.x + T.vx * dd / (Wp.speed || 900) - dr.x);
-      if (Wp.proj === 'arc') { arcStrike(w, owner, dr.x, dr.y, a, Wp.range, Wp.dmg, { ...Wp, id: 'drone_arc' }, { body: T }); continue; }
+      if (Wp.proj === 'arc') { arcStrike(w, owner, dr.x, dr.y, a, Wp.range, Wp.dmg * (dr.mul || 1), { ...Wp, id: 'drone_arc' }, { body: T }); continue; }
       const sp = Wp.speed || 900;
       w.shots.push({ id: newId(), x: dr.x, y: dr.y, px: dr.x, py: dr.y, vx: Math.cos(a) * sp + dr.vx * 0.5, vy: Math.sin(a) * sp + dr.vy * 0.5, a,
-        w: { ...Wp, mode: 'drone', id: 'drone_' + Wp.proj }, dmg: Wp.dmg, team: owner.team, owner, life: Wp.range / sp * 1.2, age: 0, pierce: 0, splash: Wp.splash || 0,
+        w: { ...Wp, mode: 'drone', id: 'drone_' + Wp.proj }, dmg: Wp.dmg * (dr.mul || 1), team: owner.team, owner, life: Wp.range / sp * 1.2, age: 0, pierce: 0, splash: Wp.splash || 0,
         opt: { shieldMult: Wp.shieldMult || 1 }, color: Wp.color, kind: Wp.proj, target: T, homing: Wp.homing || 0, hp: Wp.proj === 'missile' || Wp.proj === 'rocket' ? 3 : 0, size: Wp.size, launch: Wp.proj === 'missile' ? 0.15 : 0 });
       emit(w, { t: 'fire', w: 'drone_' + Wp.proj, x: dr.x, y: dr.y, a, color: Wp.color, team: owner.team, owner: owner.id, n: 0.5, drone: true });
     }

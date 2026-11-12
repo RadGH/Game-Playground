@@ -8,8 +8,11 @@
 // so the shipyard / repairs / crew just change G.ship. Prices are 15% worse when your standing with the
 // station's faction is below zero.
 
-import { panel, el, btn, toast, banner, fmt, esc } from './dom.js';
-import { itemCard } from './items.js';
+import { panel, el, btn, toast, banner, fmt, esc, showSelected } from './dom.js';
+import { SLOTS, itemCard } from './items.js';
+import { drawWorkshop } from './workshop.js';
+import { makeDroneItem } from '../sim/state.js';
+import { growOptions, growCost } from '../sim/hullgrow.js';
 import { GOODS, GOOD_IDS, ECONOMIES, EVENTS, RECIPES, market, prices, buy as mBuy, sell as mSell, remember } from '../sim/economy.js';
 import { cargoUsed } from '../sim/world.js';
 import { makeItem, itemValue, rollRarity } from '../sim/loot.js';
@@ -25,12 +28,14 @@ import { makeBody } from '../sim/ship.js';
 import { bakeBody } from '../render/bake.js';
 import { rng, hash, clamp } from '../core/math.js';
 import { unlockFromFind, UNLOCK_NAMES } from '../sim/quests.js';
+import { tabMercs, hangarExtras } from './mercs.js';   // Mercenaries board (play-test #29)
+import { missionsTab } from './missions.js';   // [encounters] Missions board (E8); bounties are a section of it
 import { PROJECTS, projectBlock, doProject, applyResearch, researchBonus, hasLicence, priceEdge, salvageEdge, researchLootBonus, specimenPoints } from '../sim/research.js';
 
 const SERVICES = [
   ['market', 'Market'], ['outfitter', 'Outfitter'], ['shipyard', 'Shipyard'], ['refinery', 'Refinery'], ['repair', 'Repairs'],
   ['crew', 'Crew hall'], ['insurance', 'Insurance'], ['drones', 'Drone shop'], ['lab', 'Research lab'], ['salvage', 'Salvage yard'],
-  ['bounty', 'Bounty board'], ['blackmarket', 'Black market'],
+  ['missions', 'Missions'], ['blackmarket', 'Black market'], ['workshop', 'Workshop'], ['mercs', 'Mercenaries'],
 ];
 const CAT_ORDER = ['Basics', 'Industry', 'Military', 'Luxury', 'Science', 'Raw'];
 const DAY = 600;                                   // shop stock changes every 10 minutes of play
@@ -51,8 +56,7 @@ const RANK_OF = cls => CLASSES[cls]?.rank ?? 0;
 /** Biggest block size the player may be offered: their best hull, or what quests unlocked. */
 function sizeLimit(G) {
   let n = Math.max(CLASSES[G.ship.cls]?.maxBlock || 1, ...(G.hangar || []).map(h => CLASSES[h.cls]?.maxBlock || 1));
-  if (G.unlocked.big) n = Math.max(n, 2);
-  if (G.unlocked.capital) n = Math.max(n, 4);
+  // the size of parts your best hull can mount (Grow hull raises it); unlock flags no longer widen it
   return n;
 }
 /** A ship body from a saved ship record { cls, grid }, with research bonuses. */
@@ -109,7 +113,8 @@ export function openStation(app, st, onUndock) {
     done: (msg, kind = 'good') => { if (msg) toast(msg, kind); app.save?.(); render(); },
   };
 
-  const services = SERVICES.filter(([id]) => st.services?.includes(id) && (id !== 'blackmarket' || pirate));
+  // [encounters] every trade station, and any station or outpost with a bounty board, has a Missions tab (bounties live inside it)
+  const services = SERVICES.filter(([id]) => (st.services?.includes(id) || (id === 'missions' && (st.services?.includes('bounty') || st.stationKind === 'trade'))) && (id !== 'blackmarket' || pirate));
   const open = id => !!G.unlocked[id];
   let tab = services.find(([id]) => id === lastTab && open(id))?.[0] || services.find(([id]) => open(id))?.[0] || null;
 
@@ -280,26 +285,28 @@ function shopStock(S, kind) {
   let stock = stockCache.get(cacheKey);
   if (!stock) {
     const r = rng(hash(kind, sys.seed, d)); const lim = sizeLimit(G); stock = [];
-    const basePool = Object.values(BLOCKS).filter(b => b.module && (b.size || 1) <= lim && b.tier <= sys.tier + 1);
+    const basePool = Object.values(BLOCKS).filter(b => b.module && !b.core && !b.enemyOnly && (b.size || 1) <= lim && b.tier <= sys.tier + 1);
     if (kind === 'outfit') {
-      // a harpoon and a mining laser are always on the shelf (the goals ask for them), a drone bay once drones matter
-      const sure = ['harpoon', 'mining_laser'];
-      if (G.quest?.done?.includes('trade') || G.unlocked.drones) sure.push('drone_bay');
-      const pool = basePool.filter(b => (!b.race || hasLicence(G, b.race)) && !sure.includes(b.id));
+      // a harpoon, a mining laser, a targeting computer and a scanner are always on the shelf
+      const sure = ['harpoon', 'mining_laser', 'targeting', 'scanner', 'drone_bay'];
       for (const id of sure) stock.push(makeItem(r, id, 'common'));
-      const n = 7 + Math.min(9, sys.tier);
-      for (let i = 0; i < n && pool.length; i++) {
-        let rar = rollRarity(r, sys.tier); if (RARITY_BY_ID[rar.id].index > 3) rar = RARITY[3];
-        stock.push(makeItem(r, r.pick(pool).id, rar.id));
+      // every slot gets its own shelf, so CPU, crew and cargo parts always show up
+      for (const sl of SLOTS) {
+        const pool = basePool.filter(b => sl.cats.includes(b.cat) && (!b.race || hasLicence(G, b.race)) && !sure.includes(b.id));
+        const n = sl.n + Math.min(sl.id === 'weapon' ? 6 : 2, Math.floor(sys.tier / 2));
+        for (let i = 0; i < n && pool.length; i++) {
+          let rar = rollRarity(r, sys.tier); if (RARITY_BY_ID[rar.id].index > 3) rar = RARITY[3];
+          stock.push(makeItem(r, r.pick(pool).id, rar.id));
+        }
       }
     } else {
       // black market: epic and better, plus alien weapons that need no licence here
-      const pool = basePool.filter(b => !b.race && !b.core);
+      const pool = basePool.filter(b => !b.race);
       for (let i = 0; i < 4 + Math.min(4, Math.floor(sys.tier / 2)); i++) stock.push(makeItem(r, r.pick(pool).id, r.weighted([{ id: 'epic', w: 60 }, { id: 'legendary', w: 32 }, { id: 'relic', w: 8 }], x => x.w).id));
       const alien = Object.values(BLOCKS).filter(b => b.race && (b.size || 1) <= lim);
       for (let i = 0; i < 3 && alien.length; i++) stock.push(makeItem(r, r.pick(alien).id, r.pick(['rare', 'rare', 'epic', 'legendary'])));
     }
-    stock.sort((a, b) => (BLOCKS[a.block].cat === 'weapon' ? 0 : 1) - (BLOCKS[b.block].cat === 'weapon' ? 0 : 1) || BLOCKS[a.block].tier - BLOCKS[b.block].tier);
+    stock.sort((a, b) => BLOCKS[a.block].tier - BLOCKS[b.block].tier || (RARITY_BY_ID[b.rarity]?.index || 0) - (RARITY_BY_ID[a.rarity]?.index || 0));
     stockCache.set(cacheKey, stock);
   }
   return { stock, key };
@@ -353,21 +360,30 @@ function warpSection(S, box) {
     }, can ? 'primary' : '')));
 }
 
+let outfitSlot = 'weapon';
 function tabOutfitter(S, box) {
   const { G, sys } = S; const k = S.k();
-  warpSection(S, box);
   const { stock, key } = shopStock(S, 'outfit'); const gone = taken(G, key);
   const left = Math.ceil((DAY - (G.playTime % DAY)) / 60);
-  section(box, 'For sale', `Danger ${sys.tier} system: shops further from home stock better parts. New stock in about ${left} min. Biggest parts offered: ${sizeLimit(G)}×${sizeLimit(G)}.`);
+  // one row of slot buttons, then that shelf (plus Warp core and Sell parts as their own shelves)
+  const shelves = [...SLOTS.map(sl => ({ id: sl.id, name: sl.name, n: stock.filter((it, i) => !gone.includes(i) && sl.cats.includes(BLOCKS[it.block].cat)).length })), { id: 'warp', name: 'Warp core' }, { id: 'sell', name: 'Sell parts', n: G.parts.length }];
+  if (!shelves.some(x => x.id === outfitSlot)) outfitSlot = 'weapon';
+  box.append(showSelected(el('div', { class: 'tabs st-sub' }, ...shelves.map(x => {
+    const b = btn(x.name, () => { outfitSlot = x.id; S.render(); }, x.id === outfitSlot ? 'on' : '');
+    if (x.n) b.append(el('i', { class: 'bm-badge' }, String(x.n))); return b;
+  }))));
+  if (outfitSlot === 'warp') { warpSection(S, box); return; }
+  if (outfitSlot === 'sell') { partsForSale(S, box, 1, 'The outfitter pays about a third of the list price.'); return; }
+  const sl = SLOTS.find(x => x.id === outfitSlot);
+  section(box, sl.name, `Danger ${sys.tier}: shops further from home stock better parts. New stock in about ${left} min. Biggest parts offered: ${sizeLimit(G)}×${sizeLimit(G)}.`);
   const cards = el('div', { class: 'cards' });
   stock.forEach((it, i) => {
-    if (gone.includes(i)) return;
+    if (gone.includes(i) || !sl.cats.includes(BLOCKS[it.block].cat)) return;
     const price = Math.round(listPrice(it) * k.buy);
-    cards.append(itemCard(it, { compact: true, price, actions: [btn('Buy', () => { if (G.credits < price) return toast('You cannot afford that.', 'bad'); gone.push(i); buyItem(S, it, price); }, G.credits >= price ? 'primary' : '')] }));
+    cards.append(itemCard(it, { compact: true, price, compare: S.ship(), actions: [btn('Buy', () => { if (G.credits < price) return toast('You cannot afford that.', 'bad'); gone.push(i); buyItem(S, it, price); }, G.credits >= price ? 'primary' : '')] }));
   });
-  if (!cards.children.length) cards.append(el('p', { class: 'hint' }, 'Sold out. Come back later.'));
+  if (!cards.children.length) cards.append(el('p', { class: 'hint' }, 'Sold out on this shelf. Come back later.'));
   box.append(cards);
-  partsForSale(S, box, 1, 'The outfitter pays about a third of the list price.');
 }
 
 // ================================================================== 3. shipyard
@@ -400,6 +416,41 @@ function shipStats(st) {
 }
 const kvEl = rows => el('div', { class: 'kv', html: rows.map(([a, b]) => `<span>${esc(a)}</span><span>${esc(String(b))}</span>`).join('') });
 
+/**
+ * Grow hull (owner ruling E5, 2026-11-12): refit YOUR ship into the next hull class — a bigger build area
+ * and bigger parts — keeping every block you placed. Paid in credits OR in that class's ore, so a miner
+ * and a fighter can both get there. sim/hullgrow.js has the numbers.
+ */
+function growSection(S, box) {
+  const { G, sys } = S;
+  const opts = growOptions(G.ship.cls);
+  if (!opts.length) { section(box, 'Grow hull', 'Your hull is the biggest there is.'); return; }
+  section(box, 'Grow hull', 'Refit your own ship into a bigger class. Every block stays where it is; you get a bigger build area, more base CPU, crew room and cargo — and bigger parts at frigate and cruiser.');
+  const cards = el('div', { class: 'cards' });
+  for (const to of opts) {
+    const C = CLASSES[to]; const cost = growCost(to); const near = sys.tier >= C.tier - 1;
+    const missM = Object.entries(cost.mats).filter(([m, n]) => (G.cargo[m] || 0) < n);
+    const card = el('div', { class: 'card grow-card' }, el('h4', {}, `${CLASSES[G.ship.cls].name} → ${C.name}`), el('div', { class: 'hint' }, C.blurb),
+      kvEl([['Build area', `${C.grid}×${C.grid} cells`], ['Biggest parts', `${C.maxBlock}×${C.maxBlock}`], ['Base CPU', `+${C.baseCpu}`], ['Base crew room', `+${C.baseCrew}`], ['Base cargo', `+${C.baseCargo}`]]));
+    if (!near) card.append(el('p', { class: 'bad' }, `Shipyards this close to home cannot do it — find one at danger ${C.tier - 1} or more.`));
+    else {
+      const chips = el('div', { class: 'ws-cost' }, ...Object.entries(cost.mats).map(([m, n]) => el('span', { class: 'chip ' + ((G.cargo[m] || 0) >= n ? 'ok' : 'no'), style: `--mc:${MATERIALS[m]?.color}` }, `${n} ${MATERIALS[m]?.name}`, el('small', {}, ` (${fmt(G.cargo[m] || 0)})`))));
+      const doGrow = how => {
+        if (how === 'cr' && G.credits < cost.cr) return toast('You cannot afford that.', 'bad');
+        if (how === 'ore' && missM.length) return toast(`Bring ${missM.map(([m, n]) => `${n - (G.cargo[m] || 0)} more ${MATERIALS[m].name}`).join(', ')}.`, 'bad');
+        if (how === 'cr') G.credits -= cost.cr; else { for (const [m, n] of Object.entries(cost.mats)) { G.cargo[m] -= n; if (!G.cargo[m]) delete G.cargo[m]; } G.credits -= cost.fee; }
+        G.ship.cls = to; G.stats.grown = (G.stats.grown || 0) + 1; S.changed();
+        banner(`Hull grown: ${C.name}`, 'Open Build mode to use the new space.'); S.done(null);
+      };
+      card.append(el('div', { class: 'hint' }, 'Pay with ore:'), chips, el('div', { class: 'row wrap' },
+        btn(`Pay ${fmt(cost.cr)} cr`, () => doGrow('cr'), G.credits >= cost.cr ? 'primary' : ''),
+        btn(`Pay with ore + ${fmt(cost.fee)} cr`, () => doGrow('ore'), !missM.length && G.credits >= cost.fee ? 'primary' : '')));
+    }
+    cards.append(card);
+  }
+  box.append(cards);
+}
+
 function tabShipyard(S, box) {
   const { G, sys } = S; const k = S.k();
   const cur = S.ship(); const ti = tradeIn(G.ship);
@@ -407,6 +458,7 @@ function tabShipyard(S, box) {
   box.append(el('div', { class: 'card' },
     el('b', {}, `${G.ship.name} — ${CLASSES[G.ship.cls]?.name}`), kvEl(shipStats(cur)),
     el('div', { class: 'hint' }, `Trade-in value here: ${fmt(ti)} cr (about 40% of the hull price plus a quarter of what is fitted).`)));
+  growSection(S, box);
   // hangar
   if (G.hangar.length) {
     section(box, 'Hangar', 'Ships you kept. Switching is free at any shipyard.');
@@ -414,8 +466,10 @@ function tabShipyard(S, box) {
     G.hangar.forEach((rec, i) => {
       const b = bodyOf(G, rec); const v = tradeIn(rec);
       hc.append(el('div', { class: 'card' }, el('b', {}, `${rec.name} — ${CLASSES[rec.cls]?.name}`), kvEl(shipStats(b).slice(0, 6)),
+        hangarExtras(S, rec),   // a mercenary's ship: who flies it, or Wrecked + Repair (ui/mercs.js)
         el('div', { class: 'row wrap' },
           btn('Fly this one', () => {
+            if (rec.wrecked) return toast('That ship is wrecked. Repair it first.', 'bad');
             if (cargoUsed(G) > b.stats.cargo) return toast(`That ship holds only ${fmt(b.stats.cargo)}. Sell some cargo first.`, 'bad');
             const old = G.ship; G.ship = rec; G.hangar[i] = old; S.changed(); S.done(`Now flying ${rec.name}. It launches when you undock.`);
           }, 'primary'),
@@ -443,7 +497,7 @@ function tabShipyard(S, box) {
       const nb = bodyOf(G, rec);
       if (cargoUsed(G) > nb.stats.cargo) return toast(`That ship holds only ${fmt(nb.stats.cargo)}. Sell some cargo first.`, 'bad');
       const crew = G.ship.crew ?? 2; rec.crew = Math.min(nb.stats.crewCap, crew);
-      if (crew > rec.crew) G.passengers = (G.passengers || 0) + (crew - rec.crew);
+      if (crew > rec.crew) toast(`${crew - rec.crew} crew had no room and stayed at the station.`);
       if (keep) G.hangar.push({ ...G.ship, crew: 0 });
       G.credits -= pay; G.ship = { ...rec, grid: JSON.parse(JSON.stringify(rec.grid)) }; S.changed();
       banner(`${pm.name} is yours`, `A ${CLASSES[pm.cls].name}. It launches when you undock.${keep ? ' Your old ship waits in the hangar.' : ''}`);
@@ -534,45 +588,33 @@ function tabRepair(S, box) {
 }
 
 // ================================================================== 6. crew
+/** Crew are a number (owner #33/#34): least to fly, needed for full strength, room aboard. Hire, or sell the extra. */
 function tabCrew(S, box) {
   const { G, sys } = S; const k = S.k(); const st = S.ship().stats;
-  const have = G.ship.crew ?? 0; const cap = st.crewCap; const need = st.crewNeed;
+  const have = G.ship.crew ?? 0; const cap = st.crewCap; const need = st.crewNeed; const min = st.crewMin;
   const each = Math.round(35 * (1 + (sys.tier - 1) * 0.3) * k.buy);
-  section(box, 'Crew hall', 'Crew run your guns, shields and reactors. Short of crew, those parts work slower. Bunks come from your bridge and crew quarters.');
+  const pays = Math.round(each * 0.5);
+  section(box, 'Crew hall', 'Crew run your guns, shields and reactors. Below what you need, those parts work slower. More room comes from crew quarters and hab modules.');
   const c = el('div', { class: 'card' },
-    kvEl([['Crew aboard', have], ['Crew needed', need], ['Bunks', cap], ['Hire cost', `${each} cr each`]]),
-    el('div', { class: have >= need ? 'good' : 'bad' }, have >= need ? 'Fully crewed.' : `Short by ${need - have}: crewed parts run at reduced strength.`));
+    kvEl([['Crew aboard', have], ['Least to fly', min], ['Needed for full strength', need], ['Room aboard', cap], ['Hire', `${fmt(each)} cr each`], ['Sell extra crew', `${fmt(pays)} cr each`]]),
+    el('div', { class: have >= need ? 'good' : have < min ? 'bad' : 'warn' }, have >= need ? 'Fully crewed.' : have < min ? `Below the least to fly (${min}) — the ship crawls.` : `Short by ${need - have}: crewed parts run at reduced strength.`));
   const hire = n => {
     n = Math.min(n, cap - have, Math.floor(G.credits / Math.max(1, each)));
-    if (n <= 0) return toast(cap - have <= 0 ? 'No free bunks. Fit crew quarters for more.' : 'You cannot afford that.', 'bad');
-    G.credits -= n * each; G.ship.crew = have + n; S.changed(); S.done(`Hired ${n} crew for ${fmt(n * each)} cr`);
+    if (n <= 0) return toast(cap - have <= 0 ? 'No room aboard. Fit crew quarters or a hab module.' : 'You cannot afford that.', 'bad');
+    G.credits -= n * each; G.ship.crew = have + n; S.changed(); S.done(`+${n} Crew (${fmt(n * each)} cr)`);
   };
+  const sell = n => {
+    n = Math.min(n, have - 1); if (n <= 0) return toast('Someone has to fly the ship.', 'bad');
+    G.ship.crew = have - n; G.credits += n * pays; S.changed(); S.done(`−${n} Crew (+${fmt(n * pays)} cr)`, '');
+  };
+  const extra = Math.max(0, have - need);
   c.append(el('div', { class: 'row wrap' },
     btn('Hire 1', () => hire(1)),
-    btn(`Hire up to what you need (${Math.max(0, need - have)})`, () => hire(Math.max(0, need - have)), have < need ? 'primary' : ''),
-    btn(`Fill every bunk (${Math.max(0, cap - have)})`, () => hire(cap - have)),
-    btn('Let 1 go', () => { if (have <= 0) return; G.ship.crew = have - 1; S.changed(); S.done('One crew member left the ship.', ''); })));
+    btn(`Hire what you need (${Math.max(0, need - have)})`, () => hire(Math.max(0, need - have)), have < need ? 'primary' : ''),
+    btn(`Fill the ship (${Math.max(0, cap - have)})`, () => hire(cap - have)),
+    btn('Sell 1', () => sell(1)),
+    btn(`Sell the extra (${extra})`, () => sell(extra), extra ? '' : 'off')));
   box.append(c);
-  // rescued people with no bunk
-  const pax = G.passengers || 0;
-  section(box, 'Passengers', 'People you pulled from escape pods who had no bunk aboard.');
-  const pc = el('div', { class: 'card' });
-  if (!pax) pc.append(el('span', { class: 'hint' }, 'No passengers aboard.'));
-  else {
-    const reward = 50 * sys.tier;
-    pc.append(el('div', {}, `${pax} passenger${pax > 1 ? 's' : ''} aboard. The station pays ${reward} cr each to take them in.`));
-    pc.append(el('div', { class: 'row wrap' },
-      btn(`Drop off all (${fmt(pax * reward)} cr)`, () => {
-        G.credits += pax * reward; G.passengers = 0;
-        G.rep[S.st.faction] = clamp((G.rep[S.st.faction] ?? 0) + Math.ceil(pax / 4), -100, 100);
-        S.done(`Dropped off ${pax} passengers: +${fmt(pax * reward)} cr and the station thanks you.`);
-      }, 'primary'),
-      btn('Sign them on as crew (free)', () => {
-        const n = Math.min(pax, cap - have); if (n <= 0) return toast('No free bunks.', 'bad');
-        G.passengers -= n; G.ship.crew = have + n; S.changed(); S.done(`${n} passengers joined your crew.`);
-      })));
-  }
-  box.append(pc);
 }
 
 // ================================================================== 7. insurance
@@ -592,52 +634,54 @@ function tabInsurance(S, box) {
 }
 
 // ================================================================== 8. drones
+/** Drone shop (play-test #28/#31): drones are items — buy them here, fit them to drone ports in Build mode. */
 function tabDrones(S, box) {
-  const { G, sys } = S; const cap = S.ship().stats.droneCap || 0;
-  section(box, 'Drone shop', `Drones launch from your drone bays and fly AHEAD of your ship in a fan, ready for action. They fight what is near, and are rebuilt at the bay if lost. Your bays carry ${cap}; you own ${G.drones.length}.`);
-  if (!cap) box.append(el('p', { class: 'bad' }, 'You have no drone bay. Fit one (the outfitter sells them) to carry drones.'));
-  const kinds = Object.values(DRONES).filter(d => !d.enemy && d.tier <= sys.tier + 1);
+  const { G, sys } = S; const k = S.k(); const cap = S.ship().stats.droneCap || 0; const own = G.droneItems ||= [];
+  section(box, 'Drone shop', `Drones fly AHEAD of your ship, ready for action. Fit them to drone ports in Build mode (Drones tab); a lost drone is rebuilt by its port for free. Your ports carry ${cap}; you own ${own.length}.`);
+  if (!cap) box.append(el('p', { class: 'warn' }, 'You have no drone port yet. The outfitter sells them (Drone ports shelf), or craft one at a workshop.'));
+  // today's stock: a few of each kind, some of them better than common
+  const d = dayOf(G); const key = `drones:${sys.id}:${d}`; const gone = taken(G, key);
+  const r = rng(hash('droneshop', sys.seed, d));
+  const stock = [];
+  for (const D of Object.values(DRONES).filter(x => !x.enemy && x.tier <= Math.ceil(sys.tier / 2) + 1)) {
+    stock.push({ kind: D.id, rarity: 'common' });
+    let rar = rollRarity(r, sys.tier); if (RARITY_BY_ID[rar.id].index > 3) rar = RARITY[3];
+    if (rar.id !== 'common') stock.push({ kind: D.id, rarity: rar.id });
+  }
   const cards = el('div', { class: 'cards' });
-  for (const d of kinds) {
-    const w = d.weapon; const rows = [['Health', d.hp], ['Speed', d.speed]];
-    if (w) {
-      const D = DAMAGE[w.type];
-      const dpsv = w.rate ? w.dmg * w.rate * (w.chain ? 1 + w.chain * 0.6 : 1) : w.dmg;
-      rows.push(['Damage', `<b style="color:${D.color}">${D.name}</b>`], ['Damage per second', Math.round(dpsv * 10) / 10], ['Range', w.range]);
-    }
-    if (d.mines) rows.push(['Special', 'Mines nearby rocks']);
-    if (d.repairs) rows.push(['Special', `Repairs ${d.repairs}/s`]);
-    if (d.interceptor) rows.push(['Special', 'Shoots down missiles']);
-    if (d.shield) rows.push(['Special', `Flying shield (${d.shield})`]);
-    const mats = Object.entries(d.cost.mats || {});
-    const okMats = mats.every(([m, n]) => (G.cargo[m] || 0) >= n);
-    const can = cap > G.drones.length && okMats && G.credits >= d.cost.cr;
-    const card = el('div', { class: 'card', style: `border-color:${d.color}66` },
-      el('b', { style: `color:${d.color}` }, d.name), el('div', { class: 'hint' }, d.blurb),
-      el('div', { class: 'kv', html: rows.map(([a, b]) => `<span>${esc(a)}</span><span>${typeof b === 'string' ? b : esc(String(b))}</span>`).join('') }),
-      el('div', {}, `Cost: ${d.cost.cr} cr + `, ...mats.map(([m, n]) => el('span', { class: (G.cargo[m] || 0) >= n ? 'good' : 'bad' }, `${n} ${MATERIALS[m]?.name || m} `))),
-      btn('Build', () => {
-        if (G.drones.length >= cap) return toast(cap ? 'Your drone bays are full.' : 'You need a drone bay first.', 'bad');
-        if (!okMats) return toast('Not enough materials.', 'bad');
-        if (G.credits < d.cost.cr) return toast('You cannot afford that.', 'bad');
-        G.credits -= d.cost.cr; for (const [m, n] of mats) give(G, m, -n);
-        G.drones.push(d.id); S.done(`${d.name} built. It launches when you undock.`);
-      }, can ? 'primary' : ''));
-    cards.append(card);
-  }
+  stock.forEach((x, i) => {
+    if (gone.includes(i)) return;
+    const D = DRONES[x.kind]; const R = RARITY_BY_ID[x.rarity]; const mul = 1 + R.bonus; const w = D.weapon;
+    const price = Math.round(D.cost.cr * 2.2 * (1 + R.index * 0.9 + R.index * R.index * 0.25) * k.buy);
+    const rows = [['Health', fmt(D.hp * mul)], ['Speed', fmt(D.speed)]];
+    if (w) { const DM = DAMAGE[w.type]; rows.push(['Damage', `<b style="color:${DM.color}">${DM.name}</b>`], ['Damage per second', fmt((w.rate ? w.dmg * w.rate * (w.chain ? 1 + w.chain * 0.6 : 1) : w.dmg) * mul)], ['Range', fmt(w.range)]); }
+    if (D.mines) rows.push(['Special', 'Mines nearby rocks']);
+    if (D.repairs) rows.push(['Special', `Repairs ${fmt(D.repairs * mul)}/s — you, then your wingmen`]);
+    if (D.interceptor) rows.push(['Special', 'Shoots down missiles']);
+    if (D.shield) rows.push(['Special', `Flying shield (${fmt(D.shield * mul)})`]);
+    cards.append(el('div', { class: 'card', style: `border-color:${R.color}66` },
+      el('b', { style: `color:${R.color}` }, `${R.index ? R.name + ' ' : ''}${D.name}`), el('div', { class: 'hint' }, D.blurb),
+      el('div', { class: 'kv', html: rows.map(([a2, b2]) => `<span>${esc(a2)}</span><span>${b2}</span>`).join('') }),
+      el('div', { class: 'row wrap it-foot' }, el('span', { class: 'amber it-price' }, `${fmt(price)} cr`), el('div', { class: 'grow' }), btn('Buy', () => {
+        if (G.credits < price) return toast('You cannot afford that.', 'bad');
+        G.credits -= price; gone.push(i);
+        const item = makeDroneItem(x.kind, x.rarity); own.push(item);
+        if (cap > (G.ship.drones || []).length) { (G.ship.drones ||= []).push(item.uid); S.done(`${D.name} bought and fitted — it launches when you undock.`); }
+        else S.done(`${D.name} bought. Fit it in Build mode (Drones tab) when a port has room.`);
+      }, G.credits >= price ? 'primary' : ''))));
+  });
   box.append(cards);
-  // your bay
-  section(box, 'Your drones', G.drones.length ? (G.drones.length > cap ? `Only ${cap} fit your bays; the rest wait in storage.` : null) : 'None yet.');
-  if (G.drones.length) {
-    const counts = {}; for (const id of G.drones) counts[id] = (counts[id] || 0) + 1;
-    const bay = el('div', { class: 'cards' });
-    for (const [id, n] of Object.entries(counts)) {
-      const d = DRONES[id]; const refund = Math.round((d?.cost?.cr || 0) * 0.5);
-      bay.append(el('div', { class: 'card row wrap' }, el('b', { style: `color:${d?.color}` }, `${d?.name || id} ×${n}`), el('div', { class: 'grow' }),
-        btn(`Scrap 1 (+${refund} cr)`, () => { G.drones.splice(G.drones.indexOf(id), 1); G.credits += refund; S.done(`Scrapped a ${d?.name}.`, ''); })));
-    }
-    box.append(bay);
+  // your drones
+  section(box, 'Your drones', own.length ? null : 'None yet.');
+  const bay = el('div', { class: 'cards' });
+  for (const item of own) {
+    const D = DRONES[item.kind]; if (!D) continue; const R = RARITY_BY_ID[item.rarity || 'common'];
+    const refund = Math.round(D.cost.cr * 0.8 * (1 + R.index * 0.9));
+    const fitted = (G.ship.drones || []).includes(item.uid);
+    bay.append(el('div', { class: 'card row wrap' }, el('b', { style: `color:${R.color}` }, `${R.index ? R.name + ' ' : ''}${D.name}`), el('span', { class: fitted ? 'good' : 'hint' }, fitted ? ' fitted' : ' stored'), el('div', { class: 'grow' }),
+      btn(`Sell (+${fmt(refund)} cr)`, () => { own.splice(own.indexOf(item), 1); G.ship.drones = (G.ship.drones || []).filter(u => u !== item.uid); G.credits += refund; S.done(`Sold a ${D.name}.`, ''); }, 'small')));
   }
+  box.append(bay);
 }
 
 // ================================================================== 9. research lab
@@ -663,10 +707,11 @@ function tabLab(S, box) {
   }
   box.append(sc);
   // donations
-  const relic = G.cargo.relic || 0, data = G.goods.data || 0;
-  if (relic || data) {
+  const relic = G.cargo.relic || 0, data = G.goods.data || 0, cores = G.dataCores || 0;
+  if (relic || data || cores) {
     box.append(el('div', { class: 'card' }, el('b', {}, 'Donate for points'),
-      relic ? el('div', { class: 'row wrap' }, `Relic cores: ${relic} (40 points each)`, el('div', { class: 'grow' }), btn('Donate all', () => { R.points += relic * 40; give(G, 'relic', -relic); S.done(`+${relic * 40} research points`); })) : null,
+      cores ? el('div', { class: 'row wrap' }, `Data cores: ${cores} (12 points each)`, el('div', { class: 'grow' }), btn('Hand over all', () => { R.points += cores * 12; G.dataCores = 0; S.done(`+${cores * 12} research points`); })) : null,
+      relic ? el('div', { class: 'row wrap' }, `Relic shards: ${relic} (40 points each)`, el('div', { class: 'grow' }), btn('Donate all', () => { R.points += relic * 40; give(G, 'relic', -relic); S.done(`+${relic * 40} research points`); })) : null,
       data ? el('div', { class: 'row wrap' }, `Survey data: ${data} (3 points each)`, el('div', { class: 'grow' }), btn('Donate all', () => { R.points += data * 3; give(G, 'data', -data); S.done(`+${data * 3} research points`); })) : null));
   }
   // projects
@@ -805,7 +850,15 @@ function tabBlack(S, box) {
   }
 }
 
+function tabWorkshop(S, box) {
+  const { G, sys } = S;
+  drawWorkshop(box, { app: S.app, G, tierCap: sys.tier + 2, sizeCap: sizeLimit(G), edge: 0, station: true, render: S.render });
+}
+
 const TABS = {
+  workshop: tabWorkshop,
   market: tabMarket, outfitter: tabOutfitter, shipyard: tabShipyard, refinery: tabRefinery, repair: tabRepair, crew: tabCrew,
   insurance: tabInsurance, drones: tabDrones, lab: tabLab, salvage: tabSalvage, bounty: tabBounty, blackmarket: tabBlack,
+  mercs: tabMercs,
+  missions: (S, box) => missionsTab(S, box, tabBounty),   // [encounters]
 };

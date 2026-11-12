@@ -51,36 +51,53 @@ export function armorDamage(dmg, type, size, armorId) {
   return Math.max(dmg * 0.1, after);
 }
 
-/** Raw materials: mined, salvaged, looted, traded. `tier` = where it starts showing up. */
+/**
+ * Raw materials (play-test #32, 2026-11-12: "too many materials… just 4 types per tier"). Every tier of
+ * play has the same four roles, so mining and crafting have clear priorities:
+ *   rock       — worthless filler; the only thing hull frames and cargo bays need besides structure
+ *   structural — frames, armour, hulls
+ *   energy     — reactors, engines, shields, weapons
+ *   exotic     — rare: CPU, computers, high-end parts, better crafting odds
+ * Tier = the warp-core class that reaches it (danger 1-2 → I, 3-4 → II, … 9-10 → V). `matTier(danger)`.
+ */
+export const MAT_ROLES = { rock: 'Filler', structural: 'Structural', energy: 'Energy', exotic: 'Exotic' };
 export const MATERIALS = {
-  ferrite:   { name: 'Ferrite',        tier: 1, price: 6,    color: '#b07a5a', blurb: 'Iron-rich rock. Frames and plates.' },
-  silicate:  { name: 'Silicate',       tier: 1, price: 5,    color: '#c8c0a8', blurb: 'Glassy sand. Ceramics and circuits.' },
-  carbon:    { name: 'Carbon',         tier: 1, price: 7,    color: '#4a4a52', blurb: 'Soot and graphite. Composites.' },
-  ice:       { name: 'Volatile ice',   tier: 1, price: 9,    color: '#a8e4ff', blurb: 'Frozen gas. Fuel and coolant.' },
-  cuprite:   { name: 'Cuprite',        tier: 2, price: 16,   color: '#e0864a', blurb: 'Copper ore. Wiring and insulation.' },
-  titanium:  { name: 'Titanium',       tier: 2, price: 28,   color: '#bfe3ff', blurb: 'Light and strong.' },
-  cobalt:    { name: 'Cobalt',         tier: 3, price: 45,   color: '#4f7dff', blurb: 'Magnets, reactors, engines.' },
-  quartz:    { name: 'Prism quartz',   tier: 3, price: 60,   color: '#ff9ef0', blurb: 'Laser lenses and shield emitters.' },
-  iridium:   { name: 'Iridium',        tier: 4, price: 110,  color: '#8fa6c9', blurb: 'Heavy armour and capital frames.' },
-  helium3:   { name: 'Helium-3',       tier: 4, price: 95,   color: '#ffe680', blurb: 'Gas-giant fuel for big reactors.' },
-  exotic:    { name: 'Exotic matter',  tier: 5, price: 260,  color: '#ff5fd2', blurb: 'Strange stuff. Jump drives and relics.' },
-  neutronium:{ name: 'Neutronium',     tier: 6, price: 520,  color: '#ffe7a8', blurb: 'Collapsed-star matter. The heaviest armour.' },
-  // alien-only drops (no crew comes from aliens; these instead)
-  chitin:    { name: 'Chitin shell',   tier: 2, price: 40,   color: '#9bd36a', blurb: 'From the Vesh hive. Living armour.', alien: true },
-  nanite:    { name: 'Nanite paste',   tier: 2, price: 55,   color: '#7fe6ff', blurb: 'From Lattice drones. Self-repair parts.', alien: true },
-  lumen:     { name: 'Lumen shard',    tier: 3, price: 80,   color: '#ffb8f4', blurb: 'Ossari crystal. Focuses light.', alien: true },
-  basaltcore:{ name: 'Forge basalt',   tier: 3, price: 70,   color: '#c07a50', blurb: 'Kharr heat-stone. Plasma weapons.', alien: true },
-  relic:     { name: 'Relic core',     tier: 5, price: 600,  color: '#ffd84a', blurb: 'An ancient machine heart. Research.', alien: true },
+  rock:      { name: 'Rock',          tier: 0, role: 'rock',       price: 1,    color: '#8a7f74', blurb: 'Crushed asteroid. Worth almost nothing, but hull frames and cargo bays are mostly rock.' },
+  ferrite:   { name: 'Ferrite',       tier: 1, role: 'structural', price: 6,    color: '#c0805a', blurb: 'Iron-rich ore. Frames, plates and the first armour.' },
+  carbon:    { name: 'Carbon',        tier: 1, role: 'energy',     price: 8,    color: '#5a6070', blurb: 'Graphite and soot. Fuel cells, wiring, small engines.' },
+  quartz:    { name: 'Quartz',        tier: 1, role: 'exotic',     price: 24,   color: '#ff9ef0', blurb: 'Clear crystal. CPU chips and laser lenses.' },
+  titanium:  { name: 'Titanium',      tier: 2, role: 'structural', price: 22,   color: '#bfe3ff', blurb: 'Light and strong. Corvette and frigate hulls.' },
+  cobalt:    { name: 'Cobalt',        tier: 2, role: 'energy',     price: 30,   color: '#4f7dff', blurb: 'Magnets, reactors, ion drives.' },
+  diamond:   { name: 'Diamond',       tier: 2, role: 'exotic',     price: 90,   color: '#e8fbff', blurb: 'Pressed carbon. Precision optics and shield emitters.' },
+  iridium:   { name: 'Iridium',       tier: 3, role: 'structural', price: 70,   color: '#8fa6c9', blurb: 'Heavy plate for destroyers and cruisers.' },
+  helium3:   { name: 'Helium-3',      tier: 3, role: 'energy',     price: 85,   color: '#ffe680', blurb: 'Fusion fuel. Big reactors and plasma.' },
+  starglass: { name: 'Starglass',     tier: 3, role: 'exotic',     price: 260,  color: '#7af7ff', blurb: 'Glass fused in a star\'s corona. Mind cores and lances.' },
+  osmium:    { name: 'Osmium',        tier: 4, role: 'structural', price: 180,  color: '#9a8cb8', blurb: 'The densest ore that can still be worked. Capital frames.' },
+  antimatter:{ name: 'Antimatter',    tier: 4, role: 'energy',     price: 240,  color: '#ff6ad0', blurb: 'Bottled in magnetic traps. Capital reactors and torpedoes.' },
+  exotic:    { name: 'Exotic matter', tier: 4, role: 'exotic',     price: 700,  color: '#ff5fd2', blurb: 'Strange stuff. Warp cores and relic-grade parts.' },
+  neutronium:{ name: 'Neutronium',    tier: 5, role: 'structural', price: 480,  color: '#ffe7a8', blurb: 'Collapsed-star matter. The heaviest armour.' },
+  voidplasma:{ name: 'Void plasma',   tier: 5, role: 'energy',     price: 620,  color: '#b46aff', blurb: 'Plasma from between the stars. Dreadnought engines.' },
+  relic:     { name: 'Relic shard',   tier: 5, role: 'exotic',     price: 1800, color: '#ffd84a', blurb: 'A piece of an ancient machine. The best parts in the galaxy need it.' },
 };
+/** Material tier for a danger level (1-10). */
+export const matTier = danger => Math.max(1, Math.min(5, Math.ceil((danger || 1) / 2)));
+/** The material of a role at a tier. */
+export const matOf = (role, tier) => role === 'rock' ? 'rock' : Object.keys(MATERIALS).find(k => MATERIALS[k].role === role && MATERIALS[k].tier === Math.max(1, Math.min(5, tier)));
+/** Old saves: materials that were folded into the new set. */
+export const OLD_MATERIALS = { silicate: 'rock', ice: 'carbon', cuprite: 'cobalt', chitin: 'titanium', nanite: 'cobalt', lumen: 'diamond', basaltcore: 'titanium' };
 export const MATERIAL_IDS = Object.keys(MATERIALS);
 
-/** Rarity ladder: drop colours, light beams, stat bonuses. */
+/**
+ * Rarity ladder: drop colours, light beams, and `bonus` = how much a part's base stats are lifted
+ * (sim/partstats.js). Play-test #38: legendary must clearly beat rare at the same tier.
+ * `affixes` = how many rolled bonuses it carries; legendary and relic also roll a named power.
+ */
 export const RARITY = [
-  { id: 'common',    name: 'Common',    color: '#c9ccd4', beam: 0,   bonus: 0,    weight: 60 },
-  { id: 'uncommon',  name: 'Uncommon',  color: '#4dff7a', beam: 0.4, bonus: 0.08, weight: 26 },
-  { id: 'rare',      name: 'Rare',      color: '#4da6ff', beam: 0.7, bonus: 0.16, weight: 10 },
-  { id: 'epic',      name: 'Epic',      color: '#c45cff', beam: 1.0, bonus: 0.26, weight: 3.2 },
-  { id: 'legendary', name: 'Legendary', color: '#ff9a1f', beam: 1.4, bonus: 0.40, weight: 0.7 },
-  { id: 'relic',     name: 'Relic',     color: '#ff3b5c', beam: 1.8, bonus: 0.60, weight: 0.12 },
+  { id: 'common',    name: 'Common',    color: '#c9ccd4', beam: 0,   bonus: 0,    affixes: 0, weight: 60 },
+  { id: 'uncommon',  name: 'Uncommon',  color: '#4dff7a', beam: 0.4, bonus: 0.12, affixes: 1, weight: 26 },
+  { id: 'rare',      name: 'Rare',      color: '#4da6ff', beam: 0.7, bonus: 0.28, affixes: 2, weight: 10 },
+  { id: 'epic',      name: 'Epic',      color: '#c45cff', beam: 1.0, bonus: 0.5,  affixes: 3, weight: 3.2 },
+  { id: 'legendary', name: 'Legendary', color: '#ff9a1f', beam: 1.4, bonus: 0.85, affixes: 3, weight: 0.7 },
+  { id: 'relic',     name: 'Relic',     color: '#ff3b5c', beam: 1.8, bonus: 1.25, affixes: 4, weight: 0.12 },
 ];
 export const RARITY_BY_ID = Object.fromEntries(RARITY.map((r, i) => [r.id, { ...r, index: i }]));

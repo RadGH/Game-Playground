@@ -2,15 +2,15 @@
 // light map, then the WebGL post pass (bloom + shockwaves). Labels go on a plain overlay canvas on top.
 
 import { createPost } from './post.js';
-import { bakeBody, bakeKey, paletteFor } from './bake.js';
+import { bakeBody, bakeKey, paletteFor, mix as mixHex } from './bake.js';
 import { drawTurret } from './turret-art.js';
-import { glowSprite, lightSprite, hexA } from './fx.js';
+import { glowSprite, lightSprite, hexA, impactFx } from './fx.js';
 import { toWorld } from '../sim/ship.js';
 import { CELL } from '../sim/grid.js';
 import { RARITY_BY_ID, MATERIALS } from '../data/types.js';
-import { PLANET_KINDS } from '../sim/galaxy.js';
 import { noise2, rng, hash } from '../core/math.js';
 import { shieldRadius } from '../sim/world.js';
+import { createPlanets } from './planets.js';
 
 const mk = (w, h) => Object.assign(document.createElement('canvas'), { width: w, height: h });
 
@@ -20,7 +20,7 @@ export function createRenderer(view, overlay, opts = {}) {
   const oc = overlay.getContext('2d');
   let post = opts.noGL ? null : createPost(view);
   const view2d = post ? null : view.getContext('2d');
-  const R = { scene, post, quality: 1, dpr: 1, bakes: new Map(), stars: null, nebula: null, planetTex: new Map(), W: 0, H: 0 };
+  const R = { scene, post, quality: 1, dpr: 1, bakes: new Map(), stars: null, nebula: null, W: 0, H: 0, drawn: { x: 0, y: 0, cx: 0, cy: 0, z: 1, n: 0 }, lastShots: new Map() };
 
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, R.quality >= 1 ? 1.5 : 1);
@@ -69,56 +69,15 @@ export function createRenderer(view, overlay, opts = {}) {
     R.stars = makeStars(sys.seed);
     const t = { yellow: [70, 50, 120], red: [130, 40, 50], blue: [40, 70, 140], white: [60, 60, 100], violet: [110, 40, 150], binary: [120, 70, 50] }[sys.star];
     R.nebula = makeNebula(sys.seed, sys.nebula ? t.map(v => v * 1.6) : t.map(v => v * 0.6));
-    R.planetTex.clear(); R.bakes.clear();
+    R.bakes.clear(); planets.clear();
   };
 
-  function planetTexture(p) {
-    let t = R.planetTex.get(p.id); if (t) return t;
-    const S = 768; const c = mk(S, S); const g = c.getContext('2d'); const pk = PLANET_KINDS[p.kind];
-    const n = noise2(p.seed), n2 = noise2(p.seed + 3); const img = g.createImageData(S, S);
-    const hx = (h) => { const v = parseInt(h.slice(1), 16); return [v >> 16, (v >> 8) & 255, v & 255]; };
-    const [b, d, l] = [hx(pk.base), hx(pk.dark), hx(pk.light)];
-    const glow = pk.glow ? hx(pk.glow) : null;
-    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
-      const dx = x - S / 2, dy = y - S / 2; if (dx * dx + dy * dy > (S / 2) ** 2) continue;
-      let v = pk.gas ? n.fbm(x / 140, y / 22, 5) * 0.7 + n2.fbm(x / 60, y / 60, 3) * 0.3 : n.fbm(x / 90, y / 90, 6);
-      const v2 = n2.fbm(x / 30, y / 30, 3);
-      let col;
-      if (v < 0.42) col = d.map((c, i) => c + (b[i] - c) * (v / 0.42));
-      else if (v < 0.62) col = b.map((c, i) => c + (l[i] - c) * ((v - 0.42) / 0.2) * 0.6);
-      else col = l.map((c, i) => c * (0.8 + v2 * 0.3));
-      if (glow && v < 0.36) col = col.map((c, i) => c + glow[i] * (0.36 - v) * 4);
-      if (p.kind === 'ocean' && v < 0.5) col = [20, 60 + v * 80, 140 + v * 60];
-      const i = (y * S + x) * 4;
-      img.data[i] = col[0]; img.data[i + 1] = col[1]; img.data[i + 2] = col[2]; img.data[i + 3] = 255;
-    }
-    g.putImageData(img, 0, 0);
-    // craters
-    if (!pk.gas) { const r = rng(p.seed); for (let i = 0; i < 40; i++) { const x = S / 2 + (r() - 0.5) * S * 0.8, y = S / 2 + (r() - 0.5) * S * 0.8; const rr = r() * 18 + 3; g.fillStyle = 'rgba(0,0,0,0.18)'; g.beginPath(); g.arc(x, y, rr, 0, 7); g.fill(); g.strokeStyle = 'rgba(255,255,255,0.08)'; g.lineWidth = 1.5; g.beginPath(); g.arc(x - 1, y - 1, rr, Math.PI, Math.PI * 1.7); g.stroke(); } }
-    t = { c, g, S }; R.planetTex.set(p.id, t); return t;
-  }
-  R.scorchPlanet = (p, x, y) => {
-    const t = planetTexture(p); const u = (x - p.x) / (p.r * 2) * t.S + t.S / 2, v = (y - p.y) / (p.r * 2) * t.S + t.S / 2;
-    t.g.fillStyle = 'rgba(20,12,8,0.25)'; t.g.beginPath(); t.g.arc(u, v, 2 + Math.random() * 2, 0, 7); t.g.fill();
-  };
+  // planets live in render/planets.js (unique sphere-noise pictures, day/night, air, clouds, rings, cities)
+  const planets = createPlanets(R);
+  R.scorchPlanet = (p, x, y) => planets.scorch(p, x, y);
+  R.planetStats = () => planets.stats();
+  R.planetFinish = w => planets.finish(w);
 
-  const detailCache = new Map();
-  function detailPattern(g, kind) {
-    let pat = detailCache.get(kind); if (pat) return pat;
-    const S = 256; const c = mk(S, S); const x = c.getContext('2d'); const n = noise2(hash('detail', kind)); const img = x.createImageData(S, S);
-    for (let j = 0; j < S; j++) for (let i = 0; i < S; i++) {
-      // tileable: sample a torus
-      const a = i / S * Math.PI * 2, b = j / S * Math.PI * 2;
-      const v = n.fbm(Math.cos(a) * 3 + 10, Math.sin(a) * 3 + Math.cos(b) * 3 + 20, 4) * 0.7 + n.fbm(Math.sin(b) * 6 + 5, Math.cos(a) * 6 + 7, 3) * 0.3;
-      const k = (y => y < 0 ? 0 : y > 255 ? 255 : y)(Math.round(128 + (v - 0.5) * 300));
-      const o = (j * S + i) * 4; img.data[o] = img.data[o + 1] = img.data[o + 2] = k; img.data[o + 3] = 255;
-    }
-    x.putImageData(img, 0, 0);
-    // a few small crater rims / rocks
-    const r = rng(hash('rocks', kind));
-    for (let i = 0; i < 26; i++) { const cx = r() * S, cy = r() * S, rr = 2 + r() * 7; x.strokeStyle = 'rgba(255,255,255,0.35)'; x.lineWidth = 1; x.beginPath(); x.arc(cx, cy, rr, 3.6, 5.6); x.stroke(); x.strokeStyle = 'rgba(0,0,0,0.4)'; x.beginPath(); x.arc(cx, cy, rr, 0.5, 2.5); x.stroke(); }
-    pat = g.createPattern(c, 'repeat'); detailCache.set(kind, pat); return pat;
-  }
   function bakeFor(s) {
     let b = R.bakes.get(s.id);
     const key = bakeKey(s);
@@ -133,8 +92,11 @@ export function createRenderer(view, overlay, opts = {}) {
 
   // ---------------------------------------------------------- frame
   R.frame = (w, cam, fx, ui = {}) => {
-    resize();
+    resize(); fx_ref = fx;
+    { const nowT = performance.now(); R.lastDt = R._lt ? Math.min(0.1, (nowT - R._lt) / 1000) : 1 / 60; R._lt = nowT; }
     const W = R.W, H = R.H; const z = cam.zoom * R.dpr; const t = w.t;
+    // what was actually drawn this frame (tools/smooth-check.mjs reads it to measure judder)
+    if (w.player) { R.drawn.x = w.player.x; R.drawn.y = w.player.y; R.drawn.cx = cam.x; R.drawn.cy = cam.y; R.drawn.z = cam.zoom; R.drawn.n++; }
     const sx = x => (x - cam.x) * z + W / 2, sy = y => (y - cam.y) * z + H / 2;
     const vis = (x, y, r) => Math.abs(x - cam.x) * z < W / 2 + r * z + 50 && Math.abs(y - cam.y) * z < H / 2 + r * z + 50;
     const g = sc;
@@ -162,24 +124,10 @@ export function createRenderer(view, overlay, opts = {}) {
       g.fillStyle = s.color; g.beginPath(); g.arc(s.x, s.y, s.r, 0, 7); g.fill();
       if (s.binary) { const bx = s.x + Math.cos(t * 0.2) * s.r * 3, by = s.y + Math.sin(t * 0.2) * s.r * 3; g.globalCompositeOperation = 'lighter'; g.drawImage(glowSprite('#ff8a5a'), bx - s.r * 2, by - s.r * 2, s.r * 4, s.r * 4); g.globalCompositeOperation = 'source-over'; g.fillStyle = '#ffb090'; g.beginPath(); g.arc(bx, by, s.r * 0.5, 0, 7); g.fill(); }
     }
-    // planets: textured disc, lit from the sun, atmosphere rim
-    for (const p of w.planets) {
-      if (!vis(p.x, p.y, p.r * 1.2)) continue;
-      const tx = planetTexture(p); const pk = PLANET_KINDS[p.kind];
-      g.save(); g.beginPath(); g.arc(p.x, p.y, p.r, 0, 7); g.clip();
-      g.drawImage(tx.c, p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
-      // crisp tiled detail on top of the soft base map, so low orbit does not look blurry
-      if (z > 0.25) { const pat = detailPattern(g, p.kind); g.globalCompositeOperation = 'overlay'; g.globalAlpha = Math.min(0.75, (z - 0.25) * 1.5); g.fillStyle = pat; g.fillRect(p.x - p.r, p.y - p.r, p.r * 2, p.r * 2); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
-      const la = Math.atan2(p.y - (w.sun?.y || 0), p.x - (w.sun?.x || 0));
-      const gr = g.createLinearGradient(p.x - Math.cos(la) * p.r, p.y - Math.sin(la) * p.r, p.x + Math.cos(la) * p.r, p.y + Math.sin(la) * p.r);
-      gr.addColorStop(0, 'rgba(255,240,220,0.08)'); gr.addColorStop(0.5, 'rgba(0,0,0,0.05)'); gr.addColorStop(1, 'rgba(0,0,10,0.72)');
-      g.fillStyle = gr; g.fillRect(p.x - p.r, p.y - p.r, p.r * 2, p.r * 2);
-      g.restore();
-      g.globalCompositeOperation = 'lighter';
-      g.strokeStyle = hexA(pk.light, 0.35); g.lineWidth = p.r * 0.05; g.beginPath(); g.arc(p.x, p.y, p.r * 1.02, 0, 7); g.stroke();
-      g.strokeStyle = hexA(pk.light, 0.12); g.lineWidth = p.r * 0.12; g.beginPath(); g.arc(p.x, p.y, p.r * 1.06, 0, 7); g.stroke();
-      g.globalCompositeOperation = 'source-over';
-    }
+    // planets (render/planets.js)
+    planets.draw(g, w, cam, z, W, H, t, lc_light);
+    // boost speed lines: thin streaks fixed in space that rush past the ship while the boost burns
+    speedLines(g, w, cam, z, ui.boost || 0, W, H);
     // bodies: ground first, then rocks/wrecks, then ships and stations
     const order = { ground: 0, rock: 1, wreck: 2, station: 3, ship: 4 };
     const bodies = w.bodies.filter(s => !s.dead && vis(s.x, s.y, s.r)).sort((a, b) => order[a.kind] - order[b.kind] || a.r - b.r);
@@ -196,7 +144,7 @@ export function createRenderer(view, overlay, opts = {}) {
       glowsLater.push([s, b]);
       // engine flames
       if (s.kind === 'ship' && s.engines) {
-        const sp = Math.hypot(s.vx, s.vy); const thr = (s.thrusting ? 1 : 0.25) * (s.boosting ? 1.8 : 1);
+        const sp = Math.hypot(s.vx, s.vy); const bst = s.boosting ? 1 : 0; const thr = (s.thrusting ? 1 : 0.25) * (bst ? 2.6 : 1);
         const col = paletteFor(s).light;
         g.globalCompositeOperation = 'lighter';
         for (const e of s.engines) {
@@ -208,7 +156,17 @@ export function createRenderer(view, overlay, opts = {}) {
           // a tapered flame: bright core at the nozzle, coloured plume behind
           g.globalAlpha = 0.55; g.drawImage(spr, ex + ax * 3 - e.n * 5, ey + ay * 3 - e.n * 5, e.n * 10, e.n * 10);
           for (let k = 1; k <= 3; k++) { g.globalAlpha = 0.4 / k; const s2 = e.n * (6 - k); g.drawImage(spr, ex + ax * L * k / 3 - s2, ey + ay * L * k / 3 - s2, s2 * 2, s2 * 2); }
-          lc_light(ex + ax * 14, ey + ay * 14, 26 + e.n * 18, col, 0.18 * thr);
+          if (bst) {
+            // boost: a long white-hot core, a wide outer plume and bright shock diamonds that flicker
+            const BL = L * 1.25;
+            const tx2 = ex + ax * BL, ty2 = ey + ay * BL, wq = e.n * 4.2 * (0.9 + Math.random() * 0.2), px2 = -ay, py2 = ax;
+            const fg = g.createLinearGradient(ex, ey, tx2, ty2); fg.addColorStop(0, hexA(col, 0.85)); fg.addColorStop(0.35, hexA(col, 0.45)); fg.addColorStop(1, hexA(col, 0));
+            g.globalAlpha = 1; g.fillStyle = fg; g.beginPath(); g.moveTo(ex + px2 * wq, ey + py2 * wq); g.quadraticCurveTo(ex + ax * BL * 0.4 + px2 * wq * 1.1, ey + ay * BL * 0.4 + py2 * wq * 1.1, tx2, ty2); g.quadraticCurveTo(ex + ax * BL * 0.4 - px2 * wq * 1.1, ey + ay * BL * 0.4 - py2 * wq * 1.1, ex - px2 * wq, ey - py2 * wq); g.closePath(); g.fill();
+            g.lineCap = 'round'; g.strokeStyle = hexA('#ffffff', 0.75); g.lineWidth = e.n * 2.6; line(g, ex, ey, ex + ax * BL * 0.45, ey + ay * BL * 0.45); g.lineCap = 'butt';
+            const ph = (t * 40 + e.b.idx) % 1;
+            for (let k = 0; k < 3; k++) { const d = (k + ph) / 3 * BL * 0.7; const ds = e.n * (3.2 - k * 0.6); g.globalAlpha = 0.7 - k * 0.15; g.drawImage(glowSprite('#ffffff', 0.4), ex + ax * d - ds, ey + ay * d - ds, ds * 2, ds * 2); }
+          }
+          lc_light(ex + ax * 14, ey + ay * 14, (26 + e.n * 18) * (bst ? 1.8 : 1), col, 0.18 * thr);
         }
         g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
       }
@@ -230,7 +188,9 @@ export function createRenderer(view, overlay, opts = {}) {
       if (s.kind === 'wreck') continue;
       const P = b.px; const k = CELL / P;
       g.save(); g.translate(s.x, s.y); g.rotate(s.a); g.scale(k, k); g.translate(-s.ox * P - b.pad, -s.oy * P - b.pad);
-      g.globalAlpha = s.emp > 0 ? 0.2 + Math.random() * 0.3 : 0.9; g.drawImage(b.glow, 0, 0); g.restore();
+      g.globalAlpha = s.emp > 0 ? 0.2 + Math.random() * 0.3 : 0.9; g.drawImage(b.glow, 0, 0);
+      if (s.kind === 'rock' && s.scanned) { g.globalAlpha = 0.45 + 0.25 * Math.sin(t * 2.5 + s.id); g.drawImage(b.glow, 0, 0); }   // scanned: ore veins shine brighter
+      g.restore();
       if (s.kind === 'ship' || s.kind === 'station') { const c = paletteFor(s).light; for (const L of s.lights) { if (!L.b.alive) continue; const [lx, ly] = toWorld(s, L.cx, L.cy); lc_light(lx, ly, 22 + L.n * 18, c, 0.16); } }
       if (s.burn > 0) lc_light(s.x, s.y, s.r * 1.5, '#ff6a2a', 0.4);
       if (s.kind === 'wreck' && s.burnFx > 0) { s.burnFx -= 1 / 60; }
@@ -268,28 +228,68 @@ export function createRenderer(view, overlay, opts = {}) {
     g.globalCompositeOperation = 'lighter';
     for (const p of w.pickups) {
       if (!vis(p.x, p.y, 200)) continue;
-      const col = p.kind === 'mat' ? MATERIALS[p.mat]?.color || '#fff' : p.kind === 'item' ? RARITY_BY_ID[p.rarity]?.color : p.kind === 'cr' ? '#ffd84a' : p.kind === 'pod' ? '#ffffff' : '#c8ff6a';
+      const col = p.kind === 'mat' ? MATERIALS[p.mat]?.color || '#fff' : (p.kind === 'item' || p.kind === 'drone') ? RARITY_BY_ID[p.rarity]?.color || '#c9ccd4' : p.kind === 'cr' || p.kind === 'cache' ? '#ffd84a' : p.kind === 'data' ? '#7af7ff' : p.kind === 'pod' ? '#ffffff' : '#c8ff6a';
       const bob = Math.sin(t * 3 + p.id) * 1.5;
-      if (p.kind === 'item') {
-        const RR = RARITY_BY_ID[p.rarity]; const big = RR.index;
+      if (p.kind === 'item' || p.kind === 'drone') {
+        const RR = RARITY_BY_ID[p.rarity] || RARITY_BY_ID.common; const big = RR.index;
         if (big >= 1) {
-          // light pillar up the screen
-          const hgt = (60 + big * 40) / Math.sqrt(z);
+          // light pillar up the screen: short for uncommon/rare, tall and pulsing for epic and up
+          const grand = big >= 3; const pulse = grand ? 0.75 + 0.25 * Math.sin(t * 3 + p.id) : 1;
+          const hgt = (grand ? 220 + (big - 3) * 160 : 40 + big * 25) / Math.sqrt(z);
+          const pw = (grand ? 6 + big * 2 : 2 + big) / Math.sqrt(Math.max(0.3, z));
           const gr = g.createLinearGradient(p.x, p.y, p.x, p.y - hgt);
-          gr.addColorStop(0, hexA(col, 0.55)); gr.addColorStop(1, hexA(col, 0));
-          g.fillStyle = gr; g.fillRect(p.x - 3 - big, p.y - hgt, 6 + big * 2, hgt);
+          gr.addColorStop(0, hexA(col, (grand ? 0.75 : 0.45) * pulse)); gr.addColorStop(0.4, hexA(col, (grand ? 0.3 : 0.15) * pulse)); gr.addColorStop(1, hexA(col, 0));
+          g.fillStyle = gr; g.fillRect(p.x - pw, p.y - hgt, pw * 2, hgt);
+          if (grand) { g.fillStyle = hexA('#ffffff', 0.35 * pulse); g.fillRect(p.x - pw * 0.25, p.y - hgt * 0.7, pw * 0.5, hgt * 0.7); }
           // rays
-          g.save(); g.translate(p.x, p.y + bob); g.rotate(t * 0.8);
-          for (let i = 0; i < 4 + big; i++) { g.rotate(Math.PI * 2 / (4 + big)); g.fillStyle = hexA(col, 0.12 + big * 0.03); g.beginPath(); g.moveTo(0, 0); g.lineTo(26 + big * 8, -3); g.lineTo(26 + big * 8, 3); g.fill(); }
-          g.restore();
+          if (big >= 2) {
+            g.save(); g.translate(p.x, p.y + bob); g.rotate(t * 0.8);
+            const nr = grand ? 6 + big : 4; const rl = grand ? 34 + big * 10 : 22;
+            for (let i = 0; i < nr; i++) { g.rotate(Math.PI * 2 / nr); g.fillStyle = hexA(col, (grand ? 0.16 + big * 0.03 : 0.1) * pulse); g.beginPath(); g.moveTo(0, 0); g.lineTo(rl, -3); g.lineTo(rl, 3); g.fill(); }
+            g.restore();
+          }
+          if (grand) {
+            // a slow glow that still shows when zoomed far out, and sparkles circling the drop
+            const far = Math.min(900, 70 / Math.max(0.05, z)) * pulse;
+            g.globalAlpha = 0.22 * pulse; g.drawImage(glowSprite(col), p.x - far, p.y - far, far * 2, far * 2); g.globalAlpha = 1;
+            const ns = R.quality >= 1 ? 4 + (big - 3) * 2 : 3;
+            for (let i = 0; i < ns; i++) {
+              const an = t * (1.4 + (i % 3) * 0.35) * (i % 2 ? -1 : 1) + i * 2.1 + p.id; const rr = 16 + (i % 3) * 8 + Math.sin(t * 2 + i) * 3;
+              const sx2 = p.x + Math.cos(an) * rr, sy2 = p.y + bob + Math.sin(an) * rr * 0.7; const ss = 2.2 + Math.sin(t * 6 + i * 1.7) * 1.2;
+              g.drawImage(glowSprite(i % 2 ? '#ffffff' : col, 0.3), sx2 - ss * 2, sy2 - ss * 2, ss * 4, ss * 4);
+            }
+          }
         }
         g.drawImage(glowSprite(col), p.x - 16, p.y - 16 + bob, 32, 32);
         g.globalCompositeOperation = 'source-over';
         g.save(); g.translate(p.x, p.y + bob); g.rotate(p.spin + t * 0.5);
-        g.fillStyle = '#20242c'; g.fillRect(-5, -5, 10, 10); g.strokeStyle = col; g.lineWidth = 1.6; g.strokeRect(-5, -5, 10, 10);
-        g.fillStyle = col; g.fillRect(-2, -2, 4, 4); g.restore();
+        if (p.kind === 'drone') { g.fillStyle = '#2a3038'; g.beginPath(); g.moveTo(7, 0); g.lineTo(-5, -5); g.lineTo(-2, 0); g.lineTo(-5, 5); g.closePath(); g.fill(); g.strokeStyle = col; g.lineWidth = 1.4; g.stroke(); }
+        else { g.fillStyle = '#20242c'; g.fillRect(-5, -5, 10, 10); g.strokeStyle = col; g.lineWidth = 1.6; g.strokeRect(-5, -5, 10, 10); g.fillStyle = col; g.fillRect(-2, -2, 4, 4); }
+        g.restore();
         g.globalCompositeOperation = 'lighter';
-        lc_light(p.x, p.y, 80 + big * 40, col, 0.6);
+        lc_light(p.x, p.y, (80 + big * 40) * (big >= 3 ? 2 : 1), col, big >= 3 ? 0.9 : 0.6);
+      } else if (p.kind === 'cache') {
+        // a sealed gold crate: slow pulse, a glint sweeping across the lid, light rays
+        const pulse = 0.7 + 0.3 * Math.sin(t * 2.2 + p.id);
+        g.globalAlpha = 0.6 * pulse; g.drawImage(glowSprite(col), p.x - 26, p.y - 26 + bob, 52, 52); g.globalAlpha = 1;
+        g.save(); g.translate(p.x, p.y + bob); g.rotate(t * 0.5);
+        for (let i = 0; i < 6; i++) { g.rotate(Math.PI / 3); g.fillStyle = hexA(col, 0.1 * pulse); g.beginPath(); g.moveTo(0, 0); g.lineTo(30, -2.5); g.lineTo(30, 2.5); g.fill(); }
+        g.restore();
+        g.globalCompositeOperation = 'source-over';
+        g.save(); g.translate(p.x, p.y + bob); g.rotate((p.spin || 0) + t * 0.3);
+        g.fillStyle = '#5a4416'; g.fillRect(-7, -6, 14, 12); g.fillStyle = '#c89a2a'; g.fillRect(-7, -6, 14, 3); g.fillRect(-1.2, -6, 2.4, 12);
+        g.strokeStyle = '#ffe48a'; g.lineWidth = 1.2; g.strokeRect(-7, -6, 14, 12);
+        const gl = ((t * 0.7 + p.id * 0.13) % 2) - 0.5;   // glint passes every couple of seconds
+        if (gl > 0 && gl < 1) { g.globalCompositeOperation = 'lighter'; g.fillStyle = 'rgba(255,250,220,0.8)'; g.beginPath(); const gx = -9 + gl * 18; g.moveTo(gx, -6); g.lineTo(gx + 3, -6); g.lineTo(gx - 1, 6); g.lineTo(gx - 4, 6); g.fill(); }
+        g.restore(); g.globalCompositeOperation = 'lighter';
+        lc_light(p.x, p.y, 90, col, 0.5 * pulse);
+      } else if (p.kind === 'data') {
+        // a small cyan data core: a spinning hexagon with a bright centre
+        g.drawImage(glowSprite(col), p.x - 12, p.y - 12 + bob, 24, 24);
+        g.save(); g.translate(p.x, p.y + bob); g.rotate(t * 1.6 + p.id);
+        g.strokeStyle = col; g.lineWidth = 1.3; g.beginPath(); for (let i = 0; i < 6; i++) g.lineTo(Math.cos(i * Math.PI / 3) * 5, Math.sin(i * Math.PI / 3) * 5); g.closePath(); g.stroke();
+        g.fillStyle = '#ffffff'; g.fillRect(-1.5, -1.5, 3, 3); g.restore();
+        lc_light(p.x, p.y, 50, col, 0.4);
       } else if (p.kind === 'pod') {
         g.globalCompositeOperation = 'source-over';
         g.fillStyle = '#d8dde4'; g.beginPath(); g.ellipse(p.x, p.y, 6, 4, p.spin + t * 0.4, 0, 7); g.fill();
@@ -304,15 +304,19 @@ export function createRenderer(view, overlay, opts = {}) {
         g.globalCompositeOperation = 'lighter';
       }
     }
-    // shots
+    // shots — stronger weapons (higher tier or rarer part, p.vis) get bigger glows, longer trails and orbiting motes
+    const liveShots = new Map();
     for (const p of w.shots) {
-      if (!vis(p.x, p.y, 60)) continue;
-      const a = Math.atan2(p.vy, p.vx); const c = p.color;
+      const pv = p.vis || 0;
+      if (pv >= 1 && p.kind !== 'harpoon' && p.kind !== 'mine') liveShots.set(p.id, { x: p.x, y: p.y, vis: pv, color: p.color, rc: p.rc, life: p.life, vx: p.vx, vy: p.vy });
+      if (!vis(p.x, p.y, 60 + pv * 20)) continue;
+      const a = Math.atan2(p.vy, p.vx); const c = p.color; const vk = 1 + pv * 0.3;
+      if (pv >= 1 && p.kind !== 'harpoon' && p.kind !== 'mine') shotPower(g, p, a, pv, t);
       switch (p.kind) {
-        case 'bolt': case 'pulse': { const L = p.kind === 'pulse' ? 10 : 22; g.strokeStyle = c; g.lineWidth = p.w?.size === 'm' ? 4 : 2.6; streak(g, p.x, p.y, a, L, c); lc_light(p.x, p.y, 50, c, 0.5); break; }
+        case 'bolt': case 'pulse': { const L = (p.kind === 'pulse' ? 10 : 22) * (1 + pv * 0.35); g.strokeStyle = c; g.lineWidth = (p.w?.size === 'm' ? 4 : 2.6) * (1 + pv * 0.18); streak(g, p.x, p.y, a, L, c); lc_light(p.x, p.y, 50 * vk, c, 0.5); break; }
         case 'bullet': g.strokeStyle = '#fff2c0'; g.lineWidth = 1.4; line(g, p.x, p.y, p.x - Math.cos(a) * 12, p.y - Math.sin(a) * 12); break;
-        case 'shell': case 'slug': { g.drawImage(glowSprite(c), p.x - 8, p.y - 8, 16, 16); g.strokeStyle = hexA(c, 0.6); g.lineWidth = p.kind === 'slug' ? 3 : 2; line(g, p.x, p.y, p.x - Math.cos(a) * (p.kind === 'slug' ? 40 : 18), p.y - Math.sin(a) * (p.kind === 'slug' ? 40 : 18)); lc_light(p.x, p.y, 50, c, 0.4); break; }
-        case 'plasma': { const s = p.w?.size === 'l' ? 16 : p.w?.size === 'm' ? 12 : 7; const wob = 1 + Math.sin(t * 30 + p.id) * 0.15; g.drawImage(glowSprite(c), p.x - s * 1.5 * wob, p.y - s * 1.5 * wob, s * 3 * wob, s * 3 * wob); g.drawImage(glowSprite('#ffffff', 0.5), p.x - s * 0.5, p.y - s * 0.5, s, s); lc_light(p.x, p.y, s * 8, c, 0.6); break; }
+        case 'shell': case 'slug': { g.drawImage(glowSprite(c), p.x - 8 * vk, p.y - 8 * vk, 16 * vk, 16 * vk); g.strokeStyle = hexA(c, 0.6); g.lineWidth = p.kind === 'slug' ? 3 : 2; line(g, p.x, p.y, p.x - Math.cos(a) * (p.kind === 'slug' ? 40 : 18), p.y - Math.sin(a) * (p.kind === 'slug' ? 40 : 18)); lc_light(p.x, p.y, 50, c, 0.4); break; }
+        case 'plasma': { const s = (p.w?.size === 'l' ? 16 : p.w?.size === 'm' ? 12 : 7) * (1 + pv * 0.2); const wob = 1 + Math.sin(t * 30 + p.id) * 0.15; g.drawImage(glowSprite(c), p.x - s * 1.5 * wob, p.y - s * 1.5 * wob, s * 3 * wob, s * 3 * wob); g.drawImage(glowSprite('#ffffff', 0.5), p.x - s * 0.5, p.y - s * 0.5, s, s); lc_light(p.x, p.y, s * 8, c, 0.6); break; }
         case 'missile': case 'rocket': case 'torpedo': {
           const big = p.kind === 'torpedo' ? 2.4 : p.kind === 'missile' ? 1.2 : 1;
           g.globalCompositeOperation = 'source-over'; g.save(); g.translate(p.x, p.y); g.rotate(a);
@@ -323,21 +327,25 @@ export function createRenderer(view, overlay, opts = {}) {
           if (fx.parts.length < fx.max * fx.quality && Math.random() < 0.7) fx.parts.push({ k: 'smoke', x: p.x - Math.cos(a) * 6 * big, y: p.y - Math.sin(a) * 6 * big, vx: 0, vy: 0, life: 0.7 * big, age: 0, color: '#6a6560', size: 4 * big, drag: 0.95, grow: 1.6, rot: 0 });
           break;
         }
-        case 'flak': g.drawImage(glowSprite(c), p.x - 5, p.y - 5, 10, 10); break;
+        case 'flak': g.drawImage(glowSprite(c), p.x - 5 * vk, p.y - 5 * vk, 10 * vk, 10 * vk); break;
         case 'mine': { const blink = Math.sin(t * 8 + p.id) > 0.3; g.globalCompositeOperation = 'source-over'; g.fillStyle = '#3a3a40'; g.beginPath(); g.arc(p.x, p.y, 6, 0, 7); g.fill(); g.globalCompositeOperation = 'lighter'; if (blink) g.drawImage(glowSprite(c), p.x - 9, p.y - 9, 18, 18); break; }
         case 'harpoon': { g.globalCompositeOperation = 'source-over'; g.strokeStyle = '#c8d0d8'; g.lineWidth = 1.5; const o = p.owner; line(g, o.x, o.y, p.x, p.y); g.save(); g.translate(p.x, p.y); g.rotate(a); g.fillStyle = '#e8eef2'; g.beginPath(); g.moveTo(8, 0); g.lineTo(-4, -4); g.lineTo(-2, 0); g.lineTo(-4, 4); g.fill(); g.restore(); g.globalCompositeOperation = 'lighter'; break; }
-        default: g.drawImage(glowSprite(c), p.x - 6, p.y - 6, 12, 12);
+        default: g.drawImage(glowSprite(c), p.x - 6 * vk, p.y - 6 * vk, 12 * vk, 12 * vk);
       }
     }
-    // beams: wide soft glow + bright core + hot end
+    // a strong shot that vanished before its time ran out hit something: a bigger impact for bigger guns
+    for (const [id, o] of R.lastShots) if (!liveShots.has(id) && o.life > 0.04 && vis(o.x, o.y, 100)) impactFx(fx, o.x + o.vx / 120, o.y + o.vy / 120, o.color, o.vis, o.rc);
+    R.lastShots = liveShots;
+    // beams: wide soft glow + bright core + hot end; stronger beams (bm.vis) get helix strands wrapped round the core
     for (const bm of w.beams) {
       const wd = Math.max(1, bm.width);
       const flick = 0.85 + Math.random() * 0.3;
+      if (bm.vis >= 1) beamHelix(g, bm, wd, t, z);
       g.strokeStyle = hexA(bm.color, 0.25); g.lineWidth = wd * 4 * flick; g.lineCap = 'round'; line(g, bm.x, bm.y, bm.x2, bm.y2);
       g.strokeStyle = hexA(bm.color, 0.7); g.lineWidth = wd * 1.6; line(g, bm.x, bm.y, bm.x2, bm.y2);
       g.strokeStyle = '#ffffff'; g.lineWidth = Math.max(0.8, wd * 0.5); line(g, bm.x, bm.y, bm.x2, bm.y2);
       g.lineCap = 'butt';
-      if (bm.hit) { const s = 10 + wd * 5; g.drawImage(glowSprite(bm.color), bm.x2 - s, bm.y2 - s, s * 2, s * 2); if (Math.random() < 0.5 && fx.parts.length < fx.max) fx.parts.push({ k: 'spark', x: bm.x2, y: bm.y2, vx: (Math.random() - 0.5) * 300, vy: (Math.random() - 0.5) * 300, life: 0.25, age: 0, color: bm.tool === 'mine' ? '#ffd080' : bm.color, w: 1.4, drag: 0.9 }); }
+      if (bm.hit) { const s = (10 + wd * 5) * (1 + Math.min(4, bm.vis || 0) * 0.18); g.drawImage(glowSprite(bm.color), bm.x2 - s, bm.y2 - s, s * 2, s * 2); if (bm.vis >= 3) { const s2 = s * (0.45 + Math.random() * 0.3); g.drawImage(glowSprite(bm.rc || '#ffffff', 0.4), bm.x2 - s2, bm.y2 - s2, s2 * 2, s2 * 2); lc_light(bm.x2, bm.y2, 60 + bm.vis * 30, bm.rc || bm.color, 0.7); } if (Math.random() < 0.5 && fx.parts.length < fx.max) fx.parts.push({ k: 'spark', x: bm.x2, y: bm.y2, vx: (Math.random() - 0.5) * 300, vy: (Math.random() - 0.5) * 300, life: 0.25, age: 0, color: bm.tool === 'mine' ? '#ffd080' : bm.color, w: 1.4, drag: 0.9 }); }
       const L = Math.hypot(bm.x2 - bm.x, bm.y2 - bm.y); const n = Math.max(2, Math.min(8, L / 80));
       for (let i = 0; i <= n; i++) { const tt = i / n; lc_light(bm.x + (bm.x2 - bm.x) * tt, bm.y + (bm.y2 - bm.y) * tt, 30 + wd * 12, bm.color, 0.35); }
     }
@@ -359,6 +367,20 @@ export function createRenderer(view, overlay, opts = {}) {
         case 'ring': { g.globalAlpha = f; g.strokeStyle = p.color; g.lineWidth = p.w * f + 0.5; const r = p.r0 + (p.r1 - p.r0) * Math.sqrt(p.age / p.life); g.beginPath(); g.arc(p.x, p.y, r, 0, 7); g.stroke(); break; }
         case 'bolt': { g.globalAlpha = Math.min(1, f * 1.5); g.strokeStyle = p.color; g.lineWidth = p.w * 2.6; poly(g, p.pts); g.strokeStyle = '#ffffff'; g.lineWidth = p.w * 0.8; poly(g, p.pts); break; }
         case 'line': { g.globalAlpha = f; g.lineCap = 'round'; g.strokeStyle = hexA(p.color, 0.5); g.lineWidth = p.w * 2 * f; line(g, p.x, p.y, p.x2, p.y2); g.strokeStyle = '#ffffff'; g.lineWidth = p.w * 0.5 * f; line(g, p.x, p.y, p.x2, p.y2); g.lineCap = 'butt'; break; }
+        case 'scan': { // a scanner pulse: an expanding cyan ring with a radar sweep behind it
+          const k = p.age / p.life; const rr = p.r * Math.sqrt(k); const sw = t * 6 + p.a0;
+          g.globalAlpha = f; g.strokeStyle = '#7af7ff'; g.lineWidth = (3 + 4 * f) / Math.sqrt(Math.max(0.1, z)); g.beginPath(); g.arc(p.x, p.y, rr, 0, 7); g.stroke();
+          g.globalAlpha = f * 0.25; g.fillStyle = '#7af7ff'; g.beginPath(); g.moveTo(p.x, p.y); g.arc(p.x, p.y, rr, sw - 0.7, sw); g.closePath(); g.fill();
+          break;
+        }
+        case 'pillar': { // a column of light shooting up from a rare drop, fading from the bottom up
+          const k = p.age / p.life; const hh = p.h * Math.min(1, k * 5) / Math.sqrt(Math.max(0.15, z)); const ww = p.w * (1 - k * 0.6) / Math.sqrt(Math.max(0.3, z));
+          const gr = g.createLinearGradient(p.x, p.y, p.x, p.y - hh);
+          gr.addColorStop(0, hexA(p.color, 0)); gr.addColorStop(0.08, hexA(p.color, 0.8 * f)); gr.addColorStop(0.5, hexA(p.color, 0.35 * f)); gr.addColorStop(1, hexA(p.color, 0));
+          g.globalAlpha = 1; g.fillStyle = gr; g.fillRect(p.x - ww, p.y - hh, ww * 2, hh);
+          g.fillStyle = hexA('#ffffff', 0.55 * f); g.fillRect(p.x - ww * 0.25, p.y - hh * 0.8, ww * 0.5, hh * 0.8);
+          break;
+        }
         case 'shard': { // a bright arc on the shield where it was hit
           g.globalAlpha = f; g.strokeStyle = p.color; g.lineWidth = 3 * f + 1; const an = Math.atan2(p.y - p.cy, p.x - p.cx); const span = 0.12 + p.w / 120;
           g.beginPath(); g.arc(p.cx, p.cy, p.R, an - span, an + span); g.stroke();
@@ -401,7 +423,8 @@ export function createRenderer(view, overlay, opts = {}) {
         const k = v.age / v.life; const rr = v.maxR * Math.sqrt(k) * z / H;
         return { x: ((v.x - cam.x) * z + W / 2 + shakeX) / W, y: 1 - ((v.y - cam.y) * z + H / 2 + shakeY) / H, r: rr, s: v.strength * (1 - k), th: Math.max(0.01, 0.06 * (1 - k * 0.5)) };
       });
-      post.render(scene, lightC, { waves, ambient: ui.ambient ?? 0.8, bloom: ui.bloom ?? 0.9, flash: fx.flash, flashColor: fx.flashColor, vignette: 0.85 });
+      const P0 = w.player; const bc = P0 ? [((P0.x - cam.x) * z + W / 2) / W, 1 - ((P0.y - cam.y) * z + H / 2) / H] : [0.5, 0.5];
+      post.render(scene, lightC, { waves, ambient: ui.ambient ?? 0.8, bloom: ui.bloom ?? 0.9, flash: fx.flash, flashColor: fx.flashColor, vignette: 0.85 + (ui.boost || 0) * 0.35, boost: (ui.boost || 0) * (R.quality >= 1 ? 1 : 0.6), boostC: bc });
       view.style.transform = fx.shake > 0.5 ? `translate(${shakeX / R.dpr}px,${shakeY / R.dpr}px)` : '';
     } else {
       view2d.setTransform(1, 0, 0, 1, 0, 0); view2d.drawImage(scene, shakeX, shakeY);
@@ -435,6 +458,92 @@ export function createRenderer(view, overlay, opts = {}) {
     oc.globalAlpha = 1;
     if (ui.overlay) ui.overlay(oc, { ox, oy, oz, ok, ow, oh });
   };
+
+  /** Extra layers on a strong projectile: a longer fading trail, a wider halo, and motes circling it (vis 2+). */
+  function shotPower(g, p, a, pv, t) {
+    const c = p.color, tint = p.rc || c; const ca = Math.cos(a), sa = Math.sin(a);
+    const L = 18 + pv * 16; g.lineCap = 'round';
+    for (let k = 0; k < 3; k++) { g.strokeStyle = hexA(tint, (0.32 - k * 0.09) * Math.min(1, 0.5 + pv * 0.2)); g.lineWidth = (2 + pv * 0.9) * (1 - k * 0.25); line(g, p.x - ca * L * k / 3, p.y - sa * L * k / 3, p.x - ca * L * (k + 1) / 3, p.y - sa * L * (k + 1) / 3); }
+    g.lineCap = 'butt';
+    const h = 7 + pv * 4; g.globalAlpha = Math.min(0.8, 0.3 + pv * 0.12); g.drawImage(glowSprite(tint), p.x - h, p.y - h, h * 2, h * 2); g.globalAlpha = 1;
+    if (pv >= 2) {
+      const n = Math.min(3, pv - 1), rr = 4 + pv * 1.6, ms = 2.5 + pv * 0.6;
+      for (let i = 0; i < n; i++) {
+        const an = t * 18 + (p.id % 7) + i * Math.PI * 2 / n; const ox = Math.cos(an) * rr, oy = Math.sin(an) * rr * 0.55;   // a tilted orbit round the flight line
+        const mx = p.x + ca * ox - sa * oy, my = p.y + sa * ox + ca * oy;
+        g.drawImage(glowSprite(i % 2 ? '#ffffff' : tint, 0.3), mx - ms, my - ms, ms * 2, ms * 2);
+      }
+    }
+    if (pv >= 3) lc_light(p.x, p.y, 40 + pv * 18, tint, 0.35);
+  }
+
+  /** Helix strands that wrap round a beam: 1 strand at vis 1, a double helix at 2, more plus sparkles at 3+. */
+  function beamHelix(g, bm, wd, t, z) {
+    const dx = bm.x2 - bm.x, dy = bm.y2 - bm.y; const L = Math.hypot(dx, dy); if (L < 4) return;
+    const ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+    const v = bm.vis; const strands = v >= 5 ? 4 : v >= 3 ? 3 : v;
+    const amp = wd * 1.3 + 2.5 + Math.min(4, v) * 0.9, lam = 58 + wd * 5, spin = t * 14 * (bm.tool === 'mine' ? 0.8 : 1);
+    const col = bm.rc || mixHex(bm.color, '#ffffff', 0.35);
+    const step = Math.max(3, Math.min(8, 4 / Math.sqrt(Math.max(0.05, z)))); const n = Math.min(140, Math.ceil(L / step));
+    const fade = s => Math.min(1, s / 18, (L - s) / 10 + 0.3);   // strands start at the muzzle and taper at the far end
+    g.lineCap = 'round';
+    for (let k = 0; k < strands; k++) {
+      const ph = k * Math.PI * 2 / strands;
+      // two passes: the half of each turn behind the beam is dim and thin, the half in front is bright and thick
+      for (const front of [false, true]) {
+        g.strokeStyle = hexA(col, front ? 0.85 : 0.3); g.lineWidth = (front ? 1.6 : 1) * Math.max(1, wd * 0.45) * (1 + Math.min(3, v) * 0.12);
+        g.beginPath(); let pen = false;
+        for (let i = 0; i <= n; i++) {
+          const s = i / n * L; const th = s / lam * Math.PI * 2 - spin + ph;
+          const depth = Math.cos(th); const isFront = depth >= 0;
+          const off = Math.sin(th) * amp * fade(s);
+          const px = bm.x + ux * s + nx * off, py = bm.y + uy * s + ny * off;
+          if (isFront === front) { if (pen) g.lineTo(px, py); else { g.moveTo(px, py); pen = true; } } else pen = false;
+        }
+        g.stroke();
+      }
+    }
+    g.lineCap = 'butt';
+    if (v >= 3 && fx_ref && fx_ref.parts.length < fx_ref.max * fx_ref.quality) {
+      const count = R.quality >= 1 ? Math.min(4, v - 1) : 1;
+      for (let i = 0; i < count; i++) if (Math.random() < 0.6) {
+        const s = Math.random() * L; const off = (Math.random() - 0.5) * amp * 2;
+        fx_ref.parts.push({ k: 'glow', x: bm.x + ux * s + nx * off, y: bm.y + uy * s + ny * off, vx: nx * (Math.random() - 0.5) * 60, vy: ny * (Math.random() - 0.5) * 60, life: 0.35, age: 0, color: Math.random() < 0.5 ? '#ffffff' : col, size: 2.5 + Math.random() * 2.5, drag: 0.9, grow: 0 });
+      }
+    }
+    if (v >= 2) { const m = Math.max(2, Math.min(6, L / 120)); for (let i = 0; i <= m; i++) lc_light(bm.x + dx * i / m, bm.y + dy * i / m, 30 + v * 10, col, 0.18); }
+  }
+  let fx_ref = null;
+
+  R.streaks = [];
+  function speedLines(g, w, cam, z, k, W, H) {
+    const P = w.player; const L = R.streaks;
+    if (P && k > 0.02) {
+      const sp = Math.hypot(P.vx, P.vy); const want = Math.round((R.quality >= 1 ? 70 : 30) * k);
+      const hw = W / 2 / z, hh = H / 2 / z;
+      // new lines appear across the view, mostly ahead of the ship so they sweep past it
+      let tries = 0;
+      while (L.length < want && tries++ < 12) {
+        const ux = P.vx / (sp || 1), uy = P.vy / (sp || 1);
+        const ahead = (Math.random() * 1.6 - 0.3) * Math.max(hw, hh);
+        L.push({ x: cam.x + ux * ahead + (Math.random() - 0.5) * hw * 2.2 * Math.abs(uy) + (Math.random() - 0.5) * hw * 0.4, y: cam.y + uy * ahead + (Math.random() - 0.5) * hh * 2.2 * Math.abs(ux) + (Math.random() - 0.5) * hh * 0.4, life: 0.5 + Math.random() * 0.5, age: 0 });
+      }
+    }
+    if (!L.length) return;
+    const dt = Math.min(0.05, R.lastDt || 1 / 60);
+    const vx = P ? P.vx : 0, vy = P ? P.vy : 0; const sp = Math.hypot(vx, vy) || 1;
+    const len = Math.min(900, sp * 0.16 + 40);
+    g.globalCompositeOperation = 'lighter'; g.lineCap = 'round';
+    for (let i = L.length - 1; i >= 0; i--) {
+      const s = L[i]; s.age += dt;
+      const off = Math.abs(s.x - cam.x) * z > W * 0.8 || Math.abs(s.y - cam.y) * z > H * 0.8;
+      if (s.age >= s.life || off) { L.splice(i, 1); continue; }
+      const f = Math.sin(s.age / s.life * Math.PI) * Math.max(0, k);
+      g.strokeStyle = hexA('#cfe6ff', 0.32 * f); g.lineWidth = 1.4 / z;
+      line(g, s.x, s.y, s.x - vx / sp * len, s.y - vy / sp * len);
+    }
+    g.lineCap = 'butt'; g.globalCompositeOperation = 'source-over';
+  }
 
   const frameLights = [];
   function lc_light(x, y, r, color, k) { if (frameLights.length < 600) frameLights.push({ x, y, r, color, k }); }

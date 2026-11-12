@@ -13,6 +13,9 @@ export function el(tag, attrs = {}, ...kids) {
 }
 export const btn = (label, fn, cls = '') => el('button', { class: cls, onclick: (e) => { e.stopPropagation(); fn(e); } }, label);
 export const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+import { fmt as fmtD } from '../../../../shared/format.js';
+/** Distance in km (world units are metres): "1.5 km". */
+export const km = v => `${fmtD((v || 0) / 1000, { decimals: 1 })} km`;
 export const fmt = n => { n = Math.round(n || 0); return Math.abs(n) >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M' : Math.abs(n) >= 1e4 ? (n / 1e3).toFixed(n >= 1e5 ? 0 : 1) + 'k' : n.toLocaleString(); };
 export const pct = v => `${v >= 0 ? '+' : ''}${Math.round(v * 100)}%`;
 
@@ -62,3 +65,6 @@ export function tip(target, html) {
   target.addEventListener('mouseleave', () => { tipEl?.remove(); tipEl = null; });
 }
 export const clearTip = () => { tipEl?.remove(); tipEl = null; };
+
+/** A sideways row of tabs on a phone: keep the selected one in view after a redraw. */
+export function showSelected(row) { requestAnimationFrame(() => { const on = row.querySelector('.on'); if (on && row.scrollWidth > row.clientWidth) row.scrollLeft = Math.max(0, on.offsetLeft - row.offsetLeft - 16); }); return row; }

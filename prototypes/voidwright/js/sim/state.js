@@ -19,11 +19,12 @@ export function newGame({ seed = (Math.random() * 1e9) | 0, slot = 0, name = 'Ca
   const r = rng(seed);
   const G = {
     v: SAVE_VERSION, seed, slot, name, created: Date.now(), playTime: 0,
-    credits: 400, cargo: { ferrite: 10 }, drive: 1, goods: {}, parts: [], specimens: [], passengers: 0,
-    ship: { design: 'sparrow', cls: ship.cls, name: 'Sparrow', grid: gridToJSON(ship.grid), crew: ship.crew },
+    credits: 400, cargo: { ferrite: 10, rock: 10 }, drive: 1, goods: {}, parts: [], specimens: [],
+    ship: { design: 'sparrow', cls: ship.cls, name: 'Sparrow', grid: gridToJSON(ship.grid), crew: ship.crew, drones: [] },
     hangar: [],                  // other owned ships: [{ design, cls, name, grid, crew }]
     designs: [],                 // saved build-mode layouts
-    drones: [],                  // drone kinds in the bay
+    droneItems: [],              // drone items you own: [{ uid, kind, rarity, name }] — fitted ones are in ship.drones
+    caches: [], uniques: [],     // sealed caches to crack at a station; named uniques found (collection log)
     rep: { guild: 10, navy: 5, redfang: -60, vesh: -100, lattice: -100, ossari: -100, kharr: -100 },
     system: gal.start, docked: null, lastStation: { system: gal.start },
     insured: false, insurance: { tier: 0 },
@@ -58,7 +59,7 @@ export function storeShip(G, s) {
 }
 
 export function save(G) {
-  G.itemCounter = itemCounter();
+  G.itemCounter = itemCounter(); G.droneUid = droneUid;
   G.savedAt = Date.now();
   const ok = ls.set(KEY(G.slot), JSON.stringify(G));
   ls.set('voidwright.last', String(G.slot));
@@ -67,7 +68,7 @@ export function save(G) {
 }
 export function load(slot) {
   const raw = ls.get(KEY(slot)); if (!raw) return null;
-  try { const G = JSON.parse(raw); setItemCounter(G.itemCounter || 1); return G; } catch { return null; }
+  try { const G = JSON.parse(raw); setItemCounter(G.itemCounter || 1); setDroneUid(G.droneUid || 1 + (G.droneItems || []).reduce((m, d) => Math.max(m, d.uid), 0)); return G; } catch { return null; }
 }
 export function slots() {
   const out = [];
@@ -77,3 +78,16 @@ export function slots() {
 export const lastSlot = () => +(ls.get('voidwright.last') ?? -1);
 export const deleteSlot = slot => ls.del(KEY(slot));
 export function sysMem(G, id) { return (G.sys[id] ||= { dead: [], looted: [], claims: [] }); }
+
+/** A drone item (bought, crafted or looted). */
+export function makeDroneItem(kind, rarity = 'common', uid = null) {
+  return { uid: uid ?? nextDroneUid(), kind, rarity };
+}
+let droneUid = 1;
+const nextDroneUid = () => droneUid++;
+export const setDroneUid = n => { droneUid = Math.max(droneUid, n); };
+/** The drone items fitted to the flagship, up to its drone-port capacity. */
+export function fittedDrones(G, cap) {
+  const ids = (G.ship.drones || []).slice(0, cap);
+  return ids.map(u => (G.droneItems || []).find(d => d.uid === u)).filter(Boolean);
+}

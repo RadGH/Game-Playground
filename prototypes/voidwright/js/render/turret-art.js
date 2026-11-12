@@ -29,6 +29,12 @@ const STYLES = {
   storm_spire:  { body: 'orb', bodyR: 0.36, orbR: 0.34, rings: true, tip: '#c8a0ff' },
   mining_laser: { barrels: 1, len: 0.6, wid: 0.12, gap: 0, body: 'round', bodyR: 0.3, lens: true, tip: '#7dff9a' },
   big_mining_laser: { barrels: 2, len: 0.7, wid: 0.12, gap: 0.16, body: 'round', bodyR: 0.36, lens: true, tip: '#9dffb0' },
+  // stepped-up mining lasers (2026-11-12): longer, cooled barrel; tier 3 adds focusing prongs on a ring mount
+  mining_laser_2: { barrels: 1, len: 0.68, wid: 0.14, gap: 0, body: 'round', bodyR: 0.32, lens: true, coils: true, tip: '#8dffb0' },
+  mining_laser_3: { barrels: 1, len: 0.78, wid: 0.16, gap: 0, body: 'ring', bodyR: 0.34, lens: true, coils: true, prongs: true, tip: '#b0ffd0' },
+  // sentries: self-contained automatic mounts — an armoured hexagon dome with a sweeping sensor eye
+  sentry_gun:   { barrels: 2, len: 0.55, wid: 0.07, gap: 0.11, body: 'sentry', bodyR: 0.34, brake: true, tip: '#ffe08a' },
+  sentry_laser: { barrels: 1, len: 0.66, wid: 0.11, gap: 0, body: 'sentry', bodyR: 0.34, lens: true, prongs: true, tip: '#ff6a9a' },
   harpoon:      { body: 'harpoon', bodyR: 0.3, tip: '#d0d8e0' },
   tractor:      { body: 'ring', bodyR: 0.3, barrels: 0, tip: '#7fd0ff' },
   acid_spitter: { body: 'bulb', bodyR: 0.3, barrels: 1, len: 0.5, wid: 0.14, gap: 0, organic: true, tip: '#a6ff4a' },
@@ -66,6 +72,7 @@ export function drawTurret(c, id, S, kick, t, pal, glowCtx) {
       c.fillStyle = 'rgba(255,255,255,0.22)'; c.fillRect(back, off - wd / 2, L, Math.max(0.6, wd * 0.3));
       if (st.coils) { c.fillStyle = metal; for (let k = 0.25; k < 0.9; k += 0.18) c.fillRect(back + L * k, off - wd * 0.9, L * 0.06, wd * 1.8); }
       if (st.brake) { c.fillStyle = dark; c.fillRect(back + L * 0.86, off - wd * 0.8, L * 0.14, wd * 1.6); }
+      if (st.prongs) { c.strokeStyle = metal; c.lineWidth = Math.max(0.7, wd * 0.35); for (const sg of [-1, 1]) { c.beginPath(); c.moveTo(back + L * 0.2, off + sg * wd * 1.5); c.lineTo(back + L * 0.95, off + sg * wd * 0.75); c.stroke(); } }
       if (st.flare) { c.fillStyle = mid; c.beginPath(); c.moveTo(back + L * 0.6, off - wd * 0.5); c.lineTo(back + L, off - wd * 1.4); c.lineTo(back + L, off + wd * 1.4); c.lineTo(back + L * 0.6, off + wd * 0.5); c.fill(); }
       if (st.lens) { c.fillStyle = st.tip; c.fillRect(back + L - wd * 0.6, off - wd * 0.45, wd * 0.6, wd * 0.9); if (glowCtx) { glowCtx.fillStyle = st.tip; glowCtx.fillRect(back + L - wd * 0.6, off - wd * 0.45, wd * 0.6, wd * 0.9); } }
       else { c.fillStyle = st.tip; c.globalAlpha = 0.8; c.fillRect(back + L - Math.max(1, wd * 0.4), off - wd / 2, Math.max(1, wd * 0.4), wd); c.globalAlpha = 1; }
@@ -102,6 +109,16 @@ export function drawTurret(c, id, S, kick, t, pal, glowCtx) {
     case 'ring': c.beginPath(); c.arc(0, 0, R, 0, 7); c.fill(); c.stroke(); c.strokeStyle = st.tip; c.lineWidth = Math.max(1, S * 0.08); c.beginPath(); c.arc(0, 0, R * 0.6, 0, 7); c.stroke(); break;
     case 'crystal': c.fillStyle = '#6a4a7a'; c.beginPath(); c.moveTo(R * 1.1, 0); c.lineTo(0, -R); c.lineTo(-R * 0.8, 0); c.lineTo(0, R); c.closePath(); c.fill(); c.stroke(); c.fillStyle = st.tip; c.globalAlpha = 0.7; c.beginPath(); c.moveTo(R * 0.6, 0); c.lineTo(0, -R * 0.5); c.lineTo(-R * 0.3, 0); c.lineTo(0, R * 0.5); c.fill(); c.globalAlpha = 1; break;
     case 'hatch': c.beginPath(); c.rect(-R, -R, R * 2, R * 2); c.fill(); c.stroke(); c.fillStyle = '#e8c040'; for (let i = 0; i < 3; i++) c.fillRect(-R + i * R * 0.7, -R, R * 0.3, R * 2); c.fillStyle = st.tip; c.beginPath(); c.arc(0, 0, R * 0.25, 0, 7); c.fill(); break;
+    case 'sentry': {
+      // hexagon armour dome, dark sensor slot, and a glowing eye that sweeps side to side (it aims by itself)
+      c.beginPath(); for (let i = 0; i < 6; i++) { const an = i * Math.PI / 3 + Math.PI / 6; c.lineTo(Math.cos(an) * R + back * 0.3, Math.sin(an) * R); } c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = metal; c.globalAlpha = 0.55; c.beginPath(); c.arc(back * 0.3 - R * 0.15, -R * 0.2, R * 0.35, 0, 7); c.fill(); c.globalAlpha = 1;
+      c.fillStyle = dark; c.fillRect(back * 0.3 - R * 0.1, -R * 0.55, R * 0.5, R * 1.1);
+      const eye = Math.sin(t * 2.4) * R * 0.38;
+      c.fillStyle = st.tip; c.beginPath(); c.arc(back * 0.3 + R * 0.15, eye, R * 0.16, 0, 7); c.fill();
+      if (glowCtx) { glowCtx.fillStyle = st.tip; glowCtx.beginPath(); glowCtx.arc(back * 0.3 + R * 0.15, eye, R * 0.22, 0, 7); glowCtx.fill(); }
+      break;
+    }
     case 'harpoon': {
       c.beginPath(); c.arc(0, 0, R, 0, 7); c.fill(); c.stroke();
       c.fillStyle = '#9aa4ae'; c.fillRect(back, -S * 0.05, S * 0.7, S * 0.1);

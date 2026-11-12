@@ -146,7 +146,7 @@ export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, see
 
   // core in the middle of the spine
   const coreX = Math.max(1, Math.floor(len * 0.4));
-  set(coreX, half, CORE[U]);
+  set(coreX, half, gnat ? 'gnat_core' : CORE[U]);   // play-test #24: a gnat's last block must not be a tank
   // engines on the stern of every row, facing back
   for (let y = 0; y < wid; y++) { let x = 0; while (x < len && !isIn(x, y)) x++; if (x < len && (Math.abs(y - half) % 2 === 0 || r.chance(0.5))) set(x, y, ENGINE[U], 4); }
   // systems near the core

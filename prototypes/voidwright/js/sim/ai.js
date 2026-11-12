@@ -9,8 +9,10 @@ import { rand, setRand } from './rand.js';
 import { hostile, near, launchDrone } from './world.js';
 import { angDiff } from '../core/math.js';
 import { DRONES } from '../data/drones.js';
+import { escortThink } from './mercs.js';   // mercenary wingmen fly their own escort brain (sim/mercs.js)
 
 export function think(w, s, dt) {
+  if (s.wing) return escortThink(w, s, dt);
   const ai = s.ai || (s.ai = { t: 0, orbit: rand() < 0.5 ? 1 : -1, home: { x: s.x, y: s.y }, wander: null, target: null, look: 0 });
   ai.t += dt; ai.look -= dt;
   const inp = { mx: 0, my: 0, ax: s.x + Math.cos(s.a) * 100, ay: s.y + Math.sin(s.a) * 100, fire: false, missile: false, boost: false };

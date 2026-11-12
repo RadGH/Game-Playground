@@ -8,7 +8,7 @@ import { makeBody, recompute } from './ship.js';
 import { generateShip, generateStation, TIER_DMG, hardenEnemy } from './shipgen.js';
 import { ECONOMIES } from './economy.js';
 import { FACTIONS, factionsForTier } from '../data/factions.js';
-import { MATERIALS } from '../data/types.js';
+import { MATERIALS, matTier, matOf } from '../data/types.js';
 import { noise2 } from '../core/math.js';
 
 const SYL = ['ka', 'ri', 'vo', 'th', 'el', 'mar', 'dun', 'is', 'sol', 've', 'qu', 'ar', 'ne', 'tor', 'lu', 'xi', 'om', 'ba', 'cen', 'ty', 'gr', 'ul', 'phe', 'zan', 'or', 'wy'];
@@ -29,14 +29,17 @@ export const STAR_KINDS = {
 };
 
 export const PLANET_KINDS = {
-  rocky:   { name: 'Rocky world', base: '#7a6a5a', dark: '#3a3028', light: '#b8a890', ores: ['ferrite', 'silicate', 'titanium'] },
-  ice:     { name: 'Ice world', base: '#9ec8e0', dark: '#4a6880', light: '#e8f6ff', ores: ['ice', 'silicate', 'cobalt'] },
-  lava:    { name: 'Lava world', base: '#5a2a1a', dark: '#200a05', light: '#ff7a2a', ores: ['ferrite', 'iridium', 'cobalt'], glow: '#ff5a1a' },
-  jungle:  { name: 'Jungle world', base: '#3a7a3a', dark: '#1a3a1a', light: '#8ad06a', ores: ['carbon', 'cuprite', 'quartz'] },
-  desert:  { name: 'Desert world', base: '#c8a060', dark: '#6a4a20', light: '#f0d8a0', ores: ['silicate', 'quartz', 'titanium'] },
-  ocean:   { name: 'Ocean world', base: '#2a5a9a', dark: '#0a2040', light: '#7ab8f0', ores: ['ice', 'cuprite', 'helium3'] },
-  gas:     { name: 'Gas giant', base: '#c89a6a', dark: '#6a4a3a', light: '#f0d0a0', ores: ['helium3', 'ice', 'exotic'], gas: true },
-  crystal: { name: 'Crystal world', base: '#8a5aa0', dark: '#3a1a50', light: '#ffb8f4', ores: ['quartz', 'exotic', 'neutronium'], glow: '#ff9ef0' },
+  // ores list every tier's version of what this world gives; populate() keeps the ones near the system's tier
+  rocky:   { name: 'Rocky world', base: '#7a6a5a', dark: '#3a3028', light: '#b8a890', ores: ['ferrite', 'titanium', 'iridium', 'osmium', 'neutronium'], life: 0.25 },
+  ice:     { name: 'Ice world', base: '#9ec8e0', dark: '#4a6880', light: '#e8f6ff', ores: ['carbon', 'cobalt', 'helium3', 'antimatter'], life: 0.15 },
+  lava:    { name: 'Lava world', base: '#5a2a1a', dark: '#200a05', light: '#ff7a2a', ores: ['ferrite', 'titanium', 'iridium', 'osmium', 'neutronium'], glow: '#ff5a1a', life: 0 },
+  jungle:  { name: 'Jungle world', base: '#3a7a3a', dark: '#1a3a1a', light: '#8ad06a', ores: ['carbon', 'cobalt', 'helium3', 'quartz', 'diamond'], life: 0.7 },
+  desert:  { name: 'Desert world', base: '#c8a060', dark: '#6a4a20', light: '#f0d8a0', ores: ['ferrite', 'titanium', 'quartz', 'diamond', 'starglass'], life: 0.35 },
+  ocean:   { name: 'Ocean world', base: '#2a5a9a', dark: '#0a2040', light: '#7ab8f0', ores: ['carbon', 'cobalt', 'helium3', 'antimatter'], life: 0.7 },
+  gas:     { name: 'Gas giant', base: '#c89a6a', dark: '#6a4a3a', light: '#f0d0a0', ores: ['carbon', 'helium3', 'antimatter', 'voidplasma'], gas: true, life: 0 },
+  crystal: { name: 'Crystal world', base: '#8a5aa0', dark: '#3a1a50', light: '#ffb8f4', ores: ['quartz', 'diamond', 'starglass', 'exotic', 'relic'], glow: '#ff9ef0', life: 0 },
+  toxic:   { name: 'Toxic world', base: '#8a9a3a', dark: '#2a3010', light: '#d8f07a', ores: ['carbon', 'cobalt', 'helium3', 'antimatter', 'voidplasma'], life: 0.1 },
+  barren:  { name: 'Barren moon', base: '#8a8a90', dark: '#303034', light: '#d0d0d8', ores: ['ferrite', 'titanium', 'iridium', 'osmium', 'neutronium'], life: 0.05 },
 };
 
 /** Build the galaxy: ~46 stars, links between neighbours, tiers by jumps from the start. */
@@ -83,6 +86,9 @@ export function generateGalaxy(seed) {
     if (s.id === start.id) { s.owner = 'guild'; s.station = 'trade'; }
     // a shop variety per station
     s.shops = s.station === 'trade' ? pickShops(sr, s.tier) : s.station === 'pirate' ? ['market', 'blackmarket', 'bounty', 'repair', 'crew'] : [];
+    // Mercenaries (play-test #29): every den, about half the trade stations (more further in). Its own rng, so the
+    // rest of each system (features, planets) stays what older saves already know.
+    if (s.station === 'pirate' || (s.station === 'trade' && rng(hash(s.seed, 'mercs')).chance(0.45 + s.tier * 0.05))) s.shops.push('mercs');
     s.features = [];
     if (sr.chance(0.6)) s.features.push('derelict');
     if (sr.chance(0.45)) s.features.push('beacon');
@@ -136,10 +142,10 @@ export function traitWords(t) {
  */
 export const WARP_CORES = [
   { cls: 1, name: 'Class I warp core', reach: 2, cr: 0, mats: {} },
-  { cls: 2, name: 'Class II warp core', reach: 4, cr: 6000, mats: { cuprite: 20, titanium: 10 } },
-  { cls: 3, name: 'Class III warp core', reach: 6, cr: 30000, mats: { titanium: 30, cobalt: 20 } },
-  { cls: 4, name: 'Class IV warp core', reach: 8, cr: 120000, mats: { cobalt: 40, iridium: 20, helium3: 10 } },
-  { cls: 5, name: 'Class V warp core', reach: 10, cr: 400000, mats: { iridium: 50, exotic: 20 } },
+  { cls: 2, name: 'Class II warp core', reach: 4, cr: 6000, mats: { ferrite: 40, carbon: 30, quartz: 8 } },
+  { cls: 3, name: 'Class III warp core', reach: 6, cr: 30000, mats: { titanium: 40, cobalt: 30, diamond: 8 } },
+  { cls: 4, name: 'Class IV warp core', reach: 8, cr: 120000, mats: { iridium: 40, helium3: 30, starglass: 8 } },
+  { cls: 5, name: 'Class V warp core', reach: 10, cr: 400000, mats: { osmium: 40, antimatter: 30, exotic: 8 } },
 ];
 export const warpCore = G => WARP_CORES[Math.max(1, Math.min(WARP_CORES.length, G.drive || 1)) - 1];
 /** Can this save's warp core take it into a star of this danger? */
@@ -151,46 +157,63 @@ function link(a, b) { if (a === b) return; if (!a.links.includes(b.id)) a.links.
 
 function pickShops(r, tier) {
   const all = ['market', 'shipyard', 'outfitter', 'refinery', 'repair', 'crew', 'insurance', 'drones', 'lab', 'salvage', 'bounty', 'blackmarket'];
-  const always = ['market', 'repair', 'outfitter'];
+  const always = ['market', 'repair', 'outfitter', 'workshop'];
   const rest = all.filter(x => !always.includes(x) && x !== 'blackmarket');
   const extra = rest.filter(() => r.chance(0.55 + tier * 0.03));
   return [...always, ...extra];
 }
 
 // ------------------------------------------------------------------ asteroids
+/**
+ * Asteroids are TYPED (play-test #32: "there should be ferrite asteroids or diamond asteroids"): each one is
+ * rock with veins of ONE ore. `pickRockType` chooses it from the system's tier; a scanner reveals the type
+ * from far away (sim/scan.js), up close the veins show their colour.
+ */
+export function pickRockType(r, tier, rich = false) {
+  const t = matTier(tier);
+  // most rocks are this tier's ores, some are a tier lower; exotic is rare, plain rock is common
+  const lower = t > 1 && r.chance(0.25);
+  const tt = lower ? t - 1 : t;
+  const roll = r();
+  if (!rich && roll < 0.3) return 'rock';
+  // now and then a mixed "cluster" rock with every ore of the tier (owner: allowed, but not the norm)
+  if (r.chance(rich ? 0.15 : 0.08)) return 'mixed';
+  const p = rich ? [0.35, 0.7] : [0.6, 0.9];
+  const role = roll < p[0] ? 'structural' : roll < p[1] ? 'energy' : 'exotic';
+  return matOf(role, tt);
+}
 export function makeRock(seed, radius, tier, opts = {}) {
   const r = rng(seed); const n = noise2(seed);
   const size = Math.ceil(radius * 2 + 3);
   const g = createGrid(size, size);
-  const c = size / 2; const ores = oreTable(tier, opts.rich);
-  // ore veins come in clusters, from a second noise
+  const c = size / 2;
+  const type = opts.type || pickRockType(rng(hash(seed, 'type')), tier, opts.rich);
+  const exotic = MATERIALS[type]?.role === 'exotic';
+  const mixed = type === 'mixed' ? ['structural', 'energy', 'exotic'].map(ro => matOf(ro, matTier(tier))) : null;
+  // ore veins come in clusters, from a second noise; exotic veins are thinner, rich rocks are mostly ore
   const vein = noise2(seed + 7);
-  const veinMat = ores.map(o => o.mat);
+  const cut = (exotic ? 0.66 : 0.56) - (opts.rich ? 0.14 : 0);
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
     const dx = x + 0.5 - c, dy = y + 0.5 - c; const d = Math.hypot(dx, dy);
     const edge = radius * (0.72 + 0.4 * n.fbm(x * 0.18 + 3, y * 0.18 + 9, 3));
     if (d > edge) continue;
     const v = vein.fbm(x * 0.22, y * 0.22, 2);
     let id = 'rock';
-    if (v > 0.6 - (opts.rich ? 0.12 : 0)) {
-      const pick = veinMat[Math.floor(((v * 97 + Math.floor(x / 4) * 13 + Math.floor(y / 4) * 7) % veinMat.length + veinMat.length) % veinMat.length)];
-      id = 'ore_' + pick;
-    }
+    if (mixed && v > cut) id = 'ore_' + mixed[(Math.floor(x / 3) * 7 + Math.floor(y / 3) * 13) % 5 === 0 ? 2 : (Math.floor(x / 3) + Math.floor(y / 3)) % 2];
+    else if (type !== 'rock' && v > cut) id = 'ore_' + type;
     place(g, id, x, y);
   }
-  const body = makeBody('rock', g, { team: 'neutral', name: 'Asteroid', tier });
+  const body = makeBody('rock', g, { team: 'neutral', name: type === 'rock' ? 'Asteroid' : mixed ? 'Mixed ore cluster' : `${MATERIALS[type].name} asteroid`, tier });
+  body.oreType = type; body.rich = !!opts.rich;
   body.va = r.range(-0.15, 0.15) / Math.max(1, radius * 0.25);
   return body;
 }
 
+/** What a rich field / claim digs: the best ore of the tier (exotic for claims). */
 export function oreTable(tier, rich = false) {
-  const out = [];
-  for (const [mat, m] of Object.entries(MATERIALS)) {
-    if (m.alien) continue;
-    if (m.tier > tier + (rich ? 1 : 0)) continue;
-    const w = m.tier === 1 ? 4 : m.tier <= tier - 2 ? 2 : 1;
-    for (let i = 0; i < w; i++) out.push({ mat });
-  }
+  const t = matTier(tier);
+  const out = [{ mat: matOf('structural', t) }, { mat: matOf('energy', t) }];
+  if (rich) out.push({ mat: matOf('exotic', t) });
   return out;
 }
 
@@ -243,8 +266,10 @@ export function populate(w, sys, state = {}, opts = {}) {
     const kind = r.pick(Object.keys(PLANET_KINDS));
     const pk = PLANET_KINDS[kind];
     const pr = pk.gas ? r.range(1500, 2200) : r.range(700, 1400);
-    const p = { id: `p${i}`, x: Math.cos(ang) * orbit, y: Math.sin(ang) * orbit, r: pr, kind, seed: hash(sys.seed, 'planet', i), name: `${sys.name} ${['I', 'II', 'III', 'IV', 'V'][i]}`, ores: pk.ores.filter(m => MATERIALS[m].tier <= tier + 2), outposts: [] };
-    if (!p.ores.length) p.ores = ['ferrite', 'silicate'];
+    // inhabited worlds show cities: lights on the night side, streets from low orbit (render/planets.js)
+    const inhabited = !!FACTIONS[sys.owner]?.human && r.chance(pk.life || 0);
+    const p = { id: `p${i}`, x: Math.cos(ang) * orbit, y: Math.sin(ang) * orbit, r: pr, kind, seed: hash(sys.seed, 'planet', i), name: `${sys.name} ${['I', 'II', 'III', 'IV', 'V'][i]}`, ores: pk.ores.filter(m => MATERIALS[m] && Math.abs(MATERIALS[m].tier - matTier(tier)) <= 1), outposts: [], inhabited };
+    if (!p.ores.length) p.ores = [pk.ores[0]];
     w.planets.push(p);
     // ground structures: hostile bunkers, a base, or friendly mining outposts
     const nGround = pk.gas ? 0 : r.int(0, 2 + Math.floor(tier / 3));

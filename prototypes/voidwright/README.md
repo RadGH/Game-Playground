@@ -1,8 +1,8 @@
 # Voidwright
 
-> **Status:** live on games.radgh.com · QA pass done 2026-11-11 (lint clean, every screen walked on desktop + phone) · enemy toughness taken back + gnat packs 2026-11-11 · checked 2026-11-11
+> **Status:** live on games.radgh.com · Expansion 1 "Shipwright" 2026-11-12 (play-test reports #24-#41 + owner rulings E1-E10, `docs/PLAN.md` §E1) · lint clean, every screen walked desktop + phone
 > **Play:** LAN `http://<LAN IP>:8400/prototypes/voidwright/` (stable; https 8442 for a controller) · public https://games.radgh.com/voidwright/
-> **Next:** the owner's next play-test — watch whether enemies now feel right and gnat packs are fun; tune `ENEMY_HP` / gnat numbers in `js/sim/shipgen.js` from what he reports
+> **Next:** the owner's play-test of the expansion — watch crafting costs (`sim/craft.js ORE_SHARE`), grow-hull prices (`sim/hullgrow.js`), legendary strength (`types.js RARITY.bonus`), merc wages and outpost output; boost now stacks on cruise (very fast) — check it feels right
 > **Parked:** co-op (the input shape is ready, `docs/PLAN.md`); nothing else on hold
 
 A 2D top-down space game: **build your ship from blocks → kill things or work for things → upgrade → kill bigger
@@ -55,6 +55,74 @@ ports (8442 stable / 8441 dev).
   can be done anywhere; each one unlocks the next part of the game (drip-feed). Finding certain parts unlocks their
   feature early.
 
+## Expansion 1 — "Shipwright" (2026-11-12)
+Owner rulings E1-E10 are in `docs/PLAN.md` §E1; play-test reports #24-#41 answered. Checklist: `~/claude/agent/voidwright-expansion-checklist.md`.
+- **Materials** (`data/types.js`): Rock (filler: hull frames and cargo bays) + one structural / energy / exotic ore
+  per tier; tier = warp-core class (`matTier(danger)`, `matOf(role, tier)`). Old ids fold in via `OLD_MATERIALS`
+  (main.js `migrate`, `G.fixes.exp1`). Rock cells drop Rock; the hold's Cargo tab can switch that off (`G.settings.noRock`).
+- **Typed asteroids** (`galaxy.js pickRockType/makeRock`): one ore per rock (`body.oreType`), plain rock common,
+  mixed "cluster" rocks ~8% (owner: allowed, not the norm). **Scan** (V / D-pad right / Scan button, `sim/scan.js`):
+  1.5 km from the bridge, Scanner 3.5 km, Deep scanner 9 km; marks rocks (`body.scanned`) on screen + local map.
+- **Rarity is power** (`sim/partstats.js` — the ONE place part numbers are computed; ship.js, world.js, grid.js and
+  ui/items.js all read it): rarity lifts base stats (+12% … legendary +85%, relic +125%), then rolled bonuses
+  (`loot.js AFFIX`, every part kind incl. CPU / crew / cargo / slots) and legendary powers (`POWERS`).
+- **Named uniques** (`data/uniques.js`, 20): fixed stacked powers, `loot.js rollUnique(r, from, chance)`; collection
+  log in the hold (Crew & finds). **Reveal card** (`ui/reveal.js`) for epic+ and uniques, with a compare line.
+- **Manual / auto fire** (#26): every gun fires by hand at your aim; Auto needs a targeting slot (bridge 2, command
+  deck 4, flag bridge 10, Targeting computers +2/+6/+18); sentries and point defence are always automatic
+  (`ship.js` sets `t.autoOn`; the choice is the 7th grid field `b.auto`; build mode Weapons tab toggles it).
+- **Crew** (#33/#34): a number — least to fly (`crewMin`), needed (`crewNeed`), room (`crewCap`). Pods give "+N Crew";
+  no passengers. 25% chance to lose one crew when a crewed part dies. Crew hall hires and sells.
+- **Drones** (#28/#31): items (`G.droneItems`, rarity lifts health/damage) fitted to Drone ports in build mode
+  (`G.ship.drones` = uids); a lost drone is rebuilt free after 12 s (`main.js droneUpkeep`). Menders heal wingmen too.
+- **Workshop** (station tab, or ☰ → Fabricator with a Fabricator part; `sim/craft.js`, `ui/workshop.js`): craft parts
+  and drones from ore, exotic ore boosts rarity odds, re-roll one bonus, open sealed caches (always rare+).
+- **Grow hull** (shipyard, `sim/hullgrow.js`): next class keeping every block, credits OR ore. **Ship upgrades**
+  (☰ menu, `ui/upgrades.js`): Ship rating + next hull + weak spots with buy / craft / loot routes.
+- **Outfitter by slot** (`ui/items.js SLOTS`): Weapons, Shields, Power, Engines, Computing, Crew & cargo, Utility,
+  Drone ports, Warp core, Sell parts. **Goals**: "Hook, line" removed; finishing "Further out" unlocks everything.
+- Undocking puts you back on the side you docked from (`G.dockAngle`).
+- **Mercenaries** (#29, E1/E2; `sim/mercs.js`, `ui/mercs.js`, station tab `mercs` — every pirate den, ~half the trade
+  stations): a merc is a person with FIXED stats — piloting (max CPU + crew of a ship → `GRADES`), gunnery (body
+  `dmgMul`), one trait (`TRAITS`: shield tech, field mechanic, missile ace, prospector, hunter) — plus a hire fee and
+  a wage every 10 min of play (`payWages`: warn, then leave after 2 min). Better ones at more dangerous stations. Give
+  them a hangar ship (`assign`; hangar records get a stable `rec.hid`; refusal reasons are shown on each row). Wing
+  slots by flagship class: 1 skiff/corvette, 2 frigate/destroyer, 3 cruiser+ (`wingSlots`). Wingmen are bodies with
+  `team 'player'`, `s.wing`, never `w.player`; `ai.js think` hands them to `escortThink` (formation behind you, fight
+  what hits you / what you mark, leash 2.2 km, catch up past 6 km). Shot down → merc ejects, `rec.wrecked`, no loot;
+  repair for credits on the Mercenaries board or the shipyard hangar. Damage is written back to the hangar on dock /
+  jump / autosave (`storeWing`). Repair rigs (not bridges) patch allies within 600 out of combat (`world.js upkeep`).
+- **Outposts** (#39, E3; `sim/colony.js`, `ui/colony.js`): Use over a planet → found one (credits + structural / energy
+  / rock of the system's tier). A small station in orbit beside the planet (`outpostBody`: your colours, dockable,
+  invulnerable, 2 real guns per Defence level), placed by `placeOutposts` on entering the system; docking opens its own
+  screen. Modules (`MODULES`, 3 levels): Ore site, R&D lab, Factory, Trade post, Storage, Defence turrets; output
+  piles up by `G.playTime` to the storage cap (`produce`), "Collect all" moves what fits. Raids every 30-55 min of play,
+  warned 3 min ahead: in the system → raiders spawn at the outpost, beat them for loot + credits; away → settled on
+  paper by turret level (`REPEL` / `LOSS`), never destroyed. Shown on the star map (⌂) and local map (green).
+  Hooks in `main.js` are marked `[wing]` / `[outpost]`.
+- **Encounters + space outposts** (E6, E7; `sim/encounters.js`): `sectors.js` hands empty squares to `encounterSector`
+  (own seeded stream, so older sector kinds never move): convoy under attack (help → credits + standing + a part; rob
+  it → standing loss + cargo), wandering merchant (Use → `ui/merchant.js`, rare+ parts, buys yours), space rift (3
+  alien waves, then a cache), ion cloud (`s.ionized` stops shield regen in `world.js upkeep`, lightning, rich rocks),
+  comet (circles its sector dropping ore), derelict station (hollow hub, sealed cache), wanted captain (`s.wanted`,
+  bounty on screen, cache on the kill), ambush (looks like a field), friendly outpost (`OUTPOST_TYPES`: 1-3 services
+  + Missions; docks through `app.dockAt`; not in `w.stations`), corsair outpost (silence the guns, crack the vault:
+  parts, cache, `rollUnique('vault')`), alien nest (swarms every 22 s until under 40% hull), abandoned outpost
+  (sections: cache / survivors / salvage / trap). Done ones are kept in `sysMem(G, sys).enc[key]`. A timed spawner adds
+  raids / merchants / wanted captains near you every ~2-3 min, plus event spawns. Messages go out through
+  `w.encMsgs` (the sim never touches the DOM).
+- **Missions** (E8; `sim/missions.js`, board = the station / outpost **Missions** tab, which also holds the bounty
+  board): recovery (harpoon a marked rock / hull / disabled ship into the station's reach), delivery (here or one jump,
+  sometimes timed), clear a site (camp / nest / corsair outpost), escort (freighter to a relay beacon, 3 raider waves),
+  survey (scan typed asteroids — counts `body.scanned` — or fly into anomalies), acquisition (ore or a rare+ part of a
+  sort). 4 jobs per board from its seed + 10-minute window; 3 active max; `G.missions = { active, done, taken }`;
+  `G.stats.missions` feeds "Odd jobs". HUD lines under the goal box (tap = course), and a Jobs section in Goals.
+- **Galaxy events** (E10 + E4 treasure; `sim/events.js`): invasion / gold rush / pirate war / treasure system, rolled
+  per 20-minute window of `G.playTime` from the galaxy seed, never at the start star. Read in ONE place each:
+  `w.eventLuck` (destroy loot), `w.eventRich` (sector rocks), `eventMods().spawn/bounty/tough` (encounters.js).
+  Star map halos + timers + an events strip (`ui/events.js`). Hooks are marked `[encounters]`; glue is
+  `ui/missions.js initExpansion`. Tests: `tests/expansion-*.test.mjs`.
+
 ## Code map
 No build step; ES modules. `index.html` → `js/main.js`.
 
@@ -63,7 +131,7 @@ No build step; ES modules. `index.html` → `js/main.js`.
 | `js/core/` | `math.js` (seeded rng, noise, angles), `input.js` (keys/mouse, gamepad, two touch sticks → one input object), `audio.js` (a synthesized voice per weapon + the shared `sfx/` library for explosions/loot/UI; positional; beam/mining loops) |
 | `js/data/` | Plain data: `types.js` (5 damage types × 3 hit sizes, 14 armour materials, 17 materials, 6 rarities), `weapons.js` (36 weapons/tools incl. 13 alien), `blocks.js` (≈150 blocks: structure in 1×1/2×2/4×4, modules, rock/ore cells), `hulls.js` (8 hull classes + 13 shipyard ships), `factions.js` (3 human + 4 alien), `drones.js` |
 | `js/sim/` | The pure simulation (no DOM, no clock): `grid.js` (block grids, connectivity), `ship.js` (bodies, stats, damage, breaking apart), `world.js` (the step: flight, collisions, turrets, shots, beams, shields, splash, destruction, loot, drones, harpoon), `ai.js`, `shipgen.js` (procedural ships + stations from a seed), `galaxy.js` (galaxy, star traits, warp cores, system population, asteroids, outposts, encounter groups), `sectors.js` (big systems filled in as you fly), `loot.js`, `economy.js`, `quests.js`, `state.js` (the save), `rand.js` |
-| `js/render/` | `post.js` (WebGL2: bloom, coloured light map, up to 16 shockwave ripples with colour split, vignette), `bake.js` (grid → hull picture with the cosmetic slope smoothing + a glow layer), `turret-art.js` (per-weapon turret drawings with recoil), `fx.js` (particles, lights, waves, shake; sim events → visuals), `draw.js` (the frame) |
+| `js/render/` | `planets.js` (procedural planets: lighting, air, clouds, rings, city lights, low-orbit tiles), `smooth.js` (draws moving things between sim steps — play-test #35), `post.js` (WebGL2: bloom, coloured light map, up to 16 shockwave ripples with colour split, vignette), `bake.js` (grid → hull picture with the cosmetic slope smoothing + a glow layer), `turret-art.js` (per-weapon turret drawings with recoil), `fx.js` (particles, lights, waves, shake; sim events → visuals), `draw.js` (the frame) |
 | `js/ui/` | `dom.js` helpers, `station.js`, `build.js`, `galaxy.js` (star map), `localmap.js` (local system map), `hold.js`, `quests-ui.js`, `minimap.js`, `items.js` |
 
 ### Gotcha

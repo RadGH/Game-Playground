@@ -172,4 +172,40 @@ export function loopLevel(id, level) {
   L.o.frequency.setTargetAtTime((id === 'mining' ? 330 : 180) * (1 + Math.random() * 0.02), ctx.currentTime, 0.1);
 }
 
+/**
+ * Boost engines (report #36): a rising whoosh when the boost lights, a roaring loop while it burns (pitch and
+ * loudness follow how hard you are pushing, `level` 0..1), and a quick fade when it stops. Call every frame.
+ */
+let boostL = null, boostWas = false;
+export function boostSound(on, level = 1) {
+  if (!ctx) return;
+  if (!boostL) {
+    const src = ctx.createBufferSource(); src.buffer = noiseBuf(); src.loop = true;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 500; lp.Q.value = 0.7;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 0.8;
+    const rum = ctx.createOscillator(); rum.type = 'sawtooth'; rum.frequency.value = 46;
+    const rumF = ctx.createBiquadFilter(); rumF.type = 'lowpass'; rumF.frequency.value = 180;
+    const rumG = ctx.createGain(); rumG.gain.value = 0.35;
+    const g = ctx.createGain(); g.gain.value = 0;
+    src.connect(lp); lp.connect(g); src.connect(bp); bp.connect(g); rum.connect(rumF); rumF.connect(rumG); rumG.connect(g); g.connect(master);
+    src.start(); rum.start();
+    boostL = { g, lp, bp, rum };
+  }
+  const now = ctx.currentTime;
+  if (on && !boostWas && !muted) {
+    // ignition: a noise sweep up plus a low thump
+    const d = out(0.55, 0);
+    noise(d, now, 0.55, 'bandpass', 300, 1.2, 0.9, 3200, 0.04);
+    osc('sine', 90, 45, 0.35, d, now, 0.01, 0.8);
+    noise(d, now + 0.02, 0.25, 'highpass', 2500, 0.7, 0.3, null, 0.01);
+  }
+  if (!on && boostWas && !muted) { const d = out(0.3, 0); noise(d, now, 0.4, 'bandpass', 1800, 1, 0.5, 250, 0.01); }   // the burn dies away
+  boostWas = on;
+  const L = on ? Math.max(0.3, Math.min(1, level)) : 0;
+  boostL.g.gain.setTargetAtTime(muted ? 0 : L * 0.16, now, on ? 0.08 : 0.12);
+  boostL.lp.frequency.setTargetAtTime(380 + L * 520, now, 0.1);
+  boostL.bp.frequency.setTargetAtTime(1100 + L * 900, now, 0.1);
+  boostL.rum.frequency.setTargetAtTime(40 + L * 16, now, 0.15);
+}
+
 export const VOICE_IDS = Object.keys(VOICES);

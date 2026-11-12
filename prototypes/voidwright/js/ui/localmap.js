@@ -5,6 +5,8 @@
 // anything to set a course marker (an arrow at the screen edge points you to it).
 
 import { panel, el, btn } from './dom.js';
+import { scanLabel } from '../sim/scan.js';
+import { MATERIALS } from '../data/types.js';
 import { sectorsAround, SECTOR_KINDS, SEC } from '../sim/sectors.js';
 import { RARITY_BY_ID } from '../data/types.js';
 
@@ -17,7 +19,8 @@ const KEY = [
   ['rich', SECTOR_KINDS.rich.color, 'Rich asteroids / claim'], ['wrecks', SECTOR_KINDS.wrecks.color, 'Wrecks / derelict'],
   ['camp', SECTOR_KINDS.camp.color, 'Enemy camp / enemy ship'], ['swarm', SECTOR_KINDS.swarm.color, 'Alien swarm'],
   ['gnats', SECTOR_KINDS.gnats.color, 'Gnat pack (small, easy kills)'],
-  ['friend', '#5fa8ff', 'Friendly ship / convoy'], ['beacon', '#ffc45a', 'Distress call'], ['boss', '#ff3b5c', 'Something enormous'],
+  ['outpost', '#7dff9a', 'Your outpost'], ['wing', '#7dffd8', 'Your wingman'],   // sim/colony.js, sim/mercs.js
+  ['friend', '#5fa8ff', 'Friendly ship / convoy'], ['outpost', SECTOR_KINDS.outpost.color, 'Outpost (dock here)'], ['anomaly', SECTOR_KINDS.rift.color, 'Anomaly (rift, ion cloud, comet)'], ['danger', SECTOR_KINDS.vault.color, 'Corsair outpost / alien nest'], ['job', '#ffd27a', 'Job marker'], ['beacon', '#ffc45a', 'Distress call'], ['boss', '#ff3b5c', 'Something enormous'],
 ];
 
 export function openLocalMap(app) {
@@ -66,10 +69,18 @@ export function openLocalMap(app) {
       const K = SECTOR_KINDS[s.kind]; const x = X(s.x), y = Y(s.y);
       const rr = Math.max(5 * d, 800 * k);
       ctx.globalAlpha = s.cleared ? 0.3 : 0.8;
-      if (s.kind === 'field' || s.kind === 'rich') { ctx.fillStyle = K.color; for (let i = 0; i < 5; i++) { const a = i * 1.3 + s.x * 0.001, q = rr * (0.3 + (i % 3) * 0.25); ctx.beginPath(); ctx.arc(x + Math.cos(a) * q, y + Math.sin(a) * q, Math.max(1.5 * d, rr * 0.18), 0, 7); ctx.fill(); } }
+      if (s.kind === 'field' || s.kind === 'rich' || K.mapAs === 'field') { /* [encounters] an ambush looks like a field */ ctx.fillStyle = K.color; for (let i = 0; i < 5; i++) { const a = i * 1.3 + s.x * 0.001, q = rr * (0.3 + (i % 3) * 0.25); ctx.beginPath(); ctx.arc(x + Math.cos(a) * q, y + Math.sin(a) * q, Math.max(1.5 * d, rr * 0.18), 0, 7); ctx.fill(); } }
       else { ctx.strokeStyle = K.color; ctx.lineWidth = 2 * d; ctx.beginPath(); ctx.arc(x, y, rr * 0.6, 0, 7); ctx.stroke(); ctx.fillStyle = K.color; ctx.beginPath(); ctx.arc(x, y, 2.5 * d, 0, 7); ctx.fill(); }
       ctx.globalAlpha = 1; ctx.lineWidth = 1;
-      picks.push({ x: s.x, y: s.y, label: K.name, what: s.kind === 'camp' ? 'Enemy camp — a pack waits here.' : s.kind === 'swarm' ? 'An alien swarm drifts here.' : s.kind === 'gnats' ? 'A pack of gnats — small, unshielded, easy kills.' : s.kind === 'wrecks' ? 'Old wrecks — cut them up for salvage.' : s.kind === 'convoy' ? 'Friendly traders.' : s.kind === 'rich' ? 'Asteroids full of better ore.' : 'Asteroids to mine.' });
+      picks.push({ x: s.x, y: s.y, label: K.name, what: s.kind === 'camp' ? 'Enemy camp — a pack waits here.' : s.kind === 'swarm' ? 'An alien swarm drifts here.' : s.kind === 'gnats' ? 'A pack of gnats — small, unshielded, easy kills.' : s.kind === 'wrecks' ? 'Old wrecks — cut them up for salvage.' : s.kind === 'convoy' ? 'Friendly traders.' : s.kind === 'rich' ? 'Asteroids full of better ore.' : K.what || 'Asteroids to mine.' });   // [encounters] K.what
+    }
+    // scanned asteroids (Scan, V): a dot in their ore's colour, the valuable ones labelled
+    for (const s of w.bodies) {
+      if (s.dead || s.kind !== 'rock' || !s.scanned || s.oreType === 'rock') continue;
+      const L = scanLabel(s); const x = X(s.x), y = Y(s.y); const r = Math.max(2.5 * d, s.r * k);
+      ctx.fillStyle = L.color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+      if (MATERIALS[s.oreType]?.role === 'exotic' || s.oreType === 'mixed') { ctx.fillText(L.label, x, y - r - 4 * d); }
+      picks.push({ x: s.x, y: s.y, label: `${L.label} asteroid`, what: 'Scanned: point a mining laser at it.' });
     }
     // live bodies within sensor range (ships, stations, wrecks); rocks are already shown as their cluster
     for (const s of w.bodies) {
@@ -77,12 +88,12 @@ export function openLocalMap(app) {
       if (s.kind !== 'station' && Math.hypot(s.x - P.x, s.y - P.y) > range) continue;
       const x = X(s.x), y = Y(s.y);
       let col = '#888', r = Math.max(2.2 * d, s.r * k);
-      if (s.kind === 'station') { col = s.team === 'hostile' ? '#ff3b5c' : '#5fd8ff'; r = Math.max(6 * d, s.r * k); }
-      else if (s.kind === 'ship') col = s.team === 'hostile' ? '#ff5a6a' : s.team === 'friendly' ? '#5fa8ff' : '#aaa';
+      if (s.kind === 'station') { col = s.team === 'hostile' ? '#ff3b5c' : s.colony ? '#7dff9a' : '#5fd8ff'; r = Math.max(6 * d, s.r * k); }
+      else if (s.kind === 'ship') { col = s.wing ? '#7dffd8' : s.team === 'hostile' ? '#ff5a6a' : s.team === 'friendly' ? '#5fa8ff' : '#aaa'; if (s.wing) r = Math.max(3.5 * d, r); }
       else if (s.kind === 'ground') col = s.team === 'hostile' ? '#ff8a6a' : '#5fff9a';
       else if (s.kind === 'wreck') { if (!s.derelict && !s.sector) continue; col = '#c48cff'; }
       ctx.fillStyle = col;
-      if (s.kind === 'station') { ctx.fillRect(x - r, y - r, r * 2, r * 2); ctx.fillText(s.name, x, y - r - 5 * d); picks.push({ x: s.x, y: s.y, label: s.name, what: s.team === 'hostile' ? 'Enemy base. Heavily armed.' : s.dockable ? 'Dock here: trade, refit, repairs.' : '' }); }
+      if (s.kind === 'station') { ctx.fillRect(x - r, y - r, r * 2, r * 2); ctx.fillText(s.name, x, y - r - 5 * d); picks.push({ x: s.x, y: s.y, label: s.name, what: s.team === 'hostile' ? 'Enemy base. Heavily armed.' : s.colony ? 'Your outpost. Dock to collect what it made and build modules.' : s.dockable ? 'Dock here: trade, refit, repairs.' : '' }); }
       else { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); }
       if (s.boss) { ctx.strokeStyle = '#ff3b5c'; ctx.lineWidth = 2 * d; ctx.beginPath(); ctx.arc(x, y, r + 5 * d, 0, 7); ctx.stroke(); ctx.lineWidth = 1; }
     }
@@ -90,10 +101,10 @@ export function openLocalMap(app) {
     for (const q of w.poi || []) {
       if (q.done || (q.body && q.body.dead)) continue;
       const qx = q.body?.x ?? q.x, qy = q.body?.y ?? q.y; const x = X(qx), y = Y(qy);
-      const col = q.kind === 'boss' ? '#ff3b5c' : q.kind === 'beacon' ? '#ffc45a' : q.kind === 'claim' ? '#5fff9a' : q.kind === 'stronghold' ? '#ff5a6a' : '#c48cff';
-      const label = q.kind === 'boss' ? q.name : q.kind === 'beacon' ? 'Distress call' : q.kind === 'claim' ? 'Rich field (claim)' : q.kind === 'stronghold' ? 'Stronghold' : 'Derelict';
+      const col = q.color || (q.kind === 'boss' ? '#ff3b5c' : q.kind === 'beacon' ? '#ffc45a' : q.kind === 'claim' ? '#5fff9a' : q.kind === 'stronghold' ? '#ff5a6a' : '#c48cff');   // [encounters] POIs may carry their own colour + label
+      const label = q.label || (q.kind === 'boss' ? q.name : q.kind === 'beacon' ? 'Distress call' : q.kind === 'claim' ? 'Rich field (claim)' : q.kind === 'stronghold' ? 'Stronghold' : 'Derelict');
       ctx.strokeStyle = col; ctx.lineWidth = 2 * d; ctx.strokeRect(x - 5 * d, y - 5 * d, 10 * d, 10 * d); ctx.lineWidth = 1;
-      ctx.fillStyle = col; ctx.fillText(label, x, y - 9 * d);
+      ctx.fillStyle = col; if (q.body?.kind !== 'station') ctx.fillText(label, x, y - 9 * d);   // [encounters] a station already prints its own name
       picks.push({ x: qx, y: qy, label, what: '' });
     }
     // loot on the map

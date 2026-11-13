@@ -27,7 +27,7 @@ import { drawMinimap } from './ui/minimap.js';
 import { spawnWing, storeWing, wingTick } from './sim/mercs.js';
 import { placeOutposts, colonyTick, planetInteract } from './sim/colony.js';
 
-const BUILD = '2026-11-12';
+const BUILD = '2026-11-13';
 const COARSE = matchMedia?.('(pointer: coarse)').matches;
 const app = window.app = {
   G: null, w: null, P: null, galaxy: null, mode: 'title', cam: { x: 0, y: 0, zoom: 1, zoomMul: 1 }, fx: null, R: null, input: null,

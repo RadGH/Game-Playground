@@ -152,6 +152,6 @@ export function cropToBlocks(blocks) {
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
   for (const b of blocks) { const n = b.def.size || 1; x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + n); y1 = Math.max(y1, b.y + n); }
   const g = createGrid(x1 - x0, y1 - y0);
-  for (const b of blocks) { const nb = place(g, b.id, b.x - x0, b.y - y0, b.rot, b.item); if (nb) nb.hp = b.hp; }
+  for (const b of blocks) { const nb = place(g, b.id, b.x - x0, b.y - y0, b.rot, b.item); if (nb) { nb.hp = b.hp; if (b.look != null) nb.look = b.look; } }
   return { grid: g, ox: x0, oy: y0 };
 }

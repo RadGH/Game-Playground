@@ -101,10 +101,14 @@ export function bakeBody(s, opts = {}) {
   const art = mk(W, H); const a = art.getContext('2d');
   const glow = mk(W, H); const gl = glow.getContext('2d');
   a.fillStyle = wreck ? shade(pal.hull, -0.45) : rock ? '#4d453f' : pal.hull; a.fillRect(0, 0, W, H);   // concave wedges take the hull colour
-  const r = rng(hash(s.seed || s.id, g.w, g.h));
+  // each block gets its own random stream, picked once and kept on the block (b.look). One shared stream for the whole
+  // body meant a block mined or shot out shifted the dice for every block drawn after it, so half an asteroid
+  // re-rolled its texture on every hit. cropToBlocks copies b.look, so broken-off debris keeps its look too.
+  const base = s.seed || s.id;
   for (const b of g.blocks) {
     if (!b.alive) continue;
-    drawBlock(a, gl, b, pad + b.x * P, pad + b.y * P, (b.def.size || 1) * P, pal, r, wreck, rock);
+    if (b.look == null) b.look = hash(base, b.x, b.y);
+    drawBlock(a, gl, b, pad + b.x * P, pad + b.y * P, (b.def.size || 1) * P, pal, rng(b.look), wreck, rock);
   }
   // mask the art to the silhouette
   a.globalCompositeOperation = 'destination-in'; a.drawImage(mask, 0, 0); a.globalCompositeOperation = 'source-over';

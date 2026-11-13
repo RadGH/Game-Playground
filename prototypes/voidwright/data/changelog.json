@@ -1,6 +1,14 @@
 {
  "entries": [
   {
+   "id": "2026-11-13",
+   "date": "2026-11-13",
+   "title": "Asteroids keep their look while you mine",
+   "items": [
+    "Mining or shooting a block out of an asteroid no longer reshuffles the rock texture on the rest of it. Every block keeps the same look until it breaks, and pieces that break off keep theirs too."
+   ]
+  },
+  {
    "id": "2026-11-12b",
    "date": "2026-11-12",
    "title": "Missile defence and five kinds of missile",

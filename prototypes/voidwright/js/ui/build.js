@@ -10,13 +10,13 @@
 // Test hook: app.buildUI (state + actions) while the editor is open.
 
 import { el, btn, modal, esc, fmt } from './dom.js';
-import { itemTipHTML, itemCard } from './items.js';
+import { itemTipHTML, itemCard, nextBridge, biggerHullText } from './items.js';
 import { BLOCKS } from '../data/blocks.js';
 import { CLASSES } from '../data/hulls.js';
 import { ALL_WEAPONS } from '../data/weapons.js';
 import { DAMAGE, DAMAGE_IDS, ARMOR, RARITY_BY_ID, MATERIALS } from '../data/types.js';
 import { createGrid, place, killBlock, components } from '../sim/grid.js';
-import { makeBody, recompute } from '../sim/ship.js';
+import { makeBody, recompute, isCpuPart, isPowerPart, partLimits } from '../sim/ship.js';
 import { bakeBody, PLAYER_PALETTE } from '../render/bake.js';
 import { drawTurret } from '../render/turret-art.js';
 import { makeItem } from '../sim/loot.js';
@@ -146,6 +146,8 @@ export function openBuild(app, { docked = false } = {}) {
   let t0 = performance.now();
 
   function say(msg, kind = '') {
+    // the same message twice at once is noise (lessons rule 42): drop the older copy, show it fresh
+    for (const o of [...sayEl.children]) if (o.textContent === msg) o.remove();
     const d = el('div', { class: 'bm-msg ' + kind }, msg); sayEl.append(d);
     setTimeout(() => d.remove(), 3200); while (sayEl.children.length > 3) sayEl.firstChild.remove();
   }
@@ -210,10 +212,28 @@ export function openBuild(app, { docked = false } = {}) {
     else spare[e.id] = (spare[e.id] || 0) + 1;
     if (e.counted) led.placed--;
   }
+  /** Play-test #61: how many CPU / power parts are fitted, and how many the bridge runs. */
+  function partCaps() {
+    const core = entries.find(e => e.alive && BLOCKS[e.id].core);
+    const lim = partLimits(core ? BLOCKS[core.id] : null);
+    let cpu = 0, power = 0;
+    for (const e of entries) { if (!e.alive) continue; const d = BLOCKS[e.id]; if (isCpuPart(d)) cpu++; if (isPowerPart(d)) power++; }
+    return { cpu, power, cpuMax: lim.cpu, powerMax: lim.power, core: core ? core.id : null };
+  }
+  /** The bridge-limit refusal for a CPU or power part, or ''. */
+  function capReason(def) {
+    if (!isCpuPart(def) && !isPowerPart(def)) return '';
+    const c = partCaps(); const nb = nextBridge(c.core, maxB);
+    const more = nb ? ` Fit a ${nb.name} (${nb.where}) to run ${isCpuPart(def) ? nb.cpu : nb.power}, or swap one for a better part.` : ' Swap one for a better part.';
+    if (isCpuPart(def) && c.cpu >= c.cpuMax) return `Your bridge runs ${c.cpuMax} CPU parts and ${c.cpu} are fitted.${more}`;
+    if (isPowerPart(def) && c.power >= c.powerMax) return `Your bridge runs ${c.powerMax} power parts and ${c.power} are fitted.${more}`;
+    return '';
+  }
   /** Why a part can't go at (x, y) — '' when it can. */
   function blockReason(def, x, y, item) {
     const n = def.size || 1;
-    if (n > maxB) return `${C.name} hulls can only fit parts up to ${maxB}×${maxB}.`;
+    if (n > maxB) return `${C.name} hulls can only fit parts up to ${maxB}×${maxB}. ${biggerHullText(n)}`;
+    const cap = capReason(def); if (cap) return cap;
     if (x < 0 || y < 0 || x + n > W || y + n > H) return 'That is outside the hull limits.';
     for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) if (grid.cells[(y + j) * W + x + i]) return 'Something is already there.';
     if (def.module) { if (!item) return `You have no more ${def.name} parts.`; }
@@ -314,7 +334,11 @@ export function openBuild(app, { docked = false } = {}) {
     else coreB = cores[0].b;
     const loose = disconnected();
     if (coreB && loose.size) out.push({ msg: `${loose.size} part${loose.size > 1 ? 's are' : ' is'} not joined to the bridge (shown in red). Join them with hull frame or remove them — loose parts would just fall off.`, stop: true });
-    if (st.cpu > st.cpuCap) out.push({ msg: `Over the CPU limit (${st.cpu} used, ${st.cpuCap} available). Add CPU nodes or remove some weapons or shields.`, stop: true });
+    if (st.cpu > st.cpuCap) out.push({ msg: `Over the CPU limit (${st.cpu} used, ${st.cpuCap} available). Add CPU parts (up to your bridge's limit), fit a better bridge, or remove some weapons or shields.`, stop: true });
+    const pc = partCaps(); const nb = nextBridge(pc.core, maxB);
+    const better = nb ? ` A ${nb.name} runs ${nb.cpu} CPU and ${nb.power} power parts (${nb.where}).` : '';
+    if (pc.cpu > pc.cpuMax) out.push({ msg: `${pc.cpu - pc.cpuMax} CPU part${pc.cpu - pc.cpuMax > 1 ? 's are' : ' is'} idle: your bridge runs only ${pc.cpuMax}. The best ones count; remove the rest or upgrade the bridge.${better}` });
+    if (pc.power > pc.powerMax) out.push({ msg: `${pc.power - pc.powerMax} power part${pc.power - pc.powerMax > 1 ? 's are' : ' is'} idle: your bridge runs only ${pc.powerMax}. The best ones count; remove the rest or upgrade the bridge.${better}` });
     if (!st.powerOk) out.push({ msg: `Not enough power (${Math.round(st.power)} made, ${Math.round(st.powerUse)} used): weapons fire slower and shields charge slower. Add fuel cells or reactors.` });
     const have = Math.min(G.ship.crew ?? 0, st.crewCap);
     if ((G.ship.crew ?? 0) > st.crewCap) out.push({ msg: `Only ${st.crewCap} bunks: ${(G.ship.crew ?? 0) - st.crewCap} crew would have to leave. Add crew quarters to keep them.` });
@@ -384,9 +408,9 @@ export function openBuild(app, { docked = false } = {}) {
     // structure built from materials
     const structs = Object.values(BLOCKS).filter(d => !d.module && !d.nature && !d.enemyOnly && T.cats.includes(d.cat) && (d.size || 1) <= maxB);
     for (const d of structs) {
-      const miss = missingFor(d); const sp = spare[d.id] || 0;
+      const miss = missingFor(d); const sp = spare[d.id] || 0; const cap = capReason(d);
       rows.push(tile({
-        key: 's:' + d.id, id: d.id, label: d.name, sub: sp ? `${sp} spare — free` : costText(d), off: !!miss, why: miss ? `Not enough: ${miss.join(', ')}` : '',
+        key: 's:' + d.id, id: d.id, label: d.name, sub: cap ? 'Bridge limit reached' : sp ? `${sp} spare — free` : costText(d), off: !!miss || !!cap, why: cap || (miss ? `Not enough: ${miss.join(', ')}` : ''),
         selected: sel?.kind === 'struct' && sel.id === d.id, onPick: () => select(sel?.kind === 'struct' && sel.id === d.id ? null : { kind: 'struct', id: d.id }),
         tipHTML: () => structTip(d),
       }));
@@ -396,11 +420,11 @@ export function openBuild(app, { docked = false } = {}) {
     for (const it of parts) { const d = BLOCKS[it.block]; if (!d || !T.cats.includes(d.cat)) continue; const k = itemKey(it); if (!groups.has(k)) groups.set(k, { it, n: 0 }); groups.get(k).n++; }
     const sorted = [...groups.entries()].sort((a, b) => (BLOCKS[a[1].it.block].size - BLOCKS[b[1].it.block].size) || a[1].it.block.localeCompare(b[1].it.block) || (RARITY_BY_ID[b[1].it.rarity]?.index || 0) - (RARITY_BY_ID[a[1].it.rarity]?.index || 0));
     for (const [k, { it, n }] of sorted) {
-      const d = BLOCKS[it.block]; const big = (d.size || 1) > maxB;
+      const d = BLOCKS[it.block]; const big = (d.size || 1) > maxB; const cap = big ? '' : capReason(d);
       rows.push(tile({
-        key: 'i:' + k, id: it.block, label: it.name, rarity: it.rarity, count: n, sub: `${d.size}×${d.size} · ${RARITY_BY_ID[it.rarity]?.name || ''}${big ? ' · needs a bigger hull' : ''}`,
-        off: big, why: big ? `${C.name} hulls fit parts up to ${maxB}×${maxB}.` : '', selected: sel?.kind === 'item' && sel.key === k,
-        onPick: () => { if (big) { say(`Too big for a ${C.name}. Bigger hulls take ${d.size}×${d.size} parts.`, 'bad'); return; } select(sel?.kind === 'item' && sel.key === k ? null : { kind: 'item', key: k, id: it.block }); },
+        key: 'i:' + k, id: it.block, label: it.name, rarity: it.rarity, count: n, sub: `${d.size}×${d.size} · ${RARITY_BY_ID[it.rarity]?.name || ''}${big ? ' · needs a bigger hull' : cap ? ' · bridge limit reached' : ''}`,
+        off: big || !!cap, why: big ? `${C.name} hulls fit parts up to ${maxB}×${maxB}. ${biggerHullText(d.size)}` : cap, selected: sel?.kind === 'item' && sel.key === k,
+        onPick: () => { if (big) { say(`Too big for a ${C.name}. ${biggerHullText(d.size)}`, 'bad'); return; } if (cap) say(cap, 'bad'); select(sel?.kind === 'item' && sel.key === k ? null : { kind: 'item', key: k, id: it.block }); },
         tipHTML: () => itemTipHTML(it),
       }));
     }
@@ -489,6 +513,7 @@ export function openBuild(app, { docked = false } = {}) {
     if (arm[best] >= 0.2) hint += ` Strong against ${DAMAGE[best].name.toLowerCase()}.`;
     if (!hint) hint = 'Even protection, nothing special.';
     const cpuBad = st.cpu > st.cpuCap, powBad = !st.powerOk, crewBad = st.crewNeed > have;
+    const caps = partCaps(); const capNext = nextBridge(caps.core, maxB);
     const shieldN = body.shields.length;
     const matLines = Object.entries(led.mats).filter(([, v]) => v).map(([m, v]) => `<span class="${v > 0 ? 'bad' : 'good'}">${v > 0 ? '−' : '+'}${Math.abs(v)} ${esc(matName(m))}</span>`);
     const spares = Object.entries(spare).filter(([, v]) => v > 0);
@@ -517,10 +542,13 @@ export function openBuild(app, { docked = false } = {}) {
       <h4>Budget</h4>
       <div class="kv">
         ${row('CPU', `${st.cpu} / ${st.cpuCap}`, cpuBad ? 'bad' : '')}
+        ${row('CPU parts', `${caps.cpu} / ${caps.cpuMax}`, caps.cpu > caps.cpuMax ? 'bad' : caps.cpu === caps.cpuMax ? 'amber' : '')}
         ${row('Power', `${Math.round(st.power)} made / ${Math.round(st.powerUse)} used`, powBad ? 'bad' : '')}
+        ${row('Power parts', `${caps.power} / ${caps.powerMax}`, caps.power > caps.powerMax ? 'bad' : caps.power === caps.powerMax ? 'amber' : '')}
         ${row('Crew', `${have} aboard / ${st.crewNeed} needed <small class="hint">(${st.crewCap} bunks)</small>`, crewBad ? 'bad' : '')}
       </div>
       ${cpuBad ? '<p class="bad small">Over the CPU limit — you cannot finish until it fits.</p>' : ''}
+      <p class="hint small">Your bridge sets how many CPU and power parts run.${capNext ? ` Next: ${esc(capNext.name)} runs ${capNext.cpu} CPU / ${capNext.power} power parts — ${esc(capNext.where)}.` : ''}</p>
       ${powBad ? '<p class="bad small">Not enough power: weapons fire slower.</p>' : ''}
       ${crewBad ? '<p class="bad small">Not enough crew: parts run slower.</p>' : ''}
       <h4>Cost of changes</h4>

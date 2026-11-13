@@ -5,7 +5,8 @@
 // anything to set a course marker (an arrow at the screen edge points you to it).
 
 import { panel, el, btn } from './dom.js';
-import { scanLabel } from '../sim/scan.js';
+import { scanLabel, rockOre } from '../sim/scan.js';
+import { missionMarks } from '../sim/missions.js';
 import { MATERIALS } from '../data/types.js';
 import { sectorsAround, SECTOR_KINDS, SEC } from '../sim/sectors.js';
 import { RARITY_BY_ID } from '../data/types.js';
@@ -16,7 +17,7 @@ export const sensorRange = P => 14000 + (P?.stats.scan || 0) * 4000;
 const KEY = [
   ['you', '#ffd27a', 'You'], ['station', '#5fd8ff', 'Station (dock here)'], ['hostileStation', '#ff3b5c', 'Enemy base'],
   ['planet', '#8a9ab8', 'Planet (low orbit: mine from above)'], ['field', SECTOR_KINDS.field.color, 'Asteroid cluster'],
-  ['rich', SECTOR_KINDS.rich.color, 'Rich asteroids / claim'], ['wrecks', SECTOR_KINDS.wrecks.color, 'Wrecks / derelict'],
+  ['rich', SECTOR_KINDS.rich.color, 'Rich asteroids (better ore)'], ['wrecks', SECTOR_KINDS.wrecks.color, 'Wrecks / derelict'],
   ['camp', SECTOR_KINDS.camp.color, 'Enemy camp / enemy ship'], ['swarm', SECTOR_KINDS.swarm.color, 'Alien swarm'],
   ['gnats', SECTOR_KINDS.gnats.color, 'Gnat pack (small, easy kills)'],
   ['outpost', '#7dff9a', 'Your outpost'], ['wing', '#7dffd8', 'Your wingman'],   // sim/colony.js, sim/mercs.js
@@ -76,10 +77,10 @@ export function openLocalMap(app) {
     }
     // scanned asteroids (Scan, V): a dot in their ore's colour, the valuable ones labelled
     for (const s of w.bodies) {
-      if (s.dead || s.kind !== 'rock' || !s.scanned || s.oreType === 'rock') continue;
-      const L = scanLabel(s); const x = X(s.x), y = Y(s.y); const r = Math.max(2.5 * d, s.r * k);
+      if (s.dead || s.kind !== 'rock' || !s.scanned || rockOre(s).type === 'rock') continue;
+      const L = scanLabel(s); const real = rockOre(s).type; const x = X(s.x), y = Y(s.y); const r = Math.max(2.5 * d, s.r * k);
       ctx.fillStyle = L.color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
-      if (MATERIALS[s.oreType]?.role === 'exotic' || s.oreType === 'mixed') { ctx.fillText(L.label, x, y - r - 4 * d); }
+      if (MATERIALS[real]?.role === 'exotic' || real === 'mixed') { ctx.fillText(L.label, x, y - r - 4 * d); }
       picks.push({ x: s.x, y: s.y, label: `${L.label} asteroid`, what: 'Scanned: point a mining laser at it.' });
     }
     // live bodies within sensor range (ships, stations, wrecks); rocks are already shown as their cluster
@@ -99,10 +100,10 @@ export function openLocalMap(app) {
     }
     // points of interest
     for (const q of w.poi || []) {
-      if (q.done || (q.body && q.body.dead)) continue;
+      if (q.done || q.mission || (q.body && q.body.dead)) continue;   // job markers are drawn below, on top
       const qx = q.body?.x ?? q.x, qy = q.body?.y ?? q.y; const x = X(qx), y = Y(qy);
       const col = q.color || (q.kind === 'boss' ? '#ff3b5c' : q.kind === 'beacon' ? '#ffc45a' : q.kind === 'claim' ? '#5fff9a' : q.kind === 'stronghold' ? '#ff5a6a' : '#c48cff');   // [encounters] POIs may carry their own colour + label
-      const label = q.label || (q.kind === 'boss' ? q.name : q.kind === 'beacon' ? 'Distress call' : q.kind === 'claim' ? 'Rich field (claim)' : q.kind === 'stronghold' ? 'Stronghold' : 'Derelict');
+      const label = q.label || (q.kind === 'boss' ? q.name : q.kind === 'beacon' ? 'Distress call' : q.kind === 'claim' ? 'Rich field' : q.kind === 'stronghold' ? 'Stronghold' : 'Derelict');
       ctx.strokeStyle = col; ctx.lineWidth = 2 * d; ctx.strokeRect(x - 5 * d, y - 5 * d, 10 * d, 10 * d); ctx.lineWidth = 1;
       ctx.fillStyle = col; if (q.body?.kind !== 'station') ctx.fillText(label, x, y - 9 * d);   // [encounters] a station already prints its own name
       picks.push({ x: qx, y: qy, label, what: '' });
@@ -111,6 +112,19 @@ export function openLocalMap(app) {
     for (const it of w.pickups) if (it.kind === 'item') { ctx.fillStyle = RARITY_BY_ID[it.rarity]?.color || '#fff'; ctx.fillRect(X(it.x) - 2 * d, Y(it.y) - 2 * d, 4 * d, 4 * d); }
     // course marker
     if (app.waypoint) { const x = X(app.waypoint.x), y = Y(app.waypoint.y); ctx.strokeStyle = '#ffd27a'; ctx.lineWidth = 2 * d; ctx.beginPath(); ctx.moveTo(x, y - 10 * d); ctx.lineTo(x + 8 * d, y); ctx.lineTo(x, y + 10 * d); ctx.lineTo(x - 8 * d, y); ctx.closePath(); ctx.stroke(); ctx.setLineDash([4 * d, 5 * d]); ctx.beginPath(); ctx.moveTo(X(P.x), Y(P.y)); ctx.lineTo(x, y); ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth = 1; }
+    // jobs (live reports #43/#46): a filled diamond in the job's colour with its label, over everything else
+    for (const mk of missionMarks(app.G, w, app.G.system)) {
+      const x = X(mk.x), y = Y(mk.y); const on = app.waypoint?.mission === mk.m.id; const s = (on ? 9 : 7) * d;
+      ctx.beginPath(); ctx.moveTo(x, y - s); ctx.lineTo(x + s, y); ctx.lineTo(x, y + s); ctx.lineTo(x - s, y); ctx.closePath();
+      ctx.fillStyle = mk.color; ctx.strokeStyle = 'rgba(0,0,0,0.9)'; ctx.lineWidth = 3 * d; ctx.stroke(); ctx.fill();
+      if (on) { ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5 * d; ctx.stroke(); }
+      ctx.lineWidth = 1;
+      ctx.font = `600 ${12 * d}px Rajdhani, sans-serif`; const tw = ctx.measureText(mk.label).width + 10 * d;
+      ctx.fillStyle = 'rgba(4,8,18,0.85)'; ctx.fillRect(x - tw / 2, y - s - 20 * d, tw, 16 * d);
+      ctx.fillStyle = mk.color; ctx.fillText(mk.label, x, y - s - 8 * d);
+      ctx.font = `${11 * d}px Rajdhani, sans-serif`;
+      picks.push({ x: mk.x, y: mk.y, label: mk.label, what: `Job: ${mk.m.title}.`, mission: mk.m.id });
+    }
     // you
     ctx.save(); ctx.translate(X(P.x), Y(P.y)); ctx.rotate(P.a); ctx.fillStyle = '#ffd27a'; ctx.beginPath(); ctx.moveTo(9 * d, 0); ctx.lineTo(-6 * d, -5.5 * d); ctx.lineTo(-6 * d, 5.5 * d); ctx.fill(); ctx.restore();
     cv._X = X; cv._Y = Y; cv._k = k;
@@ -118,9 +132,9 @@ export function openLocalMap(app) {
   function showInfo(pk) {
     info.innerHTML = '';
     if (!pk) { info.append(el('b', {}, w.system.name), el('div', { class: 'hint' }, 'Tap anything to set a course marker. Your sensors read the sectors inside the blue ring.')); return; }
-    const dist = Math.round(Math.hypot(pk.x - P.x, pk.y - P.y) / 100);
-    info.append(el('b', {}, pk.label), pk.what ? el('div', { class: 'hint' }, pk.what) : '', el('div', {}, `${dist} away`),
-      el('div', { class: 'row' }, btn('Set course', () => { app.waypoint = { x: pk.x, y: pk.y, label: pk.label }; draw(); showInfo(pk); }, 'primary'),
+    const dist = Math.max(0.1, Math.round(Math.hypot(pk.x - P.x, pk.y - P.y) / 100) / 10);
+    info.append(el('b', {}, pk.label), pk.what ? el('div', { class: 'hint' }, pk.what) : '', el('div', {}, `${dist} km away`),
+      el('div', { class: 'row' }, btn('Set course', () => { app.waypoint = { x: pk.x, y: pk.y, label: pk.label, ...(pk.mission ? { mission: pk.mission } : {}) }; draw(); showInfo(pk); }, 'primary'),
         app.waypoint ? btn('Clear course', () => { app.waypoint = null; draw(); showInfo(pk); }) : ''));
   }
   showInfo(null); requestAnimationFrame(draw);

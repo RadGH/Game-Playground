@@ -29,7 +29,7 @@ const ORE_SHARE = 0.55;          // crafting from ore costs about 55% of the par
 const FEE = 0.08;                // …plus an 8% fee in credits
 
 /** Can this block be crafted at all? (modules you could buy; not enemy-only, not alien race parts) */
-export const craftable = d => !!d && d.module && !d.enemyOnly && !d.race && !d.core;
+export const craftable = d => !!d && d.module && !d.enemyOnly && !d.race && (!d.core || d.id !== 'bridge');   // better bridges can be crafted (#61)
 
 export function recipe(id) {
   const d = BLOCKS[id]; if (!craftable(d)) return null;
@@ -77,9 +77,27 @@ function spend(G, cost) {
 export function craftOdds(tier, boost, edge = 0) {
   const bonus = boost * BOOST_STEP + edge;
   const shift = (tier - 1) * 0.18 + bonus;
-  const list = RARITY.filter(x => x.id !== 'relic').map(x => ({ id: x.id, w: x.weight * Math.pow(1 + RARITY_BY_ID[x.id].index * 0.9, shift) }));
+  // a relic roll is handed out as a legendary (craft / craftDrone), so its share is counted there
+  const w = id => RARITY_BY_ID[id].weight * Math.pow(1 + RARITY_BY_ID[id].index * 0.9, shift);
+  const list = RARITY.filter(x => x.id !== 'relic').map(x => ({ id: x.id, w: w(x.id) + (x.id === 'legendary' ? w('relic') : 0) }));
   const sum = list.reduce((s, x) => s + x.w, 0);
   return list.map(x => ({ id: x.id, p: x.w / sum }));
+}
+
+/** Chance a sealed cache holds a named unique (openCache). */
+export const cacheUniqueChance = tier => 0.08 + (tier || 1) * 0.01;
+/**
+ * The real odds of a sealed cache (mirrors openCache): a named unique, else a rarity rolled at tier + 2 with a
+ * +1.2 bonus where anything under rare becomes rare. 'unique' is its own entry (the reel shows it).
+ */
+export function cacheOdds(tier = 1) {
+  const shift = (tier + 1) * 0.18 + 1.2;
+  const w = id => RARITY_BY_ID[id].weight * Math.pow(1 + RARITY_BY_ID[id].index * 0.9, shift);
+  const sum = RARITY.reduce((s, x) => s + w(x.id), 0); const uq = cacheUniqueChance(tier);
+  const out = RARITY.filter(x => RARITY_BY_ID[x.id].index >= 2).map(x => ({ id: x.id, p: w(x.id) / sum }));
+  out[0].p += (w('common') + w('uncommon')) / sum;
+  for (const o of out) o.p *= 1 - uq;
+  return [...out, { id: 'unique', p: uq }];
 }
 
 /** Craft a part. Returns { ok, item } or { ok:false, why }. */
@@ -144,7 +162,7 @@ export function openCache(G, r, cache, pool) {
   const fee = cacheFee(cache); if (G.credits < fee) return { ok: false, why: 'missing', miss: [['cr', fee - G.credits]] };
   G.credits -= fee; G.caches.splice(i, 1);
   const tier = cache.tier || 1;
-  const uq = rollUnique(r, 'cache', 0.08 + tier * 0.01);
+  const uq = rollUnique(r, 'cache', cacheUniqueChance(tier));
   let item = uq;
   if (!item) {
     let rar = rollRarity(r, tier + 2, 1.2);

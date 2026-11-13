@@ -5,7 +5,7 @@
 
 export const CHAPTERS = [
   { id: 'mine', title: 'First light', text: 'Your hold is empty and so is your wallet. Point your mining laser at an asteroid (hold Fire) and cut out some ore.', goal: g => g.stats.mined, need: 25, unit: 'ore mined', unlock: ['cargo'], reward: { cr: 150 } },
-  { id: 'dock', title: 'Somewhere to sell', text: 'Stations buy what you dig. Fly to the station and press Dock (E) when you are close.', goal: g => g.stats.docks, need: 1, unit: 'docked', unlock: ['market', 'repair'], reward: { cr: 100 } },
+  { id: 'dock', title: 'Somewhere to sell', text: 'Stations buy what you dig. Fly to the station and press Dock (E) when you are close.', goal: g => g.stats.docks, need: 1, unit: 'docked', unlock: ['market', 'repair', 'insurance'], reward: { cr: 100 } },
   { id: 'sell', title: 'Trader\'s first coin', text: 'Sell ore at a market. Prices differ from station to station: the trade screen shows where each thing sells best.', goal: g => g.stats.sold, need: 20, unit: 'units sold', unlock: ['outfitter'], reward: { cr: 200 } },
   { id: 'hunt', title: 'Teeth', text: 'Corsairs raid the lanes. Destroy three hostile ships anywhere. Your laser turret aims by itself.', goal: g => g.stats.kills, need: 3, unit: 'ships destroyed', unlock: ['loot', 'missiles', 'build'], reward: { cr: 400 } },
   { id: 'build', title: 'Make it yours', text: 'Open Build mode (B) — docked or out of combat — and fit a part from your hold. Turret arcs show where each gun can aim.', goal: g => g.stats.built, need: 1, unit: 'parts fitted', unlock: ['shipyard', 'galaxy'], reward: { cr: 300 } },
@@ -36,7 +36,7 @@ export const UNLOCK_NAMES = {
   cargo: 'Cargo readout', market: 'Station markets', repair: 'Repairs', outfitter: 'Outfitter (buy parts)', loot: 'Loot from wrecks',
   missiles: 'Missile button (right mouse)', build: 'Build mode (B)', shipyard: 'Shipyards', galaxy: 'Star map + jumps (M)', refinery: 'Refineries',
   crew: 'Crew halls', workshop: 'Workshops (craft, re-roll, open caches)', harpoon: 'Harpoon (F)', salvage: 'Salvage yards', insurance: 'Ship insurance', bounty: 'Bounty boards', drones: 'Drone shops',
-  lab: 'Research labs', blackmarket: 'Black markets', research: 'Research projects', claims: 'Mining claims', big: '2×2 parts', capital: '4×4 capital parts',
+  lab: 'Research labs', blackmarket: 'Black markets', research: 'Research projects', big: '2×2 parts', capital: '4×4 capital parts',
   fabricator: 'Fabricators (craft parts from ore)', missions: 'Mission boards', colonies: 'Outposts over planets', mercs: 'Mercenaries', ALL: 'Everything else in the game',
 };
 

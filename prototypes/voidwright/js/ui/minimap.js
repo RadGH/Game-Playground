@@ -1,5 +1,6 @@
 // The round radar in the corner: rocks, ships by side, stations, planets, loot, points of interest.
 import { RARITY_BY_ID } from '../data/types.js';
+import { missionMarks } from '../sim/missions.js';
 
 export function drawMinimap(cv, app) {
   const c = cv.getContext('2d'); const W = cv.width, H = cv.height; const P = app.P, w = app.w; if (!P) return;
@@ -24,8 +25,20 @@ export function drawMinimap(cv, app) {
     if (s.boss) { c.strokeStyle = '#ff3b5c'; c.lineWidth = 2; c.beginPath(); c.arc(x, y, r + 4, 0, 7); c.stroke(); }
   }
   for (const p of w.pickups) { if (p.kind !== 'item') continue; c.fillStyle = RARITY_BY_ID[p.rarity]?.color || '#fff'; c.fillRect(X(p.x) - 1.5, Y(p.y) - 1.5, 3, 3); }
-  for (const p of w.poi || []) { if (p.done) continue; c.strokeStyle = p.kind === 'beacon' ? '#ffc45a' : p.kind === 'claim' ? '#5fff9a' : '#c48cff'; c.lineWidth = 1.5; c.strokeRect(X(p.x) - 3, Y(p.y) - 3, 6, 6); }
+  for (const p of w.poi || []) { if (p.done || p.mission) continue; c.strokeStyle = p.kind === 'beacon' ? '#ffc45a' : p.kind === 'claim' ? '#5fff9a' : '#c48cff'; c.lineWidth = 1.5; c.strokeRect(X(p.x) - 3, Y(p.y) - 3, 6, 6); }
   c.restore();
+  // jobs (live reports #43/#46): a diamond in the job's colour, drawn last; off the radar it sits on the rim
+  if (app.G) for (const mk of missionMarks(app.G, w, app.G.system)) {
+    let x = X(mk.x) - W / 2, y = Y(mk.y) - H / 2; const d = Math.hypot(x, y); const R = W / 2 - 7; const out = d > R;
+    if (out) { x *= R / d; y *= R / d; }
+    const on = app.waypoint?.mission === mk.m.id; const s = on ? 6 : 5;
+    c.save(); c.translate(W / 2 + x, H / 2 + y);
+    if (out) { c.rotate(Math.atan2(y, x)); c.beginPath(); c.moveTo(s + 2, 0); c.lineTo(-s, -s); c.lineTo(-s, s); c.closePath(); }
+    else { c.beginPath(); c.moveTo(0, -s - 1); c.lineTo(s, 0); c.lineTo(0, s + 1); c.lineTo(-s, 0); c.closePath(); }
+    c.fillStyle = mk.color; c.strokeStyle = 'rgba(0,0,0,0.9)'; c.lineWidth = 2; c.stroke(); c.fill();
+    if (on) { c.strokeStyle = '#ffffff'; c.lineWidth = 1; c.stroke(); }
+    c.restore();
+  }
   // you
   c.save(); c.translate(W / 2, H / 2); c.rotate(P.a); c.fillStyle = '#ffd27a'; c.beginPath(); c.moveTo(7, 0); c.lineTo(-5, -4.5); c.lineTo(-5, 4.5); c.fill(); c.restore();
 }

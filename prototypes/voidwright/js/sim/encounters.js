@@ -288,7 +288,7 @@ export function spawnEncounter(w, kind, x, y, opts = {}) {
       const s = generateStation({ seed: hash(seed, 'outpost'), size: 36, faction: F?.human && !F.hostile ? faction : 'guild', kind: 'trade', tier });
       s.x = x; s.y = y; s.static = true; s.team = 'friendly'; s.invuln = true; s.dockable = true;
       s.name = `${starName(r).split(' ')[0]} ${T.name}`;
-      s.services = [...T.services, 'missions'];
+      s.services = [...T.services, 'insurance', 'missions'];   // insurance everywhere (report #65)
       s.outpost = { type: opts.type || 'depot', key: e.key, board: `O${sys?.id}:${e.key || e.id}` };
       w.bodies.push(s); e.ships.push(s); e.name = s.name;
       addPoi(w, e, { body: s, color: '#5fd8ff', label: s.name });
@@ -610,7 +610,7 @@ function searchSection(w, e, q) {
   const m = memOf(w, e.key); if (m && e.key) { const rec = (m[e.key] ||= {}); (rec.searched ||= []).push(q.i); }
   const r = rng(hash(e.seed, 'found', q.i)); const P = w.player;
   if (q.what === 'cache') { dropCache(w, e.tier, q.x, q.y); say(w, { t: 'toast', text: 'You find a sealed cache behind a jammed door.', kind: 'good' }); }
-  else if (q.what === 'survivors') { for (let i = 0; i < 2; i++) spawnPickup(w, { kind: 'pod', n: 1 + Math.floor(r() * 2) }, q.x, q.y, 0, 0, 60); if (w.game) w.game.rep.guild = Math.min(100, (w.game.rep.guild || 0) + 3); say(w, { t: 'toast', text: 'Survivors! Their pods drift out to you.', kind: 'good' }); }
+  else if (q.what === 'survivors') { for (let i = 0; i < 2; i++) spawnPickup(w, { kind: 'pod', n: 1 + Math.floor(r() * 2) }, q.x, q.y, 0, 0, 60); if (w.game) w.game.rep.guild = Math.min(100, (w.game.rep.guild || 0) + 3); say(w, { t: 'toast', text: 'Crew pods drift out to you.', kind: 'good' }); }
   else if (q.what === 'salvage') { dropMats(w, r, e.tier, q.x, q.y, 3); if (r() < 0.5) dropPart(w, r, e.tier, 0.3, q.x, q.y, 'common'); say(w, { t: 'toast', text: 'Old stores: salvage spills out.', kind: 'good' }); }
   else if (q.what === 'ambush') {
     const g = spawnGroup(w, { x: q.x + 500, y: q.y + 300 }, 'redfang', e.tier, r, 'pack');

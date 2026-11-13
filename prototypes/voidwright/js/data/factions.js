@@ -22,7 +22,7 @@ export const FACTIONS = {
     blurb: 'The law in the core systems. Heavy armour, big guns, long memories.',
     rivals: ['redfang', 'vesh'], color: '#7f9bff',
     style: { armor: ['steel', 'titanium', 'reactive'], hull: '#3c4a78', trim: '#c8d4ff', light: '#7f9bff', shape: 'wedge',
-      weapons: { s: ['autocannon', 'pulse_laser', 'missile_rack', 'mass_driver'], m: ['heavy_laser', 'howitzer', 'swarm_pod'], l: ['siege_cannon', 'torpedo_tube', 'lance_battery'] }, roles: ['patrol', 'gunship', 'capital'] },
+      weapons: { s: ['autocannon', 'pulse_laser', 'missile_rack', 'mass_driver', 'ram_rack'], m: ['heavy_laser', 'howitzer', 'swarm_pod', 'ram_battery', 'emp_battery'], l: ['siege_cannon', 'torpedo_tube', 'lance_battery', 'ion_silo'] }, roles: ['patrol', 'gunship', 'capital'] },
     drops: ['structural', 'energy', 'energy', 'exotic'],
   },
   redfang: {
@@ -30,7 +30,7 @@ export const FACTIONS = {
     blurb: 'Pirates. Fast, scrappy ships held together with rockets and grudges.',
     rivals: ['guild', 'navy'], color: '#ff5a4a',
     style: { armor: ['steel', 'frame', 'reactive'], hull: '#5a2a2a', trim: '#ff8a6a', light: '#ff5a4a', shape: 'jagged',
-      weapons: { s: ['gatling', 'rocket_pod', 'scatter', 'autocannon', 'mass_driver'], m: ['howitzer', 'swarm_pod'], l: ['siege_cannon', 'torpedo_tube'] }, roles: ['swarm', 'gunship', 'brawler'] },
+      weapons: { s: ['gatling', 'rocket_pod', 'scatter', 'autocannon', 'mass_driver', 'he_rack'], m: ['howitzer', 'swarm_pod', 'he_battery'], l: ['siege_cannon', 'torpedo_tube'] }, roles: ['swarm', 'gunship', 'brawler'] },
     drops: ['structural', 'energy', 'energy'],
   },
   vesh: {
@@ -46,7 +46,7 @@ export const FACTIONS = {
     blurb: 'Self-building machines with no makers left. Lightning, nanites and endless drones.',
     rivals: ['guild', 'kharr'], color: '#7fe6ff',
     style: { armor: ['lattice'], hull: '#20404a', trim: '#7fe6ff', light: '#7fe6ff', shape: 'grid',
-      weapons: { s: ['lattice_arc', 'pd_laser'], m: ['disassembler', 'lattice_web'], l: ['storm_spire'] }, roles: ['swarm', 'gunship', 'carrier'] },
+      weapons: { s: ['lattice_arc', 'pd_laser', 'emp_rack'], m: ['disassembler', 'lattice_web', 'emp_battery'], l: ['storm_spire'] }, roles: ['swarm', 'gunship', 'carrier'] },
     drops: ['energy', 'energy', 'exotic'], specimen: 'Lattice logic shard',
   },
   ossari: {
@@ -62,7 +62,7 @@ export const FACTIONS = {
     blurb: 'Slow, huge, volcanic. They fire molten rock and wear mountains for armour.',
     rivals: ['lattice', 'guild'], color: '#ff7a2a',
     style: { armor: ['basalt'], hull: '#4a2a1a', trim: '#ffb070', light: '#ff7a2a', shape: 'slab',
-      weapons: { s: ['autocannon', 'magma_mortar'], m: ['forge_hammer', 'howitzer'], l: ['siege_cannon', 'forge_battery'] }, roles: ['brawler', 'capital', 'capital'] },
+      weapons: { s: ['autocannon', 'magma_mortar', 'fire_rack'], m: ['forge_hammer', 'howitzer', 'fire_battery'], l: ['siege_cannon', 'forge_battery'] }, roles: ['brawler', 'capital', 'capital'] },
     drops: ['structural', 'structural', 'exotic'], specimen: 'Forge ember-stone',
   },
 };

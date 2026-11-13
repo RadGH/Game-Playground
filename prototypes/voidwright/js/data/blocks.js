@@ -30,6 +30,9 @@ function structure(id, base) {
     cost: { cr: Math.round((base.cost?.cr || 0) * n * n * 0.9), mats: Object.fromEntries(Object.entries(base.cost?.mats || {}).map(([k, v]) => [k, Math.ceil(v * n * n * 0.85)])) },
     cargo: base.cargo ? base.cargo * n * n * 1.2 : undefined,
     crewCap: base.crewCap ? base.crewCap * n * n * 1.2 : undefined,
+    cpuCap: base.cpuCap ? base.cpuCap * n * n : undefined,
+    power: base.power ? base.power * n * n : 0,
+    blurb: base.cpuCap ? base.blurb.replace(`+${base.cpuCap} CPU`, `+${base.cpuCap * n * n} CPU`) : base.blurb,
   });
   add(`${id}_2`, big(2, 1.25));
   add(`${id}_4`, big(4, 1.5));
@@ -52,17 +55,21 @@ structure('basalt', { name: 'Forge basalt', cat: 'armor', hp: 160, mass: 4, armo
 structure('cargo', { name: 'Cargo bay', cat: 'cargo', hp: 40, mass: 1, armor: 'frame', cargo: 40, cost: { cr: 6, mats: { rock: 3, ferrite: 1 } }, blurb: 'Holds 40 units of ore or goods. Built from rock you mine.' });
 structure('quarters', { name: 'Crew quarters', cat: 'crew', hp: 40, mass: 1.2, armor: 'frame', crewCap: 4, cost: { cr: 20, mats: { rock: 2, ferrite: 2, carbon: 1 } }, blurb: 'Room for 4 more crew.' });
 // play-test #25: "easier to use mined materials … to increase CPU" — CPU you build straight from ore
-structure('cpu_rack', { name: 'Logic rack', cat: 'cpu', hp: 30, mass: 0.6, armor: 'frame', cpuCap: 2, power: -1, cost: { cr: 10, mats: { quartz: 2, ferrite: 1 } }, blurb: '+2 CPU. Built from quartz as you place it.' });
+structure('cpu_rack', { name: 'Logic rack', cat: 'cpu', hp: 30, mass: 0.6, armor: 'frame', cpuCap: 1, power: -1, cost: { cr: 10, mats: { quartz: 2, ferrite: 1 } }, blurb: '+1 CPU. Built from quartz as you place it. Counts as a CPU part (your bridge sets how many run).' });
 
 // ------------------------------------------------------------- modules (items in your parts hold)
 const mod = (id, def) => add(id, { module: true, ...def });
 
 // cores: losing the core loses the ship
-mod('bridge', { name: 'Bridge', cat: 'core', hp: 120, mass: 2, armor: 'steel', core: true, power: 4, cpuCap: 6, crewCap: 2, repair: 1.5, cost: { cr: 200 }, blurb: 'The heart of a small ship. Lose it and the ship is lost. Gives 2 automatic weapon slots; its crew patch the hull out of combat.' });
+// play-test #61 (2026-11-12): the bridge sets how many CPU parts (cpuParts) and power parts (powerParts) the ship
+// can run — extra ones sit idle (ship.js recompute). Better bridges raise both; coreSlots = automatic weapon slots.
+mod('bridge', { name: 'Bridge', cat: 'core', hp: 120, mass: 2, armor: 'steel', core: true, power: 4, cpuCap: 6, crewCap: 2, repair: 1.5, cpuParts: 3, powerParts: 4, coreSlots: 2, cost: { cr: 200 }, blurb: 'The heart of a small ship. Lose it and the ship is lost. Runs up to 3 CPU parts and 4 power parts, gives 2 automatic weapon slots; its crew patch the hull out of combat.' });
+mod('bridge_2', { name: 'Bridge Mk II', cat: 'core', tier: 3, hp: 200, mass: 2.4, armor: 'steel', core: true, power: 6, cpuCap: 9, crewCap: 3, repair: 2.5, cpuParts: 5, powerParts: 6, coreSlots: 3, cost: { cr: 4800 }, blurb: 'A better small-ship bridge: runs up to 5 CPU parts and 6 power parts, 3 automatic weapon slots. Swap it for your old bridge in Build mode.' });
+mod('bridge_3', { name: 'Bridge Mk III', cat: 'core', tier: 5, hp: 320, mass: 3, armor: 'titanium', core: true, power: 9, cpuCap: 14, crewCap: 4, repair: 4, cpuParts: 8, powerParts: 9, coreSlots: 4, cost: { cr: 19000 }, blurb: 'The best 1×1 bridge: runs up to 8 CPU parts and 9 power parts, 4 automatic weapon slots.' });
 // enemy-only: the flimsy pilot pod of a gnat (play-test #24: "gnats final core block has too much hp")
-add('gnat_core', { name: 'Gnat pod', cat: 'core', hp: 30, mass: 0.8, armor: 'frame', core: true, power: 3, cpuCap: 3, crewCap: 1, enemyOnly: true, blurb: '' });
-mod('command_deck', { name: 'Command Deck', cat: 'core', size: 2, tier: 3, hp: 700, mass: 8, armor: 'titanium', core: true, power: 20, cpuCap: 30, crewCap: 10, repair: 10, cost: { cr: 6000 }, blurb: 'A frigate-class bridge. Gives 4 automatic weapon slots.' });
-mod('flag_bridge', { name: 'Flag Bridge', cat: 'core', size: 4, tier: 5, hp: 4200, mass: 40, armor: 'iridium', core: true, power: 120, cpuCap: 160, crewCap: 40, repair: 60, cost: { cr: 90000 }, blurb: 'The command centre of a capital ship. Gives 10 automatic weapon slots.' });
+add('gnat_core', { name: 'Gnat pod', cat: 'core', hp: 30, mass: 0.8, armor: 'frame', core: true, power: 3, cpuCap: 3, crewCap: 1, cpuParts: 2, powerParts: 2, coreSlots: 0, enemyOnly: true, blurb: '' });
+mod('command_deck', { name: 'Command Deck', cat: 'core', size: 2, tier: 3, hp: 700, mass: 8, armor: 'titanium', core: true, power: 20, cpuCap: 30, crewCap: 10, repair: 10, cpuParts: 14, powerParts: 12, coreSlots: 4, cost: { cr: 6000 }, blurb: 'A frigate-class bridge. Runs up to 14 CPU parts and 12 power parts, gives 4 automatic weapon slots.' });
+mod('flag_bridge', { name: 'Flag Bridge', cat: 'core', size: 4, tier: 5, hp: 4200, mass: 40, armor: 'iridium', core: true, power: 120, cpuCap: 160, crewCap: 40, repair: 60, cpuParts: 40, powerParts: 30, coreSlots: 10, cost: { cr: 90000 }, blurb: 'The command centre of a capital ship. Runs up to 40 CPU parts and 30 power parts, gives 10 automatic weapon slots.' });
 
 // power
 mod('battery', { name: 'Fuel cell', cat: 'power', hp: 30, mass: 0.8, power: 6, cost: { cr: 120 }, explode: 20, blurb: '+6 power.' });
@@ -79,15 +86,20 @@ mod('gyro', { name: 'Gyroscope', cat: 'gyro', hp: 30, mass: 0.6, power: -1, turn
 mod('gyro_2', { name: 'Control moment gyro', cat: 'gyro', size: 2, tier: 3, hp: 200, mass: 4, power: -6, turn: 300, cost: { cr: 3600 }, blurb: 'Turning for big hulls.' });
 
 // computing and crew
-mod('cpu', { name: 'CPU node', cat: 'cpu', hp: 25, mass: 0.4, power: -1, cpuCap: 4, cost: { cr: 160 }, blurb: '+4 CPU for weapons and tools.' });
-mod('cpu_2', { name: 'Compute block', cat: 'cpu', size: 2, tier: 3, hp: 180, mass: 3, power: -6, cpuCap: 26, cost: { cr: 4000 }, blurb: '+26 CPU.' });
-mod('cpu_4', { name: 'Mind core', cat: 'cpu', size: 4, tier: 5, hp: 1100, mass: 14, power: -24, cpuCap: 130, cost: { cr: 46000 }, blurb: '+130 CPU.' });
+// play-test #42: CPU is a longer-term goal — a node is +2 (rarity lifts it) and costs about 1,200 cr
+mod('cpu', { name: 'CPU node', cat: 'cpu', hp: 25, mass: 0.4, power: -1, cpuCap: 2, cost: { cr: 1200 }, blurb: '+2 CPU for weapons and tools. Rarer nodes give more. Counts as a CPU part (your bridge sets how many run).' });
+mod('cpu_2', { name: 'Compute block', cat: 'cpu', size: 2, tier: 3, hp: 180, mass: 3, power: -6, cpuCap: 26, cost: { cr: 4000 }, blurb: '+26 CPU. Counts as one CPU part.' });
+mod('cpu_4', { name: 'Mind core', cat: 'cpu', size: 4, tier: 5, hp: 1100, mass: 14, power: -24, cpuCap: 130, cost: { cr: 46000 }, blurb: '+130 CPU. Counts as one CPU part.' });
 
 // shields
 mod('shield_bubble', { name: 'Bubble shield', cat: 'shield', hp: 40, mass: 1, power: -4, cpu: 2, crew: 1, shield: { kind: 'bubble', hp: 120, regen: 14, delay: 3, pad: 1.4 }, cost: { cr: 500 }, blurb: 'Wraps the whole ship. Recharges after you stop taking hits.' });
 mod('shield_arc', { name: 'Deflector', cat: 'shield', hp: 40, mass: 1, power: -3, cpu: 1, crew: 0, shield: { kind: 'arc', hp: 160, regen: 22, delay: 2, arc: 100, pad: 2.2 }, rot: true, cost: { cr: 420 }, blurb: 'A strong curved shield facing one way. Point it where the fire comes from.' });
 mod('shield_bubble_2', { name: 'Shield dome', cat: 'shield', size: 2, tier: 3, hp: 260, mass: 6, power: -18, cpu: 8, crew: 2, shield: { kind: 'bubble', hp: 900, regen: 70, delay: 4, pad: 2 }, cost: { cr: 6200 }, blurb: 'Frigate-class bubble.' });
 mod('shield_arc_2', { name: 'Bulwark projector', cat: 'shield', size: 2, tier: 3, hp: 260, mass: 6, power: -14, cpu: 6, crew: 1, shield: { kind: 'arc', hp: 1300, regen: 110, delay: 3, arc: 110, pad: 3 }, rot: true, cost: { cr: 5400 }, blurb: 'A wall of light on one side.' });
+// missile defence (play-test #66): a bubble tuned against blasts — `resist` multiplies what each damage type (and any
+// missile, key 'missile') takes from it, applied in world.js absorb
+mod('blast_screen', { name: 'Blast Screen', cat: 'shield', hp: 40, mass: 1, power: -3, cpu: 1, crew: 0, shield: { kind: 'bubble', hp: 90, regen: 16, delay: 2.5, pad: 1.8, resist: { explosive: 0.35, missile: 0.6 } }, cost: { cr: 650 }, blurb: 'A bubble tuned against blasts: explosions hit it at 35% force and missiles at 60% on top. Weak to lightning like any shield.' });
+mod('blast_screen_2', { name: 'Blast Screen Array', cat: 'shield', size: 2, tier: 3, hp: 260, mass: 6, power: -14, cpu: 5, crew: 1, shield: { kind: 'bubble', hp: 700, regen: 60, delay: 3, pad: 2.4, resist: { explosive: 0.35, missile: 0.6 } }, cost: { cr: 5600 }, blurb: 'A frigate-class blast screen: explosions at 35% force, missiles at 60% on top.' });
 mod('shield_bubble_4', { name: 'Aegis lattice', cat: 'shield', size: 4, tier: 5, hp: 1600, mass: 30, power: -80, cpu: 40, crew: 6, shield: { kind: 'bubble', hp: 7000, regen: 420, delay: 5, pad: 3 }, cost: { cr: 70000 }, blurb: 'A capital shield.' });
 
 // utilities
@@ -104,6 +116,9 @@ mod('hab', { name: 'Hab module', cat: 'crew', hp: 45, mass: 1.4, power: -1, crew
 mod('hab_2', { name: 'Hab ring', cat: 'crew', size: 2, tier: 3, hp: 320, mass: 6, power: -4, crewCap: 30, cost: { cr: 3800 }, blurb: 'Room for 30 crew.' });
 mod('cargo_pod', { name: 'Cargo pod', cat: 'cargo', hp: 50, mass: 1.2, cargo: 70, cost: { cr: 220 }, blurb: 'Holds 70 units.' });
 mod('cargo_pod_2', { name: 'Bulk hold', cat: 'cargo', size: 2, tier: 3, hp: 300, mass: 5, cargo: 400, cost: { cr: 3000 }, blurb: 'Holds 400 units.' });
+// decoys (play-test #66): fire flares on their own when enemy missiles close in; each missile chasing you may follow one
+mod('decoy', { name: 'Decoy Launcher', cat: 'utility', hp: 30, mass: 0.6, power: -1, cpu: 1, decoy: { cd: 9, n: 3, pull: 0.75, life: 3.5, range: 520 }, cost: { cr: 450 }, blurb: 'When enemy missiles come within 520, fires 3 decoy flares on its own (every 9 s). Each missile chasing you has a 75% chance to follow a flare instead.' });
+mod('decoy_2', { name: 'Decoy Battery', cat: 'utility', size: 2, tier: 3, hp: 200, mass: 4, power: -4, cpu: 3, decoy: { cd: 7, n: 6, pull: 0.85, life: 4, range: 800 }, cost: { cr: 4800 }, blurb: 'Fires 6 decoy flares when enemy missiles come within 800 (every 7 s). Each missile chasing you has an 85% chance to follow one.' });
 mod('jump_drive', { name: 'Jump drive', cat: 'utility', hp: 40, mass: 1.2, power: -2, cpu: 1, jump: 2, cost: { cr: 900 }, blurb: 'Jump to star systems up to 2 links away.' });
 mod('loot_magnet', { name: 'Salvage magnet', cat: 'utility', hp: 25, mass: 0.6, power: -1, cpu: 1, magnet: 220, cost: { cr: 350 }, blurb: 'Pulls loot and ore in from further away.' });
 mod('cloak', { name: 'Cloak field', cat: 'utility', tier: 4, hp: 40, mass: 1.5, power: -12, cpu: 6, crew: 1, cloak: 6, cost: { cr: 9000 }, blurb: 'Vanish from enemy sensors for 6 seconds (Utility button).' });

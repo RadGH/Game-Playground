@@ -9,6 +9,7 @@ import { BLOCKS } from '../data/blocks.js';
 import { growOptions, growCost, rating } from '../sim/hullgrow.js';
 import { recipe } from '../sim/craft.js';
 import { warpCore, WARP_CORES } from '../sim/galaxy.js';
+import { nextBridge } from './items.js';
 
 const ways = (...w) => el('div', { class: 'up-ways' }, ...w.map(([k, t]) => el('span', { class: 'up-way ' + k }, el('b', {}, { buy: 'Buy', craft: 'Craft', loot: 'Loot', build: 'Build', yard: 'Shipyard' }[k]), ` ${t}`)));
 const oreText = mats => Object.entries(mats).map(([m, n]) => `${n} ${MATERIALS[m]?.name || m}`).join(', ');
@@ -30,11 +31,26 @@ export function openUpgrades(app) {
     B.append(el('div', { class: 'card' }, el('b', {}, `${N.name}: ${N.grid}×${N.grid} build area, parts up to ${N.maxBlock}×${N.maxBlock}`),
       ways(['yard', `Grow hull at ${N.tier <= 2 ? 'any shipyard' : `a shipyard at danger ${N.tier - 1}+`} for ${fmt(cost.cr)} cr`], ['craft', `…or pay ${oreText(cost.mats)} + ${fmt(cost.fee)} cr`], ['buy', 'or buy a ready-made ship there'])));
   }
+  // bigger parts (#61): block size stays gated by hull class (ruling E5) — spell out the whole path to the next size
+  if (C.maxBlock < 4) {
+    const path = []; let at = G.ship.cls;
+    for (let k = 0; k < 6; k++) { const nx = growOptions(at)[0]; if (!nx) break; path.push(nx); at = nx; if (CLASSES[nx].maxBlock > C.maxBlock) break; }
+    const to = path.length && CLASSES[path[path.length - 1]];
+    if (to && to.maxBlock > C.maxBlock) {
+      const steps = [C.name, ...path.map(c => CLASSES[c].name)].join(' → ');
+      B.append(el('div', { class: 'card' }, el('b', {}, `Bigger parts: ${to.maxBlock}×${to.maxBlock} needs a ${to.name}`),
+        el('div', { class: 'hint' }, `Your ${C.name} fits parts up to ${C.maxBlock}×${C.maxBlock}. Grow it one class at a time at a shipyard: ${steps}.`),
+        ways(['yard', `Grow hull (${path.map(c => `${CLASSES[c].name} ${fmt(growCost(c).cr)} cr`).join(', then ')})`], ['buy', `or buy a ready-made ${to.name} at a shipyard`])));
+    }
+  }
   // 2. weak spots, worst first
   const tips = [];
   const fix = (sev, title, why, ...w) => tips.push({ sev, el: el('div', { class: 'card' }, el('b', {}, title), el('div', { class: 'hint' }, why), ways(...w)) });
   const rc = id => { const r = recipe(id); return r ? oreText(r.mats) : ''; };
-  if (st.cpu >= st.cpuCap - 1) fix(3, 'More CPU', `CPU ${st.cpu} of ${st.cpuCap} used — weapons and tools need it.`, ['build', `Logic racks in Build mode (Computing): ${oreText(BLOCKS.cpu_rack.cost.mats)} each`], ['craft', `CPU node: ${rc('cpu')}`], ['buy', 'Computing shelf at outfitters']);
+  const coreB = P.grid.blocks.find(b => b.alive && b.def.core); const nb = nextBridge(coreB?.def.id, C.maxBlock);
+  const capped = (st.cpuParts || 0) >= (st.cpuPartsMax || 99) || (st.powerParts || 0) >= (st.powerPartsMax || 99);
+  if (capped && nb) fix(3, 'A better bridge', `CPU parts ${st.cpuParts} of ${st.cpuPartsMax}, power parts ${st.powerParts} of ${st.powerPartsMax}: your bridge runs no more. A ${nb.name} runs ${nb.cpu} CPU and ${nb.power} power parts.`, ['buy', nb.where], ['craft', `${nb.name}: ${rc(nb.id)}`]);
+  if (st.cpu >= st.cpuCap - 1) fix(3, 'More CPU', `CPU ${st.cpu} of ${st.cpuCap} used — weapons and tools need it. CPU parts ${st.cpuParts} of ${st.cpuPartsMax} fitted.`, ['build', `Logic racks in Build mode (Computing): ${oreText(BLOCKS.cpu_rack.cost.mats)} each, +1 CPU`], ['craft', `CPU node (+2, rarer gives more): ${rc('cpu')}`], ['buy', 'Computing shelf at outfitters; a better bridge runs more CPU parts']);
   if (!st.powerOk) fix(4, 'More power', `Using ${Math.round(st.powerUse)} power but making ${Math.round(st.power)} — everything runs slower.`, ['craft', `Fuel cell: ${rc('battery')}`], ['buy', 'Power shelf at outfitters'], ['loot', 'Reactors drop from bigger ships']);
   if (P.crew < st.crewNeed) fix(3, 'More crew', `${P.crew} crew of ${st.crewNeed} needed — parts run below full strength.`, ['buy', 'Hire at a crew hall'], ['loot', 'Escape pods from human ships'], ['build', st.crewCap < st.crewNeed ? 'Crew quarters or a Hab module for more room' : 'You have room for them']);
   if (st.cargo < 120) fix(1, 'More cargo', `Your hold takes ${fmt(st.cargo)} units.`, ['build', `Cargo bays in Build mode: ${oreText(BLOCKS.cargo.cost.mats)} each — mostly rock`], ['craft', `Cargo pod: ${rc('cargo_pod')}`]);

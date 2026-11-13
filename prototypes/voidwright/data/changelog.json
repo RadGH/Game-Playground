@@ -1,6 +1,26 @@
 {
  "entries": [
   {
+   "id": "2026-11-12b",
+   "date": "2026-11-12",
+   "title": "Missile defence and five kinds of missile",
+   "items": [
+    "Big ships no longer bury you in missiles. A bug made some launchers fire their whole volley over and over (one swarm pod sent 57 missiles instead of 8). Enemies now carry a few launchers each, reload slower, and show a red ring and a lock tone before they fire. Smaller enemy ships fight smarter and hit a little harder instead.",
+    "Rocket pods now fire the 4 rockets their card always promised (the same bug gave them extra).",
+    "Missile defence for small ships: the Blast Screen (a shield bubble that shrugs off explosions and missiles) and the Decoy Launcher (throws flares that pull chasing missiles away). Every outfitter stocks both, plus a flak or point-defence gun. Shields now flash when they stop a missile.",
+    "Five kinds of missile: Ram torpedoes (very fast, punch through a block), Blastcap (huge blast), Homing, Ion (wrecks shields, briefly jams guns and engines) and Firebrand (sets blocks burning). Ion and Firebrand are rare near home.",
+    "Your bridge now sets how many CPU and power parts can run. Bridge Mk II and Mk III (1x1) raise the limits — see the new Bridge shelf at outfitters. CPU nodes are a longer goal now: +2 CPU, 1,200 cr. Parts over the limit stay fitted but sit idle.",
+    "Build mode and Ship upgrades now spell out the road to bigger parts: 2x2 parts need a Frigate (Grow hull at a shipyard: Skiff, then Corvette, then Frigate).",
+    "Drones look like tiny ships now, keep up when you boost or cruise, and you choose which ones fly in the hold's Drones tab. Mining drones are much faster and better ones mine more.",
+    "Crafting and sealed caches spin a rarity reel weighted by the real odds. Tap to skip.",
+    "Jobs show where to go: an arrow at the screen edge with the distance, and a marker on the radar and local map that sits on top. A tow job points at the ship, then at where it goes, and the station pulls it in with a tractor beam.",
+    "Buying at the salvage yard shows exactly what you got and where it went. Asteroid scans only name an ore when there is real ore inside. Rich ore fields are just rich rocks to mine — no more claims. Insurance is at every station.",
+    "Phone: hold your thumb where you want to shoot; missiles fire by themselves.",
+    "Keys: I opens the cargo hold; C, I, N, M and J close their panel when pressed again. Boost stays off when it runs dry until it refills to 30%.",
+    "Fixed: planets that drew the wrong surface or a second smaller copy after a jump."
+   ]
+  },
+  {
    "id": "2026-11-12",
    "date": "2026-11-12",
    "title": "Expansion: Shipwright",

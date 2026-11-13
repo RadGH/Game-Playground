@@ -24,7 +24,7 @@ kill bigger things.** Started 2026-11-06. Owner brief verbatim in `docs/OWNER-BR
 | 15 | Factions | Human traders / navy / pirates + **4 invented alien races** + **reputation** (hurting one pleases its rivals) |
 | 16 | Unlocks | **Quest + finds**: the open quest introduces systems; anything can be found early |
 | 17 | Shops | Shipyard, outfitter, market, refinery, repair, crew hall, insurance + **research lab, salvage yard, black market + bounty board** (no arena, no paint shop) |
-| 18 | World | **Roaming bosses, derelicts + distress beacons, pirate bases + mining claims** (no blueprint crafting / set bonuses) |
+| 18 | World | **Roaming bosses, derelicts + distress beacons, pirate bases + mining claims** (no blueprint crafting / set bonuses). *Owner 2026-11-12 (#64): the claim mechanic is removed — rich fields stay as rich asteroids you just mine* |
 | 19 | Players | **Solo, co-op ready** (pure sim, inputs as data) |
 | 20 | Build | **Milestones nonstop**, LAN links as we go; ask before games.radgh.com |
 

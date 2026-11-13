@@ -15,11 +15,26 @@ import { rollLoot } from './loot.js';
 import { researchLootBonus } from './research.js';
 import { makeDroneItem } from './state.js';
 import { think } from './ai.js';
+import { CLASSES } from '../data/hulls.js';
 
 const HASH = 400;
 const SPLASH_CAP = 1.5;
 export const GRACE_SECONDS = 6;
+/** Report #60: once the booster runs dry it stays off until refilled to this share (30%). */
+export const BOOST_RELOCK = 0.3;
 const SHIELD_MULT = { kinetic: 1, laser: 1.15, plasma: 0.85, explosive: 0.9, lightning: 1.6 };
+/**
+ * Enemy missiles (play-test #66, 2026-11-12: "big ships just launch 50 missiles at the player that destroy instantly").
+ * Enemy launchers reload at ENEMY_MISSILE_RATE, give a LOCK_WARN-second warning before each salvo, keep at most
+ * MISSILES_IN_FLIGHT[class rank] missiles in the air, and all enemy missiles together deal at most SALVO_SHARE of your
+ * hull's full health per SALVO_WINDOW seconds (beyond it 5% gets through, up to SALVO_CEIL). Launcher counts per ship are in shipgen.js.
+ */
+export const ENEMY_MISSILE_RATE = 0.6;
+export const LOCK_WARN = 0.8;
+export const MISSILES_IN_FLIGHT = [3, 4, 6, 6, 8, 10, 10, 12];
+export const SALVO_SHARE = 0.3, SALVO_CEIL = 0.4, SALVO_WINDOW = 2.5;   // past the share only 5% gets through, never past the ceiling
+const isMissile = p => p.kind === 'missile' || p.kind === 'torpedo' || p.kind === 'rocket';
+export const missileCap = s => s.kind === 'station' ? 8 : MISSILES_IN_FLIGHT[Math.min(7, CLASSES[s.cls]?.rank ?? 0)];
 
 export function createWorld({ seed = 1, game = null } = {}) {
   return {
@@ -79,12 +94,15 @@ export function fly(s, inp, dt) {
   const st = s.stats; if (!st || s.static) return;
   const empSlow = s.emp > 0 ? 0.3 : 1;
   let mx = inp.mx || 0, my = inp.my || 0; const ml = Math.hypot(mx, my); if (ml > 1) { mx /= ml; my /= ml; }
-  const boosting = inp.boost && (s.boostFuel ?? 1) > 0.05;
+  // report #60: an empty booster locks until it has refilled to BOOST_RELOCK, so it can't flicker on and off at 0%
+  if (s.boostLocked && (s.boostFuel ?? 1) >= BOOST_RELOCK) s.boostLocked = false;
+  const boosting = !!inp.boost && !s.boostLocked && (s.boostFuel ?? 1) > 0;
   const od = st.overdrive || 0; // "of Overdrive" engines: boost goes faster and lasts longer
   // 2026-11-12 (report #36, "boosters don't do much"): +10% on the boost, and boosting no longer switches cruise off —
   // out of combat it used to drop you from cruise (x2.4) to boost (x1.55), so pressing boost made you SLOWER.
   const boostMul = boosting ? (1.55 + st.boost * 0.3 + od * 0.25) * 1.1 : 1;
   if (boosting) s.boostFuel = Math.max(0, (s.boostFuel ?? 1) - dt * 0.35 / (1 + od * 0.5)); else s.boostFuel = Math.min(1, (s.boostFuel ?? 1) + dt * 0.18);
+  if (s.boostFuel <= 0) s.boostLocked = true;
   s.boosting = boosting;
   // cruise: out of combat the engines open up so the (big) systems can be crossed (main.js sets inp.cruise)
   const cruise = inp.cruise ? 2.4 : 1;
@@ -138,6 +156,7 @@ export function step(w, dt, input) {
     if (s.kind === 'ship' || s.kind === 'station' || s.kind === 'ground') { turrets(w, s, dt); upkeep(w, s, dt); }
   }
   drones(w, dt);
+  decoys(w, dt);
   shots(w, dt);
   pickups(w, dt);
   // break off pieces / kill ships whose blocks died this step
@@ -230,12 +249,14 @@ export function shieldAt(s, x, y) {
 }
 export function shieldRadius(s, sh) { return s.r + sh.pad * CELL; }
 
-function absorb(w, s, sh, dmg, type, x, y, mult = 1, src = null) {
+function absorb(w, s, sh, dmg, type, x, y, mult = 1, src = null, missile = false) {
   if (s.grace > w.t && s === w.player) return;
-  const take = dmg * (SHIELD_MULT[type] || 1) * mult;
+  // a Blast Screen (#66) shrugs off explosions and missiles: sh.resist = { explosive: 0.35, missile: 0.6 }
+  const res = (sh.resist?.[type] ?? 1) * (missile ? sh.resist?.missile ?? 1 : 1);
+  const take = dmg * (SHIELD_MULT[type] || 1) * mult * res;
   sh.cur -= take; s.lastHit = w.t;
   if (src) noteCombat(w, src, s);
-  emit(w, { t: 'shieldhit', x, y, sx: s.x, sy: s.y, id: s.id, r: shieldRadius(s, sh), color: FACTIONS[s.faction]?.style.light || '#6fd0ff', amt: take, down: sh.cur <= 0 });
+  emit(w, { t: 'shieldhit', x, y, sx: s.x, sy: s.y, id: s.id, r: shieldRadius(s, sh), color: FACTIONS[s.faction]?.style.light || '#6fd0ff', amt: take, down: sh.cur <= 0, missile });
   if (sh.cur <= 0) { sh.cur = 0; emit(w, { t: 'shielddown', x: s.x, y: s.y, r: shieldRadius(s, sh) }); }
 }
 
@@ -254,6 +275,14 @@ export function hitBlock(w, s, b, dmg, type, size, src, opts = {}) {
   if (!b || !b.alive || s.dead) return 0;
   if (s.invuln) return 0;
   if (s === w.player && s.grace > w.t) return 0;
+  // #66: enemy missiles together deal at most SALVO_SHARE of your full hull per SALVO_WINDOW — no salvo one-shots you
+  if (opts.missile && s === w.player && src && src.team !== 'player') {
+    const win = s.salvoWin || (s.salvoWin = { t: -99, d: 0 });
+    if (w.t - win.t > SALVO_WINDOW) { win.t = w.t; win.d = 0; }
+    const room = Math.max(0, s.stats.maxHp * SALVO_SHARE - win.d);
+    if (dmg > room) dmg = Math.min(room + (dmg - room) * 0.05, Math.max(0, s.stats.maxHp * SALVO_CEIL - win.d));
+    win.d += dmg;
+  }
   const before = b.hp;
   const { dealt, killed } = damageBlock(s, b, dmg, type, size);
   s.lastHit = w.t;
@@ -316,13 +345,13 @@ export function hitBody(w, s, x, y, dmg, type, size, src, opts = {}) {
 
 /** Area damage. Shields block it for the covered side; blocks in the radius take falloff damage. */
 export function splash(w, x, y, R, dmg, type, size, src, opts = {}) {
-  emit(w, { t: 'boom', x, y, r: R, type, big: R > 80 });
+  emit(w, { t: 'boom', x, y, r: R, type, big: R > 80, wh: opts.warhead });
   for (const s of near(w, x, y, R)) {
     if (s.dead) continue;
     if (!opts.noTeam && src && !hostile(w, src, s) && s.kind !== 'rock' && s.kind !== 'wreck') continue;
     const d = Math.hypot(s.x - x, s.y - y); if (d > R + s.r) continue;
     const sh = shieldAt(s, x, y) || (d > s.r ? shieldAt(s, s.x + (x - s.x) * (s.r / d), s.y + (y - s.y) * (s.r / d)) : null);
-    if (sh && d > s.r * 0.6) { absorb(w, s, sh, dmg, type, x, y, 1, src); continue; }
+    if (sh && d > s.r * 0.6) { absorb(w, s, sh, dmg, type, x, y, opts.shieldMult || 1, src, !!opts.missile); continue; }
     // blocks within R, using the local grid window
     const [lx, ly] = toLocal(s, x, y); const rc = R / CELL;
     const x0 = Math.max(0, Math.floor(lx - rc)), x1 = Math.min(s.grid.w - 1, Math.ceil(lx + rc));
@@ -338,7 +367,10 @@ export function splash(w, x, y, R, dmg, type, size, src, opts = {}) {
     // missile hitting a tightly packed little ship hurt fifty blocks at once and one volley erased it.
     // Enemies take the full blast again (2026-11-11, owner: enemies were too strong with the cap on them).
     const m = s === w.player && tot > dmg * SPLASH_CAP ? dmg * SPLASH_CAP / tot : 1;
-    for (const [b, k] of hits) hitBlock(w, s, b, k * m, type, size, src);
+    for (const [b, k] of hits) hitBlock(w, s, b, k * m, type, size, src, { missile: opts.missile });
+    // incendiary / ion warheads (#57) carry their effect in the blast too
+    if (hits.length && opts.burn) { s.burn = Math.max(s.burn, opts.burnT || 3); s.burnDps = Math.max(s.burnDps || 0, opts.burn); s.burnSrc = src; }
+    if (hits.length && opts.emp) s.emp = Math.max(s.emp, opts.emp);
   }
   // flak / blasts also kill drones and missiles
   for (const dr of w.drones) if (!dr.dead && (!src || hostile(w, src, dr.owner)) && Math.hypot(dr.x - x, dr.y - y) < R) damageDrone(w, dr, dmg * 0.8);
@@ -404,7 +436,7 @@ function turrets(w, s, dt) {
     if (!t.b.alive) continue;
     const W = t.w; const pos = toWorld(s, t.cx, t.cy);
     t.kick = Math.max(0, t.kick - dt * 3);
-    t.cd -= dt * Math.max(0.15, eff) * (s.fireMul ?? 1);
+    t.cd -= dt * Math.max(0.15, eff) * (s.fireMul ?? 1) * (W.mode === 'lock' && s.team !== 'player' ? ENEMY_MISSILE_RATE : 1);
     if (W.mode === 'tool' && W.tool === 'harpoon') { t.aim = turnToward(t.aim, clampArc(t, localAim(s, pos, inp.ax, inp.ay)), wStat(t, 'turn') * dt); continue; }
     const arcC = s.a + t.b.rot * Math.PI / 4, arcH = W.arc >= 360 ? Math.PI * 1.01 : W.arc * Math.PI / 360;
     const range = wStat(t, 'range');
@@ -457,8 +489,16 @@ function turrets(w, s, dt) {
       if (t.beamOn > 0.05) beam(w, s, t, pos, worldAim, range, dt, tgt);
       continue;
     }
-    if (t.burst > 0) { t.burstT -= dt; if (t.burstT <= 0) { t.burst--; t.burstT = W.burst; shoot(w, s, t, pos, worldAim, tgt); } continue; }
+    if (t.burst > 0) { t.burstT -= dt; if (t.burstT <= 0) { t.burst--; t.burstT = W.burst; shoot(w, s, t, pos, worldAim, tgt, 1); } continue; }   // #66: one shot per burst step (it used to fire the whole count every step: a swarm pod launched 57, not 8)
+    // #66: an enemy launcher warns before each salvo (LOCK_WARN s) and holds fire while its missiles fill the sky
+    if (t.warnAt && w.t > t.warnAt + 1.5) t.warnAt = 0;   // a warning that never turned into a salvo starts over
+    if (mode === 'lock' && s.team !== 'player' && fire && onTarget && t.cd <= 0 && eff > 0) {
+      if (missilesOut(w, s) >= missileCap(s)) fire = false;
+      else if (!t.warnAt) { t.warnAt = w.t + LOCK_WARN; lockWarn(w, s, tgt?.body, pos); fire = false; }
+      else if (w.t < t.warnAt) fire = false;
+    }
     if (fire && onTarget && t.cd <= 0 && eff > 0) {
+      t.warnAt = 0;
       const rate = wStat(t, 'rate') || 1;
       t.cd = 1 / rate;
       if (W.burst && W.count > 1) { t.burst = W.count - 1; t.burstT = W.burst; shoot(w, s, t, pos, worldAim, tgt, 1); }
@@ -469,6 +509,16 @@ function turrets(w, s, dt) {
   }
 }
 
+/** Enemy missiles in the air right now (for the in-flight cap). */
+function missilesOut(w, s) { let n = 0; for (const q of w.shots) if (q.owner === s && !q.dead && q.hp && isMissile(q)) n++; return n; }
+/** The salvo warning: a marker on the launcher (fx 'lockwarn' + sound), and a message when a big ship locks on to you. */
+function lockWarn(w, s, tb, pos) {
+  if (!tb) return;
+  emit(w, { t: 'lockwarn', x: pos[0], y: pos[1], id: s.id, tx: tb.x, ty: tb.y, onPlayer: tb === w.player, r: s.r });
+  if (tb === w.player && ((CLASSES[s.cls]?.rank ?? 0) >= 2 || s.kind === 'station') && w.t - (w.salvoNoteT ?? -99) > 8) {
+    w.salvoNoteT = w.t; w.notes.push({ t: 'salvo', name: s.name || 'An enemy' });
+  }
+}
 function localAim(s, pos, ax, ay) { return Math.atan2((ay ?? pos[1]) - pos[1], (ax ?? pos[0] + 1) - pos[0]) - s.a; }
 function clampArc(t, local) {
   if (t.w.arc >= 360) return t.aim + angDiff(t.aim, local);
@@ -502,7 +552,9 @@ function shoot(w, s, t, pos, ang, tgt, volley) {
   const opt = { burn: W.burn || (mods.burn ? 4 : 0), emp: W.emp, shieldMult: W.shieldMult || 1 };
   if (W.proj === 'arc') { arcStrike(w, s, mx, my, ang, range, dmg, W, tgt, mods); return; }
   if (W.proj === 'rail' || W.proj === 'lance') { railStrike(w, s, mx, my, ang, range, dmg, W, mods); return; }
+  const capM = s.team !== 'player' && (W.proj === 'missile' || W.proj === 'torpedo') ? missileCap(s) - missilesOut(w, s) : Infinity;
   for (let i = 0; i < n; i++) {
+    if (i >= capM) break;   // #66: never more than the in-flight cap from one enemy
     const a = ang + (rand() - 0.5) * W.spread * (n > 1 && !W.burst ? 1.6 : 1) * 2;
     const sp = (W.speed || 800) * (0.94 + rand() * 0.12);
     const p = {
@@ -513,7 +565,8 @@ function shoot(w, s, t, pos, ang, tgt, volley) {
       leech: !!mods.leech, size: W.size, vis, rc,
     };
     if (W.proj === 'mine') { p.vx = s.vx * 0.2 - Math.cos(s.a) * 40; p.vy = s.vy * 0.2 - Math.sin(s.a) * 40; p.armed = 0.8; }
-    if (W.proj === 'missile' || W.proj === 'torpedo') p.launch = 0.25;
+    if (W.proj === 'missile' || W.proj === 'torpedo') { p.launch = W.warhead === 'ram' ? 0.12 : 0.25; p.warhead = W.warhead || 'std'; }
+    if (W.burnT) p.opt.burnT = W.burnT;
     w.shots.push(p);
   }
 }
@@ -659,6 +712,8 @@ function shots(w, dt) {
       if (p.launch > 0) { p.launch -= dt; p.vx *= 0.96; p.vy *= 0.96; }
       else {
         if (p.target && p.target.dead) p.target = null;
+        // a decoy flare (#66) soaks the missile that chased it
+        if (p.target?.decoy && Math.hypot(p.target.x - p.x, p.target.y - p.y) < 22) { p.dead = true; emit(w, { t: 'boom', x: p.x, y: p.y, r: 14, type: p.w.type, wh: p.warhead }); continue; }
         if (!p.target) { // reacquire
           let best = null, bd = 900 * 900;
           for (const o of near(w, p.x, p.y, 900)) if (!o.dead && !o.invuln && !o.dockable && hostile(w, p.owner, o) && o.kind !== 'rock' && o.cloak <= 0) { const d = (o.x - p.x) ** 2 + (o.y - p.y) ** 2; if (d < bd) { bd = d; best = o; } }
@@ -667,7 +722,8 @@ function shots(w, dt) {
         const sp = p.w.speed * (p.kind === 'torpedo' ? 1 : 1.0);
         let a = Math.atan2(p.vy, p.vx);
         if (p.target) a = turnToward(a, Math.atan2(p.target.y - p.y, p.target.x - p.x), p.homing * dt);
-        const cur = Math.hypot(p.vx, p.vy); const ns = Math.min(sp, cur + sp * 2 * dt);
+        // ram darts (#57) reach full speed almost at once; heavy blast missiles build up slowly
+        const cur = Math.hypot(p.vx, p.vy); const ns = Math.min(sp, cur + sp * (p.warhead === 'ram' ? 6 : p.warhead === 'he' ? 1.2 : 2) * dt);
         p.vx = Math.cos(a) * ns; p.vy = Math.sin(a) * ns; p.a = a;
       }
     } else if (p.kind === 'mine') {
@@ -681,7 +737,7 @@ function shots(w, dt) {
     p.x += p.vx * dt; p.y += p.vy * dt;
     if (p.kind === 'harpoon') { if (p.life <= 0) p.dead = true; continue; }   // tethers() latches it
     if (p.life <= 0) {
-      if (p.splash) { p.dead = true; splash(w, p.x, p.y, p.splash, p.dmg, p.w.type, p.w.size, p.owner, { interceptor: p.kind === 'flak' }); }
+      if (p.splash) { p.dead = true; splash(w, p.x, p.y, p.splash, p.dmg, p.w.type, p.w.size, p.owner, { interceptor: p.kind === 'flak', missile: !!p.hp && isMissile(p), warhead: p.warhead }); }
       else p.dead = true;
       continue;
     }
@@ -710,16 +766,19 @@ function shots(w, dt) {
       // shield bubble check at the current point
       const sh = shieldAt(o, p.x, p.y);
       if (sh && Math.hypot(p.px - o.x, p.py - o.y) > Math.hypot(p.x - o.x, p.y - o.y) - 1) {
-        absorb(w, o, sh, p.dmg, p.w.type, p.x, p.y, p.opt.shieldMult, p.owner);
+        absorb(w, o, sh, p.dmg, p.w.type, p.x, p.y, p.opt.shieldMult, p.owner, !!p.hp && isMissile(p));
         p.dead = true;
-        if (p.splash) emit(w, { t: 'boom', x: p.x, y: p.y, r: p.splash * 0.6, type: p.w.type });
+        if (p.splash) emit(w, { t: 'boom', x: p.x, y: p.y, r: p.splash * 0.6, type: p.w.type, wh: p.warhead, shield: true });
+        if (p.opt.emp && p.warhead === 'emp') o.emp = Math.max(o.emp, p.opt.emp * 0.5);   // ion warheads half-stall a shielded ship
         break;
       }
       const hit = rayHit(o, p.px, p.py, p.x, p.y);
       if (!hit) continue;
-      if (p.splash) { p.dead = true; splash(w, hit.x, hit.y, p.splash, p.dmg, p.w.type, p.w.size, p.owner); hitBlock(w, o, hit.b, p.dmg * 0.6, p.w.type, p.w.size, p.owner); break; }
-      hitBlock(w, o, hit.b, p.dmg, p.w.type, p.w.size, p.owner);
-      if (p.opt.burn) { o.burn = Math.max(o.burn, 3); o.burnDps = Math.max(o.burnDps || 0, p.opt.burn); }
+      const ms = !!p.hp && isMissile(p);
+      if (p.splash) { p.dead = true; splash(w, hit.x, hit.y, p.splash, p.dmg, p.w.type, p.w.size, p.owner, { missile: ms, warhead: p.warhead, burn: p.opt.burn, burnT: p.opt.burnT, emp: p.opt.emp, shieldMult: p.opt.shieldMult }); hitBlock(w, o, hit.b, p.dmg * 0.6, p.w.type, p.w.size, p.owner, { missile: ms }); break; }
+      hitBlock(w, o, hit.b, p.dmg, p.w.type, p.w.size, p.owner, { missile: ms });
+      if (p.warhead === 'ram') emit(w, { t: 'boom', x: hit.x, y: hit.y, r: 12, type: 'kinetic', wh: 'ram' });
+      if (p.opt.burn) { o.burn = Math.max(o.burn, p.opt.burnT || 3); o.burnDps = Math.max(o.burnDps || 0, p.opt.burn); }
       if (p.opt.emp) o.emp = Math.max(o.emp, p.opt.emp);
       if (p.leech && p.owner.stats) p.owner.leechBank = (p.owner.leechBank || 0) + p.dmg * 0.1;
       emit(w, { t: 'hit', x: hit.x, y: hit.y, type: p.w.type, color: p.color, size: p.w.size, kind: p.kind });
@@ -729,6 +788,35 @@ function shots(w, dt) {
   }
   if (w.shots.length > 1500) w.shots.splice(0, w.shots.length - 1500);
   w.shots = w.shots.filter(p => !p.dead);
+}
+
+// ------------------------------------------------------------------ decoy flares (play-test #66)
+/**
+ * A ship with a Decoy launcher (st.decoy = { cd, n, pull, life, range }) fires flares on its own when hostile
+ * missiles chasing it come within range; each such missile follows a flare instead with chance `pull`.
+ */
+function launchDecoys(w, s, dt) {
+  const D = s.stats.decoy;
+  s.decoyCd = Math.max(0, (s.decoyCd || 0) - dt);
+  if (s.decoyCd > 0 || s.emp > 0) return;
+  const chasing = [];
+  for (const p of w.shots) if (!p.dead && p.hp && isMissile(p) && p.target === s && Math.hypot(p.x - s.x, p.y - s.y) < D.range + s.r) chasing.push(p);
+  if (!chasing.length) return;
+  s.decoyCd = D.cd;
+  const list = w.decoys || (w.decoys = []); const made = [];
+  for (let i = 0; i < D.n; i++) {
+    const a = s.a + Math.PI + (i - (D.n - 1) / 2) * 0.7 + (w.r() - 0.5) * 0.3;
+    const d = { decoy: true, x: s.x + Math.cos(a) * s.r, y: s.y + Math.sin(a) * s.r, vx: s.vx * 0.5 + Math.cos(a) * 260, vy: s.vy * 0.5 + Math.sin(a) * 260, life: D.life, dead: false, team: s.team, owner: s, r: 6, id: newId() };
+    list.push(d); made.push(d);
+  }
+  for (const p of chasing) if (w.r() < D.pull) p.target = made[Math.floor(w.r() * made.length)];
+  emit(w, { t: 'decoy', x: s.x, y: s.y, n: D.n, id: s.id });
+  if (s === w.player) w.notes.push({ t: 'decoy', n: chasing.length });
+}
+function decoys(w, dt) {
+  if (!w.decoys?.length) return;
+  for (const d of w.decoys) { d.x += d.vx * dt; d.y += d.vy * dt; d.vx *= 0.97; d.vy *= 0.97; d.life -= dt; if (d.life <= 0) d.dead = true; }
+  w.decoys = w.decoys.filter(d => !d.dead);
 }
 
 // ------------------------------------------------------------------ upkeep: shields, burn, emp, repair, cloak
@@ -750,6 +838,7 @@ function upkeep(w, s, dt) {
       }
     }
   }
+  if (st.decoy && s.kind === 'ship') launchDecoys(w, s, dt);
   // alien hulls regrow
   if (st.regrow > 0) for (const b of s.grid.blocks) if (b.alive && b.def.regrow && b.hp < b.maxHp) b.hp = Math.min(b.maxHp, b.hp + b.def.regrow * b.maxHp * 0.01 * dt);
   if (s.leechBank > 1) { healSome(w, s, s.leechBank); s.leechBank = 0; }
@@ -909,11 +998,11 @@ function collect(w, p) {
     // crew are just a number (owner #33): they fill empty room; with no room the pod is towed to safety
     const room = Math.max(0, w.player.stats.crewCap - w.player.crew); const n = Math.min(room, p.n);
     w.player.crew += n; if (n) recompute(w.player);
-    w.notes.push({ t: 'crew', n, full: p.n - n }); p.got = n;
+    w.notes.push({ t: 'crew', n }); p.got = n;
   }
   else if (p.kind === 'data') G.dataCores = (G.dataCores || 0) + p.n;
   else if (p.kind === 'specimen') { (G.specimens ||= []).push({ name: p.name, faction: p.faction, value: p.value }); }
-  emit(w, { t: 'collect', x: p.x, y: p.y, kind: p.kind, mat: p.mat, n: p.n, rarity: p.rarity, item: p.item });
+  emit(w, { t: 'collect', x: p.x, y: p.y, kind: p.kind, mat: p.mat, n: p.kind === 'pod' ? p.got : p.n, rarity: p.rarity, item: p.item });
   w.notes.push({ t: 'collect', kind: p.kind, mat: p.mat, n: p.n, ore: !!p.ore, item: p.item, rarity: p.rarity, name: p.name });
 }
 
@@ -1001,6 +1090,7 @@ function drones(w, dt) {
     const inp = owner.input || {};
     const fa = inp.ax != null ? Math.atan2(inp.ay - owner.y, inp.ax - owner.x) : owner.a;
     const n = list.length;
+    const ownSp = Math.hypot(owner.vx, owner.vy); const fast = !!owner.boosting || ownSp > (owner.stats?.maxSpeed || 300) * 1.3;
     for (let i = 0; i < list.length; i++) {
       const dr = list[i];
       const D = dr.def;
@@ -1013,10 +1103,11 @@ function drones(w, dt) {
         dr.retarget = 0.4;
         dr.target = null;
         const range = (D.weapon?.range || 200) + 160;
-        if (D.mines) { let bd = 1e18; for (const o of near(w, gx, gy, 360)) if (!o.dead && o.kind === 'rock') { const d = Math.hypot(o.x - gx, o.y - gy); if (d < bd) { bd = d; dr.target = o; } } }
+        if (fast) { /* report #58: while you boost or cruise, drones keep formation instead of stopping to work */ }
+        else if (D.mines) { let bd = 1e18; for (const o of near(w, gx, gy, 360)) if (!o.dead && o.kind === 'rock') { const d = Math.hypot(o.x - gx, o.y - gy); if (d < bd) { bd = d; dr.target = o; } } }
         else if (!D.repairs) { let bd = range; for (const o of near(w, gx, gy, range)) if (!o.dead && hostile(w, owner, o) && o.cloak <= 0) { const d = Math.hypot(o.x - gx, o.y - gy) - o.r; if (d < bd) { bd = d; dr.target = o; } } }
       }
-      const T = dr.target && !dr.target.dead ? dr.target : null;
+      const T = dr.target && !dr.target.dead && !fast ? dr.target : null;
       if (T && !D.interceptor && !D.shield) {
         // hover near the target, staying on the owner's side
         const ang = Math.atan2(owner.y - T.y, owner.x - T.x) + spread * 2;
@@ -1025,8 +1116,11 @@ function drones(w, dt) {
         if (Math.hypot(gx - owner.x, gy - owner.y) > 900) { gx = owner.x + Math.cos(fa) * 300; gy = owner.y + Math.sin(fa) * 300; }
       }
       const dx = gx - dr.x, dy = gy - dr.y; const d = Math.hypot(dx, dy);
-      const want = Math.min(D.speed, d * 3);
-      const tvx = d > 1 ? dx / d * want + owner.vx * 0.3 : owner.vx, tvy = d > 1 ? dy / d * want + owner.vy * 0.3 : owner.vy;
+      // report #58: in formation a drone flies WITH you (your velocity plus its own correction), so boost and cruise
+      // never leave it behind; one that has fallen far back gets extra speed to catch up
+      const carry = T ? 0.3 : 1;
+      const want = Math.min(D.speed + (d > 400 ? ownSp : 0), d * 3);
+      const tvx = d > 1 ? dx / d * want + owner.vx * carry : owner.vx, tvy = d > 1 ? dy / d * want + owner.vy * carry : owner.vy;
       dr.vx += (tvx - dr.vx) * Math.min(1, dt * 4); dr.vy += (tvy - dr.vy) * Math.min(1, dt * 4);
       dr.x += dr.vx * dt; dr.y += dr.vy * dt;
       const face = T ? Math.atan2(T.y - dr.y, T.x - dr.x) : Math.atan2(dr.vy, dr.vx);
@@ -1051,8 +1145,18 @@ function drones(w, dt) {
       const Wp = D.weapon; const dd = Math.hypot(T.x - dr.x, T.y - dr.y) - T.r;
       if (dd > Wp.range) continue;
       if (D.mines || Wp.proj === 'beam') {
-        const hit = rayHit(T, dr.x, dr.y, T.x, T.y);
-        if (hit) { hitBlock(w, T, hit.b, Wp.dmg * (dr.mul || 1) * dt * (D.mines ? 3 : 1), Wp.type, 's', owner, { mining: D.mines }); w.beams.push({ x: dr.x, y: dr.y, x2: hit.x, y2: hit.y, color: Wp.color, width: 1.6, hit: true, tool: D.mines ? 'mine' : null }); }
+        let hit = rayHit(T, dr.x, dr.y, T.x, T.y);
+        if (!hit && D.mines) {
+          // dug a channel to the middle: cut toward the nearest block still standing (it used to stop here for good)
+          if (!dr.mineB?.alive || dr.mineBody !== T) {
+            dr.mineB = null; dr.mineBody = T; let bd = 1e18;
+            for (const b of T.grid.blocks) { if (!b.alive) continue; const k = b.def.size || 1; const [bx, by] = toWorld(T, b.x + k / 2, b.y + k / 2); const q = (bx - dr.x) ** 2 + (by - dr.y) ** 2; if (q < bd) { bd = q; dr.mineB = b; } }
+          }
+          if (dr.mineB) { const k = dr.mineB.def.size || 1; const [bx, by] = toWorld(T, dr.mineB.x + k / 2, dr.mineB.y + k / 2); hit = rayHit(T, dr.x, dr.y, bx + (bx - dr.x) * 0.1, by + (by - dr.y) * 0.1); }
+        }
+        // report #54: a mining drone cuts `mine` per second as medium hits (like your mining laser), so the rock's
+        // flat armour no longer eats most of each tiny per-frame cut
+        if (hit) { hitBlock(w, T, hit.b, (D.mines ? D.mine : Wp.dmg) * (dr.mul || 1) * dt, Wp.type, D.mines ? 'm' : 's', owner, { mining: D.mines }); w.beams.push({ x: dr.x, y: dr.y, x2: hit.x, y2: hit.y, color: Wp.color, width: 1.6, hit: true, tool: D.mines ? 'mine' : null }); }
         continue;
       }
       if (dr.cd > 0) continue;
@@ -1067,6 +1171,12 @@ function drones(w, dt) {
     }
   }
 }
+
+/**
+ * The one line shown when crew come aboard (owner #33 / #55: "It's just a number"): "+3 crew", or "Crew full"
+ * when there was no room. Never talk about rescuing or dropping people off.
+ */
+export const crewText = n => n > 0 ? `+${n} crew` : 'Crew full';
 
 /** For tests / tools: the material colour for a pickup. */
 export const pickupColor = p => p.kind === 'mat' ? MATERIALS[p.mat]?.color : p.kind === 'item' ? RARITY_BY_ID[p.rarity]?.color : p.kind === 'cr' ? '#ffd84a' : p.kind === 'pod' ? '#ffffff' : '#c8ff6a';

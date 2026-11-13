@@ -65,7 +65,15 @@ export function think(w, s, dt) {
   }
 
   const d = dist(s, T);
+  // #66 (smaller enemies should be a threat too): a fighter that finds a target calls its pack in — idle ships of
+  // its faction within 1.6 km join the fight, once per target
+  if (s.small && ai.called !== T) {
+    ai.called = T;
+    for (const o of near(w, s.x, s.y, 1600)) if (o !== s && !o.dead && o.ai && o.kind === 'ship' && o.faction === s.faction && !o.ai.target && !o.wing && o.role !== 'trader' && o.role !== 'miner') { o.ai.target = T; o.ai.called = T; }
+  }
   inp.ax = T.x + T.vx * 0.2; inp.ay = T.y + T.vy * 0.2; inp.lock = T;
+  // small ships lead their shots properly (where the target will be when the shot lands)
+  if (s.small) { const lead = Math.min(1.2, d / 900); inp.ax = T.x + (T.vx - s.vx) * lead; inp.ay = T.y + (T.vy - s.vy) * lead; }
   inp.fire = d < reach + T.r; inp.missile = lockReach > 0 && d < lockReach;
   const toT = Math.atan2(T.y - s.y, T.x - s.x);
   inp.noseOn = Math.abs(angDiff(s.a, toT)) < 0.18;
@@ -92,6 +100,19 @@ export function think(w, s, dt) {
   const orbitW = s.role === 'capital' || s.role === 'boss' ? 0.5 : hasFixed && d < keep * 1.3 ? 0.2 : 0.85;
   inp.mx = rx * clamp1(radial) + ox * orbitW;
   inp.my = ry * clamp1(radial) + oy * orbitW;
+  if (s.small) {
+    // jink: a sideways weave every 0.5-1.1 s makes small ships hard to track
+    ai.jinkT = (ai.jinkT || 0) - dt;
+    if (ai.jinkT <= 0) { ai.jinkT = 0.5 + rand() * 0.6; ai.jink = (rand() - 0.5) * 1.4; }
+    inp.mx += ox * ai.jink; inp.my += oy * ai.jink;
+    // hit and run: with the shields gone and the hull hurt, pull back until the shields come back, then return
+    const shDown = st.shieldMax > 0 && s.shields.every(sh => sh.cur <= 0);
+    if (!ai.regroup && shDown && hpRatio < 0.6) ai.regroup = w.t + 5;
+    if (ai.regroup) {
+      if (w.t > ai.regroup || s.shields.some(sh => sh.cur >= sh.max * 0.6)) ai.regroup = 0;
+      else { inp.mx = -rx + ox * 0.6; inp.my = -ry + oy * 0.6; inp.boost = true; }
+    }
+  }
   if (s.role === 'swarm' && d > keep * 2) inp.boost = true;
   if (rand() < dt * 0.15) ai.orbit *= -1;
   // bosses enrage below half health

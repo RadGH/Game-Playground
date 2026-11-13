@@ -296,7 +296,12 @@ export function createPlanets(R) {
   const O = new Float32Array(6);
 
   function state(p, w) {
-    let st = P.get(p.id); if (st) return st;
+    let st = P.get(p.id); if (st && st.p === p) return st;
+    // Planet ids ('p0', 'p1'…) repeat in every system. The frame that jumps still draws the OLD world once after
+    // setSystem() cleared the cache, so a state keyed by id alone was then reused for the NEW system's planet: the
+    // last system's picture on this planet, and detail tiles sampled at the old radius drawn at the new one
+    // (live reports #56/#63: "texture glitching", "double-rendering at a smaller scale"). Same object or rebuild.
+    if (st) for (const [k, tt] of tiles) if (tt.pid === p.id) tiles.delete(k);
     const cfg = makeCfg(p, w.sun);
     st = { p, cfg, base: null, lights: null, clouds: null, shade: makeShade(cfg), air: makeAir(cfg), ring: cfg.ring ? makeRing(cfg) : null, job: null, twinkle: [], scorch: [], ready: false };
     st.job = baseJob(st);
@@ -441,7 +446,7 @@ export function createPlanets(R) {
     clear() { P.clear(); tiles.clear(); },
     /** A mining laser burn on the surface (planet-local position from world x, y). */
     scorch(p, x, y) {
-      const st = P.get(p.id); if (!st) return;
+      const st = P.get(p.id); if (!st || st.p !== p) return;
       const sc = { x: x - p.x, y: y - p.y, r: 3 + Math.random() * 3 };
       if (st.scorch.length > 3000) st.scorch.shift();
       st.scorch.push(sc);

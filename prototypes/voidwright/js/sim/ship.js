@@ -12,6 +12,16 @@ let nextId = 1;
 export const newId = () => nextId++;
 export const resetIds = (n = 1) => { nextId = n; };
 
+/** A part that adds CPU and counts against the bridge's CPU-part limit (CPU nodes, compute blocks, logic racks). */
+export const isCpuPart = d => !!d && !d.core && d.cat === 'cpu' && (d.cpuCap || 0) > 0;
+/** A part that makes power and counts against the bridge's power-part limit (fuel cells, reactors). */
+export const isPowerPart = d => !!d && d.cat === 'power' && (d.power || 0) > 0;
+/** How many CPU / power parts a bridge runs (no bridge = the plain one's limits). */
+export function partLimits(coreDef) {
+  if (!coreDef) return { cpu: 3, power: 4 };
+  return { cpu: coreDef.cpuParts ?? 99, power: coreDef.powerParts ?? 99 };
+}
+
 /** Make a body around a grid. Local origin = the grid's centre of mass. */
 export function makeBody(kind, grid, opts = {}) {
   const s = {
@@ -31,6 +41,12 @@ export function recompute(s) {
   const st = { mass: 0, thrust: 0, turn: 0, power: 0, powerUse: 0, cpu: 0, cpuCap: 0, crewNeed: 0, crewCap: 0, cargo: 0,
     repair: 0, scan: 0, jump: 0, magnet: 0, drones: 0, cloak: 0, boost: 0, blocks: 0, hp: 0, maxHp: 0, core: null, regrow: 0 };
   s.turrets = []; s.shields = []; s.engines = []; s.lights = [];
+  // play-test #61: the bridge caps how many CPU parts and power parts run (player ships only — enemies are built
+  // to their own budget in shipgen.js and ignore it). Extra parts stay fitted but add nothing (b.idle).
+  const capped = s.team === 'player';
+  const coreDef = capped ? (g.blocks.find(b => b.alive && b.def.core)?.def || null) : null;
+  const lim = partLimits(coreDef);
+  const cpuList = [], powList = [];
   for (const b of g.blocks) {
     const d = b.def; const n = d.size || 1;
     st.maxHp += b.maxHp;
@@ -40,8 +56,11 @@ export function recompute(s) {
     m += bm; mx += cx * bm; my += cy * bm;
     // part bonuses rolled on the item (loot.js AFFIX/POWERS): weapons read theirs in wStat, the rest here
     const it = b.item; const mo = it?.mods || {};
-    st.power += partStat(d, it, 'powerOut'); st.powerUse += partStat(d, it, 'powerUse');
-    st.cpu += partStat(d, it, 'cpu'); st.cpuCap += partStat(d, it, 'cpuCap');
+    b.idle = false;
+    if (capped && isPowerPart(d)) powList.push([b, partStat(d, it, 'powerOut')]); else st.power += partStat(d, it, 'powerOut');
+    st.powerUse += partStat(d, it, 'powerUse');
+    st.cpu += partStat(d, it, 'cpu');
+    if (capped && isCpuPart(d)) cpuList.push([b, partStat(d, it, 'cpuCap')]); else st.cpuCap += partStat(d, it, 'cpuCap');
     st.crewNeed += d.crew || 0; st.crewCap += partStat(d, it, 'crewCap');
     st.thrust += partStat(d, it, 'thrust');
     if (!d.weapon) st.turn += partStat(d, it, 'turn');
@@ -50,9 +69,10 @@ export function recompute(s) {
     if (mo.motherlode) st.motherlode = true;
     st.repair += partStat(d, it, 'repair'); st.scan = Math.max(st.scan, d.scan || 0); st.scanRange = Math.max(st.scanRange || 0, partStat(d, it, 'scanRange'));
     st.jump = Math.max(st.jump, d.jump || 0); st.fab = Math.max(st.fab || 0, d.fab || 0);
-    st.autoSlots = (st.autoSlots || 0) + partStat(d, it, 'autoSlots') + (d.core && !d.enemyOnly ? (d.size >= 4 ? 10 : d.size >= 2 ? 4 : 2) : 0);
+    st.autoSlots = (st.autoSlots || 0) + partStat(d, it, 'autoSlots') + (d.core && !d.enemyOnly ? (d.coreSlots ?? (d.size >= 4 ? 10 : d.size >= 2 ? 4 : 2)) : 0);
     st.magnet = Math.max(st.magnet, d.magnet || 0); st.drones += partStat(d, it, 'drones'); st.cloak = Math.max(st.cloak, d.cloak || 0);
     st.boost += d.boost || 0; st.regrow += d.regrow || 0;
+    if (d.decoy && (!st.decoy || d.decoy.n > st.decoy.n)) st.decoy = d.decoy;   // the best decoy launcher fitted (#66)
     if (d.core && !st.core) st.core = b;
     if (d.weapon) {
       const w = ALL_WEAPONS[d.weapon];
@@ -64,6 +84,17 @@ export function recompute(s) {
     if (d.cat === 'engine') s.engines.push({ b, cx, cy, n });
     if (d.cat === 'power' || d.cat === 'core') s.lights.push({ b, cx, cy, n });
   }
+  // the best parts run first; the rest are idle until the bridge is upgraded (old saves keep them — nothing is deleted)
+  const runBest = (list, max, add) => {
+    list.sort((a, b) => b[1] - a[1] || a[0].idx - b[0].idx);
+    list.forEach(([b, v], i) => { if (i < max) add(v); else b.idle = true; });
+  };
+  runBest(cpuList, lim.cpu, v => { st.cpuCap += v; });
+  for (const [b] of cpuList) if (b.idle) st.powerUse -= partStat(b.def, b.item, 'powerUse');   // an idle part draws nothing
+  runBest(powList, lim.power, v => { st.power += v; });
+  st.cpuParts = capped ? cpuList.length : 0; st.cpuPartsMax = lim.cpu;
+  st.powerParts = capped ? powList.length : 0; st.powerPartsMax = lim.power;
+  st.idleParts = Math.max(0, cpuList.length - lim.cpu) + Math.max(0, powList.length - lim.power);
   s.turretState = new Map(s.turrets.map(t => [t.b, t]));
   // targeting slots (owner #26): sentries and point defence are always automatic; any other gun is
   // automatic only when it is set to Auto (block.auto) AND a slot is free — first come, first served.

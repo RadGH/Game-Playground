@@ -4,6 +4,7 @@
 import { createPost } from './post.js';
 import { bakeBody, bakeKey, paletteFor, mix as mixHex } from './bake.js';
 import { drawTurret } from './turret-art.js';
+import { droneArt, DRONE_CELL } from './drone-art.js';
 import { glowSprite, lightSprite, hexA, impactFx } from './fx.js';
 import { toWorld } from '../sim/ship.js';
 import { CELL } from '../sim/grid.js';
@@ -136,6 +137,7 @@ export function createRenderer(view, overlay, opts = {}) {
       const b = bakeFor(s);
       const P = b.px; const k = CELL / P;
       g.save(); g.translate(s.x, s.y); g.rotate(s.a);
+      if (s.shrink != null) { g.scale(s.shrink, s.shrink); g.globalAlpha = s.fade ?? 1; }   // pulled into a station by its tractor beam (ui/missions.js)
       g.scale(k, k); g.translate(-s.ox * P - b.pad, -s.oy * P - b.pad);
       if (s.cloak > 0) g.globalAlpha = s === w.player ? 0.35 : 0.08;
       if (s.kind === 'ground') { g.globalAlpha = 0.5; g.fillStyle = '#000'; g.drawImage(b.mask, 6, 6); g.globalAlpha = 1; }
@@ -171,7 +173,7 @@ export function createRenderer(view, overlay, opts = {}) {
         g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
       }
       // turrets
-      if (s.turrets?.length && (s.r * z > 6)) {
+      if (s.turrets?.length && (s.r * z > 6) && s.shrink == null) {
         const pal = paletteFor(s);
         for (const tu of s.turrets) {
           if (!tu.b.alive) continue;
@@ -187,10 +189,12 @@ export function createRenderer(view, overlay, opts = {}) {
     for (const [s, b] of glowsLater) {
       if (s.kind === 'wreck') continue;
       const P = b.px; const k = CELL / P;
-      g.save(); g.translate(s.x, s.y); g.rotate(s.a); g.scale(k, k); g.translate(-s.ox * P - b.pad, -s.oy * P - b.pad);
-      g.globalAlpha = s.emp > 0 ? 0.2 + Math.random() * 0.3 : 0.9; g.drawImage(b.glow, 0, 0);
+      g.save(); g.translate(s.x, s.y); g.rotate(s.a); if (s.shrink != null) g.scale(s.shrink, s.shrink); g.scale(k, k); g.translate(-s.ox * P - b.pad, -s.oy * P - b.pad);
+      g.globalAlpha = s.emp > 0 ? 0.2 + Math.random() * 0.3 : 0.9 * (s.fade ?? 1); g.drawImage(b.glow, 0, 0);
       if (s.kind === 'rock' && s.scanned) { g.globalAlpha = 0.45 + 0.25 * Math.sin(t * 2.5 + s.id); g.drawImage(b.glow, 0, 0); }   // scanned: ore veins shine brighter
+      else if (s.kind === 'rock' && s.rich) { g.globalAlpha = 0.3 + 0.15 * Math.sin(t * 1.6 + s.id); g.drawImage(b.glow, 0, 0); }   // rich rocks (report #64): veins glow a little even unscanned
       g.restore();
+      if (s.kind === 'rock' && s.rich) lc_light(s.x, s.y, s.r * 1.6, MATERIALS[s.oreType]?.color || '#ffd27a', 0.22);
       if (s.kind === 'ship' || s.kind === 'station') { const c = paletteFor(s).light; for (const L of s.lights) { if (!L.b.alive) continue; const [lx, ly] = toWorld(s, L.cx, L.cy); lc_light(lx, ly, 22 + L.n * 18, c, 0.16); } }
       if (s.burn > 0) lc_light(s.x, s.y, s.r * 1.5, '#ff6a2a', 0.4);
       if (s.kind === 'wreck' && s.burnFx > 0) { s.burnFx -= 1 / 60; }
@@ -263,7 +267,7 @@ export function createRenderer(view, overlay, opts = {}) {
         g.drawImage(glowSprite(col), p.x - 16, p.y - 16 + bob, 32, 32);
         g.globalCompositeOperation = 'source-over';
         g.save(); g.translate(p.x, p.y + bob); g.rotate(p.spin + t * 0.5);
-        if (p.kind === 'drone') { g.fillStyle = '#2a3038'; g.beginPath(); g.moveTo(7, 0); g.lineTo(-5, -5); g.lineTo(-2, 0); g.lineTo(-5, 5); g.closePath(); g.fill(); g.strokeStyle = col; g.lineWidth = 1.4; g.stroke(); }
+        if (p.kind === 'drone') { const A = droneArt(p.drone); const k = DRONE_CELL / A.px; g.scale(k, k); g.translate(-A.cx, -A.cy); g.drawImage(A.hull, 0, 0); }   // report #44: same little ship as in flight
         else { g.fillStyle = '#20242c'; g.fillRect(-5, -5, 10, 10); g.strokeStyle = col; g.lineWidth = 1.6; g.strokeRect(-5, -5, 10, 10); g.fillStyle = col; g.fillRect(-2, -2, 4, 4); }
         g.restore();
         g.globalCompositeOperation = 'lighter';
@@ -318,13 +322,24 @@ export function createRenderer(view, overlay, opts = {}) {
         case 'shell': case 'slug': { g.drawImage(glowSprite(c), p.x - 8 * vk, p.y - 8 * vk, 16 * vk, 16 * vk); g.strokeStyle = hexA(c, 0.6); g.lineWidth = p.kind === 'slug' ? 3 : 2; line(g, p.x, p.y, p.x - Math.cos(a) * (p.kind === 'slug' ? 40 : 18), p.y - Math.sin(a) * (p.kind === 'slug' ? 40 : 18)); lc_light(p.x, p.y, 50, c, 0.4); break; }
         case 'plasma': { const s = (p.w?.size === 'l' ? 16 : p.w?.size === 'm' ? 12 : 7) * (1 + pv * 0.2); const wob = 1 + Math.sin(t * 30 + p.id) * 0.15; g.drawImage(glowSprite(c), p.x - s * 1.5 * wob, p.y - s * 1.5 * wob, s * 3 * wob, s * 3 * wob); g.drawImage(glowSprite('#ffffff', 0.5), p.x - s * 0.5, p.y - s * 0.5, s, s); lc_light(p.x, p.y, s * 8, c, 0.6); break; }
         case 'missile': case 'rocket': case 'torpedo': {
-          const big = p.kind === 'torpedo' ? 2.4 : p.kind === 'missile' ? 1.2 : 1;
+          // each warhead has its own look (#57): ram = long pale needle + blue-white streak, no smoke; he = fat
+          // olive body, orange band, heavy smoke; emp = blue glow that crackles; fire = orange body with a flame trail
+          const big = p.kind === 'torpedo' ? 2.4 : p.kind === 'missile' ? 1.2 : 1; const wh = p.warhead || 'std';
+          const L = wh === 'ram' ? 15 : wh === 'he' ? 11 : 10, Wd = wh === 'ram' ? 2 : wh === 'he' ? 4.6 : 3.2;
+          const body = wh === 'ram' ? '#e6eef4' : wh === 'he' ? '#6a6a48' : wh === 'emp' ? '#9aa8c8' : wh === 'fire' ? '#c06030' : p.kind === 'torpedo' ? '#8a8f98' : '#d0d4da';
+          const flame = wh === 'ram' ? '#cfe8ff' : wh === 'emp' ? '#8fb4ff' : wh === 'fire' ? '#ff7a2a' : '#ffb060';
           g.globalCompositeOperation = 'source-over'; g.save(); g.translate(p.x, p.y); g.rotate(a);
-          g.fillStyle = p.kind === 'torpedo' ? '#8a8f98' : '#d0d4da'; g.fillRect(-6 * big, -1.6 * big, 10 * big, 3.2 * big); g.fillStyle = c; g.fillRect(3 * big, -1.6 * big, 2 * big, 3.2 * big);
+          g.fillStyle = body; g.fillRect(-6 * big, -Wd / 2 * big, L * big, Wd * big); g.fillStyle = c; g.fillRect((L - 7) * big, -Wd / 2 * big, 2 * big, Wd * big);
+          if (wh === 'ram') { g.fillStyle = '#ffffff'; g.beginPath(); g.moveTo((L - 6) * big, -Wd / 2 * big); g.lineTo((L - 2) * big, 0); g.lineTo((L - 6) * big, Wd / 2 * big); g.fill(); }
           g.restore(); g.globalCompositeOperation = 'lighter';
-          g.drawImage(glowSprite('#ffb060'), p.x - Math.cos(a) * 7 * big - 7 * big, p.y - Math.sin(a) * 7 * big - 7 * big, 14 * big, 14 * big);
-          lc_light(p.x, p.y, 60 * big, '#ff9a40', 0.5);
-          if (fx.parts.length < fx.max * fx.quality && Math.random() < 0.7) fx.parts.push({ k: 'smoke', x: p.x - Math.cos(a) * 6 * big, y: p.y - Math.sin(a) * 6 * big, vx: 0, vy: 0, life: 0.7 * big, age: 0, color: '#6a6560', size: 4 * big, drag: 0.95, grow: 1.6, rot: 0 });
+          if (wh === 'ram') { g.lineWidth = 1.6; streak(g, p.x - Math.cos(a) * 6, p.y - Math.sin(a) * 6, a, 46, flame); }
+          g.drawImage(glowSprite(flame), p.x - Math.cos(a) * 7 * big - 7 * big, p.y - Math.sin(a) * 7 * big - 7 * big, 14 * big, 14 * big);
+          if (wh === 'emp') { g.drawImage(glowSprite('#8fb4ff'), p.x - 10 * big, p.y - 10 * big, 20 * big, 20 * big); if (Math.random() < 0.5) { g.strokeStyle = '#e0e8ff'; g.lineWidth = 1; const ra = Math.random() * 6.3; line(g, p.x, p.y, p.x + Math.cos(ra) * 9 * big, p.y + Math.sin(ra) * 9 * big); } }
+          lc_light(p.x, p.y, 60 * big * (wh === 'he' ? 1.3 : 1), flame, 0.5);
+          if (fx.parts.length < fx.max * fx.quality && wh !== 'ram' && Math.random() < (wh === 'he' ? 0.95 : 0.7)) {
+            if (wh === 'fire') fx.parts.push({ k: 'glow', x: p.x - Math.cos(a) * 6 * big, y: p.y - Math.sin(a) * 6 * big, vx: (Math.random() - 0.5) * 30, vy: (Math.random() - 0.5) * 30, life: 0.45, age: 0, color: Math.random() < 0.5 ? '#ff7a2a' : '#ffc040', size: 6 * big, drag: 0.92, grow: 0.6, rot: 0 });
+            else fx.parts.push({ k: 'smoke', x: p.x - Math.cos(a) * 6 * big, y: p.y - Math.sin(a) * 6 * big, vx: 0, vy: 0, life: 0.7 * big * (wh === 'he' ? 1.5 : 1), age: 0, color: wh === 'emp' ? '#4a5a7a' : '#6a6560', size: 4 * big * (wh === 'he' ? 1.6 : 1), drag: 0.95, grow: 1.6, rot: 0 });
+          }
           break;
         }
         case 'flak': g.drawImage(glowSprite(c), p.x - 5 * vk, p.y - 5 * vk, 10 * vk, 10 * vk); break;
@@ -389,15 +404,30 @@ export function createRenderer(view, overlay, opts = {}) {
         }
       }
     }
+    // decoy flares (#66): bright white-gold points that blink and fade, so you can see what the missiles are chasing
+    if (w.decoys?.length) {
+      g.globalCompositeOperation = 'lighter';
+      for (const d of w.decoys) {
+        if (!vis(d.x, d.y, 30)) continue;
+        const k = Math.min(1, d.life) * (0.75 + 0.25 * Math.sin(t * 40 + d.id));
+        g.globalAlpha = k; g.drawImage(glowSprite('#fff0b0'), d.x - 12, d.y - 12, 24, 24); g.drawImage(glowSprite('#ffffff', 0.5), d.x - 4, d.y - 4, 8, 8);
+        lc_light(d.x, d.y, 90, '#ffe080', 0.4 * k);
+      }
+      g.globalAlpha = 1;
+    }
     g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
     // drones
     for (const d of w.drones) {
       if (d.dead || !vis(d.x, d.y, 20)) continue;
+      // report #44: a tiny block-built ship at half a block per cell, baked like every other hull (render/drone-art.js)
+      const A = droneArt(d.kind); const k = DRONE_CELL / A.px;
+      const sp = Math.hypot(d.vx, d.vy); const stern = -A.gw / 2 * DRONE_CELL;
       g.save(); g.translate(d.x, d.y); g.rotate(d.a);
-      g.fillStyle = '#2a3038'; g.beginPath(); g.moveTo(9, 0); g.lineTo(-6, -6); g.lineTo(-3, 0); g.lineTo(-6, 6); g.closePath(); g.fill();
-      g.strokeStyle = d.def.color; g.lineWidth = 1.4; g.stroke();
+      g.globalCompositeOperation = 'lighter'; const fl = 3 + Math.min(9, sp / 60) * (0.8 + Math.random() * 0.4);
+      g.drawImage(glowSprite(d.def.color), stern - fl * 1.4, -fl * 0.7, fl * 1.8, fl * 1.4); g.globalCompositeOperation = 'source-over';
+      g.scale(k, k); g.translate(-A.cx, -A.cy); g.drawImage(A.hull, 0, 0);
+      g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.7; g.drawImage(A.glow, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
       g.restore();
-      g.globalCompositeOperation = 'lighter'; g.drawImage(glowSprite(d.def.color), d.x - 6, d.y - 6, 12, 12); g.globalCompositeOperation = 'source-over';
       if (d.def.shield && d.shield > 0) { g.strokeStyle = hexA('#9fd8ff', 0.4); g.lineWidth = 2; g.beginPath(); g.arc(d.x, d.y, 18, 0, 7); g.stroke(); }
       if (d.beam && d.def.repairs && Math.random() < 0.5) { g.strokeStyle = hexA('#6fff8a', 0.5); g.lineWidth = 1; line(g, d.x, d.y, d.beam.x + (Math.random() - 0.5) * d.beam.r, d.beam.y + (Math.random() - 0.5) * d.beam.r); }
       lc_light(d.x, d.y, 30, d.def.color, 0.3);

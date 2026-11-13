@@ -102,6 +102,17 @@ export function rollUnique(r, from, chance) {
   return makeUnique(r.pick(pool));
 }
 
+/**
+ * Pick a part from a pool; exotic kinds (ion / firebrand missiles, #57) get re-rolled most of the time near home
+ * (75% at danger 1-3, 45% deeper), so they stay rare. Shops (ui/station.js) and drops both use this.
+ */
+export const EXOTIC_REROLL = t => (t <= 3 ? 0.75 : 0.45);
+export function pickPart(r, pool, tier) {
+  let d = r.pick(pool);
+  if (ALL_WEAPONS[d?.weapon]?.exotic && r() < EXOTIC_REROLL(tier)) d = r.pick(pool);
+  return d;
+}
+
 /** Module blocks a faction might drop at a tier. */
 function dropPool(faction, tier, maxSize) {
   const F = FACTIONS[faction];
@@ -132,7 +143,7 @@ export function rollLoot(r, s, luck = 0) {
   const pool = dropPool(s.faction, tier, Math.max(1, cls.maxBlock));
   for (let i = 0; i < rolls && pool.length; i++) {
     const rar = rollRarity(r, tier, (s.boss ? 1.4 : 0) + (s.elite ? 0.6 : 0) + cls.rank * 0.15 + luck);
-    const def = r.pick(pool);
+    const def = pickPart(r, pool, tier);
     out.push({ kind: 'item', item: makeItem(r, def.id, rar.id), rarity: rar.id });
   }
   // named uniques (owner E4): bosses often, strongholds and wanted captains sometimes, deep space rarely

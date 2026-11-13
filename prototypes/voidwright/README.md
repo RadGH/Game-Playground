@@ -1,8 +1,8 @@
 # Voidwright
 
-> **Status:** live on games.radgh.com · Expansion 1 "Shipwright" 2026-11-12 (play-test reports #24-#41 + owner rulings E1-E10, `docs/PLAN.md` §E1) · lint clean, every screen walked desktop + phone
+> **Status:** live on games.radgh.com · round 3 2026-11-12: reports #42-#66 (missile kinds + missile defence, bridge part limits, drones, phone aim, job markers, planet fix; #47 withdrawn by #59) on top of Expansion 1 "Shipwright" · lint clean, every screen walked desktop + phone
 > **Play:** LAN `http://<LAN IP>:8400/prototypes/voidwright/` (stable; https 8442 for a controller) · public https://games.radgh.com/voidwright/
-> **Next:** the owner's play-test of the expansion — watch crafting costs (`sim/craft.js ORE_SHARE`), grow-hull prices (`sim/hullgrow.js`), legendary strength (`types.js RARITY.bonus`), merc wages and outpost output; boost now stacks on cruise (very fast) — check it feels right
+> **Next:** the owner's play-test of round 3 — is missile pressure right at danger 3+ (`sim/world.js` enemy missile cap), do the bridge limits feel fair, rocket pods after the burst fix; also from the expansion: watch crafting costs (`sim/craft.js ORE_SHARE`), grow-hull prices (`sim/hullgrow.js`), legendary strength (`types.js RARITY.bonus`), merc wages and outpost output; boost now stacks on cruise (very fast) — check it feels right
 > **Parked:** co-op (the input shape is ready, `docs/PLAN.md`); nothing else on hold
 
 A 2D top-down space game: **build your ship from blocks → kill things or work for things → upgrade → kill bigger
@@ -73,6 +73,17 @@ Owner rulings E1-E10 are in `docs/PLAN.md` §E1; play-test reports #24-#41 answe
   (`ship.js` sets `t.autoOn`; the choice is the 7th grid field `b.auto`; build mode Weapons tab toggles it).
 - **Crew** (#33/#34): a number — least to fly (`crewMin`), needed (`crewNeed`), room (`crewCap`). Pods give "+N Crew";
   no passengers. 25% chance to lose one crew when a crewed part dies. Crew hall hires and sells.
+- **Play-test 2026-11-12 batch 2 (helper B, tests in `tests/playtest-1112b.test.mjs`)**: drones are tiny block-built
+  ships baked like any hull at half a block per cell (`render/drone-art.js`, #44); the hold's Drones tab (C) and the
+  drone shop share one picker — Fly / Store / Swap in (`ui/drones-ui.js`, `state.js fitDrone/unfitDrone/swapDrone`,
+  `main.js app.refreshDrones`, #53); mining drones cut `mine` rock/s as medium hits — Prospector 55, Excavator 120,
+  Quarrier 240, × rarity, vs the Mining Laser I's 98 (#54; they also no longer stall after digging to a rock's
+  middle); in formation drones fly with your velocity so boost/cruise never leaves them (#58); an empty booster locks
+  until 30% (`world.js BOOST_RELOCK`, striped bar, #60); crew pickups say only "+N crew" (`world.js crewText`, #55);
+  phones: right thumb = hold where you want to shoot, missiles fire by themselves at the nearest enemy, no Missiles /
+  Dock buttons (the Dock pill docks) (#49); C, I, N, M, J close their own panel and swap between each other
+  (`main.js panelKeys`, #51/#52); crafting, drone building and sealed caches spin one rarity reel weighted by the
+  real odds (`sim/reel.js`, `ui/reel.js`, `craft.js cacheOdds`, #62).
 - **Drones** (#28/#31): items (`G.droneItems`, rarity lifts health/damage) fitted to Drone ports in build mode
   (`G.ship.drones` = uids); a lost drone is rebuilt free after 12 s (`main.js droneUpkeep`). Menders heal wingmen too.
 - **Workshop** (station tab, or ☰ → Fabricator with a Fabricator part; `sim/craft.js`, `ui/workshop.js`): craft parts
@@ -122,6 +133,52 @@ Owner rulings E1-E10 are in `docs/PLAN.md` §E1; play-test reports #24-#41 answe
   `w.eventLuck` (destroy loot), `w.eventRich` (sector rocks), `eventMods().spawn/bounty/tough` (encounters.js).
   Star map halos + timers + an events strip (`ui/events.js`). Hooks are marked `[encounters]`; glue is
   `ui/missions.js initExpansion`. Tests: `tests/expansion-*.test.mjs`.
+
+## Missiles, bridges and CPU (play-test #42 / #57 / #61 / #66, 2026-11-12)
+- **CPU node** is +2 CPU for 1,200 cr (rarity lifts it); Logic racks are +1 (+4 / +16 for the 2×2 / 4×4 racks).
+- **Bridge limits** (`ship.js partLimits`, `isCpuPart`, `isPowerPart`): the bridge sets how many CPU parts (`cpuParts`)
+  and power parts (`powerParts`) run — Bridge 3/4, Bridge Mk II 5/6 (tier 3, danger 2+ shops), Mk III 8/9 (tier 5,
+  danger 4+), Command Deck 14/12, Flag Bridge 40/30. The best parts count; the rest stay fitted but idle (`b.idle`), so
+  old saves load unchanged. Player-team ships only — generated enemies are built to their own budget. Build mode shows
+  "CPU parts 3 / 3", refuses an over-limit part with the next bridge and where to get it (`ui/items.js nextBridge`), and
+  says how to get a bigger hull for a 2×2 part (`biggerHullText`); block size stays gated by hull class (ruling E5).
+  Outfitters have a **Bridge** shelf (every bridge the shop can sell); better bridges can also be crafted.
+- **Missile kinds** (`weapons.js warhead`): std (Homing Missiles, Swarm pod), ram (Ram Torpedoes / Battery: very fast
+  kinetic darts, no blast, pierce), he (Blastcap Missiles / Battery, Torpedo Tube: slow, huge blast), emp (Ion Seekers /
+  Battery / Ion Storm Silo: shield ×3.2, stalls systems), fire (Firebrand Missiles / Battery: blocks burn 6 s). Each has
+  its own turret art, missile look, trail, burst (`fx.js boom wh`) and launch sound. `exotic` (emp, fire) are tier 3+,
+  re-rolled 75% of the time near home in shops and drops (`loot.js pickPart`), and only on enemies of their tier.
+- **Enemy missile volume** (#66): `shipgen MAX_LAUNCHERS` by class (1,1,2,2,3,4,3,5), bases `1 + tier/3`; enemy
+  launchers reload at ×0.6 (`world.js ENEMY_MISSILE_RATE`), warn 0.8 s before a salvo (`lockwarn` event: red ring +
+  lock tone; big ships also post "Missile lock: …"), keep at most `MISSILES_IN_FLIGHT[rank]` in the air, and all enemy
+  missiles deal at most 30% of your full hull per 2.5 s (5% past that, ceiling 40%; `SALVO_SHARE`). Fixed a bug where
+  burst weapons fired their whole count on every burst step (a swarm pod launched 57 missiles, rocket pods 13).
+  Small enemies (skiff/corvette, not gnats) do ×1.2 damage, weave, lead their shots, call their pack in, and pull back
+  to recharge shields (`ai.js`, `s.small`).
+- **Missile defence**: Blast Screen / Array (bubble shield, explosions 35%, missiles ×0.6 on top — `shield.resist`),
+  Decoy Launcher / Battery (`world.js launchDecoys`: flares that pull each chasing missile with 75-85% chance), plus the
+  existing Flak Burster, Point-Defence Laser and Warden drone. Every outfitter stocks a Blast Screen, a Decoy launcher
+  and one point-defence gun. Tests: `tests/playtest-1112-missiles.test.mjs`.
+
+## Jobs, salvage, scans, planets (play-test #43-#50 / #56 / #63-#65, 2026-11-12)
+- **Job markers** (#43/#46): `sim/missions.js missionTarget` answers "where now" by the job's STAGE — tow target →
+  (once harpooned) the station / outpost that wants it; meet the freighter → the freighter; delivery / hand-over → the
+  board's station or outpost (`boardBody`); anomaly survey → nearest unrecorded anomaly. `missionMarks` lists every
+  job with a place; `ui/missions.js drawMarks` draws them LAST (on top): a reticle on screen, an edge arrow + km off
+  screen, kept clear of the HUD boxes; the radar and local map draw a diamond in the job colour. A course set from a
+  job (`app.waypoint.mission`) follows the stage every frame (`followCourse`) and toasts when it changes.
+- **Tractor beam** (#48): a delivered tow is let go and pulled into the station (`pullIn` / `tractorTick`, 3.2 s;
+  `b.shrink` / `b.fade` read by `render/draw.js`), beam drawn by `ui/missions.js drawTractors`.
+- **Salvage yard** (#45): a lot is stripped on the spot; a result card says what went into which hold and what to do
+  next. Rock (tier 0) is no longer in the salvage ore pool — it gave an endless pile and Infinity credits.
+- **Honest scans** (#50): `sim/scan.js rockOre` reads the live cells (a node = at least 4 cells and 6% of the rock;
+  two nodes = mixed), cached per grid version, so labels follow mining. `makeRock` tops a typed rock up to a node.
+- **Planets** (#56/#63): planet ids repeat in every system and the jump frame drew the old world once after the cache
+  was cleared, so a planet got the previous system's picture and tiles sampled at the old radius. `render/planets.js
+  state()` now rebuilds unless it is the same planet object.
+- **Claims removed** (#64): rich fields are rich, glowing asteroids you mine; old saves keep `G.claims`, unread.
+- **Insurance** (#65): every station, den and friendly outpost; opens with the first dock.
+- Tests: `tests/playtest-1112c.test.mjs`.
 
 ## Code map
 No build step; ES modules. `index.html` → `js/main.js`.

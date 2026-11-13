@@ -85,6 +85,13 @@ const VOICES = {
   scatter: (d, t) => { noise(d, t, 0.22, 'bandpass', v(1300), 0.6, 0.9, 400); osc('sawtooth', v(500), 120, 0.15, d, t, 0.002, 0.3); },
   rocket: (d, t) => { noise(d, t, 0.35, 'bandpass', v(700), 0.8, 0.7, 2400, 0.02); osc('sawtooth', v(90), 140, 0.3, d, t, 0.02, 0.2); },
   missile: (d, t) => { noise(d, t, 0.5, 'bandpass', v(500), 1, 0.6, 2600, 0.04); osc('triangle', v(300), 900, 0.4, d, t, 0.03, 0.15); },
+  // missile kinds (#57): a whip-crack hiss for ram darts, a deep thump + long roar for blastcaps, a rising
+  // electric whine for ion seekers, a crackling woosh for firebrands
+  ram_missile: (d, t) => { noise(d, t, 0.18, 'highpass', v(2600), 0.9, 0.7, 6000, 0.002); zap('sawtooth', v(1800), 420, 0.16, d, t, 0.35, 8000, 1200, 5); osc('sine', v(160), 60, 0.1, d, t, 0.002, 0.6); },
+  he_missile: (d, t) => { osc('sine', v(70), 38, 0.35, d, t, 0.004, 1); noise(d, t + 0.03, 0.9, 'lowpass', v(500), 1, 0.8, 1400, 0.08); osc('sawtooth', v(70), 110, 0.6, d, t + 0.05, 0.05, 0.18); },
+  emp_missile: (d, t) => { noise(d, t, 0.4, 'bandpass', v(700), 1, 0.45, 2200, 0.03); osc('square', v(220), 1700, 0.4, d, t, 0.02, 0.14); for (let i = 0; i < 3; i++) noise(d, t + 0.08 + i * 0.07, 0.03, 'highpass', 4500, 1, 0.35); },
+  fire_missile: (d, t) => { noise(d, t, 0.55, 'bandpass', v(400), 0.7, 0.75, 1800, 0.05); for (let i = 0; i < 5; i++) noise(d, t + 0.05 + Math.random() * 0.4, 0.025, 'bandpass', v(2600), 2, 0.3); osc('triangle', v(140), 220, 0.4, d, t, 0.03, 0.12); },
+  decoy: (d, t) => { for (let i = 0; i < 3; i++) { noise(d, t + i * 0.06, 0.12, 'highpass', 3000, 1, 0.45, 1500); osc('sine', 1800 - i * 200, 900, 0.1, d, t + i * 0.06, 0.002, 0.12); } },
   torpedo: (d, t) => { noise(d, t, 1.1, 'lowpass', 400, 1, 0.9, 1500, 0.1); osc('sine', v(50), 90, 1.0, d, t, 0.1, 0.6); },
   beam: (d, t) => { osc('sawtooth', v(220), 210, 0.25, d, t, 0.02, 0.25); osc('sine', v(880), 860, 0.25, d, t, 0.02, 0.15); },
   beam_heavy: (d, t) => { osc('sawtooth', v(110), 100, 0.3, d, t, 0.02, 0.35); noise(d, t, 0.3, 'bandpass', 1400, 3, 0.2); },

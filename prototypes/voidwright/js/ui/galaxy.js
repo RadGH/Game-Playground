@@ -1,5 +1,5 @@
 // The star map (PLAN §0 #1): every star you have seen, the lanes between them, danger by colour,
-// who holds each system, rumours of roaming giants, your mining claims. Pick a linked star and jump.
+// who holds each system, rumours of roaming giants. Pick a linked star and jump.
 
 import { panel, el, btn, toast, fmt } from './dom.js';
 import { FACTIONS } from '../data/factions.js';
@@ -55,12 +55,11 @@ export function openGalaxy(app) {
       if (reach.has(s.id) && !locked) { ctx.strokeStyle = 'rgba(95,216,255,0.6)'; ctx.setLineDash([4 * d, 3 * d]); ctx.beginPath(); ctx.arc(x, y, r + 5 * d, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
       if (s === sel) { ctx.strokeStyle = '#ffc45a'; ctx.lineWidth = 3 * d; ctx.beginPath(); ctx.arc(x, y, r + 9 * d, 0, 7); ctx.stroke(); }
       if (s.id === G.system) { ctx.fillStyle = '#ffd27a'; ctx.beginPath(); ctx.moveTo(x, y - r - 12 * d); ctx.lineTo(x - 5 * d, y - r - 20 * d); ctx.lineTo(x + 5 * d, y - r - 20 * d); ctx.fill(); }
-      // markers: station, claim, boss rumour
+      // markers: station, boss rumour
       ctx.font = `${11 * d}px Rajdhani, sans-serif`; ctx.textAlign = 'center';
       ctx.fillStyle = visited ? '#dfe8f6' : '#8c9ab4'; ctx.fillText(s.name, x, y + r + 13 * d);
       const icons = [];
       if (s.station === 'trade') icons.push(['◆', '#5fd8ff']); if (s.station === 'pirate') icons.push(['◆', '#ff5a4a']);
-      if (G.claims.some(c => c.system === s.id)) icons.push(['⛏', '#5fff9a']);
       // your outposts (sim/colony.js); red while raiders are on the way
       for (const c of (G.colonies || []).filter(c => c.system === s.id)) icons.push(['⌂', c.raid?.warned || c.raid?.live ? '#ff5a6a' : '#7dff9a']);
       if (G.bosses.some(b => b.alive && b.system === s.id) && (visited || reach.has(s.id) || s.tier <= G.stats.maxTier + 2)) icons.push(['☠', '#ff3b5c']);

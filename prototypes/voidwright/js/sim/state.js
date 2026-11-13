@@ -91,3 +91,27 @@ export function fittedDrones(G, cap) {
   const ids = (G.ship.drones || []).slice(0, cap);
   return ids.map(u => (G.droneItems || []).find(d => d.uid === u)).filter(Boolean);
 }
+/**
+ * Choose which owned drones fly (report #53). Returns { ok, why } — `why` is a sentence for the player.
+ *   fitDrone:   put a stored drone into a free port
+ *   unfitDrone: send a flying drone back to storage
+ *   swapDrone:  a stored drone takes a flying drone's place (keeps its position in the fan)
+ */
+export function fitDrone(G, uid, cap) {
+  const list = (G.ship.drones ||= []).filter(u => (G.droneItems || []).some(d => d.uid === u)); G.ship.drones = list;
+  if (!(G.droneItems || []).some(d => d.uid === uid)) return { ok: false, why: 'You do not own that drone.' };
+  if (list.includes(uid)) return { ok: false, why: 'That drone is already flying.' };
+  if (!cap) return { ok: false, why: 'Place a Drone port in Build mode first.' };
+  if (list.length >= cap) return { ok: false, why: `All ${cap} drone port${cap === 1 ? ' is' : 's are'} in use — swap one out.` };
+  list.push(uid); return { ok: true };
+}
+export function unfitDrone(G, uid) {
+  const before = (G.ship.drones || []).length; G.ship.drones = (G.ship.drones || []).filter(u => u !== uid);
+  return { ok: G.ship.drones.length < before, why: '' };
+}
+export function swapDrone(G, outUid, inUid) {
+  const list = G.ship.drones || []; const i = list.indexOf(outUid);
+  if (i < 0) return { ok: false, why: 'That drone is not flying.' };
+  if (list.includes(inUid) || !(G.droneItems || []).some(d => d.uid === inUid)) return { ok: false, why: 'Pick a stored drone to swap in.' };
+  list[i] = inUid; return { ok: true };
+}

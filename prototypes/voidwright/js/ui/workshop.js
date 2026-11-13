@@ -3,13 +3,15 @@
 // space when a Fabricator part is fitted (out of combat; on-board fabricators make lower-tier parts only).
 // The maths lives in sim/craft.js; this file only draws it.
 
-import { el, btn, toast, fmt, panel, showSelected } from './dom.js';
+import { el, btn, toast, fmt, panel, showSelected, esc } from './dom.js';
+import { droneRows } from './drones-ui.js';
 import { itemCard, SLOTS, rarityColor } from './items.js';
 import { BLOCKS } from '../data/blocks.js';
 import { DRONES } from '../data/drones.js';
 import { MATERIALS, RARITY_BY_ID, matTier } from '../data/types.js';
 import { CLASSES } from '../data/hulls.js';
-import { recipe, droneRecipe, craftCost, craftOdds, craft, craftDrone, missing, MAX_BOOST, rerollable, rerollCost, reroll, openCache, cacheFee, craftable, partMatTier } from '../sim/craft.js';
+import { recipe, droneRecipe, craftCost, craftOdds, craft, craftDrone, missing, MAX_BOOST, rerollable, rerollCost, reroll, openCache, cacheFee, cacheOdds, craftable, partMatTier } from '../sim/craft.js';
+import { spinReel, reelResult } from './reel.js';
 import { rng, hash } from '../core/math.js';
 import { reveal, worthRevealing } from './reveal.js';
 import { play } from '../core/audio.js';
@@ -76,7 +78,9 @@ function craftTab(box, ctx) {
     card.append(el('div', { class: 'row end it-foot' }, btn('Craft', () => {
       const res = craft(G, rng(hash(G.seed, 'craft', G.stats.crafted || 0, Math.floor(G.playTime * 10))), d.id, b, ctx.edge || 0);
       if (!res.ok) { toast(res.miss ? `Short of ${res.miss.map(([m, n]) => `${fmt(n)} ${matName(m)}`).join(', ')}.` : res.why, 'bad'); return; }
-      landed(ctx, res.item, 'Crafted');
+      ctx.app.save?.();   // the part is yours before the reel spins
+      spinReel({ odds: craftOdds(rec.tier * 2 - 1, b, ctx.edge || 0), result: reelResult(res.item), label: res.item.name, names: list.map(x => x.name), r: rng(hash(G.seed, 'reel', G.stats.crafted || 0)), heading: `Crafting ${d.name}` })
+        .then(() => landed(ctx, res.item, 'Crafted'));
     }, miss.length ? 'off' : 'primary')));
     cards.append(card);
   }
@@ -86,20 +90,24 @@ function craftTab(box, ctx) {
 
 function droneTab(box, ctx) {
   const { G } = ctx;
-  box.append(el('h3', { class: 'st-h' }, 'Build drones'), el('p', { class: 'hint' }, 'Drones you build go to your drone list; fit them to drone ports in Build mode (Drones tab). A lost drone is rebuilt by its port for free.'));
+  box.append(el('h3', { class: 'st-h' }, 'Build drones'), el('p', { class: 'hint' }, 'Drones you build go to your drone list; choose which ones fly in the hold (C → Drones). A lost drone is rebuilt by its port for free.'));
   const cards = el('div', { class: 'cards' });
   for (const D of Object.values(DRONES)) {
     if (D.enemy || D.tier > ctx.tierCap) continue;
     const rec = droneRecipe(D.id); const { row, b } = boostRow('drone:' + D.id, rec.tier, ctx);
     const cost = craftCost(rec, b); const miss = missing(G, cost);
     const have = (G.droneItems || []).filter(x => x.kind === D.id).length;
-    cards.append(el('div', { class: 'card' }, el('h4', { style: `color:${D.color}` }, D.name), el('div', { class: 'hint' }, D.blurb), el('div', { class: 'hint' }, `Health ${fmt(D.hp)}${D.weapon ? ` · ${fmt(D.weapon.dmg * (D.weapon.rate || 1))} damage per second` : ''}${D.repairs ? ` · repairs ${D.repairs} a second` : ''} · you own ${have}`),
+    cards.append(el('div', { class: 'card' }, el('h4', { style: `color:${D.color}` }, D.name), el('div', { class: 'hint' }, D.blurb), el('div', { class: 'kv', html: droneRows({ kind: D.id, rarity: 'common' }).map(([a, v]) => `<span>${esc(a)}</span><span>${v}</span>`).join('') }), el('div', { class: 'hint' }, `Common numbers shown; rarer rolls are stronger. You own ${have}.`),
       costChips(G, cost), row, oddsBar(craftOdds(rec.tier * 2 - 1, b, ctx.edge || 0)),
       el('div', { class: 'row end' }, btn('Build', () => {
         const res = craftDrone(G, rng(hash(G.seed, 'drone', G.stats.crafted || 0, Math.floor(G.playTime * 10))), D.id, b, ctx.edge || 0);
         if (!res.ok) { toast(res.miss ? `Short of ${res.miss.map(([m, n]) => `${fmt(n)} ${matName(m)}`).join(', ')}.` : res.why, 'bad'); return; }
-        const R = RARITY_BY_ID[res.drone.rarity]; play(R.index >= 2 ? 'rare' : 'pickup');
-        toast(`${R.index ? R.name + ' ' : ''}${D.name} drone built. Fit it in Build mode.`, 'good', R.color); ctx.app.save?.(); ctx.render();
+        const R = RARITY_BY_ID[res.drone.rarity]; ctx.app.save?.();
+        spinReel({ odds: craftOdds(rec.tier * 2 - 1, b, ctx.edge || 0), result: res.drone.rarity, label: `${R.index ? R.name + ' ' : ''}${D.name}`, r: rng(hash(G.seed, 'reel', G.stats.crafted || 0)), heading: `Building a ${D.name}`,
+          names: Object.values(DRONES).filter(x => !x.enemy).map(x => x.name) }).then(() => {
+          play(R.index >= 2 ? 'rare' : 'pickup');
+          toast(`${R.index ? R.name + ' ' : ''}${D.name} drone built. Choose it in the hold (C).`, 'good', R.color); ctx.render();
+        });
       }, miss.length ? 'off' : 'primary'))));
   }
   box.append(cards);
@@ -138,22 +146,16 @@ function cacheTab(box, ctx) {
   box.append(cards);
 }
 
-// a little drum-roll before the cache lands: names flicker past, then the real one
+// the cache spins the same rarity reel as crafting (report #62), weighted by the cache's real odds
 function crack(ctx, c, i) {
   const { G } = ctx;
   const pool = Object.values(BLOCKS).filter(d => craftable(d) && d.tier <= (c.tier || 1) + 1 && (d.size || 1) <= ctx.sizeCap);
   const r = rng(hash(G.seed, 'cache', G.stats.caches || 0, i, Math.floor(G.playTime)));
   const res = openCache(G, r, c, pool);
   if (!res.ok) { toast(res.miss ? `You need ${fmt(res.miss[0][1])} more credits.` : res.why, 'bad'); return; }
-  const shade = el('div', { class: 'cache-roll' }, el('div', { class: 'cr-box' }, el('div', { class: 'cr-name' }, '…')));
-  document.body.append(shade);
-  const names = pool.map(d => d.name); const rar = ['rare', 'epic', 'legendary', 'rare', 'epic'];
-  let k = 0; const nameEl = shade.querySelector('.cr-name');
-  const iv = setInterval(() => { nameEl.textContent = names[(k * 7) % names.length]; nameEl.style.color = RARITY_BY_ID[rar[k % rar.length]].color; k++; play('pickup'); }, 90);
-  setTimeout(() => {
-    clearInterval(iv); nameEl.textContent = res.item.name; nameEl.style.color = rarityColor(res.item);
-    setTimeout(() => { shade.remove(); landed(ctx, res.item, 'From a sealed cache'); toast(`Also inside: ${Object.entries(res.ore).map(([m, n]) => `${n} ${matName(m)}`).join(', ')}`, 'good'); }, 650);
-  }, 1300);
+  ctx.app.save?.();
+  spinReel({ odds: cacheOdds(c.tier || 1), result: reelResult(res.item), label: res.item.name, names: pool.map(d => d.name), r: rng(hash(G.seed, 'cachereel', G.stats.caches || 0)), heading: 'Cracking a sealed cache' })
+    .then(() => { landed(ctx, res.item, 'From a sealed cache'); toast(`Also inside: ${Object.entries(res.ore).map(([m, n]) => `${n} ${matName(m)}`).join(', ')}`, 'good'); });
 }
 
 /** The on-board fabricator, from the ☰ menu out in space. */

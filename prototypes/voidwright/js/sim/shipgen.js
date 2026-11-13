@@ -36,6 +36,21 @@ export function hardenEnemy(body) {
   return body;
 }
 const CORE = { 1: 'bridge', 2: 'command_deck', 4: 'flag_bridge' };
+/** Most missile launchers per enemy ship, by class rank (skiff … dreadnought) — play-test #66. Stations: STATION_LAUNCHERS. */
+export const MAX_LAUNCHERS = [1, 1, 2, 2, 3, 4, 3, 5];
+export const STATION_LAUNCHERS = t => 1 + Math.floor(t / 3);
+/** Small enemies hit a little harder (#66: "no other enemy has been a threat"): skiffs and corvettes, not gnats. */
+export const SMALL_ENEMY_DMG = 1.2;
+const isLauncher = id => ALL_WEAPONS[BLOCKS[id]?.weapon]?.mode === 'lock';
+function capLaunchers(g, max, pools, armorBase) {
+  const list = g.blocks.filter(b => b.alive && b.def.weapon && isLauncher(b.def.id));
+  for (const b of list.slice(max)) {
+    const n = b.def.size || 1;
+    const alt = [...(pools.s || []), ...(pools.m || []), ...(pools.l || [])].find(id => (ALL_WEAPONS[id].bsize || 1) === n && ALL_WEAPONS[id].mode !== 'lock' && ALL_WEAPONS[id].mode !== 'pd');
+    const { x, y, rot, item } = b; remove(g, b);
+    if (alt) place(g, alt, x, y, rot, item); else place(g, sized(armorBase, n), x, y);
+  }
+}
 const ENGINE = { 1: 'thruster', 2: 'thruster_2', 4: 'thruster_4' };
 const POWER = { 1: 'reactor', 2: 'reactor_2', 4: 'reactor_4' };
 const CPU = { 1: 'cpu', 2: 'cpu_2', 4: 'cpu_4' };
@@ -131,7 +146,10 @@ export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, see
     // big hulls mix capital guns with secondary batteries one size down
     const lst = U === 4 ? (r.chance(0.55) ? pools.l : pools.m) : U === 2 ? (r.chance(0.6) ? pools.m : pools.s) : pools.s;
     const fit = lst.filter(id => (ALL_WEAPONS[id].bsize || 1) <= U && (U < 4 || (ALL_WEAPONS[id].bsize || 1) >= 2));
-    const pool = fit.length ? fit : pools.s;
+    let pool = fit.length ? fit : pools.s;
+    // exotic missiles (ion, firebrand — #57) only on ships of their tier or deeper
+    const tierOk = pool.filter(id => !ALL_WEAPONS[id].exotic || ALL_WEAPONS[id].tier <= tier);
+    if (tierOk.length) pool = tierOk;
     const wantList = want ? pool.filter(id => ALL_WEAPONS[id].mode === want) : [];
     let pick = r.pick(wantList.length ? wantList : pool);
     // keep point defence to about a quarter of the guns
@@ -172,6 +190,9 @@ export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, see
     } else if (outer(x, y)) pair(x, d, gnat ? frameId : armorId);
     else pair(x, d, gnat ? frameId : r.chance(0.15) ? sized('cargo', U) : r.chance(0.2) ? armorId : frameId);
   }
+  // #66: a ship carries at most MAX_LAUNCHERS[class rank] missile launchers (big ships used to fire 50 at once);
+  // extra launchers become the faction's best non-missile gun of the same size, or armour
+  capLaunchers(g, MAX_LAUNCHERS[CLASSES[cls].rank] ?? 2, style.weapons, armorBase);
   // give it enough CPU and power to run what it carries: swap interior frames for computers / reactors
   const fix = () => {
     const tmp = makeBody('ship', g, { cls });
@@ -190,6 +211,7 @@ export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, see
   // enemies near home hit softly; the far rim hits harder than the raw numbers
   body.dmgMul = TIER_DMG[Math.min(10, tier)];
   if (gnat) { body.gnat = true; body.dmgMul *= 0.6; body.name = gnatName(r, F); }
+  else if (CLASSES[cls].rank <= 1 && role !== 'trader' && role !== 'miner') { body.dmgMul *= SMALL_ENEMY_DMG; body.small = true; }
   return body;
 }
 
@@ -220,7 +242,7 @@ export function generateStation({ seed = 1, size = 80, faction = 'guild', kind =
   const ringR = c * r.range(0.6, 0.8), ringW = r.range(1.0, 1.8);
   const arms = r.int(3, 6), armW = 0.7;
   const weapons = F.style.weapons.l;
-  let guns = 0;
+  let guns = 0, launchers = 0;
   for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
     const dx = x - c, dy = y - c; const d = Math.hypot(dx, dy), a = Math.atan2(dy, dx);
     const inRing = Math.abs(d - ringR) <= ringW;
@@ -236,7 +258,9 @@ export function generateStation({ seed = 1, size = 80, faction = 'guild', kind =
       // hostile bases carry a handful of big guns, not a ring of them (a danger-3 hive fired a wall of acid
       // in every direction); the cap grows with danger
       if (id !== arm && kind !== 'trade' && guns >= 3 + tier) id = arm;
-      if (id !== arm) guns++;
+      // #66: at most STATION_LAUNCHERS(tier) torpedo launchers on a base
+      if (id !== arm && isLauncher(id) && launchers >= STATION_LAUNCHERS(tier)) id = arm;
+      if (id !== arm) { guns++; if (isLauncher(id)) launchers++; }
     }
     else if (inArm && d > c - 1.5) id = 'shield_bubble_4';
     const def = BLOCKS[id];
@@ -264,13 +288,15 @@ export function buildPremade(id, opts = {}) {
     // shipyard designs are generated like a ship of their class's tier, but every part is a plain common one
     body = generateShip({ cls: p.cls, tier: CLASSES[p.cls].tier, ...p.gen });
     for (const b of body.grid.blocks) b.item = null;
-    body.dmgMul = 1; body.crew = undefined; recompute(body);
+    body.dmgMul = 1; body.crew = undefined; body.team = 'player'; recompute(body);   // player rules (bridge part caps) while it is fitted out
     // a ship for sale must run what it carries: trade extra guns for armour until the CPU fits,
     // and frames for reactors until the power fits
     const U = CLASSES[p.cls].maxBlock;
     for (let k = 0; k < 60; k++) {
       const st = body.stats;
-      if (st.cpu > st.cpuCap) {
+      // the bridge caps CPU / power parts (#61): when no more can run, trade a gun for armour instead
+      const capFull = (st.cpu > st.cpuCap && st.cpuParts >= st.cpuPartsMax) || (st.powerUse > st.power && st.powerParts >= st.powerPartsMax);
+      if (st.cpu > st.cpuCap || capFull) {
         const guns = body.grid.blocks.filter(b => b.alive && b.def.cat === 'weapon').sort((a, b) => (a.def.weapon && ALL_WEAPONS[a.def.weapon].mode === 'pd' ? -1 : 0) - (b.def.weapon && ALL_WEAPONS[b.def.weapon].mode === 'pd' ? -1 : 0));
         const g = guns[0]; if (!g) break;
         const { x, y } = g; const n = g.def.size || 1; remove(body.grid, g); place(body.grid, sized('steel', n), x, y);

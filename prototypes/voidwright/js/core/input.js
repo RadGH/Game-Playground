@@ -25,7 +25,8 @@ export function createInput(el) {
   el.addEventListener('contextmenu', e => e.preventDefault());
   el.addEventListener('wheel', e => { I.wheel += Math.sign(e.deltaY); e.preventDefault(); }, { passive: false });
 
-  // touch: left half = move stick, right half = aim stick (fires while pushed out)
+  // touch: left half = move stick; right half = hold your thumb where you want manual weapons to fire (report #49 —
+  // a second stick plus buttons was too much while flying; missiles and turrets aim themselves on a phone)
   const stickR = 60;
   el.addEventListener('touchstart', e => {
     for (const t of e.changedTouches) {
@@ -53,7 +54,7 @@ export function createInput(el) {
     // touch sticks
     const L = I.touch.left, Rt = I.touch.right;
     if (L) { const dx = L.x - L.x0, dy = L.y - L.y0; const d = Math.hypot(dx, dy); if (d > 6) { const k = Math.min(1, d / stickR); out.mx = dx / d * k; out.my = dy / d * k; } }
-    if (Rt) { const dx = Rt.x - Rt.x0, dy = Rt.y - Rt.y0; const d = Math.hypot(dx, dy); if (d > 10) { out.aimStick = [dx / d, dy / d]; out.fire = out.fire || d > stickR * 0.45; } }
+    if (Rt) { out.aimTouch = [Rt.x, Rt.y]; out.fire = true; }
     // gamepad
     const pads = navigator.getGamepads ? navigator.getGamepads() : [];
     const p = [...pads].find(x => x && x.connected);

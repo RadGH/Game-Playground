@@ -11,7 +11,7 @@
 import { el, btn, toast, banner, fmt } from './dom.js';
 import { play } from '../core/audio.js';
 import { encounterTick, encounterInteract, onKillNote } from '../sim/encounters.js';
-import { MISSION_KINDS, MAX_ACTIVE, missionState, boardOf, boardOffers, boardRefresh, acceptMission, abandonMission, progressOf, handInBlock, handIn, missionTarget, missionTick } from '../sim/missions.js';
+import { MISSION_KINDS, MAX_ACTIVE, missionState, boardOf, boardOffers, boardRefresh, acceptMission, abandonMission, progressOf, handInBlock, handIn, missionTarget, missionMarks, missionTick } from '../sim/missions.js';
 import { eventsAt, EVENT_KINDS, timeLeft } from '../sim/events.js';
 
 const km = d => `${Math.max(0.1, Math.round(d / 100) / 10)} km`;
@@ -26,6 +26,7 @@ export function initExpansion(app) {
     if (w !== lastW) { lastW = w; arrived(app); }
     encounterTick(w, G, app.galaxy, dt);
     missionTick(w, G, dt);
+    followCourse(app);
     drain(app);
     hud(app, dt);
   };
@@ -33,6 +34,39 @@ export function initExpansion(app) {
   app.encInteract = () => (app.w ? encounterInteract(app.w, app.P) : null);
   app.encOverlay = (g, z) => drawWorld(app, g, z);
   app.missionsSection = box => goalsSection(app, box);
+  app.missionOverlay = (c, o) => drawMarks(app, c, o);   // main.js drawOverlay, after the other markers (so these sit on top)
+}
+
+/** Set the course marker to a job: it then follows the job's stage (sim/missions.js missionTarget). */
+export function followMission(app, m, quiet = false) {
+  const tg = app.w && missionTarget(m, app.w, app.G.system);
+  const at = tg || (m.system === app.G.system ? aimFor(m) : null);
+  if (!at) { if (!quiet) toast(m.kind === 'delivery' ? `Deliver at ${m.to.name}.` : m.kind === 'acquire' ? `Hand over at ${m.board.name}.` : 'This job has no single place to go.'); return null; }
+  app.waypoint = { x: at.x, y: at.y, label: at.label, mission: m.id };
+  if (!quiet) toast(`Course set: ${at.label}`);
+  return app.waypoint;
+}
+
+/**
+ * Each frame: a course that follows a job moves with it (the tow target drifts, the freighter flies, the stage
+ * changes); a job whose stage changed says where to go next.
+ */
+const stages = new Map();
+function followCourse(app) {
+  const G = app.G, w = app.w; const act = missionState(G).active;
+  for (const m of act) {
+    const tg = missionTarget(m, w, G.system); const st = tg?.stage || null; const was = stages.get(m.id);
+    if (was !== undefined && was !== st && tg) {
+      if (st === 'tow') { toast(`Got it. Tow it to ${m.dest.name} — follow the ${MISSION_KINDS[m.kind].name.toLowerCase()} arrow.`, 'good'); if (!app.waypoint || app.waypoint.mission === m.id || !act.some(x => x.id === app.waypoint.mission)) followMission(app, m, true); }
+      else if (st === 'find' && was === 'tow') toast('The tow line came loose. Harpoon it again (F).', 'bad');
+    }
+    stages.set(m.id, st);
+  }
+  const wp = app.waypoint; if (!wp?.mission) return;
+  const m = act.find(x => x.id === wp.mission);
+  if (!m) { app.waypoint = null; return; }
+  const tg = missionTarget(m, w, G.system);
+  if (tg) { wp.x = tg.x; wp.y = tg.y; wp.label = tg.label; }
 }
 
 /** Banners and toasts the sim asked for. */
@@ -72,7 +106,8 @@ function hud(app, dt) {
   if (q && !q.classList.contains('hidden')) { const r = q.getBoundingClientRect(); hudEl.style.top = `${Math.round(r.bottom + 6)}px`; }
   const rows = act.map(m => {
     const p = progressOf(G, m); const tg = missionTarget(m, w, G.system);
-    const far = tg ? km(Math.hypot(tg.x - P.x, tg.y - P.y)) : m.kind === 'delivery' || m.kind === 'acquire' ? `to ${m.kind === 'delivery' ? m.to.name : m.board.name}` : '';
+    const away = m.kind === 'delivery' ? m.to.system : m.kind === 'acquire' ? m.board.system : m.system;
+    const far = tg ? `${tg.label} · ${km(Math.hypot(tg.x - P.x, tg.y - P.y))}` : away >= 0 && away !== G.system ? `Jump to ${app.galaxy.systems[away]?.name || 'another system'}` : m.kind === 'survey' && m.survey.what === 'rock' ? 'Scan asteroids here (V)' : '';
     const clock = m.expires ? ` · ${mins(m.expires - G.playTime)}` : '';
     return { m, tg, text: `${m.title}`, sub: `${p.need > 1 ? `${fmt(p.have)} / ${fmt(p.need)} · ` : ''}${far}${clock}` };
   });
@@ -81,7 +116,7 @@ function hud(app, dt) {
   hudEl.innerHTML = '';
   for (const r of rows) {
     const line = el('button', { class: 'ms-line', style: `--k:${MISSION_KINDS[r.m.kind].color}` }, el('b', {}, r.text), el('span', {}, r.sub));
-    line.addEventListener('click', e => { e.stopPropagation(); if (r.tg) { app.waypoint = { x: r.tg.x, y: r.tg.y, label: r.tg.label }; toast(`Course set: ${r.tg.label}`); } else toast(r.m.kind === 'delivery' ? `Deliver at ${r.m.to.name}.` : `Hand over at ${r.m.board.name}.`); });
+    line.addEventListener('click', e => { e.stopPropagation(); followMission(app, r.m); });
     hudEl.append(line);
   }
 }
@@ -119,7 +154,7 @@ export function missionsTab(S, box, bountyTab) {
         const why = acceptMission(G, m); if (why) return toast(why, 'bad');
         const live = M.active.find(x => x.id === m.id);
         const tg = live && aimFor(live, st);
-        if (tg) app.waypoint = tg;
+        if (tg) app.waypoint = { ...tg, mission: live.id };   // follows the job's stage once you fly (followCourse)
         play('coin');
         S.done(`Job taken: ${m.title}${tg ? ' — course set' : ''}`);
       }, full ? '' : 'primary'));
@@ -134,8 +169,8 @@ export function missionsTab(S, box, bountyTab) {
 /** Where to point the course marker for a fresh job (we are docked, so the world may not have spawned it yet). */
 function aimFor(m, st) {
   if (m.kind === 'recovery') return { x: m.target.x, y: m.target.y, label: 'Tow target' };
-  if (m.kind === 'clear') return { x: m.site.x, y: m.site.y, label: m.title.replace('Clear out a ', '') };
-  if (m.kind === 'escort') return { x: m.to.x, y: m.to.y, label: 'Relay beacon' };
+  if (m.kind === 'clear') return { x: m.site.x, y: m.site.y, label: m.title.replace('Clear out a ', 'Clear: ') };
+  if (m.kind === 'escort') return { x: m.from.x, y: m.from.y, label: 'Meet the freighter' };
   void st; return null;
 }
 
@@ -151,7 +186,7 @@ function jobCard(app, G, m, board, S) {
     el('div', { class: 'ms-meta' }, el('span', {}, `${fmt(p.have)} / ${fmt(p.need)}`), m.expires ? el('span', { class: 'amber' }, `${mins(m.expires - G.playTime)} left`) : '', block && (m.kind === 'delivery' || m.kind === 'acquire') ? el('span', { class: 'hint' }, block) : ''));
   const row = el('div', { class: 'row wrap' });
   if (ready) row.append(btn('Hand over', () => { const res = handIn(G, m); banner(`Job done: ${m.title}`, res.text); play('rare'); S.done(); }, 'primary'));
-  if (m.kind !== 'delivery' && m.kind !== 'acquire' && (m.system === G.system)) { const tg = aimFor(m); if (tg) row.append(btn('Set course', () => { app.waypoint = tg; toast(`Course set: ${tg.label}`); })); }
+  if (m.kind !== 'delivery' && m.kind !== 'acquire' && (m.system === G.system)) { const tg = aimFor(m); if (tg) row.append(btn('Set course', () => { app.waypoint = { ...tg, mission: m.id }; toast(`Course set: ${tg.label}`); })); }
   row.append(btn('Give up', () => { abandonMission(G, m); S.done('Job dropped.', ''); }));
   c.append(row);
   return c;
@@ -170,7 +205,7 @@ function goalsSection(app, box) {
       el('b', { class: 'ms-title' }, m.title), el('div', { class: 'hint' }, m.text),
       el('div', { class: 'ms-meta' }, el('span', {}, `${fmt(p.have)} / ${fmt(p.need)}`), m.expires ? el('span', { class: 'amber' }, `${mins(m.expires - G.playTime)} left`) : '',
         m.system >= 0 && m.system !== G.system ? el('span', {}, `In ${app.galaxy.systems[m.system].name}`) : ''),
-      el('div', { class: 'row wrap' }, tg ? btn('Set course', () => { app.waypoint = { x: tg.x, y: tg.y, label: tg.label }; toast(`Course set: ${tg.label}`); }) : '',
+      el('div', { class: 'row wrap' }, tg ? btn('Set course', () => followMission(app, m)) : '',
         btn('Give up', e => { abandonMission(G, m); e.target.closest('.card')?.remove(); toast('Job dropped.'); }))));
   }
   box.append(cards);
@@ -178,7 +213,9 @@ function goalsSection(app, box) {
 
 // ------------------------------------------------------------------ world-space drawing (rifts, clouds, sections, labels)
 function drawWorld(app, g, z) {
-  const w = app.w; if (!w?.enc || app.mode === 'title') return;
+  const w = app.w; if (!w || app.mode === 'title') return;
+  if (w.tractors?.length) { g.save(); drawTractors(app, g, 1 / z); g.restore(); }
+  if (!w.enc) return;
   const cam = app.cam; const vw = innerWidth / z, vh = innerHeight / z;
   const inView = (x, y, r) => Math.abs(x - cam.x) < vw / 2 + r && Math.abs(y - cam.y) < vh / 2 + r;
   const t = w.t; const k = 1 / z;
@@ -223,6 +260,113 @@ function drawWorld(app, g, z) {
   }
   g.restore();
 }
+// ------------------------------------------------------------------ job markers on screen (live reports #43/#46)
+/**
+ * Every job with a place gets its own marker, drawn after (on top of) every other marker: a reticle on the spot
+ * while it is on screen, an arrow at the screen edge with the distance while it is not. The job your course
+ * follows pulses. Colours are the job kinds' colours (MISSION_KINDS).
+ */
+// HUD boxes the markers must not hide under (the goal box, the job list, the radar, the top-left bars…), in
+// overlay pixels; read from the page a few times a second, not every frame
+let hudBoxes = [], hudBoxT = 0;
+const HUD_SEL = '#btn-menu, #st-credits, #st-system, #bars, #mini-stats, #quest, #mission-hud, #target, #minimap, #touch .tbtn';
+function hudRects(k, now) {
+  if (now - hudBoxT < 0.4) return hudBoxes;
+  hudBoxT = now; hudBoxes = [];
+  for (const e of document.querySelectorAll(HUD_SEL)) {
+    if (e.closest('.hidden')) continue; const r = e.getBoundingClientRect(); if (!r.width || !r.height) continue;
+    hudBoxes.push([(r.left - 6) * k, (r.top - 6) * k, (r.right + 6) * k, (r.bottom + 6) * k]);
+  }
+  return hudBoxes;
+}
+const hits = (boxes, x0, y0, x1, y1) => boxes.some(b => x1 > b[0] && x0 < b[2] && y1 > b[1] && y0 < b[3]);
+
+function drawMarks(app, c, o) {
+  const w = app.w, P = app.P, G = app.G; if (!w || !P || !G || app.mode === 'title') return;
+  const marks = missionMarks(G, w, G.system); if (!marks.length) return;
+  const k = o.ok, t = w.t; const follow = app.waypoint?.mission;
+  const padX = 34 * k, padTop = 40 * k, padBot = 40 * k;
+  const boxes = hudRects(k, performance.now() / 1000); const placed = [];
+  c.save(); c.font = `700 ${Math.round(12 * k)}px Rajdhani, system-ui`; c.textBaseline = 'middle';
+  // the followed job last, so it is on top of the others
+  marks.sort((a, b) => (a.m.id === follow) - (b.m.id === follow));
+  for (const mk of marks) {
+    const on = mk.m.id === follow; const pulse = on ? 0.75 + 0.25 * Math.sin(t * 5) : 0.85;
+    const x = o.ox(mk.x), y = o.oy(mk.y); const d = Math.hypot(mk.x - P.x, mk.y - P.y);
+    const text = `${mk.label} · ${km(d)}`;
+    const inside = x > padX && y > padTop && x < o.ow - padX && y < o.oh - padBot && !hits(boxes, x - 4, y - 4, x + 4, y + 4);
+    let lx, ly, ux = 0, uy = -1;
+    if (inside) {
+      // reticle: four corners round the spot (or round the body), turning slowly
+      const r = Math.max(16 * k, (mk.body?.r || 0) * o.oz * 1.15);
+      c.strokeStyle = mk.color; c.lineWidth = (on ? 3 : 2) * k; c.globalAlpha = pulse;
+      for (let i = 0; i < 4; i++) {
+        const a = i * Math.PI / 2 + Math.PI / 4 + t * 0.6; const cx = x + Math.cos(a) * r, cy = y + Math.sin(a) * r; const q = 7 * k;
+        c.beginPath(); c.moveTo(cx - Math.cos(a - 0.9) * q, cy - Math.sin(a - 0.9) * q); c.lineTo(cx, cy); c.lineTo(cx - Math.cos(a + 0.9) * q, cy - Math.sin(a + 0.9) * q); c.stroke();
+      }
+      lx = x; ly = y - r - 14 * k;
+    } else {
+      // arrow on the screen edge, along the line from the middle of the screen to the spot
+      const cx = o.ow / 2, cy = o.oh / 2; const dx = x - cx, dy = y - cy; const a = Math.atan2(dy, dx);
+      const sx = dx > 0 ? (o.ow - padX - cx) / dx : dx < 0 ? (padX - cx) / dx : Infinity;
+      const sy = dy > 0 ? (o.oh - padBot - cy) / dy : dy < 0 ? (padTop - cy) / dy : Infinity;
+      let s = Math.min(sx, sy); let ex = cx + dx * s, ey = cy + dy * s;
+      // slide in along the same line until the arrow is clear of the HUD boxes
+      for (let i = 0; i < 60 && hits(boxes, ex - 14 * k, ey - 14 * k, ex + 14 * k, ey + 14 * k); i++) { s *= 0.96; ex = cx + dx * s; ey = cy + dy * s; }
+      const L = (on ? 17 : 14) * k;
+      c.save(); c.translate(ex, ey); c.rotate(a); c.globalAlpha = pulse;
+      c.beginPath(); c.moveTo(L, 0); c.lineTo(-L * 0.6, -L * 0.7); c.lineTo(-L * 0.25, 0); c.lineTo(-L * 0.6, L * 0.7); c.closePath();
+      c.fillStyle = mk.color; c.strokeStyle = 'rgba(0,0,0,0.85)'; c.lineWidth = 2.5 * k; c.stroke(); c.fill();
+      c.restore();
+      // the label sits on the inner side of the arrow
+      lx = ex - Math.cos(a) * 30 * k; ly = ey - Math.sin(a) * 24 * k; ux = -Math.cos(a); uy = -Math.sin(a);
+    }
+    c.globalAlpha = 1;
+    const tw = c.measureText(text).width + 12 * k; const th = 18 * k;
+    const clampL = () => { lx = Math.max(tw / 2 + 4 * k, Math.min(o.ow - tw / 2 - 4 * k, lx)); ly = Math.max(th, Math.min(o.oh - th, ly)); };
+    clampL();
+    // the label keeps clear of the HUD and of the other job labels: step inward (toward the middle) until it is
+    for (let i = 0; i < 40 && (hits(boxes, lx - tw / 2, ly - th / 2, lx + tw / 2, ly + th / 2) || hits(placed, lx - tw / 2, ly - th / 2, lx + tw / 2, ly + th / 2)); i++) {
+      if (hits(placed, lx - tw / 2, ly - th / 2, lx + tw / 2, ly + th / 2) && !hits(boxes, lx - tw / 2, ly - th / 2, lx + tw / 2, ly + th / 2)) ly += (ly < o.oh / 2 ? 1 : -1) * (th + 2 * k);
+      else { lx += ux * 12 * k; ly += uy * 12 * k; }
+      clampL();
+    }
+    placed.push([lx - tw / 2, ly - th / 2, lx + tw / 2, ly + th / 2]);
+    c.fillStyle = 'rgba(4,8,18,0.82)'; c.fillRect(lx - tw / 2, ly - th / 2, tw, th);
+    c.fillStyle = mk.color; c.fillRect(lx - tw / 2, ly - th / 2, 3 * k, th);
+    if (on) { c.strokeStyle = mk.color; c.lineWidth = 1 * k; c.strokeRect(lx - tw / 2, ly - th / 2, tw, th); }
+    c.textAlign = 'center'; c.fillStyle = on ? '#ffffff' : mk.color; c.fillText(text, lx + 1.5 * k, ly + 0.5 * k);
+  }
+  c.restore();
+}
+
+/** Tractor beams: a station pulling a delivered tow in (sim/missions.js pullIn). */
+function drawTractors(app, g, k) {
+  const w = app.w; if (!w?.tractors?.length) return;
+  const t = w.t;
+  for (const T of w.tractors) {
+    const b = T.b; const sx = T.st ? T.st.x : T.tx, sy = T.st ? T.st.y : T.ty;
+    const dx = b.x - sx, dy = b.y - sy; const d = Math.hypot(dx, dy) || 1; const ux = dx / d, uy = dy / d;
+    const from = Math.min(d * 0.5, (T.st?.r || 60) * 0.8); const x0 = sx + ux * from, y0 = sy + uy * from;
+    const half = Math.max(20, b.r * (b.shrink ?? 1) * 0.9); const px = -uy, py = ux; const a = T.b.fade ?? 1;
+    // the beam: a soft cone from the station to the hull
+    const gr = g.createLinearGradient(x0, y0, b.x, b.y);
+    gr.addColorStop(0, `rgba(120,220,255,${0.5 * a})`); gr.addColorStop(1, `rgba(120,220,255,${0.18 * a})`);
+    g.fillStyle = gr; g.beginPath(); g.moveTo(x0 + px * 8, y0 + py * 8); g.lineTo(b.x + px * half, b.y + py * half); g.lineTo(b.x - px * half, b.y - py * half); g.lineTo(x0 - px * 8, y0 - py * 8); g.closePath(); g.fill();
+    // rings running toward the station
+    g.strokeStyle = `rgba(180,240,255,${0.7 * a})`; g.lineWidth = 2.5 * k * 2;
+    for (let i = 0; i < 4; i++) {
+      const f = 1 - ((t * 0.9 + i / 4) % 1); const cx = x0 + (b.x - x0) * f, cy = y0 + (b.y - y0) * f; const hw = 8 + (half - 8) * f;
+      g.beginPath(); g.moveTo(cx + px * hw, cy + py * hw); g.lineTo(cx - px * hw, cy - py * hw); g.stroke();
+    }
+    // the two edge lines
+    g.strokeStyle = `rgba(150,230,255,${0.8 * a})`; g.lineWidth = 2 * k * 2;
+    g.beginPath(); g.moveTo(x0 + px * 8, y0 + py * 8); g.lineTo(b.x + px * half, b.y + py * half); g.moveTo(x0 - px * 8, y0 - py * 8); g.lineTo(b.x - px * half, b.y - py * half); g.stroke();
+    app.fx?.lights?.push({ x: b.x, y: b.y, r: half * 4, color: '#78dcff', life: 0.016, max: 0.016, k: 0.5 * a });
+    app.fx?.lights?.push({ x: x0, y: y0, r: 260, color: '#78dcff', life: 0.016, max: 0.016, k: 0.6 * a });
+  }
+}
+
 function label(g, text, x, y, color, k) {
   g.font = `600 ${Math.round(13 * k)}px Rajdhani, system-ui`; g.textAlign = 'center';
   g.fillStyle = 'rgba(0,0,0,0.6)'; g.fillText(text, x + 1 * k, y + 1 * k);

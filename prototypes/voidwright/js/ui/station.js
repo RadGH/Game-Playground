@@ -11,15 +11,16 @@
 import { panel, el, btn, toast, banner, fmt, esc, showSelected } from './dom.js';
 import { SLOTS, itemCard } from './items.js';
 import { drawWorkshop } from './workshop.js';
-import { makeDroneItem } from '../sim/state.js';
+import { makeDroneItem, fitDrone, unfitDrone } from '../sim/state.js';
+import { droneCard, dronePicker } from './drones-ui.js';
 import { growOptions, growCost } from '../sim/hullgrow.js';
 import { GOODS, GOOD_IDS, ECONOMIES, EVENTS, RECIPES, market, prices, buy as mBuy, sell as mSell, remember } from '../sim/economy.js';
 import { cargoUsed } from '../sim/world.js';
-import { makeItem, itemValue, rollRarity } from '../sim/loot.js';
+import { makeItem, itemValue, rollRarity, pickPart } from '../sim/loot.js';
 import { BLOCKS } from '../data/blocks.js';
 import { CLASSES, PREMADES } from '../data/hulls.js';
 import { DRONES } from '../data/drones.js';
-import { DAMAGE, MATERIALS, RARITY, RARITY_BY_ID } from '../data/types.js';
+import { MATERIALS, RARITY, RARITY_BY_ID } from '../data/types.js';
 import { FACTIONS, factionsForTier } from '../data/factions.js';
 import { buildPremade } from '../sim/shipgen.js';
 import { WARP_CORES, warpCore, canWarpTo } from '../sim/galaxy.js';
@@ -114,7 +115,8 @@ export function openStation(app, st, onUndock) {
   };
 
   // [encounters] every trade station, and any station or outpost with a bounty board, has a Missions tab (bounties live inside it)
-  const services = SERVICES.filter(([id]) => (st.services?.includes(id) || (id === 'missions' && (st.services?.includes('bounty') || st.stationKind === 'trade'))) && (id !== 'blackmarket' || pirate));
+  // insurance is sold at every station and outpost (owner 2026-11-12, report #65) — also old saves' stations
+  const services = SERVICES.filter(([id]) => (st.services?.includes(id) || id === 'insurance' || (id === 'missions' && (st.services?.includes('bounty') || st.stationKind === 'trade'))) && (id !== 'blackmarket' || pirate));
   const open = id => !!G.unlocked[id];
   let tab = services.find(([id]) => id === lastTab && open(id))?.[0] || services.find(([id]) => open(id))?.[0] || null;
 
@@ -143,7 +145,7 @@ export function openStation(app, st, onUndock) {
     else (TABS[tab] || (() => content.append(el('p', {}, 'Closed.'))))(S, content);
     p.body.scrollTop = scroll;
   }
-  S.render = render;
+  S.render = render; S.toTop = () => { p.body.scrollTop = 0; };
   render();
   return p;
 }
@@ -285,18 +287,28 @@ function shopStock(S, kind) {
   let stock = stockCache.get(cacheKey);
   if (!stock) {
     const r = rng(hash(kind, sys.seed, d)); const lim = sizeLimit(G); stock = [];
-    const basePool = Object.values(BLOCKS).filter(b => b.module && !b.core && !b.enemyOnly && (b.size || 1) <= lim && b.tier <= sys.tier + 1);
+    const basePool = Object.values(BLOCKS).filter(b => b.module && (!b.core || b.id !== 'bridge') && !b.enemyOnly && (b.size || 1) <= lim && b.tier <= sys.tier + 1);
     if (kind === 'outfit') {
       // a harpoon, a mining laser, a targeting computer and a scanner are always on the shelf
-      const sure = ['harpoon', 'mining_laser', 'targeting', 'scanner', 'drone_bay'];
+      // #66: missile defence is always on offer too — a Blast Screen (Shields) and a Decoy launcher (Utility)
+      const sure = ['harpoon', 'mining_laser', 'targeting', 'scanner', 'drone_bay', 'blast_screen', 'decoy'];
       for (const id of sure) stock.push(makeItem(r, id, 'common'));
       // every slot gets its own shelf, so CPU, crew and cargo parts always show up
       for (const sl of SLOTS) {
         const pool = basePool.filter(b => sl.cats.includes(b.cat) && (!b.race || hasLicence(G, b.race)) && !sure.includes(b.id));
         const n = sl.n + Math.min(sl.id === 'weapon' ? 6 : 2, Math.floor(sys.tier / 2));
-        for (let i = 0; i < n && pool.length; i++) {
+        // a shelf that covers two kinds (Crew & cargo, Engines & gyros) always shows at least one of
+        // each kind first, so cargo pods never go missing behind a row of hab modules
+        const picks = sl.cats.map(c => pool.filter(b => b.cat === c)).filter(p => p.length).map(p => r.pick(p));
+        // #66: the Weapons shelf always has one point-defence gun (flak or point-defence laser) when the shop can sell one
+        const pdPool = sl.id === 'weapon' ? pool.filter(b => BLOCKS[b.id].weapon && b.autoOnly && /^(flak|pd_)/.test(b.weapon)) : [];
+        if (pdPool.length) picks.push(r.pick(pdPool));
+        while (picks.length < n && pool.length) picks.push(pickPart(r, pool, sys.tier));
+        // the Bridge shelf (#61) always shows every bridge this shop can sell, so the upgrade path is never hidden
+        if (sl.id === 'core') { picks.length = 0; picks.push(...pool); }
+        for (const b of picks.slice(0, Math.max(n, sl.cats.length, sl.id === 'core' ? pool.length : 0))) {
           let rar = rollRarity(r, sys.tier); if (RARITY_BY_ID[rar.id].index > 3) rar = RARITY[3];
-          stock.push(makeItem(r, r.pick(pool).id, rar.id));
+          stock.push(makeItem(r, b.id, rar.id));
         }
       }
     } else {
@@ -382,7 +394,7 @@ function tabOutfitter(S, box) {
     const price = Math.round(listPrice(it) * k.buy);
     cards.append(itemCard(it, { compact: true, price, compare: S.ship(), actions: [btn('Buy', () => { if (G.credits < price) return toast('You cannot afford that.', 'bad'); gone.push(i); buyItem(S, it, price); }, G.credits >= price ? 'primary' : '')] }));
   });
-  if (!cards.children.length) cards.append(el('p', { class: 'hint' }, 'Sold out on this shelf. Come back later.'));
+  if (!cards.children.length) cards.append(el('p', { class: 'hint' }, sl.id === 'core' && sys.tier < 2 ? `No better bridge here. ${BLOCKS.bridge_2.name} is sold at danger 2 and further out; ${BLOCKS.bridge_3.name} at danger 4.` : 'Sold out on this shelf. Come back later.'));
   box.append(cards);
 }
 
@@ -637,7 +649,7 @@ function tabInsurance(S, box) {
 /** Drone shop (play-test #28/#31): drones are items — buy them here, fit them to drone ports in Build mode. */
 function tabDrones(S, box) {
   const { G, sys } = S; const k = S.k(); const cap = S.ship().stats.droneCap || 0; const own = G.droneItems ||= [];
-  section(box, 'Drone shop', `Drones fly AHEAD of your ship, ready for action. Fit them to drone ports in Build mode (Drones tab); a lost drone is rebuilt by its port for free. Your ports carry ${cap}; you own ${own.length}.`);
+  section(box, 'Drone shop', `Drones fly AHEAD of your ship, ready for action; a lost drone is rebuilt by its port for free. Your ports carry ${cap}; you own ${own.length}. Choose which ones fly under Your drones below, or from the hold (C) in flight.`);
   if (!cap) box.append(el('p', { class: 'warn' }, 'You have no drone port yet. The outfitter sells them (Drone ports shelf), or craft one at a workshop.'));
   // today's stock: a few of each kind, some of them better than common
   const d = dayOf(G); const key = `drones:${sys.id}:${d}`; const gone = taken(G, key);
@@ -651,37 +663,25 @@ function tabDrones(S, box) {
   const cards = el('div', { class: 'cards' });
   stock.forEach((x, i) => {
     if (gone.includes(i)) return;
-    const D = DRONES[x.kind]; const R = RARITY_BY_ID[x.rarity]; const mul = 1 + R.bonus; const w = D.weapon;
+    const D = DRONES[x.kind]; const R = RARITY_BY_ID[x.rarity];
     const price = Math.round(D.cost.cr * 2.2 * (1 + R.index * 0.9 + R.index * R.index * 0.25) * k.buy);
-    const rows = [['Health', fmt(D.hp * mul)], ['Speed', fmt(D.speed)]];
-    if (w) { const DM = DAMAGE[w.type]; rows.push(['Damage', `<b style="color:${DM.color}">${DM.name}</b>`], ['Damage per second', fmt((w.rate ? w.dmg * w.rate * (w.chain ? 1 + w.chain * 0.6 : 1) : w.dmg) * mul)], ['Range', fmt(w.range)]); }
-    if (D.mines) rows.push(['Special', 'Mines nearby rocks']);
-    if (D.repairs) rows.push(['Special', `Repairs ${fmt(D.repairs * mul)}/s — you, then your wingmen`]);
-    if (D.interceptor) rows.push(['Special', 'Shoots down missiles']);
-    if (D.shield) rows.push(['Special', `Flying shield (${fmt(D.shield * mul)})`]);
-    cards.append(el('div', { class: 'card', style: `border-color:${R.color}66` },
-      el('b', { style: `color:${R.color}` }, `${R.index ? R.name + ' ' : ''}${D.name}`), el('div', { class: 'hint' }, D.blurb),
-      el('div', { class: 'kv', html: rows.map(([a2, b2]) => `<span>${esc(a2)}</span><span>${b2}</span>`).join('') }),
-      el('div', { class: 'row wrap it-foot' }, el('span', { class: 'amber it-price' }, `${fmt(price)} cr`), el('div', { class: 'grow' }), btn('Buy', () => {
-        if (G.credits < price) return toast('You cannot afford that.', 'bad');
-        G.credits -= price; gone.push(i);
-        const item = makeDroneItem(x.kind, x.rarity); own.push(item);
-        if (cap > (G.ship.drones || []).length) { (G.ship.drones ||= []).push(item.uid); S.done(`${D.name} bought and fitted — it launches when you undock.`); }
-        else S.done(`${D.name} bought. Fit it in Build mode (Drones tab) when a port has room.`);
-      }, G.credits >= price ? 'primary' : ''))));
+    // one card printer for every drone list (ui/drones-ui.js): mining drones show their cutting speed (report #54)
+    cards.append(droneCard(x, { actions: [el('span', { class: 'amber it-price' }, `${fmt(price)} cr`), btn('Buy', () => {
+      if (G.credits < price) return toast('You cannot afford that.', 'bad');
+      G.credits -= price; gone.push(i);
+      const item = makeDroneItem(x.kind, x.rarity); own.push(item);
+      if (fitDrone(G, item.uid, cap).ok) S.done(`${D.name} bought — it flies with you when you undock.`);
+      else S.done(`${D.name} bought and stored. Swap it in under Your drones below.`);
+    }, G.credits >= price ? 'primary' : '')] }));
   });
   box.append(cards);
-  // your drones
-  section(box, 'Your drones', own.length ? null : 'None yet.');
-  const bay = el('div', { class: 'cards' });
-  for (const item of own) {
-    const D = DRONES[item.kind]; if (!D) continue; const R = RARITY_BY_ID[item.rarity || 'common'];
-    const refund = Math.round(D.cost.cr * 0.8 * (1 + R.index * 0.9));
-    const fitted = (G.ship.drones || []).includes(item.uid);
-    bay.append(el('div', { class: 'card row wrap' }, el('b', { style: `color:${R.color}` }, `${R.index ? R.name + ' ' : ''}${D.name}`), el('span', { class: fitted ? 'good' : 'hint' }, fitted ? ' fitted' : ' stored'), el('div', { class: 'grow' }),
-      btn(`Sell (+${fmt(refund)} cr)`, () => { own.splice(own.indexOf(item), 1); G.ship.drones = (G.ship.drones || []).filter(u => u !== item.uid); G.credits += refund; S.done(`Sold a ${D.name}.`, ''); }, 'small')));
-  }
-  box.append(bay);
+  // your drones: the same picker as the hold's Drones tab (report #53), plus Sell
+  section(box, 'Your drones', null);
+  box.append(dronePicker({ G, cap, onChange: msg => S.done(msg),
+    more: item => {
+      const D = DRONES[item.kind]; const R = RARITY_BY_ID[item.rarity || 'common']; const refund = Math.round(D.cost.cr * 0.8 * (1 + R.index * 0.9));
+      return [btn(`Sell +${fmt(refund)} cr`, () => { own.splice(own.indexOf(item), 1); unfitDrone(G, item.uid); G.credits += refund; S.done(`Sold a ${D.name}.`, ''); }, 'small')];
+    } }));
 }
 
 // ================================================================== 9. research lab
@@ -733,7 +733,9 @@ function tabLab(S, box) {
 function tabSalvage(S, box) {
   const { G, sys } = S; const k = S.k();
   const d = dayOf(G); const key = `lots:${sys.id}:${d}`; const gone = taken(G, key);
-  section(box, 'Wreck lots', 'Buy the salvage rights to a wreck. You get whatever the crews cut out of it: ore and 1-3 parts. Sometimes a bargain, sometimes junk.');
+  // what the last lot gave (report #45: "I bought a ship from the salvage yard. Nothing happened?") — stays on the tab
+  if (S.lastLot) lotResult(S, box, S.lastLot);
+  section(box, 'Wreck lots', 'The yard has towed these wrecks in. Buy one and its crews strip it on the spot: the ore goes into your cargo hold and 1-3 parts into your parts hold. Nothing to fly out to. Sometimes a bargain, sometimes junk.');
   const cards = el('div', { class: 'cards' });
   const r = rng(hash('lots', sys.seed, d));
   const classes = ['skiff', 'corvette', ...(sys.tier >= 3 ? ['frigate'] : []), ...(sys.tier >= 4 ? ['destroyer'] : []), ...(sys.tier >= 5 ? ['cruiser'] : [])];
@@ -746,11 +748,12 @@ function tabSalvage(S, box) {
     cards.append(el('div', { class: 'card' }, el('b', {}, `${conds[cond]} ${CLASSES[cls].name.toLowerCase()}`),
       el('div', { class: 'hint' }, `Was a ${FACTIONS[fac]?.name || fac} ship.`),
       el('div', { class: 'amber' }, `${fmt(price)} cr`),
-      btn('Buy the lot', () => {
+      btn(`Buy and strip it (${fmt(price)} cr)`, () => {
         if (G.credits < price) return toast('You cannot afford that.', 'bad');
         G.credits -= price; gone.push(i);
-        const msg = openLot(S, seed, price, cls, cond);
-        S.done(msg);
+        S.lastLot = openLot(S, seed, price, cls, cond);
+        S.lastLot.what = `${conds[cond]} ${CLASSES[cls].name.toLowerCase()}`;
+        S.done('Wreck stripped. Everything went into your holds.'); S.toTop?.();
       }, G.credits >= price ? 'primary' : '')));
   }
   if (!cards.children.length) cards.append(el('p', { class: 'hint' }, 'No lots left today. New wrecks come in later.'));
@@ -761,7 +764,8 @@ function tabSalvage(S, box) {
 function openLot(S, seed, price, cls, cond) {
   const { G, sys } = S; const r = rng(seed); const edge = salvageEdge(G);
   const value = price * r.range(0.5, 1.6) * (0.75 + cond * 0.12) * edge;   // a gamble around the price
-  const mats = Object.entries(MATERIALS).filter(([, m]) => !m.alien && m.tier <= sys.tier + 1);
+  // real ores only: Rock is tier 0 filler, and n / sqrt(0) gave an endless pile (Infinity credits as "scrap")
+  const mats = Object.entries(MATERIALS).filter(([, m]) => !m.alien && m.tier >= 1 && m.tier <= sys.tier + 1);
   let left = value * 0.55, scrap = 0; const got = {};
   while (left > 5) {
     const [id, m] = r.pick(mats); const n = Math.max(1, Math.round(r.range(3, 14) / Math.sqrt(m.tier)));
@@ -775,8 +779,23 @@ function openLot(S, seed, price, cls, cond) {
   const items = [];
   for (let i = 0; i < nItems; i++) { const rar = rollRarity(r, sys.tier, 0.2 + RANK_OF(cls) * 0.15 + researchLootBonus(G)); const it = makeItem(r, r.pick(pool).id, rar.id); G.parts.push(it); items.push(it); }
   for (const it of items) { const u = unlockFromFind(G, it); if (u) banner('New feature', UNLOCK_NAMES[u] || u); }
-  const oreTxt = Object.entries(got).map(([id, n]) => `${n} ${MATERIALS[id].name}`).join(', ');
-  return `Salvaged: ${oreTxt || 'no ore'}${scrap ? ` (+${fmt(scrap)} cr scrap — hold full)` : ''}; parts: ${items.map(it => it.name).join(', ')}`;
+  const worth = Math.round(Object.entries(got).reduce((t, [id, n]) => t + n * (MATERIALS[id]?.price || 0), 0) + scrap + items.reduce((t, it) => t + itemValue(it), 0));
+  return { price, got, scrap, items, worth };
+}
+/** The card that says what a wreck lot gave, where it went and what to do with it. */
+function lotResult(S, box, L) {
+  const { app } = S;
+  const ore = Object.entries(L.got);
+  const verdict = L.worth >= L.price * 1.15 ? ['good', 'A bargain'] : L.worth >= L.price * 0.85 ? ['', 'About what you paid'] : ['bad', 'Mostly junk'];
+  box.append(el('div', { class: 'card st-ready st-lot' },
+    el('b', {}, `Stripped: ${L.what}`), el('div', { class: verdict[0] }, `${verdict[1]}: worth about ${fmt(L.worth)} cr, you paid ${fmt(L.price)} cr`),
+    el('div', { class: 'hint' }, 'Into your cargo hold'),
+    el('div', {}, ore.length ? ore.map(([id, n]) => `${fmt(n)} ${MATERIALS[id].name}`).join(' · ') : 'No ore'),
+    L.scrap ? el('div', { class: 'amber' }, `Your hold was full: the rest sold for scrap, +${fmt(L.scrap)} cr`) : '',
+    el('div', { class: 'hint' }, 'Into your parts hold'),
+    ...L.items.map(it => el('div', { style: `color:${RARITY_BY_ID[it.rarity]?.color || '#ccc'}` }, `${RARITY_BY_ID[it.rarity]?.name || ''} ${it.name}`)),
+    el('div', { class: 'hint' }, 'Fit parts to your ship in Build mode (B), sell them below, or use the ore at the Workshop.'),
+    el('div', { class: 'row wrap' }, btn('See your parts', () => app.openHold?.('parts')), btn('Done', () => { S.lastLot = null; S.render(); }))));
 }
 
 // ================================================================== 11. bounty board

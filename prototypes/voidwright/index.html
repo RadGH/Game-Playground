@@ -11,6 +11,8 @@
 <link rel="stylesheet" href="../../shared/credits.css">
 <link rel="stylesheet" href="css/game.css">
 <link rel="stylesheet" href="css/missions.css">
+<link rel="stylesheet" href="css/drones.css">
+<link rel="stylesheet" href="css/reel.css">
 </head>
 <body>
 <canvas id="view" aria-label="Space"></canvas>
@@ -46,12 +48,11 @@
   <div id="toasts" aria-live="polite"></div>
   <div id="banner" class="banner hidden"></div>
   <canvas id="minimap" width="180" height="180"></canvas>
+  <!-- report #49: on a phone missiles fire by themselves and the "Dock / Use" pill is the dock button -->
   <div id="touch" class="touch hidden">
-    <button data-act="missile" class="tbtn">Missiles</button>
     <button data-act="harpoon" class="tbtn">Harpoon</button>
     <button data-act="scan" class="tbtn">Scan</button>
     <button data-act="boost" class="tbtn" data-hold="1">Boost</button>
-    <button data-act="interact" class="tbtn">Dock</button>
   </div>
   <div id="sticks" class="sticks"></div>
 </div>

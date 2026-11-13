@@ -3,7 +3,8 @@
 // and the better the drops and the shops.
 
 import { rng, hash, TAU } from '../core/math.js';
-import { createGrid, place } from './grid.js';
+import { createGrid, place, remove } from './grid.js';
+import { rockOre, ORE_NODE_MIN, ORE_NODE_SHARE } from './scan.js';
 import { makeBody, recompute } from './ship.js';
 import { generateShip, generateStation, TIER_DMG, hardenEnemy } from './shipgen.js';
 import { ECONOMIES } from './economy.js';
@@ -85,7 +86,7 @@ export function generateGalaxy(seed) {
     s.station = FACTIONS[s.owner].human && s.owner !== 'redfang' ? 'trade' : s.owner === 'redfang' ? (sr.chance(0.6) ? 'pirate' : null) : (sr.chance(0.5) ? 'hive' : null);
     if (s.id === start.id) { s.owner = 'guild'; s.station = 'trade'; }
     // a shop variety per station
-    s.shops = s.station === 'trade' ? pickShops(sr, s.tier) : s.station === 'pirate' ? ['market', 'blackmarket', 'bounty', 'repair', 'crew'] : [];
+    s.shops = s.station === 'trade' ? pickShops(sr, s.tier) : s.station === 'pirate' ? ['market', 'blackmarket', 'bounty', 'repair', 'crew', 'insurance'] : [];
     // Mercenaries (play-test #29): every den, about half the trade stations (more further in). Its own rng, so the
     // rest of each system (features, planets) stays what older saves already know.
     if (s.station === 'pirate' || (s.station === 'trade' && rng(hash(s.seed, 'mercs')).chance(0.45 + s.tier * 0.05))) s.shops.push('mercs');
@@ -160,7 +161,8 @@ function pickShops(r, tier) {
   const always = ['market', 'repair', 'outfitter', 'workshop'];
   const rest = all.filter(x => !always.includes(x) && x !== 'blackmarket');
   const extra = rest.filter(() => r.chance(0.55 + tier * 0.03));
-  return [...always, ...extra];
+  // insurance at every station (owner 2026-11-12, report #65); added after the roll so the other shops stay the same
+  return [...always, ...extra, ...(extra.includes('insurance') ? [] : ['insurance'])];
 }
 
 // ------------------------------------------------------------------ asteroids
@@ -192,6 +194,7 @@ export function makeRock(seed, radius, tier, opts = {}) {
   const mixed = type === 'mixed' ? ['structural', 'energy', 'exotic'].map(ro => matOf(ro, matTier(tier))) : null;
   // ore veins come in clusters, from a second noise; exotic veins are thinner, rich rocks are mostly ore
   const vein = noise2(seed + 7);
+  const veins = [];   // [vein value, block] of plain rock cells
   const cut = (exotic ? 0.66 : 0.56) - (opts.rich ? 0.14 : 0);
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
     const dx = x + 0.5 - c, dy = y + 0.5 - c; const d = Math.hypot(dx, dy);
@@ -201,10 +204,20 @@ export function makeRock(seed, radius, tier, opts = {}) {
     let id = 'rock';
     if (mixed && v > cut) id = 'ore_' + mixed[(Math.floor(x / 3) * 7 + Math.floor(y / 3) * 13) % 5 === 0 ? 2 : (Math.floor(x / 3) + Math.floor(y / 3)) % 2];
     else if (type !== 'rock' && v > cut) id = 'ore_' + type;
-    place(g, id, x, y);
+    const bl = place(g, id, x, y); if (bl && id === 'rock') veins.push([v, bl]);
   }
-  const body = makeBody('rock', g, { team: 'neutral', name: type === 'rock' ? 'Asteroid' : mixed ? 'Mixed ore cluster' : `${MATERIALS[type].name} asteroid`, tier });
-  body.oreType = type; body.rich = !!opts.rich;
+  // a typed rock always holds a decent node of its ore (report #50: "claim to be ferrite but only have rock"):
+  // when the vein noise left too little, the cells richest in vein become ore until the node is big enough
+  if (type !== 'rock' && !mixed) {
+    const need = Math.max(ORE_NODE_MIN, Math.ceil(g.blocks.length * ORE_NODE_SHARE));
+    const have = g.blocks.filter(bl => bl.def.ore === type).length;
+    veins.sort((p, q) => q[0] - p[0]);
+    for (let i = 0; i < need - have && i < veins.length; i++) { const bl = veins[i][1]; const { x, y } = bl; remove(g, bl); place(g, 'ore_' + type, x, y); }
+  }
+  // the type and the name say what the rock really holds (sim/scan.js rockOre)
+  const real = rockOre({ grid: g }).type;
+  const body = makeBody('rock', g, { team: 'neutral', name: real === 'rock' ? 'Asteroid' : real === 'mixed' ? 'Mixed ore cluster' : `${MATERIALS[real].name} asteroid`, tier });
+  body.oreType = real; body.rich = !!opts.rich;
   body.va = r.range(-0.15, 0.15) / Math.max(1, radius * 0.25);
   return body;
 }

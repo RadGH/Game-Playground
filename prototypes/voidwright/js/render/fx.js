@@ -1,6 +1,7 @@
 // Particles, lights, shockwaves and screen shake. The sim's events become visuals here.
 
 import { RARITY_BY_ID, MATERIALS, DAMAGE } from '../data/types.js';
+import { crewText } from '../sim/world.js';
 
 const mk = (w, h) => (typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : Object.assign(document.createElement('canvas'), { width: w, height: h }));
 
@@ -122,7 +123,7 @@ export function handleEvent(fx, e, ctx) {
         if (e.w !== 'gatling') smoke(fx, e.x + Math.cos(e.a) * 6, e.y + Math.sin(e.a) * 6, 2, 8, 0.6, Math.cos(e.a) * 40, Math.sin(e.a) * 40, '#4a4440');
       }
       if (e.w === 'mass_driver' || e.w === 'railgun' || e.w === 'forge_hammer' || e.w === 'siege_cannon' || e.w === 'lance_battery') { wave(fx, e.x, e.y, big ? 160 : 90, 0.012, 0.35); fx.shake = Math.max(fx.shake, ctx.isPlayer(e.owner) ? 4 : 1); ring(fx, e.x, e.y, 30, c, 0.25, 2); }
-      if (e.w === 'missile_rack' || e.w === 'rocket_pod' || e.w === 'swarm_pod' || e.w === 'torpedo_tube' || e.w === 'spore_launcher') smoke(fx, e.x, e.y, 3, 10, 0.8, 0, 0, '#5a5550');
+      if (e.w === 'missile_rack' || e.w === 'rocket_pod' || e.w === 'swarm_pod' || e.w === 'torpedo_tube' || e.w === 'spore_launcher' || /^(he|emp|fire)_(rack|battery)$|^ion_silo$/.test(e.w || '')) smoke(fx, e.x, e.y, 3, 10, 0.8, 0, 0, '#5a5550');
       break;
     }
     case 'hit': {
@@ -142,8 +143,12 @@ export function handleEvent(fx, e, ctx) {
       fx.shieldFlash.set(e.id, { t: 0.5, x: e.x, y: e.y, color: e.color, r: e.r, sx: e.sx, sy: e.sy });
       add(fx, { k: 'shard', x: e.x, y: e.y, vx: 0, vy: 0, cx: e.sx, cy: e.sy, R: e.r, life: 0.35, color: e.color, prio: 1, w: Math.min(26, 6 + e.amt) });
       light(fx, e.x, e.y, 90, e.color, 0.12);
+      if (e.missile) { ring(fx, e.x, e.y, 24, e.color, 0.3, 2.5); sparks(fx, e.x, e.y, e.color, 6, 200, 0.3); }   // #66: a shield visibly swats a missile
       break;
     }
+    // #66: an enemy launcher locking on — a red pulse on the launcher; on you, a red ring round your ship too
+    case 'lockwarn': ring(fx, e.x, e.y, 26, '#ff4040', 0.5, 2.5); light(fx, e.x, e.y, 80, '#ff3030', 0.3); if (e.onPlayer) ring(fx, e.tx, e.ty, 70, '#ff5050', 0.45, 2); break;
+    case 'decoy': sparks(fx, e.x, e.y, '#fff0b0', 10 + e.n * 3, 260, 0.5); light(fx, e.x, e.y, 160, '#ffe080', 0.25); break;
     case 'shielddown': ring(fx, e.x, e.y, e.r * 1.2, '#9fd8ff', 0.5, 5); sparks(fx, e.x, e.y, '#9fd8ff', 30, e.r * 2, 0.6); wave(fx, e.x, e.y, e.r * 1.6, 0.02, 0.5); break;
     case 'blockdie': {
       const sz = 10 * e.size;
@@ -153,6 +158,11 @@ export function handleEvent(fx, e, ctx) {
       break;
     }
     case 'boom': {
+      // missile warheads (#57) burst in their own way
+      if (e.wh === 'ram') { add(fx, { k: 'glow', x: e.x, y: e.y, vx: 0, vy: 0, life: 0.12, color: '#ffffff', size: 26, drag: 1, grow: 0 }); sparks(fx, e.x, e.y, '#cfe8ff', 14, 420, 0.35); chips(fx, e.x, e.y, '#9aa4ae', 5, 160); light(fx, e.x, e.y, 110, '#cfe8ff', 0.12); break; }
+      if (e.wh === 'emp') { ring(fx, e.x, e.y, e.r * 1.5, '#8fb4ff', 0.45, 3); ring(fx, e.x, e.y, e.r * 0.9, '#e0e8ff', 0.3, 2); for (let i = 0; i < 4; i++) { const an = Math.random() * 6.3, ln = e.r * (0.7 + Math.random() * 0.7); bolt(fx, [[e.x, e.y], [e.x + Math.cos(an) * ln, e.y + Math.sin(an) * ln]], '#9fc0ff', 0.2, 1.6, false); } light(fx, e.x, e.y, e.r * 4, '#8fb4ff', 0.3, 1.3); if (e.r > 30) wave(fx, e.x, e.y, e.r * 2.4, 0.012, 0.4); break; }
+      if (e.wh === 'fire') { fireball(fx, e.x, e.y, e.r * 0.8, 0, 0, '#ff6a1a'); glows(fx, e.x, e.y, '#ff7a2a', 6 + e.r / 8, 10, e.r * 1.2, 1.4); glows(fx, e.x, e.y, '#ffc040', 3, 8, e.r * 0.8, 1.0); smoke(fx, e.x, e.y, 2 + e.r / 20, e.r, 2.2, 0, 0, '#3a2a22'); light(fx, e.x, e.y, e.r * 4, '#ff7a2a', 0.6, 1.2); break; }
+      if (e.wh === 'he' && !e.shield) { fx.shake = Math.max(fx.shake, 5); fireball(fx, e.x, e.y, e.r * 0.7, 0, 0, '#ffd060'); wave(fx, e.x, e.y, e.r * 3.6, 0.03, 0.6); }
       const r = e.r; const col = e.type === 'plasma' ? '#40e8ff' : e.type === 'lightning' ? '#b48cff' : '#ff8a2a';
       fireball(fx, e.x, e.y, r, 0, 0, col);
       sparks(fx, e.x, e.y, '#ffd080', 6 + r / 6, r * 5, 0.5);
@@ -215,7 +225,7 @@ export function handleEvent(fx, e, ctx) {
     case 'collect': {
       const col = e.kind === 'item' ? RARITY_BY_ID[e.rarity]?.color : e.kind === 'mat' ? MATERIALS[e.mat]?.color : e.kind === 'cr' ? '#ffd84a' : '#ffffff';
       ring(fx, e.x, e.y, 26, col || '#fff', 0.3, 2);
-      const label = e.kind === 'cr' ? `+${e.n} cr` : e.kind === 'mat' ? `+${e.n} ${MATERIALS[e.mat]?.name || e.mat}` : e.kind === 'pod' ? `+${e.n} crew rescued` : e.kind === 'specimen' ? 'Specimen recovered' : e.item?.name || 'Item';
+      const label = e.kind === 'cr' ? `+${e.n} cr` : e.kind === 'mat' ? `+${e.n} ${MATERIALS[e.mat]?.name || e.mat}` : e.kind === 'pod' ? crewText(e.n) : e.kind === 'specimen' ? 'Specimen recovered' : e.item?.name || 'Item';
       text(fx, e.x, e.y - 12, label, col || '#fff', e.kind === 'item' ? 15 : 12);
       break;
     }

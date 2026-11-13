@@ -4,9 +4,7 @@
 import { panel, el, btn, toast, fmt, tip } from './dom.js';
 import { BLOCKS } from '../data/blocks.js';
 import { RARITY_BY_ID, MATERIALS, MAT_ROLES } from '../data/types.js';
-import { fmt as fmtD } from '../../../../shared/format.js';
 import { UNIQUES } from '../data/uniques.js';
-import { DRONES } from '../data/drones.js';
 import { FACTIONS } from '../data/factions.js';
 import { CLASSES } from '../data/hulls.js';
 import { GOODS } from '../sim/economy.js';
@@ -14,6 +12,7 @@ import { itemValue } from '../sim/loot.js';
 import { cargoUsed, spawnPickup } from '../sim/world.js';
 
 import { itemCard } from './items.js';
+import { dronePicker } from './drones-ui.js';
 
 function simpleCard(item) {
   const d = BLOCKS[item.block]; const R = RARITY_BY_ID[item.rarity];
@@ -35,6 +34,7 @@ export function openHold(app, tab = 'parts') {
   const T = [['parts', 'Parts'], ['cargo', 'Cargo'], ['drones', 'Drones'], ['ships', 'Ships'], ['rep', 'Factions'], ['finds', 'Crew & finds']];
   const show = (id) => { tab = id; for (const b of tabs.children) b.classList.toggle('on', b.dataset.id === id); draw(); };
   for (const [id, label] of T) { const b = btn(label, () => show(id)); b.dataset.id = id; tabs.append(b); }
+  p.root.showTab = show;   // main.js: C / I switch tabs while the hold is open (report #51)
   function draw() {
     const B = p.body; B.innerHTML = '';
     if (tab === 'parts') {
@@ -68,16 +68,10 @@ export function openHold(app, tab = 'parts') {
       }
       if (!rows.length) B.append(el('p', { class: 'hint' }, 'Empty. Mine asteroids or buy goods at a market.')); else B.append(t);
     } else if (tab === 'drones') {
-      const cap = app.P?.stats.droneCap || 0; const fitted = new Set(G.ship.drones || []);
-      B.append(el('p', {}, `Drone ports: room for ${cap} drone${cap === 1 ? '' : 's'}. Fit drones in Build mode (Drones tab). A lost drone is rebuilt by its port, free, after a few seconds.`));
-      const list = el('div', { class: 'cards' });
-      for (const d of G.droneItems || []) {
-        const D = DRONES[d.kind]; if (!D) continue; const R = RARITY_BY_ID[d.rarity || 'common'];
-        list.append(el('div', { class: 'card', style: `border-color:${R.color}55` }, el('b', { style: `color:${R.color}` }, `${R.index ? R.name + ' ' : ''}${D.name}`), el('div', { class: 'hint' }, D.blurb || ''),
-          R.bonus ? el('div', { class: 'good' }, `+${Math.round(R.bonus * 100)}% health and damage`) : '', el('div', { class: fitted.has(d.uid) ? 'good' : 'hint' }, fitted.has(d.uid) ? 'Fitted — flies with you' : 'In storage')));
-      }
-      if (!(G.droneItems || []).length) list.append(el('p', { class: 'hint' }, 'No drones yet. Drone shops sell them; fabricators craft them.'));
-      B.append(list);
+      // report #53: choose which drones fly right here — Store, Fly, or Swap one stored drone in for a flying one
+      const cap = app.P?.stats.droneCap || 0;
+      B.append(dronePicker({ G, cap, onChange: (msg) => { app.refreshDrones?.(); app.save?.(); if (msg) toast(msg, 'good'); } }));
+      B.append(el('p', { class: 'hint' }, 'A drone that is shot down is rebuilt by its port, free, after 12 seconds.'));
     } else if (tab === 'ships') {
       B.append(el('div', { class: 'card' }, el('b', {}, `${G.ship.name} — ${CLASSES[G.ship.cls].name} (flying)`), el('div', { class: 'hint' }, CLASSES[G.ship.cls].blurb)));
       for (const h of G.hangar) B.append(el('div', { class: 'card' }, el('b', {}, `${h.name} — ${CLASSES[h.cls].name}`), el('div', { class: 'hint' }, 'Stored at shipyards. Swap ships at any shipyard.')));
@@ -94,11 +88,10 @@ export function openHold(app, tab = 'parts') {
     } else if (tab === 'finds') {
       const P = app.P;
       if (P) B.append(el('p', {}, `Crew ${P.crew} — ${P.stats.crewMin} needed to fly, ${P.stats.crewNeed} for full strength, room for ${P.stats.crewCap}.`));
-      B.append(el('p', { class: 'hint' }, `People rescued so far: ${fmt(G.stats.rescued)}. Sealed caches waiting to be opened: ${(G.caches || []).length} (any station workshop). Data cores: ${G.dataCores || 0} (research labs).`));
+      B.append(el('p', { class: 'hint' }, `Sealed caches waiting to be opened: ${(G.caches || []).length} (any station workshop). Data cores: ${G.dataCores || 0} (research labs).`));
       B.append(uniquesLog(G));
       if (G.specimens.length) B.append(el('h3', {}, 'Alien specimens'));
       for (const s of G.specimens) B.append(el('div', { class: 'card' }, el('b', { style: `color:${FACTIONS[s.faction]?.color}` }, s.name), el('span', { class: 'hint' }, `Worth ~${fmt(s.value)} cr to a lab`)));
-      if (G.claims.length) { B.append(el('h3', {}, 'Mining claims')); for (const c of G.claims) B.append(el('div', {}, `${c.name}: ${MATERIALS[c.mat]?.name || c.mat}, about ${fmtD(c.rate, { decimals: 1 })} a minute (${fmt(c.store || 0)} waiting)`)); }
     }
   }
   show(tab);

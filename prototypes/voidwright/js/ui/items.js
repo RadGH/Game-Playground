@@ -11,6 +11,7 @@
 
 import { el, esc, fmt } from './dom.js';
 import { BLOCKS, CATEGORIES } from '../data/blocks.js';
+import { CLASSES } from '../data/hulls.js';
 import { ALL_WEAPONS } from '../data/weapons.js';
 import { DAMAGE, HIT_SIZE, RARITY_BY_ID, ARMOR } from '../data/types.js';
 import { POWERS } from '../sim/loot.js';
@@ -26,7 +27,30 @@ export const SLOTS = [
   { id: 'crew', name: 'Crew & cargo', cats: ['crew', 'cargo'], n: 4 },
   { id: 'utility', name: 'Utility', cats: ['utility'], n: 4 },
   { id: 'drone', name: 'Drone ports', cats: ['drone'], n: 2 },
+  // play-test #61: better bridges run more CPU and power parts (the plain Bridge is never sold — every ship has one)
+  { id: 'core', name: 'Bridge', cats: ['core'], n: 1 },
 ];
+
+/**
+ * Play-test #61: the bridge caps CPU parts and power parts. The next bridge up, and where to get it, in plain
+ * words — for build mode and the Ship upgrades screen. (Shops sell parts up to one tier above their danger.)
+ */
+export function nextBridge(coreId, maxBlock = 1) {
+  const ladder = ['bridge', 'bridge_2', 'bridge_3'];
+  const i = ladder.indexOf(coreId);
+  if (i >= 0 && i < ladder.length - 1) {
+    const d = BLOCKS[ladder[i + 1]];
+    return { id: d.id, name: d.name, where: `Bridge shelf at outfitters, danger ${Math.max(1, d.tier - 1)}+`, cpu: d.cpuParts, power: d.powerParts };
+  }
+  if (maxBlock >= 4 && coreId !== 'flag_bridge') { const d = BLOCKS.flag_bridge; return { id: d.id, name: d.name, where: 'Bridge shelf at outfitters, danger 4+ (4×4 hull)', cpu: d.cpuParts, power: d.powerParts }; }
+  if (maxBlock >= 2 && (coreId === 'bridge' || coreId === 'bridge_2' || coreId === 'bridge_3')) { const d = BLOCKS.command_deck; return { id: d.id, name: d.name, where: 'Bridge shelf at outfitters, danger 2+ (2×2 hull)', cpu: d.cpuParts, power: d.powerParts }; }
+  return null;
+}
+/** The next hull class that takes bigger parts, for "why can't I place this 2×2?" (sizes stay gated by hull — ruling E5). */
+export function biggerHullText(size) {
+  const to = Object.values(CLASSES).filter(c => c.maxBlock >= size && c.rank < 9).sort((a, b) => a.rank - b.rank)[0];
+  return to ? `${size}×${size} parts need a ${to.name} hull or bigger: Grow hull at a shipyard (Ship upgrades in the ☰ menu shows the price).` : '';
+}
 
 /** How each weapon aims, in plain words. */
 export const MODE_TEXT = {
@@ -38,6 +62,8 @@ export const MODE_TEXT = {
   beam: 'Beam — hold Fire, sweeps where you aim',
   tool: 'Tool',
 };
+/** Missile warheads (#57), in plain words. */
+const WARHEAD_TEXT = { std: 'Regular — middling speed and blast', ram: 'Ram — very fast kinetic dart, tiny blast', he: 'High explosive — slow, huge blast', emp: 'Ion — strips shields, stalls systems', fire: 'Firebrand — sets blocks burning' };
 const TOOL_TEXT = { mine: 'Tool — mining laser', harpoon: 'Tool — harpoon', tractor: 'Tool — tractor beam' };
 
 /** What each rolled bonus means (keys from sim/loot.js AFFIX). `flat` ones print as numbers, the rest as %. */
@@ -79,7 +105,9 @@ export function itemStats(x) {
     if (w.splash) rows.push(['Blast radius', fmt(w.splash * (m.splash ? 1.6 : 1))]);
     if (w.pierce || m.pierce) rows.push(['Pierces', `${(w.pierce || 0) + (m.pierce ? 2 : 0)} blocks`]);
     if (chain) rows.push(['Chains to', `${chain} more targets`]);
-    if (w.burn || m.burn) rows.push(['Burns', 'Sets targets on fire']);
+    if (w.warhead) rows.push(['Warhead', WARHEAD_TEXT[w.warhead] || w.warhead]);
+    if (w.speed && w.mode === 'lock') rows.push(['Missile speed', fmt(w.speed)]);
+    if (w.burn || m.burn) rows.push(['Burns', w.burnT ? `${fmt(w.burn)} damage/s for ${w.burnT}s` : 'Sets targets on fire']);
     if (w.emp) rows.push(['Disables', `${w.emp}s of weapons and engines`]);
     if (w.shieldMult > 1) rows.push(['Against shields', `×${w.shieldMult}`, 'good']);
     if (w.homing) rows.push(['Homing', 'Yes']);
@@ -93,10 +121,16 @@ export function itemStats(x) {
     if (sl) { rows.push(['Auto weapon slots', `+${sl}`, 'good']); out.key ||= ['Auto weapon slots', sl]; }
     if (cr) { rows.push(['Crew room', `+${fmt(cr)}`, 'good']); out.key = ['Crew room', cr]; }
     if (cg) { rows.push(['Cargo', `+${fmt(cg)}`]); out.key = ['Cargo', cg]; }
+    // play-test #61: the bridge sets how many CPU / power parts run
+    if (def.core && def.cpuParts) { rows.push(['Runs CPU parts', `up to ${def.cpuParts}`, 'good']); rows.push(['Runs power parts', `up to ${def.powerParts}`, 'good']); out.key = ['CPU parts run', def.cpuParts]; }
+    if (!def.core && def.cat === 'cpu' && def.cpuCap) rows.push(['Counts as', '1 CPU part (your bridge sets how many run)']);
+    if (def.cat === 'power' && def.power > 0) rows.push(['Counts as', '1 power part (your bridge sets how many run)']);
     if (def.shield) {
       const sh = def.shield; const hp = partStat(def, it, 'shield');
       rows.push(['Shield', `${fmt(hp)} (${sh.kind === 'arc' ? `${sh.arc}° wall one way` : 'bubble all round'})`]);
       rows.push(['Recharge', `${fmt(partStat(def, it, 'regen'))}/s after ${sh.delay}s without hits`]);
+      if (sh.resist?.explosive != null) rows.push(['Blasts take', `${Math.round(sh.resist.explosive * 100)}% from it`, 'good']);
+      if (sh.resist?.missile != null) rows.push(['Missiles take', `${Math.round(sh.resist.missile * 100)}% on top`, 'good']);
       out.key = ['Shield', hp];
     }
     const dr = partStat(def, it, 'drones'); if (dr) { rows.push(['Drones', `Carries ${dr}`]); out.key = ['Drones carried', dr]; }
@@ -106,6 +140,7 @@ export function itemStats(x) {
     if (def.jump) rows.push(['Jump reach', `${def.jump} links`]);
     if (def.magnet) rows.push(['Pull range', fmt(def.magnet)]);
     if (def.cloak) rows.push(['Cloak', `${def.cloak}s invisible`]);
+    if (def.decoy) { rows.push(['Decoy flares', `${def.decoy.n} every ${def.decoy.cd}s, on its own`, 'good']); rows.push(['Pulls each missile', `${Math.round(def.decoy.pull * 100)}% chance`]); rows.push(['Fires when missiles reach', fmt(def.decoy.range)]); out.key ||= ['Decoy flares', def.decoy.n]; }
     if (def.explode && !m.sun) rows.push(['When destroyed', 'Explodes', 'bad']);
   }
   // block costs: what fitting it takes

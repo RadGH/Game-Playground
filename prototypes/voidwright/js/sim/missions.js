@@ -23,6 +23,7 @@ import { makeRock, canWarpTo } from './galaxy.js';
 import { generateShip } from './shipgen.js';
 import { itemValue } from './loot.js';
 import { spawnEncounter, rollPart, anomaliesNear, encState } from './encounters.js';
+import { rockOre } from './scan.js';
 
 export const MISSION_WINDOW = 600;   // the board's jobs change every 10 minutes of play
 export const MAX_ACTIVE = 3;
@@ -63,7 +64,7 @@ export function boardOffers(G, gal, board, t = G.playTime || 0) {
     const id = `${board.id}:${win}:${i}`;
     const m = MAKE[kind](rng(hash(id)), board, sys, gal, G);
     if (!m) return;
-    Object.assign(m, { id, kind, board: { id: board.id, system: board.system, name: board.name, faction: board.faction }, system: m.system ?? board.system, tier: sys.tier, got: 0, posted: t });
+    Object.assign(m, { id, kind, board: { id: board.id, system: board.system, name: board.name, faction: board.faction, x: board.x, y: board.y }, system: m.system ?? board.system, tier: sys.tier, got: 0, posted: t });
     m.reward = reward(m, sys.tier, rng(hash(id, 'pay')));
     if (!M.taken.includes(id)) out.push(m);
   });
@@ -207,17 +208,63 @@ export function expireMissions(G, t = G.playTime || 0) {
   return gone;
 }
 
-/** Where a job wants you to go in this system (for the course marker and the HUD), or null. */
+/**
+ * Where a job wants you to go in this system right now, or null (live reports #43/#46: "no clear indicator where to
+ * go"; "I am supposed to take him to a mining depot. It is not clear where that mining depot is"). The answer follows
+ * the job's stage: a tow job points at the target until it is on your harpoon, then at the station or outpost that
+ * wants it; an escort points at the meeting point, then the freighter; a delivery / acquisition points at the board
+ * that takes the hand-over; an anomaly survey points at the nearest anomaly not yet recorded. Asteroid surveys
+ * (scan any rock here) and jobs in another system have no place. Returns { x, y, label, stage, body? }.
+ */
 export function missionTarget(m, w, sysId) {
   const here = m.system === sysId || m.system === -1;
-  if (m.kind === 'delivery') return m.to.system === sysId ? (m.to.id.startsWith('S') && w?.stations?.[0] ? { x: w.stations[0].x, y: w.stations[0].y, label: m.to.name } : null) : null;
-  if (!here) return null;
   const live = w?.missions?.[m.id];
-  if (m.kind === 'recovery') { const b = live?.body; return b && !b.dead && b.harpooned ? { x: m.dest.x, y: m.dest.y, label: m.dest.name } : { x: b?.x ?? m.target.x, y: b?.y ?? m.target.y, label: 'Tow target' }; }
-  if (m.kind === 'clear') return { x: m.site.x, y: m.site.y, label: m.title.replace('Clear out a ', '') };
-  if (m.kind === 'escort') { const f = live?.ship; return f && !f.dead ? { x: f.x, y: f.y, label: 'Freighter' } : { x: m.from.x, y: m.from.y, label: 'Freighter' }; }
-  if (m.kind === 'acquire') return null;
+  if (m.kind === 'delivery') {
+    if (m.to.system !== sysId) return null;
+    const st = boardBody(w, m.to.id);
+    return st ? { x: st.x, y: st.y, label: `Deliver: ${m.to.name}`, stage: 'deliver', body: st } : null;
+  }
+  if (m.kind === 'acquire') {
+    if (m.board.system !== sysId) return null;
+    const st = boardBody(w, m.board.id);
+    const p = st || (m.board.x != null ? m.board : null);
+    return p ? { x: p.x, y: p.y, label: `Hand over: ${m.board.name}`, stage: 'deliver', body: st || null } : null;
+  }
+  if (!here) return null;
+  if (m.kind === 'recovery') {
+    const b = live?.body && !live.body.dead ? live.body : null;
+    if (b && b.harpooned) return { x: m.dest.x, y: m.dest.y, label: `Tow to ${m.dest.name}`, stage: 'tow', body: boardBody(w, m.board.id) };
+    return { x: b?.x ?? m.target.x, y: b?.y ?? m.target.y, label: 'Tow target', stage: 'find', body: b };
+  }
+  if (m.kind === 'clear') return { x: m.site.x, y: m.site.y, label: m.title.replace('Clear out a ', 'Clear: '), stage: 'go' };
+  if (m.kind === 'escort') {
+    const f = live?.ship;
+    if (f && !f.dead) return { x: f.x, y: f.y, label: 'Freighter (escort)', stage: 'escort', body: f };
+    return { x: m.from.x, y: m.from.y, label: 'Meet the freighter', stage: 'meet' };
+  }
+  if (m.kind === 'survey' && m.survey.what === 'anomaly' && w) {
+    const px = w.player?.x || 0, py = w.player?.y || 0; const seen = m.seen || [];
+    const left = anomaliesNear(w, px, py, 1e9).filter(e => !seen.includes(`${sysId}:${e.key || e.id}`));
+    if (!left.length) return null;
+    const e = left.sort((a, b) => Math.hypot(a.x - px, a.y - py) - Math.hypot(b.x - px, b.y - py))[0];
+    return { x: e.x, y: e.y, label: 'Anomaly to survey', stage: 'go' };
+  }
   return null;
+}
+/** The station or friendly outpost body that runs a board ('S<system>' = the system's station, 'O…' = an outpost). */
+export function boardBody(w, id) {
+  if (!w || !id) return null;
+  if (id.startsWith('S')) return (w.stations || []).find(s => !s.dead && s.dockable && s.team !== 'hostile' && !s.outpost && !s.colony) || null;
+  return (w.bodies || []).find(b => !b.dead && b.outpost?.board === id) || null;
+}
+/** Every active job with a place in this system: [{ m, x, y, label, stage, color }] (markers on screen, radar, map). */
+export function missionMarks(G, w, sysId) {
+  const out = [];
+  for (const m of missionState(G).active) {
+    const tg = missionTarget(m, w, sysId);
+    if (tg) out.push({ m, ...tg, color: MISSION_KINDS[m.kind].color });
+  }
+  return out;
 }
 
 // ------------------------------------------------------------------ the in-space part (each frame while flying)
@@ -230,6 +277,7 @@ export function missionTick(w, G, dt) {
   const sysId = w.system.id; w.missions ||= {};
   const out = [];
   const say = m => (w.encMsgs ||= []).push(m);
+  tractorTick(w, dt);
   for (const m of [...M.active]) {
     const here = m.system === sysId;
     const L = (w.missions[m.id] ||= { cd: 0 });
@@ -238,7 +286,7 @@ export function missionTick(w, G, dt) {
         L.body = spawnTowTarget(w, m); L.cd = 15;
         L.poi = { kind: 'enc', body: L.body, color: '#ffd27a', label: 'Tow target', mission: m.id }; (w.poi ||= []).push(L.poi);
       } else if (L.body.dead && !L.told) { L.told = true; say({ t: 'toast', text: 'The tow target broke up. Another will be marked shortly.', kind: 'bad' }); }
-      if (!L.body.dead) { L.told = false; if (Math.hypot(L.body.x - m.dest.x, L.body.y - m.dest.y) < m.dest.r + 700) { m.got = 1; L.body.missionDone = true; L.poi.done = true; out.push(m); } }
+      if (!L.body.dead) { L.told = false; if (Math.hypot(L.body.x - m.dest.x, L.body.y - m.dest.y) < m.dest.r + 700) { m.got = 1; L.body.missionDone = true; L.poi.done = true; out.push(m); pullIn(w, L.body, m); say({ t: 'sound', id: 'dock' }); } }
     } else if (m.kind === 'clear' && here) {
       if (!L.entry) L.entry = spawnEncounter(w, m.site.kind, m.site.x, m.site.y, { seed: m.site.seed, faction: m.site.faction, missionId: m.id, timed: true });
       if (L.entry.cleared || (m.site.kind === 'vault' && L.entry.open)) { m.got = 1; out.push(m); }
@@ -273,7 +321,7 @@ export function missionTick(w, G, dt) {
         for (const e of anomaliesNear(w, P.x, P.y, 1100)) { const k = `${sysId}:${e.key || e.id}`; if (!(m.seen ||= []).includes(k)) { m.seen.push(k); m.got = (m.got || 0) + 1; say({ t: 'toast', text: `Anomaly recorded (${Math.min(m.got, m.need)} / ${m.need}).`, kind: 'good' }); } }
       } else if (here && (L.scanT = (L.scanT || 0) - dt) <= 0) {
         L.scanT = 0.5;
-        for (const b of w.bodies) if (b.kind === 'rock' && b.scanned && !b.dead && !(b.surveyed ||= {})[m.id] && (!m.survey.ore || b.oreType === m.survey.ore)) { b.surveyed[m.id] = true; m.got = (m.got || 0) + 1; }
+        for (const b of w.bodies) if (b.kind === 'rock' && b.scanned && !b.dead && !(b.surveyed ||= {})[m.id] && (!m.survey.ore || rockOre(b).type === m.survey.ore)) { b.surveyed[m.id] = true; m.got = (m.got || 0) + 1; }
       }
       if ((m.got || 0) >= m.need) out.push(m);
     }
@@ -288,6 +336,32 @@ export function missionTick(w, G, dt) {
   if (w.poi) w.poi = w.poi.filter(p => !p.mission || M.active.some(m => m.id === p.mission));
   void encState;
   return out;
+}
+
+/**
+ * A delivered tow is pulled in by the station's tractor beam (live report #48: "the ship is still there. It would be
+ * cool if the station used tractor beams to pull the ship in"). The harpoon lets go, the body glides to the
+ * station's middle while it shrinks and fades, then it is gone. ui/missions.js draws the beam from w.tractors.
+ */
+export const TRACTOR_TIME = 3.2;
+export function pullIn(w, b, m) {
+  for (const s of w.bodies) if (s.tether && s.tether.b === b) { s.tether.dead = true; s.tether = null; }
+  b.harpooned = false;
+  const st = boardBody(w, m.board.id);
+  const tx = st?.x ?? m.dest.x, ty = st?.y ?? m.dest.y;
+  b.static = true; b.invuln = true; b.vx = 0; b.vy = 0; b.towed = true;
+  (w.tractors ||= []).push({ b, st, x0: b.x, y0: b.y, tx, ty, t: 0, dur: TRACTOR_TIME, va: b.va || 0.3 });
+}
+export function tractorTick(w, dt) {
+  if (!w.tractors?.length) return;
+  for (const T of w.tractors) {
+    T.t += dt; const k = Math.min(1, T.t / T.dur); const e = k * k * (3 - 2 * k);
+    const b = T.b; if (T.st && !T.st.dead) { T.tx = T.st.x; T.ty = T.st.y; }
+    b.x = T.x0 + (T.tx - T.x0) * e; b.y = T.y0 + (T.ty - T.y0) * e; b.a += T.va * dt * 0.5;
+    b.shrink = 1 - 0.85 * e; b.fade = k < 0.6 ? 1 : Math.max(0, 1 - (k - 0.6) / 0.4);
+    if (k >= 1) { b.dead = true; b.unloaded = true; T.done = true; }
+  }
+  w.tractors = w.tractors.filter(T => !T.done);
 }
 
 function spawnEncounterWave(w, x, y, m, r) {

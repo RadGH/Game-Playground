@@ -63,14 +63,14 @@ export const PREMADES = [
   },
   {
     id: 'hornet', name: 'Hornet', cls: 'corvette', price: 9800,
-    blurb: 'A brawler: missiles, rockets, a bubble shield and steel all round.',
+    blurb: 'A brawler: missiles, rockets, two mass drivers, a bubble shield and steel all round.',
     rows: [
       '   SSSS     ',
-      '  E#L##S    ',
+      '  E####S    ',
       ' EG#mPUoSS  ',
       'EGBPYDU#FFW ',
       ' EG#mPUoSS  ',
-      '  E#l##S    ',
+      '  E####S    ',
       '   SSSS     ',
     ],
   },
@@ -80,7 +80,7 @@ export const PREMADES = [
     rows: [
       '  CCCC     ',
       ' E#T##C    ',
-      'EGU#d#PCC  ',
+      'EGUUd#PCC  ',
       'EGBPYsDLCW ',
       'EGU#d#PCC  ',
       ' E#T##C    ',

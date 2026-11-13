@@ -1,0 +1,21 @@
+/* The rarity reel (ui/reel.js, report #62): a vertical wheel that slows and lands on the real result. */
+.reel-shade { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: rgba(4, 6, 12, 0.78); }
+.reel-box { width: min(380px, 100%); padding: 16px 16px 12px; border: 1px solid #ffd84a88; border-radius: 16px; background: linear-gradient(170deg, #121a30, #0a0e1b); box-shadow: 0 0 60px #ffd84a33; text-align: center; }
+.reel-box h3 { margin: 0 0 10px; font-family: var(--head); color: var(--amber); font-size: 1.1rem; letter-spacing: 0.04em; }
+.reel-win { position: relative; overflow: hidden; border-radius: 10px; background: #060912; border: 1px solid var(--line);
+  -webkit-mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent); mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent); }
+.reel-track { will-change: transform; }
+.reel-row { height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--rc) 30%, transparent), transparent 70%); box-shadow: inset 4px 0 0 var(--rc); text-align: left; }
+.reel-row b { color: var(--rc); min-width: 96px; font-size: 0.98rem; letter-spacing: 0.03em; }
+.reel-row span { color: var(--dim); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.reel-pointer { position: absolute; left: 0; right: 0; top: calc(50% - 23px); height: 46px; border-top: 2px solid #ffd84a; border-bottom: 2px solid #ffd84a; pointer-events: none;
+  box-shadow: 0 0 18px #ffd84a55, inset 0 0 18px #ffd84a22; }
+.reel-pointer::before, .reel-pointer::after { content: ''; position: absolute; top: 50%; margin-top: -7px; border: 7px solid transparent; }
+.reel-pointer::before { left: 0; border-left-color: #ffd84a; }
+.reel-pointer::after { right: 0; border-right-color: #ffd84a; }
+.reel-row.won { background: linear-gradient(90deg, color-mix(in srgb, var(--rc) 55%, transparent), color-mix(in srgb, var(--rc) 15%, transparent)); }
+.reel-row.won span { color: var(--ink); font-weight: 700; }
+.landed .reel-pointer { border-color: #fff; box-shadow: 0 0 30px #fff8; transition: box-shadow 0.3s; }
+.reel-odds { margin-top: 10px; font-size: 0.82rem; line-height: 1.5; }
+.reel-skip { margin-top: 4px; font-size: 0.8rem; }

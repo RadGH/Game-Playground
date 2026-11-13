@@ -55,6 +55,10 @@ h1, h2, h3 { font-family: var(--head); margin: 0; letter-spacing: 0.04em; }
 .bar.hull i { background: linear-gradient(90deg, #ff9a3a, #ffd27a); }
 .bar.shield i { background: linear-gradient(90deg, #3a8aff, #8fd8ff); }
 .bar.boost i { background: linear-gradient(90deg, #8a5aff, #d0a0ff); }
+/* report #60: an emptied booster is locked until it refills to 30% (the line marks where it unlocks) */
+.bar.boost.locked i { background: repeating-linear-gradient(135deg, #5b5670 0 6px, #46425a 6px 12px); }
+.bar.boost.locked::after { content: ''; position: absolute; top: 0; bottom: 0; left: 30%; width: 2px; background: #d0a0ff; box-shadow: 0 0 4px #d0a0ff; }
+.bar.boost.locked span { color: #c8c2dc; }
 .mini-stats { pointer-events: auto; cursor: pointer; display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 0.82rem; color: var(--dim); font-weight: 600; text-shadow: 0 1px 2px #000; }
 .mini-stats b { color: var(--ink); }
 .mini-stats .bad { color: var(--red); }

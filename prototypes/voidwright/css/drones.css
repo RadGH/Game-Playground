@@ -1,0 +1,9 @@
+/* Drone cards and the "which drones fly" picker (ui/drones-ui.js, reports #53/#54). */
+.drone-picker .cards { margin-bottom: 6px; }
+.drone-card .row { align-items: flex-start; }
+.drone-card .drone-icon { width: 56px; height: 56px; flex: none; background: radial-gradient(circle, rgba(95, 216, 255, 0.08), transparent 70%); border-radius: 8px; }
+.drone-card.flying { box-shadow: inset 3px 0 0 var(--green); }
+.dr-state { flex: none; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--dim); }
+.dr-state.flying { color: var(--green); border-color: rgba(95, 255, 154, 0.45); }
+.drone-empty { border-style: dashed; align-items: center; justify-content: center; min-height: 96px; text-align: center; }
+.drone-card .it-foot button { min-width: 72px; }

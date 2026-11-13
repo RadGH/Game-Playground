@@ -26,6 +26,16 @@ const STYLES = {
   siege_cannon: { barrels: 3, len: 1.0, wid: 0.13, gap: 0.16, body: 'box', bodyR: 0.42, brake: true, tip: '#ffe0a0' },
   lance_battery:{ barrels: 1, len: 1.2, wid: 0.18, gap: 0, body: 'box', bodyR: 0.42, lens: true, coils: true, tip: '#ff2050' },
   torpedo_tube: { body: 'rack', bodyR: 0.44, tubes: 1, big: true, tip: '#ff4020' },
+  // missile kinds (#57): ram = slim pale needles, blastcap = one fat orange warhead, ion = blue glowing tips, firebrand = orange pods
+  ram_rack:     { body: 'rack', bodyR: 0.38, tubes: 1, slim: true, tip: '#bfe6ff' },
+  he_rack:      { body: 'rack', bodyR: 0.42, tubes: 1, fat: true, tip: '#ffb030' },
+  emp_rack:     { body: 'rack', bodyR: 0.4, tubes: 2, glowTip: true, tip: '#8fb4ff' },
+  fire_rack:    { body: 'pod', bodyR: 0.4, tubes: 2, glowTip: true, tip: '#ff7a2a' },
+  ram_battery:  { body: 'rack', bodyR: 0.42, tubes: 3, slim: true, tip: '#bfe6ff' },
+  he_battery:   { body: 'rack', bodyR: 0.44, tubes: 2, fat: true, tip: '#ffb030' },
+  emp_battery:  { body: 'rack', bodyR: 0.42, tubes: 4, glowTip: true, tip: '#8fb4ff' },
+  fire_battery: { body: 'pod', bodyR: 0.42, tubes: 4, glowTip: true, tip: '#ff7a2a' },
+  ion_silo:     { body: 'rack', bodyR: 0.44, tubes: 3, big: true, glowTip: true, tip: '#8fb4ff' },
   storm_spire:  { body: 'orb', bodyR: 0.36, orbR: 0.34, rings: true, tip: '#c8a0ff' },
   mining_laser: { barrels: 1, len: 0.6, wid: 0.12, gap: 0, body: 'round', bodyR: 0.3, lens: true, tip: '#7dff9a' },
   big_mining_laser: { barrels: 2, len: 0.7, wid: 0.12, gap: 0.16, body: 'round', bodyR: 0.36, lens: true, tip: '#9dffb0' },
@@ -85,12 +95,18 @@ export function drawTurret(c, id, S, kick, t, pal, glowCtx) {
     case 'pod': {
       c.beginPath(); c.rect(-R + back * 0.3, -R, R * 2, R * 2); c.fill(); c.stroke();
       const n = st.tubes; const k = Math.ceil(Math.sqrt(n));
-      for (let i = 0; i < n; i++) { const tx = -R * 0.5 + (i % k) * R / k * 1.6 + R * 0.4, ty = -R * 0.6 + Math.floor(i / k) * R / k * 1.6 + R * 0.3; c.fillStyle = dark; c.beginPath(); c.arc(tx + back * 0.3, ty - R * 0.25, R * 0.7 / k, 0, 7); c.fill(); c.fillStyle = st.tip; c.beginPath(); c.arc(tx + back * 0.3, ty - R * 0.25, R * 0.3 / k, 0, 7); c.fill(); }
+      for (let i = 0; i < n; i++) { const tx = -R * 0.5 + (i % k) * R / k * 1.6 + R * 0.4, ty = -R * 0.6 + Math.floor(i / k) * R / k * 1.6 + R * 0.3; c.fillStyle = dark; c.beginPath(); c.arc(tx + back * 0.3, ty - R * 0.25, R * 0.7 / k, 0, 7); c.fill(); c.fillStyle = st.tip; c.beginPath(); c.arc(tx + back * 0.3, ty - R * 0.25, R * 0.3 / k, 0, 7); c.fill(); if (st.glowTip && glowCtx) { glowCtx.fillStyle = st.tip; glowCtx.beginPath(); glowCtx.arc(tx + back * 0.3, ty - R * 0.25, R * 0.45 / k, 0, 7); glowCtx.fill(); } }
       break;
     }
     case 'rack': {
       c.beginPath(); c.rect(-R + back * 0.3, -R * 0.9, R * 2, R * 1.8); c.fill(); c.stroke();
-      const n = st.tubes; for (let i = 0; i < n; i++) { const oy = (i - (n - 1) / 2) * R * 0.9; c.fillStyle = '#d8d8d8'; c.beginPath(); c.moveTo(-R * 0.7 + back * 0.3, oy - R * 0.22); c.lineTo(R * (st.big ? 1.2 : 0.9) + back * 0.3, oy - R * 0.22); c.lineTo(R * (st.big ? 1.45 : 1.15) + back * 0.3, oy); c.lineTo(R * (st.big ? 1.2 : 0.9) + back * 0.3, oy + R * 0.22); c.lineTo(-R * 0.7 + back * 0.3, oy + R * 0.22); c.fill(); c.fillStyle = st.tip; c.fillRect(R * 0.2 + back * 0.3, oy - R * 0.22, R * 0.15, R * 0.44); }
+      // slim = long thin ram darts, fat = one heavy blast warhead; spacing shrinks so 3-4 tubes still fit the mount
+      const n = st.tubes; const hw = R * (st.slim ? 0.12 : st.fat ? 0.36 : n > 2 ? 0.16 : 0.22); const L = st.big || st.slim ? 1.2 : 0.9; const gap = R * (n > 2 ? 1.6 / n : 0.9);
+      for (let i = 0; i < n; i++) {
+        const oy = (i - (n - 1) / 2) * gap; c.fillStyle = st.slim ? '#e6eef4' : '#d8d8d8'; c.beginPath(); c.moveTo(-R * 0.7 + back * 0.3, oy - hw); c.lineTo(R * L + back * 0.3, oy - hw); c.lineTo(R * (L + (st.slim ? 0.45 : 0.25)) + back * 0.3, oy); c.lineTo(R * L + back * 0.3, oy + hw); c.lineTo(-R * 0.7 + back * 0.3, oy + hw); c.fill();
+        c.fillStyle = st.tip; c.fillRect(R * 0.2 + back * 0.3, oy - hw, R * 0.15, hw * 2);
+        if (st.glowTip && glowCtx) { glowCtx.fillStyle = st.tip; glowCtx.fillRect(R * (L - 0.1) + back * 0.3, oy - hw, R * 0.3, hw * 2); }
+      }
       break;
     }
     case 'orb': {

@@ -1,6 +1,6 @@
 # Voidwright
 
-> **Status:** live on games.radgh.com · round 3 2026-11-12: reports #42-#66 (missile kinds + missile defence, bridge part limits, drones, phone aim, job markers, planet fix; #47 withdrawn by #59) on top of Expansion 1 "Shipwright" · lint clean, every screen walked desktop + phone
+> **Status:** live on games.radgh.com · 2026-11-13: Parts hold > Ships switches ships + picks merc pilots anywhere; asteroid texture fix · round 3 2026-11-12: reports #42-#66 (missile kinds + missile defence, bridge part limits, drones, phone aim, job markers, planet fix; #47 withdrawn by #59) on top of Expansion 1 "Shipwright" · lint clean, every screen walked desktop + phone
 > **Play:** LAN `http://<LAN IP>:8400/prototypes/voidwright/` (stable; https 8442 for a controller) · public https://games.radgh.com/voidwright/
 > **Next:** the owner's play-test of round 3 — is missile pressure right at danger 3+ (`sim/world.js` enemy missile cap), do the bridge limits feel fair, rocket pods after the burst fix; also from the expansion: watch crafting costs (`sim/craft.js ORE_SHARE`), grow-hull prices (`sim/hullgrow.js`), legendary strength (`types.js RARITY.bonus`), merc wages and outpost output; boost now stacks on cruise (very fast) — check it feels right
 > **Parked:** co-op (the input shape is ready, `docs/PLAN.md`); nothing else on hold
@@ -103,6 +103,14 @@ Owner rulings E1-E10 are in `docs/PLAN.md` §E1; play-test reports #24-#41 answe
   what hits you / what you mark, leash 2.2 km, catch up past 6 km). Shot down → merc ejects, `rec.wrecked`, no loot;
   repair for credits on the Mercenaries board or the shipyard hangar. Damage is written back to the hangar on dock /
   jump / autosave (`storeWing`). Repair rigs (not bridges) patch allies within 600 out of combat (`world.js upkeep`).
+- **Parts hold > Ships** (owner 2026-11-13; `ui/ships-tab.js`, `app.switchShip` in `main.js`, `switchShip` in
+  `sim/mercs.js`): every ship you own, anywhere — in space or docked at any station (not every station has a
+  Mercenaries board). Each card: picture, numbers, who flies it. **Fly this one** makes it your flagship (refused in a
+  fight — 6 s calm — when wrecked, or when your cargo does not fit); in space the new ship takes your place, your crew
+  moves with you (bunks permitting), and a merc who flew it swaps seats into your old ship when they can fly it.
+  **Choose pilot** lists every hired merc with Assign / Move here / Swap in (bumps the current pilot) or the reason on
+  the row; the wing re-forms at once. The shipyard's "Fly this one" uses the same switch. Hiring, dismissing and
+  repairs stay at stations. Tests: `tests/ships-switch.test.mjs`; walk screen `hold-ships-pilots`.
 - **Outposts** (#39, E3; `sim/colony.js`, `ui/colony.js`): Use over a planet → found one (credits + structural / energy
   / rock of the system's tier). A small station in orbit beside the planet (`outpostBody`: your colours, dockable,
   invulnerable, 2 real guns per Defence level), placed by `placeOutposts` on entering the system; docking opens its own

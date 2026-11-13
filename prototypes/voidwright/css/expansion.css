@@ -63,3 +63,16 @@
   .co-mods { grid-template-columns: 1fr; }
   .co-bars { grid-template-columns: 1fr 1fr; }
 }
+
+/* ---- Parts hold > Ships (js/ui/ships-tab.js) */
+.sh-sum { gap: 8px; margin-bottom: 4px; }
+.sh-cards { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; align-items: start; }
+.sh-card { gap: 6px; }
+.sh-card.you { border-color: rgba(111, 208, 255, 0.45); }
+.sh-preview { height: 110px; align-items: center; }
+.sh-title { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.sh-title b { font-family: var(--head); font-size: 1.1rem; }
+.sh-you { border-color: #6fd0ff; color: #6fd0ff; margin-left: auto; }
+.sh-kv { grid-template-columns: 76px 1fr; gap: 2px 12px; }
+.sh-pilot .mc-emblem { flex: 0 0 auto; }
+.sh-design { padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; font-size: 0.86rem; }

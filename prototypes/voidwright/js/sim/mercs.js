@@ -165,6 +165,35 @@ export function assign(G, mercId, rec) {
   return null;
 }
 
+/**
+ * Make a hangar ship your flagship (owner 2026-11-13: from the Parts hold > Ships tab anywhere, not only at a
+ * shipyard). Your old flagship goes into the hangar. Your crew moves with you, as many as the new ship has bunks
+ * for (the rest stay aboard the old ship). If a merc was flying the new ship you swap seats: they take your old
+ * ship when they can fly it, otherwise they wait for one. `cargoCap` is the new ship's hold (the caller builds the
+ * body, research included). Returns { why } on refusal or { notes: [..] }. Pure: no world, no DOM.
+ */
+export function switchShip(G, rec, { cargoCap = Infinity, cargoUsed = 0 } = {}) {
+  const i = (G.hangar || []).indexOf(rec);
+  if (i < 0) return { why: 'That ship is not in your hangar' };
+  if (rec.wrecked) return { why: 'Wrecked — repair it first' };
+  if (cargoUsed > cargoCap) return { why: `Holds only ${Math.floor(cargoCap).toLocaleString()} cargo — you carry ${Math.floor(cargoUsed).toLocaleString()}` };
+  const old = G.ship; hidOf(old); hidOf(rec);
+  const notes = [];
+  const pilot = mercFlying(G, rec);
+  // your crew comes with you; a merc's ship had the merc's own crew, which leaves with the merc
+  const n = shipNeeds(rec); const mine = old.crew ?? 0; const there = pilot ? 0 : (rec.crew ?? 0);
+  const aboard = Math.min(n.crewCap, mine + there);
+  old.crew = mine + there - aboard; rec.crew = aboard;
+  if (old.crew > 0) notes.push(`${old.crew} crew had no bunks and stayed aboard ${old.name}.`);
+  G.ship = rec; G.hangar[i] = old;
+  if (pilot) {
+    pilot.ship = null;
+    if (!cannotFly(G, pilot, old)) { pilot.ship = old.hid; pilot.down = false; notes.push(`${pilot.callsign} takes over ${old.name}.`); }
+    else notes.push(`${pilot.callsign} cannot fly ${old.name} and waits for another ship.`);
+  }
+  return { notes };
+}
+
 /** Credits to make a wrecked (or damaged) wingman ship whole again. */
 export function repairCost(rec) {
   const pm = PREMADES.find(p => p.id === rec.design);

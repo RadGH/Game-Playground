@@ -18,6 +18,16 @@ It is run as a set of **attempts**, each building the same thing in a different 
 | `meshy-multi`, `meshy-single`, `meshy-lowpoly` | Meshy API from the same pictures (4 views / 1 view / clean low-poly), auto-rigged, 16 library clips, packed by `tools/pack-glb.py`, run by `js/glb-attempt.js` | `meshy/` |
 | later | Tripo (key added; its API account has no credits yet, `tools/tripo.mjs` is ready), Rodin, Hunyuan3D, TRELLIS | `<service>/` |
 
+## Owner notes
+
+- **2026-11-13:** the review page shows `opus`, `fable` and the three Meshy columns only; "Opus, refined from Meshy"
+  (`opus2/`) and the "game kit" (`kit/`) were taken off it as unneeded. Their folders stay (`?chars=kestrel-opus2` /
+  `?chars=kestrel-kit` still load them).
+- **Rebuild when newer models come out (owner 2026-11-13):** he asked for a fresh hand-coded pair "using the latest
+  version of those models". Opus 5.5 and Fable 5.1 built the current ones and were still the newest, so he chose to
+  wait. When a newer Opus or Fable comes out, build new attempts from `BRIEF.md` (new folders, e.g. `opus3/`,
+  `fable2/`), add them to `data/attempts.json`, and compare them with the old ones on the review page.
+
 ## Files
 
 | File | What |

@@ -24,7 +24,7 @@ import { BLOCKS } from './data/blocks.js';
 import { $, el, btn, toast, banner, panel, modal, fmt, km } from './ui/dom.js';
 import { drawMinimap } from './ui/minimap.js';
 // expansion: mercenary wingmen (sim/mercs.js) and planet outposts (sim/colony.js) — hooks marked [wing] / [outpost]
-import { spawnWing, storeWing, wingTick } from './sim/mercs.js';
+import { spawnWing, storeWing, wingTick, switchShip } from './sim/mercs.js';
 import { placeOutposts, colonyTick, planetInteract } from './sim/colony.js';
 
 const BUILD = '2026-11-13';
@@ -551,6 +551,30 @@ function undock(st) {
   spawnWing(app, { fresh: true });   // [wing] relaunch from the hangar records (repairs / new ships)
   save(G); updateQuest();
 }
+/**
+ * Switch to a hangar ship from anywhere (Parts hold > Ships, owner 2026-11-13). Docked: the new ship launches when
+ * you undock. In space: not while fighting; the new ship takes your place where you are, and the wing re-forms.
+ * Returns a refusal reason, or null with the notes already shown.
+ */
+app.switchShip = rec => {
+  const G = app.G; const w = app.w; const flying = app.mode !== 'docked' && app.P && w;
+  if (flying && w.t - (w.combatT ?? -99) < 6) return 'Not while you are fighting — get clear first';
+  if (flying) { storeShip(G, app.P); storeWing(app); }
+  const cap = playerShip({ ...G, ship: rec }).stats.cargo;
+  const r = switchShip(G, rec, { cargoCap: cap, cargoUsed: cargoUsed(G) });
+  if (r.why) return r.why;
+  if (flying) {
+    const old = app.P; const P = playerShip(G); Object.assign(P, { x: old.x, y: old.y, vx: old.vx, vy: old.vy, a: old.a });
+    app.w.bodies = app.w.bodies.filter(b => b !== old); old.dead = true; app.R.forget(old.id); app.w.drones = app.w.drones.filter(d => d.owner !== old);
+    app.w.bodies.push(P); app.w.player = P; app.P = P; P.grace = w.t + 2;
+    launchWing(app.w, P);
+    spawnWing(app, { fresh: true });   // the merc who swapped seats flies your old ship now
+  } else app.stationRefresh?.();
+  toast(`Now flying ${rec.name}.${flying ? '' : ' It launches when you undock.'}`, 'good');
+  for (const n of r.notes) toast(n);
+  save(G); updateQuest();
+  return null;
+};
 app.rebuildPlayer = () => { // after build mode out in space
   const G = app.G; const old = app.P; const P = playerShip(G); Object.assign(P, { x: old.x, y: old.y, vx: old.vx, vy: old.vy, a: old.a });
   app.w.bodies = app.w.bodies.filter(b => b !== old); old.dead = true; app.R.forget(old.id); app.w.drones = app.w.drones.filter(d => d.owner !== old);

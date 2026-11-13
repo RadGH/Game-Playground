@@ -1,6 +1,16 @@
 {
  "entries": [
   {
+   "id": "2026-11-13b",
+   "date": "2026-11-13",
+   "title": "Switch ships and pick pilots from anywhere",
+   "items": [
+    "The Ships tab in the Parts hold now shows every ship you own with a picture and its numbers, and works anywhere: out in space or at any station.",
+    "Fly this one: switch to any of your ships on the spot (not in the middle of a fight). Your crew comes with you, and if a mercenary was flying it they take over your old ship.",
+    "Choose pilot: give any hired mercenary a ship, move them between ships, or swap one pilot for another. Each pilot shows whether they can handle the ship, and why not if they can't."
+   ]
+  },
+  {
    "id": "2026-11-13",
    "date": "2026-11-13",
    "title": "Asteroids keep their look while you mine",

@@ -6,13 +6,13 @@ import { BLOCKS } from '../data/blocks.js';
 import { RARITY_BY_ID, MATERIALS, MAT_ROLES } from '../data/types.js';
 import { UNIQUES } from '../data/uniques.js';
 import { FACTIONS } from '../data/factions.js';
-import { CLASSES } from '../data/hulls.js';
 import { GOODS } from '../sim/economy.js';
 import { itemValue } from '../sim/loot.js';
 import { cargoUsed, spawnPickup } from '../sim/world.js';
 
 import { itemCard } from './items.js';
 import { dronePicker } from './drones-ui.js';
+import { shipsTab } from './ships-tab.js';
 
 function simpleCard(item) {
   const d = BLOCKS[item.block]; const R = RARITY_BY_ID[item.rarity];
@@ -73,9 +73,8 @@ export function openHold(app, tab = 'parts') {
       B.append(dronePicker({ G, cap, onChange: (msg) => { app.refreshDrones?.(); app.save?.(); if (msg) toast(msg, 'good'); } }));
       B.append(el('p', { class: 'hint' }, 'A drone that is shot down is rebuilt by its port, free, after 12 seconds.'));
     } else if (tab === 'ships') {
-      B.append(el('div', { class: 'card' }, el('b', {}, `${G.ship.name} — ${CLASSES[G.ship.cls].name} (flying)`), el('div', { class: 'hint' }, CLASSES[G.ship.cls].blurb)));
-      for (const h of G.hangar) B.append(el('div', { class: 'card' }, el('b', {}, `${h.name} — ${CLASSES[h.cls].name}`), el('div', { class: 'hint' }, 'Stored at shipyards. Swap ships at any shipyard.')));
-      if (G.designs.length) { B.append(el('h3', {}, 'Saved designs')); for (const d of G.designs) B.append(el('div', { class: 'hint' }, `${d.name} (${CLASSES[d.cls]?.name || d.cls})`)); }
+      // owner 2026-11-13: switch ships and choose mercenary pilots from anywhere, not only at a shipyard
+      shipsTab(app, B, draw);
     } else if (tab === 'rep') {
       const t = el('table', { class: 'grid' }, el('tr', {}, el('th', {}, 'Faction'), el('th', {}, 'Standing'), el('th', {}, '')));
       for (const [id, F] of Object.entries(FACTIONS)) {

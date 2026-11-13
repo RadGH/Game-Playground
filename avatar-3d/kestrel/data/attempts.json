@@ -11,24 +11,6 @@
    "readme": "opus/README.md"
   },
   {
-   "id": "opus2",
-   "title": "Opus, refined from Meshy",
-   "by": "Claude Opus 5.5 (second pass, fitted to the Meshy model)",
-   "kind": "code",
-   "module": "opus2/js/kestrel.js",
-   "page": "opus2/index.html",
-   "readme": "opus2/README.md"
-  },
-  {
-   "id": "kit",
-   "title": "Kestrel game kit (in progress)",
-   "by": "opus2 grown into the version the games use",
-   "kind": "code",
-   "module": "kit/js/kestrel.js",
-   "page": "kit/index.html",
-   "readme": "kit/README.md"
-  },
-  {
    "id": "fable",
    "title": "Hand-coded by Fable",
    "by": "Claude Fable 5.1",

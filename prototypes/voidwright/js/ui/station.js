@@ -92,7 +92,7 @@ export function openStation(app, st, onUndock) {
   const G = app.G; const sys = app.galaxy.systems[G.system];
   G.costBasis ||= {}; G.research ||= { points: 0, done: [] }; G.research.seen ||= {}; G.hangar ||= []; G.bounties ||= [];
   const pirate = st.stationKind === 'pirate' || sys.station === 'pirate';
-  const p = panel(st.name, () => onUndock(), { closeLabel: 'Undock', cls: 'station' });
+  const p = panel(st.name, () => { app.stationRefresh = null; onUndock(); }, { closeLabel: 'Undock', cls: 'station' });
   const info = el('div', { class: 'st-info' });
   p.head.insertBefore(info, p.head.children[1]);
   const tabsBar = el('div', { class: 'tabs st-tabs' });
@@ -113,6 +113,7 @@ export function openStation(app, st, onUndock) {
     },
     done: (msg, kind = 'good') => { if (msg) toast(msg, kind); app.save?.(); render(); },
   };
+  app.stationRefresh = () => { S.changed(); render(); };   // the Parts hold can switch ships while docked (owner 2026-11-13)
 
   // [encounters] every trade station, and any station or outpost with a bounty board, has a Missions tab (bounties live inside it)
   // insurance is sold at every station and outpost (owner 2026-11-12, report #65) — also old saves' stations
@@ -480,10 +481,9 @@ function tabShipyard(S, box) {
       hc.append(el('div', { class: 'card' }, el('b', {}, `${rec.name} — ${CLASSES[rec.cls]?.name}`), kvEl(shipStats(b).slice(0, 6)),
         hangarExtras(S, rec),   // a mercenary's ship: who flies it, or Wrecked + Repair (ui/mercs.js)
         el('div', { class: 'row wrap' },
-          btn('Fly this one', () => {
-            if (rec.wrecked) return toast('That ship is wrecked. Repair it first.', 'bad');
-            if (cargoUsed(G) > b.stats.cargo) return toast(`That ship holds only ${fmt(b.stats.cargo)}. Sell some cargo first.`, 'bad');
-            const old = G.ship; G.ship = rec; G.hangar[i] = old; S.changed(); S.done(`Now flying ${rec.name}. It launches when you undock.`);
+          btn('Fly this one', () => {   // same switch as the Parts hold: crew moves with you, a merc swaps seats
+            const why = app.switchShip?.(rec); if (why) return toast(why, 'bad');
+            S.changed(); S.render();
           }, 'primary'),
           btn(`Sell (${fmt(v)} cr)`, () => { G.hangar.splice(i, 1); G.credits += v; S.done(`Sold ${rec.name} for ${fmt(v)} cr`); }))));
     });

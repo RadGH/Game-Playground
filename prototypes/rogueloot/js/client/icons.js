@@ -64,6 +64,36 @@ export function skillIcon(sk, content, size = 40) {
   const id = skillIconId(sk, content);
   return (id && iconSvg(id, size)) || uiIconSvg('skills', size) || '';
 }
+/** A talent's picture (owner 2026-11-13 talent trees): what the skills it changes DO, plus what it changes (healing,
+ *  armour, speed…), picked from the whole library so a tree of 18 talents doesn't repeat one class's six medallions.
+ *  Ties are spread by the talent's own id. Pure apart from the SVG lookup. */
+const STAT_TAGS = { heal: ['healing'], duration: ['buff'], radius: ['area', 'around'], cost: ['buff'], cooldown: ['buff', 'movement'], cast: ['buff'], crit: ['precision'],
+  maxHp: ['defense', 'shield'], armourPct: ['defense', 'shield'], blockChance: ['shield', 'defense'], dodge: ['movement', 'dash'], moveSpeed: ['movement', 'dash'], resistAll: ['defense', 'shield'],
+  manaRegen: ['arcane', 'buff'], maxMana: ['arcane'], spellPower: ['arcane'], castSpeed: ['arcane', 'buff'], meleePower: ['weapon', 'melee'], attackSpeed: ['weapon', 'melee'], rangedPower: ['projectile', 'precision'],
+  healPower: ['healing'], hpRegen: ['healing'], lifeOnHit: ['healing', 'weapon'], critDamage: ['precision'], threat: ['taunt'], rageGen: ['weapon', 'buff'], energyRegen: ['movement', 'buff'] };
+export function talentIconId(t, content) {
+  if (!t) return null;
+  const S = content?.skills || {}, tags = new Set(), els = new Set();
+  for (const m of t.mods || []) {
+    const to = m.to || {}, ids = to.skill ? [to.skill] : to.skills || [];
+    for (const id of ids) for (const g of skillTags(S[id])) tags.add(g);
+    if (to.type) { const e = ELEMENT[to.type] || (to.type === 'heal' ? 'healing' : null); if (e) { tags.add(e); els.add(e); } }
+    for (const g of STAT_TAGS[m.stat] || []) tags.add(g);
+  }
+  if (t.synergy?.skill) for (const g of skillTags(S[t.synergy.skill])) tags.add(g);
+  for (const g of STAT_TAGS[t.passive?.stat] || []) tags.add(g);
+  for (const g of tags) if (Object.values(ELEMENT).includes(g) && g !== 'physical') els.add(g);
+  if (!tags.size) return skillIconId(t, content);
+  const score = i => i.categories.reduce((s, c) => s + (tags.has(c) ? (els.has(c) ? 3 : 1) : 0), 0);
+  let best = -1, out = []; for (const i of icons) { const s = score(i); if (s > best) { best = s; out = [i]; } else if (s === best) out.push(i); }
+  // keep it near the class's own look: prefer the owner's set when it scores within one of the best
+  const cls = content?.specs?.[t.owner]?.tvClass || PATH_CLASS[t.owner];
+  const near = out.length > 1 ? out : icons.filter(i => score(i) >= best - 1);
+  const own = near.filter(i => i.classId === cls);
+  const pool = own.length && own.length >= 3 ? own : near;
+  return pool.length ? pool[hash(t.id || t.name) % pool.length].id : null;
+}
+export function talentIcon(t, content, size = 40) { const id = talentIconId(t, content); return (id && iconSvg(id, size)) || skillIcon(t, content, size); }
 export function uiIcon(id, size = 24) { return uiIconSvg(id, size) || ''; }
 
 /** Potions, currency shards, dust and other non-gear things: drawn SVG art. Gear returns null (3D icons). */

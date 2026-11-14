@@ -1,5 +1,9 @@
 # Rogueloot — the four Paths (levels 3–10)
 
+> **2026-11-13 (owner): superseded in part.** The class is picked at creation and its skills now unlock by level
+> 1–8 (every level number below moved down by 2); talents live in trees and take all the points — see
+> `docs/TALENTS.md` and PLAN §0 rulings 51–55. Shove is gone.
+
 Design by Fable, 2026-11-10. The data is `data/skills-paths.json`; the engine vocabulary it is written in is
 the M9 one (nothing outside it, the `wishlist` at the bottom of the file lists eight engine additions with
 the exact rule for each). This page is the plain-language version: what each Path feels like, what you press,

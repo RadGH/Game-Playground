@@ -1,9 +1,9 @@
 # Rogueloot
 
-> **Status:** live on games.radgh.com · on hold since 2026-11-11 (owner), QA pass + loot-game hand/compare rules done 2026-11-11 · checked 2026-11-11
-> **Play:** LAN `http://<LAN IP>:8580/` (stable, own server; https 8582 for a controller) · public https://rogueloot.games.radgh.com/ (not updated while on hold)
-> **Next:** the overhaul list in `~/claude/agent/rogueloot-overhaul-checklist.md` (title/creator screens, gear on the body + gear icons, D2 skill trees and shop, PoE world map, river/bridge) and M33 balance (`tools/sim.mjs`)
-> **Parked:** the whole game is on hold until the owner asks; overhaul items C4-C23 + B1 in that checklist; skill-engine wishlists in each `data/skills-specs-*.json` `wishlist`
+> **Status:** live on games.radgh.com · resumed 2026-11-13 (owner): round 2 done — class at creation, no Shove, 1x1 bag, skills by level + 64 talent trees, Skills/Talents/Character screens rebuilt, 1v1 early game · checked 2026-11-13
+> **Play:** LAN `http://<LAN IP>:8580/` (stable, own server; https 8582 for a controller) · public https://rogueloot.games.radgh.com/
+> **Next:** play-test the talent trees (numbers are first-pass; `tools/sim.mjs` for pacing), then the overhaul list in `~/claude/agent/rogueloot-overhaul-checklist.md` (gear on the body, PoE world map, river/bridge) and M33 balance
+> **Parked:** overhaul items C4-C23 + B1 in that checklist; talents are number-only (no new mechanics on capstones); skill-engine wishlists in each `data/skills-specs-*.json` `wishlist`
 > **Ask the owner when this game is next worked on:** `model-library/` has 12 Meshy-made rigged + animated enemy models (goblin warrior/shaman/shieldbearer ≈ Hollowhorn, skeletons ≈ Restless, zombie, orc, ogre, bandits, cultist ≈ Gravesworn, lizardfolk ≈ Mirefolk). Owner 2026-11-11: plan for it, but do not put them in until he decides.
 
 A co-op action RPG for 1–4 players: Thousandvale's items and mechanics under a Diablo-style angled camera, with combat
@@ -22,6 +22,25 @@ everything else. §3 lists the 33 milestones. Checklist: `~/claude/agent/roguelo
 | Unit tests | `node --test tests/sim/*.test.js tests/rules/*.test.js tests/world/*.test.js` |
 
 `npm install` once in this folder for `ws` (or copy Knockabout's `node_modules`).
+
+## Round 2 (owner 2026-11-13): classes, talents, bag, menus
+
+- **Class at creation** (`js/client/class-pick.js`, `heroes.js`): four tiles + the picked class's details; Create is
+  disabled until one is picked. `rules/character.js starterKitFor(path)` gives a weapon the class can hold. A hero
+  saved without a class gets the same choice in the skill book before anything else (`skills-ui.js drawClassPick`).
+- **Skills vs talents** (`docs/TALENTS.md`, `js/sim/talents.js`): actives unlock by level (rank every 2 levels),
+  points buy talents only. Trees: `data/talents-*.json` + the old passive/synergy rows; checked by
+  `tests/rules/talents-data.test.js` (rows, columns, prereqs, counts, synergy targets, ≤ +30% on one skill, no arrow
+  through another talent). `js/rules/skill-text.js` prints every number from the data.
+- **Skill book** (`js/client/skills-ui.js`, `css/book.css`): Skills (K) = spellbook list, detail (rank now/next,
+  price, talents for it), six-slot bar (slot buttons or drag). Talents (N) = tree tabs with points spent, a grid of
+  rows × 4 columns with a level rail, SVG arrows, detail with this rank / next / requirements and Learn, and a
+  Specialization tab (look at every spec; choose at 10). Talent pictures: `icons.js talentIcon` (whole library).
+- **Bag** (`js/rules/bag.js`): one item a square, 10 × 4, moving onto an item swaps. Gear pictures:
+  `js/client/gear-icons.js`. Character screen (`sheet-ui.js`, `css/sheet.css`): equipment doll, stats, the bag, belt,
+  and the item card in a fixed place under the bag.
+- Tests: `tests/browser-skills.mjs` (class pick, bar by button + drag, learn, locked talent, spec tab, old save),
+  walk screens `skills-pick`, `talents`, `talent-detail`, `specializations`.
 
 ## Hands, the off hand and item cards (game standards §5b, 2026-11-11)
 
@@ -79,6 +98,15 @@ Credits button. Add a row whenever something made by someone else comes in (ruli
   `js/client/zone-view.js` draws it from the same samplers. Prop kinds: `js/world/props.js` (collision radius) +
   `js/client/prop-meshes.js` (mesh); a test fails if the two lists differ.
 - `node tools/zone-check.mjs [id]`: everything reachable from the start, no unknown props, a start marker.
+- **Early-game ramp (owner 2026-11-13: more 1v1 fights early, swarms and group fights a few levels later).**
+  `data/balance.json groups`, read by `js/sim/spawn.js rampGroup`, keyed by the spawn MARKER's level: a group is at
+  most 1 monster at level 1, 2 at levels 2-3 (and most of those are cut to one by `soloChance`), 3 at level 4, 4 at 5,
+  5 at 6, the table's full roll from 7. A swarm marker below `swarmMinLevel` (5) spawns only that cap of its swarm;
+  a champion stands alone up to level 3; pinned `pack` arrays keep their size up to the cap (the early zones' pinned
+  packs were cut to it by hand). Nothing is lost: each monster the cap trims off is placed as its own single 11-18 m
+  from the marker in the open (`placeStray`: a clear line back to the marker, 10 m from other strays and markers,
+  never on the start), so a zone keeps its monster count and XP and the ~30 min a level pace holds. Tests:
+  `tests/sim/spawn.test.js`.
 - **Editor:** `editor.html` (`http://<LAN IP>:8581/prototypes/rogueloot/editor.html`). Tools 1-9 (select, prop, paint,
   hill, water, cliff, scatter, spawn, patrol, chest, marker), right-drag pans, wheel zooms, Enter finishes a shape,
   Ctrl+Z/Y, Delete, R turns a prop. **Save** writes the file through the DEV server only (`POST /editor/save`,

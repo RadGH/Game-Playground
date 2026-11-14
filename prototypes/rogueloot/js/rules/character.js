@@ -1,23 +1,26 @@
 // The character document: what a browser saves and what it hands to a room when it joins (ruling 1: characters live on
 // the player's device). Pure. Version `v` lets later milestones migrate old saves forward.
-//   newCharacter({ name, look }) -> a fresh level-1 Wanderer
+//   newCharacter({ name, look, path, bar }) -> a fresh level-1 hero of that class (owner 2026-11-13: the class is picked at creation)
 //   derived(ch) -> the numbers a fight reads (M4 adds gear on top)
 import { ATTRS, START_ATTR, attrPointsFor, levelForXp, LEVEL_CAP } from './progression.js';
 
 export const CHAR_VERSION = 1;
 export const NAME_MAX = 20;
-export const cleanName = n => String(n || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX) || 'Wanderer';
+export const cleanName = n => String(n || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX) || 'Hero';
 
-/** The kit every Wanderer starts with (bases from data/item-bases.json): a short sword, a linen robe, a rope sash. */
+/** The kit every new hero starts with (bases from data/item-bases.json): a short sword, a linen robe, a rope sash. */
 export const STARTER_KIT = { weapon: 'footman_sword', chest: 'linen_robe', belt: 'rope_sash' };
-export function newCharacter({ name, look, id = null, now = Date.now(), kit = null } = {}) {
+/** Each class starts with a weapon it is allowed to hold (data/item-bases.json proficiency). */
+export const STARTER_WEAPON = { fighter: 'footman_sword', rogue: 'skinning_knife', mage: 'willow_wand', healer: 'cudgel' };
+export const starterKitFor = path => ({ ...STARTER_KIT, weapon: STARTER_WEAPON[path] || STARTER_KIT.weapon });
+export function newCharacter({ name, look, id = null, now = Date.now(), kit = null, path = null, bar = null } = {}) {
   return {
     v: CHAR_VERSION, id: id || 'c' + now.toString(36) + Math.floor(Math.random() * 1e6).toString(36),
     name: cleanName(name), look: look || null, created: now, played: 0,
     level: 1, xp: 0,
     attrs: Object.fromEntries(ATTRS.map(a => [a, START_ATTR])), unspent: 0, bonusAttr: 0,
-    path: null, spec: null,
-    skills: {}, skillPoints: 0, questPoints: 0, bar: ['sure_strike', 'spark', 'field_mend', 'shove', null, null],
+    path, spec: null, tv: 2,
+    skills: {}, skillPoints: 0, questPoints: 0, bar: bar || ['sure_strike', 'spark', 'field_mend', null, null, null],
     gold: 0, equip: kit || {}, bag: [], belt: [],
     quests: {}, waypoints: ['brightwater'], difficulty: 'normal',
   };

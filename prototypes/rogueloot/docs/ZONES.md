@@ -187,6 +187,11 @@ gullhawk flight on the hedgerow — and 2 rat swarms), 8 chests (4 crates, 3 che
   `marker: "burrow"` / `"grain_sacks"` on mole and rat markers (the table rows carry the same `marker` key and
   `spawn.js` ignores it today, so a burrow marker can currently roll wasps); `note` strings. `tag: "swarm"` on a zone
   whose table has an empty `swarms` row would fall back to the test stand-ins, so the shore has none.
+- **Early-game ramp (2026-11-13, owner):** `spawn.js` caps every group by its MARKER's level (`balance.json groups`:
+  1 at level 1, pairs at 2-3 and mostly singles, 3 at 4, 4 at 5, 5 at 6, full from 7; swarms from level 5; champions
+  alone to 3) and re-places what it trims as spread-out singles, so the counts in these notes are the markers' rolls,
+  not what stands together. The pinned packs in the shore and the tidecaves were cut to the cap by hand; the Windmill
+  Fields crate swarm by the start is "a few rats" and the barn swarm (level 5) is the first full one. README has the rule.
 - **acts.json is new data nobody loads yet**: `portalAfter` is the story gate, `links` must match a zone's `exit` /
   `entrance` markers (tests could check that), `order` is the quest order.
 - **Marker kinds I used** beyond start/waypoint/exit/entrance/portal/npc: `quest` (side errands) and `stash`.

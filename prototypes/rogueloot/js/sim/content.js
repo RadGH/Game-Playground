@@ -6,7 +6,7 @@
 import { monsterBaseline } from '../rules/combat.js';
 import { itemData } from '../rules/items.js';
 
-export const FILES = ['monsters.json', 'skills.json', 'skills-paths.json', 'item-bases.json', 'balance.json', 'affixes.json', 'rarity.json', 'uniques.json', 'legendaries.json', 'potions.json', 'acts.json', 'currency.json', 'mercenaries.json', 'specs.json', 'skills-specs-index.json', 'quests.json', 'difficulty.json'];
+export const FILES = ['monsters.json', 'skills.json', 'skills-paths.json', 'item-bases.json', 'balance.json', 'affixes.json', 'rarity.json', 'uniques.json', 'legendaries.json', 'potions.json', 'acts.json', 'currency.json', 'mercenaries.json', 'specs.json', 'skills-specs-index.json', 'talents-index.json', 'quests.json', 'difficulty.json'];
 
 export function buildContent(raw) {
   const monsters = {};
@@ -18,6 +18,11 @@ export function buildContent(raw) {
   // the Path skills (and the Wanderer's, rewritten in the same vocabulary) win over the M4 file
   for (const [id, s] of Object.entries(raw['skills-paths.json']?.skills || {})) skills[id] = { id, ...s };
   for (const f of raw['skills-specs-index.json']?.files || []) for (const [id, s] of Object.entries(raw[f]?.skills || {})) skills[id] = { id, ...s };
+  // talents (docs/TALENTS.md) live beside the skills: a character's ranks in both are ch.skills { id: rank }
+  for (const f of raw['talents-index.json']?.files || []) for (const [id, s] of Object.entries(raw[f]?.talents || {})) skills[id] = { id, kind: 'talent', ...s };
+  // a stance's bar skills (Druid shapes, Weaponmaster stances, Bard songs) are known only inside that stance
+  const isStance = s => s?.effects?.some(e => e.do === 'stance' && e.bar);
+  for (const s of Object.values(skills)) for (const e of s.effects || []) if (e.do === 'stance' && e.bar) for (const id of e.bar) if (id !== s.id && skills[id] && !isStance(skills[id])) { skills[id].stanceOnly = true; (skills[id].stances ||= []).push(s.id); }
   const bases = {};
   for (const b of raw['item-bases.json']?.bases || []) bases[b.id] = b;
   const mj = raw['monsters.json'] || {};
@@ -45,14 +50,14 @@ export function baselineFrom(b) {
 }
 export function loadContent(readJson) {
   const raw = {}; for (const f of FILES) { try { raw[f] = readJson(f); } catch { raw[f] = null; } }
-  for (const f of raw['skills-specs-index.json']?.files || []) { try { raw[f] = readJson(f); } catch { raw[f] = null; } }
+  for (const f of [...(raw['skills-specs-index.json']?.files || []), ...(raw['talents-index.json']?.files || [])]) { try { raw[f] = readJson(f); } catch { raw[f] = null; } }
   const c = buildContent(raw); c.zones = {};
   try { for (const id of readJson('zones/index.json').zones) c.zones[id] = readJson(`zones/${id}.json`); } catch { /* no zones yet */ }
   return c;
 }
 export async function loadContentAsync(readJson) {
   const raw = {}; await Promise.all(FILES.map(async f => { try { raw[f] = await readJson(f); } catch { raw[f] = null; } }));
-  await Promise.all((raw['skills-specs-index.json']?.files || []).map(async f => { try { raw[f] = await readJson(f); } catch { raw[f] = null; } }));
+  await Promise.all([...(raw['skills-specs-index.json']?.files || []), ...(raw['talents-index.json']?.files || [])].map(async f => { try { raw[f] = await readJson(f); } catch { raw[f] = null; } }));
   const c = buildContent(raw); c.zones = {};
   try { const idx = await readJson('zones/index.json'); await Promise.all(idx.zones.map(async id => { c.zones[id] = await readJson(`zones/${id}.json`); })); } catch { /* no zones yet */ }
   return c;

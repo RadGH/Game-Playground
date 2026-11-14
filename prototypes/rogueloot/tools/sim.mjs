@@ -8,13 +8,14 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createWorld, addPlayer, setInput, step, act, DT } from '../js/sim/world.js';
 import { loadContent } from '../js/sim/content.js';
-import { newCharacter, STARTER_KIT, gainXp } from '../js/rules/character.js';
+import { newCharacter, starterKitFor, gainXp } from '../js/rules/character.js';
 import { xpAtLevel } from '../js/rules/progression.js';
 import { makeItem, canEquip, weaponDamage, itemArmour, itemMods } from '../js/rules/items.js';
 import { makePotion } from '../js/rules/potions.js';
 import { sheet } from '../js/rules/sheet.js';
 import { makeRng } from '../js/sim/rng.js';
-import { rankOf, costOf, atRank } from '../js/sim/skills.js';
+import { rankOf, costOf, atRank, defaultBar } from '../js/sim/skills.js';
+import { isTalent, talentOpen } from '../js/sim/talents.js';
 import { clearLine, flowTo, downhill } from '../js/sim/paths.js';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
@@ -25,8 +26,8 @@ const D = content.items, S = content.skills;
 const MAIN = { fighter: 'str', rogue: 'agi', mage: 'int', healer: 'spi', wanderer: 'str' };
 
 function freshHero(rng, path) {
-  const kit = Object.fromEntries(Object.entries(STARTER_KIT).map(([s, b]) => [s, makeItem(D, rng, 1, { base: b })]));
-  const c = newCharacter({ name: path, kit }); c.belt = [makePotion(rng, 'health', 'minor', 3), makePotion(rng, 'mana', 'minor', 2)];
+  const kit = Object.fromEntries(Object.entries(starterKitFor(path)).map(([s, b]) => [s, makeItem(D, rng, 1, { base: b })]));
+  const c = newCharacter({ name: path, kit, path, bar: defaultBar(content.skills, { path, spec: null, level: 1, skills: {} }) });   // class at creation (owner 2026-11-13) c.belt = [makePotion(rng, 'health', 'minor', 3), makePotion(rng, 'mana', 'minor', 2)];
   c.wantPath = path;
   if (START > 1) {
     const g = gainXp(c, xpAtLevel(START)); delete g.levelled;
@@ -89,15 +90,15 @@ function play(path, seed) {
     if (ch.path && !ch.spec && ch.level >= 10) { const DEF_SPEC = { fighter: 'vanguard', rogue: 'assassin', mage: 'pyromancer', healer: 'cleric' };   // fits the bot's gear (no bow for a dagger rogue)
       const pick = SPEC && content.specs[SPEC]?.paths?.includes(ch.path) ? SPEC : DEF_SPEC[ch.path]; if (pick) act(w, 'bot', { do: 'spec', spec: pick }); }
     if (ch.unspent > 0) act(w, 'bot', { do: 'spend', attr: ch.unspent % 5 === 0 ? 'vit' : MAIN[ch.path || 'wanderer'], n: 1 });
-    if (ch.skillPoints > 0 && ch.path) { const opts = Object.values(S).filter(s => (s.owner === ch.path || (ch.spec && s.owner === ch.spec)) && s.tree && (rankOf(ch, s) < (s.maxRank || 1)) && ch.level >= (s.reqLevel || 1) && (s.prereq || []).every(x => ch.skills?.[x] > 0)); opts.sort((a, b) => (b.kind === 'active') - (a.kind === 'active') || rankOf(ch, a) - rankOf(ch, b)); if (opts[0]) act(w, 'bot', { do: 'learn', skill: opts[0].id }); }
+    if (ch.skillPoints > 0 && ch.path) { const opts = Object.values(S).filter(s => isTalent(s) && talentOpen(ch, s) && (s.owner === ch.path || (ch.spec && s.owner === ch.spec)) && s.tree && (rankOf(ch, s) < (s.maxRank || 1)) && ch.level >= (s.reqLevel || 1) && (s.prereq || []).every(x => ch.skills?.[x] > 0)); opts.sort((a, b) => (b.mods || []).length - (a.mods || []).length || rankOf(ch, a) - rankOf(ch, b)); if (opts[0]) act(w, 'bot', { do: 'learn', skill: opts[0].id }); }
     // keep the bar full of the best actives it knows (a player puts new skills on the bar); highest level first, Wanderer skills last
     if (++barTick % 100 === 0 && ch.path) {
-      const own = Object.keys(ch.skills || {}).map(id => S[id]).filter(s => s && s.kind === 'active' && !s.hidden && (s.owner === (ch.spec || ch.path)) && (s.reqLevel || 1) <= ch.level)
+      const own = Object.values(S).filter(s => s && s.kind === 'active' && !s.hidden && !s.autoAttack && rankOf(ch, s) > 0 && (s.owner === (ch.spec || ch.path)) && (s.reqLevel || 1) <= ch.level)
         .sort((a, b) => (b.reqLevel || 1) - (a.reqLevel || 1));
       const heal = own.find(s => s.target === 'ally' || s.effects?.some(e => e.do === 'heal')) || own.find(s => s.target === 'self' && /"stat":"(armour|dodge)"|"do":"shield"/.test(JSON.stringify(s.effects || [])));
       const dmg = own.filter(s => s !== heal && s.target !== 'ally').slice(0, heal ? 5 : 6);
       const want = [...dmg, ...(heal ? [heal] : [])].map(s => s.id);
-      for (const id of ['sure_strike', 'spark', 'field_mend', 'shove']) if (want.length < 6) want.push(id);
+      for (const id of ['sure_strike', 'spark', 'field_mend']) if (want.length < 6) want.push(id);
       want.forEach((id, k) => { if (ch.bar?.[k] !== id) act(w, 'bot', { do: 'bar', i: k, skill: id }); });
     }
     for (const it of ch.bag || []) {
@@ -135,7 +136,7 @@ function play(path, seed) {
     if (caster && d > 16) goTo(tg.x, tg.z); else if (!caster && d > reach) goTo(tg.x, tg.z);
     act(w, 'bot', { do: 'use', skill: 'attack', target: tg.id });
     // skills: heal self when low (healer / field mend), else the first usable damage skill on the bar
-    const bar = (ch.bar?.length ? ch.bar : ['sure_strike', 'spark', 'field_mend', 'shove']).filter(Boolean);
+    const bar = (ch.bar?.length ? ch.bar : ['sure_strike', 'spark', 'field_mend']).filter(Boolean);
     const heal = bar.find(id => S[id]?.effects?.some(e => e.do === 'heal' || e.do === 'hot' || e.do === 'shield'));
     if (heal && p.hp < p.maxHp * 0.55) { act(w, 'bot', { do: 'use', skill: heal, target: 'bot' }); return; }
     // under pressure: a defensive skill first (armour/dodge buff, ward, shield), as a player would

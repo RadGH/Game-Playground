@@ -425,7 +425,7 @@
   "spawns": [
     {"x": -102, "z": 112, "level": 3, "tag": "pack"},
     {"x": -52, "z": 110, "level": 3, "tag": "pack"},
-    {"x": 12, "z": -36, "level": 4, "tag": "swarm", "marker": "grain_sacks", "note": "grain rats pour out of the crates"},
+    {"x": 12, "z": -36, "level": 4, "tag": "swarm", "marker": "grain_sacks", "note": "a few grain rats in the crates (below the swarm level the ramp spawns only 3 of them; the full swarm waits at Longacre farm and the mill cellars)"},
     {"x": -12, "z": 8, "level": 4, "tag": "pack"},
     {"x": 24, "z": -22, "level": 4, "tag": "pack"},
     {"x": 14, "z": 36, "level": 3, "tag": "pack"},
@@ -437,7 +437,7 @@
     {"x": 22, "z": -48, "level": 4, "tag": "pack", "marker": "burrow", "note": "a churnmole under the field"},
     {"x": 30, "z": -82, "level": 5, "tag": "pack", "marker": "burrow"},
     {"x": -40, "z": -66, "level": 4, "tag": "pack"},
-    {"x": 112, "z": -22, "level": 4, "tag": "swarm", "marker": "grain_sacks", "note": "rats in the barn"},
+    {"x": 112, "z": -22, "level": 5, "tag": "swarm", "marker": "grain_sacks", "note": "rats in the barn: the first FULL swarm (level 5, the ramp's swarm level)"},
     {"x": 94, "z": -46, "level": 5, "tag": "pack"},
     {"x": 126, "z": 6, "level": 4, "tag": "pack"},
     {"x": 70, "z": -80, "level": 5, "tag": "pack"},

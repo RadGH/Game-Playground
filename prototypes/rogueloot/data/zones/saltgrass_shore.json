@@ -207,7 +207,7 @@
   "spawns": [
     {"x": -74, "z": 44, "level": 1, "tag": "pack"},
     {"x": -90, "z": 80, "level": 2, "tag": "pack"},
-    {"x": -64, "z": 58, "level": 2, "tag": "pack", "pack": ["tideling_crab", "tideling_crab", "tideling_crab", "tideling_crab"], "rare": "old_pincer", "note": "Old Pincer's pool (the rare stands here when he is up)"},
+    {"x": -64, "z": 58, "level": 2, "tag": "pack", "pack": ["tideling_crab", "tideling_crab"], "rare": "old_pincer", "note": "Old Pincer's pool: a pair of crabs (the rare stands here when he is up; level-2 cap, balance.json groups)"},
     {"x": -66, "z": 30, "level": 2, "tag": "pack"},
     {"x": 92, "z": 30, "level": 2, "tag": "pack"},
     {"x": 104, "z": 10, "level": 2, "tag": "pack"},

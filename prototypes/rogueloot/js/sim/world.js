@@ -19,6 +19,7 @@ import { inventoryAct } from './inventory.js';
 import { townAct } from './town.js';
 import { craftAct } from './craft.js';
 import { pickPath, learn, setBar, resourceOf, pickSpec, respec, stepZones } from './skills.js';
+import { migrate } from './talents.js';
 import { refreshHero } from './actors.js';
 import { stepLoot, pickup, openChest, placeChests } from './loot.js';
 
@@ -36,7 +37,9 @@ export function createWorld({ seed = 1, area = null, content = null, zone = null
 
 export function addPlayer(w, id, character = {}) {
   const s = w.area.spawn, n = w.players.size;
-  const p = makeHero(w, id, character);
+  const fixed = migrate(w.content.skills, character);              // older saves: Shove gone, skill points back as talent points
+  const p = makeHero(w, id, fixed);
+  if (fixed !== character) w.charDirty?.add(id);
   initResource(w, p);
   rescaleFoes(w, n + 1);
   p.x = s.x + (n % 2 ? 1.2 : -1.2) * Math.ceil(n / 2); p.z = s.z; p.yaw = Math.PI;

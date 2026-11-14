@@ -4,7 +4,6 @@
     "attack": { "name": "Attack", "owner": "all", "kind": "auto", "target": "enemy", "desc": "Swing at your target whenever your weapon is ready. Starts by itself when you use a weapon skill." },
     "sure_strike": { "name": "Sure Strike", "owner": "wanderer", "kind": "melee", "target": "enemy", "cast": 0, "cd": 0, "cost": { "mana": 6 }, "weaponMult": 1.45, "type": "physical", "threat": 1.2, "icon": "sword", "desc": "A careful blow for 145% of your weapon's damage." },
     "spark": { "name": "Spark", "owner": "wanderer", "kind": "bolt", "target": "enemy", "cast": 1.5, "cd": 0, "cost": { "mana": 10 }, "range": 22, "base": [7, 2.6], "type": "storm", "speed": 26, "icon": "bolt", "desc": "Throw a crackling spark that deals storm damage. Takes a moment to cast." },
-    "field_mend": { "name": "Field Mend", "owner": "wanderer", "kind": "heal", "target": "ally", "cast": 2.0, "cd": 8, "cost": { "mana": 14 }, "range": 20, "base": [14, 4.5], "icon": "heal", "desc": "Bind your own or a friend's wounds. Heals over the cast; works on yourself if nobody is picked." },
-    "shove": { "name": "Shove", "owner": "wanderer", "kind": "melee", "target": "enemy", "cast": 0, "cd": 10, "gcd": false, "cost": { "mana": 4 }, "weaponMult": 0.4, "type": "physical", "interrupts": true, "threat": 2, "icon": "shove", "desc": "Knock your target off balance, stopping whatever it is casting. Does not use the global cooldown." }
+    "field_mend": { "name": "Field Mend", "owner": "wanderer", "kind": "heal", "target": "ally", "cast": 2.0, "cd": 8, "cost": { "mana": 14 }, "range": 20, "base": [14, 4.5], "icon": "heal", "desc": "Bind your own or a friend's wounds. Heals over the cast; works on yourself if nobody is picked." }
   }
 }

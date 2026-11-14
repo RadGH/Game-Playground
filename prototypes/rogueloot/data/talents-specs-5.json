@@ -1,0 +1,4411 @@
+{
+ "_doc": "Talents for the specs of skills-specs-5.json (docs/TALENTS.md): the new talent rows of each spec tree. The older passive/synergy rows of those trees stay in skills-specs-5.json.",
+ "talents": {
+  "rns_graven_gash": {
+   "name": "Graven Gash",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "fighter_rend"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "fighter_rend"
+     },
+     "stat": "duration",
+     "perRank": 8
+    }
+   ]
+  },
+  "rns_chisel_point": {
+   "name": "Chisel Point",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "rns_graven_gash"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "fighter_breaker_blow"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "fighter_breaker_blow"
+     },
+     "stat": "duration",
+     "perRank": 6
+    }
+   ]
+  },
+  "rns_peeled_plate": {
+   "name": "Peeled Plate",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_rend_plate"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "rns_rend_plate"
+     },
+     "stat": "damage",
+     "perRank": 8
+    }
+   ]
+  },
+  "rns_cinder_script": {
+   "name": "Cinder Script",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "rns_deeper_rune"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_searing_rune"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "rns_searing_rune"
+     },
+     "stat": "duration",
+     "perRank": 6
+    }
+   ]
+  },
+  "rns_hewn_letters": {
+   "name": "Hewn Letters",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 5,
+   "prereq": [
+    "rns_chisel_point"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "fighter_hewing"
+     },
+     "stat": "damage",
+     "perRank": 4
+    },
+    {
+     "to": {
+      "skill": "fighter_cleave"
+     },
+     "stat": "damage",
+     "perRank": 3
+    }
+   ],
+   "flavour": "Every swing spells something."
+  },
+  "rns_struck_while_hot": {
+   "name": "Struck While Hot",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "tree": "forge"
+     },
+     "stat": "damage",
+     "perRank": 3
+    }
+   ]
+  },
+  "rns_ground_shaker": {
+   "name": "Ground Shaker",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [
+    "rns_peeled_plate"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_hammerfall"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "rns_hammerfall"
+     },
+     "stat": "radius",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_runes_both_ways": {
+   "name": "Runes Both Ways",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_runeskin"
+     },
+     "stat": "duration",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "rns_rune_of_holding"
+     },
+     "stat": "cooldown",
+     "perRank": 6
+    }
+   ]
+  },
+  "rns_the_last_rune": {
+   "name": "The Last Rune",
+   "owner": "runesmith",
+   "tree": "the_hammer",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "rns_lasting_rune"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_runebreaker"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "rns_runebreaker"
+     },
+     "stat": "damage",
+     "perRank": 15
+    },
+    {
+     "to": {
+      "tree": "the_hammer"
+     },
+     "stat": "crit",
+     "perRank": 3
+    }
+   ],
+   "flavour": "The one that finishes the word."
+  },
+  "rns_etched_boss": {
+   "name": "Etched Boss",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "fighter_shield_slam"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "fighter_shield_slam"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_slow_to_fade": {
+   "name": "Slow to Fade",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_runeskin"
+     },
+     "stat": "duration",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "rns_runeskin"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_rune_of_standing": {
+   "name": "Rune of Standing",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "rns_etched_boss"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "fighter_dig_in"
+     },
+     "stat": "heal",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "fighter_dig_in"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_carved_roar": {
+   "name": "Carved Roar",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "rns_rune_of_standing"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "fighter_war_cry"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "fighter_war_cry"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_binding_mark": {
+   "name": "Binding Mark",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 3,
+   "maxRank": 2,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_rune_of_holding"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "rns_rune_of_holding"
+     },
+     "stat": "duration",
+     "perRank": 10
+    }
+   ]
+  },
+  "rns_many_glyphs": {
+   "name": "Many Glyphs",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "rns_harder_skin"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_glyph_wall"
+     },
+     "stat": "heal",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "rns_glyph_wall"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_warded_hammer": {
+   "name": "Warded Hammer",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_rune_hammer"
+     },
+     "stat": "damage",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "rns_hammerfall"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_covered_coals": {
+   "name": "Covered Coals",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_forge_flame"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "rns_hammer_shout"
+     },
+     "stat": "cooldown",
+     "perRank": 6
+    }
+   ]
+  },
+  "rns_the_living_rune": {
+   "name": "The Living Rune",
+   "owner": "runesmith",
+   "tree": "runeskin",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "rns_brighter_glyph"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_runeward"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "rns_runeward"
+     },
+     "stat": "heal",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "type": "heal"
+     },
+     "stat": "duration",
+     "perRank": 10
+    }
+   ],
+   "flavour": "It reads you back."
+  },
+  "rns_out_of_the_fire": {
+   "name": "Out of the Fire",
+   "owner": "runesmith",
+   "tree": "forge",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "fighter_charge"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "fighter_charge"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_white_heat": {
+   "name": "White Heat",
+   "owner": "runesmith",
+   "tree": "forge",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_forge_flame"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "rns_forge_flame"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_slag_swing": {
+   "name": "Slag Swing",
+   "owner": "runesmith",
+   "tree": "forge",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "rns_out_of_the_fire"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "fighter_cleave"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "fighter_cleave"
+     },
+     "stat": "radius",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_quenched_edge": {
+   "name": "Quenched Edge",
+   "owner": "runesmith",
+   "tree": "forge",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "rns_slag_swing"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "fighter_breaker_blow"
+     },
+     "stat": "cost",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "fighter_breaker_blow"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ]
+  },
+  "rns_ringing_anvil": {
+   "name": "Ringing Anvil",
+   "owner": "runesmith",
+   "tree": "forge",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 3,
+   "maxRank": 2,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_hammer_shout"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "fighter_shield_slam"
+     },
+     "stat": "cooldown",
+     "perRank": 6
+    }
+   ]
+  },
+  "rns_open_furnace": {
+   "name": "Open Furnace",
+   "owner": "runesmith",
+   "tree": "forge",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "rns_hotter_forge"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_forge_blast"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "rns_forge_blast"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_fire_script": {
+   "name": "Fire Script",
+   "owner": "runesmith",
+   "tree": "forge",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_searing_rune"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "rns_runebreaker"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "rns_forge_warm_skin": {
+   "name": "Forge-Warm Skin",
+   "owner": "runesmith",
+   "tree": "forge",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "tree": "runeskin"
+     },
+     "stat": "heal",
+     "perRank": 4
+    }
+   ],
+   "flavour": "Plate that never quite cools."
+  },
+  "rns_world_anvil": {
+   "name": "World Anvil",
+   "owner": "runesmith",
+   "tree": "forge",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "rns_molten_core"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rns_great_anvil"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "rns_great_anvil"
+     },
+     "stat": "damage",
+     "perRank": 15
+    },
+    {
+     "to": {
+      "type": "fire"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ],
+   "flavour": "The ground is hard enough to forge on."
+  },
+  "scv_blind_luck": {
+   "name": "Blind Luck",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_backstab"
+     },
+     "stat": "crit",
+     "perRank": 3
+    },
+    {
+     "to": {
+      "skill": "rogue_backstab"
+     },
+     "stat": "damage",
+     "perRank": 4
+    }
+   ]
+  },
+  "scv_marked_cards": {
+   "name": "Marked Cards",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "scv_blind_luck"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_notch"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "rogue_notch"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ]
+  },
+  "scv_weighted_dice": {
+   "name": "Weighted Dice",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_loaded_dice"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "scv_loaded_dice"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "scv_press_your_luck": {
+   "name": "Press Your Luck",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "scv_luckier"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_lucky_strike"
+     },
+     "stat": "crit",
+     "perRank": 2
+    },
+    {
+     "to": {
+      "skill": "scv_lucky_strike"
+     },
+     "stat": "duration",
+     "perRank": 8
+    }
+   ]
+  },
+  "scv_lucky_draw": {
+   "name": "Lucky Draw",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "scv_marked_cards"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_aimed_shot"
+     },
+     "stat": "crit",
+     "perRank": 3
+    },
+    {
+     "to": {
+      "skill": "rogue_knife_fan"
+     },
+     "stat": "crit",
+     "perRank": 3
+    }
+   ]
+  },
+  "scv_lucky_find": {
+   "name": "Lucky Find",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "tree": "junk"
+     },
+     "stat": "crit",
+     "perRank": 2
+    }
+   ],
+   "flavour": "Somebody threw this away."
+  },
+  "scv_long_streak": {
+   "name": "Long Streak",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 3,
+   "maxRank": 2,
+   "prereq": [
+    "scv_weighted_dice"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_hot_streak"
+     },
+     "stat": "duration",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "scv_hot_streak"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "scv_house_money": {
+   "name": "House Money",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_big_score"
+     },
+     "stat": "damage",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "scv_scrounge"
+     },
+     "stat": "cooldown",
+     "perRank": 6
+    }
+   ]
+  },
+  "scv_three_bells": {
+   "name": "Three Bells",
+   "owner": "scavenger",
+   "tree": "lucky",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "scv_bigger_bet"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_jackpot"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "scv_jackpot"
+     },
+     "stat": "damage",
+     "perRank": 15
+    },
+    {
+     "to": {
+      "tree": "lucky"
+     },
+     "stat": "crit",
+     "perRank": 3
+    }
+   ],
+   "flavour": "It was never luck."
+  },
+  "scv_good_arm": {
+   "name": "Good Arm",
+   "owner": "scavenger",
+   "tree": "junk",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_junk_toss"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "scv_junk_toss"
+     },
+     "stat": "duration",
+     "perRank": 8
+    }
+   ]
+  },
+  "scv_rusty_knives": {
+   "name": "Rusty Knives",
+   "owner": "scavenger",
+   "tree": "junk",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_knife_fan"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "rogue_knife_fan"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "scv_bent_nails": {
+   "name": "Bent Nails",
+   "owner": "scavenger",
+   "tree": "junk",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "scv_good_arm"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_caltrops"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "scv_caltrops"
+     },
+     "stat": "duration",
+     "perRank": 6
+    }
+   ]
+  },
+  "scv_something_nasty": {
+   "name": "Something Nasty",
+   "owner": "scavenger",
+   "tree": "junk",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "scv_rusty_knives"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_poison_coat"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "rogue_poison_coat"
+     },
+     "stat": "duration",
+     "perRank": 8
+    }
+   ],
+   "flavour": "Best not to ask what was in the jar."
+  },
+  "scv_hotter_pitch": {
+   "name": "Hotter Pitch",
+   "owner": "scavenger",
+   "tree": "junk",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_pitch_bomb"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "scv_pitch_bomb"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "scv_duck_and_throw": {
+   "name": "Duck and Throw",
+   "owner": "scavenger",
+   "tree": "junk",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [
+    "scv_something_nasty"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_slip_step"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "rogue_hush_knife"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "scv_short_fuse": {
+   "name": "Short Fuse",
+   "owner": "scavenger",
+   "tree": "junk",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 3,
+   "maxRank": 2,
+   "prereq": [
+    "scv_more_pitch"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_bottle_rocket"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "scv_bottle_rocket"
+     },
+     "stat": "damage",
+     "perRank": 10
+    }
+   ]
+  },
+  "scv_one_mans_rubbish": {
+   "name": "One Man's Rubbish",
+   "owner": "scavenger",
+   "tree": "junk",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_loaded_dice"
+     },
+     "stat": "damage",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "scv_jackpot"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "scv_dirty_pockets": {
+   "name": "Dirty Pockets",
+   "owner": "scavenger",
+   "tree": "junk",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_pocket_sand"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "scv_sucker_punch"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "scv_the_whole_cart": {
+   "name": "The Whole Cart",
+   "owner": "scavenger",
+   "tree": "junk",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "scv_hotter_pitch"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_junk_avalanche"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "scv_junk_avalanche"
+     },
+     "stat": "damage",
+     "perRank": 15
+    },
+    {
+     "to": {
+      "tree": "junk"
+     },
+     "stat": "radius",
+     "perRank": 10
+    }
+   ],
+   "flavour": "Wheels and all."
+  },
+  "scv_easy_mark": {
+   "name": "Easy Mark",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_notch"
+     },
+     "stat": "cost",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "rogue_notch"
+     },
+     "stat": "duration",
+     "perRank": 8
+    }
+   ]
+  },
+  "scv_fistful_of_grit": {
+   "name": "Fistful of Grit",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_pocket_sand"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "scv_pocket_sand"
+     },
+     "stat": "damage",
+     "perRank": 8
+    }
+   ]
+  },
+  "scv_from_behind": {
+   "name": "From Behind",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "scv_easy_mark"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_backstab"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "rogue_backstab"
+     },
+     "stat": "cost",
+     "perRank": 4
+    }
+   ]
+  },
+  "scv_magpies_eye": {
+   "name": "Magpie's Eye",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_shiny_things"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "scv_shiny_things"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "scv_cheap_cuts": {
+   "name": "Cheap Cuts",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 5,
+   "prereq": [
+    "scv_from_behind"
+   ],
+   "mods": [
+    {
+     "to": {
+      "owner": "rogue"
+     },
+     "stat": "damage",
+     "perRank": 2
+    }
+   ],
+   "flavour": "Nothing fancy. Works anyway."
+  },
+  "scv_quick_getaway": {
+   "name": "Quick Getaway",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_slip_step"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "scv_scrounge"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "scv_counting_the_odds": {
+   "name": "Counting the Odds",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_double_or_nothing"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "scv_hot_streak"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "scv_fenced_goods": {
+   "name": "Fenced Goods",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "tree": "junk"
+     },
+     "stat": "cost",
+     "perRank": 5
+    }
+   ]
+  },
+  "scv_the_payout": {
+   "name": "The Payout",
+   "owner": "scavenger",
+   "tree": "big_score",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "scv_harder_punch"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "scv_big_score"
+     },
+     "stat": "cooldown",
+     "perRank": 25
+    },
+    {
+     "to": {
+      "skill": "scv_big_score"
+     },
+     "stat": "damage",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "scv_big_score"
+     },
+     "stat": "crit",
+     "perRank": 5
+    }
+   ],
+   "flavour": "Count it twice."
+  },
+  "str_star_tipped": {
+   "name": "Star-Tipped",
+   "owner": "starcaller",
+   "tree": "darts",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_arcane_dart"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "mage_storm_lance"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ]
+  },
+  "str_falling_lance": {
+   "name": "Falling Lance",
+   "owner": "starcaller",
+   "tree": "darts",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "str_star_tipped"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_storm_lance"
+     },
+     "stat": "cooldown",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "mage_storm_lance"
+     },
+     "stat": "crit",
+     "perRank": 2
+    }
+   ]
+  },
+  "str_full_hand": {
+   "name": "Full Hand",
+   "owner": "starcaller",
+   "tree": "darts",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_scattered_stars"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "str_scattered_stars"
+     },
+     "stat": "radius",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_paired_light": {
+   "name": "Paired Light",
+   "owner": "starcaller",
+   "tree": "darts",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "str_sharper_dart"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_twin_stars"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "str_twin_stars"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_night_storm": {
+   "name": "Night Storm",
+   "owner": "starcaller",
+   "tree": "darts",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "str_falling_lance"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_thunderhead"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "mage_thunderhead"
+     },
+     "stat": "duration",
+     "perRank": 6
+    }
+   ]
+  },
+  "str_guiding_stars": {
+   "name": "Guiding Stars",
+   "owner": "starcaller",
+   "tree": "darts",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "tree": "called"
+     },
+     "stat": "crit",
+     "perRank": 2
+    }
+   ],
+   "flavour": "The small ones show the big ones where to land."
+  },
+  "str_splinter_of_sky": {
+   "name": "Splinter of Sky",
+   "owner": "starcaller",
+   "tree": "darts",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [
+    "str_full_hand"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_star_shard"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "str_star_shard"
+     },
+     "stat": "cast",
+     "perRank": 6
+    }
+   ]
+  },
+  "str_seeded_field": {
+   "name": "Seeded Field",
+   "owner": "starcaller",
+   "tree": "darts",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_star_field"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "str_wheeling_stars"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ]
+  },
+  "str_the_joined_sky": {
+   "name": "The Joined Sky",
+   "owner": "starcaller",
+   "tree": "darts",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "str_longer_glow"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_constellation"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "str_constellation"
+     },
+     "stat": "cast",
+     "perRank": 25
+    },
+    {
+     "to": {
+      "type": "storm"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ],
+   "flavour": "Every point, one line."
+  },
+  "str_sky_fire": {
+   "name": "Sky Fire",
+   "owner": "starcaller",
+   "tree": "called",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_firebolt"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "mage_firebolt"
+     },
+     "stat": "cast",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_swift_summons": {
+   "name": "Swift Summons",
+   "owner": "starcaller",
+   "tree": "called",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_called_star"
+     },
+     "stat": "cast",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "str_called_star"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_comet_step": {
+   "name": "Comet Step",
+   "owner": "starcaller",
+   "tree": "called",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [
+    "str_sky_fire"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_shift"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "str_falling_star"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "str_scorched_sky": {
+   "name": "Scorched Sky",
+   "owner": "starcaller",
+   "tree": "called",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 5,
+   "prereq": [
+    "str_comet_step"
+   ],
+   "mods": [
+    {
+     "to": {
+      "owner": "mage"
+     },
+     "stat": "damage",
+     "perRank": 2
+    }
+   ]
+  },
+  "str_heavy_light": {
+   "name": "Heavy Light",
+   "owner": "starcaller",
+   "tree": "called",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "str_bigger_star"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_greater_star"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "str_greater_star"
+     },
+     "stat": "cast",
+     "perRank": 6
+    }
+   ]
+  },
+  "str_struck_dumb": {
+   "name": "Struck Dumb",
+   "owner": "starcaller",
+   "tree": "called",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_stifle"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "str_hush_of_stars"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    }
+   ]
+  },
+  "str_marked_by_the_sky": {
+   "name": "Marked by the Sky",
+   "owner": "starcaller",
+   "tree": "called",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_star_shard"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "str_constellation"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_rain_on_the_field": {
+   "name": "Rain on the Field",
+   "owner": "starcaller",
+   "tree": "called",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_skyfall"
+     },
+     "stat": "damage",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "str_star_field"
+     },
+     "stat": "radius",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_the_emptied_sky": {
+   "name": "The Emptied Sky",
+   "owner": "starcaller",
+   "tree": "called",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "str_wider_star"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_heavens_barrage"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "str_heavens_barrage"
+     },
+     "stat": "damage",
+     "perRank": 15
+    },
+    {
+     "to": {
+      "type": "fire"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ],
+   "flavour": "Dark overhead, afterwards."
+  },
+  "str_ring_of_stars": {
+   "name": "Ring of Stars",
+   "owner": "starcaller",
+   "tree": "fields",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_frost_ring"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "mage_frost_ring"
+     },
+     "stat": "radius",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_sown_stars": {
+   "name": "Sown Stars",
+   "owner": "starcaller",
+   "tree": "fields",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_star_field"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "str_star_field"
+     },
+     "stat": "radius",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_sky_ward": {
+   "name": "Sky Ward",
+   "owner": "starcaller",
+   "tree": "fields",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "str_ring_of_stars"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_ward"
+     },
+     "stat": "heal",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "str_star_ward"
+     },
+     "stat": "heal",
+     "perRank": 7
+    }
+   ]
+  },
+  "str_storm_garden": {
+   "name": "Storm Garden",
+   "owner": "starcaller",
+   "tree": "fields",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "str_sky_ward"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_thunderhead"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "mage_thunderhead"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_turning_sky": {
+   "name": "Turning Sky",
+   "owner": "starcaller",
+   "tree": "fields",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_wheeling_stars"
+     },
+     "stat": "cooldown",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "str_wheeling_stars"
+     },
+     "stat": "radius",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_kind_light": {
+   "name": "Kind Light",
+   "owner": "starcaller",
+   "tree": "fields",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 1,
+   "maxRank": 2,
+   "prereq": [
+    "str_lasting_field"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_bright_field"
+     },
+     "stat": "heal",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "str_bright_field"
+     },
+     "stat": "duration",
+     "perRank": 10
+    }
+   ]
+  },
+  "str_lit_from_below": {
+   "name": "Lit from Below",
+   "owner": "starcaller",
+   "tree": "fields",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_called_star"
+     },
+     "stat": "damage",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "str_greater_star"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "str_scattered_seed": {
+   "name": "Scattered Seed",
+   "owner": "starcaller",
+   "tree": "fields",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_scattered_stars"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "str_star_dart"
+     },
+     "stat": "duration",
+     "perRank": 6
+    }
+   ]
+  },
+  "str_the_sky_brought_low": {
+   "name": "The Sky Brought Low",
+   "owner": "starcaller",
+   "tree": "fields",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "str_kind_light"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "str_skyfall"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "str_skyfall"
+     },
+     "stat": "cast",
+     "perRank": 25
+    },
+    {
+     "to": {
+      "tree": "fields"
+     },
+     "stat": "duration",
+     "perRank": 10
+    }
+   ],
+   "flavour": "Low enough to walk through."
+  },
+  "sor_loose_fire": {
+   "name": "Loose Fire",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_firebolt"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "mage_firebolt"
+     },
+     "stat": "crit",
+     "perRank": 2
+    }
+   ]
+  },
+  "sor_forked_lance": {
+   "name": "Forked Lance",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "sor_loose_fire"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_storm_lance"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "mage_storm_lance"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "sor_hot_flux": {
+   "name": "Hot Flux",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_flux"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "sor_flux"
+     },
+     "stat": "duration",
+     "perRank": 8
+    }
+   ]
+  },
+  "sor_any_which_way": {
+   "name": "Any Which Way",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 2,
+   "prereq": [
+    "sor_wilder_bolt"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_wild_bolt"
+     },
+     "stat": "cast",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "sor_wild_bolt"
+     },
+     "stat": "cost",
+     "perRank": 8
+    }
+   ]
+  },
+  "sor_hail_ring": {
+   "name": "Hail Ring",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "sor_forked_lance"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_frost_ring"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "mage_frost_ring"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "sor_jagged_shard": {
+   "name": "Jagged Shard",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [
+    "sor_hot_flux"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_chaos_shard"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "sor_chaos_shard"
+     },
+     "stat": "duration",
+     "perRank": 8
+    }
+   ]
+  },
+  "sor_unruly_ruin": {
+   "name": "Unruly Ruin",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "tree": "ruin"
+     },
+     "stat": "damage",
+     "perRank": 3
+    }
+   ]
+  },
+  "sor_paid_in_blood": {
+   "name": "Paid in Blood",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_rend_asunder"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "sor_mana_rend"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ]
+  },
+  "sor_everything_at_once": {
+   "name": "Everything at Once",
+   "owner": "sorcerer",
+   "tree": "wild",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "sor_bigger_surge"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_arcane_burst"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "sor_arcane_burst"
+     },
+     "stat": "cast",
+     "perRank": 25
+    },
+    {
+     "to": {
+      "tree": "wild"
+     },
+     "stat": "crit",
+     "perRank": 3
+    }
+   ],
+   "flavour": "You did ask what it could do."
+  },
+  "sor_blood_and_air": {
+   "name": "Blood and Air",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_ward"
+     },
+     "stat": "heal",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "sor_blood_ward"
+     },
+     "stat": "heal",
+     "perRank": 7
+    }
+   ]
+  },
+  "sor_greedy_rend": {
+   "name": "Greedy Rend",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_mana_rend"
+     },
+     "stat": "cooldown",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "sor_mana_rend"
+     },
+     "stat": "crit",
+     "perRank": 2
+    }
+   ]
+  },
+  "sor_spent_freely": {
+   "name": "Spent Freely",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "sor_blood_and_air"
+   ],
+   "mods": [
+    {
+     "to": {
+      "owner": "mage"
+     },
+     "stat": "cost",
+     "perRank": 4
+    }
+   ],
+   "flavour": "There is always more. Somewhere."
+  },
+  "sor_overfed_storm": {
+   "name": "Overfed Storm",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "sor_spent_freely"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_thunderhead"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "mage_thunderhead"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "sor_wider_channel": {
+   "name": "Wider Channel",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 3,
+   "maxRank": 2,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_overchannel"
+     },
+     "stat": "duration",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "sor_overchannel"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "sor_torn_from_many": {
+   "name": "Torn from Many",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "sor_deeper_rend"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_rend_asunder"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "sor_rend_asunder"
+     },
+     "stat": "radius",
+     "perRank": 5
+    }
+   ]
+  },
+  "sor_fuel_for_the_wild": {
+   "name": "Fuel for the Wild",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "tree": "wild"
+     },
+     "stat": "cost",
+     "perRank": 5
+    }
+   ]
+  },
+  "sor_poured_into_ruin": {
+   "name": "Poured into Ruin",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_sixfold_ruin"
+     },
+     "stat": "damage",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "sor_entropic_lash"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ]
+  },
+  "sor_veins_wide_open": {
+   "name": "Veins Wide Open",
+   "owner": "sorcerer",
+   "tree": "overchannel",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "sor_torn_from_many"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_burning_veins"
+     },
+     "stat": "cooldown",
+     "perRank": 25
+    },
+    {
+     "to": {
+      "skill": "sor_burning_veins"
+     },
+     "stat": "duration",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "tree": "overchannel"
+     },
+     "stat": "damage",
+     "perRank": 8
+    }
+   ],
+   "flavour": "It only hurts for a while."
+  },
+  "sor_quick_ruin": {
+   "name": "Quick Ruin",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_ruin_bolt"
+     },
+     "stat": "cast",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "sor_ruin_bolt"
+     },
+     "stat": "duration",
+     "perRank": 8
+    }
+   ]
+  },
+  "sor_undone_words": {
+   "name": "Undone Words",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_stifle"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "sor_unmaking"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    }
+   ]
+  },
+  "sor_three_ways_to_hurt": {
+   "name": "Three Ways to Hurt",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "sor_undone_words"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skills": [
+       "mage_firebolt",
+       "mage_frost_ring",
+       "mage_storm_lance"
+      ]
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "sor_gnawing_lash": {
+   "name": "Gnawing Lash",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "sor_quick_ruin"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_entropic_lash"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "sor_entropic_lash"
+     },
+     "stat": "duration",
+     "perRank": 6
+    }
+   ]
+  },
+  "sor_sideways_step": {
+   "name": "Sideways Step",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [
+    "sor_three_ways_to_hurt"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_shift"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "mage_ward"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "sor_ruin_feeds_the_wild": {
+   "name": "Ruin Feeds the Wild",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_arcane_burst"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "sor_wild_surge"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "sor_quick_change": {
+   "name": "Quick Change",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 3,
+   "maxRank": 2,
+   "prereq": [
+    "sor_longer_shape"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_transmute"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    }
+   ],
+   "flavour": "Frog, hen, turnip. Whatever is quickest."
+  },
+  "sor_ruin_on_credit": {
+   "name": "Ruin on Credit",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_overchannel"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "sor_blood_ward"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "sor_the_seventh_ruin": {
+   "name": "The Seventh Ruin",
+   "owner": "sorcerer",
+   "tree": "ruin",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "sor_heavier_ruin"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "sor_sixfold_ruin"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "sor_sixfold_ruin"
+     },
+     "stat": "damage",
+     "perRank": 15
+    },
+    {
+     "to": {
+      "type": "shadow"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ],
+   "flavour": "Six were named. This one was not."
+  },
+  "enc_cold_lullaby": {
+   "name": "Cold Lullaby",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_frost_ring"
+     },
+     "stat": "duration",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "mage_frost_ring"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_startling_lance": {
+   "name": "Startling Lance",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "enc_cold_lullaby"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_storm_lance"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "mage_storm_lance"
+     },
+     "stat": "crit",
+     "perRank": 2
+    }
+   ]
+  },
+  "enc_heavy_eyelids": {
+   "name": "Heavy Eyelids",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 3,
+   "maxRank": 2,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_drowse"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "enc_drowse"
+     },
+     "stat": "cost",
+     "perRank": 10
+    }
+   ]
+  },
+  "enc_nodding_room": {
+   "name": "Nodding Room",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "enc_deeper_sleep"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_mass_drowse"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "enc_mass_drowse"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_waking_dart": {
+   "name": "Waking Dart",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "enc_startling_lance"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_arcane_dart"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "mage_firebolt"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_bad_morning": {
+   "name": "Bad Morning",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "enc_nodding_room"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_rude_awakening"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "enc_rude_awakening"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_dreams_of_friends": {
+   "name": "Dreams of Friends",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_beguile"
+     },
+     "stat": "duration",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "enc_befuddle"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ]
+  },
+  "enc_dreamt_shapes": {
+   "name": "Dreamt Shapes",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "tree": "phantasm"
+     },
+     "stat": "duration",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_the_long_night": {
+   "name": "The Long Night",
+   "owner": "enchanter",
+   "tree": "drowse",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "enc_bad_morning"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_deep_sleep"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "enc_deep_sleep"
+     },
+     "stat": "duration",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "type": "storm"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ],
+   "flavour": "Nobody recalls lying down."
+  },
+  "enc_stolen_breath": {
+   "name": "Stolen Breath",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_stifle"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "enc_hush"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    }
+   ]
+  },
+  "enc_sweet_talk": {
+   "name": "Sweet Talk",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_beguile"
+     },
+     "stat": "cooldown",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "enc_beguile"
+     },
+     "stat": "cost",
+     "perRank": 6
+    }
+   ]
+  },
+  "enc_heavy_weather": {
+   "name": "Heavy Weather",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "enc_stolen_breath"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_thunderhead"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "mage_thunderhead"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ]
+  },
+  "enc_numbing_ring": {
+   "name": "Numbing Ring",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "enc_heavy_weather"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_frost_ring"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "mage_frost_ring"
+     },
+     "stat": "radius",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_muddled_head": {
+   "name": "Muddled Head",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_befuddle"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "enc_befuddle"
+     },
+     "stat": "duration",
+     "perRank": 8
+    }
+   ]
+  },
+  "enc_dull_afternoon": {
+   "name": "Dull Afternoon",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_lethargy"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "enc_lethargy"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_easy_sleepers": {
+   "name": "Easy Sleepers",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [
+    "enc_muddled_head"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_drowse"
+     },
+     "stat": "duration",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "enc_mass_drowse"
+     },
+     "stat": "duration",
+     "perRank": 6
+    }
+   ]
+  },
+  "enc_fond_illusion": {
+   "name": "Fond Illusion",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_phantasm"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "enc_twin_phantasms"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_every_string": {
+   "name": "Every String",
+   "owner": "enchanter",
+   "tree": "beguile",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "enc_wider_lethargy"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_puppet"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "enc_puppet"
+     },
+     "stat": "duration",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "tree": "beguile"
+     },
+     "stat": "cost",
+     "perRank": 10
+    }
+   ],
+   "flavour": "They were glad to be asked."
+  },
+  "enc_glass_and_air": {
+   "name": "Glass and Air",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_ward"
+     },
+     "stat": "heal",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "mage_ward"
+     },
+     "stat": "duration",
+     "perRank": 6
+    }
+   ]
+  },
+  "enc_convincing_shape": {
+   "name": "Convincing Shape",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_phantasm"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "enc_phantasm"
+     },
+     "stat": "radius",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_gone_again": {
+   "name": "Gone Again",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [
+    "enc_glass_and_air"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_shift"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "enc_slip_away"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    }
+   ]
+  },
+  "enc_borrowed_face": {
+   "name": "Borrowed Face",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "enc_convincing_shape"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_twin_phantasms"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "enc_twin_phantasms"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_false_thunder": {
+   "name": "False Thunder",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "enc_gone_again"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "mage_thunderhead"
+     },
+     "stat": "radius",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "mage_thunderhead"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ]
+  },
+  "enc_lulling_shapes": {
+   "name": "Lulling Shapes",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_arcane_jolt"
+     },
+     "stat": "damage",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "enc_rude_awakening"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_long_reflection": {
+   "name": "Long Reflection",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 3,
+   "maxRank": 2,
+   "prereq": [
+    "enc_truer_mirror"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_mirror_ward"
+     },
+     "stat": "duration",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "enc_mirror_ward"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "enc_charming_double": {
+   "name": "Charming Double",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_lethargy"
+     },
+     "stat": "radius",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "enc_puppet"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "enc_hall_of_faces": {
+   "name": "Hall of Faces",
+   "owner": "enchanter",
+   "tree": "phantasm",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "enc_longer_dream"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "enc_grand_enthrallment"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "enc_grand_enthrallment"
+     },
+     "stat": "duration",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "tree": "phantasm"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ],
+   "flavour": "All of them yours. None of them you."
+  },
+  "shd_shadowed_knives": {
+   "name": "Shadowed Knives",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_quick_cuts"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "rogue_backstab"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "shd_dusk_notch": {
+   "name": "Dusk Notch",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "shd_shadowed_knives"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_notch"
+     },
+     "stat": "duration",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "rogue_notch"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ]
+  },
+  "shd_long_lash": {
+   "name": "Long Lash",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_shade_lash"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "shd_shade_lash"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "shd_fan_of_shadows": {
+   "name": "Fan of Shadows",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "shd_dusk_notch"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_knife_fan"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "rogue_knife_fan"
+     },
+     "stat": "cooldown",
+     "perRank": 5
+    }
+   ]
+  },
+  "shd_what_stays_behind": {
+   "name": "What Stays Behind",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [
+    "shd_long_lash"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_lingering_shade"
+     },
+     "stat": "damage",
+     "perRank": 8
+    },
+    {
+     "to": {
+      "skill": "shd_lingering_shade"
+     },
+     "stat": "duration",
+     "perRank": 8
+    }
+   ]
+  },
+  "shd_cut_from_the_step": {
+   "name": "Cut from the Step",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_umbral_step"
+     },
+     "stat": "damage",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "shd_dark_cut"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "shd_echoing_host": {
+   "name": "Echoing Host",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "tree": "the_host"
+     },
+     "stat": "damage",
+     "perRank": 4
+    }
+   ],
+   "flavour": "They learned the cut by watching."
+  },
+  "shd_the_last_waltz": {
+   "name": "The Last Waltz",
+   "owner": "shade_dancer",
+   "tree": "afterimage",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "shd_second_shade"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_cutting_waltz"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "shd_cutting_waltz"
+     },
+     "stat": "damage",
+     "perRank": 15
+    },
+    {
+     "to": {
+      "type": "shadow"
+     },
+     "stat": "damage",
+     "perRank": 6
+    }
+   ],
+   "flavour": "Nobody else is left standing to see it."
+  },
+  "shd_step_and_slip": {
+   "name": "Step and Slip",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_slip_step"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "shd_umbral_step"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "shd_arriving_cut": {
+   "name": "Arriving Cut",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_umbral_step"
+     },
+     "stat": "damage",
+     "perRank": 8
+    }
+   ]
+  },
+  "shd_between_the_ribs": {
+   "name": "Between the Ribs",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [
+    "shd_step_and_slip"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_backstab"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "rogue_backstab"
+     },
+     "stat": "crit",
+     "perRank": 2
+    }
+   ]
+  },
+  "shd_black_edge": {
+   "name": "Black Edge",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "shd_arriving_cut"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_dark_cut"
+     },
+     "stat": "cost",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "shd_dark_cut"
+     },
+     "stat": "crit",
+     "perRank": 2
+    }
+   ]
+  },
+  "shd_hand_over_mouth": {
+   "name": "Hand Over Mouth",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [
+    "shd_between_the_ribs"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_hush_knife"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "shd_smother"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    }
+   ]
+  },
+  "shd_through_the_images": {
+   "name": "Through the Images",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_shade_cut"
+     },
+     "stat": "damage",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "shd_twin_shade"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "shd_shared_dark": {
+   "name": "Shared Dark",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 3,
+   "maxRank": 2,
+   "prereq": [
+    "shd_thicker_shroud"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_shroud"
+     },
+     "stat": "duration",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "shd_shroud"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "shd_shades_at_your_back": {
+   "name": "Shades at Your Back",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_shade"
+     },
+     "stat": "duration",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "shd_veil"
+     },
+     "stat": "cooldown",
+     "perRank": 6
+    }
+   ]
+  },
+  "shd_the_clean_finish": {
+   "name": "The Clean Finish",
+   "owner": "shade_dancer",
+   "tree": "umbral_step",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "shd_deeper_dark"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_assassinate"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "shd_assassinate"
+     },
+     "stat": "damage",
+     "perRank": 15
+    },
+    {
+     "to": {
+      "skill": "shd_assassinate"
+     },
+     "stat": "crit",
+     "perRank": 5
+    }
+   ],
+   "flavour": "One cut. No second look."
+  },
+  "shd_many_knives": {
+   "name": "Many Knives",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "kind": "talent",
+   "reqLevel": 10,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_knife_fan"
+     },
+     "stat": "damage",
+     "perRank": 7
+    },
+    {
+     "to": {
+      "skill": "rogue_knife_fan"
+     },
+     "stat": "cost",
+     "perRank": 5
+    }
+   ]
+  },
+  "shd_copied_cuts": {
+   "name": "Copied Cuts",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 2,
+   "maxRank": 5,
+   "prereq": [
+    "shd_many_knives"
+   ],
+   "mods": [
+    {
+     "to": {
+      "owner": "rogue"
+     },
+     "stat": "damage",
+     "perRank": 2
+    }
+   ],
+   "flavour": "The shades know the old tricks too."
+  },
+  "shd_quick_to_rise": {
+   "name": "Quick to Rise",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "kind": "talent",
+   "reqLevel": 12,
+   "col": 3,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_shade"
+     },
+     "stat": "cooldown",
+     "perRank": 6
+    },
+    {
+     "to": {
+      "skill": "shd_shade"
+     },
+     "stat": "duration",
+     "perRank": 6
+    }
+   ]
+  },
+  "shd_paired_blades": {
+   "name": "Paired Blades",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 1,
+   "maxRank": 3,
+   "prereq": [
+    "shd_sharper_shade"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_shade_pair"
+     },
+     "stat": "damage",
+     "perRank": 8
+    }
+   ]
+  },
+  "shd_fall_back": {
+   "name": "Fall Back",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 2,
+   "maxRank": 2,
+   "prereq": [
+    "shd_copied_cuts"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "rogue_slip_step"
+     },
+     "stat": "cooldown",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "shd_veil"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "shd_long_dance": {
+   "name": "Long Dance",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "kind": "talent",
+   "reqLevel": 14,
+   "col": 3,
+   "maxRank": 2,
+   "prereq": [
+    "shd_quick_to_rise"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_shade_dance"
+     },
+     "stat": "duration",
+     "perRank": 10
+    },
+    {
+     "to": {
+      "skill": "shd_shade_dance"
+     },
+     "stat": "cooldown",
+     "perRank": 8
+    }
+   ]
+  },
+  "shd_images_for_the_host": {
+   "name": "Images for the Host",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "kind": "talent",
+   "reqLevel": 16,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "tree": "afterimage"
+     },
+     "stat": "damage",
+     "perRank": 3
+    }
+   ]
+  },
+  "shd_host_at_the_kill": {
+   "name": "Host at the Kill",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "kind": "talent",
+   "reqLevel": 18,
+   "col": 2,
+   "maxRank": 3,
+   "prereq": [],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_assassinate"
+     },
+     "stat": "damage",
+     "perRank": 5
+    },
+    {
+     "to": {
+      "skill": "shd_dark_cut"
+     },
+     "stat": "damage",
+     "perRank": 5
+    }
+   ]
+  },
+  "shd_the_endless_host": {
+   "name": "The Endless Host",
+   "owner": "shade_dancer",
+   "tree": "the_host",
+   "kind": "talent",
+   "reqLevel": 20,
+   "col": 1,
+   "maxRank": 1,
+   "prereq": [
+    "shd_longer_pair"
+   ],
+   "mods": [
+    {
+     "to": {
+      "skill": "shd_host_of_shades"
+     },
+     "stat": "cooldown",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "skill": "shd_host_of_shades"
+     },
+     "stat": "duration",
+     "perRank": 20
+    },
+    {
+     "to": {
+      "tree": "the_host"
+     },
+     "stat": "damage",
+     "perRank": 8
+    }
+   ],
+   "flavour": "Count them again. There are more."
+  }
+ }
+}

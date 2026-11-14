@@ -16,7 +16,7 @@ export function sheet(ch, data, skills = null) {
   const m = { ...g.mods }, attrs = {};
   // passive skills (data/skills-paths.json): { stat, value, perRank } added like gear
   const P = { armourPct: 'armourPctPassive', crit: 'critChance', dodge: 'dodge', manaRegen: 'manaRegen', castSpeed: 'castSpeed', healPower: 'healingPower', spellPower: 'spellPower', attackSpeed: 'attackSpeed', maxHp: 'health', maxMana: 'mana', hpRegen: 'healthRegen', moveSpeed: 'moveSpeed', threat: 'threat', critDamage: 'critDamage', lifeOnHit: 'lifeOnHit', resistAll: 'allResist', blockChance: 'blockChance', rageGen: 'rageGen', energyRegen: 'energyRegen', meleePower: 'meleePowerPct', rangedPower: 'rangedPowerPct' };
-  if (skills) for (const [id, r] of Object.entries(ch.skills || {})) { const s = skills[id]; if (s?.kind === 'passive' && r > 0 && s.passive) { const k = P[s.passive.stat] || s.passive.stat; m[k] = (m[k] || 0) + s.passive.value + (s.passive.perRank || 0) * (r - 1); } }
+  if (skills) for (const [id, r] of Object.entries(ch.skills || {})) { const s = skills[id]; if ((s?.kind === 'passive' || s?.kind === 'talent') && r > 0 && s.passive && (s.owner === ch.path || s.owner === ch.spec) && (!s.when || ((!s.when.spec || s.when.spec.includes(ch.spec)) && (!s.when.path || s.when.path.includes(ch.path))))) { const k = P[s.passive.stat] || s.passive.stat; m[k] = (m[k] || 0) + s.passive.value + (s.passive.perRank || 0) * (r - 1); } }
   for (const a of ATTRS) attrs[a] = (ch.attrs?.[a] || 12) + (m[a] || 0);
   const d = derived({ ...ch, attrs });
   const allRes = m.allResist || 0;

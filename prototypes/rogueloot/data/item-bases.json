@@ -1,5 +1,5 @@
 {
-  "_doc": "Rogueloot item bases. Every row is hand-specified (kind, drop level, grid, reqs, look); the damage and armour NUMBERS come from the two ladders below so the whole game scales from one place. Weapon dps ladder: refDps(L) = 4 + 1.5*L + 0.02*L*L for a ONE-HANDED weapon at drop level L; a kind multiplies it (`kinds[kind].dps`: two-handers 1.35, bows 1.2, wands 0.6 + spell power). damage.min/max = refDps*dpsMult/speed * [0.75, 1.25]. speed = attacks per second. Monster health should be tuned so a same-level normal monster dies to ~6-10 weapon hits. Armour ladder: damage reduction = armour / (armour + K) with K = 10*attackerLevel + 50 (that is ruling 41, armour diminishing against attacker level). A full plate set at level L sums to 1.5*K(L) = 60% reduction against a same-level attacker; cloth 0.45x, leather 0.6x, mail 0.8x of plate. Slot shares: chest 35%, head 20%, feet 15%, hands 12%, belt 8%, shield 10%. The percentages a tooltip prints must be computed against the PLAYER level (what you would feel against a same-level monster). Block: chance is whole PERCENT (24 = 24%), amount is FLAT damage removed from a blocked hit. Tiers: plain (drops 1-20, Act 1 Normal), fine (21-40, Act 2 / Veteran), masterwork (41-60, Act 3 / Legend). Tiers are the D2 normal/exceptional/elite ladder: same shapes, bigger numbers. levelReq: the character level needed = max(base.levelReq, ceil(0.8 * ilvlMin of the item's highest affix tier)) — see affixes.json. req: minimum ATTRIBUTES (str/agi/int/spi). proficiency: the armour weight or weapon class the character's Path must allow (`proficiency` table below). dropLevel: the lowest ITEM LEVEL at which this base can be rolled (rarity.json `basePick` says how a base is chosen). Units: every `pct` value is whole percentage points (4 = +4%). Code converts with /100 in ONE place. Never store fractions. grid: w x h cells in the 10x4 bag (ruling 11). hand: HOW it is held, the one field every reader asks (js/rules/hands.js) and the first line of the item card: 'one' = One-handed (main hand, or the off hand for a dual-wielder), 'two' = Two-handed (takes both hands; a second one in the off hand only with the Doubled Grasp passive, a Vanguard skill), 'main' = Main hand only (wands, sceptres), 'off' = Off hand only (shields, foci, quivers). hands: 2 = takes the off-hand slot too (kept equal to hand 'two'). offhandOk: kept equal to hand 'one'. Who may dual-wield is the proficiency table's dualWield + dualWieldClasses (Rogue Path; the Weaponmaster spec). pairsWith: a quiver only works with a bow or crossbow in the main hand. look: a hint for the Chibi 2.6 model (avatar-3d gear-catalog kinds first: dagger/sword/axe/mace/bow/crossbow/staff/wand, hood/cap/helm, robe/jerkin/hauberk/cuirass, gloves, shoes/boots, shield/focus/quiver, belt, ring/amulet). Counts: 169 bases, 93 droppable in Act 1 (dropLevel <= 20).",
+  "_doc": "Rogueloot item bases. Every row is hand-specified (kind, drop level, reqs, look); the damage and armour NUMBERS come from the two ladders below so the whole game scales from one place. Weapon dps ladder: refDps(L) = 4 + 1.5*L + 0.02*L*L for a ONE-HANDED weapon at drop level L; a kind multiplies it (`kinds[kind].dps`: two-handers 1.35, bows 1.2, wands 0.6 + spell power). damage.min/max = refDps*dpsMult/speed * [0.75, 1.25]. speed = attacks per second. Monster health should be tuned so a same-level normal monster dies to ~6-10 weapon hits. Armour ladder: damage reduction = armour / (armour + K) with K = 10*attackerLevel + 50 (that is ruling 41, armour diminishing against attacker level). A full plate set at level L sums to 1.5*K(L) = 60% reduction against a same-level attacker; cloth 0.45x, leather 0.6x, mail 0.8x of plate. Slot shares: chest 35%, head 20%, feet 15%, hands 12%, belt 8%, shield 10%. The percentages a tooltip prints must be computed against the PLAYER level (what you would feel against a same-level monster). Block: chance is whole PERCENT (24 = 24%), amount is FLAT damage removed from a blocked hit. Tiers: plain (drops 1-20, Act 1 Normal), fine (21-40, Act 2 / Veteran), masterwork (41-60, Act 3 / Legend). Tiers are the D2 normal/exceptional/elite ladder: same shapes, bigger numbers. levelReq: the character level needed = max(base.levelReq, ceil(0.8 * ilvlMin of the item's highest affix tier)) — see affixes.json. req: minimum ATTRIBUTES (str/agi/int/spi). proficiency: the armour weight or weapon class the character's Path must allow (`proficiency` table below). dropLevel: the lowest ITEM LEVEL at which this base can be rolled (rarity.json `basePick` says how a base is chosen). Units: every `pct` value is whole percentage points (4 = +4%). Code converts with /100 in ONE place. Never store fractions. Every item takes one square of the 10x4 bag (owner 2026-11-13). hand: HOW it is held, the one field every reader asks (js/rules/hands.js) and the first line of the item card: 'one' = One-handed (main hand, or the off hand for a dual-wielder), 'two' = Two-handed (takes both hands; a second one in the off hand only with the Doubled Grasp passive, a Vanguard skill), 'main' = Main hand only (wands, sceptres), 'off' = Off hand only (shields, foci, quivers). hands: 2 = takes the off-hand slot too (kept equal to hand 'two'). offhandOk: kept equal to hand 'one'. Who may dual-wield is the proficiency table's dualWield + dualWieldClasses (Rogue Path; the Weaponmaster spec). pairsWith: a quiver only works with a bow or crossbow in the main hand. look: a hint for the Chibi 2.6 model (avatar-3d gear-catalog kinds first: dagger/sword/axe/mace/bow/crossbow/staff/wand, hood/cap/helm, robe/jerkin/hauberk/cuirass, gloves, shoes/boots, shield/focus/quiver, belt, ring/amulet). Counts: 169 bases, 93 droppable in Act 1 (dropLevel <= 20).",
   "ladders": {
     "weaponDps": "4 + 1.5*L + 0.02*L*L",
     "armourK": "10*attackerLevel + 50",
@@ -28,7 +28,6 @@
       "hand": "one",
       "speed": 1.6,
       "dpsMult": 0.9,
-      "grid": { "w": 1, "h": 2 },
       "ranged": false,
       "offhandOk": true,
       "caster": false,
@@ -40,7 +39,6 @@
       "hand": "one",
       "speed": 1.2,
       "dpsMult": 1,
-      "grid": { "w": 1, "h": 3 },
       "ranged": false,
       "offhandOk": true,
       "caster": false,
@@ -52,7 +50,6 @@
       "hand": "one",
       "speed": 1.1,
       "dpsMult": 1,
-      "grid": { "w": 2, "h": 3 },
       "ranged": false,
       "offhandOk": true,
       "caster": false,
@@ -64,7 +61,6 @@
       "hand": "one",
       "speed": 1,
       "dpsMult": 1,
-      "grid": { "w": 1, "h": 3 },
       "ranged": false,
       "offhandOk": true,
       "caster": false,
@@ -76,7 +72,6 @@
       "hand": "main",
       "speed": 1,
       "dpsMult": 0.8,
-      "grid": { "w": 1, "h": 3 },
       "ranged": false,
       "offhandOk": false,
       "caster": true,
@@ -88,7 +83,6 @@
       "hand": "two",
       "speed": 0.8,
       "dpsMult": 1.35,
-      "grid": { "w": 2, "h": 4 },
       "ranged": false,
       "offhandOk": false,
       "caster": false,
@@ -100,7 +94,6 @@
       "hand": "two",
       "speed": 0.75,
       "dpsMult": 1.35,
-      "grid": { "w": 2, "h": 4 },
       "ranged": false,
       "offhandOk": false,
       "caster": false,
@@ -112,7 +105,6 @@
       "hand": "two",
       "speed": 0.7,
       "dpsMult": 1.35,
-      "grid": { "w": 2, "h": 4 },
       "ranged": false,
       "offhandOk": false,
       "caster": false,
@@ -124,7 +116,6 @@
       "hand": "two",
       "speed": 1,
       "dpsMult": 1.25,
-      "grid": { "w": 1, "h": 4 },
       "ranged": false,
       "offhandOk": false,
       "caster": false,
@@ -136,7 +127,6 @@
       "hand": "two",
       "speed": 0.75,
       "dpsMult": 1.35,
-      "grid": { "w": 1, "h": 4 },
       "ranged": false,
       "offhandOk": false,
       "caster": false,
@@ -148,7 +138,6 @@
       "hand": "two",
       "speed": 1.1,
       "dpsMult": 1.2,
-      "grid": { "w": 2, "h": 3 },
       "ranged": true,
       "offhandOk": false,
       "caster": false,
@@ -160,7 +149,6 @@
       "hand": "two",
       "speed": 0.7,
       "dpsMult": 1.25,
-      "grid": { "w": 2, "h": 3 },
       "ranged": true,
       "offhandOk": false,
       "caster": false,
@@ -172,7 +160,6 @@
       "hand": "two",
       "speed": 0.9,
       "dpsMult": 0.9,
-      "grid": { "w": 1, "h": 4 },
       "ranged": false,
       "offhandOk": false,
       "caster": true,
@@ -184,7 +171,6 @@
       "hand": "main",
       "speed": 1.3,
       "dpsMult": 0.6,
-      "grid": { "w": 1, "h": 2 },
       "ranged": true,
       "offhandOk": false,
       "caster": true,
@@ -255,7 +241,6 @@
       "class": "dagger",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "dagger",
       "levelReq": 1,
       "req": {
@@ -275,7 +260,6 @@
       "class": "dagger",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "dagger",
       "levelReq": 6,
       "req": {
@@ -295,7 +279,6 @@
       "class": "dagger",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "dagger",
       "levelReq": 13,
       "req": {
@@ -315,7 +298,6 @@
       "class": "dagger",
       "hands": 1,
       "tier": "fine",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "dagger",
       "levelReq": 24,
       "req": {
@@ -335,7 +317,6 @@
       "class": "dagger",
       "hands": 1,
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "dagger",
       "levelReq": 44,
       "req": {
@@ -355,7 +336,6 @@
       "class": "sword",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "sword",
       "levelReq": 1,
       "req": {
@@ -375,7 +355,6 @@
       "class": "sword",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "sword",
       "levelReq": 7,
       "req": {
@@ -395,7 +374,6 @@
       "class": "sword",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "sword",
       "levelReq": 14,
       "req": {
@@ -415,7 +393,6 @@
       "class": "sword",
       "hands": 1,
       "tier": "fine",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "sword",
       "levelReq": 23,
       "req": {
@@ -435,7 +412,6 @@
       "class": "sword",
       "hands": 1,
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "sword",
       "levelReq": 45,
       "req": {
@@ -455,7 +431,6 @@
       "class": "axe",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "axe",
       "levelReq": 2,
       "req": {
@@ -475,7 +450,6 @@
       "class": "axe",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "axe",
       "levelReq": 9,
       "req": {
@@ -495,7 +469,6 @@
       "class": "axe",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "axe",
       "levelReq": 16,
       "req": {
@@ -515,7 +488,6 @@
       "class": "axe",
       "hands": 1,
       "tier": "fine",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "axe",
       "levelReq": 26,
       "req": {
@@ -535,7 +507,6 @@
       "class": "axe",
       "hands": 1,
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "axe",
       "levelReq": 47,
       "req": {
@@ -555,7 +526,6 @@
       "class": "mace",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "mace",
       "levelReq": 1,
       "req": {
@@ -574,7 +544,6 @@
       "class": "mace",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "mace",
       "levelReq": 8,
       "req": {
@@ -593,7 +562,6 @@
       "class": "mace",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "mace",
       "levelReq": 15,
       "req": {
@@ -612,7 +580,6 @@
       "class": "mace",
       "hands": 1,
       "tier": "fine",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "mace",
       "levelReq": 25,
       "req": {
@@ -631,7 +598,6 @@
       "class": "mace",
       "hands": 1,
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "mace",
       "levelReq": 46,
       "req": {
@@ -650,7 +616,6 @@
       "class": "mace",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "mace",
       "levelReq": 3,
       "req": {
@@ -670,7 +635,6 @@
       "class": "mace",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "mace",
       "levelReq": 11,
       "req": {
@@ -690,7 +654,6 @@
       "class": "mace",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "mace",
       "levelReq": 18,
       "req": {
@@ -710,7 +673,6 @@
       "class": "mace",
       "hands": 1,
       "tier": "fine",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "mace",
       "levelReq": 28,
       "req": {
@@ -730,7 +692,6 @@
       "class": "mace",
       "hands": 1,
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "mace",
       "levelReq": 48,
       "req": {
@@ -750,7 +711,6 @@
       "class": "sword",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "sword",
       "levelReq": 4,
       "req": {
@@ -769,7 +729,6 @@
       "class": "sword",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "sword",
       "levelReq": 12,
       "req": {
@@ -788,7 +747,6 @@
       "class": "sword",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "sword",
       "levelReq": 19,
       "req": {
@@ -807,7 +765,6 @@
       "class": "sword",
       "hands": 2,
       "tier": "fine",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "sword",
       "levelReq": 29,
       "req": {
@@ -826,7 +783,6 @@
       "class": "sword",
       "hands": 2,
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "sword",
       "levelReq": 49,
       "req": {
@@ -845,7 +801,6 @@
       "class": "axe",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "axe",
       "levelReq": 5,
       "req": {
@@ -864,7 +819,6 @@
       "class": "axe",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "axe",
       "levelReq": 13,
       "req": {
@@ -883,7 +837,6 @@
       "class": "axe",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "axe",
       "levelReq": 20,
       "req": {
@@ -902,7 +855,6 @@
       "class": "axe",
       "hands": 2,
       "tier": "fine",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "axe",
       "levelReq": 30,
       "req": {
@@ -921,7 +873,6 @@
       "class": "axe",
       "hands": 2,
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "axe",
       "levelReq": 50,
       "req": {
@@ -940,7 +891,6 @@
       "class": "mace",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "mace",
       "levelReq": 3,
       "req": {
@@ -959,7 +909,6 @@
       "class": "mace",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "mace",
       "levelReq": 11,
       "req": {
@@ -978,7 +927,6 @@
       "class": "mace",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "mace",
       "levelReq": 18,
       "req": {
@@ -997,7 +945,6 @@
       "class": "mace",
       "hands": 2,
       "tier": "fine",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "mace",
       "levelReq": 27,
       "req": {
@@ -1016,7 +963,6 @@
       "class": "mace",
       "hands": 2,
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 4 },
       "proficiency": "mace",
       "levelReq": 48,
       "req": {
@@ -1035,7 +981,6 @@
       "class": "polearm",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "polearm",
       "levelReq": 2,
       "req": {
@@ -1054,7 +999,6 @@
       "class": "polearm",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "polearm",
       "levelReq": 10,
       "req": {
@@ -1073,7 +1017,6 @@
       "class": "polearm",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "polearm",
       "levelReq": 17,
       "req": {
@@ -1092,7 +1035,6 @@
       "class": "polearm",
       "hands": 2,
       "tier": "fine",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "polearm",
       "levelReq": 26,
       "req": {
@@ -1111,7 +1053,6 @@
       "class": "polearm",
       "hands": 2,
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "polearm",
       "levelReq": 46,
       "req": {
@@ -1130,7 +1071,6 @@
       "class": "polearm",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "polearm",
       "levelReq": 4,
       "req": {
@@ -1149,7 +1089,6 @@
       "class": "polearm",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "polearm",
       "levelReq": 12,
       "req": {
@@ -1168,7 +1107,6 @@
       "class": "polearm",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "polearm",
       "levelReq": 19,
       "req": {
@@ -1187,7 +1125,6 @@
       "class": "polearm",
       "hands": 2,
       "tier": "fine",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "polearm",
       "levelReq": 28,
       "req": {
@@ -1206,7 +1143,6 @@
       "class": "polearm",
       "hands": 2,
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "polearm",
       "levelReq": 49,
       "req": {
@@ -1225,7 +1161,6 @@
       "class": "bow",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "bow",
       "levelReq": 1,
       "req": {
@@ -1245,7 +1180,6 @@
       "class": "bow",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "bow",
       "levelReq": 8,
       "req": {
@@ -1265,7 +1199,6 @@
       "class": "bow",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "bow",
       "levelReq": 15,
       "req": {
@@ -1285,7 +1218,6 @@
       "class": "bow",
       "hands": 2,
       "tier": "fine",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "bow",
       "levelReq": 24,
       "req": {
@@ -1305,7 +1237,6 @@
       "class": "bow",
       "hands": 2,
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "bow",
       "levelReq": 45,
       "req": {
@@ -1325,7 +1256,6 @@
       "class": "crossbow",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "crossbow",
       "levelReq": 3,
       "req": {
@@ -1345,7 +1275,6 @@
       "class": "crossbow",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "crossbow",
       "levelReq": 11,
       "req": {
@@ -1365,7 +1294,6 @@
       "class": "crossbow",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "crossbow",
       "levelReq": 19,
       "req": {
@@ -1385,7 +1313,6 @@
       "class": "crossbow",
       "hands": 2,
       "tier": "fine",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "crossbow",
       "levelReq": 29,
       "req": {
@@ -1405,7 +1332,6 @@
       "class": "crossbow",
       "hands": 2,
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "crossbow",
       "levelReq": 50,
       "req": {
@@ -1425,7 +1351,6 @@
       "class": "staff",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "staff",
       "levelReq": 1,
       "req": {
@@ -1445,7 +1370,6 @@
       "class": "staff",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "staff",
       "levelReq": 7,
       "req": {
@@ -1465,7 +1389,6 @@
       "class": "staff",
       "hands": 2,
       "tier": "plain",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "staff",
       "levelReq": 14,
       "req": {
@@ -1485,7 +1408,6 @@
       "class": "staff",
       "hands": 2,
       "tier": "fine",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "staff",
       "levelReq": 23,
       "req": {
@@ -1505,7 +1427,6 @@
       "class": "staff",
       "hands": 2,
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 4 },
       "proficiency": "staff",
       "levelReq": 44,
       "req": {
@@ -1525,7 +1446,6 @@
       "class": "wand",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "wand",
       "levelReq": 1,
       "req": {
@@ -1546,7 +1466,6 @@
       "class": "wand",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "wand",
       "levelReq": 6,
       "req": {
@@ -1567,7 +1486,6 @@
       "class": "wand",
       "hands": 1,
       "tier": "plain",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "wand",
       "levelReq": 13,
       "req": {
@@ -1588,7 +1506,6 @@
       "class": "wand",
       "hands": 1,
       "tier": "fine",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "wand",
       "levelReq": 25,
       "req": {
@@ -1609,7 +1526,6 @@
       "class": "wand",
       "hands": 1,
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "wand",
       "levelReq": 46,
       "req": {
@@ -1627,7 +1543,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 1,
       "req": {
@@ -1643,7 +1558,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 9,
       "req": {
@@ -1659,7 +1573,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "cloth",
       "levelReq": 1,
       "req": {
@@ -1675,7 +1588,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "cloth",
       "levelReq": 9,
       "req": {
@@ -1691,7 +1603,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 1,
       "req": {
@@ -1707,7 +1618,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 9,
       "req": {
@@ -1723,7 +1633,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 1,
       "req": {
@@ -1739,7 +1648,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 9,
       "req": {
@@ -1755,7 +1663,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 22,
       "req": {
@@ -1771,7 +1678,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "fine",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "cloth",
       "levelReq": 22,
       "req": {
@@ -1787,7 +1693,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 22,
       "req": {
@@ -1803,7 +1708,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 22,
       "req": {
@@ -1819,7 +1723,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 42,
       "req": {
@@ -1835,7 +1738,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "cloth",
       "levelReq": 42,
       "req": {
@@ -1851,7 +1753,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 42,
       "req": {
@@ -1867,7 +1768,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "cloth",
       "levelReq": 42,
       "req": {
@@ -1883,7 +1783,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 2,
       "req": {
@@ -1899,7 +1798,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 11,
       "req": {
@@ -1915,7 +1813,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "leather",
       "levelReq": 2,
       "req": {
@@ -1931,7 +1828,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "leather",
       "levelReq": 11,
       "req": {
@@ -1947,7 +1843,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 2,
       "req": {
@@ -1963,7 +1858,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 11,
       "req": {
@@ -1979,7 +1873,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 2,
       "req": {
@@ -1995,7 +1888,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 11,
       "req": {
@@ -2011,7 +1903,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 23,
       "req": {
@@ -2027,7 +1918,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "fine",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "leather",
       "levelReq": 23,
       "req": {
@@ -2043,7 +1933,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 23,
       "req": {
@@ -2059,7 +1948,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 23,
       "req": {
@@ -2075,7 +1963,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 43,
       "req": {
@@ -2091,7 +1978,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "leather",
       "levelReq": 43,
       "req": {
@@ -2107,7 +1993,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 43,
       "req": {
@@ -2123,7 +2008,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 43,
       "req": {
@@ -2139,7 +2023,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 4,
       "req": {
@@ -2155,7 +2038,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 13,
       "req": {
@@ -2171,7 +2053,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "mail",
       "levelReq": 4,
       "req": {
@@ -2187,7 +2068,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "mail",
       "levelReq": 13,
       "req": {
@@ -2203,7 +2083,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 4,
       "req": {
@@ -2219,7 +2098,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 13,
       "req": {
@@ -2235,7 +2113,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 4,
       "req": {
@@ -2251,7 +2128,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 13,
       "req": {
@@ -2267,7 +2143,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 24,
       "req": {
@@ -2283,7 +2158,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "fine",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "mail",
       "levelReq": 24,
       "req": {
@@ -2299,7 +2173,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 24,
       "req": {
@@ -2315,7 +2188,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 24,
       "req": {
@@ -2331,7 +2203,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 44,
       "req": {
@@ -2347,7 +2218,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "mail",
       "levelReq": 44,
       "req": {
@@ -2363,7 +2233,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 44,
       "req": {
@@ -2379,7 +2248,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 44,
       "req": {
@@ -2395,7 +2263,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 10,
       "req": {
@@ -2411,7 +2278,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 17,
       "req": {
@@ -2427,7 +2293,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "plate",
       "levelReq": 10,
       "req": {
@@ -2443,7 +2308,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "plate",
       "levelReq": 17,
       "req": {
@@ -2459,7 +2323,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 10,
       "req": {
@@ -2475,7 +2338,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 17,
       "req": {
@@ -2491,7 +2353,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 10,
       "req": {
@@ -2507,7 +2368,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 17,
       "req": {
@@ -2523,7 +2383,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 25,
       "req": {
@@ -2539,7 +2398,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "fine",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "plate",
       "levelReq": 25,
       "req": {
@@ -2555,7 +2413,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 25,
       "req": {
@@ -2571,7 +2428,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "fine",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 25,
       "req": {
@@ -2587,7 +2443,6 @@
       "slot": "head",
       "kind": "head",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 45,
       "req": {
@@ -2603,7 +2458,6 @@
       "slot": "chest",
       "kind": "chest",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "plate",
       "levelReq": 45,
       "req": {
@@ -2619,7 +2473,6 @@
       "slot": "hands",
       "kind": "hands",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 45,
       "req": {
@@ -2635,7 +2488,6 @@
       "slot": "feet",
       "kind": "feet",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "plate",
       "levelReq": 45,
       "req": {
@@ -2651,7 +2503,6 @@
       "slot": "belt",
       "kind": "belt",
       "tier": "plain",
-      "grid": { "w": 2, "h": 1 },
       "proficiency": "cloth",
       "levelReq": 1,
       "req": {},
@@ -2666,7 +2517,6 @@
       "slot": "belt",
       "kind": "belt",
       "tier": "plain",
-      "grid": { "w": 2, "h": 1 },
       "proficiency": "leather",
       "levelReq": 5,
       "req": {},
@@ -2681,7 +2531,6 @@
       "slot": "belt",
       "kind": "belt",
       "tier": "plain",
-      "grid": { "w": 2, "h": 1 },
       "proficiency": "mail",
       "levelReq": 12,
       "req": {},
@@ -2696,7 +2545,6 @@
       "slot": "belt",
       "kind": "belt",
       "tier": "fine",
-      "grid": { "w": 2, "h": 1 },
       "proficiency": "mail",
       "levelReq": 26,
       "req": {},
@@ -2711,7 +2559,6 @@
       "slot": "belt",
       "kind": "belt",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 1 },
       "proficiency": "plate",
       "levelReq": 46,
       "req": {},
@@ -2728,7 +2575,6 @@
       "hand": "off",
       "class": "shield",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "leather",
       "levelReq": 1,
       "req": {
@@ -2750,7 +2596,6 @@
       "hand": "off",
       "class": "shield",
       "tier": "plain",
-      "grid": { "w": 2, "h": 2 },
       "proficiency": "mail",
       "levelReq": 3,
       "req": {
@@ -2772,7 +2617,6 @@
       "hand": "off",
       "class": "shield",
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "mail",
       "levelReq": 8,
       "req": {
@@ -2794,7 +2638,6 @@
       "hand": "off",
       "class": "shield",
       "tier": "plain",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "plate",
       "levelReq": 15,
       "req": {
@@ -2816,7 +2659,6 @@
       "hand": "off",
       "class": "shield",
       "tier": "fine",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "mail",
       "levelReq": 24,
       "req": {
@@ -2838,7 +2680,6 @@
       "hand": "off",
       "class": "shield",
       "tier": "fine",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "plate",
       "levelReq": 30,
       "req": {
@@ -2860,7 +2701,6 @@
       "hand": "off",
       "class": "shield",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "mail",
       "levelReq": 44,
       "req": {
@@ -2882,7 +2722,6 @@
       "hand": "off",
       "class": "shield",
       "tier": "masterwork",
-      "grid": { "w": 2, "h": 3 },
       "proficiency": "plate",
       "levelReq": 50,
       "req": {
@@ -2904,7 +2743,6 @@
       "hand": "off",
       "class": "focus",
       "tier": "plain",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "focus",
       "levelReq": 1,
       "req": {
@@ -2923,7 +2761,6 @@
       "hand": "off",
       "class": "focus",
       "tier": "plain",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "focus",
       "levelReq": 4,
       "req": {
@@ -2942,7 +2779,6 @@
       "hand": "off",
       "class": "focus",
       "tier": "plain",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "focus",
       "levelReq": 9,
       "req": {
@@ -2961,7 +2797,6 @@
       "hand": "off",
       "class": "focus",
       "tier": "plain",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "focus",
       "levelReq": 14,
       "req": {
@@ -2980,7 +2815,6 @@
       "hand": "off",
       "class": "focus",
       "tier": "fine",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "focus",
       "levelReq": 25,
       "req": {
@@ -2999,7 +2833,6 @@
       "hand": "off",
       "class": "focus",
       "tier": "fine",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "focus",
       "levelReq": 30,
       "req": {
@@ -3018,7 +2851,6 @@
       "hand": "off",
       "class": "focus",
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "focus",
       "levelReq": 44,
       "req": {
@@ -3037,7 +2869,6 @@
       "hand": "off",
       "class": "focus",
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 2 },
       "proficiency": "focus",
       "levelReq": 50,
       "req": {
@@ -3056,7 +2887,6 @@
       "hand": "off",
       "class": "quiver",
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "quiver",
       "levelReq": 1,
       "req": {
@@ -3075,7 +2905,6 @@
       "hand": "off",
       "class": "quiver",
       "tier": "plain",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "quiver",
       "levelReq": 10,
       "req": {
@@ -3094,7 +2923,6 @@
       "hand": "off",
       "class": "quiver",
       "tier": "fine",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "quiver",
       "levelReq": 26,
       "req": {
@@ -3113,7 +2941,6 @@
       "hand": "off",
       "class": "quiver",
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 3 },
       "proficiency": "quiver",
       "levelReq": 46,
       "req": {
@@ -3130,7 +2957,6 @@
       "slot": "ring",
       "kind": "ring",
       "tier": "plain",
-      "grid": { "w": 1, "h": 1 },
       "proficiency": "any",
       "levelReq": 1,
       "req": {},
@@ -3143,7 +2969,6 @@
       "slot": "ring",
       "kind": "ring",
       "tier": "plain",
-      "grid": { "w": 1, "h": 1 },
       "proficiency": "any",
       "levelReq": 8,
       "req": {},
@@ -3156,7 +2981,6 @@
       "slot": "ring",
       "kind": "ring",
       "tier": "plain",
-      "grid": { "w": 1, "h": 1 },
       "proficiency": "any",
       "levelReq": 16,
       "req": {},
@@ -3169,7 +2993,6 @@
       "slot": "ring",
       "kind": "ring",
       "tier": "fine",
-      "grid": { "w": 1, "h": 1 },
       "proficiency": "any",
       "levelReq": 28,
       "req": {},
@@ -3182,7 +3005,6 @@
       "slot": "ring",
       "kind": "ring",
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 1 },
       "proficiency": "any",
       "levelReq": 48,
       "req": {},
@@ -3195,7 +3017,6 @@
       "slot": "neck",
       "kind": "neck",
       "tier": "plain",
-      "grid": { "w": 1, "h": 1 },
       "proficiency": "any",
       "levelReq": 1,
       "req": {},
@@ -3208,7 +3029,6 @@
       "slot": "neck",
       "kind": "neck",
       "tier": "plain",
-      "grid": { "w": 1, "h": 1 },
       "proficiency": "any",
       "levelReq": 8,
       "req": {},
@@ -3221,7 +3041,6 @@
       "slot": "neck",
       "kind": "neck",
       "tier": "plain",
-      "grid": { "w": 1, "h": 1 },
       "proficiency": "any",
       "levelReq": 16,
       "req": {},
@@ -3234,7 +3053,6 @@
       "slot": "neck",
       "kind": "neck",
       "tier": "fine",
-      "grid": { "w": 1, "h": 1 },
       "proficiency": "any",
       "levelReq": 28,
       "req": {},
@@ -3247,7 +3065,6 @@
       "slot": "neck",
       "kind": "neck",
       "tier": "masterwork",
-      "grid": { "w": 1, "h": 1 },
       "proficiency": "any",
       "levelReq": 48,
       "req": {},

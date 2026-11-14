@@ -47,15 +47,16 @@
    "name": "Smith's Arm",
    "owner": "runesmith",
    "tree": "the_hammer",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "rns_rend_plate": {
@@ -101,10 +102,9 @@
    "owner": "runesmith",
    "tree": "the_hammer",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "rns_rune_hammer"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Rune Hammer strikes deeper per rank.",
    "synergy": {
@@ -169,14 +169,15 @@
    "owner": "runesmith",
    "tree": "the_hammer",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "rns_hammerfall": {
@@ -229,16 +230,17 @@
    "owner": "runesmith",
    "tree": "the_hammer",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "rns_rune_hammer"
+    "rns_cinder_script"
    ],
    "kind": "synergy",
    "desc": "Rune Hammer's rune bleeds longer per rank.",
    "synergy": {
     "skill": "rns_rune_hammer",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "rns_forge_heart": {
@@ -246,14 +248,15 @@
    "owner": "runesmith",
    "tree": "the_hammer",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Temper builds faster.",
    "passive": {
     "stat": "rageGen",
     "value": 10,
-    "perRank": 5
+    "perRank": 10
    }
   },
   "rns_runebreaker": {
@@ -362,15 +365,16 @@
    "name": "Iron Runes",
    "owner": "runesmith",
    "tree": "runeskin",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Your armour counts for more.",
    "passive": {
     "stat": "armourPct",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "rns_warding_glyph": {
@@ -423,14 +427,15 @@
    "owner": "runesmith",
    "tree": "runeskin",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "rns_harder_skin": {
@@ -438,9 +443,10 @@
    "owner": "runesmith",
    "tree": "runeskin",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "rns_runeskin"
+    "rns_slow_to_fade"
    ],
    "kind": "synergy",
    "desc": "Runeskin wards for more per rank.",
@@ -544,14 +550,15 @@
    "owner": "runesmith",
    "tree": "runeskin",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "rns_brighter_glyph": {
@@ -559,9 +566,10 @@
    "owner": "runesmith",
    "tree": "runeskin",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "rns_warding_glyph"
+    "rns_many_glyphs"
    ],
    "kind": "synergy",
    "desc": "Warding Glyph wards for more per rank.",
@@ -688,15 +696,16 @@
    "name": "Hot Iron",
    "owner": "runesmith",
    "tree": "forge",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Life on hit.",
    "passive": {
     "stat": "lifeOnHit",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "rns_hammer_shout": {
@@ -743,14 +752,15 @@
    "owner": "runesmith",
    "tree": "forge",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster swings.",
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "rns_molten_strike": {
@@ -801,9 +811,10 @@
    "owner": "runesmith",
    "tree": "forge",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "rns_forge_flame"
+    "rns_white_heat"
    ],
    "kind": "synergy",
    "desc": "Forge Flame burns harder per rank.",
@@ -878,14 +889,15 @@
    "owner": "runesmith",
    "tree": "forge",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "You hold attention better.",
    "passive": {
     "stat": "threat",
     "value": 10,
-    "perRank": 5
+    "perRank": 10
    }
   },
   "rns_molten_core": {
@@ -893,16 +905,17 @@
    "owner": "runesmith",
    "tree": "forge",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "rns_molten_strike"
+    "rns_open_furnace"
    ],
    "kind": "synergy",
    "desc": "Molten Strike hits harder per rank.",
    "synergy": {
     "skill": "rns_molten_strike",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "rns_great_anvil": {
@@ -1010,15 +1023,16 @@
    "name": "Rabbit's Foot",
    "owner": "scavenger",
    "tree": "lucky",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "scv_loaded_dice": {
@@ -1075,10 +1089,9 @@
    "owner": "scavenger",
    "tree": "lucky",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "scv_lucky_strike"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Lucky Strike hits harder per rank.",
    "synergy": {
@@ -1125,14 +1138,15 @@
    "owner": "scavenger",
    "tree": "lucky",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Energy comes back faster.",
    "passive": {
     "stat": "energyRegen",
     "value": 8,
-    "perRank": 4
+    "perRank": 8
    }
   },
   "scv_hot_streak": {
@@ -1185,16 +1199,17 @@
    "owner": "scavenger",
    "tree": "lucky",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "scv_double_or_nothing"
+    "scv_press_your_luck"
    ],
    "kind": "synergy",
    "desc": "Double or Nothing hits harder per rank.",
    "synergy": {
     "skill": "scv_double_or_nothing",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "scv_fast_hands": {
@@ -1202,14 +1217,15 @@
    "owner": "scavenger",
    "tree": "lucky",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster swings.",
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "scv_jackpot": {
@@ -1321,15 +1337,16 @@
    "name": "Light Load",
    "owner": "scavenger",
    "tree": "junk",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "scv_caltrops": {
@@ -1390,14 +1407,15 @@
    "owner": "scavenger",
    "tree": "junk",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "scv_pitch_bomb": {
@@ -1464,16 +1482,15 @@
    "owner": "scavenger",
    "tree": "junk",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "scv_pitch_bomb"
-   ],
+   "col": 3,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "The pitch bomb covers more ground per rank.",
    "synergy": {
     "skill": "scv_pitch_bomb",
     "stat": "radius",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "scv_tin_can_trap": {
@@ -1528,14 +1545,15 @@
    "owner": "scavenger",
    "tree": "junk",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "scv_bottle_rocket": {
@@ -1689,15 +1707,16 @@
    "name": "Waste Not",
    "owner": "scavenger",
    "tree": "big_score",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Life on hit.",
    "passive": {
     "stat": "lifeOnHit",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "scv_pocket_sand": {
@@ -1746,14 +1765,15 @@
    "owner": "scavenger",
    "tree": "big_score",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "scv_deeper_pockets": {
@@ -1761,10 +1781,9 @@
    "owner": "scavenger",
    "tree": "big_score",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "scv_scrounge"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Scrounge finds more per rank.",
    "synergy": {
@@ -1859,14 +1878,15 @@
    "owner": "scavenger",
    "tree": "big_score",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "scv_harder_punch": {
@@ -1874,16 +1894,15 @@
    "owner": "scavenger",
    "tree": "big_score",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "scv_sucker_punch"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Sucker Punch hits harder per rank.",
    "synergy": {
     "skill": "scv_sucker_punch",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "scv_big_score": {
@@ -1997,15 +2016,16 @@
    "name": "Starsight",
    "owner": "starcaller",
    "tree": "darts",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "str_scattered_stars": {
@@ -2072,10 +2092,9 @@
    "owner": "starcaller",
    "tree": "darts",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "str_star_dart"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Star Dart hits harder per rank.",
    "synergy": {
@@ -2141,14 +2160,15 @@
    "owner": "starcaller",
    "tree": "darts",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "str_star_shard": {
@@ -2196,16 +2216,17 @@
    "owner": "starcaller",
    "tree": "darts",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "str_star_dart"
+    "str_paired_light"
    ],
    "kind": "synergy",
    "desc": "Star Dart's star glows longer per rank.",
    "synergy": {
     "skill": "str_star_dart",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "str_quick_sky": {
@@ -2213,14 +2234,15 @@
    "owner": "starcaller",
    "tree": "darts",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster casting.",
    "passive": {
     "stat": "castSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "str_constellation": {
@@ -2337,15 +2359,16 @@
    "name": "Deep Sky",
    "owner": "starcaller",
    "tree": "called",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Mana comes back faster.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "str_falling_star": {
@@ -2400,14 +2423,15 @@
    "owner": "starcaller",
    "tree": "called",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More mana.",
    "passive": {
     "stat": "maxMana",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "str_bigger_star": {
@@ -2415,9 +2439,10 @@
    "owner": "starcaller",
    "tree": "called",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "str_called_star"
+    "str_swift_summons"
    ],
    "kind": "synergy",
    "desc": "Called Star hits harder per rank.",
@@ -2534,14 +2559,15 @@
    "owner": "starcaller",
    "tree": "called",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "str_wider_star": {
@@ -2549,16 +2575,17 @@
    "owner": "starcaller",
    "tree": "called",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "str_greater_star"
+    "str_heavy_light"
    ],
    "kind": "synergy",
    "desc": "Greater Star covers more ground per rank.",
    "synergy": {
     "skill": "str_greater_star",
     "stat": "radius",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "str_heavens_barrage": {
@@ -2670,15 +2697,16 @@
    "name": "Starlit",
    "owner": "starcaller",
    "tree": "fields",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "str_star_ward": {
@@ -2727,14 +2755,15 @@
    "owner": "starcaller",
    "tree": "fields",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "str_lasting_field": {
@@ -2742,16 +2771,17 @@
    "owner": "starcaller",
    "tree": "fields",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "str_star_field"
+    "str_sown_stars"
    ],
    "kind": "synergy",
    "desc": "Star Field lasts longer per rank.",
    "synergy": {
     "skill": "str_star_field",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "str_wheeling_stars": {
@@ -2862,14 +2892,15 @@
    "owner": "starcaller",
    "tree": "fields",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "str_wider_wheel": {
@@ -2877,16 +2908,17 @@
    "owner": "starcaller",
    "tree": "fields",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 3,
+   "maxRank": 5,
    "prereq": [
-    "str_wheeling_stars"
+    "str_turning_sky"
    ],
    "kind": "synergy",
    "desc": "Wheeling Stars hits harder per rank.",
    "synergy": {
     "skill": "str_wheeling_stars",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "str_skyfall": {
@@ -3009,15 +3041,16 @@
    "name": "Wild Mind",
    "owner": "sorcerer",
    "tree": "wild",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "sor_flux": {
@@ -3076,10 +3109,9 @@
    "owner": "sorcerer",
    "tree": "wild",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "sor_wild_bolt"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Wild Bolt hits harder per rank.",
    "synergy": {
@@ -3139,14 +3171,15 @@
    "owner": "sorcerer",
    "tree": "wild",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "sor_wild_surge": {
@@ -3218,14 +3251,15 @@
    "owner": "sorcerer",
    "tree": "wild",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster casting.",
    "passive": {
     "stat": "castSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "sor_bigger_surge": {
@@ -3233,16 +3267,17 @@
    "owner": "sorcerer",
    "tree": "wild",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "sor_wild_surge"
+    "sor_any_which_way"
    ],
    "kind": "synergy",
    "desc": "Wild Surge hits harder per rank.",
    "synergy": {
     "skill": "sor_wild_surge",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "sor_arcane_burst": {
@@ -3333,15 +3368,16 @@
    "name": "Deep Well",
    "owner": "sorcerer",
    "tree": "overchannel",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More mana.",
    "passive": {
     "stat": "maxMana",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "sor_overchannel": {
@@ -3387,14 +3423,15 @@
    "owner": "sorcerer",
    "tree": "overchannel",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Mana comes back faster.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "sor_deeper_rend": {
@@ -3402,9 +3439,10 @@
    "owner": "sorcerer",
    "tree": "overchannel",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "sor_mana_rend"
+    "sor_greedy_rend"
    ],
    "kind": "synergy",
    "desc": "Mana Rend tears more per rank.",
@@ -3518,14 +3556,15 @@
    "owner": "sorcerer",
    "tree": "overchannel",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "sor_scarred": {
@@ -3533,14 +3572,15 @@
    "owner": "sorcerer",
    "tree": "overchannel",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "sor_burning_veins": {
@@ -3656,15 +3696,16 @@
    "name": "Slippery",
    "owner": "sorcerer",
    "tree": "ruin",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "sor_transmute": {
@@ -3709,14 +3750,15 @@
    "owner": "sorcerer",
    "tree": "ruin",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "sor_longer_shape": {
@@ -3724,16 +3766,15 @@
    "owner": "sorcerer",
    "tree": "ruin",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "sor_transmute"
-   ],
+   "col": 3,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Transmute holds longer per rank.",
    "synergy": {
     "skill": "sor_transmute",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "sor_unmaking": {
@@ -3838,9 +3879,10 @@
    "owner": "sorcerer",
    "tree": "ruin",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "sor_ruin_bolt"
+    "sor_gnawing_lash"
    ],
    "kind": "synergy",
    "desc": "Ruin Bolt hits harder per rank.",
@@ -3855,14 +3897,15 @@
    "owner": "sorcerer",
    "tree": "ruin",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "sor_sixfold_ruin": {
@@ -4026,15 +4069,16 @@
    "name": "Soft Voice",
    "owner": "enchanter",
    "tree": "drowse",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "enc_arcane_jolt": {
@@ -4080,16 +4124,15 @@
    "owner": "enchanter",
    "tree": "drowse",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "enc_drowse"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Drowse holds longer per rank.",
    "synergy": {
     "skill": "enc_drowse",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "enc_mass_drowse": {
@@ -4135,14 +4178,15 @@
    "owner": "enchanter",
    "tree": "drowse",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "enc_rude_awakening": {
@@ -4203,10 +4247,9 @@
    "owner": "enchanter",
    "tree": "drowse",
    "reqLevel": 16,
-   "maxRank": 10,
-   "prereq": [
-    "enc_arcane_jolt"
-   ],
+   "col": 3,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Arcane Jolt hits harder per rank.",
    "synergy": {
@@ -4220,14 +4263,15 @@
    "owner": "enchanter",
    "tree": "drowse",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster casting.",
    "passive": {
     "stat": "castSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "enc_deep_sleep": {
@@ -4315,15 +4359,16 @@
    "name": "Patient",
    "owner": "enchanter",
    "tree": "beguile",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Mana comes back faster.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "enc_lethargy": {
@@ -4379,14 +4424,15 @@
    "owner": "enchanter",
    "tree": "beguile",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More mana.",
    "passive": {
     "stat": "maxMana",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "enc_longer_daze": {
@@ -4394,16 +4440,17 @@
    "owner": "enchanter",
    "tree": "beguile",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "enc_beguile"
+    "enc_sweet_talk"
    ],
    "kind": "synergy",
    "desc": "Beguile lasts longer per rank.",
    "synergy": {
     "skill": "enc_beguile",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "enc_hush": {
@@ -4508,14 +4555,15 @@
    "owner": "enchanter",
    "tree": "beguile",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "enc_wider_lethargy": {
@@ -4523,16 +4571,17 @@
    "owner": "enchanter",
    "tree": "beguile",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "enc_lethargy"
+    "enc_dull_afternoon"
    ],
    "kind": "synergy",
    "desc": "Lethargy covers more ground per rank.",
    "synergy": {
     "skill": "enc_lethargy",
     "stat": "radius",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "enc_puppet": {
@@ -4636,15 +4685,16 @@
    "name": "Thick Dream",
    "owner": "enchanter",
    "tree": "phantasm",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "enc_mirror_ward": {
@@ -4695,14 +4745,15 @@
    "owner": "enchanter",
    "tree": "phantasm",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "enc_truer_mirror": {
@@ -4710,10 +4761,9 @@
    "owner": "enchanter",
    "tree": "phantasm",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "enc_mirror_ward"
-   ],
+   "col": 3,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Mirror Ward wards for more per rank.",
    "synergy": {
@@ -4813,14 +4863,15 @@
    "owner": "enchanter",
    "tree": "phantasm",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "enc_longer_dream": {
@@ -4828,16 +4879,17 @@
    "owner": "enchanter",
    "tree": "phantasm",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "enc_phantasm"
+    "enc_borrowed_face"
    ],
    "kind": "synergy",
    "desc": "Phantasm lasts longer per rank.",
    "synergy": {
     "skill": "enc_phantasm",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "enc_grand_enthrallment": {
@@ -4955,15 +5007,16 @@
    "name": "Quick Blade",
    "owner": "shade_dancer",
    "tree": "afterimage",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster swings.",
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "shd_twin_shade": {
@@ -5007,10 +5060,9 @@
    "owner": "shade_dancer",
    "tree": "afterimage",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "shd_shade_cut"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Shade Cut cuts deeper per rank.",
    "synergy": {
@@ -5069,14 +5121,15 @@
    "owner": "shade_dancer",
    "tree": "afterimage",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "shd_lingering_shade": {
@@ -5128,9 +5181,10 @@
    "owner": "shade_dancer",
    "tree": "afterimage",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "shd_twin_shade"
+    "shd_darker_cut"
    ],
    "kind": "synergy",
    "desc": "Twin Shade cuts deeper per rank.",
@@ -5145,14 +5199,15 @@
    "owner": "shade_dancer",
    "tree": "afterimage",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "shd_cutting_waltz": {
@@ -5241,15 +5296,16 @@
    "name": "Soft Step",
    "owner": "shade_dancer",
    "tree": "umbral_step",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "shd_shroud": {
@@ -5300,14 +5356,15 @@
    "owner": "shade_dancer",
    "tree": "umbral_step",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "shd_thicker_shroud": {
@@ -5315,10 +5372,9 @@
    "owner": "shade_dancer",
    "tree": "umbral_step",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "shd_shroud"
-   ],
+   "col": 3,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Shroud wards for more per rank.",
    "synergy": {
@@ -5402,14 +5458,15 @@
    "owner": "shade_dancer",
    "tree": "umbral_step",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Energy comes back faster.",
    "passive": {
     "stat": "energyRegen",
     "value": 8,
-    "perRank": 4
+    "perRank": 8
    }
   },
   "shd_deeper_dark": {
@@ -5417,16 +5474,17 @@
    "owner": "shade_dancer",
    "tree": "umbral_step",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "shd_dark_cut"
+    "shd_black_edge"
    ],
    "kind": "synergy",
    "desc": "Dark Cut cuts deeper per rank.",
    "synergy": {
     "skill": "shd_dark_cut",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "shd_assassinate": {
@@ -5514,15 +5572,16 @@
    "name": "Thick Shadow",
    "owner": "shade_dancer",
    "tree": "the_host",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "shd_sharper_shade": {
@@ -5530,10 +5589,9 @@
    "owner": "shade_dancer",
    "tree": "the_host",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "shd_shade"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Shades strike harder per rank.",
    "synergy": {
@@ -5631,14 +5689,15 @@
    "owner": "shade_dancer",
    "tree": "the_host",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "shd_shade_pair": {
@@ -5693,14 +5752,15 @@
    "owner": "shade_dancer",
    "tree": "the_host",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Life on hit.",
    "passive": {
     "stat": "lifeOnHit",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "shd_longer_pair": {
@@ -5708,16 +5768,17 @@
    "owner": "shade_dancer",
    "tree": "the_host",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "shd_shade_pair"
+    "shd_paired_blades"
    ],
    "kind": "synergy",
    "desc": "Shade Pair lasts longer per rank.",
    "synergy": {
     "skill": "shd_shade_pair",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "shd_host_of_shades": {

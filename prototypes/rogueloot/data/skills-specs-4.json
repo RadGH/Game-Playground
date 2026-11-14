@@ -45,15 +45,16 @@
    "name": "Hot Blood",
    "owner": "wyrmblood",
    "tree": "fire_temper",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "wyr_fire_breath": {
@@ -121,10 +122,9 @@
    "owner": "wyrmblood",
    "tree": "fire_temper",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "wyr_fire_breath"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Fire Breath burns harder per rank.",
    "synergy": {
@@ -182,14 +182,15 @@
    "owner": "wyrmblood",
    "tree": "fire_temper",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "wyr_cinder_rush": {
@@ -246,16 +247,17 @@
    "owner": "wyrmblood",
    "tree": "fire_temper",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "wyr_fire_rend"
+    "wyr_searing_claws"
    ],
    "kind": "synergy",
    "desc": "Fire Rend burns longer per rank.",
    "synergy": {
     "skill": "wyr_fire_rend",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "wyr_furnace": {
@@ -263,14 +265,15 @@
    "owner": "wyrmblood",
    "tree": "fire_temper",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Temper builds faster.",
    "passive": {
     "stat": "rageGen",
     "value": 10,
-    "perRank": 5
+    "perRank": 10
    }
   },
   "wyr_pyre_heart": {
@@ -389,15 +392,16 @@
    "name": "Cold Scales",
    "owner": "wyrmblood",
    "tree": "frost_temper",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Your armour counts for more.",
    "passive": {
     "stat": "armourPct",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "wyr_frost_breath": {
@@ -459,16 +463,15 @@
    "owner": "wyrmblood",
    "tree": "frost_temper",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "wyr_frost_breath"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Frost Breath reaches further per rank.",
    "synergy": {
     "skill": "wyr_frost_breath",
     "stat": "radius",
-    "pctPerRank": 7
+    "pctPerRank": 14
    }
   },
   "wyr_frost_rend": {
@@ -529,14 +532,15 @@
    "owner": "wyrmblood",
    "tree": "frost_temper",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "wyr_glacier_slam": {
@@ -609,9 +613,10 @@
    "owner": "wyrmblood",
    "tree": "frost_temper",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "wyr_frost_rend"
+    "wyr_long_winter"
    ],
    "kind": "synergy",
    "desc": "Frost Rend bites harder per rank.",
@@ -626,14 +631,15 @@
    "owner": "wyrmblood",
    "tree": "frost_temper",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "wyr_winter_heart": {
@@ -757,15 +763,16 @@
    "name": "Wyrm Heart",
    "owner": "wyrmblood",
    "tree": "scales",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "wyr_wyrmfall": {
@@ -862,10 +869,9 @@
    "owner": "wyrmblood",
    "tree": "scales",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "wyr_dragonscale"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Dragonscale wards for more per rank.",
    "synergy": {
@@ -879,14 +885,15 @@
    "owner": "wyrmblood",
    "tree": "scales",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 3,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Life on hit.",
    "passive": {
     "stat": "lifeOnHit",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "wyr_tail_sweep": {
@@ -936,14 +943,15 @@
    "owner": "wyrmblood",
    "tree": "scales",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 3,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "wyr_heavier_fall": {
@@ -951,16 +959,17 @@
    "owner": "wyrmblood",
    "tree": "scales",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "wyr_wyrmfall"
+    "wyr_lashing_tail"
    ],
    "kind": "synergy",
    "desc": "Wyrmfall lands harder per rank.",
    "synergy": {
     "skill": "wyr_wyrmfall",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "wyr_ascendant": {
@@ -1129,15 +1138,16 @@
    "name": "Steady Hand",
    "owner": "tinker",
    "tree": "clockwork",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More ranged power.",
    "passive": {
     "stat": "rangedPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "tnk_flask_grenade": {
@@ -1204,10 +1214,9 @@
    "owner": "tinker",
    "tree": "clockwork",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "tnk_clockwork_bolt"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Clockwork Bolt hits harder per rank.",
    "synergy": {
@@ -1274,14 +1283,15 @@
    "owner": "tinker",
    "tree": "clockwork",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "tnk_scattershot": {
@@ -1332,16 +1342,17 @@
    "owner": "tinker",
    "tree": "clockwork",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 3,
+   "maxRank": 5,
    "prereq": [
-    "tnk_flask_grenade"
+    "tnk_stronger_mix"
    ],
    "kind": "synergy",
    "desc": "Flask Grenade covers more ground per rank.",
    "synergy": {
     "skill": "tnk_flask_grenade",
     "stat": "radius",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "tnk_overwound_bolt": {
@@ -1510,15 +1521,16 @@
    "name": "Spare Parts",
    "owner": "tinker",
    "tree": "sentries",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Energy comes back faster.",
    "passive": {
     "stat": "energyRegen",
     "value": 8,
-    "perRank": 4
+    "perRank": 8
    }
   },
   "tnk_oil_can": {
@@ -1526,10 +1538,9 @@
    "owner": "tinker",
    "tree": "sentries",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "tnk_deploy_sentry"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Sentries shoot harder per rank.",
    "synergy": {
@@ -1648,14 +1659,15 @@
    "owner": "tinker",
    "tree": "sentries",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "tnk_twin_sentries": {
@@ -1711,16 +1723,15 @@
    "owner": "tinker",
    "tree": "sentries",
    "reqLevel": 16,
-   "maxRank": 10,
-   "prereq": [
-    "tnk_flame_sentry"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "The Flame Sentry burns harder per rank.",
    "synergy": {
     "skill": "tnk_flame_sentry",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "tnk_insulation": {
@@ -1728,14 +1739,15 @@
    "owner": "tinker",
    "tree": "sentries",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "tnk_siege_engine": {
@@ -1832,15 +1844,16 @@
    "name": "Spring Heels",
    "owner": "tinker",
    "tree": "contraptions",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "tnk_pocket_watch": {
@@ -1896,14 +1909,15 @@
    "owner": "tinker",
    "tree": "contraptions",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "tnk_spring_battery": {
@@ -1953,10 +1967,9 @@
    "owner": "tinker",
    "tree": "contraptions",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "tnk_pocket_watch"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Pocket Watch heals for more per rank.",
    "synergy": {
@@ -2066,14 +2079,15 @@
    "owner": "tinker",
    "tree": "contraptions",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster swings and shots.",
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "tnk_overclock": {
@@ -2181,15 +2195,16 @@
    "name": "Fast Hands",
    "owner": "chronomancer",
    "tree": "quicken",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster casting.",
    "passive": {
     "stat": "castSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "chr_quicken": {
@@ -2243,10 +2258,9 @@
    "owner": "chronomancer",
    "tree": "quicken",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "chr_quick_bolt"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Quick Bolt hits harder per rank.",
    "synergy": {
@@ -2309,14 +2323,15 @@
    "owner": "chronomancer",
    "tree": "quicken",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "chr_double_time": {
@@ -2376,14 +2391,15 @@
    "owner": "chronomancer",
    "tree": "quicken",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Mana comes back faster.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "chr_longer_quicken": {
@@ -2391,16 +2407,17 @@
    "owner": "chronomancer",
    "tree": "quicken",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 3,
+   "maxRank": 5,
    "prereq": [
-    "chr_quicken"
+    "chr_shared_minutes"
    ],
    "kind": "synergy",
    "desc": "Quicken lasts longer per rank.",
    "synergy": {
     "skill": "chr_quicken",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "chr_borrowed_time": {
@@ -2517,15 +2534,16 @@
    "name": "Deep Well",
    "owner": "chronomancer",
    "tree": "entropy",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More mana.",
    "passive": {
     "stat": "maxMana",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "chr_entropy_field": {
@@ -2587,14 +2605,15 @@
    "owner": "chronomancer",
    "tree": "entropy",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "chr_unravel": {
@@ -2642,16 +2661,15 @@
    "owner": "chronomancer",
    "tree": "entropy",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "chr_entropy_field"
-   ],
+   "col": 3,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Entropy Field covers more ground per rank.",
    "synergy": {
     "skill": "chr_entropy_field",
     "stat": "radius",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "chr_time_rot": {
@@ -2724,9 +2742,10 @@
    "owner": "chronomancer",
    "tree": "entropy",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "chr_decay"
+    "chr_creeping_age"
    ],
    "kind": "synergy",
    "desc": "Decay eats more per rank.",
@@ -2741,14 +2760,15 @@
    "owner": "chronomancer",
    "tree": "entropy",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "chr_heat_death": {
@@ -2859,15 +2879,16 @@
    "name": "Patient Heart",
    "owner": "chronomancer",
    "tree": "stasis",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "chr_rewind": {
@@ -2977,10 +2998,9 @@
    "owner": "chronomancer",
    "tree": "stasis",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "chr_rewind"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Rewind heals for more per rank.",
    "synergy": {
@@ -2994,14 +3014,15 @@
    "owner": "chronomancer",
    "tree": "stasis",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 3,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "chr_time_lock": {
@@ -3112,14 +3133,15 @@
    "owner": "chronomancer",
    "tree": "stasis",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 3,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "chr_stop_the_clock": {
@@ -3235,15 +3257,16 @@
    "name": "Spirit Well",
    "owner": "spirit_speaker",
    "tree": "posts",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Mana comes back faster.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "spk_striking_post": {
@@ -3300,14 +3323,15 @@
    "owner": "spirit_speaker",
    "tree": "posts",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Your healing is stronger.",
    "passive": {
     "stat": "healPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "spk_angrier_post": {
@@ -3315,9 +3339,10 @@
    "owner": "spirit_speaker",
    "tree": "posts",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "spk_striking_post"
+    "spk_quick_planting"
    ],
    "kind": "synergy",
    "desc": "The Striking Post strikes harder per rank.",
@@ -3433,16 +3458,15 @@
    "owner": "spirit_speaker",
    "tree": "posts",
    "reqLevel": 16,
-   "maxRank": 10,
-   "prereq": [
-    "spk_mending_post"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "The Mending Post stands longer per rank.",
    "synergy": {
     "skill": "spk_mending_post",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "spk_wide_spirit": {
@@ -3450,14 +3474,15 @@
    "owner": "spirit_speaker",
    "tree": "posts",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More mana.",
    "passive": {
     "stat": "maxMana",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "spk_great_post": {
@@ -3589,15 +3614,16 @@
    "name": "Loud Spirit",
    "owner": "spirit_speaker",
    "tree": "spirit_bolts",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "spk_spirit_lash": {
@@ -3655,10 +3681,9 @@
    "owner": "spirit_speaker",
    "tree": "spirit_bolts",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "spk_spirit_bolt"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Spirit Bolt hits harder per rank.",
    "synergy": {
@@ -3720,14 +3745,15 @@
    "owner": "spirit_speaker",
    "tree": "spirit_bolts",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "spk_spirit_storm": {
@@ -3793,14 +3819,15 @@
    "owner": "spirit_speaker",
    "tree": "spirit_bolts",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster casting.",
    "passive": {
     "stat": "castSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "spk_kinder_bolt": {
@@ -3808,9 +3835,10 @@
    "owner": "spirit_speaker",
    "tree": "spirit_bolts",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "spk_spirit_bolt"
+    "spk_gathering_storm"
    ],
    "kind": "synergy",
    "desc": "Spirit Bolt's light heals for more per rank.",
@@ -3913,15 +3941,16 @@
    "name": "Stout Heart",
    "owner": "spirit_speaker",
    "tree": "the_calling",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "spk_spirit_mend": {
@@ -3976,14 +4005,15 @@
    "owner": "spirit_speaker",
    "tree": "the_calling",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "spk_stronger_wards": {
@@ -3991,10 +4021,9 @@
    "owner": "spirit_speaker",
    "tree": "the_calling",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "spk_warding_spirits"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Warding Spirits ward for more per rank.",
    "synergy": {
@@ -4137,16 +4166,15 @@
    "owner": "spirit_speaker",
    "tree": "the_calling",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "spk_spirit_mend"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Spirit Mend keeps mending longer per rank.",
    "synergy": {
     "skill": "spk_spirit_mend",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "spk_ancestral_tide": {
@@ -4272,15 +4300,16 @@
    "name": "True Eye",
    "owner": "hexbreaker",
    "tree": "silver",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "hex_silvered_pin": {
@@ -4326,10 +4355,9 @@
    "owner": "hexbreaker",
    "tree": "silver",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "hex_silver_edge"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Silver Edge cuts deeper per rank.",
    "synergy": {
@@ -4397,14 +4425,15 @@
    "owner": "hexbreaker",
    "tree": "silver",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "hex_quicksilver": {
@@ -4460,16 +4489,15 @@
    "owner": "hexbreaker",
    "tree": "silver",
    "reqLevel": 16,
-   "maxRank": 10,
-   "prereq": [
-    "hex_silvered_pin"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Silvered Pin holds longer per rank.",
    "synergy": {
     "skill": "hex_silvered_pin",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "hex_quick_hands": {
@@ -4477,14 +4505,15 @@
    "owner": "hexbreaker",
    "tree": "silver",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster swings and shots.",
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "hex_silver_judgement": {
@@ -4589,15 +4618,16 @@
    "name": "Warded Skin",
    "owner": "hexbreaker",
    "tree": "the_null",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "hex_iron_net": {
@@ -4668,14 +4698,15 @@
    "owner": "hexbreaker",
    "tree": "the_null",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "hex_null_circle": {
@@ -4736,16 +4767,15 @@
    "owner": "hexbreaker",
    "tree": "the_null",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "hex_null_circle"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Null Circle covers more ground per rank.",
    "synergy": {
     "skill": "hex_null_circle",
     "stat": "radius",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "hex_silver_dart": {
@@ -4794,14 +4824,15 @@
    "owner": "hexbreaker",
    "tree": "the_null",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "hex_tighter_net": {
@@ -4809,16 +4840,15 @@
    "owner": "hexbreaker",
    "tree": "the_null",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "hex_iron_net"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Iron Net holds longer per rank.",
    "synergy": {
     "skill": "hex_iron_net",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "hex_dead_silence": {
@@ -4945,15 +4975,16 @@
    "name": "Long Road",
    "owner": "hexbreaker",
    "tree": "the_writ",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "hex_cleansing_rite": {
@@ -5000,14 +5031,15 @@
    "owner": "hexbreaker",
    "tree": "the_writ",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Life on hit.",
    "passive": {
     "stat": "lifeOnHit",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "hex_longer_writ": {
@@ -5015,16 +5047,17 @@
    "owner": "hexbreaker",
    "tree": "the_writ",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "hex_writ_of_guilt"
+    "hex_swift_writ"
    ],
    "kind": "synergy",
    "desc": "The Writ of Guilt lasts longer per rank.",
    "synergy": {
     "skill": "hex_writ_of_guilt",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "hex_silver_ward": {
@@ -5130,14 +5163,15 @@
    "owner": "hexbreaker",
    "tree": "the_writ",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Your armour counts for more.",
    "passive": {
     "stat": "armourPct",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "hex_kinder_rite": {
@@ -5145,10 +5179,9 @@
    "owner": "hexbreaker",
    "tree": "the_writ",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "hex_cleansing_rite"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Cleansing Rite heals for more per rank.",
    "synergy": {
@@ -5287,15 +5320,16 @@
    "name": "Quick Hands",
    "owner": "monk",
    "tree": "open_palm",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster strikes.",
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "mnk_wind_step": {
@@ -5343,10 +5377,9 @@
    "owner": "monk",
    "tree": "open_palm",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "mnk_open_palm"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Open Palm hits harder per rank.",
    "synergy": {
@@ -5405,14 +5438,15 @@
    "owner": "monk",
    "tree": "open_palm",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "mnk_flying_knee": {
@@ -5466,14 +5500,15 @@
    "owner": "monk",
    "tree": "open_palm",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "mnk_second_palm": {
@@ -5481,9 +5516,10 @@
    "owner": "monk",
    "tree": "open_palm",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "mnk_twin_palms"
+    "mnk_rising_knee"
    ],
    "kind": "synergy",
    "desc": "Twin Palms hit harder per rank.",
@@ -5604,15 +5640,16 @@
    "name": "Rooted",
    "owner": "monk",
    "tree": "stillness",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "mnk_still_breath": {
@@ -5662,14 +5699,15 @@
    "owner": "monk",
    "tree": "stillness",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Your armour counts for more.",
    "passive": {
     "stat": "armourPct",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "mnk_iron_body": {
@@ -5732,9 +5770,10 @@
    "owner": "monk",
    "tree": "stillness",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "mnk_iron_body"
+    "mnk_drawn_breath"
    ],
    "kind": "synergy",
    "desc": "Iron Body wards for more per rank.",
@@ -5793,14 +5832,15 @@
    "owner": "monk",
    "tree": "stillness",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "mnk_slow_pulse": {
@@ -5808,14 +5848,15 @@
    "owner": "monk",
    "tree": "stillness",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Life on hit.",
    "passive": {
     "stat": "lifeOnHit",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "mnk_still_mountain": {
@@ -5961,15 +6002,16 @@
    "name": "Hard Shin",
    "owner": "monk",
    "tree": "ninefold",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "mnk_staff_line": {
@@ -6029,14 +6071,15 @@
    "owner": "monk",
    "tree": "ninefold",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "mnk_mountain_fist": {
@@ -6090,16 +6133,17 @@
    "owner": "monk",
    "tree": "ninefold",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "mnk_sweeping_heel"
+    "mnk_swift_heel"
    ],
    "kind": "synergy",
    "desc": "Sweeping Heel reaches further per rank.",
    "synergy": {
     "skill": "mnk_sweeping_heel",
     "stat": "radius",
-    "pctPerRank": 7
+    "pctPerRank": 14
    }
   },
   "mnk_leg_sweep": {
@@ -6161,16 +6205,15 @@
    "owner": "monk",
    "tree": "ninefold",
    "reqLevel": 16,
-   "maxRank": 10,
-   "prereq": [
-    "mnk_mountain_fist"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Mountain Fist hits harder per rank.",
    "synergy": {
     "skill": "mnk_mountain_fist",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "mnk_longer_line": {
@@ -6178,16 +6221,15 @@
    "owner": "monk",
    "tree": "ninefold",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "mnk_staff_line"
-   ],
+   "col": 3,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Staff Line reaches further per rank.",
    "synergy": {
     "skill": "mnk_staff_line",
     "stat": "radius",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "mnk_ninefold_staff": {

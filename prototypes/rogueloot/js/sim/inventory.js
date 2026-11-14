@@ -3,7 +3,7 @@
 //   equip { uid, slot }   unequip { slot }   move { uid, x, y }   identify { uid }   spend { attr, n }   swap (weapon sets)
 import { canEquip, identify as ided, WORN } from '../rules/items.js';
 import { gripOf, handsBumped, compareSlots, firstCompareSlot } from '../rules/hands.js';
-import { fits, findSpot } from '../rules/bag.js';
+import { fits, findSpot, itemAt, BAG_W, BAG_H } from '../rules/bag.js';
 import { spendAttr } from '../rules/character.js';
 import { refreshHero } from './actors.js';
 import { sheet } from '../rules/sheet.js';
@@ -50,8 +50,10 @@ export function inventoryAct(w, p, a) {
     }
     case 'move': {
       const it = fromBag(ch, a.uid); if (!it) return { err: 'That is not in your bag.' };
-      if (!fits(D, ch.bag, it, a.x | 0, a.y | 0)) return { err: "It doesn't fit there." };
-      p.char = { ...ch, bag: ch.bag.map(i => i.uid === it.uid ? { ...i, pos: { x: a.x | 0, y: a.y | 0 } } : i) };
+      const x = a.x | 0, y = a.y | 0;
+      if (!(x >= 0 && y >= 0 && x < BAG_W && y < BAG_H)) return { err: 'That is outside the bag.' };
+      const other = itemAt(ch.bag, x, y);                                   // one item a square: moving onto another swaps them
+      p.char = { ...ch, bag: ch.bag.map(i => i.uid === it.uid ? { ...i, pos: { x, y } } : other && i.uid === other.uid ? { ...i, pos: it.pos } : i) };
       w.charDirty.add(p.id); return { ok: true };
     }
     case 'identify': {

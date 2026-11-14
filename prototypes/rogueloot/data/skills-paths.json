@@ -23,7 +23,7 @@
    "pathBonus": 0
   },
   "wandererSkillsAfterPath": {
-   "_doc": "A Fighter has no mana bar and a Rogue has no mana bar, so their Wanderer skills (sure_strike, spark, field_mend, shove) are re-priced in the Path resource with the same number: mana n -> rage n, and mana n -> energy 2n. Mage and Healer keep the mana costs. Spark and Field Mend stay castable by everyone (a Fighter can still mend a friend out of combat), they are just slow.",
+   "_doc": "A Fighter has no mana bar and a Rogue has no mana bar, so their Wanderer skills (sure_strike, spark, field_mend) are re-priced in the Path resource with the same number: mana n -> rage n, and mana n -> energy 2n. Mage and Healer keep the mana costs. Spark and Field Mend stay castable by everyone (a Fighter can still mend a friend out of combat), they are just slow.",
    "fighter": {
     "mana": "rage",
     "mult": 1
@@ -177,39 +177,11 @@
     }
    ]
   },
-  "shove": {
-   "name": "Shove",
-   "owner": "wanderer",
-   "tree": "wanderer",
-   "reqLevel": 1,
-   "maxRank": 1,
-   "prereq": [],
-   "kind": "active",
-   "desc": "Knock your target off balance for {mult} weapon damage, stopping whatever it is casting. Does not use the global cooldown.",
-   "cost": {
-    "mana": 4
-   },
-   "cast": 0,
-   "cd": 10,
-   "gcd": false,
-   "range": 0,
-   "target": "enemy",
-   "effects": [
-    {
-     "do": "weapon",
-     "mult": 0.4
-    },
-    {
-     "do": "interrupt",
-     "lock": 2
-    }
-   ]
-  },
   "fighter_charge": {
    "name": "Headlong",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 3,
+   "reqLevel": 1,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -249,7 +221,7 @@
    "name": "Deep Gash",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 3,
+   "reqLevel": 1,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -291,7 +263,7 @@
    "name": "Wide Swing",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 4,
+   "reqLevel": 2,
    "maxRank": 10,
    "prereq": [
     "fighter_rend"
@@ -329,7 +301,7 @@
    "name": "Hard Stop",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 5,
+   "reqLevel": 3,
    "maxRank": 5,
    "prereq": [
     "fighter_charge"
@@ -368,22 +340,23 @@
    "name": "Scar Tissue",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 5,
-   "maxRank": 10,
+   "reqLevel": 2,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Old wounds make hard skin. Your armour counts for more.",
    "passive": {
     "stat": "armourPct",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "fighter_war_cry": {
    "name": "Rallying Roar",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 6,
+   "reqLevel": 4,
    "maxRank": 5,
    "prereq": [
     "fighter_shield_slam"
@@ -432,7 +405,7 @@
    "name": "Breaker Blow",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 7,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [
     "fighter_cleave"
@@ -474,27 +447,29 @@
    "name": "Long Grudge",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 8,
-   "maxRank": 10,
+   "reqLevel": 6,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "fighter_rend"
+    "fighter_running_start"
    ],
    "kind": "passive",
    "desc": "You hold on to anger. Every hit you land or take gives more temper.",
    "passive": {
     "stat": "rageGen",
     "value": 10,
-    "perRank": 5
+    "perRank": 10
    }
   },
   "fighter_follow_through": {
    "name": "Follow Through",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 9,
-   "maxRank": 10,
+   "reqLevel": 6,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "fighter_cleave"
+    "fighter_ragged_edge"
    ],
    "kind": "synergy",
    "desc": "Wide Swing carries through with the whole shoulder: more damage per rank.",
@@ -508,7 +483,7 @@
    "name": "Dig In",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 10,
+   "reqLevel": 8,
    "maxRank": 5,
    "prereq": [
     "fighter_scar_tissue"
@@ -559,7 +534,7 @@
    "name": "Notch",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 3,
+   "reqLevel": 1,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -595,7 +570,7 @@
    "name": "Back Cut",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 3,
+   "reqLevel": 1,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -624,7 +599,7 @@
    "name": "Slip Step",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 4,
+   "reqLevel": 2,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -662,7 +637,7 @@
    "name": "Long Draw",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 5,
+   "reqLevel": 3,
    "maxRank": 10,
    "prereq": [
     "rogue_notch"
@@ -692,7 +667,7 @@
    "name": "Poison Coat",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 6,
+   "reqLevel": 4,
    "maxRank": 10,
    "prereq": [
     "rogue_notch"
@@ -730,7 +705,7 @@
    "name": "Hush Knife",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 6,
+   "reqLevel": 4,
    "maxRank": 5,
    "prereq": [
     "rogue_slip_step"
@@ -766,24 +741,25 @@
    "name": "Light Feet",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 7,
-   "maxRank": 10,
+   "reqLevel": 4,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "rogue_slip_step"
+    "rogue_quick_breath"
    ],
    "kind": "passive",
    "desc": "You are not where the blow lands. More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "rogue_knife_fan": {
    "name": "Knife Fan",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 8,
+   "reqLevel": 6,
    "maxRank": 10,
    "prereq": [
     "rogue_poison_coat"
@@ -821,58 +797,59 @@
    "name": "Keen Edge",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 9,
-   "maxRank": 10,
+   "reqLevel": 6,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "rogue_notch"
+    "rogue_marked_deep"
    ],
    "kind": "passive",
    "desc": "You know where the gaps are. More critical hits.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "rogue_deeper_cut": {
    "name": "Deeper Cut",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 10,
-   "maxRank": 10,
+   "reqLevel": 8,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "rogue_backstab"
+    "rogue_keen_edge"
    ],
    "kind": "synergy",
    "desc": "Back Cut goes in to the hilt: more damage per rank.",
    "synergy": {
     "skill": "rogue_backstab",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "rogue_fletchers_eye": {
    "name": "Fletcher's Eye",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 10,
-   "maxRank": 10,
-   "prereq": [
-    "rogue_aimed_shot"
-   ],
+   "reqLevel": 8,
+   "col": 2,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Long Draw finds the seam in the armour: more damage per rank.",
    "synergy": {
     "skill": "rogue_aimed_shot",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "mage_firebolt": {
    "name": "Cinder Bolt",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 3,
+   "reqLevel": 1,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -908,7 +885,7 @@
    "name": "Frost Ring",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 3,
+   "reqLevel": 1,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -960,7 +937,7 @@
    "name": "Shift",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 4,
+   "reqLevel": 2,
    "maxRank": 3,
    "prereq": [],
    "kind": "active",
@@ -988,7 +965,7 @@
    "name": "Storm Lance",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 5,
+   "reqLevel": 3,
    "maxRank": 10,
    "prereq": [
     "mage_firebolt"
@@ -1026,7 +1003,7 @@
    "name": "Stifle",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 5,
+   "reqLevel": 3,
    "maxRank": 3,
    "prereq": [],
    "kind": "active",
@@ -1053,7 +1030,7 @@
    "name": "Ward",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 6,
+   "reqLevel": 4,
    "maxRank": 10,
    "prereq": [
     "mage_frost_ring"
@@ -1090,7 +1067,7 @@
    "name": "Thunderhead",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 7,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [
     "mage_storm_lance"
@@ -1136,28 +1113,28 @@
    "name": "Deep Study",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 8,
-   "maxRank": 10,
+   "reqLevel": 6,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "mage_ward"
+    "mage_thick_air"
    ],
    "kind": "passive",
    "desc": "Mana comes back faster, in and out of a fight.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "mage_hotter_fire": {
    "name": "Hotter Fire",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 9,
-   "maxRank": 10,
-   "prereq": [
-    "mage_firebolt"
-   ],
+   "reqLevel": 8,
+   "col": 2,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Cinder Bolt burns whiter: more damage per rank.",
    "synergy": {
@@ -1170,24 +1147,25 @@
    "name": "Quick Hands",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 10,
-   "maxRank": 10,
+   "reqLevel": 8,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "mage_storm_lance"
+    "mage_gathering_charge"
    ],
    "kind": "passive",
    "desc": "Shorter casts. Every bolt lands sooner, every cast bar is a smaller window for a skirmisher.",
    "passive": {
     "stat": "castSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "healer_mend": {
    "name": "Mend",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 3,
+   "reqLevel": 1,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -1221,7 +1199,7 @@
    "name": "Sunlash",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 3,
+   "reqLevel": 1,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -1261,7 +1239,7 @@
    "name": "Radiance",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 4,
+   "reqLevel": 2,
    "maxRank": 10,
    "prereq": [
     "healer_mend"
@@ -1305,7 +1283,7 @@
    "name": "Rebuke",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 5,
+   "reqLevel": 3,
    "maxRank": 5,
    "prereq": [
     "healer_smite"
@@ -1348,7 +1326,7 @@
    "name": "Sanctify",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 6,
+   "reqLevel": 4,
    "maxRank": 10,
    "prereq": [
     "healer_radiance"
@@ -1393,7 +1371,7 @@
    "name": "Clear Water",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 6,
+   "reqLevel": 4,
    "maxRank": 5,
    "prereq": [
     "healer_mend"
@@ -1431,7 +1409,7 @@
    "name": "Shelter",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 7,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [
     "healer_radiance"
@@ -1468,24 +1446,25 @@
    "name": "Quiet Prayer",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 7,
-   "maxRank": 10,
+   "reqLevel": 4,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "healer_smite"
+    "healer_open_sky"
    ],
    "kind": "passive",
    "desc": "Mana comes back faster, in and out of a fight.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "healer_noon_flare": {
    "name": "Noon Flare",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 8,
+   "reqLevel": 6,
    "maxRank": 10,
    "prereq": [
     "healer_smite"
@@ -1530,10 +1509,11 @@
    "name": "Steady Light",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 9,
-   "maxRank": 10,
+   "reqLevel": 6,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "healer_mend"
+    "healer_warm_hands"
    ],
    "kind": "synergy",
    "desc": "Mend heals for more per rank.",
@@ -1547,24 +1527,25 @@
    "name": "Bright Faith",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 10,
-   "maxRank": 10,
+   "reqLevel": 8,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "healer_radiance"
+    "healer_steady_light"
    ],
    "kind": "passive",
    "desc": "All your healing is stronger.",
    "passive": {
     "stat": "healPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "fighter_hewing": {
    "name": "Hewing Blows",
    "owner": "fighter",
    "tree": "iron_line",
-   "reqLevel": 4,
+   "reqLevel": 2,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -1595,7 +1576,7 @@
    "name": "Quick Cuts",
    "owner": "rogue",
    "tree": "knifework",
-   "reqLevel": 4,
+   "reqLevel": 2,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -1626,7 +1607,7 @@
    "name": "Arcane Dart",
    "owner": "mage",
    "tree": "weatherwork",
-   "reqLevel": 4,
+   "reqLevel": 2,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -1661,7 +1642,7 @@
    "name": "Sunlit Strike",
    "owner": "healer",
    "tree": "daylight",
-   "reqLevel": 4,
+   "reqLevel": 2,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",

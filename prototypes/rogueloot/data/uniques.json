@@ -1,5 +1,5 @@
 {
-  "_doc": "Act 1 uniques (ruling 38: scarce, never zero). `base` is an item-bases.json id (the unique keeps the base's damage/armour and grid; `baseMult` scales the base damage or armour). `stats` are rolled once inside [min, max] at drop and may be re-rolled by a Polish Shard. `rule` is a special that no affix gives (plain text + an object a programmer can implement). `weight` is the pick weight among eligible uniques (rarity.json `uniques`). Units follow affixes.json: pct = whole percentage points. levelReq overrides the base. A unique never gets random affixes.",
+  "_doc": "Act 1 uniques (ruling 38: scarce, never zero). `base` is an item-bases.json id (the unique keeps the base's damage/armour; `baseMult` scales the base damage or armour). `stats` are rolled once inside [min, max] at drop and may be re-rolled by a Polish Shard. `rule` is a special that no affix gives (plain text + an object a programmer can implement). `weight` is the pick weight among eligible uniques (rarity.json `uniques`). Units follow affixes.json: pct = whole percentage points. levelReq overrides the base. A unique never gets random affixes.",
   "items": [
     {
       "id": "toll_ring",

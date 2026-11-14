@@ -1,0 +1,11 @@
+{
+ "_doc": "Talent files (docs/TALENTS.md). js/sim/content.js loads exactly these and merges their `talents` into content.skills.",
+ "files": [
+  "talents-paths.json",
+  "talents-specs-1.json",
+  "talents-specs-2.json",
+  "talents-specs-3.json",
+  "talents-specs-4.json",
+  "talents-specs-5.json"
+ ]
+}

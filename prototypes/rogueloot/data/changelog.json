@@ -1,6 +1,20 @@
 {
   "entries": [
     {
+      "id": "2026-11-13-classes-talents",
+      "date": "2026-11-13",
+      "title": "Pick your class at the start, talent trees, a simpler bag",
+      "items": [
+        "You choose Fighter, Rogue, Mage or Healer when you make a hero, with a look at how each plays first. Each class starts with a weapon it can use. Heroes from before pick their class the next time they play.",
+        "Skills now arrive by themselves as you level and get stronger every two levels. Talent points go into talent trees instead.",
+        "New talent trees for every class and every specialization: rows open as you level, arrows show what leads to what, and a capstone waits at level 20. Many talents boost your class skills from your specialization's trees, and the other way round.",
+        "New Skills (K) and Talents (N) screens: see each skill's numbers at your rank and the next, which talents boost it, and put it on your bar by tapping a slot or dragging it there.",
+        "The bag is now one square per item, with new drawn pictures for every kind of gear. The character screen was rebuilt around it, and item cards show under the bag instead of covering your gear.",
+        "Shove is gone.",
+        "The first areas are mostly one-on-one fights; pairs, groups and swarms come a few levels later."
+      ]
+    },
+    {
       "id": "2026-11-11-hands-compare",
       "date": "2026-11-11",
       "title": "Two weapons, quivers and side-by-side compare",

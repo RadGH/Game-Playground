@@ -3,9 +3,17 @@
 // route?: [{x,z}...] }. Untagged markers are 'pack'. A marker rolls from the bestiary's spawn table for its area
 // (data/monsters.json spawnTables: packs / patrols / swarms with weights, counts [min,max] and minLevel) — or, with no
 // bestiary loaded (unit tests), a small built-in set of stand-ins.
+//
+// The early-game ramp (owner 2026-11-13; data/balance.json `groups`): the MARKER's level caps how many stand together —
+// 1 at level 1, pairs at 2-3 (most of them cut to one by `soloChance`), 3 at level 4, 4 at 5, 5 at 6, the table's full
+// roll from 7. A swarm marker below `swarmMinLevel` spawns only that cap of its swarm (a taste, not the lesson). A
+// champion stands alone up to `championSoloUntil`. Whatever the cap trims off is not lost: each trimmed monster becomes
+// a separate single (its own pack) placed `strays.spread` m away in the open, so a zone keeps its monster count and XP —
+// more, spread-out 1v1 fights instead of fewer markers.
 import { makeFoe } from './actors.js';
 import { monsterDef } from './content.js';
 import { resolve } from './move.js';
+import { clearLine } from './paths.js';
 import { rollMods, makeChampion, spawnRares } from './champions.js';
 
 export const FALLBACK = {
@@ -21,7 +29,8 @@ export function spawnArea(w) {
   spawnPacks(w); spawnRares(w);
 }
 function spawnPacks(w) {
-  let packN = 0;
+  let packN = 0; const nextPack = () => 'k' + (++packN);
+  const placed = [];                                     // every stray placed in this area, so two markers' strays never share a spot
   for (const sp of w.area.spawns || []) {
     if (sp.boss) {                                         // a dungeon boss's marker: { x, z, boss: '<id>' }
       const def = w.content.monsters[sp.boss]; if (!def) continue;
@@ -31,11 +40,12 @@ function spawnPacks(w) {
       f.addSpots = SPOTS.flatMap(k => Array.isArray(sp[k]) ? sp[k].filter(v => Array.isArray(v) && v.length >= 2).map(([x, z]) => ({ x, z })) : []);
       f.leashBig = true; continue;
     }
-    const ids = sp.pack || pickPack(w, sp);
-    const pack = 'k' + (++packN);
-    const n = ids.length, ring = n > 6 ? 2.6 : 1.5;
+    const rolled = sp.pack || pickPack(w, sp);
     const table = w.content.spawnTables?.[sp.table || w.area.table || w.area.id];
     const champ = sp.tag !== 'swarm' && (sp.rank === 'champion' || w.rng() < (table?.champion ?? 0));
+    const { keep: ids, strays } = rampGroup(w, rolled, sp, { pinned: !!sp.pack, champion: champ });
+    const pack = nextPack();
+    const n = ids.length, ring = n > 6 ? 2.6 : 1.5;
     const mods = champ ? rollMods(w, sp.level || 1) : null;
     const made = [];
     ids.forEach((id, i) => {
@@ -43,12 +53,53 @@ function spawnPacks(w) {
       const a = (i / n) * Math.PI * 2, r = n > 1 ? ring * (0.6 + 0.4 * ((i * 7) % 3) / 2) : 0;
       const [x, z] = resolve(w.area, sp.x + Math.cos(a) * r, sp.z + Math.sin(a) * r, def.radius);      // never inside a tree
       const f = makeFoe(w, def, clampLevel(def, sp.level || def.levelRange[0]), x, z, { pack, rank: sp.rank || 'normal' });
+      f.spawnLevel = sp.level || 1;                        // the marker's level (a crab at a level-4 marker is level 3)
       if (sp.route) { f.route = sp.route; f.leg = 0; }
       made.push(f);
     });
     // a champion pack: the first is the champion (all its mods), the rest share the pack-wide ones; twinned = two
     if (mods && made.length) { made.forEach((f, i) => makeChampion(w, f, mods, { leader: i === 0 || (i === 1 && mods.includes('twinned')) })); }
+    // the ramp's leftovers: singles in the open round the marker, each its own fight
+    for (const id of strays) placeStray(w, sp, id, nextPack(), placed);
   }
+}
+/** The early-game ramp (balance.json `groups`): which of a rolled group stand together at this marker, and which
+ *  become spread-out singles. Pinned `pack` arrays keep their size up to the cap; a champion stands alone early on;
+ *  a swarm marker below the swarm level spawns a few of its swarm and no strays. Trimming keeps one of each kind
+ *  first (the lesson monster — the caster, the archer — stays with the group). */
+export function rampGroup(w, ids, sp, { pinned = false, champion = false } = {}) {
+  const G = w.content.balance?.groups, L = sp.level || 1;
+  if (!G || !ids?.length) return { keep: ids || [], strays: [] };
+  const cap = G.maxSize?.[L] ?? Infinity;
+  if (sp.tag === 'swarm') return L >= (G.swarmMinLevel ?? 0) || ids.length <= cap ? { keep: ids, strays: [] } : { keep: oneOfEachFirst(ids).slice(0, cap), strays: [] };
+  let n = cap;
+  if (champion && L <= (G.championSoloUntil ?? 0)) n = 1;
+  else if (!pinned && (G.soloChance?.[L] || 0) > 0 && w.rng() < G.soloChance[L]) n = 1;
+  if (ids.length <= n) return { keep: ids, strays: [] };
+  const o = oneOfEachFirst(ids);
+  return { keep: o.slice(0, n), strays: o.slice(n) };
+}
+function oneOfEachFirst(ids) { const seen = new Set(), first = [], rest = []; for (const id of ids) (seen.has(id) ? rest : (seen.add(id), first)).push(id); return first.concat(rest); }
+/** One trimmed monster, re-placed as a single `spread` m from its marker: in the open (a clear line back to the marker,
+ *  so never across a cliff or a pool), not on the player's head, and `gap` m from other strays and other markers. */
+function placeStray(w, sp, id, pack, placed) {
+  const S = w.content.balance?.groups?.strays || {}, [d0, d1] = S.spread || [11, 18], gap = S.gap || 10;
+  const def = defOf(w, id); if (!def) return null;
+  const A = w.area, others = (A.spawns || []).filter(o => o !== sp);
+  // two passes: the open spread first; then closer in with a smaller gap, for a cave corridor or a tight room
+  const near = S.near || [8, 11];
+  for (const [lo, hi, g, tries] of [[d0, d1, gap, 14], [near[0], near[1], Math.max(4, gap * 0.7), 14]]) for (let t = 0; t < tries; t++) {
+    const a = w.rng() * Math.PI * 2, d = lo + w.rng() * (hi - lo);
+    const [x, z] = resolve(A, sp.x + Math.cos(a) * d, sp.z + Math.sin(a) * d, def.radius);
+    if (Math.hypot(x - sp.x, z - sp.z) < lo - 1) continue;                                // pushed back toward the group
+    if (!clearLine(A, sp.x, sp.z, x, z, def.radius)) continue;                            // same side of every cliff and pool
+    if (A.spawn && Math.hypot(x - A.spawn.x, z - A.spawn.z) < 18) continue;               // not on the player's head
+    if (placed.some(p => Math.hypot(p.x - x, p.z - z) < g)) continue;                     // not beside another stray
+    if (others.some(o => Math.hypot(o.x - x, o.z - z) < g)) continue;                     // not beside another marker's group
+    const f = makeFoe(w, def, clampLevel(def, sp.level || def.levelRange[0]), x, z, { pack, rank: 'normal' });
+    f.stray = true; f.spawnLevel = sp.level || 1; placed.push({ x, z }); return f;
+  }
+  return null;                                                                            // nowhere to stand: this one is lost
 }
 /** Roll one composition from a table list: [{ w, of: { id: n | [min, max] }, minLevel }]. */
 export function rollComposition(w, rows, level, floor = 1) {

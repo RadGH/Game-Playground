@@ -8,7 +8,7 @@ import { applyRider } from './abilities.js';
 import { lootFoe } from './loot.js';
 import { questKill } from './quests.js';
 import { leechPct } from './legendary.js';
-import { runAutoSkill } from './skills.js';
+import { runAutoSkill, unlockSkills } from './skills.js';
 import { wireChampions, modsHitTaken, modsDeath, soakWard } from './champions.js';
 import { makeFoe } from './actors.js';
 import { rankOf, castSkill, stepSkillCast, wireSkills, fxPct, markOf, armourAfter, gain } from './skills.js';
@@ -101,7 +101,7 @@ function weaponHit(w, p, t, mult, sk = null, wpn = p.weapon) {
   const roll = wpn.min + w.rng() * (wpn.max - wpn.min) + (p.st.attackPower || 0) / 14;
   // light blades (daggers, swords) take whichever of Strength or Agility is higher, so a Rogue's Agility counts
   const power = (wpn.ranged ? p.st.rangedPower : wpn.finesse ? Math.max(p.st.meleePower, p.st.rangedPower) : p.st.meleePower) * (1 + fxPct(p, 'damage') / 100) * markOf(t);
-  const r = resolveHit({ ...p, crit: p.crit + fxPct(p, 'crit') }, armourAfter(t), { amount: roll * mult * power, type: 'physical', critBonus: 0 }, w.rng);
+  const r = resolveHit({ ...p, crit: p.crit + fxPct(p, 'crit') }, armourAfter(t), { amount: roll * mult * power, type: 'physical', critBonus: sk?.critBonus || 0 }, w.rng);
   if (r.amount > 0 && p.char?.path === 'fighter') gain(p, 'rage', (w.content.resources?.rage?.perWeaponHitDealt ?? 4) * (1 + (p.st.rageGen || 0) / 100), w.content.resources);
   if (p.char?.path === 'fighter' && w.time - (p.lastFight ?? -99) > 5) gain(p, 'rage', 15, w.content.resources);      // the opening blow of a fight sets the temper going
   // elemental damage on the weapon lands with the blow, each against its own resist
@@ -189,6 +189,8 @@ export function giveXp(w, p, n) {
   if (ups > 0) {
     p.level = ch.level;
     w.events.push({ k: 'level', t: p.id, lvl: ch.level });
+    const opened = []; for (let L = ch.level - ups + 1; L <= ch.level; L++) opened.push(...unlockSkills(w, p, L));
+    if (opened.length) w.events.push({ k: 'unlock', t: p.id, ids: opened });
     refreshHero(w, p); p.hp = p.maxHp; p.mana = p.maxMana;
   }
 }

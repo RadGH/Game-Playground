@@ -71,9 +71,9 @@ function walkToward(a) {
   const l = Math.hypot(tx - a.x, tz - a.z) || 1; return [(tx - a.x) / l, (tz - a.z) / l];
 }
 const meleeReach = () => { const b = content.items?.bases?.[heroes.current()?.equip?.weapon?.base]; return b?.ranged ? 20 : 2.1; };
-const heroes = createHeroes({ root: $('#heroes'), onChange: () => {}, items: content.items });
-const sheetUI = createSheetUI({ onSkills: () => skillsUI.toggle(true), potions: content.potions, currency: content.currency, items: content.items, skills: content.skills, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
-const skillsUI = createSkillsUI({ content, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
+const heroes = createHeroes({ root: $('#heroes'), onChange: () => {}, items: content.items, content });
+const sheetUI = createSheetUI({ onSkills: pg => skillsUI.toggle(true, pg), isTouch, content, potions: content.potions, currency: content.currency, items: content.items, skills: content.skills, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current() });
+const skillsUI = createSkillsUI({ content, send: a => G.link?.send({ t: 'act', ...a }), getChar: () => heroes.current(), isTouch }); 
 const sendAct = a => G.link?.send({ t: 'act', ...a });
 const townUI = createTownUI({ content, send: sendAct, getChar: () => heroes.current() });
 const guide = createGuideView(view);
@@ -314,6 +314,7 @@ function onEvent(e, now) {
   else if (e.k === 'drink' && e.t === G.me) { const a = actors.get(G.me); if (a) { const [x, y] = worldAt(a.x, a.z, 2.2); hud.float(x, y, e.kind === 'mana' ? '💧' : '❤', e.kind === 'mana' ? 'xp' : 'heal'); } }
   else if (e.k === 'xp' && e.t === G.me) { const a = actors.get(G.me); if (a) { const [x, y] = worldAt(a.x, a.z, 2.3); hud.float(x, y - 20, `+${e.n} xp`, 'xp'); } }
   else if (e.k === 'level' && e.t === G.me) { banner2(`Level ${e.lvl}!`); tally('level', { l: e.lvl }); }
+  else if (e.k === 'unlock' && e.t === G.me) { const names = (e.ids || []).map(id => content.skills[id]?.name).filter(Boolean); if (names.length) setTimeout(() => banner2(`New skill: ${names.join(', ')}`), 1600); }
   else if (e.k === 'interrupt') { const at = posOf(e.t); if (at) { const [x, y] = worldAt(at[0], at[1], at[2] + 0.4); hud.float(x, y, 'Interrupted!', 'int'); } }
   else if (e.k === 'die' && e.t === G.target && foes.get(e.t)) { /* keep the target until it fades so the last number reads */ }
 }
@@ -335,7 +336,7 @@ function banner2(text) { const b = document.createElement('div'); b.className = 
 
 // ---- targeting + skills ---------------------------------------------------------------------------------------------
 function setTarget(id) { G.target = id; G.pendingTarget = id; G.link?.send({ t: 'act', do: 'target', target: id }); }
-const barOf = () => { if (G.meSnap?.sb) return G.meSnap.sb; const c = heroes.current(); return c?.bar?.length ? c.bar : ['sure_strike', 'spark', 'field_mend', 'shove', null, null]; };
+const barOf = () => { if (G.meSnap?.sb) return G.meSnap.sb; const c = heroes.current(); return c?.bar?.length ? c.bar : ['sure_strike', 'spark', 'field_mend', null, null, null]; };
 function useSkill(id) {
   if (!G.me || !id) return;
   const sk = content.skills[id]; if (!sk) return;
@@ -406,7 +407,8 @@ addEventListener('keydown', e => {
   // 1 = Attack (or your class's own auto-attack), 2-7 = the six skills on your bar
   const n = /^Digit([1-7])$/.exec(e.code)?.[1];
   if (n === '1') useSkill(attackId()); else if (n) { const id = barOf()[+n - 2]; if (id) useSkill(id); }
-  if (e.code === 'KeyK') skillsUI.toggle();
+  if (e.code === 'KeyK') { if (skillsUI.open && skillsUI.page === 'skills') skillsUI.toggle(false); else skillsUI.toggle(true, 'skills'); }
+  if (e.code === 'KeyN') { if (skillsUI.open && skillsUI.page === 'talents') skillsUI.toggle(false); else skillsUI.toggle(true, 'talents'); }
 });
 /** E: the nearest thing you can use, in this order: a fallen friend (revive), loot or a chest, a portal / person / sign. */
 function interact() {
@@ -472,7 +474,8 @@ const menu = createMenu([
   { label: 'Resume', act: () => {} , when: () => !!G.me },
   { label: 'Invite friends', when: () => !!G.code, act: () => openInvite() },
   { label: 'Character and bag' + (isTouch() ? '' : ' (C)'), when: () => !!G.me, act: () => sheetUI.toggle(true) },
-  { label: 'Skills' + (isTouch() ? '' : ' (K)'), when: () => !!G.me, act: () => skillsUI.toggle(true) },
+  { label: 'Skills' + (isTouch() ? '' : ' (K)'), when: () => !!G.me, act: () => skillsUI.toggle(true, 'skills') },
+  { label: 'Talents' + (isTouch() ? '' : ' (N)'), when: () => !!G.me, act: () => skillsUI.toggle(true, 'talents') },
   { label: 'Map' + (isTouch() ? '' : ' (M)'), when: () => !!G.me, act: () => travelUI.openMap(false) },
   { label: 'Quests' + (isTouch() ? '' : ' (J)'), when: () => !!G.me, act: () => openQuestLog() },
   { label: 'Recall portal' + (isTouch() ? '' : ' (T)'), when: () => !!G.me, act: () => sendAct({ do: 'travel', via: 'recall' }) },

@@ -1,21 +1,23 @@
 // Heroes on this device (ruling 1): a list in localStorage, picked on the title screen, carried into any game.
 // Optional cloud backup through the games.radgh.com account (ruling 44, shared/rgs-cloudsave.js).
 //   const heroes = createHeroes({ root, onChange })   heroes.current() -> character   heroes.save(ch)
-import { newCharacter, cleanName, STARTER_KIT } from '../rules/character.js';
+import { newCharacter, cleanName, STARTER_KIT, starterKitFor } from '../rules/character.js';
 import { makeItem } from '../rules/items.js';
 import { makePotion } from '../rules/potions.js';
 import { loadLookData, randomLook, RACES, RACE_NAMES, avatarOf } from '../../../knockabout/js/client/look.js';
 import { svgPortrait } from '../../../../avatar-3d/js/chibi26-portrait.js';
 import { askText } from '../../../../shared/dialog.js';
+import { defaultBar } from '../sim/skills.js';
+import { classTiles, classDetail } from './class-pick.js';
 
 export const KEY = 'rogueloot.heroes.v1', PICK = 'rogueloot.hero';
 const read = () => { try { const d = JSON.parse(localStorage.getItem(KEY) || '{}'); return d && typeof d === 'object' && d.list ? d : { list: [] }; } catch { return { list: [] }; } };
 const write = d => { try { localStorage.setItem(KEY, JSON.stringify(d)); return true; } catch { return false; } };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export const titleOf = ch => `Level ${ch.level} ${ch.spec ? cap(ch.spec) : ch.path ? cap(ch.path) : 'Wanderer'}`;
+export const titleOf = ch => ch.path ? `Level ${ch.level} ${cap(ch.spec || ch.path)}` : `Level ${ch.level} · choose a class`;
 const cap = s => String(s).replace(/(^|_)(\w)/g, (_, a, b) => (a ? ' ' : '') + b.toUpperCase());
 
-export function createHeroes({ root, onChange = () => {}, items = null }) {
+export function createHeroes({ root, onChange = () => {}, items = null, content = null }) {
   let data = read(), picked = null; try { picked = localStorage.getItem(PICK); } catch { /* */ }
   let draft = null;              // the create form's hero while it is open
   const portraits = new Map();
@@ -26,11 +28,12 @@ export function createHeroes({ root, onChange = () => {}, items = null }) {
   function remove(id) { data.list = data.list.filter(c => c.id !== id); write(data); cloud?.saveSoon?.(); if (picked === id) picked = data.list[0]?.id || null; draw(); onChange(current()); }
 
   function draw() {
+    document.body.classList.toggle('creating', !!draft);       // the creator is its own screen (lessons rule 13)
     if (draft) return drawCreate();
     const cur = current();
     if (!cur) { startCreate(); return; }
     root.innerHTML = `<div class="hero-list">${data.list.map(c => `<button class="hero ${c.id === cur.id ? 'on' : ''}" data-id="${c.id}" aria-pressed="${c.id === cur.id}"><span class="face">${portrait(c.look)}</span><span class="who"><b>${esc(c.name)}</b><small>${titleOf(c)}</small></span></button>`).join('')}
-      <button class="hero new" data-new><span class="face plus">+</span><span class="who"><b>New hero</b><small>Start as a Wanderer</small></span></button></div>
+      <button class="hero new" data-new><span class="face plus">+</span><span class="who"><b>New hero</b><small>Name, look and class</small></span></button></div>
       <div class="hero-tools"><button class="del" data-del>Delete ${esc(cur.name)}…</button></div>`;
     root.querySelectorAll('[data-id]').forEach(b => b.onclick = () => pick(b.dataset.id));
     root.querySelector('[data-new]').onclick = startCreate;
@@ -39,23 +42,32 @@ export function createHeroes({ root, onChange = () => {}, items = null }) {
         .then(typed => { if (typed != null) remove(cur.id); });
     };
   }
-  function startCreate() { draft = { name: '', look: randomLook() }; draw(); }
+  function startCreate() { draft = { name: '', look: randomLook(), path: null }; draw(); }
   function drawCreate() {
-    root.innerHTML = `<div class="create"><div class="face big">${portrait(draft.look)}</div>
-      <label class="field">Name <input class="nm" maxlength="20" autocomplete="off" placeholder="Wanderer" value="${esc(draft.name)}"></label>
+    const P = content?.paths || {};
+    root.innerHTML = `<div class="create"><h2 class="create-title">New hero</h2><div class="create-look"><div class="face big">${portrait(draft.look)}</div>
+      <label class="field">Name <input class="nm" maxlength="20" autocomplete="off" placeholder="Hero" value="${esc(draft.name)}"></label>
       <div class="races">${RACES.map(r => `<button data-race="${r}" class="${draft.look.race === r ? 'on' : ''}">${RACE_NAMES[r]}</button>`).join('')}</div>
-      <div class="btns"><button data-reroll>New look</button>${data.list.length ? '<button data-cancel>Cancel</button>' : ''}<button class="primary" data-make>Create hero</button></div></div>`;
+      <button class="reroll" data-reroll>New look</button></div>
+      ${content ? `<div class="create-class"><h3 class="create-h">Class</h3>${classTiles(content, draft.path)}${classDetail(content, draft.path)}</div>` : ''}
+      <div class="btns">${data.list.length ? '<button data-cancel>Cancel</button>' : ''}<button class="primary" data-make ${content && !draft.path ? 'disabled' : ''}>${content && !draft.path ? 'Pick a class first' : `Create ${esc(P[draft.path]?.name || 'hero')}`}</button></div></div>`;
     const nm = root.querySelector('.nm'); nm.oninput = () => { draft.name = nm.value; };
     root.querySelectorAll('[data-race]').forEach(b => b.onclick = () => { let l; for (let i = 0; i < 40; i++) { l = randomLook(); if (l.race === b.dataset.race) break; } draft.look = l; drawCreate(); });
     root.querySelector('[data-reroll]').onclick = () => { const race = draft.look.race; let l; for (let i = 0; i < 40; i++) { l = randomLook(); if (l.race === race) break; } draft.look = l; drawCreate(); };
+    root.querySelectorAll('[data-class]').forEach(b => b.onclick = () => { draft.path = b.dataset.class; drawCreate(); });
     root.querySelector('[data-cancel]')?.addEventListener('click', () => { draft = null; draw(); });
-    root.querySelector('[data-make]').onclick = () => { const ch = newCharacter({ name: cleanName(draft.name), look: draft.look, kit: starterKit() }); ch.belt = [makePotion(Math.random, 'health', 'minor', 3), makePotion(Math.random, 'mana', 'minor', 2)]; draft = null; save(ch); pick(ch.id); };
+    root.querySelector('[data-make]').onclick = () => {
+      if (content && !draft.path) return;
+      const path = draft.path || null, bar = content && path ? defaultBar(content.skills, { path, spec: null, level: 1, skills: {} }) : null;
+      const ch = newCharacter({ name: cleanName(draft.name), look: draft.look, kit: starterKit(path), path, bar });
+      ch.belt = [makePotion(Math.random, 'health', 'minor', 3), makePotion(Math.random, 'mana', 'minor', 2)]; draft = null; save(ch); pick(ch.id);
+    };
   }
 
-  /** The Wanderer's starting gear, as real items (they pass the server's checks like anything else). */
-  function starterKit() {
+  /** A new hero's starting gear, as real items (they pass the server's checks like anything else). */
+  function starterKit(path = null) {
     if (!items?.bases) return {};
-    const kit = {}; for (const [slot, base] of Object.entries(STARTER_KIT)) if (items.bases[base]) kit[slot] = makeItem(items, Math.random, 1, { base, rarity: 'normal' });
+    const kit = {}; for (const [slot, base] of Object.entries(path ? starterKitFor(path) : STARTER_KIT)) if (items.bases[base]) kit[slot] = makeItem(items, Math.random, 1, { base, rarity: 'normal' });
     return kit;
   }
   // heroes made before items existed get the kit once (M6)

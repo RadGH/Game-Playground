@@ -2,13 +2,13 @@
 // your cast bar, the action bar (desktop) / skill arc (phone, ruling 21), floating numbers, the "why not" line, and the
 // death panel. Pure DOM; main.js feeds it snapshots and wires the buttons.
 import { xpAtLevel, xpToNext } from '../rules/progression.js';
-import { RES_NAME, skillText } from './skills-ui.js';
+import { RES_NAME, skillText } from '../rules/skill-text.js';
 import { skillIcon, uiIcon, itemIcon } from './icons.js';
 import { rankOf } from '../sim/skills.js';
 import { registerTip } from '../../../../shared/tooltip.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export const BAR = ['sure_strike', 'spark', 'field_mend', 'shove', null, null];        // a hero with no bar yet
+export const BAR = ['sure_strike', 'spark', 'field_mend', null, null, null];        // a hero with no bar yet
 
 const ATK_NONE = () => 'attack';
 let ATK = ATK_NONE;

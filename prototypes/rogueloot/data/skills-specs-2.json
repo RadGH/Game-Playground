@@ -65,15 +65,16 @@
    "name": "Steel Vow",
    "owner": "knight",
    "tree": "sworn_guard",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "A vow is a heavier thing than plate. More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "kni_intercept": {
@@ -134,14 +135,17 @@
    "owner": "knight",
    "tree": "sworn_guard",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [
+    "kni_steel_vow"
+   ],
    "kind": "passive",
    "desc": "Your plate was made for standing still in. Your armour counts for more.",
    "passive": {
     "stat": "armourPct",
     "value": 6,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "kni_shared_shield": {
@@ -193,9 +197,10 @@
    "owner": "knight",
    "tree": "sworn_guard",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "kni_sworn_guard"
+    "kni_quick_to_step_in"
    ],
    "kind": "synergy",
    "desc": "Sworn Guard wards for more per rank.",
@@ -285,16 +290,17 @@
    "owner": "knight",
    "tree": "sworn_guard",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "kni_steel_vow"
+    "kni_spread_the_weight"
    ],
    "kind": "passive",
    "desc": "Every blow you land mends you a little. Life on hit.",
    "passive": {
     "stat": "lifeOnHit",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "kni_unbreakable_vow": {
@@ -425,15 +431,16 @@
    "name": "Loud Steel",
    "owner": "knight",
    "tree": "challenge",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "They cannot ignore you. Everything you do draws more threat.",
    "passive": {
     "stat": "threat",
     "value": 10,
-    "perRank": 5
+    "perRank": 10
    }
   },
   "kni_shield_blow": {
@@ -556,9 +563,10 @@
    "owner": "knight",
    "tree": "challenge",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "kni_shield_blow"
+    "kni_drowned_out"
    ],
    "kind": "synergy",
    "desc": "Shield Blow lands harder: more damage per rank.",
@@ -573,7 +581,8 @@
    "owner": "knight",
    "tree": "challenge",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
     "kni_loud_steel"
    ],
@@ -582,7 +591,7 @@
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "kni_sweeping_challenge": {
@@ -745,15 +754,16 @@
    "name": "Banner Bearer",
    "owner": "knight",
    "tree": "banner",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Carrying the standard into a fight feeds the temper. More temper from every hit landed or taken.",
    "passive": {
     "stat": "rageGen",
     "value": 10,
-    "perRank": 4
+    "perRank": 8
    }
   },
   "kni_stand_together": {
@@ -815,14 +825,15 @@
    "owner": "knight",
    "tree": "banner",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "The arm that carries the banner swings the sword. More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "kni_hold_fast": {
@@ -880,16 +891,17 @@
    "owner": "knight",
    "tree": "banner",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "kni_raise_banner"
+    "kni_planted_deep"
    ],
    "kind": "synergy",
    "desc": "The banner reaches further: a wider circle per rank.",
    "synergy": {
     "skill": "kni_raise_banner",
     "stat": "radius",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "kni_guardian_banner": {
@@ -952,16 +964,17 @@
    "owner": "knight",
    "tree": "banner",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "kni_heavy_standard"
+    "kni_under_the_colours"
    ],
    "kind": "passive",
    "desc": "A drumbeat in the swing. More attack speed.",
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "kni_long_standing": {
@@ -969,16 +982,17 @@
    "owner": "knight",
    "tree": "banner",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "kni_stand_together"
+    "kni_wide_banner"
    ],
    "kind": "synergy",
    "desc": "Stand Together lasts longer: more seconds per rank.",
    "synergy": {
     "skill": "kni_stand_together",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "kni_unbroken_banner": {
@@ -1108,15 +1122,16 @@
    "name": "Quick Poisons",
    "owner": "assassin",
    "tree": "venoms",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Fast hands at the vial. Energy comes back faster.",
    "passive": {
     "stat": "energyRegen",
     "value": 8,
-    "perRank": 4
+    "perRank": 8
    }
   },
   "asn_blackroot_dart": {
@@ -1176,16 +1191,15 @@
    "owner": "assassin",
    "tree": "venoms",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [
-    "asn_venom_strike"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Venom Strike's poison lasts longer: more seconds per rank.",
    "synergy": {
     "skill": "asn_venom_strike",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "asn_fester": {
@@ -1233,14 +1247,15 @@
    "owner": "assassin",
    "tree": "venoms",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "A knife-hand that does not shake. More attack speed.",
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "asn_blood_and_bile": {
@@ -1351,9 +1366,10 @@
    "owner": "assassin",
    "tree": "venoms",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "asn_venom_strike"
+    "asn_lingering"
    ],
    "kind": "synergy",
    "desc": "Venom Strike bites deeper and its poison burns hotter: more damage per rank.",
@@ -1469,15 +1485,16 @@
    "name": "Cold Eye",
    "owner": "assassin",
    "tree": "the_setup",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "You see where the blade should go. More critical chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "asn_gutting_strike": {
@@ -1549,16 +1566,15 @@
    "owner": "assassin",
    "tree": "the_setup",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "asn_gutting_strike"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Gutting Strike cuts deeper: more damage per rank.",
    "synergy": {
     "skill": "asn_gutting_strike",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "asn_throat_cut": {
@@ -1648,7 +1664,8 @@
    "owner": "assassin",
    "tree": "the_setup",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
     "asn_cold_eye"
    ],
@@ -1657,7 +1674,7 @@
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "asn_second_mark": {
@@ -1665,16 +1682,17 @@
    "owner": "assassin",
    "tree": "the_setup",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "asn_grave_mark"
+    "asn_laid_bare"
    ],
    "kind": "synergy",
    "desc": "Grave Mark lasts longer: more seconds per rank.",
    "synergy": {
     "skill": "asn_grave_mark",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "asn_execution": {
@@ -1763,15 +1781,16 @@
    "name": "Soft Boots",
    "owner": "assassin",
    "tree": "slip_away",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "asn_decoy": {
@@ -1916,16 +1935,17 @@
    "owner": "assassin",
    "tree": "slip_away",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "asn_smoke_pouch"
+    "asn_full_pouch"
    ],
    "kind": "synergy",
    "desc": "Smoke Pouch covers more ground: a wider cloud per rank.",
    "synergy": {
     "skill": "asn_smoke_pouch",
     "stat": "radius",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "asn_knife_storm": {
@@ -1976,7 +1996,8 @@
    "owner": "assassin",
    "tree": "slip_away",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
     "asn_soft_boots"
    ],
@@ -1985,7 +2006,7 @@
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "asn_storm_edge": {
@@ -1993,10 +2014,9 @@
    "owner": "assassin",
    "tree": "slip_away",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "asn_knife_storm"
-   ],
+   "col": 3,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Knife Storm throws sharper: more damage per rank.",
    "synergy": {
@@ -2108,15 +2128,16 @@
    "name": "Cold Study",
    "owner": "frostbinder",
    "tree": "rime",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Years with the frost. More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "fro_rime_burst": {
@@ -2167,14 +2188,17 @@
    "owner": "frostbinder",
    "tree": "rime",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [
+    "fro_cold_study"
+   ],
    "kind": "passive",
    "desc": "A deeper well. More mana.",
    "passive": {
     "stat": "maxMana",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "fro_rime_spear": {
@@ -2223,10 +2247,9 @@
    "owner": "frostbinder",
    "tree": "rime",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "fro_frost_shard"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Frost Shard cuts deeper: more damage per rank.",
    "synergy": {
@@ -2290,16 +2313,17 @@
    "owner": "frostbinder",
    "tree": "rime",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "fro_cold_study"
+    "fro_deep_cold"
    ],
    "kind": "passive",
    "desc": "Cold things break along their cracks. More critical chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "fro_keen_spear": {
@@ -2307,16 +2331,17 @@
    "owner": "frostbinder",
    "tree": "rime",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "fro_rime_spear"
+    "fro_sharper_shards"
    ],
    "kind": "synergy",
    "desc": "Rime Spear hits harder: more damage per rank.",
    "synergy": {
     "skill": "fro_rime_spear",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "fro_stillfrost": {
@@ -2419,15 +2444,16 @@
    "name": "Banked Cold",
    "owner": "frostbinder",
    "tree": "whiteout",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "The cold keeps. Mana comes back faster.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "fro_ice_wall": {
@@ -2489,14 +2515,15 @@
    "owner": "frostbinder",
    "tree": "whiteout",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Numb to it. More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "fro_blizzard": {
@@ -2570,16 +2597,17 @@
    "owner": "frostbinder",
    "tree": "whiteout",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "fro_whiteout"
+    "fro_driving_snow"
    ],
    "kind": "synergy",
    "desc": "Whiteout covers more ground: a wider circle per rank.",
    "synergy": {
     "skill": "fro_whiteout",
     "stat": "radius",
-    "pctPerRank": 6
+    "pctPerRank": 12
    }
   },
   "fro_glacier": {
@@ -2640,16 +2668,17 @@
    "owner": "frostbinder",
    "tree": "whiteout",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "fro_blizzard"
+    "fro_howling_white"
    ],
    "kind": "synergy",
    "desc": "Blizzard's cold lingers: more seconds per rank.",
    "synergy": {
     "skill": "fro_blizzard",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "fro_snowblind": {
@@ -2807,15 +2836,16 @@
    "name": "Winter Skin",
    "owner": "frostbinder",
    "tree": "stillness",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "What the frost cannot touch, nothing else touches easily. Resist all.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "fro_spellrush": {
@@ -2857,14 +2887,15 @@
    "owner": "frostbinder",
    "tree": "stillness",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Nothing hurries you. Faster casts.",
    "passive": {
     "stat": "castSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "fro_freeze": {
@@ -3003,9 +3034,10 @@
    "owner": "frostbinder",
    "tree": "stillness",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "fro_ice_ward"
+    "fro_cold_focus"
    ],
    "kind": "synergy",
    "desc": "Ice Ward soaks more: a bigger ward per rank.",
@@ -3020,16 +3052,17 @@
    "owner": "frostbinder",
    "tree": "stillness",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "fro_winter_skin"
+    "fro_held_fast"
    ],
    "kind": "passive",
    "desc": "Mana comes back faster.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "fro_absolute_zero": {
@@ -3149,15 +3182,16 @@
    "name": "Charged Mind",
    "owner": "stormcaller",
    "tree": "forked",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Static in the thoughts. More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "sto_shock_mark": {
@@ -3210,14 +3244,17 @@
    "owner": "stormcaller",
    "tree": "forked",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [
+    "sto_charged_mind"
+   ],
    "kind": "passive",
    "desc": "A charge waiting to jump. More critical chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "sto_arc_lash": {
@@ -3271,16 +3308,15 @@
    "owner": "stormcaller",
    "tree": "forked",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "sto_forked_bolt"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Forked Bolt reaches further: a wider fork per rank.",
    "synergy": {
     "skill": "sto_forked_bolt",
     "stat": "radius",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "sto_storm_beam": {
@@ -3332,9 +3368,10 @@
    "owner": "stormcaller",
    "tree": "forked",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "sto_forked_bolt"
+    "sto_wider_fork"
    ],
    "kind": "synergy",
    "desc": "Forked Bolt hits harder: more damage per rank.",
@@ -3349,16 +3386,17 @@
    "owner": "stormcaller",
    "tree": "forked",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "sto_charged_mind"
+    "sto_static"
    ],
    "kind": "passive",
    "desc": "Faster casts.",
    "passive": {
     "stat": "castSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "sto_chain_tempest": {
@@ -3473,15 +3511,16 @@
    "name": "Long Breath",
    "owner": "stormcaller",
    "tree": "thunder",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Mana comes back faster.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "sto_storm_orbs": {
@@ -3537,14 +3576,17 @@
    "owner": "stormcaller",
    "tree": "thunder",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [
+    "sto_long_breath"
+   ],
    "kind": "passive",
    "desc": "Resist all.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "sto_thunderclap": {
@@ -3605,16 +3647,17 @@
    "owner": "stormcaller",
    "tree": "thunder",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "sto_thunder_ring"
+    "sto_ringing_ears"
    ],
    "kind": "synergy",
    "desc": "Thunder Ring reaches further: a wider circle per rank.",
    "synergy": {
     "skill": "sto_thunder_ring",
     "stat": "radius",
-    "pctPerRank": 7
+    "pctPerRank": 14
    }
   },
   "sto_rolling_thunder": {
@@ -3674,16 +3717,17 @@
    "owner": "stormcaller",
    "tree": "thunder",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "sto_thunderclap"
+    "sto_wider_ring"
    ],
    "kind": "synergy",
    "desc": "Thunderclap hits harder: more damage per rank.",
    "synergy": {
     "skill": "sto_thunderclap",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "sto_deep_sky": {
@@ -3691,16 +3735,17 @@
    "owner": "stormcaller",
    "tree": "thunder",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "sto_long_breath"
+    "sto_thunderhide"
    ],
    "kind": "passive",
    "desc": "More mana.",
    "passive": {
     "stat": "maxMana",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "sto_eye_of_tempest": {
@@ -3818,15 +3863,16 @@
    "name": "Light Feet",
    "owner": "stormcaller",
    "tree": "bolt_step",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "sto_wind_ward": {
@@ -3878,14 +3924,15 @@
    "owner": "stormcaller",
    "tree": "bolt_step",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 3,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "sto_crackle": {
@@ -4046,9 +4093,10 @@
    "owner": "stormcaller",
    "tree": "bolt_step",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "sto_wind_ward"
+    "sto_tailwind"
    ],
    "kind": "synergy",
    "desc": "Wind Ward soaks more: a bigger ward per rank.",
@@ -4063,16 +4111,17 @@
    "owner": "stormcaller",
    "tree": "bolt_step",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 3,
+   "maxRank": 5,
    "prereq": [
-    "sto_bolt_step"
+    "sto_knuckle_thunder"
    ],
    "kind": "synergy",
    "desc": "Bolt Step burns harder: more damage per rank.",
    "synergy": {
     "skill": "sto_bolt_step",
     "stat": "damage",
-    "pctPerRank": 8
+    "pctPerRank": 6
    }
   },
   "sto_lightning_form": {
@@ -4198,15 +4247,16 @@
    "name": "Clear Sight",
    "owner": "oracle",
    "tree": "foresight",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More healing power.",
    "passive": {
     "stat": "healPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "ora_shared_vision": {
@@ -4259,14 +4309,15 @@
    "owner": "oracle",
    "tree": "foresight",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Mana comes back faster.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "ora_second_sight": {
@@ -4274,9 +4325,10 @@
    "owner": "oracle",
    "tree": "foresight",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "ora_foresight"
+    "ora_seen_early"
    ],
    "kind": "synergy",
    "desc": "Foresight wards for more per rank.",
@@ -4414,7 +4466,8 @@
    "owner": "oracle",
    "tree": "foresight",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
     "ora_calm_mind"
    ],
@@ -4423,7 +4476,7 @@
    "passive": {
     "stat": "maxMana",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "ora_lasting_sight": {
@@ -4431,9 +4484,10 @@
    "owner": "oracle",
    "tree": "foresight",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "ora_shared_vision"
+    "ora_second_sight"
    ],
    "kind": "synergy",
    "desc": "Shared Vision wards for more per rank.",
@@ -4567,15 +4621,16 @@
    "name": "Quick Omen",
    "owner": "oracle",
    "tree": "omens",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster casts.",
    "passive": {
     "stat": "castSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "ora_good_omen": {
@@ -4620,14 +4675,15 @@
    "owner": "oracle",
    "tree": "omens",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "ora_clear_the_fog": {
@@ -4673,16 +4729,17 @@
    "owner": "oracle",
    "tree": "omens",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "ora_good_omen"
+    "ora_bright_omen"
    ],
    "kind": "synergy",
    "desc": "Good Omen mends for longer: more seconds per rank.",
    "synergy": {
     "skill": "ora_good_omen",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "ora_circle_of_omens": {
@@ -4785,7 +4842,8 @@
    "owner": "oracle",
    "tree": "omens",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
     "ora_steady_hands"
    ],
@@ -4794,7 +4852,7 @@
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "ora_fate_rewritten": {
@@ -4915,15 +4973,16 @@
    "name": "Far Seeing",
    "owner": "oracle",
    "tree": "prophecy",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "ora_prophecy": {
@@ -5027,9 +5086,10 @@
    "owner": "oracle",
    "tree": "prophecy",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "ora_fate_bolt"
+    "ora_swift_fate"
    ],
    "kind": "synergy",
    "desc": "Fate Bolt hits harder: more damage per rank.",
@@ -5139,7 +5199,8 @@
    "owner": "oracle",
    "tree": "prophecy",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
     "ora_far_seeing"
    ],
@@ -5148,7 +5209,7 @@
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "ora_omen_of_ruin": {
@@ -5315,15 +5376,16 @@
    "name": "Quick Wrist",
    "owner": "swashbuckler",
    "tree": "flourish",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More attack speed.",
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "swb_pinning_thrust": {
@@ -5374,14 +5436,17 @@
    "owner": "swashbuckler",
    "tree": "flourish",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [
+    "swb_quick_wrist"
+   ],
    "kind": "passive",
    "desc": "More critical chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "swb_deeper_thrust": {
@@ -5389,10 +5454,9 @@
    "owner": "swashbuckler",
    "tree": "flourish",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "swb_pinning_thrust"
-   ],
+   "col": 2,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Pinning Thrust goes deeper: more damage per rank.",
    "synergy": {
@@ -5492,16 +5556,17 @@
    "owner": "swashbuckler",
    "tree": "flourish",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "swb_quick_wrist"
+    "swb_keen_point"
    ],
    "kind": "passive",
    "desc": "The crowd feeds you. Energy comes back faster.",
    "passive": {
     "stat": "energyRegen",
     "value": 8,
-    "perRank": 4
+    "perRank": 8
    }
   },
   "swb_wider_sweep": {
@@ -5509,16 +5574,17 @@
    "owner": "swashbuckler",
    "tree": "flourish",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "swb_sweep"
+    "swb_clean_arc"
    ],
    "kind": "synergy",
    "desc": "Sweep reaches further: a deeper arc per rank.",
    "synergy": {
     "skill": "swb_sweep",
     "stat": "radius",
-    "pctPerRank": 6
+    "pctPerRank": 12
    }
   },
   "swb_grand_sweep": {
@@ -5615,15 +5681,16 @@
    "name": "Light Boots",
    "owner": "swashbuckler",
    "tree": "panache",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Faster on your feet.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "swb_mocking_parry": {
@@ -5700,14 +5767,15 @@
    "owner": "swashbuckler",
    "tree": "panache",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More dodge.",
    "passive": {
     "stat": "dodge",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "swb_matadors_turn": {
@@ -5764,16 +5832,17 @@
    "owner": "swashbuckler",
    "tree": "panache",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "swb_mocking_parry"
+    "swb_barbed_reply"
    ],
    "kind": "synergy",
    "desc": "Mocking Parry catches more: a bigger ward per rank.",
    "synergy": {
     "skill": "swb_mocking_parry",
     "stat": "heal",
-    "pctPerRank": 8
+    "pctPerRank": 6
    }
   },
   "swb_cutting_remark": {
@@ -5825,7 +5894,8 @@
    "owner": "swashbuckler",
    "tree": "panache",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
     "swb_nimble"
    ],
@@ -5833,8 +5903,8 @@
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "swb_the_exit": {
@@ -6013,15 +6083,16 @@
    "name": "Crowd Pleaser",
    "owner": "swashbuckler",
    "tree": "grandeur",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "swb_cape_flick": {
@@ -6073,14 +6144,15 @@
    "owner": "swashbuckler",
    "tree": "grandeur",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Every blow you land mends you a little. Life on hit.",
    "passive": {
     "stat": "lifeOnHit",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "swb_thrown_dagger": {
@@ -6129,16 +6201,17 @@
    "owner": "swashbuckler",
    "tree": "grandeur",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "swb_feint"
+    "swb_false_step"
    ],
    "kind": "synergy",
    "desc": "Flourish's flair lasts longer: more seconds per rank.",
    "synergy": {
     "skill": "swb_flourish",
     "stat": "duration",
-    "pctPerRank": 8
+    "pctPerRank": 16
    }
   },
   "swb_encore": {
@@ -6186,16 +6259,17 @@
    "owner": "swashbuckler",
    "tree": "grandeur",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "swb_crowd_pleaser"
+    "swb_bravado"
    ],
    "kind": "passive",
    "desc": "Resist all.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "swb_standing_ovation": {
@@ -6203,16 +6277,17 @@
    "owner": "swashbuckler",
    "tree": "grandeur",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "swb_encore"
+    "swb_once_more"
    ],
    "kind": "synergy",
    "desc": "Grandeur lands harder: more damage per rank.",
    "synergy": {
     "skill": "swb_grandeur",
     "stat": "damage",
-    "pctPerRank": 7
+    "pctPerRank": 6
    }
   },
   "swb_grandeur": {

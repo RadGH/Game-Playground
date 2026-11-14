@@ -1,4 +1,4 @@
-// Rogueloot item data generator. Every base row below is hand-specified (kind, drop level, speed, grid, reqs, look);
+// Rogueloot item data generator. Every base row below is hand-specified (kind, drop level, speed, reqs, look);
 // the script only turns the weapon damage ladder and armour ladder into numbers, checks ids are unique and writes JSON.
 import fs from 'node:fs';
 const OUT = new URL('../data/', import.meta.url).pathname;   // re-run: node tools/gen-items.mjs (it rewrites data/item-bases, affixes, rarity, currency, uniques, legendaries)
@@ -135,7 +135,7 @@ function weaponRow([id, name, kind, L, tier, look, extraReq, implicit]) {
   const min = Math.max(1, r(per * 0.75)), max = Math.max(min + 1, r(per * 1.25));
   const req = { ...attrReq(k.primary, L, tier), ...(extraReq || {}) };
   const row = {
-    id, name, slot: 'weapon', kind, class: k.class, hands: k.hands, tier, grid: { w: k.grid[0], h: k.grid[1] },
+    id, name, slot: 'weapon', kind, class: k.class, hands: k.hands, tier,
     proficiency: k.class, levelReq: L, req, dropLevel: L,
     damage: { min, max, speed: k.speed, dps: r(dps, 1) },
   };
@@ -230,7 +230,7 @@ function armourRow([id, name, slot, prof, L, tier, look]) {
   const p = ARMOUR_PRIMARY[prof];
   if (p) req[p] = r((prof === 'plate' ? 12 : 8) + 2 * L);
   if (prof === 'cloth') req.int = r(5 + 1 * L);
-  const row = { id, name, slot, kind: slot, tier, grid: { w: ARMOUR_GRID[slot][0], h: ARMOUR_GRID[slot][1] },
+  const row = { id, name, slot, kind: slot, tier,
     proficiency: prof, levelReq: L, req, dropLevel: L, armour, look };
   return row;
 }
@@ -245,7 +245,7 @@ const BELTS = [
 ];
 function beltRow([id, name, L, tier, slots, prof, look]) {
   const armour = r(fullSetArmour(L) * PROF_MULT[prof] * SLOT_SHARE.belt);
-  return { id, name, slot: 'belt', kind: 'belt', tier, grid: { w: 2, h: 1 }, proficiency: prof, levelReq: L, req: {},
+  return { id, name, slot: 'belt', kind: 'belt', tier, proficiency: prof, levelReq: L, req: {},
     dropLevel: L, armour, implicit: { stat: 'potionSlots', units: 'flat', value: slots }, look };
 }
 
@@ -263,7 +263,7 @@ const SHIELDS = [
 function shieldRow([id, name, L, tier, prof, bc, bm, grid, look]) {
   const armour = r(fullSetArmour(L) * PROF_MULT[prof] * SLOT_SHARE.shield);
   const req = { str: r((prof === 'plate' ? 14 : 8) + 2.2 * L) };
-  return { id, name, slot: 'offhand', kind: 'shield', class: 'shield', tier, grid: { w: grid[0], h: grid[1] }, proficiency: prof,
+  return { id, name, slot: 'offhand', kind: 'shield', class: 'shield', tier, proficiency: prof,
     levelReq: L, req, dropLevel: L, armour, block: { chance: bc, amount: r((6 + 2.2 * L) * bm) }, look };
 }
 
@@ -279,7 +279,7 @@ const FOCI = [
   ['seraph_idol', 'Seraph Idol', 50, 'masterwork', { stat: 'healingPower', units: 'pct', value: 12 }, 'focus: winged figure, warm glow'],
 ];
 function focusRow([id, name, L, tier, imp2, look]) {
-  return { id, name, slot: 'offhand', kind: 'focus', class: 'focus', tier, grid: { w: 1, h: 2 }, proficiency: 'focus',
+  return { id, name, slot: 'offhand', kind: 'focus', class: 'focus', tier, proficiency: 'focus',
     levelReq: L, req: { int: r(8 + 2 * L) }, dropLevel: L,
     implicit: { stat: 'spellPower', units: 'flat', value: r(SPELL_POWER(L) * 0.7) }, implicit2: imp2, look };
 }
@@ -290,7 +290,7 @@ const QUIVERS = [
   ['storm_quiver', 'Storm Quiver', 46, 'masterwork', 12, 'quiver: bone quiver, blue-fletched arrows'],
 ];
 function quiverRow([id, name, L, tier, asp, look]) {
-  return { id, name, slot: 'offhand', kind: 'quiver', class: 'quiver', tier, grid: { w: 1, h: 3 }, proficiency: 'quiver',
+  return { id, name, slot: 'offhand', kind: 'quiver', class: 'quiver', tier, proficiency: 'quiver',
     levelReq: L, req: { agi: r(8 + 2 * L) }, dropLevel: L, pairsWith: ['bow', 'crossbow'],
     implicit: { stat: 'attackSpeed', units: 'pct', value: asp }, look };
 }
@@ -307,7 +307,7 @@ const JEWELLERY = [
   ['eclipse_amulet', 'Eclipse Amulet', 'neck', 48, 'masterwork', 'amulet: black disc ringed with light'],
 ];
 function jewelRow([id, name, slot, L, tier, look]) {
-  return { id, name, slot, kind: slot, tier, grid: { w: 1, h: 1 }, proficiency: 'any', levelReq: L, req: {}, dropLevel: L, look };
+  return { id, name, slot, kind: slot, tier, proficiency: 'any', levelReq: L, req: {}, dropLevel: L, look };
 }
 
 const bases = [
@@ -322,14 +322,14 @@ const act1 = bases.filter(b => b.dropLevel <= 20).length;
 
 const itemBases = {
   _doc: [
-    'Rogueloot item bases. Every row is hand-specified (kind, drop level, grid, reqs, look); the damage and armour NUMBERS come from the two ladders below so the whole game scales from one place.',
+    'Rogueloot item bases. Every row is hand-specified (kind, drop level, reqs, look); the damage and armour NUMBERS come from the two ladders below so the whole game scales from one place.',
     'Weapon dps ladder: refDps(L) = 4 + 1.5*L + 0.02*L*L for a ONE-HANDED weapon at drop level L; a kind multiplies it (`kinds[kind].dps`: two-handers 1.35, bows 1.2, wands 0.6 + spell power). damage.min/max = refDps*dpsMult/speed * [0.75, 1.25]. speed = attacks per second. Monster health should be tuned so a same-level normal monster dies to ~6-10 weapon hits.',
     'Armour ladder: damage reduction = armour / (armour + K) with K = 10*attackerLevel + 50 (that is ruling 41, armour diminishing against attacker level). A full plate set at level L sums to 1.5*K(L) = 60% reduction against a same-level attacker; cloth 0.45x, leather 0.6x, mail 0.8x of plate. Slot shares: chest 35%, head 20%, feet 15%, hands 12%, belt 8%, shield 10%. The percentages a tooltip prints must be computed against the PLAYER level (what you would feel against a same-level monster).',
     'Block: chance is whole PERCENT (24 = 24%), amount is FLAT damage removed from a blocked hit.',
     'Tiers: plain (drops 1-20, Act 1 Normal), fine (21-40, Act 2 / Veteran), masterwork (41-60, Act 3 / Legend). Tiers are the D2 normal/exceptional/elite ladder: same shapes, bigger numbers.',
     'levelReq: the character level needed = max(base.levelReq, ceil(0.8 * ilvlMin of the item\'s highest affix tier)) — see affixes.json. req: minimum ATTRIBUTES (str/agi/int/spi). proficiency: the armour weight or weapon class the character\'s Path must allow (`proficiency` table below). dropLevel: the lowest ITEM LEVEL at which this base can be rolled (rarity.json `basePick` says how a base is chosen).',
     'Units: every `pct` value is whole percentage points (4 = +4%). Code converts with /100 in ONE place. Never store fractions.',
-    'grid: w x h cells in the 10x4 bag (ruling 11). hands: 2 = takes the off-hand slot too. offhandOk: may be held in the off hand by a dual-wielding Path (Rogue). pairsWith: a quiver only works with a bow or crossbow in the main hand.',
+    'Every item takes one square of the 10x4 bag (owner 2026-11-13). hands: 2 = takes the off-hand slot too. offhandOk: may be held in the off hand by a dual-wielding Path (Rogue). pairsWith: a quiver only works with a bow or crossbow in the main hand.',
     'look: a hint for the Chibi 2.6 model (avatar-3d gear-catalog kinds first: dagger/sword/axe/mace/bow/crossbow/staff/wand, hood/cap/helm, robe/jerkin/hauberk/cuirass, gloves, shoes/boots, shield/focus/quiver, belt, ring/amulet).',
     `Counts: ${bases.length} bases, ${act1} droppable in Act 1 (dropLevel <= 20).`,
   ].join(' '),
@@ -342,7 +342,7 @@ const itemBases = {
     attributeReq: 'characters start at 12 in each attribute (+5 a level). weapons: primary attribute 8 + 2.5*L; leather agi 8 + 2L; mail str 8 + 2L; plate str 12 + 2L; cloth int 5 + L',
   },
   kinds: Object.fromEntries(Object.entries(KINDS).map(([k, v]) => [k, { class: v.class, hands: v.hands, speed: v.speed, dpsMult: v.dps,
-    grid: { w: v.grid[0], h: v.grid[1] }, ranged: !!v.ranged, offhandOk: !!v.offhandOk, caster: !!v.caster, primary: v.primary }])),
+    ranged: !!v.ranged, offhandOk: !!v.offhandOk, caster: !!v.caster, primary: v.primary }])),
   proficiency: {
     _doc: 'Which armour weights and weapon classes each Path (and the two first hybrid specs) may use. Wanderer is level 1-2. A spec ADDS to its Path (plate at the spec pick, ruling 2). Mage stays cloth so cloth never becomes pointless; the Spellblade hybrid gets leather at 10. Healer hybrids (Paladin) get mail then plate at 10.',
     wanderer: { armour: ['cloth', 'leather'], weapons: ['dagger', 'sword', 'mace', 'bow', 'wand', 'staff'], offhand: ['shield', 'focus', 'quiver'], dualWield: false },
@@ -587,8 +587,8 @@ const currency = {
     'DUST: `shard_dust` is the small change. Salvage always gives some; 20 dust of a grade make one Glimmer of that grade at the crafter, and that is all it does. It carries a grade like a shard.',
   ].join(' '),
   grades: GRADES,
-  shards: SHARDS.map(([id, name, does, fromLevel, weight, vendor, rule]) => ({ id, name, does, fromAreaLevel: fromLevel, dropWeight: weight, vendorPriceGrade1: vendor, rule, grid: { w: 1, h: 1 }, stack: 50 })),
-  dust: { id: 'shard_dust', name: 'Shard Dust', grid: { w: 1, h: 1 }, stack: 200, toGlimmer: 20 },
+  shards: SHARDS.map(([id, name, does, fromLevel, weight, vendor, rule]) => ({ id, name, does, fromAreaLevel: fromLevel, dropWeight: weight, vendorPriceGrade1: vendor, rule, stack: 50 })),
+  dust: { id: 'shard_dust', name: 'Shard Dust', stack: 200, toGlimmer: 20 },
   drop: {
     _doc: 'per kill per player: chance (whole percent, keyframes by area level) that ONE currency item drops; then pick a shard by dropWeight among those with fromAreaLevel <= area level; the grade is the one whose [ilvlMin, ilvlMax] holds the area level (dropAreaMin lets the next grade appear a couple of levels early at `earlyGradePct`). Monster kinds multiply the chance.',
     chancePct: [[1, 5], [10, 7], [20, 9], [40, 11], [60, 13]],
@@ -629,7 +629,7 @@ write('currency.json', currency);
 // stats: [stat, units, min, max]; the item rolls each once at drop (Polish rerolls them).
 const U = (id, name, base, levelReq, weight, stats, extra = {}) => ({ id, name, base, levelReq, weight, stats: stats.map(([stat, units, min, max]) => ({ stat, units, min, max })), ...extra });
 const uniques = {
-  _doc: 'Act 1 uniques (ruling 38: scarce, never zero). `base` is an item-bases.json id (the unique keeps the base\'s damage/armour and grid; `baseMult` scales the base damage or armour). `stats` are rolled once inside [min, max] at drop and may be re-rolled by a Polish Shard. `rule` is a special that no affix gives (plain text + an object a programmer can implement). `weight` is the pick weight among eligible uniques (rarity.json `uniques`). Units follow affixes.json: pct = whole percentage points. levelReq overrides the base. A unique never gets random affixes.',
+  _doc: 'Act 1 uniques (ruling 38: scarce, never zero). `base` is an item-bases.json id (the unique keeps the base\'s damage/armour; `baseMult` scales the base damage or armour). `stats` are rolled once inside [min, max] at drop and may be re-rolled by a Polish Shard. `rule` is a special that no affix gives (plain text + an object a programmer can implement). `weight` is the pick weight among eligible uniques (rarity.json `uniques`). Units follow affixes.json: pct = whole percentage points. levelReq overrides the base. A unique never gets random affixes.',
   items: [
     U('toll_ring', 'Toll Ring', 'copper_ring', 2, 100, [['goldFind', 'pct', 15, 25], ['vit', 'flat', 2, 3], ['lightRadius', 'flat', 1, 1]], { lore: 'Every traveller paid it once.', look: 'ring: dull copper with a coin set in it' }),
     U('hollow_reed', 'Hollow Reed', 'willow_wand', 3, 90, [['spellPower', 'flat', 5, 8], ['castSpeed', 'pct', 10, 15], ['manaOnKill', 'flat', 3, 5]], { baseMult: 1.1, lore: 'Whistles when it is pointed at something that should not be there.', look: 'wand: pale hollow reed with a green glow inside' }),

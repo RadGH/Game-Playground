@@ -8,6 +8,7 @@ import { resolve } from './move.js';
 import { inside } from './abilities.js';
 import { summon } from './allies.js';
 import { shapeSkill } from './legendary.js';
+import { skillRankAt, ownsTree, talentOpen, modsFor, isTalent, unlockedAt } from './talents.js';
 
 export const RES_OF = { fighter: 'rage', rogue: 'energy' };          // everyone else: mana
 export const resourceOf = ch => RES_OF[ch?.path] || 'mana';
@@ -19,8 +20,10 @@ export function rankOf(ch, sk, stanceBar = null) {
   if (!sk) return 0;
   if (stanceBar?.includes(sk.id)) return (ch?.level || 1) >= (sk.reqLevel || 1) ? Math.max(1, ch?.skills?.[sk.id] || 1) : (ch?.skills?.[sk.id] || 0);   // a stance's bar grants its skills at rank 1, but not below their level
   if (sk.owner === 'wanderer' || sk.owner === 'all') return Math.max(1, ch?.skills?.[sk.id] || 1);
-  if (sk.owner !== ch?.path && sk.owner !== ch?.spec) return 0;
-  return ch?.skills?.[sk.id] || 0;
+  if (!ownsTree(ch, sk)) return 0;
+  if (sk.stanceOnly) return 0;                                            // only through its stance's bar (above)
+  if (sk.kind === 'active') return skillRankAt(sk, ch.level || 1);          // skills unlock and grow by level (docs/TALENTS.md)
+  return talentOpen(ch, sk) ? (ch?.skills?.[sk.id] || 0) : 0;               // talents: the points spent
 }
 /** A skill row with every perRank increment applied for rank r (arrays add element-wise). */
 export function atRank(row, r) {
@@ -37,7 +40,8 @@ export function atRank(row, r) {
 /** Synergies: other skills' ranks that raise this one ({ damage, heal, duration, radius } as multipliers). */
 export function synergyOf(skills, ch, id) {
   const m = { damage: 1, heal: 1, duration: 1, radius: 1 };
-  for (const [sid, r] of Object.entries(ch?.skills || {})) { const s = skills[sid]; if (s?.kind === 'synergy' && s.synergy?.skill === id && r > 0) m[s.synergy.stat] = (m[s.synergy.stat] || 1) + s.synergy.pctPerRank * r / 100; }
+  for (const [sid, r] of Object.entries(ch?.skills || {})) { const s = skills[sid]; if (s?.kind === 'synergy' && s.synergy?.skill === id && r > 0 && ownsTree(ch, s) && talentOpen(ch, s)) m[s.synergy.stat] = (m[s.synergy.stat] || 1) + s.synergy.pctPerRank * r / 100; }
+  const t = modsFor(skills, ch, id); for (const k of ['damage', 'heal', 'duration', 'radius']) if (t[k]) m[k] += t[k] / 100;
   return m;
 }
 /** What a skill costs this hero, in which resource. */
@@ -48,6 +52,7 @@ export function costOf(skills, resources, ch, sk, rank) {
   let [kind, n] = Object.entries(alt || sk.cost || {})[0] || ['mana', 0];
   n = (n || 0) + (sk.costPerRank || 0) * (rank - 1);
   if ((sk.owner === 'wanderer' || sk.owner === 'all') && kind === 'mana' && res !== 'mana') { const m = resources?.wandererSkillsAfterPath?.[ch.path]; kind = res; n *= m?.mult ?? 1; }
+  if (skills) { const c = modsFor(skills, ch, sk.id).cost; if (c) n *= 1 - Math.min(60, c) / 100; }   // talents: cheaper
   return { kind, n: Math.round(n) };
 }
 const have = (p, kind) => kind === 'health' ? Math.max(0, p.hp / p.maxHp * 100 - 30) : kind === 'mana' ? p.mana : kind === 'rage' ? p.rage || 0 : p.energy || 0;   // health: percent of max, never below 30%
@@ -94,12 +99,13 @@ export function castSkill(w, p, sk, targetId, point) {
   if (row.spendAll) { extra = Math.max(0, have(p, cost.kind) - cost.n); spend(p, cost.kind, cost.n + extra); } else spend(p, cost.kind, cost.n);
   const extraMult = row.perResourceSpent?.mult ? extra * row.perResourceSpent.mult : 0;
   if (row.gcd ?? true) p.gcdUntil = w.time + GCD;
-  const cdSecs = (row.cd || 0) * (1 - Math.min(40, p.st.cooldownReduction || 0) / 100) * (1 - Math.min(50, fxPct(p, 'cdRefund')) / 100);
+  const tm = modsFor(S, ch, sk.id);
+  const cdSecs = (row.cd || 0) * (1 - Math.min(40, p.st.cooldownReduction || 0) / 100) * (1 - Math.min(50, fxPct(p, 'cdRefund')) / 100) * (1 - Math.min(50, tm.cooldown) / 100);
   if (lctx.charges) { if (cdSecs) { const used = p.charge[sk.id]; used.push(Math.max(w.time, ...used) + cdSecs); } }
   else if (row.cd) p.cds[sk.id] = w.time + cdSecs;
   lctx.costN = cost.n; lctx.skill = sk.id;
   if (t && t !== p) p.yaw = Math.atan2(t.x - p.x, t.z - p.z); else if (at) p.yaw = Math.atan2(at.x - p.x, at.z - p.z);
-  const castT = (row.cast || 0) / (1 + (p.st.castSpeed || 0) / 100 + fxPct(p, 'castSpeed') / 100);
+  const castT = (row.cast || 0) / (1 + (p.st.castSpeed || 0) / 100 + fxPct(p, 'castSpeed') / 100 + tm.cast / 100);
   if (castT > 0 || row.channel) {
     p.cast = { skill: sk.id, rank, extraMult, shaped, target: t?.id ?? null, at, start: w.time, end: w.time + (castT || row.channel), channel: !castT && row.channel ? row.channel : 0, ticks: 0 };
     w.events.push({ k: 'cast', s: p.id, sk: sk.id, t: castT || row.channel, ch: !castT && !!row.channel });
@@ -237,9 +243,10 @@ let hurtFn = null, weaponFn = null, healMostHurtFn = () => {};
 /** One swing of a class auto-attack (no cost, no global cooldown): its effects at its rank, like a cast that lands now. */
 export function runAutoSkill(w, p, sk, t) { const rank = Math.max(1, rankOf(p.char, sk)); run(w, p, sk, rank, t, { x: t.x, z: t.z }, false, 0, shapeSkill(w, p, sk, atRank(sk, rank))); }
 export function wireSkills({ hurt, weaponHit, healMostHurt }) { hurtFn = hurt; weaponFn = weaponHit; healMostHurtFn = healMostHurt; }
-function weaponBlow(w, p, t, mult, ctx) { return weaponFn(w, p, t, mult * (1 + fxPct(p, 'damage') / 100) * markOf(t), { threat: ctx.row.threat ?? 1 }); }
+const critOf = (w, p, ctx) => (ctx?.sk ? modsFor(w.content.skills, p.char, ctx.sk.id).crit : 0);
+function weaponBlow(w, p, t, mult, ctx) { return weaponFn(w, p, t, mult * (1 + fxPct(p, 'damage') / 100) * markOf(t), { threat: ctx.row.threat ?? 1, critBonus: critOf(w, p, ctx) }); }
 function spellHit(w, p, t, amount, type, ctx) {
-  const r = resolveHit({ ...p, crit: p.crit + fxPct(p, 'crit') }, armourAfter(t), { amount: amount * markOf(t), type, spell: type !== 'physical' }, w.rng);
+  const r = resolveHit({ ...p, crit: p.crit + fxPct(p, 'crit') }, armourAfter(t), { amount: amount * markOf(t), type, spell: type !== 'physical', critBonus: critOf(w, p, ctx) }, w.rng);
   hurtFn(w, p, t, r, type, (ctx.row.threat ?? 1) * (1 + (p.st.threat || 0) / 100));
   return r;
 }
@@ -251,34 +258,38 @@ function healTarget(w, p, t, n) {
   for (const f of w.foes.values()) if (!f.dead && f.threat.has(t.id)) addThreat(f.threat, p.id, done * THREAT.healing);
 }
 
-/** Path pick at level 3 (ruling 2/29): grants the starters at rank 1. */
+/** The class (Path) pick: made when the hero is created (owner 2026-11-13); an older save without one picks it before
+ *  playing. Skills come by level, so nothing is granted here; the bar is filled with what is open. */
 export function pickPath(w, p, path) {
-  const P = w.content.paths?.[path]; if (!P) return { err: 'No such Path.' };
-  const ch = p.char; if (ch.path) return { err: 'You already walk a Path.' };
-  if (ch.level < 3) return { err: 'Choose a Path at level 3.' };
-  const skills = { ...(ch.skills || {}) }; for (const id of P.starter || []) skills[id] = Math.max(1, skills[id] || 0);
-  p.char = { ...ch, path, skills, bar: defaultBar(w.content.skills, { ...ch, path, skills }) };
+  const P = w.content.paths?.[path]; if (!P) return { err: 'No such class.' };
+  const ch = p.char; if (ch.path) return { err: 'You already have a class.' };
+  const next = { ...ch, path };
+  p.char = { ...next, bar: defaultBar(w.content.skills, next) };
   return { ok: true };
 }
-/** Spend a skill point (ruling 10): level gate, prerequisites, max rank. */
+/** Spend a talent point (docs/TALENTS.md): your class or spec tree, its row's level, its prerequisites, its max rank. */
 export function learn(w, p, id) {
   const sk = w.content.skills[id], ch = p.char;
-  if (!sk || sk.owner === 'all') return { err: 'No such skill.' };
-  if (sk.owner !== 'wanderer' && sk.owner !== ch.path && sk.owner !== ch.spec) return { err: 'That belongs to another Path.' };
-  if ((ch.skillPoints || 0) < 1) return { err: 'No skill points left.' };
-  const now = ch.skills?.[id] || (sk.owner === 'wanderer' ? 1 : 0);
+  if (!sk) return { err: 'No such talent.' };
+  if (!isTalent(sk)) return { err: 'Skills unlock by themselves as you level.' };
+  if (!ownsTree(ch, sk)) return { err: 'That belongs to another class.' };
+  if (!talentOpen(ch, sk)) return { err: 'That talent is for another specialization.' };
+  if ((ch.skillPoints || 0) < 1) return { err: 'No talent points left.' };
+  const now = ch.skills?.[id] || 0;
   if (now >= (sk.maxRank || 1)) return { err: 'Already at its best.' };
   if (ch.level < (sk.reqLevel || 1)) return { err: `Needs level ${sk.reqLevel}.` };
   for (const pre of sk.prereq || []) if (!(ch.skills?.[pre] > 0)) return { err: `Learn ${w.content.skills[pre]?.name || pre} first.` };
-  const skills = { ...(ch.skills || {}), [id]: now + 1 };
-  let bar = ch.bar || [];
-  if (sk.kind === 'active' && !sk.hidden && !sk.autoAttack && !bar.includes(id) && now === 0) {   // a class auto-attack lives in slot 1
-    // a new skill goes on the bar: an empty slot, else over the last Wanderer skill (players rarely think to swap them)
-    if (bar.filter(Boolean).length < 6) bar = [...bar.filter(Boolean), id];
-    else { let k = -1; for (let i = bar.length - 1; i >= 0; i--) if (w.content.skills[bar[i]]?.owner === 'wanderer') { k = i; break; } if (k >= 0) { bar = [...bar]; bar[k] = id; } }
-  }
-  p.char = { ...ch, skills, skillPoints: ch.skillPoints - 1, bar };
+  p.char = { ...ch, skills: { ...(ch.skills || {}), [id]: now + 1 }, skillPoints: ch.skillPoints - 1 };
   return { ok: true };
+}
+/** After a level-up: skills that open at this level go on the bar if a slot is free. Returns their ids. */
+export function unlockSkills(w, p, L) {
+  const got = unlockedAt(w.content.skills, p.char, L).filter(s => !s.autoAttack);
+  if (!got.length) return [];
+  const bar = [...(p.char.bar || [])]; while (bar.length < 6) bar.push(null);
+  for (const s of got) { if (bar.includes(s.id)) continue; const i = bar.indexOf(null); if (i >= 0) bar[i] = s.id; }
+  p.char = { ...p.char, bar };
+  return got.map(s => s.id);
 }
 /** The action bar (6 slots): set slot i to a known active skill (or empty). */
 export function setBar(w, p, i, id) {
@@ -290,23 +301,25 @@ export function setBar(w, p, i, id) {
   bar[i] = id || null; p.char = { ...p.char, bar };
   return { ok: true };
 }
+/** The bar a hero starts with: their class's (and spec's) open skills first, newest-level last, common skills after. */
 export function defaultBar(skills, ch) {
-  const known = Object.values(skills).filter(s => s.kind === 'active' && !s.autoAttack && rankOf(ch, s) > 0 && s.owner !== 'all');
-  known.sort((a, b) => (a.owner === 'wanderer') - (b.owner === 'wanderer') || (a.reqLevel || 1) - (b.reqLevel || 1));
+  const known = Object.values(skills).filter(s => s.kind === 'active' && !s.autoAttack && !s.hidden && rankOf(ch, s) > 0 && s.owner !== 'all');
+  known.sort((a, b) => (a.owner === 'wanderer') - (b.owner === 'wanderer') || (b.owner === ch.spec) - (a.owner === ch.spec) || (a.reqLevel || 1) - (b.reqLevel || 1));
   const bar = known.slice(0, 6).map(s => s.id); while (bar.length < 6) bar.push(null);
   return bar;
 }
 
-/** The spec pick at level 10 (ruling 2/29): the spec must belong to the hero's Path; its armour comes with it. */
+/** The spec pick at level 10 (ruling 2/29): the spec must belong to the hero's class; its armour comes with it, and
+ *  its skills open by level from here. */
 export function pickSpec(w, p, spec) {
   const S = w.content.specs?.[spec], ch = p.char;
   if (!S) return { err: 'No such specialization.' };
-  if (!ch.path) return { err: 'Choose a Path first.' };
+  if (!ch.path) return { err: 'Choose a class first.' };
   if (ch.spec) return { err: 'You already have a specialization. The trainer in town can change it.' };
   if (ch.level < 10) return { err: 'Specializations open at level 10.' };
-  if (!(S.paths || []).includes(ch.path)) return { err: `${S.name} is not open to your Path.` };
-  const skills = { ...(ch.skills || {}) }; for (const id of S.starter || []) if (w.content.skills[id]) skills[id] = Math.max(1, skills[id] || 0);
-  p.char = { ...ch, spec, skills, bar: defaultBar(w.content.skills, { ...ch, spec, skills }) };
+  if (!(S.paths || []).includes(ch.path)) return { err: `${S.name} is not open to your class.` };
+  const next = { ...ch, spec };
+  p.char = { ...next, bar: defaultBar(w.content.skills, next) };
   return { ok: true };
 }
 export const respecPointsCost = L => Math.round(20 + 12 * L * L / 4);
@@ -315,21 +328,19 @@ export const respecSpecCost = L => Math.round(500 + 60 * L * L);
 export function respec(w, p, a) {
   const ch = p.char, near = (w.area.markers || []).some(m => m.kind === 'npc' && m.id === 'trainer' && Math.hypot(p.x - m.x, p.z - m.z) < 5);
   if (!near) return { err: 'The trainer in town does that.' };
-  // the Path's and the spec's starter skills were free (rank 1): they are not refunded, and stay (or swap to the new spec's)
-  const freeIds = new Set([...(w.content.paths?.[ch.path]?.starter || []), ...(w.content.specs?.[ch.spec]?.starter || [])]);
-  const refunded = Object.entries(ch.skills || {}).reduce((n, [id, r]) => { const s = w.content.skills[id]; if (!s || s.owner === 'wanderer') return n; return n + Math.max(0, r - (freeIds.has(id) ? 1 : 0)); }, 0);
-  const startersOf = spec => Object.fromEntries([...(w.content.paths?.[ch.path]?.starter || []), ...(w.content.specs?.[spec]?.starter || [])].filter(id => w.content.skills[id]).map(id => [id, 1]));
-  const keep = startersOf(ch.spec);
+  // every talent point comes back; skills are untouched (they come by level)
+  const refunded = Object.entries(ch.skills || {}).reduce((n, [id, r]) => n + (isTalent(w.content.skills[id]) ? r : 0), 0);
+  const keep = {};
   if (a.op === 'points') {
     const cost = respecPointsCost(ch.level); if ((ch.gold || 0) < cost) return { err: `It costs ${cost} gold.` };
-    p.char = { ...ch, gold: ch.gold - cost, skills: keep, skillPoints: (ch.skillPoints || 0) + refunded, bar: defaultBar(w.content.skills, { ...ch, skills: keep }) };
+    p.char = { ...ch, gold: ch.gold - cost, skills: keep, skillPoints: (ch.skillPoints || 0) + refunded, bar: ch.bar };
     return { ok: true };
   }
   if (a.op === 'spec') {
     const S = w.content.specs?.[a.spec]; if (!S || !(S.paths || []).includes(ch.path)) return { err: 'That specialization is not open to your Path.' };
     if (a.spec === ch.spec) return { err: 'You already follow it.' };
     const cost = respecSpecCost(ch.level); if ((ch.gold || 0) < cost) return { err: `Changing costs ${cost} gold.` };
-    const fresh = startersOf(a.spec);
+    const fresh = {};
     p.char = { ...ch, gold: ch.gold - cost, spec: a.spec, skills: fresh, skillPoints: (ch.skillPoints || 0) + refunded, bar: defaultBar(w.content.skills, { ...ch, spec: a.spec, skills: fresh }) };
     return { ok: true };
   }

@@ -44,15 +44,16 @@
    "name": "Battle Hunger",
    "owner": "vanguard",
    "tree": "thick_of_it",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "A crowd feeds you. Every hit you land or take gives more temper.",
    "passive": {
     "stat": "rageGen",
     "value": 10,
-    "perRank": 4
+    "perRank": 8
    }
   },
   "van_iron_gyre": {
@@ -106,14 +107,15 @@
    "owner": "vanguard",
    "tree": "thick_of_it",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Plate on your shoulders and a heavier swing. More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "van_open_wounds": {
@@ -121,9 +123,10 @@
    "owner": "vanguard",
    "tree": "thick_of_it",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "van_crowd_swing"
+    "van_wide_shoulders"
    ],
    "kind": "synergy",
    "desc": "Crowd Swing bites deeper: more damage per rank.",
@@ -190,7 +193,8 @@
    "owner": "vanguard",
    "tree": "thick_of_it",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
     "van_heavy_arms"
    ],
@@ -199,7 +203,7 @@
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "van_whirl_on": {
@@ -207,9 +211,10 @@
    "owner": "vanguard",
    "tree": "thick_of_it",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "van_iron_gyre"
+    "van_clean_hew"
    ],
    "kind": "synergy",
    "desc": "Iron Gyre spins harder: more damage per rank.",
@@ -309,15 +314,16 @@
    "name": "Thick Plate",
    "owner": "vanguard",
    "tree": "iron_will",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "You wear plate like skin. Your armour counts for more.",
    "passive": {
     "stat": "armourPct",
     "value": 6,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "van_iron_resolve": {
@@ -375,7 +381,8 @@
    "owner": "vanguard",
    "tree": "iron_will",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
     "van_thick_plate"
    ],
@@ -383,8 +390,8 @@
    "desc": "More health. Simply more.",
    "passive": {
     "stat": "maxHp",
-    "value": 5,
-    "perRank": 2
+    "value": 10,
+    "perRank": 8
    }
   },
   "van_bulwark_blow": {
@@ -431,7 +438,8 @@
    "owner": "vanguard",
    "tree": "iron_will",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
     "van_unmoved"
    ],
@@ -440,7 +448,7 @@
    "passive": {
     "stat": "lifeOnHit",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "van_stand_fast": {
@@ -593,15 +601,16 @@
    "name": "Find the Gap",
    "owner": "vanguard",
    "tree": "breaking_line",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "You see where the armour is thin. More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "van_hammer_blow": {
@@ -647,9 +656,10 @@
    "owner": "vanguard",
    "tree": "breaking_line",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "van_hammer_blow"
+    "van_cracked_plate"
    ],
    "kind": "synergy",
    "desc": "Hammer Blow lands with the whole body behind it: more damage per rank.",
@@ -728,10 +738,9 @@
    "owner": "vanguard",
    "tree": "breaking_line",
    "reqLevel": 18,
+   "col": 0,
    "maxRank": 1,
-   "prereq": [
-    "van_hammer_blow"
-   ],
+   "prereq": [],
    "kind": "passive",
    "desc": "The front of the line needs no shield: hold a two-handed weapon in each hand. The off-hand weapon swings on its own clock for half its damage (bows and crossbows still need both hands). A one-handed weapon can go in the off hand too.",
    "passive": {
@@ -863,15 +872,16 @@
    "name": "Steady Hand",
    "owner": "ranger",
    "tree": "far_shot",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "A still hand and a still breath. More ranged power.",
    "passive": {
     "stat": "rangedPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "rgr_full_draw": {
@@ -908,14 +918,17 @@
    "owner": "ranger",
    "tree": "far_shot",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [
+    "rgr_steady_hand"
+   ],
    "kind": "passive",
    "desc": "Nock, draw, loose, without a wasted motion. Energy comes back faster.",
    "passive": {
     "stat": "energyRegen",
     "value": 8,
-    "perRank": 4
+    "perRank": 8
    }
   },
   "rgr_piercing": {
@@ -961,9 +974,10 @@
    "owner": "ranger",
    "tree": "far_shot",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "rgr_full_draw"
+    "rgr_longer_draw"
    ],
    "kind": "synergy",
    "desc": "Full Draw flies truer: more damage per rank.",
@@ -1016,7 +1030,8 @@
    "owner": "ranger",
    "tree": "far_shot",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
     "rgr_true_aim"
    ],
@@ -1024,8 +1039,8 @@
    "desc": "You see the eye, the throat, the gap in the plate. More critical hit chance.",
    "passive": {
     "stat": "crit",
-    "value": 3,
-    "perRank": 1.5
+    "value": 2,
+    "perRank": 2
    }
   },
   "rgr_arrow_storm": {
@@ -1152,16 +1167,17 @@
    "owner": "ranger",
    "tree": "the_hunt",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "rgr_quarry"
+    "rgr_marked_for_pack"
    ],
    "kind": "passive",
    "desc": "You have looked at a lot of animals. More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "rgr_savage": {
@@ -1231,9 +1247,10 @@
    "owner": "ranger",
    "tree": "the_hunt",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "rgr_quarry"
+    "rgr_hunters_eye"
    ],
    "kind": "synergy",
    "desc": "Quarry lasts longer: more seconds per rank.",
@@ -1277,16 +1294,15 @@
    "owner": "ranger",
    "tree": "the_hunt",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "rgr_savage"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "passive",
    "desc": "You walk like something that lives out here. More move speed.",
    "passive": {
     "stat": "moveSpeed",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "rgr_wild_call": {
@@ -1390,15 +1406,16 @@
    "name": "Light Step",
    "owner": "ranger",
    "tree": "snarework",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Brush and scree do not slow you. More move speed.",
    "passive": {
     "stat": "moveSpeed",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "rgr_tracker_leap": {
@@ -1565,10 +1582,9 @@
    "owner": "ranger",
    "tree": "snarework",
    "reqLevel": 16,
-   "maxRank": 10,
-   "prereq": [
-    "rgr_hunters_snare"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Hunter's Snare holds longer: more seconds per rank.",
    "synergy": {
@@ -1726,15 +1742,16 @@
    "name": "Dry Tinder",
    "owner": "pyromancer",
    "tree": "kindling",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Everything you touch catches. More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "pyr_scorch": {
@@ -1794,14 +1811,17 @@
    "owner": "pyromancer",
    "tree": "kindling",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [
+    "pyr_dry_tinder"
+   ],
    "kind": "passive",
    "desc": "The words come faster. More cast speed.",
    "passive": {
     "stat": "castSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "pyr_fan_flames": {
@@ -1809,9 +1829,10 @@
    "owner": "pyromancer",
    "tree": "kindling",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "pyr_kindle"
+    "pyr_cinder_habit"
    ],
    "kind": "synergy",
    "desc": "Kindle burns hotter: more damage per rank.",
@@ -1875,9 +1896,10 @@
    "owner": "pyromancer",
    "tree": "kindling",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "pyr_scorch"
+    "pyr_tinder_mind"
    ],
    "kind": "synergy",
    "desc": "Scorch burns longer: more seconds per rank.",
@@ -1892,16 +1914,17 @@
    "owner": "pyromancer",
    "tree": "kindling",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "pyr_fan_flames"
+    "pyr_flash_point"
    ],
    "kind": "passive",
    "desc": "You see where the fire wants to go. More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "pyr_immolate": {
@@ -2023,15 +2046,16 @@
    "name": "Banked Coals",
    "owner": "pyromancer",
    "tree": "wildfire",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "A deeper well to draw on. More mana.",
    "passive": {
     "stat": "maxMana",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "pyr_fallstone": {
@@ -2135,10 +2159,9 @@
    "owner": "pyromancer",
    "tree": "wildfire",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "pyr_burning_line"
-   ],
+   "col": 2,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Burning Line burns hotter: more damage per rank.",
    "synergy": {
@@ -2206,9 +2229,10 @@
    "owner": "pyromancer",
    "tree": "wildfire",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "pyr_firestorm"
+    "pyr_stoked_storm"
    ],
    "kind": "synergy",
    "desc": "Firestorm covers more ground: a bigger circle per rank.",
@@ -2343,15 +2367,16 @@
    "name": "Warm Skin",
    "owner": "pyromancer",
    "tree": "the_familiar",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Fire, frost, storm, poison and shadow all find you harder to touch. More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "pyr_cinder_stride": {
@@ -2551,16 +2576,17 @@
    "owner": "pyromancer",
    "tree": "the_familiar",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "pyr_flame_shell"
+    "pyr_second_skin"
    ],
    "kind": "passive",
    "desc": "The fire banks itself between casts. More mana a second.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "pyr_pyre_heart": {
@@ -2686,15 +2712,16 @@
    "name": "Deep Well",
    "owner": "cleric",
    "tree": "overflow",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More to draw on. More mana.",
    "passive": {
     "stat": "maxMana",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "clr_guardian_light": {
@@ -2752,14 +2779,17 @@
    "owner": "cleric",
    "tree": "overflow",
    "reqLevel": 12,
-   "maxRank": 10,
-   "prereq": [],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [
+    "clr_deep_well"
+   ],
    "kind": "passive",
    "desc": "Every heal lands a little fuller. More healing power.",
    "passive": {
     "stat": "healPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "clr_barrier": {
@@ -2804,9 +2834,10 @@
    "owner": "cleric",
    "tree": "overflow",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "clr_brightmend"
+    "clr_menders_habit"
    ],
    "kind": "synergy",
    "desc": "Brightmend heals for more: more per rank.",
@@ -2859,9 +2890,10 @@
    "owner": "cleric",
    "tree": "overflow",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "clr_barrier"
+    "clr_watchful_light"
    ],
    "kind": "synergy",
    "desc": "Barrier of Faith holds more: a bigger ward per rank.",
@@ -2995,15 +3027,16 @@
    "name": "Steady Faith",
    "owner": "cleric",
    "tree": "sanctuary",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Prayer between the casts. More mana a second.",
    "passive": {
     "stat": "manaRegen",
     "value": 0.6,
-    "perRank": 0.3
+    "perRank": 0.6
    }
   },
   "clr_circle": {
@@ -3092,9 +3125,10 @@
    "owner": "cleric",
    "tree": "sanctuary",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "clr_sanctuary"
+    "clr_longer_welcome"
    ],
    "kind": "synergy",
    "desc": "Sanctuary covers more ground: a bigger circle per rank.",
@@ -3109,9 +3143,10 @@
    "owner": "cleric",
    "tree": "sanctuary",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 2,
+   "maxRank": 5,
    "prereq": [
-    "clr_circle"
+    "clr_wide_radiance"
    ],
    "kind": "synergy",
    "desc": "Circle of Light heals for more: more per rank.",
@@ -3329,15 +3364,16 @@
    "name": "Bright Mind",
    "owner": "cleric",
    "tree": "falling_light",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "clr_falling_light": {
@@ -3454,9 +3490,10 @@
    "owner": "cleric",
    "tree": "falling_light",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "clr_sunlance"
+    "clr_lash_and_lance"
    ],
    "kind": "synergy",
    "desc": "Sunlance hits harder: more damage per rank.",
@@ -3514,7 +3551,8 @@
    "owner": "cleric",
    "tree": "falling_light",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
     "clr_zeal"
    ],
@@ -3523,7 +3561,7 @@
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "clr_noonfire": {
@@ -3704,15 +3742,16 @@
    "name": "Devotion",
    "owner": "paladin",
    "tree": "holy_blade",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Every heal lands fuller. More healing power.",
    "passive": {
     "stat": "healPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "pal_hammer": {
@@ -3774,14 +3813,15 @@
    "owner": "paladin",
    "tree": "holy_blade",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "pal_blessed_edge": {
@@ -3789,9 +3829,10 @@
    "owner": "paladin",
    "tree": "holy_blade",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "pal_sanctified"
+    "pal_righteous"
    ],
    "kind": "synergy",
    "desc": "Sanctified Blade cuts deeper: more damage per rank.",
@@ -3882,16 +3923,17 @@
    "owner": "paladin",
    "tree": "holy_blade",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "pal_righteous"
+    "pal_blessed_edge"
    ],
    "kind": "passive",
    "desc": "More critical hit chance.",
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "pal_judging": {
@@ -3899,10 +3941,9 @@
    "owner": "paladin",
    "tree": "holy_blade",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "pal_hammer"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Hammer of Light falls harder: more damage per rank.",
    "synergy": {
@@ -4027,15 +4068,16 @@
    "name": "Oathkeeper",
    "owner": "paladin",
    "tree": "oath_of_mercy",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More health.",
    "passive": {
     "stat": "maxHp",
-    "value": 4,
-    "perRank": 2
+    "value": 8,
+    "perRank": 8
    }
   },
   "pal_martyr": {
@@ -4145,10 +4187,9 @@
    "owner": "paladin",
    "tree": "oath_of_mercy",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "pal_mercy"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Mercy's Touch heals for more: more per rank.",
    "synergy": {
@@ -4203,16 +4244,15 @@
    "owner": "paladin",
    "tree": "oath_of_mercy",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "pal_oathkeeper"
-   ],
+   "col": 0,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "passive",
    "desc": "Every blow you land gives a little back. Life on hit.",
    "passive": {
     "stat": "lifeOnHit",
     "value": 2,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "pal_vow_renewed": {
@@ -4220,10 +4260,9 @@
    "owner": "paladin",
    "tree": "oath_of_mercy",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "pal_martyr"
-   ],
+   "col": 2,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Martyr's Vow wards for more: a bigger ward per rank.",
    "synergy": {
@@ -4350,15 +4389,16 @@
    "name": "Faith in Plate",
    "owner": "paladin",
    "tree": "bulwark",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Your armour counts for more.",
    "passive": {
     "stat": "armourPct",
     "value": 5,
-    "perRank": 3
+    "perRank": 6
    }
   },
   "pal_blessed_earth": {
@@ -4537,7 +4577,8 @@
    "owner": "paladin",
    "tree": "bulwark",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
     "pal_faith_plate"
    ],
@@ -4546,7 +4587,7 @@
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "pal_aegis": {
@@ -4718,15 +4759,16 @@
    "name": "Edge and Word",
    "owner": "spellblade",
    "tree": "edgework",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More melee power.",
    "passive": {
     "stat": "meleePower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "spb_bright_arc": {
@@ -4789,14 +4831,15 @@
    "owner": "spellblade",
    "tree": "edgework",
    "reqLevel": 12,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More spell power.",
    "passive": {
     "stat": "spellPower",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "spb_honed_star": {
@@ -4804,9 +4847,10 @@
    "owner": "spellblade",
    "tree": "edgework",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "spb_starcut"
+    "spb_edge_word"
    ],
    "kind": "synergy",
    "desc": "Starcut cuts deeper: more damage per rank.",
@@ -4876,7 +4920,8 @@
    "owner": "spellblade",
    "tree": "edgework",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
     "spb_spark_mind"
    ],
@@ -4885,7 +4930,7 @@
    "passive": {
     "stat": "crit",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "spb_wider_arc": {
@@ -4893,10 +4938,9 @@
    "owner": "spellblade",
    "tree": "edgework",
    "reqLevel": 18,
-   "maxRank": 10,
-   "prereq": [
-    "spb_bright_arc"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Bright Arc hits harder: more damage per rank.",
    "synergy": {
@@ -5041,15 +5085,16 @@
    "name": "Mail of Light",
    "owner": "spellblade",
    "tree": "starward",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "Your armour counts for more.",
    "passive": {
     "stat": "armourPct",
     "value": 4,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "spb_tether": {
@@ -5161,9 +5206,10 @@
    "owner": "spellblade",
    "tree": "starward",
    "reqLevel": 14,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "spb_aegis"
+    "spb_mail_of_light"
    ],
    "kind": "synergy",
    "desc": "Star Aegis holds more: a bigger ward per rank.",
@@ -5216,16 +5262,17 @@
    "owner": "spellblade",
    "tree": "starward",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "spb_mail_of_light"
+    "spb_steady_star"
    ],
    "kind": "passive",
    "desc": "More resistance to everything.",
    "passive": {
     "stat": "resistAll",
     "value": 2,
-    "perRank": 1
+    "perRank": 2
    }
   },
   "spb_long_hold": {
@@ -5233,9 +5280,10 @@
    "owner": "spellblade",
    "tree": "starward",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "spb_binding"
+    "spb_last_word"
    ],
    "kind": "synergy",
    "desc": "Binding Stars holds longer: more seconds per rank.",
@@ -5382,15 +5430,16 @@
    "name": "Light Foot",
    "owner": "spellblade",
    "tree": "comet",
-   "reqLevel": 11,
-   "maxRank": 10,
+   "reqLevel": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [],
    "kind": "passive",
    "desc": "More move speed.",
    "passive": {
     "stat": "moveSpeed",
     "value": 3,
-    "perRank": 1.5
+    "perRank": 3
    }
   },
   "spb_thrown_star": {
@@ -5436,16 +5485,15 @@
    "owner": "spellblade",
    "tree": "comet",
    "reqLevel": 14,
-   "maxRank": 10,
-   "prereq": [
-    "spb_comet_rush"
-   ],
+   "col": 1,
+   "maxRank": 5,
+   "prereq": [],
    "kind": "synergy",
    "desc": "Comet Rush lands harder: more damage per rank.",
    "synergy": {
     "skill": "spb_comet_rush",
     "stat": "damage",
-    "pctPerRank": 8
+    "pctPerRank": 6
    }
   },
   "spb_flicker_cut": {
@@ -5549,16 +5597,17 @@
    "owner": "spellblade",
    "tree": "comet",
    "reqLevel": 16,
-   "maxRank": 10,
+   "col": 0,
+   "maxRank": 5,
    "prereq": [
-    "spb_light_foot"
+    "spb_there_and_gone"
    ],
    "kind": "passive",
    "desc": "More attack speed.",
    "passive": {
     "stat": "attackSpeed",
     "value": 3,
-    "perRank": 2
+    "perRank": 4
    }
   },
   "spb_second_comet": {
@@ -5566,9 +5615,10 @@
    "owner": "spellblade",
    "tree": "comet",
    "reqLevel": 18,
-   "maxRank": 10,
+   "col": 1,
+   "maxRank": 5,
    "prereq": [
-    "spb_comet_fall"
+    "spb_bright_tail"
    ],
    "kind": "synergy",
    "desc": "Comet Fall hits harder: more damage per rank.",

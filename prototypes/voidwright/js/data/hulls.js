@@ -44,10 +44,11 @@ export const PREMADES = [
   {
     id: 'wasp', name: 'Wasp', cls: 'skiff', price: 2600,
     blurb: 'A fighter: two gatlings, a mass driver, a deflector at the front.',
+    // round 4 sims: 795 hull lost two of three first fights; three frames became steel plate
     rows: [
-      ' EPg#S  ',
+      ' EPgSS  ',
       'EGBPUFW ',
-      ' E#g#S  ',
+      ' ESgSS  ',
     ],
   },
   {

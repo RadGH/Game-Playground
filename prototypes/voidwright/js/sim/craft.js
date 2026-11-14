@@ -7,6 +7,7 @@
 //   openCache(G, cache)  → a sealed cache: always rare or better, plus ore, sometimes a named unique
 // Pure: G is the save, r a seeded rng. The UI is ui/workshop.js.
 
+import { planPay, payMats } from './mats.js';
 import { BLOCKS } from '../data/blocks.js';
 import { DRONES } from '../data/drones.js';
 import { MATERIALS, RARITY, RARITY_BY_ID, matOf } from '../data/types.js';
@@ -63,13 +64,12 @@ export function craftCost(rec, boost = 0) {
   return { mats, cr: rec.cr };
 }
 export function missing(G, cost) {
-  const out = [];
-  for (const [m, n] of Object.entries(cost.mats)) if ((G.cargo[m] || 0) < n) out.push([m, n - (G.cargo[m] || 0)]);
+  const out = Object.entries(planPay(G.cargo, cost.mats).short);
   if (G.credits < cost.cr) out.push(['cr', cost.cr - G.credits]);
   return out;
 }
 function spend(G, cost) {
-  for (const [m, n] of Object.entries(cost.mats)) { G.cargo[m] -= n; if (G.cargo[m] <= 0) delete G.cargo[m]; }
+  payMats(G, cost.mats);
   G.credits -= cost.cr;
 }
 

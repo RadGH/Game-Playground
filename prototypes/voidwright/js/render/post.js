@@ -32,7 +32,7 @@ precision highp float; in vec2 uv; out vec4 o;
 uniform sampler2D scene; uniform sampler2D light; uniform sampler2D bloom;
 uniform vec4 waves[16]; uniform vec2 wavesT[16]; uniform int nWaves; uniform vec2 aspect;
 uniform float ambient; uniform float bloomK; uniform float flash; uniform vec3 flashC; uniform float vig;
-uniform float boost; uniform vec2 boostC;
+uniform float boost; uniform vec2 boostC; uniform float hurt;
 void main(){
   vec2 p = uv; vec2 off = vec2(0.0); float split = 0.0;
   for (int i = 0; i < 16; i++) {
@@ -70,6 +70,8 @@ void main(){
   // gentle filmic curve so hot colours roll off instead of clipping
   lit = lit / (1.0 + lit * 0.18);
   vec2 v = uv - 0.5; float vg = 1.0 - dot(v, v) * vig;
+  // hurt: your hull just took a heavy hit — the screen edges pulse red for a moment (fx.hurt, fades in ~0.5 s)
+  if (hurt > 0.01) { float e = smoothstep(0.12, 0.5, length(v * aspect * 0.8)); lit = mix(lit, lit * vec3(1.0, 0.45, 0.4) + vec3(0.35, 0.02, 0.0), e * hurt * 0.55); }
   o = vec4(lit * vg, 1.0);
 }`;
 
@@ -126,7 +128,7 @@ export function createPost(canvas) {
     gl,
     /**
      * @param scene  2D canvas (full res)   @param light 2D canvas (any res)
-     * @param opts { waves: [{x,y,r,s,th}] in uv, ambient, bloom, flash, flashColor:[r,g,b], vignette }
+     * @param opts { waves: [{x,y,r,s,th}] in uv, ambient, bloom, flash, flashColor:[r,g,b], vignette, hurt (0..1 red edge pulse) }
      */
     render(scene, light, opts = {}) {
       const W = canvas.width, H = canvas.height; ensure(W, H);
@@ -158,6 +160,7 @@ export function createPost(canvas) {
       gl.uniform1f(fin.u.ambient, opts.ambient ?? 0.82); gl.uniform1f(fin.u.bloomK, opts.bloom ?? 1.0);
       gl.uniform1f(fin.u.flash, opts.flash || 0); gl.uniform3fv(fin.u.flashC, opts.flashColor || [1, 0.8, 0.6]);
       gl.uniform1f(fin.u.vig, opts.vignette ?? 0.9);
+      gl.uniform1f(fin.u.hurt, opts.hurt || 0);
       gl.uniform1f(fin.u.boost, opts.boost || 0); gl.uniform2fv(fin.u.boostC, opts.boostC || [0.5, 0.5]);
       draw();
     },

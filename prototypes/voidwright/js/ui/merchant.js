@@ -4,12 +4,12 @@
 
 import { panel, el, btn, toast, fmt } from './dom.js';
 import { itemCard } from './items.js';
-import { itemValue } from '../sim/loot.js';
+import { itemValue, listValue } from '../sim/loot.js';
 import { RARITY_BY_ID } from '../data/types.js';
 import { merchantStock, merchantBought } from '../sim/encounters.js';
 import { play } from '../core/audio.js';
 
-const SELL_MARKUP = 1.35;   // their prices, against the station list price (itemValue / 0.35)
+const SELL_MARKUP = 1.35;   // their prices, against the station list price (listValue)
 const BUY_RATE = 1.2;       // what they pay for your parts, against itemValue (an outfitter pays 1.0)
 
 export function openMerchant(app, e) {
@@ -36,7 +36,7 @@ export function openMerchant(app, e) {
       const cards = el('div', { class: 'cards' });
       stock.forEach((it, i) => {
         if (e.bought.includes(i)) return;
-        const price = Math.round(itemValue(it) / 0.35 * SELL_MARKUP);
+        const price = Math.round(listValue(it) * SELL_MARKUP);
         cards.append(itemCard(it, { compact: true, price, actions: [btn('Buy', () => {
           if (G.credits < price) return toast('You cannot afford that.', 'bad');
           G.credits -= price; G.parts.push(it); merchantBought(app.w, e, i); play('coin');

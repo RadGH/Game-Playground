@@ -1,8 +1,8 @@
 # Voidwright
 
-> **Status:** live on games.radgh.com · 2026-11-13: Parts hold > Ships switches ships + picks merc pilots anywhere; asteroid texture fix · round 3 2026-11-12: reports #42-#66 (missile kinds + missile defence, bridge part limits, drones, phone aim, job markers, planet fix; #47 withdrawn by #59) on top of Expansion 1 "Shipwright" · lint clean, every screen walked desktop + phone
+> **Status:** live on games.radgh.com · round 4 2026-11-13: ore stand-ins (better ore pays for Ferrite etc., `sim/mats.js`), outposts take their tier's ore, economy + combat retune from `tools/econ.mjs` / `tools/combat-sim.mjs`, weapon effects + knockback + far less explosion smoke, Screens deck (`ui/navmenu.js`), title sign-in box fixed · lint clean, every screen walked desktop + phone
 > **Play:** LAN `http://<LAN IP>:8400/prototypes/voidwright/` (stable; https 8442 for a controller) · public https://games.radgh.com/voidwright/
-> **Next:** the owner's play-test of round 3 — is missile pressure right at danger 3+ (`sim/world.js` enemy missile cap), do the bridge limits feel fair, rocket pods after the burst fix; also from the expansion: watch crafting costs (`sim/craft.js ORE_SHARE`), grow-hull prices (`sim/hullgrow.js`), legendary strength (`types.js RARITY.bonus`), merc wages and outpost output; boost now stacks on cruise (very fast) — check it feels right
+> **Next:** the owner's play-test of round 4 — does knockback feel good on your own ship (`world.js` knock caps), is the late game's money pace right (warp cores III/IV/V should take ~15-25 min of play, `tools/econ.mjs`), danger 9 packs are still hard for a bare battleship in the sims (by design for now — watch it); older watch items: missile pressure at 3+, bridge limits, merc wages
 > **Parked:** co-op (the input shape is ready, `docs/PLAN.md`); nothing else on hold
 
 A 2D top-down space game: **build your ship from blocks → kill things or work for things → upgrade → kill bigger
@@ -188,6 +188,51 @@ Owner rulings E1-E10 are in `docs/PLAN.md` §E1; play-test reports #24-#41 answe
 - **Insurance** (#65): every station, den and friendly outpost; opens with the first dock.
 - Tests: `tests/playtest-1112c.test.mjs`.
 
+## Round 4 — ore, economy, combat feel, Screens deck (owner 2026-11-13)
+Checklist: `~/claude/agent/voidwright-round4-checklist.md`. Tests: `tests/round4.test.mjs`.
+- **Title screen**: the shared sign-in box was squeezed into a 440px left column because it carries the class `modal`
+  and this game styles `.modal` as a card; `shared/rgs-signin.css` now resets `.rgs-signin.modal` (lessons rule 52).
+  The tagline used `.tag` (the chip class) and drew a box — now `.tagline`. Title buttons share one look.
+- **Ore stand-ins** (`sim/mats.js`, owner: "ferrite is nowhere in a danger 3 zone"): any ore of the same kind
+  (structural / energy / exotic) and the same tier or higher pays one for one; rock pays only for rock. The exact ore
+  goes first, then the cheapest stand-in; needs of a higher tier are paid first. EVERY charge goes through
+  `planPay` / `payMats` — build mode (`ledNet` shows what will really be taken), outposts (`colony.js pay`),
+  crafting, warp cores, grow hull — and cost chips count stand-ins (`haveFor`) with `SUBS_HINT` underneath.
+  Outposts ask for the system's tier (`foundCost`), so a lower tier's ore never pays for a deeper outpost.
+- **Economy** (`tools/econ.mjs` measures loot per pack, mining per minute, job pay and minutes to each next step):
+  late loot was mostly ore from big wrecks (~460k a pack at danger 9; warp cores cost 3-6 minutes of fighting).
+  Knobs: `loot.js LOOT_MAT_PILES / LOOT_MAT_SIZE / LOOT_PART_ROLLS`, `SELL_SHARE` 0.35 → 0.25 (shops pay a share of
+  `listValue`, which is what they charge), `missions.js MISSION_PAY` = 1.6 × danger^1.5 (jobs were a sixth of
+  fighting), `colony.js FOUND_CR` 5000 × tier factor, Ore site 120 / Trade post 800 a level, warp cores III/IV/V
+  45k / 200k / 650k, the dearest ores come out in smaller lumps (`world.js dropOre`: tier III ÷1.3 … V ÷1.9).
+- **Combat sims** (`tools/combat-sim.mjs`: the ship you are likely in at each danger vs every faction there, pack /
+  big / gnats, a player-like pilot): the step into danger 5 was bigger hulls AND rarer gear at once (a frigate won
+  every fight at 4 and none at 5); roaming packs grew to 4-6 big hulls. Now: packs are mostly 2 (`galaxy.js
+  spawnGroup`, 4 only rarely past 8), enemy gear rare from danger 6 and epic from 9 (`shipgen.js itemFor`), `TIER_DMG`
+  flattened at the top, no small-enemy damage boost at danger 1, and shipyard ships come fitted with parts as good
+  as the shops at their tier sell (`PREMADE_RARITY`). Lattice ion missiles could chain-stun you forever — see
+  the EMP guard below. Known sim limits: drone carriers (Falcon, Kestrel) fight without drones; at danger 1 the
+  enemies barely shoot (0-18 damage a second) but the test pilot is slow to land hits on small ships, so the starter
+  ships' sim win rate there understates real play. After the retune, pack wins: danger 5 destroyer 23-83%, 6-8
+  70-100%, 9 battleship 16-36% (endgame), 10 dreadnought 86%.
+- **Combat feel** (helper agent; `render/fx.js`, `draw.js`, `post.js`, `turret-art.js`, hit paths in `world.js`; tests
+  `tests/knockback.test.mjs`): every weapon kind has its own muzzle flash (sized by hit size, mount and rarity),
+  tracer/trail and impact (damage-type colour); rails leave an afterglow line + shock ring and tear through hulls;
+  plasma scorches; lightning forks with afterglow; beams shimmer and drip; shield hits ripple round the bubble and
+  never throw debris. **Knockback** (`world.js knock` / `knockDv`): damage × hit size × weapon kind × 8 ÷ mass, at most
+  150 px/s a hit (85 on your ship), pooled over a short window, spin from off-centre hits, static bodies never move;
+  blasts push everything outward; heavy guns recoil (≤ a tenth of top speed). **Smoke** cut ~95% (fewer, shorter,
+  fainter puffs; flash + rings kept). Damaged blocks spark / burn, debris flies outward red-hot, shake fades with
+  distance (Settings → Screen shake: Full / Gentle / Off, `app.fx.shakeMul`), heavy hits on you pulse the screen edges
+  red. **EMP guard**: every EMP goes through `empHit`; after a stun ends you get `EMP_GUARD` 2.5 s in which an EMP only
+  slows you (`EMP_GUARD_SHARE` 25%) — Lattice ion missiles used to chain-stun a ship's guns off for the whole fight.
+- **Screens deck** (`ui/navmenu.js`, `css/navmenu.css`; owner: "a menu button … to navigate between cargo, ships,
+  etc without looking like the settings menu"): a tile button beside ☰ drops a console of picture tiles — Ship
+  (Cargo, Parts, Drones, Ships, Build, Upgrades, Fabricator), Space (Local map, Star map, Goals), People (Factions,
+  Crew & finds) — with hotkeys and the open screen lit. Every ship screen's head has a **Screens** button
+  (`main.js tagPanel`), so Cargo → Ships → Star map is two taps from anywhere; a hold tab just switches tabs
+  (`app.nav.go`). The ☰ menu keeps Resume / Build / Settings / Save and one "Ship screens" line.
+
 ## Code map
 No build step; ES modules. `index.html` → `js/main.js`.
 
@@ -223,6 +268,8 @@ No build step; ES modules. `index.html` → `js/main.js`.
 ## Tools
 - `node tools/smoke.mjs [system] [design]` — 30 s headless fight, prints step cost and event counts.
 - `node tools/duel.mjs <design> <faction> <tier> <pack|big> <runs>` — balance check, a bot flies a shipyard design.
+- `node tools/combat-sim.mjs [runs] [danger]` — the whole danger ladder: likely ship × every faction × pack/big/gnats.
+- `node tools/econ.mjs [runs]` — loot per pack, mining and job pay per danger, minutes of play to each next step.
 - `tools/shot.mjs` — Playwright screenshots: `STEPS="click:text=New game~~wait:300~~…" node prototypes/voidwright/tools/shot.mjs name`.
 
 ## Tests

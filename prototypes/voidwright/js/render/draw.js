@@ -97,6 +97,7 @@ export function createRenderer(view, overlay, opts = {}) {
     { const nowT = performance.now(); R.lastDt = R._lt ? Math.min(0.1, (nowT - R._lt) / 1000) : 1 / 60; R._lt = nowT; }
     const W = R.W, H = R.H; const z = cam.zoom * R.dpr; const t = w.t;
     // what was actually drawn this frame (tools/smooth-check.mjs reads it to measure judder)
+    fx.focus = w.player && !w.player.dead ? [w.player.x, w.player.y] : null;   // far-off blasts shake less (fx.js shakeAt)
     if (w.player) { R.drawn.x = w.player.x; R.drawn.y = w.player.y; R.drawn.cx = cam.x; R.drawn.cy = cam.y; R.drawn.z = cam.zoom; R.drawn.n++; }
     const sx = x => (x - cam.x) * z + W / 2, sy = y => (y - cam.y) * z + H / 2;
     const vis = (x, y, r) => Math.abs(x - cam.x) * z < W / 2 + r * z + 50 && Math.abs(y - cam.y) * z < H / 2 + r * z + 50;
@@ -144,6 +145,7 @@ export function createRenderer(view, overlay, opts = {}) {
       g.drawImage(b.hull, 0, 0);
       g.restore();
       glowsLater.push([s, b]);
+      if ((s.kind === 'ship' || s.kind === 'station') && s.shrink == null) damagedSparks(s);
       // engine flames
       if (s.kind === 'ship' && s.engines) {
         const sp = Math.hypot(s.vx, s.vy); const bst = s.boosting ? 1 : 0; const thr = (s.thrusting ? 1 : 0.25) * (bst ? 2.6 : 1);
@@ -318,9 +320,33 @@ export function createRenderer(view, overlay, opts = {}) {
       if (pv >= 1 && p.kind !== 'harpoon' && p.kind !== 'mine') shotPower(g, p, a, pv, t);
       switch (p.kind) {
         case 'bolt': case 'pulse': { const L = (p.kind === 'pulse' ? 10 : 22) * (1 + pv * 0.35); g.strokeStyle = c; g.lineWidth = (p.w?.size === 'm' ? 4 : 2.6) * (1 + pv * 0.18); streak(g, p.x, p.y, a, L, c); lc_light(p.x, p.y, 50 * vk, c, 0.5); break; }
-        case 'bullet': g.strokeStyle = '#fff2c0'; g.lineWidth = 1.4; line(g, p.x, p.y, p.x - Math.cos(a) * 12, p.y - Math.sin(a) * 12); break;
-        case 'shell': case 'slug': { g.drawImage(glowSprite(c), p.x - 8 * vk, p.y - 8 * vk, 16 * vk, 16 * vk); g.strokeStyle = hexA(c, 0.6); g.lineWidth = p.kind === 'slug' ? 3 : 2; line(g, p.x, p.y, p.x - Math.cos(a) * (p.kind === 'slug' ? 40 : 18), p.y - Math.sin(a) * (p.kind === 'slug' ? 40 : 18)); lc_light(p.x, p.y, 50, c, 0.4); break; }
-        case 'plasma': { const s = (p.w?.size === 'l' ? 16 : p.w?.size === 'm' ? 12 : 7) * (1 + pv * 0.2); const wob = 1 + Math.sin(t * 30 + p.id) * 0.15; g.drawImage(glowSprite(c), p.x - s * 1.5 * wob, p.y - s * 1.5 * wob, s * 3 * wob, s * 3 * wob); g.drawImage(glowSprite('#ffffff', 0.5), p.x - s * 0.5, p.y - s * 0.5, s, s); lc_light(p.x, p.y, s * 8, c, 0.6); break; }
+        case 'bullet': {
+          // a tracer: a warm streak in the gun's colour with a white-hot head
+          const ca = Math.cos(a), sa = Math.sin(a);
+          g.lineCap = 'round'; g.strokeStyle = hexA(c, 0.55); g.lineWidth = 2.4; line(g, p.x, p.y, p.x - ca * 16, p.y - sa * 16);
+          g.strokeStyle = '#fff6d8'; g.lineWidth = 1.2; line(g, p.x, p.y, p.x - ca * 8, p.y - sa * 8); g.lineCap = 'butt';
+          g.drawImage(glowSprite(c), p.x - 4, p.y - 4, 8, 8);
+          break;
+        }
+        case 'shell': case 'slug': {
+          // shells: a glowing round with a fading trail; slugs: a long white-hot needle with a heat haze around it
+          const slug = p.kind === 'slug'; const ca = Math.cos(a), sa = Math.sin(a); const big = p.w?.size === 'l' ? 1.3 : 1;
+          const L = (slug ? 46 : 22) * big;
+          g.lineCap = 'round';
+          for (let k = 0; k < 3; k++) { g.strokeStyle = hexA(c, 0.55 - k * 0.16); g.lineWidth = (slug ? 3.4 : 2.6) * big * (1 - k * 0.22); line(g, p.x - ca * L * k / 3, p.y - sa * L * k / 3, p.x - ca * L * (k + 1) / 3, p.y - sa * L * (k + 1) / 3); }
+          g.strokeStyle = '#ffffff'; g.lineWidth = (slug ? 1.6 : 1.2) * big; line(g, p.x, p.y, p.x - ca * L * (slug ? 0.6 : 0.3), p.y - sa * L * (slug ? 0.6 : 0.3)); g.lineCap = 'butt';
+          g.drawImage(glowSprite(c), p.x - 8 * vk * big, p.y - 8 * vk * big, 16 * vk * big, 16 * vk * big);
+          if (slug) { g.globalAlpha = 0.35; g.drawImage(glowSprite(c), p.x - ca * L * 0.5 - L * 0.5, p.y - sa * L * 0.5 - L * 0.5, L, L); g.globalAlpha = 1; }
+          lc_light(p.x, p.y, (slug ? 80 : 50) * big, c, 0.45);
+          break;
+        }
+        case 'plasma': {
+          // a wobbling glob with a white core and a short smeared tail of cooling plasma
+          const s = (p.w?.size === 'l' ? 16 : p.w?.size === 'm' ? 12 : 7) * (1 + pv * 0.2); const wob = 1 + Math.sin(t * 30 + p.id) * 0.15; const ca = Math.cos(a), sa = Math.sin(a);
+          for (let k = 1; k <= 2; k++) { g.globalAlpha = 0.45 / k; const ts = s * (1.3 - k * 0.3); g.drawImage(glowSprite(c), p.x - ca * s * k * 0.9 - ts, p.y - sa * s * k * 0.9 - ts, ts * 2, ts * 2); }
+          g.globalAlpha = 1;
+          g.drawImage(glowSprite(c), p.x - s * 1.5 * wob, p.y - s * 1.5 * wob, s * 3 * wob, s * 3 * wob); g.drawImage(glowSprite('#ffffff', 0.5), p.x - s * 0.5, p.y - s * 0.5, s, s); lc_light(p.x, p.y, s * 8, c, 0.6); break;
+        }
         case 'missile': case 'rocket': case 'torpedo': {
           // each warhead has its own look (#57): ram = long pale needle + blue-white streak, no smoke; he = fat
           // olive body, orange band, heavy smoke; emp = blue glow that crackles; fire = orange body with a flame trail
@@ -342,7 +368,7 @@ export function createRenderer(view, overlay, opts = {}) {
           }
           break;
         }
-        case 'flak': g.drawImage(glowSprite(c), p.x - 5 * vk, p.y - 5 * vk, 10 * vk, 10 * vk); break;
+        case 'flak': { const bl = 0.8 + 0.4 * Math.sin(t * 40 + p.id); g.drawImage(glowSprite(c), p.x - 5 * vk * bl, p.y - 5 * vk * bl, 10 * vk * bl, 10 * vk * bl); g.strokeStyle = hexA(c, 0.5); g.lineWidth = 1.4; line(g, p.x, p.y, p.x - Math.cos(a) * 10, p.y - Math.sin(a) * 10); break; }
         case 'mine': { const blink = Math.sin(t * 8 + p.id) > 0.3; g.globalCompositeOperation = 'source-over'; g.fillStyle = '#3a3a40'; g.beginPath(); g.arc(p.x, p.y, 6, 0, 7); g.fill(); g.globalCompositeOperation = 'lighter'; if (blink) g.drawImage(glowSprite(c), p.x - 9, p.y - 9, 18, 18); break; }
         case 'harpoon': { g.globalCompositeOperation = 'source-over'; g.strokeStyle = '#c8d0d8'; g.lineWidth = 1.5; const o = p.owner; line(g, o.x, o.y, p.x, p.y); g.save(); g.translate(p.x, p.y); g.rotate(a); g.fillStyle = '#e8eef2'; g.beginPath(); g.moveTo(8, 0); g.lineTo(-4, -4); g.lineTo(-2, 0); g.lineTo(-4, 4); g.fill(); g.restore(); g.globalCompositeOperation = 'lighter'; break; }
         default: g.drawImage(glowSprite(c), p.x - 6 * vk, p.y - 6 * vk, 12 * vk, 12 * vk);
@@ -356,10 +382,14 @@ export function createRenderer(view, overlay, opts = {}) {
       const wd = Math.max(1, bm.width);
       const flick = 0.85 + Math.random() * 0.3;
       if (bm.vis >= 1) beamHelix(g, bm, wd, t, z);
+      if (!bm.tool) beamHeat(g, bm, wd, t);
       g.strokeStyle = hexA(bm.color, 0.25); g.lineWidth = wd * 4 * flick; g.lineCap = 'round'; line(g, bm.x, bm.y, bm.x2, bm.y2);
       g.strokeStyle = hexA(bm.color, 0.7); g.lineWidth = wd * 1.6; line(g, bm.x, bm.y, bm.x2, bm.y2);
       g.strokeStyle = '#ffffff'; g.lineWidth = Math.max(0.8, wd * 0.5); line(g, bm.x, bm.y, bm.x2, bm.y2);
       g.lineCap = 'butt';
+      // the emitter: a pulsing glow at the muzzle so you can see where the beam comes from
+      { const ms = (6 + wd * 3) * flick; g.drawImage(glowSprite(bm.color), bm.x - ms, bm.y - ms, ms * 2, ms * 2); g.drawImage(glowSprite('#ffffff', 0.5), bm.x - ms * 0.35, bm.y - ms * 0.35, ms * 0.7, ms * 0.7); lc_light(bm.x, bm.y, 40 + wd * 10, bm.color, 0.5); }
+      if (bm.hit && bm.shield) { const s = (14 + wd * 6) * flick; g.drawImage(glowSprite('#bfe8ff'), bm.x2 - s, bm.y2 - s, s * 2, s * 2); }   // splashing on a shield: a cool blue bloom
       if (bm.hit) { const s = (10 + wd * 5) * (1 + Math.min(4, bm.vis || 0) * 0.18); g.drawImage(glowSprite(bm.color), bm.x2 - s, bm.y2 - s, s * 2, s * 2); if (bm.vis >= 3) { const s2 = s * (0.45 + Math.random() * 0.3); g.drawImage(glowSprite(bm.rc || '#ffffff', 0.4), bm.x2 - s2, bm.y2 - s2, s2 * 2, s2 * 2); lc_light(bm.x2, bm.y2, 60 + bm.vis * 30, bm.rc || bm.color, 0.7); } if (Math.random() < 0.5 && fx.parts.length < fx.max) fx.parts.push({ k: 'spark', x: bm.x2, y: bm.y2, vx: (Math.random() - 0.5) * 300, vy: (Math.random() - 0.5) * 300, life: 0.25, age: 0, color: bm.tool === 'mine' ? '#ffd080' : bm.color, w: 1.4, drag: 0.9 }); }
       const L = Math.hypot(bm.x2 - bm.x, bm.y2 - bm.y); const n = Math.max(2, Math.min(8, L / 80));
       for (let i = 0; i <= n; i++) { const tt = i / n; lc_light(bm.x + (bm.x2 - bm.x) * tt, bm.y + (bm.y2 - bm.y) * tt, 30 + wd * 12, bm.color, 0.35); }
@@ -368,7 +398,7 @@ export function createRenderer(view, overlay, opts = {}) {
     for (const p of fx.parts) {
       const f = 1 - p.age / p.life;
       switch (p.k) {
-        case 'smoke': g.globalCompositeOperation = 'source-over'; g.globalAlpha = f * 0.35; g.fillStyle = p.color; g.beginPath(); g.arc(p.x, p.y, p.size * (1 + p.age * p.grow), 0, 7); g.fill(); g.globalCompositeOperation = 'lighter'; break;
+        case 'smoke': g.globalCompositeOperation = 'source-over'; g.globalAlpha = f * (p.al ?? 0.35); g.fillStyle = p.color; g.beginPath(); g.arc(p.x, p.y, p.size * (1 + p.age * p.grow), 0, 7); g.fill(); g.globalCompositeOperation = 'lighter'; break;
         case 'chip': g.globalCompositeOperation = 'source-over'; g.globalAlpha = Math.min(1, f * 2); g.fillStyle = p.hot && p.age < 0.5 ? '#ffb060' : p.color; g.save(); g.translate(p.x, p.y); g.rotate(p.rot); g.fillRect(-p.size / 2, -p.size / 3, p.size, p.size * 0.66); g.restore(); g.globalCompositeOperation = 'lighter'; break;
         case 'spark': g.globalAlpha = f; g.strokeStyle = p.color; g.lineWidth = p.w; line(g, p.x, p.y, p.x - p.vx * 0.03, p.y - p.vy * 0.03); break;
         case 'glow': { g.globalAlpha = f; const s = p.size * (1 + p.age * (p.grow || 0) * 3); g.drawImage(glowSprite(p.color), p.x - s, p.y - s, s * 2, s * 2); break; }
@@ -380,8 +410,32 @@ export function createRenderer(view, overlay, opts = {}) {
           break;
         }
         case 'ring': { g.globalAlpha = f; g.strokeStyle = p.color; g.lineWidth = p.w * f + 0.5; const r = p.r0 + (p.r1 - p.r0) * Math.sqrt(p.age / p.life); g.beginPath(); g.arc(p.x, p.y, r, 0, 7); g.stroke(); break; }
-        case 'bolt': { g.globalAlpha = Math.min(1, f * 1.5); g.strokeStyle = p.color; g.lineWidth = p.w * 2.6; poly(g, p.pts); g.strokeStyle = '#ffffff'; g.lineWidth = p.w * 0.8; poly(g, p.pts); break; }
-        case 'line': { g.globalAlpha = f; g.lineCap = 'round'; g.strokeStyle = hexA(p.color, 0.5); g.lineWidth = p.w * 2 * f; line(g, p.x, p.y, p.x2, p.y2); g.strokeStyle = '#ffffff'; g.lineWidth = p.w * 0.5 * f; line(g, p.x, p.y, p.x2, p.y2); g.lineCap = 'butt'; break; }
+        case 'bolt': {
+          if (p.soft) { g.globalAlpha = f * f * 0.35; g.strokeStyle = p.color; g.lineWidth = p.w * 2.6; g.lineJoin = 'round'; poly(g, p.pts); g.lineJoin = 'miter'; break; }   // afterglow
+          g.globalAlpha = Math.min(1, f * 1.5); g.strokeStyle = p.color; g.lineWidth = p.w * 2.6; poly(g, p.pts); g.strokeStyle = '#ffffff'; g.lineWidth = p.w * 0.8; poly(g, p.pts); break;
+        }
+        case 'flare': { // a muzzle flash stretched along the barrel: a tapered glow, brightest at the muzzle
+          const k = 1 - f; const L = p.len * (0.7 + k * 0.6), Wd = p.wid * (1 - k * 0.4);
+          g.save(); g.translate(p.x, p.y); g.rotate(p.a); g.globalAlpha = f;
+          g.drawImage(glowSprite(p.color), -L * 0.15, -Wd, L * 1.3, Wd * 2);
+          g.drawImage(glowSprite('#ffffff', 0.5), -Wd * 0.5, -Wd * 0.5, L * 0.55, Wd);
+          g.restore(); break;
+        }
+        case 'bflash': { // the struck block glows for a moment (rides along with its ship)
+          g.save(); g.translate(p.x, p.y); g.rotate(p.a); g.globalAlpha = f * f * p.al;
+          g.fillStyle = p.color; g.fillRect(-p.s / 2, -p.s / 2, p.s, p.s);
+          g.globalAlpha = f * p.al * 0.4; g.drawImage(glowSprite(p.color), -p.s * 1.2, -p.s * 1.2, p.s * 2.4, p.s * 2.4);
+          g.restore(); break;
+        }
+        case 'ripple': { // a shield ripple: two bright arcs running round the bubble away from the hit, thinning as they go
+          const k = p.age / p.life; const sp = 0.12 + k * 1.1; const wd = p.w * f + 0.4;
+          g.globalAlpha = f * 0.9; g.strokeStyle = p.color; g.lineWidth = wd;
+          for (const sg of [-1, 1]) { g.beginPath(); g.arc(p.x, p.y, p.R, p.an + sg * sp - 0.1, p.an + sg * sp + 0.1); g.stroke(); }
+          g.globalAlpha = f * 0.25; g.lineWidth = wd * 2.5; g.beginPath(); g.arc(p.x, p.y, p.R, p.an - sp, p.an + sp); g.stroke();
+          break;
+        }
+        case 'line': { if (p.soft) { g.globalAlpha = f * f * 0.3; g.lineCap = 'round'; g.strokeStyle = p.color; g.lineWidth = p.w * f; line(g, p.x, p.y, p.x2, p.y2); g.lineCap = 'butt'; break; }
+          g.globalAlpha = f; g.lineCap = 'round'; g.strokeStyle = hexA(p.color, 0.5); g.lineWidth = p.w * 2 * f; line(g, p.x, p.y, p.x2, p.y2); g.strokeStyle = '#ffffff'; g.lineWidth = p.w * 0.5 * f; line(g, p.x, p.y, p.x2, p.y2); g.lineCap = 'butt'; break; }
         case 'scan': { // a scanner pulse: an expanding cyan ring with a radar sweep behind it
           const k = p.age / p.life; const rr = p.r * Math.sqrt(k); const sw = t * 6 + p.a0;
           g.globalAlpha = f; g.strokeStyle = '#7af7ff'; g.lineWidth = (3 + 4 * f) / Math.sqrt(Math.max(0.1, z)); g.beginPath(); g.arc(p.x, p.y, rr, 0, 7); g.stroke();
@@ -454,7 +508,7 @@ export function createRenderer(view, overlay, opts = {}) {
         return { x: ((v.x - cam.x) * z + W / 2 + shakeX) / W, y: 1 - ((v.y - cam.y) * z + H / 2 + shakeY) / H, r: rr, s: v.strength * (1 - k), th: Math.max(0.01, 0.06 * (1 - k * 0.5)) };
       });
       const P0 = w.player; const bc = P0 ? [((P0.x - cam.x) * z + W / 2) / W, 1 - ((P0.y - cam.y) * z + H / 2) / H] : [0.5, 0.5];
-      post.render(scene, lightC, { waves, ambient: ui.ambient ?? 0.8, bloom: ui.bloom ?? 0.9, flash: fx.flash, flashColor: fx.flashColor, vignette: 0.85 + (ui.boost || 0) * 0.35, boost: (ui.boost || 0) * (R.quality >= 1 ? 1 : 0.6), boostC: bc });
+      post.render(scene, lightC, { waves, ambient: ui.ambient ?? 0.8, bloom: ui.bloom ?? 0.9, flash: fx.flash, flashColor: fx.flashColor, hurt: fx.hurt, vignette: 0.85 + (ui.boost || 0) * 0.35, boost: (ui.boost || 0) * (R.quality >= 1 ? 1 : 0.6), boostC: bc });
       view.style.transform = fx.shake > 0.5 ? `translate(${shakeX / R.dpr}px,${shakeY / R.dpr}px)` : '';
     } else {
       view2d.setTransform(1, 0, 0, 1, 0, 0); view2d.drawImage(scene, shakeX, shakeY);
@@ -505,6 +559,25 @@ export function createRenderer(view, overlay, opts = {}) {
       }
     }
     if (pv >= 3) lc_light(p.x, p.y, 40 + pv * 18, tint, 0.35);
+  }
+
+  /**
+   * Heat shimmer round a weapon beam: two faint wavy ribbons that crawl along it, plus (now and then) a molten
+   * droplet or a curl of vapour flicked off the far end when it is cutting into something.
+   */
+  function beamHeat(g, bm, wd, t) {
+    const dx = bm.x2 - bm.x, dy = bm.y2 - bm.y; const L = Math.hypot(dx, dy); if (L < 8) return;
+    const ux = dx / L, uy = dy / L, nx = -uy, ny = ux; const n = Math.min(24, Math.ceil(L / 24));
+    g.lineWidth = Math.max(1, wd * 0.9);
+    for (const k of [1, -1]) {
+      g.strokeStyle = hexA(bm.color, 0.14); g.beginPath();
+      for (let i = 0; i <= n; i++) { const s = i / n * L; const off = Math.sin(s / 19 - t * 22 * k + k) * (wd * 1.6 + 2) * Math.min(1, s / 30); const px = bm.x + ux * s + nx * off, py = bm.y + uy * s + ny * off; if (i) g.lineTo(px, py); else g.moveTo(px, py); }
+      g.stroke();
+    }
+    if (bm.hit && !bm.shield && fx_ref && fx_ref.parts.length < fx_ref.max * fx_ref.quality * 0.6 && Math.random() < 0.35) {
+      const an = Math.atan2(-uy, -ux) + (Math.random() - 0.5) * 2.2, sp = 60 + Math.random() * 140;
+      fx_ref.parts.push({ k: 'glow', x: bm.x2, y: bm.y2, vx: Math.cos(an) * sp, vy: Math.sin(an) * sp, life: 0.4, age: 0, color: Math.random() < 0.5 ? '#ffffff' : bm.color, size: 1.5 + wd * 0.5, drag: 0.92, grow: 0 });
+    }
   }
 
   /** Helix strands that wrap round a beam: 1 strand at vis 1, a double helix at 2, more plus sparkles at 3+. */
@@ -573,6 +646,21 @@ export function createRenderer(view, overlay, opts = {}) {
       line(g, s.x, s.y, s.x - vx / sp * len, s.y - vy / sp * len);
     }
     g.lineCap = 'butt'; g.globalCompositeOperation = 'source-over';
+  }
+
+  /**
+   * A battered hull shows it: a few times a second, a random block that is below half health spits sparks (and, badly
+   * hurt, a lick of flame). More broken blocks = more often, since a random pick lands on one more often.
+   */
+  function damagedSparks(s) {
+    const fx = fx_ref; if (!fx || fx.parts.length > fx.max * fx.quality * 0.6) return;
+    const bl = s.grid.blocks; if (!bl.length || Math.random() > 0.3 * fx.quality) return;
+    const b = bl[(Math.random() * bl.length) | 0]; if (!b.alive || b.hp > b.maxHp * 0.5) return;
+    const n = b.def.size || 1; const [x, y] = toWorld(s, b.x + n / 2 + (Math.random() - 0.5) * n, b.y + n / 2 + (Math.random() - 0.5) * n);
+    const an = Math.random() * Math.PI * 2;
+    for (let i = 0; i < 2; i++) { const a2 = an + (Math.random() - 0.5) * 0.8, sp = 60 + Math.random() * 120; fx.parts.push({ k: 'spark', x, y, vx: s.vx + Math.cos(a2) * sp, vy: s.vy + Math.sin(a2) * sp, life: 0.3, age: 0, color: Math.random() < 0.5 ? '#ffd27a' : '#ffffff', w: 1.2, drag: 0.9 }); }
+    if (b.hp < b.maxHp * 0.25) fx.parts.push({ k: 'fire', x, y, vx: s.vx + (Math.random() - 0.5) * 20, vy: s.vy + (Math.random() - 0.5) * 20, life: 0.4, age: 0, size: 3 + n * 2, drag: 0.95, grow: 1.1, color: '#ff7a2a' });
+    lc_light(x, y, 30, '#ffb060', 0.35);
   }
 
   const frameLights = [];

@@ -9,6 +9,7 @@
 // Entry point: openBuild(app, { docked }) — see js/main.js openBuild().
 // Test hook: app.buildUI (state + actions) while the editor is open.
 
+import { planPay, payMats, shortText, SUBS_HINT } from '../sim/mats.js';
 import { el, btn, modal, esc, fmt } from './dom.js';
 import { itemTipHTML, itemCard, nextBridge, biggerHullText } from './items.js';
 import { BLOCKS } from '../data/blocks.js';
@@ -160,12 +161,22 @@ export function openBuild(app, { docked = false } = {}) {
 
   // ---------------------------------------------------------------- money and materials
   const crLeft = () => G.credits - led.cr;
-  const matLeft = m => (G.cargo[m] || 0) - (led.mats[m] || 0);
+  // what the session really takes from the hold: a cost in Ferrite may be paid in Titanium (sim/mats.js)
+  function ledNet() {
+    const net = {};
+    for (const [m, v] of Object.entries(led.mats)) if (v < 0) net[m] = v;
+    const pos = Object.fromEntries(Object.entries(led.mats).filter(([, v]) => v > 0));
+    const refunded = { ...G.cargo }; for (const [m, v] of Object.entries(net)) refunded[m] = (refunded[m] || 0) - v;
+    for (const [m, v] of Object.entries(planPay(refunded, pos).take)) net[m] = (net[m] || 0) + v;
+    return net;
+  }
+  const matLeft = m => (G.cargo[m] || 0) - (ledNet()[m] || 0);
   function missingFor(def) {
     if ((spare[def.id] || 0) > 0) return null;
     const c = def.cost || {}; const miss = [];
     if ((c.cr || 0) > crLeft()) miss.push(`${fmt(c.cr - crLeft())} credits`);
-    for (const [m, v] of Object.entries(c.mats || {})) if (v > matLeft(m)) miss.push(`${v - Math.max(0, matLeft(m))} ${matName(m)}`);
+    const want = { ...led.mats }; for (const [m, v] of Object.entries(c.mats || {})) want[m] = (want[m] || 0) + v;
+    miss.push(...shortText(G.cargo, want));
     return miss.length ? miss : null;
   }
   function spend(def, sign) {
@@ -515,7 +526,8 @@ export function openBuild(app, { docked = false } = {}) {
     const cpuBad = st.cpu > st.cpuCap, powBad = !st.powerOk, crewBad = st.crewNeed > have;
     const caps = partCaps(); const capNext = nextBridge(caps.core, maxB);
     const shieldN = body.shields.length;
-    const matLines = Object.entries(led.mats).filter(([, v]) => v).map(([m, v]) => `<span class="${v > 0 ? 'bad' : 'good'}">${v > 0 ? '−' : '+'}${Math.abs(v)} ${esc(matName(m))}</span>`);
+    const net = ledNet();
+    const matLines = Object.entries(net).filter(([, v]) => v).map(([m, v]) => `<span class="${v > 0 ? 'bad' : 'good'}">${v > 0 ? '−' : '+'}${Math.abs(v)} ${esc(matName(m))}</span>`);
     const spares = Object.entries(spare).filter(([, v]) => v > 0);
     const spareMats = {};
     for (const [id, n] of spares) for (const [m, v] of Object.entries(BLOCKS[id].cost?.mats || {})) spareMats[m] = (spareMats[m] || 0) + Math.floor(v * n / 2);
@@ -554,11 +566,11 @@ export function openBuild(app, { docked = false } = {}) {
       <h4>Cost of changes</h4>
       <div class="bm-costs">${led.cr ? `<span class="${led.cr > 0 ? 'bad' : 'good'}">${led.cr > 0 ? '−' : '+'}${fmt(Math.abs(led.cr))} cr</span>` : ''}${matLines.join('')}${!led.cr && !matLines.length ? '<span class="meh">nothing yet</span>' : ''}</div>
       ${spares.length ? `<p class="hint small">Removed hull you have not reused gives back half its materials when you press Done: ${Object.entries(spareMats).filter(([, v]) => v).map(([m, v]) => `+${v} ${esc(matName(m))}`).join(', ') || 'nothing'}.</p>` : ''}
-      <p class="hint small">You have ${fmt(crLeft())} cr${Object.keys(G.cargo).length ? ', ' + Object.keys(G.cargo).filter(m => matLeft(m) > 0).map(m => `${fmt(matLeft(m))} ${esc(matName(m))}`).join(', ') : ''}.</p>`;
+      <p class="hint small">You have ${fmt(crLeft())} cr${Object.keys(G.cargo).length ? ', ' + Object.keys(G.cargo).filter(m => (G.cargo[m] || 0) - (net[m] || 0) > 0).map(m => `${fmt((G.cargo[m] || 0) - (net[m] || 0))} ${esc(matName(m))}`).join(', ') : ''}. ${esc(SUBS_HINT)}</p>`;
     // header summary
     const bits = [];
     if (led.cr) bits.push(`${led.cr > 0 ? '−' : '+'}${fmt(Math.abs(led.cr))} cr`);
-    for (const [m, v] of Object.entries(led.mats)) if (v) bits.push(`${v > 0 ? '−' : '+'}${Math.abs(v)} ${matName(m)}`);
+    for (const [m, v] of Object.entries(net)) if (v) bits.push(`${v > 0 ? '−' : '+'}${Math.abs(v)} ${matName(m)}`);
     costEl.textContent = bits.length ? bits.join(' · ') : '';
     // problems strip
     const pr = problems();
@@ -1010,7 +1022,7 @@ export function openBuild(app, { docked = false } = {}) {
     for (const [id, n] of Object.entries(spare)) if (n > 0) for (const [m, v] of Object.entries(BLOCKS[id].cost?.mats || {})) led.mats[m] = (led.mats[m] || 0) - Math.floor(v * n / 2);
     if (led.cr > G.credits) { say('Not enough credits.', 'bad'); return; }
     G.credits -= led.cr;
-    for (const [m, v] of Object.entries(led.mats)) { G.cargo[m] = Math.max(0, (G.cargo[m] || 0) - v); if (!G.cargo[m]) delete G.cargo[m]; }
+    if (!payMats(G, led.mats)) for (const [m, v] of Object.entries(ledNet())) { G.cargo[m] = Math.max(0, (G.cargo[m] || 0) - v); if (!G.cargo[m]) delete G.cargo[m]; }
     G.parts = parts; G.ship.drones = fittedDr;
     G.ship.grid = cropped(true);
     // count blocks that are really new: not the same part already sitting in the same spot at the start

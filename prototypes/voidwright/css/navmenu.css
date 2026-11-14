@@ -1,0 +1,44 @@
+/* Ship screens deck (js/ui/navmenu.js). Deliberately NOT the ☰ menu's look: no title, no stacked buttons —
+   a console of picture tiles that drops from its own button, with the open screen lit. */
+.nav-btn svg { display: block; margin: auto; color: var(--cyan); }
+.nav-btn { border-color: #2f6f8f; }
+
+.modal-back.nav-back { background: rgba(2, 4, 10, 0.35); align-items: flex-start; justify-content: flex-start; padding: 0; }
+.modal.nav-deck {
+  position: absolute; left: calc(8px + var(--safe-l)); top: calc(58px + var(--safe-t)); width: auto; max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 80px); overflow: auto; gap: 10px; padding: 12px 12px 14px;
+  background: linear-gradient(160deg, rgba(14, 30, 48, 0.97), rgba(8, 14, 28, 0.97));
+  border: 1px solid #2f6f8f; border-radius: 14px;
+  box-shadow: 0 0 0 1px rgba(95, 216, 255, 0.08) inset, 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(95, 216, 255, 0.12);
+  animation: nav-drop 0.14s ease-out;
+}
+@keyframes nav-drop { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
+.nav-group + .nav-group { border-top: 1px solid rgba(95, 216, 255, 0.12); padding-top: 8px; }
+.nav-gh { font-family: var(--head); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: #6fb4d2; margin: 0 2px 6px; }
+.nav-grid { display: grid; grid-template-columns: repeat(4, 96px); gap: 6px; }
+.nav-tile {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  height: 78px; padding: 6px 4px; border-radius: 10px; font-size: 0.92rem; line-height: 1.1; text-align: center;
+  background: rgba(20, 40, 64, 0.55); border: 1px solid rgba(95, 216, 255, 0.18); color: var(--ink);
+}
+.nav-tile .nav-ic { color: var(--cyan); display: flex; }
+.nav-tile kbd { position: absolute; top: 4px; right: 5px; font: 600 0.68rem var(--font); color: var(--dim); border: 1px solid #34506a; border-radius: 4px; padding: 0 4px; }
+.nav-tile:hover:not(.off) { background: rgba(30, 70, 104, 0.75); border-color: var(--cyan); }
+.nav-tile.on { background: linear-gradient(rgba(95, 216, 255, 0.28), rgba(95, 216, 255, 0.1)); border-color: var(--cyan); box-shadow: 0 0 12px rgba(95, 216, 255, 0.3); }
+.nav-tile.on .nav-ic { color: #fff; }
+.nav-tile.off { opacity: 0.5; }
+.nav-tile .nav-why { font-size: 0.7rem; color: var(--amber); }
+.nav-tile.shake { animation: nav-shake 0.3s; }
+@keyframes nav-shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+
+/* the button in each ship screen's head */
+.nav-head-btn { display: inline-flex; align-items: center; gap: 6px; border-color: #2f6f8f; }
+.nav-head-btn svg { color: var(--cyan); }
+
+@media (max-width: 560px) {
+  .modal.nav-deck { left: 8px; right: 8px; max-width: none; }
+  .nav-grid { grid-template-columns: repeat(4, 1fr); }
+  .nav-tile { height: 70px; font-size: 0.82rem; }
+  .nav-head-btn span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .modal.nav-deck, .nav-tile.shake { animation: none; } }

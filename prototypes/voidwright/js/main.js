@@ -1,6 +1,7 @@
 // Voidwright — the app: title screen, the flight loop, camera, HUD, docking, jumping, death, saves.
 // The sim (js/sim) is pure; this file feeds it input and turns its events into pictures, sound and UI.
 
+import { openNav, deckButton, DECK_ICON } from './ui/navmenu.js';
 import { createWorld, step, hostile, fireHarpoon, launchDrone, repair, spawnPickup, cargoUsed, GRACE_SECONDS, BOOST_RELOCK, crewText } from './sim/world.js';
 import { generateGalaxy, populate, spawnGroup, SAFE_RADIUS, canWarpTo, warpCore, coreFor } from './sim/galaxy.js';
 import { streamSectors } from './sim/sectors.js';
@@ -41,6 +42,7 @@ const view = $('#view'), overlay = $('#overlay');
 app.R = createRenderer(view, overlay);
 app.R.quality = app.settings.quality;
 app.fx = createFx(app.settings.quality >= 1 ? 1 : 0.5);
+app.fx.shakeMul = app.settings.shake ?? 1;
 app.input = createInput(view);
 setVolume(app.settings.volume); setMuted(app.settings.muted);
 addEventListener('pointerdown', async () => { await initAudio(); resumeAudio(); setVolume(app.settings.volume); setMuted(app.settings.muted); ambience('ambience.void'); }, { once: false });
@@ -65,7 +67,7 @@ function showTitle() {
   box.append(btn('New game', () => newGameDialog(), 'big'));
   if (list.some(Boolean)) box.append(btn('Load a save', () => loadDialog()));
   const extra = $('#title-extra'); extra.innerHTML = '';
-  extra.append(btn('Settings', () => settingsDialog(), 'small'));
+  extra.append(btn('Settings', () => settingsDialog()));
   import('../../../shared/whats-new.js').then(({ createWhatsNew }) => {
     app.news = createWhatsNew({ url: new URL('../data/changelog.json', import.meta.url), key: 'voidwright', title: "What's new" });
     extra.append(app.news.button({ label: "What's new" }));
@@ -759,19 +761,33 @@ for (const b of document.querySelectorAll('#touch .tbtn')) {
 
 // ------------------------------------------------------------------ menus
 $('#btn-menu').addEventListener('click', () => openMenu());
-function closeTopPanel() { const p = $('#panels'); const last = p.lastElementChild; if (!last) return; last.querySelector('.panel-head button.primary')?.click() ?? last.remove(); if (p.lastElementChild === last) last.remove(); }
+// Ship screens deck (ui/navmenu.js): its own top-bar button, and a "Screens" button in the head of every ship screen
+$('#btn-nav').innerHTML = DECK_ICON;
+$('#btn-nav').addEventListener('click', e => { if (app.mode === 'fly' || app.mode === 'paused') openNav(app, e.currentTarget); });
+const HOLD_TABS = { cargo: 'cargo', parts: 'parts', drones: 'drones', ships: 'ships', rep: 'rep', finds: 'finds' };
+app.nav = {
+  go(id) {
+    const top = $('#panels').lastElementChild;
+    // a hold tab while the hold is on top: just switch the tab
+    if (HOLD_TABS[id] && top?.showTab && top.dataset.key) { top.showTab(HOLD_TABS[id]); return; }
+    // leave the ship screen on top (never a station screen: those stay under the new one)
+    if (top?.dataset.key) closeTopPanel();
+    const open = {
+      build: openBuild, upgrades: openUpgrades, fab: openFab, local: openLocal, stars: openMap, goals: openQuests,
+    }[id];
+    if (open) open(); else if (HOLD_TABS[id]) openHold(HOLD_TABS[id]);
+  },
+};
+function openUpgrades() { import('./ui/upgrades.js').then(m => { m.openUpgrades(app); tagPanel('upgrades'); }).catch(e => console.error(e)); }
+function openFab() { import('./ui/workshop.js').then(m => { m.openFabricator(app); tagPanel('fab'); }).catch(e => console.error(e)); }
+function closeTopPanel() { const p = $('#panels'); const last = p.lastElementChild; if (!last) return; if (last.closeNav) { last.closeNav(); return; } last.querySelector('.panel-head button.primary')?.click() ?? last.remove(); if (p.lastElementChild === last) last.remove(); }
 function openMenu() {
   modal('Menu', (m, close) => {
     const G = app.G;
     const add = (label, fn, cls) => m.append(btn(label, () => { close(); fn(); }, cls));
     add('Resume', () => {}, 'primary');
     if (G.unlocked.build) add('Build mode (B)', openBuild);
-    add('Parts hold, cargo & drones', () => openHold());
-    if (app.P?.stats.fab) add('Fabricator (craft from ore)', () => import('./ui/workshop.js').then(m => m.openFabricator(app)));
-    add('Ship upgrades', () => import('./ui/upgrades.js').then(m => m.openUpgrades(app)));
-    add('Local map (N)', openLocal);
-    if (G.unlocked.galaxy) add('Star map (M)', openMap);
-    add('Goals', openQuests);
+    add('Ship screens — cargo, ships, maps…', () => openNav(app, $('#btn-nav')));
     add('Settings', settingsDialog);
     add('Controls', controlsDialog);
     if (app.news) add("What's new", () => app.news.open());
@@ -788,7 +804,9 @@ function settingsDialog() {
     const mute = el('input', { type: 'checkbox', checked: s.muted, onchange: e => { s.muted = e.target.checked; setMuted(s.muted); saveSettings(); } });
     const q = el('select', { onchange: e => { s.quality = +e.target.value; app.R.quality = s.quality; app.fx.quality = s.quality >= 1 ? 1 : 0.5; app.R.W = 0; saveSettings(); } },
       el('option', { value: 1, selected: s.quality >= 1 }, 'High (bloom, full particles)'), el('option', { value: 0.5, selected: s.quality < 1 }, 'Phone saver (fewer particles, lower resolution)'));
-    m.append(el('label', {}, 'Volume', vol), el('label', { class: 'row' }, mute, ' Mute everything'), el('label', {}, 'Graphics ', q), btn('Done', close, 'primary'));
+    const shake = el('select', { onchange: e => { s.shake = +e.target.value; app.fx.shakeMul = s.shake; saveSettings(); } },
+      ...[[1, 'Full'], [0.5, 'Gentle'], [0, 'Off']].map(([v, n]) => el('option', { value: v, selected: (s.shake ?? 1) === v }, n)));
+    m.append(el('label', {}, 'Volume', vol), el('label', { class: 'row' }, mute, ' Mute everything'), el('label', {}, 'Graphics ', q), el('label', {}, 'Screen shake ', shake), btn('Done', close, 'primary'));
   });
 }
 function controlsDialog() {
@@ -847,7 +865,14 @@ function openLocal() {
   import('./ui/localmap.js').then(m => { m.openLocalMap(app); tagPanel('local'); }).catch(e => console.error(e));
 }
 /** Remember which hotkey opened the panel on top, so the same key closes it (report #51). */
-function tagPanel(key) { const top = $('#panels').lastElementChild; if (top?.classList.contains('panel-full') && !top.dataset.key) top.dataset.key = key; }
+function tagPanel(key) {
+  const top = $('#panels').lastElementChild;
+  if (!top?.classList.contains('panel-full') || top.dataset.key) return;
+  top.dataset.key = key;
+  // every ship screen gets the deck button in its head, just left of Close
+  const head = top.querySelector('.panel-head'); const closeB = head?.querySelector(':scope > button.primary');
+  if (head && !head.querySelector('.nav-head-btn')) head.insertBefore(deckButton(app), closeB || null);
+}
 /** Which hotkey opens what: the key that opened the top panel closes it; another of these keys swaps to its panel. */
 const PANEL_KEYS = { map: () => openMap(), local: () => openLocal(), quests: () => openQuests(), drones: () => openHold('drones'), hold: () => openHold('cargo') };
 const HOLD_TAB = { drones: 'drones', hold: 'cargo' };
@@ -910,7 +935,15 @@ function clearDoorstep(w, st) {
 }
 
 function openQuests() { import('./ui/quests-ui.js').then(m => { m.openQuests(app); tagPanel('quests'); }).catch(e => console.error(e)); }
-function openHold(tab) { import('./ui/hold.js').then(m => { m.openHold(app, tab); tagPanel(tab === 'drones' ? 'drones' : 'hold'); }).catch(e => console.error(e)); }
+function openHold(tab) {
+  import('./ui/hold.js').then(m => {
+    m.openHold(app, tab); tagPanel(tab === 'drones' ? 'drones' : 'hold');
+    // the deck lights the hold's current tab
+    const top = $('#panels').lastElementChild; if (!top?.showTab) return;
+    top.dataset.navTab = tab || 'parts';
+    const show = top.showTab; top.showTab = id => { top.dataset.navTab = id; show(id); };
+  }).catch(e => console.error(e));
+}
 app.openHold = openHold; app.openMap = openMap; app.updateQuest = updateQuest; app.save = () => { if (app.P && app.mode !== 'docked') storeShip(app.G, app.P); return save(app.G); };
 app.toast = toast; app.banner = banner;
 app.dockAt = dockAt;   // [encounters] friendly outposts dock through the same path

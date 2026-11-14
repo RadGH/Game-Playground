@@ -5,6 +5,7 @@
 //                 you have against what it needs.
 //   Defence     — the next raid (warned 3 minutes ahead) and how the turrets would do while you are away.
 
+import { haveFor, SUBS_HINT } from '../sim/mats.js';
 import { panel, modal, el, btn, toast, banner, fmt } from './dom.js';
 import { MATERIALS, matTier } from '../data/types.js';
 import { cargoUsed } from '../sim/world.js';
@@ -113,7 +114,7 @@ export function foundDialog(app, planet) {
     const cost = foundCost(sys.tier);
     box.append(el('p', {}, 'A small station in orbit that you manage from its own screen: dig ore, research, make parts and earn credits while you are away. Raiders sometimes come for what it stores.'),
       el('div', { class: 'kv', html: `<span>Ores below</span><span>${(planet.ores || []).map(m => MATERIALS[m]?.name || m).join(', ') || 'Rock'}</span><span>Danger</span><span>${sys.tier}</span>` }),
-      el('h3', { class: 'st-h' }, 'Cost'), costRow(G, cost));
+      el('h3', { class: 'st-h' }, 'Cost'), costRow(G, cost), el('p', { class: 'hint' }, `Ore of danger ${sys.tier}'s tier or better. ${SUBS_HINT}`));
     const why = cannotFound(G, sys.id, planet, sys.tier);
     if (why) box.append(el('div', { class: 'bad hint' }, why));
     box.append(el('div', { class: 'row end' }, btn('Not now', close), btn(`Found outpost (${fmt(cost.cr)} cr)`, () => {
@@ -137,7 +138,7 @@ function rateText(kind, L, mt) {
 function costRow(G, cost) {
   const items = [el('span', { class: 'co-cost' + (G.credits >= cost.cr ? '' : ' bad') }, `${fmt(cost.cr)} cr`)];
   for (const [m, n] of Object.entries(cost.mats)) {
-    const have = G.cargo[m] || 0;
+    const have = haveFor(G.cargo, m);
     items.push(el('span', { class: 'co-cost' + (have >= n ? '' : ' bad') }, el('i', { style: `background:${MATERIALS[m]?.color}` }), `${MATERIALS[m]?.name || m} ${fmt(have)}/${fmt(n)}`));
   }
   return el('div', { class: 'co-costs' }, ...items);

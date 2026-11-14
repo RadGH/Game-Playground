@@ -1,6 +1,23 @@
 {
  "entries": [
   {
+   "id": "2026-11-13c",
+   "date": "2026-11-13",
+   "title": "Punchier weapons, fairer ore, a Screens menu",
+   "items": [
+    "Weapons hit harder on screen: every gun has its own muzzle flash, tracers and impact sparks in its damage colour. Railguns leave a glowing line and a shock ring, plasma leaves scorch marks, lightning forks and crackles, beams shimmer with heat, and shield hits ripple round the bubble instead of throwing debris.",
+    "Knockback: hits shove ships, scaled by how heavy they are. Railguns and shells push hardest, explosions push everything outward, and heavy guns kick back a little. Small ships get thrown around; a battleship barely moves. Stations never budge.",
+    "Explosions leave far less smoke: a bright flash and rings, then clear space.",
+    "Damaged blocks spark and burn, and debris from destroyed blocks flies outward red-hot. Heavy hits on your own ship flash the edges of the screen. Screen shake fades with distance, and Settings now has a Screen shake choice (Full, Gentle, Off).",
+    "Better ore pays for cheaper ore: out past danger 3, where Ferrite is rare, the Titanium you mine pays for hull frames, armour, cargo bays, crafting and upgrades. The same goes for energy and exotic ore. Costs show how much you can pay, stand-ins included.",
+    "Outposts ask for the ore of their own system's tier, and better ore pays too.",
+    "New Screens button next to the menu: one tap opens Cargo, Parts, Drones, Ships, Build, Upgrades, the maps, Goals, Factions and Crew. Every one of those screens has a Screens button too, so you can jump straight from one to another.",
+    "Fairer fights further in: roaming enemy groups are smaller (mostly two ships), enemies get rare gear from danger 6 and epic from 9, and ready-made ships at the shipyard now come with parts as good as that tier's shops sell. Ion missiles can no longer chain-stun you: after your guns come back, you shrug off the next jam for a moment.",
+    "Money rebalanced: big wrecks drop less ore and fewer parts, shops pay a quarter of a part's price, jobs pay much more further in, outposts cost more but their trade posts and ore sites make much more, and the Class III, IV and V warp cores cost more.",
+    "The sign-in box on the title screen fills the screen properly again, and the title buttons match."
+   ]
+  },
+  {
    "id": "2026-11-13b",
    "date": "2026-11-13",
    "title": "Switch ships and pick pilots from anywhere",

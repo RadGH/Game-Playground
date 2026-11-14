@@ -14,6 +14,15 @@
   padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
   background: rgba(6, 7, 10, .72); pointer-events: auto; overflow-y: auto; overscroll-behavior: contain;
 }
+/* The root also carries the class `modal` (so game menus treat it as a dialog). Games often style `.modal` as their
+   own card (Voidwright: 440px wide, padded, column flex) — undo every such property here, at higher specificity, so
+   the box stays a full-screen backdrop in every game. */
+.rgs-signin.modal {
+  position: fixed; inset: 0; width: auto; height: auto; max-width: none; max-height: none; min-width: 0; margin: 0;
+  display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 0;
+  background: rgba(6, 7, 10, .72); border: 0; border-radius: 0; box-shadow: none; transform: none; overflow-y: auto;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+}
 .rgs-card {
   width: min(760px, 100%); margin: auto; background: var(--rgs-bg); border: 1px solid var(--rgs-line);
   border-radius: 14px; padding: 20px 22px; box-shadow: 0 20px 60px rgba(0, 0, 0, .5); text-align: left;
@@ -68,7 +77,7 @@
 .rgs-later:hover { border-color: var(--rgs-accent); }
 
 @media (max-width: 640px) {
-  .rgs-signin { align-items: flex-start; }
+  .rgs-signin, .rgs-signin.modal { align-items: flex-start; }
   .rgs-card { padding: 16px; border-radius: 12px; }
   .rgs-cols { grid-template-columns: 1fr; gap: 16px; }
   .rgs-qr-img { max-width: 180px; }

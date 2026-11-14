@@ -140,9 +140,12 @@ const MAKE = {
   },
 };
 
+/** Job pay multiplier by danger (round 4 economy, tools/econ.mjs). */
+export const MISSION_PAY = tier => 1.6 * Math.pow(tier, 1.5);
 function reward(m, tier, r) {
   // base pay grows with danger; goods are already priced by tier, so their value (m.value) is added as it is
-  const k = Math.pow(tier, 1.2);
+  // round 4 economy: jobs paid about a sixth of what fighting did past danger 3; now about the same per minute
+  const k = MISSION_PAY(tier);
   const cr = Math.round((m.base * k + (m.value || 0)) / 10) * 10;
   return { cr, rep: 3 + Math.floor(r() * 4), part: r() < (m.kind === 'clear' || m.kind === 'escort' ? 0.55 : 0.3) };
 }

@@ -14,6 +14,7 @@
 //
 // Pure sim + helpers that take `app` for the hooks in main.js (placeOutposts, colonyTick, planetInteract).
 
+import { shortText, payMats } from './mats.js';
 import { rng, hash, clamp, TAU } from '../core/math.js';
 import { MATERIALS, matTier, matOf } from '../data/types.js';
 import { BLOCKS } from '../data/blocks.js';
@@ -33,14 +34,16 @@ const RAID_LIVE_MAX = 240;                          // a live raid nobody finish
 const TIER_K = [1, 1, 3, 8, 20, 50];
 
 /**
- * Modules. `rate(level, mt)` = output per hour of play. `cost(level, mt)` = { cr, mats } for that level.
+ * Modules. `rate(level, mt)` = output per hour of play. Round 4 economy: Ore site 50 → 120 a level, Trade post
+ * 300 → 800 a level (a level-1 trade post took ~2.5 hours of play to pay for itself; now under an hour).
+ * `cost(level, mt)` = { cr, mats } for that level.
  * Every number the screen shows comes from here.
  */
 export const MODULES = {
-  ore:     { name: 'Ore site', unit: 'ore an hour', blurb: 'Digs the planet\'s ores.', rate: (L) => 50 * L },
+  ore:     { name: 'Ore site', unit: 'ore an hour', blurb: 'Digs the planet\'s ores.', rate: (L) => 120 * L },
   lab:     { name: 'R&D lab', unit: 'research points an hour', blurb: 'Research points for a station research lab.', rate: (L) => 2 * L },
   factory: { name: 'Factory', unit: 'parts an hour', blurb: 'Makes parts of this outpost\'s tier. With 15 stored ore to use, each one rolls finer.', rate: (L) => L },
-  trade:   { name: 'Trade post', unit: 'credits an hour', blurb: 'Sells to the planet below.', rate: (L, mt) => 300 * L * TIER_K[mt] },
+  trade:   { name: 'Trade post', unit: 'credits an hour', blurb: 'Sells to the planet below.', rate: (L, mt) => 800 * L * TIER_K[mt] },
   storage: { name: 'Storage', unit: 'times the room', blurb: 'More room before output stops piling up.', rate: (L) => 1 + L },
   turrets: { name: 'Defence turrets', unit: 'turrets', blurb: 'Real guns on the station. They fight raiders, here or while you are away.', rate: (L) => 2 * L },
 };
@@ -54,19 +57,21 @@ export function moduleCost(kind, level, mt) {
   if (level >= 3) mats[matOf('exotic', mt)] = 4;
   return { cr: Math.round(base * level * k / 50) * 50, mats };
 }
+/** Founding credits at tier I (× TIER_K). Round 4 economy: 2,500 was about a minute of fighting past danger 4. */
+export const FOUND_CR = 5000;
 /** Founding an outpost: credits + raw materials of the system's tier. */
 export function foundCost(tier) {
   const mt = matTier(tier);
-  return { cr: 2500 * TIER_K[mt], mats: { [matOf('structural', mt)]: 40, [matOf('energy', mt)]: 20, rock: 60 } };
+  return { cr: FOUND_CR * TIER_K[mt], mats: { [matOf('structural', mt)]: 40, [matOf('energy', mt)]: 20, rock: 60 } };
 }
 /** Missing materials / credits for a cost, as short strings ("12 more Ferrite"), or [] when affordable. */
 export function shortOf(G, cost) {
   const out = [];
   if (G.credits < cost.cr) out.push(`${(cost.cr - G.credits).toLocaleString()} more cr`);
-  for (const [m, n] of Object.entries(cost.mats)) if ((G.cargo[m] || 0) < n) out.push(`${n - (G.cargo[m] || 0)} more ${MATERIALS[m]?.name || m}`);
+  out.push(...shortText(G.cargo, cost.mats));
   return out;
 }
-function pay(G, cost) { G.credits -= cost.cr; for (const [m, n] of Object.entries(cost.mats)) { G.cargo[m] -= n; if (G.cargo[m] <= 0) delete G.cargo[m]; } }
+function pay(G, cost) { G.credits -= cost.cr; payMats(G, cost.mats); }
 
 export const levelOf = (c, kind) => c.modules.find(m => m.kind === kind)?.level || 0;
 export const colonyAt = (G, system, planet) => (G.colonies || []).find(c => c.system === system && c.planet === planet) || null;

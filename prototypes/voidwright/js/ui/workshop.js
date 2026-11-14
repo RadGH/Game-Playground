@@ -3,6 +3,7 @@
 // space when a Fabricator part is fitted (out of combat; on-board fabricators make lower-tier parts only).
 // The maths lives in sim/craft.js; this file only draws it.
 
+import { haveFor } from '../sim/mats.js';
 import { el, btn, toast, fmt, panel, showSelected, esc } from './dom.js';
 import { droneRows } from './drones-ui.js';
 import { itemCard, SLOTS, rarityColor } from './items.js';
@@ -39,7 +40,7 @@ export function drawWorkshop(box, ctx) {
 
 function costChips(G, cost) {
   const row = el('div', { class: 'ws-cost' });
-  for (const [m, n] of Object.entries(cost.mats)) row.append(el('span', { class: 'chip ' + ((G.cargo[m] || 0) >= n ? 'ok' : 'no'), style: `--mc:${MATERIALS[m]?.color || '#ccc'}` }, `${n} ${matName(m)}`, el('small', {}, ` (${fmt(G.cargo[m] || 0)})`)));
+  for (const [m, n] of Object.entries(cost.mats)) row.append(el('span', { class: 'chip ' + (haveFor(G.cargo, m) >= n ? 'ok' : 'no'), style: `--mc:${MATERIALS[m]?.color || '#ccc'}` }, `${n} ${matName(m)}`, el('small', {}, ` (${fmt(haveFor(G.cargo, m))})`)));
   if (cost.cr) row.append(el('span', { class: 'chip ' + (G.credits >= cost.cr ? 'ok' : 'no') }, `${fmt(cost.cr)} cr`));
   return row;
 }

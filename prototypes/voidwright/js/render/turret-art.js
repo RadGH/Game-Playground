@@ -1,6 +1,8 @@
 // Turret graphics: each weapon has its own look, rotates to its aim and kicks back when it fires
 // (owner: "Turrets should have their own graphics, rotate at enemies, and have cosmetic knockback").
 
+import { glowSprite } from './fx.js';
+
 const STYLES = {
   pulse_laser:  { barrels: 2, len: 0.75, wid: 0.1, gap: 0.16, body: 'round', bodyR: 0.32, tip: '#ff4f7a' },
   gatling:      { barrels: 4, len: 0.7, wid: 0.07, gap: 0.07, body: 'round', bodyR: 0.3, spin: true, tip: '#ffd27a' },
@@ -86,6 +88,13 @@ export function drawTurret(c, id, S, kick, t, pal, glowCtx) {
       if (st.flare) { c.fillStyle = mid; c.beginPath(); c.moveTo(back + L * 0.6, off - wd * 0.5); c.lineTo(back + L, off - wd * 1.4); c.lineTo(back + L, off + wd * 1.4); c.lineTo(back + L * 0.6, off + wd * 0.5); c.fill(); }
       if (st.lens) { c.fillStyle = st.tip; c.fillRect(back + L - wd * 0.6, off - wd * 0.45, wd * 0.6, wd * 0.9); if (glowCtx) { glowCtx.fillStyle = st.tip; glowCtx.fillRect(back + L - wd * 0.6, off - wd * 0.45, wd * 0.6, wd * 0.9); } }
       else { c.fillStyle = st.tip; c.globalAlpha = 0.8; c.fillRect(back + L - Math.max(1, wd * 0.4), off - wd / 2, Math.max(1, wd * 0.4), wd); c.globalAlpha = 1; }
+      // just fired: the muzzle glows hot and cools as the barrel runs back out (combat feel, 2026-11-13)
+      if (kick > 0.15 && !glowCtx) {
+        const hs = Math.max(2, wd * 2.2) * (0.6 + kick);
+        const op = c.globalCompositeOperation; c.globalCompositeOperation = 'lighter'; c.globalAlpha = Math.min(1, kick * 1.1);
+        c.drawImage(glowSprite(st.tip), back + L - hs, off - hs, hs * 2, hs * 2);
+        c.globalAlpha = 1; c.globalCompositeOperation = op;
+      }
     }
   }
   // body

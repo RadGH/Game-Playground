@@ -8,6 +8,7 @@
 // so the shipyard / repairs / crew just change G.ship. Prices are 15% worse when your standing with the
 // station's faction is below zero.
 
+import { shortText, payMats, haveFor, SUBS_HINT } from '../sim/mats.js';
 import { panel, el, btn, toast, banner, fmt, esc, showSelected } from './dom.js';
 import { SLOTS, itemCard } from './items.js';
 import { drawWorkshop } from './workshop.js';
@@ -16,7 +17,7 @@ import { droneCard, dronePicker } from './drones-ui.js';
 import { growOptions, growCost } from '../sim/hullgrow.js';
 import { GOODS, GOOD_IDS, ECONOMIES, EVENTS, RECIPES, market, prices, buy as mBuy, sell as mSell, remember } from '../sim/economy.js';
 import { cargoUsed } from '../sim/world.js';
-import { makeItem, itemValue, rollRarity, pickPart } from '../sim/loot.js';
+import { makeItem, itemValue, listValue, rollRarity, pickPart } from '../sim/loot.js';
 import { BLOCKS } from '../data/blocks.js';
 import { CLASSES, PREMADES } from '../data/hulls.js';
 import { DRONES } from '../data/drones.js';
@@ -324,7 +325,7 @@ function shopStock(S, kind) {
   }
   return { stock, key };
 }
-const listPrice = (item, mult = 1) => Math.round(itemValue(item) / 0.35 * mult);
+const listPrice = (item, mult = 1) => Math.round(listValue(item) * mult);
 
 function buyItem(S, item, price) {
   const { G } = S;
@@ -358,15 +359,16 @@ function warpSection(S, box) {
   section(box, 'Warp core', `Yours: ${cur.name} — jumps into stars up to danger ${cur.reach}. Safer stars are always in reach.`);
   if (!next) { box.append(el('p', { class: 'good' }, 'The best warp core there is. Every star is open to you.')); return; }
   const mats = Object.entries(next.mats);
-  const short = mats.filter(([m, n]) => (G.cargo[m] || 0) < n);
+  const short = shortText(G.cargo, next.mats);
   const can = G.credits >= next.cr && !short.length;
   box.append(el('div', { class: 'card warp-card' },
     el('b', {}, `${next.name}`), el('div', {}, `Reaches danger ${next.reach} (${next.reach - cur.reach} more).`),
-    el('div', { class: 'amber' }, `${fmt(next.cr)} cr`, mats.length ? ' + ' : '', ...mats.map(([m, n], i) => el('span', { class: (G.cargo[m] || 0) >= n ? 'good' : 'bad' }, `${i ? ', ' : ''}${n} ${MATERIALS[m]?.name || m} (${G.cargo[m] || 0})`))),
+    el('div', { class: 'amber' }, `${fmt(next.cr)} cr`, mats.length ? ' + ' : '', ...mats.map(([m, n], i) => el('span', { class: haveFor(G.cargo, m) >= n ? 'good' : 'bad' }, `${i ? ', ' : ''}${n} ${MATERIALS[m]?.name || m} (${fmt(haveFor(G.cargo, m))})`))),
+    el('div', { class: 'hint' }, SUBS_HINT),
     btn('Install', () => {
       if (G.credits < next.cr) return toast('You cannot afford that.', 'bad');
-      if (short.length) return toast(`Bring ${short.map(([m, n]) => `${n - (G.cargo[m] || 0)} more ${MATERIALS[m]?.name || m}`).join(', ')}.`, 'bad');
-      G.credits -= next.cr; for (const [m, n] of mats) G.cargo[m] -= n;
+      if (short.length) return toast(`Bring ${short.join(', ')}.`, 'bad');
+      G.credits -= next.cr; payMats(G, next.mats);
       G.drive = next.cls;
       banner(`${next.name} installed`, `You can now jump into stars up to danger ${next.reach}.`);
       S.done();
@@ -442,16 +444,16 @@ function growSection(S, box) {
   const cards = el('div', { class: 'cards' });
   for (const to of opts) {
     const C = CLASSES[to]; const cost = growCost(to); const near = sys.tier >= C.tier - 1;
-    const missM = Object.entries(cost.mats).filter(([m, n]) => (G.cargo[m] || 0) < n);
+    const missM = shortText(G.cargo, cost.mats);
     const card = el('div', { class: 'card grow-card' }, el('h4', {}, `${CLASSES[G.ship.cls].name} → ${C.name}`), el('div', { class: 'hint' }, C.blurb),
       kvEl([['Build area', `${C.grid}×${C.grid} cells`], ['Biggest parts', `${C.maxBlock}×${C.maxBlock}`], ['Base CPU', `+${C.baseCpu}`], ['Base crew room', `+${C.baseCrew}`], ['Base cargo', `+${C.baseCargo}`]]));
     if (!near) card.append(el('p', { class: 'bad' }, `Shipyards this close to home cannot do it — find one at danger ${C.tier - 1} or more.`));
     else {
-      const chips = el('div', { class: 'ws-cost' }, ...Object.entries(cost.mats).map(([m, n]) => el('span', { class: 'chip ' + ((G.cargo[m] || 0) >= n ? 'ok' : 'no'), style: `--mc:${MATERIALS[m]?.color}` }, `${n} ${MATERIALS[m]?.name}`, el('small', {}, ` (${fmt(G.cargo[m] || 0)})`))));
+      const chips = el('div', { class: 'ws-cost' }, ...Object.entries(cost.mats).map(([m, n]) => el('span', { class: 'chip ' + (haveFor(G.cargo, m) >= n ? 'ok' : 'no'), style: `--mc:${MATERIALS[m]?.color}` }, `${n} ${MATERIALS[m]?.name}`, el('small', {}, ` (${fmt(haveFor(G.cargo, m))})`))));
       const doGrow = how => {
         if (how === 'cr' && G.credits < cost.cr) return toast('You cannot afford that.', 'bad');
-        if (how === 'ore' && missM.length) return toast(`Bring ${missM.map(([m, n]) => `${n - (G.cargo[m] || 0)} more ${MATERIALS[m].name}`).join(', ')}.`, 'bad');
-        if (how === 'cr') G.credits -= cost.cr; else { for (const [m, n] of Object.entries(cost.mats)) { G.cargo[m] -= n; if (!G.cargo[m]) delete G.cargo[m]; } G.credits -= cost.fee; }
+        if (how === 'ore' && missM.length) return toast(`Bring ${missM.join(', ')}.`, 'bad');
+        if (how === 'cr') G.credits -= cost.cr; else { payMats(G, cost.mats); G.credits -= cost.fee; }
         G.ship.cls = to; G.stats.grown = (G.stats.grown || 0) + 1; S.changed();
         banner(`Hull grown: ${C.name}`, 'Open Build mode to use the new space.'); S.done(null);
       };

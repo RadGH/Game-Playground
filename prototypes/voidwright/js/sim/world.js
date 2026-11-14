@@ -92,7 +92,7 @@ export function near(w, x, y, rad) {
 // ------------------------------------------------------------------ flight (arcade, PLAN §0 #7 + #10)
 export function fly(s, inp, dt) {
   const st = s.stats; if (!st || s.static) return;
-  const empSlow = s.emp > 0 ? 0.3 : 1;
+  const empSlow = s.emp > 0 || s.empSlow > 0 ? 0.3 : 1;
   let mx = inp.mx || 0, my = inp.my || 0; const ml = Math.hypot(mx, my); if (ml > 1) { mx /= ml; my /= ml; }
   // report #60: an empty booster locks until it has refilled to BOOST_RELOCK, so it can't flicker on and off at 0%
   if (s.boostLocked && (s.boostFuel ?? 1) >= BOOST_RELOCK) s.boostLocked = false;
@@ -300,7 +300,7 @@ export function hitBlock(w, s, b, dmg, type, size, src, opts = {}) {
   if (src?.leech && src.stats) src.leechBank = (src.leechBank || 0) + dealt * 0.08;
   if (killed) {
     const n = b.def.size || 1; const [x, y] = toWorld(s, b.x + n / 2, b.y + n / 2);
-    emit(w, { t: 'blockdie', x, y, size: n, color: b.def.color || FACTIONS[s.faction]?.style.hull || '#888', kind: s.kind, ore: b.def.ore, vx: s.vx, vy: s.vy });
+    emit(w, { t: 'blockdie', x, y, size: n, color: b.def.color || FACTIONS[s.faction]?.style.hull || '#888', kind: s.kind, ore: b.def.ore, vx: s.vx, vy: s.vy, tgt: s.id, sx: s.x, sy: s.y });
     if (b.def.ore || (s.kind === 'rock' && w.r() < (opts.mining ? 0.35 : 0.15)) || (s.kind === 'wreck' && w.r() < 0.25)) dropOre(w, s, b, x, y, opts.mining);
     // play-test #34: a small, forgiving chance to lose a crew member when a part with people in it is destroyed
     if (s === w.player && (b.def.crew || b.def.crewCap) && s.crew > 1 && w.r() < 0.25) { s.crew--; w.notes.push({ t: 'crewlost', n: 1 }); }
@@ -309,7 +309,7 @@ export function hitBlock(w, s, b, dmg, type, size, src, opts = {}) {
     if (b.def.core && s.kind === 'ship') s.coreLost = true;
   } else if (dealt > 0 && w.r() < 0.4) {
     const n = b.def.size || 1; const [x, y] = toWorld(s, b.x + n / 2, b.y + n / 2);
-    emit(w, { t: 'spark', x, y, type, amt: dealt });
+    emit(w, { t: 'spark', x, y, type, amt: dealt, tgt: s.id, vx: s.vx, vy: s.vy });
   }
   void before;
   return dealt;
@@ -323,8 +323,64 @@ function dropOre(w, s, b, x, y, mining) {
     if (s.kind === 'wreck') mat = w.r() < 0.65 ? matOf('structural', t) : matOf('energy', t);
     else { if (w.game?.settings?.noRock) return; mat = 'rock'; }
   }
-  const n = Math.max(1, Math.round((b.def.ore ? 2 + w.r() * 3 : 1) * (mining ? 1 : 0.6) * (mining && b.def.ore && mining.motherlode ? 2 : 1)));
+  // round 4 economy: the dearest ores come out in smaller lumps (tier III ÷1.3, IV ÷1.6, V ÷1.9)
+  const lump = b.def.ore ? 1 / (1 + Math.max(0, (MATERIALS[b.def.ore]?.tier || 1) - 2) * 0.3) : 1;
+  const n = Math.max(1, Math.round((b.def.ore ? (2 + w.r() * 3) * lump : 1) * (mining ? 1 : 0.6) * (mining && b.def.ore && mining.motherlode ? 2 : 1)));
   spawnPickup(w, { kind: 'mat', mat, n, ore: s.kind === 'rock' }, x, y, s.vx, s.vy, 30);
+}
+
+// ------------------------------------------------------------------ knockback (combat feel, 2026-11-13)
+/**
+ * Hits shove the body they land on. The push is an impulse: damage x hit size x how the shot carries momentum
+ * (KNOCK_KIND), divided by the body's mass — a dreadnought barely moves, a skiff gets shoved. Each hit changes speed
+ * by at most KNOCK_CAP (KNOCK_CAP_PLAYER for your own ship, so it never takes the controls away), and the pushes a
+ * body takes are pooled over a short window so a hail of rounds cannot launch it across the map (KNOCK_POOL, which
+ * drains at KNOCK_DRAIN per second). Off-centre hits add a little spin (KNOCK_SPIN cap). Static bodies (stations,
+ * outposts, towed prizes) never move. Shield hits push at half strength (the bubble spreads the blow).
+ */
+export const KNOCK_K = 8;
+export const KNOCK_SIZE = { s: 0.5, m: 1, l: 1.6 };
+export const KNOCK_KIND = { rail: 2.2, lance: 1.2, slug: 2.0, shell: 1.4, bullet: 1, ram: 2.2, missile: 1, rocket: 1, torpedo: 1, plasma: 0.8, flak: 0.6, mine: 1, bolt: 0.35, pulse: 0.35, arc: 0.25, beam: 0.3, blast: 2.5 };
+export const KNOCK_CAP = 150, KNOCK_CAP_PLAYER = 85, KNOCK_POOL = 1.6, KNOCK_DRAIN = 4, KNOCK_SPIN = 0.6;
+/** Recoil on the shooter (shoot()): RECOIL_K x damage x the weapon's `recoil` / mass, capped at RECOIL_MAX of top speed. */
+export const RECOIL_K = 10, RECOIL_MAX = 0.1;
+export function knock(w, s, x, y, dx, dy, dv) {
+  if (!s || s.dead || s.static || !s.stats || !(dv > 0)) return 0;
+  const L = Math.hypot(dx, dy); if (!L) return 0;
+  const cap = s === w.player ? KNOCK_CAP_PLAYER : KNOCK_CAP;
+  // the pool: recent pushes use up room, which drains back over time (w.t based, so the same fight runs the same)
+  const k = s.kb || (s.kb = { v: 0, t: w.t });
+  k.v = Math.max(0, k.v - (w.t - k.t) * KNOCK_DRAIN * cap); k.t = w.t;
+  const room = Math.max(0, cap * KNOCK_POOL - k.v);
+  const v = Math.min(dv, cap, room); if (v <= 0.01) return 0;
+  k.v += v;
+  const ux = dx / L, uy = dy / L;
+  s.vx += ux * v; s.vy += uy * v;
+  // off-centre: torque = r x push, scaled down by the body's size so big hulls hardly turn
+  const rx = x - s.x, ry = y - s.y; const r = Math.max(CELL, s.r || CELL);
+  s.va = (s.va || 0) + clamp((rx * uy - ry * ux) / r * v / r * 0.5, -KNOCK_SPIN, KNOCK_SPIN);
+  return v;
+}
+/** Where a struck block is, for the hit flash (render/fx.js draws it moving with the body). */
+export function blockSpot(s, b) {
+  if (!b) return {};
+  const n = b.def.size || 1; const [bx, by] = toWorld(s, b.x + n / 2, b.y + n / 2);
+  return { bx, by, bn: n, ba: s.a, bvx: s.vx, bvy: s.vy };
+}
+/** The push for `dmg` of a weapon kind and hit size on body s (before the caps). */
+export const knockDv = (s, dmg, kind, size) => s?.stats ? dmg * (KNOCK_SIZE[size] ?? 1) * (KNOCK_KIND[kind] ?? 0.5) * KNOCK_K / Math.max(1, s.stats.mass) : 0;
+
+/**
+ * EMP stun with a lockout guard (2026-11-13: Lattice packs with Ion Seekers chained the stun and kept the player's guns
+ * off for good). Every EMP source goes through here. A stun knocks out guns + engines (s.emp). When it runs out, upkeep()
+ * gives EMP_GUARD seconds of resistance: an EMP landing inside that window only slows the ship (s.empSlow, a quarter
+ * of the time, EMP_GUARD_SHARE) and does not switch its guns off.
+ */
+export const EMP_GUARD = 2.5, EMP_GUARD_SHARE = 0.25;
+export function empHit(s, secs) {
+  if (!s || !(secs > 0)) return;
+  if (s.empGuard > 0 && !(s.emp > 0)) { s.empSlow = Math.max(s.empSlow || 0, secs * EMP_GUARD_SHARE); return; }
+  s.emp = Math.max(s.emp || 0, secs);
 }
 
 /** A projectile / beam / arc reaches a body at (x,y). Handles shields, then the grid. */
@@ -339,19 +395,23 @@ export function hitBody(w, s, x, y, dmg, type, size, src, opts = {}) {
   if (!b) return null;
   hitBlock(w, s, b, dmg, type, size, src, opts);
   if (opts.burn) { s.burn = Math.max(s.burn, 3); s.burnDps = Math.max(s.burnDps || 0, opts.burn); s.burnSrc = src; }
-  if (opts.emp) s.emp = Math.max(s.emp, opts.emp);
+  if (opts.emp) empHit(s, opts.emp);
   return 'block';
 }
 
 /** Area damage. Shields block it for the covered side; blocks in the radius take falloff damage. */
 export function splash(w, x, y, R, dmg, type, size, src, opts = {}) {
-  emit(w, { t: 'boom', x, y, r: R, type, big: R > 80, wh: opts.warhead });
+  emit(w, { t: 'boom', x, y, r: R, type, big: R > 80, wh: opts.warhead, wid: opts.wid, dmg });
   for (const s of near(w, x, y, R)) {
     if (s.dead) continue;
     if (!opts.noTeam && src && !hostile(w, src, s) && s.kind !== 'rock' && s.kind !== 'wreck') continue;
     const d = Math.hypot(s.x - x, s.y - y); if (d > R + s.r) continue;
+    // the blast shoves everything in it outward: hardest at the centre, a heavy (he) warhead harder still
+    const kb = knockDv(s, dmg, 'blast', size) * clamp(1 - d / (R + s.r), 0.25, 1) * (opts.warhead === 'he' ? 1.4 : 1);
+    const kdx = d > 1 ? s.x - x : 1, kdy = d > 1 ? s.y - y : 0;
     const sh = shieldAt(s, x, y) || (d > s.r ? shieldAt(s, s.x + (x - s.x) * (s.r / d), s.y + (y - s.y) * (s.r / d)) : null);
-    if (sh && d > s.r * 0.6) { absorb(w, s, sh, dmg, type, x, y, opts.shieldMult || 1, src, !!opts.missile); continue; }
+    if (sh && d > s.r * 0.6) { absorb(w, s, sh, dmg, type, x, y, opts.shieldMult || 1, src, !!opts.missile); knock(w, s, x, y, kdx, kdy, kb * 0.5); continue; }
+    knock(w, s, x, y, kdx, kdy, kb);
     // blocks within R, using the local grid window
     const [lx, ly] = toLocal(s, x, y); const rc = R / CELL;
     const x0 = Math.max(0, Math.floor(lx - rc)), x1 = Math.min(s.grid.w - 1, Math.ceil(lx + rc));
@@ -370,7 +430,7 @@ export function splash(w, x, y, R, dmg, type, size, src, opts = {}) {
     for (const [b, k] of hits) hitBlock(w, s, b, k * m, type, size, src, { missile: opts.missile });
     // incendiary / ion warheads (#57) carry their effect in the blast too
     if (hits.length && opts.burn) { s.burn = Math.max(s.burn, opts.burnT || 3); s.burnDps = Math.max(s.burnDps || 0, opts.burn); s.burnSrc = src; }
-    if (hits.length && opts.emp) s.emp = Math.max(s.emp, opts.emp);
+    if (hits.length && opts.emp) empHit(s, opts.emp);
   }
   // flak / blasts also kill drones and missiles
   for (const dr of w.drones) if (!dr.dead && (!src || hostile(w, src, dr.owner)) && Math.hypot(dr.x - x, dr.y - y) < R) damageDrone(w, dr, dmg * 0.8);
@@ -547,8 +607,12 @@ function shoot(w, s, t, pos, ang, tgt, volley) {
   const muzzle = (t.n * CELL) * 0.55;
   const mx = pos[0] + Math.cos(ang) * muzzle, my = pos[1] + Math.sin(ang) * muzzle;
   t.kick = Math.min(1, t.kick + (W.recoil || 0.2) * 2);
-  emit(w, { t: 'fire', w: W.id, x: mx, y: my, a: ang, color: W.color, team: s.team, owner: s.id, n: t.n, vis, rc });
-  if (s.kind === 'ship' && W.recoil > 0.5) { s.vx -= Math.cos(ang) * W.recoil * 8 / Math.sqrt(s.stats.mass); s.vy -= Math.sin(ang) * W.recoil * 8 / Math.sqrt(s.stats.mass); }
+  emit(w, { t: 'fire', w: W.id, x: mx, y: my, a: ang, color: W.color, team: s.team, owner: s.id, n: t.n, vis, rc, proj: W.proj, size: W.size, dmg });
+  // heavy guns kick the ship that fires them: damage x the gun's recoil / mass, at most a tenth of its top speed
+  if (s.kind === 'ship' && W.recoil >= 0.5 && !s.static) {
+    const kv = Math.min(dmg * n * W.recoil * RECOIL_K / Math.max(1, s.stats.mass), (s.stats.maxSpeed || 200) * RECOIL_MAX, s === w.player ? 22 : 40);
+    s.vx -= Math.cos(ang) * kv; s.vy -= Math.sin(ang) * kv;
+  }
   const opt = { burn: W.burn || (mods.burn ? 4 : 0), emp: W.emp, shieldMult: W.shieldMult || 1 };
   if (W.proj === 'arc') { arcStrike(w, s, mx, my, ang, range, dmg, W, tgt, mods); return; }
   if (W.proj === 'rail' || W.proj === 'lance') { railStrike(w, s, mx, my, ang, range, dmg, W, mods); return; }
@@ -586,7 +650,7 @@ function arcStrike(w, s, x, y, ang, range, dmg, W, tgt, mods = {}) {
     const tx = cur.x + (rand() - 0.5) * (cur.r || 6), ty = cur.y + (rand() - 0.5) * (cur.r || 6);
     pts.push([tx, ty]);
     if (cur.owner) damageDrone(w, cur, d); // a drone
-    else hitBody(w, cur, tx, ty, d, W.type, W.size, s, { shieldMult: W.shieldMult || 1 });
+    else { const res = hitBody(w, cur, tx, ty, d, W.type, W.size, s, { shieldMult: W.shieldMult || 1 }); if (res) knock(w, cur, tx, ty, tx - px, ty - py, knockDv(cur, d, 'arc', W.size) * (res === 'shield' ? 0.5 : 1)); }
     px = tx; py = ty; d *= 0.8;
     // next: nearest hostile within chainRange
     let nx = null, nd = (W.chainRange || 150) ** 2;
@@ -601,7 +665,7 @@ function railStrike(w, s, x, y, ang, range, dmg, W, mods) {
   const ex = x + Math.cos(ang) * range, ey = y + Math.sin(ang) * range;
   let pierce = (W.pierce || 1) + (mods.pierce ? 2 : 0); let endT = 1;
   // bodies along the line, nearest first
-  const cand = [];
+  const cand = []; const railHits = [];
   const mxp = (x + ex) / 2, myp = (y + ey) / 2;
   for (const o of near(w, mxp, myp, range / 2 + 50)) {
     if (o.dead || o === s || (!hostile(w, s, o) && o.kind !== 'rock' && o.kind !== 'wreck')) continue;
@@ -613,19 +677,22 @@ function railStrike(w, s, x, y, ang, range, dmg, W, mods) {
   for (const [, o] of cand) {
     if (pierce <= 0) break;
     const sh = (() => { const R = o.r + 30; for (let k = 0; k < 40; k++) { const tt = k / 40; const px = x + (ex - x) * tt, py = y + (ey - y) * tt; if (Math.hypot(px - o.x, py - o.y) < R) { const s2 = shieldAt(o, px, py); if (s2) return [s2, px, py, tt]; } } return null; })();
-    if (sh && W.proj !== 'lance') { absorb(w, o, sh[0], dmg, W.type, sh[1], sh[2], 1, s); endT = sh[3]; pierce = 0; break; }
+    if (sh && W.proj !== 'lance') { absorb(w, o, sh[0], dmg, W.type, sh[1], sh[2], 1, s); knock(w, o, sh[1], sh[2], ex - x, ey - y, knockDv(o, dmg, W.proj, W.size) * 0.5); endT = sh[3]; pierce = 0; break; }
     // walk the line through the grid, hitting each block once
-    const seen = new Set();
+    const seen = new Set(); let first = null;
     const steps = Math.ceil(range / (CELL * 0.5));
     for (let k = 0; k <= steps && pierce > 0; k++) {
       const tt = k / steps; const px = x + (ex - x) * tt, py = y + (ey - y) * tt;
       if (Math.hypot(px - o.x, py - o.y) > o.r + 2) continue;
       const b = blockAtWorld(o, px, py); if (!b || seen.has(b)) continue;
       seen.add(b); hitBlock(w, o, b, dmg, W.type, W.size, s); pierce--; endT = tt;
+      if (!first) first = [px, py, b];
     }
+    // the slug's momentum: one shove per body, bigger for every block it tore through (up to three)
+    if (first) { knock(w, o, first[0], first[1], ex - x, ey - y, knockDv(o, dmg * Math.min(3, seen.size), W.proj, W.size)); railHits.push({ x: first[0], y: first[1], n: seen.size, ...blockSpot(o, first[2]) }); }
   }
   if (pierce > 0) endT = 1;
-  emit(w, { t: 'rail', x, y, x2: x + (ex - x) * endT, y2: y + (ey - y) * endT, color: W.color, big: W.proj === 'lance' });
+  emit(w, { t: 'rail', x, y, x2: x + (ex - x) * endT, y2: y + (ey - y) * endT, color: W.color, big: W.proj === 'lance', hits: railHits, owner: s.id, dmg });
 }
 
 /** Continuous beams (focus beam, plasma lance, mining laser, tractor). Damage is per second. */
@@ -662,12 +729,13 @@ function beam(w, s, t, pos, ang, range, dt, tgt) {
     let d = dps * dt * (W.tool === 'mine' ? (isRock ? W.mineMult || 4 : 0.35) : 1);
     if (W.race === 'ossari' || W.id === 'refractor') d *= 1 + Math.min(1.5, t.beamHeat * 0.4);
     if (W.tool === 'tractor') { tractorPull(w, s, hitBodyRef, dt); return; }
+    if (!W.tool) knock(w, hitBodyRef, hx, hy, ex - x, ey - y, knockDv(hitBodyRef, d, 'beam', W.size) * (hitShield ? 0.5 : 1));
     if (hitShield) { const sh = shieldAt(hitBodyRef, hx, hy); if (sh) absorb(w, hitBodyRef, sh, d, W.type, hx, hy, 1, s); }
     else {
       const b = blockAtWorld(hitBodyRef, hx + Math.cos(ang) * 2, hy + Math.sin(ang) * 2) || blockAtWorld(hitBodyRef, hx, hy);
       if (b) hitBlock(w, hitBodyRef, b, d, W.type, 'm', s, { mining: W.tool === 'mine' ? (it?.mods?.motherlode ? { motherlode: true } : true) : false });
       if (W.burn) { hitBodyRef.burn = Math.max(hitBodyRef.burn, 1); hitBodyRef.burnDps = Math.max(hitBodyRef.burnDps || 0, W.burn); }
-      if (W.emp) hitBodyRef.emp = Math.max(hitBodyRef.emp, W.emp * dt * 2);
+      if (W.emp) empHit(hitBodyRef, W.emp * dt * 2);
     }
   } else {
     t.beamHeat = 0;
@@ -737,7 +805,7 @@ function shots(w, dt) {
     p.x += p.vx * dt; p.y += p.vy * dt;
     if (p.kind === 'harpoon') { if (p.life <= 0) p.dead = true; continue; }   // tethers() latches it
     if (p.life <= 0) {
-      if (p.splash) { p.dead = true; splash(w, p.x, p.y, p.splash, p.dmg, p.w.type, p.w.size, p.owner, { interceptor: p.kind === 'flak', missile: !!p.hp && isMissile(p), warhead: p.warhead }); }
+      if (p.splash) { p.dead = true; splash(w, p.x, p.y, p.splash, p.dmg, p.w.type, p.w.size, p.owner, { interceptor: p.kind === 'flak', missile: !!p.hp && isMissile(p), warhead: p.warhead, wid: p.w.id }); }
       else p.dead = true;
       continue;
     }
@@ -767,21 +835,23 @@ function shots(w, dt) {
       const sh = shieldAt(o, p.x, p.y);
       if (sh && Math.hypot(p.px - o.x, p.py - o.y) > Math.hypot(p.x - o.x, p.y - o.y) - 1) {
         absorb(w, o, sh, p.dmg, p.w.type, p.x, p.y, p.opt.shieldMult, p.owner, !!p.hp && isMissile(p));
+        knock(w, o, p.x, p.y, p.vx, p.vy, knockDv(o, p.dmg, p.warhead === 'ram' ? 'ram' : p.kind, p.w.size) * 0.5);
         p.dead = true;
-        if (p.splash) emit(w, { t: 'boom', x: p.x, y: p.y, r: p.splash * 0.6, type: p.w.type, wh: p.warhead, shield: true });
-        if (p.opt.emp && p.warhead === 'emp') o.emp = Math.max(o.emp, p.opt.emp * 0.5);   // ion warheads half-stall a shielded ship
+        if (p.splash) emit(w, { t: 'boom', x: p.x, y: p.y, r: p.splash * 0.6, type: p.w.type, wh: p.warhead, shield: true, wid: p.w.id });
+        if (p.opt.emp && p.warhead === 'emp') empHit(o, p.opt.emp * 0.5);   // ion warheads half-stall a shielded ship
         break;
       }
       const hit = rayHit(o, p.px, p.py, p.x, p.y);
       if (!hit) continue;
       const ms = !!p.hp && isMissile(p);
-      if (p.splash) { p.dead = true; splash(w, hit.x, hit.y, p.splash, p.dmg, p.w.type, p.w.size, p.owner, { missile: ms, warhead: p.warhead, burn: p.opt.burn, burnT: p.opt.burnT, emp: p.opt.emp, shieldMult: p.opt.shieldMult }); hitBlock(w, o, hit.b, p.dmg * 0.6, p.w.type, p.w.size, p.owner, { missile: ms }); break; }
+      if (p.splash) { p.dead = true; splash(w, hit.x, hit.y, p.splash, p.dmg, p.w.type, p.w.size, p.owner, { wid: p.w.id, missile: ms, warhead: p.warhead, burn: p.opt.burn, burnT: p.opt.burnT, emp: p.opt.emp, shieldMult: p.opt.shieldMult }); hitBlock(w, o, hit.b, p.dmg * 0.6, p.w.type, p.w.size, p.owner, { missile: ms }); break; }
       hitBlock(w, o, hit.b, p.dmg, p.w.type, p.w.size, p.owner, { missile: ms });
+      const kb = knock(w, o, hit.x, hit.y, p.vx, p.vy, knockDv(o, p.dmg, p.warhead === 'ram' ? 'ram' : p.kind, p.w.size));
       if (p.warhead === 'ram') emit(w, { t: 'boom', x: hit.x, y: hit.y, r: 12, type: 'kinetic', wh: 'ram' });
       if (p.opt.burn) { o.burn = Math.max(o.burn, p.opt.burnT || 3); o.burnDps = Math.max(o.burnDps || 0, p.opt.burn); }
-      if (p.opt.emp) o.emp = Math.max(o.emp, p.opt.emp);
+      if (p.opt.emp) empHit(o, p.opt.emp);
       if (p.leech && p.owner.stats) p.owner.leechBank = (p.owner.leechBank || 0) + p.dmg * 0.1;
-      emit(w, { t: 'hit', x: hit.x, y: hit.y, type: p.w.type, color: p.color, size: p.w.size, kind: p.kind });
+      emit(w, { t: 'hit', x: hit.x, y: hit.y, type: p.w.type, color: p.color, size: p.w.size, kind: p.kind, wid: p.w.id, a: Math.atan2(p.vy, p.vx), dmg: p.dmg, kb, tgt: o.id, ...blockSpot(o, hit.b) });
       if (p.pierce > 0) { p.pierce--; (p.hitIds ||= new Set()).add(o.id); p.dmg *= 0.75; continue; }
       p.dead = true; break;
     }
@@ -822,7 +892,11 @@ function decoys(w, dt) {
 // ------------------------------------------------------------------ upkeep: shields, burn, emp, repair, cloak
 function upkeep(w, s, dt) {
   const st = s.stats;
-  s.emp = Math.max(0, s.emp - dt); s.cloak = Math.max(0, s.cloak - dt); s.slow = Math.max(0, (s.slow || 0) - dt);
+  // EMP: when a stun runs out the ship gets EMP_GUARD seconds of resistance (see empHit)
+  if (s.emp > 0) { s.emp = Math.max(0, s.emp - dt); if (s.emp <= 0) s.empGuard = EMP_GUARD; }
+  else if (s.empGuard > 0) s.empGuard = Math.max(0, s.empGuard - dt);
+  if (s.empSlow > 0) s.empSlow = Math.max(0, s.empSlow - dt);
+  s.cloak = Math.max(0, s.cloak - dt); s.slow = Math.max(0, (s.slow || 0) - dt);
   for (const sh of s.shields) {
     if (!sh.b.alive) { sh.cur = 0; continue; }
     if (w.t - s.lastHit > sh.delay && !w.storm && !s.ionized) sh.cur = Math.min(sh.max, sh.cur + sh.regen * dt * st.efficiency);   // s.ionized: inside an ion cloud (encounters.js)

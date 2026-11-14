@@ -33,9 +33,12 @@ h1, h2, h3 { font-family: var(--head); margin: 0; letter-spacing: 0.04em; }
    10.5vw keeps the word (about 7.9em wide) inside any phone; the right padding is smaller because letter-spacing
    already adds space after the last letter. */
 .title-card h1 { width: max-content; max-width: none; margin-left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 0 0.06em 0 0.2em; font-size: clamp(1.6rem, 10.5vw, 5.4rem); font-weight: 700; letter-spacing: 0.14em; background: linear-gradient(90deg, #5fd8ff, #c48cff 50%, #ffc45a); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 18px rgba(120, 160, 255, 0.45)); }
-.title-card .tag { color: var(--dim); margin: 6px 0 22px; font-size: 1.05rem; }
+.title-card .tagline { color: var(--dim); margin: 6px 0 22px; font-size: 1.05rem; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8); }
 #title-buttons button { width: 100%; }
-#title-extra { margin-top: 14px; }
+/* one look for the small title buttons, whichever shared helper made them (What's new, Credits, the account button) */
+#title-extra { margin-top: 14px; gap: 8px; }
+#title-extra > button, #title-extra .rgs-acct-btn { font-family: var(--font); font-weight: 600; font-size: 0.95rem; line-height: 1.2; color: var(--ink); background: linear-gradient(#1c2640, #121a2e); border: 1px solid #344566; border-radius: 8px; padding: 6px 14px; min-height: 40px; letter-spacing: 0.02em; }
+#title-extra > button:hover, #title-extra .rgs-acct-btn:hover { border-color: var(--cyan); box-shadow: 0 0 10px rgba(95, 216, 255, 0.25); }
 .slot { display: flex; justify-content: space-between; gap: 8px; text-align: left; }
 .slot small { color: var(--dim); font-weight: 500; }
 

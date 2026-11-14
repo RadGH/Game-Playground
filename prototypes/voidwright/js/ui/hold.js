@@ -33,7 +33,7 @@ export function openHold(app, tab = 'parts') {
   const tabs = el('div', { class: 'tabs' }); p.head.insertBefore(tabs, p.head.children[1]);
   const T = [['parts', 'Parts'], ['cargo', 'Cargo'], ['drones', 'Drones'], ['ships', 'Ships'], ['rep', 'Factions'], ['finds', 'Crew & finds']];
   const show = (id) => { tab = id; for (const b of tabs.children) b.classList.toggle('on', b.dataset.id === id); draw(); };
-  for (const [id, label] of T) { const b = btn(label, () => show(id)); b.dataset.id = id; tabs.append(b); }
+  for (const [id, label] of T) { const b = btn(label, () => p.root.showTab(id)); b.dataset.id = id; tabs.append(b); }
   p.root.showTab = show;   // main.js: C / I switch tabs while the hold is open (report #51)
   function draw() {
     const B = p.body; B.innerHTML = '';

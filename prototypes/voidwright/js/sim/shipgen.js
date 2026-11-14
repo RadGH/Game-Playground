@@ -15,7 +15,8 @@ const sized = (id, U) => {
   const s = `${id}_${U}`;
   return BLOCKS[s] ? s : id;
 };
-export const TIER_DMG = [0.3, 0.3, 0.42, 0.55, 0.65, 0.74, 0.82, 0.9, 0.96, 1.02, 1.08];
+// round 4 combat sims (tools/combat-sim.mjs): the top end climbed faster than anything a player can buy; flattened
+export const TIER_DMG = [0.3, 0.3, 0.42, 0.52, 0.62, 0.7, 0.76, 0.82, 0.86, 0.9, 0.94];
 /**
  * Enemy pacing (play-test 2026-11-10: "one or two missile bursts kill them before they fight back", and a
  * danger-3 base "obliterated me immediately"). Enemy guns cycle slower and bases carry fewer of them.
@@ -125,7 +126,9 @@ export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, see
   const armorBase = tier >= 6 && faction === 'navy' ? 'iridium' : tier >= 4 && faction === 'navy' ? 'titanium' : armorMat;
   const armorId = sized(tier >= 6 && faction === 'navy' ? 'iridium' : tier >= 4 && faction === 'navy' ? 'titanium' : armorMat, U);
   const frameId = sized('frame', U);
-  const itemFor = () => (tier > 1 ? { rarity: tier >= 7 ? 'epic' : tier >= 5 ? 'rare' : tier >= 3 ? 'uncommon' : 'common', mods: { dmg: (tier - 1) * 0.05 } } : null);
+  // enemy gear (round 4 sims): rare from danger 6 (was 5) and epic from 9 (was 7), so the step into danger 5 is
+  // not bigger hulls AND better gear at once; +4% damage a danger (was 5%)
+  const itemFor = () => (tier > 1 ? { rarity: tier >= 9 ? 'epic' : tier >= 6 ? 'rare' : tier >= 3 ? 'uncommon' : 'common', mods: { dmg: (tier - 1) * 0.04 } } : null);
   const putUnit = (x, y, id, rot = 0, item = null) => {
     const def = BLOCKS[id];
     if (!def) return;
@@ -211,7 +214,7 @@ export function generateShip({ cls = 'skiff', faction = 'redfang', tier = 1, see
   // enemies near home hit softly; the far rim hits harder than the raw numbers
   body.dmgMul = TIER_DMG[Math.min(10, tier)];
   if (gnat) { body.gnat = true; body.dmgMul *= 0.6; body.name = gnatName(r, F); }
-  else if (CLASSES[cls].rank <= 1 && role !== 'trader' && role !== 'miner') { body.dmgMul *= SMALL_ENEMY_DMG; body.small = true; }
+  else if (CLASSES[cls].rank <= 1 && role !== 'trader' && role !== 'miner') { body.dmgMul *= tier <= 1 ? 1 : SMALL_ENEMY_DMG; body.small = true; }   // round 4: not in your very first fights
   return body;
 }
 
@@ -276,6 +279,8 @@ export function generateStation({ seed = 1, size = 80, faction = 'guild', kind =
   return body;
 }
 
+/** Rarity of the parts a shipyard fits to its ready-made ships, by the hull's tier. */
+export const PREMADE_RARITY = t => t >= 7 ? 'epic' : t >= 5 ? 'rare' : t >= 3 ? 'uncommon' : 'common';
 /** Build one of the shipyard's premade ships (hand-drawn rows, or a fixed-seed generated design). */
 import { gridFromRows } from './grid.js';
 import { PREMADES } from '../data/hulls.js';
@@ -285,9 +290,11 @@ export function buildPremade(id, opts = {}) {
   let body;
   if (p.rows) body = makeBody('ship', gridFromRows(p.rows).grid, { cls: p.cls });
   else {
-    // shipyard designs are generated like a ship of their class's tier, but every part is a plain common one
+    // shipyard designs are generated like a ship of their class's tier, fitted with parts as good as the shops
+    // there sell (round 4 sims: all-common capital ships lost to the enemies at their own danger)
     body = generateShip({ cls: p.cls, tier: CLASSES[p.cls].tier, ...p.gen });
-    for (const b of body.grid.blocks) b.item = null;
+    const rar = PREMADE_RARITY(CLASSES[p.cls].tier);
+    for (const b of body.grid.blocks) b.item = b.item && rar !== 'common' ? { rarity: rar, mods: {} } : null;
     body.dmgMul = 1; body.crew = undefined; body.team = 'player'; recompute(body);   // player rules (bridge part caps) while it is fitted out
     // a ship for sale must run what it carries: trade extra guns for armour until the CPU fits,
     // and frames for reactors until the power fits

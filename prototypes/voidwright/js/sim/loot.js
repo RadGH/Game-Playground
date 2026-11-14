@@ -124,6 +124,8 @@ function dropPool(faction, tier, maxSize) {
  * Loot from a destroyed ship. Returns a list of pickups (without positions): materials, credits, items,
  * escape pods (humans only) and alien specimens.
  */
+/** Loot knobs (round 4 economy). Ore piles per hull rank, pile size per hull rank, part rolls per hull rank. */
+export const LOOT_MAT_PILES = 0.6, LOOT_MAT_SIZE = 0.35, LOOT_PART_ROLLS = 0.55;
 export function rollLoot(r, s, luck = 0) {
   const tier = s.tier || 1; const F = FACTIONS[s.faction]; const cls = CLASSES[s.cls] || CLASSES.skiff;
   const scale = 1 + cls.rank * 1.4;
@@ -132,14 +134,17 @@ export function rollLoot(r, s, luck = 0) {
   out.push({ kind: 'cr', n: Math.round((20 + r() * 40) * tier * scale * (F?.human ? 1 : 0.6)) });
   // materials
   const roles = F?.drops || ['structural'];
-  const nMat = Math.round(1 + r() * 2 + cls.rank * 1.5);
+  // round 4 economy (tools/econ.mjs): ore from big wrecks was most of the late game's money (a danger-9 pack dropped
+  // ~460k of ore, a warp core cost ~4 minutes of fighting). Piles and pile size now grow gently with the hull.
+  const nMat = Math.round(1 + r() * 2 + cls.rank * LOOT_MAT_PILES);
+  const pile = 1 + cls.rank * LOOT_MAT_SIZE;
   for (let i = 0; i < nMat; i++) {
     const mat = matOf(r.pick(roles), matTier(tier));
     const m = MATERIALS[mat];
-    out.push({ kind: 'mat', mat, n: Math.max(1, Math.round((2 + r() * 6) * scale * (m.role === 'exotic' ? 0.35 : 1))) });
+    out.push({ kind: 'mat', mat, n: Math.max(1, Math.round((2 + r() * 5) * pile * (m.role === 'exotic' ? 0.3 : 1))) });
   }
-  // items: the bigger the ship, the more rolls
-  const rolls = (r() < 0.45 ? 1 : 0) + cls.rank + (s.boss ? 4 : 0) + (s.elite ? 2 : 0);
+  // items: the bigger the ship, the more rolls (one more roll per ~2 hull classes, was one per class)
+  const rolls = (r() < 0.45 ? 1 : 0) + Math.floor(cls.rank * LOOT_PART_ROLLS + r()) + (s.boss ? 4 : 0) + (s.elite ? 2 : 0);
   const pool = dropPool(s.faction, tier, Math.max(1, cls.maxBlock));
   for (let i = 0; i < rolls && pool.length; i++) {
     const rar = rollRarity(r, tier, (s.boss ? 1.4 : 0) + (s.elite ? 0.6 : 0) + cls.rank * 0.15 + luck);
@@ -170,9 +175,13 @@ export function rollLoot(r, s, luck = 0) {
   return out;
 }
 
-/** What an item sells for. */
-export function itemValue(item) {
+/** A part's list price: what an outfitter asks for it (rarity and a legendary power lift it). */
+export function listValue(item) {
   const def = BLOCKS[item.block]; const rr = RARITY_BY_ID[item.rarity] || RARITY[0];
   if (!def) return 0;
-  return Math.round((def.cost?.cr || 50) * 0.35 * (1 + rr.index * 0.9 + rr.index * rr.index * 0.25 + (item.power ? 1.5 : 0)));
+  return Math.round((def.cost?.cr || 50) * (1 + rr.index * 0.9 + rr.index * rr.index * 0.25 + (item.power ? 1.5 : 0)));
 }
+/** Share of the list price a shop pays for your parts. Round 4 economy: 0.35 → 0.25 (parts were half the late game's money). */
+export const SELL_SHARE = 0.25;
+/** What an item sells for. */
+export const itemValue = item => Math.round(listValue(item) * SELL_SHARE);

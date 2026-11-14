@@ -141,12 +141,13 @@ export function traitWords(t) {
  * maybe different tier warp drives"). Your core's class caps the danger you can jump INTO; going back to
  * safer stars is always allowed. Upgrades are bought at outfitters, built from credits and materials.
  */
+// round 4 economy (tools/econ.mjs): III / IV / V were 30k / 120k / 400k — 3 to 6 minutes of fighting where they unlock
 export const WARP_CORES = [
   { cls: 1, name: 'Class I warp core', reach: 2, cr: 0, mats: {} },
   { cls: 2, name: 'Class II warp core', reach: 4, cr: 6000, mats: { ferrite: 40, carbon: 30, quartz: 8 } },
-  { cls: 3, name: 'Class III warp core', reach: 6, cr: 30000, mats: { titanium: 40, cobalt: 30, diamond: 8 } },
-  { cls: 4, name: 'Class IV warp core', reach: 8, cr: 120000, mats: { iridium: 40, helium3: 30, starglass: 8 } },
-  { cls: 5, name: 'Class V warp core', reach: 10, cr: 400000, mats: { osmium: 40, antimatter: 30, exotic: 8 } },
+  { cls: 3, name: 'Class III warp core', reach: 6, cr: 45000, mats: { titanium: 40, cobalt: 30, diamond: 8 } },
+  { cls: 4, name: 'Class IV warp core', reach: 8, cr: 200000, mats: { iridium: 40, helium3: 30, starglass: 8 } },
+  { cls: 5, name: 'Class V warp core', reach: 10, cr: 650000, mats: { osmium: 40, antimatter: 30, exotic: 8 } },
 ];
 export const warpCore = G => WARP_CORES[Math.max(1, Math.min(WARP_CORES.length, G.drive || 1)) - 1];
 /** Can this save's warp core take it into a star of this danger? */
@@ -432,7 +433,10 @@ export function spawnGroup(w, at, faction, tier, r, mode = null) {
     list.push({ cls, role: r.pick(FACTIONS[faction].style.roles.filter(x => x !== 'swarm')) || 'capital' });
   } else {
     const small = pool[0];
-    const n = kind === 'guard' ? 2 + Math.floor(r() * 2) : tier <= 1 ? 1 + Math.floor(r() * 2) : 2 + Math.floor(r() * (1 + tier * 0.35));
+    // round 4 combat sims (tools/combat-sim.mjs): packs grew to 4-6 big hulls deep in and beat the ship a player
+    // can afford there almost every time; now mostly 2, sometimes 3 (a quarter of packs at danger 3, a third at 6,
+    // half at 9), 4 only rarely past danger 8
+    const n = kind === 'guard' ? 2 + Math.floor(r() * 2) : tier <= 1 ? 1 + Math.floor(r() * 2) : 2 + Math.floor(r() * (1 + tier * 0.12));
     for (let i = 0; i < Math.min(7, n); i++) list.push({ cls: r() < 0.25 ? pool[1] : small, role: r.pick(FACTIONS[faction].style.roles) });
   }
   const out = [];

@@ -807,6 +807,23 @@
    ]
   },
   {
+   "id": "hullforge",
+   "group": "prototypes",
+   "title": "Hullforge",
+   "href": "prototypes/hullforge/",
+   "folder": "prototypes/hullforge",
+   "summary": "A 3D space game where you build your ship from cubes: corners fill in by themselves, eight kinds of turret each look and move their own way, and you fly in every direction to mine, fight pirates and hive swarms, and grow your ship across a star map of rising danger.",
+   "status": "prototype",
+   "statusNote": "Playable, desktop only",
+   "date": "2026-11-14",
+   "tags": [
+    "space",
+    "ship builder",
+    "3d",
+    "shooter"
+   ]
+  },
+  {
    "id": "spirehold",
    "group": "prototypes",
    "title": "Spirehold",

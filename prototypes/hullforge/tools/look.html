@@ -1,0 +1,44 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Hullforge look</title>
+<script type="importmap">{ "imports": { "three": "../../../vendor/three/three.module.js", "three/addons/": "../../../vendor/three/addons/" } }</script>
+<style>body{margin:0;background:#05070c}canvas{display:block}</style></head><body>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { buildHullGeometry, hullMaterial } from '../js/render/ship-mesh.js';
+import { buildTurret, animateTurret } from '../js/render/turrets.js';
+import { buildStarter, generateShip, generateRock } from '../js/sim/shipgen.js';
+import { makeItem } from '../js/sim/items.js';
+import { DIRV } from '../js/core/math.js';
+const q = new URLSearchParams(location.search);
+const R = new THREE.WebGLRenderer({ antialias: true }); R.setSize(innerWidth, innerHeight); R.toneMapping = THREE.ACESFilmicToneMapping; R.outputColorSpace = THREE.SRGBColorSpace; document.body.append(R.domElement);
+const S = new THREE.Scene(); S.background = new THREE.Color('#070a12');
+const cam = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 2000);
+S.add(new THREE.HemisphereLight(0x9fb8ff, 0x302820, 0.9)); const sun = new THREE.DirectionalLight(0xfff0dd, 2.6); sun.position.set(30, 50, 20); S.add(sun);
+import { makeEnvironment } from '../js/render/env.js'; S.environment = makeEnvironment(R); S.environmentIntensity = 0.8;
+const fill=new THREE.DirectionalLight(0x6f8cff,0.9);fill.position.set(-30,-10,-40);S.add(fill);
+const ctl = new OrbitControls(cam, R.domElement);
+const turrets = [];
+function addBody(g, x, z) {
+  const grp = new THREE.Group(); grp.position.set(x, 0, z); S.add(grp);
+  grp.add(new THREE.Mesh(buildHullGeometry(g), hullMaterial()));
+  for (const b of g.cells.values()) if (b.item && ['autocannon','gatling','laser','railgun','flak','missile','plasma','mining'].includes(b.t)) {
+    const T = buildTurret(b.t, { tier: b.item.tier, rarity: b.item.rarity });
+    const n = DIRV[b.r]; T.root.position.set(b.x + 0.5 + n.x * 0.5, b.y + 0.5 + n.y * 0.5, b.z + 0.5 + n.z * 0.5);
+    T.root.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(n.x, n.y, n.z)); grp.add(T.root); turrets.push(T);
+  }
+}
+const mk = (k, t, r) => makeItem(k, t, r);
+const view = q.get('v') || 'all';
+if (view === 'all' || view === 'ships') {
+  addBody(buildStarter('wasp', mk), -24, 0); addBody(buildStarter('mule', mk), -8, 0); addBody(buildStarter('bulwark', mk), 8, 0);
+  addBody(generateShip(11, { danger: 3 }).grid, 30, 0); addBody(generateShip(5, { danger: 5, faction: 'swarm' }).grid, -10, 40);
+  addBody(generateRock(3, { radius: 6, danger: 3 }), 30, 40);
+}
+if (view === 'all' || view === 'turrets') {
+  ['autocannon','gatling','laser','railgun','flak','missile','plasma','mining'].forEach((k, i) => { const T = buildTurret(k, { tier: 2, rarity: i % 5 }); T.root.position.set(-14 + i * 4, 0, view === 'turrets' ? 0 : -20); S.add(T.root); turrets.push(T); });
+}
+const c = q.get('cam') ? q.get('cam').split(',').map(Number) : [0, 40, 70]; cam.position.set(...c); const tg = q.get("tg") ? q.get("tg").split(",").map(Number) : [0, 0, view === "turrets" ? 0 : 10]; ctl.target.set(...tg);
+let t0 = performance.now();
+R.setAnimationLoop(() => { const now = performance.now() / 1000; const dt = 1 / 60; turrets.forEach((T, i) => { animateTurret(T, { yaw: Math.sin(now * 0.7 + i) * 1.2, pitch: 0.3 + Math.sin(now + i) * 0.3, firing: true, beam: true, charge: (now % 2) / 2, target: true }, dt, now); }); ctl.update(); R.render(S, cam); });
+window.ready = true;
+</script></body></html>

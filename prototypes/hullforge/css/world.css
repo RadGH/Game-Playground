@@ -1,0 +1,77 @@
+/* Round 2 world systems: the job tracker and F prompt on the HUD, the Jobs board, Standing, Outpost, Merchant and
+   Drone hangar screens. Loaded by js/ui/world-ext.js. Colours come from game.css :root. */
+
+/* ---------------- HUD */
+.w-track { position: absolute; top: 160px; left: 12px; width: 250px; display: flex; flex-direction: column; gap: 6px; pointer-events: auto; }
+.w-track:empty { display: none; }
+.w-job { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--jc, var(--cyan)); border-radius: 9px; padding: 7px 10px; cursor: pointer; }
+.w-job b { display: block; font-family: var(--head); font-size: 0.92rem; color: var(--jc, var(--ink)); }
+.w-job small { color: var(--dim); font-size: 0.82rem; display: block; margin-top: 2px; }
+.w-job .prog { margin: 5px 0 0; height: 4px; }
+.w-job .prog i { background: var(--jc, var(--amber)); }
+.w-alert { background: rgba(60, 12, 16, 0.86); border: 1px solid var(--red); border-radius: 9px; padding: 7px 10px; font-weight: 700; color: #ffb09a; font-size: 0.9rem; }
+.w-alert small { display: block; color: var(--dim); font-weight: 500; }
+.w-prompt { position: absolute; bottom: 86px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; pointer-events: none; }
+.w-prompt > div { background: var(--panel); border: 1px solid var(--line2); border-radius: 22px; padding: 6px 16px; font-weight: 700; font-family: var(--head); font-size: 0.92rem; white-space: nowrap; color: var(--ink); }
+.w-prompt > div.use { border-color: var(--amber); color: var(--amber); }
+.w-prompt > div.tow { border-color: #ffd27a; color: #ffe2a6; font-weight: 600; }
+.w-prompt .k { display: inline-block; min-width: 22px; padding: 0 6px; margin-right: 6px; border-radius: 5px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); text-align: center; }
+
+/* ---------------- shared bits on the screens */
+.w-two { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 980px) { .w-two { grid-template-columns: 1fr; } }
+.w-col-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 2px 2px 10px; }
+.w-col-head h3 { font-size: 1.05rem; }
+.w-col-head small { color: var(--dim); }
+.w-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.w-card { --jc: var(--cyan); background: var(--panel2); border: 1px solid var(--line); border-top: 3px solid var(--jc); border-radius: 11px; padding: 12px 14px; display: flex; flex-direction: column; gap: 7px; }
+.w-card.mine { background: var(--panel3); }
+.w-card .kind { font-family: var(--head); font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--jc); }
+.w-card h4 { font-size: 1.04rem; line-height: 1.25; }
+.w-card p { margin: 0; color: var(--dim); font-size: 0.92rem; line-height: 1.35; }
+.w-card .kv { font-size: 0.9rem; }
+.w-card .why { color: var(--red); font-size: 0.86rem; }
+.w-card .prog { height: 6px; margin: 2px 0 0; }
+.w-card .prog i { background: var(--jc); }
+.w-card .row { margin-top: auto; padding-top: 4px; }
+.w-empty { padding: 22px; border: 1px dashed var(--line2); border-radius: 11px; color: var(--dim); text-align: center; }
+.w-foot { margin-top: 14px; color: var(--dim); font-size: 0.9rem; }
+
+/* ---------------- standing */
+.w-fac { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 18px; align-items: start; }
+@media (max-width: 980px) { .w-fac { grid-template-columns: 1fr; } }
+.w-fac h3 { color: var(--fc); }
+.w-fac .blurb { color: var(--dim); margin: 4px 0 10px; font-size: 0.92rem; }
+.w-rep { position: relative; height: 16px; border-radius: 8px; background: linear-gradient(90deg, #4a1420 0%, #3a2a2a 25%, #2a3242 50%, #1f3a32 75%, #163a4a 100%); border: 1px solid var(--line2); margin: 22px 0 6px; }
+.w-rep i { position: absolute; top: -5px; width: 4px; height: 24px; border-radius: 2px; background: #fff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.7); transform: translateX(-2px); }
+.w-rep span { position: absolute; top: -20px; transform: translateX(-50%); font-size: 0.72rem; color: var(--dim); white-space: nowrap; }
+.w-rep b { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255, 255, 255, 0.18); }
+.w-rep-now { display: flex; justify-content: space-between; gap: 10px; font-size: 0.92rem; }
+.w-levels { display: grid; grid-template-columns: 110px 1fr; gap: 0; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; font-size: 0.88rem; }
+.w-levels > * { padding: 6px 10px; border-top: 1px solid var(--line); }
+.w-levels > :nth-child(-n+2) { border-top: 0; }
+.w-levels .on { background: rgba(95, 216, 255, 0.1); }
+.w-levels b { font-family: var(--head); }
+.w-levels ul { margin: 0; padding-left: 16px; color: var(--ink); }
+.w-how { color: var(--dim); font-size: 0.88rem; margin-top: 8px; }
+
+/* ---------------- outpost */
+.w-store { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 900px) { .w-store { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.w-stat { background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; }
+.w-stat span { color: var(--dim); font-size: 0.84rem; display: block; }
+.w-stat b { font-family: var(--head); font-size: 1.12rem; }
+.w-stat .prog { margin-top: 6px; height: 5px; }
+.w-mods { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.w-pips { display: inline-flex; gap: 4px; }
+.w-pips i { width: 16px; height: 6px; border-radius: 3px; background: #26344f; }
+.w-pips i.on { background: var(--green); box-shadow: 0 0 6px rgba(98, 240, 168, 0.5); }
+.w-raid { border-left: 3px solid var(--red); }
+.w-raid.calm { border-left-color: var(--green); }
+.w-log { margin: 6px 0 0; padding-left: 18px; color: var(--dim); font-size: 0.88rem; }
+
+/* ---------------- drone hangar */
+.w-bays { display: flex; flex-direction: column; gap: 8px; }
+.w-bay { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 10px; align-items: center; background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; }
+.w-bay > span { font-family: var(--head); font-weight: 600; }
+.w-bay .row { flex-wrap: wrap; }

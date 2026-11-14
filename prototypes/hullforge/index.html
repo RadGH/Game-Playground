@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#05070c">
+<title>Hullforge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+<link rel="stylesheet" href="../../shared/whats-new.css">
+<link rel="stylesheet" href="../../shared/credits.css">
+<link rel="stylesheet" href="../../shared/dialog.css">
+<link rel="stylesheet" href="../../shared/tooltip.css">
+<link rel="stylesheet" href="../../shared/rgs-signin.css">
+<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/builder.css">
+<link rel="stylesheet" href="css/economy.css">
+</head>
+<body>
+<canvas id="view" aria-label="Space"></canvas>
+<canvas id="overlay" aria-hidden="true"></canvas>
+<div id="jumpfade" aria-hidden="true"></div>
+<div id="hitflash" aria-hidden="true"></div>
+
+<section id="title" class="screen hidden">
+  <div class="title-card">
+    <h1>HULLFORGE</h1>
+    <p class="tagline">Build your ship block by block. Fly it anywhere. Make it bigger.</p>
+    <div class="col" id="title-buttons"></div>
+    <div class="row wrap center" id="title-extra"></div>
+  </div>
+</section>
+
+<div id="hud" class="hidden">
+  <div class="topbar">
+    <button class="icon-btn" id="btn-menu" aria-label="Menu">☰</button>
+    <div class="stat" id="st-credits">0 cr</div>
+    <div class="stat" id="st-cargo">Cargo 0 / 0</div>
+    <div class="grow"></div>
+    <div class="stat" id="st-system">—</div>
+  </div>
+  <div class="bars">
+    <div class="bar hull" id="bar-hull"><i></i><span>Hull</span></div>
+    <div class="bar shield" id="bar-shield"><i></i><span>Shield</span></div>
+    <div class="bar boost" id="bar-boost"><i></i><span>Boost</span></div>
+    <div class="bar power hidden" id="bar-power"><i></i><span>Power</span></div>
+    <div class="stat small" id="st-speed">0 m/s</div>
+  </div>
+  <div id="goal" class="goal hidden"></div>
+  <div id="target" class="target hidden"></div>
+  <div id="prompt" class="prompt hidden"></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="banner" class="banner hidden"></div>
+  <canvas id="radar" width="190" height="190" aria-label="Radar"></canvas>
+</div>
+
+<div id="panels"></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

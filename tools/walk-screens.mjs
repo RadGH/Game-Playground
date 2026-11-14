@@ -9,6 +9,7 @@
 //     base: 'http://localhost:8581',          // optional: games with their own dev server (default: playground dev 8401)
 //     allow: ['N/A'],                         // optional: exact texts that are fine
 //     ignoreErrors: [/ResizeObserver/],       // optional: console errors that are not ours
+//     views: ['desktop'],                     // optional: only these views (a desktop-only game, by owner ruling)
 //     ready: async (page, ctx) => {},         // wait until the first screen is drawn (ctx = { phone, w, h })
 //     screens: [{ name: 'title' }, { name: 'map', open: async (page, ctx) => {}, close: async (page, ctx) => {} }],
 //   };
@@ -31,7 +32,8 @@ const BASE = (flag('--base') || cfg.base || 'http://localhost:8401').replace(/\/
 const SHOTS = resolve(flag('--shots', join(ROOT, 'test-results', 'walk', name)));
 mkdirSync(SHOTS, { recursive: true });
 const only = flag('--only');
-const VIEWS = [{ id: 'desktop', w: 1280, h: 800, phone: false }, { id: 'phone', w: 390, h: 844, phone: true }].filter(v => !only || v.id === only);
+// cfg.views: a game the owner ruled desktop-only (Hullforge, 2026-11-14: "It does not need phone support") lists ['desktop']
+const VIEWS = [{ id: 'desktop', w: 1280, h: 800, phone: false }, { id: 'phone', w: 390, h: 844, phone: true }].filter(v => (!only || v.id === only) && (!cfg.views || cfg.views.includes(v.id)));
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
 let failures = 0;

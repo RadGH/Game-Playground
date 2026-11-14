@@ -1,0 +1,35 @@
+{
+ "entries": [
+  {
+   "id": "2026-11-14b",
+   "date": "2026-11-14",
+   "title": "Spiral beams, a living galaxy, and room to grow",
+   "items": [
+    "Mining and pulse lasers now spiral: strands wind round every beam, more of them on better parts (mining lasers always have at least two), in the part's rarity colour on epic and legendary gear.",
+    "Every gun has its own muzzle flash, tracers and hit sparks. Railguns leave a glowing line and shock rings, plasma scorches hulls, damaged blocks burn, broken blocks fly off red-hot, explosions are bigger, and engines leave trails when you boost. Hits shove ships around — small ships more than big ones.",
+    "Trade: every station buys and sells twelve kinds of goods. Prices move as you trade and recover over time, with shortages and gluts. The trade screen shows the best price you've seen elsewhere and the profit per crate.",
+    "Research lab: nineteen permanent upgrades (thrust, turning, shields, cargo room, mining, cheaper repairs, better shops and more).",
+    "Insurance cuts the rebuild bill when you lose your ship; full cover also keeps your cargo.",
+    "Workshop: craft parts from ore (better ore, better odds of a rare part), and re-roll a part's bonus.",
+    "Shipyard: save your designs as blueprints and load them again, see a turret's firing arc before you place it, and build with big 2×2×2 blocks (after the Heavy frames research) that count as one block toward your bridge's limit — the way to build capital ships.",
+    "Factions: traders, the patrol, pirates and the Hive remember what you do to them. Your standing changes job pay, prices and who shoots at you.",
+    "Jobs board at every station: recover wrecks with your harpoon, deliver cargo, clear pirate camps, escort traders, survey with your scanner, or fetch what someone needs.",
+    "Things happen out there: convoys under attack (help them or join the raid), wandering merchants, strange anomalies, derelicts, distress calls, wanted captains and ambushes.",
+    "Found an outpost at a planet: add modules, collect what they make, and defend it from warned raids.",
+    "Drones (from a Drone bay) mine, fight or patch your hull; a harpoon (G) tows rocks and wrecks; the scanner (V) shows what ore each rock holds."
+   ]
+  },
+  {
+   "id": "2026-11-14a",
+   "date": "2026-11-14",
+   "title": "Hullforge opens",
+   "items": [
+    "Build your ship from cubes in the Shipyard: click a face to add a block, right click to take one off, mirror mode builds both sides at once, and undo / redo has your back.",
+    "Corners fill in by themselves: little 1-by-1 steps become 45° slopes and 1-by-2 steps become gentle half slopes, so a stack of cubes reads as a sleek hull. A switch in the Shipyard shows the ship without them.",
+    "Eight turrets that each look and move their own way: twin autocannons that kick back, a gatling that spins up, pulse lasers with glowing focus rings, railguns whose coils fill with light before they fire, flak cannons with a turning radar fin, missile pods that open their hatches, plasma lances with a pulsing bulb, and mining lasers with spinning rings.",
+    "Fly in every direction: the ship turns toward your crosshair, Q and E roll, Space and C rise and sink. Lock a target and a marker shows where to aim.",
+    "Mine asteroids for ore, fight pirates and hive swarms, collect their parts, sell at stations, and jump across a star map where danger rises the further you go."
+   ]
+  }
+ ]
+}

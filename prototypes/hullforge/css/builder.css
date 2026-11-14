@@ -1,0 +1,25 @@
+/* The Shipyard builder: the 3D view fills the screen; palette left, numbers right, toolbar along the bottom. */
+.builder { position: absolute; inset: 0; pointer-events: none !important; }
+.builder > * { pointer-events: auto; }
+.builder .b-tip, .builder .b-centre { pointer-events: none; }
+.b-top { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: linear-gradient(rgba(5, 9, 18, 0.95), rgba(5, 9, 18, 0.7)); border-bottom: 1px solid var(--line); }
+.b-top h2 { color: var(--cyan); font-size: 1.35rem; letter-spacing: 0.08em; }
+.b-left { position: absolute; top: 64px; left: 12px; bottom: 60px; width: 300px; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.b-left h4 { margin: 8px 0 2px; color: #cfe0f6; font-size: 0.95rem; }
+.b-right { position: absolute; top: 64px; right: 12px; width: 290px; max-height: calc(100vh - 130px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.b-right h3 { color: #cfe0f6; }
+.b-bottom { position: absolute; left: 324px; right: 314px; bottom: 12px; display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; }
+.b-bottom .on, .b-left .on { border-color: var(--amber); color: var(--amber); }
+.b-tool { display: flex; gap: 10px; align-items: center; text-align: left; padding: 8px 10px; min-height: 52px; }
+.b-tool span { display: flex; flex-direction: column; gap: 1px; }
+.b-tool small { font-family: var(--font); color: var(--dim); font-weight: 500; font-size: 0.82rem; }
+.b-tool.on { box-shadow: 0 0 0 1px var(--amber) inset; }
+.b-chip { width: 22px; height: 22px; border-radius: 5px; flex: none; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.15), inset 0 -4px 0 rgba(0, 0, 0, 0.25); }
+.b-check { display: flex; gap: 8px; align-items: center; color: var(--dim); cursor: pointer; }
+.b-prob { margin: 0; color: var(--red); font-weight: 600; }
+.b-warn { margin: 0; color: var(--amber); font-size: 0.9rem; }
+.b-tip { position: absolute; background: rgba(8, 14, 26, 0.92); border: 1px solid var(--cyan); color: var(--ink); border-radius: 8px; padding: 4px 10px; font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
+.b-tip.bad { border-color: var(--red); color: #ffb0a6; }
+.b-centre { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border: 2px solid var(--amber); border-radius: 50%; }
+.b-tool.locked { opacity: 0.55; }
+.b-chip.big { width: 28px; height: 28px; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.15), inset 0 -6px 0 rgba(0, 0, 0, 0.25), inset 0 0 0 7px rgba(0, 0, 0, 0.08); }

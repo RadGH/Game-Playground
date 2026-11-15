@@ -128,6 +128,11 @@ function moveBody(w, b) {
     if (ang > 1e-4) { const axis = vnorm({ x: -tl.y, y: tl.x, z: 0 }); const sp = Math.min(tr, ang * 4); wantW = vscale(axis, sp); }
   }
   wantW.z += (inp.roll || 0) * tr * 1.2;
+  // the player's ship rolls its top toward the camera's up (core/rig.js) — the camera leads, the ship follows
+  if (inp.upDir) {
+    const tu = qinv(b.quat, inp.upDir); const side = Math.hypot(tu.x, tu.y);
+    if (side > 0.25) { const ang = Math.atan2(-tu.x, tu.y); wantW.z += clamp(ang * 4, -tr * 1.2, tr * 1.2) * Math.min(1, (side - 0.25) * 4); }
+  }
   const aa = tr * 5 * DT;
   b.angVel = { x: b.angVel.x + clamp(wantW.x - b.angVel.x, -aa, aa), y: b.angVel.y + clamp(wantW.y - b.angVel.y, -aa, aa), z: b.angVel.z + clamp(wantW.z - b.angVel.z, -aa, aa) };
   integrate(b);
@@ -206,7 +211,13 @@ function turrets(w, b) {
     const def = t.def, s = t.s; const fr = turretFrame(b, t);
     t.auto = false; t.firing = false; t.beam = false;
     let aimPt = null, tgt = null, manual = false;
-    if (isPlayer && inp.fire && inp.aimPoint) { aimPt = inp.aimPoint; manual = true; tgt = inp.aimBody || null; }
+    if (isPlayer && inp.fire && inp.aimPoint) {
+      manual = true; tgt = inp.aimBody?.kind === 'ship' && !inp.aimBody.dead ? inp.aimBody : null; aimPt = inp.aimPoint;
+      // a moving ship: lead it like auto-aim does (the offset keeps whichever block you are pointing at)
+      if (tgt && s.speed) aimPt = vadd(aimPt, vsub(leadPoint(fr.mount, tgt.pos, s.speed, tgt.vel, b.vel), tgt.pos));
+      // nothing under the crosshair: shoot down the crosshair line to this gun's reach, so every click shows shots
+      else if (!inp.aimBody && inp.aimRay) aimPt = rayPointAt(inp.aimRay, fr.mount, s.range);
+    }
     else if (def.fire !== 'mine' && autoLeft > 0) {
       t.auto = true; autoLeft--;
       if (def.fire === 'flak' && missilesNear.length) { const m = nearest(missilesNear, fr.mount); if (m && vdist(m.pos, fr.mount) < s.range) { tgt = m; aimPt = leadPoint(fr.mount, m.pos, s.speed, m.vel); } }
@@ -238,6 +249,12 @@ function turrets(w, b) {
     t.firing = true;
     fireTurret(w, b, t, fr, dir, tgt, manual);
   }
+}
+/** The point on the crosshair line `ray` that is `dist` metres from `from` (the far one), or its farthest reach. */
+function rayPointAt(ray, from, dist) {
+  const o = vsub(ray.from, from); const bq = vdot(o, ray.dir), c = vdot(o, o) - dist * dist; const disc = bq * bq - c;
+  const t = disc > 0 ? Math.max(1, -bq + Math.sqrt(disc)) : dist;
+  return vadd(ray.from, vscale(ray.dir, t * 0.97));
 }
 const nearest = (list, p) => { let best = null, bd = Infinity; for (const o of list) { const d = vdist2(o.pos, p); if (d < bd) { bd = d; best = o; } } return best; };
 function nearestInRange(list, p, range) { const n = nearest(list, p); return n && vdist(n.pos, p) < range ? n : null; }

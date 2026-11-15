@@ -1,5 +1,5 @@
 // Shipyard: a turret's firing arc, drawn in 3D while you place a turret or point at a fitted one. A turret aims
-// anywhere above its mount face and a little below it (sim/body.js PITCH_MIN … PITCH_MAX: −17° … 86°), all the way
+// anywhere above its mount face and a little below it (sim/body.js PITCH_MIN … PITCH_MAX: −17° … 90°), all the way
 // round; your own hull never blocks it (shots pass through your hull). The dome is drawn at a fixed size, not to
 // range — the label gives the range in metres. Geometry and materials are made once per Shipyard visit.
 
@@ -11,7 +11,7 @@ import { partStats } from '../sim/items.js';
 import { fmt } from '../../../../shared/format.js';
 
 const R = 5.5;                                     // drawn radius (m)
-const TOP = Math.PI / 2 - PITCH_MAX;               // polar angle from the face normal where the arc starts (the tiny hole straight up)
+const TOP = Math.PI / 2 - PITCH_MAX;               // polar angle from the face normal where the arc starts (0: no hole straight out)
 const BOTTOM = Math.PI / 2 - PITCH_MIN;            // polar angle of the lowest aim
 const UP = new THREE.Vector3(0, 1, 0);
 

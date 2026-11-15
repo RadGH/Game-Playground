@@ -1,7 +1,7 @@
 # Hullforge
 
 **Status:** round 2 done 2026-11-14 — on top of round 1 (Shipyard with automatic corners, eight animated turrets, 6-direction flight, mining, stations, star map): Voidwright-style effects (spiral beams, tracers, debris, knockback), trade goods, research, insurance, Workshop crafting, blueprints, turret arc preview, 2×2×2 big blocks, factions + standing, jobs, encounters, planet outposts with raids, drones, harpoon, scanning. Desktop only (owner ruling). Lint clean, every module connected, every screen walked.
-**Play:** LAN `http://<LAN IP>:8400/prototypes/hullforge/` (stable; https 8442 for a controller) · dev 8401 · not on games.radgh.com yet (owner decides)
+**Play:** LAN `http://<LAN IP>:8400/prototypes/hullforge/` (stable; https 8442 for a controller) · dev 8401 · public https://games.radgh.com/hullforge/ (live 2026-11-14)
 **Next:** the owner's first play-test (he hasn't played yet) — mouse flight feel, corner looks on his builds, effects, then pacing of jobs/outposts/research money
 **Parked:** mercenaries/wingmen (owner 2026-11-14) — see `docs/PLAN.md` §3
 
@@ -10,10 +10,10 @@ fight and grow it. The 3D cousin of Voidwright (`../voidwright/`). Owner's reque
 
 ## How it plays
 - **Fly**: W/S forward/back, A/D slide, Space/C rise/sink, Q/E roll, Shift boost (cruise ×3.4 when no enemy is within
-  1.5 km). The mouse aims: the ship's nose turns toward the crosshair at its turn rate (a small ring shows where the nose
+  1.5 km). The mouse aims: the camera leads (`js/core/rig.js` — its up stays square to the view, so it never flips; you can loop over the top) and the ship turns its nose toward the crosshair and rolls to the camera's up at its turn rate (a small ring shows where the nose
   points now). Click the view to capture the mouse; Esc frees it and opens the menu.
-- **Fire**: hold left mouse — every turret that can reach the crosshair fires at it (a tick per turret on the crosshair
-  ring shows how many can). Turrets also aim and fire **on their own** at the nearest enemy (or your locked target),
+- **Fire**: hold left mouse — every turret that can reach the crosshair fires at it (an enemy within ~3° of the crosshair counts; with nothing under it, guns fire down the crosshair line to their own reach; moving ships are led; an enemy beyond every gun's reach shows "Out of reach" under the crosshair). Turrets aim from −17° below their face to straight out of it (`body.js PITCH_MIN/PITCH_MAX`). A tick per turret on the crosshair
+  ring shows how many can. Turrets also aim and fire **on their own** at the nearest enemy (or your locked target),
   as many as your bridge + targeting computers allow; mining lasers only fire when you hold Fire.
 - **Lock** (R / right mouse): the enemy nearest the crosshair. A lead marker shows where to aim so shells meet it;
   missile pods fire only at a locked target.
@@ -148,7 +148,7 @@ plated with big armor (`shipgen.js bigify`). Tests: `tests/bigblocks.test.mjs`.
   `death.js`, `cards.js`, `dom.js`, `padnav.js` (copied from Voidwright).
 - `js/main.js`: modes, smooth drawing between sim steps (`snapPrev` / `pose`), the mouse-aim camera rig, events → effects
   and sound, docking, jumps, death, `window.gameEye`.
-- Tests: `node --test prototypes/hullforge/tests/*.test.mjs` (corners, sim, saves, duel); `node tools/walk-screens.mjs
+- Tests: `node --test prototypes/hullforge/tests/*.test.mjs` (corners, sim, saves, duel, aiming); `node prototypes/hullforge/tests/aim-browser.mjs` (real mouse: camera never flips, guns engage); `node tools/walk-screens.mjs
   hullforge` (every screen, desktop only via `views` in `tests/walk.mjs`). `tools/look.html` shows the starters, an
   enemy, a rock and the eight turrets in a turntable view (dev only).
 

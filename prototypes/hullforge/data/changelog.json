@@ -1,6 +1,18 @@
 {
  "entries": [
   {
+   "id": "2026-11-14c",
+   "date": "2026-11-14",
+   "title": "Steadier view, guns that hit",
+   "items": [
+    "The view no longer flips or rolls on its own when you swing round to chase an enemy above, below or behind you. The camera now leads and your ship rolls to match it; Q/E still roll, and hits that spin your ship no longer swing the view.",
+    "You can pull the mouse up and over the top in a full loop.",
+    "Guns fitted on the front of the ship can now hit what is dead ahead (they had a small blind spot straight out of their face) — the Mule's two mining lasers now join the fight.",
+    "Holding Fire always shoots toward the crosshair, even with nothing under it, and a near miss on an enemy still counts as aiming at it. Your guns lead moving ships when you fire by hand too.",
+    "When you hold Fire on an enemy too far for any of your guns, the crosshair tells you how far it is and how far your guns reach."
+   ]
+  },
+  {
    "id": "2026-11-14b",
    "date": "2026-11-14",
    "title": "Spiral beams, a living galaxy, and room to grow",

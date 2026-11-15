@@ -13,7 +13,7 @@ Add corners automatically for both 1x1 and 1x2 style gaps and make weapon turret
 
 ## §1 Decisions Claude made (owner can overrule)
 - **Mouse-aim flight**: the mouse moves a free aim direction; the ship turns its nose toward it at its turn rate; the
-  camera sits behind along the aim. Q/E roll; the camera's up follows the ship's. Arcade flight assist (thrust asks for a
+  camera sits behind along the aim. Q/E roll; the camera's up follows the ship's (changed 2026-11-14: the camera leads — the ship turns its nose to the aim AND rolls its top to the camera's up, `js/core/rig.js`; copying the ship's up flipped the view when the ship turned over). Arcade flight assist (thrust asks for a
   velocity, thrusters get there).
 - **Cubes only, 1 m each**; corners are cosmetic (same rule as Voidwright §0 #5). Bigger ships = more blocks, limited by
   the bridge's block limit (no 2×2 / 4×4 blocks in v1).

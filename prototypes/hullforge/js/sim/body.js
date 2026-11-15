@@ -83,5 +83,7 @@ export function aimAngles(fr, d) {
   const x = d.x * fr.r.x + d.y * fr.r.y + d.z * fr.r.z, y = d.x * fr.u.x + d.y * fr.u.y + d.z * fr.u.z, z = d.x * fr.f.x + d.y * fr.f.y + d.z * fr.f.z;
   return { yaw: Math.atan2(x, z), pitch: Math.asin(Math.max(-1, Math.min(1, y))) };
 }
-export const PITCH_MIN = -0.3, PITCH_MAX = 1.5;      // a turret can dip 17° below its mount face
+// a turret can dip 17° below its mount face and aim all the way out of it. (Until 2026-11-14 it stopped at 86°, which
+// left a blind spot straight out of the face — a gun on the nose could not hit what was dead ahead.)
+export const PITCH_MIN = -0.3, PITCH_MAX = Math.PI / 2;
 export const blockDef = blk => BLOCKS[blk.t];

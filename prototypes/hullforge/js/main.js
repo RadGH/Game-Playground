@@ -29,6 +29,7 @@ import { buildSky } from './render/sky.js';
 import { createViews } from './render/views.js';
 import { createFx } from './render/fx.js';
 import { createInput } from './core/input.js';
+import { createRig, turnRig, rollRig, squareUp, aimRigAt } from './core/rig.js';
 import { initAudio, resumeAudio, play, lib, setVolume, setMuted, TURRET_VOICE, loopLevel, boostSound } from './core/audio.js';
 import { createHud } from './ui/hud.js';
 import { $, el, toast, banner, credits as cr } from './ui/dom.js';
@@ -98,17 +99,11 @@ app.views = views; app.input = input; app.sunLight = sunLight; app.fillLight = f
 installTooltips();
 
 // ------------------------------------------------------------------ the camera rig (mouse aim)
-// aimDir: where you want to go/shoot (world). The ship turns its nose toward it; the camera sits behind it.
-const rig = { aim: { x: 0, y: 0, z: 1 }, up: { x: 0, y: 1, z: 0 }, dist: 1, pos: null, look: null };
-function resetRig(P) { rig.aim = forward(P); rig.up = upOf(P); rig.dist = 1; rig.pos = null; }
-function turnAim(dx, dy) {
-  const s = 0.0022 * app.prefs.sens; const right = vnorm(vcross(rig.aim, rig.up));
-  let a = rotate(rig.aim, rig.up, -dx * s);
-  a = rotate(a, right, (app.prefs.invertY ? 1 : -1) * dy * s);
-  // never past straight up/down relative to the camera's up (no flipping)
-  if (Math.abs(vdot(a, rig.up)) < 0.985) rig.aim = vnorm(a);
-}
-function rotate(v, axis, ang) { const q = qaxis(vnorm(axis), ang); return qrot(q, v); }
+// rig.aim: where you want to go/shoot (world); rig.up: the screen's up. The camera leads and the ship follows both
+// (core/rig.js says why — the old rig copied the ship's up and flipped when you aimed above or below the ship).
+const rig = createRig();
+function resetRig(P) { rig.aim = forward(P); rig.up = upOf(P); squareUp(rig); rig.dist = 1; rig.pos = null; }
+function turnAim(dx, dy) { const s = 0.0022 * app.prefs.sens; turnRig(rig, -dx * s, (app.prefs.invertY ? 1 : -1) * dy * s); }
 
 // ------------------------------------------------------------------ smooth drawing
 function snapPrev(w) { for (const b of w.bodies) { b.prevPos = { ...b.pos }; b.prevQuat = { ...b.quat }; } }
@@ -196,7 +191,7 @@ function playerDied() {
   document.exitPointerLock?.();
 }
 /** Point the aim (and so the nose) at a world point — for tests and Claude's game-eye. */
-app.aimAt = p => { if (app.P) rig.aim = vnorm(vsub(p, app.P.pos)); };
+app.aimAt = p => { if (app.P) aimRigAt(rig, vsub(p, app.P.pos)); };
 app.rig = rig;
 app.dock = dock; app.launch = launch; app.jumpTo = jumpTo; app.enterSystem = enterSystem;
 
@@ -313,13 +308,15 @@ function flyFrame(inp, dt, now, panelsOpen) {
     if (inp.look.x || inp.look.y) turnAim(inp.look.x, inp.look.y);
     if (inp.padLook.x || inp.padLook.y) turnAim(inp.padLook.x * 900 * dt, inp.padLook.y * 700 * dt);
     if (inp.wheel) rig.dist = clamp(rig.dist + inp.wheel * 0.12, 0.6, 3);
-    rig.up = vnorm(vlerp(rig.up, upOf(P), Math.min(1, dt * 3)));
+    if (inp.roll && !P.dead) rollRig(rig, inp.roll * P.stats.turn * 1.2 * dt);   // Q/E roll the view; the ship rolls to match
     const camPos = camera.position; const look = rig.look || vadd(P.pos, vscale(rig.aim, 1000));
     const toLook = vnorm(vsub(look, camPos));
     const hit = rayWorld(w.bodies, camPos, toLook, 2500, b => b !== P && b.kind !== 'station');
-    const aimPoint = hit ? vadd(camPos, vscale(toLook, hit.t)) : vadd(camPos, vscale(toLook, 1200));
-    P.input = { thrust: inp.thrust, aimDir: rig.aim, roll: inp.roll, boost: inp.boost, fire: inp.fire && !P.dead, aimPoint, aimBody: hit?.body || null };
-    app.aimHit = hit;
+    // a near miss still counts: the hostile closest to the crosshair within a few degrees is what you're shooting at
+    const near = hit ? null : nearCrosshair(w, P, camPos, toLook);
+    const aimPoint = hit ? vadd(camPos, vscale(toLook, hit.t)) : near ? { ...near.pos } : vadd(camPos, vscale(toLook, 1200));
+    P.input = { thrust: inp.thrust, aimDir: rig.aim, upDir: rig.up, roll: 0, boost: inp.boost, fire: inp.fire && !P.dead, aimPoint, aimBody: hit?.body || near || null, aimRay: { from: { ...camPos }, dir: toLook } };
+    app.aimHit = hit || (near ? { body: near } : null);
     if (inp.pressed.has('lock')) lockTarget();
     if (inp.pressed.has('use') && canDock()) { dock(); return; }
     if (inp.pressed.has('use')) runHooks('action', 'use');   // world: F at an outpost, a merchant, a convoy
@@ -346,6 +343,18 @@ function flyFrame(inp, dt, now, panelsOpen) {
   views.sync(w, now, dt, pose);
   placeCamera(dt, now);
   app.hud.update(dt, now, paused);
+}
+/** The hostile ship nearest the crosshair line, if it is within ~3° of it (plus its own size) and 2.5 km. */
+function nearCrosshair(w, P, from, dir) {
+  let best = null, bs = Infinity;
+  for (const b of w.bodies) {
+    if (b.dead || b.kind !== 'ship' || !hostile(P, b)) continue;
+    const d = vsub(b.pos, from); const along = vdot(d, dir); if (along < 5 || along > 2500) continue;
+    const off = vlen(vsub(d, vscale(dir, along)));                 // metres from the crosshair line
+    const ang = Math.max(0, off - b.radius * 0.8) / along;         // ≈ angle past its edge
+    if (ang < 0.05 && ang < bs) { bs = ang; best = b; }
+  }
+  return best;
 }
 function lockTarget() {
   const w = app.w, P = app.P; let best = null, bs = 0.97;

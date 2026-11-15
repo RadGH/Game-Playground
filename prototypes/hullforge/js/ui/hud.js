@@ -125,14 +125,17 @@ export function createHud(app) {
     const nose = project({ x: P.pos.x + forward(P).x * 1000, y: P.pos.y + forward(P).y * 1000, z: P.pos.z + forward(P).z * 1000 });
     if (nose.front) { g.strokeStyle = 'rgba(180,220,255,0.55)'; g.lineWidth = 1.5; g.beginPath(); g.arc(nose.x, nose.y, 5, 0, 7); g.stroke(); g.beginPath(); g.moveTo(nose.x - 12, nose.y); g.lineTo(nose.x - 7, nose.y); g.moveTo(nose.x + 7, nose.y); g.lineTo(nose.x + 12, nose.y); g.stroke(); }
     // crosshair with a tick per turret that can reach the aim point
-    const aimP = P.input.aimPoint; let bear = 0, total = 0;
-    if (aimP) for (const t of P.turrets) { total++; const fr = turretFrame(P, t); const a = aimAngles(fr, vnorm(vsub(aimP, fr.mount))); const d = vlen(vsub(aimP, fr.mount)); if (a.pitch >= PITCH_MIN - 0.02 && d < t.s.range * 1.15) bear++; }
+    // (nothing under the crosshair: guns fire down the crosshair line to their own reach, so only the angle counts)
+    const aimP = P.input.aimPoint, open = !P.input.aimBody; let bear = 0, total = 0, reach = 0;
+    if (aimP) for (const t of P.turrets) { total++; reach = Math.max(reach, t.s.range * 1.15); const fr = turretFrame(P, t); const a = aimAngles(fr, vnorm(vsub(aimP, fr.mount))); const d = vlen(vsub(aimP, fr.mount)); if (a.pitch >= PITCH_MIN - 0.02 && (open || d < t.s.range * 1.15)) bear++; }
+    const aimShip = P.input.aimBody?.kind === 'ship' ? P.input.aimBody : null;
     const safe = inSafeZone(w, P.pos);
     g.strokeStyle = safe ? 'rgba(98,240,168,0.8)' : app.aimHit && hostile(P, app.aimHit.body) ? '#ff7a5a' : 'rgba(220,235,255,0.9)'; g.lineWidth = 1.6;
     g.beginPath(); g.arc(cx, cy, 14, 0, 7); g.stroke();
     g.beginPath(); g.moveTo(cx - 24, cy); g.lineTo(cx - 17, cy); g.moveTo(cx + 17, cy); g.lineTo(cx + 24, cy); g.moveTo(cx, cy - 24); g.lineTo(cx, cy - 17); g.moveTo(cx, cy + 17); g.lineTo(cx, cy + 24); g.stroke();
     for (let i = 0; i < total; i++) { const a = -Math.PI / 2 + (i - (total - 1) / 2) * 0.22; g.strokeStyle = i < bear ? '#62f0a8' : 'rgba(255,255,255,0.18)'; g.lineWidth = 3; g.beginPath(); g.arc(cx, cy, 20, a - 0.07, a + 0.07); g.stroke(); }
     if (safe) label(cx, cy + 42, 'Station safe zone — weapons hold fire', '#62f0a8');
+    else if (aimShip && total && !bear && reach) label(cx, cy + 42, `Out of reach — ${dist(vlen(vsub(aimP, P.pos)))} away, your guns reach ${dist(reach)}`, '#ffb37a');
     drawRadar(now);
   }
   function bracket(x, y, r, col) {

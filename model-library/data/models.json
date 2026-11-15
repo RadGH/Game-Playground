@@ -1,0 +1,504 @@
+{
+  "_doc": "The Model Library's catalog: one row per Meshy model. tools/make.mjs reads `look` to write the Codex prompt, `height` for the rig, `clips` (Meshy animation library ids \u2192 our clip names) for the animations. Fields filled by the pipeline: `status`, `credits`, `tasks`, `glb`, `triangles`. Owner 2026-11-11: only two-legged characters Meshy can auto-rig; mobs, not bosses; traditional medieval-fantasy creatures any game can reuse; NOT yet used by any game (ask the owner first).",
+  "style": "stylised-realistic 3D fantasy game character, like a polished modern action-RPG: believable proportions for its kind, clean readable shapes, hand-painted-looking textures with subtle shading, rich but not garish colours, not photoreal, not chibi, not cartoonish, not anime",
+  "baseClips": {
+    "idle": 0,
+    "attack": 219,
+    "hit": 178,
+    "death": 189
+  },
+  "models": [
+    {
+      "id": "goblin_warrior",
+      "name": "Goblin Warrior",
+      "group": "goblins",
+      "role": "melee",
+      "height": 1.15,
+      "look": "a wiry adult goblin warrior: green-grey skin, long pointed ears, sharp nose, small yellow eyes, scrappy mismatched leather armour with a few iron plates, a ragged loincloth tabard, leather wrist wraps, bare clawed feet",
+      "clips": {
+        "idle": 0,
+        "ready": 89,
+        "attack": 219,
+        "attack2": 97,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Rogueloot: Hollowhorn Raider / Cutthroat",
+        "Thousandvale: road raiders",
+        "any goblin camp"
+      ],
+      "status": "ready",
+      "glb": "models/goblin_warrior.glb",
+      "credits": 53,
+      "tasks": {
+        "model": "01a1cd10-3718-7540-af69-4945639d9430",
+        "rig": "01a1cd13-62af-70bc-8242-230a487ea5e9",
+        "anim": "01a1cd13-c434-7585-871b-4409ad8aaffc"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "ready",
+        "attack",
+        "attack2",
+        "hit",
+        "death"
+      ],
+      "bytes": 2294564
+    },
+    {
+      "id": "goblin_shaman",
+      "name": "Goblin Shaman",
+      "group": "goblins",
+      "role": "caster",
+      "height": 1.1,
+      "look": "an old goblin shaman: green-grey skin, long pointed ears, hunched shoulders, a hooded hide cloak hung with bone charms and feathers, a necklace of teeth, painted white face markings, a short ragged skirt, bare clawed feet",
+      "clips": {
+        "idle": 0,
+        "attack": 129,
+        "cast2": 125,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Rogueloot: Hollowhorn Bonechanter",
+        "Thousandvale: Slagborn Firecaller (re-coloured)",
+        "any goblin camp"
+      ],
+      "credits": 53,
+      "status": "ready",
+      "glb": "models/goblin_shaman.glb",
+      "tasks": {
+        "model": "01a1cd17-3443-73b3-a704-f584fe4a960f",
+        "rig": "01a1cd1b-3cfc-736b-b295-8848083a9eab",
+        "anim": "01a1cd1b-9fe2-7253-8608-aa774bb66007",
+        "anim2": "01a1cd30-20a9-7392-abd2-62ac84f040d5"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "attack",
+        "cast2",
+        "hit",
+        "death",
+        "ready"
+      ],
+      "bytes": 2401360,
+      "clips2": {
+        "ready": 89
+      }
+    },
+    {
+      "id": "goblin_guard",
+      "name": "Goblin Shieldbearer",
+      "group": "goblins",
+      "role": "tank",
+      "height": 1.25,
+      "look": "a stocky, broad goblin shieldbearer: green-grey skin, long pointed ears, heavy dented iron helmet with a nose guard, thick padded gambeson under a rusty iron breastplate, iron shoulder plates, leather greaves, heavy boots",
+      "clips": {
+        "idle": 0,
+        "ready": 89,
+        "attack": 220,
+        "block": 138,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Rogueloot: Hollowhorn Breaker",
+        "any goblin camp (front line)"
+      ],
+      "credits": 53,
+      "status": "ready",
+      "glb": "models/goblin_guard.glb",
+      "tasks": {
+        "model": "01a1cd17-3442-719e-a369-38fbdf192284",
+        "rig": "01a1cd1b-166c-733b-a2a9-c18870da7602",
+        "anim": "01a1cd1b-7705-75b5-a1d3-1f2de3257dcf"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "ready",
+        "attack",
+        "block",
+        "hit",
+        "death"
+      ],
+      "bytes": 2137892
+    },
+    {
+      "id": "skeleton_warrior",
+      "name": "Skeleton Warrior",
+      "group": "undead",
+      "role": "melee",
+      "height": 1.75,
+      "look": "an animated human skeleton warrior: aged ivory bones, faint cold blue glow in the eye sockets, a dented open iron helmet, a torn rusty chainmail shirt, a rotted leather belt with a tattered cloth tabard, iron bracers",
+      "clips": {
+        "idle": 0,
+        "ready": 89,
+        "attack": 219,
+        "attack2": 221,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Rogueloot: Ossuary Knight, Barrow Husk",
+        "Thousandvale: barrows, old battlefield",
+        "any crypt"
+      ],
+      "credits": 53,
+      "status": "ready",
+      "tasks": {
+        "model": "01a1cd17-3443-7667-85de-90d72ce064f9",
+        "rig": "01a1cd1a-c657-75fe-9b30-7e704a4468de",
+        "anim": "01a1cd1b-26e9-773e-bdb9-d2fafd875179"
+      },
+      "glb": "models/skeleton_warrior.glb",
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "ready",
+        "attack",
+        "attack2",
+        "hit",
+        "death"
+      ],
+      "bytes": 2450944
+    },
+    {
+      "id": "skeleton_archer",
+      "name": "Skeleton Archer",
+      "group": "undead",
+      "role": "archer",
+      "height": 1.72,
+      "look": "an animated human skeleton archer: aged ivory bones, faint cold blue glow in the eye sockets, a tattered hooded cloak of faded green cloth, a leather chest strap with an empty quiver on the back, leather bracers",
+      "clips": {
+        "idle": 0,
+        "attack": 224,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Rogueloot: Rattlebone Archer",
+        "any crypt"
+      ],
+      "credits": 50,
+      "status": "ready",
+      "glb": "models/skeleton_archer.glb",
+      "tasks": {
+        "model": "01a1cd1c-bf63-739d-a854-c920cc813dd4",
+        "rig": "01a1cd21-61e7-7475-980e-8077fb3a5e42",
+        "anim": "01a1cd21-d66e-7358-ab8f-124313bc50e5",
+        "anim2": "01a1cd30-5017-7707-bbe1-063a54f62547"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "attack",
+        "hit",
+        "death",
+        "attack2"
+      ],
+      "bytes": 2498652,
+      "clips2": {
+        "attack2": 225
+      }
+    },
+    {
+      "id": "zombie",
+      "name": "Zombie",
+      "group": "undead",
+      "role": "melee",
+      "height": 1.75,
+      "look": "a shambling zombie peasant: grey-green rotting skin, sunken pale eyes, ragged torn shirt and patched trousers stained with mud, one bare foot and one worn shoe, thin stringy hair",
+      "clips": {
+        "idle": 0,
+        "shamble": 112,
+        "attack": 4,
+        "scream": 386,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Rogueloot: Drowned Husk, Barrow Husk, Sludge Husk",
+        "Thousandvale: blight, graveyards",
+        "any graveyard"
+      ],
+      "credits": 53,
+      "status": "ready",
+      "glb": "models/zombie.glb",
+      "tasks": {
+        "model": "01a1cd1c-fa81-72b6-bce0-bd55b6b38ae6",
+        "rig": "01a1cd21-4c02-7265-911a-51fecf859574",
+        "anim": "01a1cd21-af19-771a-aa44-796754b646ea"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "shamble",
+        "attack",
+        "scream",
+        "hit",
+        "death"
+      ],
+      "bytes": 2227320
+    },
+    {
+      "id": "orc_warrior",
+      "name": "Orc Warrior",
+      "group": "orcs",
+      "role": "melee",
+      "height": 1.95,
+      "look": "a muscular orc warrior: grey-green skin, heavy brow, small tusks from the lower jaw, black hair tied in a topknot, spiked leather and iron armour on the shoulders and chest, a fur-trimmed belt, leather kilt with iron studs, heavy boots",
+      "clips": {
+        "idle": 0,
+        "ready": 85,
+        "attack": 237,
+        "attack2": 238,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Rogueloot: Hollowhorn Warcaller (leader)",
+        "Thousandvale: Slagborn Raider",
+        "any warband"
+      ],
+      "credits": 53,
+      "status": "ready",
+      "glb": "models/orc_warrior.glb",
+      "tasks": {
+        "model": "01a1cd1d-11ac-7566-82bd-1d239e0517a8",
+        "rig": "01a1cd21-b849-774e-b255-10f4be3d66a9",
+        "anim": "01a1cd22-459e-726f-ab5a-63b98e617154"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "ready",
+        "attack",
+        "attack2",
+        "hit",
+        "death"
+      ],
+      "bytes": 2478832
+    },
+    {
+      "id": "ogre",
+      "name": "Ogre",
+      "group": "brutes",
+      "role": "brute",
+      "height": 2.7,
+      "look": "a huge hulking ogre: pale tan-grey skin, big round belly, very broad shoulders and long thick arms, small head with an underbite and two blunt tusks, shaggy hair, a crude hide loincloth held by a rope belt, a single iron shoulder plate, bare feet",
+      "clips": {
+        "idle": 0,
+        "attack": 128,
+        "roar": 386,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Rogueloot: Glade Warden / Cairn Sentinel (re-skin)",
+        "Thousandvale: toll-bridge trolls",
+        "any brute"
+      ],
+      "credits": 53,
+      "status": "ready",
+      "glb": "models/ogre.glb",
+      "tasks": {
+        "model": "01a1cd24-35df-7405-9618-ef4e4bc93b40",
+        "rig": "01a1cd27-0eb1-71bc-9db6-d39bba5c76fd",
+        "anim": "01a1cd27-7bf2-74e4-9895-e8521d0205d0",
+        "anim2": "01a1cd30-7e0b-708b-82c1-1ac323c97fb4"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "attack",
+        "roar",
+        "hit",
+        "death",
+        "attack2"
+      ],
+      "bytes": 2372332,
+      "clips2": {
+        "attack2": 237
+      }
+    },
+    {
+      "id": "bandit",
+      "name": "Bandit",
+      "group": "humans",
+      "role": "melee",
+      "height": 1.78,
+      "look": "a rough human bandit: weathered man in his thirties with stubble, a dark cloth half-mask over the lower face, a hooded brown cloak, a worn leather jerkin over a grey shirt, fingerless gloves, a belt with pouches, dark trousers and scuffed boots",
+      "clips": {
+        "idle": 0,
+        "ready": 89,
+        "attack": 219,
+        "attack2": 240,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Thousandvale: Road Brigand (the most common enemy)",
+        "Rogueloot: Gravesworn Digger",
+        "any road ambush"
+      ],
+      "credits": 53,
+      "status": "ready",
+      "glb": "models/bandit.glb",
+      "tasks": {
+        "model": "01a1cd24-6ff8-7262-96d1-0ca472e3abff",
+        "rig": "01a1cd27-0372-7105-8ce8-795cd85406a3",
+        "anim": "01a1cd27-65ce-728c-984a-ced0b9db2c13"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "ready",
+        "attack",
+        "attack2",
+        "hit",
+        "death"
+      ],
+      "bytes": 1921644
+    },
+    {
+      "id": "bandit_archer",
+      "name": "Bandit Archer",
+      "group": "humans",
+      "role": "archer",
+      "height": 1.72,
+      "look": "a lean human bandit archer: young woman with a hood and a green cloth scarf over the lower face, a short padded green-brown jacket, a leather bracer on the left forearm, a quiver of arrows on the back, close-fitting trousers and soft boots",
+      "clips": {
+        "idle": 0,
+        "attack": 224,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Thousandvale: Road Brigand archers",
+        "Rogueloot: Hollowhorn Slinger (stand-in)",
+        "any road ambush"
+      ],
+      "credits": 50,
+      "status": "ready",
+      "glb": "models/bandit_archer.glb",
+      "tasks": {
+        "model": "01a1cd19-43f7-7153-b722-ba9aa8a73d9f",
+        "rig": "01a1cd1c-0612-73b9-b603-5d074e9903e7",
+        "anim": "01a1cd1c-6407-773f-8f6c-fcf8d7a12828",
+        "anim2": "01a1cd30-ae7c-7154-a469-66802b165b5d"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "attack",
+        "hit",
+        "death",
+        "attack2"
+      ],
+      "bytes": 2071480,
+      "clips2": {
+        "attack2": 225
+      }
+    },
+    {
+      "id": "cultist",
+      "name": "Cultist",
+      "group": "humans",
+      "role": "caster",
+      "height": 1.75,
+      "look": "a hooded human cultist: deep crimson robe with a black hood shading the face, a pale face with dark eye paint visible under the hood, a rope belt hung with a small bronze sigil and candle stubs, black cloth wraps on the forearms, plain sandals",
+      "clips": {
+        "idle": 0,
+        "attack": 129,
+        "cast2": 126,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Thousandvale: Sky Cultist",
+        "Rogueloot: Gravesworn Chanter / Keeper",
+        "any dark shrine"
+      ],
+      "credits": 53,
+      "status": "ready",
+      "glb": "models/cultist.glb",
+      "tasks": {
+        "model": "01a1cd24-a18b-7669-b4bc-08160fd5b362",
+        "rig": "01a1cd28-0b3d-779f-a3cc-b6b41d80bec8",
+        "anim": "01a1cd28-6a70-7205-a0c7-19af449625f5",
+        "anim2": "01a1cd30-df67-7516-8af9-332ec83df0f3"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "attack",
+        "cast2",
+        "hit",
+        "death",
+        "ready"
+      ],
+      "bytes": 2260020,
+      "clips2": {
+        "ready": 89
+      }
+    },
+    {
+      "id": "lizardfolk",
+      "name": "Lizardfolk Warrior",
+      "group": "beastfolk",
+      "role": "melee",
+      "height": 1.85,
+      "look": "an upright lizardfolk warrior standing on two legs: scaly olive-green and tan reptile skin, a long reptile snout with small teeth, a short frill behind the head, a thick tail reaching the ground, a bone-and-leather harness across the chest, a woven reed kilt, bone arm bands, clawed three-toed feet",
+      "clips": {
+        "idle": 0,
+        "ready": 89,
+        "attack": 240,
+        "hit": 178,
+        "death": 189
+      },
+      "fits": [
+        "Rogueloot: Mire Lurker (mirefolk)",
+        "Thousandvale: marsh / Reed Serpent country",
+        "any swamp"
+      ],
+      "credits": 53,
+      "status": "ready",
+      "glb": "models/lizardfolk.glb",
+      "tasks": {
+        "model": "01a1cd28-d03f-754b-a4f8-eb08f8c3cb57",
+        "rig": "01a1cd2c-00aa-77b4-bc8b-54613fdbb287",
+        "anim": "01a1cd2c-6b90-717f-9e44-8dc687008a49",
+        "anim2": "01a1cd31-0c87-7430-9767-79af4b6b212e"
+      },
+      "clipNames": [
+        "walk",
+        "run",
+        "idle",
+        "ready",
+        "attack",
+        "hit",
+        "death",
+        "attack2"
+      ],
+      "bytes": 2328772,
+      "clips2": {
+        "attack2": 97
+      }
+    }
+  ]
+}

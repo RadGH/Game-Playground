@@ -73,6 +73,7 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 | `prototypes/voidwright/` | 2D block-built space game | live |
 | `prototypes/hullforge/` | 3D block-built space game (auto corners, animated turrets, 6-direction flight); desktop only | new |
 | `prototypes/spirehold/` | Semi-idle city defence | playable |
+| `prototypes/grimring/` | Arena with the Model Library Meshy fighters (1-2 foes at a time) | new |
 | `prototypes/tinyrts/` | Symlink to its own repo `~/claude/tinyrts` — commit THERE; keep its `master` green (stable serves it) | playable |
 | `prototypes/lanternfall/` | Side-scrolling pixel action RPG (`docs/HANDOFF.md` = remaining work) | playable |
 | `prototypes/bannerline/` | Lockstep RTS of game modes (lane wars, hunters vs farmers) | done |

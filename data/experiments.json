@@ -840,6 +840,23 @@
     "spells",
     "adventurers"
    ]
+  },
+  {
+   "id": "grimring",
+   "group": "prototypes",
+   "title": "Grimring",
+   "href": "prototypes/grimring/",
+   "folder": "prototypes/grimring",
+   "summary": "A small 3D arena for the Model Library's Meshy fighters: pick one of twelve (goblins, skeletons, zombie, orc, ogre, bandits, cultist, lizardfolk) and face one or two at a time in an eight-round Gauntlet with boons, a Duel, or just watch them fight.",
+   "status": "prototype",
+   "statusNote": "Playable",
+   "date": "2026-11-15",
+   "tags": [
+    "arena",
+    "3d",
+    "action",
+    "meshy"
+   ]
   }
  ]
 }

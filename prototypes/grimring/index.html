@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1b1418">
+<title>Grimring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Spectral:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../../shared/whats-new.css">
+<link rel="stylesheet" href="../../shared/credits.css">
+<link rel="stylesheet" href="../../shared/dialog.css">
+<link rel="stylesheet" href="../../shared/tooltip.css">
+<link rel="stylesheet" href="css/game.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<canvas id="view" aria-label="The arena"></canvas>
+<div id="labels" aria-hidden="true"></div>
+
+<!-- title -->
+<section id="title" class="screen hidden">
+  <div class="title-card">
+    <h1>GRIMRING</h1>
+    <p class="tagline">Pick a fighter. Hold the sand.</p>
+    <div class="col" id="title-buttons"></div>
+    <div class="row wrap center" id="title-extra"></div>
+  </div>
+</section>
+
+<!-- fighter pick (gauntlet) and duel setup share one screen -->
+<section id="pick" class="screen hidden">
+  <header class="pick-head">
+    <button class="icon-btn" id="pick-back" aria-label="Back">←</button>
+    <h2 id="pick-title">Choose your fighter</h2>
+    <div class="grow"></div>
+  </header>
+  <div class="pick-body">
+    <div class="pick-stage" id="pick-stage"></div>
+    <div class="pick-panel" id="pick-panel">
+      <div class="slots" id="slots"></div>
+      <div class="roster" id="roster"></div>
+      <div class="detail" id="detail"></div>
+      <div class="pick-foot" id="pick-foot"></div>
+    </div>
+  </div>
+</section>
+
+<!-- the fight -->
+<div id="hud" class="hidden">
+  <div class="topbar">
+    <button class="icon-btn" id="btn-menu" aria-label="Menu">☰</button>
+    <div class="round" id="round-label"></div>
+  </div>
+  <div id="banner" class="banner hidden"></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div class="me" id="me-box">
+    <div class="me-name" id="me-name"></div>
+    <div class="bar big"><i id="me-hp"></i><span id="me-hp-text"></span></div>
+    <div class="me-tags" id="me-tags"></div>
+  </div>
+  <div class="stick hidden" id="stick"><i id="stick-knob"></i></div>
+  <div class="actions" id="actions">
+    <button class="act dodge" id="act-dodge"><b>Dodge</b><kbd data-key="dodge"></kbd><i class="cd"></i></button>
+    <button class="act special" id="act-special"><b id="act-special-name">Special</b><kbd data-key="special"></kbd><i class="cd"></i><em class="cd-num"></em></button>
+    <button class="act attack" id="act-attack"><b>Attack</b><kbd data-key="attack"></kbd><i class="cd"></i></button>
+  </div>
+  <div class="watch-note hidden" id="watch-note"></div>
+</div>
+
+<!-- between rounds, and the end -->
+<section id="boons" class="screen hidden"><div class="panel-card" id="boons-card"></div></section>
+<section id="result" class="screen hidden"><div class="panel-card" id="result-card"></div></section>
+
+<div id="panels"></div>
+<div id="loading" class="loading hidden"><div class="spinner"></div><p id="loading-text">Loading…</p></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

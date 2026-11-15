@@ -35,5 +35,18 @@ re-rolls, missions (jobs) + encounters, factions + standing, harpoon, scanning, 
 turret arc preview, saved blueprints — plus the Voidwright-style effects pass. Copy/paste of designs (optional) was not
 built.
 
+## §3b Controls round (owner 2026-11-15)
+Report: *"Hullforge controls need significant work. When I turn left and right to look at enemies I randomly get turned
+around like 180 degrees and it's still infuriating. When in combat an enemy passes me the ship flips over all weird and I
+continue moment in the other way and combat just does not feel fun. Weapons cannot engage far enough away"*
+- View leads the nose by at most 30° (`core/rig.js limitLead`); swinging further turns the ship at its rate. No more
+  view-behind-the-ship, so no over-the-top flips.
+- Keys push relative to the view; A/D were swapped (D pushed the ship's +x = screen-left) — fixed.
+- Mouse glitches skipped (`core/input.js`), raw pointer capture where offered.
+- Gun reach ~2.5× with faster shells and tighter gatling/autocannon spread; enemy sight 1000 + 80/danger m, hold range
+  60% of their shortest gun (120-480 m); ambushes spring at 650 m; new groups arrive 2.2 km+ away.
+- Tests: `tests/aim.test.mjs` (lead cap, passing enemy, W/A/D direction, 300 m reach, enemies hold off),
+  `tests/aim-browser.mjs` (real mouse: lead never past 30°, a 1400 px glitch skipped).
+
 ## §4 Parked
 Mercenaries / wingmen (owner: "except for mercenaries for now"); copy/paste in the Shipyard.

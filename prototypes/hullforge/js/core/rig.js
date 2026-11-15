@@ -7,6 +7,12 @@
 // up, the two stopped being at right angles, and three.js's lookAt then spun the horizon wildly on every tiny mouse
 // move. Hits that spun the ship also swung the view. Now nothing feeds back from the ship into the camera, the mouse
 // can carry you over the top in a loop, and the horizon only turns when you roll.
+//
+// Second report (2026-11-15, "I randomly get turned around like 180 degrees", "an enemy passes me and the ship flips
+// over"): the view could lead the nose by ANY angle. One bad mouse reading (Chrome sends a huge jump right after the
+// mouse is captured) or a fast swing after a passing enemy put the view far behind the ship; the ship then turned
+// the short way — often over the top — and W pushed along the old nose. Now the view may lead the nose by at most
+// LEAD_MAX (`limitLead`); swinging further turns the ship at its own rate with the view held at the edge.
 import { vnorm, vcross, vdot, vsub, vscale, vlen, qaxis, qrot } from './math.js';
 
 export function createRig(aim = { x: 0, y: 0, z: 1 }, up = { x: 0, y: 1, z: 0 }) {
@@ -37,6 +43,27 @@ export function turnRig(r, yaw, pitch) {
 }
 /** Roll the view about the aim (+ = roll right, the same sense as the ship's +z spin). */
 export function rollRig(r, ang) { if (ang) { r.up = rotate(r.up, r.aim, ang); squareUp(r); } return r; }
+
+/** Most the view may lead the ship's nose (radians). */
+export const LEAD_MAX = 30 * Math.PI / 180;
+
+/**
+ * Keep the view within `max` of the ship's nose. `was` = the lead before this frame's mouse move: a move may never
+ * make the lead larger than max(was, max), so the ship's own turning or a hit never drags the view (rule 55) — only
+ * the mouse is held back. The whole frame (aim AND up) turns back together, so the horizon doesn't twist.
+ */
+export function limitLead(r, nose, was = 0, max = LEAD_MAX) {
+  const n = vnorm(nose); const lead = Math.acos(Math.max(-1, Math.min(1, vdot(r.aim, n))));
+  const cap = Math.max(max, was);
+  if (lead <= cap + 1e-6) return lead;
+  let axis = vcross(r.aim, n);
+  if (vlen(axis) < 1e-6) axis = r.up;          // straight behind: swing back over the screen's up (any axis works)
+  const back = lead - cap;
+  r.aim = vnorm(rotate(r.aim, axis, back)); r.up = rotate(r.up, axis, back); squareUp(r);
+  return cap;
+}
+/** How far the view leads the nose now (radians). */
+export const leadOf = (r, nose) => Math.acos(Math.max(-1, Math.min(1, vdot(r.aim, vnorm(nose)))));
 
 /** Point the aim at a direction (tests, game-eye), keeping the horizon. */
 export function aimRigAt(r, dir) { r.aim = vnorm(dir); return squareUp(r); }

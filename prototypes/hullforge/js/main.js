@@ -29,7 +29,7 @@ import { buildSky } from './render/sky.js';
 import { createViews } from './render/views.js';
 import { createFx } from './render/fx.js';
 import { createInput } from './core/input.js';
-import { createRig, turnRig, rollRig, squareUp, aimRigAt } from './core/rig.js';
+import { createRig, turnRig, rollRig, squareUp, aimRigAt, limitLead, leadOf } from './core/rig.js';
 import { initAudio, resumeAudio, play, lib, setVolume, setMuted, TURRET_VOICE, loopLevel, boostSound } from './core/audio.js';
 import { createHud } from './ui/hud.js';
 import { $, el, toast, banner, credits as cr } from './ui/dom.js';
@@ -305,8 +305,12 @@ function flyFrame(inp, dt, now, panelsOpen) {
   const paused = panelsOpen;   // any open screen pauses the game (single player)
   if (!paused) {
     // controls → the player's ship
+    // the view leads the nose by at most LEAD_MAX (core/rig.js limitLead): swing further and the ship turns at its own
+    // rate with the view held at the edge — no 180° swings from a mouse glitch, no over-the-top flips chasing a pass
+    const leadWas = leadOf(rig, forward(P));
     if (inp.look.x || inp.look.y) turnAim(inp.look.x, inp.look.y);
     if (inp.padLook.x || inp.padLook.y) turnAim(inp.padLook.x * 900 * dt, inp.padLook.y * 700 * dt);
+    if (inp.look.x || inp.look.y || inp.padLook.x || inp.padLook.y) limitLead(rig, forward(P), leadWas);
     if (inp.wheel) rig.dist = clamp(rig.dist + inp.wheel * 0.12, 0.6, 3);
     if (inp.roll && !P.dead) rollRig(rig, inp.roll * P.stats.turn * 1.2 * dt);   // Q/E roll the view; the ship rolls to match
     const camPos = camera.position; const look = rig.look || vadd(P.pos, vscale(rig.aim, 1000));
@@ -328,7 +332,7 @@ function flyFrame(inp, dt, now, panelsOpen) {
     runHooks('frame', dt, now);
     alpha = acc / DT;
     // keep the fight going: new groups arrive now and then, away from you
-    if (w.t > w.nextSpawn) { w.nextSpawn = w.t + 70 + Math.random() * 60; const hostiles = w.bodies.filter(b => b.kind === 'ship' && b.team === 'hostile' && !b.dead).length; if (hostiles < 3 + w.sys.danger * 2 && w.posts?.length) { const post = w.posts[Math.floor(Math.random() * w.posts.length)]; if (vdist(post, P.pos) > 1600) spawnGroup(w, post, w.sys, Math.floor(Math.random() * 1e9)); } }
+    if (w.t > w.nextSpawn) { w.nextSpawn = w.t + 70 + Math.random() * 60; const hostiles = w.bodies.filter(b => b.kind === 'ship' && b.team === 'hostile' && !b.dead).length; if (hostiles < 3 + w.sys.danger * 2 && w.posts?.length) { const post = w.posts[Math.floor(Math.random() * w.posts.length)]; if (vdist(post, P.pos) > 2200) spawnGroup(w, post, w.sys, Math.floor(Math.random() * 1e9)); } }
     // sounds that follow state
     loopLevel('mining', P.turrets.filter(t => t.beam && t.kind === 'mining').length);
     boostSound(!!(P.input.boost && (P.cruise || P.boostE > 0.02)) && !P.dead, P.cruise ? 1 : 0.7);
@@ -438,9 +442,15 @@ addEventListener('keydown', e => {
   if (e.code !== 'Escape' || app.mode === 'build') return;
   if ($('#panels').children.length && !document.querySelector('.gdlg-modal, .wn-modal, .cr-modal, .rgs-signin')) { e.stopImmediatePropagation(); app.closeTop(); }
 }, true);
+// raw mouse movement where the browser offers it (skips Windows pointer acceleration and its jumpy readings)
+function captureMouse() {
+  let p;
+  try { p = view.requestPointerLock?.({ unadjustedMovement: true }); } catch { try { view.requestPointerLock?.(); } catch { /* not allowed right now */ } return; }
+  p?.catch?.(() => { try { view.requestPointerLock?.()?.catch?.(() => {}); } catch { /* not allowed right now */ } });
+}
 view.addEventListener('click', () => {
   resumeAudio();
-  if (app.mode === 'fly' && !$('#panels').children.length && document.pointerLockElement !== view) view.requestPointerLock?.()?.catch?.(() => {});
+  if (app.mode === 'fly' && !$('#panels').children.length && document.pointerLockElement !== view) captureMouse();
 });
 document.addEventListener('pointerlockchange', () => {
   if (!document.pointerLockElement && app.mode === 'fly' && !$('#panels').children.length && app.lockedOnce) app.openMenu?.();

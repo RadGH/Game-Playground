@@ -113,7 +113,16 @@ function moveBody(w, b) {
   if (cruise) mul = CRUISE_MUL;
   b.cruise = cruise;
   const t = inp.thrust;
-  const want = vscale({ x: t.x * 0.75, y: t.y * 0.75, z: t.z > 0 ? t.z * mul : t.z * 0.6 }, st.maxSpeed);
+  let want = vscale({ x: t.x * 0.75, y: t.y * 0.75, z: t.z > 0 ? t.z * mul : t.z * 0.6 }, st.maxSpeed);
+  // the player's keys push relative to the VIEW (W = toward the crosshair), not the nose, which may lag behind it by up
+  // to core/rig.js LEAD_MAX while turning (owner 2026-11-15: "I continue movement the other way"). Thrusters still
+  // only push as hard as they can along each of the ship's own axes (the limits below).
+  if (inp.upDir && inp.aimDir) {
+    const right = vnorm(vcross(inp.aimDir, inp.upDir));
+    // (D = screen-right. Before 2026-11-15 the keys pushed the ship's +x, which is screen-LEFT: A and D were swapped)
+    const world = vadd(vadd(vscale(right, want.x), vscale(inp.upDir, want.y)), vscale(inp.aimDir, want.z));
+    want = qinv(b.quat, world);
+  }
   const cur = qinv(b.quat, b.vel);
   const acc = st.accel; const k = (cruise ? 2.2 : mul > 1 ? 1.5 : 1) * DT;
   const ax = (d, pos, neg) => { const lim = (d > 0 ? acc[pos] : acc[neg]) * k; return clamp(d, -lim, lim); };

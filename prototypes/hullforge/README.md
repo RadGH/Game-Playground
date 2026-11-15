@@ -1,8 +1,8 @@
 # Hullforge
 
-**Status:** round 2 done 2026-11-14 — on top of round 1 (Shipyard with automatic corners, eight animated turrets, 6-direction flight, mining, stations, star map): Voidwright-style effects (spiral beams, tracers, debris, knockback), trade goods, research, insurance, Workshop crafting, blueprints, turret arc preview, 2×2×2 big blocks, factions + standing, jobs, encounters, planet outposts with raids, drones, harpoon, scanning. Desktop only (owner ruling). Lint clean, every module connected, every screen walked.
+**Status:** controls round 2026-11-15 (owner: random 180° turns, flips when an enemy passes, short gun reach) — view leads the nose by at most 30°, keys push relative to the view, A/D un-swapped, mouse glitches skipped, gun reach ~2.5×. Round 2 (2026-11-14) on top of round 1: Shipyard with automatic corners, eight animated turrets, 6-direction flight, mining, stations, star map, trade, research, insurance, Workshop, blueprints, 2×2×2 blocks, factions, jobs, encounters, outposts, drones, harpoon, scanning. Desktop only (owner ruling).
 **Play:** LAN `http://<LAN IP>:8400/prototypes/hullforge/` (stable; https 8442 for a controller) · dev 8401 · public https://games.radgh.com/hullforge/ (live 2026-11-14)
-**Next:** the owner's first play-test (he hasn't played yet) — mouse flight feel, corner looks on his builds, effects, then pacing of jobs/outposts/research money
+**Next:** the owner's play-test of the new controls — is 30° of lead right (`rig.js LEAD_MAX`), does combat at 300-500 m feel better; then pacing of jobs/outposts/research money
 **Parked:** mercenaries/wingmen (owner 2026-11-14) — see `docs/PLAN.md` §3
 
 A 3D space game where you build your ship out of cubes, like stacking blocks, then fly it in every direction, mine,
@@ -11,10 +11,16 @@ fight and grow it. The 3D cousin of Voidwright (`../voidwright/`). Owner's reque
 ## How it plays
 - **Fly**: W/S forward/back, A/D slide, Space/C rise/sink, Q/E roll, Shift boost (cruise ×3.4 when no enemy is within
   1.5 km). The mouse aims: the camera leads (`js/core/rig.js` — its up stays square to the view, so it never flips; you can loop over the top) and the ship turns its nose toward the crosshair and rolls to the camera's up at its turn rate (a small ring shows where the nose
-  points now). Click the view to capture the mouse; Esc frees it and opens the menu.
+  points now). The view may lead the nose by at most **30°** (`rig.js LEAD_MAX`, `limitLead`): swing further and the ship
+  turns at its own rate with the view held at the edge. The keys push relative to the **view** (W = toward the crosshair,
+  D = screen-right; A/D were swapped before 2026-11-15). Mouse glitches (one huge jump) are skipped (`core/input.js`).
+  Click the view to capture the mouse (raw movement where the browser offers it); Esc frees it and opens the menu.
 - **Fire**: hold left mouse — every turret that can reach the crosshair fires at it (an enemy within ~3° of the crosshair counts; with nothing under it, guns fire down the crosshair line to their own reach; moving ships are led; an enemy beyond every gun's reach shows "Out of reach" under the crosshair). Turrets aim from −17° below their face to straight out of it (`body.js PITCH_MIN/PITCH_MAX`). A tick per turret on the crosshair
   ring shows how many can. Turrets also aim and fire **on their own** at the nearest enemy (or your locked target),
   as many as your bridge + targeting computers allow; mining lasers only fire when you hold Fire.
+- **Reach** (2026-11-15, owner: "weapons cannot engage far enough away"): gatling 340 m, pulse laser 360, flak 310,
+  plasma 370, autocannon 430, railgun 780, missiles 900 (mining laser 76), with faster shells; enemy pilots spot you at
+  1 km+ and hold at 120-480 m (60% of their shortest gun) instead of brushing past.
 - **Lock** (R / right mouse): the enemy nearest the crosshair. A lead marker shows where to aim so shells meet it;
   missile pods fire only at a locked target.
 - **Dock** (F) near a station. Station: Launch, **Shipyard** (build), Outfitter (buy/sell parts, stock changes on each

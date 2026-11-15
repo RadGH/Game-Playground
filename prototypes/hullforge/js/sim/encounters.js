@@ -304,9 +304,9 @@ export function encounterStep(w, ctx) {
         }
         break;
       case 'ambush':
-        if (!e.sprung && dist < 450) {
+        if (!e.sprung && dist < 650) {
           e.sprung = true; const n = 2 + Math.floor(d / 2); const away = vnorm(vsub(e.pos, P.pos));
-          for (let i = 0; i < n; i++) { const s = ship(w, e, hash(e.seed, 'amb', i), { faction: 'pirate', danger: d, small: d <= 1 && i > 0, team: 'hostile', name: pirateName(rng(e.seed + i)) }); s.pos = vadd(e.pos, vadd(vscale(away, 240), vscale(vrand(w.rand), 60))); s.post = { ...e.pos }; s.mode = 'attack'; e.ships.push(s); }
+          for (let i = 0; i < n; i++) { const s = ship(w, e, hash(e.seed, 'amb', i), { faction: 'pirate', danger: d, small: d <= 1 && i > 0, team: 'hostile', name: pirateName(rng(e.seed + i)) }); s.pos = vadd(e.pos, vadd(vscale(away, 300), vscale(vrand(w.rand), 60))); s.post = { ...e.pos }; s.mode = 'attack'; e.ships.push(s); }
           ctx.say({ t: 'banner', title: 'Ambush', text: e.revealed ? 'The pirates you scanned are coming out of the rocks.' : 'Pirates were hiding in the rocks!' }); ctx.say({ t: 'sound', id: 'warn' });
         }
         if (e.sprung && !live.length) { e.state = 'done'; G.stats.encounters++; }

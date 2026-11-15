@@ -9,7 +9,7 @@ export function think(w, b) {
   const P = w.player; const inp = b.input;
   b.thinkT = (b.thinkT || 0) - 1 / 60; if (b.thinkT > 0) return;
   b.thinkT = 0.15 + (b.id % 7) * 0.01;
-  const sight = (520 + b.danger * 50 + (b.boss ? 300 : 0)) * (w.sightMul ? w.sightMul(b) : 1);   // world: pirates who like you look away
+  const sight = (1000 + b.danger * 80 + (b.boss ? 400 : 0)) * (w.sightMul ? w.sightMul(b) : 1);   // world: pirates who like you look away
   const home = b.post || b.pos;
   const st = w.station;
   const playerSafe = !P || P.dead || (st && vdist(P.pos, st.pos) < SAFE_RADIUS + 150);
@@ -20,7 +20,7 @@ export function think(w, b) {
   // never into the safe zone
   if (st && vdist(b.pos, st.pos) < SAFE_RADIUS + 100) { b.mode = 'return'; }
 
-  const range = b.prefRange || (b.prefRange = clamp(Math.min(...b.turrets.map(t => t.s.range).concat([300])) * 0.62, 55, 260));
+  const range = b.prefRange || (b.prefRange = clamp(Math.min(...b.turrets.map(t => t.s.range).concat([700])) * 0.6, 120, 480));
   const ph = (hash(b.id) % 1000) / 1000 * 6.28;
   if (b.mode === 'attack') {
     b.target = P;

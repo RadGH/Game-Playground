@@ -43,7 +43,18 @@ export function createInput(canvas) {
   });
   addEventListener('keyup', e => down.delete(e.code));
   addEventListener('blur', () => { down.clear(); mouseBtn.clear(); });
-  addEventListener('mousemove', e => { if (document.pointerLockElement === canvas || e.buttons) { mx += e.movementX; my += e.movementY; } else { mx += e.movementX * 0.6; my += e.movementY * 0.6; } });
+  // Mouse glitches (owner 2026-11-15, "I randomly get turned around like 180 degrees"): Chrome on Windows can report
+  // one huge jump right after the mouse is captured, and now and then while captured. Skip any event far bigger than
+  // the recent movement, and the first moments after capture changes. `spikes` counts what was skipped (tests).
+  let avgMove = 6, lockAt = -1e9, spikes = 0;
+  document.addEventListener('pointerlockchange', () => { lockAt = performance.now(); });
+  addEventListener('mousemove', e => {
+    const dx = e.movementX || 0, dy = e.movementY || 0; const m = Math.hypot(dx, dy);
+    if (performance.now() - lockAt < 120 && m > 40) { spikes++; return; }
+    if (m > 160 && m > avgMove * 10) { spikes++; return; }
+    avgMove = avgMove * 0.85 + Math.min(m, 400) * 0.15; avgMove = Math.max(avgMove, 6);
+    if (document.pointerLockElement === canvas || e.buttons) { mx += dx; my += dy; } else { mx += dx * 0.6; my += dy * 0.6; }
+  });
   canvas.addEventListener('mousedown', e => { mouseBtn.add(e.button); lastDevice = 'keyboard'; for (const b of BINDINGS) if (b.mouse === e.button && b.edge) edges.add(b.id); });
   addEventListener('mouseup', e => mouseBtn.delete(e.button));
   canvas.addEventListener('contextmenu', e => e.preventDefault());
@@ -86,5 +97,5 @@ export function createInput(canvas) {
     last = out;   // world: the latest poll, for systems outside the main loop (held reel)
     return out;
   }
-  return { poll, get device() { return lastDevice; }, get last() { return last; }, clear() { down.clear(); mouseBtn.clear(); edges.clear(); } };
+  return { poll, get spikes() { return spikes; }, get device() { return lastDevice; }, get last() { return last; }, clear() { down.clear(); mouseBtn.clear(); edges.clear(); } };
 }

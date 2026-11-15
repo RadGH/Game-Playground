@@ -1,6 +1,18 @@
 {
  "entries": [
   {
+   "id": "2026-11-15a",
+   "date": "2026-11-15",
+   "title": "Controls that stay with you, guns that reach",
+   "items": [
+    "No more sudden 180° spins: the view can now get at most 30° ahead of your ship's nose. Swing the mouse further and your ship turns at its own speed with the view held at the edge, so chasing an enemy that flies past no longer flips your ship over.",
+    "W now flies toward the crosshair even while your ship is still turning, and A/D slide the right way (they were swapped).",
+    "Glitchy mouse readings (one huge jump, which some browsers send right after the mouse is captured) are ignored, and the mouse now uses raw movement where your browser allows it.",
+    "Every gun reaches about two and a half times further, with faster shells: gatling 340 m, autocannon 430 m, railgun 780 m, missiles 900 m. Gatlings and autocannons are more accurate.",
+    "Enemies spot you from further away and fight at range instead of brushing past you."
+   ]
+  },
+  {
    "id": "2026-11-14c",
    "date": "2026-11-14",
    "title": "Steadier view, guns that hit",

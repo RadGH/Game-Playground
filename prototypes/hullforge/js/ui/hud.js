@@ -100,7 +100,7 @@ export function createHud(app) {
         const f = integrity(b); const bw = Math.max(34, r * 1.4);
         g.fillStyle = 'rgba(0,0,0,0.6)'; g.fillRect(s.x - bw / 2, s.y - r - 10, bw, 4); g.fillStyle = col; g.fillRect(s.x - bw / 2, s.y - r - 10, bw * f, 4);
         if (b.stats.shield) { g.fillStyle = '#5fc8ff'; g.fillRect(s.x - bw / 2, s.y - r - 15, bw * (b.shield / b.stats.shield), 3); }
-        if (b === P.target || d < 600) label(s.x, s.y + r + 14, `${b.boss ? '★ ' : ''}${b.name} · ${dist(d)}`, col);
+        if (b === P.target || d < 1200) label(s.x, s.y + r + 14, `${b.boss ? '★ ' : ''}${b.name} · ${dist(d)}`, col);
         // lead marker for the locked target: where shells must go to meet it
         if (b === P.target) {
           const sp = P.turrets.find(t => t.s.speed && t.def.fire !== 'missile')?.s.speed;

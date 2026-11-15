@@ -27,7 +27,7 @@ export function steerTo(b, goal, speed = 1, stopAt = 30) {
 /** Fight one target: hold at the guns' range, circle and strafe (same moves as ai.js enemy pilots). */
 export function attackMove(w, b, T) {
   const inp = b.input; const d = vdist(T.pos, b.pos);
-  const range = b.prefRange || (b.prefRange = clamp(Math.min(...b.turrets.map(t => t.s.range).concat([300])) * 0.62, 55, 260));
+  const range = b.prefRange || (b.prefRange = clamp(Math.min(...b.turrets.map(t => t.s.range).concat([700])) * 0.6, 120, 480));
   const ph = (hash(b.id) % 1000) / 1000 * 6.28;
   const to = vnorm(vsub(T.pos, b.pos));
   let aim = to;

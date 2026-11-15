@@ -68,7 +68,7 @@ function traffic(w, G) {
   }
   if (navy) {
     const pts = [0, 1, 2, 3].map(i => { const a = i * Math.PI / 2 + r(); return vadd(st.pos, { x: Math.cos(a) * 1500, y: r.range(-120, 120), z: Math.sin(a) * 1500 }); });
-    for (let i = 0; i < 2; i++) { const p = mk('navy', 'ally', i + 1, `Patrol cutter ${i + 1}`, Math.max(1, sys.danger)); p.ai = { route: pts, loop: true, speed: 0.4, reach: 150, sight: 650 }; p.pos = vadd(pts[0], { x: i * 30, y: 0, z: 0 }); }
+    for (let i = 0; i < 2; i++) { const p = mk('navy', 'ally', i + 1, `Patrol cutter ${i + 1}`, Math.max(1, sys.danger)); p.ai = { route: pts, loop: true, speed: 0.4, reach: 150, sight: 1000 }; p.pos = vadd(pts[0], { x: i * 30, y: 0, z: 0 }); }
   }
 }
 

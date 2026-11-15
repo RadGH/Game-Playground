@@ -118,7 +118,7 @@ export async function createActor(id, opts = {}) {
     hitFlash(color = 0xff3020) { flash = 1; for (const m of mats) m.emissive.setHex(color); },
     update(dt) {
       mixer.update(dt);
-      if (flash > 0) { flash = Math.max(0, flash - dt * 6); for (const m of mats) m.emissiveIntensity = flash * 0.9; }
+      if (flash > 0) { flash = Math.max(0, flash - dt * 6); for (const m of mats) m.emissiveIntensity = flash * 0.35; }
     },
     dispose() { mixer.stopAllAction(); group.removeFromParent(); },
   };

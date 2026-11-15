@@ -244,6 +244,7 @@ async function beginFight(sides, diff, label, foeNames) {
   const me = F.fighters[0];
   $('#me-name').textContent = app.duel?.watch ? nameOf(me.model) : `${nameOf(me.model)} (you)`;
   $('#act-special-name').textContent = me.def.special.name;
+  $('#act-special').classList.toggle('long', me.def.special.name.length > 11);      // long names wrap smaller to fit the button
   const actors = await withLoading('Bringing the fighters out…', () => Promise.all(F.fighters.map(f => createActor(f.model, { height: HEIGHTS[f.model], weapon: f.def.weapon }))));
   if (app.F !== F) { actors.forEach(a => a.dispose()); return; }
   F.fighters.forEach((f, i) => { const a = actors[i]; a.group.position.set(f.x, 0, f.z); a.group.rotation.y = f.face; stage.scene.add(a.group); app.actors.set(f.id, a); });

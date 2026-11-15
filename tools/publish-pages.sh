@@ -46,7 +46,9 @@ while [ $# -gt 0 ]; do
 done
 
 # Paths the site never needs (regex, matched against the full path).
-EXCLUDE='^avatar-3d/chibi4/|^model-library/|(^|/)(tests|test-results|playwright-report|node_modules)/|/research/.*[.](png|jpe?g|webp)$|/assets/ref/.*[.]png$|^package(-lock)?[.]json$|^playwright[.]config[.]js$'
+# model-library: only the GLB models, their card pictures and models.json go out (Grimring loads them, 2026-11-15);
+# the library page, Codex sheets and build tools stay home.
+EXCLUDE='^avatar-3d/chibi4/|^model-library/(index[.]html|README[.]md|css/|js/|ref/|tools/|runs|data/spend)|(^|/)(tests|test-results|playwright-report|node_modules)/|/research/.*[.](png|jpe?g|webp)$|/assets/ref/.*[.]png$|^package(-lock)?[.]json$|^playwright[.]config[.]js$'
 
 # 1. Pull TinyRTS's committed files into this repo's object store (no merge, just objects).
 git fetch -q "$TINYRTS" master:refs/tinyrts/master --force

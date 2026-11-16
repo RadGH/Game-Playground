@@ -25,11 +25,15 @@ prototypes/arcline/
       people.js         population, housing capacity, jobs, arrivals queue, births, education level
       economy.js        monthly budget: R/C/I taxes, upkeep, loans; materials stock (Metal, Stone, Crystal → Steel,
                         Concrete, Power cells)
-      networks.js       roads (street/avenue/highway), power grid, water pipes: connectivity + coverage
+      networks.js       roads (street/avenue/highway), power grid, water pipes: connectivity + coverage. Power: every
+                        road, line, wall, building, turret and zoned tile hands power on to anything within POWER_REACH;
+                        pylonPlan() spaces pylons along lines (≤ PYLON_SPAN apart) for the renderer
       services.js       education + leisure coverage, land value
       transit.js        mass transit lines + stations; interstate links at region edges
-      ships.js          Comms Array range, passing ships (settlers, warships, merchants), offers, landings (pods →
-                        Landing Pad priority), founding drop
+      ships.js          Comms Array range, passing ships (warships, merchants), offers, supply landings (pods →
+                        Landing Pad priority), founding drop. People arrive by immigration (city.js appeal / immigrate).
+      schedule.js       the Comms timetable: a merchant convoy + warship patrol on a fixed beat, and ships you call
+                        for a fee (requestVisit); visits become ordinary passing ships
       industry.js       outposts on deposits (send home on their own when powered), refineries
       milestones.js     population milestones → unlocks; landmarks
       defence.js        walls, gates, turrets (power + upkeep) — wraps citykit/js/world/{field,horde,defence}.js
@@ -45,6 +49,8 @@ prototypes/arcline/
     ui/
       hud.js            top bar (money, population + next milestone, date, speed), tool bar, info panel
       tools.js          road / zone / bulldoze / level / place building / wall / turret tools (drag + ghost + price)
+      comms.js          the Comms panel (ships overhead + answers, timetable, call a ship) — C key, row-2 button, or
+                        tapping a Comms Array
       panels.js         budget, comms (ships), city stats, milestones, build menu
       menu.js           ☰ menu: settings, What's new, Report a bug, credits, sign in, save/load, back to world
       input.js          one binding table (lessons rule 34), mouse/touch/keys, edge scroll, pinch

@@ -3,8 +3,10 @@
 //   zones and water (not through buildings or walls). Stations are 2×2 lots beside a line. A line is WORKING when two
 //   or more stations sit on it; each working station cuts traffic on the roads around it and lifts land value nearby.
 //   Interstate links: a city road (one that reaches the Colony Core) or a working transit line reaching the region's
-//   edge where the neighbour region holds one of your cities links the two (world.js neighbours). Each linked city
-//   sends T.neighbourTrickle people a month as arrivals — more when the link is a transit line.
+//   edge where the neighbour region holds one of your cities links the two (world.js neighbours). A link works for
+//   BOTH cities, whichever side built it (owner 2026-11-16: "transit lines benefit other cities by increasing growth
+//   and demand"): each linked city sends T.neighbourTrickle people a month, and linkBoost() raises Residential and
+//   Commercial demand and how fast newcomers move in (appeal) — transit counts for more than a road.
 // Pure. Hooks the city tick calls: cutTraffic(r) right after solveTraffic, transitLandValue(r) right after
 // solveLandValue, neighbourArrivals(world, r) once a month; transitUpkeep(r) belongs in the monthly budget.
 import { T } from './tuning.js';
@@ -151,14 +153,48 @@ export function edgeLinks(world, r, founded = o => !!o.city) {
   return [...links.values()];
 }
 /**
+ * Links that other cities built to this one: a neighbour whose world record lists this region (written when that
+ * city last ran its month). Same shape as edgeLinks. A link is a two-way street: both cities get its benefits.
+ */
+export function linksFrom(world, r, founded = o => !!o.city) {
+  const out = [];
+  for (const o of world.regions || []) {
+    if (!o || o.id === r.id || !founded(o)) continue;
+    const l = (o.links || []).find(l => l.id === r.id); if (!l) continue;
+    out.push({ id: o.id, name: o.name, road: l.by === 'road' || l.by === 'both', transit: l.by === 'transit' || l.by === 'both' });
+  }
+  return out;
+}
+/**
+ * What this city's links (r.links, refreshed monthly by neighbourArrivals) are worth right now:
+ *   R, C — extra share of Residential / Commercial demand (0.12 = the targets grow 12%)
+ *   appeal — added to city.appeal (newcomers move in faster)
+ * A road link counts T.linkRoad, a transit link T.linkTransit (both: the bigger); more links add up with a cap.
+ */
+export function linkBoost(r) {
+  let k = 0;
+  for (const l of r.links || []) k += l.by === 'road' ? (T.linkRoad ?? 0.1) : (T.linkTransit ?? 0.25);
+  k = Math.min(T.linkCap ?? 0.6, k);
+  return { R: k, C: k * 1.2, appeal: k * 0.8 };
+}
+/**
  * Once a month: each linked city sends T.neighbourTrickle people (× T.transitTrickleMul over a transit line) as
- * arrivals. Stores the links on the region (r.links) and the world record (world.regions[id].links) so the world map
- * can draw them without loading the region. → { people, from: [{ id, name, people, by }] }
+ * arrivals. Links count from either side (edgeLinks from here, linksFrom the neighbours' records). Stores the links on
+ * the region (r.links) and the world record (world.regions[id].links) so the world map can draw them without loading
+ * the region. → { people, from: [{ id, name, people, by }] }
  */
 export function neighbourArrivals(world, r, founded) {
-  const links = edgeLinks(world, r, founded);
-  r.links = links.map(l => ({ id: l.id, name: l.name, by: l.transit && l.road ? 'both' : l.transit ? 'transit' : 'road' }));
-  if (world.regions[r.id]) world.regions[r.id].links = r.links.map(l => ({ id: l.id, by: l.by }));
+  const by = l => l.transit && l.road ? 'both' : l.transit ? 'transit' : 'road';
+  const own = edgeLinks(world, r, founded);
+  // the world record keeps only the links THIS city built (a neighbour's own record speaks for its side; copying theirs
+  // here would keep a link alive after they tore it down)
+  if (world.regions[r.id]) world.regions[r.id].links = own.map(l => ({ id: l.id, by: by(l) }));
+  const links = own.map(l => ({ ...l }));
+  for (const o of linksFrom(world, r, founded)) {
+    const l = links.find(l => l.id === o.id);
+    if (l) { l.road ||= o.road; l.transit ||= o.transit; } else links.push({ ...o, x: null, z: null, theirs: true });
+  }
+  r.links = links.map(l => ({ id: l.id, name: l.name, by: by(l) }));
   const from = [];
   for (const l of links) { const n = Math.round((T.neighbourTrickle ?? 4) * (l.transit ? (T.transitTrickleMul ?? 2) : 1)); if (n > 0) from.push({ id: l.id, name: l.name, people: n, by: l.transit ? 'transit' : 'road' }); }
   const people = from.reduce((s, f) => s + f.people, 0);

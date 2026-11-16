@@ -1,5 +1,5 @@
 {
-  "_doc": "Every feel/balance number in Arcline. Read through js/sim/tuning.js at use time; the tuning panel (` key or ?tune) moves them live and tools/apply-tune.mjs arcline writes them back. Owner rebalance 2026-11-15: arrivals are the main growth.",
+  "_doc": "Every feel/balance number in Arcline. Read through js/sim/tuning.js at use time; the tuning panel (` key or ?tune) moves them live and tools/apply-tune.mjs arcline writes them back. Round 2 (2026-11-16): people move in on their own when there are free homes (immigration), ships bring supplies not people; check any change with tools/balance.mjs.",
   "milestone1": {
     "value": 100,
     "min": 20,
@@ -83,30 +83,6 @@
     "group": "Arrivals",
     "unit": "min"
   },
-  "settlersSmall": {
-    "value": 35,
-    "min": 5,
-    "max": 120,
-    "step": 5,
-    "label": "Settlers per early ship",
-    "group": "Arrivals"
-  },
-  "settlersLiner": {
-    "value": 260,
-    "min": 60,
-    "max": 800,
-    "step": 10,
-    "label": "Settlers per colony liner",
-    "group": "Arrivals"
-  },
-  "linerFrom": {
-    "value": 800,
-    "min": 100,
-    "max": 5000,
-    "step": 50,
-    "label": "Liners start at population",
-    "group": "Arrivals"
-  },
   "birthsPerMonth": {
     "value": 0.003,
     "min": 0,
@@ -157,7 +133,7 @@
     "group": "Money"
   },
   "taxPerPerson": {
-    "value": 3.5,
+    "value": 4.0,
     "min": 0.2,
     "max": 6,
     "step": 0.1,
@@ -546,6 +522,147 @@
     "max": 30,
     "step": 1,
     "label": "Nests never spread this close to a building or turret",
+    "group": "Threat",
+    "unit": "tiles"
+  },
+  "immigrateBase": {
+    "value": 1.0,
+    "min": 0,
+    "max": 10,
+    "step": 0.1,
+    "label": "Newcomers a day (base, at appeal 1)",
+    "group": "Arrivals"
+  },
+  "immigrateSqrt": {
+    "value": 0.1,
+    "min": 0,
+    "max": 1,
+    "step": 0.01,
+    "label": "Extra newcomers a day per √people",
+    "group": "Arrivals"
+  },
+  "homesAhead": {
+    "value": 0.15,
+    "min": 0,
+    "max": 0.6,
+    "step": 0.01,
+    "label": "Homes built ahead of the people (share)",
+    "group": "Arrivals"
+  },
+  "homesAheadMin": {
+    "value": 16,
+    "min": 0,
+    "max": 100,
+    "step": 2,
+    "label": "Homes built ahead of the people (at least)",
+    "group": "Arrivals"
+  },
+  "breachScareDays": {
+    "value": 8,
+    "min": 0,
+    "max": 60,
+    "step": 1,
+    "label": "Days a broken wall scares newcomers off",
+    "group": "Arrivals",
+    "unit": "days"
+  },
+  "breachScare": {
+    "value": 0.7,
+    "min": 0.1,
+    "max": 1,
+    "step": 0.05,
+    "label": "Newcomers while scared (share)",
+    "group": "Arrivals"
+  },
+  "colonyGrant": {
+    "value": 700,
+    "min": 0,
+    "max": 5000,
+    "step": 50,
+    "label": "Colony grant a month (at founding)",
+    "group": "Money",
+    "unit": "cr"
+  },
+  "grantFadePop": {
+    "value": 1500,
+    "min": 100,
+    "max": 10000,
+    "step": 100,
+    "label": "Colony grant is gone at this population",
+    "group": "Money"
+  },
+  "linkRoad": {
+    "value": 0.1,
+    "min": 0,
+    "max": 1,
+    "step": 0.01,
+    "label": "Demand + appeal from a road link to another city",
+    "group": "Transit"
+  },
+  "linkTransit": {
+    "value": 0.25,
+    "min": 0,
+    "max": 1,
+    "step": 0.01,
+    "label": "Demand + appeal from a transit link to another city",
+    "group": "Transit"
+  },
+  "linkCap": {
+    "value": 0.6,
+    "min": 0,
+    "max": 2,
+    "step": 0.05,
+    "label": "Most demand + appeal from all links together",
+    "group": "Transit"
+  },
+  "supplyEveryDays": {
+    "value": 25,
+    "min": 3,
+    "max": 200,
+    "step": 1,
+    "label": "Days between free supply crates",
+    "group": "Ships",
+    "unit": "days"
+  },
+  "rarePartChance": {
+    "value": 0.12,
+    "min": 0,
+    "max": 1,
+    "step": 0.01,
+    "label": "Chance a supply crate holds a rare part",
+    "group": "Ships"
+  },
+  "migrateEveryDays": {
+    "value": 40,
+    "min": 3,
+    "max": 300,
+    "step": 1,
+    "label": "Days between nests moving in from the wilds (small city)",
+    "group": "Threat",
+    "unit": "days"
+  },
+  "wildShare": {
+    "value": 0.2,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Share of creatures that come from the region edges",
+    "group": "Threat"
+  },
+  "wildFloor": {
+    "value": 0.4,
+    "min": 0,
+    "max": 1.5,
+    "step": 0.05,
+    "label": "Creature stream with no nests left (share of normal)",
+    "group": "Threat"
+  },
+  "gatePull": {
+    "value": 10,
+    "min": 0,
+    "max": 28,
+    "step": 1,
+    "label": "Creatures within this many tiles of a gate attack it instead of the wall",
     "group": "Threat",
     "unit": "tiles"
   }

@@ -9,6 +9,10 @@ import { TURRETS, Defence } from '../../../../citykit/js/world/defence.js';
 import { BIOMES } from '../sim/world.js';
 import { MAX } from '../sim/terrain.js';
 import { ZONE } from '../sim/region.js';
+import { pylonPlan } from '../sim/networks.js';
+import { CELL, regionAt } from '../sim/world.js';
+import { PYLON } from '../../../../citykit/js/kit/power.js';
+import { PX_PER_HEIGHT } from '../../../../citykit/js/iso.js';
 
 export const LEVEL = 0.26;               // one height level in tile heights (≈10 px at 1×)
 const BIDS = Object.keys(BIOMES);
@@ -24,7 +28,8 @@ export class MapView {
     this.ghost = null;                 // { tiles: [[x,z]], ok, color, sprite? {id, params, x, z, w, d} }
     this.hover = null;
   }
-  setRegion(r) { this.r = r; this.N = r.size; this._colors = null; }
+  /** world (optional) = the generated world, for naming the neighbours at the region's edge. */
+  setRegion(r, world = null) { this.r = r; this.N = r.size; this._colors = null; this.world = world; this._edgeKey = null; }
 
   // ---------------- projection ----------------
   h(x, z) { const N = this.N, tx = Math.max(0, Math.min(N - 1, Math.floor(x))), tz = Math.max(0, Math.min(N - 1, Math.floor(z))); return this.r.ter.height[tz * N + tx] * LEVEL; }
@@ -116,9 +121,16 @@ export class MapView {
       if (road) this._roadMarks(ctx, x, z, c, hw, hh, road, night, wat);
       const zn = r.tiles.zone[i]; if (zn && r.tiles.lot[i] < 0) { diamondFill(ctx, c.sx, c.sy, hw * 0.86, hh * 0.86, ZONE_TINT[zn]); }
       if (this.overlay) this._overlayTile(ctx, i, c, hw, hh);
-      if (r.tiles.power[i] && !road) items.push({ d: this.depth(x + 0.5, z + 0.5), draw: () => this._pylon(ctx, x, z, night) });
       if (r.tiles.transit[i]) items.push({ d: this.depth(x + 0.5, z + 0.5) + 0.05, draw: () => this._track(ctx, x, z, r.tiles.transit[i], night) });
       if (r.ter.flora[i] && !road && r.tiles.lot[i] < 0 && !r.tiles.wall[i]) items.push({ d: this.depth(x + 0.5, z + 0.5) - 0.01, draw: () => this._plant(ctx, x, z, r.ter.flora[i], night) });
+    }
+    // power lines: pylons every few tiles, wires between them (networks.js pylonPlan)
+    const pl = pylonPlan(r);
+    for (const p of pl.poles) { if (!this._near(p.x + 0.5, p.z + 0.5)) continue; items.push({ d: this.depth(p.x + 0.5, p.z + 0.5), draw: () => this._pole(ctx, p, night) }); }
+    for (const [a, b, axis] of pl.spans) {
+      const A = pl.poles[a], Bp = pl.poles[b];
+      if (!this._near((A.x + Bp.x) / 2 + 0.5, (A.z + Bp.z) / 2 + 0.5, Math.abs(A.x - Bp.x) + Math.abs(A.z - Bp.z) + 4)) continue;
+      items.push({ d: (this.depth(A.x + 0.5, A.z + 0.5) + this.depth(Bp.x + 0.5, Bp.z + 0.5)) / 2 + 0.01, draw: () => this._wire(ctx, A, Bp, axis, night) });
     }
     // nests
     for (const n of r.nests) { if (!this._near(n.x, n.z)) continue; items.push({ d: this.depth(n.x + 0.5, n.z + 0.5), draw: () => this._nest(ctx, n, night, t) }); }
@@ -146,10 +158,53 @@ export class MapView {
     fx?.drawSolid(ctx, this.G, zoom);
     fx?.drawLights(ctx, this.G, zoom);
     strikeDraw?.(ctx);
+    this._edges(ctx, night);
     if (this.ghost) this._ghostTiles(ctx, hw, hh);
     if (this.hover && !this.ghost) { const [x, z] = this.hover; const c = this.G(x + 0.5, z + 0.5); ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1.5; diamondStroke(ctx, c.sx, c.sy, hw, hh); }
     weather?.drawOver(ctx, W, H, night);
     fx?.drawFlash(ctx, W, H);
+  }
+  /**
+   * A small overhead picture of the whole region for the world map (SimCity 4's region view): the same iso angle as the
+   * world map (turn 0), daylight, the ground as one picture of tile colours, then every building, wall and pylon from
+   * the pictures already baked (a stand-in block where one isn't). Transparent outside the region's diamond.
+   * → { url (WebP data URL), w, h, top } — the diamond's top corner sits at (w / 2, top) and it is w wide.
+   */
+  snapshot({ width = 288, quality = 0.7 } = {}) {
+    const r = this.r, N = this.N, zoom = width / (N * TILE_W), top = Math.ceil(width * 0.1), H = Math.ceil(top + width / 2 + 2);
+    const cv = document.createElement('canvas'); cv.width = width; cv.height = H;
+    const ctx = cv.getContext('2d');
+    // the ground: one pixel per tile, sheared into the diamond
+    const tc = document.createElement('canvas'); tc.width = N; tc.height = N;
+    const tg = tc.getContext('2d'), img = tg.createImageData(N, N), d = img.data;
+    const ZC = { 1: [86, 214, 120], 2: [80, 160, 255], 3: [255, 190, 70] };
+    for (let i = 0; i < N * N; i++) {
+      const x = i % N, z = (i / N) | 0, lv = r.ter.height[i], wat = r.ter.water[i];
+      let c;
+      if (wat) c = wat === 2 ? [36, 97, 143] : [47, 127, 176];
+      else { const B = BIOMES[BIDS[r.ter.biome[i]]] || BIOMES.verdant; c = rgbOf(shade(((((x * 73856093) ^ (z * 19349663)) >>> 0) % 7 < 2) ? B.alt : B.ground, (lv - 2) * 0.05)); }
+      if (r.tiles.road[i]) c = r.tiles.road[i] === 3 ? [58, 62, 69] : [72, 77, 85];
+      else if (r.tiles.zone[i] && r.tiles.lot[i] < 0) c = c.map((v, k) => v * 0.6 + ZC[r.tiles.zone[i]][k] * 0.4);
+      if (r.tiles.lot[i] >= 0) c = c.map(v => v * 0.55 + 40);
+      if (r.tiles.wall[i]) c = [150, 158, 170];
+      if (r.tiles.transit?.[i]) c = [63, 200, 220];
+      const o = i * 4; d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
+    }
+    tg.putImageData(img, 0, 0);
+    const ox = width / 2, oy = top, a = TILE_W / 2 * zoom, b = TILE_H / 2 * zoom;   // tile (x, z) → (ox + (x − z)a, oy + (x + z)b)
+    ctx.save(); ctx.setTransform(a, b, -a, b, ox, oy); ctx.imageSmoothingEnabled = false; ctx.drawImage(tc, 0, 0); ctx.restore();
+    // things standing on it, back to front, from the baked pictures (turn 0)
+    const at = (x, z) => ({ sx: ox + (x - z) * a, sy: oy + (x + z) * b });
+    const things = r.lots.map(l => ({ d: l.x + l.z + l.w + l.d, l })).sort((p, q) => p.d - q.d);
+    for (const { l } of things) {
+      const g = at(l.x + l.w / 2, l.z + l.d / 2), pair = this.sprites.building(l.recipe, spriteParams(l), 0);
+      if (pair && !pair.failed) { composite(ctx, pair, g.sx, g.sy, 0, zoom / this.sprites.scale); continue; }
+      // stand-in: a small block as tall as its storeys
+      const hgt = (0.25 + (l.params?.floors || 1) * 0.22) * PX_PER_HEIGHT * zoom, w = (l.w + l.d) / 2 * a * 0.8;
+      ctx.fillStyle = '#9aa6b6'; ctx.fillRect(g.sx - w / 2, g.sy - hgt, w, hgt); ctx.fillStyle = '#c8d2de'; ctx.fillRect(g.sx - w / 2, g.sy - hgt, w, Math.max(1, hgt * 0.15));
+    }
+    let url = null; try { url = cv.toDataURL('image/webp', quality); if (!url.startsWith('data:image/webp')) url = cv.toDataURL('image/png'); } catch { /* tainted or unsupported */ }
+    return url ? { url, w: width, h: H, top } : null;
   }
   _near(x, z, pad = 4) { const p = this.P(x, z, 0); const m = pad * TILE_W * this.cam.zoom; return p.sx > -m && p.sx < this.W + m && p.sy > -m * 3 && p.sy < this.H + m; }
 
@@ -177,7 +232,13 @@ export class MapView {
   _overlayTile(ctx, i, c, hw, hh) {
     const r = this.r, o = this.overlay; let col = null;
     if (o === 'pipes') { if (r.tiles.pipe[i]) col = 'rgba(70,170,255,0.9)'; else if (r.waterNet?.reach?.[i]) col = 'rgba(70,170,255,0.25)'; else col = 'rgba(0,0,0,0.35)'; }
-    else if (o === 'power') { if (r.tiles.power[i] || r.tiles.road[i]) col = `rgba(255,220,80,${r.power?.share < 1 ? 0.45 : 0.7})`; }
+    else if (o === 'power') {
+      // like the pipes: the line itself bright, everything within reach of a live grid softly lit, the rest dimmed
+      const short = r.power?.share < 1, reach = r.power?.reach;
+      if (r.tiles.power[i]) col = `rgba(255,220,80,${short ? 0.6 : 0.85})`;
+      else if (reach?.[i]) col = short ? 'rgba(255,160,60,0.24)' : 'rgba(255,220,80,0.24)';
+      else col = 'rgba(0,0,0,0.35)';
+    }
     else if (o === 'value') { const v = r.tiles.value[i]; col = `hsla(${Math.round(v * 120)}, 80%, 50%, 0.5)`; }
     else if (o === 'edu') { const v = r.tiles.edu[i]; if (v > 0.02) col = `rgba(120,160,255,${Math.min(0.7, v)})`; }
     else if (o === 'leisure') { const v = r.tiles.leisure[i]; if (v > 0.02) col = `rgba(120,255,160,${Math.min(0.7, v)})`; }
@@ -294,12 +355,76 @@ export class MapView {
       ctx.beginPath(); ctx.moveTo(top.sx, top.sy - 2 * zm); ctx.lineTo(b.sx, b.sy - 2 * zm); ctx.stroke(); ctx.restore();
     }
   }
-  _pylon(ctx, x, z, night) {
-    const g = this.G(x + 0.5, z + 0.5), t = this.G(x + 0.5, z + 0.5, 0.55), zm = this.cam.zoom;
-    ctx.strokeStyle = mix('#8a8f98', '#3a3f4a', night * 0.6); ctx.lineWidth = Math.max(1, 2 * zm);
-    ctx.beginPath(); ctx.moveTo(g.sx - 4 * zm, g.sy); ctx.lineTo(t.sx, t.sy); ctx.lineTo(g.sx + 4 * zm, g.sy); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(t.sx - 6 * zm, t.sy + 3 * zm); ctx.lineTo(t.sx + 6 * zm, t.sy + 3 * zm); ctx.stroke();
-    if (night > 0.4) { ctx.fillStyle = '#ff4040'; ctx.fillRect(t.sx - 1.5, t.sy - 2, 3, 3); }
+  /** A pylon (City Kit 'pwr-pylon'): its crossarm runs across the line, so a line along z uses the next view turn. */
+  _pole(ctx, p, night) {
+    const rot = p.axis === 'z' ? (this.cam.rot + 1) & 3 : this.cam.rot, g = this.G(p.x + 0.5, p.z + 0.5);
+    const pair = this.sprites.building('pwr-pylon', { cross: p.corner ? 1 : 0 }, rot);
+    if (pair && !pair.failed) { composite(ctx, pair, g.sx, g.sy, night, this.cam.zoom / this.sprites.scale); return; }
+    const t = this.G(p.x + 0.5, p.z + 0.5, PYLON.TOP_Y), zm = this.cam.zoom;   // until the picture is baked
+    ctx.strokeStyle = mix('#59606c', '#2a2f3a', night * 0.6); ctx.lineWidth = Math.max(1, 2 * zm);
+    ctx.beginPath(); ctx.moveTo(g.sx - 5 * zm, g.sy); ctx.lineTo(t.sx, t.sy); ctx.lineTo(g.sx + 5 * zm, g.sy); ctx.stroke();
+  }
+  /** The wires between two pylons: two conductors from the arm tips and a thinner earth wire from the peaks, each
+   *  sagging in the middle; at night they carry a faint cyan glow. */
+  _wire(ctx, a, b, axis, night) {
+    const A = PYLON.ARM_HALF, Y = PYLON.ARM_Y - 0.1, zm = this.cam.zoom;
+    const offs = axis === 'x' ? [[0, -A, Y], [0, A, Y], [0, 0, PYLON.TOP_Y]] : [[-A, 0, Y], [A, 0, Y], [0, 0, PYLON.TOP_Y]];
+    const len = Math.abs(a.x - b.x) + Math.abs(a.z - b.z), sag = (0.06 + 0.035 * len) * PX_PER_HEIGHT * zm;
+    ctx.save(); ctx.lineCap = 'round';
+    for (let k = 0; k < 3; k++) {
+      const [dx, dz, y] = offs[k];
+      const p = this.G(a.x + 0.5 + dx, a.z + 0.5 + dz, y), q = this.G(b.x + 0.5 + dx, b.z + 0.5 + dz, y);
+      const cx = (p.sx + q.sx) / 2, cy = (p.sy + q.sy) / 2 + sag * (k === 2 ? 1.4 : 2);
+      const path = () => { ctx.beginPath(); ctx.moveTo(p.sx, p.sy); ctx.quadraticCurveTo(cx, cy, q.sx, q.sy); };
+      ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+      ctx.strokeStyle = mix('#232a36', '#0c1018', night * 0.5); ctx.lineWidth = Math.max(0.7, (k === 2 ? 0.7 : 1.1) * zm); path(); ctx.stroke();
+      if (night > 0.3 && k < 2) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = (night - 0.3) * 0.55; ctx.strokeStyle = 'rgba(95,242,255,0.5)'; ctx.lineWidth = Math.max(1, 1.8 * zm); path(); ctx.stroke(); }
+    }
+    ctx.restore();
+  }
+  /** Roads and transit lines that reach the region's edge: an arrow on the ground and a plate naming the neighbour
+   *  ("To Ravel Basin") — where an interstate link to that region leaves the map. */
+  _edges(ctx, night) {
+    // a cheap scan of the 4 edges, a couple of times a second (roads change rarely)
+    if (!this._edgeList || this._edgeKey === null || (this._edgeT = (this._edgeT || 0) + 1) % 30 === 0) { this._edgeKey = 1; this._edgeList = this._scanEdges(); }
+    if (!this._edgeList.length) return;
+    const zm = this.cam.zoom, t = performance.now() / 1000;
+    ctx.save();
+    for (const e of this._edgeList) {
+      for (const [x, z] of e.tiles) {
+        if (!this._near(x + 0.5, z + 0.5, 2)) continue;
+        const [ox, oz] = e.out, c = (dx, dz) => this.G(x + 0.5 + dx, z + 0.5 + dz, 0.02);
+        const tip = c(ox * 0.48, oz * 0.48), l = c(-ox * 0.05 - oz * 0.3, -oz * 0.05 - ox * 0.3), rr = c(-ox * 0.05 + oz * 0.3, -oz * 0.05 + ox * 0.3), back = c(ox * 0.12, oz * 0.12);
+        ctx.globalCompositeOperation = night > 0.3 ? 'lighter' : 'source-over';
+        ctx.fillStyle = `rgba(255,176,46,${0.55 + 0.25 * Math.sin(t * 3 + x + z)})`;
+        ctx.beginPath(); ctx.moveTo(tip.sx, tip.sy); ctx.lineTo(l.sx, l.sy); ctx.lineTo(back.sx, back.sy); ctx.lineTo(rr.sx, rr.sy); ctx.closePath(); ctx.fill();
+      }
+      const m = e.tiles[e.tiles.length >> 1]; if (!this._near(m[0] + 0.5, m[1] + 0.5, 3) || zm < 0.45) continue;
+      const g = this.G(m[0] + 0.5 - e.out[0] * 1.6, m[1] + 0.5 - e.out[1] * 1.6, 0.4);
+      ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+      ctx.font = '600 12px "Segoe UI", system-ui, sans-serif'; const text = e.name ? `To ${e.name}` : 'Out of the region', w = ctx.measureText(text).width + 18;
+      ctx.fillStyle = 'rgba(9,12,26,0.85)'; ctx.strokeStyle = 'rgba(255,176,46,0.75)'; ctx.lineWidth = 1;
+      rrect(ctx, g.sx - w / 2, g.sy - 11, w, 22, 6); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffd38a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, g.sx, g.sy + 0.5);
+    }
+    ctx.restore();
+  }
+  /** Edge road/transit tiles grouped by side and neighbour: [{ out: [dx, dz], name, tiles: [[x, z]] }]. */
+  _scanEdges() {
+    const r = this.r, N = this.N, wr = this.world?.regions?.[r.id], groups = new Map();
+    const across = (x, z, side) => {
+      if (!wr || !this.world) return null;
+      const o = side === 'w' ? regionAt(this.world, wr.cx - 1, wr.cz + Math.floor(z / CELL)) : side === 'e' ? regionAt(this.world, wr.cx + wr.span, wr.cz + Math.floor(z / CELL))
+        : side === 'n' ? regionAt(this.world, wr.cx + Math.floor(x / CELL), wr.cz - 1) : regionAt(this.world, wr.cx + Math.floor(x / CELL), wr.cz + wr.span);
+      return o && o.id !== wr.id ? o : null;
+    };
+    for (let k = 0; k < N; k++) for (const [x, z, side, out] of [[0, k, 'w', [-1, 0]], [N - 1, k, 'e', [1, 0]], [k, 0, 'n', [0, -1]], [k, N - 1, 's', [0, 1]]]) {
+      const i = z * N + x; if (!r.tiles.road[i] && !r.tiles.transit?.[i]) continue;
+      const o = across(x, z, side), name = o ? (o.city?.name || o.name) : null, key = `${side}|${o?.id ?? '-'}`;
+      if (!groups.has(key)) groups.set(key, { out, name, tiles: [] });
+      groups.get(key).tiles.push([x, z]);
+    }
+    return [...groups.values()];
   }
   _plant(ctx, x, z, kind, night) {
     // alien plants: glow a little at night. Shapes by kind: crystal spikes, bulb stalks, fan fronds
@@ -329,6 +454,7 @@ export class MapView {
   }
   _ghostTiles(ctx, hw, hh) {
     const g = this.ghost; const col = g.ok ? (g.color || 'rgba(90,220,140,0.45)') : 'rgba(255,80,70,0.45)';
+    if (g.reach && g.ok) for (const i of g.reach) { const x = i % this.N, z = (i / this.N) | 0; if (!this._near(x + 0.5, z + 0.5, 1)) continue; const c = this.G(x + 0.5, z + 0.5); diamondFill(ctx, c.sx, c.sy, hw * 0.96, hh * 0.96, g.reachColor || 'rgba(255,220,80,0.16)'); }
     for (const [x, z] of g.tiles || []) { if (x < 0 || z < 0 || x >= this.N || z >= this.N) continue; const c = this.G(x + 0.5, z + 0.5); diamondFill(ctx, c.sx, c.sy, hw * 0.94, hh * 0.94, col); }
   }
   _ghostSprite(ctx, s) {
@@ -351,6 +477,7 @@ function cliff(ctx, x, y, hw, hh, drop, side) {
   else { ctx.moveTo(x - hw, y); ctx.lineTo(x, y + hh); ctx.lineTo(x, y + hh + drop); ctx.lineTo(x - hw, y + drop); }
   ctx.closePath(); ctx.fill();
 }
+function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 function diamond(ctx, x, y, hw, hh, col) { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x, y - hh); ctx.lineTo(x + hw, y); ctx.lineTo(x, y + hh); ctx.lineTo(x - hw, y); ctx.closePath(); ctx.fill(); }
 function diamondFill(ctx, x, y, hw, hh, col) { diamond(ctx, x, y, hw, hh, col); }
 function diamondStroke(ctx, x, y, hw, hh) { ctx.beginPath(); ctx.moveTo(x, y - hh); ctx.lineTo(x + hw, y); ctx.lineTo(x, y + hh); ctx.lineTo(x - hw, y); ctx.closePath(); ctx.stroke(); }
@@ -359,5 +486,6 @@ export function mix(a, b, t) {
   const p = s => s.startsWith('rgb') ? s.match(/[\d.]+/g).slice(0, 3).map(Number) : [1, 3, 5].map(i => parseInt(s.slice(i, i + 2), 16));
   const A = p(a), B = p(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',')})`;
 }
+function rgbOf(hex) { return [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); }
 export function shade(hex, k) { const n = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); const f = v => Math.max(0, Math.min(255, Math.round(k >= 0 ? v + (255 - v) * k : v * (1 + k)))); return '#' + n.map(v => f(v).toString(16).padStart(2, '0')).join(''); }
 export { ZONE };

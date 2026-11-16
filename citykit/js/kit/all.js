@@ -5,3 +5,4 @@ import './defence.js';
 import './creatures.js';
 import './vehicles.js';
 import './transit.js';
+import './power.js';

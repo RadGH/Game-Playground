@@ -35,6 +35,7 @@ export const hideBanner = () => { clearTimeout(bannerT); $('#banner')?.classList
 export function sheet(title, build, opts = {}) {
   const back = el('div', { class: 'modal-back' }); const m = el('div', { class: 'modal ac-modal', role: 'dialog', 'aria-label': title }, el('h2', {}, title));
   back.append(m); $('#panels').append(back);
+  $('#toasts')?.replaceChildren();   // old news would sit on top of the sheet
   // the city behind a sheet is background: out of reach for clicks, keys and screen readers until it closes
   const city = $('#city'); if (city) { city.setAttribute('aria-hidden', 'true'); city.inert = true; }
   let closed = false;

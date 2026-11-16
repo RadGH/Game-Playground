@@ -30,9 +30,9 @@ export function awayTick(r, days) {
 }
 /** Everything that would have "happened" while away waits instead: ship and nest timers slide by the same days. */
 function freeze(r, days) {
-  const s = r.ships; if (s) { if (s.nextDay != null) s.nextDay += days; s.passing = []; }
+  const s = r.ships; if (s) { if (s.nextDay != null) s.nextDay += days; if (s.nextDrop != null) s.nextDrop += days; s.passing = []; }
   const t = r.threat; if (t) {
-    for (const k of ['nextSpread', 'nextSwarm', 'calmUntil', 'angerDay']) if (t[k] != null && t[k] >= 0) t[k] += days;
+    for (const k of ['nextSpread', 'nextSwarm', 'nextMigration', 'calmUntil', 'angerDay']) if (t[k] != null && t[k] >= 0) t[k] += days;
     if (t.swarm) t.swarm.at += days;
     if (t.lastBreach != null) t.lastBreach += days;
   }

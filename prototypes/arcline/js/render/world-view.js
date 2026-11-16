@@ -1,7 +1,8 @@
 // The world map, drawn the SimCity 4 region-map way: the whole planet as one big iso diamond, each region outlined and
 // filled with its biome's ground, sea and coast from the world noise (sim/world.js sample), rivers (riverAt), a little
-// hill shading so the ground reads as land, your cities as glowing markers with their name and people, and interstate
-// links between neighbouring cities. Used by the New world preview (small, no cities) and the World map screen.
+// hill shading so the ground reads as land, your cities drawn as they really are — the picture each city saves of
+// itself (render/map.js snapshot(), owner 2026-11-16: "I want your actual city ... to appear on the world map ... SimCity
+// 4 did it better"), or a small cluster of blocks until it has one — with a quiet name plate, and interstate links. Used by the New world preview (small, no cities) and the World map screen.
 //
 //   const v = new WorldView(canvas, world, { ppc: 20 });   // ppc = picture pixels per world cell
 //   v.resize(cssW, cssH, dpr); v.fit({ x, y, w, h });     // fit the diamond into a part of the canvas (CSS px)
@@ -125,26 +126,18 @@ export class WorldView {
       g.strokeStyle = '#ffb02e'; g.lineWidth = 2; g.setLineDash([8, 7]); g.lineDashOffset = -t * 18; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); g.setLineDash([]);
     }
     g.restore();
-    // city markers: a beam of light, a pulsing ring, the name and people
+    // each city's name and people on a quiet plate just below its region (the city itself is drawn in the still layer)
     this.placed = [];
     const later = [];
     for (const r of founded) {
-      const c = this.centre(r), pulse = 0.5 + 0.5 * Math.sin(t * 2.4 + r.id), beam = 16 + Math.min(40, s * 0.9);
-      g.save(); g.globalCompositeOperation = 'lighter';
-      const bg = g.createLinearGradient(0, c.y - beam, 0, c.y); bg.addColorStop(0, 'rgba(255,79,216,0)'); bg.addColorStop(1, 'rgba(255,79,216,0.85)');
-      g.fillStyle = bg; g.fillRect(c.x - 1.5, c.y - beam, 3, beam);
-      const rg = g.createRadialGradient(c.x, c.y, 0, c.x, c.y, 14 + pulse * 6); rg.addColorStop(0, 'rgba(255,120,230,0.9)'); rg.addColorStop(1, 'rgba(255,79,216,0)');
-      g.fillStyle = rg; g.beginPath(); g.arc(c.x, c.y, 14 + pulse * 6, 0, Math.PI * 2); g.fill();
-      g.restore();
-      g.fillStyle = '#fff'; g.beginPath(); g.arc(c.x, c.y, 3.5, 0, Math.PI * 2); g.fill();
-      g.strokeStyle = '#ff4fd8'; g.lineWidth = 1.5; g.beginPath(); g.ellipse(c.x, c.y, 9 + pulse * 3, (9 + pulse * 3) / 2, 0, 0, Math.PI * 2); g.stroke();
-      if (this.labels) later.push([r === this.sel ? 0 : 1, c.x, c.y + 14, r.city.name || r.name, cities.peopleText?.(r) || '']);
+      const b = this.toScreen(r.cx + r.span, r.cz + r.span), c = this.centre(r);
+      if (this.labels) later.push([r === this.sel ? 0 : 1, c.x, Math.min(b.y - 6, c.y + r.span * s * 0.35), r.city.name || r.name, cities.peopleText?.(r) || '', false, true]);
     }
     // the hovered / selected region's name (desktop hover, controller, keys)
     for (const r of [this.sel, this.hover]) if (r && !r.city?.founded && this.labels) { const c = this.centre(r); later.push([r === this.sel ? 0 : 2, c.x, c.y - 8, r.name, '', true]); }
     // the picked one first, then the rest, each nudged off the ones already drawn (no label on top of another)
     later.sort((a, b) => a[0] - b[0]);
-    for (const [, x, y, name, sub, quiet] of later) this.label(x, y, name, sub, quiet);
+    for (const [, x, y, name, sub, quiet, city] of later) this.label(x, y, name, sub, quiet, city);
   }
   drawBase() {
     const d = this.dpr, n = this.world.cells, s = this.s;
@@ -173,10 +166,48 @@ export class WorldView {
     const poly = r => { const a = this.toScreen(r.cx, r.cz), b = this.toScreen(r.cx + r.span, r.cz), c = this.toScreen(r.cx + r.span, r.cz + r.span), e = this.toScreen(r.cx, r.cz + r.span); g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.lineTo(c.x, c.y); g.lineTo(e.x, e.y); g.closePath(); };
     g.strokeStyle = 'rgba(6, 12, 24, 0.55)'; g.lineWidth = Math.max(1, Math.min(2, s / 18));
     for (const r of this.world.regions) { poly(r); g.stroke(); }
-    // claimed regions get a faint tint
-    for (const r of this.world.regions) if (r.city?.founded) { poly(r); g.fillStyle = 'rgba(255, 79, 216, 0.08)'; g.fill(); g.strokeStyle = 'rgba(255, 79, 216, 0.45)'; g.lineWidth = 1.2; g.stroke(); }
+    if (!this.showCities) return;
+    // your cities: their own picture laid into the region's diamond (or blocks until they have one)
+    for (const r of this.world.regions) {
+      if (!r.city?.founded) continue;
+      const img = this.snapImage(r);
+      if (img) {
+        const sn = r.city.snap, top = this.toScreen(r.cx, r.cz), k = (r.span * 2 * s) / sn.w;
+        g.save(); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+        g.drawImage(img, top.x - (sn.w / 2) * k, top.y - sn.top * k, sn.w * k, sn.h * k); g.restore();
+      } else this.cityBlocks(g, r);
+      poly(r); g.strokeStyle = 'rgba(255, 211, 138, 0.45)'; g.lineWidth = 1.2; g.stroke();
+    }
   }
-  label(x, y, name, sub, quiet = false) {
+  /** The city's saved picture as an Image (loaded once; the still layer redraws when it arrives), or null. */
+  snapImage(r) {
+    const sn = r.city?.snap; if (!sn?.url) return null;
+    this._imgs ||= new Map();
+    let e = this._imgs.get(r.id);
+    if (!e || e.url !== sn.url) {
+      const img = new Image(); e = { url: sn.url, img, ok: false }; this._imgs.set(r.id, e);
+      img.onload = () => { e.ok = true; this._key = null; }; img.onerror = () => { e.bad = true; };
+      img.src = sn.url;
+    }
+    return e.ok ? e.img : null;
+  }
+  /** A city saved before it had a picture: a little cluster of lit blocks at the region's middle, more and taller with
+   *  more people (seeded by the region, so it doesn't jump around). It gets its real picture the next time it's played. */
+  cityBlocks(g, r) {
+    const pop = r.city.population || 0, n = Math.max(4, Math.min(40, Math.round(4 + Math.sqrt(pop) / 2))), s = this.s;
+    let h = (r.id + 1) * 2654435761 >>> 0; const rnd = () => ((h = (Math.imul(h ^ (h >>> 15), 2246822519) + 0x9e3779b9) >>> 0) / 4294967296);
+    const pts = [];
+    for (let k = 0; k < n; k++) { const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * r.span * 0.22; pts.push({ u: r.cx + r.span / 2 + Math.cos(a) * d, v: r.cz + r.span / 2 + Math.sin(a) * d, ht: 0.3 + rnd() * (0.4 + Math.min(1.6, pop / 3000)) }); }
+    pts.sort((a, b) => (a.u + a.v) - (b.u + b.v));
+    const bw = Math.max(1.2, s * 0.045);
+    for (const p of pts) {
+      const c = this.toScreen(p.u, p.v), ht = p.ht * s * 0.18;
+      g.fillStyle = '#7d8898'; g.beginPath(); g.moveTo(c.x - bw, c.y); g.lineTo(c.x, c.y + bw / 2); g.lineTo(c.x, c.y + bw / 2 - ht); g.lineTo(c.x - bw, c.y - ht); g.closePath(); g.fill();
+      g.fillStyle = '#5c6676'; g.beginPath(); g.moveTo(c.x + bw, c.y); g.lineTo(c.x, c.y + bw / 2); g.lineTo(c.x, c.y + bw / 2 - ht); g.lineTo(c.x + bw, c.y - ht); g.closePath(); g.fill();
+      g.fillStyle = '#c3ccd8'; g.beginPath(); g.moveTo(c.x, c.y - bw / 2 - ht); g.lineTo(c.x + bw, c.y - ht); g.lineTo(c.x, c.y + bw / 2 - ht); g.lineTo(c.x - bw, c.y - ht); g.closePath(); g.fill();
+    }
+  }
+  label(x, y, name, sub, quiet = false, city = false) {
     const g = this.ctx;
     g.font = '600 13px "Exo 2", system-ui, sans-serif';
     const w1 = g.measureText(name).width; g.font = '500 12px "Exo 2", system-ui, sans-serif'; const w2 = sub ? g.measureText(sub).width : 0;
@@ -185,7 +216,7 @@ export class WorldView {
     for (const dy of [0, h + 4, -(h + 36), 2 * (h + 4), -(2 * h + 40)]) if (!hits(y + dy)) { y += dy; break; }
     (this.placed ||= []).push({ x: x - w / 2 - 2, y: y - 2, w: w + 4, h: h + 4 });
     g.save();
-    g.fillStyle = quiet ? 'rgba(7, 11, 22, 0.72)' : 'rgba(9, 12, 26, 0.86)'; g.strokeStyle = quiet ? 'rgba(255,255,255,0.25)' : 'rgba(255, 79, 216, 0.6)'; g.lineWidth = 1;
+    g.fillStyle = quiet ? 'rgba(7, 11, 22, 0.72)' : 'rgba(9, 12, 26, 0.8)'; g.strokeStyle = quiet ? 'rgba(255,255,255,0.25)' : city ? 'rgba(255, 211, 138, 0.35)' : 'rgba(63, 240, 255, 0.5)'; g.lineWidth = 1;
     roundRect(g, x - w / 2, y, w, h, 7); g.fill(); g.stroke();
     g.textAlign = 'center'; g.textBaseline = 'top';
     g.fillStyle = '#f2f6ff'; g.font = '600 13px "Exo 2", system-ui, sans-serif'; g.fillText(name, x, y + 4);

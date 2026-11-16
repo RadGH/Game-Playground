@@ -1,7 +1,10 @@
-// The city's clock: what happens every game day and every month. Arrivals are the main way people come (owner
-// 2026-11-15); zoning decides WHERE they live and work. Homes grow when people are waiting for them; shops and
-// industry grow when residents need jobs and shopping. Land value (leisure, education, water nearby, threat) decides
-// how tall and fancy a lot grows. Money comes from taxes and goes to upkeep; below the shutdown line services stop.
+// The city's clock: what happens every game day and every month. People move in on their own whenever there are free
+// homes (round 2, owner 2026-11-16: "make people keep coming in when there's demand" — SimCity-style immigration, no
+// ships), faster the more attractive the city is (appeal(): land value, jobs, power + water, taxes, reputation,
+// defence holding, links to your other cities). Zoning decides WHERE they live and work. Homes grow a step ahead of the
+// people; shops and industry grow when residents need jobs and shopping. Land value (leisure, education, water
+// nearby, threat) decides how tall and fancy a lot grows. Money: taxes + a Colony grant that fades as the city grows,
+// minus upkeep; below the shutdown line services stop.
 import { T, milestones } from './tuning.js';
 import { cat, item } from './catalog.js';
 import { roadReach, touchesRoad, solvePower, solveWater, solveTraffic } from './networks.js';
@@ -9,9 +12,11 @@ import { isFlat } from './terrain.js';
 import { addLot, reindexLots } from './build.js';
 import { ZONE, RAW, REFINED } from './region.js';
 import { rng } from '../../../../citykit/js/kit/rng.js';
-import { cutTraffic, transitLandValue, transitUpkeep } from './transit.js';
+import { cutTraffic, transitLandValue, transitUpkeep, linkBoost } from './transit.js';
 
 const ZKEY = { 1: 'R', 2: 'C', 3: 'I' };
+/** Share of residents who work (jobs wanted = people × this). */
+export const WORK_SHARE = 0.58;
 
 // ---------------- derived numbers (cheap, used by the HUD) ----------------
 export function housing(r) { let h = 0; for (const l of r.lots) if (l.people && (l.powered ?? 1) > 0) h += l.people; return h; }
@@ -24,8 +29,16 @@ export function census(r) {
 /** What the city needs right now: homes for everyone here and on the way (+ a small buffer), shop jobs and
  *  industry jobs for its workers. Growth builds toward these targets and stops there (no ghost towns). */
 export function targets(r) {
-  const p = r.people.total, coming = r.people.arriving;
-  return { R: p + coming + Math.max(8, Math.round((p + coming) * 0.12)), C: Math.round(p * 0.24) + 6, I: Math.round(p * 0.34) + 6 };
+  const p = r.people.total, coming = r.people.arriving, c = census(r), link = linkBoost(r), a = appeal(r).value;
+  // homes run a step ahead of the people (more for an attractive city, more when linked cities send interest), plus
+  // homes for anyone the open jobs could employ — that's what keeps immigration going
+  const ahead = Math.max(T.homesAheadMin ?? 16, (p + coming) * (T.homesAhead ?? 0.15) * Math.max(0.5, a)) * (1 + link.R);
+  const openJobs = Math.max(0, c.jobs - p * WORK_SHARE) / WORK_SHARE;
+  return {
+    R: Math.round(p + coming + ahead + openJobs * 0.5),
+    C: Math.round((p * 0.24 + 6) * (1 + link.C)),
+    I: Math.round(p * 0.34 + 6),
+  };
 }
 /** Demand per zone, -1..1 (the meter). Positive = the city wants more of it. Higher taxes cut it. */
 export function demand(r) {
@@ -146,25 +159,79 @@ export function settle(r, days) {
   const h = housing(r); if (r.people.total > h) { r.people.arriving += r.people.total - h; r.people.total = h; }
 }
 
+/**
+ * How attractive the city is to newcomers, ~0.1..2 (1 = an ordinary well-run colony). parts are for the UI:
+ *   land 0..1 (average land value where people live), jobs −1..1 (open jobs + / unemployed −), power + water shares
+ *   0..1, tax (demand lost to a homes tax over 9%), rep −1..1, scared (a wall broke lately), links (other cities).
+ */
+export function appeal(r) {
+  const p = r.people.total, c = census(r);
+  let vs = 0, vn = 0; for (const l of r.lots) if (l.zone === 'R' && l.people) { vs += (l.value ?? 0.3) * l.people; vn += l.people; }
+  const workers = p * WORK_SHARE;
+  const parts = {
+    land: vn ? vs / vn : 0.3,
+    jobs: clamp((c.jobs - workers) / Math.max(20, workers), -1, 1),
+    power: Math.min(1, r.power?.share ?? 1),
+    water: Math.min(1, r.waterNet ? r.waterNet.share : 1),
+    tax: Math.max(0, (r.taxes.R - 0.09) * 100) * (T.taxGrowthPenalty ?? 4) / 100,
+    rep: r.reputation || 0,
+    scared: r.threat?.lastBreach != null && r.day - r.threat.lastBreach < (T.breachScareDays ?? 8),
+    links: linkBoost(r).appeal,
+  };
+  let v = 0.6 + 0.55 * parts.land + 0.25 * parts.jobs + 0.25 * parts.rep + parts.links - parts.tax;
+  v *= 0.35 + 0.65 * parts.power;
+  v *= 0.75 + 0.25 * parts.water;
+  if (parts.scared) v *= T.breachScare ?? 0.7;
+  if (r.shutdown) v *= 0.3;
+  return { value: clamp(v, 0.1, 2), parts };
+}
+/** People a game day who'd move in right now if there were room: (T.immigrateBase + T.immigrateSqrt × √people) × appeal. */
+export function immigrationRate(r) {
+  return ((T.immigrateBase ?? 1.2) + (T.immigrateSqrt ?? 0.08) * Math.sqrt(Math.max(0, r.people.total))) * appeal(r).value;
+}
+/** Daily: newcomers move straight into free homes (after anyone already waiting). → people who came. */
+export function immigrate(r, days) {
+  if (!r.founded) return 0;
+  const free = housing(r) - r.people.total - r.people.arriving;
+  if (free <= 0) { r.people.immAcc = 0; return 0; }
+  r.people.immAcc = (r.people.immAcc || 0) + immigrationRate(r) * days;
+  const come = Math.min(free, Math.floor(r.people.immAcc));
+  if (come <= 0) return 0;
+  r.people.immAcc -= come; r.people.total += come; r.people.moved = (r.people.moved || 0) + come;
+  return come;
+}
+
 // ---------------- money ----------------
+/** The Colony grant: T.colonyGrant credits a month at founding, fading to nothing by T.grantFadePop people. */
+export function colonyGrant(r) {
+  if (!r.founded) return 0;
+  return Math.max(0, (T.colonyGrant ?? 0) * (1 - r.people.total / Math.max(1, T.grantFadePop ?? 1500)));
+}
+const WALL_ID = { 1: 'wall-1', 2: 'wall-2', 3: 'wall-3', 9: 'gate' };
 export function monthBudget(r) {
   const c = census(r), rateOf = z => r.taxes[z] / 0.09;
   const employed = Math.min(c.jobs, r.people.total * 0.58);
   const fill = c.jobs ? employed / c.jobs : 0;
+  // shops and industry pay more per job the bigger the building (tier 1 → 1×, tier 4 → 1.75×)
+  let cPay = 0, iPay = 0; for (const l of r.lots) if (l.jobs && l.kind === 'zoned') { const k = l.jobs * (1 + ((l.tier || 1) - 1) * 0.25); if (l.zone === 'C') cPay += k; else if (l.zone === 'I') iPay += k; }
   const income = {
     R: r.people.total * (T.taxPerPerson ?? 1.6) * rateOf('R'),
-    C: c.cjobs * fill * (T.taxPerJob ?? 2.1) * rateOf('C'),
-    I: c.ijobs * fill * (T.taxPerJob ?? 2.1) * rateOf('I'),
+    C: cPay * fill * (T.taxPerJob ?? 2.1) * rateOf('C'),
+    I: iPay * fill * (T.taxPerJob ?? 2.1) * rateOf('I'),
+    grant: colonyGrant(r),
   };
   const roads = cat().roads; let roadUp = 0; for (let i = 0; i < r.size * r.size; i++) { const lv = r.tiles.road[i]; if (lv) roadUp += roads[lv - 1].upkeep; }
-  let wallUp = 0; for (let i = 0; i < r.size * r.size; i++) if (r.tiles.wall[i]) wallUp += 1.5;
+  // walls and turrets pay today's catalog upkeep (so a rebalance reaches old saves too)
+  const wallRate = {}; for (const [v, id] of Object.entries(WALL_ID)) wallRate[v] = item(id)?.upkeep ?? 1;
+  let wallUp = 0; for (let i = 0; i < r.size * r.size; i++) { const v = r.tiles.wall[i]; if (v) wallUp += wallRate[v] ?? 1; }
+  const upkeepOf = (id, fallback) => { const e = id ? item(id) : null; return e && e.upkeep != null ? e.upkeep : (fallback || 0); };
   const upkeep = {
-    buildings: r.lots.reduce((s, l) => s + (l.upkeep || 0), 0), roads: roadUp, walls: wallUp,
-    turrets: r.turrets.reduce((s, t) => s + (t.upkeep || 0), 0),
+    buildings: r.lots.reduce((s, l) => s + (l.kind === 'placed' ? upkeepOf(l.id, l.upkeep) : (l.upkeep || 0)), 0), roads: roadUp, walls: wallUp,
+    turrets: r.turrets.reduce((s, t) => s + upkeepOf(t.id, t.upkeep), 0),
     loans: r.loans.reduce((s, l) => s + l.amount * (T.loanInterest ?? 0.04) / 12 + l.amount / l.months, 0),
     transit: transitUpkeep(r),
   };
-  const inTotal = income.R + income.C + income.I, outTotal = Object.values(upkeep).reduce((a, b) => a + b, 0);
+  const inTotal = income.R + income.C + income.I + income.grant, outTotal = Object.values(upkeep).reduce((a, b) => a + b, 0);
   return { income, upkeep, inTotal, outTotal, net: inTotal - outTotal };
 }
 export function takeLoan(r) { const a = T.loanSize ?? 25000; if (r.loans.length >= 3) return false; r.loans.push({ amount: a, months: 48, left: 48 }); r.money += a; return true; }
@@ -214,6 +281,7 @@ function dayTick(r, day) {
   const R = rng(r.seed * 31 + day);
   if (r.dirty || day % 5 === 0) { solvePower(r); solveWater(r); r.dirty = false; }
   settle(r, 1);
+  immigrate(r, 1);
   const made = industry(r, 1);
   // money trickles daily (a month's net / 30), so the counter moves smoothly
   const b = monthBudget(r); const net = b.net / 30;

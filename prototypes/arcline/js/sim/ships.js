@@ -1,8 +1,11 @@
-// Ships overhead (PLAN §0 'Ship comms', 'Landings', 'Population', 'Orbital strikes'). A powered Comms Array lets the
-// city hear the ships that pass on their own schedule; each one crosses the sky strip with a timer and an offer:
-//   settlers  — accept or refuse the whole ship; accepted people come down in drop pods (the main way the city grows)
+// Ships overhead (PLAN §0 'Ship comms', 'Landings', 'Orbital strikes'). A powered Comms Array lets the city hear the
+// ships that pass on their own schedule; each one crosses the sky strip with a timer and an offer:
 //   warship   — sells 1–3 orbital strike charges for Credits + Crystal
-//   merchant  — sells only EXCLUSIVE goods (turret Mk II/III parts, landmark pieces, blueprints) for Credits + Crystal
+//   merchant  — sells EXCLUSIVE goods (turret Mk II/III parts, landmark pieces, blueprints) for Credits + Crystal, and
+//               supply crates (Metal, Stone, Crystal, refined goods) for Credits
+// Round 2 (owner 2026-11-16): ships no longer bring people — people move in on their own (city.immigrate). Drop pods
+// now carry SUPPLIES: what you buy from a merchant, and a free supply crate from the colony's sponsors every
+// T.supplyEveryDays (no Comms Array needed), now and then with a rare part inside.
 // Pods land on open ground near the city (always safe) until a Landing Pad exists; then on the pad.
 // Also: the founding pod rain, orbital strike charges and the Orbital Lance landmark's cooldown.
 //
@@ -17,23 +20,22 @@ import { damageNests } from './nests.js';
 
 // ---------------------------------------------------------------- data
 /** What each kind of ship is called on screen. */
-export const KIND_NAMES = { settlers: 'Settler ship', liner: 'Colony liner', warship: 'Warship', merchant: 'Merchant' };
+export const KIND_NAMES = { warship: 'Warship', merchant: 'Merchant' };
 
-/** How likely each kind is: a doing-well city mostly hears settlers; a struggling one hears warships. */
+/** How likely each kind is: a doing-well city mostly hears merchants; a struggling one hears warships. */
 export const KIND_ODDS = {
-  normal: { settlers: 0.6, merchant: 0.22, warship: 0.18 },
-  struggling: { settlers: 0.25, merchant: 0.2, warship: 0.55 },
+  normal: { merchant: 0.6, warship: 0.4 },
+  struggling: { merchant: 0.3, warship: 0.7 },
 };
 
 // Ship names: original, two words. Never "ember", "veil" or "muster" (docs/banned-names.md).
 const NAME_A = ['Patient', 'Quiet', 'Distant', 'Silver', 'Steady', 'Seventh', 'Wandering', 'Amber', 'Northern', 'Gentle', 'Lucky', 'Hollow',
   'Bright', 'Long', 'Tenth', 'Brass', 'Cobalt', 'Glad', 'Slow', 'Far', 'Second', 'Copper', 'Open', 'Tidal'];
 const NAME_B = {
-  settlers: ['Orchard', 'Harvest', 'Promise', 'Meridian', 'Lantern', 'Homestead', 'Compass', 'Seedline', 'Morning', 'Threshold', 'Cradle', 'Tidewater', 'Wayfarer'],
   warship: ['Verdict', 'Reckoning', 'Answer', 'Bastion', 'Thunder', 'Argument', 'Rampart', 'Sentence', 'Anvil', 'Hammerhead', 'Warden', 'Gauntlet'],
   merchant: ['Ledger', 'Bargain', 'Margin', 'Tidings', 'Lot', 'Weight', 'Purse', 'Cargo', 'Barter', 'Courier', 'Manifest', 'Exchange'],
 };
-const CLASS = { settlers: 'Colony ship', liner: 'Colony liner', warship: 'Frigate', merchant: 'Trader' };
+const CLASS = { warship: 'Frigate', merchant: 'Trader' };
 
 /**
  * Exclusive goods merchants sell — things the city can't make. `from` = lowest milestone they're offered at;
@@ -65,7 +67,22 @@ export const GOODS = [
   { id: 'bp-strike', name: 'Shell-spread blueprint', kind: 'blueprint', credits: 5000, crystal: 70, from: 1, effect: { strikeRadius: 1.2 },
     blurb: 'Orbital strikes hit a 20% wider circle.' },
 ];
-export const goodById = id => GOODS.find(g => g.id === id);
+/**
+ * Supply crates: bulk materials a merchant sells for credits (any number of times — not owned like GOODS), and what
+ * the free sponsor drops carry. `from` = lowest milestone. give = stock added.
+ */
+export const SUPPLIES = [
+  { id: 'crate-metal', name: 'Metal crates', kind: 'supply', give: { metal: 160 }, credits: 1100, crystal: 0, from: 0, blurb: '160 Metal for walls and turrets.' },
+  { id: 'crate-stone', name: 'Stone crates', kind: 'supply', give: { stone: 160 }, credits: 800, crystal: 0, from: 0, blurb: '160 Stone.' },
+  { id: 'crate-crystal', name: 'Crystal cache', kind: 'supply', give: { crystal: 45 }, credits: 2200, crystal: 0, from: 0, blurb: '45 Crystal — orbital strikes and rare goods take it.' },
+  { id: 'crate-steel', name: 'Steel girders', kind: 'supply', give: { steel: 60 }, credits: 2600, crystal: 0, from: 1, blurb: '60 Steel, ready to build with.' },
+  { id: 'crate-concrete', name: 'Concrete pallets', kind: 'supply', give: { concrete: 60 }, credits: 2200, crystal: 0, from: 2, blurb: '60 Concrete, ready to build with.' },
+  { id: 'crate-cells', name: 'Power cell rack', kind: 'supply', give: { cells: 30 }, credits: 3600, crystal: 0, from: 3, blurb: '30 Power cells.' },
+];
+export const goodById = id => GOODS.find(g => g.id === id) || SUPPLIES.find(g => g.id === id);
+const MAT_NAMES = { metal: 'Metal', stone: 'Stone', crystal: 'Crystal', steel: 'Steel', concrete: 'Concrete', cells: 'Power cells' };
+/** "160 Metal, 20 Crystal" */
+export const supplyText = give => Object.entries(give).filter(([, v]) => v > 0).map(([k, v]) => `${fmt(Math.round(v))} ${MAT_NAMES[k] || k}`).join(', ');
 
 // ---------------------------------------------------------------- state
 /** Fill in the ship fields (safe to call every tick; old saves and fresh regions both work). */
@@ -73,6 +90,9 @@ export function ensureShips(r) {
   const s = r.ships || (r.ships = {});
   s.passing ??= []; s.history ??= []; s.strikes ??= 0; s.lanceReady ??= 0; s.seq ??= 0; s.rolls ??= 0;
   s.goods ??= {};
+  // round 2: ships no longer carry people — an old save's settler ships simply fly on
+  s.passing = s.passing.filter(sh => sh.kind === 'warship' || sh.kind === 'merchant');
+  s.nextDrop ??= (r.day || 0) + (T.supplyEveryDays ?? 25) * 0.5;
   // region.found() sets s.next in real seconds at 1×; turn it into a game day once
   if (s.nextDay == null) s.nextDay = (r.day || 0) + (s.next ? s.next / dayLen() : interval(r));
   return s;
@@ -104,6 +124,7 @@ export function interval(r) {
 // ---------------------------------------------------------------- the tick
 /**
  * Advance the ships to r.day (call after city.tick moved the clock). Returns events:
+ *   { type: 'landing', supply: { metal: n, … }, part?, text, … }  a free supply crate came down (landing() shape)
  *   { type: 'ship-arrived', ship }      a new ship entered the sky strip (ship = shipView)
  *   { type: 'ship-left', ship, answered }  it crossed out of range
  *   { type: 'comms-online' } / { type: 'comms-offline' }
@@ -111,6 +132,12 @@ export function interval(r) {
 export function shipsTick(r, days = 0) {
   const s = ensureShips(r), ev = [];
   if (!r.founded) return ev;
+  // the sponsors' free supply crate (no Comms Array needed)
+  if (r.day >= s.nextDrop) {
+    const R = roll(r), drop = supplyDrop(r, R);
+    s.nextDrop = r.day + (T.supplyEveryDays ?? 25) * R.range(0.7, 1.3);
+    if (drop) ev.push(drop);
+  }
   // ships that crossed out of range
   for (const sh of [...s.passing]) if (r.day >= sh.leaves) { s.passing.splice(s.passing.indexOf(sh), 1); remember(r, sh, sh.answered ? 'answered' : 'missed'); ev.push({ type: 'ship-left', ship: shipView(r, sh), answered: !!sh.answered }); }
   const tier = commsTier(r);
@@ -137,16 +164,9 @@ function makeShip(r, R, tier) {
   const s = r.ships, odds = KIND_ODDS[struggling(r) ? 'struggling' : 'normal'];
   let kind = pickWeighted(R, odds);
   let offer = null;
-  if (kind === 'merchant') { offer = merchantOffer(r, R, tier); if (!offer) kind = R.chance(0.5) ? 'settlers' : 'warship'; }
+  if (kind === 'merchant') { offer = merchantOffer(r, R, tier); if (!offer) kind = 'warship'; }
   if (kind === 'warship') offer = { charges: R.int(1, 3), price: T.strikePrice ?? 4000, crystal: T.strikeCrystal ?? 40 };
-  if (kind === 'settlers') {
-    const pop = r.people.total + r.people.arriving;
-    const liner = pop >= (T.linerFrom ?? 800) && R.chance(0.3 + 0.25 * (tier - 1));
-    const base = liner ? (T.settlersLiner ?? 260) : (T.settlersSmall ?? 35);
-    const n = Math.max(5, Math.round(base * R.range(0.6, 1.4) * (1 + 0.15 * (tier - 1) + 0.2 * clamp(r.reputation || 0, 0, 1)) / 5) * 5);
-    offer = { people: n, liner };
-  }
-  const cls = kind === 'settlers' && offer.liner ? 'liner' : kind;
+  const cls = kind;
   const name = `${R.pick(NAME_A)} ${R.pick(NAME_B[kind])}`;
   const cross = R.range(T.shipPassMinSec ?? 60, T.shipPassMaxSec ?? 90) / dayLen();
   return { id: ++s.seq, kind, cls, name, title: `${CLASS[cls]} ${name}`, came: r.day, leaves: r.day + cross, offer, answered: false };
@@ -156,10 +176,13 @@ function merchantOffer(r, R, tier) {
   const can = GOODS.filter(g => !own[g.id] && (!g.needs || own[g.needs]) && (!g.rare || rare)
     && (g.from == null || g.from <= r.milestone) && (!g.fromTurret || (item(g.fromTurret)?.unlock ?? 0) <= r.milestone)
     && (!g.landmark || (item(g.landmark)?.unlock ?? 0) <= r.milestone + 1));
-  if (!can.length) return null;
   const goods = []; const pool = [...can];
-  const n = Math.min(pool.length, R.int(2, 3) + (hasSpaceport(r) ? 1 : 0));
+  const n = Math.min(pool.length, R.int(1, 2) + (hasSpaceport(r) ? 1 : 0));
   for (let k = 0; k < n; k++) goods.push(pool.splice(R.int(0, pool.length - 1), 1)[0].id);
+  // and a couple of supply crates (bigger arrays bring bigger traders: one more crate a tier)
+  const crates = SUPPLIES.filter(c => (c.from ?? 0) <= r.milestone);
+  for (let k = 0; k < Math.min(crates.length, 1 + tier) && crates.length; k++) goods.push(crates.splice(R.int(0, crates.length - 1), 1)[0].id);
+  if (!goods.length) return null;
   return { goods };
 }
 function pickWeighted(R, odds) { const tot = Object.values(odds).reduce((a, b) => a + b, 0); let x = R() * tot; for (const [k, v] of Object.entries(odds)) { x -= v; if (x <= 0) return k; } return Object.keys(odds)[0]; }
@@ -167,7 +190,7 @@ function pickWeighted(R, odds) { const tot = Object.values(odds).reduce((a, b) =
 // ---------------------------------------------------------------- answering
 /**
  * Answer a passing ship. choice:
- *   settlers: 'accept' | 'refuse'
+ *   (old saves' settler ships are gone: ensureShips drops them)
  *   warship:  a number of charges to buy (1..offered), 'accept' (= all) or 'refuse'
  *   merchant: a good id to buy, or 'refuse'
  * → { ok, why?, text, events: [landing…] }  Nothing is paid when ok is false.
@@ -177,14 +200,6 @@ export function answer(r, shipId, choice) {
   if (!sh) return { ok: false, why: 'That ship has already gone', events: [] };
   const R = roll(r);
   if (choice === 'refuse') { leave(r, sh, 'refused'); return { ok: true, text: `You waved the ${sh.title} on.`, events: [] }; }
-  if (sh.kind === 'settlers') {
-    const n = sh.offer.people;
-    r.people.arriving += n; s.landed = (s.landed || 0) + n;
-    const land = landing(r, R, n, { pod: sh.offer.liner ? 20 : 8 });
-    leave(r, sh, 'accepted');
-    r.log?.push({ day: Math.round(r.day), text: `${fmt(n)} settlers from the ${sh.title} are landing${land.onPad ? ' on the Landing Pad' : ''}.` });
-    return { ok: true, text: `${fmt(n)} settlers are coming down.`, events: [land] };
-  }
   if (sh.kind === 'warship') {
     const want = choice === 'accept' ? sh.offer.charges : Math.floor(Number(choice));
     if (!(want >= 1 && want <= sh.offer.charges)) return { ok: false, why: `They have ${sh.offer.charges} charge${sh.offer.charges > 1 ? 's' : ''} to sell`, events: [] };
@@ -198,12 +213,15 @@ export function answer(r, shipId, choice) {
     const g = goodById(choice);
     if (!g || !sh.offer.goods.includes(g.id)) return { ok: false, why: 'They are not selling that', events: [] };
     const broke = afford(r, g.credits, g.crystal); if (broke) return { ok: false, why: broke, events: [] };
-    r.money -= g.credits; r.stock.crystal -= g.crystal; s.goods[g.id] = r.day; sh.answered = true;
+    r.money -= g.credits; r.stock.crystal -= g.crystal; sh.answered = true;
+    if (g.kind === 'supply') for (const [k, v] of Object.entries(g.give)) r.stock[k] = (r.stock[k] || 0) + v;
+    else s.goods[g.id] = r.day;
     sh.offer.goods = sh.offer.goods.filter(id => id !== g.id);
     const land = landing(r, R, 0, { cargo: g.id });
+    if (g.kind === 'supply') land.supply = { ...g.give };
     if (!sh.offer.goods.length) leave(r, sh, 'bought');
     r.log?.push({ day: Math.round(r.day), text: `Bought ${g.name} from the ${sh.title}.` });
-    return { ok: true, text: `${g.name}: ${g.blurb}`, events: [land] };
+    return { ok: true, text: g.kind === 'supply' ? `${g.name} are coming down: ${supplyText(g.give)}.` : `${g.name}: ${g.blurb}`, events: [land] };
   }
   return { ok: false, why: 'Nothing to answer', events: [] };
 }
@@ -228,22 +246,17 @@ export function timeLeft(r, sh) {
  */
 export function shipView(r, sh) {
   const tl = timeLeft(r, sh), out = { id: sh.id, kind: sh.kind, kindName: KIND_NAMES[sh.cls], name: sh.name, title: sh.title, secondsLeft: tl.sec, daysLeft: tl.days, progress: tl.progress, choices: [] };
-  if (sh.kind === 'settlers') {
-    const n = sh.offer.people;
-    out.text = sh.offer.liner ? `A colony liner with ${fmt(n)} settlers asks to land.` : `${fmt(n)} settlers ask to land.`;
-    out.lines = [`${fmt(n)} people`, `They need homes: zone housing beside roads.`];
-    out.choices.push({ choice: 'accept', label: `Let them land (${fmt(n)} people)`, cost: 'Free', ok: true });
-  } else if (sh.kind === 'warship') {
+  if (sh.kind === 'warship') {
     const o = sh.offer;
     out.text = `Offers ${o.charges} orbital strike charge${o.charges > 1 ? 's' : ''} at ${fmt(o.price)} credits + ${fmt(o.crystal)} Crystal each.`;
     out.lines = [`${o.charges} charge${o.charges > 1 ? 's' : ''} for sale`, `Each strike: a ${fmt(strikeRadius(r), { decimals: 1 })}-tile blast you aim anywhere`];
     for (let k = 1; k <= o.charges; k++) { const why = afford(r, k * o.price, k * o.crystal); out.choices.push({ choice: k, label: `Buy ${k}`, cost: `${fmt(k * o.price)} credits + ${fmt(k * o.crystal)} Crystal`, ok: !why, why }); }
   } else {
-    out.text = `Sells rare goods you can't make yourself.`;
+    out.text = `Sells rare goods you can't make yourself, and supply crates.`;
     out.lines = sh.offer.goods.map(id => goodById(id).name);
-    for (const id of sh.offer.goods) { const g = goodById(id), why = afford(r, g.credits, g.crystal); out.choices.push({ choice: id, label: g.name, blurb: g.blurb, cost: `${fmt(g.credits)} credits + ${fmt(g.crystal)} Crystal`, ok: !why, why }); }
+    for (const id of sh.offer.goods) { const g = goodById(id), why = afford(r, g.credits, g.crystal); out.choices.push({ choice: id, label: g.name, blurb: g.blurb, cost: g.crystal ? `${fmt(g.credits)} credits + ${fmt(g.crystal)} Crystal` : `${fmt(g.credits)} credits`, ok: !why, why }); }
   }
-  out.choices.push({ choice: 'refuse', label: sh.kind === 'settlers' ? 'Wave them on' : 'No thanks', cost: '', ok: true });
+  out.choices.push({ choice: 'refuse', label: 'No thanks', cost: '', ok: true });
   return out;
 }
 /** The comms panel: ships overhead now (soonest to leave first), the next ship roughly, strikes on hand. */
@@ -277,6 +290,29 @@ export function landing(r, R, count, { pod = 8, cargo = null } = {}) {
   const tiles = openTilesAround(r, spot.x, spot.z, 2.5);
   for (let k = 0; k < n; k++) { const t = tiles.length ? tiles[R.int(0, tiles.length - 1)] : [spot.x, spot.z]; pods.push({ x: t[0] + R.range(0.25, 0.75), z: t[1] + R.range(0.25, 0.75), count: share(count, n, k), delay: k * 0.45 }); }
   return { type: 'landing', x: spot.x + 0.5, z: spot.z + 0.5, count, onPad: false, cargo, pods };
+}
+/**
+ * The sponsors' free supply crate: raw materials (more at higher milestones), refined goods from milestone 1, and
+ * now and then (T.rarePartChance, from milestone 1) a rare part a merchant would sell — the cheapest one you don't own.
+ * Adds it to the stockpile and returns the landing event (landing() shape + supply, part?, text).
+ */
+export function supplyDrop(r, R) {
+  ensureShips(r);
+  const m = 1 + 0.5 * (r.milestone || 0), give = {};
+  const raw = R.pick(['metal', 'stone', 'crystal']);
+  give[raw] = Math.round((raw === 'crystal' ? R.range(12, 30) : R.range(60, 130)) * m);
+  if (r.milestone >= 1 && R.chance(0.5)) { const ref = R.pick(r.milestone >= 3 ? ['steel', 'concrete', 'cells'] : r.milestone >= 2 ? ['steel', 'concrete'] : ['steel']); give[ref] = Math.round(R.range(15, 35) * m); }
+  for (const [k, v] of Object.entries(give)) r.stock[k] = (r.stock[k] || 0) + v;
+  let part = null;
+  if (r.milestone >= 1 && R.chance(T.rarePartChance ?? 0.12)) {
+    const own = r.ships.goods;
+    const can = GOODS.filter(g => !own[g.id] && !g.rare && (!g.needs || own[g.needs]) && (g.from == null || g.from <= r.milestone) && (!g.fromTurret || (item(g.fromTurret)?.unlock ?? 0) <= r.milestone) && !g.landmark).sort((a, b) => a.credits - b.credits);
+    if (can.length) { part = can[0]; own[part.id] = r.day; }
+  }
+  const land = landing(r, R, 0, { cargo: part ? part.id : 'supply' });
+  const text = `A supply crate from the colony's sponsors landed${land.onPad ? ' on the Landing Pad' : ''}: ${supplyText(give)}${part ? `, and ${part.name} — ${part.blurb}` : ''}.`;
+  r.log?.push({ day: Math.round(r.day), text, kind: 'supply' });
+  return { ...land, supply: give, part: part ? part.id : null, text };
 }
 const share = (count, n, k) => Math.floor(count / n) + (k < count % n ? 1 : 0);
 

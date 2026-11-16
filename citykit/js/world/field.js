@@ -5,10 +5,14 @@
 
 export const T = { LAND: 0, WATER: 1, WALL: 2, BRIDGE: 3, BUILDING: 4 };
 const WALL_COST = 30;      // a wall tile counts as 30 tiles of walking: worth breaking only when there's no way round
+export { WALL_COST };
 const BUILDING_COST = 6;   // buildings block too, but creatures will chew into the city's edge once inside
 
 export class Grid {
   constructor(w, d) { this.w = w; this.d = d; this.kind = new Uint8Array(w * d); this.hp = new Float32Array(w * d); this.dist = new Float64Array(w * d); }   // 64-bit: 32 rounds diagonal costs and the search skips cells
+  /** Optional per-tile cost for WALL tiles (Float32Array, 0 = the default WALL_COST). A game sets it before solve() to
+   *  make some wall tiles more tempting — Arcline's gates are cheaper, so a horde nearby heads for the gate. */
+  wallCost = null;
   i(x, z) { return z * this.w + x; }
   in(x, z) { return x >= 0 && z >= 0 && x < this.w && z < this.d; }
   at(x, z) { return this.in(x, z) ? this.kind[this.i(x, z)] : T.WATER; }
@@ -18,7 +22,7 @@ export class Grid {
   /** Cost to step into a tile (Infinity = never). */
   cost(x, z) {
     const k = this.at(x, z);
-    return k === T.LAND || k === T.BRIDGE ? 1 : k === T.WALL ? WALL_COST : k === T.BUILDING ? BUILDING_COST : Infinity;
+    return k === T.LAND || k === T.BRIDGE ? 1 : k === T.WALL ? (this.wallCost?.[this.i(x, z)] || WALL_COST) : k === T.BUILDING ? BUILDING_COST : Infinity;
   }
 
   /** Recompute distances to the goal tiles (Dijkstra on the 8-neighbour grid; diagonals can't cut wall corners). */

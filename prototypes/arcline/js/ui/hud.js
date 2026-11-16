@@ -7,6 +7,7 @@ import { census, demand, monthBudget, nextMilestone, takeLoan } from '../sim/cit
 import { item, cat, unlocked, materials } from '../sim/catalog.js';
 import { T, milestones } from '../sim/tuning.js';
 import { GROUPS } from './tools.js';
+import { moveProblem, moveFee } from '../sim/build.js';
 
 const MONTHS = ['Dawnmonth', 'Bloom', 'Highsun', 'Glow', 'Drift', 'Harvest', 'Duskfall', 'Frost', 'Deepnight', 'Thaw', 'Spark', 'Turn'];
 const MAT_NAME = { metal: 'Metal', stone: 'Stone', crystal: 'Crystal', steel: 'Steel', concrete: 'Concrete', cells: 'Power cells' };
@@ -34,6 +35,7 @@ export function buildHud(game) {
       <div class="ac-chip" id="h-power" data-tip="Power made / used"><i></i> <b>—</b></div>
       <div class="ac-chip" id="h-water" data-tip="Water pumped / used"><i></i> <b>—</b></div>
       <div class="ac-mile" data-tip-render="milestone"><span id="h-mile-label">Next milestone</span><div class="bar"><i id="h-mile"></i></div></div>
+      <button type="button" class="ac-commsbtn" id="h-comms" data-tip="Comms: ships overhead, the timetable, call a ship (C)">Comms <b hidden>0</b></button>
       <button type="button" class="ac-strikebtn" id="h-strike" hidden data-tip="Aim an orbital strike (F)">Orbital strike <b>0</b></button>
       <div class="ac-stock" id="h-stock" data-tip="Materials in store"></div>
       <div class="ac-alert" id="h-alert" hidden></div>
@@ -57,6 +59,7 @@ export function buildHud(game) {
   hud.querySelector(".ac-menubtn").addEventListener('click', () => game.openMenu());
   hud.querySelector('.ac-money').addEventListener('click', () => budgetSheet(game));
   hud.querySelector('#h-strike').addEventListener('click', () => game.armStrike());
+  hud.querySelector('#h-comms').addEventListener('click', () => game.openComms());
   hud.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => game.setSpeed(+b.dataset.speed)));
   return hud;
 }
@@ -88,6 +91,21 @@ export function updateHud(game) {
   $('#h-stock').textContent = st.join(' · '); $('#h-stock').hidden = !st.length;
   document.querySelectorAll('[data-speed]').forEach(b => b.classList.toggle('on', +b.dataset.speed === game.speed));
   const alert = game.alertText?.(); const a = $('#h-alert'); a.hidden = !alert; if (alert) a.textContent = alert;
+  const ov = r.ships?.passing?.length || 0, cb = $('#h-comms b'); if (cb) { cb.hidden = !ov; cb.textContent = fmt(ov); }
+  // the ships strip sits just under the second row, however many lines that row wraps to (phones: two or three)
+  const row2 = $('.ac-row2'), sky = $('#h-sky');
+  if (row2 && sky) {
+    const top = Math.round(row2.getBoundingClientRect().bottom + 6); if (sky._top !== top) { sky._top = top; sky.style.top = `${top}px`; }
+    const below = sky.childElementCount ? Math.round(sky.getBoundingClientRect().bottom + 6) : top;   // toasts go under both
+    if (game._hudBottom !== below) { game._hudBottom = below; document.documentElement.style.setProperty('--hud-bottom', `${below}px`); document.documentElement.classList.add('ac-in-city'); }
+  }
+  updateMoveButton(game);
+}
+/** The info panel's Move button counts down its free minute. */
+function updateMoveButton(game) {
+  const b = $('#h-move'), lot = game.selected; if (!b || !lot) return;
+  const f = moveFee(lot);
+  b.querySelector('small').textContent = f.free ? `Free for ${fmt(f.secondsLeft)} s` : f.cost ? money(f.cost) : 'Free';
 }
 
 // ---------------- trays (pick a building) ----------------
@@ -101,7 +119,7 @@ export function openTray(game, groupId) {
     if (t.group !== groupId) continue;
     const e = t.entry, open = !e || unlocked(game.r, e);
     const mats = e ? materials(e) : {};
-    const perTile = t.level || t.transit || t.wall;
+    const perTile = t.level || t.transit || t.wall || t.layer;
     const price = e?.cost != null ? money(e.cost) + (perTile ? ' a tile' : '') + (Object.keys(mats).length ? ' + ' + Object.entries(mats).map(([k, v]) => `${v} ${MAT_NAME[k]}`).join(', ') : '') : '';
     const card = btn('', () => { if (!open) { toast(`${t.name} unlocks at milestone ${e.unlock} (${fmt(milestones()[e.unlock - 1])} people).`); return; } game.setTool(id); tray.hidden = true; document.querySelectorAll('.ac-group').forEach(b => b.classList.remove('on')); }, 'ac-tcard' + (open ? '' : ' locked'), { 'data-tool': id });
     const thumb = el('canvas', { class: 'thumb', width: 96, height: 72 });
@@ -127,9 +145,15 @@ export function showInfo(game, lot) {
   if (lot.value != null) rows.push(['Land value', pct(lot.value)]);
   if (lot.dry) rows.push(['Deposit', 'Used up — build on a new one']);
   if (lot.starved) rows.push(['Refinery', 'Waiting for raw material']);
+  const canMove = !moveProblem(lot);
+  const moveBtn = canMove ? btn('', () => game.startMove(lot), 'small ac-movebtn', { id: 'h-move', 'data-tip': 'Pick it up and set it down somewhere else: free for a minute after you build it, then 10% of its price.' }) : null;
+  moveBtn?.append(el('span', {}, 'Move'), el('small', {}, ''));
+  const comms = e?.comms ? btn('Open comms', () => game.openComms(), 'primary small') : null;
   box.replaceChildren(el('h3', {}, name), el('p', { class: 'dim' }, e?.blurb || zoneBlurb(lot)), el('dl', {}, ...rows.flatMap(([k, v]) => [el('dt', {}, k), el('dd', {}, v)])),
-    el('div', { class: 'row' }, lot.id !== 'col-core' ? btn('Bulldoze', () => { game.bulldozeLot(lot); }, 'danger') : null, btn('Close', () => { box.hidden = true; game.selected = null; })));
+    ...(comms ? [el('div', { class: 'row wide' }, comms)] : []),
+    el('div', { class: 'row' }, moveBtn, lot.id !== 'col-core' ? btn('Bulldoze', () => { game.bulldozeLot(lot); }, 'danger small') : null, btn('Close', () => { box.hidden = true; game.selected = null; }, 'small')));
   box.hidden = false;
+  updateMoveButton(game);
 }
 const zoneName = l => ({ R: ['Habitat Pods', 'Terrace Homes', 'Apartment Block', 'Residential Tower'], C: ['Street Market', 'Shop Row', 'Hotel', 'Office Tower'], I: ['Fab Workshop', 'Logistics Depot'] }[l.zone]?.[l.tier - 1] || 'Building');
 const zoneBlurb = l => l.zone === 'R' ? 'Homes for the people who land here.' : l.zone === 'C' ? 'Shops and offices: jobs, and somewhere to spend.' : 'Workshops and depots: jobs for your workers.';
@@ -150,8 +174,8 @@ export function budgetSheet(game) {
       box.append(el('h3', {}, 'Taxes'), el('p', { class: 'dim' }, 'Above 9% slows growth in that zone.'), tax('R'), tax('C'), tax('I'));
       const line = (k, v, cls = '') => el('div', { class: 'bl ' + cls }, el('span', {}, k), el('b', {}, money(v)));
       box.append(el('h3', {}, 'Each month'),
-        line('Homes tax', b.income.R), line('Shops & offices tax', b.income.C), line('Industry tax', b.income.I),
-        line('Buildings upkeep', -b.upkeep.buildings), line('Roads', -b.upkeep.roads), line('Walls', -b.upkeep.walls), line('Turrets', -b.upkeep.turrets), line('Loans', -b.upkeep.loans),
+        line('Homes tax', b.income.R), line('Shops & offices tax', b.income.C), line('Industry tax', b.income.I), ...(b.income.grant ? [line('Colony grant (fades as you grow)', b.income.grant)] : []),
+        line('Buildings upkeep', -b.upkeep.buildings), line('Roads', -b.upkeep.roads), line('Walls', -b.upkeep.walls), line('Turrets', -b.upkeep.turrets), ...(b.upkeep.transit ? [line('Transit', -b.upkeep.transit)] : []), line('Loans', -b.upkeep.loans),
         line('Balance', b.net, b.net >= 0 ? 'good total' : 'bad total'));
       box.append(el('h3', {}, 'Loans'), el('p', { class: 'dim' }, r.loans.length ? r.loans.map(l => `${money(l.amount)}, ${l.left} months left`).join(' · ') : 'No loans.'),
         btn(`Take a loan of ${money(T.loanSize)}`, () => { if (takeLoan(r)) { toast(`Loan of ${money(T.loanSize)} taken.`, 'good'); draw(); } else toast('Three loans at once is the limit.', 'bad'); }, '', { disabled: r.loans.length >= 3 || null }));

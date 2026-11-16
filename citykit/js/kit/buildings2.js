@@ -787,7 +787,6 @@ function buildCore(p) {
   cyl(g, 0.24, 0.1, dk, pw[0], y0, pw[1], { seg: 16 });
   dome(g, 0.22, M('#e6eaee', 0.4, 0.35), pw[0], y0 + 0.1, pw[1], { squash: 0.9, seg: 20 });
   ring(g, 0.225, 0.018, neonMat(CYAN, 0.55), pw[0], y0 + 0.11, pw[1]);
-  ring(g, 0.3, 0.015, neonMat(CYAN, 0.5), pw[0], y0 + 0.2, pw[1], { tilt: 0.5, arc: Math.PI * 1.2 });
   const sx = 1.05, sz = 1.0;
   for (let i = 0; i < 2; i++) hcyl(g, 0.09, 0.42, M('#c9d2dc', 0.5, 0.4), sx - 0.1, y0 + 0.1, sz - 0.2 + i * 0.2, Math.PI / 2, 14);
   for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) container(g, sx + 0.25 - j * 0.0, y0 + i * 0.105, sz - 0.2 + j * 0.22, Math.PI / 2, CONTAINER[(i + j + p.seed) % CONTAINER.length]);

@@ -28,13 +28,18 @@ function pay(r, cost, mats = {}) { r.money -= cost; for (const [k, v] of Object.
 // ---------------- roads ----------------
 export function quoteRoad(r, tiles, level = 1) {
   const kind = cat().roads[level - 1];
-  if (!unlocked(r, kind)) return { ok: false, why: `${kind.name}s unlock at a later milestone`, cost: 0, tiles: [] };
-  const good = []; let cost = 0, why = null;
+  if (!unlocked(r, kind)) return { ok: false, why: `${kind.name}s unlock at a later milestone`, cost: 0, tiles: [], gates: [] };
+  const good = [], gates = []; let cost = 0, why = null;
   for (let n = 0; n < tiles.length; n++) {
     const [x, z] = tiles[n]; if (!inMap(r, x, z)) continue; const i = z * r.size + x;
     if (r.tiles.road[i] >= level) continue;
     if (r.tiles.lot[i] >= 0) { why = 'A building is in the way'; continue; }
-    if (r.tiles.wall[i] && !item(r.tiles.wall[i] === 2 ? 'gate' : 'wall-1')?.gate && r.tiles.wall[i] !== 2) { why = 'A wall is in the way — put a gate there'; continue; }
+    if (r.turrets.some(t => t.x === x && t.z === z)) { why = 'A turret is in the way'; continue; }
+    // a road through a wall turns that tile into a gate (with the gate's price); a gate already there lets it pass
+    if (r.tiles.wall[i] && r.tiles.wall[i] !== GATE) {
+      if (!unlocked(r, item('gate'))) { why = 'A wall is in the way'; continue; }
+      gates.push([x, z]); cost += item('gate').cost;
+    }
     if (r.ter.water[i]) {  // bridges: allowed straight across water, cost more
       cost += kind.cost * 6; good.push([x, z, 'bridge']); continue;
     }
@@ -43,13 +48,17 @@ export function quoteRoad(r, tiles, level = 1) {
     cost += kind.cost * (r.tiles.road[i] ? 0.6 : 1); good.push([x, z]);
   }
   const broke = afford(r, cost);
-  return { ok: good.length > 0 && !broke, why: broke || why, cost: Math.round(cost), tiles: good };
+  return { ok: good.length > 0 && !broke, why: broke || why, cost: Math.round(cost), tiles: good, gates };
 }
 export function buildRoad(r, tiles, level = 1) {
   const q = quoteRoad(r, tiles, level); if (!q.ok) return q;
   for (const [x, z] of q.tiles) { const i = z * r.size + x; r.tiles.road[i] = level; r.tiles.zone[i] = 0; r.ter.flora[i] = 0; }
-  pay(r, q.cost); r.dirty = true; return q;
+  for (const [x, z] of q.gates) makeGate(r, z * r.size + x);
+  pay(r, q.cost); r.dirty = true; r.lineRev = (r.lineRev || 0) + 1; if (q.gates.length) r.wallsChanged = true; return q;
 }
+/** Wall value of a gate in tiles.wall (walls are 1..3 by tier). Creatures treat a gate as wall; roads run under it. */
+export const GATE = 9;
+function makeGate(r, i) { r.tiles.wall[i] = GATE; r.tiles.wallHp[i] = (item('gate').hp ?? 300) * (r.wallHpMul || 1); r.tiles.zone[i] = 0; r.ter.flora[i] = 0; }
 
 // ---------------- zones ----------------
 export function quoteZone(r, tiles, zone) {
@@ -73,6 +82,7 @@ export function quoteLine(r, tiles, layer) {
 export function buildLine(r, tiles, layer) {
   const q = quoteLine(r, tiles, layer); if (!q.ok) return q;
   for (const [x, z] of tiles) { if (!inMap(r, x, z)) continue; const i = z * r.size + x; if (!(layer === 'power' && r.ter.water[i] === 2)) r.tiles[layer][i] = 1; }
+  if (layer === 'power') r.lineRev = (r.lineRev || 0) + 1;   // the pylons re-space
   pay(r, q.cost); r.dirty = true; return q;
 }
 
@@ -80,27 +90,34 @@ export function buildLine(r, tiles, layer) {
 export function quotePlace(r, id, x, z) {
   const e = item(id); if (!e) return { ok: false, why: 'Unknown building' };
   if (!unlocked(r, e)) return { ok: false, why: `Unlocks at milestone ${e.unlock}` };
-  const [w, d] = e.size;
-  if (!inMap(r, x, z) || !inMap(r, x + w - 1, z + d - 1)) return { ok: false, why: 'Off the edge of the region' };
   if (e.unique && r.lots.some(l => l.id === id)) return { ok: false, why: 'You already have one' };
-  for (let k = 0; k < d; k++) for (let j = 0; j < w; j++) { const i = (z + k) * r.size + x + j; if (occupied(r, i)) return { ok: false, why: 'Something is in the way' }; if (r.tiles.road[i]) return { ok: false, why: 'A road is in the way' }; }
-  if (!isFlat(r.ter, x, z, w, d)) return { ok: false, why: 'The ground must be flat and dry — level it first' };
-  if (e.deposit) {
-    let n = 0; for (let k = 0; k < d; k++) for (let j = 0; j < w; j++) if (DEP_NAMES[r.ter.deposit[(z + k) * r.size + x + j]] === e.deposit) n++;
-    if (!n) return { ok: false, why: `Build it on a ${e.deposit} deposit` };
-  }
-  if (e.nearWater) {
-    let wet = false; for (let k = -1; k <= d && !wet; k++) for (let j = -1; j <= w && !wet; j++) { const tx = x + j, tz = z + k; if (inMap(r, tx, tz) && r.ter.water[tz * r.size + tx]) wet = true; }
-    if (!wet) return { ok: false, why: 'Must stand next to water' };
-  }
+  const bad = siteProblem(r, e, x, z); if (bad) return { ok: false, why: bad };
   const mats = materials(e), broke = afford(r, e.cost, mats);
   return { ok: !broke, why: broke, cost: e.cost, mats };
 }
+/** Why entry e can't stand at (x, z) — off the map, something in the way, not flat, no deposit, no water — or null. */
+function siteProblem(r, e, x, z) {
+  const [w, d] = e.size;
+  if (!inMap(r, x, z) || !inMap(r, x + w - 1, z + d - 1)) return 'Off the edge of the region';
+  for (let k = 0; k < d; k++) for (let j = 0; j < w; j++) { const i = (z + k) * r.size + x + j; if (occupied(r, i)) return 'Something is in the way'; if (r.tiles.road[i]) return 'A road is in the way'; }
+  if (!isFlat(r.ter, x, z, w, d)) return 'The ground must be flat and dry — level it first';
+  if (e.deposit) {
+    let n = 0; for (let k = 0; k < d; k++) for (let j = 0; j < w; j++) if (DEP_NAMES[r.ter.deposit[(z + k) * r.size + x + j]] === e.deposit) n++;
+    if (!n) return `Build it on a ${e.deposit} deposit`;
+  }
+  if (e.nearWater) {
+    let wet = false; for (let k = -1; k <= d && !wet; k++) for (let j = -1; j <= w && !wet; j++) { const tx = x + j, tz = z + k; if (inMap(r, tx, tz) && r.ter.water[tz * r.size + tx]) wet = true; }
+    if (!wet) return 'Must stand next to water';
+  }
+  return null;
+}
+/** Place a building. extra.placedAt = real time in ms (Date.now()) — starts the free-move window (moveQuote). */
 export function place(r, id, x, z, extra = {}) {
   const q = quotePlace(r, id, x, z); if (!q.ok) return q;
   const e = item(id); const [w, d] = e.size;
   const lot = { n: r.nextLot = (r.nextLot || 0) + 1, id, kind: 'placed', x, z, w, d, recipe: e.recipe, params: { ...(e.params || {}), seed: (x * 31 + z * 17) % 997 + 1, ...extra.params },
     power: e.power ?? 0, water: e.water ?? 0, people: e.people ?? 0, jobs: e.jobs ?? 0, upkeep: e.upkeep ?? 0, built: r.day, hp: 1 };
+  if (extra.placedAt != null) lot.placedAt = extra.placedAt;
   addLot(r, lot); pay(r, q.cost, q.mats); r.dirty = true;
   return { ...q, lot };
 }
@@ -114,17 +131,26 @@ export function reindexLots(r) { r.tiles.lot.fill(-1); r.lots.forEach((l, idx) =
 // ---------------- walls + turrets ----------------
 export function quoteWall(r, tiles, id = 'wall-1') {
   const e = item(id); if (!unlocked(r, e)) return { ok: false, why: `${e.name} unlocks later`, cost: 0, tiles: [] };
-  const good = [];
-  for (const [x, z] of tiles) { if (!inMap(r, x, z)) continue; const i = z * r.size + x; if (r.ter.water[i] || occupied(r, i)) continue; if (r.tiles.road[i] && !e.gate) continue; good.push([x, z]); }
+  // a wall drawn across a road leaves the road open as a gate (gate price); the Gate tool also turns a plain wall into a gate
+  const good = [], gates = [], G = item('gate');
+  for (const [x, z] of tiles) {
+    if (!inMap(r, x, z)) continue; const i = z * r.size + x; if (r.ter.water[i]) continue;
+    if (e.gate && r.tiles.wall[i] && r.tiles.wall[i] !== GATE && r.tiles.lot[i] < 0) { good.push([x, z]); continue; }
+    if (occupied(r, i)) continue;
+    if (r.tiles.road[i] && !e.gate) { if (unlocked(r, G)) gates.push([x, z]); continue; }
+    good.push([x, z]);
+  }
   const per = materials(e), mats = Object.fromEntries(Object.entries(per).map(([k, v]) => [k, v * good.length]));
-  const cost = e.cost * good.length, broke = afford(r, cost, mats);
-  return { ok: good.length > 0 && !broke, why: broke || (good.length ? null : 'Nowhere to build here'), cost, mats, tiles: good };
+  const cost = e.cost * good.length + G.cost * gates.length, broke = afford(r, cost, mats);
+  const n = good.length + gates.length;
+  return { ok: n > 0 && !broke, why: broke || (n ? null : 'Nowhere to build here'), cost, mats, tiles: [...good, ...gates], walls: good, gates };
 }
 export function buildWall(r, tiles, id = 'wall-1') {
   const q = quoteWall(r, tiles, id); if (!q.ok) return q;
   const e = item(id), tier = e.params?.tier ?? 1;
-  for (const [x, z] of q.tiles) { const i = z * r.size + x; r.tiles.wall[i] = e.gate ? 9 : tier; r.tiles.wallHp[i] = e.hp; r.tiles.zone[i] = 0; r.ter.flora[i] = 0; }
-  pay(r, q.cost, q.mats); r.dirty = true; r.wallsChanged = true; return q;
+  for (const [x, z] of q.walls) { const i = z * r.size + x; if (e.gate) { makeGate(r, i); continue; } r.tiles.wall[i] = tier; r.tiles.wallHp[i] = e.hp * (r.wallHpMul || 1); r.tiles.zone[i] = 0; r.ter.flora[i] = 0; }
+  for (const [x, z] of q.gates) makeGate(r, z * r.size + x);
+  pay(r, q.cost, q.mats); r.dirty = true; r.wallsChanged = true; r.lineRev = (r.lineRev || 0) + 1; return q;
 }
 /** Gate on a road: a road tile drawn over with the Gate tool. */
 export function quoteTurret(r, id, x, z) {
@@ -157,6 +183,7 @@ export function bulldoze(r, tiles) {
     r.turrets = r.turrets.filter(t => !(t.x === x && t.z === z));
   }
   if (kill.size) { r.lots = r.lots.filter((_, idx) => !kill.has(idx)); reindexLots(r); }
+  r.lineRev = (r.lineRev || 0) + 1;
   r.money -= q.cost; r.dirty = true; r.wallsChanged = true; return q;
 }
 export function quoteLevel(r, x, z, w, d, to) {
@@ -180,4 +207,45 @@ export function repairWalls(r, tiles) {
   const q = quoteRepair(r, tiles); if (!q.ok) return q;
   for (const [x, z] of tiles) { if (!inMap(r, x, z)) continue; const i = z * r.size + x; if (r.tiles.wall[i]) r.tiles.wallHp[i] = wallMax(r, i); }
   pay(r, q.cost); r.wallsChanged = true; return q;
+}
+
+// ---------------- moving a placed building ----------------
+// Owner 2026-11-16: "click on buildings you placed and move them for free for 60 seconds or for 10% fee after that.
+// Not turrets, not zoned buildings." Real seconds (now = Date.now()), counted from when it was placed.
+export const MOVE_FREE_SEC = 60, MOVE_FEE = 0.1;
+/** Can this lot be moved at all? → null or the reason it can't. */
+export function moveProblem(lot) {
+  if (!lot) return 'Nothing selected';
+  if (lot.kind !== 'placed') return 'Zoned buildings grow where they are: rezone instead';
+  if (typeof lot.id === 'string' && lot.id.startsWith('station-')) return 'A station stays on its line';
+  if (!item(lot.id)) return 'This one can\'t be moved';
+  return null;
+}
+/** The price of moving it now: free inside the first MOVE_FREE_SEC real seconds, then MOVE_FEE of its build price. */
+export function moveFee(lot, now = Date.now()) {
+  const left = lot.placedAt != null ? Math.max(0, MOVE_FREE_SEC - (now - lot.placedAt) / 1000) : 0;
+  const cost = left > 0 ? 0 : Math.round((item(lot.id)?.cost || 0) * MOVE_FEE);
+  return { free: left > 0, secondsLeft: Math.ceil(left), cost };
+}
+/** Check moving `lot` so its top-left lands on (x, z): the same checks as placing it. → { ok, why, cost, free } */
+export function quoteMove(r, lot, x, z, now = Date.now()) {
+  const bad0 = moveProblem(lot); if (bad0) return { ok: false, why: bad0, cost: 0 };
+  const fee = moveFee(lot, now);
+  if (x === lot.x && z === lot.z) return { ok: false, why: 'It is already here', cost: fee.cost, free: fee.free };
+  const idx = r.lots.indexOf(lot);
+  for (let k = 0; k < lot.d; k++) for (let j = 0; j < lot.w; j++) r.tiles.lot[(lot.z + k) * r.size + lot.x + j] = -1;   // lift it off for the check
+  const bad = siteProblem(r, item(lot.id), x, z);
+  for (let k = 0; k < lot.d; k++) for (let j = 0; j < lot.w; j++) r.tiles.lot[(lot.z + k) * r.size + lot.x + j] = idx;
+  if (bad) return { ok: false, why: bad, cost: fee.cost, free: fee.free };
+  const broke = afford(r, fee.cost);
+  return { ok: !broke, why: broke, cost: fee.cost, free: fee.free };
+}
+export function moveLot(r, lot, x, z, now = Date.now()) {
+  const q = quoteMove(r, lot, x, z, now); if (!q.ok) return q;
+  lot.x = x; lot.z = z;
+  if (lot.id === 'col-core' && r.core) { r.core.x = x; r.core.z = z; }
+  reindexLots(r);
+  for (let k = 0; k < lot.d; k++) for (let j = 0; j < lot.w; j++) { const i = (z + k) * r.size + x + j; r.ter.flora[i] = 0; r.tiles.zone[i] = 0; }
+  pay(r, q.cost); r.dirty = true; r.wallsChanged = true; r.lineRev = (r.lineRev || 0) + 1;
+  return q;
 }

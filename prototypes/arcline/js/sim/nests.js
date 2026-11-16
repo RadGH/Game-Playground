@@ -3,7 +3,12 @@
 // the walls along the path map and chew in where defence is thin; now and then a big swarm, ANNOUNCED a few seconds
 // ahead with its direction (lessons rule 39: never punish what the player couldn't see). Nests spread over time,
 // get angrier when you build or mine near them, and clearing one (turrets in range, orbital strikes) frees its land.
-// Also: the path map for the citykit horde built from a region, and syncing wall/building damage back into it.
+// Round 2 (owner 2026-11-16: "even end game cities [must] require defenses"): clearing every nest never ends it. The
+// wilds beyond the map keep sending packs in from the region edges (part of the stream always, all of it with no nest
+// left), swarms come from the edge when no nest can send one, and new nests migrate in from the edges over time —
+// more often the bigger the city. Clearing nests still buys local relief.
+// Also: the path map for the citykit horde built from a region (gates are cheaper to break than walls, so a horde
+// near a gate goes for it — owner item 9), and syncing wall/building damage back into it.
 //
 // Pure, seeded. The creatures themselves live in citykit/js/world/horde.js (flocking, chewing, THE blast rule);
 // this file only says WHEN and WHERE they come out and keeps the region in step with the path map.
@@ -11,7 +16,7 @@ import { T } from './tuning.js';
 import { item } from './catalog.js';
 import { reindexLots } from './build.js';
 import { rng } from '../../../../citykit/js/kit/rng.js';
-import { Grid, T as K } from '../../../../citykit/js/world/field.js';
+import { Grid, T as K, WALL_COST } from '../../../../citykit/js/world/field.js';
 import { TURRETS } from '../../../../citykit/js/world/defence.js';
 import { fmt } from '../../../../shared/format.js';
 
@@ -35,6 +40,8 @@ export function ensureThreat(r) {
   t.calmUntil ??= start + (T.calmDays ?? 6);
   t.nextSpread ??= t.calmUntil + (T.nestSpreadDays ?? 18);
   t.nextSwarm ??= t.calmUntil + (T.swarmEveryDays ?? 14) * 0.8;
+  t.nextMigration ??= t.calmUntil + migrateEvery(r);
+  t.wild ??= 0;
   t.angerDay ??= -1;
   for (const n of r.nests) { n.hp ??= 1; n.angry ??= 0; n.size ??= 1; }
   return t;
@@ -58,13 +65,15 @@ export function kindOdds(r, night = 0) {
 }
 function hasWalls(r) { const w = r.tiles.wall; for (let i = 0; i < w.length; i++) if (w[i]) return true; return false; }
 
+/** Days between nests migrating in from the edges: T.migrateEveryDays, shorter as the city grows (÷ (1 + √(people/1000))). */
+export function migrateEvery(r) { return (T.migrateEveryDays ?? 40) / (1 + Math.sqrt(Math.max(0, r.people?.total || 0) / 1000)); }
 /** Steady creatures per game day right now (before the calm check): T.spawnPerDay × pressure × city size × anger × night. */
 export function spawnRate(r) {
-  if (!r.nests.length) return 0;
   const { night } = dayNight(r);
-  const anger = r.nests.reduce((s, n) => s + n.angry, 0) / r.nests.length;
+  const anger = r.nests.length ? r.nests.reduce((s, n) => s + n.angry, 0) / r.nests.length : 0;
   const size = 1 + Math.sqrt(Math.max(0, r.people.total) / 200);
-  const nests = Math.min(1.5, 0.4 + 0.15 * r.nests.length);
+  // no nest left still leaves the wilds: the floor (T.wildFloor) never reaches zero
+  const nests = Math.min(1.5, Math.max(T.wildFloor ?? 0.4, 0.4 + 0.15 * r.nests.length));
   // anger at most triples the stream (a game day is only a few real seconds — keep this a trickle you can hold)
   return (T.spawnPerDay ?? 0.35) * (T.pressure ?? 1) * (r.pressureMul ?? 1) * size * (1 + Math.min(2, anger * 0.5)) * nests * (1 + ((T.nightBoldness ?? 1.6) - 1) * night);
 }
@@ -92,19 +101,33 @@ export function nestsTick(r, days, { field = null, alive = 0 } = {}) {
     if (kid) out.events.push({ type: 'nest-spread', x: kid.x, z: kid.z, from: kid.from, text: `A new nest has appeared ${where(r, kid.x, kid.z).dir === 'here' ? 'near the city' : `to the ${where(r, kid.x, kid.z).dir}`}.` });
     t.nextSpread = r.day + (T.nestSpreadDays ?? 18) * R.range(0.8, 1.2);
   }
-  // steady pressure
+  // migrations: a new nest moves in from the wilds at a region edge
+  if (r.day >= t.nextMigration) {
+    const R = roll(r); const kid = migrate(r, R);
+    if (kid) { const w = where(r, kid.x, kid.z); out.events.push({ type: 'nest-spread', migrated: true, x: kid.x, z: kid.z, from: kid.from, text: `Wildlife from beyond the region has made a new nest ${w.dir === 'here' ? 'near the city' : `to the ${w.dir}`}.` }); }
+    t.nextMigration = r.day + migrateEvery(r) * R.range(0.75, 1.25);
+  }
+  // steady pressure: from the nests, and always a share (all of it with no nest left) from the wilds at the edges
   t.acc += spawnRate(r) * days;
   const { night } = dayNight(r);
   const live = field ? r.nests.filter(n => reachable(field, n)) : r.nests;
-  if (alive >= (T.creatureCap ?? 300) || !live.length) t.acc = Math.min(t.acc, 1);
+  if (alive >= (T.creatureCap ?? 300)) t.acc = Math.min(t.acc, 1);
   else if (t.acc >= 1) {
     const R = roll(r), odds = kindOdds(r, night);
-    while (t.acc >= 1) { t.acc -= 1; const n = pickNest(r, R, live); out.spawns.push({ kind: pick(R, odds), ...spot(r, R, n, 1.2), nest: r.nests.indexOf(n) }); }
+    while (t.acc >= 1) {
+      t.acc -= 1;
+      const wild = !live.length || R() < (T.wildShare ?? 0.2);
+      const e = wild ? edgeSpot(r, R, field) : null;
+      if (e) { out.spawns.push({ kind: pick(R, odds), ...spot(r, R, e, 1.2), wild: true }); t.wild++; continue; }
+      if (!live.length) { t.acc = 0; break; }   // nowhere for anything to come from (the edges are all water)
+      const n = pickNest(r, R, live); out.spawns.push({ kind: pick(R, odds), ...spot(r, R, n, 1.2), nest: r.nests.indexOf(n) });
+    }
   }
-  // big swarms: announce, then launch
-  if (!t.swarm && r.day >= t.nextSwarm && live.length) {
+  // big swarms: announce, then launch — from a nest, or from the wilds when no nest can send one
+  if (!t.swarm && r.day >= t.nextSwarm) {
     const R = roll(r);
-    const n = live.slice().sort((a, b) => (b.angry + b.size) - (a.angry + a.size))[R.int(0, Math.min(2, r.nests.length - 1))];
+    const n = live.length ? live.slice().sort((a, b) => (b.angry + b.size) - (a.angry + a.size))[R.int(0, Math.min(2, live.length - 1))] : edgeSpot(r, R, field);
+    if (!n) { t.nextSwarm = r.day + 1; return finish(); }
     const count = Math.round((T.swarmSize ?? 30) * (T.pressure ?? 1) * (r.pressureMul ?? 1) * (1 + Math.sqrt(r.people.total / 500)) * (1 + 0.3 * night));
     const w = where(r, n.x, n.z), inSec = T.swarmWarnSec ?? 10;
     t.swarm = { at: r.day + inSec / dayLen(), x: n.x, z: n.z, count, dir: w.dir, angle: w.angle };
@@ -117,8 +140,41 @@ export function nestsTick(r, days, { field = null, alive = 0 } = {}) {
     for (let k = 0; k < s.count; k++) out.spawns.push({ kind: pick(R, odds), ...spot(r, R, s, 3), swarm: true });
     out.events.push({ type: 'swarm', x: s.x, z: s.z, dir: s.dir, count: s.count, text: `The swarm from the ${s.dir} is moving: ${fmt(s.count)} creatures.` });
   }
-  t.spawned += out.spawns.length;
-  return out;
+  return finish();
+  function finish() { t.spawned += out.spawns.length; return out; }
+}
+
+/** A dry, open tile just inside a random region edge that has a way to the city (on the path map when given). The
+ *  wilds' packs and migrating nests come from here. → { x, z, side } or null when every edge try failed. */
+export function edgeSpot(r, R, field = null) {
+  const N = r.size;
+  for (let tries = 0; tries < 24; tries++) {
+    const side = R.int(0, 3), along = R.int(3, N - 4);
+    for (let inset = 1; inset <= 5; inset++) {
+      const x = side === 0 ? inset : side === 1 ? N - 1 - inset : along, z = side === 2 ? inset : side === 3 ? N - 1 - inset : along;
+      const i = z * N + x;
+      if (r.ter.water[i] || r.tiles.lot[i] >= 0 || r.tiles.wall[i]) continue;
+      if (field && !Number.isFinite(field.dist[field.i(x, z)])) continue;
+      return { x, z, side };
+    }
+  }
+  return null;
+}
+/** A nest migrating in: somewhere within 10 tiles of an edge that a nest may take (nestSpotOk), under the cap. */
+function migrate(r, R) {
+  const cap = Math.round((T.nestCap ?? 14) * (r.size / 64) ** 2);
+  if (r.nests.length >= cap) return null;
+  const N = r.size;
+  for (let tries = 0; tries < 60; tries++) {
+    const side = R.int(0, 3), along = R.int(4, N - 5), inset = R.int(4, 10);
+    const x = side === 0 ? inset : side === 1 ? N - 1 - inset : along, z = side === 2 ? inset : side === 3 ? N - 1 - inset : along;
+    if (!nestSpotOk(r, x, z)) continue;
+    const kid = { x, z, size: 0.7, grow: 0, hp: 1, angry: 0.3, born: Math.round(r.day), migrated: true };
+    r.nests.push(kid);
+    const ex = side === 0 ? 0 : side === 1 ? N - 1 : x, ez = side === 2 ? 0 : side === 3 ? N - 1 : z;
+    return { ...kid, from: { x: ex, z: ez } };
+  }
+  return null;
 }
 
 /** Nests notice what's built near them (outposts — mining — count three times) and calm down slowly when left alone. */
@@ -214,6 +270,7 @@ export function clearNest(r, n) {
 /** Powered turrets in reach of a nest wear it down over time (the steady siege); range from citykit TURRETS.
  *  rangeMul lets a merchant blueprint stretch it. → { cleared: [{ x, z }] } */
 export function siegeNests(r, days, rangeMul = 1) {
+  ensureThreat(r);
   const cleared = [], sec = days * dayLen();
   for (const t of r.turrets) {
     const s = TURRETS[t.kind]; if (!s || (t.powered ?? 1) <= 0) continue;
@@ -253,12 +310,19 @@ export function threatView(r) {
  * Rebuild it (and set horde.grid) when walls/buildings change (r.wallsChanged / r.dirty).
  */
 export const SRC = { NONE: 0, WALL: 1, LOT: 2, TURRET: 3 };
+/** A gate tile's path cost: a wall's minus T.gatePull tiles of walking, so a horde within about that many tiles of a
+ *  gate walks to it and breaks it rather than the wall in front of it (owner item 9). */
+export const gateCost = () => Math.max(2, WALL_COST - (T.gatePull ?? 10));
 export function makeField(r) {
   const N = r.size, g = new Grid(N, N); g.src = new Uint8Array(N * N);
   const bHp = T.buildingHp ?? 600, tHp = T.turretHp ?? 300;
   for (let i = 0; i < N * N; i++) {
     if (r.ter.water[i]) { g.kind[i] = r.tiles.road[i] ? K.BRIDGE : K.WATER; continue; }
-    if (r.tiles.wall[i]) { g.kind[i] = K.WALL; g.hp[i] = r.tiles.wallHp[i] || 1; g.src[i] = SRC.WALL; continue; }
+    if (r.tiles.wall[i]) {
+      g.kind[i] = K.WALL; g.hp[i] = r.tiles.wallHp[i] || 1; g.src[i] = SRC.WALL;
+      if (r.tiles.wall[i] === 9) (g.wallCost ||= new Float32Array(N * N))[i] = gateCost();
+      continue;
+    }
     const li = r.tiles.lot[i];
     if (li >= 0) { g.kind[i] = K.BUILDING; g.hp[i] = bHp * (r.lots[li]?.id === 'col-core' ? 3 : 1); g.src[i] = SRC.LOT; }
   }

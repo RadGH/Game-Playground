@@ -1,6 +1,23 @@
 {
   "entries": [
     {
+      "id": "2026-11-16b",
+      "date": "2026-11-16",
+      "title": "A city that grows",
+      "items": [
+        "People now move in on their own whenever there are free homes — more when the city is attractive (land value, jobs, power, water, low taxes) and fewer just after a wall breaks. Hover the people counter to see why.",
+        "A colony grant pays the bills while your city is small, and upkeep is lower, so a well-built town makes money from the first months.",
+        "Drop pods now bring supply crates: a free one from the colony's sponsors every few weeks, and anything you buy from merchants.",
+        "Power lines: draw a line and the pylons place themselves, evenly spaced with wires between them. Power reaches nearby buildings, and zones and buildings pass it on — the Power view shows where it reaches.",
+        "Roads can run through walls: a road across a wall becomes a gate. Build roads to the region edge to link up with a neighbouring city — linked cities grow faster.",
+        "Tap a building you placed to move it: free for the first minute, then 10% of its price.",
+        "The Comms panel (C, or tap a Comms Array) shows ships overhead, the schedule of merchant convoys and warship patrols, and lets you call one in.",
+        "The wildlife never runs out: new nests move in from beyond the region, and creatures go for gates before walls.",
+        "Your cities appear on the world map as they really look.",
+        "Fixed: the New world button on phones, and a stray light on the Colony Core."
+      ]
+    },
+    {
       "id": "2026-11-16",
       "date": "2026-11-16",
       "title": "First landing",

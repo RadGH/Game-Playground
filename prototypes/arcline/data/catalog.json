@@ -203,7 +203,7 @@
         2
       ],
       "cost": 2500,
-      "upkeep": 40,
+      "upkeep": 20,
       "power": -2,
       "unlock": 0,
       "blurb": "Settler pods and merchant goods land here instead of on open ground."
@@ -221,7 +221,7 @@
         2
       ],
       "cost": 4000,
-      "upkeep": 60,
+      "upkeep": 30,
       "power": -6,
       "unlock": 0,
       "comms": 1,
@@ -280,7 +280,7 @@
         2
       ],
       "cost": 9000,
-      "upkeep": 180,
+      "upkeep": 90,
       "power": 120,
       "water": -6,
       "jobs": 20,
@@ -301,7 +301,7 @@
         3
       ],
       "cost": 26000,
-      "upkeep": 420,
+      "upkeep": 240,
       "power": 420,
       "water": -14,
       "jobs": 45,
@@ -319,7 +319,7 @@
         2
       ],
       "cost": 3500,
-      "upkeep": 60,
+      "upkeep": 30,
       "power": -8,
       "water": 80,
       "jobs": 4,
@@ -537,8 +537,8 @@
         1,
         1
       ],
-      "cost": 60,
-      "upkeep": 1,
+      "cost": 40,
+      "upkeep": 0.5,
       "unlock": 0,
       "hp": 220,
       "wall": true,
@@ -557,7 +557,7 @@
         1
       ],
       "cost": 140,
-      "upkeep": 2,
+      "upkeep": 1,
       "unlock": 2,
       "hp": 520,
       "wall": true,
@@ -577,7 +577,7 @@
         1
       ],
       "cost": 320,
-      "upkeep": 4,
+      "upkeep": 2,
       "power": -1,
       "unlock": 4,
       "hp": 1100,
@@ -599,7 +599,7 @@
         1
       ],
       "cost": 200,
-      "upkeep": 3,
+      "upkeep": 1,
       "unlock": 0,
       "hp": 300,
       "wall": true,
@@ -615,8 +615,8 @@
         1,
         1
       ],
-      "cost": 900,
-      "upkeep": 20,
+      "cost": 700,
+      "upkeep": 10,
       "power": -3,
       "unlock": 0,
       "turret": "pulse",
@@ -632,7 +632,7 @@
         1
       ],
       "cost": 2400,
-      "upkeep": 45,
+      "upkeep": 22,
       "power": -5,
       "unlock": 1,
       "turret": "mortar",
@@ -648,7 +648,7 @@
         1
       ],
       "cost": 3200,
-      "upkeep": 60,
+      "upkeep": 30,
       "power": -8,
       "unlock": 2,
       "turret": "arc",
@@ -664,7 +664,7 @@
         1
       ],
       "cost": 5200,
-      "upkeep": 90,
+      "upkeep": 45,
       "power": -10,
       "unlock": 3,
       "turret": "rail",

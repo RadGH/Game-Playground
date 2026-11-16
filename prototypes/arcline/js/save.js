@@ -9,8 +9,10 @@
 //     arcline.settings                     the settings sheet (volume, muted, shake, effects, weather, edgeScroll)
 //     arcline.region.<worldId>.<regionId>  one city: sim/region.js saveRegion() JSON, gzipped + base64 ('gz1:…'),
 //                                          or plain JSON ('js1:…') where the browser has no CompressionStream
-//   summary = { name, founded, population, money, milestone, day, lastPlayed, rates, size } — what the world map shows
-//   without opening the city.
+//     arcline.snap.<worldId>.<regionId>    the city's picture for the world map: { w, h, top, url } (a small WebP,
+//                                          render/map.js snapshot()); kept out of arcline.worlds so the index stays small
+//   summary = { name, founded, population, money, milestone, day, lastPlayed, rates, size, snapAt } — what the world
+//   map shows without opening the city. loadWorld() puts the picture on it as summary.snap.
 //
 // Every localStorage call is wrapped (private windows, full storage): a failed write returns { ok: false, reason }.
 // Versioning: meta.v = SAVE_VERSION; push a step onto MIGRATE.world[v] (v → v+1) when the shape changes, and
@@ -21,8 +23,9 @@ import { saveRegion } from './sim/region.js';
 export const SAVE_VERSION = 1;
 export const KEYS = { worlds: 'arcline.worlds', last: 'arcline.last', settings: 'arcline.settings' };
 export const REGION_PREFIX = 'arcline.region.';
+export const SNAP_PREFIX = 'arcline.snap.';
 /** For shared/rgs-cloudsave.js: cloudSave({ game: 'arcline', keys: CLOUD.keys, prefixes: CLOUD.prefixes, … }). */
-export const CLOUD = { keys: { worlds: KEYS.worlds, last: KEYS.last, settings: KEYS.settings }, prefixes: { regions: REGION_PREFIX } };
+export const CLOUD = { keys: { worlds: KEYS.worlds, last: KEYS.last, settings: KEYS.settings }, prefixes: { regions: REGION_PREFIX, snaps: SNAP_PREFIX } };
 
 /** World sizes (cells per side) and creature pressure (a multiplier the defence sim reads from meta.pressure). */
 export const WORLD_SIZES = [
@@ -122,7 +125,7 @@ export function newWorldSave({ name = 'New World', seed = 1, cells = 14, pressur
 export async function loadWorld(id) {
   const meta = getWorldMeta(id); if (!meta) return null;
   const world = generateWorld({ seed: meta.seed, cells: meta.cells });
-  for (const r of world.regions) r.city = meta.regions[r.id] || null;
+  for (const r of world.regions) { r.city = meta.regions[r.id] || null; if (r.city) { const sn = loadSnap(id, r.id); if (sn) r.city.snap = sn; } }
   const regions = {};
   for (const rid of Object.keys(meta.regions)) regions[rid] = await loadRegionSave(id, rid);
   return { meta, world, regions };
@@ -133,6 +136,9 @@ export async function loadRegionSave(worldId, regionId) {
   try { return migrateRegion(await unpack(raw)); } catch { return undefined; }
 }
 export const regionKey = (worldId, regionId) => `${REGION_PREFIX}${worldId}.${regionId}`;
+export const snapKey = (worldId, regionId) => `${SNAP_PREFIX}${worldId}.${regionId}`;
+/** A city's world-map picture ({ w, h, top, url }) or null. */
+export function loadSnap(worldId, regionId) { const s = storage.getJSON(snapKey(worldId, regionId), null); return s && typeof s.url === 'string' && s.w > 0 ? s : null; }
 
 /** A city's summary for the world map (no typed arrays). */
 export function summarize(r) {
@@ -143,20 +149,25 @@ export function summarize(r) {
   };
 }
 
-/** Save one region's city into world `id`. Async (gzip). → { ok, bytes, packed: 'gz1'|'js1', reason? } */
-export async function saveRegionTo(id, regionState) {
+/** Save one region's city into world `id`. Async (gzip). opts.snap = its world-map picture (map.js snapshot()), stored
+ *  beside it; a picture that doesn't fit is skipped, never the city. → { ok, bytes, packed: 'gz1'|'js1', reason?, snap } */
+export async function saveRegionTo(id, regionState, opts = {}) {
   const idx = readIndex(); const meta = idx.worlds.find(w => w.id === id);
   if (!meta) return { ok: false, reason: 'no-world' };
   const text = await pack(saveRegion(regionState));
   const res = storage.set(regionKey(id, regionState.id), text);
   if (!res.ok) return { ok: false, reason: res.reason, bytes: text.length };
+  const prevSnap = meta.regions[regionState.id]?.snapAt;
   meta.regions[regionState.id] = summarize(regionState);
+  let snap = false;
+  if (opts.snap?.url) { snap = storage.set(snapKey(id, regionState.id), JSON.stringify(opts.snap)).ok; }
+  if (snap) meta.regions[regionState.id].snapAt = Date.now(); else if (prevSnap) meta.regions[regionState.id].snapAt = prevSnap;
   meta.lastPlayed = Date.now();
   const r2 = writeIndex(idx);
   if (!r2.ok) return { ok: false, reason: r2.reason, bytes: text.length };
   storage.set(KEYS.last, id);
   saved({ world: id, region: regionState.id });
-  return { ok: true, bytes: text.length, packed: text.slice(0, 3) };
+  return { ok: true, bytes: text.length, packed: text.slice(0, 3), snap };
 }
 
 /** Mark a world as just opened (Continue order) without saving a city. */
@@ -172,7 +183,7 @@ export function renameWorld(id, name) {
 export function deleteWorld(id) {
   const idx = readIndex(); const before = idx.worlds.length;
   idx.worlds = idx.worlds.filter(w => w.id !== id);
-  for (const k of storage.keys()) if (k.startsWith(`${REGION_PREFIX}${id}.`)) storage.remove(k);
+  for (const k of storage.keys()) if (k.startsWith(`${REGION_PREFIX}${id}.`) || k.startsWith(`${SNAP_PREFIX}${id}.`)) storage.remove(k);
   writeIndex(idx);
   if (storage.get(KEYS.last) === id) storage.remove(KEYS.last);
   saved({ world: id, deleted: true });

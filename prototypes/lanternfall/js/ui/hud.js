@@ -74,7 +74,10 @@ export function createHud(game) {
       if (boss.phaseTitle && t - boss.phaseTitleT < 2.5) text(boss.phaseTitle, W / 2, by + 9, C.ink, 1, 'center');
     } else H.bossTrail = 1;
     // --- currencies + objective (top-right under the minimap) ---
-    const right = W - 8; let ry = 64;
+    // the minimap (js/ui/map.js) is a page element 54 map pixels tall at round(1.2 × screen pixels per HUD pixel), 12px
+    // from the top: start below it at every window size, never under it
+    const sc = (typeof innerWidth === 'number' ? innerWidth : W) / W;
+    const right = W - 8; let ry = Math.max(64, Math.ceil((14 + 54 * Math.max(1, Math.round(sc * 1.2))) / sc) + 4);
     if (hero.currency) { text(`● ${fmtInt(hero.currency.pennies || 0)}`, right, ry, C.gold, 1, 'right'); if (hero.currency.pearls) text(`◆ ${hero.currency.pearls}`, right - measure(`● ${fmtInt(hero.currency.pennies || 0)}`) - 8, ry, [0.75, 0.91, 1, 1], 1, 'right'); ry += 10; }
     if (game.objective) for (const line of wrap('◇ ' + game.objective, 24).slice(0, 2)) { text(line, right, ry, C.ink, 1, 'right'); ry += 8; }
     // --- toasts ---

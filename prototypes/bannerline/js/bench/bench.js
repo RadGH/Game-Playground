@@ -25,6 +25,8 @@ import { loadLooks } from '../view/unit-looks.js';
 import { createPortrait } from '../view/portrait.js';
 import { BatchedSpellFx } from '../../../../avatar-3d/js/spellfx-batched.js';
 import { Assets } from '../../../../assets/js/assets.js';
+import { installTooltips } from '../../../../shared/tooltip.js';
+installTooltips();
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);

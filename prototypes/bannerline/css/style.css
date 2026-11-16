@@ -139,3 +139,9 @@ kbd.pad { border-radius: 999px; min-width: 1.6em; color: #bfe6a8; border-color: 
 .stat-list dt.who, .stat-list dd.who { color: var(--ink); font-weight: 700; padding-top: 4px; }
 .stat-list dt.who:not(:first-child) { border-top: 1px solid rgba(255,255,255,.08); margin-top: 6px; padding-top: 8px; }
 .stat-list dd.who:not(:nth-child(2)) { border-top: 1px solid rgba(255,255,255,.08); margin-top: 6px; padding-top: 8px; }
+
+/* What's new + Credits: a quiet row under the title menu (shared/whats-new.js, shared/credits.js) */
+.title-extra { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 4px; }
+.title-extra:empty { display: none; }
+.menu-btn.small { flex: 1 1 0; min-height: 44px; padding: 6px 12px; font-size: 14px; }
+.menu-btn.primary small { color: rgba(26,18,6,.72); }

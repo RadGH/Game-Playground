@@ -4,7 +4,7 @@
 //   const spec = createSpectator({ root, mode: 'linewar' | 'hvf', fog: true, onSpeed, onPause, onFog });
 //   spec.input(frames, { isDown, rect })   -> { pan, drag, zoom, next, pick, centre }   (call once a frame)
 //   spec.update({ teams, chars, followId, speed, paused, fog })   repaints only what changed
-//   spec.alert(text, kind)   spec.destroy()
+//   spec.toast(text, kind)   spec.destroy()
 //
 // Keys (keyboard): WASD / arrows / screen edge / left- or middle-drag pan, wheel or + - zoom,
 //   F next character (alternates sides), Shift+F previous, 1-9 that character, Space follow again,
@@ -128,7 +128,7 @@ export function createSpectator({ root, mode = 'linewar', fog = false, teamColou
     K.paused.hidden = !paused;
   }
 
-  function alert(text, kind = 'info', ms = 3200) {
+  function toast(text, kind = 'info', ms = 3200) {
     const a = document.createElement('div');
     a.className = 'spec-alert ' + kind; a.textContent = text;
     K.alerts.prepend(a);
@@ -136,5 +136,5 @@ export function createSpectator({ root, mode = 'linewar', fog = false, teamColou
     setTimeout(() => { a.classList.add('out'); setTimeout(() => a.remove(), 400); }, ms);
   }
 
-  return { el, input, update, alert, get fog() { return last.fog; }, destroy() { el.remove(); } };
+  return { el, input, update, toast, get fog() { return last.fog; }, destroy() { el.remove(); } };
 }

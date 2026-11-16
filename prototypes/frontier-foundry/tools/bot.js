@@ -1,7 +1,7 @@
 // The simulator's bot. It is not an opponent and it is not clever - it exists so the balance sim
 // can play a real game end to end and report where the numbers hurt.
 //
-//   import { Bot } from './ai.js';
+//   import { Bot } from './bot.js';
 //   const bot = new Bot(game);
 //   for (let t = 0; t < hours * 3600; t++) { game.tick(1); bot.tick(1); }
 //
@@ -25,10 +25,10 @@
 // tuning the bot means editing a list rather than the logic. Everything else it needs is in
 // `data/balance.json -> bot`.
 
-import { available } from './build.js';
-import { recomputeLinks, recomputePower, isStore } from './production.js';
-import { BALANCE } from './rules.js';
-import { nextTier, garageFor, vehiclesFor } from './logistics.js';
+import { available } from '../js/build.js';
+import { recomputeLinks, recomputePower, isStore } from '../js/production.js';
+import { BALANCE } from '../js/rules.js';
+import { nextTier, garageFor, vehiclesFor } from '../js/logistics.js';
 
 /**
  * One-off buildings, in the order they are worth having. `after` is a research id that has to be

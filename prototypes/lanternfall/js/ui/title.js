@@ -23,7 +23,7 @@ export const titleScreen = {
     const page = el('div', { class: 'lf-titlepage' },
       el('h1', { class: 'lf-logo', text: 'LANTERNFALL' }),
       el('p', { class: 'lf-tagline', text: '"Go down, Lamplighter. Light them again."' }), menu,
-      el('div', { class: 'lf-foot' }, el('span', { text: VERSION }), el('span', { text: 'Press F1 for keys' })));
+      el('div', { class: 'lf-foot' }, el('span', { text: VERSION }), matchMedia?.('(pointer: fine)').matches ? el('span', { text: 'Press F1 for keys' }) : null));
     root.append(page);
     if (s.access?.flash_reduction || s.video?.flash_reduction) root.closest('.lf-menus')?.classList.add('flash-safe');
     const p = ctx.profile || {};
@@ -39,8 +39,9 @@ export const titleScreen = {
       const modes = btn(el('span', {}, 'Modes'), () => router.open('modes'));
       if (!anyMode) modes.append(el('span', { class: 'note lf-lock', text: 'locked' }));
       items.push(modes);
-      const guild = btn(el('span', {}, 'Guild Hall'), () => toast('The Guild Hall opens with its own milestone (09 §15).'), { tip: 'Spend Guild marks on unlocks that carry across saves.' });
+      const guild = btn(el('span', {}, 'Guild Hall'), () => toast('The Guild Hall is not open yet. Your marks are kept for when it is.'), { tip: 'Spend Guild marks on unlocks that carry across saves.' });
       guild.append(el('span', { class: 'note', text: `◆ ${hp(p.marks || 0)} marks` })); items.push(guild);
+      if (ctx.news) items.push(newsButton(ctx));
       items.push(btn('Settings', () => router.open('settings')));
       items.push(btn('Credits', () => router.open('credits')));
       menu.replaceChildren(...items);
@@ -52,6 +53,16 @@ export const titleScreen = {
     if (!args.skipPhone && matchMedia?.('(pointer: coarse)').matches && innerWidth < 900 && !sessionStorageGet('lf-phone-ok')) phoneCard(root);
   },
 };
+/** The What's new button (title and pause menu): opens the changelog, carries a dot while something is unread. */
+export function newsButton(ctx, opts = {}) {
+  const b = btn(el('span', {}, "What's new"), () => ctx.news.open(), opts);
+  b.classList.add('wn-open');
+  let shown = false;   // a screen re-render drops the old button: it stops listening once it has left the page
+  const off = ctx.news.onUnread(n => { if (b.isConnected) shown = true; else if (shown) return off(); b.classList.toggle('wn-has-new', n > 0); });
+  return b;
+}
+/** A save's time as people read it ("Nov 16, 2026, 6:16 AM"), never the raw stored timestamp. */
+function whenText(t) { const d = new Date(t || NaN); return Number.isFinite(+d) ? d.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—'; }
 function sessionStorageGet(k) { try { return sessionStorage.getItem(k); } catch { return null; } }
 function phoneCard(root) {
   const card = el('div', { class: 'lf-modal' }, el('div', { class: 'lf-modal-card' }, el('h3', { class: 'lf-h', text: 'Desktop recommended' }),
@@ -113,7 +124,7 @@ export const slotsScreen = {
           el('div', { text: `Level ${s.level || 1} · ${cap(s.difficulty || 'lamplighter')}` }),
           el('div', {}, 'Lamps lit ', el('span', { class: 'pips', text: '●'.repeat(s.lampsLit || 0) + '○'.repeat(6 - (s.lampsLit || 0)) })),
           el('div', { text: `${clock(s.playTime || 0)} · ${hp(s.deaths || 0)} deaths` }),
-          el('div', { class: 'dim small', text: `Last played ${s.lastPlayed || '—'}${s.sizeBytes ? ` · ${fmt(s.sizeBytes / 1024, { decimals: 0 })} KB` : ''}` }),
+          el('div', { class: 'dim small', text: `Last played ${whenText(s.lastPlayed)}${s.sizeBytes ? ` · ${fmt(s.sizeBytes / 1024, { decimals: 0 })} KB` : ''}` }),
           el('div', { class: 'row' }, ...slotActions(ctx, router, s, n, mode)));
         card.addEventListener('click', e => { if (e.target.closest('button')) return; activate(); });
         const activate = async () => {

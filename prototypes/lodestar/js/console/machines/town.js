@@ -48,7 +48,7 @@ export function mountTown(C) {
       <div class="tw-nx"><span>FOOD D</span><b data-nx="food">--</b></div>
       <div class="tw-nx"><span>WATER D</span><b data-nx="water">--</b></div>
     </div>
-    <div class="tw-lamps">${LAMPS.map(([k, l]) => `<span class="tw-lamp" data-lamp="${k}" title=""><i></i><em>${l}</em><small></small></span>`).join('')}</div>
+    <div class="tw-lamps">${LAMPS.map(([k, l]) => `<span class="tw-lamp" data-lamp="${k}"><i></i><em>${l}</em><small></small></span>`).join('')}</div>
     <button type="button" class="tw-settlers" aria-pressed="true" aria-label="Settlers welcome">
       <span class="tw-bat"></span><span class="tw-sw-label"><b>SETTLERS</b><i>WELCOME</i></span>
     </button>
@@ -90,7 +90,7 @@ export function mountTown(C) {
       l.classList.toggle('lit', v > 0);
       l.classList.toggle('bad', v >= 0.5);
       l.querySelector('small').textContent = v > 0 ? `${Math.round(v * 100)}%` : '';
-      l.title = v > 0 ? `${Math.round(v * 100)}% of the people` : 'all right';
+      l.dataset.tip = v > 0 ? `${Math.round(v * 100)}% of the people` : 'all right';
     }
     if (t.open !== open) { open = t.open; paintSwitch(); }
     body.querySelector('.tw-why').textContent = t.why ? `NO SETTLERS: ${t.why.toUpperCase()}` : t.walking ? `${t.walking} SETTLER${t.walking > 1 ? 'S' : ''} ON THE ROAD IN` : 'THE TOWN IS GROWING';

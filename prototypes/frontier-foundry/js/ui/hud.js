@@ -241,9 +241,12 @@ export class Hud {
   toast(n) {
     if (n.importance < 4 || this.seenToast.has(n.id)) return;
     this.seenToast.add(n.id);
-    this.sound?.alert(n.importance);
     const box = $('toasts');
+    // one scan can find two patches of the same rare element: the same sentence twice is noise, not news
+    for (const old of box.children) if (old.dataset.text === n.text) return;
+    this.sound?.notice(n.importance);
     const t = el('div.toast.i' + n.importance);
+    t.dataset.text = n.text;
     t.append(rawIcon(noteIcon(n.icon), { size: 20 }), el('span', { text: n.text }));
     if (n.at) t.append(el('button.small', { text: 'go', onClick: () => { this.jump(n); t.remove(); } }));
     t.append(el('button.small.ghost', { text: '×', onClick: () => t.remove() }));

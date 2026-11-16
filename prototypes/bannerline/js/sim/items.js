@@ -1,5 +1,5 @@
 // Hero inventory (owner round 2, R2.2): six slots with no slot types, simple stat items in the classic
-// hero-arena style, bought at the Outfitter (the hero must stand in its radius; js/sim/shop.js).
+// hero-arena style, bought at the Outfitter (the hero must stand in its radius; the AI shops in js/sim/ai/shop.js).
 //
 //   player.inv = [6 x { uid, id, charges } | null]       id = key in data/items-bl.json `items`
 //

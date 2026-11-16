@@ -310,7 +310,7 @@ carries an `icon` field naming the one to use.
 | `js/combat.js` | threat, wave composition and spawning, flow-field movement, turrets, guards, nests |
 | `js/space.js` | satellites, probes, the rocket, the station, beacons, victory |
 | `js/planets.js` | the planet contract and a local stand-in (10 archetypes, system generation) |
-| `js/ai.js` | the sim bot: an ordered build programme plus upkeep |
+| `tools/bot.js` | the sim bot: an ordered build programme plus upkeep |
 
 Tick order, once a second: builders → power → extraction → production → logistics → research →
 repair → shields → threat → combat → artillery → space; scanners every 4 s, vision and quests every
@@ -454,7 +454,7 @@ which is a property of the sim's map size and not of the game.
 - `DIFFICULTY` in `js/rules.js` — five multipliers per level.
 - `SHARE_PER_RESOURCE` / `RAW_SHARE_TOTAL` in `js/production.js` — how mixed a store stays.
 - `PRIORITY` in `js/production.js` — which categories survive a brownout.
-- `PLAN`, `DEMANDS`, `RESEARCH_ORDER` and `STOCK_TARGET` in `js/ai.js` — what the bot builds, the
+- `PLAN`, `DEMANDS`, `RESEARCH_ORDER` and `STOCK_TARGET` in `tools/bot.js` — what the bot builds, the
   throughput it aims at, the line it researches, and how much it stockpiles.
 - `data/balance.json -> bot` — how far it spreads (`compactRadius`, `maxReach`, `latticeStride`), how
   many stores, scanners, generators, harvesters and turrets it is allowed, `maxPerRecipe`,
@@ -483,11 +483,11 @@ headless game in its own process.
 
 ### The reservation ledger — how the bot saves up
 
-Every spender in `js/ai.js` used to ask "can I afford this right now" against everything in the
+Every spender in `tools/bot.js` used to ask "can I afford this right now" against everything in the
 stores, and whoever asked first won. On a world that spends what it makes that is not a race but a
 deadlock: volcanic made 2.2 steel plate a second and held none, because defence bought a wall with
 each plate as it landed, so a sixteen-plate chemical plant was never affordable and research stopped
-at 29 nodes. The ledger (`Ledger` in `js/ai.js`) is the fix. The rule:
+at 29 nodes. The ledger (`Ledger` in `tools/bot.js`) is the fix. The rule:
 
 - **A booking belongs to one job.** Owners are `infra:<building>` (a build-programme step),
   `chain:<recipe>` (a machine the chain planner wants), `power` (the next generator) and `defence`

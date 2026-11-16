@@ -2,6 +2,7 @@
 // overlay (F1: the live binding table from data/bindings.json with the player's rebinds applied).
 import { el, btn, toast, confirmBox, clock, hp, secs, cap, statusText, fmt } from './menukit.js';
 import { effectiveBindings, keyName, actionName, loadSettings } from './settings.js';
+import { newsButton } from './title.js';
 
 const heroOf = ctx => (typeof ctx.hero === 'function' ? ctx.hero() : ctx.hero) || ctx.game?.hero;
 const val = (v, ...a) => (typeof v === 'function' ? v(...a) : v);
@@ -31,6 +32,7 @@ export const pauseScreen = {
         }, { disabled: rekWhy }),
         item('Controls', 'F1', () => router.open('controls')),
         item('Settings', null, () => router.open('settings')),
+        el('div', { class: 'row' }, ctx.news ? newsButton(ctx, { cls: 'small' }) : null, btn('Credits', () => router.open('credits'), { cls: 'small' })),
         item('Return to last lamp-post', 'costs what dying costs', async () => {
           if (await confirmBox(root, { title: 'Return to the lamp-post?', text: 'This works like dying, without adding a death: you drop part of your pennies in a purse here.', yes: 'Return' })) { router.closeAll(); ctx.actions.returnToLampPost?.(); }
         }),

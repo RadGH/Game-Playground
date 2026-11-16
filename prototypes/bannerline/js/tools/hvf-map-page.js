@@ -2,6 +2,8 @@
 // One seed with layers, metrics and the hollow list, or a 16-seed compare grid. window.hvfMap exposes
 // the current world for screenshot tools and tests.
 import { generateWorld, buildWorld, KIND, KIND_NAMES, WALK_FARMER, WALK_HUNTER, bfsMove } from '../sim/modes/hvf/mapgen.js';
+import { installTooltips } from '../../../../shared/tooltip.js';
+installTooltips();
 
 const $ = id => document.getElementById(id);
 const load = n => fetch(new URL(`../../data/hvf/${n}`, import.meta.url)).then(r => r.json());

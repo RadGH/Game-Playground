@@ -1,0 +1,17 @@
+{
+  "entries": [
+    {
+      "id": "2026-11-15-live",
+      "date": "2026-11-15",
+      "title": "Tiny RTS is now on games.radgh.com",
+      "items": [
+        "Signal Line, an eight-mission campaign with stars and best times, from the first wall to two battles against the rival commander Umbra.",
+        "Free Play Siege: a wave director that reads your defence and sends whatever it is weakest against, for 10, 20, 30 or endless waves.",
+        "Free Play Versus: Umbra builds its own fort across the map with your roster and comes for you.",
+        "Every wall and hill is made of pixels: shots chip them away, overhangs break off and crush what is under them, and drills hollow out the ground.",
+        "The Commander's teleport is now called Slipstep (same key, W).",
+        "Hover hints on campaign missions and the unit queue now use the game's own styled tooltip."
+      ]
+    }
+  ]
+}

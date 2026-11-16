@@ -264,7 +264,7 @@ function howtoPages(app) {
       <p>Build a <b>Fabricator</b> (R, Q) to train Troopers, Lancers, Skimmers and Siege Walkers. Right-click the ground to set a <b>rally point</b>.</p>
       <p>Drag to select. <b>Right-click</b> moves or attacks; right-click an enemy wall to shoot it. <b>A</b> attack-move, <b>S</b> stop, <b>D</b> hold, <b>F</b> patrol. <b>Shift</b> queues orders. <b>Shift+1–0</b> saves a group, <b>1–0</b> recalls it.</p>
       <p>Your units walk through your own <b>Gates</b> — build one into any wall your army needs to cross.</p>
-      <p>The <b>Commander</b> is free and comes back 30 s after falling: <b>Q</b> Overcharge nearby turrets, <b>W</b> Blink, <b>E</b> Orbital Lance (a beam from orbit that carves a trench).</p>
+      <p>The <b>Commander</b> is free and comes back 30 s after falling: <b>Q</b> Overcharge nearby turrets, <b>W</b> Slipstep, <b>E</b> Orbital Lance (a beam from orbit that carves a trench).</p>
       <p>A <b>Research Lab</b> unlocks upgrades like tougher walls, faster drills and more population.</p>`) },
     { title: 'Enemies', render: txt(`
       <p><b>The Hollow</b> walk toward your Core and climb natural rock (slowly) — but they <b>can't climb your walls</b>, so they chew through them from the bottom. Pits slow them; they don't trap them.</p>

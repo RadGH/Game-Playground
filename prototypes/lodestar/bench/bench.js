@@ -5,6 +5,8 @@
 // set(), cmd(), step(), frames(n), settle(), probe().
 
 import { createScope } from '../js/render/scope.js';
+import { installTooltips } from '../../../shared/tooltip.js';
+installTooltips();
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('scope');
@@ -46,7 +48,7 @@ function buildUi() {
     sw.style.background = row ? row.colors[0] : '#8f7a5a';
     const sp = document.createElement('span'); sp.textContent = row ? row.name : 'Road';
     b.append(sw, sp);
-    b.title = row ? row.name : 'Road (a firebreak)';
+    b.dataset.tip = row ? row.name : 'Road (a firebreak)';
     b.addEventListener('click', () => { mat = id; tool = 'paint'; refreshTools(); });
     mb.appendChild(b);
   }

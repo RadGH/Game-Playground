@@ -175,3 +175,20 @@
 .lb-watch.on, .lb-go.on { color: #1b1408; background: var(--gold); border-color: var(--gold); }
 .lb-go { align-self: start; margin: 2px auto 0; font: 700 17px var(--head); padding: 8px 22px; color: var(--gold); border-color: var(--line-strong); }
 .lb-watch.pfocus, .lb-go.pfocus { position: relative; }
+
+/* Phones (QA pass 2026-11-15): the header and seat cards used to keep their desktop width and run off the
+   right edge. Everything stacks to the screen width; the header wraps instead of squeezing. */
+@media (max-width: 600px) {
+  .lobby { grid-template-columns: minmax(0, 1fr); padding: 10px 12px 14px; }
+  .lobby > .lb-top, .netroom .lb-top { display: flex; flex-wrap: wrap; gap: 10px 12px; }
+  .lb-top > .lb-title { flex: 1 1 160px; min-width: 0; }
+  .lb-title h1 { font-size: 24px; }
+  .lb-speed { flex-wrap: wrap; }
+  .lb-teams { grid-template-columns: minmax(0, 1fr); }
+  .lb-team, .lb-slots, .lb-slot { min-width: 0; }
+  .lb-row { grid-template-columns: 52px 32px minmax(0, 1fr) 32px; }
+  .lb-rv { overflow-wrap: anywhere; }
+  .lb-kind > span:nth-child(2), .lb-head.ai .lb-kind > span:nth-child(2) { min-width: 0; }
+  .nr-code b { font-size: 22px; letter-spacing: .15em; }
+  .nr-start, .nj-go { min-width: 0; width: 100%; }
+}

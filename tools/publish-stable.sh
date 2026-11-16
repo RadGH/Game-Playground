@@ -61,8 +61,16 @@ if [ "$FORCE" -eq 0 ]; then
   # Run the unit tests on THAT commit, not on the working tree: agents keep half-finished edits in
   # the working tree, and testing those made this gate refuse good commits (and could pass bad ones).
   ln -s "$PWD/node_modules" "$TMP/node_modules"
-  ( cd "$TMP" && npm run test:unit --silent >/dev/null 2>&1 ) \
-    || { echo "Refusing to publish: npm run test:unit fails at $SHA. Use --force if you really mean it."; exit 1; }
+  # the full log is kept (test-results/publish-stable-unit.log) and the failing tests are named, so a refusal says what
+  # broke instead of sending you off to rerun a 7-minute suite
+  LOG="$PWD/test-results/publish-stable-unit.log"; mkdir -p "$(dirname "$LOG")"
+  if ! ( cd "$TMP" && npm run test:unit --silent >"$LOG" 2>&1 ); then
+    echo "Refusing to publish: npm run test:unit fails at $SHA:"
+    grep -E '^ *not ok ' "$LOG" | sed 's/^ */    /' | head -20
+    echo "  full log: $LOG"
+    echo "  Use --force only if those failures are older than this change (check the commit before it)."
+    exit 1
+  fi
   echo "  …it parses and the tests pass."
 
   # Every game that changed since the last stable passes tools/prepublish-check.sh (a game that has not had its QA
@@ -74,7 +82,7 @@ if [ "$FORCE" -eq 0 ]; then
   # moved to a new import) don't make a game go through its pass. SKIP_QA="game game" lets named games through for a
   # change that isn't game work (say why in the commit), and is printed so it is never silent.
   CHANGED="$( { [ -n "$OLD" ] && git diff --name-only "$OLD" "$SHA" -- prototypes || git ls-tree -r --name-only "$SHA" prototypes/; } \
-    | grep -v -E '(^|/)(README[^/]*|[^/]*\.md)$|/(docs|tests|research|tools)/' | awk -F/ 'NF>=3{print $2}' | sort -u)"
+    | grep -v -E '(^|/)(README[^/]*|[^/]*\.md)$|/(docs|tests|research|tools)/' | awk -F/ 'NF>=3{print $2}' | sort -u || true)"   # || true: a commit touching only tests/docs leaves nothing to list, and grep's no-match must not end the script
   for g in $CHANGED; do
     [ -f "prototypes/$g/index.html" ] || continue
     if [[ " ${SKIP_QA:-} " == *" $g "* ]]; then echo "  SKIP_QA: $g's pre-publish checks skipped on request"; continue; fi

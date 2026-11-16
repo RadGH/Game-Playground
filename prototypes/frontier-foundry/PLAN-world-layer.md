@@ -170,7 +170,7 @@ Ranked by how much they give back for the work.
 
 ## 9. What this changes elsewhere
 
-- **The bot (`js/ai.js`) must understand the world layer**, or the balance sim stops being
+- **The bot (`tools/bot.js`) must understand the world layer**, or the balance sim stops being
   meaningful the moment remote sites carry real production. Budget real time for this; it is not a
   trailing chore. It should also inherit the material reservation work landing now.
 - **Balance** gains a `world` block in `data/balance.json`: road costs and speed multipliers per

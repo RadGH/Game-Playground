@@ -1,6 +1,9 @@
 # Bannerline
 
-> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh bannerline` from the playground and fix what it finds — game-lint (on 2026-11-11: 7 browser-tooltip, 39 browser-popup, 1 no-whats-new), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `bannerline` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass. Known: `js/sim/shop.js` (an older copy of `js/sim/ai/shop.js`) and `js/sim/adapters/affixes.js` are loaded by nothing — delete or wire.
+**Status:** QA pass done 2026-11-15 (game-lint clean, every module connected, `tests/walk.mjs` walks every screen on desktop + phone); ready for games.radgh.com — Line War, Hunters vs Farmers, Campaign (Warrior chapter)
+**Play:** LAN stable http://192.168.1.34:8400/prototypes/bannerline/ (https for controllers: https://192.168.1.34:8442/prototypes/bannerline/) · public https://games.radgh.com/bannerline/
+**Next:** owner playtest on the live site; touch controls for phones (today the match needs a keyboard + mouse or a controller; menus work by tap)
+**Parked:** balance passes, the other four campaign chapters, Tower defense / MOBA / Heroes and Empires modes, in-game bug reports + ratings (no game server) — all in `docs/SHELVED.md`
 
 A couch-and-online **lane war** in the browser. Two teams each guard a **Keep** flying **banners**
 at the foot of their own walled field. You fight with a hero to stop whatever comes down your field,

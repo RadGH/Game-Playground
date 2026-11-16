@@ -1,6 +1,9 @@
 # Frontier Foundry (`prototypes/frontier-foundry/`)
 
-> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh frontier-foundry` from the playground and fix what it finds — game-lint (on 2026-11-11: 2 browser-tooltip, 1 browser-popup, 1 no-whats-new), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `frontier-foundry` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass.
+**Status:** QA pass done 2026-11-15 (game-lint clean, every module connected, every screen walked on desktop + phone); ready for games.radgh.com
+**Play:** LAN stable http://192.168.1.34:8400/prototypes/frontier-foundry/ · public https://games.radgh.com/frontier-foundry/
+**Next:** owner playtest of a full run (land → rocket), on a phone too (2026-11-15: stacked top bar, the log is a drawer behind the Log button)
+**Parked:** shared accounts, ratings and in-game bug reports (no game server yet); the world-layer plan in `PLAN-world-layer.md`
 
 A 4X + RTS automation prototype: land on a planet, scan for what is under the ground, mine it, haul
 it, refine it, build a factory, research your way up the tree, hold off waves of local wildlife, and
@@ -158,7 +161,7 @@ Using the engine from code:
 ```js
 import { loadData } from './js/data.js';
 import { Game } from './js/game.js';
-import { Bot } from './js/ai.js';
+import { Bot } from './tools/bot.js';
 
 const game = await Game.create({ seed: 7, difficulty: 'normal' });
 game.scan(game.hq().x, game.hq().y, 30);

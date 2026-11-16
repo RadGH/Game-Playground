@@ -102,6 +102,7 @@ fi
 
 # games.radgh.com serves Farhold, Emberveil 2 and Thousandvale from this same gh-pages branch (~/claude/docs/rgs.md).
 if [ "$PUSH" = 1 ]; then
-  echo "== gh-pages pushed. To update games.radgh.com too (production — only when Radley asks):"
-  echo "   cd ~/claude/rads-game-server && tools/deploy.sh update playground     # + 'update thousandvale' for a Thousandvale release"
+  echo "== gh-pages pushed. To update games.radgh.com too (allowed without asking since 2026-11-15, unless Radley said hold):"
+  echo "   cd ~/claude/rads-game-server && tools/deploy.sh update playground     # bumps 'updated' on every changed game by itself"
+  echo "   (or tools/go-live.sh <game> next time: stable + pages + droplet + RGS commit in one go)"
 fi

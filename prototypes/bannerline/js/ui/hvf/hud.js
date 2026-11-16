@@ -154,7 +154,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   function useSlot(i) {
     const it = me().inv?.[i]; if (!it) return;
     const use = HI.items[it.id].use;
-    if (!use) { alert(REASONS.notUsable, 'info'); return; }
+    if (!use) { toast(REASONS.notUsable, 'info'); return; }
     if (use === 'ward' || use === 'flare') onAim({ slot: i, use });
     else onCmd({ type: 'use', slot: i });
   }
@@ -171,7 +171,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   }
 
   // ── alerts ──
-  function alert(text, kind = 'info', ms = 3200) {
+  function toast(text, kind = 'info', ms = 3200) {
     const a = document.createElement('div');
     a.className = 'hv-alert ' + kind; a.textContent = text;
     K.alerts.prepend(a);
@@ -344,21 +344,21 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
     const near = (x, z) => nearName(map, x, z);
     if (spectate) { spectatorEvent(ev, near); return; }
     switch (ev.type) {
-      case 'released': alert(role === 'hunter' ? 'The kennel opens — go hunting!' : 'The hunters are loose!', role === 'hunter' ? 'good' : 'bad', 4000); break;
-      case 'animalKilled': if (ev.owner === player) alert(`A ${ev.kind} was taken near ${near(ev.x, ev.z)}`, 'bad'); break;
-      case 'farmerDown': alert(ev.player === player ? 'You are down!' : `${s.players[ev.player].name} is down near ${near(ev.grave.x, ev.grave.z)}`, ev.player === player || role === 'farmer' ? 'bad' : 'good'); break;
-      case 'farmerRevived': alert(ev.player === player ? 'You are back on your feet' : `${s.players[ev.player].name} is back on their feet`, role === 'farmer' ? 'good' : 'bad'); break;
-      case 'hunterDown': alert(ev.player === player ? 'You fell — back at a lodge soon' : 'A hunter is down', role === 'farmer' ? 'good' : 'bad'); break;
-      case 'hunterOut': alert(`${s.players[ev.player].name} is out of the hunt`, role === 'farmer' ? 'good' : 'bad', 4500); break;
-      case 'lost': if (ev.owner === player) alert(`Your ${(B.kinds[ev.kind] || { name: ev.kind }).name} was destroyed`, 'bad'); break;
-      case 'wardPulled': if (ev.owner === player) alert('Your watchstone was pulled up', 'bad'); else if (role === 'farmer') alert('Watchstone pulled up', 'good'); break;
-      case 'snared': if (ev.owner === player) alert('Snared!', 'bad'); else if (ev.by === player) alert('Your snare caught something', 'good'); break;
-      case 'levelUp': if (ev.player === player) alert(`Level ${ev.level}!`, 'good'); break;
-      case 'turn': alert(ev.value > 0 ? 'The Turn: the farmers now outweigh the hunt' : 'The Turn swings back to the hunters', ev.value > 0 === (role === 'farmer') ? 'good' : 'bad', 4500); break;
+      case 'released': toast(role === 'hunter' ? 'The kennel opens — go hunting!' : 'The hunters are loose!', role === 'hunter' ? 'good' : 'bad', 4000); break;
+      case 'animalKilled': if (ev.owner === player) toast(`A ${ev.kind} was taken near ${near(ev.x, ev.z)}`, 'bad'); break;
+      case 'farmerDown': toast(ev.player === player ? 'You are down!' : `${s.players[ev.player].name} is down near ${near(ev.grave.x, ev.grave.z)}`, ev.player === player || role === 'farmer' ? 'bad' : 'good'); break;
+      case 'farmerRevived': toast(ev.player === player ? 'You are back on your feet' : `${s.players[ev.player].name} is back on their feet`, role === 'farmer' ? 'good' : 'bad'); break;
+      case 'hunterDown': toast(ev.player === player ? 'You fell — back at a lodge soon' : 'A hunter is down', role === 'farmer' ? 'good' : 'bad'); break;
+      case 'hunterOut': toast(`${s.players[ev.player].name} is out of the hunt`, role === 'farmer' ? 'good' : 'bad', 4500); break;
+      case 'lost': if (ev.owner === player) toast(`Your ${(B.kinds[ev.kind] || { name: ev.kind }).name} was destroyed`, 'bad'); break;
+      case 'wardPulled': if (ev.owner === player) toast('Your watchstone was pulled up', 'bad'); else if (role === 'farmer') toast('Watchstone pulled up', 'good'); break;
+      case 'snared': if (ev.owner === player) toast('Snared!', 'bad'); else if (ev.by === player) toast('Your snare caught something', 'good'); break;
+      case 'levelUp': if (ev.player === player) toast(`Level ${ev.level}!`, 'good'); break;
+      case 'turn': toast(ev.value > 0 ? 'The Turn: the farmers now outweigh the hunt' : 'The Turn swings back to the hunters', ev.value > 0 === (role === 'farmer') ? 'good' : 'bad', 4500); break;
       case 'noise': if (role === 'hunter' && ev.heard && ev.heard.includes(player)) ripples.push({ x: ev.x, z: ev.z, t: 0 }); break;
-      case 'reject': if (ev.player === player) alert(REASONS[ev.reason] || ev.reason, 'warn', 1600); break;
-      case 'item': if (ev.player === player) alert(`Bought ${HI.items[ev.id]?.name || ev.id}`, 'good', 1400); break;
-      case 'built': if (ev.player === player) alert(`${(B.kinds[ev.kind] || { name: 'Lodge' }).name} built`, 'good', 1400); break;
+      case 'reject': if (ev.player === player) toast(REASONS[ev.reason] || ev.reason, 'warn', 1600); break;
+      case 'item': if (ev.player === player) toast(`Bought ${HI.items[ev.id]?.name || ev.id}`, 'good', 1400); break;
+      case 'built': if (ev.player === player) toast(`${(B.kinds[ev.kind] || { name: 'Lodge' }).name} built`, 'good', 1400); break;
       default: break;
     }
   }
@@ -367,16 +367,16 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   function spectatorEvent(ev, near) {
     const s = sim.state, who = (pid) => s.players[pid]?.name || 'Someone';
     switch (ev.type) {
-      case 'released': alert('The kennel opens: the hunters are loose', 'warn', 4000); break;
-      case 'farmerDown': alert(`${who(ev.player)} is down near ${near(ev.grave.x, ev.grave.z)}`, 'bad'); break;
-      case 'farmerRevived': alert(`${who(ev.player)} is back on their feet`, 'good'); break;
-      case 'hunterDown': alert(`${who(ev.player)} is down`, 'good'); break;
-      case 'hunterOut': alert(`${who(ev.player)} is out of the hunt`, 'good', 4500); break;
-      case 'lost': alert(`${who(ev.owner)} lost a ${(B.kinds[ev.kind] || { name: ev.kind }).name}`, 'warn', 2200); break;
-      case 'wardPulled': alert('A watchstone was pulled up', 'info', 2000); break;
-      case 'snared': alert(`${who(ev.owner)} is snared`, 'warn', 2000); break;
-      case 'levelUp': alert(`${who(ev.player)} reached level ${ev.level}`, 'info', 2000); break;
-      case 'turn': alert(ev.value > 0 ? 'The Turn: the farmers now outweigh the hunt' : 'The Turn swings back to the hunters', 'warn', 4500); break;
+      case 'released': toast('The kennel opens: the hunters are loose', 'warn', 4000); break;
+      case 'farmerDown': toast(`${who(ev.player)} is down near ${near(ev.grave.x, ev.grave.z)}`, 'bad'); break;
+      case 'farmerRevived': toast(`${who(ev.player)} is back on their feet`, 'good'); break;
+      case 'hunterDown': toast(`${who(ev.player)} is down`, 'good'); break;
+      case 'hunterOut': toast(`${who(ev.player)} is out of the hunt`, 'good', 4500); break;
+      case 'lost': toast(`${who(ev.owner)} lost a ${(B.kinds[ev.kind] || { name: ev.kind }).name}`, 'warn', 2200); break;
+      case 'wardPulled': toast('A watchstone was pulled up', 'info', 2000); break;
+      case 'snared': toast(`${who(ev.owner)} is snared`, 'warn', 2000); break;
+      case 'levelUp': toast(`${who(ev.player)} reached level ${ev.level}`, 'info', 2000); break;
+      case 'turn': toast(ev.value > 0 ? 'The Turn: the farmers now outweigh the hunt' : 'The Turn swings back to the hunters', 'warn', 4500); break;
       default: break;
     }
   }
@@ -401,7 +401,7 @@ export function createHvfHud({ root, sim, player, onCmd, onPlace, onAim, onMinim
   }
 
   return {
-    el, update, onEvent, alert, showResult, useSlot, toggleShop,
+    el, update, onEvent, toast, showResult, useSlot, toggleShop,
     get shopOpen() { return shopOpen; },
     /** The sound bridge arrived: show mute + volume (saved per browser by the bridge). */
     setSound(snd) { sound = snd; K.soundw.hidden = !snd; paintSound(); },

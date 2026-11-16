@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700;800&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="../../shared/tooltip.css">
 <link rel="stylesheet" href="css/bench.css">
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
 </head>
@@ -36,7 +37,7 @@
     <div class="bench-live" id="live">--</div>
     <div class="vp-label" id="vp0">Viewport 1</div>
     <div class="vp-label" id="vp1" hidden>Viewport 2</div>
-    <div class="bench-portrait" id="portrait" title="Live portrait (js/view/portrait.js): click to cycle units"></div>
+    <div class="bench-portrait" id="portrait" data-tip="Live portrait: click to cycle units"></div>
   </div>
   <section class="bench-results">
     <div class="manual">

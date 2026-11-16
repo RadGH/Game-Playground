@@ -308,3 +308,12 @@ hr.lf-rule { border: 0; height: 9px; margin: 10px 0; background: linear-gradient
   .lf-classgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .lf-dialogue { flex-direction: column; }
 }
+
+/* What's new (shared/whats-new.js): the menu's slate and brass instead of the shared light card */
+.wn-modal { --wn-bg: #121821; --wn-ink: var(--m-ink); --wn-edge: var(--m-brass); --wn-accent: var(--m-gold); background: rgba(3, 4, 6, .72); }
+.wn-modal .wn-panel { border-width: 1px; border-radius: 4px; font-family: var(--m-body); }
+.wn-modal .wn-head h2 { font-family: var(--m-head); color: var(--m-gold); letter-spacing: .06em; }
+.wn-modal .wn-entry { background: rgba(26, 23, 18, .6); border: 1px solid var(--m-edge); border-radius: 3px; }
+.wn-modal .wn-entry.new { border-color: var(--m-brass); background: rgba(240, 196, 106, .08); }
+.wn-modal .wn-head, .wn-modal .wn-foot { border-color: var(--m-edge); }
+.wn-modal .wn-x { width: 44px; height: 44px; border: 1px solid var(--m-brass); border-radius: 3px; color: var(--m-gold); }

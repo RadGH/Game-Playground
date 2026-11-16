@@ -91,7 +91,7 @@ export function mountLedger(C) {
       <header><b>${esc(def.name.toUpperCase())}</b><i>${m}</i></header>
       <p class="lg-about">${esc(def.about || '')}</p>
       <p class="lg-extra">${esc(extras)}</p>
-      <div class="lg-stamp${short.length ? ' short' : ''}" title="${short.length ? 'The stores cannot spare: ' + short.join(', ') : 'Cost'}">${esc(costText(def.cost))}</div>
+      <div class="lg-stamp${short.length ? ' short' : ''}" data-tip="${short.length ? 'The stores cannot spare: ' + short.join(', ') : 'Cost'}">${esc(costText(def.cost))}</div>
       ${lock || `<button type="button" class="lg-place" data-place="${def.id}" aria-label="Place ${esc(def.name)}">${sel ? 'LOADED ✓' : 'PLACE'}</button>`}
     </article>`;
   }
@@ -128,7 +128,7 @@ export function mountLedger(C) {
     if (!b) { insp.innerHTML = `<p class="lg-empty">TAP A BUILDING ON THE SCOPE (NO SWITCH UP) TO READ ITS CARD HERE.</p>`; keepKnob = null; keepFor = null; return; }
     const def = D.B[b.type];
     if (!def) { insp.innerHTML = `<p class="lg-empty">A PILE OF SALVAGE — THE PORTERS WILL TAKE IT IN.</p>`; return; }
-    const lamps = ['power', 'input', 'output'].map((k) => `<span class="lg-lamp${b.lamps?.[k] ? ' lit' : ''}" title="${esc(b.lamps?.[k] || '')}"><i></i>${k.toUpperCase()}</span>`).join('');
+    const lamps = ['power', 'input', 'output'].map((k) => `<span class="lg-lamp${b.lamps?.[k] ? ' lit' : ''}"${b.lamps?.[k] ? ` data-tip="${esc(b.lamps[k])}"` : ''}><i></i>${k.toUpperCase()}</span>`).join('');
     const status = statusLine(b, D);
     // M7: who works or lives here (the town staffs itself — this is a readout, not a control)
     const town = b.beds ? ` · ${b.residents || 0}/${b.beds} LIVE HERE` : b.jobs ? ` · CREW ${b.workers ?? b.jobs}/${b.jobs}` : '';

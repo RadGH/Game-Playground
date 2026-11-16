@@ -109,13 +109,14 @@ async function boot() {
   ensureWorld(buildMap(data, 'vale', '1v1'));
 
   app.session = defaultSession(data);
-  app.title = createTitle({
+  app.titleScreen = createTitle({
     screen: $('screen-title'),
     onPlay: () => { app.pendingOnline = false; showModes(); },
     onHost: () => { app.pendingOnline = true; showModes(); },
     onJoin: () => showJoin(),
     onCampaign: () => showCampaign(),
   });
+  addTitleExtras();
   // Hunters vs Farmers (stream H) owns its whole session: setup card, match, results.
   app.hvf = createHvfGame({ gfx: app.gfx, data, host: $('screen-hvf'), devices: app.devices, params,
     onExit: () => { $('screen-hvf').hidden = true; showModes(); } });
@@ -124,7 +125,7 @@ async function boot() {
   app.modes = createModeScreen({
     screen: $('screen-modes'), modes: modeList(data),
     onPick: (mode) => {
-      if (mode.id === 'hvf') { endMatch(); app.title.hide(); app.lobby.hide(); setScreen('hvf'); $('screen-hvf').hidden = false; app.hvf.openSetup(); return; }
+      if (mode.id === 'hvf') { endMatch(); app.titleScreen.hide(); app.lobby.hide(); setScreen('hvf'); $('screen-hvf').hidden = false; app.hvf.openSetup(); return; }
       const s = app.session;
       Object.assign(s, { game: mode.id, gameName: mode.name, heroes: mode.heroes, races: mode.races });
       if (!mode.formats.includes(s.mode)) s.mode = mode.defaultFormat || mode.formats[0];
@@ -141,7 +142,7 @@ async function boot() {
   app.devices.onJoin((dev) => {
     if (app.screen !== 'match') return;
     const v = app.match?.views.find((x) => x.lost && (x.deviceType === dev.type));
-    if (v) { v.device = dev.id; v.lost = false; app.devices.claim(dev.id, v.slotKey); v.hud.alert(`${dev.label} took over Player ${v.slotPlayer}`, 'good'); }
+    if (v) { v.device = dev.id; v.lost = false; app.devices.claim(dev.id, v.slotKey); v.hud.toast(`${dev.label} took over Player ${v.slotPlayer}`, 'good'); }
   });
 
   bootEl.classList.add('done');
@@ -160,7 +161,7 @@ async function boot() {
   else {
     showTitle();
     const rj = loadRejoin();
-    if (rj) app.title.offerRejoin?.(rj.code, () => rejoinOnline(rj));
+    if (rj) app.titleScreen.offerRejoin?.(rj.code, () => rejoinOnline(rj));
   }
 }
 
@@ -200,12 +201,12 @@ function setScreen(name) {
 function showTitle() {
   saveRejoin(app.match?.net ? null : loadRejoin());   // leaving a running online match on purpose forgets it
   if (app.room) { const r = app.room; app.room = null; try { r.leave(); } catch { /* already closed */ } app.netroom.detach(); }
-  app.hvf?.end(); endMatch(); app.lobby.hide(); setScreen('title'); app.title.show(); useFlyCam(); }
-function showModes() { app.hvf?.end(); endMatch(); app.title.hide(); app.lobby.hide(); setScreen('modes'); app.modes.show(); useFlyCam(); }
+  app.hvf?.end(); endMatch(); app.lobby.hide(); setScreen('title'); app.titleScreen.show(); useFlyCam(); }
+function showModes() { app.hvf?.end(); endMatch(); app.titleScreen.hide(); app.lobby.hide(); setScreen('modes'); app.modes.show(); useFlyCam(); }
 // ---------------------------------------------------------------- campaign (stream F)
 
 async function showCampaign() {
-  endMatch(); app.title.hide();
+  endMatch(); app.titleScreen.hide();
   try { app.campaign = app.campaign || await loadCampaign(); } catch (err) { alertBoot(err.message, 'Could not load the campaign'); showTitle(); return; }
   app.progress = app.progress || campaignProgress();
   setScreen('campaign');
@@ -226,8 +227,8 @@ function nextMissionOf(mission) {
   return null;
 }
 
-function showJoin() { endMatch(); app.title.hide(); setScreen('netjoin'); app.join.show(); useFlyCam(); }
-function showNetRoom() { endMatch(); app.title.hide(); setScreen('netroom'); app.netroom.show(); useFlyCam(); }
+function showJoin() { endMatch(); app.titleScreen.hide(); setScreen('netjoin'); app.join.show(); useFlyCam(); }
+function showNetRoom() { endMatch(); app.titleScreen.hide(); setScreen('netroom'); app.netroom.show(); useFlyCam(); }
 
 // ---------------------------------------------------------------- online (stream D's js/net)
 
@@ -251,7 +252,7 @@ function attachRoom(room) {
   room.on('closed', () => {
     if (app.room !== room) return;
     app.room = null;
-    if (app.match?.net) { for (const v of app.match.views) v.hud.alert('Host left — match ended', 'bad', 4000); setTimeout(() => showTitle(), 2500); }
+    if (app.match?.net) { for (const v of app.match.views) v.hud.toast('Host left — match ended', 'bad', 4000); setTimeout(() => showTitle(), 2500); }
     else if (app.screen === 'netroom') { showTitle(); alertBoot('The room closed.', 'Online'); }
   });
 }
@@ -272,7 +273,7 @@ function netStart(room, packet, rejoin = null) {
 }
 function netEvent(type, e = {}) {
   const views = app.match?.views || [];
-  const say = (text, kind = 'info', ms = 3600) => { for (const v of views) v.hud.alert(text, kind, ms); };
+  const say = (text, kind = 'info', ms = 3600) => { for (const v of views) v.hud.toast(text, kind, ms); };
   if (type === 'takeover') say(`${e.name || 'A player'} left — an AI takes their seat`, 'warn');
   else if (type === 'rejoin') say(`${e.name || 'A player'} is back`, 'good');
   else if (type === 'hostLeft') { say('Host left — match ended', 'bad', 4000); setTimeout(() => showTitle(), 2500); }
@@ -304,7 +305,7 @@ async function rejoinOnline(info) {
 app.startOpts = () => ({ tickMs: 50 / (Number(params.get('speed')) || 1) });
 
 function showLobby() {
-  app.hvf?.end(); endMatch(); app.title.hide(); setScreen('lobby'); app.lobby.show(); useFlyCam(); }
+  app.hvf?.end(); endMatch(); app.titleScreen.hide(); setScreen('lobby'); app.lobby.show(); useFlyCam(); }
 function useFlyCam() {
   if (!app.gfx.viewports.includes(app.flyViewport)) app.gfx.addViewport(app.flyViewport);
   app.flyCam.setBounds({ x0: -1e9, x1: 1e9, z0: -1e9, z1: 1e9 });
@@ -373,12 +374,12 @@ function startMatch(session, net = null, campaignConfig = null) {
   if (!seats.length && !campaignConfig) m.spec = makeSpectatorView(m, host);
 
   setScreen('match');
-  app.title.hide(); app.lobby.hide();
+  app.titleScreen.hide(); app.lobby.hide();
   if (campaignConfig && m.views[0]) m.overlay = createCampaignOverlay({ root: m.views[0].root });
   for (const v of m.views) {
     const w = document.createElement('div'); w.className = 'net-wait'; w.hidden = true; v.hudRoot.append(w); v.netWait = w;
   }
-  for (const v of m.views) v.hud.alert(v.isPad ? 'Hold your field. D-pad down opens the Barracks.' : 'Hold your field. B opens the Barracks to hire units.', 'info', 3600);
+  for (const v of m.views) v.hud.toast(v.isPad ? 'Hold your field. D-pad down opens the Barracks.' : 'Hold your field. B opens the Barracks to hire units.', 'info', 3600);
 }
 
 // ---------- spectator (no seat) ----------
@@ -400,7 +401,7 @@ function makeSpectatorView(m, host) {
   v.numbers = createNumbers(overlay);
   v.spec = createSpectator({
     root: hudRoot, mode: 'linewar', fog: false, teamColours: ['#5d9cf5', '#ee6a58'],
-    onSpeed: (n) => { if (m.net) { v.spec.alert('An online match runs at one speed', 'info', 1600); return; } m.clock.setSpeed(n); specPause(m, false); },
+    onSpeed: (n) => { if (m.net) { v.spec.toast('An online match runs at one speed', 'info', 1600); return; } m.clock.setSpeed(n); specPause(m, false); },
     onPause: (p) => specPause(m, p),
     onPick: (id) => specFollow(m, id),
   });
@@ -409,18 +410,18 @@ function makeSpectatorView(m, host) {
   const f0 = sim.map.fields[0];
   camera.snapTo(e ? e.x : (f0.x0 + f0.x1) / 2, e ? e.z : (f0.z0 + f0.z1) / 2);
   if (first) { v.follow = first.id; camera.centre(); }
-  v.spec.alert('Watching the AI: F jumps between heroes, WASD or drag to look around', 'info', 6000);
+  v.spec.toast('Watching the AI: F jumps between heroes, WASD or drag to look around', 'info', 6000);
   return v;
 }
 function specPause(m, p) {
-  if (m.net) { m.spec?.spec.alert('Online matches do not pause', 'info', 1400); return; }
+  if (m.net) { m.spec?.spec.toast('Online matches do not pause', 'info', 1400); return; }
   m.spec.paused = !!p; m.clock.setPaused(!!p);
 }
 function specFollow(m, id, say = true) {
   const v = m.spec; if (!v) return;
   v.follow = id; v.camera.centre();
   const c = linewarChars(m.sim.state, m.sim.data).find((x) => x.id === id);
-  if (say && c) v.spec.alert(`Following ${c.name}`, 'info', 1200);
+  if (say && c) v.spec.toast(`Following ${c.name}`, 'info', 1200);
 }
 function spectatorFrame(m, frames, dt) {
   const v = m.spec, s = m.sim.state;
@@ -505,6 +506,8 @@ function makeView(m, i, n, l, host) {
     onSurrender: () => view.seat.issue({ type: 'surrender' }),
     onQuit: () => showLobby(),
     onHowTo: () => view.onboarding.start(),
+    onNews: () => app.news?.open(),
+    onCredits: () => app.credits?.open(),
   });
   const unitIcon = (u) => app.icons?.url('unit', u) || null;
   const itemIcon = (ic) => app.icons?.url('item', ic) || null;
@@ -613,7 +616,7 @@ function onSeatUi(view, u) {
     const usable = inv.slots.filter((x) => x && x.consumable);
     const it = usable[u.n];
     if (it) view.seat.issue({ type: 'use', slot: it.slot });
-    else view.hud.alert(u.n ? 'No second item to use' : 'No item to use — buy draughts at the Outfitter', 'info', 1400);
+    else view.hud.toast(u.n ? 'No second item to use' : 'No item to use — buy draughts at the Outfitter', 'info', 1400);
   }
 }
 
@@ -648,7 +651,7 @@ function walkTo(view, kind) {
   const b = view.buildings.find((x) => x.kind === kind); if (!b) return;
   const r = ringPoint(b);
   view.seat.issue({ type: 'move', x: r.x, z: r.z });
-  view.hud.alert(`Walking to the ${BUILDING_NAMES[kind]}`, 'info', 1400);
+  view.hud.toast(`Walking to the ${BUILDING_NAMES[kind]}`, 'info', 1400);
 }
 
 // ---------- Sanctum power targeting ----------
@@ -671,7 +674,7 @@ function beginAim(view, row) {
 function castAim(view, x, z) {
   const m = app.match; const a = view.aim; if (!a) return;
   const why = Q.powerTargetCheck(m.sim.state, m.sim.data, view.player, a.row.id, x, z);
-  if (why) { view.hud.alert(view.hud.reasonText?.(why) || why, 'bad', 1400); return; }
+  if (why) { view.hud.toast(view.hud.reasonText?.(why) || why, 'bad', 1400); return; }
   view.seat.issue({ type: 'power', id: a.row.id, x, z });
   sfx('power', { id: a.row.id });
   m.fx.flare(x, z, 0xc69cff, a.row.radius || 4);
@@ -704,7 +707,7 @@ function lookAtField(view, idx) {
   const mine = s.ents.filter((e) => e.kind === 'unit' && e.owner === view.player && e.field === f.id && e.alive !== false);
   const z = mine.length ? mine.reduce((a, e) => a + e.z, 0) / mine.length : (f.z0 + f.z1) / 2;
   view.camera.lookAt(f.cx ?? (f.x0 + f.x1) / 2, z);
-  view.hud.alert(view.lookIdx === 1 ? `Watching your rival's field — ${view.isPad ? 'L3' : 'Space'} returns to your hero` : 'Watching another field', 'info', 1800);
+  view.hud.toast(view.lookIdx === 1 ? `Watching your rival's field — ${view.isPad ? 'L3' : 'Space'} returns to your hero` : 'Watching another field', 'info', 1800);
 }
 
 /** Sound hook: the sound stream (sfx/) listens for `bannerline:sfx` events; nothing plays without it. */
@@ -809,14 +812,14 @@ function matchFrame(dt, frames) {
   for (const v of m.views) {
     const dev = app.devices.get(v.device);
     const connected = !!dev && dev.connected !== false && !dev.duplicate;
-    if (!connected && !v.lost) { v.lost = true; v.hud.alert(`Controller lost — press A on a controller to take over Player ${v.slotPlayer}`, 'bad', 6000); }
+    if (!connected && !v.lost) { v.lost = true; v.hud.toast(`Controller lost — press A on a controller to take over Player ${v.slotPlayer}`, 'bad', 6000); }
     const f = connected ? frames.get(v.device) : null;
     if (v.vp.rect && kbmFrame?.pointer?.inside && v.isPad) {
       const p = kbmFrame.pointer, r = v.vp.rect;
       if (p.x >= r.x && p.x < r.x + r.w) overPad = true;
     }
     if (m.pausedBy) {
-      if (m.pausedBy === v && f) v.hud.pauseFrame(f);
+      if (m.pausedBy === v && f && !sharedModalFrame(f)) v.hud.pauseFrame(f);
       v.camera.update(dt, {});
       continue;
     }
@@ -1015,7 +1018,7 @@ function frame(dt) {
       if (p.has('confirm')) app.campaignScreen.confirm(); if (p.has('back')) app.campaignScreen.back();
     }
   }
-  if (app.screen === 'title') app.title.frame && frames.forEach((f) => app.title.frame(f));
+  if (app.screen === 'title') app.titleScreen.frame && frames.forEach((f) => { if (!sharedModalFrame(f)) app.titleScreen.frame(f); });
   else if (app.screen === 'modes') frames.forEach((f) => app.modes.frame(f));
   else if (app.screen === 'lobby') app.lobby.frame(frames, dt);
   else if (app.screen === 'netjoin') frames.forEach((f) => app.join.frame(f));
@@ -1040,9 +1043,31 @@ function frame(dt) {
   app.gfx.render();
 }
 
-function alertBoot(msg, title = 'Could not start the match') {
+// ---------------------------------------------------------------- What's new + Credits
+
+/** The shared What's new and Credits windows: small buttons under the title menu, items in the pause menu. */
+function addTitleExtras() {
+  const box = $('title-extra');
+  Promise.allSettled([
+    import('../../../shared/whats-new.js').then(({ createWhatsNew }) => { app.news = createWhatsNew({ url: new URL('../data/changelog.json', import.meta.url), key: 'bannerline', title: "What's new" }); }),
+    import('../../../shared/credits.js').then(({ createCredits }) => { app.credits = createCredits({ game: 'bannerline', made: 'Bannerline — by Radley Sustaire, built with Claude.' }); }),
+  ]).then(() => {
+    if (app.news) box.append(app.news.button({ label: "What's new", className: 'menu-btn small' }));
+    if (app.credits) box.append(app.credits.button({ label: 'Credits', className: 'menu-btn small' }));
+  });
+}
+
+/** While a shared window (What's new / Credits) is open, a controller's A or B closes it and nothing else reads the press. */
+function sharedModalFrame(f) {
+  const close = document.querySelector('.wn-modal [data-close], .cr-modal [data-close]');
+  if (!close) return false;
+  if (f?.pressed && (f.pressed.has('back') || f.pressed.has('confirm'))) close.click();
+  return true;
+}
+
+function alertBoot(msg, heading = 'Could not start the match') {
   const el = document.createElement('div');
-  el.className = 'boot error'; el.textContent = title + ':\n' + msg + '\n\n(click to close)';
+  el.className = 'boot error'; el.textContent = heading + ':\n' + msg + '\n\n(click to close)';
   el.addEventListener('click', () => el.remove());
   $('app').append(el);
 }
@@ -1090,6 +1115,8 @@ app.spectator = () => {
   const m = app.match; const v = m?.spec; if (!v) return null;
   return { follow: v.follow, paused: v.paused, speed: m.clock.speed, mode: v.camera.mode, next: (d = 1) => specFollow(m, nextChar(linewarChars(m.sim.state, m.sim.data), v.follow, d)) };
 };
+/** Back to the title from anywhere (tests and the screen walk). */
+app.showTitle = () => showTitle();
 app.state = () => app.match?.sim.state;
 app.views = () => app.match?.views || [];
 /** Run the sim forward `ticks` ticks right now (AI plays; local heroes get only queued commands). */

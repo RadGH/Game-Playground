@@ -20,7 +20,7 @@ export function mountAlarms(C) {
   // MUTE sits at the end of the lamp strip (owner: one slim top row). Hold it (or right-click it) for a LAMP TEST.
   const mute = document.createElement('button');
   mute.type = 'button'; mute.className = 'mute mute-strip'; mute.setAttribute('aria-pressed', 'false'); mute.setAttribute('aria-label', 'Klaxon mute (hold for a lamp test)');
-  mute.title = 'Klaxon mute — hold for a lamp test';
+  mute.dataset.tip = 'Klaxon mute — hold for a lamp test';
   mute.innerHTML = '<span class="mute-guard"></span><span class="mute-label">MUTE</span>';
   row.append(mute);
   body.append(row);

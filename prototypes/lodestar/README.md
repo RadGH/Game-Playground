@@ -1,6 +1,9 @@
 # Lodestar
 
-> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh lodestar` from the playground and fix what it finds — game-lint (on 2026-11-11: 8 browser-tooltip), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `lodestar` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass. Parked: `js/render/chart.js` (PLAN M2's outlined chart view at range ¼ and ½) is written and tested but not drawn; the far zoom uses `cells.glsl.js` instead.
+**Status:** QA pass done 2026-11-15 (lint, every module connected, every screen walked on desktop + phone); ready for games.radgh.com. Built: M1 cell world, M2 bunker desk, M3 economy, M4 walls/towers/raids, M6 mana and spells, M7 town
+**Play:** LAN stable http://192.168.1.34:8400/prototypes/lodestar/ (https for controllers: https://192.168.1.34:8442/prototypes/lodestar/) · public https://games.radgh.com/lodestar/
+**Next:** M5 (squads) and the later milestones in `docs/PLAN.md`; the ☰ menu still needs Report a bug, Credits and the account pill (M8)
+**Parked:** `js/render/chart.js` (PLAN M2's outlined chart view at range ¼ and ½) is written and tested but not drawn — the far zoom uses `cells.glsl.js` instead (listed in `tools/reach-baseline.json`)
 
 A pixel-physics city-and-defence game played from a commander's bunker (independent project by Radley Sustaire,
 sandbox). The spec is `docs/PLAN.md` (it overrides `docs/BRAINSTORM.md`); the owner's words are `docs/OWNER-BRIEF.md`.

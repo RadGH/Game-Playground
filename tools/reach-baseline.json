@@ -3,9 +3,6 @@
   "bannerline": {
     "js/net/loopback.js": "in-memory transport for the tests (tests/_net.mjs); real matches use PeerJS"
   },
-  "frontier-foundry": {
-    "js/ai.js": "the balance bot that tools/sim-foundry.mjs and tests/sim.test.js drive; not a player feature"
-  },
   "lanternfall": {
     "js/ai/bosskit.js": "hook shapes for the boss scripts in js/ai/bosses/, which are all still Mother Tallow stand-ins (docs/HANDOFF.md)",
     "js/world/reach.js": "the reachability bot behind tools/room-check.mjs and tools/kit-check.mjs"

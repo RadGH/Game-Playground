@@ -1,7 +1,7 @@
 # Frontier Foundry — balance pass 4 (2026-09-14)
 
 *Written from `tools/sim-foundry.mjs --json` runs and `tools/sim-matrix.mjs`: six in-game hours,
-288 × 288 map (3 × 3 chunks), seed 7, played headless by the bot in `js/ai.js`. Round 1's report was
+288 × 288 map (3 × 3 chunks), seed 7, played headless by the bot in `tools/bot.js`. Round 1's report was
 the `--why` dumps in the commit that built the engine; round 2 was the first proper funnel; §0b is
 round 3, which got the research tree unstuck; §0 is round 4, the reservation ledger and everything it
 uncovered, which is the pass that got a rocket off all three worlds on normal.*
@@ -55,7 +55,7 @@ Two more seeds on the final code, normal, six hours, to show how far "green on s
 Six of six keep the pod, five of six launch. Seed 11 temperate is a live failure of the same family as
 round 3's volcanic — the chemistry line never starts — and has not been looked into.
 
-### The ledger (`Ledger` in `js/ai.js`, rule in `DESIGN.md` §11)
+### The ledger (`Ledger` in `tools/bot.js`, rule in `DESIGN.md` §11)
 
 Kept from the stopped work: bookings per owner, free stock through `have()`, priorities, a stall
 timer, a time-to-live, a cool-off, `maxReservations`, the `saveFor` rocket steps and the build-queue
@@ -171,7 +171,7 @@ Every remaining loss on normal and hard has the same signature in the last colum
 ### The research order deadlocked on itself
 
 `t_refractory` is the first node in the tree that has to be paid for in **energy packs**. The recipe
-that *makes* an energy pack is unlocked by `t_highvoltage`, and `RESEARCH_ORDER` in `js/ai.js` listed
+that *makes* an energy pack is unlocked by `t_highvoltage`, and `RESEARCH_ORDER` in `tools/bot.js` listed
 `t_highvoltage` five places **after** `t_refractory`. So the bot could not research the node that
 taught it to build the thing the research needed, and the whole rocket half of the tree — refractory,
 superalloy, re-entry, precision, rocketry, satellites, probes — sat behind a node it could never pay

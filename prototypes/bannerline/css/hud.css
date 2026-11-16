@@ -253,3 +253,11 @@ body.hall-hover #view { cursor: pointer; }
 /* the result word over the field before the results card */
 .end-word { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); font: 800 clamp(48px, 9vw, 110px)/1 var(--head); letter-spacing: .05em; pointer-events: none; text-shadow: 0 4px 0 #000, 0 0 40px rgba(0,0,0,.6); animation: countIn .7s ease-out; white-space: nowrap; z-index: 30; }
 .end-word.win { color: var(--gold); } .end-word.lose { color: #e8dccb; }
+.pause-row { display: flex; gap: 8px; }
+/* phone-narrow view (QA pass 2026-11-15): the Tide ring hides, so the bar has four parts, not five — the
+   clock used to slide under the rival's banner count */
+@container (max-width: 560px) {
+  .topbar { grid-template-columns: minmax(56px, 1fr) auto auto minmax(56px, 1fr); gap: 6px; }
+  .tb-econ, .tb-clock { min-width: max-content; }
+  .tb-tide { display: none; }
+}

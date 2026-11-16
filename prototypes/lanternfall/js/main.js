@@ -17,6 +17,7 @@ import { spawnEnemy } from './ai/brain.js';
 import { fontSprites } from './render/font5x7.js';
 import { createHud } from './ui/hud.js';
 import { createScreens } from './ui/screens.js';
+import { MODES } from './ui/title.js';
 import { createMinimap } from './ui/map.js';
 import { loadSettings } from './ui/settings.js';
 import { createSaves, snapshot } from './save/save.js';
@@ -31,11 +32,13 @@ import { createBuilder } from './entities/build.js';
 import { useConsumable, stepConsumables } from './rpg/consume.js';
 import { toast as menuToast } from './ui/menukit.js';
 import { Meter } from '../../../meters/js/meter.js';
+import { createWhatsNew } from '../../../shared/whats-new.js';
 
 const params = new URLSearchParams(location.search);
 const canvas = document.getElementById('view');
 const bootEl = document.getElementById('boot');
 const LF = window.lanternfall = { ready: false, errors: [], warnings: [] };
+const MODE_NAMES = Object.fromEntries(MODES.map(m => [m.id, m.name]));
 
 try {
   const data = await loadData();
@@ -158,6 +161,7 @@ try {
     applySettings: s => { settings = s; audio?.apply?.(s); },
     where: () => game ? { act: String(game.act || 'act1').slice(3), actName: data.acts.byId?.[game.act]?.name, node: game.actMaps.nodes[game.actMaps.nodeOf(game.room.room.id)]?.name } : {},
     errors: LF.errors,
+    news: createWhatsNew({ url: new URL('../data/changelog.json', import.meta.url), key: 'lanternfall', title: "What's new" }),
     actions: {
       newGame: opts => newGame(opts), loadSlot: n => loadSlot(n),
       resume: () => {}, rekindle: () => game && interactWith(game, { t: 'rekindle', def: {} }),
@@ -183,7 +187,7 @@ try {
   async function startMode(id, opts) {
     router.closeAll();
     try { const m = await import(`./modes/${id}.js`); if (!m.startMode) throw new Error('no startMode'); await m.startMode(modeApi, opts); LF.mode = id; }
-    catch (e) { console.error(e); LF.warnings.push(`mode ${id}: ${e.message}`); if (!game || game.titleScreen) router.open('title'); menuToast(`${id.replace(/_/g, ' ')} is not built yet (see docs/HANDOFF.md).`, 'bad'); }
+    catch (e) { console.error(e); LF.warnings.push(`mode ${id}: ${e.message}`); if (!game || game.titleScreen) router.open('title'); menuToast(`${MODE_NAMES[id] || 'That mode'} is not open yet.`, 'bad'); }
   }
   LF.startMode = startMode;
   async function toTitle() {
@@ -224,6 +228,11 @@ try {
     game.pendingExit = null; exitCooldown = 20; fade.classList.remove('on'); changing = false;
   }
   const fadeEl = document.createElement('div'); fadeEl.className = 'fade'; document.body.appendChild(fadeEl);
+  // ☰ in the top-right corner: the pause menu for a mouse, a touch screen or anyone who does not know Esc
+  const menuBtn = document.createElement('button');
+  menuBtn.type = 'button'; menuBtn.className = 'lf-menu-btn'; menuBtn.setAttribute('aria-label', 'Menu'); menuBtn.textContent = '☰'; menuBtn.hidden = true;
+  menuBtn.addEventListener('click', () => { if (game && !game.titleScreen && !router.isOpen()) { input.clear(); router.open('pause'); } });
+  document.body.appendChild(menuBtn);
   let mmT = 0;
   const loop = createLoop({
     tick() {
@@ -242,6 +251,7 @@ try {
       barks?.update?.(1 / 60);
     },
     render(alpha, dt) {
+      menuBtn.hidden = !game || !!game.titleScreen || router.isOpen();
       if (!game) return;
       if (bench) bench.frame(dt * 1000);
       const f = buildFrame(game, cam, atlas, alpha);
@@ -253,7 +263,8 @@ try {
         cam: { x: cam.x + cam.shakeX, y: cam.y + cam.shakeY }, view: { w: cam.vw, h: cam.vh }, scale: cam.scale, time: game.time,
         lights: f.lights, sprites: f.sprites, overlays: f.overlays, additive: f.additive, ripple: game.ripples.h.subarray(x0, x0 + cam.vw + 2),
         ambient: { top: ambC.map(v => v * ambP * 0.9 + 0.04), bottom: ambC.map(v => v * ambP * 0.5 + 0.02), floor: act?.ambient?.floor ?? 0.08 }, sky, rain: { alpha: (game.rain?.density ?? 60) > 0 ? 1 : 0, wind: game.rain?.wind || 0 },
-        bloom: BLOOM[settings.video?.bloom ?? 'low'] ?? ((+settings.video?.bloom || 0) / 100), // stored 'off'/'low'/'high' hud: hud && !game.titleScreen ? hud.build(atlas, { w: cam.vw, h: cam.vh }, { x: cam.x, y: cam.y }) : [],
+        bloom: BLOOM[settings.video?.bloom ?? 'low'] ?? ((+settings.video?.bloom || 0) / 100), // stored 'off'/'low'/'high'
+        hud: hud && !game.titleScreen ? hud.build(atlas, { w: cam.vw, h: cam.vh }, { x: cam.x, y: cam.y }) : [],
       });
       if ((mmT += dt) > 0.25) { mmT = 0; minimap.update(game.titleScreen || router.isOpen() ? null : game, cam.scale); }
     },

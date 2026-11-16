@@ -41,7 +41,7 @@ export function mountTitle(C, root, { onStart }) {
   btns.append(newBtn, contBtn, newsBtn, setBtn);
   C.news.onUnread(n => newsBtn.classList.toggle('wn-has-new', n > 0));
   const last = readLastGame();
-  if (!last) { contBtn.disabled = true; contBtn.title = 'No game yet'; }
+  if (!last) { contBtn.disabled = true; contBtn.dataset.tip = 'No game yet'; }
   else contBtn.querySelector('.push-label').innerHTML = `CONTINUE<small>SEED ${last.seed}</small>`;
 
   newBtn.addEventListener('click', () => { C.room.unlock(); C.room.play('press'); openNewGame(); });

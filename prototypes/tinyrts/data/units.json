@@ -191,7 +191,7 @@
      "desc": "Your turrets within 50 fire 50% faster for 8 s."
     },
     "blink": {
-     "name": "Blink",
+     "name": "Slipstep",
      "slot": "KeyW",
      "cd": 12,
      "range": 80,

@@ -2,7 +2,7 @@
 // of the interface can say `sound.build()` without knowing which sample that is.
 //
 //   const sound = await Sound.create(settings);
-//   sound.ui('click'); sound.alert(5); sound.turret('energy');
+//   sound.ui('click'); sound.notice(5); sound.turret('energy');
 //
 // The audio context cannot start until the player has clicked something, so every call is a no-op
 // until then and `unlock()` is wired to the first pointer event.
@@ -76,7 +76,7 @@ export class Sound {
   launch() { this.cue('spell.fire.launch', { gap: 1, volume: 1 }); }
 
   /** A notification: importance 1-5 decides whether it makes a noise at all. */
-  alert(importance = 1) {
+  notice(importance = 1) {
     if (importance >= 5) this.cue('ui.error', { gap: 0.8, volume: 0.9 });
     else if (importance === 4) this.cue('ui.open', { gap: 0.6, volume: 0.6 });
   }

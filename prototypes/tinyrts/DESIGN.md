@@ -276,7 +276,7 @@ Respawns at the Core 30 s after death. No XP; abilities are fixed:
 | Key | Ability | Effect | Cooldown |
 |---|---|---|---|
 | **Q** | Overcharge | Your turrets within 50 fire +50 % faster for 8 s | 30 s |
-| **W** | Blink | Teleport to the cursor within 80 (needs room) | 12 s |
+| **W** | Slipstep | Teleport to the cursor within 80 (needs room) | 12 s |
 | **E** | Orbital Lance | After 2 s, a sky beam hits a 12-wide column: 500 dmg, carves up to **40 cells** deep. Can't target within 60 of any Core. | 90 s |
 
 ---
@@ -484,7 +484,7 @@ each button is the key on *your* keyboard layout.
 | **D** | Hold position |
 | **F** then click | Patrol |
 | **Q** | Siege Walker: Deploy/Undeploy · Commander: Overcharge |
-| **W** | Commander: Blink (click target) |
+| **W** | Commander: Slipstep (click target) |
 | **E** | Commander: Orbital Lance (click target) |
 | **Shift** + order | Queue it |
 

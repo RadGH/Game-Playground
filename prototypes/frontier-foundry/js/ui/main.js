@@ -20,6 +20,7 @@ import { universePlanets } from '../planets.js';
 import { $, el, fill, num, clamp, countdown } from './dom.js';
 import { iconsReady, preload, rawIcon } from './icons.js';
 import { installTooltips } from '../../../../shared/tooltip.js';
+import { createWhatsNew } from '../../../../shared/whats-new.js';
 import { Sound } from './sound.js';
 import { Surface } from './surface.js';
 import { Hud, openDialog, closeDialog } from './hud.js';
@@ -79,14 +80,20 @@ class App {
     this.orbit = new OrbitScreen({ game: null, sound: this.sound, onMessage: (m, bad) => this.hint(m, bad), onLand: t => this.landOn(t) });
     this.codex = new CodexScreen({ game: null, sound: this.sound, onJump: (x, y) => this.jump(x, y) });
 
-    this.title = new Title({
+    this.titleScreen = new Title({
       data: this.data, sound: this.sound,
       onStart: opts => this.newGame(opts),
       onContinue: save => this.loadGame(save),
       onSettings: () => this.openMenu(true),
     });
-    this.title.setSave(Save.read());
-    this.title.survey();
+    this.titleScreen.setSave(Save.read());
+    this.titleScreen.survey();
+    // What's new: a button on the title screen and one in the in-game menu, both with a dot while unread
+    this.news = createWhatsNew({ url: new URL('../../data/changelog.json', import.meta.url), key: 'frontier-foundry', title: "What's new" });
+    $('btn-continue').after(this.news.button({ label: "What's new", className: 'big ghost' }));
+    const menuNews = this.news.button({ label: "What's new" });
+    menuNews.dataset.menu = 'news';
+    $('menu-dialog').querySelector('.menu-buttons [data-menu="new"]').before(menuNews);
 
     this._wireChrome();
     this._wireKeys();
@@ -109,6 +116,8 @@ class App {
     $('btn-route').addEventListener('click', () => this.routeTool.start());
     $('btn-routes').addEventListener('click', () => this.showRoutes());
     $('btn-grid').addEventListener('click', () => { this.surface.showGrid = !this.surface.showGrid; this.sound.ui('tab'); });
+    // phones: the log is a drawer over the map instead of a fixed column (style.css, max-width 600px)
+    $('btn-log').addEventListener('click', () => { document.body.classList.toggle('feed-open'); this.sound.ui('tab'); });
     $('menu-dialog').addEventListener('click', e => {
       const b = e.target.closest('[data-menu]');
       if (b) this.menuAction(b.dataset.menu);
@@ -316,7 +325,8 @@ class App {
       if (steps > 0) { this.game.tick(steps); this.accum -= steps; }
     }
 
-    if (this.screen === 'surface') this.surface.frame();
+    // the map is hidden under a dark backdrop while a dialog is up: no need to redraw it every frame
+    if (this.screen === 'surface' && !$('dlg').open && !$('menu-dialog').open) this.surface.frame();
     if (now - (this._hudAt || 0) > 220) {
       this._hudAt = now;
       this.hud.update();
@@ -352,11 +362,12 @@ class App {
     const dlg = $('menu-dialog');
     switch (what) {
       case 'resume': dlg.close(); break;
+      case 'news': dlg.close(); break;          // (the button opens the window itself; the menu steps out of its way)
       case 'save': this.save(); dlg.close(); break;
       case 'load': { const s = Save.read(); if (s) { this.loadGame(s); dlg.close(); } else this.hint('No save in this browser.', true); break; }
       case 'export': Save.exportFile(this.save(true)); break;
       case 'import': { const s = await Save.importFile(); if (s?.game) { this.loadGame(s); dlg.close(); } else this.hint('That file was not a Frontier Foundry save.', true); break; }
-      case 'new': dlg.close(); document.body.classList.remove('playing'); this.game = null; this.title.setSave(Save.read()); break;
+      case 'new': dlg.close(); document.body.classList.remove('playing'); this.game = null; this.titleScreen.setSave(Save.read()); break;
       case 'quit': this.save(true); location.href = '../../index.html'; break;
     }
   }

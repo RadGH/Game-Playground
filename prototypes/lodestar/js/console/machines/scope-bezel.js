@@ -35,7 +35,7 @@ export async function mountScope(C) {
       </div>
     </div>
     <div class="scope-readout">
-      <span class="ro ro-grid" title="Grid square under the pen">GRID <b>—</b></span>
+      <span class="ro ro-grid" data-tip="Grid square under the pen">GRID <b>—</b></span>
       <span class="ro ro-cell"><b>—</b></span>
       <span class="ro ro-range">RANGE <b>—</b></span>
       <span class="ro ro-filter"><b>SIGHT</b></span>

@@ -18,7 +18,7 @@ const REJECT_TEXT = {
 };
 export { DMG_NAMES, ARMOUR_NAMES };
 
-export function createHud({ root, overlay, sim, Q, player, seat, project, onPause, onSurrender, onQuit, onHowTo = null, isPad = false }) {
+export function createHud({ root, overlay, sim, Q, player, seat, project, onPause, onSurrender, onQuit, onHowTo = null, onNews = null, onCredits = null, isPad = false }) {
   const data = sim.data;
   const tickHz = data.econ?.clock?.tickHz || 20;
   const me = () => sim.state.players[player];
@@ -85,7 +85,7 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
   const reject = h('div', 'reject');
   root.append(alerts, reject);
   let rejectT = 0;
-  function alert(text, kind = 'info', ms = 2600) {
+  function toast(text, kind = 'info', ms = 2600) {
     const el = h('div', 'alert ' + kind, text);
     alerts.append(el);
     while (alerts.children.length > 4) alerts.firstChild.remove();
@@ -109,6 +109,7 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
     <button class="menu-btn" data-act="howto">How to play</button>
     <button class="menu-btn" data-act="surrender">Surrender</button>
     <button class="menu-btn" data-act="quit">Leave to the lobby</button>
+    <div class="pause-row"><button class="menu-btn small" data-act="news">What's new</button><button class="menu-btn small" data-act="credits">Credits</button></div>
     <p class="keys"><kbd>↑</kbd><kbd>↓</kbd> choose · <kbd>Enter</kbd> confirm · controller: d-pad, <kbd class="pad">A</kbd>, <kbd class="pad">B</kbd><br>Right-click move / attack · <kbd>A</kbd> attack-move · <kbd>S</kbd> stop · <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>D</kbd><kbd>R</kbd> skills at the cursor · <kbd>Ctrl</kbd>+key learn ·
     <kbd>B</kbd> Barracks (hire units, hold to keep hiring) · <kbd>O</kbd> Outfitter · <kbd>U</kbd> Drill Yard · <kbd>P</kbd> Sanctum · <kbd>1</kbd>–<kbd>6</kbd> use items · <kbd>F</kbd> look at the next field · <kbd>Space</kbd> back to your hero · wheel zoom</p></div>`;
   root.append(pause);
@@ -117,6 +118,8 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
     if (act === 'resume') setPaused(false);
     if (act === 'surrender') { setPaused(false); onSurrender(); }
     if (act === 'howto') { setPaused(false); onHowTo?.(); }
+    if (act === 'news') onNews?.();
+    if (act === 'credits') onCredits?.();
     if (act === 'quit') { setPaused(false); onQuit(); }
   });
   let paused = false;
@@ -207,7 +210,7 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
         gate._k = key;
         gate.innerHTML = `<div class="gp-head">Next Pay · ${shortSecs(c.payIn / tickHz)}s</div><div class="gp-list">${gp.map((g) => {
           const u = data.units.units[g.unit];
-          return `<span class="gp-unit t${u?.tier || 1}" title="${u?.name || g.unit}">${initials(u?.name || g.unit)}<b>${g.count > 1 ? '×' + g.count : ''}</b></span>`;
+          return `<span class="gp-unit t${u?.tier || 1}" data-tip="${u?.name || g.unit}">${initials(u?.name || g.unit)}<b>${g.count > 1 ? '×' + g.count : ''}</b></span>`;
         }).join('')}</div>`;
       }
     } else gate.hidden = true;
@@ -267,38 +270,38 @@ export function createHud({ root, overlay, sim, Q, player, seat, project, onPaus
         break;
       case 'leak': {
         const n = Math.round(ev.banners * 10) / 10;
-        if (ev.team === myTeam) alert(`Leak! −${n} banner${n === 1 ? '' : 's'}`, 'bad', 1800);
+        if (ev.team === myTeam) toast(`Leak! −${n} banner${n === 1 ? '' : 's'}`, 'bad', 1800);
         break;
       }
-      case 'unlock': alert(`Tier ${ev.tier} sends are open`, 'good'); break;
-      case 'rising': alert(`The Rising Tide — step ${ev.step}. Leaks hit harder.`, 'warn', 3800); break;
+      case 'unlock': toast(`Tier ${ev.tier} sends are open`, 'good'); break;
+      case 'rising': toast(`The Rising Tide — step ${ev.step}. Leaks hit harder.`, 'warn', 3800); break;
       case 'heroDown':
         if (ev.player === player) break;   // the big "Your hero has fallen" card says it (main.js)
-        if (s.players[ev.player]?.team === myTeam) alert(`${s.players[ev.player].name} is down`, 'bad', 2000);
-        else if (s.players[ev.player]?.team !== myTeam) alert('Rival hero is down', 'good', 2000);
+        if (s.players[ev.player]?.team === myTeam) toast(`${s.players[ev.player].name} is down`, 'bad', 2000);
+        else if (s.players[ev.player]?.team !== myTeam) toast('Rival hero is down', 'good', 2000);
         break;
-      case 'levelUp': if (ev.player === player) alert(`Level ${ev.level} — a skill point is ready (Ctrl + Q/W/E/R)`, 'good', 2200); break;
-      case 'talentReady': if (ev.player === player) alert('Level 6: choose a talent', 'good', 2600); break;
+      case 'levelUp': if (ev.player === player) toast(`Level ${ev.level} — a skill point is ready (Ctrl + Q/W/E/R)`, 'good', 2200); break;
+      case 'talentReady': if (ev.player === player) toast('Level 6: choose a talent', 'good', 2600); break;
       case 'champion': {
         const f = sim.map.fields[ev.field];
         const name = data.units.units[ev.unit]?.name || 'A champion';
-        if (f && f.team === myTeam) alert(`${name} marches on your Keep!`, 'warn', 3600);
-        else alert(`Your ${name} leaves the gate`, 'good', 2600);
+        if (f && f.team === myTeam) toast(`${name} marches on your Keep!`, 'warn', 3600);
+        else toast(`Your ${name} leaves the gate`, 'good', 2600);
         break;
       }
       case 'counter': {
         if (ev.target !== player) break;
         const who = s.players[ev.player]?.name || 'Your rival';
-        alert(`${who} sends ${ev.name}${ev.count > 1 ? ` ×${ev.count}` : ''} — ${ev.reason}`, 'warn', 3600);
+        toast(`${who} sends ${ev.name}${ev.count > 1 ? ` ×${ev.count}` : ''} — ${ev.reason}`, 'warn', 3600);
         break;
       }
-      case 'upgradeUnit': case 'unitUpgrade': if (ev.player === player) alert('Your army is better trained', 'good', 1600); break;
+      case 'upgradeUnit': case 'unitUpgrade': if (ev.player === player) toast('Your army is better trained', 'good', 1600); break;
       default: break;
     }
   }
 
   return {
-    update, onEvent, alert,
+    update, onEvent, toast,
     get paused() { return paused; },
     togglePause() { setPaused(!paused); },
     /** Match over: clear the talent pick, alerts and the reject line so the result word stands alone. */

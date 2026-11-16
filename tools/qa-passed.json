@@ -3,6 +3,11 @@
   "games": [
     "rogueloot",
     "voidwright",
-    "hullforge"
+    "hullforge",
+    "bannerline",
+    "lanternfall",
+    "lodestar",
+    "frontier-foundry",
+    "tinyrts"
   ]
 }

@@ -32,7 +32,8 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 ## Servers and publishing (full note: `tools/README-servers.md`)
 
 - Start both with `tools/serve-both.sh`. **8400 = STABLE** (worktree `~/claude/playground-stable`, `stable` branch) — the URL to give the user. **8401 = DEV** (this working tree, often broken mid-edit). https for gamepads: 8442 stable, 8441 dev. Always give the LAN IP (`hostname -I | awk '{print $1}'`), never localhost. Do not use `./serve.sh --bg`.
-- Promote: commit → `tools/publish-stable.sh` (refuses unparseable JS or red unit tests) → `tools/publish-pages.sh` (GitHub Pages, https://radgh.github.io/Game-Playground/ — never use a path starting with `/`) → for games.radgh.com, `cd ~/claude/rads-game-server && tools/deploy.sh update <game>` (`~/claude/docs/rgs.md`). Games with their own server (Thousandvale, Tumblefair, Knockabout, Roverlands, Oddhaven, Rogueloot) have their own publish script — see their README.
+- **Going live, one command: `tools/go-live.sh <game…>`** (all the steps below + the RGS commit; `--check` only checks the games.json entry, picture and What's new).
+- Promote by hand: commit → `tools/publish-stable.sh` (refuses unparseable JS or red unit tests) → `tools/publish-pages.sh` (GitHub Pages, https://radgh.github.io/Game-Playground/ — never use a path starting with `/`) → for games.radgh.com, `cd ~/claude/rads-game-server && tools/deploy.sh update playground` (stamps every changed game) (`~/claude/docs/rgs.md`). Games with their own server (Thousandvale, Tumblefair, Knockabout, Roverlands, Oddhaven, Rogueloot) have their own publish script — see their README.
 
 ## Experiments
 
@@ -73,7 +74,7 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 | `prototypes/voidwright/` | 2D block-built space game | live |
 | `prototypes/hullforge/` | 3D block-built space game (auto corners, animated turrets, 6-direction flight); desktop only | new |
 | `prototypes/spirehold/` | Semi-idle city defence | playable |
-| `prototypes/grimring/` | Arena with the Model Library Meshy fighters (1-2 foes at a time) | new |
+| `prototypes/grimring/` | Arena with the Model Library Meshy fighters (1-2 foes at a time) | live |
 | `prototypes/tinyrts/` | Symlink to its own repo `~/claude/tinyrts` — commit THERE; keep its `master` green (stable serves it) | playable |
 | `prototypes/lanternfall/` | Side-scrolling pixel action RPG (`docs/HANDOFF.md` = remaining work) | playable |
 | `prototypes/bannerline/` | Lockstep RTS of game modes (lane wars, hunters vs farmers) | done |

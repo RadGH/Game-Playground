@@ -76,14 +76,14 @@ export const classSelect = {
       }));
       const c = D.classes.byId[CS.pick]; const open = isUnlocked(c, profile); const ch = challengeLines(c, profile);
       const wicks = c.startWicks.map(w => `${D.flames.byId[w.flame]?.name} ${D.shapes.byId[w.shape]?.name}${w.dry ? ' (dry)' : ''}`).join(' · ');
-      preview.replaceChildren(canvas,
+      preview.replaceChildren(...[canvas,
         el('h3', { class: 'lf-h', text: `${c.name.toUpperCase()} — ${c.role}` }),
         el('div', { class: 'small' }, el('b', { text: 'Wicks: ' }), wicks),
         el('div', { class: 'small' }, el('b', { text: 'Ability: ' }), cap(String(c.ability).replace('ability_', '').replace(/_/g, ' ')), el('span', { class: 'dim', text: ' (from the Act 1 relight)' })),
         el('div', { class: 'lf-attrbars' }, ATTRS.map(a => [el('span', { text: ATTR_NAMES[a] }), el('span', { class: 'bar', 'aria-label': `${c.attrs[a]}`, text: '▮'.repeat(Math.round(c.attrs[a] / 2)) + '▯'.repeat(Math.max(0, 5 - Math.round(c.attrs[a] / 2))) })]).flat()),
         el('p', { class: 'small', text: `${c.desc} ${PLAYS[c.id] || ''}` }),
         !open && ch ? el('div', { class: 'lf-panel col' }, el('b', { class: 'gold', text: 'How to unlock' }), el('span', { class: 'small', text: ch.challenge }), ...ch.progress.map(t => el('span', { class: 'small dim', text: t })),
-          btn(profile.tracked === ch.id ? 'Tracking ✓' : 'Track', () => { profile.tracked = profile.tracked === ch.id ? null : ch.id; ctx.actions.trackChallenge?.(profile.tracked); draw(); }, { cls: 'small' })) : null);
+          btn(profile.tracked === ch.id ? 'Tracking ✓' : 'Track', () => { profile.tracked = profile.tracked === ch.id ? null : ch.id; ctx.actions.trackChallenge?.(profile.tracked); draw(); }, { cls: 'small' })) : null].filter(Boolean)); // replaceChildren would print a null as the word "null"
       canvas.classList.toggle('grey', !open);
       if (CS.chamber) { CS.cast = 0; nextWick(); }
       footer.replaceChildren(btn('Back', () => router.back()),
@@ -96,7 +96,7 @@ export const classSelect = {
       const n = CS.name.trim(); if (!NAME_OK.test(n)) { toast('Names are 1-16 letters, spaces, \' or -.', 'bad'); nameIn.focus(); return; }
       router.open('newgame', { slot: args.slot, classId: CS.pick, name: n, palette: CS.palette });
     };
-    const confirmSwitch = async () => { if (await confirmBox(root, { title: 'Answer the call?', text: `Become a ${D.classes.byId[CS.pick].name}. This is 04's class switch rule.`, yes: 'Answer' })) { if (ctx.actions.switchClass) { ctx.actions.switchClass(CS.pick); router.closeAll(); } else toast('Class switching opens with its milestone (docs/HANDOFF.md, M34).', 'bad'); } };
+    const confirmSwitch = async () => { if (await confirmBox(root, { title: 'Answer the call?', text: `Become a ${D.classes.byId[CS.pick].name}. You keep your level and gear; your points are refunded.`, yes: 'Answer' })) { if (ctx.actions.switchClass) { ctx.actions.switchClass(CS.pick); router.closeAll(); } else toast('Class switching opens with its milestone (docs/HANDOFF.md, M34).', 'bad'); } };
     const footer = el('div', { class: 'row end' });
     const look = el('div', { class: 'row small' }, 'Coat', btn('◂', () => { CS.palette = (CS.palette + 7) % 8; lookLbl.textContent = `palette ${CS.palette + 1}/8`; }, { cls: 'small', 'aria-label': 'previous palette' }),
       el('span', { text: `palette ${CS.palette + 1}/8` }), btn('▸', () => { CS.palette = (CS.palette + 1) % 8; lookLbl.textContent = `palette ${CS.palette + 1}/8`; }, { cls: 'small', 'aria-label': 'next palette' }));

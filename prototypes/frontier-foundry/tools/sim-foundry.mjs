@@ -18,7 +18,7 @@
 
 import { loadData } from '../js/data.js';
 import { Game } from '../js/game.js';
-import { Bot, PLAN } from '../js/ai.js';
+import { Bot, PLAN } from './bot.js';
 import { makePlanet } from '../js/planets.js';
 
 const argv = process.argv.slice(2);

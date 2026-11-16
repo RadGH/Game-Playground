@@ -219,10 +219,10 @@ function readout(w, why, stats) {
     w.knot?.trigger && w.knot.flame && w.knot.shape ? ['Knot', knotLine(w)] : null,
     flag ? ['Balance', el('span', { class: 'gold', text: flag })] : null,
   ].filter(Boolean);
-  box.append(el('dl', { class: 'lf-readout' }, rows.map(([k, ...v]) => [el('dt', { text: k }), el('dd', {}, ...v)]).flat()),
+  box.append(...[el('dl', { class: 'lf-readout' }, rows.map(([k, ...v]) => [el('dt', { text: k }), el('dd', {}, ...v)]).flat()),
     el('h4', { class: 'gold small', text: 'Burn-in' }), burnRow(f.name, H.burn?.flame?.[f.id] || 0, lv.flame), burnRow(s.name, H.burn?.shape?.[s.id] || 0, lv.shape),
     changed.length ? el('p', { class: 'small gold', text: changed.join(' ') }) : null,
-    why ? el('p', { class: 'bad small', text: why }) : null);
+    why ? el('p', { class: 'bad small', text: why }) : null].filter(Boolean)); // append would print a null as "null"
   return box;
 }
 function knotLine(w) {

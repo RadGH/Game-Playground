@@ -108,7 +108,7 @@ export class Hud {
     this.alerts = []; this.alertBox.innerHTML = ''; this.lastAlert = null;
     this.miniTerrain = null; this.miniT = 0;
     const E = game.events;
-    const A = (type, text, x, y, cls = '') => this.alert(text, x, y, cls, type);
+    const A = (type, text, x, y, cls = '') => this.notify(text, x, y, cls, type);
     E.on('underAttack', (e) => { if (e.team === 1) A('attack', e.kind === 'b' ? `${nameOf(game, e.type)} under attack` : 'Units under attack', e.x, e.y, 'bad'); });
     E.on('buildingDestroyed', (e) => { if (e.team === 1) A('lost', `${nameOf(game, e.type)} destroyed`, e.x, e.y, 'bad'); else if (e.team === 2) A('kill', `Umbra ${nameOf(game, e.type)} destroyed`, e.x, e.y, 'good'); });
     E.on('waveStart', (e) => A('wave', e.boss ? `Wave ${e.n} — BOSS incoming!` : `Wave ${e.n} incoming${e.lanes.some((l) => l.includes('left')) ? ' (both sides)' : ''}`, null, null, 'warn'));
@@ -127,7 +127,7 @@ export class Hud {
     this.refreshCard();
   }
 
-  alert(text, x, y, cls, type) {
+  notify(text, x, y, cls, type) {
     const now = performance.now();
     const same = this.alerts.find((a) => a.text === text && now - a.t < 4000);
     if (same) { same.t = now; same.x = x ?? same.x; same.y = y ?? same.y; return; }
@@ -138,7 +138,7 @@ export class Hud {
     this.alerts.unshift(a);
     while (this.alerts.length > 5) { const old = this.alerts.pop(); old.node.remove(); }
     if (x != null) this.lastAlert = a;
-    this.app.audio?.alert(cls);
+    this.app.audio?.warn(cls);
   }
 
   jumpToAlert() {
@@ -266,7 +266,7 @@ export class Hud {
     pw.parentElement.classList.toggle('bad', p.ratio < 1);
     $('r-batt').style.width = (p.cap ? Math.round((p.battery / p.cap) * 100) : 0) + '%';
     $('r-batt').parentElement.style.display = p.cap ? 'inline-block' : 'none';
-    if (p.ratio < 1 && !this.lastBrownout) this.alert('Brown-out! Build Solar Arrays or a Reactor', null, null, 'bad', 'power');
+    if (p.ratio < 1 && !this.lastBrownout) this.notify('Brown-out! Build Solar Arrays or a Reactor', null, null, 'bad', 'power');
     this.lastBrownout = p.ratio < 1;
     $('r-pop').textContent = `${t.pop}/${t.popCap}`;
     // Wave.
@@ -382,7 +382,7 @@ export class Hud {
       if (def.refine) ctx += `<div>${e.refining === false ? '<span class="c-warn">Waiting for crystal/ferrite</span>' : 'Refining alloy'}</div>`;
       if (def.trains && e.queue.length) {
         const first = udef(g, e.queue[0]);
-        ctx += `<div class="queue">` + e.queue.map((q, i) => `<span class="qi" data-b="${e.id}" data-cancel="${i}" title="Click to cancel"><canvas width="22" height="22" data-k="u" data-t="${q}" data-team="1"></canvas>${i === 0 ? `<i style="width:${Math.round((e.trainT / (first.train || 8)) * 100)}%"></i>` : ''}</span>`).join('') + `</div>`;
+        ctx += `<div class="queue">` + e.queue.map((q, i) => `<span class="qi" data-b="${e.id}" data-cancel="${i}" data-hint="Click to cancel"><canvas width="22" height="22" data-k="u" data-t="${q}" data-team="1"></canvas>${i === 0 ? `<i style="width:${Math.round((e.trainT / (first.train || 8)) * 100)}%"></i>` : ''}</span>`).join('') + `</div>`;
       }
       if (e.type === 'lab') {
         const a = g.teams[e.team].research.active[e.id];

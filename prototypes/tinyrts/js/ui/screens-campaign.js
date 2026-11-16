@@ -33,7 +33,7 @@ export function registerCampaignScreens(app, menus) {
         const stars = prog.stars[ms.id] || 0;
         const node = el('button', 'node' + (i === sel ? ' sel' : '') + (locked ? ' locked' : '') + (i < prog.unlocked ? ' done' : ''));
         node.innerHTML = `<span class="num">${i}</span><span class="nstars">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</span>`;
-        node.title = locked ? 'Locked' : ms.name;
+        node.dataset.hint = locked ? 'Locked' : ms.name;
         node.addEventListener('click', () => { if (!locked) { sel = i; p.sel = i; render(); } });
         line.appendChild(node);
         if (i < missions.length - 1) line.appendChild(el('div', 'beam' + (i < prog.unlocked ? ' lit' : '')));
@@ -56,7 +56,7 @@ export function registerCampaignScreens(app, menus) {
       if (icons.length) {
         nw.appendChild(el('span', 'c-dim', 'New: '));
         for (const ic of icons) {
-          const cv = el('canvas'); cv.width = 26; cv.height = 26; cv.title = nameOf(data, ic.t);
+          const cv = el('canvas'); cv.width = 26; cv.height = 26; cv.dataset.hint = nameOf(data, ic.t);
           cv.getContext('2d').drawImage(iconFor({ kind: ic.kind, type: ic.t }, 26), 0, 0);
           nw.appendChild(cv);
         }

@@ -1,9 +1,9 @@
 # Grimring
 
-**Status:** new 2026-11-15 — playable: Gauntlet, Duel, Watch; all twelve Model Library fighters
-**Play:** LAN stable http://192.168.1.34:8400/prototypes/grimring/ (https for controllers: https://192.168.1.34:8442/prototypes/grimring/) · not public yet (owner decides; see Parked)
-**Next:** owner playtest; tune fighters from what feels off; then decide whether it goes on games.radgh.com
-**Parked:** public listing (the Model Library GLBs are left out of GitHub Pages because of size — publishing needs them copied or served by RGS); ratings/insights (no game server); four-legged fighters (the library has none)
+**Status:** LIVE on games.radgh.com 2026-11-15 — Gauntlet, Duel, Watch; all twelve Model Library fighters
+**Play:** LAN stable http://192.168.1.34:8400/prototypes/grimring/ (https for controllers: https://192.168.1.34:8442/prototypes/grimring/) · public https://games.radgh.com/grimring/
+**Next:** owner playtest; tune fighters from what feels off
+**Parked:** ratings/insights (no game server); four-legged fighters (the library has none)
 
 A small arena to see the **Model Library**'s Meshy fighters (`model-library/`) in action, one or two at a time.
 Owner's ask (2026-11-15): "Create a new game using those Meshy models we created, just a simple arena type of game to
@@ -42,4 +42,5 @@ see 1-2 models at a time."
 - `node prototypes/grimring/tests/shots.mjs` — screenshots to look at.
 
 ## History
-- 2026-11-15 — built: twelve fighters, three modes, arena, weapons, sounds, What's new, credits, reports.
+- 2026-11-15 — built: twelve fighters, three modes, arena, weapons, sounds, What's new, credits, reports. Went live the same day
+  (`tools/publish-pages.sh` now sends `model-library/models/` + `data/models.json`; the rest of the library stays home).

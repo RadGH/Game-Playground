@@ -126,7 +126,7 @@ export class Audio {
   }
 
   ui(kind) { this.play('ui-' + kind); }
-  alert(cls) { this.play('alert-' + (cls || 'warn')); }
+  warn(cls) { this.play('alert-' + (cls || 'warn')); }
 
   attach(game) {
     const E = game.events;

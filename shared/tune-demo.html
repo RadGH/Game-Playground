@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tuning panel demo</title>
+<link rel="stylesheet" href="tune-demo.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<p class="hint">Press <b>`</b> or tap <b>Tune</b> to open the tuning panel.</p>
+<script type="module">
+import { loadTuning, tunePanel } from './tune.js';
+const T = await loadTuning(new URL('./test/tune-demo/tuning.json', import.meta.url));
+window.tuning = T;
+window.panel = tunePanel({ game: 'tune-demo', tuning: T, button: true });
+const c = document.getElementById('c'), x = c.getContext('2d');
+const ball = { x: 80, y: 80, vx: 1, vy: 0 };
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  c.width = innerWidth; c.height = innerHeight;
+  ball.vy += T.gravity * 60 * dt;
+  ball.x += ball.vx * T.ballSpeed * dt; ball.y += ball.vy * 60 * dt;
+  const r = T.ballSize;
+  if (ball.x < r || ball.x > c.width - r) { ball.vx *= -1; ball.x = Math.max(r, Math.min(c.width - r, ball.x)); }
+  if (ball.y > c.height - r) { ball.y = c.height - r; ball.vy *= -T.bounce; if (Math.abs(ball.vy) < 1) ball.vy = -14; }
+  x.fillStyle = '#121a20'; x.fillRect(0, 0, c.width, c.height);
+  x.fillStyle = '#ffc95a'; x.beginPath(); x.arc(ball.x, ball.y, r, 0, Math.PI * 2); x.fill();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

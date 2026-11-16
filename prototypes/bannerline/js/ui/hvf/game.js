@@ -233,12 +233,12 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     for (const l of local) m.views.push(makeView(l, n));
     // seat 0 shortcuts (tests, tools)
     m.me = m.views[0].player; m.camera = m.views[0].camera; m.vp = m.views[0].vp;
-    if (n > 1 && new Set(m.views.map((v) => v.team)).size > 1) for (const v of m.views) v.hud.alert('Both screens are visible — no peeking!', 'warn', 5000);
+    if (n > 1 && new Set(m.views.map((v) => v.team)).size > 1) for (const v of m.views) v.hud.toast('Both screens are visible — no peeking!', 'warn', 5000);
     for (const v of m.views) {
-      if (v.spectator) { v.spec.alert('Watching the AI: F jumps between characters, V changes whose fog you see', 'info', 6000); continue; }
+      if (v.spectator) { v.spec.toast('Watching the AI: F jumps between characters, V changes whose fog you see', 'info', 6000); continue; }
       devices?.claim?.(v.device, 'hvf' + v.i);
       const f = rules.formats[sim.state.format];
-      v.hud.alert(v.role === 'farmer' ? `Find a hidden spot before the hunters are loose (${f.headStart} s). Hollows are off the trails behind briar or a single tree.` : `You wait in your kennel for ${f.headStart} s while the farmers hide. Listen for their animals.`, 'info', 7000);
+      v.hud.toast(v.role === 'farmer' ? `Find a hidden spot before the hunters are loose (${f.headStart} s). Hollows are off the trails behind briar or a single tree.` : `You wait in your kennel for ${f.headStart} s while the farmers hide. Listen for their animals.`, 'info', 7000);
     }
     bindKbm();
     // sound (stream C's bridge, js/view/hvf-sound.js): one listener per screen — the nearest local character
@@ -321,7 +321,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     });
     v.spec = createSpectator({
       root: v.root, mode: 'hvf', fog: true, teamColours: ['#e8c34a', '#e0503e'],
-      onSpeed: (n) => { if (m.net) { v.spec.alert('An online match runs at one speed', 'info', 1600); return; } m.clock.setSpeed(n); if (m.paused) setSpecPause(false); },
+      onSpeed: (n) => { if (m.net) { v.spec.toast('An online match runs at one speed', 'info', 1600); return; } m.clock.setSpeed(n); if (m.paused) setSpecPause(false); },
       onPause: (p) => setSpecPause(p),
       onFog: (id) => { v.fog = id; },
       onPick: (id) => specFollow(v, id),
@@ -333,14 +333,14 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     return v;
   }
   function setSpecPause(p) {
-    if (m.net) { for (const w of m.views) w.spec?.alert('Online matches do not pause', 'info', 1400); return; }
+    if (m.net) { for (const w of m.views) w.spec?.toast('Online matches do not pause', 'info', 1400); return; }
     m.paused = !!p; m.clock.setPaused(m.paused);
   }
   function specFollow(v, id, say = true) {
     v.follow = id;
     v.camera.centre();
     const c = hvfChars(m.sim).find((x) => x.id === id);
-    if (say && c) v.spec.alert(`Following ${c.name}`, 'info', 1200);
+    if (say && c) v.spec.toast(`Following ${c.name}`, 'info', 1200);
   }
   /** One frame of the spectator: camera input from every device, follow-cam, the side panels. */
   function spectatorFrame(v, frames, dt) {
@@ -381,7 +381,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     else if (a.use) issue(v, { type: 'use', slot: a.slot, x, z });
     else if (a.army) {
       const ids = m.sim.state.ents.filter((e) => e.kind === 'army' && e.owner === v.player && e.alive).map((e) => e.id);
-      if (ids.length) issue(v, { type: 'order', ids, kind: 'amove', x, z }); else v.hud.alert('No army yet — build a Harvest Hall', 'warn', 1600);
+      if (ids.length) issue(v, { type: 'order', ids, kind: 'amove', x, z }); else v.hud.toast('No army yet — build a Harvest Hall', 'warn', 1600);
     }
     v.aim = null; v.hud.setPlaceHint(null);
   }
@@ -490,10 +490,10 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
     return v.camera.groundAt(cx - c.left - v.vp.rect.x, cy - c.top - v.vp.rect.y, v.vp.rect);
   }
   function togglePause(v) {
-    if (m.net) { v.hud.alert('Online matches do not pause', 'info', 1400); return; }
+    if (m.net) { v.hud.toast('Online matches do not pause', 'info', 1400); return; }
     m.paused = !m.paused;
     m.clock.setPaused(m.paused);
-    for (const w of m.views) w.hud.alert(m.paused ? 'Paused — Esc / Menu to resume' : 'Resumed', 'info', 1200);
+    for (const w of m.views) w.hud.toast(m.paused ? 'Paused — Esc / Menu to resume' : 'Resumed', 'info', 1200);
   }
 
   // ── gamepad (B's device frames) ────────────────────────────────────────────────────────────────
@@ -711,8 +711,8 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       if (setup) { setup.online = setup.online || {}; setup.online.room = room; }
       room.on('change', () => { if (setup) drawSetup(); });
       room.on('start', (packet) => online.begin(packet));
-      room.on('error', (e) => { if (setup?.online) { setup.online.error = e.message; drawSetup(); } for (const v of m?.views || []) v.hud.alert(e.message, 'bad', 4000); });
-      room.on('closed', () => { if (m?.net) for (const v of m.views) v.hud.alert('Host left — match ended', 'bad', 4000); });
+      room.on('error', (e) => { if (setup?.online) { setup.online.error = e.message; drawSetup(); } for (const v of m?.views || []) v.hud.toast(e.message, 'bad', 4000); });
+      room.on('closed', () => { if (m?.net) for (const v of m.views) v.hud.toast('Host left — match ended', 'bad', 4000); });
     },
     async host(code, { format = choice.format, name = 'Host' } = {}) {
       const { createRoom } = await import('../../net/lobbysync.js');
@@ -735,7 +735,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       online.hashes = {};
       const match = beginMatch(online.room, packet, {
         data, createSim, restoreSim, now: () => performance.now(),
-        onEvent: (type, e = {}) => { for (const v of m?.views || []) { if (type === 'takeover') v.hud.alert(`${e.name || 'A player'} left — an AI takes their seat`, 'warn', 3600); else if (type === 'hostLeft') v.hud.alert('Host left — match ended', 'bad', 4000); } },
+        onEvent: (type, e = {}) => { for (const v of m?.views || []) { if (type === 'takeover') v.hud.toast(`${e.name || 'A player'} left — an AI takes their seat`, 'warn', 3600); else if (type === 'hostLeft') v.hud.toast('Host left — match ended', 'bad', 4000); } },
         onTick: (t, sim) => { if (t % 200 === 0) online.hashes[t] = sim.hash(); },
       });
       const clock = createNetClock({ lockstep: match.lockstep, tickMs: packet.tickMs });
@@ -747,7 +747,7 @@ export function createHvfGame({ gfx, data, host, devices = null, onExit = () => 
       // it owns no players, so it issues nothing.
       const watching = !local.length;
       begin({ sim: match.sim, clock, local, opts: { format: packet.config.format, online: true, watching }, net: { match, clock, room: online.room, detach } });
-      if (watching) for (const v of m.views) v.spec?.alert('You have no seat in this match: spectating both sides.', 'info', 6000);
+      if (watching) for (const v of m.views) v.spec?.toast('You have no seat in this match: spectating both sides.', 'info', 6000);
     },
   };
 

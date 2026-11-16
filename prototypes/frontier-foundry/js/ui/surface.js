@@ -386,6 +386,18 @@ export class Surface {
     if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; }
   }
 
+  /**
+   * Draw a one-pixel-per-tile layer (terrain, roads, fog) scaled up to the view, copying only the tiles on screen.
+   * Scaling the whole 480-tile layer every frame and letting the canvas clip it is what made the surface slow on
+   * weak GPUs (a 5000-pixel-wide draw for a 1280-pixel screen).
+   */
+  _blit(g, layer, v, m) {
+    const x0 = Math.max(0, Math.floor(-v.ox / v.z) - 1), y0 = Math.max(0, Math.floor(-v.oy / v.z) - 1);
+    const x1 = Math.min(m.width, Math.ceil((v.w - v.ox) / v.z) + 1), y1 = Math.min(m.height, Math.ceil((v.h - v.oy) / v.z) + 1);
+    if (x1 <= x0 || y1 <= y0) return;
+    g.drawImage(layer, x0, y0, x1 - x0, y1 - y0, v.ox + x0 * v.z, v.oy + y0 * v.z, (x1 - x0) * v.z, (y1 - y0) * v.z);
+  }
+
   draw() {
     if (!this.game) return;
     this.resize();
@@ -399,8 +411,8 @@ export class Surface {
     if (now > this.dirty.fog) this._bakeFog();
 
     g.imageSmoothingEnabled = v.z < 7;
-    g.drawImage(this.terrainCanvas, v.ox, v.oy, m.width * v.z, m.height * v.z);
-    if (!this.roadEmpty) g.drawImage(this.roadCanvas, v.ox, v.oy, m.width * v.z, m.height * v.z);
+    this._blit(g, this.terrainCanvas, v, m);
+    if (!this.roadEmpty) this._blit(g, this.roadCanvas, v, m);
     g.imageSmoothingEnabled = true;
 
     if (this.showGrid && v.z >= 10) this._drawGrid(g, v, m);
@@ -412,7 +424,7 @@ export class Surface {
 
     // fog last of the world layers, so nothing hidden shows through
     g.imageSmoothingEnabled = true;
-    g.drawImage(this.fogCanvas, v.ox, v.oy, m.width * v.z, m.height * v.z);
+    this._blit(g, this.fogCanvas, v, m);
 
     this._drawSelection(g, v, now);
     if (this.tool?.draw) this.tool.draw(g, v, this);

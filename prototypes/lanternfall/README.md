@@ -1,6 +1,9 @@
 # Lanternfall
 
-> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh lanternfall` from the playground and fix what it finds — game-lint (on 2026-11-11: 1 browser-tooltip, 1 no-whats-new), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `lanternfall` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass.
+**Status:** QA pass done 2026-11-15 (lint, every module connected, every screen walked on desktop + phone); ready for games.radgh.com. Playable end to end: title → class → Guild Hall → six acts → ending line
+**Play:** LAN stable http://192.168.1.34:8400/prototypes/lanternfall/ · public https://games.radgh.com/lanternfall/
+**Next:** the Act 1 hand-made rooms (a1_n02, n03, n06, n07, n09), then the grapple verb — order in `docs/HANDOFF.md` "Recommended order to finish"
+**Parked:** real scripts for bosses 2–6 and the minibosses (they run Mother Tallow's script; `js/ai/bosskit.js` waits for them), the five Modes, endings A/B/C, touch controls (phones reach every menu but cannot play), gamepad — all in `docs/HANDOFF.md`
 
 A side-scrolling pixel action RPG in a drowned chasm-city, **Vessmere**. It has falling-sand physics (every cell
 is simulated: water, wax, oil, fire, steam, sand, rubble), spells you build from parts, and six acts going *down*

@@ -221,7 +221,7 @@ the spam. **Removed** = done in the sim already; **Flag** = a judgement call for
   E did not touch A's file.
 - [x] (E -> B) Toast for `counter` events whose `target` is a local player: "**{sender name}** sends
   **{name}** x{count} — {reason}". The reason is written to be read by the DEFENDER ("your").
-- [ ] (E -> I) `js/sim/shop.js` `aiShopping` / `aiHealSlot` are no longer called (the AI's Outfitter,
+- [x] (E -> I) `js/sim/shop.js` `aiShopping` / `aiHealSlot` are no longer called (deleted 2026-11-15) (the AI's Outfitter,
   Drill Yard and Sanctum decisions moved into js/sim/ai/shop.js + town.js). Safe to delete.
 - [ ] (E -> lead) **Balance finding, not tuned (owner: balance later).** In the current numbers raw send
   volume decides almost everything: a scripted "new player" (spends 70% of its gold on tier 1-2 units every

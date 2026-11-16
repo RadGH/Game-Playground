@@ -10,6 +10,7 @@ import { createWorldLink } from './console/link.js';
 import { createPadNav } from './console/padnav.js';
 import { installEye } from './eye.js';
 import { createWhatsNew } from '../../../shared/whats-new.js';
+import { installTooltips } from '../../../shared/tooltip.js';
 import { compileData } from './sim/data.js';
 import { gridRef } from './console/view.js';
 import { installArcane } from './console/arcane.js'; // M6: spell aiming, spell effects, mana events
@@ -21,6 +22,7 @@ const room = createRoom({ volume: volumeOf(settings), enabled: settings.volume >
 const state = createState({ tool: null, range: data.range.default, filter: 'sight', rate: data.time.default, drawer: null, page: 'tools', buildType: null, inspect: null });
 const news = createWhatsNew({ url: new URL('../data/changelog.json', import.meta.url), key: 'lodestar', title: "WHAT'S NEW" });
 const app = document.getElementById('app');
+installTooltips();
 
 const C = {
   data, settings, room, state, news, game: null, hud: null,

@@ -10,6 +10,7 @@ export class Menus {
     this.stack = [];
     this.screens = {};
     window.addEventListener('keydown', (e) => this.onKey(e), true);
+    installHints();
   }
 
   register(name, fn) { this.screens[name] = fn; }
@@ -49,6 +50,10 @@ export class Menus {
 
   onKey(e) {
     if (!this.open) return;
+    if (document.querySelector('.wn-modal')) {        // the What's new window is on top: Esc closes it, nothing else moves
+      if (e.code === 'Escape') { e.preventDefault(); e.stopPropagation(); this.app.news?.close(); }
+      return;
+    }
     const t = e.target;
     const typing = t && (t.tagName === 'INPUT' && t.type !== 'range' && t.type !== 'checkbox') || (t && t.tagName === 'TEXTAREA');
     if (e.code === 'Escape') {
@@ -82,3 +87,26 @@ export function button(label, onClick, cls = '') {
 }
 
 export { el };
+
+// Small styled hints for anything marked data-hint="text" (campaign nodes, unit queue, mission icons), drawn in the
+// same #tooltip box the HUD uses — never the browser's own title= tooltip.
+function installHints() {
+  const box = document.getElementById('tooltip');
+  if (!box) return;
+  let cur = null;
+  document.addEventListener('mouseover', (e) => {
+    const n = e.target.closest?.('[data-hint]');
+    if (n === cur) return;
+    cur = n;
+    if (!n) { box.hidden = true; return; }
+    box.textContent = n.dataset.hint;
+    box.hidden = false;
+    const r = n.getBoundingClientRect();
+    const tw = box.offsetWidth, th = box.offsetHeight;
+    let x = r.left + r.width / 2 - tw / 2, y = r.top - th - 8;
+    if (y < 4) y = r.bottom + 8;
+    x = Math.max(4, Math.min(window.innerWidth - tw - 4, x));
+    box.style.left = x + 'px'; box.style.top = y + 'px';
+  });
+  document.addEventListener('pointerdown', () => { if (cur) { cur = null; box.hidden = true; } }, true);
+}

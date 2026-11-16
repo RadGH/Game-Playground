@@ -29,6 +29,7 @@ tools/serve-both.sh stop     # stop both
 tools/publish-stable.sh      # promote HEAD to stable
 tools/publish-stable.sh <ref>   # promote a specific commit or branch
 tools/publish-stable.sh --force # skip the checks (don't)
+tools/go-live.sh <game…>     # stable + GitHub Pages + games.radgh.com + RGS commit, in one go
 ```
 
 ## The gate

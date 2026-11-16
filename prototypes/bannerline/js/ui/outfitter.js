@@ -69,7 +69,7 @@ export function createOutfitter({ root, sim, Q, player, seat, isPad = false, ico
         <span class="ot-nm">${it.name}</span>
         <span class="ot-price">${icon('coin')}<b>${it.price}</b></span>
         <span class="ot-own"></span>
-        ${it.uniqueEquipped ? '<span class="ot-uq" title="Unique: carry only one">★</span>' : ''}
+        ${it.uniqueEquipped ? '<span class="ot-uq" data-tip="Unique: carry only one">★</span>' : ''}
         ${it.consumable ? '<span class="ot-use">use</span>' : ''}
       </button>`).join('');
   }

@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="css/hvf-map.css">
+<link rel="stylesheet" href="../../shared/tooltip.css">
 </head>
 <body>
 <!-- Hunters vs Farmers world generator (docs/hvf-PLAN.md §3.4): one seed with layers + metrics, or a
@@ -21,8 +22,8 @@
   </div>
   <label>Format <select id="format"></select></label>
   <label>Seed <input id="seed" type="number" min="0" step="1" value="1"></label>
-  <button class="btn" id="prev" title="Previous seed">&lsaquo;</button>
-  <button class="btn" id="next" title="Next seed">&rsaquo;</button>
+  <button class="btn" id="prev" data-tip="Previous seed">&lsaquo;</button>
+  <button class="btn" id="next" data-tip="Next seed">&rsaquo;</button>
   <button class="btn primary" id="random">Random</button>
 </header>
 <main id="one">

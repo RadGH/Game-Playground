@@ -128,3 +128,12 @@ input[type=range] { width: 200px; accent-color: var(--cyan); }
 .briefing p { margin: 0 0 10px; }
 .tech-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; }
 .fg-card.enemy { border-color: #5a1f55; }
+
+/* What's new window (the playground's shared/whats-new.css) in this game's colours */
+body > .wn-modal { --wn-bg: var(--panel-solid); --wn-ink: var(--text); --wn-edge: var(--line-hi); --wn-accent: var(--power); background: rgba(3, 3, 10, 0.6); }
+.wn-modal .wn-panel { border-radius: 0; border-width: 2px; box-shadow: 0 0 18px rgba(78, 230, 255, 0.25); }
+.wn-modal .wn-head h2 { font-family: var(--font); color: var(--cyan); font-weight: 400; }
+.wn-modal .wn-entry { border-radius: 0; border-color: var(--line); background: rgba(20, 24, 50, 0.6); }
+.wn-modal .wn-entry h3 { color: var(--cyan); }
+.wn-modal .wn-x { border-radius: 0; font-family: system-ui, sans-serif; }
+.mbtn.wn-open.wn-has-new::after { top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 0; background: var(--power); box-shadow: none; }

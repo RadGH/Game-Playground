@@ -56,7 +56,7 @@ export function createLocalMap({ world, wx, wy, planet, data, size = 96, chunks 
   const map = {
     schema: 1, seed: s, width: W, height: H, size: CH,
     worldCell: { x: wx, y: wy }, planetId: planet?.id ?? null,
-    biomeKey: null, biomeName: null, title: null,
+    biomeKey: null, biomeName: null, regionTitle: null,
     elevation: new Float32Array(N), biome: new Uint8Array(N), slope: new Float32Array(N),
     water: new Uint8Array(N), buildable: new Uint8Array(N), forest: new Uint8Array(N),
     moveCost: new Float32Array(N).fill(Infinity), road: new Uint8Array(N),
@@ -169,7 +169,7 @@ export function ensureChunk(map, cx, cy) {
   C.version++;
   growBounds(map, ox, oy, ox + CH - 1, oy + CH - 1);
   if (cx === C.centre && cy === C.centre) {
-    map.biomeKey = detail.biomeKey; map.biomeName = detail.biomeName; map.title = detail.title;
+    map.biomeKey = detail.biomeKey; map.biomeName = detail.biomeName; map.regionTitle = detail.title;
     map.clearing = { x: detail.clearing.x + ox, y: detail.clearing.y + oy, r: detail.clearing.r };
   }
 

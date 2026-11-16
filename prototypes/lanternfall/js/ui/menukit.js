@@ -72,7 +72,7 @@ export function announce(msg) {
  * confirmBox(host, { title, text, yes, no, hold, input: {label, match} }) -> Promise<boolean>
  * hold: true = the yes button must be held 1.0 s (mouse, Enter or Space). input.match = text the player must type.
  */
-export function confirmBox(host, { title = 'Are you sure?', text = '', yes = 'Yes', no = 'Cancel', hold = false, input = null, extra = null } = {}) {
+export function confirmBox(host, { title = 'Are you sure?', text = '', yes = 'Yes', no = 'Cancel', hold = false, input = null, extra = null } = {}) { // lint-ok: the dialog's heading option, not a browser tooltip
   return new Promise(resolve => {
     const prev = document.activeElement;
     const done = v => { box.remove(); prev?.focus?.(); resolve(v); };

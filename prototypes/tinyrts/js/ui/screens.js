@@ -6,7 +6,31 @@ import { fmtTime } from '../core/util.js';
 
 export const VERSION = '0.5.0';
 
+// What's new: the playground's shared changelog window (shared/whats-new.js). Loaded by path from the playground
+// root, where this game is served (prototypes/tinyrts/ -> ../../shared/); when the game is served on its own
+// (tools/serve.sh) that folder is not there and the buttons simply do not appear.
+function loadWhatsNew(app, menus) {
+  const css = document.createElement('link');
+  css.rel = 'stylesheet'; css.href = new URL('../../../../shared/whats-new.css', import.meta.url).href;
+  document.head.appendChild(css);
+  import('../../../../shared/whats-new.js').then(({ createWhatsNew }) => {
+    app.news = createWhatsNew({ url: new URL('../../data/changelog.json', import.meta.url), key: 'tinyrts', title: "What's new" });
+    // the dot on any What's new button already drawn (no menu re-render: that would pull focus out of the window)
+    app.news.onUnread((n) => { for (const b of document.querySelectorAll('#menus .wn-open')) b.classList.toggle('wn-has-new', n > 0); });
+    if (['title', 'pause'].includes(menus.current?.name)) menus.render();   // the button appears once the module is in
+  }).catch(() => { css.remove(); });
+}
+
+/** The What's new button for a menu column: opens the window, with a dot while something is unread. */
+function newsButton(app) {
+  const b = button("What's new", () => app.news.open());
+  b.classList.add('wn-open');
+  if (app.news.unread > 0) b.classList.add('wn-has-new');
+  return b;
+}
+
 export function registerScreens(app, menus) {
+  loadWhatsNew(app, menus);
   menus.register('title', (root, p, m) => {
     root.appendChild(el('div', 'logo', '<div class="logo-main">TINY&nbsp;RTS</div><div class="logo-sub">hold the line · pixel by pixel</div>'));
     const col = el('div', 'menu-col');
@@ -15,6 +39,7 @@ export function registerScreens(app, menus) {
     col.appendChild(button('Free Play', () => m.show('setup')));
     col.appendChild(button('How to Play', () => m.show('howto')));
     col.appendChild(button('Settings', () => m.show('settings')));
+    if (app.news) col.appendChild(newsButton(app));
     col.appendChild(button('Credits', () => m.show('credits')));
     col.appendChild(button('Fullscreen', () => app.toggleFullscreen(), 'small'));
     root.appendChild(col);
@@ -31,6 +56,7 @@ export function registerScreens(app, menus) {
     col.appendChild(button('Resume', () => app.closePause(), 'primary'));
     col.appendChild(button('Settings', () => m.show('settings', { overlay: true })));
     col.appendChild(button('How to Play', () => m.show('howto', { overlay: true })));
+    if (app.news) col.appendChild(newsButton(app));
     col.appendChild(button('Restart', () => m.show('confirm', { overlay: true, text: 'Restart this match? Progress in it is lost.', yes: () => app.restart() })));
     if (app.canSuspend()) col.appendChild(button('Save &amp; Quit', () => app.suspendAndQuit()));
     col.appendChild(button('Quit to Title', () => m.show('confirm', { overlay: true, text: 'Quit to the title screen? Progress in this match is lost.', yes: () => app.quitToTitle() })));

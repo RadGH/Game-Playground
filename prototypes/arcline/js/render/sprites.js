@@ -3,7 +3,7 @@
 // simple stand-in shape of the right size. Zoned lots reuse a handful of looks per recipe+storeys (seed modulo) so
 // a big city needs hundreds of bakes, not thousands.
 import { Baker } from '../../../../citykit/js/bake.js';
-import { headingOfDir } from '../../../../citykit/js/iso.js';
+import { headingOfDir, headingOfGroundDir } from '../../../../citykit/js/iso.js';
 import { RECIPES, build } from '../../../../citykit/js/kit/buildings.js';
 import '../../../../citykit/js/kit/all.js';
 
@@ -27,6 +27,16 @@ export class Sprites {
     const r = RECIPES[id]; if (!r) return null;
     return this._get(`f|${id}|${stable(params)}|${dir}|${anim}|${frame}`, () => {
       const g = build(id, params), h = headingOfDir(dir, n, 0);
+      if (anim && g.userData.pose) g.userData.pose(anim, frame / r.anims[anim].frames, h); else g.userData.face?.(h);
+      return this.baker.bakePair(g, { rot: 0 });
+    });
+  }
+  /** A picture facing ground direction `i` of n (iso.js groundDirOfHeading — vehicles on roads): the model's long axis
+   *  lies exactly along the road on screen. Same set at every map turn. */
+  ground(id, params, i, n, anim = null, frame = 0) {
+    const r = RECIPES[id]; if (!r) return null;
+    return this._get(`g|${id}|${stable(params)}|${i}|${n}|${anim}|${frame}`, () => {
+      const g = build(id, params), h = headingOfGroundDir(i, n);
       if (anim && g.userData.pose) g.userData.pose(anim, frame / r.anims[anim].frames, h); else g.userData.face?.(h);
       return this.baker.bakePair(g, { rot: 0 });
     });

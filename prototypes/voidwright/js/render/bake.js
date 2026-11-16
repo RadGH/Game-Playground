@@ -261,6 +261,7 @@ function drawBlock(a, gl, b, x, y, S, pal, r, wreck, rock) {
     }
   }
   gl.globalAlpha = 1;
+  if ((d.size || 1) > 1 && d.module) bigModuleDetail(a, gl, d, x, y, S, pal, wreck);
   // damage: scorch and cracks
   if (hpR < 0.65) {
     a.fillStyle = `rgba(10,6,4,${(0.65 - hpR) * 0.9})`; a.beginPath(); a.arc(x + S * (0.3 + r() * 0.4), y + S * (0.3 + r() * 0.4), S * 0.4, 0, 7); a.fill();
@@ -270,6 +271,61 @@ function drawBlock(a, gl, b, x, y, S, pal, r, wreck, rock) {
     a.stroke();
     if (hpR < 0.3 && !wreck) { gl.fillStyle = '#ff6020'; gl.globalAlpha = 0.6; gl.fillRect(px - S * 0.06, py - S * 0.06, S * 0.12, S * 0.12); gl.globalAlpha = 1; }
   }
+}
+
+/**
+ * 2×2 and 4×4 parts (reports #67/#68): the same art as the 1×1, plus what makes a big part read as big — a
+ * bolted service frame, and the working bits repeated: n engine nozzles, n×n cargo crates, chip rows, reactor
+ * vents, a second shield ring. Shared by the purpose-built big parts and the ones made from a 1×1.
+ */
+function bigModuleDetail(a, gl, d, x, y, S, pal, wreck) {
+  const n = d.size; const cx = x + S / 2, cy = y + S / 2; const lw = Math.max(1, S * 0.012);
+  const lit = (c, al) => { if (wreck) return false; gl.globalAlpha = al; gl.fillStyle = c; return true; };
+  // service frame and bolts
+  a.strokeStyle = 'rgba(0,0,0,0.35)'; a.lineWidth = lw; a.strokeRect(x + S * 0.06, y + S * 0.06, S * 0.88, S * 0.88);
+  a.fillStyle = shade(pal.trim || '#ccc', -0.1);
+  const nb = n >= 4 ? 4 : 2;
+  for (let i = 0; i <= nb; i++) for (const [px, py] of [[i / nb, 0], [i / nb, 1], [0, i / nb], [1, i / nb]]) { a.beginPath(); a.arc(x + S * (0.09 + px * 0.82), y + S * (0.09 + py * 0.82), Math.max(0.7, S * 0.012), 0, 7); a.fill(); }
+  switch (d.cat) {
+    case 'engine': {
+      // the 1×1 nozzle split into n, each with its own glow
+      const h = 0.64 / n;
+      for (let i = 0; i < n; i++) {
+        const ny = y + S * (0.18 + i * h);
+        a.fillStyle = '#20242c'; a.fillRect(x, ny + S * h * 0.08, S * 0.3, S * h * 0.84);
+        a.fillStyle = 'rgba(0,0,0,0.5)'; a.fillRect(x, ny, S * 0.32, Math.max(1, S * 0.012));
+        if (lit(pal.light, 0.95)) gl.fillRect(x, ny + S * h * 0.2, S * 0.16, S * h * 0.6);
+      }
+      break;
+    }
+    case 'cargo': {
+      a.strokeStyle = 'rgba(0,0,0,0.35)'; a.lineWidth = lw * 1.5;
+      for (let i = 1; i < n; i++) { const k = 0.12 + i * 0.76 / n; a.beginPath(); a.moveTo(x + S * k, y + S * 0.12); a.lineTo(x + S * k, y + S * 0.88); a.moveTo(x + S * 0.12, y + S * k); a.lineTo(x + S * 0.88, y + S * k); a.stroke(); }
+      break;
+    }
+    case 'cpu': {
+      const k = n * 2;
+      for (let j = 0; j < k; j++) for (let i = 0; i < k; i++) if ((i + j) % 2 === 0 && lit('#5fff8a', 0.75)) gl.fillRect(x + S * (0.24 + i * 0.52 / k), y + S * (0.24 + j * 0.52 / k), S * 0.2 / k, S * 0.2 / k);
+      break;
+    }
+    case 'power': {
+      const m = n * 4;
+      for (let i = 0; i < m; i++) { const an = i * Math.PI * 2 / m; a.fillStyle = 'rgba(0,0,0,0.45)'; a.beginPath(); a.arc(cx + Math.cos(an) * S * 0.31, cy + Math.sin(an) * S * 0.31, S * 0.02, 0, 7); a.fill(); if (lit('#ffd060', 0.6)) { gl.beginPath(); gl.arc(cx + Math.cos(an) * S * 0.31, cy + Math.sin(an) * S * 0.31, S * 0.015, 0, 7); gl.fill(); } }
+      break;
+    }
+    case 'shield': case 'gyro': {
+      a.strokeStyle = d.cat === 'shield' ? '#bfe8ff' : shade(pal.trim || '#ccc', -0.1); a.lineWidth = Math.max(1, S * 0.025);
+      for (let i = 1; i < n; i++) { a.beginPath(); a.arc(cx, cy, S * (0.1 + i * 0.08), 0, 7); a.stroke(); }
+      break;
+    }
+    case 'drone': {
+      a.fillStyle = 'rgba(0,0,0,0.35)';
+      for (let i = 1; i < n; i++) a.fillRect(x + S * 0.15, y + S * (0.2 + i * 0.6 / n), S * 0.7, Math.max(1, S * 0.02));
+      break;
+    }
+    default: break;
+  }
+  gl.globalAlpha = 1;
 }
 
 /** A cheap number that changes when blocks change enough to need a new picture. */

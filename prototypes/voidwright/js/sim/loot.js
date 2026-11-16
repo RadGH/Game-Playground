@@ -116,7 +116,7 @@ export function pickPart(r, pool, tier) {
 /** Module blocks a faction might drop at a tier. */
 function dropPool(faction, tier, maxSize) {
   const F = FACTIONS[faction];
-  return Object.values(BLOCKS).filter(b => b.module && !b.core && (b.size || 1) <= maxSize && b.tier <= tier + 1 &&
+  return Object.values(BLOCKS).filter(b => b.module && !b.core && !b.sized && (b.size || 1) <= maxSize && b.tier <= tier + 1 &&
     (!b.race || b.race === faction) && (F?.human || b.cat === 'weapon' || b.cat === 'shield' || b.cat === 'utility' || b.cat === 'drone' || b.cat === 'power' || b.cat === 'cpu'));
 }
 

@@ -158,7 +158,7 @@ export function rollPart(r, tier, bonus = 0, minRarity = 'uncommon') {
   let rar = rollRarity(r, tier, bonus); const min = RARITY_BY_ID[minRarity]?.index || 0;
   if (RARITY_BY_ID[rar.id].index < min) rar = RARITY[min];
   const big = tier >= 4 ? 2 : 1;
-  const pool = Object.values(BLOCKS).filter(b => b.module && !b.core && !b.race && (b.size || 1) <= big && (b.tier || 1) <= tier + 1);
+  const pool = Object.values(BLOCKS).filter(b => b.module && !b.core && !b.race && !b.sized && (b.size || 1) <= big && (b.tier || 1) <= tier + 1);
   return makeItem(r, r.pick(pool).id, rar.id);
 }
 function dropPart(w, r, tier, bonus, x, y, minRarity = 'uncommon') { const it = rollPart(r, tier, bonus, minRarity); spawnPickup(w, { kind: 'item', item: it, rarity: it.rarity }, x, y, 0, 0, 90); return it; }

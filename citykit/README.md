@@ -23,6 +23,10 @@ review/adjust without having to actually play the game to see it. These models m
 4. **Turning the map**: 4 view turns. Buildings are baked once per turn (the model turns, the camera and sun stay).
    Things that face a way (creatures, vehicles, turret heads) are baked per **screen direction** instead
    (8 or 16, 0 = up the screen, clockwise; `headingOfDir` / `dirOfHeading` in `iso.js`), so one set works at every turn.
+   Things that run along the grid (vehicles on roads) are baked per **ground direction** instead
+   (`groundDirOfHeading` / `headingOfGroundDir`: even steps of world heading as seen from the view, so the four road
+   directions are exact steps). A road runs ~26.6° off the screen's horizontal — between screen steps — so a car baked
+   for the nearest screen step looked like it was driving crabwise (owner report 2026-11-16).
 
 Everything is code: no image files, no model files. Materials and textures are cached.
 

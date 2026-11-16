@@ -3,7 +3,7 @@
 
 import { openNav, deckButton, DECK_ICON } from './ui/navmenu.js';
 import { createWorld, step, hostile, fireHarpoon, launchDrone, repair, spawnPickup, cargoUsed, GRACE_SECONDS, BOOST_RELOCK, crewText } from './sim/world.js';
-import { generateGalaxy, populate, spawnGroup, SAFE_RADIUS, canWarpTo, warpCore, coreFor } from './sim/galaxy.js';
+import { generateGalaxy, populate, spawnGroup, SAFE_RADIUS, canWarpTo, warpCore, coreFor, arrivalSpot, secureArrival, ARRIVAL_GRACE } from './sim/galaxy.js';
 import { streamSectors } from './sim/sectors.js';
 import { newGame, playerShip, storeShip, save, load, slots, lastSlot, sysMem, fittedDrones, makeDroneItem } from './sim/state.js';
 import { checkQuests, CHAPTERS, UNLOCK_NAMES, unlockFromFind } from './sim/quests.js';
@@ -189,11 +189,15 @@ function enterSystem(id, how = 'jump', from = null) {
     // arrive at the jump point on the side you came from, a short flight from the middle (systems are huge)
     const fromSys = from != null ? app.galaxy.systems[from] : null;
     const a = fromSys ? Math.atan2(fromSys.y - sys.y, fromSys.x - sys.x) : Math.random() * TAU;
-    P.x = Math.cos(a) * 7000; P.y = Math.sin(a) * 7000; P.a = a + Math.PI;
+    // #69: turned away from hostile bases / a roaming giant if one sits on that side
+    const spot = arrivalSpot(w, a, 7000);
+    P.x = spot.x; P.y = spot.y; P.a = spot.a + Math.PI;
   }
   w.bodies.push(P); w.player = P; app.w = w; app.P = P;
-  P.grace = w.t + GRACE_SECONDS;
+  P.grace = w.t + GRACE_SECONDS; P.graceKind = 'launch';
   if (st) clearDoorstep(w, st);
+  // #69 safe arrival: no hostile within ARRIVAL_RADIUS of where you come in, no camps around it, a longer grace
+  if (how !== 'dock') { secureArrival(w, P.x, P.y); P.grace = w.t + ARRIVAL_GRACE; P.graceKind = 'arrive'; }
   for (let i = 0; i < 9; i++) streamSectors(w, P.x, P.y);   // the sectors around you are ready on arrival
   launchWing(w, P);
   spawnWing(app);   // [wing] mercenary wingmen arrive with you
@@ -564,7 +568,7 @@ function undock(st) {
   app.w.drones = app.w.drones.filter(d => d.owner !== old);
   app.w.bodies.push(P); app.w.player = P; app.P = P;
   // a few seconds of grace and a clear doorstep (play-test: "I exited a station and was immediately destroyed")
-  P.grace = app.w.t + GRACE_SECONDS; clearDoorstep(app.w, st); app.w.combatT = -99;
+  P.grace = app.w.t + GRACE_SECONDS; P.graceKind = 'launch'; clearDoorstep(app.w, st); app.w.combatT = -99;
   launchWing(app.w, P);
   spawnWing(app, { fresh: true });   // [wing] relaunch from the hangar records (repairs / new ships)
   save(G); updateQuest();
@@ -668,7 +672,7 @@ function updateHud() {
   mini.push(`CPU <b class="${st.cpu > st.cpuCap ? 'bad' : ''}">${st.cpu}/${st.cpuCap}</b>`);
   mini.push(`Crew <b class="${P.crew < st.crewMin ? 'bad' : st.crewRatio < 1 ? 'warn' : ''}">${P.crew}/${st.crewCap}</b>${st.crewNeed > P.crew ? `<span class="hint"> need ${st.crewNeed}</span>` : ''}`);
   mini.push(`Power <b class="${st.powerOk ? '' : 'bad'}">${Math.round(st.power)}/${Math.round(st.powerUse)}</b>`);
-  if (P.grace > app.w.t) mini.push(`<b class="good">Safe launch ${Math.ceil(P.grace - app.w.t)}s</b>`);
+  if (P.grace > app.w.t) mini.push(`<b class="good">${P.graceKind === 'arrive' ? 'Safe arrival' : 'Safe launch'} ${Math.ceil(P.grace - app.w.t)}s</b>`);
   else if (app.cruise && Math.hypot(P.vx, P.vy) > 40) mini.push('<b class="good">Cruise</b>');
   else if (app.w.t - app.combatOK() < 5) mini.push('<b class="bad">In combat</b>');
   if (P.stats.droneCap) mini.push(`Drones <b>${app.w.drones.filter(d => !d.dead && d.owner === P).length}/${P.stats.droneCap}</b>`);

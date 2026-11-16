@@ -323,6 +323,23 @@ table.grid.st-market tr.st-cat td { text-align: left; color: var(--cyan); font-f
 .ws-boost { margin-top: 6px; align-items: center; } .ws-boost button { min-height: 34px; min-width: 44px; }
 .ws-odds { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 6px; background: #111; }
 .ws-oddsw { font-size: 12px; margin-top: 2px; }
+/* size tiers (#67/#68): Tier 1 · 1×1 / Tier 2 · 2×2 / Tier 3 · 4×4 switch on a craft card */
+.ws-sizes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 8px 0 4px; }
+.ws-size { min-width: 0; min-height: 46px; padding: 4px 4px; background: rgba(255,255,255,.03); }
+.ws-size.on { border-color: var(--amber); color: var(--amber); background: rgba(255, 196, 90, .08); box-shadow: 0 0 10px rgba(255, 196, 90, .2); }
+.ws-size.dim:not(.on) { opacity: .55; }
+.ws-size-in { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: center; column-gap: 6px; row-gap: 1px; }
+.ws-size-in small { grid-column: 1 / -1; text-align: center; font-size: 12px; font-weight: 500; color: #9fb0c8; line-height: 1.1; white-space: nowrap; }
+.ws-size-in b { font-size: 15px; line-height: 1.1; }
+.ws-size.on .ws-size-in small { color: inherit; }
+.ws-sq { width: 16px; height: 16px; border: 1.5px solid currentColor; border-radius: 3px; display: inline-block; opacity: .9;
+  background-image: linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px); background-position: -1px -1px; }
+.ws-sq.s1 { background-image: none; background-color: rgba(255,255,255,.12); }
+.ws-sq.s2 { background-size: 50% 50%; }
+.ws-sq.s4 { background-size: 25% 25%; }
+.ws-ore { margin-top: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.ws-why { font-size: 13px; margin-top: 6px; }
+.it-fit { font-size: 13px; margin-top: 6px; padding: 5px 8px; border-radius: 6px; background: rgba(255,255,255,.03); border-left: 3px solid currentColor; }
 .cache-card { border-color: #ffd84a66; background: linear-gradient(160deg, rgba(60,46,10,.35), rgba(14,18,34,.9)); }
 .cache-roll { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(4,6,12,.72); }
 .cr-box { padding: 26px 34px; border: 2px solid #ffd84a; border-radius: 16px; background: #0b0f1d; box-shadow: 0 0 60px #ffd84a55; min-width: min(420px, 86vw); text-align: center; }

@@ -24,6 +24,25 @@ export function roadReach(r) {
   while (q.length) { const i = q.pop(), x = i % N, z = (i / N) | 0; for (const [dx, dz] of N4) { const nx = x + dx, nz = z + dz; if (nx < 0 || nz < 0 || nx >= N || nz >= N) continue; const j = nz * N + nx; if (!seen[j] && r.tiles.road[j]) { seen[j] = 1; q.push(j); } } }
   return seen;
 }
+/** Which way a zoned building's front (its doors, porches, shopfronts — the model's +z side) faces, as the model turn
+ *  that puts it there (iso.js turnXZ: 0 = front toward +z, 1 = −x, 2 = −z, 3 = +x). The model is built size[0] wide
+ *  along x; a lot laid the other way round (w = size[1]) can only face −x / +x, an upright one only +z / −z, a square
+ *  one any way. Picks the allowed side with the most road beside it. Returns { face, road } (road = tiles of road on
+ *  that side; 0 means no allowed side touches a road). size defaults to [long, short] — every non-square recipe is
+ *  built wider than deep. */
+export function lotFace(r, x, z, w, d, size = [Math.max(w, d), Math.min(w, d)]) {
+  const N = r.size, road = (tx, tz) => (tx >= 0 && tz >= 0 && tx < N && tz < N && r.tiles.road[tz * N + tx] ? 1 : 0);
+  const side = q => {
+    let n = 0;
+    if (q === 0 || q === 2) { const tz = q === 0 ? z + d : z - 1; for (let j = 0; j < w; j++) n += road(x + j, tz); }
+    else { const tx = q === 3 ? x + w : x - 1; for (let k = 0; k < d; k++) n += road(tx, z + k); }
+    return n;
+  };
+  const allowed = size[0] === size[1] ? [0, 3, 2, 1] : w === size[0] ? [0, 2] : [3, 1];
+  let best = { face: allowed[0], road: 0 };
+  for (const q of allowed) { const n = side(q); if (n > best.road) best = { face: q, road: n }; }
+  return best;
+}
 /** Does the rectangle touch a road tile that is in `reach`? */
 export function touchesRoad(r, reach, x, z, w, d) {
   const N = r.size;

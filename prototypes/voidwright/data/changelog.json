@@ -1,6 +1,18 @@
 {
  "entries": [
   {
+   "id": "2026-11-16-sizes",
+   "date": "2026-11-16",
+   "title": "Bigger parts from the fabricator, and a safe arrival after every jump",
+   "items": [
+    "The fabricator now has a Size switch on its parts: Tier 1 (1×1), Tier 2 (2×2) and Tier 3 (4×4). Bigger sizes are much stronger, cost more and need better ore: a tier I part's 2×2 is made from Titanium and Cobalt, its 4×4 from Iridium and Helium-3.",
+    "Thrusters, afterburners, gyros, fuel cells, reactors, CPU nodes, targeting computers, shields, blast screens, repair rigs, decoys, habs, cargo pods, drone ports and every gun now come in 2×2 and 4×4 sizes. Big guns look like their small versions with a heavy armoured mount.",
+    "The fabricator on your ship makes parts up to 2×2; a Forge bay or a station workshop makes 4×4. You can build or buy a big part before your hull can carry it: its card says whether it fits your ship and how to get a hull that does.",
+    "Shops further out sell bigger sizes too: 2×2 parts from danger 2, 4×4 parts from danger 4, more often the more dangerous the system.",
+    "Jumping into a system is now safe: no enemies wait at the spot you arrive, no enemy camps sit right next to it, and you get 8 seconds of Safe arrival (shown on screen) to look around before anyone can target you."
+   ]
+  },
+  {
    "id": "2026-11-16-music",
    "date": "2026-11-16",
    "title": "New music, space ambience and separate sound sliders",

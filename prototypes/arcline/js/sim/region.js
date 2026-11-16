@@ -3,6 +3,7 @@
 // (lessons rule 36; tests/region.test.mjs reads the real save call).
 import { generateTerrain, settleRivers } from './terrain.js';
 import { T } from './tuning.js';
+import { lotFace } from './networks.js';
 import { rng } from '../../../../citykit/js/kit/rng.js';
 
 export const SAVE_VERSION = 2;   // 2: rivers settled below their banks (report #70)
@@ -60,5 +61,8 @@ export function loadRegion(s) {
   for (const [k, Type] of Object.entries(TER_TYPES)) r.ter[k] = unb64(s.ter[k], Type);
   for (const k of LAYERS) r.tiles[k] = unb64(s.tiles[k], TYPES[k]);
   if ((s.v || 1) < 2) { settleRivers(r.ter); r.v = SAVE_VERSION; }   // saves made before the river fix (report #70) had raised wide rivers
+  // saves from before zoned buildings faced their road (2026-11-16 report): pick each lot's front from the roads now
+  // beside it, so a lot laid sideways draws its building sideways instead of spilling across its neighbours
+  for (const l of r.lots || []) if (l.kind === 'zoned' && l.face == null) l.face = lotFace(r, l.x, l.z, l.w, l.d).face;
   return r;
 }

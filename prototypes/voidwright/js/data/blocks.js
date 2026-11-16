@@ -12,7 +12,7 @@
 //            false = structure built straight from materials as you place it.
 // Extras by category: thrust, turn, cargo, crewCap, cpuCap, shield{...}, weapon (WEAPONS id), drones, repair, scan, jump.
 
-import { ALL_WEAPONS } from './weapons.js';
+import { ALL_WEAPONS, sizedTier } from './weapons.js';
 
 const B = {};
 const add = (id, def) => { B[id] = { id, size: 1, tier: 1, module: false, power: 0, cpu: 0, crew: 0, armor: 'frame', ...def }; };
@@ -138,8 +138,66 @@ for (const w of Object.values(ALL_WEAPONS)) {
     cpu, crew: size >= 2 ? size : (w.mode === 'tool' ? 0 : 0),
     cost: { cr: Math.round(140 * Math.pow(w.tier, 1.6) * n2 * (w.race ? 1.6 : 1)) },
     blurb: w.blurb,
+    ...(w.sizeOf ? { sized: true } : {}),
   });
 }
+
+// ------------------------------------------------------------- size tiers (reports #67/#68, 2026-11-16)
+// "allow changing the tier 1,2,3 changing from 1x1, 2x2, 4x4 and requiring more advanced metals" — every part
+// that makes sense bigger has a size family: Tier 1 = 1×1, Tier 2 = 2×2, Tier 3 = 4×4. Where a purpose-built big
+// part already existed (Plasma drive, Fusion reactor…) it IS that size; the missing sizes are made here from the
+// 1×1 (`sized: true`). A bigger size is a higher part tier (sizedTier: 2×2 ≥ tier 3, 4×4 ≥ tier 5), so the
+// fabricator asks for that tier's ore (crafting: partMatTier). Fitting stays gated by hull class (ruling E5).
+// No size family: structure + armour (built from ore in Build mode, already 1×1/2×2/4×4), bridges (sized by hull),
+// scanners, jump drives, salvage magnets, cloaks and tools (a bigger one would do nothing more).
+/** Output stats (thrust, power made, cargo, crew room, shield, repair…) of a 2×2 / 4×4 vs the 1×1. */
+export const SIZE_OUTPUT = { 2: 5.4, 4: 27 };
+const MODULE_FAMILIES = {
+  // base: [2×2 id, 4×4 id] — an existing id is used as is; null = made from the base below
+  thruster: ['thruster_2', 'thruster_4'], afterburner: [null, null], gyro: ['gyro_2', null],
+  battery: [null, null], reactor: ['reactor_2', 'reactor_4'],
+  cpu: ['cpu_2', 'cpu_4'], targeting: ['targeting_2', 'targeting_4'],
+  shield_bubble: ['shield_bubble_2', 'shield_bubble_4'], shield_arc: ['shield_arc_2', null], blast_screen: ['blast_screen_2', null],
+  repair_bay: ['repair_bay_2', null], decoy: ['decoy_2', null], fabricator: ['fabricator_2', undefined],
+  hab: ['hab_2', null], cargo_pod: ['cargo_pod_2', null], drone_bay: ['drone_bay_2', 'drone_bay_4'],
+};
+function sizedModule(b, n) {
+  const k = SIZE_OUTPUT[n], c = n * n, r = v => Math.round(v);
+  const d = {
+    ...b, id: `${b.id}_${n}`, name: `${b.name} ${n}×${n}`, size: n, tier: sizedTier(b.tier, n), sized: true,
+    hp: r(b.hp * c * (n === 2 ? 1.3 : 1.5)), mass: +(b.mass * c * 0.95).toFixed(2),
+    power: b.power > 0 ? r(b.power * k) : r(b.power * c * 0.9),
+    cpu: r((b.cpu || 0) * c), crew: (b.crew || 0) * n,
+    cost: { cr: r((b.cost?.cr || 100) * c * (n === 2 ? 2.2 : 6)) },
+  };
+  if (b.thrust) d.thrust = r(b.thrust * k);
+  if (b.turn) d.turn = r(b.turn * k);
+  if (b.cargo) d.cargo = r(b.cargo * k);
+  if (b.crewCap) d.crewCap = r(b.crewCap * k);
+  if (b.repair) d.repair = r(b.repair * k);
+  if (b.explode) d.explode = r(b.explode * c);
+  if (b.shield) d.shield = { ...b.shield, hp: r(b.shield.hp * k), regen: r(b.shield.regen * k), delay: b.shield.delay + (n === 2 ? 1 : 2), pad: +(b.shield.pad + (n === 2 ? 0.6 : 1.4)).toFixed(1), ...(b.shield.arc ? { arc: b.shield.arc + (n === 2 ? 10 : 20) } : {}) };
+  if (b.decoy) d.decoy = { cd: +(b.decoy.cd * (n === 2 ? 0.8 : 0.65)).toFixed(1), n: b.decoy.n * n, pull: Math.min(0.95, b.decoy.pull + (n === 2 ? 0.1 : 0.15)), life: b.decoy.life + (n === 2 ? 0.5 : 1), range: r(b.decoy.range * (n === 2 ? 1.5 : 2.2)) };
+  // the sentence is made from the real numbers (lessons rule 3)
+  if (b.cat === 'power') d.blurb = `+${d.power} power.${d.explode ? ' Explodes when destroyed.' : ''}`;
+  else if (b.cat === 'crew') d.blurb = `Room for ${d.crewCap} crew.`;
+  else if (b.cat === 'cargo') d.blurb = `Holds ${d.cargo} units.`;
+  else if (b.decoy) d.blurb = `When enemy missiles come within ${d.decoy.range}, fires ${d.decoy.n} decoy flares on its own (every ${d.decoy.cd} s). Each missile chasing you has a ${Math.round(d.decoy.pull * 100)}% chance to follow one.`;
+  return d;
+}
+/** Size family of each part: base id → [1×1 id, 2×2 id, 4×4 id] (a missing size is left out). */
+export const SIZE_FAMILIES = {};
+for (const [base, [m2, m4]] of Object.entries(MODULE_FAMILIES)) {
+  const ids = [base];
+  for (const [n, have] of [[2, m2], [4, m4]]) {
+    if (have === undefined) continue;
+    if (have) { ids.push(have); continue; }
+    const d = sizedModule(B[base], n); B[d.id] = d; ids.push(d.id);
+  }
+  SIZE_FAMILIES[base] = ids;
+}
+for (const w of Object.values(ALL_WEAPONS)) if (w.sizeOf) (SIZE_FAMILIES[w.sizeOf] ||= [w.sizeOf]).push(w.id);
+for (const [base, ids] of Object.entries(SIZE_FAMILIES)) ids.forEach(id => { B[id].fam = base; B[id].sizeTier = [1, 2, 4].indexOf(B[id].size || 1) + 1; });
 
 export const BLOCKS = B;
 export const BLOCK_IDS = Object.keys(B);

@@ -1,6 +1,6 @@
 # Voidwright
 
-> **Status:** live on games.radgh.com · 2026-11-16 (dev, not yet published): new music with five moods, separate ambience, Effects/Music/Ambience sliders (see Sound) · round 4 2026-11-13: ore stand-ins (better ore pays for Ferrite etc., `sim/mats.js`), outposts take their tier's ore, economy + combat retune from `tools/econ.mjs` / `tools/combat-sim.mjs`, weapon effects + knockback + far less explosion smoke, Screens deck (`ui/navmenu.js`), title sign-in box fixed · lint clean, every screen walked desktop + phone
+> **Status:** live on games.radgh.com · 2026-11-16 (dev, not yet published): new music with five moods, separate ambience, Effects/Music/Ambience sliders (see Sound) · part sizes Tier 1/2/3 = 1×1/2×2/4×4 in the fabricator + bigger sizes in shops further out (#67/#68), safe arrival after a jump (#69) · round 4 2026-11-13: ore stand-ins (better ore pays for Ferrite etc., `sim/mats.js`), outposts take their tier's ore, economy + combat retune from `tools/econ.mjs` / `tools/combat-sim.mjs`, weapon effects + knockback + far less explosion smoke, Screens deck (`ui/navmenu.js`), title sign-in box fixed · lint clean, every screen walked desktop + phone
 > **Play:** LAN `http://<LAN IP>:8400/prototypes/voidwright/` (stable; https 8442 for a controller) · public https://games.radgh.com/voidwright/
 > **Next:** the owner's play-test of round 4 — does knockback feel good on your own ship (`world.js` knock caps), is the late game's money pace right (warp cores III/IV/V should take ~15-25 min of play, `tools/econ.mjs`), danger 9 packs are still hard for a bare battleship in the sims (by design for now — watch it); older watch items: missile pressure at 3+, bridge limits, merc wages
 > **Parked:** co-op (the input shape is ready, `docs/PLAN.md`); nothing else on hold
@@ -262,6 +262,36 @@ CC0 void bed); nothing here is anyone else's music.
   ambience 75%) the bed sits ~5 dB under the music. Ducking under a big on-screen wreck takes the music to 30%.
 - **Test hooks**: `gameEye.audio()` (bus gains, mood, music state, ambience layers, mood inputs) and
   `gameEye.measureAudio(ms)` (dBFS per bus). Unit tests: `tests/sound.test.mjs`.
+
+## Part sizes + safe arrival (play-test #67-#69, 2026-11-16)
+Tests: `tests/sizes-1116.test.mjs`; walk screens `workshop-sizes`, `fabricator-onboard`.
+- **Size families** (`data/blocks.js SIZE_FAMILIES`, helpers in `sim/sizes.js`): Tier 1 = 1×1, Tier 2 = 2×2, Tier 3 = 4×4.
+  Families: thrusters, afterburners, gyros, fuel cells, reactors, CPU nodes, targeting computers, bubble / arc / blast
+  shields, repair rigs, decoys, fabricator (1×1 + Forge bay only), habs, cargo pods, drone ports, and every human
+  1×1 gun (not tools). An existing big part IS that size (Ion thruster → Plasma drive → Torch drive); a missing size
+  is made from the 1×1 (`sized: true`): modules × `SIZE_OUTPUT` (5.4 / 27) on their output, guns × `WEAPON_SIZE_UP`
+  (damage per cell ×1.3 / ×1.55, one hit size heavier, more reach, slower swing; `weapons.js`). Part tier
+  `sizedTier` (2×2 ≥ 3, 4×4 ≥ 5) drives shop gating; the ORE is `craft.js oreTierOf`: one ore tier up per size
+  step from the 1×1 (Ferrite/Carbon → Titanium/Cobalt → Iridium/Helium-3 for a tier I part). Rarity still lifts
+  through `partstats.js` only. No sizes for structure/armour (Build mode already has 1×1/2×2/4×4 from ore), bridges
+  (sized by hull), scanners, jump drives, magnets, cloaks, tools.
+- **Workshop** (`ui/workshop.js`): one card per family with a Size switch; it opens on the biggest size this
+  workshop makes AND your hull fits. On-board Fabricator makes up to 2×2, Forge bay / station workshops 4×4
+  (`fabCan` reason written on the card). Fitting stays gated by hull class (ruling E5): 2×2 / 4×4 cards say
+  "Fits your Frigate" or "Too big for your Corvette … Grow hull at a shipyard" (`fitInfo`, itemCard `fit`).
+- **Shops** (`ui/station.js shopStock`): a shelf pick may come as a bigger size (`upsizeForShop`, own rng stream):
+  none at danger 1, 2×2 from danger 2 (12% rising), 4×4 from danger 4 (10% rising), only sizes with tier ≤ danger+1,
+  whatever your hull. The made-from-1×1 sizes never drop from wrecks, merchants, salvage or outposts and enemies
+  never carry them (faction gun lists), so `tools/econ.mjs` / `combat-sim.mjs` are unchanged.
+- **Art**: big parts get a bolted service frame + repeated working bits (`bake.js bigModuleDetail`: n nozzles, n×n
+  crates, chip rows, reactor vents, shield rings); heavy / capital guns reuse their 1×1 turret with an armoured
+  collar (bolted ring on 2×2, double ring + warning stripes on 4×4, `turret-art.js`).
+- **Safe arrival** (#69, `galaxy.js arrivalSpot / secureArrival`, lessons rule 39): the jump point turns away from
+  hostile stations / bases / a roaming giant; every hostile ship within `ARRIVAL_RADIUS` 4 km is moved to its edge,
+  enemy shots and drones there fizzle, and sectors near it hold no camp / pack / ambush this visit (`w.safeSpots`,
+  read by `sectors.js` like a friendly station). Grace `ARRIVAL_GRACE` 8 s, HUD "Safe arrival Ns" + the green ring.
+  The test arrives 32 times in danger 3-4 systems (the old spot had enemies inside 4 km in some) and steps the whole
+  grace: no hostile within 4 km, no damage, nobody targets you, nobody within 1.5 km when it ends.
 
 ## Code map
 No build step; ES modules. `index.html` → `js/main.js`.

@@ -154,7 +154,7 @@ function factoryPart(c, S) {
   const ore = Object.keys(S.mats).find(m => MATERIALS[m]?.role === 'structural' && S.mats[m] >= 15);
   if (ore) { S.mats[ore] -= 15; if (!S.mats[ore]) delete S.mats[ore]; }
   const maxSize = mt >= 3 ? 2 : 1;
-  const pool = Object.values(BLOCKS).filter(b => b.module && !b.core && !b.race && (b.size || 1) <= maxSize && (b.tier || 1) <= mt + 1 && b.cost?.cr);
+  const pool = Object.values(BLOCKS).filter(b => b.module && !b.core && !b.race && !b.sized && (b.size || 1) <= maxSize && (b.tier || 1) <= mt + 1 && b.cost?.cr);
   const def = r.pick(pool);
   const rar = rollRarity(r, c.tier, ore ? 0.6 : 0);
   return makeItem(r, def.id, rar.id);

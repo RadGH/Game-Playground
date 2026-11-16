@@ -13,6 +13,7 @@ import { MATERIALS, RARITY_BY_ID, matTier } from '../data/types.js';
 import { CLASSES } from '../data/hulls.js';
 import { recipe, droneRecipe, craftCost, craftOdds, craft, craftDrone, missing, MAX_BOOST, rerollable, rerollCost, reroll, openCache, cacheFee, cacheOdds, craftable, partMatTier } from '../sim/craft.js';
 import { spinReel, reelResult } from './reel.js';
+import { family, fabCan, fabSizeCap, sizeTierOf } from '../sim/sizes.js';
 import { rng, hash } from '../core/math.js';
 import { reveal, worthRevealing } from './reveal.js';
 import { play } from '../core/audio.js';
@@ -23,7 +24,8 @@ let sub = 'craft', slot = 'weapon';
 const boosts = new Map();
 
 /**
- * Draw the workshop into `box`. ctx = { app, G, tierCap (max part tier), sizeCap, edge (rarity bonus from
+ * Draw the workshop into `box`. ctx = { app, G, tierCap (max part tier), sizeCap (biggest part it makes),
+ * hullCap (biggest part your hulls fit), edge (rarity bonus from
  * a Forge bay / factory), station (true at a station: caches and re-rolls need one), render() }.
  */
 export function drawWorkshop(box, ctx) {
@@ -63,29 +65,61 @@ function landed(ctx, it, what) {
   ctx.app.updateQuest?.(); ctx.app.save?.(); ctx.render();
 }
 
+// Size tiers (reports #67/#68): a part that comes in sizes is ONE card with a Tier 1 / 2 / 3 (1×1 / 2×2 / 4×4)
+// switch; a bigger size costs more and asks for better ore (craft.js recipe, by the size's part tier). A size this
+// fabricator cannot make, or your hull cannot fit, says why on the card (lessons rule 10).
+const sizePick = new Map();
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V'];
+function sizeRow(ids, cur, ctx, fam) {
+  const row = el('div', { class: 'ws-sizes', role: 'group', 'aria-label': 'Size' });
+  for (const id of ids) {
+    const d = BLOCKS[id]; const n = d.size || 1; const can = fabCan(d, ctx).ok;
+    const b = btn(el('span', { class: 'ws-size-in' }, el('i', { class: `ws-sq s${n}` }), el('b', {}, `${n}×${n}`), el('small', {}, `Size tier ${sizeTierOf(d)}`)),
+      () => { sizePick.set(fam, id); ctx.render(); }, 'ws-size' + (id === cur ? ' on' : '') + (can ? '' : ' dim'));
+    row.append(b);
+  }
+  return row;
+}
+/** The size a family card opens on: the biggest one that this workshop makes AND your hull fits, else the 1×1. */
+function defaultSize(ids, ctx) {
+  const ok = ids.filter(id => fabCan(BLOCKS[id], ctx).ok && (BLOCKS[id].size || 1) <= ctx.hullCap);
+  return ok[ok.length - 1] || ids[0];
+}
+
 function craftTab(box, ctx) {
   const { G } = ctx;
-  box.append(el('h3', { class: 'st-h' }, 'Craft parts from ore'), el('p', { class: 'hint' }, `Parts here are made from structural and energy ore of their tier; computing parts need exotic ore. Bonuses are rolled like loot.${ctx.edge ? ' This fabricator adds better odds.' : ''}`));
+  box.append(el('h3', { class: 'st-h' }, 'Craft parts from ore'), el('p', { class: 'hint' }, `Parts here are made from structural and energy ore of their tier; computing parts need exotic ore. Bigger sizes need better ore. Bonuses are rolled like loot.${ctx.edge ? ' This fabricator adds better odds.' : ''}`));
   box.append(showSelected(el('div', { class: 'tabs st-sub' }, ...SLOTS.map(sl => btn(sl.name, () => { slot = sl.id; ctx.render(); }, sl.id === slot ? 'on' : '')))));
   const sl = SLOTS.find(x => x.id === slot);
-  const list = Object.values(BLOCKS).filter(d => craftable(d) && sl.cats.includes(d.cat) && d.tier <= ctx.tierCap && (d.size || 1) <= ctx.sizeCap)
+  // one entry per size family (its 1×1) plus every part that has no sizes
+  const entries = Object.values(BLOCKS).filter(d => craftable(d) && sl.cats.includes(d.cat) && (!d.fam || d.fam === d.id))
+    .filter(d => (d.tier || 1) <= ctx.tierCap)
     .sort((a, b) => a.tier - b.tier || (a.size || 1) - (b.size || 1) || a.name.localeCompare(b.name));
   const cards = el('div', { class: 'cards' });
-  for (const d of list) {
-    const rec = recipe(d.id); const { row, b } = boostRow(d.id, rec.tier, ctx);
+  const names = entries.map(x => x.name);
+  for (const base of entries) {
+    const ids = base.fam ? family(base.id).filter(id => craftable(BLOCKS[id])) : [base.id];
+    const id = ids.includes(sizePick.get(base.id)) ? sizePick.get(base.id) : defaultSize(ids, ctx);
+    const d = BLOCKS[id];
+    const rec = recipe(id); const { row, b } = boostRow(id, rec.tier, ctx);
     const cost = craftCost(rec, b); const miss = missing(G, cost);
-    const card = itemCard(d.id, { compact: true, compare: ctx.app.P || null });
-    card.append(costChips(G, cost), row, oddsBar(craftOdds(rec.tier * 2 - 1, b, ctx.edge || 0)));
+    const can = fabCan(d, ctx);
+    const card = itemCard(id, { compact: true, compare: ctx.app.P || null, fit: G.ship.cls });
+    card.classList.add('ws-card');
+    if (ids.length > 1) card.insertBefore(sizeRow(ids, id, ctx, base.id), card.children[1] || null);
+    card.append(el('div', { class: 'hint ws-ore' }, `Made from tier ${ROMAN[rec.tier] || rec.tier} ore`), costChips(G, cost), row, oddsBar(craftOdds(rec.tier * 2 - 1, b, ctx.edge || 0)));
+    if (!can.ok) card.append(el('div', { class: 'bad ws-why' }, can.why));
     card.append(el('div', { class: 'row end it-foot' }, btn('Craft', () => {
+      if (!can.ok) { toast(can.why, 'bad'); return; }
       const res = craft(G, rng(hash(G.seed, 'craft', G.stats.crafted || 0, Math.floor(G.playTime * 10))), d.id, b, ctx.edge || 0);
       if (!res.ok) { toast(res.miss ? `Short of ${res.miss.map(([m, n]) => `${fmt(n)} ${matName(m)}`).join(', ')}.` : res.why, 'bad'); return; }
       ctx.app.save?.();   // the part is yours before the reel spins
-      spinReel({ odds: craftOdds(rec.tier * 2 - 1, b, ctx.edge || 0), result: reelResult(res.item), label: res.item.name, names: list.map(x => x.name), r: rng(hash(G.seed, 'reel', G.stats.crafted || 0)), heading: `Crafting ${d.name}` })
+      spinReel({ odds: craftOdds(rec.tier * 2 - 1, b, ctx.edge || 0), result: reelResult(res.item), label: res.item.name, names, r: rng(hash(G.seed, 'reel', G.stats.crafted || 0)), heading: `Crafting ${d.name}` })
         .then(() => landed(ctx, res.item, 'Crafted'));
-    }, miss.length ? 'off' : 'primary')));
+    }, miss.length || !can.ok ? 'off' : 'primary')));
     cards.append(card);
   }
-  if (!list.length) cards.append(el('p', { class: 'hint' }, 'Nothing of this kind can be made here.'));
+  if (!entries.length) cards.append(el('p', { class: 'hint' }, 'Nothing of this kind can be made here.'));
   box.append(cards);
 }
 
@@ -150,7 +184,7 @@ function cacheTab(box, ctx) {
 // the cache spins the same rarity reel as crafting (report #62), weighted by the cache's real odds
 function crack(ctx, c, i) {
   const { G } = ctx;
-  const pool = Object.values(BLOCKS).filter(d => craftable(d) && d.tier <= (c.tier || 1) + 1 && (d.size || 1) <= ctx.sizeCap);
+  const pool = Object.values(BLOCKS).filter(d => craftable(d) && !d.sized && d.tier <= (c.tier || 1) + 1 && (d.size || 1) <= ctx.hullCap);
   const r = rng(hash(G.seed, 'cache', G.stats.caches || 0, i, Math.floor(G.playTime)));
   const res = openCache(G, r, c, pool);
   if (!res.ok) { toast(res.miss ? `You need ${fmt(res.miss[0][1])} more credits.` : res.why, 'bad'); return; }
@@ -167,7 +201,7 @@ export function openFabricator(app) {
   if (app.w.t - app.combatOK() < 5) { toast('Too hot — get out of combat first.', 'bad'); return; }
   const wasMode = app.mode; app.mode = 'paused';
   const p = panel('Fabricator', () => { app.mode = wasMode === 'paused' ? 'fly' : wasMode; });
-  const ctx = { app, G, tierCap: fab >= 5 ? 6 : 2, sizeCap: CLASSES[G.ship.cls]?.maxBlock || 1, edge: fab >= 5 ? 0.4 : 0, station: false, render: () => { p.body.innerHTML = ''; drawWorkshop(p.body, ctx); } };
+  const ctx = { app, G, tierCap: fab >= 5 ? 6 : 2, sizeCap: fabSizeCap({ fab }), hullCap: CLASSES[G.ship.cls]?.maxBlock || 1, edge: fab >= 5 ? 0.4 : 0, station: false, render: () => { p.body.innerHTML = ''; drawWorkshop(p.body, ctx); } };
   ctx.render();
 }
 export { partMatTier, matTier };

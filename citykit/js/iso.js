@@ -59,3 +59,16 @@ export function dirOfHeading(angle, n = 8, rot = 0) {
   const step = Math.PI * 2 / n;
   return ((Math.round(th / step) % n) + n) % n;
 }
+
+/** Things that run along the grid (vehicles on roads, trams on rails) are baked per GROUND direction instead of screen
+ *  direction: n even steps of world heading as seen from the view (0 = along +x at turn 0, then a quarter of the steps
+ *  per 90°), so the four road directions are exact steps. A screen-direction step can't do that: a road runs ~26.6°
+ *  off the screen's horizontal (the 2:1 diamond), between two of the 8/16 screen steps, so a car baked for the nearest
+ *  screen step drives visibly crabwise (owner report 2026-11-16).
+ *  The map turning by rot looks the same as everything on it turning by rot × 90° (turnXZ), so the view's heading is
+ *  the world heading plus rot quarter turns. Bake step i with headingOfGroundDir(i, n) at view turn 0. */
+export function groundDirOfHeading(angle, n = 8, rot = 0) {
+  const step = Math.PI * 2 / n, a = angle + (rot & 3) * (Math.PI / 2);
+  return ((Math.round(a / step) % n) + n) % n;
+}
+export function headingOfGroundDir(i, n = 8) { return i * (Math.PI * 2 / n); }

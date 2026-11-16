@@ -2,7 +2,7 @@
 // roads, zone tints, deposits, nests and alien plants, then every baked picture (buildings, walls, turrets, creatures,
 // vehicles) back to front, then effects, weather and the night. Turns in 4 steps; zooms; picks the tile under a point
 // taking heights into account.
-import { toScreen, toWorld, turnXZ, dirOfHeading, TILE_W, TILE_H } from '../../../../citykit/js/iso.js';
+import { toScreen, toWorld, turnXZ, dirOfHeading, groundDirOfHeading, TILE_W, TILE_H } from '../../../../citykit/js/iso.js';
 import { composite } from '../../../../citykit/js/bake.js';
 import { KINDS } from '../../../../citykit/js/world/horde.js';
 import { TURRETS, Defence } from '../../../../citykit/js/world/defence.js';
@@ -197,7 +197,7 @@ export class MapView {
     const at = (x, z) => ({ sx: ox + (x - z) * a, sy: oy + (x + z) * b });
     const things = r.lots.map(l => ({ d: l.x + l.z + l.w + l.d, l })).sort((p, q) => p.d - q.d);
     for (const { l } of things) {
-      const g = at(l.x + l.w / 2, l.z + l.d / 2), pair = this.sprites.building(l.recipe, spriteParams(l), 0);
+      const g = at(l.x + l.w / 2, l.z + l.d / 2), pair = this.sprites.building(l.recipe, spriteParams(l), (l.face || 0) & 3);
       if (pair && !pair.failed) { composite(ctx, pair, g.sx, g.sy, 0, zoom / this.sprites.scale); continue; }
       // stand-in: a small block as tall as its storeys
       const hgt = (0.25 + (l.params?.floors || 1) * 0.22) * PX_PER_HEIGHT * zoom, w = (l.w + l.d) / 2 * a * 0.8;
@@ -247,7 +247,7 @@ export class MapView {
   }
   _lot(ctx, l, night) {
     const cx = l.x + l.w / 2, cz = l.z + l.d / 2, base = this.r.ter.height[l.z * this.N + l.x] * LEVEL;
-    const pair = this.sprites.building(l.recipe, spriteParams(l), this.cam.rot);
+    const pair = this.sprites.building(l.recipe, spriteParams(l), (this.cam.rot + (l.face || 0)) & 3);   // the lot's own turn (its front faces its road) + the view's
     const g = this.P(cx, cz, base);
     if (!pair || pair.failed) { const top = this.P(cx, cz, base + 0.2 + (l.params.floors || 1) * 0.12); ctx.fillStyle = mix('#7f8a96', '#1a2030', night * 0.7); ctx.fillRect(g.sx - 14 * this.cam.zoom * l.w, top.sy, 28 * this.cam.zoom * l.w, g.sy - top.sy); return; }
     composite(ctx, pair, g.sx, g.sy, night, this.cam.zoom / this.sprites.scale);
@@ -307,8 +307,10 @@ export class MapView {
   }
   _vehicle(ctx, v, night) {
     const rec = this.sprites.recipe(v.id); if (!rec) return;
-    const dir = dirOfHeading(v.heading, rec.dirs || 8, this.cam.rot), frame = Math.floor(v.t * 6) % (rec.anims?.drive?.frames || 1);
-    const pair = this.sprites.facing(v.id, { seed: v.seed }, dir, rec.dirs || 8, rec.anims?.drive ? 'drive' : null, frame);
+    // ground directions, not screen directions: a road runs ~26.6° off the screen's horizontal, so only a heading baked
+    // in the grid's own steps lies along it (owner report 2026-11-16: cars drifting at an angle)
+    const n = rec.dirs || 8, dir = groundDirOfHeading(v.heading, n, this.cam.rot), frame = Math.floor(v.t * 6) % (rec.anims?.drive?.frames || 1);
+    const pair = this.sprites.ground(v.id, { seed: v.seed }, dir, n, rec.anims?.drive ? 'drive' : null, frame);
     if (pair && !pair.failed) { const g = this.G(v.x, v.z); composite(ctx, pair, g.sx, g.sy, night, this.cam.zoom / this.sprites.scale); }
   }
   _pod(ctx, p) {

@@ -12,6 +12,7 @@ import { shortText, payMats, haveFor, SUBS_HINT } from '../sim/mats.js';
 import { panel, el, btn, toast, banner, fmt, esc, showSelected } from './dom.js';
 import { SLOTS, itemCard } from './items.js';
 import { drawWorkshop } from './workshop.js';
+import { upsizeForShop } from '../sim/sizes.js';
 import { makeDroneItem, fitDrone, unfitDrone } from '../sim/state.js';
 import { droneCard, dronePicker } from './drones-ui.js';
 import { growOptions, growCost } from '../sim/hullgrow.js';
@@ -288,8 +289,8 @@ function shopStock(S, kind) {
   const cacheKey = `${G.seed}:${key}:${sizeLimit(G)}:${(G.research.done || []).join(',')}`;
   let stock = stockCache.get(cacheKey);
   if (!stock) {
-    const r = rng(hash(kind, sys.seed, d)); const lim = sizeLimit(G); stock = [];
-    const basePool = Object.values(BLOCKS).filter(b => b.module && (!b.core || b.id !== 'bridge') && !b.enemyOnly && (b.size || 1) <= lim && b.tier <= sys.tier + 1);
+    const r = rng(hash(kind, sys.seed, d)); const ru = rng(hash(kind, sys.seed, d, 'sizes')); const lim = sizeLimit(G); stock = [];
+    const basePool = Object.values(BLOCKS).filter(b => b.module && (!b.core || b.id !== 'bridge') && !b.enemyOnly && !b.sized && (b.size || 1) <= lim && b.tier <= sys.tier + 1);
     if (kind === 'outfit') {
       // a harpoon, a mining laser, a targeting computer and a scanner are always on the shelf
       // #66: missile defence is always on offer too — a Blast Screen (Shields) and a Decoy launcher (Utility)
@@ -310,13 +311,14 @@ function shopStock(S, kind) {
         if (sl.id === 'core') { picks.length = 0; picks.push(...pool); }
         for (const b of picks.slice(0, Math.max(n, sl.cats.length, sl.id === 'core' ? pool.length : 0))) {
           let rar = rollRarity(r, sys.tier); if (RARITY_BY_ID[rar.id].index > 3) rar = RARITY[3];
-          stock.push(makeItem(r, b.id, rar.id));
+          // #68: further out some parts come as 2×2 / 4×4 (whatever your hull — the card says if it fits); own stream
+          stock.push(makeItem(r, sl.id === 'core' ? b.id : upsizeForShop(ru, b.id, sys.tier), rar.id));
         }
       }
     } else {
       // black market: epic and better, plus alien weapons that need no licence here
       const pool = basePool.filter(b => !b.race);
-      for (let i = 0; i < 4 + Math.min(4, Math.floor(sys.tier / 2)); i++) stock.push(makeItem(r, r.pick(pool).id, r.weighted([{ id: 'epic', w: 60 }, { id: 'legendary', w: 32 }, { id: 'relic', w: 8 }], x => x.w).id));
+      for (let i = 0; i < 4 + Math.min(4, Math.floor(sys.tier / 2)); i++) stock.push(makeItem(r, upsizeForShop(ru, r.pick(pool).id, sys.tier), r.weighted([{ id: 'epic', w: 60 }, { id: 'legendary', w: 32 }, { id: 'relic', w: 8 }], x => x.w).id));
       const alien = Object.values(BLOCKS).filter(b => b.race && (b.size || 1) <= lim);
       for (let i = 0; i < 3 && alien.length; i++) stock.push(makeItem(r, r.pick(alien).id, r.pick(['rare', 'rare', 'epic', 'legendary'])));
     }
@@ -390,12 +392,12 @@ function tabOutfitter(S, box) {
   if (outfitSlot === 'warp') { warpSection(S, box); return; }
   if (outfitSlot === 'sell') { partsForSale(S, box, 1, 'The outfitter pays about a third of the list price.'); return; }
   const sl = SLOTS.find(x => x.id === outfitSlot);
-  section(box, sl.name, `Danger ${sys.tier}: shops further from home stock better parts. New stock in about ${left} min. Biggest parts offered: ${sizeLimit(G)}×${sizeLimit(G)}.`);
+  section(box, sl.name, `Danger ${sys.tier}: shops further from home stock better parts${sys.tier >= 4 ? ', some in 2×2 and 4×4 sizes' : sys.tier >= 2 ? ', some in 2×2 size (4×4 from danger 4)' : ' (2×2 sizes from danger 2)'}. New stock in about ${left} min.`);
   const cards = el('div', { class: 'cards' });
   stock.forEach((it, i) => {
     if (gone.includes(i) || !sl.cats.includes(BLOCKS[it.block].cat)) return;
     const price = Math.round(listPrice(it) * k.buy);
-    cards.append(itemCard(it, { compact: true, price, compare: S.ship(), actions: [btn('Buy', () => { if (G.credits < price) return toast('You cannot afford that.', 'bad'); gone.push(i); buyItem(S, it, price); }, G.credits >= price ? 'primary' : '')] }));
+    cards.append(itemCard(it, { compact: true, price, compare: S.ship(), fit: G.ship.cls, actions: [btn('Buy', () => { if (G.credits < price) return toast('You cannot afford that.', 'bad'); gone.push(i); buyItem(S, it, price); }, G.credits >= price ? 'primary' : '')] }));
   });
   if (!cards.children.length) cards.append(el('p', { class: 'hint' }, sl.id === 'core' && sys.tier < 2 ? `No better bridge here. ${BLOCKS.bridge_2.name} is sold at danger 2 and further out; ${BLOCKS.bridge_3.name} at danger 4.` : 'Sold out on this shelf. Come back later.'));
   box.append(cards);
@@ -776,7 +778,7 @@ function openLot(S, seed, price, cls, cond) {
     if (n > fit) scrap += Math.round((n - fit) * m.price * 0.5);
   }
   G.credits += scrap;
-  const lim = sizeLimit(G); const pool = Object.values(BLOCKS).filter(b => b.module && !b.core && !b.race && (b.size || 1) <= lim && b.tier <= sys.tier + 1);
+  const lim = sizeLimit(G); const pool = Object.values(BLOCKS).filter(b => b.module && !b.core && !b.race && !b.sized && (b.size || 1) <= lim && b.tier <= sys.tier + 1);
   const nItems = 1 + (r() < 0.5 ? 1 : 0) + (r() < 0.25 + RANK_OF(cls) * 0.1 ? 1 : 0);
   const items = [];
   for (let i = 0; i < nItems; i++) { const rar = rollRarity(r, sys.tier, 0.2 + RANK_OF(cls) * 0.15 + researchLootBonus(G)); const it = makeItem(r, r.pick(pool).id, rar.id); G.parts.push(it); items.push(it); }
@@ -859,7 +861,7 @@ function tabBlack(S, box) {
   stock.forEach((it, i) => {
     if (gone.includes(i)) return;
     const price = Math.round(listPrice(it, 2.2) * k.buy);
-    cards.append(itemCard(it, { compact: true, price, actions: [btn('Buy', () => { if (G.credits < price) return toast('You cannot afford that.', 'bad'); gone.push(i); buyItem(S, it, price); }, G.credits >= price ? 'primary' : '')] }));
+    cards.append(itemCard(it, { compact: true, price, fit: G.ship.cls, actions: [btn('Buy', () => { if (G.credits < price) return toast('You cannot afford that.', 'bad'); gone.push(i); buyItem(S, it, price); }, G.credits >= price ? 'primary' : '')] }));
   });
   if (!cards.children.length) cards.append(el('p', { class: 'hint' }, 'Sold out. Come back later.'));
   box.append(cards);
@@ -873,7 +875,7 @@ function tabBlack(S, box) {
 
 function tabWorkshop(S, box) {
   const { G, sys } = S;
-  drawWorkshop(box, { app: S.app, G, tierCap: sys.tier + 2, sizeCap: sizeLimit(G), edge: 0, station: true, render: S.render });
+  drawWorkshop(box, { app: S.app, G, tierCap: sys.tier + 2, sizeCap: 4, hullCap: sizeLimit(G), edge: 0, station: true, render: S.render });
 }
 
 const TABS = {

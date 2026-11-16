@@ -257,6 +257,49 @@ export function makeOutpost(seed, faction, tier, kind = 'bunker') {
 /** Hostiles are kept this far from a friendly station (spawns, camps, roamers). */
 export const SAFE_RADIUS = 3500;
 
+// ------------------------------------------------------------------ safe arrival (report #69, 2026-11-16)
+// "I went to a danger 3 or 4 zone and there were enemies right at spawn shooting at me before I could get my
+// bearings" (lessons rule 39). Arriving in a system: the jump point is picked away from hostile things that cannot
+// move (stations, bases, a roaming giant), every hostile ship inside ARRIVAL_RADIUS is moved out to its edge, shots
+// and enemy drones in it fizzle, and the sectors around it hold no camps / packs / ambushes for this visit
+// (w.safeSpots, read by sectors.js like a friendly station). The arrival grace (ARRIVAL_GRACE, world.js hostile)
+// keeps anyone from targeting you meanwhile; main.js shows it as "Safe arrival".
+export const ARRIVAL_RADIUS = 4000;
+export const ARRIVAL_GRACE = 8;
+const immovableFoe = b => !b.dead && b.team === 'hostile' && (b.static || b.kind === 'station' || b.kind === 'ground' || b.boss);
+/** Where to come out of a jump: `dist` from the centre near angle `a`, turned away from hostile things that cannot be moved. */
+export function arrivalSpot(w, a, dist = 7000) {
+  const foes = w.bodies.filter(immovableFoe);
+  const clear = (x, y) => Math.min(Infinity, ...foes.map(b => Math.hypot(b.x - x, b.y - y) - (b.r || 0)));
+  let best = null;
+  for (let i = 0; i < 16; i++) {
+    const an = a + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * (Math.PI / 8);
+    const x = Math.cos(an) * dist, y = Math.sin(an) * dist; const c = clear(x, y);
+    if (!best || c > best.c) best = { x, y, a: an, c };
+    if (c > ARRIVAL_RADIUS + 1500) break;
+  }
+  return best;
+}
+/** Make (x, y) safe to arrive at (see above). Returns how many ships were moved. */
+export function secureArrival(w, x, y, R = ARRIVAL_RADIUS) {
+  (w.safeSpots ||= []).push({ x, y, r: R });
+  let moved = 0;
+  for (const b of w.bodies) {
+    if (b.dead || b.kind !== 'ship' || b.team !== 'hostile' || b.static) continue;
+    const dx = b.x - x, dy = b.y - y; const d = Math.hypot(dx, dy);
+    if (d >= R + (b.r || 0)) continue;
+    // straight out along the line from the arrival point (a ship right on it goes out by its index)
+    const ux = d > 1 ? dx / d : Math.cos(moved * 2.4), uy = d > 1 ? dy / d : Math.sin(moved * 2.4);
+    const out = R + (b.r || 0) + 500 + (moved % 5) * 120;
+    b.x = x + ux * out; b.y = y + uy * out; b.vx = 0; b.vy = 0;
+    if (b.ai) b.ai.target = null;
+    moved++;
+  }
+  for (const p of w.shots) if (p.team !== 'player' && Math.hypot(p.x - x, p.y - y) < R) p.dead = true;
+  for (const d of w.drones || []) if (d.team === 'hostile' && Math.hypot(d.x - x, d.y - y) < R) d.dead = true;
+  return moved;
+}
+
 // ------------------------------------------------------------------ fill a system
 /**
  * Put everything in a system into a world. `state` is the saved per-system memory

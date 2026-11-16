@@ -16,6 +16,7 @@ import { ALL_WEAPONS } from '../data/weapons.js';
 import { DAMAGE, HIT_SIZE, RARITY_BY_ID, ARMOR } from '../data/types.js';
 import { POWERS } from '../sim/loot.js';
 import { partStat, weaponStat } from '../sim/partstats.js';
+import { fitInfo } from '../sim/sizes.js';
 
 /** Outfitter shelves by slot (play-test #38: "parts organized by slot … never seen parts that give more crew or CPU"). */
 export const SLOTS = [
@@ -201,14 +202,15 @@ export function itemTipHTML(x) {
 /**
  * A card element for a shop or the parts hold.
  * opts.price (number) + opts.priceLabel ('Price'), opts.actions (array of buttons), opts.note (text),
- * opts.compact (true = only the key numbers; the rest in a <details> fold).
+ * opts.compact (true = only the key numbers; the rest in a <details> fold), opts.fit (a hull class: 2×2 / 4×4 parts
+ * say whether they fit it).
  */
 export function itemCard(x, opts = {}) {
   const it = norm(x); const S = itemStats(it);
   const card = el('div', { class: 'card it-card', style: `border-color:${rarityColor(it)}55` });
   if (!S.def) { card.append(el('div', {}, 'Unknown part')); return card; }
   card.append(el('div', { html: headHTML(it, S) }));
-  const keys = opts.compact ? S.rows.filter(r => ['Damage', 'Damage per second', 'Range', 'Shield', 'Thrust', 'Power made', 'CPU given', 'Auto weapon slots', 'Crew room', 'Cargo', 'Drones', 'Size', 'CPU', 'Power use', 'Crew'].includes(r[0])) : S.rows;
+  const keys = opts.compact ? S.rows.filter(r => ['Damage', 'Damage per second', 'Range', 'Shield', 'Thrust', 'Turning', 'Power made', 'CPU given', 'Auto weapon slots', 'Crew room', 'Cargo', 'Drones', 'Size', 'CPU', 'Power use', 'Crew'].includes(r[0])) : S.rows;
   card.append(el('div', { html: rowsHTML(keys) }));
   if (opts.compact && keys.length < S.rows.length) {
     const more = el('details', { class: 'it-more' }, el('summary', {}, 'More numbers'));
@@ -216,6 +218,8 @@ export function itemCard(x, opts = {}) {
     card.append(more);
   }
   card.append(el('div', { html: extrasHTML(S) }));
+  // a 2×2 / 4×4 part says whether it fits your hull, and what to do if not (reports #67/#68, lessons rule 10)
+  if (opts.fit && (S.def.size || 1) > 1) { const f = fitInfo(opts.fit, S.def); card.append(el('div', { class: 'it-fit ' + (f.ok ? 'good' : 'bad') }, f.text)); }
   if (opts.compare) { const c = compareLine(it, opts.compare); if (c) card.append(el('div', { html: c })); }
   if (opts.note) card.append(el('div', { class: 'hint' }, opts.note));
   if (opts.price != null || opts.actions?.length) {

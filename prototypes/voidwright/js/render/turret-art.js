@@ -2,6 +2,7 @@
 // (owner: "Turrets should have their own graphics, rotate at enemies, and have cosmetic knockback").
 
 import { glowSprite } from './fx.js';
+import { ALL_WEAPONS } from '../data/weapons.js';
 
 const STYLES = {
   pulse_laser:  { barrels: 2, len: 0.75, wid: 0.1, gap: 0.16, body: 'round', bodyR: 0.32, tip: '#ff4f7a' },
@@ -97,6 +98,19 @@ export function drawTurret(c, id, S, kick, t, pal, glowCtx) {
       }
     }
   }
+  // heavy (2×2) and capital (4×4) mounts of a 1×1 gun (reports #67/#68): an armoured collar under the body — one
+  // ring with bolts on a 2×2, a double ring with warning stripes on a 4×4 — so the size reads at a glance
+  if (st.heavy) {
+    const CR = R * (st.heavy >= 4 ? 1.42 : 1.28);
+    c.fillStyle = dark; c.beginPath(); c.arc(0, 0, CR, 0, 7); c.fill();
+    c.strokeStyle = metal; c.lineWidth = Math.max(1, S * 0.03); c.beginPath(); c.arc(0, 0, CR * 0.94, 0, 7); c.stroke();
+    if (st.heavy >= 4) {
+      c.strokeStyle = '#e8c040'; c.lineWidth = Math.max(1, S * 0.035);
+      for (let i = 0; i < 8; i++) { const a0 = i * Math.PI / 4 + 0.15; c.beginPath(); c.arc(0, 0, CR * 0.82, a0, a0 + 0.35); c.stroke(); }
+    }
+    c.fillStyle = metal; const nb = st.heavy >= 4 ? 12 : 8;
+    for (let i = 0; i < nb; i++) { const an = i * Math.PI * 2 / nb; c.beginPath(); c.arc(Math.cos(an) * CR * 0.94, Math.sin(an) * CR * 0.94, Math.max(0.6, S * 0.018), 0, 7); c.fill(); }
+  }
   // body
   c.fillStyle = st.organic ? '#4a6a2a' : mid; c.strokeStyle = dark; c.lineWidth = Math.max(1, S * 0.05);
   switch (st.body) {
@@ -154,4 +168,11 @@ export function drawTurret(c, id, S, kick, t, pal, glowCtx) {
   }
 }
 
+// the heavy / capital mounts reuse their 1×1 gun's look (plus the collar above): thicker barrels, a smaller body
+// relative to the bigger square so the collar shows, coils on the capital size
+for (const w of Object.values(ALL_WEAPONS)) {
+  if (!w.sizeOf || STYLES[w.id]) continue;
+  const b = STYLES[w.sizeOf] || STYLES.pulse_laser; const n = w.bsize;
+  STYLES[w.id] = { ...b, heavy: n, bodyR: b.bodyR * (n >= 4 ? 0.62 : 0.72), ...(b.len ? { len: b.len * (n >= 4 ? 0.82 : 0.9), wid: b.wid * (n >= 4 ? 0.95 : 0.9) } : {}), ...(n >= 4 && b.barrels ? { coils: true } : {}) };
+}
 export const TURRET_STYLES = STYLES;

@@ -38,7 +38,9 @@ export function sectorInfo(sys, sx, sy, w = null) {
   const cx = (sx + 0.5) * SEC, cy = (sy + 0.5) * SEC; const d = Math.hypot(cx, cy);
   if (d > R) return null;
   const r = rng(hash(sys.seed, 'sec', sx, sy));
-  const nearStation = w?.stations?.some(s => s.team !== 'hostile' && Math.hypot(s.x - cx, s.y - cy) < SAFE_RADIUS + SEC * 0.6);
+  // nothing hostile parked by a friendly station, nor by the spot you jumped in at this visit (#69, galaxy.js secureArrival)
+  const nearStation = !!(w?.stations?.some(s => s.team !== 'hostile' && Math.hypot(s.x - cx, s.y - cy) < SAFE_RADIUS + SEC * 0.6) ||
+    w?.safeSpots?.some(s => Math.hypot(s.x - cx, s.y - cy) < s.r + SEC * 0.6));
   // belts make fields far more likely along their ring
   const onBelt = (w?.belts || []).some(b => Math.abs(d - b.r) < b.width + SEC * 0.5);
   const ore = T.ore ?? 1, foes = T.enemies ?? 1;

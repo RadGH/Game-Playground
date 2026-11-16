@@ -21,8 +21,8 @@ function simpleCard(item) {
 }
 // The shared item card is an ELEMENT; the plain HTML card is the fallback if it ever throws.
 // (It used to be loaded late and fed to innerHTML, which printed "[object HTMLDivElement]".)
-function card(item, actions) {
-  try { return itemCard(item, { actions, compact: true }); }
+function card(item, actions, fit) {
+  try { return itemCard(item, { actions, compact: true, fit }); }
   catch { const c = el('div', { class: 'card', html: simpleCard(item) }); c.append(el('div', { class: 'row end' }, ...actions)); return c; }
 }
 
@@ -47,7 +47,7 @@ export function openHold(app, tab = 'parts') {
           G.parts.splice(G.parts.indexOf(it), 1);
           if (app.w && app.P && wasMode === 'fly') spawnPickup(app.w, { kind: 'item', item: it, rarity: it.rarity }, app.P.x - Math.cos(app.P.a) * (app.P.r + 30), app.P.y - Math.sin(app.P.a) * (app.P.r + 30), 0, 0, 10);
           draw();
-        }, 'small')]));
+        }, 'small')], G.ship.cls));
       }
       B.append(grid);
     } else if (tab === 'cargo') {

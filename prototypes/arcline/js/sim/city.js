@@ -7,7 +7,7 @@
 // minus upkeep; below the shutdown line services stop.
 import { T, milestones } from './tuning.js';
 import { cat, item } from './catalog.js';
-import { roadReach, touchesRoad, solvePower, solveWater, solveTraffic } from './networks.js';
+import { roadReach, touchesRoad, lotFace, solvePower, solveWater, solveTraffic } from './networks.js';
 import { isFlat } from './terrain.js';
 import { addLot, reindexLots } from './build.js';
 import { ZONE, RAW, REFINED } from './region.js';
@@ -106,9 +106,10 @@ export function grow(r, R) {
   const old = r.lots.filter(l => l.kind === 'zoned' && l.tier < 4 && r.day - l.built > 60);
   for (let k = 0; k < Math.min(3, old.length); k++) {
     const l = old[R.int(0, old.length - 1)], value = lotValue(r, l.x, l.z, l.w, l.d);
-    const table = cat().zones[l.zone], next = table.find(t => t.tier === l.tier + 1 && t.size[0] === l.w && t.size[1] === l.d);
+    // the next tier on the same footprint, either way round (a lot laid sideways stays sideways and keeps its front)
+    const table = cat().zones[l.zone], next = table.find(t => t.tier === l.tier + 1 && ((t.size[0] === l.w && t.size[1] === l.d) || (t.size[1] === l.w && t.size[0] === l.d)));
     if (next && value >= next.minValue && (next.unlock ?? 0) <= r.milestone && dm[l.zone] > 0.2 && (!next.water || l.wet)) {
-      Object.assign(l, makeLot(r, next, l.zone, l.x, l.z, value, R), { n: l.n }); grown++;
+      Object.assign(l, makeLot(r, next, l.zone, l.x, l.z, value, R, l.w, l.d), { n: l.n }); grown++;
     }
   }
   if (grown) { solvePower(r); solveWater(r); }
@@ -130,19 +131,22 @@ function bestLot(r, reach, table, key, x, z, R) {
         if (value < t.minValue) continue;
         if (t.water && !waterAt(r, lx + (w >> 1), lz + (d >> 1))) continue;
         if (t.education && r.people.edu < t.education) continue;
-        return { ...makeLot(r, t, key, lx, lz, value, R), w, d };
+        // the building's front must face a road (a row of homes never turns its back or its end to the street)
+        if (!lotFace(r, lx, lz, w, d, t.size).road) continue;
+        return makeLot(r, t, key, lx, lz, value, R, w, d);
       }
     }
   }
   return null;
 }
-function makeLot(r, t, zone, x, z, value, R) {
+/** A zoned lot of tier t at (x, z), w × d tiles (t.size, or turned the other way round), facing its road. */
+function makeLot(r, t, zone, x, z, value, R, w = t.size[0], d = t.size[1]) {
   const [lo, hi] = t.floors, span = t.minValue >= 0.99 ? 1 : (value - t.minValue) / (1 - t.minValue);
   const floors = Math.max(lo, Math.min(hi, Math.round(lo + (hi - lo) * Math.pow(Math.max(0, span), 1.2) * R.range(0.8, 1.1))));
   const cap = floors * t.perFloor;
   const params = { seed: R.int(1, 9999), style: R.pick(['chrome', 'pearl', 'copper', 'concrete']) };
   if (t.param === 'stalls') params.stalls = Math.max(2, Math.min(6, 2 + Math.round(value * 5))); else params.floors = floors;
-  return { n: r.nextLot = (r.nextLot || 0) + 1, id: `zone-${zone}-${t.tier}`, kind: 'zoned', zone, tier: t.tier, x, z, w: t.size[0], d: t.size[1], recipe: t.recipe, params,
+  return { n: r.nextLot = (r.nextLot || 0) + 1, id: `zone-${zone}-${t.tier}`, kind: 'zoned', zone, tier: t.tier, x, z, w, d, face: lotFace(r, x, z, w, d, t.size).face, recipe: t.recipe, params,
     people: zone === 'R' ? cap : 0, jobs: zone === 'R' ? 0 : cap, power: -Math.max(1, Math.round(cap / 25)), water: 0, upkeep: 0, built: r.day, value };
 }
 

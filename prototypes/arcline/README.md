@@ -34,3 +34,8 @@ way a city grows), zoning decides where they live and work.
   (`js/audio/music.js`: calm / night / tension moods that crossfade, seeded 8-bar phrase planning, ducks under big
   blasts; starts on the first tap, also on the title). Settings: Volume, Music, Effects, Ambience sliders + Mute.
   Tests: `tests/audio.test.mjs` (curves, mood picking, phrases), city.spec.js "sound" (browser).
+- 2026-11-16 — owner report: cars drifted at an angle, terrace homes spilled into roads and neighbours. Vehicles are
+  baked per ground direction (citykit `groundDirOfHeading`) and drive straight lane runs with square corners
+  (`render/traffic.js`); a zoned lot laid sideways (1×2) now turns its building with it — `lot.face` (networks.js
+  `lotFace`: the model turn that puts its front on a road; old saves get one on load) — and only grows where its front
+  meets a road. Tests: `tests/alignment.test.mjs`, `tests/alignment.spec.js`.

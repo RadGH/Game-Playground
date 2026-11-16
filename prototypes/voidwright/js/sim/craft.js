@@ -1,5 +1,5 @@
 // Crafting (play-test #25 + owner ruling E9, 2026-11-12): turn mined ore into parts.
-//   recipe(blockId)      → { mats, cr } — structural + energy ore of the part's tier (+ a little exotic for
+//   recipe(blockId)      → { mats, cr } — structural + energy ore of the part's ore tier (oreTierOf; + a little exotic for
 //                           computing and high-end parts), from the part's shop value, so mining pays like buying
 //   craft(G, id, boost)  → spends the recipe (+ boost × exotic) and rolls a part; each boost step raises the
 //                           rarity odds; a Forge bay / outpost factory adds more (`edge`)
@@ -16,6 +16,15 @@ import { makeDroneItem } from './state.js';
 
 /** Material tier for a part's tier (parts go to tier 6, ore to 5). */
 export const partMatTier = t => [1, 1, 2, 3, 4, 5, 5][Math.max(0, Math.min(6, t || 1))];
+
+/**
+ * Ore tier a part is made from. A bigger size of a part (reports #67/#68) is one ore tier up per size step from its
+ * 1×1: a tier I thruster's 2×2 takes tier II ore (Titanium, Cobalt), its 4×4 tier III (Iridium, Helium-3).
+ */
+export function oreTierOf(d) {
+  if (d.fam && (d.size || 1) > 1 && BLOCKS[d.fam]) return Math.min(5, partMatTier(BLOCKS[d.fam].tier) + (d.sizeTier || 1) - 1);
+  return partMatTier(d.tier);
+}
 
 /** What share of a part's value goes to each ore role, by part category. */
 const SPLIT = {
@@ -34,7 +43,7 @@ export const craftable = d => !!d && d.module && !d.enemyOnly && !d.race && (!d.
 
 export function recipe(id) {
   const d = BLOCKS[id]; if (!craftable(d)) return null;
-  const t = partMatTier(d.tier); const value = d.cost?.cr || 100; const split = SPLIT[d.cat] || SPLIT.utility;
+  const t = oreTierOf(d); const value = d.cost?.cr || 100; const split = SPLIT[d.cat] || SPLIT.utility;
   const mats = {};
   for (const [role, share] of Object.entries(split)) {
     if (!share) continue;
@@ -129,7 +138,7 @@ export function rerollable(item) {
   return Object.keys(item.mods || {}).filter(k => AFFIX.some(a => a.key === k && a.when(d)));
 }
 export function rerollCost(item) {
-  const d = BLOCKS[item.block]; const t = partMatTier(d.tier); const ri = RARITY_BY_ID[item.rarity]?.index || 0;
+  const d = BLOCKS[item.block]; const t = oreTierOf(d); const ri = RARITY_BY_ID[item.rarity]?.index || 0;
   return { mats: { [matOf('exotic', t)]: 3 + t * 2 + ri * 2 }, cr: Math.round((d.cost?.cr || 100) * 0.1 * (1 + ri)) };
 }
 /** Swap one rolled bonus for a fresh roll of any bonus that fits the part (may land on the same kind). */

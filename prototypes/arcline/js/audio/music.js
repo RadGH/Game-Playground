@@ -144,7 +144,9 @@ class MoodPlayer {
 
   _step(step, t) {
     const s16 = step % 16;
-    if (s16 === 0) this._bar(step / 16 | 0, t);
+    // a new bar — or no chord yet: after a hidden tab or a busy machine the clock skips ahead and can land mid-bar
+    // ("chord is not iterable" every step, 2026-11-16)
+    if (s16 === 0 || !this.chord) this._bar(step / 16 | 0, t);
     const M = this.M, L = this.plan.layers, mix = M.mix, chord = this.chord;
     const swing = (s16 % 2 === 1) ? M.swing * this.sixteenth : 0, ts = t + swing;
     // drums

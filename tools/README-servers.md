@@ -167,3 +167,27 @@ The rules that matter (full list: `prototypes/thousandvale/ops/SECURITY.md`):
 ## Game room servers beside these two
 
 Some games have a Node server of their own, with the same stable/dev split: a published copy on one port, the working tree on the next. Oddhaven: 8560 stable, 8561 dev, https 8562/8563 (`prototypes/oddhaven/ops/`, user units `oddhaven` and `oddhaven-dev`, publish with `prototypes/oddhaven/tools/publish-oddhaven.sh`). A page on 8400/8401/8442/8441 finds the room server on the matching port; the room server also serves the page.
+
+## Game servers are off unless needed (owner 2026-11-16)
+
+The owner plays everything on games.radgh.com, and this VM and its host are short on memory (the 12 per-game servers
+took about 1.2 GB). So every per-game server — a systemd user unit named after a `prototypes/` folder: `tumblefair`,
+`tumblefair-dev`, `rogueloot`, `thousandvale-dev`, `thousandvale-quick-tunnel`, … — is stopped and does not start on
+boot. The system unit `thousandvale.service` (8490) is stopped and disabled too (sudo).
+
+    tools/game-servers.sh status                    running?, how long, memory, starts on boot?, kept until
+    tools/game-servers.sh start <unit>              for work or testing; stopped by itself after 24 h
+    tools/game-servers.sh keep <unit> [days|forever]  ONLY when the owner asks; starts it and skips the reaper
+    tools/game-servers.sh unkeep <unit> | stop <unit>|all
+
+An hourly user timer (`game-servers-reap.timer`, installed by `game-servers.sh install-timer`) stops any game server up
+over 24 h that is not kept, and removes any start-on-boot link a publish/install script added (publish scripts may
+restart a game's stable unit — that only starts the 24 h clock). A new game's server therefore lives about a day.
+Keep list: `~/.config/game-servers/keep`.
+
+Not touched: the page servers 8400/8401 (experiments + prototypes stay up), `kokoro-tts` (Voice Lab), `rgs-api-dev`,
+Postgres, Claude/Codex remote sessions.
+
+**Never `systemctl --user disable` a game unit.** They are `systemctl link`ed from each game's `ops/` folder, and
+disable deletes a linked unit file outright (2026-11-16 it removed all 11 and left Rogueloot running where the tool
+could not see it). If one goes missing: `systemctl --user link prototypes/<game>/ops/<unit>.service`.

@@ -93,6 +93,39 @@ for (const [id, w] of Object.entries(ALL_WEAPONS)) {
   if (w.mode === 'pd' || (w.proj === 'arc' && w.arc >= 360)) w.autoOnly = true;
 }
 
+// ---------------------------------------------- size tiers (reports #67/#68, 2026-11-16)
+// Every human 1×1 gun (not tools) also comes as a Tier 2 (2×2) and Tier 3 (4×4) mount, made in the fabricator
+// or bought further out. Same look and behaviour, scaled like the purpose-built big guns: damage per cell
+// ×1.3 / ×1.55 (the "bigger mounts do more per cell" rule), hits one size heavier, reaches further, swings slower.
+// `sizeOf` = the 1×1 weapon it grew from. Enemies never carry these (factions list their own guns).
+export const WEAPON_SIZE_UP = {
+  2: { dmg: 1.3, range: 1.2, turn: 0.6, splash: 1.4, speed: 1.08, hit: 1 },
+  4: { dmg: 1.55, range: 1.4, turn: 0.35, splash: 2, speed: 1.15, hit: 2 },
+};
+/** Part tier of a bigger size of a part of tier `t` (2×2 is at least tier 3, 4×4 at least tier 5; always above the 1×1). */
+export const sizedTier = (t, n) => n === 1 ? t : Math.min(6, Math.max(n === 2 ? 3 : 5, (t || 1) + (n === 2 ? 1 : 2)));
+const HITS = ['s', 'm', 'l'];
+function sizedWeapon(w, n) {
+  const k = WEAPON_SIZE_UP[n]; const cells = n * n; const r = v => Math.round(v);
+  const out = {
+    ...w, id: `${w.id}_${n}`, name: `${w.name} ${n}×${n}`, sizeOf: w.id, bsize: n, tier: sizedTier(w.tier, n),
+    size: HITS[Math.min(2, HITS.indexOf(w.size) + k.hit)],
+    dmg: r(w.dmg * cells * k.dmg), range: r(w.range * k.range), turn: w.turn >= 99 ? w.turn : +(w.turn * k.turn).toFixed(2),
+    blurb: `A ${n === 2 ? 'heavy' : 'capital'} ${n}×${n} mount of the ${w.name}: ${fmtX(cells * k.dmg)} the damage of the 1×1, longer reach, slower to swing.`,
+  };
+  if (w.splash) out.splash = r(w.splash * k.splash);
+  if (w.burn) out.burn = r(w.burn * cells * k.dmg);
+  if (w.chainRange) out.chainRange = r(w.chainRange * k.range);
+  if (w.speed) out.speed = r(w.speed * k.speed);
+  if (w.recoil) out.recoil = +(w.recoil * (n === 2 ? 1.2 : 1.4)).toFixed(2);
+  return out;
+}
+const fmtX = x => `${Math.round(x * 10) / 10}×`;
+for (const w of Object.values(WEAPONS)) {
+  if (w.bsize !== 1 || w.mode === 'tool' || w.race) continue;
+  for (const n of [2, 4]) { const s = sizedWeapon(w, n); ALL_WEAPONS[s.id] = s; }
+}
+
 /** Damage per second, for cards and balance tests. */
 export function dps(w) {
   if (w.mode === 'beam' || w.proj === 'beam') return w.dmg;

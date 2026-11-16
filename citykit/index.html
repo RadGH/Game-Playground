@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>City Kit — Arcline's buildings, creatures and vehicles</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="../shared/tooltip.css">
+<link rel="stylesheet" href="citykit.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body>
+<header class="topbar ck-top">
+  <a href="../" class="muted">← Playground</a>
+  <h1>City Kit</h1>
+  <nav class="ck-tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" data-view="catalog" aria-selected="true">Catalog</button>
+    <button type="button" role="tab" data-view="sheet" aria-selected="false">Variants</button>
+    <button type="button" role="tab" data-view="scene" aria-selected="false">Scene</button>
+  </nav>
+  <span class="spacer"></span>
+  <span id="status" class="muted small" role="status">Loading…</span>
+</header>
+
+<div class="ck">
+  <aside class="ck-list" aria-label="Catalog">
+    <input type="text" id="search" placeholder="Search: hotel, turret, brute…" aria-label="Search the catalog">
+    <select id="pick" aria-label="Pick an item"></select>
+    <div id="groups"></div>
+  </aside>
+
+  <main class="ck-stage" aria-label="Preview">
+    <div class="ck-stagebar">
+      <div class="seg" role="group" aria-label="Turn the map">
+        <button type="button" id="rot-l" data-tip="Turn the view left (Q)">⟲</button>
+        <span id="rot-label" class="small">View 1 of 4</span>
+        <button type="button" id="rot-r" data-tip="Turn the view right (E)">⟳</button>
+      </div>
+      <div class="seg" role="group" aria-label="Zoom">
+        <button type="button" data-zoom="fit" class="on" data-tip="Fit the item to the view">Fit</button><button type="button" data-zoom="0.5">½×</button><button type="button" data-zoom="1">1×</button><button type="button" data-zoom="2">2×</button>
+      </div>
+      <label class="seg ck-time small">Time <input type="range" id="time" min="0" max="1" step="0.05" value="0" aria-label="Time of day"> <span id="time-label">Noon</span></label>
+    </div>
+    <div class="ck-canvaswrap"><canvas id="view"></canvas></div>
+    <p id="facts" class="small muted ck-facts"></p>
+  </main>
+
+  <aside class="ck-params" aria-label="Settings">
+    <h2 id="title">—</h2>
+    <p id="blurb" class="small muted"></p>
+    <div id="params"></div>
+    <div class="row ck-actions">
+      <button type="button" id="reseed">New seed</button>
+      <button type="button" id="reset">Defaults</button>
+      <button type="button" id="copy" data-tip="Copy this item's settings to paste to Claude">Copy settings</button>
+    </div>
+    <p id="copied" class="small muted" role="status"></p>
+  </aside>
+</div>
+
+<section id="scene" class="sc" hidden aria-label="Scene">
+  <div class="sc-bar">
+    <div class="seg" role="group" aria-label="Game speed">
+      <button type="button" id="sc-pause" data-tip="Pause or carry on (Space)">Pause</button>
+      <button type="button" data-speed="1" class="on">1×</button><button type="button" data-speed="2">2×</button><button type="button" data-speed="4">4×</button>
+    </div>
+    <button type="button" id="sc-strike" class="sc-strike" data-tip="Arm the orbital strike, then tap the map (S)">Orbital strike <b id="sc-charges">3</b></button>
+    <button type="button" id="sc-swarm" data-tip="Send a big swarm from every nest">Big swarm</button>
+    <button type="button" id="sc-reset">Start over</button>
+    <div class="seg" role="group" aria-label="Turn the map">
+      <button type="button" id="sc-rot-l" data-tip="Turn the view left (Q)">⟲</button><button type="button" id="sc-rot-r" data-tip="Turn the view right (E)">⟳</button>
+    </div>
+    <button type="button" id="sc-sound" data-tip="Sound starts on your first tap of the map">Sound off</button>
+  </div>
+  <div class="sc-bar sc-bar2">
+    <label class="small">Time <input type="range" id="sc-time" min="0" max="1" step="0.01" value="0.15" aria-label="Time of day"> <span id="sc-time-label">Morning</span></label>
+    <label class="small sc-check"><input type="checkbox" id="sc-auto"> Day cycle</label>
+    <span class="sc-weather" role="group" aria-label="Weather and sky">
+      <label class="small sc-check"><input type="checkbox" data-weather="rain"> Rain</label>
+      <label class="small sc-check"><input type="checkbox" data-weather="storm"> Thunderstorm</label>
+      <label class="small sc-check"><input type="checkbox" data-weather="aurora"> Aurora</label>
+      <label class="small sc-check"><input type="checkbox" data-weather="stars"> Shooting stars</label>
+      <label class="small sc-check"><input type="checkbox" data-weather="mist"> Mist</label>
+    </span>
+    <label class="small">Pressure <input type="range" id="sc-rate" min="0" max="3" step="0.25" value="1" aria-label="How often creatures come"> <span id="sc-rate-label">Normal</span></label>
+    <label class="small sc-check"><input type="checkbox" id="sc-shake" checked> Screen shake</label>
+  </div>
+  <div class="sc-canvaswrap"><canvas id="sc-view" aria-label="The scene: drag to look around, pinch or scroll to zoom"></canvas>
+    <p id="sc-status" class="sc-status small" role="status"></p>
+  </div>
+</section>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

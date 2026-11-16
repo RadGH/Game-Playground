@@ -1,0 +1,786 @@
+{
+  "_doc": "Everything the player can build or that grows on zoned land. recipe = citykit recipe id (citykit/js/kit/*). size in tiles. cost in credits (+ materials), upkeep per month. power/water: + makes, − uses (units). people = homes, jobs = jobs. unlock = milestone index (0 = from the start). Zone growth tables in `zones`: a lot grows the highest tier its land value, water and education allow; floors scale with land value inside the tier's range.",
+  "zones": {
+    "R": [
+      {
+        "tier": 1,
+        "recipe": "res-pods",
+        "size": [
+          1,
+          1
+        ],
+        "floors": [
+          1,
+          3
+        ],
+        "perFloor": 6,
+        "minValue": 0,
+        "water": false,
+        "unlock": 0
+      },
+      {
+        "tier": 2,
+        "recipe": "res-terrace",
+        "size": [
+          2,
+          1
+        ],
+        "floors": [
+          2,
+          5
+        ],
+        "perFloor": 12,
+        "minValue": 0.25,
+        "water": true,
+        "unlock": 0
+      },
+      {
+        "tier": 3,
+        "recipe": "res-block",
+        "size": [
+          2,
+          2
+        ],
+        "floors": [
+          4,
+          16
+        ],
+        "perFloor": 14,
+        "minValue": 0.45,
+        "water": true,
+        "unlock": 2
+      },
+      {
+        "tier": 4,
+        "recipe": "res-tower",
+        "size": [
+          2,
+          2
+        ],
+        "floors": [
+          12,
+          60
+        ],
+        "perFloor": 10,
+        "minValue": 0.68,
+        "water": true,
+        "unlock": 4
+      }
+    ],
+    "C": [
+      {
+        "tier": 1,
+        "recipe": "com-market",
+        "size": [
+          1,
+          1
+        ],
+        "floors": [
+          1,
+          1
+        ],
+        "perFloor": 6,
+        "minValue": 0,
+        "water": false,
+        "unlock": 0,
+        "param": "stalls"
+      },
+      {
+        "tier": 2,
+        "recipe": "com-shops",
+        "size": [
+          2,
+          1
+        ],
+        "floors": [
+          1,
+          4
+        ],
+        "perFloor": 7,
+        "minValue": 0.2,
+        "water": true,
+        "unlock": 0
+      },
+      {
+        "tier": 3,
+        "recipe": "com-hotel",
+        "size": [
+          2,
+          2
+        ],
+        "floors": [
+          2,
+          30
+        ],
+        "perFloor": 5,
+        "minValue": 0.4,
+        "water": true,
+        "unlock": 1
+      },
+      {
+        "tier": 4,
+        "recipe": "com-office",
+        "size": [
+          2,
+          2
+        ],
+        "floors": [
+          6,
+          70
+        ],
+        "perFloor": 9,
+        "minValue": 0.6,
+        "water": true,
+        "unlock": 3
+      }
+    ],
+    "I": [
+      {
+        "tier": 1,
+        "recipe": "ind-workshop",
+        "size": [
+          2,
+          2
+        ],
+        "floors": [
+          1,
+          2
+        ],
+        "perFloor": 14,
+        "minValue": 0,
+        "water": false,
+        "unlock": 0,
+        "education": 0
+      },
+      {
+        "tier": 2,
+        "recipe": "ind-depot",
+        "size": [
+          3,
+          2
+        ],
+        "floors": [
+          1,
+          3
+        ],
+        "perFloor": 16,
+        "minValue": 0,
+        "water": true,
+        "unlock": 1,
+        "education": 0.2
+      }
+    ]
+  },
+  "build": [
+    {
+      "id": "col-core",
+      "name": "Colony Core",
+      "cat": "colony",
+      "recipe": "col-core",
+      "size": [
+        3,
+        3
+      ],
+      "cost": 0,
+      "upkeep": 0,
+      "power": 40,
+      "water": 20,
+      "jobs": 10,
+      "unlock": 0,
+      "unique": true,
+      "blurb": "The heart of the city: city hall, a small reactor, storage and a turret mount.",
+      "params": {
+        "upgrade": 1
+      }
+    },
+    {
+      "id": "col-pad",
+      "name": "Landing Pad",
+      "cat": "colony",
+      "recipe": "col-pad",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 2500,
+      "upkeep": 40,
+      "power": -2,
+      "unlock": 0,
+      "blurb": "Settler pods and merchant goods land here instead of on open ground."
+    },
+    {
+      "id": "col-comms",
+      "name": "Comms Array",
+      "cat": "colony",
+      "recipe": "col-comms",
+      "params": {
+        "tier": 1
+      },
+      "size": [
+        2,
+        2
+      ],
+      "cost": 4000,
+      "upkeep": 60,
+      "power": -6,
+      "unlock": 0,
+      "comms": 1,
+      "blurb": "Lets you call the ships passing overhead. Bigger arrays reach more ships."
+    },
+    {
+      "id": "col-comms2",
+      "name": "Long-range Array",
+      "cat": "colony",
+      "recipe": "col-comms",
+      "params": {
+        "tier": 2
+      },
+      "size": [
+        2,
+        2
+      ],
+      "cost": 12000,
+      "upkeep": 120,
+      "power": -12,
+      "unlock": 2,
+      "comms": 2,
+      "blurb": "Reaches more ships, and better ones."
+    },
+    {
+      "id": "col-comms3",
+      "name": "Deep-space Array",
+      "cat": "colony",
+      "recipe": "col-comms",
+      "params": {
+        "tier": 3
+      },
+      "size": [
+        2,
+        2
+      ],
+      "cost": 30000,
+      "upkeep": 220,
+      "power": -20,
+      "unlock": 4,
+      "comms": 3,
+      "steel": 120,
+      "blurb": "Colony liners and rare merchants answer this one."
+    },
+    {
+      "id": "svc-power",
+      "name": "Fusion Plant",
+      "cat": "power",
+      "recipe": "svc-power",
+      "params": {
+        "rings": 1,
+        "towers": 1
+      },
+      "size": [
+        2,
+        2
+      ],
+      "cost": 9000,
+      "upkeep": 180,
+      "power": 120,
+      "water": -6,
+      "jobs": 20,
+      "unlock": 0,
+      "blurb": "Power for about 120 units of buildings and turrets."
+    },
+    {
+      "id": "svc-power2",
+      "name": "Fusion Plant (large)",
+      "cat": "power",
+      "recipe": "svc-power-l",
+      "params": {
+        "rings": 3,
+        "towers": 2
+      },
+      "size": [
+        3,
+        3
+      ],
+      "cost": 26000,
+      "upkeep": 420,
+      "power": 420,
+      "water": -14,
+      "jobs": 45,
+      "unlock": 2,
+      "cells": 40,
+      "blurb": "Much more power for a growing city."
+    },
+    {
+      "id": "svc-water",
+      "name": "Water Pump",
+      "cat": "water",
+      "recipe": "svc-water",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 3500,
+      "upkeep": 60,
+      "power": -8,
+      "water": 80,
+      "jobs": 4,
+      "unlock": 0,
+      "nearWater": true,
+      "blurb": "Pumps from a river, lake or the sea into the pipes. Bigger homes and shops need water."
+    },
+    {
+      "id": "svc-school",
+      "name": "School",
+      "cat": "education",
+      "recipe": "svc-school",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 7000,
+      "upkeep": 150,
+      "power": -6,
+      "water": -4,
+      "jobs": 18,
+      "unlock": 1,
+      "cover": {
+        "education": 9
+      },
+      "blurb": "Raises education nearby: better industry, higher land value."
+    },
+    {
+      "id": "svc-university",
+      "name": "University",
+      "cat": "education",
+      "recipe": "svc-university",
+      "size": [
+        3,
+        3
+      ],
+      "cost": 24000,
+      "upkeep": 380,
+      "power": -14,
+      "water": -8,
+      "jobs": 60,
+      "unlock": 3,
+      "cover": {
+        "education": 16
+      },
+      "blurb": "The city's whole education rises; high-tech industry can grow."
+    },
+    {
+      "id": "svc-park",
+      "name": "Park & Plaza",
+      "cat": "leisure",
+      "recipe": "svc-park",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 1800,
+      "upkeep": 25,
+      "water": -2,
+      "unlock": 0,
+      "cover": {
+        "leisure": 6
+      },
+      "blurb": "Raises land value around it; towers and hotels follow."
+    },
+    {
+      "id": "svc-arena",
+      "name": "Arena",
+      "cat": "leisure",
+      "recipe": "svc-arena",
+      "size": [
+        3,
+        3
+      ],
+      "cost": 16000,
+      "upkeep": 260,
+      "power": -10,
+      "water": -6,
+      "jobs": 40,
+      "unlock": 3,
+      "cover": {
+        "leisure": 14
+      },
+      "blurb": "Big nights out: a large lift to land value across the district."
+    },
+    {
+      "id": "ind-refinery-steel",
+      "name": "Steel Refinery",
+      "cat": "industry",
+      "recipe": "ind-refinery-l",
+      "params": {
+        "product": 0
+      },
+      "size": [
+        3,
+        3
+      ],
+      "cost": 8000,
+      "upkeep": 140,
+      "power": -14,
+      "water": -4,
+      "jobs": 30,
+      "unlock": 1,
+      "refine": {
+        "from": "metal",
+        "to": "steel"
+      },
+      "blurb": "Turns Metal into Steel."
+    },
+    {
+      "id": "ind-refinery-concrete",
+      "name": "Concrete Works",
+      "cat": "industry",
+      "recipe": "ind-refinery-l",
+      "params": {
+        "product": 1
+      },
+      "size": [
+        3,
+        3
+      ],
+      "cost": 7000,
+      "upkeep": 120,
+      "power": -10,
+      "water": -8,
+      "jobs": 26,
+      "unlock": 2,
+      "refine": {
+        "from": "stone",
+        "to": "concrete"
+      },
+      "blurb": "Turns Stone into Concrete."
+    },
+    {
+      "id": "ind-refinery-cells",
+      "name": "Cell Foundry",
+      "cat": "industry",
+      "recipe": "ind-refinery-l",
+      "params": {
+        "product": 2
+      },
+      "size": [
+        3,
+        3
+      ],
+      "cost": 14000,
+      "upkeep": 220,
+      "power": -20,
+      "water": -6,
+      "jobs": 34,
+      "unlock": 3,
+      "refine": {
+        "from": "crystal",
+        "to": "cells"
+      },
+      "blurb": "Turns Crystal into Power cells."
+    },
+    {
+      "id": "out-metal",
+      "name": "Metal Drill",
+      "cat": "outpost",
+      "recipe": "out-metal",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 3000,
+      "upkeep": 50,
+      "power": -6,
+      "unlock": 0,
+      "deposit": "metal",
+      "blurb": "Built on a metal deposit; sends Metal home on its own while powered."
+    },
+    {
+      "id": "out-stone",
+      "name": "Stone Quarry",
+      "cat": "outpost",
+      "recipe": "out-stone",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 2500,
+      "upkeep": 40,
+      "power": -4,
+      "unlock": 0,
+      "deposit": "stone",
+      "blurb": "Built on stone; sends Stone home on its own while powered."
+    },
+    {
+      "id": "out-crystal",
+      "name": "Crystal Extractor",
+      "cat": "outpost",
+      "recipe": "out-crystal",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 4500,
+      "upkeep": 70,
+      "power": -8,
+      "unlock": 2,
+      "deposit": "crystal",
+      "blurb": "Built on crystal; sends Crystal home on its own while powered."
+    },
+    {
+      "id": "wall-1",
+      "name": "Barrier Wall",
+      "cat": "defence",
+      "recipe": "wall-straight",
+      "params": {
+        "tier": 1
+      },
+      "size": [
+        1,
+        1
+      ],
+      "cost": 60,
+      "upkeep": 1,
+      "unlock": 0,
+      "hp": 220,
+      "wall": true,
+      "blurb": "Blocks creatures and everything they throw. Draw a line of it."
+    },
+    {
+      "id": "wall-2",
+      "name": "Plated Wall",
+      "cat": "defence",
+      "recipe": "wall-straight",
+      "params": {
+        "tier": 2
+      },
+      "size": [
+        1,
+        1
+      ],
+      "cost": 140,
+      "upkeep": 2,
+      "unlock": 2,
+      "hp": 520,
+      "wall": true,
+      "steel": 2,
+      "blurb": "Twice as tough. Needs a little Steel."
+    },
+    {
+      "id": "wall-3",
+      "name": "Energy Wall",
+      "cat": "defence",
+      "recipe": "wall-straight",
+      "params": {
+        "tier": 3
+      },
+      "size": [
+        1,
+        1
+      ],
+      "cost": 320,
+      "upkeep": 4,
+      "power": -1,
+      "unlock": 4,
+      "hp": 1100,
+      "wall": true,
+      "concrete": 2,
+      "cells": 1,
+      "blurb": "The toughest wall; needs power."
+    },
+    {
+      "id": "gate",
+      "name": "Gate",
+      "cat": "defence",
+      "recipe": "wall-gate",
+      "params": {
+        "tier": 2
+      },
+      "size": [
+        1,
+        1
+      ],
+      "cost": 200,
+      "upkeep": 3,
+      "unlock": 0,
+      "hp": 300,
+      "wall": true,
+      "gate": true,
+      "blurb": "A wall your roads pass through; creatures can't."
+    },
+    {
+      "id": "tur-pulse",
+      "name": "Pulse Gun",
+      "cat": "defence",
+      "recipe": "tur-pulse",
+      "size": [
+        1,
+        1
+      ],
+      "cost": 900,
+      "upkeep": 20,
+      "power": -3,
+      "unlock": 0,
+      "turret": "pulse",
+      "blurb": "Cheap, rapid bolts."
+    },
+    {
+      "id": "tur-mortar",
+      "name": "Mortar",
+      "cat": "defence",
+      "recipe": "tur-mortar",
+      "size": [
+        1,
+        1
+      ],
+      "cost": 2400,
+      "upkeep": 45,
+      "power": -5,
+      "unlock": 1,
+      "turret": "mortar",
+      "blurb": "Lobbed shells that clear crowds."
+    },
+    {
+      "id": "tur-arc",
+      "name": "Arc Coil",
+      "cat": "defence",
+      "recipe": "tur-arc",
+      "size": [
+        1,
+        1
+      ],
+      "cost": 3200,
+      "upkeep": 60,
+      "power": -8,
+      "unlock": 2,
+      "turret": "arc",
+      "blurb": "Lightning that jumps between close creatures."
+    },
+    {
+      "id": "tur-rail",
+      "name": "Rail Lance",
+      "cat": "defence",
+      "recipe": "tur-rail",
+      "size": [
+        1,
+        1
+      ],
+      "cost": 5200,
+      "upkeep": 90,
+      "power": -10,
+      "unlock": 3,
+      "turret": "rail",
+      "steel": 20,
+      "blurb": "Long range; a shot goes straight through a line of creatures."
+    },
+    {
+      "id": "lm-spaceport",
+      "name": "Spaceport",
+      "cat": "landmark",
+      "recipe": "lm-spaceport",
+      "size": [
+        4,
+        4
+      ],
+      "cost": 60000,
+      "upkeep": 600,
+      "power": -40,
+      "water": -10,
+      "jobs": 120,
+      "unlock": 4,
+      "steel": 200,
+      "concrete": 200,
+      "cover": {
+        "leisure": 14
+      },
+      "landmark": true,
+      "blurb": "Ships come twice as often; merchants bring rarer goods."
+    },
+    {
+      "id": "lm-arcology",
+      "name": "Arcology Spire",
+      "cat": "landmark",
+      "recipe": "lm-arcology",
+      "size": [
+        3,
+        3
+      ],
+      "cost": 90000,
+      "upkeep": 800,
+      "power": -60,
+      "water": -30,
+      "people": 1200,
+      "jobs": 300,
+      "unlock": 5,
+      "steel": 300,
+      "concrete": 400,
+      "cells": 60,
+      "cover": {
+        "leisure": 18
+      },
+      "landmark": true,
+      "blurb": "A city in one tower: homes for 1,200 and a huge lift to land value around it."
+    },
+    {
+      "id": "lm-lance",
+      "name": "Orbital Lance",
+      "cat": "landmark",
+      "recipe": "lm-lance",
+      "size": [
+        3,
+        3
+      ],
+      "cost": 120000,
+      "upkeep": 1200,
+      "power": -120,
+      "unlock": 6,
+      "steel": 400,
+      "cells": 150,
+      "landmark": true,
+      "lance": true,
+      "blurb": "Your own orbital strike, on a cooldown, anywhere in the region."
+    }
+  ],
+  "roads": [
+    {
+      "id": "street",
+      "name": "Street",
+      "cost": 25,
+      "upkeep": 0.4,
+      "capacity": 60,
+      "unlock": 0
+    },
+    {
+      "id": "avenue",
+      "name": "Avenue",
+      "cost": 70,
+      "upkeep": 1,
+      "capacity": 180,
+      "unlock": 2
+    },
+    {
+      "id": "highway",
+      "name": "Highway",
+      "cost": 220,
+      "upkeep": 3,
+      "capacity": 600,
+      "unlock": 3
+    }
+  ],
+  "transit": [
+    {
+      "id": "monorail",
+      "name": "Monorail",
+      "cost": 160,
+      "station": 3500,
+      "upkeep": 2,
+      "unlock": 3
+    },
+    {
+      "id": "maglev",
+      "name": "Maglev",
+      "cost": 380,
+      "station": 9000,
+      "upkeep": 5,
+      "unlock": 4
+    }
+  ]
+}

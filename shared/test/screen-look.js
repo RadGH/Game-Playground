@@ -44,7 +44,8 @@ export function screenLookProblems(opts = {}) {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
     const t = n.textContent.trim(); if (!t) continue;
-    const el = n.parentElement; if (!el || el.closest('script,style,noscript,[data-lint-skip],[aria-hidden="true"]') || !visible(el)) continue;
+    // a tooltip floats over other text on purpose — skip it
+    const el = n.parentElement; if (!el || el.closest('script,style,noscript,[data-lint-skip],[aria-hidden="true"],[role="tooltip"],.tipbox') || !visible(el)) continue;
     const range = document.createRange(); range.selectNodeContents(n);
     const rects = [...range.getClientRects()].filter(r => r.width >= 1 && r.height >= 1); if (!rects.length) continue;
     const s = getComputedStyle(el);

@@ -1,0 +1,552 @@
+{
+  "_doc": "Every feel/balance number in Arcline. Read through js/sim/tuning.js at use time; the tuning panel (` key or ?tune) moves them live and tools/apply-tune.mjs arcline writes them back. Owner rebalance 2026-11-15: arrivals are the main growth.",
+  "milestone1": {
+    "value": 100,
+    "min": 20,
+    "max": 400,
+    "step": 10,
+    "label": "Milestone 1 (people)",
+    "group": "Milestones"
+  },
+  "milestone2": {
+    "value": 300,
+    "min": 100,
+    "max": 1000,
+    "step": 25,
+    "label": "Milestone 2",
+    "group": "Milestones"
+  },
+  "milestone3": {
+    "value": 800,
+    "min": 300,
+    "max": 2500,
+    "step": 50,
+    "label": "Milestone 3",
+    "group": "Milestones"
+  },
+  "milestone4": {
+    "value": 2000,
+    "min": 800,
+    "max": 6000,
+    "step": 100,
+    "label": "Milestone 4",
+    "group": "Milestones"
+  },
+  "milestone5": {
+    "value": 5000,
+    "min": 2000,
+    "max": 15000,
+    "step": 250,
+    "label": "Milestone 5",
+    "group": "Milestones"
+  },
+  "milestone6": {
+    "value": 12000,
+    "min": 5000,
+    "max": 40000,
+    "step": 500,
+    "label": "Milestone 6",
+    "group": "Milestones"
+  },
+  "foundingSettlers": {
+    "value": 40,
+    "min": 10,
+    "max": 120,
+    "step": 5,
+    "label": "Founding settlers",
+    "group": "Arrivals"
+  },
+  "foundingMoney": {
+    "value": 60000,
+    "min": 10000,
+    "max": 200000,
+    "step": 5000,
+    "label": "Starting money",
+    "group": "Money",
+    "unit": "cr"
+  },
+  "shipEveryMin": {
+    "value": 11,
+    "min": 3,
+    "max": 30,
+    "step": 0.5,
+    "label": "Minutes between ships (start)",
+    "group": "Arrivals",
+    "unit": "min"
+  },
+  "shipEveryBest": {
+    "value": 4,
+    "min": 1,
+    "max": 15,
+    "step": 0.5,
+    "label": "Minutes between ships (best reputation)",
+    "group": "Arrivals",
+    "unit": "min"
+  },
+  "settlersSmall": {
+    "value": 35,
+    "min": 5,
+    "max": 120,
+    "step": 5,
+    "label": "Settlers per early ship",
+    "group": "Arrivals"
+  },
+  "settlersLiner": {
+    "value": 260,
+    "min": 60,
+    "max": 800,
+    "step": 10,
+    "label": "Settlers per colony liner",
+    "group": "Arrivals"
+  },
+  "linerFrom": {
+    "value": 800,
+    "min": 100,
+    "max": 5000,
+    "step": 50,
+    "label": "Liners start at population",
+    "group": "Arrivals"
+  },
+  "birthsPerMonth": {
+    "value": 0.003,
+    "min": 0,
+    "max": 0.02,
+    "step": 0.0005,
+    "label": "Births per month (share)",
+    "group": "Arrivals"
+  },
+  "birthsFrom": {
+    "value": 500,
+    "min": 0,
+    "max": 5000,
+    "step": 50,
+    "label": "Births start at population",
+    "group": "Arrivals"
+  },
+  "neighbourTrickle": {
+    "value": 4,
+    "min": 0,
+    "max": 40,
+    "step": 1,
+    "label": "People a month from each linked city",
+    "group": "Arrivals"
+  },
+  "dayLengthSec": {
+    "value": 6,
+    "min": 1,
+    "max": 30,
+    "step": 0.5,
+    "label": "Real seconds per game day (1×)",
+    "group": "Time",
+    "unit": "s"
+  },
+  "dayNightDays": {
+    "value": 4,
+    "min": 1,
+    "max": 30,
+    "step": 1,
+    "label": "Game days per day/night cycle",
+    "group": "Time"
+  },
+  "taxDefault": {
+    "value": 0.09,
+    "min": 0,
+    "max": 0.2,
+    "step": 0.005,
+    "label": "Starting tax rate",
+    "group": "Money"
+  },
+  "taxPerPerson": {
+    "value": 3.5,
+    "min": 0.2,
+    "max": 6,
+    "step": 0.1,
+    "label": "Tax per resident per month at 9%",
+    "group": "Money",
+    "unit": "cr"
+  },
+  "taxPerJob": {
+    "value": 4,
+    "min": 0.2,
+    "max": 8,
+    "step": 0.1,
+    "label": "Tax per job per month at 9%",
+    "group": "Money",
+    "unit": "cr"
+  },
+  "taxGrowthPenalty": {
+    "value": 4,
+    "min": 0,
+    "max": 12,
+    "step": 0.5,
+    "label": "Demand lost per tax point over 9%",
+    "group": "Money"
+  },
+  "loanSize": {
+    "value": 25000,
+    "min": 5000,
+    "max": 200000,
+    "step": 5000,
+    "label": "One loan",
+    "group": "Money",
+    "unit": "cr"
+  },
+  "loanInterest": {
+    "value": 0.04,
+    "min": 0,
+    "max": 0.2,
+    "step": 0.005,
+    "label": "Loan interest per year",
+    "group": "Money"
+  },
+  "debtShutdown": {
+    "value": -5000,
+    "min": -100000,
+    "max": 0,
+    "step": 1000,
+    "label": "Services shut down below",
+    "group": "Money",
+    "unit": "cr"
+  },
+  "levelCost": {
+    "value": 120,
+    "min": 0,
+    "max": 2000,
+    "step": 10,
+    "label": "Levelling cost per tile per level",
+    "group": "Building",
+    "unit": "cr"
+  },
+  "growPerMonth": {
+    "value": 0.35,
+    "min": 0.05,
+    "max": 1,
+    "step": 0.05,
+    "label": "Share of ready lots that grow a month",
+    "group": "City"
+  },
+  "landValueParks": {
+    "value": 0.25,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Land value from leisure",
+    "group": "City"
+  },
+  "landValueSchools": {
+    "value": 0.15,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Land value from education",
+    "group": "City"
+  },
+  "landValueWater": {
+    "value": 0.15,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Land value near water",
+    "group": "City"
+  },
+  "landValueThreat": {
+    "value": 0.3,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Land value lost near nests/attacks",
+    "group": "City"
+  },
+  "trafficPenalty": {
+    "value": 0.2,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Growth lost on jammed roads",
+    "group": "City"
+  },
+  "outpostRate": {
+    "value": 9,
+    "min": 1,
+    "max": 50,
+    "step": 1,
+    "label": "Raw material per outpost per day",
+    "group": "Industry"
+  },
+  "refineRate": {
+    "value": 6,
+    "min": 1,
+    "max": 40,
+    "step": 1,
+    "label": "Refined goods per refinery per day",
+    "group": "Industry"
+  },
+  "refineIn": {
+    "value": 2,
+    "min": 1,
+    "max": 5,
+    "step": 1,
+    "label": "Raw needed per refined unit",
+    "group": "Industry"
+  },
+  "nestSpreadDays": {
+    "value": 18,
+    "min": 3,
+    "max": 120,
+    "step": 1,
+    "label": "Days for a nest to send out a new one",
+    "group": "Threat"
+  },
+  "pressure": {
+    "value": 1,
+    "min": 0,
+    "max": 4,
+    "step": 0.1,
+    "label": "Creature pressure",
+    "group": "Threat"
+  },
+  "calmDays": {
+    "value": 6,
+    "min": 0,
+    "max": 60,
+    "step": 1,
+    "label": "Calm days after founding",
+    "group": "Threat"
+  },
+  "nightBoldness": {
+    "value": 1.6,
+    "min": 1,
+    "max": 4,
+    "step": 0.1,
+    "label": "How much bolder creatures are at night",
+    "group": "Threat"
+  },
+  "expansionAnger": {
+    "value": 1,
+    "min": 0,
+    "max": 4,
+    "step": 0.1,
+    "label": "How much building near nests stirs them",
+    "group": "Threat"
+  },
+  "strikePrice": {
+    "value": 4000,
+    "min": 0,
+    "max": 50000,
+    "step": 250,
+    "label": "Orbital strike charge (credits)",
+    "group": "Ships",
+    "unit": "cr"
+  },
+  "strikeCrystal": {
+    "value": 40,
+    "min": 0,
+    "max": 500,
+    "step": 5,
+    "label": "Orbital strike charge (crystal)",
+    "group": "Ships"
+  },
+  "lanceCooldownDays": {
+    "value": 10,
+    "min": 1,
+    "max": 60,
+    "step": 1,
+    "label": "Orbital Lance cooldown",
+    "group": "Ships",
+    "unit": "days"
+  },
+  "strikeRadius": {
+    "value": 4.5,
+    "min": 2,
+    "max": 9,
+    "step": 0.25,
+    "label": "Orbital strike radius",
+    "group": "Ships",
+    "unit": "tiles"
+  },
+  "strikeDamage": {
+    "value": 520,
+    "min": 100,
+    "max": 3000,
+    "step": 10,
+    "label": "Orbital strike damage",
+    "group": "Ships"
+  },
+  "awayShare": {
+    "value": 0.8,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Share of income a city earns while you're away",
+    "group": "Regions"
+  },
+  "shipPassMinSec": {
+    "value": 60,
+    "min": 20,
+    "max": 180,
+    "step": 5,
+    "label": "Shortest time a ship stays in range",
+    "group": "Ships",
+    "unit": "s"
+  },
+  "shipPassMaxSec": {
+    "value": 90,
+    "min": 30,
+    "max": 240,
+    "step": 5,
+    "label": "Longest time a ship stays in range",
+    "group": "Ships",
+    "unit": "s"
+  },
+  "lanceCrystal": {
+    "value": 60,
+    "min": 0,
+    "max": 500,
+    "step": 5,
+    "label": "Orbital Lance shot (crystal)",
+    "group": "Ships"
+  },
+  "spawnPerDay": {
+    "value": 0.35,
+    "min": 0,
+    "max": 20,
+    "step": 0.1,
+    "label": "Creatures a game day (base, before city size/anger/night)",
+    "group": "Threat"
+  },
+  "swarmEveryDays": {
+    "value": 30,
+    "min": 3,
+    "max": 90,
+    "step": 1,
+    "label": "Days between big swarms",
+    "group": "Threat",
+    "unit": "days"
+  },
+  "swarmSize": {
+    "value": 18,
+    "min": 5,
+    "max": 200,
+    "step": 5,
+    "label": "Creatures in a big swarm (base)",
+    "group": "Threat"
+  },
+  "swarmWarnSec": {
+    "value": 10,
+    "min": 3,
+    "max": 30,
+    "step": 1,
+    "label": "Warning before a big swarm",
+    "group": "Threat",
+    "unit": "s"
+  },
+  "nestCap": {
+    "value": 14,
+    "min": 2,
+    "max": 60,
+    "step": 1,
+    "label": "Most nests per 64×64 tiles",
+    "group": "Threat"
+  },
+  "nestHp": {
+    "value": 1500,
+    "min": 200,
+    "max": 10000,
+    "step": 100,
+    "label": "Nest health (average size)",
+    "group": "Threat"
+  },
+  "nestNoticeRadius": {
+    "value": 16,
+    "min": 4,
+    "max": 40,
+    "step": 1,
+    "label": "How far nests notice building",
+    "group": "Threat",
+    "unit": "tiles"
+  },
+  "nestCoreClear": {
+    "value": 22,
+    "min": 8,
+    "max": 60,
+    "step": 1,
+    "label": "Nests never spread this close to the core",
+    "group": "Threat",
+    "unit": "tiles"
+  },
+  "buildingHp": {
+    "value": 600,
+    "min": 50,
+    "max": 5000,
+    "step": 50,
+    "label": "Building toughness per tile",
+    "group": "Defence"
+  },
+  "turretHp": {
+    "value": 300,
+    "min": 50,
+    "max": 3000,
+    "step": 25,
+    "label": "Turret toughness",
+    "group": "Defence"
+  },
+  "stationRadius": {
+    "value": 9,
+    "min": 3,
+    "max": 24,
+    "step": 1,
+    "label": "Station reach",
+    "group": "Transit",
+    "unit": "tiles"
+  },
+  "transitTrafficCut": {
+    "value": 0.4,
+    "min": 0,
+    "max": 0.9,
+    "step": 0.05,
+    "label": "Traffic cut next to a station",
+    "group": "Transit"
+  },
+  "transitValue": {
+    "value": 0.12,
+    "min": 0,
+    "max": 0.5,
+    "step": 0.01,
+    "label": "Land value next to a station",
+    "group": "Transit"
+  },
+  "transitTrickleMul": {
+    "value": 2,
+    "min": 1,
+    "max": 6,
+    "step": 0.5,
+    "label": "Extra arrivals from a city linked by transit",
+    "group": "Arrivals"
+  },
+  "awayMaxDays": {
+    "value": 360,
+    "min": 30,
+    "max": 3600,
+    "step": 30,
+    "label": "Most days a city earns while you are away",
+    "group": "Regions",
+    "unit": "days"
+  },
+  "creatureCap": {
+    "value": 300,
+    "min": 50,
+    "max": 2000,
+    "step": 25,
+    "label": "Most creatures out at once (steady stream pauses)",
+    "group": "Threat"
+  },
+  "nestBuildingClear": {
+    "value": 8,
+    "min": 2,
+    "max": 30,
+    "step": 1,
+    "label": "Nests never spread this close to a building or turret",
+    "group": "Threat",
+    "unit": "tiles"
+  }
+}

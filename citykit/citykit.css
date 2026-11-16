@@ -1,0 +1,65 @@
+/* City Kit review page. Desktop: list | stage | settings. Phone: one column, the stage first. */
+body { overflow-x: hidden; }
+.ck-top { flex-wrap: wrap; row-gap: 6px; }
+.ck-tabs { display: flex; gap: 4px; }
+.ck-tabs button { min-height: 36px; padding: 4px 14px; border-radius: 18px; }
+.ck-tabs button[aria-selected="true"] { background: var(--accent); color: #001; border-color: var(--accent); }
+
+.ck { display: grid; grid-template-columns: 250px minmax(0, 1fr) 300px; height: calc(100vh - 54px); height: calc(100dvh - 54px); }
+.ck-list, .ck-params { background: var(--bg2); padding: 12px; overflow-y: auto; overscroll-behavior: contain; }
+.ck-list { border-right: 1px solid var(--border); }
+.ck-params { border-left: 1px solid var(--border); }
+.ck-list input[type=text] { width: 100%; margin-bottom: 10px; }
+#pick { display: none; width: 100%; }
+.ck-group h3 { margin: 14px 0 6px; }
+.ck-item { display: block; width: 100%; text-align: left; margin: 2px 0; padding: 8px 10px; border-radius: 8px; background: transparent; border: 1px solid transparent; }
+.ck-item:hover { border-color: var(--border); background: var(--bg3); }
+.ck-item.on { background: var(--bg3); border-color: var(--accent); }
+.ck-item small { display: block; color: var(--fg2); }
+
+.ck-stage { display: flex; flex-direction: column; min-width: 0; background: #0d1016; }
+.ck-stagebar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border); background: var(--bg2); }
+.seg { display: inline-flex; align-items: center; gap: 4px; }
+.seg button { min-width: 40px; min-height: 36px; }
+.seg button.on { border-color: var(--accent); color: var(--accent); }
+.ck-time input { width: 120px; }
+.ck-canvaswrap { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+#view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.ck-facts { margin: 0; padding: 8px 12px; border-top: 1px solid var(--border); background: var(--bg2); }
+
+.ck-params h2 { margin-bottom: 4px; }
+.ck-param { margin-bottom: 12px; }
+.ck-param .head { display: flex; justify-content: space-between; font-size: 13px; color: var(--fg2); }
+.ck-param .head b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.ck-param input[type=range] { height: 32px; }
+.ck-param select { width: 100%; min-height: 36px; }
+.ck-actions button { min-height: 40px; }
+
+@media (max-width: 860px) {
+  .ck { display: flex; flex-direction: column; height: auto; }
+  .ck-stage { order: 1; height: 62vh; height: 62dvh; }
+  .ck-list { order: 0; border-right: 0; border-bottom: 1px solid var(--border); overflow: visible; }
+  .ck-params { order: 2; border-left: 0; overflow: visible; }
+  #groups { display: none; }
+  #pick { display: block; min-height: 40px; }
+  .ck-list input[type=text] { display: none; }
+}
+
+/* Scene view */
+.sc { display: flex; flex-direction: column; height: calc(100vh - 54px); height: calc(100dvh - 54px); background: #0d1016; }
+.sc[hidden] { display: none; }
+.sc-bar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 8px 12px; background: var(--bg2); border-bottom: 1px solid var(--border); }
+.sc-bar button { min-height: 38px; }
+.sc-bar .on { border-color: var(--accent); color: var(--accent); }
+.sc-strike { background: #3a1e10; border-color: #ff9a3a; color: #ffd6a0; font-weight: 600; }
+.sc-strike.armed { background: #ff9a3a; color: #2a1200; }
+.sc-strike:disabled { opacity: .45; }
+.sc-check { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; }
+.sc-weather { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; }
+.sc-bar2 input[type=range] { width: 110px; vertical-align: middle; }
+.sc-canvaswrap { flex: 1; min-height: 0; position: relative; }
+#sc-view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+#sc-view.aiming { cursor: crosshair; }
+.sc-status { position: absolute; left: 10px; top: 10px; margin: 0; padding: 6px 10px; border-radius: 8px; background: rgba(8, 12, 20, .72); color: #dfe6ee; pointer-events: none; max-width: calc(100% - 20px); }
+body.scene-on .ck { display: none; }
+@media (max-width: 860px) { .sc { height: auto; } .sc-canvaswrap { height: 70vh; height: 70dvh; flex: none; } }

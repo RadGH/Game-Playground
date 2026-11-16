@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e18">
+<title>Arcline</title>
+<link rel="stylesheet" href="../../shared/tooltip.css">
+<link rel="stylesheet" href="../../shared/dialog.css">
+<link rel="stylesheet" href="../../shared/whats-new.css">
+<link rel="stylesheet" href="../../shared/credits.css">
+<link rel="stylesheet" href="../../shared/rgs-signin.css">
+<link rel="stylesheet" href="../../shared/tune.css">
+<link rel="stylesheet" href="css/arcline.css">
+<link rel="stylesheet" href="css/screens.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<div id="app">
+  <div id="screens"></div>
+  <section id="city" class="city" hidden aria-label="Your city">
+    <canvas id="map" aria-label="The city map: drag to look around, pinch or scroll to zoom"></canvas>
+  </section>
+  <div id="panels"></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="banner" class="banner hidden"></div>
+  <noscript>Arcline needs JavaScript.</noscript>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

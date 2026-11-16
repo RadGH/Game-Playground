@@ -336,6 +336,25 @@
    ]
   },
   {
+   "id": "citykit",
+   "group": "world",
+   "title": "City Kit",
+   "href": "citykit/",
+   "folder": "citykit",
+   "summary": "Arcline's procedural futuristic city, drawn the SimCity 4 way: three.js models baked into isometric 2D pictures with a matching night-lights layer. Review every building (the same Hotel from 1 to 48 storeys), wall, turret, creature and vehicle from all four view turns, from noon to night, with sliders for every setting.",
+   "status": "prototype",
+   "date": "2026-11-15",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "2d",
+    "iso",
+    "city",
+    "procedural",
+    "review"
+   ]
+  },
+  {
    "id": "voice-lab",
    "group": "language",
    "title": "Voice Lab",
@@ -856,6 +875,25 @@
     "3d",
     "action",
     "meshy"
+   ]
+  },
+  {
+   "id": "arcline",
+   "group": "prototypes",
+   "title": "Arcline",
+   "href": "prototypes/arcline/",
+   "folder": "prototypes/arcline",
+   "summary": "A SimCity 4-style isometric city builder: a futuristic cyber city on an alien world. Zone homes, shops and industry, run power and water, settle the people your ships bring down, and hold the line with walls and turrets against flocking alien wildlife. Generated worlds of mixed-size regions.",
+   "status": "prototype",
+   "statusNote": "Building",
+   "date": "2026-11-15",
+   "isNew": true,
+   "tags": [
+    "city",
+    "iso",
+    "2d",
+    "defence",
+    "sci-fi"
    ]
   }
  ]

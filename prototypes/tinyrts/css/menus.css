@@ -8,10 +8,11 @@
 }
 #menus.active::before { content: ''; position: fixed; inset: 0; background: rgba(3, 3, 10, 0.55); z-index: -1; }
 .menu-screen.title { background: rgba(8, 10, 26, 0.72); padding: 34px 48px; }
+@media (max-width: 480px) { .menu-screen.title { padding: 24px 16px; } }
 .menu-screen h2 { margin: 0 0 18px; font-size: 20px; color: var(--cyan); letter-spacing: 2px; }
 .menu-screen h3 { font-size: 12px; color: var(--cyan); margin: 14px 0 6px; }
 .logo { margin-bottom: 26px; }
-.logo-main { font-size: 56px; font-weight: 700; color: #eaffff; letter-spacing: 6px; text-shadow: 0 0 12px var(--cyan), 0 0 30px rgba(78, 230, 255, 0.6), 4px 4px 0 #1b2a55; }
+.logo-main { font-size: clamp(30px, 11vw, 56px); font-weight: 700; color: #eaffff; letter-spacing: 6px; text-shadow: 0 0 12px var(--cyan), 0 0 30px rgba(78, 230, 255, 0.6), 4px 4px 0 #1b2a55; }
 .logo-sub { font-size: 12px; color: var(--dim); letter-spacing: 3px; margin-top: 6px; }
 .menu-col { display: flex; flex-direction: column; gap: 8px; align-items: center; }
 .menu-row { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }

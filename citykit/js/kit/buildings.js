@@ -78,8 +78,8 @@ addRecipes({
         const f = i === 0 ? p.floors : Math.max(2, Math.round(p.floors * 0.6));
         const top = storeys(g, { w, d, floors: f, x, z, y: podium, style: p.style, kind: 'grid', seed: p.seed + i });
         balconies(g, w, d, podium, f, p.style, 2, x, z);
-        slab(g, w + 0.04, d + 0.04, p.style, x, top);
-        roofProps(g, w * 0.8, d * 0.8, top + 0.04, p.style, p.R, { tank: true });
+        slab(g, w + 0.04, d + 0.04, p.style, x, top, z);
+        roofProps(g, w * 0.8, d * 0.8, top + 0.04, p.style, p.R, { tank: true, x, z });
       });
       neonEdges(g, 1.8, 1.8, neonOf(p), 0, podium - 0.01, 0);
       return g;
@@ -134,7 +134,7 @@ addRecipes({
       box(g, 1.8, FLOOR * 0.9, 0.02, glassMat(p.style), 0, y0, 0.35);
       for (let i = 0; i < 4; i++) box(g, 0.36, 0.07, 0.03, neonMat(neonOf(p, i), 0.75), -0.69 + i * 0.46, y0 + FLOOR, 0.36);
       slab(g, 1.9, 0.82, p.style, 0, top, -0.05);
-      roofProps(g, 1.6, 0.6, top + 0.04, p.style, p.R, { antenna: p.floors > 2 });
+      roofProps(g, 1.6, 0.6, top + 0.04, p.style, p.R, { antenna: p.floors > 2, z: -0.05 });
       if (p.floors >= 2) sign(g, '+x', neonOf(p, 2), p.seed, { x: 0.96, y: y0 + FLOOR, z: 0.1, h: Math.min(0.5, p.floors * FLOOR * 0.7) });
       return g;
     },
@@ -150,7 +150,7 @@ addRecipes({
       if (p.shape === 2) {
         for (const [x, f] of [[-0.42, p.floors], [0.42, Math.round(p.floors * 0.75)]]) {
           const top = storeys(g, { w: 0.7, d: 1.3, floors: f, x, y, style: p.style, kind: 'curtain', seed: p.seed + x * 10 });
-          slab(g, 0.74, 1.34, p.style, x, top); roofProps(g, 0.6, 1.1, top + 0.04, p.style, p.R, {});
+          slab(g, 0.74, 1.34, p.style, x, top); roofProps(g, 0.6, 1.1, top + 0.04, p.style, p.R, { x });
         }
         box(g, 0.2, 0.12, 0.6, glassMat(p.style), 0, y + Math.round(p.floors * 0.5) * FLOOR, 0);   // sky bridge
         return g;
@@ -190,9 +190,9 @@ addRecipes({
       y = slab(g, 1.26, 1.56, p.style, -0.2, top);
       // the vertical sign runs down the tower's right corner
       sign(g, '+x', neonOf(p, 1), p.seed, { x: 0.42, y: lobby + FLOOR * 0.5, z: 0.55, h: Math.min(rest * FLOOR * 0.8, 3), w: 0.16 });
-      if (p.floors >= 24) roofProps(g, 1.2, 1.5, y, p.style, p.R, { helipad: true, antenna: false });
+      if (p.floors >= 24) roofProps(g, 1.2, 1.5, y, p.style, p.R, { helipad: true, antenna: false, x: -0.2 });
       else if (p.floors >= 8) { box(g, 0.7, 0.03, 0.5, bodyMat('pearl', 0, { color: '#3cc6e8', metal: 0.2, rough: 0.1 }), -0.2, y, 0.3); neonEdges(g, 0.72, 0.52, '#3ff0ff', -0.2, y + 0.03, 0.3, 0.015, 0.2); }
-      else roofProps(g, 1.0, 1.3, y, p.style, p.R, {});
+      else roofProps(g, 1.0, 1.3, y, p.style, p.R, { x: -0.2 });
       return g;
     },
   },

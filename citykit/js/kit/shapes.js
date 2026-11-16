@@ -60,7 +60,9 @@ export function sign(parent, face, color, seed, { w = 0.12, h = 0.6, x = 0, y = 
 }
 
 /** Rooftop clutter: vents, AC boxes, antennas with red beacons, maybe a helipad or a tank. */
-export function roofProps(parent, w, d, y, style, R, { helipad = false, tank = false, antenna = true } = {}) {
+export function roofProps(parent0, w, d, y, style, R, { helipad = false, tank = false, antenna = true, x = 0, z = 0 } = {}) {
+  // x/z: the centre of the roof it sits on (owner bug 2026-11-16: props and roofs were always centred on the lot)
+  const parent = new THREE.Group(); parent.position.set(x, 0, z); parent0.add(parent);
   const t = trimMat(style), b = bodyMat(style, 1);
   const n = Math.max(1, Math.round(w * d * 6));
   for (let i = 0; i < n && !helipad; i++) {

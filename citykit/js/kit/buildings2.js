@@ -313,7 +313,7 @@ function buildDepot(p) {
   });
   if (p.sheds === 1) {   // a gate office + stores where the second shed would be
     const t = storeys(g, { w: 0.5, d: 0.5, floors: 2, x: 1.1, z: -0.65, y: y0, style: p.style, kind: 'curtain', seed: p.seed + 5 });
-    slab(g, 0.53, 0.53, p.style, 1.1, t, -0.65); roofProps(g, 0.4, 0.4, t + 0.04, p.style, p.R, {});
+    slab(g, 0.53, 0.53, p.style, 1.1, t, -0.65); roofProps(g, 0.4, 0.4, t + 0.04, p.style, p.R, { x: 1.1, z: -0.65 });
     neonEdges(g, 0.5, 0.5, neonOf(p), 1.1, y0 + FLOOR, -0.65, 0.02);
   }
   // container yard: rows of stacks
@@ -399,7 +399,7 @@ function buildRefinery(p, S) {
     box(a, 0.44 * (n - 1) + 0.2, 0.025, 0.12, M('#7d858e', 0.5, 0.5), -1.15 + 0.22 * (n - 1), 1.6, -0.62);
     // batching tower + conveyor from the heaps
     const bt = storeys(a, { w: 0.45, d: 0.45, floors: 7, x: 1.05, z: -0.95, style: p.style, kind: 'bands', seed: p.seed + 2, lit: 0.45 });
-    slab(a, 0.5, 0.5, p.style, 1.05, bt, -0.95); roofProps(a, 0.4, 0.4, bt + 0.04, p.style, R, {});
+    slab(a, 0.5, 0.5, p.style, 1.05, bt, -0.95); roofProps(a, 0.4, 0.4, bt + 0.04, p.style, R, { x: 1.05, z: -0.95 });
     neonEdges(a, 0.45, 0.45, neonOf(p), 1.05, FLOOR * 2, -0.95, 0.02);
     belt(a, [-0.3, 0.12, 0.6], [0.85, 1.35, -0.85], 0.08, 0.025, M('#4f555c', 0.5, 0.5));
     for (const t of [0.25, 0.55, 0.8]) { const x = -0.3 + 1.15 * t, z = 0.6 - 1.45 * t; rod(a, [x, 0, z], [x, 0.12 + 1.23 * t - 0.02, z], 0.014, M(STEEL), 5); }
@@ -484,7 +484,7 @@ function buildFusion(p, S) {
   for (let i = 0; i < p.towers; i++) { const [x, z] = spots[i]; const r = coolingTower(a, x, z, 0, 0.4, 1.1, CYAN); steam(a, R, x, z, 1.2, r * 0.6); }
   // turbine hall + control room
   const ht = storeys(a, { w: 1.0, d: 0.48, floors: 2, x: 0.5, z: 1.1, style: p.style, kind: 'bands', seed: p.seed, lit: 0.5 });
-  slab(a, 1.04, 0.52, p.style, 0.5, ht, 1.1); roofProps(a, 0.9, 0.4, ht + 0.04, p.style, R, { antenna: false });
+  slab(a, 1.04, 0.52, p.style, 0.5, ht, 1.1); roofProps(a, 0.9, 0.4, ht + 0.04, p.style, R, { antenna: false, x: 0.5, z: 1.1 });
   neonEdges(a, 1.0, 0.48, CYAN, 0.5, ht, 1.1, 0.02, 0.35);
   rod(a, [cx + 0.5, 0.15, cz + 0.55], [0.3, 0.15, 0.86], 0.05, M('#5f6873', 0.6, 0.4));
   // switchyard: transformers + insulators on the left edge
@@ -625,7 +625,7 @@ function buildUniversity(p) {
     const f = Math.max(1, p.floors - (i % 2));
     const t = storeys(g, { w, d, floors: f, x, z, y: y0, style: st, kind: i < 2 ? 'grid' : 'curtain', seed: p.seed + 1 + i, lit: 0.5 });
     slab(g, w + 0.04, d + 0.04, st, x, t, z);
-    roofProps(g, w * 0.7, d * 0.7, t + 0.04, st, R, { antenna: i === 1 });
+    roofProps(g, w * 0.7, d * 0.7, t + 0.04, st, R, { antenna: i === 1, x, z });
     balconies(g, w, d, y0, f, st, 1, x, z);
   });
   // gate posts with lights
@@ -855,7 +855,7 @@ function buildComms(p) {
   const T = p.tier, st = p.style;
   // equipment shed with cable trays
   const t = storeys(g, { w: 0.5, d: 0.36, floors: 1, x: -0.62, z: 0.68, y: y0, style: st, kind: 'grid', seed: p.seed });
-  slab(g, 0.54, 0.4, st, -0.62, t, 0.68); roofProps(g, 0.4, 0.3, t + 0.04, st, p.R, { antenna: false });
+  slab(g, 0.54, 0.4, st, -0.62, t, 0.68); roofProps(g, 0.4, 0.3, t + 0.04, st, p.R, { antenna: false, x: -0.62, z: 0.68 });
   box(g, 0.16, 0.015, 0.015, neonMat(neonOf(p), 0.5), -0.62, y0 + 0.18, 0.68 + 0.185);
   // lattice mast
   const mx = 0.6, mz = -0.6, mh = 0.9 + T * 0.45, m = M('#c9d2dc', 0.6, 0.4), w = 0.06 + T * 0.015;
@@ -1007,7 +1007,7 @@ function buildSpaceport(p) {
   }
   // terminal + control tower on the right
   const t = storeys(g, { w: 1.3, d: 1.2, floors: 3, x: 1.15, z: -0.7, y: y0, style: st, kind: 'curtain', seed: p.seed + 7, lit: 0.65 });
-  slab(g, 1.36, 1.26, st, 1.15, t, -0.7); roofProps(g, 1.0, 0.9, t + 0.04, st, R, { antenna: false });
+  slab(g, 1.36, 1.26, st, 1.15, t, -0.7); roofProps(g, 1.0, 0.9, t + 0.04, st, R, { antenna: false, x: 1.15, z: -0.7 });
   neonEdges(g, 1.3, 1.2, neonOf(p), 1.15, y0 + FLOOR, -0.7, 0.025);
   box(g, 1.1, 0.03, 0.3, trimMat(st), 1.15, y0 + FLOOR * 0.95, -0.7 + 0.72);
   const cx = 1.55, cz = -1.55;

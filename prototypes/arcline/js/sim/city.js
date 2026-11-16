@@ -140,7 +140,7 @@ function makeLot(r, t, zone, x, z, value, R) {
   const [lo, hi] = t.floors, span = t.minValue >= 0.99 ? 1 : (value - t.minValue) / (1 - t.minValue);
   const floors = Math.max(lo, Math.min(hi, Math.round(lo + (hi - lo) * Math.pow(Math.max(0, span), 1.2) * R.range(0.8, 1.1))));
   const cap = floors * t.perFloor;
-  const params = { seed: R.int(1, 9999), style: R.pick(['chrome', 'graphite', 'pearl', 'copper', 'concrete']) };
+  const params = { seed: R.int(1, 9999), style: R.pick(['chrome', 'pearl', 'copper', 'concrete']) };
   if (t.param === 'stalls') params.stalls = Math.max(2, Math.min(6, 2 + Math.round(value * 5))); else params.floors = floors;
   return { n: r.nextLot = (r.nextLot || 0) + 1, id: `zone-${zone}-${t.tier}`, kind: 'zoned', zone, tier: t.tier, x, z, w: t.size[0], d: t.size[1], recipe: t.recipe, params,
     people: zone === 'R' ? cap : 0, jobs: zone === 'R' ? 0 : cap, power: -Math.max(1, Math.round(cap / 25)), water: 0, upkeep: 0, built: r.day, value };

@@ -57,9 +57,9 @@ export class Scene {
     this.lots = [
       { id: 'com-hotel', x: 9, z: 17, params: { floors: 18, style: 'pearl', seed: 4 } },
       { id: 'com-office', x: 15, z: 17, params: { floors: 30, style: 'chrome', seed: 2, shape: 1 } },
-      { id: 'res-tower', x: 19, z: 18, params: { floors: 26, style: 'graphite', seed: 7, taper: 2 } },
+      { id: 'res-tower', x: 19, z: 18, params: { floors: 26, style: 'copper', seed: 7, taper: 2 } },
       { id: 'res-block', x: 4, z: 18, params: { floors: 9, style: 'copper', seed: 3 } },
-      { id: 'com-shops', x: 11, z: 22, params: { floors: 2, style: 'graphite', seed: 5 } },
+      { id: 'com-shops', x: 11, z: 22, params: { floors: 2, style: 'concrete', seed: 5 } },
       { id: 'res-pods', x: 2, z: 23, params: { floors: 2, style: 'pearl', seed: 8 } },
       { id: 'com-market', x: 16, z: 22, params: { stalls: 5, style: 'concrete', seed: 6 } },
       { id: 'res-terrace', x: 19, z: 22, params: { floors: 3, style: 'chrome', seed: 9 } },

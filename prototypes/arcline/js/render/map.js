@@ -465,7 +465,11 @@ export class MapView {
 }
 
 /** Zoned lots reuse a few looks: seed modulo 6 keeps a city varied without a bake per building. */
-export function spriteParams(l) { const p = { ...l.params }; if (l.kind === 'zoned') p.seed = (p.seed % 6) + 1; return p; }
+export function spriteParams(l) {
+  const p = { ...l.params }; if (l.kind === 'zoned') p.seed = (p.seed % 6) + 1;
+  if (p.style === 'graphite') p.style = ['chrome', 'pearl', 'copper', 'concrete'][(p.seed || 1) % 4];   // retired style (owner 2026-11-16): old saves redraw lighter
+  return p;
+}
 
 function frontNeighbours(rot) {
   // the two neighbours whose faces the camera sees, per map turn (camera toward +x +z at turn 0)

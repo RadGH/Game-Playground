@@ -15,7 +15,8 @@ export const STYLES = {
   copper:   { label: 'Copper',   body: ['#a8735a', '#8f604c', '#b98668'], trim: '#5b3d31', glass: '#35566b', sky: '#a9cbe0', frame: '#d4a988', neon: ['#ffb02e', '#3fffd2', '#ff4f6a'] },
   concrete: { label: 'Concrete', body: ['#9aa0a2', '#8a9092', '#a9aeb0'], trim: '#666c6e', glass: '#3a5566', sky: '#a6c3d6', frame: '#9aa1a3', neon: ['#7dff6a', '#3fd0ff', '#ffde3f'] },
 };
-export const STYLE_IDS = Object.keys(STYLES);
+// Graphite stays for trim/parts but is no longer a building style (owner 2026-11-16: "too dark black, looks out of place")
+export const STYLE_IDS = Object.keys(STYLES).filter(id => id !== 'graphite');
 
 const cache = new Map();
 const cached = (key, make) => { if (!cache.has(key)) cache.set(key, make()); return cache.get(key); };

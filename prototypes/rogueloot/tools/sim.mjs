@@ -9,13 +9,13 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { createWorld, addPlayer, setInput, step, act, DT } from '../js/sim/world.js';
 import { loadContent } from '../js/sim/content.js';
 import { newCharacter, starterKitFor, gainXp } from '../js/rules/character.js';
-import { xpAtLevel } from '../js/rules/progression.js';
+import { xpAtLevel, SPEC_LEVEL } from '../js/rules/progression.js';
 import { makeItem, canEquip, weaponDamage, itemArmour, itemMods } from '../js/rules/items.js';
 import { makePotion } from '../js/rules/potions.js';
 import { sheet } from '../js/rules/sheet.js';
 import { makeRng } from '../js/sim/rng.js';
 import { rankOf, costOf, atRank, defaultBar } from '../js/sim/skills.js';
-import { isTalent, talentOpen } from '../js/sim/talents.js';
+import { isTalent, talentOpen, learnable } from '../js/sim/talents.js';
 import { clearLine, flowTo, downhill } from '../js/sim/paths.js';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
@@ -86,10 +86,12 @@ function play(path, seed) {
     if (p.dead) { act(w, 'bot', { do: 'release' }); return; }
     // housekeeping: path, points, skills, gear, identify
     if (!ch.path && ch.level >= 3) act(w, 'bot', { do: 'path', path });
-    // a spec at 10: --spec <id>, or the first wave-1 spec open to this Path (so spec skills are played, not only the Path's)
-    if (ch.path && !ch.spec && ch.level >= 10) { const DEF_SPEC = { fighter: 'vanguard', rogue: 'assassin', mage: 'pyromancer', healer: 'cleric' };   // fits the bot's gear (no bow for a dagger rogue)
+    // a spec at SPEC_LEVEL (5): --spec <id>, or the first wave-1 spec open to this Path (so spec skills are played, not only the Path's)
+    if (ch.path && !ch.spec && ch.level >= SPEC_LEVEL) { const DEF_SPEC = { fighter: 'vanguard', rogue: 'assassin', mage: 'pyromancer', healer: 'cleric' };   // fits the bot's gear (no bow for a dagger rogue)
       const pick = SPEC && content.specs[SPEC]?.paths?.includes(ch.path) ? SPEC : DEF_SPEC[ch.path]; if (pick) act(w, 'bot', { do: 'spec', spec: pick }); }
     if (ch.unspent > 0) act(w, 'bot', { do: 'spend', attr: ch.unspent % 5 === 0 ? 'vit' : MAIN[ch.path || 'wanderer'], n: 1 });
+    // skill points (owner 2026-11-16: skills are learned, not given): its spec's newest open skill first, then its class's
+    if (ch.learnPoints > 0 && ch.path) { const opts = Object.values(S).filter(s => learnable(ch, s) && s.owner !== 'wanderer' && !(ch.skills?.[s.id] > 0) && (s.reqLevel || 1) <= ch.level); const hurts = s => /"do":"(weapon|damage|bolt|dot|area)"/.test(JSON.stringify(s.effects || [])); opts.sort((a, b) => (b.owner === ch.spec) - (a.owner === ch.spec) || hurts(b) - hurts(a) || !!a.autoAttack - !!b.autoAttack || (b.reqLevel || 1) - (a.reqLevel || 1)); if (opts[0]) act(w, 'bot', { do: 'learn', skill: opts[0].id }); }
     if (ch.skillPoints > 0 && ch.path) { const opts = Object.values(S).filter(s => isTalent(s) && talentOpen(ch, s) && (s.owner === ch.path || (ch.spec && s.owner === ch.spec)) && s.tree && (rankOf(ch, s) < (s.maxRank || 1)) && ch.level >= (s.reqLevel || 1) && (s.prereq || []).every(x => ch.skills?.[x] > 0)); opts.sort((a, b) => (b.mods || []).length - (a.mods || []).length || rankOf(ch, a) - rankOf(ch, b)); if (opts[0]) act(w, 'bot', { do: 'learn', skill: opts[0].id }); }
     // keep the bar full of the best actives it knows (a player puts new skills on the bar); highest level first, Wanderer skills last
     if (++barTick % 100 === 0 && ch.path) {
@@ -98,7 +100,7 @@ function play(path, seed) {
       const heal = own.find(s => s.target === 'ally' || s.effects?.some(e => e.do === 'heal')) || own.find(s => s.target === 'self' && /"stat":"(armour|dodge)"|"do":"shield"/.test(JSON.stringify(s.effects || [])));
       const dmg = own.filter(s => s !== heal && s.target !== 'ally').slice(0, heal ? 5 : 6);
       const want = [...dmg, ...(heal ? [heal] : [])].map(s => s.id);
-      for (const id of ['sure_strike', 'spark', 'field_mend']) if (want.length < 6) want.push(id);
+      for (const id of ['sure_strike', 'spark', 'field_mend']) if (want.length < 6 && rankOf(ch, S[id]) > 0) want.push(id);
       want.forEach((id, k) => { if (ch.bar?.[k] !== id) act(w, 'bot', { do: 'bar', i: k, skill: id }); });
     }
     for (const it of ch.bag || []) {

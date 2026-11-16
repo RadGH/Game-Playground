@@ -1,7 +1,7 @@
 // Rogueloot page: title -> game. Solo runs the room code in a Worker; online talks to the room server. Either way the
 // page sends inputs and draws snapshots, predicting its own walking with the SAME rule the sim uses (js/sim/move.js).
 import { createScene, buildArea as buildTestArea } from './scene.js';
-import { createActors } from './actors.js';
+import { createActors, handStats } from './actors.js';
 import { createInput } from './input.js';
 import { createTouch, isTouch } from './touch.js';
 import { openSolo, openOnline, serverAvailable } from './link.js';
@@ -19,6 +19,7 @@ import { createFx } from './fx.js';
 import { createSheetUI } from './sheet-ui.js';
 import { createSkillsUI } from './skills-ui.js';
 import { createTravelUI } from './travel-ui.js';
+import { createMaps } from './maps.js';
 import { createGuideView } from './guide-view.js';
 import { createTownUI } from './town-ui.js';
 import { createPartyUI } from './party-ui.js';
@@ -43,7 +44,7 @@ document.body.classList.toggle('no-server', !ONLINE);
 
 const quality = store.get('quality', isTouch() ? 'low' : 'high');
 const view = createScene($('#view'), { quality });
-const actors = createActors(view, $('#tags'));
+const actors = createActors(view, $('#tags'), { bases: () => content.items?.bases });   // heroes wear their gear (live report #4)
 const content = await loadContentAsync(f => fetch(new URL('../../data/' + f, import.meta.url)).then(r => r.json()));
 const foes = createFoes(view, $('#tags'), { content });
 const fx = createFx(view);
@@ -78,7 +79,10 @@ const sendAct = a => G.link?.send({ t: 'act', ...a });
 const townUI = createTownUI({ content, send: sendAct, getChar: () => heroes.current() });
 const guide = createGuideView(view);
 const travelUI = createTravelUI({ view, content, labelRoot: $('#tags'), send: sendAct, getChar: () => heroes.current(), getMe: () => actors.get(G.me), getArea: () => G.area, getDifficulty: () => G.difficulty,
-  onNpc: id => openNpc(id) });
+  onNpc: id => openNpc(id), onRegion: () => maps.openRegion() });
+// the minimap (top-right corner) and the region map (M) — live report #2, 2026-11-16; the world map above is its other tab
+const maps = createMaps({ content, onWorld: () => travelUI.openMap(false), world: { isOpen: () => travelUI.mapOpen, close: () => travelUI.closeMap() },
+  state: () => { const me = actors.get(G.me), ch = heroes.current(); return { area: G.area, heroId: ch?.id, ch, me: me && { x: me.rx ?? me.x, z: me.rz ?? me.z, yaw: me.yaw }, party: [...actors.list.values()].filter(a => a.id !== G.me && !a.npc).map(a => ({ x: a.x, z: a.z, name: G.roster?.get(a.id)?.name || '' })), foes: [...foes.list.values()].filter(f => f.st !== 'dead').map(f => ({ x: f.x, z: f.z, rk: f.rk, role: f.row?.role, name: f.name, lvl: f.lvl })), chests: [...ground.chests.values()], goal: guide.target }; } });
 function openNpc(id) { if (id === 'stash') townUI.openStash(); else if (id === 'elder') { const q = activeStep(content, heroes.current() || {}, G.difficulty); if (q) showQuest(q.name, q.text); else showQuest('The coast is safe', 'For now. Rest in Brightwater, hero.'); } else sendAct({ do: 'shop', npc: id }); }
 const partyUI = createPartyUI({ content, send: sendAct, getChar: () => heroes.current(), zoneName: id => content.zones?.[id]?.name || id || '' });
 const hud = createHud($('#fight'), { skills: content.skills, content, isTouch: isTouch(), onUse: id => useSkill(id), onTargetNext: () => targetNext(), onRelease: () => G.link?.send({ t: 'act', do: 'release' }), onBag: () => sheetUI.toggle(), onDrink: kind => G.link?.send({ t: 'act', do: 'drink', kind }), onRecall: () => sendAct({ do: 'travel', via: 'recall' }),
@@ -134,10 +138,10 @@ function onMessage(m) {
   if (m.t === 'snap') { if (m.area && G.area && m.area !== G.area.id) return; return onSnap(m); }
   if (m.t === 'area') { showArea(m.area, m.seed); townUI.close(); travelUI.closeMap(); return; }
   if (m.t === 'left') { actors.remove(m.id); return; }
-  if (m.t === 'roster') { G.roster = new Map(m.players.map(p => [p.id, p])); partyUI.setRoster(m.players, G.me); G.host = m.host; G.isPublic = m.public; for (const p of m.players) actors.get(p.id)?.tag.classList.toggle('away', !!p.away); refreshInvite(); return; }
+  if (m.t === 'roster') { G.roster = new Map(m.players.map(p => [p.id, p])); partyUI.setRoster(m.players, G.me); G.host = m.host; G.isPublic = m.public; for (const p of m.players) { actors.get(p.id)?.tag.classList.toggle('away', !!p.away); if (p.id !== G.me) actors.setGear(p.id, p.gear || {}); } refreshInvite(); return; }
   if (m.t === 'list') return showList(m.rooms);
   if (m.t === 'nope') return hud.nope(m.msg);
-  if (m.t === 'char') { const cur = heroes.current(); if (cur && m.character?.id === cur.id) { heroes.save({ ...cur, ...m.character }); sheetUI.refresh(); skillsUI.check(heroes.current()); if (townUI.open) townUI.refresh(); } return; }
+  if (m.t === 'char') { const cur = heroes.current(); if (cur && m.character?.id === cur.id) { heroes.save({ ...cur, ...m.character }); actors.setGear(G.me, heroes.current().equip || {}); sheetUI.refresh(); skillsUI.check(heroes.current()); if (townUI.open) townUI.refresh(); } return; }
   if (m.t === 'pong') { G.ping = performance.now() - m.at; return; }
   if (m.t === 'removed') { leaveGame(); titleMsg(m.msg); return; }
   if (m.t === 'closed') {
@@ -240,7 +244,7 @@ function onSnap(s) {
   for (const p of s.players) {
     seen.add(p.id);
     let a = actors.get(p.id);
-    if (!a) { a = actors.add(p.id, { name: p.name, look: (p.id === G.me ? heroes.current()?.look : null) || G.roster?.get(p.id)?.look || null, me: p.id === G.me }); a.x = p.x; a.z = p.z; a.yaw = p.yaw; if (p.id === G.me) view.snapTo(p.x, p.z); }
+    if (!a) { a = actors.add(p.id, { name: p.name, look: (p.id === G.me ? heroes.current()?.look : null) || G.roster?.get(p.id)?.look || null, me: p.id === G.me, gear: (p.id === G.me ? heroes.current()?.equip : G.roster?.get(p.id)?.gear) || {} }); a.x = p.x; a.z = p.z; a.yaw = p.yaw; if (p.id === G.me) view.snapTo(p.x, p.z); }
     a.casting = !!p.cast;
     if (p.id === G.me) {
       // reconcile: start from the server's answer, re-walk the inputs it has not applied yet
@@ -307,14 +311,14 @@ function onEvent(e, now) {
     if (mine || onMe || G.target === e.t) hud.float(x + (Math.random() * 30 - 15), y, text + (e.r === 'crit' ? '!' : ''), (onMe ? 'hurt' : 'deal') + (e.r === 'crit' ? ' crit' : '') + ' ty-' + e.ty);
     const f = foes.get(e.t); if (f && e.n > 0) f.hitAt = now;
   } else if (e.k === 'heal') { const at = posOf(e.t); if (at) { const [x, y] = worldAt(at[0], at[1], at[2]); hud.float(x, y, '+' + e.n, 'heal'); } }
-  else if (e.k === 'swing') { const f = foes.get(e.s); if (f) f.swingAt = now; else { const tg = G.snapPlayers?.get(e.s)?.tg; actors.get(e.s)?.swing?.(tg ? (foes.get(tg) || actors.get(tg)) : null); } }
+  else if (e.k === 'swing') { const f = foes.get(e.s); if (f) f.swingAt = now; else { const tg = G.snapPlayers?.get(e.s)?.tg; actors.get(e.s)?.swing(tg ? (foes.get(tg) || actors.get(tg)) : null, null, e.off ? 'off' : null); } }
   // a hero's skill hit also swings / casts and faces what it hit (skills send dmg / shoot / area, not swing)
   if (e.k === 'dmg' && actors.get(e.s) && e.r !== 'link' && e.t !== e.s) { const t = foes.get(e.t) || actors.get(e.t); if (e.ty === 'physical') actors.get(e.s).swing(t); else actors.get(e.s).face(t); }
-  if (e.k === 'shoot' && actors.get(e.s)) { const t = foes.get(e.t) || actors.get(e.t); actors.get(e.s).swing(t, 'cast'); }
+  if (e.k === 'shoot' && actors.get(e.s)) { const t = foes.get(e.t) || actors.get(e.t); actors.get(e.s).swing(t, e.ty === 'arrow' ? null : 'spell'); }   // an arrow: the bow / crossbow's own shot
   else if (e.k === 'drink' && e.t === G.me) { const a = actors.get(G.me); if (a) { const [x, y] = worldAt(a.x, a.z, 2.2); hud.float(x, y, e.kind === 'mana' ? '💧' : '❤', e.kind === 'mana' ? 'xp' : 'heal'); } }
   else if (e.k === 'xp' && e.t === G.me) { const a = actors.get(G.me); if (a) { const [x, y] = worldAt(a.x, a.z, 2.3); hud.float(x, y - 20, `+${e.n} xp`, 'xp'); } }
   else if (e.k === 'level' && e.t === G.me) { banner2(`Level ${e.lvl}!`); tally('level', { l: e.lvl }); }
-  else if (e.k === 'unlock' && e.t === G.me) { const names = (e.ids || []).map(id => content.skills[id]?.name).filter(Boolean); if (names.length) setTimeout(() => banner2(`New skill: ${names.join(', ')}`), 1600); }
+  else if (e.k === 'unlock' && e.t === G.me) { const names = (e.ids || []).map(id => content.skills[id]?.name).filter(Boolean); if (names.length) setTimeout(() => banner2(`New skill to learn: ${names.join(', ')}${isTouch() ? '' : ' (K)'}`), 1600); }
   else if (e.k === 'interrupt') { const at = posOf(e.t); if (at) { const [x, y] = worldAt(at[0], at[1], at[2] + 0.4); hud.float(x, y, 'Interrupted!', 'int'); } }
   else if (e.k === 'die' && e.t === G.target && foes.get(e.t)) { /* keep the target until it fades so the last number reads */ }
 }
@@ -398,7 +402,7 @@ addEventListener('keydown', e => {
   // E = interact (owner 2026-11-11): revive a fallen friend beside you, else pick up / open, else portal / talk
   if ((e.code === 'KeyE' || e.code === 'Space') && !e.repeat) { e.preventDefault(); interact(); }
   if (e.code === 'KeyJ' || e.code === 'KeyL') openQuestLog();
-  if (e.code === 'KeyM') { if (travelUI.mapOpen) travelUI.closeMap(); else travelUI.openMap(false); }
+  if (e.code === 'KeyM') maps.toggleRegion();          // M = this area's map; the world map is its Tab (region-map.js)
   if (e.code === 'KeyT') sendAct({ do: 'travel', via: 'recall' });
   if (e.code === 'KeyC' || e.code === 'KeyI' || e.code === 'KeyB') sheetUI.toggle();
   if (e.code === 'KeyX') G.link?.send({ t: 'act', do: 'swap' });
@@ -464,6 +468,7 @@ function frame(t) {
   fx.update(dt, t);
   ground.update(dt, t);
   travelUI.update(dt, t);
+  maps.update(t);
   { const ch = heroes.current(), me = actors.get(G.me); if (ch && G.area) guide.update(content, { ...ch, quests: ch[questKey(G.difficulty)] || {} }, G.area, activeStep(content, ch, G.difficulty), me && { x: me.rx ?? me.x, z: me.rz ?? me.z }, t); }
   padCombat();
   view.render();
@@ -476,7 +481,8 @@ const menu = createMenu([
   { label: 'Character and bag' + (isTouch() ? '' : ' (C)'), when: () => !!G.me, act: () => sheetUI.toggle(true) },
   { label: 'Skills' + (isTouch() ? '' : ' (K)'), when: () => !!G.me, act: () => skillsUI.toggle(true, 'skills') },
   { label: 'Talents' + (isTouch() ? '' : ' (N)'), when: () => !!G.me, act: () => skillsUI.toggle(true, 'talents') },
-  { label: 'Map' + (isTouch() ? '' : ' (M)'), when: () => !!G.me, act: () => travelUI.openMap(false) },
+  { label: 'Map' + (isTouch() ? '' : ' (M)'), when: () => !!G.me, act: () => maps.openRegion() },
+  { label: 'World map', when: () => !!G.me, act: () => travelUI.openMap(false) },
   { label: 'Quests' + (isTouch() ? '' : ' (J)'), when: () => !!G.me, act: () => openQuestLog() },
   { label: 'Recall portal' + (isTouch() ? '' : ' (T)'), when: () => !!G.me, act: () => sendAct({ do: 'travel', via: 'recall' }) },
   { label: "What's new", act: () => news.open() },
@@ -505,10 +511,16 @@ window.gameEye = {
   quests: () => openQuestLog(),
   /** hero's drawn position on screen, per frame, for the smoothness test */
   heroScreen: () => { const a = actors.get(G.me); if (!a) return null; const [x, y] = worldAt(a.group.position.x, a.group.position.z, 1); return { x, y, t: performance.now() }; },
+  /** what a hero's body holds (live report #4 tests): vertices on each grip bone, the hold the clips read */
+  heroBody: id => handStats(actors.get(id ?? G.me)),
+  sheetPreview: () => sheetUI.preview.state(),
   screenOfPoint: (x, z) => { const [sx, sy] = worldAt(x, z, 0); return { x: sx, y: sy }; },
   screenOf: id => { const f = foes.get(id) || actors.get(id); if (!f) return null; const [x, y] = worldAt(f.x, f.z, 0.8); return { x, y }; },
   perf: () => ({ fps: Math.round(G.fps || 0), calls: view.renderer.info.render.calls, triangles: view.renderer.info.render.triangles, foes: foes.list.size, drawnFoes: [...foes.list.values()].filter(f => f.group.visible).length }),
 };
+
+window.gameEye.maps = () => maps.state();
+window.gameEye.minimapPoint = (x, z) => maps.screenOf(x, z);
 
 // controller: A = attack (targets the nearest), X/Y/B/RB = skills 1-4, LB = next target (game standards §1)
 let padPrev = {};

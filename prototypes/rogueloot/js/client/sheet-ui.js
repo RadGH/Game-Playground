@@ -14,6 +14,7 @@ import { itemIcon } from './icons.js';
 import { gearIcon } from './gear-icons.js';
 import { itemIconSvg } from '../../../../icons/js/game-icons.js';
 import { freeSlots } from '../rules/bag.js';
+import { createHeroPreview } from './hero-preview.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const SLOT_LABEL = { head: 'Head', chest: 'Chest', hands: 'Hands', belt: 'Belt', feet: 'Feet', neck: 'Neck', ring1: 'Ring', ring2: 'Ring', weapon: 'Main hand', offhand: 'Off hand' };
@@ -54,7 +55,7 @@ export function itemTip(items, it, ch, worn = null, potions = null, currency = n
   const prof = ch && b.slot && !canUseByPath(items, ch, b) ? `<div class="bad">Your class can't use this.</div>` : '';
   const cmp = worn && worn.uid !== it.uid ? compare(items, it, worn) : '';
   const uniq = it.unique && it.ided !== false ? items.uniques[it.unique] : null;
-  return `<div class="tip ${rarityClass(it)}">${label ? `<div class="worn-label">${esc(label)}</div>` : ''}<h4>${esc(itemName(items, it))}</h4>${card.hand ? `<div class="hand">${esc(card.hand)}</div>` : ''}<div class="sub">${esc(cap(it.rarity))} ${esc(b.name || '')} · item level ${it.ilvl}</div>
+  return `<div class="tip ${rarityClass(it)}">${label ? `<div class="worn-label">${esc(label)}</div>` : ''}<h4>${esc(itemName(items, it))}</h4>${card.hand ? `<div class="hand">${esc(card.hand)}</div>` : ''}<div class="sub">${esc(cap(it.rarity))} ${esc(b.name || '')}${Number.isFinite(Number(it.ilvl)) ? ` · item level ${it.ilvl}` : ''}</div>
     ${lines.join('')}${uniq?.lore ? `<div class="lore">“${esc(uniq.lore)}”</div>` : ''}
     <div class="req">Requires ${reqs.join(' · ')}</div>${prof}${it.dur ? `<div class="dur${it.dur[0] <= 0 ? ' bad' : ''}">Durability ${it.dur[0]} / ${it.dur[1]}${it.dur[0] <= 0 ? ' — broken, repair in town' : ''}</div>` : ''}${cmp}</div>`;
 }
@@ -87,7 +88,8 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, curr
   const root = document.createElement('div'); root.className = 'sheet-ui'; root.hidden = true;
   document.body.append(root);
   let sel = null, tipEl = null;
-  function toggle(force) { root.hidden = force != null ? !force : !root.hidden; sel = null; if (!root.hidden) refresh(); hideTip(); }
+  const preview = createHeroPreview();          // the real 3D hero in the middle of the equipment (live report #4)
+  function toggle(force) { root.hidden = force != null ? !force : !root.hidden; sel = null; if (!root.hidden) refresh(); else preview.hide(); hideTip(); }
   function refresh(ch = getChar()) {
     if (root.hidden || !ch) return;
     hideTip();
@@ -104,11 +106,11 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, curr
     const pts = ch.skillPoints || 0;
     root.innerHTML = `<div class="sheet-panel">
       <header class="sh-top"><div class="sh-name"><h2>${esc(ch.name)}</h2><span>Level ${ch.level} ${esc(content?.specs?.[ch.spec]?.name || content?.paths?.[ch.path]?.name || '')} · Gear score ${st.gearScore}</span></div>
-        <div class="sh-links"><button data-skills>Skills${isTouch() ? '' : ' <kbd>K</kbd>'}</button><button data-talents>Talents${pts ? ` <span class="pip">${pts}</span>` : ''}${isTouch() ? '' : ' <kbd>N</kbd>'}</button></div>
+        <div class="sh-links"><button data-skills>Skills${ch.learnPoints ? ` <span class="pip">${ch.learnPoints}</span>` : ''}${isTouch() ? '' : ' <kbd>K</kbd>'}</button><button data-talents>Talents${pts ? ` <span class="pip">${pts}</span>` : ''}${isTouch() ? '' : ' <kbd>N</kbd>'}</button></div>
         <button class="x" data-close aria-label="Close">×</button></header>
       <div class="sh-body">
         <section class="sh-hero">
-          <div class="doll">${['weapon', 'head', 'neck', 'offhand', 'chest', 'ring1', 'hands', 'belt', 'ring2', 'feet'].map(slot).join('')}</div>
+          <div class="doll">${['head', 'weapon', 'chest', 'hands', 'ring1', 'neck', 'offhand', 'belt', 'feet', 'ring2'].map(slot).join('')}<div class="doll-figure"></div></div>
           <button class="swap" data-swap>⇄ Swap weapon set${isTouch() ? '' : ' <kbd>X</kbd>'}${ch.equip?.weapon2 || ch.equip?.offhand2 ? '' : ' <small>(the other set is empty)</small>'}</button>
         </section>
         <section class="sh-stats">
@@ -129,6 +131,7 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, curr
       </div>
     </div>`;
     root.querySelector('[data-close]').onclick = () => toggle(false);
+    preview.show(root.querySelector('.doll-figure'), ch.look, ch.equip, items?.bases);
     root.querySelector('[data-skills]').onclick = () => { toggle(false); onSkills('skills'); };
     root.querySelector('[data-talents]').onclick = () => { toggle(false); onSkills('talents'); };
     root.querySelectorAll('[data-spend]').forEach(b => b.onclick = () => send({ do: 'spend', attr: b.dataset.spend, n: 1 }));
@@ -236,5 +239,5 @@ export function createSheetUI({ items, send, getChar, nope, potions = null, curr
   function backToSel(ch) { const it = sel && ch?.bag?.find(i => i.uid === sel); const el = it && root.querySelector(`.bag .item[data-uid="${it.uid}"]`); if (el) showTip(el, it, ch); else hideTip(); }
   root.addEventListener('click', e => { if (e.target === root) toggle(false); });
   void nope;
-  return { toggle, refresh, cycleCompare, get open() { return !root.hidden; } };
+  return { toggle, refresh, cycleCompare, preview, get open() { return !root.hidden; } };
 }

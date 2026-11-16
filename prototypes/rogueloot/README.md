@@ -1,8 +1,8 @@
 # Rogueloot
 
-> **Status:** live on games.radgh.com · resumed 2026-11-13 (owner): round 2 done — class at creation, no Shove, 1x1 bag, skills by level + 64 talent trees, Skills/Talents/Character screens rebuilt, 1v1 early game · checked 2026-11-13
+> **Status:** live on games.radgh.com · resumed 2026-11-13 (owner): round 2 done — class at creation, no Shove, 1x1 bag, skills by level + 64 talent trees, Skills/Talents/Character screens rebuilt, 1v1 early game · 2026-11-16 (report #3): new heroes start with only Attack and learn skills with skill points; specialization at 5 · checked 2026-11-13
 > **Play:** LAN `http://<LAN IP>:8580/` (stable, own server; https 8582 for a controller) · public https://rogueloot.games.radgh.com/
-> **Next:** play-test the talent trees (numbers are first-pass; `tools/sim.mjs` for pacing), then the overhaul list in `~/claude/agent/rogueloot-overhaul-checklist.md` (gear on the body, PoE world map, river/bridge) and M33 balance
+> **Next:** play-test the talent trees (numbers are first-pass; `tools/sim.mjs` for pacing), then the overhaul list in `~/claude/agent/rogueloot-overhaul-checklist.md` (PoE world map, river/bridge) and M33 balance
 > **Parked:** overhaul items C4-C23 + B1 in that checklist; talents are number-only (no new mechanics on capstones); skill-engine wishlists in each `data/skills-specs-*.json` `wishlist`
 > **Ask the owner when this game is next worked on:** `model-library/` has 12 Meshy-made rigged + animated enemy models (goblin warrior/shaman/shieldbearer ≈ Hollowhorn, skeletons ≈ Restless, zombie, orc, ogre, bandits, cultist ≈ Gravesworn, lizardfolk ≈ Mirefolk). Owner 2026-11-11: plan for it, but do not put them in until he decides.
 
@@ -28,19 +28,49 @@ everything else. §3 lists the 33 milestones. Checklist: `~/claude/agent/roguelo
 - **Class at creation** (`js/client/class-pick.js`, `heroes.js`): four tiles + the picked class's details; Create is
   disabled until one is picked. `rules/character.js starterKitFor(path)` gives a weapon the class can hold. A hero
   saved without a class gets the same choice in the skill book before anything else (`skills-ui.js drawClassPick`).
-- **Skills vs talents** (`docs/TALENTS.md`, `js/sim/talents.js`): actives unlock by level (rank every 2 levels),
-  points buy talents only. Trees: `data/talents-*.json` + the old passive/synergy rows; checked by
+- **Skills vs talents** (`docs/TALENTS.md`, `js/sim/talents.js`): **since 2026-11-16 (live report #3) a new hero has
+  only Attack and learns every other skill with a skill point** (1 a level from level 1, `ch.learnPoints`; rank still
+  grows every 2 levels), talent points buy talents only, and the **specialization is picked at 5** (spec trees/skills
+  shifted to rows 5 8 11 14 17 20). Tests: `tests/sim/learn.test.js`. Trees: `data/talents-*.json` + the old passive/synergy rows; checked by
   `tests/rules/talents-data.test.js` (rows, columns, prereqs, counts, synergy targets, ≤ +30% on one skill, no arrow
   through another talent). `js/rules/skill-text.js` prints every number from the data.
 - **Skill book** (`js/client/skills-ui.js`, `css/book.css`): Skills (K) = spellbook list, detail (rank now/next,
   price, talents for it), six-slot bar (slot buttons or drag). Talents (N) = tree tabs with points spent, a grid of
   rows × 4 columns with a level rail, SVG arrows, detail with this rank / next / requirements and Learn, and a
-  Specialization tab (look at every spec; choose at 10). Talent pictures: `icons.js talentIcon` (whole library).
+  Specialization tab (look at every spec; choose at 5). Talent pictures: `icons.js talentIcon` (whole library).
 - **Bag** (`js/rules/bag.js`): one item a square, 10 × 4, moving onto an item swaps. Gear pictures:
   `js/client/gear-icons.js`. Character screen (`sheet-ui.js`, `css/sheet.css`): equipment doll, stats, the bag, belt,
   and the item card in a fixed place under the bag.
 - Tests: `tests/browser-skills.mjs` (class pick, bar by button + drag, learn, locked talent, spec tab, old save),
   walk screens `skills-pick`, `talents`, `talent-detail`, `specializations`.
+
+## Gear on the body (live report #4, 2026-11-16)
+
+"Character does not appear to wear weapons. We had this all figured out in Thousandvale." Heroes now wear what they
+equip, the Thousandvale way: an equipped item becomes a Chibi 2 part in the avatar JSON, and avatar-3d builds it ON THE
+HAND BONES (`gripR`; the off hand on `gripL`, strapped shields on the forearm) inside the body's skinned mesh.
+
+- **Data:** `data/gear-looks.json` — every item base to a model from `avatar-3d/data/gear-catalog.json` (byBase, then
+  byKind for weapons / off hands, byProf for armour), colours, rarity detail. `js/rules/gear-look.js` (pure, copied from
+  `thousandvale/js/client/gear-look.js`): `heroAvatar(avatar, equip, { table, bases })`, `gearSig`, `compactGear`.
+  The main hand is always what is equipped; a weapon in the off hand (dual wield, Doubled Grasp) is drawn as a weapon;
+  an empty armour slot keeps the creator's clothes; gloves merge into the top, rings into the accessory.
+- **World:** `js/client/actors.js` — `add(id, { gear })`, `setGear(id, equip)`. A change is baked in slices
+  (`prepareChibi2`) and swapped onto the SAME body (`setAvatar`); `park: true` keeps a look taken off, so swapping sets
+  back and forth never disposes a material (lessons rule 29). Your own gear comes from `char`, everyone else's from
+  `roster` (`hub.js` resends it when an action changes someone's `gearSig`).
+- **Swings:** `body.hold` (what the hands hold) picks the strike: `attack` becomes a cut / stab / slam / bow draw /
+  staff cast; two weapons alternate (Thousandvale's `swingClip`, `dualAttackByCount`); the sim's `swing {off: 1}` plays
+  the off hand's own strike; an arrow plays the bow's shot; a spell casts through a wand / staff (`spellClip`).
+- **Character screen:** `js/client/hero-preview.js` — the same body (same template) in the middle of the equipment, on
+  its own small renderer made once and kept; drag to turn. Five slots down each side (`css/sheet.css .doll`).
+- Tests: `tests/rules/gear-look.test.js` (every base resolves to a catalog model of the right slot; a real Chibi 2.6
+  body has the sword on `gripR` and changes on a live swap), `tests/sim/hub-gear.test.js` (roster gear + resend),
+  `tests/browser-gear.mjs <shots> [w h mobile]` (town, swap, character screen, fight on the dev server),
+  `tests/browser-gear-coop.mjs <shots>` (two browsers: the host sees the guest's dagger, then the bow after X).
+  `gameEye.heroBody(id?)` and `gameEye.sheetPreview()` report what a body holds.
+- Not yet: mercenaries still carry their seeded look (they wear weapon/chest/head by ruling 31, but the sim does not
+  send their gear yet).
 
 ## Hands, the off hand and item cards (game standards §5b, 2026-11-11)
 
@@ -82,8 +112,34 @@ everything else. §3 lists the 33 milestones. Checklist: `~/claude/agent/roguelo
 
 Browser → server: `hello {v, token}`, `create {character}`, `join {code, character}`, `input {mx, mz, seq}` (world-space
 move vector, ≤ 1), `leave`, `ping`. Server → browser: `welcome {token}`, `joined {code, you, host, seed, area}`,
-`roster {host, players:[{id,name,look}]}` (on every join/leave; looks never ride in snapshots), `snap {tick, players:[{id,
+`roster {host, players:[{id,name,look,gear}]}` (on every join/leave, and when an action changes what someone has equipped; looks and gear never ride in snapshots), `snap {tick, players:[{id,
 x, z, yaw, moving, seq}]}` at 10 Hz, `left {id, host}`, `err {code, msg}`.
+
+## Maps (live report #2, 2026-11-16)
+
+- **Minimap** (`js/client/maps.js`, `css/map.css`): round, top-right under the bag/☰ buttons (176 px; 100 px on an
+  upright phone; 96 px left of the buttons on a phone on its side, where the skill arc owns the right). The quest
+  tracker moved under it. Draws the zone picture, fog, you (arrow = facing), party, monsters by rank (ring: blue
+  champion/elite, gold rare; boss = big diamond) and role (caster/shaman diamond, archer triangle), unopened chests,
+  people, exits (chevron points out), dungeon entrances, waypoint, portals, quest spots, your portal and the guide's
+  goal; rim arrows for the goal and party members off the edge; N on the rim. Map up = screen up (`CAM.yaw`; W = north).
+  No tooltip of its own (only the pins have a card: Thousandvale W16). +/− and the wheel zoom (`rogueloot.mm.zoom`); the
+  corner button hides it to a map button (`rogueloot.mm.hidden`, body class `mm-off`); click/tap opens the region map.
+- **Region map** (`js/client/region-map.js`): **M** opens/closes (Esc and the ✕ close too; **Tab** or the tab button
+  switches to the World map, the old waypoint map in `travel-ui.js`, which now has a "This area" tab back). Whole zone,
+  named exits/entrances/portals/people, a place list (Quests, Ways on, Waypoint, People) with live distance + compass;
+  pressing a row centres the map on it. Drag / wheel / pinch; controller: padnav walks the list, right stick pans,
+  LB/RB zoom. Monsters only within 30 m of you. Labels are decluttered (an overlapping label is left off).
+- **Shared** (`js/client/map-core.js`, pure): `mapView` (world ↔ map with the camera yaw, plus the canvas matrix),
+  `fitScale`, `compass`, the explored grid (6 m cells, 24 m reveal radius, `encodeExplored`/`decodeExplored`, a zone
+  whose bounds changed starts fresh), `exploredStore` — saved per hero per zone under `rogueloot.explored.v1` (kept out
+  of the character because the room server drops unknown fields and caps frame size), `placesOf`, `foePin`.
+  `js/client/map-paint.js` paints the zone ONCE per area at 3 px/m from the same shapes as the 3D ground; the town and
+  the Proving Meadow have no fog.
+- Tests: `tests/world/map-core.test.js` (node), `tests/browser-maps.mjs <shotDir>` (desktop, 390 and 360 px phones:
+  minimap shows the hero + Thornwood exit, keeps clear of the HUD, M / tap opens, list centring, drag, Tab ↔ World,
+  Esc / M close, hide sticks over a reload, explored cells saved). Walk screens `region-map` and `map`.
+  `gameEye.maps()` reports both.
 
 ## Credits
 

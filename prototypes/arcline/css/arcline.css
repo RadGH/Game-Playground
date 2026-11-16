@@ -26,7 +26,7 @@ button:disabled { opacity: .45; cursor: default; }
 .ac-top { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: stretch; gap: 6px; padding: calc(6px + var(--safe-t)) calc(8px + var(--safe-r)) 6px calc(8px + var(--safe-l));
   background: linear-gradient(180deg, rgba(6, 9, 16, 0.92), rgba(6, 9, 16, 0.75)); border-bottom: 1px solid var(--line); z-index: 5; }
 .ac-top > * { flex: none; }
-.ac-menu { width: 44px; font-size: 20px; padding: 0; }
+.ac-menubtn { width: 44px; font-size: 20px; padding: 0; }
 .ac-money, .ac-people, .ac-date { display: flex; flex-direction: column; justify-content: center; text-align: left; padding: 2px 10px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); min-width: 0; }
 .ac-money { cursor: pointer; }
 .ac-top .lbl { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; }

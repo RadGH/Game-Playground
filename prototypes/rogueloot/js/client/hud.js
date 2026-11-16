@@ -8,7 +8,7 @@ import { rankOf } from '../sim/skills.js';
 import { registerTip } from '../../../../shared/tooltip.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export const BAR = ['sure_strike', 'spark', 'field_mend', null, null, null];        // a hero with no bar yet
+export const BAR = [null, null, null, null, null, null];        // a hero with no bar yet: only Attack (owner 2026-11-16)
 
 const ATK_NONE = () => 'attack';
 let ATK = ATK_NONE;
@@ -129,7 +129,7 @@ export function createHud(root, { skills, content = null, onUse, onTargetNext, o
     }
     $('.dead-panel').hidden = !me.dead;
     if (ch && quest) { const q = quest(ch); const el = $('.quest-track'); el.hidden = !q; if (q) { el.querySelector('.qn').textContent = q.name; el.querySelector('.qt').textContent = q.progress || q.short || ''; const g = el.querySelector('.qg'); g.textContent = q.hint ? '➜ ' + q.hint : ''; g.hidden = !q.hint; } }
-    $('.bag-btn .dot').hidden = !(ch?.unspent > 0 || ch?.skillPoints > 0 || (ch && !ch.path && ch.level >= 3));
+    $('.bag-btn .dot').hidden = !(ch?.unspent > 0 || ch?.skillPoints > 0 || ch?.learnPoints > 0 || (ch && !ch.path && ch.level >= 3));
     if (ch) for (const kind of ['health', 'mana']) { const n = (ch.belt || []).filter(x => x?.kind === kind).reduce((s, x) => s + x.n, 0) + (ch.bag || []).filter(x => x.base === 'potion' && x.kind === kind).reduce((s, x) => s + x.n, 0); for (const b of pots[kind]) { b.querySelector('.n').textContent = n; b.classList.toggle('poor', !n); } }
   }
   const bars = (el, v, m) => { el.querySelector('b').style.width = Math.max(0, Math.min(100, v / m * 100)) + '%'; el.querySelector('span').textContent = `${Math.max(0, Math.round(v))} / ${m}`; };

@@ -14,7 +14,7 @@ export const ATTR_HELP = {
 export const START_ATTR = 12;                // every attribute starts here (docs/ITEMS.md: weapon reqs are 8 + 2.5 x level)
 export const POINTS_PER_LEVEL = 5;
 export const PATH_LEVEL = 3;                 // ruling 29
-export const SPEC_LEVEL = 10;
+export const SPEC_LEVEL = 5;                  // owner 2026-11-16 (live report #3): was 10
 
 /** Experience needed to go from level L to L+1. */
 export function xpToNext(L) {
@@ -47,4 +47,5 @@ export function partyShares(monsterLevel, levels, kind = 'normal', mult = 1) {
 
 /** Points a character of level L has had to spend, ever. Quest points come on top (`bonusPoints`). */
 export const attrPointsFor = (L, bonus = 0) => POINTS_PER_LEVEL * (L - 1) + bonus;
-export const skillPointsFor = (L, questPoints = 0) => (L - 1) + questPoints;     // 1 a level + 1 per main-quest step
+export const skillPointsFor = (L, questPoints = 0) => (L - 1) + questPoints;     // TALENT points: 1 a level from 2 + 1 per main-quest step
+export const learnPointsFor = L => Math.max(1, L);                              // SKILL points (learning skills): 1 a level, the first at level 1

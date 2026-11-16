@@ -1,6 +1,6 @@
 // The skill engine (M9): runs every skill written in the effect vocabulary of data/skills-paths.json (docs/SKILLS.md).
-// Pure. A hero's ranks are ch.skills { id: rank }; Wanderer skills are known by everyone at rank 1, a Path's starters are
-// granted at the Path pick. Resources: mana for everyone except Fighters (rage, shown as "Temper") and Rogues
+// Pure. A hero's ranks are ch.skills { id: rank }; a learned skill is ch.skills[id] = 1 and its rank comes from the level
+// (owner 2026-11-16: a new hero has only Attack; every other skill, the Wanderer's three too, is learned with a skill point). Resources: mana for everyone except Fighters (rage, shown as "Temper") and Rogues
 // (energy); a Fighter's or Rogue's Wanderer skills are re-priced in their own resource (resources.wandererSkillsAfterPath).
 import { resolveHit, addThreat, taunt as tauntTable, GCD, THREAT } from '../rules/combat.js';
 import { addFx } from './status.js';
@@ -8,21 +8,23 @@ import { resolve } from './move.js';
 import { inside } from './abilities.js';
 import { summon } from './allies.js';
 import { shapeSkill } from './legendary.js';
-import { skillRankAt, ownsTree, talentOpen, modsFor, isTalent, unlockedAt } from './talents.js';
+import { skillRankAt, ownsTree, talentOpen, modsFor, isTalent, isSkill, unlockedAt, learnable, learnedSkills } from './talents.js';
+import { SPEC_LEVEL } from '../rules/progression.js';
 
 export const RES_OF = { fighter: 'rage', rogue: 'energy' };          // everyone else: mana
 export const resourceOf = ch => RES_OF[ch?.path] || 'mana';
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const gap = (a, b) => dist(a, b) - (a.r || 0) - (b.r || 0);
 
-/** The rank a hero has in a skill (Wanderer skills: 1 for everyone; 0 = not known). */
+/** The rank a hero has in a skill (0 = not known). Skills: learned ones, at the rank their level gives. */
 export function rankOf(ch, sk, stanceBar = null) {
   if (!sk) return 0;
   if (stanceBar?.includes(sk.id)) return (ch?.level || 1) >= (sk.reqLevel || 1) ? Math.max(1, ch?.skills?.[sk.id] || 1) : (ch?.skills?.[sk.id] || 0);   // a stance's bar grants its skills at rank 1, but not below their level
-  if (sk.owner === 'wanderer' || sk.owner === 'all') return Math.max(1, ch?.skills?.[sk.id] || 1);
+  if (sk.owner === 'all') return 1;                                        // plain Attack
+  if (sk.kind === 'active') return learnable(ch, sk) && ch?.skills?.[sk.id] > 0 ? skillRankAt(sk, ch.level || 1) : 0;   // learned, then grows by level (docs/TALENTS.md)
+  if (sk.owner === 'wanderer') return Math.max(1, ch?.skills?.[sk.id] || 1);   // the old M4 rows (no `kind: active`)
   if (!ownsTree(ch, sk)) return 0;
   if (sk.stanceOnly) return 0;                                            // only through its stance's bar (above)
-  if (sk.kind === 'active') return skillRankAt(sk, ch.level || 1);          // skills unlock and grow by level (docs/TALENTS.md)
   return talentOpen(ch, sk) ? (ch?.skills?.[sk.id] || 0) : 0;               // talents: the points spent
 }
 /** A skill row with every perRank increment applied for rank r (arrays add element-wise). */
@@ -259,7 +261,7 @@ function healTarget(w, p, t, n) {
 }
 
 /** The class (Path) pick: made when the hero is created (owner 2026-11-13); an older save without one picks it before
- *  playing. Skills come by level, so nothing is granted here; the bar is filled with what is open. */
+ *  playing. Nothing is granted: skills are learned with skill points; the bar keeps what the hero already learned. */
 export function pickPath(w, p, path) {
   const P = w.content.paths?.[path]; if (!P) return { err: 'No such class.' };
   const ch = p.char; if (ch.path) return { err: 'You already have a class.' };
@@ -267,11 +269,26 @@ export function pickPath(w, p, path) {
   p.char = { ...next, bar: defaultBar(w.content.skills, next) };
   return { ok: true };
 }
-/** Spend a talent point (docs/TALENTS.md): your class or spec tree, its row's level, its prerequisites, its max rank. */
+/** Learn a skill with a skill point (owner 2026-11-16): yours (class, spec or everyone's), at its level, once. It goes on
+ *  the first empty bar slot; a class's own auto-attack takes the Attack button instead. */
+export function learnSkill(w, p, sk) {
+  const ch = p.char;
+  if (!learnable(ch, sk)) return { err: sk.stanceOnly ? 'That one comes with its stance.' : 'That belongs to another class.' };
+  if (ch.skills?.[sk.id] > 0) return { err: 'You already know it.' };
+  if ((ch.level || 1) < (sk.reqLevel || 1)) return { err: `Needs level ${sk.reqLevel}.` };
+  if (!((ch.learnPoints || 0) >= 1)) return { err: 'No skill points left. You get one each level.' };
+  const bar = [...(ch.bar || [])]; while (bar.length < 6) bar.push(null);
+  if (!sk.autoAttack && !bar.includes(sk.id)) { const i = bar.indexOf(null); if (i >= 0) bar[i] = sk.id; }
+  p.char = { ...ch, skills: { ...(ch.skills || {}), [sk.id]: 1 }, learnPoints: ch.learnPoints - 1, bar };
+  return { ok: true };
+}
+/** Spend a point: a skill point on a skill (learnSkill), or a talent point (docs/TALENTS.md): your class or spec tree,
+ *  its row's level, its prerequisites, its max rank. */
 export function learn(w, p, id) {
   const sk = w.content.skills[id], ch = p.char;
   if (!sk) return { err: 'No such talent.' };
-  if (!isTalent(sk)) return { err: 'Skills unlock by themselves as you level.' };
+  if (isSkill(sk)) return learnSkill(w, p, sk);
+  if (!isTalent(sk)) return { err: 'That one works on its own.' };
   if (!ownsTree(ch, sk)) return { err: 'That belongs to another class.' };
   if (!talentOpen(ch, sk)) return { err: 'That talent is for another specialization.' };
   if ((ch.skillPoints || 0) < 1) return { err: 'No talent points left.' };
@@ -282,14 +299,9 @@ export function learn(w, p, id) {
   p.char = { ...ch, skills: { ...(ch.skills || {}), [id]: now + 1 }, skillPoints: ch.skillPoints - 1 };
   return { ok: true };
 }
-/** After a level-up: skills that open at this level go on the bar if a slot is free. Returns their ids. */
+/** After a level-up: the skills that become AVAILABLE to learn at this level (nothing is learned for the player). */
 export function unlockSkills(w, p, L) {
-  const got = unlockedAt(w.content.skills, p.char, L).filter(s => !s.autoAttack);
-  if (!got.length) return [];
-  const bar = [...(p.char.bar || [])]; while (bar.length < 6) bar.push(null);
-  for (const s of got) { if (bar.includes(s.id)) continue; const i = bar.indexOf(null); if (i >= 0) bar[i] = s.id; }
-  p.char = { ...p.char, bar };
-  return got.map(s => s.id);
+  return unlockedAt(w.content.skills, p.char, L).filter(s => learnable(p.char, s)).map(s => s.id);
 }
 /** The action bar (6 slots): set slot i to a known active skill (or empty). */
 export function setBar(w, p, i, id) {
@@ -301,7 +313,8 @@ export function setBar(w, p, i, id) {
   bar[i] = id || null; p.char = { ...p.char, bar };
   return { ok: true };
 }
-/** The bar a hero starts with: their class's (and spec's) open skills first, newest-level last, common skills after. */
+/** A bar from the skills a hero has learned: their spec's first, then their class's by level, everyone's last.
+ *  A new hero has learned nothing, so their bar is empty: only the Attack button (owner 2026-11-16). */
 export function defaultBar(skills, ch) {
   const known = Object.values(skills).filter(s => s.kind === 'active' && !s.autoAttack && !s.hidden && rankOf(ch, s) > 0 && s.owner !== 'all');
   known.sort((a, b) => (a.owner === 'wanderer') - (b.owner === 'wanderer') || (b.owner === ch.spec) - (a.owner === ch.spec) || (a.reqLevel || 1) - (b.reqLevel || 1));
@@ -309,39 +322,39 @@ export function defaultBar(skills, ch) {
   return bar;
 }
 
-/** The spec pick at level 10 (ruling 2/29): the spec must belong to the hero's class; its armour comes with it, and
- *  its skills open by level from here. */
+/** The spec pick at SPEC_LEVEL (5, owner 2026-11-16): the spec must belong to the hero's class; its armour comes with it,
+ *  and its skills become learnable by level from here. The bar is left as the player set it. */
 export function pickSpec(w, p, spec) {
   const S = w.content.specs?.[spec], ch = p.char;
   if (!S) return { err: 'No such specialization.' };
   if (!ch.path) return { err: 'Choose a class first.' };
   if (ch.spec) return { err: 'You already have a specialization. The trainer in town can change it.' };
-  if (ch.level < 10) return { err: 'Specializations open at level 10.' };
+  if (ch.level < SPEC_LEVEL) return { err: `Specializations open at level ${SPEC_LEVEL}.` };
   if (!(S.paths || []).includes(ch.path)) return { err: `${S.name} is not open to your class.` };
-  const next = { ...ch, spec };
-  p.char = { ...next, bar: defaultBar(w.content.skills, next) };
+  p.char = { ...ch, spec };
   return { ok: true };
 }
 export const respecPointsCost = L => Math.round(20 + 12 * L * L / 4);
 export const respecSpecCost = L => Math.round(500 + 60 * L * L);
-/** At the trainer (town): refund every skill point, or change specialization (points reset too). */
+/** At the trainer (town): unlearn everything (every talent point and skill point comes back), or change specialization
+ *  (talent points come back, and so do the skill points in the old specialization's skills). */
 export function respec(w, p, a) {
-  const ch = p.char, near = (w.area.markers || []).some(m => m.kind === 'npc' && m.id === 'trainer' && Math.hypot(p.x - m.x, p.z - m.z) < 5);
+  const S = w.content.skills, ch = p.char, near = (w.area.markers || []).some(m => m.kind === 'npc' && m.id === 'trainer' && Math.hypot(p.x - m.x, p.z - m.z) < 5);
   if (!near) return { err: 'The trainer in town does that.' };
-  // every talent point comes back; skills are untouched (they come by level)
-  const refunded = Object.entries(ch.skills || {}).reduce((n, [id, r]) => n + (isTalent(w.content.skills[id]) ? r : 0), 0);
-  const keep = {};
+  const refunded = Object.entries(ch.skills || {}).reduce((n, [id, r]) => n + (isTalent(S[id]) ? r : 0), 0);
+  const learned = learnedSkills(S, ch);
   if (a.op === 'points') {
     const cost = respecPointsCost(ch.level); if ((ch.gold || 0) < cost) return { err: `It costs ${cost} gold.` };
-    p.char = { ...ch, gold: ch.gold - cost, skills: keep, skillPoints: (ch.skillPoints || 0) + refunded, bar: ch.bar };
+    p.char = { ...ch, gold: ch.gold - cost, skills: {}, skillPoints: (ch.skillPoints || 0) + refunded, learnPoints: (ch.learnPoints || 0) + learned.length, bar: [null, null, null, null, null, null] };
     return { ok: true };
   }
   if (a.op === 'spec') {
     const S = w.content.specs?.[a.spec]; if (!S || !(S.paths || []).includes(ch.path)) return { err: 'That specialization is not open to your Path.' };
     if (a.spec === ch.spec) return { err: 'You already follow it.' };
     const cost = respecSpecCost(ch.level); if ((ch.gold || 0) < cost) return { err: `Changing costs ${cost} gold.` };
-    const fresh = {};
-    p.char = { ...ch, gold: ch.gold - cost, spec: a.spec, skills: fresh, skillPoints: (ch.skillPoints || 0) + refunded, bar: defaultBar(w.content.skills, { ...ch, spec: a.spec, skills: fresh }) };
+    const fresh = {}, gone = learned.filter(id => w.content.skills[id].owner === ch.spec);
+    for (const id of learned) if (!gone.includes(id)) fresh[id] = 1;
+    p.char = { ...ch, gold: ch.gold - cost, spec: a.spec, skills: fresh, skillPoints: (ch.skillPoints || 0) + refunded, learnPoints: (ch.learnPoints || 0) + gone.length, bar: (ch.bar || []).map(id => (id && fresh[id] ? id : null)) };
     return { ok: true };
   }
   return { err: 'unknown' };

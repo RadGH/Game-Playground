@@ -1,0 +1,97 @@
+{
+  "_doc": "What each Rogueloot item base looks like ON THE HERO (live report #4, 2026-11-16: 'Character does not appear to wear weapons'). Every value is a Chibi 2 part id from avatar-3d/data/gear-catalog.json (the same models Thousandvale draws; the armory/ page shows each one in the main hand, the off hand and both). Read by js/rules/gear-look.js only. weapon/offhand: byBase first, then byKind (the base's `kind`); a weapon in the OFF hand (dual wield, Doubled Grasp) uses the weapon table. head/chest/hands/feet: byBase first, then byProf (the base's `proficiency`: cloth, leather, mail, plate). hands are gloves laid over the top (`field: gloves`); rings sit on the hands (`field: ring`); a belt is the waist decor; an amulet is the neck accessory (only when the hero's own look wears no accessory). colour: byBase wins, then the slot's own default; rarity only adds detail (`quality`) and a gold trim for legendary/unique armour. tests/rules/gear-look.test.js checks that every base resolves to a catalog model of the right slot.",
+  "weapon": {
+    "byKind": { "dagger": "fh_dagger", "sword": "fh_sword", "axe": "fh_axe", "mace": "fh_mace", "sceptre": "fh_scepter", "greatsword": "fh_greatsword", "greataxe": "fh_greataxe", "maul": "fh_maul", "spear": "fh_spear", "polearm": "fh_halberd", "bow": "bow", "crossbow": "crossbow", "staff": "staff_orb", "wand": "fh_wand" },
+    "byBase": {
+      "skinning_knife": "fh_dagger", "stiletto": "fh_dagger", "hooked_dirk": "g5_kris", "glass_fang": "fh_dagger", "widow_needle": "fh_dagger",
+      "footman_sword": "fh_sword", "river_sabre": "fh_sabre", "warden_blade": "fh_longsword", "heron_sword": "fh_rapier", "kingfisher": "g5_leafblade",
+      "hand_axe": "fh_axe", "bearded_axe": "fh_axe", "cleaver_axe": "cleaver", "moon_axe": "g5_moonaxe", "raven_axe": "fh_axe",
+      "cudgel": "tv_club", "iron_mace": "fh_mace", "morningstar": "g5_morningstar", "bell_mace": "fh_mace", "sunder_mace": "fh_hammer",
+      "prayer_rod": "fh_scepter", "hallow_sceptre": "fh_scepter", "bishop_sceptre": "g5_crownsceptre", "dawn_sceptre": "g5_crownsceptre", "choir_sceptre": "g5_crownsceptre",
+      "bastard_sword": "fh_greatsword", "claymore": "fh_greatsword", "headsman": "fh_greatsword", "flamberge": "g5_flamberge", "king_cleaver": "fh_greatsword",
+      "splitting_axe": "fh_greataxe", "war_axe": "fh_greataxe", "reaver_axe": "fh_greataxe", "giant_axe": "g5_headsman", "doom_axe": "fh_greataxe",
+      "sledge": "fh_maul", "war_maul": "fh_maul", "ogre_maul": "g5_stonemaul", "thunder_maul": "fh_maul", "mountain_maul": "g5_stonemaul",
+      "boar_spear": "fh_spear", "long_spear": "fh_spear", "trident": "g5_harpoon", "pike": "fh_spear", "star_spear": "g5_partisan",
+      "bill_hook": "fh_halberd", "halberd": "fh_halberd", "glaive": "g5_bardiche", "bardiche": "g5_bardiche", "sky_scythe": "g5_bardiche",
+      "hunting_bow": "bow", "long_bow": "bow", "recurve_bow": "g5_recurve", "composite_bow": "g5_recurve", "wyvern_bow": "g5_recurve",
+      "light_crossbow": "crossbow", "heavy_crossbow": "crossbow", "arbalest": "g5_arbalest", "siege_crossbow": "g5_arbalest", "gale_crossbow": "crossbow",
+      "walking_staff": "g5_staff_branch", "gnarled_staff": "staff_crook", "lens_staff": "g5_staff_lens", "spire_staff": "g5_staff_spire", "halo_staff": "g5_staff_halo",
+      "willow_wand": "fh_wand", "bone_wand": "g5_wand_dart", "fork_wand": "g5_wand_fork", "hoop_wand": "g5_wand_hoop", "bell_wand": "g5_wand_bell"
+    },
+    "colour": {
+      "default": "#c8ccd6",
+      "byBase": {
+        "skinning_knife": "#b9b2a4", "glass_fang": "#7fd8a0", "widow_needle": "#3a3a44", "river_sabre": "#d8c08a", "kingfisher": "#bfe0e0",
+        "cudgel": "#8a6a44", "bell_mace": "#c8964a", "moon_axe": "#6a7078", "raven_axe": "#3a3a44", "prayer_rod": "#a07a4a", "dawn_sceptre": "#f0e0b0", "choir_sceptre": "#e8e2d0",
+        "king_cleaver": "#4a4a54", "doom_axe": "#3a3238", "ogre_maul": "#8a8478", "mountain_maul": "#2e2a30", "star_spear": "#d8e0f0",
+        "hunting_bow": "#8a6a44", "long_bow": "#9a7448", "wyvern_bow": "#d8d0b8", "light_crossbow": "#8a6a44", "gale_crossbow": "#c8d0dc",
+        "walking_staff": "#8a6a44", "gnarled_staff": "#6a5236", "willow_wand": "#d8ccaa", "bone_wand": "#e0d8c0", "hoop_wand": "#e0b850", "bell_wand": "#b8a0e8"
+      }
+    }
+  },
+  "offhand": {
+    "byKind": { "shield": "fh_heater_shield", "focus": "orb", "quiver": "quiver" },
+    "byBase": {
+      "buckler": "buckler", "round_shield": "round_shield", "kite_shield": "fh_kite_shield", "tower_shield": "fh_tower_shield", "heater_shield": "fh_heater_shield",
+      "pavise": "g5_pavise", "aegis_shield": "g5_scutcheon", "rampart_shield": "fh_tower_shield",
+      "charm_bundle": "tv_totem", "bound_tome": "book", "glass_orb": "orb", "saint_idol": "idol", "star_glass": "g5_starglass", "reliquary": "relic", "void_lens": "g5_seeingmask", "seraph_idol": "idol",
+      "hip_quiver": "g5_hipquiver", "back_quiver": "quiver", "horn_quiver": "quiver", "storm_quiver": "quiver"
+    },
+    "colour": {
+      "default": "#8d97a3",
+      "byKind": { "focus": "#9fd8ff", "quiver": "#6a4a2a" },
+      "byBase": { "buckler": "#9a7a52", "round_shield": "#8a5a3a", "aegis_shield": "#d8b860", "rampart_shield": "#5e646c", "bound_tome": "#5a2a2a", "glass_orb": "#9fd8ff", "void_lens": "#3a3640", "seraph_idol": "#e8c878", "saint_idol": "#b89a58", "reliquary": "#c8a040", "storm_quiver": "#d8d4c4" }
+    }
+  },
+  "armour": {
+    "head": {
+      "byProf": { "cloth": "hood", "leather": "leather_cap", "mail": "chain_coif", "plate": "plate_helm" },
+      "byBase": {
+        "linen_hood": "hood", "scholar_cap": "cap", "sage_cowl": "hood", "archon_crown": "circlet",
+        "hide_cap": "leather_cap", "ranger_hood": "hood", "drake_cap": "g5_leather_slouch", "shade_mask": "hood",
+        "mail_coif": "chain_coif", "nasal_helm": "helmet", "scale_helm": "g5_mail_cap", "wyrm_helm": "dragon_helm",
+        "kettle_helm": "war_helm", "great_helm": "great_helm", "bastion_helm": "plate_helm", "titan_helm": "horned_helm"
+      }
+    },
+    "chest": {
+      "byProf": { "cloth": "robe", "leather": "leather", "mail": "chainmail", "plate": "plate" },
+      "byBase": {
+        "linen_robe": "robe", "quilted_robe": "g5_cloth_vestment", "sage_vestment": "high_collar_robe", "archon_robe": "trim_robe",
+        "hide_jerkin": "leather", "studded_jerkin": "strapped_leather", "drake_coat": "g5_leather_brigandine", "shade_harness": "harness",
+        "mail_shirt": "chainmail", "mail_hauberk": "hauberk", "scale_hauberk": "scale_plate", "wyrm_hauberk": "g5_mail_hauberk",
+        "breastplate": "plate", "field_plate": "g5_plate_cuirass", "bastion_plate": "g5_plate_cuirass", "titan_plate": "plate"
+      }
+    },
+    "hands": {
+      "byProf": { "cloth": "g5_cloth_handwraps", "leather": "g5_leather_gloves", "mail": "g5_mail_mitts", "plate": "g5_plate_gauntlets" },
+      "byBase": {}
+    },
+    "feet": {
+      "byProf": { "cloth": "sandals", "leather": "boots", "mail": "g5_mail_splints", "plate": "g5_plate_sabatons" },
+      "byBase": {
+        "cloth_shoes": "slippers", "pilgrim_shoes": "wraps", "sage_slippers": "g5_cloth_curltoes", "archon_shoes": "soft_boots",
+        "hide_boots": "boots", "tracker_boots": "knee_boots", "drake_boots": "g5_leather_cuffboots", "shade_boots": "soft_boots",
+        "mail_boots": "g5_mail_splints", "splint_boots": "g5_mail_splints", "scale_boots": "heavy", "wyrm_boots": "heavy",
+        "plate_boots": "g5_plate_sabatons", "war_boots": "heavy", "bastion_boots": "g5_plate_sabatons", "titan_boots": "heavy"
+      }
+    },
+    "colour": {
+      "byProf": { "cloth": "#7a6a8a", "leather": "#7a5a3a", "mail": "#8a9098", "plate": "#a0a8b2" },
+      "byBase": {
+        "linen_hood": "#cdbf9f", "linen_robe": "#cdbf9f", "scholar_cap": "#4a5a7a", "quilted_robe": "#6a7a9a", "sage_cowl": "#4a4a7a", "sage_vestment": "#4a4a7a", "sage_gloves": "#4a4a7a", "sage_slippers": "#4a4a7a",
+        "archon_crown": "#e0c060", "archon_robe": "#e8e4f0", "archon_gloves": "#e8e4f0", "archon_shoes": "#e8e4f0", "pilgrim_shoes": "#a89878",
+        "ranger_hood": "#4a5a3a", "drake_cap": "#4a6a4a", "drake_coat": "#4a6a4a", "drake_gloves": "#4a6a4a", "drake_boots": "#4a6a4a",
+        "shade_mask": "#2a2a32", "shade_harness": "#2a2a32", "shade_gloves": "#2a2a32", "shade_boots": "#2a2a32",
+        "wyrm_helm": "#3a4a3a", "wyrm_hauberk": "#3a4a3a", "wyrm_gauntlets": "#3a4a3a", "wyrm_boots": "#3a4a3a",
+        "titan_helm": "#3a3a42", "titan_plate": "#3a3a42", "titan_gauntlets": "#3a3a42", "titan_boots": "#3a3a42",
+        "bastion_helm": "#c0c8d2", "bastion_plate": "#c0c8d2", "bastion_gauntlets": "#c0c8d2", "bastion_boots": "#c0c8d2"
+      },
+      "trimByRarity": { "legendary": "#c8a24a", "unique": "#c8a24a" }
+    }
+  },
+  "belt": { "byBase": { "rope_sash": "belt_pouches", "leather_belt": "belt_pouches", "war_belt": "g5_girdle", "champion_girdle": "g5_girdle", "titan_girdle": "g5_girdle" }, "default": "belt_pouches",
+    "colour": { "rope_sash": "#b8a070", "leather_belt": "#6a4a2a", "war_belt": "#5a5a60", "champion_girdle": "#8a6a3a", "titan_girdle": "#3a3a42" } },
+  "neck": { "default": "pendant", "colour": { "bead_necklace": "#8a6a44", "silver_amulet": "#c8ccd6", "jade_pendant": "#6ac08a", "sun_amulet": "#e0b850", "eclipse_amulet": "#3a3640" } },
+  "ring": { "default": "g5_signet", "colour": { "copper_ring": "#c87a4a", "silver_ring": "#c8ccd6", "gold_signet": "#e0b850", "opal_ring": "#e0e8f0", "star_ring": "#f0e0a0" } },
+  "quality": { "normal": 0, "magic": 1, "rare": 2, "legendary": 3, "unique": 3 }
+}

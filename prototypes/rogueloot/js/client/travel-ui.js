@@ -8,7 +8,7 @@ import { questKey } from '../sim/quests.js';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const REACH = 4.2;
 
-export function createTravelUI({ view, content, labelRoot, send, getChar, getMe, getArea, onNpc, getDifficulty = () => 'normal' }) {
+export function createTravelUI({ view, content, labelRoot, send, getChar, getMe, getArea, onNpc, getDifficulty = () => 'normal', onRegion = null }) {
   const prompt = document.createElement('button'); prompt.className = 'prompt'; prompt.hidden = true; document.body.append(prompt);
   let current = null, plates = [], portalMesh = null, swirls = [];
   const swirlGeo = new THREE.CircleGeometry(1.25, 28), ringGeo = new THREE.TorusGeometry(1.4, 0.2, 6, 28);   // the stone portal_ring is r 1.4 at 1.6 m (js/client/prop-meshes.js)
@@ -95,13 +95,16 @@ export function createTravelUI({ view, content, labelRoot, send, getChar, getMe,
     const ch = getChar(), area = getArea(), nodes = act.nodes, byId = Object.fromEntries(nodes.map(n => [n.id, n]));
     const lines = []; for (const n of nodes) for (const l of n.links || []) if (byId[l] && n.id < l) lines.push(`<line x1="${n.x}" y1="${n.y}" x2="${byId[l].x}" y2="${byId[l].y}"/>`);
     mapEl = document.createElement('div'); mapEl.className = 'modal map-modal';
-    mapEl.innerHTML = `<div class="panel map-panel"><h2>${esc(act.name || 'Act I')}</h2><p class="sub">${atWaypoint ? 'You stand at a waypoint: pick a place you have found to go there.' : 'Waypoints you have found are bright. Walk to a waypoint to travel.'}</p>
+    const coarse = matchMedia('(pointer: coarse)').matches;
+    // tabs shared with the region map (js/client/region-map.js): M opens "This area", Tab switches
+    const tabs = onRegion ? `<div class="rm-tabs map-tabs"><button data-region>This area${coarse ? '' : ' <kbd>M</kbd>'}</button><button class="on" data-world>World map${coarse ? '' : ' <kbd>Tab</kbd>'}</button></div>` : '';
+    mapEl.innerHTML = `<div class="panel map-panel">${tabs}<h2>${esc(act.name || 'Act I')}</h2><p class="sub">${atWaypoint ? 'You stand at a waypoint: pick a place you have found to go there.' : 'Waypoints you have found are bright. Walk to a waypoint to travel.'}</p>
       <div class="map"><svg viewBox="0 0 100 100" preserveAspectRatio="none">${lines.join('')}</svg>${nodes.map(n => {
         const found = n.id === 'brightwater' || (ch?.waypoints || []).includes(n.id), open = isOpen(ch, n.id), here = area?.id === n.id, built = !!content.zones?.[n.id];
         return `<button class="mnode k-${n.kind} ${found ? 'found' : ''} ${open ? 'open' : ''} ${here ? 'here' : ''} ${built ? '' : 'unbuilt'}" style="left:${n.x}%;top:${n.y}%" data-id="${n.id}" ${atWaypoint && found && built && !here ? '' : 'disabled'}>
           <b>${esc(n.name)}</b><small>${n.kind === 'town' ? 'Town' : (n.levels?.[0] === n.levels?.[1] ? `Level ${n.levels?.[0]}` : `Levels ${n.levels?.[0]}–${n.levels?.[1]}`)}${here ? ' · you are here' : ''}${built ? '' : ' · not built yet'}</small></button>`; }).join('')}</div>
       <div class="btns"><button data-close class="primary">Close</button></div></div>`;
-    mapEl.addEventListener('click', e => { const id = e.target.closest('[data-id]')?.dataset.id; if (id && !e.target.closest('[data-id]').disabled) { send({ do: 'travel', via: 'waypoint', to: id }); closeMap(); } else if (e.target === mapEl || e.target.closest('[data-close]')) closeMap(); });
+    mapEl.addEventListener('click', e => { if (e.target.closest('[data-region]')) { closeMap(); onRegion?.(); return; } const id = e.target.closest('[data-id]')?.dataset.id; if (id && !e.target.closest('[data-id]').disabled) { send({ do: 'travel', via: 'waypoint', to: id }); closeMap(); } else if (e.target === mapEl || e.target.closest('[data-close]')) closeMap(); });
     document.body.append(mapEl);
   }
   function closeMap() { mapEl?.remove(); mapEl = null; }

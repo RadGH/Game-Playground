@@ -66,9 +66,13 @@ export function chestDrops(items, P, rng, { level, tier = 'chest', mf = 0, gf = 
 export function itemValue(items, it) {
   const G = items.rarity.gold || {}, b = items.bases[it.base] || {};
   const kv = G.kindValue?.[b.kind] ?? G.kindValue?.[b.slot] ?? 6;
-  return Math.max(1, Math.round(kv * (1 + it.ilvl * 0.35) * (G.rarityValueMult?.[it.ided === false ? 'rare' : it.rarity] ?? 1)));
+  // live report #1/#5 (2026-11-16): an item with no item level was worth NaN, and selling it wiped the player's gold.
+  // Math.max/round don't fix NaN, so every input falls back to a real number and the result is checked.
+  const lvl = Number(it.ilvl) || Number(it.level) || Number(b.dropLevel) || 1;
+  const v = Math.round(Number(kv) * (1 + lvl * 0.35) * (Number(G.rarityValueMult?.[it.ided === false ? 'rare' : it.rarity]) || 1));
+  return Number.isFinite(v) ? Math.max(1, v) : 1;
 }
-export const sellPrice = (items, it) => Math.max(1, Math.round(itemValue(items, it) * (items.rarity.gold?.sellPct ?? 20) / 100));
+export const sellPrice = (items, it) => { const v = Math.round(itemValue(items, it) * (Number(items.rarity.gold?.sellPct) || 20) / 100); return Number.isFinite(v) ? Math.max(1, v) : 1; };
 export const buyPrice = (items, it) => itemValue(items, it);
 /** The gambler: an unidentified item for 3x a normal one's value, rarity from a flat table. */
 export function gamble(items, rng, level, base, ch = null) {

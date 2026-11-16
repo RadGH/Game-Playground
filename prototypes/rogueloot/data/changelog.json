@@ -1,6 +1,44 @@
 {
   "entries": [
     {
+      "id": "2026-11-16-gear-on-heroes",
+      "date": "2026-11-16",
+      "title": "Heroes wear their gear",
+      "items": [
+        "Your hero now holds the weapon you equip: swords, daggers, axes, maces, sceptres, greatswords, mauls, spears, polearms, bows, crossbows, staves and wands each have their own model, and better items show more detail.",
+        "Shields ride your forearm, foci and orbs sit in your off hand, and quivers hang on your back or hip. Two daggers or two blades are carried one in each hand.",
+        "Helmets, hoods, chest armour, gloves, boots, belts, amulets and rings show on your hero as well.",
+        "Attacks swing the weapon you hold: a sword cuts, a dagger stabs, a greatsword slams, a bow draws, a staff or wand casts, and two weapons strike in turn.",
+        "Swapping weapon sets (X) changes what your hero holds straight away, and the other players in your game see your new weapon and armour too.",
+        "The character screen (C) shows your hero in 3D in the middle of your equipment, wearing exactly what is in the slots. Drag to turn them."
+      ]
+    },
+    {
+      "id": "2026-11-16-maps",
+      "date": "2026-11-16",
+      "title": "A minimap and a map of each area",
+      "items": [
+        "A round minimap sits in the top-right corner: you (pointing the way you face), your party, nearby monsters (champions, rares and bosses ringed), unopened chests, people, ways out, waypoints, portals and your next quest goal. Arrows on its rim point to your goal and to party members off the edge.",
+        "Press M (or tap the minimap) for a big map of the whole area, with every way out named, dungeon entrances, the waypoint and quest spots. Drag or pinch to move and zoom, and pick a place from the list to find it on the map.",
+        "Places you have not explored yet stay dark until you walk there, and each hero remembers what they have explored.",
+        "The waypoint map of the whole act is now the World map tab of the same window (Tab switches between them).",
+        "The minimap can be tucked away with its corner button and stays that way until you bring it back."
+      ]
+    },
+    {
+      "id": "2026-11-16-learn-skills",
+      "date": "2026-11-16",
+      "title": "Learn your skills, specialize at level 5",
+      "items": [
+        "A new hero starts with only Attack. Every other skill is yours to choose: you get a skill point each level (the first one right away), and learning a skill costs 1 point. Open Skills (K) and press Learn.",
+        "A learned skill goes straight onto the first empty button of your bar, and still gets stronger every two levels.",
+        "Skill points and talent points are separate, so learning skills never costs you a talent.",
+        "Pick your specialization at level 5 instead of 10. Specialization skills and talent rows open earlier to match.",
+        "Heroes from before keep every skill on their bar, and get skill points for the rest of their levels to spend however they like.",
+        "The trainer in town now gives back skill points as well as talent points when you unlearn everything."
+      ]
+    },
+    {
       "id": "2026-11-13-classes-talents",
       "date": "2026-11-13",
       "title": "Pick your class at the start, talent trees, a simpler bag",

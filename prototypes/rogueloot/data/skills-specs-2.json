@@ -5,7 +5,7 @@
    "name": "Sworn Guard",
    "owner": "knight",
    "tree": "sworn_guard",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -65,7 +65,7 @@
    "name": "Steel Vow",
    "owner": "knight",
    "tree": "sworn_guard",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -81,7 +81,7 @@
    "name": "Intercept",
    "owner": "knight",
    "tree": "sworn_guard",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 3,
    "prereq": [
     "kni_sworn_guard"
@@ -134,7 +134,7 @@
    "name": "Vigil Plate",
    "owner": "knight",
    "tree": "sworn_guard",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -152,7 +152,7 @@
    "name": "Shared Shield",
    "owner": "knight",
    "tree": "sworn_guard",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "kni_sworn_guard"
@@ -196,7 +196,7 @@
    "name": "Steadfast Vow",
    "owner": "knight",
    "tree": "sworn_guard",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -214,7 +214,7 @@
    "name": "Bodyguard",
    "owner": "knight",
    "tree": "sworn_guard",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "kni_intercept"
@@ -289,7 +289,7 @@
    "name": "Oath of Iron",
    "owner": "knight",
    "tree": "sworn_guard",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -385,7 +385,7 @@
    "name": "Challenge",
    "owner": "knight",
    "tree": "challenge",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -431,7 +431,7 @@
    "name": "Loud Steel",
    "owner": "knight",
    "tree": "challenge",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -447,7 +447,7 @@
    "name": "Shield Blow",
    "owner": "knight",
    "tree": "challenge",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "kni_challenge"
@@ -480,7 +480,7 @@
    "name": "Rim Strike",
    "owner": "knight",
    "tree": "challenge",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "kni_shield_blow"
@@ -521,7 +521,7 @@
    "name": "Bellow",
    "owner": "knight",
    "tree": "challenge",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 5,
    "prereq": [
     "kni_challenge"
@@ -562,7 +562,7 @@
    "name": "Heavy Hand",
    "owner": "knight",
    "tree": "challenge",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -580,7 +580,7 @@
    "name": "Unbowed",
    "owner": "knight",
    "tree": "challenge",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -598,7 +598,7 @@
    "name": "Sweeping Challenge",
    "owner": "knight",
    "tree": "challenge",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "maxRank": 10,
    "prereq": [
     "kni_rim_strike"
@@ -703,7 +703,7 @@
    "name": "Raise the Banner",
    "owner": "knight",
    "tree": "banner",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -754,7 +754,7 @@
    "name": "Banner Bearer",
    "owner": "knight",
    "tree": "banner",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -770,7 +770,7 @@
    "name": "Stand Together",
    "owner": "knight",
    "tree": "banner",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "kni_raise_banner"
@@ -824,7 +824,7 @@
    "name": "Heavy Standard",
    "owner": "knight",
    "tree": "banner",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -840,7 +840,7 @@
    "name": "Hold Fast",
    "owner": "knight",
    "tree": "banner",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 5,
    "prereq": [
     "kni_raise_banner"
@@ -890,7 +890,7 @@
    "name": "Wide Banner",
    "owner": "knight",
    "tree": "banner",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -908,7 +908,7 @@
    "name": "Guardian Banner",
    "owner": "knight",
    "tree": "banner",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "kni_stand_together"
@@ -963,7 +963,7 @@
    "name": "Steel Cadence",
    "owner": "knight",
    "tree": "banner",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -981,7 +981,7 @@
    "name": "Long Standing",
    "owner": "knight",
    "tree": "banner",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -1080,7 +1080,7 @@
    "name": "Venom Strike",
    "owner": "assassin",
    "tree": "venoms",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -1122,7 +1122,7 @@
    "name": "Quick Poisons",
    "owner": "assassin",
    "tree": "venoms",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -1138,7 +1138,7 @@
    "name": "Blackroot Dart",
    "owner": "assassin",
    "tree": "venoms",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "asn_venom_strike"
@@ -1190,7 +1190,7 @@
    "name": "Lingering",
    "owner": "assassin",
    "tree": "venoms",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -1206,7 +1206,7 @@
    "name": "Fester",
    "owner": "assassin",
    "tree": "venoms",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "asn_blackroot_dart"
@@ -1246,7 +1246,7 @@
    "name": "Steady Hand",
    "owner": "assassin",
    "tree": "venoms",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 2,
    "maxRank": 5,
    "prereq": [],
@@ -1262,7 +1262,7 @@
    "name": "Blood and Bile",
    "owner": "assassin",
    "tree": "venoms",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "asn_fester"
@@ -1306,7 +1306,7 @@
    "name": "Spreading Rot",
    "owner": "assassin",
    "tree": "venoms",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "asn_blackroot_dart"
@@ -1365,7 +1365,7 @@
    "name": "Virulence",
    "owner": "assassin",
    "tree": "venoms",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -1450,7 +1450,7 @@
    "name": "Grave Mark",
    "owner": "assassin",
    "tree": "the_setup",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -1485,7 +1485,7 @@
    "name": "Cold Eye",
    "owner": "assassin",
    "tree": "the_setup",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -1501,7 +1501,7 @@
    "name": "Gutting Strike",
    "owner": "assassin",
    "tree": "the_setup",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "asn_grave_mark"
@@ -1530,7 +1530,7 @@
    "name": "Sap",
    "owner": "assassin",
    "tree": "the_setup",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -1565,7 +1565,7 @@
    "name": "The Opening",
    "owner": "assassin",
    "tree": "the_setup",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -1581,7 +1581,7 @@
    "name": "Throat Cut",
    "owner": "assassin",
    "tree": "the_setup",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 5,
    "prereq": [
     "asn_sap"
@@ -1625,7 +1625,7 @@
    "name": "Exposed",
    "owner": "assassin",
    "tree": "the_setup",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "asn_grave_mark"
@@ -1663,7 +1663,7 @@
    "name": "Deadly Patience",
    "owner": "assassin",
    "tree": "the_setup",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -1681,7 +1681,7 @@
    "name": "Second Mark",
    "owner": "assassin",
    "tree": "the_setup",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -1733,7 +1733,7 @@
    "name": "Vanish Step",
    "owner": "assassin",
    "tree": "slip_away",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -1781,7 +1781,7 @@
    "name": "Soft Boots",
    "owner": "assassin",
    "tree": "slip_away",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -1797,7 +1797,7 @@
    "name": "Decoy",
    "owner": "assassin",
    "tree": "slip_away",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "asn_vanish_step"
@@ -1844,7 +1844,7 @@
    "name": "Smoke Pouch",
    "owner": "assassin",
    "tree": "slip_away",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -1890,7 +1890,7 @@
    "name": "Hush",
    "owner": "assassin",
    "tree": "slip_away",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 5,
    "prereq": [
     "asn_smoke_pouch"
@@ -1934,7 +1934,7 @@
    "name": "Thicker Smoke",
    "owner": "assassin",
    "tree": "slip_away",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 2,
    "maxRank": 5,
    "prereq": [
@@ -1952,7 +1952,7 @@
    "name": "Knife Storm",
    "owner": "assassin",
    "tree": "slip_away",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "asn_decoy"
@@ -1995,7 +1995,7 @@
    "name": "Shadow Sense",
    "owner": "assassin",
    "tree": "slip_away",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -2013,7 +2013,7 @@
    "name": "Storm Edge",
    "owner": "assassin",
    "tree": "slip_away",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 3,
    "maxRank": 5,
    "prereq": [],
@@ -2083,7 +2083,7 @@
    "name": "Frost Shard",
    "owner": "frostbinder",
    "tree": "rime",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -2128,7 +2128,7 @@
    "name": "Cold Study",
    "owner": "frostbinder",
    "tree": "rime",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -2144,7 +2144,7 @@
    "name": "Rime Burst",
    "owner": "frostbinder",
    "tree": "rime",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "fro_frost_shard"
@@ -2187,7 +2187,7 @@
    "name": "Deep Cold",
    "owner": "frostbinder",
    "tree": "rime",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -2205,7 +2205,7 @@
    "name": "Rime Spear",
    "owner": "frostbinder",
    "tree": "rime",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "fro_rime_burst"
@@ -2246,7 +2246,7 @@
    "name": "Sharper Shards",
    "owner": "frostbinder",
    "tree": "rime",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -2262,7 +2262,7 @@
    "name": "Shatter",
    "owner": "frostbinder",
    "tree": "rime",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "fro_rime_spear"
@@ -2312,7 +2312,7 @@
    "name": "Brittle",
    "owner": "frostbinder",
    "tree": "rime",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -2330,7 +2330,7 @@
    "name": "Keen Spear",
    "owner": "frostbinder",
    "tree": "rime",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -2394,7 +2394,7 @@
    "name": "Whiteout",
    "owner": "frostbinder",
    "tree": "whiteout",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -2444,7 +2444,7 @@
    "name": "Banked Cold",
    "owner": "frostbinder",
    "tree": "whiteout",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -2460,7 +2460,7 @@
    "name": "Ice Wall",
    "owner": "frostbinder",
    "tree": "whiteout",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "fro_whiteout"
@@ -2514,7 +2514,7 @@
    "name": "Frostbitten",
    "owner": "frostbinder",
    "tree": "whiteout",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -2530,7 +2530,7 @@
    "name": "Blizzard",
    "owner": "frostbinder",
    "tree": "whiteout",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "fro_whiteout"
@@ -2596,7 +2596,7 @@
    "name": "Wider White",
    "owner": "frostbinder",
    "tree": "whiteout",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -2614,7 +2614,7 @@
    "name": "Glacier",
    "owner": "frostbinder",
    "tree": "whiteout",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "fro_ice_wall"
@@ -2667,7 +2667,7 @@
    "name": "Lasting Cold",
    "owner": "frostbinder",
    "tree": "whiteout",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -2685,7 +2685,7 @@
    "name": "Snowblind",
    "owner": "frostbinder",
    "tree": "whiteout",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "maxRank": 10,
    "prereq": [
     "fro_blizzard"
@@ -2787,7 +2787,7 @@
    "name": "Ice Ward",
    "owner": "frostbinder",
    "tree": "stillness",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -2836,7 +2836,7 @@
    "name": "Winter Skin",
    "owner": "frostbinder",
    "tree": "stillness",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -2852,7 +2852,7 @@
    "name": "Spellrush",
    "owner": "frostbinder",
    "tree": "stillness",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -2886,7 +2886,7 @@
    "name": "Cold Focus",
    "owner": "frostbinder",
    "tree": "stillness",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -2902,7 +2902,7 @@
    "name": "Freeze",
    "owner": "frostbinder",
    "tree": "stillness",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "fro_ice_ward"
@@ -2947,7 +2947,7 @@
    "name": "Frost Step",
    "owner": "frostbinder",
    "tree": "stillness",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 3,
    "prereq": [
     "fro_spellrush"
@@ -2990,7 +2990,7 @@
    "name": "Stifling Cold",
    "owner": "frostbinder",
    "tree": "stillness",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 5,
    "prereq": [
     "fro_freeze"
@@ -3033,7 +3033,7 @@
    "name": "Thicker Ice",
    "owner": "frostbinder",
    "tree": "stillness",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -3051,7 +3051,7 @@
    "name": "Deep Well",
    "owner": "frostbinder",
    "tree": "stillness",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -3141,7 +3141,7 @@
    "name": "Forked Bolt",
    "owner": "stormcaller",
    "tree": "forked",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -3182,7 +3182,7 @@
    "name": "Charged Mind",
    "owner": "stormcaller",
    "tree": "forked",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -3198,7 +3198,7 @@
    "name": "Shock Mark",
    "owner": "stormcaller",
    "tree": "forked",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "sto_forked_bolt"
@@ -3243,7 +3243,7 @@
    "name": "Static",
    "owner": "stormcaller",
    "tree": "forked",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -3261,7 +3261,7 @@
    "name": "Arc Lash",
    "owner": "stormcaller",
    "tree": "forked",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "sto_shock_mark"
@@ -3307,7 +3307,7 @@
    "name": "Wider Fork",
    "owner": "stormcaller",
    "tree": "forked",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -3323,7 +3323,7 @@
    "name": "Storm Beam",
    "owner": "stormcaller",
    "tree": "forked",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "sto_arc_lash"
@@ -3367,7 +3367,7 @@
    "name": "Conductor",
    "owner": "stormcaller",
    "tree": "forked",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -3385,7 +3385,7 @@
    "name": "Overcharge",
    "owner": "stormcaller",
    "tree": "forked",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -3460,7 +3460,7 @@
    "name": "Thunder Ring",
    "owner": "stormcaller",
    "tree": "thunder",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -3511,7 +3511,7 @@
    "name": "Long Breath",
    "owner": "stormcaller",
    "tree": "thunder",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -3527,7 +3527,7 @@
    "name": "Storm Orbs",
    "owner": "stormcaller",
    "tree": "thunder",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "sto_thunder_ring"
@@ -3575,7 +3575,7 @@
    "name": "Thunderhide",
    "owner": "stormcaller",
    "tree": "thunder",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -3593,7 +3593,7 @@
    "name": "Thunderclap",
    "owner": "stormcaller",
    "tree": "thunder",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "sto_thunder_ring"
@@ -3646,7 +3646,7 @@
    "name": "Wider Ring",
    "owner": "stormcaller",
    "tree": "thunder",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -3664,7 +3664,7 @@
    "name": "Rolling Thunder",
    "owner": "stormcaller",
    "tree": "thunder",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "sto_thunderclap"
@@ -3716,7 +3716,7 @@
    "name": "Louder Clap",
    "owner": "stormcaller",
    "tree": "thunder",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -3734,7 +3734,7 @@
    "name": "Deep Sky",
    "owner": "stormcaller",
    "tree": "thunder",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -3810,7 +3810,7 @@
    "name": "Bolt Step",
    "owner": "stormcaller",
    "tree": "bolt_step",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 3,
    "prereq": [],
    "kind": "active",
@@ -3863,7 +3863,7 @@
    "name": "Light Feet",
    "owner": "stormcaller",
    "tree": "bolt_step",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -3879,7 +3879,7 @@
    "name": "Wind Ward",
    "owner": "stormcaller",
    "tree": "bolt_step",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -3923,7 +3923,7 @@
    "name": "Stormhardy",
    "owner": "stormcaller",
    "tree": "bolt_step",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 3,
    "maxRank": 5,
    "prereq": [],
@@ -3939,7 +3939,7 @@
    "name": "Crackle",
    "owner": "stormcaller",
    "tree": "bolt_step",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 5,
    "prereq": [
     "sto_wind_ward"
@@ -3984,7 +3984,7 @@
    "name": "Thunder Fist",
    "owner": "stormcaller",
    "tree": "bolt_step",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "sto_bolt_step"
@@ -4029,7 +4029,7 @@
    "name": "Gale",
    "owner": "stormcaller",
    "tree": "bolt_step",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "sto_wind_ward"
@@ -4092,7 +4092,7 @@
    "name": "Sure Footing",
    "owner": "stormcaller",
    "tree": "bolt_step",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -4110,7 +4110,7 @@
    "name": "Hotter Step",
    "owner": "stormcaller",
    "tree": "bolt_step",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 3,
    "maxRank": 5,
    "prereq": [
@@ -4212,7 +4212,7 @@
    "name": "Foresight",
    "owner": "oracle",
    "tree": "foresight",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -4247,7 +4247,7 @@
    "name": "Clear Sight",
    "owner": "oracle",
    "tree": "foresight",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -4263,7 +4263,7 @@
    "name": "Shared Vision",
    "owner": "oracle",
    "tree": "foresight",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "ora_foresight"
@@ -4308,7 +4308,7 @@
    "name": "Calm Mind",
    "owner": "oracle",
    "tree": "foresight",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -4324,7 +4324,7 @@
    "name": "Second Sight",
    "owner": "oracle",
    "tree": "foresight",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -4342,7 +4342,7 @@
    "name": "Warding Glyph",
    "owner": "oracle",
    "tree": "foresight",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "ora_shared_vision"
@@ -4401,7 +4401,7 @@
    "name": "Thread of Fate",
    "owner": "oracle",
    "tree": "foresight",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "ora_warding_glyph"
@@ -4465,7 +4465,7 @@
    "name": "Far Sight",
    "owner": "oracle",
    "tree": "foresight",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -4483,7 +4483,7 @@
    "name": "Lasting Sight",
    "owner": "oracle",
    "tree": "foresight",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -4559,7 +4559,7 @@
    "name": "Kind Omen",
    "owner": "oracle",
    "tree": "omens",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -4621,7 +4621,7 @@
    "name": "Quick Omen",
    "owner": "oracle",
    "tree": "omens",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -4637,7 +4637,7 @@
    "name": "Good Omen",
    "owner": "oracle",
    "tree": "omens",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "ora_kind_omen"
@@ -4674,7 +4674,7 @@
    "name": "Steady Hands",
    "owner": "oracle",
    "tree": "omens",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -4690,7 +4690,7 @@
    "name": "Clear the Fog",
    "owner": "oracle",
    "tree": "omens",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 5,
    "prereq": [
     "ora_good_omen"
@@ -4728,7 +4728,7 @@
    "name": "Long Omen",
    "owner": "oracle",
    "tree": "omens",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -4746,7 +4746,7 @@
    "name": "Circle of Omens",
    "owner": "oracle",
    "tree": "omens",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "ora_kind_omen"
@@ -4804,7 +4804,7 @@
    "name": "Read the Bones",
    "owner": "oracle",
    "tree": "omens",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 5,
    "prereq": [
     "ora_clear_the_fog"
@@ -4841,7 +4841,7 @@
    "name": "Unshaken",
    "owner": "oracle",
    "tree": "omens",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -4933,7 +4933,7 @@
    "name": "Fate Bolt",
    "owner": "oracle",
    "tree": "prophecy",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -4973,7 +4973,7 @@
    "name": "Far Seeing",
    "owner": "oracle",
    "tree": "prophecy",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -4989,7 +4989,7 @@
    "name": "Prophecy",
    "owner": "oracle",
    "tree": "prophecy",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "ora_fate_bolt"
@@ -5042,7 +5042,7 @@
    "name": "Portent",
    "owner": "oracle",
    "tree": "prophecy",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -5085,7 +5085,7 @@
    "name": "Sure Doom",
    "owner": "oracle",
    "tree": "prophecy",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 2,
    "maxRank": 5,
    "prereq": [
@@ -5103,7 +5103,7 @@
    "name": "What Is Coming",
    "owner": "oracle",
    "tree": "prophecy",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "ora_prophecy"
@@ -5152,7 +5152,7 @@
    "name": "Doom Spoken",
    "owner": "oracle",
    "tree": "prophecy",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "ora_sure_doom"
@@ -5198,7 +5198,7 @@
    "name": "Keen Eye",
    "owner": "oracle",
    "tree": "prophecy",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -5216,7 +5216,7 @@
    "name": "Omen of Ruin",
    "owner": "oracle",
    "tree": "prophecy",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "maxRank": 10,
    "prereq": [
     "ora_doom_spoken"
@@ -5343,7 +5343,7 @@
    "name": "Flourish",
    "owner": "swashbuckler",
    "tree": "flourish",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -5376,7 +5376,7 @@
    "name": "Quick Wrist",
    "owner": "swashbuckler",
    "tree": "flourish",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -5392,7 +5392,7 @@
    "name": "Pinning Thrust",
    "owner": "swashbuckler",
    "tree": "flourish",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "swb_flourish"
@@ -5435,7 +5435,7 @@
    "name": "Keen Point",
    "owner": "swashbuckler",
    "tree": "flourish",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -5453,7 +5453,7 @@
    "name": "Deeper Thrust",
    "owner": "swashbuckler",
    "tree": "flourish",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 2,
    "maxRank": 5,
    "prereq": [],
@@ -5469,7 +5469,7 @@
    "name": "Double Thrust",
    "owner": "swashbuckler",
    "tree": "flourish",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "swb_flourish"
@@ -5511,7 +5511,7 @@
    "name": "Sweep",
    "owner": "swashbuckler",
    "tree": "flourish",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "swb_double_thrust"
@@ -5555,7 +5555,7 @@
    "name": "Showmanship",
    "owner": "swashbuckler",
    "tree": "flourish",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -5573,7 +5573,7 @@
    "name": "Wider Sweep",
    "owner": "swashbuckler",
    "tree": "flourish",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 2,
    "maxRank": 5,
    "prereq": [
@@ -5643,7 +5643,7 @@
    "name": "Daring Leap",
    "owner": "swashbuckler",
    "tree": "panache",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -5681,7 +5681,7 @@
    "name": "Light Boots",
    "owner": "swashbuckler",
    "tree": "panache",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -5697,7 +5697,7 @@
    "name": "Mocking Parry",
    "owner": "swashbuckler",
    "tree": "panache",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "swb_daring_leap"
@@ -5766,7 +5766,7 @@
    "name": "Nimble",
    "owner": "swashbuckler",
    "tree": "panache",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -5782,7 +5782,7 @@
    "name": "Matador's Turn",
    "owner": "swashbuckler",
    "tree": "panache",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "swb_mocking_parry"
@@ -5831,7 +5831,7 @@
    "name": "Sure Parry",
    "owner": "swashbuckler",
    "tree": "panache",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 2,
    "maxRank": 5,
    "prereq": [
@@ -5849,7 +5849,7 @@
    "name": "Cutting Remark",
    "owner": "swashbuckler",
    "tree": "panache",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 5,
    "prereq": [
     "swb_matadors_turn"
@@ -5893,7 +5893,7 @@
    "name": "Bold Front",
    "owner": "swashbuckler",
    "tree": "panache",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -5911,7 +5911,7 @@
    "name": "The Exit",
    "owner": "swashbuckler",
    "tree": "panache",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "maxRank": 3,
    "prereq": [
     "swb_cutting_remark"
@@ -6041,7 +6041,7 @@
    "name": "Feint",
    "owner": "swashbuckler",
    "tree": "grandeur",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -6083,7 +6083,7 @@
    "name": "Crowd Pleaser",
    "owner": "swashbuckler",
    "tree": "grandeur",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -6099,7 +6099,7 @@
    "name": "Cape Flick",
    "owner": "swashbuckler",
    "tree": "grandeur",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "swb_feint"
@@ -6143,7 +6143,7 @@
    "name": "Bravado",
    "owner": "swashbuckler",
    "tree": "grandeur",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -6159,7 +6159,7 @@
    "name": "Thrown Dagger",
    "owner": "swashbuckler",
    "tree": "grandeur",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "swb_feint"
@@ -6200,7 +6200,7 @@
    "name": "Longer Show",
    "owner": "swashbuckler",
    "tree": "grandeur",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -6218,7 +6218,7 @@
    "name": "Encore",
    "owner": "swashbuckler",
    "tree": "grandeur",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "swb_cape_flick"
@@ -6258,7 +6258,7 @@
    "name": "Steady Nerve",
    "owner": "swashbuckler",
    "tree": "grandeur",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -6276,7 +6276,7 @@
    "name": "Standing Ovation",
    "owner": "swashbuckler",
    "tree": "grandeur",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 2,
    "maxRank": 5,
    "prereq": [

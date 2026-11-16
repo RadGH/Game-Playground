@@ -19,8 +19,9 @@ export function newCharacter({ name, look, id = null, now = Date.now(), kit = nu
     name: cleanName(name), look: look || null, created: now, played: 0,
     level: 1, xp: 0,
     attrs: Object.fromEntries(ATTRS.map(a => [a, START_ATTR])), unspent: 0, bonusAttr: 0,
-    path, spec: null, tv: 2,
-    skills: {}, skillPoints: 0, questPoints: 0, bar: bar || ['sure_strike', 'spark', 'field_mend', null, null, null],
+    path, spec: null, tv: 3,
+    // a new hero knows only Attack (owner 2026-11-16) and has 1 skill point to learn a first skill with
+    skills: {}, skillPoints: 0, learnPoints: 1, questPoints: 0, bar: bar || [null, null, null, null, null, null],
     gold: 0, equip: kit || {}, bag: [], belt: [],
     quests: {}, waypoints: ['brightwater'], difficulty: 'normal',
   };
@@ -35,7 +36,7 @@ export function spendAttr(ch, attr, n = 1) {
 export function gainXp(ch, amount) {
   const xp = ch.xp + Math.max(0, Math.round(amount)), level = Math.min(LEVEL_CAP, levelForXp(xp));
   const ups = level - ch.level;
-  return { ...ch, xp, level, unspent: ch.unspent + ups * 5, skillPoints: ch.skillPoints + ups, levelled: ups };
+  return { ...ch, xp, level, unspent: ch.unspent + ups * 5, skillPoints: ch.skillPoints + ups, learnPoints: (ch.learnPoints || 0) + ups, levelled: ups };
 }
 
 /** The numbers a fight reads, from attributes alone (gear comes on top in M6). */

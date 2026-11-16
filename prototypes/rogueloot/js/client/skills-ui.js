@@ -1,14 +1,16 @@
 // The skill book (owner 2026-11-13: "redesign the talent and skill menus … completely rebuilt"). Two pages in one window:
 //   Skills (K)   every skill of your class and specialization: what it does at your rank, its price, when it next grows,
-//                the talents that boost it, and the six-slot action bar (tap a slot, or drag a skill onto it).
+//                the talents that boost it, Learn (1 skill point; owner 2026-11-16: a new hero has only Attack and
+//                learns the rest by choice), and the six-slot action bar (tap a slot, or drag a learned skill onto it).
 //   Talents (N)  the talent trees (docs/TALENTS.md): your class tree and your specialization's three, as a grid of rows
 //                opened by level (the level rail on the left), arrows from a talent to the one it opens, a detail panel
-//                with this rank and the next, and Learn. At level 10 the specialization choice sits in its own tab.
+//                with this rank and the next, and Learn. From level 5 (SPEC_LEVEL) the specialization choice sits in its own tab.
 // A hero saved before classes came at creation (no class) gets the class choice here before anything else.
 // Looking is separate from committing (lessons rule 47): tapping anything shows it; only the panel's button acts.
 //   const ui = createSkillsUI({ content, send, getChar });  ui.toggle(true, 'talents');  ui.check(ch)
 import { rankOf, costOf } from '../sim/skills.js';
 import { isTalent, isSkill, ownsTree, talentOpen, RANK_EVERY, PATH_ROWS, SPEC_ROWS } from '../sim/talents.js';
+import { SPEC_LEVEL } from '../rules/progression.js';
 import { skillText, talentLines, boostsOn, boostersOf, RES_NAME } from '../rules/skill-text.js';
 import { ask } from '../../../../shared/dialog.js';
 import { secs } from '../../../../shared/format.js';
@@ -40,9 +42,9 @@ export function createSkillsUI({ content, send, getChar, isTouch = () => false }
     if (root.hidden || !ch) return;
     const keep = root.querySelector('.bk-scroll'); if (keep) scrolls[keep.dataset.keep] = keep.scrollTop;
     if (!ch.path) return drawClassPick(ch);
-    const pts = ch.skillPoints || 0;
+    const pts = ch.skillPoints || 0, lp = ch.learnPoints || 0;
     const tabs = `<nav class="bk-pages" role="tablist">
-      <button role="tab" data-page="skills" class="${page === 'skills' ? 'on' : ''}" aria-selected="${page === 'skills'}">Skills${isTouch() ? '' : ' <kbd>K</kbd>'}</button>
+      <button role="tab" data-page="skills" class="${page === 'skills' ? 'on' : ''}" aria-selected="${page === 'skills'}">Skills${lp ? ` <span class="pip">${lp}</span>` : ''}${isTouch() ? '' : ' <kbd>K</kbd>'}</button>
       <button role="tab" data-page="talents" class="${page === 'talents' ? 'on' : ''}" aria-selected="${page === 'talents'}">Talents${pts ? ` <span class="pip">${pts}</span>` : ''}${isTouch() ? '' : ' <kbd>N</kbd>'}</button></nav>`;
     const who = `${esc(ch.name)} · Level ${ch.level} ${esc(SP[ch.spec]?.name || P[ch.path]?.name || '')}`;
     root.innerHTML = `<div class="bk-panel bk-${page}"><header class="bk-top"><div class="bk-who">${who}</div>${tabs}<button class="x" data-close aria-label="Close">×</button></header>
@@ -80,33 +82,47 @@ export function createSkillsUI({ content, send, getChar, isTouch = () => false }
   };
   function skillsPage(ch) {
     const groups = mySkills(ch), all = groups.flatMap(g => g[1]);
-    if (!selSkill || !all.some(s => s.id === selSkill)) selSkill = (ch.bar || []).find(id => id && all.some(s => s.id === id)) || all[0]?.id;
+    if (!selSkill || !all.some(s => s.id === selSkill)) selSkill = (ch.learnPoints ? all.find(s => stateOf(ch, s) === 'ready')?.id : null) || (ch.bar || []).find(id => id && all.some(s => s.id === id)) || all[0]?.id;   // points to spend: open on something to learn
     const bar = [0, 1, 2, 3, 4, 5].map(i => ch.bar?.[i] || null);
+    const lp = ch.learnPoints || 0;
     const row = s => {
-      const r = rankOf(ch, s), locked = r < 1, slot = bar.indexOf(s.id);
-      return `<button class="bk-row${locked ? ' locked' : ''}${s.id === selSkill ? ' sel' : ''}" data-skill="${s.id}">
-        <span class="ic">${icon(s, 40)}${slot >= 0 ? `<b class="onbar">${slot + 1}</b>` : ''}</span>
-        <span class="tx"><b>${esc(s.name)}</b><small>${locked ? `Opens at level ${s.reqLevel || 1}` : `Rank ${r} of ${s.maxRank || 1} · ${esc(lineOf(ch, s, r).slice(0, 2).join(' · '))}`}</small></span></button>`;
+      const r = rankOf(ch, s), st = stateOf(ch, s), slot = bar.indexOf(s.id);
+      const sub = st === 'known' ? `Rank ${r} of ${s.maxRank || 1} · ${esc(lineOf(ch, s, r).slice(0, 2).join(' · '))}`
+        : st === 'ready' ? (lp ? 'Ready to learn · 1 skill point' : 'Ready to learn · no skill points left') : `Opens at level ${s.reqLevel || 1}`;
+      return `<button class="bk-row st-${st}${st === 'known' ? '' : ' locked'}${st === 'ready' && lp ? ' can' : ''}${s.id === selSkill ? ' sel' : ''}" data-skill="${s.id}">
+        <span class="ic">${icon(s, 40)}${slot >= 0 ? `<b class="onbar">${slot + 1}</b>` : ''}${st === 'ready' && lp ? '<b class="new" aria-hidden="true">+</b>' : ''}</span>
+        <span class="tx"><b>${esc(s.name)}</b><small>${sub}</small></span></button>`;
     };
+    const pts = `<div class="bk-lpts${lp ? ' have' : ''}"><b>${lp}</b> skill point${lp === 1 ? '' : 's'} to spend <small>· 1 more each level</small></div>`;
     return `<div class="bk-body bk-skills-body">
-      <div class="bk-scroll bk-list" data-keep="skills">${groups.map(([name, list]) => `<h3>${esc(name)}</h3>${list.map(row).join('')}`).join('')}</div>
+      <div class="bk-scroll bk-list" data-keep="skills">${pts}${groups.map(([name, list]) => `<h3>${esc(name)}</h3>${list.map(row).join('')}`).join('')}</div>
       <section class="bk-detail">${skillDetail(ch, S[selSkill], bar)}</section>
       <section class="bk-bar"><h3>Action bar</h3><div class="bk-slots">${bar.map((id, i) => `<button class="bk-slot${id ? '' : ' empty'}${id && id === selSkill ? ' sel' : ''}" data-slot="${i}" aria-label="Slot ${i + 1}${id ? ': ' + esc(S[id]?.name) : ', empty'}"><kbd>${i + 1}</kbd>${id ? icon(S[id], 34) : ''}<small>${id ? esc(S[id]?.name || '') : 'Empty'}</small></button>`).join('')}</div></section>
     </div>`;
+  }
+  /** 'known' (learned), 'ready' (your level, not learned yet) or 'later' (opens at a higher level). */
+  const stateOf = (ch, s) => rankOf(ch, s) > 0 ? 'known' : (ch.level || 1) >= (s.reqLevel || 1) ? 'ready' : 'later';
+  function learnBox(ch, s) {
+    const st = stateOf(ch, s), lp = ch.learnPoints || 0, L0 = s.reqLevel || 1;
+    const why = st === 'later' ? `Opens at level ${L0} (you are ${ch.level})` : !lp ? `No skill points left · next at level ${ch.level + 1}` : '';
+    return `<div class="bk-learnbox">${s.autoAttack ? '<p class="bk-note">Once learned it replaces Attack on your first button.</p>' : '<p class="bk-note">Once learned it goes on the first empty slot of your bar, and grows a rank every 2 levels.</p>'}
+      <button class="primary bk-learn" data-learnskill="${s.id}" ${why ? 'disabled' : ''}>${why ? esc(why) : `Learn ${esc(s.name)} — 1 skill point`}</button></div>`;
   }
   function skillDetail(ch, s, bar) {
     if (!s) return '<p class="bk-empty">No skills yet.</p>';
     const r = rankOf(ch, s), max = s.maxRank || 1, locked = r < 1, L0 = s.reqLevel || 1;
     const next = !locked && r < max ? L0 + RANK_EVERY * r : null;
+    const st = stateOf(ch, s);
     const on = boostsOn(s.id, ch, content), could = boostersOf(s.id, content, ch).filter(t => !(ch.skills?.[t.id] > 0) && talentOpen(ch, t));
     const slot = bar.indexOf(s.id);
     return `<div class="bk-dhead"><span class="ic big">${icon(s, 56)}</span><div><h3>${esc(s.name)}</h3>
-        <small>${locked ? `Opens at level ${L0}` : `Rank ${r} of ${max}${next ? ` · rank ${r + 1} at level ${next}` : ' · full strength'}`}</small></div></div>
+        <small>${st === 'later' ? `Opens at level ${L0}` : st === 'ready' ? `Not learned yet · from level ${L0}` : `Rank ${r} of ${max}${next ? ` · rank ${r + 1} at level ${next}` : ' · full strength'}`}</small></div></div>
+      ${locked ? learnBox(ch, s) : ''}
       <div class="bk-chips">${lineOf(ch, s, r).map(x => `<span>${esc(x)}</span>`).join('')}${s.range ? `<span>${s.range} m reach</span>` : ''}</div>
       <p class="bk-desc">${esc(skillText(s, Math.max(1, r), ch.level, ch, S))}</p>
       ${next ? `<p class="bk-next"><b>At rank ${r + 1}:</b> ${esc(skillText(s, r + 1, next, ch, S))}</p>` : ''}
       ${on.length || could.length ? `<h4>Talents for it</h4><ul class="bk-boost">${on.map(b => `<li class="have"><b>${esc(b.talent.name)} ${b.rank}/${b.talent.maxRank || 1}</b> ${esc(b.text)}</li>`).join('')}${could.slice(0, 6).map(t => `<li><button class="link" data-goto="${t.id}">${esc(t.name)}</button> <small>${esc(talentLines(t, 1, content)[0] || '')} a rank</small></li>`).join('')}</ul>` : ''}
-      ${locked ? '' : `<h4>Put it on the bar</h4><div class="bk-put">${[0, 1, 2, 3, 4, 5].map(i => `<button data-put="${i}" class="${bar[i] === s.id ? 'on' : ''}" aria-label="Slot ${i + 1}">${i + 1}</button>`).join('')}${slot >= 0 ? '<button data-take>Take off</button>' : ''}</div>`}`;
+      ${locked || s.autoAttack ? '' : `<h4>Put it on the bar</h4><div class="bk-put">${[0, 1, 2, 3, 4, 5].map(i => `<button data-put="${i}" class="${bar[i] === s.id ? 'on' : ''}" aria-label="Slot ${i + 1}">${i + 1}</button>`).join('')}${slot >= 0 ? '<button data-take>Take off</button>' : ''}</div>`}`;
   }
   function wireSkills(ch) {
     root.querySelectorAll('[data-skill]').forEach(b => b.onclick = () => { if (dragged) return; selSkill = b.dataset.skill; draw(); if (narrow()) root.querySelector('.bk-detail')?.scrollIntoView({ block: 'nearest' }); });
@@ -114,6 +130,7 @@ export function createSkillsUI({ content, send, getChar, isTouch = () => false }
     root.querySelector('[data-take]')?.addEventListener('click', () => { const i = (ch.bar || []).indexOf(selSkill); if (i >= 0) send({ do: 'bar', i, skill: null }); });
     root.querySelectorAll('[data-slot]').forEach(b => b.onclick = () => { const id = ch.bar?.[+b.dataset.slot]; if (dragged) return; if (id) { selSkill = id; draw(); } else if (selSkill && rankOf(ch, S[selSkill]) > 0) send({ do: 'bar', i: +b.dataset.slot, skill: selSkill }); });
     root.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => { const t = S[b.dataset.goto]; page = 'talents'; tree = t.tree; selTalent = t.id; draw(); });
+    root.querySelector('[data-learnskill]')?.addEventListener('click', e => send({ do: 'learn', skill: e.currentTarget.dataset.learnskill }));
     root.querySelectorAll('.bk-row:not(.locked) .ic, .bk-slot:not(.empty)').forEach(el => el.addEventListener('pointerdown', e => startDrag(e, el)));
   }
   // drag a skill onto a slot (or a slot onto another slot to swap; off the bar to take it off)
@@ -168,9 +185,9 @@ export function createSkillsUI({ content, send, getChar, isTouch = () => false }
   const forWhom = t => [...(t.when?.spec || []).map(id => SP[id]?.name), ...(t.when?.path || []).map(id => P[id]?.name)].filter(Boolean).join(' or ');
   function talentsPage(ch) {
     const trees = treesOf(ch);
-    if (!tree || !trees.some(t => t.id === tree)) tree = (ch.level >= 10 && !ch.spec) ? '@spec' : trees[0].id;
+    if (!tree || !trees.some(t => t.id === tree)) tree = (ch.level >= SPEC_LEVEL && !ch.spec) ? '@spec' : trees[0].id;
     const tr = trees.find(t => t.id === tree);
-    const tabs = `<nav class="bk-trees">${trees.map(t => `<button data-tree="${t.id}" class="${t.id === tree ? 'on' : ''}${t.spec && ch.level >= 10 ? ' call' : ''}">${esc(t.name)}<small>${t.spec ? (ch.level >= 10 ? 'Choose now' : 'Level 10') : `${spentIn(ch, t)} point${spentIn(ch, t) === 1 ? '' : 's'}`}</small></button>`).join('')}</nav>`;
+    const tabs = `<nav class="bk-trees">${trees.map(t => `<button data-tree="${t.id}" class="${t.id === tree ? 'on' : ''}${t.spec && ch.level >= SPEC_LEVEL ? ' call' : ''}">${esc(t.name)}<small>${t.spec ? (ch.level >= SPEC_LEVEL ? 'Choose now' : `Level ${SPEC_LEVEL}`) : `${spentIn(ch, t)} point${spentIn(ch, t) === 1 ? '' : 's'}`}</small></button>`).join('')}</nav>`;
     const pts = `<div class="bk-pts${ch.skillPoints ? ' have' : ''}"><b>${ch.skillPoints || 0}</b> talent point${ch.skillPoints === 1 ? '' : 's'} to spend</div>`;
     if (tr.spec) return `<div class="bk-body bk-talents-body">${tabs}${pts}${specPage(ch)}</div>`;
     const list = talentsIn(ch, tr);
@@ -209,13 +226,13 @@ export function createSkillsUI({ content, send, getChar, isTouch = () => false }
   function specPage(ch) {
     const list = Object.entries(SP).filter(([, sp]) => (sp.paths || []).includes(ch.path));
     if (!pickSpec || !list.some(([id]) => id === pickSpec)) pickSpec = list[0]?.[0];
-    const sp = SP[pickSpec], can = ch.level >= 10;
+    const sp = SP[pickSpec], can = ch.level >= SPEC_LEVEL;
     const starters = Object.values(S).filter(s => isSkill(s) && s.owner === pickSpec && !s.hidden).sort((a, b) => (a.reqLevel || 0) - (b.reqLevel || 0)).slice(0, 4);
     return `<div class="bk-scroll bk-specs" data-keep="specs"><div class="bk-speclist">${list.map(([id, s]) => `<button class="bk-spec${id === pickSpec ? ' on' : ''}" data-spec="${id}"><b>${esc(s.name)}</b><small>${(s.paths || []).length > 1 ? 'Hybrid · ' : ''}${esc(s.role || '')}</small></button>`).join('')}</div></div>
       <section class="bk-detail bk-specdetail">${sp ? `<h3>${esc(sp.name)}</h3><small>${esc(sp.role || '')}${(sp.armour || []).length ? ` · wears ${esc(sp.armour.join(', '))}` : ''}</small><p>${esc(sp.blurb || '')}</p>
         <h4>Three talent trees</h4><ul class="bk-sptrees">${(sp.trees || []).map(t => `<li><b>${esc(t.name)}</b> ${esc(t.blurb || '')}</li>`).join('')}</ul>
-        ${starters.length ? `<h4>New skills</h4><ul class="bk-spskills">${starters.map(s => `<li>${icon(s, 26)}<span><b>${esc(s.name)}</b> <small>level ${s.reqLevel || 10}</small></span></li>`).join('')}</ul>` : ''}
-        <button class="primary" data-pickspec ${can ? '' : 'disabled'}>${can ? `Become a ${esc(sp.name)}` : `Opens at level 10 (you are ${ch.level})`}</button>` : ''}</section>`;
+        ${starters.length ? `<h4>Skills you can learn</h4><ul class="bk-spskills">${starters.map(s => `<li>${icon(s, 26)}<span><b>${esc(s.name)}</b> <small>level ${s.reqLevel || SPEC_LEVEL}</small></span></li>`).join('')}</ul>` : ''}
+        <button class="primary" data-pickspec ${can ? '' : 'disabled'}>${can ? `Become a ${esc(sp.name)}` : `Opens at level ${SPEC_LEVEL} (you are ${ch.level})`}</button>` : ''}</section>`;
   }
   function wireTalents(ch) {
     root.querySelectorAll('[data-tree]').forEach(b => b.onclick = () => { tree = b.dataset.tree; selTalent = null; draw(); });
@@ -248,11 +265,12 @@ export function createSkillsUI({ content, send, getChar, isTouch = () => false }
   addEventListener('resize', () => { if (!root.hidden && page === 'talents') drawArrows(); });
   const narrow = () => innerWidth < 720;
 
-  /** Called on every character update: no class → the class choice; level 10 with no specialization → once, the
+  /** Called on every character update: no class → the class choice; level 5 with no specialization → once, the
    *  Specialization tab. Redraws while open. */
   function check(ch) {
+    // the specialization prompt opens a CLOSED book only: it never yanks an open one to another page
     if (ch && !ch.path && root.hidden) { toggle(true); return; }
-    if (ch && ch.path && !ch.spec && ch.level >= 10 && !specAsked && Object.keys(SP).length) { specAsked = true; page = 'talents'; tree = '@spec'; toggle(true); return; }
+    if (ch && ch.path && !ch.spec && ch.level >= SPEC_LEVEL && !specAsked && root.hidden && Object.keys(SP).length) { specAsked = true; page = 'talents'; tree = '@spec'; toggle(true); return; }
     if (!root.hidden) draw(ch);
   }
   root.addEventListener('click', e => { if (e.target === root) toggle(false); });

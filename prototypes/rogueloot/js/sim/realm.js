@@ -35,9 +35,12 @@ export function createRealm({ seed = 1, content, start = null, difficulty = 'nor
     if (from !== to) { from.players.delete(pid); for (const f of from.foes.values()) { f.threat.delete(pid); if (f.target === pid) f.target = null; } rescaleFoes(from, from.players.size); }
     p.x = at.x; p.z = at.z; p.target = null; p.autoOn = false; p.cast = null; p.queue.length = 0; p.moving = false; p.fx = (p.fx || []).filter(f => f.kind === 'hot' || f.kind === 'mot' || f.kind === 'stance');
     if (from !== to) {
+      // every area keeps its own clock: move the hero's timers onto the new one (a hero leaving a long-running town for
+      // a fresh zone kept a cooldown ~an hour in that zone's future — "combat gets disabled", owner 2026-11-15)
+      rebaseTimers(p, to.time - from.time);
       to.players.set(pid, p); rescaleFoes(to, to.players.size); initResource(to, p);
       // companions travel with their hero
-      for (const [k, a] of [...(from.allies || [])]) if (a.owner === pid) { from.allies.delete(k); to.allies ||= new Map(); a.x = at.x + 1.5; a.z = at.z + 1.5; a.target = null; to.allies.set(k, a); }
+      for (const [k, a] of [...(from.allies || [])]) if (a.owner === pid) { from.allies.delete(k); to.allies ||= new Map(); a.x = at.x + 1.5; a.z = at.z + 1.5; a.target = null; rebaseTimers(a, to.time - from.time); to.allies.set(k, a); }
     }
     where.set(pid, area);
     p.travelSeq = (p.travelSeq || 0) + 1;                  // the browser drops its prediction when this changes
@@ -125,4 +128,14 @@ export function createRealm({ seed = 1, content, start = null, difficulty = 'nor
   const self = { difficulty, seed, content, worlds, where, world, worldOf, join, leave, travel, move, step, forEachWorld, unlocked, recallSpot, get startArea() { return startArea; } };
   const trades = createTrades(self); self.trades = trades;
   return self;
+}
+
+/** Shift every time stamp on a hero (or companion) by d seconds — the gap between two areas' clocks. */
+export function rebaseTimers(a, d) {
+  if (!d || !Number.isFinite(d)) return a;
+  for (const k of ['gcdUntil', 'nextSwing', 'nextOffSwing', 'lastFight', 'lastHurt', 'diedAt', 'silencedUntil', 'born']) if (typeof a[k] === 'number') a[k] += d;
+  if (a.cds) for (const k of Object.keys(a.cds)) a.cds[k] += d;
+  for (const f of a.fx || []) { if (typeof f.until === 'number') f.until += d; if (typeof f.next === 'number') f.next += d; if (typeof f.at === 'number') f.at += d; }
+  if (a.cast) a.cast = null;
+  return a;
 }

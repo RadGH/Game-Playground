@@ -2,8 +2,9 @@
 // saved before classes came at creation, by the class screen that opens before they can play. Looking is separate from
 // choosing (lessons rule 47): a tile only shows that class's details; the screen's own button commits.
 //   classTiles(content, picked)   the four tiles (data-class="<id>")
-//   classDetail(content, id)      the picked class: what it does, its resource, its first skills with their numbers
+//   classDetail(content, id)      the picked class: what it does, its resource, the skills it can learn first, with their numbers
 import { PATH_BONUS } from '../rules/sheet.js';
+import { SPEC_LEVEL } from '../rules/progression.js';
 import { skillIcon } from './icons.js';
 import { skillText, RES_NAME } from '../rules/skill-text.js';
 
@@ -11,7 +12,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 /** One line each: how the class fights. */
 export const ROLE = { fighter: 'Up close · takes the hits', rogue: 'Blades and bows · sets up the kill', mage: 'Spells from range · slows the pack', healer: 'Keeps the party up · holy damage' };
 const bonusText = id => { const b = PATH_BONUS[id]; if (!b) return ''; return [b.hpPct && `+${b.hpPct}% health`, b.armourPct && `+${b.armourPct}% armour`, b.dodge && `+${b.dodge}% dodge`, b.dr && `${b.dr}% less damage taken`].filter(Boolean).join(', '); };
-/** The skills a new hero of this class has on day one (level-1 actives of the class, starters first). */
+/** The skills a new hero of this class can learn on day one (level-1 actives of the class, starters first). */
 export function firstSkills(content, id) {
   const P = content.paths[id]; if (!P) return [];
   const S = content.skills, first = Object.values(S).filter(s => s.kind === 'active' && s.owner === id && (s.reqLevel || 1) <= 1 && !s.hidden && !s.autoAttack);
@@ -30,6 +31,7 @@ export function classDetail(content, id) {
   const bonus = bonusText(id);
   return `<div class="class-detail cd-${id}"><div class="cd-head"><b>${esc(p.name)}</b><span class="res-pill res-${esc(p.resource)}">${esc(RES_NAME[p.resource] || 'Mana')}</span></div>
     <p>${esc(p.blurb)}</p>${bonus ? `<p class="bonus">Built to take hits: ${esc(bonus)}</p>` : ''}
+    <p class="cd-learn">Starts with Attack. Learn one of these with your first skill point:</p>
     <ul class="cd-skills">${firstSkills(content, id).map(s => `<li><span class="ic">${skillIcon(s, content, 30)}</span><span><b>${esc(s.name)}</b><small>${esc(skillText(s, 1, 1))}</small></span></li>`).join('')}</ul>
-    <p class="cd-more">New skills every level up to 8, a talent point every level from 2, and a specialization at 10.</p></div>`;
+    <p class="cd-more">A skill point every level to learn a new skill (more open up to level 8), a talent point every level from 2, and a specialization at ${SPEC_LEVEL}.</p></div>`;
 }

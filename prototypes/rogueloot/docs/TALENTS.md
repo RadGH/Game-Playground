@@ -5,12 +5,18 @@
 
 ## Skills vs talents
 
-- **Skills** = every `kind: "active"` row (the buttons on the bar). They **unlock by themselves** at their `reqLevel`
-  for your class (Path) and specialization. No points. A skill gets stronger as you level: its rank is
-  `min(maxRank, 1 + floor((level - reqLevel) / 2))` (`js/sim/talents.js skillRankAt`). `prereq` on a skill is ignored.
+- **Skills** = every `kind: "active"` row (the buttons on the bar). **Owner 2026-11-16 (live report #3):** a new hero
+  has **only Attack**; every other skill (class, specialization and the three everyone-skills) becomes **available** at
+  its `reqLevel` and the player **learns** it with a **skill point** (`ch.learnPoints`: 1 a level, the first at level 1;
+  learning costs 1; `js/sim/skills.js learnSkill`, sent as `{ do: 'learn', skill }`). A learned skill is
+  `ch.skills[id] = 1` and goes on the first empty bar slot (a class auto-attack takes the Attack button instead). It
+  still grows by level: rank `min(maxRank, 1 + floor((level - reqLevel) / 2))` (`skillRankAt`). Skill points and talent
+  points are separate pools. `prereq` on a skill is ignored. Stance-only skills come with their stance, never learned.
+  Old saves (`tv` < 3, `migrate`): the skills on their bar stay learned, `learnPoints = level - those`. Every join runs
+  `fixSkills` (a learned skill above the level or of another class is dropped; points capped at level − learned).
 - **Talents** = every `kind: "passive" | "synergy" | "talent"` row. They cost **talent points** (1 a level from level 2,
   plus quest points). Each lives in one **tree**: the class (Path) tree, open from level 2, and the specialization's three
-  trees, open from level 10.
+  trees, open from the spec pick at **level 5** (`SPEC_LEVEL`; was 10 until 2026-11-16).
 
 ## The tree screen (what we took from each game)
 
@@ -35,7 +41,7 @@
 ```
 
 - `owner`: the path id (fighter/rogue/mage/healer) or spec id. `tree`: the path's `tree.id` or one of the spec's `trees[].id`.
-- `reqLevel` must be one of the **row levels**: class tree `2 4 6 8 11 14 17 20`, spec trees `10 12 14 16 18 20`.
+- `reqLevel` must be one of the **row levels**: class tree `2 4 6 8 11 14 17 20`, spec trees `5 8 11 14 17 20` (shifted from 10 12 14 16 18 20 on 2026-11-16; spec skills moved the same way, L → floor(5 + (L − 10) × 1.5)).
 - `col` 0-3; at most one talent per (tree, row, col). `prereq`: talents of the **same tree** in an **earlier row**
   (prefer the same column, so the arrow runs straight down; an adjacent column is fine).
 - `maxRank` 1-5 (a capstone in the last row is 1). Values are per rank: rank r gives `perRank * r` for mods, and

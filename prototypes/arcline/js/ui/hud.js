@@ -19,7 +19,7 @@ export function buildHud(game) {
   const hud = el('div', { class: 'hud' });
   hud.innerHTML = `
     <header class="ac-top">
-      <button type="button" class="ac-menu" data-tip="Menu (Esc)" aria-label="Menu">☰</button>
+      <button type="button" class="ac-menubtn" data-tip="Menu (Esc)" aria-label="Menu">☰</button>
       <button type="button" class="ac-money" data-tip="Budget and taxes (B)"><span class="lbl">Credits</span><b id="h-money">—</b><small id="h-net"></small></button>
       <div class="ac-people" data-tip-render="people"><span class="lbl">People</span><b id="h-people">0</b><small id="h-wait"></small></div>
       <div class="ac-date"><span class="lbl" id="h-region">—</span><b id="h-date">—</b></div>
@@ -54,7 +54,7 @@ export function buildHud(game) {
   // overlays
   const ov = $('#h-overlays');
   for (const [id, label] of [[null, 'City'], ['pipes', 'Underground'], ['power', 'Power'], ['value', 'Land value'], ['traffic', 'Traffic']]) ov.append(btn(label, () => { game.setOverlay(id); }, id === null ? 'on' : '', { 'data-overlay': id ?? '' }));
-  hud.querySelector('.ac-menu').addEventListener('click', () => game.openMenu());
+  hud.querySelector(".ac-menubtn").addEventListener('click', () => game.openMenu());
   hud.querySelector('.ac-money').addEventListener('click', () => budgetSheet(game));
   hud.querySelector('#h-strike').addEventListener('click', () => game.armStrike());
   hud.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => game.setSpeed(+b.dataset.speed)));

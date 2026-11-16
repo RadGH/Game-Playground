@@ -5,7 +5,7 @@
    "name": "Crowd Swing",
    "owner": "vanguard",
    "tree": "thick_of_it",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -44,7 +44,7 @@
    "name": "Battle Hunger",
    "owner": "vanguard",
    "tree": "thick_of_it",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -60,7 +60,7 @@
    "name": "Iron Gyre",
    "owner": "vanguard",
    "tree": "thick_of_it",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "van_crowd_swing"
@@ -106,7 +106,7 @@
    "name": "Heavy Arms",
    "owner": "vanguard",
    "tree": "thick_of_it",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -122,7 +122,7 @@
    "name": "Open Wounds",
    "owner": "vanguard",
    "tree": "thick_of_it",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 2,
    "maxRank": 5,
    "prereq": [
@@ -140,7 +140,7 @@
    "name": "Hew",
    "owner": "vanguard",
    "tree": "thick_of_it",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "van_iron_gyre"
@@ -192,7 +192,7 @@
    "name": "Hardened Grip",
    "owner": "vanguard",
    "tree": "thick_of_it",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -210,7 +210,7 @@
    "name": "Whirl On",
    "owner": "vanguard",
    "tree": "thick_of_it",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 2,
    "maxRank": 5,
    "prereq": [
@@ -273,7 +273,7 @@
    "name": "Hold the Line",
    "owner": "vanguard",
    "tree": "iron_will",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -314,7 +314,7 @@
    "name": "Thick Plate",
    "owner": "vanguard",
    "tree": "iron_will",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -330,7 +330,7 @@
    "name": "Iron Resolve",
    "owner": "vanguard",
    "tree": "iron_will",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 5,
    "prereq": [
     "van_hold_line"
@@ -380,7 +380,7 @@
    "name": "Unmoved",
    "owner": "vanguard",
    "tree": "iron_will",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -398,7 +398,7 @@
    "name": "Bulwark Blow",
    "owner": "vanguard",
    "tree": "iron_will",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "van_hold_line"
@@ -437,7 +437,7 @@
    "name": "Blood Price",
    "owner": "vanguard",
    "tree": "iron_will",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -455,7 +455,7 @@
    "name": "Stand Fast",
    "owner": "vanguard",
    "tree": "iron_will",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "maxRank": 5,
    "prereq": [
     "van_iron_resolve"
@@ -553,7 +553,7 @@
    "name": "Breaching Shove",
    "owner": "vanguard",
    "tree": "breaking_line",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -601,7 +601,7 @@
    "name": "Find the Gap",
    "owner": "vanguard",
    "tree": "breaking_line",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -617,7 +617,7 @@
    "name": "Hammer Blow",
    "owner": "vanguard",
    "tree": "breaking_line",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "van_shove"
@@ -655,7 +655,7 @@
    "name": "Sunder",
    "owner": "vanguard",
    "tree": "breaking_line",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -673,7 +673,7 @@
    "name": "Run Them Down",
    "owner": "vanguard",
    "tree": "breaking_line",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 3,
    "prereq": [
     "van_shove"
@@ -708,7 +708,7 @@
    "name": "Finishing Blow",
    "owner": "vanguard",
    "tree": "breaking_line",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "van_hammer_blow"
@@ -737,7 +737,7 @@
    "name": "Doubled Grasp",
    "owner": "vanguard",
    "tree": "breaking_line",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 1,
    "prereq": [],
@@ -752,7 +752,7 @@
    "name": "Shockwave",
    "owner": "vanguard",
    "tree": "breaking_line",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "maxRank": 10,
    "prereq": [
     "van_run_down"
@@ -845,7 +845,7 @@
    "name": "Broadhead",
    "owner": "ranger",
    "tree": "far_shot",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -872,7 +872,7 @@
    "name": "Steady Hand",
    "owner": "ranger",
    "tree": "far_shot",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -888,7 +888,7 @@
    "name": "Full Draw",
    "owner": "ranger",
    "tree": "far_shot",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "rgr_broadhead"
@@ -917,7 +917,7 @@
    "name": "Easy Quiver",
    "owner": "ranger",
    "tree": "far_shot",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -935,7 +935,7 @@
    "name": "Piercing Shot",
    "owner": "ranger",
    "tree": "far_shot",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "rgr_full_draw"
@@ -973,7 +973,7 @@
    "name": "True Aim",
    "owner": "ranger",
    "tree": "far_shot",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -991,7 +991,7 @@
    "name": "Broadhead Fan",
    "owner": "ranger",
    "tree": "far_shot",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "rgr_broadhead"
@@ -1029,7 +1029,7 @@
    "name": "Deadeye",
    "owner": "ranger",
    "tree": "far_shot",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -1085,7 +1085,7 @@
    "name": "Call the Hound",
    "owner": "ranger",
    "tree": "the_hunt",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -1138,7 +1138,7 @@
    "name": "Quarry",
    "owner": "ranger",
    "tree": "the_hunt",
-   "reqLevel": 11,
+   "reqLevel": 6,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -1166,7 +1166,7 @@
    "name": "Hunter's Eye",
    "owner": "ranger",
    "tree": "the_hunt",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -1184,7 +1184,7 @@
    "name": "Savage Hound",
    "owner": "ranger",
    "tree": "the_hunt",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "rgr_call_hound"
@@ -1246,7 +1246,7 @@
    "name": "Shared Quarry",
    "owner": "ranger",
    "tree": "the_hunt",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -1264,7 +1264,7 @@
    "name": "Run Down the Quarry",
    "owner": "ranger",
    "tree": "the_hunt",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "rgr_hunters_eye"
@@ -1293,7 +1293,7 @@
    "name": "Old Tracks",
    "owner": "ranger",
    "tree": "the_hunt",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -1366,7 +1366,7 @@
    "name": "Hunter's Snare",
    "owner": "ranger",
    "tree": "snarework",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -1406,7 +1406,7 @@
    "name": "Light Step",
    "owner": "ranger",
    "tree": "snarework",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -1422,7 +1422,7 @@
    "name": "Tracker's Leap",
    "owner": "ranger",
    "tree": "snarework",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 3,
    "prereq": [],
    "kind": "active",
@@ -1456,7 +1456,7 @@
    "name": "Hamstring Shot",
    "owner": "ranger",
    "tree": "snarework",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -1489,7 +1489,7 @@
    "name": "Pinning Shot",
    "owner": "ranger",
    "tree": "snarework",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 5,
    "prereq": [
     "rgr_hamstring"
@@ -1530,7 +1530,7 @@
    "name": "Caltrop Field",
    "owner": "ranger",
    "tree": "snarework",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "rgr_hunters_snare"
@@ -1581,7 +1581,7 @@
    "name": "Tight Snare",
    "owner": "ranger",
    "tree": "snarework",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -1597,7 +1597,7 @@
    "name": "Netting Shot",
    "owner": "ranger",
    "tree": "snarework",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "maxRank": 10,
    "prereq": [
     "rgr_pinning"
@@ -1691,7 +1691,7 @@
    "name": "Kindle",
    "owner": "pyromancer",
    "tree": "kindling",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -1742,7 +1742,7 @@
    "name": "Dry Tinder",
    "owner": "pyromancer",
    "tree": "kindling",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -1758,7 +1758,7 @@
    "name": "Scorch",
    "owner": "pyromancer",
    "tree": "kindling",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "pyr_kindle"
@@ -1810,7 +1810,7 @@
    "name": "Quick Match",
    "owner": "pyromancer",
    "tree": "kindling",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -1828,7 +1828,7 @@
    "name": "Fan the Flames",
    "owner": "pyromancer",
    "tree": "kindling",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 2,
    "maxRank": 5,
    "prereq": [
@@ -1846,7 +1846,7 @@
    "name": "Flashover",
    "owner": "pyromancer",
    "tree": "kindling",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "pyr_scorch"
@@ -1895,7 +1895,7 @@
    "name": "Long Burn",
    "owner": "pyromancer",
    "tree": "kindling",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -1913,7 +1913,7 @@
    "name": "Hot Eye",
    "owner": "pyromancer",
    "tree": "kindling",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 2,
    "maxRank": 5,
    "prereq": [
@@ -1987,7 +1987,7 @@
    "name": "Burning Line",
    "owner": "pyromancer",
    "tree": "wildfire",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -2046,7 +2046,7 @@
    "name": "Banked Coals",
    "owner": "pyromancer",
    "tree": "wildfire",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -2062,7 +2062,7 @@
    "name": "Fallstone",
    "owner": "pyromancer",
    "tree": "wildfire",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "pyr_burning_line"
@@ -2112,7 +2112,7 @@
    "name": "Firestorm",
    "owner": "pyromancer",
    "tree": "wildfire",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "pyr_fallstone"
@@ -2158,7 +2158,7 @@
    "name": "Spreading Fire",
    "owner": "pyromancer",
    "tree": "wildfire",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 2,
    "maxRank": 5,
    "prereq": [],
@@ -2174,7 +2174,7 @@
    "name": "Ash Cloud",
    "owner": "pyromancer",
    "tree": "wildfire",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "pyr_burning_line"
@@ -2228,7 +2228,7 @@
    "name": "Wide Fire",
    "owner": "pyromancer",
    "tree": "wildfire",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -2312,7 +2312,7 @@
    "name": "Stoke the Familiar",
    "owner": "pyromancer",
    "tree": "the_familiar",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -2367,7 +2367,7 @@
    "name": "Warm Skin",
    "owner": "pyromancer",
    "tree": "the_familiar",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -2383,7 +2383,7 @@
    "name": "Cinder Stride",
    "owner": "pyromancer",
    "tree": "the_familiar",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 3,
    "prereq": [],
    "kind": "active",
@@ -2440,7 +2440,7 @@
    "name": "Flame Shell",
    "owner": "pyromancer",
    "tree": "the_familiar",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "pyr_warm_skin"
@@ -2477,7 +2477,7 @@
    "name": "Snuff",
    "owner": "pyromancer",
    "tree": "the_familiar",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 3,
    "prereq": [],
    "kind": "active",
@@ -2512,7 +2512,7 @@
    "name": "Ashen Familiar",
    "owner": "pyromancer",
    "tree": "the_familiar",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "pyr_familiar"
@@ -2575,7 +2575,7 @@
    "name": "Afterglow",
    "owner": "pyromancer",
    "tree": "the_familiar",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -2664,7 +2664,7 @@
    "name": "Brightmend",
    "owner": "cleric",
    "tree": "overflow",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -2712,7 +2712,7 @@
    "name": "Deep Well",
    "owner": "cleric",
    "tree": "overflow",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -2728,7 +2728,7 @@
    "name": "Guardian Light",
    "owner": "cleric",
    "tree": "overflow",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "clr_brightmend"
@@ -2778,7 +2778,7 @@
    "name": "Kind Hands",
    "owner": "cleric",
    "tree": "overflow",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -2796,7 +2796,7 @@
    "name": "Barrier of Faith",
    "owner": "cleric",
    "tree": "overflow",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "clr_guardian_light"
@@ -2833,7 +2833,7 @@
    "name": "Overflowing",
    "owner": "cleric",
    "tree": "overflow",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -2851,7 +2851,7 @@
    "name": "Swift Word",
    "owner": "cleric",
    "tree": "overflow",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 5,
    "prereq": [
     "clr_barrier"
@@ -2889,7 +2889,7 @@
    "name": "Unbroken",
    "owner": "cleric",
    "tree": "overflow",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 2,
    "maxRank": 5,
    "prereq": [
@@ -2963,7 +2963,7 @@
    "name": "Sanctuary",
    "owner": "cleric",
    "tree": "sanctuary",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -3027,7 +3027,7 @@
    "name": "Steady Faith",
    "owner": "cleric",
    "tree": "sanctuary",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -3043,7 +3043,7 @@
    "name": "Circle of Light",
    "owner": "cleric",
    "tree": "sanctuary",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "clr_sanctuary"
@@ -3087,7 +3087,7 @@
    "name": "Raise the Fallen",
    "owner": "cleric",
    "tree": "sanctuary",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 5,
    "prereq": [
     "clr_circle"
@@ -3124,7 +3124,7 @@
    "name": "Wider Ground",
    "owner": "cleric",
    "tree": "sanctuary",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -3142,7 +3142,7 @@
    "name": "Lasting Light",
    "owner": "cleric",
    "tree": "sanctuary",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 2,
    "maxRank": 5,
    "prereq": [
@@ -3160,7 +3160,7 @@
    "name": "Hymn of Rest",
    "owner": "cleric",
    "tree": "sanctuary",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "clr_circle"
@@ -3208,7 +3208,7 @@
    "name": "Blessed Ground",
    "owner": "cleric",
    "tree": "sanctuary",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "maxRank": 10,
    "prereq": [
     "clr_sanctuary"
@@ -3324,7 +3324,7 @@
    "name": "Sunlance",
    "owner": "cleric",
    "tree": "falling_light",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -3364,7 +3364,7 @@
    "name": "Bright Mind",
    "owner": "cleric",
    "tree": "falling_light",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -3380,7 +3380,7 @@
    "name": "Falling Light",
    "owner": "cleric",
    "tree": "falling_light",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "clr_sunlance"
@@ -3446,7 +3446,7 @@
    "name": "Censure",
    "owner": "cleric",
    "tree": "falling_light",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -3489,7 +3489,7 @@
    "name": "Zeal",
    "owner": "cleric",
    "tree": "falling_light",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -3507,7 +3507,7 @@
    "name": "Judgement",
    "owner": "cleric",
    "tree": "falling_light",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "clr_falling_light"
@@ -3550,7 +3550,7 @@
    "name": "Sure Light",
    "owner": "cleric",
    "tree": "falling_light",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -3568,7 +3568,7 @@
    "name": "Noonfire",
    "owner": "cleric",
    "tree": "falling_light",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "maxRank": 10,
    "prereq": [
     "clr_judgement"
@@ -3691,7 +3691,7 @@
    "name": "Sanctified Blade",
    "owner": "paladin",
    "tree": "holy_blade",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -3742,7 +3742,7 @@
    "name": "Devotion",
    "owner": "paladin",
    "tree": "holy_blade",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -3758,7 +3758,7 @@
    "name": "Hammer of Light",
    "owner": "paladin",
    "tree": "holy_blade",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "pal_sanctified"
@@ -3812,7 +3812,7 @@
    "name": "Righteous Arm",
    "owner": "paladin",
    "tree": "holy_blade",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -3828,7 +3828,7 @@
    "name": "Blessed Edge",
    "owner": "paladin",
    "tree": "holy_blade",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -3846,7 +3846,7 @@
    "name": "Radiant Sweep",
    "owner": "paladin",
    "tree": "holy_blade",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "pal_hammer"
@@ -3922,7 +3922,7 @@
    "name": "Fervour",
    "owner": "paladin",
    "tree": "holy_blade",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -3940,7 +3940,7 @@
    "name": "Judging Hand",
    "owner": "paladin",
    "tree": "holy_blade",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -4032,7 +4032,7 @@
    "name": "Mercy's Touch",
    "owner": "paladin",
    "tree": "oath_of_mercy",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -4068,7 +4068,7 @@
    "name": "Oathkeeper",
    "owner": "paladin",
    "tree": "oath_of_mercy",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -4084,7 +4084,7 @@
    "name": "Martyr's Vow",
    "owner": "paladin",
    "tree": "oath_of_mercy",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "pal_mercy"
@@ -4131,7 +4131,7 @@
    "name": "Daybreak Descent",
    "owner": "paladin",
    "tree": "oath_of_mercy",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 3,
    "prereq": [
     "pal_mercy"
@@ -4186,7 +4186,7 @@
    "name": "Gentle Hand",
    "owner": "paladin",
    "tree": "oath_of_mercy",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -4202,7 +4202,7 @@
    "name": "Lay Down the Burden",
    "owner": "paladin",
    "tree": "oath_of_mercy",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 5,
    "prereq": [
     "pal_descent"
@@ -4243,7 +4243,7 @@
    "name": "Light Within",
    "owner": "paladin",
    "tree": "oath_of_mercy",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -4259,7 +4259,7 @@
    "name": "Vow Renewed",
    "owner": "paladin",
    "tree": "oath_of_mercy",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 2,
    "maxRank": 5,
    "prereq": [],
@@ -4331,7 +4331,7 @@
    "name": "Call to Account",
    "owner": "paladin",
    "tree": "bulwark",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -4389,7 +4389,7 @@
    "name": "Faith in Plate",
    "owner": "paladin",
    "tree": "bulwark",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -4405,7 +4405,7 @@
    "name": "Blessed Earth",
    "owner": "paladin",
    "tree": "bulwark",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "pal_call_account"
@@ -4480,7 +4480,7 @@
    "name": "Shield of Faith",
    "owner": "paladin",
    "tree": "bulwark",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 5,
    "prereq": [
     "pal_faith_plate"
@@ -4533,7 +4533,7 @@
    "name": "Retort",
    "owner": "paladin",
    "tree": "bulwark",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "pal_call_account"
@@ -4576,7 +4576,7 @@
    "name": "Stout Heart",
    "owner": "paladin",
    "tree": "bulwark",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -4594,7 +4594,7 @@
    "name": "Shared Aegis",
    "owner": "paladin",
    "tree": "bulwark",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "maxRank": 5,
    "prereq": [
     "pal_shield_faith"
@@ -4715,7 +4715,7 @@
    "name": "Starcut",
    "owner": "spellblade",
    "tree": "edgework",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -4759,7 +4759,7 @@
    "name": "Edge and Word",
    "owner": "spellblade",
    "tree": "edgework",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -4775,7 +4775,7 @@
    "name": "Bright Arc",
    "owner": "spellblade",
    "tree": "edgework",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "spb_starcut"
@@ -4830,7 +4830,7 @@
    "name": "Spark Mind",
    "owner": "spellblade",
    "tree": "edgework",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -4846,7 +4846,7 @@
    "name": "Honed Star",
    "owner": "spellblade",
    "tree": "edgework",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -4864,7 +4864,7 @@
    "name": "Riven Star",
    "owner": "spellblade",
    "tree": "edgework",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "spb_bright_arc"
@@ -4919,7 +4919,7 @@
    "name": "Starlit Eye",
    "owner": "spellblade",
    "tree": "edgework",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -4937,7 +4937,7 @@
    "name": "Wider Arc",
    "owner": "spellblade",
    "tree": "edgework",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -5019,7 +5019,7 @@
    "name": "Star Aegis",
    "owner": "spellblade",
    "tree": "starward",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -5085,7 +5085,7 @@
    "name": "Mail of Light",
    "owner": "spellblade",
    "tree": "starward",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -5101,7 +5101,7 @@
    "name": "Star Tether",
    "owner": "spellblade",
    "tree": "starward",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [
     "spb_aegis"
@@ -5150,7 +5150,7 @@
    "name": "Binding Stars",
    "owner": "spellblade",
    "tree": "starward",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "spb_tether"
@@ -5205,7 +5205,7 @@
    "name": "Steady Star",
    "owner": "spellblade",
    "tree": "starward",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -5223,7 +5223,7 @@
    "name": "Null Word",
    "owner": "spellblade",
    "tree": "starward",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -5261,7 +5261,7 @@
    "name": "Starskin",
    "owner": "spellblade",
    "tree": "starward",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -5279,7 +5279,7 @@
    "name": "Long Hold",
    "owner": "spellblade",
    "tree": "starward",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [
@@ -5381,7 +5381,7 @@
    "name": "Comet Rush",
    "owner": "spellblade",
    "tree": "comet",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "maxRank": 5,
    "prereq": [],
    "kind": "active",
@@ -5430,7 +5430,7 @@
    "name": "Light Foot",
    "owner": "spellblade",
    "tree": "comet",
-   "reqLevel": 10,
+   "reqLevel": 5,
    "col": 0,
    "maxRank": 5,
    "prereq": [],
@@ -5446,7 +5446,7 @@
    "name": "Thrown Star",
    "owner": "spellblade",
    "tree": "comet",
-   "reqLevel": 12,
+   "reqLevel": 8,
    "maxRank": 10,
    "prereq": [],
    "kind": "active",
@@ -5484,7 +5484,7 @@
    "name": "Bright Tail",
    "owner": "spellblade",
    "tree": "comet",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "col": 1,
    "maxRank": 5,
    "prereq": [],
@@ -5500,7 +5500,7 @@
    "name": "Flicker Cut",
    "owner": "spellblade",
    "tree": "comet",
-   "reqLevel": 14,
+   "reqLevel": 11,
    "maxRank": 10,
    "prereq": [
     "spb_comet_rush"
@@ -5537,7 +5537,7 @@
    "name": "Comet Fall",
    "owner": "spellblade",
    "tree": "comet",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "maxRank": 10,
    "prereq": [
     "spb_flicker_cut"
@@ -5596,7 +5596,7 @@
    "name": "Quickened Edge",
    "owner": "spellblade",
    "tree": "comet",
-   "reqLevel": 16,
+   "reqLevel": 14,
    "col": 0,
    "maxRank": 5,
    "prereq": [
@@ -5614,7 +5614,7 @@
    "name": "Second Comet",
    "owner": "spellblade",
    "tree": "comet",
-   "reqLevel": 18,
+   "reqLevel": 17,
    "col": 1,
    "maxRank": 5,
    "prereq": [

@@ -7,6 +7,7 @@ import { sellPrice } from '../rules/loot.js';
 import { fits, findSpot } from '../rules/bag.js';
 import { hirePrice, revivePrice } from '../sim/mercs.js';
 import { respecPointsCost, respecSpecCost } from '../sim/skills.js';
+import { SPEC_LEVEL } from '../rules/progression.js';
 import { ask, tell, askText } from '../../../../shared/dialog.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -62,13 +63,13 @@ export function createTownUI({ content, send, getChar }) {
     } else if (state.npc === 'trainer') {
       const others = Object.entries(content.specs || {}).filter(([id, sp]) => (sp.paths || []).includes(ch.path) && id !== ch.spec);
       body = `<h2>Trainer</h2><span class="gold">🪙 ${ch.gold || 0} gold</span>
-        <h3>Unlearn your skills</h3><p>Every point you spent comes back to spend again (your Path's first skills stay).</p><button class="primary" data-respec-points>Unlearn everything: ${respecPointsCost(ch.level)} gold</button>
-        ${ch.spec && others.length ? `<h3>Change specialization</h3><p>Leave the ${esc(content.specs[ch.spec]?.name)} for another; your points come back too.</p><div class="tlist">${others.map(([id, sp]) => `<button class="trow" data-respec-spec="${id}"><span class="g">✦</span><span class="nm">${esc(sp.name)}</span><span class="pr ${respecSpecCost(ch.level) > (ch.gold || 0) ? 'bad' : ''}">${respecSpecCost(ch.level)}</span></button>`).join('')}</div>` : ch.path ? '<p>You choose a specialization at level 10.</p>' : ''}`;
+        <h3>Unlearn everything</h3><p>Every skill and talent you learned is forgotten, and all your skill points and talent points come back to spend again.</p><button class="primary" data-respec-points>Unlearn everything: ${respecPointsCost(ch.level)} gold</button>
+        ${ch.spec && others.length ? `<h3>Change specialization</h3><p>Leave the ${esc(content.specs[ch.spec]?.name)} for another; your points come back too.</p><div class="tlist">${others.map(([id, sp]) => `<button class="trow" data-respec-spec="${id}"><span class="g">✦</span><span class="nm">${esc(sp.name)}</span><span class="pr ${respecSpecCost(ch.level) > (ch.gold || 0) ? 'bad' : ''}">${respecSpecCost(ch.level)}</span></button>`).join('')}</div>` : ch.path ? `<p>You choose a specialization at level ${SPEC_LEVEL}.</p>` : ''}`;
     } else body = `<h2>${esc(state.npc)}</h2><p>They have nothing for you yet.</p>`;
     root.innerHTML = `<div class="panel town-panel">${body}<div class="btns"><button data-close class="primary">Done</button></div></div>`;
     root.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => send({ do: 'buy', uid: b.dataset.buy }));
     root.querySelectorAll('[data-act="sell"]').forEach(b => b.onclick = () => send({ do: 'sell', uid: b.dataset.uid }));
-    root.querySelector('[data-respec-points]')?.addEventListener('click', () => { ask({ title: 'Unlearn every skill?', text: 'Your skill points come back to spend again.', ok: 'Unlearn' }).then(y => y && send({ do: 'respec', op: 'points' })); });
+    root.querySelector('[data-respec-points]')?.addEventListener('click', () => { ask({ title: 'Unlearn everything?', text: 'Your skill points and talent points come back to spend again. Your bar will be empty until you learn skills again.', ok: 'Unlearn' }).then(y => y && send({ do: 'respec', op: 'points' })); });
     root.querySelectorAll('[data-respec-spec]').forEach(b => b.onclick = () => { ask({ title: `Become a ${content.specs[b.dataset.respecSpec].name}?`, ok: 'Change' }).then(y => y && send({ do: 'respec', op: 'spec', spec: b.dataset.respecSpec })); });
     root.querySelectorAll('[data-hire]').forEach(b => b.onclick = () => send({ do: 'merc', op: 'hire', kind: b.dataset.hire, name: root.querySelector('.mname')?.value || '' }));
     root.querySelector('[data-revive]')?.addEventListener('click', () => send({ do: 'merc', op: 'revive' }));

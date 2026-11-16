@@ -11,6 +11,7 @@
 import { PROTOCOL, parseFrame, createBuckets, cleanCode, newCode, SNAP_EVERY } from './protocol.js';
 import * as World from '../sim/world.js';
 import { createRealm } from '../sim/realm.js';
+import { compactGear, gearSig } from '../rules/gear-look.js';
 
 export const MAX_PLAYERS = 4;
 export const SEAT_KEEP_MS = 90_000;
@@ -35,7 +36,7 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
   /** Who is here and what they look like: sent whenever someone joins, drops, comes back or leaves. */
   function roster(room) {
     broadcast(room, { t: 'roster', code: room.code, host: room.host, public: room.public,
-      players: [...room.seats.values()].map(x => { const p = room.realm.worldOf(x.id)?.players.get(x.id); return { id: x.id, name: p?.name, look: p?.look, away: !x.conn, area: room.realm.where.get(x.id) }; }) });
+      players: [...room.seats.values()].map(x => { const p = room.realm.worldOf(x.id)?.players.get(x.id); return { id: x.id, name: p?.name, look: p?.look, gear: compactGear(p?.char?.equip), away: !x.conn, area: room.realm.where.get(x.id) }; }) });
   }
   function pickHost(room) {
     if (room.host && room.seats.has(room.host) && room.seats.get(room.host).conn) return;
@@ -119,10 +120,12 @@ export function createHub({ now = () => Date.now(), build = 'dev', seed = Date.n
         case 'act': {
           if (!S.room) return;
           const realm = S.room.realm, before = realm.where.get(S.id);
+          const gearOf = () => gearSig(realm.worldOf(S.id)?.players.get(S.id)?.char?.equip), gearBefore = gearOf();
           const r = msg.do === 'travel' ? realm.travel(S.id, msg) : msg.do === 'trade' ? realm.trades.act(S.id, msg) : World.act(realm.worldOf(S.id), S.id, msg);
           if (r?.err) send({ t: 'nope', msg: r.err, n: msg.n });
           const after = realm.where.get(S.id);
           if (after !== before) { const w = realm.worldOf(S.id); send({ t: 'area', area: after, seed: w.seed }); roster(S.room); }
+          else if (gearOf() !== gearBefore) roster(S.room);          // live report #4: the others see your new weapon / armour at once
           return;
         }
         case 'host': {

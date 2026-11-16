@@ -211,7 +211,7 @@
       "dualWield": false
     },
     "specAdds": {
-      "_doc": "Spec picks at level 10 add these (js/rules/items.js profOf reads specAdds[spec], plus fighter_any for every Fighter spec). Fighter specs are the only way to plate besides the Paladin hybrid.",
+      "_doc": "Spec picks (level 5 since 2026-11-16) add these (js/rules/items.js profOf reads specAdds[spec], plus fighter_any for every Fighter spec). Fighter specs are the only way to plate besides the Paladin hybrid.",
       "fighter_any": {
         "armour": ["plate"]
       },

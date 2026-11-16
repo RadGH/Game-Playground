@@ -64,7 +64,7 @@ export function townAct(w, p, a) {
       if (!npcNear(w, p, 'vendor') && !npcNear(w, p, 'potions') && !npcNear(w, p, 'gambler')) return { err: 'Walk up to a trader first.' };
       const it = (ch.bag || []).find(i => i.uid === a.uid); if (!it) return { err: 'That is not in your bag.' };
       const gold = isPotion(it) ? Math.max(1, Math.round((P.sizes[it.size]?.price || 4) * 0.25)) * it.n : sellPrice(D, it);
-      p.char = { ...ch, gold: (ch.gold || 0) + gold, bag: ch.bag.filter(i => i.uid !== it.uid) };
+      p.char = { ...ch, gold: safeGold(ch.gold) + (Number.isFinite(gold) ? gold : 1), bag: ch.bag.filter(i => i.uid !== it.uid) };
       w.events.push({ k: 'sold', to: p.id, gold });
       return done();
     }
@@ -117,3 +117,5 @@ function pickGambleBase(D, rng, L, kind, ch) {
   return pool.length ? pool[Math.floor(rng() * pool.length)] : null;
 }
 void canEquip;
+/** Gold is always a whole, real number (a NaN once wiped a player's purse: live report #5, 2026-11-16). */
+export function safeGold(g) { const n = Math.floor(Number(g)); return Number.isFinite(n) && n > 0 ? n : 0; }

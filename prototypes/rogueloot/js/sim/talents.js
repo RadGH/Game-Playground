@@ -1,16 +1,23 @@
 // Skills vs talents (owner 2026-11-13, docs/TALENTS.md). Pure.
-//   Skills (kind 'active') unlock by themselves at their level for your class (Path) and specialization, and gain a rank
-//   every RANK_EVERY levels after that. Talents (passive / synergy / talent) cost talent points and live in trees.
-//   skillRankAt(sk, level)       the rank a level gives an unlocked skill
+//   Skills (kind 'active') become AVAILABLE at their level for your class (Path), specialization and everyone's few, and
+//   the player chooses to LEARN them with skill points (owner 2026-11-16, live report #3: "start with only Attack; the
+//   other abilities should be learned optionally"). One skill point a level (1 at level 1), learning costs 1, and a
+//   learned skill gains a rank every RANK_EVERY levels after its level as before. A learned skill is ch.skills[id] = 1.
+//   Talents (passive / synergy / talent) cost talent points and live in trees.
+//   skillRankAt(sk, level)       the rank a level gives a learned skill
+//   learnable(ch, sk)            can this hero learn that skill at all (theirs, not a stance's, not hidden)
+//   learnPointsEarned(ch)        skill points a hero of this level has had: 1 a level
+//   fixSkills(skills, ch)        a save's learned skills checked: none above its level, no points it could not have
 //   isTalent(sk) / talentOpen(ch, t)   is it a talent, and can this hero use it (its `when`)
 //   modsFor(skills, ch, id)      every talent mod on one skill, summed: { damage, heal, duration, radius, cost, cooldown, cast, crit } (percent)
 //   unlockedAt(skills, ch, L)    the skills that open exactly at level L for this hero
-//   migrate(skills, ch)          an older save: Shove off the bar, points that bought skills come back as talent points
+//   migrate(skills, ch)          an older save: Shove off the bar, points that bought skills come back as talent points;
+//                                before v3 every open skill was known: the ones on its bar stay learned, the rest become points
 export const RANK_EVERY = 2;
 export const TALENT_KINDS = new Set(['passive', 'synergy', 'talent']);
 export const MOD_STATS = ['damage', 'heal', 'duration', 'radius', 'cost', 'cooldown', 'cast', 'crit'];
-export const PATH_ROWS = [2, 4, 6, 8, 11, 14, 17, 20], SPEC_ROWS = [10, 12, 14, 16, 18, 20];
-export const TALENT_VERSION = 2;
+export const PATH_ROWS = [2, 4, 6, 8, 11, 14, 17, 20], SPEC_ROWS = [5, 8, 11, 14, 17, 20];   // spec trees open at the spec pick (level 5, owner 2026-11-16)
+export const TALENT_VERSION = 3;
 
 export const isTalent = s => !!s && TALENT_KINDS.has(s.kind) && s.owner !== 'wanderer' && s.owner !== 'all';
 export const isSkill = s => !!s && s.kind === 'active';
@@ -70,6 +77,29 @@ export function unlockedAt(skills, ch, L) {
 }
 /** Talent points a hero of this level has earned in all: 1 a level from 2, plus the quest points. */
 export const talentPointsEarned = ch => Math.max(0, (ch.level || 1) - 1) + (ch.questPoints || 0);
+/** Skill points (for learning skills) a hero of this level has earned in all: 1 a level, the first at level 1. */
+export const learnPointsEarned = ch => Math.max(1, ch?.level || 1);
+/** A skill this hero could ever learn: an active of their class, their spec, or everyone's — never a stance's own. */
+export const learnable = (ch, s) => isSkill(s) && !s.hidden && !s.stanceOnly && (s.owner === 'wanderer' || ownsTree(ch, s));
+/** The skills this hero has learned (ids). */
+export const learnedSkills = (skills, ch) => Object.keys(ch?.skills || {}).filter(id => ch.skills[id] > 0 && isSkill(skills[id]));
+/** Light checks on a save (ruling 8): a learned skill above the hero's level, or not theirs, is dropped (and off the bar);
+ *  skill points are capped at what the level gives minus what is learned. Safe to run more than once. */
+export function fixSkills(skills, ch) {
+  if (!ch) return ch;
+  const L = ch.level || 1, own = {}; let changed = false;
+  for (const [id, r] of Object.entries(ch.skills || {})) {
+    const s = skills[id];
+    if (isSkill(s) && r > 0 && (!learnable(ch, s) || (s.reqLevel || 1) > L)) { changed = true; continue; }
+    own[id] = isSkill(s) && r > 0 ? 1 : r;
+    if (own[id] !== r) changed = true;
+  }
+  const n = learnedSkills(skills, { skills: own }).length;
+  const pts = Math.max(0, Math.min(Number.isInteger(ch.learnPoints) ? ch.learnPoints : 0, learnPointsEarned(ch) - n));
+  const bar = (ch.bar || []).map(id => (id && (own[id] > 0 || !isSkill(skills[id])) ? id : null));
+  if (!changed && pts === ch.learnPoints && bar.every((id, i) => id === (ch.bar || [])[i])) return ch;
+  return { ...ch, skills: own, learnPoints: pts, bar };
+}
 
 /** Bring an older save up to the skills/talents split. Safe to run more than once. */
 export function migrate(skills, ch) {
@@ -77,11 +107,18 @@ export function migrate(skills, ch) {
   let out = ch;
   const bar = (ch.bar || []).map(id => (id && skills[id] ? id : null));
   if (bar.some((id, i) => id !== (ch.bar || [])[i])) out = { ...out, bar };
-  if ((ch.tv || 1) < TALENT_VERSION) {
+  if ((ch.tv || 1) < 2) {
     // points that went into skills come back; talents keep their ranks only if they still fit the new caps
     const keep = {}; let spent = 0;
     for (const [id, r] of Object.entries(ch.skills || {})) { const s = skills[id]; if (isTalent(s) && r > 0) { const k = Math.min(r, s.maxRank || 1); keep[id] = k; spent += k; } }
-    out = { ...out, skills: keep, skillPoints: Math.max(0, talentPointsEarned(ch) - spent), tv: TALENT_VERSION };
+    out = { ...out, skills: keep, skillPoints: Math.max(0, talentPointsEarned(ch) - spent), tv: 2 };
   }
-  return out;
+  if ((out.tv || 1) < 3) {
+    // skills became a choice (owner 2026-11-16): what is on the bar stays learned, the rest of the level's points come back
+    const L = out.level || 1, own = { ...(out.skills || {}) };
+    for (const id of out.bar || []) { const s = skills[id]; if (s && learnable(out, s) && (s.reqLevel || 1) <= L) own[id] = 1; }
+    const n = learnedSkills(skills, { skills: own }).length;
+    out = { ...out, skills: own, learnPoints: Math.max(0, learnPointsEarned(out) - n), tv: TALENT_VERSION };
+  }
+  return fixSkills(skills, out);
 }

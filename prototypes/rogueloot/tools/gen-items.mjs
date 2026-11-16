@@ -351,7 +351,7 @@ const itemBases = {
     mage: { armour: ['cloth'], weapons: ['wand', 'staff', 'dagger'], offhand: ['focus'], dualWield: false },
     healer: { armour: ['cloth', 'leather'], weapons: ['mace', 'staff', 'wand', 'sword'], offhand: ['shield', 'focus'], dualWield: false },
     specAdds: {
-      _doc: 'Spec picks at level 10 add these. Fighter specs are the only way to plate besides the Paladin hybrid.',
+      _doc: 'Spec picks (level 5 since 2026-11-16) add these. Fighter specs are the only way to plate besides the Paladin hybrid.',
       fighter_any: { armour: ['plate'] },
       paladin: { armour: ['mail', 'plate'], weapons: ['mace', 'sword', 'axe', 'polearm'] },
       spellblade: { armour: ['leather'], weapons: ['sword', 'dagger'], dualWield: false },

@@ -1,8 +1,22 @@
 // Sound. Weapons get their own synthesized voices (dozens, no files, each varied a little every shot);
 // explosions, loot and interface sounds come from the shared sfx/ library of real recordings.
 // Positional: volume falls off with distance from the camera, pan follows screen x.
+//
+// The mix (owner 2026-11-16: separate sliders for sound, music and ambience): one AudioContext,
+//   effects bus  ─┐
+//   music bus    ─┼─ master (volume + mute) ─ compressor ─ speakers
+//   ambience bus ─┘
+// plus the shared sfx/ library's own buses (its sfx/ui follow Effects, its ambience follows Ambience).
+// Music (core/music.js) stops altogether when its slider is at 0 or the game is muted; ambience (core/ambience.js)
+// and effects carry on. setLevels() takes core/mix.js levelsFrom(settings).
+
+import { Music } from './music.js';
+import { Bed } from './ambience.js';
 
 let ctx = null, master = null, comp = null, sfxLib = null, muted = false, vol = 0.7, loops = new Map();
+let fxBus = null, musicBus = null, ambBus = null, music = null, amb = null;
+let levels = { master: 0.7, effects: 1, music: 0.55, ambience: 0.75, muted: false };
+let moodWant = 'cruise', intensityWant = 1, bed = null, ambCap = 0.6;   // ambCap: the sfx library's ambience bus ceiling (its busCap)
 const last = new Map();
 
 export async function initAudio() {
@@ -10,15 +24,74 @@ export async function initAudio() {
   const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
   ctx = new AC();
   comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 6; comp.connect(ctx.destination);
-  master = ctx.createGain(); master.gain.value = muted ? 0 : vol; master.connect(comp);
+  master = ctx.createGain(); master.connect(comp);
+  fxBus = ctx.createGain(); fxBus.connect(master);
+  musicBus = ctx.createGain(); musicBus.connect(master);
+  ambBus = ctx.createGain(); ambBus.connect(master);
+  try { amb = new Bed({ ctx, out: ambBus }); } catch (e) { console.info('[voidwright] ambience unavailable', e?.message); }
+  try { music = new Music({ ctx, out: musicBus, seed: (Date.now() / 1000) >>> 0 }); } catch (e) { console.info('[voidwright] music unavailable', e?.message); }
+  applyLevels();
   try {
-    const { Sfx } = await import('../../../../sfx/js/sfx.js');
+    const { Sfx, busCap } = await import('../../../../sfx/js/sfx.js');
+    if (busCap) ambCap = busCap('ambience');
     sfxLib = await Sfx.create({ method: 'hybrid', volume: 0.6 });
+    applyLevels();
   } catch (e) { console.info('[voidwright] shared sfx unavailable', e?.message); }
 }
 export function resumeAudio() { if (ctx?.state === 'suspended') ctx.resume(); }
-export function setVolume(v) { vol = v; if (master) master.gain.value = muted ? 0 : v; sfxLib?.setVolume?.(v * 0.85); }
-export function setMuted(m) { muted = m; if (master) master.gain.value = m ? 0 : vol; sfxLib?.setMuted?.(m); }
+
+/** The settings sliders: { master, effects, music, ambience, muted } (core/mix.js levelsFrom). */
+export function setLevels(l) { levels = { ...levels, ...l }; muted = !!levels.muted; vol = levels.master; applyLevels(); }
+function applyLevels() {
+  const L = levels, t = ctx?.currentTime ?? 0;
+  if (master) { master.gain.setTargetAtTime(L.muted ? 0 : L.master, t, 0.03); fxBus.gain.setTargetAtTime(L.effects, t, 0.03); musicBus.gain.setTargetAtTime(L.music, t, 0.08); ambBus.gain.setTargetAtTime(L.ambience, t, 0.08); }
+  if (sfxLib) {
+    const wasMuted = sfxLib.muted;
+    sfxLib.setVolume(L.master * 0.85); sfxLib.setMuted(L.muted);
+    sfxLib.setBusVolume('sfx', L.effects); sfxLib.setBusVolume('ui', L.effects); sfxLib.setBusVolume('ambience', L.ambience * ambCap);
+    if (wasMuted && !L.muted && bed) { const b = bed; bed = null; ambience(b); }   // muting stopped the recorded bed: start it again
+  }
+  // music plays only while it can be heard (saves a phone's battery too)
+  if (music) {
+    const want = !L.muted && L.music > 0.001 && L.master > 0.001;
+    if (want && !music.playing) { music.start(); music.setMood(moodWant); music.setIntensity(intensityWant); }
+    else if (!want && music.playing) music.stop();
+  }
+}
+/** Old callers: master volume and mute alone. */
+export function setVolume(v) { setLevels({ master: v }); }
+export function setMuted(m) { setLevels({ muted: m }); }
+
+/** What the music should be doing (core/music.js pickMood). Cheap to call every frame. */
+export function musicMood(mood, intensity = 1) {
+  moodWant = mood; intensityWant = intensity;
+  if (music?.playing) { music.setMood(mood); music.setIntensity(intensity); }
+}
+/** Push the music down under a big blast: depth 0..1 (its level while ducked), seconds. */
+export function duckMusic(depth, sec) { if (music?.playing) music.duck(depth, sec); }
+/** The synthesized ambience bed, once a frame (core/ambience.js bedMix state). */
+export function ambienceTick(dt, st) { if (amb && ctx?.state === 'running') amb.update(dt, st); }
+
+/** Numbers for tests and game-eye: bus gains, the music's state, each ambience layer's level. */
+export function audioState() {
+  const g = n => (n ? +n.gain.value.toFixed(4) : null);
+  return { ctx: ctx?.state ?? 'none', levels: { ...levels }, buses: { master: g(master), effects: g(fxBus), music: g(musicBus), ambience: g(ambBus) },
+    music: music?.state() ?? null, ambience: amb?.state() ?? null, recordedBed: sfxLib ? (sfxLib.loopingIds?.() || []) : null };
+}
+/**
+ * Measure how loud each bus is right now (RMS and peak in dBFS over `ms`), for tests — nobody here can listen.
+ * Taps analysers onto the buses for the measurement and removes them after.
+ */
+export async function measureBuses(ms = 1500) {
+  if (!ctx) return null;
+  const taps = { effects: fxBus, music: musicBus, ambience: ambBus, master };
+  const an = {}; for (const [k, n] of Object.entries(taps)) { const a = ctx.createAnalyser(); a.fftSize = 2048; n.connect(a); an[k] = { a, buf: new Float32Array(2048), sum: 0, n: 0, peak: 0 }; }
+  const until = performance.now() + ms;
+  await new Promise(res => { const tick = () => { for (const v of Object.values(an)) { v.a.getFloatTimeDomainData(v.buf); for (const x of v.buf) { v.sum += x * x; v.peak = Math.max(v.peak, Math.abs(x)); } v.n += v.buf.length; } if (performance.now() < until) setTimeout(tick, 40); else res(); }; tick(); });
+  const db = x => (x > 1e-6 ? +(20 * Math.log10(x)).toFixed(1) : -120);
+  const out = {}; for (const [k, v] of Object.entries(an)) { out[k] = { rms: db(Math.sqrt(v.sum / Math.max(1, v.n))), peak: db(v.peak) }; try { taps[k].disconnect(v.a); } catch { /* */ } }
+  return out;
+}
 
 function noiseBuf() {
   if (noiseBuf.b) return noiseBuf.b;
@@ -31,7 +104,7 @@ const v = (x) => x * (0.92 + Math.random() * 0.16);
 function out(gain, pan) {
   const g = ctx.createGain(); g.gain.value = gain;
   const p = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-  if (p) { p.pan.value = Math.max(-1, Math.min(1, pan)); g.connect(p); p.connect(master); } else g.connect(master);
+  if (p) { p.pan.value = Math.max(-1, Math.min(1, pan)); g.connect(p); p.connect(fxBus); } else g.connect(fxBus);
   return g;
 }
 function env(g, t, a, d, peak = 1) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
@@ -159,8 +232,7 @@ export function play(id, x = null, y = null, cam = null, gain = 1) {
 /** Shared-library sounds (real recordings): explosions, loot, interface. */
 export function lib(id, opts) { try { sfxLib?.play(id, opts); } catch { /* ignore */ } }
 
-/** A quiet space bed under everything (shared library; only ambience beds loop). */
-let bed = null;
+/** A quiet space bed under everything (shared library; only ambience beds loop). `bed` is declared up top. */
 export function ambience(id) { if (!sfxLib || bed === id) return; bed = id; try { sfxLib.ambience?.(id); } catch { /* */ } }
 
 /** A continuous loop (beams, mining) whose loudness follows how many are on. */
@@ -171,7 +243,7 @@ export function loopLevel(id, level) {
     const o = ctx.createOscillator(); const o2 = ctx.createOscillator(); const g = ctx.createGain(); const f = ctx.createBiquadFilter();
     const conf = { beam: [180, 'sawtooth', 361, 2400], mining: [330, 'triangle', 662, 3200], beam_heavy: [95, 'sawtooth', 191, 1400], tractor: [140, 'sine', 210, 800] }[id] || [200, 'sine', 400, 1000];
     o.frequency.value = conf[0]; o.type = conf[1]; o2.frequency.value = conf[2]; o2.type = 'sine'; f.type = 'lowpass'; f.frequency.value = conf[3]; f.Q.value = 3;
-    g.gain.value = 0; o.connect(f); o2.connect(f); f.connect(g); g.connect(master); o.start(); o2.start();
+    g.gain.value = 0; o.connect(f); o2.connect(f); f.connect(g); g.connect(fxBus); o.start(); o2.start();
     L = { g, o, f }; loops.set(id, L);
   }
   const target = Math.min(0.18, level * 0.06);
@@ -194,7 +266,7 @@ export function boostSound(on, level = 1) {
     const rumF = ctx.createBiquadFilter(); rumF.type = 'lowpass'; rumF.frequency.value = 180;
     const rumG = ctx.createGain(); rumG.gain.value = 0.35;
     const g = ctx.createGain(); g.gain.value = 0;
-    src.connect(lp); lp.connect(g); src.connect(bp); bp.connect(g); rum.connect(rumF); rumF.connect(rumG); rumG.connect(g); g.connect(master);
+    src.connect(lp); lp.connect(g); src.connect(bp); bp.connect(g); rum.connect(rumF); rumF.connect(rumG); rumG.connect(g); g.connect(fxBus);
     src.start(); rum.start();
     boostL = { g, lp, bp, rum };
   }

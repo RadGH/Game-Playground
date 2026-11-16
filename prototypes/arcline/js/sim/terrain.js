@@ -26,13 +26,11 @@ export function generateTerrain(world, region) {
     if (riverAt(seed, wx, wz)) { water[i] = 1; }
     biome[i] = BIDS.indexOf(biomeAt(seed, wx, wz));
   }
-  // rivers sit one level below their lowest bank so they read as cut into the ground
-  for (let z = 0; z < N; z++) for (let x = 0; x < N; x++) {
-    const i = z * N + x; if (water[i] !== 1) continue;
-    let low = MAX; for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, nz = z + dz; if (nx >= 0 && nz >= 0 && nx < N && nz < N && !water[nz * N + nx]) low = Math.min(low, height[nz * N + nx]); }
-    height[i] = Math.max(0, low - 1);
-  }
+  // rivers sit one level below their banks. Depth spreads inward from the banks: a tile in the middle of a wide river
+  // has no dry neighbour, and taking "the lowest dry neighbour" there left it at full height — a raised river
+  // (owner report #70, 2026-11-16). Relax until stable: each river tile = min(bank − 1, neighbouring river tile).
   smoothSteps(height, water, N);
+  settleRivers({ size: N, height, water });   // after smoothing, so a save's re-settle on load gives the same result
   // deposits: blobs of ore where the region is rich in it
   const R = rng(seed * 7919 + region.id * 31 + 5);
   const kinds = [[DEP.METAL, region.deposits.metal], [DEP.STONE, region.deposits.stone], [DEP.CRYSTAL, region.deposits.crystal]];
@@ -90,4 +88,25 @@ export function levelCost(ter, x, z, w, d, to, perStep) {
 export function level(ter, x, z, w, d, to) {
   const N = ter.size;
   for (let k = 0; k < d; k++) for (let j = 0; j < w; j++) { const tx = x + j, tz = z + k; if (tx < 0 || tz < 0 || tx >= N || tz >= N) continue; const i = tz * N + tx; if (!ter.water[i]) ter.height[i] = Math.max(1, Math.min(MAX, to)); }
+}
+
+/** River tiles sit below their banks: depth spreads inward from the banks (see generateTerrain). Also run on old saves. */
+export function settleRivers(ter) {
+  const N = ter.size, height = ter.height, water = ter.water;
+  for (let i = 0; i < N * N; i++) if (water[i] === 1) height[i] = MAX;
+  for (let changed = true, pass = 0; changed && pass < N * 2; pass++) {
+    changed = false;
+    for (let z = 0; z < N; z++) for (let x = 0; x < N; x++) {
+      const i = z * N + x; if (water[i] !== 1) continue;
+      let h = height[i];
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nx = x + dx, nz = z + dz; if (nx < 0 || nz < 0 || nx >= N || nz >= N) continue;
+        const j = nz * N + nx;
+        const cand = water[j] === 0 ? height[j] - 1 : water[j] === 2 ? 0 : height[j];
+        if (cand < h) h = cand;
+      }
+      h = Math.max(0, h); if (h !== height[i]) { height[i] = h; changed = true; }
+    }
+  }
+  return ter;
 }

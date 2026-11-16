@@ -22,6 +22,12 @@ export function createPadNav({ busy = () => false, back = () => false } = {}) {
   function move(dx, dy) {
     const all = items(); if (!all.length) return mark(null);
     if (!cur || !all.includes(cur)) return mark(all[0]);
+    // a slider under the highlight: left / right move its value (the sound settings), up / down leave it
+    if (dx && cur.tagName === 'INPUT' && cur.type === 'range') {
+      const st = +cur.step || 0.05, v = Math.max(+cur.min || 0, Math.min(+cur.max || 1, +cur.value + dx * st));
+      cur.value = String(Math.round(v / st) * st); cur.dispatchEvent(new Event('input', { bubbles: true })); cur.dispatchEvent(new Event('change', { bubbles: true }));
+      return;
+    }
     const a = mid(cur), ra = cur.getBoundingClientRect(); let best = null, score = Infinity;
     for (const el of all) {
       if (el === cur) continue;

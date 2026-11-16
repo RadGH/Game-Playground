@@ -54,6 +54,10 @@ prototypes/arcline/
       panels.js         budget, comms (ships), city stats, milestones, build menu
       menu.js           ☰ menu: settings, What's new, Report a bug, credits, sign in, save/load, back to world
       input.js          one binding table (lessons rule 34), mouse/touch/keys, edge scroll, pinch
+    audio/
+      music.js          original procedural synthwave (WebAudio): calm / night / tension moods crossfade; pickMood()
+                        picks from night, alerts and creature count; ducks under big blasts. Mixer: citykit/js/world/mix.js
+                        (zoom → effects gain, off-screen cut, ambient bed of city/wilds/weather; main.js audioFrame feeds it)
     main.js             boot, screens, the frame loop (fixed sim step + smooth drawing between steps)
   tests/                node --test for every sim module; Playwright specs; walk.mjs (strict: true)
 ```

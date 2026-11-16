@@ -57,7 +57,7 @@
     "group": "Arrivals"
   },
   "foundingMoney": {
-    "value": 60000,
+    "value": 35000,
     "min": 10000,
     "max": 200000,
     "step": 5000,

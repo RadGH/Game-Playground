@@ -75,7 +75,8 @@ are always auto); drones are items fitted to drone ports, respawn for free; fini
 - **Data first** (`data/*.json`): blocks, weapons, materials, ships (hull classes + premade layouts), factions,
   enemies, goods, quests, systems seed rules.
 - Sound: a game-local Web Audio synth for weapon voices (dozens of distinct sounds, no files) + the shared `sfx/`
-  library for explosions, loot, interface.
+  library for explosions, loot, interface. 2026-11-16: procedural music with moods + a synthesized ambience bed,
+  each on its own slider (README › Sound).
 
 ## §3 Milestones (built back to back)
 - **M0 Fly**: renderer + post pass, input (keys/mouse/pad/touch), ship grid + smoothing bake, arcade flight, camera

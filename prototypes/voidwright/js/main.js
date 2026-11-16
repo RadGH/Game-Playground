@@ -15,7 +15,9 @@ import { scanPulse, scanSummary, scanLabel, rockOre } from './sim/scan.js';
 import { reveal, worthRevealing } from './ui/reveal.js';
 import { snapPrev, blendIn, blendOut } from './render/smooth.js';
 import { createInput } from './core/input.js';
-import { initAudio, resumeAudio, play, lib, loopLevel, setVolume, setMuted, ambience, boostSound } from './core/audio.js';
+import { initAudio, resumeAudio, play, lib, loopLevel, ambience, boostSound, audioState, measureBuses } from './core/audio.js';
+import { applySound, soundTick, soundEvent, soundRows, soundInputs } from './ui/sound.js';
+import { prefsFrom } from './core/mix.js';
 import { rng, hash, clamp, TAU } from './core/math.js';
 import { FACTIONS } from './data/factions.js';
 import { CLASSES } from './data/hulls.js';
@@ -34,7 +36,8 @@ const app = window.app = {
   G: null, w: null, P: null, galaxy: null, mode: 'title', cam: { x: 0, y: 0, zoom: 1, zoomMul: 1 }, fx: null, R: null, input: null,
   paused: false, lock: null, settings: loadSettings(), acc: 0, jump: null, deadT: 0, spawnT: 30, saveT: 60, lastNoteKill: 0,
 };
-function loadSettings() { try { return { volume: 0.7, quality: 1, muted: false, shake: 1, ...JSON.parse(localStorage.getItem('voidwright.prefs') || '{}') }; } catch { return { volume: 0.7, quality: 1, muted: false, shake: 1 }; } }
+// old prefs (volume + muted only) keep working: prefsFrom fills in the Effects / Music / Ambience sliders (core/mix.js)
+function loadSettings() { try { return prefsFrom(JSON.parse(localStorage.getItem('voidwright.prefs') || '{}')); } catch { return prefsFrom({}); } }
 export function saveSettings() { try { localStorage.setItem('voidwright.prefs', JSON.stringify(app.settings)); } catch { /* private */ } }
 
 // ------------------------------------------------------------------ boot
@@ -44,8 +47,10 @@ app.R.quality = app.settings.quality;
 app.fx = createFx(app.settings.quality >= 1 ? 1 : 0.5);
 app.fx.shakeMul = app.settings.shake ?? 1;
 app.input = createInput(view);
-setVolume(app.settings.volume); setMuted(app.settings.muted);
-addEventListener('pointerdown', async () => { await initAudio(); resumeAudio(); setVolume(app.settings.volume); setMuted(app.settings.muted); ambience('ambience.void'); }, { once: false });
+applySound(app);
+// sound starts on the first tap, click or key (browsers only allow it after one); music, ambience and effects follow the sliders
+const wakeAudio = async () => { await initAudio(); resumeAudio(); applySound(app); ambience('ambience.void'); };
+addEventListener('pointerdown', wakeAudio); addEventListener('keydown', wakeAudio);
 
 // a demo battle behind the title screen
 function titleScene() {
@@ -65,7 +70,7 @@ function showTitle() {
   const last = lastSlot(); const list = slots();
   if (last >= 0 && list[last]) box.append(btn(`Continue — ${list[last].name}, ${list[last].ship}`, () => startGame(load(last)), 'big primary'));
   box.append(btn('New game', () => newGameDialog(), 'big'));
-  if (list.some(Boolean)) box.append(btn('Load a save', () => loadDialog()));
+  if (list.some(Boolean) || app.cloud?.backup?.()) box.append(btn('Load a save', () => loadDialog()));
   const extra = $('#title-extra'); extra.innerHTML = '';
   extra.append(btn('Settings', () => settingsDialog()));
   import('../../../shared/whats-new.js').then(({ createWhatsNew }) => {
@@ -97,6 +102,14 @@ function loadDialog() {
       const when = s.savedAt ? new Date(s.savedAt).toLocaleString() : '';
       m.append(btn(el('span', { class: 'slot' }, el('span', {}, `${s.name} — ${s.ship} (${CLASSES[s.cls]?.name || s.cls})`), el('small', {}, `${fmt(s.credits)} cr · ${when}`)), () => { close(); startGame(load(i)); }));
     });
+    // the copy replaced by the last "which saves to keep?" choice — kept so a wrong pick can be undone (owner 2026-11-16)
+    const bk = app.cloud?.backup?.();
+    if (bk) {
+      m.append(el('h3', {}, bk.kind === 'device' ? "This device's earlier saves" : "Your account's earlier saves"),
+        el('p', { class: 'hint' }, `Set aside ${new Date(bk.at).toLocaleString()} when you picked the other copy.`),
+        ...(bk.lines || []).map(l => el('p', { class: 'hint' }, l)),
+        btn('Bring these saves back (swaps with the current ones)', async () => { close(); await app.cloud.restoreBackup(); }));
+    }
     m.append(btn('Back', close));
   });
 }
@@ -271,6 +284,7 @@ function frame(dt, raw) {
   const boostOn = !!(app.mode === 'fly' && P && !P.dead && P.boosting && Math.hypot(P.vx, P.vy) > 30);
   app.boostFx = (app.boostFx || 0) + ((boostOn ? 1 : 0) - (app.boostFx || 0)) * (1 - Math.exp(-dt * (boostOn ? 6 : 3)));
   boostSound(boostOn, boostOn ? 0.6 + 0.4 * (P.boostFuel ?? 1) : 0);
+  soundTick(app, dt);   // music mood + ambience bed (ui/sound.js)
   // notes (kills, pickups, reputation…)
   if (G) handleNotes(w.notes); w.notes.length = 0;
   if (live) { spawner(dt); prompts(); droneUpkeep(dt); weather(dt); stream(dt); wingTick(app, dt); colonyTick(app, dt); app.encTick?.(dt); }   // [wing] [outpost] [encounters: ui/missions.js]
@@ -314,8 +328,8 @@ function sound(e, cam) {
     case 'shieldhit': play('shield', e.x, e.y, cam, 0.7); break;
     case 'shielddown': play('shielddown', e.x, e.y, cam); break;
     case 'blockdie': play('blockdie', e.x, e.y, cam, 0.8); break;
-    case 'boom': play('boom', e.x, e.y, cam, Math.min(1.2, 0.4 + e.r / 80)); break;
-    case 'death': play('death', e.x, e.y, cam, Math.min(1.5, 0.6 + e.r / 150)); lib(e.r > 150 ? 'explosion.large' : 'explosion.small'); break;
+    case 'boom': play('boom', e.x, e.y, cam, Math.min(1.2, 0.4 + e.r / 80)); soundEvent(app, e, nearView(e, cam)); break;
+    case 'death': play('death', e.x, e.y, cam, Math.min(1.5, 0.6 + e.r / 150)); lib(e.r > 150 ? 'explosion.large' : 'explosion.small'); soundEvent(app, e, nearView(e, cam)); break;
     case 'arc': play('arc', e.pts[0][0], e.pts[0][1], cam, 0.7); break;
     case 'rail': play(e.big ? 'lance' : 'rail', e.x, e.y, cam); break;
     case 'clang': play('clang', e.x, e.y, cam); break;
@@ -327,6 +341,8 @@ function sound(e, cam) {
     case 'decoy': play('decoy', e.x, e.y, cam, 0.8); break;
   }
 }
+/** 1 on screen, falling to 0 about a screen and a half away — how much a blast should duck the music. */
+function nearView(e, cam) { const d = Math.hypot((e.x - cam.x) * cam.zoom, (e.y - cam.y) * cam.zoom) / (cam.w || 800); return Math.max(0, Math.min(1, 1.5 - d)); }
 const WSOUND = {
   pulse_laser: 'laser_pulse', heavy_laser: 'laser_heavy', gatling: 'gatling', autocannon: 'cannon_light', howitzer: 'cannon_heavy', siege_cannon: 'siege', scatter: 'scatter',
   mass_driver: 'mass_driver', forge_hammer: 'mass_driver', rocket_pod: 'rocket', missile_rack: 'missile', swarm_pod: 'missile', torpedo_tube: 'torpedo', spore_launcher: 'spore',
@@ -623,7 +639,7 @@ app.startJump = (toId) => {
   const to = app.galaxy.systems[toId];
   if (!canWarpTo(G, to)) { toast(`Your ${warpCore(G).name} cannot reach danger ${to.tier}. You need a ${coreFor(to.tier).name}.`, 'bad'); return; }
   app.mode = 'jumping'; app.jump = { to: toId, t: 0, from: G.system };
-  play('jump'); toast(`Jump drive charging…`);
+  play('jump'); soundEvent(app, { t: 'jump' }); toast(`Jump drive charging…`);
 };
 function jumpTick(dt) {
   const J = app.jump; J.t += dt; const P = app.P;
@@ -800,13 +816,12 @@ function openMenu() {
 function settingsDialog() {
   modal('Settings', (m, close) => {
     const s = app.settings;
-    const vol = el('input', { type: 'range', min: 0, max: 1, step: 0.05, value: s.volume, oninput: e => { s.volume = +e.target.value; setVolume(s.volume); saveSettings(); } });
-    const mute = el('input', { type: 'checkbox', checked: s.muted, onchange: e => { s.muted = e.target.checked; setMuted(s.muted); saveSettings(); } });
     const q = el('select', { onchange: e => { s.quality = +e.target.value; app.R.quality = s.quality; app.fx.quality = s.quality >= 1 ? 1 : 0.5; app.R.W = 0; saveSettings(); } },
       el('option', { value: 1, selected: s.quality >= 1 }, 'High (bloom, full particles)'), el('option', { value: 0.5, selected: s.quality < 1 }, 'Phone saver (fewer particles, lower resolution)'));
     const shake = el('select', { onchange: e => { s.shake = +e.target.value; app.fx.shakeMul = s.shake; saveSettings(); } },
       ...[[1, 'Full'], [0.5, 'Gentle'], [0, 'Off']].map(([v, n]) => el('option', { value: v, selected: (s.shake ?? 1) === v }, n)));
-    m.append(el('label', {}, 'Volume', vol), el('label', { class: 'row' }, mute, ' Mute everything'), el('label', {}, 'Graphics ', q), el('label', {}, 'Screen shake ', shake), btn('Done', close, 'primary'));
+    m.classList.add('settings-sheet');
+    m.append(soundRows(app, saveSettings), el('h3', {}, 'Picture'), el('label', {}, 'Graphics ', q), el('label', {}, 'Screen shake ', shake), btn('Done', close, 'primary'));
   });
 }
 function controlsDialog() {
@@ -963,6 +978,9 @@ window.gameEye = {
     };
   },
   health() { return { fps: Math.round(1 / Math.max(0.001, app.lastDt || 0.016)) }; },
+  // sound (tests + game-eye): bus gains, music mood/notes, ambience layers; measureAudio(ms) → dBFS per bus
+  audio() { return { ...audioState(), inputs: soundInputs(app), mood: app.musicMood || null }; },
+  measureAudio(ms) { return measureBuses(ms); },
 };
 
 // controller in menus: whenever flight does not own the pad (title, docked, any open panel)
@@ -975,9 +993,10 @@ import('./ui/padnav.js').then(({ createPadNav }) => {
 }).catch(e => console.info('[voidwright] pad menus unavailable', e?.message));
 
 // cloud saves while signed in to games.radgh.com (saves stay per game)
-import('../../../shared/rgs-cloudsave.js').then(({ cloudSave }) => {
-  app.cloud = cloudSave({ game: 'voidwright', keys: { prefs: 'voidwright.prefs', last: 'voidwright.last' }, prefixes: { slots: 'voidwright.slot.' },
+Promise.all([import('../../../shared/rgs-cloudsave.js'), import('./sim/save-summary.js')]).then(([{ cloudSave }, { describeSaves }]) => {
+  app.cloud = cloudSave({ describe: describeSaves, game: 'voidwright', keys: { prefs: 'voidwright.prefs', last: 'voidwright.last' }, prefixes: { slots: 'voidwright.slot.' },
     canRestore: () => app.mode === 'title', onRestore: () => location.reload() });
+  if (app.mode === 'title' && app.cloud.backup() && !slots().some(Boolean)) showTitle();   // the title drew before this loaded
 }).catch(e => console.info('[voidwright] cloud saves unavailable', e?.message));
 
 showTitle();

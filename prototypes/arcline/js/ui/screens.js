@@ -196,14 +196,19 @@ export function openSettings(app) {
   const s = app.settings;
   const changed = () => { S.saveSettings(s); app.onSettings?.(s); titleScene?.set({ light: s.effects === 'light', sky: s.weather !== false }); };
   sheet('Settings', (m, close) => {
-    const volText = el('output', {}, pct(s.volume));
-    const vol = el('input', { type: 'range', min: 0, max: 1, step: 0.05, value: s.volume, 'aria-label': 'Volume', oninput: e => { s.volume = +e.target.value; volText.textContent = pct(s.volume); changed(); } });
+    // one slider per sound layer; each saves as it moves (Volume = everything, then music / effects / ambience)
+    const slider = (label, keyName, def, note) => {
+      if (!Number.isFinite(+s[keyName])) s[keyName] = def;
+      const out = el('output', {}, pct(s[keyName]));
+      const input = el('input', { type: 'range', min: 0, max: 1, step: 0.05, value: s[keyName], 'aria-label': label, 'data-setting': keyName, oninput: e => { s[keyName] = +e.target.value; out.textContent = pct(s[keyName]); changed(); } });
+      return el('label', { class: 'ac-field' }, el('span', {}, `${label} `, out), input, note ? el('small', { class: 'dim' }, note) : null);
+    };
     const toggle = (label, keyName, note) => el('label', { class: 'ac-toggle' }, el('input', { type: 'checkbox', checked: s[keyName] || null, onchange: e => { s[keyName] = e.target.checked; changed(); } }), el('span', { class: 'ac-switch', 'aria-hidden': 'true' }), el('span', { class: 'ac-toggle-text' }, el('b', {}, label), note ? el('small', {}, note) : null));
     const seg = el('div', { class: 'ac-seg', role: 'group', 'aria-label': 'Effects' });
     const drawSeg = () => seg.replaceChildren(...[['full', 'Full', 'Every particle'], ['light', 'Light', 'For phones']].map(([v, label, sub]) => btn([el('b', {}, label), el('small', {}, sub)], () => { s.effects = v; changed(); drawSeg(); }, s.effects === v ? 'on' : '')));
     drawSeg();
     m.append(
-      el('div', { class: 'ac-group' }, el('h3', {}, 'Sound'), el('label', { class: 'ac-field' }, el('span', {}, 'Volume ', volText), vol), toggle('Mute everything', 'muted')),
+      el('div', { class: 'ac-group' }, el('h3', {}, 'Sound'), slider('Volume', 'volume', 0.8), slider('Music', 'musicVol', 0.5), slider('Effects', 'sfxVol', 1, 'Turrets and blasts. They get quieter as you zoom out.'), slider('Ambience', 'ambVol', 0.7, 'The city and the wilds around it. Louder as you zoom out.'), toggle('Mute everything', 'muted')),
       el('div', { class: 'ac-group' }, el('h3', {}, 'Look'), el('div', { class: 'ac-field' }, el('span', {}, 'Effects'), seg), toggle('Weather and sky shows', 'weather', 'Rain, lightning, auroras, shooting stars'), toggle('Screen shake', 'shake', 'On big blasts')),
       el('div', { class: 'ac-group' }, el('h3', {}, 'Controls'), toggle('Edge scroll', 'edgeScroll', 'Move the view when the mouse touches the screen edge')),
       btn('Done', close, 'primary'));
@@ -247,7 +252,7 @@ export function openCredits(app) { boot(app); app.credits?.open(); }
 // ================================================================== NEW WORLD
 export function showNewWorld(app) {
   boot(app);
-  const st = { seed: S.randomSeed(), size: 'medium', pressure: 'normal', name: '', named: false };
+  const st = { seed: S.randomSeed(), size: 'medium', pressure: 'normal', difficulty: 'normal', name: '', named: false };
   st.name = S.planetName(st.seed);
   const cv = el('canvas', { class: 'ac-preview-cv', 'aria-label': 'Preview of the world' });
   const facts = el('div', { class: 'ac-facts' }), biomes = el('div', { class: 'ac-biomes' });
@@ -255,15 +260,17 @@ export function showNewWorld(app) {
   const seedIn = el('input', { type: 'text', inputmode: 'numeric', value: st.seed, maxlength: 7, autocomplete: 'off', 'aria-label': 'Seed', oninput: e => { const v = e.target.value.replace(/\D/g, '').slice(0, 7); if (v !== e.target.value) e.target.value = v; if (+v > 0) { st.seed = +v; follow(); redraw(); } } });
   const follow = () => { if (!st.named) { st.name = S.planetName(st.seed); nameIn.value = st.name; } };
   const sizeSeg = el('div', { class: 'ac-seg three', role: 'group', 'aria-label': 'World size' });
-  const presSeg = el('div', { class: 'ac-seg three', role: 'group', 'aria-label': 'Creature pressure' });
+  const presSeg = el('div', { class: 'ac-seg', role: 'group', 'aria-label': 'Creature pressure' });
+  const diffSeg = el('div', { class: 'ac-seg', role: 'group', 'aria-label': 'Difficulty' });
   const drawSegs = () => {
     sizeSeg.replaceChildren(...S.WORLD_SIZES.map(z => btn([el('b', {}, z.label), el('small', {}, `${z.cells} × ${z.cells} cells`)], () => { st.size = z.id; drawSegs(); redraw(); }, st.size === z.id ? 'on' : '')));
     presSeg.replaceChildren(...S.PRESSURES.map(p => btn([el('b', {}, p.label), el('small', {}, `Attacks ×${fmt(p.value)}`)], () => { st.pressure = p.id; drawSegs(); }, st.pressure === p.id ? 'on' : '', { 'data-tip': p.note })));
+    diffSeg.replaceChildren(...S.DIFFICULTIES.map(d => btn([el('b', {}, d.label), el('small', {}, `${fmt(d.money)} credits`)], () => { st.difficulty = d.id; drawSegs(); }, st.difficulty === d.id ? 'on' : '', { 'data-tip': d.note })));
   };
   drawSegs();
   const create = () => {
     const name = nameIn.value.trim() || S.planetName(st.seed);
-    const ws = S.newWorldSave({ name, seed: st.seed, cells: S.WORLD_SIZES.find(z => z.id === st.size).cells, pressure: S.PRESSURES.find(p => p.id === st.pressure).value });
+    const ws = S.newWorldSave({ name, seed: st.seed, cells: S.WORLD_SIZES.find(z => z.id === st.size).cells, pressure: S.PRESSURES.find(p => p.id === st.pressure).value, difficulty: st.difficulty });
     if (!ws.ok) toast('This browser would not save it. You can play, but the world will not be kept.', 'bad');
     showWorldMap(app, ws, { fresh: true });
   };
@@ -277,6 +284,7 @@ export function showNewWorld(app) {
         el('label', { class: 'ac-field' }, el('span', {}, 'Planet name'), el('div', { class: 'ac-inline' }, nameIn, btn('New name', () => { st.named = false; st.name = S.planetName(S.randomSeed()); nameIn.value = st.name; st.named = true; }, 'ac-mini'))),
         el('label', { class: 'ac-field' }, el('span', {}, 'Seed'), el('div', { class: 'ac-inline' }, seedIn, btn('Reroll', () => { st.seed = S.randomSeed(); seedIn.value = st.seed; follow(); redraw(); }, 'ac-mini'))),
         el('div', { class: 'ac-field' }, el('span', {}, 'World size'), sizeSeg),
+        el('div', { class: 'ac-field' }, el('span', {}, 'Difficulty'), diffSeg),
         el('div', { class: 'ac-field' }, el('span', {}, 'Creature pressure'), presSeg),
         btn([el('b', {}, 'Create world'), kbd('Enter')], create, 'ac-big primary ac-create'))));
 
@@ -297,7 +305,7 @@ export function showNewWorld(app) {
     back: () => { showTitle(app); return true; },
     key: e => { if (e.key === 'Enter') { e.preventDefault(); create(); } },
     destroy: () => { clearTimeout(timer); ro?.disconnect(); },
-    state: () => ({ seed: st.seed, size: st.size, pressure: st.pressure, name: nameIn.value }),
+    state: () => ({ seed: st.seed, size: st.size, pressure: st.pressure, difficulty: st.difficulty, name: nameIn.value }),
   });
   ro = new ResizeObserver(() => { size(); view?.draw(0); }); ro.observe(cv);
   paint();

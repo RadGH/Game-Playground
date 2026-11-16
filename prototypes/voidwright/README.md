@@ -1,6 +1,6 @@
 # Voidwright
 
-> **Status:** live on games.radgh.com · round 4 2026-11-13: ore stand-ins (better ore pays for Ferrite etc., `sim/mats.js`), outposts take their tier's ore, economy + combat retune from `tools/econ.mjs` / `tools/combat-sim.mjs`, weapon effects + knockback + far less explosion smoke, Screens deck (`ui/navmenu.js`), title sign-in box fixed · lint clean, every screen walked desktop + phone
+> **Status:** live on games.radgh.com · 2026-11-16 (dev, not yet published): new music with five moods, separate ambience, Effects/Music/Ambience sliders (see Sound) · round 4 2026-11-13: ore stand-ins (better ore pays for Ferrite etc., `sim/mats.js`), outposts take their tier's ore, economy + combat retune from `tools/econ.mjs` / `tools/combat-sim.mjs`, weapon effects + knockback + far less explosion smoke, Screens deck (`ui/navmenu.js`), title sign-in box fixed · lint clean, every screen walked desktop + phone
 > **Play:** LAN `http://<LAN IP>:8400/prototypes/voidwright/` (stable; https 8442 for a controller) · public https://games.radgh.com/voidwright/
 > **Next:** the owner's play-test of round 4 — does knockback feel good on your own ship (`world.js` knock caps), is the late game's money pace right (warp cores III/IV/V should take ~15-25 min of play, `tools/econ.mjs`), danger 9 packs are still hard for a bare battleship in the sims (by design for now — watch it); older watch items: missile pressure at 3+, bridge limits, merc wages
 > **Parked:** co-op (the input shape is ready, `docs/PLAN.md`); nothing else on hold
@@ -233,12 +233,42 @@ Checklist: `~/claude/agent/voidwright-round4-checklist.md`. Tests: `tests/round4
   (`main.js tagPanel`), so Cargo → Ships → Star map is two taps from anywhere; a hold tab just switches tabs
   (`app.nav.go`). The ☰ menu keeps Resume / Build / Settings / Save and one "Ship screens" line.
 
+## Sound — music, ambience, sliders (owner 2026-11-16)
+"Voidwright could do with some more interesting music, if disabled, keep the ambient sfx, with individual sliders
+for sound, music, ambient." All of it is made live with WebAudio (no recordings except the shared `sfx/` library's
+CC0 void bed); nothing here is anyone else's music.
+- **Mixer** (`core/audio.js`): one AudioContext — effects bus, music bus and ambience bus → master (Volume + Mute) →
+  compressor. The shared `sfx/` library's sfx/ui buses follow Effects, its ambience bus follows Ambience. Music stops
+  altogether at 0% or when muted (saves a phone's battery); ambience and effects carry on.
+- **Music** (`core/music.js`): five moods that crossfade — `station` (docked: lydian/ionian, glass piano, no beat),
+  `cruise` (wide detuned pads over slow two-bar chords, an echoing 16th sequence, sparse soft drums), `danger`
+  (danger 6+ stars: phrygian/locrian, low pulse, ticking hats, heartbeat kick), `alien` (alien-held stars, alien ships
+  or an anomaly within 2.6 km: whole-tone / five-note scales, gliding sine lead, inharmonic bells, no beat) and
+  `combat` (drums build with intensity 1-3 from ship count + danger). `pickMood` (pure) starts battle at once, holds
+  it 14 s after the last exchange, and holds calm moods 10 s so they don't flicker. Variation: every 8 bars a seeded
+  plan picks a section (intro/build/full/break/thin), layers, groove variant, arpeggio shape and a motif variation;
+  every 4 phrases a new progression (some generated), every ~6 a key change. Big wrecks on screen, your own death
+  and jumps duck the music (`core/mix.js duckFor`).
+- **Ambience** (`core/ambience.js`): deep void rumble + solar-wind shimmer, your engine (pitch/loudness from speed and
+  boost, lower for big hulls), docked station hum + vents + radio chatter + far-off clanks, alien glass tones and
+  whispers, a sonar ping at danger 5+. `bedMix` (pure) sets each layer from the game.
+- **Settings** (`ui/sound.js soundRows`): Volume, Effects, Music, Ambience sliders + Mute everything, in the settings
+  sheet (title and ☰ menu). Saved in `voidwright.prefs` as `volume`, `sfxVol`, `musicVol`, `ambVol`, `muted`;
+  `core/mix.js prefsFrom` upgrades old prefs (volume + muted only) and fixes bad numbers. A controller's d-pad
+  left/right moves a highlighted slider (`ui/padnav.js`).
+- **Measured levels** (headless Chromium, nobody listened — RMS / peak dBFS, the bus at 100%): music station −21.6/−13,
+  cruise −19.9/−8, danger −20.8/−12, alien −18.3/−10, combat (intensity 3) −16.5/−5.5; ambience bed title −30, still
+  in flight −27.6, full boost −23.4, docked −29.6, alien −26.7, danger 8 −26.5. With the default sliders (music 55%,
+  ambience 75%) the bed sits ~5 dB under the music. Ducking under a big on-screen wreck takes the music to 30%.
+- **Test hooks**: `gameEye.audio()` (bus gains, mood, music state, ambience layers, mood inputs) and
+  `gameEye.measureAudio(ms)` (dBFS per bus). Unit tests: `tests/sound.test.mjs`.
+
 ## Code map
 No build step; ES modules. `index.html` → `js/main.js`.
 
 | Folder | What |
 |---|---|
-| `js/core/` | `math.js` (seeded rng, noise, angles), `input.js` (keys/mouse, gamepad, two touch sticks → one input object), `audio.js` (a synthesized voice per weapon + the shared `sfx/` library for explosions/loot/UI; positional; beam/mining loops) |
+| `js/core/` | `math.js` (seeded rng, noise, angles), `input.js` (keys/mouse, gamepad, two touch sticks → one input object), `audio.js` (mixer: effects / music / ambience buses; a synthesized voice per weapon + the shared `sfx/` library for explosions/loot/UI; positional; beam/mining loops) |
 | `js/data/` | Plain data: `types.js` (5 damage types × 3 hit sizes, 14 armour materials, 17 materials, 6 rarities), `weapons.js` (36 weapons/tools incl. 13 alien), `blocks.js` (≈150 blocks: structure in 1×1/2×2/4×4, modules, rock/ore cells), `hulls.js` (8 hull classes + 13 shipyard ships), `factions.js` (3 human + 4 alien), `drones.js` |
 | `js/sim/` | The pure simulation (no DOM, no clock): `grid.js` (block grids, connectivity), `ship.js` (bodies, stats, damage, breaking apart), `world.js` (the step: flight, collisions, turrets, shots, beams, shields, splash, destruction, loot, drones, harpoon), `ai.js`, `shipgen.js` (procedural ships + stations from a seed), `galaxy.js` (galaxy, star traits, warp cores, system population, asteroids, outposts, encounter groups), `sectors.js` (big systems filled in as you fly), `loot.js`, `economy.js`, `quests.js`, `state.js` (the save), `rand.js` |
 | `js/render/` | `planets.js` (procedural planets: lighting, air, clouds, rings, city lights, low-orbit tiles), `smooth.js` (draws moving things between sim steps — play-test #35), `post.js` (WebGL2: bloom, coloured light map, up to 16 shockwave ripples with colour split, vignette), `bake.js` (grid → hull picture with the cosmetic slope smoothing + a glow layer), `turret-art.js` (per-weapon turret drawings with recoil), `fx.js` (particles, lights, waves, shake; sim events → visuals), `draw.js` (the frame) |

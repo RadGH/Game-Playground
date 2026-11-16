@@ -81,7 +81,7 @@ button:disabled { opacity: .45; cursor: default; }
 .ac-tray:not([hidden]) ~ .ac-overlays { display: none; }
 
 /* ---------- info panel ---------- */
-.ac-info { position: absolute; left: calc(8px + var(--safe-l)); top: calc(110px + var(--safe-t)); width: min(300px, calc(100% - 16px)); background: var(--panel2); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; z-index: 6; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+.ac-info { position: absolute; left: calc(8px + var(--safe-l)); top: var(--hud-bottom, calc(110px + var(--safe-t))); width: min(300px, calc(100% - 16px)); background: var(--panel2); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; z-index: 6; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
 .ac-info[hidden] { display: none; }
 .ac-info h3 { margin: 0 0 4px; font-size: 17px; color: var(--cyan); }
 .ac-info .dim { color: var(--dim); font-size: 13px; margin: 0 0 8px; }
@@ -128,7 +128,7 @@ button:disabled { opacity: .45; cursor: default; }
 }
 
 /* ---------- getting started ---------- */
-.ac-guide { position: absolute; right: calc(8px + var(--safe-r)); top: calc(110px + var(--safe-t)); width: min(300px, calc(100% - 16px)); background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; z-index: 4; font-size: 13.5px; }
+.ac-guide { position: absolute; right: calc(8px + var(--safe-r)); top: var(--hud-bottom, calc(110px + var(--safe-t))); width: min(300px, calc(100% - 16px)); background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; z-index: 4; font-size: 13.5px; }
 .ac-guide header { display: flex; align-items: center; gap: 8px; }
 .ac-guide header b { flex: 1; color: var(--cyan); }
 .ac-guide header .dim { color: var(--dim); font-size: 12px; }
@@ -200,3 +200,6 @@ button:disabled { opacity: .45; cursor: default; }
 .ac-movebtn small { font-size: 12px; color: var(--good); font-variant-numeric: tabular-nums; }
 /* a chosen tool's chip sits where the phone's map views row is: lift the views above it */
 @media (max-width: 640px) { .ac-toolchip:not([hidden]) ~ .ac-overlays { bottom: calc(114px + var(--safe-b)); } .ac-toolchip:not([hidden]) ~ .ac-guide { bottom: calc(164px + var(--safe-b)); } }
+/* the tool bar's text wraps instead of running off a phone screen (walk 2026-11-16: "Move Colony Core · free · …") */
+.ac-toolchip span { min-width: 0; flex: 1 1 auto; white-space: normal; line-height: 1.25; }
+@media (max-width: 640px) { .ac-toolchip { width: calc(100% - 16px); border-radius: 16px; font-size: 13px; } }

@@ -23,6 +23,8 @@ import { Fx } from '../../../citykit/js/world/fx.js';
 import { Weather } from '../../../citykit/js/world/weather.js';
 import { battleFx } from '../../../citykit/js/world/battlefx.js';
 import * as snd from '../../../citykit/js/world/sound.js';
+import { mix } from '../../../citykit/js/world/mix.js';
+import { Music, pickMood } from './audio/music.js';
 import { $, el, btn, toast, banner, sheet, topSheet, closeTopSheet } from './ui/dom.js';
 import { buildHud, updateHud, openTray, showInfo, budgetSheet, money, dateText } from './ui/hud.js';
 import { toolDefs, plan, apply } from './ui/tools.js';
@@ -48,7 +50,7 @@ window.app = app;
 const sprites = new Sprites({ scale: navigator.webdriver ? 1 : 2 });
 const view = new MapView($('#map'), sprites);
 const fx = new Fx({ phone: matchMedia('(max-width: 700px)').matches });
-const weather = new Weather({ onThunder: p => snd.play('thunder', { pan: p, gain: 0.7 }) });
+const weather = new Weather({ onThunder: p => snd.play('thunder', { pan: p, gain: 0.7, global: true }) });
 const traffic = new Traffic();
 tunePanel({ game: 'arcline', tuning });
 
@@ -63,10 +65,42 @@ const opt = {};
 function loadOptional() { Object.assign(opt, { ships: shipsMod, nests: nestsMod, away: awayMod, transit: transitMod, save: saveMod, screens: screensMod }); }
 
 // ------------------------------------------------------------------ settings
-function loadSettings() { const d = { volume: 0.8, muted: false, shake: true, effects: 'full', weather: true, edgeScroll: false }; try { return { ...d, ...JSON.parse(localStorage.getItem('arcline.settings') || '{}') }; } catch { return d; } }
+function loadSettings() { const d = { volume: 0.8, musicVol: 0.5, sfxVol: 1, ambVol: 0.7, muted: false, shake: true, effects: 'full', weather: true, edgeScroll: false }; try { return { ...d, ...JSON.parse(localStorage.getItem('arcline.settings') || '{}') }; } catch { return d; } }
 function saveSettings() { try { localStorage.setItem('arcline.settings', JSON.stringify(app.settings)); } catch { /* private window */ } }
-app.onSettings = s => { app.settings = s; saveSettings(); fx.shakeScale = s.shake ? 1 : 0; snd.setMuted(s.muted); };
+app.onSettings = s => { app.settings = s; saveSettings(); fx.shakeScale = s.shake ? 1 : 0; mix.setLevels(s); };
 fx.shakeScale = app.settings.shake ? 1 : 0;
+mix.setLevels(app.settings);
+
+// ------------------------------------------------------------------ sound: the zoom-aware mix + music
+// Browsers allow audio only after a tap or key: the first one starts the Sound Lab, the mixer's ambient bed and the
+// music; every later one wakes audio an iPhone suspended (lessons rule 30). The mix follows the view each frame
+// (citykit/js/world/mix.js); the music's mood follows the game (js/audio/music.js pickMood).
+let music = null, moodMem = {}, moodT = 0;
+async function unlockAudio() {
+  snd.resume();
+  try { await snd.startSound(); } catch (e) { console.info('[arcline] sound unavailable', e?.message); return; }
+  mix.setLevels(app.settings);
+  if (!music && mix.ctx) { music = new Music({ ctx: mix.ctx, out: mix.musicOut, seed: (Math.random() * 2 ** 31) >>> 0 }); mix.onDuck((d, sec) => music.duck(d, sec)); music.start(); }
+}
+addEventListener('pointerdown', unlockAudio, { capture: true });
+addEventListener('keydown', unlockAudio, { capture: true });
+function audioFrame(real) {
+  if (!mix.attached) return;
+  const city = app.mode === 'city' && app.r, nt = city ? night() : 0;
+  mix.setActive(!!city);
+  if (city) {
+    mix.setZoom(view.cam.zoom); mix.setNight(nt);
+    mix.setWeather(app.settings.weather ? weather.on : {});
+    mix.setCity(Math.sqrt(Math.min(1, app.r.lots.length / 220)));
+    mix.locate((x, z) => { const g = view.G(x, z), W = view.W || 1, H = view.H || 1; return Math.hypot(Math.max(0, -g.sx, g.sx - W) / W, Math.max(0, -g.sy, g.sy - H) / H); });
+  }
+  mix.update(real);
+  if (music && (moodT -= real) <= 0) {
+    moodT = 0.5;
+    const res = pickMood({ screen: city ? 'city' : 'title', night: nt, alert: !!(app.alert && performance.now() < app.alert.until), creatures: app.sim?.horde?.list.length || 0, now: performance.now() / 1000 }, moodMem);
+    moodMem = res.memory; music.setMood(res.mood);
+  }
+}
 
 // ------------------------------------------------------------------ playing a region
 app.playRegion = async (worldSave, regionId) => {
@@ -108,6 +142,7 @@ function foundAt(x, z) {
   const r = app.r;
   if (!isFlat(r.ter, x, z, 3, 3)) { toast('The Core needs flat, dry ground — try another spot.', 'bad'); return; }
   found(r, x, z);
+  const sm = app.worldSave?.meta?.startMoney; if (sm) r.money = sm;   // the world's difficulty (Easy 60,000 / Normal 35,000)
   const res = B.place(r, 'col-core', x, z);
   if (!res.ok) { toast(res.why || 'Can\'t land there', 'bad'); r.founded = false; return; }
   // a short street out of the core so the first homes have somewhere to go
@@ -190,7 +225,7 @@ function updatePods(dt) {
 }
 app.castStrike = (x, z) => {
   app.sim.strikes.push({ x, z, age: 0, fall: 2.2 });
-  snd.play('meteor.fall', { pan: (view.G(x, z).sx / view.W) * 2 - 1, gain: 0.9, delay: 0.05 });
+  snd.play('meteor.fall', { pan: (view.G(x, z).sx / view.W) * 2 - 1, gain: 0.9, delay: 0.05, x, z });
 };
 function updateStrikes(dt) {
   for (const s of app.sim.strikes) {
@@ -270,7 +305,7 @@ function spawnTick(dt) {
   const res = N.nestsTick(app.r, days, { field: S.grid, alive: S.horde.list.length });
   for (const sp of res.spawns || []) S.horde.spawn(sp.kind, sp.x + 0.5, sp.z + 0.5);
   for (const ev of res.events || []) {
-    if (ev.type === 'swarm-warning') { app.alert = { text: ev.text || `A swarm is coming from the ${ev.dir}`, until: performance.now() + Math.max(6, ev.inSec || 10) * 1000 }; banner('Swarm incoming', ev.text || `From the ${ev.dir}`, 2600); snd.play('quake.rumble', { gain: 0.35, pitch: 1.4 }); }
+    if (ev.type === 'swarm-warning') { app.alert = { text: ev.text || `A swarm is coming from the ${ev.dir}`, until: performance.now() + Math.max(6, ev.inSec || 10) * 1000 }; banner('Swarm incoming', ev.text || `From the ${ev.dir}`, 2600); snd.play('quake.rumble', { gain: 0.35, pitch: 1.4, global: true }); }
     else if (ev.type === 'calm-over') toast(ev.text || 'The wildlife has noticed the colony.', 'bad');
     else if (ev.type === 'nest-spread') { app.r.log.push({ day: app.r.day, text: ev.text || 'A new nest has appeared.' }); if (ev.migrated) toast(ev.text || 'Wildlife from beyond the region has made a new nest.', 'bad'); }
   }
@@ -290,7 +325,7 @@ function onShipEvent(ev) {
   if (ev.type === 'ship-arrived') {
     const v = ev.ship?.kindName ? ev.ship : opt.ships.shipView(app.r, ev.ship);   // events carry the ship's view already
     const how = ev.why === 'request' ? ' — the ship you called' : ev.why === 'convoy' || ev.why === 'patrol' ? ' on its regular run' : '';
-    toast(`${v.kindName || 'A ship'}: ${v.name} is passing overhead${how}. Open Comms (C) to answer.`); snd.play('spell.arcane.impact', { gain: 0.25, pitch: 1.4 });
+    toast(`${v.kindName || 'A ship'}: ${v.name} is passing overhead${how}. Open Comms (C) to answer.`); snd.play('spell.arcane.impact', { gain: 0.25, pitch: 1.4, global: true });
   }
   else if (ev.type === 'visit-missed') toast(`The ${ev.name.toLowerCase()} passed by: no Comms Array was listening.`, 'bad');
   else if (ev.type === 'comms-online') toast('Comms Array online: you can hear passing ships now.', 'good');
@@ -403,7 +438,6 @@ cv.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('pointerdown', e => {
   if (e.isPrimary) ptrs.clear();
   cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, [e.offsetX, e.offsetY]); moved = 0;
-  snd.startSound().then(() => snd.setMuted(app.settings.muted));
   if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), zoom: view.cam.zoom, mid: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], cx: view.cam.x, cz: view.cam.z }; app.drag = null; pan = null; return; }
   const building = app.tool !== 'query' && !app.founding && !app.aiming;
   if (e.button === 2 || e.button === 1 || !building || e.pointerType === 'touch' && app.tool === 'query') pan = { x: e.offsetX, y: e.offsetY, cx: view.cam.x, cz: view.cam.z };
@@ -420,11 +454,16 @@ cv.addEventListener('pointermove', e => {
 });
 const up = e => {
   const tap = moved < 8 && ptrs.size === 1;
+  // right-click (without dragging) cancels the build/bulldoze tool, a move or an aimed strike (owner 2026-11-16)
+  if (e.button === 2 && tap && !app.founding && (app.tool !== 'query' || app.aiming)) {
+    app.drag = null; app.aiming = false; app.setTool('query'); refreshGhost();
+    ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; if (!ptrs.size) pan = null; return;
+  }
   if (app.founding && tap) { const p = view.pick(e.offsetX, e.offsetY); if (p) foundAt(p[0] - 1, p[1] - 1); }
   else if (app.aiming && tap) { const p = view.pick(e.offsetX, e.offsetY); if (p) { app.strikeSource = app.aiming; app.aiming = false; useStrikeAt(p[2], p[3]); } }
   else if (app.drag) {
     const moving = app.tools[app.tool]?.move, res = apply(app.r, app.tools[app.tool], app.drag.a, app.drag.b);
-    if (res.ok) { afterBuild(); snd.play('fragment.crash.small', { gain: 0.15, pitch: 1.6 }); if (res.cost) toast(`${money(-res.cost)}`, ''); if (moving) { toast(res.cost ? `Moved for ${money(res.cost)}.` : 'Moved.', 'good'); app.setTool('query'); app.selected = moving; showInfo(app, moving); } }
+    if (res.ok) { afterBuild(); snd.play('fragment.crash.small', { gain: 0.15, pitch: 1.6, global: true }); if (res.cost) toast(`${money(-res.cost)}`, ''); if (moving) { toast(res.cost ? `Moved for ${money(res.cost)}.` : 'Moved.', 'good'); app.setTool('query'); app.selected = moving; showInfo(app, moving); } }
     else if (res.why) toast(res.why, 'bad');
     app.drag = null; refreshGhost();
   }
@@ -470,7 +509,7 @@ function useStrikeAt(x, z) {
   const res = opt.ships.useStrike(app.r, x, z, app.strikeSource || 'charge');
   if (!res.ok) { toast(res.why, 'bad'); return; }
   app.sim.strikes.push({ ...res.strike, age: 0, fall: res.strike.fallSec });
-  snd.play('meteor.fall', { pan: (view.G(x, z).sx / view.W) * 2 - 1, gain: 0.9, delay: Math.max(0, res.strike.fallSec - 2.15) });
+  snd.play('meteor.fall', { pan: (view.G(x, z).sx / view.W) * 2 - 1, gain: 0.9, delay: Math.max(0, res.strike.fallSec - 2.15), x, z });
   drawSky();
 }
 
@@ -511,6 +550,7 @@ function loop(now) {
   requestAnimationFrame(loop);
   const real = Math.min(0.1, (now - app.last) / 1000); app.last = now;
   if (app.mode === 'city' && app.r) cityFrame(real);
+  audioFrame(real);
 }
 
 // ------------------------------------------------------------------ tooltips with live content
@@ -537,6 +577,7 @@ window.gameEye = {
       creatures: app.sim?.horde.list.length ?? 0, cam: { ...view.cam }, baking: sprites.queue.length, screens: opt.screens?.screenState?.() ?? null };
   },
   view, sprites, B, foundAt, setupBattle, afterBuild, podRain,
+  audio: () => ({ mix: mix.state(), music: music?.state() ?? null }),
 };
 
 if (!new URLSearchParams(location.search).has('noopt')) loadOptional();

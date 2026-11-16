@@ -23,12 +23,19 @@
 //                                         the account's copy, so a game can MERGE instead of asking: write the combined
 //                                         saves to localStorage and resolve 'local' (Kindlewild, 2026-10-30).
 //
+// Added 2026-11-16 (owner lost a day of Voidwright to a bare "OK = account / Cancel = this device" box):
+//   describe(values) → { playedAt?: ms, lines: [string] }   the game's own summary of a set of saves ({ slot: value },
+//                                         this device's or the account's) so the choice shows real stats per side.
+//   The default question is now an in-game dialog with both copies side by side (last played, which device, the
+//   game's lines), never a browser confirm(). Whichever copy gets replaced is kept as a backup in this browser:
+//   cloud.backup() → { kind: 'device'|'account', at, lines } | null, cloud.restoreBackup() puts it back.
+//
 // Which copy wins: each browser remembers the cloud copy it last matched (the server's time + a fingerprint of the
 // values).
 //   - nothing in the cloud yet               -> upload this browser's saves
 //   - only the cloud changed since last time -> download (onRestore runs, so the game can re-read its saves)
 //   - only this browser changed              -> upload
-//   - both changed, or first time on a device that already has its own saves -> ask (onConflict, default a confirm())
+//   - both changed, or first time on a device that already has its own saves -> ask (onConflict, default chooseCopy: an in-game side-by-side dialog)
 // Times are always the SERVER's (the upsert returns updated_at), so a device whose clock is wrong cannot mistake its
 // own upload for a newer save from somewhere else.
 import { account } from './rgs-account.js';
@@ -44,7 +51,7 @@ const when = iso => { try { return new Date(iso).toLocaleString(undefined, { dat
 const ms = iso => { const t = Date.parse(iso || ''); return Number.isFinite(t) ? t : 0; };
 const newest = rows => rows.reduce((m, r) => (ms(r.updated_at) > ms(m) ? r.updated_at : m), '');
 
-export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => location.reload(), onConflict = null, canRestore = () => true, device = navigator.userAgent.slice(0, 60) }) {
+export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => location.reload(), onConflict = null, canRestore = () => true, device = navigator.userAgent.slice(0, 60), describe = null }) {
   if (!/^[a-z0-9-]{1,32}$/.test(game)) throw new Error('cloudSave: bad game id');
   const slots = Object.entries(keys);                        // [[slot, localStorage key], …]
   const groups = Object.entries(prefixes);                   // [[slot, key prefix], …]
@@ -54,6 +61,18 @@ export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => lo
   const subs = new Set();
   const set = patch => { Object.assign(st, patch); for (const f of subs) try { f({ ...st }); } catch {} };
   let busy = null, soon = null, held = false;
+  const LOCAL_AT = `rgs.cloud.${game}.localAt`, BACKUP = `rgs.cloud.${game}.backup`;
+  /** Remember when this device's saves last changed (the game may not stamp its own saves). */
+  function noteLocal() {
+    const fp = localFp(); let cur = null; try { cur = JSON.parse(ls.get(LOCAL_AT) || 'null'); } catch { cur = null; }
+    if (!cur || cur.fp !== fp) ls.set(LOCAL_AT, JSON.stringify({ fp, at: Date.now() }));
+  }
+  const localAt = () => { try { return JSON.parse(ls.get(LOCAL_AT) || 'null')?.at || 0; } catch { return 0; } };
+  const summary = vals => { try { return describe ? (describe(vals) || {}) : {}; } catch (e) { console.warn('[cloudsave] describe failed', e); return {}; } };
+  function keepBackup(kind, values) {
+    const d = summary(values);
+    if (!ls.set(BACKUP, JSON.stringify({ kind, at: Date.now(), values, lines: d.lines || [] }))) console.warn('[cloudsave] no room to keep a backup');
+  }
 
   /** slot -> string value (or null) for every named key and every prefix group. */
   function localValues() {
@@ -103,7 +122,8 @@ export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => lo
     ls.set(SYNC(), JSON.stringify({ at, fp: fpOf(vals) }));
     set({ state: 'saved', at, message: 'Saved to your account' });
   }
-  function download(rows) {
+  function download(rows, { backup = false } = {}) {
+    if (backup && hasLocal()) keepBackup('device', localValues());
     const by = Object.fromEntries(rows.map(r => [r.slot, r]));
     for (const slot of allSlots()) writeLocal(slot, by[slot] ? by[slot].state?.v ?? null : null);
     const at = newest(rows);
@@ -115,16 +135,33 @@ export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => lo
   async function ask(rows, latest) {
     if (held) return wait('Your account and this device have different saves. Nothing was changed.');
     const from = rows.find(r => r.updated_at === latest)?.device || 'another device';
-    const q = { cloudAt: latest, cloudDevice: from, cloud: Object.fromEntries(rows.map(r => [r.slot, r.state?.v ?? null])), text: `Your account has saves from ${when(latest)} (${from}).\n\nOK = use your account's saves on this device.\nCancel = keep this device's saves and copy them to your account.` };
-    const pick = onConflict ? await onConflict(q) : (window.confirm(q.text) ? 'cloud' : 'local');
+    const cloudVals = Object.fromEntries(rows.map(r => [r.slot, r.state?.v ?? null])), localVals = localValues();
+    const dl = summary(localVals), dc = summary(cloudVals);
+    const q = {
+      cloudAt: latest, cloudDevice: from, cloud: cloudVals,
+      device: { at: dl.playedAt || localAt() || 0, device: deviceName(device), lines: dl.lines || [] },
+      account: { at: dc.playedAt || ms(latest), device: deviceName(from), lines: dc.lines || [] },
+      text: `Your account has saves from ${when(latest)} (${deviceName(from)}).`,
+    };
+    const pick = onConflict ? await onConflict(q) : await chooseCopy(q);
     if (pick === 'cloud') {
       // the player may have started a run while the question was up
       if (!canRestore()) return wait('Your account has newer saves. They will load next time you are on the title screen.');
-      return download(rows);
+      return download(rows, { backup: true });
     }
-    if (pick === 'local') return upload();
+    if (pick === 'local') { keepBackup('account', cloudVals); return upload(); }
     held = true;
     return wait('Your account and this device have different saves. Nothing was changed.');
+  }
+  /** Put back the copy replaced by the last choice. */
+  async function restoreBackup() {
+    let b = null; try { b = JSON.parse(ls.get(BACKUP) || 'null'); } catch { b = null; }
+    if (!b?.values) return false;
+    keepBackup(b.kind === 'device' ? 'account' : 'device', localValues());          // so the restore can be undone too
+    for (const slot of allSlots()) writeLocal(slot, b.values[slot] ?? null);
+    try { await upload(); } catch (e) { console.warn(e); }
+    try { onRestore(); } catch (e) { console.error(e); }
+    return true;
   }
 
   async function run() {
@@ -152,19 +189,22 @@ export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => lo
     return busy;
   }
   function saveSoon() {
+    noteLocal();
     if (!st.signedIn) return;
     clearTimeout(soon); soon = setTimeout(sync, 4000);
   }
 
   account.onChange(u => { held = false; set({ signedIn: !!u }); if (u) sync(); else { uid = null; set({ state: 'off', message: 'Sign in to keep your saves in your account' }); } });
-  const tick = setInterval(() => { if (st.signedIn && uid && (synced()?.fp !== localFp() || st.state === 'waiting')) sync(); }, MINUTE);
+  const tick = setInterval(() => { noteLocal(); if (st.signedIn && uid && (synced()?.fp !== localFp() || st.state === 'waiting')) sync(); }, MINUTE);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && st.signedIn && uid && synced()?.fp !== localFp()) sync(); });
+  noteLocal();
   sync();
 
   return {
     status: () => ({ ...st }),
     onStatus(fn) { subs.add(fn); fn({ ...st }); return () => subs.delete(fn); },
-    sync, saveSoon,
+    sync, saveSoon, restoreBackup,
+    backup() { try { const b = JSON.parse(ls.get(BACKUP) || 'null'); return b ? { kind: b.kind, at: b.at, lines: b.lines || [] } : null; } catch { return null; } },
     stop() { clearInterval(tick); clearTimeout(soon); },
   };
 }
@@ -191,4 +231,65 @@ export function statusLine(s) {
   if (s.state === 'idle') return 'Saves kept in your account · nothing saved yet';
   if (s.state === 'saved' && s.at) return `Saves kept in your account · saved ${agoText(s.at)}`;
   return 'Saves kept in your account';
+}
+
+/** "Windows · Chrome", "iPhone · Safari" from a user agent (or the text as given). */
+export function deviceName(ua = '') {
+  if (!/Mozilla|AppleWebKit|Gecko/.test(ua)) return ua || 'another device';
+  const os = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X|Macintosh/.test(ua) ? 'Mac' : /CrOS/.test(ua) ? 'Chromebook' : /Linux/.test(ua) ? 'Linux' : 'a device';
+  const br = /Edg\//.test(ua) ? 'Edge' : /Firefox\//.test(ua) ? 'Firefox' : /SteamDeck|Steam/.test(ua) ? 'Steam' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : '';
+  return br ? `${os} · ${br}` : os;
+}
+
+/**
+ * The default question: both copies side by side, each with when it was last played, where, and the game's own
+ * summary — never a browser confirm(). Resolves 'local', 'cloud' or 'later'.
+ */
+export function chooseCopy(q) {
+  return new Promise(resolve => {
+    injectStyle();
+    const ago = t => { if (!t) return 'unknown'; const m = Math.round((Date.now() - t) / 60000); const rel = m < 2 ? 'just now' : m < 60 ? `${m} min ago` : m < 48 * 60 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`; return `${when(new Date(t).toISOString())} (${rel})`; };
+    const newer = q.device.at > q.account.at ? 'device' : q.account.at > q.device.at ? 'account' : null;
+    const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const card = (key, title, info, btn) => `<section class="rcs-card${newer === key ? ' rcs-newer' : ''}">
+      <h3>${title}${newer === key ? '<span class="rcs-tag">Newer</span>' : ''}</h3>
+      <p class="rcs-when">Last played: <b>${esc(ago(info.at))}</b></p><p class="rcs-dev">${esc(info.device)}</p>
+      ${info.lines.length ? `<ul>${info.lines.map(l => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}
+      <button type="button" class="rcs-pick" data-pick="${key === 'device' ? 'local' : 'cloud'}">${btn}</button></section>`;
+    const back = document.createElement('div'); back.className = 'rcs-back';
+    back.innerHTML = `<div class="rcs-box" role="dialog" aria-modal="true" aria-label="Choose which saves to keep">
+      <h2>Two different saves</h2>
+      <p class="rcs-lead">This device and your account have different progress. Pick the one to keep — the other is kept as a backup in this browser, so you can switch back later.</p>
+      <div class="rcs-cards">${card('device', 'This device', q.device, 'Keep this device\'s saves')}${card('account', 'Your account', q.account, 'Use my account\'s saves')}</div>
+      <button type="button" class="rcs-later" data-pick="later">Decide later (change nothing)</button></div>`;
+    const done = v => { back.remove(); removeEventListener('keydown', key, true); resolve(v); };
+    const key = e => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); done('later'); } };
+    back.addEventListener('click', e => { const b = e.target.closest('[data-pick]'); if (b) done(b.dataset.pick); });
+    addEventListener('keydown', key, true);
+    document.body.append(back);
+    setTimeout(() => back.querySelector(newer === 'account' ? '[data-pick="cloud"]' : '[data-pick="local"]')?.focus(), 30);
+  });
+}
+function injectStyle() {
+  if (document.getElementById('rcs-style')) return;
+  const st = document.createElement('style'); st.id = 'rcs-style';
+  // own class prefix + every layout property set here, so a game's own CSS can't squeeze it (lessons rule 52)
+  st.textContent = `
+.rcs-back{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:safe center;justify-content:center;overflow-y:auto;padding:16px;background:rgba(4,8,16,.72);font:15px/1.4 system-ui,sans-serif;color:#e8eef5;box-sizing:border-box}
+.rcs-box{width:min(720px,100%);box-sizing:border-box;margin:auto 0;padding:20px;border-radius:16px;background:#141c2a;border:1px solid rgba(140,190,255,.25);box-shadow:0 20px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:12px}
+.rcs-box h2{margin:0;font-size:21px;color:#7fe3ff}
+.rcs-lead{margin:0;color:#b3c2d3;font-size:14px}
+.rcs-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rcs-card{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:12px;background:#1b2536;border:1px solid rgba(140,190,255,.18);min-width:0}
+.rcs-card.rcs-newer{border-color:#6bf09a;box-shadow:0 0 0 1px rgba(107,240,154,.35)}
+.rcs-card h3{margin:0;font-size:17px;display:flex;align-items:center;gap:8px}
+.rcs-tag{font-size:12px;font-weight:700;color:#06210f;background:#6bf09a;border-radius:9px;padding:1px 8px}
+.rcs-when,.rcs-dev{margin:0;font-size:14px}.rcs-dev{color:#9fb0c4}
+.rcs-card ul{margin:2px 0 4px;padding-left:18px;font-size:14px;display:flex;flex-direction:column;gap:2px}
+.rcs-pick,.rcs-later{font:600 15px system-ui,sans-serif;min-height:44px;border-radius:10px;cursor:pointer;padding:8px 12px;margin-top:auto}
+.rcs-pick{background:#19c6d6;color:#031418;border:0}.rcs-card:not(.rcs-newer) .rcs-pick{background:#2a3a52;color:#e8eef5}
+.rcs-later{background:transparent;color:#cfd9e6;border:1px solid rgba(140,190,255,.3)}
+.rcs-pick:focus-visible,.rcs-later:focus-visible{outline:2px solid #7fe3ff;outline-offset:2px}
+@media (max-width:600px){.rcs-cards{grid-template-columns:1fr}}`;
+  document.head.append(st);
 }

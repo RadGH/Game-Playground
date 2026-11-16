@@ -28,3 +28,9 @@ way a city grows), zoning decides where they live and work.
 - 2026-11-16 — title, new world, world map, saves; ships (settlers, warships, merchants), orbital strikes + Lance;
   nests with constant pressure and warned swarms; away earnings; transit + neighbour arrivals; wall repair; guide;
   traffic. Tests: 60+ node, Playwright player path + W-is-up, strict screen walk.
+- 2026-11-16 — sound: zoom-aware mix (`citykit/js/world/mix.js`: effects 100% at zoom ≥ 1.2 → 25% at the widest,
+  quieter off screen, big blasts carry; an ambient bed fades in as you zoom out — synthesized city hum + traffic, wind,
+  alien birds by day / insects by night, Sound Lab rain + storm loops) and original procedural synthwave
+  (`js/audio/music.js`: calm / night / tension moods that crossfade, seeded 8-bar phrase planning, ducks under big
+  blasts; starts on the first tap, also on the title). Settings: Volume, Music, Effects, Ambience sliders + Mute.
+  Tests: `tests/audio.test.mjs` (curves, mood picking, phrases), city.spec.js "sound" (browser).

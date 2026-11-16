@@ -1,6 +1,20 @@
 {
   "entries": [
     {
+      "id": "2026-11-16c",
+      "date": "2026-11-16",
+      "title": "Music and a city you can hear",
+      "items": [
+        "Arcline has its own music: synthwave that plays itself and keeps changing — a calm theme while you build, a dreamier one at night, and a driving one when a swarm is announced or the walls are under attack. It drops for a moment under a big blast.",
+        "Zoom out and the fighting gets quieter while the city takes over: traffic and the hum of machinery, wind over the wilds, alien birds by day and alien insects at night, and rain or storms when the weather turns. Zoom in on a fight and the guns are as loud as ever. Fights off screen are quieter too.",
+        "Settings has separate sliders for Music, Effects and Ambience, as well as the main volume and Mute.",
+        "Rivers now sit below their banks — wide rivers were drawn raised up on a ledge.",
+        "Right-click cancels the build and bulldoze tools.",
+        "New cities start with 35,000 credits (was 60,000): money is tighter at the start.",
+        "Roofs and their tanks and antennas sit on their own wing of a building, and the darkest building style is gone from the city."
+      ]
+    },
+    {
       "id": "2026-11-16b",
       "date": "2026-11-16",
       "title": "A city that grows",

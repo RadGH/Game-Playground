@@ -6,7 +6,7 @@
 //     arcline.worlds                       { v, worlds: [meta…] }   meta = { id, v, name, seed, cells, pressure,
 //                                          created, lastPlayed, regions: { [regionId]: summary } }
 //     arcline.last                         id of the world played last
-//     arcline.settings                     the settings sheet (volume, muted, shake, effects, weather, edgeScroll)
+//     arcline.settings                     the settings sheet (volume, musicVol, sfxVol, ambVol, muted, shake, effects, weather, edgeScroll)
 //     arcline.region.<worldId>.<regionId>  one city: sim/region.js saveRegion() JSON, gzipped + base64 ('gz1:…'),
 //                                          or plain JSON ('js1:…') where the browser has no CompressionStream
 //     arcline.snap.<worldId>.<regionId>    the city's picture for the world map: { w, h, top, url } (a small WebP,
@@ -36,9 +36,17 @@ export const WORLD_SIZES = [
 export const PRESSURES = [
   { id: 'calm', label: 'Calm', value: 0.6, note: 'Fewer probes, smaller swarms' },
   { id: 'normal', label: 'Normal', value: 1, note: 'The intended pressure' },
-  { id: 'fierce', label: 'Fierce', value: 1.5, note: 'Bigger swarms, faster nests' },
 ];
-export const pressureOf = v => PRESSURES.reduce((a, b) => (Math.abs(b.value - v) < Math.abs(a.value - v) ? b : a));
+// Fierce is not offered until it's tested (owner 2026-11-16: "omit any harder difficulties until further tested");
+// worlds made with it before still show its name.
+const ALL_PRESSURES = [...PRESSURES, { id: 'fierce', label: 'Fierce', value: 1.5, note: 'Bigger swarms, faster nests' }];
+export const pressureOf = v => ALL_PRESSURES.reduce((a, b) => (Math.abs(b.value - v) < Math.abs(a.value - v) ? b : a));
+/** Difficulty = starting credits (owner 2026-11-16: Normal 35,000, Easy 60,000; nothing harder yet). */
+export const DIFFICULTIES = [
+  { id: 'easy', label: 'Easy', money: 60000, note: 'Start with 60,000 credits' },
+  { id: 'normal', label: 'Normal', money: 35000, note: 'Start with 35,000 credits' },
+];
+export const difficultyOf = id => DIFFICULTIES.find(d => d.id === id) || DIFFICULTIES[1];
 export const sizeOf = cells => WORLD_SIZES.find(s => s.cells === cells) || { id: 'custom', label: `${cells} × ${cells}`, cells };
 
 /** Shape changes, step by step: MIGRATE.world[1] = meta => meta (v1 → v2)… The lead adds steps; tests prove the hook. */
@@ -58,7 +66,7 @@ export const storage = {
 };
 
 // ------------------------------------------------------------------ settings
-export const DEFAULT_SETTINGS = { volume: 0.8, muted: false, shake: true, effects: 'full', weather: true, edgeScroll: true };
+export const DEFAULT_SETTINGS = { volume: 0.8, musicVol: 0.5, sfxVol: 1, ambVol: 0.7, muted: false, shake: true, effects: 'full', weather: true, edgeScroll: true };
 export function loadSettings() { return { ...DEFAULT_SETTINGS, ...storage.getJSON(KEYS.settings, {}) }; }
 export function saveSettings(s) { return storage.set(KEYS.settings, JSON.stringify({ ...DEFAULT_SETTINGS, ...s })); }
 
@@ -109,10 +117,10 @@ let idCounter = 0;
 const newId = () => `w${Date.now().toString(36)}${(idCounter++).toString(36)}${Math.floor(Math.random() * 1296).toString(36)}`;
 
 /** Make and store a new world. Returns { meta, world, regions: {} } (the same shape loadWorld gives). */
-export function newWorldSave({ name = 'New World', seed = 1, cells = 14, pressure = 1 } = {}) {
+export function newWorldSave({ name = 'New World', seed = 1, cells = 14, pressure = 1, difficulty = 'normal' } = {}) {
   seed = Math.max(1, Math.floor(Math.abs(Number(seed)) || 1));
   const now = Date.now();
-  const meta = { id: newId(), v: SAVE_VERSION, name: String(name).trim().slice(0, 40) || 'New World', seed, cells, pressure, created: now, lastPlayed: now, regions: {} };
+  const meta = { id: newId(), v: SAVE_VERSION, name: String(name).trim().slice(0, 40) || 'New World', seed, cells, pressure, difficulty, startMoney: difficultyOf(difficulty).money, created: now, lastPlayed: now, regions: {} };
   const idx = readIndex(); idx.worlds.push(meta);
   const res = writeIndex(idx);
   if (res.ok) { storage.set(KEYS.last, meta.id); saved({ world: meta.id }); }

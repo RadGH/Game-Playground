@@ -1,6 +1,17 @@
 {
  "entries": [
   {
+   "id": "2026-11-16-music",
+   "date": "2026-11-16",
+   "title": "New music, space ambience and separate sound sliders",
+   "items": [
+    "All-new music made for Voidwright that follows what you are doing: calm and warm when docked, wide drifting chords out in open space, darker in dangerous systems, strange and eerie in alien space or near anomalies, and drums that build as a battle gets bigger. It keeps changing over long sessions instead of looping.",
+    "Big explosions and your jump drive push the music down for a moment so the blast comes through.",
+    "Space now sounds like somewhere: a deep hum of the void, your engines rising with speed and boost, radio chatter and machinery while docked, whispers in alien space and a far-off sonar ping in dangerous systems.",
+    "Settings has separate sliders for Volume, Effects, Music and Ambience, plus Mute everything. Turning the music down to 0% keeps the ambience and effects playing. A controller's d-pad moves a highlighted slider. Your old volume setting carries over."
+   ]
+  },
+  {
    "id": "2026-11-13c",
    "date": "2026-11-13",
    "title": "Punchier weapons, fairer ore, a Screens menu",

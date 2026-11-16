@@ -1,11 +1,11 @@
 // The state of one region's city — the object every sim module reads and changes — plus founding, save and load.
 // Typed arrays are index z*size+x. Save is plain JSON (typed arrays as base64), and every field round-trips
 // (lessons rule 36; tests/region.test.mjs reads the real save call).
-import { generateTerrain } from './terrain.js';
+import { generateTerrain, settleRivers } from './terrain.js';
 import { T } from './tuning.js';
 import { rng } from '../../../../citykit/js/kit/rng.js';
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;   // 2: rivers settled below their banks (report #70)
 export const RAW = ['metal', 'stone', 'crystal'], REFINED = ['steel', 'concrete', 'cells'];
 // tile layers beyond the terrain's: what's been built
 export const LAYERS = ['zone', 'road', 'power', 'pipe', 'lot', 'wall', 'wallHp', 'value', 'edu', 'leisure', 'traffic', 'transit'];
@@ -59,5 +59,6 @@ export function loadRegion(s) {
   const r = { ...s, ter: { size: s.ter.size, nests: s.ter.nests }, tiles: {} };
   for (const [k, Type] of Object.entries(TER_TYPES)) r.ter[k] = unb64(s.ter[k], Type);
   for (const k of LAYERS) r.tiles[k] = unb64(s.tiles[k], TYPES[k]);
+  if ((s.v || 1) < 2) { settleRivers(r.ter); r.v = SAVE_VERSION; }   // saves made before the river fix (report #70) had raised wide rivers
   return r;
 }

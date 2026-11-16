@@ -93,7 +93,13 @@ export function updateHud(game) {
   const alert = game.alertText?.(); const a = $('#h-alert'); a.hidden = !alert; if (alert) a.textContent = alert;
   const ov = r.ships?.passing?.length || 0, cb = $('#h-comms b'); if (cb) { cb.hidden = !ov; cb.textContent = fmt(ov); }
   // the ships strip sits just under the second row, however many lines that row wraps to (phones: two or three)
-  const row2 = $('.ac-row2'), sky = $('#h-sky');
+  const row2 = $('.ac-row2'), sky = $('#h-sky'), topBar = $('.ac-top');
+  // the second row starts under the top bar however tall it grows (three-line Credits, big text, narrow screens):
+  // a fixed 64px let the bar cover R/C/I, Power and Water (owner report 2026-11-16)
+  if (row2 && topBar && !topBar._watch) {
+    const place = () => { const t = Math.round(topBar.getBoundingClientRect().bottom + 6); if (row2._top !== t) { row2._top = t; row2.style.top = `${t}px`; } };
+    topBar._watch = new ResizeObserver(place); topBar._watch.observe(topBar); place();
+  }
   if (row2 && sky) {
     const top = Math.round(row2.getBoundingClientRect().bottom + 6); if (sky._top !== top) { sky._top = top; sky.style.top = `${top}px`; }
     const below = sky.childElementCount ? Math.round(sky.getBoundingClientRect().bottom + 6) : top;   // toasts go under both

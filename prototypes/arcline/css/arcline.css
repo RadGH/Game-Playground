@@ -261,3 +261,7 @@ button:disabled { opacity: .45; cursor: default; }
   .ac-top .ac-money, .ac-top .ac-people { flex: 0 1 auto; min-width: 0; overflow: hidden; }
   .ac-top .ac-money small, .ac-top .ac-people small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 }
+
+/* a tappable alert (attack incoming): small and brief, not a banner (owner 2026-11-17) */
+.ac-alert.go { cursor: pointer; pointer-events: auto; }
+.ac-alert.go:hover, .ac-alert.go:focus-visible { border-color: #ffb3a8 !important; outline: none; }

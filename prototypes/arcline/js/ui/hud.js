@@ -140,7 +140,12 @@ export function updateHud(game) {
   const st = Object.entries(r.stock).filter(([, v]) => v >= 1).map(([k, v]) => `${MAT_NAME[k]} ${fmt(Math.floor(v))}`);
   $('#h-stock').textContent = st.join(' · '); $('#h-stock').hidden = !st.length;
   document.querySelectorAll('[data-speed]').forEach(b => b.classList.toggle('on', +b.dataset.speed === game.speed));
-  const alert = game.alertText?.(); const a = $('#h-alert'); a.hidden = !alert; if (alert) a.textContent = alert;
+  const alert = game.alertText?.(); const a = $('#h-alert'); a.hidden = !alert; if (alert && a.textContent !== alert) a.textContent = alert;
+  // an alert with a place (attack incoming, core under attack) jumps the camera there when tapped
+  const at = game.alert && performance.now() < game.alert.until && game.alert.x != null ? game.alert : null;
+  a.classList.toggle('go', !!at); a.setAttribute('role', at ? 'button' : 'status'); a.tabIndex = at ? 0 : -1;
+  if (!a._wired) { a._wired = true; const go = () => { const g = game.alert; if (g?.x != null && performance.now() < g.until) game.lookAt?.(g.x, g.z); };
+    a.addEventListener('click', go); a.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }); }
   // the R&D tab shows the research under way as a thin bar (and its name in the tip)
   const rdTab = document.querySelector('.ac-group[data-group="research"]');
   if (rdTab) { const a = r.research?.active, k = a ? researchProgress(r) : 0; rdTab.classList.toggle('busy', !!a); rdTab.querySelector('.ac-rdbar b').style.width = `${Math.round(k * 100)}%`; rdTab.dataset.tip = a ? `R&D (T): researching ${TECH_BY_ID[a.id]?.name}, ${Math.round(k * 100)}%` : 'R&D (T): research upgrades and new buildings'; }

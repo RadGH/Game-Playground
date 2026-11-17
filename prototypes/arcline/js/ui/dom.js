@@ -20,7 +20,7 @@ export function toast(text, kind = '') {
   if (same) { clearTimeout(same._t); same._t = setTimeout(() => same.remove(), 3500); return; }
   const t = el('div', { class: `toast ${kind}` }, text); t.dataset.text = String(text);
   box.append(t); t._t = setTimeout(() => t.remove(), 3500);
-  while (box.children.length > 3) box.firstChild.remove();
+  while (box.children.length > 2) box.firstChild.remove();   // at most two: the map comes first (owner 2026-11-17)
 }
 let bannerT = null;
 export function banner(title, text = '', ms = 1800) {

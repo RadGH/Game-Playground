@@ -7,7 +7,8 @@
       "items": [
         "If you leave Arcline open on one device and play on another, the old tab now notices when it wakes up: it pauses and asks whether to load the newer save, instead of quietly saving its older city over it.",
         "When this device and your account have different saves, each side shows when you really last played it and what's in it (worlds, cities, people). A time the game doesn't know is shown as \"not recorded\" instead of \"just now\".",
-        "Whenever the account's saves replace this device's, this device's saves are kept as a backup."
+        "Whenever the account's saves replace this device's, this device's saves are kept as a backup.",
+        "Less on screen while you play: passing ships no longer pop up messages or cards — the number on the Comms button tells you. A big swarm no longer covers the screen with giant text: a small \"Attack incoming\" note shows for a few seconds; tap it to look. At most two messages show at once."
       ]
     },
     {

@@ -106,7 +106,7 @@ function audioFrame(real) {
   mix.update(real);
   if (music && (moodT -= real) <= 0) {
     moodT = 0.5;
-    const res = pickMood({ screen: city ? 'city' : 'title', night: nt, alert: !!(app.alert && performance.now() < app.alert.until), creatures: app.sim?.horde?.list.length || 0, now: performance.now() / 1000 }, moodMem);
+    const res = pickMood({ screen: city ? 'city' : 'title', night: nt, alert: !!(app.alert && performance.now() < app.alert.until) || performance.now() < (app.tension || 0), creatures: app.sim?.horde?.list.length || 0, now: performance.now() / 1000 }, moodMem);
     moodMem = res.memory; music.setMood(res.mood);
   }
 }
@@ -335,7 +335,9 @@ function spawnTick(dt) {
   const res = N.nestsTick(app.r, days, { field: S.grid, alive: S.horde.list.length });
   for (const sp of res.spawns || []) S.horde.spawn(sp.kind, sp.x + 0.5, sp.z + 0.5);
   for (const ev of res.events || []) {
-    if (ev.type === 'swarm-warning') { app.alert = { text: ev.text || `A swarm is coming from the ${ev.dir}`, until: performance.now() + Math.max(6, ev.inSec || 10) * 1000 }; banner('Swarm incoming', ev.text || `From the ${ev.dir}`, 2600); snd.play('quake.rumble', { gain: 0.35, pitch: 1.4, global: true }); }
+    // owner 2026-11-17: no giant text over the fight — a small alert for a few seconds; tap it to look (the music
+    // still turns tense until the swarm arrives: app.mood below)
+    if (ev.type === 'swarm-warning') { app.alert = { text: `Attack incoming from the ${ev.dir} · tap to look`, until: performance.now() + 5000, x: ev.x, z: ev.z }; app.tension = performance.now() + Math.max(6, ev.inSec || 10) * 1000; snd.play('quake.rumble', { gain: 0.35, pitch: 1.4, global: true }); }
     else if (ev.type === 'swarm') statsMod.noteSwarm(app.r);
     else if (ev.type === 'calm-over') toast(ev.text || 'The wildlife has noticed the colony.', 'bad');
     else if (ev.type === 'nest-spread') { app.r.log.push({ day: app.r.day, text: ev.text || 'A new nest has appeared.' }); if (ev.migrated) toast(ev.text || 'Wildlife from beyond the region has made a new nest.', 'bad'); }
@@ -348,7 +350,7 @@ function spawnTick(dt) {
       statsMod.noteDamage(app.r, ev.type);   // the Defence tab's damage taken
       if (ev.type === 'turret-wrecked') toast('A turret was wrecked — tap its ghost to rebuild it.', 'bad');
       else if (ev.type === 'building-wrecked') toast(`${ev.name || 'A building'} was wrecked${RP.ghostAt(app.r, ev.x, ev.z) ? ' — tap its ghost to rebuild it' : ''}.`, 'bad');
-      else if (ev.type === 'core-hit') { app.alert = { text: 'The Colony Core is under attack!', until: performance.now() + 5000 }; }
+      else if (ev.type === 'core-hit') { const c = app.r.core; app.alert = { text: 'Colony Core under attack · tap to look', until: performance.now() + 5000, x: c?.x, z: c?.z }; }
     }
     if (out.changed) { app.r.dirty = true; syncTurrets(); syncGrid(); }
     // walls heal themselves after a quiet spell while above half health (report #82)
@@ -359,9 +361,10 @@ function onShipEvent(ev) {
   if (ev.type === 'ship-arrived') {
     const v = ev.ship?.kindName ? ev.ship : opt.ships.shipView(app.r, ev.ship);   // events carry the ship's view already
     const how = ev.why === 'request' ? ' — the ship you called' : ev.why === 'convoy' || ev.why === 'patrol' ? ' on its regular run' : '';
-    toast(`${v.kindName || 'A ship'}: ${v.name} is passing overhead${how}. Open Comms (C) to answer.`); snd.play('spell.arcane.impact', { gain: 0.25, pitch: 1.4, global: true });
+    // owner 2026-11-17: no popup per ship and no ship cards on the map — the Comms button's count says it; a soft chime
+    app.r.log?.push({ day: app.r.day, text: `${v.kindName || 'A ship'}: ${v.name} passed overhead${how}.` }); snd.play('spell.arcane.impact', { gain: 0.2, pitch: 1.4, global: true }); void v;
   }
-  else if (ev.type === 'visit-missed') toast(`The ${ev.name.toLowerCase()} passed by: no Comms Array was listening.`, 'bad');
+  else if (ev.type === 'visit-missed') app.r.log?.push({ day: app.r.day, text: `The ${ev.name.toLowerCase()} passed by: no Comms Array was listening.` });
   else if (ev.type === 'comms-online') toast('Comms Array online: you can hear passing ships now.', 'good');
   else if (ev.type === 'comms-offline') toast('Comms Array has no power: ships can\'t reach you.', 'bad');
   else if (ev.type === 'landing' || ev.type === 'founding') { landPods(ev); if (ev.text) toast(ev.text, 'good'); }
@@ -371,39 +374,15 @@ function onShipEvent(ev) {
 function landPods(ev) {
   for (const p of ev.pods || [{ x: ev.x, z: ev.z, count: ev.count, delay: 0 }]) app.sim.pods.push({ x: p.x + 0.5, z: p.z + 0.5, age: -(p.delay || 0), fall: 1.4 + Math.random() * 0.4 });
 }
-/** The ships strip at the top of the map: each ship overhead with its kind and time left; tap to answer it. */
+/** Keeps the strike button current (the ships strip it also drew was removed 2026-11-17). */
 function drawSky() {
   const box = $('#h-sky'); if (!box || !opt.ships?.commsView) return;
   const cv = opt.ships.commsView(app.r);
-  box.replaceChildren(...cv.ships.map(v => {
-    const b = btn('', () => shipSheet(v.id), 'ac-ship ' + v.kind, { 'data-tip': v.text });
-    b.append(el('span', { class: 'k' }, v.kindName), el('b', {}, v.name), el('span', { class: 'bar' }, el('i', { style: `width:${Math.round((1 - v.progress) * 100)}%` })));
-    return b;
-  }));
+  box.replaceChildren();   // ship cards removed (owner 2026-11-17: too much on screen) — the Comms button's count and Comms (C) list them
   const st = cv.strikes, sb = $('#h-strike');
   if (sb) { sb.hidden = !(st.charges > 0 || st.lance); sb.querySelector('b').textContent = st.lance ? (st.lance.ready ? 'Lance ready' : `${fmt(st.charges)}`) : fmt(st.charges); sb.classList.toggle('ready', st.ready); }
 }
-function shipSheet(id) {
-  const sh = app.r.ships.passing.find(s => s.id === id); if (!sh) { toast('That ship has moved on.'); drawSky(); return; }
-  const v = opt.ships.shipView(app.r, sh);
-  sheet(v.name, (m, close) => {
-    m.append(el('p', { class: 'dim' }, `${v.kindName} · leaves in ${fmt(v.secondsLeft)} s`), el('p', {}, v.text), el('ul', { class: 'shiplines' }, ...v.lines.map(t => el('li', {}, t))));
-    for (const c of v.choices) {
-      const b = btn('', () => {
-        const res = opt.ships.answer(app.r, id, c.choice);
-        close();
-        if (!res.ok) { toast(res.why || 'Can\'t do that', 'bad'); return; }
-        if (res.text) toast(res.text, 'good');
-        if (res.upgrade) { syncTurrets(); afterBuild(); }   // refits and tougher walls take effect at once
-        for (const ev of res.events || []) onShipEvent(ev);
-        drawSky(); updateHud(app);
-      }, c.choice === 'refuse' ? '' : 'primary', { disabled: c.ok ? null : true });
-      b.append(...[el('span', {}, c.label), c.unlocks ? el('small', { class: 'unlocks' }, c.unlocks) : null, c.cost ? el('small', { class: 'cost' }, c.cost) : null, !c.ok && c.why ? el('small', { class: 'why' }, c.why) : null].filter(Boolean));
-      if (c.blurb) b.dataset.tip = c.blurb;
-      m.append(b);
-    }
-  });
-}
+app.lookAt = (x, z) => { view.cam.x = clamp(x + 0.5, 0, app.r.size); view.cam.z = clamp(z + 0.5, 0, app.r.size); };   // tap an alert: go there
 app.alertText = () => app.alert && performance.now() < app.alert.until ? app.alert.text : (app.r?.shutdown ? 'Out of money: services are off' : app.r?.people.arriving > 0 && census(app.r).homes <= app.r.people.total ? `${fmt(app.r.people.arriving)} people need homes — zone more` : null);
 
 // ------------------------------------------------------------------ tools + input

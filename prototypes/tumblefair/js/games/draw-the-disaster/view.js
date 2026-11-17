@@ -29,7 +29,7 @@ export function createView(ctx) {
       <p class="dd-prompt"><small>Draw this:</small> <b></b></p>
       <div class="dd-pad"><canvas></canvas><i class="dd-full">Page full!</i></div>
       <div class="dd-tools">
-        <div class="dd-swatches">${colors.map((c, i) => `<button class="dd-sw${i === init.eraser ? ' rubber' : ''}" data-c="${i}" style="--c:${c.hex}" aria-label="${esc(c.name)}" title="${esc(c.name)}"><i></i></button>`).join('')}</div>
+        <div class="dd-swatches">${colors.map((c, i) => `<button class="dd-sw${i === init.eraser ? ' rubber' : ''}" data-c="${i}" style="--c:${c.hex}" aria-label="${esc(c.name)}" data-tip="${esc(c.name)}"><i></i></button>`).join('')}</div>
         <div class="dd-brushes">${widths.map((w, i) => `<button class="dd-br" data-w="${i}" aria-label="${i ? 'Thick' : 'Thin'} brush"><i style="--w:${Math.round(6 + i * 12)}px"></i>${i ? 'Thick' : 'Thin'}</button>`).join('')}
           <button class="dd-undo" data-do="undo">Undo</button><button class="dd-clear" data-do="clear">Clear</button></div>
         <button class="dd-done big-btn" data-do="done">I'm done!</button>
@@ -125,7 +125,7 @@ export function createView(ctx) {
     cards.forEach((c, i) => { c.classList.toggle('mine', i === mine); c.classList.toggle('picked', myVote === i || myVote === 'both'); });
     $('.dd-both')?.classList.toggle('picked', myVote === 'both');
   }
-  const face = p => `<i class="vface" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
+  const face = p => `<i class="vface" style="--seat:${p.color}" data-tip="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
   function paintReveal(r, scores) {
     cards.forEach((c, i) => {
       const pid = r.who[i], p = byPid.get(pid); if (!p) return;

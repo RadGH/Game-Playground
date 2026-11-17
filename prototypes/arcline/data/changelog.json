@@ -1,6 +1,29 @@
 {
   "entries": [
     {
+      "id": "2026-11-16e",
+      "date": "2026-11-16",
+      "title": "Builder's tools",
+      "items": [
+        "Turrets now point exactly at what they shoot — they used to be turned about 15° off. Creatures face the way they walk more closely too.",
+        "Destroyed walls, gates, turrets and buildings leave a see-through ghost. Tap a ghost to rebuild it at its normal price, or use Tools › Bulk repair to rebuild every ghost at once and patch damaged walls — it shows the total first and lets you choose defences, buildings or both.",
+        "Undo: Ctrl+Z (or the Undo button at the left of the tool bar) takes back what you just built — a whole road or wall run counts as one — with a full refund, for 60 seconds.",
+        "Right-click while dragging a road, wall, power line or zone cancels that drag without building anything; right-click again (or Esc) puts the tool away.",
+        "Merchant upgrades now work and show: Mk II and Mk III parts refit every turret of that kind, standing and new, and the build tray, the turret's panel and a message say what changed (Pulse Gun Mk II: 7 → 10 damage a bolt). The wall blueprint, the range blueprint and the landmark discounts now work too.",
+        "The build trays show each part's numbers: damage a second and range on turret cards, health on walls, power or water on plants and pumps — and the full list (damage per shot, fire rate, range, power, upkeep) when you hover or select it.",
+        "Walls heal themselves a few seconds after the fighting stops, as long as they're above half health. Below half they look cracked and stay damaged until you repair them, so a wall that looks whole really is. Tap a wall to see its health, and a bar shows over walls under attack.",
+        "Tap a turret to see its Mk, damage, fire rate and range; tap a wall for its health and a one-tap repair.",
+        "Power pylons no longer stand on top of turrets, walls or buildings.",
+        "Street lights now line your roads, and most shops and offices put up a neon billboard or a tall glowing sign — the streets light up warmly at night.",
+        "Income is shown per day, because that's when you're paid: the Credits box says what the next pay day brings, and a bar under the date (along the Credits box on a phone) fills up to it. The budget lists each line per day too.",
+        "Power and Water turn amber when you're close to using all you make and red when you're over, with a message the moment it happens. Tap Power, Water or the R/C/I bars for a sheet: what you use and make, which buildings are short, what to build, and why each zone wants more or less.",
+        "Tap a home, shop or workshop to see how close it is to its next level and what it still needs — land value, water, power, room to grow, more demand. Buildings now really do level up when they're ready, growing into the zoned land beside them.",
+        "Bridges sit level with their banks instead of dipping below the ground.",
+        "Roads between neighbouring cities: when you open a new region next to one of your cities, it starts with a short road wherever your other city's road reaches the border, so the two line up. The world map shows a link only where both cities' roads meet.",
+        "Opening a new region no longer shows cars left over from your last city."
+      ]
+    },
+    {
       "id": "2026-11-16d",
       "date": "2026-11-16",
       "title": "Tidier streets",

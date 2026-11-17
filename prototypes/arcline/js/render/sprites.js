@@ -49,7 +49,7 @@ export class Sprites {
       try { this.map.set(key, make()); } catch (e) { this.map.set(key, { failed: String(e) }); console.warn('[arcline] bake failed', key, e); }
       this.queued.delete(key); this.baked++;
     }
-    if (this.map.size > 2500) { let n = 400; for (const k of this.map.keys()) { this.map.delete(k); if (--n <= 0) break; } }
+    if (this.map.size > 5000) { let n = 600; for (const k of this.map.keys()) { this.map.delete(k); if (--n <= 0) break; } }
     return this.queue.length;
   }
 }

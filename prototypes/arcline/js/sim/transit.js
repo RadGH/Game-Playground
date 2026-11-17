@@ -2,8 +2,9 @@
 //   Lines: tiles.transit (1 = Monorail, 2 = Maglev; catalog.json `transit`) drawn like roads, elevated — over roads,
 //   zones and water (not through buildings or walls). Stations are 2×2 lots beside a line. A line is WORKING when two
 //   or more stations sit on it; each working station cuts traffic on the roads around it and lifts land value nearby.
-//   Interstate links: a city road (one that reaches the Colony Core) or a working transit line reaching the region's
-//   edge where the neighbour region holds one of your cities links the two (world.js neighbours). A link works for
+//   Interstate links: a road on the border that meets the neighbour city's own border road tile to tile (#74), or a
+//   transit line with a station reaching the region's edge where the neighbour region holds one of your cities, links
+//   the two (world.js neighbours). A link works for
 //   BOTH cities, whichever side built it (owner 2026-11-16: "transit lines benefit other cities by increasing growth
 //   and demand"): each linked city sends T.neighbourTrickle people a month, and linkBoost() raises Residential and
 //   Commercial demand and how fast newcomers move in (appeal) — transit counts for more than a road.
@@ -11,7 +12,6 @@
 // solveLandValue, neighbourArrivals(world, r) once a month; transitUpkeep(r) belongs in the monthly budget.
 import { T } from './tuning.js';
 import { cat, unlocked } from './catalog.js';
-import { roadReach } from './networks.js';
 import { isFlat } from './terrain.js';
 import { addLot } from './build.js';
 import { CELL, regionAt } from './world.js';
@@ -137,17 +137,80 @@ function across(world, wr, r, x, z) {
   if (z === N - 1) out.push(regionAt(world, wr.cx + Math.floor(x / CELL), wr.cz + wr.span));
   return out.filter(o => o && o.id !== wr.id);
 }
+// Road links need a road on BOTH sides of the border, meeting tile to tile (owner report #74, 2026-11-16: "If two
+// adjacent cities do not have a connecting road, they should NOT form a connection on the world map"). A city's border
+// roads are saved in its world summary (save.js summarize → edgeRoads: [[x, z, level]] in its own tiles), so a city
+// can check its neighbour without loading it. A new region starts with a short road at every spot where a neighbour's
+// road reaches the shared border, pointing out toward it (seedEdgeRoads) — so two cities line up and know they link.
+/** Road tiles on the region's border, in its own tiles: [[x, z, level]]. */
+export function edgeRoadTiles(r) {
+  const N = r.size, out = [], seen = new Set();
+  for (let k = 0; k < N; k++) for (const [x, z] of [[k, 0], [k, N - 1], [0, k], [N - 1, k]]) {
+    const i = z * N + x; if (!r.tiles.road[i] || seen.has(i)) continue; seen.add(i); out.push([x, z, r.tiles.road[i]]);
+  }
+  return out;
+}
+/** The tile just across the border from (x, z) of world region a, in world region b's own tiles — or null. */
+function acrossInto(a, x, z, b) {
+  const N = a.size, wx = a.wx + x, wz = a.wz + z, steps = [];
+  if (x === 0) steps.push([-1, 0]); if (x === N - 1) steps.push([1, 0]); if (z === 0) steps.push([0, -1]); if (z === N - 1) steps.push([0, 1]);
+  for (const [dx, dz] of steps) { const bx = wx + dx - b.wx, bz = wz + dz - b.wz; if (bx >= 0 && bz >= 0 && bx < b.size && bz < b.size) return [bx, bz, dx, dz]; }
+  return null;
+}
+const edgeSet = city => {
+  if (!city?.edgeRoads) return null;
+  if (city._edgeSet?.src !== city.edgeRoads) Object.defineProperty(city, '_edgeSet', { value: { src: city.edgeRoads, set: new Set(city.edgeRoads.map(([x, z]) => `${x},${z}`)) }, enumerable: false, configurable: true, writable: true });
+  return city._edgeSet.set;
+};
+/** Does world region b (its saved summary) have a road on the tile across the border from (x, z) of region a? */
+function theirRoadAt(a, x, z, b) { const set = edgeSet(b.city), t = set && acrossInto(a, x, z, b); return !!(t && set.has(`${t[0]},${t[1]}`)); }
+/** Do two neighbouring world regions' saved border roads meet? (the world map's road links) */
+export function roadsMeet(world, a, b) {
+  const own = a.city?.edgeRoads; if (!own?.length || !edgeSet(b.city)) return false;
+  return own.some(([x, z]) => theirRoadAt(a, x, z, b));
+}
+/** Two cities are linked on the world map when their border roads meet, or either side runs a transit line across. */
+export function citiesLinked(world, a, b) {
+  if (roadsMeet(world, a, b)) return true;
+  const rail = (p, q) => (p.city?.links || []).some(l => l.id === q.id && (l.by === 'transit' || l.by === 'both') && !l.theirs);
+  return rail(a, b) || rail(b, a);
+}
+/**
+ * A brand-new region (never played): for every neighbour city whose road reaches the shared border, lay a short road
+ * (T.edgeStub tiles, default 3) from the matching border tile inward, so it starts pointing out at the neighbour. Free.
+ * It may not reach anything yet — it's there to line the two cities up. → number of road tiles laid
+ */
+export function seedEdgeRoads(world, r) {
+  const wr = world.regions[r.id]; if (!wr) return 0;
+  const N = r.size, len = Math.max(1, Math.round(T.edgeStub ?? 3)); let laid = 0;
+  for (const o of world.regions) {
+    if (!o || o.id === wr.id || !o.city?.edgeRoads?.length) continue;
+    for (const [ox, oz, lv] of o.city.edgeRoads) {
+      const t = acrossInto(o, ox, oz, wr); if (!t) continue;
+      const [x, z, dx, dz] = t;   // (dx, dz) points from the neighbour into this region: the stub runs that way
+      for (let k = 0; k < len; k++) {
+        const tx = x + dx * k, tz = z + dz * k; if (tx < 0 || tz < 0 || tx >= N || tz >= N) break;
+        const i = tz * N + tx; if (r.tiles.lot[i] >= 0 || r.tiles.wall[i]) break;
+        if (!r.tiles.road[i]) { r.tiles.road[i] = Math.min(3, Math.max(1, lv || 1)); r.tiles.zone[i] = 0; r.ter.flora[i] = 0; laid++; }
+      }
+    }
+  }
+  if (laid) { r.dirty = true; r.lineRev = (r.lineRev || 0) + 1; }
+  return laid;
+}
+
 /**
  * Links from this city to neighbouring cities. founded(o) says whether world region o holds one of your cities
- * (default: o.city is set). → [{ id, name, road: bool, transit: bool, x, z }]
+ * (default: o.city is set). A road link needs the neighbour's saved border road on the tile across (theirRoadAt); a
+ * transit line needs one station on its side. → [{ id, name, road: bool, transit: bool, x, z }]
  */
 export function edgeLinks(world, r, founded = o => !!o.city) {
   const wr = world.regions[r.id]; if (!wr || !r.founded) return [];
-  const N = r.size, reach = roadReach(r), lines = transitLines(r), links = new Map();
+  const N = r.size, lines = transitLines(r), links = new Map();
   const note = (o, how, x, z) => { if (!founded(o)) return; const l = links.get(o.id) || { id: o.id, name: o.name, road: false, transit: false, x, z }; l[how] = true; links.set(o.id, l); };
   for (let k = 0; k < N; k++) for (const [x, z] of [[k, 0], [k, N - 1], [0, k], [N - 1, k]]) {
     const i = z * N + x;
-    if (reach[i]) for (const o of across(world, wr, r, x, z)) note(o, 'road', x, z);
+    if (r.tiles.road[i]) for (const o of across(world, wr, r, x, z)) if (theirRoadAt(wr, x, z, o)) note(o, 'road', x, z);
     const c = lines.comp[i]; if (c >= 0 && lines[c].stations.length >= 1) for (const o of across(world, wr, r, x, z)) note(o, 'transit', x, z);
   }
   return [...links.values()];

@@ -2,6 +2,20 @@
  "_doc": "Player-facing changelog for Tumblefair, newest first (shared/whats-new.js reads it). Append one entry at EVERY publish: plain language, what players will notice, no file names. `id` is stable and unique (date, plus a letter for a second publish that day).",
  "entries": [
   {
+   "id": "2026-11-16",
+   "date": "2026-11-16",
+   "title": "Fairer, clearer, more time",
+   "items": [
+    "⛳ Mini Golf and Fairway Golf: once your ball drops, your golfer cheers and then steps off the course, so nobody stands in the way of the players still putting.",
+    "🔍 Pattern Impostor explains itself: every rule is said in plain words with real numbers, every picture is labelled when the answer is shown, a clue appears halfway through each round, the tricky \"two things go together\" rounds explain what that means and give you more time, small pictures look clearly small, and the last screen lists all six rules.",
+    "🏀 Letter Shot runs longer (2½ minutes instead of 1½), with a little more time to pick a mark and to shoot, so a game usually ends with someone spelling FAIR instead of the bell.",
+    "⛄ Snowman Styling: with two or more people there is no longer a computer snowman competing for your votes. Two computer judges still vote, but only for your snowmen.",
+    "🧑 On a computer or TV the title screen shows your character beside the menu instead of hidden behind it, and the ✨ What's new button is easy to read.",
+    "💬 Hover hints are the fair's own style now, and buying a costume asks in the fair's own box instead of a browser pop-up.",
+    "🎟️ Sticker pop-ups wait for the results instead of covering the score bar mid-game."
+   ]
+  },
+  {
    "id": "2026-11-08",
    "date": "2026-11-08",
    "title": "The Winter Fair is open early",

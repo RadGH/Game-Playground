@@ -47,12 +47,15 @@ export function createPass({ net, S, sfx = () => {}, costumeName = id => id, sea
   const queue = []; let showing = false;
   function pop(pic, title, sub = '', cls = '') { queue.push({ pic, title, sub, cls }); if (!showing) next(); }
   function next() {
-    const q = queue.shift(); if (!q) { showing = false; return; }
+    if (!queue.length) { showing = false; return; }
     showing = true;
+    // QA pass 2026-11-16 (lessons rule 15): a sticker never lands on a minigame's score strip — it waits for the results
+    if (document.body.dataset.phase === 'game') { setTimeout(next, 700); return; }
+    const q = queue.shift();
     const e = h('div', 'pass-pop ' + q.cls);
     e.innerHTML = `<i aria-hidden="true">${esc(q.pic)}</i><span><b>${esc(q.title)}</b>${q.sub ? `<small>${esc(q.sub)}</small>` : ''}</span>`;
     popLayer.append(e);
-    setTimeout(() => e.classList.add('out'), 2400); setTimeout(() => { e.remove(); next(); }, 2800);
+    setTimeout(() => e.classList.add('out'), 2400); setTimeout(() => { e.remove(); if (document.body.dataset.phase === 'game' && !q.again) queue.unshift({ ...q, again: true }); next(); }, 2800);   // cut off by a game starting (hidden in pass.css): shown again after it
   }
 
   net.on('pass', m => {
@@ -74,7 +77,7 @@ export function createPass({ net, S, sfx = () => {}, costumeName = id => id, sea
     const ids = S.passFinal.match.filter(id => byId.has(id)), v = view();
     const b = h('div', 'pass-final');
     b.innerHTML = `<div class="pf-head"><b>Fair Pass</b><span>Level ${v?.level || 1}${v && !v.max ? ` · ${v.into}/${v.need} XP` : ''}</span><button class="btn small" data-pass-open="1">Open</button></div>
-      ${ids.length ? `<ul class="pf-stickers">${ids.map(id => { const s = byId.get(id); return `<li title="${esc(s.how)}"><i>${esc(s.pic)}</i><span>${esc(s.name)}</span></li>`; }).join('')}</ul>` : '<p class="note">No new stickers this time — open the Fair Pass to see what is next.</p>'}`;
+      ${ids.length ? `<ul class="pf-stickers">${ids.map(id => { const s = byId.get(id); return `<li data-tip="${esc(s.how)}"><i>${esc(s.pic)}</i><span>${esc(s.name)}</span></li>`; }).join('')}</ul>` : '<p class="note">No new stickers this time — open the Fair Pass to see what is next.</p>'}`;
     b.querySelector('[data-pass-open]').onclick = () => { sfx('tap'); open(); };
     const before = card.querySelector('.final-go') || card.lastElementChild;
     card.insertBefore(b, before);
@@ -132,7 +135,7 @@ export function createPass({ net, S, sfx = () => {}, costumeName = id => id, sea
   function chipBits(m) {
     if (!m || m.cpu || m.display || !m.lv) return { attr: '', html: '' };
     const css = m.plate ? plateCss(m.plate) : '';
-    return { attr: m.plate ? ` data-plate="${esc(m.plate)}"` : '', style: css, html: `<em class="lv-tag" title="Fair Pass level ${m.lv}">${m.lv}</em>` };
+    return { attr: m.plate ? ` data-plate="${esc(m.plate)}"` : '', style: css, html: `<em class="lv-tag" data-tip="Fair Pass level ${m.lv}">${m.lv}</em>` };
   }
   return { open, close, draw, titleHtml, chipBits, pop, get isOpen() { return !!el; } };
 }

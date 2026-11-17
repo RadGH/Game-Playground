@@ -51,7 +51,7 @@ export function createView(ctx) {
       c.classList.toggle('right', i === r.answer); c.classList.toggle('wrong', i !== r.answer && (i === mine || (watching && Object.values(r.picks).includes(i))));
       c.querySelector('.ml-val').textContent = Q.f === 6 ? (v[i] === hi ? 'the biggest' : v[i] === lo ? 'the smallest' : 'middle-sized') : `${v[i]} ${v[i] === 1 ? Q.word.replace(/s$/, '') : Q.word}`;
       c.querySelector('.ml-mark').textContent = i === r.answer ? 'YES!' : '';
-      c.querySelector('.ml-who').innerHTML = players.filter(p => r.picks[p.pid] === i).map(p => `<i class="ml-face" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : esc(p.name[0] || '?')}</i>`).join('');
+      c.querySelector('.ml-who').innerHTML = players.filter(p => r.picks[p.pid] === i).map(p => `<i class="ml-face" style="--seat:${p.color}" data-tip="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : esc(p.name[0] || '?')}</i>`).join('');
       c.disabled = true;
     });
     if (me != null && r.picks[me] != null) {

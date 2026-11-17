@@ -8,14 +8,18 @@ import { bindLive, T, milestones } from './sim/tuning.js';
 import { useCatalog, item, cat } from './sim/catalog.js';
 import { generateWorld, BIOMES } from './sim/world.js';
 import { newRegion, found, saveRegion, loadRegion } from './sim/region.js';
-import { tick, census, solveLandValue, appeal, immigrationRate } from './sim/city.js';
+import { tick, census, solveLandValue, appeal, immigrationRate, dailyNet, dayProgress } from './sim/city.js';
 import { solvePower, solveWater } from './sim/networks.js';
 import { isFlat } from './sim/terrain.js';
 import * as B from './sim/build.js';
+import { turretStats, keyLine } from './sim/arms.js';
+import * as RP from './sim/repair.js';
+import * as UN from './sim/undo.js';
+import { installBuilderTips, buildUndoButton, refreshUndo, refreshWall, showTurret, showWall, showGhost, bulkSheet } from './ui/builder.js';
 import { MapView, LEVEL } from './render/map.js';
 import { Sprites } from './render/sprites.js';
 import { Traffic } from './render/traffic.js';
-import { toWorld, toScreen } from '../../../citykit/js/iso.js';
+import { toWorld, toScreen, dirOfHeading } from '../../../citykit/js/iso.js';
 import { Horde, KINDS } from '../../../citykit/js/world/horde.js';
 import { Defence, TURRETS } from '../../../citykit/js/world/defence.js';
 import { Grid, T as TK } from '../../../citykit/js/world/field.js';
@@ -26,7 +30,7 @@ import * as snd from '../../../citykit/js/world/sound.js';
 import { mix } from '../../../citykit/js/world/mix.js';
 import { Music, pickMood } from './audio/music.js';
 import { $, el, btn, toast, banner, sheet, topSheet, closeTopSheet } from './ui/dom.js';
-import { buildHud, updateHud, openTray, showInfo, budgetSheet, money, dateText } from './ui/hud.js';
+import { buildHud, updateHud, openTray, showInfo, budgetSheet, money, perDay, dateText } from './ui/hud.js';
 import { toolDefs, plan, apply } from './ui/tools.js';
 import { updateGuide } from './ui/guide.js';
 import { openComms } from './ui/comms.js';
@@ -46,6 +50,7 @@ const app = {
   sim: null, last: performance.now(), acc: 0,
 };
 window.app = app;
+installBuilderTips(app);   // the build trays' stat cards (report #81)
 // automated test browsers draw 3D in software: half-size pictures keep their screen walks fast (players get full size)
 const sprites = new Sprites({ scale: navigator.webdriver ? 1 : 2 });
 const view = new MapView($('#map'), sprites);
@@ -108,20 +113,36 @@ app.playRegion = async (worldSave, regionId) => {
   app.pressure = worldSave.meta?.pressure ?? 1;
   const wr = app.world.regions[regionId];
   const saved = worldSave.regions?.[regionId];
-  for (const [id, sv] of Object.entries(worldSave.regions || {})) if (sv?.founded && app.world.regions[id]) app.world.regions[id].city = { name: sv.name, people: sv.people?.total || 0 };
+  // keep each city's whole saved summary (its border roads line new neighbours up and decide road links — #74)
+  for (const [id, sv] of Object.entries(worldSave.regions || {})) if (sv?.founded && app.world.regions[id]) app.world.regions[id].city = { ...(worldSave.meta?.regions?.[id] || app.world.regions[id].city || {}), founded: true, name: sv.name, people: sv.people?.total || 0 };
   app.r = saved ? loadRegion(saved) : newRegion(app.world, wr);
+  if (!saved) transitMod.seedEdgeRoads(app.world, app.r);   // a new region starts with a road wherever a neighbour's road meets the border
   app.r.pressureMul = app.pressure;   // the world's Calm / Normal / Fierce choice
   let away = null;
   if (saved && opt.away?.awayCatchUp && app.r.lastActive && app.r.founded) { opt.away.awayCatchUp(app.r, (Date.now() - app.r.lastActive) / 1000); away = opt.away.awaySummary(app.r); opt.away.clearAway(app.r); }
   enterCity();
   if (away?.length) sheet('While you were away', (m, close) => { m.append(el('ul', { class: 'shiplines' }, ...away.map(t => el('li', {}, t))), btn('Back to the city', close, 'primary')); });
 };
+/** Everything the city view keeps between frames belongs to ONE region: clear it before showing another, or the last
+ *  city's cars, sparks, pods and alerts show up on the new map (owner report #75, 2026-11-16). */
+function resetCityView() {
+  traffic.reset();
+  for (const k of ['parts', 'lights', 'rings', 'decals', 'bodies', 'beams', 'arcs']) if (Array.isArray(fx[k])) fx[k].length = 0;
+  fx.trauma = 0; fx.flash = 0;
+  Object.assign(app, { acc: 0, hitStop: 0, alert: null, aiming: false, drag: null, selected: null, hoverPoint: null, founding: false, _lastLots: null, _sig: null });
+  view.ghost = null; view.hover = null; view._edgeList = null;
+  $('#h-info') && ($('#h-info').hidden = true);
+}
+app.resetCityView = resetCityView;
 function enterCity() {
   const r = app.r;
   opt.screens?.leaveScreens?.();
+  resetCityView();
   app.mode = 'city'; app.root.replaceChildren(); app.root.hidden = true; $('#city').hidden = false;
   view.setRegion(r, app.world);
+  opt.ships?.ensureShips?.(r);   // reads the merchant upgrades the city owns (arms.js) before the turrets are set up
   buildHud(app);
+  buildUndoButton(app);   // the tool bar's Undo (Ctrl+Z), report #76
   setupBattle();
   solvePower(r); solveWater(r); solveLandValue(r);
   if (!r.founded) startFounding();
@@ -191,7 +212,7 @@ function simpleGrid(r) {
 }
 function syncTurrets() {
   const d = app.sim.defence, r = app.r, old = new Map(d.turrets.map(t => [`${t.x},${t.z}`, t]));
-  d.turrets = r.turrets.map(rt => { const o = old.get(`${rt.x},${rt.z}`); const t = o || d.add(rt.kind, rt.x, rt.z); t.kind = rt.kind; t.tier = rt.tier || 1; t.powered = rt.powered ?? 1; t.ref = rt; return t; }).filter(Boolean);
+  d.turrets = r.turrets.map(rt => { const o = old.get(`${rt.x},${rt.z}`); const t = o || d.add(rt.kind, rt.x, rt.z); t.kind = rt.kind; t.tier = rt.tier || 1; t.stats = turretStats(r, rt.kind, t.tier); t.powered = rt.powered ?? 1; t.ref = rt; return t; }).filter(Boolean);   // t.stats: its Mk + range blueprint (arms.js)
   d.turrets = [...new Set(d.turrets)];
 }
 function syncWallBroken(x, z) { const r = app.r, i = z * r.size + x; r.tiles.wall[i] = 0; r.tiles.wallHp[i] = 0; r.wallsChanged = true; app.sim.grid.solve(goalTiles()); }
@@ -211,7 +232,7 @@ function syncGrid() {
 }
 function deathSprite(c) {
   const k = KINDS[c.kind], rec = sprites.recipe(k.recipe); if (!rec) return null;
-  const dir = 0; const s = sprites.facing(k.recipe, {}, dir, rec.dirs || 8, 'die', (rec.anims?.die?.frames || 1) - 1);
+  const n = rec.dirs || 8, dir = dirOfHeading(c.heading || 0, n, view.cam.rot); const s = sprites.facing(k.recipe, {}, dir, n, 'die', (rec.anims?.die?.frames || 1) - 1);   // falls the way it faced (#72)
   return s && !s.failed ? { img: s.day, ax: s.ax, ay: s.ay, w: s.w, h: s.h, scale: 1 / sprites.scale } : null;
 }
 // muzzle points come from the turret models (built once each)
@@ -281,7 +302,7 @@ function cityFrame(real) {
   const sig = `${view.cam.x},${view.cam.z},${view.cam.zoom},${view.cam.rot},${app.tool},${!!view.ghost}`;   // a moved view always redraws at once
   if (navigator.webdriver && sig === app._sig && (app._drawT = (app._drawT || 0) + real) < 0.25) return; app._drawT = 0; app._sig = sig;
   view.draw({ night: nt, fx, weather: app.settings.weather ? weather : null, horde: S.horde, defence: S.defence, alpha: app.acc / STEP, pods: S.pods, vehicles: app.settings.effects === 'light' ? traffic.list.slice(0, 20) : traffic.list, strikeDraw: drawStrikes });
-  if ((app._hudT = (app._hudT || 0) + real) > 0.2) { app._hudT = 0; updateHud(app); if ((app._guideT = (app._guideT || 0) + 1) % 5 === 0) updateGuide(app); }
+  if ((app._hudT = (app._hudT || 0) + real) > 0.2) { app._hudT = 0; updateHud(app); refreshUndo(app); refreshWall(app); if ((app._guideT = (app._guideT || 0) + 1) % 5 === 0) updateGuide(app); }
 }
 function onNewDay(day) {
   const r = app.r;
@@ -297,7 +318,7 @@ function onNewDay(day) {
   if (opt.ships?.shipsTick) for (const ev of opt.ships.shipsTick(r, 1) || []) onShipEvent(ev);
   if (opt.ships) for (const ev of scheduleMod.scheduleTick(r)) onShipEvent(ev);
   if (opt.nests?.siegeNests) for (const n of opt.nests.siegeNests(r, 1)?.cleared || []) toast('A nest near your turrets was destroyed.', 'good');
-  if (opt.transit?.transitMonth && day % 30 === 0 && app.world) { const a = opt.transit.transitMonth(app.world, r, o => !!o.city); if (a?.people) toast(`${fmt(a.people)} people came over from your other cities.`, 'good'); }
+  if (opt.transit?.transitMonth && day % 30 === 0 && app.world) { const a = opt.transit.transitMonth(app.world, r, o => !!o.city?.founded); if (a?.people) toast(`${fmt(a.people)} people came over from your other cities.`, 'good'); }
 }
 function spawnTick(dt) {
   const N = opt.nests; if (!N?.nestsTick) return;
@@ -314,11 +335,13 @@ function spawnTick(dt) {
     S.syncT = 0; S.fieldDirty = false;
     const out = N.syncField(app.r, S.grid);
     for (const ev of out.events || []) {
-      if (ev.type === 'turret-wrecked') toast('A turret was wrecked.', 'bad');
-      else if (ev.type === 'building-wrecked') toast(`${ev.name || 'A building'} was wrecked.`, 'bad');
+      if (ev.type === 'turret-wrecked') toast('A turret was wrecked — tap its ghost to rebuild it.', 'bad');
+      else if (ev.type === 'building-wrecked') toast(`${ev.name || 'A building'} was wrecked${RP.ghostAt(app.r, ev.x, ev.z) ? ' — tap its ghost to rebuild it' : ''}.`, 'bad');
       else if (ev.type === 'core-hit') { app.alert = { text: 'The Colony Core is under attack!', until: performance.now() + 5000 }; }
     }
     if (out.changed) { app.r.dirty = true; syncTurrets(); syncGrid(); }
+    // walls heal themselves after a quiet spell while above half health (report #82)
+    const r = app.r, d = r.day - (S.wallDay ?? r.day); S.wallDay = r.day; if (d > 0) RP.wallTick(r, d, S.grid);
   }
 }
 function onShipEvent(ev) {
@@ -331,6 +354,7 @@ function onShipEvent(ev) {
   else if (ev.type === 'comms-online') toast('Comms Array online: you can hear passing ships now.', 'good');
   else if (ev.type === 'comms-offline') toast('Comms Array has no power: ships can\'t reach you.', 'bad');
   else if (ev.type === 'landing' || ev.type === 'founding') { landPods(ev); if (ev.text) toast(ev.text, 'good'); }
+  if (app.sim) syncTurrets();   // a part in a crate refits turrets (Mk II/III): they fire harder from now
   drawSky();
 }
 function landPods(ev) {
@@ -359,6 +383,7 @@ function shipSheet(id) {
         close();
         if (!res.ok) { toast(res.why || 'Can\'t do that', 'bad'); return; }
         if (res.text) toast(res.text, 'good');
+        if (res.upgrade) { syncTurrets(); afterBuild(); }   // refits and tougher walls take effect at once
         for (const ev of res.events || []) onShipEvent(ev);
         drawSky(); updateHud(app);
       }, c.choice === 'refuse' ? '' : 'primary', { disabled: c.ok ? null : true });
@@ -376,7 +401,7 @@ app.setTool = id => {
   const t = app.tools[id], chip = $('#h-tool');
   if (chip) {
     if (id === 'query') chip.hidden = true;
-    else { chip.hidden = false; chip.replaceChildren(el('span', {}, t.name), btn('Done', () => app.setTool('query'), 'small')); }
+    else { chip.hidden = false; const kl = t.entry ? keyLine(app.r, t.entry) : ''; chip.replaceChildren(el('span', {}, `${t.name}${kl ? ' · ' + kl : ''}`), btn('Done', () => app.setTool('query'), 'small')); }
   }
   view.overlay = t?.overlay || app.overlay || null;
   $('#map').classList.toggle('building', id !== 'query');
@@ -394,7 +419,26 @@ app.startMove = lot => {
   $('#h-info').hidden = true; app.setTool('move');
   toast(`Tap where the ${name} should go. Esc cancels.`);
 };
-app.bulldozeLot = lot => { const res = B.bulldoze(app.r, [[lot.x, lot.z]]); if (res.ok) { afterBuild(); showInfo(app, null); toast('Cleared.'); } else toast(res.why, 'bad'); };
+app.bulldozeLot = lot => { const res = withUndo('Bulldoze', () => B.bulldoze(app.r, [[lot.x, lot.z]])); if (res.ok) { showInfo(app, null); toast('Cleared.'); } else toast(res.why, 'bad'); };
+/** Run a build action so it can be undone for a minute with a full refund (report #76). → the action's result */
+function withUndo(label, fn) { const snap = UN.snapshot(app.r), res = fn(); if (res?.ok) { UN.record(app.r, snap, label); afterBuild(); refreshUndo(app); } return res; }
+app.undo = () => {
+  if (app.mode !== 'city' || !app.r) return;
+  app.drag = null; refreshGhost();
+  const res = UN.undo(app.r);
+  if (!res.ok) { toast(res.why, 'bad'); return; }
+  afterBuild(); $('#h-info').hidden = true; app.picked = null; refreshUndo(app);
+  const mats = Object.entries(res.mats || {}).map(([k, v]) => `${fmt(Math.round(v))} ${k === 'cells' ? 'Power cells' : k[0].toUpperCase() + k.slice(1)}`).join(', ');
+  toast(`Undone: ${res.label}.${res.refund ? ` ${money(res.refund)} back${mats ? ` + ${mats}` : ''}.` : ''}`, 'good');
+};
+// turrets, walls and ghosts from the info panel (reports #73, #82)
+app.bulldozeAt = (x, z) => { const res = withUndo('Bulldoze', () => B.bulldoze(app.r, [[x, z]])); $('#h-info').hidden = true; app.picked = null; res.ok ? toast('Cleared.') : toast(res.why, 'bad'); };
+app.quoteRepairAt = (x, z) => B.quoteRepair(app.r, [[x, z]]);
+app.repairAt = (x, z) => { const res = withUndo('Repair', () => B.repairWalls(app.r, [[x, z]])); res.ok ? toast(`Repaired for ${money(res.cost)}.`, 'good') : toast(res.why, 'bad'); refreshWall(app); };
+app.rebuildGhost = g => { const name = RP.ghostName(g), res = withUndo(`Rebuild ${name}`, () => RP.rebuildGhost(app.r, g)); if (res.ok) { $('#h-info').hidden = true; app.picked = null; toast(`${name} rebuilt for ${money(res.cost)}.`, 'good'); } else toast(res.why || 'Can\'t rebuild it here', 'bad'); };
+app.clearGhost = g => { app.r.ghosts = (app.r.ghosts || []).filter(o => o !== g); $('#h-info').hidden = true; app.picked = null; };
+app.openBulkRepair = () => { if (app.mode === 'city' && app.r) bulkSheet(app); };
+app.bulkRebuild = opts => { const res = withUndo('Bulk repair', () => RP.bulkRebuild(app.r, opts)); if (res.ok && app.picked) { $('#h-info').hidden = true; app.picked = null; } return res; };
 app.thumb = (canvas, t) => {
   const e = t.name === 'Repair walls' ? { recipe: 'wall-straight', params: { tier: 2, damage: 1 } } : t.entry; const id = e?.recipe;
   if (!id || !sprites.has(id)) { drawToolGlyph(canvas.getContext('2d'), t); return; }
@@ -427,6 +471,12 @@ function drawToolGlyph(c, t) {
     c.strokeStyle = t.transit === 2 ? '#b77dff' : '#3ff0ff'; c.lineWidth = 2; c.beginPath(); c.moveTo(6, cy - 7); c.lineTo(W - 6, cy - 37); c.stroke();
   } else if (t.name === 'Bulldoze') {
     dia('#6b5a4a'); c.strokeStyle = '#ff6a5a'; c.lineWidth = 5; c.beginPath(); c.moveTo(cx - 12, cy - 12); c.lineTo(cx + 12, cy + 8); c.moveTo(cx + 12, cy - 12); c.lineTo(cx - 12, cy + 8); c.stroke();
+  } else if (t.action === 'openBulkRepair') {
+    // a ghost wall (dashed cyan) becoming solid again, with a turret ghost behind it
+    dia('#5f7a58'); c.setLineDash([4, 3]); c.strokeStyle = '#7fe8ff'; c.lineWidth = 1.8;
+    c.strokeRect(cx - 4, cy - 30, 22, 18); c.beginPath(); c.arc(cx + 7, cy - 34, 6, Math.PI, 0); c.stroke(); c.setLineDash([]);
+    c.fillStyle = '#c9ced6'; c.fillRect(cx - 26, cy - 14, 26, 12); c.fillStyle = '#8f98a4'; c.fillRect(cx - 26, cy - 4, 26, 4);
+    c.strokeStyle = '#ffb02e'; c.lineWidth = 3; c.beginPath(); c.moveTo(cx + 4, cy + 6); c.lineTo(cx + 20, cy - 6); c.stroke();
   } else if (t.name === 'Level ground') {
     dia('#7a6650', cy + 6); dia('#9a8466', cy - 2, 0.7); dia('#b9a07c', cy - 9, 0.4);
   } else { dia('#556'); }
@@ -443,7 +493,18 @@ cv.addEventListener('pointerdown', e => {
   if (e.button === 2 || e.button === 1 || !building || e.pointerType === 'touch' && app.tool === 'query') pan = { x: e.offsetX, y: e.offsetY, cx: view.cam.x, cz: view.cam.z };
   if (building && e.button === 0) { const p = view.pick(e.offsetX, e.offsetY); if (p) app.drag = { a: [p[0], p[1]], b: [p[0], p[1]] }; pan = null; refreshGhost(); }
 });
+// Right-click while dragging a road, wall, line or zone cancels that drag: nothing is built (owner report #77). A second
+// right-click then puts the tool away (the right-click on release below). Escape does the same, one step at a time.
+// A second button pressed during a drag arrives as a mousedown (and as a pointermove with button 2), never a pointerdown.
+function cancelDrag() {
+  if (!app.drag) return false;
+  app.drag = null; refreshGhost(); moved = 99;   // the release that ends this press is not a tap
+  toast(`Cancelled. Right-click again or press Esc to put the ${app.tools[app.tool]?.name || 'tool'} away.`);
+  return true;
+}
+cv.addEventListener('mousedown', e => { if (e.button === 2 && app.drag) { e.preventDefault(); cancelDrag(); } });
 cv.addEventListener('pointermove', e => {
+  if (e.button === 2 && (e.buttons & 2) && app.drag) cancelDrag();
   const p = view.pick(e.offsetX, e.offsetY); view.hover = p ? [p[0], p[1]] : null; app.hoverPoint = p ? [p[2], p[3]] : null;
   if (!ptrs.has(e.pointerId)) { if (app.founding || app.tool !== 'query') refreshGhost(); return; }
   ptrs.set(e.pointerId, [e.offsetX, e.offsetY]);
@@ -462,14 +523,23 @@ const up = e => {
   if (app.founding && tap) { const p = view.pick(e.offsetX, e.offsetY); if (p) foundAt(p[0] - 1, p[1] - 1); }
   else if (app.aiming && tap) { const p = view.pick(e.offsetX, e.offsetY); if (p) { app.strikeSource = app.aiming; app.aiming = false; useStrikeAt(p[2], p[3]); } }
   else if (app.drag) {
-    const moving = app.tools[app.tool]?.move, res = apply(app.r, app.tools[app.tool], app.drag.a, app.drag.b);
-    if (res.ok) { afterBuild(); snd.play('fragment.crash.small', { gain: 0.15, pitch: 1.6, global: true }); if (res.cost) toast(`${money(-res.cost)}`, ''); if (moving) { toast(res.cost ? `Moved for ${money(res.cost)}.` : 'Moved.', 'good'); app.setTool('query'); app.selected = moving; showInfo(app, moving); } }
+    const t = app.tools[app.tool], moving = t?.move, res = withUndo(moving ? 'move' : t?.name || 'build', () => apply(app.r, t, app.drag.a, app.drag.b));
+    if (res.ok) { snd.play('fragment.crash.small', { gain: 0.15, pitch: 1.6, global: true }); if (res.cost) toast(`${money(-res.cost)}`, ''); if (moving) { toast(res.cost ? `Moved for ${money(res.cost)}.` : 'Moved.', 'good'); app.setTool('query'); app.selected = moving; showInfo(app, moving); } }
     else if (res.why) toast(res.why, 'bad');
     app.drag = null; refreshGhost();
   }
   else if (tap && app.tool === 'query') {
     const p = view.pick(e.offsetX, e.offsetY);
-    if (p) { const li = app.r.tiles.lot[p[1] * app.r.size + p[0]]; app.selected = li >= 0 ? app.r.lots[li] : null; showInfo(app, app.selected); if (app.selected && item(app.selected.id)?.comms) app.openComms(); }
+    if (p) {
+      const r = app.r, [x, z] = p, i = z * r.size + x, li = r.tiles.lot[i], tu = r.turrets.find(t => t.x === x && t.z === z), gh = RP.ghostAt(r, x, z);
+      app.picked = null;
+      // a building → its panel; else a turret, a wall or a ghost of something destroyed (reports #72, #73, #82)
+      if (li >= 0) { app.selected = r.lots[li]; showInfo(app, app.selected); if (item(app.selected.id)?.comms) app.openComms(); }
+      else if (tu) showTurret(app, tu);
+      else if (r.tiles.wall[i]) showWall(app, x, z);
+      else if (gh) showGhost(app, gh);
+      else { app.selected = null; showInfo(app, null); }
+    }
   }
   ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; if (!ptrs.size) pan = null;
 };
@@ -483,7 +553,8 @@ function refreshGhost() {
   const p = plan(app.r, t, a, b); if (!p) { view.ghost = null; return; }
   view.ghost = { tiles: p.tiles, ok: p.quote.ok, color: t.color, sprite: p.sprite && p.quote.ok !== undefined ? p.sprite : null, reach: p.reach || null, reachColor: t.reachColor };
   const price = t.move ? (p.quote.cost ? ' · ' + money(p.quote.cost) : ' · free') : p.quote.cost ? ' · ' + money(p.quote.cost) : '';
-  const tip = $('#h-tool span'); if (tip) tip.textContent = `${t.name}${price}${p.quote.ok ? '' : ' · ' + (p.quote.why || 'Can\'t build here')}`;
+  const kl = t.entry && p.quote.ok ? keyLine(app.r, t.entry) : '';   // the key numbers while it's held (report #81)
+  const tip = $('#h-tool span'); if (tip) tip.textContent = `${t.name}${price}${p.quote.ok ? '' : ' · ' + (p.quote.why || 'Can\'t build here')}${kl ? ' · ' + kl : ''}`;
 }
 
 // keys: one table (lessons rule 34). W/A/S/D and arrows move the view; W is always UP the screen (lessons 26).
@@ -494,10 +565,13 @@ const KEYS = {
   Space: () => app.setSpeed(app.speed ? 0 : 1), Digit1: () => app.setSpeed(1), Digit2: () => app.setSpeed(2), Digit3: () => app.setSpeed(4),
   KeyB: () => budgetSheet(app), KeyC: () => app.openComms(), KeyF: () => app.armStrike(), KeyR: () => openTray(app, 'roads'), KeyZ: () => openTray(app, 'zones'), KeyX: () => app.setTool('bulldoze'),
   Equal: () => { view.cam.zoom = clamp(view.cam.zoom * 1.2, 0.35, 3); }, Minus: () => { view.cam.zoom = clamp(view.cam.zoom / 1.2, 0.35, 3); },
-  Escape: () => { if (closeTopSheet()) return; if (app.aiming) { app.aiming = false; return; } if (app.tool !== 'query') { app.setTool('query'); return; } $('#h-tray') && ($('#h-tray').hidden = true); app.openMenu(); },
+  Escape: () => { if (closeTopSheet()) return; if (app.drag) { app.drag = null; refreshGhost(); return; } if (app.aiming) { app.aiming = false; return; } if (app.tool !== 'query') { app.setTool('query'); return; } $('#h-tray') && ($('#h-tray').hidden = true); app.openMenu(); },
 };
 function nudge(sx, sy) { const step = 120 / view.cam.zoom, [dx, dz] = toWorld(sx * step, sy * step, view.cam.rot); view.cam.x = clamp(view.cam.x + dx, 0, app.r.size); view.cam.z = clamp(view.cam.z + dz, 0, app.r.size); }
-addEventListener('keydown', e => { if (app.mode !== 'city' || e.target.matches('input,textarea,select')) return; const f = KEYS[e.code]; if (f) { e.preventDefault(); f(); } });
+addEventListener('keydown', e => {
+  if (app.mode !== 'city' || e.target.matches('input,textarea,select')) return;
+  if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); if (!topSheet()) app.undo(); return; }   // undo (report #76) — plain Z opens the zones
+  const f = KEYS[e.code]; if (f) { e.preventDefault(); f(); } });
 
 // ------------------------------------------------------------------ orbital strikes (charges bought from warships; the Lance)
 app.armStrike = () => {
@@ -554,6 +628,11 @@ function loop(now) {
 }
 
 // ------------------------------------------------------------------ tooltips with live content
+registerTip('payday', () => {
+  const r = app.r; if (!r) return '';
+  const net = r.budget ? dailyNet(r, r.budget) : 0, left = (1 - dayProgress(r)) * (T.dayLengthSec || 6) / Math.max(1, app.speed || 1);
+  return `Taxes and upkeep are paid once a game day. Next pay day: ${net >= 0 ? '+' : ''}${perDay(net)}${app.speed ? ` in ${fmt(Math.ceil(left))} s` : ' (paused)'}. Tap Credits for the budget (B).`;
+});
 registerTip('people', () => {
   const r = app.r; if (!r) return ''; const c = census(r), a = appeal(r), p = a.parts, why = [];
   if (c.homes <= r.people.total) why.push('no free homes: zone more homes');
@@ -577,6 +656,7 @@ window.gameEye = {
       creatures: app.sim?.horde.list.length ?? 0, cam: { ...view.cam }, baking: sprites.queue.length, screens: opt.screens?.screenState?.() ?? null };
   },
   view, sprites, B, foundAt, setupBattle, afterBuild, podRain,
+  vehicles: () => traffic.list.length,   // tests: a new region starts with none (#75)
   audio: () => ({ mix: mix.state(), music: music?.state() ?? null }),
 };
 

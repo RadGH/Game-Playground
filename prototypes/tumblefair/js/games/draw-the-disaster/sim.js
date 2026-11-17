@@ -6,7 +6,8 @@
 // Drawings travel as compact point lists: a stroke is [colour, brush, "xxyyxxyy…"] where every point is two bytes
 // (0-255 on a square grid) written as four hex characters. A phone sends a long stroke in chunks (`ink`), each chunk
 // appending to the stroke it names. Drawings live only in this match's memory; nothing is ever stored.
-import PROMPTS_FILE from '../../../data/prompts.json' with { type: 'json' };
+import { loadJson } from '../../shared/load-json.js';
+const PROMPTS_FILE = await loadJson(new URL('../../../data/prompts.json', import.meta.url));
 
 export const meta = {
   id: 'draw-the-disaster', title: 'Draw the Disaster', blurb: 'Draw the silly prompt, then vote for the best picture!',

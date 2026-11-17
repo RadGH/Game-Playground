@@ -95,10 +95,10 @@ export function createView(ctx) {
   const pop = (el, text, cls = '') => { if (!el) return; const f = document.createElement('span'); f.className = 'mh-pop ' + cls; f.textContent = text; el.appendChild(f); setTimeout(() => f.remove(), 1300); };
   if (me != null) ui.querySelector(`.mh-players [data-pid="${me}"]`)?.classList.add('me');
   let phase = '', qi = -1, mine = null, gridFor = null;
-  const face = p => `<i class="vface" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
+  const face = p => `<i class="vface" style="--seat:${p.color}" data-tip="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
   function drawVault(v) {
     const key = JSON.stringify(v); if (gridFor === key) return; gridFor = key;
-    $('.mh-grid').innerHTML = v.map(([k, c], i) => `<div class="mh-cell" data-i="${i}" style="--d:${i * 40}ms" title="${esc(C[c].name + ' ' + T[k].name)}">${treasureSvg(T[k].id, C[c].hex)}<span>${esc(T[k].name)}</span></div>`).join('');
+    $('.mh-grid').innerHTML = v.map(([k, c], i) => `<div class="mh-cell" data-i="${i}" style="--d:${i * 40}ms" data-tip="${esc(C[c].name + ' ' + T[k].name)}">${treasureSvg(T[k].id, C[c].hex)}<span>${esc(T[k].name)}</span></div>`).join('');
   }
   function drawQuestion(q) {
     $('.mh-qn').textContent = `Question ${qi + 1} of ${init.questions}`;

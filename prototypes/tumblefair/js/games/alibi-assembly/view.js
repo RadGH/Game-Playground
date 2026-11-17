@@ -16,7 +16,7 @@ const INSPECTOR = `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" c
 export function createView(ctx) {
   const { ui, players, me, init } = ctx, watching = me == null;
   const byPid = new Map(players.map(p => [p.pid, p]));
-  const face = p => `<i class="aa-face" style="--seat:${p?.color || '#999'}" title="${esc(p?.name || '')}">${p?.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
+  const face = p => `<i class="aa-face" style="--seat:${p?.color || '#999'}" data-tip="${esc(p?.name || '')}">${p?.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
   ui.innerHTML = `
     <div class="aa-top"><span class="aa-title">Alibi Assembly</span><span class="clock"><b>--</b></span></div>
     <div class="aa-case"><span class="aa-tag">The case</span><b>${esc(init.crime)}</b></div>

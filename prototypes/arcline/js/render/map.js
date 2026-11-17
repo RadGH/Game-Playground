@@ -9,10 +9,12 @@ import { TURRETS, Defence } from '../../../../citykit/js/world/defence.js';
 import { BIOMES } from '../sim/world.js';
 import { MAX } from '../sim/terrain.js';
 import { ZONE } from '../sim/region.js';
-import { pylonPlan } from '../sim/networks.js';
+import { pylonPlan, bridgeDecks } from '../sim/networks.js';
+import { streetPlan } from './street.js';
 import { CELL, regionAt } from '../sim/world.js';
 import { PYLON } from '../../../../citykit/js/kit/power.js';
 import { PX_PER_HEIGHT } from '../../../../citykit/js/iso.js';
+import { wallFrac, wallLook, wallUnderAttack } from '../sim/repair.js';
 
 export const LEVEL = 0.26;               // one height level in tile heights (≈10 px at 1×)
 const BIDS = Object.keys(BIOMES);
@@ -29,10 +31,12 @@ export class MapView {
     this.hover = null;
   }
   /** world (optional) = the generated world, for naming the neighbours at the region's edge. */
-  setRegion(r, world = null) { this.r = r; this.N = r.size; this._colors = null; this.world = world; this._edgeKey = null; }
+  setRegion(r, world = null) { this.r = r; this.N = r.size; this._colors = null; this.world = world; this._edgeKey = null; this._decks = null; }
+  /** Height level of tile i as drawn: a bridge's deck (sim/networks.js bridgeDecks), else the ground. */
+  lvAt(i) { const d = this._decks?.get(i); return d ?? this.r.ter.height[i]; }
 
   // ---------------- projection ----------------
-  h(x, z) { const N = this.N, tx = Math.max(0, Math.min(N - 1, Math.floor(x))), tz = Math.max(0, Math.min(N - 1, Math.floor(z))); return this.r.ter.height[tz * N + tx] * LEVEL; }
+  h(x, z) { const N = this.N, tx = Math.max(0, Math.min(N - 1, Math.floor(x))), tz = Math.max(0, Math.min(N - 1, Math.floor(z))); return this.lvAt(tz * N + tx) * LEVEL; }
   P = (x, z, y = 0) => {
     const { sx, sy } = toScreen(x - this.cam.x, z - this.cam.z, y, this.cam.rot);
     return { sx: this.W / 2 + sx * this.cam.zoom + this.shk.x, sy: this.H / 2 + sy * this.cam.zoom + this.shk.y };
@@ -45,7 +49,7 @@ export class MapView {
       const [x, z] = toWorld((px - this.W / 2 - this.shk.x) / this.cam.zoom, (py - this.H / 2 - this.shk.y) / this.cam.zoom + lv * LEVEL * 39.19, this.cam.rot);
       const tx = Math.floor(x + this.cam.x), tz = Math.floor(z + this.cam.z);
       if (tx < 0 || tz < 0 || tx >= this.N || tz >= this.N) continue;
-      if (this.r.ter.height[tz * this.N + tx] === lv) return [tx, tz, x + this.cam.x, z + this.cam.z];
+      if (this.lvAt(tz * this.N + tx) === lv) return [tx, tz, x + this.cam.x, z + this.cam.z];
     }
     const [x, z] = toWorld((px - this.W / 2) / this.cam.zoom, (py - this.H / 2) / this.cam.zoom, this.cam.rot);
     const tx = Math.floor(x + this.cam.x), tz = Math.floor(z + this.cam.z);
@@ -83,6 +87,8 @@ export class MapView {
   draw({ night = 0, fx = null, weather = null, horde = null, defence = null, alpha = 1, shots = true, vehicles = [], strikeDraw = null, pods = [], dt = 0 }) {
     this.resize();
     const ctx = this.ctx, W = this.W, H = this.H, r = this.r, N = this.N, zoom = this.cam.zoom, rot = this.cam.rot;
+    // bridge decks: refreshed a few times a second (roads and ground change rarely)
+    if (!this._decks || this._deckRev !== r.lineRev || (this._deckT = (this._deckT || 0) + 1) % 20 === 0) { this._decks = bridgeDecks(r); this._deckRev = r.lineRev; }
     this.shk = fx ? fx.shakeOffset(14) : { x: 0, y: 0 };
     // sky
     const rain = weather?.raining ? 0.35 : 0;
@@ -115,10 +121,11 @@ export class MapView {
         col = shade(col, (lv - 2) * 0.035);
         if (r.ter.deposit[i]) col = mix(col, DEP_COLOR[r.ter.deposit[i]], ((x * 31 + z * 17) % 3) * 0.08 + 0.18);
       }
-      const road = r.tiles.road[i];
-      if (road) col = road === 3 ? '#3a3e45' : road === 2 ? '#454a52' : '#50565e';
+      const road = r.tiles.road[i], deck = road && wat ? this._decks.get(i) : undefined;
+      if (road && deck === undefined) col = road === 3 ? '#3a3e45' : road === 2 ? '#454a52' : '#50565e';
       diamond(ctx, c.sx, c.sy, hw, hh, mix(col, wat ? '#0b1730' : '#141a26', nightK));
-      if (road) this._roadMarks(ctx, x, z, c, hw, hh, road, night, wat);
+      if (deck !== undefined) items.push({ d: this.depth(x + 0.5, z + 0.5) - 1.05, draw: () => this._bridge(ctx, x, z, i, deck, road, hw, hh, night, nightK) });
+      else if (road) this._roadMarks(ctx, x, z, c, hw, hh, road, night, wat);
       const zn = r.tiles.zone[i]; if (zn && r.tiles.lot[i] < 0) { diamondFill(ctx, c.sx, c.sy, hw * 0.86, hh * 0.86, ZONE_TINT[zn]); }
       if (this.overlay) this._overlayTile(ctx, i, c, hw, hh);
       if (r.tiles.transit[i]) items.push({ d: this.depth(x + 0.5, z + 0.5) + 0.05, draw: () => this._track(ctx, x, z, r.tiles.transit[i], night) });
@@ -142,7 +149,12 @@ export class MapView {
       let best = -Infinity; for (const [ox, oz] of [[0, 0], [l.w, 0], [0, l.d], [l.w, l.d]]) best = Math.max(best, this.depth(l.x + ox, l.z + oz));
       items.push({ d: best - 0.5, draw: () => this._lot(ctx, l, night) });
     }
+    // street lights and neon signs (report #71): models from citykit street.js, placed by render/street.js
+    if (zoom >= 0.45) for (const s of streetPlan(r)) { if (!this._near(s.x, s.z, 2)) continue; if (s.id === 'st-lamp' && zoom < 0.6 && !s.params.kind) { if (night > 0.4) items.push({ d: -1e9, draw: () => this._lampPool(ctx, s, night) }); continue; } items.push({ d: this.depth(s.x, s.z) + 0.02, draw: () => this._street(ctx, s, night) }); }
+    else if (night > 0.4) for (const s of streetPlan(r)) { if (s.id === 'st-lamp' && this._near(s.x, s.z, 1)) items.push({ d: -1e9, draw: () => this._lampPool(ctx, s, night) }); }
     this._walls(items, night);
+    // ghosts of what creatures destroyed: tap to rebuild (report #73)
+    for (const g of r.ghosts || []) { if (!this._near(g.x + g.w / 2, g.z + g.d / 2, Math.max(g.w, g.d) + 4)) continue; let best = -Infinity; for (const [ox, oz] of [[0, 0], [g.w, 0], [0, g.d], [g.w, g.d]]) best = Math.max(best, this.depth(g.x + ox, g.z + oz)); items.push({ d: best - 0.5, draw: () => this._ghost(ctx, g, night) }); }
     if (defence) for (const tu of defence.turrets) { if (!this._near(tu.x, tu.z)) continue; items.push({ d: this.depth(tu.x + 0.5, tu.z + 0.5), draw: () => this._turret(ctx, tu, night) }); }
     if (horde) for (const c of horde.list) {
       const x = lerp(c.px ?? c.x, c.x, alpha), z = lerp(c.pz ?? c.z, c.z, alpha); if (!this._near(x, z)) continue;
@@ -208,10 +220,29 @@ export class MapView {
   }
   _near(x, z, pad = 4) { const p = this.P(x, z, 0); const m = pad * TILE_W * this.cam.zoom; return p.sx > -m && p.sx < this.W + m && p.sy > -m * 3 && p.sy < this.H + m; }
 
+  /** A bridge tile: a pillar down to the water every other tile, the deck at bank height (bridgeDecks), its edge
+   *  faces where nothing as high stands in front, then the usual road marks and rails on top (owner report #83). */
+  _bridge(ctx, x, z, i, deck, road, hw, hh, night, nightK) {
+    const r = this.r, N = this.N, zm = this.cam.zoom, wl = r.ter.height[i] * LEVEL, top = deck * LEVEL, c = this.P(x + 0.5, z + 0.5, top);
+    const lp = LEVEL * 39.19 * zm, thick = Math.max(3, 0.32 * lp);
+    if ((x + z) % 2 === 0) {
+      const a = this.P(x + 0.5, z + 0.5, wl), w = Math.max(2, 7 * zm);
+      ctx.fillStyle = mix('#6d747e', '#151a24', nightK); ctx.fillRect(a.sx - w / 2, c.sy, w, a.sy - c.sy);
+      ctx.fillStyle = mix('#565c66', '#10141c', nightK); ctx.fillRect(a.sx, c.sy, w / 2, a.sy - c.sy);
+    }
+    const [fx1, fz1] = frontNeighbours(this.cam.rot);
+    for (const [dx, dz, side] of [[fx1[0], fx1[1], 0], [fz1[0], fz1[1], 1]]) {
+      const nx = x + dx, nz = z + dz, nlv = nx >= 0 && nz >= 0 && nx < N && nz < N ? this.lvAt(nz * N + nx) : 0;
+      if (nlv >= deck) continue;
+      ctx.fillStyle = mix(side ? '#7b828c' : '#646b75', '#0d1018', nightK); cliff(ctx, c.sx, c.sy, hw, hh, Math.min(thick, (deck - nlv) * lp), side);
+    }
+    diamond(ctx, c.sx, c.sy, hw, hh, mix(road === 3 ? '#3a3e45' : road === 2 ? '#454a52' : '#50565e', '#141a26', nightK));
+    this._roadMarks(ctx, x, z, c, hw, hh, road, night, true);
+  }
   _roadMarks(ctx, x, z, c, hw, hh, level, night, wat) {
     const r = this.r, N = this.N, con = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dz]) => { const nx = x + dx, nz = z + dz; return nx >= 0 && nz >= 0 && nx < N && nz < N && r.tiles.road[nz * N + nx] > 0; });
     const along = (con[0] || con[1]) && !(con[2] || con[3]) ? 'x' : (con[2] || con[3]) && !(con[0] || con[1]) ? 'z' : null;
-    const lvl = this.r.ter.height[z * N + x] * LEVEL;
+    const lvl = this.lvAt(z * N + x) * LEVEL;
     ctx.save();
     if (wat) {   // bridge deck rails
       ctx.strokeStyle = mix('#9aa2ac', '#2a3040', night * 0.7); ctx.lineWidth = Math.max(1, 2 * this.cam.zoom);
@@ -225,8 +256,21 @@ export class MapView {
       ctx.lineWidth = Math.max(1, (level === 1 ? 1 : 1.6) * this.cam.zoom); ctx.setLineDash(level === 1 ? [4 * this.cam.zoom, 5 * this.cam.zoom] : []);
       ctx.beginPath(); ctx.moveTo(p.sx, p.sy); ctx.lineTo(q.sx, q.sy); ctx.stroke(); ctx.setLineDash([]);
     }
-    // street lights glow at night
-    if (night > 0.4 && (x * 3 + z) % 4 === 0) { const g = this.P(x + 0.12, z + 0.12, lvl); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(0.8, (night - 0.4) * 1.4); const s = 7 * this.cam.zoom; const gr = ctx.createRadialGradient(g.sx, g.sy, 0, g.sx, g.sy, s); gr.addColorStop(0, 'rgba(255,214,140,0.9)'); gr.addColorStop(0.25, 'rgba(255,190,110,0.35)'); gr.addColorStop(1, 'rgba(255,170,90,0)'); ctx.fillStyle = gr; ctx.beginPath(); ctx.ellipse(g.sx, g.sy, s, s * 0.55, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+  /** A street light or neon sign: the baked model (lights at night through composite), and under a lamp a warm pool
+   *  of light on the road once it's dark. */
+  _street(ctx, s, night) {
+    if (s.id === 'st-lamp' && night > 0.4) this._lampPool(ctx, s, night);
+    const pair = this.sprites.building(s.id, s.params, (this.cam.rot + s.turn) & 3); if (!pair || pair.failed) return;
+    const g = this.G(s.x, s.z); composite(ctx, pair, g.sx, g.sy, night, this.cam.zoom / this.sprites.scale);
+  }
+  _lampPool(ctx, s, night) {
+    // one pre-drawn warm glow, stretched into the ground ellipse (cheap: no gradient made per lamp per frame)
+    const pool = this._poolImg ??= (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,220,150,0.85)'); gr.addColorStop(0.3, 'rgba(255,196,120,0.32)'); gr.addColorStop(1, 'rgba(255,170,90,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c; })();
+    const zm = this.cam.zoom, rr = 15 * zm;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(0.75, (night - 0.4) * 1.3);
+    for (const k of s.params.kind ? [1, -1] : [1]) { const g = this.G(s.x + s.arm[0] * 0.19 * k, s.z + s.arm[1] * 0.19 * k); ctx.drawImage(pool, g.sx - rr, g.sy - rr * 0.55, rr * 2, rr * 1.1); }
     ctx.restore();
   }
   _overlayTile(ctx, i, c, hw, hh) {
@@ -275,7 +319,8 @@ export class MapView {
   }
   _wall(ctx, x, z, night) {
     const r = this.r, N = this.N, i = z * N + x, v = r.tiles.wall[i], gate = v === 9, tier = gate ? 2 : v;
-    const max = [0, 220, 520, 1100][tier] || 300, hp = r.tiles.wallHp[i], damage = hp > max * 0.66 ? 0 : hp > max * 0.33 ? 1 : 2;
+    // looks whole above half health (and then heals itself); cracked / battered below — repair.js wallLook (report #82)
+    const frac = wallFrac(r, i), damage = gate ? 0 : wallLook(frac);
     const at = (dx, dz) => { const nx = x + dx, nz = z + dz; return nx >= 0 && nz >= 0 && nx < N && nz < N && r.tiles.wall[nz * N + nx] > 0; };
     const ax = at(1, 0) || at(-1, 0), az = at(0, 1) || at(0, -1);
     let id = 'wall-straight', params = { tier, damage }, rot = this.cam.rot;
@@ -286,6 +331,27 @@ export class MapView {
     const pair = this.sprites.building(id, params, rot), g = this.G(x + 0.5, z + 0.5);
     if (!pair || pair.failed) { ctx.fillStyle = '#7a8290'; ctx.fillRect(g.sx - 12 * this.cam.zoom, g.sy - 18 * this.cam.zoom, 24 * this.cam.zoom, 18 * this.cam.zoom); return; }
     composite(ctx, pair, g.sx, g.sy, night, this.cam.zoom / this.sprites.scale);
+    // a health bar while it's being hit or once it's damaged, so "looks fine" is never a guess (report #82)
+    if (frac < 0.999 && (frac <= 0.5 || wallUnderAttack(r, i)) && this.cam.zoom >= 0.5) {
+      const zm = this.cam.zoom, w = 22 * zm, y = g.sy - 30 * zm;
+      ctx.fillStyle = 'rgba(8,10,18,0.75)'; ctx.fillRect(g.sx - w / 2 - 1, y - 1, w + 2, 4 * zm + 2);
+      ctx.fillStyle = frac > 0.5 ? '#6bf09a' : frac > 0.25 ? '#ffc04a' : '#ff6a5a'; ctx.fillRect(g.sx - w / 2, y, w * frac, 4 * zm);
+    }
+  }
+  /** A ghost: what stood here before the creatures broke it, drawn see-through with a dashed outline (report #73). */
+  _ghost(ctx, gh, night) {
+    const r = this.r, N = this.N, zm = this.cam.zoom, base = r.ter.height[gh.z * N + gh.x] * LEVEL, t = performance.now() / 1000;
+    let pair = null;
+    if (gh.kind === 'lot') pair = this.sprites.building(gh.recipe, { ...gh.params }, (this.cam.rot + (gh.face || 0)) & 3);
+    else if (gh.kind === 'wall') { const along = [[0, 1], [0, -1]].some(([dx, dz]) => { const j = (gh.z + dz) * N + gh.x + dx; return r.tiles.wall[j] || r.ghosts.some(o => o.kind === 'wall' && o.x === gh.x + dx && o.z === gh.z + dz); }); pair = this.sprites.building(gh.v === 9 ? 'wall-gate' : 'wall-straight', gh.v === 9 ? { tier: 2, open: 0 } : { tier: gh.v || 1, damage: 0 }, along ? (this.cam.rot + 1) & 3 : this.cam.rot); }
+    else if (gh.kind === 'turret') { const rec = TURRETS[item0(gh.id)]?.recipe; if (rec) pair = this.sprites.facing(rec, { tier: gh.tier || 1 }, 0, this.sprites.recipe(rec)?.dirs || 32); }
+    const g = this.P(gh.x + gh.w / 2, gh.z + gh.d / 2, base);
+    ctx.save();
+    if (pair && !pair.failed) { ctx.globalAlpha = 0.3 + 0.06 * Math.sin(t * 2.4); composite(ctx, pair, g.sx, g.sy, night, zm / this.sprites.scale); }
+    ctx.globalAlpha = 0.85; ctx.strokeStyle = '#7fe8ff'; ctx.lineWidth = Math.max(1, 1.5 * zm); ctx.setLineDash([5 * zm, 4 * zm]); ctx.lineDashOffset = -t * 8;
+    const c = [[0, 0], [gh.w, 0], [gh.w, gh.d], [0, gh.d]].map(([ox, oz]) => this.P(gh.x + ox, gh.z + oz, base));
+    ctx.beginPath(); c.forEach((p, k) => k ? ctx.lineTo(p.sx, p.sy) : ctx.moveTo(p.sx, p.sy)); ctx.closePath(); ctx.stroke();
+    ctx.restore();
   }
   _turret(ctx, tu, night) {
     const kind = TURRETS[tu.kind], rec = this.sprites.recipe(kind.recipe), g = this.G(tu.x + 0.5, tu.z + 0.5);
@@ -488,6 +554,8 @@ function diamond(ctx, x, y, hw, hh, col) { ctx.fillStyle = col; ctx.beginPath();
 function diamondFill(ctx, x, y, hw, hh, col) { diamond(ctx, x, y, hw, hh, col); }
 function diamondStroke(ctx, x, y, hw, hh) { ctx.beginPath(); ctx.moveTo(x, y - hh); ctx.lineTo(x + hw, y); ctx.lineTo(x, y + hh); ctx.lineTo(x - hw, y); ctx.closePath(); ctx.stroke(); }
 const lerp = (a, b, t) => a + (b - a) * t;
+/** A turret catalog id → its kind ('tur-pulse' → 'pulse'). */
+const item0 = id => String(id || '').replace(/^tur-/, '');
 export function mix(a, b, t) {
   const p = s => s.startsWith('rgb') ? s.match(/[\d.]+/g).slice(0, 3).map(Number) : [1, 3, 5].map(i => parseInt(s.slice(i, i + 2), 16));
   const A = p(a), B = p(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',')})`;

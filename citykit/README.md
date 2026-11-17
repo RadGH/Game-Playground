@@ -79,5 +79,6 @@ anything that should light up at night must use a material with `userData.glow`)
 | `js/kit/shapes.js` | The building blocks |
 | `js/kit/buildings.js` | Groups, the recipe registry, homes + shops/offices + hotel |
 | `js/kit/power.js` | Power pylon (`pwr-pylon`): lattice mast, crossarm with glowing insulators; exports `PYLON` (where the game hangs its wires) |
+| `js/kit/street.js` | Street furniture (`st-lamp` street light, one or two arms; `st-billboard` billboard or neon blade sign, 6 colours, word-free patterns) — Arcline stands them along roads and at shops (report #71) |
 | `js/kit/all.js` | Imports every kit file |
 | `js/app.js` | The review page |

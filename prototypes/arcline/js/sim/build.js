@@ -5,6 +5,7 @@ import { item, cat, unlocked, materials } from './catalog.js';
 import { isFlat, levelCost, level, DEP_NAMES } from './terrain.js';
 import { ZONE } from './region.js';
 import { T } from './tuning.js';
+import { mkOf, priceOf, wallMaxHp } from './arms.js';
 
 const inMap = (r, x, z) => x >= 0 && z >= 0 && x < r.size && z < r.size;
 const occupied = (r, i) => r.tiles.lot[i] >= 0 || r.tiles.wall[i] > 0 || r.turrets.some(t => t.z * r.size + t.x === i);
@@ -92,8 +93,8 @@ export function quotePlace(r, id, x, z) {
   if (!unlocked(r, e)) return { ok: false, why: `Unlocks at milestone ${e.unlock}` };
   if (e.unique && r.lots.some(l => l.id === id)) return { ok: false, why: 'You already have one' };
   const bad = siteProblem(r, e, x, z); if (bad) return { ok: false, why: bad };
-  const mats = materials(e), broke = afford(r, e.cost, mats);
-  return { ok: !broke, why: broke, cost: e.cost, mats };
+  const cost = priceOf(r, e), mats = materials(e), broke = afford(r, cost, mats);   // a merchant's landmark piece takes its share off
+  return { ok: !broke, why: broke, cost, mats };
 }
 /** Why entry e can't stand at (x, z) — off the map, something in the way, not flat, no deposit, no water — or null. */
 function siteProblem(r, e, x, z) {
@@ -163,15 +164,17 @@ export function quoteTurret(r, id, x, z) {
 export function buildTurret(r, id, x, z) {
   const q = quoteTurret(r, id, x, z); if (!q.ok) return q;
   const e = item(id);
-  r.turrets.push({ id, kind: e.turret, x, z, power: -(e.power ?? -3), upkeep: e.upkeep, built: r.day, heading: -Math.PI / 4 });
+  r.turrets.push({ id, kind: e.turret, tier: mkOf(r, e.turret), x, z, power: -(e.power ?? -3), upkeep: e.upkeep, built: r.day, heading: -Math.PI / 4 });   // built at the Mk the merchants' parts allow
   r.tiles.wall[z * r.size + x] = 0; r.ter.flora[z * r.size + x] = 0; r.tiles.zone[z * r.size + x] = 0;   // nothing grows on a turret
   pay(r, q.cost, q.mats); r.dirty = true; r.wallsChanged = true; return q;
 }
 
 // ---------------- bulldoze + level ----------------
+const ghostOn = (r, x, z) => (r.ghosts || []).some(g => x >= g.x && z >= g.z && x < g.x + (g.w || 1) && z < g.z + (g.d || 1));
 export function quoteBulldoze(r, tiles) {
-  let n = 0; for (const [x, z] of tiles) { if (!inMap(r, x, z)) continue; const i = z * r.size + x; if (r.tiles.road[i] || r.tiles.lot[i] >= 0 || r.tiles.wall[i] || r.tiles.power[i] || r.tiles.zone[i] || r.turrets.some(t => t.x === x && t.z === z)) n++; }
-  const cost = n * 8; return { ok: n > 0 && r.money >= cost, why: n ? (r.money >= cost ? null : `Needs ${cost} credits`) : 'Nothing to clear', cost };
+  let n = 0, ghosts = 0;
+  for (const [x, z] of tiles) { if (!inMap(r, x, z)) continue; const i = z * r.size + x; if (r.tiles.road[i] || r.tiles.lot[i] >= 0 || r.tiles.wall[i] || r.tiles.power[i] || r.tiles.zone[i] || r.turrets.some(t => t.x === x && t.z === z)) n++; else if (ghostOn(r, x, z)) ghosts++; }
+  const cost = n * 8; return { ok: (n > 0 || ghosts > 0) && r.money >= cost, why: n || ghosts ? (r.money >= cost ? null : `Needs ${cost} credits`) : 'Nothing to clear', cost };   // clearing a ghost (report #73) is free
 }
 export function bulldoze(r, tiles) {
   const q = quoteBulldoze(r, tiles); if (!q.ok) return q;
@@ -181,6 +184,7 @@ export function bulldoze(r, tiles) {
     const li = r.tiles.lot[i]; if (li >= 0 && r.lots[li].id !== 'col-core') kill.add(li);
     r.tiles.road[i] = 0; r.tiles.wall[i] = 0; r.tiles.wallHp[i] = 0; r.tiles.power[i] = 0; r.tiles.zone[i] = 0;
     r.turrets = r.turrets.filter(t => !(t.x === x && t.z === z));
+    if (r.ghosts?.length) r.ghosts = r.ghosts.filter(g => !(x >= g.x && z >= g.z && x < g.x + (g.w || 1) && z < g.z + (g.d || 1)));
   }
   if (kill.size) { r.lots = r.lots.filter((_, idx) => !kill.has(idx)); reindexLots(r); }
   r.lineRev = (r.lineRev || 0) + 1;
@@ -195,8 +199,7 @@ export function levelGround(r, x, z, w, d, to) { const q = quoteLevel(r, x, z, w
 export { ZONE };
 
 // ---------------- repair walls ----------------
-const WALL_MAX = { 1: 220, 2: 520, 3: 1100, 9: 300 };
-export function wallMax(r, i) { const v = r.tiles.wall[i]; return (WALL_MAX[v] || 300) * (r.wallHpMul || 1); }
+export function wallMax(r, i) { return wallMaxHp(r, r.tiles.wall[i]); }
 /** Repair every damaged wall in the tiles: 1 credit per 2 points of wall health restored. */
 export function quoteRepair(r, tiles) {
   let pts = 0; for (const [x, z] of tiles) { if (!inMap(r, x, z)) continue; const i = z * r.size + x; if (r.tiles.wall[i]) pts += Math.max(0, wallMax(r, i) - r.tiles.wallHp[i]); }

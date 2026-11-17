@@ -48,6 +48,7 @@
 .pass-pop span { display: grid; min-width: 0; } .pass-pop b { font-size: 14px; } .pass-pop small { font-size: 11px; font-weight: 700; color: #47606a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pass-pop.level { background: #fff3b8; } .pass-pop.daily { background: #eaffe3; }
 .pass-pop.out { opacity: 0; transform: translateY(-8px); }
+body[data-phase="game"] .pass-pops { display: none; }   /* QA pass 2026-11-16: never over a minigame's score strip (pass.js holds them till the results) */
 @keyframes pass-in { from { transform: scale(.6); opacity: 0; } }
 
 /* final screen block */

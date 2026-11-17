@@ -101,7 +101,7 @@ export function createView(ctx) {
 
   const want = card => BUTTONS.filter(b => card & b.bit).map(b => `<i class="pb-wi">${ICON[b.id]}<em>${b.name}</em></i>`).join('<span class="pb-plus">+</span>');
   function paintStrip(list) {
-    $('.pb-strip').innerHTML = players.map(p => `<div class="pb-row">${chip(p)}<span class="pb-film">${list.map(([card, m, pts]) => `<i class="${pts[p.pid] ? 'ok' : 'no'}" title="${esc(POSES[card].name)}">${pts[p.pid] ? '✓' : '✗'}</i>`).join('')}</span></div>`).join('');
+    $('.pb-strip').innerHTML = players.map(p => `<div class="pb-row">${chip(p)}<span class="pb-film">${list.map(([card, m, pts]) => `<i class="${pts[p.pid] ? 'ok' : 'no'}" data-tip="${esc(POSES[card].name)}">${pts[p.pid] ? '✓' : '✗'}</i>`).join('')}</span></div>`).join('');
   }
   function note(g) {
     if (g.phase === 'count') return 'Watch the card, hit its buttons, then hold still for the flash!';

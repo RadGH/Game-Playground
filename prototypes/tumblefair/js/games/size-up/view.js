@@ -70,7 +70,7 @@ export function createView(ctx) {
       c.classList.toggle('right', i === r.answer); c.classList.toggle('wrong', i !== r.answer && (i === mine || (watching && Object.values(r.picks).includes(i))));
       c.querySelector('.su-val').textContent = fmt(stat, t[stat]) + (stat === 'kmh' ? ` (${Math.max(0.01, Math.round(t.kmh * 0.621 * 10) / 10)} mph)` : '');
       c.querySelector('.su-mark').textContent = i === r.answer ? 'YES!' : '';
-      c.querySelector('.su-who').innerHTML = players.filter(p => r.picks[p.pid] === i).map(p => `<i class="su-face" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : esc(p.name[0] || '?')}</i>`).join('');
+      c.querySelector('.su-who').innerHTML = players.filter(p => r.picks[p.pid] === i).map(p => `<i class="su-face" style="--seat:${p.color}" data-tip="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : esc(p.name[0] || '?')}</i>`).join('');
       c.disabled = true;
       // round 12: a bar on a log scale under each value, so "about 40x" reads at a glance
       const vs = ids.map(id => Math.log10(byId.get(id)[stat])), lo = Math.min(...vs), hi = Math.max(...vs);

@@ -13,7 +13,7 @@ import { CHAT_QUICK, CHAT_MAX, cleanChat } from '../shared/protocol.js';
 export const BUBBLE_MS = 5000, BUBBLES_MAX = 3, HISTORY_SHOWN = 8;
 
 export function createChat({ net, members, me, faceSrc, seatOf, sfx = () => {}, openSheet, closeSheet }) {
-  const button = h('button', 'chat-btn', '💬'); button.type = 'button'; button.title = 'Chat'; button.setAttribute('aria-label', 'Chat'); button.hidden = true;
+  const button = h('button', 'chat-btn', '💬'); button.type = 'button'; button.dataset.tip = 'Chat'; button.setAttribute('aria-label', 'Chat'); button.hidden = true;
   const dot = h('i', 'chat-dot'); dot.hidden = true; button.append(dot);
   const feed = h('div', 'chat-feed'); feed.setAttribute('aria-live', 'polite');
   document.body.append(button, feed);

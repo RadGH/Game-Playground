@@ -1,0 +1,38 @@
+/* Arcline — the builder's tools (js/ui/builder.js): stat cards on the build trays (#81), the Mk badge (#78), the
+   tool bar's Undo (#76), the Bulk repair dialog (#73) and the turret/wall/ghost panels. Uses arcline.css tokens. */
+
+/* tray cards: the key numbers printed on the card (phones and controllers see them without hovering) */
+.ac-tcard { position: relative; }
+.ac-tcard .kl { font-size: 12px; color: var(--cyan); line-height: 1.2; font-variant-numeric: tabular-nums; }
+.ac-tcard .mk { position: absolute; top: 6px; right: 6px; padding: 1px 6px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #031418;
+  background: linear-gradient(180deg, #ffd36a, #ffb02e); box-shadow: 0 0 10px rgba(255, 176, 46, 0.45); }
+.ac-tcard.locked .kl { color: var(--dim); }
+
+/* the stat card inside the shared tooltip box */
+.ac-statcard { display: flex; flex-direction: column; gap: 6px; max-width: 300px; }
+.ac-statcard .nm { font-size: 15px; color: var(--cyan); }
+.ac-statcard p { margin: 0; color: var(--dim); font-size: 13px; line-height: 1.35; }
+.ac-statcard p.why { color: var(--amber); }
+.ac-stats { display: grid; grid-template-columns: auto 1fr; gap: 3px 14px; margin: 0; font-size: 13px; }
+.ac-stats dt { color: var(--dim); }
+.ac-stats dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+
+/* the info panel for a turret / wall / ghost: the same look as a building's */
+.ac-info[data-kind="ghost"] h3 { color: #7fe8ff; }
+.ac-info[data-kind="ghost"] { border-color: rgba(127, 232, 255, 0.45); border-style: dashed; }
+.ac-info dl.ac-stats { font-size: 14px; margin: 0 0 10px; }
+
+/* the tool bar's Undo: first on the bar; the bar scrolls back to show it when a new step appears (phones) */
+.ac-undo { flex: none; display: inline-flex; flex-direction: column; justify-content: center; align-items: flex-start; min-height: 44px; line-height: 1.15;
+  border-color: rgba(255, 176, 46, 0.6); background: linear-gradient(180deg, rgb(60, 44, 18), rgb(40, 30, 14)); }
+.ac-undo span { font-weight: 600; font-size: 13.5px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ac-undo small { font-size: 12px; color: var(--amber); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Bulk repair */
+.ac-bulk { display: flex; flex-direction: column; gap: 4px; }
+.ac-bulk .ac-toggle { padding: 4px 2px; }
+.ac-bulk .ac-toggle-text { display: flex; flex-direction: column; }
+.ac-bulk .ac-toggle-text small { color: var(--dim); font-size: 12.5px; }
+.ac-bulkrows { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 14px; }
+.ac-bulkrows dt:last-of-type, .ac-bulkrows dd:last-of-type { font-weight: 700; color: var(--text); padding-top: 4px; }
+.ac-bulkgo { display: flex; flex-direction: column; align-items: center; }

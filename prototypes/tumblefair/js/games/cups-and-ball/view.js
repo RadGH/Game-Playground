@@ -140,7 +140,7 @@ export function createView(ctx) {
       });
     }
   }
-  function prompt() {
+  function doLine() {
     if (!g) return '';
     if (ph === 'show') return 'Watch the ball!';
     if (ph === 'shuffle') return 'Follow that cup…';
@@ -175,7 +175,7 @@ export function createView(ctx) {
         el.classList.toggle('lead', players.length > 1 && s.sc[p.pid] === lead && lead > 0);
         el.querySelector('.pk').textContent = s.ph === 'guess' && s.pk?.includes(p.pid) ? '✓' : s.sk[p.pid] >= 2 ? `🔥${s.sk[p.pid]}` : '';
       }
-      doEl.textContent = prompt(); doEl.className = 'cb-do ' + s.ph + (s.ph === 'reveal' && reveal?.got?.[me] > 0 ? ' good' : s.ph === 'reveal' && me != null ? ' bad' : '');
+      doEl.textContent = doLine(); doEl.className = 'cb-do ' + s.ph + (s.ph === 'reveal' && reveal?.got?.[me] > 0 ? ' good' : s.ph === 'reveal' && me != null ? ' bad' : '');
       $('.cb-note').textContent = note();
     },
     priv(d) { if (d && d.r === round && d.pick != null) myPick = d.pick; },

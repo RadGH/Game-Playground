@@ -440,6 +440,8 @@ export function createView(ctx) {
       juice.frame(dt, t);
       const camPos = stage.camera.position, panelTop = panel ? panel.getBoundingClientRect().top : 0;
       for (const [pid, r] of R) {
+        // live report #47: a golfer who has holed out cheers by the cup, then steps off the green (never in the others' line)
+        if (r.st === ST.in && !r.anim) { r.offAt ??= performance.now() + 1800; if (r.actor && performance.now() >= r.offAt) r.actor.group.visible = false; }
         let pos;
         const A = r.anim;
         if (A) {

@@ -31,8 +31,9 @@ export function createCpu(c) {
         const odd = solve(items), wrongP = by(sk, [0.22, 0.12, 0.06]) * lv;
         mem.r = g.round; mem.at = v.t + Math.max(0.9, base * (1 + gauss(c.rng) * 0.4));
         mem.pick = odd >= 0 && c.rng() >= wrongP ? odd : Math.floor(c.rng() * items.length);
-        if (mem.pick === odd && mem.at > v.t + 9.3) mem.pick = Math.floor(c.rng() * items.length);  // ran out of time: a hurried guess
-        mem.at = Math.min(mem.at, v.t + 9.3);
+        const last = (v.init?.times?.[g.round] ?? 10) - 0.7;                                       // the round's own length (#48: later rounds are longer)
+        if (mem.pick === odd && mem.at > v.t + last) mem.pick = Math.floor(c.rng() * items.length);  // ran out of time: a hurried guess
+        mem.at = Math.min(mem.at, v.t + last);
       }
       if (mem.at != null && v.t >= mem.at) { mem.at = null; v.act('tap', mem.pick); }
     },

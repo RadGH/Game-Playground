@@ -1,6 +1,9 @@
 # Tumblefair
 
-> **QA pass pending** (added 2026-11-11): the next time this game is worked on, run `tools/prepublish-check.sh tumblefair` from the playground and fix what it finds — game-lint (on 2026-11-11: 40 browser-tooltip, 3 browser-popup, 2 json-import, 1 muster), modules nothing loads (`tools/game-reach.mjs`), and a `tests/walk.mjs` that walks every screen on desktop + phone (`tools/walk-screens.mjs`; none yet). Replace this note with the **Status / Play / Next / Parked** block (`~/claude/docs/game-standards.md`) and add `tumblefair` to `tools/qa-passed.json`. Publishing this game refuses until the checks pass.
+> **Status:** live on tumblefair.games.radgh.com · 2026-11-16 (dev, not yet published): live reports #47-#50 (golfers step off the course, Pattern Impostor rules checkable, Letter Shot 150 s, no CPU snowman builder with 2+ people) + the QA pass (lint clean, styled tooltips and dialogs, every screen walked on desktop + phone by `tests/walk.mjs`)
+> **Play:** public https://tumblefair.games.radgh.com/ · LAN stable `http://<LAN IP>:8480/` · dev `:8483` (start it with `tools/game-servers.sh start tumblefair-dev`; local game servers are off by default)
+> **Next:** publish this batch (`tools/publish-tumblefair.sh`, then the RGS deploy — see Publish below); then the next live reports (`tools/feedback-report.mjs` on the droplet)
+> **Parked:** the RPG one-shot mode and branching paths, more boards, tuning after real play (see "Not built yet" near the end)
 
 A couch party game for 2–4 players, played on phones. Everyone opens one link (or scans the QR code on the host's
 screen), picks a look for their character, and the match runs: roll dice round a fairground board, vote for a
@@ -504,10 +507,10 @@ player gets in five seconds — HOLD a button and let go while the meter is in t
   1v2 in the brief; solo is 1v1 against Hopper. A without the ball while your CPU teammate has it = "pass it here".
   The tip-off bounces toward a random side (the first version always gave red the first ball: a 13-7 edge over 24
   bot games).
-- **Letter Shot** (`letter-shot`, screen, 1-4, 90 s): call-your-shot. The setter taps one of 7 marks on a little
+- **Letter Shot** (`letter-shot`, screen, 1-4, 150 s — was 90 s until live report #49 "need more time", 2026-11-16): call-your-shot. The setter taps one of 7 marks on a little
   court map, then shoots; if it drops, EVERYONE ELSE shoots that mark at the same moment (no queue — this is what
   keeps the dead time short) and each miss earns the next letter of F-A-I-R; 4 letters = out, last one in wins.
-  Setter misses = nothing, the next player sets. Timers: 5 s to pick, 6 s to shoot (then the clock throws a bad one
+  Setter misses = nothing, the next player sets. Timers: 7 s to pick, 8 s to shoot (then the clock throws a bad one
   for you). In the second half a missed copy costs TWO letters, so most games finish with one player left; at the bell
   the fewest letters wins. Solo: you against Rimsby (CPU). Scores are letters (`scoring: 'survival'`, fewer = better).
 - **`js/games/hoops-kit.js`** (pure, sim + view): a real ball flight — gravity, a rim you can bounce off, a backboard
@@ -1377,6 +1380,35 @@ and passwords included); each game keeps its own save on it.
   the second-tab message, the 💬 position + bubbles + markup as text, the wheel's size at 402x684, the away badge, and
   Letter Shot's hoop on screen between the bars and the panel).
 
+## Live reports #47-#50: golfers, rules, time and bots (2026-11-16)
+
+All four from 2-person rooms (Rad + another person; no CPU fairgoers seated — `cpus: 0` in the reports).
+- **#47 Mini Golf (👍) "when ur turn over remove the player so they don't stand in the way".** A golfer whose ball is
+  in (or picked up) cheers for 1.3 s (0.5 s after a pick-up) and then steps off the course: the shared putting view
+  hides the character and its name tag until the next hole (`js/games/golf-view.js` `offAt`, so Putt Party and Haunted
+  Hole get it too). Fairway Golf stood finished golfers in a ring 2.2 yd from the cup — on the green, in the putting
+  line — and now hides them 1.8 s after the ball drops (`js/games/fairway-golf/view.js`).
+- **#48 Pattern Impostor (👎) "each color had its own nuymber of shapes???????"** — he was quoting the round-5 reveal
+  ("Each colour had its own number of shapes: every red one had two…"). Nothing on screen let him check it, the
+  pairing kind of rule was never explained before it came up, and a small picture of three shapes drew each shape as big
+  as a big picture of one. Now: plain rule text with numerals ("The rule: the colour tells you how many shapes. Every
+  red picture had 2 shapes, … — but this red picture had 1 shape."); at the reveal every tile carries a label with the
+  features the rule uses ("red · 2 shapes"), the impostor's in red, and only the pictures fade; rounds 5-6 show "Example:
+  every star is red and every circle is blue. Find the picture that breaks the pairing." while you look; a clue names
+  the features halfway through every round (`clueOf`, `CLUE_AT`); rounds take 10/10/13/13/16/16 s (`ROUND_TIMES`), the
+  reveal 5.5 s; a small picture is the whole group shrunk to the middle (`SMALL` in view.js); the end screen lists the
+  six rules with their impostors (`recap`). Game 122 s (was 88). Tests: `tests/pattern-impostor.test.js` (#48 cases).
+- **#49 Letter Shot (👎) "need more time".** His game rang the bell at 90 s with both players on F-A-I. Now 150 s, 7 s
+  to pick and 8 s to shoot (were 5 and 6), double letters in the second half (last 75 s). A test plays two people at a
+  person's pace who sink 55% of shots: 1 game in 10 reached a winner at 90 s, about half now (the rest still end by
+  fewest letters).
+- **#50 Snowman Styling (👎) "go away bot"** (owner: "the bot is the AI character that participated"). Two people got
+  one CPU builder, Mitten, whose anonymous snowman took both their votes and the judge's: Mitten 4, both people 0. CPU
+  builders now come only when you play alone; two people get two CPU judges (they vote, never score) and no builder.
+  The class is checked for every minigame: `tests/no-cpu-entrants.test.js` plays each game with 2 and 3 people and
+  fails if any reports a CPU entrant's score (`result().cpu`) or a solo `beat` — computer extras with 2+ people may be
+  judges, targets to bump (Bumper Boats, Sled Bash) or a fill-in teammate (Court Clash), never rivals for the win.
+
 ## CPU Fairgoers (Expansion 1, M1, 2026-11-07)
 
 A person alone, or two people, can have a whole match: named computer fairgoers sit in the empty seats. **Optional**
@@ -1767,6 +1799,28 @@ comfort settings.
   minigame contract.
 - The page asked the server hello before it had loaded its data, so the reply could arrive before anything listened:
   handlers registered late now replay the last welcome.
+
+## QA pass (2026-11-16)
+
+The playground's per-game QA pass (`tools/prepublish-check.sh tumblefair`; the game is now in `tools/qa-passed.json`):
+- **game-lint, 43 → 0.** 37 browser `title=` tooltips became the shared styled tooltip (`data-tip`, `shared/tooltip.js`
+  installed once in `js/client/main.js`, coloured in the fair's ink/sun via `--tip-*` in `css/tumblefair.css`) — the
+  ☰/QR/!/💬 corner buttons, lobby buttons, board item cards, CPU tags, every minigame's player faces. The costume shop's
+  `confirm()` is the shared in-game dialog (`shared/dialog.js` `ask`, themed with `--dlg-*`; a controller's B presses its
+  Cancel). Cups and Ball had a local function named `prompt()` (renamed `doLine`). Caption Clash and Draw the Disaster
+  read their JSON with import attributes (which kill Steam Deck browsers): now `js/shared/load-json.js` (file read on
+  the server, fetch in the browser). "muster" is out of Word Relay's dictionary and on `tools/build-words.py`'s blocklist.
+- **Screen walk:** `tests/walk.mjs` (needs the dev server on 8483) visits, on a desktop and a phone: title, look editor,
+  costumes, the buy question, My games, Comfort, Find a game, Spectate, What's new, the report form, lobby (3 CPU
+  fairgoers), ☰ menu, Fair Pass, minigame pool, big QR, chat, board, board turn, vote, Custom pick, intro, an arena game
+  (Paint Panic), results, final standings, a phone-screen game (Tile Flip Race) and back to the title.
+- **Fixed from the screenshots:** on a wide screen the title panel hid your character (only the hair showed) — the title
+  now stands them to the left of the panel (`safeFor('home')`); the ✨ What's new button was white text on the bright
+  stage — it has a dark backing now; a Custom-mode pick of 2-5 games sat stranded at the left of the screen — centred;
+  Fair Pass sticker pop-ups landed on a minigame's score strip — they wait for the results now (`pass.js`, `pass.css`).
+  In a minigame the 💬 chat button sat on the second row, over Tile Flip Race's CPU score — it joins the ☰/! corner row now
+  and the shared score bar leaves room for three buttons (`games.css` `.scorebar` right: 110px); on a narrow phone a results
+  row's score line ran under the face's CPU/level badges — indented clear of them.
 
 ## Tests
 

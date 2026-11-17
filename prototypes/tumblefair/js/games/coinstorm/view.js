@@ -66,7 +66,7 @@ export function createView(ctx) {
       locked = !locked; ctx.send('lock', locked); ctx.sfx(locked ? 'good' : 'tap'); paintSplit();
     }
   });
-  const face = p => `<i class="cn-face" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
+  const face = p => `<i class="cn-face" style="--seat:${p.color}" data-tip="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
   function paintReveal(r) {
     spots.forEach((el, k) => {
       el.querySelector('.cn-piles').innerHTML = players.map(p => {
@@ -108,7 +108,7 @@ export function createView(ctx) {
       $('.cn-title').textContent = g.phase === 'end' ? 'Final count' : g.phase === 'reveal' ? 'Reveal!' : 'Coinstorm';
       $('.cn-round').textContent = g.phase === 'end' ? '' : `Round ${Math.max(0, g.round) + 1} of ${init.rounds}`;
       if (g.f != null) { $('.cn-fcsun').textContent = `${g.f}% sun`; $('.cn-fcstorm').textContent = `${100 - g.f}% storm`; $('.cn-bar u').style.width = g.f + '%'; }
-      $('.cn-past').innerHTML = [...g.past].map(c => `<i class="${c === '1' ? 'sunny' : 'stormy'}" title="${c === '1' ? 'sunshine' : 'storm'}">${c === '1' ? 'Sun' : 'Storm'}</i>`).join('');
+      $('.cn-past').innerHTML = [...g.past].map(c => `<i class="${c === '1' ? 'sunny' : 'stormy'}" data-tip="${c === '1' ? 'sunshine' : 'storm'}">${c === '1' ? 'Sun' : 'Storm'}</i>`).join('');
       for (const p of players) {
         const r = ui.querySelector(`.cn-players [data-pid="${p.pid}"]`); r.querySelector('.sc').textContent = g.scores[p.pid];
         r.classList.toggle('in', g.phase === 'pick' && g.locked.includes(p.pid));

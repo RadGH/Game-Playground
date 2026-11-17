@@ -32,8 +32,11 @@ import { openSignIn, accountButton } from '../../../../shared/rgs-signin.js';
 import { GAMES, gameIds } from '../games/metas.js';
 import { KINDS, kindsOf, hasKind } from '../games/tags.js';
 import { storyCardHtml, storyFinalLine, storyPoses } from './story.js';            // Expansion 1 M8: Story Night cards
+import { installTooltips } from '../../../../shared/tooltip.js';   // QA pass 2026-11-16: one styled tooltip (lessons rule 9), never title=
+import { ask } from '../../../../shared/dialog.js';                // ... and styled dialogs, never confirm() (rule 8)
 import { createWhatsNew } from '../../../../shared/whats-new.js';    // 2026-10-24: the changelog (data/changelog.json)     // meta only: the rules stay on the server
 
+installTooltips();
 const $ = s => document.querySelector(s);
 const screen = $('#screen'), hud = $('#hud'), toasts = $('#toasts');
 const ART = new URL('../../assets/art/', import.meta.url).href;
@@ -114,9 +117,9 @@ function toast(text, cls = '') { const e = h('div', 'toast ' + cls); e.textConte
 const face = m => `<i class="face">${m?.look ? `<img src="${portrait(m)}" alt="">` : ''}</i>`;
 // report #40: a seated player whose phone has gone is marked "away" (the board plays their turns until they are back,
 // and after 2 minutes in a match they leave it)
-const awayTag = m => (m.on === false && m.seat != null && !m.display ? '<em class="away" title="Their phone has left the game">away</em>' : '');
+const awayTag = m => (m.on === false && m.seat != null && !m.display ? '<em class="away" data-tip="Their phone has left the game">away</em>' : '');
 // Expansion 1 M1: a computer fairgoer always wears a small CPU badge on its face (so it shows when the name is hidden)
-const cpuTag = m => (m?.cpu ? `<em class="cpu-tag" title="Computer player (${esc(CPU_SKILL[m.cpu] || m.cpu)})">CPU</em>` : '');
+const cpuTag = m => (m?.cpu ? `<em class="cpu-tag" data-tip="Computer player (${esc(CPU_SKILL[m.cpu] || m.cpu)})">CPU</em>` : '');
 const CPU_SKILL = { family: 'Family', normal: 'Normal', tricky: 'Tricky' };
 const chipOf = (m, extra = '') => { const s = seatOf(m), pb = pass.chipBits(m); return `<span class="chip${m.pid === S.room?.you ? ' me' : ''}${m.on === false ? ' off' : ''}${m.cpu ? ' cpu' : ''}" data-pid="${m.pid}"${pb.attr} ${s || pb.style ? `${s ? `data-shape="${s.shape}" ` : ''}style="${s ? `--seat:${s.color};--seat-dark:${s.dark};` : ''}${pb.style || ''}"` : ''}>${face(m)}${cpuTag(m)}${pb.html}<b class="nm">${esc(m.name)}</b>${awayTag(m)}${extra}</span>`; };
 const DUCK = `<svg viewBox="0 0 64 56" class="duck-svg" aria-hidden="true"><ellipse cx="30" cy="38" rx="24" ry="14" fill="currentColor" stroke="#12222a" stroke-width="3"/><circle cx="44" cy="20" r="12" fill="currentColor" stroke="#12222a" stroke-width="3"/><path d="M54 20 l9 3 -9 4z" fill="#ff8a1a" stroke="#12222a" stroke-width="2"/><circle cx="47" cy="17" r="2.6" fill="#12222a"/><path d="M14 34 q10 -8 20 2" fill="none" stroke="#12222a" stroke-width="2.5" opacity=".5"/></svg>`;
@@ -131,6 +134,9 @@ function safeFor(kind) {
   stage.setSafe(kind === 'arena' ? { top: 0.13, bottom: isTouch() ? (portraitMode ? 0.3 : 0.06) : 0.09, left: 0.03, right: 0.03 }
     : kind === 'board' ? (S.boardSafe || { top: 0.1, bottom: 0.18, left: 0.02, right: 0.02 })
     : kind === 'editor' ? (portraitMode ? { top: 0.07, bottom: 0.6, left: 0.06, right: 0.06 } : { top: 0.08, bottom: 0.06, left: 0.04, right: Math.min(0.62, 470 / innerWidth + 0.04) })
+    // QA pass 2026-11-16: on a wide screen the title panel sits in the middle and hid your character behind it — stand
+    // them in the free space to the left of the panel instead (a phone keeps them above it)
+    : kind === 'home' && !portraitMode && innerWidth >= 900 ? { top: 0.2, bottom: 0.14, left: 0.04, right: Math.max(0.5, 1 - (innerWidth - 440) / 2 / innerWidth) }
     : kind === 'lobby' ? (portraitMode ? { top: 0.1, bottom: 0.62, left: 0.04, right: 0.04 } : { top: 0.16, bottom: 0.12, left: 0.04, right: 0.5 })
     : { top: 0.1, bottom: 0.5, left: 0.04, right: 0.04 });
 }
@@ -139,7 +145,7 @@ const setSafe = kind => { S.safeKind = kind; safeFor(S.modal?.editor ? 'editor' 
 
 // ------------------------------------------------------------------ title
 function showTitle() {
-  S.phase = null; hud.innerHTML = ''; setSafe('title');
+  S.phase = null; document.body.dataset.phase = ''; hud.innerHTML = ''; setSafe('home');
   lineup.show(true);
   if (S.me) lineup.sync([{ pid: 0, seat: 0, name: S.me.name, look: S.me.look, costume: S.me.costume }], { labels: false });
   const code = cleanCode(q.get('code') || '') || '';
@@ -175,7 +181,7 @@ function showTitle() {
       <button class="btn big" data-act="find">Find a game</button>
       <div class="join-row"><input id="code" maxlength="${CODE_LENGTH}" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${code}"><button class="btn big" data-act="join">Join</button></div>
       <input type="checkbox" id="as-display" hidden ${S.asDisplay ? 'checked' : ''}>
-      <div class="row title-extras"><button class="btn" data-act="watch" title="Watch a game on a TV, or sit one out">👀 Spectate</button><button class="btn" data-act="mygames" title="Every minigame you've played, and your likes">⭐ My games</button><button class="btn" data-act="comfort" title="Bigger text, less motion, practice">⚙️ Comfort</button></div>
+      <div class="row title-extras"><button class="btn" data-act="watch" data-tip="Watch a game on a TV, or sit one out">👀 Spectate</button><button class="btn" data-act="mygames" data-tip="Every minigame you've played, and your likes">⭐ My games</button><button class="btn" data-act="comfort" data-tip="Bigger text, less motion, practice">⚙️ Comfort</button></div>
       ${pass.titleHtml(S.me)}
       <p class="err">${esc(S.err)}</p>
     </div>
@@ -222,12 +228,12 @@ async function showLobby() {
   setScreen('lobby', `
     <div class="panel lobby-code${S.codeSmall ? ' small' : ''}">
       <div class="qr" id="qr"></div>
-      <div class="code-txt"><span class="lbl">Join at <b>${esc(location.host)}</b> with code</span><div class="code">${r.code}</div><button class="btn small" data-act="copy">Copy invite link</button> <button class="btn small" data-act="bigqr" title="Show the QR code full screen">Big QR</button></div>
+      <div class="code-txt"><span class="lbl">Join at <b>${esc(location.host)}</b> with code</span><div class="code">${r.code}</div><button class="btn small" data-act="copy">Copy invite link</button> <button class="btn small" data-act="bigqr" data-tip="Show the QR code full screen">Big QR</button></div>
       <button class="code-fold" data-act="fold" aria-label="${S.codeSmall ? 'Show the QR code' : 'Make this smaller'}">${S.codeSmall ? 'QR ▾' : '▴'}</button>
     </div>
     <div class="panel lobby-main">
       <h2>Players <small>${n} of 4</small></h2>
-      <div class="members">${members().filter(m => !m.display).map(m => chipOf(m, `${m.pid === r.host ? '<em class="tagh">host</em>' : ''}${m.wait ? '<em class="tagh">waiting</em>' : ''}${m.pid !== r.you && !m.display ? (host ? `<button class="x" data-act="kick" data-pid="${m.pid}" title="Remove">×</button>` : me?.seat != null && !m.cpu ? `<button class="x" data-act="votekick" data-pid="${m.pid}" title="Vote to remove">×</button>` : '') : ''}`)).join('')}
+      <div class="members">${members().filter(m => !m.display).map(m => chipOf(m, `${m.pid === r.host ? '<em class="tagh">host</em>' : ''}${m.wait ? '<em class="tagh">waiting</em>' : ''}${m.pid !== r.you && !m.display ? (host ? `<button class="x" data-act="kick" data-pid="${m.pid}" data-tip="Remove">×</button>` : me?.seat != null && !m.cpu ? `<button class="x" data-act="votekick" data-pid="${m.pid}" data-tip="Vote to remove">×</button>` : '') : ''}`)).join('')}
         ${members().some(m => m.display) ? `<span class="chip tv">Big screen connected</span>` : ''}</div>
       ${me?.display ? `<p class="note">This screen is watching. Players join on their phones.</p>${tvOwner() ? '<button class="btn" data-act="tvview">Back to the big-screen view</button>' : ''}` : `<div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>`}
       <h2>Game</h2>
@@ -264,7 +270,7 @@ async function showLobby() {
       ${(r.season || r.dateSeason) && r.opts.mode !== 'golf' ? `<div class="row opts"><label class="check"><input type="checkbox" data-act="holidaymode" ${r.opts.holidayMode ? 'checked' : ''} ${host ? '' : 'disabled'}> <b>${esc(seasonName(r.season || r.dateSeason))} mode</b></label>
         <span class="est">${r.opts.holidayMode ? `Only ${esc(seasonName(r.season || r.dateSeason))} minigames` : `${esc(seasonName(r.season || r.dateSeason))} games are mixed in with the rest right now`}</span></div>` : ''}
       ${r.opts.mode === 'golf' ? '' : `<div class="row opts"><span>Minigames</span><button class="pill on" data-act="pool">${r.opts.pool?.length ? `${r.opts.pool.length} picked` : `All ${Object.values(GAMES).filter(g => inSeason(g.meta, r.season)).length}`}</button>${host ? '<span class="est">tap to choose</span>' : ''}</div>`}
-      <div class="lobby-go${host ? '' : ' guest'}">${host ? `<div class="go-row"><button class="btn big quick" data-act="quick" title="A board match sized to about ten minutes, started now">⚡ Quick Match<small>${r.est?.quick ? `${r.est.quick.rounds} rounds · ~${r.est.quick.min} min` : 'about 10 min'}</small></button><button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}<small>${esc(estLine(true))}</small></button></div>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
+      <div class="lobby-go${host ? '' : ' guest'}">${host ? `<div class="go-row"><button class="btn big quick" data-act="quick" data-tip="A board match sized to about ten minutes, started now">⚡ Quick Match<small>${r.est?.quick ? `${r.est.quick.rounds} rounds · ~${r.est.quick.min} min` : 'about 10 min'}</small></button><button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}<small>${esc(estLine(true))}</small></button></div>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
       ${me?.display ? '<button class="btn small" data-act="swap" data-to="play">Play instead</button>' : host ? '' : '<button class="btn small" data-act="swap" data-to="watch">Just watch instead</button>'}
       <button class="btn small ghost" data-act="leave">Leave</button></div>
     </div>`);
@@ -300,7 +306,7 @@ function drawHud() {
   if (board && S.phase === 'board') {
     // round 12 (owner's phone screenshots): ONE row that never wraps — a face, tickets over ribbons, the player whose
     // turn it is lit up; the round number moved down beside the bulletin tag so the strip has the width
-    hud.innerHTML = `<div class="match-bar board-strip">${teams}<div class="strip">${seated().map(m => chipOf(m, `<span class="sc2"><em class="sc tk">${ICON.ticket}${S.bd.tickets[m.pid] ?? 0}</em><em class="sc rb">${ICON.ribbon}${S.bd.ribbons[m.pid] ?? 0}</em></span>${(S.bd.items?.[m.pid] || []).length ? `<i class="cardn" title="Prize cards">${S.bd.items[m.pid].length}</i>` : ''}`)).join('')}</div></div>`;
+    hud.innerHTML = `<div class="match-bar board-strip">${teams}<div class="strip">${seated().map(m => chipOf(m, `<span class="sc2"><em class="sc tk">${ICON.ticket}${S.bd.tickets[m.pid] ?? 0}</em><em class="sc rb">${ICON.ribbon}${S.bd.ribbons[m.pid] ?? 0}</em></span>${(S.bd.items?.[m.pid] || []).length ? `<i class="cardn" data-tip="Prize cards">${S.bd.items[m.pid].length}</i>` : ''}`)).join('')}</div></div>`;
     const on = S.bd.pid != null && hud.querySelector(`[data-pid="${S.bd.pid}"]`); if (on) { on.classList.add('turn'); on.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }); }
     return;
   }
@@ -336,7 +342,7 @@ function showBoard() {
   setSafe('board'); lineup.show(false);
   const b = S.bd, turn = members().find(m => m.pid === b.pid), my = b.pid === S.room.you, r = S.room.match;
   let body = '';
-  const items = (b.items?.[S.room.you] || []).map((id, i) => `<button class="pcard" data-act="item" data-i="${i}" title="${esc(ITEMS[id]?.text || '')}"><b>${esc(ITEMS[id]?.name || id)}</b><small>${esc(ITEMS[id]?.short || '')}</small></button>`).join('');
+  const items = (b.items?.[S.room.you] || []).map((id, i) => `<button class="pcard" data-act="item" data-i="${i}" data-tip="${esc(ITEMS[id]?.text || '')}"><b>${esc(ITEMS[id]?.name || id)}</b><small>${esc(ITEMS[id]?.short || '')}</small></button>`).join('');
   if (dock.active) body = '';
   else if (b.ask && my) body = `<div class="panel ask"><h3>${b.ask.kind === 'booth' ? 'Prize Booth' : 'Crossroads'}</h3><div class="row">${b.ask.options.map((o, i) => `<button class="btn big${i === 0 ? ' primary' : ''}" data-act="choose" data-i="${i}">${esc(o)}</button>`).join('')}</div></div>`;
   else if (b.ask) body = `<div class="turnline">${face(turn)}<b>${esc(turn?.name || '')}</b> is choosing a way…</div>`;
@@ -346,7 +352,7 @@ function showBoard() {
   const dice = b.dice ? `<div class="bdie two">${b.dice.map(n => `<i class="${b.boost === 'gold' ? 'gold' : 'sticky'}">${n}</i>`).join('')}</div>` : b.rolled ? `<div class="bdie"><i>${b.rolled}</i></div>` : '';
   const bull = b.bulletin ? `<div class="bulletin"><small>FAIR BULLETIN · Round ${b.bulletin.round}</small><h2>${esc(b.bulletin.short || b.bulletin.title)}</h2><p><b>${esc(b.bulletin.title)}</b> ${esc(b.bulletin.text)}</p></div>` : '';
   const round = r ? `<span class="round match-clock-pill">${esc(clockText())}</span>` : '';   // M2: "Round 3 of 5 · ~6 min left" (the row under the score strip)
-  const mod = b.mods ? `<button class="mods" data-act="bulletin" title="What this round's bulletin does">${esc(b.mods)} <i>ⓘ</i></button>` : '';
+  const mod = b.mods ? `<button class="mods" data-act="bulletin" data-tip="What this round's bulletin does">${esc(b.mods)} <i>ⓘ</i></button>` : '';
   const tick = (b.feed || []).map((f, i, all) => `<p class="${f.cls}${i === all.length - 1 ? ' new' : ''}" data-n="${f.n}">${f.pid != null ? face(members().find(m => m.pid === f.pid)) : ''}<span>${esc(f.text)}</span></p>`).join('');
   setScreen('board', `<div class="board-sub">${round}${mod}</div>${dice}${bull}<div class="board-foot">${tick && !dock.active ? `<div class="ticker">${tick}</div>` : ''}<div class="foot-main">${body}</div></div>`);
   if (dock.active) screen.querySelector('.foot-main').append(dock.el);
@@ -760,7 +766,7 @@ function openShop() {
     const c = costumes().find(x => x.id === sel);
     if (e.target.closest('[data-wear]')) { net.send({ t: 'equip', id: c.id }); sfx('good'); return; }
     if (e.target.closest('[data-passopen]')) { pass.open(); return; }   // M7
-    if (e.target.closest('[data-buy]')) { if (confirm(`Buy ${c.name} for ${c.price} coins?`)) { net.send({ t: 'buy', id: c.id }); net.send({ t: 'equip', id: c.id }); sfx('coins'); tally('buy_costume', { id: c.id }); } return; }
+    if (e.target.closest('[data-buy]')) { ask({ title: `Buy ${c.name}?`, text: `It costs ${c.price} coins. You have ${S.me.coins}.`, ok: 'Buy it' }).then(yes => { if (yes) { net.send({ t: 'buy', id: c.id }); net.send({ t: 'equip', id: c.id }); sfx('coins'); tally('buy_costume', { id: c.id }); } }); return; }
     const b = e.target.closest('.costume'); if (!b) return;
     sel = b.dataset.id; preview(sel); sfx('tap');
     const y = el.scrollTop; draw(); el.scrollTop = y;
@@ -873,7 +879,7 @@ function openWatch() {
 // ------------------------------------------------------------------ the menu button (2026-10-22, a player's report)
 // "There needs to be a reliable menu button to get back to the main menu, including this screen [a minigame] and the
 // invite QR screen." One ☰ next to the ! on every screen except the title (which IS the main menu).
-const menuBtn = h('button', 'menu-btn', '☰'); menuBtn.type = 'button'; menuBtn.title = 'Menu'; menuBtn.setAttribute('aria-label', 'Menu'); menuBtn.hidden = true;
+const menuBtn = h('button', 'menu-btn', '☰'); menuBtn.type = 'button'; menuBtn.dataset.tip = 'Menu'; menuBtn.setAttribute('aria-label', 'Menu'); menuBtn.hidden = true;
 menuBtn.onclick = () => openMenu(); document.body.append(menuBtn);
 function openMenu() {
   closeBigQr(); closeModal();
@@ -926,7 +932,7 @@ window.tumblefairChat = chat;                                       // specs
 // "Add a QR code button to join from. Useful with a TV and several people on phones." A full-screen code anyone in the
 // room can read from the sofa — in the lobby, and mid-match too (a late joiner watches, then gets a seat at the next
 // minigame). The corner button shows on the big screen and on a computer the whole time (a phone uses the lobby's own Big QR button).
-const qrBtn = h('button', 'qr-btn', 'QR'); qrBtn.type = 'button'; qrBtn.title = 'Show a QR code to join this game'; qrBtn.hidden = true;
+const qrBtn = h('button', 'qr-btn', 'QR'); qrBtn.type = 'button'; qrBtn.dataset.tip = 'Show a QR code to join this game'; qrBtn.setAttribute('aria-label', 'Show a QR code to join this game'); qrBtn.hidden = true;
 qrBtn.onclick = () => showBigQr(); document.body.append(qrBtn);
 let bigQr = null;
 function showBigQr() {
@@ -944,7 +950,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && bigQr) closeBigQr()
 createPadNav({ busy: () => !!controls.shown, back: () => {
   if (bigQr) return closeBigQr();
   const top = [...document.querySelectorAll('.modal')].pop();
-  const x = top?.querySelector('[data-close], [data-x], [data-m="close"], .fb-cancel, .x-close');
+  const x = top?.querySelector('[data-close], [data-x], [data-m="close"], .fb-cancel, .x-close, .gdlg-cancel');
   if (x) return x.click();
   if (top && S.modal?.el === top) return closeModal();
 } });
@@ -973,7 +979,7 @@ function drawNet(t) {
   netq.hidden = !on; if (!on) return;
   const j = S.play?.net?.().jitter ?? 0, ms = net.ping + Math.round(j), q = ms < 80 ? 'good' : ms < 160 ? 'ok' : 'bad';
   netq.className = 'netq ' + q; netq.textContent = '';
-  menuBtn.title = `Menu · connection ${netText()}`;
+  menuBtn.dataset.tip = `Menu · connection ${netText()}`;
 }
 function frame(t) {
   const dt = Math.min(0.1, (t - lastT) / 1000); lastT = t;

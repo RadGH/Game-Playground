@@ -102,15 +102,15 @@ export function grow(r, R) {
       addLot(r, lot); grown++;
     }
   }
-  // redevelop: an old low lot on valuable land is replaced by a taller one (SimCity's up-zoning feel)
-  const old = r.lots.filter(l => l.kind === 'zoned' && l.tier < 4 && r.day - l.built > 60);
-  for (let k = 0; k < Math.min(3, old.length); k++) {
-    const l = old[R.int(0, old.length - 1)], value = lotValue(r, l.x, l.z, l.w, l.d);
-    // the next tier on the same footprint, either way round (a lot laid sideways stays sideways and keeps its front)
-    const table = cat().zones[l.zone], next = table.find(t => t.tier === l.tier + 1 && ((t.size[0] === l.w && t.size[1] === l.d) || (t.size[1] === l.w && t.size[0] === l.d)));
-    if (next && value >= next.minValue && (next.unlock ?? 0) <= r.milestone && dm[l.zone] > 0.2 && (!next.water || l.wet)) {
-      Object.assign(l, makeLot(r, next, l.zone, l.x, l.z, value, R, l.w, l.d), { n: l.n }); grown++;
-    }
+  // level up: a zoned lot that meets every need (levelUp() — the same check the info panel shows) is rebuilt one tier
+  // taller, growing into the zoned land around it if the next tier is bigger (SimCity's up-zoning feel). Up to 3 every
+  // few days, the readiest first.
+  const ready = [];
+  for (const l of r.lots) if (l.kind === 'zoned') { const u = levelUp(r, l, { reach, dm }); if (u.ready) ready.push(u); }
+  for (let k = 0; k < Math.min(LEVEL_PER_PASS, ready.length); k++) {
+    const u = ready.splice(R.int(0, ready.length - 1), 1)[0], l = u.lot;
+    if (!r.lots.includes(l) || !levelUp(r, l, { reach, dm }).ready) continue;   // an earlier upgrade took its room
+    applyLevelUp(r, l, u, R); grown++;
   }
   if (grown) { solvePower(r); solveWater(r); }
   return grown;
@@ -148,6 +148,66 @@ function makeLot(r, t, zone, x, z, value, R, w = t.size[0], d = t.size[1]) {
   if (t.param === 'stalls') params.stalls = Math.max(2, Math.min(6, 2 + Math.round(value * 5))); else params.floors = floors;
   return { n: r.nextLot = (r.nextLot || 0) + 1, id: `zone-${zone}-${t.tier}`, kind: 'zoned', zone, tier: t.tier, x, z, w, d, face: lotFace(r, x, z, w, d, t.size).face, recipe: t.recipe, params,
     people: zone === 'R' ? cap : 0, jobs: zone === 'R' ? 0 : cap, power: -Math.max(1, Math.round(cap / 25)), water: 0, upkeep: 0, built: r.day, value };
+}
+
+// ---------------- levelling up ----------------
+/** Days a zoned building stands before it can level up, and how many level up each growth pass. */
+export const LEVEL_AGE = 60, LEVEL_PER_PASS = 3;
+const ZONE_WORD = { R: 'homes', C: 'shops and offices', I: 'industry' };
+/** Where the next tier's footprint can stand: it covers the whole lot, every tile is this zone (no road, flat), any
+ *  other building inside is the same zone and no taller (it is absorbed), and its front meets a road.
+ *  → { x, z, w, d, absorb: [lots] } or null */
+function upgradeSpot(r, l, next, reach) {
+  const N = r.size, code = ZONE[l.zone], idx = r.lots.indexOf(l);
+  for (const [w, d] of [[l.w, l.d], next.size, [next.size[1], next.size[0]]]) {
+    if (!((w === next.size[0] && d === next.size[1]) || (w === next.size[1] && d === next.size[0]))) continue;
+    if (w < l.w || d < l.d) continue;
+    for (let oz = l.d - d; oz <= 0; oz++) for (let ox = l.w - w; ox <= 0; ox++) {
+      const x = l.x + ox, z = l.z + oz; if (x < 0 || z < 0 || x + w > N || z + d > N) continue;
+      let ok = true; const absorb = new Set();
+      for (let k = 0; k < d && ok; k++) for (let j = 0; j < w && ok; j++) {
+        const i = (z + k) * N + x + j, li = r.tiles.lot[i];
+        if (r.tiles.zone[i] !== code || r.tiles.road[i]) ok = false;
+        else if (li >= 0 && li !== idx) { const o = r.lots[li]; if (o.kind !== 'zoned' || o.zone !== l.zone || o.tier > l.tier || o.x < x || o.z < z || o.x + o.w > x + w || o.z + o.d > z + d) ok = false; else absorb.add(o); }
+      }
+      if (!ok || !isFlat(r.ter, x, z, w, d) || !touchesRoad(r, reach, x, z, w, d) || !lotFace(r, x, z, w, d, next.size).road) continue;
+      return { x, z, w, d, absorb: [...absorb] };
+    }
+  }
+  return null;
+}
+/**
+ * How close a zoned building is to its next level, and what it still needs (owner report #84). One check for the sim
+ * (grow() levels up lots that are ready) and the info panel (the bar and the list), so the two can't disagree.
+ * → { lot, tier, top: bool, nextName, progress 0..1, ready, needs: [{ key, ok, text, part 0..1 }], spot }
+ */
+export function levelUp(r, l, { reach = null, dm = null } = {}) {
+  const table = cat().zones[l.zone] || [], next = table.find(t => t.tier === l.tier + 1);
+  if (l.kind !== 'zoned' || !next) return { lot: l, tier: l.tier, top: true, progress: 1, ready: false, needs: [] };
+  reach ??= roadReach(r); dm ??= demand(r);
+  const needs = [], value = lotValue(r, l.x, l.z, l.w, l.d), age = r.day - l.built, ms = milestones();
+  const need = (key, part, text, short = text) => needs.push({ key, ok: part >= 1, part: clamp(part, 0, 1), text, short });
+  need('age', age / LEVEL_AGE, age >= LEVEL_AGE ? 'Settled in' : `Settling in: ${Math.ceil(LEVEL_AGE - age)} more days`, age >= LEVEL_AGE ? 'Settled in' : `Settling in: ${Math.ceil(LEVEL_AGE - age)} days`);
+  need('value', next.minValue ? value / next.minValue : 1, `Land value ${Math.round(value * 100)}% of ${Math.round(next.minValue * 100)}%${value >= next.minValue ? '' : ': parks, schools, transit and water nearby raise it'}`, `Land value ${Math.round(value * 100)}% of ${Math.round(next.minValue * 100)}%`);
+  need('demand', dm[l.zone] / 0.2, dm[l.zone] > 0.2 ? `The city wants more ${ZONE_WORD[l.zone]}` : `The city wants more ${ZONE_WORD[l.zone]} first (demand is ${dm[l.zone] > 0 ? 'low' : 'full'})`, dm[l.zone] > 0.2 ? 'Demand' : 'More demand');
+  if ((next.unlock ?? 0) > r.milestone) need('unlock', 0, `Unlocks at milestone ${next.unlock} (${ms[next.unlock - 1]} people)`);
+  need('power', (l.powered ?? 0) > 0 ? 1 : 0, (l.powered ?? 0) > 0 ? 'Has power' : 'Needs power: build a power line or plant nearby', (l.powered ?? 0) > 0 ? 'Power' : 'Needs power');
+  if (next.water) need('water', l.wet ? 1 : 0, l.wet ? 'Has water' : 'Needs water: lay a pipe from a Water Pump nearby', l.wet ? 'Water' : 'Needs water');
+  if (next.education) need('education', (r.people.edu || 0) / next.education, `Schooling ${Math.round((r.people.edu || 0) * 100)}% of ${Math.round(next.education * 100)}% needed: build schools near homes`);
+  const spot = upgradeSpot(r, l, next, reach);
+  const [a, b] = next.size;
+  if (a * b > l.w * l.d) need('room', spot ? 1 : 0, spot ? `Room to grow to ${a} × ${b}` : `Needs room to grow to ${a} × ${b}: zone more ${ZONE_WORD[l.zone]} land beside it`, spot ? 'Room' : `Needs room (${a} × ${b})`);
+  else if (!spot) need('room', 0, 'Its front must face a road');
+  const progress = needs.reduce((s, n) => s + n.part, 0) / needs.length;
+  return { lot: l, tier: l.tier, top: false, nextTier: next.tier, progress, ready: needs.every(n => n.ok), needs, spot };
+}
+/** Rebuild lot l as the next tier at u.spot, absorbing the small buildings inside it. */
+function applyLevelUp(r, l, u, R) {
+  const next = cat().zones[l.zone].find(t => t.tier === l.tier + 1), { x, z, w, d, absorb } = u.spot;
+  const value = lotValue(r, x, z, w, d);
+  Object.assign(l, makeLot(r, next, l.zone, x, z, value, R, w, d), { n: l.n });
+  if (absorb.length) { const gone = new Set(absorb); r.lots = r.lots.filter(o => !gone.has(o)); }
+  reindexLots(r);
 }
 
 // ---------------- people ----------------
@@ -238,6 +298,15 @@ export function monthBudget(r) {
   const inTotal = income.R + income.C + income.I + income.grant, outTotal = Object.values(upkeep).reduce((a, b) => a + b, 0);
   return { income, upkeep, inTotal, outTotal, net: inTotal - outTotal };
 }
+/** Days in a budget month: monthBudget() is written per month, money is paid per day (owner #85: show it per day). */
+export const DAYS_PER_MONTH = 30;
+/** Credits paid at the next day tick: the month's net ÷ 30; while broke (shutdown) only income minus loans. One source
+ *  for the sim and the HUD's "+X/day" (owner report #85, 2026-11-16). */
+export function dailyNet(r, b = monthBudget(r), shut = r.money < (T.debtShutdown ?? -5000)) {
+  return shut ? (b.inTotal - b.upkeep.loans) / DAYS_PER_MONTH : b.net / DAYS_PER_MONTH;
+}
+/** How far through the current game day (0..1): the next pay-out comes at 1 (owner report #79). */
+export function dayProgress(r) { return r.day - Math.floor(r.day); }
 export function takeLoan(r) { const a = T.loanSize ?? 25000; if (r.loans.length >= 3) return false; r.loans.push({ amount: a, months: 48, left: 48 }); r.money += a; return true; }
 
 // ---------------- industry ----------------
@@ -287,13 +356,14 @@ function dayTick(r, day) {
   settle(r, 1);
   immigrate(r, 1);
   const made = industry(r, 1);
-  // money trickles daily (a month's net / 30), so the counter moves smoothly
-  const b = monthBudget(r); const net = b.net / 30;
+  // money is paid once a game day: the day's share of the budget (dailyNet) — the HUD shows exactly this number
+  const b = monthBudget(r);
   const shut = r.money < (T.debtShutdown ?? -5000);
-  r.money += shut ? (b.inTotal / 30) - (b.upkeep.loans / 30) : net;
+  const pay = dailyNet(r, b, shut);
+  r.money += pay;
   r.budget = b; r.shutdown = shut;
   for (const k of [...RAW, ...REFINED]) r.rates[k] = r.rates[k] * 0.9 + made[k] * 0.1;
-  r.rates.money = r.rates.money * 0.9 + (shut ? b.inTotal / 30 : net) * 0.1;
+  r.rates.money = r.rates.money * 0.9 + pay * 0.1;
   if (day % 30 === 0) monthTick(r, R);
   else if (day % 3 === 0) { solveLandValue(r); transitLandValue(r); grow(r, R); }
   checkMilestone(r);

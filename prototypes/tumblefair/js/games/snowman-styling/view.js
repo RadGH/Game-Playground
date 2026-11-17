@@ -72,20 +72,22 @@ export function createView(ctx) {
   function paintVotes() {
     ui.querySelectorAll('.sm-card').forEach((c, i) => { c.classList.toggle('mine', i === mine); c.classList.toggle('picked', i === myVote); });
   }
-  const facePic = p => `<i class="vface" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
+  const facePic = p => `<i class="vface" style="--seat:${p.color}" role="img" aria-label="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
   function paintReveal(rv) {
     const best = Math.max(...rv.pts);
     ui.querySelectorAll('.sm-card').forEach((c, i) => {
       const who = String(rv.who[i]), p = byPid.get(who);
       c.querySelector('.sm-by').innerHTML = p ? chip(p, String(p.pid) === String(me) ? '<em class="you">you</em>' : '') : `<span class="sm-cpu">${esc(cpuName.get(who) || 'CPU')} <small>CPU</small></span>`;
       const voters = Object.entries(rv.v).filter(([, v]) => v === i).map(([q]) => byPid.get(q)).filter(Boolean).map(facePic);
-      const judges = rv.j.map((v, k) => (v === i ? `<i class="sm-judge" title="${esc(init.judges[k])}">${esc(init.judges[k].split(' ').pop()[0])}</i>` : '')).join('');
+      const judges = rv.j.map((v, k) => (v === i ? `<i class="sm-judge" role="img" aria-label="${esc(init.judges[k])}">${esc(init.judges[k].split(' ').pop()[0])}</i>` : '')).join('');
       c.querySelector('.sm-vt').innerHTML = voters.join('') + judges || '<em>no votes</em>';
       c.classList.toggle('ribbon', rv.rb === i);
       c.classList.toggle('best', best > 0 && rv.pts.filter(x => x === best).length === 1 && rv.pts[i] === best);
       c.querySelector('.sm-pts').textContent = `+${rv.pts[i]}`;
     });
   }
+  /** The judges' letters on the vote badges, spelled out (no hover needed): " Judges: F = Granny Frost, S = Sir Sleet." */
+  const judgeKey = () => (init.judges.length ? ` Judges: ${init.judges.map(j => `${j.split(' ').pop()[0]} = ${j}`).join(', ')}.` : '');
   function note(g) {
     if (g.phase === 'dress') return watching ? 'The snowmen line up when the clock runs out.' : done ? 'Waiting for the other builders…' : `Dress your snowman for ${theme.name}. Tap a tab, then a piece.`;
     const judges = init.judges.length ? ` Judges ${init.judges.join(', ')} vote too.` : '';
@@ -93,9 +95,9 @@ export function createView(ctx) {
     if (init.alone && g.scores) return `The Frost Judge counts ${g.scores[players[0].pid]} of ${N_SLOTS} pieces that fit ${theme.name}.`;
     if (init.solo && g.scores) {
       const meP = g.scores[players[0].pid], cp = init.cpus.map(c => g.rv.pts[g.rv.who.indexOf(c.id)]);
-      return meP > Math.max(...cp) ? '🏆 Your snowman won the yard!' : meP === Math.max(...cp) ? 'A tie for the top of the yard!' : `${init.cpus[cp.indexOf(Math.max(...cp))].name} won this time.`;
+      return (meP > Math.max(...cp) ? '🏆 Your snowman won the yard!' : meP === Math.max(...cp) ? 'A tie for the top of the yard!' : `${init.cpus[cp.indexOf(Math.max(...cp))].name} won this time.`) + judgeKey();
     }
-    return '1 point per vote. Frost Ribbon (+1): the best fit for the theme.';
+    return `1 point per vote. Frost Ribbon (+1): the best fit for the theme.${judgeKey()}`;
   }
 
   return {

@@ -3,6 +3,10 @@
 :root {
   --bg: #12323a; --ink: #0d2228; --paper: #fff8e7; --paper2: #f3e6c8; --sun: #ffd23f; --pop: #ff5f5f; --mint: #3ecf5a; --sky: #39d0e0;
   --font: "Baloo 2", "Fredoka", ui-rounded, "Arial Rounded MT Bold", "Nunito", "Trebuchet MS", system-ui, sans-serif;
+  /* shared/tooltip.css + shared/dialog.css in the fair's colours (QA pass 2026-11-16) */
+  --tip-bg: var(--ink); --tip-fg: var(--paper); --tip-line: var(--sun); --tip-strong: var(--sun);
+  --dlg-bg: var(--paper); --dlg-ink: var(--ink); --dlg-edge: var(--ink); --dlg-title: var(--ink); --dlg-accent: var(--sun); --dlg-accent-ink: var(--ink); --dlg-danger: var(--pop);
+  --dlg-font: var(--font); --dlg-title-font: var(--font);
   --st: env(safe-area-inset-top, 0px); --sr: env(safe-area-inset-right, 0px); --sb: env(safe-area-inset-bottom, 0px); --sl: env(safe-area-inset-left, 0px);
 }
 * { box-sizing: border-box; }
@@ -246,7 +250,7 @@ body[data-phase=game] .fb-btn { width: 28px; height: 28px; font-size: 15px; opac
 /* narrow phones: a results row is place | name | award, with the game score on a second line under the name */
 @media (max-width: 440px) {
   .places li { grid-template-columns: 34px minmax(0, 1fr) auto; grid-template-areas: 'pl who award' 'pl score score'; row-gap: 0; }
-  .places .pl { grid-area: pl; } .places li > .chip { grid-area: who; } .places .award { grid-area: award; } .places .score { grid-area: score; font-size: 12px; }
+  .places .pl { grid-area: pl; } .places li > .chip { grid-area: who; } .places .award { grid-area: award; } .places .score { grid-area: score; font-size: 12px; padding-left: 44px; }   /* QA pass 2026-11-16: clear of the face's CPU and level badges */
 }
 .pool-g.asleep { opacity: .45; } .pool-g.asleep small { color: #8a3ad8; font-weight: 800; }
 /* ---- round 6: the Halloween theme for the menus (body[data-season] is set from the room, or the date before one) ---- */
@@ -375,6 +379,7 @@ body[data-phase=game] .qr-btn { right: calc(var(--sr) + 76px); }
 .row.opts label.check input { width: 22px; height: 22px; accent-color: var(--accent, #f0a020); }
 .kind-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 0 0 10px; width: 100%; max-width: min(760px, calc(100vw - 32px)); box-sizing: border-box; padding: 0 4px; }
 #screen .pick-grid { width: 100%; max-width: min(760px, calc(100vw - 32px)); margin: 0 auto 12px; box-sizing: border-box; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+#screen .pick-grid:has(> :nth-child(-n+5):last-child) { grid-template-columns: repeat(auto-fit, minmax(112px, 150px)); justify-content: center; }   /* a short list sits in the middle, not stranded on the left */
 #screen .pick-grid .pool-g { opacity: 1; filter: none; background: #fff; }
 #screen .pick-grid .pool-g.asleep { opacity: .8; }            /* already played this match: still pickable */
 #screen.vote { overflow-x: hidden; }
@@ -401,6 +406,8 @@ body[data-phase=game] .qr-btn { right: calc(var(--sr) + 76px); }
 .title-extras .btn { font-size: 15px; padding-top: 10px; padding-bottom: 10px; }
 .title-panel .err:empty { display: none; }
 .foot .wn-open { color: #fff; border-color: rgba(255,255,255,.6); }
+.foot .wn-open { background: rgba(13, 34, 40, .82); text-decoration: none; }   /* QA pass 2026-11-16: readable over the bright stage */
+.gdlg-modal .gdlg-title { margin: 0 0 10px; }                                /* .modal h2 (above) must not eat the shared dialog's title gap */
 .foot .net:not(:empty) { margin-left: 10px; }
 /* round 12: ✨ New / 🔧 Updated */
 .fresh-tag { position: absolute; left: 8px; bottom: 8px; z-index: 2; font-style: normal; font-weight: 800; font-size: 12px; border-radius: 999px; padding: 2px 8px; border: 2px solid var(--ink); box-shadow: 0 2px 5px rgba(0,0,0,.2); }
@@ -452,7 +459,10 @@ body[data-phase=results] #game-ui > .game > * { visibility: hidden; }
    score bar or title row loses room); bubbles stack top-left under the score bar and fade. js/client/chat.js */
 .chat-btn { position: fixed; z-index: 45; top: calc(var(--st) + 50px); right: calc(var(--sr) + 50px); width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--ink); background: #fff; color: var(--ink); font: 400 16px/1 var(--font); box-shadow: 0 3px 0 var(--ink); opacity: .8; cursor: pointer; padding: 0; }
 .chat-btn:hover { opacity: 1; } .chat-btn[hidden] { display: none; }
-body[data-phase=game] .chat-btn { width: 28px; height: 28px; font-size: 13px; opacity: .6; top: calc(var(--st) + 40px); right: calc(var(--sr) + 42px); }
+/* QA pass 2026-11-16: in a minigame the 💬 joins the top corner row (it sat on the second row, over a game's own score
+   chips — Tile Flip Race's CPU score); the QR button moves one place left to make room, and the score bar leaves it room */
+body[data-phase=game] .chat-btn { width: 28px; height: 28px; font-size: 13px; opacity: .6; top: calc(var(--st) + 8px); right: calc(var(--sr) + 76px); }
+body[data-phase=game] .qr-btn { right: calc(var(--sr) + 110px); }
 .chat-dot { position: absolute; top: -4px; right: -4px; width: 11px; height: 11px; border-radius: 50%; background: #e84a4a; border: 2px solid var(--ink); pointer-events: none; }
 .chat-dot[hidden] { display: none; }
 .chat-feed { position: fixed; z-index: 58; top: calc(var(--st) + 96px); left: calc(var(--sl) + 8px); width: min(76vw, 340px); display: flex; flex-direction: column; align-items: flex-start; gap: 5px; pointer-events: none; }

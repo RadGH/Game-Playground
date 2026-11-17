@@ -8,7 +8,8 @@
 // Captions are cleaned on the server: markup and control characters removed, spaces collapsed, 80 characters at most.
 // A phone sends its draft as you type (`cap`) so a caption is never lost when the clock runs out, and `done` when you
 // press Submit. Captions live only in this match's memory.
-import SCENES_FILE from '../../../data/scenes.json' with { type: 'json' };
+import { loadJson } from '../../shared/load-json.js';
+const SCENES_FILE = await loadJson(new URL('../../../data/scenes.json', import.meta.url));
 
 export const meta = {
   id: 'caption-clash', title: 'Caption Clash', blurb: 'Write the funniest caption, then vote!',

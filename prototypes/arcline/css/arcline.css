@@ -203,3 +203,54 @@ button:disabled { opacity: .45; cursor: default; }
 /* the tool bar's text wraps instead of running off a phone screen (walk 2026-11-16: "Move Colony Core · free · …") */
 .ac-toolchip span { min-width: 0; flex: 1 1 auto; white-space: normal; line-height: 1.25; }
 @media (max-width: 640px) { .ac-toolchip { width: calc(100% - 16px); border-radius: 16px; font-size: 13px; } }
+
+/* ---------- pay day bar, utility warnings, pill sheets, level up (owner reports #79 #80 #84, 2026-11-16) ---------- */
+/* the day's progress to the next pay day: under the date; on a phone (no date) a hairline along the Credits pill */
+.ac-daybar { display: block; height: 4px; margin-top: 3px; border-radius: 2px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.ac-daybar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--good), var(--cyan)); border-radius: 2px; }
+.ac-money { position: relative; }
+.ac-daybar.phone { display: none; }
+@media (max-width: 640px) { .ac-daybar.phone { display: block; position: absolute; left: 8px; right: 8px; bottom: 2px; height: 3px; margin: 0; } }
+/* the second row's pills are buttons now: same look, a pointer, and a state colour */
+.ac-row2 button.ac-demand, .ac-row2 button.ac-chip { color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
+.ac-row2 button.ac-demand:hover, .ac-row2 button.ac-chip:hover { border-color: rgba(63, 240, 255, 0.55); }
+.ac-chip.near { border-color: rgba(255, 176, 46, 0.85); color: #ffd590; background: rgba(60, 38, 8, 0.92); }
+.ac-chip.near .gly { color: #ffd590; }
+.ac-chip.bad { background: rgba(70, 18, 16, 0.92); animation: ac-pulse 1.6s ease-in-out infinite; }
+.ac-chip.bad .gly { color: #ff8d80; }
+@keyframes ac-pulse { 50% { box-shadow: 0 0 0 3px rgba(255, 106, 90, 0.35); } }
+@media (prefers-reduced-motion: reduce) { .ac-chip.bad { animation: none; } }
+.ac-util-head { margin: 0; font-size: 15px; font-weight: 600; }
+.ac-util.lv-near .ac-util-head { color: #ffd590; } .ac-util.lv-over .ac-util-head { color: #ffb0a6; } .ac-util.lv-ok .ac-util-head { color: var(--good); }
+.ac-meter .bar, .ac-dem .bar, .ac-level .bar { height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.08); overflow: hidden; position: relative; }
+.ac-meter .bar i { display: block; height: 100%; border-radius: 5px; background: var(--good); }
+.ac-util.lv-near .ac-meter .bar i { background: var(--amber); } .ac-util.lv-over .ac-meter .bar i { background: var(--bad); }
+.ac-meter .nums { display: flex; justify-content: space-between; font-size: 13px; color: var(--dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.ac-util .row { display: flex; gap: 8px; flex-wrap: wrap; } .ac-util .row > button { flex: 1 1 140px; }
+.ac-dem { display: flex; flex-direction: column; gap: 4px; padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+.ac-dem .hd { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; }
+.ac-dem .hd span { font-size: 13px; color: var(--dim); } .ac-dem .hd span.up { color: var(--good); } .ac-dem .hd span.down { color: #ffb0a6; }
+.ac-dem .bar.two::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(255, 255, 255, 0.35); }
+.ac-dem .bar i { position: absolute; top: 0; bottom: 0; border-radius: 5px; }
+.ac-dem.r .bar i { background: #56d678; } .ac-dem.c .bar i { background: #50a0ff; } .ac-dem.i .bar i { background: #ffbe46; }
+.ac-dem small { font-size: 13px; color: var(--dim); }
+.ac-dem ul, .ac-level ul { margin: 0; padding-left: 18px; font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
+.ac-level { margin: 0 0 10px; padding: 8px 10px; border-radius: 10px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.07); display: flex; flex-direction: column; gap: 6px; }
+.ac-level .hd { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--dim); }
+.ac-level .hd b { color: var(--text); font-variant-numeric: tabular-nums; }
+.ac-level .bar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--cyan), var(--good)); }
+.ac-level li.ok { color: var(--good); } .ac-level li.no { color: var(--text); }
+.ac-level p.ok { margin: 0; font-size: 13px; color: var(--good); }
+.ac-level.ready { border-color: rgba(107, 240, 154, 0.45); }
+.ac-info { max-height: calc(100vh - var(--hud-bottom, 120px) - 130px); overflow-y: auto; }
+/* the panel's buttons stay in reach while its middle scrolls */
+.ac-info > .row:last-child { position: sticky; bottom: -12px; margin: 0 -14px -12px; padding: 8px 14px 12px; background: var(--panel2); border-radius: 0 0 14px 14px; }
+/* phones: short words, only what's still missing (as chips), and no scrolling box (nothing hidden under the views row) */
+.ac-level .s { display: none; }
+@media (max-width: 640px) {
+  .ac-info { max-height: none; overflow: visible; }
+  .ac-level .l { display: none; } .ac-level .s { display: inline; }
+  .ac-level ul { flex-direction: row; flex-wrap: wrap; padding: 0; list-style: none; gap: 4px; }
+  .ac-level li { padding: 2px 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.07); }
+  .ac-level li.ok { display: none; }
+}

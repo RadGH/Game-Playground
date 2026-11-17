@@ -3,16 +3,18 @@
 // Frenzy. Sink it and EVERYONE ELSE shoots that same mark at the same time (no waiting in a queue): whoever misses
 // earns the next letter of F-A-I-R. Miss as the setter and nothing happens — the next player sets. The setter moves
 // round the table after every turn. Spell FAIR and you are out; the last one in wins. A far mark is harder for
-// everybody (its green band is narrower), so a confident setter picks a hard one. Timers keep it moving: 5 s to pick
-// (or a mark is picked for you), 6 s to shoot (or the ball is thrown for you, badly). In the second half a missed
-// copy costs two letters, so a game nearly always ends with one player left. Solo: you against Rimsby, a CPU
+// everybody (its green band is narrower), so a confident setter picks a hard one. Timers keep it moving: 7 s to pick
+// (or a mark is picked for you), 8 s to shoot (or the ball is thrown for you, badly). Live report #49 (2026-11-12,
+// "need more time"): at 90 s a two-player game rang the bell with both on F-A-I and nobody out (1 game in 10 reached
+// a winner in tests/letter-shot.test.js); it now runs 150 s, about 15 turns, and most games end with someone spelling
+// the word. In the second half (the last 75 s) a missed copy costs two letters. Solo: you against Rimsby, a CPU
 // shooter who gets better with the lobby difficulty. Halloween spells B-O-O-! instead (looks only).
 import { flyShot, release, qualityOf, idealPower, tolFor, HOOP_R } from '../hoops-kit.js';
 
 export const meta = {
   id: 'letter-shot', title: 'Letter Shot', blurb: 'Call your shot — if it drops, everyone must copy it or take a letter!',
   how: ['The setter taps a mark, then HOLDS and lets go in the green.', 'If it goes in, everyone else shoots that mark. Miss = a letter of FAIR.', 'Spell FAIR and you are out. Last one in wins!', 'Second half: a missed copy costs TWO letters.'],
-  kind: 'ui', min: 1, max: 4, seconds: 90, scoring: 'survival', unit: 'letters', tags: ['action'], card: 'card-letter-shot', css: true, rival: 'needed',   // alone with 'Rival when alone' off it is not worth playing: not offered then
+  kind: 'ui', min: 1, max: 4, seconds: 150, scoring: 'survival', unit: 'letters', tags: ['action'], card: 'card-letter-shot', css: true, rival: 'needed',   // alone with 'Rival when alone' off it is not worth playing: not offered then
 };
 
 export const WORD = 'FAIR', OUT_AT = WORD.length;
@@ -24,8 +26,8 @@ export const SPOTS = [
   { id: 'lcorner', name: 'Left corner', d: 5.2, a: -78 }, { id: 'rcorner', name: 'Right corner', d: 5.2, a: 78 }, { id: 'top', name: 'Top', d: 5.6, a: 0 },
   { id: 'deep', name: 'Way back', d: 7, a: 22 },
 ].map(s => ({ ...s, x: Math.round(Math.sin(s.a * Math.PI / 180) * s.d * 100) / 100, z: Math.round((HOOP_Z + Math.cos(s.a * Math.PI / 180) * s.d) * 100) / 100 }));
-export const DOUBLE_S = 45;                                        // the hurry-up: a missed copy costs two letters
-export const TIMES = { start: 1.5, pick: 5, shoot: 6, after: 0.9, end: 1.5, cpuPick: 1.1, cpuShoot: 1.3 };
+export const DOUBLE_S = 75;                                        // the hurry-up: a missed copy costs two letters
+export const TIMES = { start: 1.5, pick: 7, shoot: 8, after: 0.9, end: 1.5, cpuPick: 1.1, cpuShoot: 1.3 };
 /** Meter period, band half width, the CPU's aim (its error in band widths) by lobby difficulty. */
 export const LEVELS = {
   easy:   { period: 1.8, tol: 0.08, cpu: 1.7 },

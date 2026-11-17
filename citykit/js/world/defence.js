@@ -17,11 +17,17 @@ export class Defence {
   constructor(horde, hooks = {}) { this.horde = horde; this.turrets = []; this.shots = []; this.shells = []; this.hooks = hooks; this.powered = true; }
   add(kind, x, z) { const t = { kind, x, z, cool: Math.random() * TURRETS[kind].every, heading: -Math.PI / 4, target: null, recoil: 0 }; this.turrets.push(t); return t; }
 
+  /** A turret's numbers: its own `stats` (the owner's upgrades — Arcline's Mk II/III and range blueprint) or the base. */
+  static stats(t) { return t.stats || TURRETS[t.kind]; }
+  /** A turret stands on tile (x, z): it turns, measures and aims from the tile's middle, the point its picture is drawn
+   *  around. Aiming from the corner put the head ~15° off at short range (Arcline report #72). */
+  static centre(t) { return [t.x + 0.5, t.z + 0.5]; }
+
   _pick(t) {
-    const s = TURRETS[t.kind];
+    const s = Defence.stats(t), [tx, tz] = Defence.centre(t);
     let best = null, bd = Infinity;
-    for (const c of this.horde.near(t.x, t.z, s.range)) {
-      const d = Math.hypot(c.x - t.x, c.z - t.z);
+    for (const c of this.horde.near(tx, tz, s.range)) {
+      const d = Math.hypot(c.x - tx, c.z - tz);
       if (s.min && d < s.min) continue;
       // mortars want crowds: score by how many are near the creature
       const score = t.kind === 'mortar' ? d - this.horde.near(c.x, c.z, s.radius).length * 1.5 : d;
@@ -34,18 +40,18 @@ export class Defence {
     const h = this.horde;
     h._hash();   // targeting reads the spatial hash: never rely on the horde having stepped first
     for (const t of this.turrets) {
-      const s = TURRETS[t.kind];
+      const s = Defence.stats(t), [tx, tz] = Defence.centre(t);
       t.cool -= dt; t.recoil = Math.max(0, t.recoil - dt * 6);
       if (!this.powered || (t.powered != null && t.powered <= 0)) continue;   // no power: the turret sits idle
-      if (!t.target || t.target.hp <= 0 || !h.list.includes(t.target) || Math.hypot(t.target.x - t.x, t.target.z - t.z) > s.range) t.target = this._pick(t);
+      if (!t.target || t.target.hp <= 0 || !h.list.includes(t.target) || Math.hypot(t.target.x - tx, t.target.z - tz) > s.range) t.target = this._pick(t);
       const c = t.target; if (!c) continue;
       // turn the head toward where the target will be (lead for slow shots)
-      const lead = t.kind === 'pulse' ? Math.hypot(c.x - t.x, c.z - t.z) / s.speed : t.kind === 'mortar' ? s.flight : 0;
+      const lead = t.kind === 'pulse' ? Math.hypot(c.x - tx, c.z - tz) / s.speed : t.kind === 'mortar' ? s.flight : 0;
       const ax = c.x + c.vx * lead, az = c.z + c.vz * lead;
-      t.heading = Math.atan2(az - t.z, ax - t.x);
+      t.heading = Math.atan2(az - tz, ax - tx);
       if (t.cool > 0) continue;
       t.cool = s.every / Math.max(0.25, t.powered ?? 1); t.recoil = 1;   // a brownout slows the rate of fire
-      const m = this.hooks.muzzle?.(t) || { x: t.x + 0.5, z: t.z + 0.5, y: 0.5 };
+      const m = this.hooks.muzzle?.(t) || { x: tx, z: tz, y: 0.5 };
       if (t.kind === 'pulse') {
         const dx = ax - m.x, dz = az - m.z, l = Math.hypot(dx, dz) || 1;
         this.shots.push({ x: m.x, z: m.z, y: m.y, px: m.x, pz: m.z, py: m.y, vx: dx / l * s.speed, vz: dz / l * s.speed, life: s.range / s.speed + 0.1, dmg: s.damage, from: t });
@@ -58,7 +64,7 @@ export class Defence {
         }
         const pts = [[m.x, m.z, m.y], ...chain.map(o => [o.x, o.z, 0.25])];
         this.hooks.onFire?.(t, 'arc', { muzzle: m, pts });
-        chain.forEach((o, i) => { const died = h.hurt(o, s.damage * Math.pow(0.85, i), [t.x + 0.5, t.z + 0.5], 0.6); this.hooks.onImpact?.('arc-hit', { x: o.x, z: o.z, died, c: o }); });
+        chain.forEach((o, i) => { const died = h.hurt(o, s.damage * Math.pow(0.85, i), [tx, tz], 0.6); this.hooks.onImpact?.('arc-hit', { x: o.x, z: o.z, died, c: o }); });
       } else if (t.kind === 'rail') {
         const dx = ax - m.x, dz = az - m.z, l = Math.hypot(dx, dz) || 1, ux = dx / l, uz = dz / l;
         const ex = m.x + ux * s.range, ez = m.z + uz * s.range;

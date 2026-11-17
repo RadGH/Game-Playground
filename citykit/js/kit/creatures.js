@@ -379,22 +379,22 @@ function drawBrute(root, L, anim, t) {
 const seedParam = [];
 addRecipes({
   'cr-swarmer': {
-    name: 'Swarmer', group: 'creatures', size: [1, 1], dirs: 8, anims: ANIMS, noStyle: true,
+    name: 'Swarmer', group: 'creatures', size: [1, 1], dirs: 16, anims: ANIMS, noStyle: true,
     blurb: 'Small, fast and many: a low six-legged biter about a third of a tile long. Comes in packs.',
     params: seedParam, build: creature(swarmerLook, drawSwarmer),
   },
   'cr-breaker': {
-    name: 'Wall-breaker', group: 'creatures', size: [1, 1], dirs: 8, anims: ANIMS, noStyle: true,
+    name: 'Wall-breaker', group: 'creatures', size: [1, 1], dirs: 16, anims: ANIMS, noStyle: true,
     blurb: 'Armoured and hunched behind a horned ram shield; it charges walls head first.',
     params: seedParam, build: creature(breakerLook, drawBreaker),
   },
   'cr-sapper': {
-    name: 'Sapper', group: 'creatures', size: [1, 1], dirs: 8, anims: ANIMS, noStyle: true,
+    name: 'Sapper', group: 'creatures', size: [1, 1], dirs: 16, anims: ANIMS, noStyle: true,
     blurb: 'Fragile and tall on four stilt legs; its glowing acid sacs melt walls and burst when it dies.',
     params: seedParam, build: creature(sapperLook, drawSapper),
   },
   'cr-brute': {
-    name: 'Brute', group: 'creatures', size: [1, 1], dirs: 8, anims: ANIMS, noStyle: true,
+    name: 'Brute', group: 'creatures', size: [1, 1], dirs: 16, anims: ANIMS, noStyle: true,
     blurb: 'Rare and huge: fills a tile, crystal spines on its back, smashes with both fists.',
     params: seedParam, build: creature(bruteLook, drawBrute),
   },

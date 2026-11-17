@@ -2,7 +2,11 @@
 // Phones tap the tile they think breaks the rule; a wrong tap shakes red and locks that phone out for the round. The
 // reveal lights up the impostor, says the rule in words, and puts each player's face on the tile they tapped, with
 // the order of the right taps. A watch-only screen shows the same grid at TV size, not tappable.
+// Live report #48 ("each color had its own nuymber of shapes???????"): the reveal now labels EVERY tile with the
+// features the rule uses (the impostor's in red), rounds 5-6 explain the pairing idea while you look, a clue appears
+// halfway through each round, small pictures are a small group in the middle, and the end lists all six rules.
 import { esc, chip } from '../../client/gamehud.js';
+import { caption } from './sim.js';
 
 const HEX = ['#e8383d', '#ff9a1f', '#2fb84f', '#2f7ff0', '#9b4fe0'];
 const INK = '#0d2228';
@@ -22,11 +26,15 @@ const SHAPES = [
 const SPOTS = [[[50, 50]], [[28, 50], [72, 50]], [[50, 29], [28, 70], [72, 70]]];
 const RADIUS = [34, 21, 19];
 
+/** How much smaller a SMALL picture is: the whole group shrinks to the middle (#48: shrinking only the shapes left a
+ *  small picture of three looking as big as a big picture of one, so size and count were easy to mix up). */
+export const SMALL = 0.55;
 /** One tile's picture. `id` makes the pattern ids unique to this game. */
 export function tileSvg(code, id = 'pi') {
-  const [s, c, z, f, n] = [...code].map(Number);
-  const r = RADIUS[n] * (z ? 1 : 0.56), fill = f === 0 ? HEX[c] : `url(#${id}-${f}-${c})`;
-  return `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="${fill}" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round">${SPOTS[n].map(([x, y]) => SHAPES[s](x, y, r)).join('')}</g></svg>`;
+  const [s, c, z, f, n] = [...code].map(Number), k = z ? 1 : SMALL;
+  const r = RADIUS[n] * k, fill = f === 0 ? HEX[c] : `url(#${id}-${f}-${c})`;
+  const at = v => 50 + (v - 50) * k;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="${fill}" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round">${SPOTS[n].map(([x, y]) => SHAPES[s](at(x), at(y), r)).join('')}</g></svg>`;
 }
 /** The stripe and dot fills, once per page, for every colour. */
 export function patternDefs(id = 'pi') {
@@ -42,20 +50,25 @@ export function createView(ctx) {
   ui.innerHTML = `${patternDefs()}
     <div class="pi-top"><span class="pi-title">Pattern Impostor</span><span class="clock"><b>--</b></span></div>
     <p class="pi-round"></p>
+    <p class="pi-explain"><span>Example: every star is red and every circle is blue.</span> Find the picture that breaks the pairing.</p>
+    <p class="pi-clue" aria-live="polite"></p>
     <div class="pi-grid"></div>
     <div class="pi-rule"><b></b> <span></span></div>
+    <ol class="pi-recap"></ol>
     <div class="pi-players">${players.map(p => chip(p, '<em class="sc">0</em><strong class="delta"></strong>')).join('')}</div>
     <p class="pi-note"></p>`;
   const $ = s => ui.querySelector(s);
   ui.classList.toggle('watching', watching); ui.dataset.phase = 'ready';
   if (me != null) ui.querySelector(`.pi-players [data-pid="${me}"]`)?.classList.add('me');
   let phase = '', round = -1, items = '', tiles = [], mine = null, ok = null, gain = null, last = { phase: 'ready', in: [] };
-  const face = p => `<i class="pi-face" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
+  /** Rounds whose rule pairs two features (the sim's level 3). */
+  const pairRound = g => g.round >= 0 && (init.levels ? init.levels[g.round] === 3 : g.round >= 4);
+  const face = p => `<i class="pi-face" style="--seat:${p.color}" role="img" aria-label="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
 
   function build(list) {
     items = list; const codes = list.split(',');
     const g = $('.pi-grid'); g.dataset.n = codes.length;
-    g.innerHTML = codes.map((c, i) => `<button class="pi-tile" data-i="${i}" style="--d:${i * 45}ms" aria-label="picture ${i + 1}">${tileSvg(c)}<span class="pi-who"></span><i class="pi-badge"></i></button>`).join('');
+    g.innerHTML = codes.map((c, i) => `<button class="pi-tile" data-i="${i}" style="--d:${i * 45}ms" aria-label="picture ${i + 1}">${tileSvg(c)}<span class="pi-who"></span><i class="pi-badge"></i><span class="pi-cap"></span></button>`).join('');
     tiles = [...g.querySelectorAll('.pi-tile')];
   }
   ui.addEventListener('click', e => {
@@ -71,7 +84,7 @@ export function createView(ctx) {
     if (g.phase === 'end') return 'Thanks for playing!';
     if (g.phase === 'reveal') return '';
     if (watching) return `${g.in.length} of ${players.length} have tapped`;
-    if (mine == null) return 'Tap the impostor. First right tap scores most!';
+    if (mine == null) return pairRound(g) ? 'Tap the one that breaks the pairing. First right tap scores most!' : 'Tap the impostor. First right tap scores most!';
     return ok ? `Got it! +${gain}` : ok === false ? 'Wrong one: locked out until the next round.' : 'Tapped!';
   }
 
@@ -90,11 +103,15 @@ export function createView(ctx) {
       $('.clock b').textContent = g.left;
       $('.clock').classList.toggle('hurry', g.phase === 'play' && g.left <= 3);
       $('.pi-title').textContent = g.phase === 'end' ? 'Final scores' : 'Pattern Impostor';
-      $('.pi-round').textContent = g.round < 0 ? `${init.rounds} rounds` : g.phase === 'end' ? '' : `Round ${g.round + 1} of ${init.rounds}${g.round >= 4 ? ': two things go together' : g.round >= 2 ? ': look closer' : ''}`;
+      $('.pi-round').textContent = g.round < 0 ? `${init.rounds} rounds` : g.phase === 'end' ? '' : `Round ${g.round + 1} of ${init.rounds}${pairRound(g) ? ': two things go together' : g.round >= 2 ? ': look closer' : ': one thing is the same'}`;
+      ui.classList.toggle('pairs', g.phase === 'play' && pairRound(g));
+      $('.pi-clue').textContent = g.phase === 'play' && g.clue ? g.clue : '';
       const rv = g.phase === 'reveal';
       $('.pi-rule b').textContent = rv ? g.rule : ''; $('.pi-rule span').textContent = rv ? g.why : '';
+      const codes = items ? items.split(',') : [];
       tiles.forEach((t, i) => {
         t.classList.toggle('odd', rv && g.odd === i);
+        t.querySelector('.pi-cap').textContent = rv && g.keys && codes[i] ? caption(codes[i], g.keys) : '';
         t.querySelector('.pi-who').innerHTML = rv ? players.filter(p => g.picks[p.pid] === i).map(face).join('') : '';
         t.querySelector('.pi-badge').textContent = rv && g.odd === i ? 'Impostor!' : '';
       });
@@ -104,6 +121,9 @@ export function createView(ctx) {
         const d = r.querySelector('.delta'), k = rv ? g.first.indexOf(p.pid) : -1;
         d.textContent = rv ? (k >= 0 ? `${ORD[k]} +${g.gain[p.pid]}` : g.picks[p.pid] == null ? 'no tap' : 'wrong') : g.phase === 'end' ? `${g.right[p.pid]}/${init.rounds} found` : '';
         d.className = 'delta ' + (rv ? (k >= 0 ? 'good' : 'bad') : '');
+      }
+      if (g.phase === 'end' && g.recap && !$('.pi-recap').childElementCount) {
+        $('.pi-recap').innerHTML = `<li class="pi-rhead">The six rules</li>` + g.recap.map(([code, text], i) => `<li><i class="pi-rtile">${tileSvg(code)}</i><span><b>Round ${i + 1}:</b> ${esc(text.replace(/^The rule: /, ''))}</span></li>`).join('');
       }
       $('.pi-note').textContent = note(g);
     },

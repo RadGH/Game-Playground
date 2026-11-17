@@ -17,9 +17,30 @@
 .pi-tile.bad { background: #ffd0d0; animation: shake .4s; }
 .game-pattern-impostor.locked .pi-tile:not(.mine) { opacity: .75; }
 .game-pattern-impostor:is(.watching, .locked, [data-phase=reveal], [data-phase=ready]) .pi-tile { pointer-events: none; cursor: default; }
-.game-pattern-impostor[data-phase=reveal] .pi-tile:not(.odd) { opacity: .45; }
+.game-pattern-impostor[data-phase=reveal] .pi-tile:not(.odd) svg { opacity: .45; }   /* the picture fades, its label stays readable */
 .game-pattern-impostor[data-phase=reveal] .pi-tile.odd { opacity: 1; background: var(--sun); outline: 6px solid #fff; z-index: 1; animation: bob .5s 2; }
 .game-pattern-impostor[data-phase=end] .pi-grid { display: none; }
+
+/* #48: the reveal labels every tile with what the rule looks at; the impostor's label is red */
+.pi-cap { position: absolute; left: -6px; right: -6px; bottom: -27px; display: none; text-align: center; font: 800 13px/1.1 var(--font); color: var(--ink); background: #fffdf5; border: 2px solid var(--ink); border-radius: 8px; padding: 2px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2; }
+.game-pattern-impostor[data-phase=reveal] .pi-cap:not(:empty) { display: block; }
+.game-pattern-impostor[data-phase=reveal] .pi-tile.odd .pi-cap { background: #e8383d; color: #fff; }
+.game-pattern-impostor[data-phase=reveal] .pi-grid { row-gap: 34px; margin-bottom: 26px; }
+/* rounds 5-6: what "two things go together" means, while you look */
+.pi-explain { display: none; margin: 0; max-width: min(100%, 560px); text-align: center; color: #fff; font-weight: 700; font-size: 15px; line-height: 1.25; text-shadow: 0 2px 0 var(--ink); }
+.pi-explain span { color: #fff3b8; }
+.game-pattern-impostor.pairs .pi-explain { display: block; }
+/* the clue, halfway through a round */
+.pi-clue { margin: 0; min-height: 0; color: var(--ink); background: #fff3b8; border: 3px solid var(--ink); border-radius: 10px; padding: 3px 12px; font-weight: 900; font-size: 15px; transform: rotate(-1.5deg); box-shadow: 0 3px 0 var(--ink); animation: pi-pin .3s backwards; }
+.pi-clue:empty { display: none; }
+/* the end: all six rules with their impostors */
+.pi-recap { display: none; list-style: none; margin: 0; padding: 10px 12px; width: min(100%, 680px); box-sizing: border-box; background: var(--paper); border: 4px solid var(--ink); border-radius: 14px; box-shadow: 0 5px 0 var(--ink); }
+.game-pattern-impostor[data-phase=end] .pi-recap:not(:empty) { display: block; }
+.pi-recap li { display: flex; gap: 10px; align-items: center; padding: 4px 0; font-size: 14px; line-height: 1.2; }
+.pi-recap li + li { border-top: 2px dashed rgba(13, 34, 40, .2); }
+.pi-recap .pi-rhead { font-weight: 900; font-size: 16px; justify-content: center; }
+.pi-rtile { flex: none; width: 50px; height: 50px; background: #fffdf5; border: 3px solid var(--ink); border-radius: 9px; padding: 2px; box-sizing: border-box; }
+.pi-rtile svg { width: 100%; height: 100%; display: block; }
 .pi-who { position: absolute; left: 4px; right: 4px; bottom: 4px; display: flex; gap: 2px; justify-content: center; flex-wrap: wrap; }
 .pi-face { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; box-shadow: 0 0 0 2px var(--ink); }
 .pi-face img { width: 100%; height: 100%; display: block; }
@@ -35,7 +56,8 @@
 .pi-players .chip.in { outline: 4px solid #fff; }
 .pi-players .delta { font-size: 13px; } .pi-players .delta.good { color: #1d8a37; } .pi-players .delta.bad { color: #c22; }
 .pi-players .delta:empty { display: none; }
-.game-pattern-impostor[data-phase=end] .pi-players { margin-top: 12vh; }
+.game-pattern-impostor[data-phase=end] .pi-players { margin-top: 8px; }
+.game-pattern-impostor[data-phase=end] .pi-top { order: -2; } .game-pattern-impostor[data-phase=end] .pi-players { order: -1; }   /* the scores under the title, the six rules below */
 .game-pattern-impostor[data-phase=end] .pi-players .chip { font-size: 20px; }
 .game-pattern-impostor[data-phase=end] .pi-players .chip .face { width: 52px; height: 52px; }
 
@@ -50,3 +72,5 @@
   .watching .pi-rule { font-size: 22px; }
 }
 .game-pattern-impostor.watching[data-phase=end] .pi-players .chip { font-size: 30px; } .game-pattern-impostor.watching[data-phase=end] .pi-players .chip .face { width: 80px; height: 80px; }
+/* phones: the round line wraps clear of the corner buttons (QR / menu / report / chat) */
+@media (max-width: 520px) { .pi-round { max-width: calc(100% - 130px); line-height: 1.25; } }

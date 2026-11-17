@@ -23,7 +23,7 @@ export function createView(ctx) {
   if (me != null) ui.querySelector(`.ou-board [data-pid="${me}"]`)?.classList.add('me');
   let phase = '', round = -1, last = null, tray = [], myK = 0, sent = -1, results = [], lineKey = '';
   const bubble = items => `<span class="ou-bubble">${items.map(f => foodSvg(f, HW)).join('')}</span>`;
-  const cust = (c, inner = '', cls = '') => `<span class="ou-cust ${cls}" title="${customerName(c, HW)}">${customerSvg(c, HW)}${inner}</span>`;
+  const cust = (c, inner = '', cls = '') => `<span class="ou-cust ${cls}" data-tip="${customerName(c, HW)}">${customerSvg(c, HW)}${inner}</span>`;
   function now(text, cls = '') { const e = $('.ou-now'); e.textContent = text; e.className = 'ou-now ' + cls; }
   function drawTray() {
     $('.ou-plate').innerHTML = tray.length ? tray.map(f => `<i data-f="${f}">${foodSvg(f, HW)}</i>`).join('') : `<em>${phase === 'serve' ? 'Tap the food they wanted' : ''}</em>`;

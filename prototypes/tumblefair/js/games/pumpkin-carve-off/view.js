@@ -158,7 +158,7 @@ export function createView(ctx) {
     cards.forEach((c, i) => { c.el.classList.toggle('mine', i === mine); c.el.classList.toggle('picked', myVote === i || myVote === 'both'); });
     $('.pc-both')?.classList.toggle('picked', myVote === 'both');
   }
-  const facePic = p => `<i class="vface" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
+  const facePic = p => `<i class="vface" style="--seat:${p.color}" data-tip="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
   function paintReveal(r, scores) {
     cards.forEach((c, i) => {
       const pid = r.who[i], p = byPid.get(pid); if (!p) return;

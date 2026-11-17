@@ -403,15 +403,15 @@ export const GAMES = Object.freeze({
    "title": "Pattern Impostor",
    "blurb": "Spot the one that breaks the rule!",
    "how": [
-    "All the pictures follow a secret rule, except one.",
-    "Tap the impostor. The first right tap scores most!",
-    "A wrong tap locks you out until the next round.",
-    "Six rounds, and the rules get sneakier."
+    "All the pictures follow a secret rule, except one. Tap that one!",
+    "First right tap scores most. A wrong tap locks you out for the round.",
+    "Later rules pair two things up: every star is red, every circle is blue…",
+    "Stuck? A clue appears halfway through each round."
    ],
    "kind": "ui",
    "min": 1,
    "max": 4,
-   "seconds": 88,
+   "seconds": 122,
    "scoring": "points",
    "unit": "points",
    "tags": [
@@ -3028,7 +3028,7 @@ export const GAMES = Object.freeze({
    "kind": "ui",
    "min": 1,
    "max": 4,
-   "seconds": 90,
+   "seconds": 150,
    "scoring": "survival",
    "unit": "letters",
    "tags": [

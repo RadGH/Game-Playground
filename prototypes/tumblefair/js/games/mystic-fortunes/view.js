@@ -52,7 +52,7 @@ export function createView(ctx) {
     $('.mf-sent').innerHTML = sentHtml(P.t, P.pick, { buttons: true });
     const ks = pieces(P.t).filter(x => x.blank != null).map(x => x.kind), k = ks[sel];
     $('.mf-ask').innerHTML = `Pick a card for <b>${esc(KIND_NAMES[k])}</b>`;
-    $('.mf-hand').innerHTML = P.hand[sel].map(c => `<button class="mf-card-w${P.pick[sel] === c ? ' on' : ''}${fits(k, c) ? ' fit' : ''}" data-c="${c}"><span>${esc(cardText(k, c))}</span>${fits(k, c) ? `<i class="mf-star" title="Mabel likes this">★</i>` : ''}</button>`).join('');
+    $('.mf-hand').innerHTML = P.hand[sel].map(c => `<button class="mf-card-w${P.pick[sel] === c ? ' on' : ''}${fits(k, c) ? ' fit' : ''}" data-c="${c}"><span>${esc(cardText(k, c))}</span>${fits(k, c) ? `<i class="mf-star" data-tip="Mabel likes this">★</i>` : ''}</button>`).join('');
     const full = P.pick.every(c => c >= 0), d = $('.mf-done');
     d.disabled = !full; d.textContent = done ? 'Done! (tap to change)' : full ? 'Done!' : 'Fill every blank';
     d.classList.toggle('on', done); ui.classList.toggle('is-done', done);
@@ -99,7 +99,7 @@ export function createView(ctx) {
       c.querySelector('.mf-flag').textContent = own ? 'you wrote this' : picked ? '✓ your vote' : '';
     });
   }
-  const face = p => `<i class="mf-face" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${esc(p.portrait)}" alt="">` : ''}</i>`;
+  const face = p => `<i class="mf-face" style="--seat:${p.color}" data-tip="${esc(p.name)}">${p.portrait ? `<img src="${esc(p.portrait)}" alt="">` : ''}</i>`;
   function paintReveal(r, scores) {
     const best = Math.max(...Object.values(scores));
     cards.forEach((c, i) => {

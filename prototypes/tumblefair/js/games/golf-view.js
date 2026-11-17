@@ -98,6 +98,7 @@ export function createPuttView(ctx, { theme = {}, decorate = null, onState = nul
   }
 
   // ---------------------------------------------------------------- balls, clubs, aim
+  const OFF_AFTER_IN = 1300, OFF_AFTER_OUT = 500;                // ms a finished golfer stays (to cheer / shrug) before stepping off (#47)
   const DRAW_R = BALL_R * 1.4;                                   // drawn a little bigger than the rules' ball, so a phone can see it
   const ballGeo = new THREE.SphereGeometry(DRAW_R, 16, 10), ringGeo = new THREE.RingGeometry(DRAW_R * 1.45, DRAW_R * 2.05, 24).rotateX(-Math.PI / 2);
   const B = new Map();
@@ -158,7 +159,13 @@ export function createPuttView(ctx, { theme = {}, decorate = null, onState = nul
         const [, x, z, st, strokes, ch] = row;
         if (R.snap || Math.hypot(x - R.tx, z - R.tz) > 2.4) { R.x = x; R.z = z; R.snap = false; }
         R.tx = x; R.tz = z; R.ch = ch / 100;
-        if (st !== R.st) { if (st === ST.in) R.sink = 0.001; if (st === ST.aim) R.sink = 0; R.st = st; }
+        if (st !== R.st) {
+          if (st === ST.in) R.sink = 0.001; if (st === ST.aim) R.sink = 0;
+          // live report #47 (Mini Golf): a golfer who has finished the hole steps off the course after a short cheer, so
+          // they never stand in the way of the players still putting; back on the tee for the next hole
+          R.offAt = st >= ST.in ? performance.now() + (st === ST.in ? OFF_AFTER_IN : OFF_AFTER_OUT) : null;
+          R.st = st;
+        }
         R.strokes = strokes;
       }
       bar.set(g.sc, g.left);
@@ -203,6 +210,7 @@ export function createPuttView(ctx, { theme = {}, decorate = null, onState = nul
         R.ball.rotation.x += Math.hypot(R.tx - R.x, R.tz - R.z) * dt * 20;
         // the character: behind its ball facing its aim (yours from your own stick, at once)
         const a = ctx.actor(pid);
+        if (a && R.offAt != null && last?.ph === 'play' && performance.now() >= R.offAt) a.group.visible = false;   // #47: finished = off the course (play.js shows it again every frame)
         if (a && R.st === ST.aim && !hidden && last?.ph === 'play') { const yaw = ballYaw(pid); a.group.position.set(R.x - Math.sin(yaw) * STANCE, y, R.z - Math.cos(yaw) * STANCE); }
         const club = clubOf(pid);
         if (club) {

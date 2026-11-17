@@ -19,7 +19,7 @@ export function createView(ctx) {
     <div class="pt-top"><span class="pt-title">${HW ? 'Spooky Pie Toss' : 'Pie Toss'}</span><span class="clock"><b>--</b></span></div>
     <div class="pt-board">${players.map(p => chip(p, '<em class="sc">0</em>')).join('')}</div>
     <div class="pt-booth"><canvas></canvas><div class="pt-count"></div></div>
-    <div class="pt-me"><span class="pt-pie" title="pie ready"></span><span class="pt-say"></span></div>
+    <div class="pt-me"><span class="pt-pie" data-tip="pie ready"></span><span class="pt-say"></span></div>
     <p class="pt-note"></p>`;
   const $ = s => ui.querySelector(s);
   ui.classList.toggle('watching', watching); ui.dataset.phase = 'count';

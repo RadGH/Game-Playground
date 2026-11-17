@@ -11,7 +11,7 @@
 //                                          or plain JSON ('js1:…') where the browser has no CompressionStream
 //     arcline.snap.<worldId>.<regionId>    the city's picture for the world map: { w, h, top, url } (a small WebP,
 //                                          render/map.js snapshot()); kept out of arcline.worlds so the index stays small
-//   summary = { name, founded, population, money, milestone, day, lastPlayed, rates, size, snapAt } — what the world
+//   summary = { name, founded, population, money, milestone, day, lastPlayed, rates, size, snapAt, links, edgeRoads } — what the world
 //   map shows without opening the city. loadWorld() puts the picture on it as summary.snap.
 //
 // Every localStorage call is wrapped (private windows, full storage): a failed write returns { ok: false, reason }.
@@ -19,6 +19,7 @@
 // MIGRATE.region[v] for the region JSON (its own v from sim/region.js). loadWorld() runs every step in order.
 import { generateWorld } from './sim/world.js';
 import { saveRegion } from './sim/region.js';
+import { edgeRoadTiles } from './sim/transit.js';
 
 export const SAVE_VERSION = 1;
 export const KEYS = { worlds: 'arcline.worlds', last: 'arcline.last', settings: 'arcline.settings' };
@@ -154,6 +155,7 @@ export function summarize(r) {
     name: r.name, founded: !!r.founded, population: Math.round(r.people?.total || 0), money: Math.round(r.money || 0),
     milestone: r.milestone || 0, day: Math.floor(r.day || 0), lastPlayed: Date.now(), size: r.size,
     rates: { ...(r.rates || {}) }, stock: { ...(r.stock || {}) }, links: Array.isArray(r.links) ? r.links.slice() : undefined,
+    edgeRoads: r.tiles?.road ? edgeRoadTiles(r) : undefined,   // border roads, so neighbours can line up and link (#74)
   };
 }
 

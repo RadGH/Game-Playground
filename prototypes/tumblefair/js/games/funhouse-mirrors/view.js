@@ -98,7 +98,7 @@ export function createView(ctx) {
       c.querySelector('.fm-flag').textContent = own ? 'you made this' : picked ? '✓ your vote' : '';
     });
   }
-  const face = p => `<i class="fm-face" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${esc(p.portrait)}" alt="">` : ''}</i>`;
+  const face = p => `<i class="fm-face" style="--seat:${p.color}" data-tip="${esc(p.name)}">${p.portrait ? `<img src="${esc(p.portrait)}" alt="">` : ''}</i>`;
   function paintReveal(r, scores) {
     const best = Math.max(...Object.values(scores));
     cards.forEach((c, i) => {

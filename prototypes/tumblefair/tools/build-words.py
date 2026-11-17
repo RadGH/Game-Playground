@@ -24,8 +24,9 @@ TARGET = 17000          # words kept
 MAX_BYTES = 150_000
 
 # Words a party game must never accept or show. Stems: any word CONTAINING one of STEMS is dropped too.
+# "muster": banned by the owner in every game (QA pass 2026-11-16)
 BLOCK = set('''
-ass asses arse arses bastard bastards bitch bitches bitchy bloody bollocks boner boob boobs booty breast breasts bugger
+muster ass asses arse arses bastard bastards bitch bitches bitchy bloody bollocks boner boob boobs booty breast breasts bugger
 bum butt butts cock cocks coke crap crappy cum cunt damn damned dick dicks dildo dope dumbass erotic fag fags faggot
 fanny fart farts feces fetish fuck hell hoe hoes homo horny hump humping jerk junkie kinky knob lesbian lust lusty
 masturbate meth naked nazi nazis nipple nipples nude nudes nudity orgasm orgy penis perv pervert piss pissed poop porn

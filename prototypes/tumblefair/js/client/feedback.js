@@ -12,7 +12,7 @@ addEventListener('unhandledrejection', e => keep('promise', e.reason?.message ||
 const ce = console.error.bind(console); console.error = (...a) => { keep('console', a.map(x => x?.message || x).join(' ')); ce(...a); };
 
 export function installFeedback({ stage, getS, net }) {
-  const btn = h('button', 'fb-btn', '!'); btn.title = 'Report a bug or suggest something'; btn.setAttribute('aria-label', btn.title);
+  const btn = h('button', 'fb-btn', '!'); btn.dataset.tip = 'Report a bug or suggest something'; btn.setAttribute('aria-label', btn.dataset.tip);
   document.body.append(btn);
   function debug() {
     const S = getS(), r = S.room;

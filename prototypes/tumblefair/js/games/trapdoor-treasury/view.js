@@ -10,7 +10,7 @@ const RISK = r => !r ? 'Always safe' : r >= 0.5 ? 'Trapdoor: 1 in 2' : `Trapdoor
 
 export function createView(ctx) {
   const { ui, players, me } = ctx, chests = ctx.init.chests;
-  const face = p => `<i class="tt-face" style="--seat:${p.color}" title="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
+  const face = p => `<i class="tt-face" style="--seat:${p.color}" data-tip="${esc(p.name)}">${p.portrait ? `<img src="${p.portrait}" alt="">` : ''}</i>`;
   ui.style.setProperty('--vault', `url(${ART('vault')})`);
   ui.innerHTML = `
     <div class="tt-top"><span class="tt-round"></span><span class="clock"><b>--</b></span></div>

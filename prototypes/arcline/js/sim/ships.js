@@ -17,6 +17,7 @@ import { item } from './catalog.js';
 import { rng } from '../../../../citykit/js/kit/rng.js';
 import { fmt } from '../../../../shared/format.js';
 import { damageNests } from './nests.js';
+import { refreshArms, turretStats, MK } from './arms.js';
 
 // ---------------------------------------------------------------- data
 /** What each kind of ship is called on screen. */
@@ -49,9 +50,9 @@ export const GOODS = [
     const base = { pulse: 4500, mortar: 6500, arc: 8000, rail: 11000 }[t];
     return [
       { id: `mk2-${t}`, name: `${nm} Mk II parts`, kind: 'turret', turret: t, mk: 2, credits: base, crystal: Math.round(base / 90), fromTurret: `tur-${t}`,
-        blurb: `Unlocks the ${nm} Mk II: about 40% more damage.` },
+        blurb: `Refits every ${nm} — the ones standing and every one you build later — to Mk II: 40% more damage.` },
       { id: `mk3-${t}`, name: `${nm} Mk III parts`, kind: 'turret', turret: t, mk: 3, credits: base * 3, crystal: Math.round(base / 30), fromTurret: `tur-${t}`, needs: `mk2-${t}`, rare: true,
-        blurb: `Unlocks the ${nm} Mk III: about twice the damage of Mk I and a longer reach.` },
+        blurb: `Refits every ${nm} to Mk III: twice the damage of Mk I and 15% more reach.` },
     ];
   }),
   { id: 'piece-spaceport', name: 'Docking ring', kind: 'landmark', landmark: 'lm-spaceport', credits: 9000, crystal: 120, from: 3, effect: { discount: 0.3 },
@@ -61,7 +62,7 @@ export const GOODS = [
   { id: 'piece-lance', name: 'Lance focusing crystal', kind: 'landmark', landmark: 'lm-lance', credits: 15000, crystal: 220, from: 5, effect: { lanceCooldown: 0.7 }, rare: true,
     blurb: 'The Orbital Lance recharges 30% faster.' },
   { id: 'bp-walls', name: 'Woven wall blueprint', kind: 'blueprint', credits: 6000, crystal: 60, from: 1, effect: { wallHp: 1.25 },
-    blurb: 'Walls you build from now on are 25% tougher.' },
+    blurb: 'Every wall and gate, standing and new, is 25% tougher.' },
   { id: 'bp-range', name: 'Range-finder blueprint', kind: 'blueprint', credits: 7000, crystal: 80, from: 2, effect: { turretRange: 1.1 },
     blurb: 'Every turret reaches 10% farther.' },
   { id: 'bp-strike', name: 'Shell-spread blueprint', kind: 'blueprint', credits: 5000, crystal: 70, from: 1, effect: { strikeRadius: 1.2 },
@@ -90,6 +91,7 @@ export function ensureShips(r) {
   const s = r.ships || (r.ships = {});
   s.passing ??= []; s.history ??= []; s.strikes ??= 0; s.lanceReady ??= 0; s.seq ??= 0; s.rolls ??= 0;
   s.goods ??= {};
+  if (!r.arms) refreshArms(r, ownedGoods(r));   // old saves: the upgrades they paid for (report #78: Mk II did nothing)
   // round 2: ships no longer carry people — an old save's settler ships simply fly on
   s.passing = s.passing.filter(sh => sh.kind === 'warship' || sh.kind === 'merchant');
   s.nextDrop ??= (r.day || 0) + (T.supplyEveryDays ?? 25) * 0.5;
@@ -216,12 +218,13 @@ export function answer(r, shipId, choice) {
     r.money -= g.credits; r.stock.crystal -= g.crystal; sh.answered = true;
     if (g.kind === 'supply') for (const [k, v] of Object.entries(g.give)) r.stock[k] = (r.stock[k] || 0) + v;
     else s.goods[g.id] = r.day;
+    const changed = g.kind === 'supply' ? null : refreshArms(r, ownedGoods(r));
     sh.offer.goods = sh.offer.goods.filter(id => id !== g.id);
     const land = landing(r, R, 0, { cargo: g.id });
     if (g.kind === 'supply') land.supply = { ...g.give };
     if (!sh.offer.goods.length) leave(r, sh, 'bought');
     r.log?.push({ day: Math.round(r.day), text: `Bought ${g.name} from the ${sh.title}.` });
-    return { ok: true, text: g.kind === 'supply' ? `${g.name} are coming down: ${supplyText(g.give)}.` : `${g.name}: ${g.blurb}`, events: [land] };
+    return { ok: true, text: g.kind === 'supply' ? `${g.name} are coming down: ${supplyText(g.give)}.` : upgradeText(r, g, changed), events: [land], upgrade: changed };
   }
   return { ok: false, why: 'Nothing to answer', events: [] };
 }
@@ -307,10 +310,10 @@ export function supplyDrop(r, R) {
   if (r.milestone >= 1 && R.chance(T.rarePartChance ?? 0.12)) {
     const own = r.ships.goods;
     const can = GOODS.filter(g => !own[g.id] && !g.rare && (!g.needs || own[g.needs]) && (g.from == null || g.from <= r.milestone) && (!g.fromTurret || (item(g.fromTurret)?.unlock ?? 0) <= r.milestone) && !g.landmark).sort((a, b) => a.credits - b.credits);
-    if (can.length) { part = can[0]; own[part.id] = r.day; }
+    if (can.length) { part = can[0]; own[part.id] = r.day; refreshArms(r, ownedGoods(r)); }
   }
   const land = landing(r, R, 0, { cargo: part ? part.id : 'supply' });
-  const text = `A supply crate from the colony's sponsors landed${land.onPad ? ' on the Landing Pad' : ''}: ${supplyText(give)}${part ? `, and ${part.name} — ${part.blurb}` : ''}.`;
+  const text = `A supply crate from the colony's sponsors landed${land.onPad ? ' on the Landing Pad' : ''}: ${supplyText(give)}${part ? `, and ${part.name}. ${upgradeText(r, part, null)}` : '.'}`;
   r.log?.push({ day: Math.round(r.day), text, kind: 'supply' });
   return { ...land, supply: give, part: part ? part.id : null, text };
 }
@@ -358,6 +361,19 @@ export function foundingDrop(r) {
     pods.push({ x, z, count: share(count, n, k), delay: 1.4 + k * 0.32 + R.range(0, 0.2) });
   }
   return { type: 'founding', core: r.core ? { ...r.core } : null, x: c.x, z: c.z, count, pods };
+}
+
+/** The goods this region owns, as GOODS entries. */
+export function ownedGoods(r) { const own = r.ships?.goods || {}; return GOODS.filter(g => own[g.id] != null); }
+/** What a bought good just did, in a sentence with its numbers (report #78: the player couldn't tell). */
+export function upgradeText(r, g, changed) {
+  if (g.turret) {
+    const now = turretStats(r, g.turret), was = turretStats(r, g.turret, Math.max(1, g.mk - 1)), n = (r.turrets || []).filter(t => t.kind === g.turret).length;
+    const reach = now.range > was.range + 0.01 ? `, reach ${fmt(was.range, { decimals: 1 })} → ${fmt(now.range, { decimals: 1 })} tiles` : '';
+    return `${now.label}: ${n ? `your ${fmt(n)} ${now.name}${n > 1 ? 's are' : ' is'} refitted` : `every ${now.name} you build is ${MK[g.mk].label}`} — damage ${fmt(was.damage, { decimals: 0 })} → ${fmt(now.damage, { decimals: 0 })} a shot${reach}.`;
+  }
+  if (g.effect?.wallHp) return `${g.name}: every wall and gate is ${fmt(Math.round((g.effect.wallHp - 1) * 100))}% tougher, from now on and the ones standing.`;
+  return `${g.name}: ${g.blurb}`;
 }
 
 // ---------------------------------------------------------------- orbital strikes

@@ -19,6 +19,8 @@ import { rng } from '../../../../citykit/js/kit/rng.js';
 import { Grid, T as K, WALL_COST } from '../../../../citykit/js/world/field.js';
 import { TURRETS } from '../../../../citykit/js/world/defence.js';
 import { fmt } from '../../../../shared/format.js';
+import { turretStats } from './arms.js';
+import { addGhost } from './repair.js';
 
 const dayLen = () => Math.max(0.1, T.dayLengthSec ?? 6);
 
@@ -273,7 +275,8 @@ export function siegeNests(r, days, rangeMul = 1) {
   ensureThreat(r);
   const cleared = [], sec = days * dayLen();
   for (const t of r.turrets) {
-    const s = TURRETS[t.kind]; if (!s || (t.powered ?? 1) <= 0) continue;
+    if (!TURRETS[t.kind] || (t.powered ?? 1) <= 0) continue;
+    const s = turretStats(r, t.kind, t.tier || 1);   // its Mk and the range blueprint (arms.js)
     const dps = s.damage * (s.chain ? 2 : 1) / s.every * 0.5 * Math.min(1, t.powered ?? 1);
     const n = r.nests.find(n => Math.hypot(n.x - t.x, n.z - t.z) <= s.range * rangeMul + 0.5);
     if (!n) continue;
@@ -353,10 +356,12 @@ export function syncField(r, g) {
     const x = i % N, z = (i / N) | 0, broken = g.kind[i] !== K.WALL && g.kind[i] !== K.BUILDING;
     if (src === SRC.WALL) {
       if (!broken) { r.tiles.wallHp[i] = g.hp[i]; continue; }
+      addGhost(r, { kind: 'wall', x, z, v: r.tiles.wall[i] });   // tap it, or Tools › Rebuild everything (report #73)
       r.tiles.wall[i] = 0; r.tiles.wallHp[i] = 0; g.src[i] = 0; changed = true; t.lastBreach = r.day;
       ev.push({ type: 'wall-broken', x, z });
     } else if (src === SRC.TURRET && broken) {
       const tu = r.turrets.find(q => q.x === x && q.z === z);
+      if (tu?.id) addGhost(r, { kind: 'turret', x, z, id: tu.id, tier: tu.tier || 1 });
       r.turrets = r.turrets.filter(q => q !== tu); g.src[i] = 0; changed = true;
       ev.push({ type: 'turret-wrecked', x, z, kind: tu?.kind });
     } else if (src === SRC.LOT && broken) {
@@ -372,6 +377,8 @@ export function syncField(r, g) {
   if (wreck.size) {
     for (const li of wreck) {
       const l = r.lots[li]; const e = item(l.id);
+      // a placed building leaves a ghost to rebuild; zoned ones grow back on their own (the zone is still painted)
+      if (l.kind === 'placed' && e && !String(l.id).startsWith('station-')) addGhost(r, { kind: 'lot', x: l.x, z: l.z, w: l.w, d: l.d, id: l.id, recipe: l.recipe, params: { ...l.params }, face: l.face || 0 });
       ev.push({ type: 'building-wrecked', x: l.x, z: l.z, w: l.w, d: l.d, id: l.id, name: e?.name || (l.zone === 'R' ? 'Homes' : l.zone === 'C' ? 'Shops' : l.zone === 'I' ? 'Industry' : 'A building') });
       for (let k = 0; k < l.d; k++) for (let j = 0; j < l.w; j++) { const i = (l.z + k) * N + l.x + j; g.src[i] = 0; g.kind[i] = K.LAND; g.hp[i] = 0; }
     }

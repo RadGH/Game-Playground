@@ -89,7 +89,7 @@
 .game-snowman-styling[data-phase=vote]:not(.watching) .sm-card.picked:not(.mine)::before { content: 'My vote'; position: absolute; z-index: 1; bottom: -12px; background: var(--mint); color: #fff; border: 3px solid var(--ink); border-radius: 10px; padding: 0 10px; font-size: 14px; }
 .game-snowman-styling:is([data-phase=reveal], .watching) .sm-card { pointer-events: none; }
 .sm-card.best { border-color: var(--sun); box-shadow: 0 0 22px rgba(255, 210, 63, .8); }
-.sm-card.best::before { content: 'Best snowman!'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%) rotate(-3deg); z-index: 3; background: var(--sun); font: 900 13px/1 var(--font); padding: 4px 9px; border: 3px solid var(--ink); border-radius: 10px; white-space: nowrap; }
+.sm-card.best::before { content: 'Best snowman!'; position: absolute; top: -12px; left: 8px; transform: rotate(-3deg); z-index: 3; background: var(--sun); font: 900 13px/1 var(--font); padding: 4px 9px; border: 3px solid var(--ink); border-radius: 10px; white-space: nowrap; }
 .sm-note { margin: 0; text-align: center; min-height: 1.2em; max-width: 640px; font-size: 14px; font-weight: 700; color: #2b4258; }
 @media (min-aspect-ratio: 1/1) {
   .sm-cards { grid-template-columns: repeat(var(--cols, 4), minmax(0, 260px)); justify-content: center; }
@@ -97,3 +97,5 @@
   .sm-frame { height: clamp(150px, calc(100dvh - 300px), 360px); }
 }
 @media (prefers-reduced-motion: reduce) { .sm-flakes, .sm-me.wob, .sm-blank.wob svg, .sm-frame svg { animation: none; } }
+/* narrow cards (two side by side on a phone): the badge drops below the corner points so they never overlap */
+@media (max-width: 520px) { .sm-card.best::before { top: 22px; left: 50%; transform: translateX(-50%) rotate(-3deg); } }

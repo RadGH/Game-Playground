@@ -6,3 +6,4 @@ import './creatures.js';
 import './vehicles.js';
 import './transit.js';
 import './power.js';
+import './street.js';

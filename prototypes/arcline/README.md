@@ -39,3 +39,21 @@ way a city grows), zoning decides where they live and work.
   (`render/traffic.js`); a zoned lot laid sideways (1×2) now turns its building with it — `lot.face` (networks.js
   `lotFace`: the model turn that puts its front on a road; old saves get one on load) — and only grows where its front
   meets a road. Tests: `tests/alignment.test.mjs`, `tests/alignment.spec.js`.
+- 2026-11-16 — owner reports #72 #73 #76 #77 #78 #81 #82 #86 (builder's tools). Turrets aim from their tile's middle
+  and bake 32 facings, creatures 16 (citykit `Defence.centre`, recipe `dirs`). `sim/arms.js` is the one source for
+  turret/wall numbers and merchant upgrades (`refreshArms`: Mk II/III refit every turret of a kind; wall/range
+  blueprints, landmark discounts — none were read before). `sim/repair.js`: ghosts of destroyed walls/turrets/placed
+  buildings (tap → rebuild; Tools › Bulk repair), walls heal above 50% after `wallRegenQuietSec`. `sim/undo.js`: every
+  build action is a tile diff, undone with a full refund for `undoSec` (Ctrl+Z, the tool bar's Undo). Right-click or
+  Esc during a drag cancels it. `ui/builder.js`: tray stat cards, turret/wall/ghost panels, Bulk repair, Undo. No
+  pylon on a turret/wall/building tile. Tests: `tests/builder-1116.test.mjs`, `tests/builder.spec.js`, walk lines.
+- 2026-11-16 — owner reports #71 #74 #75 #79 #80 #83 #84 #85 (city, world, HUD). Street lights every 3 tiles on
+  straight roads + neon billboards / blade signs at most shops (`render/street.js` plan, `citykit/js/kit/street.js`
+  models). Money shown per day = what each day pays (`city.js dailyNet`), a pay-day bar under the date (on the Credits
+  pill on phones). Power/Water pills amber ≥ 85% use, red over, a toast when it gets worse; the R/C/I, Power and Water
+  pills open sheets (`sim/advice.js`). Zoned lots level up through `city.js levelUp()` — the same check the info panel
+  shows as a bar + needs — and grow into neighbouring zoned land (1×1 homes could never upgrade before). Bridges sit at
+  bank height (`networks.js bridgeDecks`). Road links need roads meeting on both sides of the border; a new region gets
+  a road stub at every neighbour road (`transit.js seedEdgeRoads`, summaries save `edgeRoads`); the world map draws a
+  link only then. The city view resets traffic/effects per region (`main.js resetCityView`). Tests:
+  `tests/feedback-1116.test.mjs`, `tests/feedback-1116.spec.js`, walk lines (power/water/demand sheets, info-home).

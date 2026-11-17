@@ -30,7 +30,7 @@ export function createView(ctx) {
       const p = items[i];
       if (p == null) return '<span class="ps-slot empty"></span>';
       if (p < 0) return '<span class="ps-slot gap"><i class="ps-puff"></i></span>';
-      return `<span class="ps-slot${glow.includes(p) ? ' glow' : ''}" title="${prizeName(p, HW)}">${prizeSvg(p, HW)}</span>`;
+      return `<span class="ps-slot${glow.includes(p) ? ' glow' : ''}" data-tip="${prizeName(p, HW)}">${prizeSvg(p, HW)}</span>`;
     }).join('');
   }
   function tray(g) {

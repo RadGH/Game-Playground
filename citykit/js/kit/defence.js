@@ -6,7 +6,7 @@
 // Posts join walls in any direction (`arms` = which sides get a wall stub). Gates sit where a road crosses a wall.
 // Every wall reaches exactly to the tile edge (x = ±0.5), so walls side by side read as one unbroken line.
 //
-// Turrets are baked per SCREEN direction (16): the base stays put, userData.face(heading) turns the head.
+// Turrets are baked per SCREEN direction (32, ≤ 5.6° off on screen — Arcline report #72): the base stays put, userData.face(heading) turns the head.
 //   userData.face(heading)    turn the head (barrel) to a world heading (radians, atan2(dz, dx); 0 = +x)
 //   userData.muzzle(heading)  → { x, y, z }: where the barrel tip is, in the model's own units (tile units, y up,
 //                              origin = the tile centre on the ground) when the head faces `heading`. It is a world
@@ -463,22 +463,22 @@ addRecipes({
     },
   },
   'tur-pulse': {
-    name: 'Pulse Gun', group: 'defence', size: [1, 1], dirs: 16, noStyle: true,
+    name: 'Pulse Gun', group: 'defence', size: [1, 1], dirs: 32, noStyle: true,
     blurb: 'Cheap rapid-fire guns: short glowing bolts. Two, three, then four barrels as it upgrades.',
     params: [tierParam], build: turret('pulse', pulseHead, GLOW.cyan, { kind: 'bolt', color: GLOW.cyan }),
   },
   'tur-arc': {
-    name: 'Arc Coil', group: 'defence', size: [1, 1], dirs: 16, noStyle: true,
+    name: 'Arc Coil', group: 'defence', size: [1, 1], dirs: 32, noStyle: true,
     blurb: 'A charged coil that throws lightning from its fork; the bolt jumps on to nearby creatures.',
     params: [tierParam], build: turret('arc', arcHead, GLOW.violet, { kind: 'arc', color: GLOW.violet }),
   },
   'tur-rail': {
-    name: 'Rail Lance', group: 'defence', size: [1, 1], dirs: 16, noStyle: true,
+    name: 'Rail Lance', group: 'defence', size: [1, 1], dirs: 32, noStyle: true,
     blurb: 'Long-range, slow and heavy: twin rails fling a slug that punches through armour.',
     params: [tierParam], build: turret('rail', railHead, GLOW.blue, { kind: 'slug', color: '#bfe0ff' }),
   },
   'tur-mortar': {
-    name: 'Mortar', group: 'defence', size: [1, 1], dirs: 16, noStyle: true,
+    name: 'Mortar', group: 'defence', size: [1, 1], dirs: 32, noStyle: true,
     blurb: 'A chunky tube that lobs explosive shells over walls into crowds. More tubes as it upgrades.',
     params: [tierParam], build: turret('mortar', mortarHead, GLOW.orange, { kind: 'shell', color: GLOW.orange, pitch: MORTAR_PITCH }),
   },

@@ -31,7 +31,17 @@ echo "== $GAME: every module connected"
 node tools/game-reach.mjs "$SRC" | sed "s#$TMP/##" || FAIL=1
 if [[ -f "$DIR/tests/walk.mjs" && "${WALK:-1}" != 0 ]]; then
   echo "== $GAME: walk every screen (desktop + phone)${DIRTY:+ — NOTE: the dev server serves the working tree, which differs from $SHA}"
+  # a game with its own dev server (tumblefair-dev …): local game servers are off by default (owner 2026-11-16), so
+  # start it for the walk and stop it again if this check started it
+  STARTED=""
+  if systemctl --user cat "$GAME-dev.service" >/dev/null 2>&1 && [[ "$(systemctl --user is-active "$GAME-dev")" != active ]]; then
+    tools/game-servers.sh start "$GAME-dev" >/dev/null && STARTED="$GAME-dev"
+    PORT=$(grep -oE 'localhost:[0-9]+' "$DIR/tests/walk.mjs" | head -1 | cut -d: -f2)
+    for _ in $(seq 1 60); do { [[ -n "$PORT" ]] && curl -s -o /dev/null "http://localhost:$PORT/"; } && break; sleep 1; done
+    echo "   (started $STARTED for the walk)"
+  fi
   timeout 900 node tools/walk-screens.mjs "$GAME" | tail -60 || FAIL=1
+  [[ -n "$STARTED" ]] && tools/game-servers.sh stop "$STARTED" >/dev/null && echo "   (stopped $STARTED again)"
 elif [[ ! -f "$DIR/tests/walk.mjs" ]]; then
   echo "== $GAME: no tests/walk.mjs, screens not walked"
 else

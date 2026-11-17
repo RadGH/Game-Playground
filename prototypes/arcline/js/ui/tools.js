@@ -25,6 +25,9 @@ export function toolDefs() {
     bulldoze: { name: 'Bulldoze', kind: 'rect', group: 'tools', color: 'rgba(255,90,70,0.45)' },
     repair: { name: 'Repair walls', kind: 'rect', group: 'defence', color: 'rgba(120,220,255,0.4)', blurb: 'Drag over damaged walls to patch them up: 1 credit for every 2 points of wall restored.' },
     level: { name: 'Level ground', kind: 'rect', group: 'tools', color: 'rgba(200,170,120,0.5)' },
+    // not a map tool: opens the Bulk repair dialog (owner report #73: "Tools > Bulk Repair")
+    bulkrepair: { name: 'Bulk repair', kind: 'action', group: 'tools', action: 'openBulkRepair',
+      blurb: 'Rebuild everything creatures destroyed (the see-through ghosts on the map) and patch damaged walls — you see the total first.' },
   };
   (C.transit || []).forEach((k, i) => {
     t[`line-${k.id}`] = { name: `${k.name} line`, kind: 'line', group: 'transit', transit: i + 1, entry: { ...k, cost: k.cost, recipe: null, unlock: k.unlock, blurb: `Elevated ${k.name.toLowerCase()} track. A line works once it has two stations; it cuts traffic and lifts land value around each station.` } };

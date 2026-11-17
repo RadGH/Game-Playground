@@ -140,10 +140,12 @@ export function reachOf(r, tiles, reach = POWER_REACH, sum = reach) {
  * → { poles: [{ x, z, axis: 'x'|'z', corner }], spans: [[a, b, axis]] } (a, b = indices into poles)
  */
 export function pylonPlan(r) {
-  const key = `${r.lineRev || 0}|${r.lots.length}|${r.size}`;
+  const tur = new Set((r.turrets || []).map(t => t.z * r.size + t.x));
+  const key = `${r.lineRev || 0}|${r.lots.length}|${r.size}|${[...tur].join(',')}`;
   if (r._pylons?.key === key) return r._pylons;
   const N = r.size, P = r.tiles.power, isP = (x, z) => x >= 0 && z >= 0 && x < N && z < N && P[z * N + x] > 0;
-  const blocked = i => r.tiles.road[i] || r.tiles.lot[i] >= 0 || r.tiles.wall[i];
+  // never a pylon on a road, building, wall or turret (report #86: one stood on a turret and couldn't be removed)
+  const blocked = i => r.tiles.road[i] || r.tiles.lot[i] >= 0 || r.tiles.wall[i] || tur.has(i);
   const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
   const dirsAt = (x, z) => DIRS.map(([dx, dz], k) => isP(x + dx, z + dz) ? k : -1).filter(k => k >= 0);
   const isNode = (x, z) => { const ds = dirsAt(x, z); return ds.length !== 2 || (ds[0] >> 1) !== (ds[1] >> 1); };
@@ -215,3 +217,39 @@ export function solveTraffic(r, roadsCat) {
 
 /** Facts about a catalog entry placed as a lot (power/water/people/jobs) — copied onto the lot when built. */
 export function entryFacts(id) { const e = item(id); return { power: e.power ?? 0, water: e.water ?? 0, people: e.people ?? 0, jobs: e.jobs ?? 0 }; }
+
+/**
+ * Bridge decks (owner report #83, 2026-11-16: "This should have been a bridge but the bridge segments are lower than the
+ * ground"). A road tile over water is a bridge; its deck sits at the height of the HIGHER bank at the two ends of its
+ * straight run across the water, so it never dips below the land it leaves from (rivers are carved a level below their
+ * banks — terrain.js settleRivers — and the sea is at 0). One source for drawing, vehicles and the tests.
+ * → Map tileIndex → deck level (whole height levels, like ter.height). Not cached: the renderer refreshes its copy.
+ */
+export function bridgeDecks(r) {
+  const N = r.size, road = r.tiles.road, water = r.ter.water, height = r.ter.height;
+  const map = new Map(), isBridge = i => road[i] && water[i];
+  for (let i = 0; i < N * N; i++) {
+    if (!isBridge(i) || map.has(i)) continue;
+    const x = i % N, z = (i / N) | 0;
+    const along = (dx, dz) => { const nx = x + dx, nz = z + dz; return nx >= 0 && nz >= 0 && nx < N && nz < N && road[nz * N + nx]; };
+    // the run's axis: the way the road continues (a lone tile or a crossing takes x)
+    const axis = (along(1, 0) || along(-1, 0)) && !(along(0, 1) || along(0, -1)) ? [1, 0] : !(along(1, 0) || along(-1, 0)) && (along(0, 1) || along(0, -1)) ? [0, 1] : [1, 0];
+    const run = [i]; let bank = 0;
+    for (const s of [1, -1]) {
+      let cx = x, cz = z;
+      for (;;) {
+        cx += axis[0] * s; cz += axis[1] * s;
+        if (cx < 0 || cz < 0 || cx >= N || cz >= N) break;
+        const j = cz * N + cx;
+        if (isBridge(j)) { run.push(j); continue; }
+        if (!water[j]) bank = Math.max(bank, height[j]);   // the bank this end lands on
+        break;
+      }
+    }
+    // no bank at either end (off the map): the highest dry ground beside the run
+    if (!bank) for (const j of run) for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const jx = j % N + dx, jz = ((j / N) | 0) + dz; if (jx >= 0 && jz >= 0 && jx < N && jz < N && !water[jz * N + jx]) bank = Math.max(bank, height[jz * N + jx]); }
+    const deck = Math.max(1, bank);
+    for (const j of run) map.set(j, Math.max(map.get(j) || 0, deck, height[j]));
+  }
+  return map;
+}

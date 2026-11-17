@@ -4,9 +4,12 @@
 const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
 export class Traffic {
-  constructor() { this.list = []; this.seed = 1; }
+  constructor() { this.reset(); }
+  /** Forget every vehicle and the road list: a new region starts empty (report #75). */
+  reset() { this.list = []; this.seed = 1; this._roads = null; this._roadCount = -1; this._dirtySeen = undefined; this._region = null; }
   rnd() { this.seed = (this.seed * 16807) % 2147483647; return this.seed / 2147483647; }
   update(r, dt) {
+    if (r !== this._region) { this.reset(); this._region = r; }   // another city: nothing carries over
     const N = r.size; if (!r.core) { this.list.length = 0; return; }
     const want = Math.min(80, Math.round((r.people.total / 12) + (r.lots.reduce((s, l) => s + (l.jobs || 0), 0) / 30)));
     if (!this._roads || r.dirty !== this._dirtySeen || this._roadCount !== countRoads(r)) { this._roads = []; for (let i = 0; i < N * N; i++) if (r.tiles.road[i]) this._roads.push(i); this._roadCount = this._roads.length; }

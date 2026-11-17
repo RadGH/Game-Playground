@@ -4,8 +4,11 @@
 // own, never a bare one). Points = votes received + the Frost Ribbon (+1) for the snowman that fits the theme best
 // (a tie on fit goes to whoever finished dressing first).
 //
-// With few players the yard fills up with CPU snowman-builders (Mitten, Flurry) and CPU judges (Granny Frost…) so the
-// vote still means something: 1 player = 2 builders + 3 judges, 2 players = 1 builder + 1 judge, 3-4 = none. A judge
+// With few players CPU judges (Granny Frost…) vote too, so the vote still means something; alone, CPU snowman-builders
+// (Mitten, Flurry) also dress snowmen for you to beat. 1 player = 2 builders + 3 judges, 2 players = 2 judges and NO
+// builder, 3-4 = none. Live report #50 (2026-11-12, "go away bot"): two people in a room got one CPU builder, Mitten,
+// whose anonymous snowman took both their votes and the judge's — it scored 4 and both people 0. A game's own
+// computer entrants are for a lone player only; with 2+ people they may judge (they never score) but never compete. A judge
 // likes snowmen that fit the theme (2 a fitting piece, 1 any piece) plus its own seeded taste (+1 for each of its
 // favourite pieces) and a little whim, so a well-dressed snowman usually wins and a bare one never gets a vote.
 // Alone you win when you collect more points than both builders (`beat` in the result).
@@ -100,7 +103,7 @@ export function create({ rng, players, difficulty = 'normal', rivals }) {
   const th = rng.int(0, THEMES.length - 1), theme = THEMES[th];
   const cpuRng = rng.fork();                                  // the CPUs never shift anything the players get
   const alone = solo && rivals === false;                    // a lone player who asked for no computer rivals
-  const nb = alone ? 0 : n === 1 ? 2 : n === 2 ? 1 : 0, nj = alone ? 0 : n === 1 ? 3 : n === 2 ? 1 : 0;
+  const nb = alone ? 0 : n === 1 ? 2 : 0, nj = alone ? 0 : n === 1 ? 3 : n === 2 ? 2 : 0;   // #50: builders only when alone
   const cpus = BUILDERS.slice(0, nb).map((name, i) => ({ id: 'c' + i, name, outfit: rollOutfit(cpuRng, theme, L.fit) }));
   const judges = JUDGES.slice(0, nj).map(name => ({ name, fav: SLOTS.map((_, s) => cpuRng.int(0, optsOf(s).length - 1)) }));
   const outfit = {}, at = {}, done = new Set(), votes = {};

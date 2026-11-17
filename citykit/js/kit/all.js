@@ -7,3 +7,5 @@ import './vehicles.js';
 import './transit.js';
 import './power.js';
 import './street.js';
+import './parks.js';
+import './zoned.js';

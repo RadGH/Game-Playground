@@ -254,3 +254,10 @@ button:disabled { opacity: .45; cursor: default; }
   .ac-level li { padding: 2px 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.07); }
   .ac-level li.ok { display: none; }
 }
+
+/* phones: Credits and People may shrink; their small second line is cut short (the tooltip has it in full) so the
+   speed buttons never run off a 360-390 px screen with big numbers (2026-11-17) */
+@media (max-width: 480px) {
+  .ac-top .ac-money, .ac-top .ac-people { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+  .ac-top .ac-money small, .ac-top .ac-people small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+}

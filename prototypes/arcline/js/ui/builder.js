@@ -9,7 +9,7 @@
 import { $, el, btn, sheet, toast } from './dom.js';
 import { fmt, pct } from '../../../../shared/format.js';
 import { registerTip } from '../../../../shared/tooltip.js';
-import { item, unlocked, materials } from '../sim/catalog.js';
+import { item, unlocked, materials, lockText } from '../sim/catalog.js';
 import { milestones } from '../sim/tuning.js';
 import { statRows, keyLine, nameWithMk, priceOf, turretStats, WALL_ID, wallMaxHp } from '../sim/arms.js';
 import { ghostName, quoteGhost, bulkPlan, wallState } from '../sim/repair.js';
@@ -43,7 +43,7 @@ export function statCard(game, t) {
   if (e?.cost != null) rows.push(['Price', priceText(priceOf(r, e), materials(e)) + (t.level || t.transit || t.wall || t.layer ? ' a tile' : '')]);
   rows.push(...statRows(r, e));
   if (rows.length) box.append(dl(rows));
-  if (!open) box.append(el('p', { class: 'why' }, `Unlocks at milestone ${e.unlock}: ${fmt(milestones()[e.unlock - 1])} people.`));
+  if (!open) box.append(el('p', { class: 'why' }, lockText(r, e)?.text || ''));
   return box;
 }
 /** Fill a tray card: the name with its Mk, a Mk badge, the price after discounts, the key numbers line, the tooltip. */
@@ -76,7 +76,7 @@ export function showTurret(game, tu) {
   rows.splice(2, 1, ['Damage a second', fmt(s.dps, { decimals: 0 })]);
   rows.splice(3, 1, ['Range', `${fmt(s.range, { decimals: 1 })} tiles`]);
   rows.push(['Power', (tu.powered ?? 1) >= 1 ? 'Connected' : (tu.powered ?? 0) > 0 ? `Short: firing at ${pct(tu.powered)}` : 'No power: idle']);
-  const next = s.mk < 3 ? (s.mk === 1 ? 'Mk II parts from a merchant refit it: 40% more damage.' : 'Mk III parts from a deep-space merchant: twice Mk I damage, more reach.') : 'Fully upgraded.';
+  const next = s.mk < 3 ? (s.mk === 1 ? 'Mk II (research it in R&D, or buy the parts from a passing merchant) refits it: 40% more damage.' : 'Mk III (R&D, or parts from a deep-space merchant): twice Mk I damage, more reach.') : 'Fully upgraded.';
   panel(game, s.label, `${e?.blurb || ''} ${next}`.trim(), rows, [btn('Bulldoze', () => game.bulldozeAt(tu.x, tu.z), 'danger small')], 'turret');
 }
 /** A tapped wall or gate: health %, whether it is healing, the repair price. */
@@ -158,7 +158,7 @@ export function refreshUndo(game) {
   const b = $('#h-undo'); if (!b || !game.r) return;
   const u = nextUndo(game.r);
   b.hidden = !u; if (!u) return;
-  if (b._at !== u.at) { b._at = u.at; b.parentElement?.scrollTo?.({ left: 0, behavior: 'smooth' }); }   // a new step: bring Undo into view on a phone
+  if (b._at !== u.at) { b._at = u.at; document.querySelector('.ac-tabs')?.scrollTo?.({ left: 0, behavior: 'smooth' }); }   // a new step: the tabs roll back to the start beside Undo (phones)
   const key = matchMedia('(pointer: coarse)').matches ? '' : ' · Ctrl+Z';
   b.querySelector('span').textContent = `Undo ${u.label}`;
   b.querySelector('small').textContent = `${fmt(u.secondsLeft)} s left${u.cost ? ` · ${money(u.cost)} back` : ''}${key}`;

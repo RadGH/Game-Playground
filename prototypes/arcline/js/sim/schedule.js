@@ -76,10 +76,8 @@ export function spawnVisit(r, kind, why = 'request') {
   return sh;
 }
 function merchantGoods(r, R) {
-  const own = r.ships.goods || {}, rare = ships.commsTier(r) >= 3 || ships.hasSpaceport?.(r);
-  const can = (ships.GOODS || []).filter(g => !own[g.id] && (!g.needs || own[g.needs]) && (!g.rare || rare)
-    && (g.from == null || g.from <= r.milestone) && (!g.fromTurret || (item(g.fromTurret)?.unlock ?? 0) <= r.milestone)
-    && (!g.landmark || (item(g.landmark)?.unlock ?? 0) <= r.milestone + 1));
+  const rare = ships.commsTier(r) >= 3 || ships.hasSpaceport?.(r);
+  const can = (ships.GOODS || []).filter(g => ships.goodOpen(r, g) && (!g.rare || rare));
   const out = [], pool = [...can];
   for (let k = 0; k < Math.min(3, pool.length); k++) out.push(pool.splice(R.int(0, pool.length - 1), 1)[0].id);
   return out;

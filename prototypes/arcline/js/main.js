@@ -34,7 +34,11 @@ import { buildHud, updateHud, openTray, showInfo, budgetSheet, money, perDay, da
 import { toolDefs, plan, apply } from './ui/tools.js';
 import { updateGuide } from './ui/guide.js';
 import { openComms } from './ui/comms.js';
+import { openResearch } from './ui/research.js';
+import { TECH_BY_ID } from './sim/research-data.js';
 import * as scheduleMod from './sim/schedule.js';
+import * as statsMod from './sim/stats.js';
+import { openStats } from './ui/stats.js';
 
 export const BUILD = '2026-11-16.1';
 const STEP = 1 / 30;
@@ -117,10 +121,14 @@ app.playRegion = async (worldSave, regionId) => {
   for (const [id, sv] of Object.entries(worldSave.regions || {})) if (sv?.founded && app.world.regions[id]) app.world.regions[id].city = { ...(worldSave.meta?.regions?.[id] || app.world.regions[id].city || {}), founded: true, name: sv.name, people: sv.people?.total || 0 };
   app.r = saved ? loadRegion(saved) : newRegion(app.world, wr);
   if (!saved) transitMod.seedEdgeRoads(app.world, app.r);   // a new region starts with a road wherever a neighbour's road meets the border
+  // opened before a neighbour built its border road: lay that stub now, if the tiles are free (2026-11-17)
+  const late = saved ? transitMod.lateEdgeRoads(app.world, app.r) : null;
+  if (late?.laid) app.r.log.push({ day: app.r.day, text: `A road from ${late.from.join(' and ')} reached the border: a short road was laid to meet it.` });
   app.r.pressureMul = app.pressure;   // the world's Calm / Normal / Fierce choice
   let away = null;
   if (saved && opt.away?.awayCatchUp && app.r.lastActive && app.r.founded) { opt.away.awayCatchUp(app.r, (Date.now() - app.r.lastActive) / 1000); away = opt.away.awaySummary(app.r); opt.away.clearAway(app.r); }
   enterCity();
+  if (late?.laid) toast(`${late.from.join(' and ')} built a road to your border: a ${fmt(T.edgeStub ?? 3)}-tile road now meets it.`, 'good');
   if (away?.length) sheet('While you were away', (m, close) => { m.append(el('ul', { class: 'shiplines' }, ...away.map(t => el('li', {}, t))), btn('Back to the city', close, 'primary')); });
 };
 /** Everything the city view keeps between frames belongs to ONE region: clear it before showing another, or the last
@@ -183,7 +191,7 @@ function setupBattle() {
   const grid = opt.nests?.makeField ? opt.nests.makeField(r) : simpleGrid(r);
   const handlers = battleFx({ fx, pan: (x, z) => (view.G(x, z).sx / Math.max(1, view.W)) * 2 - 1, onScreen: (x, z) => view._near(x, z, 0), deathSprite: c => deathSprite(c) });
   const horde = new Horde(grid, {
-    onKill: (c, from) => handlers.onKill(c, from),
+    onKill: (c, from) => { statsMod.noteKill(r); handlers.onKill(c, from); },
     onWallBroken: (x, z) => { handlers.onWallBroken(x, z); app.sim && (app.sim.fieldDirty = true); },
   });
   const defence = new Defence(horde, {
@@ -284,7 +292,7 @@ function cityFrame(real) {
       const days = STEP / (T.dayLengthSec || 6);
       const before = Math.floor(r.day);
       tick(r, days);
-      if (Math.floor(r.day) !== before) onNewDay(Math.floor(r.day));
+      if (Math.floor(r.day) !== before) { onNewDay(Math.floor(r.day)); researchNews(); }
       spawnTick(STEP);
       S.horde.step(STEP); S.defence.step(STEP);
       app.acc -= STEP;
@@ -313,6 +321,7 @@ function onNewDay(day) {
     const W = (BIOMES[r.biome] || BIOMES.verdant).weather, rnd = Math.random;
     for (const k of ['rain', 'storm', 'aurora', 'stars', 'mist']) weather.set(k, rnd() < W[k] * 0.6);
   }
+  statsMod.recordDay(r);   // one row of the Statistics history a day (sim/stats.js)
   if (day % 30 === 0) autosave();
   // ships + nests (modules from the parallel build)
   if (opt.ships?.shipsTick) for (const ev of opt.ships.shipsTick(r, 1) || []) onShipEvent(ev);
@@ -327,6 +336,7 @@ function spawnTick(dt) {
   for (const sp of res.spawns || []) S.horde.spawn(sp.kind, sp.x + 0.5, sp.z + 0.5);
   for (const ev of res.events || []) {
     if (ev.type === 'swarm-warning') { app.alert = { text: ev.text || `A swarm is coming from the ${ev.dir}`, until: performance.now() + Math.max(6, ev.inSec || 10) * 1000 }; banner('Swarm incoming', ev.text || `From the ${ev.dir}`, 2600); snd.play('quake.rumble', { gain: 0.35, pitch: 1.4, global: true }); }
+    else if (ev.type === 'swarm') statsMod.noteSwarm(app.r);
     else if (ev.type === 'calm-over') toast(ev.text || 'The wildlife has noticed the colony.', 'bad');
     else if (ev.type === 'nest-spread') { app.r.log.push({ day: app.r.day, text: ev.text || 'A new nest has appeared.' }); if (ev.migrated) toast(ev.text || 'Wildlife from beyond the region has made a new nest.', 'bad'); }
   }
@@ -335,6 +345,7 @@ function spawnTick(dt) {
     S.syncT = 0; S.fieldDirty = false;
     const out = N.syncField(app.r, S.grid);
     for (const ev of out.events || []) {
+      statsMod.noteDamage(app.r, ev.type);   // the Defence tab's damage taken
       if (ev.type === 'turret-wrecked') toast('A turret was wrecked — tap its ghost to rebuild it.', 'bad');
       else if (ev.type === 'building-wrecked') toast(`${ev.name || 'A building'} was wrecked${RP.ghostAt(app.r, ev.x, ev.z) ? ' — tap its ghost to rebuild it' : ''}.`, 'bad');
       else if (ev.type === 'core-hit') { app.alert = { text: 'The Colony Core is under attack!', until: performance.now() + 5000 }; }
@@ -387,7 +398,7 @@ function shipSheet(id) {
         for (const ev of res.events || []) onShipEvent(ev);
         drawSky(); updateHud(app);
       }, c.choice === 'refuse' ? '' : 'primary', { disabled: c.ok ? null : true });
-      b.append(...[el('span', {}, c.label), c.cost ? el('small', { class: 'cost' }, c.cost) : null, !c.ok && c.why ? el('small', { class: 'why' }, c.why) : null].filter(Boolean));
+      b.append(...[el('span', {}, c.label), c.unlocks ? el('small', { class: 'unlocks' }, c.unlocks) : null, c.cost ? el('small', { class: 'cost' }, c.cost) : null, !c.ok && c.why ? el('small', { class: 'why' }, c.why) : null].filter(Boolean));
       if (c.blurb) b.dataset.tip = c.blurb;
       m.append(b);
     }
@@ -408,6 +419,16 @@ app.setTool = id => {
 };
 app.setOverlay = id => { app.overlay = id; view.overlay = id; document.querySelectorAll('[data-overlay]').forEach(b => b.classList.toggle('on', (b.dataset.overlay || null) === id)); };
 app.setSpeed = s => { app.speed = s; updateHud(app); };
+app.openStats = tab => { if (app.mode !== 'city' || !app.r) return; const open = !!document.querySelector('.ac-statsheet'); if (topSheet()) closeTopSheet(); if (!open || tab) openStats(app, tab); };   // G again closes it
+/** R&D (owner 2026-11-17): the research screen; focus = a tech id to show (a locked tray card opens it there). */
+app.openResearch = (focus = null) => { if (app.mode !== 'city' || !app.r) return; openResearch(app, typeof focus === 'string' ? focus : null); };
+/** Research that finished on a day tick: a toast, and turrets/walls refitted at once. */
+function researchNews() {
+  const list = app.r?.researchNews; if (!list?.length) return;
+  app.r.researchNews = [];
+  for (const n of list) { const t = TECH_BY_ID[n.id]; if (n.how === 'research' && t) { toast(`Research done: ${t.name}. ${t.what}`, 'good'); } }
+  syncTurrets(); afterBuild();
+}
 app.openComms = () => { if (app.mode !== 'city' || !app.r) return; if (!opt.ships) { toast('Ships are off in this test mode.'); return; } openComms(app); };
 app.onShipEvents = evs => { for (const ev of evs) onShipEvent(ev); };
 app.refresh = () => { drawSky(); updateHud(app); };
@@ -563,7 +584,7 @@ const KEYS = {
   KeyA: () => nudge(-1, 0), ArrowLeft: () => nudge(-1, 0), KeyD: () => nudge(1, 0), ArrowRight: () => nudge(1, 0),
   KeyQ: () => { view.cam.rot = (view.cam.rot + 3) & 3; }, KeyE: () => { view.cam.rot = (view.cam.rot + 1) & 3; },
   Space: () => app.setSpeed(app.speed ? 0 : 1), Digit1: () => app.setSpeed(1), Digit2: () => app.setSpeed(2), Digit3: () => app.setSpeed(4),
-  KeyB: () => budgetSheet(app), KeyC: () => app.openComms(), KeyF: () => app.armStrike(), KeyR: () => openTray(app, 'roads'), KeyZ: () => openTray(app, 'zones'), KeyX: () => app.setTool('bulldoze'),
+  KeyB: () => budgetSheet(app), KeyG: () => app.openStats(), KeyC: () => app.openComms(), KeyF: () => app.armStrike(), KeyR: () => openTray(app, 'roads'), KeyZ: () => openTray(app, 'zones'), KeyX: () => app.setTool('bulldoze'), KeyP: () => openTray(app, 'parks'), KeyT: () => app.openResearch(),
   Equal: () => { view.cam.zoom = clamp(view.cam.zoom * 1.2, 0.35, 3); }, Minus: () => { view.cam.zoom = clamp(view.cam.zoom / 1.2, 0.35, 3); },
   Escape: () => { if (closeTopSheet()) return; if (app.drag) { app.drag = null; refreshGhost(); return; } if (app.aiming) { app.aiming = false; return; } if (app.tool !== 'query') { app.setTool('query'); return; } $('#h-tray') && ($('#h-tray').hidden = true); app.openMenu(); },
 };
@@ -594,6 +615,7 @@ app.openMenu = () => {
       btn('Back to the city', close, 'primary'),
       btn('Save now', () => { autosave(true); close(); }),
       btn('Budget', () => { close(); budgetSheet(app); }),
+      btn([el('span', {}, 'Statistics'), el('kbd', { class: 'ac-kbd', 'aria-hidden': 'true' }, 'G')], () => { close(); app.openStats(); }, 'ac-menu-stats'),
       btn('Back to the world map', () => { close(); leaveCity(); }),
       btn('Settings', () => { close(); opt.screens?.openSettings?.(app); }),
       btn("What's new", () => { close(); opt.screens?.openWhatsNew ? opt.screens.openWhatsNew(app) : app.news?.open?.(); }),

@@ -87,7 +87,7 @@ function shipCard(game, v, redraw) {
       game.onShipEvents?.(res.events || []);
       game.refresh?.(); redraw();
     }, c.choice === 'refuse' ? 'small' : 'primary small', { disabled: c.ok ? null : true, 'data-tip': c.blurb || null });
-    b.append(...[el('span', {}, c.label), c.cost ? el('small', { class: 'cost' }, c.cost) : null, !c.ok && c.why ? el('small', { class: 'why' }, c.why) : null].filter(Boolean));
+    b.append(...[el('span', {}, c.label), c.unlocks ? el('small', { class: 'unlocks' }, c.unlocks) : null, c.cost ? el('small', { class: 'cost' }, c.cost) : null, !c.ok && c.why ? el('small', { class: 'why' }, c.why) : null].filter(Boolean));
     acts.append(b);
   }
   card.append(acts);

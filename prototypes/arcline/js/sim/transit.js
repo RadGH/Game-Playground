@@ -3,8 +3,8 @@
 //   zones and water (not through buildings or walls). Stations are 2×2 lots beside a line. A line is WORKING when two
 //   or more stations sit on it; each working station cuts traffic on the roads around it and lifts land value nearby.
 //   Interstate links: a road on the border that meets the neighbour city's own border road tile to tile (#74), or a
-//   transit line with a station reaching the region's edge where the neighbour region holds one of your cities, links
-//   the two (world.js neighbours). A link works for
+//   transit line with a station reaching the shared border on BOTH sides (2026-11-17; one side was enough before),
+//   links the two (world.js neighbours). A link works for
 //   BOTH cities, whichever side built it (owner 2026-11-16: "transit lines benefit other cities by increasing growth
 //   and demand"): each linked city sends T.neighbourTrickle people a month, and linkBoost() raises Residential and
 //   Commercial demand and how fast newcomers move in (appeal) — transit counts for more than a road.
@@ -14,7 +14,7 @@ import { T } from './tuning.js';
 import { cat, unlocked } from './catalog.js';
 import { isFlat } from './terrain.js';
 import { addLot } from './build.js';
-import { CELL, regionAt } from './world.js';
+import { CELL, regionAt, neighbours } from './world.js';
 import { fmt } from '../../../../shared/format.js';
 
 const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -157,52 +157,102 @@ function acrossInto(a, x, z, b) {
   for (const [dx, dz] of steps) { const bx = wx + dx - b.wx, bz = wz + dz - b.wz; if (bx >= 0 && bz >= 0 && bx < b.size && bz < b.size) return [bx, bz, dx, dz]; }
   return null;
 }
-const edgeSet = city => {
-  if (!city?.edgeRoads) return null;
-  if (city._edgeSet?.src !== city.edgeRoads) Object.defineProperty(city, '_edgeSet', { value: { src: city.edgeRoads, set: new Set(city.edgeRoads.map(([x, z]) => `${x},${z}`)) }, enumerable: false, configurable: true, writable: true });
-  return city._edgeSet.set;
+/** Transit tiles on the region's border that belong to a line with at least one station: [[x, z, level]]. Saved in the
+ *  city's summary (edgeTransit) so a neighbour can tell its line reaches the shared border too (both ends, 2026-11-17). */
+export function edgeTransitTiles(r) {
+  const N = r.size, out = []; if (!r.tiles?.transit) return out;
+  const lines = transitLines(r), seen = new Set();
+  for (let k = 0; k < N; k++) for (const [x, z] of [[k, 0], [k, N - 1], [0, k], [N - 1, k]]) {
+    const i = z * N + x; if (!r.tiles.transit[i] || seen.has(i)) continue; seen.add(i);
+    const c = lines.comp[i]; if (c >= 0 && lines[c].stations.length >= 1) out.push([x, z, r.tiles.transit[i]]);
+  }
+  return out;
+}
+const edgeSet = (city, key = 'edgeRoads') => {
+  const src = city?.[key]; if (!src) return null;
+  const memo = `_${key}Set`;
+  if (city[memo]?.src !== src) Object.defineProperty(city, memo, { value: { src, set: new Set(src.map(([x, z]) => `${x},${z}`)) }, enumerable: false, configurable: true, writable: true });
+  return city[memo].set;
 };
-/** Does world region b (its saved summary) have a road on the tile across the border from (x, z) of region a? */
-function theirRoadAt(a, x, z, b) { const set = edgeSet(b.city), t = set && acrossInto(a, x, z, b); return !!(t && set.has(`${t[0]},${t[1]}`)); }
+/** What an old summary (saved before border tiles were recorded) says about a link to region id: its own link list. */
+const recorded = (city, id, kind) => (city?.links || []).some(l => l.id === id && (l.by === kind || l.by === 'both'));
+/** Does world region b (its saved summary) have a road on the tile across the border from (x, z) of region a? A
+ *  summary saved before 2026-11-16 has no border roads (and no region save to work them out from — save.js
+ *  loadWorld fills them in when it has one): then its own link list decides. */
+function theirRoadAt(a, x, z, b) {
+  const t = acrossInto(a, x, z, b); if (!t) return false;
+  const set = edgeSet(b.city); if (!set) return recorded(b.city, a.id, 'road');
+  return set.has(`${t[0]},${t[1]}`);
+}
+/** Does world region b's saved summary have a transit line (with a station) reaching the border it shares with a? */
+function theirTransitTo(a, b) {
+  const own = b.city?.edgeTransit; if (!own) return recorded(b.city, a.id, 'transit');
+  return own.some(([x, z]) => !!acrossInto(b, x, z, a));
+}
+/** One side's border tiles of a kind meet the other's: roads tile to tile, transit anywhere along the shared border.
+ *  When only one summary has its border tiles recorded, the old one's link list stands in for its side. */
+function meets(a, b, key, kind) {
+  const ea = a.city?.[key], eb = b.city?.[key];
+  if (!ea && !eb) return recorded(a.city, b.id, kind) || recorded(b.city, a.id, kind);
+  if (!ea) return meets(b, a, key, kind);
+  if (kind === 'road') return ea.some(([x, z]) => theirRoadAt(a, x, z, b));
+  return ea.some(([x, z]) => !!acrossInto(a, x, z, b)) && theirTransitTo(a, b);
+}
 /** Do two neighbouring world regions' saved border roads meet? (the world map's road links) */
-export function roadsMeet(world, a, b) {
-  const own = a.city?.edgeRoads; if (!own?.length || !edgeSet(b.city)) return false;
-  return own.some(([x, z]) => theirRoadAt(a, x, z, b));
+export function roadsMeet(world, a, b) { return meets(a, b, 'edgeRoads', 'road'); }
+/** Do both cities run a transit line with a station to the border they share? (2026-11-17: both ends, like roads) */
+export function transitMeets(world, a, b) { return meets(a, b, 'edgeTransit', 'transit'); }
+/** How two neighbouring world regions are linked, from their saved summaries: 'road' | 'transit' | 'both' | null.
+ *  The world map's lines and its Neighbours panel both read this, so they always agree. */
+export function linkKind(world, a, b) {
+  if (!a?.city?.founded || !b?.city?.founded) return null;
+  const road = roadsMeet(world, a, b), rail = transitMeets(world, a, b);
+  return road && rail ? 'both' : rail ? 'transit' : road ? 'road' : null;
 }
-/** Two cities are linked on the world map when their border roads meet, or either side runs a transit line across. */
-export function citiesLinked(world, a, b) {
-  if (roadsMeet(world, a, b)) return true;
-  const rail = (p, q) => (p.city?.links || []).some(l => l.id === q.id && (l.by === 'transit' || l.by === 'both') && !l.theirs);
-  return rail(a, b) || rail(b, a);
-}
-/**
- * A brand-new region (never played): for every neighbour city whose road reaches the shared border, lay a short road
- * (T.edgeStub tiles, default 3) from the matching border tile inward, so it starts pointing out at the neighbour. Free.
- * It may not reach anything yet — it's there to line the two cities up. → number of road tiles laid
- */
-export function seedEdgeRoads(world, r) {
-  const wr = world.regions[r.id]; if (!wr) return 0;
-  const N = r.size, len = Math.max(1, Math.round(T.edgeStub ?? 3)); let laid = 0;
+/** Two cities are linked on the world map when their border roads meet, or both run transit to the shared border. */
+export function citiesLinked(world, a, b) { return !!linkKind(world, a, b); }
+// Starter road stubs (#74, 2026-11-16; late stubs 2026-11-17): wherever a neighbour city's road reaches the shared
+// border, this region gets a short free road (T.edgeStub tiles, default 3) from the matching border tile inward, so the
+// two line up and link. A new region gets them when it is first opened; a region opened BEFORE the neighbour built that
+// road gets it the next time it is opened, if the tiles are free (no building, wall or turret; the border tile not
+// already a road). Each stub is offered once: r.stubs remembers it, so a stub the player bulldozes stays gone.
+function layStubs(world, r, late) {
+  const wr = world.regions[r.id]; if (!wr) return { laid: 0, from: [] };
+  const N = r.size, len = Math.max(1, Math.round(T.edgeStub ?? 3)), from = new Set(); let laid = 0;
+  const offered = new Set(r.stubs || []);
+  const blocked = i => r.tiles.lot[i] >= 0 || r.tiles.wall[i] || (late && r.turrets?.some(t => t.z * N + t.x === i));
   for (const o of world.regions) {
     if (!o || o.id === wr.id || !o.city?.edgeRoads?.length) continue;
     for (const [ox, oz, lv] of o.city.edgeRoads) {
       const t = acrossInto(o, ox, oz, wr); if (!t) continue;
-      const [x, z, dx, dz] = t;   // (dx, dz) points from the neighbour into this region: the stub runs that way
+      const [x, z, dx, dz] = t, key = `${o.id}:${x},${z}`;   // (dx, dz) points from the neighbour into this region
+      if (offered.has(key)) continue;
+      offered.add(key);
+      if (late && (r.tiles.road[z * N + x] || blocked(z * N + x))) continue;   // it already meets (or can't): nothing to lay
+      let n = 0;
       for (let k = 0; k < len; k++) {
         const tx = x + dx * k, tz = z + dz * k; if (tx < 0 || tz < 0 || tx >= N || tz >= N) break;
-        const i = tz * N + tx; if (r.tiles.lot[i] >= 0 || r.tiles.wall[i]) break;
-        if (!r.tiles.road[i]) { r.tiles.road[i] = Math.min(3, Math.max(1, lv || 1)); r.tiles.zone[i] = 0; r.ter.flora[i] = 0; laid++; }
+        const i = tz * N + tx; if (blocked(i)) break;
+        if (!r.tiles.road[i]) { r.tiles.road[i] = Math.min(3, Math.max(1, lv || 1)); r.tiles.zone[i] = 0; r.ter.flora[i] = 0; laid++; n++; }
       }
+      if (n) from.add(o.city.name || o.name);
     }
   }
+  r.stubs = [...offered];
   if (laid) { r.dirty = true; r.lineRev = (r.lineRev || 0) + 1; }
-  return laid;
+  return { laid, from: [...from] };
 }
+/** A brand-new region (never played): lay every stub. → number of road tiles laid */
+export function seedEdgeRoads(world, r) { return layStubs(world, r, false).laid; }
+/** A saved region being opened again: lay the stubs for neighbour roads built since, where the tiles are free.
+ *  → { laid: road tiles, from: [neighbour city names] } — the game says so in a small notice. */
+export function lateEdgeRoads(world, r) { return layStubs(world, r, true); }
 
 /**
  * Links from this city to neighbouring cities. founded(o) says whether world region o holds one of your cities
  * (default: o.city is set). A road link needs the neighbour's saved border road on the tile across (theirRoadAt); a
- * transit line needs one station on its side. → [{ id, name, road: bool, transit: bool, x, z }]
+ * transit line needs a station on its side AND the neighbour's own line with a station reaching the same border
+ * (theirTransitTo — both ends, 2026-11-17; before that one side was enough). → [{ id, name, road: bool, transit: bool, x, z }]
  */
 export function edgeLinks(world, r, founded = o => !!o.city) {
   const wr = world.regions[r.id]; if (!wr || !r.founded) return [];
@@ -211,7 +261,7 @@ export function edgeLinks(world, r, founded = o => !!o.city) {
   for (let k = 0; k < N; k++) for (const [x, z] of [[k, 0], [k, N - 1], [0, k], [N - 1, k]]) {
     const i = z * N + x;
     if (r.tiles.road[i]) for (const o of across(world, wr, r, x, z)) if (theirRoadAt(wr, x, z, o)) note(o, 'road', x, z);
-    const c = lines.comp[i]; if (c >= 0 && lines[c].stations.length >= 1) for (const o of across(world, wr, r, x, z)) note(o, 'transit', x, z);
+    const c = lines.comp[i]; if (c >= 0 && lines[c].stations.length >= 1) for (const o of across(world, wr, r, x, z)) if (theirTransitTo(wr, o)) note(o, 'transit', x, z);
   }
   return [...links.values()];
 }
@@ -228,6 +278,13 @@ export function linksFrom(world, r, founded = o => !!o.city) {
   }
   return out;
 }
+/** What ONE link is worth before the cap: k = T.linkRoad for a road, T.linkTransit for transit or both (the bigger);
+ *  R and C demand shares, appeal (move-in speed on an ordinary city), and people it sends a month. */
+export function linkValue(by) {
+  if (!by) return { k: 0, R: 0, C: 0, appeal: 0, arrivals: 0 };
+  const k = by === 'road' ? (T.linkRoad ?? 0.1) : (T.linkTransit ?? 0.25);
+  return { k, R: k, C: k * 1.2, appeal: k * 0.8, arrivals: Math.round((T.neighbourTrickle ?? 4) * (by === 'road' ? 1 : (T.transitTrickleMul ?? 2))) };
+}
 /**
  * What this city's links (r.links, refreshed monthly by neighbourArrivals) are worth right now:
  *   R, C — extra share of Residential / Commercial demand (0.12 = the targets grow 12%)
@@ -236,9 +293,28 @@ export function linksFrom(world, r, founded = o => !!o.city) {
  */
 export function linkBoost(r) {
   let k = 0;
-  for (const l of r.links || []) k += l.by === 'road' ? (T.linkRoad ?? 0.1) : (T.linkTransit ?? 0.25);
+  for (const l of r.links || []) k += linkValue(l.by).k;
   k = Math.min(T.linkCap ?? 0.6, k);
   return { R: k, C: k * 1.2, appeal: k * 0.8 };
+}
+/**
+ * Every neighbouring region of world region wr, for the Neighbours panels (world map + Statistics). links = [{ id, by }]
+ * (in a city: r.links, what the sim applies; on the world map: linkKind from the summaries, what the map draws).
+ * → { rows: [{ id, name, city, people, by, ...linkValue(by) }] (people = its population, arrivals = people it sends a month) (cities first, linked first), total: { k, R, C, appeal,
+ *   arrivals, raw, capped, cap, linked } } — total follows linkBoost's cap (one rule, lessons 33).
+ */
+export function linkReport(world, wr, links = []) {
+  const by = new Map(links.map(l => [l.id, l.by]));
+  const rows = [];
+  for (const o of neighbours(world, wr)) {
+    const city = !!o.city?.founded, b = by.get(o.id) || null;
+    rows.push({ id: o.id, name: (city && o.city.name) || o.name, city, people: city ? (o.city.population ?? o.city.people ?? 0) : 0, by: b, ...linkValue(b) });
+  }
+  // a linked city that isn't on the world record next door any more (shouldn't happen) still counts
+  for (const [id, b] of by) if (!rows.some(r => r.id === id)) { const o = world.regions[id]; rows.push({ id, name: o?.city?.name || o?.name || 'Another city', city: true, people: o?.city?.population ?? 0, by: b, ...linkValue(b) }); }
+  rows.sort((a, b) => (b.k - a.k) || (b.city - a.city) || (b.people - a.people) || a.name.localeCompare(b.name));
+  const raw = rows.reduce((s, r) => s + r.k, 0), k = Math.min(T.linkCap ?? 0.6, raw);
+  return { rows, total: { k, R: k, C: k * 1.2, appeal: k * 0.8, arrivals: rows.reduce((s, r) => s + r.arrivals, 0), raw, capped: raw > k + 1e-9, cap: T.linkCap ?? 0.6, linked: rows.filter(r => r.by).length } };
 }
 /**
  * Once a month: each linked city sends T.neighbourTrickle people (× T.transitTrickleMul over a transit line) as
@@ -259,7 +335,7 @@ export function neighbourArrivals(world, r, founded) {
   }
   r.links = links.map(l => ({ id: l.id, name: l.name, by: by(l) }));
   const from = [];
-  for (const l of links) { const n = Math.round((T.neighbourTrickle ?? 4) * (l.transit ? (T.transitTrickleMul ?? 2) : 1)); if (n > 0) from.push({ id: l.id, name: l.name, people: n, by: l.transit ? 'transit' : 'road' }); }
+  for (const l of links) { const n = linkValue(l.transit ? 'transit' : 'road').arrivals; if (n > 0) from.push({ id: l.id, name: l.name, people: n, by: l.transit ? 'transit' : 'road' }); }
   const people = from.reduce((s, f) => s + f.people, 0);
   if (people) { r.people.arriving += people; r.people.fromNeighbours = (r.people.fromNeighbours || 0) + people; }
   return { people, from };

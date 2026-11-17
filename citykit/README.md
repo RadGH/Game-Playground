@@ -80,5 +80,7 @@ anything that should light up at night must use a material with `userData.glow`)
 | `js/kit/buildings.js` | Groups, the recipe registry, homes + shops/offices + hotel |
 | `js/kit/power.js` | Power pylon (`pwr-pylon`): lattice mast, crossarm with glowing insulators; exports `PYLON` (where the game hangs its wires) |
 | `js/kit/street.js` | Street furniture (`st-lamp` street light, one or two arms; `st-billboard` billboard or neon blade sign, 6 colours, word-free patterns) — Arcline stands them along roads and at shops (report #71) |
+| `js/kit/zoned.js` | 24 zoned buildings so every zone comes in 1×1, 2×1 and 2×2 lots at every level: homes (`res-court`, `res-duplex`, `res-townhouse`, `res-walkup`, `res-slim`, `res-midrise`, `res-needle`, `res-twin`), shops/offices (`com-kiosks`, `com-mart`, `com-corner`, `com-gallery`, `com-studio`, `com-capsule`, `com-spire`, `com-exchange`), industry (`ind-shed`, `ind-yard`, `ind-printworks`, `ind-chemworks`, `ind-freight`, `ind-cleanlab`, `ind-assembly`, `ind-robotics`); `tests/zoned.spec.js` checks every storey × style × seed × turn stays in its lot |
+| `js/kit/parks.js` | Parks & plazas group (Arcline round 4): `pk-pocket`, `pk-fountain`, `pk-playground` (1×1), `pk-court` (2×1), `pk-promenade` (3×1), `pk-garden`, `pk-skate`, `pk-memorial`, `pk-neon`, `pk-terrace` (2×2), `pk-central`, `pk-amphi` (3×3), `pk-biodome` (4×4); moves the Park & Plaza and Arena into the group |
 | `js/kit/all.js` | Imports every kit file |
 | `js/app.js` | The review page |

@@ -1,0 +1,82 @@
+/* Arcline — the R&D screen (js/ui/research.js). A wide sheet: the research under way, what you have, the branch tabs,
+   then the tree in three tier columns (one column on a phone). Violet is R&D's colour. Uses arcline.css tokens. */
+.ac-modal.ac-rd { width: min(1040px, 100%); --rd: #c8a8ff; --rd2: #a77bff; }
+.ac-rd h2 { color: var(--rd); }
+.ac-rd > button.rd-close { width: auto; align-self: center; min-width: 220px; }
+
+/* the research under way */
+.rd-active { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; align-items: center; padding: 12px 14px; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(167, 123, 255, 0.18), rgba(63, 240, 255, 0.06)); border: 1px solid rgba(200, 168, 255, 0.45); }
+.rd-active.idle { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; background: rgba(255, 255, 255, 0.03); border-color: var(--line); }
+.rd-active.idle small { color: var(--dim); font-size: 13px; }
+.rd-atext { display: flex; flex-direction: column; min-width: 0; }
+.rd-atext small { color: var(--dim); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.rd-atext b { font-size: 17px; color: var(--rd); }
+.rd-active .rd-bar { grid-column: 1 / -1; grid-row: 2; }
+.rd-active > button { grid-column: 2; grid-row: 1; }
+.rd-bar { height: 8px; border-radius: 5px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.rd-bar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--rd2), #e3d0ff); }
+
+/* what you have */
+.rd-stock { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.rd-stock > small { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+.rd-chip { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 8px; font-size: 13px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.08); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rd-chip.money { color: var(--amber); }
+.rd-chip.none { color: var(--dim); }
+.rd-chip.short { color: #ffc2ba; border-color: rgba(255, 106, 90, 0.55); background: rgba(255, 106, 90, 0.1); }
+.rd-chip.time { color: var(--rd); border-color: rgba(200, 168, 255, 0.35); }
+
+/* branch tabs */
+.rd-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.rd-tabs button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; min-height: 48px; padding: 4px 6px; }
+.rd-tabs button b { font-size: 14px; }
+.rd-tabs button small { font-size: 12px; color: var(--dim); }
+.rd-tabs button.on { border-color: var(--rd); color: var(--rd); background: rgba(167, 123, 255, 0.14); box-shadow: inset 0 -3px 0 var(--rd); }
+.rd-blurb { margin: 0; color: var(--dim); font-size: 13.5px; }
+
+/* the tree: tier columns, cards, and a connector line down each column */
+.rd-tree { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.rd-col { display: flex; flex-direction: column; gap: 10px; position: relative; }
+.rd-col h3 { margin: 0 !important; padding-bottom: 4px; border-bottom: 1px solid rgba(200, 168, 255, 0.25); color: var(--rd) !important; }
+.rd-card { display: flex; flex-direction: column; gap: 6px; padding: 11px 12px; border-radius: 13px; background: rgba(255, 255, 255, 0.035); border: 1px solid rgba(120, 200, 255, 0.14); }
+.rd-card header { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; }
+.rd-card header b { font-size: 15px; line-height: 1.25; }
+.rd-badge { flex: none; font-size: 12px; padding: 1px 7px; border-radius: 8px; background: rgba(255, 255, 255, 0.07); color: var(--dim); white-space: nowrap; }
+.rd-what { margin: 0; font-size: 13.5px; line-height: 1.35; }
+.rd-meta { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--dim); }
+.rd-meta .un { color: #b8f5c8; }
+.rd-meta .ok { color: var(--good); } .rd-meta .no { color: #ffc2ba; }
+.rd-cost { display: flex; flex-wrap: wrap; gap: 4px; }
+.rd-merchant { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 13px; color: var(--dim); padding: 5px 8px; border-radius: 9px; background: rgba(255, 176, 46, 0.06); border: 1px dashed rgba(255, 176, 46, 0.35); }
+.rd-merchant p { margin: 0; flex: 1 1 160px; }
+.rd-merchant b { color: var(--amber); font-weight: 600; white-space: nowrap; }
+.rd-merchant.now { border-style: solid; background: rgba(255, 176, 46, 0.14); color: var(--text); }
+.rd-merchant button { margin-left: auto; }
+.rd-why { margin: 0; font-size: 12.5px; color: #ffc2ba; }
+.rd-go { align-self: flex-start; min-width: 120px; }
+.rd-foot { margin: 0; font-size: 12.5px; color: var(--dim); }
+/* states */
+.rd-card.done { border-color: rgba(107, 240, 154, 0.4); background: rgba(107, 240, 154, 0.06); }
+.rd-card.done .rd-badge { color: #06210f; background: var(--good); font-weight: 700; }
+.rd-card.active { border-color: var(--rd); background: rgba(167, 123, 255, 0.12); box-shadow: 0 0 18px rgba(167, 123, 255, 0.2); }
+.rd-card.active .rd-badge { color: #1a0d33; background: var(--rd); font-weight: 700; }
+.rd-card.ready { border-color: rgba(63, 240, 255, 0.45); }
+.rd-card.ready .rd-badge { color: var(--cyan); background: rgba(63, 240, 255, 0.12); }
+.rd-card.blocked .rd-badge { color: var(--amber); }
+.rd-card.locked { opacity: .72; }
+.rd-card.hi { outline: 2px solid var(--rd); outline-offset: 2px; }
+
+@media (max-width: 760px) {
+  .rd-tree { grid-template-columns: 1fr; }
+  .rd-col h3 { position: sticky; top: -18px; background: var(--panel2); z-index: 1; padding-top: 6px; }
+}
+@media (max-width: 420px) {
+  .ac-modal.ac-rd { padding: 14px 12px; }
+  .rd-tabs { gap: 4px; }
+  .rd-tabs button { padding: 4px 2px; min-height: 46px; }
+  .rd-tabs button b { font-size: 13px; }
+  .rd-active { grid-template-columns: 1fr; }
+  .rd-active > button { grid-column: 1; grid-row: 3; }
+}
+/* a merchant's offer that is an R&D tech: "Unlocks: Pulse Gun Mk II (R&D)" */
+button small.unlocks { display: block; font-size: 12px; color: #c8a8ff; font-weight: 600; }

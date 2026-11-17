@@ -9,7 +9,7 @@
 //   v.draw(timeSeconds);                                   // cheap: one picture + vector lines
 //   v.pick(cssX, cssY) → region | null; v.panBy(dx, dy); v.zoomAt(factor, cssX, cssY); v.centreOn(region, area)
 import { sample, riverAt, BIOMES, SEA, CELL, neighbours } from '../sim/world.js';
-import { citiesLinked } from '../sim/transit.js';
+import { linkKind } from '../sim/transit.js';
 
 const hex = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
 const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
@@ -122,10 +122,14 @@ export class WorldView {
     g.save(); g.lineCap = 'round';
     for (const r of founded) for (const o of neighbours(this.world, r)) {
       if (!o.city?.founded) continue; const key = Math.min(r.id, o.id) + ':' + Math.max(r.id, o.id); if (done.has(key)) continue; done.add(key);
-      if (!citiesLinked(this.world, r, o)) continue;   // only where their border roads meet (or a transit line crosses) — #74
-      const a = this.centre(r), b = this.centre(o);
-      g.strokeStyle = 'rgba(255, 176, 46, 0.35)'; g.lineWidth = 6; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke();
-      g.strokeStyle = '#ffb02e'; g.lineWidth = 2; g.setLineDash([8, 7]); g.lineDashOffset = -t * 18; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); g.setLineDash([]);
+      // only where their border roads meet, or both run transit to the shared border (#74, 2026-11-17) — linkKind is
+      // also what the region card's Neighbours list reads, so the two always agree
+      const kind = linkKind(this.world, r, o); if (!kind) continue;
+      const a = this.centre(r), b = this.centre(o), rail = kind !== 'road';
+      const ln = (style, w, dash, off = 0) => { g.strokeStyle = style; g.lineWidth = w; g.setLineDash(dash); g.lineDashOffset = off; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); };
+      if (kind !== 'transit') { ln('rgba(255, 176, 46, 0.35)', 6, []); ln('#ffb02e', 2, [8, 7], -t * 18); }
+      if (rail) { const k = kind === 'both' ? 1 : 0; g.save(); g.translate(k * 3, -k * 3); ln('rgba(63, 240, 255, 0.3)', 6, []); ln('#3ff0ff', 2.5, [14, 6], -t * 30); g.restore(); }
+      g.setLineDash([]);
     }
     g.restore();
     // each city's name and people on a quiet plate just below its region (the city itself is drawn in the still layer)

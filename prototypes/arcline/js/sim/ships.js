@@ -18,6 +18,9 @@ import { rng } from '../../../../citykit/js/kit/rng.js';
 import { fmt } from '../../../../shared/format.js';
 import { damageNests } from './nests.js';
 import { refreshArms, turretStats, MK } from './arms.js';
+import { techDone } from './catalog.js';
+import { TECHS, TECH_BY_ID } from './research-data.js';
+import { completeTech } from './research.js';
 
 // ---------------------------------------------------------------- data
 /** What each kind of ship is called on screen. */
@@ -68,6 +71,33 @@ export const GOODS = [
   { id: 'bp-strike', name: 'Shell-spread blueprint', kind: 'blueprint', credits: 5000, crystal: 70, from: 1, effect: { strikeRadius: 1.2 },
     blurb: 'Orbital strikes hit a 20% wider circle.' },
 ];
+// Every merchant tech in the R&D tree is a good too (owner 2026-11-17: comms are "an alternate, cheaper way to unlock
+// recipes"). The Mk parts and blueprints above already share their R&D ids; the rest are added here at
+// T.rdMerchantShare of the research credits plus a little Crystal, no materials and no wait. `tech: true` marks a good
+// that is an R&D tech (owning it = researched; the comms offer says "Unlocks: … (R&D)").
+for (const g of GOODS) if (TECH_BY_ID[g.id]) g.tech = true;
+for (const t of TECHS) {
+  if (t.merchant === false || GOODS.some(g => g.id === t.id)) continue;
+  const mats = Object.entries(t.cost).filter(([k]) => k !== 'credits').reduce((a, [, v]) => a + v, 0);
+  GOODS.push({ id: t.id, name: `${t.name} plans`, kind: 'tech', tech: true, credits: Math.round(t.cost.credits * 0.55 / 100) * 100, crystal: Math.max(10, Math.round(mats * 0.2 / 5) * 5),
+    from: t.from, needs: t.needs.length ? t.needs : undefined, rare: t.tier >= 3, blurb: t.what, priceShare: true });
+}
+/** Re-price the generated tech goods from the live tuning (T.rdMerchantShare). */
+function techPrice(g) { if (!g.priceShare) return g.credits; const t = TECH_BY_ID[g.id]; return Math.round(t.cost.credits * (T.rdMerchantShare ?? 0.55) * (T.rdCostMul ?? 1) / 100) * 100; }
+/** Can a merchant offer good g to this region? Not owned (either route), prerequisites owned, milestone reached, its
+ *  turret/landmark open. Rare goods are checked by the caller (they need a Deep-space Array or the Spaceport). */
+export function goodOpen(r, g) {
+  if (techDone(r, g.id)) return false;
+  const needs = g.needs == null ? [] : Array.isArray(g.needs) ? g.needs : [g.needs];
+  if (needs.some(n => !techDone(r, n))) return false;
+  if (g.from != null && g.from > r.milestone) return false;
+  if (g.fromTurret && (item(g.fromTurret)?.unlock ?? 0) > r.milestone) return false;
+  if (g.landmark && (item(g.landmark)?.unlock ?? 0) > r.milestone + 1) return false;
+  return true;
+}
+/** What a good's R&D twin is called, for the comms offer ("Unlocks: Pulse Gun Mk II (R&D)"), or null. */
+export function goodUnlocks(g) { return g?.tech ? TECH_BY_ID[g.id]?.name || null : null; }
+
 /**
  * Supply crates: bulk materials a merchant sells for credits (any number of times — not owned like GOODS), and what
  * the free sponsor drops carry. `from` = lowest milestone. give = stock added.
@@ -174,12 +204,11 @@ function makeShip(r, R, tier) {
   return { id: ++s.seq, kind, cls, name, title: `${CLASS[cls]} ${name}`, came: r.day, leaves: r.day + cross, offer, answered: false };
 }
 function merchantOffer(r, R, tier) {
-  const rare = tier >= 3 || hasSpaceport(r), own = r.ships.goods;
-  const can = GOODS.filter(g => !own[g.id] && (!g.needs || own[g.needs]) && (!g.rare || rare)
-    && (g.from == null || g.from <= r.milestone) && (!g.fromTurret || (item(g.fromTurret)?.unlock ?? 0) <= r.milestone)
-    && (!g.landmark || (item(g.landmark)?.unlock ?? 0) <= r.milestone + 1));
+  const rare = tier >= 3 || hasSpaceport(r);
+  const can = GOODS.filter(g => goodOpen(r, g) && (!g.rare || rare));
   const goods = []; const pool = [...can];
-  const n = Math.min(pool.length, R.int(1, 2) + (hasSpaceport(r) ? 1 : 0));
+  // a Long-range Array or better hears bigger traders: one more good
+  const n = Math.min(pool.length, R.int(1, 2) + (hasSpaceport(r) ? 1 : 0) + (tier >= 2 ? 1 : 0));
   for (let k = 0; k < n; k++) goods.push(pool.splice(R.int(0, pool.length - 1), 1)[0].id);
   // and a couple of supply crates (bigger arrays bring bigger traders: one more crate a tier)
   const crates = SUPPLIES.filter(c => (c.from ?? 0) <= r.milestone);
@@ -214,11 +243,13 @@ export function answer(r, shipId, choice) {
   if (sh.kind === 'merchant') {
     const g = goodById(choice);
     if (!g || !sh.offer.goods.includes(g.id)) return { ok: false, why: 'They are not selling that', events: [] };
-    const broke = afford(r, g.credits, g.crystal); if (broke) return { ok: false, why: broke, events: [] };
-    r.money -= g.credits; r.stock.crystal -= g.crystal; sh.answered = true;
+    if (g.kind !== 'supply' && techDone(r, g.id)) return { ok: false, why: 'You already have it (researched in R&D)', events: [] };
+    const price = techPrice(g), broke = afford(r, price, g.crystal); if (broke) return { ok: false, why: broke, events: [] };
+    r.money -= price; r.stock.crystal -= g.crystal; sh.answered = true;
     if (g.kind === 'supply') for (const [k, v] of Object.entries(g.give)) r.stock[k] = (r.stock[k] || 0) + v;
     else s.goods[g.id] = r.day;
-    const changed = g.kind === 'supply' ? null : refreshArms(r, ownedGoods(r));
+    // a tech bought here is researched (R&D shows it done; research of it in progress is refunded)
+    const changed = g.kind === 'supply' ? null : g.tech ? completeTech(r, g.id, 'merchant') : refreshArms(r, ownedGoods(r));
     sh.offer.goods = sh.offer.goods.filter(id => id !== g.id);
     const land = landing(r, R, 0, { cargo: g.id });
     if (g.kind === 'supply') land.supply = { ...g.give };
@@ -257,7 +288,10 @@ export function shipView(r, sh) {
   } else {
     out.text = `Sells rare goods you can't make yourself, and supply crates.`;
     out.lines = sh.offer.goods.map(id => goodById(id).name);
-    for (const id of sh.offer.goods) { const g = goodById(id), why = afford(r, g.credits, g.crystal); out.choices.push({ choice: id, label: g.name, blurb: g.blurb, cost: g.crystal ? `${fmt(g.credits)} credits + ${fmt(g.crystal)} Crystal` : `${fmt(g.credits)} credits`, ok: !why, why }); }
+    for (const id of sh.offer.goods) {
+      const g = goodById(id), price = techPrice(g), have = g.kind !== 'supply' && techDone(r, g.id), why = have ? 'Already researched' : afford(r, price, g.crystal), un = goodUnlocks(g);
+      out.choices.push({ choice: id, label: g.name, blurb: g.blurb, cost: g.crystal ? `${fmt(price)} credits + ${fmt(g.crystal)} Crystal` : `${fmt(price)} credits`, ok: !why, why, unlocks: un ? `Unlocks: ${un} (R&D)` : null });
+    }
   }
   out.choices.push({ choice: 'refuse', label: 'No thanks', cost: '', ok: true });
   return out;
@@ -309,8 +343,8 @@ export function supplyDrop(r, R) {
   let part = null;
   if (r.milestone >= 1 && R.chance(T.rarePartChance ?? 0.12)) {
     const own = r.ships.goods;
-    const can = GOODS.filter(g => !own[g.id] && !g.rare && (!g.needs || own[g.needs]) && (g.from == null || g.from <= r.milestone) && (!g.fromTurret || (item(g.fromTurret)?.unlock ?? 0) <= r.milestone) && !g.landmark).sort((a, b) => a.credits - b.credits);
-    if (can.length) { part = can[0]; own[part.id] = r.day; refreshArms(r, ownedGoods(r)); }
+    const can = GOODS.filter(g => goodOpen(r, g) && !g.rare && !g.landmark).sort((a, b) => a.credits - b.credits);
+    if (can.length) { part = can[0]; own[part.id] = r.day; if (part.tech) completeTech(r, part.id, 'drop'); else refreshArms(r, ownedGoods(r)); }
   }
   const land = landing(r, R, 0, { cargo: part ? part.id : 'supply' });
   const text = `A supply crate from the colony's sponsors landed${land.onPad ? ' on the Landing Pad' : ''}: ${supplyText(give)}${part ? `, and ${part.name}. ${upgradeText(r, part, null)}` : '.'}`;
@@ -364,7 +398,7 @@ export function foundingDrop(r) {
 }
 
 /** The goods this region owns, as GOODS entries. */
-export function ownedGoods(r) { const own = r.ships?.goods || {}; return GOODS.filter(g => own[g.id] != null); }
+export function ownedGoods(r) { return GOODS.filter(g => techDone(r, g.id)); }
 /** What a bought good just did, in a sentence with its numbers (report #78: the player couldn't tell). */
 export function upgradeText(r, g, changed) {
   if (g.turret) {
@@ -380,7 +414,7 @@ export function upgradeText(r, g, changed) {
 /** Merchant-good effects, combined. key: 'wallHp' | 'turretRange' | 'strikeRadius' | 'lanceCooldown' (multipliers, 1 if
  *  none) — or 'discount' with a landmark id (fraction off), or 'mk' with a turret kind (1..3). */
 export function goodsEffect(r, key, arg) {
-  const own = r.ships?.goods || {};
+  const own = { }; for (const g of GOODS) if (techDone(r, g.id)) own[g.id] = 1;   // bought or researched: the same
   if (key === 'mk') { let mk = 1; for (const g of GOODS) if (own[g.id] && g.turret === arg) mk = Math.max(mk, g.mk); return mk; }
   if (key === 'discount') { let d = 0; for (const g of GOODS) if (own[g.id] && g.landmark === arg && g.effect?.discount) d = Math.max(d, g.effect.discount); return d; }
   let m = 1; for (const g of GOODS) if (own[g.id] && g.effect?.[key]) m *= g.effect[key]; return m;

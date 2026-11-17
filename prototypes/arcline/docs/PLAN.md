@@ -61,7 +61,7 @@ Owner's own words and every answer: `docs/OWNER-BRIEF.md`. First game under `~/c
     Comms Array 30, Landing Pad 20, Pulse Gun 10 (and costs 700, was 900), Mortar 22, Arc Coil 30, Rail Lance 45,
     walls 0.5 / 1 / 2 a tile, gate 1 (Barrier Wall costs 40, was 60). Upkeep is read from the catalog live, so old
     saves get the new numbers.
-  - Milestone times (bot, 1×): **M1 ~4 min, M2 ~14 min, M3 ~36 min, M4 ~1.9 h**; M5/M6 later still. Shorter than the
+  - Milestone times (bot, 1×, with creatures, after the 2026-11-17 balance pass — README history): **M1 ~4 min, M2 ~14 min, M3 ~67 min (6 of 8 games; Easy 56 min, 8 of 8), M4 ~2 h+**; M5/M6 later still. Shorter than the
     first plan below (owner: "the city should grow faster in order to keep up").
   - The wilds: 20% of the steady stream always comes in from the region edges (all of it once no nest is left, when the
     stream keeps running at the wildFloor share, 0.4 — it used to stop dead); big swarms come from the edge when no nest can send one

@@ -1,6 +1,26 @@
 {
   "entries": [
     {
+      "id": "2026-11-17",
+      "date": "2026-11-17",
+      "title": "Bigger blocks, parks and research",
+      "items": [
+        "Zoned land now fills in all the way, middle included: a painted block grows wherever it is within 8 tiles of a road (walking through the same zone), not just along the road. Buildings deeper in face the way out to the street.",
+        "Homes, shops and industry now come in three sizes at every level: 1×1, 2×1 and 2×2. Blocks are laid out smartly: a 4×2 strip takes two 2×2 buildings side by side (never one in the middle), and odd widths leave a row of smaller buildings only along one edge.",
+        "Small neighbouring buildings combine into one bigger building once they have settled in and the land, power and demand are good enough. Tap a building to see whether its next step is to combine or to go up a level, and what it still needs.",
+        "24 new building designs: Pod Court, Garden Duplex, Townhouse, Garden Walk-ups, Slim Apartments, Midrise Bar, Needle Tower and Twin Residences for homes; Kiosk Row, Corner Mart, Corner Shop, Gallery Mall, Studio Offices, Capsule Hotel, Data Spire and Trade Exchange for shops and offices; Fab Shed, Parts Yard, Print Works, Chem Works, Freight Depot, Clean Lab, Drone Assembly and Robot Plant for industry (a new third industry level).",
+        "Statistics: open it from the ☰ menu (or press G). Overview gives people, jobs, credits, income per day, power, water, attractiveness, land value and R/C/I demand at a glance. History charts people, credits, income, demand, power and water use against what you make, and attractiveness over the last 30 or 120 days or the whole game. Tap or drag across a chart to read any day. Neighbours lists the cities next door and what each link gives you. Defence shows your turrets, walls and wall health, creatures killed, swarms held and damage taken, with charts.",
+        "The world map card now lists a city's neighbours: how each one is linked (road, transit or not yet) and what it gives in numbers: extra home and shop demand, faster move-ins and people a month, plus the total. Transit links show as their own cyan line on the map.",
+        "A transit link between two cities now needs a line with a station reaching the shared border on both sides, the same way roads already have to meet.",
+        "Cities saved before border roads were recorded keep their road links. The game works them out from the saved city, so you don't have to open and save each one again.",
+        "If a neighbour builds a road to your border after you last played, your city now gets a short road to meet it the next time you open it (when the ground there is free), with a message saying so.",
+        "New Parks tab (P): 13 new parks and plazas from a Pocket Park, Playground and Fountain Square to a Sports Court, Promenade, Skate Park, Founders' Memorial, Neon Night Plaza, Central Park, Amphitheatre and a Grand Biodome. Each lifts land value around it (the card says how much and how far), pulls in more newcomers while homes sit in its reach, and lights up at night. Holding one shows the Land value view and its reach.",
+        "New R&D tab (T): spend credits and materials to research upgrades — stronger pumps and power plants, better drills and refineries, cheaper upkeep, turret Mk II and Mk III refits, tougher walls, new parks, plans that open buildings before their milestone, and city policies you switch on and off. Each card shows what it does in numbers, its price, its time and what it needs. One at a time; stopping gives everything back.",
+        "Passing merchants sell many of the same techs, cheaper and at once: an R&D card says when a merchant offers it (and when one is overhead now), and a merchant's offer says which R&D tech it unlocks. Whichever way you get a tech, it's the same one.",
+        "The tool bar on phones: icons over short names, arrows and a fade at the ends when there are more tabs, a clear highlight on the open tab, and the map views fold into one View button so nothing covers the tool you're holding."
+      ]
+    },
+    {
       "id": "2026-11-16e",
       "date": "2026-11-16",
       "title": "Builder's tools",

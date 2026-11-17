@@ -7,6 +7,7 @@
 //   Water: pipes (tiles.pipe = 1, drawn in the underground view) from pumps; a building within PIPE_REACH tiles of a
 //          connected pipe has water. Bigger homes and shops need it.
 import { item } from './catalog.js';
+import { effect } from './research.js';
 
 export const PIPE_REACH = 5;
 const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -109,7 +110,7 @@ export function solvePower(r) {
       if (i < NN - N && grown[i + N] !== 255 && comp[i + N] < 0) { comp[i + N] = id; q.push(i + N); }
     }
   }
-  for (const l of r.lots) { const g = comp[l.z * N + l.x]; l.grid = g; const p = pieces[g]; if (!p) continue; const u = l.power ?? 0; if (u > 0) p.supply += u; else p.demand -= u; }
+  for (const l of r.lots) { const g = comp[l.z * N + l.x]; l.grid = g; const p = pieces[g]; if (!p) continue; const u = l.power ?? 0; if (u > 0) p.supply += u * (l.id?.startsWith('svc-power') ? effect(r, 'power') : 1); else p.demand -= u; }
   for (const t of r.turrets) { const g = comp[t.z * N + t.x]; t.grid = g; const p = pieces[g]; if (p) p.demand += t.power ?? 3; }
   let supply = 0, demand = 0;
   for (const p of pieces) { p.share = p.supply <= 0 ? 0 : Math.min(1, p.supply / Math.max(1e-6, p.demand)); supply += p.supply; demand += p.demand; }
@@ -186,7 +187,7 @@ export function solveWater(r) {
   const pumps = r.lots.filter(l => (l.water ?? 0) > 0 && l.powered > 0);
   const q = [];
   for (const p of pumps) {
-    supply += p.water * Math.min(1, p.powered);
+    supply += p.water * Math.min(1, p.powered) * (p.id === 'svc-water' ? effect(r, 'water') : 1);   // R&D Pressure Pumps
     for (let k = -1; k <= p.d; k++) for (let j = -1; j <= p.w; j++) { const x = p.x + j, z = p.z + k; if (x < 0 || z < 0 || x >= N || z >= N) continue; const i = z * N + x; if (r.tiles.pipe[i] && !live[i]) { live[i] = 1; q.push(i); } }
   }
   while (q.length) { const i = q.pop(), x = i % N, z = (i / N) | 0; for (const [dx, dz] of N4) { const nx = x + dx, nz = z + dz; if (nx < 0 || nz < 0 || nx >= N || nz >= N) continue; const j = nz * N + nx; if (r.tiles.pipe[j] && !live[j]) { live[j] = 1; q.push(j); } } }

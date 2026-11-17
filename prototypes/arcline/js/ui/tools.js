@@ -34,15 +34,18 @@ export function toolDefs() {
     t[`station-${k.id}`] = { name: `${k.name} station`, kind: 'point', group: 'transit', station: i + 1, entry: { cost: k.station, recipe: 'tr-station', params: { line: i + 1 }, unlock: k.unlock, size: [2, 2], blurb: `A 2×2 station beside a ${k.name.toLowerCase()} line.` } };
   });
   for (const e of C.build) {
-    const group = e.cat === 'defence' ? 'defence' : e.cat === 'landmark' ? 'landmarks' : e.cat === 'colony' ? 'colony' : e.cat === 'outpost' || e.cat === 'industry' ? 'industry' : 'services';
+    const group = e.cat === 'defence' ? 'defence' : e.cat === 'landmark' ? 'landmarks' : e.cat === 'colony' ? 'colony' : e.cat === 'outpost' || e.cat === 'industry' ? 'industry'
+      : e.cat === 'park' || e.cat === 'leisure' ? 'parks' : 'services';
+    // parks and plazas: the Land value view shows while one is held, and the ghost shows its reach (owner 2026-11-17)
+    if (group === 'parks') { t[e.id] = { name: e.name, kind: 'point', group, place: e.id, entry: e, overlay: 'value', reachColor: 'rgba(150,255,180,0.3)' }; continue; }
     t[e.id] = e.wall ? { name: e.name, kind: 'line', group, wall: e.id, entry: e } : e.turret ? { name: e.name, kind: 'point', group, turret: e.id, entry: e } : { name: e.name, kind: 'point', group, place: e.id, entry: e };
   }
   return t;
 }
 export const GROUPS = [
-  { id: 'roads', name: 'Roads' }, { id: 'zones', name: 'Zones' }, { id: 'utilities', name: 'Power & water' },
-  { id: 'services', name: 'Services' }, { id: 'industry', name: 'Industry' }, { id: 'defence', name: 'Defence' },
-  { id: 'transit', name: 'Transit' }, { id: 'colony', name: 'Colony' }, { id: 'landmarks', name: 'Landmarks' }, { id: 'tools', name: 'Tools' },
+  { id: 'roads', name: 'Roads' }, { id: 'zones', name: 'Zones' }, { id: 'utilities', name: 'Power & water', short: 'Utilities' },
+  { id: 'services', name: 'Services' }, { id: 'parks', name: 'Parks', key: 'P' }, { id: 'industry', name: 'Industry' }, { id: 'defence', name: 'Defence' },
+  { id: 'transit', name: 'Transit' }, { id: 'colony', name: 'Colony' }, { id: 'landmarks', name: 'Landmarks', short: 'Landmark' }, { id: 'research', name: 'R&D', action: 'openResearch', key: 'T' }, { id: 'tools', name: 'Tools' },
 ];
 
 /** Tiles + quote for a tool between two tiles (a = press, b = current). */
@@ -68,7 +71,9 @@ export function plan(r, tool, a, b) {
   if (tool.place) {
     const e = item(tool.place), [w, d] = e.size, x = x1 - Math.floor((w - 1) / 2), z = z1 - Math.floor((d - 1) / 2);
     const tiles = B.rectTiles(x, z, x + w - 1, z + d - 1);
-    return { tiles, quote: B.quotePlace(r, tool.place, x, z), at: [x, z], sprite: { id: e.recipe, params: { ...(e.params || {}), seed: 1 }, x, z, w, d } };
+    const rad = e.cat === 'park' || e.cat === 'leisure' ? e.cover?.leisure : 0;
+    const reach = rad ? coverTiles(r, x + w / 2, z + d / 2, rad) : undefined;
+    return { tiles, reach, quote: B.quotePlace(r, tool.place, x, z), at: [x, z], sprite: { id: e.recipe, params: { ...(e.params || {}), seed: 1 }, x, z, w, d } };
   }
   if (tool === 'bulldoze' || tool.name === 'Bulldoze') { const tiles = B.rectTiles(x0, z0, x1, z1); return { tiles, quote: B.quoteBulldoze(r, tiles) }; }
   if (tool.name === 'Level ground') {
@@ -78,6 +83,12 @@ export function plan(r, tool, a, b) {
   return null;
 }
 
+/** Tile indices within `rad` of a lot's middle (cx, cz) — a park's reach, the same circle city.js solveLandValue lifts. */
+function coverTiles(r, cx, cz, rad) {
+  const out = [], N = r.size;
+  for (let z = Math.max(0, Math.floor(cz - rad)); z < Math.min(N, cz + rad); z++) for (let x = Math.max(0, Math.floor(cx - rad)); x < Math.min(N, cx + rad); x++) if (Math.hypot(x + 0.5 - cx, z + 0.5 - cz) < rad) out.push(z * N + x);
+  return out;
+}
 /** Apply a planned action. Returns the sim's result ({ ok, why, cost }). */
 export function apply(r, tool, a, b) {
   const p = plan(r, tool, a, b); if (!p) return { ok: false };

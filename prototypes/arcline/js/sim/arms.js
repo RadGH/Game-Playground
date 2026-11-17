@@ -12,6 +12,7 @@ import { TURRETS } from '../../../../citykit/js/world/defence.js';
 import { item } from './catalog.js';
 import { T } from './tuning.js';
 import { fmt } from '../../../../shared/format.js';
+import { effect } from './research.js';
 
 /** Mk table: damage and range multipliers. Mk II about 40% more damage, Mk III twice Mk I and 15% more reach. */
 export const MK = { 1: { damage: 1, range: 1, label: '' }, 2: { damage: 1.4, range: 1, label: 'Mk II' }, 3: { damage: 2, range: 1.15, label: 'Mk III' } };
@@ -93,14 +94,20 @@ export function statRows(r, e) {
     rows.push(['Strength', `${fmt(hp)} health a tile`]);
     rows.push(['Self-repair', `back to full ${fmt(T.wallRegenQuietSec ?? 8)} s after the last hit, while above ${fmt(Math.round((T.wallRegenAbove ?? 0.5) * 100))}%`]);
   }
-  if ((e.power ?? 0) > 0) rows.push(['Power made', fmt(e.power)]);
+  const park = parkLift(r, e);
+  if (park) {
+    rows.push(['Land value', `+${fmt(park.lift)}% at its middle, fading out ${fmt(park.reach)} tiles away`]);
+    rows.push(['Newcomers', 'more move in while homes sit in its reach']);
+  }
+  if (e.rep) rows.push(['Reputation', `+${fmt(Math.round(e.rep * 100))} while it stands`]);
+  if ((e.power ?? 0) > 0) rows.push(['Power made', fmt(Math.round(e.power * plantMul(r, e)))]);
   else if (e.power) rows.push(['Power used', fmt(-e.power)]);
-  if ((e.water ?? 0) > 0) rows.push(['Water pumped', fmt(e.water)]);
+  if ((e.water ?? 0) > 0) rows.push(['Water pumped', fmt(Math.round(e.water * pumpMul(r, e)))]);
   else if (e.water) rows.push(['Water used', fmt(-e.water)]);
   if (e.people) rows.push(['Homes', `${fmt(e.people)} people`]);
   if (e.jobs) rows.push(['Jobs', fmt(e.jobs)]);
   if (e.cover?.education) rows.push(['Education reach', `${fmt(e.cover.education)} tiles`]);
-  if (e.cover?.leisure) rows.push(['Leisure reach', `${fmt(e.cover.leisure)} tiles`]);
+  if (e.cover?.leisure && !park) rows.push(['Leisure reach', `${fmt(e.cover.leisure)} tiles`]);
   if (e.comms) rows.push(['Hears ships', ['', 'nearby', 'long range', 'deep space'][e.comms]]);
   if (e.deposit) rows.push(['Mines', `${fmt(T.outpostRate ?? 9)} ${cap(e.deposit)} a day while powered`]);
   if (e.refine) rows.push(['Refines', `${fmt((T.refineRate ?? 6) * (T.refineIn ?? 2))} ${cap(e.refine.from)} → ${fmt(T.refineRate ?? 6)} ${e.refine.to === 'cells' ? 'Power cells' : cap(e.refine.to)} a day`]);
@@ -109,6 +116,16 @@ export function statRows(r, e) {
   return rows;
 }
 const cap = s => s[0].toUpperCase() + s.slice(1);
+/** R&D multipliers on a building's output (the same ones networks.js applies). */
+const plantMul = (r, e) => (e.id?.startsWith('svc-power') ? effect(r, 'power') : 1);
+const pumpMul = (r, e) => (e.id === 'svc-water' ? effect(r, 'water') : 1);
+/** A park's or plaza's lift: land value % at its middle (city.js solveLandValue: boost × parks policy, capped at 1,
+ *  × T.landValueParks × 2) and its reach in tiles. null for anything else. */
+export function parkLift(r, e) {
+  if (!(e?.cat === 'park' || e?.cat === 'leisure') || !e.cover?.leisure) return null;
+  const b = Math.min(1, (e.boost ?? 0.8) * effect(r, 'parks'));
+  return { lift: Math.round(b * (T.landValueParks ?? 0.25) * 2 * 100), reach: e.cover.leisure };
+}
 const DAYS_PER_MONTH = 30;   // city.js DAYS_PER_MONTH (not imported: city.js → build.js → arms.js)
 /** Same rule as the HUD's perDay: whole credits from 100, one decimal from 1, two below (never "¢0"). */
 const perDay = n => { const a = Math.abs(n), d = a >= 100 ? 0 : a >= 1 ? 1 : 2; return `¢${fmt(Math.round(a * 10 ** d) / 10 ** d, { decimals: d })}`; };
@@ -118,8 +135,9 @@ export function keyLine(r, e) {
   if (!e) return '';
   if (e.turret) { const s = turretStats(r, e.turret); return `${fmt(s.dps, { decimals: 0 })} dmg/s · ${fmt(s.range, { decimals: 1 })} tiles`; }
   if (e.wall) return `${fmt(wallMaxHp(r, e.gate ? 9 : e.params?.tier ?? 1))} health`;
-  if ((e.power ?? 0) > 0) return `+${fmt(e.power)} power`;
-  if ((e.water ?? 0) > 0) return `+${fmt(e.water)} water`;
+  const park = parkLift(r, e); if (park) return `+${fmt(park.lift)}% value · ${fmt(park.reach)} tiles`;
+  if ((e.power ?? 0) > 0) return `+${fmt(Math.round(e.power * plantMul(r, e)))} power`;
+  if ((e.water ?? 0) > 0) return `+${fmt(Math.round(e.water * pumpMul(r, e)))} water`;
   if (e.cover?.education) return `${fmt(e.cover.education)}-tile school reach`;
   if (e.cover?.leisure) return `${fmt(e.cover.leisure)}-tile leisure reach`;
   if (e.deposit) return `${fmt(T.outpostRate ?? 9)} ${cap(e.deposit)}/day`;

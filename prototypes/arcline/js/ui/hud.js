@@ -3,15 +3,16 @@
 // Top bar holds only what is always there (lessons rule 14); new indicators go on the row below.
 import { $, el, btn, sheet, toast } from './dom.js';
 import { fmt, pct } from '../../../../shared/format.js';
-import { census, demand, monthBudget, nextMilestone, takeLoan, dailyNet, dayProgress, levelUp, DAYS_PER_MONTH } from '../sim/city.js';
+import { census, demand, monthBudget, nextMilestone, takeLoan, dailyNet, dayProgress, levelUp, designName, DAYS_PER_MONTH } from '../sim/city.js';
 import { utilityStatus, demandInfo } from '../sim/advice.js';
 import { POWER_REACH, PIPE_REACH } from '../sim/networks.js';
-import { item, cat, unlocked, materials } from '../sim/catalog.js';
+import { item, cat, unlocked, materials, lockText } from '../sim/catalog.js';
 import { T, milestones } from '../sim/tuning.js';
 import { GROUPS } from './tools.js';
 import { moveProblem, moveFee } from '../sim/build.js';
 import { priceOf } from '../sim/arms.js';
 import { decorateCard } from './builder.js';
+import { progress as researchProgress, TECH_BY_ID } from '../sim/research.js';
 
 const MONTHS = ['Dawnmonth', 'Bloom', 'Highsun', 'Glow', 'Drift', 'Harvest', 'Duskfall', 'Frost', 'Deepnight', 'Thaw', 'Spark', 'Turn'];
 const MAT_NAME = { metal: 'Metal', stone: 'Stone', crystal: 'Crystal', steel: 'Steel', concrete: 'Concrete', cells: 'Power cells' };
@@ -56,12 +57,26 @@ export function buildHud(game) {
   // drawn glyphs, not emoji (one icon style per game, lessons 17)
   $('#h-power').firstChild.replaceWith(glyph('bolt')); $('#h-water').firstChild.replaceWith(glyph('drop'));
 
-  // tool groups
-  const tools = $('#h-tools');
-  for (const g of GROUPS) tools.append(btn(g.name, () => openTray(game, g.id), 'ac-group', { 'data-group': g.id }));
-  // overlays
+  // tool groups: a drawn icon over a short name; on a phone the row scrolls sideways with arrows + fades at the ends
+  // that show only while there is more that way (owner 2026-11-17: "Refine the bottom menu on mobile")
+  const tools = $('#h-tools'), tabs = el('div', { class: 'ac-tabs', role: 'toolbar', 'aria-label': 'Build' });
+  for (const g of GROUPS) {
+    const b = btn('', () => (g.action ? game[g.action]?.() : openTray(game, g.id)), 'ac-group', { 'data-group': g.id, 'aria-label': g.name, 'data-tip': g.key ? `${g.name} (${g.key})` : g.name });
+    b.append(tabGlyph(g.id), el('span', { class: 'gl' }, g.name), el('span', { class: 'gs' }, g.short || g.name));   // gs = the phone's shorter name
+    if (g.id === 'research') b.append(el('i', { class: 'ac-rdbar', 'aria-hidden': 'true' }, el('b')));
+    tabs.append(b);
+  }
+  const arrow = (dir, label) => btn(dir < 0 ? '‹' : '›', () => tabs.scrollBy({ left: dir * tabs.clientWidth * 0.8, behavior: 'smooth' }), `ac-tabarrow ${dir < 0 ? 'l' : 'r'}`, { 'aria-label': label, tabindex: '-1' });
+  tools.append(tabs, arrow(-1, 'More tabs to the left'), arrow(1, 'More tabs to the right'));
+  const ends = () => { const m = tabs.scrollWidth - tabs.clientWidth; tools.classList.toggle('more-l', tabs.scrollLeft > 4); tools.classList.toggle('more-r', tabs.scrollLeft < m - 4); };
+  tabs.addEventListener('scroll', ends, { passive: true }); new ResizeObserver(ends).observe(tabs); ends();
+  // overlays: a column on a desktop; on a phone one "View" button that opens the list (it used to be a full row that
+  // ran off the screen under the tool chip)
   const ov = $('#h-overlays');
-  for (const [id, label] of [[null, 'City'], ['pipes', 'Underground'], ['power', 'Power'], ['value', 'Land value'], ['traffic', 'Traffic']]) ov.append(btn(label, () => { game.setOverlay(id); }, id === null ? 'on' : '', { 'data-overlay': id ?? '' }));
+  const viewBtn = btn('', () => ov.classList.toggle('open'), 'ac-viewbtn', { 'aria-label': 'Map view', 'aria-haspopup': 'true' });
+  viewBtn.append(el('span', { class: 'lbl' }, 'View'), el('b', {}, 'City'));
+  ov.append(viewBtn);
+  for (const [id, label] of [[null, 'City'], ['pipes', 'Underground'], ['power', 'Power'], ['value', 'Land value'], ['traffic', 'Traffic']]) ov.append(btn(label, () => { game.setOverlay(id); ov.classList.remove('open'); viewBtn.querySelector('b').textContent = label; }, id === null ? 'on' : '', { 'data-overlay': id ?? '' }));
   hud.querySelector(".ac-menubtn").addEventListener('click', () => game.openMenu());
   hud.querySelector('.ac-money').addEventListener('click', () => budgetSheet(game));
   hud.querySelector('#h-strike').addEventListener('click', () => game.armStrike());
@@ -74,6 +89,25 @@ export function buildHud(game) {
   return hud;
 }
 
+/** The tab icons (one drawn style, lessons 17): 16×16, currentColor. */
+const TAB_ICONS = {
+  roads: '<path d="M5 1 2 15M11 1l3 14" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M8 2v2.5M8 7v2.5M8 12v2" stroke="currentColor" stroke-width="1.4"/>',
+  zones: '<rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1" fill="#56d678"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1" fill="#50a0ff"/><rect x="1.5" y="9" width="13" height="5.5" rx="1" fill="#ffbe46"/>',
+  utilities: '<path d="M6 1 2 8h3l-1 6 4-7H5z" fill="currentColor"/><path d="M12 5c-1.4 2.6-3 4-3 6a3 3 0 0 0 6 0c0-2-1.6-3.4-3-6z" fill="currentColor" opacity=".75"/>',
+  services: '<path d="M8 1.5 1.5 6v1.5h13V6zM3 8.5h2v4.5H3zm4 0h2v4.5H7zm4 0h2v4.5h-2zM1.5 14h13v1.5h-13z" fill="currentColor"/>',
+  parks: '<circle cx="8" cy="6" r="4.6" fill="currentColor"/><path d="M7.2 9h1.6v6H7.2z" fill="currentColor"/><path d="M2 15h12" stroke="currentColor" stroke-width="1.4"/>',
+  industry: '<path d="M1.5 15V7l4 2.5V7l4 2.5V3h3v12z" fill="currentColor"/>',
+  defence: '<path d="M8 1 2 3.5v4.2C2 11.4 4.6 14 8 15c3.4-1 6-3.6 6-7.3V3.5z" fill="currentColor"/>',
+  transit: '<rect x="3" y="1.5" width="10" height="10" rx="2.5" fill="currentColor"/><path d="M4 15l2-3m6 3-2-3" stroke="currentColor" stroke-width="1.4"/><rect x="4.6" y="3.5" width="6.8" height="3.4" rx="1" fill="#0b1220"/>',
+  colony: '<path d="M8 1 13 8H3z" fill="currentColor"/><path d="M5 9h6v6H5z" fill="currentColor"/><path d="M8 1v-1" stroke="currentColor"/>',
+  landmarks: '<path d="M7 1h2l1.4 14H5.6z" fill="currentColor"/><path d="M3 15h10" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="1.5" r="1.2" fill="currentColor"/>',
+  research: '<path d="M6 1.5h4M7 1.5v4.2L2.6 13a1.2 1.2 0 0 0 1 1.8h8.8a1.2 1.2 0 0 0 1-1.8L9 5.7V1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M4.4 10.5h7.2l1.2 2.6H3.2z" fill="currentColor"/>',
+  tools: '<path d="M10.5 1.5a3.5 3.5 0 0 0-3.3 4.6L1.8 11.5a1.3 1.3 0 0 0 1.8 1.8L9 7.9a3.5 3.5 0 0 0 4.6-3.3l-2 1-1.5-1.5 1-2z" fill="currentColor"/>',
+};
+export function tabGlyph(id) {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 16 16'); s.setAttribute('class', 'gi'); s.setAttribute('aria-hidden', 'true');
+  s.innerHTML = TAB_ICONS[id] || '<circle cx="8" cy="8" r="5" fill="currentColor"/>'; return s;
+}
 export function glyph(kind) {
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 16 16'); s.setAttribute('class', 'gly'); s.setAttribute('aria-hidden', 'true');
   s.innerHTML = kind === 'bolt' ? '<path d="M9 1 3 9h4l-1 6 6-8H8z" fill="currentColor"/>' : kind === 'drop' ? '<path d="M8 1C6 5 3 7.5 3 10.5a5 5 0 0 0 10 0C13 7.5 10 5 8 1z" fill="currentColor"/>' : '<circle cx="8" cy="8" r="6" fill="currentColor"/>';
@@ -84,7 +118,9 @@ export function glyph(kind) {
 export function updateHud(game) {
   const r = game.r; if (!r || !$('#h-money')) return;
   const c = census(r), dm = demand(r);
-  $('#h-money').textContent = money(r.money);
+  // phones: big balances shortened so the speed buttons stay on screen (360 px, owner rule 14) — the tip has the exact sum
+  const narrow = innerWidth < 480, m = Math.round(r.money);
+  $('#h-money').textContent = narrow && Math.abs(m) >= 1e6 ? `¢${(m / 1e6).toFixed(2)}M` : narrow && Math.abs(m) >= 1e5 ? `¢${Math.round(m / 1e3)}k` : money(r.money);
   // what the next pay day adds (money is paid once a game day — owner #85: "income per day")
   const net = r.budget ? dailyNet(r, r.budget) : 0;
   $('#h-net').textContent = `${net >= 0 ? '+' : ''}${perDay(net)}/day`; $('#h-net').className = net >= 0 ? 'good' : 'bad';
@@ -105,6 +141,9 @@ export function updateHud(game) {
   $('#h-stock').textContent = st.join(' · '); $('#h-stock').hidden = !st.length;
   document.querySelectorAll('[data-speed]').forEach(b => b.classList.toggle('on', +b.dataset.speed === game.speed));
   const alert = game.alertText?.(); const a = $('#h-alert'); a.hidden = !alert; if (alert) a.textContent = alert;
+  // the R&D tab shows the research under way as a thin bar (and its name in the tip)
+  const rdTab = document.querySelector('.ac-group[data-group="research"]');
+  if (rdTab) { const a = r.research?.active, k = a ? researchProgress(r) : 0; rdTab.classList.toggle('busy', !!a); rdTab.querySelector('.ac-rdbar b').style.width = `${Math.round(k * 100)}%`; rdTab.dataset.tip = a ? `R&D (T): researching ${TECH_BY_ID[a.id]?.name}, ${Math.round(k * 100)}%` : 'R&D (T): research upgrades and new buildings'; }
   const ov = r.ships?.passing?.length || 0, cb = $('#h-comms b'); if (cb) { cb.hidden = !ov; cb.textContent = fmt(ov); }
   // the ships strip sits just under the second row, however many lines that row wraps to (phones: two or three)
   const row2 = $('.ac-row2'), sky = $('#h-sky'), topBar = $('.ac-top');
@@ -141,10 +180,13 @@ export function openTray(game, groupId) {
     const mats = e ? materials(e) : {};
     const perTile = t.level || t.transit || t.wall || t.layer;
     const price = e?.cost != null ? money(priceOf(game.r, e)) + (perTile ? ' a tile' : '') + (Object.keys(mats).length ? ' + ' + Object.entries(mats).map(([k, v]) => `${v} ${MAT_NAME[k]}`).join(', ') : '') : '';
-    const card = btn('', () => { if (!open) { toast(`${t.name} unlocks at milestone ${e.unlock} (${fmt(milestones()[e.unlock - 1])} people).`); return; } if (t.action) game[t.action](); else game.setTool(id); tray.hidden = true; document.querySelectorAll('.ac-group').forEach(b => b.classList.remove('on')); }, 'ac-tcard' + (open ? '' : ' locked'), { 'data-tool': id });
+    const lock = open ? null : lockText(game.r, e);
+    // a locked card says why; one R&D opens (a new park, or plans ahead of a milestone) opens R&D at that tech
+    const card = btn('', () => { if (!open) { if (lock?.tech && game.openResearch) { tray.hidden = true; document.querySelectorAll('.ac-group').forEach(b => b.classList.remove('on')); game.openResearch(lock.tech); return; } toast(`${t.name}: ${lock?.text || 'locked'}`); return; } if (t.action) game[t.action](); else game.setTool(id); tray.hidden = true; document.querySelectorAll('.ac-group').forEach(b => b.classList.remove('on')); }, 'ac-tcard' + (open ? '' : ' locked'), { 'data-tool': id });
     const thumb = el('canvas', { class: 'thumb', width: 96, height: 72 });
-    card.append(thumb, el('span', { class: 'nm' }, t.name), el('span', { class: 'pr' }, open ? price : `Milestone ${e.unlock}`));
-    if (e?.blurb) card.dataset.tip = e.blurb + (open ? '' : ` Unlocks at ${fmt(milestones()[e.unlock - 1])} people.`);
+    card.append(thumb, el('span', { class: 'nm' }, t.name), el('span', { class: 'pr' }, open ? price : lock?.short || 'Locked'));
+    if (lock?.short === 'R&D') card.classList.add('rd');
+    if (e?.blurb) card.dataset.tip = e.blurb + (open ? '' : ` ${lock?.text || ''}`);
     decorateCard(game, card, id, t);   // Mk name, key numbers on the card, the full stat card on hover/focus (#78, #81)
     tray.append(card);
     game.thumb(thumb, t);
@@ -178,7 +220,7 @@ export function showInfo(game, lot) {
   box.hidden = false;
   updateMoveButton(game);
 }
-const zoneName = l => ({ R: ['Habitat Pods', 'Terrace Homes', 'Apartment Block', 'Residential Tower'], C: ['Street Market', 'Shop Row', 'Hotel', 'Office Tower'], I: ['Fab Workshop', 'Logistics Depot'] }[l.zone]?.[l.tier - 1] || 'Building');
+const zoneName = l => designName(l);   // the growth table's name for its size + level (catalog.json zones)
 const zoneBlurb = l => l.zone === 'R' ? 'Homes for the people who land here.' : l.zone === 'C' ? 'Shops and offices: jobs, and somewhere to spend.' : 'Workshops and depots: jobs for your workers.';
 
 // ---------------- budget ----------------
@@ -201,7 +243,7 @@ export function budgetSheet(game) {
       const daily = dailyNet(r, b);
       box.append(el('h3', {}, 'Each day'), el('p', { class: 'dim' }, `Paid every game day (${fmt(T.dayLengthSec || 6)} s at normal speed).`),
         dayLine('Homes tax', b.income.R), dayLine('Shops & offices tax', b.income.C), dayLine('Industry tax', b.income.I), ...(b.income.grant ? [dayLine('Colony grant (fades as you grow)', b.income.grant)] : []),
-        dayLine('Buildings upkeep', -b.upkeep.buildings), dayLine('Roads', -b.upkeep.roads), dayLine('Walls', -b.upkeep.walls), dayLine('Turrets', -b.upkeep.turrets), ...(b.upkeep.transit ? [dayLine('Transit', -b.upkeep.transit)] : []), dayLine('Loans', -b.upkeep.loans),
+        dayLine('Buildings upkeep', -b.upkeep.buildings), dayLine('Roads', -b.upkeep.roads), dayLine('Walls', -b.upkeep.walls), dayLine('Turrets', -b.upkeep.turrets), ...(b.upkeep.transit ? [dayLine('Transit', -b.upkeep.transit)] : []), ...(b.upkeep.policies ? [dayLine('Policies (R&D)', -b.upkeep.policies)] : []), dayLine('Loans', -b.upkeep.loans),
         el('div', { class: 'bl ' + (daily >= 0 ? 'good total' : 'bad total') }, el('span', {}, r.shutdown ? 'Balance (broke: upkeep unpaid)' : 'Balance'), el('b', {}, perDay(daily))));
       box.append(el('h3', {}, 'Loans'), el('p', { class: 'dim' }, r.loans.length ? r.loans.map(l => `${money(l.amount)}, ${l.left} months left`).join(' · ') : 'No loans.'),
         btn(`Take a loan of ${money(T.loanSize)}`, () => { if (takeLoan(r)) { toast(`Loan of ${money(T.loanSize)} taken.`, 'good'); draw(); } else toast('Three loans at once is the limit.', 'bad'); }, '', { disabled: r.loans.length >= 3 || null }));
@@ -220,9 +262,9 @@ function levelBox(r, lot) {
   if (u.top) return el('div', { class: 'ac-level top' }, el('div', { class: 'hd' }, el('span', {}, `Level ${lot.tier}`), el('b', {}, 'Top level')));
   const pc = Math.round(u.progress * 100);
   return el('div', { class: 'ac-level' + (u.ready ? ' ready' : '') },
-    el('div', { class: 'hd' }, el('span', {}, `Level ${lot.tier} → ${u.nextTier}: ${zoneName({ zone: lot.zone, tier: u.nextTier })}`), el('b', {}, `${pc}%`)),
+    el('div', { class: 'hd' }, el('span', {}, u.title), el('b', {}, `${pc}%`)),
     el('div', { class: 'bar', role: 'progressbar', 'aria-valuenow': pc, 'aria-valuemin': 0, 'aria-valuemax': 100 }, el('i', { style: `width:${Math.max(2, pc)}%` })),
-    u.ready ? el('p', { class: 'ok' }, 'Ready: it will rebuild taller soon.') : null,
+    u.ready ? el('p', { class: 'ok' }, u.kind === 'combine' ? 'Ready: it will combine with its plot soon.' : 'Ready: it will rebuild taller soon.') : null,
     el('ul', {}, ...u.needs.filter(n => !n.ok).concat(u.needs.filter(n => n.ok)).map(n => el('li', { class: n.ok ? 'ok' : 'no' }, el('span', { class: 'l' }, n.text), el('span', { class: 's' }, n.short)))));
 }
 

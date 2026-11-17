@@ -7,12 +7,14 @@
 // minus upkeep; below the shutdown line services stop.
 import { T, milestones } from './tuning.js';
 import { cat, item } from './catalog.js';
-import { roadReach, touchesRoad, lotFace, solvePower, solveWater, solveTraffic } from './networks.js';
+import { roadReach, lotFace, solvePower, solveWater, solveTraffic } from './networks.js';
 import { isFlat } from './terrain.js';
 import { addLot, reindexLots } from './build.js';
 import { ZONE, RAW, REFINED } from './region.js';
 import { rng } from '../../../../citykit/js/kit/rng.js';
 import { cutTraffic, transitLandValue, transitUpkeep, linkBoost } from './transit.js';
+import { plots, plotOf, rectAccess, inwardFace, zoneDepth } from './plots.js';
+import { effect, researchTick, policyUpkeep } from './research.js';
 
 const ZKEY = { 1: 'R', 2: 'C', 3: 'I' };
 /** Share of residents who work (jobs wanted = people × this). */
@@ -36,7 +38,7 @@ export function targets(r) {
   const openJobs = Math.max(0, c.jobs - p * WORK_SHARE) / WORK_SHARE;
   return {
     R: Math.round(p + coming + ahead + openJobs * 0.5),
-    C: Math.round((p * 0.24 + 6) * (1 + link.C)),
+    C: Math.round((p * 0.24 + 6) * (1 + link.C) * effect(r, 'demandC')),   // R&D policy: Night Market Licences
     I: Math.round(p * 0.34 + 6),
   };
 }
@@ -49,6 +51,12 @@ export function demand(r) {
 }
 
 // ---------------- land value ----------------
+/** How strongly a building lifts the leisure/education layer at its middle: its catalog `boost` (parks and plazas
+ *  differ), else 1.2 for a landmark and 0.8 for the rest; parks × the Green City Charter policy (R&D). */
+function boostOf(r, e, l) {
+  const b = e?.boost ?? (l.landmark ? 1.2 : 0.8);
+  return e?.cat === 'park' || e?.cat === 'leisure' ? b * effect(r, 'parks') : b;
+}
 export function solveLandValue(r) {
   const N = r.size, v = r.tiles.value, edu = r.tiles.edu, lei = r.tiles.leisure;
   edu.fill(0); lei.fill(0);
@@ -58,7 +66,7 @@ export function solveLandValue(r) {
     for (const [key, rad] of Object.entries(cover)) {
       const arr = key === 'education' ? edu : lei;
       for (let z = Math.max(0, Math.floor(cz - rad)); z < Math.min(N, cz + rad); z++) for (let x = Math.max(0, Math.floor(cx - rad)); x < Math.min(N, cx + rad); x++) {
-        const d = Math.hypot(x + 0.5 - cx, z + 0.5 - cz); if (d < rad) arr[z * N + x] = Math.min(1, arr[z * N + x] + (1 - d / rad) * (l.landmark ? 1.2 : 0.8));
+        const d = Math.hypot(x + 0.5 - cx, z + 0.5 - cz); if (d < rad) arr[z * N + x] = Math.min(1, arr[z * N + x] + (1 - d / rad) * boostOf(r, e, l));
       }
     }
   }
@@ -82,131 +90,183 @@ function threatMap(r) {
 }
 
 // ---------------- growth ----------------
-/** Grow a share of the zoned land that's ready: pick a lot spot, a tier the land allows, floors from land value. */
+// Owner 2026-11-17: zoned land fills its middle too, every zone comes in 1×1, 2×1 and 2×2 at every level, and small
+// buildings with good enough stats combine into bigger ones. sim/plots.js cuts each painted block into plots (2×2
+// first, packed from the block's corners); growth puts a building on a free plot — the whole plot, or a 2×1 / 1×1 piece
+// of it on poorer land — and levelUp() later combines the pieces of a plot into one building the plot's size, or
+// rebuilds a building that already fills its plot one level taller.
+/** The growth table entry a lot was built from (its name, size, level). */
+export function zoneDesign(l) {
+  const t = cat().zones[l.zone] || [];
+  return t.find(e => e.recipe === l.recipe) || t.find(e => e.tier === l.tier && fits(e, l.w, l.d)) || null;
+}
+/** A zoned building's player-facing name. */
+export function designName(l) { return zoneDesign(l)?.name || 'Building'; }
+const fits = (e, w, d) => (e.size[0] === w && e.size[1] === d) || (e.size[0] === d && e.size[1] === w);
+/** The design for zone/tier on a w × d lot (either way round), or null. Old-only designs (legacy) are never picked. */
+function designFor(zone, tier, w, d) { return (cat().zones[zone] || []).find(e => e.tier === tier && !e.legacy && fits(e, w, d)) || null; }
+/** The best design a new w × d building could be here: the highest level the land, water, schooling and milestone allow. */
+function bestDesign(r, zone, w, d, value, wet) {
+  const opts = (cat().zones[zone] || []).filter(e => !e.legacy && fits(e, w, d) && (e.unlock ?? 0) <= r.milestone && value >= e.minValue
+    && (!e.water || wet) && (!e.education || (r.people.edu || 0) >= e.education));
+  return opts.sort((a, b) => b.tier - a.tier)[0] || null;
+}
+/** How many new buildings may go up per growth pass (share of free plots × demand). */
+const growBudget = (free, dm) => Math.max(1, Math.ceil(free * (T.growPerMonth ?? 0.35) * dm));
+/** Free (empty, flat) zoned tiles in reach for zone key — what can still grow. Used by the balance bot and advice. */
+export function growableTiles(r, key) {
+  const P = plots(r, roadReach(r)), N = r.size, depth = zoneDepth(); let n = 0;
+  for (const p of P.list) if (p.zone === key && rectAccess(P, r, p.x, p.z, p.w, p.d) <= depth)
+    for (let k = 0; k < p.d; k++) for (let j = 0; j < p.w; j++) if (r.tiles.lot[(p.z + k) * N + p.x + j] < 0) n++;
+  return n;
+}
+/** Grow a share of the zoned land that's ready, then level up / combine the buildings that are ready. */
 export function grow(r, R) {
-  const N = r.size, reach = roadReach(r), dm = demand(r);
-  const zoneTables = cat().zones;
+  const N = r.size, reach = roadReach(r), dm = demand(r), depth = zoneDepth();
   let grown = 0;
-  for (const z of [ZONE.R, ZONE.C, ZONE.I]) {
-    const key = ZKEY[z]; if (dm[key] <= 0.02) continue;
-    // candidate seeds: zoned empty tiles beside a connected road
-    const seeds = [];
-    for (let i = 0; i < N * N; i++) if (r.tiles.zone[i] === z && r.tiles.lot[i] < 0) { const x = i % N, zz = (i / N) | 0; if (touchesRoad(r, reach, x, zz, 1, 1)) seeds.push([x, zz]); }
-    if (!seeds.length) continue;
-    const budget = Math.max(1, Math.ceil(seeds.length * (T.growPerMonth ?? 0.35) * dm[key]));
-    const tgt = targets(r)[key], have = () => { const c = census(r); return key === 'R' ? c.homes : key === 'C' ? c.cjobs : c.ijobs; };
-    for (let k = 0; k < budget && seeds.length && have() < tgt; k++) {
-      const [x, zz] = seeds.splice(R.int(0, seeds.length - 1), 1)[0];
-      if (r.tiles.lot[zz * N + x] >= 0) continue;
-      const lot = bestLot(r, reach, zoneTables[key], key, x, zz, R); if (!lot) continue;
-      addLot(r, lot); grown++;
-    }
-  }
-  // level up: a zoned lot that meets every need (levelUp() — the same check the info panel shows) is rebuilt one tier
-  // taller, growing into the zoned land around it if the next tier is bigger (SimCity's up-zoning feel). Up to 3 every
-  // few days, the readiest first.
+  // level up / combine first, so a settled piece takes in the free land of its plot before new growth fills it: a
+  // zoned lot that meets every need (levelUp() — the same check the info panel shows) is rebuilt, a few each pass
   const ready = [];
   for (const l of r.lots) if (l.kind === 'zoned') { const u = levelUp(r, l, { reach, dm }); if (u.ready) ready.push(u); }
-  for (let k = 0; k < Math.min(LEVEL_PER_PASS, ready.length); k++) {
+  const per = Math.max(LEVEL_PER_PASS, Math.ceil(ready.length * 0.25));
+  for (let k = 0; k < per && ready.length; k++) {
     const u = ready.splice(R.int(0, ready.length - 1), 1)[0], l = u.lot;
-    if (!r.lots.includes(l) || !levelUp(r, l, { reach, dm }).ready) continue;   // an earlier upgrade took its room
-    applyLevelUp(r, l, u, R); grown++;
+    if (!r.lots.includes(l)) continue;
+    const now = levelUp(r, l, { reach, dm }); if (!now.ready) continue;   // an earlier rebuild took its room
+    applyLevelUp(r, l, now, R); grown++;
+  }
+  for (const key of ['R', 'C', 'I']) {
+    if (dm[key] <= 0.02) continue;
+    const P = plots(r, reach);
+    // plots with free ground a road reaches: nearest the road first, a little shuffled
+    const cands = [];
+    for (const p of P.list) {
+      if (p.zone !== key) continue;
+      const acc = rectAccess(P, r, p.x, p.z, p.w, p.d); if (acc > depth) continue;
+      let free = 0; for (let k = 0; k < p.d; k++) for (let j = 0; j < p.w; j++) if (r.tiles.lot[(p.z + k) * N + p.x + j] < 0) free++;
+      if (free) cands.push({ p, free, order: acc + R.range(0, 2.5) });
+    }
+    if (!cands.length) continue;
+    cands.sort((a, b) => a.order - b.order);
+    const budget = growBudget(cands.reduce((s, c) => s + c.free, 0) / 2, dm[key]);
+    const tgt = targets(r)[key], have = () => { const c = census(r); return key === 'R' ? c.homes : key === 'C' ? c.cjobs : c.ijobs; };
+    for (let k = 0, made = 0; k < cands.length && made < budget && have() < tgt; k++) {
+      const lot = pieceFor(r, plots(r, reach), cands[k].p, key, R); if (!lot) continue;
+      addLot(r, lot); grown++; made++;
+    }
   }
   if (grown) { solvePower(r); solveWater(r); }
   return grown;
 }
 function lotValue(r, x, z, w, d) { let s = 0; for (let k = 0; k < d; k++) for (let j = 0; j < w; j++) s += r.tiles.value[(z + k) * r.size + x + j]; return s / (w * d); }
 function waterAt(r, x, z) { return r.waterNet?.reach?.[z * r.size + x] ? 1 : 0; }
-function bestLot(r, reach, table, key, x, z, R) {
-  const N = r.size, zcode = { R: ZONE.R, C: ZONE.C, I: ZONE.I }[key];
-  const options = table.filter(t => (t.unlock ?? 0) <= r.milestone).sort((a, b) => b.tier - a.tier);
-  for (const t of options) {
-    for (const [w, d] of [t.size, [t.size[1], t.size[0]]]) {
-      // try the lot with (x, z) at each corner
-      for (const [ox, oz] of [[0, 0], [-(w - 1), 0], [0, -(d - 1)], [-(w - 1), -(d - 1)]]) {
-        const lx = x + ox, lz = z + oz; if (lx < 0 || lz < 0 || lx + w > N || lz + d > N) continue;
-        let ok = true; for (let k = 0; k < d && ok; k++) for (let j = 0; j < w && ok; j++) { const i = (lz + k) * N + lx + j; if (r.tiles.zone[i] !== zcode || r.tiles.lot[i] >= 0 || r.tiles.road[i]) ok = false; }
-        if (!ok || !isFlat(r.ter, lx, lz, w, d) || !touchesRoad(r, reach, lx, lz, w, d)) continue;
-        const value = lotValue(r, lx, lz, w, d);
-        if (value < t.minValue) continue;
-        if (t.water && !waterAt(r, lx + (w >> 1), lz + (d >> 1))) continue;
-        if (t.education && r.people.edu < t.education) continue;
-        // the building's front must face a road (a row of homes never turns its back or its end to the street)
-        if (!lotFace(r, lx, lz, w, d, t.size).road) continue;
-        return makeLot(r, t, key, lx, lz, value, R, w, d);
-      }
-    }
+const freeRect = (r, x, z, w, d) => { for (let k = 0; k < d; k++) for (let j = 0; j < w; j++) if (r.tiles.lot[(z + k) * r.size + x + j] >= 0) return false; return isFlat(r.ter, x, z, w, d); };
+/** Which way a w × d building at (x, z) faces: its road if its front can meet one, else toward the way out. */
+function faceOf(r, P, x, z, w, d, size) {
+  const f = lotFace(r, x, z, w, d, size); return f.road ? f.face : inwardFace(P, r, x, z, w, d, size);
+}
+/** How good a spot is for a piece's front: 0 = its front is on a road; higher = deeper inside the block. */
+function frontScore(r, P, x, z, w, d, size) {
+  if (lotFace(r, x, z, w, d, size).road) return 0;
+  return 1 + rectAccess(P, r, x, z, w, d);
+}
+/**
+ * A new building on plot p: the whole plot when the land is good (or by chance), else a 2×1 / 1×1 piece of it at the
+ * front. Pieces fill the rest of the plot later and combine (levelUp). → a lot, or null if nothing fits.
+ */
+function pieceFor(r, P, p, key, R) {
+  const opts = [];   // [x, z, w, d]
+  if (freeRect(r, p.x, p.z, p.w, p.d)) opts.push([p.x, p.z, p.w, p.d]);
+  const halves = [];
+  if (p.w === 2 && p.d === 2) for (const [x, z, w, d] of [[p.x, p.z, 2, 1], [p.x, p.z + 1, 2, 1], [p.x, p.z, 1, 2], [p.x + 1, p.z, 1, 2]]) if (freeRect(r, x, z, w, d)) halves.push([x, z, w, d]);
+  const singles = [];
+  for (let k = 0; k < p.d; k++) for (let j = 0; j < p.w; j++) if (p.w * p.d > 1 && freeRect(r, p.x + j, p.z + k, 1, 1)) singles.push([p.x + j, p.z + k, 1, 1]);
+  const value = lotValue(r, p.x, p.z, p.w, p.d);
+  // bigger plots go up whole more often on better land; poor land starts with small pieces that combine later
+  const whole = Math.min(0.9, Math.max(0.25, (value - 0.05) / 0.35));
+  const byFront = list => list.map(o => [o, frontScore(r, P, o[0], o[1], o[2], o[3], [Math.max(o[2], o[3]), Math.min(o[2], o[3])]) + R.range(0, 0.4)]).sort((a, b) => a[1] - b[1]).map(a => a[0]);
+  let order;
+  if (opts.length && R() < whole) order = [opts[0], ...byFront(halves), ...byFront(singles)];
+  else order = [...(R() < 0.7 ? byFront(halves) : []), ...byFront(singles), ...byFront(halves), ...opts];
+  for (const [x, z, w, d] of order) {
+    const v = lotValue(r, x, z, w, d), t = bestDesign(r, key, w, d, v, waterAt(r, x + (w >> 1), z + (d >> 1)));
+    if (!t) continue;
+    return makeLot(r, t, key, x, z, v, R, w, d, faceOf(r, P, x, z, w, d, t.size));
   }
   return null;
 }
-/** A zoned lot of tier t at (x, z), w × d tiles (t.size, or turned the other way round), facing its road. */
-function makeLot(r, t, zone, x, z, value, R, w = t.size[0], d = t.size[1]) {
+/** A zoned lot of design t at (x, z), w × d tiles (t.size, or turned the other way round), facing `face`. */
+function makeLot(r, t, zone, x, z, value, R, w = t.size[0], d = t.size[1], face = lotFace(r, x, z, w, d, t.size).face) {
   const [lo, hi] = t.floors, span = t.minValue >= 0.99 ? 1 : (value - t.minValue) / (1 - t.minValue);
   const floors = Math.max(lo, Math.min(hi, Math.round(lo + (hi - lo) * Math.pow(Math.max(0, span), 1.2) * R.range(0.8, 1.1))));
   const cap = floors * t.perFloor;
   const params = { seed: R.int(1, 9999), style: R.pick(['chrome', 'pearl', 'copper', 'concrete']) };
   if (t.param === 'stalls') params.stalls = Math.max(2, Math.min(6, 2 + Math.round(value * 5))); else params.floors = floors;
-  return { n: r.nextLot = (r.nextLot || 0) + 1, id: `zone-${zone}-${t.tier}`, kind: 'zoned', zone, tier: t.tier, x, z, w, d, face: lotFace(r, x, z, w, d, t.size).face, recipe: t.recipe, params,
+  return { n: r.nextLot = (r.nextLot || 0) + 1, id: `zone-${zone}-${t.tier}`, kind: 'zoned', zone, tier: t.tier, x, z, w, d, face, recipe: t.recipe, params,
     people: zone === 'R' ? cap : 0, jobs: zone === 'R' ? 0 : cap, power: -Math.max(1, Math.round(cap / 25)), water: 0, upkeep: 0, built: r.day, value };
 }
 
-// ---------------- levelling up ----------------
-/** Days a zoned building stands before it can level up, and how many level up each growth pass. */
+// ---------------- levelling up + combining ----------------
+/** Days a zoned building stands before it can level up or combine, and the fewest that do so each growth pass. */
 export const LEVEL_AGE = 60, LEVEL_PER_PASS = 3;
 const ZONE_WORD = { R: 'homes', C: 'shops and offices', I: 'industry' };
-/** Where the next tier's footprint can stand: it covers the whole lot, every tile is this zone (no road, flat), any
- *  other building inside is the same zone and no taller (it is absorbed), and its front meets a road.
- *  → { x, z, w, d, absorb: [lots] } or null */
-function upgradeSpot(r, l, next, reach) {
-  const N = r.size, code = ZONE[l.zone], idx = r.lots.indexOf(l);
-  for (const [w, d] of [[l.w, l.d], next.size, [next.size[1], next.size[0]]]) {
-    if (!((w === next.size[0] && d === next.size[1]) || (w === next.size[1] && d === next.size[0]))) continue;
-    if (w < l.w || d < l.d) continue;
-    for (let oz = l.d - d; oz <= 0; oz++) for (let ox = l.w - w; ox <= 0; ox++) {
-      const x = l.x + ox, z = l.z + oz; if (x < 0 || z < 0 || x + w > N || z + d > N) continue;
-      let ok = true; const absorb = new Set();
-      for (let k = 0; k < d && ok; k++) for (let j = 0; j < w && ok; j++) {
-        const i = (z + k) * N + x + j, li = r.tiles.lot[i];
-        if (r.tiles.zone[i] !== code || r.tiles.road[i]) ok = false;
-        else if (li >= 0 && li !== idx) { const o = r.lots[li]; if (o.kind !== 'zoned' || o.zone !== l.zone || o.tier > l.tier || o.x < x || o.z < z || o.x + o.w > x + w || o.z + o.d > z + d) ok = false; else absorb.add(o); }
-      }
-      if (!ok || !isFlat(r.ter, x, z, w, d) || !touchesRoad(r, reach, x, z, w, d) || !lotFace(r, x, z, w, d, next.size).road) continue;
-      return { x, z, w, d, absorb: [...absorb] };
-    }
-  }
-  return null;
-}
 /**
- * How close a zoned building is to its next level, and what it still needs (owner report #84). One check for the sim
- * (grow() levels up lots that are ready) and the info panel (the bar and the list), so the two can't disagree.
- * → { lot, tier, top: bool, nextName, progress 0..1, ready, needs: [{ key, ok, text, part 0..1 }], spot }
+ * The next step for a zoned building, and what it still needs (owner reports #84 and 2026-11-17). One check for the sim
+ * (grow() rebuilds lots that are ready) and the info panel (the bar and the list), so the two can't disagree.
+ *   combine: the building is smaller than its plot → it becomes one building the plot's size (same level as the best
+ *            piece in it), taking in the free land and the other small buildings of its zone in that plot.
+ *   level:   it fills its plot → it is rebuilt one level up, same footprint.
+ * → { lot, tier, top, kind: 'combine'|'level', nextTier, nextName, title, progress 0..1, ready,
+ *     needs: [{ key, ok, text, short, part 0..1 }], spot: { x, z, w, d, absorb: [lots] } }
  */
 export function levelUp(r, l, { reach = null, dm = null } = {}) {
-  const table = cat().zones[l.zone] || [], next = table.find(t => t.tier === l.tier + 1);
-  if (l.kind !== 'zoned' || !next) return { lot: l, tier: l.tier, top: true, progress: 1, ready: false, needs: [] };
+  if (l.kind !== 'zoned') return { lot: l, tier: l.tier, top: true, progress: 1, ready: false, needs: [] };
   reach ??= roadReach(r); dm ??= demand(r);
-  const needs = [], value = lotValue(r, l.x, l.z, l.w, l.d), age = r.day - l.built, ms = milestones();
+  const P = plots(r, reach), N = r.size, plot = plotOf(P, r, l);
+  let kind = 'level', next, spot, absorb = [], youngest = l;
+  if (plot && plot.w * plot.d > l.w * l.d) {
+    // combine: every other tile of the plot is free land or a small building of this zone
+    kind = 'combine';
+    const seen = new Set([l]); let blocked = false, tier = l.tier;
+    for (let k = 0; k < plot.d; k++) for (let j = 0; j < plot.w; j++) {
+      const li = r.tiles.lot[(plot.z + k) * N + plot.x + j]; if (li < 0) continue;
+      const o = r.lots[li]; if (seen.has(o)) continue; seen.add(o);
+      if (o.kind !== 'zoned' || o.zone !== l.zone || o.x < plot.x || o.z < plot.z || o.x + o.w > plot.x + plot.w || o.z + o.d > plot.z + plot.d) { blocked = true; continue; }
+      absorb.push(o); tier = Math.max(tier, o.tier); if (o.built > youngest.built) youngest = o;
+    }
+    next = designFor(l.zone, tier, plot.w, plot.d);
+    for (let t = tier - 1; !next && t >= 1; t--) next = designFor(l.zone, t, plot.w, plot.d);
+    spot = { x: plot.x, z: plot.z, w: plot.w, d: plot.d, absorb, blocked, flat: isFlat(r.ter, plot.x, plot.z, plot.w, plot.d) };
+  } else {
+    next = designFor(l.zone, l.tier + 1, l.w, l.d);
+    spot = { x: l.x, z: l.z, w: l.w, d: l.d, absorb: [], blocked: false, flat: true };
+  }
+  if (!next) return { lot: l, tier: l.tier, top: true, progress: 1, ready: false, needs: [] };
+  const needs = [], value = lotValue(r, spot.x, spot.z, spot.w, spot.d), age = r.day - youngest.built, ms = milestones();
   const need = (key, part, text, short = text) => needs.push({ key, ok: part >= 1, part: clamp(part, 0, 1), text, short });
-  need('age', age / LEVEL_AGE, age >= LEVEL_AGE ? 'Settled in' : `Settling in: ${Math.ceil(LEVEL_AGE - age)} more days`, age >= LEVEL_AGE ? 'Settled in' : `Settling in: ${Math.ceil(LEVEL_AGE - age)} days`);
+  const settle = absorb.length ? 'Settling in (it and its neighbours)' : 'Settling in';
+  need('age', age / LEVEL_AGE, age >= LEVEL_AGE ? 'Settled in' : `${settle}: ${Math.ceil(LEVEL_AGE - age)} more days`, age >= LEVEL_AGE ? 'Settled in' : `Settling in: ${Math.ceil(LEVEL_AGE - age)} days`);
   need('value', next.minValue ? value / next.minValue : 1, `Land value ${Math.round(value * 100)}% of ${Math.round(next.minValue * 100)}%${value >= next.minValue ? '' : ': parks, schools, transit and water nearby raise it'}`, `Land value ${Math.round(value * 100)}% of ${Math.round(next.minValue * 100)}%`);
   need('demand', dm[l.zone] / 0.2, dm[l.zone] > 0.2 ? `The city wants more ${ZONE_WORD[l.zone]}` : `The city wants more ${ZONE_WORD[l.zone]} first (demand is ${dm[l.zone] > 0 ? 'low' : 'full'})`, dm[l.zone] > 0.2 ? 'Demand' : 'More demand');
   if ((next.unlock ?? 0) > r.milestone) need('unlock', 0, `Unlocks at milestone ${next.unlock} (${ms[next.unlock - 1]} people)`);
   need('power', (l.powered ?? 0) > 0 ? 1 : 0, (l.powered ?? 0) > 0 ? 'Has power' : 'Needs power: build a power line or plant nearby', (l.powered ?? 0) > 0 ? 'Power' : 'Needs power');
   if (next.water) need('water', l.wet ? 1 : 0, l.wet ? 'Has water' : 'Needs water: lay a pipe from a Water Pump nearby', l.wet ? 'Water' : 'Needs water');
   if (next.education) need('education', (r.people.edu || 0) / next.education, `Schooling ${Math.round((r.people.edu || 0) * 100)}% of ${Math.round(next.education * 100)}% needed: build schools near homes`);
-  const spot = upgradeSpot(r, l, next, reach);
-  const [a, b] = next.size;
-  if (a * b > l.w * l.d) need('room', spot ? 1 : 0, spot ? `Room to grow to ${a} × ${b}` : `Needs room to grow to ${a} × ${b}: zone more ${ZONE_WORD[l.zone]} land beside it`, spot ? 'Room' : `Needs room (${a} × ${b})`);
-  else if (!spot) need('room', 0, 'Its front must face a road');
+  if (kind === 'combine') {
+    const ok = !spot.blocked && spot.flat, [a, b] = [spot.w, spot.d];
+    need('room', ok ? 1 : 0, ok ? `Room to combine into ${a} × ${b}` : spot.flat ? `Something else stands on its ${a} × ${b} plot` : `Its ${a} × ${b} plot must be flat: level the ground`, ok ? 'Room' : `Needs room (${a} × ${b})`);
+  }
   const progress = needs.reduce((s, n) => s + n.part, 0) / needs.length;
-  return { lot: l, tier: l.tier, top: false, nextTier: next.tier, progress, ready: needs.every(n => n.ok), needs, spot };
+  const title = kind === 'combine' ? `Combine into ${spot.w} × ${spot.d}: ${next.name}` : `Level ${l.tier} → ${next.tier}: ${next.name}`;
+  return { lot: l, tier: l.tier, top: false, kind, nextTier: next.tier, nextName: next.name, title, progress, ready: needs.every(n => n.ok), needs, spot, design: next };
 }
-/** Rebuild lot l as the next tier at u.spot, absorbing the small buildings inside it. */
+/** Rebuild lot l as u.design on u.spot, taking in the small buildings there. */
 function applyLevelUp(r, l, u, R) {
-  const next = cat().zones[l.zone].find(t => t.tier === l.tier + 1), { x, z, w, d, absorb } = u.spot;
+  const { x, z, w, d, absorb } = u.spot, P = plots(r);
   const value = lotValue(r, x, z, w, d);
-  Object.assign(l, makeLot(r, next, l.zone, x, z, value, R, w, d), { n: l.n });
   if (absorb.length) { const gone = new Set(absorb); r.lots = r.lots.filter(o => !gone.has(o)); }
+  const face = w === l.w && d === l.d && u.design.size[0] !== u.design.size[1] ? l.face : faceOf(r, P, x, z, w, d, u.design.size);
+  Object.assign(l, makeLot(r, u.design, l.zone, x, z, value, R, w, d, face), { n: l.n });
   reindexLots(r);
 }
 
@@ -241,13 +301,20 @@ export function appeal(r) {
     rep: r.reputation || 0,
     scared: r.threat?.lastBreach != null && r.day - r.threat.lastBreach < (T.breachScareDays ?? 8),
     links: linkBoost(r).appeal,
+    parks: parksNearHomes(r) * (T.parkAppeal ?? 0.3),   // parks and plazas near homes draw newcomers
   };
-  let v = 0.6 + 0.55 * parts.land + 0.25 * parts.jobs + 0.25 * parts.rep + parts.links - parts.tax;
+  let v = (0.6 + 0.55 * parts.land + 0.25 * parts.jobs + 0.25 * parts.rep + parts.links + parts.parks - parts.tax) * effect(r, 'appeal');
   v *= 0.35 + 0.65 * parts.power;
   v *= 0.75 + 0.25 * parts.water;
   if (parts.scared) v *= T.breachScare ?? 0.7;
   if (r.shutdown) v *= 0.3;
   return { value: clamp(v, 0.1, 2), parts };
+}
+/** Share 0..1 of residents whose home sits in a park's or plaza's reach (the leisure layer, averaged by people). */
+export function parksNearHomes(r) {
+  let s = 0, n = 0; const N = r.size;
+  for (const l of r.lots) if (l.people && l.zone === 'R') { s += Math.min(1, (r.tiles.leisure?.[(l.z + (l.d >> 1)) * N + l.x + (l.w >> 1)] || 0) * 1.5) * l.people; n += l.people; }
+  return n ? s / n : 0;
 }
 /** People a game day who'd move in right now if there were room: (T.immigrateBase + T.immigrateSqrt × √people) × appeal. */
 export function immigrationRate(r) {
@@ -290,10 +357,11 @@ export function monthBudget(r) {
   let wallUp = 0; for (let i = 0; i < r.size * r.size; i++) { const v = r.tiles.wall[i]; if (v) wallUp += wallRate[v] ?? 1; }
   const upkeepOf = (id, fallback) => { const e = id ? item(id) : null; return e && e.upkeep != null ? e.upkeep : (fallback || 0); };
   const upkeep = {
-    buildings: r.lots.reduce((s, l) => s + (l.kind === 'placed' ? upkeepOf(l.id, l.upkeep) : (l.upkeep || 0)), 0), roads: roadUp, walls: wallUp,
+    buildings: r.lots.reduce((s, l) => s + (l.kind === 'placed' ? upkeepOf(l.id, l.upkeep) : (l.upkeep || 0)), 0) * effect(r, 'upkeep'), roads: roadUp, walls: wallUp,
     turrets: r.turrets.reduce((s, t) => s + upkeepOf(t.id, t.upkeep), 0),
     loans: r.loans.reduce((s, l) => s + l.amount * (T.loanInterest ?? 0.04) / 12 + l.amount / l.months, 0),
     transit: transitUpkeep(r),
+    policies: policyUpkeep(r),
   };
   const inTotal = income.R + income.C + income.I + income.grant, outTotal = Object.values(upkeep).reduce((a, b) => a + b, 0);
   return { income, upkeep, inTotal, outTotal, net: inTotal - outTotal };
@@ -317,12 +385,12 @@ export function industry(r, days) {
     const e = item(l.id); if (!e) continue;
     if (e.deposit && (l.powered ?? 0) > 0) {
       let left = 0, tiles = []; for (let k = 0; k < l.d; k++) for (let j = 0; j < l.w; j++) { const i = (l.z + k) * N + l.x + j; if (r.ter.amount[i] && ['', 'metal', 'stone', 'crystal'][r.ter.deposit[i]] === e.deposit) { left += r.ter.amount[i]; tiles.push(i); } }
-      const take = Math.min(left, (T.outpostRate ?? 9) * days * l.powered);
+      const take = Math.min(left, (T.outpostRate ?? 9) * effect(r, 'mine') * days * l.powered);
       for (const i of tiles) { const t = Math.min(r.ter.amount[i], take / tiles.length + 0.5); r.ter.amount[i] -= t; if (r.ter.amount[i] <= 0) r.ter.deposit[i] = 0; }
       r.stock[e.deposit] += take; made[e.deposit] += take; l.dry = left - take <= 0;
     }
     if (e.refine && (l.powered ?? 0) > 0) {
-      const want = (T.refineRate ?? 6) * days * l.powered, need = want * (T.refineIn ?? 2);
+      const want = (T.refineRate ?? 6) * effect(r, 'refine') * days * l.powered, need = want * (T.refineIn ?? 2);
       const can = Math.min(want, r.stock[e.refine.from] / (T.refineIn ?? 2));
       r.stock[e.refine.from] -= can * (T.refineIn ?? 2); r.stock[e.refine.to] += can; made[e.refine.to] += can; l.starved = can < want * 0.5;
     }
@@ -367,6 +435,7 @@ function dayTick(r, day) {
   if (day % 30 === 0) monthTick(r, R);
   else if (day % 3 === 0) { solveLandValue(r); transitLandValue(r); grow(r, R); }
   checkMilestone(r);
+  researchTick(r);   // R&D finishes on a day tick (also while away)
 }
 function monthTick(r, R) {
   solveTraffic(r, cat().roads); cutTraffic(r);
@@ -380,7 +449,7 @@ function monthTick(r, R) {
   // loans pay down
   for (const l of r.loans) l.left--; r.loans = r.loans.filter(l => l.left > 0);
   // reputation drifts toward how well the city is doing
-  const target = clamp((r.rates.money > 0 ? 0.2 : -0.2) + Math.min(0.4, r.lots.filter(l => item(l.id)?.landmark).length * 0.15) + (r.shutdown ? -0.4 : 0) + Math.min(0.3, r.people.total / 20000), -1, 1);
+  const target = clamp((r.rates.money > 0 ? 0.2 : -0.2) + Math.min(0.4, r.lots.filter(l => item(l.id)?.landmark).length * 0.15) + Math.min(0.2, r.lots.reduce((t, l) => t + (item(l.id)?.rep || 0), 0)) + (r.shutdown ? -0.4 : 0) + Math.min(0.3, r.people.total / 20000), -1, 1);
   r.reputation += (target - r.reputation) * 0.2;
 }
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));

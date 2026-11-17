@@ -1,0 +1,68 @@
+/* Arcline — the bottom build menu (owner 2026-11-17: "Refine the bottom menu on mobile") and the map-view picker.
+   Desktop: one row of icon + name tabs; Undo first. Phone: square icon-over-name tabs in a sideways-scrolling row with
+   arrows and fades that show only while there is more that way; the map views fold into one "View" button.
+   Uses arcline.css tokens. Bar height: --bar-h (the trays, tool chip and views sit just above it). */
+:root { --bar-h: 62px; }
+.ac-tools { overflow: visible; align-items: stretch; padding-top: 7px; padding-bottom: calc(7px + var(--safe-b)); }
+.ac-tabs { flex: 1 1 auto; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; scroll-behavior: smooth; scroll-padding-inline: 44px; }
+.ac-tabs::-webkit-scrollbar { display: none; }
+/* (screens.css has a settings-sheet .ac-group too: everything here is scoped to the tool bar) */
+.ac-tools .ac-group { flex: none; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px; padding: 5px 12px; border-radius: 10px; background: var(--panel2); scroll-snap-align: start; position: relative; color: var(--text); }
+.ac-group .gi { width: 18px; height: 18px; flex: none; color: var(--dim); }
+.ac-group .gl { font-size: 14px; font-weight: 600; white-space: nowrap; }
+.ac-group .gs { display: none; }
+.ac-group.on { border-color: var(--cyan); color: var(--cyan); background: linear-gradient(180deg, rgba(63, 240, 255, 0.16), rgba(63, 240, 255, 0.05)); box-shadow: inset 0 -3px 0 var(--cyan), 0 0 14px rgba(63, 240, 255, 0.18); }
+.ac-group.on .gi { color: var(--cyan); }
+.ac-group[data-group="parks"] .gi { color: #7ef0a0; }
+.ac-group[data-group="research"] .gi { color: #c8a8ff; }
+/* the R&D tab's research bar */
+.ac-rdbar { display: none; position: absolute; left: 8px; right: 8px; bottom: 4px; height: 3px; border-radius: 2px; background: rgba(200, 168, 255, 0.2); overflow: hidden; }
+.ac-rdbar b { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #a77bff, #e3d0ff); }
+.ac-group.busy .ac-rdbar { display: block; }
+/* scroll arrows + end fades: only while there is more that way. The arrows sit in the row beside the tabs (not on top
+   of them), so no tab name is ever hidden under one: Undo · ‹ · tabs · › */
+#h-undo { order: 0; } .ac-tabarrow.l { order: 1; } .ac-tabs { order: 2; } .ac-tabarrow.r { order: 3; }
+.ac-tabarrow { display: none; flex: none; width: 30px; min-height: 0; padding: 0; font-size: 24px; line-height: 1; border-radius: 10px;
+  color: var(--cyan); border-color: rgba(63, 240, 255, 0.45); background: rgba(63, 240, 255, 0.08); }
+.ac-tools.more-l .ac-tabarrow.l, .ac-tools.more-r .ac-tabarrow.r { display: block; }
+.ac-tools.more-r .ac-tabs { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); }
+.ac-tools.more-l .ac-tabs { -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px); mask-image: linear-gradient(90deg, transparent, #000 56px); }
+.ac-tools.more-l.more-r .ac-tabs { -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, transparent, #000 56px, #000 calc(100% - 56px), transparent); }
+/* locked by research: the tray card's price line reads "R&D" in violet */
+.ac-tcard.rd .pr { color: #c8a8ff; }
+
+/* map views: the desktop column gets a heading look; the View button is for phones only */
+.ac-viewbtn { display: none; }
+
+/* ---------- phone ---------- */
+@media (max-width: 640px) {
+  :root { --bar-h: 74px; }
+  .ac-tools { gap: 6px; padding: 6px calc(6px + var(--safe-r)) calc(6px + var(--safe-b)) calc(6px + var(--safe-l)); }
+  .ac-group { flex-direction: column; justify-content: center; gap: 3px; width: 66px; min-height: 60px; padding: 6px 2px 7px; border-radius: 12px; }
+  .ac-group .gi { width: 22px; height: 22px; }
+  .ac-group .gl { display: none; }
+  .ac-group .gs { display: block; font-size: 12px; font-weight: 600; line-height: 1.1; max-width: 62px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ac-group.on { box-shadow: inset 0 -3px 0 var(--cyan); }
+  /* Undo: name on one line, the seconds and refund wrap onto two short lines inside the button */
+  .ac-tools .ac-undo { width: 78px; min-height: 60px; padding: 3px 5px; align-items: center; text-align: center; overflow: hidden; }
+  .ac-tools .ac-undo span { display: none; }   /* "Undo Bulk repair" can't fit: the word alone, the step is in its tip */
+  .ac-tools .ac-undo::before { content: 'Undo'; font-weight: 700; font-size: 13px; }
+  .ac-tools .ac-undo small { white-space: normal; line-height: 1.15; max-width: 68px; }
+  /* everything that sits above the bar */
+  .ac-tray { bottom: calc(var(--bar-h) + 6px + var(--safe-b)); }
+  .ac-toolchip { bottom: calc(var(--bar-h) + 6px + var(--safe-b)); }
+  .ac-info { bottom: calc(var(--bar-h) + 52px + var(--safe-b)); }
+  /* one View button in the corner; tap it for the list (opens upward) */
+  .ac-overlays { left: auto; right: calc(8px + var(--safe-r)); bottom: calc(var(--bar-h) + 6px + var(--safe-b)); flex-direction: column-reverse; align-items: stretch; overflow: visible; gap: 4px; }
+  .ac-overlays > button[data-overlay] { display: none; min-height: 44px; font-size: 14px; }
+  .ac-overlays.open > button[data-overlay] { display: block; }
+  /* the getting-started card sits above the View button, and the open list goes over it */
+  .ac-guide { bottom: calc(var(--bar-h) + 58px + var(--safe-b)); }
+  .ac-toolchip:not([hidden]) ~ .ac-guide { bottom: calc(var(--bar-h) + 110px + var(--safe-b)); }
+  .ac-overlays.open { z-index: 7; background: var(--panel2); border: 1px solid var(--line); border-radius: 14px; padding: 6px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); }
+  .ac-overlays .ac-viewbtn { display: inline-flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: 44px; line-height: 1.1; padding: 4px 12px; background: var(--panel); }
+  .ac-viewbtn .lbl { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; }
+  .ac-viewbtn b { font-size: 14px; color: var(--cyan); }
+  /* the tool chip takes the views' corner while a tool is held: the views move above it */
+  .ac-toolchip:not([hidden]) ~ .ac-overlays { bottom: calc(var(--bar-h) + 58px + var(--safe-b)); }
+}

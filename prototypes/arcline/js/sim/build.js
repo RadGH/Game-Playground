@@ -1,7 +1,7 @@
 // Everything the player does to the map, as plain functions that check, price and apply. Each has a `quote` (what
 // it would cost and why it can't be done — shown on the ghost before you let go) and an `apply`. The quote IS the
 // result (lessons Part 3 "the preview is exactly the result").
-import { item, cat, unlocked, materials } from './catalog.js';
+import { item, cat, unlocked, materials, lockText } from './catalog.js';
 import { isFlat, levelCost, level, DEP_NAMES } from './terrain.js';
 import { ZONE } from './region.js';
 import { T } from './tuning.js';
@@ -90,7 +90,7 @@ export function buildLine(r, tiles, layer) {
 // ---------------- placed buildings ----------------
 export function quotePlace(r, id, x, z) {
   const e = item(id); if (!e) return { ok: false, why: 'Unknown building' };
-  if (!unlocked(r, e)) return { ok: false, why: `Unlocks at milestone ${e.unlock}` };
+  if (!unlocked(r, e)) return { ok: false, why: lockText(r, e).text };
   if (e.unique && r.lots.some(l => l.id === id)) return { ok: false, why: 'You already have one' };
   const bad = siteProblem(r, e, x, z); if (bad) return { ok: false, why: bad };
   const cost = priceOf(r, e), mats = materials(e), broke = afford(r, cost, mats);   // a merchant's landmark piece takes its share off

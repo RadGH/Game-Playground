@@ -11,15 +11,15 @@
 //                                          or plain JSON ('js1:…') where the browser has no CompressionStream
 //     arcline.snap.<worldId>.<regionId>    the city's picture for the world map: { w, h, top, url } (a small WebP,
 //                                          render/map.js snapshot()); kept out of arcline.worlds so the index stays small
-//   summary = { name, founded, population, money, milestone, day, lastPlayed, rates, size, snapAt, links, edgeRoads } — what the world
+//   summary = { name, founded, population, money, milestone, day, lastPlayed, rates, size, snapAt, links, edgeRoads, edgeTransit } — what the world
 //   map shows without opening the city. loadWorld() puts the picture on it as summary.snap.
 //
 // Every localStorage call is wrapped (private windows, full storage): a failed write returns { ok: false, reason }.
 // Versioning: meta.v = SAVE_VERSION; push a step onto MIGRATE.world[v] (v → v+1) when the shape changes, and
 // MIGRATE.region[v] for the region JSON (its own v from sim/region.js). loadWorld() runs every step in order.
 import { generateWorld } from './sim/world.js';
-import { saveRegion } from './sim/region.js';
-import { edgeRoadTiles } from './sim/transit.js';
+import { saveRegion, savedLayer } from './sim/region.js';
+import { edgeRoadTiles, edgeTransitTiles } from './sim/transit.js';
 
 export const SAVE_VERSION = 1;
 export const KEYS = { worlds: 'arcline.worlds', last: 'arcline.last', settings: 'arcline.settings' };
@@ -137,6 +137,15 @@ export async function loadWorld(id) {
   for (const r of world.regions) { r.city = meta.regions[r.id] || null; if (r.city) { const sn = loadSnap(id, r.id); if (sn) r.city.snap = sn; } }
   const regions = {};
   for (const rid of Object.keys(meta.regions)) regions[rid] = await loadRegionSave(id, rid);
+  // old summaries without border tiles: work them out from the city's own save, so their links keep working (and keep
+  // the result, so it's done once). The summary object is the world record's city, so the map sees it at once.
+  let filled = false;
+  for (const [rid, sum] of Object.entries(meta.regions)) {
+    if (!sum || (sum.edgeRoads && sum.edgeTransit) || !regions[rid]) continue;
+    const e = edgesFromSave(regions[rid]); if (!e) continue;
+    sum.edgeRoads ??= e.edgeRoads; sum.edgeTransit ??= e.edgeTransit; filled = true;
+  }
+  if (filled) { const idx = readIndex(), m = idx.worlds.find(w => w.id === id); if (m) { for (const [rid, sum] of Object.entries(meta.regions)) if (m.regions[rid]) Object.assign(m.regions[rid], { edgeRoads: sum.edgeRoads, edgeTransit: sum.edgeTransit }); writeIndex(idx); } }
   return { meta, world, regions };
 }
 /** One city's saved JSON (migrated), or undefined. */
@@ -156,7 +165,16 @@ export function summarize(r) {
     milestone: r.milestone || 0, day: Math.floor(r.day || 0), lastPlayed: Date.now(), size: r.size,
     rates: { ...(r.rates || {}) }, stock: { ...(r.stock || {}) }, links: Array.isArray(r.links) ? r.links.slice() : undefined,
     edgeRoads: r.tiles?.road ? edgeRoadTiles(r) : undefined,   // border roads, so neighbours can line up and link (#74)
+    edgeTransit: r.tiles?.transit ? edgeTransitTiles(r) : undefined,   // border transit with a station: links need both ends (2026-11-17)
   };
+}
+/** Border roads + transit worked out from a saved city's JSON (summaries saved before 2026-11-16 have none, so their
+ *  road links dropped until the city was opened and saved again). → { edgeRoads, edgeTransit } or null. */
+export function edgesFromSave(json) {
+  const size = json?.size, road = savedLayer(json, 'road'), transit = savedLayer(json, 'transit');
+  if (!size || !road || road.length !== size * size) return null;
+  const r = { size, lots: Array.isArray(json.lots) ? json.lots : [], tiles: { road, transit: transit && transit.length === size * size ? transit : new Uint8Array(size * size) } };
+  return { edgeRoads: edgeRoadTiles(r), edgeTransit: edgeTransitTiles(r) };
 }
 
 /** Save one region's city into world `id`. Async (gzip). opts.snap = its world-map picture (map.js snapshot()), stored

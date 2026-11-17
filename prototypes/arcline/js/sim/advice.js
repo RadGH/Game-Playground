@@ -5,13 +5,13 @@
 //   demandInfo(r)                       → R / C / I demand with the reasons behind each
 import { T } from './tuning.js';
 import { cat, item, unlocked } from './catalog.js';
-import { census, demand, targets, appeal, WORK_SHARE } from './city.js';
+import { census, demand, targets, appeal, designName, WORK_SHARE } from './city.js';
 import { linkBoost } from './transit.js';
 
 /** Use at or above this share of supply = "near the limit" (amber). Over 100% = red. */
 export const NEAR_LIMIT = 0.85;
 const ZONE_NAME = { R: 'Homes', C: 'Shops & offices', I: 'Industry' };
-const tierName = l => ({ R: ['Habitat Pods', 'Terrace Homes', 'Apartment Block', 'Residential Tower'], C: ['Street Market', 'Shop Row', 'Hotel', 'Office Tower'], I: ['Fab Workshop', 'Logistics Depot'] }[l.zone]?.[l.tier - 1]);
+const tierName = l => (l.kind === 'zoned' ? designName(l) : null);
 
 /** ok | near | over | none — how close use is to supply. */
 export function limitLevel(supply, use) {

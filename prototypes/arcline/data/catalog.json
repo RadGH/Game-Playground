@@ -4,11 +4,12 @@
     "R": [
       {
         "tier": 1,
-        "recipe": "res-pods",
         "size": [
           1,
           1
         ],
+        "recipe": "res-pods",
+        "name": "Habitat Pods",
         "floors": [
           1,
           3
@@ -19,12 +20,64 @@
         "unlock": 0
       },
       {
-        "tier": 2,
-        "recipe": "res-terrace",
+        "tier": 1,
         "size": [
           2,
           1
         ],
+        "recipe": "res-duplex",
+        "name": "Garden Duplex",
+        "floors": [
+          1,
+          3
+        ],
+        "perFloor": 13,
+        "minValue": 0,
+        "water": false,
+        "unlock": 0
+      },
+      {
+        "tier": 1,
+        "size": [
+          2,
+          2
+        ],
+        "recipe": "res-court",
+        "name": "Pod Court",
+        "floors": [
+          1,
+          3
+        ],
+        "perFloor": 27,
+        "minValue": 0,
+        "water": false,
+        "unlock": 0
+      },
+      {
+        "tier": 2,
+        "size": [
+          1,
+          1
+        ],
+        "recipe": "res-townhouse",
+        "name": "Townhouse",
+        "floors": [
+          2,
+          5
+        ],
+        "perFloor": 6,
+        "minValue": 0.25,
+        "water": true,
+        "unlock": 0
+      },
+      {
+        "tier": 2,
+        "size": [
+          2,
+          1
+        ],
+        "recipe": "res-terrace",
+        "name": "Terrace Homes",
         "floors": [
           2,
           5
@@ -35,12 +88,64 @@
         "unlock": 0
       },
       {
-        "tier": 3,
-        "recipe": "res-block",
+        "tier": 2,
         "size": [
           2,
           2
         ],
+        "recipe": "res-walkup",
+        "name": "Garden Walk-ups",
+        "floors": [
+          2,
+          5
+        ],
+        "perFloor": 26,
+        "minValue": 0.25,
+        "water": true,
+        "unlock": 0
+      },
+      {
+        "tier": 3,
+        "size": [
+          1,
+          1
+        ],
+        "recipe": "res-slim",
+        "name": "Slim Apartments",
+        "floors": [
+          4,
+          12
+        ],
+        "perFloor": 4,
+        "minValue": 0.45,
+        "water": true,
+        "unlock": 2
+      },
+      {
+        "tier": 3,
+        "size": [
+          2,
+          1
+        ],
+        "recipe": "res-midrise",
+        "name": "Midrise Bar",
+        "floors": [
+          4,
+          14
+        ],
+        "perFloor": 8,
+        "minValue": 0.45,
+        "water": true,
+        "unlock": 2
+      },
+      {
+        "tier": 3,
+        "size": [
+          2,
+          2
+        ],
+        "recipe": "res-block",
+        "name": "Apartment Block",
         "floors": [
           4,
           16
@@ -52,11 +157,46 @@
       },
       {
         "tier": 4,
-        "recipe": "res-tower",
+        "size": [
+          1,
+          1
+        ],
+        "recipe": "res-needle",
+        "name": "Needle Tower",
+        "floors": [
+          10,
+          32
+        ],
+        "perFloor": 3,
+        "minValue": 0.68,
+        "water": true,
+        "unlock": 4
+      },
+      {
+        "tier": 4,
+        "size": [
+          2,
+          1
+        ],
+        "recipe": "res-twin",
+        "name": "Twin Residences",
+        "floors": [
+          10,
+          40
+        ],
+        "perFloor": 6,
+        "minValue": 0.68,
+        "water": true,
+        "unlock": 4
+      },
+      {
+        "tier": 4,
         "size": [
           2,
           2
         ],
+        "recipe": "res-tower",
+        "name": "Residential Tower",
         "floors": [
           12,
           60
@@ -70,11 +210,12 @@
     "C": [
       {
         "tier": 1,
-        "recipe": "com-market",
         "size": [
           1,
           1
         ],
+        "recipe": "com-market",
+        "name": "Street Market",
         "floors": [
           1,
           1
@@ -86,12 +227,64 @@
         "param": "stalls"
       },
       {
-        "tier": 2,
-        "recipe": "com-shops",
+        "tier": 1,
         "size": [
           2,
           1
         ],
+        "recipe": "com-kiosks",
+        "name": "Kiosk Row",
+        "floors": [
+          1,
+          2
+        ],
+        "perFloor": 7,
+        "minValue": 0,
+        "water": false,
+        "unlock": 0
+      },
+      {
+        "tier": 1,
+        "size": [
+          2,
+          2
+        ],
+        "recipe": "com-mart",
+        "name": "Corner Mart",
+        "floors": [
+          1,
+          2
+        ],
+        "perFloor": 14,
+        "minValue": 0,
+        "water": false,
+        "unlock": 0
+      },
+      {
+        "tier": 2,
+        "size": [
+          1,
+          1
+        ],
+        "recipe": "com-corner",
+        "name": "Corner Shop",
+        "floors": [
+          1,
+          4
+        ],
+        "perFloor": 4,
+        "minValue": 0.2,
+        "water": true,
+        "unlock": 0
+      },
+      {
+        "tier": 2,
+        "size": [
+          2,
+          1
+        ],
+        "recipe": "com-shops",
+        "name": "Shop Row",
         "floors": [
           1,
           4
@@ -102,12 +295,64 @@
         "unlock": 0
       },
       {
-        "tier": 3,
-        "recipe": "com-hotel",
+        "tier": 2,
         "size": [
           2,
           2
         ],
+        "recipe": "com-gallery",
+        "name": "Gallery Mall",
+        "floors": [
+          1,
+          4
+        ],
+        "perFloor": 15,
+        "minValue": 0.2,
+        "water": true,
+        "unlock": 0
+      },
+      {
+        "tier": 3,
+        "size": [
+          1,
+          1
+        ],
+        "recipe": "com-studio",
+        "name": "Studio Offices",
+        "floors": [
+          3,
+          10
+        ],
+        "perFloor": 3,
+        "minValue": 0.4,
+        "water": true,
+        "unlock": 1
+      },
+      {
+        "tier": 3,
+        "size": [
+          2,
+          1
+        ],
+        "recipe": "com-capsule",
+        "name": "Capsule Hotel",
+        "floors": [
+          3,
+          12
+        ],
+        "perFloor": 5,
+        "minValue": 0.4,
+        "water": true,
+        "unlock": 1
+      },
+      {
+        "tier": 3,
+        "size": [
+          2,
+          2
+        ],
+        "recipe": "com-hotel",
+        "name": "Hotel",
         "floors": [
           2,
           30
@@ -119,11 +364,46 @@
       },
       {
         "tier": 4,
-        "recipe": "com-office",
+        "size": [
+          1,
+          1
+        ],
+        "recipe": "com-spire",
+        "name": "Data Spire",
+        "floors": [
+          8,
+          30
+        ],
+        "perFloor": 3,
+        "minValue": 0.6,
+        "water": true,
+        "unlock": 3
+      },
+      {
+        "tier": 4,
+        "size": [
+          2,
+          1
+        ],
+        "recipe": "com-exchange",
+        "name": "Trade Exchange",
+        "floors": [
+          8,
+          40
+        ],
+        "perFloor": 5,
+        "minValue": 0.6,
+        "water": true,
+        "unlock": 3
+      },
+      {
+        "tier": 4,
         "size": [
           2,
           2
         ],
+        "recipe": "com-office",
+        "name": "Office Tower",
         "floors": [
           6,
           70
@@ -137,16 +417,53 @@
     "I": [
       {
         "tier": 1,
-        "recipe": "ind-workshop",
         "size": [
-          2,
-          2
+          1,
+          1
         ],
+        "recipe": "ind-shed",
+        "name": "Fab Shed",
         "floors": [
           1,
           2
         ],
-        "perFloor": 14,
+        "perFloor": 4,
+        "minValue": 0,
+        "water": false,
+        "unlock": 0,
+        "education": 0
+      },
+      {
+        "tier": 1,
+        "size": [
+          2,
+          1
+        ],
+        "recipe": "ind-yard",
+        "name": "Parts Yard",
+        "floors": [
+          1,
+          2
+        ],
+        "perFloor": 7,
+        "minValue": 0,
+        "water": false,
+        "unlock": 0,
+        "education": 0
+      },
+      {
+        "tier": 1,
+        "size": [
+          2,
+          2
+        ],
+        "recipe": "ind-workshop",
+        "name": "Fab Workshop",
+        "floors": [
+          1,
+          2
+        ],
+        "perFloor": 15,
         "minValue": 0,
         "water": false,
         "unlock": 0,
@@ -154,11 +471,66 @@
       },
       {
         "tier": 2,
-        "recipe": "ind-depot",
+        "size": [
+          1,
+          1
+        ],
+        "recipe": "ind-printworks",
+        "name": "Print Works",
+        "floors": [
+          1,
+          3
+        ],
+        "perFloor": 4,
+        "minValue": 0,
+        "water": true,
+        "unlock": 1,
+        "education": 0.2
+      },
+      {
+        "tier": 2,
+        "size": [
+          2,
+          1
+        ],
+        "recipe": "ind-chemworks",
+        "name": "Chem Works",
+        "floors": [
+          1,
+          3
+        ],
+        "perFloor": 8,
+        "minValue": 0,
+        "water": true,
+        "unlock": 1,
+        "education": 0.2
+      },
+      {
+        "tier": 2,
+        "size": [
+          2,
+          2
+        ],
+        "recipe": "ind-freight",
+        "name": "Freight Depot",
+        "floors": [
+          1,
+          3
+        ],
+        "perFloor": 17,
+        "minValue": 0,
+        "water": true,
+        "unlock": 1,
+        "education": 0.2
+      },
+      {
+        "tier": 2,
         "size": [
           3,
           2
         ],
+        "recipe": "ind-depot",
+        "name": "Logistics Depot",
         "floors": [
           1,
           3
@@ -167,7 +539,62 @@
         "minValue": 0,
         "water": true,
         "unlock": 1,
-        "education": 0.2
+        "education": 0.2,
+        "legacy": true
+      },
+      {
+        "tier": 3,
+        "size": [
+          1,
+          1
+        ],
+        "recipe": "ind-cleanlab",
+        "name": "Clean Lab",
+        "floors": [
+          2,
+          4
+        ],
+        "perFloor": 5,
+        "minValue": 0.2,
+        "water": true,
+        "unlock": 3,
+        "education": 0.4
+      },
+      {
+        "tier": 3,
+        "size": [
+          2,
+          1
+        ],
+        "recipe": "ind-assembly",
+        "name": "Drone Assembly",
+        "floors": [
+          1,
+          4
+        ],
+        "perFloor": 10,
+        "minValue": 0.2,
+        "water": true,
+        "unlock": 3,
+        "education": 0.4
+      },
+      {
+        "tier": 3,
+        "size": [
+          2,
+          2
+        ],
+        "recipe": "ind-robotics",
+        "name": "Robot Plant",
+        "floors": [
+          1,
+          4
+        ],
+        "perFloor": 22,
+        "minValue": 0.2,
+        "water": true,
+        "unlock": 3,
+        "education": 0.4
       }
     ]
   },
@@ -404,6 +831,260 @@
         "leisure": 14
       },
       "blurb": "Big nights out: a large lift to land value across the district."
+    },
+    {
+      "id": "pk-pocket",
+      "name": "Pocket Park",
+      "cat": "park",
+      "recipe": "pk-pocket",
+      "size": [
+        1,
+        1
+      ],
+      "cost": 400,
+      "upkeep": 6,
+      "unlock": 0,
+      "cover": {
+        "leisure": 4
+      },
+      "boost": 0.5,
+      "blurb": "A scrap of lawn with glowing trees and benches: a small lift to the homes right round it."
+    },
+    {
+      "id": "pk-playground",
+      "name": "Playground",
+      "cat": "park",
+      "recipe": "pk-playground",
+      "size": [
+        1,
+        1
+      ],
+      "cost": 700,
+      "upkeep": 9,
+      "unlock": 0,
+      "cover": {
+        "leisure": 4
+      },
+      "boost": 0.6,
+      "blurb": "Swings, a slide and a climbing dome. Families like living near one."
+    },
+    {
+      "id": "pk-fountain",
+      "name": "Fountain Square",
+      "cat": "park",
+      "recipe": "pk-fountain",
+      "size": [
+        1,
+        1
+      ],
+      "cost": 900,
+      "upkeep": 10,
+      "power": -1,
+      "water": -1,
+      "unlock": 0,
+      "cover": {
+        "leisure": 5
+      },
+      "boost": 0.65,
+      "blurb": "A paved square round a fountain whose jets glow at night."
+    },
+    {
+      "id": "pk-court",
+      "name": "Sports Court",
+      "cat": "park",
+      "recipe": "pk-court",
+      "size": [
+        2,
+        1
+      ],
+      "cost": 1400,
+      "upkeep": 16,
+      "power": -1,
+      "unlock": 0,
+      "cover": {
+        "leisure": 6
+      },
+      "boost": 0.6,
+      "blurb": "A floodlit court for hoops or net games."
+    },
+    {
+      "id": "pk-promenade",
+      "name": "Promenade",
+      "cat": "park",
+      "recipe": "pk-promenade",
+      "size": [
+        3,
+        1
+      ],
+      "cost": 2600,
+      "upkeep": 24,
+      "unlock": 1,
+      "cover": {
+        "leisure": 7
+      },
+      "boost": 0.7,
+      "blurb": "A long boardwalk with planters, benches and a kiosk: lay it along a street or the water."
+    },
+    {
+      "id": "pk-skate",
+      "name": "Skate Park",
+      "cat": "park",
+      "recipe": "pk-skate",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 3000,
+      "upkeep": 30,
+      "power": -2,
+      "unlock": 1,
+      "cover": {
+        "leisure": 7
+      },
+      "boost": 0.75,
+      "blurb": "Bowls, ramps and rails under floodlights."
+    },
+    {
+      "id": "pk-memorial",
+      "name": "Founders' Memorial",
+      "cat": "park",
+      "recipe": "pk-memorial",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 5000,
+      "upkeep": 20,
+      "unlock": 1,
+      "cover": {
+        "leisure": 8
+      },
+      "boost": 0.7,
+      "unique": true,
+      "rep": 0.1,
+      "blurb": "A quiet obelisk over reflecting pools. The colony's reputation rises while it stands."
+    },
+    {
+      "id": "pk-garden",
+      "name": "Hydro Garden",
+      "cat": "park",
+      "recipe": "pk-garden",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 2600,
+      "upkeep": 25,
+      "power": -2,
+      "water": -3,
+      "jobs": 4,
+      "unlock": 0,
+      "cover": {
+        "leisure": 7
+      },
+      "boost": 0.8,
+      "blurb": "Hydroponic beds under grow-lights and a greenhouse dome; a few jobs tending them."
+    },
+    {
+      "id": "pk-neon",
+      "name": "Neon Night Plaza",
+      "cat": "park",
+      "recipe": "pk-neon",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 6500,
+      "upkeep": 60,
+      "power": -4,
+      "jobs": 6,
+      "unlock": 1,
+      "cover": {
+        "leisure": 8
+      },
+      "boost": 0.95,
+      "blurb": "A plaza that comes alive at night: lit floors, neon arches, food stalls."
+    },
+    {
+      "id": "pk-terrace",
+      "name": "Sky Terrace Gardens",
+      "cat": "park",
+      "recipe": "pk-terrace",
+      "size": [
+        2,
+        2
+      ],
+      "cost": 5500,
+      "upkeep": 45,
+      "water": -3,
+      "unlock": 2,
+      "cover": {
+        "leisure": 9
+      },
+      "boost": 0.85,
+      "blurb": "Garden decks stacked on pillars, like a rooftop garden: a lot of green on a small lot."
+    },
+    {
+      "id": "pk-central",
+      "name": "Central Park",
+      "cat": "park",
+      "recipe": "pk-central",
+      "size": [
+        3,
+        3
+      ],
+      "cost": 9000,
+      "upkeep": 80,
+      "water": -4,
+      "unlock": 2,
+      "cover": {
+        "leisure": 12
+      },
+      "boost": 1.0,
+      "blurb": "A big lawn with a pond, a pavilion and dozens of trees: a strong lift across a whole district."
+    },
+    {
+      "id": "pk-amphi",
+      "name": "Amphitheatre",
+      "cat": "park",
+      "recipe": "pk-amphi",
+      "size": [
+        3,
+        3
+      ],
+      "cost": 14000,
+      "upkeep": 140,
+      "power": -6,
+      "jobs": 20,
+      "unlock": 3,
+      "cover": {
+        "leisure": 13
+      },
+      "boost": 1.0,
+      "blurb": "Concerts and shows on a covered stage."
+    },
+    {
+      "id": "pk-biodome",
+      "name": "Grand Biodome",
+      "cat": "park",
+      "recipe": "pk-biodome",
+      "size": [
+        4,
+        4
+      ],
+      "cost": 30000,
+      "upkeep": 300,
+      "power": -12,
+      "water": -8,
+      "jobs": 40,
+      "unlock": 3,
+      "cover": {
+        "leisure": 18
+      },
+      "boost": 1.15,
+      "steel": 60,
+      "cells": 10,
+      "blurb": "A jungle under a geodesic dome: the biggest lift of all."
     },
     {
       "id": "ind-refinery-steel",

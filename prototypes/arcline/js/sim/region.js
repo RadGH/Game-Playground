@@ -50,6 +50,8 @@ const b64 = arr => { const u8 = new Uint8Array(arr.buffer, arr.byteOffset, arr.b
 const unb64 = (str, Type) => { const s = typeof atob === 'function' ? atob(str) : Buffer.from(str, 'base64').toString('binary'); const u8 = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u8[i] = s.charCodeAt(i); return new Type(u8.buffer); };
 const TER_TYPES = { height: Uint8Array, water: Uint8Array, deposit: Uint8Array, amount: Uint16Array, flora: Uint8Array, biome: Uint8Array };
 
+/** One tile layer straight from a saved region's JSON (no full load): e.g. savedLayer(json, 'road'). null if missing. */
+export function savedLayer(s, k) { const Type = TYPES[k] || TER_TYPES[k]; const src = TYPES[k] ? s?.tiles?.[k] : s?.ter?.[k]; if (!Type || typeof src !== 'string') return null; try { return unb64(src, Type); } catch { return null; } }
 export function saveRegion(r) {
   const out = { ...r, ter: { size: r.ter.size, nests: r.ter.nests }, tiles: {} };
   for (const k of Object.keys(TER_TYPES)) out.ter[k] = b64(r.ter[k]);

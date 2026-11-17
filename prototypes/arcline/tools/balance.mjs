@@ -2,7 +2,7 @@
 // balance, when each milestone came (real minutes at 1×), and the fighting (creatures, kills, wall breaches, wrecks).
 // Use it after moving any number in data/tuning.json or data/catalog.json.
 //
-//   node prototypes/arcline/tools/balance.mjs [--years 3] [--seed 12] [--nofight] [--quiet] [--json]
+//   node prototypes/arcline/tools/balance.mjs [--years 3] [--seed 12] [--nofight] [--quiet] [--json] [--set key=v,key=v]
 //
 // The player it imitates: a street grid around the Colony Core; zones a new block for whichever of homes / shops /
 // industry the demand meter wants most; adds a Fusion Plant or a Water Pump when the grid runs short; a park now and
@@ -18,7 +18,6 @@ import { T, milestones } from '../js/sim/tuning.js';
 import { item } from '../js/sim/catalog.js';
 import { lineTiles, rectTiles, buildRoad, paintZone, place, buildLine, buildWall, buildTurret, bulldoze, repairWalls, ZONE } from '../js/sim/build.js';
 import * as city from '../js/sim/city.js';
-import { roadReach, touchesRoad } from '../js/sim/networks.js';
 import * as ships from '../js/sim/ships.js';
 import * as nests from '../js/sim/nests.js';
 import { Horde } from '../../../citykit/js/world/horde.js';
@@ -31,8 +30,9 @@ const opt = (k, d) => { const i = args.indexOf('--' + k); return i < 0 ? d : (ar
  * Play one city. → { years: [{ year, people, money, net, minNet, lots, turrets, nests, spawned, kills, breaches, wrecks }],
  *   milestones: [{ n, people, day, minutes }], months: [{ day, people, net }], firstNet, negativeMonths }
  */
-export function play({ years = 3, seed = 12, fight = true, log = () => {} } = {}) {
+export function play({ years = 3, seed = 12, fight = true, log = () => {}, set = {} } = {}) {
   freshTuning();
+  Object.assign(T, set);   // --set key=value,key=value: try a tuning without editing data/tuning.json
   // a medium (128-tile) region; the core in the middle of a big flat dry square (no luck with the terrain)
   const world = generateWorld({ seed, cells: 8 });
   const wr = world.regions.find(o => o.span === 2 && o.land > 0.7) || world.regions.find(o => o.land > 0.7);
@@ -73,17 +73,8 @@ export function play({ years = 3, seed = 12, fight = true, log = () => {} } = {}
     if (use === 'R' || use === 'C' || use === 'I') paintZone(r, rectTiles(b.x, b.z, b.x + 4, b.z + 4), ZONE[use]);
     return b;
   }
-  // zoned tiles that can still grow: empty and beside a connected road (what city.grow() seeds from)
-  // (industry needs 2×2 room: count the 2×2 spots instead)
-  const emptyZoned = z => {
-    const reach = roadReach(r), w = z === ZONE.I ? 2 : 1, free = i => r.tiles.zone[i] === z && r.tiles.lot[i] < 0;
-    let n = 0;
-    for (let zz = 0; zz < N - w; zz++) for (let x = 0; x < N - w; x++) {
-      let ok = true; for (let k = 0; k < w && ok; k++) for (let j = 0; j < w && ok; j++) ok = free((zz + k) * N + x + j);
-      if (ok && touchesRoad(r, reach, x, zz, w, w)) n += w === 2 ? 4 : 1;
-    }
-    return n;
-  };
+  // zoned tiles that can still grow: empty, in a plot a road reaches (city.growableTiles — what city.grow() builds on)
+  const emptyZoned = z => city.growableTiles(r, { [ZONE.R]: 'R', [ZONE.C]: 'C', [ZONE.I]: 'I' }[z]);
   function placeIn(id, use) {
     const e = item(id); const b = blocks.find(b => b.use === 'svc' && b.free?.length) || openBlock('svc');
     if (!b) return false; b.free ??= [[b.x, b.z], [b.x + 3, b.z], [b.x, b.z + 3], [b.x + 3, b.z + 3]];
@@ -144,11 +135,12 @@ export function play({ years = 3, seed = 12, fight = true, log = () => {} } = {}
 
   // ---- found: a main cross of streets through the core's block, first blocks, power, water, the first ring
   buildRoad(r, lineTiles(cx - 22, gz0, cx + 22, gz0)); buildRoad(r, lineTiles(gx0, cz - 22, gx0, cz + 22));
-  wallUp(20);
+  wallUp(+opt('ring', 14));   // the first wall ring's half-size (--ring; 20 before 2026-11-17 — a 164-tile ring at founding left no money for guns)
   openBlock('R'); openBlock('R'); openBlock('C'); openBlock('I');
   placeIn('svc-power'); pump(); placeIn('col-comms');
   let def = null;
   for (let k = 0; k < 6; k++) addTurret();
+  if (process.env.DBG) console.log('after founding:', Math.round(r.money), 'cr left,', r.turrets.length, 'turrets, ring tiles', ringTiles.length, 'wall upkeep/mo', Math.round(city.monthBudget(r).upkeep.walls), 'turret upkeep/mo', Math.round(city.monthBudget(r).upkeep.turrets));
 
   // ---- the run
   let g = fight ? nests.makeField(r) : null;
@@ -195,7 +187,9 @@ export function play({ years = 3, seed = 12, fight = true, log = () => {} } = {}
       const wantTurrets = Math.ceil(ringTiles.length / 10) + Math.floor(r.people.total / 80);
       const onRing = r.turrets.filter(t => Math.max(Math.abs(t.x - cx), Math.abs(t.z - cz)) >= ring - 4).length;
       if (onRing < wantTurrets) track('turrets', () => addTurret());
-      if (onRing >= wantTurrets * 0.9) for (const [k, z] of Object.entries({ R: ZONE.R, C: ZONE.C, I: ZONE.I }).sort((a, b) => dm[b[0]] - dm[a[0]]))
+      // a new block whenever the city wants one and there's money after the guns (2026-11-17: it used to wait for 90% of
+      // the wanted ring guns first — with walls eating the money that never came, and the bot's city stalled at ~200)
+      for (const [k, z] of Object.entries({ R: ZONE.R, C: ZONE.C, I: ZONE.I }).sort((a, b) => dm[b[0]] - dm[a[0]]))
         if (dm[k] > 0.1 && emptyZoned(z) < 6 && r.money > reserve() + 1500) track('blocks', () => openBlock(k));
       if (r.power && r.power.demand > r.power.supply * 0.85 && r.money > item('svc-power').cost + reserve()) track('power', () => placeIn('svc-power'));
       if (r.waterNet && r.waterNet.demand > r.waterNet.supply * 0.85 && r.money > item('svc-water').cost + reserve()) pump();
@@ -242,7 +236,8 @@ export function play({ years = 3, seed = 12, fight = true, log = () => {} } = {}
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const res = play({ years: +opt('years', 3), seed: +opt('seed', 12), fight: !opt('nofight', false), log: opt('quiet', false) ? () => {} : s => console.log(s) });
+  const set = Object.fromEntries(String(opt('set', '') || '').split(',').filter(Boolean).map(kv => { const [k, v] = kv.split('='); return [k, +v]; }));
+  const res = play({ years: +opt('years', 3), seed: +opt('seed', 12), fight: !opt('nofight', false), set, log: opt('quiet', false) ? () => {} : s => console.log(s) });
   if (opt('json', false)) { delete res.r; console.log(JSON.stringify(res, null, 1)); }
   else {
     console.log('\nyear | people | money | net/mo | worst net/mo | lots | turrets | nests | creatures | killed | wall tiles broken | buildings wrecked | turrets lost');

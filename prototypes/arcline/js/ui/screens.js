@@ -15,7 +15,9 @@
 import { el, btn, toast, sheet, topSheet, closeTopSheet } from './dom.js';
 import { fmt, pct, sign } from '../../../../shared/format.js';
 import { installTooltips } from '../../../../shared/tooltip.js';
-import { BIOMES, CELL, generateWorld } from '../sim/world.js';
+import { BIOMES, CELL, generateWorld, neighbours } from '../sim/world.js';
+import { linkKind, linkReport } from '../sim/transit.js';
+import { neighbourList } from './stats.js';
 import { milestones } from '../sim/tuning.js';
 import * as S from '../save.js';
 import { WorldView, worldFacts } from '../render/world-view.js';
@@ -424,7 +426,16 @@ export function showWorldMap(app, ws, { fresh = false, focus = null } = {}) {
           fact('Coast', r.coast ? 'Yes' : 'No'),
           fact('River', r.river ? 'Yes' : 'No', r.river ? 'Bridges over it make good choke points' : null),
           fact('Nests', fmt(r.nests), 'Wildlife nests in the region at the start')),
-        el('div', { class: 'ac-deps' }, el('h4', {}, 'In the ground'), ...DEP.map(([k, l]) => bar(k, l)))));
+        el('div', { class: 'ac-deps' }, el('h4', {}, 'In the ground'), ...DEP.map(([k, l]) => bar(k, l))),
+        neighbourSection(r)));
+  }
+  // the region's neighbours: how each city links and what it gives (the same list as Statistics › Neighbours). Links
+  // come from linkKind — the rule the map's lines are drawn by — so the card and the map always agree.
+  function neighbourSection(r) {
+    const links = []; for (const o of neighbours(world, r)) { const by = r.city?.founded ? linkKind(world, r, o) : null; if (by) links.push({ id: o.id, by }); }
+    const rep = linkReport(world, r, links);
+    if (!rep.rows.some(x => x.city) && !r.city?.founded) return null;
+    return el('div', { class: 'ac-nbs' }, el('h4', {}, r.city?.founded ? 'Neighbours and links' : 'Cities next door'), neighbourList(rep, { compact: true }));
   }
   function step(d) { const i = order.indexOf(sel); select(order[(i + d + order.length) % order.length], { centre: true }); }
   function moveSel(dx, dy) {
@@ -455,7 +466,7 @@ export function showWorldMap(app, ws, { fresh = false, focus = null } = {}) {
       m.append(el('div', { class: 'ac-key' },
         ...Object.values(BIOMES).map(b => row(sq(b.ground), b.name)),
         row(sq('#14507a'), 'Sea'), row(sq('#d9c99c'), 'Coast'), row(sq('#53c8f2'), 'River'),
-        row(sq('transparent', 'city'), 'Your city'), row(sq('transparent', 'link'), 'Road link between your cities'), row(sq('transparent', 'sel'), 'Picked region')),
+        row(sq('transparent', 'city'), 'Your city'), row(sq('transparent', 'link'), 'Road link between your cities'), row(sq('transparent', 'link transit'), 'Transit link (a road too: both lines)'), row(sq('transparent', 'sel'), 'Picked region')),
       btn('Close', close, 'primary'));
     });
   }

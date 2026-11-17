@@ -1,0 +1,84 @@
+/* Statistics sheet (js/ui/stats.js), its charts (js/ui/chart.js) and the Neighbours list (also on the world map card). */
+.ac-modal.ac-statsheet { width: min(780px, 100%); gap: 12px; }
+.ac-stats-tabs { position: sticky; top: calc(-16px - var(--safe-t)); z-index: 2; border-radius: 0; display: flex; gap: 4px; margin: 0 -20px; padding: 8px 20px; background: var(--panel2); border-bottom: 1px solid var(--line); }
+.ac-stats-tabs button { flex: 1 1 0; min-width: 0; padding: 6px 4px; font-size: 14px; white-space: nowrap; }
+.ac-stats-body { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ac-stats-hd { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+.ac-stats-range button { min-height: 36px; font-size: 13px; padding: 4px 10px; }
+.ac-stats-done { margin-top: 4px; }
+
+/* number tiles */
+.ac-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.ac-tile { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); min-width: 0; }
+.ac-tile small { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; }
+.ac-tile > b { font-size: 20px; font-variant-numeric: tabular-nums; color: var(--text); overflow-wrap: anywhere; }
+.ac-tile > span { font-size: 13px; color: var(--dim); }
+.ac-tile.good > b { color: var(--good); } .ac-tile.bad > b { color: var(--bad); } .ac-tile.warn > b { color: var(--amber); }
+.ac-tile.wide { grid-column: 1 / -1; }
+.ac-stats-dem .dr { display: grid; grid-template-columns: 70px 1fr 52px; align-items: center; gap: 10px; font-size: 14px; margin-top: 4px; }
+.ac-stats-dem .dr b { text-align: right; font-variant-numeric: tabular-nums; font-size: 14px; }
+.ac-stats-dem .bar { position: relative; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.ac-stats-dem .bar::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(255, 255, 255, 0.35); }
+.ac-stats-dem .bar i { position: absolute; top: 0; bottom: 0; border-radius: 5px; }
+.ac-stats-dem .r i { background: #56d678; } .ac-stats-dem .c i { background: #50a0ff; } .ac-stats-dem .i i { background: #ffbe46; }
+.ac-stats-kinds { display: flex; flex-wrap: wrap; gap: 6px; font-size: 13px; color: var(--dim); }
+.ac-stats-kinds span { padding: 4px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); }
+.ac-stats-kinds b { color: var(--text); }
+
+/* charts */
+.ac-chart { padding: 10px 12px 8px; border-radius: 12px; background: rgba(6, 10, 18, 0.55); border: 1px solid rgba(120, 170, 220, 0.16); min-width: 0; }
+.ac-chart-hd { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ac-chart-hd h4 { margin: 0; font-size: 15px; color: var(--text); font-weight: 600; }
+.ac-chart-day { font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.ac-chart-plot { position: relative; margin: 6px 0 4px; touch-action: pan-y; cursor: crosshair; min-height: 40px; }
+.ac-chart-plot svg { display: block; overflow: visible; }
+.ac-chart-plot .grid { stroke: rgba(160, 190, 230, 0.12); stroke-width: 1; }
+.ac-chart-plot .zero { stroke: rgba(220, 235, 255, 0.4); stroke-width: 1; }
+.ac-chart-plot .ax { fill: #a9b8cc; font: 12px var(--font); font-variant-numeric: tabular-nums; }
+.ac-chart-plot .cursor { stroke: rgba(63, 240, 255, 0.55); stroke-width: 1; stroke-dasharray: 3 3; }
+.ac-chart-plot .dot { stroke: var(--panel2); stroke-width: 1.5; }
+.ac-chart-empty { margin: 8px 0; font-size: 13px; color: var(--dim); }
+.ac-chart-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--dim); }
+.ac-chip-key { display: inline-flex; align-items: center; gap: 6px; }
+.ac-chip-key i { width: 12px; height: 4px; border-radius: 2px; display: inline-block; }
+.ac-chip-key b { color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* neighbours */
+.ac-nb { display: flex; flex-direction: column; gap: 8px; }
+.ac-nb-row, .ac-nb-total { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.035); border: 1px solid rgba(255, 255, 255, 0.07); }
+.ac-nb-row.linked { border-color: rgba(255, 176, 46, 0.35); }
+.ac-nb-total { background: rgba(63, 240, 255, 0.06); border-color: rgba(63, 240, 255, 0.3); }
+.ac-nb-hd { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ac-nb-hd b { font-size: 15px; overflow-wrap: anywhere; }
+.ac-nb small { font-size: 13px; }
+.ac-nb .dim { color: var(--dim); }
+.ac-nb .warn { color: var(--amber); }
+.ac-nb-by { flex: none; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.15); color: var(--dim); }
+.ac-nb-by.road { color: #ffd38a; border-color: rgba(255, 176, 46, 0.6); background: rgba(255, 176, 46, 0.1); }
+.ac-nb-by.transit, .ac-nb-by.both { color: #9ff8ff; border-color: rgba(63, 240, 255, 0.6); background: rgba(63, 240, 255, 0.1); }
+.ac-nb-gives { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 4px 10px; }
+.ac-nb-gives span { display: flex; flex-direction: column; }
+.ac-nb-gives small { color: var(--dim); font-size: 12px; }
+.ac-nb-gives b { font-size: 14px; color: var(--good); font-variant-numeric: tabular-nums; }
+.ac-nb-how { color: var(--dim); }
+.ac-nb.compact .ac-nb-row, .ac-nb.compact .ac-nb-total { padding: 8px 10px; }
+.ac-nb.compact .ac-nb-gives { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+@media (max-width: 420px) {
+  .ac-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ac-tile > b { font-size: 17px; }
+  .ac-stats-tabs button { font-size: 13px; }
+  .ac-nb-gives { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* world map card + key */
+.ac-sw.link.transit { background: #3ff0ff !important; box-shadow: 0 0 8px #3ff0ff; }
+.ac-nbs { display: flex; flex-direction: column; gap: 8px; }
+.ac-nbs h4 { margin: 0; font: 600 13px var(--ac-head); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ac-dim); }
+.ac-nb-empty { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 12px; border: 1px dashed rgba(255, 255, 255, 0.12); font-size: 13px; color: #c3d0e6; }
+/* the card's "Your city" badge carries class "city", which the city view's `.city { position: absolute; inset: 0 }`
+   also matched: it sat on top of the card's title (seen 2026-11-17 while adding the Neighbours list) */
+.ac-badge.city { position: static; inset: auto; }
+/* a banner ("Swarm incoming") waits under an open sheet instead of printing across it (walk 2026-11-17: it covered the
+   Statistics tiles); it shows again when the sheet closes, if still on */
+#panels:has(.modal-back) ~ #banner { visibility: hidden; }

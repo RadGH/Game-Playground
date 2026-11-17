@@ -60,6 +60,7 @@ export function generateWorld({ seed = 1, cells = 12, mix = { large: 0.42, mediu
   tries(SIZES.large, mix.large); tries(SIZES.medium, mix.medium);
   for (let cz = 0; cz < cells; cz++) for (let cx = 0; cx < cells; cx++) if (grid[cz * cells + cx] < 0) place(cx, cz, 1);
 
+  const taken = new Set();
   for (const r of regions) {
     const size = r.span * CELL, wx = r.cx * CELL, wz = r.cz * CELL;
     // look at the region's ground on a coarse 9×9 grid: biome by vote, how much is land, coast
@@ -72,7 +73,9 @@ export function generateWorld({ seed = 1, cells = 12, mix = { large: 0.42, mediu
     r.biome = Object.entries(votes).sort((a, b) => b[1] - a[1])[0]?.[0] || 'verdant';
     r.land = land / n; r.coast = land < n;
     const B = BIOMES[r.biome], RR = rng(seed * 997 + r.id * 131 + 1);
-    r.name = regionName(RR);
+    // no two regions share a name (seed 4242 had two "Torvax Bend"s side by side, 2026-11-17): a taken name is drawn
+    // again — only the later duplicate changes, so every name that was already unique stays the same
+    r.name = regionName(RR); for (let k = 1; k <= 20 && taken.has(r.name); k++) r.name = regionName(rng(seed * 997 + r.id * 131 + 1 + k * 7919)); taken.add(r.name);   // its own draws: deposits stay put
     r.deposits = Object.fromEntries(Object.entries(B.deposits).map(([k, v]) => [k, Math.round(Math.min(1, v * RR.range(0.6, 1.4)) * 100) / 100]));
     r.nests = Math.round(B.nests * RR.range(0.7, 1.3) * r.span * r.span * 3);
     r.river = riverCrosses(seed, wx, wz, size);

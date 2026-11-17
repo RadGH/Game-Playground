@@ -55,8 +55,8 @@ function boot(app) {
   import('../../../../shared/whats-new.js').then(({ createWhatsNew }) => { app.news ||= createWhatsNew({ url: new URL('../../data/changelog.json', import.meta.url), key: 'arcline', title: "What's new" }); app.news.ensure?.(); refreshTitle(app); }).catch(() => {});
   import('../../../../shared/credits.js').then(({ createCredits }) => { app.credits ||= createCredits({ game: 'arcline', made: 'Arcline — by Radley Sustaire, built with Claude. Buildings, creatures and vehicles are our own models, drawn by City Kit.' }); }).catch(() => {});
   import('../../../../shared/rgs-signin.js').then(({ accountButton }) => { if (!app.account) { const b = accountButton({ game: 'arcline', gameName: 'Arcline' }); if (b) { b.classList.add('small'); app.account = b; } } refreshTitle(app); }).catch(() => {});
-  import('../../../../shared/rgs-cloudsave.js').then(({ cloudSave }) => {
-    app.cloud ||= cloudSave({ game: 'arcline', keys: S.CLOUD.keys, prefixes: S.CLOUD.prefixes, canRestore: () => app.screen === 'title', onRestore: () => location.reload() });
+  Promise.all([import('../../../../shared/rgs-cloudsave.js'), import('../save-summary.js')]).then(([{ cloudSave }, { describeSaves }]) => {
+    app.cloud ||= cloudSave({ describe: describeSaves, game: 'arcline', keys: S.CLOUD.keys, prefixes: S.CLOUD.prefixes, canRestore: () => app.screen === 'title', onRestore: () => location.reload() });
     S.onSaved(() => app.cloud?.saveSoon?.());
   }).catch(e => console.info('[arcline] cloud saves unavailable', e?.message));
 }

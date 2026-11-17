@@ -626,7 +626,7 @@ app.openMenu = () => {
   });
 };
 async function autosave(say = false) {
-  if (!app.r || !opt.save?.saveRegionTo || !app.worldSave) return;
+  if (!app.r || !opt.save?.saveRegionTo || !app.worldSave || app.noAutosave) return;   // noAutosave: a newer save is waiting (checkStale)
   try {
     app.r.lastActive = Date.now();
     // the city's picture for the world map (SimCity 4's region view); never let it stop a save
@@ -639,7 +639,28 @@ async function leaveCity(to = 'map') {
   const id = app.worldSave?.meta?.id; const ws = id && opt.save?.loadWorld ? await opt.save.loadWorld(id) : app.worldSave;
   if (opt.screens?.showWorldMap && ws) opt.screens.showWorldMap(app, ws, { focus: app.regionId }); else opt.screens?.showTitle?.(app);
 }
-addEventListener('visibilitychange', () => { if (document.hidden && app.mode === 'city') autosave(); });
+addEventListener('visibilitychange', () => {
+  if (document.hidden) { app.hiddenAt = Date.now(); if (app.mode === 'city') autosave(); return; }
+  if (app.mode === 'city' && app.hiddenAt && Date.now() - app.hiddenAt > 60e3) checkStale();
+});
+setInterval(() => { if (!document.hidden && app.mode === 'city') checkStale(); }, 5 * 60e3);
+// A tab left open on a city keeps running: when it wakes, has another device saved this world since? (owner
+// 2026-11-17: an old phone tab woke, autosaved its older city a year further on, and overwrote the PC's progress.)
+// Pause, stop autosaving, and ask — never let a stale tab save over newer work without the player knowing.
+async function checkStale() {
+  if (app.staleAsked || !app.cloud?.peek) return;
+  const p = await app.cloud.peek().catch(() => null);
+  if (!p?.newer || p.sameDevice || app.mode !== 'city') return;
+  app.staleAsked = true; app.noAutosave = true;
+  const was = app.speed; app.setSpeed(0);
+  const { ask } = await import('../../../shared/dialog.js');
+  const mins = Math.max(1, Math.round((Date.now() - Date.parse(p.at)) / 60e3));
+  const load = await ask({ title: 'A newer save is in your account',
+    text: `Your worlds were saved from ${p.device} ${mins < 90 ? `${mins} min` : `${Math.round(mins / 60)} h`} ago, after this tab last checked. This tab has been running an older copy. Load the newer copy? (This tab's saves are kept as a backup.)`,
+    ok: 'Load the newer copy', cancel: 'Keep playing this tab' });
+  if (load) { app.mode = 'world'; await app.cloud.pull(); return; }   // pull keeps this tab's saves as the backup, then reloads
+  app.noAutosave = false; app.setSpeed(was || 1);
+}
 
 // ------------------------------------------------------------------ loop
 function loop(now) {

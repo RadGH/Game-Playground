@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "id": "2026-11-17b",
+      "date": "2026-11-17",
+      "title": "Safer saves between devices",
+      "items": [
+        "If you leave Arcline open on one device and play on another, the old tab now notices when it wakes up: it pauses and asks whether to load the newer save, instead of quietly saving its older city over it.",
+        "When this device and your account have different saves, each side shows when you really last played it and what's in it (worlds, cities, people). A time the game doesn't know is shown as \"not recorded\" instead of \"just now\".",
+        "Whenever the account's saves replace this device's, this device's saves are kept as a backup."
+      ]
+    },
+    {
       "id": "2026-11-17",
       "date": "2026-11-17",
       "title": "Bigger blocks, parks and research",

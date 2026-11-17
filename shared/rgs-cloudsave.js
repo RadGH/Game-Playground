@@ -29,6 +29,7 @@
 //   The default question is now an in-game dialog with both copies side by side (last played, which device, the
 //   game's lines), never a browser confirm(). Whichever copy gets replaced is kept as a backup in this browser:
 //   cloud.backup() → { kind: 'device'|'account', at, lines } | null, cloud.restoreBackup() puts it back.
+//   (2026-11-17) await cloud.peek() → { newer, at, device } — another device saved since; cloud.pull() loads it now.
 //
 // Which copy wins: each browser remembers the cloud copy it last matched (the server's time + a fingerprint of the
 // values).
@@ -61,11 +62,15 @@ export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => lo
   const subs = new Set();
   const set = patch => { Object.assign(st, patch); for (const f of subs) try { f({ ...st }); } catch {} };
   let busy = null, soon = null, held = false;
-  const LOCAL_AT = `rgs.cloud.${game}.localAt`, BACKUP = `rgs.cloud.${game}.backup`;
+  const LOCAL_AT = `rgs.cloud.${game}.localAt2`,   // 2: the first version stamped "now" on first sight (2026-11-17) — those records are ignored
+    BACKUP = `rgs.cloud.${game}.backup`;
   /** Remember when this device's saves last changed (the game may not stamp its own saves). */
   function noteLocal() {
     const fp = localFp(); let cur = null; try { cur = JSON.parse(ls.get(LOCAL_AT) || 'null'); } catch { cur = null; }
-    if (!cur || cur.fp !== fp) ls.set(LOCAL_AT, JSON.stringify({ fp, at: Date.now() }));
+    // the FIRST look records "unknown" (0), not now: the saves were already there, we just never saw them change.
+    // Stamping now made a phone untouched for days say "last played just now" (owner, Arcline 2026-11-17).
+    if (!cur) ls.set(LOCAL_AT, JSON.stringify({ fp, at: 0 }));
+    else if (cur.fp !== fp) ls.set(LOCAL_AT, JSON.stringify({ fp, at: Date.now() }));
   }
   const localAt = () => { try { return JSON.parse(ls.get(LOCAL_AT) || 'null')?.at || 0; } catch { return 0; } };
   const summary = vals => { try { return describe ? (describe(vals) || {}) : {}; } catch (e) { console.warn('[cloudsave] describe failed', e); return {}; } };
@@ -122,7 +127,8 @@ export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => lo
     ls.set(SYNC(), JSON.stringify({ at, fp: fpOf(vals) }));
     set({ state: 'saved', at, message: 'Saved to your account' });
   }
-  function download(rows, { backup = false } = {}) {
+  function download(rows, { backup = true } = {}) {
+    // always keep this device's saves before replacing them (2026-11-17: a quiet download is as final as a picked one)
     if (backup && hasLocal()) keepBackup('device', localValues());
     const by = Object.fromEntries(rows.map(r => [r.slot, r]));
     for (const slot of allSlots()) writeLocal(slot, by[slot] ? by[slot].state?.v ?? null : null);
@@ -153,6 +159,19 @@ export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => lo
     held = true;
     return wait('Your account and this device have different saves. Nothing was changed.');
   }
+  /**
+   * Has another device saved to the account since this device last matched it? For a game that keeps running while a
+   * tab sleeps (owner 2026-11-17: an old phone tab woke up, saved its stale city and won the next sync).
+   * → { newer, at, device, sameDevice } or null when signed out / offline.
+   */
+  async function peek() {
+    if (!uid) return null;
+    const rows = await cloudRows(); const latest = newest(rows), last = synced();
+    const from = rows.find(r => r.updated_at === latest)?.device || '';
+    return { newer: !!latest && (!last || ms(latest) > ms(last.at)), at: latest, device: deviceName(from), sameDevice: from === device };
+  }
+  /** Replace this device's saves with the account's now (this device's are kept as the backup). */
+  async function pull() { const rows = await cloudRows(); if (rows.length) download(rows, { backup: true }); return rows.length > 0; }
   /** Put back the copy replaced by the last choice. */
   async function restoreBackup() {
     let b = null; try { b = JSON.parse(ls.get(BACKUP) || 'null'); } catch { b = null; }
@@ -203,7 +222,7 @@ export function cloudSave({ game, keys = {}, prefixes = {}, onRestore = () => lo
   return {
     status: () => ({ ...st }),
     onStatus(fn) { subs.add(fn); fn({ ...st }); return () => subs.delete(fn); },
-    sync, saveSoon, restoreBackup,
+    sync, saveSoon, restoreBackup, peek, pull,
     backup() { try { const b = JSON.parse(ls.get(BACKUP) || 'null'); return b ? { kind: b.kind, at: b.at, lines: b.lines || [] } : null; } catch { return null; } },
     stop() { clearInterval(tick); clearTimeout(soon); },
   };
@@ -248,8 +267,8 @@ export function deviceName(ua = '') {
 export function chooseCopy(q) {
   return new Promise(resolve => {
     injectStyle();
-    const ago = t => { if (!t) return 'unknown'; const m = Math.round((Date.now() - t) / 60000); const rel = m < 2 ? 'just now' : m < 60 ? `${m} min ago` : m < 48 * 60 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`; return `${when(new Date(t).toISOString())} (${rel})`; };
-    const newer = q.device.at > q.account.at ? 'device' : q.account.at > q.device.at ? 'account' : null;
+    const ago = t => { if (!t) return 'not recorded on this device'; const m = Math.round((Date.now() - t) / 60000); const rel = m < 2 ? 'just now' : m < 60 ? `${m} min ago` : m < 48 * 60 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`; return `${when(new Date(t).toISOString())} (${rel})`; };
+    const newer = !q.device.at || !q.account.at ? null : q.device.at > q.account.at ? 'device' : q.account.at > q.device.at ? 'account' : null;   // never guess: an unknown time is not "older"
     const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const card = (key, title, info, btn) => `<section class="rcs-card${newer === key ? ' rcs-newer' : ''}">
       <h3>${title}${newer === key ? '<span class="rcs-tag">Newer</span>' : ''}</h3>

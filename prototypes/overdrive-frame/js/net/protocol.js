@@ -46,8 +46,8 @@ export function cleanBuild(b, P, CHIPS, SLOTS) {
 }
 
 /** Held input packed small: i = [mx, mz, ax, az, bits] (move and aim to hundredths, buttons as bits). */
-export const BITS = Object.freeze({ f0: 1, f1: 2, f2: 4, f3: 8, boost: 16, jump: 32, jumpPressed: 64, qb: 128, lockOnPressed: 256, ping: 512, interact: 1024, swap: 2048, pad: 4096 });
-const PRESS = ['jumpPressed', 'qb', 'lockOnPressed', 'ping', 'interact', 'swap'];
+export const BITS = Object.freeze({ f0: 1, f1: 2, f2: 4, f3: 8, boost: 16, jump: 32, jumpPressed: 64, qb: 128, lockOnPressed: 256, ping: 512, interact: 1024, swap: 2048, pad: 4096, overload: 8192 });
+const PRESS = ['jumpPressed', 'qb', 'lockOnPressed', 'ping', 'interact', 'swap', 'overload'];
 export function packInput(inp) {
   let b = 0;
   for (let k = 0; k < 4; k++) if (inp.fire?.[k]) b |= 1 << k;
@@ -79,7 +79,7 @@ export const CLIENT_MSGS = Object.freeze({
   opt:    { fields: { key: 'str:16', value: 'num|str:40|bool' }, rate: 6, burst: 12 },      // host only
   // host: the mission — a story mission id, or a contract (index on the host's board + what makes that board)
   pick:   { fields: { story: '?str:40', contract: '?int', played: '?int', grades: '?obj' }, rate: 2, burst: 6 },
-  start:  { fields: {}, rate: 1, burst: 3 },                                                 // host only
+  start:  { fields: { fromCheckpoint: '?bool' }, rate: 1, burst: 3 },                        // host only (a long mission lost: again from its checkpoint)
   loaded: { fields: {}, rate: 1, burst: 3 },                                                 // this device has the mission drawn
   in:     { fields: { s: 'int', i: 'arr' }, rate: 45, burst: 90 },                           // input, 30 a second
   kick:   { fields: { pid: 'str:12' }, rate: 2, burst: 4 },                                  // host only

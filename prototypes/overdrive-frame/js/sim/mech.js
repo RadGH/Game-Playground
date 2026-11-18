@@ -5,6 +5,9 @@
 //   heatMax, coolMul, jumpMul, hoverMul, qbMul, qbCostMul, turnMul, legs: 'biped'|'reverse'|'quad'|'treads'|'hover',
 //   radius, overweight (0 = within carry limit, 0.2 = 20% over) }
 
+import { STATUS } from './damage.js';
+const SLOW_MUL = STATUS.slow.mul;
+
 export const DEFAULT_STATS = {
   hp: 1000, armour: 40, speedMul: 1, boostMul: 1, accelMul: 1, energyMax: 0, regenMul: 1, heatMax: 0, coolMul: 1,
   jumpMul: 1, hoverMul: 1, qbMul: 1, qbCostMul: 1, turnMul: 1, legs: 'biped', radius: 0.2, overweight: 0, critChance: 0,
@@ -62,11 +65,14 @@ export function addHeat(m, n, T) {
 /**
  * One step. inp: { mx, mz: wanted move in world x/z (length 0..1, already turned so W = screen north),
  *   ax, az: aim point in world, boost, qb (pressed this step), jump (held), jumpPressed }
- * world: { groundAt(x, z), pushOut(body, r) }. Pushes events (qb, jump, land, overheat, stall) to `ev`.
+ * world: { groundAt(x, z), pushOut(body, r), gravity? }. Pushes events (qb, jump, land, overheat, stall) to `ev`.
+ * world.gravity (round 5, the moon): share of normal gravity, default 1 = unchanged. Below 1 a frame jumps higher,
+ * falls slower, hovers on less energy and keeps more momentum off a quick boost (less grip on loose dust).
  */
 export function stepMech(m, inp, dt, T, world, ev = []) {
   if (m.energy == null) m.energy = energyMaxOf(m, T);
   const S = m.stats, L = LEG_TRAITS[S.legs] || LEG_TRAITS.biped;
+  const G = world.gravity ?? 1, gMod = G !== 1;                 // gMod: every gravity change sits behind this, so G = 1 runs the exact old maths
   if (m.down) { m.vx = approach(m.vx, 0, 6, dt); m.vz = approach(m.vz, 0, 6, dt); m.x += m.vx * dt; m.z += m.vz * dt; world.pushOut(m, m.r); m.downT += dt; m.anim = 'down'; return; }
 
   // timers
@@ -75,6 +81,7 @@ export function stepMech(m, inp, dt, T, world, ev = []) {
   const stunned = (m.status?.shock || 0) > 0;
   const heavy = 1 / (1 + Math.max(0, S.overweight) * 1.5);        // over the carry limit = sluggish, never blocked
   const hot = m.overheated ? T.overheatSlow : 1;
+  const gas = (m.status?.slow || 0) > 0 ? SLOW_MUL : 1;            // round 5: inside spore gas (and 2 s after) — damage.js STATUS.slow
 
   // move intent
   let mx = stunned ? 0 : inp.mx || 0, mz = stunned ? 0 : inp.mz || 0;
@@ -85,8 +92,9 @@ export function stepMech(m, inp, dt, T, world, ev = []) {
   m.boosting = boosting;
   if (boosting) addHeat(m, T.boostHeat * dt, T);
 
-  const speed = (boosting ? T.boostSpeed * S.boostMul * (L.boost ?? 1) : T.walkSpeed * S.speedMul * (L.speed ?? 1)) * heavy * hot;
-  const grip = (boosting ? T.boostAccel : T.walkAccel) * S.accelMul * (L.accel ?? 1) * (m.onGround ? 1 : 0.45);
+  const speed = (boosting ? T.boostSpeed * S.boostMul * (L.boost ?? 1) : T.walkSpeed * S.speedMul * (L.speed ?? 1)) * heavy * hot * gas;
+  let grip = (boosting ? T.boostAccel : T.walkAccel) * S.accelMul * (L.accel ?? 1) * (m.onGround ? 1 : 0.45);
+  if (gMod) grip *= 0.5 + 0.5 * G;                                // low gravity: less traction, a quick boost carries further
 
   // quick boost: a sharp burst the way you push (or straight back from the aim when standing still)
   if (inp.qb && !stunned && m.qbCd <= 0 && m.stall <= 0 && S.qbMul > 0) {
@@ -113,11 +121,13 @@ export function stepMech(m, inp, dt, T, world, ev = []) {
   m.hovering = false;
   if (!m.onGround) {
     m.airT += dt;
-    let ay = -T.gravity;
+    let ay = gMod ? -T.gravity * G : -T.gravity;
     const hoverMul = S.hoverMul * (L.hover ?? 1);
-    if (inp.jump && m.airT > 0.18 && hoverMul > 0 && m.stall <= 0 && spendEnergy(m, T.hoverEnergy * dt, T, true)) {
-      ay += T.hoverLift * hoverMul; m.hovering = true; addHeat(m, T.boostHeat * 0.6 * dt, T);
-      if (m.vy < -0.4) m.vy = approach(m.vy, -0.4, 4, dt);
+    const hoverCost = gMod ? T.hoverEnergy * (0.6 + 0.4 * G) : T.hoverEnergy;       // less to hold up: hovers longer on a bar
+    if (inp.jump && m.airT > 0.18 && hoverMul > 0 && m.stall <= 0 && spendEnergy(m, hoverCost * dt, T, true)) {
+      ay += gMod ? T.hoverLift * hoverMul * G : T.hoverLift * hoverMul; m.hovering = true; addHeat(m, T.boostHeat * 0.6 * dt, T);
+      const sink = gMod ? -0.4 * G : -0.4;                         // and sinks slower while it does
+      if (m.vy < sink) m.vy = approach(m.vy, sink, 4, dt);
     }
     m.vy += ay * dt;
   }

@@ -16,12 +16,13 @@ import { JOBS } from './enemies.js';
 const open = (S, x, z) => !blocked(S.world, x, z, 0) && !blocked(S.world, x + 0.3, z, 0) && !blocked(S.world, x - 0.3, z, 0) && !blocked(S.world, x, z + 0.3, 0) && !blocked(S.world, x, z - 0.3, 0);
 
 /** Open spots far from the drop point, spread apart, reachable from it (the flow field from the start reaches them). */
-export function farSpots(S, R, n, { minFromStart = 12, apart = 6 } = {}) {
+export function farSpots(S, R, n, { minFromStart = 12, apart = 6, near = null } = {}) {   // near {x,z,r}: only inside that circle (round 5: the moon's mine)
   const st = S.def.start[0], F = makeFlow(S.world); updateFlow(F, S.world, [st]);
   const cand = [];
   for (let z = 1; z < S.world.h - 1; z++) for (let x = 1; x < S.world.w - 1; x++) {
     const px = x + 0.5, pz = z + 0.5, d = flowDist(F, px, pz);
     if (d < minFromStart || !Number.isFinite(d) || !open(S, px, pz)) continue;
+    if (near && Math.hypot(px - near.x, pz - near.z) > near.r) continue;
     cand.push({ x: px, z: pz, d });
   }
   const out = [];
@@ -48,7 +49,8 @@ export function setupOps(S) {
   S.allies = []; S.ops = { plants: [], core: null, route: null, escaped: 0, arrived: 0, lost: 0, convoyLeft: 0, landed: false, convoyUnits: [] };
   // enemies placed far away (nests, the hunt's marked target)
   for (const p of def.place || []) {
-    for (const spot of farSpots(S, R, p.count || 1, { apart: 7 })) {
+    const mine = p.place === 'mine' && def.map.moon?.mine;    // round 5: nests down in the moon outpost's mine pit
+    for (const spot of mine ? farSpots(S, R, p.count || 1, { apart: 2.2, near: mine }) : farSpots(S, R, p.count || 1, { apart: 7 })) {
       const e = S.spawn(p.kind, spot.x, spot.z, { warn: 0, elite: !!p.elite, force: true });
       if (e) { if (p.tag) e.tag = p.tag; if (p.hpMul) { e.hp *= p.hpMul; e.hpMax *= p.hpMul; } }
     }

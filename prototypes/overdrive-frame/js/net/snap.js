@@ -15,12 +15,15 @@ const r2 = v => Math.round(v * 100) / 100;
 // enemy fields: [wire key, property, kind] — q = hundredths, i = whole number, s = text, b = flag
 const E_FIELDS = [['x', 'x', 'q'], ['z', 'z', 'q'], ['y', 'flying', 'q'], ['f', 'face', 'q'], ['a', 'aim', 'q'], ['n', 'anim', 's'],
   ['h', 'hp', 'i'], ['H', 'hpMax', 'i'], ['s', 'state', 's'], ['l', 'elite', 'b'], ['d', 'hidden', 'b'], ['g', 'tag', 's'],
-  ['r', 'r', 'q'], ['D', 'dead', 'b'], ['t', 'stateT', 'q']];
+  ['r', 'r', 'q'], ['D', 'dead', 'b'], ['t', 'stateT', 'q'],
+  ['w', 'shielded', 'b'], ['m', 'healing', 's']];   // round 5 roles: inside a bulwark's dome; a medic's patient id (append only: index 13 = dead)
 // a mech (players, bots, rival aces): sent whole every snapshot — there are only a few
 const M_FIELDS = [['x', 'x', 'q'], ['z', 'z', 'q'], ['y', 'y', 'q'], ['f', 'face', 'q'], ['a', 'aim', 'q'], ['n', 'anim', 's'],
   ['h', 'hp', 'i'], ['H', 'hpMax', 'i'], ['e', 'energy', 'i'], ['t', 'heat', 'i'], ['o', 'overheated', 'b'], ['s', 'stall', 'q'],
   ['D', 'down', 'b'], ['T', 'downT', 'q'], ['R', 'reviveT', 'q'], ['L', 'lockOn', 's'], ['b', 'boosting', 'b'], ['v', 'hovering', 'b'],
-  ['k', 'kills', 'i'], ['u', 'hurtT', 'q'], ['X', 'dead', 'b'], ['S', 'state', 's'], ['g', 'onGround', 'b']];
+  ['k', 'kills', 'i'], ['u', 'hurtT', 'q'], ['X', 'dead', 'b'], ['S', 'state', 's'], ['g', 'onGround', 'b'],
+  ['O', 'od', 'q'], ['P', 'odT', 'q'], ['Q', 'odK', 's'],                         // the Overload bar, time left, which one
+  ['W', 'team', 's']];                                                              // versus sides (else 'player' / 'enemy')
 // the moving parts of your OWN frame, for correcting what your browser predicted
 const ME_FIELDS = ['x', 'z', 'y', 'vx', 'vz', 'vy', 'face', 'qbT', 'qbCd', 'qbX', 'qbZ', 'airT', 'regenWait', 'stall', 'energy', 'heat'];
 const ME_FLAGS = ['onGround', 'boosting', 'hovering', 'overheated'];
@@ -33,7 +36,9 @@ const dec = (v, k) => k === 'q' ? uq(v) : k === 'b' ? !!v : k === 's' ? (v === '
 function bossExtra(e) {
   if (!e.parts) return null;
   return JSON.stringify({ parts: e.parts.map(p => ({ id: p.id, label: p.label, hp: Math.round(p.hp), hpMax: Math.round(p.hpMax), broken: p.broken, locked: p.locked, at: r2(p.at), arc: r2(p.arc) })),
-    atk: e.atk ? roundObj(e.atk) : null, phase: e.phase, stagger: r2(e.stagger || 0), diedAt: e.diedAt ?? null, bodyR: e.bodyR, boss: true });
+    atk: e.atk ? roundObj(e.atk) : null, phase: e.phase, stagger: r2(e.stagger || 0), diedAt: e.diedAt ?? null, bodyR: e.bodyR, boss: true,
+    // the Juggernaut (sim/juggernaut.js): its dome, whether it kneels, its mines on the ground (atk carries the cannon lane / stomp ring / mine spots)
+    ...(e.mines ? { shield: !!e.shield, kneel: !!e.kneel, mines: e.mines.map(n => ({ x: r2(n.x), z: r2(n.z), arm: n.arm > 0 ? 1 : 0, life: n.life < 2 ? 1 : 9 })) } : {}) });
 }
 function roundObj(o) {
   const out = {};
@@ -55,7 +60,7 @@ const objView = S => S.objectives.map(o => { const { points, core, ...rest } = o
  *  pack({ full: true }) is everything, for a player arriving now (it does not disturb the change list). */
 export function createPacker() {
   const lastE = new Map(), lastBoss = new Map(), lastLots = new Map();
-  let lastObj = '', lastOps = '', lastStats = '';
+  let lastObj = '', lastOps = '', lastStats = '', lastVs = '';
   return {
     pack(S, { full = false } = {}) {
       const out = { tm: r2(S.time), ph: S.phase, pt: r2(S.phaseT) };
@@ -65,6 +70,8 @@ export function createPacker() {
         for (const [w, p, k] of M_FIELDS) { const v = enc(m[p], k); if (v !== 0 && v !== '') r[w] = v; }
         if (m.pid) r.p = m.pid;
         if (m.team === 'enemy') { r.E = 1; r.K = m.kind; r.A = m.ace; }
+        if (m.status?.slow > 0) r.sl = q(m.status.slow);            // round 5: spore gas (the HUD and your prediction read it)
+        if (m.status?.burn > 0) r.bu = q(m.status.burn);
         return r;
       });
       // enemies (changes)
@@ -95,12 +102,14 @@ export function createPacker() {
       // shots: every one, each time (they live a second at most)
       if (S.shots.length) out.s = S.shots.map(s => [q(s.x), q(s.z), q(s.y ?? 0.4), q(s.vx), q(s.vz), s.kind || 'bullet', s.dtype || 'kinetic', s.team === 'enemy' ? 1 : 0,
         s.lob ? 1 : 0, s.flame ? q(s.age / (s.life || 1)) : -1, s.tx != null ? q(s.tx) : null, s.tz != null ? q(s.tz) : null, q(s.splash || 0)]);
+      if (S.clouds?.length) out.c = S.clouds.map(c => [c.id, q(c.x), q(c.z), q(c.r), q(c.t), q(c.life)]);   // round 5: spore clouds
       if (S.strikes.length) out.k = S.strikes.map(k => [q(k.x), q(k.z), q(k.r), q(k.t)]);
       if (S.deployed.length) out.d = S.deployed.map(d => [d.id, d.kind, q(d.x), q(d.z), q(d.y || d.flying || 0)]);
       if (S.allies?.length) out.a = S.allies.map(a => [a.id, q(a.x), q(a.z), q(a.face || 0), Math.round(a.hp), Math.round(a.hpMax), a.down ? 1 : 0, a.arrived ? 1 : 0, q(a.r)]);
       const ob = JSON.stringify(objView(S)); if (full || ob !== lastObj) { out.o = ob; if (!full) lastObj = ob; }
       const op = JSON.stringify(opsView(S)); if (full || op !== lastOps) { out.O = op; if (!full) lastOps = op; }
       const st = JSON.stringify({ ...S.stats, revives: S.revives }); if (full || st !== lastStats) { out.st = st; if (!full) lastStats = st; }
+      if (S.versus) { const vs = JSON.stringify({ score: S.versus.score, round: S.versus.round, resetT: Math.round(S.versus.resetT * 10) / 10 }); if (full || vs !== lastVs) { out.V = vs; if (!full) lastVs = vs; } }
       if (S.result) out.res = S.result;
       if (full) out.full = 1;
       return out;
@@ -148,6 +157,7 @@ export function applySnap(M, snap, ctx = {}) {
       m[p] = nv;
     }
     if (r.p) m.pid = r.p;
+    m.status ||= {}; m.status.slow = r.sl ? uq(r.sl) : 0; m.status.burn = r.bu ? uq(r.bu) : 0;   // round 5: gas + fire on frames
   }
   // mechs the server no longer has (a player left, an ace gone) leave the mirror too
   if (snap.m) M.mechs = M.mechs.filter(m => { if (live.has(m.id)) return true; M.byId.delete(m.id); return false; });
@@ -176,6 +186,7 @@ export function applySnap(M, snap, ctx = {}) {
   // shots, strikes, deployed, convoy trucks
   M.shots = (snap.s || []).map(s => ({ x: uq(s[0]), z: uq(s[1]), y: uq(s[2]), vx: uq(s[3]), vz: uq(s[4]), kind: s[5], dtype: s[6], team: s[7] ? 'enemy' : 'player',
     lob: !!s[8], flame: s[9] >= 0, age: s[9] >= 0 ? uq(s[9]) : 0, life: 1, tx: s[10] != null ? uq(s[10]) : null, tz: s[11] != null ? uq(s[11]) : null, splash: uq(s[12]) }));
+  M.clouds = (snap.c || []).map(c => ({ id: c[0], x: uq(c[1]), z: uq(c[2]), r: uq(c[3]), t: uq(c[4]), life: uq(c[5]) }));   // round 5
   M.strikes = (snap.k || []).map(k => ({ x: uq(k[0]), z: uq(k[1]), r: uq(k[2]), t: uq(k[3]) }));
   M.deployed = (snap.d || []).map(d => ({ id: d[0], kind: d[1], x: uq(d[2]), z: uq(d[3]), y: uq(d[4]) }));
   if (snap.a) {
@@ -198,6 +209,7 @@ export function applySnap(M, snap, ctx = {}) {
     }
   }
   if (snap.st) { const st = JSON.parse(snap.st); M.revives = st.revives; delete st.revives; M.stats = st; }
+  if (snap.V && M.versus) Object.assign(M.versus, JSON.parse(snap.V));
   if (snap.res && !M.result) M.result = snap.res;
   return { events: snap.ev || [] };
 }

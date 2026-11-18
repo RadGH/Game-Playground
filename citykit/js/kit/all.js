@@ -13,3 +13,4 @@ import './swarm.js';
 import './army.js';
 import './workshop.js';
 import './hangar.js';
+import './moon.js';       // Overdrive Frame round 5: the moon outpost

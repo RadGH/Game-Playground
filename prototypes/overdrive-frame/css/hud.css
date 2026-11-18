@@ -61,6 +61,10 @@
   .of-w { position: static; width: auto; padding: 5px 7px 6px; grid-template-columns: auto 1fr; }
   .of-w-2 { order: -2; } .of-w-3 { order: -1; }
   .of-w b { font-size: 12px; white-space: normal; line-height: 1.15; } .of-w-ammo { grid-column: 1 / -1; font-size: 13px; }
+  /* round 5: a third / fourth objective row (an optional one, the extraction line) pushes the weapon strip down
+     instead of running under it (Quiet Dust on a phone) */
+  .of-hud:has(.of-hud-obj li:nth-child(3)) .of-hud-weapons { top: calc(194px + var(--safe-t)); }
+  .of-hud:has(.of-hud-obj li:nth-child(4)) .of-hud-weapons { top: calc(238px + var(--safe-t)); }
   .of-comms { top: auto; bottom: calc(286px + var(--safe-b)); width: calc(100vw - 24px); }
   .of-comms-face { width: 48px; height: 48px; }
 }
@@ -100,3 +104,50 @@
   .of-boss-hp { height: 5px; margin-top: 3px; }
   .of-boss-parts { grid-template-columns: repeat(5, 1fr); gap: 3px; margin-top: 4px; } .of-boss-parts li { font-size: 9px; padding: 1px 3px 4px; }
 }
+
+/* the Overload core's bar, inside the armour panel (round 5) */
+.of-od { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-top: 8px; font: 600 12px var(--of-font); letter-spacing: 0.08em; text-transform: uppercase; color: var(--of-dim); }
+.of-od[hidden] { display: none; }
+.of-od-bar { height: 5px; background: rgba(255, 255, 255, 0.1); }
+.of-od-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #a35cff, var(--of-violet)); }
+.of-od-key { font: 600 12px var(--of-num); color: var(--of-faint); }
+.of-od-ready { color: var(--of-violet); }
+.of-od-ready .of-od-bar i { box-shadow: 0 0 10px var(--of-violet); animation: of-od-pulse 0.9s ease-in-out infinite alternate; }
+.of-od-on { color: #f0d6ff; }
+.of-od-on .of-od-bar i { background: linear-gradient(90deg, #ffd34a, #ff9a2e); }
+@keyframes of-od-pulse { from { opacity: 0.65; } to { opacity: 1; } }
+.of-tbtn-od { border-color: var(--of-violet) !important; color: #e8c8ff !important; }
+.of-hud-obj li.of-stage { border-right-color: var(--of-cyan); }
+.of-hud-obj li.of-stage span, .of-hud-obj li.of-stage small { color: var(--of-cyan); }
+/* versus: the score where the objectives go */
+.of-hud-obj li.of-vs-red { border-right-color: #ff5a5a; } .of-hud-obj li.of-vs-red small { color: #ff8a8a; }
+.of-hud-obj li.of-vs-blue { border-right-color: #4aa8ff; } .of-hud-obj li.of-vs-blue small { color: #8ac8ff; }
+.of-hud-obj li.of-vs-me span { color: var(--of-text); font-weight: 700; }
+.of-hud-obj li.of-vs-them:not(.of-vs-red):not(.of-vs-blue) { border-right-color: #ff9a2e; }
+.of-hud-obj li.of-vs-round { border-right-color: var(--of-line-2); } .of-hud-obj li.of-vs-round small { color: var(--of-dim); }
+/* phones: a boss's parts as one row of pips (each keeps its name for screen readers) — eight labelled parts took three
+   rows over the top half of the screen (round 5 Juggernaut) */
+@media (max-width: 760px) {
+  .of-boss { min-width: 0; }
+  .of-boss-row { padding: 5px 8px 6px; }
+  .of-boss-parts { display: flex; gap: 3px; margin-top: 5px; }
+  .of-boss-parts li { flex: 1; min-width: 0; height: 7px; padding: 0; }
+  .of-boss-parts li span { display: none; }
+  .of-boss-parts li i { height: 100%; }
+  .of-boss-parts li.of-broken i { background: rgba(255, 255, 255, 0.12); }
+}
+
+/* minimap (wide screens, under the armour panel) + the mission map sheet (owner report 2026-11-18: no minimap) */
+.of-hud .of-map-btn { pointer-events: auto; position: absolute; top: calc(10px + var(--safe-t)); right: calc(62px + var(--safe-r)); min-width: 52px; height: 44px; padding: 0 10px; font: 600 14px var(--of-font); color: var(--of-text); background: rgba(12, 16, 24, 0.75); border: 1px solid var(--of-line-2); border-radius: var(--of-r); cursor: pointer; }
+.of-hud .of-map-btn::after { content: attr(data-key); position: absolute; right: -2px; bottom: -14px; font: 600 11px var(--of-num); color: var(--of-dim); }
+.of-minimap-hud { position: absolute; top: calc(118px + var(--safe-t)); left: calc(12px + var(--safe-l)); width: 180px; height: 120px; pointer-events: none; background: rgba(10, 14, 22, 0.85); border: 1px solid var(--of-line-2); border-left: 3px solid var(--of-cyan); }
+.of-mapsheet { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(4, 6, 10, 0.55); pointer-events: auto; z-index: 60; }
+.of-mapsheet[hidden] { display: none; }
+.of-mapsheet-card { width: min(940px, calc(100vw - 24px)); padding: 14px 16px; background: rgba(12, 16, 24, 0.94); border: 1px solid var(--of-line-2); border-top: 3px solid var(--of-cyan); border-radius: var(--of-r); display: grid; gap: 10px; }
+.of-mapsheet-card header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.of-mapsheet-card h2 { margin: 0; font: 600 14px var(--of-font); letter-spacing: 0.16em; text-transform: uppercase; color: var(--of-dim); }
+.of-mapsheet-card canvas { display: block; margin: 0 auto; }
+.of-map-key { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; color: var(--of-dim); }
+.of-map-key i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; background: var(--c); vertical-align: -1px; }
+.of-map-key i.of-ring { background: none; border: 2px solid var(--c); }
+@media (max-width: 760px) { .of-minimap-hud { display: none; } }

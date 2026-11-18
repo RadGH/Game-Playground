@@ -4,12 +4,15 @@
 // comms from a character on the left — never big text in the middle of the screen (owner ruling, lessons 42).
 import { fmt, hp as hpFmt } from '../../../../shared/format.js';
 import { hintFor } from '../input/bindings.js';
+import { OVERLOAD } from '../sim/overload.js';
+import { MiniMap } from './minimap.js';
 import { energyMaxOf, heatMaxOf } from '../sim/mech.js';
 import { TILE_W } from '../../../../citykit/js/iso.js';
 import { aceSpeaker } from './speakers.js';
 
 /** Mission comms lines can wait for these sim events (sim/boss.js, sim/ace.js); a line may narrow with part / phase / ace. */
-const EVENT_COMMS = new Set(['boss', 'bossPart', 'bossOpen', 'bossPhase', 'bossDown', 'aceIn', 'aceDown']);
+const ROLE_NOTES = { bulwark: 'Shield projector: its dome shields the army inside — kill it first', medic: 'Medic drone: it repairs the army — shoot it down' };
+const EVENT_COMMS = new Set(['boss', 'bossPart', 'bossOpen', 'bossPhase', 'bossDown', 'bossKneel', 'aceIn', 'aceDown', 'stage', 'checkpoint', 'objective']);   // stage / checkpoint: long missions (sim/stages.js); objective: a line when one is done (c.objective = its id)
 
 const SLOT_NAMES = ['Left arm', 'Right arm', 'Left shoulder', 'Right shoulder'];
 const SLOT_KEYS = ['fireL', 'fireR', 'fireSL', 'fireSR'];
@@ -20,15 +23,18 @@ export class Hud {
     this.el = document.createElement('div'); this.el.className = 'of-hud';
     this.el.innerHTML = `
       <canvas class="of-hud-arcs" aria-hidden="true"></canvas>
-      <div class="of-hud-armour" role="group" aria-label="Armour"><span class="of-hud-label">Armour</span><b class="of-ap">0</b><div class="of-ap-bar"><i></i></div><small class="of-status"></small></div>
+      <div class="of-hud-armour" role="group" aria-label="Armour"><span class="of-hud-label">Armour</span><b class="of-ap">0</b><div class="of-ap-bar"><i></i></div><small class="of-status"></small><div class="of-od" hidden><span class="of-od-name"></span><div class="of-od-bar"><i></i></div><span class="of-od-key"></span></div></div>
       <ol class="of-hud-obj" aria-label="Objectives"></ol>
       <div class="of-hud-weapons" aria-label="Weapons"></div>
       <div class="of-comms" aria-live="polite" hidden><canvas class="of-comms-face" width="96" height="96" aria-hidden="true"></canvas><div><b class="of-comms-who"></b><p class="of-comms-text"></p><canvas class="of-comms-wave" width="160" height="18" aria-hidden="true"></canvas></div></div>
       <div class="of-alert" hidden></div>
       <div class="of-hurt" aria-hidden="true"></div>
-      <button type="button" class="of-menu-btn" aria-label="Menu">☰</button>`;
+      <button type="button" class="of-menu-btn" aria-label="Menu">☰</button>
+      <button type="button" class="of-map-btn" aria-label="Mission map">Map</button>`;
     this.arcs = this.el.querySelector('.of-hud-arcs'); this.ax = this.arcs.getContext('2d');
     this.el.querySelector('.of-menu-btn').addEventListener('click', () => this.openMenu());
+    this.map = new MiniMap(this.el);                     // minimap + mission map (ui/minimap.js)
+    this.el.querySelector('.of-map-btn').addEventListener('click', () => this.map.toggle());
     this.commsQueue = []; this.commsT = 0; this.alertT = 0; this.saidAt = new Set();
   }
 
@@ -42,12 +48,14 @@ export class Hud {
     });
     this._keys();
   }
-  detach() { this.el.remove(); this.play = null; }
+  detach() { this.el.remove(); this.play = null; this.map?.toggle(false); }
 
   _keys() {
     const dev = this.play?.controls.device || 'keys', gl = this.play?.controls.glyphs || 'xbox';
     this.el.querySelectorAll('.of-w').forEach((d, i) => { d.querySelector('.of-w-key').textContent = hintFor(SLOT_KEYS[i], dev, gl); });
     this.el.querySelector('.of-menu-btn').dataset.key = hintFor('menu', dev, gl);
+    this.el.querySelector('.of-map-btn').dataset.key = dev === 'touch' ? '' : hintFor('map', dev, gl);
+    this.el.querySelector('.of-od-key').textContent = dev === 'touch' ? '' : hintFor('overload', dev, gl);
     this._dev = dev;
   }
 
@@ -68,6 +76,8 @@ export class Hud {
     if (ev.type === 'escaped') this.notice('A hauler got away', 2);
     // co-op: who came and went, who needs picking up
     const who = id => S.byId?.get(id)?.name || 'A teammate';
+    // round 5 roles: one short note the first time each support unit shows up in a mission
+    if (ev.type === 'espawn' && ROLE_NOTES[ev.kind] && !(S._roleNotes ||= new Set()).has(ev.kind)) { S._roleNotes.add(ev.kind); this.notice(ROLE_NOTES[ev.kind], 3); }
     if (ev.type === 'joined' && ev.id !== this.play.mech.id) this.notice(`${ev.name || 'A pilot'} dropped in`, 2.5);
     if (ev.type === 'left') this.notice(`${ev.name || 'A pilot'} left`, 2.5);
     if (ev.type === 'down' && ev.id !== this.play.mech.id && S.byId?.get(ev.id)?.pid) this.notice(`${who(ev.id)} is down — stand next to them to revive`, 3);
@@ -79,12 +89,21 @@ export class Hud {
       this.say(ev.who, ev.text);
     }
     if (ev.type === 'overheat' && ev.id === this.play.mech.id) this.notice('Overheating — ease off', 2.5);
+    if (ev.type === 'checkpoint') this.notice(`Checkpoint — ${ev.label}`, 3);
+    if (ev.type === 'roundEnd') {
+      const mine = ev.winner && ev.winner === this.play.mech.team, who = ev.winner === 'red' ? 'Red' : ev.winner === 'blue' ? 'Blue' : S.mechs.find(x => x.team === ev.winner)?.name || 'The other side';
+      this.notice(!ev.winner ? 'Nobody standing — a draw round' : mine ? `You take round ${ev.round}` : `${who} takes round ${ev.round}`, 3);
+    }
+    if (ev.type === 'roundStart') this.notice(`Round ${ev.round} — fight`, 2);
+    if (ev.type === 'frameDown' && ev.by === this.play.mech.id) this.notice(`You downed ${S.byId?.get(ev.id)?.name || 'a frame'}`, 2);
+    if (ev.type === 'odReady' && ev.id === this.play.mech.id) this.notice(`Overload ready${this._dev === 'touch' ? '' : ` — ${hintFor('overload', this._dev, this.play.controls.glyphs || 'xbox')}`}`, 2.5);
   }
 
   _commsEvent(name, ev = null) {
     for (const c of this.commsLines || []) {
       if (c.event !== name || this.saidAt.has(c)) continue;
       if (c.part && c.part !== ev?.part) continue; if (c.phase != null && c.phase !== ev?.phase) continue; if (c.ace && c.ace !== ev?.ace) continue;
+      if (c.stage != null && c.stage !== ev?.stage) continue; if (c.again != null && !!c.again !== !!ev?.again) continue; if (c.objective && c.objective !== ev?.id) continue;
       this.saidAt.add(c); this.say(c.who, c.text);
     }
   }
@@ -93,7 +112,7 @@ export class Hud {
    *  whole (its own health), armoured (locked weak point), or broken. Hidden when no boss or ace is in the fight. */
   bossBar(S) {
     const bosses = S.enemies.filter(e => e.boss && e.parts && !e.dead && e.state !== 'warn');
-    const aces = S.mechs.filter(m => m.ace && !m.dead && m.state !== 'warn');
+    const aces = S.mechs.filter(m => m.ace && !m.grunt && !m.dead && m.state !== 'warn');   // line frames (round 5) get no bar
     let el = this.el.querySelector('.of-boss');
     if (!bosses.length && !aces.length) { if (el) el.hidden = true; return; }
     if (!el) { el = document.createElement('div'); el.className = 'of-boss'; el.setAttribute('role', 'group'); el.setAttribute('aria-label', 'Big target'); this.el.append(el); }
@@ -111,6 +130,8 @@ export class Hud {
 
   frame(S, m, dt, inp) {
     if (!this.play) return;
+    if (inp?.map && performance.now() - (this._mapAt || 0) > 300) { this._mapAt = performance.now(); this.map.toggle(); }   // a press can be seen by two frames between steps
+    this.map.frame(S, m, this.play.t || 0);
     if (this.play.controls.device !== this._dev) this._keys();
     // timed comms lines
     for (const c of this.commsLines || []) if (c.at != null && !this.saidAt.has(c) && S.time >= c.at) { this.saidAt.add(c); this.say(c.who, c.text); }
@@ -122,8 +143,17 @@ export class Hud {
     const share = Math.max(0, m.hp / m.hpMax);
     this.el.querySelector('.of-ap').textContent = hpFmt(m.hp);
     const bar = this.el.querySelector(".of-hud-armour .of-ap-bar i"); bar.style.width = (share * 100).toFixed(1) + '%';
+    // the Overload core's bar (sim/overload.js): fills with damage dealt, glows when ready, counts down while running
+    const od = this.el.querySelector('.of-od'), kind = m.stats?.overload;
+    od.hidden = !kind;
+    if (kind) {
+      const running = m.odT > 0, full = !running && (m.od || 0) >= 1;
+      od.classList.toggle('of-od-ready', full); od.classList.toggle('of-od-on', running);
+      od.querySelector('.of-od-name').textContent = running ? `${OVERLOAD[kind].label} ${Math.ceil(m.odT)} s` : full ? `${OVERLOAD[kind].label} ready` : 'Overload';
+      od.querySelector('.of-od-bar i').style.width = (running ? m.odT / OVERLOAD[kind].time * 100 : Math.min(1, m.od || 0) * 100).toFixed(1) + '%';
+    }
     bar.parentElement.classList.toggle('of-low', share < 0.3);
-    const st = []; if (m.overheated) st.push('Overheated'); if (m.stall > 0) st.push('Energy stall'); if (m.status?.burn > 0) st.push('Burning'); if (m.status?.shock > 0) st.push('Shocked');
+    const st = []; if (m.overheated) st.push('Overheated'); if (m.stall > 0) st.push('Energy stall'); if (m.status?.burn > 0) st.push('Burning'); if (m.status?.shock > 0) st.push('Shocked'); if (m.status?.slow > 0) st.push('Slowed');
     this.el.querySelector('.of-status').textContent = st.join(' · ');
     // hurt vignette
     const v = this.play.view; v.hurt = Math.max(0, (v.hurt || 0) - dt * 1.5);
@@ -156,6 +186,13 @@ export class Hud {
       return `<li class="${o.done ? 'of-done' : o.failed ? 'of-failed' : ''}${o.optional ? ' of-opt' : ''}"><span>${o.label}</span><small>${o.done ? 'Done' : o.failed ? 'Missed' : prog}</small></li>`;
     });
     if (S.phase === 'extract') rows.push('<li class="of-extract"><span>Reach the dropship</span><small>Marked green</small></li>');
+    if (S.versus) {                                   // versus: the score instead of objectives
+      const V = S.versus, me = this.play?.mech?.team, name = t => (t === 'red' ? 'Red' : t === 'blue' ? 'Blue' : S.mechs.find(x => x.team === t)?.name || 'Pilot');
+      rows.length = 0;
+      for (const t of Object.keys(V.score)) rows.push(`<li class="of-vs of-vs-${t === me ? 'me' : 'them'}${t === 'red' || t === 'blue' ? ' of-vs-' + t : ''}"><span>${name(t)}${t === me ? ' (you)' : ''}</span><small>${V.score[t]} / ${V.wins}</small></li>`);
+      rows.push(`<li class="of-vs-round"><span>Round ${V.round}</span><small>${V.resetT > 0 ? `next in ${Math.ceil(V.resetT)} s` : 'fight'}</small></li>`);
+    }
+    if (S.def.stages?.length > 1 && S.phase !== 'extract') rows.unshift(`<li class="of-stage"><span>${S.def.stages[S.stage].label}</span><small>Part ${S.stage + 1} of ${S.def.stages.length}</small></li>`);
     const html = rows.join(''); if (html !== this._obj) { ol.innerHTML = html; this._obj = html; }
 
     this._arcs(S, m, inp);

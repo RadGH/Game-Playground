@@ -24,22 +24,25 @@ const NONE = { id: 'none', name: 'Empty', kind: 'none', dmg: 0, rate: 1, range: 
  */
 export function aceKinds(json, P, C = null) {
   const out = {};
-  for (const a of json.aces || []) {
+  // round 5: json.grunts = Halden-Voss line frames — the same machinery at grunt level (kind = its own id, not
+  // 'ace:<id>'; several alive at once up to `max`; no comms lines; weaker AI; loot like an elite)
+  for (const a of [...(json.aces || []), ...(json.grunts || []).map(g => ({ ...g, grunt: true }))]) {
     const build = { ...a.build, weapons: (a.build.weapons || []).slice(0, 4), paint: a.paint };
     while (build.weapons.length < 4) build.weapons.push(null);
     const st = mechStats(build, P, C);
     st.hp = Math.round(a.hp || st.hp * (a.hpMul || 1));
     st.dmgMulAll = (st.dmgMulAll || 1) * (a.dmgMul ?? 0.35);
     const specs = build.weapons.map(w => { const p = w && P[itemId(w)]; if (!p) return null; const sp = weaponSpec(p, null, st); return ACE_WEAPON_KINDS.has(sp.kind) && !sp.charge ? sp : null; });
-    out['ace:' + a.id] = {
-      name: `${a.callsign} (${a.name})`, faction: 'army', job: 'ace', score: a.score || 100, mats: a.mats || { scrap: 3, alloy: 1.5 }, radius: st.radius,
-      ace: { id: a.id, name: a.name, callsign: a.callsign, colour: a.colour || '#ff5a3a', build, paint: a.paint, stats: st, specs, ai: { ...DEFAULT_AI, ...a.ai }, lines: a.lines || {}, tier: a.tier || 2 },
+    out[a.grunt ? a.id : 'ace:' + a.id] = {
+      name: a.grunt ? a.name : `${a.callsign} (${a.name})`, faction: 'army', job: 'ace', score: a.score || 100, mats: a.mats || { scrap: 3, alloy: 1.5 }, radius: st.radius,
+      ace: { id: a.id, name: a.name, callsign: a.callsign || a.name, colour: a.colour || '#ff5a3a', build, paint: a.paint, stats: st, specs, ai: { ...DEFAULT_AI, ...a.ai }, lines: a.grunt ? {} : a.lines || {}, tier: a.tier || 2,
+        grunt: !!a.grunt, max: a.max || 1 },
     };
   }
   return out;
 }
 
-export const DEFAULT_AI = { range: 4, aggression: 0.5, strafe: 0.7, dodge: 0.4, accuracy: 0.7, boostFloor: 0.3, heatLimit: 0.85, jump: 2 };
+export const DEFAULT_AI = { range: 4, aggression: 0.5, strafe: 0.7, dodge: 0.4, accuracy: 0.7, boostFloor: 0.3, heatLimit: 0.85, jump: 2, lead: 0.8 };   // lead: share of the target's movement it aims ahead by
 
 /** Who's speaking, for the comms box (the HUD draws the ace's own frame from build + paint). */
 export const aceSpeakerOf = A => ({ id: A.id, name: A.callsign, colour: A.colour, build: A.build, paint: A.paint });
@@ -47,11 +50,13 @@ export const aceSpeakerOf = A => ({ id: A.id, name: A.callsign, colour: A.colour
 /** Bring an ace into the mission (mission.js spawn() calls this for a kind with job 'ace'). */
 export function spawnAce(S, kind, K, x, z, opts = {}) {
   const A = K.ace;
-  if (S.mechs.some(m => m.ace === A.id && !m.dead)) return null;            // one of each pilot at a time
+  if (!A.grunt && S.mechs.some(m => m.ace === A.id && !m.dead)) return null;            // one of each pilot at a time
+  if (A.grunt && S.mechs.filter(m => m.ace === A.id && !m.dead).length >= A.max) return null;   // line frames: up to max at once
   const m = makeMech({ id: 'a' + (S.nextId++), team: 'enemy', x, z, stats: { ...A.stats }, weapons: A.specs.map((sp, i) => arm(sp || NONE, i)), name: A.callsign, paint: A.paint });
-  Object.assign(m, { ace: A.id, kind, build: A.build, dead: false, boss: true, state: (opts.warn ?? 1.2) > 0 ? 'warn' : null, stateT: opts.warn ?? 1.2,
+  Object.assign(m, { ace: A.id, grunt: A.grunt, elite: A.grunt, kind, build: A.build, dead: false, boss: !A.grunt, state: (opts.warn ?? 1.2) > 0 ? 'warn' : null, stateT: opts.warn ?? 1.2,
     ai: { strafe: S.rng.next() < 0.5 ? 1 : -1, flipT: 2, dodgeCd: 0, jumpT: 0, hold: 0, tauntT: 20 + S.rng.next() * 15, hurtSaid: false } });
   S.mechs.push(m); S.byId.set(m.id, m);
+  if (A.grunt) { S.events.push({ type: 'gruntIn', id: m.id, kind, x, z, t: m.stateT }); return m; }   // no comms, no ace bar
   S.events.push({ type: 'aceIn', id: m.id, ace: A.id, name: A.callsign, x, z, t: m.stateT });
   say(S, A, 'in');
   return m;
@@ -81,10 +86,10 @@ function aceDefeated(S, m, by) {
   S.stats.kills++; S.stats.score += K.score || 100;
   const src = by && S.byId.get(by); if (src && src.kills != null) src.kills++;
   S.events.push({ type: 'kill', id: m.id, kind: m.kind, x: m.x, z: m.z, y: 0.3, by, big: true });
-  S.events.push({ type: 'aceDown', id: m.id, ace: A.id, name: A.callsign, x: m.x, z: m.z, by });
-  say(S, A, 'down');
-  for (const o of S.objectives) if (!o.done && o.type === 'kill' && (o.kind === m.kind || o.kind === 'ace')) o.progress++;
-  S.dropLoot(m, K);               // boss-style: a part for every player (m.boss → one loot tier higher), plus materials
+  if (A.grunt) S.events.push({ type: 'gruntDown', id: m.id, kind: m.kind, x: m.x, z: m.z, by });   // a line frame: a wreck blast, no comms
+  else { S.events.push({ type: 'aceDown', id: m.id, ace: A.id, name: A.callsign, x: m.x, z: m.z, by }); say(S, A, 'down'); }
+  for (const o of S.objectives) if (!o.done && o.type === 'kill' && (o.kind === m.kind || o.kind === 'ace' && !A.grunt)) o.progress++;
+  S.dropLoot(m, K);               // grunts: m.elite → a part like an elite; aces: boss-style: a part for every player (m.boss → one loot tier higher), plus materials
 }
 
 /** Every ace's step: think (same input shape as a player), then the same mech rules and weapons a player uses. */
@@ -167,7 +172,7 @@ export function aceInput(S, m, A, dt) {
   // aim: lead the target by how fast its shots fly; a small honest wobble from accuracy (never a perfect aimbot)
   const shotSp = 16, lead = dist / shotSp;
   const wob = (1 - ai.accuracy) * Math.min(1.2, dist * 0.18);
-  const ax = P.x + P.vx * lead * 0.8 + Math.sin(S.time * 2.3 + m.x) * wob, az = P.z + P.vz * lead * 0.8 + Math.cos(S.time * 1.9 + m.z) * wob;
+  const ax = P.x + P.vx * lead * ai.lead + Math.sin(S.time * 2.3 + m.x) * wob, az = P.z + P.vz * lead * ai.lead + Math.cos(S.time * 1.9 + m.z) * wob;
   // fire what reaches and has a clear line; let the heat bleed off near the limit (an overheated frame is a dead one)
   const see = S.canSee(m, P), cool = hFrac > ai.heatLimit || m.overheated;
   m.weapons.forEach((w, i) => {

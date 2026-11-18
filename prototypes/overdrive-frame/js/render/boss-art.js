@@ -10,6 +10,7 @@ import { composite } from '../../../../citykit/js/bake.js';
 import { TILE_W, TILE_H, dirOfHeading } from '../../../../citykit/js/iso.js';
 import { DIRS } from './sprites.js';
 import { partWorld } from '../sim/boss.js';
+import { drawWalkerOver, drawWalkerMarks } from './walker-art.js';   // the Juggernaut's dome, lanes, rings and mines
 
 const partKey = name => 'brk_' + name.replace(/-/g, '_');       // the City Kit's own key (enemy-bits.js partKey)
 const FPS = 8;
@@ -27,7 +28,9 @@ export function bossParams(e) {
 export function bossBakeJobs(sprites, K, params = { seed: 1 }) {
   const jobs = [], id = K.recipe;
   const anim = a => sprites.animOf(id, a);
-  for (const [a, urgent, frames] of [[anim('crawl'), true, null], [anim('spit'), false, [1, 2]], [anim('roar'), false, null], [anim('summon'), false, [0, 2]]]) {
+  const list = K.bakeAnims ? K.bakeAnims.map(([a, u, f]) => [anim(a), u, f])        // a boss can name its own (data/enemies.json)
+    : [[anim('crawl'), true, null], [anim('spit'), false, [1, 2]], [anim('roar'), false, null], [anim('summon'), false, [0, 2]]];
+  for (const [a, urgent, frames] of list) {
     if (!a) continue;
     const n = sprites.frames(id, a), list = frames ? frames.filter(f => f < n) : Array.from({ length: n }, (_, f) => f);
     for (let d = 0; d < DIRS; d++) for (const f of list) jobs.push(() => sprites.facing(id, params, d, a, f, urgent));
@@ -75,6 +78,7 @@ export function drawBoss(ctx, view, S, e, p, t) {
   const n = view.night * 0.5, flash = !e.dead && (S.time - (e.lastHit || -9)) < 0.05;
   composite(ctx, pic, q.sx, q.sy, n, sc);
   if (flash) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.28; composite(ctx, pic, q.sx, q.sy, 0, sc); ctx.restore(); }
+  if (e.mines) drawWalkerOver(ctx, view, S, e, p, t);   // the Juggernaut's shield dome (render/walker-art.js)
   // the open weak point: a pulsing amber diamond over the head plate
   const crest = e.parts?.find(x => K.parts.find(d => d.id === x.id)?.weak);   // the weak point (head plate)
   if (!e.dead && crest && !crest.locked && !crest.broken) {
@@ -87,6 +91,7 @@ export function drawBoss(ctx, view, S, e, p, t) {
 /** Ground marks for every boss wind-up (view.draw calls this with the other ground markers, under everything). */
 export function drawBossMarks(ctx, view, S, t) {
   for (const e of S.enemies) {
+    if (e.mines) drawWalkerMarks(ctx, view, S, e, t);   // the Juggernaut's cannon lane, stomp ring, mine row, mines
     if (!e.parts || e.dead || !e.atk) continue;
     const K = S.kinds[e.kind], A = e.atk;
     if (A.kind === 'claw') {
@@ -130,8 +135,8 @@ export function drawEnemyMech(ctx, view, m, p, t, before) {
     return true;
   }
   if (m.dead) return false;
-  const top = view.P(p.x, p.z, (p.y || 0) + 0.95), w = 46 * Math.min(1.4, view.zoom / 2.5);
-  ctx.save(); ctx.textAlign = 'center'; ctx.font = `800 ${Math.round(12 * Math.min(1.3, view.zoom / 2.5))}px "Barlow Condensed", system-ui, sans-serif`;
+  const top = view.P(p.x, p.z, (p.y || 0) + 0.95), w = (m.grunt ? 32 : 46) * Math.min(1.4, view.zoom / 2.5);   // line frames: a smaller tag
+  ctx.save(); ctx.textAlign = 'center'; ctx.font = `800 ${Math.round((m.grunt ? 10 : 12) * Math.min(1.3, view.zoom / 2.5))}px "Barlow Condensed", system-ui, sans-serif`;
   ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.strokeText(m.name || 'Ace', top.sx, top.sy - 6);
   ctx.fillStyle = '#ff5a4a'; ctx.fillText(m.name || 'Ace', top.sx, top.sy - 6);
   ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(top.sx - w / 2 - 1, top.sy - 1, w + 2, 5);

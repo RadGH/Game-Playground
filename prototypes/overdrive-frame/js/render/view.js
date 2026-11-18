@@ -28,6 +28,9 @@ function compositeA(ctx, pair, x, y, t, scale, a) {
 import { Fx } from '../../../../citykit/js/world/fx.js';
 import { DIRS } from './sprites.js';
 import { drawBoss, drawBossMarks, drawEnemyMech } from './boss-art.js';
+import { drawMoonGround } from './moon-ground.js';   // round 5: the moon's dust, craters, mine and pads
+import { drawRoles } from './roles-art.js';
+import { objectiveTargets } from './targets.js';     // the mission's targets: edge arrows here, the minimap in ui/minimap.js          // round 5: bulwark domes, heal beams, flamer cones, spore clouds
 
 const C = {
   ground: '#1b1f27', groundNight: '#0c0f16', road: '#262a33', lane: '#c9b04a', walk: '#343944', plaza: '#2c313b', curb: '#4a5160',
@@ -80,6 +83,7 @@ export class View {
   }
   _ground(ctx, map) {
     if (map.interior) return this._interior(ctx, map);
+    if (map.moon) { drawMoonGround(this, ctx, map); return this._scorch(ctx); }   // round 5: the moon outpost
     const n = this.night;
     ctx.fillStyle = mixHex(C.ground, C.groundNight, n); ctx.fillRect(0, 0, this.W, this.H);
     // sidewalks under every block, then roads with lane marks, then plazas
@@ -93,7 +97,10 @@ export class View {
       if (Math.min(w, d) >= 2) { ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); }
     }
     ctx.restore();
-    // scorch decals (stay all mission)
+    this._scorch(ctx);
+  }
+  /** Scorch decals (stay all mission). */
+  _scorch(ctx) {
     for (const d of this.decals) {
       if (!this.visible(d.x, d.z, 1)) continue;
       const p = this.P(d.x, d.z), rx = d.r * TILE_W * 0.5 * this.zoom;
@@ -191,6 +198,7 @@ export class View {
   draw(S, lerp, me, dt, t) {
     const ctx = this.ctx; ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     this.localPid = S.localPid; this.reviveTime = S.T?.reviveTime || 3;
+    this.localTeam = S.versus ? S.mechs.find(m => m.pid === S.localPid)?.team : null;
     this.fx.update(dt);
     const sh = this.fx.shakeOffset(14); this.shx = sh?.x || sh?.[0] || 0; this.shy = sh?.y || sh?.[1] || 0;
     const map = S.def.map;
@@ -224,7 +232,7 @@ export class View {
     let dropAlt = 0;
     if (S.phase === 'drop' && S.def.drop && S.def.orbital) {       // orbital drop: a burning streak falling onto the landing reticle
       for (const q of mechPts) items.push({ d: q.p.x + q.p.z + 60, draw: () => this._fall(ctx, q.m, q.p, t) });
-    } else if (S.phase === 'drop' && S.def.drop) {
+    } else if (S.phase === 'drop' && S.def.drop && !S.versus) {        // versus: the sides start on the ground
       const k = 1 - Math.max(0, S.phaseT) / S.def.drop, st = S.def.start[0];      // 0 → 1 over the drop
       const shipY = k < 0.55 ? 3.6 - k / 0.55 * 2.0 : k < 0.7 ? 1.6 : 1.6 + (k - 0.7) * 12;
       dropAlt = k < 0.6 ? shipY - 0.75 : 0.85 * (1 - ((k - 0.6) / 0.4) ** 2);       // let go at 0.6, lands as the drop ends
@@ -234,6 +242,7 @@ export class View {
     for (const q of mechPts) items.push({ d: q.p.x + q.p.z + 0.01, draw: () => this._mech(ctx, q.m, { ...q.p, y: (q.p.y || 0) + (q.m.pid === S.localPid ? dropAlt : 0) }, t) });
     items.sort((a, b) => a.d - b.d);
     for (const it of items) it.draw();
+    drawRoles(ctx, this, S, lerp, t);     // round 5 roles, over the scene (render/roles-art.js)
 
     this._shots(ctx, S, t);
     this._pings(ctx, S, lerp, dt, t);
@@ -337,6 +346,13 @@ export class View {
   _mech(ctx, m, p, t) {
     const q = this.P(p.x, p.z, p.y || 0), g = this.P(p.x, p.z, 0);
     if (m.team === 'enemy' && drawEnemyMech(ctx, this, m, p, t, true)) return;   // a rival ace dropping in
+    if (m.odT > 0) {                               // an Overload running: an aura on the ground in its colour
+      const col = m.odK === 'surge' ? '255,176,46' : m.odK === 'bastion' ? '63,240,255' : '196,107,255', rx = (0.55 + 0.08 * Math.sin(t * 9)) * TILE_W * 0.5 * this.zoom * Math.SQRT2;
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createRadialGradient(g.sx, g.sy, 0, g.sx, g.sy, rx);
+      gr.addColorStop(0, `rgba(${col},0.55)`); gr.addColorStop(1, `rgba(${col},0)`); ctx.fillStyle = gr; ctx.beginPath(); ctx.ellipse(g.sx, g.sy, rx, rx / 2, 0, 0, Math.PI * 2); ctx.fill();
+      if (m.odK === 'bastion') { ctx.strokeStyle = `rgba(${col},0.5)`; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(g.sx, g.sy - 0.45 * PX_PER_HEIGHT * this.zoom, rx * 0.9, 0.6 * PX_PER_HEIGHT * this.zoom, 0, Math.PI, 0); ctx.stroke(); }
+      ctx.restore();
+    }
     if (this.mechDrawer) this.mechDrawer(ctx, m, g.sx, g.sy, this.zoom, this.night * UNIT_NIGHT, t, p.y || 0);
     else { ctx.fillStyle = '#9aa4b4'; ctx.fillRect(q.sx - 8, q.sy - 40, 16, 40); }
     if (m.team === 'enemy') { drawEnemyMech(ctx, this, m, p, t, false); return; }
@@ -352,9 +368,10 @@ export class View {
     // a teammate: name and health over the frame (yours is in the cockpit arcs)
     if (m.pid && m.pid !== this.localPid) {
       const y = q.sy - 1.15 * PX_PER_HEIGHT * this.zoom, w = 46, f = Math.max(0, m.hp / (m.hpMax || 1));
+      const foe = this.localTeam && m.team !== this.localTeam, side = m.team === 'red' ? '#ff8a8a' : m.team === 'blue' ? '#8ac8ff' : foe ? '#ffb46a' : null;   // versus: by side
       ctx.save(); ctx.font = '600 12px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.strokeText(m.name || 'Pilot', q.sx, y - 5); ctx.fillStyle = m.down ? '#ff8a6a' : '#bff8ff'; ctx.fillText(m.name || 'Pilot', q.sx, y - 5);
-      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(q.sx - w / 2 - 1, y - 1, w + 2, 5); ctx.fillStyle = f > 0.35 ? '#3ff0ff' : '#ff5a3a'; ctx.fillRect(q.sx - w / 2, y, w * f, 3);
+      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.strokeText(m.name || 'Pilot', q.sx, y - 5); ctx.fillStyle = m.down ? '#ff8a6a' : side || '#bff8ff'; ctx.fillText(m.name || 'Pilot', q.sx, y - 5);
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(q.sx - w / 2 - 1, y - 1, w + 2, 5); ctx.fillStyle = foe ? '#ff5a3a' : f > 0.35 ? '#3ff0ff' : '#ff5a3a'; ctx.fillRect(q.sx - w / 2, y, w * f, 3);
       ctx.restore();
     }
   }
@@ -386,15 +403,25 @@ export class View {
       if (!edge(p.x, p.z, col, who)) { ctx.save(); ctx.globalAlpha = fade; ctx.font = '700 13px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = col; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.lineWidth = 3; ctx.strokeText(who, top.sx, top.sy - 4); ctx.fillText(who, top.sx, top.sy - 4); ctx.restore(); }
     }
     for (const m of S.mechs) if (m.pid && m.pid !== S.localPid && m.team !== 'enemy') { const q = lerp(m); edge(q.x, q.z, m.down ? '#ff8a6a' : '#3ff0ff', m.name || ''); }
-    // the job's done: the way to the dropship (owner report 2026-11-18 "an arrow pointing to the dropship after quests")
-    if (S.phase === 'extract' && S.def.extract) {
-      const ex = S.def.extract, me = S.mechs.find(m => m.pid === S.localPid), d = me ? Math.hypot(ex.x - me.x, ex.z - me.z) : 0;
-      if (!edge(ex.x, ex.z, '#5fffb0', `Dropship ${Math.round(d * 16)} m`)) {
-        const a = this.P(ex.x, ex.z, 0), b = this.P(ex.x, ex.z, 3), k = 0.5 + 0.5 * Math.sin(t * 4);
-        ctx.save(); ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createLinearGradient(a.sx, a.sy, b.sx, b.sy); gr.addColorStop(0, 'rgba(95,255,176,0.8)'); gr.addColorStop(1, 'rgba(95,255,176,0)');
-        ctx.strokeStyle = gr; ctx.lineWidth = 6; ctx.globalAlpha = 0.55 + 0.35 * k; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); ctx.restore();
+    // where the job is (owner reports 2026-11-18: an arrow to the dropship after the job; "I don't know what the tank
+    // farms look like — no indicators"): an arrow at the screen edge to each target off screen (the nearest few, with
+    // their distance), a beam on each one on screen. One list: render/targets.js (the minimap reads it too).
+    const me = S.mechs.find(m => m.pid === S.localPid) || S.mechs[0];
+    const list = objectiveTargets(S).map(g => ({ ...g, d: me ? Math.hypot(g.x - me.x, g.z - me.z) : 0 })).sort((a, b) => a.d - b.d);
+    const k = 0.5 + 0.5 * Math.sin(t * 4), groups = [];
+    for (const g of list) {
+      const p = this.P(g.x, g.z, 0.4), m = 28, onScreen = p.sx > m && p.sx < this.W - m && p.sy > m && p.sy < this.H - m;
+      if (!onScreen) {                                // off screen: one arrow per direction (the nearest leads, the rest count)
+        const ang = Math.atan2(p.sy - this.H / 2, p.sx - this.W / 2), grp = groups.find(q => q.label === g.label && Math.abs(Math.atan2(Math.sin(q.ang - ang), Math.cos(q.ang - ang))) < 0.3);
+        if (grp) grp.n++; else groups.push({ ...g, ang, n: 1 });
+        continue;
       }
+      const a = this.P(g.x, g.z, 0), b = this.P(g.x, g.z, g.kind === 'build' ? (g.lot?.h || 1) + 1.6 : 2.6);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createLinearGradient(a.sx, a.sy, b.sx, b.sy);
+      gr.addColorStop(0, g.color); gr.addColorStop(1, 'rgba(0,0,0,0)'); ctx.strokeStyle = gr; ctx.lineWidth = g.kind === 'extract' ? 6 : 4;
+      ctx.globalAlpha = 0.45 + 0.35 * k; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); ctx.restore();
     }
+    for (const q of groups.slice(0, 4)) edge(q.x, q.z, q.color, `${q.n > 1 ? `${q.n} ${q.label.toLowerCase()}s` : q.label} ${Math.round(q.d * 16)} m`);
   }
 
   _dropship(ctx, st, y, t) {
@@ -476,11 +503,13 @@ export class View {
       const l = S.world.lots.find(x => x.id === id); if (!l || l.stage >= 3) continue;
       ring(l.x + l.w / 2, l.z + l.d / 2, Math.max(l.w, l.d) * 0.75, '#ffb02e', 0.5 + 0.4 * pulse, [8, 6]);
     }
+    // round 5: a zone to hold (survive with x/z/r — the moon's landing pad): solid while a frame holds it, dashed when empty
+    for (const o of S.objectives) if (o.type === 'survive' && o.r && !o.done) { ring(o.x, o.z, o.r, '#3ff0ff', o.held ? 0.75 : 0.45 + 0.4 * pulse, o.held ? null : [10, 6]); if (!o.held) beacon(o.x, o.z, '#3ff0ff'); }
     if (S.phase === 'extract' && S.def.extract) { const e = S.def.extract; ring(e.x, e.z, e.r, '#5fffb0', 0.6 + 0.4 * pulse); ring(e.x, e.z, e.r * (1 + pulse * 0.3), '#5fffb0', 0.3); }
     for (const p of S.pickups) {
       if (p.owner !== S.localPid) continue;
       const q = this.P(p.x, p.z, 0.08 + Math.sin(t * 4 + p.x) * 0.03);
-      const col = p.part ? '#c46bff' : p.mat === 'chitin' ? '#a8ff2e' : p.mat === 'exotic' ? '#ff9a2e' : p.mat === 'alloy' ? '#4aa8ff' : '#c9ced6';
+      const col = p.part ? '#c46bff' : p.mat === 'chitin' ? '#a8ff2e' : p.mat === 'siegeplate' ? '#ffd24a' : p.mat === 'exotic' ? '#ff9a2e' : p.mat === 'alloy' ? '#4aa8ff' : '#c9ced6';
       ctx.save(); ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 8; ctx.beginPath();
       const s = (p.part ? 6 : 4) * this.zoom * 0.5; ctx.moveTo(q.sx, q.sy - s); ctx.lineTo(q.sx + s, q.sy); ctx.lineTo(q.sx, q.sy + s); ctx.lineTo(q.sx - s, q.sy); ctx.fill(); ctx.restore();
     }

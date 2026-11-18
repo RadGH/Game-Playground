@@ -1,6 +1,23 @@
 {
   "entries": [
     {
+      "id": "2026-11-18-breadth",
+      "date": "2026-11-18",
+      "title": "Overload, the walker, the moon and versus",
+      "items": [
+        "Overload cores: three late generators you can craft from rank 6. Deal damage to fill the bar, then press V (d-pad down, or the Overload button on a phone). Surge fires faster with no heat, Bastion shrugs off most damage and shelters teammates, Cascade blasts everything around you.",
+        "A second boss: the Juggernaut, a Halden-Voss siege walker. Break its shield generator from behind, then its cannon, missile racks and legs. Every attack is marked on the ground first. It drops siege plate. Find it in Iron Stride, in the Kettle, after Sawtooth.",
+        "New enemies: flamer troopers, shield projectors that protect the army inside their dome, medic drones that repair it, spore drifters whose gas slows you down, and Halden-Voss line frames — enemy mechs that fly like aces.",
+        "The moon: Quiet Dust takes you to a mining outpost on the moon. Low gravity means huge jumps, long hovers and quick boosts that slide. It opens from the Crown once the Broodmother is down.",
+        "Long missions: The Long Night (in the Spindle) comes in three parts with a checkpoint after each. Lose, and you can fly it again from the last checkpoint with everything you'd picked up — alone or with your co-op room.",
+        "The Proving Ground (in the Foundry, after Sawtooth): five arena rounds against Halden-Voss frames, then their aces.",
+        "Versus: in a co-op room, the host can pick Crossfire (red against blue) or Scrapyard Brawl (every frame for itself). First to three rounds wins. Bots can fill the sides.",
+        "On phones, a boss's parts now show as one slim row of pips instead of three rows of names.",
+        "Every objective now shows where it is: an arrow at the edge of the screen to each target (with its distance), a beam on targets in view, a minimap on wide screens, and a full mission map (Tab or M, the View button, or the Map button).",
+        "Hold the Line is now a four-minute hold instead of nine, with the waves packed closer together."
+      ]
+    },
+    {
       "id": "2026-11-18-coop",
       "date": "2026-11-18",
       "title": "Online co-op",

@@ -35,6 +35,7 @@ export const CATEGORIES = [
   { id: 'industrial', label: 'Industrial & workshop' },
   { id: 'military', label: 'Military' },
   { id: 'alien', label: 'Alien' },
+  { id: 'moon', label: 'Moon outpost' },     // Overdrive Frame round 5 (kit/moon.js)
 ];
 /** Groups whose recipes are buildings: each gets the common `damage` setting (whole → damaged → burning → rubble). */
 export const WRECK_GROUPS = ['homes', 'shops', 'industry', 'services', 'parks', 'colony', 'landmarks', 'outposts'];

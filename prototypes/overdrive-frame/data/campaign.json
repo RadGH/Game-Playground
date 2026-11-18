@@ -4,24 +4,24 @@
   "rival": { "name": "Halden-Voss Security", "short": "Halden-Voss" },
   "districts": [
     { "id": "thornfield", "name": "Thornfield", "type": "residential", "x": 0, "y": 0, "held": "swarm", "story": "m08-long-fall", "after": ["m06-last-bus", "m07-ace"], "tier": 3 },
-    { "id": "crown", "name": "The Crown", "type": "downtown", "x": 1, "y": 0, "held": "swarm", "story": "m09-brood-queen", "after": ["m08-long-fall"], "tier": 3 },
-    { "id": "foundry", "name": "Foundry Flats", "type": "industrial", "x": 2, "y": 0, "held": "army", "story": "m07-ace", "after": ["m04-cold-cargo"], "tier": 2 },
+    { "id": "crown", "name": "The Crown", "type": "downtown", "x": 1, "y": 0, "held": "swarm", "story": "m09-brood-queen", "after": ["m08-long-fall"], "tier": 3, "more": [{ "story": "m11-quiet-dust", "after": ["m09-brood-queen"] }] },
+    { "id": "foundry", "name": "Foundry Flats", "type": "industrial", "x": 2, "y": 0, "held": "army", "story": "m07-ace", "after": ["m04-cold-cargo"], "tier": 2, "more": [{ "story": "a01-proving-ground", "after": ["m07-ace"] }] },
     { "id": "ashgrove", "name": "Ashgrove", "type": "residential", "x": 0, "y": 1, "held": "swarm", "story": "m06-last-bus", "after": ["m05-dead-air"], "tier": 2 },
-    { "id": "spindle", "name": "Spindle Quarter", "type": "downtown", "x": 1, "y": 1, "held": "both", "story": "m05-dead-air", "after": ["m03-hold-the-line", "m04-cold-cargo"], "afterAny": true, "tier": 2 },
+    { "id": "spindle", "name": "Spindle Quarter", "type": "downtown", "x": 1, "y": 1, "held": "both", "story": "m05-dead-air", "after": ["m03-hold-the-line", "m04-cold-cargo"], "afterAny": true, "tier": 2, "more": [{ "story": "m12-long-night", "after": ["m09-brood-queen"] }] },
     { "id": "saltmarsh", "name": "Saltmarsh Docks", "type": "industrial", "x": 2, "y": 1, "held": "army", "story": "m04-cold-cargo", "after": ["m02-fuel-line"], "tier": 2 },
     { "id": "linden", "name": "Linden Heights", "type": "residential", "x": 0, "y": 2, "held": "swarm", "story": "m03-hold-the-line", "after": ["m01-drop-zone"], "tier": 1 },
     { "id": "glasswell", "name": "Glasswell", "type": "downtown", "x": 1, "y": 2, "held": "swarm", "story": "m01-drop-zone", "after": [], "tier": 1, "start": true },
-    { "id": "kettle", "name": "Kettle Row", "type": "industrial", "x": 2, "y": 2, "held": "army", "story": "m02-fuel-line", "after": ["m01-drop-zone"], "tier": 1 }
+    { "id": "kettle", "name": "Kettle Row", "type": "industrial", "x": 2, "y": 2, "held": "army", "story": "m02-fuel-line", "after": ["m01-drop-zone"], "tier": 1, "more": [{ "story": "m10-iron-stride", "after": ["m07-ace"] }] }
   ],
   "factions": {
     "swarm": { "label": "Swarm", "colour": "#ff5a3a",
-      "early": ["swarmer", "swarmer", "swarmer", "leaper", "spitter"], "mid": ["swarmer", "swarmer", "leaper", "spitter", "brute"], "late": ["swarmer", "leaper", "spitter", "brute", "brute"],
-      "rare": ["bloater", "burrower"], "big": "brute", "home": "nest" },
+      "early": ["swarmer", "swarmer", "swarmer", "leaper", "spitter"], "mid": ["swarmer", "swarmer", "leaper", "spitter", "brute", "drifter"], "late": ["swarmer", "leaper", "spitter", "brute", "brute", "drifter"],
+      "rare": ["bloater", "burrower", "drifter"], "big": "brute", "home": "nest" },
     "army": { "label": "Halden-Voss", "colour": "#ffb02e",
-      "early": ["trooper", "trooper", "drone", "tank"], "mid": ["trooper", "drone", "tank", "artillery", "shieldbearer"], "late": ["trooper", "tank", "gunship", "sniper", "aa", "artillery"],
-      "rare": ["jammer"], "big": "tank", "home": "apc" }
+      "early": ["trooper", "trooper", "drone", "tank"], "mid": ["trooper", "drone", "tank", "artillery", "shieldbearer", "flamer"], "late": ["trooper", "tank", "gunship", "sniper", "aa", "artillery", "flamer", "bulwark", "medic", "hv-light"],
+      "rare": ["jammer", "medic", "bulwark", "hv-heavy"], "big": "tank", "home": "apc" }
   },
-  "counts": { "swarmer": [30, 70], "leaper": [5, 10], "spitter": [4, 7], "brute": [1, 3], "bloater": [1, 2], "burrower": [2, 3], "trooper": [6, 12], "drone": [6, 12], "tank": [1, 2], "artillery": [1, 1], "shieldbearer": [1, 2], "gunship": [1, 1], "sniper": [1, 2], "aa": [1, 1], "jammer": [1, 1] },
+  "counts": { "swarmer": [30, 70], "leaper": [5, 10], "spitter": [4, 7], "brute": [1, 3], "bloater": [1, 2], "burrower": [2, 3], "trooper": [6, 12], "drone": [6, 12], "tank": [1, 2], "artillery": [1, 1], "shieldbearer": [1, 2], "gunship": [1, 1], "sniper": [1, 2], "aa": [1, 1], "jammer": [1, 1], "flamer": [3, 5], "bulwark": [1, 1], "medic": [1, 2], "drifter": [3, 6], "hv-light": [2, 2], "hv-heavy": [1, 1] },
   "contracts": [
     { "type": "wipe", "name": "Clear-out", "length": "short", "w": 3, "brief": "{client} wants {district} swept clean before their crews go back in. Clear every contact." },
     { "type": "nest", "name": "Nest burn", "length": "short", "w": 2, "only": "swarm", "brief": "Hives have taken root in {district}. Burn every one before they bud." },

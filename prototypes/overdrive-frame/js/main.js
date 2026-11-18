@@ -76,11 +76,11 @@ const game = {
   /** Bot teammates for solo play (sim/bots.js): starter frames from each maker, built like a co-op seat. */
   soloBots(n) { return Array.from({ length: n }, (_, i) => { const id = 'b' + (i + 1), b = asItems(botBuild(PARTS_JSON, MAKER_LIST, i)); return { id, mech: frameFor(NETDATA, id, b, botName(i)) }; }); },
   /** Start a mission with a build. Resolves with the result when it ends. */
-  startMission(mission, build, nBots = 0) {
+  startMission(mission, build, nBots = 0, checkpoint = null) {
     return new Promise(resolve => {
       play?.dispose();
       const hud = new Hud(stage, { comms: mission.comms, speakers: SPEAKERS(sprites, mechArt, build), menu: screens.pauseMenu });
-      play = new Play({ root: stage, mission, build, bots: game.soloBots(nBots), P, C, kinds: KINDS, T, sprites, mechArt, mechDrawer: mechArt.draw, hud, pilotName: save.callsign, night: mission.night ?? 0.72,
+      play = new Play({ root: stage, mission, build, bots: game.soloBots(nBots), checkpoint, P, C, kinds: KINDS, T, sprites, mechArt, mechDrawer: mechArt.draw, hud, pilotName: save.callsign, night: mission.night ?? 0.72,
         onEnd: (result, S) => { const p = play; resolve({ result, S, mission, build }); setTimeout(() => { if (play === p) { play.dispose(); play = null; } }, 0); } });
       // the upper body plays its recoil when a weapon fires
       const fx = play.fxOf; play.fxOf = (ev, S) => { if (ev.type === 'fire' && ev.slot != null) mechArt.fired(ev.id, ev.slot); fx(ev, S); };

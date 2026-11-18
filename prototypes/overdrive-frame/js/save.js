@@ -13,7 +13,7 @@ export const SAVE_KEY = 'overdrive-frame:save';
 export const SAVE_VERSION = 2;
 
 export function freshSave(ctx) {
-  const s = { v: SAVE_VERSION, callsign: 'Frame', credits: 0, xp: 0, mats: { scrap: 0, alloy: 0, exotic: 0, chitin: 0 }, grades: {}, items: [], chips: [], builds: [], active: null,
+  const s = { v: SAVE_VERSION, callsign: 'Frame', credits: 0, xp: 0, mats: { scrap: 0, alloy: 0, exotic: 0, chitin: 0, siegeplate: 0 }, grades: {}, items: [], chips: [], builds: [], active: null,
     seen: [], learned: [], dealer: { turn: -1, sold: [] }, played: 0, playedAt: null, settings: { night: 'mission' } };
   if (ctx) Object.assign(s, starterLocker(ctx.PARTS, ctx.MAKERS));
   return s;
@@ -23,7 +23,7 @@ export function freshSave(ctx) {
 export function upgradeSave(old, ctx) {
   if (!old || typeof old !== 'object') return freshSave(ctx);
   if (old.v === SAVE_VERSION) {
-    const s = { ...freshSave(null), ...old, mats: { scrap: 0, alloy: 0, exotic: 0, chitin: 0, ...(old.mats || {}) } };
+    const s = { ...freshSave(null), ...old, mats: { scrap: 0, alloy: 0, exotic: 0, chitin: 0, siegeplate: 0, ...(old.mats || {}) } };
     if (!s.builds?.length && ctx) Object.assign(s, starterLocker(ctx.PARTS, ctx.MAKERS));
     if (!s.builds.some(b => b.id === s.active)) s.active = s.builds[0]?.id || null;
     return s;
@@ -55,6 +55,12 @@ export function writeSave(s, stamp = true) { if (stamp) s.playedAt = Date.now();
  */
 export function applyResult(s, result, missionId, ctx, pid = 'p1') {
   const me = result.perPlayer.find(p => p.id === pid) || result.perPlayer[0];
+  if (result.versus) {                       // versus (sim/versus.js): no loot, no grade — experience, and a purse for the winners
+    const before = rankOf(s.xp), win = me?.team === result.winner, xp = 400 + (win ? 600 : 0) + (me?.kills || 0) * 50;
+    s.xp = (s.xp || 0) + xp; s.credits += win ? 1500 : 500; s.played++;
+    const after = rankOf(s.xp);
+    return { items: [], chips: [], mats: {}, learned: [], crates: 0, xp, won: win, ...(after.rank > before.rank ? { rankUp: after } : {}) };
+  }
   const mission = ctx.mission || ctx.MISSIONS?.find(m => m.id === missionId);
   const tier = ctx.tier || mission?.tier || 1;
   const before = rankOf(s.xp);

@@ -19,7 +19,7 @@ export function gradeParts(S) {
   const hpShare = pm.reduce((s, m) => s + Math.max(0, m.hp) / m.hpMax, 0) / Math.max(1, pm.length);
   const downs = pm.reduce((s, m) => s + (m.timesDown || 0), 0);
   const health = Math.max(0, hpShare - downs * 0.15);
-  const opt = S.objectives.filter(o => o.optional);
+  const opt = [...(S.doneObjectives || []), ...S.objectives].filter(o => o.optional);   // a long mission's earlier stages count too
   const bonus = opt.length ? opt.filter(o => o.done).length / opt.length : 1;
   const care = Math.max(0, 1 - (S.stats.collateral || 0) * 0.25);
   const parts = [

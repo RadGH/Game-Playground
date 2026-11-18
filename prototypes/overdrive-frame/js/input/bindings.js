@@ -38,6 +38,7 @@ export const ACTIONS = [
   { id: 'swap', label: 'Swap hangar weapon', key: 'KeyX', pad: 'Y', touch: 'Swap' },
   { id: 'interact', label: 'Use', key: 'KeyG', pad: 'X', touch: 'Use', note: 'Stations, revive, pick up' },
   { id: 'ping', label: 'Ping', key: 'KeyC', pad: 'UP', note: 'Mark a spot for your team' },
+  { id: 'overload', label: 'Overload', key: 'KeyV', pad: 'DOWN', touch: 'Overload', note: 'An Overload core\'s ultimate, once its bar is full' },
   { id: 'menu', label: 'Menu', key: 'Escape', pad: 'START', touch: '☰' },
   { id: 'map', label: 'Mission map', key: 'Tab', keys: ['KeyM'], pad: 'BACK' },
 ];

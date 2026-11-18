@@ -23,8 +23,8 @@ import { openReport } from './report.js';
 import { play as sound } from '../../../../citykit/js/world/sound.js';
 
 const LENGTH = { short: '4–8 min', mid: '8–15 min', long: '15+ min' };
-const DISTRICT = { downtown: 'Downtown', residential: 'Residential', industrial: 'Industrial' };
-const MAT_NAMES = { scrap: 'Scrap', alloy: 'Alloy', exotic: 'Exotic', chitin: 'Chitin' };
+const DISTRICT = { downtown: 'Downtown', residential: 'Residential', industrial: 'Industrial', moon: 'Moon outpost' };   // moon: round 5
+const MAT_NAMES = { scrap: 'Scrap', alloy: 'Alloy', exotic: 'Exotic', chitin: 'Chitin', siegeplate: 'Siege plate' };   // chitin: the Broodmother's, siege plate: the Juggernaut's
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 const click = () => sound('ui.click', { global: true, gain: 0.4 });
 
@@ -39,7 +39,7 @@ export class Screens {
 
   // ---------------------------------------------------------------- title
   title() {
-    this._leaveNow();
+    this._leaveNow(); this.g.quitMission?.();          // no mission keeps running (and drawing) behind another screen
     const g = this.g;
     const el = h('section', 'of-title');
     const cv = h('canvas', 'of-title-scene'); cv.setAttribute('aria-hidden', 'true');
@@ -93,7 +93,7 @@ export class Screens {
   /** The walkable hub (owner: "walk your mech around the hangar hub — menus are lame"). The hangar runs on the stage
    *  like a mission; each bay opens its sheet over it and the mech waits until you close it. */
   async hangar() {
-    this._leaveNow();
+    this._leaveNow(); this.g.quitMission?.();
     const g = this.g;
     this.root.replaceChildren(); this.root.hidden = true; this.current = 'hangar';
     const { Hangar } = await import('../hangar.js');
@@ -180,7 +180,7 @@ export class Screens {
       li.append(b); return li;
     };
     const draw = () => {
-      el.querySelector('[data-l="story"]').replaceChildren(...story.map(x => card(x.mission, x.open || x.done ? null : x.district.reached ? 'Finish the missions before it first' : `Free a district next to ${x.district.name} first`)));
+      el.querySelector('[data-l="story"]').replaceChildren(...story.map(x => card(x.mission, x.open || x.done ? null : x.after && !x.district.freed ? `Free ${x.district.name} first` : x.district.reached ? 'Finish the missions before it first' : `Free a district next to ${x.district.name} first`)));
       el.querySelector('[data-l="contracts"]').replaceChildren(...contracts.map(m => card(m)));
       this._brief(brief, sel);
       this._city(el.querySelector('.of-city'), sel);
@@ -228,7 +228,7 @@ export class Screens {
       </div>
       <p class="of-brief-text">${m.brief}</p>
       <div class="of-brief-cols">
-        <section><h3>Objectives</h3><ul class="of-obj-list">${def.objectives.map(o => `<li class="${o.optional ? 'of-opt' : ''}">${o.label}${o.optional ? ' <small>bonus</small>' : ''}</li>`).join('')}${def.extract ? '<li>Reach the dropship when done</li>' : ''}</ul></section>
+        <section><h3>${def.stages ? `In ${def.stages.length} parts <small>a checkpoint after each</small>` : 'Objectives'}</h3><ul class="of-obj-list">${def.stages ? def.stages.map((st, i) => `<li>${i + 1}. ${st.label}</li>`).join('') : def.objectives.map(o => `<li class="${o.optional ? 'of-opt' : ''}">${o.label}${o.optional ? ' <small>bonus</small>' : ''}</li>`).join('')}${def.extract ? '<li>Reach the dropship when done</li>' : ''}</ul></section>
         <section><h3>Expect</h3><ul class="of-expect">${kinds.map(k => `<li><canvas width="56" height="56" data-kind="${k}" aria-hidden="true"></canvas><span>${g.KINDS[k].name}</span></li>`).join('')}</ul></section>
       </div>
       <section class="of-frames"><h3>Frame <small>saved builds — change parts in the hangar's assembly bay</small></h3><div class="of-frame-row"></div><div class="of-frame-stats"></div></section>
@@ -340,6 +340,7 @@ export class Screens {
       for (let d = 0; d < 16; d++) {
         for (let f = 0; f < g.sprites.frames(K.recipe, walk); f++) jobs.push(() => g.sprites.facing(K.recipe, { seed: 1 }, d, walk, f, true));
         if (die) jobs.push(() => g.sprites.facing(K.recipe, { seed: 1 }, d, die, g.sprites.frames(K.recipe, die) - 1, true));
+        for (const a of K.prebake || []) { const an = g.sprites.animOf(K.recipe, a); for (let f = 0; f < g.sprites.frames(K.recipe, an); f++) jobs.push(() => g.sprites.facing(K.recipe, { seed: 1 }, d, an, f, true)); }   // round 5: a kind's job pose (flamer's flicker…), never a blink on first use
       }
     }
     for (const w of m.waves) {                   // bosses' attack poses and rival aces' frames
@@ -369,13 +370,14 @@ export class Screens {
     });
     this.root.hidden = true; this.current = 'mission';
     if (coop) { const r = await g.startCoop(coop, opts.net); return { ...r, m }; }   // the room shows the results (ui/coop.js)
-    const { result, S } = await g.startMission(m, build, g.save.bots || 0);
+    const { result, S } = await g.startMission(m, build, g.save.bots || 0, opts.checkpoint || null);
     this.results(m, result, S);
     return {};
   }
 
   // ---------------------------------------------------------------- results
   results(m, result, S, opts = {}) {
+    if (result.versus) return this._versusResults(m, result, opts);
     const g = this.g, pid = opts.pid || 'p1';
     const gained = g.applyResult(result, m, S, pid, !!opts.coop); g.saveNow();
     const me = result.perPlayer.find(p => p.id === pid) || result.perPlayer[0];
@@ -402,7 +404,8 @@ export class Screens {
         ${Object.keys(gained.rep || {}).length ? `<p class="of-res-rep">${Object.entries(gained.rep).filter(([, v]) => v > 0).map(([k, v]) => `<span>+${fmt(v, { decimals: 0 })} ${g.MAKERS.find(x => x.id === k)?.short} reputation</span>`).join('')}</p>` : ''}
         ${gained.items.length || gained.chips.length || gained.learned.length ? `<section class="of-res-loot"><h2>${gained.crates ? `${gained.crates} crate${gained.crates > 1 ? 's' : ''} opened · ` : ''}Found</h2><ul class="of-loot-row"></ul></section>` : ''}
         ${team.length ? `<section class="of-res-team"><h2>The team</h2><ul>${team.map(p => `<li><b>${p.name || 'Pilot'}</b><span>${fmt(p.kills, { decimals: 0 })} kills · ${fmt(p.dealt, { decimals: 0 })} damage${p.bot ? ' · bot' : ''}</span></li>`).join('')}</ul></section>` : ''}
-        <div class="of-res-actions">${opts.coop ? '<button type="button" class="of-btn of-primary" data-a="room">Back to the room</button><button type="button" class="of-btn" data-a="leave">Leave the room</button>' : '<button type="button" class="of-btn of-primary" data-a="hangar">Back to the hangar</button><button type="button" class="of-btn" data-a="again">Run it again</button><button type="button" class="of-btn" data-a="board">Contracts</button>'}</div>
+        ${!result.won && result.checkpoint && S?.checkpoint && !opts.coop ? `<p class="of-res-cp">Checkpoint: <b>${result.checkpoint.label}</b> — fly it again from there with what you've picked up so far.</p>` : ''}
+        <div class="of-res-actions">${!result.won && result.checkpoint && S?.checkpoint && !opts.coop ? '<button type="button" class="of-btn of-primary" data-a="cp">Retry from the checkpoint</button>' : ''}${opts.coop ? '<button type="button" class="of-btn of-primary" data-a="room">Back to the room</button><button type="button" class="of-btn" data-a="leave">Leave the room</button>' : `<button type="button" class="of-btn${!result.won && result.checkpoint && S?.checkpoint ? '' : ' of-primary'}" data-a="hangar">Back to the hangar</button><button type="button" class="of-btn" data-a="again">Run it again</button><button type="button" class="of-btn" data-a="board">Contracts</button>`}</div>
       </div>`;
     const row = el.querySelector('.of-loot-row');
     if (row) {
@@ -420,12 +423,35 @@ export class Screens {
       el.querySelector('[data-a="room"]').addEventListener('click', () => { click(); g.coop.sendMe(); g.coop.roomScreen(); });
       el.querySelector('[data-a="leave"]').addEventListener('click', () => { click(); g.coop.leave(); this.hangar(); });
     } else {
+      el.querySelector('[data-a="cp"]')?.addEventListener('click', () => { click(); this.drop(m, { checkpoint: S.checkpoint }); });
       el.querySelector('[data-a="hangar"]').addEventListener('click', () => { click(); this.hangar(); });
       el.querySelector('[data-a="again"]').addEventListener('click', () => { click(); this.drop(m); });
       el.querySelector('[data-a="board"]').addEventListener('click', () => { click(); this.missions(m.id, 'hangar'); });
     }
     this._show('results', el);
     sound(result.won ? 'quest.complete' : 'ui.error', { global: true, gain: 0.6 });
+  }
+
+  /** Versus results: who took the match, the score, everyone's downs and damage; experience (and a purse) for playing. */
+  _versusResults(m, result, opts) {
+    const g = this.g, pid = opts.pid || 'p1', gained = g.applyResult(result, m, null, pid, true); g.saveNow();
+    const me = result.perPlayer.find(p => p.id === pid), win = me?.team === result.winner;
+    const side = t => (t === 'red' ? 'Red' : t === 'blue' ? 'Blue' : result.perPlayer.find(p => p.team === t)?.name || 'Pilot');
+    const rk = rankOf(g.save.xp);
+    const el = h('section', 'of-results' + (win ? '' : ' of-lost'));
+    el.innerHTML = `
+      <div class="of-res-card">
+        <header><span class="of-res-kicker">${win ? 'Victory' : 'Defeat'}</span><h1>${m.name}</h1></header>
+        <p class="of-res-vs">${Object.entries(result.score).map(([t, n]) => `<span class="of-vs-side of-vs-${t}${t === me?.team ? ' of-vs-mine' : ''}">${side(t)} <b>${n}</b></span>`).join('<i>·</i>')}</p>
+        <section class="of-res-team"><h2>Pilots</h2><ul>${result.perPlayer.slice().sort((a, b) => b.kills - a.kills).map(p => `<li class="of-vs-${p.team}"><b>${p.name || 'Pilot'}${p.id === pid ? ' (you)' : ''}</b><span>${side(p.team)} · ${fmt(p.kills, { decimals: 0 })} ${p.kills === 1 ? 'down' : 'downs'} · ${fmt(p.dealt, { decimals: 0 })} damage${p.bot ? ' · bot' : ''}</span></li>`).join('')}</ul></section>
+        <dl class="of-res-nums"><div><dt>Rounds</dt><dd>${result.rounds}</dd></div><div><dt>Purse</dt><dd>${win ? '1,500' : '500'} cr</dd></div><div><dt>Experience</dt><dd>+${fmt(gained.xp, { decimals: 0 })}</dd></div></dl>
+        <div class="of-res-rank"><span>${gained.rankUp ? `<b>Rank up!</b> Rank ${rk.rank} · ${rk.name}` : `Rank ${rk.rank} · ${rk.name}`}</span><i style="--v:${rk.max ? 100 : Math.round(rk.into / rk.need * 100)}%"></i><small>${rk.max ? 'Top rank' : `${fmt(rk.need - rk.into, { decimals: 0 })} to rank ${rk.rank + 1}`}</small></div>
+        <div class="of-res-actions"><button type="button" class="of-btn of-primary" data-a="room">Back to the room</button><button type="button" class="of-btn" data-a="leave">Leave the room</button></div>
+      </div>`;
+    el.querySelector('[data-a="room"]').addEventListener('click', () => { click(); g.coop.sendMe(); g.coop.roomScreen(); });
+    el.querySelector('[data-a="leave"]').addEventListener('click', () => { click(); g.coop.leave(); this.hangar(); });
+    this._show('results', el);
+    sound(win ? 'quest.complete' : 'ui.error', { global: true, gain: 0.6 });
   }
 
   // ---------------------------------------------------------------- ☰ pause menu + settings

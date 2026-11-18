@@ -11,12 +11,14 @@
 //   Shield bearer      — a heavy walker behind a tall shield with a glowing rim; braces it into the street
 //   Jammer truck       — raises a mast with a spinning dish; jams the mech's radar (used sparingly)
 //   Sniper walker      — a long-legged walker carrying a rail gun; a laser sight glows while it aims
+//   Flamer, Bulwark, Field medic drone — round 5 roles, at the end of this file
+//   Juggernaut         — the boss: a siege walker on four legs, main cannon, two missile racks, a shield generator
 // Enemy mechs come from mechkit/, not here. Scale (ARCH.md): 1 unit = 16 m; a mech is 0.75 tall; a trooper 0.16.
 import * as THREE from 'three';
 import { addRecipes } from './buildings.js';
 import {
   put, geo, cbox, seg, ball, spike, disc, wheel, ringFlat, profile, group, marker, V, clamp01, ease, lerp, lerpV, TAU, bump, ik, step,
-  frame, torsoGroup, C, dim, lit, neonMat, shade, SCORCH, SOOT, FIRE, throws, flight, chunk, fireball, flames, poseable, aimLocal, jitter,
+  frame, torsoGroup, C, dim, lit, neonMat, shade, SCORCH, SOOT, FIRE, FIRE_HOT, throws, flight, chunk, fireball, flames, poseable, aimLocal, jitter, partKey,
 } from './enemy-bits.js';
 
 // ---------- paint + faction stripe ----------
@@ -586,6 +588,170 @@ function drawSniper(root, L, anim, t) {
   }
 }
 
+// =====================================================================================================================
+// Juggernaut — the army's siege-walker boss (Overdrive Frame's second boss): ~1.9 long with its gun, ~1.05 tall (a
+// mech is 0.75). An armoured hull on four splayed spider legs, a turret with one long main cannon, a missile rack on
+// each flank and a shield generator mast on its back. Breakable parts (named groups `part:<name>`, a wreck stump when
+// broken): cannon, rack-left, rack-right, generator, leg-fl, leg-fr, leg-rl, leg-rr. A broken leg leaves a torn
+// thigh and that corner of the hull sags — two gone and it walks bent over.
+// =====================================================================================================================
+const JUG_PARTS = ['cannon', 'rack-left', 'rack-right', 'generator', 'leg-fl', 'leg-fr', 'leg-rl', 'leg-rr'];
+const JUG_LABELS = { cannon: 'Main cannon', 'rack-left': 'Left missile rack', 'rack-right': 'Right missile rack', generator: 'Shield generator', 'leg-fl': 'Front left leg', 'leg-fr': 'Front right leg', 'leg-rl': 'Rear left leg', 'leg-rr': 'Rear right leg' };
+const A_JUG = {
+  walk: { label: 'Walk', frames: 8, fps: 8 }, fire: { label: 'Cannon', frames: 8, fps: 12 }, slam: { label: 'Stomp', frames: 10, fps: 10 },
+  deploy: { label: 'Launch', frames: 8, fps: 10 }, roar: { label: 'Reel', frames: 8, fps: 10 }, die: { label: 'Die', frames: 14, fps: 10, once: true },
+};
+// legs: [name, side (+1 = left, +z), front (+1) / rear (−1), gait phase] — one foot moves at a time
+const JUG_LEGS = [['leg-fl', 1, 1, 0], ['leg-fr', -1, 1, 0.5], ['leg-rl', 1, -1, 0.75], ['leg-rr', -1, -1, 0.25]];
+const GEN_GLOW = '#5fe8ff', HAZARD = '#e8b21c';
+function jugLook(p) {
+  const L = looks(p, { flameSpots: [[0.1, 0.62, 0.12, 0.04], [-0.3, 0.6, -0.1, 0.035], [0.35, 0.55, -0.15, 0.03], [-0.15, 0.58, 0.2, 0.03]] });
+  return { ...L, hazard: C(HAZARD, 0.3, 0.5), bits: throws(L.R, 18, { spread: 0.9, up: 0.9, size: [0.06, 0.12] }), legFly: throws(p.R.fork(21), 4, { spread: 0.5, up: 0.6 }) };
+}
+function drawJuggernaut(root, L, anim, t, st, p) {
+  const dead = anim === 'die' && t > 0.18;
+  const broken = name => st.broken.has(name) || !!p[partKey(name)];
+  let hipY = 0.56, pitch = 0, roll = 0, legPh = 0, stride = 0.22, recoil = 0, flashOn = false, rise = 0, slamK = -1, rackUp = 0, launch = -1, reel = 0, die = 0;
+  if (anim === 'walk') { legPh = t; hipY += 0.012 * Math.cos(t * TAU * 4); roll = 0.015 * Math.sin(t * TAU * 2); pitch = 0.01 * Math.sin(t * TAU * 4); }
+  else if (anim === 'fire') { stride = 0; recoil = t < 0.25 ? ease(t / 0.25) : 1 - ease((t - 0.25) / 0.7); flashOn = t > 0.2 && t < 0.45; pitch = 0.03 * recoil; }
+  else if (anim === 'slam') { stride = 0; rise = t < 0.55 ? ease(t / 0.55) : 1 - ease((t - 0.55) / 0.1); if (t > 0.62) slamK = (t - 0.62) / 0.38; pitch = 0.16 * rise - (slamK >= 0 ? 0.04 * (1 - slamK) : 0); hipY += 0.1 * rise - (slamK >= 0 ? 0.07 * (1 - slamK) : 0); }
+  else if (anim === 'deploy') { stride = 0; rackUp = ease(Math.min(1, t / 0.4)); if (t > 0.45) launch = (t - 0.45) / 0.55; hipY -= 0.02 * rackUp; }
+  else if (anim === 'roar') { stride = 0; reel = 1; roll = 0.05 * Math.sin(t * TAU * 2); pitch = -0.04 + 0.02 * Math.sin(t * TAU * 3); hipY -= 0.03; }
+  else if (anim === 'die') { stride = 0; die = ease(t / 0.7); hipY = lerp(0.56, 0.14, die); pitch = -0.12 * die; roll = 0.22 * die; }
+  // broken legs: that corner of the hull sags (the stump can't hold it up)
+  const sag = {}; let nBroken = 0;
+  for (const [name] of JUG_LEGS) if (broken(name)) { nBroken++; sag[name] = 1; }
+  const dF = 0.08 * ((sag['leg-fl'] || 0) + (sag['leg-fr'] || 0)), dB = 0.08 * ((sag['leg-rl'] || 0) + (sag['leg-rr'] || 0));
+  const dL = 0.08 * ((sag['leg-fl'] || 0) + (sag['leg-rl'] || 0)), dR = 0.08 * ((sag['leg-fr'] || 0) + (sag['leg-rr'] || 0));
+  if (!die) { hipY -= 0.04 * nBroken; pitch += (dB - dF) * 0.9; roll += (dL - dR) * 0.9; }
+  const f = frame(0, hipY, 0, pitch, roll, 0);
+  const T = torsoGroup(root, f, 'hull');
+  const hull = burnt(L, dead, L.hull), hullLight = burnt(L, dead, L.hullLight), hullDark = burnt(L, dead, L.hullDark), stripe = dead ? SOOT : L.stripe;
+  // ---- hull: a long armoured body with a sloped glacis, side skirts carrying the faction stripe, a belly keel ----
+  profile(T, 'jug-hull', [[-0.6, 0.0], [0.44, 0.0], [0.62, 0.09], [0.52, 0.2], [-0.44, 0.25], [-0.62, 0.15]], 0.56, hull, 0.01);
+  profile(group(T, '', 0, -0.06, 0), 'jug-keel', [[-0.45, 0.0], [0.35, 0.0], [0.45, 0.06], [-0.5, 0.07]], 0.36, hullDark, 0.008);
+  for (const s of [1, -1]) {
+    cbox(T, 0.9, 0.11, 0.025, hullLight, -0.05, 0.11, s * 0.29);                 // side skirt
+    cbox(T, 0.78, 0.016, 0.006, stripe, -0.05, 0.13, s * 0.304);                  // faction stripe (glows at night)
+    for (let i = 0; i < 5; i++) cbox(T, 0.012, 0.09, 0.03, hullDark, -0.42 + i * 0.18, 0.11, s * 0.3);   // skirt ribs
+    cbox(T, 0.006, 0.02, 0.05, lit(HEAD, !dead, 0.9), 0.585, 0.11, s * 0.2);     // head lamps on the glacis
+    cbox(T, 0.006, 0.02, 0.03, lit(TAIL, !dead, 0.6), -0.615, 0.16, s * 0.22);   // tail lamps
+  }
+  for (let i = 0; i < 4; i++) cbox(T, 0.03, 0.012, 0.5, i % 2 ? L.metal : L.hazard, 0.47 + i * 0.03, 0.03 + i * 0.03, 0).rotation.z = 0.6;   // hazard bands on the nose
+  cbox(T, 0.3, 0.03, 0.4, hullDark, -0.2, 0.245, 0);                               // engine deck
+  for (let i = 0; i < 5; i++) cbox(T, 0.02, 0.012, 0.34, L.metal, -0.32 + i * 0.055, 0.265, 0);    // grille
+  for (const s of [1, -1]) { cbox(T, 0.06, 0.04, 0.04, L.metal, -0.08, 0.26, s * 0.2); ball(T, 0.014, lit('#ff9a2e', !dead, 0.8), -0.08, 0.29, s * 0.2, 1, 1, 1, 8); }   // beacons
+  if (reel && !dead) for (const [x, z] of [[-0.25, 0.1], [0.1, -0.15]]) ball(T, 0.03, neonMat(FIRE, 0.9), x, 0.27, z, 1, 0.6, 1, 8);   // reeling: sparks off the deck
+  // ---- turret + main cannon (breakable: 'cannon') ----
+  const Tu = group(T, '', 0.18, 0.22, 0);
+  if (!broken('cannon')) {
+    const Cn = group(Tu, 'part:cannon');
+    profile(Cn, 'jug-turret', [[-0.22, 0.0], [0.15, 0.0], [0.24, 0.06], [0.16, 0.13], [-0.18, 0.14], [-0.25, 0.07]], 0.36, hullLight, 0.008);
+    for (const s of [1, -1]) { cbox(Cn, 0.3, 0.012, 0.004, stripe, -0.02, 0.09, s * 0.181); cbox(Cn, 0.08, 0.06, 0.05, L.metal, -0.12, 0.17, s * 0.1); }
+    cbox(Cn, 0.03, 0.02, 0.07, lit(L.stripeColor, !dead, 0.8), 0.18, 0.1, 0.0);        // sight
+    const gx = 0.2 - 0.12 * recoil;
+    seg(Cn, [gx - 0.06, 0.07, 0], [gx + 0.66, 0.07, 0], 0.046, 0.036, L.metal, 12);
+    seg(Cn, [gx + 0.2, 0.07, 0], [gx + 0.3, 0.07, 0], 0.05, 0.05, L.trim, 12);           // fume extractor
+    disc(Cn, 0.05, 0.1, L.metal, gx + 0.66, 0.07, 0, 10).rotation.z = Math.PI / 2;      // muzzle brake
+    for (const s of [1, -1]) cbox(Cn, 0.05, 0.02, 0.03, L.trim, gx + 0.66, 0.07, s * 0.05);
+    marker(Cn, 'muzzle', gx + 0.72, 0.07, 0);
+    if (flashOn) { flash(Cn, [gx + 0.74, 0.07, 0], [1, 0, 0], 0.12); for (const s of [1, -1]) flash(Cn, [gx + 0.66, 0.07, s * 0.07], [0, 0, s], 0.05); }
+    seg(Cn, [-0.15, 0.14, 0.06], [-0.18, 0.3, 0.06], 0.004, 0.002, L.metal, 4);          // antenna
+  } else {
+    const Sb = group(Tu, 'stump:cannon');
+    profile(Sb, 'jug-turret-wreck', [[-0.22, 0.0], [0.12, 0.0], [0.18, 0.05], [0.1, 0.1], [-0.18, 0.12], [-0.25, 0.07]], 0.34, SCORCH, 0.008);
+    seg(Sb, [0.1, 0.06, 0], [0.32, 0.05, 0.01], 0.046, 0.044, SOOT, 12);
+    for (let i = 0; i < 5; i++) { const a = i * TAU / 5; spike(Sb, [0.31, 0.05 + Math.cos(a) * 0.03, Math.sin(a) * 0.03], [0.37 + (i % 2) * 0.03, 0.05 + Math.cos(a) * 0.045, Math.sin(a) * 0.045], 0.014, SOOT, 4); }
+    if (!dead) ball(Sb, 0.03, neonMat(FIRE_HOT, 0.8), 0.32, 0.05, 0.01, 1, 1, 1, 8);    // the torn barrel still glows
+    if (!dead) ball(Sb, 0.045, neonMat(FIRE, 0.7), -0.02, 0.12, 0, 1.4, 0.5, 1.2, 8);
+  }
+  // ---- missile racks on each flank (breakable): two rows of three tubes, raised to fire ----
+  for (const [name, s] of [['rack-left', 1], ['rack-right', -1]]) {
+    const at = [-0.12, 0.17, s * 0.39];
+    seg(T, [-0.12, 0.13, s * 0.29], at, 0.03, 0.03, L.metal, 6);                     // bracket arm
+    if (!broken(name)) {
+      const R = group(T, 'part:' + name, ...at); R.rotation.z = 0.7 * rackUp;
+      cbox(R, 0.34, 0.17, 0.13, hullLight, 0, 0.04, 0);
+      cbox(R, 0.3, 0.012, 0.004, stripe, -0.01, 0.1, s * 0.066);
+      cbox(R, 0.02, 0.15, 0.12, L.metal, 0.17, 0.04, 0);
+      for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
+        const y = r * 0.075, z = (c - 1) * 0.038, n = r * 3 + c;
+        disc(R, 0.015, 0.006, C('#151719', 0.2, 0.8), 0.181, y, z, 10).rotation.z = Math.PI / 2;
+        const fired = launch >= 0 && n < launch * 6;
+        if (!fired) ball(R, 0.012, lit('#ff3b30', !dead, 0.6), 0.178, y, z, 0.6, 1, 1, 8);
+        else if (launch * 6 - n < 1.2) rocket(R, [0.2 + (launch * 6 - n) * 0.4, y, z], [1, 0, 0], 0.08, 0.012, L.trim);
+        marker(R, 'muzzle:' + name + ':' + n, 0.19, y, z);
+      }
+      if (launch >= 0 && launch < 0.9) flash(R, [-0.19, 0.04, 0], [-1, 0, 0], 0.05);     // back-blast
+    } else {
+      const R = group(T, 'stump:' + name, ...at); R.rotation.set(0.25 * s, 0, -0.35);
+      cbox(R, 0.18, 0.08, 0.1, SCORCH, -0.06, 0.0, 0);
+      for (let i = 0; i < 4; i++) spike(R, [0.02, -0.03 + i * 0.025, (i - 1.5) * 0.025], [0.09 + (i % 2) * 0.04, i * 0.03, (i - 1.5) * 0.04], 0.012, SOOT, 4);
+      if (!dead) ball(R, 0.035, neonMat(FIRE, 0.8), 0.0, 0.03, 0, 1.2, 0.8, 1, 8);
+    }
+  }
+  // ---- shield generator mast on its back (breakable): a pylon, two coil rings and a glowing emitter ----
+  if (!broken('generator')) {
+    const Gn = group(T, 'part:generator', -0.44, 0.22, 0);
+    cbox(Gn, 0.2, 0.05, 0.3, hullDark, 0, 0.02, 0);
+    disc(Gn, 0.06, 0.16, L.metal, 0, 0.12, 0, 10);
+    for (const s of [1, -1]) { seg(Gn, [0, 0.05, s * 0.12], [0, 0.2, s * 0.05], 0.014, 0.01, L.trim, 6); cbox(Gn, 0.05, 0.08, 0.008, hullLight, 0.02, 0.08, s * 0.15); }
+    const glow = lit(GEN_GLOW, !dead, 0.9);
+    ringFlat(Gn, 0.085, 0.012, glow, 0, 0.15, 0); ringFlat(Gn, 0.06, 0.01, glow, 0, 0.21, 0);
+    ball(Gn, 0.055, glow, 0, 0.26, 0, 1, 0.9, 1, 14);
+    spike(Gn, [0, 0.3, 0], [0, 0.38, 0], 0.012, L.metal, 6);
+    for (const s of [1, -1]) cbox(Gn, 0.004, 0.04, 0.05, lit(GEN_GLOW, !dead, 0.6), 0.101, 0.08, s * 0.07);
+  } else {
+    const Sb = group(T, 'stump:generator', -0.44, 0.22, 0);
+    cbox(Sb, 0.2, 0.05, 0.3, SCORCH, 0, 0.02, 0);
+    seg(Sb, [0, 0.04, 0], [0.02, 0.1, 0.01], 0.06, 0.05, SOOT, 10);
+    for (let i = 0; i < 5; i++) { const a = i * TAU / 5; spike(Sb, [Math.cos(a) * 0.04, 0.09, Math.sin(a) * 0.04], [Math.cos(a) * 0.07, 0.15 + (i % 2) * 0.03, Math.sin(a) * 0.07], 0.012, SOOT, 4); }
+    if (!dead) ball(Sb, 0.03, neonMat(GEN_GLOW, 0.5), 0.0, 0.1, 0, 1, 0.6, 1, 8);       // a last flicker in the torn coil
+    if (!dead) ball(Sb, 0.04, neonMat(FIRE, 0.7), 0.04, 0.07, -0.05, 1, 0.6, 1, 8);
+  }
+  // ---- four splayed legs: hip on a hull corner, an armoured thigh up to a high knee, a shin down to a broad
+  //      three-toed foot ----
+  JUG_LEGS.forEach(([name, s, fb, off], i) => {
+    const hip = f.tp([fb * 0.4, 0.02, s * 0.28]);
+    if (broken(name)) {        // torn at the knee: the thigh hangs, a cable trails, sparks at the break
+      const Sb = group(root, 'stump:' + name);
+      const end = f.tp([fb * 0.6, -0.2, s * 0.46]);
+      seg(Sb, hip, end, 0.06, 0.05, dead ? SCORCH : L.hullDark, 6);
+      ball(Sb, 0.07, SCORCH, ...hip, 1, 1, 1, 10);
+      for (let k = 0; k < 3; k++) spike(Sb, end, [end[0] + fb * 0.03 * (k - 1), end[1] - 0.05 - k * 0.02, end[2] + s * 0.02 * k], 0.016, SOOT, 4);
+      seg(Sb, end, [end[0] + fb * 0.02, Math.max(0.02, end[1] - 0.14), end[2] + s * 0.03], 0.006, 0.004, C('#1a1a1a', 0, 0.9), 4);   // cable
+      if (!dead) ball(Sb, 0.025, neonMat(FIRE_HOT, 0.9), ...end, 1, 1, 1, 8);
+      return;
+    }
+    const Lg = group(root, 'part:' + name);
+    const stp = step(legPh + off, 0.75);
+    let foot = [fb * 0.66 + stp.u * stride, 0.09 * stp.lift, s * 0.62];
+    if (anim === 'slam' && fb > 0) foot = slamK >= 0 ? [fb * 0.72, 0, s * 0.66] : [fb * 0.66 + 0.08 * rise, 0.24 * rise, s * 0.62];
+    if (die) { const lf = L.legFly[i]; foot = lerpV(foot, [fb * 0.85 + lf.v[0] * 0.1, 0, s * (0.82 + Math.abs(lf.v[2]) * 0.1)], die); }
+    const [kn, ft] = ik(hip, foot, 0.44, 0.56, [fb * 0.25, 1, s * 0.5]);
+    seg(Lg, hip, kn, 0.075, 0.06, hull, 6);                                            // thigh (six-sided: armoured)
+    seg(Lg, lerpV(hip, kn, 0.15), lerpV(hip, kn, 0.75), 0.088, 0.07, hullLight, 4);   // thigh plate
+    seg(Lg, f.tp([fb * 0.3, 0.12, s * 0.27]), lerpV(hip, kn, 0.6), 0.016, 0.014, L.trim, 6);   // hydraulic ram
+    ball(Lg, 0.07, L.metal, ...hip, 1, 1, 1, 10);
+    ball(Lg, 0.06, hullDark, ...kn, 1, 1, 1, 10);
+    disc(Lg, 0.05, 0.12, L.metal, ...kn, 10).rotation.x = Math.PI / 2;                   // knee actuator
+    seg(Lg, kn, ft, 0.052, 0.04, L.metal, 8);                                          // shin
+    seg(Lg, kn, lerpV(kn, ft, 0.5), 0.055, 0.045, hull, 6);                            // shin guard
+    cbox(Lg, 0.012, 0.06, 0.012, stripe, ...lerpV(kn, ft, 0.25));
+    disc(Lg, 0.08, 0.035, hullDark, ft[0], ft[1] + 0.018, ft[2], 8);                    // foot pad
+    for (const a of [-0.7, 0, 0.7]) { const d = Math.atan2(s, fb) + a; spike(Lg, [ft[0], ft[1] + 0.012, ft[2]], [ft[0] + Math.cos(d) * 0.13, ft[1] + 0.006, ft[2] + Math.sin(d) * 0.13], 0.018, L.metal, 4); }
+  });
+  // ---- the stomp lands: a ring of dust thrown out round its feet ----
+  if (slamK >= 0 && slamK < 0.95) { const k = ease(slamK); ringFlat(root, 0.7 + 1.0 * k, 0.03 * (1 - k) + 0.006, C('#8a8478', 0, 1), 0, 0.02, 0); ringFlat(root, 0.5 + 0.7 * k, 0.02 * (1 - k) + 0.004, C('#a39a8a', 0, 1), 0, 0.03, 0); }
+  // ---- death: the legs give, a fireball in the hull, plates and parts thrown, then it burns ----
+  if (anim === 'die') {
+    fireball(root, 0, hipY + 0.15, 0, 0.32, t / 0.55);
+    if (t > 0.3) fireball(root, -0.35, hipY + 0.2, 0.1, 0.2, (t - 0.3) / 0.5);
+    for (let i = 0; i < 14; i++) chunk(root, [(i % 5 - 2) * 0.12, hipY + 0.2, (i % 3 - 1) * 0.15], L.bits[i], clamp01(t / 0.85), i % 3 ? SCORCH : L.metal, i % 4 ? 'box' : 'ball');
+    if (t > 0.4) flames(root, L.flameSpots.map(([x, y, z, r]) => [x, y - (0.56 - hipY), z, r]), t);
+  }
+}
+
 // ---------- recipes ----------
 const common = { group: 'army', genre: ['military'], dirs: 16, noStyle: true, size: [1, 1] };
 const altParam = (def, min, max) => ({ key: 'alt', label: 'Altitude', min, max, step: 0.05, def, unit: 'tiles' });
@@ -639,5 +805,180 @@ addRecipes({
     ...common, name: 'Sniper Walker', anims: A_SNIPER, dims: { h: 0.4 },
     blurb: 'A tall long-legged walker with a rail gun longer than itself. A red laser shows where it is aiming.',
     params: [paintParam, stripeParam], build: poseable(A_SNIPER, sniperLook, drawSniper),
+  },
+  'ar-juggernaut': {
+    ...common, name: 'Juggernaut', size: [2, 2], anims: A_JUG, dims: { len: 2.0, h: 1.15 }, parts: JUG_PARTS,
+    blurb: 'Boss, a siege walker about 30 m long on four splayed legs: a main cannon, two missile racks and a shield generator on its back. Every one of them, and each leg, can be shot off.',
+    params: [paintParam, stripeParam, ...JUG_PARTS.map(n => ({ key: partKey(n), label: JUG_LABELS[n], min: 0, max: 1, step: 1, def: 0, names: ['Whole', 'Shot off'] }))],
+    build: poseable(A_JUG, jugLook, drawJuggernaut, { parts: JUG_PARTS }),
+  },
+});
+
+// =====================================================================================================================
+// Round 5 roles (Overdrive Frame R5 — "full enemy role list"):
+//   Flamer          — one heavy trooper (0.2 tall) with twin fuel tanks and a flame lance; a pilot light flickers
+//                     at the nozzle (`light`) before the short fire jet (`fire`); the tanks burst when it dies
+//   Bulwark         — a squat four-legged walker carrying a tall emitter mast; the ring at the top spins and glows
+//                     while it holds its dome up (`project` — the game draws the dome itself)
+//   Field medic     — a pale twin-fan drone with a green emitter lens underneath; `heal` lowers the lens and lights it
+// =====================================================================================================================
+const A_FLAMER = { walk: { label: 'Walk', frames: 8, fps: 10 }, light: { label: 'Pilot light', frames: 6, fps: 12 }, fire: { label: 'Spray', frames: 6, fps: 14 }, die: { label: 'Die', frames: 10, fps: 12, once: true } };
+function flamerLook(p) { const L = looks(p); return { ...L, tank: C('#7a3020', 0.5, 0.4), plate: L.hullLight, flyTank: throws(L.R.fork(21), 2, { spread: 0.25, up: 0.6 }) }; }
+function drawFlamer(root, L, anim, t) {
+  const dead = anim === 'die' && t > 0.15;
+  let hipY = 0.09, lean = 0.06, stride = 0.06, legPh = 0, aim = 0, pilot = 0, jet = 0, fall = 0;
+  if (anim === 'walk') { legPh = t; hipY += 0.005 * Math.abs(Math.cos(t * TAU)); }
+  else if (anim === 'light') { aim = 1; stride = 0; lean = 0.02; pilot = 0.5 + 0.5 * Math.abs(Math.sin(t * TAU * 3)); }
+  else if (anim === 'fire') { aim = 1; stride = 0; lean = -0.03; jet = 0.8 + 0.2 * Math.sin(t * TAU * 2); }
+  else if (anim === 'die') { fall = ease(clamp01((t - 0.1) / 0.6)); stride = 0; }
+  const f = frame(-0.01 * jet, hipY - 0.06 * fall, 0, -lean - 1.2 * fall, 0.25 * fall, 0);
+  const T = torsoGroup(root, f);
+  // body: a barrel chest of armour plates, a striped collar, a helmet with a narrow glowing slit
+  cbox(T, 0.044, 0.026, 0.056, L.hullDark, 0, 0.005, 0);
+  cbox(T, 0.05, 0.058, 0.064, burnt(L, dead, L.hull), 0, 0.045, 0);
+  cbox(T, 0.01, 0.04, 0.054, burnt(L, dead, L.plate), 0.026, 0.046, 0);
+  cbox(T, 0.042, 0.007, 0.066, dead ? SOOT : L.stripe, 0, 0.074, 0);
+  for (const s of [1, -1]) ball(T, 0.02, burnt(L, dead, L.hull), 0.0, 0.07, s * 0.04, 1.1, 0.8, 1, 10);
+  ball(T, 0.02, burnt(L, dead, L.hullLight), 0.004, 0.1, 0, 1.1, 1, 0.95, 12);
+  cbox(T, 0.006, 0.006, 0.026, lit(L.stripeColor, !dead, 0.7), 0.022, 0.101, 0);
+  // twin fuel tanks on the back with stripe bands (they fly off and burst when it dies)
+  for (const [i, s] of [[0, 1], [1, -1]]) {
+    const at = [-0.04, 0.05, s * 0.018];
+    if (anim === 'die' && t > 0.12) { const { p } = flight(f.tp(at), L.flyTank[i].v, clamp01((t - 0.12) / 0.6), 0.015); const o = seg(root, [p[0], p[1] - 0.03, p[2]], [p[0], p[1] + 0.03, p[2]], 0.014, 0.014, SCORCH, 10); o.rotation.z = (t - 0.12) * 6 * s; continue; }
+    seg(T, [at[0], at[1] - 0.035, at[2]], [at[0], at[1] + 0.035, at[2]], 0.015, 0.015, burnt(L, dead, L.tank), 10);
+    ball(T, 0.015, burnt(L, dead, L.tank), at[0], at[1] + 0.035, at[2], 1, 0.6, 1, 10);
+    disc(T, 0.0155, 0.006, dead ? SOOT : L.stripe, at[0], at[1] + 0.01, at[2], 10);
+  }
+  // the flame lance: held low on the walk, levelled at the hip when lit; a hose from the tanks
+  const back = aim ? [0.0, 0.03, -0.03] : [-0.005, 0.02, -0.03];
+  const muz = aim ? [0.12, 0.034, -0.03] : [0.08, -0.012, -0.022];
+  const grip = lerpV(back, muz, 0.15);
+  seg(T, back, muz, 0.009, 0.007, L.metal, 8);
+  seg(T, grip, [grip[0], grip[1] - 0.018, -0.03], 0.006, 0.006, L.metal, 6);
+  ball(T, 0.011, L.trim, ...lerpV(back, muz, 0.92), 1.4, 1, 1, 8);
+  seg(T, [-0.04, 0.02, 0], lerpV(back, muz, 0.2), 0.004, 0.004, L.rubber, 5);
+  marker(T, 'muzzle', ...muz);
+  const dir = V(muz[0] - back[0], muz[1] - back[1], muz[2] - back[2]).normalize();
+  const along = k => [muz[0] + dir.x * k, muz[1] + dir.y * k, muz[2] + dir.z * k];
+  if (pilot > 0 && !dead) { ball(T, 0.005 + 0.005 * pilot, neonMat('#6ad8ff', 1), ...along(0.006), 1, 1, 1, 8); ball(T, 0.004 + 0.006 * pilot, neonMat(FIRE_HOT, 1), ...along(0.013), 1.3, 1, 1, 8); }
+  if (jet > 0) for (let i = 0; i < 6; i++) {          // the jet: a widening tongue of fire, hot near the nozzle
+    const k = (i + 1) / 6, w = 0.008 + 0.03 * k * jet, wob = 0.006 * Math.sin((t * 4 + i * 0.3) * TAU);
+    const p = along(0.18 * k * jet); ball(T, w, neonMat(i < 2 ? FIRE_HOT : FIRE, 0.95), p[0], p[1] + wob + 0.01 * k, p[2] + wob, 1.4, 0.8, 1, 10).castShadow = false;
+  }
+  // arms reach the lance
+  for (const s of [1, -1]) {
+    const sh = [0.0, 0.066, s * 0.04];
+    const hand = s < 0 ? lerpV(back, muz, 0.35) : lerpV(back, muz, 0.65);
+    const [el, h] = ik(sh, [hand[0], hand[1], hand[2] + (s > 0 ? 0.01 : 0)], 0.036, 0.036, [-0.4, -1, s * 0.6]);
+    seg(T, sh, el, 0.012, 0.01, burnt(L, dead, L.hull), 6); seg(T, el, h, 0.01, 0.009, L.hullDark, 6);
+  }
+  // legs: heavy armoured thighs and boots
+  for (const s of [1, -1]) {
+    const hip = f.tp([0, -0.005, s * 0.016]);
+    const st = step(legPh + (s > 0 ? 0 : 0.5), 0.6);
+    let foot = [st.u * stride + (aim ? s * 0.014 : 0), 0.02 * st.lift + 0.007, s * (aim ? 0.026 : 0.02)];
+    if (fall) foot = lerpV(foot, [0.04 * s, 0.01, s * 0.03], fall);
+    const [kn, ft] = ik(hip, foot, 0.045, 0.045, [1, 0, 0]);
+    seg(root, hip, kn, 0.014, 0.012, burnt(L, dead, L.hull), 6); seg(root, kn, ft, 0.012, 0.01, L.hullDark, 6);
+    cbox(root, 0.028, 0.012, 0.018, L.metal, ft[0] + 0.005, ft[1], ft[2]);
+  }
+  if (anim === 'die') { fireball(root, -0.03, 0.06, 0, 0.1, t / 0.6); if (t > 0.45) flames(root, [[-0.02, 0.03, 0.0, 0.016], [0.03, 0.02, 0.02, 0.01]], t); }
+}
+
+const A_BULWARK = { walk: { label: 'Walk', frames: 8, fps: 8 }, project: { label: 'Project', frames: 8, fps: 10 }, die: { label: 'Die', frames: 12, fps: 10, once: true } };
+function bulwarkLook(p) { return looks(p, { mastFly: throws(p.R.fork(22), 1, { spread: 0.2, up: 0.4 })[0], field: '#6fe8ff' }); }
+function drawBulwark(root, L, anim, t) {
+  const dead = anim === 'die' && t > 0.15;
+  let hipY = 0.1, legPh = 0, stride = 0.06, pulse = 0.35, spin = t * TAU * 0.5, buckle = 0, roll = 0;
+  if (anim === 'walk') { legPh = t; hipY += 0.005 * Math.cos(t * TAU * 2); roll = 0.025 * Math.sin(t * TAU); }
+  else if (anim === 'project') { stride = 0; hipY -= 0.015; pulse = 0.55 + 0.45 * Math.sin(t * TAU) ** 2; spin = t * TAU; }
+  else if (anim === 'die') { buckle = ease(t / 0.7); hipY = lerp(0.1, 0.045, buckle); roll = 0.35 * buckle; stride = 0; pulse = 0; }
+  const f = frame(0, hipY, 0, -0.1 * buckle, roll, 0);
+  const T = torsoGroup(root, f);
+  // a low armoured body with sloped plates, generator vents on the sides, the faction stripe round its skirt
+  cbox(T, 0.2, 0.05, 0.16, burnt(L, dead, L.hull), 0, 0.03, 0);
+  const top = cbox(T, 0.17, 0.02, 0.13, burnt(L, dead, L.hullLight), 0, 0.064, 0); top.rotation.z = 0.04;
+  cbox(T, 0.202, 0.008, 0.162, dead ? SOOT : L.stripe, 0, 0.012, 0);
+  for (const s of [1, -1]) for (let i = 0; i < 3; i++) cbox(T, 0.03, 0.026, 0.003, lit(L.field, !dead, 0.35 * pulse + 0.1), -0.05 + i * 0.045, 0.034, s * 0.081);
+  cbox(T, 0.04, 0.03, 0.05, L.metal, 0.09, 0.036, 0);
+  cbox(T, 0.006, 0.01, 0.034, lit(L.stripeColor, !dead, 0.7), 0.111, 0.04, 0);
+  // the emitter mast: a braced pylon, three fins, a ring that spins and a core that glows (the dome's source)
+  const M = group(buckle > 0.35 ? root : T, 'mast');
+  if (buckle > 0.35) { const { p, k } = flight(f.tp([-0.02, 0.07, 0]), L.mastFly.v, (buckle - 0.35) / 0.65, 0.02); M.position.set(...p); M.rotation.set(0.4 * k, 0, -1.3 * k); }
+  else M.position.set(-0.02, 0.07, 0);
+  seg(M, [0, 0, 0], [0, 0.17, 0], 0.016, 0.01, L.metal, 8);
+  for (let i = 0; i < 3; i++) { const a = i * TAU / 3; const fin = cbox(M, 0.004, 0.09, 0.03, burnt(L, dead, L.hullDark), Math.cos(a) * 0.018, 0.06, Math.sin(a) * 0.018); fin.rotation.y = -a; }
+  const R = group(M, 'ring', 0, 0.19, 0); R.rotation.y = spin;
+  ringFlat(R, 0.045, 0.006, lit(L.field, !dead, 0.5 + 0.4 * pulse), 0, 0, 0);
+  for (let i = 0; i < 4; i++) { const a = i * TAU / 4; cbox(R, 0.014, 0.01, 0.01, L.trim, Math.cos(a) * 0.045, 0, Math.sin(a) * 0.045).rotation.y = -a; }
+  ball(M, 0.02 + 0.006 * pulse, lit(L.field, !dead, 0.6 + 0.4 * pulse), 0, 0.19, 0, 1, 1, 1, 12);
+  for (const y of [0.2, 0.218]) disc(M, 0.012, 0.004, L.metal, 0, y, 0, 10);
+  // four stubby legs with wide feet, set out to the corners
+  for (const [hx, hz, off] of [[0.07, 1, 0], [0.07, -1, 0.5], [-0.07, 1, 0.5], [-0.07, -1, 0]]) {
+    const hip = f.tp([hx, 0.0, hz * 0.07]);
+    const stp = step(legPh + off, 0.6);
+    let foot = [hx * 1.3 + stp.u * stride, 0.02 * stp.lift, hz * 0.12];
+    if (buckle) foot = lerpV(foot, [hx * 1.6, 0, hz * 0.15], buckle);
+    const [kn, ft] = ik(hip, foot, 0.06, 0.08, [0, 1, hz]);
+    seg(root, hip, kn, 0.018, 0.014, burnt(L, dead, L.hull), 7); seg(root, kn, ft, 0.013, 0.01, L.metal, 7);
+    cbox(root, 0.04, 0.01, 0.034, L.metal, ft[0], ft[1] + 0.005, ft[2]);
+  }
+  if (anim === 'die') {
+    fireball(root, 0, hipY + 0.05, 0, 0.1, t / 0.6);
+    for (let i = 0; i < 8; i++) chunk(root, [0, hipY + 0.04, 0], L.bits[i], clamp01(t / 0.8), i % 2 ? SCORCH : L.metal);
+    if (t > 0.4) flames(root, [[0.02, hipY + 0.05, 0.03, 0.02], [-0.06, hipY + 0.04, -0.03, 0.014]], t);
+  }
+}
+
+const A_MEDIC = { fly: { label: 'Fly', frames: 4, fps: 12 }, heal: { label: 'Heal', frames: 6, fps: 12 }, die: { label: 'Die', frames: 10, fps: 12, once: true } };
+function medicLook(p) { return looks(p, { alt: p.alt, shell: C('#d8dde3', 0.3, 0.35), shellDark: C('#9aa2ac', 0.4, 0.4), green: '#5dff8a' }); }
+function drawMedic(root, L, anim, t) {
+  const dead = anim === 'die' && t > 0.1;
+  let alt = L.alt, pitch = -0.08, roll = 0, yaw = 0, spin = t * TAU * 2, k = 0, lens = 0.3;
+  if (anim === 'fly') { alt += 0.006 * Math.sin(t * TAU); roll = 0.05 * Math.sin(t * TAU); }
+  else if (anim === 'heal') { pitch = 0.05; lens = 0.7 + 0.3 * Math.sin(t * TAU * 2); alt += 0.003 * Math.sin(t * TAU); }
+  else if (anim === 'die') { k = ease(t / 0.7); alt = lerp(L.alt, 0.02, k); roll = -1.3 * k; yaw = -t * TAU; pitch = -0.5 * k; lens = 0; }
+  const f = frame(0, alt, 0, pitch, roll, yaw);
+  const B = torsoGroup(root, f, 'airframe');
+  // a rounded pale body, a green band, a sensor eye at the front
+  ball(B, 0.034, dead ? SCORCH : L.shell, 0, 0, 0, 1.45, 0.62, 1.05, 14);
+  ball(B, 0.026, dead ? SOOT : L.shellDark, -0.012, 0.012, 0, 1.3, 0.5, 1, 12);
+  cbox(B, 0.006, 0.008, 0.07, lit(L.green, !dead, 0.6), 0.0, 0.01, 0);
+  cbox(B, 0.03, 0.004, 0.012, lit(L.green, !dead, 0.6), 0.0, 0.019, 0);
+  ball(B, 0.008, lit('#eaffef', !dead, 0.9), 0.048, 0.0, 0, 1, 1, 1, 8);
+  cbox(B, 0.018, 0.012, 0.006, dead ? SOOT : L.stripe, -0.036, 0.004, 0);
+  // two side fans in ducts on short booms
+  for (const s of [1, -1]) {
+    if (dead && k > 0.45 && s > 0) continue;               // a fan torn off
+    seg(B, [0, 0.004, s * 0.03], [0, 0.008, s * 0.062], 0.005, 0.004, L.metal, 5);
+    const ring = put(B, geo('medic-duct', () => new THREE.TorusGeometry(1, 0.16, 6, 18)), dead ? SCORCH : L.shellDark, 0, 0.01, s * 0.075); ring.scale.setScalar(0.026); ring.rotation.x = Math.PI / 2;
+    const bl = cbox(B, 0.044, 0.002, 0.006, L.metal, 0, 0.011, s * 0.075); bl.rotation.y = spin * s;
+    disc(B, 0.023, 0.002, lit('#bfffd2', !dead, 0.25), 0, 0.006, s * 0.075, 12).castShadow = false;
+  }
+  // the emitter: a lens on a short arm under the body; lowered and bright while it heals
+  const ly = -0.022 - (anim === 'heal' ? 0.012 : 0);
+  seg(B, [0.006, -0.012, 0], [0.012, ly, 0], 0.005, 0.004, L.metal, 5);
+  ball(B, 0.009, lit(L.green, !dead && lens > 0, 0.4 + 0.6 * lens), 0.012, ly - 0.004, 0, 1, 0.8, 1, 10);
+  ringFlat(B, 0.012, 0.0025, lit(L.green, !dead, 0.3 + 0.5 * lens), 0.012, ly, 0);
+  marker(B, 'muzzle', 0.012, ly - 0.01, 0);
+  if (anim === 'heal') spike(B, [0.012, ly - 0.01, 0], [0.012, ly - 0.06 * lens, 0], 0.005 * lens, neonMat(L.green, 0.9), 6).castShadow = false;
+  if (anim === 'die') { fireball(B, 0, 0, 0, 0.032, t / 0.6); if (t > 0.65) { fireball(root, 0, 0, 0, 0.05, (t - 0.65) / 0.35); for (let i = 0; i < 5; i++) chunk(root, [0, 0.03, 0], L.bits[i], (t - 0.65) / 0.35, i % 2 ? SCORCH : L.metal); } }
+}
+
+addRecipes({
+  'ar-flamer': {
+    ...common, name: 'Flamer', anims: A_FLAMER, dims: { h: 0.2 },
+    blurb: 'A heavy trooper with twin fuel tanks and a flame lance. A pilot light flickers before it sprays: back off.',
+    params: [paintParam, stripeParam], build: poseable(A_FLAMER, flamerLook, drawFlamer),
+  },
+  'ar-bulwark': {
+    ...common, name: 'Bulwark', anims: A_BULWARK, dims: { len: 0.32, h: 0.34 },
+    blurb: 'A squat four-legged shield projector. The ring on its mast holds a dome over the army round it: kill it first.',
+    params: [paintParam, stripeParam], build: poseable(A_BULWARK, bulwarkLook, drawBulwark),
+  },
+  'ar-medic': {
+    ...common, name: 'Field Medic Drone', anims: A_MEDIC, dims: { len: 0.11, h: 0.07 }, flyer: true,
+    blurb: 'A pale twin-fan drone that patches up the army with a green beam from the lens underneath. Shoot it first.',
+    params: [altParam(0.2, 0.1, 0.6), paintParam, stripeParam], build: poseable(A_MEDIC, medicLook, drawMedic),
   },
 });

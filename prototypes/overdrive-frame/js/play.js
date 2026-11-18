@@ -31,7 +31,7 @@ export class Play {
       this.mech.build = o.build;
       // solo with bots: their frames fly beside you (sim/bots.js), built the same way a co-op seat is
       const bots = (o.bots || []).map(b => ({ id: b.id, bot: true, mech: b.mech }));
-      this.S = createMission(this.def, { kinds: o.kinds, T: o.T, players: [{ id: this.pid, mech: this.mech }, ...bots], seed: this.def.seed });
+      this.S = createMission(this.def, { kinds: o.kinds, T: o.T, players: [{ id: this.pid, mech: this.mech }, ...bots], seed: this.def.seed, checkpoint: o.checkpoint || null });
     }
     this.S.localPid = this.pid;
     this.canvas = document.createElement('canvas'); this.canvas.className = 'of-play'; this.canvas.setAttribute('aria-label', 'The mission');
@@ -41,7 +41,7 @@ export class Play {
     this.view.mechDrawer = o.mechDrawer;
     this.view.cam.x = this.def.start[0].x; this.view.cam.z = this.def.start[0].z;
     this.controls = new Controls(this.canvas);
-    this.touch = installTouch(this.controls, o.root);
+    this.touch = installTouch(this.controls, o.root, { overload: !!this.mech.stats?.overload });
     const deathSprite = kind => { const K = o.kinds[kind]; const a = o.sprites.animOf(K.recipe, 'die'); if (!a) return null; const n = o.sprites.frames(K.recipe, a), sp = o.sprites.facing(K.recipe, { seed: 1 }, (Math.random() * 16) | 0, a, n - 1); return sp ? { img: sp.day, ax: sp.ax, ay: sp.ay, w: sp.w, h: sp.h, scale: 1 / o.sprites.scale } : null; };
     this.fxOf = makeEventFx(this.view, { deathSprite, localId: () => this.mech.id, pan: (x) => Math.max(-1, Math.min(1, (this.view.P(x, 0).sx - this.view.W / 2) / (this.view.W / 2))) });
     this.acc = 0; this.last = performance.now(); this.t = 0; this.running = true; this.paused = false;
@@ -84,7 +84,7 @@ export class Play {
         for (const e of ev) { this.fxOf(e, this.S); this.hud?.onEvent(e, this.S); }
         this.controls.consume();
         this.acc -= STEP; steps++;
-        inp.qb = inp.jumpPressed = inp.lockOnPressed = false;
+        inp.qb = inp.jumpPressed = inp.lockOnPressed = inp.ping = inp.overload = false;
       }
       if (steps === 4) this.acc = 0;
       this.alpha = Math.min(1, this.acc / STEP);
@@ -124,7 +124,7 @@ export class Play {
       const todo = [];
       const add = (maxD, st) => { for (const [d, l] of lots) if (d < maxD && l.stage <= st && !this.sprites.hasKey(this.sprites.buildingKey(l.recipe, l.params, st))) todo.push([l, st]); };
       add(18, 0); add(9, 1); add(9, 2); add(9, 3); add(16, 1); add(99, 0); add(16, 2);
-      for (const w of this.def.waves) { const K = this.kinds[w.kind]; const walk = this.sprites.animOf(K.recipe, 'walk'); for (let d = 0; d < 16; d++) for (let f = 0; f < this.sprites.frames(K.recipe, walk); f++) todo.push([null, 0, K.recipe, walk, d, f]); }
+      for (const w of this.def.allWaves || this.def.waves) { const K = this.kinds[w.kind]; if (!K) continue; const walk = this.sprites.animOf(K.recipe, 'walk'); for (let d = 0; d < 16; d++) for (let f = 0; f < this.sprites.frames(K.recipe, walk); f++) todo.push([null, 0, K.recipe, walk, d, f]); }
       this._todo = todo;
     }
     while (this._todo.length) {

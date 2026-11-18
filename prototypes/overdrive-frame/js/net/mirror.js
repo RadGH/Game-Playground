@@ -25,7 +25,7 @@ export const asItems = b => { const o = { ...b }; for (const [k, v] of Object.en
 export function makeMirror(start, data, localPid) {
   const def = buildMissionDef(start.mission);
   const players = start.roster.map(r => ({ id: r.pid, bot: r.bot, rank: r.rank, mech: frameFor(data, r.pid, r.build, r.name) }));
-  const M = createMission(def, { kinds: data.KINDS, T: data.T, players, seed: start.seed ?? def.seed });
+  const M = createMission(def, { kinds: data.KINDS, T: data.T, players, seed: start.seed ?? def.seed, checkpoint: start.checkpoint || null });
   M.localPid = localPid; M.mirror = true;
   M.enemies = []; M.byId = new Map(M.mechs.map(m => [m.id, m])); M.shots = []; M._dead = 0;   // enemies come from the server
   M.roster = new Map(start.roster.map(r => [r.mid, r]));

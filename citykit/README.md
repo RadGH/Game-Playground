@@ -77,6 +77,15 @@ left is rebuilt column by column with its facade texture mapped to the same wind
   stubs and one to three taller stubs toward the back, charred tree stumps, embers and a few small fires.
 Decals (`userData.decal`) darken what is behind them in the lights picture instead of blacking out a square (bake.js).
 
+### Moon outpost (`js/kit/moon.js`, group `outposts`, genre `moon`)
+Overdrive Frame round 5: a mining and research outpost on grey dust. `moon-dome` (2×2 greenhouse dome), `moon-hab`
+(2×1 habitat modules, 1–2 storeys), `moon-lab` (1×1 research tower, 2–4 storeys), `moon-mast` (1×1 comms mast),
+`moon-silo` (2×1 ore silos + conveyor), `moon-garage` (2×2 rover garage), `moon-solar` (2×1 solar array), `moon-tank`
+(1×1 oxygen spheres — the game makes them explode) and `moon-drill` (2×2 mine drill rig). White panels, orange bands,
+gold foil, lit portholes and beacons; every one sits on a dust-coloured pad and gets the four wreck stages.
+The game's map: `prototypes/overdrive-frame/js/sim/moonmap.js`; its ground (craters, mine pit, pads):
+`prototypes/overdrive-frame/js/render/moon-ground.js`.
+
 ### Workshop props (`js/kit/workshop.js`, group `workshop`, genre `industrial`)
 For Overdrive Frame's title workshop and hangar (`prototypes/overdrive-frame/docs/ARCH.md`). **True to scale: 1 unit =
 16 m** (`M = 1/16`). Forklift (forks down/up, paint), Semi Truck (cab colour; box van / flatbed / tanker), Gantry Crane
@@ -147,8 +156,8 @@ spawn, summon, roar, deploy, fire, open, hover, jam, brace, aim…). Extra contr
 | `js/kit/workshop.js` | Workshop & industrial props, true to scale (`crewFigure`, `M`); `tests/workshop.spec.js` measures them |
 | `js/kit/hangar.js` | Overdrive Frame's hangar hub + test range (group `hangar`, category Industrial): `hg-wall` (ribbed + catwalk, window band, pipes + vents, column, range berm; `len` 1–6), `hg-bay` (the back of a bay: neon sign with a word-free pictogram in the station's colour + the station — contracts terminal, assembly cradle, parts dealer shelves, workshop fabricator, paint booth, range blast door), `hg-spine` (lockers + pipes between bays), `hg-rail` (low safety rail), `hg-target` / `hg-target-armour` / `hg-target-sled` (range targets, 16 facings) |
 | `js/kit/enemy-bits.js` | Shared pieces for posable enemies: mesh builders, two-bone IK + gait steps, thrown debris / fireballs / flames for deaths, and `poseable()` (the pose wrapper with `face`, `only`, `breakPart`, `muzzles`, and a ground clamp so nothing is drawn under the street) |
-| `js/kit/swarm.js` | Overdrive Frame's alien Swarm (group `swarm`, category Alien): `sw-swarmer`, `sw-leaper`, `sw-spitter`, `sw-brute`, `sw-burrower`, `sw-bloater`, `sw-hive` (1×1), `sw-hive-great` (2×2), `sw-broodmother` (boss, 2×2, breakable parts) |
-| `js/kit/army.js` | Overdrive Frame's rival army (group `army`, category Military): `ar-troopers`, `ar-tank`, `ar-rocket-truck`, `ar-apc`, `ar-gunship`, `ar-drone`, `ar-aa`, `ar-shield`, `ar-jammer`, `ar-sniper`; paint + faction stripe settings |
+| `js/kit/swarm.js` | Overdrive Frame's alien Swarm (group `swarm`, category Alien): `sw-swarmer`, `sw-leaper`, `sw-spitter`, `sw-brute`, `sw-burrower`, `sw-bloater`, `sw-hive` (1×1), `sw-hive-great` (2×2), `sw-broodmother` (boss, 2×2, breakable parts), `sw-drifter` (round 5: floating spore bladder, flyer) |
+| `js/kit/army.js` | Overdrive Frame's rival army (group `army`, category Military): `ar-troopers`, `ar-tank`, `ar-rocket-truck`, `ar-apc`, `ar-gunship`, `ar-drone`, `ar-aa`, `ar-shield`, `ar-jammer`, `ar-sniper`, round 5: `ar-flamer` (pilot light → fire jet), `ar-bulwark` (shield projector mast), `ar-medic` (heal drone, flyer); paint + faction stripe settings |
 | `tests/enemies.spec.js` | Every swarm/army recipe × animation × 16 facings poses cleanly and stays above the street; sizes match `dims` and ARCH.md; the broodmother loses each part alone; turrets point within 6° of their aim; hull/turret layers split |
 | `js/kit/all.js` | Imports every kit file |
 | `js/app.js` | The review page |

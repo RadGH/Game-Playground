@@ -14,9 +14,12 @@
 //   • every attack winds up first and marks the ground (claw arc, charge lane, barrage circles) — never an instant,
 //     unavoidable hit (lessons 39).
 //   • she is too big for the streets: buildings she pushes against are crushed and fall (the city is destructible).
+// The second boss, the Juggernaut (`walker: true`), keeps the part, drop, phase and stagger rules above and fights its
+// own way — shield dome, legs, cannon lane, missile barrage, stomp ring, mines: sim/juggernaut.js.
 // Pure: no DOM; randomness from S.rng. Rendering: js/render/boss-art.js.
 import { angleDiff } from './weapons.js';
 import { lotAt, damageLot } from './world.js';
+import { initWalker, walkerPartBroken, walkerDied, stepWalker, shieldUp } from './juggernaut.js';   // the Juggernaut (walker: true)
 
 const DEG = Math.PI / 180;
 
@@ -47,6 +50,7 @@ export function initBoss(S, e, K) {
   e.phase = 0; e.atk = null; e.stagger = 0; e.out = 0;
   e.cds = { claw: 1.5, charge: (K.charge?.cd || 7) * 0.5, barrage: (K.barrage?.cd || 8) * 0.4, lob: 2 };
   e.sacT = {}; for (const p of K.parts || []) if (p.spawn) e.sacT[p.id] = p.spawnEvery * 0.6;
+  if (K.walker) initWalker(S, e, K);                  // the Juggernaut's own timers (sim/juggernaut.js)
   S.events.push({ type: 'boss', id: e.id, kind: e.kind, name: K.name, x: e.x, z: e.z });
 }
 
@@ -60,6 +64,11 @@ export function partWorld(S, e, partId) {
 /** Route one hit by where it landed. Returns { amount: what the body takes, shown: the number to show (null = body),
  *  part, armoured }. Hits at her exact centre (blasts, beams, burn) are body hits. */
 export function bossHit(S, e, amount, hx, hz, by) {
+  const r = routeHit(S, e, amount, hx, hz, by), K = S.kinds[e.kind];
+  if (K.shield && shieldUp(e, K)) { r.amount *= K.shield.cut; r.shielded = true; }   // the Juggernaut's dome: the hull shrugs it off
+  return r;
+}
+function routeHit(S, e, amount, hx, hz, by) {
   const K = S.kinds[e.kind];
   if (Math.abs(hx - e.x) < 1e-6 && Math.abs(hz - e.z) < 1e-6) return { amount: amount * (K.blastShare ?? 1), shown: null, part: null };   // blasts, beams: her bulk soaks some
   const bearing = angleDiff(Math.atan2(hz - e.z, hx - e.x), e.face);
@@ -76,8 +85,9 @@ export function bossHit(S, e, amount, hx, hz, by) {
 function breakPart(S, e, K, p, by) {
   p.broken = true; p.hp = 0;
   const def = K.parts.find(q => q.id === p.id), at = partWorld(S, e, p.id);
-  S.events.push({ type: 'bossPart', id: e.id, part: p.id, label: p.label, x: at.x, z: at.z, by });
+  S.events.push({ type: 'bossPart', id: e.id, kind: e.kind, part: p.id, label: p.label, x: at.x, z: at.z, by });
   e.stagger = Math.max(e.stagger, K.stagger ?? 1.1); if (e.atk && e.atk.kind !== 'dash') e.atk = null;   // she reels
+  if (K.walker) walkerPartBroken(S, e, K, p);         // dome down / down on its knees (sim/juggernaut.js)
   // the chapter's boss material for every player (each their own drop), plus some scrap
   for (const pl of S.players) {
     for (let i = 0; i < (def.drop ?? 2); i++) S.pickups.push({ id: 'p' + (S.nextId++), owner: pl.id, mat: K.bossMat || 'chitin', n: 1, x: at.x + S.rng.range(-0.25, 0.25), z: at.z + S.rng.range(-0.25, 0.25), t: 0 });
@@ -100,7 +110,7 @@ export function bossSpeedMul(S, e) {
 const alive = (e, id) => { const p = e.parts.find(q => q.id === id); return p && !p.broken; };
 
 /** A spot for her brood: outside buildings, 1.5+ tiles from every player, on her far side from the target. */
-function broodSpot(S, e, P) {
+export function broodSpot(S, e, P) {
   const away = Math.atan2(e.z - P.z, e.x - P.x);
   for (let k = 0; k < 14; k++) {
     const a = away + S.rng.range(-1.4, 1.4), d = e.r + S.rng.range(0.3, 2.2), x = e.x + Math.cos(a) * d, z = e.z + Math.sin(a) * d;
@@ -124,7 +134,7 @@ function hurtInArc(S, e, dir, range, arc, dmg, hitSet = null) {
 }
 
 /** Crush the buildings her body presses into (and, charging, ploughs through). */
-function crush(S, e, K, amount) {
+export function crush(S, e, K, amount) {
   const r = e.bodyR + 0.3, seen = new Set();
   for (let k = 0; k < 8; k++) {
     const a = e.face + (k - 3.5) * 0.35, l = lotAt(S.world, e.x + Math.cos(a) * r, e.z + Math.sin(a) * r);
@@ -133,10 +143,11 @@ function crush(S, e, K, amount) {
   }
 }
 
-const turn = (e, want, rate, dt) => { e.face += Math.max(-rate * dt, Math.min(rate * dt, angleDiff(want, e.face))); };
+export const turn = (e, want, rate, dt) => { e.face += Math.max(-rate * dt, Math.min(rate * dt, angleDiff(want, e.face))); };
 
 /** The boss job (enemies.js JOBS.boss). g = { dx, dz, dist, ux, uz, toP, slow } toward the target P. */
 export function stepBoss(S, e, K, P, g, dt) {
+  if (K.walker) return stepWalker(S, e, K, P, g, dt);   // the Juggernaut fights its own way (sim/juggernaut.js)
   const T = S.T;
   for (const k in e.cds) e.cds[k] = Math.max(0, e.cds[k] - dt);
   // phases: each threshold once, in order (a big hit that skips one still plays both, one after the other)
@@ -255,5 +266,6 @@ export function stepBoss(S, e, K, P, g, dt) {
 /** Called when she dies: she keeps lying where she fell (the renderer plays her death), and the comms hear it. */
 export function bossDied(S, e) {
   e.deadT = 1; e.diedAt = S.time; e.anim = 'die'; e.atk = null;
+  if (S.kinds[e.kind]?.walker) walkerDied(S, e);      // its mines switch off
   S.events.push({ type: 'bossDown', id: e.id, kind: e.kind, x: e.x, z: e.z });
 }

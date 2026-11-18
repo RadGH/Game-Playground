@@ -32,6 +32,12 @@
     { "id": "s-mother-hive", "name": "Mother Hive", "type": "crafted", "state": "secret", "makes": "mother-hive", "learn": { "grade": "S", "mission": "m03-hold-the-line" },
       "cost": { "scrap": 60, "alloy": 14, "credits": 7000 }, "text": "Long-lived drones." },
     { "id": "s-longbow-rail", "name": "Longbow Rail", "type": "crafted", "state": "secret", "makes": "longbow-rail", "learn": { "schematic": 3 },
-      "cost": { "scrap": 90, "alloy": 30, "exotic": 3, "credits": 14000 }, "text": "Rails that reach across the district." }
+      "cost": { "scrap": 90, "alloy": 30, "exotic": 3, "credits": 14000 }, "text": "Rails that reach across the district." },
+    { "id": "od-surge", "name": "Overload core: Surge", "type": "crafted", "state": "locked", "rank": 6, "makes": "surge-core",
+      "cost": { "alloy": 40, "exotic": 6, "chitin": 4, "credits": 22000 }, "text": "A generator with an ultimate: fill it by dealing damage, then fire fast with no heat." },
+    { "id": "od-bastion", "name": "Overload core: Bastion", "type": "crafted", "state": "locked", "rank": 7, "makes": "bastion-core",
+      "cost": { "alloy": 40, "exotic": 6, "chitin": 4, "credits": 22000 }, "text": "A generator with an ultimate: shrug off most damage, and shelter teammates near you." },
+    { "id": "od-cascade", "name": "Overload core: Cascade", "type": "crafted", "state": "locked", "rank": 8, "makes": "cascade-core",
+      "cost": { "alloy": 40, "exotic": 6, "chitin": 4, "credits": 22000 }, "text": "A generator with an ultimate: a blast around your frame, then pulses." }
   ]
 }

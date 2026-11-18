@@ -6,6 +6,7 @@ import { isStunned, tickStatus } from './damage.js';
 import { pushOut } from './world.js';
 import { flowDir, flowDist } from './flow.js';
 import { stepBoss } from './boss.js';
+import { ROLE_JOBS } from './roles.js';
 
 /** A new enemy. warn = seconds it shows as a flash before it is real (spawn warning — never a surprise). */
 export function makeEnemy(kind, K, x, z, T, { id, warn = 0, elite = false, boss = false } = {}) {
@@ -194,6 +195,9 @@ export const JOBS = {
     if (g.dist < K.range && e.cd <= 0 && S.canSee(e, P)) { e.state = 'aim'; e.stateT = K.aimTime; S.events.push({ type: 'aimline', id: e.id, target: P.id, t: K.aimTime }); }
   },
 };
+
+// round 5 roles (sim/roles.js): flame (Flamer), shieldgen (Bulwark), heal (Field medic), drift (Spore drifter)
+Object.assign(JOBS, ROLE_JOBS);
 
 /** Move and keep apart (swarm spacing) — grid neighbours push each other; buildings push out. */
 function moveBody(S, e, dt) {

@@ -49,5 +49,26 @@
         "down": ["Bah! Pulling back — keep the change!", "Jackdaw's grounded. Somebody owes me a frame."]
       }
     }
+  ],
+  "_grunts": "Round 5: Halden-Voss line frames — rank-and-file enemy mechs on the same machinery as the aces (sim/ace.js aceKinds), at grunt level. Enemy kind = the id itself (use it in waves like any kind). max = how many of that kind may be alive at once; no comms lines, no ace bar, weaker ai (dodge, accuracy, lead = how far ahead of a moving frame it aims, 0..1); beaten = a wreck blast and loot like an elite.",
+  "grunts": [
+    {
+      "id": "hv-light", "name": "Striker", "colour": "#ffb02e", "tier": 1, "max": 4,
+      "blurb": "Halden-Voss's light line frame: quick on two legs, a pulse gun and a rifle. Comes in pairs.",
+      "build": { "head": "celerity-head-1", "core": "celerity-core-1", "arms": "celerity-arms-1", "legs": "celerity-legs-1", "booster": "celerity-booster-1", "generator": "celerity-generator-1", "cooling": "celerity-cooling-1", "cpu": "celerity-cpu-1",
+        "weapons": ["stitch-pulse-gun", "bulwark-rifle", null, null] },
+      "paint": { "primary": "#3a3f47", "secondary": "#1a1d22", "accent": "#ffb02e", "glow": "#ffb02e" },
+      "ai": { "range": 4.5, "aggression": 0.55, "strafe": 0.6, "dodge": 0.12, "accuracy": 0.45, "boostFloor": 0.35, "heatLimit": 0.8, "jump": 1, "lead": 0.3 },
+      "hp": 5200, "dmgMul": 0.04, "score": 25, "mats": { "scrap": 1.2, "alloy": 0.4 }
+    },
+    {
+      "id": "hv-heavy", "name": "Warden", "colour": "#ffb02e", "tier": 2, "max": 3,
+      "blurb": "Halden-Voss's heavy line frame: slow, thick armour, a rifle and a shoulder of missiles.",
+      "build": { "head": "brannoch-head-1", "core": "brannoch-core-1", "arms": "brannoch-arms-1", "legs": "brannoch-legs-1", "booster": "brannoch-booster-1", "generator": "brannoch-generator-1", "cooling": "brannoch-cooling-1", "cpu": "brannoch-cpu-1",
+        "weapons": ["bulwark-rifle", "thumper-grenade-launcher", "rampart-salvo-pod", null] },
+      "paint": { "primary": "#4a4f57", "secondary": "#22262c", "accent": "#ffb02e", "glow": "#ff8a2a" },
+      "ai": { "range": 5, "aggression": 0.4, "strafe": 0.45, "dodge": 0.05, "accuracy": 0.5, "boostFloor": 0.4, "heatLimit": 0.8, "jump": 0, "lead": 0.25 },
+      "hp": 9000, "dmgMul": 0.035, "score": 40, "mats": { "scrap": 2, "alloy": 0.8, "exotic": 0.05 }
+    }
   ]
 }

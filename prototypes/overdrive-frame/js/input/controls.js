@@ -101,6 +101,7 @@ export class Controls {
     out.swap = this.pressed.has('swap');
     out.interact = this.pressed.has('interact');
     out.ping = this.pressed.has('ping');
+    out.overload = this.pressed.has('overload');
     out.menu = this.pressed.has('menu');
     out.map = this.pressed.has('map');
     out.device = this.device;

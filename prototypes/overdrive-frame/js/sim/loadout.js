@@ -102,6 +102,7 @@ export function mechStats(build, P, C = null) {
     meleeMul: arms ? partNum(arms, armsIt, 'melee') / 100 : 1,
     critChance: 0, radius: legs?.type === 'quad' || legs?.type === 'treads' ? 0.24 : 0.2,
     boostEff: core ? (core.boostEff || 100) / 100 : 1,
+    overload: gen?.overload || null,                                       // an Overload core's ultimate (sim/overload.js)
   };
   return applyChips(st, build.chips, C);
 }

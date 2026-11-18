@@ -34,6 +34,7 @@ export const STATUS = {
   burn: { label: 'Burning', time: 3, dps: 0.12 },          // dps × the hit's damage, per second
   shock: { label: 'Shocked', time: 0.8 },                   // can't move or attack (bosses: slowed instead)
   corrode: { label: 'Corroded', time: 5 },                  // takes 25% more damage
+  slow: { label: 'Slowed', time: 2, mul: 0.6 },             // round 5: spore gas — a mech moves at mul × speed (mech.js)
 };
 
 /** Put a status on a target (longer time wins; burn keeps the stronger tick). */

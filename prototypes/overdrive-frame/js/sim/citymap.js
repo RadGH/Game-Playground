@@ -5,6 +5,7 @@
 // Heights: a storey is citykit's FLOOR (0.22 tiles ≈ 3.5 m); a mech is ~0.75 tiles tall, so a two-storey shop row is a
 // roof you can jump onto and a 30-storey tower is a wall of glass nine mechs high.
 import { makeRng } from './rng.js';
+import { makeMoonMap, MOON_DISTRICT } from './moonmap.js';   // round 5: the moon outpost (its own generator)
 
 export const FLOOR = 0.22;
 /** City Kit building styles (citykit/js/kit/materials.js STYLE_IDS — copied here so the rules need no three.js). */
@@ -25,6 +26,7 @@ export const DISTRICTS = {
     { recipe: 'ind-workshop', size: [2, 2], floors: [1, 2], w: 3 }, { recipe: 'ind-depot', size: [3, 2], floors: [1, 1], w: 2, h: 0.5 },
     { recipe: 'ind-refinery', size: [2, 2], floors: [1, 1], w: 2, h: 0.9, explosive: 1400 }, { recipe: 'ind-freight', size: [2, 2], floors: [1, 1], w: 2, h: 0.55 },
     { recipe: 'ind-chemworks', size: [2, 1], floors: [1, 1], w: 2, h: 0.6, explosive: 900 }, { recipe: 'ind-printworks', size: [1, 1], floors: [1, 2], w: 2 } ] },
+  moon: MOON_DISTRICT,   // round 5: not a city block at all — makeCityMap hands it to moonmap.js
 };
 
 const pickW = (R, list) => { const tot = list.reduce((s, x) => s + (x.w || 1), 0); let v = R.next() * tot; for (const x of list) { v -= x.w || 1; if (v <= 0) return x; } return list[0]; };
@@ -34,6 +36,7 @@ const pickW = (R, list) => { const tot = list.reduce((s, x) => s + (x.w || 1), 0
  * @returns {{ w, h, lots, roads: Array<[x, z, w, d]>, plazas: Array<[x, z, w, d]>, start: {x, z}, extract: {x, z, r}, edges }}
  */
 export function makeCityMap({ seed, w = 40, h = 40, district = 'downtown', mix = null }) {
+  if (DISTRICTS[district]?.moon) return makeMoonMap({ seed, w, h });     // round 5: the moon outpost
   const R = makeRng(seed);
   const D = DISTRICTS[district];
   const occ = new Uint8Array(w * h);            // 0 free, 1 road, 2 building, 3 plaza (kept open)

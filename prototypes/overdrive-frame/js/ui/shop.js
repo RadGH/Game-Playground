@@ -13,7 +13,7 @@ import { baySheet, BAY_INFO, click } from './bays.js';
 import { play as sound } from '../../../../citykit/js/world/sound.js';
 
 const RANK_ORDER = r => RARITY.findIndex(x => x.id === r);
-const MAT = { scrap: 'Scrap', alloy: 'Alloy', exotic: 'Exotic', credits: 'cr' };
+const MAT = { scrap: 'Scrap', alloy: 'Alloy', exotic: 'Exotic', chitin: 'Chitin', siegeplate: 'Siege plate', credits: 'cr' };
 /** The fitted item in the active build for a part's slot (for the card's change column). */
 function fittedFor(g, part) {
   const b = activeBuild(g.save);

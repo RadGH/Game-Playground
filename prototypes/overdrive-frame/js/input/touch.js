@@ -4,7 +4,7 @@
 import { BY_ID } from './bindings.js';
 
 /** mode 'hangar': only the move stick (the bay prompt is its own button; nothing fires in the hangar). */
-export function installTouch(controls, root, { mode = 'fight' } = {}) {
+export function installTouch(controls, root, { mode = 'fight', overload = false } = {}) {
   if (!matchMedia('(pointer: coarse)').matches && !/[?&]touch=1/.test(location.search)) return null;
   const el = document.createElement('div'); el.className = 'of-touch' + (mode === 'hangar' ? ' of-touch-hangar' : '');
   el.innerHTML = mode === 'hangar' ? '<div class="of-stick of-stick-move" aria-label="Move"><i></i></div>' : `
@@ -13,7 +13,7 @@ export function installTouch(controls, root, { mode = 'fight' } = {}) {
     <div class="of-tbtns">
       <button type="button" data-act="quick">Dash</button><button type="button" data-act="jump">Jump</button>
       <button type="button" data-act="boost">Boost</button><button type="button" data-act="lock">Lock</button>
-      <button type="button" data-act="fireSL">Left pod</button><button type="button" data-act="fireSR">Right pod</button>
+      <button type="button" data-act="fireSL">Left pod</button><button type="button" data-act="fireSR">Right pod</button>${overload ? '<button type="button" data-act="overload" class="of-tbtn-od">Overload</button>' : ''}
     </div>`;
   root.append(el);
   controls.device = 'touch';             // hints follow the device: no keyboard letters on a phone

@@ -23,13 +23,20 @@ export function buildMissionDef(m, opts = {}) {
     const r = { ...o };
     if (o.pickLots) r.lots = pick(o.pickLots);
     if (o.type === 'keepLots') r.lots = pick({ recipe: o.recipe, count: o.count || 1 });
+    if (o.zone === 'start') { r.x = map.start.x; r.z = map.start.z; r.r = o.r || 3; }   // round 5: hold the landing pad (survive in a zone)
     return r;
   });
-  const collateral = objectives.filter(o => o.type === 'keepLots').flatMap(o => o.lots);
+  // a long mission (round 5): stage 1 is the mission's own objectives + waves; `stages` names it and adds the rest
+  const stages = m.stages?.length ? m.stages.map((st, i) => i === 0 ? { id: st.id || 's1', label: st.label, objectives, waves: m.waves || [] }
+    : { id: st.id || 's' + (i + 1), label: st.label, waves: st.waves || [], enemies: st.enemies || [], objectives: (st.objectives || []).map(o => (o.pickLots ? { ...o, lots: pick(o.pickLots) } : o.type === 'keepLots' ? { ...o, lots: pick({ recipe: o.recipe, count: o.count || 1 }) } : { ...o })) }) : null;
+  const collateral = (stages ? stages.flatMap(s => s.objectives) : objectives).filter(o => o.type === 'keepLots').flatMap(o => o.lots);
   return {
     id: m.id, name: m.name, seed: m.map.seed, map, start: [map.start], drop: m.drop ?? 3,
     waves: m.waves || [], enemies: (m.enemies || []).filter(e => !e.place), place: (m.enemies || []).filter(e => e.place), objectives,
     convoy: m.convoy || null, orbital: !!m.orbital, orbitalDmg: m.orbitalDmg, extract: m.extract ? map.extract : null,
     par: m.par || {}, pay: m.pay, payPerScore: m.payPerScore, tier: m.tier || 1, comms: m.comms || [], collateral, length: m.length,
+    versus: m.versus || null,                                              // versus (sim/versus.js): { mode, wins }
+    stages, allWaves: stages ? stages.flatMap(s => s.waves) : (m.waves || []),
+    gravity: m.gravity ?? 1,       // round 5: the moon is 0.4 (sim/mech.js, lobbed shots in sim/mission.js)
   };
 }

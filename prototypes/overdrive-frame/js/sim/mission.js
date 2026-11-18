@@ -18,17 +18,22 @@ import { triggerWeapon, updateLocks, resolveHit, angleDiff } from './weapons.js'
 import { mitigate, tickStatus } from './damage.js';
 import { gradeOf } from './grade.js';
 import { botInputs } from './bots.js';
+import { chargeOverload, triggerOverload, stepOverload, afterWeapons, overloadTaken } from './overload.js';
+import { setupStages, nextStage } from './stages.js';
+import { setupVersus, joinVersus, buildVersusGrids, useGrid, versusHurt, stepVersus, versusResult } from './versus.js';
 import { makeFlow, updateFlow, flowDist } from './flow.js';
+import { stepRoles, shieldMul, addCloud } from './roles.js';      // round 5 roles: bulwark domes, spore clouds
 
 export const PHASES = ['drop', 'fight', 'extract', 'won', 'failed'];
 
-export function createMission(def, { kinds, T, players = [], seed = def.seed || 1 }) {
+export function createMission(def, { kinds, T, players = [], seed = def.seed || 1, checkpoint = null }) {
   const world = makeWorld(def.map);
   const S = {
     def, T, kinds, seed, rng: makeRng(mixSeed(seed, def.id)), time: 0, phase: 'drop', phaseT: def.drop ?? 3,
     world, grid: new Grid(world.w, world.h, 1), mechs: [], enemies: [], byId: new Map(), shots: [], strikes: [], delayed: [],
     pickups: [], deployed: [], events: [], nextId: 1, waveDone: new Set(), objectives: [], stats: { kills: 0, score: 0, structures: 0, collateral: 0 },
-    revives: 0, checkpoint: null, result: null, flow: null, flowT: 0,
+    revives: 0, checkpoint: null, result: null, flow: null, flowT: 0, clouds: [],   // clouds: spore gas (sim/roles.js)
+    gravity: def.gravity ?? 1,     // round 5: share of normal gravity (the moon is 0.4) — mech jumps/hover + lobbed shots
   };
   S.flow = makeFlow(world);
   // players drop in at the start points
@@ -44,6 +49,8 @@ export function createMission(def, { kinds, T, players = [], seed = def.seed || 
   attachHelpers(S);
   for (const p of def.enemies || []) spawn(S, p.kind, p.x, p.z, { warn: 0, elite: p.elite, boss: p.boss });
   setupOps(S);          // mission types: placed enemies, masts, the data core, convoys, orbital drop (ops.js)
+  setupStages(S, checkpoint);   // long missions: stages + checkpoints (stages.js); S.waves = the waves this run uses
+  setupVersus(S);               // versus: teams, spawns, rounds (versus.js)
   return S;
 }
 
@@ -99,7 +106,7 @@ function edgePoint(S, i) {
 }
 
 function runWaves(S) {
-  for (const [i, w] of (S.def.waves || []).entries()) {
+  for (const [i, w] of (S.waves || S.def.waves || []).entries()) {
     const key = i + ':' + (w.every ? Math.floor((S.time - w.at) / w.every) : 0);
     if (S.time < w.at || S.waveDone.has(key)) continue;
     if (w.until != null && S.time > w.until) continue;
@@ -127,7 +134,7 @@ function attachHelpers(S) {
   S.canSee = (a, b) => (a.flying || b.y > 0.5) ? true : !rayLot(S.world, a.x, a.z, b.x, b.z, 0.25);
   S.spawn = (kind, x, z, o) => spawn(S, kind, x, z, o);
   S.dropLoot = (e, K) => dropLoot(S, e, K);
-  S.hurtPlayer = (m, amount, dtype, from) => { let n = mitigate(amount, dtype, m); const src = from?.id && S.byId.get(from.id);
+  S.hurtPlayer = (m, amount, dtype, from) => { let n = (from?.mitigated ? amount : mitigate(amount, dtype, m)) * overloadTaken(S, m);   // mitigated: a versus hit already went through resolveHit const src = from?.id && S.byId.get(from.id);
     const sh = m.weapons.find(w => w.spec.kind === 'shield' && w.held); if (sh && src && Math.abs(angleDiff(Math.atan2(src.z - m.z, src.x - m.x), m.aim)) < 1.1) { n *= 1 - sh.spec.block; S.events.push({ type: 'block', id: m.id }); } const got = hurtMech(m, n, S.events, from?.id); if (got > 0) S.events.push({ type: 'phit', id: m.id, amount: got, dtype, x: m.x, z: m.z, from: from?.id || null }); };
   S.damageEnemy = (e, amount, dtype, by, tier = 0, hx = e.x, hz = e.z) => damageEnemy(S, e, amount, dtype, by, tier, hx, hz);
   S.killEnemy = (e, by, burst = false) => killEnemy(S, e, by, burst);
@@ -143,11 +150,13 @@ function damageEnemy(S, e, amount, dtype, by, tier, hx, hz) {
   // test-range dummies take every point (the meter reads the real hit) but never drop below 1 and never die
   if (e.dummy) { e.hp = Math.max(1, e.hp - amount); e.quiet = 0; S.events.push({ type: 'hit', id: e.id, amount, tier, dtype, x: hx, z: hz, y: e.flying || 0.2, by, dummy: true }); return amount; }
   if (e.ace) return hurtAce(S, e, amount, dtype, by, tier, hx, hz);          // a rival ace (a mech: sim/ace.js)
+  if (S.versus && e.pid) { const got = versusHurt(S, e, amount, dtype, by); if (got > 0) S.events.push({ type: 'hit', id: e.id, amount: got, tier, dtype, x: hx, z: hz, y: 0.4, by }); return got; }   // versus: a frame
   let shown = null, part = null;
+  const shield = shieldMul(S, e); if (shield < 1) amount *= shield;          // round 5: inside a living bulwark's dome (sim/roles.js)
   if (e.parts) ({ amount, shown, part } = bossHit(S, e, amount, hx, hz, by));   // boss: the part where it landed (sim/boss.js)
   const n = Math.min(e.hp, amount); e.hp -= n; e.lastHitBy = by;
-  const m = by && S.byId.get(by); if (m && m.dealt != null) m.dealt += n;
-  S.events.push({ type: 'hit', id: e.id, amount: shown ?? n, tier, dtype, x: hx, z: hz, y: e.flying || 0.2, by, part });
+  const m = by && S.byId.get(by); if (m && m.dealt != null) { m.dealt += n; chargeOverload(S, m, n); }
+  S.events.push({ type: 'hit', id: e.id, amount: shown ?? n, tier, dtype, x: hx, z: hz, y: e.flying || 0.2, by, part, shield: shield < 1 || undefined });
   if (e.hp <= 0) killEnemy(S, e, by);
   return n;
 }
@@ -161,6 +170,7 @@ function killEnemy(S, e, by, burst = false) {
   const m = by && S.byId.get(by); if (m && m.kills != null) m.kills++;
   S.events.push({ type: 'kill', id: e.id, kind: e.kind, x: e.x, z: e.z, y: e.flying || 0, by, big: (K.radius || 0) > 0.2 || !!K.structure, elite: e.elite });
   // bloaters (and anything with a burst) explode, hurting everything near — friends too
+  if (K.cloud) addCloud(S, e, K);                                         // round 5: a spore drifter leaves a slowing cloud
   if (K.job === 'burst') blast(S, { owner: e.id, team: 'neutral', dtype: K.dtype || 'fire', dmg: K.dmg * S.T.enemyDamage, crit: 0 }, e.x, e.z, K.splash, true);
   for (const o of S.objectives) if (!o.done && (o.type === 'kill' && (!o.kind || o.kind === e.kind) && (!o.tag || o.tag === e.tag) || o.type === 'killAll')) o.progress++;
   if (e.parts) bossDied(S, e);
@@ -261,8 +271,9 @@ function deploy(S, shot, m, spec, aim) {
 function stepDeployed(S, dt) {
   for (const d of S.deployed) {
     d.life -= dt; d.cd -= dt;
+    const team = S.byId.get(d.owner)?.team || 'player'; useGrid(S, team);           // versus: its owner's targets
     if (d.kind === 'mine') {
-      for (const e of S.grid.within(d.x, d.z, 0.4)) if (!e.dead && !e.flying && !e.hidden) { blast(S, { owner: d.owner, team: 'player', dtype: 'explosive', dmg: d.spec.dmg, crit: 0 }, d.x, d.z, d.spec.splash || 0.8); d.life = 0; break; }
+      for (const e of S.grid.within(d.x, d.z, 0.4)) if (!e.dead && !e.flying && !e.hidden) { blast(S, { owner: d.owner, team, dtype: 'explosive', dmg: d.spec.dmg, crit: 0 }, d.x, d.z, d.spec.splash || 0.8); d.life = 0; break; }
       continue;
     }
     if (d.kind === 'drone') {   // drones circle their owner and shoot what comes near
@@ -274,7 +285,7 @@ function stepDeployed(S, dt) {
     if (!best) continue;
     d.cd = 1 / (d.spec.turretRate || 4);
     const a = Math.atan2(best.z - d.z, best.x - d.x), sp = 10; d.aim = a;
-    S.shots.push({ owner: d.owner, team: 'player', kind: 'bullet', dtype: 'kinetic', dmg: d.spec.turretDmg || 12, x: d.x, z: d.z, y: 0.25, vx: Math.cos(a) * sp, vz: Math.sin(a) * sp, life: d.spec.range / sp, age: 0, hits: [], pierce: 0, crit: 0 });
+    S.shots.push({ owner: d.owner, team, kind: 'bullet', dtype: 'kinetic', dmg: d.spec.turretDmg || 12, x: d.x, z: d.z, y: 0.25, vx: Math.cos(a) * sp, vz: Math.sin(a) * sp, life: d.spec.range / sp, age: 0, hits: [], pierce: 0, crit: 0 });
     S.events.push({ type: 'fire', id: d.id, kind: 'bullet', x: d.x, z: d.z, y: 0.25, dir: a, turret: true });
   }
   S.deployed = S.deployed.filter(d => d.life > 0);
@@ -283,7 +294,11 @@ function stepDeployed(S, dt) {
 function stepShots(S, dt) {
   const T = S.T, keep = [];
   for (const s of S.shots) {
+    // low gravity (round 5): a lobbed shot keeps its arc's shape and landing spot but hangs in the air longer —
+    // the whole flight is slowed by sqrt(gravity), once, when it is first seen (so snapshots carry its real speed)
+    if (s.lob && S.gravity !== 1 && !s.gDone) { const k = Math.sqrt(S.gravity); s.vx *= k; s.vz *= k; s.vy *= k; s.g *= S.gravity; s.life /= k; s.gDone = true; }
     s.age += dt;
+    if (S.versus && s.team !== 'enemy') useGrid(S, s.team);                            // versus: this team's targets
     if (s.target && !s.vertical) {                    // homing
       const t = S.byId.get(s.target);
       if (t && !t.dead) { const want = Math.atan2(t.z - s.z, t.x - s.x), cur = Math.atan2(s.vz, s.vx), sp = Math.hypot(s.vx, s.vz); const a = cur + Math.max(-s.turn * dt, Math.min(s.turn * dt, angleDiff(want, cur))); s.vx = Math.cos(a) * sp; s.vz = Math.sin(a) * sp; }
@@ -377,7 +392,7 @@ function stepObjectives(S) {
   const requiredDone = S.objectives.filter(o => !o.optional).every(o => o.done);
   for (const o of S.objectives) {
     if (o.done || o.failed) continue;
-    if (o.type === 'beat' && S.time - (S.def.drop ?? 3) > o.time) { o.failed = true; S.events.push({ type: 'objectiveFailed', id: o.id, label: o.label }); continue; }
+    if (o.type === 'beat' && S.time - (o.t0 ?? (S.def.drop ?? 3)) > o.time) { o.failed = true; S.events.push({ type: 'objectiveFailed', id: o.id, label: o.label }); continue; }
     if (o.type === 'keepLots' || o.type === 'beat') { if (requiredDone && S.objectives.filter(x => !x.optional).length) { o.done = true; S.events.push({ type: 'objective', id: o.id, label: o.label }); } continue; }
     const ops = opsObjective(S, o);
     if (ops) {
@@ -386,12 +401,15 @@ function stepObjectives(S) {
       else if (S.phase !== 'drop' && o.progress >= o.goal) { o.done = true; S.events.push({ type: 'objective', id: o.id, label: o.label }); }
       continue;
     }
-    if (o.type === 'survive') o.progress = Math.min(o.time, S.time - (S.def.drop ?? 3));
+    if (o.type === 'survive' && o.r) {        // round 5: a held zone (the moon's landing pad) — the clock only runs while a standing frame is in it
+      o.held = S.phase !== 'drop' && S.mechs.some(m => !m.down && m.team !== 'enemy' && Math.hypot(m.x - o.x, m.z - o.z) < o.r);
+      o.progress = Math.min(o.time, o.progress + (o.held ? S.time - (o.lastT ?? S.time) : 0)); o.lastT = S.time;
+    } else if (o.type === 'survive') o.progress = Math.min(o.time, S.time - (o.t0 ?? (S.def.drop ?? 3)));   // t0: a later stage's start
     if (o.type === 'reach') o.progress = S.mechs.some(m => !m.down && m.team !== 'enemy' && Math.hypot(m.x - o.x, m.z - o.z) < o.r) ? 1 : 0;
     let met;
     if (o.type === 'killAll') {
       const left = S.enemies.filter(e => !e.dead && (!o.kind || e.kind === o.kind)).length + S.mechs.filter(m => m.ace && !m.dead && (!o.kind || m.kind === o.kind)).length;
-      const pending = (S.def.waves || []).some(w => S.time < w.at || (w.every && (w.until == null || S.time < w.until)));
+      const pending = (S.waves || S.def.waves || []).some(w => S.time < w.at || (w.every && (w.until == null || S.time < w.until)));
       o.left = left; met = S.phase !== 'drop' && left === 0 && !pending && o.progress > 0;
     } else {
       const goal = o.type === 'survive' ? o.time : o.type === 'reach' ? 1 : o.type === 'destroy' ? o.lots.length : o.count;
@@ -406,16 +424,20 @@ function stepObjectives(S) {
  *   lockOn: bool (sticky lock button), pad: bool } }. dt in seconds (fixed step, e.g. 1/30).
  */
 export function stepMission(S, inputs, dt) {
-  const T = S.T; S.events.length = 0; S.time += dt;
+  const T = S.T; S.events.length = 0;
+  if (S.announceStage) { S.announceStage = false; const st = S.def.stages[S.stage]; S.events.push({ type: 'stage', stage: S.stage, label: st.label, of: S.def.stages.length, again: !!S.fromCheckpoint }); }
+  S.time += dt;
   const evStart = 0;
   S.grid.clear(); for (const e of S.enemies) if (!e.dead) S.grid.add(e);
+  if (S.versus) buildVersusGrids(S);                                                  // versus: a target grid per team
   for (const a of S.mechs) if (a.team === 'enemy' && !a.dead) S.grid.add(a);   // rival aces: player shots find them like any enemy
 
   if (S.phase === 'drop') { S.phaseT -= dt; if (S.phaseT <= 0) { S.phase = 'fight'; S.events.push({ type: 'phase', phase: 'fight' }); } }
-  const worldApi = { groundAt: (x, z) => groundAt(S.world, x, z), pushOut: (b, r) => pushOut(S.world, b, r) };
+  const worldApi = { groundAt: (x, z) => groundAt(S.world, x, z), pushOut: (b, r) => pushOut(S.world, b, r), gravity: S.gravity };
   if (S.players.some(p => p.bot)) { inputs = { ...inputs }; botInputs(S, inputs, dt); }   // bot teammates (sim/bots.js)
 
   for (const p of S.players) {
+    useGrid(S, p.mech.team);                                                       // versus: this frame's targets
     const m = p.mech, inp = (S.phase === 'drop' ? null : inputs[p.id]) || {};
     m.padAim = !!inp.pad;
     stepMech(m, inp, dt, T, worldApi, S.events);
@@ -432,7 +454,12 @@ export function stepMission(S, inputs, dt) {
     const aim = stuck && !stuck.dead ? { x: stuck.x, z: stuck.z } : { x: inp.ax ?? m.x + Math.cos(m.aim), z: inp.az ?? m.z + Math.sin(m.aim) };
     if (stuck && !stuck.dead && !m.down) m.aim = Math.atan2(stuck.z - m.z, stuck.x - m.x);
     if (m.down || S.phase === 'drop') { for (const w of m.weapons) w.held = false; continue; }
+    // the Overload core's ultimate (sim/overload.js): the button, then its effect around the weapons
+    const odBlast = (shot, x, z, r) => blast(S, shot, x, z, r);
+    if (inp.overload) triggerOverload(S, m, odBlast);
+    const heldHeat = stepOverload(S, m, dt, odBlast);
     m.weapons.forEach((w, i) => { updateLocks(S, m, w, dt, T, aim.x, aim.z); triggerWeapon(S, m, w, !!inp.fire?.[i], dt, T, aim); });
+    afterWeapons(m, heldHeat, dt);
     // revive: stand next to a downed teammate
     for (const o of S.mechs) if (o !== m && o.down && o.team === m.team && !o.dead && Math.hypot(o.x - m.x, o.z - m.z) < 0.7) { o.reviveT += dt; if (o.reviveT >= (T.reviveTime || 3)) { o.down = false; o.hp = o.hpMax * 0.35; o.reviveT = 0; S.revives++; S.events.push({ type: 'revive', id: o.id, by: m.id }); } }
   }
@@ -440,7 +467,7 @@ export function stepMission(S, inputs, dt) {
   S.flowT -= dt;
   if (S.flowT <= 0) { S.flowT = 0.4; updateFlow(S.flow, S.world, [...S.mechs.filter(m => !m.down && m.team !== 'enemy'), ...(S.allies || []).filter(a => !a.down && !a.arrived)]); }   // escort trucks are worth walking to
   if (S.phase === 'fight' || S.phase === 'extract') { runWaves(S); stepEnemies(S, dt, T); stepAces(S, dt, worldApi); }
-  stepShots(S, dt); stepStrikes(S, dt); stepDeployed(S, dt); stepPickups(S, dt);
+  stepShots(S, dt); stepStrikes(S, dt); stepRoles(S, dt); stepDeployed(S, dt); stepPickups(S, dt);
   stepOps(S, inputs, dt);
   handleWorldEvents(S, evStart);
   aceAfterStep(S);
@@ -451,17 +478,21 @@ export function stepMission(S, inputs, dt) {
 
   // phases: all required objectives → extract; at extraction with everyone standing (or all who are up) → won
   const required = S.objectives.filter(o => !o.optional);
-  if (S.phase === 'fight' && required.length && required.every(o => o.done)) {
+  if (S.phase === 'fight' && required.length && required.every(o => o.done) && !nextStage(S)) {   // a long mission's next stage, else done
     S.phase = S.def.extract ? 'extract' : 'won'; S.events.push({ type: 'phase', phase: S.phase });
   }
   if (S.phase === 'extract') {
     const ex = S.def.extract, up = S.mechs.filter(m => !m.down && m.team !== 'enemy');
     if (up.length && up.every(m => Math.hypot(m.x - ex.x, m.z - ex.z) < ex.r)) { S.phase = 'won'; S.events.push({ type: 'phase', phase: 'won' }); }
   }
-  if ((S.phase === 'fight' || S.phase === 'extract') && S.mechs.some(m => m.team !== 'enemy') && S.mechs.every(m => m.team === 'enemy' || m.down && m.downT > 1.5)) {
+  stepVersus(S, dt);                                                                  // versus: rounds and the match
+  if (!S.versus && (S.phase === 'fight' || S.phase === 'extract') && S.mechs.some(m => m.team !== 'enemy') && S.mechs.every(m => m.team === 'enemy' || m.down && m.downT > 1.5)) {
     S.phase = 'failed'; S.events.push({ type: 'phase', phase: 'failed' });
   }
-  if ((S.phase === 'won' || S.phase === 'failed') && !S.result) S.result = gradeOf(S);
+  if ((S.phase === 'won' || S.phase === 'failed') && !S.result) {
+    S.result = S.versus ? versusResult(S) : gradeOf(S);
+    if (!S.result.won && S.checkpoint) S.result.checkpoint = { stage: S.checkpoint.stage, label: S.checkpoint.label };   // fly it again from here
+  }
   return S.events;
 }
 
@@ -483,6 +514,7 @@ export function addPlayer(S, p) {
     const l = lotAt(S.world, x, z); if (x > 0.4 && z > 0.4 && x < S.world.w - 0.4 && z < S.world.h - 0.4 && !(l && l.solid && l.stage < 3)) { spot = { x, z }; break; }
   }
   const m = p.mech; m.x = spot.x; m.z = spot.z; m.y = 0; m.pid = p.id;
+  if (S.versus) joinVersus(S, m);                                     // versus: a team and its spawn
   p.mats = { scrap: 0, alloy: 0, exotic: 0 }; p.loot = [];
   S.players.push(p); S.mechs.push(m); S.byId.set(m.id, m);
   partyScale(S);

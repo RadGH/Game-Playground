@@ -20,11 +20,15 @@ export function districtStates(save, CAMP) {
   });
 }
 
-/** The story missions in order, each with its district and whether it can be flown. */
+/** The story missions in order, each with its district and whether it can be flown. A district can hold more story
+ *  missions after its first (`more: [{ story, after }]` — round 5: the long night, the walker, the moon): each opens
+ *  once the district is freed and its `after` missions are flown. */
 export function storyList(save, CAMP, MISSIONS) {
   const st = districtStates(save, CAMP);
   const rank = x => (x.open ? 0 : x.done ? 1 : 2);               // ready first, then flown (to replay), then locked
-  return st.map(d => ({ district: d, mission: MISSIONS.find(m => m.id === d.story), open: d.storyOpen, done: d.freed })).filter(x => x.mission)
+  const more = st.flatMap(d => (d.more || []).map(x => ({ district: d, mission: MISSIONS.find(m => m.id === x.story), done: missionDone(save, x.story),
+    open: d.freed && (x.after || []).every(id => missionDone(save, id)) && !missionDone(save, x.story), after: x.after || [] })));
+  return [...st.map(d => ({ district: d, mission: MISSIONS.find(m => m.id === d.story), open: d.storyOpen, done: d.freed })), ...more].filter(x => x.mission)
     .sort((a, b) => rank(a) - rank(b) || MISSIONS.indexOf(a.mission) - MISSIONS.indexOf(b.mission));
 }
 

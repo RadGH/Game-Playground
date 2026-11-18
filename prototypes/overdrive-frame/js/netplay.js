@@ -22,7 +22,8 @@ export class NetPlay extends Play {
     this.net = o.net; this.data = o.data;
     this.seq = 0; this.pending = []; this.queue = []; this.snapT = 0; this.snapAlpha = 1; this.relT = 0; this.ownPrev = null; this.tickAlpha = 1;
     this.netStats = { snaps: 0, late: 0, corrections: 0, lastFix: 0 };
-    this.worldApi = { groundAt: (x, z) => groundAt(this.S.world, x, z), pushOut: (b, r) => pushOut(this.S.world, b, r) };
+    // gravity: the same share the server's mission runs (the moon is 0.4), or prediction would jump to the wrong height
+    this.worldApi = { groundAt: (x, z) => groundAt(this.S.world, x, z), pushOut: (b, r) => pushOut(this.S.world, b, r), gravity: this.S.def.gravity ?? 1 };
     this.offs = [
       this.net.on('s', m => this._onSnap(m)),
       this.net.on('roster', m => applyRoster(this.S, m.roster, this.data)),
@@ -80,11 +81,12 @@ export class NetPlay extends Play {
     this.snapT += dt; this.snapAlpha = Math.min(1, this.snapT / SNAP_DT);
   }
 
-  /** A mech the server mentions that this copy does not have: a rival ace (built from its kind). */
+  /** A mech the server mentions that this copy does not have: a rival ace or a line frame (built from its kind). */
   _newMech(r) {
     if (!r.E || !r.K) return null;
     const K = this.S.kinds[r.K]; if (!K?.ace) return null;
-    return { id: r.i, team: 'enemy', ace: r.A, kind: r.K, build: K.ace.build, paint: K.ace.paint, name: K.ace.callsign, x: 0, z: 0, y: 0, face: 0, aim: 0, anim: 'idle', animT: 0, hp: 1, hpMax: 1, r: 0.22, weapons: [], status: {}, boss: true };
+    return { id: r.i, team: 'enemy', ace: r.A, kind: r.K, build: K.ace.build, paint: K.ace.paint, name: K.ace.callsign, x: 0, z: 0, y: 0, face: 0, aim: 0, anim: 'idle', animT: 0, hp: 1, hpMax: 1, r: 0.22, weapons: [], status: {},
+      boss: !K.ace.grunt, grunt: !!K.ace.grunt, elite: !!K.ace.grunt };   // round 5: Halden-Voss line frames come through here too
   }
 
   _advance(dt) {
@@ -109,7 +111,7 @@ export class NetPlay extends Play {
       if (this.pending.length > 90) this.pending.shift();
       if (this.S.phase !== 'drop' && !this.mech.down) stepMech(this.mech, copy, STEP, this.S.T, this.worldApi, []);
       this.controls.consume();
-      inp.qb = inp.jumpPressed = inp.lockOnPressed = inp.ping = inp.interact = inp.swap = false;
+      inp.qb = inp.jumpPressed = inp.lockOnPressed = inp.ping = inp.interact = inp.swap = inp.overload = false;
       this.acc -= STEP; steps++;
     }
     if (steps === 8) this.acc = 0;

@@ -20,7 +20,7 @@ export function createRoom({ code, serial = 0, now = () => Date.now(), seed = 1,
   const seats = [];                 // { pid, token, name, rank, build, ready, host, away, awayAt, send, loaded, inputs, last, ack, needFull, votes }
   const kicked = new Set();
   const opts = { public: false, bots: 0 };
-  let phase = 'lobby', pick = null, S = null, packer = null, tick = 0, loadUntil = 0, evBuf = [], emptySince = null, nextPid = 1;
+  let phase = 'lobby', pick = null, cp = null, S = null, packer = null, tick = 0, loadUntil = 0, evBuf = [], emptySince = null, nextPid = 1;
   const stats = { steps: 0, stepMs: 0, bytesOut: 0 };
 
   const humans = () => seats.filter(s => !s.gone);
@@ -32,7 +32,7 @@ export function createRoom({ code, serial = 0, now = () => Date.now(), seed = 1,
   function roomMsg(seat) {
     return { t: 'room', code, phase, you: seat.pid, host: hostSeat()?.pid || null, public: opts.public, bots: opts.bots,
       seats: seats.map(s => ({ pid: s.pid, name: s.name, rank: s.rank, frame: frameLabel(s.build), ready: s.ready, host: s.host, away: s.away, hasBuild: !!s.build, loaded: s.loaded, votes: s.votes.size })),
-      pick: pick ? { label: pick.m.name, story: pick.story || null, contract: pick.contract ?? null, tier: pick.m.tier || 1, type: pick.m.type || null, district: pick.m.district || null, brief: pick.m.brief || '' } : null,
+      pick: pick ? { label: pick.m.name, story: pick.story || null, contract: pick.contract ?? null, tier: pick.m.tier || 1, type: pick.m.type || null, district: pick.m.district || null, brief: pick.m.brief || '', stages: pick.m.stages?.map(s => s.label) || null, checkpoint: cp ? { stage: cp.stage, label: cp.label } : null } : null,
       mission: S ? { time: Math.round(S.time), phase: S.phase } : null };
   }
   const announce = () => { for (const s of seats) send(s, roomMsg(s)); };
@@ -94,7 +94,7 @@ export function createRoom({ code, serial = 0, now = () => Date.now(), seed = 1,
       case 'pick': {
         if (!isHost || phase !== 'lobby') return;
         const m = pickMission(msg); if (!m) return send(seat, { t: 'err', code: 'pick', msg: 'That mission could not be found.' });
-        pick = m; for (const s of seats) if (!s.host) s.ready = false;
+        pick = m; cp = null; for (const s of seats) if (!s.host) s.ready = false;
         return announce();
       }
       case 'start': {
@@ -103,7 +103,7 @@ export function createRoom({ code, serial = 0, now = () => Date.now(), seed = 1,
         if (!seat.build) return send(seat, { t: 'err', code: 'build', msg: 'Your frame is not ready.' });
         const waiting = seats.filter(s => s !== seat && !s.away && (!s.build || !s.ready));
         if (waiting.length) return send(seat, { t: 'err', code: 'ready', msg: `Waiting for ${waiting.map(s => s.name).join(', ')} to be ready.` });
-        return launch();
+        return launch(msg.fromCheckpoint && cp ? cp : null);
       }
       case 'loaded': {
         if (phase === 'lobby' || seat.loaded || !S) return;
@@ -159,9 +159,9 @@ export function createRoom({ code, serial = 0, now = () => Date.now(), seed = 1,
   /** Events the sim makes between steps (someone dropping in or out) go out with the next snapshot. */
   function simEvents(fn) { const n = S.events.length, r = fn(); evBuf.push(...S.events.slice(n)); return r; }
   function rosterAll() { if (S) all({ t: 'roster', roster: rosterOf() }); }
-  function sendStart(seat) { if (!S || !pick) return; send(seat, { t: 'start', mission: pick.m, roster: rosterOf(), you: seat.pid, seed: S.seed }); }
+  function sendStart(seat) { if (!S || !pick) return; send(seat, { t: 'start', mission: pick.m, roster: rosterOf(), you: seat.pid, seed: S.seed, checkpoint: S.startCp || null }); }
 
-  function launch() {
+  function launch(fromCp = null) {
     const def = buildMissionDef(pick.m);
     const players = [];
     for (const s of seats) if (s.build) { players.push({ id: s.pid, mech: frameFor(data, s.pid, s.build, s.name), rank: s.rank }); s.loaded = false; s.inputs = []; s.last = null; s.ack = 0; s.owed = 0; s.missed = 0; s.ready = false; }
@@ -169,7 +169,8 @@ export function createRoom({ code, serial = 0, now = () => Date.now(), seed = 1,
       const id = 'b' + (i + 1), b = asItems(botBuild(data.PARTS, data.MAKERS, i + serial));
       players.push({ id, bot: true, mech: frameFor(data, id, b, botName(i + serial)), rank: 1 });
     }
-    S = createMission(def, { kinds: data.KINDS, T: data.T, players, seed: def.seed });
+    S = createMission(def, { kinds: data.KINDS, T: data.T, players, seed: def.seed, checkpoint: fromCp });
+    S.startCp = fromCp;                     // late joiners build the same mission from the same checkpoint
     packer = createPacker(); tick = 0; evBuf = [];
     phase = 'loading'; loadUntil = now() + LOAD_WAIT_MS;
     log('room.launch', { code, mission: pick.m.id, players: players.length });
@@ -222,6 +223,7 @@ export function createRoom({ code, serial = 0, now = () => Date.now(), seed = 1,
     stats.stepMs += performance.now() - t0;
     if (S.result) {
       const result = S.result;
+      cp = !result.won && S.checkpoint ? S.checkpoint : null;     // a long mission lost: the host can launch it again from here
       for (const s of seats) send(s, { t: 'result', result, mission: pick.m, you: s.pid });
       log('room.result', { code, won: result.won, grade: result.grade });
       toLobby();

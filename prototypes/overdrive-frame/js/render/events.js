@@ -3,6 +3,8 @@
 // the same everywhere (Arcline's battlefx pattern; sounds from the shared Sound Lab).
 import { play } from '../../../../citykit/js/world/sound.js';
 import { SHOT_COLOURS } from './view.js';
+import { domeHit } from './roles-art.js';
+import { walkerFx } from './walker-art.js';
 
 export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSprite = () => null } = {}) {
   const fx = view.fx;
@@ -10,6 +12,7 @@ export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSp
   const snd = (id, x, z, o = {}) => play(id, { pan: pan(x, z), x, z, ...o });
 
   return function handle(ev, S) {
+    if ((ev.type.startsWith('boss') || ev.type.startsWith('mine')) && walkerFx(ev, S, fx, view, snd)) return;   // the Juggernaut's own look (render/walker-art.js)
     switch (ev.type) {
       case 'fire': {
         const col = SHOT_COLOURS[S.byId.get(ev.id)?.weapons?.[ev.slot]?.spec?.dtype] || '#ffd27a';
@@ -36,6 +39,7 @@ export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSp
           if (ev.by === localId() || !ev.by) view.number(ev.x, ev.z, ev.y ?? 0.2, ev.amount, ev.tier);
         }
         const e = S.byId.get(ev.id); if (e) e.lastHit = S.time;
+        if (ev.shield && near(ev.x, ev.z)) { fx.ring(ev.x, ev.z, 0.3, 0.16, 'rgba(111,232,255,0.9)', 2); domeHit(view, S, ev); }   // softened by a bulwark's dome
         break;
       }
       case 'kill': {
@@ -104,6 +108,10 @@ export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSp
       case 'objectiveFailed': snd('ui.error', 0, 0, { global: true, gain: 0.5 }); break;
       case 'down': fx.light(ev.x, ev.z, 2, 0.4, '#ff5a3a', 1.2); fx.smoke(ev.x, ev.z, 4, { life: [1.5, 2.2], rise: 0.4 }); snd('hvf.down', ev.x, ev.z, { gain: 0.8 }); break;
       case 'revive': snd('hvf.revive', 0, 0, { global: true, gain: 0.7 }); break;
+      case 'overload': { const col = ev.kind === 'surge' ? '#ffb02e' : ev.kind === 'bastion' ? '#3ff0ff' : '#c46bff';
+        fx.light(ev.x, ev.z, 3.2, 0.6, col, 1.6); fx.shake?.(ev.kind === 'cascade' ? 0.5 : 0.25); fx.spark(ev.x, ev.z, 0.5, 24, { speed: [3, 7], life: [0.2, 0.5], color: col });
+        snd(ev.kind === 'cascade' ? 'spell.lightning.impact' : 'spell.lightning.launch', ev.x, ev.z, { gain: 0.9 }); break; }
+      case 'odPulse': fx.light(ev.x, ev.z, ev.r * 1.4, 0.25, '#c46bff', 1); snd('spell.lightning.travel', ev.x, ev.z, { gain: 0.4 }); break;
       case 'ping': view.ping(ev); snd('hvf.bell', 0, 0, { global: true, gain: 0.35, pitch: ev.kind === 'enemy' ? 0.85 : 1.2 }); break;
       case 'joined': fx.light(ev.x, ev.z, 1.6, 0.5, '#3ff0ff', 1); snd('ui.open', 0, 0, { global: true, gain: 0.5 }); break;
       case 'leap': snd('beast.growl', ev.x, ev.z, { gain: 0.3, pitch: 1.4 }); break;
@@ -137,6 +145,27 @@ export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSp
       case 'aceIn': snd('fire.whoosh', ev.x, ev.z, { gain: 0.6, pitch: 0.7 }); break;
       case 'aceDown': fx.light(ev.x, ev.z, 2.6, 0.5, '#ff5a3a', 1.3); fx.ring(ev.x, ev.z, 2, 0.35); fx.shake(0.35); snd('explosion.large', ev.x, ev.z, { gain: 0.8 }); break;
       case 'ewarn': break;
+      // round 5 roles (sim/roles.js) and the Halden-Voss line frames (sim/ace.js)
+      case 'flameLight': if (near(ev.x, ev.z)) { fx.light(ev.x, ev.z, 0.5, ev.t || 0.6, '#9fd8ff', 0.8); snd('lamp.relight', ev.x, ev.z, { gain: 0.45, pitch: 1.3 }); } break;
+      case 'flameOn': snd('fire.whoosh', ev.x, ev.z, { gain: 0.7, pitch: 0.75 }); break;
+      case 'flame': {
+        if (!near(ev.x, ev.z)) break;
+        for (let i = 0; i < 3; i++) { const a = ev.dir + (Math.random() - 0.5) * ev.arc * 1.6, d = Math.random() * ev.r; fx.spark(ev.x + Math.cos(a) * d, ev.z + Math.sin(a) * d, 0.1, 2, { speed: [0.5, 1.5], life: [0.2, 0.45], color: Math.random() < 0.5 ? '#ffb347' : '#ff6a1a', up: [1, 2.5] }); }
+        fx.light(ev.x + Math.cos(ev.dir) * ev.r * 0.5, ev.z + Math.sin(ev.dir) * ev.r * 0.5, ev.r * 1.2, 0.22, '#ff7a2a', 1);
+        if (Math.random() < 0.35) snd('fire.crackle', ev.x, ev.z, { gain: 0.3 });
+        break;
+      }
+      case 'eheal':
+        if (ev.start) snd('heal', ev.x, ev.z, { gain: 0.3, pitch: 1.2 });
+        else if (near(ev.x, ev.z)) fx.spark(ev.x, ev.z, ev.y ?? 0.25, 4, { speed: [0.3, 1], life: [0.4, 0.8], color: '#7dff9e', up: [1, 2] });
+        break;
+      case 'cloud':
+        fx.light(ev.x, ev.z, ev.r * 1.4, 0.6, '#9dff6a', 1); fx.ring(ev.x, ev.z, ev.r, 0.35, 'rgba(160,255,110,0.8)', 3);
+        fx.spark(ev.x, ev.z, 0.3, 14, { speed: [1, 3], life: [0.4, 0.9], color: '#b6ff7a', up: [0.5, 2] });   // the haze itself is drawn by roles-art.js
+        snd('gutter.burst', ev.x, ev.z, { gain: 0.6 }); break;
+      case 'slowed': if (ev.id === localId()) snd('status.slow.apply', 0, 0, { global: true, gain: 0.5 }); break;
+      case 'gruntIn': snd('fire.whoosh', ev.x, ev.z, { gain: 0.4, pitch: 0.85 }); break;
+      case 'gruntDown': fx.light(ev.x, ev.z, 2, 0.45, '#ffb02e', 1.2); fx.ring(ev.x, ev.z, 1.4, 0.3); fx.smoke(ev.x, ev.z, 3, { life: [1.2, 2], rise: 0.35 }); fx.shake(0.2); view.scorch(ev.x, ev.z, 0.6); snd('explosion.large', ev.x, ev.z, { gain: 0.6, pitch: 1.1 }); break;
       // round 3 mission types (ops.js)
       case 'planted': fx.ring(ev.x, ev.z, 1.2, 0.5, 'rgba(255,176,46,0.9)', 4); fx.light(ev.x, ev.z, 1.6, 0.5, '#ffb02e', 1.2); snd('lever.pull', ev.x, ev.z, { gain: 0.8 }); snd('hvf.bell', 0, 0, { global: true, gain: 0.4, pitch: 1.2 }); break;
       case 'corePick': fx.light(ev.x, ev.z, 1.4, 0.4, '#3ff0ff', 1.2); snd('loot.magic', 0, 0, { global: true, gain: 0.6 }); break;

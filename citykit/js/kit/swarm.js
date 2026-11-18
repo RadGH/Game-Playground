@@ -9,6 +9,7 @@
 //   Bloater      — a waddling glowing gas sac in a cage of ribs; it swells and bursts next to you (used sparingly)
 //   Hive / Great Hive — the spawner nests (1×1 and 2×2 lots): ribbed mounds whose petal mouths open to let swarmers out
 //   Broodmother  — the boss (~1.75 tiles long): claws, a crest, egg sacs; each of those can be shot off
+//   Spore drifter — (round 5) a floating gas bladder that drifts at the mech and bursts into a slowing cloud
 //
 // Every model is rebuilt per frame through userData.pose(anim, phase, heading) (enemy-bits.js `poseable`), faces one
 // of 16 screen directions, and uses glow materials for eyes, sacs, vents and pores so the night layer shines.
@@ -681,5 +682,65 @@ addRecipes({
     ...common, name: 'Broodmother', size: [2, 2], anims: A_BROOD, dims: { len: 1.8, h: 0.95 }, parts: BROOD_PARTS,
     blurb: 'Boss, about 28 m long: great claws, a crest and two glowing egg sacs that can each be shot off. Spits, roars and calls swarmers.',
     params: [skinParam, ...breakParams], build: poseable(A_BROOD, broodLook, drawBrood, { parts: BROOD_PARTS }),
+  },
+});
+
+// =====================================================================================================================
+// Spore drifter (round 5) — a floating gas bladder (~0.22 tall, flies at `alt`): a glowing sac under a cap of dark
+// plates, a frilled skirt, tendrils that sway. Drifts at the mech and bursts into a slowing gas cloud (`burst`; the
+// game draws the lasting cloud itself).
+// =====================================================================================================================
+const A_DRIFT = { drift: { label: 'Drift', frames: 8, fps: 8 }, burst: { label: 'Burst', frames: 10, fps: 12, once: true } };
+function driftLook(p) { const L = mats(p); return { ...L, alt: p.alt, gas: '#9dff6a', scale: jitter(p), shards: throws(L.R, 8, { spread: 0.4, up: 0.3, size: [0.025, 0.045] }), puffs: throws(L.R, 9, { spread: 0.35, up: 0.05, size: [0.05, 0.09] }) }; }
+function drawDrifter(root, L, anim, t) {
+  let by = L.alt + 0.08, roll = 0, pitch = 0, swell = 1, gone = -1, sway = 0;
+  if (anim === 'drift') { by += 0.012 * Math.sin(t * TAU); roll = 0.08 * Math.sin(t * TAU); pitch = 0.05 * Math.cos(t * TAU); swell = 1 + 0.06 * Math.sin(t * TAU * 2); sway = t; }
+  else if (anim === 'burst') { if (t < 0.15) swell = 1.25 + t * 2; else gone = (t - 0.15) / 0.85; }
+  const f = frame(0, by, 0, pitch, roll, 0);
+  const T = torsoGroup(root, f);
+  const R = 0.075 * swell;
+  if (gone < 0) {
+    // the sac: a glowing bladder, darker veins round it, pores along its middle
+    ball(T, R, neonMat(L.gas, 0.35 + 0.25 * (swell - 1) * 4), 0, 0, 0, 1, 0.9, 1, 18);
+    for (let i = 0; i < 6; i++) {
+      const a = i * TAU / 6;
+      const v = put(T, geo('dvein', () => new THREE.TorusGeometry(1, 0.05, 5, 20, Math.PI)), L.dark, 0, 0, 0);
+      v.scale.setScalar(R * 1.01); v.rotation.set(0, a, Math.PI / 2);
+    }
+    for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + 0.2; ball(T, R * 0.12, lit(L.glow, true, 0.8), Math.cos(a) * R * 0.98, -R * 0.1, Math.sin(a) * R * 0.98, 1, 1, 1, 6); }
+    // the cap: overlapping dark plates with a bony crest, two small eyes at the front
+    ball(T, R * 0.95, L.shell, 0, R * 0.45, 0, 1.08, 0.5, 1.08, 16);
+    for (let i = 0; i < 5; i++) { const a = i * TAU / 5; ball(T, R * 0.4, L.plate, Math.cos(a) * R * 0.55, R * 0.62, Math.sin(a) * R * 0.55, 1, 0.35, 1, 10); }
+    for (let i = 0; i < 3; i++) spike(T, [-R * 0.3 + i * R * 0.3, R * 0.8, 0], [-R * 0.36 + i * R * 0.3, R * 1.15, 0], R * 0.1, L.bone, 4);
+    for (const s of [1, -1]) ball(T, R * 0.11, lit(L.glow, true, 0.9), R * 0.86, R * 0.3, s * R * 0.25, 1, 1, 1, 8);
+    // the frilled skirt under the sac
+    for (let i = 0; i < 10; i++) { const a = i * TAU / 10; const fr = cbox(T, R * 0.4, 0.006, R * 0.22, L.belly, Math.cos(a) * R * 0.8, -R * 0.55, Math.sin(a) * R * 0.8); fr.rotation.set(0, -a, -0.6); }
+  }
+  // tendrils: six hanging strands of three links each, swaying with the drift (torn loose by the burst)
+  for (let i = 0; i < 6; i++) {
+    const a = i * TAU / 6 + 0.3, r0 = R * 0.5;
+    let p = f.tp([Math.cos(a) * r0, -R * 0.7, Math.sin(a) * r0]);
+    const len = 0.03 + 0.012 * (i % 3);
+    for (let j = 0; j < 3; j++) {
+      const w = Math.sin((sway + i * 0.17 + j * 0.12) * TAU) * 0.012 * (j + 1);
+      let q = [p[0] + w, Math.max(0.006, p[1] - len), p[2] + w * 0.6];
+      if (gone >= 0) q = [p[0] + Math.cos(a) * 0.02 * gone, Math.max(0.005, p[1] - len * (1 - 0.5 * gone)), p[2] + Math.sin(a) * 0.02 * gone];
+      seg(root, p, q, 0.006 - j * 0.0015, 0.004 - j * 0.001, j === 2 ? lit(L.glow, gone < 0, 0.6) : L.leg, 5);
+      p = q;
+    }
+  }
+  // the burst: shell shards fly, a green cloud swells, a splash soaks the ground
+  if (gone >= 0) {
+    for (let i = 0; i < L.shards.length; i++) chunk(root, f.tp([0, 0, 0]), L.shards[i], gone * 0.9, i % 2 ? L.dark : L.plate);
+    const cloud = 1 - ease((gone - 0.3) / 0.7);
+    if (cloud > 0.02) for (const pf of L.puffs) { const k = ease(gone / 0.45); ball(root, pf.size * (0.6 + 0.9 * k) * cloud, neonMat(L.gas, 0.45), pf.v[0] * k, by + pf.v[1] * k - 0.04 * k, pf.v[2] * k, 1, 0.75, 1, 10).castShadow = false; }
+    splat(root, L.gas, gone * 1.4, 0, 0, 0.22);
+  }
+}
+addRecipes({
+  'sw-drifter': {
+    ...common, name: 'Spore Drifter', size: [1, 1], anims: A_DRIFT, dims: { len: 0.2, h: 0.24 }, flyer: true,
+    blurb: 'A floating gas bladder trailing tendrils. It drifts at the mech and bursts into a cloud that slows it. Shoot it while it is far away.',
+    params: [{ key: 'alt', label: 'Altitude', min: 0.05, max: 0.6, step: 0.05, def: 0.1, unit: 'tiles' }, skinParam], build: poseable(A_DRIFT, driftLook, drawDrifter),
   },
 });

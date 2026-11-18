@@ -98,7 +98,13 @@ for (const v of VIEWS) {
       const soft = [];                                  // strict findings: problems for strict games, notes on a --strict trial
       if (STRICT) {
         for (const b of await page.evaluate(screenLookProblems, cfg.look || {})) soft.push(`${b.what}: ${b.text}`);
-        if (s.live) { const a = await shot(); await page.waitForTimeout(1500); const d = await change(a, await shot()); if (d < 0.0005) soft.push(`frozen: nothing on screen moved in 1.5 s`); }
+        if (s.live) {
+          // a live screen must move. Look twice: one long task (a picture baking in software graphics on this VM) can
+          // stall a frame for over a second; a dead screen is still dead on the second look
+          let moved = false;
+          for (let look = 0; look < 2 && !moved; look++) { const a = await shot(); await page.waitForTimeout(1500); moved = (await change(a, await shot())) >= 0.0005; }
+          if (!moved) soft.push(`frozen: nothing on screen moved in 1.5 s (looked twice)`);
+        }
         if (s.input && !(ctx.phone && s.input && s.inputPhone === false)) {
           const input = (ctx.phone && s.inputPhone) || s.input;
           const t0 = Date.now(); const a = await shot(); await play(input); const took = Date.now() - t0; const b = await shot();

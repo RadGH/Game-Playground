@@ -12,7 +12,7 @@ export function recipeState(r, save, rank) {
   return { state: 'ready' };
 }
 
-export const COST_KEYS = ['scrap', 'alloy', 'exotic', 'credits'];
+export const COST_KEYS = ['scrap', 'alloy', 'exotic', 'chitin', 'siegeplate', 'credits'];   // boss materials: chitin (Broodmother), siege plate (Juggernaut)
 export function canAfford(save, cost = {}) {
   for (const k of COST_KEYS) { const have = k === 'credits' ? save.credits : save.mats[k] || 0; if ((cost[k] || 0) > have) return false; }
   return true;

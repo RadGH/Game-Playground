@@ -15,7 +15,7 @@ import { play as sound } from '../../../../citykit/js/world/sound.js';
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const click = () => sound('ui.click', { global: true, gain: 0.4 });
-const DISTRICT = { downtown: 'Downtown', residential: 'Residential', industrial: 'Industrial' };
+const DISTRICT = { downtown: 'Downtown', residential: 'Residential', industrial: 'Industrial', moon: 'Moon outpost' };   // moon: round 5
 const CALL_A = ['Iron', 'Low', 'Copper', 'Grey', 'Night', 'Rust', 'Bright', 'Static', 'Cold', 'Long', 'Quick', 'Steel', 'Dust', 'Signal', 'Arc', 'Torque'];
 const CALL_B = ['tide', 'jack', 'wire', 'heron', 'ridge', 'hound', 'lark', 'wren', 'pike', 'gantry', 'rook', 'bolt', 'spur', 'kite', 'drift', 'anvil'];
 export const randomCallsign = () => CALL_A[Math.floor(Math.random() * CALL_A.length)] + CALL_B[Math.floor(Math.random() * CALL_B.length)];   // lint-ok: a name suggestion, not game rules
@@ -152,7 +152,7 @@ export class Coop {
         <div class="of-room-main">
           <section class="of-panel of-room-mission"></section>
           <section class="of-panel of-frames"><h2>Your frame <small>the saved build you bring</small></h2><div class="of-frame-row"></div><div class="of-frame-stats"></div></section>
-          <div class="of-room-go"><p class="of-room-why" role="status"></p><button type="button" class="of-btn of-primary" data-a="go"></button></div>
+          <div class="of-room-go"><p class="of-room-why" role="status"></p><button type="button" class="of-btn" data-a="cp" hidden></button><button type="button" class="of-btn of-primary" data-a="go"></button></div>
         </div>
       </div>`;
     el.querySelector('[data-a="leave"]').addEventListener('click', async () => {
@@ -164,6 +164,7 @@ export class Coop {
     el.querySelector('[data-a="bigqr"]').addEventListener('click', () => { click(); this._bigQr(); });
     el.querySelectorAll('[data-bots]').forEach(b => b.addEventListener('click', () => { click(); this.net.send({ t: 'opt', key: 'bots', value: +b.dataset.bots }); }));
     el.querySelectorAll('[data-pub]').forEach(b => b.addEventListener('click', () => { click(); this.net.send({ t: 'opt', key: 'public', value: b.dataset.pub === '1' }); }));
+    el.querySelector('[data-a="cp"]').addEventListener('click', () => { click(); this.net.send({ t: 'start', fromCheckpoint: true }); });
     el.querySelector('[data-a="go"]').addEventListener('click', () => {
       click();
       if (this.isHost) this.net.send({ t: 'start' });
@@ -210,6 +211,8 @@ export class Coop {
     if (r.phase !== 'lobby') { go.textContent = 'Mission under way…'; go.disabled = true; why.textContent = 'Your frame drops in beside the team as soon as it\'s loaded.'; }
     else if (host) { go.textContent = 'Launch'; go.disabled = !r.pick || waiting.length > 0 || !me?.hasBuild; why.textContent = !r.pick ? 'Pick a mission.' : waiting.length ? `Waiting for ${waiting.map(s => s.name).join(', ')} to be ready.` : 'Everyone is ready.'; }
     else { go.textContent = me?.ready ? 'Not ready' : 'Ready'; go.disabled = !me?.hasBuild || !r.pick; go.setAttribute('aria-pressed', me?.ready ? 'true' : 'false'); why.textContent = !r.pick ? 'The host is picking a mission.' : me?.ready ? 'Waiting for the host to launch.' : 'Say when you\'re ready.'; }
+    const cpBtn = el.querySelector('[data-a="cp"]'), cp = r.pick?.checkpoint;
+    cpBtn.hidden = !(host && cp && r.phase === 'lobby'); if (cp) { cpBtn.textContent = `From the checkpoint: ${cp.label}`; cpBtn.disabled = go.disabled; if (!go.disabled) go.textContent = 'Launch from the start'; }
     this._dot();
   }
   /** The mission panel: what's picked (everyone), and for the host, the list to pick from (their own city board). */
@@ -234,7 +237,9 @@ export class Coop {
     const so = h('ol', 'of-board-list'), co = h('ol', 'of-board-list');
     so.append(...story.map(x => card(x.mission, { story: x.mission.id })));
     co.append(...contracts.map((m, i) => card(m, { contract: i, played: g.save.played || 0, grades: g.save.grades })));
-    lists.append(h('h3', null, 'Story'), so, h('h3', null, 'Contracts'), co);
+    const vo = h('ol', 'of-board-list');
+    vo.append(...g.MISSIONS.filter(m => m.versus).map(m => { const li = card(m, { story: m.id }); li.querySelector('.of-card-pay').textContent = m.versus.mode === 'ffa' ? 'Every frame for itself' : 'Red against blue'; return li; }));
+    lists.append(h('h3', null, 'Story'), so, h('h3', null, 'Contracts'), co, h('h3', null, 'Versus'), vo);
     box.append(lists);
   }
   _bigQr() {

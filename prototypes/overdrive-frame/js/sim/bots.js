@@ -19,7 +19,7 @@ import { blocked, rayLot } from './world.js';
 import { makeFlow, updateFlow, flowDir } from './flow.js';
 
 /** Twelve original callsigns for the computer's pilots. */
-export const BOT_NAMES = ['Tally', 'Rivet', 'Halyard', 'Bramble', 'Quill', 'Sprocket', 'Dunlin', 'Corvo', 'Mica', 'Ostler', 'Tamber', 'Wicket'];
+export const BOT_NAMES = ['Tally', 'Rivet', 'Marlin', 'Bramble', 'Quill', 'Sprocket', 'Dunlin', 'Corvo', 'Mica', 'Pylon', 'Tamber', 'Wicket'];
 export const botName = i => BOT_NAMES[((i % BOT_NAMES.length) + BOT_NAMES.length) % BOT_NAMES.length];
 
 // Paint schemes from data/paints.json (rank 0, so nothing locked) — each bot's frame wears a different one, so you can
@@ -56,7 +56,14 @@ export function botBuild(PARTS, MAKERS, i = 0) {
 
 /** Fill in the inputs of every bot player for this step (human entries are never touched). */
 export function botInputs(S, inputs, dt) {
-  for (const p of S.players) if (p.bot) inputs[p.id] = botInput(S, p.mech, dt);
+  for (const p of S.players) if (p.bot) { if (S.versus) S.grid = S.versus.grids.get(p.mech.team) || S.grid; const inp = inputs[p.id] = botInput(S, p.mech, dt); inp.overload = wantsOverload(S, p.mech); }
+}
+
+/** An Overload core (sim/overload.js) with a full bar: fire it when the fight is close — a crowd near, or a teammate down. */
+export function wantsOverload(S, m) {
+  if (!m.stats?.overload || (m.od || 0) < 1 || m.odT > 0) return false;
+  let near = 0; for (const e of S.candidates(m.x, m.z, 3.5)) { near++; if (e.boss || near >= 6) return true; }
+  return m.stats.overload === 'bastion' && S.mechs.some(o => o.team === m.team && o !== m && o.down && Math.hypot(o.x - m.x, o.z - m.z) < 3);
 }
 
 // ---- knobs (plain rules of thumb, not balance numbers) ----
@@ -238,7 +245,14 @@ export function botInput(S, m, dt) {
         if (A.kind === 'dash' && eFrac > 0.1) qb = true;
       }
     }
+    // the Juggernaut (sim/juggernaut.js): its cannon lane, its stomp ring, its mines
+    if (A.kind === 'cannon') {
+      const cx = Math.cos(A.dir), cz = Math.sin(A.dir), rx = m.x - A.x0, rz = m.z - A.z0, along = rx * cx + rz * cz, side = -rx * cz + rz * cx;
+      if (along > -0.5 && along < A.len + 0.5 && Math.abs(side) < A.w / 2 + m.r + 0.35) { danger = true; const sg = side >= 0 ? 1 : -1; mx = -cz * sg; mz = cx * sg; boost = eFrac > 0.12; if (A.t > A.wind - 0.35 && eFrac > 0.1) qb = true; }
+    }
+    if (A.kind === 'stomp') { const sx = m.x - A.x0, sz = m.z - A.z0, sd = Math.hypot(sx, sz); if (sd < A.r + m.r + 0.4) { danger = true; mx = sx / (sd || 1); mz = sz / (sd || 1); boost = eFrac > 0.12; if (A.t > A.wind - 0.35 && eFrac > 0.1) qb = true; } }
   }
+  for (const e of S.enemies) for (const n of e.mines || []) { const dx = m.x - n.x, dz = m.z - n.z, d = Math.hypot(dx, dz); if (d < 0.8) { danger = true; mx = dx / (d || 1); mz = dz / (d || 1); } }
   if (B.dodgeCd <= 0 && eFrac > (reserve + qbCost) / eMax * 0.8) for (const s of S.shots) {
     if (s.team === m.team || s.lob) continue;
     const rx = m.x - s.x, rz = m.z - s.z, d = Math.hypot(rx, rz); if (d > 1.8 || d < 0.02) continue;

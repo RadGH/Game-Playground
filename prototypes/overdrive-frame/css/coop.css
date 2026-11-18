@@ -94,3 +94,11 @@
 .of-callsign { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 15px; color: var(--of-dim); }
 .of-callsign input { min-height: 44px; width: min(260px, 100%); padding: 8px 12px; font: 700 18px var(--of-font); color: var(--of-text); background: #0a0e16; border: 1px solid var(--of-line-2); border-radius: var(--of-r); }
 .of-callsign input:focus { outline: none; border-color: var(--of-amber); }
+
+/* versus results */
+.of-res-vs { margin: 0; display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: baseline; justify-content: center; font: 700 22px var(--of-font); }
+.of-res-vs i { color: var(--of-faint); font-style: normal; }
+.of-vs-side b { font: 800 34px var(--of-num); margin-left: 6px; }
+.of-vs-side.of-vs-red b { color: #ff8a8a; } .of-vs-side.of-vs-blue b { color: #8ac8ff; }
+.of-vs-side.of-vs-mine { text-decoration: underline; text-underline-offset: 6px; text-decoration-color: var(--of-amber); }
+.of-res-team li.of-vs-red { border-left-color: #ff5a5a; } .of-res-team li.of-vs-blue { border-left-color: #4aa8ff; }

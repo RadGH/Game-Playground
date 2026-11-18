@@ -25,9 +25,9 @@ mkdir -p "$(dirname "$KEEP")"; touch "$KEEP"
 games() {   # every user unit named after a prototype folder
   { systemctl --user list-unit-files --type=service --no-legend; systemctl --user list-units --type=service --all --no-legend --plain; } 2>/dev/null \
     | awk '{print $1}' | grep '\.service$' | sed 's/\.service$//' | sort -u | while read -r u; do
-    base=${u%%-*}; [ -d "$PROTO/$base" ] || [ -L "$PROTO/$base" ] || continue
     case "$u" in game-servers*) continue ;; esac
-    echo "$u"
+    # the longest name a prototype folder has: knockabout-dev → knockabout, overdrive-frame-dev → overdrive-frame
+    b=$u; while :; do if [ -d "$PROTO/$b" ] || [ -L "$PROTO/$b" ]; then echo "$u"; break; fi; [[ "$b" == *-* ]] || break; b=${b%-*}; done
   done
 }
 kept_until() { awk -v u="$1" '$1 == u { print $2 }' "$KEEP" | tail -1; }

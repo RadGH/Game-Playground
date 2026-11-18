@@ -17,7 +17,6 @@
 .of-bay h4 { margin: 10px 0 4px; font: 600 13px var(--of-font); letter-spacing: 0.1em; text-transform: uppercase; color: var(--of-faint); }
 .of-note { margin: 0; color: var(--of-dim); font-size: 14px; line-height: 1.45; }
 .of-empty { margin: 0; padding: 14px; color: var(--of-dim); font-size: 14px; border: 1px dashed var(--of-line-2); border-radius: var(--of-r); }
-.of-bad { color: var(--of-red); }
 .of-btn.of-chip { min-height: 44px; padding: 8px 14px; font-size: 14px; }
 .of-btn.of-chip.on { border-color: var(--of-amber); background: linear-gradient(180deg, #3a2c10, #261d0c); color: #ffe2a8; }
 .of-btn.of-icon { min-width: 44px; padding: 8px; text-align: center; font-size: 22px; }
@@ -29,7 +28,7 @@
 .of-item header { display: grid; gap: 2px; }
 .of-item header b { font: 700 17px var(--of-font); color: var(--rc); }
 .of-item header small { color: var(--of-dim); font-size: 13px; }
-.of-tag { position: absolute; top: 10px; right: 10px; font: 600 12px var(--of-font); letter-spacing: 0.1em; text-transform: uppercase; color: var(--of-bg); background: var(--of-amber); padding: 2px 6px; border-radius: 2px; }
+.of-fit-tag { position: absolute; top: 10px; right: 10px; font: 600 12px var(--of-font); letter-spacing: 0.1em; text-transform: uppercase; color: var(--of-bg); background: var(--of-amber); padding: 2px 6px; border-radius: 2px; }
 .of-item-nums { margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 6px 12px; }
 .of-item-nums dt { font-size: 12px; color: var(--of-dim); letter-spacing: 0.04em; }
 .of-item-nums dd { margin: 0; font: 600 17px var(--of-num); }

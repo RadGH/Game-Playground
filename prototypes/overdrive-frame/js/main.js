@@ -18,6 +18,11 @@ import { Play } from './play.js';
 import { Hud } from './ui/hud.js';
 import { Screens } from './ui/screens.js';
 import { loadSave, writeSave, applyResult, SAVE_KEY } from './save.js';
+import { NetPlay } from './netplay.js';
+import { makeMirror, frameFor, asItems } from './net/mirror.js';
+import { botBuild, botName } from './sim/bots.js';
+import { levelTier } from './sim/progress.js';
+import { Coop } from './ui/coop.js';
 import { SPEAKERS } from './ui/speakers.js';
 import { startSound, resume } from '../../../citykit/js/world/sound.js';
 import './render/props.js';
@@ -61,20 +66,37 @@ const game = {
   rank() { return rankOf(save.xp); },
   saveNow(stamp = true) { if (game.noSave) return; writeSave(save, stamp); game.cloud?.saveSoon?.(); },
   noSave: false, cloud: null,
-  applyResult(result, mission, S = null) {
-    const st = S?.mechs?.[0]?.stats, gained = applyResult(save, result, mission.id, { ...ctx, stats: st, mission });
+  applyResult(result, mission, S = null, pid = 'p1', coop = false) {
+    const st = (S?.mechs?.find(m => m.pid === pid) || S?.mechs?.[0])?.stats;
+    // co-op: the host's mission, your rewards at your own level (owner ruling)
+    const gained = applyResult(save, result, mission.id, { ...ctx, stats: st, mission, ...(coop ? { tier: levelTier(rankOf(save.xp).rank) } : {}) }, pid);
     gained.rep = applyCampaign(save, mission, result).rep;
     return gained;
   },
+  /** Bot teammates for solo play (sim/bots.js): starter frames from each maker, built like a co-op seat. */
+  soloBots(n) { return Array.from({ length: n }, (_, i) => { const id = 'b' + (i + 1), b = asItems(botBuild(PARTS_JSON, MAKER_LIST, i)); return { id, mech: frameFor(NETDATA, id, b, botName(i)) }; }); },
   /** Start a mission with a build. Resolves with the result when it ends. */
-  startMission(mission, build) {
+  startMission(mission, build, nBots = 0) {
     return new Promise(resolve => {
       play?.dispose();
       const hud = new Hud(stage, { comms: mission.comms, speakers: SPEAKERS(sprites, mechArt, build), menu: screens.pauseMenu });
-      play = new Play({ root: stage, mission, build, P, C, kinds: KINDS, T, sprites, mechArt, mechDrawer: mechArt.draw, hud, pilotName: save.callsign, night: mission.night ?? 0.72,
+      play = new Play({ root: stage, mission, build, bots: game.soloBots(nBots), P, C, kinds: KINDS, T, sprites, mechArt, mechDrawer: mechArt.draw, hud, pilotName: save.callsign, night: mission.night ?? 0.72,
         onEnd: (result, S) => { const p = play; resolve({ result, S, mission, build }); setTimeout(() => { if (play === p) { play.dispose(); play = null; } }, 0); } });
       // the upper body plays its recoil when a weapon fires
       const fx = play.fxOf; play.fxOf = (ev, S) => { if (ev.type === 'fire' && ev.slot != null) mechArt.fired(ev.id, ev.slot); fx(ev, S); };
+    });
+  },
+  /** A co-op mission (start = the server's 'start' message): the browser's copy of it, drawn by NetPlay. */
+  startCoop(start, net) {
+    return new Promise(resolve => {
+      play?.dispose();
+      const mission = start.mission, M = makeMirror(start, NETDATA, start.you);
+      const build = M.byId.get('m-' + start.you)?.build || game.build();
+      const hud = new Hud(stage, { comms: mission.comms, speakers: SPEAKERS(sprites, mechArt, build), menu: screens.pauseMenu });
+      play = new NetPlay({ root: stage, M, net, data: NETDATA, P, C, kinds: KINDS, T, sprites, mechArt, build, mechDrawer: mechArt.draw, hud, night: mission.night ?? 0.72,
+        onEnd: (result, S) => { const p = play; resolve({ result, S, mission }); setTimeout(() => { if (play === p) { play.dispose(); play = null; } }, 0); } });
+      const fx = play.fxOf; play.fxOf = (ev, S) => { if (ev.type === 'fire' && ev.slot != null) mechArt.fired(ev.id, ev.slot); fx(ev, S); };
+      net.send({ t: 'loaded' });
     });
   },
   quitMission() { play?.dispose(); play = null; },
@@ -91,9 +113,13 @@ const game = {
 
   get play() { return play; },
 };
+const NETDATA = { P, C, KINDS, T };
 const screens = new Screens(document.getElementById('screens'), game);
 game.screens = screens;
+game.coop = new Coop(screens, game);
 screens.title();
+// an invite link (?code=ABCD) joins that room straight away
+{ const code = new URLSearchParams(location.search).get('code'); if (code && /^[A-Za-z]{4}$/.test(code)) game.coop.join(code.toUpperCase()); }
 
 // Cloud saves while signed in to games.radgh.com, with the whole conflict kit (game-standards §3): the "which copy?"
 // choice shows each side's own stats + last-played time (save-summary.js); the side not chosen is kept as a backup
@@ -128,7 +154,7 @@ async function checkStale() {
 game.checkStale = checkStale;
 
 // Claude's game-eye and the tests read the game through this
-window.gameEye = { state: () => ({ screen: screens.current, range: game.range?.state?.() || null, hangar: screens.hangarNow?.state?.() || null, noSave: game.noSave, previewsLeft: screens._previewQ?.length || 0, play: play?.state() || null, save: { credits: save.credits, grades: save.grades, items: save.items.length, xp: save.xp } }), game };
+window.gameEye = { state: () => ({ screen: screens.current, coop: game.coop.room ? { code: game.coop.room.code, phase: game.coop.room.phase, you: game.coop.room.you, host: game.coop.room.host, seats: game.coop.room.seats.length, net: game.coop.net?.state } : null, range: game.range?.state?.() || null, hangar: screens.hangarNow?.state?.() || null, noSave: game.noSave, previewsLeft: screens._previewQ?.length || 0, play: play?.state() || null, save: { credits: save.credits, grades: save.grades, items: save.items.length, xp: save.xp } }), game };
 
 // While a sheet or a shared dialog is open, everything behind it is hidden from screen readers and can't take focus
 // (and the screen checks read only what's on top).

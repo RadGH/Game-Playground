@@ -3,6 +3,7 @@
 **Status:** first playable build (2026-11-16) — rounds 0–4 built: City Kit art, world + regions, the city sim, defence, ships, transit, weather; round 5 (house standard + publish) in progress.
 **Play:** http://192.168.1.34:8400/prototypes/arcline/ (stable, LAN) · live: https://games.radgh.com/arcline/ once published.
 **Next:** publish to games.radgh.com; then owner play-testing — balance from the tuning panel and the feel log.
+**QA note (2026-11-18):** game-lint's new `css-class-twice` rule (lessons rule 52) finds 5 classes styled in two of Arcline's stylesheets (`.ac-tools`, `.ac-group`, `.ac-tcard`, `.modal-back`, `.toast`) — rename them after their screen the next time Arcline is worked on; the publish gate fails until then (`node tools/game-lint.mjs prototypes/arcline`).
 **Parked:** trade routes between your own cities (owner: "tbd"); shared online world; controller support. See `docs/PLAN.md`.
 
 A SimCity 4-style isometric city builder: a futuristic cyber city (skyscrapers, hotels, neon) on an alien world,

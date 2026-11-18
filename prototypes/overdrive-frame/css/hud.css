@@ -9,9 +9,9 @@
 .of-hud-armour { position: absolute; top: calc(12px + var(--safe-t)); left: calc(12px + var(--safe-l)); width: min(300px, 46vw); padding: 10px 12px; background: linear-gradient(90deg, rgba(10, 14, 22, 0.85), rgba(10, 14, 22, 0.4)); border-left: 3px solid var(--of-cyan); }
 .of-hud-label { font: 600 12px var(--of-font); letter-spacing: 0.14em; text-transform: uppercase; color: var(--of-dim); }
 .of-ap { display: block; font: 800 30px/1 var(--of-num); letter-spacing: 0.02em; }
-.of-bar { height: 6px; margin-top: 6px; background: rgba(255, 255, 255, 0.1); }
-.of-bar i { display: block; height: 100%; background: linear-gradient(90deg, #2fc7e0, var(--of-cyan)); transition: width 120ms; }
-.of-bar.of-low i { background: linear-gradient(90deg, #ff3b3b, #ff7a4a); }
+.of-ap-bar { height: 6px; margin-top: 6px; background: rgba(255, 255, 255, 0.1); }
+.of-ap-bar i { display: block; height: 100%; background: linear-gradient(90deg, #2fc7e0, var(--of-cyan)); transition: width 120ms; }
+.of-ap-bar.of-low i { background: linear-gradient(90deg, #ff3b3b, #ff7a4a); }
 .of-status { display: block; min-height: 1em; margin-top: 4px; font-size: 12px; color: var(--of-amber); }
 
 /* objectives, top right (under the ☰) */

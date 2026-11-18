@@ -141,7 +141,7 @@ export function openAssembly(screens, { onClose, onChange } = {}) {
     const cur = placeItem(place);
     box.querySelector('h3').textContent = place.startsWith('w') ? PLACE_LABEL[place] : SLOT_LABEL[place];
     const others = save.items.filter(it => it !== cur && fits(g.P[it.id], place)).sort((a, b) => RANK_ORDER(b.rarity) - RANK_ORDER(a.rarity) || (g.P[a.id].name < g.P[b.id].name ? -1 : 1));
-    list.innerHTML = (cur ? itemCard(g, cur, { tag: '<span class="of-tag">Fitted</span>', extra: place.startsWith('w') ? '<button type="button" class="of-btn of-small" data-rm>Take off</button>' : '' }) : '<p class="of-empty">Nothing fitted here.</p>')
+    list.innerHTML = (cur ? itemCard(g, cur, { tag: '<span class="of-fit-tag">Fitted</span>', extra: place.startsWith('w') ? '<button type="button" class="of-btn of-small" data-rm>Take off</button>' : '' }) : '<p class="of-empty">Nothing fitted here.</p>')
       + (others.length ? others.map(it => itemCard(g, it, { vs: cur, extra: `<button type="button" class="of-btn of-small of-primary" data-fit="${it.uid}">Fit</button>${usedIn(it)}` })).join('') : `<p class="of-empty">No other parts for this place in your locker. The parts dealer and the workshop have more.</p>`);
     list.querySelectorAll('[data-fit]').forEach(b => {
       const uid = b.dataset.fit;

@@ -2,7 +2,7 @@
 // Walk every screen of a game on a desktop and a phone, and fail on what the owner keeps reporting
 // (docs/lessons-from-games.md Part 4 checks 1, 3, 4): long decimals, NaN, code names, browser tooltips, a scroller
 // inside a scroller, a page wider than the phone, console errors, browser popups. Screenshots of every screen.
-//   node tools/walk-screens.mjs <game> [--base http://host:port] [--shots dir] [--only desktop|phone]
+//   node tools/walk-screens.mjs <game> [--base http://host:port] [--shots dir] [--only desktop|phone] [--screens title,map]
 // Each game describes its own screens in prototypes/<game>/tests/walk.mjs:
 //   export default {
 //     path: 'prototypes/<game>/',             // page to open, relative to the base
@@ -42,6 +42,7 @@ const BASE = (flag('--base') || cfg.base || 'http://localhost:8401').replace(/\/
 const SHOTS = resolve(flag('--shots', join(ROOT, 'test-results', 'walk', name)));
 mkdirSync(SHOTS, { recursive: true });
 const only = flag('--only');
+const pick = flag('--screens') ? new Set(flag('--screens').split(',')) : null;   // --screens a,b: only these (while working on them; publishing walks all)
 const TRY_STRICT = args.includes('--strict') && !cfg.strict;   // trial run on an older game: report, never fail
 const STRICT = !!cfg.strict || TRY_STRICT;
 // cfg.views: a game the owner ruled desktop-only (Hullforge, 2026-11-14: "It does not need phone support") lists ['desktop']
@@ -87,6 +88,7 @@ for (const v of VIEWS) {
     await (cfg.ready ? cfg.ready(page, ctx) : page.waitForLoadState('load'));
   } catch (e) { report('(load)', ['could not load: ' + e.message.split('\n')[0], ...errs.splice(0)]); await bc.close(); continue; }
   for (const s of cfg.screens) {
+    if (pick && !pick.has(s.name)) continue;
     const problems = [];
     try {
       if (s.open) await s.open(page, ctx);

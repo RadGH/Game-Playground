@@ -1,6 +1,24 @@
 {
   "entries": [
     {
+      "id": "2026-11-18-coop",
+      "date": "2026-11-18",
+      "title": "Online co-op",
+      "items": [
+        "Co-op is here: fly any mission with up to three friends. Open Co-op from the title screen or the hangar menu, host a room, and send the four-letter code, the link or the QR code.",
+        "Friends can join in the middle of a mission and land right beside you. If someone's connection drops, a bot flies their frame until they're back (up to 90 seconds).",
+        "Everyone brings their own frame and keeps their own loot, rolled at their own rank. The pay is never split: everyone gets all of it.",
+        "Enemies get tougher and there are more of them for each extra frame in the team.",
+        "Bots: fill empty seats with bot pilots, or bring up to three of them on a solo mission from the briefing. They stick with you, fight, revive you and plant charges.",
+        "When a teammate goes down, stand next to them: a ring fills, and they're back up. Press C (d-pad up) to ping a spot or an enemy for the team.",
+        "Rooms can be Invite only or Public; public rooms show up under Find a game. The host can remove someone, and everyone else can vote to.",
+        "Pick your callsign on the Co-op screen; teammates see it over your frame.",
+        "Fixed: the header bar on the contracts board was squashed so its Back button overlapped the page.",
+        "Once a mission's job is done, a green arrow at the edge of the screen points to the dropship (with how far it is), and a beam marks the pad.",
+        "Fixed: Report a bug could get stuck on \"Sending…\". It now always finishes, and a report that can't be sent waits on your device and goes later."
+      ]
+    },
+    {
       "id": "2026-11-18-hangar",
       "date": "2026-11-18",
       "title": "The hangar and the city campaign",

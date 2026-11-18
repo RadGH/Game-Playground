@@ -17,6 +17,7 @@ import { makeEnemy, stepEnemies } from './enemies.js';
 import { triggerWeapon, updateLocks, resolveHit, angleDiff } from './weapons.js';
 import { mitigate, tickStatus } from './damage.js';
 import { gradeOf } from './grade.js';
+import { botInputs } from './bots.js';
 import { makeFlow, updateFlow, flowDist } from './flow.js';
 
 export const PHASES = ['drop', 'fight', 'extract', 'won', 'failed'];
@@ -38,6 +39,7 @@ export function createMission(def, { kinds, T, players = [], seed = def.seed || 
     p.mats = { scrap: 0, alloy: 0, exotic: 0 }; p.loot = [];
   });
   S.players = players;
+  partyScale(S);
   for (const o of def.objectives || []) S.objectives.push({ ...o, progress: 0, done: false, failed: false });
   attachHelpers(S);
   for (const p of def.enemies || []) spawn(S, p.kind, p.x, p.z, { warn: 0, elite: p.elite, boss: p.boss });
@@ -52,6 +54,7 @@ export function spawn(S, kind, x, z, opts = {}) {
   if (K.job === 'boss') { const p = bossSpot(S, x, z, K.radius); if (!p) return null; x = p.x; z = p.z; opts = { ...opts, force: true, warn: Math.max(opts.warn ?? 0, 1.6) }; }
   if (S.enemies.length - S.deadCount() >= S.T.maxEnemies && !opts.force) return null;
   const e = makeEnemy(kind, K, x, z, S.T, { ...opts, id: 'e' + (S.nextId++) });
+  if (S.hpScale > 1 && !K.dummy) { e.hp *= S.hpScale; e.hpMax *= S.hpScale; }    // a bigger team meets tougher enemies
   e.parent = opts.parent || null;
   S.enemies.push(e); S.byId.set(e.id, e);
   S.events.push({ type: e.state === 'warn' ? 'ewarn' : 'espawn', id: e.id, kind, x, z, t: e.stateT });
@@ -105,7 +108,8 @@ function runWaves(S) {
     S.waveDone.add(key);
     let from = w.from || 'edge';
     const centre = from === 'edge' ? edgePoint(S, i) : from === 'nest' ? null : from;
-    for (let n = 0; n < w.count; n++) {
+    const count = w.count > 1 ? Math.round(w.count * (S.countScale || 1)) : w.count;   // more frames, more of them
+    for (let n = 0; n < count; n++) {
       let c = centre;
       if (from === 'nest') { const nests = S.enemies.filter(e => !e.dead && e.kind === 'nest'); if (!nests.length) break; const ne = nests[n % nests.length]; c = { x: ne.x, z: ne.z }; }
       const sp = w.spread ?? 1.6, a = S.rng.next() * Math.PI * 2, rr = Math.sqrt(S.rng.next()) * sp;
@@ -167,6 +171,7 @@ function killEnemy(S, e, by, burst = false) {
 function dropLoot(S, e, K) {
   const mats = K.mats || {};
   for (const p of S.players) {
+    if (p.bot) continue;                                       // bot teammates don't collect
     const st = p.mech.stats || {};
     for (const [mat, chance0] of Object.entries(mats)) {
       const chance = chance0 * (1 + (st.matBonus || 0));      // Magnet Hook chip
@@ -408,6 +413,7 @@ export function stepMission(S, inputs, dt) {
 
   if (S.phase === 'drop') { S.phaseT -= dt; if (S.phaseT <= 0) { S.phase = 'fight'; S.events.push({ type: 'phase', phase: 'fight' }); } }
   const worldApi = { groundAt: (x, z) => groundAt(S.world, x, z), pushOut: (b, r) => pushOut(S.world, b, r) };
+  if (S.players.some(p => p.bot)) { inputs = { ...inputs }; botInputs(S, inputs, dt); }   // bot teammates (sim/bots.js)
 
   for (const p of S.players) {
     const m = p.mech, inp = (S.phase === 'drop' ? null : inputs[p.id]) || {};
@@ -420,6 +426,7 @@ export function stepMission(S, inputs, dt) {
       else { let best = null, bs = Infinity; for (const e of S.candidates(m.x, m.z, 12)) { const a = Math.abs(angleDiff(Math.atan2(e.z - m.z, e.x - m.x), Math.atan2((inp.az ?? m.z) - m.z, (inp.ax ?? m.x) - m.x))); const sc = a * 4 + Math.hypot(e.x - m.x, e.z - m.z) * 0.1; if (sc < bs) { bs = sc; best = e; } } m.lockOn = best?.id || null; }
       S.events.push({ type: 'stick', id: m.id, target: m.lockOn });
     }
+    if (inp.ping && !m.down) ping(S, m, inp);
     const stuck = m.lockOn && S.byId.get(m.lockOn);
     if (stuck && stuck.dead) m.lockOn = null;
     const aim = stuck && !stuck.dead ? { x: stuck.x, z: stuck.z } : { x: inp.ax ?? m.x + Math.cos(m.aim), z: inp.az ?? m.z + Math.sin(m.aim) };
@@ -456,4 +463,51 @@ export function stepMission(S, inputs, dt) {
   }
   if ((S.phase === 'won' || S.phase === 'failed') && !S.result) S.result = gradeOf(S);
   return S.events;
+}
+
+/** How much tougher a bigger team's enemies are: each frame past the first adds 45% health and 20% more per wave
+ *  (bots count as a frame — they fight). Called at the start and whenever someone drops in or out. */
+export function partyScale(S) {
+  const n = Math.max(1, S.players.length);
+  S.hpScale = 1 + (n - 1) * (S.T.coopHealth ?? 0.45);
+  S.countScale = 1 + (n - 1) * (S.T.coopCount ?? 0.2);
+}
+
+/** Drop in mid-mission: the new frame lands beside a standing teammate (or at the start), out of harm's way. */
+export function addPlayer(S, p) {
+  const friend = S.mechs.find(m => m.team !== 'enemy' && !m.down) || null;
+  const base = friend ? { x: friend.x, z: friend.z } : S.def.start[S.players.length % S.def.start.length];
+  let spot = base;
+  for (let r = 0.6; r <= 3; r += 0.4) {
+    const a = S.rng.next() * Math.PI * 2, x = base.x + Math.cos(a) * r, z = base.z + Math.sin(a) * r;
+    const l = lotAt(S.world, x, z); if (x > 0.4 && z > 0.4 && x < S.world.w - 0.4 && z < S.world.h - 0.4 && !(l && l.solid && l.stage < 3)) { spot = { x, z }; break; }
+  }
+  const m = p.mech; m.x = spot.x; m.z = spot.z; m.y = 0; m.pid = p.id;
+  p.mats = { scrap: 0, alloy: 0, exotic: 0 }; p.loot = [];
+  S.players.push(p); S.mechs.push(m); S.byId.set(m.id, m);
+  partyScale(S);
+  S.events.push({ type: 'joined', id: m.id, pid: p.id, name: m.name || '', bot: !!p.bot, x: m.x, z: m.z });
+  S.events.push({ type: 'land', id: m.id, x: m.x, z: m.z, hard: true });
+  return m;
+}
+
+/** Drop out: the frame leaves the field (its pickups go with it). Returns the player entry, or null. */
+export function removePlayer(S, pid) {
+  const i = S.players.findIndex(p => p.id === pid); if (i < 0) return null;
+  const p = S.players[i], m = p.mech;
+  S.players.splice(i, 1); S.mechs = S.mechs.filter(x => x !== m); S.byId.delete(m.id);
+  S.pickups = S.pickups.filter(q => q.owner !== pid);
+  partyScale(S);
+  S.events.push({ type: 'left', id: m.id, pid, name: m.name || '', x: m.x, z: m.z });
+  return p;
+}
+
+/** A ping: marks the spot under the aim for the whole team (an enemy there gets the mark). One a second per frame. */
+function ping(S, m, inp) {
+  if ((m.pingT ?? -9) > S.time - 1) return;
+  m.pingT = S.time;
+  const x = inp.ax ?? m.x, z = inp.az ?? m.z;
+  let best = null, bd = 1.2;
+  for (const e of S.candidates(x, z, 1.2)) { const d = Math.hypot(e.x - x, e.z - z); if (d < bd) { bd = d; best = e; } }
+  S.events.push({ type: 'ping', id: m.id, x: best ? best.x : x, z: best ? best.z : z, target: best?.id || null, kind: best ? 'enemy' : 'spot' });
 }

@@ -42,6 +42,6 @@ export function gradeOf(S) {
     pay: won ? Math.round(basePay * g.pay) : 0,          // every player gets this full amount
     crates: won ? g.crate : 0, seed: S.seed,
     time: S.time, kills: S.stats.kills,
-    perPlayer: S.players.map(p => ({ id: p.id, mats: { ...p.mats }, loot: p.loot.slice(), kills: p.mech.kills, dealt: Math.round(p.mech.dealt), taken: Math.round(p.mech.taken) })),
+    perPlayer: S.players.map(p => ({ id: p.id, name: p.mech.name || '', bot: !!p.bot, mats: { ...p.mats }, loot: p.loot.slice(), kills: p.mech.kills, dealt: Math.round(p.mech.dealt), taken: Math.round(p.mech.taken) })),
   };
 }

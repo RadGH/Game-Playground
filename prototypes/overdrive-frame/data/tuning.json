@@ -374,5 +374,23 @@
     "group": "View",
     "unit": "×",
     "note": "How close the camera sits; pictures bake at this size"
+  },
+  "coopHealth": {
+    "value": 0.45,
+    "min": 0,
+    "max": 2,
+    "step": 0.05,
+    "label": "Enemy health per extra frame",
+    "group": "Co-op",
+    "unit": "×"
+  },
+  "coopCount": {
+    "value": 0.2,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Enemies per wave per extra frame",
+    "group": "Co-op",
+    "unit": "×"
   }
 }

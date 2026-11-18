@@ -50,6 +50,7 @@ export class Screens {
       <p class="of-tag">Mech contracts. Swarms by the hundred.</p>
       <nav class="of-title-menu" aria-label="Main menu">
         <button type="button" class="of-btn of-primary" data-go="hangar">Hangar <small>walk to the bays, launch from the pad</small></button>
+        <button type="button" class="of-btn" data-go="coop">Co-op <small>fly with friends, or with bots</small></button>
         <button type="button" class="of-btn" data-go="missions">Contracts</button>
         <button type="button" class="of-btn" data-go="settings">Settings</button>
         <div class="of-title-small">
@@ -67,6 +68,7 @@ export class Screens {
     try { col.querySelector('.of-acct-slot').append(accountButton({ game: 'overdrive-frame', gameName: 'Overdrive Frame' })); } catch { /* accounts optional */ }
     col.querySelector('[data-go="missions"]').addEventListener('click', () => { click(); this.missions(); });
     col.querySelector('[data-go="settings"]').addEventListener('click', () => { click(); this.settings(); });
+    col.querySelector('[data-go="coop"]').addEventListener('click', () => { click(); if (g.coop.active) g.coop.roomScreen(); else g.coop.entry(); });
     col.querySelector('[data-go="credits"]').addEventListener('click', () => { click(); g.credits.open(); });
     col.querySelector('[data-go="hangar"]').addEventListener('click', () => { click(); this.hangar(); });
     this._show('title', el);
@@ -122,6 +124,7 @@ export class Screens {
     el.innerHTML = `<div class="of-pause-card"><h2>Hangar</h2>
       <button type="button" class="of-btn of-primary" data-a="resume">Back to the hangar</button>
       <button type="button" class="of-btn" data-a="missions">Contracts</button>
+      <button type="button" class="of-btn" data-a="coop">Co-op</button>
       <button type="button" class="of-btn" data-a="controls">Controls</button>
       <button type="button" class="of-btn" data-a="settings">Settings</button>
       <span class="of-news-slot"></span>
@@ -131,6 +134,7 @@ export class Screens {
     const shut = () => { el.remove(); this.pad.popLayer(); };
     el.querySelector('[data-a="resume"]').addEventListener('click', () => { shut(); resume(); });
     el.querySelector('[data-a="missions"]').addEventListener('click', () => { shut(); this.missions(null, 'hangar'); });
+    el.querySelector('[data-a="coop"]').addEventListener('click', () => { shut(); if (g.coop.active) g.coop.roomScreen(); else g.coop.entry(); });
     el.querySelector('[data-a="controls"]').addEventListener('click', () => this._controls(el));
     el.querySelector('[data-a="settings"]').addEventListener('click', () => this.settings(el));
     el.querySelector('[data-a="report"]').addEventListener('click', () => openReport(g, hg));
@@ -228,7 +232,8 @@ export class Screens {
         <section><h3>Expect</h3><ul class="of-expect">${kinds.map(k => `<li><canvas width="56" height="56" data-kind="${k}" aria-hidden="true"></canvas><span>${g.KINDS[k].name}</span></li>`).join('')}</ul></section>
       </div>
       <section class="of-frames"><h3>Frame <small>saved builds — change parts in the hangar's assembly bay</small></h3><div class="of-frame-row"></div><div class="of-frame-stats"></div></section>
-      <div class="of-brief-go"><button type="button" class="of-btn of-primary of-launch">Launch</button></div>`;
+      <div class="of-brief-go"><div class="of-opt-row of-solo-bots"><span>Bots with you</span><div class="of-seg" role="group" aria-label="Bots with you">${[0, 1, 2, 3].map(n => `<button type="button" class="of-btn of-small${(g.save.bots || 0) === n ? ' on' : ''}" data-bots="${n}" aria-pressed="${(g.save.bots || 0) === n}">${n}</button>`).join('')}</div></div><button type="button" class="of-btn of-primary of-launch">Launch</button></div>`;
+    el.querySelectorAll('[data-bots]').forEach(b => b.addEventListener('click', () => { click(); g.save.bots = +b.dataset.bots; g.saveNow(false); el.querySelectorAll('[data-bots]').forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }));
     this._minimap(el.querySelector('.of-minimap'), def);
     el.querySelectorAll('[data-kind]').forEach(c => this._enemyIcon(c, c.dataset.kind));
     this._frames(el.querySelector('.of-frame-row'), el.querySelector('.of-frame-stats'));
@@ -308,9 +313,9 @@ export class Screens {
   }
 
   // ---------------------------------------------------------------- the drop (load + bake while the dropship flies)
-  async drop(m) {
+  async drop(m, opts = {}) {
     this._leaveNow();
-    const g = this.g, build = g.build();
+    const g = this.g, build = g.build(), coop = opts.coop || null;
     const el = h('section', 'of-drop');
     el.innerHTML = `
       <canvas class="of-drop-ship" width="420" height="300" aria-hidden="true"></canvas>
@@ -322,6 +327,8 @@ export class Screens {
     // the work: the frame's pictures, then the district's buildings, then each enemy kind's walk + death
     const def = buildMissionDef(m);
     const jobs = [...g.mechArt.prebakeSteps(build)];
+    const team = coop ? coop.roster.filter(r => r.pid !== coop.you).map(r => r.build) : g.soloBots(g.save.bots || 0).map(b => b.mech.build);
+    for (const b of team) jobs.push(...g.mechArt.prebakeSteps(b));          // teammates' and bots' frames too
     // only what the first minute needs: the buildings round the drop point and the first waves' enemies — the rest
     // bakes in the background while you play (owner report: "loading screen takes a while"). Daytime: no night lights.
     g.sprites.lights = (m.night ?? 0.72) >= 0.15;
@@ -361,15 +368,18 @@ export class Screens {
       tick();
     });
     this.root.hidden = true; this.current = 'mission';
-    const { result, S } = await g.startMission(m, build);
+    if (coop) { const r = await g.startCoop(coop, opts.net); return { ...r, m }; }   // the room shows the results (ui/coop.js)
+    const { result, S } = await g.startMission(m, build, g.save.bots || 0);
     this.results(m, result, S);
+    return {};
   }
 
   // ---------------------------------------------------------------- results
-  results(m, result, S) {
-    const g = this.g;
-    const gained = g.applyResult(result, m, S); g.saveNow();
-    const me = result.perPlayer[0];
+  results(m, result, S, opts = {}) {
+    const g = this.g, pid = opts.pid || 'p1';
+    const gained = g.applyResult(result, m, S, pid, !!opts.coop); g.saveNow();
+    const me = result.perPlayer.find(p => p.id === pid) || result.perPlayer[0];
+    const team = result.perPlayer.filter(p => p.id !== pid);
     const el = h('section', 'of-results' + (result.won ? '' : ' of-lost'));
     const mats = Object.entries(gained.mats).filter(([, v]) => v > 0);
     const rk = rankOf(g.save.xp);
@@ -391,7 +401,8 @@ export class Screens {
         <div class="of-res-rank"><span>${gained.rankUp ? `<b>Rank up!</b> Rank ${rk.rank} · ${rk.name}` : `Rank ${rk.rank} · ${rk.name}`}</span><i style="--v:${rk.max ? 100 : Math.round(rk.into / rk.need * 100)}%"></i><small>${rk.max ? 'Top rank' : `${fmt(rk.need - rk.into, { decimals: 0 })} to rank ${rk.rank + 1}`}</small></div>
         ${Object.keys(gained.rep || {}).length ? `<p class="of-res-rep">${Object.entries(gained.rep).filter(([, v]) => v > 0).map(([k, v]) => `<span>+${fmt(v, { decimals: 0 })} ${g.MAKERS.find(x => x.id === k)?.short} reputation</span>`).join('')}</p>` : ''}
         ${gained.items.length || gained.chips.length || gained.learned.length ? `<section class="of-res-loot"><h2>${gained.crates ? `${gained.crates} crate${gained.crates > 1 ? 's' : ''} opened · ` : ''}Found</h2><ul class="of-loot-row"></ul></section>` : ''}
-        <div class="of-res-actions"><button type="button" class="of-btn of-primary" data-a="hangar">Back to the hangar</button><button type="button" class="of-btn" data-a="again">Run it again</button><button type="button" class="of-btn" data-a="board">Contracts</button></div>
+        ${team.length ? `<section class="of-res-team"><h2>The team</h2><ul>${team.map(p => `<li><b>${p.name || 'Pilot'}</b><span>${fmt(p.kills, { decimals: 0 })} kills · ${fmt(p.dealt, { decimals: 0 })} damage${p.bot ? ' · bot' : ''}</span></li>`).join('')}</ul></section>` : ''}
+        <div class="of-res-actions">${opts.coop ? '<button type="button" class="of-btn of-primary" data-a="room">Back to the room</button><button type="button" class="of-btn" data-a="leave">Leave the room</button>' : '<button type="button" class="of-btn of-primary" data-a="hangar">Back to the hangar</button><button type="button" class="of-btn" data-a="again">Run it again</button><button type="button" class="of-btn" data-a="board">Contracts</button>'}</div>
       </div>`;
     const row = el.querySelector('.of-loot-row');
     if (row) {
@@ -405,9 +416,14 @@ export class Screens {
       const best = gained.items.reduce((b, it) => Math.max(b, ['common', 'refined', 'rare', 'prototype', 'experimental'].indexOf(it.rarity)), 0);
       setTimeout(() => sound(best >= 2 ? 'loot.rare' : best ? 'loot.uncommon' : 'loot.common', { global: true, gain: 0.5 }), 400);
     }
-    el.querySelector('[data-a="hangar"]').addEventListener('click', () => { click(); this.hangar(); });
-    el.querySelector('[data-a="again"]').addEventListener('click', () => { click(); this.drop(m); });
-    el.querySelector('[data-a="board"]').addEventListener('click', () => { click(); this.missions(m.id, 'hangar'); });
+    if (opts.coop) {
+      el.querySelector('[data-a="room"]').addEventListener('click', () => { click(); g.coop.sendMe(); g.coop.roomScreen(); });
+      el.querySelector('[data-a="leave"]').addEventListener('click', () => { click(); g.coop.leave(); this.hangar(); });
+    } else {
+      el.querySelector('[data-a="hangar"]').addEventListener('click', () => { click(); this.hangar(); });
+      el.querySelector('[data-a="again"]').addEventListener('click', () => { click(); this.drop(m); });
+      el.querySelector('[data-a="board"]').addEventListener('click', () => { click(); this.missions(m.id, 'hangar'); });
+    }
     this._show('results', el);
     sound(result.won ? 'quest.complete' : 'ui.error', { global: true, gain: 0.6 });
   }
@@ -422,14 +438,24 @@ export class Screens {
       <button type="button" class="of-btn" data-a="settings">Settings</button>
       <span class="of-news-slot"></span>
       <button type="button" class="of-btn" data-a="report">Report a bug</button>
-      <button type="button" class="of-btn of-danger" data-a="quit">Leave mission</button></div>`;
+      ${g.coop.active && g.coop.isHost ? '<button type="button" class="of-btn" data-a="recall">Call the team back to the room</button>' : ''}
+      <button type="button" class="of-btn of-danger" data-a="quit">${g.coop.active ? 'Leave the room' : 'Leave mission'}</button></div>`;
+    if (g.coop.active) el.querySelector('h2').textContent = 'Menu — the mission goes on';
     el.querySelector('.of-news-slot').append(g.news.button({ className: 'of-btn' }));
     const close = () => { el.remove(); this.pad.popLayer(); resume(); };
     el.querySelector('[data-a="resume"]').addEventListener('click', close);
     el.querySelector('[data-a="controls"]').addEventListener('click', () => this._controls(el));
     el.querySelector('[data-a="settings"]').addEventListener('click', () => this.settings(el));
     el.querySelector('[data-a="report"]').addEventListener('click', () => openReport(g, play));
+    el.querySelector('[data-a="recall"]')?.addEventListener('click', async () => {
+      if (!(await ask({ title: 'End the mission for everyone?', text: 'Nobody is paid; everyone goes back to the room.', ok: 'End it', danger: true }))) return;
+      el.remove(); this.pad.popLayer(); g.coop.net.send({ t: 'end' });
+    });
     el.querySelector('[data-a="quit"]').addEventListener('click', async () => {
+      if (g.coop.active) {
+        if (!(await ask({ title: 'Leave the room?', text: 'Your frame leaves the mission; the team plays on. No pay.', ok: 'Leave', danger: true }))) return;
+        el.remove(); this.pad.popLayer(); g.quitMission(); g.coop.leave(); this.title(); return;
+      }
       if (!(await ask({ title: 'Leave the mission?', text: 'You keep what you picked up. No pay.', ok: 'Leave', danger: true }))) return;
       el.remove(); this.pad.popLayer(); g.quitMission(); this.missions();
     });

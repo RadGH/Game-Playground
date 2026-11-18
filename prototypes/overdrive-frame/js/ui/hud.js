@@ -20,7 +20,7 @@ export class Hud {
     this.el = document.createElement('div'); this.el.className = 'of-hud';
     this.el.innerHTML = `
       <canvas class="of-hud-arcs" aria-hidden="true"></canvas>
-      <div class="of-hud-armour" role="group" aria-label="Armour"><span class="of-hud-label">Armour</span><b class="of-ap">0</b><div class="of-bar"><i></i></div><small class="of-status"></small></div>
+      <div class="of-hud-armour" role="group" aria-label="Armour"><span class="of-hud-label">Armour</span><b class="of-ap">0</b><div class="of-ap-bar"><i></i></div><small class="of-status"></small></div>
       <ol class="of-hud-obj" aria-label="Objectives"></ol>
       <div class="of-hud-weapons" aria-label="Weapons"></div>
       <div class="of-comms" aria-live="polite" hidden><canvas class="of-comms-face" width="96" height="96" aria-hidden="true"></canvas><div><b class="of-comms-who"></b><p class="of-comms-text"></p><canvas class="of-comms-wave" width="160" height="18" aria-hidden="true"></canvas></div></div>
@@ -66,6 +66,12 @@ export class Hud {
     if (ev.type === 'allyDown') this.notice('A truck is lost', 2.5);
     if (ev.type === 'allyArrived') this.notice('A truck made it through', 2);
     if (ev.type === 'escaped') this.notice('A hauler got away', 2);
+    // co-op: who came and went, who needs picking up
+    const who = id => S.byId?.get(id)?.name || 'A teammate';
+    if (ev.type === 'joined' && ev.id !== this.play.mech.id) this.notice(`${ev.name || 'A pilot'} dropped in`, 2.5);
+    if (ev.type === 'left') this.notice(`${ev.name || 'A pilot'} left`, 2.5);
+    if (ev.type === 'down' && ev.id !== this.play.mech.id && S.byId?.get(ev.id)?.pid) this.notice(`${who(ev.id)} is down — stand next to them to revive`, 3);
+    if (ev.type === 'revive' && ev.id === this.play.mech.id) this.notice(`${who(ev.by)} got you back up`, 2.5);
     if (ev.type === 'phase' && ev.phase === 'extract') this._commsEvent('extract');
     if (EVENT_COMMS.has(ev.type)) this._commsEvent(ev.type, ev);
     if (ev.type === 'say') {             // a rival ace on the open channel: its own frame is the picture
@@ -115,7 +121,7 @@ export class Hud {
     // armour
     const share = Math.max(0, m.hp / m.hpMax);
     this.el.querySelector('.of-ap').textContent = hpFmt(m.hp);
-    const bar = this.el.querySelector('.of-hud-armour .of-bar i'); bar.style.width = (share * 100).toFixed(1) + '%';
+    const bar = this.el.querySelector(".of-hud-armour .of-ap-bar i"); bar.style.width = (share * 100).toFixed(1) + '%';
     bar.parentElement.classList.toggle('of-low', share < 0.3);
     const st = []; if (m.overheated) st.push('Overheated'); if (m.stall > 0) st.push('Energy stall'); if (m.status?.burn > 0) st.push('Burning'); if (m.status?.shock > 0) st.push('Shocked');
     this.el.querySelector('.of-status').textContent = st.join(' · ');

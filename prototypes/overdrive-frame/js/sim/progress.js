@@ -17,6 +17,9 @@ export function rankOf(xp = 0) {
 /** Experience from a mission: the pay, or kills on a loss. */
 export const xpFor = (result, me) => (result.won ? result.pay : Math.round((me?.kills || 0) * 6));
 
+/** Loot tier for a pilot's own level (co-op: each player's rewards at their own level — owner ruling). */
+export const levelTier = rank => Math.max(1, Math.min(5, 1 + Math.floor((rank - 1) / 2)));
+
 /** Highest Mech Kit part tier the dealer sells at a rank. */
 export const dealerTier = rank => (rank >= 6 ? 3 : rank >= 3 ? 2 : 1);
 

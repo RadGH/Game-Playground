@@ -22,12 +22,17 @@ export class Play {
   constructor(o) {
     Object.assign(this, o);
     this.pid = o.pid || 'p1';
-    this.def = buildMissionDef(o.mission);
-    const st = mechStats(o.build, o.P, o.C);
-    const weapons = o.build.weapons.map((w, i) => { const p = w && o.P[typeof w === 'string' ? w : w.id]; return p ? arm(weaponSpec(p, typeof w === 'object' ? w : null, st), i) : null; });
-    this.mech = makeMech({ id: 'm-' + this.pid, x: 0, z: 0, stats: st, weapons: weapons.map((w, i) => w || arm({ id: 'none', kind: 'none', dmg: 0, rate: 1, range: 1, speed: 1 }, i)), paint: o.build.paint, name: o.pilotName });
-    this.mech.build = o.build;
-    this.S = createMission(this.def, { kinds: o.kinds, T: o.T, players: [{ id: this.pid, mech: this.mech }], seed: this.def.seed });
+    if (o.S) { this.S = o.S; this.def = o.S.def; this.mech = o.mech; }      // co-op: the browser's copy of the server's mission (netplay.js)
+    else {
+      this.def = buildMissionDef(o.mission);
+      const st = mechStats(o.build, o.P, o.C);
+      const weapons = o.build.weapons.map((w, i) => { const p = w && o.P[typeof w === 'string' ? w : w.id]; return p ? arm(weaponSpec(p, typeof w === 'object' ? w : null, st), i) : null; });
+      this.mech = makeMech({ id: 'm-' + this.pid, x: 0, z: 0, stats: st, weapons: weapons.map((w, i) => w || arm({ id: 'none', kind: 'none', dmg: 0, rate: 1, range: 1, speed: 1 }, i)), paint: o.build.paint, name: o.pilotName });
+      this.mech.build = o.build;
+      // solo with bots: their frames fly beside you (sim/bots.js), built the same way a co-op seat is
+      const bots = (o.bots || []).map(b => ({ id: b.id, bot: true, mech: b.mech }));
+      this.S = createMission(this.def, { kinds: o.kinds, T: o.T, players: [{ id: this.pid, mech: this.mech }, ...bots], seed: this.def.seed });
+    }
     this.S.localPid = this.pid;
     this.canvas = document.createElement('canvas'); this.canvas.className = 'of-play'; this.canvas.setAttribute('aria-label', 'The mission');
     o.root.append(this.canvas);
@@ -57,6 +62,12 @@ export class Play {
     if (!this.running) return;
     this.raf = requestAnimationFrame(this.frame);
     const dt = Math.min(0.1, (now - this.last) / 1000); this.last = now; this.t += dt;
+    this._advance(dt);
+    this._render(dt);
+  };
+
+  /** Read the controls and move the mission on (solo: the sim runs here; co-op overrides this — netplay.js). */
+  _advance(dt) {
     if (!this.paused) {
       this.acc += dt;
       const me = this.lerp(this.mech), s = this.view.P(me.x, me.z, (me.y || 0) + 0.4);
@@ -79,6 +90,9 @@ export class Play {
       this.alpha = Math.min(1, this.acc / STEP);
       this.lastInput = inp;
     }
+  }
+
+  _render(dt) {
     const me = this.lerp(this.mech);
     const ax = this.lastInput?.ax ?? me.x, az = this.lastInput?.az ?? me.z;
     this.view.follow(me.x, me.z, ax, az, dt);
@@ -87,7 +101,7 @@ export class Play {
     this.view.draw(this.S, this.lerp, this.mech, dt, this.t);
     this.hud?.frame(this.S, this.mech, dt, this.lastInput);
     if (this.S.result && !this.ended) { this.ended = true; setTimeout(() => this.onEnd?.(this.S.result, this.S), this.S.result.won ? 2600 : 2200); }
-  };
+  }
 
   /** Background baking while you play (owner report: "lag when attacking buildings for the first time"): every third
    *  frame, one picture the fight will soon need — the damaged looks of the buildings nearest your frame first, then

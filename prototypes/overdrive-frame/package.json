@@ -1,0 +1,14 @@
+{
+  "name": "overdrive-frame",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "description": "Overdrive Frame: iso co-op mech action. The page runs anywhere; this package is the co-op room server (authoritative Node + WebSocket, runs js/sim).",
+  "scripts": {
+    "start": "node server/main.mjs",
+    "test": "node --test tests/sim/*.test.mjs tests/net/*.test.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

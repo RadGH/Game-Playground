@@ -130,7 +130,7 @@ export function openWorkshop(screens, { onClose, onChange } = {}) {
       const opts = r.type === 'fabricate' ? { partId: pick } : r.type === 'chip' ? { chipId: pick } : { uid: pick, line };
       const out = craft(save, r, opts, { P: g.P, CHIPS: g.CHIPS, rank: rk, seed: (Date.now() ^ (save.played * 2654435761)) >>> 0 });
       if (!out.ok) { made = `<p class="of-bad">${out.why}</p>`; return drawDetail(rk); }
-      if (out.item) { if (!save.seen.includes(out.item.id)) save.seen.push(out.item.id); made = (out.before ? `<div class="of-before">${itemCard(g, out.before, { compact: true, tag: '<span class="of-tag">Before</span>' })}</div>` : '') + itemCard(g, out.item, { tag: '<span class="of-tag">New</span>' }); }
+      if (out.item) { if (!save.seen.includes(out.item.id)) save.seen.push(out.item.id); made = (out.before ? `<div class="of-before">${itemCard(g, out.before, { compact: true, tag: '<span class="of-fit-tag">Before</span>' })}</div>` : '') + itemCard(g, out.item, { tag: '<span class="of-fit-tag">New</span>' }); }
       if (out.chip) { const c = g.C[out.chip.id]; made = `<article class="of-item of-chipcard" style="--rc:${c.colour}"><header><b>${c.name}</b><small>${c.cost} firmware</small></header><p>${c.text}</p><p class="of-note">Slot it at the assembly bay.</p></article>`; }
       sound('build.done', { global: true, gain: 0.5 }); g.saveNow(); onChange?.(); sheet.wallet(); drawDetail(rk);
       sheet.body.querySelector('.of-made')?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });

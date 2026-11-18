@@ -103,7 +103,9 @@ export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSp
       case 'objective': snd('quest.complete', 0, 0, { global: true, gain: 0.6 }); break;
       case 'objectiveFailed': snd('ui.error', 0, 0, { global: true, gain: 0.5 }); break;
       case 'down': fx.light(ev.x, ev.z, 2, 0.4, '#ff5a3a', 1.2); fx.smoke(ev.x, ev.z, 4, { life: [1.5, 2.2], rise: 0.4 }); snd('hvf.down', ev.x, ev.z, { gain: 0.8 }); break;
-      case 'revive': snd('revive', 0, 0, { global: true, gain: 0.7 }); break;
+      case 'revive': snd('hvf.revive', 0, 0, { global: true, gain: 0.7 }); break;
+      case 'ping': view.ping(ev); snd('hvf.bell', 0, 0, { global: true, gain: 0.35, pitch: ev.kind === 'enemy' ? 0.85 : 1.2 }); break;
+      case 'joined': fx.light(ev.x, ev.z, 1.6, 0.5, '#3ff0ff', 1); snd('ui.open', 0, 0, { global: true, gain: 0.5 }); break;
       case 'leap': snd('beast.growl', ev.x, ev.z, { gain: 0.3, pitch: 1.4 }); break;
       case 'charge': snd('beast.growl', ev.x, ev.z, { gain: 0.6, pitch: 0.6 }); break;
       case 'fuse': fx.light(ev.x, ev.z, ev.r * 2, 0.8, '#ff7a2a', 0.8); snd('lava.bubble', ev.x, ev.z, { gain: 0.6 }); break;

@@ -35,9 +35,10 @@ function screenshot() {
 async function sendReport(rep) {
   let list = []; try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { /* blocked */ }
   list.push(rep); const out = [];
+  try { localStorage.setItem(KEY, JSON.stringify(list.slice(-10))); } catch { /* blocked */ }   // kept on the device first: a hung send never loses it
   for (const r of list) {
-    let ok = false;
-    for (const url of ['/api/report/overdrive-frame', '/api/inbox/overdrive-frame-report']) { try { const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(r) }); if (res.ok) { ok = true; break; } } catch { /* offline */ } }
+    let ok = false;   // each try gives up after 8 s: never stuck on "Sending…" (owner report 2026-11-18)
+    for (const url of ['/api/report/overdrive-frame', '/api/inbox/overdrive-frame-report']) { try { const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(r), signal: AbortSignal.timeout(8000) }); if (res.ok) { ok = true; break; } } catch { /* offline */ } }
     if (!ok) out.push(r);
   }
   try { if (out.length) localStorage.setItem(KEY, JSON.stringify(out.slice(-10))); else localStorage.removeItem(KEY); } catch { /* blocked */ }

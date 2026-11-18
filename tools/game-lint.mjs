@@ -83,6 +83,25 @@ export function lintGame(dir, { strict = false } = {}) {
       for (const h of hits) { const [rule, path, text] = h.split('|'); push(rule, rel, 0, `${path}: ${text}`, rule === 'muster' ? 'the owner banned the word "muster" in every game' : 'banned name (docs/banned-names.md): invent an original one'); }
     }
   })(dataDir);
+  // game-wide: one class styled at the top level of two of the game's stylesheets (lessons rule 52 — Overdrive Frame
+  // 2026-11-18: the HUD's 6 px armour bar and every screen header were both `.of-bar`, squashing the headers; a card
+  // badge `.of-tag` boxed the title tagline). Games on the strict walk (new games) or --strict; `lint-ok` on the line opts out.
+  const walkFile = join(dir, 'tests', 'walk.mjs');
+  if (strict || (existsSync(walkFile) && /strict:\s*true/.test(readFileSync(walkFile, 'utf8')))) {
+    const cssDir = join(dir, 'css'), where = new Map();
+    if (existsSync(cssDir)) for (const f of readdirSync(cssDir).filter(n => n.endsWith('.css'))) {
+      const lines = readFileSync(join(cssDir, f), 'utf8').split('\n');
+      let depth = 0, inComment = false;
+      lines.forEach((raw, i) => {
+        let line = raw; if (inComment) { const e = line.indexOf('*/'); if (e < 0) return; line = line.slice(e + 2); inComment = false; }
+        line = line.replace(/\/\*.*?\*\//g, ''); const o = line.indexOf('/*'); if (o >= 0) { line = line.slice(0, o); inComment = true; }
+        const m = depth === 0 && !/lint-ok/.test(raw) && line.match(/^\s*(\.[a-zA-Z][\w-]*)\s*\{/);
+        if (m) { if (!where.has(m[1])) where.set(m[1], []); where.get(m[1]).push([f, i + 1]); }
+        for (const c of line) { if (c === '{') depth++; else if (c === '}') depth = Math.max(0, depth - 1); }
+      });
+    }
+    for (const [cls, at] of where) { const files = [...new Set(at.map(x => x[0]))]; if (files.length > 1) push('css-class-twice', 'css/' + at[1][0], at[1][1], `${cls} also in css/${at[0][0]}:${at[0][1]}`, 'one class styled in two stylesheets: name classes after their screen (lessons rule 52)'); }
+  }
   // game-wide: a What's new button (shared/whats-new.js + data/changelog.json, or the game's own)
   const hasNews = existsSync(join(dir, 'data', 'changelog.json')) || existsSync(join(dir, '.lint-has-whats-new'));
   if (!hasNews) push('no-whats-new', '(game)', 0, basename(dir), "every published game has a What's new button: shared/whats-new.js + data/changelog.json");

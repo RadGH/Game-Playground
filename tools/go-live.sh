@@ -42,6 +42,12 @@ for g in "${GAMES[@]}"; do
     if (!g) { console.error(`✗ ${slug}: no entry in ${rgs}/games.json. A new game needs one entry + a real 1280x720 screenshot in site/img/ (docs/rgs.md), then run this again.`); process.exit(1); }
     if (g.type !== "playground") { console.error(`✗ ${slug}: type "${g.type}" has its own publish script (see its README and docs/rgs.md deploy map).`); process.exit(1); }
     if (!fs.existsSync(rgs + "/site/" + g.image)) { console.error(`✗ ${slug}: card picture ${g.image} is missing in ${rgs}/site/.`); process.exit(1); }
+    // a report button that posts to the RGS API needs the game on the API list, or every live report fails
+    // (Overdrive Frame 2026-11-18: "stuck at Sending…" — the API answered No such game)
+    const dir = `prototypes/${g.path.split("/")[1]}`, walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => e.isDirectory() ? (["node_modules", "tests", "tools", "data"].includes(e.name) ? [] : walk(d + "/" + e.name)) : /\.m?js$/.test(e.name) ? [d + "/" + e.name] : []);
+    const posts = new Set(); for (const f of walk(dir)) for (const m of fs.readFileSync(f, "utf8").matchAll(/\/api\/report\/([a-z0-9-]+)/g)) posts.add(m[1]);
+    const allowed = (fs.readFileSync(rgs + "/api/src/reports.js", "utf8").match(/REPORT_GAMES\s*=\s*\[([^\]]*)\]/) || [, ""])[1];
+    for (const p of posts) if (!allowed.includes(`\x27${p}\x27`)) { console.error(`✗ ${slug}: its report button posts to /api/report/${p}, but ${rgs}/api/src/reports.js REPORT_GAMES lacks ${p} — add it and run tools/deploy.sh update api.`); process.exit(1); }
     const cl = `prototypes/${g.path.split("/")[1]}/data/changelog.json`;
     if (!fs.existsSync(cl)) { console.error(`! ${slug}: no ${cl} — every published game needs a What\x27s new list.`); process.exit(0); }
     const list = JSON.parse(fs.readFileSync(cl, "utf8"));
@@ -65,6 +71,12 @@ for g in "${GAMES[@]}"; do
   SLUGS+=("$(node -e 'const [s, r] = process.argv.slice(1); const g = JSON.parse(require("fs").readFileSync(r + "/games.json", "utf8")).games.find(x => x.slug === s || x.path === `prototypes/${s}/`); console.log(g.slug)' "$g" "$RGS")")
 done
 ( cd "$RGS" && tools/deploy.sh update playground "${SLUGS[@]}" )
+# a playground game with its own co-op room server (games.json "server": { unit, port, ws }) gets that rebuilt too
+for s in "${SLUGS[@]}"; do
+  if node -e 'const [s, r] = process.argv.slice(1); const g = JSON.parse(require("fs").readFileSync(r + "/games.json", "utf8")).games.find(x => x.slug === s); process.exit(g?.server?.unit ? 0 : 1)' "$s" "$RGS"; then
+    echo "== $s: its room server"; ssh -o ServerAliveInterval=30 "${RGS_HOST:-rgs}" "rgs update $s"
+  fi
+done
 
 # ---- 4: record it ----
 if ! git -C "$RGS" diff --quiet -- games.json; then

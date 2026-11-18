@@ -51,7 +51,28 @@ js/render/   sprite cache (bakes lazily in idle time, like arcline/js/render/spr
              buildings in front of mechs, fx (sparks, explosions — live particles), title workshop scene.
 js/ui/       title, ☰ menu, HUD (energy, heat, ammo around the mech), hangar stations, dialogs (shared/dialog.js).
 js/input/    one binding table: keyboard+mouse, controller (twin-stick), touch fallback. W = screen north.
-server/      (R4) rooms, protocol, runs js/sim.
+server/      (R4) the co-op room server: main.mjs (ws + 30 steps/s), hub.js (rooms by code), room.js (seats, mission,
+             snapshots, drop in/out), data.js. js/net/: protocol, snap (changes-only), mirror (browser copy), client.
 tests/       node unit tests (sim) + Playwright specs + walk.mjs (strict: true).
 ```
 Memory budget: bake only what a mission uses; wreck stages bake on first hit; lights layer only when it is night.
+
+## Co-op (round 4)
+- **Authoritative server** (`server/`) runs `createMission`/`stepMission` for every room — the browser never runs the
+  mission's rules in co-op. Rooms in memory; nothing on disk. Live: Caddy routes `wss://games.radgh.com/ws/overdrive-frame`
+  to 127.0.0.1:8620 (RGS games.json `server` field); LAN: dev 8621/8623, stable 8620/8622 (`js/net/client.js serverUrl`).
+- **Mirror**: each browser builds the same mission (`js/net/mirror.js makeMirror`: same def, same roster → same city, same
+  ids), clears its enemies, then applies snapshots (`js/net/snap.js`). The socket is ordered, so a snapshot is the list
+  of CHANGES since the last one (enemies by field, damaged buildings, objectives/ops when their JSON changes); shots,
+  strikes, mechs are sent whole. A player arriving mid-mission gets one `full` snapshot. Events go with each snapshot
+  and drive the same `render/events.js` + HUD as solo.
+- **Your own frame** is predicted: `NetPlay` runs `stepMech` on your input at once, numbers each input (`s`), and on each
+  snapshot puts the frame where the server says after input `ack`, then runs the newer inputs again. The server uses
+  one input per step; a late input is stood in for by the last one and then counted as used (`owed`); during the drop
+  it keeps only the newest two (a cushion). Weapons fire on the server only.
+- **Contracts in co-op** are rebuilt on the server from the host's `played` + `grades` (`contractsFor`) — a browser
+  never sends a mission. Builds are checked part by part (`protocol.js cleanBuild`), and the server works out the
+  frame's numbers itself (`mirror.js frameFor`).
+- **Results**: everyone gets the full `result` (`perPlayer` has names/bots); each browser applies its own share with its
+  own pid, loot tier = `levelTier(own rank)` (`progress.js`). Enemy health/count per extra frame: `partyScale` in
+  mission.js (tuning `coopHealth`, `coopCount`).

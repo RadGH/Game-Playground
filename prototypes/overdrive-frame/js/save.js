@@ -56,12 +56,12 @@ export function writeSave(s, stamp = true) { if (stamp) s.playedAt = Date.now();
 export function applyResult(s, result, missionId, ctx, pid = 'p1') {
   const me = result.perPlayer.find(p => p.id === pid) || result.perPlayer[0];
   const mission = ctx.mission || ctx.MISSIONS?.find(m => m.id === missionId);
-  const tier = mission?.tier || 1;
+  const tier = ctx.tier || mission?.tier || 1;
   const before = rankOf(s.xp);
   const gained = { items: [], chips: [], mats: { ...(me?.mats || {}) }, learned: [], crates: result.crates || 0 };
   for (const k of Object.keys(s.mats)) s.mats[k] += me?.mats?.[k] || 0;
   const st = ctx.stats || {};
-  for (const l of me?.loot || []) { const it = rollItem(ctx.P, { tier: l.tier || tier, seed: l.seed || 1, boss: !!l.boss }); s.items.push(it); gained.items.push(it); }
+  for (const l of me?.loot || []) { const it = rollItem(ctx.P, { tier: ctx.tier || l.tier || tier, seed: l.seed || 1, boss: !!l.boss }); s.items.push(it); gained.items.push(it); }   // co-op: ctx.tier = your own level
   for (let i = 0; i < (result.crates || 0); i++) {
     const c = openCrate(ctx.P, ctx.CHIPS, { tier, seed: ((result.seed || 1) * 7919 + i * 104729 + s.played) >>> 0, luck: st.partLuck || 0 });
     s.items.push(...c.items); gained.items.push(...c.items);

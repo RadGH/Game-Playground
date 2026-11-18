@@ -41,7 +41,7 @@ export function bossSpot(S, x, z, r) {
 
 /** Called once by spawn(): give the enemy its parts, phases and timers from its kind. */
 export function initBoss(S, e, K) {
-  const hpMul = S.T.enemyHealth;
+  const hpMul = S.T.enemyHealth * (S.hpScale || 1);   // a bigger team: every part tougher too
   e.boss = true; e.bodyR = K.bodyRadius || e.r * 0.6;
   e.parts = (K.parts || []).map(p => ({ id: p.id, label: p.label, hp: p.hp * hpMul, hpMax: p.hp * hpMul, broken: false, locked: !!p.lockedBy?.length, at: p.at * DEG, arc: p.arc * DEG }));
   e.phase = 0; e.atk = null; e.stagger = 0; e.out = 0;

@@ -1,0 +1,13 @@
+# Overdrive Frame co-op server (dev) on :8621 (+ wss 8623). User unit, LAN only. OFF by default (owner
+# 2026-11-16): start it while working on the game with playground/tools/game-servers.sh start overdrive-frame-dev.
+# The public game's rooms run on the games.radgh.com droplet (wss://games.radgh.com/ws/overdrive-frame).
+[Unit]
+Description=Overdrive Frame co-op server (dev) on :8621
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/overdrive-frame/ops/start.sh dev
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=default.target

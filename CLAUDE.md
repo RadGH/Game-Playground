@@ -78,7 +78,7 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 | `prototypes/hullforge/` | 3D block-built space game (auto corners, animated turrets, 6-direction flight); desktop only | new |
 | `prototypes/spirehold/` | Semi-idle city defence | playable |
 | `prototypes/arcline/` | SimCity 4-style iso cyber city builder + wall/turret defence (plan in docs/PLAN.md) | planning — round 0 = `citykit/` |
-| `prototypes/overdrive-frame/` | Iso co-op mech action in a neon city; fully prerendered (City Kit + Mech Kit) | round 1 |
+| `prototypes/overdrive-frame/` | Iso co-op mech action in a neon city; fully prerendered (City Kit + Mech Kit); co-op room server 8620/8621 | live, round 4 |
 | `prototypes/grimring/` | Arena with the Model Library Meshy fighters (1-2 foes at a time) | live |
 | `prototypes/tinyrts/` | Symlink to its own repo `~/claude/tinyrts` — commit THERE; keep its `master` green (stable serves it) | playable |
 | `prototypes/lanternfall/` | Side-scrolling pixel action RPG (`docs/HANDOFF.md` = remaining work) | playable |

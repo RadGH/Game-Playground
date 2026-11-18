@@ -40,6 +40,7 @@ export class View {
     this.fade = new Map();             // lot id → current alpha (smooth fade in/out)
     this.decals = [];                  // scorch marks that stay for the whole mission
     this.numbers = [];                 // floating damage numbers
+    this.pings = [];                   // co-op pings: { x, z, target, by, age } (ping events)
     this.shx = 0; this.shy = 0;
     this.mechDrawer = null;            // set by the game: (ctx, mech, sx, sy, scale, night) => void
     this.dpr = 1; this.resize();
@@ -189,6 +190,7 @@ export class View {
    */
   draw(S, lerp, me, dt, t) {
     const ctx = this.ctx; ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.localPid = S.localPid; this.reviveTime = S.T?.reviveTime || 3;
     this.fx.update(dt);
     const sh = this.fx.shakeOffset(14); this.shx = sh?.x || sh?.[0] || 0; this.shy = sh?.y || sh?.[1] || 0;
     const map = S.def.map;
@@ -234,6 +236,7 @@ export class View {
     for (const it of items) it.draw();
 
     this._shots(ctx, S, t);
+    this._pings(ctx, S, lerp, dt, t);
     this.fx.drawSolid(ctx, P, this.zoom);
     this.fx.drawLights(ctx, P, this.zoom);
     this._ambient(ctx, S, t);
@@ -337,7 +340,61 @@ export class View {
     if (this.mechDrawer) this.mechDrawer(ctx, m, g.sx, g.sy, this.zoom, this.night * UNIT_NIGHT, t, p.y || 0);
     else { ctx.fillStyle = '#9aa4b4'; ctx.fillRect(q.sx - 8, q.sy - 40, 16, 40); }
     if (m.team === 'enemy') { drawEnemyMech(ctx, this, m, p, t, false); return; }
-    if (m.down) { ctx.save(); ctx.fillStyle = '#ff5a3a'; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(t * 6); ctx.beginPath(); ctx.arc(q.sx, q.sy - 0.9 * PX_PER_HEIGHT * this.zoom, 6, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+    if (m.down) {
+      ctx.save(); ctx.fillStyle = '#ff5a3a'; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(t * 6); ctx.beginPath(); ctx.arc(q.sx, q.sy - 0.9 * PX_PER_HEIGHT * this.zoom, 6, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      // revive: a ring on the ground that fills while a teammate stands in it
+      const rx = 0.7 * TILE_W * 0.5 * this.zoom * Math.SQRT2, k = Math.min(1, (m.reviveT || 0) / this.reviveTime);
+      ctx.save(); ctx.strokeStyle = '#5fffb0'; ctx.lineWidth = 2; ctx.globalAlpha = 0.45 + 0.25 * Math.sin(t * 4); ctx.setLineDash([6, 5]);
+      ctx.beginPath(); ctx.ellipse(g.sx, g.sy, rx, rx / 2, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      if (k > 0) { ctx.globalAlpha = 1; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(g.sx, g.sy, rx, rx / 2, 0, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.stroke(); }
+      ctx.restore();
+    }
+    // a teammate: name and health over the frame (yours is in the cockpit arcs)
+    if (m.pid && m.pid !== this.localPid) {
+      const y = q.sy - 1.15 * PX_PER_HEIGHT * this.zoom, w = 46, f = Math.max(0, m.hp / (m.hpMax || 1));
+      ctx.save(); ctx.font = '600 12px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.strokeText(m.name || 'Pilot', q.sx, y - 5); ctx.fillStyle = m.down ? '#ff8a6a' : '#bff8ff'; ctx.fillText(m.name || 'Pilot', q.sx, y - 5);
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(q.sx - w / 2 - 1, y - 1, w + 2, 5); ctx.fillStyle = f > 0.35 ? '#3ff0ff' : '#ff5a3a'; ctx.fillRect(q.sx - w / 2, y, w * f, 3);
+      ctx.restore();
+    }
+  }
+
+  /** A co-op ping (ping events): a marker the whole team sees for a few seconds — a ring and a beam on the spot (red
+   *  over an enemy), and an arrow at the screen edge while it's off screen. Teammates off screen get an edge arrow too. */
+  ping(ev) { this.pings.push({ x: ev.x, z: ev.z, target: ev.target, by: ev.id, kind: ev.kind, age: 0 }); if (this.pings.length > 12) this.pings.shift(); }
+  _pings(ctx, S, lerp, dt, t) {
+    const edge = (x, z, col, label) => {
+      const p = this.P(x, z, 0.4), m = 28; if (p.sx > m && p.sx < this.W - m && p.sy > m && p.sy < this.H - m) return false;
+      const cx = this.W / 2, cy = this.H / 2, dx = p.sx - cx, dy = p.sy - cy, k = Math.min((cx - m) / Math.abs(dx || 1e-6), (cy - m) / Math.abs(dy || 1e-6));
+      const ax = cx + dx * k, ay = cy + dy * k, a = Math.atan2(dy, dx);
+      ctx.save(); ctx.translate(ax, ay); ctx.rotate(a); ctx.fillStyle = col; ctx.strokeStyle = 'rgba(0,0,0,0.7)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(-8, -9); ctx.lineTo(-4, 0); ctx.lineTo(-8, 9); ctx.closePath(); ctx.stroke(); ctx.fill(); ctx.restore();
+      if (label) { ctx.save(); ctx.font = '600 11px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = col; ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.lineWidth = 3; const ly = ay + (ay > cy ? -16 : 22); ctx.strokeText(label, ax, ly); ctx.fillText(label, ax, ly); ctx.restore(); }
+      return true;
+    };
+    this.pings = this.pings.filter(p => (p.age += dt) < 6);
+    for (const p of this.pings) {
+      const tgt = p.target && S.byId.get(p.target); if (tgt && !tgt.dead) { const q = lerp(tgt); p.x = q.x; p.z = q.z; }
+      const col = p.kind === 'enemy' ? '#ff4a3a' : '#ffd34a', fade = Math.min(1, (6 - p.age) / 0.8), pulse = 0.5 + 0.5 * Math.sin(t * 8);
+      const g = this.P(p.x, p.z), top = this.P(p.x, p.z, 2.6), rx = (0.55 + 0.25 * Math.min(1, p.age * 3)) * TILE_W * 0.5 * this.zoom * Math.SQRT2;
+      ctx.save(); ctx.globalAlpha = fade; ctx.strokeStyle = col; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.ellipse(g.sx, g.sy, rx, rx / 2, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = fade * (0.35 + 0.3 * pulse); ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(g.sx, g.sy); ctx.lineTo(top.sx, top.sy); ctx.stroke();
+      ctx.restore();
+      const who = S.byId.get(p.by)?.name || '';
+      if (!edge(p.x, p.z, col, who)) { ctx.save(); ctx.globalAlpha = fade; ctx.font = '700 13px "Chakra Petch", sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = col; ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.lineWidth = 3; ctx.strokeText(who, top.sx, top.sy - 4); ctx.fillText(who, top.sx, top.sy - 4); ctx.restore(); }
+    }
+    for (const m of S.mechs) if (m.pid && m.pid !== S.localPid && m.team !== 'enemy') { const q = lerp(m); edge(q.x, q.z, m.down ? '#ff8a6a' : '#3ff0ff', m.name || ''); }
+    // the job's done: the way to the dropship (owner report 2026-11-18 "an arrow pointing to the dropship after quests")
+    if (S.phase === 'extract' && S.def.extract) {
+      const ex = S.def.extract, me = S.mechs.find(m => m.pid === S.localPid), d = me ? Math.hypot(ex.x - me.x, ex.z - me.z) : 0;
+      if (!edge(ex.x, ex.z, '#5fffb0', `Dropship ${Math.round(d * 16)} m`)) {
+        const a = this.P(ex.x, ex.z, 0), b = this.P(ex.x, ex.z, 3), k = 0.5 + 0.5 * Math.sin(t * 4);
+        ctx.save(); ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createLinearGradient(a.sx, a.sy, b.sx, b.sy); gr.addColorStop(0, 'rgba(95,255,176,0.8)'); gr.addColorStop(1, 'rgba(95,255,176,0)');
+        ctx.strokeStyle = gr; ctx.lineWidth = 6; ctx.globalAlpha = 0.55 + 0.35 * k; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); ctx.restore();
+      }
+    }
   }
 
   _dropship(ctx, st, y, t) {

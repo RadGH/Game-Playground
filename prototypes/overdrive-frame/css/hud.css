@@ -75,3 +75,28 @@
 .of-tbtns button { height: 48px; font: 600 13px var(--of-font); color: var(--of-text); background: rgba(16, 20, 29, 0.78); border: 1px solid var(--of-line-2); border-radius: var(--of-r); touch-action: none; }
 .of-tbtns button.on { border-color: var(--of-amber); background: rgba(255, 176, 46, 0.25); }
 @media (pointer: coarse) and (min-width: 641px) { .of-hud-weapons { bottom: calc(170px + var(--safe-b)); } }
+
+/* Boss / rival ace bar along the top edge (js/ui/hud.js bossBar): name, health, one pip per breakable part. */
+.of-boss { position: absolute; top: calc(12px + var(--safe-t)); left: 50%; transform: translateX(-50%); width: min(460px, calc(100vw - 680px)); min-width: 300px; display: grid; gap: 6px; pointer-events: none; }
+.of-boss[hidden] { display: none; }
+.of-boss-row { padding: 7px 10px 8px; background: linear-gradient(180deg, rgba(10, 14, 22, 0.9), rgba(10, 14, 22, 0.6)); border-top: 3px solid var(--of-red); }
+.of-boss-row > b { font: 700 15px var(--of-font); letter-spacing: 0.08em; text-transform: uppercase; color: #ffb4a4; }
+.of-boss-row > small { margin-left: 8px; font-size: 12px; color: var(--of-dim); }
+.of-boss-hp { height: 8px; margin-top: 5px; background: rgba(255, 255, 255, 0.1); }
+.of-boss-hp i { display: block; height: 100%; background: linear-gradient(90deg, #ff3b3b, #ff7a4a); transition: width 120ms linear; }
+.of-boss-parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 4px; margin: 6px 0 0; padding: 0; list-style: none; }
+.of-boss-parts li { position: relative; padding: 2px 4px 5px; font-size: 11px; line-height: 1.2; background: rgba(255, 255, 255, 0.06); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.of-boss-parts li i { position: absolute; left: 0; bottom: 0; height: 3px; background: #a8ff2e; }
+.of-boss-parts li.of-locked { color: var(--of-dim); }
+.of-boss-parts li.of-locked i { background: repeating-linear-gradient(90deg, #7a8290 0 4px, transparent 4px 7px); }
+.of-boss-parts li.of-broken { opacity: 0.45; text-decoration: line-through; }
+.of-boss-parts li.of-broken i { background: #ff3b3b; }
+.of-boss .of-ace { border-top-color: #ff6a3a; }
+@media (max-width: 1000px) { .of-boss { top: calc(100px + var(--safe-t)); left: calc(12px + var(--safe-l)); transform: none; width: min(380px, 46vw); min-width: 0; } }
+@media (max-width: 640px) {
+  /* under the weapon strip, full width, one slim row per big target */
+  .of-boss { top: calc(256px + var(--safe-t)); left: calc(8px + var(--safe-l)); right: calc(8px + var(--safe-r)); width: auto; gap: 3px; }
+  .of-boss-row { padding: 4px 7px 5px; border-top-width: 2px; } .of-boss-row > b { font-size: 12px; } .of-boss-row > small { display: none; }
+  .of-boss-hp { height: 5px; margin-top: 3px; }
+  .of-boss-parts { grid-template-columns: repeat(5, 1fr); gap: 3px; margin-top: 4px; } .of-boss-parts li { font-size: 9px; padding: 1px 3px 4px; }
+}

@@ -23,7 +23,7 @@ export class Play {
     Object.assign(this, o);
     this.pid = o.pid || 'p1';
     this.def = buildMissionDef(o.mission);
-    const st = mechStats(o.build, o.P);
+    const st = mechStats(o.build, o.P, o.C);
     const weapons = o.build.weapons.map((w, i) => { const p = w && o.P[typeof w === 'string' ? w : w.id]; return p ? arm(weaponSpec(p, typeof w === 'object' ? w : null, st), i) : null; });
     this.mech = makeMech({ id: 'm-' + this.pid, x: 0, z: 0, stats: st, weapons: weapons.map((w, i) => w || arm({ id: 'none', kind: 'none', dmg: 0, rate: 1, range: 1, speed: 1 }, i)), paint: o.build.paint, name: o.pilotName });
     this.mech.build = o.build;

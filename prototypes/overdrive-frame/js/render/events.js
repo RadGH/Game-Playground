@@ -43,7 +43,7 @@ export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSp
         const K = S.kinds[ev.kind] || {};
         const swarm = K.faction === 'swarm';
         // the body: its own death picture thrown away from the hit, spinning, then lying where it lands
-        const body = deathSprite(ev.kind, ev);
+        const body = K.boss || K.job === 'ace' ? null : deathSprite(ev.kind, ev);   // a boss lies where she fell; an ace's wreck stays drawn
         if (body) { const a = Math.random() * Math.PI * 2, sp = ev.big ? 0.6 : 1.4 + Math.random(); fx.fling(ev.x, ev.z, Math.cos(a) * sp, Math.sin(a) * sp, ev.big ? 1.5 : 2.5 + Math.random() * 2, body, { colors: swarm ? ['#3a2a22', '#7a3a2a'] : ['#3a3f48', '#55505a'] }); }
         fx.burst?.(ev.x, ev.z, swarm ? ['#3a2a22', '#7a3a2a', '#9cff6a'] : ['#3a3f48', '#55505a', '#ffb35a'], ev.big ? 16 : 7);
         fx.chunks(ev.x, ev.z, ev.big ? 14 : 4, { speed: [1.5, 3.5], up: [2, 4], hot: swarm ? 0 : 0.5, colors: swarm ? ['#3a2a22', '#5a3a2a'] : ['#3a3f48', '#55505a'], stay: [6, 12] });
@@ -113,7 +113,38 @@ export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSp
       case 'lock': if (ev.id === localId()) snd('ui.hover', 0, 0, { global: true, gain: 0.25, pitch: 1.6 }); break;
       case 'stick': if (ev.id === localId()) snd('ui.tab', 0, 0, { global: true, gain: 0.4 }); break;
       case 'block': if (ev.id === localId()) snd('melee.block', 0, 0, { global: true, gain: 0.35 }); break;
+      // the boss (sim/boss.js) and the rival ace (sim/ace.js)
+      case 'boss': snd('quake.rumble', ev.x, ev.z, { gain: 0.8 }); fx.shake(0.25); fx.chunks(ev.x, ev.z, 18, { speed: [1, 3], up: [2, 5], hot: 0, colors: ['#4a3a2a', '#5a4a38'], stay: [20, 40] }); break;
+      case 'bossWind': snd('beast.growl', ev.x, ev.z, { gain: 0.7, pitch: ev.kind === 'charge' ? 0.45 : 0.6 }); break;
+      case 'bossStrike':
+        if (ev.kind === 'claw') { fx.ring(ev.x, ev.z, ev.r * 1.4, 0.18, 'rgba(255,120,90,0.9)', 5); snd('melee.swing', ev.x, ev.z, { gain: 0.9, pitch: 0.5 }); }
+        else if (ev.kind === 'charge') { fx.shake(0.3); snd('quake.rumble', ev.x, ev.z, { gain: 0.8 }); }
+        else snd('spell.poison.launch', ev.x, ev.z, { gain: 0.8, pitch: 0.6 });
+        break;
+      case 'bossSac': fx.spark(ev.x, ev.z, 0.4, 8, { speed: [1, 2.5], life: [0.3, 0.6], color: '#a8ff2e', up: [1, 3] }); fx.light(ev.x, ev.z, 0.8, 0.3, '#a8ff2e', 0.9); break;
+      case 'bossPart':
+        fx.light(ev.x, ev.z, 2.4, 0.4, '#a8ff2e', 1.3); fx.ring(ev.x, ev.z, 1.6, 0.3, 'rgba(168,255,46,0.9)', 5);
+        fx.spark(ev.x, ev.z, 0.5, 30, { speed: [2, 6], life: [0.3, 0.7], color: '#a8ff2e', up: [2, 5] });
+        fx.chunks(ev.x, ev.z, 18, { speed: [1.5, 4], up: [3, 6], hot: 0, colors: ['#3a2f4e', '#5c4b78', '#ddd2b6'], stay: [20, 40] });
+        fx.shake(0.3); view.scorch(ev.x, ev.z, 0.6);
+        snd('death.beast', ev.x, ev.z, { gain: 0.9, pitch: 0.55 }); snd('fragment.crash.medium', ev.x, ev.z, { gain: 0.6 });
+        break;
+      case 'bossOpen': fx.light(ev.x, ev.z, 1.6, 0.6, '#ffcf4a', 1.2); snd('hvf.bell', ev.x, ev.z, { gain: 0.5, pitch: 0.8 }); break;
+      case 'bossPhase': fx.shake(0.35); snd('beast.growl', ev.x, ev.z, { gain: 1, pitch: 0.4 }); snd('quake.rumble', ev.x, ev.z, { gain: 0.6, delay: 0.2 }); break;
+      case 'bossDown': fx.shake(0.6); fx.light(ev.x, ev.z, 4, 0.8, '#a8ff2e', 1.4); fx.smoke(ev.x, ev.z, 6, { life: [1.6, 2.6], rise: 0.4, size: [16, 26], spread: 0.8 }); view.scorch(ev.x, ev.z, 1.6); snd('death.beast', ev.x, ev.z, { gain: 1, pitch: 0.35 }); break;
+      case 'aceIn': snd('fire.whoosh', ev.x, ev.z, { gain: 0.6, pitch: 0.7 }); break;
+      case 'aceDown': fx.light(ev.x, ev.z, 2.6, 0.5, '#ff5a3a', 1.3); fx.ring(ev.x, ev.z, 2, 0.35); fx.shake(0.35); snd('explosion.large', ev.x, ev.z, { gain: 0.8 }); break;
       case 'ewarn': break;
+      // round 3 mission types (ops.js)
+      case 'planted': fx.ring(ev.x, ev.z, 1.2, 0.5, 'rgba(255,176,46,0.9)', 4); fx.light(ev.x, ev.z, 1.6, 0.5, '#ffb02e', 1.2); snd('lever.pull', ev.x, ev.z, { gain: 0.8 }); snd('hvf.bell', 0, 0, { global: true, gain: 0.4, pitch: 1.2 }); break;
+      case 'corePick': fx.light(ev.x, ev.z, 1.4, 0.4, '#3ff0ff', 1.2); snd('loot.magic', 0, 0, { global: true, gain: 0.6 }); break;
+      case 'coreDrop': fx.ring(ev.x, ev.z, 0.8, 0.4, 'rgba(63,240,255,0.8)', 3); snd('ui.error', 0, 0, { global: true, gain: 0.4 }); break;
+      case 'coreHome': snd('quest.complete', 0, 0, { global: true, gain: 0.5 }); break;
+      case 'allyHit': if (near(ev.x, ev.z) && Math.random() < 0.3) fx.spark(ev.x, ev.z, 0.2, 2, { speed: [1.5, 3], life: [0.08, 0.16], color: '#ffd27a' }); break;
+      case 'allyDown': fx.light(ev.x, ev.z, 2.2, 0.6, '#ff7a2a', 1.4); fx.smoke(ev.x, ev.z, 5, { life: [1.6, 2.4], rise: 0.4 }); fx.shake(0.12); snd('explosion.large', ev.x, ev.z, { gain: 0.8 }); break;
+      case 'escaped': snd('ui.error', 0, 0, { global: true, gain: 0.35 }); break;
+      case 'orbitalLand': fx.shake(0.45); fx.ring(ev.x, ev.z, 2.4, 0.5, 'rgba(255,190,120,0.95)', 6); fx.ring(ev.x, ev.z, 1.2, 0.3, 'rgba(255,255,255,0.9)', 4); fx.light(ev.x, ev.z, 3.2, 0.7, '#ffb060', 1.6);
+        fx.chunks(ev.x, ev.z, 18, { speed: [2, 5], up: [2, 5], hot: 0.4, colors: ['#4a4a52', '#6a5a48'], stay: [6, 12] }); fx.smoke(ev.x, ev.z, 8, { life: [1, 2], size: [12, 22], spread: 0.6, rise: 0.15, color: '#7a7470' }); snd('explosion.large', ev.x, ev.z, { gain: 1 }); break;
       default: break;
     }
   };

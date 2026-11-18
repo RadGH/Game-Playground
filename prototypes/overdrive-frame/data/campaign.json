@@ -1,0 +1,41 @@
+{
+  "_doc": "The campaign (owner: 'a city map of districts held by enemies; story missions push in; contracts in reached districts; the city recovers visibly'). districts: grid x,y on the city map (3×3), held = who holds it at the start (swarm | army | both), story = the story mission that frees it, after = story missions that must be done first, tier = loot tier of its contracts. A district is REACHED once it borders a freed district (or is the start). contracts: templates the board fills from (js/sim/campaign.js). licences: reputation with each maker (from their contracts) unlocks their parts at the dealer and a discount.",
+  "city": { "name": "Larkspur", "blurb": "A coastal megacity of glass towers and refinery flats. Half of it went dark when the swarm broke through the sea wall; the rest is being carved up by Halden-Voss Security, a company army that calls it 'stabilisation'." },
+  "rival": { "name": "Halden-Voss Security", "short": "Halden-Voss" },
+  "districts": [
+    { "id": "thornfield", "name": "Thornfield", "type": "residential", "x": 0, "y": 0, "held": "swarm", "story": "m08-long-fall", "after": ["m06-last-bus", "m07-ace"], "tier": 3 },
+    { "id": "crown", "name": "The Crown", "type": "downtown", "x": 1, "y": 0, "held": "swarm", "story": "m09-brood-queen", "after": ["m08-long-fall"], "tier": 3 },
+    { "id": "foundry", "name": "Foundry Flats", "type": "industrial", "x": 2, "y": 0, "held": "army", "story": "m07-ace", "after": ["m04-cold-cargo"], "tier": 2 },
+    { "id": "ashgrove", "name": "Ashgrove", "type": "residential", "x": 0, "y": 1, "held": "swarm", "story": "m06-last-bus", "after": ["m05-dead-air"], "tier": 2 },
+    { "id": "spindle", "name": "Spindle Quarter", "type": "downtown", "x": 1, "y": 1, "held": "both", "story": "m05-dead-air", "after": ["m03-hold-the-line", "m04-cold-cargo"], "afterAny": true, "tier": 2 },
+    { "id": "saltmarsh", "name": "Saltmarsh Docks", "type": "industrial", "x": 2, "y": 1, "held": "army", "story": "m04-cold-cargo", "after": ["m02-fuel-line"], "tier": 2 },
+    { "id": "linden", "name": "Linden Heights", "type": "residential", "x": 0, "y": 2, "held": "swarm", "story": "m03-hold-the-line", "after": ["m01-drop-zone"], "tier": 1 },
+    { "id": "glasswell", "name": "Glasswell", "type": "downtown", "x": 1, "y": 2, "held": "swarm", "story": "m01-drop-zone", "after": [], "tier": 1, "start": true },
+    { "id": "kettle", "name": "Kettle Row", "type": "industrial", "x": 2, "y": 2, "held": "army", "story": "m02-fuel-line", "after": ["m01-drop-zone"], "tier": 1 }
+  ],
+  "factions": {
+    "swarm": { "label": "Swarm", "colour": "#ff5a3a",
+      "early": ["swarmer", "swarmer", "swarmer", "leaper", "spitter"], "mid": ["swarmer", "swarmer", "leaper", "spitter", "brute"], "late": ["swarmer", "leaper", "spitter", "brute", "brute"],
+      "rare": ["bloater", "burrower"], "big": "brute", "home": "nest" },
+    "army": { "label": "Halden-Voss", "colour": "#ffb02e",
+      "early": ["trooper", "trooper", "drone", "tank"], "mid": ["trooper", "drone", "tank", "artillery", "shieldbearer"], "late": ["trooper", "tank", "gunship", "sniper", "aa", "artillery"],
+      "rare": ["jammer"], "big": "tank", "home": "apc" }
+  },
+  "counts": { "swarmer": [30, 70], "leaper": [5, 10], "spitter": [4, 7], "brute": [1, 3], "bloater": [1, 2], "burrower": [2, 3], "trooper": [6, 12], "drone": [6, 12], "tank": [1, 2], "artillery": [1, 1], "shieldbearer": [1, 2], "gunship": [1, 1], "sniper": [1, 2], "aa": [1, 1], "jammer": [1, 1] },
+  "contracts": [
+    { "type": "wipe", "name": "Clear-out", "length": "short", "w": 3, "brief": "{client} wants {district} swept clean before their crews go back in. Clear every contact." },
+    { "type": "nest", "name": "Nest burn", "length": "short", "w": 2, "only": "swarm", "brief": "Hives have taken root in {district}. Burn every one before they bud." },
+    { "type": "demolition", "name": "Demolition", "length": "short", "w": 2, "brief": "{client} is writing off {count} buildings in {district} that the enemy turned into strongpoints. Bring them down." },
+    { "type": "defend", "name": "Hold", "length": "mid", "w": 1, "brief": "{client} is pulling people out of {district}. Hold the area until the last transport is gone." },
+    { "type": "hunt", "name": "Hunt", "length": "short", "w": 2, "brief": "A big one is roaming {district}. {client} will pay for its head. The rest are a bonus." },
+    { "type": "sabotage", "name": "Sabotage", "length": "short", "w": 2, "only": "army", "brief": "Halden-Voss has relay masts in {district}. Plant charges on {count} of them — stand at each for a few seconds." },
+    { "type": "salvage", "name": "Recovery", "length": "short", "w": 2, "brief": "A data core went down with a {client} transport in {district}. Find it, carry it to the dropship." },
+    { "type": "convoy", "name": "Convoy raid", "length": "short", "w": 1, "only": "army", "brief": "A Halden-Voss convoy is crossing {district}. Stop at least {count} trucks before they reach the far side." },
+    { "type": "escort", "name": "Escort", "length": "mid", "w": 1, "brief": "A {client} supply convoy has to cross {district}. Keep the trucks alive until they're through." }
+  ],
+  "clients": ["celerity", "brannoch", "calyx", "patchwork"],
+  "licences": {
+    "levels": [{ "rep": 0, "label": "No licence" }, { "rep": 3000, "label": "Licence I", "off": 0.05, "tier": 1, "extra": 2 }, { "rep": 9000, "label": "Licence II", "off": 0.1, "tier": 2, "extra": 3 }, { "rep": 20000, "label": "Licence III", "off": 0.15, "tier": 3, "extra": 4 }],
+    "text": "Fly contracts for a maker to earn its trust. Each licence puts more of that maker's parts on the dealer's shelves — including ones above your rank — and takes money off them."
+  }
+}

@@ -6,7 +6,7 @@ import { dirOfHeading } from '../../../../citykit/js/iso.js';
 
 /** The game's build (weapons as [L, R, SL, SR], items or ids) → the Mech Kit's build shape. */
 export function kitBuild(b) {
-  const id = x => (typeof x === 'string' ? x : x?.id) || null;
+  const id = x => (typeof x === 'string' ? x : x?.model || x?.id) || null;   // crafted weapons draw their Mech Kit model
   const w = b.weapons || [];
   return { head: id(b.head), core: id(b.core), arms: id(b.arms), legs: id(b.legs), booster: id(b.booster), generator: id(b.generator), cooling: id(b.cooling), cpu: id(b.cpu),
     weapons: { armL: id(w[0]), armR: id(w[1]), shoulderL: id(w[2]), shoulderR: id(w[3]) } };

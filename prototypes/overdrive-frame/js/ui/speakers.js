@@ -25,3 +25,8 @@ function portrait(canvas, sprites, s) {
   const sp = sprites.icon(s.recipe, s.params || {}, s.dir); if (!sp) return;
   drawFit(canvas, sp.day, sp.lights, 0.06, false);
 }
+
+/** A rival ace on comms (sim/ace.js aceSpeakerOf): its own frame, in its own paint, from the Mech Kit layers. */
+export function aceSpeaker(mechArt, ace) {
+  return { name: ace.name, colour: ace.colour || '#ff5a3a', draw(canvas) { const g = canvas.getContext('2d'); g.clearRect(0, 0, canvas.width, canvas.height); try { composeMech(g, mechArt.layersFor(ace.build), 6, 6, 0, ace.paint || 'maker', 0, { x: canvas.width / 2, y: canvas.height * 0.92, zoom: 0.55, shadow: false }); } catch { /* not baked yet */ } } };
+}

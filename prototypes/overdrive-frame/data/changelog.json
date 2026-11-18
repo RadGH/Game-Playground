@@ -1,6 +1,27 @@
 {
   "entries": [
     {
+      "id": "2026-11-18-hangar",
+      "date": "2026-11-18",
+      "title": "The hangar and the city campaign",
+      "items": [
+        "The hangar is open: walk your frame around it and step into a bay to use it. There's an assembly bay, a parts dealer, a workshop, a paint bay, a test range and the launch pad.",
+        "Every part you pick up is now a real part with a rarity (Common to Experimental) and bonus lines. Grade A and S missions give crates with more parts, materials, and sometimes firmware chips or secret recipes.",
+        "Assembly bay: change any part or weapon, and see how each swap changes your armour, speed, energy and the rest before you fit it. Save up to eight builds. All four makers' starter frames are already yours.",
+        "Firmware chips go in your CPU: more crit chance, faster locks, more energy, or a two-handed weapon held in one arm.",
+        "Workshop: build parts you've seen, re-roll a bonus, raise a part's rarity, burn chips, or scrap parts you don't need. Secret recipes for odd weapons turn up as schematics in crates.",
+        "Paint bay: 16 paint schemes (more unlock as your rank rises) or your own colours, kept per build.",
+        "Test range: try your build on target dummies, with damage per second on screen.",
+        "Pilot rank: missions earn experience. Higher ranks bring better parts to the dealer and unlock recipes.",
+        "The campaign: free the city of Larkspur one district at a time. The map lights back up as you go. Four new story missions: stop a truck convoy, plant charges on relay masts, escort evacuation trucks, and a drop from orbit where you steer your own landing.",
+        "A rival ace: Sawtooth, a Halden-Voss pilot in her own frame, who boosts, dodges and overheats just like you. Two more rival pilots are waiting later in the campaign.",
+        "The first boss: the Broodmother. Burst her egg sacs and break her claws to open her armoured head. Her claw sweeps, charges and spit always show on the ground before they land. Broken parts drop chitin, a new boss material.",
+        "Contracts: new jobs appear in every district you can reach, refreshed after each mission: clear-outs, nest burns, demolition, hunts, sabotage, data-core recovery, convoy raids and escorts.",
+        "Maker licences: contracts earn a maker's trust. Licences put more of their parts on the dealer's shelves, even above your rank, at a discount.",
+        "Signed in, your pilot is saved to your account. If two devices disagree, you choose which save to keep, and the other is kept so you can swap back from Settings."
+      ]
+    },
+    {
       "id": "2026-11-17",
       "date": "2026-11-17",
       "title": "Overdrive Frame is here",

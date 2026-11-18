@@ -75,6 +75,111 @@
         { "at": 299, "who": "handler", "text": "Ground's moving under the station. Something's digging." },
         { "at": 418, "who": "handler", "text": "Last train's boarding. This is everything they've got." }
       ]
-    }
+    },    {
+      "id": "m04-cold-cargo", "name": "Cold Cargo", "length": "short", "night": 0.85, "drop": 4.5, "tier": 2, "pay": 6400, "payPerScore": 5,
+      "map": { "seed": 4413, "district": "industrial", "w": 42, "h": 42 },
+      "brief": "Halden-Voss is trucking the Saltmarsh cold stores out of the city — food the shelters need. Stop the haulers before they reach the coast road.",
+      "waves": [
+        { "at": 3, "kind": "trooper", "count": 8, "from": "edge" },
+        { "at": 20, "kind": "drone", "count": 8, "from": "edge" },
+        { "at": 40, "kind": "tank", "count": 1, "from": "edge" },
+        { "at": 60, "kind": "shieldbearer", "count": 1, "from": "edge" },
+        { "at": 80, "kind": "trooper", "count": 10, "from": "edge" },
+        { "at": 110, "kind": "gunship", "count": 1, "from": "edge" }
+      ],
+      "convoy": { "side": "enemy", "count": 6, "kind": "convoy-truck", "at": 14 },
+      "objectives": [
+        { "id": "convoy", "type": "intercept", "kind": "convoy-truck", "count": 4, "of": 6, "label": "Stop the haulers (4 of 6)" },
+        { "id": "all", "type": "kill", "kind": "convoy-truck", "count": 6, "optional": true, "label": "Not one gets through" }
+      ],
+      "extract": true, "par": { "time": 260 },
+      "comms": [
+        { "at": 0, "who": "handler", "text": "Six haulers, one road out. They won't stop to fight you — they just want the coast road." },
+        { "at": 14, "who": "handler", "text": "First truck's rolling. The escort will try to keep you busy. Don't let it." },
+        { "at": 39, "who": "handler", "text": "Tank on the dock road. Its front plate's thick; get round it." },
+        { "event": "extract", "who": "pilot", "text": "Cold stores are staying put. Nice. I'm on the north pad." }
+      ]
+    },
+    {
+      "id": "m05-dead-air", "name": "Dead Air", "length": "short", "night": 0.5, "drop": 4.5, "tier": 2, "pay": 6800, "payPerScore": 5,
+      "map": { "seed": 5521, "district": "downtown", "w": 40, "h": 40 },
+      "brief": "Spindle Quarter is contested: swarm in the streets, Halden-Voss relay masts on the roofs jamming every channel we have. Plant charges on the masts and give the city its voice back.",
+      "waves": [
+        { "at": 3, "kind": "swarmer", "count": 45, "from": "edge", "spread": 2.5 },
+        { "at": 18, "kind": "trooper", "count": 8, "from": "edge" },
+        { "at": 35, "kind": "leaper", "count": 8, "from": "edge" },
+        { "at": 50, "kind": "jammer", "count": 1, "from": "edge" },
+        { "at": 65, "kind": "swarmer", "count": 70, "from": "edge", "spread": 3 },
+        { "at": 85, "kind": "sniper", "count": 1, "from": "edge" },
+        { "at": 100, "kind": "brute", "count": 2, "from": "edge" },
+        { "at": 120, "kind": "drone", "count": 10, "from": "edge" }
+      ],
+      "objectives": [
+        { "id": "plant", "type": "plant", "count": 4, "time": 3, "label": "Plant charges on the relay masts (4)" },
+        { "id": "quick", "type": "beat", "time": 270, "optional": true, "label": "Inside 4:30" }
+      ],
+      "extract": true, "par": { "time": 250 },
+      "comms": [
+        { "at": 0, "who": "handler", "text": "Four masts, marked. Stand on each one until the charge is set. Moving off it loses you time." },
+        { "at": 49, "who": "handler", "text": "Jammer walker inbound. Your locks will drop near it — kill it with your guns." },
+        { "at": 84, "who": "handler", "text": "Red line on your screen means a sniper has you. Break line of sight." },
+        { "event": "extract", "who": "pilot", "text": "I can hear you clearly for the first time all week. Pad's north-east." }
+      ]
+    },
+    {
+      "id": "m06-last-bus", "name": "Last Bus Out", "length": "mid", "night": 0.65, "drop": 4.5, "tier": 2, "pay": 9200, "payPerScore": 4,
+      "map": { "seed": 6637, "district": "residential", "w": 44, "h": 44 },
+      "brief": "Four haulers full of Ashgrove families are crossing the district to the evacuation line. The swarm can smell them. Get at least three through.",
+      "waves": [
+        { "at": 3, "kind": "swarmer", "count": 40, "from": "edge", "every": 35, "until": 380 },
+        { "at": 25, "kind": "leaper", "count": 6, "from": "edge", "every": 50, "until": 380 },
+        { "at": 60, "kind": "spitter", "count": 5, "from": "edge" },
+        { "at": 110, "kind": "brute", "count": 2, "from": "edge" },
+        { "at": 160, "kind": "bloater", "count": 2, "from": "edge" },
+        { "at": 220, "kind": "swarmer", "count": 120, "from": "edge", "spread": 3 },
+        { "at": 230, "kind": "brute", "count": 2, "from": "edge" }
+      ],
+      "convoy": { "side": "ally", "count": 4, "kind": "ally-truck", "at": 8 },
+      "objectives": [
+        { "id": "escort", "type": "escort", "count": 3, "of": 4, "label": "Get the haulers through (3 of 4)" },
+        { "id": "all", "type": "escort", "count": 4, "of": 4, "optional": true, "label": "Every hauler makes it" }
+      ],
+      "extract": true, "par": { "time": 420 },
+      "comms": [
+        { "at": 0, "who": "pilot", "text": "Haulers are lined up at the south gate. They'll go when you're down." },
+        { "at": 8, "who": "handler", "text": "Convoy's moving. When the swarm piles on a truck it slows to a crawl — clear the road ahead of it." },
+        { "at": 160, "who": "handler", "text": "Bloaters. Pop them away from the trucks." },
+        { "at": 219, "who": "handler", "text": "That's the whole nest coming. Stay on the trucks." },
+        { "event": "extract", "who": "pilot", "text": "Families are over the line. Come home, Frame." }
+      ]
+    },
+    {
+      "id": "m08-long-fall", "name": "Long Fall", "length": "mid", "night": 0.8, "orbital": true, "orbitalDmg": 1400, "drop": 7, "tier": 3, "pay": 11000, "payPerScore": 4,
+      "map": { "seed": 8819, "district": "residential", "w": 44, "h": 44 },
+      "brief": "No dropship can get near Thornfield — the air's thick with spore and anti-air. We're dropping you from orbit. Steer your fall, land on something that matters, and burn the great hives.",
+      "enemies": [{ "kind": "nest", "count": 5, "place": "far" }],
+      "waves": [
+        { "at": 0, "kind": "swarmer", "count": 60, "from": "nest" },
+        { "at": 25, "kind": "leaper", "count": 10, "from": "edge" },
+        { "at": 50, "kind": "spitter", "count": 8, "from": "edge" },
+        { "at": 80, "kind": "brute", "count": 3, "from": "edge" },
+        { "at": 120, "kind": "burrower", "count": 3, "from": "edge" },
+        { "at": 160, "kind": "swarmer", "count": 140, "from": "edge", "spread": 3, "elite": 0.05 },
+        { "at": 200, "kind": "brute", "count": 4, "from": "edge" }
+      ],
+      "objectives": [
+        { "id": "nests", "type": "kill", "kind": "nest", "count": 5, "label": "Burn the great hives (5)" },
+        { "id": "clear", "type": "killAll", "optional": true, "label": "Leave nothing alive" }
+      ],
+      "extract": true, "par": { "time": 480 },
+      "comms": [
+        { "at": 0, "who": "handler", "text": "You're falling. Steer with your move stick — land near a hive and the impact does half the work." },
+        { "at": 8, "who": "handler", "text": "Down! Hives are marked. They bud swarm while they stand." },
+        { "at": 120, "who": "handler", "text": "Ground's moving — burrowers. Keep your feet light." },
+        { "event": "extract", "who": "pilot", "text": "Spore count's falling. I can get in now. North pad." }
+      ]
+    },
+    {"id": "m09-brood-queen", "name": "Brood Queen", "length": "mid", "night": 0.8, "drop": 4.5, "tier": 3, "pay": 14000, "payPerScore": 5, "map": {"seed": 9109, "district": "downtown", "w": 44, "h": 44}, "brief": "Something huge is laying eggs under the Crown. The swarm keeps coming back to it. Find it and put it down.", "waves": [{"at": 3, "kind": "swarmer", "count": 40, "from": "edge", "spread": 2.5}, {"at": 14, "kind": "leaper", "count": 6, "from": "edge"}, {"at": 22, "kind": "broodmother", "count": 1, "from": "edge"}, {"at": 40, "kind": "swarmer", "count": 50, "from": "edge", "every": 45, "until": 400, "spread": 3}, {"at": 70, "kind": "spitter", "count": 4, "from": "edge", "every": 60, "until": 400}], "objectives": [{"id": "queen", "type": "kill", "kind": "broodmother", "count": 1, "label": "Kill the Broodmother"}, {"id": "sacs", "type": "kill", "kind": "swarmer", "count": 150, "optional": true, "label": "Thin the brood (150)"}], "extract": true, "par": {"time": 420}, "comms": [{"at": 0, "who": "handler", "text": "You're over the Crown. Ground sensors are jumping — something heavy under the plaza. Stay mobile."}, {"event": "boss", "who": "handler", "text": "There she is. That's the mother of the lot. Those glowing sacs on her flanks are where the swarmers come from — burst them."}, {"event": "bossPart", "part": "sac-left", "who": "handler", "text": "One sac down. The brood's thinning on that side."}, {"event": "bossPart", "part": "claw-left", "who": "handler", "text": "Claw's off. She's dragging that side now."}, {"event": "bossPart", "part": "claw-right", "who": "handler", "text": "Took her other claw. She'll have to spit at you instead."}, {"event": "bossOpen", "who": "handler", "text": "Both sacs gone — her head plate's loose. Hit the glowing spot on her head."}, {"event": "bossPhase", "phase": 1, "who": "handler", "text": "She's angry. Watch for a red lane on the ground — that's her charging line. Get off it."}, {"event": "bossPhase", "phase": 2, "who": "pilot", "text": "Seeing acid going up from her back. Circles on the ground, frame — don't stand in them."}, {"event": "bossDown", "who": "handler", "text": "She's down. Nothing's spawning. Take a breath, then grab what you can."}, {"event": "extract", "who": "pilot", "text": "Pad's lit. Bring that chitin home — the workshop's going to want it."}]},
+    {"id": "m07-ace", "name": "Sawtooth", "length": "short", "night": 0.35, "drop": 4.5, "tier": 2, "pay": 9800, "payPerScore": 5, "map": {"seed": 7207, "district": "industrial", "w": 40, "h": 40}, "brief": "Halden-Voss has sent one of its named pilots into Foundry Flats to hunt freelancers. Draw her out and beat her.", "waves": [{"at": 3, "kind": "trooper", "count": 8, "from": "edge"}, {"at": 12, "kind": "drone", "count": 8, "from": "edge"}, {"at": 18, "kind": "ace:sawtooth", "count": 1, "from": "edge"}, {"at": 40, "kind": "trooper", "count": 10, "from": "edge"}, {"at": 60, "kind": "tank", "count": 1, "from": "edge"}], "objectives": [{"id": "ace", "type": "kill", "kind": "ace:sawtooth", "count": 1, "label": "Beat Sawtooth"}, {"id": "quick", "type": "beat", "time": 240, "optional": true, "label": "Inside 4:00"}], "extract": true, "par": {"time": 240}, "comms": [{"at": 0, "who": "handler", "text": "Foundry Flats. Halden-Voss troopers on the ground — and they've brought someone special."}, {"event": "aceIn", "who": "handler", "text": "That's their ace. She fights like you do: boosts, dodges, runs hot. Make her burn her energy, then punish her."}, {"event": "aceDown", "who": "handler", "text": "She's out. Halden-Voss will remember that name — yours."}, {"event": "extract", "who": "pilot", "text": "Dropship inbound. North-east lot."}]}
   ]
 }

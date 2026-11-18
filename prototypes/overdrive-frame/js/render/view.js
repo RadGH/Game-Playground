@@ -27,6 +27,7 @@ function compositeA(ctx, pair, x, y, t, scale, a) {
 }
 import { Fx } from '../../../../citykit/js/world/fx.js';
 import { DIRS } from './sprites.js';
+import { drawBoss, drawBossMarks, drawEnemyMech } from './boss-art.js';
 
 const C = {
   ground: '#1b1f27', groundNight: '#0c0f16', road: '#262a33', lane: '#c9b04a', walk: '#343944', plaza: '#2c313b', curb: '#4a5160',
@@ -77,6 +78,7 @@ export class View {
     ctx.fillStyle = fill; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.lineTo(c.sx, c.sy); ctx.lineTo(e.sx, e.sy); ctx.closePath(); ctx.fill();
   }
   _ground(ctx, map) {
+    if (map.interior) return this._interior(ctx, map);
     const n = this.night;
     ctx.fillStyle = mixHex(C.ground, C.groundNight, n); ctx.fillRect(0, 0, this.W, this.H);
     // sidewalks under every block, then roads with lane marks, then plazas
@@ -99,6 +101,86 @@ export class View {
       ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(1, 0.5); ctx.translate(-p.sx, -p.sy); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.sx, p.sy, rx, 0, Math.PI * 2); ctx.fill(); ctx.restore();
     }
   }
+  /** Inside a hangar (map.interior): a concrete floor in big slabs, pools of light from the ceiling and the bays' neon,
+   *  painted bay boxes with hazard stripes at their mouths, walkway lanes, the launch pad, and each bay's name
+   *  stencilled on the floor (map.decor — see sim/hangarmap.js). Outside the walls is dark. */
+  _interior(ctx, map) {
+    const D = map.decor || {}, z = this.zoom;
+    ctx.fillStyle = '#05070b'; ctx.fillRect(0, 0, this.W, this.H);
+    this._diamond(ctx, 0, 0, map.w, map.h, '#2a2e35');
+    // slab seams every 2 tiles + fine expansion joints
+    ctx.save(); ctx.lineWidth = 1;
+    for (let x = 0; x <= map.w; x += 1) { const a = this.P(x, 0), b = this.P(x, map.h); ctx.strokeStyle = x % 2 ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); }
+    for (let q = 0; q <= map.h; q += 1) { const a = this.P(0, q), b = this.P(map.w, q); ctx.strokeStyle = q % 2 ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); }
+    ctx.restore();
+    // light pools (ceiling lamps, bay neon) — added light
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    for (const L of D.lights || []) {
+      if (!this.visible(L.x, L.z, L.r + 1)) continue;
+      const p = this.P(L.x, L.z), rx = L.r * TILE_W * 0.5 * z * Math.SQRT2;
+      const g = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, rx);
+      g.addColorStop(0, hexA(L.color, L.a ?? 0.2)); g.addColorStop(0.55, hexA(L.color, (L.a ?? 0.2) * 0.35)); g.addColorStop(1, hexA(L.color, 0));
+      ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(1, 0.5); ctx.translate(-p.sx, -p.sy); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.sx, p.sy, rx, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    }
+    ctx.restore();
+    const outline = (x, q, w, d, color, width, dash = null) => { const a = this.P(x, q), b = this.P(x + w, q), c = this.P(x + w, q + d), e = this.P(x, q + d); ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = width; if (dash) ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.lineTo(c.sx, c.sy); ctx.lineTo(e.sx, e.sy); ctx.closePath(); ctx.stroke(); ctx.restore(); };
+    // walkway lanes: dashed double lines
+    for (const [x, q, w, d] of D.walkways || []) for (const off of [-0.18, 0.18]) {
+      const a = this.P(x + (d ? off : 0), q + (w ? off : 0)), b = this.P(x + w + (d ? off : 0), q + d + (w ? off : 0));
+      ctx.save(); ctx.strokeStyle = 'rgba(214,190,90,0.38)'; ctx.lineWidth = Math.max(1, 0.8 * z); ctx.setLineDash([5 * z, 4 * z]); ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); ctx.restore();
+    }
+    // bay boxes: a faint wash of the bay's colour, a painted yellow edge, a thin neon inner line
+    for (const b of D.bays || []) {
+      this._diamond(ctx, b.x, b.z, b.w, b.d, hexA(b.color, 0.07));
+      outline(b.x + 0.06, b.z + 0.06, b.w - 0.12, b.d - 0.12, 'rgba(222,186,64,0.8)', Math.max(1.5, 1.1 * z));
+      outline(b.x + 0.22, b.z + 0.22, b.w - 0.44, b.d - 0.44, hexA(b.color, 0.35), 1, [3 * z, 3 * z]);
+    }
+    // hazard stripes (bay mouths, the firing line)
+    for (const s of D.stripes || []) this._stripes(ctx, s.x, s.z, s.w, s.d);
+    // the launch pad: rings, a landing cross, corner chevrons and blinking edge lights
+    if (D.pad) {
+      const { x, z: q, r, color } = D.pad, p = this.P(x, q), rx = r * TILE_W * 0.5 * z * Math.SQRT2;
+      ctx.save(); ctx.translate(p.sx, p.sy); ctx.scale(1, 0.5);
+      ctx.fillStyle = 'rgba(30,38,52,0.55)'; ctx.beginPath(); ctx.arc(0, 0, rx, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 3 * z; ctx.strokeStyle = 'rgba(222,186,64,0.85)'; ctx.beginPath(); ctx.arc(0, 0, rx * 0.97, 0, Math.PI * 2); ctx.stroke();
+      ctx.lineWidth = 1.2 * z; ctx.strokeStyle = hexA(color, 0.55); ctx.setLineDash([8 * z, 6 * z]); ctx.beginPath(); ctx.arc(0, 0, rx * 0.8, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      const t = performance.now() / 1000;
+      for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, on = (Math.floor(t * 2) + i) % 3 === 0; ctx.fillStyle = on ? '#ffd27a' : 'rgba(255,210,122,0.25)'; ctx.beginPath(); ctx.arc(Math.cos(a) * rx * 0.97, Math.sin(a) * rx * 0.97, (on ? 2.6 : 1.8) * z, 0, Math.PI * 2); ctx.fill(); }
+      ctx.restore();
+    }
+    // stencilled names on the floor (always visible: a new player sees where everything is)
+    for (const L of D.labels || []) this._floorText(ctx, L);
+    // the floor's open edges: a painted kerb line
+    outline(0.02, 0.02, map.w - 0.04, map.h - 0.04, 'rgba(222,186,64,0.45)', Math.max(1, 0.8 * z));
+  }
+
+  /** Yellow/black diagonal stripes filling a floor rectangle (tiles). */
+  _stripes(ctx, x, q, w, d) {
+    const a = this.P(x, q), b = this.P(x + w, q), c = this.P(x + w, q + d), e = this.P(x, q + d);
+    ctx.save(); ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.lineTo(c.sx, c.sy); ctx.lineTo(e.sx, e.sy); ctx.closePath();
+    ctx.fillStyle = 'rgba(20,20,22,0.85)'; ctx.fill(); ctx.clip();
+    const minX = Math.min(a.sx, b.sx, c.sx, e.sx), maxX = Math.max(a.sx, b.sx, c.sx, e.sx), minY = Math.min(a.sy, b.sy, c.sy, e.sy), maxY = Math.max(a.sy, b.sy, c.sy, e.sy), st = 7 * this.zoom;
+    ctx.strokeStyle = 'rgba(226,182,46,0.85)'; ctx.lineWidth = st * 0.5;
+    for (let k = minX - (maxY - minY); k < maxX + st; k += st) { ctx.beginPath(); ctx.moveTo(k, maxY); ctx.lineTo(k + (maxY - minY), minY); ctx.stroke(); }
+    ctx.restore();
+  }
+
+  /** A word painted flat on the floor: { text, x, z, axis: 'x' (reads along +x, wall at −z) | 'z' (reads along −z, wall at −x), size (tiles), color }. */
+  _floorText(ctx, L) {
+    if (!this.visible(L.x, L.z, 4)) return;
+    const o = this.P(L.x, L.z), k = 1 / 100;                         // draw at 100 px per tile, then map onto the floor
+    const ux = L.axis === 'x' ? this.P(L.x + 1, L.z) : this.P(L.x, L.z - 1), vx = L.axis === 'x' ? this.P(L.x, L.z + 1) : this.P(L.x + 1, L.z);
+    ctx.save();
+    ctx.transform((ux.sx - o.sx) * k, (ux.sy - o.sy) * k, (vx.sx - o.sx) * k, (vx.sy - o.sy) * k, o.sx, o.sy);
+    ctx.font = `800 ${Math.round(L.size * 100)}px "Barlow Condensed", system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    try { ctx.letterSpacing = `${Math.round(L.size * 12)}px`; } catch { /* older canvas */ }
+    const text = String(L.text).toUpperCase();
+    if (L.maxW) { const w = ctx.measureText(text).width; if (w > L.maxW * 100) { const k2 = L.maxW * 100 / w; ctx.scale(k2, k2); } }   // long names shrink to fit their bay
+    ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillText(text, 3, 3);
+    ctx.fillStyle = hexA(L.color || '#e2b62e', 0.82); ctx.fillText(text, 0, 0);
+    ctx.restore();
+  }
+
   scorch(x, z, r) { this.decals.push({ x, z, r }); if (this.decals.length > 400) this.decals.shift(); }
 
   // ---------- one frame ----------
@@ -114,16 +196,20 @@ export class View {
     this._ground(ctx, map);
     const P = (x, z, y) => this.P(x, z, y);
     this.fx.drawGround?.(ctx, P, this.zoom);
+    this.underlay?.(ctx, P, t);           // a screen's own floor marks (the hangar's bay rings)
 
     // markers on the ground: objectives, extraction, artillery circles, pickups
     this._markers(ctx, S, t);
+    drawBossMarks(ctx, this, S, t);       // boss wind-ups: the claw sweep and charge lane fill before they land
 
     const items = [];
     const mechPts = S.mechs.map(m => { const p = lerp(m); return { m, p, s: this.P(p.x, p.z, (p.y || 0) + 0.4) }; });
+    // a boss stands as tall as the buildings: those in front of her fade too, so she is never lost behind a tower
+    const fadePts = mechPts.concat(S.enemies.filter(e => e.parts && !e.dead).map(e => { const p = lerp(e); return { m: e, p, s: this.P(p.x, p.z, 0.5) }; }));
     for (const l of S.world.lots) {
       if (!this.visible(l.x + l.w / 2, l.z + l.d / 2, 2 + Math.max(l.w, l.d))) continue;
       const depth = l.x + l.w + l.z + l.d - 1;
-      items.push({ d: depth, draw: () => this._lot(ctx, l, depth, mechPts, dt) });
+      items.push({ d: depth, draw: () => this._lot(ctx, l, depth, fadePts, dt) });
     }
     for (const e of S.enemies) {
       if (e.dead && !e.deadT) continue;
@@ -131,9 +217,12 @@ export class View {
       items.push({ d: p.x + p.z, draw: () => this._enemy(ctx, S, e, p, t) });
     }
     for (const d of S.deployed) items.push({ d: d.x + d.z, draw: () => this._deployed(ctx, d, t) });
+    for (const a of S.allies || []) if (!a.arrived && this.visible(a.x, a.z, 1)) { const p = lerp(a); items.push({ d: p.x + p.z, draw: () => this._ally(ctx, S, a, p, t) }); }
     // the drop-in: the dropship comes down over the start with your frame under it, lets go, and climbs away
     let dropAlt = 0;
-    if (S.phase === 'drop' && S.def.drop) {
+    if (S.phase === 'drop' && S.def.drop && S.def.orbital) {       // orbital drop: a burning streak falling onto the landing reticle
+      for (const q of mechPts) items.push({ d: q.p.x + q.p.z + 60, draw: () => this._fall(ctx, q.m, q.p, t) });
+    } else if (S.phase === 'drop' && S.def.drop) {
       const k = 1 - Math.max(0, S.phaseT) / S.def.drop, st = S.def.start[0];      // 0 → 1 over the drop
       const shipY = k < 0.55 ? 3.6 - k / 0.55 * 2.0 : k < 0.7 ? 1.6 : 1.6 + (k - 0.7) * 12;
       dropAlt = k < 0.6 ? shipY - 0.75 : 0.85 * (1 - ((k - 0.6) / 0.4) ** 2);       // let go at 0.6, lands as the drop ends
@@ -147,13 +236,32 @@ export class View {
     this._shots(ctx, S, t);
     this.fx.drawSolid(ctx, P, this.zoom);
     this.fx.drawLights(ctx, P, this.zoom);
+    this._ambient(ctx, S, t);
     this._numbers(ctx, dt);
     this.fx.drawFlash?.(ctx, this.W, this.H);
   }
 
+  /** Drifting motes over the whole view — dust under the hangar lights, ash over a city at war. Cheap (a few dozen
+   *  dots in screen space, tied to the camera so they read as being in the air), and the scene is never dead still. */
+  _ambient(ctx, S, t) {
+    const indoor = !!S.def.map.interior || S.def.kind === 'hangar' || S.def.kind === 'range', n = indoor ? 60 : 44;
+    const W = this.W, H = this.H, cx = this.cam.x * 40, cz = this.cam.z * 40;
+    ctx.save(); ctx.globalCompositeOperation = indoor ? 'lighter' : 'source-over';
+    for (let i = 0; i < n; i++) {
+      const h1 = Math.sin(i * 12.9898) * 43758.5453, h2 = Math.sin(i * 78.233) * 12543.123, r1 = h1 - Math.floor(h1), r2 = h2 - Math.floor(h2);
+      const sp = 6 + r2 * 14, x = ((r1 * W * 1.3 + t * sp * (indoor ? 0.6 : 1.4) - cx * 0.3) % (W * 1.1) + W * 1.1) % (W * 1.1) - W * 0.05;
+      const y = ((r2 * H * 1.2 + t * sp * (indoor ? -0.35 : 0.8) + Math.sin(t * 0.7 + i) * 8 - cz * 0.3) % (H * 1.1) + H * 1.1) % (H * 1.1) - H * 0.05;
+      const a = (indoor ? 0.18 : 0.22) * (0.5 + 0.5 * Math.sin(t * (0.8 + r1) + i));
+      ctx.fillStyle = indoor ? `rgba(255,232,190,${a.toFixed(3)})` : `rgba(150,140,130,${a.toFixed(3)})`;
+      const sz = 2 + r1 * 2.2; ctx.fillRect(x, y, sz, sz);
+    }
+    ctx.restore();
+  }
+
   _lot(ctx, l, depth, mechPts, dt) {
     const params = l.params || {};
-    const sp = this.sprites.building(l.recipe || 'fuel-tanks', params, l.stage);
+    // props that face a way (forklifts, crew, the parked dropship) bake per screen direction; buildings per wreck stage
+    const sp = l.face != null ? this.sprites.facing(l.recipe, params, l.face) : this.sprites.building(l.recipe || 'fuel-tanks', params, l.stage);
     // fade when it stands in front of a mech and covers it on screen
     let want = 1;
     for (const q of mechPts) {
@@ -179,6 +287,7 @@ export class View {
   }
 
   _enemy(ctx, S, e, p, t) {
+    if (e.parts) return drawBoss(ctx, this, S, e, p, t);    // part-breakable bosses (render/boss-art.js)
     const K = S.kinds[e.kind];
     const sc = this.zoom / this.sprites.scale;
     const dir = dirOfHeading(e.anim === 'fire' || e.anim === 'aim' ? e.aim ?? e.face : e.face, DIRS, 0);
@@ -224,8 +333,10 @@ export class View {
 
   _mech(ctx, m, p, t) {
     const q = this.P(p.x, p.z, p.y || 0), g = this.P(p.x, p.z, 0);
+    if (m.team === 'enemy' && drawEnemyMech(ctx, this, m, p, t, true)) return;   // a rival ace dropping in
     if (this.mechDrawer) this.mechDrawer(ctx, m, g.sx, g.sy, this.zoom, this.night * UNIT_NIGHT, t, p.y || 0);
     else { ctx.fillStyle = '#9aa4b4'; ctx.fillRect(q.sx - 8, q.sy - 40, 16, 40); }
+    if (m.team === 'enemy') { drawEnemyMech(ctx, this, m, p, t, false); return; }
     if (m.down) { ctx.save(); ctx.fillStyle = '#ff5a3a'; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(t * 6); ctx.beginPath(); ctx.arc(q.sx, q.sy - 0.9 * PX_PER_HEIGHT * this.zoom, 6, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
   }
 
@@ -238,9 +349,66 @@ export class View {
     this.fx.light(st.x, st.z, 0.9, 0.05, '#3ff0ff', 0.5);
   }
 
+  /** A friendly convoy truck (escort missions): the City Kit hauler in cobalt, a cyan ring, a health bar once hit. */
+  _ally(ctx, S, a, p, t) {
+    const sc = this.zoom / this.sprites.scale, dir = dirOfHeading(a.face || 0, DIRS, 0), q = this.P(p.x, p.z);
+    ctx.save(); ctx.strokeStyle = a.down ? 'rgba(255,90,58,0.6)' : 'rgba(63,240,255,0.65)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(q.sx, q.sy, a.r * TILE_W * this.zoom * 1.1, a.r * TILE_H * this.zoom * 1.1, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    const sp = this.sprites.facing('veh-hauler', { paint: a.down ? 5 : 3 }, dir, 'drive', a.down ? 0 : Math.floor(t * 8) % 2);
+    if (sp) { ctx.save(); if (a.down) ctx.filter = 'brightness(0.45)'; composite(ctx, sp, q.sx, q.sy, this.night * UNIT_NIGHT, sc); ctx.restore(); }
+    if (!a.down && a.hp < a.hpMax) {
+      const w = 34 * this.zoom * 0.5, y = q.sy - 0.75 * PX_PER_HEIGHT * this.zoom;
+      ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(q.sx - w / 2 - 1, y - 1, w + 2, 5);
+      ctx.fillStyle = a.hp / a.hpMax > 0.35 ? '#3ff0ff' : '#ff5a3a'; ctx.fillRect(q.sx - w / 2, y, w * a.hp / a.hpMax, 3);
+    }
+  }
+
+  /** Orbital drop: the frame falls as a burning streak; a reticle on the ground shows where it will land. */
+  _fall(ctx, m, p, t) {
+    const g = this.P(p.x, p.z), k = 0.5 + 0.5 * Math.sin(t * 10), rx = 1.6 * TILE_W * 0.5 * this.zoom * Math.SQRT2;
+    ctx.save(); ctx.strokeStyle = '#ffb060'; ctx.lineWidth = 2; ctx.globalAlpha = 0.6 + 0.3 * k;
+    ctx.beginPath(); ctx.ellipse(g.sx, g.sy, rx, rx / 2, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.ellipse(g.sx, g.sy, rx * 0.5, rx * 0.25, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    for (const a of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) { ctx.beginPath(); ctx.moveTo(g.sx + Math.cos(a) * rx * 0.6, g.sy + Math.sin(a) * rx * 0.3); ctx.lineTo(g.sx + Math.cos(a) * rx * 1.15, g.sy + Math.sin(a) * rx * 0.575); ctx.stroke(); }
+    ctx.restore();
+    const alt = Math.min(p.y || 0, 4.5);                         // drawn height: high enough to read as falling, still on screen
+    const hi = this.P(p.x, p.z, alt + 0.4);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    const grad = ctx.createLinearGradient(hi.sx, hi.sy - 160 * this.zoom, hi.sx, hi.sy);
+    grad.addColorStop(0, 'rgba(255,120,40,0)'); grad.addColorStop(1, 'rgba(255,200,120,0.9)');
+    ctx.strokeStyle = grad; ctx.lineWidth = 10 * this.zoom * 0.5; ctx.beginPath(); ctx.moveTo(hi.sx, hi.sy - 160 * this.zoom); ctx.lineTo(hi.sx, hi.sy); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,220,160,0.95)'; ctx.beginPath(); ctx.arc(hi.sx, hi.sy, (7 + 3 * k) * this.zoom * 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    this._mech(ctx, m, { ...p, y: alt }, t);
+  }
+
   _markers(ctx, S, t) {
     const pulse = 0.5 + 0.5 * Math.sin(t * 4);
     const ring = (x, z, r, color, alpha = 0.8, dash = null) => { const p = this.P(x, z); ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = alpha; ctx.lineWidth = 2; if (dash) ctx.setLineDash(dash); ctx.beginPath(); ctx.ellipse(p.sx, p.sy, r * TILE_W * 0.5 * this.zoom * Math.SQRT2, r * TILE_H * 0.5 * this.zoom * Math.SQRT2, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); };
+    const beacon = (x, z, color) => { const a = this.P(x, z, 0), b = this.P(x, z, 2.2); ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(a.sx, a.sy, b.sx, b.sy); g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.strokeStyle = g; ctx.lineWidth = 4; ctx.globalAlpha = 0.5 + 0.3 * pulse; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke(); ctx.restore(); };
+    const O = S.ops;
+    if (O) {
+      // sabotage masts: an amber ring that fills as the charge is set
+      for (const m of O.plants) {
+        const q = this.P(m.x, m.z), rx = 0.6 * TILE_W * 0.5 * this.zoom * Math.SQRT2, f = Math.min(1, m.t / 3);
+        ctx.save(); ctx.strokeStyle = m.done ? '#5fffb0' : '#ffb02e'; ctx.lineWidth = 2; ctx.globalAlpha = m.done ? 0.5 : 0.7 + 0.3 * pulse;
+        ctx.beginPath(); ctx.ellipse(q.sx, q.sy, rx, rx / 2, 0, 0, Math.PI * 2); ctx.stroke();
+        if (!m.done && f > 0) { ctx.fillStyle = 'rgba(255,176,46,0.35)'; ctx.beginPath(); ctx.ellipse(q.sx, q.sy, rx * f, rx * f / 2, 0, 0, Math.PI * 2); ctx.fill(); }
+        ctx.restore(); if (!m.done) beacon(m.x, m.z, '#ffb02e');
+      }
+      // the data core: a cyan crystal on the ground (or over its carrier)
+      const c = O.core;
+      if (c && !c.home) {
+        const q = this.P(c.x, c.z, c.carrier ? 1.0 : 0.15 + Math.sin(t * 3) * 0.04), s = 6 * this.zoom * 0.5;
+        ctx.save(); ctx.fillStyle = '#3ff0ff'; ctx.shadowColor = '#3ff0ff'; ctx.shadowBlur = 12; ctx.beginPath(); ctx.moveTo(q.sx, q.sy - s * 1.6); ctx.lineTo(q.sx + s, q.sy); ctx.lineTo(q.sx, q.sy + s * 1.6); ctx.lineTo(q.sx - s, q.sy); ctx.fill(); ctx.restore();
+        if (!c.carrier) { beacon(c.x, c.z, '#3ff0ff'); if (c.pick > 0) { const g = this.P(c.x, c.z); ctx.save(); ctx.strokeStyle = '#3ff0ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(g.sx, g.sy - 18, 10, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, c.pick / 1.2)); ctx.stroke(); ctx.restore(); } }
+        else if (S.def.extract) { const e = S.def.extract; ring(e.x, e.z, e.r, '#3ff0ff', 0.5 + 0.4 * pulse); }
+      }
+      // convoys: where the trucks are heading (red = stop them before it, cyan = get them there)
+      if (O.route && S.def.convoy) { const x = O.route.exit, col = S.def.convoy.side === 'ally' ? '#3ff0ff' : '#ff5a3a'; ring(x.x, x.z, 1.4, col, 0.4 + 0.4 * pulse, [10, 6]); beacon(x.x, x.z, col); }
+      for (const e of O.convoyUnits) if (!e.dead && this.visible(e.x, e.z, 1)) ring(e.x, e.z, 0.4, '#ff5a3a', 0.5 + 0.3 * pulse);
+    }
+    for (const e of S.enemies) if (e.tag === 'target' && !e.dead) { ring(e.x, e.z, e.r + 0.35, '#ff3b3b', 0.6 + 0.4 * pulse, [6, 4]); beacon(e.x, e.z, '#ff3b3b'); }
     for (const k of S.strikes) {                                  // artillery: a red circle that fills as the shell falls
       const p = this.P(k.x, k.z), rx = k.r * TILE_W * 0.5 * this.zoom * Math.SQRT2, ry = rx / 2, fill = Math.max(0, 1 - k.t / 1.6);
       ctx.save(); ctx.fillStyle = 'rgba(255,60,40,0.18)'; ctx.strokeStyle = '#ff4030'; ctx.lineWidth = 2;
@@ -255,7 +423,7 @@ export class View {
     for (const p of S.pickups) {
       if (p.owner !== S.localPid) continue;
       const q = this.P(p.x, p.z, 0.08 + Math.sin(t * 4 + p.x) * 0.03);
-      const col = p.part ? '#c46bff' : p.mat === 'exotic' ? '#ff9a2e' : p.mat === 'alloy' ? '#4aa8ff' : '#c9ced6';
+      const col = p.part ? '#c46bff' : p.mat === 'chitin' ? '#a8ff2e' : p.mat === 'exotic' ? '#ff9a2e' : p.mat === 'alloy' ? '#4aa8ff' : '#c9ced6';
       ctx.save(); ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 8; ctx.beginPath();
       const s = (p.part ? 6 : 4) * this.zoom * 0.5; ctx.moveTo(q.sx, q.sy - s); ctx.lineTo(q.sx + s, q.sy); ctx.lineTo(q.sx, q.sy + s); ctx.lineTo(q.sx - s, q.sy); ctx.fill(); ctx.restore();
     }
@@ -311,6 +479,9 @@ const UNIT_NIGHT = 0.5;
 
 export const SHOT_COLOURS = { kinetic: '#ffd27a', energy: '#7fe8ff', explosive: '#ffb35a', fire: '#ff8a3a', electric: '#b49bff' };
 export const CRIT_COLOURS = ['#f2f4f8', '#ffe14a', '#ff9a2e', '#ff3b3b', '#ff5adf'];
+
+/** '#rrggbb' + alpha → rgba(). */
+function hexA(h, a) { const v = parseInt(h.slice(1), 16); return `rgba(${(v >> 16) & 255},${(v >> 8) & 255},${v & 255},${a})`; }
 
 function mixHex(a, b, t) {
   const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);

@@ -46,6 +46,17 @@ export class Sprites {
   }
   hasKey(key) { return this.map.has(key); }
 
+  /** A new map is about to be shown: let go of building pictures no lot on it uses (every stage, day and night), so
+   *  a long session of missions doesn't keep every district it ever visited in memory (phones run out). */
+  keepBuildingsFor(lots) {
+    const keep = new Set(), lights = this.lights;
+    for (const l of lots) if (l.recipe) for (const lt of [true, false]) { this.lights = lt; for (let st = 0; st < 4; st++) keep.add(this.buildingKey(l.recipe, l.params, st)); }
+    this.lights = lights;
+    let n = 0;
+    for (const k of [...this.map.keys()]) if (k.startsWith('b|') && !keep.has(k)) { this.map.delete(k); n++; }
+    return n;
+  }
+
   /** Which animation names a recipe really has (falls back to the closest it offers). */
   animOf(id, want) {
     const A = RECIPES[id]?.anims; if (!A) return null;

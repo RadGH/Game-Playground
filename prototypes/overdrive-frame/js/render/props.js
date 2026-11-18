@@ -29,12 +29,13 @@ addRecipes({
   },
   'of-dropship': {
     name: 'Dropship', group: 'vehicles', genre: ['military'], dirs: 16, blurb: 'Carries a frame in and out. Four tilting engines, a cradle under the belly.',
-    params: [{ key: 'cargo', label: 'Cargo', min: 0, max: 1, step: 1, def: 1, names: ['Empty', 'Frame aboard'] }],
+    params: [{ key: 'cargo', label: 'Cargo', min: 0, max: 1, step: 1, def: 1, names: ['Empty', 'Frame aboard'] },
+      { key: 'parked', label: 'Parked', min: 0, max: 1, step: 1, def: 0, names: ['Flying', 'On the pad (gear down)'] }],
     anims: { hover: { label: 'Hover', frames: 4, fps: 8 } },
     build(p) {
       const g = new THREE.Group(), body = new THREE.Group(); g.add(body);
       const plate = hull('#5a6170'), dark = hull('#2c313b'), glow = neonMat('#3ff0ff', 0.7), warn = neonMat('#ff8a2a', 0.6);
-      body.position.y = 1.1;
+      const baseY = p.parked ? 0.27 : 1.1; body.position.y = baseY;
       box(body, 1.2, 0.18, 0.42, plate, 0, 0, 0); box(body, 0.5, 0.14, 0.34, dark, 0.48, 0.12, 0);        // fuselage + cockpit block
       box(body, 0.22, 0.05, 0.26, glow, 0.68, 0.16, 0);                                                     // canopy glow
       box(body, 0.3, 0.12, 0.3, plate, -0.62, 0.06, 0); box(body, 0.05, 0.24, 0.02, plate, -0.7, 0.18, 0);  // tail + fin
@@ -48,8 +49,13 @@ addRecipes({
       // cradle clamps under the belly
       for (const s of [-1, 1]) box(body, 0.06, 0.16, 0.06, dark, s * 0.25, -0.16, 0);
       box(body, 0.6, 0.03, 0.08, warn, 0, -0.16, 0);
+      if (p.parked) {                                   // landing gear, a lowered ramp and the pad's work lights on the hull
+        for (const x of [-0.42, 0.36]) for (const s of [-1, 1]) { box(g, 0.035, 0.2, 0.035, dark, x, 0.0, s * 0.16); box(g, 0.1, 0.02, 0.07, dark, x, 0, s * 0.16); }
+        box(g, 0.34, 0.012, 0.24, warn, -0.05, 0, 0);
+        box(body, 0.12, 0.03, 0.03, neonMat('#5dff6a', 0.8), 0.2, 0.19, 0.18);
+      }
       if (p.cargo) { const c = box(body, 0.22, 0.5, 0.22, hull('#8a8f9a'), 0, -0.68, 0); c.userData.cargo = true; }
-      g.userData.pose = (anim, phase, heading) => { g.rotation.y = -heading; body.position.y = 1.1 + Math.sin(phase * Math.PI * 2) * 0.02; };
+      g.userData.pose = (anim, phase, heading) => { g.rotation.y = -heading; body.position.y = baseY + (p.parked ? 0 : Math.sin(phase * Math.PI * 2) * 0.02); };
       g.userData.face = h => { g.rotation.y = -h; };
       return g;
     },

@@ -89,6 +89,14 @@ truck, pallet jack and crew face a way (`dirs: 8`, `userData.face`). Shapes to b
 `lotPad`). Materials: `js/kit/materials.js` (`STYLES`, `bodyMat`, `trimMat`, `glassMat`, `neonMat(color, dayGlow)` —
 anything that should light up at night must use a material with `userData.glow`). Heights: `FLOOR` (one storey).
 
+### Hangar pieces (`js/kit/hangar.js`, group `hangar`, genre `industrial`)
+Overdrive Frame round 2's walkable hangar (`prototypes/overdrive-frame/js/sim/hangarmap.js` lays them out). Same scale as
+the workshop props; back walls are 1.9 tiles (~30 m, two and a half mechs). Wall pieces are built along x with their
+working face toward +z (the game turns them with the lot's `rot: 3` for the other back wall). Every bay sign glows in its
+station's colour (`STATIONS`), so the bays read across the floor at the hangar's indoor light; the game paints the bay
+names on the floor rather than baking words. The dropship (`of-dropship`, the game's `js/render/props.js`) has a
+`parked` setting (gear down, on the pad).
+
 ## Enemies (Overdrive Frame, `swarm.js` + `army.js`)
 
 Every enemy faces 16 screen directions and is rebuilt per frame by `userData.pose(anim, phase, heading)`; each kind has
@@ -137,6 +145,7 @@ spawn, summon, roar, deploy, fire, open, hover, jam, brace, aim…). Extra contr
 | `js/kit/parks.js` | Parks & plazas group (Arcline round 4): `pk-pocket`, `pk-fountain`, `pk-playground` (1×1), `pk-court` (2×1), `pk-promenade` (3×1), `pk-garden`, `pk-skate`, `pk-memorial`, `pk-neon`, `pk-terrace` (2×2), `pk-central`, `pk-amphi` (3×3), `pk-biodome` (4×4); moves the Park & Plaza and Arena into the group |
 | `js/kit/wreck.js` | `wreck()`: damage stages 1–3 for any building model (`DAMAGE_NAMES`); `tests/wreck.spec.js` |
 | `js/kit/workshop.js` | Workshop & industrial props, true to scale (`crewFigure`, `M`); `tests/workshop.spec.js` measures them |
+| `js/kit/hangar.js` | Overdrive Frame's hangar hub + test range (group `hangar`, category Industrial): `hg-wall` (ribbed + catwalk, window band, pipes + vents, column, range berm; `len` 1–6), `hg-bay` (the back of a bay: neon sign with a word-free pictogram in the station's colour + the station — contracts terminal, assembly cradle, parts dealer shelves, workshop fabricator, paint booth, range blast door), `hg-spine` (lockers + pipes between bays), `hg-rail` (low safety rail), `hg-target` / `hg-target-armour` / `hg-target-sled` (range targets, 16 facings) |
 | `js/kit/enemy-bits.js` | Shared pieces for posable enemies: mesh builders, two-bone IK + gait steps, thrown debris / fireballs / flames for deaths, and `poseable()` (the pose wrapper with `face`, `only`, `breakPart`, `muzzles`, and a ground clamp so nothing is drawn under the street) |
 | `js/kit/swarm.js` | Overdrive Frame's alien Swarm (group `swarm`, category Alien): `sw-swarmer`, `sw-leaper`, `sw-spitter`, `sw-brute`, `sw-burrower`, `sw-bloater`, `sw-hive` (1×1), `sw-hive-great` (2×2), `sw-broodmother` (boss, 2×2, breakable parts) |
 | `js/kit/army.js` | Overdrive Frame's rival army (group `army`, category Military): `ar-troopers`, `ar-tank`, `ar-rocket-truck`, `ar-apc`, `ar-gunship`, `ar-drone`, `ar-aa`, `ar-shield`, `ar-jammer`, `ar-sniper`; paint + faction stripe settings |

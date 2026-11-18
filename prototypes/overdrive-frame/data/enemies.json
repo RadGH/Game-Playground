@@ -1,5 +1,5 @@
 {
-  "_doc": "Enemy kinds. recipe = the citykit recipe drawn for it. job = how it fights (enemies.js JOBS). Numbers: hp, speed in tiles/s, radius in tiles, dmg per hit, range in tiles, cd = seconds between attacks. score feeds the grade; mats = materials dropped (Scrap/Alloy/Exotic chance). sparing = kinds the owner wants used rarely (missions cap them).",
+  "_doc": "Enemy kinds. recipe = the citykit recipe drawn for it. job = how it fights (enemies.js JOBS). Numbers: hp, speed in tiles/s, radius in tiles, dmg per hit, range in tiles, cd = seconds between attacks. score feeds the grade; mats = materials dropped (Scrap/Alloy/Exotic chance). sparing = kinds the owner wants used rarely (missions cap them). boss = job boss (js/sim/boss.js): parts (hit zones by bearing `at` and half-width `arc` in degrees from her facing; hp; drop = boss material count; spawn = sacs; claw/slow = claws; lockedBy + weak = an armoured weak point), claw/charge/barrage/lob = attacks (every one winds up and marks the ground first), phases = health shares that each trigger once (a roar + a brood wave, then a new attack). Rival aces are in data/aces.json (kinds ace:<id>). dummy = a test-range target (job dummy: never attacks, never dies, refills after refill seconds without a hit; patrol = tiles it walks either side of its spot).",
   "swarmer": {"name": "Swarmer", "faction": "swarm", "recipe": "sw-swarmer", "job": "chase", "hp": 120, "speed": 1.7, "radius": 0.07, "dmg": 18, "range": 0.3, "cd": 0.7, "score": 1, "mats": {"scrap": 0.06}},
   "leaper": {"name": "Leaper", "faction": "swarm", "recipe": "sw-leaper", "job": "pounce", "hp": 270, "speed": 1.4, "radius": 0.1, "dmg": 90, "range": 2.6, "cd": 2.2, "leapSpeed": 4.5, "score": 3, "mats": {"scrap": 0.15}},
   "spitter": {"name": "Spitter", "faction": "swarm", "recipe": "sw-spitter", "job": "lob", "hp": 360, "speed": 0.9, "radius": 0.12, "dmg": 136, "range": 6, "keep": 4.5, "cd": 2.6, "shotSpeed": 3.2, "splash": 0.45, "dtype": "fire", "score": 4, "mats": {"scrap": 0.2, "alloy": 0.03}},
@@ -16,5 +16,23 @@
   "aa": {"name": "Missile Battery", "faction": "army", "recipe": "ar-aa", "job": "missiles", "hp": 3900, "speed": 0, "radius": 0.35, "dmg": 160, "range": 10, "cd": 5, "salvo": 3, "shotSpeed": 3.2, "turn": 2.2, "dtype": "explosive", "structure": true, "score": 16, "mats": {"scrap": 1.2, "alloy": 0.5}},
   "shieldbearer": {"name": "Shield Walker", "faction": "army", "recipe": "ar-shield", "job": "shoot", "hp": 3000, "speed": 0.55, "radius": 0.22, "frontArmour": 0.9, "dmg": 73, "range": 4.5, "keep": 2.5, "cd": 1.1, "shotSpeed": 9, "dtype": "kinetic", "score": 12, "mats": {"scrap": 0.8, "alloy": 0.3}},
   "jammer": {"name": "Jammer Truck", "faction": "army", "recipe": "ar-jammer", "job": "jam", "hp": 1800, "speed": 0.6, "radius": 0.24, "range": 5, "keep": 7, "sparing": true, "score": 10, "mats": {"scrap": 0.6, "alloy": 0.3, "exotic": 0.02}},
-  "sniper": {"name": "Sniper Walker", "faction": "army", "recipe": "ar-sniper", "job": "snipe", "hp": 1500, "speed": 0.5, "radius": 0.18, "dmg": 480, "range": 13, "keep": 9, "cd": 5, "aimTime": 1.6, "shotSpeed": 30, "dtype": "kinetic", "score": 12, "mats": {"scrap": 0.6, "alloy": 0.35}}
+  "sniper": {"name": "Sniper Walker", "faction": "army", "recipe": "ar-sniper", "job": "snipe", "hp": 1500, "speed": 0.5, "radius": 0.18, "dmg": 480, "range": 13, "keep": 9, "cd": 5, "aimTime": 1.6, "shotSpeed": 30, "dtype": "kinetic", "score": 12, "mats": {"scrap": 0.6, "alloy": 0.35}},
+  "broodmother": {"name": "Broodmother", "faction": "swarm", "recipe": "sw-broodmother", "job": "boss", "boss": true, "hp": 70000, "speed": 0.55, "turn": 1.3, "radius": 0.85, "bodyRadius": 0.45, "score": 300, "mats": {"scrap": 6, "alloy": 3, "exotic": 0.6},
+    "bossMat": "chitin", "bodyShare": 0.4, "blastShare": 0.55, "armoured": 0.25, "stagger": 1.1, "crush": 1500, "maxOut": 24,
+    "parts": [
+      {"id": "sac-left", "label": "Left egg sac", "at": 125, "arc": 40, "dist": 0.7, "hp": 6000, "drop": 2, "spawn": "swarmer", "spawnEvery": 9, "spawnCount": 3},
+      {"id": "sac-right", "label": "Right egg sac", "at": -125, "arc": 40, "dist": 0.7, "hp": 6000, "drop": 2, "spawn": "swarmer", "spawnEvery": 9, "spawnCount": 3},
+      {"id": "claw-left", "label": "Left claw", "at": 38, "arc": 22, "dist": 0.8, "hp": 5000, "drop": 2, "claw": true, "slow": 0.72},
+      {"id": "claw-right", "label": "Right claw", "at": -38, "arc": 22, "dist": 0.8, "hp": 5000, "drop": 2, "claw": true, "slow": 0.72},
+      {"id": "crest", "label": "Head plate", "at": 0, "arc": 15, "dist": 0.6, "hp": 7000, "drop": 3, "lockedBy": ["sac-left", "sac-right"], "weak": 1.4}
+    ],
+    "claw": {"wind": 0.85, "range": 1.45, "arc": 1.9, "dmg": 380, "cd": 2.2},
+    "charge": {"wind": 1.2, "speed": 3.6, "len": 7, "width": 0.8, "dmg": 560, "cd": 6.5},
+    "barrage": {"count": 7, "warn": 1.5, "gap": 0.18, "r": 0.6, "dmg": 300, "cd": 9},
+    "lob": {"range": 7, "speed": 3.6, "dmg": 150, "splash": 0.55, "cd": 3.6},
+    "phases": [{"at": 0.66, "roar": 1.4, "brood": {"swarmer": 22, "leaper": 4}}, {"at": 0.33, "roar": 1.4, "brood": {"swarmer": 26, "spitter": 4}}]},
+  "dummy": {"name": "Target Dummy", "faction": "range", "recipe": "hg-target", "job": "dummy", "dummy": true, "hp": 40000, "speed": 0, "radius": 0.2, "refill": 3, "structure": true, "score": 0, "mats": {}},
+  "dummy-move": {"name": "Moving Target", "faction": "range", "recipe": "hg-target-sled", "job": "dummy", "dummy": true, "hp": 40000, "speed": 0.9, "patrol": 1.4, "radius": 0.2, "refill": 3, "score": 0, "mats": {}},
+  "dummy-armour": {"name": "Armoured Target", "faction": "range", "recipe": "hg-target-armour", "job": "dummy", "dummy": true, "hp": 40000, "speed": 0, "radius": 0.22, "armour": 90, "refill": 3, "structure": true, "score": 0, "mats": {}},
+  "convoy-truck": {"name": "Convoy hauler", "faction": "army", "recipe": "veh-hauler", "job": "drive", "hp": 2400, "speed": 1.25, "radius": 0.24, "armour": 40, "dmg": 0, "range": 0, "cd": 99, "dtype": "kinetic", "score": 20, "mats": {"scrap": 2, "alloy": 0.6}}
 }

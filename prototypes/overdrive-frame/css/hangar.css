@@ -1,0 +1,58 @@
+/* The hangar hub and the test range (js/hangar.js, js/range.js, js/ui/range-panel.js). Loaded by ensureHangarCss(). */
+.of-hangar { position: absolute; inset: 0; overflow: hidden; }
+
+/* the in-world prompt over the bay you stand in: the bay's name in its neon colour + the Use key */
+.of-hg-prompt {
+  position: absolute; left: 0; top: 0; z-index: 4; display: inline-flex; align-items: center; gap: 10px;
+  min-height: 44px; padding: 8px 14px; white-space: nowrap; cursor: pointer;
+  font: 600 16px/1 var(--of-font); letter-spacing: 0.04em; color: var(--of-text);
+  background: rgba(10, 13, 20, 0.86); border: 1px solid var(--bay, var(--of-amber)); border-left-width: 4px; border-radius: var(--of-r);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--bay, #ffb02e) 35%, transparent), 0 6px 18px rgba(0, 0, 0, 0.55);
+  animation: of-hg-in 160ms ease-out;
+}
+.of-hg-prompt[hidden] { display: none; }
+.of-hg-prompt b { font-weight: 700; color: var(--bay, var(--of-amber)); text-transform: uppercase; letter-spacing: 0.08em; }
+.of-hg-prompt kbd { min-width: 26px; padding: 4px 7px; text-align: center; font: 800 16px/1 var(--of-num); color: #12151c; background: var(--of-text); border-radius: 3px; }
+.of-hg-prompt span { color: var(--of-dim); font-size: 14px; }
+.of-hg-prompt .of-hg-tap { padding: 6px 10px; color: #12151c; background: var(--bay, var(--of-amber)); border-radius: 3px; font-weight: 700; }
+.of-hg-prompt:focus-visible, .of-hg-prompt:hover { outline: 2px solid var(--bay, var(--of-amber)); outline-offset: 2px; }
+@keyframes of-hg-in { from { opacity: 0; } to { opacity: 1; } }
+
+.of-hg-menu {
+  position: absolute; top: calc(12px + var(--safe-t, 0px)); right: calc(12px + var(--safe-r, 0px)); z-index: 5;
+  width: 48px; height: 48px; font: 600 22px/1 var(--of-font); color: var(--of-text); cursor: pointer;
+  background: rgba(16, 20, 29, 0.82); border: 1px solid var(--of-line-2); border-radius: var(--of-r);
+}
+.of-hg-menu:hover, .of-hg-menu:focus-visible { border-color: var(--of-amber); outline: none; }
+
+/* test range panel: damage per second, total, biggest hit, by damage type; Reset + Leave */
+/* left side under the HUD's armour box: the targets are up-right of the frame, the panel never covers them */
+.of-range-panel {
+  position: absolute; top: calc(112px + var(--safe-t, 0px)); left: calc(12px + var(--safe-l, 0px)); z-index: 5; width: 250px;
+  display: grid; gap: 8px; padding: 12px 14px; background: rgba(12, 15, 22, 0.88); border: 1px solid var(--of-line-2);
+  border-top: 3px solid #ff4a4a; border-radius: var(--of-r); font-family: var(--of-font);
+}
+.of-range-panel h2 { margin: 0; font: 700 14px var(--of-font); letter-spacing: 0.12em; text-transform: uppercase; color: #ff8a7a; }
+.of-rp-dps { display: flex; align-items: baseline; gap: 8px; }
+.of-rp-dps b { font: 800 40px/1 var(--of-num); color: var(--of-text); }
+.of-rp-dps span { font-size: 14px; color: var(--of-dim); }
+.of-rp-grid { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin: 0; font-size: 14px; }
+.of-rp-grid dt { color: var(--of-dim); }
+.of-rp-grid dd { margin: 0; text-align: right; font: 600 17px/1.2 var(--of-num); }
+.of-rp-types { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.of-rp-types li { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; position: relative; padding: 3px 6px; }
+.of-rp-types li i { position: absolute; left: 0; top: 0; bottom: 0; z-index: -1; border-radius: 2px; opacity: 0.28; }
+.of-rp-types li b { font: 600 15px var(--of-num); }
+.of-rp-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.of-rp-btns .of-btn { min-height: 44px; padding: 10px; font-size: 14px; text-align: center; }
+.of-rp-hint { margin: 0; font-size: 13px; color: var(--of-dim); }
+@media (max-width: 640px) {
+  /* phone: a compact card above the move stick (the HUD's weapons sit along the top) */
+  .of-range-panel { top: auto; bottom: calc(176px + var(--safe-b, 0px)); left: calc(8px + var(--safe-l, 0px)); width: 172px; grid-template-columns: 1fr; gap: 6px; padding: 8px 10px; }
+  .of-rp-grid dt:nth-of-type(3), .of-rp-grid dd:nth-of-type(3) { display: none; }
+  .of-rp-btns .of-btn { padding: 6px; font-size: 13px; }
+  .of-range-panel h2, .of-rp-hint, .of-rp-types { display: none; }
+  .of-rp-dps b { font-size: 30px; }
+  .of-rp-grid { font-size: 13px; }
+  .of-hg-menu { top: calc(8px + var(--safe-t, 0px)); right: calc(8px + var(--safe-r, 0px)); }
+}

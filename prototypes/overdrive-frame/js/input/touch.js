@@ -3,10 +3,11 @@
 // Controls object as keys and pads (touch.move / touch.aim / touch.buttons), so the sim never knows which was used.
 import { BY_ID } from './bindings.js';
 
-export function installTouch(controls, root) {
+/** mode 'hangar': only the move stick (the bay prompt is its own button; nothing fires in the hangar). */
+export function installTouch(controls, root, { mode = 'fight' } = {}) {
   if (!matchMedia('(pointer: coarse)').matches && !/[?&]touch=1/.test(location.search)) return null;
-  const el = document.createElement('div'); el.className = 'of-touch';
-  el.innerHTML = `
+  const el = document.createElement('div'); el.className = 'of-touch' + (mode === 'hangar' ? ' of-touch-hangar' : '');
+  el.innerHTML = mode === 'hangar' ? '<div class="of-stick of-stick-move" aria-label="Move"><i></i></div>' : `
     <div class="of-stick of-stick-move" aria-label="Move"><i></i></div>
     <div class="of-stick of-stick-aim" aria-label="Aim and fire"><i></i></div>
     <div class="of-tbtns">
@@ -24,7 +25,7 @@ export function installTouch(controls, root) {
     node.addEventListener('pointermove', move); node.addEventListener('pointerup', end); node.addEventListener('pointercancel', end);
   };
   stick(el.querySelector('.of-stick-move'), v => { controls.touch.move = v; controls.device = 'touch'; });
-  stick(el.querySelector('.of-stick-aim'), v => { controls.touch.aim = v; controls.touch.autoFire = !!v; controls.device = 'touch'; });
+  if (mode !== 'hangar') stick(el.querySelector('.of-stick-aim'), v => { controls.touch.aim = v; controls.touch.autoFire = !!v; controls.device = 'touch'; });
   for (const b of el.querySelectorAll('[data-act]')) {
     const id = b.dataset.act, hold = BY_ID[id]?.hold;
     // iOS can skip pointerup: every fresh touch-start clears stuck buttons first (lessons rule 30)

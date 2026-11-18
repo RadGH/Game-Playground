@@ -5,6 +5,7 @@ import { angleDiff } from './weapons.js';
 import { isStunned, tickStatus } from './damage.js';
 import { pushOut } from './world.js';
 import { flowDir, flowDist } from './flow.js';
+import { stepBoss } from './boss.js';
 
 /** A new enemy. warn = seconds it shows as a flash before it is real (spawn warning — never a surprise). */
 export function makeEnemy(kind, K, x, z, T, { id, warn = 0, elite = false, boss = false } = {}) {
@@ -14,7 +15,7 @@ export function makeEnemy(kind, K, x, z, T, { id, warn = 0, elite = false, boss 
     face: 0, aim: 0, cd: K.cd ? K.cd * 0.5 : 1, t: 0, state: warn > 0 ? 'warn' : 'move', stateT: warn,
     burstLeft: 0, out: 0, armour: K.armour || 0, frontArmour: K.frontArmour || 0, resist: K.resist || {}, elite, boss,
     status: {}, dead: false, anim: 'walk', animT: 0, hidden: K.job === 'burrow', target: null, lastHitBy: null,
-    flying: K.flying || 0, structure: !!K.structure,
+    flying: K.flying || 0, structure: !!K.structure, dummy: !!K.dummy, quiet: 0,
   };
 }
 
@@ -23,7 +24,9 @@ const D2 = (a, b) => (a.x - b.x) ** 2 + (a.z - b.z) ** 2;
 /** Nearest living, standing player mech to an enemy. */
 function nearestPlayer(S, e) {
   let best = null, bd = Infinity;
-  for (const m of S.mechs) { if (m.down) continue; const d = D2(m, e); if (d < bd) { bd = d; best = m; } }
+  for (const m of S.mechs) { if (m.down || m.team === 'enemy') continue; const d = D2(m, e); if (d < bd) { bd = d; best = m; } }   // never a rival ace
+  // escort missions: the convoy's trucks are targets too (a little less tempting than a mech that's shooting you)
+  if (S.allies) for (const a of S.allies) { if (a.down || a.arrived) continue; const d = D2(a, e) * 1.3; if (d < bd) { bd = d; best = a; } }
   return best;
 }
 
@@ -69,7 +72,7 @@ function shootAt(S, e, K, P, g, opts = {}) {
   e.aim = a; S.events.push({ type: 'eshot', id: e.id, kind: e.kind, x: e.x, z: e.z, dir: a });
 }
 
-const JOBS = {
+export const JOBS = {
   chase(S, e, K, P, g, dt) {
     if (g.dist > K.range + P.r) { seek(e, K, g.ux, g.uz, K.speed * g.slow, dt); e.anim = 'walk'; }
     else { e.vx *= 0.7; e.vz *= 0.7; if (e.cd <= 0) { e.cd = K.cd; S.hurtPlayer(P, K.dmg * S.T.enemyDamage * (e.elite ? 1.5 : 1), K.dtype || 'kinetic', e); e.anim = 'attack'; e.animT = 0; S.events.push({ type: 'eattack', id: e.id, kind: e.kind, x: e.x, z: e.z }); } }
@@ -169,6 +172,16 @@ const JOBS = {
       for (let i = 0; i < K.salvo; i++) S.delayed.push({ t: 0.5 + i * 0.22, fn: 'enemyMissile', e: e.id, p: P.id });
     }
   },
+  // test-range targets: never attack; refill after K.refill seconds without a hit; the moving kind walks back and forth
+  dummy(S, e, K, P, g, dt) {
+    e.quiet += dt; if (e.quiet >= (K.refill || 3)) e.hp = e.hpMax;
+    e.home ||= { x: e.x, z: e.z }; e.face = K.faceTo ?? Math.PI / 2; e.anim = 'idle';
+    if (!K.patrol) { e.vx = 0; e.vz = 0; e.x = e.home.x; e.z = e.home.z; return; }
+    e.dir ||= 1;
+    if (e.x > e.home.x + K.patrol) e.dir = -1; else if (e.x < e.home.x - K.patrol) e.dir = 1;
+    e.vx = e.dir * K.speed; e.vz = 0; e.z = e.home.z; e.anim = 'walk';
+  },
+  boss(S, e, K, P, g, dt) { stepBoss(S, e, K, P, g, dt); },     // part-breakable bosses: sim/boss.js
   jam(S, e, K, P, g, dt) { keepAt(e, K, g, K.keep, g.slow, dt); e.face = Math.atan2(e.vz, e.vx) || g.toP; e.anim = 'drive'; e.jamming = true; },
   snipe(S, e, K, P, g, dt) {
     if (e.state === 'aim') {
@@ -184,7 +197,7 @@ const JOBS = {
 
 /** Move and keep apart (swarm spacing) — grid neighbours push each other; buildings push out. */
 function moveBody(S, e, dt) {
-  if (!e.structure) {
+  if (!e.structure && !e.boss) {
     const sep = S.T.swarmSep;
     S.grid.near(e.x, e.z, e.r + sep + 0.3, o => {
       if (o === e || o.dead || o.flying !== e.flying || o.hidden !== e.hidden) return;
@@ -193,6 +206,6 @@ function moveBody(S, e, dt) {
     });
   }
   e.x += e.vx * dt; e.z += e.vz * dt;
-  if (!e.flying && !e.hidden) { if (pushOut(S.world, e, e.r)) e.bumped = true; }
+  if (!e.flying && !e.hidden) { if (pushOut(S.world, e, e.bodyR || e.r)) e.bumped = true; }
   else { e.x = Math.max(0.2, Math.min(S.world.w - 0.2, e.x)); e.z = Math.max(0.2, Math.min(S.world.h - 0.2, e.z)); }
 }

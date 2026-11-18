@@ -15,8 +15,9 @@ export function gradeParts(S) {
   const par = S.def.par || {};
   const mins = (S.time - (S.def.drop ?? 3)) / 60;
   const speed = par.time ? Math.max(0, Math.min(1, 1.5 - mins / (par.time / 60) * 0.5)) : 0.7;
-  const hpShare = S.mechs.reduce((s, m) => s + Math.max(0, m.hp) / m.hpMax, 0) / Math.max(1, S.mechs.length);
-  const downs = S.mechs.reduce((s, m) => s + (m.timesDown || 0), 0);
+  const pm = S.mechs.filter(m => m.team !== 'enemy');                       // players only (never a rival ace)
+  const hpShare = pm.reduce((s, m) => s + Math.max(0, m.hp) / m.hpMax, 0) / Math.max(1, pm.length);
+  const downs = pm.reduce((s, m) => s + (m.timesDown || 0), 0);
   const health = Math.max(0, hpShare - downs * 0.15);
   const opt = S.objectives.filter(o => o.optional);
   const bonus = opt.length ? opt.filter(o => o.done).length / opt.length : 1;
@@ -39,7 +40,7 @@ export function gradeOf(S) {
   return {
     won, points: won ? points : 0, grade: g?.id || null, parts,
     pay: won ? Math.round(basePay * g.pay) : 0,          // every player gets this full amount
-    crates: won ? g.crate : 0,
+    crates: won ? g.crate : 0, seed: S.seed,
     time: S.time, kills: S.stats.kills,
     perPlayer: S.players.map(p => ({ id: p.id, mats: { ...p.mats }, loot: p.loot.slice(), kills: p.mech.kills, dealt: Math.round(p.mech.dealt), taken: Math.round(p.mech.taken) })),
   };

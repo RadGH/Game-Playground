@@ -1,0 +1,53 @@
+{
+  "_doc": "Rival aces: Halden-Voss Security's named pilots. Each flies a real Mech Kit build (part ids from mechkit/data/parts.json; weapons [left arm, right arm, left shoulder, right shoulder] — projectile weapons only: rifles, guns, shotguns, missile pods, grenade launchers, mortars) under the same movement rules as the player (boost, quick boost, jump + hover, energy, heat). paint = the frame's colours. ai = personality: range (tiles it likes to fight at), aggression (0..1, how hard it closes in), strafe (0..1, how much it circles), dodge (0..1, chance to quick-boost out of a shot coming at it), accuracy (0..1), boostFloor (energy share it keeps in reserve), heatLimit (heat share it stops firing at), jump (jumps per minute). hp = its armour (a duel, not a pop: an ace takes a minute or two of good shooting); dmgMul scales its weapons' damage against a player's (it fires as often as a player, every hit hurts less). lines = comms taunts (spoken as 'ace:<id>' with its own frame as the picture): in (arrives), taunt (now and then), hurt (below half armour), win (a player goes down), down (beaten). Missions use an ace as the enemy kind 'ace:<id>' in waves or 'kill' objectives.",
+  "aces": [
+    {
+      "id": "sawtooth", "name": "Vesna Krall", "callsign": "Sawtooth", "colour": "#ff6a3a", "tier": 2,
+      "blurb": "Halden-Voss's breach specialist. Closes the distance behind a gatling and finishes it with a shotgun.",
+      "build": { "head": "brannoch-head-1", "core": "brannoch-core-1", "arms": "brannoch-arms-1", "legs": "brannoch-legs-1", "booster": "brannoch-booster-1", "generator": "brannoch-generator-1", "cooling": "brannoch-cooling-1", "cpu": "brannoch-cpu-1",
+        "weapons": ["thresher-gatling", "doorbreaker-shotgun", "rampart-salvo-pod", null] },
+      "paint": { "primary": "#2b2f36", "secondary": "#121418", "accent": "#ff6a3a", "glow": "#ff3b3b" },
+      "ai": { "range": 2.2, "aggression": 0.85, "strafe": 0.55, "dodge": 0.35, "accuracy": 0.7, "boostFloor": 0.3, "heatLimit": 0.85, "jump": 2 },
+      "hp": 36000, "dmgMul": 0.055, "score": 120, "mats": { "scrap": 4, "alloy": 2, "exotic": 0.4 },
+      "lines": {
+        "in": ["Sawtooth on your channel. This district's under Halden-Voss protection. Walk away.", "You're the freelancer they keep paying? Let's see what you're worth up close."],
+        "taunt": ["Keep running. Gatling's barely warm.", "You fight like a contractor. Paid by the hour."],
+        "hurt": ["Lucky. Won't happen twice.", "Fine. No more playing nice."],
+        "win": ["One less freelancer on the board.", "Stay down."],
+        "down": ["Systems red — Sawtooth's out. This isn't over.", "Pulling out! Someone get me a recovery team!"]
+      }
+    },
+    {
+      "id": "lancet", "name": "Idony Marsh", "callsign": "Lancet", "colour": "#7fe8ff", "tier": 2,
+      "blurb": "A duellist on light legs. Keeps her distance, dodges everything she sees coming and punishes you from range.",
+      "build": { "head": "celerity-head-1", "core": "celerity-core-1", "arms": "celerity-arms-1", "legs": "celerity-legs-3", "booster": "celerity-booster-1", "generator": "celerity-generator-1", "cooling": "celerity-cooling-1", "cpu": "celerity-cpu-1",
+        "weapons": ["glint-laser-rifle", "stitch-pulse-gun", "farsight-sniper-cannon", null] },
+      "paint": { "primary": "#e8eef4", "secondary": "#262a32", "accent": "#ffb02e", "glow": "#7fe8ff" },
+      "ai": { "range": 6, "aggression": 0.35, "strafe": 0.9, "dodge": 0.7, "accuracy": 0.8, "boostFloor": 0.35, "heatLimit": 0.8, "jump": 5 },
+      "hp": 30000, "dmgMul": 0.12, "score": 120, "mats": { "scrap": 3, "alloy": 2, "exotic": 0.5 },
+      "lines": {
+        "in": ["This is Lancet. I've watched your last three drops. You lean left when you dodge.", "Halden-Voss asked me to make an example. Hold still."],
+        "taunt": ["Too slow.", "Every shot you miss, I'm counting."],
+        "hurt": ["Hm. You've been practising.", "That one cost me paint. Now it costs you."],
+        "win": ["Predictable to the end.", "Lancet to command: target is down."],
+        "down": ["Lancet, disengaging. Next time I won't hold back.", "Eject, eject — mark this one, command."]
+      }
+    },
+    {
+      "id": "jackdaw", "name": "Corvin Achterberg", "callsign": "Jackdaw", "colour": "#c9ff4a", "tier": 3,
+      "blurb": "A scrap-built frame held together by spite. Fills the air with rockets and bolts from the middle distance.",
+      "build": { "head": "patchwork-head-1", "core": "patchwork-core-1", "arms": "patchwork-arms-1", "legs": "patchwork-legs-2", "booster": "patchwork-booster-1", "generator": "patchwork-generator-1", "cooling": "patchwork-cooling-1", "cpu": "patchwork-cpu-1",
+        "weapons": ["rattler-machine-gun", "rivet-gun", "bottle-rocket-pod", null] },
+      "paint": { "primary": "#4a3f33", "secondary": "#1d1a16", "accent": "#c9ff4a", "glow": "#c9ff4a" },
+      "ai": { "range": 4, "aggression": 0.6, "strafe": 0.75, "dodge": 0.5, "accuracy": 0.65, "boostFloor": 0.25, "heatLimit": 0.9, "jump": 3 },
+      "hp": 34000, "dmgMul": 0.065, "score": 140, "mats": { "scrap": 5, "alloy": 2, "exotic": 0.6 },
+      "lines": {
+        "in": ["Jackdaw here. Halden-Voss pays me per frame I scrap. Smile.", "Ooh, shiny. I'll be wearing your arms by tonight."],
+        "taunt": ["Rockets are cheap, friend. I've got crates of 'em.", "Hold still, I'm trying to read your serial number."],
+        "hurt": ["Ha! It's fine, it was like that when I found it.", "Okay, okay — that one stung."],
+        "win": ["Dibs on the parts!", "Scrap for the pile."],
+        "down": ["Bah! Pulling back — keep the change!", "Jackdaw's grounded. Somebody owes me a frame."]
+      }
+    }
+  ]
+}

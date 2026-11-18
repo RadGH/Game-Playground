@@ -15,7 +15,8 @@ export function makeWorld(def) {
   const W = { w: def.w, h: def.h, lots: [], cells: new Int32Array(def.w * def.h).fill(-1) };
   def.lots.forEach((l, i) => {
     const lot = { id: l.id || `lot${i}`, i, x: l.x, z: l.z, w: l.w, d: l.d, h0: l.h, h: l.h, hpMax: l.hp, hp: l.hp, stage: 0,
-      recipe: l.recipe || null, params: l.params || null, solid: l.solid !== false, explosive: l.explosive || 0, objective: l.objective || null };
+      recipe: l.recipe || null, params: l.params || null, solid: l.solid !== false, explosive: l.explosive || 0, objective: l.objective || null,
+      fixed: !!l.fixed, face: l.face ?? null };   // fixed = never damaged (hangar walls); face = screen direction for props that face a way
     W.lots.push(lot);
     for (let z = l.z; z < l.z + l.d; z++) for (let x = l.x; x < l.x + l.w; x++) if (x >= 0 && z >= 0 && x < def.w && z < def.h) W.cells[z * def.w + x] = i;
   });
@@ -91,7 +92,7 @@ export function rayLot(W, x0, z0, x1, z1, y = 0.2) {
  * falls (the mission turns a collapse into crush damage and a chain reaction for explosive lots).
  */
 export function damageLot(W, lot, amount, events) {
-  if (!lot || lot.stage >= 3 || !lot.solid) return;
+  if (!lot || lot.stage >= 3 || !lot.solid || lot.fixed) return;
   lot.hp = Math.max(0, lot.hp - amount);
   const share = lot.hp / lot.hpMax;
   let stage = 0; for (let s = 1; s <= 3; s++) if (share <= STAGE_AT[s] + 1e-9) stage = s;

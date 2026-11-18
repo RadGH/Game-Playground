@@ -10,6 +10,9 @@ import { makeRng, mixSeed } from './rng.js';
 import { Grid } from './grid.js';
 import { makeWorld, groundAt, pushOut, lotAt, rayLot, damageLot } from './world.js';
 import { stepMech, hurtMech, energyMaxOf } from './mech.js';
+import { setupOps, stepOps, opsObjective } from './ops.js';
+import { bossSpot, initBoss, bossHit, bossDied } from './boss.js';
+import { spawnAce, hurtAce, stepAces, aceAfterStep } from './ace.js';
 import { makeEnemy, stepEnemies } from './enemies.js';
 import { triggerWeapon, updateLocks, resolveHit, angleDiff } from './weapons.js';
 import { mitigate, tickStatus } from './damage.js';
@@ -38,17 +41,21 @@ export function createMission(def, { kinds, T, players = [], seed = def.seed || 
   for (const o of def.objectives || []) S.objectives.push({ ...o, progress: 0, done: false, failed: false });
   attachHelpers(S);
   for (const p of def.enemies || []) spawn(S, p.kind, p.x, p.z, { warn: 0, elite: p.elite, boss: p.boss });
+  setupOps(S);          // mission types: placed enemies, masts, the data core, convoys, orbital drop (ops.js)
   return S;
 }
 
 /** Add an enemy (respects the cap and the spawn rules: never on top of a player, never inside a building). */
 export function spawn(S, kind, x, z, opts = {}) {
   const K = S.kinds[kind]; if (!K) return null;
+  if (K.job === 'ace') return spawnAce(S, kind, K, x, z, opts);             // rival aces are mechs (sim/ace.js)
+  if (K.job === 'boss') { const p = bossSpot(S, x, z, K.radius); if (!p) return null; x = p.x; z = p.z; opts = { ...opts, force: true, warn: Math.max(opts.warn ?? 0, 1.6) }; }
   if (S.enemies.length - S.deadCount() >= S.T.maxEnemies && !opts.force) return null;
   const e = makeEnemy(kind, K, x, z, S.T, { ...opts, id: 'e' + (S.nextId++) });
   e.parent = opts.parent || null;
   S.enemies.push(e); S.byId.set(e.id, e);
   S.events.push({ type: e.state === 'warn' ? 'ewarn' : 'espawn', id: e.id, kind, x, z, t: e.stateT });
+  if (K.job === 'boss') initBoss(S, e, K);
   return e;
 }
 
@@ -58,7 +65,7 @@ function safeSpot(S, x, z, opts = null) {
   const ok = (px, pz) => {
     if (px < 0.25 || pz < 0.25 || px > W.w - 0.25 || pz > W.h - 0.25) return false;
     const l = lotAt(W, px, pz); if (l && l.solid && l.stage < 3) return false;
-    if (S.mechs.some(m => !m.down && Math.hypot(m.x - px, m.z - pz) < R)) return false;
+    if (S.mechs.some(m => !m.down && m.team !== 'enemy' && Math.hypot(m.x - px, m.z - pz) < R)) return false;
     if (S.flow && !Number.isFinite(flowDist(S.flow, px, pz)) && !opts?.anywhere) return false;   // never in a sealed-off pocket
     return true;
   };
@@ -73,7 +80,8 @@ function safeSpot(S, x, z, opts = null) {
 
 function edgePoint(S, i) {
   // spread around the map edge, away from the players' average position
-  const ax = S.mechs.reduce((s, m) => s + m.x, 0) / Math.max(1, S.mechs.length), az = S.mechs.reduce((s, m) => s + m.z, 0) / Math.max(1, S.mechs.length);
+  const pm = S.mechs.filter(m => m.team !== 'enemy');
+  const ax = pm.reduce((s, m) => s + m.x, 0) / Math.max(1, pm.length), az = pm.reduce((s, m) => s + m.z, 0) / Math.max(1, pm.length);
   const E = S.def.map.edges;
   if (E?.length) {        // the district's road ends: enemies pour in along the streets
     const far = E.filter(p => Math.hypot(p.x - ax, p.z - az) > S.T.spawnSafeRadius * 1.5);
@@ -114,6 +122,7 @@ function attachHelpers(S) {
   S.jammedAt = (x, z) => S.enemies.some(e => e.jamming && !e.dead && Math.hypot(e.x - x, e.z - z) < S.kinds[e.kind].range);
   S.canSee = (a, b) => (a.flying || b.y > 0.5) ? true : !rayLot(S.world, a.x, a.z, b.x, b.z, 0.25);
   S.spawn = (kind, x, z, o) => spawn(S, kind, x, z, o);
+  S.dropLoot = (e, K) => dropLoot(S, e, K);
   S.hurtPlayer = (m, amount, dtype, from) => { let n = mitigate(amount, dtype, m); const src = from?.id && S.byId.get(from.id);
     const sh = m.weapons.find(w => w.spec.kind === 'shield' && w.held); if (sh && src && Math.abs(angleDiff(Math.atan2(src.z - m.z, src.x - m.x), m.aim)) < 1.1) { n *= 1 - sh.spec.block; S.events.push({ type: 'block', id: m.id }); } const got = hurtMech(m, n, S.events, from?.id); if (got > 0) S.events.push({ type: 'phit', id: m.id, amount: got, dtype, x: m.x, z: m.z, from: from?.id || null }); };
   S.damageEnemy = (e, amount, dtype, by, tier = 0, hx = e.x, hz = e.z) => damageEnemy(S, e, amount, dtype, by, tier, hx, hz);
@@ -127,15 +136,20 @@ function attachHelpers(S) {
 
 function damageEnemy(S, e, amount, dtype, by, tier, hx, hz) {
   if (e.dead || e.state === 'warn' || amount <= 0) return 0;
+  // test-range dummies take every point (the meter reads the real hit) but never drop below 1 and never die
+  if (e.dummy) { e.hp = Math.max(1, e.hp - amount); e.quiet = 0; S.events.push({ type: 'hit', id: e.id, amount, tier, dtype, x: hx, z: hz, y: e.flying || 0.2, by, dummy: true }); return amount; }
+  if (e.ace) return hurtAce(S, e, amount, dtype, by, tier, hx, hz);          // a rival ace (a mech: sim/ace.js)
+  let shown = null, part = null;
+  if (e.parts) ({ amount, shown, part } = bossHit(S, e, amount, hx, hz, by));   // boss: the part where it landed (sim/boss.js)
   const n = Math.min(e.hp, amount); e.hp -= n; e.lastHitBy = by;
   const m = by && S.byId.get(by); if (m && m.dealt != null) m.dealt += n;
-  S.events.push({ type: 'hit', id: e.id, amount: n, tier, dtype, x: hx, z: hz, y: e.flying || 0.2, by });
+  S.events.push({ type: 'hit', id: e.id, amount: shown ?? n, tier, dtype, x: hx, z: hz, y: e.flying || 0.2, by, part });
   if (e.hp <= 0) killEnemy(S, e, by);
   return n;
 }
 
 function killEnemy(S, e, by, burst = false) {
-  if (e.dead) return; e.dead = true; e.hp = 0; S._dead = (S._dead || 0) + 1;
+  if (e.dead || e.dummy) return; e.dead = true; e.hp = 0; S._dead = (S._dead || 0) + 1;
   const K = S.kinds[e.kind];
   if (e.parent) { const p = S.byId.get(e.parent); if (p) p.out = Math.max(0, p.out - 1); }
   S.stats.kills++; S.stats.score += (K.score || 1) * (e.elite ? 3 : 1);
@@ -144,7 +158,8 @@ function killEnemy(S, e, by, burst = false) {
   S.events.push({ type: 'kill', id: e.id, kind: e.kind, x: e.x, z: e.z, y: e.flying || 0, by, big: (K.radius || 0) > 0.2 || !!K.structure, elite: e.elite });
   // bloaters (and anything with a burst) explode, hurting everything near — friends too
   if (K.job === 'burst') blast(S, { owner: e.id, team: 'neutral', dtype: K.dtype || 'fire', dmg: K.dmg * S.T.enemyDamage, crit: 0 }, e.x, e.z, K.splash, true);
-  for (const o of S.objectives) if (!o.done && (o.type === 'kill' && (!o.kind || o.kind === e.kind) || o.type === 'killAll')) o.progress++;
+  for (const o of S.objectives) if (!o.done && (o.type === 'kill' && (!o.kind || o.kind === e.kind) && (!o.tag || o.tag === e.tag) || o.type === 'killAll')) o.progress++;
+  if (e.parts) bossDied(S, e);
   dropLoot(S, e, K);
 }
 
@@ -152,12 +167,17 @@ function killEnemy(S, e, by, burst = false) {
 function dropLoot(S, e, K) {
   const mats = K.mats || {};
   for (const p of S.players) {
-    for (const [mat, chance] of Object.entries(mats)) {
+    const st = p.mech.stats || {};
+    for (const [mat, chance0] of Object.entries(mats)) {
+      const chance = chance0 * (1 + (st.matBonus || 0));      // Magnet Hook chip
       let n = Math.floor(chance) + (S.rng.next() < chance % 1 ? 1 : 0);
       if (e.elite) n += S.rng.next() < 0.5 ? 1 : 0;
       for (let i = 0; i < n; i++) S.pickups.push({ id: 'p' + (S.nextId++), owner: p.id, mat, n: 1, x: e.x + S.rng.range(-0.15, 0.15), z: e.z + S.rng.range(-0.15, 0.15), t: 0 });
     }
-    if ((e.elite || K.structure || e.boss) && S.def.partDrops !== false) S.pickups.push({ id: 'p' + (S.nextId++), owner: p.id, part: true, tier: S.def.tier || 1, boss: !!e.boss, x: e.x, z: e.z, t: 0 });
+    if ((e.elite || K.structure || e.boss) && S.def.partDrops !== false) {
+      const extra = st.partLuck && S.rng.next() < st.partLuck ? 2 : 1;   // Salvage Eye chip: sometimes a second part
+      for (let i = 0; i < extra; i++) S.pickups.push({ id: 'p' + (S.nextId++), owner: p.id, part: true, tier: S.def.tier || 1, boss: !!e.boss, x: e.x + i * 0.2, z: e.z, t: 0 });
+    }
   }
 }
 
@@ -170,7 +190,7 @@ function blast(S, shot, x, z, r, fromEnemyBurst = false) {
     const { amount, tier } = resolveHit(S, shot, e, S.T, fall); damageEnemy(S, e, amount, shot.dtype, shot.owner, tier, e.x, e.z);
   }
   if (shot.team === 'enemy' || fromEnemyBurst) for (const m of S.mechs) {
-    if (m.down) continue; const d = Math.hypot(m.x - x, m.z - z); if (d > r + m.r) continue;
+    if (m.down || m.team === 'enemy') continue; const d = Math.hypot(m.x - x, m.z - z); if (d > r + m.r) continue;
     S.hurtPlayer(m, shot.dmg * (1 - 0.5 * Math.min(1, d / (r + m.r))), shot.dtype, { id: shot.owner });
   }
   // buildings in the blast take damage (player shots and enemy shots alike — the city is destructible)
@@ -278,17 +298,21 @@ function stepShots(S, dt) {
     }
     if (s.team === 'enemy') {
       let hit = false;
-      for (const m of S.mechs) { if (m.down) continue; if ((m.x - s.x) ** 2 + (m.z - s.z) ** 2 < (m.r + 0.04) ** 2) { if (s.splash > 0) land(S, s, s.x, s.z); else S.hurtPlayer(m, s.dmg, s.dtype, { id: s.owner }); hit = true; break; } }
+      for (const m of S.mechs) { if (m.down || m.team === 'enemy') continue; if ((m.x - s.x) ** 2 + (m.z - s.z) ** 2 < (m.r + 0.04) ** 2) { if (s.splash > 0) land(S, s, s.x, s.z); else S.hurtPlayer(m, s.dmg, s.dtype, { id: s.owner }); hit = true; break; } }
       for (const d of S.deployed) { if (hit) break; if ((d.x - s.x) ** 2 + (d.z - s.z) ** 2 < 0.03) { d.hp -= s.dmg; if (d.hp <= 0) d.life = 0; hit = true; } }
       if (!hit) keep.push(s);
       continue;
     }
     let stop = false;
-    S.grid.near(s.x, s.z, 0.6, e => {
+    // swept test: a fast bullet moves more than a small target's width in one step, so check the whole path this step
+    // (start → end), not just where it ended up (the test range showed bullets passing straight through dummies)
+    const sx0 = s.x - ox, sz0 = s.z - oz, sl2 = sx0 * sx0 + sz0 * sz0 || 1e-9;
+    S.grid.near((s.x + ox) / 2, (s.z + oz) / 2, 0.6 + Math.sqrt(sl2) / 2, e => {
       if (e.dead || e.hidden || e.state === 'warn' || s.hits.includes(e.id)) return;
       if (e.flying && s.kind !== 'missile' && s.y < e.flying - 0.6 && !s.flame) { /* flyers are hit by anything aimed at them */ }
       const rr = e.r + (s.flame ? 0.12 : 0.04);
-      if ((e.x - s.x) ** 2 + (e.z - s.z) ** 2 > rr * rr) return;
+      const k = Math.max(0, Math.min(1, ((e.x - ox) * sx0 + (e.z - oz) * sz0) / sl2));
+      if ((e.x - (ox + sx0 * k)) ** 2 + (e.z - (oz + sz0 * k)) ** 2 > rr * rr) return;
       if (s.splash > 0 && !s.flame) { land(S, s, s.x, s.z); stop = true; return true; }
       const { amount, tier } = resolveHit(S, s, e, T); damageEnemy(S, e, amount, s.dtype, s.owner, tier, s.x, s.z);
       if (s.knock) { const k = s.knock / Math.max(0.5, e.r * 6); e.vx += s.vx / Math.hypot(s.vx, s.vz) * k; e.vz += s.vz / Math.hypot(s.vx, s.vz) * k; }
@@ -337,7 +361,7 @@ function stepPickups(S, dt) {
   for (const p of S.pickups) {
     p.t += dt; const owner = S.players.find(q => q.id === p.owner); const m = owner?.mech;
     if (m && !m.down) { const d = Math.hypot(m.x - p.x, m.z - p.z); const pull = m.stats.magnet || 1.6;
-      if (d < 0.3) { if (p.mat) owner.mats[p.mat] += p.n; else owner.loot.push({ tier: p.tier, boss: p.boss, seed: mixSeed(S.seed, p.id) }); S.events.push({ type: 'pickup', id: p.id, owner: p.owner, mat: p.mat || null, part: !!p.part }); continue; }
+      if (d < 0.3) { if (p.mat) owner.mats[p.mat] = (owner.mats[p.mat] || 0) + p.n; else owner.loot.push({ tier: p.tier, boss: p.boss, seed: mixSeed(S.seed, p.id) }); S.events.push({ type: 'pickup', id: p.id, owner: p.owner, mat: p.mat || null, part: !!p.part }); continue; }
       if (d < pull) { p.x += (m.x - p.x) / d * dt * 4; p.z += (m.z - p.z) / d * dt * 4; } }
     if (p.t < 90) keep.push(p);
   }
@@ -350,11 +374,18 @@ function stepObjectives(S) {
     if (o.done || o.failed) continue;
     if (o.type === 'beat' && S.time - (S.def.drop ?? 3) > o.time) { o.failed = true; S.events.push({ type: 'objectiveFailed', id: o.id, label: o.label }); continue; }
     if (o.type === 'keepLots' || o.type === 'beat') { if (requiredDone && S.objectives.filter(x => !x.optional).length) { o.done = true; S.events.push({ type: 'objective', id: o.id, label: o.label }); } continue; }
+    const ops = opsObjective(S, o);
+    if (ops) {
+      o.progress = ops.progress; o.goal = ops.goal;
+      if (ops.failed) { o.failed = true; S.events.push({ type: 'objectiveFailed', id: o.id, label: o.label }); if (!o.optional && S.phase !== 'won') { S.phase = 'failed'; S.events.push({ type: 'phase', phase: 'failed' }); } }
+      else if (S.phase !== 'drop' && o.progress >= o.goal) { o.done = true; S.events.push({ type: 'objective', id: o.id, label: o.label }); }
+      continue;
+    }
     if (o.type === 'survive') o.progress = Math.min(o.time, S.time - (S.def.drop ?? 3));
-    if (o.type === 'reach') o.progress = S.mechs.some(m => !m.down && Math.hypot(m.x - o.x, m.z - o.z) < o.r) ? 1 : 0;
+    if (o.type === 'reach') o.progress = S.mechs.some(m => !m.down && m.team !== 'enemy' && Math.hypot(m.x - o.x, m.z - o.z) < o.r) ? 1 : 0;
     let met;
     if (o.type === 'killAll') {
-      const left = S.enemies.filter(e => !e.dead && (!o.kind || e.kind === o.kind)).length;
+      const left = S.enemies.filter(e => !e.dead && (!o.kind || e.kind === o.kind)).length + S.mechs.filter(m => m.ace && !m.dead && (!o.kind || m.kind === o.kind)).length;
       const pending = (S.def.waves || []).some(w => S.time < w.at || (w.every && (w.until == null || S.time < w.until)));
       o.left = left; met = S.phase !== 'drop' && left === 0 && !pending && o.progress > 0;
     } else {
@@ -373,6 +404,7 @@ export function stepMission(S, inputs, dt) {
   const T = S.T; S.events.length = 0; S.time += dt;
   const evStart = 0;
   S.grid.clear(); for (const e of S.enemies) if (!e.dead) S.grid.add(e);
+  for (const a of S.mechs) if (a.team === 'enemy' && !a.dead) S.grid.add(a);   // rival aces: player shots find them like any enemy
 
   if (S.phase === 'drop') { S.phaseT -= dt; if (S.phaseT <= 0) { S.phase = 'fight'; S.events.push({ type: 'phase', phase: 'fight' }); } }
   const worldApi = { groundAt: (x, z) => groundAt(S.world, x, z), pushOut: (b, r) => pushOut(S.world, b, r) };
@@ -395,14 +427,16 @@ export function stepMission(S, inputs, dt) {
     if (m.down || S.phase === 'drop') { for (const w of m.weapons) w.held = false; continue; }
     m.weapons.forEach((w, i) => { updateLocks(S, m, w, dt, T, aim.x, aim.z); triggerWeapon(S, m, w, !!inp.fire?.[i], dt, T, aim); });
     // revive: stand next to a downed teammate
-    for (const o of S.mechs) if (o !== m && o.down && Math.hypot(o.x - m.x, o.z - m.z) < 0.7) { o.reviveT += dt; if (o.reviveT >= (T.reviveTime || 3)) { o.down = false; o.hp = o.hpMax * 0.35; o.reviveT = 0; S.revives++; S.events.push({ type: 'revive', id: o.id, by: m.id }); } }
+    for (const o of S.mechs) if (o !== m && o.down && o.team === m.team && !o.dead && Math.hypot(o.x - m.x, o.z - m.z) < 0.7) { o.reviveT += dt; if (o.reviveT >= (T.reviveTime || 3)) { o.down = false; o.hp = o.hpMax * 0.35; o.reviveT = 0; S.revives++; S.events.push({ type: 'revive', id: o.id, by: m.id }); } }
   }
 
   S.flowT -= dt;
-  if (S.flowT <= 0) { S.flowT = 0.4; updateFlow(S.flow, S.world, S.mechs.filter(m => !m.down)); }
-  if (S.phase === 'fight' || S.phase === 'extract') { runWaves(S); stepEnemies(S, dt, T); }
+  if (S.flowT <= 0) { S.flowT = 0.4; updateFlow(S.flow, S.world, [...S.mechs.filter(m => !m.down && m.team !== 'enemy'), ...(S.allies || []).filter(a => !a.down && !a.arrived)]); }   // escort trucks are worth walking to
+  if (S.phase === 'fight' || S.phase === 'extract') { runWaves(S); stepEnemies(S, dt, T); stepAces(S, dt, worldApi); }
   stepShots(S, dt); stepStrikes(S, dt); stepDeployed(S, dt); stepPickups(S, dt);
+  stepOps(S, inputs, dt);
   handleWorldEvents(S, evStart);
+  aceAfterStep(S);
   stepObjectives(S);
 
   // cleanup dead enemies after their death animation has had time to be seen (renderer keeps its own copy)
@@ -414,10 +448,10 @@ export function stepMission(S, inputs, dt) {
     S.phase = S.def.extract ? 'extract' : 'won'; S.events.push({ type: 'phase', phase: S.phase });
   }
   if (S.phase === 'extract') {
-    const ex = S.def.extract, up = S.mechs.filter(m => !m.down);
+    const ex = S.def.extract, up = S.mechs.filter(m => !m.down && m.team !== 'enemy');
     if (up.length && up.every(m => Math.hypot(m.x - ex.x, m.z - ex.z) < ex.r)) { S.phase = 'won'; S.events.push({ type: 'phase', phase: 'won' }); }
   }
-  if ((S.phase === 'fight' || S.phase === 'extract') && S.mechs.length && S.mechs.every(m => m.down && m.downT > 1.5)) {
+  if ((S.phase === 'fight' || S.phase === 'extract') && S.mechs.some(m => m.team !== 'enemy') && S.mechs.every(m => m.team === 'enemy' || m.down && m.downT > 1.5)) {
     S.phase = 'failed'; S.events.push({ type: 'phase', phase: 'failed' });
   }
   if ((S.phase === 'won' || S.phase === 'failed') && !S.result) S.result = gradeOf(S);

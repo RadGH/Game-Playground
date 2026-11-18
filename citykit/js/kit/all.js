@@ -12,3 +12,4 @@ import './zoned.js';
 import './swarm.js';
 import './army.js';
 import './workshop.js';
+import './hangar.js';

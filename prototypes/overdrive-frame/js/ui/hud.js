@@ -6,6 +6,10 @@ import { fmt, hp as hpFmt } from '../../../../shared/format.js';
 import { hintFor } from '../input/bindings.js';
 import { energyMaxOf, heatMaxOf } from '../sim/mech.js';
 import { TILE_W } from '../../../../citykit/js/iso.js';
+import { aceSpeaker } from './speakers.js';
+
+/** Mission comms lines can wait for these sim events (sim/boss.js, sim/ace.js); a line may narrow with part / phase / ace. */
+const EVENT_COMMS = new Set(['boss', 'bossPart', 'bossOpen', 'bossPhase', 'bossDown', 'aceIn', 'aceDown']);
 
 const SLOT_NAMES = ['Left arm', 'Right arm', 'Left shoulder', 'Right shoulder'];
 const SLOT_KEYS = ['fireL', 'fireR', 'fireSL', 'fireSR'];
@@ -56,11 +60,48 @@ export class Hud {
   onEvent(ev, S) {
     if (ev.type === 'objective') this.notice(`Done: ${ev.label}`, 3);
     if (ev.type === 'objectiveFailed') this.notice(`Missed: ${ev.label}`, 3);
+    if (ev.type === 'planted') this.notice('Charge set', 2);
+    if (ev.type === 'corePick') this.notice(ev.id === this.play.mech.id ? 'You have the core — get it to the dropship' : 'A teammate has the core', 3);
+    if (ev.type === 'coreDrop') this.notice('The core is down — pick it back up', 3);
+    if (ev.type === 'allyDown') this.notice('A truck is lost', 2.5);
+    if (ev.type === 'allyArrived') this.notice('A truck made it through', 2);
+    if (ev.type === 'escaped') this.notice('A hauler got away', 2);
     if (ev.type === 'phase' && ev.phase === 'extract') this._commsEvent('extract');
+    if (EVENT_COMMS.has(ev.type)) this._commsEvent(ev.type, ev);
+    if (ev.type === 'say') {             // a rival ace on the open channel: its own frame is the picture
+      if (ev.ace && this.speakers && !this.speakers[ev.who]) this.speakers[ev.who] = aceSpeaker(this.play.mechArt, ev.ace);
+      this.say(ev.who, ev.text);
+    }
     if (ev.type === 'overheat' && ev.id === this.play.mech.id) this.notice('Overheating — ease off', 2.5);
   }
 
-  _commsEvent(name) { for (const c of this.commsLines || []) if (c.event === name && !this.saidAt.has(c)) { this.saidAt.add(c); this.say(c.who, c.text); } }
+  _commsEvent(name, ev = null) {
+    for (const c of this.commsLines || []) {
+      if (c.event !== name || this.saidAt.has(c)) continue;
+      if (c.part && c.part !== ev?.part) continue; if (c.phase != null && c.phase !== ev?.phase) continue; if (c.ace && c.ace !== ev?.ace) continue;
+      this.saidAt.add(c); this.say(c.who, c.text);
+    }
+  }
+
+  /** Boss / ace health along the top edge (owner: no centre text): name, a bar, and one pip per breakable part —
+   *  whole (its own health), armoured (locked weak point), or broken. Hidden when no boss or ace is in the fight. */
+  bossBar(S) {
+    const bosses = S.enemies.filter(e => e.boss && e.parts && !e.dead && e.state !== 'warn');
+    const aces = S.mechs.filter(m => m.ace && !m.dead && m.state !== 'warn');
+    let el = this.el.querySelector('.of-boss');
+    if (!bosses.length && !aces.length) { if (el) el.hidden = true; return; }
+    if (!el) { el = document.createElement('div'); el.className = 'of-boss'; el.setAttribute('role', 'group'); el.setAttribute('aria-label', 'Big target'); this.el.append(el); }
+    el.hidden = false;
+    const rows = [];
+    for (const e of bosses) {
+      const K = S.kinds[e.kind];
+      const pips = e.parts.map(p => `<li class="${p.broken ? 'of-broken' : p.locked ? 'of-locked' : ''}" aria-label="${p.label}: ${p.broken ? 'broken' : p.locked ? 'armoured' : fmt(p.hp / p.hpMax * 100, { decimals: 0 }) + '%'}"><span>${p.label}</span><i style="width:${p.broken ? 100 : Math.round(p.hp / p.hpMax * 100)}%"></i></li>`).join('');
+      rows.push(`<div class="of-boss-row"><b>${K.name}</b><div class="of-boss-hp"><i style="width:${(e.hp / e.hpMax * 100).toFixed(1)}%"></i></div><ul class="of-boss-parts">${pips}</ul></div>`);
+    }
+    for (const m of aces) rows.push(`<div class="of-boss-row of-ace"><b>${m.name}</b><small>Halden-Voss ace</small><div class="of-boss-hp"><i style="width:${(m.hp / m.hpMax * 100).toFixed(1)}%"></i></div></div>`);
+    const html = rows.join('');
+    if (html !== this._boss) { el.innerHTML = html; this._boss = html; }
+  }
 
   frame(S, m, dt, inp) {
     if (!this.play) return;
@@ -68,6 +109,7 @@ export class Hud {
     // timed comms lines
     for (const c of this.commsLines || []) if (c.at != null && !this.saidAt.has(c) && S.time >= c.at) { this.saidAt.add(c); this.say(c.who, c.text); }
     this._comms(dt);
+    this.bossBar(S);
     this.alertT -= dt; if (this.alertT <= 0) this.el.querySelector('.of-alert').hidden = true;
 
     // armour
@@ -100,6 +142,11 @@ export class Hud {
       if (o.type === 'destroy') prog = `${o.progress} / ${o.lots.length}`;
       if (o.type === 'survive') prog = clock(Math.max(0, o.time - o.progress));
       if (o.type === 'beat') prog = clock(Math.max(0, o.time - (S.time - (S.def.drop ?? 3))));
+      if (o.type === 'kill' && o.count > 1) prog = `${fmt(Math.min(o.count, o.progress), { decimals: 0 })} / ${fmt(o.count, { decimals: 0 })}`;
+      if (o.type === 'plant' || o.type === 'intercept' || o.type === 'escort') prog = `${o.progress ?? 0} / ${o.goal ?? o.count}`;
+      if (o.type === 'carry') prog = S.ops?.core?.carrier ? (S.ops.core.carrier === this.play?.mech?.id ? 'You have it' : 'A teammate has it') : 'On the ground';
+      if (o.type === 'escort' && S.ops) prog += ` · ${S.ops.lost} lost`;
+      if (o.type === 'intercept' && S.ops) prog += ` · ${S.ops.escaped} got away`;
       return `<li class="${o.done ? 'of-done' : o.failed ? 'of-failed' : ''}${o.optional ? ' of-opt' : ''}"><span>${o.label}</span><small>${o.done ? 'Done' : o.failed ? 'Missed' : prog}</small></li>`;
     });
     if (S.phase === 'extract') rows.push('<li class="of-extract"><span>Reach the dropship</span><small>Marked green</small></li>');

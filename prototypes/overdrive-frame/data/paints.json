@@ -1,0 +1,23 @@
+{
+  "_doc": "Paint bay schemes. 'maker' = each part in its own maker's factory colours. Every other scheme paints the whole frame: primary (big plates), secondary (frame + joints), accent (stripes, trims), glow (lights; null keeps each part's own). rank = pilot rank that unlocks it (0 = from the start). Custom colours are always available.",
+  "schemes": [
+    { "id": "maker", "name": "Factory colours", "rank": 0 },
+    { "id": "gunmetal", "name": "Gunmetal", "rank": 0, "primary": "#59606b", "secondary": "#2a2e35", "accent": "#e2a91c", "glow": null },
+    { "id": "arctic", "name": "Arctic", "rank": 0, "primary": "#e8eef4", "secondary": "#8a96a4", "accent": "#2f8fd8", "glow": "#9fe8ff" },
+    { "id": "hazard", "name": "Hazard", "rank": 0, "primary": "#f2c21b", "secondary": "#232323", "accent": "#e8e8e8", "glow": "#ffb02e" },
+    { "id": "night-op", "name": "Night op", "rank": 0, "primary": "#24282f", "secondary": "#14161a", "accent": "#3a4250", "glow": "#ff3b3b" },
+    { "id": "desert", "name": "Desert", "rank": 1, "primary": "#c8a874", "secondary": "#7a6448", "accent": "#5a7a3a", "glow": null },
+    { "id": "forest", "name": "Forest", "rank": 1, "primary": "#4e6a3c", "secondary": "#2e3a26", "accent": "#c9b04a", "glow": null },
+    { "id": "rust", "name": "Rust bucket", "rank": 1, "primary": "#9b5b33", "secondary": "#4a3a2e", "accent": "#d9c08a", "glow": "#ff6a2a" },
+    { "id": "neon-pink", "name": "Neon pink", "rank": 2, "primary": "#e44a9a", "secondary": "#2a1e33", "accent": "#3ff0ff", "glow": "#ff4ad8" },
+    { "id": "cobalt", "name": "Cobalt", "rank": 2, "primary": "#2a5fd8", "secondary": "#1c2440", "accent": "#e4e8ee", "glow": "#5fb0ff" },
+    { "id": "racing", "name": "Racing", "rank": 2, "primary": "#d82a2a", "secondary": "#f0f0f0", "accent": "#232323", "glow": null },
+    { "id": "jade", "name": "Jade", "rank": 3, "primary": "#2fa88a", "secondary": "#ece3cf", "accent": "#c23f7c", "glow": "#7dff9a" },
+    { "id": "violet", "name": "Violet", "rank": 3, "primary": "#7a4ad8", "secondary": "#221a33", "accent": "#ffcf4a", "glow": "#c46bff" },
+    { "id": "ivory", "name": "Ivory", "rank": 4, "primary": "#ece3cf", "secondary": "#b8ad98", "accent": "#a8542a", "glow": "#ffcf4a" },
+    { "id": "chrome", "name": "Chrome", "rank": 5, "primary": "#c9d2dc", "secondary": "#6a7480", "accent": "#1fb8e0", "glow": "#3ff0ff" },
+    { "id": "black-gold", "name": "Black and gold", "rank": 6, "primary": "#1c1c1f", "secondary": "#3a3a40", "accent": "#e2b93c", "glow": "#ffcf4a" }
+  ],
+  "swatches": ["#e4e8ee", "#c9d2dc", "#8a96a4", "#59606b", "#2a2e35", "#14161a", "#f2c21b", "#e2a91c", "#ff9a2e", "#d82a2a", "#9b5b33", "#c8a874", "#4e6a3c", "#2fa88a", "#4fb39a", "#1fb8e0", "#2a5fd8", "#7a4ad8", "#e44a9a", "#ece3cf"],
+  "glows": ["#3ff0ff", "#7dff9a", "#ffb02e", "#ff6a2a", "#ff3b3b", "#ff4ad8", "#c46bff", "#5fb0ff", "#ffffff"]
+}

@@ -6,9 +6,10 @@ export class Grid {
     this.cell = cell; this.cols = Math.max(1, Math.ceil(w / cell)); this.rows = Math.max(1, Math.ceil(h / cell));
     this.heads = new Int32Array(this.cols * this.rows).fill(-1);
     this.next = new Int32Array(64); this.items = [];
+    this.big = [];                     // things wider than a cell (bosses): every query visits them, the caller checks distance
   }
 
-  clear() { this.heads.fill(-1); this.items.length = 0; }
+  clear() { this.heads.fill(-1); this.items.length = 0; this.big.length = 0; }
 
   _cellOf(x, z) {
     const cx = Math.min(this.cols - 1, Math.max(0, Math.floor(x / this.cell)));
@@ -18,6 +19,7 @@ export class Grid {
 
   /** File one thing (anything with x, z). */
   add(it) {
+    if ((it.r || 0) > 0.45) { this.big.push(it); return; }
     const i = this.items.length; this.items.push(it);
     if (i >= this.next.length) { const n = new Int32Array(this.next.length * 2); n.set(this.next); this.next = n; }
     const c = this._cellOf(it.x, it.z); this.next[i] = this.heads[c]; this.heads[c] = i;
@@ -26,6 +28,7 @@ export class Grid {
   /** Call fn(item) for everything filed in the cells a circle touches (the caller checks the real distance).
    *  fn returning true stops the search early. */
   near(x, z, r, fn) {
+    for (const it of this.big) if (fn(it) === true) return true;
     const c = this.cell;
     const x0 = Math.max(0, Math.floor((x - r) / c)), x1 = Math.min(this.cols - 1, Math.floor((x + r) / c));
     const z0 = Math.max(0, Math.floor((z - r) / c)), z1 = Math.min(this.rows - 1, Math.floor((z + r) / c));

@@ -1,0 +1,57 @@
+{
+  "_doc": "Missions for the first boss and the first rival ace (round 3), in the missions.json shape, to fold into the campaign (ids match data/campaign.json's chain). Launch one directly for testing with ?mission=<id> (js/boss-ace-hooks.js). Comms lines can wait for boss/ace events: { event: 'boss' | 'bossPart' (part: id) | 'bossOpen' | 'bossPhase' (phase: 1|2) | 'bossDown' | 'aceIn' | 'aceDown', who, text }.",
+  "missions": [
+    {
+      "id": "m09-brood-queen", "name": "Brood Queen", "length": "mid", "night": 0.8, "drop": 4.5, "tier": 3, "pay": 14000, "payPerScore": 5,
+      "map": { "seed": 9109, "district": "downtown", "w": 44, "h": 44 },
+      "brief": "Something huge is laying eggs under the Crown. The swarm keeps coming back to it. Find it and put it down.",
+      "waves": [
+        { "at": 3, "kind": "swarmer", "count": 40, "from": "edge", "spread": 2.5 },
+        { "at": 14, "kind": "leaper", "count": 6, "from": "edge" },
+        { "at": 22, "kind": "broodmother", "count": 1, "from": "edge" },
+        { "at": 40, "kind": "swarmer", "count": 50, "from": "edge", "every": 45, "until": 400, "spread": 3 },
+        { "at": 70, "kind": "spitter", "count": 4, "from": "edge", "every": 60, "until": 400 }
+      ],
+      "objectives": [
+        { "id": "queen", "type": "kill", "kind": "broodmother", "count": 1, "label": "Kill the Broodmother" },
+        { "id": "sacs", "type": "kill", "kind": "swarmer", "count": 150, "optional": true, "label": "Thin the brood (150)" }
+      ],
+      "extract": true, "par": { "time": 420 },
+      "comms": [
+        { "at": 0, "who": "handler", "text": "You're over the Crown. Ground sensors are jumping — something heavy under the plaza. Stay mobile." },
+        { "event": "boss", "who": "handler", "text": "There she is. That's the mother of the lot. Those glowing sacs on her flanks are where the swarmers come from — burst them." },
+        { "event": "bossPart", "part": "sac-left", "who": "handler", "text": "One sac down. The brood's thinning on that side." },
+        { "event": "bossPart", "part": "claw-left", "who": "handler", "text": "Claw's off. She's dragging that side now." },
+        { "event": "bossPart", "part": "claw-right", "who": "handler", "text": "Took her other claw. She'll have to spit at you instead." },
+        { "event": "bossOpen", "who": "handler", "text": "Both sacs gone — her head plate's loose. Hit the glowing spot on her head." },
+        { "event": "bossPhase", "phase": 1, "who": "handler", "text": "She's angry. Watch for a red lane on the ground — that's her charging line. Get off it." },
+        { "event": "bossPhase", "phase": 2, "who": "pilot", "text": "Seeing acid going up from her back. Circles on the ground, frame — don't stand in them." },
+        { "event": "bossDown", "who": "handler", "text": "She's down. Nothing's spawning. Take a breath, then grab what you can." },
+        { "event": "extract", "who": "pilot", "text": "Pad's lit. Bring that chitin home — the workshop's going to want it." }
+      ]
+    },
+    {
+      "id": "m07-ace", "name": "Sawtooth", "length": "short", "night": 0.35, "drop": 4.5, "tier": 2, "pay": 9800, "payPerScore": 5,
+      "map": { "seed": 7207, "district": "industrial", "w": 40, "h": 40 },
+      "brief": "Halden-Voss has sent one of its named pilots into Foundry Flats to hunt freelancers. Draw her out and beat her.",
+      "waves": [
+        { "at": 3, "kind": "trooper", "count": 8, "from": "edge" },
+        { "at": 12, "kind": "drone", "count": 8, "from": "edge" },
+        { "at": 18, "kind": "ace:sawtooth", "count": 1, "from": "edge" },
+        { "at": 40, "kind": "trooper", "count": 10, "from": "edge" },
+        { "at": 60, "kind": "tank", "count": 1, "from": "edge" }
+      ],
+      "objectives": [
+        { "id": "ace", "type": "kill", "kind": "ace:sawtooth", "count": 1, "label": "Beat Sawtooth" },
+        { "id": "quick", "type": "beat", "time": 240, "optional": true, "label": "Inside 4:00" }
+      ],
+      "extract": true, "par": { "time": 240 },
+      "comms": [
+        { "at": 0, "who": "handler", "text": "Foundry Flats. Halden-Voss troopers on the ground — and they've brought someone special." },
+        { "event": "aceIn", "who": "handler", "text": "That's their ace. She fights like you do: boosts, dodges, runs hot. Make her burn her energy, then punish her." },
+        { "event": "aceDown", "who": "handler", "text": "She's out. Halden-Voss will remember that name — yours." },
+        { "event": "extract", "who": "pilot", "text": "Dropship inbound. North-east lot." }
+      ]
+    }
+  ]
+}

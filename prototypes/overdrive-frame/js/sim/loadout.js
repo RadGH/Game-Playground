@@ -6,6 +6,8 @@
 // build = { head, core, arms, legs, booster, generator, cooling, cpu, weapons: [leftArm, rightArm, leftShoulder,
 //   rightShoulder], hangar?: weapon } — each entry is a part id OR an owned item { id, rarity, rolls: [{ stat, value }] }.
 
+import { applyChips } from './chips.js';
+
 export const SLOTS = ['head', 'core', 'arms', 'legs', 'booster', 'generator', 'cooling', 'cpu'];
 export const WEAPON_SLOTS = [
   { id: 'L', label: 'Left arm', mount: 'arm' }, { id: 'R', label: 'Right arm', mount: 'arm' },
@@ -29,17 +31,30 @@ export const itemId = it => (typeof it === 'string' ? it : it?.id);
 
 /** One number of one part, after rarity and rolled bonuses. Every reader goes through here. */
 export function partNum(part, item, key) {
-  let v = part[key]; if (typeof v !== 'number') return v;
+  let v = part[key];
+  if (v == null && typeof item === 'object' && item?.rolls?.some(r => r.stat === key)) v = 0;   // a bonus line on a number the part lacks (crit)
+  if (typeof v !== 'number') return v;
   const r = typeof item === 'object' && item ? RARITY_BY_ID[item.rarity] : null;
   if (r && LIFTED.has(key)) v = key === 'lockCount' || key === 'firmware' ? v + Math.round(r.lift * 2) : v * (1 + r.lift);
   if (typeof item === 'object' && item?.rolls) for (const roll of item.rolls) if (roll.stat === key) v = roll.pct ? v * (1 + roll.value / 100) : v + roll.value;
   return v;
 }
 
-export function partsIndex(partsJson) { return Object.fromEntries(partsJson.parts.map(p => [p.id, p])); }
+/** Parts by id: every Mech Kit part plus the crafted-only weapons (data/crafted.json: a Mech Kit model with its own
+ *  numbers — set replaces, mul multiplies). Crafted parts carry model = the Mech Kit part drawn for them. */
+export function partsIndex(partsJson, craftedJson = null) {
+  const P = Object.fromEntries(partsJson.parts.map(p => [p.id, p]));
+  for (const c of craftedJson?.parts || []) {
+    const base = P[c.model]; if (!base) continue;
+    const p = { ...base, ...c.set, id: c.id, name: c.name, blurb: c.blurb, cost: c.cost, crafted: true, model: c.model, tier: base.tier || 1 };
+    for (const [k, v] of Object.entries(c.mul || {})) if (typeof p[k] === 'number') p[k] = Math.round(p[k] * v * 100) / 100;
+    P[c.id] = p;
+  }
+  return P;
+}
 
-/** Everything the stat panel shows and the mission uses. P = partsIndex(parts.json). */
-export function mechStats(build, P) {
+/** Everything the stat panel shows and the mission uses. P = partsIndex(parts.json); C = chipsIndex (build.chips). */
+export function mechStats(build, P, C = null) {
   const get = slot => { const it = build[slot]; const p = P[itemId(it)]; return p ? [p, it] : [null, null]; };
   const all = [...SLOTS.map(get), ...(build.weapons || []).map(w => { const p = P[itemId(w)]; return p ? [p, w] : [null, null]; })].filter(([p]) => p);
   const sum = key => all.reduce((s, [p, it]) => s + (partNum(p, it, key) || 0), 0);
@@ -61,7 +76,7 @@ export function mechStats(build, P) {
   const passiveHeat = sum('heat');
   const coolRate = cool ? partNum(cool, coolIt, 'rate') : 20;
 
-  return {
+  const st = {
     hp: Math.round(ap), armour: 0, resist: res,
     legs: legs?.type || 'biped',
     speedMul: legs ? partNum(legs, legsIt, 'speed') / 110 : 1,
@@ -88,6 +103,7 @@ export function mechStats(build, P) {
     critChance: 0, radius: legs?.type === 'quad' || legs?.type === 'treads' ? 0.24 : 0.2,
     boostEff: core ? (core.boostEff || 100) / 100 : 1,
   };
+  return applyChips(st, build.chips, C);
 }
 
 const KIND_MAP = {
@@ -108,10 +124,10 @@ export function weaponSpec(part, item = null, stats = null) {
   const map = KIND_MAP[part.kind] || { kind: 'bullet', speed: 14 };
   const range = n('range') / M;
   const spec = {
-    id: part.id, name: part.name, kind: map.kind, dtype: part.type || 'kinetic', dmg: n('damage'), rate: n('rate'),
+    id: part.id, name: part.name, kind: map.kind, dtype: part.type || 'kinetic', dmg: n('damage'), rate: n('rate') * (stats?.wfx?.rate || 1), crit: n('crit') || 0,
     speed: map.speed || 10, range: Math.max(0.6, range), spread: (part.spread ? part.spread * Math.PI / 180 : 0.03) / (stats?.aimMul || 1),
-    count: part.pellets || part.salvo || 1, ammo: part.ammo ?? null, mag: part.mag ?? null, reload: part.reload || 1.5,
-    heat: (part.heatPerShot || 0) * 0.6, energy: (part.shotEnergy || 0) / 10, splash: part.blast ? part.blast / M : 0,
+    count: part.pellets || part.salvo || 1, ammo: part.ammo ?? null, mag: part.mag ?? null, reload: n('reload') || 1.5,
+    heat: (n('heatPerShot') || 0) * 0.6 * (stats?.wfx?.heat || 1), energy: (n('shotEnergy') || 0) / 10, splash: part.blast ? part.blast / M : 0,
     pierce: part.pierce ? 3 : 0, charge: part.charge || 0, vertical: !!map.vertical, gravity: map.gravity, mount: part.mount, hand: part.hand,
     status: part.burn ? Math.min(1, part.burn / 60) : part.shock ? Math.min(1, part.shock / 60) : 0,
     knock: part.kind === 'shotgun' || part.kind === 'pile' ? 2.5 : 0, recoil: part.kind === 'railgun' || part.kind === 'sniper' ? 0.6 * (stats?.recoilMul ? 1 / stats.recoilMul : 1) : 0,
@@ -128,6 +144,7 @@ export function weaponSpec(part, item = null, stats = null) {
     spec.rate = map.deploy === 'mine' ? 2 : 0.5;
   }
   if (map.kind === 'shield') spec.block = (part.block || 50) / 100;
-  if (map.kind === 'missile') spec.turn = part.kind === 'swarm-pod' ? 6 : 4;
+  if (map.kind === 'missile') { spec.turn = (part.kind === 'swarm-pod' ? 6 : 4) * (stats?.wfx?.missileTurn || 1); spec.dmg *= stats?.wfx?.missileDmg || 1; }
+  if (part.burn && map.kind !== 'flame') spec.burn = part.burn;
   return spec;
 }

@@ -47,12 +47,16 @@ const STRICT = !!cfg.strict || TRY_STRICT;
 // cfg.views: a game the owner ruled desktop-only (Hullforge, 2026-11-14: "It does not need phone support") lists ['desktop']
 const VIEWS = [{ id: 'desktop', w: 1280, h: 800, phone: false }, { id: 'phone', w: 390, h: 844, phone: true }].filter(v => (!only || v.id === only) && (!cfg.views || cfg.views.includes(v.id)));
 
-const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
+// one browser per view (2026-11-18): desktop and phone sharing one software-graphics process for a long walk ran it
+// out of room on a big game (Overdrive Frame) — a real device only ever runs one view.
+const launch = () => chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required'] });
+let browser = null;
 let failures = 0;
 const lines = [];
 const notes = [];                                       // --strict trial findings (do not fail)
 for (const v of VIEWS) {
   const ctx = { phone: v.phone, w: v.w, h: v.h, view: v.id };
+  await browser?.close(); browser = await launch();
   const bc = await browser.newContext({ viewport: { width: v.w, height: v.h }, isMobile: v.phone, hasTouch: v.phone, deviceScaleFactor: v.phone ? 2 : 1, ignoreHTTPSErrors: true });
   const page = await bc.newPage();
   const cmp = await bc.newPage();                       // compares screenshots for the input / live checks
@@ -111,6 +115,6 @@ for (const v of VIEWS) {
   }
   await bc.close();
 }
-await browser.close();
+await browser?.close();
 console.log(`walk ${name} @ ${BASE}${STRICT ? (TRY_STRICT ? ' (strict trial)' : ' (strict)') : ''}\n` + lines.join('\n') + (notes.length ? `\nstrict trial — would fail a new game:\n` + notes.map(n => '  - ' + n).join('\n') : '') + `\nscreenshots: ${SHOTS}\n${failures ? `${failures} problem(s)` : 'all screens clean'}`);
 process.exit(failures ? 1 : 0);

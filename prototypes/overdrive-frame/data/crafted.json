@@ -1,0 +1,21 @@
+{
+  "_doc": "Crafted-only weapons: tweaked versions of Mech Kit weapons, made in the workshop from secret recipes (owner: 'secret recipes hidden until learned — odd weapons, tweaked crafted versions'). model = the Mech Kit part whose 3D model it uses (same picture, its own numbers). set = numbers that replace the model's; mul = numbers multiplied. The game adds these to the parts index.",
+  "parts": [
+    { "id": "twin-glint", "name": "Twin Glint", "model": "glint-laser-rifle", "blurb": "Two beam emitters on one stock: two lasers per pull, more heat.",
+      "set": { "salvo": 2, "spread": 4 }, "mul": { "heatPerShot": 1.5, "shotEnergy": 1.3, "damage": 0.85 }, "cost": 14000 },
+    { "id": "ricochet-rivet", "name": "Ricochet Rivet", "model": "rivet-gun", "blurb": "Hardened rivets that punch through the first targets they hit.",
+      "set": { "pierce": 1 }, "mul": { "damage": 1.1, "rate": 0.9 }, "cost": 11000 },
+    { "id": "cinder-saw", "name": "Cinder Saw", "model": "grinder-buzzsaw", "blurb": "A buzzsaw run red-hot: sets what it cuts on fire.",
+      "set": { "type": "fire", "burn": 40 }, "mul": { "damage": 1.05, "heatPerShot": 1.4 }, "cost": 17000 },
+    { "id": "stormcage", "name": "Stormcage", "model": "forkbolt-projector", "blurb": "Arcs jump to twice as many targets, at a shorter reach.",
+      "set": { "chain": 8 }, "mul": { "range": 0.75, "damage": 0.9 }, "cost": 15000 },
+    { "id": "breaching-slug", "name": "Breaching Slug", "model": "doorbreaker-shotgun", "blurb": "Fires one heavy slug instead of pellets: long reach, huge hit.",
+      "set": { "pellets": 1, "spread": 1 }, "mul": { "damage": 4.5, "range": 1.8, "rate": 0.8 }, "cost": 16000 },
+    { "id": "firefly-pod", "name": "Firefly Pod", "model": "hornet-swarm-pod", "blurb": "Twice the missiles, each one smaller, and they burn.",
+      "set": { "type": "fire", "burn": 30 }, "mul": { "salvo": 2, "damage": 0.55 }, "cost": 15500 },
+    { "id": "longbow-rail", "name": "Longbow Rail", "model": "needle-railgun", "blurb": "Extended rails: slower to fire, reaches across the district.",
+      "set": {}, "mul": { "range": 1.6, "damage": 1.35, "rate": 0.75 }, "cost": 19000 },
+    { "id": "mother-hive", "name": "Mother Hive", "model": "hive-drone-bay", "blurb": "Launches drones that last twice as long.",
+      "set": {}, "mul": { "life": 2, "damage": 1.15 }, "cost": 13000 }
+  ]
+}

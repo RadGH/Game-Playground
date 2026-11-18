@@ -336,6 +336,25 @@
    ]
   },
   {
+   "id": "mechkit",
+   "group": "characters",
+   "title": "Mech Kit",
+   "href": "mechkit/",
+   "folder": "mechkit",
+   "summary": "Overdrive Frame's mech parts from four makers with four looks (sleek, chunky, rounded, scrap-built): dress up a mech part by part, paint it, turn the legs and the aim separately, play every animation from noon to night and read every stat, all drawn from the same layered baked pictures the game uses.",
+   "status": "prototype",
+   "date": "2026-11-17",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "2d",
+    "iso",
+    "mech",
+    "dress-up",
+    "review"
+   ]
+  },
+  {
    "id": "citykit",
    "group": "world",
    "title": "City Kit",
@@ -893,6 +912,25 @@
     "iso",
     "2d",
     "defence",
+    "sci-fi"
+   ]
+  },
+  {
+   "id": "overdrive-frame",
+   "group": "prototypes",
+   "title": "Overdrive Frame",
+   "href": "prototypes/overdrive-frame/",
+   "folder": "prototypes/overdrive-frame",
+   "summary": "Isometric mech action in a neon city: pick a maker's frame, drop into a district and blow up swarms by the hundred. Boost, quick-boost, hover; energy and heat; buildings that crack, burn and collapse. Everything is a 3D model baked to pictures (City Kit + Mech Kit).",
+   "status": "prototype",
+   "statusNote": "Round 1",
+   "date": "2026-11-17",
+   "isNew": true,
+   "tags": [
+    "action",
+    "mechs",
+    "iso",
+    "2d",
     "sci-fi"
    ]
   }

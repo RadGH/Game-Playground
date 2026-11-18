@@ -29,7 +29,7 @@ export class Baker {
     this.hemi = new THREE.HemisphereLight('#dbe8ff', '#4a4038', 0.95);
     this.sun = new THREE.DirectionalLight('#fff3e0', 3.4);
     this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(1024 * scale, 1024 * scale);
+    this.sun.shadow.mapSize.set(Math.min(4096, 1024 * scale), Math.min(4096, 1024 * scale));   // capped: big bake scales (tiny props) would ask for a texture the GPU may not have
     this.sun.shadow.bias = -0.0008;
     this.sun.shadow.normalBias = 0.02;
     this.scene.add(this.hemi, this.sun, this.sun.target);
@@ -73,6 +73,8 @@ export class Baker {
     if (!this._glowCache.has(m)) {
       const g = new THREE.MeshBasicMaterial({ color: m.emissive ? m.emissive.clone().multiplyScalar(m.emissiveIntensity ?? 1) : 0xffffff, map: m.emissiveMap || null });
       if (m.emissiveMap) g.color.set('#ffffff').multiplyScalar(m.emissiveIntensity ?? 1);
+      // a see-through glow (fire in windows, wreck.js) glows only where its picture does
+      if (m.transparent) { g.transparent = true; g.depthWrite = false; g.polygonOffset = m.polygonOffset; g.polygonOffsetFactor = m.polygonOffsetFactor; g.polygonOffsetUnits = m.polygonOffsetUnits; }
       this._glowCache.set(m, g);
     }
     return this._glowCache.get(m);
@@ -83,6 +85,13 @@ export class Baker {
    * opts: rot (0..3) · layer 'day'|'lights' · pad px · shadow (true) · frame (reuse a frame so layers line up)
    * Returns { canvas, w, h, ax, ay, frame }.
    */
+  /** A decal (soot, smashed windows — userData.decal) in the lights picture: black through its own alpha, so it darkens
+   *  the lit windows under it instead of blacking out a rectangle. */
+  _decalMat(m) {
+    if (!this._glowCache.has(m)) this._glowCache.set(m, new THREE.MeshBasicMaterial({ color: 0x000000, map: m.map, transparent: true, depthWrite: false, polygonOffset: m.polygonOffset, polygonOffsetFactor: m.polygonOffsetFactor, polygonOffsetUnits: m.polygonOffsetUnits }));
+    return this._glowCache.get(m);
+  }
+
   bake(obj, { rot = 0, layer = 'day', pad = 2, shadow = true, frame = null } = {}) {
     this.holder.clear();
     const turn = new THREE.Group(); turn.rotation.y = modelTurn(rot); turn.add(obj);
@@ -105,7 +114,7 @@ export class Baker {
       obj.traverse(o => {
         if (!o.isMesh) return;
         const list = Array.isArray(o.material) ? o.material : [o.material];
-        const next = list.map(m => (m.userData?.glow ? this._glowMat(m) : this._black));
+        const next = list.map(m => (m.userData?.glow ? this._glowMat(m) : m.userData?.decal ? this._decalMat(m) : this._black));
         swapped.push([o, o.material]); o.material = Array.isArray(o.material) ? next : next[0];
       });
     } else {

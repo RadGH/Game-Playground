@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mech Kit — dress up Overdrive Frame's mechs</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="../shared/tooltip.css">
+<link rel="stylesheet" href="css/mechkit.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body>
+<header class="topbar mk-top">
+  <a href="../" class="muted">← Playground</a>
+  <h1>Mech Kit</h1>
+  <nav class="mk-tabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" data-view="dress" aria-selected="true">Dress up</button>
+    <button type="button" role="tab" data-view="sheet" aria-selected="false">Parts sheet</button>
+    <button type="button" role="tab" data-view="lineup" aria-selected="false">Line-up</button>
+  </nav>
+  <span class="spacer"></span>
+  <span id="status" class="muted small" role="status">Loading…</span>
+</header>
+
+<div class="mk" id="dress">
+  <aside class="mk-build" aria-label="Build">
+    <div class="mk-makers" role="group" aria-label="Filter parts by maker" id="makers"></div>
+    <div id="slots" class="mk-slots"></div>
+    <section class="mk-paint" aria-label="Paint">
+      <h3>Paint</h3>
+      <div id="presets" class="mk-presets" role="group" aria-label="Paint schemes"></div>
+      <div id="colours"></div>
+    </section>
+    <div class="mk-actions">
+      <button type="button" id="random" data-tip="A new build that fits its legs' carry limit (uses the maker filter)">Random build <kbd data-k="R" data-pad="X"></kbd></button>
+      <button type="button" id="random-paint" data-tip="A new paint scheme">Random paint <kbd data-k="P" data-pad="Y"></kbd></button>
+      <button type="button" id="copy" data-tip="Put this build on the clipboard to paste to Claude">Copy settings <kbd data-k="C" data-pad="Back"></kbd></button>
+      <button type="button" id="reset">Starter build</button>
+    </div>
+    <p id="copied" class="small muted" role="status"></p>
+  </aside>
+
+  <main class="mk-stage" aria-label="Preview">
+    <div class="mk-stagebar">
+      <div class="mk-dialgroup">
+        <div class="mk-dial" id="dial-legs" role="slider" tabindex="0" aria-label="Legs facing" aria-valuemin="0" aria-valuemax="15" aria-valuenow="6" data-tip="Which way the legs walk. Drag, or A / D"><canvas width="128" height="128"></canvas><span>Legs <kbd data-k="A D" data-pad="LB RB"></kbd></span></div>
+        <div class="mk-dial" id="dial-aim" role="slider" tabindex="0" aria-label="Aim" aria-valuemin="0" aria-valuemax="15" aria-valuenow="6" data-tip="Which way the upper body aims. Drag, or ← / →"><canvas width="128" height="128"></canvas><span>Aim <kbd data-k="← →" data-pad="R stick"></kbd></span></div>
+        <label class="mk-check small"><input type="checkbox" id="aim-follow"> Aim with legs</label>
+        <label class="mk-check small"><input type="checkbox" id="aim-pointer"> Aim at pointer</label>
+        <label class="mk-check small"><input type="checkbox" id="spin"> Spin</label>
+      </div>
+      <div class="mk-anim">
+        <label class="small">Legs <select id="anim-legs" aria-label="Legs animation"></select></label>
+        <label class="small">Upper <select id="anim-upper" aria-label="Upper body animation"></select></label>
+        <div class="seg" role="group" aria-label="Animation player">
+          <button type="button" id="step-back" aria-label="Previous frame">◀</button>
+          <button type="button" id="play" data-tip="Play or pause (Space)">Pause <kbd data-k="Space" data-pad="Start"></kbd></button>
+          <button type="button" id="step-fwd" aria-label="Next frame">▶</button>
+        </div>
+        <span id="frame-label" class="small muted"></span>
+        <label class="mk-check small"><input type="checkbox" id="lift" checked> Lift off for jump and hover</label>
+      </div>
+      <div class="mk-view">
+        <div class="seg" role="group" aria-label="Zoom">
+          <button type="button" data-zoom="1" data-tip="The size the game draws it">1×</button><button type="button" data-zoom="2">2×</button><button type="button" data-zoom="fit" class="on">Fit</button>
+        </div>
+        <label class="small mk-time">Time <input type="range" id="time" min="0" max="1" step="0.05" value="0" aria-label="Time of day"> <span id="time-label">Noon</span></label>
+        <label class="small">Show <select id="only" aria-label="Show one layer"></select></label>
+        <label class="mk-check small"><input type="checkbox" id="markers"> Hip and muzzles</label>
+        <label class="mk-check small" data-tip="Pictures baked at twice the game's detail, for a close look. Off = exactly the game's pictures"><input type="checkbox" id="sharp"> Sharp close-up</label>
+      </div>
+    </div>
+    <div class="mk-canvaswrap"><canvas id="view" aria-label="The mech, drawn the way the game draws it"></canvas></div>
+    <p id="facts" class="small muted mk-facts"></p>
+  </main>
+
+  <aside class="mk-stats" aria-label="Stats">
+    <h2 id="build-name">—</h2>
+    <p id="problems" class="mk-problems small" role="status"></p>
+    <div id="stats"></div>
+  </aside>
+</div>
+
+<section id="sheet" class="mk-sheet" hidden aria-label="Parts sheet">
+  <div class="mk-sheetbar">
+    <div id="sheet-slots" class="mk-chips" role="group" aria-label="Slot"></div>
+    <div id="sheet-makers" class="mk-chips" role="group" aria-label="Maker"></div>
+    <div class="seg" role="group" aria-label="Show parts">
+      <button type="button" data-sheetmode="mech" class="on" data-tip="Each part fitted to your current mech">On the mech</button><button type="button" data-sheetmode="alone" data-tip="Each part on its own">Part alone</button>
+    </div>
+    <label class="small mk-time">Time <input type="range" id="sheet-time" min="0" max="1" step="0.05" value="0" aria-label="Time of day on the sheet"></label>
+  </div>
+  <div id="sheet-grid" class="mk-grid"></div>
+</section>
+
+<section id="lineup" class="mk-sheet" hidden aria-label="Line-up">
+  <div class="mk-sheetbar">
+    <p class="small muted mk-lineup-note">Each maker's own light, medium and heavy frame in factory paint, with one of every leg type it makes.</p>
+    <label class="small mk-time">Time <input type="range" id="lineup-time" min="0" max="1" step="0.05" value="0" aria-label="Time of day on the line-up"></label>
+  </div>
+  <div id="lineup-grid" class="mk-lineup"></div>
+</section>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "about": "The four part makers of Overdrive Frame. Each builds in its own style on purpose, so a mech mixing makers looks patched together. colours = the factory paint (primary, secondary, accent) and the colour its lights glow.",
+  "makers": [
+    {
+      "id": "celerity",
+      "name": "Celerity Works",
+      "short": "Celerity",
+      "look": "sleek",
+      "lookText": "Sleek and angular: knife-edge plates, swept fins, a narrow waist and glowing seams.",
+      "leaning": "Speed and energy weapons. Light frames, strong boosters, lasers and rail guns; thin armour that shrugs off energy hits.",
+      "colours": { "primary": "#e4e8ee", "secondary": "#2b3242", "accent": "#1fb8e0", "glow": "#3ff0ff" }
+    },
+    {
+      "id": "brannoch",
+      "name": "Brannoch Heavy Industries",
+      "short": "Brannoch",
+      "look": "chunky",
+      "lookText": "Chunky and industrial: slab armour, bolted plates, hydraulic rams, hazard stripes and exhaust stacks.",
+      "leaning": "Armour and kinetic or explosive firepower. Heavy frames with big carry limits; slow, hard to stagger.",
+      "colours": { "primary": "#e2a91c", "secondary": "#3c4047", "accent": "#d2452c", "glow": "#ffb02e" }
+    },
+    {
+      "id": "calyx",
+      "name": "Calyx Biomechanics",
+      "short": "Calyx",
+      "look": "rounded",
+      "lookText": "Rounded and organic: smooth shells, segmented limbs, ring joints and soft glowing pods.",
+      "leaning": "Endurance and odd technology. Big generators, cool running, shields, repair beams, chain lightning and hover legs.",
+      "colours": { "primary": "#4fb39a", "secondary": "#ece3cf", "accent": "#c23f7c", "glow": "#7dff9a" }
+    },
+    {
+      "id": "patchwork",
+      "name": "Patchwork Salvage",
+      "short": "Patchwork",
+      "look": "scrap",
+      "lookText": "Cheap and scrap-built: mismatched plates, exposed pipes, roll cages and welded patches.",
+      "leaning": "Cheap, light and hot-running. Fire, mines, turrets and swarms of small hits; low armour, odd tricks.",
+      "colours": { "primary": "#6e7a48", "secondary": "#9b5b33", "accent": "#e6cf3a", "glow": "#ff6a2a" }
+    }
+  ]
+}

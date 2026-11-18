@@ -1,0 +1,77 @@
+/* The mission HUD: a cockpit frame around the play area. Nothing sits in the middle of the screen. */
+.of-hud { position: absolute; inset: 0; pointer-events: none; z-index: 5; font-family: var(--of-font); }
+.of-hud-arcs { position: absolute; inset: 0; width: 100%; height: 100%; }
+.of-hud > * { pointer-events: none; }
+.of-hud .of-menu-btn { pointer-events: auto; position: absolute; top: calc(10px + var(--safe-t)); right: calc(10px + var(--safe-r)); width: 44px; height: 44px; font-size: 22px; color: var(--of-text); background: rgba(12, 16, 24, 0.75); border: 1px solid var(--of-line-2); border-radius: var(--of-r); cursor: pointer; }
+.of-hud .of-menu-btn::after { content: attr(data-key); position: absolute; right: -2px; bottom: -14px; font: 600 11px var(--of-num); color: var(--of-dim); }
+
+/* armour, top left */
+.of-hud-armour { position: absolute; top: calc(12px + var(--safe-t)); left: calc(12px + var(--safe-l)); width: min(300px, 46vw); padding: 10px 12px; background: linear-gradient(90deg, rgba(10, 14, 22, 0.85), rgba(10, 14, 22, 0.4)); border-left: 3px solid var(--of-cyan); }
+.of-hud-label { font: 600 12px var(--of-font); letter-spacing: 0.14em; text-transform: uppercase; color: var(--of-dim); }
+.of-ap { display: block; font: 800 30px/1 var(--of-num); letter-spacing: 0.02em; }
+.of-bar { height: 6px; margin-top: 6px; background: rgba(255, 255, 255, 0.1); }
+.of-bar i { display: block; height: 100%; background: linear-gradient(90deg, #2fc7e0, var(--of-cyan)); transition: width 120ms; }
+.of-bar.of-low i { background: linear-gradient(90deg, #ff3b3b, #ff7a4a); }
+.of-status { display: block; min-height: 1em; margin-top: 4px; font-size: 12px; color: var(--of-amber); }
+
+/* objectives, top right (under the ☰) */
+.of-hud-obj { position: absolute; top: calc(66px + var(--safe-t)); right: calc(12px + var(--safe-r)); width: min(300px, 46vw); margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.of-hud-obj li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 10px; font-size: 14px; background: rgba(10, 14, 22, 0.72); border-right: 3px solid var(--of-amber); }
+.of-hud-obj li small { font: 600 15px var(--of-num); color: var(--of-amber); white-space: nowrap; }
+.of-hud-obj li.of-opt { border-right-color: var(--of-green); color: var(--of-dim); }
+.of-hud-obj li.of-opt small { color: var(--of-green); }
+.of-hud-obj li.of-done { opacity: 0.55; border-right-color: var(--of-green); }
+.of-hud-obj li.of-failed { opacity: 0.55; border-right-color: var(--of-red); text-decoration: line-through; }
+.of-hud-obj li.of-extract { border-right-color: var(--of-green); }
+.of-hud-obj li.of-extract small { color: var(--of-green); }
+
+/* weapons: bottom corners, in the slot they sit in (left arm bottom-left, right arm bottom-right, shoulders above) */
+.of-hud-weapons { position: absolute; inset: auto calc(12px + var(--safe-r)) calc(12px + var(--safe-b)) calc(12px + var(--safe-l)); height: 120px; }
+.of-w { position: absolute; width: min(230px, 42vw); padding: 7px 10px 9px; background: rgba(10, 14, 22, 0.78); border-bottom: 2px solid var(--of-line-2); display: grid; grid-template-columns: auto 1fr auto; column-gap: 8px; align-items: baseline; }
+.of-w-0 { left: 0; bottom: 0; } .of-w-1 { right: 0; bottom: 0; } .of-w-2 { left: 0; bottom: 58px; } .of-w-3 { right: 0; bottom: 58px; }
+.of-w b { font: 600 14px/1.15 var(--of-font); min-width: 0; overflow-wrap: anywhere; }
+.of-w-key { font: 700 13px var(--of-num); color: #1a1206; background: var(--of-amber); padding: 1px 5px; border-radius: 2px; min-width: 12px; text-align: center; }
+.of-w-key:empty { display: none; }
+.of-w-ammo { font: 600 16px var(--of-num); color: var(--of-text); white-space: nowrap; }
+.of-w-cd { position: absolute; left: 0; bottom: -2px; height: 2px; background: var(--of-cyan); }
+.of-w-locks { grid-column: 1 / -1; font: 600 13px var(--of-num); color: #ffcf4a; min-height: 0; }
+.of-w-locks:empty { display: none; }
+.of-w.of-w-firing { border-bottom-color: var(--of-amber); }
+.of-w.of-w-out .of-w-ammo { color: var(--of-red); }
+.of-w-empty { opacity: 0.35; }
+
+/* comms: a character speaks — their machine, callsign, words, a moving waveform. Left side, middle height */
+.of-comms { position: absolute; left: calc(12px + var(--safe-l)); top: 38%; width: min(380px, 70vw); display: flex; gap: 10px; padding: 10px; background: rgba(8, 12, 20, 0.82); border-left: 3px solid var(--of-amber); animation: of-in 220ms ease-out; }
+.of-comms[hidden] { display: none; }
+.of-comms-face { width: 64px; height: 64px; flex: none; background: radial-gradient(circle, #1c2433, #0c1018); border: 1px solid var(--of-line-2); }
+.of-comms-who { font: 700 14px var(--of-font); letter-spacing: 0.08em; text-transform: uppercase; }
+.of-comms-text { margin: 3px 0 4px; font-size: 15px; line-height: 1.35; }
+.of-comms-wave { width: 160px; height: 18px; opacity: 0.8; }
+
+/* small alert: a few seconds, top centre, never over the play area's middle */
+.of-alert { position: absolute; top: calc(12px + var(--safe-t)); left: 50%; transform: translateX(-50%); padding: 8px 16px; font-size: 15px; background: rgba(10, 14, 22, 0.85); border-bottom: 2px solid var(--of-amber); white-space: nowrap; animation: of-in 160ms ease-out; }
+.of-alert[hidden] { display: none; }
+.of-hurt { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 55%, rgba(200, 30, 20, 0.55) 100%); transition: opacity 80ms; }
+
+@media (max-width: 640px) {
+  .of-hud-armour { width: 44vw; padding: 8px; } .of-ap { font-size: 24px; }
+  .of-hud-obj { top: calc(62px + var(--safe-t)); width: 48vw; } .of-hud-obj li { font-size: 12px; padding: 5px 8px; }
+  /* weapons: a 2 × 2 strip under the armour and objectives, so the bottom stays free for the thumbs */
+  .of-hud-weapons { inset: calc(150px + var(--safe-t)) calc(8px + var(--safe-r)) auto calc(8px + var(--safe-l)); height: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .of-w { position: static; width: auto; padding: 5px 7px 6px; grid-template-columns: auto 1fr; }
+  .of-w-2 { order: -2; } .of-w-3 { order: -1; }
+  .of-w b { font-size: 12px; white-space: normal; line-height: 1.15; } .of-w-ammo { grid-column: 1 / -1; font-size: 13px; }
+  .of-comms { top: auto; bottom: calc(286px + var(--safe-b)); width: calc(100vw - 24px); }
+  .of-comms-face { width: 48px; height: 48px; }
+}
+/* phone controls: two thumb sticks + named buttons (only on touch screens) */
+.of-touch { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+.of-stick { position: absolute; bottom: calc(24px + var(--safe-b)); width: 132px; height: 132px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.18); background: rgba(10, 14, 22, 0.35); pointer-events: auto; touch-action: none; }
+.of-stick i { position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; margin: -27px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); border: 2px solid rgba(255, 255, 255, 0.4); }
+.of-stick-move { left: calc(20px + var(--safe-l)); }
+.of-stick-aim { right: calc(20px + var(--safe-r)); border-color: rgba(255, 176, 46, 0.4); }
+.of-stick-aim i { background: rgba(255, 176, 46, 0.3); border-color: rgba(255, 176, 46, 0.7); }
+.of-tbtns { position: absolute; right: calc(12px + var(--safe-r)); bottom: calc(170px + var(--safe-b)); display: grid; grid-template-columns: repeat(3, 64px); gap: 6px; pointer-events: auto; }
+.of-tbtns button { height: 48px; font: 600 13px var(--of-font); color: var(--of-text); background: rgba(16, 20, 29, 0.78); border: 1px solid var(--of-line-2); border-radius: var(--of-r); touch-action: none; }
+.of-tbtns button.on { border-color: var(--of-amber); background: rgba(255, 176, 46, 0.25); }
+@media (pointer: coarse) and (min-width: 641px) { .of-hud-weapons { bottom: calc(170px + var(--safe-b)); } }

@@ -60,6 +60,7 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 | `armory/` | Review page for every wearable/holdable Chibi 2 model |
 | `model-library/` | Meshy-made rigged + animated enemy models (goblins, skeletons, orc, ogre, bandits…) with their Codex sheets and prompts — **no game uses them yet: remind the owner when Thousandvale or Rogueloot is worked on; he decides** |
 | `combined/` | Two full characters talking in one 3D scene |
+| `mechkit/` | Overdrive Frame's mech parts (4 makers, 116 parts with stats), layered baked sprites + paint masks, dress-up page |
 | `citykit/` | Arcline's procedural iso city: three.js models baked to 2D day + night pictures; review page for buildings, walls, turrets, creatures, vehicles |
 
 ## Prototypes (games)
@@ -77,6 +78,7 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 | `prototypes/hullforge/` | 3D block-built space game (auto corners, animated turrets, 6-direction flight); desktop only | new |
 | `prototypes/spirehold/` | Semi-idle city defence | playable |
 | `prototypes/arcline/` | SimCity 4-style iso cyber city builder + wall/turret defence (plan in docs/PLAN.md) | planning — round 0 = `citykit/` |
+| `prototypes/overdrive-frame/` | Iso co-op mech action in a neon city; fully prerendered (City Kit + Mech Kit) | round 1 |
 | `prototypes/grimring/` | Arena with the Model Library Meshy fighters (1-2 foes at a time) | live |
 | `prototypes/tinyrts/` | Symlink to its own repo `~/claude/tinyrts` — commit THERE; keep its `master` green (stable serves it) | playable |
 | `prototypes/lanternfall/` | Side-scrolling pixel action RPG (`docs/HANDOFF.md` = remaining work) | playable |

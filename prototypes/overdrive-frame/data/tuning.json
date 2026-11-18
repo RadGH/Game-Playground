@@ -1,0 +1,378 @@
+{
+  "_doc": "Every feel/balance number in Overdrive Frame. Read through the live tuning object at use time (shared/tune.js; ` key or ?tune), written back by tools/apply-tune.mjs overdrive-frame. Distances in tiles (1 tile = 16 m), speeds in tiles per second. A mech's own parts scale these (legs speed, booster thrust, generator, cooling).",
+  "walkSpeed": {
+    "value": 1.1,
+    "min": 0.4,
+    "max": 2.5,
+    "step": 0.05,
+    "label": "Walk speed",
+    "group": "Movement",
+    "unit": "tiles/s",
+    "note": "Before legs and weight"
+  },
+  "walkAccel": {
+    "value": 7,
+    "min": 2,
+    "max": 20,
+    "step": 0.5,
+    "label": "Walk grip",
+    "group": "Movement",
+    "unit": "/s",
+    "note": "How fast the mech reaches its walk speed and stops"
+  },
+  "boostSpeed": {
+    "value": 2.6,
+    "min": 1,
+    "max": 5,
+    "step": 0.05,
+    "label": "Boost speed",
+    "group": "Movement",
+    "unit": "tiles/s"
+  },
+  "boostAccel": {
+    "value": 5,
+    "min": 1,
+    "max": 15,
+    "step": 0.5,
+    "label": "Boost grip",
+    "group": "Movement",
+    "unit": "/s",
+    "note": "Lower = more sliding while boosting"
+  },
+  "boostEnergy": {
+    "value": 22,
+    "min": 0,
+    "max": 60,
+    "step": 1,
+    "label": "Boost energy use",
+    "group": "Energy",
+    "unit": "/s"
+  },
+  "quickBoostSpeed": {
+    "value": 6,
+    "min": 2,
+    "max": 12,
+    "step": 0.1,
+    "label": "Quick boost burst",
+    "group": "Movement",
+    "unit": "tiles/s"
+  },
+  "quickBoostTime": {
+    "value": 0.22,
+    "min": 0.08,
+    "max": 0.6,
+    "step": 0.01,
+    "label": "Quick boost length",
+    "group": "Movement",
+    "unit": "s"
+  },
+  "quickBoostCooldown": {
+    "value": 0.55,
+    "min": 0.1,
+    "max": 2,
+    "step": 0.05,
+    "label": "Quick boost cooldown",
+    "group": "Movement",
+    "unit": "s"
+  },
+  "quickBoostEnergy": {
+    "value": 18,
+    "min": 0,
+    "max": 60,
+    "step": 1,
+    "label": "Quick boost energy",
+    "group": "Energy"
+  },
+  "quickBoostHeat": {
+    "value": 6,
+    "min": 0,
+    "max": 30,
+    "step": 1,
+    "label": "Quick boost heat",
+    "group": "Heat"
+  },
+  "jumpSpeed": {
+    "value": 2.4,
+    "min": 0.5,
+    "max": 6,
+    "step": 0.1,
+    "label": "Jump strength",
+    "group": "Movement",
+    "unit": "tiles/s"
+  },
+  "gravity": {
+    "value": 6,
+    "min": 1,
+    "max": 15,
+    "step": 0.25,
+    "label": "Gravity",
+    "group": "Movement",
+    "unit": "tiles/s²"
+  },
+  "hoverLift": {
+    "value": 5.6,
+    "min": 0,
+    "max": 15,
+    "step": 0.1,
+    "label": "Hover lift",
+    "group": "Movement",
+    "unit": "tiles/s²",
+    "note": "Holding jump in the air pushes up against gravity while energy lasts"
+  },
+  "hoverEnergy": {
+    "value": 30,
+    "min": 0,
+    "max": 80,
+    "step": 1,
+    "label": "Hover energy use",
+    "group": "Energy",
+    "unit": "/s"
+  },
+  "energyMax": {
+    "value": 100,
+    "min": 20,
+    "max": 400,
+    "step": 5,
+    "label": "Energy (base)",
+    "group": "Energy",
+    "note": "Before the generator"
+  },
+  "energyRegen": {
+    "value": 34,
+    "min": 5,
+    "max": 120,
+    "step": 1,
+    "label": "Energy recharge",
+    "group": "Energy",
+    "unit": "/s"
+  },
+  "energyRegenDelay": {
+    "value": 0.6,
+    "min": 0,
+    "max": 3,
+    "step": 0.05,
+    "label": "Recharge delay",
+    "group": "Energy",
+    "unit": "s",
+    "note": "Pause after spending before recharge starts"
+  },
+  "stallTime": {
+    "value": 1.6,
+    "min": 0.3,
+    "max": 5,
+    "step": 0.1,
+    "label": "Stall when empty",
+    "group": "Energy",
+    "unit": "s",
+    "note": "Run energy to zero and boosting is locked this long"
+  },
+  "heatMax": {
+    "value": 100,
+    "min": 20,
+    "max": 400,
+    "step": 5,
+    "label": "Heat limit",
+    "group": "Heat"
+  },
+  "heatCool": {
+    "value": 26,
+    "min": 2,
+    "max": 100,
+    "step": 1,
+    "label": "Cooling",
+    "group": "Heat",
+    "unit": "/s",
+    "note": "Before the cooling part"
+  },
+  "boostHeat": {
+    "value": 5,
+    "min": 0,
+    "max": 30,
+    "step": 0.5,
+    "label": "Boost heat",
+    "group": "Heat",
+    "unit": "/s"
+  },
+  "overheatSlow": {
+    "value": 0.55,
+    "min": 0.1,
+    "max": 1,
+    "step": 0.05,
+    "label": "Overheated speed",
+    "group": "Heat",
+    "unit": "×"
+  },
+  "overheatDamage": {
+    "value": 6,
+    "min": 0,
+    "max": 40,
+    "step": 0.5,
+    "label": "Overheat damage",
+    "group": "Heat",
+    "unit": "% armour/s"
+  },
+  "overheatRecover": {
+    "value": 0.6,
+    "min": 0.2,
+    "max": 1,
+    "step": 0.05,
+    "label": "Overheat clears at",
+    "group": "Heat",
+    "unit": "× limit"
+  },
+  "turnRate": {
+    "value": 9,
+    "min": 2,
+    "max": 30,
+    "step": 0.5,
+    "label": "Leg turn rate",
+    "group": "Movement",
+    "unit": "rad/s"
+  },
+  "aimRate": {
+    "value": 14,
+    "min": 2,
+    "max": 40,
+    "step": 0.5,
+    "label": "Upper body turn rate",
+    "group": "Aim",
+    "unit": "rad/s"
+  },
+  "lockCone": {
+    "value": 0.32,
+    "min": 0.05,
+    "max": 1.2,
+    "step": 0.01,
+    "label": "Lock circle size",
+    "group": "Aim",
+    "unit": "rad"
+  },
+  "padAimHelp": {
+    "value": 0.12,
+    "min": 0,
+    "max": 0.5,
+    "step": 0.01,
+    "label": "Controller aim help",
+    "group": "Aim",
+    "unit": "rad",
+    "note": "Mouse gets none"
+  },
+  "critMult": {
+    "value": 2,
+    "min": 1.2,
+    "max": 4,
+    "step": 0.05,
+    "label": "Critical damage",
+    "group": "Damage",
+    "unit": "×",
+    "note": "Each crit tier adds this much again (tier 2 = 3×)"
+  },
+  "critBase": {
+    "value": 0.05,
+    "min": 0,
+    "max": 0.5,
+    "step": 0.01,
+    "label": "Base crit chance",
+    "group": "Damage"
+  },
+  "spawnWarn": {
+    "value": 0.9,
+    "min": 0.2,
+    "max": 3,
+    "step": 0.05,
+    "label": "Spawn warning",
+    "group": "Enemies",
+    "unit": "s",
+    "note": "Enemies flash in place this long before they are real"
+  },
+  "spawnSafeRadius": {
+    "value": 5,
+    "min": 1,
+    "max": 15,
+    "step": 0.5,
+    "label": "No spawns within",
+    "group": "Enemies",
+    "unit": "tiles of a player"
+  },
+  "swarmSep": {
+    "value": 0.14,
+    "min": 0.02,
+    "max": 0.5,
+    "step": 0.01,
+    "label": "Swarm spacing",
+    "group": "Enemies",
+    "unit": "tiles"
+  },
+  "enemyDamage": {
+    "value": 1,
+    "min": 0.2,
+    "max": 3,
+    "step": 0.05,
+    "label": "Enemy damage",
+    "group": "Enemies",
+    "unit": "×"
+  },
+  "enemyHealth": {
+    "value": 1,
+    "min": 0.2,
+    "max": 4,
+    "step": 0.05,
+    "label": "Enemy health",
+    "group": "Enemies",
+    "unit": "×"
+  },
+  "maxEnemies": {
+    "value": 600,
+    "min": 50,
+    "max": 2000,
+    "step": 10,
+    "label": "Most enemies alive",
+    "group": "Enemies"
+  },
+  "buildingArmour": {
+    "value": 1,
+    "min": 0.1,
+    "max": 5,
+    "step": 0.05,
+    "label": "Building toughness",
+    "group": "World",
+    "unit": "×"
+  },
+  "crushRadius": {
+    "value": 1,
+    "min": 0,
+    "max": 3,
+    "step": 0.1,
+    "label": "Falling building reach",
+    "group": "World",
+    "unit": "× lot"
+  },
+  "crushDamage": {
+    "value": 400,
+    "min": 0,
+    "max": 2000,
+    "step": 10,
+    "label": "Falling building damage",
+    "group": "World"
+  },
+  "reviveTime": {
+    "value": 3,
+    "min": 0.5,
+    "max": 10,
+    "step": 0.25,
+    "label": "Revive time",
+    "group": "Co-op",
+    "unit": "s",
+    "note": "Stand next to a downed teammate this long"
+  },
+  "cameraZoom": {
+    "value": 3,
+    "min": 1.5,
+    "max": 4.5,
+    "step": 0.1,
+    "label": "Camera zoom",
+    "group": "View",
+    "unit": "×",
+    "note": "How close the camera sits; pictures bake at this size"
+  }
+}

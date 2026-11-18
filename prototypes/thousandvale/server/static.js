@@ -19,7 +19,7 @@ export const ALLOW = Object.freeze([
   'shared', 'vendor', 'assets',
   // experiments
   'armory', 'avatar-2d', 'avatar-3d', 'citykit', 'combined', 'conversations', 'highdef-3d', 'icons', 'items', 'library', 'model-library',
-  'lingo', 'meters', 'namegen', 'proctown', 'sfx', 'universe', 'voice-lab', 'worldgen',
+  'lingo', 'mechkit', 'meters', 'namegen', 'proctown', 'sfx', 'universe', 'voice-lab', 'worldgen',
   // prototypes (prototypes/tinyrts is a symlink to another repo, so a published copy cannot hold it)
   'prototypes/thousandvale', 'prototypes/farhold', 'prototypes/emberveil', 'prototypes/bannerline',
   'prototypes/frontier-foundry', 'prototypes/lanternfall', 'prototypes/lodestar', 'prototypes/kindlewild', 'prototypes/stoneward', 'prototypes/oddhaven', 'prototypes/voidwright', 'prototypes/spirehold',

@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import { rng } from './rng.js';
 import { STYLES, STYLE_IDS } from './materials.js';
 import { box, cyl, dome, storeys, slab, neonEdges, sign, roofProps, balconies, lotPad, FLOOR, bodyMat, trimMat, neonMat, glassMat } from './shapes.js';
+import { wreck, DAMAGE_NAMES } from './wreck.js';
 
 export const GROUPS = [
   { id: 'homes', label: 'Homes' },
@@ -23,11 +24,33 @@ export const GROUPS = [
   { id: 'defence', label: 'Walls & turrets' },
   { id: 'creatures', label: 'Creatures' },
   { id: 'vehicles', label: 'Vehicles' },
+  { id: 'swarm', label: 'Swarm' },
+  { id: 'army', label: 'Rival army' },
 ];
 
+/** Categories to filter the catalog by game or genre (a recipe's optional `genre`: an array of these ids). Arcline's
+ *  futuristic city is 'neon'; every recipe without a `genre` counts as neon. */
+export const CATEGORIES = [
+  { id: 'neon', label: 'Neon city' },
+  { id: 'industrial', label: 'Industrial & workshop' },
+  { id: 'military', label: 'Military' },
+  { id: 'alien', label: 'Alien' },
+];
+/** Groups whose recipes are buildings: each gets the common `damage` setting (whole → damaged → burning → rubble). */
+export const WRECK_GROUPS = ['homes', 'shops', 'industry', 'services', 'parks', 'colony', 'landmarks', 'outposts'];
+
 export const RECIPES = {};
-/** Register recipes (other kit files call this). */
-export function addRecipes(obj) { Object.assign(RECIPES, obj); }
+/** Register recipes (other kit files call this). A recipe without a `genre` is in the 'neon' category. */
+export function addRecipes(obj) { for (const r of Object.values(obj)) if (!Array.isArray(r.genre)) r.genre = ['neon']; Object.assign(RECIPES, obj); }
+/** The categories a recipe is in. */
+export function genreOf(id) { const g = RECIPES[id]?.genre; return Array.isArray(g) && g.length ? g : ['neon']; }
+
+/** Settings every recipe of a kind gets on top of its own params (the review page shows them as sliders too). */
+export function commonParams(id) {
+  const r = RECIPES[id];
+  return r && WRECK_GROUPS.includes(r.group) && !r.noWreck
+    ? [{ key: 'damage', label: 'Damage', min: 0, max: 3, step: 1, def: 0, names: DAMAGE_NAMES }] : [];
+}
 
 const neonOf = (p, i = 0) => STYLES[p.style].neon[(p.seed + i) % STYLES[p.style].neon.length];
 
@@ -203,13 +226,17 @@ export function build(id, params = {}) {
   const r = RECIPES[id]; if (!r) throw new Error(`unknown recipe ${id}`);
   const p = { style: 'chrome', seed: 1 };
   for (const k of r.params || []) p[k.key] = k.def;
+  const common = commonParams(id);
+  for (const k of common) p[k.key] = k.def;
   Object.assign(p, params);
   p.R = rng(p.seed * 9973 + id.length);
   const g = r.build(p);
+  // wreck stages are a post-process on the finished model, so every building gets them without its own code
+  if (common.length && p.damage > 0) wreck(g, Math.round(p.damage), p.seed, { size: r.size, style: STYLES[p.style] ? p.style : 'concrete', smoke: p.smoke !== 0 });   // smoke: 0 = no baked smoke (a game draws its own, live)
   g.userData.recipe = id; g.userData.params = { ...p, R: undefined };
   return g;
 }
 
-/** The defaults of a recipe's params (for the review page and the game's catalog). */
-export function defaults(id) { const o = { style: 'chrome', seed: 1 }; for (const k of RECIPES[id].params || []) o[k.key] = k.def; return o; }
+/** The defaults of a recipe's params, common ones included (for the review page and the game's catalog). */
+export function defaults(id) { const o = { style: 'chrome', seed: 1 }; for (const k of [...(RECIPES[id].params || []), ...commonParams(id)]) o[k.key] = k.def; return o; }
 export { STYLE_IDS, STYLES };

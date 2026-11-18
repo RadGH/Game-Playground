@@ -9,3 +9,6 @@ import './power.js';
 import './street.js';
 import './parks.js';
 import './zoned.js';
+import './swarm.js';
+import './army.js';
+import './workshop.js';

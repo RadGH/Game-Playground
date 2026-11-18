@@ -1,0 +1,80 @@
+{
+  "_doc": "Missions. map = citymap.js options (seed + district). waves: at (s after drop), kind, count, from ('edge' = the district's road ends, 'nest', or {x,z}), spread, every (repeat), until, elite (chance). objectives: kill / killAll / destroy (lots by index into the generated map's biggest lots of a recipe: pickLots) / survive / reach. optional objectives raise the grade. par.time = the time an A-grade run takes. pay = base pay. tier = loot tier (1 early … 5 late). length = 'short' 4-8 min | 'mid' 8-15 | 'long' 15+. comms = lines said in-world (who + text + when). night = time of day, 0 noon … 1 deep night.",
+  "missions": [
+    {
+      "id": "m01-drop-zone", "name": "Drop Zone", "length": "short", "night": 0.7, "drop": 4.5, "tier": 1, "pay": 4200, "payPerScore": 6,
+      "map": { "seed": 1101, "district": "downtown", "w": 40, "h": 40 },
+      "brief": "The swarm has broken into the Glasswell business district. Drop in, clear the streets, get out.",
+      "waves": [
+        { "at": 3, "kind": "swarmer", "count": 40, "from": "edge", "spread": 2 },
+        { "at": 18, "kind": "swarmer", "count": 60, "from": "edge", "spread": 2.5 },
+        { "at": 30, "kind": "leaper", "count": 8, "from": "edge" },
+        { "at": 45, "kind": "spitter", "count": 6, "from": "edge" },
+        { "at": 60, "kind": "swarmer", "count": 90, "from": "edge", "spread": 3 },
+        { "at": 75, "kind": "brute", "count": 2, "from": "edge" },
+        { "at": 90, "kind": "swarmer", "count": 120, "from": "edge", "spread": 3, "elite": 0.04 }
+      ],
+      "objectives": [
+        { "id": "clear", "type": "killAll", "label": "Clear the district" },
+        { "id": "care", "type": "keepLots", "optional": true, "label": "Keep the transit hub standing", "recipe": "com-hotel", "count": 1 }
+      ],
+      "extract": true, "par": { "time": 300 },
+      "comms": [
+        { "at": 0, "who": "handler", "text": "Frame, you're over Glasswell. Doors open in three. Swarm's thick on the east avenues." },
+        { "at": 20, "who": "handler", "text": "Fuel depots on your map will go up if you hit them. Use that." },
+        { "at": 74, "who": "handler", "text": "Big contacts moving in. Armoured fronts — get round behind them." },
+        { "event": "extract", "who": "pilot", "text": "Dropship's on the pad, north-east corner. Come home." }
+      ]
+    },
+    {
+      "id": "m02-fuel-line", "name": "Fuel Line", "length": "short", "night": 0.1, "drop": 4.5, "tier": 1, "pay": 5200, "payPerScore": 5,
+      "map": { "seed": 2207, "district": "industrial", "w": 40, "h": 40 },
+      "brief": "A rival company is pumping our refineries dry. Burn their three tank farms before the convoy leaves.",
+      "waves": [
+        { "at": 3, "kind": "trooper", "count": 8, "from": "edge" },
+        { "at": 15, "kind": "tank", "count": 1, "from": "edge" },
+        { "at": 25, "kind": "drone", "count": 10, "from": "edge" },
+        { "at": 40, "kind": "trooper", "count": 10, "from": "edge" },
+        { "at": 55, "kind": "artillery", "count": 1, "from": "edge" },
+        { "at": 70, "kind": "tank", "count": 2, "from": "edge" },
+        { "at": 85, "kind": "gunship", "count": 1, "from": "edge" }
+      ],
+      "objectives": [
+        { "id": "farms", "type": "destroy", "pickLots": { "recipe": "ind-refinery", "count": 3 }, "label": "Destroy the tank farms" },
+        { "id": "quick", "type": "beat", "time": 240, "optional": true, "label": "Before the convoy leaves (4:00)" }
+      ],
+      "extract": true, "par": { "time": 270 },
+      "comms": [
+        { "at": 0, "who": "handler", "text": "Three refineries, marked on your map. They're full. Stand well back when they blow." },
+        { "at": 54, "who": "handler", "text": "They've brought rocket artillery. Watch the ground for the red circles." },
+        { "event": "extract", "who": "pilot", "text": "Smoke's visible from orbit. Nice work. Pick-up's at the north-east lot." }
+      ]
+    },
+    {
+      "id": "m03-hold-the-line", "name": "Hold the Line", "length": "mid", "night": 0.45, "drop": 4.5, "tier": 2, "pay": 8800, "payPerScore": 5,
+      "map": { "seed": 3319, "district": "residential", "w": 44, "h": 44 },
+      "brief": "Evacuation trains are leaving the Kettle Row station. Keep the swarm off it until the last one is out.",
+      "waves": [
+        { "at": 3, "kind": "swarmer", "count": 50, "from": "edge", "every": 25, "until": 520, "spread": 2.5 },
+        { "at": 20, "kind": "leaper", "count": 6, "from": "edge", "every": 40, "until": 520 },
+        { "at": 60, "kind": "spitter", "count": 4, "from": "edge", "every": 45, "until": 520 },
+        { "at": 120, "kind": "brute", "count": 1, "from": "edge", "every": 60, "until": 520 },
+        { "at": 200, "kind": "bloater", "count": 2, "from": "edge" },
+        { "at": 300, "kind": "burrower", "count": 3, "from": "edge" },
+        { "at": 420, "kind": "swarmer", "count": 160, "from": "edge", "spread": 3.5, "elite": 0.05 },
+        { "at": 425, "kind": "brute", "count": 3, "from": "edge" }
+      ],
+      "objectives": [
+        { "id": "hold", "type": "survive", "time": 540, "label": "Hold until the last train leaves" },
+        { "id": "station", "type": "keepLots", "optional": true, "label": "Keep the station standing", "recipe": "res-block", "count": 1 }
+      ],
+      "extract": true, "par": { "time": 560 },
+      "comms": [
+        { "at": 0, "who": "handler", "text": "Nine minutes, Frame. The trains don't stop for anything." },
+        { "at": 199, "who": "handler", "text": "Swollen ones coming in. Don't let them reach you — pop them at range." },
+        { "at": 299, "who": "handler", "text": "Ground's moving under the station. Something's digging." },
+        { "at": 418, "who": "handler", "text": "Last train's boarding. This is everything they've got." }
+      ]
+    }
+  ]
+}

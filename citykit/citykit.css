@@ -11,6 +11,16 @@ body { overflow-x: hidden; }
 .ck-params { border-left: 1px solid var(--border); }
 .ck-list input[type=text] { width: 100%; margin-bottom: 10px; }
 #pick { display: none; width: 100%; }
+/* category chips: by game or genre; several can be on */
+.ck-cats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.ck-chip { min-height: 34px; padding: 4px 12px; border-radius: 17px; background: var(--bg3); border: 1px solid var(--border); color: var(--fg2); font-size: 13px; }
+.ck-chip small { color: var(--fg2); opacity: .75; margin-left: 2px; font-variant-numeric: tabular-nums; }
+.ck-chip:hover { border-color: var(--accent); color: var(--fg); }
+.ck-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ck-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #001; }
+.ck-chip[aria-pressed="true"] small { color: #001; }
+#across { min-height: 34px; }
+#across-wrap[hidden] { display: none; }
 .ck-group h3 { margin: 14px 0 6px; }
 .ck-item { display: block; width: 100%; text-align: left; margin: 2px 0; padding: 8px 10px; border-radius: 8px; background: transparent; border: 1px solid transparent; }
 .ck-item:hover { border-color: var(--border); background: var(--bg3); }

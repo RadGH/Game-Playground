@@ -4,23 +4,47 @@ import { installTooltips } from '../../shared/tooltip.js';
 import { fmt } from '../../shared/format.js';
 import { Baker, composite } from './bake.js';
 import { TILE_W, TILE_H, toScreen, headingOfDir } from './iso.js';
-import { RECIPES, GROUPS, build, defaults, STYLE_IDS, STYLES } from './kit/buildings.js';
+import { RECIPES, GROUPS, CATEGORIES, genreOf, commonParams, build, defaults, STYLE_IDS, STYLES } from './kit/buildings.js';
 import './kit/all.js';
 
 installTooltips();
 const $ = s => document.querySelector(s);
 const baker = new Baker({ scale: 2 });
-const state = { id: null, params: {}, rot: 0, zoom: 'fit', time: 0, view: 'catalog', anim: null, dir: 3, playing: true };
+// tiny props (a 1.8 m crew figure is 4 px tall at the game's 1×) bake at a bigger scale (recipe.bakeScale) so they stay sharp
+const bakers = new Map([[2, baker]]);
+const bakerFor = id => { const s = RECIPES[id]?.bakeScale || 2; if (!bakers.has(s)) bakers.set(s, new Baker({ scale: s })); return bakers.get(s); };
+const state = { id: null, params: {}, rot: 0, zoom: 'fit', time: 0, view: 'catalog', anim: null, dir: 3, playing: true, genres: new Set(), across: null };
+try { for (const g of JSON.parse(localStorage.getItem('citykit:genres') || '[]')) if (CATEGORIES.some(c => c.id === g)) state.genres.add(g); } catch { /* private window */ }
 const cache = new Map();   // bake key → pair
 
 // ---------- catalog list ----------
 function items() { return Object.entries(RECIPES).map(([id, r]) => ({ id, ...r })); }
+/** The category chips: All + each category that has something in it. Several can be on at once; none = All. */
+const inGenres = id => !state.genres.size || genreOf(id).some(g => state.genres.has(g));
+function drawChips() {
+  const host = $('#cats'); host.replaceChildren();
+  const all = items();
+  const chip = (id, label, n, on) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'ck-chip'; b.dataset.cat = id;
+    b.setAttribute('aria-pressed', String(on)); b.innerHTML = `${label} <small>${n}</small>`;
+    b.addEventListener('click', () => {
+      if (id === 'all') state.genres.clear(); else if (state.genres.has(id)) state.genres.delete(id); else state.genres.add(id);
+      if (CATEGORIES.every(c => state.genres.has(c.id) || !all.some(i => genreOf(i.id).includes(c.id)))) state.genres.clear();   // every one on = All
+      try { localStorage.setItem('citykit:genres', JSON.stringify([...state.genres])); } catch { /* private window */ }
+      drawChips(); drawList();
+      host.querySelector(`[data-cat="${id}"]`)?.focus();
+    });
+    host.append(b);
+  };
+  chip('all', 'All', all.length, !state.genres.size);
+  for (const c of CATEGORIES) { const n = all.filter(i => genreOf(i.id).includes(c.id)).length; if (n) chip(c.id, c.label, n, state.genres.has(c.id)); }
+}
 function drawList() {
   const q = $('#search').value.trim().toLowerCase();
   const host = $('#groups'); host.replaceChildren();
   const pick = $('#pick'); pick.replaceChildren();
   for (const g of GROUPS) {
-    const list = items().filter(i => i.group === g.id && (!q || (i.name + ' ' + i.id + ' ' + g.label).toLowerCase().includes(q)));
+    const list = items().filter(i => i.group === g.id && inGenres(i.id) && (!q || (i.name + ' ' + i.id + ' ' + g.label).toLowerCase().includes(q)));
     if (!list.length) continue;
     const sec = document.createElement('section'); sec.className = 'ck-group';
     sec.innerHTML = `<h3>${g.label}</h3>`;
@@ -57,7 +81,7 @@ function drawParams() {
   for (const s of STYLE_IDS) { const o = document.createElement('option'); o.value = s; o.textContent = STYLES[s].label; if (s === state.params.style) o.selected = true; sel.append(o); }
   sel.addEventListener('change', () => { state.params.style = sel.value; redraw(); });
   if (!r.noStyle) add('Style', '', sel);
-  for (const k of r.params || []) {
+  for (const k of [...(r.params || []), ...commonParams(state.id)]) {
     const inp = document.createElement('input'); inp.type = 'range'; inp.min = k.min; inp.max = k.max; inp.step = k.step ?? 1; inp.value = state.params[k.key];
     inp.setAttribute('aria-label', k.label);
     const row = add(k.label, valueOf(k, state.params[k.key]), inp);
@@ -68,11 +92,24 @@ function drawParams() {
     for (const name of Object.keys(r.anims)) { const o = document.createElement('option'); o.value = name; o.textContent = r.anims[name].label || name; if (name === state.anim) o.selected = true; a.append(o); }
     a.addEventListener('change', () => { state.anim = a.value; redraw(); });
     add('Animation', '', a);
+  }
+  if (r.anims || r.dirs) {
     const dirs = document.createElement('input'); dirs.type = 'range'; dirs.min = 0; dirs.max = (r.dirs || 8) - 1; dirs.value = state.dir; dirs.setAttribute('aria-label', 'Facing');
     const row = add('Facing', dirName(state.dir, r.dirs || 8), dirs);
     dirs.addEventListener('input', () => { state.dir = +dirs.value; row.querySelector('b').textContent = dirName(state.dir, r.dirs || 8); redraw(); });
   }
   $('#copied').textContent = '';
+  drawAcross();
+}
+/** Variants: which setting runs across the columns (the first one unless picked; Damage shows every wreck stage). */
+const sheetParams = () => [...(RECIPES[state.id].params || []), ...commonParams(state.id)];
+function drawAcross() {
+  const sel = $('#across'), list = sheetParams();
+  sel.replaceChildren();
+  for (const k of list) { const o = document.createElement('option'); o.value = k.key; o.textContent = k.label; sel.append(o); }
+  if (!list.some(k => k.key === state.across)) state.across = list[0]?.key ?? null;
+  if (state.across) sel.value = state.across;
+  $('#across-wrap').hidden = state.view !== 'sheet' || list.length < 2;
 }
 const valueOf = (k, v) => k.names ? k.names[v] : fmt(v) + (k.unit ? ' ' + k.unit : '');
 const DIRN = ['up', 'up-right', 'right', 'down-right', 'down', 'down-left', 'left', 'up-left'];
@@ -87,7 +124,9 @@ function pairFor(id, params, rot, anim = null, frame = 0, dir = 0) {
     // a facing sprite is the same at every view turn (directions are measured on screen), so bake it at turn 0
     if (anim && g.userData.pose) g.userData.pose(anim, frame / RECIPES[id].anims[anim].frames, headingOfDir(dir, RECIPES[id].dirs || 8, 0));
     else if (g.userData.face) g.userData.face(headingOfDir(dir, RECIPES[id].dirs || 8, 0));
-    const pair = baker.bakePair(g, { rot: g.userData.pose || g.userData.face ? 0 : rot, shadow: true });
+    const bk = bakerFor(id);
+    const pair = bk.bakePair(g, { rot: g.userData.pose || g.userData.face ? 0 : rot, shadow: true });
+    pair.scale = bk.scale;
     cache.set(k, pair);
     if (cache.size > 600) cache.delete(cache.keys().next().value);
   }
@@ -133,8 +172,8 @@ function paintOne(W, H, now) {
   }
   const pair = pairFor(state.id, state.params, state.rot, state.anim, frame, state.dir);
   // Fit: the picture fills ~80% of the stage; otherwise 1× = the game's own size
-  const zoom = state.zoom === 'fit' ? Math.min(4, (W * 0.8) / (pair.w / baker.scale), (H * 0.8) / (pair.h / baker.scale)) : state.zoom;
-  const z = zoom / baker.scale;
+  const zoom = state.zoom === 'fit' ? Math.min(2 * pair.scale, (W * 0.8) / (pair.w / pair.scale), (H * 0.8) / (pair.h / pair.scale)) : state.zoom;
+  const z = zoom / pair.scale;
   const cx = W / 2 + (pair.w / 2 - pair.ax) * z, cy = H / 2 + (pair.ay - pair.h / 2) * z;
   groundTiles(cx, cy, w, d, zoom);
   composite(ctx, pair, cx, cy, state.time, z);
@@ -144,7 +183,7 @@ function paintOne(W, H, now) {
 function paintSheet(W, H) {
   // rows: the 4 view turns; columns: the first numeric setting at evenly spaced values
   const r = RECIPES[state.id]; if (!r) return;
-  const k = (r.params || [])[0];
+  const k = sheetParams().find(p => p.key === state.across) || sheetParams()[0];
   const vals = k ? spread(k.min, k.max, Math.min(6, Math.round((k.max - k.min) / (k.step || 1)) + 1)) : [null];
   const cols = vals.length, rows = 4;
   const cellW = W / cols, cellH = H / rows;
@@ -155,7 +194,8 @@ function paintSheet(W, H) {
     const pair = pairFor(state.id, p, rot, state.anim, 0, state.dir);
     pairs.push(pair); maxW = Math.max(maxW, pair.w); maxH = Math.max(maxH, pair.h);
   }
-  const z = Math.min(cellW * 0.9 / maxW, cellH * 0.85 / maxH, (state.zoom === 'fit' ? 4 : state.zoom) / baker.scale);
+  const sc = pairs[0].scale;
+  const z = Math.min(cellW * 0.9 / maxW, cellH * 0.85 / maxH, (state.zoom === 'fit' ? 2 * sc : state.zoom) / sc);
   let i = 0;
   ctx.font = '12px system-ui'; ctx.fillStyle = state.time > 0.5 ? '#c8d0dc' : '#1d2430';
   for (let rot = 0; rot < 4; rot++) for (let c = 0; c < cols; c++) {
@@ -176,7 +216,8 @@ function factLine(r, pair) {
   if (r.size) bits.push(`Lot ${r.size[0]}×${r.size[1]} tiles`);
   if (r.zone) bits.push({ R: 'Residential zone', C: 'Commercial zone', I: 'Industrial zone' }[r.zone]);
   if (state.params.floors) bits.push(`${state.params.floors} storeys`);
-  bits.push(`Picture ${Math.round(pair.w / baker.scale)}×${Math.round(pair.h / baker.scale)} px at 1×`);
+  if (state.params.damage) bits.push(['Whole', 'Damaged', 'Burning', 'Rubble'][state.params.damage]);
+  bits.push(`Picture ${Math.round(pair.w / pair.scale)}×${Math.round(pair.h / pair.scale)} px at 1×`);
   return bits.join(' · ');
 }
 function mix(a, b, t) {
@@ -191,6 +232,7 @@ function updateLabels() {
 
 // ---------- controls ----------
 $('#search').addEventListener('input', drawList);
+$('#across').addEventListener('change', e => { state.across = e.target.value; redraw(); });
 $('#pick').addEventListener('change', e => select(e.target.value));
 $('#rot-l').addEventListener('click', () => { state.rot = (state.rot + 3) % 4; redraw(); });
 $('#rot-r').addEventListener('click', () => { state.rot = (state.rot + 1) % 4; redraw(); });
@@ -214,6 +256,7 @@ function showView(v) {
   document.body.classList.toggle('scene-on', sceneOn);
   $('#scene').hidden = !sceneOn;
   try { localStorage.setItem('citykit:view', v); } catch { /* private window */ }
+  if (state.id) drawAcross();
   if (sceneOn) openScene(); else { scene?.stop(); redraw(); }
 }
 
@@ -273,10 +316,37 @@ window.addEventListener('keydown', e => {
 new ResizeObserver(redraw).observe(cv);
 
 // test hook: what is showing
-window.citykit = { state, RECIPES, baker, pairFor, select };
+window.citykit = { state, RECIPES, baker, bakerFor, pairFor, select };
 
+drawChips();
 let first = null; try { first = localStorage.getItem('citykit:last'); } catch { /* private window */ }
 select(RECIPES[first] ? first : 'com-hotel');
 let firstView = null; try { firstView = localStorage.getItem('citykit:view'); } catch { /* private window */ }
 const askView = new URLSearchParams(location.search).get('view');
 if (askView || firstView === 'scene') showView(askView || firstView);
+
+// ---------- controller: D-pad / left stick walks the focus through the page (chips, list, settings), A presses,
+// LB / RB turn the view. Sliders take left/right while focused.
+const padPrev = {};
+function padLoop() {
+  const pads = navigator.getGamepads?.() || [];
+  for (const gp of pads) {
+    if (!gp) continue;
+    const ax = gp.axes[0] || 0, ay = gp.axes[1] || 0;
+    const now = { up: gp.buttons[12]?.pressed || ay < -0.6, down: gp.buttons[13]?.pressed || ay > 0.6, left: gp.buttons[14]?.pressed || ax < -0.6, right: gp.buttons[15]?.pressed || ax > 0.6, a: gp.buttons[0]?.pressed, lb: gp.buttons[4]?.pressed, rb: gp.buttons[5]?.pressed };
+    const prev = padPrev[gp.index] || {}; padPrev[gp.index] = now;
+    const hit = k => now[k] && !prev[k];
+    const el = document.activeElement;
+    if ((hit('left') || hit('right')) && el?.matches('input[type=range]')) { el.value = +el.value + (hit('right') ? 1 : -1) * (+el.step || 1); el.dispatchEvent(new Event('input')); continue; }
+    if (hit('up') || hit('down') || hit('left') || hit('right')) {
+      const list = [...document.querySelectorAll('button, select, input, [tabindex="0"]')].filter(e => !e.disabled && e.offsetParent !== null);
+      const i = list.indexOf(el), d = hit('down') || hit('right') ? 1 : -1;
+      const next = list[i < 0 ? 0 : (i + d + list.length) % list.length];
+      next?.focus(); next?.scrollIntoView({ block: 'nearest' });
+    }
+    if (hit('a') && el && el !== document.body) el.click();
+    if (hit('lb')) $('#rot-l').click(); if (hit('rb')) $('#rot-r').click();
+  }
+  requestAnimationFrame(padLoop);
+}
+window.addEventListener('gamepadconnected', () => { if (!padLoop.on) { padLoop.on = true; requestAnimationFrame(padLoop); } });

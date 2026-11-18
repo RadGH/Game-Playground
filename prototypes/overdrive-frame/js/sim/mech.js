@@ -68,6 +68,7 @@ export function addHeat(m, n, T) {
  * world: { groundAt(x, z), pushOut(body, r), gravity? }. Pushes events (qb, jump, land, overheat, stall) to `ev`.
  * world.gravity (round 5, the moon): share of normal gravity, default 1 = unchanged. Below 1 a frame jumps higher,
  * falls slower, hovers on less energy and keeps more momentum off a quick boost (less grip on loose dust).
+ * world.gripAt(x, z) (round 6, ice): optional share of grip for the ground under the feet; only maps with ice give one.
  */
 export function stepMech(m, inp, dt, T, world, ev = []) {
   if (m.energy == null) m.energy = energyMaxOf(m, T);
@@ -95,6 +96,7 @@ export function stepMech(m, inp, dt, T, world, ev = []) {
   const speed = (boosting ? T.boostSpeed * S.boostMul * (L.boost ?? 1) : T.walkSpeed * S.speedMul * (L.speed ?? 1)) * heavy * hot * gas;
   let grip = (boosting ? T.boostAccel : T.walkAccel) * S.accelMul * (L.accel ?? 1) * (m.onGround ? 1 : 0.45);
   if (gMod) grip *= 0.5 + 0.5 * G;                                // low gravity: less traction, a quick boost carries further
+  if (world.gripAt && m.onGround) grip *= world.gripAt(m.x, m.z);   // round 6: the frozen lake (sim/snowmap.js) — no hook, no change
 
   // quick boost: a sharp burst the way you push (or straight back from the aim when standing still)
   if (inp.qb && !stunned && m.qbCd <= 0 && m.stall <= 0 && S.qbMul > 0) {

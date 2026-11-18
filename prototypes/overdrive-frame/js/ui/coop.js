@@ -15,7 +15,7 @@ import { play as sound } from '../../../../citykit/js/world/sound.js';
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const click = () => sound('ui.click', { global: true, gain: 0.4 });
-const DISTRICT = { downtown: 'Downtown', residential: 'Residential', industrial: 'Industrial', moon: 'Moon outpost' };   // moon: round 5
+const DISTRICT = { downtown: 'Downtown', residential: 'Residential', industrial: 'Industrial', moon: 'Moon outpost', forest: 'Pine forest', snow: 'Snowfield', desert: 'Badlands' };   // moon: round 5; forest, snow, desert: round 6 (the Outskirts)
 const CALL_A = ['Iron', 'Low', 'Copper', 'Grey', 'Night', 'Rust', 'Bright', 'Static', 'Cold', 'Long', 'Quick', 'Steel', 'Dust', 'Signal', 'Arc', 'Torque'];
 const CALL_B = ['tide', 'jack', 'wire', 'heron', 'ridge', 'hound', 'lark', 'wren', 'pike', 'gantry', 'rook', 'bolt', 'spur', 'kite', 'drift', 'anvil'];
 export const randomCallsign = () => CALL_A[Math.floor(Math.random() * CALL_A.length)] + CALL_B[Math.floor(Math.random() * CALL_B.length)];   // lint-ok: a name suggestion, not game rules

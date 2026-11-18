@@ -21,6 +21,7 @@ export const GROUPS = [
   { id: 'colony', label: 'Colony' },
   { id: 'landmarks', label: 'Landmarks' },
   { id: 'outposts', label: 'Outposts' },
+  { id: 'wilds', label: 'Forest & wilds' },  // Overdrive Frame: Pinewatch (kit/forest.js)
   { id: 'defence', label: 'Walls & turrets' },
   { id: 'creatures', label: 'Creatures' },
   { id: 'vehicles', label: 'Vehicles' },
@@ -36,9 +37,12 @@ export const CATEGORIES = [
   { id: 'military', label: 'Military' },
   { id: 'alien', label: 'Alien' },
   { id: 'moon', label: 'Moon outpost' },     // Overdrive Frame round 5 (kit/moon.js)
+  { id: 'forest', label: 'Pine forest' },    // Overdrive Frame: Pinewatch (kit/forest.js)
+  { id: 'snow', label: 'Snowfield' },        // Overdrive Frame round 6 (kit/snow.js)
+  { id: 'desert', label: 'Desert badlands' },  // Overdrive Frame Red Mesa (kit/desert.js)
 ];
 /** Groups whose recipes are buildings: each gets the common `damage` setting (whole → damaged → burning → rubble). */
-export const WRECK_GROUPS = ['homes', 'shops', 'industry', 'services', 'parks', 'colony', 'landmarks', 'outposts'];
+export const WRECK_GROUPS = ['homes', 'shops', 'industry', 'services', 'parks', 'colony', 'landmarks', 'outposts', 'wilds'];
 
 export const RECIPES = {};
 /** Register recipes (other kit files call this). A recipe without a `genre` is in the 'neon' category. */

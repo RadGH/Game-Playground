@@ -23,6 +23,7 @@ import { setupStages, nextStage } from './stages.js';
 import { setupVersus, joinVersus, buildVersusGrids, useGrid, versusHurt, stepVersus, versusResult } from './versus.js';
 import { makeFlow, updateFlow, flowDist } from './flow.js';
 import { stepRoles, shieldMul, addCloud } from './roles.js';      // round 5 roles: bulwark domes, spore clouds
+import { gripFor } from './snowmap.js';                             // round 6: slippery lake ice (null off the snowfield)
 
 export const PHASES = ['drop', 'fight', 'extract', 'won', 'failed'];
 
@@ -433,7 +434,7 @@ export function stepMission(S, inputs, dt) {
   for (const a of S.mechs) if (a.team === 'enemy' && !a.dead) S.grid.add(a);   // rival aces: player shots find them like any enemy
 
   if (S.phase === 'drop') { S.phaseT -= dt; if (S.phaseT <= 0) { S.phase = 'fight'; S.events.push({ type: 'phase', phase: 'fight' }); } }
-  const worldApi = { groundAt: (x, z) => groundAt(S.world, x, z), pushOut: (b, r) => pushOut(S.world, b, r), gravity: S.gravity };
+  const worldApi = { groundAt: (x, z) => groundAt(S.world, x, z), pushOut: (b, r) => pushOut(S.world, b, r), gravity: S.gravity, gripAt: gripFor(S.def.map) };
   if (S.players.some(p => p.bot)) { inputs = { ...inputs }; botInputs(S, inputs, dt); }   // bot teammates (sim/bots.js)
 
   for (const p of S.players) {

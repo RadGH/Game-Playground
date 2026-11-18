@@ -11,6 +11,7 @@ import { groundAt, pushOut } from './sim/world.js';
 import { packInput, STEP_HZ, SNAP_EVERY } from './net/protocol.js';
 import { applySnap, applyMe, setPhys } from './net/snap.js';
 import { applyRoster } from './net/mirror.js';
+import { gripFor } from './sim/snowmap.js';
 
 const STEP = 1 / STEP_HZ, SNAP_DT = SNAP_EVERY / STEP_HZ;
 
@@ -23,7 +24,8 @@ export class NetPlay extends Play {
     this.seq = 0; this.pending = []; this.queue = []; this.snapT = 0; this.snapAlpha = 1; this.relT = 0; this.ownPrev = null; this.tickAlpha = 1;
     this.netStats = { snaps: 0, late: 0, corrections: 0, lastFix: 0 };
     // gravity: the same share the server's mission runs (the moon is 0.4), or prediction would jump to the wrong height
-    this.worldApi = { groundAt: (x, z) => groundAt(this.S.world, x, z), pushOut: (b, r) => pushOut(this.S.world, b, r), gravity: this.S.def.gravity ?? 1 };
+    // ice (round 6): the same slippery lake tiles the server's mission reads (sim/snowmap.js gripFor; null off the snowfield)
+    this.worldApi = { groundAt: (x, z) => groundAt(this.S.world, x, z), pushOut: (b, r) => pushOut(this.S.world, b, r), gravity: this.S.def.gravity ?? 1, gripAt: gripFor(this.S.def.map) };
     this.offs = [
       this.net.on('s', m => this._onSnap(m)),
       this.net.on('roster', m => applyRoster(this.S, m.roster, this.data)),

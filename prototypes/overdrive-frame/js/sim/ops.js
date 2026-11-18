@@ -49,7 +49,7 @@ export function setupOps(S) {
   S.allies = []; S.ops = { plants: [], core: null, route: null, escaped: 0, arrived: 0, lost: 0, convoyLeft: 0, landed: false, convoyUnits: [] };
   // enemies placed far away (nests, the hunt's marked target)
   for (const p of def.place || []) {
-    const mine = p.place === 'mine' && def.map.moon?.mine;    // round 5: nests down in the moon outpost's mine pit
+    const mine = (p.place === 'mine' && def.map.moon?.mine) || def.map.zones?.[p.place];    // round 5: nests down in the moon's mine pit; round 6: in a named zone (the snowfield's lake)
     for (const spot of mine ? farSpots(S, R, p.count || 1, { apart: 2.2, near: mine }) : farSpots(S, R, p.count || 1, { apart: 7 })) {
       const e = S.spawn(p.kind, spot.x, spot.z, { warn: 0, elite: !!p.elite, force: true });
       if (e) { if (p.tag) e.tag = p.tag; if (p.hpMul) { e.hp *= p.hpMul; e.hpMax *= p.hpMul; } }
@@ -57,7 +57,7 @@ export function setupOps(S) {
   }
   for (const o of S.objectives) {
     if (o.type === 'plant') { S.ops.plants = farSpots(S, R, o.count, { apart: 8 }).map((p, i) => ({ id: 'mast' + i, x: p.x, z: p.z, t: 0, done: false })); o.points = S.ops.plants; }
-    if (o.type === 'carry') { const p = farSpots(S, R, 1, { minFromStart: 16 })[0] || { x: S.world.w / 2, z: S.world.h / 2 }; S.ops.core = { x: p.x, z: p.z, carrier: null, pick: 0, home: false }; o.core = S.ops.core; }
+    if (o.type === 'carry') { const near = def.map.zones?.[o.near]; const p = (near && farSpots(S, R, 1, { minFromStart: 8, near })[0]) || farSpots(S, R, 1, { minFromStart: 16 })[0] || { x: S.world.w / 2, z: S.world.h / 2 }; S.ops.core = { x: p.x, z: p.z, carrier: null, pick: 0, home: false }; o.core = S.ops.core; }   // round 6: `near` a named zone (the relay dish)
   }
   if (def.convoy) {
     S.ops.route = convoyRoute(S);

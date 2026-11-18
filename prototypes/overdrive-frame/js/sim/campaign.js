@@ -10,13 +10,14 @@ export const missionDone = (save, id) => !!save.grades?.[id];
  *  storyOpen (its story mission can be flown now), control 0..1 (freed + cleaned up by contracts — the map recovers). */
 export function districtStates(save, CAMP) {
   const D = CAMP.districts, freed = new Set(D.filter(d => missionDone(save, d.story)).map(d => d.id));
-  const near = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1;
+  const regionOf = d => d.region || 'city';                      // the city, the outskirts… (round 6) — neighbours only inside one
+  const near = (a, b) => regionOf(a) === regionOf(b) && Math.abs(a.x - b.x) + Math.abs(a.y - b.y) === 1;
   return D.map(d => {
     const isFreed = freed.has(d.id);
     const reached = isFreed || d.start || D.some(o => freed.has(o.id) && near(o, d));
     const afterOk = d.afterAny ? d.after.some(id => missionDone(save, id)) : d.after.every(id => missionDone(save, id));
     const cleaned = save.cleanup?.[d.id] || 0;
-    return { ...d, freed: isFreed, reached, storyOpen: reached && afterOk && !isFreed, control: isFreed ? Math.min(1, 0.55 + cleaned * 0.15) : reached ? 0.12 : 0, cleaned };
+    return { ...d, region: regionOf(d), freed: isFreed, reached, storyOpen: reached && afterOk && !isFreed, control: isFreed ? Math.min(1, 0.55 + cleaned * 0.15) : reached ? 0.12 : 0, cleaned };
   });
 }
 
@@ -34,7 +35,7 @@ export function storyList(save, CAMP, MISSIONS) {
 
 const pickW = (R, list) => { const tot = list.reduce((s, x) => s + (x.w || 1), 0); let v = R.next() * tot; for (const x of list) { v -= x.w || 1; if (v <= 0) return x; } return list[0]; };
 const range = (R, [a, b]) => Math.round(a + (b - a) * R.next());
-const TALL = { downtown: 'com-office', industrial: 'ind-depot', residential: 'res-block' };
+const TALL = { downtown: 'com-office', industrial: 'ind-depot', residential: 'res-block', forest: 'forest-cabin', snow: 'snow-radar', desert: 'desert-hangar' };   // outskirts: Pinewatch's crew cabins, Frostline's radar domes, Red Mesa's hangars
 const PAY = { 1: 3800, 2: 5600, 3: 7600 };
 
 /** Waves for a contract: one faction's (or both, for a contested district) units, spread over the mission's length. */

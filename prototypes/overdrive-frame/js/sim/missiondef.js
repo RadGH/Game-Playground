@@ -3,6 +3,10 @@
 import { makeCityMap } from './citymap.js';
 import { makeHangarMap, makeRangeMap } from './hangarmap.js';
 
+// trees and rock are never stand-in demolition targets ("bring down the strongpoints" picking a pine stand) — Red Mesa marks
+// its rock `natural`; the forest's and the snowfield's woods and ridges are listed here (round 6)
+const NATURAL = new Set(['forest-pine', 'forest-pines', 'forest-thicket', 'forest-rock', 'forest-crag', 'snow-pines', 'snow-spruce', 'snow-ridge']);
+
 export function buildMissionDef(m, opts = {}) {
   // the hangar hub and the test range: fixed maps, no waves or objectives, never end (no drop-in either)
   const kind = m.map?.kind;
@@ -16,7 +20,7 @@ export function buildMissionDef(m, opts = {}) {
   const pick = ({ recipe, count }) => {
     const size = l => l.w * l.d * 10 + l.h;
     let list = map.lots.filter(l => l.recipe === recipe && !used.has(l.id)).sort((a, b) => size(b) - size(a));
-    if (list.length < count) list = list.concat(map.lots.filter(l => !used.has(l.id) && !list.includes(l) && l.w * l.d >= 2).sort((a, b) => size(b) - size(a)));
+    if (list.length < count) list = list.concat(map.lots.filter(l => !used.has(l.id) && !list.includes(l) && l.w * l.d >= 2 && !l.natural && !NATURAL.has(l.recipe)).sort((a, b) => size(b) - size(a)));   // natural: rock (Red Mesa) is never a stand-in target
     const out = list.slice(0, count); out.forEach(l => used.add(l.id)); return out.map(l => l.id);
   };
   const objectives = (m.objectives || []).map(o => {
@@ -24,6 +28,7 @@ export function buildMissionDef(m, opts = {}) {
     if (o.pickLots) r.lots = pick(o.pickLots);
     if (o.type === 'keepLots') r.lots = pick({ recipe: o.recipe, count: o.count || 1 });
     if (o.zone === 'start') { r.x = map.start.x; r.z = map.start.z; r.r = o.r || 3; }   // round 5: hold the landing pad (survive in a zone)
+    else if (o.zone && map.zones?.[o.zone]) { const q = map.zones[o.zone]; r.x = q.x; r.z = q.z; r.r = o.r || q.r; }   // round 6: a named spot (the snowfield's station yard)
     return r;
   });
   // a long mission (round 5): stage 1 is the mission's own objectives + waves; `stages` names it and adds the rest

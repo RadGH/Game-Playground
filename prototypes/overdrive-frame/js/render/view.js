@@ -29,6 +29,9 @@ import { Fx } from '../../../../citykit/js/world/fx.js';
 import { DIRS } from './sprites.js';
 import { drawBoss, drawBossMarks, drawEnemyMech } from './boss-art.js';
 import { drawMoonGround } from './moon-ground.js';   // round 5: the moon's dust, craters, mine and pads
+import { drawForestGround } from './forest-ground.js';   // Pinewatch: grass, woods floor, trails, road, river
+import { drawSnowGround, drawSnowOver, drawSnowfall } from './snow-ground.js';   // round 6: the snowfield (ground, lift cables, snowfall)
+import { drawDesertGround } from './desert-ground.js';   // Red Mesa: sand, washes, the highway, the base basin
 import { drawRoles } from './roles-art.js';
 import { objectiveTargets } from './targets.js';     // the mission's targets: edge arrows here, the minimap in ui/minimap.js          // round 5: bulwark domes, heal beams, flamer cones, spore clouds
 
@@ -84,6 +87,9 @@ export class View {
   _ground(ctx, map) {
     if (map.interior) return this._interior(ctx, map);
     if (map.moon) { drawMoonGround(this, ctx, map); return this._scorch(ctx); }   // round 5: the moon outpost
+    if (map.forest) { drawForestGround(this, ctx, map); return this._scorch(ctx); }   // Pinewatch: the pine forest
+    if (map.snow) { drawSnowGround(this, ctx, map); return this._scorch(ctx); }   // round 6: the snowfield
+    if (map.desert) { drawDesertGround(this, ctx, map); return this._scorch(ctx); }   // Red Mesa: the desert badlands
     const n = this.night;
     ctx.fillStyle = mixHex(C.ground, C.groundNight, n); ctx.fillRect(0, 0, this.W, this.H);
     // sidewalks under every block, then roads with lane marks, then plazas
@@ -243,6 +249,7 @@ export class View {
     items.sort((a, b) => a.d - b.d);
     for (const it of items) it.draw();
     drawRoles(ctx, this, S, lerp, t);     // round 5 roles, over the scene (render/roles-art.js)
+    if (map.snow) drawSnowOver(ctx, this, map, t);   // round 6: the ski lift's cables and cabins, over everything on the ground
 
     this._shots(ctx, S, t);
     this._pings(ctx, S, lerp, dt, t);
@@ -256,6 +263,7 @@ export class View {
   /** Drifting motes over the whole view — dust under the hangar lights, ash over a city at war. Cheap (a few dozen
    *  dots in screen space, tied to the camera so they read as being in the air), and the scene is never dead still. */
   _ambient(ctx, S, t) {
+    if (S.def.map.snow) return drawSnowfall(this, ctx, t);           // round 6: falling snow instead of ash
     const indoor = !!S.def.map.interior || S.def.kind === 'hangar' || S.def.kind === 'range', n = indoor ? 60 : 44;
     const W = this.W, H = this.H, cx = this.cam.x * 40, cz = this.cam.z * 40;
     ctx.save(); ctx.globalCompositeOperation = indoor ? 'lighter' : 'source-over';
@@ -264,7 +272,7 @@ export class View {
       const sp = 6 + r2 * 14, x = ((r1 * W * 1.3 + t * sp * (indoor ? 0.6 : 1.4) - cx * 0.3) % (W * 1.1) + W * 1.1) % (W * 1.1) - W * 0.05;
       const y = ((r2 * H * 1.2 + t * sp * (indoor ? -0.35 : 0.8) + Math.sin(t * 0.7 + i) * 8 - cz * 0.3) % (H * 1.1) + H * 1.1) % (H * 1.1) - H * 0.05;
       const a = (indoor ? 0.18 : 0.22) * (0.5 + 0.5 * Math.sin(t * (0.8 + r1) + i));
-      ctx.fillStyle = indoor ? `rgba(255,232,190,${a.toFixed(3)})` : `rgba(150,140,130,${a.toFixed(3)})`;
+      ctx.fillStyle = indoor ? `rgba(255,232,190,${a.toFixed(3)})` : S.def.map.forest ? `rgba(236,232,170,${a.toFixed(3)})` : `rgba(150,140,130,${a.toFixed(3)})`;   // forest: pollen and seed fluff in the sun
       const sz = 2 + r1 * 2.2; ctx.fillRect(x, y, sz, sz);
     }
     ctx.restore();

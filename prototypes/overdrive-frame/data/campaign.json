@@ -2,6 +2,10 @@
   "_doc": "The campaign (owner: 'a city map of districts held by enemies; story missions push in; contracts in reached districts; the city recovers visibly'). districts: grid x,y on the city map (3×3), held = who holds it at the start (swarm | army | both), story = the story mission that frees it, after = story missions that must be done first, tier = loot tier of its contracts. A district is REACHED once it borders a freed district (or is the start). contracts: templates the board fills from (js/sim/campaign.js). licences: reputation with each maker (from their contracts) unlocks their parts at the dealer and a discount.",
   "city": { "name": "Larkspur", "blurb": "A coastal megacity of glass towers and refinery flats. Half of it went dark when the swarm broke through the sea wall; the rest is being carved up by Halden-Voss Security, a company army that calls it 'stabilisation'." },
   "rival": { "name": "Halden-Voss Security", "short": "Halden-Voss" },
+  "regions": [
+    { "id": "city", "name": "Larkspur", "blurb": "The city: nine districts between the hills and the sea wall." },
+    { "id": "outskirts", "name": "The Outskirts", "blurb": "Past the city limits: pine ridges, red badlands and the snowfields in the mountains. Pinewatch is open from the start; each area you free opens the next." }
+  ],
   "districts": [
     { "id": "thornfield", "name": "Thornfield", "type": "residential", "x": 0, "y": 0, "held": "swarm", "story": "m08-long-fall", "after": ["m06-last-bus", "m07-ace"], "tier": 3 },
     { "id": "crown", "name": "The Crown", "type": "downtown", "x": 1, "y": 0, "held": "swarm", "story": "m09-brood-queen", "after": ["m08-long-fall"], "tier": 3, "more": [{ "story": "m11-quiet-dust", "after": ["m09-brood-queen"] }] },
@@ -11,7 +15,10 @@
     { "id": "saltmarsh", "name": "Saltmarsh Docks", "type": "industrial", "x": 2, "y": 1, "held": "army", "story": "m04-cold-cargo", "after": ["m02-fuel-line"], "tier": 2 },
     { "id": "linden", "name": "Linden Heights", "type": "residential", "x": 0, "y": 2, "held": "swarm", "story": "m03-hold-the-line", "after": ["m01-drop-zone"], "tier": 1 },
     { "id": "glasswell", "name": "Glasswell", "type": "downtown", "x": 1, "y": 2, "held": "swarm", "story": "m01-drop-zone", "after": [], "tier": 1, "start": true },
-    { "id": "kettle", "name": "Kettle Row", "type": "industrial", "x": 2, "y": 2, "held": "army", "story": "m02-fuel-line", "after": ["m01-drop-zone"], "tier": 1, "more": [{ "story": "m10-iron-stride", "after": ["m07-ace"] }] }
+    { "id": "kettle", "name": "Kettle Row", "type": "industrial", "x": 2, "y": 2, "held": "army", "story": "m02-fuel-line", "after": ["m01-drop-zone"], "tier": 1, "more": [{ "story": "m10-iron-stride", "after": ["m07-ace"] }] },
+    { "id": "pinewatch", "region": "outskirts", "name": "Pinewatch Ridge", "type": "forest", "x": 0, "y": 0, "held": "swarm", "story": "m13-pinewatch", "after": [], "tier": 1, "start": true },
+    { "id": "redmesa", "region": "outskirts", "name": "Red Mesa", "type": "desert", "x": 1, "y": 0, "held": "army", "story": "m14-red-mesa", "after": [], "tier": 2 },
+    { "id": "frostline", "region": "outskirts", "name": "Frostline", "type": "snow", "x": 2, "y": 0, "held": "both", "story": "m15-frostline", "after": [], "tier": 2 }
   ],
   "factions": {
     "swarm": { "label": "Swarm", "colour": "#ff5a3a",

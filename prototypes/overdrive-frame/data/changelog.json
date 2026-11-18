@@ -1,6 +1,18 @@
 {
   "entries": [
     {
+      "id": "2026-11-18-outskirts",
+      "date": "2026-11-18",
+      "title": "The Outskirts",
+      "items": [
+        "A second region past the city: the Outskirts. Switch between Larkspur and the Outskirts with the tabs above the campaign map.",
+        "Pinewatch Ridge — daylight pine forest with a river, a hydro dam and a logging camp. Open from the start: its story mission and contracts are waiting.",
+        "Red Mesa — red desert badlands with mesas, a wind farm, a solar field and a Halden-Voss forward base. Free Pinewatch to reach it.",
+        "Frostline — a snowfield in the mountains with a radar station, a ski lift and a frozen lake. The ice is slippery: frames slide on it. Free Red Mesa to reach it.",
+        "Contracts come up in every area you've reached, so you'll see outdoor maps on the board between city jobs."
+      ]
+    },
+    {
       "id": "2026-11-18-breadth",
       "date": "2026-11-18",
       "title": "Overload, the walker, the moon and versus",

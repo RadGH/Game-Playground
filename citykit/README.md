@@ -86,6 +86,19 @@ gold foil, lit portholes and beacons; every one sits on a dust-coloured pad and 
 The game's map: `prototypes/overdrive-frame/js/sim/moonmap.js`; its ground (craters, mine pit, pads):
 `prototypes/overdrive-frame/js/render/moon-ground.js`.
 
+### Pine forest (`js/kit/forest.js`, group `wilds`, genre `forest`)
+Overdrive Frame's Pinewatch ridge: a daylight change from the neon city. **Woods** — `forest-pine` (1×1 lone pine),
+`forest-pines` (2×2 stand of 5–7 pines), `forest-thicket` (2×1 young pines + windfall log), `forest-rock` (1×1 boulder,
+low enough to jump onto), `forest-crag` (2×2 outcrop) — draw their OWN damage stages (`noWreck` + a Damage param):
+the city's wreck turns anything into concrete slabs, so instead a stand loses trees (snapped trunks, trees lying across
+the lot), then burns (charred crowns, fire cones that glow in the lights picture), then is felled (burnt logs, stumps,
+embers); rock cracks, scorches and splits, then lies shattered. **Buildings** — `forest-sawmill` (3×2, wigwam burner),
+`forest-logs` (2×1 log decks), `forest-skidder` (1×1 log skidder), `forest-cabin` (1×1 log cabin), `forest-tower`
+(1×1 fire lookout), `forest-dam` (4×2 hydro dam: reservoir, spillway, powerhouse), `forest-pylon` (1×1 power pylon) —
+get the common wreck stages. Pines are 0.9–1.4 tall (a frame is 0.75). Lit windows and lamps for dusk.
+The game's map: `prototypes/overdrive-frame/js/sim/forestmap.js`; its ground (grass, trails, road, river):
+`prototypes/overdrive-frame/js/render/forest-ground.js`.
+
 ### Workshop props (`js/kit/workshop.js`, group `workshop`, genre `industrial`)
 For Overdrive Frame's title workshop and hangar (`prototypes/overdrive-frame/docs/ARCH.md`). **True to scale: 1 unit =
 16 m** (`M = 1/16`). Forklift (forks down/up, paint), Semi Truck (cab colour; box van / flatbed / tanker), Gantry Crane

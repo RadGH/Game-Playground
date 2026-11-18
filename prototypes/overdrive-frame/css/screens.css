@@ -125,3 +125,7 @@
   .of-res-parts li { grid-template-columns: 110px 1fr 54px; }
   .of-launch { width: 100%; text-align: center; }
 }
+
+/* the campaign map's region tabs (round 6: Larkspur / the Outskirts) */
+.of-region-tabs { display: flex; gap: 6px; }
+.of-region-tabs .of-btn { flex: 1; text-align: center; }

@@ -23,7 +23,7 @@ import { openReport } from './report.js';
 import { play as sound } from '../../../../citykit/js/world/sound.js';
 
 const LENGTH = { short: '4–8 min', mid: '8–15 min', long: '15+ min' };
-const DISTRICT = { downtown: 'Downtown', residential: 'Residential', industrial: 'Industrial', moon: 'Moon outpost' };   // moon: round 5
+const DISTRICT = { downtown: 'Downtown', residential: 'Residential', industrial: 'Industrial', moon: 'Moon outpost', forest: 'Pine forest', snow: 'Snowfield', desert: 'Badlands' };   // moon: round 5; forest, snow, desert: round 6 (the Outskirts)
 const MAT_NAMES = { scrap: 'Scrap', alloy: 'Alloy', exotic: 'Exotic', chitin: 'Chitin', siegeplate: 'Siege plate' };   // chitin: the Broodmother's, siege plate: the Juggernaut's
 const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
 const click = () => sound('ui.click', { global: true, gain: 0.4 });
@@ -163,7 +163,8 @@ export class Screens {
       <header class="of-bar"><button type="button" class="of-btn of-back" aria-label="Back">‹ Back</button><h1>${CAMP.city.name} <span class="of-wide">operations</span></h1><span class="of-bar-credits">${fmt(g.save.credits, { decimals: 0 })} credits</span></header>
       <div class="of-board-body">
         <div class="of-board-side">
-          <canvas class="of-city" width="420" height="330" aria-label="City map: freed districts glow, dark ones are held by the enemy"></canvas>
+          <div class="of-seg of-region-tabs" role="tablist" aria-label="Region">${(CAMP.regions || [{ id: 'city', name: CAMP.city.name }]).map(r => `<button type="button" class="of-btn of-small" role="tab" data-region="${r.id}">${r.name}</button>`).join('')}</div>
+          <canvas class="of-city" width="420" height="330" aria-label="Campaign map: freed areas glow, dark ones are held by the enemy"></canvas>
           <div class="of-board-lists"><h3>Story</h3><ol class="of-board-list" data-l="story" aria-label="Story missions"></ol><h3>Contracts <small>new ones after every mission</small></h3><ol class="of-board-list" data-l="contracts" aria-label="Contracts"></ol></div>
         </div>
         <article class="of-brief" aria-live="polite"></article>
@@ -176,14 +177,19 @@ export class Screens {
       const best = g.save.grades[m.id], d = CAMP.districts.find(x => x.id === (m.district || CAMP.districts.find(y => y.story === m.id)?.id));
       const tag = m.contract ? `<span class="of-card-client">${g.MAKERS.find(x => x.id === m.client)?.short}</span>` : best ? `<span class="of-grade of-grade-${best}">${best}</span>` : locked ? '' : '<span class="of-card-new">New</span>';
       b.innerHTML = `<span class="of-card-name">${m.name}</span><span class="of-card-meta">${locked || `${d?.name || DISTRICT[m.map.district]} · ${LENGTH[m.length]}`}</span><span class="of-card-pay">${locked ? '' : fmt(m.pay, { decimals: 0 }) + ' cr'}</span>${tag}`;
-      if (locked) b.disabled = true; else b.addEventListener('click', () => { click(); sel = m; draw(); });
+      if (locked) b.disabled = true; else b.addEventListener('click', () => { click(); sel = m; region = regionOfMission(m); draw(); });
       li.append(b); return li;
     };
+    // which region the map shows: the selected mission's (round 6: Larkspur or the Outskirts)
+    const regionOfMission = m => (CAMP.districts.find(d => d.id === (m?.district || CAMP.districts.find(y => y.story === m?.id || (y.more || []).some(x => x.story === m?.id))?.id))?.region) || 'city';
+    let region = regionOfMission(sel);
+    el.querySelectorAll('[data-region]').forEach(b => b.addEventListener('click', () => { click(); region = b.dataset.region; draw(); }));
     const draw = () => {
+      el.querySelectorAll('[data-region]').forEach(b => { const on = b.dataset.region === region; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); });
       el.querySelector('[data-l="story"]').replaceChildren(...story.map(x => card(x.mission, x.open || x.done ? null : x.after && !x.district.freed ? `Free ${x.district.name} first` : x.district.reached ? 'Finish the missions before it first' : `Free a district next to ${x.district.name} first`)));
       el.querySelector('[data-l="contracts"]').replaceChildren(...contracts.map(m => card(m)));
       this._brief(brief, sel);
-      this._city(el.querySelector('.of-city'), sel);
+      this._city(el.querySelector('.of-city'), sel, region);
     };
     draw();
     this._show('missions', el);
@@ -191,8 +197,9 @@ export class Screens {
 
   /** The city map: districts glow as they are freed and cleaned up (owner: "the city recovers visibly"); dark ones
    *  carry the colour of whoever holds them. The selected mission's district is outlined. */
-  _city(cv, sel) {
-    const g = this.g, ctx = cv.getContext('2d'), st = districtStates(g.save, g.CAMP), W = cv.width, H = cv.height;
+  _city(cv, sel, region = 'city') {
+    if (region !== 'city') return this._outskirts(cv, sel, region);
+    const g = this.g, ctx = cv.getContext('2d'), st = districtStates(g.save, g.CAMP).filter(d => d.region === 'city'), W = cv.width, H = cv.height;
     ctx.fillStyle = '#060a12'; ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = '#0a1a2a'; ctx.fillRect(0, H - 34, W, 34);                  // the sea along the south edge
     ctx.strokeStyle = 'rgba(63, 240, 255, 0.15)'; for (let x = 0; x < W; x += 14) { ctx.beginPath(); ctx.moveTo(x, H - 20 + Math.sin(x) * 2); ctx.lineTo(x + 7, H - 20); ctx.stroke(); }
@@ -212,6 +219,39 @@ export class Screens {
       ctx.font = '600 13px "Chakra Petch", system-ui'; ctx.fillStyle = d.freed ? '#d9fff0' : d.reached ? '#f0e2c0' : '#8a93a6'; ctx.fillText(d.name, x + 8, y + 18);
       ctx.font = '500 12px "Chakra Petch", system-ui'; ctx.fillStyle = d.freed ? '#5fffb0' : d.storyOpen ? '#ffb02e' : '#8a93a6';
       ctx.fillText(d.freed ? `Freed · ${Math.round(d.control * 100)}%` : d.storyOpen ? 'Story mission ready' : d.reached ? `Held by ${g.CAMP.factions[d.held === 'both' ? 'army' : d.held].label}${d.held === 'both' ? ' + swarm' : ''}` : 'Out of reach', x + 8, y + hh - 9);
+    }
+  }
+
+  /** The Outskirts on the campaign map (round 6): a row of outdoor areas, each drawn as its land — pines, red mesas, snow —
+   *  greying out while out of reach and coming alive as it's freed. */
+  _outskirts(cv, sel, region) {
+    const g = this.g, ctx = cv.getContext('2d'), W = cv.width, H = cv.height, st = districtStates(g.save, g.CAMP).filter(d => d.region === region);
+    const R = (seed => () => (seed = (seed * 16807) % 2147483647) / 2147483647)(11);
+    ctx.fillStyle = '#081016'; ctx.fillRect(0, 0, W, H);
+    const cols = Math.max(1, ...st.map(d => d.x + 1)), rows = Math.max(1, ...st.map(d => d.y + 1));
+    const cw = (W - 40) / cols, ch = (H - 40) / rows;
+    const selD = sel && (sel.district || g.CAMP.districts.find(d => d.story === sel.id || (d.more || []).some(x => x.story === sel.id))?.id);
+    const LAND = { forest: ['#14301f', '#2f7a46', '#1d4a2c'], desert: ['#3a2216', '#c4683a', '#7a3c22'], snow: ['#1c2633', '#dfe9f3', '#8fa7c2'] };
+    for (const d of st) {
+      const x = 20 + d.x * cw + 5, y = 20 + d.y * ch + 5, w = cw - 10, hh = ch - 10, [base, hi, mid] = LAND[d.type] || LAND.forest;
+      ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, hh); ctx.clip();
+      ctx.fillStyle = base; ctx.fillRect(x, y, w, hh);
+      ctx.globalAlpha = d.reached ? 1 : 0.35;
+      for (let k = 0; k < 60; k++) {                         // the land: pines, mesas or snow drifts
+        const px = x + R() * w, py = y + 20 + R() * (hh - 30);
+        if (d.type === 'desert') { ctx.fillStyle = k % 3 ? mid : hi; const s = 6 + R() * 16; ctx.fillRect(px, py, s * 1.6, s * 0.7); }
+        else if (d.type === 'snow') { ctx.fillStyle = k % 4 ? hi : mid; ctx.beginPath(); ctx.ellipse(px, py, 4 + R() * 10, 2 + R() * 3, 0, 0, Math.PI * 2); ctx.fill(); }
+        else { ctx.fillStyle = k % 4 ? mid : hi; ctx.beginPath(); ctx.moveTo(px, py - 9); ctx.lineTo(px + 5, py + 4); ctx.lineTo(px - 5, py + 4); ctx.fill(); }
+      }
+      ctx.restore();
+      const held = g.CAMP.factions[d.held === 'both' ? 'army' : d.held]?.colour || '#888';
+      if (!d.freed) { ctx.fillStyle = held + (d.reached ? '26' : '14'); ctx.fillRect(x, y, w, hh); }
+      if (!d.reached) { ctx.fillStyle = 'rgba(6, 8, 12, 0.55)'; ctx.fillRect(x, y, w, hh); }
+      ctx.lineWidth = d.id === selD ? 3 : 1; ctx.strokeStyle = d.id === selD ? '#ffb02e' : d.freed ? '#5fffb0' : d.reached ? '#6a5a3a' : '#2a3140'; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, hh - 1);
+      ctx.fillStyle = 'rgba(6, 8, 12, 0.7)'; ctx.fillRect(x, y, w, 26); ctx.fillRect(x, y + hh - 24, w, 24);
+      ctx.font = '600 13px "Chakra Petch", system-ui'; ctx.fillStyle = d.freed ? '#d9fff0' : d.reached ? '#f0e2c0' : '#8a93a6'; ctx.fillText(d.name, x + 8, y + 18);
+      ctx.font = '500 12px "Chakra Petch", system-ui'; ctx.fillStyle = d.freed ? '#5fffb0' : d.storyOpen ? '#ffb02e' : '#8a93a6';
+      ctx.fillText(d.freed ? `Freed · ${Math.round(d.control * 100)}%` : d.storyOpen ? 'Story ready' : d.reached ? 'Held' : 'Locked', x + 8, y + hh - 8);
     }
   }
 

@@ -30,3 +30,6 @@ prototypes/thousandvale/tests/G/shots/
 # Kokoro model, voices and runtime wasm — downloaded by tools/fetch-kokoro.sh
 vendor/kokoro/models/
 voice-lab/server/cache/
+
+# Overdrive Frame helper screenshots (round 7 weapons) stay on this machine
+prototypes/overdrive-frame/shots/

@@ -57,6 +57,7 @@
   .of-hud-armour { width: 44vw; padding: 8px; } .of-ap { font-size: 24px; }
   .of-hud-obj { top: calc(62px + var(--safe-t)); width: 48vw; } .of-hud-obj li { font-size: 12px; padding: 5px 8px; }
   /* weapons: a 2 × 2 strip under the armour and objectives, so the bottom stays free for the thumbs */
+  .of-hud .of-perks { display: none; }   /* phone: the kit charges and the skill recharge show on the Fix and Skill buttons instead (round 7) */
   .of-hud-weapons { inset: calc(150px + var(--safe-t)) calc(8px + var(--safe-r)) auto calc(8px + var(--safe-l)); height: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
   .of-w { position: static; width: auto; padding: 5px 7px 6px; grid-template-columns: auto 1fr; }
   .of-w-2 { order: -2; } .of-w-3 { order: -1; }
@@ -106,6 +107,16 @@
 }
 
 /* the Overload core's bar, inside the armour panel (round 5) */
+.of-perks { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.of-pk { position: relative; display: flex; align-items: center; gap: 6px; padding: 3px 8px 5px; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(8, 12, 20, 0.55);
+  font: 600 12px var(--of-font); letter-spacing: 0.06em; text-transform: uppercase; color: var(--of-dim); --pk: #5fffb0; overflow: hidden; }
+.of-pk[hidden] { display: none; }
+.of-pk b { font-weight: 700; color: var(--of-text, #e8eef6); }
+.of-pk-key { font: 600 12px var(--of-num); color: var(--of-faint); }
+.of-pk-pips { font: 600 12px var(--of-num); color: var(--pk); letter-spacing: 0.04em; }
+.of-pk-cd { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: var(--pk); }
+.of-pk-ready { border-color: color-mix(in srgb, var(--pk) 60%, transparent); box-shadow: 0 0 10px color-mix(in srgb, var(--pk) 35%, transparent); }
+.of-pk-empty { opacity: 0.55; }
 .of-od { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin-top: 8px; font: 600 12px var(--of-font); letter-spacing: 0.08em; text-transform: uppercase; color: var(--of-dim); }
 .of-od[hidden] { display: none; }
 .of-od-bar { height: 5px; background: rgba(255, 255, 255, 0.1); }
@@ -117,6 +128,8 @@
 .of-od-on .of-od-bar i { background: linear-gradient(90deg, #ffd34a, #ff9a2e); }
 @keyframes of-od-pulse { from { opacity: 0.65; } to { opacity: 1; } }
 .of-tbtn-od { border-color: var(--of-violet) !important; color: #e8c8ff !important; }
+.of-tbtn-kit { border-color: #5fffb0 !important; color: #c8ffe4 !important; }
+.of-tbtn-skill { border-color: #3ff0ff !important; color: #c8f8ff !important; }
 .of-hud-obj li.of-stage { border-right-color: var(--of-cyan); }
 .of-hud-obj li.of-stage span, .of-hud-obj li.of-stage small { color: var(--of-cyan); }
 /* versus: the score where the objectives go */
@@ -151,3 +164,6 @@
 .of-map-key i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; background: var(--c); vertical-align: -1px; }
 .of-map-key i.of-ring { background: none; border: 2px solid var(--c); }
 @media (max-width: 760px) { .of-minimap-hud { display: none; } }
+
+.of-tbtns button small { display: block; font: 600 12px var(--of-num); letter-spacing: 0.04em; opacity: 0.85; }
+.of-tbtns button.of-tbtn-wait { opacity: 0.55; }

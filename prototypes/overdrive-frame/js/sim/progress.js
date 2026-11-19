@@ -1,8 +1,9 @@
 // Pilot rank (from experience: what missions paid, plus a little for every kill even on a lost run — owner: "never
 // too punishing") and the parts dealer's stock (what's on sale grows with rank; the stock turns over every two missions).
 import { makeRng } from './rng.js';
-import { RARITY_BY_ID } from './loadout.js';
+import { RARITY_BY_ID, plainSpec } from './loadout.js';
 import { newUid, rollLines } from './loot.js';
+import { rollMods } from './mods.js';
 
 /** Experience needed for each rank (index = rank − 1). */
 export const RANK_XP = [0, 4000, 11000, 22000, 38000, 60000, 90000, 130000, 180000, 250000];
@@ -26,39 +27,45 @@ export const dealerTier = rank => (rank >= 6 ? 3 : rank >= 3 ? 2 : 1);
 /** What a dealer item costs (rarer = dearer). */
 export const priceOf = (part, rarity = 'common') => Math.round((part.cost || 5000) * 0.6 * (1 + RARITY_BY_ID[rarity].lift * 3) / 50) * 50;
 
+/** What rarity the dealer stocks at a rank (round 7 — owner: "more rare parts … especially in the shop … so many white
+ *  items for sale that are equivalent or barely different"): never Common; Rare and better grow with rank. */
+export const DEALER_ODDS = [
+  { upTo: 2, odds: { refined: 55, rare: 35, prototype: 10, experimental: 0 } },
+  { upTo: 4, odds: { refined: 35, rare: 42, prototype: 19, experimental: 4 } },
+  { upTo: 6, odds: { refined: 20, rare: 42, prototype: 28, experimental: 10 } },
+  { upTo: 99, odds: { refined: 10, rare: 38, prototype: 36, experimental: 16 } },
+];
+const dealerRarity = (R, rank, floor = 'refined') => {
+  const odds = DEALER_ODDS.find(d => rank <= d.upTo).odds, order = ['refined', 'rare', 'prototype', 'experimental'];
+  const list = order.slice(order.indexOf(floor)), tot = list.reduce((a, k) => a + odds[k], 0) || 1;
+  let v = R.next() * tot; for (const k of list) { v -= odds[k]; if (v <= 0) return k; } return list[list.length - 1];
+};
+/** What a firmware chip costs at the dealer. */
+export const chipPrice = chip => Math.round((1500 + chip.cost * 1200 + (chip.rank || 1) * 400) / 50) * 50;
+
 /**
- * The dealer's shelves: a few parts per slot group, the same until two more missions are played. Crafted-only weapons
- * are never sold. Items come pre-rolled so what you see is exactly what you buy.
- * @returns {{ turn: number, items: Array<item & { price }> }}
+ * The dealer's shelves: 5 weapons, 5 frame or inner parts, one featured part (Prototype or better, from a tier above
+ * your rank), and 2 firmware chips. The same until two more missions are played. Crafted-only weapons are never sold.
+ * Items come pre-rolled (bonus lines AND mods) so what you see is exactly what you buy.
+ * @returns {{ turn: number, items: Array<item & { price, featured? }>, chips: Array<{ uid, id, price }> }}
  */
-export function dealerStock(P, { rank = 1, played = 0, seed = 7, licences = {} }) {
+export function dealerStock(P, { rank = 1, played = 0, seed = 7, CHIPS = [] }) {
   const turn = Math.floor(played / 2), R = makeRng(seed * 977 + turn * 131 + rank);
   const ceil = dealerTier(rank);
   const pool = Object.values(P).filter(p => !p.crafted && (p.tier || 1) <= ceil);
-  const groups = [['weapon', 6], ['head', 1], ['core', 1], ['arms', 1], ['legs', 2], ['booster', 1], ['generator', 1], ['cooling', 1], ['cpu', 1]];
   const items = [];
-  for (const [slot, n] of groups) {
-    const list = pool.filter(p => p.slot === slot);
-    for (let i = 0; i < n && list.length; i++) {
-      const part = list.splice(Math.floor(R.next() * list.length), 1)[0];
-      const rar = R.next() < (rank >= 4 ? 0.3 : 0.18) ? 'refined' : 'common';
-      const it = { uid: 'd' + turn + '-' + items.length, id: part.id, rarity: rar, rolls: rollLines(R, part, rar) };
-      items.push({ ...it, price: priceOf(part, rar) });
-    }
-  }
-  // maker licences: that maker's parts on the shelf (up to the licence's tier, even above your rank) and a discount
-  for (const [maker, L] of Object.entries(licences)) {
-    if (!L?.level) continue;
-    const list = Object.values(P).filter(p => !p.crafted && p.maker === maker && (p.tier || 1) <= Math.max(ceil, L.tier || 1) && !items.some(i => i.id === p.id));
-    for (let i = 0; i < (L.extra || 2) && list.length; i++) {
-      const part = list.splice(Math.floor(R.next() * list.length), 1)[0];
-      const rar = R.next() < 0.35 ? 'refined' : 'common';
-      items.push({ uid: 'd' + turn + '-' + items.length, id: part.id, rarity: rar, rolls: rollLines(R, part, rar), price: priceOf(part, rar), licence: maker });
-    }
-  }
-  for (const it of items) { const L = licences[P[it.id].maker]; if (L?.off) { it.full = it.price; it.price = Math.round(it.price * (1 - L.off) / 50) * 50; } }
-  return { turn, items };
+  const add = (part, rar, extra = {}) => { const rolls = rollLines(R, part, rar); items.push({ uid: 'd' + turn + '-' + items.length, id: part.id, rarity: rar, rolls, mods: rollMods(R, part, rar, plainSpec), price: priceOf(part, rar), ...extra }); };
+  const take = (list) => list.splice(Math.floor(R.next() * list.length), 1)[0];
+  const weapons = pool.filter(p => p.slot === 'weapon'), frame = pool.filter(p => p.slot !== 'weapon');
+  for (let i = 0; i < 5 && weapons.length; i++) add(take(weapons), dealerRarity(R, rank));
+  for (let i = 0; i < 5 && frame.length; i++) add(take(frame), dealerRarity(R, rank));
+  const highAll = Object.values(P).filter(p => !p.crafted && (p.tier || 1) <= Math.min(3, ceil + 1) && !items.some(i => i.id === p.id));
+  const high = R.next() < 0.65 ? highAll.filter(p => p.slot === 'weapon') : highAll;   // the featured slot is usually a weapon
+  if (high.length) add(take(high), dealerRarity(R, rank + 4, 'prototype'), { featured: true });
+  const chipPool = CHIPS.filter(c => (c.rank || 1) <= rank + 1), chips = [];
+  for (let i = 0; i < 2 && chipPool.length; i++) { const c = take(chipPool); chips.push({ uid: 'dc' + turn + '-' + i, id: c.id, price: chipPrice(c) }); }
+  return { turn, items, chips };
 }
 
 /** A bought item becomes the player's own (new uid). */
-export const bought = it => ({ uid: newUid(), id: it.id, rarity: it.rarity, rolls: it.rolls.slice(), found: Date.now() });
+export const bought = it => ({ uid: newUid(), id: it.id, rarity: it.rarity, rolls: it.rolls.slice(), mods: (it.mods || []).slice(), found: Date.now() });

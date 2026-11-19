@@ -1,0 +1,471 @@
+{
+  "about": "Frame lines: a matching set of head / core / arms / booster / legs from one maker with its own silhouette and role. Every frame part in parts.json carries line = one of these ids. suggestedBonus = a set-bonus idea for wearing 3+ parts of the line (null for legs-only lines, which cannot make a set). isNew = added in Overdrive Frame round 7.",
+  "lines": [
+    {
+      "id": "wisp",
+      "maker": "celerity",
+      "name": "Wisp",
+      "tier": 1,
+      "legType": "biped",
+      "isNew": false,
+      "parts": [
+        "celerity-head-1",
+        "celerity-core-1",
+        "celerity-arms-1",
+        "celerity-booster-1",
+        "celerity-legs-1"
+      ],
+      "look": "A narrow arrowhead frame with a whip antenna and a glowing waist ring.",
+      "role": "Light skirmisher: fast, fragile, cheap boosts.",
+      "suggestedBonus": "Quick boosts cost 20% less energy for 2 s after a quick boost."
+    },
+    {
+      "id": "stride",
+      "maker": "celerity",
+      "name": "Stride",
+      "tier": 2,
+      "legType": "biped",
+      "isNew": false,
+      "parts": [
+        "celerity-head-2",
+        "celerity-core-2",
+        "celerity-arms-2",
+        "celerity-booster-2",
+        "celerity-legs-2"
+      ],
+      "look": "The Celerity all-rounder: swept crest blades, a wedge chest and skirted legs.",
+      "role": "Balanced energy-weapon frame for any mission.",
+      "suggestedBonus": "Energy weapons build 15% less heat while you are moving."
+    },
+    {
+      "id": "halberd",
+      "maker": "celerity",
+      "name": "Halberd",
+      "tier": 3,
+      "legType": null,
+      "isNew": false,
+      "parts": [
+        "celerity-head-3",
+        "celerity-core-3",
+        "celerity-arms-3",
+        "celerity-booster-3"
+      ],
+      "look": "Celerity at its heaviest: cheek plates, flank armour and a four-nozzle booster.",
+      "role": "Front-line energy frame that still boosts well.",
+      "suggestedBonus": "Energy hits taken are reduced a further 10% while boosting."
+    },
+    {
+      "id": "heron",
+      "maker": "celerity",
+      "name": "Heron",
+      "tier": 1,
+      "legType": "reverse",
+      "isNew": false,
+      "parts": [
+        "celerity-legs-3"
+      ],
+      "look": "Sleek bird legs with knife-edge toes.",
+      "role": "Jumping legs for a light frame.",
+      "suggestedBonus": null
+    },
+    {
+      "id": "glider",
+      "maker": "celerity",
+      "name": "Glider",
+      "tier": 3,
+      "legType": "hover",
+      "isNew": false,
+      "parts": [
+        "celerity-legs-4"
+      ],
+      "look": "A delta hover skirt with swept fins.",
+      "role": "Fast hover legs for light loads.",
+      "suggestedBonus": null
+    },
+    {
+      "id": "vantage",
+      "maker": "celerity",
+      "name": "Vantage",
+      "tier": 2,
+      "legType": "reverse",
+      "isNew": true,
+      "parts": [
+        "celerity-head-4",
+        "celerity-core-4",
+        "celerity-arms-4",
+        "celerity-booster-4",
+        "celerity-legs-5"
+      ],
+      "look": "A tall recon frame: a sensor-mast head, a dorsal blade, long scoped arms, a tail fin and stilt bird legs with sensor vanes.",
+      "role": "Long-range spotter and sniper platform: sees and locks first, jumps high, hits from far away.",
+      "suggestedBonus": "Enemies you lock stay marked for allies for 5 s and take 10% more damage from everyone."
+    },
+    {
+      "id": "rapier",
+      "maker": "celerity",
+      "name": "Rapier",
+      "tier": 3,
+      "legType": "biped",
+      "isNew": true,
+      "parts": [
+        "celerity-head-5",
+        "celerity-core-5",
+        "celerity-arms-5",
+        "celerity-booster-5",
+        "celerity-legs-6"
+      ],
+      "look": "A bladed duellist: a crested helm with one eye slit, a wasp-waisted V chest with coat-tail fins, tonfa-bladed arms and spiked legs.",
+      "role": "Close-in duellist: lunges with the strongest quick boost and finishes with blades.",
+      "suggestedBonus": "A quick boost toward an enemy makes your next melee hit within 1 s deal 40% more damage."
+    },
+    {
+      "id": "mule",
+      "maker": "brannoch",
+      "name": "Mule",
+      "tier": 1,
+      "legType": null,
+      "isNew": false,
+      "parts": [
+        "brannoch-head-1",
+        "brannoch-core-1",
+        "brannoch-arms-1",
+        "brannoch-booster-1"
+      ],
+      "look": "A squat Brannoch work frame with a single work lamp.",
+      "role": "Cheap, tough starter frame.",
+      "suggestedBonus": "Kinetic weapons reload 15% faster."
+    },
+    {
+      "id": "bastion",
+      "maker": "brannoch",
+      "name": "Bastion",
+      "tier": 2,
+      "legType": "biped",
+      "isNew": false,
+      "parts": [
+        "brannoch-head-2",
+        "brannoch-core-2",
+        "brannoch-arms-2",
+        "brannoch-booster-2",
+        "brannoch-legs-1"
+      ],
+      "look": "The Brannoch standard: a slab cab, side armour, hazard stripes and exhaust stacks.",
+      "role": "Armoured all-rounder for kinetic and explosive weapons.",
+      "suggestedBonus": "Taking a hit over 10% of your armour points gives 15% damage resistance for 3 s."
+    },
+    {
+      "id": "mountain",
+      "maker": "brannoch",
+      "name": "Mountain",
+      "tier": 3,
+      "legType": "biped",
+      "isNew": false,
+      "parts": [
+        "brannoch-head-3",
+        "brannoch-core-3",
+        "brannoch-arms-3",
+        "brannoch-booster-3",
+        "brannoch-legs-2"
+      ],
+      "look": "The heaviest Brannoch biped: a turret-bucket head with an antenna mast and four exhausts.",
+      "role": "Slow walking fortress that carries the biggest guns.",
+      "suggestedBonus": "Standing still for 1 s cuts recoil and spread by 30%."
+    },
+    {
+      "id": "ox",
+      "maker": "brannoch",
+      "name": "Ox",
+      "tier": 3,
+      "legType": "quad",
+      "isNew": false,
+      "parts": [
+        "brannoch-legs-3"
+      ],
+      "look": "Chunky four legs with hazard-striped body plates.",
+      "role": "Steady gun platform legs.",
+      "suggestedBonus": null
+    },
+    {
+      "id": "crawler",
+      "maker": "brannoch",
+      "name": "Crawler",
+      "tier": 3,
+      "legType": "treads",
+      "isNew": false,
+      "parts": [
+        "brannoch-legs-4"
+      ],
+      "look": "Heavy Brannoch tank treads.",
+      "role": "Carry anything, never jump.",
+      "suggestedBonus": null
+    },
+    {
+      "id": "redoubt",
+      "maker": "brannoch",
+      "name": "Redoubt",
+      "tier": 3,
+      "legType": "quad",
+      "isNew": true,
+      "parts": [
+        "brannoch-head-4",
+        "brannoch-core-4",
+        "brannoch-arms-4",
+        "brannoch-booster-4",
+        "brannoch-legs-5"
+      ],
+      "look": "A siege frame: a periscope bunker head, a sloped casemate core with sandbag ridges, gun-carriage arms with mantlet shields and four braced legs on pads.",
+      "role": "Siege anchor: the most armour and steadiest aim; holds a position and shells it.",
+      "suggestedBonus": "Standing still for 1.5 s braces the legs: +25% damage resistance and shoulder weapons fire 20% faster until you move."
+    },
+    {
+      "id": "breaker",
+      "maker": "brannoch",
+      "name": "Breaker",
+      "tier": 2,
+      "legType": "treads",
+      "isNew": true,
+      "parts": [
+        "brannoch-head-5",
+        "brannoch-core-5",
+        "brannoch-arms-5",
+        "brannoch-booster-5",
+        "brannoch-legs-6"
+      ],
+      "look": "A breacher on treads: a caged welding-mask head, a wedge-prowed core, ram shoulders over huge fists and a dozer blade.",
+      "role": "Wall-breaker: rams through cover and crowds at melee and shotgun range.",
+      "suggestedBonus": "Boosting into an enemy or a structure rams it for heavy kinetic damage and knocks it back; rams cost you no armour."
+    },
+    {
+      "id": "lily",
+      "maker": "calyx",
+      "name": "Lily",
+      "tier": 1,
+      "legType": null,
+      "isNew": false,
+      "parts": [
+        "calyx-head-1",
+        "calyx-core-1",
+        "calyx-arms-1",
+        "calyx-booster-1"
+      ],
+      "look": "A Calyx light frame with one big eye and glowing pod lamps.",
+      "role": "Light endurance frame that feeds its boosters well.",
+      "suggestedBonus": "Generator recharge starts 0.3 s sooner."
+    },
+    {
+      "id": "shell",
+      "maker": "calyx",
+      "name": "Shell",
+      "tier": 2,
+      "legType": "biped",
+      "isNew": false,
+      "parts": [
+        "calyx-head-2",
+        "calyx-core-2",
+        "calyx-arms-2",
+        "calyx-booster-2",
+        "calyx-legs-1"
+      ],
+      "look": "The Calyx standard: a three-eyed bulb head and a beetle-shell core.",
+      "role": "Balanced endurance frame for odd weapons.",
+      "suggestedBonus": "Electric and repair weapons draw 15% less energy."
+    },
+    {
+      "id": "carapace",
+      "maker": "calyx",
+      "name": "Carapace",
+      "tier": 3,
+      "legType": null,
+      "isNew": false,
+      "parts": [
+        "calyx-head-3",
+        "calyx-core-3",
+        "calyx-arms-3",
+        "calyx-booster-3"
+      ],
+      "look": "The heaviest Calyx frame: mandible plates and side carapace.",
+      "role": "Tough endurance frame that runs cool.",
+      "suggestedBonus": "Overheating vents 30% faster."
+    },
+    {
+      "id": "drift",
+      "maker": "calyx",
+      "name": "Drift",
+      "tier": 2,
+      "legType": "hover",
+      "isNew": false,
+      "parts": [
+        "calyx-legs-3"
+      ],
+      "look": "A Calyx jellyfish hover bell with hanging fins.",
+      "role": "Floaty hover legs.",
+      "suggestedBonus": null
+    },
+    {
+      "id": "mantis",
+      "maker": "calyx",
+      "name": "Mantis",
+      "tier": 2,
+      "legType": "quad",
+      "isNew": false,
+      "parts": [
+        "calyx-legs-2"
+      ],
+      "look": "Calyx four legs with long tapering spike shins.",
+      "role": "Steady four legs for a medium frame.",
+      "suggestedBonus": null
+    },
+    {
+      "id": "bloom",
+      "maker": "calyx",
+      "name": "Bloom",
+      "tier": 1,
+      "legType": "hover",
+      "isNew": true,
+      "parts": [
+        "calyx-head-4",
+        "calyx-core-4",
+        "calyx-arms-4",
+        "calyx-booster-4",
+        "calyx-legs-4"
+      ],
+      "look": "A hover medic frame: a flower head round a lamp eye, a core hung with pod clusters, a halo shield emitter and a ring of floating seed pods.",
+      "role": "Support and shield frame: the most power to weapons, cool running and the longest hover.",
+      "suggestedBonus": "Your repairs heal 15% more, and allies within 3 tiles regain 1% armour per second."
+    },
+    {
+      "id": "sickle",
+      "maker": "calyx",
+      "name": "Sickle",
+      "tier": 3,
+      "legType": "reverse",
+      "isNew": true,
+      "parts": [
+        "calyx-head-5",
+        "calyx-core-5",
+        "calyx-arms-5",
+        "calyx-booster-5",
+        "calyx-legs-5"
+      ],
+      "look": "A mantis hunter: a triangle head with compound eyes and feelers, a hunched thorax with a hanging abdomen, scythe forearms and clawed bird legs.",
+      "role": "Hunter-killer: fast, quick to turn, pounces and cuts down single targets.",
+      "suggestedBonus": "Melee kills refund a quick boost and give 20% speed for 3 s."
+    },
+    {
+      "id": "tinker",
+      "maker": "patchwork",
+      "name": "Tinker",
+      "tier": 1,
+      "legType": "biped",
+      "isNew": false,
+      "parts": [
+        "patchwork-head-1",
+        "patchwork-core-1",
+        "patchwork-arms-1",
+        "patchwork-booster-1",
+        "patchwork-legs-1"
+      ],
+      "look": "An oil-drum head on a roll-caged forklift cab.",
+      "role": "The cheapest frame in the city.",
+      "suggestedBonus": "Picking up scrap restores 2% armour."
+    },
+    {
+      "id": "junker",
+      "maker": "patchwork",
+      "name": "Junker",
+      "tier": 2,
+      "legType": null,
+      "isNew": false,
+      "parts": [
+        "patchwork-head-2",
+        "patchwork-core-2",
+        "patchwork-arms-2",
+        "patchwork-booster-2"
+      ],
+      "look": "A camera-box head and a tyre for armour.",
+      "role": "Cheap all-rounder that runs hot.",
+      "suggestedBonus": "Fire weapons burn 20% longer."
+    },
+    {
+      "id": "hulk",
+      "maker": "patchwork",
+      "name": "Hulk",
+      "tier": 3,
+      "legType": null,
+      "isNew": false,
+      "parts": [
+        "patchwork-head-3",
+        "patchwork-core-3",
+        "patchwork-arms-3",
+        "patchwork-booster-3"
+      ],
+      "look": "A caged floodlight head and a rocket-drum booster.",
+      "role": "The heaviest scrap frame.",
+      "suggestedBonus": "When armour drops below 30%, heat build-up halves for 5 s (once per minute)."
+    },
+    {
+      "id": "hopper",
+      "maker": "patchwork",
+      "name": "Hopper",
+      "tier": 2,
+      "legType": "reverse",
+      "isNew": false,
+      "parts": [
+        "patchwork-legs-2"
+      ],
+      "look": "Scrap bird legs with a coil spring on each foot bone.",
+      "role": "Jumping legs on the cheap.",
+      "suggestedBonus": null
+    },
+    {
+      "id": "rustcrawler",
+      "maker": "patchwork",
+      "name": "Rustcrawler",
+      "tier": 3,
+      "legType": "treads",
+      "isNew": false,
+      "parts": [
+        "patchwork-legs-3"
+      ],
+      "look": "Patchwork treads with a fuel drum strapped on.",
+      "role": "Cheap heavy-carry treads.",
+      "suggestedBonus": null
+    },
+    {
+      "id": "hauler",
+      "maker": "patchwork",
+      "name": "Hauler",
+      "tier": 2,
+      "legType": "treads",
+      "isNew": true,
+      "parts": [
+        "patchwork-head-4",
+        "patchwork-core-4",
+        "patchwork-arms-4",
+        "patchwork-booster-4",
+        "patchwork-legs-4"
+      ],
+      "look": "A junk-crawler: a crane-cab head with a beacon, a skip-bin core heaped with scrap, a crane jib and winch, an exhaust stack and treads with forklift tines.",
+      "role": "Heavy hauler: carries the biggest weapon load for its price and runs turrets and mines.",
+      "suggestedBonus": "Deployed turrets, mines and drones get +30% armour and last 25% longer; +1 deploy charge."
+    },
+    {
+      "id": "pogo",
+      "maker": "patchwork",
+      "name": "Pogo",
+      "tier": 1,
+      "legType": "reverse",
+      "isNew": true,
+      "parts": [
+        "patchwork-head-5",
+        "patchwork-core-5",
+        "patchwork-arms-5",
+        "patchwork-booster-5",
+        "patchwork-legs-5"
+      ],
+      "look": "A scrappy hopper: an upturned bucket head with a traffic-light eye, a barrel body with a flag, scaffold-pole arms and big pogo-spring bird legs.",
+      "role": "Cheap hopper: the biggest jump for the price and twitchy quick boosts.",
+      "suggestedBonus": "Landing from a jump shocks enemies nearby for light electric damage and staggers small ones."
+    }
+  ]
+}

@@ -5,6 +5,7 @@
 // doesn't pause the mission.
 import { toScreen } from '../../../../citykit/js/iso.js';
 import { objectiveTargets } from '../render/targets.js';
+import { drawMapGround } from '../render/city-ground.js';   // round 7: a city layout's water, rails, parks
 
 export class MiniMap {
   constructor(root) {
@@ -43,7 +44,8 @@ export class MiniMap {
     g.fillStyle = 'rgba(8, 11, 18, 0.82)'; g.beginPath(); c.forEach((p, i) => { const q = [ox + p.sx * k, oy + p.sy * k]; i ? g.lineTo(...q) : g.moveTo(...q); }); g.closePath(); g.fill();
     g.strokeStyle = 'rgba(120, 140, 170, 0.5)'; g.lineWidth = dpr; g.stroke();
     const foot = (x, z, fw, fd) => { g.beginPath(); [[x, z], [x + fw, z], [x + fw, z + fd], [x, z + fd]].forEach((q, i) => (i ? g.lineTo(...P(...q)) : g.moveTo(...P(...q)))); g.closePath(); };
-    for (const l of W.lots) { if (!l.solid && !l.recipe) continue; foot(l.x, l.z, l.w, l.d); g.fillStyle = l.stage >= 3 ? 'rgba(90, 80, 70, 0.55)' : 'rgba(118, 130, 152, 0.85)'; g.fill(); }
+    drawMapGround(S.def.map, (x, z, fw, fd, col) => { foot(x, z, fw, fd); g.fillStyle = col; g.fill(); });
+    for (const l of W.lots) { if (!l.solid && !l.recipe) continue; foot(l.x, l.z, l.w, l.d); g.fillStyle = l.stage >= 3 ? 'rgba(90, 80, 70, 0.55)' : l.natural ? 'rgba(70, 130, 70, 0.8)' : 'rgba(118, 130, 152, 0.85)'; g.fill(); }
     const pulse = 0.5 + 0.5 * Math.sin(t * 5), dot = (x, z, r, col) => { const [px, py] = P(x, z); g.fillStyle = col; g.beginPath(); g.arc(px, py, r * dpr, 0, Math.PI * 2); g.fill(); };
     // targets: the building itself lit, a pulsing ring on the rest
     for (const tg of objectiveTargets(S)) {

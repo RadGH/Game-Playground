@@ -16,7 +16,8 @@ const r2 = v => Math.round(v * 100) / 100;
 const E_FIELDS = [['x', 'x', 'q'], ['z', 'z', 'q'], ['y', 'flying', 'q'], ['f', 'face', 'q'], ['a', 'aim', 'q'], ['n', 'anim', 's'],
   ['h', 'hp', 'i'], ['H', 'hpMax', 'i'], ['s', 'state', 's'], ['l', 'elite', 'b'], ['d', 'hidden', 'b'], ['g', 'tag', 's'],
   ['r', 'r', 'q'], ['D', 'dead', 'b'], ['t', 'stateT', 'q'],
-  ['w', 'shielded', 'b'], ['m', 'healing', 's']];   // round 5 roles: inside a bulwark's dome; a medic's patient id (append only: index 13 = dead)
+  ['w', 'shielded', 'b'], ['m', 'healing', 's'],    // round 5 roles: inside a bulwark's dome; a medic's patient id (append only: index 13 = dead)
+  ['u', 'look', 'i']];                               // round 7: status bits (damage.js LOOK: chilled, frozen, rift, burning, shocked, corroded)
 // a mech (players, bots, rival aces): sent whole every snapshot — there are only a few
 const M_FIELDS = [['x', 'x', 'q'], ['z', 'z', 'q'], ['y', 'y', 'q'], ['f', 'face', 'q'], ['a', 'aim', 'q'], ['n', 'anim', 's'],
   ['h', 'hp', 'i'], ['H', 'hpMax', 'i'], ['e', 'energy', 'i'], ['t', 'heat', 'i'], ['o', 'overheated', 'b'], ['s', 'stall', 'q'],
@@ -101,9 +102,12 @@ export function createPacker() {
       if (L.length) out.L = L;
       // shots: every one, each time (they live a second at most)
       if (S.shots.length) out.s = S.shots.map(s => [q(s.x), q(s.z), q(s.y ?? 0.4), q(s.vx), q(s.vz), s.kind || 'bullet', s.dtype || 'kinetic', s.team === 'enemy' ? 1 : 0,
-        s.lob ? 1 : 0, s.flame ? q(s.age / (s.life || 1)) : -1, s.tx != null ? q(s.tx) : null, s.tz != null ? q(s.tz) : null, q(s.splash || 0)]);
+        s.lob ? 1 : 0, s.flame ? q(s.age / (s.life || 1)) : -1, s.tx != null ? q(s.tx) : null, s.tz != null ? q(s.tz) : null, q(s.splash || 0), s.look || '']);   // 13: round 7 look
       if (S.clouds?.length) out.c = S.clouds.map(c => [c.id, q(c.x), q(c.z), q(c.r), q(c.t), q(c.life)]);   // round 5: spore clouds
       if (S.strikes.length) out.k = S.strikes.map(k => [q(k.x), q(k.z), q(k.r), q(k.t)]);
+      // round 7 (sim/weapon-fx.js): zones (gravity wells, burning ground, nanite clouds, storms, orbital marks) + bomblets
+      if (S.zones?.length) out.Z = S.zones.map(z => [z.id, z.kind, q(z.x), q(z.z), q(z.r), q(z.t), q(z.life)]);
+      if (S.bomblets?.length) out.bl = S.bomblets.map(b => [q(b.x), q(b.z), q(b.t), q(b.x0), q(b.z0)]);
       if (S.deployed.length) out.d = S.deployed.map(d => [d.id, d.kind, q(d.x), q(d.z), q(d.y || d.flying || 0)]);
       if (S.allies?.length) out.a = S.allies.map(a => [a.id, q(a.x), q(a.z), q(a.face || 0), Math.round(a.hp), Math.round(a.hpMax), a.down ? 1 : 0, a.arrived ? 1 : 0, q(a.r)]);
       const ob = JSON.stringify(objView(S)); if (full || ob !== lastObj) { out.o = ob; if (!full) lastObj = ob; }
@@ -185,9 +189,12 @@ export function applySnap(M, snap, ctx = {}) {
   }
   // shots, strikes, deployed, convoy trucks
   M.shots = (snap.s || []).map(s => ({ x: uq(s[0]), z: uq(s[1]), y: uq(s[2]), vx: uq(s[3]), vz: uq(s[4]), kind: s[5], dtype: s[6], team: s[7] ? 'enemy' : 'player',
-    lob: !!s[8], flame: s[9] >= 0, age: s[9] >= 0 ? uq(s[9]) : 0, life: 1, tx: s[10] != null ? uq(s[10]) : null, tz: s[11] != null ? uq(s[11]) : null, splash: uq(s[12]) }));
+    lob: !!s[8], flame: s[9] >= 0, age: s[9] >= 0 ? uq(s[9]) : 0, life: 1, tx: s[10] != null ? uq(s[10]) : null, tz: s[11] != null ? uq(s[11]) : null, splash: uq(s[12]),
+    look: s[13] || null, orb: s[5] === 'orb', glaive: s[5] === 'glaive', wave: s[5] === 'wave' }));
   M.clouds = (snap.c || []).map(c => ({ id: c[0], x: uq(c[1]), z: uq(c[2]), r: uq(c[3]), t: uq(c[4]), life: uq(c[5]) }));   // round 5
   M.strikes = (snap.k || []).map(k => ({ x: uq(k[0]), z: uq(k[1]), r: uq(k[2]), t: uq(k[3]) }));
+  M.zones = (snap.Z || []).map(z => ({ id: z[0], kind: z[1], x: uq(z[2]), z: uq(z[3]), r: uq(z[4]), t: uq(z[5]), life: uq(z[6]) }));   // round 7
+  M.bomblets = (snap.bl || []).map(b => ({ x: uq(b[0]), z: uq(b[1]), t: uq(b[2]), x0: uq(b[3]), z0: uq(b[4]) }));
   M.deployed = (snap.d || []).map(d => ({ id: d[0], kind: d[1], x: uq(d[2]), z: uq(d[3]), y: uq(d[4]) }));
   if (snap.a) {
     const byA = new Map((M.allies || []).map(a => [a.id, a]));

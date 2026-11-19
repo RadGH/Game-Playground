@@ -7,6 +7,10 @@
 //   rightShoulder], hangar?: weapon } — each entry is a part id OR an owned item { id, rarity, rolls: [{ stat, value }] }.
 
 import { applyChips } from './chips.js';
+import { applyTuning } from './tuning.js';
+import { applyWeaponMods, frameRules } from './mods.js';
+import { applySets } from './frames.js';
+import { extraSpec, NEW_KINDS } from './weapon-kinds.js';      // round 7: new weapon kinds + effect fields
 
 export const SLOTS = ['head', 'core', 'arms', 'legs', 'booster', 'generator', 'cooling', 'cpu'];
 export const WEAPON_SLOTS = [
@@ -37,6 +41,7 @@ export function partNum(part, item, key) {
   const r = typeof item === 'object' && item ? RARITY_BY_ID[item.rarity] : null;
   if (r && LIFTED.has(key)) v = key === 'lockCount' || key === 'firmware' ? v + Math.round(r.lift * 2) : v * (1 + r.lift);
   if (typeof item === 'object' && item?.rolls) for (const roll of item.rolls) if (roll.stat === key) v = roll.pct ? v * (1 + roll.value / 100) : v + roll.value;
+  if (key === 'block') v = Math.min(90, v);              // a shield never stops more than 90% (round 7: a Prototype read 105%)
   return v;
 }
 
@@ -104,7 +109,14 @@ export function mechStats(build, P, C = null) {
     boostEff: core ? (core.boostEff || 100) / 100 : 1,
     overload: gen?.overload || null,                                       // an Overload core's ultimate (sim/overload.js)
   };
-  return applyChips(st, build.chips, C);
+  // round 7: frame rules from part mods, Frame Tuning (before chips: Firmware Expansion makes room for them), set
+  // bonuses, then chips; the repair kit's Mk and the skill ride along for perks.js
+  st.rules = frameRules(all.filter(([p]) => p.slot !== 'weapon').map(([, it]) => it)); st.wmods = [];
+  st.kitLevel = Math.max(1, Math.min(5, build.kit | 0 || 1)); st.skill = build.skill || null;
+  applyTuning(st, build.tuning);
+  applySets(st, build, P);
+  applyChips(st, build.chips, C);
+  return st;
 }
 
 const KIND_MAP = {
@@ -116,6 +128,7 @@ const KIND_MAP = {
   plasma: { kind: 'plasma', speed: 5 }, chain: { kind: 'chain' }, repair: { kind: 'repair' },
   'drone-bay': { kind: 'deploy', deploy: 'drone' }, 'mine-layer': { kind: 'deploy', deploy: 'mine' }, 'turret-deployer': { kind: 'deploy', deploy: 'turret' },
   flamer: { kind: 'flame', speed: 4.5 }, 'laser-blade': { kind: 'blade' }, pile: { kind: 'blade' }, saw: { kind: 'blade' }, shield: { kind: 'shield' },
+  ...NEW_KINDS,     // round 7: sweep-lance, prism, orbital-lance, scythe, rift-needler, cluster-mortar, grav-anchor, cryo-projector, tesla-coil, orb-launcher, storm-caller, nanite-sprayer, firepot, glaive, pinball, sparkplug (sim/weapon-kinds.js)
 };
 const M = 16;   // metres per tile
 
@@ -144,8 +157,22 @@ export function weaponSpec(part, item = null, stats = null) {
     if (map.deploy === 'mine') { spec.splash = Math.max(spec.splash, 0.6); spec.life = 60; }
     spec.rate = map.deploy === 'mine' ? 2 : 0.5;
   }
-  if (map.kind === 'shield') spec.block = (part.block || 50) / 100;
+  if (map.kind === 'shield') spec.block = (n('block') || 50) / 100;          // rarity raises it (to 90% at most) — the card and the mission agree
   if (map.kind === 'missile') { spec.turn = (part.kind === 'swarm-pod' ? 6 : 4) * (stats?.wfx?.missileTurn || 1); spec.dmg *= stats?.wfx?.missileDmg || 1; }
   if (part.burn && map.kind !== 'flame') spec.burn = part.burn;
+  extraSpec(part, spec, n, stats);                                        // round 7: new kinds + effect fields (weapon-kinds.js)
+  // round 7: frame-wide weapon changes (Ordnance Racks, Twin Lock, Brawler Servos), then the item's own mods, then the
+  // mods every weapon gets from tuning keystones / set bonuses (each only where it fits — mods.js)
+  const wfx = stats?.wfx, R = stats?.rules || {};
+  if (wfx?.salvo && map.kind === 'missile') spec.count += wfx.salvo;
+  if (wfx?.splash && spec.splash) spec.splash *= wfx.splash;
+  if (R.twinlock && spec.lock) { spec.lock.count += 2; spec.lock.time *= 0.5; }
+  if (R.deployBoost && map.kind === 'deploy') { spec.hp *= 1 + 0.3 * R.deployBoost; spec.life *= 1 + 0.25 * R.deployBoost; }   // Hauler set
+  if (R.brawler && map.kind === 'blade') { spec.dtype = 'electric'; spec.status = Math.max(spec.status || 0, 0.5); spec.knock = 6; }
+  applyWeaponMods(spec, typeof item === 'object' ? item?.mods : null);
+  applyWeaponMods(spec, stats?.wmods);
   return spec;
 }
+
+/** A weapon's plain spec (no item, no frame) — what mods.js tests a mod against when rolling. */
+export const plainSpec = part => weaponSpec(part, null, null);

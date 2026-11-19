@@ -5,6 +5,7 @@
 import { fmt, hp as hpFmt } from '../../../../shared/format.js';
 import { hintFor } from '../input/bindings.js';
 import { OVERLOAD } from '../sim/overload.js';
+import { SKILL_BY_ID } from '../sim/skills.js';
 import { MiniMap } from './minimap.js';
 import { energyMaxOf, heatMaxOf } from '../sim/mech.js';
 import { TILE_W } from '../../../../citykit/js/iso.js';
@@ -23,7 +24,7 @@ export class Hud {
     this.el = document.createElement('div'); this.el.className = 'of-hud';
     this.el.innerHTML = `
       <canvas class="of-hud-arcs" aria-hidden="true"></canvas>
-      <div class="of-hud-armour" role="group" aria-label="Armour"><span class="of-hud-label">Armour</span><b class="of-ap">0</b><div class="of-ap-bar"><i></i></div><small class="of-status"></small><div class="of-od" hidden><span class="of-od-name"></span><div class="of-od-bar"><i></i></div><span class="of-od-key"></span></div></div>
+      <div class="of-hud-armour" role="group" aria-label="Armour"><span class="of-hud-label">Armour</span><b class="of-ap">0</b><div class="of-ap-bar"><i></i></div><small class="of-status"></small><div class="of-perks"><div class="of-pk of-pk-kit"><span class="of-pk-key"></span><b>Repair</b><span class="of-pk-pips"></span><i class="of-pk-cd"></i></div><div class="of-pk of-pk-skill" hidden><span class="of-pk-key"></span><b class="of-pk-name"></b><span class="of-pk-pips"></span><i class="of-pk-cd"></i></div></div><div class="of-od" hidden><span class="of-od-name"></span><div class="of-od-bar"><i></i></div><span class="of-od-key"></span></div></div>
       <ol class="of-hud-obj" aria-label="Objectives"></ol>
       <div class="of-hud-weapons" aria-label="Weapons"></div>
       <div class="of-comms" aria-live="polite" hidden><canvas class="of-comms-face" width="96" height="96" aria-hidden="true"></canvas><div><b class="of-comms-who"></b><p class="of-comms-text"></p><canvas class="of-comms-wave" width="160" height="18" aria-hidden="true"></canvas></div></div>
@@ -56,6 +57,8 @@ export class Hud {
     this.el.querySelector('.of-menu-btn').dataset.key = hintFor('menu', dev, gl);
     this.el.querySelector('.of-map-btn').dataset.key = dev === 'touch' ? '' : hintFor('map', dev, gl);
     this.el.querySelector('.of-od-key').textContent = dev === 'touch' ? '' : hintFor('overload', dev, gl);
+    this.el.querySelector('.of-pk-kit .of-pk-key').textContent = dev === 'touch' ? '' : hintFor('kit', dev, gl);
+    this.el.querySelector('.of-pk-skill .of-pk-key').textContent = dev === 'touch' ? '' : hintFor('skill', dev, gl);
     this._dev = dev;
   }
 
@@ -152,8 +155,31 @@ export class Hud {
       od.querySelector('.of-od-name').textContent = running ? `${OVERLOAD[kind].label} ${Math.ceil(m.odT)} s` : full ? `${OVERLOAD[kind].label} ready` : 'Overload';
       od.querySelector('.of-od-bar i').style.width = (running ? m.odT / OVERLOAD[kind].time * 100 : Math.min(1, m.od || 0) * 100).toFixed(1) + '%';
     }
+    // round 7: the repair kit's charges and the skill's recharge (sim/perks.js)
+    if (m.kit) {
+      const k = this.el.querySelector('.of-pk-kit');
+      k.querySelector('.of-pk-pips').textContent = '●'.repeat(m.kit.n) + '○'.repeat(Math.max(0, m.kit.max - m.kit.n));
+      k.querySelector('.of-pk-cd').style.width = (m.kit.cd > 0 ? m.kit.cd / m.kit.cdMax * 100 : 0).toFixed(1) + '%';
+      k.classList.toggle('of-pk-empty', m.kit.n <= 0); k.classList.toggle('of-pk-ready', m.kit.n > 0 && m.kit.cd <= 0 && share < 0.6);
+    }
+    const sk = this.el.querySelector('.of-pk-skill'); sk.hidden = !m.skill;
+    if (m.skill) {
+      const K = SKILL_BY_ID[m.skill.id];
+      sk.querySelector('.of-pk-name').textContent = m.odrvT > 0 ? `${K.name} ${Math.ceil(m.odrvT)} s` : K.name;
+      sk.querySelector('.of-pk-pips').textContent = m.skill.max > 1 ? '●'.repeat(m.skill.n) + '○'.repeat(m.skill.max - m.skill.n) : m.skill.n > 0 ? 'Ready' : `${Math.ceil(m.skill.cd)} s`;
+      sk.querySelector('.of-pk-cd').style.width = (m.skill.n < m.skill.max ? (1 - m.skill.cd / m.skill.cdMax) * 100 : 100).toFixed(1) + '%';
+      sk.classList.toggle('of-pk-ready', m.skill.n > 0); sk.style.setProperty('--pk', K.colour);
+    }
+    // the minimap sits under the armour block, which grows with the kit/skill row, an Overload bar and status words
+    this._mmT = (this._mmT || 0) - dt;
+    if (this._mmT <= 0) { this._mmT = 0.5; const a = this.el.querySelector('.of-hud-armour'), mm = this.el.querySelector('.of-minimap-hud'); if (a && mm) { const top = a.offsetTop + a.offsetHeight + 8; if (top !== this._mmTop) { this._mmTop = top; mm.style.top = top + 'px'; } } }
+    // phone: the same state on the Fix and Skill buttons (the row above is hidden on narrow screens)
+    this._tb ||= { kit: document.querySelector('.of-tbtn-kit'), skill: document.querySelector('.of-tbtn-skill') };
+    if (this._tb.kit?.isConnected && m.kit) { const t = `Fix<small>${'●'.repeat(m.kit.n)}${'○'.repeat(Math.max(0, m.kit.max - m.kit.n))}</small>`; if (this._tb.kitT !== t) { this._tb.kitT = t; this._tb.kit.innerHTML = t; } this._tb.kit.classList.toggle('of-tbtn-wait', m.kit.n <= 0 || m.kit.cd > 0); }
+    else if (this._tb.kit && !this._tb.kit.isConnected) this._tb = null;
+    if (this._tb?.skill?.isConnected && m.skill) { const t = `Skill<small>${m.skill.n > 0 ? 'ready' : Math.ceil(m.skill.cd) + ' s'}</small>`; if (this._tb.skT !== t) { this._tb.skT = t; this._tb.skill.innerHTML = t; } this._tb.skill.classList.toggle('of-tbtn-wait', m.skill.n <= 0); }
     bar.parentElement.classList.toggle('of-low', share < 0.3);
-    const st = []; if (m.overheated) st.push('Overheated'); if (m.stall > 0) st.push('Energy stall'); if (m.status?.burn > 0) st.push('Burning'); if (m.status?.shock > 0) st.push('Shocked'); if (m.status?.slow > 0) st.push('Slowed');
+    const st = []; if (m.overheated) st.push('Overheated'); if (m.stall > 0) st.push('Energy stall'); if (m.status?.burn > 0) st.push('Burning'); if (m.status?.shock > 0) st.push('Shocked'); if (m.status?.slow > 0) st.push('Slowed'); if (m.status?.chill > 0) st.push('Chilled'); if (m.status?.frozen > 0) st.push('Frozen'); if (m.phaseT > 0) st.push('Phased'); if (m.shieldT > 0) st.push('Patched');
     this.el.querySelector('.of-status').textContent = st.join(' · ');
     // hurt vignette
     const v = this.play.view; v.hurt = Math.max(0, (v.hurt || 0) - dt * 1.5);

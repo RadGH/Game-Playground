@@ -5,6 +5,10 @@
 
 export const STAGE_AT = [1, 0.7, 0.35, 0];   // health share at or below which a building shows stage 1, 2, 3
 export const RUBBLE_H = 0.05;                 // rubble is a low heap you walk over
+// Round 7 city layouts: deep water (canals, the harbour) is tile code 'w' in map.city.ground — the SAME string the
+// ground drawing (render/city-ground.js) paints from. Nothing below DEEP_CLEAR walks or wades in it (a frame can jump
+// a canal if it clears the height); shots fly over it.
+export const DEEP_CODE = 'w', DEEP_CLEAR = 0.45;
 
 /**
  * @param {{ w: number, h: number, lots: Array<{ id?: string, x: number, z: number, w: number, d: number, h: number,
@@ -20,6 +24,8 @@ export function makeWorld(def) {
     W.lots.push(lot);
     for (let z = l.z; z < l.z + l.d; z++) for (let x = l.x; x < l.x + l.w; x++) if (x >= 0 && z >= 0 && x < def.w && z < def.h) W.cells[z * def.w + x] = i;
   });
+  const g = def.city?.ground;
+  if (g && g.includes(DEEP_CODE)) { W.deep = new Uint8Array(def.w * def.h); for (let i = 0; i < W.deep.length; i++) W.deep[i] = g[i] === DEEP_CODE ? 1 : 0; }
   return W;
 }
 
@@ -39,6 +45,7 @@ export function groundAt(W, x, z) {
 /** Is (x, z, y) inside a standing building? */
 export function blocked(W, x, z, y = 0) {
   if (x < 0 || z < 0 || x >= W.w || z >= W.h) return true;
+  if (W.deep && y < DEEP_CLEAR && W.deep[Math.floor(z) * W.w + Math.floor(x)]) return true;   // round 7: canal / harbour water
   const l = lotAt(W, x, z); if (!l || !l.solid || l.stage >= 3) return false;
   return y < l.h - 0.02;
 }
@@ -72,6 +79,14 @@ export function pushOut(W, b, r) {
     const vn = (b.vx || 0) * dx + (b.vz || 0) * dz; if (vn < 0) { b.vx -= vn * dx; b.vz -= vn * dz; }
   }
   return hit;
+}
+
+/** Does a straight walk from (x0, z0) to (x1, z1) cross deep water? (bots check it before walking straight) */
+export function wetLine(W, x0, z0, x1, z1) {
+  if (!W.deep) return false;
+  const len = Math.hypot(x1 - x0, z1 - z0), steps = Math.ceil(len / 0.25);
+  for (let i = 1; i <= steps; i++) { const t = i / steps, x = x0 + (x1 - x0) * t, z = z0 + (z1 - z0) * t; if (x >= 0 && z >= 0 && x < W.w && z < W.h && W.deep[Math.floor(z) * W.w + Math.floor(x)]) return true; }
+  return false;
 }
 
 /** First standing building along a straight line at height y, or null: { lot, x, z, t } (t = 0..1 along the line). */

@@ -4,32 +4,55 @@
 //
 // v1 (round 1) → v2 (round 2, the hangar): every maker's starter frame becomes owned parts + a saved build, round 1's
 // unopened part pickups are rolled into real parts, and experience starts at the credits earned so far.
-import { starterLocker, activeBuild } from './sim/inventory.js';
+import { starterLocker, allStartersLocker, activeBuild, STARTER_CHIP } from './sim/inventory.js';
+import { newUid } from './sim/loot.js';
 import { rollItem, openCrate } from './sim/loot.js';
 import { learn } from './sim/craft.js';
 import { rankOf, xpFor } from './sim/progress.js';
 
 export const SAVE_KEY = 'overdrive-frame:save';
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 export function freshSave(ctx) {
   const s = { v: SAVE_VERSION, callsign: 'Frame', credits: 0, xp: 0, mats: { scrap: 0, alloy: 0, exotic: 0, chitin: 0, siegeplate: 0 }, grades: {}, items: [], chips: [], builds: [], active: null,
-    seen: [], learned: [], dealer: { turn: -1, sold: [] }, played: 0, playedAt: null, settings: { night: 'mission' } };
-  if (ctx) Object.assign(s, starterLocker(ctx.PARTS, ctx.MAKERS));
+    seen: [], learned: [], dealer: { turn: -1, sold: [] }, played: 0, playedAt: null, settings: { night: 'mission' }, kit: 1 };
+  return s;   // round 7: no frame yet — the first visit picks ONE maker's starter (chooseFirstFrame)
+}
+
+/** The first-frame choice (round 7): that maker's starter frame, its chip fitted, nothing else. */
+export function chooseFirstFrame(s, ctx, maker) {
+  const l = starterLocker(ctx.PARTS, ctx.MAKERS, maker);
+  s.items.push(...l.items); s.chips.push(...l.chips); s.builds.push(...l.builds); s.active = l.active;
+  s.firstFrame = maker;
   return s;
 }
+export const needsFirstFrame = s => !s.builds?.length;
 
 /** Bring any older save up to date (never throws away anything the player earned). */
 export function upgradeSave(old, ctx) {
   if (!old || typeof old !== 'object') return freshSave(ctx);
   if (old.v === SAVE_VERSION) {
     const s = { ...freshSave(null), ...old, mats: { scrap: 0, alloy: 0, exotic: 0, chitin: 0, siegeplate: 0, ...(old.mats || {}) } };
-    if (!s.builds?.length && ctx) Object.assign(s, starterLocker(ctx.PARTS, ctx.MAKERS));
+    if (s.builds.length && !s.builds.some(b => b.id === s.active)) s.active = s.builds[0]?.id || null;
+    return s;
+  }
+  if (old.v === 2) {
+    // round 7: keep everything; add the repair kit, a skill + empty tuning on every build, and a firmware chip for a
+    // pilot who never found one (owner: "I still haven't seen any firmware … by level 5"). Reputation is no longer used.
+    const s = { ...freshSave(null), ...old, v: SAVE_VERSION, mats: { scrap: 0, alloy: 0, exotic: 0, chitin: 0, siegeplate: 0, ...(old.mats || {}) }, kit: old.kit || 1 };
+    delete s.rep;
+    for (const b of s.builds || []) { b.skill ||= 'repulse'; b.tuning ||= {}; }
+    if (!s.chips?.length) {
+      const maker = (ctx?.P?.[s.items.find(i => i.uid === activeBuild(s)?.parts?.core)?.id]?.maker) || 'brannoch';
+      const chip = { uid: newUid(), id: STARTER_CHIP[maker] || 'keen-edge' }; s.chips = [chip];
+      const b = activeBuild(s); if (b) b.chips = [...(b.chips || []), chip.uid];
+    }
     if (!s.builds.some(b => b.id === s.active)) s.active = s.builds[0]?.id || null;
     return s;
   }
   if (old.v === 1) {
     const s = freshSave(ctx);
+    if (ctx) Object.assign(s, allStartersLocker(ctx.PARTS, ctx.MAKERS));   // a round 1 pilot already had all four
     for (const k of ['callsign', 'credits', 'grades', 'played', 'playedAt', 'settings']) if (old[k] != null) s[k] = old[k];
     s.mats = { ...s.mats, ...(old.mats || {}) };
     s.xp = old.credits || 0;
@@ -71,6 +94,9 @@ export function applyResult(s, result, missionId, ctx, pid = 'p1') {
   for (let i = 0; i < (result.crates || 0); i++) {
     const c = openCrate(ctx.P, ctx.CHIPS, { tier, seed: ((result.seed || 1) * 7919 + i * 104729 + s.played) >>> 0, luck: st.partLuck || 0 });
     s.items.push(...c.items); gained.items.push(...c.items);
+    if (!c.chips.length && s.chips.length < 3) {   // round 7: the first few crates always carry a chip, so firmware turns up early
+      const pool = (ctx.CHIPS || []).filter(x => (x.drop || 1) <= Math.max(1, tier)); if (pool.length) c.chips.push({ uid: newUid(), id: pool[(s.played * 7 + i * 3) % pool.length].id });
+    }
     s.chips.push(...c.chips); gained.chips.push(...c.chips);
     for (const k of Object.keys(c.mats)) { s.mats[k] += c.mats[k]; gained.mats[k] = (gained.mats[k] || 0) + c.mats[k]; }
     if (c.schematic) gained.learned.push(...learn(s, ctx.RECIPES, { schematic: c.schematic }, s.played * 31 + i));

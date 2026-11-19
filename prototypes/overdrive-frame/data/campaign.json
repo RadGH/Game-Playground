@@ -40,9 +40,5 @@
     { "type": "convoy", "name": "Convoy raid", "length": "short", "w": 1, "only": "army", "brief": "A Halden-Voss convoy is crossing {district}. Stop at least {count} trucks before they reach the far side." },
     { "type": "escort", "name": "Escort", "length": "mid", "w": 1, "brief": "A {client} supply convoy has to cross {district}. Keep the trucks alive until they're through." }
   ],
-  "clients": ["celerity", "brannoch", "calyx", "patchwork"],
-  "licences": {
-    "levels": [{ "rep": 0, "label": "No licence" }, { "rep": 3000, "label": "Licence I", "off": 0.05, "tier": 1, "extra": 2 }, { "rep": 9000, "label": "Licence II", "off": 0.1, "tier": 2, "extra": 3 }, { "rep": 20000, "label": "Licence III", "off": 0.15, "tier": 3, "extra": 4 }],
-    "text": "Fly contracts for a maker to earn its trust. Each licence puts more of that maker's parts on the dealer's shelves — including ones above your rank — and takes money off them."
-  }
+  "clients": ["celerity", "brannoch", "calyx", "patchwork"]
 }

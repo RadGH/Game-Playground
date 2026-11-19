@@ -15,8 +15,9 @@
 // Per-bot memory lives on the mech as m.bot. Pure: S.rng only, no clock.
 import { energyMaxOf, heatMaxOf } from './mech.js';
 import { angleDiff } from './weapons.js';
-import { blocked, rayLot } from './world.js';
+import { blocked, rayLot, wetLine } from './world.js';   // wetLine: round 7 canals (a bot never walks straight into deep water)
 import { makeFlow, updateFlow, flowDir } from './flow.js';
+import { BOT_USE } from './weapon-kinds.js';                     // round 7: how bots use the new kinds
 
 /** Twelve original callsigns for the computer's pilots. */
 export const BOT_NAMES = ['Tally', 'Rivet', 'Marlin', 'Bramble', 'Quill', 'Sprocket', 'Dunlin', 'Corvo', 'Mica', 'Pylon', 'Tamber', 'Wicket'];
@@ -51,12 +52,21 @@ export function botBuild(PARTS, MAKERS, i = 0) {
   const k = Math.floor(i / makers.length);                 // the 5th bot (2nd round of makers) gets the next pair of guns
   const a1 = arms[(k * 2) % arms.length], a2 = arms[(k * 2 + 1) % arms.length];
   return { head: first('head'), core: first('core'), arms: first('arms'), legs: first('legs'), booster: first('booster'), generator: first('generator'),
-    cooling: first('cooling'), cpu: first('cpu'), weapons: [a1.id, a2.id, shoulders[k % shoulders.length].id, null], paint: { ...BOT_PAINTS[i % BOT_PAINTS.length] } };
+    cooling: first('cooling'), cpu: first('cpu'), weapons: [a1.id, a2.id, shoulders[k % shoulders.length].id, null], paint: { ...BOT_PAINTS[i % BOT_PAINTS.length] },
+    kit: 1, skill: ['repulse', 'dome', 'nova', 'decoy'][i % 4] };   // round 7: every bot carries a repair kit and a skill
 }
 
 /** Fill in the inputs of every bot player for this step (human entries are never touched). */
 export function botInputs(S, inputs, dt) {
-  for (const p of S.players) if (p.bot) { if (S.versus) S.grid = S.versus.grids.get(p.mech.team) || S.grid; const inp = inputs[p.id] = botInput(S, p.mech, dt); inp.overload = wantsOverload(S, p.mech); }
+  for (const p of S.players) if (p.bot) { if (S.versus) S.grid = S.versus.grids.get(p.mech.team) || S.grid; const inp = inputs[p.id] = botInput(S, p.mech, dt); inp.overload = wantsOverload(S, p.mech); inp.kit = wantsKit(p.mech); inp.skill = wantsSkill(S, p.mech); }
+}
+
+/** Round 7: the repair kit when badly hurt; the skill when a crowd is close (sim/perks.js). */
+export const wantsKit = m => !!(m.kit?.n > 0 && m.kit.cd <= 0 && !m.down && m.hp < m.hpMax * 0.35);
+export function wantsSkill(S, m) {
+  if (!m.skill || m.skill.n <= 0 || m.down || !(S.phase === 'fight' || S.phase === 'extract')) return false;
+  let near = 0; for (const e of S.candidates(m.x, m.z, 3)) { near++; if (e.boss || near >= 5) return true; }
+  return false;
 }
 
 /** An Overload core (sim/overload.js) with a full bar: fire it when the fight is close — a crowd near, or a teammate down. */
@@ -83,7 +93,7 @@ const open = (S, x, z) => {
 /** The way to walk from the mech to point p: straight when the street is clear, else along a flow field (cached). */
 function wayTo(S, m, B, p) {
   const dx = p.x - m.x, dz = p.z - m.z, d = Math.hypot(dx, dz) || 1e-6;
-  if (d < 1.2 || !rayLot(S.world, m.x, m.z, p.x, p.z, 0.05) && !rayLot(S.world, m.x + dz / d * 0.22, m.z - dx / d * 0.22, p.x, p.z, 0.05) && !rayLot(S.world, m.x - dz / d * 0.22, m.z + dx / d * 0.22, p.x, p.z, 0.05)) return [dx / d, dz / d];
+  if (d < 1.2 || !wetLine(S.world, m.x, m.z, p.x, p.z) && !rayLot(S.world, m.x, m.z, p.x, p.z, 0.05) && !rayLot(S.world, m.x + dz / d * 0.22, m.z - dx / d * 0.22, p.x, p.z, 0.05) && !rayLot(S.world, m.x - dz / d * 0.22, m.z + dx / d * 0.22, p.x, p.z, 0.05)) return [dx / d, dz / d];
   const tile = Math.floor(p.z) * S.world.w + Math.floor(p.x);
   if (!B.flow) B.flow = makeFlow(S.world);
   if ((B.flowTile !== tile && B.flowT <= 0) || B.flowTile == null || B.flowT < -3) {
@@ -96,7 +106,9 @@ function wayTo(S, m, B, p) {
 const ready = w => w.reloadT <= 0 && (w.inMag == null || w.inMag > 0) && (w.ammo == null || w.ammo > 0);
 
 /** A shooting kind: shots fly straight along the aim (a teammate in the way would be in the line of fire). */
-const STRAIGHT = new Set(['bullet', 'pellets', 'rail', 'beam', 'flame', 'plasma', 'chain']);
+const STRAIGHT = new Set(['bullet', 'pellets', 'rail', 'beam', 'flame', 'plasma', 'chain', ...Object.keys(BOT_USE).filter(k => BOT_USE[k] === 'straight')]);
+/** Round 7 kinds that land on a spot (no sight line needed) — like a lobbed shell. */
+const GROUND = new Set(['lob', ...Object.keys(BOT_USE).filter(k => BOT_USE[k] === 'ground')]);
 
 /**
  * One bot's hands on the controls. Same shape as Controls.read():
@@ -312,13 +324,14 @@ export function botInput(S, m, dt) {
     if (!ready(w)) return;
     if (sp.heat > 0 && (B.cooling || m.overheated || (m.heat + sp.heat) / hMax > 0.95)) return;
     if (sp.energy && energy - sp.energy < reserve) return;
-    const reach = (sp.kind === 'blade' ? sp.range + (tgt.r || 0.15) : sp.range * 0.95 + (tgt.r || 0) * 0.5);
+    if (BOT_USE[sp.kind] === 'aura') { inp.fire[i] = countNear(S, m, sp.range) > 0; return; }        // round 7: the arc coil hits around the frame
+    const reach = (sp.kind === 'blade' ? sp.range + (tgt.r || 0.15) : sp.kind === 'scythe' ? (sp.waveRange || sp.range) * 0.85 : sp.range * 0.95 + (tgt.r || 0) * 0.5);
     if (tdist > reach) return;
     if (sp.kind === 'deploy') { inp.fire[i] = tdist < Math.min(sp.range, 6); return; }
     if (sp.kind === 'lob' && tdist < (sp.splash || 0.5) + 0.4) return;
     const homing = sp.kind === 'missile' && (w.locks?.length || sp.vertical);
-    if (!see && !homing && sp.kind !== 'lob' && !tgt.flying) return;
-    if (!homing && aimErr > (sp.kind === 'blade' ? 0.6 : 0.35)) return;
+    if (!see && !homing && !GROUND.has(sp.kind) && !tgt.flying) return;
+    if (!homing && aimErr > (sp.kind === 'blade' || sp.kind === 'scythe' ? 0.6 : 0.35)) return;
     if (STRAIGHT.has(sp.kind) && blockedByMate) return;
     if (sp.charge) { inp.fire[i] = w.charge < sp.charge; return; }   // hold to charge, let go when full
     inp.fire[i] = true;

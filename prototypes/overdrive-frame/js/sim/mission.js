@@ -24,6 +24,8 @@ import { setupVersus, joinVersus, buildVersusGrids, useGrid, versusHurt, stepVer
 import { makeFlow, updateFlow, flowDist } from './flow.js';
 import { stepRoles, shieldMul, addCloud } from './roles.js';      // round 5 roles: bulwark domes, spore clouds
 import { gripFor } from './snowmap.js';                             // round 6: slippery lake ice (null off the snowfield)
+import { stepPerks, afterPerks, perkEvents, perkLate, perkTaken, paintedMul, paintFrom, stepPerkWorld, isDecoy } from './perks.js';   // round 7: kit, skill, frame rules
+import { afterHit, afterBlast, landFx, specialShot, seekStep, ricochet, stepWeaponFx } from './weapon-fx.js';   // round 7: weapon effects
 
 export const PHASES = ['drop', 'fight', 'extract', 'won', 'failed'];
 
@@ -33,6 +35,7 @@ export function createMission(def, { kinds, T, players = [], seed = def.seed || 
     def, T, kinds, seed, rng: makeRng(mixSeed(seed, def.id)), time: 0, phase: 'drop', phaseT: def.drop ?? 3,
     world, grid: new Grid(world.w, world.h, 1), mechs: [], enemies: [], byId: new Map(), shots: [], strikes: [], delayed: [],
     pickups: [], deployed: [], events: [], nextId: 1, waveDone: new Set(), objectives: [], stats: { kills: 0, score: 0, structures: 0, collateral: 0 },
+    zones: [], bomblets: [], echoes: [],          // round 7 (sim/weapon-fx.js): gravity wells, burning ground, nanite clouds, storms, orbital marks
     revives: 0, checkpoint: null, result: null, flow: null, flowT: 0, clouds: [],   // clouds: spore gas (sim/roles.js)
     gravity: def.gravity ?? 1,     // round 5: share of normal gravity (the moon is 0.4) — mech jumps/hover + lobbed shots
   };
@@ -135,7 +138,11 @@ function attachHelpers(S) {
   S.canSee = (a, b) => (a.flying || b.y > 0.5) ? true : !rayLot(S.world, a.x, a.z, b.x, b.z, 0.25);
   S.spawn = (kind, x, z, o) => spawn(S, kind, x, z, o);
   S.dropLoot = (e, K) => dropLoot(S, e, K);
-  S.hurtPlayer = (m, amount, dtype, from) => { let n = (from?.mitigated ? amount : mitigate(amount, dtype, m)) * overloadTaken(S, m);   // mitigated: a versus hit already went through resolveHit const src = from?.id && S.byId.get(from.id);
+  S.hurtPlayer = (m, amount, dtype, from) => {
+    if (isDecoy(m)) { m.hp -= amount; return; }                                   // round 7: a Decoy Holo soaks the hit (sim/perks.js)
+    let n = (from?.mitigated ? amount : mitigate(amount, dtype, m)) * overloadTaken(S, m);   // mitigated: a versus hit already went through resolveHit
+    n = perkTaken(S, m, n);                                                        // round 7: phase dash, reactive plate, domes, last stand… (sim/perks.js)
+    const src = from?.id && S.byId.get(from.id);
     const sh = m.weapons.find(w => w.spec.kind === 'shield' && w.held); if (sh && src && Math.abs(angleDiff(Math.atan2(src.z - m.z, src.x - m.x), m.aim)) < 1.1) { n *= 1 - sh.spec.block; S.events.push({ type: 'block', id: m.id }); } const got = hurtMech(m, n, S.events, from?.id); if (got > 0) S.events.push({ type: 'phit', id: m.id, amount: got, dtype, x: m.x, z: m.z, from: from?.id || null }); };
   S.damageEnemy = (e, amount, dtype, by, tier = 0, hx = e.x, hz = e.z) => damageEnemy(S, e, amount, dtype, by, tier, hx, hz);
   S.killEnemy = (e, by, burst = false) => killEnemy(S, e, by, burst);
@@ -144,6 +151,23 @@ function attachHelpers(S) {
   S.melee = (shot, m, dir, range, arc) => melee(S, shot, m, dir, range, arc);
   S.repairLine = (shot, m, dir, range, heal) => repairLine(S, shot, m, dir, range, heal);
   S.deploy = (shot, m, spec, aim) => deploy(S, shot, m, spec, aim);
+  // round 7 (sim/weapon-fx.js)
+  S.hitEnemy = (shot, e, scale, hx, hz, rx, rz) => hitEnemy(S, shot, e, scale, hx, hz, rx, rz);
+  S.blast = (shot, x, z, r) => blast(S, shot, x, z, r);
+  S.useGrid = team => useGrid(S, team);
+  S.lotAt = (x, z) => lotAt(S.world, x, z);
+  S.damageLot = (l, dmg) => damageLot(S.world, l, dmg / S.T.buildingArmour, S.events);
+}
+
+/** One player hit on an enemy, start to finish: crit + resistances + status (resolveHit), the damage, then the round 7
+ *  weapon effects (leech, chain sparks, overkill…). scale = falloff; (hx, hz) = where the number shows; (rx, rz) = the
+ *  hit point a void rift tugs toward (a blast's centre). Returns the damage dealt. */
+function hitEnemy(S, shot, e, scale = 1, hx = e.x, hz = e.z, rx = null, rz = null) {
+  const { amount, tier } = resolveHit(S, shot, e, S.T, scale, rx, rz);
+  const was = e.dead, n = damageEnemy(S, e, amount, shot.dtype, shot.owner, tier, hx, hz);
+  if (e.justFroze) { e.justFroze = false; S.events.push({ type: 'freeze', id: e.id, x: e.x, z: e.z }); }
+  if (shot.fx) afterHit(S, shot, e, n || 0, !was && !!e.dead, scale);
+  return n;
 }
 
 function damageEnemy(S, e, amount, dtype, by, tier, hx, hz) {
@@ -153,6 +177,7 @@ function damageEnemy(S, e, amount, dtype, by, tier, hx, hz) {
   if (e.ace) return hurtAce(S, e, amount, dtype, by, tier, hx, hz);          // a rival ace (a mech: sim/ace.js)
   if (S.versus && e.pid) { const got = versusHurt(S, e, amount, dtype, by); if (got > 0) S.events.push({ type: 'hit', id: e.id, amount: got, tier, dtype, x: hx, z: hz, y: 0.4, by }); return got; }   // versus: a frame
   let shown = null, part = null;
+  if (e.painted > S.time) amount *= paintedMul(S, e);                       // round 7: Target Painter (sim/perks.js)
   const shield = shieldMul(S, e); if (shield < 1) amount *= shield;          // round 5: inside a living bulwark's dome (sim/roles.js)
   if (e.parts) ({ amount, shown, part } = bossHit(S, e, amount, hx, hz, by));   // boss: the part where it landed (sim/boss.js)
   const n = Math.min(e.hp, amount); e.hp -= n; e.lastHitBy = by;
@@ -203,7 +228,7 @@ function blast(S, shot, x, z, r, fromEnemyBurst = false) {
   if (shot.team !== 'enemy') for (const e of S.grid.within(x, z, r)) {
     if (e.dead || e.hidden || e.state === 'warn') continue;
     const d = Math.hypot(e.x - x, e.z - z), fall = 1 - 0.5 * Math.min(1, d / Math.max(0.01, r + e.r));
-    const { amount, tier } = resolveHit(S, shot, e, S.T, fall); damageEnemy(S, e, amount, shot.dtype, shot.owner, tier, e.x, e.z);
+    hitEnemy(S, shot, e, fall, e.x, e.z, x, z);
   }
   if (shot.team === 'enemy' || fromEnemyBurst) for (const m of S.mechs) {
     if (m.down || m.team === 'enemy') continue; const d = Math.hypot(m.x - x, m.z - z); if (d > r + m.r) continue;
@@ -215,6 +240,7 @@ function blast(S, shot, x, z, r, fromEnemyBurst = false) {
     const l = lotAt(S.world, tx + 0.5, tz + 0.5); if (!l || seen.has(l)) continue; seen.add(l);
     damageLot(S.world, l, shot.dmg * 0.6 / S.T.buildingArmour, S.events);
   }
+  if (shot.fx) afterBlast(S, shot, x, z, r);                         // round 7: cluster bomblets, burning ground, gravity wells
 }
 
 function hitLine(S, shot, x, z, y, dir, len, pierce, width) {
@@ -230,11 +256,13 @@ function hitLine(S, shot, x, z, y, dir, len, pierce, width) {
   }
   hits.sort((a, b) => a[0] - b[0]);
   let n = 0;
-  for (const [, e] of hits) { const { amount, tier } = resolveHit(S, { ...shot, vx: Math.cos(dir), vz: Math.sin(dir) }, e, S.T); damageEnemy(S, e, amount, shot.dtype, shot.owner, tier); if (++n > pierce) break; }
+  const lineShot = { ...shot, vx: Math.cos(dir), vz: Math.sin(dir) };
+  for (const [, e] of hits) { hitEnemy(S, lineShot, e, 1, e.x, e.z); if (++n > pierce) break; }
   const endLen = n > pierce && hits[n - 1] ? hits[n - 1][0] : stopAt;
   if (wall && (pierce < 99) && endLen >= stopAt - 1e-6) damageLot(S.world, wall.lot, shot.dmg / S.T.buildingArmour, S.events);
   if (pierce >= 99 && wall) damageLot(S.world, wall.lot, shot.dmg * 0.5 / S.T.buildingArmour, S.events);
-  S.events.push({ type: 'line', owner: shot.owner, x, z, y, x2: x + Math.cos(dir) * endLen, z2: z + Math.sin(dir) * endLen, dtype: shot.dtype, weapon: shot.weapon });
+  S.events.push({ type: 'line', owner: shot.owner, x, z, y, x2: x + Math.cos(dir) * endLen, z2: z + Math.sin(dir) * endLen, dtype: shot.dtype, weapon: shot.weapon, look: shot.look || undefined });
+  return { x2: x + Math.cos(dir) * endLen, z2: z + Math.sin(dir) * endLen, first: hits[0]?.[1] || null };   // round 7: the prism splits here
 }
 
 function chain(S, shot, x, z, dir, range, jumps, jr) {
@@ -243,7 +271,7 @@ function chain(S, shot, x, z, dir, range, jumps, jr) {
   const pts = [[x, z]];
   for (let j = 0; cur && j <= jumps; j++) {
     hit.add(cur.id); pts.push([cur.x, cur.z]);
-    const { amount, tier } = resolveHit(S, shot, cur, S.T, Math.pow(0.85, j)); damageEnemy(S, cur, amount, shot.dtype, shot.owner, tier);
+    hitEnemy(S, shot, cur, Math.pow(0.85, j), cur.x, cur.z);
     from = cur; cur = null; best = Infinity;
     for (const e of S.candidates(from.x, from.z, jr)) { if (hit.has(e.id)) continue; const d = Math.hypot(e.x - from.x, e.z - from.z); if (d < best) { best = d; cur = e; } }
   }
@@ -252,7 +280,7 @@ function chain(S, shot, x, z, dir, range, jumps, jr) {
 
 function melee(S, shot, m, dir, range, arc) {
   let n = 0;
-  for (const e of S.candidates(m.x, m.z, range + 0.3)) { const a = Math.abs(angleDiff(Math.atan2(e.z - m.z, e.x - m.x), dir)); if (a > arc / 2) continue; const { amount, tier } = resolveHit(S, shot, e, S.T); damageEnemy(S, e, amount, shot.dtype, shot.owner, tier); e.vx += Math.cos(dir) * (shot.knock || 2); e.vz += Math.sin(dir) * (shot.knock || 2); n++; }
+  for (const e of S.candidates(m.x, m.z, range + 0.3)) { const a = Math.abs(angleDiff(Math.atan2(e.z - m.z, e.x - m.x), dir)); if (a > arc / 2) continue; hitEnemy(S, shot, e, 1, e.x, e.z, m.x, m.z); e.vx += Math.cos(dir) * (shot.knock || 2); e.vz += Math.sin(dir) * (shot.knock || 2); n++; }
   const l = lotAt(S.world, m.x + Math.cos(dir) * range, m.z + Math.sin(dir) * range); if (l) damageLot(S.world, l, shot.dmg / S.T.buildingArmour, S.events);
   S.events.push({ type: 'slash', owner: m.id, x: m.x, z: m.z, dir, range, arc, n });
 }
@@ -298,8 +326,11 @@ function stepShots(S, dt) {
     // low gravity (round 5): a lobbed shot keeps its arc's shape and landing spot but hangs in the air longer —
     // the whole flight is slowed by sqrt(gravity), once, when it is first seen (so snapshots carry its real speed)
     if (s.lob && S.gravity !== 1 && !s.gDone) { const k = Math.sqrt(S.gravity); s.vx *= k; s.vz *= k; s.vy *= k; s.g *= S.gravity; s.life /= k; s.gDone = true; }
-    s.age += dt;
     if (S.versus && s.team !== 'enemy') useGrid(S, s.team);                            // versus: this team's targets
+    const special = specialShot(S, s, dt);                                             // round 7: seeker orbs, the returning disc
+    if (special) { if (special === 'keep') keep.push(s); continue; }
+    s.age += dt;
+    if (s.fx?.seek && !s.lob && !s.target && s.team !== 'enemy') seekStep(S, s, dt);   // round 7: bullets that curve in
     if (s.target && !s.vertical) {                    // homing
       const t = S.byId.get(s.target);
       if (t && !t.dead) { const want = Math.atan2(t.z - s.z, t.x - s.x), cur = Math.atan2(s.vz, s.vx), sp = Math.hypot(s.vx, s.vz); const a = cur + Math.max(-s.turn * dt, Math.min(s.turn * dt, angleDiff(want, cur))); s.vx = Math.cos(a) * sp; s.vz = Math.sin(a) * sp; }
@@ -331,13 +362,14 @@ function stepShots(S, dt) {
     S.grid.near((s.x + ox) / 2, (s.z + oz) / 2, 0.6 + Math.sqrt(sl2) / 2, e => {
       if (e.dead || e.hidden || e.state === 'warn' || s.hits.includes(e.id)) return;
       if (e.flying && s.kind !== 'missile' && s.y < e.flying - 0.6 && !s.flame) { /* flyers are hit by anything aimed at them */ }
-      const rr = e.r + (s.flame ? 0.12 : 0.04);
+      const rr = e.r + (s.flame ? 0.12 : s.wave ? 0.3 : 0.04);
       const k = Math.max(0, Math.min(1, ((e.x - ox) * sx0 + (e.z - oz) * sz0) / sl2));
       if ((e.x - (ox + sx0 * k)) ** 2 + (e.z - (oz + sz0 * k)) ** 2 > rr * rr) return;
       if (s.splash > 0 && !s.flame) { land(S, s, s.x, s.z); stop = true; return true; }
-      const { amount, tier } = resolveHit(S, s, e, T); damageEnemy(S, e, amount, s.dtype, s.owner, tier, s.x, s.z);
+      hitEnemy(S, s, e, 1, s.x, s.z);
       if (s.knock) { const k = s.knock / Math.max(0.5, e.r * 6); e.vx += s.vx / Math.hypot(s.vx, s.vz) * k; e.vz += s.vz / Math.hypot(s.vx, s.vz) * k; }
       s.hits.push(e.id);
+      if (s.fx?.ricochet && ricochet(S, s, e)) return true;                           // round 7: bounced to the next enemy
       if (s.hits.length > s.pierce) { stop = true; return true; }
     });
     if (!stop) keep.push(s);
@@ -346,6 +378,7 @@ function stepShots(S, dt) {
 }
 
 function land(S, s, x, z) {
+  if (s.zone && landFx(S, s, x, z)) return;                          // round 7: a nanite canister opens a cloud
   if (s.splash > 0) blast(S, s, x, z, s.splash);
   else S.events.push({ type: 'spark', x, z, y: 0.1, dtype: s.dtype });
 }
@@ -441,7 +474,9 @@ export function stepMission(S, inputs, dt) {
     useGrid(S, p.mech.team);                                                       // versus: this frame's targets
     const m = p.mech, inp = (S.phase === 'drop' ? null : inputs[p.id]) || {};
     m.padAim = !!inp.pad;
+    const evMech = S.events.length;
     stepMech(m, inp, dt, T, worldApi, S.events);
+    perkEvents(S, m, evMech);                                                      // round 7: afterburner, shock landing, thermal vent…
     const burn = tickStatus(m, dt); if (burn) hurtMech(m, burn, S.events);
     // sticky lock-on: the button grabs the enemy nearest the aim and the aim follows it until pressed again
     if (inp.lockOnPressed) {
@@ -454,13 +489,15 @@ export function stepMission(S, inputs, dt) {
     if (stuck && stuck.dead) m.lockOn = null;
     const aim = stuck && !stuck.dead ? { x: stuck.x, z: stuck.z } : { x: inp.ax ?? m.x + Math.cos(m.aim), z: inp.az ?? m.z + Math.sin(m.aim) };
     if (stuck && !stuck.dead && !m.down) m.aim = Math.atan2(stuck.z - m.z, stuck.x - m.x);
+    stepPerks(S, m, S.phase === 'drop' ? {} : inp, dt);                           // round 7: repair kit, skill, frame rules
     if (m.down || S.phase === 'drop') { for (const w of m.weapons) w.held = false; continue; }
     // the Overload core's ultimate (sim/overload.js): the button, then its effect around the weapons
     const odBlast = (shot, x, z, r) => blast(S, shot, x, z, r);
     if (inp.overload) triggerOverload(S, m, odBlast);
     const heldHeat = stepOverload(S, m, dt, odBlast);
     m.weapons.forEach((w, i) => { updateLocks(S, m, w, dt, T, aim.x, aim.z); triggerWeapon(S, m, w, !!inp.fire?.[i], dt, T, aim); });
-    afterWeapons(m, heldHeat, dt);
+    afterWeapons(m, heldHeat, dt); afterPerks(m);
+    paintFrom(S, evMech);                                                          // locks, sticks and pings this step
     // revive: stand next to a downed teammate
     for (const o of S.mechs) if (o !== m && o.down && o.team === m.team && !o.dead && Math.hypot(o.x - m.x, o.z - m.z) < 0.7) { o.reviveT += dt; if (o.reviveT >= (T.reviveTime || 3)) { o.down = false; o.hp = o.hpMax * 0.35; o.reviveT = 0; S.revives++; S.events.push({ type: 'revive', id: o.id, by: m.id }); } }
   }
@@ -468,7 +505,9 @@ export function stepMission(S, inputs, dt) {
   S.flowT -= dt;
   if (S.flowT <= 0) { S.flowT = 0.4; updateFlow(S.flow, S.world, [...S.mechs.filter(m => !m.down && m.team !== 'enemy'), ...(S.allies || []).filter(a => !a.down && !a.arrived)]); }   // escort trucks are worth walking to
   if (S.phase === 'fight' || S.phase === 'extract') { runWaves(S); stepEnemies(S, dt, T); stepAces(S, dt, worldApi); }
-  stepShots(S, dt); stepStrikes(S, dt); stepRoles(S, dt); stepDeployed(S, dt); stepPickups(S, dt);
+  const evLate = S.events.length;
+  stepShots(S, dt); stepWeaponFx(S, dt); stepStrikes(S, dt); stepPerkWorld(S, dt); stepRoles(S, dt); stepDeployed(S, dt); stepPickups(S, dt);
+  for (const p of S.players) perkLate(S, p.mech, evLate);                          // round 7: kills and pickups this step (reaper, scavenger)
   stepOps(S, inputs, dt);
   handleWorldEvents(S, evStart);
   aceAfterStep(S);

@@ -16,7 +16,7 @@ const STEEL = '#6f7883', DARK = '#2a2f37', PANEL = '#4b525c', CONC = '#5d6168', 
 /** Bay colours by station (match prototypes/overdrive-frame/js/sim/hangarmap.js BAYS). */
 export const STATIONS = [
   ['Contracts terminal', '#3ff0ff'], ['Assembly bay', '#ffb02e'], ['Parts dealer', '#5fffb0'],
-  ['Workshop', '#ff7a3a'], ['Paint bay', '#ff5adf'], ['Test range door', '#ff4a4a'],
+  ['Workshop', '#ff7a3a'], ['Paint bay', '#ff5adf'], ['Test range door', '#ff4a4a'], ['Tuning rig', '#7dff9a'],
 ];
 const WALL_H = 1.9, BACK = 0.34;             // wall height, thickness of the wall slab (the rest of the tile is kit)
 const zBack = -0.5 + BACK / 2, zFace = -0.5 + BACK;
@@ -50,6 +50,7 @@ function icon(p, station, color, x, y, z, s = 0.12) {
     case 2: { const d = box(g, 1.0 * s, 1.0 * s, t, n, 0, -0.5 * s, 0); d.rotation.z = Math.PI / 4; const h = box(g, 0.3 * s, 0.3 * s, t * 1.4, mat(BLACK), 0.22 * s, 0.07 * s, 0.004); h.rotation.z = Math.PI / 4; break; }   // a price tag
     case 3: { const hd = box(g, 1.2 * s, 0.4 * s, t, n, 0.1 * s, 0.3 * s, 0); hd.rotation.z = -0.5; const hn = box(g, 0.18 * s, 1.3 * s, t, n, -0.15 * s, -0.75 * s, 0); hn.rotation.z = -0.5; break; }   // a hammer
     case 4: { const b = new THREE.Mesh(new THREE.SphereGeometry(0.45 * s, 16, 12), n); b.position.y = -0.25 * s; g.add(b); const c = new THREE.Mesh(new THREE.ConeGeometry(0.4 * s, 0.75 * s, 16), n); c.position.y = 0.38 * s; g.add(c); break; }   // a paint drop
+    case 6: for (let i = 0; i < 3; i++) { const x = (i - 1) * 0.55; bar(0.1, 1.3, x, 0.65); box(g, 0.34 * s, 0.2 * s, t * 1.3, n, x * s, ([0.3, -0.25, 0.1][i]) * s, 0.003); } break;   // tuning sliders
     default: ring(0.7, 0.09); ring(0.4, 0.09); { const d = new THREE.Mesh(new THREE.SphereGeometry(0.13 * s, 12, 8), n); g.add(d); } break;   // a target
   }
   return g;
@@ -130,6 +131,19 @@ const KIT = [
     for (const x of [-1.52, 1.52]) box(g, 0.14, 1.37, 0.2, mat(STEEL), x, 0, zFace + 0.1);
     box(g, 0.1, 0.1, 0.05, neonMat('#ff4040', 0.9), -0.3, 1.27, zFace + 0.21); box(g, 0.1, 0.1, 0.05, neonMat('#5dff6a', 0.9), 0.3, 1.27, zFace + 0.21);
     hazard(g, 2.9, 0, 0.47, 0.012, 0.12);
+  },
+  // 6 tuning rig (round 7): a calibration gantry — a scanning ring on rails over a test plinth, diagnostic screens,
+  //   cable looms from the header, a dial bank on the side
+  (g, c) => {
+    const fr = mat('#3c434d', 0.55, 0.45), yel = mat(HAZ, 0.3, 0.5), bez = mat(DARK, 0.4, 0.5), scr = neonMat(c, 0.55);
+    box(g, 1.3, 0.06, 0.9, mat('#43474e', 0.2, 0.9), 0, 0, 0.08); box(g, 1.1, 0.012, 0.012, neonMat(c, 0.6), 0, 0.065, 0.53);   // the plinth
+    for (const x of [-0.75, 0.75]) { box(g, 0.1, 1.2, 0.1, fr, x, 0, 0.1); box(g, 0.14, 0.05, 0.14, yel, x, 0, 0.1); box(g, 0.02, 1.0, 0.02, neonMat(c, 0.45), x + Math.sign(x) * -0.06, 0.1, 0.16); }
+    box(g, 1.6, 0.08, 0.12, fr, 0, 1.2, 0.1);
+    const scan = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.03, 10, 48), neonMat(c, 0.8)); scan.rotation.x = Math.PI / 2; scan.position.set(0, 0.62, 0.1); g.add(scan);   // the scanning ring
+    for (const x of [-0.62, 0.62]) box(g, 0.06, 0.06, 0.06, mat(STEEL), x, 0.6, 0.1);
+    for (let i = 0; i < 5; i++) box(g, 0.012, 0.4 + (i % 2) * 0.15, 0.012, mat(BLACK), -0.4 + i * 0.2, 0.8 - (i % 2) * 0.15, 0.02);   // cable looms
+    for (let i = 0; i < 3; i++) { const x = -1.15; box(g, 0.34, 0.26, 0.04, bez, x, 0.35 + i * 0.3, zFace + 0.03); box(g, 0.3, 0.2, 0.01, i === 1 ? neonMat('#bfffd0', 0.6) : scr, x, 0.38 + i * 0.3, zFace + 0.055); }
+    for (let i = 0; i < 4; i++) { const k = cyl(g, 0.05, 0.04, mat(STEEL), 1.12, 0.3 + i * 0.18, zFace + 0.06, { seg: 12 }); k.rotation.x = Math.PI / 2; box(g, 0.015, 0.04, 0.012, neonMat(c, 0.9), 1.12, 0.31 + i * 0.18, zFace + 0.09); }
   },
 ];
 

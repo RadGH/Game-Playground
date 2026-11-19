@@ -99,6 +99,19 @@ get the common wreck stages. Pines are 0.9–1.4 tall (a frame is 0.75). Lit win
 The game's map: `prototypes/overdrive-frame/js/sim/forestmap.js`; its ground (grass, trails, road, river):
 `prototypes/overdrive-frame/js/render/forest-ground.js`.
 
+### City quarters (`js/kit/quarters.js`)
+Overdrive Frame round 7 ("add a variety of map layouts"): the set pieces its new city layouts
+(`prototypes/overdrive-frame/js/sim/citylayouts.js`) stand among the ordinary buildings. **Green** (group `parks`, own
+damage stages like the forest: a bough down, crowns on fire, a charred stump) — `qt-tree` (1×1 street tree or two on a
+kerbed lawn with a bench and lamp), `qt-grove` (2×2 clump of 4–6 park trees over shrubs), `qt-planter` (1×1 concrete
+planter: shrubs, a small tree or reeds, a lit rim). **Rail yard** (category Industrial) — `qt-boxcar` (2×1 freight car on
+its stretch of track: box car, flat car with containers, tank car, ore hopper — `kind`), `qt-signal` (1×1 signal box +
+three-lamp mast), `qt-station` (3×2 station hall, clock tower, glass platform canopy). **Harbour** — `qt-crane` (2×2
+ship-to-shore crane, boom stowed upright over −z, the water side), `qt-containers` (2×1 stack, 1–4 layers). **Megablocks**
+— `qt-megatower` (4×4: three-storey podium with a planted terrace, curtain-wall tower 8–30 storeys with a set-back and a
+neon crown). Freight cars and containers are drawn a little wider than real ones so a tile-wide lot reads as what it
+is. Water, bridges, quays, piers, tracks, paths and plazas are ground the game draws: `render/city-ground.js`.
+
 ### Workshop props (`js/kit/workshop.js`, group `workshop`, genre `industrial`)
 For Overdrive Frame's title workshop and hangar (`prototypes/overdrive-frame/docs/ARCH.md`). **True to scale: 1 unit =
 16 m** (`M = 1/16`). Forklift (forks down/up, paint), Semi Truck (cab colour; box van / flatbed / tanker), Gantry Crane

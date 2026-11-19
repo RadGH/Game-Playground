@@ -19,7 +19,7 @@ export function frameFor(data, pid, build, name) {
 }
 
 /** A build in item form ({ id } objects), so every browser's Mech Kit draws it the same way. */
-export const asItems = b => { const o = { ...b }; for (const [k, v] of Object.entries(b)) if (typeof v === 'string' && k !== 'paint' && k !== 'name') o[k] = { id: v }; o.weapons = (b.weapons || []).map(w => (typeof w === 'string' ? { id: w } : w || null)); return o; };
+export const asItems = b => { const o = { ...b }; for (const [k, v] of Object.entries(b)) if (typeof v === 'string' && !['paint', 'name', 'skill'].includes(k)) o[k] = { id: v }; o.weapons = (b.weapons || []).map(w => (typeof w === 'string' ? { id: w } : w || null)); return o; };
 
 /** The mirror for a mission start message: { mission, roster: [{ pid, mid, name, bot, build, rank }], seed }. */
 export function makeMirror(start, data, localPid) {

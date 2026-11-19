@@ -129,3 +129,23 @@
 /* the campaign map's region tabs (round 6: Larkspur / the Outskirts) */
 .of-region-tabs { display: flex; gap: 6px; }
 .of-region-tabs .of-btn { flex: 1; text-align: center; }
+
+/* round 7: the first-frame choice */
+.of-first { position: absolute; inset: 0; display: flex; flex-direction: column; background: radial-gradient(ellipse at 50% 0%, #151b28, var(--of-bg) 65%); }
+.of-first-body { flex: 1; min-height: 0; overflow-y: auto; padding: var(--of-gap) calc(var(--of-gap) + var(--safe-r)) calc(var(--of-gap) + var(--safe-b)) calc(var(--of-gap) + var(--safe-l)); display: flex; flex-direction: column; gap: 14px; }
+.of-first-lead { margin: 0; color: var(--of-dim); font-size: 15px; }
+.of-first-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.of-first-card { --mk: var(--of-amber); display: flex; flex-direction: column; gap: 8px; padding: 12px; text-align: left; color: var(--of-text); font-family: var(--of-font); background: var(--of-panel); border: 1px solid var(--of-line); border-top: 3px solid var(--mk); border-radius: var(--of-r); cursor: pointer; }
+.of-first-card:hover, .of-first-card:focus-visible, .of-first-card.pad-focus { background: var(--of-panel-2); outline: none; border-color: var(--of-line-2); border-top-color: var(--mk); }
+.of-first-card.on { border-color: var(--mk); box-shadow: 0 0 0 1px var(--mk), 0 0 24px color-mix(in srgb, var(--mk) 25%, transparent); background: var(--of-panel-2); }
+.of-first-pic { width: 100%; max-width: 220px; aspect-ratio: 1; align-self: center; background: radial-gradient(circle at 50% 70%, color-mix(in srgb, var(--mk) 14%, transparent), transparent 70%); }
+.of-first-info b { font-size: 17px; letter-spacing: 0.04em; }
+.of-first-info p { margin: 4px 0 8px; color: var(--of-dim); font-size: 14px; line-height: 1.35; }
+.of-first-info .of-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 12px; margin: 0 0 8px; }
+.of-first-guns { margin: 0 0 8px; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 6px; }
+.of-first-guns li { padding: 2px 8px; border: 1px solid var(--of-line-2); border-radius: 999px; font-size: 13px; color: var(--of-text); }
+.of-first-chip { display: block; color: var(--of-dim); font-size: 13px; line-height: 1.35; }
+.of-first-chip b { color: var(--of-cyan); font-size: 13px; }
+.of-first-go { position: sticky; bottom: 0; display: flex; justify-content: center; padding: 10px 0 4px; background: linear-gradient(180deg, transparent, var(--of-bg) 40%); }
+.of-first-go .of-btn { min-width: min(320px, 100%); font-size: 18px; padding: 14px 22px; }
+.of-loot .of-loot-mod { color: var(--rc); font-weight: 700; }

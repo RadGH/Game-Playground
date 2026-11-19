@@ -31,6 +31,7 @@ export function bossSpot(S, x, z, r) {
     for (let k = 0; k <= 8; k++) {                                 // the centre and eight points on her outline
       const a = k / 8 * Math.PI * 2, q = k ? r * 0.85 : 0, l = lotAt(W, px + Math.cos(a) * q, pz + Math.sin(a) * q);
       if (l && l.solid && l.stage < 3) return false;
+      if (W.deep && W.deep[Math.floor(pz + Math.sin(a) * q) * W.w + Math.floor(px + Math.cos(a) * q)]) return false;   // round 7: never in a canal
     }
     return !S.mechs.some(m => m.team !== 'enemy' && !m.down && Math.hypot(m.x - px, m.z - pz) < Math.max(3, S.T.spawnSafeRadius * 0.8));
   };

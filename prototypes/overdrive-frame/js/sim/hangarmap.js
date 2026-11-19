@@ -22,6 +22,7 @@ export const BAYS = {
   workshop: { label: 'Workshop', color: '#ff7a3a', station: 3 },
   paint: { label: 'Paint bay', color: '#ff5adf', station: 4 },
   range: { label: 'Test range', color: '#ff4a4a', station: 5 },
+  tuning: { label: 'Tuning rig', color: '#7dff9a', station: 6 },   // round 7: Frame Tuning + skills + frame lines (ui/tuning.js)
   pad: { label: 'Launch pad', color: '#7fb4ff' },
 };
 export const BAY_IDS = Object.keys(BAYS);
@@ -50,7 +51,7 @@ function builder(w, h) {
  * @returns {{ w, h, lots, roads, plazas, start, extract, edges, bays, decor, interior: true, kind: 'hangar', name }}
  */
 export function makeHangarMap() {
-  const w = 23, h = 20;
+  const w = 24, h = 20;   // round 7: one tile wider for the Tuning rig's bay
   const B = builder(w, h), { lots, bays, decor, wall, spine, prop } = B;
 
   // corner column where the two back walls meet
@@ -79,8 +80,8 @@ export function makeHangarMap() {
   };
   // back wall up-right on screen (z = 0): assembly, dealer, workshop (the corner keeps a plain stretch so the two
   // walls' bays never share floor)
-  const endX = run('x', [['wall', 3, 1], ['bay', 'assembly'], ['col'], ['bay', 'dealer'], ['col'], ['bay', 'workshop'], ['col']]);
-  wall('x', endX, w - endX, 'hg-wall', { kind: 2 });
+  const endX = run('x', [['wall', 3, 1], ['bay', 'assembly'], ['col'], ['bay', 'dealer'], ['col'], ['bay', 'workshop'], ['col'], ['bay', 'tuning']]);
+  if (endX < w) wall('x', endX, w - endX, 'hg-wall', { kind: 2 });
   // back wall up-left on screen (x = 0): the contracts terminal, the paint bay, the range door
   const endZ = run('z', [['wall', 4, 1], ['bay', 'terminal'], ['col'], ['bay', 'paint'], ['col'], ['bay', 'range']]);
   if (endZ < h) wall('z', endZ, h - endZ, 'hg-wall', { kind: 0 });
@@ -95,10 +96,10 @@ export function makeHangarMap() {
   // everyday machines and people for scale (props from citykit/js/kit/workshop.js), kept off the walkways
   prop(8, 16, 'ws-semi', { cab: 3, trailer: 0 }, { face: 2, h: 0.25 });
   prop(9, 17, 'ws-stack', { kind: 1, count: 3 }, { h: 0.35 });
-  prop(19, 1, 'ws-stack', { kind: 1, count: 4 }, { h: 0.35 });
-  prop(20, 1, 'ws-scaffold', { levels: 5 }, { h: 0.5 });
-  prop(20, 3, 'ws-drums', { count: 6 }, { h: 0.1 });
-  prop(19, 4, 'ws-toolcart', { paint: 2 }, { h: 0.08 });
+  prop(22, 7, 'ws-stack', { kind: 1, count: 4 }, { h: 0.35 });   // round 7: moved out of the Tuning rig's bay
+  prop(21, 10, 'ws-scaffold', { levels: 5 }, { h: 0.5 });
+  prop(22, 9, 'ws-drums', { count: 6 }, { h: 0.1 });
+  prop(20, 6, 'ws-toolcart', { paint: 2 }, { h: 0.08 });
   prop(12, 8, 'ws-forklift', { forks: 1 }, { face: 10, h: 0.2 });
   prop(8, 11, 'ws-palletjack', { load: 1 }, { face: 3, solid: false, h: 0.06 });
   prop(11, 16, 'ws-reel', { wound: 3 }, { h: 0.15 });

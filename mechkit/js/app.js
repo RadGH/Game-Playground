@@ -5,7 +5,7 @@ import { fmt, pct } from '../../shared/format.js';
 import { TILE_W, TILE_H, PX_PER_HEIGHT, toScreen } from '../../citykit/js/iso.js';
 import { MechBaker, mechLayers, composeMech, drawPart, DIRS, paintFor } from './bake-mech.js';
 import { PARTS, LEG_ANIMS, UPPER_ANIMS, UPPER_KEYS, animAlt } from './rig.js';
-import { MAKER, MAKER_LIST } from './data.js';
+import { MAKER, MAKER_LIST, LINE, LINE_LIST } from './data.js';
 import { buildStats, randomBuild, WEAPON_SLOTS, FRAME_SLOTS, validBuild, weaponDps as dpsOf } from './stats.js';
 import { createPadNav } from './padnav.js';
 
@@ -23,13 +23,18 @@ function view(build, sharp) { return sharp ? { ly: mechLayers(sharpMb(), build),
 const SLOT_LABEL = { head: 'Head', core: 'Core', arms: 'Arms', legs: 'Legs', booster: 'Booster', generator: 'Generator', cooling: 'Cooler', cpu: 'CPU (fire control)' };
 const LEG_TYPE = { biped: 'Two legs', reverse: 'Bird legs', quad: 'Four legs', treads: 'Treads', hover: 'Hover' };
 const CLASS = { light: 'Light', medium: 'Medium', heavy: 'Heavy' };
-const TYPE = { kinetic: 'Kinetic', energy: 'Energy', explosive: 'Explosive', fire: 'Fire', electric: 'Electric' };
+const TYPE = { kinetic: 'Kinetic', energy: 'Energy', explosive: 'Explosive', fire: 'Fire', electric: 'Electric', cryo: 'Cryo', void: 'Void' };
 const LOCK = { none: 'No lock', aim: 'Free aim', homing: 'Homing', multi: 'Multi-lock' };
 const KIND = {
   rifle: 'Rifle', mg: 'Machine gun', shotgun: 'Shotgun', 'laser-rifle': 'Laser rifle', pulse: 'Pulse gun', grenade: 'Grenade launcher', rivet: 'Rivet gun',
   flamer: 'Flamethrower', chain: 'Chain lightning', repair: 'Repair beam', railgun: 'Railgun', gatling: 'Gatling', 'laser-blade': 'Laser blade', pile: 'Pile driver',
   saw: 'Buzzsaw', shield: 'Shield', sniper: 'Sniper cannon', 'vertical-pod': 'Vertical missiles', 'swarm-pod': 'Homing swarm', 'missile-pod': 'Missile pod',
   mortar: 'Mortar', plasma: 'Plasma cannon', 'drone-bay': 'Drone bay', 'mine-layer': 'Mine layer', 'turret-deployer': 'Turret deployer',
+  // round 7 (Overdrive Frame "Variety")
+  'sweep-lance': 'Sweep lance', prism: 'Prism laser', 'orbital-lance': 'Orbital lance', scythe: 'Wave scythe', 'rift-needler': 'Rift needler',
+  'cluster-mortar': 'Cluster mortar', 'grav-anchor': 'Gravity well launcher', 'cryo-projector': 'Cryo projector', 'tesla-coil': 'Arc coil',
+  'orb-launcher': 'Seeker orbs', 'storm-caller': 'Storm caller', 'nanite-sprayer': 'Nanite sprayer', firepot: 'Firepot lobber',
+  glaive: 'Returning disc', pinball: 'Ricochet gun', sparkplug: 'Spark carbine',
 };
 const DIR_NAME = ['up', 'up, a bit right', 'up-right', 'right, a bit up', 'right', 'right, a bit down', 'down-right', 'down, a bit right', 'down', 'down, a bit left', 'down-left', 'left, a bit down', 'left', 'left, a bit up', 'up-left', 'up, a bit left'];
 const partsOf = slot => Object.values(PARTS).filter(p => p.slot === slot);
@@ -109,8 +114,9 @@ const current = slot => WEAPON_SLOTS.some(w => w.key === slot) ? (state.build.we
 function subline(p) {
   if (!p) return 'Empty';
   if (p.slot === 'weapon') return `${makerName(p.maker)} · ${KIND[p.kind]} · ${p.hand === 'two' ? 'Two-handed' : p.mount === 'shoulder' ? 'Shoulder' : 'One-handed'}`;
-  if (p.slot === 'legs') return `${makerName(p.maker)} · ${LEG_TYPE[p.type]} · ${CLASS[p.class]}`;
-  return `${makerName(p.maker)} · ${CLASS[p.class]}`;
+  const ln = p.line && LINE[p.line] ? ` · ${LINE[p.line].name} line` : '';
+  if (p.slot === 'legs') return `${makerName(p.maker)}${ln} · ${LEG_TYPE[p.type]} · ${CLASS[p.class]}`;
+  return `${makerName(p.maker)}${ln} · ${CLASS[p.class]}`;
 }
 function keyStat(p) {
   if (!p) return '';
@@ -591,14 +597,22 @@ function makerBuild(mk, k, legsId) {
   if (k === 2 && two.length) { b.weapons.armR = two[0].id; b.weapons.armL = null; }
   return b;
 }
+/** One card per frame line (data/lines.json): the line's own parts in every slot it makes; a slot it lacks (and the
+ *  generator, cooler, CPU and weapons) comes from the same-weight standard frame. Legs-only lines ride a medium frame. */
 function lineupBuilds() {
   const out = [];
+  const K = { light: 0, medium: 1, heavy: 2 };
   for (const m of MAKER_LIST) {
     const legs = partsOf('legs').filter(p => p.maker === m.id);
     const used = new Set();
-    for (let k = 0; k < 3; k++) {
-      const l = legs.find(p => p.class === ['light', 'medium', 'heavy'][k] && p.type === 'biped' && !used.has(p.id)) || legs.find(p => p.type === 'biped' && !used.has(p.id)) || legs.find(p => !used.has(p.id)) || legs[0];
-      used.add(l.id); out.push({ maker: m.id, title: `${['Light', 'Medium', 'Heavy'][k]} ${m.short}`, build: makerBuild(m.id, k, l.id) });
+    for (const ln of LINE_LIST.filter(l => l.maker === m.id && l.parts.some(id => PARTS[id]?.slot === 'core'))) {
+      const own = slot => ln.parts.find(id => PARTS[id]?.slot === slot);
+      const k = K[PARTS[own('core')].class] ?? 1;
+      const l = own('legs') || legs.find(p => p.class === ['light', 'medium', 'heavy'][k] && p.type === 'biped' && !used.has(p.id)) || legs.find(p => p.type === 'biped' && !used.has(p.id)) || legs.find(p => p.type === 'biped') || legs[0];
+      const b = makerBuild(m.id, k, typeof l === 'string' ? l : l.id);
+      for (const s of ['head', 'core', 'arms', 'booster']) if (own(s)) b[s] = own(s);
+      used.add(b.legs);
+      out.push({ maker: m.id, line: ln, title: `${ln.name}${ln.isNew ? '' : ` (${['light', 'medium', 'heavy'][k]})`}`, build: b });
     }
     for (const l of legs) if (!used.has(l.id)) out.push({ maker: m.id, title: `${m.short} on ${l.name}`, build: makerBuild(m.id, 1, l.id) });
   }
@@ -613,7 +627,9 @@ function drawLineup() {
     const st = buildStats(it.build, PARTS);
     const card = el('article', 'mk-card'); const c = el('canvas'); c.setAttribute('aria-label', `${it.title} picture`); card.append(c);
     const body = el('div', 'body');
-    body.append(el('h4', null, `${makerDot(it.maker)}${it.title}`), el('div', 'sub', `${PARTS[it.build.legs].name} · ${LEG_TYPE[PARTS[it.build.legs].type]}`),
+    body.append(el('h4', null, `${makerDot(it.maker)}${it.title}`), el('div', 'sub', `${PARTS[it.build.legs].name} · ${LEG_TYPE[PARTS[it.build.legs].type]}`));
+    if (it.line) body.append(el('p', 'sub', it.line.role));
+    body.append(
       el('div', 'nums', `<span>Weight <b>${fmt(st.weight)} t</b></span><span>AP <b>${fmt(st.ap)}</b></span><span>Speed <b>${fmt(st.move.speed)} km/h</b></span><span>Fire <b>${fmt(st.firepower)}/s</b></span>`));
     const b = el('button', '', 'Dress up this one'); b.type = 'button';
     b.addEventListener('click', () => { setBuild(clone(it.build), `Loaded the ${it.title}.`); showView('dress'); });

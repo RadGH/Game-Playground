@@ -1,6 +1,25 @@
 {
   "entries": [
     {
+      "id": "2026-11-18-variety",
+      "date": "2026-11-18",
+      "title": "Variety: mods, tuning, skills, new mechs and weapons",
+      "items": [
+        "New pilots pick ONE maker's starter frame to begin with. Pilots who already have all four keep them.",
+        "Parts can carry mods that change how they work, not just their numbers: split barrels, wider blasts, cryo, void, fire and arc rounds, ricochets, gravity wells, cluster bomblets, burning ground, and more. Refined parts sometimes have one, Rare and better always do, and Experimental parts have two. The workshop can rewire a mod.",
+        "The parts dealer no longer sells Common parts. Rarer stock comes in as your rank rises, there's a featured Prototype-or-better part, and firmware chips are on the shelf. Crates drop rarer parts too.",
+        "A repair kit: press 1 (d-pad left, or Fix on a phone) to restore 30% of your armour, twice a mission. Upgrade it up to Mk V at the workshop.",
+        "Your starter frame comes with a firmware chip, and your first few crates always contain one. Every older pilot without a chip gets one now.",
+        "New in the hangar: the Tuning rig. Frame Tuning is four boards of upgrades with a choice of two big perks on rows 3 and 5, such as afterburner trails, phase dashes, shock landings, static shells and echo firing. You get 2 points a rank and 1 per story mission, and re-tuning is free.",
+        "Skills on key 2 (d-pad right): Repulsor Pulse, Arc Nova, Barrier Dome, Gravity Well, Decoy Holo, Cryo Burst, Orbital Lance and Overdrive, opening as you rank up.",
+        "8 new mechs, two per maker: Vantage, Rapier, Redoubt, Breaker, Bloom, Sickle, Hauler and Pogo. Wear 3 parts of one mech to switch on its set bonus. Breaker rams what you boost into, Bloom's repair kit heals teammates, and Redoubt braces when it stands still.",
+        "16 new weapons: a sweeping beam lance, a prism laser, an orbital lance, a wave scythe, a gravity well launcher, a cryo projector, an arc coil, seeker orbs, a storm caller, a nanite sprayer, a returning saw disc, and more. Cryo freezes enemies; void ignores armour.",
+        "City missions now come in 7 new layouts besides the grid: canal quarter, ring plaza, city park, old town, rail yard, harbour front and megablocks.",
+        "Maker reputation and licences are gone.",
+        "Fixed: holding a shield while getting hit could stop the mission. Closing a bay with Esc no longer opens the hangar menu. A Prototype shield showed blocking over 100%."
+      ]
+    },
+    {
       "id": "2026-11-18-outskirts",
       "date": "2026-11-18",
       "title": "The Outskirts",

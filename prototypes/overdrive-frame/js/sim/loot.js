@@ -3,15 +3,16 @@
 // lift + one bonus line per step); bonus lines come from a pool per slot, bigger at higher rarity. Pure: same seed, same
 // item, so a co-op server and the player's own screen agree on what dropped.
 import { makeRng } from './rng.js';
-import { RARITY, RARITY_BY_ID } from './loadout.js';
+import { RARITY, RARITY_BY_ID, plainSpec } from './loadout.js';
+import { rollMods } from './mods.js';
 
 /** Chance of each rarity by loot tier (mission tier 1 early … 5 late). Rare stays rare early (owner). */
-export const RARITY_ODDS = {
-  1: { common: 70, refined: 26, rare: 4, prototype: 0, experimental: 0 },
-  2: { common: 55, refined: 32, rare: 11, prototype: 2, experimental: 0 },
-  3: { common: 40, refined: 35, rare: 18, prototype: 6, experimental: 1 },
-  4: { common: 28, refined: 34, rare: 24, prototype: 11, experimental: 3 },
-  5: { common: 18, refined: 30, rare: 28, prototype: 17, experimental: 7 },
+export const RARITY_ODDS = {           // round 7: a step rarer across the board (owner: "I would like to see more rare parts")
+  1: { common: 58, refined: 30, rare: 10, prototype: 2, experimental: 0 },
+  2: { common: 45, refined: 33, rare: 16, prototype: 5, experimental: 1 },
+  3: { common: 32, refined: 34, rare: 22, prototype: 9, experimental: 3 },
+  4: { common: 22, refined: 32, rare: 27, prototype: 14, experimental: 5 },
+  5: { common: 14, refined: 28, rare: 30, prototype: 19, experimental: 9 },
 };
 
 /** Bonus lines per slot. pct = a percent change to the part's own number (negative = less, for costs); value range
@@ -60,7 +61,7 @@ const FRAME_SLOTS = new Set(['head', 'core', 'arms', 'legs']);
 export function poolFor(part) {
   if (part.slot === 'weapon') {
     // lines a weapon can't use are left out (no reload on a beam with no magazine, no shot energy on a gun)
-    return ROLL_POOLS.weapon.filter(r => (r.stat !== 'reload' || part.mag) && (r.stat !== 'shotEnergy' || part.shotEnergy) && (r.stat !== 'heatPerShot' || part.heatPerShot) && (r.stat !== 'rate' || part.rate));
+    return ROLL_POOLS.weapon.filter(r => (!['damage', 'crit'].includes(r.stat) || part.damage > 0) && (r.stat !== 'reload' || part.mag) && (r.stat !== 'shotEnergy' || part.shotEnergy) && (r.stat !== 'heatPerShot' || part.heatPerShot) && (r.stat !== 'rate' || part.rate));
   }
   return [...(ROLL_POOLS[part.slot] || []), ...(FRAME_SLOTS.has(part.slot) ? ROLL_POOLS.frame : [])].filter(r => r.stat === 'lockCount' || r.stat === 'firmware' || typeof part[r.stat] === 'number' || r.flat);
 }
@@ -112,7 +113,8 @@ export function rollItem(P, { tier = 1, seed = 1, boss = false, luck = 0, slot =
     part ||= pool[0].p;
   }
   const rar = rarity || pickRarity(R, tier + (boss ? 1 : 0), luck);
-  return { uid: newUid(R), id: part.id, rarity: rar, rolls: rollLines(R, part, rar), found: Date.now() };
+  const rolls = rollLines(R, part, rar);
+  return { uid: newUid(R), id: part.id, rarity: rar, rolls, mods: rollMods(R, part, rar, plainSpec), found: Date.now() };
 }
 
 /** A crate (grade reward): 1 part + materials + sometimes a firmware chip or a schematic. */
@@ -121,7 +123,7 @@ export function openCrate(P, CHIPS, { tier = 1, seed = 1, luck = 0 }) {
   const items = [rollItem(P, { tier, seed: seed * 31 + 7, luck: luck + 0.1 })];
   const mats = { scrap: 10 + Math.floor(R.next() * 12) * tier, alloy: Math.floor(R.next() * 3 * tier), exotic: tier >= 3 && R.next() < 0.15 * (tier - 2) ? 1 : 0 };
   const chips = [];
-  if (R.next() < 0.3) { const pool = CHIPS.filter(c => (c.drop || 1) <= tier); if (pool.length) chips.push({ uid: newUid(R), id: pool[Math.floor(R.next() * pool.length)].id }); }
+  if (R.next() < 0.4) { const pool = CHIPS.filter(c => (c.drop || 1) <= tier); if (pool.length) chips.push({ uid: newUid(R), id: pool[Math.floor(R.next() * pool.length)].id }); }
   const schematic = R.next() < 0.12 + 0.04 * tier ? tier : 0;
   return { items, mats, chips, schematic };
 }
@@ -139,8 +141,10 @@ export function sellValue(part, item) {
 }
 
 /** One bonus line as words: "+7% damage", "−9% heat per shot", "+1 lock targets", "+4% crit chance". */
-export function lineText(roll) {
-  const all = Object.values(ROLL_POOLS).flat(); const L = all.find(l => l.stat === roll.stat);
+export function lineText(roll, slot = null) {
+  // the part's own slot first: 'rate' is fire rate on a weapon but cooling rate on a cooler
+  const own = slot ? [...(ROLL_POOLS[slot === 'weapon' ? 'weapon' : slot] || []), ...ROLL_POOLS.frame] : [];
+  const L = own.find(l => l.stat === roll.stat) || Object.values(ROLL_POOLS).flat().find(l => l.stat === roll.stat);
   const label = L?.label || roll.stat;
   const sign = roll.value < 0 ? '−' : '+';
   if (roll.pct) return `${sign}${Math.abs(roll.value)}% ${label}`;

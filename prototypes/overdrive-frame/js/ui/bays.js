@@ -12,6 +12,7 @@ import { chipLoad } from '../sim/chips.js';
 import { activeBuild, itemByUid, buildProblems, equip, fits, copyBuild, buildsUsing, chipIdsOf, MAX_BUILDS } from '../sim/inventory.js';
 import { mechStats, RARITY } from '../sim/loadout.js';
 import { itemCard, frameStats, SLOT_LABEL, PLACE_LABEL, esc } from './itemcard.js';
+import { activeSets, linesWorn, SETS, SET_NEED } from '../sim/frames.js';
 import { play as sound } from '../../../../citykit/js/world/sound.js';
 
 export const BAY_INFO = {
@@ -40,7 +41,7 @@ export function baySheet(screens, id, { title, tabs = null, tab = null, onTab = 
   wallet();
   const close = () => { el.remove(); screens.pad.popLayer(); sound('ui.close', { global: true, gain: 0.4 }); onClose?.(); };
   el.querySelector('[data-a="cancel"]').addEventListener('click', close);
-  el.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.querySelector('.gdlg-modal')) { e.preventDefault(); close(); } });
+  el.addEventListener('keydown', e => { if (e.key === 'Escape' && !document.querySelector('.gdlg-modal')) { e.preventDefault(); e.stopPropagation(); close(); } });   // stop: the hangar wakes on close and would read this Esc as its menu key
   el.querySelectorAll('.of-tab').forEach(b => b.addEventListener('click', () => {
     click(); el.querySelectorAll('.of-tab').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-selected', x === b); });
     onTab?.(b.dataset.tab);
@@ -127,7 +128,10 @@ export function openAssembly(screens, { onClose, onChange } = {}) {
   };
 
   const drawStats = (next = null) => {
-    body.querySelector('.of-asm-stats').innerHTML = frameStats(g, built(), next);
+    const sets = activeSets(next || built(), g.P), worn = linesWorn(next || built(), g.P);
+    const near = Object.entries(worn).filter(([l, n]) => SETS[l] && n === SET_NEED - 1);
+    body.querySelector('.of-asm-stats').innerHTML = frameStats(g, built(), next)
+      + (sets.length || near.length ? `<ul class="of-asm-sets">${sets.map(s => `<li class="on"><b>${esc(s.name)} frame</b> ${esc(s.text)}</li>`).join('')}${near.map(([l]) => `<li><b>${esc(SETS[l].name)} frame</b> one more part switches on: ${esc(SETS[l].text)}</li>`).join('')}</ul>` : '');   // round 7: set bonuses
     const pr = buildProblems(next || built(), g.P, g.C);
     body.querySelector('.of-asm-warn').innerHTML = [...pr.errors.map(e => `<li class="of-bad">${e}</li>`), ...pr.warnings.map(w => `<li>${w}</li>`)].join('');
   };

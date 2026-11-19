@@ -102,6 +102,8 @@ export class Controls {
     out.interact = this.pressed.has('interact');
     out.ping = this.pressed.has('ping');
     out.overload = this.pressed.has('overload');
+    out.kit = this.pressed.has('kit');                 // round 7: repair kit
+    out.skill = this.pressed.has('skill');             // round 7: the build's skill
     out.menu = this.pressed.has('menu');
     out.map = this.pressed.has('map');
     out.device = this.device;

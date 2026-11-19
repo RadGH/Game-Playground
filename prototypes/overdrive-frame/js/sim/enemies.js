@@ -2,7 +2,7 @@
 // spawn (nests), shoot, artillery, carrier, strafe (flyers), missiles, jam, snipe. Numbers come from data/enemies.json.
 // Swarms keep apart (no stacking) with a cheap push from their grid neighbours. Pure.
 import { angleDiff } from './weapons.js';
-import { isStunned, tickStatus } from './damage.js';
+import { isStunned, tickStatus, slowOf, STATUS } from './damage.js';
 import { pushOut } from './world.js';
 import { flowDir, flowDist } from './flow.js';
 import { stepBoss } from './boss.js';
@@ -28,6 +28,7 @@ function nearestPlayer(S, e) {
   for (const m of S.mechs) { if (m.down || m.team === 'enemy') continue; const d = D2(m, e); if (d < bd) { bd = d; best = m; } }   // never a rival ace
   // escort missions: the convoy's trucks are targets too (a little less tempting than a mech that's shooting you)
   if (S.allies) for (const a of S.allies) { if (a.down || a.arrived) continue; const d = D2(a, e) * 1.3; if (d < bd) { bd = d; best = a; } }
+  if (S.decoys) for (const a of S.decoys) { if (a.down) continue; const d = D2(a, e) * 0.5; if (d < bd) { bd = d; best = a; } }   // round 7: a Decoy Holo is the most tempting thing in sight
   return best;
 }
 
@@ -41,10 +42,14 @@ export function stepEnemies(S, dt, T) {
     if (e.state === 'warn') { e.stateT -= dt; if (e.stateT <= 0) { e.state = 'move'; S.events.push({ type: 'espawn', id: e.id, kind: e.kind, x: e.x, z: e.z }); } continue; }
     const burn = tickStatus(e, dt); if (burn > 0) S.damageEnemy(e, burn, 'fire', null, 0);
     if (e.dead) continue;
-    if (isStunned(e)) { e.vx *= 0.8; e.vz *= 0.8; e.anim = 'walk'; continue; }
-    const slow = (e.status.shock > 0 ? 0.5 : 1);
+    if (e.status.rift > 0 && e.riftX != null) {     // round 7 void: tugged toward where the hit landed
+      const dx = e.riftX - e.x, dz = e.riftZ - e.z, d = Math.hypot(dx, dz);
+      if (d > 0.05) { const k = Math.min(d, STATUS.rift.pull * dt) / d; e.x += dx * k; e.z += dz * k; }
+    }
+    if (isStunned(e)) { e.vx *= 0.8; e.vz *= 0.8; e.anim = e.status.frozen > 0 ? e.anim : 'walk'; if (e.status.frozen > 0) { e.vx = 0; e.vz = 0; e.animT -= dt; } continue; }
+    const slow = slowOf(e);                           // shock halves, round 7 cryo chill slows
     const P = nearestPlayer(S, e); e.target = P ? P.id : null;
-    e.cd = Math.max(0, e.cd - dt);
+    e.cd = Math.max(0, e.cd - dt * (e.status.chill > 0 ? STATUS.chill.mul : 1));   // round 7: a chilled enemy attacks slower too
     if (!P) { e.vx *= 0.9; e.vz *= 0.9; moveBody(S, e, dt); continue; }
     const dx = P.x - e.x, dz = P.z - e.z, dist = Math.hypot(dx, dz) || 1e-6;
     let ux = dx / dist, uz = dz / dist;

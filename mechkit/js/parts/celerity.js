@@ -87,6 +87,117 @@ function booster(k) {
 const biped = (k) => ({ dims: { hip: 0.35 + k * 0.005, drop: 0.032, thigh: 0.152 + k * 0.004, shin: 0.165 + k * 0.004, ankle: 0.032, hipW: 0.048 + k * 0.006, stance: 0.06 + k * 0.006, stride: 0.2, lift: 0.055, foot: 0.085 },
   draw(root, st) { drawBiped(K, root, st, this.dims, { t: 0.037 + k * 0.007, thigh: 1, shin: 0.92, fins: true, kneeMat: 'A', seed: k, skirt: k === 1 }); } });
 
+// =====================================================================================================================
+// Vantage line — tall long-range recon: a sensor-mast head, a slim core with a dorsal blade, long scoped arms, a tail-fin
+// booster and stilt bird legs with sensor vanes.
+const vantage = {
+  head: { build(root) {
+    const g = at(root, 0, 0, 0);
+    box(g, 0.02, 0.03, 0.02, K.D, 0, 0.015, 0);
+    prism(g, 'vt-pod', [[-0.04, 0.02], [0.04, 0.02], [0.062, 0.034], [0.036, 0.052], [-0.034, 0.052], [-0.05, 0.036]], 0.046, K.P, 0.004);
+    prism(g, 'vt-eye', [[0.035, 0.028], [0.06, 0.033], [0.036, 0.046], [0.02, 0.044]], 0.05, K.L, 0.002);
+    cbox(g, 0.016, 0.11, 0.016, 0.004, K.D, -0.01, 0.1, 0);                         // the mast
+    cbox(g, 0.022, 0.03, 0.022, 0.005, K.A, -0.01, 0.075, 0);                        // its collar
+    cbox(g, 0.032, 0.018, 0.14, 0.006, K.P, -0.006, 0.16, 0);                        // the sensor bar across the top
+    box(g, 0.004, 0.008, 0.118, K.L, 0.011, 0.16, 0);
+    for (const sd of [-1, 1]) prism(g, 'vt-tip', [[0.02, -0.01], [-0.03, -0.012], [-0.06, 0.016], [0.0, 0.01]], 0.008, K.A, 0.0015, -0.006, 0.16, sd * 0.074);
+    cyl(g, 0.016, 0.006, K.S, 'x', -0.032, 0.125, 0, { seg: 14 });                 // a little dish on the back of the mast
+    box(g, 0.002, 0.05, 0.002, K.M, -0.02, 0.19, 0.02);
+  } },
+  core: (() => {
+    const W = 0.82, top = 0.24;
+    return {
+      sockets: { neck: [0.014, top, 0], shoulderL: [0, 0.2, -0.158 * W], shoulderR: [0, 0.2, 0.158 * W], back: [-0.07, 0.13, 0], mountL: [-0.04, top, -0.085 * W], mountR: [-0.04, top, 0.085 * W] },
+      build(root) {
+        const g = at(root, 0, 0, 0);
+        cbox(g, 0.06, 0.085, 0.07, 0.012, K.D, 0, 0.042, 0);
+        front(g, 'vt-chest', [[-0.04, 0.07], [0.04, 0.07], [0.115, 0.16], [0.1, 0.24], [-0.1, 0.24], [-0.115, 0.16]].map(([z, y]) => [z * W * 1.1, y]), 0.13, K.S, 0.005, -0.012, 0, 0);
+        front(g, 'vt-chestP', [[-0.03, 0.1], [0.03, 0.1], [0.1, 0.17], [0.09, 0.232], [-0.09, 0.232], [-0.1, 0.17]].map(([z, y]) => [z * W * 1.1, y]), 0.14, K.P, 0.006, 0.0, 0.0, 0);
+        prism(g, 'vt-chin', [[0.04, 0.12], [0.085, 0.15], [0.08, 0.2], [0.04, 0.215]], 0.05, K.P, 0.004);
+        box(g, 0.004, 0.05, 0.008, K.G, 0.083, 0.175, 0);
+        // the dorsal blade: a tall swept fin up the back carrying the sensor feed
+        prism(g, 'vt-dorsal', [[-0.03, 0.16], [-0.075, 0.17], [-0.12, 0.34], [-0.095, 0.35], [-0.04, 0.23]], 0.012, K.A, 0.002);
+        box(g, 0.004, 0.13, 0.014, K.G, -0.08, 0.26, 0).rotation.z = 0.33;
+        cbox(g, 0.05, 0.12, 0.07, 0.01, K.D, -0.06, 0.15, 0);
+        for (const sd of [-1, 1]) { box(g, 0.002, 0.09, 0.002, K.M, -0.06, 0.29, sd * 0.03); box(g, 0.006, 0.006, 0.006, K.G, -0.06, 0.335, sd * 0.03); }
+      },
+    };
+  })(),
+  arms: { dims: { upper: 0.12, fore: 0.135, reach: 0.135, drop: 0.14, inset: 0.008 },
+    draw(root, p, side, j) { drawArm(K, root, side, j, { t: 0.029, paul: 0.78, upper: 1, fore: 0.9, fin: false, blade: false, seed: 4, shoulder: 'sensor', forearm: 'scope' }); } },
+  booster: { build(root) {
+    const g = at(root, 0, 0, 0);
+    cbox(g, 0.045, 0.07, 0.05, 0.01, K.D, -0.02, 0, 0);
+    prism(g, 'vt-tail', [[0.0, 0.0], [-0.035, 0.0], [-0.11, 0.15], [-0.085, 0.155], [-0.005, 0.05]], 0.008, K.A, 0.002, -0.01, 0.02, 0);
+    box(g, 0.004, 0.1, 0.01, K.G, -0.06, 0.1, 0).rotation.z = 0.5;
+    for (const sd of [-1, 1]) {
+      cyl(g, 0.011, 0.08, K.S, 'x', -0.07, -0.012, sd * 0.024, { rt: 0.009, seg: 12 });
+      cyl(g, 0.01, 0.01, K.D, 'x', -0.112, -0.012, sd * 0.024, { rt: 0.013, seg: 12 });
+      cyl(g, 0.008, 0.004, K.G, 'x', -0.118, -0.012, sd * 0.024, { seg: 12 });
+    }
+  } },
+  legs: { dims: { hip: 0.42, drop: 0.03, thigh: 0.15, shin: 0.21, meta: 0.16, toe: 0.06, ankle: 0, hipW: 0.045, stance: 0.06, stride: 0.24, lift: 0.08, foot: 0.07 },
+    draw(root, st) { drawReverse(K, root, st, this.dims, { t: 0.032, thigh: 1, shin: 0.85, seed: 4, skirt: false, vanes: true }); } },
+};
+
+// Rapier line — a bladed duellist: a crested helm with one eye slit, a wasp-waisted V chest with coat-tail fins, arms with
+// tonfa blades and blade shoulders, an X of booster blades round one big nozzle, and spiked duelling legs.
+const rapier = {
+  head: { build(root) {
+    const g = at(root, 0, 0, 0);
+    box(g, 0.024, 0.02, 0.024, K.D, 0, 0.01, 0);
+    prism(g, 'rp-helm', [[-0.042, 0.012], [0.04, 0.012], [0.06, 0.03], [0.046, 0.062], [-0.018, 0.072], [-0.052, 0.042]], 0.046, K.P, 0.004);
+    box(g, 0.004, 0.007, 0.04, K.L, 0.054, 0.042, 0);
+    prism(g, 'rp-crest', [[0.03, 0.058], [0.05, 0.068], [-0.02, 0.125], [-0.12, 0.15], [-0.04, 0.098]], 0.007, K.A, 0.0015);
+    box(g, 0.003, 0.05, 0.004, K.G, -0.03, 0.11, 0).rotation.z = 1.0;
+    for (const sd of [-1, 1]) {
+      const m = prism(g, 'rp-cheek', [[-0.01, 0.034], [0.07, 0.004], [0.074, -0.008], [0.0, 0.016]], 0.006, K.S, 0.0015, 0, 0, sd * 0.026);
+      m.rotation.x = sd * 0.2;
+    }
+  } },
+  core: (() => {
+    const top = 0.235;
+    return {
+      sockets: { neck: [0.012, top, 0], shoulderL: [0, 0.205, -0.168], shoulderR: [0, 0.205, 0.168], back: [-0.07, 0.15, 0], mountL: [-0.045, top, -0.09], mountR: [-0.045, top, 0.09] },
+      build(root) {
+        const g = at(root, 0, 0, 0);
+        cbox(g, 0.05, 0.085, 0.05, 0.01, K.D, 0, 0.042, 0);
+        box(g, 0.056, 0.006, 0.056, K.G, 0, 0.06, 0);
+        front(g, 'rp-chest', [[-0.028, 0.07], [0.028, 0.07], [0.162, 0.2], [0.15, 0.235], [-0.15, 0.235], [-0.162, 0.2]], 0.12, K.S, 0.005, -0.012, 0, 0);
+        front(g, 'rp-chestP', [[-0.022, 0.09], [0.022, 0.09], [0.14, 0.198], [0.13, 0.228], [-0.13, 0.228], [-0.14, 0.198]], 0.13, K.P, 0.006, 0.0, 0.002, 0);
+        prism(g, 'rp-keel', [[0.04, 0.08], [0.085, 0.14], [0.075, 0.225], [0.03, 0.232]], 0.03, K.P, 0.003);
+        for (const sd of [-1, 1]) {
+          const v = box(g, 0.004, 0.1, 0.006, K.G, 0.071, 0.16, sd * 0.05); v.rotation.x = sd * 0.75;
+          const t = prism(g, 'rp-tail', [[0, 0], [-0.025, 0.0], [-0.08, -0.17], [-0.055, -0.18], [-0.01, -0.06]], 0.008, K.A, 0.002, -0.035, 0.215, sd * 0.085);
+          t.rotation.x = sd * 0.22;
+        }
+        cbox(g, 0.05, 0.12, 0.08, 0.01, K.D, -0.065, 0.16, 0);
+      },
+    };
+  })(),
+  arms: { dims: { upper: 0.11, fore: 0.125, reach: 0.13, drop: 0.13, inset: 0.008 },
+    draw(root, p, side, j) { drawArm(K, root, side, j, { t: 0.035, paul: 0.95, upper: 1, fore: 1, fin: false, blade: false, seed: 5, shoulder: 'blade', forearm: 'tonfa' }); } },
+  booster: { build(root) {
+    const g = at(root, 0, 0, 0);
+    cbox(g, 0.05, 0.06, 0.06, 0.01, K.D, -0.02, 0, 0);
+    cyl(g, 0.024, 0.05, K.S, 'x', -0.06, 0, 0, { rt: 0.02, seg: 16 });
+    cyl(g, 0.02, 0.014, K.D, 'x', -0.092, 0, 0, { rt: 0.026, seg: 16 });
+    cyl(g, 0.017, 0.004, K.G, 'x', -0.1, 0, 0, { seg: 16 });
+    for (const a of [0.75, -0.75, Math.PI - 0.75, Math.PI + 0.75]) {
+      const r = at(g, -0.02, 0, 0, a, 0, 0);
+      prism(r, 'rp-bblade', [[0.0, 0.01], [-0.03, 0.012], [-0.15, 0.03], [-0.125, 0.04], [0.0, 0.026]], 0.007, a > 0 && a < 2 ? K.A : K.P, 0.0015);
+      box(r, 0.07, 0.003, 0.009, K.G, -0.07, 0.026, 0);
+    }
+  } },
+  legs: { dims: { hip: 0.36, drop: 0.03, thigh: 0.155, shin: 0.17, ankle: 0.03, hipW: 0.045, stance: 0.055, stride: 0.22, lift: 0.06, foot: 0.09 },
+    draw(root, st) { drawBiped(K, root, st, this.dims, { t: 0.036, thigh: 0.95, shin: 0.85, fins: false, kneeMat: 'A', seed: 5, skirt: true, spike: true }); } },
+};
+
+addParts({
+  'celerity-head-4': vantage.head, 'celerity-core-4': vantage.core, 'celerity-arms-4': vantage.arms, 'celerity-booster-4': vantage.booster, 'celerity-legs-5': vantage.legs,
+  'celerity-head-5': rapier.head, 'celerity-core-5': rapier.core, 'celerity-arms-5': rapier.arms, 'celerity-booster-5': rapier.booster, 'celerity-legs-6': rapier.legs,
+});
+
 addParts({
   'celerity-head-1': head(0), 'celerity-head-2': head(1), 'celerity-head-3': head(2),
   'celerity-core-1': core(0), 'celerity-core-2': core(1), 'celerity-core-3': core(2),

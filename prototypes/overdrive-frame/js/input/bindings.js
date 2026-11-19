@@ -38,6 +38,8 @@ export const ACTIONS = [
   { id: 'swap', label: 'Swap hangar weapon', key: 'KeyX', pad: 'Y', touch: 'Swap' },
   { id: 'interact', label: 'Use', key: 'KeyG', pad: 'X', touch: 'Use', note: 'Stations, revive, pick up' },
   { id: 'ping', label: 'Ping', key: 'KeyC', pad: 'UP', note: 'Mark a spot for your team' },
+  { id: 'kit', label: 'Repair kit', key: 'Digit1', keys: ['Numpad1'], pad: 'LEFT', touch: 'Fix', note: 'Restores armour; a few charges a mission' },
+  { id: 'skill', label: 'Skill', key: 'Digit2', keys: ['Numpad2'], pad: 'RIGHT', touch: 'Skill', note: 'Your build\'s skill (picked at the Tuning rig), then it recharges' },
   { id: 'overload', label: 'Overload', key: 'KeyV', pad: 'DOWN', touch: 'Overload', note: 'An Overload core\'s ultimate, once its bar is full' },
   { id: 'menu', label: 'Menu', key: 'Escape', pad: 'START', touch: '☰' },
   { id: 'map', label: 'Mission map', key: 'Tab', keys: ['KeyM'], pad: 'BACK' },

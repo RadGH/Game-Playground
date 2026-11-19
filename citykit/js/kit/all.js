@@ -17,3 +17,4 @@ import './moon.js';       // Overdrive Frame round 5: the moon outpost
 import './forest.js';     // Overdrive Frame: Pinewatch, the pine-forest ridge
 import './snow.js';       // Overdrive Frame round 6: Frostline, the snowfield station
 import './desert.js';     // Overdrive Frame: Red Mesa badlands
+import './quarters.js';   // Overdrive Frame round 7: city layouts (park trees, planters, rail yard, harbour, megatowers)

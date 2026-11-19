@@ -9,13 +9,19 @@ import { buildMissionDef } from '../sim/missiondef.js';
 import { RARITY_BY_ID } from '../sim/loadout.js';
 import { rankOf } from '../sim/progress.js';
 import { lineText } from '../sim/loot.js';
-import { buildProblems } from '../sim/inventory.js';
+import { MOD_BY_ID } from '../sim/mods.js';
+import { buildProblems, STARTER_CHIP } from '../sim/inventory.js';
+import { asItems } from '../net/mirror.js';
+import { chooseFirstFrame, needsFirstFrame } from '../save.js';
 import { districtStates, storyList, contractsFor } from '../sim/campaign.js';
+import { layoutTag } from '../sim/citylayouts.js'; import { drawMapGround } from '../render/city-ground.js';   // round 7 map layouts
 import { TitleScene } from '../render/title-scene.js';
 import { composeMech } from '../../../../mechkit/js/bake-mech.js';
 import { SPEAKER_INFO } from './speakers.js';
 import { drawFit } from './fit.js';
-import { openAssembly, openPaint } from './bays.js';
+import { openAssembly, openPaint, mechPreview } from './bays.js';
+import { openTuning } from './tuning.js';
+import { esc } from './itemcard.js';
 import { openDealer, openWorkshop } from './shop.js';
 import { bossBakeJobs, aceBakeJobs } from '../render/boss-art.js';
 import { installPadNav } from './padnav.js';
@@ -66,11 +72,12 @@ export class Screens {
     pilot.innerHTML = `<span class="of-rank">Rank ${rk.rank} · ${rk.name}</span><span>${fmt(g.save.credits, { decimals: 0 })} credits</span>${Object.entries(g.save.mats).map(([k, v]) => `<span class="of-mat of-mat-${k}">${MAT_NAMES[k]} ${fmt(v, { decimals: 0 })}</span>`).join('')}`;
     col.querySelector('.of-news-slot').append(g.news.button({ className: 'of-btn of-small' }));
     try { col.querySelector('.of-acct-slot').append(accountButton({ game: 'overdrive-frame', gameName: 'Overdrive Frame' })); } catch { /* accounts optional */ }
-    col.querySelector('[data-go="missions"]').addEventListener('click', () => { click(); this.missions(); });
+    const first = go => () => { click(); if (needsFirstFrame(g.save)) this.firstFrame(go); else go(); };   // round 7: a new pilot picks one maker's frame first
+    col.querySelector('[data-go="missions"]').addEventListener('click', first(() => this.missions()));
     col.querySelector('[data-go="settings"]').addEventListener('click', () => { click(); this.settings(); });
-    col.querySelector('[data-go="coop"]').addEventListener('click', () => { click(); if (g.coop.active) g.coop.roomScreen(); else g.coop.entry(); });
+    col.querySelector('[data-go="coop"]').addEventListener('click', first(() => { if (g.coop.active) g.coop.roomScreen(); else g.coop.entry(); }));
     col.querySelector('[data-go="credits"]').addEventListener('click', () => { click(); g.credits.open(); });
-    col.querySelector('[data-go="hangar"]').addEventListener('click', () => { click(); this.hangar(); });
+    col.querySelector('[data-go="hangar"]').addEventListener('click', first(() => this.hangar()));
     this._show('title', el);
 
     // the workshop picture (rendered once per size; your own frame stands in the cradle)
@@ -84,6 +91,48 @@ export class Screens {
     let rt = 0; const onResize = () => { size(); clearTimeout(rt); rt = setTimeout(() => scene.render(g.build(), innerWidth, innerHeight), 400); };
     addEventListener('resize', onResize);
     this._leave = () => { alive = false; removeEventListener('resize', onResize); };
+  }
+
+  // ---------------------------------------------------------------- first frame (round 7)
+  /** A new pilot's one choice: which maker's starter frame to fly (owner: "choose just one of the four bots to start
+   *  with and start with only those parts"). Look at each (picture, leaning, numbers, guns, chip), then commit. */
+  firstFrame(then) {
+    this._leaveNow();
+    const g = this.g, makers = g.MAKERS;
+    let sel = makers[0].id;
+    const el = h('section', 'of-first');
+    el.innerHTML = `<header class="of-bar"><button type="button" class="of-btn of-back">‹ Title</button><h1>Choose your first frame</h1></header>
+      <div class="of-first-body"><p class="of-first-lead">Each maker lends one starter frame. The others' parts turn up later in crates and at the dealer.</p>
+      <div class="of-first-grid" role="radiogroup" aria-label="Makers"></div>
+      <div class="of-first-go"><button type="button" class="of-btn of-primary of-first-pick"></button></div></div>`;
+    const grid = el.querySelector('.of-first-grid'), go = el.querySelector('.of-first-pick');
+    const cards = makers.map(mk => {
+      const b = asItems({ ...g.STARTERS[mk.id], kit: 1, skill: 'repulse' }), st = mechStats(b, g.P, g.C);
+      const chip = g.C[STARTER_CHIP[mk.id]];
+      const btn = h('button', 'of-first-card'); btn.type = 'button'; btn.setAttribute('role', 'radio'); btn.dataset.mk = mk.id; btn.style.setProperty('--mk', mk.colours.glow);
+      const cv = h('canvas', 'of-first-pic'); cv.width = 220; cv.height = 220; cv.setAttribute('aria-hidden', 'true');
+      btn.append(cv, h('div', 'of-first-info', `<b>${esc(mk.name)}</b><p>${esc(mk.leaning)}</p>
+        <dl class="of-stats"><div><dt>Armour</dt><dd>${fmt(st.hp, { decimals: 0 })}</dd></div><div><dt>Speed</dt><dd>${fmt(st.speedMul * 100, { decimals: 0 })}%</dd></div>
+        <div><dt>Energy</dt><dd>${fmt(g.T.energyMax + st.energyMax, { decimals: 0 })}</dd></div><div><dt>Carries</dt><dd>${fmt(st.carry, { decimals: 0 })} t</dd></div></dl>
+        <ul class="of-first-guns">${b.weapons.filter(Boolean).map(w => `<li>${esc(g.P[w.id].name)}</li>`).join('')}</ul>
+        ${chip ? `<small class="of-first-chip">Firmware: <b>${esc(chip.name)}</b> — ${esc(chip.text)}</small>` : ''}`));
+      btn.addEventListener('click', () => { click(); sel = mk.id; draw(); });
+      mechPreview(g, cv, () => b, { dir: 6 });
+      return btn;
+    });
+    grid.append(...cards);
+    const draw = () => {
+      for (const c of cards) { const on = c.dataset.mk === sel; c.classList.toggle('on', on); c.setAttribute('aria-checked', on ? 'true' : 'false'); }
+      go.textContent = `Fly the ${makers.find(m => m.id === sel).short} starter`;
+    };
+    draw();
+    go.addEventListener('click', () => {
+      chooseFirstFrame(g.save, g.ctx, sel); g.saveNow();
+      sound('build.done', { global: true, gain: 0.5 });
+      then ? then() : this.title();
+    });
+    el.querySelector('.of-back').addEventListener('click', () => { click(); this.title(); });
+    this._show('firstFrame', el);
   }
 
   _toast(parent, text) { const t = h('div', 'of-toast', text); parent.append(t); setTimeout(() => t.remove(), 4200); }
@@ -108,7 +157,7 @@ export class Screens {
       if (id === 'terminal' || id === 'pad') { this._leaveNow(); this.missions(null, 'hangar'); return; }
       if (id === 'range') { this._leaveNow(); this.range(); return; }
       hg.pause(true);
-      ({ assembly: openAssembly, dealer: openDealer, workshop: openWorkshop, paint: openPaint })[id]?.(this, opts);
+      ({ assembly: openAssembly, dealer: openDealer, workshop: openWorkshop, paint: openPaint, tuning: openTuning })[id]?.(this, opts);
     };
     hg = new Hangar({ root: g.stage, T: g.T, P: g.P, C: g.C, kinds: g.KINDS, sprites: g.sprites, mechArt: g.mechArt, build: g.build(), pilotName: g.save.callsign,
       onBay: open, onMenu: () => { hg.pause(true); this.hangarMenu(hg, resume); } });
@@ -176,7 +225,7 @@ export class Screens {
       const li = h('li'); const b = h('button', 'of-card' + (m === sel ? ' on' : '') + (locked ? ' of-card-locked' : '')); b.type = 'button';
       const best = g.save.grades[m.id], d = CAMP.districts.find(x => x.id === (m.district || CAMP.districts.find(y => y.story === m.id)?.id));
       const tag = m.contract ? `<span class="of-card-client">${g.MAKERS.find(x => x.id === m.client)?.short}</span>` : best ? `<span class="of-grade of-grade-${best}">${best}</span>` : locked ? '' : '<span class="of-card-new">New</span>';
-      b.innerHTML = `<span class="of-card-name">${m.name}</span><span class="of-card-meta">${locked || `${d?.name || DISTRICT[m.map.district]} · ${LENGTH[m.length]}`}</span><span class="of-card-pay">${locked ? '' : fmt(m.pay, { decimals: 0 }) + ' cr'}</span>${tag}`;
+      b.innerHTML = `<span class="of-card-name">${m.name}</span><span class="of-card-meta">${locked || `${d?.name || DISTRICT[m.map.district]}${layoutTag(m.map)} · ${LENGTH[m.length]}`}</span><span class="of-card-pay">${locked ? '' : fmt(m.pay, { decimals: 0 }) + ' cr'}</span>${tag}`;
       if (locked) b.disabled = true; else b.addEventListener('click', () => { click(); sel = m; region = regionOfMission(m); draw(); });
       li.append(b); return li;
     };
@@ -263,7 +312,7 @@ export class Screens {
     const client = m.contract ? g.MAKERS.find(x => x.id === m.client) : null;
     el.innerHTML = `
       <div class="of-brief-top">
-        <div><h2>${m.name}</h2><p class="of-brief-meta">${m.contract ? `Contract for ${client?.name || 'a client'} · ` : 'Story · '}${dist?.name || DISTRICT[m.map.district]} (${DISTRICT[m.map.district].toLowerCase()}) · ${LENGTH[m.length]} · Pay ${fmt(m.pay, { decimals: 0 })} credits + more for every kill · Loot tier ${m.tier}</p></div>
+        <div><h2>${m.name}</h2><p class="of-brief-meta">${m.contract ? `Contract for ${client?.name || 'a client'} · ` : 'Story · '}${dist?.name || DISTRICT[m.map.district]} (${DISTRICT[m.map.district].toLowerCase()})${layoutTag(m.map)} · ${LENGTH[m.length]} · Pay ${fmt(m.pay, { decimals: 0 })} credits + more for every kill · Loot tier ${m.tier}</p></div>
         <canvas class="of-minimap" width="220" height="140" aria-label="District map"></canvas>
       </div>
       <p class="of-brief-text">${m.brief}</p>
@@ -284,6 +333,7 @@ export class Screens {
     const g = cv.getContext('2d'), M = def.map, k = Math.min(cv.width / M.w, cv.height / M.h) * 0.95, ox = (cv.width - M.w * k) / 2, oy = (cv.height - M.h * k) / 2;
     g.fillStyle = '#10141c'; g.fillRect(0, 0, cv.width, cv.height);
     g.fillStyle = '#2a2f3a'; for (const [x, z, w, d] of M.roads) g.fillRect(ox + x * k, oy + z * k, w * k, d * k);
+    drawMapGround(M, (x, z, w, d, col) => { g.fillStyle = col; g.fillRect(ox + x * k, oy + z * k, w * k, d * k); });
     for (const l of M.lots) { g.fillStyle = l.explosive ? '#a8542a' : '#4a5262'; g.fillRect(ox + l.x * k + 0.5, oy + l.z * k + 0.5, l.w * k - 1, l.d * k - 1); }
     for (const o of def.objectives) for (const id of o.lots || []) { const l = M.lots.find(x => x.id === id); if (l) { g.strokeStyle = o.optional ? '#7dff6a' : '#ffb02e'; g.lineWidth = 2; g.strokeRect(ox + l.x * k, oy + l.z * k, l.w * k, l.d * k); } }
     const dot = (p, c) => { g.fillStyle = c; g.beginPath(); g.arc(ox + p.x * k, oy + p.z * k, 4, 0, Math.PI * 2); g.fill(); };
@@ -441,7 +491,7 @@ export class Screens {
           <div><dt>Experience</dt><dd>+${fmt(gained.xp, { decimals: 0 })}</dd></div>
         </dl>
         <div class="of-res-rank"><span>${gained.rankUp ? `<b>Rank up!</b> Rank ${rk.rank} · ${rk.name}` : `Rank ${rk.rank} · ${rk.name}`}</span><i style="--v:${rk.max ? 100 : Math.round(rk.into / rk.need * 100)}%"></i><small>${rk.max ? 'Top rank' : `${fmt(rk.need - rk.into, { decimals: 0 })} to rank ${rk.rank + 1}`}</small></div>
-        ${Object.keys(gained.rep || {}).length ? `<p class="of-res-rep">${Object.entries(gained.rep).filter(([, v]) => v > 0).map(([k, v]) => `<span>+${fmt(v, { decimals: 0 })} ${g.MAKERS.find(x => x.id === k)?.short} reputation</span>`).join('')}</p>` : ''}
+        
         ${gained.items.length || gained.chips.length || gained.learned.length ? `<section class="of-res-loot"><h2>${gained.crates ? `${gained.crates} crate${gained.crates > 1 ? 's' : ''} opened · ` : ''}Found</h2><ul class="of-loot-row"></ul></section>` : ''}
         ${team.length ? `<section class="of-res-team"><h2>The team</h2><ul>${team.map(p => `<li><b>${p.name || 'Pilot'}</b><span>${fmt(p.kills, { decimals: 0 })} kills · ${fmt(p.dealt, { decimals: 0 })} damage${p.bot ? ' · bot' : ''}</span></li>`).join('')}</ul></section>` : ''}
         ${!result.won && result.checkpoint && S?.checkpoint && !opts.coop ? `<p class="of-res-cp">Checkpoint: <b>${result.checkpoint.label}</b> — fly it again from there with what you've picked up so far.</p>` : ''}
@@ -450,7 +500,7 @@ export class Screens {
     const row = el.querySelector('.of-loot-row');
     if (row) {
       const cards = [
-        ...gained.items.map(it => { const p = g.P[it.id], r = RARITY_BY_ID[it.rarity]; return `<li class="of-loot of-r-${it.rarity}" style="--rc:${r.colour}"><small>${r.label} ${p.slot === 'weapon' ? 'weapon' : p.slot}</small><b>${p.name}</b>${it.rolls.map(x => `<span>${lineText(x)}</span>`).join('')}</li>`; }),
+        ...gained.items.map(it => { const p = g.P[it.id], r = RARITY_BY_ID[it.rarity]; return `<li class="of-loot of-r-${it.rarity}" style="--rc:${r.colour}"><small>${r.label} ${p.slot === 'weapon' ? 'weapon' : p.slot}</small><b>${p.name}</b>${it.rolls.map(x => `<span>${lineText(x, p.slot)}</span>`).join('')}${(it.mods || []).map(id => MOD_BY_ID[id] ? `<span class="of-loot-mod">${esc(MOD_BY_ID[id].name)}</span>` : '').join('')}</li>`; }),
         ...gained.chips.map(c => { const ch = g.C[c.id]; return `<li class="of-loot of-loot-chip" style="--rc:${ch.colour}"><small>Firmware chip · ${ch.cost} firmware</small><b>${ch.name}</b><span>${ch.text}</span></li>`; }),
         ...gained.learned.map(r => `<li class="of-loot of-loot-recipe"><small>Secret recipe learned</small><b>${r.name}</b><span>Make it at the workshop.</span></li>`),
       ];

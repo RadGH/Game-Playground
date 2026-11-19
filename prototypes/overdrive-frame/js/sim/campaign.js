@@ -1,7 +1,10 @@
 // The campaign: which districts of the city are freed, reached or still dark; which story mission is next; the
-// contracts on the board (made from data/campaign.json templates, the same until another mission is flown); maker
-// reputation and licences. Pure: everything comes from the save + the data, so the board and a co-op host agree.
+// contracts on the board (made from data/campaign.json templates, the same until another mission is flown). Pure: everything comes from the save + the data, so the board and a co-op host agree.
 import { makeRng } from './rng.js';
+import { layoutFor } from './citylayouts.js';
+/** Round 7: a contract's street layout comes from its own map seed (citylayouts.js), so the board shows a mix and the
+ *  co-op server rebuilding the contract gets the same one. */
+const withLayout = map => ({ ...map, layout: layoutFor(map.district, map.seed) });
 
 const ORDER = ['S', 'A', 'B', 'C', 'D'];
 export const missionDone = (save, id) => !!save.grades?.[id];
@@ -70,7 +73,7 @@ export function makeContract(R, CAMP, MAKERS, d, tpl, idx, turn) {
     id: `c${turn}-${idx}-${tpl.type}`, contract: true, client, district: d.id, type: tpl.type,
     name: `${tpl.name}: ${d.name}`, length: tpl.length, night: Math.round(R.next() * 9) / 10, drop: 4.5, tier,
     pay: Math.round(PAY[tier] * (mid ? 1.5 : 1) / 100) * 100, payPerScore: 5,
-    map: { seed: 5000 + turn * 97 + idx * 13 + Math.floor(R.next() * 1000), district: d.type, w: 40, h: 40 },
+    map: withLayout({ seed: 5000 + turn * 97 + idx * 13 + Math.floor(R.next() * 1000), district: d.type, w: 40, h: 40 }),
     brief: tpl.brief.replace('{client}', clientName).replace('{district}', d.name).replace('{count}', count),
     waves: makeWaves(R, CAMP, d.held, tier, seconds, { every: tpl.type === 'defend' }), enemies: [], objectives: [], extract: true,
     par: { time: Math.round(seconds * 1.1) }, comms: [],
@@ -113,24 +116,14 @@ export function contractsFor(save, CAMP, MAKERS, { n = 5 } = {}) {
   return out;
 }
 
-/** Reputation → licence level for one maker. */
-export function licenceOf(save, CAMP, maker) {
-  const rep = save.rep?.[maker] || 0, L = CAMP.licences.levels;
-  let lv = 0; for (let i = 0; i < L.length; i++) if (rep >= L[i].rep) lv = i;
-  return { level: lv, rep, ...L[lv], next: L[lv + 1] || null };
-}
-
-/** After a mission: a contract cleans up its district and earns its client reputation; a story mission earns a little
- *  with every maker. Returns { rep: { maker: n } } for the results screen. */
+/** After a mission: a contract cleans up its district (the city map recovers). Round 7: reputation and maker licences
+ *  are gone (owner: "you just get rep with all 4 factions at once … remove that unless we actually develop the
+ *  factions more"); the dealer's rarer shelves took over what licences did. */
 export function applyCampaign(save, mission, result) {
-  if (!result.won) return { rep: {} };
-  save.rep ||= {}; save.cleanup ||= {};
-  const rep = {};
-  const amount = Math.round((result.pay || 0) * 0.5);
-  if (mission.contract) { rep[mission.client] = amount; save.cleanup[mission.district] = (save.cleanup[mission.district] || 0) + 1; }
-  else for (const mk of ['celerity', 'brannoch', 'calyx', 'patchwork']) rep[mk] = Math.round(amount * 0.3);
-  for (const [k, v] of Object.entries(rep)) save.rep[k] = (save.rep[k] || 0) + v;
-  return { rep };
+  if (!result.won) return {};
+  save.cleanup ||= {};
+  if (mission.contract) save.cleanup[mission.district] = (save.cleanup[mission.district] || 0) + 1;
+  return {};
 }
 
 export { ORDER };

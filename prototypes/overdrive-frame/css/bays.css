@@ -166,3 +166,58 @@
 .of-price s { color: var(--of-faint); font-size: 14px; }
 .of-lic-card p { margin: 0; font-size: 14px; color: var(--of-dim); line-height: 1.4; }
 .of-res-rep { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--of-cyan); }
+
+/* round 7: the Tuning rig (ui/tuning.js) */
+.of-tune-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-bottom: 12px; }
+.of-tune-head p { margin: 0; }
+.of-tune-pts { font: 700 26px var(--of-num); color: var(--of-green); }
+.of-tune-head small { color: var(--of-faint); margin-left: 6px; }
+.of-boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; align-items: start; }
+.of-tboard { --bc: var(--of-amber); border: 1px solid var(--of-line); border-top: 3px solid var(--bc); border-radius: var(--of-r); background: var(--of-panel); padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.of-tboard > header { display: grid; gap: 2px; }
+.of-tboard > header b { color: var(--bc); font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; }
+.of-tboard > header small { color: var(--of-faint); font-size: 13px; }
+.of-trow { display: grid; gap: 6px; }
+.of-trow-need { color: var(--of-faint); font-size: 12px; letter-spacing: 0.04em; }
+.of-trow-key { padding: 6px; border: 1px dashed color-mix(in srgb, var(--bc) 45%, transparent); border-radius: var(--of-r); }
+.of-node { display: flex; gap: 4px; align-items: stretch; }
+.of-node-main { flex: 1; display: grid; gap: 3px; padding: 8px 10px; text-align: left; color: var(--of-text); font-family: var(--of-font); background: var(--of-panel-2); border: 1px solid var(--of-line); border-radius: var(--of-r); cursor: pointer; min-height: 44px; }
+.of-node-main:hover, .of-node-main:focus-visible, .of-node-main.pad-focus { border-color: var(--bc); outline: none; }
+.of-node-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.of-node-top b { font-size: 14px; }
+.of-node-pips { font: 600 13px var(--of-num); color: var(--bc); letter-spacing: 0.06em; white-space: nowrap; }
+.of-node-text { font-size: 13px; color: var(--of-dim); line-height: 1.35; }
+.of-node-text em { font-style: normal; color: var(--of-faint); }
+.of-node-why { font-size: 12px; color: var(--of-faint); }
+.of-node-locked .of-node-main { opacity: 0.55; }
+.of-node-some .of-node-main, .of-node-full .of-node-main { border-color: color-mix(in srgb, var(--bc) 60%, var(--of-line)); background: color-mix(in srgb, var(--bc) 8%, var(--of-panel-2)); }
+.of-node-full .of-node-text { color: var(--of-text); }
+.of-node-key .of-node-top b { color: var(--bc); }
+.of-node-down { min-width: 40px; font-size: 18px; }
+.of-skills .of-skill { text-align: left; cursor: pointer; color: var(--of-text); font-family: var(--of-font); }
+.of-skill.on { box-shadow: 0 0 0 1px var(--rc), 0 0 18px color-mix(in srgb, var(--rc) 30%, transparent); }
+.of-skill[disabled] { opacity: 0.5; cursor: default; }
+.of-skill p, .of-set p { margin: 6px 0 0; font-size: 14px; color: var(--of-dim); line-height: 1.35; }
+.of-set.on { box-shadow: 0 0 0 1px var(--rc), 0 0 18px color-mix(in srgb, var(--rc) 30%, transparent); }
+.of-set-bonus b { color: var(--rc); }
+.of-shelf { margin: 14px 0 8px; font: 600 14px var(--of-font); letter-spacing: 0.1em; text-transform: uppercase; color: var(--of-dim); }
+.of-featured .of-item { box-shadow: 0 0 0 1px var(--rc), 0 0 26px color-mix(in srgb, var(--rc) 30%, transparent); }
+/* part mods on item cards (round 7) */
+.of-item-mods { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.of-item-mods li { padding: 5px 8px; font-size: 13px; line-height: 1.35; color: var(--of-text); background: color-mix(in srgb, var(--rc) 12%, transparent); border-left: 2px solid var(--rc); }
+.of-item-mods b { color: var(--rc); margin-right: 4px; }
+.of-item-set { margin: 6px 0 0; font-size: 12px; color: var(--of-dim); line-height: 1.35; }
+.of-item-set b { color: var(--of-text); }
+/* the repair kit (workshop tab) */
+.of-kit { display: grid; gap: 12px; max-width: 720px; }
+.of-kit-card p { margin: 6px 0 0; font-size: 14px; color: var(--of-dim); }
+.of-kit-steps { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.of-kit-steps li { display: grid; padding: 6px 10px; border: 1px solid var(--of-line); border-radius: var(--of-r); background: var(--of-panel); font-size: 13px; }
+.of-kit-steps li small { color: var(--of-faint); font-size: 12px; }
+.of-kit-steps li.on { border-color: var(--of-green); }
+.of-kit-steps li.on b { color: var(--of-green); }
+.of-asm-sets { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.of-asm-sets li { padding: 5px 8px; font-size: 13px; line-height: 1.35; color: var(--of-dim); border-left: 2px solid var(--of-line-2); background: var(--of-panel-2); }
+.of-asm-sets li.on { color: var(--of-text); border-left-color: var(--of-green); }
+.of-asm-sets b { color: var(--of-green); margin-right: 4px; }
+.of-item-builtin { margin: 6px 0 0; padding: 0 0 0 10px; list-style: none; display: grid; gap: 2px; font-size: 13px; color: var(--of-text); border-left: 2px solid var(--of-line-2); }

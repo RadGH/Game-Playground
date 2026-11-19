@@ -14,7 +14,8 @@ export const activeBuild = save => save.builds.find(b => b.id === save.active) |
 /** A saved build → the mission's build: { head: item, …, weapons: [item|null ×4], chips: [chipId], paint }. Crafted parts
  *  keep their model id (the Mech Kit draws the model's picture). */
 export function resolveBuild(save, b, P) {
-  const out = { paint: b.paint || 'maker', chips: (b.chips || []).map(u => chipByUid(save, u)?.id).filter(Boolean), name: b.name };
+  const out = { paint: b.paint || 'maker', chips: (b.chips || []).map(u => chipByUid(save, u)?.id).filter(Boolean), name: b.name,
+    kit: save.kit || 1, skill: b.skill || 'repulse', tuning: { ...(b.tuning || {}) } };   // round 7: the pilot's repair kit Mk; the build's skill and Frame Tuning
   const asItem = it => (it ? { ...it, model: P[it.id]?.model || null } : null);
   for (const s of SLOTS) out[s] = asItem(itemByUid(save, b.parts[s]));
   out.weapons = (b.weapons || [null, null, null, null]).map(u => asItem(itemByUid(save, u)));
@@ -53,17 +54,28 @@ export function buildProblems(build, P, C) {
   return { errors, warnings };
 }
 
-/** A fresh locker: every maker's starter frame as owned Common parts, one saved build per maker (owner: lots of
- *  options from the start). active = the frame picked in round 1 if there was one. */
-export function starterLocker(PARTS, MAKERS, activeMaker = 'brannoch') {
-  const items = [], builds = [];
-  const own = id => { if (!id) return null; const it = { uid: newUid(), id, rarity: 'common', rolls: [], found: 0 }; items.push(it); return it.uid; };
-  for (const mk of MAKERS) {
-    const sb = starterBuild(PARTS, mk.id);
-    const parts = Object.fromEntries(SLOTS.map(s => [s, own(sb[s])]));
-    builds.push({ id: 'b-' + mk.id, name: `${mk.short} starter`, parts, weapons: sb.weapons.map(own), chips: [], paint: 'maker' });
-  }
-  return { items, builds, active: 'b-' + activeMaker };
+/** The chip each maker's starter frame comes with (round 7 — owner: "I still haven't seen any firmware"). */
+export const STARTER_CHIP = { celerity: 'snap-dash', brannoch: 'layered-plate', calyx: 'deep-cell', patchwork: 'magnet-hook' };
+
+/** A locker with ONE maker's starter frame as owned Common parts, its chip fitted (round 7 — owner: "too many parts
+ *  provided out of the box … choose just one of the four bots to start with and start with only those parts"). */
+export function starterLocker(PARTS, MAKERS, maker = 'brannoch') {
+  const items = [], chips = [];
+  const own = id => { if (!id) return null; const it = { uid: newUid(), id, rarity: 'common', rolls: [], mods: [], found: 0 }; items.push(it); return it.uid; };
+  const mk = MAKERS.find(m => m.id === maker) || MAKERS[0];
+  const sb = starterBuild(PARTS, mk.id);
+  const parts = Object.fromEntries(SLOTS.map(s => [s, own(sb[s])]));
+  const chip = STARTER_CHIP[mk.id] ? { uid: newUid(), id: STARTER_CHIP[mk.id] } : null; if (chip) chips.push(chip);
+  const builds = [{ id: 'b-' + mk.id, name: `${mk.short} starter`, parts, weapons: sb.weapons.map(own), chips: chip ? [chip.uid] : [], paint: 'maker', skill: 'repulse', tuning: {} }];
+  return { items, chips, builds, active: 'b-' + mk.id };
+}
+
+/** Every maker's starter (round 2's locker) — only for upgrading round 1 saves, which had all four. */
+export function allStartersLocker(PARTS, MAKERS) {
+  const out = { items: [], chips: [], builds: [], active: null };
+  for (const mk of MAKERS) { const l = starterLocker(PARTS, MAKERS, mk.id); out.items.push(...l.items); out.builds.push(...l.builds.map(b => ({ ...b, chips: [] }))); }
+  out.active = out.builds[0]?.id || null;
+  return out;
 }
 
 /** A new saved build copied from another (shares the same parts — builds are loadouts, not separate stock). */

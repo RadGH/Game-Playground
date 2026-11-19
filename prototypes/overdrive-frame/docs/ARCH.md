@@ -76,3 +76,25 @@ Memory budget: bake only what a mission uses; wreck stages bake on first hit; li
 - **Results**: everyone gets the full `result` (`perPlayer` has names/bots); each browser applies its own share with its
   own pid, loot tier = `levelTier(own rank)` (`progress.js`). Enemy health/count per extra frame: `partyScale` in
   mission.js (tuning `coopHealth`, `coopCount`).
+
+## City layouts (round 7)
+`makeCityMap({ …, layout })` — `'grid'` (default) is the original street grid, unchanged for the same seed. The others
+live in `js/sim/layouts/` on a shared toolkit (`layouts/kit.js`: streets, bands, set pieces, the district's building
+fill, `finish` = no sealed pockets + spawn edges + the briefing map's roads) and are listed in `js/sim/citylayouts.js`
+(`LAYOUTS`: label, one line, the district types each suits with a weight): **canal** (deep canal, quays, a bridge on
+every street that meets it), **ring** (round plaza + monument, two ring roads, eight spokes; you drop on the plaza),
+**park** (big park in the middle: lawns, tree clumps, wadeable pond, paths, stage/court/playground), **oldtown**
+(crooked 2-wide cobbled lanes from recursive splits with jogs, small low houses, little squares), **railyard** (four
+tracks + platform across the middle, freight trains, signal boxes, a station, level crossings), **harbour** (sea in the
+north, apron, piers — the dropship waits at the end of one — cranes, a container yard), **megablock** (3-wide avenues,
+one 4×4 podium tower per block, wide plazas, planters).
+- One source for the ground: `map.city.ground` (one character per tile, `layouts/kit.js GC`). `world.js` makes `'w'`
+  deep water (blocks anything below `DEEP_CLEAR` 0.45 — a frame can jump a canal; shots fly over; `wetLine` for bots);
+  `render/city-ground.js` paints the same string (+ the smooth bands whose tiles the generator reserved from the same
+  points); the minimap and the briefing map use `drawMapGround`.
+- Lots: trees/planters are `natural`, freight cars/containers/cranes/signal boxes are `prop` — never stand-in
+  demolition targets (`missiondef.js`).
+- Contracts: `campaign.js makeContract` sets `map.layout = layoutFor(district type, map seed)` — deterministic, so the
+  co-op server's rebuilt contract gets the same map. Story missions name theirs in `data/missions.json` (m01 stays grid).
+- `?mission=<id>&layout=<id>` (js/boss-ace-hooks.js) flies a mission on another layout, for testing.
+- Tests: `tests/sim/layouts.test.mjs` (every layout × district × size × seeds; every contract type on every layout).

@@ -4,10 +4,12 @@ import { fmt } from '../../../../shared/format.js';
 import { ask } from '../../../../shared/dialog.js';
 import { RARITY, RARITY_BY_ID } from '../sim/loadout.js';
 import { rankOf, dealerStock, bought } from '../sim/progress.js';
+import { newUid } from '../sim/loot.js';
 import { sellValue, salvageValue, lineText } from '../sim/loot.js';
-import { recipeState, canAfford, craft, fabOptions, itemOptions, salvage, COST_KEYS } from '../sim/craft.js';
+import { recipeState, canAfford, craft, fabOptions, itemOptions, salvage, upgradeKit, COST_KEYS } from '../sim/craft.js';
+import { KIT_LEVELS, KIT_MAX, kitStats, kitLine } from '../sim/kit.js';
+import { MOD_BY_ID } from '../sim/mods.js';
 import { buildsUsing, activeBuild, itemByUid } from '../sim/inventory.js';
-import { licenceOf } from '../sim/campaign.js';
 import { itemCard, SLOT_LABEL, esc } from './itemcard.js';
 import { baySheet, BAY_INFO, click } from './bays.js';
 import { play as sound } from '../../../../citykit/js/world/sound.js';
@@ -28,32 +30,31 @@ const inFilter = (p, f) => f === 'all' || (f === 'weapon' ? p.slot === 'weapon' 
 export function openDealer(screens, { onClose, onChange } = {}) {
   const g = screens.g, save = g.save;
   let tab = 'buy', filter = 'all';
-  const sheet = baySheet(screens, 'dealer', { title: BAY_INFO.dealer.name, tabs: [['buy', 'Buy'], ['sell', 'Sell'], ['licences', 'Licences']], tab, onTab: t => { tab = t; draw(); }, onClose });
+  const sheet = baySheet(screens, 'dealer', { title: BAY_INFO.dealer.name, tabs: [['buy', 'Buy'], ['sell', 'Sell']], tab, onTab: t => { tab = t; draw(); }, onClose });
   const draw = () => {
     const rk = rankOf(save.xp).rank;
     if (tab === 'buy') {
-      const licences = Object.fromEntries(g.MAKERS.map(m => [m.id, licenceOf(save, g.CAMP, m.id)]));
-      const stock = dealerStock(g.P, { rank: rk, played: save.played, licences });
+      const stock = dealerStock(g.P, { rank: rk, played: save.played, CHIPS: g.CHIPS });
       if (save.dealer?.turn !== stock.turn) save.dealer = { turn: stock.turn, sold: [] };
       for (const it of stock.items) if (!save.seen.includes(it.id)) save.seen.push(it.id);   // seen at the dealer = the workshop can build it
       const left = stock.items.filter(it => !save.dealer.sold.includes(it.uid) && inFilter(g.P[it.id], filter));
+      const feat = left.find(it => it.featured), rest = left.filter(it => !it.featured);
+      const chips = (stock.chips || []).filter(c => !save.dealer.sold.includes(c.uid) && g.C[c.id]);
       const turnsLeft = 2 - (save.played % 2);
-      sheet.body.innerHTML = `<p class="of-note">New stock after ${turnsLeft} more mission${turnsLeft > 1 ? 's' : ''}. Better parts come in as your rank rises.</p>${filterRow(filter)}
-        <div class="of-grid">${left.length ? left.map(it => itemCard(g, it, { vs: fittedFor(g, g.P[it.id]), extra: `${it.licence ? `<small class="of-lic">On the shelf through your ${esc(g.MAKERS.find(m => m.id === it.licence)?.short)} licence</small>` : ''}<div class="of-buy"><span class="of-price">${it.full ? `<s>${fmt(it.full, { decimals: 0 })}</s> ` : ''}${fmt(it.price, { decimals: 0 })} cr</span><button type="button" class="of-btn of-small of-primary" data-buy="${it.uid}"${save.credits < it.price ? ' disabled' : ''}>${save.credits < it.price ? 'Not enough credits' : 'Buy'}</button></div>` })).join('') : '<p class="of-empty">Sold out. Fly a mission or two for new stock.</p>'}</div>`;
+      const buyRow = (uid, price) => `<div class="of-buy"><span class="of-price">${fmt(price, { decimals: 0 })} cr</span><button type="button" class="of-btn of-small of-primary" data-buy="${uid}"${save.credits < price ? ' disabled' : ''}>${save.credits < price ? 'Not enough credits' : 'Buy'}</button></div>`;
+      const card = it => itemCard(g, it, { vs: fittedFor(g, g.P[it.id]), extra: buyRow(it.uid, it.price) });
+      sheet.body.innerHTML = `<p class="of-note">New stock after ${turnsLeft} more mission${turnsLeft > 1 ? 's' : ''}. Rarer parts come in as your rank rises.</p>${filterRow(filter)}
+        ${feat ? `<h4 class="of-shelf">Featured</h4><div class="of-grid of-featured">${card(feat)}</div>` : ''}
+        <h4 class="of-shelf">On the shelves</h4>
+        <div class="of-grid">${rest.length ? rest.map(card).join('') : '<p class="of-empty">Sold out. Fly a mission or two for new stock.</p>'}</div>
+        ${filter === 'all' && chips.length ? `<h4 class="of-shelf">Firmware chips</h4><div class="of-grid">${chips.map(c => { const ch = g.C[c.id]; return `<article class="of-item of-chipcard" style="--rc:${ch.colour}"><header><b>${esc(ch.name)}</b><small>${ch.cost} firmware</small></header><p>${esc(ch.text)}</p>${buyRow(c.uid, c.price)}</article>`; }).join('')}</div>` : ''}`;
       sheet.body.querySelectorAll('[data-buy]').forEach(b => b.addEventListener('click', () => {
-        const it = stock.items.find(x => x.uid === b.dataset.buy); if (!it || save.credits < it.price) return;
-        save.credits -= it.price; save.items.push(bought(it)); save.dealer.sold.push(it.uid);
+        const it = stock.items.find(x => x.uid === b.dataset.buy), chip = (stock.chips || []).find(x => x.uid === b.dataset.buy);
+        const price = it?.price ?? chip?.price; if (price == null || save.credits < price) return;
+        save.credits -= price; save.dealer.sold.push(b.dataset.buy);
+        if (it) save.items.push(bought(it)); else save.chips.push({ uid: newUid(), id: chip.id });
         sound('loot.normal', { global: true, gain: 0.5 }); g.saveNow(); onChange?.(); sheet.wallet(); draw();
       }));
-    } else if (tab === 'licences') {
-      sheet.body.innerHTML = `<p class="of-note">${g.CAMP.licences.text}</p><div class="of-grid of-lics">${g.MAKERS.map(mk => {
-        const L = licenceOf(save, g.CAMP, mk.id), next = L.next;
-        const prev = g.CAMP.licences.levels[L.level].rep, span = next ? next.rep - prev : 1, into = next ? L.rep - prev : 1;
-        return `<article class="of-item of-lic-card" style="--rc:${mk.colours.glow}"><header><b>${esc(mk.name)}</b><small>${L.label}${L.off ? ` · ${Math.round(L.off * 100)}% off their parts` : ''}</small></header>
-          <p>${esc(mk.leaning)}</p>
-          <div class="of-fw"><i style="--v:${next ? Math.round(into / span * 100) : 100}%"></i>${next ? `${fmt(L.rep, { decimals: 0 })} / ${fmt(next.rep, { decimals: 0 })} reputation` : 'Top licence'}</div>
-          <small class="of-used">${next ? `Next: ${next.label} — ${next.extra} of their parts on the shelf up to their tier ${next.tier} designs, ${Math.round(next.off * 100)}% off.` : 'Every design they make can turn up here.'} Earn it by flying ${esc(mk.short)} contracts.</small></article>`;
-      }).join('')}</div>`;
     } else {
       const mine = save.items.filter(it => inFilter(g.P[it.id], filter)).sort((a, b) => RANK_ORDER(a.rarity) - RANK_ORDER(b.rarity));
       sheet.body.innerHTML = `<p class="of-note">The dealer pays about a third of what it charges (more for rarer parts). Parts in a saved build can't be sold — take them off first.</p>${filterRow(filter)}
@@ -75,7 +76,7 @@ export function openDealer(screens, { onClose, onChange } = {}) {
 export function openWorkshop(screens, { onClose, onChange } = {}) {
   const g = screens.g, save = g.save;
   let tab = 'craft', sel = null, pick = null, line = 0, made = null;
-  const sheet = baySheet(screens, 'workshop', { title: BAY_INFO.workshop.name, tabs: [['craft', 'Make'], ['scrap', 'Scrap parts']], tab, onTab: t => { tab = t; made = null; draw(); }, onClose });
+  const sheet = baySheet(screens, 'workshop', { title: BAY_INFO.workshop.name, tabs: [['craft', 'Make'], ['kit', 'Repair kit'], ['scrap', 'Scrap parts']], tab, onTab: t => { tab = t; made = null; draw(); }, onClose });
   const costHtml = cost => `<ul class="of-cost">${COST_KEYS.filter(k => cost[k]).map(k => { const have = k === 'credits' ? save.credits : save.mats[k] || 0; return `<li class="${have < cost[k] ? 'of-bad' : ''}"><b>${fmt(cost[k], { decimals: 0 })}</b> ${MAT[k]}<small>have ${fmt(have, { decimals: 0 })}</small></li>`; }).join('')}</ul>`;
 
   const drawCraft = () => {
@@ -103,14 +104,15 @@ export function openWorkshop(screens, { onClose, onChange } = {}) {
       ready &&= !!pick;
     } else if (r.type === 'crafted') {
       picker = itemCard(g, { id: r.makes, rarity: 'refined', rolls: [] }, { vs: fittedFor(g, g.P[r.makes]), extra: `<p class="of-note">Uses the ${esc(g.P[g.P[r.makes].model]?.name)} frame, with its own numbers. Built Refined.</p>` });
-    } else if (r.type === 'refit' || r.type === 'upgrade') {
+    } else if (r.type === 'refit' || r.type === 'upgrade' || r.type === 'remod') {
       const opts = itemOptions(r, save).sort((a, b) => RANK_ORDER(b.rarity) - RANK_ORDER(a.rarity));
       pick = opts.find(i => i.uid === pick) ? pick : opts[0]?.uid;
       const it = opts.find(i => i.uid === pick);
-      picker = opts.length ? `<label class="of-pick"><span>Part</span><select data-pick>${opts.map(i => `<option value="${i.uid}"${i.uid === pick ? ' selected' : ''}>${RARITY_BY_ID[i.rarity].label} ${esc(g.P[i.id].name)}${i.rolls.length ? ' — ' + i.rolls.map(lineText).join(', ') : ''}</option>`).join('')}</select></label>
-        ${r.type === 'refit' && it ? `<div class="of-lines" role="group" aria-label="Bonus line to re-roll">${it.rolls.map((x, j) => `<button type="button" class="of-btn of-chip${j === line ? ' on' : ''}" data-line="${j}" aria-pressed="${j === line}">${lineText(x)}</button>`).join('')}</div>` : ''}
+      picker = opts.length ? `<label class="of-pick"><span>Part</span><select data-pick>${opts.map(i => `<option value="${i.uid}"${i.uid === pick ? ' selected' : ''}>${RARITY_BY_ID[i.rarity].label} ${esc(g.P[i.id].name)}${r.type === 'remod' ? ' — ' + i.mods.map(x => MOD_BY_ID[x]?.name || '').join(', ') : i.rolls.length ? ' — ' + i.rolls.map(x => lineText(x, g.P[i.id].slot)).join(', ') : ''}</option>`).join('')}</select></label>
+        ${r.type === 'remod' && it ? `<div class="of-lines" role="group" aria-label="Mod to swap">${it.mods.map((x, j) => `<button type="button" class="of-btn of-chip${j === line ? ' on' : ''}" data-line="${j}" aria-pressed="${j === line}">${esc(MOD_BY_ID[x]?.name || 'Old mod')}</button>`).join('')}</div>` : ''}
+        ${r.type === 'refit' && it ? `<div class="of-lines" role="group" aria-label="Bonus line to re-roll">${it.rolls.map((x, j) => `<button type="button" class="of-btn of-chip${j === line ? ' on' : ''}" data-line="${j}" aria-pressed="${j === line}">${lineText(x, g.P[it.id].slot)}</button>`).join('')}</div>` : ''}
         ${it ? itemCard(g, it) : ''}`
-        : `<p class="of-empty">${r.type === 'refit' ? 'No parts with a bonus line yet.' : 'No parts of the right rarity.'}</p>`;
+        : `<p class="of-empty">${r.type === 'refit' ? 'No parts with a bonus line yet.' : r.type === 'remod' ? 'No parts with a mod yet. Refined parts sometimes carry one; Rare and better always do.' : 'No parts of the right rarity.'}</p>`;
       ready &&= !!pick;
     } else if (r.type === 'chip') {
       const opts = g.CHIPS.slice().sort((a, b) => (a.rank || 1) - (b.rank || 1));
@@ -157,7 +159,23 @@ export function openWorkshop(screens, { onClose, onChange } = {}) {
     });
   };
 
-  const draw = () => (tab === 'craft' ? drawCraft() : drawScrap());
+  // the repair kit (round 7 — owner: "start with a repair kit that heals 30% hp, with a way to upgrade")
+  const drawKit = () => {
+    const lv = save.kit || 1, now = kitStats(lv), next = lv < KIT_MAX ? KIT_LEVELS[lv] : null;
+    sheet.body.innerHTML = `<div class="of-kit">
+      <article class="of-item of-kit-card" style="--rc:#5fffb0"><header><b>${now.name}</b><small>Key 1 · controller d-pad left · touch Fix</small></header>
+        <p>${kitLine(now)}</p><p class="of-note">Frame Tuning (Plating) and Field Kit mods add charges and strength on top.</p></article>
+      ${next ? `<article class="of-item of-kit-card" style="--rc:#3ff0ff"><header><b>Next: ${next.name}</b></header><p>${kitLine(next)}</p>
+        ${costHtml(next.cost)}<div class="of-make"><button type="button" class="of-btn of-primary" data-kit${canAfford(save, next.cost) ? '' : ' disabled'}>${canAfford(save, next.cost) ? `Upgrade to ${next.name.replace('Repair Kit ', '')}` : 'Not enough credits or materials'}</button></div></article>`
+        : '<p class="of-note">Your kit is the best the workshop can build.</p>'}
+      <ol class="of-kit-steps">${KIT_LEVELS.map(K => `<li class="${K.lv <= lv ? 'on' : ''}"><b>${K.name.replace('Repair Kit ', '')}</b><small>${Math.round(K.heal * 100)}% · ${K.charges} charges${K.cleanse ? ' · cleanses' : ''}</small></li>`).join('')}</ol></div>`;
+    sheet.body.querySelector('[data-kit]')?.addEventListener('click', () => {
+      const out = upgradeKit(save); if (!out.ok) return;
+      sound('build.done', { global: true, gain: 0.5 }); g.saveNow(); onChange?.(); sheet.wallet(); drawKit();
+    });
+  };
+
+  const draw = () => (tab === 'craft' ? drawCraft() : tab === 'kit' ? drawKit() : drawScrap());
   draw();
   return sheet;
 }

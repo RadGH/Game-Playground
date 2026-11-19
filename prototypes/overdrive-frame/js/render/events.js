@@ -5,6 +5,8 @@ import { play } from '../../../../citykit/js/world/sound.js';
 import { SHOT_COLOURS } from './view.js';
 import { domeHit } from './roles-art.js';
 import { walkerFx } from './walker-art.js';
+import { perkFx } from './perks-art.js';
+import { weaponEventFx } from './weapons-art.js';     // round 7: the new weapons' looks and sounds
 
 export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSprite = () => null } = {}) {
   const fx = view.fx;
@@ -13,6 +15,8 @@ export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSp
 
   return function handle(ev, S) {
     if ((ev.type.startsWith('boss') || ev.type.startsWith('mine')) && walkerFx(ev, S, fx, view, snd)) return;   // the Juggernaut's own look (render/walker-art.js)
+    if (perkFx(ev, S, view, snd, localId)) return;                                       // round 7: kit, skills, frame rules (render/perks-art.js)
+    if (weaponEventFx(ev, S, fx, view, snd, localId)) return;                                                     // round 7 weapons (render/weapons-art.js)
     switch (ev.type) {
       case 'fire': {
         const col = SHOT_COLOURS[S.byId.get(ev.id)?.weapons?.[ev.slot]?.spec?.dtype] || '#ffd27a';
@@ -35,8 +39,8 @@ export function makeEventFx(view, { localId = () => null, pan = () => 0, deathSp
       case 'hit': {
         const big = ev.amount > 300;
         if (near(ev.x, ev.z)) {
-          fx.spark(ev.x, ev.z, ev.y ?? 0.2, big ? 8 : 3, { speed: [2, 5], life: [0.08, 0.2], color: SHOT_COLOURS[ev.dtype] || '#ffd27a' });
-          if (ev.by === localId() || !ev.by) view.number(ev.x, ev.z, ev.y ?? 0.2, ev.amount, ev.tier);
+          if (ev.dtype !== 'cryo' || Math.random() < 0.25) fx.spark(ev.x, ev.z, ev.y ?? 0.2, big ? 8 : ev.dtype === 'cryo' ? 1 : 3, { speed: [2, 5], life: [0.08, 0.2], color: SHOT_COLOURS[ev.dtype] || '#ffd27a' });   // round 7: a cryo stream hits 36 times a second — keep it from glaring white
+          if (ev.by === localId() || !ev.by) view.number(ev.x, ev.z, ev.y ?? 0.2, ev.amount, ev.tier, ev.dtype);
         }
         const e = S.byId.get(ev.id); if (e) e.lastHit = S.time;
         if (ev.shield && near(ev.x, ev.z)) { fx.ring(ev.x, ev.z, 0.3, 0.16, 'rgba(111,232,255,0.9)', 2); domeHit(view, S, ev); }   // softened by a bulwark's dome

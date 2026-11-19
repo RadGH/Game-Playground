@@ -32,7 +32,10 @@ import { drawMoonGround } from './moon-ground.js';   // round 5: the moon's dust
 import { drawForestGround } from './forest-ground.js';   // Pinewatch: grass, woods floor, trails, road, river
 import { drawSnowGround, drawSnowOver, drawSnowfall } from './snow-ground.js';   // round 6: the snowfield (ground, lift cables, snowfall)
 import { drawDesertGround } from './desert-ground.js';   // Red Mesa: sand, washes, the highway, the base basin
+import { drawCityGround } from './city-ground.js';   // round 7: city layouts (canal, ring, park, old town, rail yard, harbour, megablocks)
 import { drawRoles } from './roles-art.js';
+import { drawPerks } from './perks-art.js';   // round 7: skills + frame rules
+import { drawWeaponGround, drawWeaponOver, drawShotFx, ELEMENT_COLOURS } from './weapons-art.js';   // round 7: wells, burning ground, storms, orbs, frozen enemies
 import { objectiveTargets } from './targets.js';     // the mission's targets: edge arrows here, the minimap in ui/minimap.js          // round 5: bulwark domes, heal beams, flamer cones, spore clouds
 
 const C = {
@@ -90,6 +93,7 @@ export class View {
     if (map.forest) { drawForestGround(this, ctx, map); return this._scorch(ctx); }   // Pinewatch: the pine forest
     if (map.snow) { drawSnowGround(this, ctx, map); return this._scorch(ctx); }   // round 6: the snowfield
     if (map.desert) { drawDesertGround(this, ctx, map); return this._scorch(ctx); }   // Red Mesa: the desert badlands
+    if (map.city) { drawCityGround(this, ctx, map); return this._scorch(ctx); }   // round 7: a city layout's water, rails, parks…
     const n = this.night;
     ctx.fillStyle = mixHex(C.ground, C.groundNight, n); ctx.fillRect(0, 0, this.W, this.H);
     // sidewalks under every block, then roads with lane marks, then plazas
@@ -217,6 +221,7 @@ export class View {
     // markers on the ground: objectives, extraction, artillery circles, pickups
     this._markers(ctx, S, t);
     drawBossMarks(ctx, this, S, t);       // boss wind-ups: the claw sweep and charge lane fill before they land
+    drawWeaponGround(ctx, this, S, t);    // round 7: gravity wells, burning ground, nanite clouds, orbital marks, bomblets
 
     const items = [];
     const mechPts = S.mechs.map(m => { const p = lerp(m); return { m, p, s: this.P(p.x, p.z, (p.y || 0) + 0.4) }; });
@@ -249,6 +254,8 @@ export class View {
     items.sort((a, b) => a.d - b.d);
     for (const it of items) it.draw();
     drawRoles(ctx, this, S, lerp, t);     // round 5 roles, over the scene (render/roles-art.js)
+    drawPerks(ctx, this, S, lerp, t, dt);  // round 7: domes, wells, decoys, fire trails (render/perks-art.js)
+    drawWeaponOver(ctx, this, S, lerp, t);   // round 7: frost, ice blocks, void swirls, storm clouds
     if (map.snow) drawSnowOver(ctx, this, map, t);   // round 6: the ski lift's cables and cabins, over everything on the ground
 
     this._shots(ctx, S, t);
@@ -528,6 +535,7 @@ export class View {
     for (const s of S.shots) {
       const a = this.P(s.x, s.z, s.y ?? 0.4);
       const col = SHOT_COLOURS[s.dtype] || '#ffd27a';
+      if ((s.look || s.orb || s.glaive || s.wave) && drawShotFx(ctx, this, s, t)) continue;   // round 7 (render/weapons-art.js)
       if (s.kind === 'missile') {
         const b = this.P(s.x - s.vx * 0.05, s.z - s.vz * 0.05, s.y ?? 0.4);
         ctx.strokeStyle = '#ffe2a8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(a.sx, a.sy); ctx.lineTo(b.sx, b.sy); ctx.stroke();
@@ -546,9 +554,9 @@ export class View {
   }
 
   /** Damage numbers: rounded, colour by crit tier (white, yellow, orange, red), small for chip damage. */
-  number(x, z, y, amount, tier = 0) {
+  number(x, z, y, amount, tier = 0, dtype = null) {
     if (amount < 1) return;
-    this.numbers.push({ x, z, y: y + 0.5, vy: 0.9, life: 0.8, age: 0, text: String(Math.round(amount)), tier, size: Math.min(1.6, 0.85 + Math.log10(amount + 1) * 0.18) * (tier ? 1.15 + tier * 0.1 : 1) });
+    this.numbers.push({ x, z, y: y + 0.5, vy: 0.9, life: 0.8, age: 0, text: String(Math.round(amount)), tier, col: !tier && ELEMENT_COLOURS[dtype] || null, size: Math.min(1.6, 0.85 + Math.log10(amount + 1) * 0.18) * (tier ? 1.15 + tier * 0.1 : 1) });
     if (this.numbers.length > 120) this.numbers.splice(0, this.numbers.length - 120);
   }
   _numbers(ctx, dt) {
@@ -560,7 +568,7 @@ export class View {
       ctx.globalAlpha = k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3;
       ctx.font = `800 ${Math.round(13 * n.size)}px "Barlow Condensed", system-ui, sans-serif`;
       ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.strokeText(n.text, p.sx, p.sy);
-      ctx.fillStyle = CRIT_COLOURS[Math.min(n.tier, CRIT_COLOURS.length - 1)]; ctx.fillText(n.text, p.sx, p.sy);
+      ctx.fillStyle = n.col || CRIT_COLOURS[Math.min(n.tier, CRIT_COLOURS.length - 1)]; ctx.fillText(n.text, p.sx, p.sy);   // round 7: cryo / void numbers in their colour
     }
     ctx.restore();
     this.numbers = this.numbers.filter(n => n.age < n.life);
@@ -571,7 +579,7 @@ export class View {
  *  buildings at night, so they always read against the street. */
 const UNIT_NIGHT = 0.5;
 
-export const SHOT_COLOURS = { kinetic: '#ffd27a', energy: '#7fe8ff', explosive: '#ffb35a', fire: '#ff8a3a', electric: '#b49bff' };
+export const SHOT_COLOURS = { kinetic: '#ffd27a', energy: '#7fe8ff', explosive: '#ffb35a', fire: '#ff8a3a', electric: '#b49bff', cryo: '#bfefff', void: '#c38bff' };
 export const CRIT_COLOURS = ['#f2f4f8', '#ffe14a', '#ff9a2e', '#ff3b3b', '#ff5adf'];
 
 /** '#rrggbb' + alpha → rgba(). */

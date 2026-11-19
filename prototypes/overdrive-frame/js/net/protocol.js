@@ -3,6 +3,9 @@
 // dropped and counted) and rate-limited per type before a room sees it. Pure: the server, the browser and the tests
 // import it. Modelled on Knockabout's js/net/protocol.js.
 import { RARITY } from '../sim/loadout.js';
+import { MOD_BY_ID } from '../sim/mods.js';
+import { cleanTuning, tuningPoints } from '../sim/tuning.js';
+import { cleanSkill } from '../sim/skills.js';
 
 export const PROTOCOL = 1;
 export const STEP_HZ = 30;                    // the server steps every mission 30 times a second (the sim's own step)
@@ -25,7 +28,7 @@ const RARITIES = RARITY.map(r => r.id);
  * chips must exist, paint is 'maker' or four colours. Returns null when the frame is missing a core part.
  * The server then works out the frame's numbers itself (mechStats) — a browser never sends numbers it made up.
  */
-export function cleanBuild(b, P, CHIPS, SLOTS) {
+export function cleanBuild(b, P, CHIPS, SLOTS, rank = 1) {
   if (!b || typeof b !== 'object') return null;
   const item = (it, ok) => {
     if (!it) return null;
@@ -33,21 +36,27 @@ export function cleanBuild(b, P, CHIPS, SLOTS) {
     if (typeof it === 'string') return { id };
     const rolls = Array.isArray(it.rolls) ? it.rolls.slice(0, 6).filter(r => r && typeof r.stat === 'string' && r.stat.length <= 24 && Number.isFinite(r.value) && Math.abs(r.value) <= 300)
       .map(r => ({ stat: r.stat, value: r.value, ...(r.pct ? { pct: true } : {}) })) : [];
-    return { id, uid: typeof it.uid === 'string' ? it.uid.slice(0, 24) : undefined, rarity: RARITIES.includes(it.rarity) ? it.rarity : 'common', rolls, model: part.model || null };
+    const mods = Array.isArray(it.mods) ? it.mods.filter(m => typeof m === 'string' && MOD_BY_ID[m]).slice(0, 2) : [];   // round 7: part mods
+    return { id, uid: typeof it.uid === 'string' ? it.uid.slice(0, 24) : undefined, rarity: RARITIES.includes(it.rarity) ? it.rarity : 'common', rolls, mods, model: part.model || null };
   };
   const out = { name: typeof b.name === 'string' ? b.name.slice(0, 24) : '' };
   for (const s of SLOTS) { out[s] = item(b[s], p => p.slot === s); }
   if (!out.core || !out.legs || !out.arms || !out.head) return null;
   out.weapons = [0, 1, 2, 3].map(i => item(Array.isArray(b.weapons) ? b.weapons[i] : null, p => p.slot === 'weapon'));
   out.chips = (Array.isArray(b.chips) ? b.chips : []).slice(0, 8).filter(c => typeof c === 'string' && CHIPS[c]);
+  // round 7: repair kit Mk, the build's skill (only one the pilot's rank opens), Frame Tuning within the rank's points
+  // (story missions add a point each; the server can't see them, so it allows the whole campaign's worth)
+  out.kit = Number.isInteger(b.kit) ? Math.max(1, Math.min(5, b.kit)) : 1;
+  out.skill = cleanSkill(b.skill, rank);
+  out.tuning = cleanTuning(b.tuning, tuningPoints(rank, 20));
   const pt = b.paint;
   out.paint = pt && typeof pt === 'object' && ['primary', 'secondary', 'accent', 'glow'].every(k => HEX.test(pt[k])) ? { primary: pt.primary, secondary: pt.secondary, accent: pt.accent, glow: pt.glow } : 'maker';
   return out;
 }
 
 /** Held input packed small: i = [mx, mz, ax, az, bits] (move and aim to hundredths, buttons as bits). */
-export const BITS = Object.freeze({ f0: 1, f1: 2, f2: 4, f3: 8, boost: 16, jump: 32, jumpPressed: 64, qb: 128, lockOnPressed: 256, ping: 512, interact: 1024, swap: 2048, pad: 4096, overload: 8192 });
-const PRESS = ['jumpPressed', 'qb', 'lockOnPressed', 'ping', 'interact', 'swap', 'overload'];
+export const BITS = Object.freeze({ f0: 1, f1: 2, f2: 4, f3: 8, boost: 16, jump: 32, jumpPressed: 64, qb: 128, lockOnPressed: 256, ping: 512, interact: 1024, swap: 2048, pad: 4096, overload: 8192, kit: 16384, skill: 32768 });
+const PRESS = ['jumpPressed', 'qb', 'lockOnPressed', 'ping', 'interact', 'swap', 'overload', 'kit', 'skill'];
 export function packInput(inp) {
   let b = 0;
   for (let k = 0; k < 4; k++) if (inp.fire?.[k]) b |= 1 << k;

@@ -2,8 +2,10 @@
 // they're learned (a schematic from a crate, or an S grade). data/recipes.json lists them; this is every rule about
 // them. Pure: changes the save object it's given and returns what it made.
 import { makeRng } from './rng.js';
-import { RARITY, RARITY_BY_ID } from './loadout.js';
+import { RARITY, RARITY_BY_ID, plainSpec } from './loadout.js';
 import { newUid, rollLines, rollLine, poolFor, salvageValue } from './loot.js';
+import { rollMods, modPool, MOD_COUNT } from './mods.js';
+import { KIT_LEVELS, KIT_MAX } from './kit.js';
 
 /** How a recipe looks to this pilot: 'ready' (usable), 'locked' (shown, with why), 'hidden' (secret, not learned). */
 export function recipeState(r, save, rank) {
@@ -29,6 +31,7 @@ export function fabOptions(r, save, P) {
 export function itemOptions(r, save) {
   if (r.type === 'upgrade') return save.items.filter(i => r.from.includes(i.rarity));
   if (r.type === 'refit') return save.items.filter(i => i.rolls?.length);
+  if (r.type === 'remod') return save.items.filter(i => i.mods?.length);
   return [];
 }
 
@@ -43,11 +46,11 @@ export function craft(save, r, opts, { P, CHIPS, rank, seed = Date.now() }) {
   let out;
   if (r.type === 'fabricate') {
     const part = P[opts.partId]; if (!part || !r.slots.includes(part.slot)) return { ok: false, why: 'Pick a part.' };
-    out = { item: { uid: newUid(R), id: part.id, rarity: r.rarity, rolls: rollLines(R, part, r.rarity), found: Date.now(), crafted: true } };
+    out = { item: { uid: newUid(R), id: part.id, rarity: r.rarity, rolls: rollLines(R, part, r.rarity), mods: rollMods(R, part, r.rarity, plainSpec), found: Date.now(), crafted: true } };
     save.items.push(out.item);
   } else if (r.type === 'crafted') {
     const part = P[r.makes]; if (!part) return { ok: false, why: 'Unknown part.' };
-    out = { item: { uid: newUid(R), id: part.id, rarity: 'refined', rolls: rollLines(R, part, 'refined'), found: Date.now(), crafted: true } };
+    out = { item: { uid: newUid(R), id: part.id, rarity: 'refined', rolls: rollLines(R, part, 'refined'), mods: rollMods(R, part, 'refined', plainSpec), found: Date.now(), crafted: true } };
     save.items.push(out.item);
   } else if (r.type === 'refit') {
     const it = save.items.find(i => i.uid === opts.uid); if (!it?.rolls?.length) return { ok: false, why: 'Pick a part with a bonus.' };
@@ -62,6 +65,16 @@ export function craft(save, r, opts, { P, CHIPS, rank, seed = Date.now() }) {
     const before = JSON.parse(JSON.stringify(it));
     const next = RARITY[RARITY.findIndex(x => x.id === it.rarity) + 1]; if (!next) return { ok: false, why: 'Already the best.' };
     it.rarity = next.id; it.rolls = rollLines(R, P[it.id], next.id, it.rolls);
+    // a rarer part carries more mods (mods.js MOD_COUNT): keep the ones it has, add what the new rarity always brings
+    const want = MOD_COUNT[next.id].filter(c => c >= 1).length, pool = modPool(P[it.id], plainSpec).filter(m => !(it.mods || []).includes(m.id));
+    it.mods = (it.mods || []).slice(); while (it.mods.length < want && pool.length) it.mods.push(pool.splice(Math.floor(R.next() * pool.length), 1)[0].id);
+    out = { item: it, before };
+  } else if (r.type === 'remod') {
+    const it = save.items.find(i => i.uid === opts.uid); if (!it?.mods?.length) return { ok: false, why: 'Pick a part with a mod.' };
+    const li = Math.max(0, Math.min(it.mods.length - 1, opts.line | 0)), before = JSON.parse(JSON.stringify(it));
+    const pool = modPool(P[it.id], plainSpec).filter(m => !it.mods.includes(m.id));
+    if (!pool.length) return { ok: false, why: 'No other mod fits this part.' };
+    it.mods = it.mods.slice(); it.mods[li] = pool[Math.floor(R.next() * pool.length)].id;
     out = { item: it, before };
   } else if (r.type === 'chip') {
     const c = CHIPS.find(x => x.id === opts.chipId); if (!c) return { ok: false, why: 'Pick a chip.' };
@@ -99,3 +112,12 @@ export function learn(save, RECIPES, from, seed = 1) {
 }
 
 export { RARITY_BY_ID };
+
+/** The repair kit's next Mk (kit.js KIT_LEVELS): pays its cost and raises save.kit. */
+export function upgradeKit(save) {
+  const lv = save.kit || 1; if (lv >= KIT_MAX) return { ok: false, why: 'Already Mk V.' };
+  const next = KIT_LEVELS[lv];
+  if (!canAfford(save, next.cost)) return { ok: false, why: 'Not enough credits or materials.' };
+  pay(save, next.cost); save.kit = lv + 1;
+  return { ok: true, kit: next };
+}

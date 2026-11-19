@@ -61,7 +61,11 @@ const game = {
   /** Swap in a different save (a cloud copy picked on sign-in): same object, new contents, so every screen keeps it. */
   replaceSave(next) { for (const k of Object.keys(save)) delete save[k]; Object.assign(save, next); },
   /** The build a mission runs: the active saved build, resolved to owned items. */
-  build(b = null) { return resolveBuild(save, b || activeBuild(save), P); },
+  build(b = null) {
+    const sb = b || activeBuild(save);
+    if (!sb) return asItems({ ...STARTERS[MAKER_LIST[0].id], kit: 1, skill: 'repulse', paint: 'maker' });   // round 7: a new pilot before the first-frame choice (the title scene still shows a frame)
+    return resolveBuild(save, sb, P);
+  },
   buildOf(maker) { return STARTERS[maker]; },
   rank() { return rankOf(save.xp); },
   saveNow(stamp = true) { if (game.noSave) return; writeSave(save, stamp); game.cloud?.saveSoon?.(); },
@@ -70,7 +74,7 @@ const game = {
     const st = (S?.mechs?.find(m => m.pid === pid) || S?.mechs?.[0])?.stats;
     // co-op: the host's mission, your rewards at your own level (owner ruling)
     const gained = applyResult(save, result, mission.id, { ...ctx, stats: st, mission, ...(coop ? { tier: levelTier(rankOf(save.xp).rank) } : {}) }, pid);
-    gained.rep = applyCampaign(save, mission, result).rep;
+    applyCampaign(save, mission, result);
     return gained;
   },
   /** Bot teammates for solo play (sim/bots.js): starter frames from each maker, built like a co-op seat. */

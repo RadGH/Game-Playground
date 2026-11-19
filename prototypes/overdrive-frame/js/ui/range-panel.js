@@ -1,9 +1,10 @@
 // The test range's meter panel: damage per second over the last 5 seconds (big), total, biggest hit, hit count, and
 // the split by damage type. Reset clears it; Leave range calls onLeave. Numbers are rounded (lessons: no long decimals).
+import { DAMAGE_NAMES } from '../sim/damage.js';
 import { fmt } from '../../../../shared/format.js';
 import { SHOT_COLOURS } from '../render/view.js';
 
-const TYPE_NAMES = { kinetic: 'Kinetic', energy: 'Energy', explosive: 'Explosive', fire: 'Fire', electric: 'Electric' };
+const TYPE_NAMES = DAMAGE_NAMES;   // round 7: cryo + void too
 const n0 = v => fmt(Math.round(v || 0), { decimals: 0 });
 
 export class RangePanel {

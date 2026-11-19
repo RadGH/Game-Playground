@@ -9,6 +9,7 @@ import { makeMoonMap, MOON_DISTRICT } from './moonmap.js';   // round 5: the moo
 import { makeForestMap, FOREST_DISTRICT } from './forestmap.js';   // Pinewatch: the pine forest (its own generator)
 import { makeSnowMap, SNOW_DISTRICT } from './snowmap.js';   // round 6: Frostline, the snowfield station (its own generator)
 import { makeDesertMap, DESERT_DISTRICT } from './desertmap.js';   // Red Mesa: the desert badlands (its own generator)
+import { makeLayoutMap, LAYOUTS } from './citylayouts.js';   // round 7: canal, ring, park, old town, rail yard, harbour, megablocks
 
 export const FLOOR = 0.22;
 /** City Kit building styles (citykit/js/kit/materials.js STYLE_IDS — copied here so the rules need no three.js). */
@@ -38,14 +39,17 @@ export const DISTRICTS = {
 const pickW = (R, list) => { const tot = list.reduce((s, x) => s + (x.w || 1), 0); let v = R.next() * tot; for (const x of list) { v -= x.w || 1; if (v <= 0) return x; } return list[0]; };
 
 /**
- * @param {{ seed: number, w?: number, h?: number, district?: keyof DISTRICTS, mix?: string[] }} o
+ * @param {{ seed: number, w?: number, h?: number, district?: keyof DISTRICTS, mix?: string[], layout?: string }} o
+ *   layout (round 7): 'grid' (default — this street grid, the same map for the same seed as before) or one of
+ *   citylayouts.js LAYOUTS; a layout the district doesn't suit still builds (the board never offers one).
  * @returns {{ w, h, lots, roads: Array<[x, z, w, d]>, plazas: Array<[x, z, w, d]>, start: {x, z}, extract: {x, z, r}, edges }}
  */
-export function makeCityMap({ seed, w = 40, h = 40, district = 'downtown', mix = null }) {
+export function makeCityMap({ seed, w = 40, h = 40, district = 'downtown', mix = null, layout = 'grid' }) {
   if (DISTRICTS[district]?.moon) return makeMoonMap({ seed, w, h });     // round 5: the moon outpost
   if (DISTRICTS[district]?.forest) return makeForestMap({ seed, w, h });  // Pinewatch: the pine forest
   if (DISTRICTS[district]?.snow) return makeSnowMap({ seed, w, h });     // round 6: the snowfield
   if (DISTRICTS[district]?.desert) return makeDesertMap({ seed, w, h }); // Red Mesa: the desert badlands
+  if (layout && layout !== 'grid' && LAYOUTS[layout]) return makeLayoutMap({ seed, w, h, district, layout, D: DISTRICTS[district], FLOOR, STYLES });
   const R = makeRng(seed);
   const D = DISTRICTS[district];
   const occ = new Uint8Array(w * h);            // 0 free, 1 road, 2 building, 3 plaza (kept open)

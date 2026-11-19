@@ -79,9 +79,10 @@ export function createRoom({ code, serial = 0, now = () => Date.now(), seed = 1,
     const isHost = seat.host;
     switch (msg.t) {
       case 'me': {
-        const b = cleanBuild(msg.build, data.P, data.CHIPS, data.SLOTS);
+        const rank = Math.max(1, Math.min(99, msg.rank));
+        const b = cleanBuild(msg.build, data.P, data.CHIPS, data.SLOTS, rank);
         if (!b) return send(seat, { t: 'err', code: 'build', msg: 'That frame is missing a part. Fix it in the hangar.' });
-        seat.name = cleanName(msg.name) || seat.name; seat.rank = Math.max(1, Math.min(99, msg.rank)); seat.build = b;
+        seat.name = cleanName(msg.name) || seat.name; seat.rank = rank; seat.build = b;
         if (phase !== 'lobby' && !seat.loaded) sendStart(seat);
         return announce();
       }

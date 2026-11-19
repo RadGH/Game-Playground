@@ -21,8 +21,8 @@ makers looks odd on purpose. Mechs can be drones (no pilot).
 
 ## Parts (`data/parts.json` — the game reads this same file)
 
-116 parts: per maker 3 heads, 3 cores, 3 arms, 3 boosters, 3–4 legs, 2 generators, 2 coolers, 2 CPUs (86 frame
-parts) + 30 weapons (7–8 per maker). Every part: `{ id, name, slot, maker, class, tier, weight, energy, heat, cost, … }`
+172 parts: per maker 5 heads, 5 cores, 5 arms, 5 boosters, 5–6 legs, 2 generators, 2 coolers, 2 CPUs (126 frame
+parts) + 46 weapons (11–12 per maker; 16 added in Overdrive Frame round 7). Every head / core / arms / booster / legs part carries `line` — its frame line. Every part: `{ id, name, slot, maker, class, tier, weight, energy, heat, cost, … }`
 plus its slot's numbers — armour parts `ap` + `res` (% resisted per damage type); head `scan`, `stability`; core
 `supply` (% of generator output), `boostEff`, `stability`; arms `aim`, `recoil`, `melee`, `handLoad`; legs `type`,
 `speed`, `jump`, `carry`, `turn`, `stability` (`hoverTime` on hover); booster `thrust`, `qbThrust`, `qbCost`,
@@ -31,12 +31,42 @@ plus its slot's numbers — armour parts `ap` + `res` (% resisted per damage typ
 (one | two), `type` (kinetic | energy | explosive | fire | electric), `damage`, `rate`, `range`, `ammo`, `mag`,
 `reload`, `heatPerShot`, `shotEnergy`, `lock` (none | aim | homing | multi), `impact`, and extras (`salvo`, `pellets`,
 `blast`, `chain`, `heal`, `block`, `drones`, `turrets`, `mines`, `burn`, `charge`, `pierce`, `melee`).
+Round 7 kinds (weapons that do something other than shoot bullets — models in `js/parts/weapons.js`, numbers in the game's
+`js/sim/weapon-kinds.js`): sweep lance, prism laser, orbital lance, wave scythe, rift needler, cluster mortar, gravity well
+launcher, cryo projector, arc coil, seeker orbs, storm caller, nanite sprayer, firepot lobber, returning saw disc, ricochet
+gun, spark carbine. `elementTypes` (cryo, void) are weapon-only damage types: armour carries no resistance to them.
+Effect fields a weapon part may carry: `ricochet`, `chainJumps` + `chainChance`, `seek`, `echo`, `wellRadius` +
+`wellTime` + `wellPull` + `wellDps`, `cluster`, `napalm`, `leech`, `overkill` (units in the file's `about`).
 Weapon kinds: rifle, machine gun, shotgun, laser rifle, pulse gun, laser blade, pile driver, buzzsaw, shield (slab and
 energy petals), single / salvo / vertical missile pods, homing swarm pods, grenade launcher, mortar, railgun, gatling,
 sniper cannon, flamethrower, chain lightning, plasma cannon, repair beam, drone bay, mine layer, turret deployer, rivet gun.
 `js/stats.js` adds a build up (pure, the game's sim uses it too): load vs carry limit (overload slows every move),
 energy draw vs generator output × core supply, heat (idle + full fire + boosting vs cooling → seconds to overheat),
 resistances weighted by armour, damage per second (salvos, pellets and reloads counted), and a list of problems.
+
+## Frame lines (`data/lines.json`)
+
+Owner (2026-11-18, Overdrive Frame round 7): "I would like each faction to have multiple mechs, not just one frame."
+A **line** is a matching head / core / arms / booster / legs set with its own silhouette and role inside its maker's
+shape language. `lines.json` lists every line `{ id, maker, name, tier, legType, isNew, parts, look, role,
+suggestedBonus }` — `suggestedBonus` is a set-bonus idea for wearing 3+ parts of the line (null for legs-only lines).
+The three original lines per maker (Wisp / Stride / Halberd …) are the same drawer at three sizes; round 7 added two
+clearly different lines per maker (each part keeps its numbers inside the existing bands of its slot):
+
+| Maker | Line | Tier | Legs | Look | Leaning |
+|---|---|---|---|---|---|
+| Celerity | Vantage | 2 | bird | sensor-mast head, dorsal blade, scoped arms, tail-fin booster, stilt legs with vanes | scan, aim, jump |
+| Celerity | Rapier | 3 | two legs | crested one-slit helm, wasp-waisted V chest with coat-tail fins, tonfa blades, X booster, spiked legs | melee, quick boost, turn |
+| Brannoch | Redoubt | 3 | four legs | periscope bunker head, casemate core with sandbags, mantlet arms, braced legs on pads | armour, stability, recoil |
+| Brannoch | Breaker | 2 | treads | caged welding-mask head, wedge prow, ram shoulders + big fists, dozer blade | melee, charge boost |
+| Calyx | Bloom | 1 | hover | flower head, pod-cluster core, halo shield booster, ring of floating seed pods | energy supply, cool running, hover |
+| Calyx | Sickle | 3 | bird | triangle mantis head, hunched thorax + abdomen, scythe forearms, wing-case booster | melee, speed, turn |
+| Patchwork | Hauler | 2 | treads | crane-cab head with beacon, skip-bin core, crane jib + winch arms, exhaust stack, forklift tines | carry, hand load |
+| Patchwork | Pogo | 1 | bird | bucket head with traffic-light eye, barrel core with a flag, scaffold-pole arms, pogo-spring legs | jump, cheap boosts |
+
+New looks come from knobs on the shared drawers (`limbs.js`: arm `shoulder` / `forearm` extras in `SHOULDER` /
+`FOREARM`, biped `spike`, bird-leg `vanes` / `pogo` / `shovel`, quad `bunker` / `pads`, treads `dozer` / `forks`,
+hover `pods`) and new head / core / booster drawers in each maker file. The Line-up shows one card per line.
 
 ## How it works
 
@@ -83,7 +113,8 @@ composeMech(ctx, layers, legDir, aimDir, { legs: ['walk', 3], upper: ['fire-R', 
   output, heat, targeting, arms, each weapon), Random build (R — fits its legs; uses the maker filter), Random paint (P),
   Copy settings (C — the build JSON for Claude), Starter build.
 - **Parts sheet**: every part of a slot side by side, on your mech (framed on that part) or alone; Fit to my mech.
-- **Line-up**: each maker's light / medium / heavy frame in factory paint, plus each other leg type it makes.
+- **Line-up**: one card per frame line (its own parts in factory paint, with its role), plus each maker's other legs.
+- Part lists name each part's line ("Celerity · Vantage line · Light").
 - Controller: d-pad / left stick move the highlight, A presses, B closes a list; right stick aims; LB / RB turn the
   legs; X random build, Y random paint, Start play / pause, Back copy. Key hints follow the device.
 - `window.mechkit = { state, PARTS, MAKER, mb, layers, composeMech, mechLayers, setBuild, equip, buildStats, showView, redraw }`.
@@ -91,12 +122,14 @@ composeMech(ctx, layers, legDir, aimDir, { legs: ['walk', 3], upper: ['fire-R', 
 ## Tests
 
 - `tests/parts.test.js` (node, in `npm run test:unit`): data complete and in range, 3+ per visible slot per maker,
+  every frame part in a described line (and nothing else), 2+ new full lines per maker on different leg types, new
+  lines at every tier, new parts inside the existing number bands,
   every brief weapon kind and damage type, every id has a visual, no banned names, build totals = sum of parts,
   overload / energy / two-hander problems reported, random builds fit, dps counts salvos and reloads.
 - `tests/mechkit.spec.js` (Playwright; run alone under the lock): every part builds and bakes (alone and fitted, weapons
   have muzzles); **alignment** — for every legs part × animation × frame × 16 directions the hip pixel matches the bake
   camera's own projection and the socket touches the legs' geometry, marker bakes prove the hip pixel / core attach
-  pixel / arm shoulder land where the pictures say (≤ 1 px), and composeMech puts every core on every legs part's hip;
+  pixel / arm shoulder land where the pictures say (≤ 1 px; every arms part on its own line's core), and composeMech puts every core on every legs part's hip;
   paint changes only masked pixels; the page works with zero console errors at 1280×800 and 390×844.
 
 ## Files
@@ -104,6 +137,7 @@ composeMech(ctx, layers, legDir, aimDir, { legs: ['walk', 3], upper: ['fire-R', 
 | File | What |
 |---|---|
 | `data/makers.json`, `data/parts.json` | The makers and every part's stats |
+| `data/lines.json` | Frame lines: look, role, set-bonus idea, parts |
 | `js/data.js` | Loads the JSON (fetch + top-level await; no import attributes) |
 | `js/parts/kit.js` | Geometry cache, maker materials + paint regions, the maker shape language, IK |
 | `js/parts/limbs.js` | Leg drawers per leg type + the arm drawer, dressed per maker |

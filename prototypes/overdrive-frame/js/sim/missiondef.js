@@ -5,7 +5,8 @@ import { makeHangarMap, makeRangeMap } from './hangarmap.js';
 
 // trees and rock are never stand-in demolition targets ("bring down the strongpoints" picking a pine stand) — Red Mesa marks
 // its rock `natural`; the forest's and the snowfield's woods and ridges are listed here (round 6)
-const NATURAL = new Set(['forest-pine', 'forest-pines', 'forest-thicket', 'forest-rock', 'forest-crag', 'snow-pines', 'snow-spruce', 'snow-ridge']);
+const NATURAL = new Set(['forest-pine', 'forest-pines', 'forest-thicket', 'forest-rock', 'forest-crag', 'snow-pines', 'snow-spruce', 'snow-ridge',
+  'qt-tree', 'qt-grove', 'qt-planter']);   // round 7 city layouts: park trees and planters (their lots are also marked `natural`)
 
 export function buildMissionDef(m, opts = {}) {
   // the hangar hub and the test range: fixed maps, no waves or objectives, never end (no drop-in either)
@@ -20,7 +21,7 @@ export function buildMissionDef(m, opts = {}) {
   const pick = ({ recipe, count }) => {
     const size = l => l.w * l.d * 10 + l.h;
     let list = map.lots.filter(l => l.recipe === recipe && !used.has(l.id)).sort((a, b) => size(b) - size(a));
-    if (list.length < count) list = list.concat(map.lots.filter(l => !used.has(l.id) && !list.includes(l) && l.w * l.d >= 2 && !l.natural && !NATURAL.has(l.recipe)).sort((a, b) => size(b) - size(a)));   // natural: rock (Red Mesa) is never a stand-in target
+    if (list.length < count) list = list.concat(map.lots.filter(l => !used.has(l.id) && !list.includes(l) && l.w * l.d >= 2 && !l.natural && !l.prop && !NATURAL.has(l.recipe)).sort((a, b) => size(b) - size(a)));   // natural: rock (Red Mesa) is never a stand-in target; prop (round 7): freight cars, containers, cranes
     const out = list.slice(0, count); out.forEach(l => used.add(l.id)); return out.map(l => l.id);
   };
   const objectives = (m.objectives || []).map(o => {

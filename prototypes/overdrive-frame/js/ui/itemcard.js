@@ -2,12 +2,15 @@
 // lines — loadout.partNum, the same numbers the mission uses), bonus lines, and, when something is fitted there, the
 // change to that number (green better, red worse). Lessons: stats with numbers, rounded, no code names.
 import { fmt } from '../../../../shared/format.js';
-import { partNum, RARITY_BY_ID, mechStats } from '../sim/loadout.js';
+import { partNum, RARITY_BY_ID, mechStats, plainSpec } from '../sim/loadout.js';
+import { FX_TEXT, KIND_LABELS } from '../sim/weapon-kinds.js';
 import { lineText } from '../sim/loot.js';
+import { MOD_BY_ID } from '../sim/mods.js';
+import { SETS, SET_NEED } from '../sim/frames.js';
 
 export const SLOT_LABEL = { head: 'Head', core: 'Core', arms: 'Arms', legs: 'Legs', booster: 'Booster', generator: 'Generator', cooling: 'Cooling', cpu: 'CPU', weapon: 'Weapon' };
 export const PLACE_LABEL = { w0: 'Left arm', w1: 'Right arm', w2: 'Left shoulder', w3: 'Right shoulder' };
-const TYPE = { kinetic: 'Kinetic', energy: 'Energy', explosive: 'Explosive', fire: 'Fire', electric: 'Electric' };
+const TYPE = { kinetic: 'Kinetic', energy: 'Energy', explosive: 'Explosive', fire: 'Fire', electric: 'Electric', cryo: 'Cryo', void: 'Void' };
 const LEGS = { biped: 'Two legs', reverse: 'Reverse joint', quad: 'Four legs', treads: 'Treads', hover: 'Hover' };
 
 /** The numbers a card shows per slot: [key, label, unit, decimals, lowerIsBetter]. */
@@ -23,6 +26,18 @@ const NUMS = {
   cpu: [['firmware', 'Firmware', '', 0], ['lockCount', 'Lock targets', '', 0], ['lockSpeed', 'Lock time', ' s', 2, 1], ['lockRange', 'Lock range', ' m', 0], ['weight', 'Weight', ' t', 1, 1]],
 };
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/** What a weapon does by its own design (round 7 weapons: bounces, wells, bomblets…), before any mod. */
+function builtInHtml(p) {
+  const sp = plainSpec(p), lines = Object.entries(FX_TEXT).filter(([k]) => sp[k] != null && sp[k] !== 0).map(([k, f]) => f(sp[k]));
+  return lines.length ? `<ul class="of-item-builtin">${lines.map(l => `<li>${esc(l)}</li>`).join('')}</ul>` : '';
+}
+
+/** A part's mods (round 7): each a named line that changes how the part works. */
+export function modsHtml(it) {
+  const list = (it?.mods || []).map(id => MOD_BY_ID[id]).filter(Boolean);
+  return list.length ? `<ul class="of-item-mods">${list.map(m => `<li><b>${esc(m.name)}</b> ${esc(m.text)}</li>`).join('')}</ul>` : '';
+}
 
 export function itemName(P, it) { return P[it.id]?.name || 'Unknown part'; }
 
@@ -40,11 +55,14 @@ export function itemCard(g, it, { vs = null, extra = '', compact = false, tag = 
     }
     return `<div><dt>${label}</dt><dd>${fmt(v, { decimals: dec })}${unit}${d}</dd></div>`;
   }).join('');
-  const kind = p.slot === 'weapon' ? `${TYPE[p.type] || ''} · ${p.hand === 'two' ? 'two-handed' : p.mount === 'shoulder' ? 'shoulder' : 'arm'}` : p.slot === 'legs' ? LEGS[p.type] || '' : '';
+  const kind = p.slot === 'weapon' ? `${KIND_LABELS[p.kind] ? KIND_LABELS[p.kind] + ' · ' : ''}${TYPE[p.type] || ''} · ${p.hand === 'two' ? 'two-handed' : p.mount === 'shoulder' ? 'shoulder' : 'arm'}` : p.slot === 'legs' ? LEGS[p.type] || '' : '';
   return `<article class="of-item${compact ? ' of-item-sm' : ''}" style="--rc:${r.colour}">
     <header><b>${esc(p.name)}</b>${tag}<small>${r.label} · ${mk?.short || ''} ${SLOT_LABEL[p.slot]}${kind ? ' · ' + kind : ''}${p.crafted ? ' · crafted' : ''}</small></header>
     <dl class="of-item-nums">${rows}</dl>
-    ${it.rolls?.length ? `<ul class="of-item-rolls">${it.rolls.map(x => `<li>${lineText(x)}</li>`).join('')}</ul>` : ''}
+    ${p.slot === 'weapon' ? builtInHtml(p) : ''}
+    ${modsHtml(it)}
+    ${it.rolls?.length ? `<ul class="of-item-rolls">${it.rolls.map(x => `<li>${lineText(x, p.slot)}</li>`).join('')}</ul>` : ''}
+    ${!compact && p.line && SETS[p.line] ? `<p class="of-item-set"><b>${esc(SETS[p.line].name)} frame</b> — wear ${SET_NEED} of its parts: ${esc(SETS[p.line].text)}</p>` : ''}
     ${!compact && p.blurb ? `<p class="of-item-blurb">${esc(p.blurb)}</p>` : ''}
     ${extra}
   </article>`;

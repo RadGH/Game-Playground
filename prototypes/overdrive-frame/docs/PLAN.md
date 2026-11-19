@@ -13,13 +13,13 @@ Sandbox (playground prototype). Everything the owner said: `docs/OWNER-BRIEF.md`
 | View | Arcline's iso angle, fixed. No view turning in v1; buildings in front of a mech fade see-through |
 | Art | **Fully prerendered**: every mech part, enemy, building, wreck is a three.js model baked to sprites (City Kit baker). No live 3D in play |
 | Player mech | Layered baked parts stacked at run time; legs face movement, upper body faces aim; paint = baked colour mask |
-| Makers | 4 part makers, each with its own look (sleek, chunky, rounded, scrap-built) and design leaning |
+| Makers | 4 part makers, each with its own look (sleek, chunky, rounded, scrap-built) and design leaning. Round 7: each maker has several **frame lines** (mechs) — 3 parts of one line switch on its set bonus (`js/sim/frames.js`); a new pilot starts with ONE maker's starter |
 | Slots | Head, core, arms, legs, booster, generator, cooling, CPU (fire control); 4 weapon slots (L/R arm, L/R shoulder) + hangar swap slot |
 | Movement | Boost, quick boost, jump + hover, energy bar, **heat bar**, leg types (biped, reverse-joint, quad, treads, hover), weight. **No wall kick** |
 | Aiming | Free aim (mouse / right stick) + homing weapons lock inside an aim circle + a sticky lock-on button |
 | Weapons | Wide list (rifles, shotguns, lasers, blades, missiles, swarm pods, mortars, rail, flame, chain lightning, plasma, shields, deployables, drones, repair beam). Overload = a late "ultimate" part. Healing is a niche, never a required role |
-| Upgrades | **Firmware chips** slotted into the CPU's capacity (e.g. two-handed weapon in one arm); **maker licences** from reputation. No pilot implants |
-| Loot | Diablo-style rolled parts (Voidwright's roller), rarity Common → Refined → Rare → Prototype → Experimental, rare kept rare early. Each player own loot |
+| Upgrades | **Firmware chips** slotted into the CPU's capacity (e.g. two-handed weapon in one arm). **Frame Tuning** (round 7): a mech-themed talent tree — four boards, points from rank + story, free re-tune, per build — plus one active **skill** per build and a **repair kit** (30% at Mk I, upgraded at the workshop). Maker licences + reputation **removed** (owner 2026-11-18: rep went to all four makers at once). No pilot implants |
+| Loot | Diablo-style rolled parts (Voidwright's roller), rarity Common → Refined → Rare → Prototype → Experimental. Round 7 (owner: "more rare parts … modifiers that change them functionally"): **mods** on Refined (sometimes) and Rare+ (always) that change how a part works (`js/sim/mods.js`); the dealer never sells Commons; drops a step rarer. Each player own loot |
 | Materials | **Simple**: Scrap / Alloy / Exotic + one boss material per chapter. Nothing else |
 | Crafting | Base recipes known; more unlock by level/progress (shown locked); **secret recipes** hidden until learned (odd weapons, tweaked crafted versions) |
 | Damage | Damage types + resistances, status effects, weak points, rounded damage numbers, **crit tiers past 100%** (late game) |

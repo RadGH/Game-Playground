@@ -13,6 +13,7 @@ export function installTouch(controls, root, { mode = 'fight', overload = false 
     <div class="of-tbtns">
       <button type="button" data-act="quick">Dash</button><button type="button" data-act="jump">Jump</button>
       <button type="button" data-act="boost">Boost</button><button type="button" data-act="lock">Lock</button>
+      <button type="button" data-act="kit" class="of-tbtn-kit">Fix</button><button type="button" data-act="skill" class="of-tbtn-skill">Skill</button>
       <button type="button" data-act="fireSL">Left pod</button><button type="button" data-act="fireSR">Right pod</button>${overload ? '<button type="button" data-act="overload" class="of-tbtn-od">Overload</button>' : ''}
     </div>`;
   root.append(el);

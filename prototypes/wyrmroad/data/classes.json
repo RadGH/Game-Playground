@@ -1,0 +1,104 @@
+{
+  "_doc": "The four heroes and every move/spell. A move: anim (Chibi 2.6 clip), t [wind-up, hitting, recovery] seconds, dmg (× the hero's power), reach (m in front), depth (m up/down either side), kb (push m/s), up (launch m/s), down (knocks down), stun (s of flinch), guardBreak, hits (hits spread over the hitting time), mp (mana), move (m/s the hero slides forward while it plays). Spells add shot / aoe / self effects (js/sim/moves.js reads every field). Levels: hp/mp/power grow per level (perLevel).",
+  "perLevel": { "hp": 0.09, "mp": 0.05, "power": 0.08 },
+  "levels": [0, 60, 160, 320, 540, 840, 1220, 1700, 2300, 3000, 3850, 4850],
+  "classes": {
+    "vanguard": {
+      "name": "Vanguard", "line": "Heavy armour and a two-handed blade. Slow swings that send crowds flying.",
+      "hp": 160, "mp": 60, "power": 15, "def": 14, "speed": 0.94,
+      "weapon": "great", "offhand": false,
+      "look": { "body": { "build": "broad", "skin": "#e7b48f" }, "hair": { "id": "short", "color": "#5a3a22" } },
+      "combo": [
+        { "anim": "slash", "t": [0.16, 0.1, 0.18], "dmg": 1.0, "reach": 1.9, "kb": 1.5, "stun": 0.35, "move": 1.2 },
+        { "anim": "slashBack", "t": [0.15, 0.1, 0.2], "dmg": 1.1, "reach": 1.9, "kb": 1.5, "stun": 0.38, "move": 1.2 },
+        { "anim": "overhead", "t": [0.26, 0.12, 0.34], "dmg": 2.0, "reach": 2.1, "kb": 7, "up": 4, "down": true, "move": 1.6 }
+      ],
+      "heavy": { "anim": "sweep", "t": [0.42, 0.14, 0.4], "dmg": 2.4, "reach": 2.4, "depth": 1.0, "kb": 8, "up": 5, "down": true, "guardBreak": true, "move": 0.8 },
+      "air": { "anim": "slam", "t": [0.08, 0.3, 0.2], "dmg": 1.6, "reach": 1.7, "kb": 4, "down": true },
+      "dash": { "anim": "lunge", "t": [0.06, 0.22, 0.3], "dmg": 1.6, "reach": 1.8, "kb": 6, "up": 3, "down": true, "move": 7 },
+      "grabHit": { "anim": "kick", "t": [0.1, 0.08, 0.16], "dmg": 0.8 },
+      "spells": ["ground_slam", "war_shout", "iron_skin"]
+    },
+    "duelist": {
+      "name": "Duelist", "line": "Two blades and light leather. The fastest hands on the road.",
+      "hp": 120, "mp": 70, "power": 10, "def": 7, "speed": 1.1,
+      "weapon": "blade", "offhand": "blade",
+      "look": { "body": { "build": "slim", "skin": "#c98e66" }, "hair": { "id": "ponytail", "color": "#1d1a22" } },
+      "combo": [
+        { "anim": "jab", "t": [0.08, 0.07, 0.1], "dmg": 0.8, "reach": 1.5, "kb": 1, "stun": 0.28, "move": 1 },
+        { "anim": "offSlash", "t": [0.08, 0.07, 0.1], "dmg": 0.8, "reach": 1.5, "kb": 1, "stun": 0.28, "move": 1 },
+        { "anim": "crossSlash", "t": [0.12, 0.12, 0.24], "dmg": 1.7, "reach": 1.7, "kb": 6.5, "up": 3.5, "down": true, "hits": 2, "move": 2 }
+      ],
+      "heavy": { "anim": "spinSweep", "t": [0.26, 0.24, 0.3], "dmg": 1.9, "reach": 1.8, "depth": 1.0, "back": true, "kb": 5, "up": 4, "down": true, "guardBreak": true, "hits": 3 },
+      "air": { "anim": "flurry", "t": [0.05, 0.25, 0.15], "dmg": 1.2, "reach": 1.5, "kb": 2, "hits": 3, "stun": 0.3 },
+      "dash": { "anim": "thrust", "t": [0.05, 0.2, 0.26], "dmg": 1.4, "reach": 1.7, "kb": 5, "down": true, "move": 9 },
+      "grabHit": { "anim": "stab", "t": [0.07, 0.06, 0.12], "dmg": 0.7 },
+      "spells": ["shadow_step", "blade_fan", "hundred_cuts"]
+    },
+    "arcanist": {
+      "name": "Arcanist", "line": "A staff, a robe and fire at the fingertips. Fragile up close, deadly at range.",
+      "hp": 105, "mp": 120, "power": 11, "def": 5, "speed": 1.0,
+      "weapon": "staff", "offhand": false,
+      "look": { "body": { "build": "slim", "skin": "#f0c9a8" }, "hair": { "id": "long", "color": "#d8d0c4" } },
+      "combo": [
+        { "anim": "jab", "t": [0.1, 0.08, 0.14], "dmg": 0.8, "reach": 1.8, "kb": 1.2, "stun": 0.3, "move": 0.8 },
+        { "anim": "slash", "t": [0.11, 0.08, 0.16], "dmg": 0.9, "reach": 1.9, "kb": 1.2, "stun": 0.3, "move": 0.8 },
+        { "anim": "castStaff", "t": [0.18, 0.1, 0.3], "dmg": 1.4, "reach": 1.4, "kb": 3, "stun": 0.3,
+          "shot": { "speed": 13, "range": 7, "dmg": 1.1, "kb": 6, "up": 3, "down": true, "look": "spark" } }
+      ],
+      "heavy": { "anim": "castPoint", "t": [0.36, 0.08, 0.36], "dmg": 0, "reach": 0, "guardBreak": true,
+        "shot": { "speed": 10, "range": 9, "dmg": 2.2, "kb": 7, "up": 4, "down": true, "pierce": true, "look": "arcane" } },
+      "air": { "anim": "castPoint", "t": [0.08, 0.1, 0.2], "dmg": 0, "reach": 0,
+        "shot": { "speed": 13, "range": 6, "dmg": 1.0, "kb": 3, "dive": true, "look": "spark" } },
+      "dash": { "anim": "thrust2h", "t": [0.06, 0.2, 0.3], "dmg": 1.2, "reach": 1.9, "kb": 6, "down": true, "move": 7.5 },
+      "grabHit": { "anim": "bash", "t": [0.1, 0.08, 0.16], "dmg": 0.7 },
+      "spells": ["fire_bolt", "frost_ring", "meteor"]
+    },
+    "warden": {
+      "name": "Warden", "line": "Mace, shield and the old light. Holds the line and keeps friends standing.",
+      "hp": 145, "mp": 90, "power": 12, "def": 12, "speed": 0.98,
+      "weapon": "mace", "offhand": "shield",
+      "look": { "body": { "build": "average", "skin": "#8d5a3c" }, "hair": { "id": "bob", "color": "#a8642a" } },
+      "blockBonus": 0.1,
+      "combo": [
+        { "anim": "smash", "t": [0.13, 0.09, 0.16], "dmg": 1.0, "reach": 1.6, "kb": 1.5, "stun": 0.34, "move": 1 },
+        { "anim": "bash", "t": [0.12, 0.09, 0.16], "dmg": 0.9, "reach": 1.4, "kb": 2.5, "stun": 0.42, "move": 1.2 },
+        { "anim": "uppercut", "t": [0.2, 0.1, 0.3], "dmg": 1.8, "reach": 1.7, "kb": 4, "up": 7, "down": true, "move": 1.4 }
+      ],
+      "heavy": { "anim": "hack", "t": [0.36, 0.12, 0.36], "dmg": 2.2, "reach": 1.9, "kb": 8, "up": 3, "down": true, "guardBreak": true, "move": 1 },
+      "air": { "anim": "smash", "t": [0.06, 0.28, 0.2], "dmg": 1.5, "reach": 1.6, "kb": 3, "down": true },
+      "dash": { "anim": "bash", "t": [0.05, 0.22, 0.3], "dmg": 1.3, "reach": 1.6, "kb": 7, "down": true, "move": 7 },
+      "grabHit": { "anim": "punch", "t": [0.09, 0.07, 0.14], "dmg": 0.8 },
+      "spells": ["holy_light", "smite", "sanctuary"]
+    }
+  },
+  "spells": {
+    "ground_slam": { "name": "Ground Slam", "level": 1, "mp": 28, "cd": 4, "anim": "slam", "t": [0.3, 0.1, 0.4],
+      "aoe": { "at": "self", "r": 3.0, "dmg": 2.2, "kb": 6, "up": 6, "down": true }, "fx": "quake" },
+    "war_shout": { "name": "War Shout", "level": 4, "mp": 35, "cd": 14, "anim": "cheer", "t": [0.2, 0.1, 0.4],
+      "aoe": { "at": "self", "r": 4.0, "dmg": 0, "stun": 1.2 }, "buff": { "who": "party", "r": 8, "power": 0.3, "time": 8 }, "fx": "shout" },
+    "iron_skin": { "name": "Iron Skin", "level": 8, "mp": 40, "cd": 18, "anim": "guard", "t": [0.15, 0.05, 0.25],
+      "buff": { "who": "self", "guard": 0.5, "steady": true, "time": 7 }, "fx": "iron" },
+
+    "shadow_step": { "name": "Shadow Step", "level": 1, "mp": 22, "cd": 3, "anim": "lunge", "t": [0.05, 0.15, 0.25],
+      "step": { "dist": 4.5, "dmg": 1.6, "kb": 3, "stun": 0.8 }, "fx": "shadow" },
+    "blade_fan": { "name": "Blade Fan", "level": 4, "mp": 30, "cd": 6, "anim": "throw", "t": [0.15, 0.05, 0.3],
+      "fan": { "n": 5, "spread": 1.6, "speed": 14, "range": 9, "dmg": 1.0, "kb": 2, "stun": 0.4, "look": "blade" }, "fx": "fan" },
+    "hundred_cuts": { "name": "Hundred Cuts", "level": 8, "mp": 45, "cd": 16, "anim": "flurry", "t": [0.1, 1.0, 0.3],
+      "dmg": 0.55, "reach": 2.2, "depth": 1.0, "hits": 10, "stun": 0.35, "lastDown": true, "steady": true, "fx": "cuts" },
+
+    "fire_bolt": { "name": "Fire Bolt", "level": 1, "mp": 18, "cd": 1.2, "anim": "castPoint", "t": [0.18, 0.05, 0.25],
+      "shot": { "speed": 15, "range": 10, "dmg": 2.0, "kb": 5, "up": 3, "down": true, "burst": 1.6, "look": "fire" }, "fx": "fire" },
+    "frost_ring": { "name": "Frost Ring", "level": 4, "mp": 34, "cd": 9, "anim": "channel", "t": [0.3, 0.1, 0.3],
+      "aoe": { "at": "self", "r": 3.6, "dmg": 1.0, "freeze": 2.2 }, "fx": "frost" },
+    "meteor": { "name": "Meteor", "level": 8, "mp": 55, "cd": 16, "anim": "castStaff", "t": [0.4, 0.1, 0.4],
+      "aoe": { "at": "ahead", "ahead": 5, "r": 3.2, "delay": 0.9, "dmg": 4.5, "kb": 8, "up": 8, "down": true }, "fx": "meteor" },
+
+    "holy_light": { "name": "Holy Light", "level": 1, "mp": 30, "cd": 6, "anim": "pray", "t": [0.3, 0.1, 0.3],
+      "heal": { "r": 6, "amount": 0.3 }, "fx": "heal" },
+    "smite": { "name": "Smite", "level": 4, "mp": 28, "cd": 5, "anim": "castPoint", "t": [0.25, 0.1, 0.3],
+      "aoe": { "at": "foe", "ahead": 7, "r": 1.6, "delay": 0.35, "dmg": 2.6, "up": 9, "down": true }, "fx": "smite" },
+    "sanctuary": { "name": "Sanctuary", "level": 8, "mp": 50, "cd": 20, "anim": "pray", "t": [0.3, 0.1, 0.3],
+      "zone": { "r": 3.4, "time": 7, "heal": 0.05, "slow": 0.5 }, "fx": "sanctuary" }
+  }
+}

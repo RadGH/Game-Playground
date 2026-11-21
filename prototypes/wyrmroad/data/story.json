@@ -1,0 +1,144 @@
+{
+  "_doc": "Story scenes and lines. A scene is shown between chapters: a list of [speaker, text] lines, a place and who stands on stage. 'hero' = the leading player's hero (their own name is shown). Lines (banter + boss lines) are said during play in a speech strip at the top of the screen, never over the fight. choice: the last scene's two endings. speakers: who each speaker is and how they look (a foe/boss id to borrow the 3D look from, or a Chibi look).",
+  "speakers": {
+    "aldric": { "name": "Brother Aldric", "look": { "body": { "skin": "#f6d7bd" }, "hair": { "id": "long", "color": "#e8e4dc" }, "facialHair": { "id": "long", "color": "#e8e4dc" }, "top": { "id": "cassock", "color": "#4a4236", "color2": "#c6e05a" }, "shoes": { "id": "sandals", "color": "#6a5a44" }, "decor": { "id": "g5_hexlantern", "color": "#f2d070" }, "held": { "id": "staff_crook", "color": "#7a5a3a" } } },
+    "lamplord": { "name": "The Lamplord", "boss": "lamplord" },
+    "grell": { "name": "Grell", "boss": "grell" },
+    "maud": { "name": "Maud", "boss": "maud" },
+    "vessa": { "name": "Captain Vessa", "boss": "vessa" },
+    "corwen": { "name": "High Zealot Corwen", "boss": "corwen" },
+    "golem": { "name": "The Lantern Golem", "boss": "golem_boss" },
+    "tamsin": { "name": "Tamsin", "look": { "body": { "skin": "#e7b48f", "form": "fem" }, "hair": { "id": "curly_bob", "color": "#c86a2a" }, "top": { "id": "apron", "color": "#8a6a4a" }, "bottom": { "id": "long_skirt", "color": "#5a4a3a" }, "shoes": { "id": "boots", "color": "#3a2a1a" } } },
+    "wyrm": { "name": "The Wyrm", "voice": "deep" }
+  },
+  "scenes": {
+    "ch1_intro": { "place": "Millbrook, at dawn", "cast": ["aldric", "tamsin"], "lines": [
+      ["tamsin", "They came over the mill bridge before the cocks crowed. Rook Gang, all of them."],
+      ["tamsin", "They didn't want our grain. They pulled the bell-stone right out of the square."],
+      ["aldric", "Then the road is open, and the old thing under it is restless."],
+      ["hero", "The stone's just a stone, Brother. Isn't it?"],
+      ["aldric", "Every village on the Wyrmroad keeps one. Bring it back, child. I taught you to fight for days like this."],
+      ["aldric", "And mind your temper. A thief can still be talked to."]
+    ] },
+    "ch1_outro": { "place": "The mill bridge", "cast": ["grell"], "lines": [
+      ["grell", "Enough! You hit like a mule, I'll give you that."],
+      ["hero", "The stone. Now."],
+      ["grell", "You think you're the hero of this, don't you? Ask your priest who's paying for what."],
+      ["grell", "Rooks! Out, over the river!"],
+      ["hero", "He's running for Thornwood. With the stone."]
+    ] },
+    "ch2_intro": { "place": "The edge of Thornwood", "cast": ["aldric"], "lines": [
+      ["aldric", "The Rooks have gone to ground in the old forest. There's a witch in there who gives them shelter."],
+      ["hero", "Grell said to ask you who's paying for what."],
+      ["aldric", "Thieves say anything when they're losing. Go. Bring the stone home."]
+    ] },
+    "ch2_outro": { "place": "The Briar Hollow", "cast": ["maud"], "lines": [
+      ["maud", "Stop. Stop! You've made your point, little blade."],
+      ["maud", "Look at the chest the Rooks left. Look at the seal on it."],
+      ["hero", "A lantern. That's the Order's seal."],
+      ["maud", "Someone is paying good silver for those stones. And the stones are the only thing holding it down."],
+      ["hero", "Holding what down?"],
+      ["maud", "Walk east, down to the docks at Saltmere. You'll see who comes for them."]
+    ] },
+    "ch3_intro": { "place": "Saltmere Docks, evening", "cast": ["grell"], "lines": [
+      ["grell", "You again. Fine. Since you're here, you might as well see it."],
+      ["grell", "Seven bell-stones, crated under the fish. We've been stealing them before the Order can."],
+      ["hero", "The Order? Brother Aldric's Order?"],
+      ["grell", "Lantern Guard's coming up the pier now. Pick a side, farm-hand."]
+    ] },
+    "ch3_outro": { "place": "The burning pier", "cast": ["vessa", "grell"], "lines": [
+      ["vessa", "You fool. The Lamplord promised you'd bring the stones to us yourself."],
+      ["hero", "The Lamplord?"],
+      ["vessa", "Ask your teacher what he calls himself at Greyspire."],
+      ["grell", "She's gone off the end of the pier. Come on. If your priest is who I think he is, you'll want me with you."]
+    ] },
+    "ch4_intro": { "place": "The road to Greyspire Abbey", "cast": ["aldric", "grell"], "lines": [
+      ["aldric", "You found the stones. All seven. You've done so well."],
+      ["hero", "Brother, the Guard said you are the Lamplord."],
+      ["aldric", "I'm sorry, child. I needed someone who wouldn't ask questions until the work was done."],
+      ["lamplord", "Take them up to the lantern. And keep my student busy."],
+      ["grell", "Told you. Told you!"]
+    ] },
+    "ch4_outro": { "place": "The lantern tower", "cast": ["lamplord"], "lines": [
+      ["lamplord", "Too late. Seven stones, seven chains, and every one of them is mine now."],
+      ["lamplord", "When the wyrm wakes it will wake on a leash. My leash."],
+      ["hero", "You'll kill everyone on the road!"],
+      ["lamplord", "Only the ones standing on it."]
+    ] },
+    "ch5_intro": { "place": "The Spine", "cast": ["grell"], "lines": [
+      ["grell", "The road's moving. The whole road is moving!"],
+      ["wyrm", "...CHAINS. ALWAYS CHAINS."],
+      ["hero", "It's talking."],
+      ["grell", "Of course it's talking. Climb!"]
+    ] },
+    "ch5_outro": { "place": "The wyrm's shoulder", "cast": ["corwen", "grell"], "lines": [
+      ["corwen", "You don't understand. It was never asleep. It was held."],
+      ["corwen", "The first Lamplords chained it here and built a road on its back so no one would remember."],
+      ["hero", "And now Aldric wants to hold the chain himself."],
+      ["corwen", "...He told us it was a monster."],
+      ["wyrm", "THE LAST CHAIN IS AT MY CROWN. COME, SMALL ONE."]
+    ] },
+    "ch6_intro": { "place": "Crownhollow", "cast": ["lamplord"], "lines": [
+      ["lamplord", "One more stone and it's done. One more and it does whatever I say."],
+      ["hero", "You taught me a thief can still be talked to."],
+      ["lamplord", "I taught you what I needed you to know. Come here and I'll teach you one more thing."]
+    ] },
+    "ch6_outro": { "place": "The wyrm's crown", "cast": ["lamplord", "grell"], "lines": [
+      ["lamplord", "Wait. Wait! If you break the chain it will be free. Do you know what a free wyrm does?"],
+      ["wyrm", "SMALL ONE. THE CHAIN IS IN YOUR HAND."]
+    ],
+      "choice": {
+        "prompt": "The last chain is in your hand.",
+        "options": [
+          { "id": "free", "label": "Break the chain", "scene": "end_free" },
+          { "id": "hold", "label": "Take the lantern", "scene": "end_hold" }
+        ] } },
+    "end_free": { "place": "Above the Wyrmroad", "cast": ["grell", "tamsin"], "lines": [
+      ["wyrm", "FREE."],
+      ["grell", "It's... flying. The whole mountain is flying."],
+      ["tamsin", "The bells are ringing in every village. All by themselves."],
+      ["hero", "Then the road's just a road now."],
+      ["grell", "A road with a lot of Rooks on it who could use honest work. Coming?"]
+    ] },
+    "end_hold": { "place": "Crownhollow", "cast": ["grell"], "lines": [
+      ["wyrm", "...ANOTHER HAND ON THE CHAIN."],
+      ["grell", "Put it down. Put the lantern down."],
+      ["hero", "Someone has to hold it. Better me than him."],
+      ["grell", "That's what he said, too."],
+      ["wyrm", "I WILL WAIT. I AM VERY GOOD AT WAITING."]
+    ] }
+  },
+  "lines": {
+    "ch1_b1": [["hero", "Rooks! Still here, are you?"]],
+    "ch1_b2": [["tamsin", "They've taken the cart road. Go!"]],
+    "ch2_b1": [["hero", "Wolves. The Rooks must feed them."]],
+    "ch2_b2": [["maud", "Off my paths, little blade."]],
+    "ch3_b1": [["grell", "Guard on the left! Don't let them near the crates!"]],
+    "ch3_b2": [["grell", "Priests. Hit the priests first or they'll patch everyone up."]],
+    "ch4_b1": [["grell", "Zealots. They go up like lamp oil when they drop. Stand back."]],
+    "ch4_b2": [["grell", "That thing is solid stone. Knock it off its feet with something heavy."]],
+    "ch5_b1": [["wyrm", "...WHO WALKS ON ME?"]],
+    "ch5_b2": [["grell", "Hold on to something!"]],
+    "ch6_b1": [["lamplord", "Turn back, child. This is not your road."]],
+    "ch6_b2": [["wyrm", "SMALL ONE. HURRY."]],
+    "grell_start": [["grell", "Back for more? You can't have it."]],
+    "grell_phase": [["grell", "Rooks! A little help here!"]],
+    "grell_end": [["grell", "All right! All right!"]],
+    "maud_start": [["maud", "Thorn and fire, little blade."]],
+    "maud_phase": [["maud", "Up, my wolves!"]],
+    "maud_end": [["maud", "Enough. Look in the chest."]],
+    "vessa_start": [["vessa", "Lantern Guard! Take the stones!"]],
+    "vessa_phase": [["vessa", "Crossbows, on me!"]],
+    "vessa_end": [["vessa", "This isn't over."]],
+    "golem_start": [["lamplord", "Keep my student busy."]],
+    "golem_phase": [["golem", "LIGHT. MORE LIGHT."]],
+    "golem_end": [["grell", "Down it goes!"]],
+    "corwen_start": [["corwen", "For the Lamplord!"]],
+    "corwen_phase": [["corwen", "Faithful, to me!"]],
+    "corwen_end": [["corwen", "...He said it was a monster."]],
+    "lamplord_start": [["lamplord", "Come here, child."]],
+    "lamplord_phase": [["lamplord", "Then burn with it!"]],
+    "lamplord_end": [["lamplord", "No... no, it's mine..."]],
+    "revive": [["grell", "Up you get!"]]
+  }
+}

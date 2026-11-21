@@ -1,0 +1,74 @@
+{
+  "_doc": "The six chapters along the Wyrmroad. Each section is one stop-and-go fight: the screen stops when the lead hero reaches `at` (metres along the road) and releases with GO when every wave is beaten. A wave is a list of foe ids; 'id@l' comes in from the left edge (default: right). crates: x along the road, z depth (-2.6..2.6, + is toward the camera), holds 'food' | 'gold' | 'weapon:<pickup id>' | 'random'. banter: a story line id (data/story.json lines) said when the fight starts. tier: enemy strength step for this chapter (×health, ×power). ally: a story friend who fights beside a lone hero. theme: the backdrop the renderer builds (js/render/themes.js).",
+  "chapters": [
+    { "id": "millbrook", "name": "Millbrook", "sub": "The bell-stone is gone", "theme": "village", "tier": 0, "length": 150,
+      "intro": "ch1_intro", "outro": "ch1_outro", "level": 1,
+      "sections": [
+        { "at": 16, "banter": "ch1_b1", "waves": [["thug", "thug"], ["thug", "knifer"]], "crates": [{ "x": 12, "z": -1.4, "holds": "food" }] },
+        { "at": 40, "waves": [["thug", "knifer", "thug@l"], ["knifer", "knifer"]], "crates": [{ "x": 35, "z": 1.6, "holds": "weapon:pitchfork" }, { "x": 37, "z": -2, "holds": "random" }] },
+        { "at": 66, "banter": "ch1_b2", "waves": [["thug", "thug", "thug"], ["bruiser"]], "crates": [{ "x": 60, "z": 0.6, "holds": "food" }] },
+        { "at": 94, "waves": [["knifer", "knifer@l", "thug"], ["bruiser", "thug"]], "crates": [{ "x": 88, "z": -1, "holds": "random" }, { "x": 90, "z": 1.8, "holds": "gold" }] },
+        { "at": 132, "boss": "grell", "waves": [["thug", "knifer"]], "crates": [{ "x": 124, "z": 1.5, "holds": "food" }, { "x": 126, "z": -1.8, "holds": "food" }] }
+      ] },
+    { "id": "thornwood", "name": "Thornwood", "sub": "Into the old forest", "theme": "forest", "tier": 1, "length": 170,
+      "intro": "ch2_intro", "outro": "ch2_outro", "level": 3,
+      "sections": [
+        { "at": 16, "banter": "ch2_b1", "waves": [["wolf", "wolf"], ["thug", "wolf"]], "crates": [{ "x": 12, "z": 1, "holds": "food" }] },
+        { "at": 44, "waves": [["sprite", "thug", "thug"], ["knifer", "sprite", "wolf@l"]], "crates": [{ "x": 40, "z": -1.6, "holds": "weapon:log" }] },
+        { "at": 72, "banter": "ch2_b2", "waves": [["wolf", "wolf", "wolf@l"], ["bruiser", "sprite"]], "crates": [{ "x": 66, "z": 0.4, "holds": "random" }, { "x": 68, "z": 2, "holds": "food" }] },
+        { "at": 104, "waves": [["sprite", "sprite", "knifer"], ["bruiser", "wolf", "wolf"]], "crates": [{ "x": 98, "z": -2, "holds": "gold" }] },
+        { "at": 128, "waves": [["thug", "thug", "knifer@l", "sprite"], ["bruiser", "bruiser"]], "crates": [{ "x": 122, "z": 1.4, "holds": "food" }] },
+        { "at": 152, "boss": "maud", "waves": [["sprite", "wolf"]], "crates": [{ "x": 144, "z": -1.5, "holds": "food" }, { "x": 146, "z": 1.7, "holds": "food" }] }
+      ] },
+    { "id": "saltmere", "name": "Saltmere Docks", "sub": "Who are the thieves?", "theme": "docks", "tier": 2, "length": 175,
+      "intro": "ch3_intro", "outro": "ch3_outro", "level": 5,
+      "sections": [
+        { "at": 16, "banter": "ch3_b1", "waves": [["guard", "thug"], ["crossbow", "guard"]], "crates": [{ "x": 12, "z": -1.2, "holds": "food" }] },
+        { "at": 46, "waves": [["guard", "guard", "knifer@l"], ["crossbow", "crossbow", "thug"]], "crates": [{ "x": 40, "z": 1.6, "holds": "weapon:anchor" }, { "x": 42, "z": -2, "holds": "random" }] },
+        { "at": 76, "banter": "ch3_b2", "waves": [["priest", "guard", "guard"], ["crossbow", "bruiser"]], "crates": [{ "x": 70, "z": 0.8, "holds": "food" }] },
+        { "at": 106, "waves": [["guard", "crossbow", "priest", "thug@l"], ["guard", "guard", "crossbow"]], "crates": [{ "x": 100, "z": -1.4, "holds": "gold" }, { "x": 101, "z": 1.9, "holds": "random" }] },
+        { "at": 134, "waves": [["hound", "hound", "guard"], ["priest", "crossbow", "guard@l"]], "crates": [{ "x": 128, "z": 0, "holds": "food" }] },
+        { "at": 158, "boss": "vessa", "waves": [["guard", "crossbow"]], "crates": [{ "x": 150, "z": 1.5, "holds": "food" }, { "x": 152, "z": -1.8, "holds": "food" }] }
+      ] },
+    { "id": "greyspire", "name": "Greyspire Abbey", "sub": "The Lamplord's house", "theme": "abbey", "tier": 3, "length": 180, "ally": "grell_ally",
+      "intro": "ch4_intro", "outro": "ch4_outro", "level": 7,
+      "sections": [
+        { "at": 16, "banter": "ch4_b1", "waves": [["zealot", "guard"], ["priest", "zealot", "zealot"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 46, "waves": [["hound", "hound", "crossbow"], ["guard", "guard", "priest"]], "crates": [{ "x": 40, "z": -1.6, "holds": "weapon:candelabra" }] },
+        { "at": 76, "banter": "ch4_b2", "waves": [["golem"], ["zealot", "zealot@l", "crossbow"]], "crates": [{ "x": 70, "z": 0.4, "holds": "random" }, { "x": 72, "z": 2, "holds": "food" }] },
+        { "at": 108, "waves": [["guard", "priest", "zealot", "hound@l"], ["golem", "crossbow"]], "crates": [{ "x": 102, "z": -2, "holds": "gold" }] },
+        { "at": 136, "waves": [["zealot", "zealot", "zealot"], ["priest", "priest", "guard", "guard"]], "crates": [{ "x": 130, "z": 1.4, "holds": "food" }] },
+        { "at": 162, "boss": "golem_boss", "waves": [["zealot", "hound"]], "crates": [{ "x": 154, "z": -1.5, "holds": "food" }, { "x": 156, "z": 1.7, "holds": "food" }] }
+      ] },
+    { "id": "spine", "name": "The Spine", "sub": "The road wakes up", "theme": "spine", "tier": 4, "length": 185, "ally": "grell_ally", "quake": true,
+      "intro": "ch5_intro", "outro": "ch5_outro", "level": 9,
+      "sections": [
+        { "at": 16, "banter": "ch5_b1", "waves": [["wyrmling", "zealot"], ["zealot", "zealot", "guard"]], "crates": [{ "x": 12, "z": -1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["wyrmling", "wyrmling", "crossbow"], ["golem", "zealot@l"]], "crates": [{ "x": 42, "z": 1.6, "holds": "weapon:scale" }, { "x": 44, "z": -2, "holds": "random" }] },
+        { "at": 80, "banter": "ch5_b2", "waves": [["priest", "guard", "guard", "hound"], ["wyrmling", "wyrmling", "zealot"]], "crates": [{ "x": 74, "z": 0.8, "holds": "food" }] },
+        { "at": 112, "waves": [["golem", "priest"], ["hound", "hound", "hound@l", "crossbow"]], "crates": [{ "x": 106, "z": -1.4, "holds": "gold" }, { "x": 107, "z": 1.9, "holds": "random" }] },
+        { "at": 140, "waves": [["zealot", "zealot", "wyrmling", "guard@l"], ["golem", "golem"]], "crates": [{ "x": 134, "z": 0, "holds": "food" }] },
+        { "at": 166, "boss": "corwen", "waves": [["zealot", "priest"]], "crates": [{ "x": 158, "z": 1.5, "holds": "food" }, { "x": 160, "z": -1.8, "holds": "food" }] }
+      ] },
+    { "id": "crownhollow", "name": "Crownhollow", "sub": "At the wyrm's head", "theme": "crown", "tier": 5, "length": 160, "quake": true,
+      "intro": "ch6_intro", "outro": "ch6_outro", "level": 11,
+      "sections": [
+        { "at": 16, "banter": "ch6_b1", "waves": [["guard", "guard", "priest"], ["zealot", "zealot", "wyrmling@l"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["golem", "crossbow", "crossbow"], ["hound", "hound", "zealot", "priest"]], "crates": [{ "x": 42, "z": -1.6, "holds": "weapon:chain" }, { "x": 44, "z": 1.8, "holds": "food" }] },
+        { "at": 82, "banter": "ch6_b2", "waves": [["wyrmling", "wyrmling", "guard", "guard@l"], ["golem", "golem", "priest"]], "crates": [{ "x": 76, "z": 0.4, "holds": "random" }] },
+        { "at": 112, "waves": [["zealot", "zealot", "zealot", "zealot@l"], ["crossbow", "crossbow", "guard", "priest"]], "crates": [{ "x": 106, "z": -2, "holds": "food" }, { "x": 108, "z": 2, "holds": "gold" }] },
+        { "at": 142, "boss": "lamplord", "waves": [], "crates": [{ "x": 134, "z": 1.5, "holds": "food" }, { "x": 136, "z": -1.8, "holds": "food" }] }
+      ] }
+  ],
+  "pickups": {
+    "pitchfork": { "name": "Pitchfork", "uses": 10, "held": "fh_spear", "color": "#8a6a44", "move": { "anim": "thrust", "t": [0.14, 0.1, 0.2], "dmg": 1.3, "reach": 2.3, "kb": 4, "stun": 0.4 } },
+    "log": { "name": "Mossy log", "uses": 8, "held": "tv_club", "color": "#5a6a3a", "move": { "anim": "smash", "t": [0.24, 0.12, 0.3], "dmg": 1.8, "reach": 2.0, "depth": 1.0, "kb": 7, "down": true } },
+    "anchor": { "name": "Boat anchor", "uses": 6, "held": "g5_harpoon", "color": "#5a5f66", "move": { "anim": "sweep", "t": [0.3, 0.14, 0.34], "dmg": 2.4, "reach": 2.1, "depth": 1.1, "kb": 9, "up": 4, "down": true } },
+    "candelabra": { "name": "Candelabra", "uses": 8, "held": "fh_scepter", "color": "#c8a050", "move": { "anim": "smash", "t": [0.16, 0.1, 0.24], "dmg": 1.6, "reach": 1.8, "kb": 5, "down": true, "burn": 2 } },
+    "scale": { "name": "Wyrm scale", "uses": 8, "held": "g5_targe", "color": "#5a6a78", "move": { "anim": "bash", "t": [0.14, 0.1, 0.22], "dmg": 1.7, "reach": 1.6, "kb": 8, "down": true } },
+    "chain": { "name": "Broken chain", "uses": 10, "held": "g5_morningstar", "color": "#7a7e86", "move": { "anim": "whirl", "t": [0.18, 0.26, 0.28], "dmg": 1.0, "reach": 2.2, "depth": 1.1, "back": true, "hits": 3, "kb": 5, "down": true } }
+  },
+  "allies": {
+    "grell_ally": { "name": "Grell", "foe": "grell", "hpMul": 0.7, "dmgMul": 0.6 }
+  }
+}

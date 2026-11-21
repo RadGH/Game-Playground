@@ -1,0 +1,363 @@
+{
+  "_doc": "Every feel/balance number in Wyrmroad. Read through the live tuning object at use time (shared/tune.js; ` key or ?tune), written back by tools/apply-tune.mjs wyrmroad. Distances in metres.",
+  "walkSpeed": {
+    "value": 4.2,
+    "min": 2,
+    "max": 8,
+    "step": 0.1,
+    "label": "Walk speed",
+    "group": "Movement",
+    "unit": "m/s",
+    "note": ""
+  },
+  "depthSpeed": {
+    "value": 2.8,
+    "min": 1,
+    "max": 6,
+    "step": 0.1,
+    "label": "Up/down speed",
+    "group": "Movement",
+    "unit": "m/s",
+    "note": "Moving into and out of the screen"
+  },
+  "dashSpeed": {
+    "value": 8.5,
+    "min": 4,
+    "max": 14,
+    "step": 0.25,
+    "label": "Dash speed",
+    "group": "Movement",
+    "unit": "m/s",
+    "note": ""
+  },
+  "jumpSpeed": {
+    "value": 7.2,
+    "min": 4,
+    "max": 12,
+    "step": 0.1,
+    "label": "Jump strength",
+    "group": "Movement",
+    "unit": "m/s",
+    "note": "Upward speed at take-off"
+  },
+  "gravity": {
+    "value": 22,
+    "min": 10,
+    "max": 40,
+    "step": 0.5,
+    "label": "Gravity",
+    "group": "Movement",
+    "unit": "m/s²",
+    "note": ""
+  },
+  "laneAlign": {
+    "value": 0.55,
+    "min": 0,
+    "max": 1.2,
+    "step": 0.05,
+    "label": "Lane align",
+    "group": "Combat",
+    "unit": "m",
+    "note": "How far an attack nudges you up or down to line up with the enemy you face"
+  },
+  "comboWindow": {
+    "value": 0.32,
+    "min": 0.1,
+    "max": 0.8,
+    "step": 0.02,
+    "label": "Combo window",
+    "group": "Combat",
+    "unit": "s",
+    "note": "Time after a hit to press Attack again for the next hit"
+  },
+  "inputBuffer": {
+    "value": 0.16,
+    "min": 0,
+    "max": 0.4,
+    "step": 0.02,
+    "label": "Input buffer",
+    "group": "Combat",
+    "unit": "s",
+    "note": "A press this early still counts"
+  },
+  "hitStop": {
+    "value": 0.06,
+    "min": 0,
+    "max": 0.15,
+    "step": 0.01,
+    "label": "Hit pause",
+    "group": "Combat",
+    "unit": "s",
+    "note": "Freeze on a solid hit"
+  },
+  "knockdownTime": {
+    "value": 1.1,
+    "min": 0.4,
+    "max": 2.5,
+    "step": 0.05,
+    "label": "Time on the floor",
+    "group": "Combat",
+    "unit": "s",
+    "note": ""
+  },
+  "getUpGrace": {
+    "value": 0.7,
+    "min": 0,
+    "max": 2,
+    "step": 0.05,
+    "label": "Get-up safety",
+    "group": "Combat",
+    "unit": "s",
+    "note": "Can’t be hit just after standing up"
+  },
+  "blockCut": {
+    "value": 0.8,
+    "min": 0.3,
+    "max": 1,
+    "step": 0.05,
+    "label": "Block strength",
+    "group": "Combat",
+    "unit": "",
+    "note": "Share of a frontal hit that a block stops"
+  },
+  "perfectBlock": {
+    "value": 0.15,
+    "min": 0,
+    "max": 0.4,
+    "step": 0.01,
+    "label": "Perfect block window",
+    "group": "Combat",
+    "unit": "s",
+    "note": "Blocking this soon before a hit staggers the attacker"
+  },
+  "throwSpeed": {
+    "value": 11,
+    "min": 5,
+    "max": 20,
+    "step": 0.5,
+    "label": "Throw speed",
+    "group": "Combat",
+    "unit": "m/s",
+    "note": ""
+  },
+  "throwDamage": {
+    "value": 1.4,
+    "min": 0.5,
+    "max": 3,
+    "step": 0.1,
+    "label": "Throw damage",
+    "group": "Combat",
+    "unit": "×",
+    "note": "Times your power, to the thrown enemy and anyone it hits"
+  },
+  "grabHold": {
+    "value": 2.4,
+    "min": 1,
+    "max": 5,
+    "step": 0.1,
+    "label": "Grab hold time",
+    "group": "Combat",
+    "unit": "s",
+    "note": "How long you can hold an enemy before it breaks free"
+  },
+  "breakerCost": {
+    "value": 0.08,
+    "min": 0,
+    "max": 0.25,
+    "step": 0.01,
+    "label": "Breaker health cost",
+    "group": "Combat",
+    "unit": "",
+    "note": "Share of max health the Breaker costs (never kills)"
+  },
+  "breakerRadius": {
+    "value": 2.8,
+    "min": 1.5,
+    "max": 5,
+    "step": 0.1,
+    "label": "Breaker reach",
+    "group": "Combat",
+    "unit": "m",
+    "note": ""
+  },
+  "manaRegen": {
+    "value": 2.5,
+    "min": 0,
+    "max": 10,
+    "step": 0.25,
+    "label": "Mana regen",
+    "group": "Magic",
+    "unit": "/s",
+    "note": ""
+  },
+  "manaOnHit": {
+    "value": 2,
+    "min": 0,
+    "max": 8,
+    "step": 0.5,
+    "label": "Mana per hit",
+    "group": "Magic",
+    "unit": "",
+    "note": "Mana gained each time you land a hit"
+  },
+  "attackTokens": {
+    "value": 2,
+    "min": 1,
+    "max": 6,
+    "step": 1,
+    "label": "Enemies attacking at once",
+    "group": "Enemies",
+    "unit": "",
+    "note": "Per hero: the rest circle and wait their turn"
+  },
+  "foeDamage": {
+    "value": 1,
+    "min": 0.3,
+    "max": 3,
+    "step": 0.05,
+    "label": "Enemy damage",
+    "group": "Enemies",
+    "unit": "×",
+    "note": ""
+  },
+  "foeHealth": {
+    "value": 1,
+    "min": 0.3,
+    "max": 3,
+    "step": 0.05,
+    "label": "Enemy health",
+    "group": "Enemies",
+    "unit": "×",
+    "note": ""
+  },
+  "foeWindup": {
+    "value": 1,
+    "min": 0.5,
+    "max": 2,
+    "step": 0.05,
+    "label": "Enemy wind-up",
+    "group": "Enemies",
+    "unit": "×",
+    "note": "How long enemies show an attack before it lands"
+  },
+  "coopHealth": {
+    "value": 0.6,
+    "min": 0,
+    "max": 1.5,
+    "step": 0.05,
+    "label": "Co-op enemy health",
+    "group": "Enemies",
+    "unit": "",
+    "note": "Extra enemy health per hero after the first"
+  },
+  "lives": {
+    "value": 3,
+    "min": 1,
+    "max": 9,
+    "step": 1,
+    "label": "Lives",
+    "group": "Stakes",
+    "unit": "",
+    "note": "Per hero, per chapter"
+  },
+  "downTime": {
+    "value": 5,
+    "min": 2,
+    "max": 12,
+    "step": 0.5,
+    "label": "Time to revive",
+    "group": "Stakes",
+    "unit": "s",
+    "note": "A downed hero waits this long for a partner before losing a life"
+  },
+  "reviveTime": {
+    "value": 1.5,
+    "min": 0.5,
+    "max": 4,
+    "step": 0.1,
+    "label": "Revive time",
+    "group": "Stakes",
+    "unit": "s",
+    "note": "Standing beside a downed partner"
+  },
+  "respawnGrace": {
+    "value": 2.5,
+    "min": 0,
+    "max": 5,
+    "step": 0.25,
+    "label": "Respawn safety",
+    "group": "Stakes",
+    "unit": "s",
+    "note": "Can’t be hit after coming back in"
+  },
+  "foodHeal": {
+    "value": 0.35,
+    "min": 0.1,
+    "max": 1,
+    "step": 0.05,
+    "label": "Food heal",
+    "group": "Stakes",
+    "unit": "",
+    "note": "Share of max health a meal heals"
+  },
+  "crateFood": {
+    "value": 0.45,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Crate food chance",
+    "group": "Loot",
+    "unit": "",
+    "note": ""
+  },
+  "dropChance": {
+    "value": 0.08,
+    "min": 0,
+    "max": 0.5,
+    "step": 0.01,
+    "label": "Item drop chance",
+    "group": "Loot",
+    "unit": "",
+    "note": "Per normal enemy, per hero"
+  },
+  "xpScale": {
+    "value": 1,
+    "min": 0.2,
+    "max": 4,
+    "step": 0.1,
+    "label": "Experience gained",
+    "group": "Progress",
+    "unit": "×",
+    "note": ""
+  },
+  "viewWidth": {
+    "value": 17,
+    "min": 10,
+    "max": 26,
+    "step": 0.5,
+    "label": "View width",
+    "group": "Camera",
+    "unit": "m",
+    "note": "Width of road the screen shows"
+  },
+  "camHeight": {
+    "value": 3.2,
+    "min": 1,
+    "max": 8,
+    "step": 0.1,
+    "label": "Camera height",
+    "group": "Camera",
+    "unit": "m",
+    "note": ""
+  },
+  "camDistance": {
+    "value": 15,
+    "min": 8,
+    "max": 28,
+    "step": 0.5,
+    "label": "Camera distance",
+    "group": "Camera",
+    "unit": "m",
+    "note": ""
+  }
+}

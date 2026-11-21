@@ -80,6 +80,7 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 | `prototypes/arcline/` | SimCity 4-style iso cyber city builder + wall/turret defence (plan in docs/PLAN.md) | planning — round 0 = `citykit/` |
 | `prototypes/overdrive-frame/` | Iso co-op mech action in a neon city; fully prerendered (City Kit + Mech Kit); co-op room server 8620/8621 | live, round 4 |
 | `prototypes/grimring/` | Arena with the Model Library Meshy fighters (1-2 foes at a time) | live |
+| `prototypes/wyrmroad/` | Side-scrolling 3D beat 'em up, Chibi 2.6, story + gear, co-op 1–4 local/online, own server 8640/8641 | building |
 | `prototypes/tinyrts/` | Symlink to its own repo `~/claude/tinyrts` — commit THERE; keep its `master` green (stable serves it) | playable |
 | `prototypes/lanternfall/` | Side-scrolling pixel action RPG (`docs/HANDOFF.md` = remaining work) | playable |
 | `prototypes/bannerline/` | Lockstep RTS of game modes (lane wars, hunters vs farmers) | done |

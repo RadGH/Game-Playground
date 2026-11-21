@@ -1,0 +1,200 @@
+/* Wyrmroad online co-op screens (js/ui/online.js). Loaded by online.js itself the first time the screens open.
+   Look: the storybook kingdom at dusk — cold blue panels over the live 3D street, warm lantern-gold accents.
+   Buttons are the game's own .wr-btn (css/wyrmroad.css); this file lays out the screens and adds the online parts.
+   Phone first (402×780 portrait): one column, one scroller (.wo-scroll) per screen; wider screens get columns. */
+.wo-screen {
+  --wo-ink: #f1e8d6; --wo-dim: #b9b2a4; --wo-gold: #f0b04a; --wo-gold-soft: rgba(240, 176, 74, .16);
+  --wo-panel: rgba(18, 24, 38, .86); --wo-panel-2: rgba(30, 38, 58, .9); --wo-line: rgba(240, 220, 180, .14);
+  --wo-ok: #8ad06a; --wo-warn: #e8b04a; --wo-bad: #e8705a; --wo-blue: #5ab8e8;
+  position: fixed; inset: 0; display: flex; flex-direction: column; color: var(--wo-ink);
+  font-family: 'Alegreya Sans', system-ui, sans-serif; font-size: 16px; line-height: 1.35;
+  background: linear-gradient(180deg, rgba(10, 14, 24, .55), rgba(10, 14, 24, .25) 30%, rgba(10, 14, 24, .7));
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.wo-screen h1, .wo-screen h2, .wo-screen h3 { font-family: 'Alegreya SC', Georgia, serif; font-weight: 700; margin: 0; letter-spacing: .02em; }
+.wo-screen h2 { font-size: 1.15rem; display: flex; align-items: center; gap: 8px; color: var(--wo-gold); }
+.wo-screen h2 svg { width: 20px; height: 20px; flex: none; }
+.wo-dim { color: var(--wo-dim); margin: 0; }
+.wo-center { text-align: center; justify-content: center; }
+.wo-grow { flex: 1; }
+.wo-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* top bar: back, title, the connection dot (detail in its tooltip and the ☰ menu — never over the game) */
+.wo-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; flex: none; }
+.wo-bar h1 { flex: 1; font-size: 1.45rem; text-shadow: 0 2px 8px rgba(0, 0, 0, .6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wo-code { color: var(--wo-gold); letter-spacing: .18em; font-family: 'Alegreya SC', Georgia, serif; }
+.wo-dot { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; color: var(--wo-dim); padding: 4px 10px; border-radius: 99px; background: rgba(0, 0, 0, .35); flex: none; }
+.wo-dot i { width: 9px; height: 9px; border-radius: 50%; background: var(--wo-bad); box-shadow: 0 0 0 2px rgba(0, 0, 0, .3); }
+.wo-dot[data-state="open"] i { background: var(--wo-ok); }
+.wo-dot[data-state="slow"] i, .wo-dot[data-state="connecting"] i { background: var(--wo-warn); }
+
+/* the one scroller */
+.wo-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.wo-wrap { max-width: 1120px; margin: 0 auto; padding: 4px 16px 28px; display: flex; flex-direction: column; gap: 16px; }
+.wo-panel { background: var(--wo-panel); border: 1px solid var(--wo-line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 28px rgba(0, 0, 0, .35); }
+.wo-note { min-height: 1.35em; margin: 0; color: var(--wo-warn); text-align: center; }
+.wo-note:empty { display: none; }
+.wo-wide { width: 100%; justify-content: center; }
+.wo-seg { display: flex; gap: 6px; flex-wrap: wrap; }
+.wo-seg .wr-btn { flex: 1; justify-content: center; }
+.wo-on { outline: 2px solid var(--wo-gold); outline-offset: -2px; background-color: var(--wo-gold-soft) !important; }
+.wo-danger { color: #ffc4b6; }
+
+/* faces: the portrait from the 3D model, or the initial until it is drawn */
+.wo-face { width: 56px; height: 56px; border-radius: 12px; overflow: hidden; flex: none; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 35%, #3a4a6a, #1a2236); border: 1px solid var(--wo-line); }
+.wo-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wo-face-big { width: 76px; height: 76px; border-radius: 16px; }
+.wo-initial { font-family: 'Alegreya SC', Georgia, serif; font-size: 1.6rem; color: var(--wo-gold); }
+
+/* entry: your hero, then the three ways in */
+.wo-hero { display: flex; align-items: center; gap: 14px; background: var(--wo-panel-2); border: 1px solid var(--wo-line); border-radius: 16px; padding: 12px 14px; }
+.wo-hero-who { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.wo-hero-who b { font-size: 1.2rem; font-family: 'Alegreya SC', Georgia, serif; }
+.wo-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+.wo-code-form { display: flex; gap: 8px; }
+.wo-code-in { flex: 1; min-width: 0; font: 700 1.6rem 'Alegreya SC', Georgia, serif; letter-spacing: .3em; text-transform: uppercase; text-align: center;
+  color: var(--wo-ink); background: rgba(0, 0, 0, .35); border: 1px solid var(--wo-line); border-radius: 10px; padding: 8px 10px; }
+.wo-code-in:focus { outline: 2px solid var(--wo-gold); }
+.wo-rooms, .wo-seats, .wo-ch-list, .wo-res-list, .wo-pick { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.wo-room-card { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; text-align: left; padding: 10px 12px; border-radius: 10px; cursor: pointer;
+  color: inherit; font: inherit; background: var(--wo-panel-2); border: 1px solid var(--wo-line); }
+.wo-room-card:hover:not(:disabled), .wo-room-card.pad-focus { border-color: var(--wo-gold); }
+.wo-room-card:disabled { opacity: .55; cursor: default; }
+.wo-room-name { font-weight: 700; }
+.wo-room-count { color: var(--wo-gold); font-weight: 700; }
+.wo-room-meta { grid-column: 1 / -1; color: var(--wo-dim); font-size: .88rem; }
+.wo-find h2 { justify-content: space-between; }
+
+/* the room */
+.wo-room-grid { display: grid; grid-template-columns: 1fr; }
+.wo-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.wo-invite { flex-direction: row; align-items: center; gap: 14px; }
+.wo-qr { width: 112px; height: 112px; flex: none; background: #fff; border-radius: 10px; padding: 6px; }
+.wo-qr svg { width: 100%; height: 100%; display: block; }
+.wo-invite-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.wo-link { color: var(--wo-blue); font-size: .88rem; overflow-wrap: anywhere; }
+.wo-seat { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "face who badges" "tools tools tools"; gap: 6px 12px; align-items: center;
+  background: var(--wo-panel-2); border: 1px solid var(--wo-line); border-radius: 12px; padding: 10px 12px; }
+.wo-seat .wo-face { grid-area: face; }
+.wo-seat-who { grid-area: who; display: flex; flex-direction: column; min-width: 0; }
+.wo-seat-who b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wo-seat-who span { color: var(--wo-dim); font-size: .9rem; }
+.wo-badges { grid-area: badges; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+.wo-seat-tools { grid-area: tools; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.wo-seat-tools:empty { display: none; }
+.wo-you { border-color: rgba(240, 176, 74, .55); box-shadow: inset 0 0 0 1px rgba(240, 176, 74, .25); }
+.wo-away { opacity: .65; }
+.wo-seat-open { opacity: .6; border-style: dashed; }
+.wo-badge { font-size: .76rem; padding: 2px 8px; border-radius: 99px; background: rgba(255, 255, 255, .1); color: var(--wo-dim); white-space: nowrap; }
+.wo-badge-host { background: var(--wo-gold-soft); color: var(--wo-gold); }
+.wo-badge-ready { background: rgba(138, 208, 106, .18); color: var(--wo-ok); }
+.wo-badge-away { background: rgba(232, 112, 90, .18); color: #ffb4a4; }
+.wo-h-small { margin-bottom: 2px; }
+.wo-ch-picked h2 { color: var(--wo-ink); font-size: 1.5rem; }
+.wo-ch-no { color: var(--wo-gold); font-family: 'Alegreya SC', Georgia, serif; }
+.wo-ch { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; padding: 10px 12px; border-radius: 10px; cursor: pointer;
+  color: inherit; font: inherit; background: var(--wo-panel-2); border: 1px solid var(--wo-line); }
+.wo-ch .wo-ch-no { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgba(0, 0, 0, .35); flex: none; }
+.wo-ch-name { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.wo-ch-name small { color: var(--wo-dim); }
+.wo-ch:hover:not(:disabled), .wo-ch.pad-focus { border-color: var(--wo-gold); }
+.wo-ch:disabled { opacity: .5; cursor: default; }
+.wo-ch svg { width: 18px; height: 18px; opacity: .7; }
+.wo-go { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.wo-go .wr-btn { justify-content: center; }
+.wo-why { margin: 0; text-align: center; color: var(--wo-dim); min-height: 1.35em; }
+.wo-room:not(.wo-is-host) .wo-host-only { display: none; }
+.wo-opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+/* big QR (a .wr-sheet) */
+.wo-bigqr { background: #fff; border-radius: 14px; padding: 12px; width: min(78vw, 60vh, 420px); margin: 0 auto; }
+.wo-bigqr svg { width: 100%; height: auto; display: block; }
+.wo-bigqr-code { text-align: center; font: 700 2.2rem 'Alegreya SC', Georgia, serif; letter-spacing: .3em; margin: 12px 0 0; color: #f0b04a; }
+
+/* hero picker sheet */
+.wo-pick-row { width: 100%; display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 10px; cursor: pointer; color: inherit; font: inherit; text-align: left;
+  background: rgba(255, 255, 255, .05); border: 1px solid rgba(240, 220, 180, .14); }
+.wo-pick-who { display: flex; flex-direction: column; }
+.wo-pick-who span { opacity: .75; font-size: .9rem; }
+
+/* story scenes: the street behind, the speech box at the bottom (never over a fight — there is none now) */
+.wo-scene { background: linear-gradient(180deg, rgba(10, 14, 24, .45), transparent 30%, transparent 55%, rgba(10, 14, 24, .8)); }
+.wo-scene-top { display: flex; align-items: center; gap: 10px; padding: 12px 16px; }
+.wo-scene-place { margin: 0; font: 700 1.2rem 'Alegreya SC', Georgia, serif; color: var(--wo-gold); text-shadow: 0 2px 8px rgba(0, 0, 0, .7); }
+.wo-scene-wait { margin: 0 auto; padding: 6px 14px; border-radius: 99px; background: rgba(0, 0, 0, .5); color: var(--wo-ink); font-size: .9rem; }
+.wo-scene-wait[hidden] { display: none; }
+.wo-scene-box { margin: auto 16px 16px; display: flex; gap: 14px; align-items: flex-start; background: var(--wo-panel); border: 1px solid var(--wo-line); border-radius: 18px;
+  padding: 14px; box-shadow: 0 10px 34px rgba(0, 0, 0, .5); cursor: pointer; max-width: 980px; align-self: center; width: calc(100% - 32px); box-sizing: border-box; }
+.wo-face-story { width: 96px; height: 96px; border-radius: 16px; }
+.wo-scene-words { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.wo-scene-name { margin: 0; font: 700 1.1rem 'Alegreya SC', Georgia, serif; color: var(--wo-gold); }
+.wo-scene-text { margin: 0; font-size: 1.12rem; min-height: 3.1em; }
+.wo-voice .wo-scene-text { font-style: italic; letter-spacing: .04em; }
+.wo-voice-mark { width: 60%; height: 60%; border-radius: 50%; background: radial-gradient(circle, #f2d070, rgba(240, 176, 74, .1) 70%); }
+.wo-scene-more { margin: 0; display: flex; align-items: center; justify-content: space-between; color: var(--wo-dim); font-size: .85rem; }
+.wo-scene-choice { margin: 0 16px 16px; align-self: center; background: var(--wo-panel); border: 1px solid var(--wo-gold); border-radius: 16px; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
+.wo-scene-choice[hidden] { display: none; }
+.wo-choice-prompt { margin: 0; text-align: center; font: 700 1.2rem 'Alegreya SC', Georgia, serif; }
+
+/* lost / results: one card over the street */
+.wo-end .wo-scroll { display: flex; }
+.wo-card { margin: auto; width: min(680px, calc(100% - 32px)); box-sizing: border-box; background: var(--wo-panel); border: 1px solid var(--wo-line); border-radius: 18px;
+  padding: 22px 18px; display: flex; flex-direction: column; gap: 14px; text-align: center; box-shadow: 0 12px 40px rgba(0, 0, 0, .5); margin-block: 16px; }
+.wo-card h1 { font-size: 1.9rem; }
+.wo-kicker { margin: 0; color: var(--wo-gold); font: 700 1rem 'Alegreya SC', Georgia, serif; letter-spacing: .08em; }
+.wo-wait { margin: 0; color: var(--wo-dim); }
+.wo-res-list { text-align: left; }
+.wo-res { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "face who" "nums nums"; gap: 8px 12px; align-items: center; background: var(--wo-panel-2);
+  border: 1px solid var(--wo-line); border-radius: 12px; padding: 10px 12px; }
+.wo-res .wo-face { grid-area: face; }
+.wo-res .wo-seat-who { grid-area: who; }
+.wo-res-nums { grid-area: nums; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0; }
+.wo-res-nums div { background: rgba(0, 0, 0, .25); border-radius: 8px; padding: 6px 8px; }
+.wo-res-nums dt { font-size: .75rem; color: var(--wo-dim); }
+.wo-res-nums dd { margin: 0; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+.wo-res-nums dd svg { width: 16px; height: 16px; color: var(--wo-gold); }
+
+/* wider screens: columns */
+@media (min-width: 760px) {
+  .wo-grid { grid-template-columns: 1fr 1fr; }
+  .wo-find { grid-column: 1 / -1; }
+  .wo-room-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; }
+  .wo-res { grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.3fr); grid-template-areas: "face who nums"; }
+  .wo-qr { width: 132px; height: 132px; }
+}
+@media (min-width: 1100px) {
+  .wo-grid { grid-template-columns: 1fr 1fr 1.2fr; }
+  .wo-find { grid-column: auto; }
+}
+@media (max-width: 400px) {
+  .wo-invite { flex-direction: column; align-items: stretch; }
+  .wo-qr { align-self: center; }
+  .wo-face-story { width: 72px; height: 72px; }
+  .wo-scene-box { margin: auto 10px 10px; width: calc(100% - 20px); padding: 10px; gap: 10px; }
+}
+
+/* fallbacks with zero priority (:where): the game's own .wr-btn rules in css/wyrmroad.css win whenever they exist */
+:where(.wo-screen, .wo-bigqr-sheet) :where(.wr-btn) { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; min-height: 40px; border-radius: 10px; cursor: pointer;
+  font: 600 1rem 'Alegreya Sans', system-ui, sans-serif; color: #f1e8d6; background: rgba(46, 56, 82, .95); border: 1px solid rgba(240, 220, 180, .2); }
+:where(.wo-screen) :where(.wr-btn.wr-primary) { background: linear-gradient(180deg, #f3bc5c, #d6922e); color: #1d1408; border-color: #f7cf86; }
+:where(.wo-screen) :where(.wr-btn:disabled) { opacity: .5; cursor: default; }
+:where(.wo-screen) :where(.wr-btn.wr-small) { min-height: 34px; padding: 5px 10px; font-size: .9rem; }
+:where(.wo-screen) :where(.wr-btn.wr-big) { min-height: 52px; padding: 10px 18px; font-size: 1.08rem; }
+:where(.wo-screen) :where(.wr-btn) :where(svg) { width: 20px; height: 20px; flex: none; }
+:where(.wo-screen) :where(.wr-btn) :where(kbd) { font: 600 .72rem 'Alegreya Sans', system-ui, sans-serif; padding: 1px 6px; border-radius: 5px; background: rgba(0, 0, 0, .3); opacity: .85; }
+:where(.wo-screen) :where(svg) { width: 20px; height: 20px; }
+:where(.wo-screen) :where(.pad-focus) { outline: 3px solid #f0b04a; outline-offset: 2px; }
+/* the room's Start / Ready button stays in reach while the list scrolls (phones) */
+.wo-room .wo-go { position: sticky; bottom: 0; z-index: 2; padding: 10px 0 12px; background: linear-gradient(180deg, transparent, rgba(10, 14, 24, .92) 30%); }
+@media (min-width: 760px) { .wo-room .wo-go { position: static; background: none; padding: 0; } }
+/* the room title: the code is what a player must read — the word "Room" steps back, the code never cuts off */
+.wo-h-code { display: flex; align-items: baseline; gap: 10px; min-width: 0; overflow: visible; }
+.wo-h-code small { font-size: 1rem; color: var(--wo-dim); }
+.wo-h-code .wo-code { font-size: 1.7rem; white-space: nowrap; }
+@media (max-width: 480px) {
+  .wo-h-code { flex-direction: column; gap: 0; line-height: 1.05; }
+  .wo-h-code small { font-size: .8rem; }
+  .wo-bar .wo-dot-text { display: none; }
+  .wo-bar .wo-dot { padding: 8px; }
+}

@@ -897,6 +897,23 @@
    ]
   },
   {
+   "id": "wyrmroad",
+   "group": "prototypes",
+   "title": "Wyrmroad",
+   "href": "prototypes/wyrmroad/",
+   "folder": "prototypes/wyrmroad",
+   "summary": "A side-scrolling 3D brawler with Chibi 2.6 heroes: four classes mixing melee and magic, six story chapters along a road on a sleeping wyrm's back, gear from every chapter worn on the body, and co-op for one to four on one screen or online.",
+   "status": "prototype",
+   "statusNote": "Playable",
+   "date": "2026-11-20",
+   "tags": [
+    "brawler",
+    "3d",
+    "co-op",
+    "story"
+   ]
+  },
+  {
    "id": "arcline",
    "group": "prototypes",
    "title": "Arcline",

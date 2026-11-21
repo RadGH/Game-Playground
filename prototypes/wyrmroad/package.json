@@ -1,0 +1,16 @@
+{
+  "name": "wyrmroad",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Wyrmroad: side-scrolling 3D beat 'em up. The page runs anywhere; this package is the online room server (authoritative Node + WebSocket, runs js/sim).",
+  "author": "Radley Sustaire",
+  "scripts": {
+    "start": "node server/main.mjs",
+    "test": "node --test tests/sim/*.test.mjs tests/net/*.test.mjs",
+    "test:net": "node --test tests/net/*.test.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

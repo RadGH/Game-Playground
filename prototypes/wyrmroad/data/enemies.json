@@ -1,0 +1,143 @@
+{
+  "_doc": "Every enemy and boss. body: 'chibi' (look = a Chibi 2.6 avatar) or 'creature' (look = an avatar-3d creature spec). ai = the brain in js/sim/foes.js. moves use the same fields as hero moves (data/classes.json), plus cd (s between uses), w (weight when picking), range [min,max] (m along the road it likes to use it from), phase (boss phase it unlocks at, 0-based), summon. poise: hits of this much damage before it flinches (0 = flinches from everything). shield: 'front' blocks light frontal hits. heavy: can't be grabbed or thrown. xp / gold on defeat. height in metres (drawn size = rule size).",
+  "foes": {
+    "thug": { "name": "Rook Thug", "body": "chibi", "ai": "brawler", "hp": 60, "power": 8, "def": 0, "speed": 2.6, "height": 1.7, "xp": 10, "gold": [2, 5],
+      "look": { "body": { "skin": "#d59c74" }, "hair": { "id": "messy", "color": "#3b2a1e" }, "top": { "id": "vest", "color": "#5b4636" }, "bottom": { "id": "breeches", "color": "#3e3a34" }, "shoes": { "id": "boots", "color": "#2a2420" }, "hat": { "id": "bandana", "color": "#2a2a30" }, "held": { "id": "none" } },
+      "moves": [
+        { "id": "punch", "anim": "punch", "t": [0.42, 0.1, 0.4], "dmg": 1.0, "reach": 1.3, "kb": 1.5, "stun": 0.35, "cd": 1.4, "w": 3 },
+        { "id": "kick", "anim": "kick", "t": [0.55, 0.1, 0.45], "dmg": 1.4, "reach": 1.5, "kb": 6, "down": true, "cd": 3, "w": 1 }
+      ] },
+    "knifer": { "name": "Rook Knifer", "body": "chibi", "ai": "skirmish", "hp": 40, "power": 7, "def": 0, "speed": 3.6, "height": 1.65, "xp": 12, "gold": [2, 6],
+      "look": { "body": { "skin": "#f0c9a8" }, "hair": { "id": "mohawk", "color": "#8a2a2a" }, "top": { "id": "tunic", "color": "#463c52" }, "bottom": { "id": "leggings", "color": "#2c2833" }, "shoes": { "id": "ankle_boots", "color": "#221e26" }, "accessory": { "id": "scarf_mask", "color": "#222" }, "held": { "id": "fh_dagger", "color": "#c9ccd2" } },
+      "moves": [
+        { "id": "stab", "anim": "stab", "t": [0.34, 0.08, 0.3], "dmg": 0.9, "reach": 1.4, "kb": 1, "stun": 0.3, "cd": 1.0, "w": 3 },
+        { "id": "lunge", "anim": "lunge", "t": [0.5, 0.2, 0.4], "dmg": 1.3, "reach": 1.5, "kb": 4, "move": 7, "cd": 3.5, "w": 1, "range": [2.5, 5] }
+      ] },
+    "bruiser": { "name": "Rook Bruiser", "body": "chibi", "ai": "grabber", "hp": 150, "power": 12, "def": 6, "speed": 2.0, "height": 2.2, "heavy": true, "poise": 14, "xp": 30, "gold": [6, 12],
+      "look": { "body": { "skin": "#8d5a3c", "build": "broad" }, "hair": { "id": "bald", "color": "#000" }, "facialHair": { "id": "full", "color": "#4a3020" }, "top": { "id": "leather", "color": "#6a4a2e" }, "bottom": { "id": "baggy", "color": "#4a4036" }, "shoes": { "id": "heavy", "color": "#2a2420" }, "held": { "id": "tv_club", "color": "#6b4a2a" } },
+      "moves": [
+        { "id": "club", "anim": "smash", "t": [0.6, 0.12, 0.5], "dmg": 1.6, "reach": 1.8, "kb": 7, "down": true, "cd": 2.2, "w": 2 },
+        { "id": "grab", "anim": "throw", "t": [0.5, 0.15, 0.6], "dmg": 2.2, "reach": 1.3, "grab": true, "cd": 5, "w": 1 }
+      ] },
+    "wolf": { "name": "Thornwood Wolf", "body": "creature", "ai": "lunger", "hp": 45, "power": 8, "def": 0, "speed": 4.4, "height": 0.9, "xp": 12, "gold": [0, 2],
+      "look": { "type": "wolf", "size": 1.25, "colors": { "body": "#57534e", "belly": "#a89f90", "accent": "#2e2b28", "eyes": "#f2c14e" } },
+      "moves": [
+        { "id": "bite", "anim": "attack", "t": [0.35, 0.1, 0.35], "dmg": 0.9, "reach": 1.3, "kb": 1, "stun": 0.3, "cd": 1.2, "w": 2 },
+        { "id": "pounce", "anim": "attack", "t": [0.55, 0.25, 0.5], "dmg": 1.3, "reach": 1.4, "kb": 5, "down": true, "move": 8, "up": 3, "cd": 3, "w": 2, "range": [3, 6] }
+      ] },
+    "sprite": { "name": "Briar Sprite", "body": "creature", "ai": "caster", "hp": 35, "power": 9, "def": 0, "speed": 2.4, "height": 0.9, "float": 1.0, "xp": 14, "gold": [1, 4],
+      "look": { "type": "wisp", "size": 1.1, "colors": { "body": "#6fbf4a", "belly": "#c8f08a", "accent": "#2f5a1e", "eyes": "#fff6a0" } },
+      "moves": [
+        { "id": "thornshot", "anim": "attack", "t": [0.6, 0.05, 0.5], "cd": 2.4, "w": 1, "range": [3, 8],
+          "shot": { "speed": 7, "range": 10, "dmg": 1.0, "kb": 1, "stun": 0.4, "slow": 0.4, "look": "thorn" } }
+      ] },
+    "guard": { "name": "Lantern Guard", "body": "chibi", "ai": "guard", "hp": 90, "power": 10, "def": 10, "speed": 2.3, "height": 1.8, "shield": "front", "xp": 22, "gold": [4, 9],
+      "look": { "body": { "skin": "#e7b48f" }, "hat": { "id": "great_helm", "color": "#3a3f2c" }, "top": { "id": "chainmail", "color": "#6f7560" }, "bottom": { "id": "greaves", "color": "#4a4f3c" }, "shoes": { "id": "heavy", "color": "#2a2e22" }, "decor": { "id": "tabard", "color": "#a6c24a" }, "held": { "id": "fh_spear", "color": "#b0b4a0" }, "offhand": { "id": "fh_kite_shield", "color": "#3e4a22", "emblem": "sun" } },
+      "moves": [
+        { "id": "spear", "anim": "thrust", "t": [0.48, 0.1, 0.4], "dmg": 1.2, "reach": 2.2, "kb": 3, "stun": 0.4, "cd": 1.6, "w": 3 },
+        { "id": "shieldbash", "anim": "bash", "t": [0.5, 0.1, 0.5], "dmg": 1.0, "reach": 1.3, "kb": 7, "down": true, "cd": 4, "w": 1 }
+      ] },
+    "crossbow": { "name": "Lantern Crossbow", "body": "chibi", "ai": "archer", "hp": 55, "power": 10, "def": 3, "speed": 2.5, "height": 1.75, "xp": 18, "gold": [3, 8],
+      "look": { "body": { "skin": "#a9714c" }, "hat": { "id": "g5_mail_cap", "color": "#5a5f4a" }, "top": { "id": "brigandine", "color": "#4a5236" }, "bottom": { "id": "breeches", "color": "#3a3e2c" }, "shoes": { "id": "boots", "color": "#2a2e22" }, "decor": { "id": "tabard", "color": "#a6c24a" }, "held": { "id": "crossbow", "color": "#8a6a44" } },
+      "moves": [
+        { "id": "bolt", "anim": "shoot", "t": [0.8, 0.05, 0.6], "cd": 2.6, "w": 1, "range": [5, 11], "aimLine": true,
+          "shot": { "speed": 16, "range": 14, "dmg": 1.3, "kb": 3, "stun": 0.4, "look": "bolt" } }
+      ] },
+    "priest": { "name": "Lantern Priest", "body": "chibi", "ai": "healer", "hp": 60, "power": 8, "def": 2, "speed": 2.3, "height": 1.75, "xp": 24, "gold": [4, 10],
+      "look": { "body": { "skin": "#f6d7bd" }, "hat": { "id": "hood", "color": "#2c3122" }, "top": { "id": "robe", "color": "#3a4228", "color2": "#c6e05a" }, "shoes": { "id": "boots", "color": "#22261a" }, "held": { "id": "g5_staff_lens", "color": "#c6e05a" }, "decor": { "id": "ember_censer", "color": "#c6e05a" } },
+      "moves": [
+        { "id": "mend", "anim": "channel", "t": [0.9, 0.1, 0.5], "cd": 4, "w": 1, "healFoes": { "r": 6, "amount": 0.35 } },
+        { "id": "flare", "anim": "castPoint", "t": [0.7, 0.05, 0.5], "cd": 3, "w": 1, "range": [2, 8],
+          "shot": { "speed": 9, "range": 10, "dmg": 1.1, "kb": 2, "stun": 0.4, "look": "lantern" } }
+      ] },
+    "zealot": { "name": "Lantern Zealot", "body": "chibi", "ai": "charger", "hp": 50, "power": 11, "def": 0, "speed": 2.8, "height": 1.7, "xp": 20, "gold": [2, 6],
+      "look": { "body": { "skin": "#c98e66" }, "hair": { "id": "buzz", "color": "#222" }, "top": { "id": "rags", "color": "#4a4a2a" }, "bottom": { "id": "loincloth", "color": "#3a3a22" }, "shoes": { "id": "barefoot" }, "decor": { "id": "belt_lantern", "color": "#d8ff6a" }, "accessory": { "id": "mask", "color": "#d8d0a0" }, "held": { "id": "none" }, "offhand": { "id": "torch" } },
+      "deathBurst": { "r": 2.2, "delay": 0.8, "dmg": 1.6, "kb": 6, "down": true },
+      "moves": [
+        { "id": "charge", "anim": "lunge", "t": [0.9, 0.7, 0.6], "dmg": 1.4, "reach": 1.4, "kb": 7, "down": true, "move": 9, "cd": 3, "w": 2, "range": [3, 9] },
+        { "id": "flail", "anim": "flurry", "t": [0.4, 0.3, 0.4], "dmg": 0.9, "reach": 1.3, "hits": 2, "stun": 0.3, "cd": 1.5, "w": 1 }
+      ] },
+    "hound": { "name": "Lantern Hound", "body": "creature", "ai": "lunger", "hp": 55, "power": 9, "def": 2, "speed": 4.8, "height": 1.0, "xp": 16, "gold": [1, 3],
+      "look": { "type": "hound", "size": 1.3, "colors": { "body": "#2a2e22", "belly": "#4a5236", "accent": "#c6e05a", "eyes": "#d8ff6a" }, "features": { "spikes": true, "glow": true } },
+      "moves": [
+        { "id": "bite", "anim": "attack", "t": [0.32, 0.1, 0.32], "dmg": 1.0, "reach": 1.3, "kb": 1, "stun": 0.3, "cd": 1.0, "w": 2 },
+        { "id": "pounce", "anim": "attack", "t": [0.5, 0.25, 0.45], "dmg": 1.4, "reach": 1.4, "kb": 5, "down": true, "move": 9, "up": 3, "cd": 2.6, "w": 2, "range": [3, 6] }
+      ] },
+    "golem": { "name": "Stoneskin", "body": "creature", "ai": "armored", "hp": 220, "power": 14, "def": 16, "speed": 1.6, "height": 2.4, "heavy": true, "poise": 40, "xp": 45, "gold": [8, 16],
+      "look": { "type": "golem", "size": 1.2, "colors": { "body": "#6e6a62", "belly": "#8e897e", "accent": "#c6e05a", "eyes": "#d8ff6a" }, "features": { "core": true, "glow": true } },
+      "moves": [
+        { "id": "pound", "anim": "attack", "t": [0.8, 0.14, 0.6], "dmg": 1.8, "reach": 2.0, "depth": 1.0, "kb": 8, "down": true, "cd": 2.4, "w": 2 },
+        { "id": "quake", "anim": "attack", "t": [1.1, 0.1, 0.8], "cd": 6, "w": 1, "aoe": { "at": "self", "r": 3.2, "dmg": 1.4, "up": 5, "down": true } }
+      ] },
+    "wyrmling": { "name": "Spine Wyrmling", "body": "creature", "ai": "caster", "hp": 70, "power": 11, "def": 4, "speed": 3.0, "height": 1.2, "xp": 26, "gold": [3, 8],
+      "look": { "type": "drake", "size": 0.8, "colors": { "body": "#5a6a78", "belly": "#a8b8c0", "accent": "#2a3440", "eyes": "#ffd060" } },
+      "moves": [
+        { "id": "spit", "anim": "attack", "t": [0.65, 0.05, 0.5], "cd": 2.2, "w": 2, "range": [3, 8],
+          "shot": { "speed": 10, "range": 10, "dmg": 1.2, "kb": 3, "stun": 0.4, "burst": 1.2, "look": "wyrmfire" } },
+        { "id": "tail", "anim": "attack", "t": [0.45, 0.12, 0.4], "dmg": 1.2, "reach": 1.6, "kb": 5, "down": true, "cd": 2.5, "w": 1 }
+      ] }
+  },
+  "bosses": {
+    "grell": { "name": "Grell the Hook", "title": "Rook Gang lieutenant", "body": "chibi", "ai": "boss", "hp": 520, "power": 11, "def": 6, "speed": 3.0, "height": 1.95, "heavy": true, "poise": 26, "xp": 120, "gold": [30, 50],
+      "look": { "body": { "skin": "#a9714c", "build": "broad" }, "hair": { "id": "short", "color": "#2a1e14" }, "facialHair": { "id": "goatee", "color": "#2a1e14" }, "hat": { "id": "tricorn", "color": "#2a2420" }, "top": { "id": "duster", "color": "#5a2a22" }, "bottom": { "id": "breeches", "color": "#3a2e24" }, "shoes": { "id": "knee_boots", "color": "#22180f" }, "accessory": { "id": "eyepatch" }, "held": { "id": "tv_scimitar", "color": "#c9ccd2" }, "offhand": { "id": "dagger", "color": "#9aa" } },
+      "moves": [
+        { "id": "slash", "anim": "slash", "t": [0.4, 0.1, 0.35], "dmg": 1.1, "reach": 1.8, "kb": 2, "stun": 0.4, "cd": 1.2, "w": 3 },
+        { "id": "hook", "anim": "throw", "t": [0.7, 0.3, 0.5], "cd": 5, "w": 2, "range": [3, 9], "pull": { "range": 9, "dmg": 0.8, "stun": 0.8 } },
+        { "id": "spin", "anim": "spinSweep", "t": [0.6, 0.4, 0.6], "dmg": 1.0, "reach": 2.0, "depth": 1.1, "back": true, "hits": 3, "kb": 6, "down": true, "cd": 6, "w": 2, "phase": 1 },
+        { "id": "callgang", "anim": "point", "t": [0.5, 0.1, 0.4], "cd": 14, "w": 2, "phase": 1, "summon": ["thug", "knifer"] }
+      ],
+      "phases": [0.5],
+      "lines": { "start": "grell_start", "phase": "grell_phase", "end": "grell_end" } },
+    "maud": { "name": "Maud of the Briars", "title": "hedge witch of Thornwood", "body": "chibi", "ai": "boss", "hp": 600, "power": 12, "def": 4, "speed": 2.4, "height": 1.75, "heavy": true, "poise": 30, "xp": 160, "gold": [40, 60], "keepAway": 4.5,
+      "look": { "body": { "form": "fem", "skin": "#e7b48f" }, "hair": { "id": "long", "color": "#9aa08a" }, "hat": { "id": "witch_hat", "color": "#2f3a22" }, "top": { "id": "robe", "color": "#3a4a2a", "color2": "#8a3a2a" }, "shoes": { "id": "boots", "color": "#2a2018" }, "cape": { "id": "tattered_cape", "color": "#2f3a22" }, "held": { "id": "g5_staff_branch", "color": "#6b4a2a" } },
+      "moves": [
+        { "id": "thorns", "anim": "castPoint", "t": [0.6, 0.05, 0.4], "cd": 1.6, "w": 3, "range": [2, 10], "fan": { "n": 3, "spread": 1.4, "speed": 9, "range": 11, "dmg": 1.0, "kb": 2, "stun": 0.4, "slow": 0.4, "look": "thorn" } },
+        { "id": "briarpatch", "anim": "channel", "t": [0.8, 0.1, 0.5], "cd": 5, "w": 2, "aoe": { "at": "foe", "ahead": 0, "r": 1.8, "delay": 1.0, "dmg": 1.5, "up": 6, "down": true } },
+        { "id": "firewall", "anim": "castStaff", "t": [0.9, 0.1, 0.6], "cd": 8, "w": 2, "phase": 1, "fan": { "n": 5, "spread": 2.6, "speed": 7, "range": 12, "dmg": 1.3, "kb": 3, "down": true, "look": "fire" } },
+        { "id": "wolves", "anim": "point", "t": [0.6, 0.1, 0.4], "cd": 15, "w": 2, "phase": 1, "summon": ["wolf", "wolf"] }
+      ],
+      "phases": [0.5],
+      "lines": { "start": "maud_start", "phase": "maud_phase", "end": "maud_end" } },
+    "vessa": { "name": "Captain Vessa", "title": "Lantern Guard", "body": "chibi", "ai": "boss", "hp": 720, "power": 13, "def": 12, "speed": 2.8, "height": 1.85, "heavy": true, "poise": 34, "shield": "front", "xp": 200, "gold": [50, 70],
+      "look": { "body": { "form": "fem", "skin": "#f0c9a8" }, "hair": { "id": "long_braid", "color": "#c8a060" }, "hat": { "id": "g5_plate_armet", "color": "#4a5236" }, "top": { "id": "g5_plate_cuirass", "color": "#6f7560", "color2": "#c6e05a" }, "bottom": { "id": "g5_plate_cuisses", "color": "#4a4f3c" }, "shoes": { "id": "g5_plate_sabatons", "color": "#2a2e22" }, "cape": { "id": "long_cloak", "color": "#a6c24a" }, "held": { "id": "fh_longsword", "color": "#d0d4c0" }, "offhand": { "id": "g5_scutcheon", "color": "#3e4a22", "emblem": "sun" } },
+      "moves": [
+        { "id": "cut", "anim": "slash", "t": [0.42, 0.1, 0.35], "dmg": 1.2, "reach": 1.9, "kb": 2, "stun": 0.4, "cd": 1.2, "w": 3 },
+        { "id": "rush", "anim": "bash", "t": [0.7, 0.5, 0.5], "dmg": 1.5, "reach": 1.5, "kb": 8, "down": true, "move": 9, "cd": 4.5, "w": 2, "range": [3, 9] },
+        { "id": "volley", "anim": "point", "t": [0.6, 0.1, 0.4], "cd": 9, "w": 2, "phase": 1, "rain": { "n": 6, "r": 1.3, "delay": 1.1, "dmg": 1.3, "spread": 7, "down": true } },
+        { "id": "guards", "anim": "point", "t": [0.5, 0.1, 0.4], "cd": 16, "w": 2, "phase": 1, "summon": ["guard", "crossbow"] }
+      ],
+      "phases": [0.5],
+      "lines": { "start": "vessa_start", "phase": "vessa_phase", "end": "vessa_end" } },
+    "golem_boss": { "name": "The Lantern Golem", "title": "warden of Greyspire", "body": "creature", "ai": "boss", "hp": 900, "power": 15, "def": 14, "speed": 1.8, "height": 3.4, "heavy": true, "poise": 60, "xp": 260, "gold": [60, 90],
+      "look": { "type": "titan", "size": 1.6, "colors": { "body": "#5e5a52", "belly": "#7e796e", "accent": "#c6e05a", "eyes": "#d8ff6a" }, "features": { "core": true, "glow": true, "plates": true } },
+      "moves": [
+        { "id": "smash", "anim": "attack", "t": [0.8, 0.15, 0.6], "dmg": 1.8, "reach": 2.6, "depth": 1.2, "kb": 9, "down": true, "cd": 2, "w": 3 },
+        { "id": "stomp", "anim": "attack", "t": [1.0, 0.1, 0.8], "cd": 6, "w": 2, "aoe": { "at": "self", "r": 3.8, "dmg": 1.6, "up": 6, "down": true } },
+        { "id": "beam", "anim": "talk", "t": [1.2, 1.0, 0.6], "cd": 9, "w": 2, "phase": 1, "beam": { "len": 12, "depth": 0.7, "dmg": 0.45, "hits": 6, "kb": 3 } },
+        { "id": "cores", "anim": "talk", "t": [0.6, 0.1, 0.5], "cd": 12, "w": 2, "phase": 1, "rain": { "n": 5, "r": 1.4, "delay": 1.2, "dmg": 1.4, "spread": 8, "down": true } }
+      ],
+      "phases": [0.5],
+      "lines": { "start": "golem_start", "phase": "golem_phase", "end": "golem_end" } },
+    "corwen": { "name": "High Zealot Corwen", "title": "voice of the Lamplord", "body": "chibi", "ai": "boss", "hp": 820, "power": 15, "def": 8, "speed": 3.4, "height": 1.85, "heavy": true, "poise": 34, "xp": 300, "gold": [70, 100],
+      "look": { "body": { "skin": "#5e3b28" }, "hair": { "id": "buzz", "color": "#222" }, "top": { "id": "g5_cloth_vestment", "color": "#2c3122", "color2": "#d8ff6a" }, "bottom": { "id": "g5_cloth_pleats", "color": "#22261a" }, "shoes": { "id": "g5_cloth_curltoes", "color": "#1a1d14" }, "accessory": { "id": "mask", "color": "#e8e0b0" }, "decor": { "id": "rune_halo", "color": "#d8ff6a" }, "held": { "id": "g5_bardiche", "color": "#c6e05a" } },
+      "moves": [
+        { "id": "reap", "anim": "sweep", "t": [0.5, 0.14, 0.4], "dmg": 1.3, "reach": 2.4, "depth": 1.0, "kb": 3, "stun": 0.45, "cd": 1.3, "w": 3 },
+        { "id": "dive", "anim": "slam", "t": [0.7, 0.4, 0.6], "dmg": 1.7, "reach": 1.8, "kb": 7, "down": true, "move": 10, "cd": 4, "w": 2, "range": [3, 10] },
+        { "id": "pyre", "anim": "channel", "t": [0.8, 0.1, 0.5], "cd": 7, "w": 2, "phase": 1, "rain": { "n": 7, "r": 1.3, "delay": 1.0, "dmg": 1.4, "spread": 8, "down": true } },
+        { "id": "faithful", "anim": "point", "t": [0.5, 0.1, 0.4], "cd": 14, "w": 2, "phase": 1, "summon": ["zealot", "zealot", "priest"] }
+      ],
+      "phases": [0.5],
+      "lines": { "start": "corwen_start", "phase": "corwen_phase", "end": "corwen_end" } },
+    "lamplord": { "name": "Aldric, the Lamplord", "title": "head of the Lantern Order", "body": "chibi", "ai": "boss", "hp": 1300, "power": 17, "def": 12, "speed": 3.0, "height": 2.3, "heavy": true, "poise": 44, "xp": 500, "gold": [120, 160], "keepAway": 3,
+      "look": { "body": { "skin": "#f6d7bd", "build": "broad" }, "hair": { "id": "long", "color": "#e8e4dc" }, "facialHair": { "id": "long", "color": "#e8e4dc" }, "hat": { "id": "crown", "color": "#c6e05a" }, "top": { "id": "g5_cloth_vestment", "color": "#e8e4dc", "color2": "#c6e05a" }, "bottom": { "id": "g5_cloth_pleats", "color": "#c8c4bc" }, "shoes": { "id": "g5_cloth_curltoes", "color": "#8a8478" }, "cape": { "id": "long_cloak", "color": "#2c3122" }, "decor": { "id": "g5_hexlantern", "color": "#d8ff6a" }, "held": { "id": "g5_staff_halo", "color": "#d8ff6a" } },
+      "moves": [
+        { "id": "lanternlash", "anim": "slash", "t": [0.45, 0.12, 0.35], "dmg": 1.3, "reach": 2.2, "kb": 3, "stun": 0.45, "cd": 1.2, "w": 3 },
+        { "id": "orbs", "anim": "castPoint", "t": [0.6, 0.05, 0.4], "cd": 3, "w": 2, "range": [3, 12], "fan": { "n": 4, "spread": 2.2, "speed": 8, "range": 12, "dmg": 1.2, "kb": 2, "stun": 0.4, "look": "lantern", "seek": 1.2 } },
+        { "id": "judgement", "anim": "channel", "t": [0.9, 0.1, 0.6], "cd": 7, "w": 2, "phase": 1, "rain": { "n": 8, "r": 1.4, "delay": 1.0, "dmg": 1.5, "spread": 9, "down": true } },
+        { "id": "wyrmfire", "anim": "castStaff", "t": [1.2, 1.2, 0.6], "cd": 10, "w": 2, "phase": 1, "beam": { "len": 14, "depth": 0.8, "dmg": 0.5, "hits": 7, "kb": 3 } },
+        { "id": "chained", "anim": "point", "t": [0.5, 0.1, 0.4], "cd": 16, "w": 1, "phase": 1, "summon": ["wyrmling", "zealot"] }
+      ],
+      "phases": [0.55],
+      "lines": { "start": "lamplord_start", "phase": "lamplord_phase", "end": "lamplord_end" } }
+  }
+}

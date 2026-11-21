@@ -1,0 +1,13 @@
+# Wyrmroad room server (dev) on :8641 (+ wss 8643). User unit, LAN only. OFF by default (owner 2026-11-16): start it while
+# working on the game with playground/tools/game-servers.sh start wyrmroad-dev. The public game's rooms run on the
+# games.radgh.com droplet (wss://games.radgh.com/ws/wyrmroad).
+[Unit]
+Description=Wyrmroad room server (dev) on :8641
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/wyrmroad/ops/start.sh dev
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=default.target

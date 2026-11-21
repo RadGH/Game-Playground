@@ -562,6 +562,17 @@
    ]
   },
   {
+   "title": "Beast Snarling",
+   "author": "Christopherderp",
+   "url": "https://freesound.org/people/Christopherderp/sounds/342204/",
+   "license": "CC0 1.0",
+   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+   "source": "freesound",
+   "files": [
+    "fs/death.beast-3.ogg"
+   ]
+  },
+  {
    "title": "Dropping Sword 2",
    "author": "Christopherderp",
    "url": "https://freesound.org/people/Christopherderp/sounds/342453/",
@@ -614,6 +625,18 @@
    "source": "freesound",
    "files": [
     "fs/melee.hit-1.ogg"
+   ]
+  },
+  {
+   "title": "Dog Growl - Beast / Creature",
+   "author": "coldvet",
+   "url": "https://freesound.org/people/coldvet/sounds/404920/",
+   "license": "CC0 1.0",
+   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+   "source": "freesound",
+   "files": [
+    "fs/death.beast-1.ogg",
+    "fs/death.beast-2.ogg"
    ]
   },
   {
@@ -752,6 +775,17 @@
    ]
   },
   {
+   "title": "Clean fast Swoosh.aiff",
+   "author": "Danjocross",
+   "url": "https://freesound.org/people/Danjocross/sounds/507466/",
+   "license": "CC0 1.0",
+   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+   "source": "freesound",
+   "files": [
+    "fs/blade.whirl-2.ogg"
+   ]
+  },
+  {
    "title": "Bird Sound #1",
    "author": "danlucaz",
    "url": "https://freesound.org/people/danlucaz/sounds/517736/",
@@ -815,6 +849,17 @@
    "source": "freesound",
    "files": [
     "fs/status.haste.tick-2.ogg"
+   ]
+  },
+  {
+   "title": "wooden-crate-break1.wav",
+   "author": "DeltaCode",
+   "url": "https://freesound.org/people/DeltaCode/sounds/667653/",
+   "license": "CC0 1.0",
+   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+   "source": "freesound",
+   "files": [
+    "fs/crate.break-3.ogg"
    ]
   },
   {
@@ -1163,6 +1208,17 @@
    "source": "freesound",
    "files": [
     "fs/death.construct-2.ogg"
+   ]
+  },
+  {
+   "title": "snd_box_smash.wav",
+   "author": "gristi",
+   "url": "https://freesound.org/people/gristi/sounds/562189/",
+   "license": "CC0 1.0",
+   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+   "source": "freesound",
+   "files": [
+    "fs/crate.break-2.ogg"
    ]
   },
   {
@@ -1524,6 +1580,17 @@
    ]
   },
   {
+   "title": "Crate Break 4.wav",
+   "author": "kevinkace",
+   "url": "https://freesound.org/people/kevinkace/sounds/66780/",
+   "license": "CC0 1.0",
+   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+   "source": "freesound",
+   "files": [
+    "fs/crate.break-1.ogg"
+   ]
+  },
+  {
    "title": "Dark Dungeon Ambience",
    "author": "Kinoton",
    "url": "https://freesound.org/people/Kinoton/sounds/516566/",
@@ -1565,6 +1632,17 @@
    "source": "freesound",
    "files": [
     "fs/spell.nature.launch-3.ogg"
+   ]
+  },
+  {
+   "title": "Inception Horn Victory",
+   "author": "Kubatko",
+   "url": "https://freesound.org/people/Kubatko/sounds/336725/",
+   "license": "CC0 1.0",
+   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+   "source": "freesound",
+   "files": [
+    "fs/victory.horn-1.ogg"
    ]
   },
   {
@@ -1643,17 +1721,6 @@
    "source": "freesound",
    "files": [
     "fs/loot.rare-1.ogg"
-   ]
-  },
-  {
-   "title": "monster_sound_medium_death.wav",
-   "author": "Leadstarson",
-   "url": "https://freesound.org/people/Leadstarson/sounds/559621/",
-   "license": "CC0 1.0",
-   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
-   "source": "freesound",
-   "files": [
-    "fs/death.beast-1.ogg"
    ]
   },
   {
@@ -2567,6 +2634,17 @@
    ]
   },
   {
+   "title": "swosh swinging sword 37.flac",
+   "author": "qubodup",
+   "url": "https://freesound.org/people/qubodup/sounds/60024/",
+   "license": "CC0 1.0",
+   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
+   "source": "freesound",
+   "files": [
+    "fs/blade.whirl-1.ogg"
+   ]
+  },
+  {
    "title": "SWOSH-01 44.1kHz",
    "author": "qubodup",
    "url": "https://freesound.org/people/qubodup/sounds/59988/",
@@ -3294,17 +3372,6 @@
     "fs/water.splash.small-1.ogg",
     "fs/water.splash.small-2.ogg",
     "fs/water.splash.small-3.ogg"
-   ]
-  },
-  {
-   "title": "monster_dying.wav",
-   "author": "vox_artist",
-   "url": "https://freesound.org/people/vox_artist/sounds/513621/",
-   "license": "CC0 1.0",
-   "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/",
-   "source": "freesound",
-   "files": [
-    "fs/death.beast-2.ogg"
    ]
   },
   {

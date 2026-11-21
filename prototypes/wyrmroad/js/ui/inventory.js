@@ -1,22 +1,39 @@
 // Bag and gear: the paper doll (the live 3D hero wearing every piece, seven slots around it), the stat sheet (every
 // number from heroStats — the one stat function — with base and gear parts in green/red, rule 5), the bag grid, and the
 // picked item's card beside the one it would replace (compare always on screen, game-standards §5b; the Duelist can
-// compare a blade against either hand). Equip, take off, sell (salvage) for gold.
+// compare a blade against either hand). Equip, take off, sell (salvage) for gold. The stat list is one compact line
+// per stat (owner #103: fits a 1280x720 desktop); each line's meaning opens by hover / keyboard or controller focus
+// (shared/tooltip.js) and by a tap on the row. Local co-op (#111): a tab per hero on this screen (controller: the d-pad
+// reaches them, A picks), and Give hands a bag item — or a worn one, taken off first — to another hero's bag.
 import { heroStats, baseOf, canUse, SLOTS, dressedLook } from '../sim/items.js';
 import { ask } from '../../../../shared/dialog.js';
 import { hp as n } from '../../../../shared/format.js';
 import { icon } from './icons.js';
 import { esc, itemCardHtml, itemName, rarityColor, sheetRows, statAmount, SLOT_NAMES, CLASS_NAMES } from './text.js';
 import { openSheet } from './kit.js';
-import { equip, unequip, BAG_SIZE } from '../save.js';
+import { equip, unequip, giveItem, BAG_SIZE } from '../save.js';
 import { sellPrice } from './peddler.js';
 
 const LEFT = ['head', 'chest', 'legs', 'feet'], RIGHT = ['weapon', 'offhand', 'trinket'];
 
-export function openInventory(app, h, { live = false, onChange = null } = {}) {
+/** The heroes this screen can switch between: every local player's hero in the party (co-op), the opened one first
+ *  when it is not in the party. Bots and other people's online heroes are not ours to dress. */
+function partyHeroes(app, h) {
+  const s = app.session, out = [];
+  for (const slot of app.party || []) {
+    if (slot.bot || slot.remote || (s?.online && !s.localPids?.includes(slot.pid))) continue;
+    const x = app.hero(slot.heroId); if (x && !out.some(o => o.hero.id === x.id)) out.push({ hero: x, color: slot.color });
+  }
+  if (!out.some(o => o.hero.id === h.id)) out.unshift({ hero: h, color: null });
+  return out;
+}
+
+export function openInventory(app, h0, { live = false, onChange = null } = {}) {
   const { data } = app;
-  let sel = null, vsSlot = null, preview = null, closed = false;
-  const sh = openSheet({ title: `${h.name} · Bag and gear`, wide: true, cls: 'wr-inv', body: `<div class="wr-inv-cols">
+  let h = h0, sel = null, vsSlot = null, preview = null, closed = false, openStat = null;
+  const mates = partyHeroes(app, h0);
+  const tabsHtml = () => (mates.length > 1 ? `<div class="wr-inv-tabs" role="tablist" aria-label="Whose bag">${mates.map(m => `<button type="button" role="tab" class="wr-inv-tab${m.hero === h ? ' on' : ''}" data-hero="${esc(m.hero.id)}" aria-selected="${m.hero === h}" style="--pc:${m.color || 'var(--amber)'}"><b>${esc(m.hero.name)}</b><small>Level ${n(m.hero.level)} ${esc(CLASS_NAMES[m.hero.cls])}</small></button>`).join('')}</div>` : '');
+  const sh = openSheet({ title: mates.length > 1 ? 'Bags and gear' : `${h.name} · Bag and gear`, wide: true, cls: 'wr-inv', body: `<div class="wr-inv-tabbox">${tabsHtml()}</div><div class="wr-inv-cols">
       <section class="wr-doll-col">
         <div class="wr-doll">
           <div class="wr-doll-side">${LEFT.map(s => `<button type="button" class="wr-slot" data-slot="${s}"></button>`).join('')}</div>
@@ -41,6 +58,8 @@ export function openInventory(app, h, { live = false, onChange = null } = {}) {
     return `<button type="button" class="wr-cell${sel?.uid === it.uid ? ' on' : ''}${ok ? '' : ' wr-cell-off'}" ${attrs} style="--rar:${rarityColor(data.items, it)};--tint:${tint}" ${b ? `data-icon-base="${esc(b.id)}"` : ''} aria-label="${esc(itemName(data.items, it))}">${icon(b?.slot || 'bag')}</button>`;
   };
   function draw() {
+    const tb = root.querySelector('.wr-inv-tabbox'); if (mates.length > 1) tb.innerHTML = tabsHtml();
+    root.querySelector('.wr-preview').setAttribute('aria-label', `${h.name} wearing their gear`);
     // slots
     root.querySelectorAll('[data-slot]').forEach(el => {
       const s = el.dataset.slot, it = h.gear[s];
@@ -64,11 +83,13 @@ export function openInventory(app, h, { live = false, onChange = null } = {}) {
     let after = null;
     const it = sel?.uid && h.bag.find(x => x.uid === sel.uid);
     if (it && canUse(data.items, h.cls, it)) { const b = baseOf(data.items, it), g = { ...h.gear, [b.slot]: it }; if (b.hand === 'two') delete g.offhand; after = heroStats(data.classes, data.items, { cls: h.cls, level: h.level, gear: g }); }
-    root.querySelector('.wr-sheetstats').innerHTML = `<h3>${icon('info')}Your numbers</h3><dl class="wr-stats">${rows.map(r => {
+    root.querySelector('.wr-sheetstats').innerHTML = `<h3>${icon('info')}${mates.length > 1 ? `${esc(h.name)}’s numbers` : 'Your numbers'}</h3><div class="wr-stats">${rows.map(r => {
       const d = after ? Math.round(((after[r.k] || 0) - r.total) * 10) / 10 : 0;
-      const parts = r.gear ? ` <span class="wr-parts">(${statAmount(r.k, r.base, { sign: false })} <i class="${r.gear > 0 ? 'wr-up' : 'wr-down'}">${statAmount(r.k, r.gear)}</i>)</span>` : '';
-      return `<div class="wr-stat${r.gear > 0 ? ' wr-stat-up' : r.gear < 0 ? ' wr-stat-down' : ''}"><dt>${esc(r.name)}</dt><dd><b>${statAmount(r.k, r.total, { sign: false })}</b>${parts}${d ? ` <em class="${d > 0 ? 'wr-up' : 'wr-down'}">${statAmount(r.k, d)}</em>` : ''}</dd><p>${esc(r.text)}</p></div>`;
-    }).join('')}</dl>`;
+      const parts = r.gear ? `${statAmount(r.k, r.base, { sign: false })} <i class="${r.gear > 0 ? 'wr-up' : 'wr-down'}">${statAmount(r.k, r.gear)}</i>` : '';
+      const tip = `<b>${esc(r.name)} ${statAmount(r.k, r.total, { sign: false })}</b>${r.gear ? `<br>${statAmount(r.k, r.base, { sign: false })} from your level, ${statAmount(r.k, r.gear)} from gear` : ''}${r.text ? `<br>${esc(r.text)}` : ''}${d ? `<br>Wearing the picked item: ${statAmount(r.k, d)}` : ''}`;
+      const open = openStat === r.k;
+      return `<button type="button" class="wr-stat${r.gear > 0 ? ' wr-stat-up' : r.gear < 0 ? ' wr-stat-down' : ''}${open ? ' open' : ''}" data-stat="${r.k}" aria-expanded="${open}" data-tip-html="${esc(tip)}"><span class="wr-stat-name">${esc(r.name)}</span><span class="wr-stat-val"><b>${statAmount(r.k, r.total, { sign: false })}</b>${parts ? ` <span class="wr-parts">(${parts})</span>` : ''}${d ? ` <em class="${d > 0 ? 'wr-up' : 'wr-down'}">${statAmount(r.k, d)}</em>` : ''}</span><span class="wr-stat-more">${esc(r.text || (r.gear ? `${statAmount(r.k, r.gear)} from gear` : 'From your level'))}</span></button>`;
+    }).join('')}</div>`;
   }
   function detail() {
     const box = root.querySelector('.wr-inv-detail');
@@ -76,7 +97,7 @@ export function openInventory(app, h, { live = false, onChange = null } = {}) {
     if (sel.slot) {
       const it = h.gear[sel.slot];
       box.innerHTML = `<div class="wr-compare wr-compare-one"><div><h4>${esc(SLOT_NAMES[sel.slot])}</h4>${itemCardHtml(data.items, it, { cls: h.cls, expand: true })}</div></div>
-        <div class="wr-inv-acts">${it ? `<button type="button" class="wr-btn" data-act="unequip" ${h.bag.length >= BAG_SIZE ? 'disabled' : ''}>${icon('bag')}<span>Take off</span></button>${h.bag.length >= BAG_SIZE ? '<p class="wr-why">Your bag is full</p>' : ''}` : ''}</div>`;
+        <div class="wr-inv-acts">${it ? `<button type="button" class="wr-btn" data-act="unequip" ${h.bag.length >= BAG_SIZE ? 'disabled' : ''}>${icon('bag')}<span>Take off</span></button>${h.bag.length >= BAG_SIZE ? '<p class="wr-why">Your bag is full</p>' : ''}${giveHtml(true)}` : ''}</div>`;
       return;
     }
     const it = h.bag.find(x => x.uid === sel.uid); if (!it) { sel = null; return detail(); }
@@ -91,8 +112,16 @@ export function openInventory(app, h, { live = false, onChange = null } = {}) {
       <div class="wr-inv-acts">
         <button type="button" class="wr-btn wr-primary" data-act="equip" ${ok ? '' : 'disabled'}>${icon('check')}<span>Wear it${b.slot !== vs ? ` (${SLOT_NAMES[b.slot]})` : ''}</span></button>
         <button type="button" class="wr-btn wr-ghost" data-act="sell">${icon('gold')}<span>Sell for ${n(sellPrice(data.items, it))} gold</span></button>
+        ${giveHtml(false)}
         ${ok ? '' : `<p class="wr-why">${esc(b.cls.map(c => CLASS_NAMES[c]).join(', '))} only</p>`}
       </div>`;
+  }
+  /** Give buttons, one per other hero in the party; a full bag says so on the button (rule 10). */
+  function giveHtml(worn) {
+    return mates.filter(m => m.hero !== h).map(m => {
+      const full = m.hero.bag.length >= BAG_SIZE;
+      return `<button type="button" class="wr-btn wr-give" data-give="${esc(m.hero.id)}" style="--pc:${m.color || 'var(--amber)'}" ${full ? 'disabled' : ''}>${icon('swap')}<span>${full ? `${esc(m.hero.name)}’s bag is full` : `${worn ? 'Take off and give' : 'Give'} to ${esc(m.hero.name)}`}</span></button>`;
+    }).join('');
   }
   /** In a chapter, the hero on the street wears the change at once (local play; online it counts from the next chapter). */
   function applyLive() {
@@ -106,6 +135,17 @@ export function openInventory(app, h, { live = false, onChange = null } = {}) {
     e.look = dressedLook(data.classes, data.items, { cls: h.cls, look: h.look, gear: h.gear });
   }
   root.addEventListener('click', async e => {
+    const tab = e.target.closest('[data-hero]');
+    if (tab) { const m = mates.find(x => x.hero.id === tab.dataset.hero); if (m && m.hero !== h) { h = m.hero; sel = null; vsSlot = null; app.audio.play('ui.tab'); look(); draw(); root.querySelector(`[data-hero="${CSS.escape(h.id)}"]`)?.focus({ preventScroll: true }); } return; }
+    const st = e.target.closest('[data-stat]');
+    if (st) { openStat = openStat === st.dataset.stat ? null : st.dataset.stat; sheet(); root.querySelector(`[data-stat="${st.dataset.stat}"]`)?.focus({ preventScroll: true }); return; }
+    const gv = e.target.closest('[data-give]');
+    if (gv) {
+      const to = mates.find(x => x.hero.id === gv.dataset.give)?.hero;
+      const it = to && giveItem(h, to, sel?.slot ? { slot: sel.slot } : { uid: sel?.uid });
+      if (it) { app.audio.play('equip'); app.note(`${itemName(data.items, it)} is in ${to.name}’s bag now.`); sel = null; app.saveNow(); applyLive(); draw(); }
+      return;
+    }
     const c = e.target.closest('[data-uid]'); if (c) { sel = { uid: c.dataset.uid }; vsSlot = null; app.audio.play('ui.click'); draw(); return; }
     const s = e.target.closest('[data-slot]'); if (s) { sel = { slot: s.dataset.slot }; app.audio.play('ui.click'); draw(); return; }
     const v = e.target.closest('[data-vs]'); if (v) { vsSlot = v.dataset.vs; detail(); return; }

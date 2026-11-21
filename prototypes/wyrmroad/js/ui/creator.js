@@ -83,8 +83,8 @@ export function creatorScreen(app, opts = {}) {
     skin: { list: LOOK.skin, get: () => st.look.skin.color, set: v => { st.look.skin.color = v; st.look.body.skin = v; }, label: 'Skin' },
     eyeColor: { list: LOOK.eyeColor, get: () => st.look.eyes.color, set: v => { st.look.eyes.color = v; }, label: 'Eye colour' },
     hairColor: { list: LOOK.hairColor, get: () => st.look.hair.color, set: v => { st.look.hair.color = v; }, label: 'Colour' },
-    form: { list: LOOK.form, get: () => st.look.body.form, set: v => { st.look.body.form = v; if (v === 'masc') st.look.body.chestSize = 'flat'; }, label: 'Body form' },
-    chest: { list: LOOK.chest, get: () => st.look.body.chestSize, set: v => { st.look.body.chestSize = v; }, label: 'Chest' },
+    // the form alone shapes the body (masculine flat, feminine round — js/render/actors.js bodyShape): no separate chest row
+    form: { list: LOOK.form, get: () => st.look.body.form, set: v => { st.look.body.form = v; delete st.look.body.chestSize; }, label: 'Body form' },
   };
 
   function classTab() {
@@ -106,13 +106,12 @@ export function creatorScreen(app, opts = {}) {
   }
   function draw() {
     root.querySelectorAll('.wr-tab').forEach(t => { const on = t.dataset.tab === st.tab; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
-    const fem = st.look.body.form === 'fem';
     if (st.tab === 'class') body.innerHTML = classTab();
     else if (st.tab === 'face') body.innerHTML = swatches('skin', 'Skin', LOOK.skin, st.look.skin.color) + optRow('eyes', 'Eyes', LOOK.eyes, st.look.eyes.id)
       + swatches('eyeColor', 'Eye colour', LOOK.eyeColor, st.look.eyes.color) + optRow('brows', 'Brows', LOOK.brows, st.look.brows.id)
       + optRow('extras', 'Face marks', LOOK.extras, st.look.extras.id) + optRow('facialHair', 'Beard', LOOK.facialHair, st.look.facialHair.id);
     else if (st.tab === 'hair') body.innerHTML = optRow('hair', 'Style', LOOK.hair, st.look.hair.id) + swatches('hairColor', 'Colour', LOOK.hairColor, st.look.hair.color);
-    else body.innerHTML = toggle('form', 'Body form', LOOK.form, st.look.body.form) + toggle('chest', 'Chest', LOOK.chest, st.look.body.chestSize, { disabled: !fem, note: 'With the feminine form' });
+    else body.innerHTML = toggle('form', 'Body form', LOOK.form, st.look.body.form);
     sub();
   }
   const sub = () => { root.querySelector('.wr-create-sub').textContent = `${(st.name || '').trim() || 'Name your hero'} · ${CLASS_NAMES[st.cls]}`; };

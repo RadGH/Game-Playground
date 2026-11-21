@@ -389,5 +389,11 @@
    "fs/crowd.cheer-2.ogg"
   ],
   "note": "short crowd cheers with clapping"
+ },
+ "victory.horn": {
+  "files": [
+   "fs/victory.horn-1.ogg"
+  ],
+  "note": "A low brass victory horn, three seconds (Kubatko), for a grounded win instead of a cartoon fanfare (Wyrmroad #108, 2026-11-21)."
  }
 }

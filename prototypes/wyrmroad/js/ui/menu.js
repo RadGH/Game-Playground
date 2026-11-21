@@ -7,7 +7,7 @@ import { icon } from './icons.js';
 import { esc } from './text.js';
 import { fmt, pct } from '../../../../shared/format.js';
 import { openSheet } from './kit.js';
-import { SCHEMES, ACTION_NAMES, ACTION_HELP, keyName, padName } from '../input/bindings.js';
+import { SCHEMES, ACTION_NAMES, ACTION_HELP, keyName, padName, KEYBOARD_LAYOUTS, MOUSE_LABELS } from '../input/bindings.js';
 
 export function openMenu(app, { onClose = null } = {}) {
   const inPlay = app.screen === 'play', online = !!app.session?.online;
@@ -69,6 +69,7 @@ export function openSettings(app) {
       <div class="wr-range"><input type="range" min="0" max="1" step="0.05" value="${S.volume}" aria-label="Sound volume"><output>${fmt(Math.round(S.volume * 100))}%</output></div></div>
     <div class="wr-set-row"><div><b>Graphics</b><small>Low is lighter on phones and older computers (used the next time the game opens)</small></div>
       <div class="wr-toggle">${['high', 'low'].map(q => `<button type="button" class="${S.quality === q ? 'on' : ''}" data-q="${q}" aria-pressed="${S.quality === q}">${q === 'high' ? 'High' : 'Low'}</button>`).join('')}</div></div>
+    ${layoutRow(S)}
     ${sw('shake', 'Screen shake', 'Big hits and the waking road shake the view')}
     ${sw('damageNumbers', 'Damage numbers', 'Numbers float up from every hit')}
     <button type="button" class="wr-btn" data-act="controls">${icon('keyboard')}<span>Controls</span></button>
@@ -79,12 +80,26 @@ export function openSettings(app) {
   sh.body.addEventListener('click', e => {
     const f = e.target.closest('[data-flag]');
     if (f) { const k = f.dataset.flag; app.setSetting(k, !S[k]); f.classList.toggle('on', S[k]); f.setAttribute('aria-pressed', S[k]); f.querySelector('span').textContent = S[k] ? 'On' : 'Off'; app.audio.play('ui.click'); return; }
+    const L = e.target.closest('[data-layout]');
+    if (L) { pickLayout(app, sh.body, L.dataset.layout); return; }
     const q = e.target.closest('[data-q]');
     if (q) { app.setSetting('quality', q.dataset.q); sh.body.querySelectorAll('[data-q]').forEach(b => { const on = b.dataset.q === S.quality; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); return; }
     if (e.target.closest('[data-act="controls"]')) openControls(app);
     if (e.target.closest('[data-act="restore"]')) restore(app);
   });
   return sh;
+}
+
+/** The keyboard layout choice (owner #93): keyboard and mouse is the default; the round-1 keys-only layout stays. */
+const LAYOUT_TEXT = { kbm: ['Keyboard and mouse', 'WASD to walk, left click attacks, right click is Heavy, 1 and 2 cast'], kb: ['Keyboard only', 'WASD or arrows to walk, J attacks, K is Heavy, U and I cast'] };
+function layoutRow(S) {
+  return `<div class="wr-set-row"><div><b>Keyboard layout</b><small data-layout-sub>${esc(LAYOUT_TEXT[S.keys]?.[1] || '')}</small></div>
+    <div class="wr-toggle" role="group" aria-label="Keyboard layout">${KEYBOARD_LAYOUTS.map(id => `<button type="button" class="${S.keys === id ? 'on' : ''}" data-layout="${id}" aria-pressed="${S.keys === id}">${id === 'kbm' ? 'With mouse' : 'Keys only'}</button>`).join('')}</div></div>`;
+}
+function pickLayout(app, root, id) {
+  app.setSetting('keys', id); app.audio.play('ui.click');
+  root.querySelectorAll('[data-layout]').forEach(b => { const on = b.dataset.layout === id; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  root.querySelectorAll('[data-layout-sub]').forEach(n => { n.textContent = LAYOUT_TEXT[id][1]; });
 }
 
 /** "Bring these saves back" (game-standards §3): the copy a sync replaced is kept in this browser; this puts it back. */
@@ -104,7 +119,11 @@ async function restore(app) {
 export function openControls(app) {
   const HELP = { ...ACTION_HELP, breaker: `Knock back everyone around you for ${pct(app.T.breakerCost)} of your health` };
   const acts = ['left', 'right', 'up', 'down', 'attack', 'heavy', 'jump', 'dash', 'block', 'grab', 'spell1', 'spell2', 'breaker', 'pause'];
-  const keysOf = (id, a) => { const S = SCHEMES[id]; const list = S.move?.[a] || S.keys?.[a] || []; return [...new Set(list.map(keyName))]; };
+  const keysOf = (id, a) => {
+    const S = SCHEMES[id]; const list = (S.move?.[a] || S.keys?.[a] || []).map(keyName);
+    if (S.mouse && S.buttons?.[a] != null) list.unshift(MOUSE_LABELS[S.buttons[a]]);
+    return [...new Set(list)];
+  };
   const padOf = a => {
     const S = SCHEMES.pad;
     if (a in S.dpad) return ['Left stick', `D-pad ${a === 'up' ? '↑' : a === 'down' ? '↓' : a === 'left' ? '←' : '→'}`];
@@ -117,16 +136,22 @@ export function openControls(app) {
   const table = cols => `<table class="wr-ctl"><thead><tr><th>Action</th>${cols.map(c => `<th>${esc(c[0])}</th>`).join('')}</tr></thead><tbody>${acts.map(a => `<tr><th scope="row"><b>${esc(ACTION_NAMES[a])}</b>${HELP[a] ? `<small>${esc(HELP[a])}</small>` : ''}</th>${cols.map(c => `<td>${kbd(c[1](a))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   function show(id) {
     sh.body.querySelectorAll('[data-ctab]').forEach(t => { const on = t.dataset.ctab === id; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
-    if (id === 'kb') body.innerHTML = table([['Keys', a => keysOf('kb', a)]]) + '<p class="wr-dim">Tap a direction twice to dash. W walks up the street, S walks toward you.</p>';
-    else if (id === 'two') body.innerHTML = table([['Left player', a => keysOf('kbL', a)], ['Right player', a => keysOf('kbR', a)]]) + '<p class="wr-dim">Join from Local co-op with F (left keys) and K (right keys).</p>';
+    if (id === 'kb') {
+      const L = app.settings.keys;
+      body.innerHTML = `${layoutRow(app.settings)}${table([[LAYOUT_TEXT[L][0], a => keysOf(L, a)]])}<p class="wr-dim">Tap a direction twice to dash. W walks up the street, S walks toward you.${L === 'kbm' ? ' Hold 1 or 2 to keep a spinning spell going.' : ''}</p>`;
+    }
+    else if (id === 'two') body.innerHTML = table([['Left player', a => keysOf('kbL', a)], ['Right player', a => keysOf('kbR', a)]]) + '<p class="wr-dim">Join from Local co-op with F (left keys) and K (right keys). With the mouse layout, the mouse player can share the keyboard with the right-keys player.</p>';
     else if (id === 'pad') body.innerHTML = table([['Controller', padOf]]) + '<p class="wr-dim">In menus: the d-pad or stick moves, A presses, B goes back. Flick the stick twice to dash.</p>';
     else body.innerHTML = `<ul class="wr-touch-help"><li>${icon('touch')}<span><b>Stick</b> bottom left: walk, and up or down the street</span></li>
       <li>${icon('attack')}<span><b>Attack, Heavy, Jump, Dash, Block</b>: hold Block to keep your guard up</span></li>
-      <li>${icon('spell')}<span><b>Spell buttons</b> show the spell's name; greyed out while it recharges or you lack mana</span></li>
+      <li>${icon('spell')}<span><b>Spell buttons</b> show the spell's name; greyed out while it recharges or you lack mana. Hold one to keep a spinning spell going</span></li>
       <li>${icon('breaker')}<span><b>Breaker</b> knocks everyone around you back for ${pct(app.T.breakerCost)} of your health</span></li>
       <li>${icon('grab')}<span><b>Grab</b> appears when a road weapon is at your feet</span></li></ul>`;
   }
-  sh.body.addEventListener('click', e => { const t = e.target.closest('[data-ctab]'); if (t) show(t.dataset.ctab); });
+  sh.body.addEventListener('click', e => {
+    const t = e.target.closest('[data-ctab]'); if (t) show(t.dataset.ctab);
+    const L = e.target.closest('[data-layout]'); if (L) { pickLayout(app, sh.body, L.dataset.layout); show('kb'); sh.body.querySelector(`[data-layout="${L.dataset.layout}"]`)?.focus({ preventScroll: true }); }
+  });
   show(app.input.last === 'pad' ? 'pad' : app.input.last === 'touch' ? 'touch' : 'kb');
   return sh;
 }

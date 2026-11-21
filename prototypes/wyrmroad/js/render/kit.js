@@ -58,7 +58,7 @@ export function prim(name, ...a) {
     case 'sphere': g = new THREE.SphereGeometry(1, a[0] || 8, a[1] || 6); break;
     case 'ico': g = new THREE.IcosahedronGeometry(1, a[0] || 0); break;
     case 'dodeca': g = new THREE.DodecahedronGeometry(1, 0); break;
-    case 'prism': {   // a roof: triangular prism, ridge along x, 1×1×1
+    case 'prism': {   // a roof: triangular prism, ridge along x (length sx), eaves along z (width sz), base at y = 0, apex at y = sy
       const s = new THREE.Shape(); s.moveTo(-0.5, 0); s.lineTo(0.5, 0); s.lineTo(0, 1); s.lineTo(-0.5, 0);
       g = new THREE.ExtrudeGeometry(s, { depth: 1, bevelEnabled: false }); g.translate(0, 0, -0.5); g.rotateY(Math.PI / 2); break;
     }
@@ -99,6 +99,9 @@ export class Batch {
     tmpM.compose(tmpP, tmpQ, tmpS);
     if (t.m) tmpM.premultiply(t.m);
     g.applyMatrix4(tmpM);
+    // the drawn box of this piece, after its transform: buildings record what was really drawn (themes.js, rule 22)
+    g.computeBoundingBox(); this.last = g.boundingBox.clone();
+    if (!Number.isFinite(this.last.min.x + this.last.max.y)) console.warn('batch: NaN piece', JSON.stringify(t), new Error().stack.split('\n')[2]);
     const c = new THREE.Color(color);
     if (jitter && rand) c.offsetHSL(0, 0, (rand() - 0.5) * jitter);
     const n = g.attributes.position.count, col = new Float32Array(n * 3);
@@ -185,11 +188,12 @@ export function angleMaskTex() {
 
 // ------------------------------------------------------------------------------------------------ glyph atlas
 // White glyphs with a dark rim; tinted per sprite through SpriteMaterial.color. Digits and words used over the fight.
-export const WORDS = ['Blocked', 'Perfect!', 'Level up!', 'Armour', 'No mana', 'Revived'];
+/** Every word label the fx draw (fx.js / fx-acts.js text(…, { word: true })): a word not listed here can't be drawn. */
+export const WORDS = ['Blocked', 'Perfect!', 'Level up!', 'Armour', 'No mana', 'Revived', 'Broken!', 'Steady', 'Riposte!', 'Calmed', 'Enraged!'];
 let atlas = null;
 export function glyphAtlas() {
   if (atlas) return atlas;
-  const W = 512, H = 512, cw = 40, ch = 60, rects = {};
+  const W = 512, H = 1024, cw = 40, ch = 60, rects = {};     // 1024 tall: room for every word (2 rows of digits + 54 px a word)
   const tex = canvasTex(W, H, (g) => {
     g.textBaseline = 'middle'; g.textAlign = 'center'; g.lineJoin = 'round';
     const glyphs = '0123456789,+!−xpgold·';

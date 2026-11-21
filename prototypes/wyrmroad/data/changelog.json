@@ -1,6 +1,40 @@
 {
   "entries": [
     {
+      "id": "2026-11-21-acts-two-and-three",
+      "date": "2026-11-21",
+      "title": "Acts II and III: four roads, four endings",
+      "items": [
+        "The story goes on after the wyrm's crown. Whether you broke the chain or took the lantern sends you down a different Act II, with its own places, bosses and scenes.",
+        "Act II ends in a second choice, and Act III splits four ways. Each road has its own three chapters, its own final boss and its own ending. The wyrm, Ossmara, can be your friend, your weapon, or your last fight.",
+        "The map now shows the acts and the roads. Roads you have walked stay on it, roads you haven't are a dotted line of question marks, and stars mark the endings you have found.",
+        "Story scenes now put the characters in the street, moving and talking. A short scene plays before every Act II and III boss.",
+        "Giant bosses fight from the back of the street. Watch where their strikes land, then hit the part they leave on the road.",
+        "Every class has new moves on its dash and block. The Duelist can counter with a well-timed block, and the Arcanist can teleport. The Vanguard's War Shout is now Iron Gale, a spin you can hold.",
+        "Harder fights: more enemies with two or more players, tougher foes, health that only comes back between fights, and a cooldown on Breaker. Some enemies get knocked back instead of down, and bosses can't be knocked down over and over.",
+        "The Vanguard holds two-handed weapons in both hands. Masculine bodies are flat and feminine bodies are rounder (the separate chest option is gone), and faces have softer lines.",
+        "Rooftops sit properly on their houses, boats look like boats, the flamberge is taller and the ham bone sits in the meat.",
+        "Fixes: you can turn round mid-combo, the boss's long grab is now a thrown hook you can dodge, and enemies can hit you again after Breaker leaves you at 1 health.",
+        "Levels now go to 20, with gear for every new chapter."
+      ]
+    },
+    {
+      "id": "2026-11-21-controls-and-bags",
+      "date": "2026-11-21",
+      "title": "Mouse controls, co-op bags and cleaner sound",
+      "items": [
+        "Keyboard and mouse is the new way to play on a computer: WASD to walk, left click to attack, right click for Heavy, 1 and 2 for spells, Space to jump, hold Shift to block, Q to dash, E to grab and R for Breaker. The old keys-only layout is still in Settings.",
+        "The mouse pointer hides while you fight with keys or a controller and comes back as soon as you move the mouse.",
+        "Enemy and boss health bars and story lines now sit over the top of the street, so the fight never jumps in size when one appears.",
+        "In co-op, the bag has a tab for each hero, and you can give items to each other.",
+        "Your hero's numbers in the bag are shorter: point at one, or tap it, to see what it does.",
+        "The chapter map's places now line up with what you pick, on every window size.",
+        "A new chapter loads behind a cover, so you never see a flash of the last one.",
+        "New sounds: wolves and hounds sound like one animal, crates break with a light crack, spells sound like magic (no more bow twang for the Arcanist), and a won chapter ends on a low horn instead of a cartoon fanfare.",
+        "The account menu on the title screen no longer opens off the edge of the screen."
+      ]
+    },
+    {
       "id": "2026-11-21-phone-creator",
       "date": "2026-11-21",
       "title": "Phone fix: making a hero",

@@ -1,0 +1,476 @@
+{
+  "_doc": "Acts II and III story (docs/STORY.md). Same shape as story.json (merged into it at load): speakers, scenes (place, cast, lines, optional choice), lines (banter + boss lines said in play). 'hero' = the leading player's hero. A choice option's id is the road it opens; its `blurb` is shown under the button. Scenes named in a chapter's bossScene play when that chapter's boss fight starts.",
+  "speakers": {
+    "ossmara": { "name": "Ossmara", "voice": "deep" },
+    "isolde": { "name": "Queen Isolde", "boss": "isolde" },
+    "orsolya": { "name": "Dame Orsolya", "boss": "orsolya" },
+    "marrow": { "name": "Sexton Marrow", "boss": "marrow" },
+    "sabel": { "name": "Mother Sabel", "boss": "sabel" },
+    "hollow_aldric": { "name": "Aldric", "boss": "aldric_hollow" },
+    "voice": { "name": "The Lantern", "boss": "aldric_eternal" },
+    "undermaw": { "name": "The Undermaw", "voice": "deep" },
+    "herald": { "name": "Royal Herald", "look": { "body": { "skin": "#e9c3a0" }, "hair": { "id": "short", "color": "#6a4a2a" }, "top": { "id": "tunic", "color": "#2f4a8a" }, "bottom": { "id": "leggings", "color": "#d8d8e0" }, "shoes": { "id": "boots", "color": "#2a2a30" }, "hat": { "id": "feather_cap", "color": "#2f4a8a" } } },
+    "wraith_vessa": { "name": "Vessa", "boss": "vessa_wraith" },
+    "tamsin_foe": { "name": "Tamsin", "boss": "tamsin_last" }
+  },
+  "scenes": {
+    "br_intro": { "place": "Brokenreach, three days later", "cast": ["grell", "tamsin", "maud"], "lines": [
+      ["tamsin", "Three villages along the trench have gone quiet. No smoke, no bells. Nothing."],
+      ["grell", "Where she lay, the ground's split open. It breathes. Cold, like a cellar."],
+      ["hero", "She's gone. Aldric's gone. What's left to be afraid of?"],
+      ["maud", "Whatever she was lying on, little blade."],
+      ["maud", "You think the first Lamplords chained a wyrm for fun? She wasn't their prisoner. She was the lid.", {"anim": "point", "cam": "two"}],
+      ["grell", "And you lifted it. Lovely. Rooks, with me.", [{"anim": "point"}, {"who": "grell", "exit": true, "wait": 1.4}]]
+    ] },
+    "br_boss": { "place": "The trench graveyard", "cast": ["marrow"], "lines": [
+      ["marrow", "Shh. Shh. It's talking. It's been talking to me for forty years."],
+      ["hero", "Sexton Marrow? You kept the graves at Greyspire."],
+      ["marrow", "I kept them full. It's hungry, you see, and the wyrm sat on its mouth for an age."],
+      ["marrow", "Now the mouth is open, and somebody has to set the table."]
+    ] },
+    "br_outro": { "place": "The trench's edge", "cast": ["marrow", "maud", "grell"], "lines": [
+      ["marrow", "Aldric only listened to half of it. He heard 'chain the wyrm' and stopped there."],
+      ["marrow", "The other half said 'and then I will be free'."],
+      ["hero", "What is it? What's down there?"],
+      ["marrow", "The Undermaw. Go and see. It will be so pleased to meet you."],
+      ["grell", "He jumped. He just... jumped in."],
+      ["maud", "Then so do we. There are steps cut in the wall. Old ones."]
+    ] },
+    "uw_intro": { "place": "The Underway", "cast": ["maud", "grell"], "lines": [
+      ["grell", "Those aren't rocks. Those are ribs."],
+      ["maud", "Wyrms. Dozens. This whole land used to have them, one under every hill."],
+      ["hero", "What happened to them?"],
+      ["undermaw", "...I HAPPENED TO THEM."],
+      ["maud", "It ate them. One by one, for a thousand years. She's the last."],
+      ["grell", "And she flew off without us. Brilliant."]
+    ] },
+    "uw_boss": { "place": "The root chamber", "cast": ["hollow_aldric"], "lines": [
+      ["hollow_aldric", "Child. You came down. Of course you did. I taught you that."],
+      ["hero", "Brother? You're... your skin. There are roots in your skin."],
+      ["hollow_aldric", "It caught me when I fell. It is very kind. It only wants a little of you."],
+      ["hollow_aldric", "Come here. Let me show you how warm it is."]
+    ] },
+    "uw_outro": { "place": "The root chamber", "cast": ["hollow_aldric", "maud"], "lines": [
+      ["hollow_aldric", "...The roots let go. I can hear myself again."],
+      ["hollow_aldric", "I heard it too, child. Years ago. I thought a leash on the wyrm was safer than an open door."],
+      ["hero", "You could have told me."],
+      ["hollow_aldric", "You'd have freed her sooner. You did anyway. You were always better than me.", {"mood": "sad"}],
+      ["hollow_aldric", "She's hurt. She flew to Bellwater to die. Ossmara. Her name is Ossmara.", {"mood": "sad", "anim": "kneel"}],
+      ["maud", "He's gone. Rest, old man.", [{"anim": "pray"}, {"who": "hollow_aldric", "loop": "sleep"}]]
+    ] },
+    "bw_intro": { "place": "Bellwater, a drowned village", "cast": ["tamsin", "grell"], "lines": [
+      ["tamsin", "The whole village is under the lake. You can see the bell towers under the water."],
+      ["grell", "And there she is. In the shallows. Look at her side."],
+      ["ossmara", "...SMALL ONE. YOU CAME. YOU SHOULD NOT HAVE."],
+      ["hero", "There are roots in you. Like Aldric."],
+      ["ossmara", "IT FOLLOWED ME UP. IT WANTS THE LAST OF US."]
+    ] },
+    "bw_boss": { "place": "The lake's heart", "cast": ["ossmara", "grell"], "lines": [
+      ["grell", "The water's moving. Something under it.", {"anim": "point", "cam": "wide", "fx": "quake"}],
+      ["ossmara", "ITS HAND. IT REACHES.", {"anim": "rise", "fx": "rise", "cam": "ossmara"}],
+      ["hero", "Then we cut it off.", {"cam": "low"}]
+    ] },
+    "bw_outro": { "place": "Bellwater", "cast": ["ossmara", "maud", "tamsin"], "lines": [
+      ["maud", "The pit's still open behind us, and that hand will grow back."],
+      ["maud", "We have the bell-stones. Their song can do one of two things."],
+      ["maud", "Ring them for her, and they'll heal her. She'll be strong again, and the pit stays open."],
+      ["maud", "Or chain her over the pit, as the old Lamplords did. The mouth shuts. She'll never forgive you."],
+      ["ossmara", "...THE CHOICE IS YOURS, SMALL ONE. I HAVE MADE ENOUGH OF THEM.", {"cam": "ossmara"}]
+    ],
+      "choice": { "prompt": "The bell-stones are in your hands.", "options": [
+        { "id": "bond", "label": "Ring the bells for her", "scene": "bw_bond", "blurb": "Heal Ossmara. She will fight beside you. The pit stays open." },
+        { "id": "seal", "label": "Chain her over the pit", "scene": "bw_seal", "blurb": "Shut the Undermaw's mouth. She will not forgive it." }
+      ] } },
+    "bw_bond": { "place": "Bellwater, at dawn", "cast": ["ossmara", "grell", "tamsin"], "lines": [
+      ["tamsin", "Listen. The towers under the water are ringing.", {"anim": "point", "fx": "bell", "cam": "wide"}],
+      ["ossmara", "...WARM. I HAD FORGOTTEN WARM.", {"fx": "heal", "cam": "ossmara"}],
+      ["ossmara", "THE UNDERMAW WILL CLIMB TO THE CAPITAL. IT WANTS PEOPLE, MANY PEOPLE."],
+      ["ossmara", "CLIMB ON, SMALL ONE. WE HUNT IT TOGETHER.", [{"anim": "roar", "cam": "pullback"}, {"who": "hero", "anim": "cheer", "wait": 0.8}]]
+    ] },
+    "bw_seal": { "place": "The pit's mouth", "cast": ["ossmara", "maud"], "lines": [
+      ["ossmara", "NO. NO. NOT AGAIN.", {"anim": "roar", "mood": "angry", "cam": "ossmara"}],
+      ["maud", "The chains are taking. The mouth is shutting.", [{"who": "ossmara", "fx": "chains"}]],
+      ["ossmara", "I GAVE YOU MY NAME.", {"cam": "ossmara"}],
+      ["hero", "I'm sorry. It was the only way to shut it.", {"mood": "sad", "cam": "low"}],
+      ["ossmara", "THEN I WILL BREAK THE WAY.", {"anim": "roar", "fx": "quake", "cam": "pullback"}]
+    ] },
+
+    "kw_intro": { "place": "The Kingsway", "cast": ["grell", "herald"], "lines": [
+      ["grell", "They're kneeling to you. The Order. They're kneeling to you."],
+      ["hero", "Someone has to hold the chain, Grell."],
+      ["grell", "That's what he said, too. I'm done. Don't follow me."],
+      ["herald", "By order of Queen Isolde: the holder of the lantern is outlaw. Lay it down or be cut down."],
+      ["voice", "...good, child. hold it tight."],
+      ["hero", "Did you hear that?"]
+    ] },
+    "kw_boss": { "place": "The Silver Bridge", "cast": ["orsolya"], "lines": [
+      ["orsolya", "I am Orsolya of the Silver. I have killed one Lamplord already this year."],
+      ["orsolya", "I would rather not make it two. Put it down."],
+      ["voice", "she lies. she wants it for her queen."],
+      ["orsolya", "No? Then lances, front!"]
+    ] },
+    "kw_outro": { "place": "The Silver Bridge", "cast": ["orsolya"], "lines": [
+      ["orsolya", "The Queen will not let a second Lamplord rise. Not while I breathe."],
+      ["voice", "THEN STOP HER BREATHING."],
+      ["hero", "Aldric. That's Aldric's voice. Inside the glass."],
+      ["voice", "where else would I be, child? I poured myself in as I fell. we are going to do great things."]
+    ] },
+    "rh_intro": { "place": "Rookhaven, on the marsh", "cast": ["tamsin", "grell"], "lines": [
+      ["tamsin", "Turn round. Please. Millbrook came here. We're Rooks now, all of us."],
+      ["hero", "Tamsin? You left home?"],
+      ["tamsin", "Home is under that thing's shadow every time it flies over. You fly it."],
+      ["grell", "Rooks! Nobody touches the farm-hand. I'll do it myself."]
+    ] },
+    "rh_boss": { "place": "The hanging hall", "cast": ["grell"], "lines": [
+      ["grell", "I taught you one trick at the docks. Here's another."],
+      ["grell", "This hook's thrown, not swung. Mind your feet."],
+      ["voice", "kill him and the Rooks scatter."]
+    ] },
+    "rh_outro": { "place": "Rookhaven", "cast": ["grell", "tamsin"], "lines": [
+      ["voice", "finish him."],
+      ["hero", "No."],
+      ["voice", "...weak. then come to the Kiln, where the glass was blown. I will make you strong."],
+      ["tamsin", "Who are you talking to?"],
+      ["grell", "Go on, then. Run to your lamp. We'll be here when it burns you."]
+    ] },
+    "kiln_intro": { "place": "The Kiln Cathedral", "cast": ["sabel"], "lines": [
+      ["sabel", "The lantern comes home. Every lamp of the Order was blown from this furnace."],
+      ["hero", "And the wyrm? Why is she chained over the roof?"],
+      ["sabel", "Because the glass needs her heat. Did he not tell you? He tells nobody anything."],
+      ["voice", "keep walking, child."]
+    ] },
+    "kiln_boss": { "place": "The furnace floor", "cast": ["sabel"], "lines": [
+      ["sabel", "He wants to pour you into the glass beside him. Two minds, one leash."],
+      ["sabel", "I want the lantern for myself. So, you see, I can't let either of you have it."]
+    ] },
+    "kiln_outro": { "place": "The furnace floor", "cast": ["sabel"], "lines": [
+      ["sabel", "...Do it, then. Choose. Everyone has to, in the end."],
+      ["voice", "pour yourself in. the wyrm obeys forever. no one ever kneels to anyone else again."],
+      ["ossmara", "SMALL ONE. I HAVE WORN THIS LEASH FOR AN AGE. I WILL NOT BEG."]
+    ],
+      "choice": { "prompt": "The lantern hums in your hand.", "options": [
+        { "id": "crown", "label": "Keep the lantern", "scene": "kiln_crown", "blurb": "Rule the road. The wyrm obeys. Your friends will not forgive it." },
+        { "id": "break", "label": "Smash the lantern", "scene": "kiln_break", "blurb": "Free the wyrm, and whatever is inside the glass." }
+      ] } },
+    "kiln_crown": { "place": "The Kiln", "cast": ["sabel"], "lines": [
+      ["voice", "yes. YES.", {"who": "hero", "fx": "crown"}],
+      ["hero", "Not for you. For the road.", {"cam": "low"}],
+      ["voice", "of course, child. for the road."],
+      ["ossmara", "...THE LEASH TIGHTENS.", [{"who": "sabel", "anim": "headShake"}]],
+      ["sabel", "And so the Lamplords go on."]
+    ] },
+    "kiln_break": { "place": "The Kiln", "cast": ["sabel"], "lines": [
+      ["hero", "Enough.", {"anim": "slam", "fx": "lanternBreak", "cam": "low"}],
+      ["voice", "child, WAIT—"],
+      ["sabel", "The glass! The green is getting out!", {"anim": "point", "mood": "afraid", "cam": "wide"}],
+      ["ossmara", "...FREE. FREE AND— IT HURTS. IT HURTS."],
+      ["voice", "you broke my house, child. now I need a bigger one.", [{"who": "hero", "fx": "greenfire"}, {"who": "sabel", "anim": "kneel"}]]
+    ] },
+
+    "hh_intro": { "place": "Halvenhold, at night", "cast": ["ossmara", "grell", "maud"], "lines": [
+      ["ossmara", "THERE. IT COMES UP THROUGH THE CELLARS.", {"cam": "ossmara", "anim": "roar"}],
+      ["grell", "The whole capital's crawling. Root-folk in the streets."],
+      ["maud", "The Queen's knights are fighting. Some of them. The rest have roots in them."],
+      ["ossmara", "WHERE I SEE THEM, I WILL BURN THEM. KEEP YOUR HEADS DOWN.", {"anim": "roar", "fx": "fire", "cam": "pullback"}]
+    ] },
+    "hh_boss": { "place": "The palace steps", "cast": ["isolde"], "lines": [
+      ["isolde", "Kneel. All of you. Kneel to the Undermaw."],
+      ["hero", "Queen Isolde? Her eyes..."],
+      ["maud", "Roots, behind the eyes. Knock her down hard enough and they'll let go."]
+    ] },
+    "hh_outro": { "place": "The palace steps", "cast": ["isolde", "ossmara"], "lines": [
+      ["isolde", "...I could hear it. In my own voice. Telling my knights to kneel."],
+      ["isolde", "Its heart is under the Old Crown, the first city. It's buried under this one."],
+      ["ossmara", "THEN WE GO DOWN. HOLD ON TO MY SCALES, SMALL ONE."]
+    ] },
+    "wb_intro": { "place": "Above the clouds", "cast": ["ossmara", "grell"], "lines": [
+      ["grell", "I am not. Looking. Down.", {"anim": "lookAround"}],
+      ["ossmara", "THEY FOLLOW. THINGS WITH WINGS, MADE OF ROOT."],
+      ["hero", "Then we fight up here."],
+      ["ossmara", "STAND WIDE. I CANNOT BREATHE ON MY OWN BACK."]
+    ] },
+    "wb_boss": { "place": "Ossmara's shoulders", "cast": ["ossmara"], "lines": [
+      ["ossmara", "THE BIG ONE. IT TORE THE WING OFF MY SISTER, LONG AGO."],
+      ["hero", "Then it doesn't get yours."]
+    ] },
+    "wb_outro": { "place": "The pit, falling", "cast": ["ossmara", "grell"], "lines": [
+      ["ossmara", "NOW. INTO THE DARK. FOLD YOUR ARMS."],
+      ["grell", "If I die I'm haunting you. Both of you."],
+      ["ossmara", "THE HEART IS AT THE BOTTOM. WHEN IT OPENS, I WILL BE THERE."]
+    ] },
+    "um_intro": { "place": "The floor of the pit", "cast": ["ossmara", "maud", "grell"], "lines": [
+      ["undermaw", "...THE LAST WYRM BRINGS ME A MEAL. HOW THOUGHTFUL."],
+      ["maud", "It's everywhere. The walls, the floor. We're standing in its mouth."],
+      ["hero", "Where's the heart?"],
+      ["ossmara", "BEHIND THE EYE. MAKE IT OPEN THE EYE."]
+    ] },
+    "um_boss": { "place": "The heart's ring", "cast": ["ossmara"], "lines": [
+      ["undermaw", "I ATE A THOUSAND WYRMS. I WILL NOT CHOKE ON ONE SMALL ONE."],
+      ["ossmara", "YOU WILL CHOKE ON TWO.", {"anim": "roar", "fx": "fire", "cam": "ossmara"}]
+    ] },
+    "um_outro": { "place": "The pit, dawn coming through", "cast": ["ossmara", "grell", "tamsin", "maud"], "lines": [
+      ["undermaw", "...BURNING. I AM... BURNING.", {"cam": "deep"}],
+      ["ossmara", "IT IS DONE. FOR THE FIRST TIME IN AN AGE, NOTHING IS HUNGRY UNDER THE WORLD.", {"fx": "dawn", "cam": "ossmara"}],
+      ["tamsin", "Every bell in Halvenmark is ringing.", {"fx": "bell", "anim": "point"}],
+      ["grell", "Rooks, the lot of us, and we saved the kingdom. Someone write that down.", {"anim": "cheer"}],
+      ["ossmara", "SMALL ONE. WHERE YOU WALK, I WILL FLY. CALL, AND I WILL COME.", [{"cam": "pullback"}, {"who": "ossmara", "anim": "fly", "wait": 1.4}]]
+    ] },
+
+    "af_intro": { "place": "Ashfall, the southern fields", "cast": ["tamsin", "grell"], "lines": [
+      ["tamsin", "She broke the chains in a day. A day."],
+      ["grell", "And she's not hunting the Undermaw. The pit's shut tight. She's hunting us."],
+      ["tamsin", "Her brood's burning the fields from here to the sea."],
+      ["ossmara", "SMALL ONE. I KNOW YOUR SMELL NOW. I AM COMING."]
+    ] },
+    "af_boss": { "place": "The burning mill", "cast": ["grell"], "lines": [
+      ["grell", "That's no wyrmling. That's their mother."],
+      ["hero", "Keep her off the village."]
+    ] },
+    "af_outro": { "place": "Ashfall", "cast": ["maud", "tamsin"], "lines": [
+      ["maud", "Fighting her brood won't end it. She'll come herself, and nothing on this road can stand against her."],
+      ["hero", "Then what?"],
+      ["maud", "The bell-stones' song is what the old Lamplords used. A whisper of it. Cast a bell big enough, and she might hear the whole song."],
+      ["tamsin", "The Great Bell. There's a foundry outside the capital that could cast it."]
+    ] },
+    "fd_intro": { "place": "The Bell Foundry", "cast": ["corwen", "maud"], "lines": [
+      ["corwen", "You. The one who woke her. And then chained her. And then lost her."],
+      ["hero", "Corwen. I thought you'd gone."],
+      ["corwen", "The last of the Order want the Bell too. To ring her into the ground and keep her there."],
+      ["maud", "Then we cast it first."]
+    ] },
+    "fd_boss": { "place": "The casting pit", "cast": ["maud"], "lines": [
+      ["maud", "The foundry's guardian. Bronze, older than the Order."],
+      ["maud", "It won't let anyone pour the Bell who hasn't beaten it. Old rules."]
+    ] },
+    "fd_outro": { "place": "The casting pit", "cast": ["maud", "corwen", "grell"], "lines": [
+      ["maud", "The Bell's cast. Seven stones in the bronze."],
+      ["corwen", "Take it to the tower. I'll hold the Order off. I owe you one wyrm."],
+      ["grell", "She's here. Look at the sky. She's here."],
+      ["ossmara", "SMALL ONE. COME UP THE TOWER. COME AND ANSWER FOR IT."]
+    ] },
+    "bt_intro": { "place": "The Great Bell Tower, in the storm", "cast": ["ossmara", "grell"], "lines": [
+      ["grell", "Her brood's on the stairs. All of them."],
+      ["hero", "Get the Bell to the top. I'll clear the way."],
+      ["ossmara", "I GAVE YOU MY NAME, AND YOU GAVE ME A CHAIN.", {"anim": "roar", "mood": "angry", "cam": "ossmara"}]
+    ] },
+    "bt_boss": { "place": "The tower's crown", "cast": ["ossmara"], "lines": [
+      ["ossmara", "NO MORE CHAINS. NO MORE SMALL ONES WITH LANTERNS AND STONES."],
+      ["hero", "Ossmara, I'm sorry. I'm sorry. But I won't let you burn them."],
+      ["ossmara", "THEN STAND, AND BURN FIRST.", {"anim": "roar", "fx": "fire", "cam": "ossmara"}]
+    ] },
+    "bt_outro": { "place": "The tower's crown", "cast": ["ossmara", "grell", "maud"], "lines": [
+      ["grell", "Ring it! Ring it now!", [{"anim": "point"}, {"who": "hero", "fx": "bell", "cam": "wide"}]],
+      ["ossmara", "...THAT SONG.", {"cam": "ossmara"}],
+      ["ossmara", "MY MOTHER SANG IT. UNDER THE HILLS, BEFORE THE HUNGER CAME."],
+      ["hero", "Sleep. Please. Just sleep.", {"cam": "low", "mood": "sad"}],
+      ["ossmara", "...I AM SO TIRED, SMALL ONE. I WILL LIE DOWN. LET THEM BUILD ROADS ON ME AGAIN.", [{"anim": "sleep", "fx": "calm", "cam": "ossmara"}]],
+      ["maud", "She's lying down along the hills. Look. She's becoming the hills.", {"anim": "point", "fx": "dawn", "cam": "pullback"}]
+    ] },
+
+    "sg_intro": { "place": "Before Halvenhold's walls", "cast": ["voice", "ossmara"], "lines": [
+      ["voice", "the Queen's walls. thirty feet of stone. how quaint."],
+      ["ossmara", "...WHERE DO YOU WANT THE FIRE, LAMPLORD.", {"cam": "ossmara"}],
+      ["hero", "The gate. Only the gate.", {"anim": "point"}],
+      ["voice", "only the gate. for now.", [{"who": "ossmara", "fx": "greenfire"}]]
+    ] },
+    "sg_boss": { "place": "The throne yard", "cast": ["isolde", "orsolya"], "lines": [
+      ["isolde", "So. The farm-hand with the leash."],
+      ["isolde", "My mother fought the last Lamplord. I suppose it's my turn."],
+      ["voice", "she has no wyrm. we do."]
+    ] },
+    "sg_outro": { "place": "The throne yard", "cast": ["isolde"], "lines": [
+      ["isolde", "Enough. Halvenhold yields. Spare the city."],
+      ["voice", "kill her. a living queen is a rallying flag."],
+      ["hero", "No. She lives. The city lives."],
+      ["voice", "...you keep saying no to me, child. the lantern is getting hot in your hand."]
+    ] },
+    "ls_intro": { "place": "Millbrook, at night", "cast": ["tamsin", "grell"], "lines": [
+      ["tamsin", "Barricades on the mill bridge. Pitchforks. Everyone we grew up with."],
+      ["grell", "We're not letting you take Millbrook. Not this one."],
+      ["hero", "I don't want to take it. I want to come home."],
+      ["voice", "you can't go home with me in your hand, child."]
+    ] },
+    "ls_boss": { "place": "The village square, by the empty plinth", "cast": ["grell", "tamsin_foe"], "lines": [
+      ["tamsin_foe", "Remember the bell-stone? I was there the morning they took it. I sent you after it."],
+      ["grell", "Two of us this time, kid. Put it down or get through us."]
+    ] },
+    "ls_outro": { "place": "Millbrook square", "cast": ["grell", "tamsin_foe"], "lines": [
+      ["grell", "...Go on, then. Finish it."],
+      ["hero", "No. Not here. Not you."],
+      ["voice", "THEN I WILL."],
+      ["tamsin_foe", "Your hand. Your hand is burning green."],
+      ["voice", "you are a slow student, child. i am done waiting for you to learn."]
+    ] },
+    "lv_intro": { "place": "Inside the lantern", "cast": ["voice"], "lines": [
+      ["hero", "Where... is this?"],
+      ["voice", "home. mine. it's warm, isn't it? green and warm.", {"cam": "voice"}],
+      ["voice", "a lantern only needs one mind. i was here first."],
+      ["hero", "Then I'll put you out.", {"cam": "low"}]
+    ] },
+    "lv_boss": { "place": "The lantern's wick", "cast": ["voice"], "lines": [
+      ["voice", "i taught you every move you know."],
+      ["hero", "You taught me a thief can still be talked to. I'm done talking."]
+    ] },
+    "lv_outro": { "stage": "crown", "place": "Crownhollow, after", "cast": ["ossmara", "isolde", "grell"], "lines": [
+      ["voice", "...the light... is yours...", [{"who": "hero", "fx": "crown", "cam": "low"}]],
+      ["ossmara", "...ONE MIND ON THE LEASH NOW. YOURS.", {"cam": "ossmara"}],
+      ["isolde", "Halvenmark has a new ruler, then. One with a wyrm."],
+      ["grell", "We'll be on the marsh. When you get tired of it, we'll be there."],
+      ["ossmara", "I WILL WAIT, LAMPLORD. I AM VERY GOOD AT WAITING.", {"cam": "pullback"}]
+    ] },
+
+    "ww_intro": { "place": "The Hollow Fells", "cast": ["grell", "maud"], "lines": [
+      ["grell", "Heard you smashed it. Heard it right across the marsh."],
+      ["hero", "You came back."],
+      ["grell", "You put it down. That's all I wanted. Now look at her."],
+      ["maud", "The leash cut deep. She doesn't know friend from foe. She's burning the fells."],
+      ["ossmara", "CHAINS— NO MORE— GET OFF— GET OFF ME—"]
+    ] },
+    "ww_boss": { "place": "The burning heather", "cast": ["ossmara", "maud"], "lines": [
+      ["maud", "Don't kill her. Wear her down. She has to see you."],
+      ["ossmara", "LANTERN. I SMELL THE LANTERN ON YOU.", {"anim": "roar", "mood": "angry", "cam": "ossmara"}]
+    ] },
+    "ww_outro": { "place": "The fells", "cast": ["ossmara", "grell", "maud"], "lines": [
+      ["ossmara", "...YOU. YOU BROKE THE GLASS.", {"fx": "calm", "cam": "ossmara"}],
+      ["hero", "I did. I'm sorry it took so long."],
+      ["ossmara", "SOMETHING CAME OUT OF THE GLASS WHEN IT BROKE. IT WENT TO GREYSPIRE."],
+      ["maud", "Aldric. What's left of him."],
+      ["ossmara", "THEN WE GO TO GREYSPIRE. I FLY ABOVE. YOU WALK BELOW.", [{"cam": "pullback"}, {"who": "ossmara", "anim": "fly", "wait": 1.2}]]
+    ] },
+    "wl_intro": { "place": "Greyspire Abbey, at night", "cast": ["grell", "corwen"], "lines": [
+      ["corwen", "The dead are walking the cloisters. Brothers I buried myself."],
+      ["grell", "Corwen. Thought you'd be on the other side."],
+      ["corwen", "He's raising them in green light. I won't serve that. Not again."],
+      ["voice", "children. all my children, come home."]
+    ] },
+    "wl_boss": { "place": "The lantern tower, ruined", "cast": ["wraith_vessa"], "lines": [
+      ["wraith_vessa", "The Lamplord promised. The Lamplord always keeps his promises."],
+      ["corwen", "That's Vessa. She drowned off the pier at Saltmere."],
+      ["hero", "Then let's give her some rest."]
+    ] },
+    "wl_outro": { "place": "Greyspire", "cast": ["wraith_vessa", "corwen"], "lines": [
+      ["wraith_vessa", "...cold. I was so cold. Thank you."],
+      ["wraith_vessa", "He's gone to the Crown. To make a new lantern. From her heart."],
+      ["ossmara", "LET HIM TRY."],
+      ["corwen", "Crownhollow, then. Where it all started."]
+    ] },
+    "bc_intro": { "place": "Crownhollow, burning", "cast": ["ossmara", "grell", "maud"], "lines": [
+      ["maud", "The whole crown's on fire. Green fire."],
+      ["voice", "MY STUDENT. YOU CAME TO WATCH ME WORK.", [{"who": "voice", "cam": "voice"}]],
+      ["ossmara", "HE IS TALLER THAN THE ABBEY NOW. HE HAS EATEN EVERY LANTERN IN THE LAND.", {"cam": "ossmara"}],
+      ["hero", "Then he's got nothing left to hide in."]
+    ] },
+    "bc_boss": { "place": "The wyrm's old crown", "cast": ["voice", "ossmara"], "lines": [
+      ["voice", "i only ever wanted it to be safe. a leash is safe. a cage is safe.", {"cam": "voice"}],
+      ["hero", "You were afraid. That's all. You were always afraid."],
+      ["ossmara", "WHEN HE FALTERS, SMALL ONE, STAND CLEAR.", {"anim": "roar"}]
+    ] },
+    "bc_outro": { "place": "Crownhollow, the fire going out", "cast": ["ossmara", "grell", "maud", "tamsin"], "lines": [
+      ["voice", "...child. it's dark in here. it's so quiet.", [{"who": "voice", "cam": "voice", "fx": "calm"}]],
+      ["voice", "...thank you. I think I'd like to rest.", [{"who": "voice", "anim": "sleep"}]],
+      ["ossmara", "THE LAST LANTERN IS ASH. THE SKY IS OPEN.", {"fx": "dawn", "cam": "ossmara"}],
+      ["tamsin", "The bells are ringing. All the way back to Millbrook.", {"fx": "bell"}],
+      ["grell", "No lanterns, no leashes, no Order. Just a road.", {"anim": "cheer"}],
+      ["ossmara", "AND A WYRM WHO REMEMBERS WHO BROKE THE GLASS.", [{"cam": "pullback"}, {"who": "ossmara", "anim": "fly", "wait": 1}]]
+    ] }
+  },
+  "lines": {
+    "br_b1": [["grell", "Pale things. Coming up out of the dirt!"]],
+    "br_b2": [["maud", "Hit the callers. They pull more up."]],
+    "uw_b1": [["undermaw", "...SMALL ONES. IN MY THROAT."]],
+    "uw_b2": [["grell", "Mind the ribs, they're sharp."]],
+    "bw_b1": [["tamsin", "The drowned ones still ring their bells!"]],
+    "bw_b2": [["ossmara", "...THEY COME FOR ME. KEEP THEM BACK."]],
+    "bw_b3": [["grell", "Her children! The wyrmlings are fighting with us!"]],
+    "kw_b1": [["voice", "the Queen's dogs. bite back."]],
+    "kw_b2": [["herald", "Bounty on the lantern! A thousand crowns!"]],
+    "rh_b1": [["tamsin", "Rooks! Hold the bridges!"]],
+    "rh_b2": [["grell", "Let the wolves out!"]],
+    "kiln_b1": [["sabel", "Glass and fire, brothers."]],
+    "kiln_b2": [["voice", "almost there, child."]],
+    "hh_b1": [["ossmara", "BELOW ME, SMALL ONE. STAND CLEAR."]],
+    "hh_b2": [["grell", "Knights with roots in them! Don't let them grab you!"]],
+    "wb_b1": [["ossmara", "HOLD ON!"]],
+    "wb_b2": [["grell", "More of them! From below!"]],
+    "um_b1": [["undermaw", "...COME CLOSER."]],
+    "um_b2": [["ossmara", "I SEE THE EYE. MAKE IT OPEN."]],
+    "af_b1": [["tamsin", "The wyrmlings! They're everywhere!"]],
+    "af_b2": [["grell", "Drakes. Big ones. Watch the fire."]],
+    "fd_b1": [["corwen", "The Order wants the Bell! Hold the yard!"]],
+    "fd_b2": [["maud", "Keep them off the moulds!"]],
+    "bt_b1": [["ossmara", "CLIMB, SMALL ONE. CLIMB TO ME."]],
+    "bt_b2": [["grell", "Halfway! Keep going!"]],
+    "sg_b1": [["voice", "burn them, wyrm."]],
+    "sg_b2": [["ossmara", "...AS YOU COMMAND."]],
+    "ls_b1": [["tamsin", "Millbrook! Hold the bridge!"]],
+    "ls_b2": [["grell", "Wolves! Go!"]],
+    "lv_b1": [["voice", "my old brothers. they live in here too."]],
+    "lv_b2": [["voice", "every lantern i ever lit. all of it, me."]],
+    "ww_b1": [["maud", "Her brood's gone wild with her."]],
+    "ww_b2": [["grell", "Lantern-wisps! Bits of the old glass!"]],
+    "wl_b1": [["corwen", "Brother Hale. I'm sorry, Brother Hale."]],
+    "wl_b2": [["ossmara", "I SEE THE GREEN. STAND CLEAR."]],
+    "bc_b1": [["voice", "LITTLE LIGHTS. COME TO ME."]],
+    "bc_b2": [["ossmara", "HE FEEDS ON THE WISPS. BREAK THEM."]],
+    "sky_gold": [["ossmara", "STAND CLEAR!"]],
+    "sky_green": [["ossmara", "...AS YOU COMMAND."]],
+    "marrow_start": [["marrow", "Dinner, my love!"]],
+    "marrow_phase": [["marrow", "Up, up from your beds!"]],
+    "marrow_end": [["marrow", "It's... so pleased..."]],
+    "aldric_hollow_start": [["hollow_aldric", "Come here, child."]],
+    "aldric_hollow_phase": [["hollow_aldric", "It wants you so badly!"]],
+    "aldric_hollow_end": [["hollow_aldric", "...let go. let go of me."]],
+    "maw_hand_start": [["undermaw", "...MINE."]],
+    "maw_hand_phase": [["undermaw", "SQUEEZE."]],
+    "maw_hand_end": [["ossmara", "IT LETS GO!"]],
+    "orsolya_start": [["orsolya", "For the Queen!"]],
+    "orsolya_phase": [["orsolya", "Silver, form on me!"]],
+    "orsolya_end": [["orsolya", "...not twice."]],
+    "grell_free_start": [["grell", "Duck!"]],
+    "grell_free_phase": [["grell", "Rooks! Now!"]],
+    "grell_free_end": [["grell", "Fine! FINE!"]],
+    "sabel_start": [["sabel", "Hold still. Glass takes a steady hand."]],
+    "sabel_phase": [["sabel", "Let it pour!"]],
+    "sabel_end": [["sabel", "Cracked..."]],
+    "isolde_hollow_start": [["isolde", "Kneel!"]],
+    "isolde_hollow_phase": [["isolde", "My knights! Kneel with me!"]],
+    "isolde_hollow_end": [["isolde", "...get it out of me..."]],
+    "gloomwing_start": [["ossmara", "THERE! ON MY WING!"]],
+    "gloomwing_phase": [["ossmara", "IT IS TEARING! HURRY!"]],
+    "gloomwing_end": [["ossmara", "GONE. GOOD."]],
+    "undermaw_start": [["undermaw", "OPEN WIDE."]],
+    "undermaw_phase": [["ossmara", "THE EYE! IT OPENS!"]],
+    "undermaw_phase2": [["ossmara", "THE HEART! NOW, SMALL ONE, NOW!"]],
+    "undermaw_end": [["undermaw", "BURNING..."]],
+    "brood_mother_start": [["grell", "Here she comes!"]],
+    "brood_mother_phase": [["grell", "She's calling the little ones!"]],
+    "brood_mother_end": [["tamsin", "She's down!"]],
+    "bronze_warden_start": [["maud", "Old rules. Beat it."]],
+    "bronze_warden_phase": [["maud", "It's heating up!"]],
+    "bronze_warden_end": [["maud", "It bows. The foundry is ours."]],
+    "ossmara_wrath_start": [["ossmara", "BURN."]],
+    "ossmara_wrath_phase": [["ossmara", "INTO THE SKY, THEN DOWN ON YOU!"]],
+    "ossmara_wrath_phase2": [["grell", "The Bell! Get to the Bell!"]],
+    "ossmara_wrath_end": [["ossmara", "...THAT SONG..."]],
+    "isolde_start": [["isolde", "For Halvenmark!"]],
+    "isolde_phase": [["isolde", "Orsolya! To me!"]],
+    "isolde_end": [["isolde", "Enough..."]],
+    "grell_last_start": [["grell", "Last time, kid."]],
+    "grell_last_phase": [["tamsin_foe", "Grell, left!"]],
+    "grell_last_end": [["grell", "...go on, then."]],
+    "aldric_eternal_start": [["voice", "THE LAST LESSON."]],
+    "aldric_eternal_phase": [["voice", "BURN BRIGHTER!"]],
+    "aldric_eternal_phase2": [["voice", "I AM THE LANTERN!"]],
+    "aldric_eternal_end": [["voice", "...yours..."]],
+    "ossmara_mad_start": [["ossmara", "GET OFF ME!"]],
+    "ossmara_mad_phase": [["maud", "She's slowing! Keep at it!"]],
+    "ossmara_mad_end": [["ossmara", "...SMALL ONE?"]],
+    "vessa_wraith_start": [["wraith_vessa", "The Lamplord keeps his promises."]],
+    "vessa_wraith_phase": [["wraith_vessa", "Drown with me!"]],
+    "vessa_wraith_end": [["wraith_vessa", "...cold..."]],
+    "lantern_wraith_start": [["voice", "COME HERE, CHILD."]],
+    "lantern_wraith_phase": [["ossmara", "NOW I BURN!"]],
+    "lantern_wraith_phase2": [["voice", "I WILL NOT GO DARK!"]],
+    "lantern_wraith_end": [["voice", "...rest..."]]
+  }
+}

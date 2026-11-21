@@ -21,9 +21,10 @@ export function createTouchControls(host, reader) {
   const st = reader.state;
   let stickId = null, cx = 0, cy = 0;
   const blockIds = new Set();
+  const spellIds = new Map();        // pointerId → 'spell1Held' | 'spell2Held' (a held spell button keeps a spin going)
   const R = () => Math.max(36, stick.clientWidth * 0.36);
 
-  function resetAll() { stickId = null; st.mx = 0; st.mz = 0; knob.style.transform = ''; blockIds.clear(); st.block = false; el.querySelectorAll('.wr-tb.on').forEach(b => b.classList.remove('on')); }
+  function resetAll() { stickId = null; st.mx = 0; st.mz = 0; knob.style.transform = ''; blockIds.clear(); st.block = false; spellIds.clear(); st.spell1Held = false; st.spell2Held = false; el.querySelectorAll('.wr-tb.on').forEach(b => b.classList.remove('on')); }
   // a fresh touch (the first finger of a new gesture) clears what iOS forgot — on pointerdown in the capture phase, so it
   // runs BEFORE the stick takes this pointer (touchstart fires after pointerdown and wiped the stick's own finger)
   el.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && e.isPrimary) resetAll(); }, { capture: true });
@@ -49,10 +50,13 @@ export function createTouchControls(host, reader) {
     e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch { /* a pointer the browser no longer tracks */ }
     const a = b.dataset.a; b.classList.add('on');
     if (a === 'block') { blockIds.add(e.pointerId); st.block = true; } else reader.press(a);
+    if (a === 'spell1' || a === 'spell2') { spellIds.set(e.pointerId, `${a}Held`); st[`${a}Held`] = true; }
   });
   const up = e => {
     const b = e.target.closest?.('[data-a]');
     if (blockIds.delete(e.pointerId)) st.block = blockIds.size > 0;
+    const k = spellIds.get(e.pointerId);
+    if (k) { spellIds.delete(e.pointerId); st[k] = [...spellIds.values()].includes(k); }
     b?.classList.remove('on');
     if (!blockIds.size) el.querySelector('.wr-tb-block')?.classList.remove('on');
   };

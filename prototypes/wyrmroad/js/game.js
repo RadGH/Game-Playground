@@ -37,7 +37,7 @@ export function createLocalSession({ data, T, chapter, heroes, seed = (Math.rand
         for (const e of G.foes) snap(e);
         const now = {};
         for (const [pid, inp] of Object.entries(inputs)) {
-          now[pid] = { mx: inp.mx || 0, mz: inp.mz || 0, block: !!inp.block };
+          now[pid] = { mx: inp.mx || 0, mz: inp.mz || 0, block: !!inp.block, spell1Held: !!inp.spell1Held, spell2Held: !!inp.spell2Held };
           const c = carry[pid] || {};
           for (const k of EDGES) now[pid][k] = !!c[k];
           carry[pid] = {};

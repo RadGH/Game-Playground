@@ -219,8 +219,11 @@ export function buildBody(a, rig, c) {
     [-0.125, 0.09, 0.08, 0], [-0.105, 0.172 + R * 0.03, 0.123 + R * 0.03, 0], [-0.05, 0.196 + R * 0.07, 0.133 + R * 0.08, R * 0.018],
     [0.0, 0.195 + R * 0.075, 0.131 + R * 0.1, R * 0.035], [0.05, 0.188 + R * 0.075, 0.128 + R * 0.115, R * 0.045],
   ].map(([y, rx, rz, z]) => [y, rx * W, rz * W, z * W]);
-  const bustShape = rig.v26 && rig.form === 'fem' && a.body?.chestSize === 'round';
-  const bustAt = (x, y) => bustShape ? 0.019 * W * (Math.exp(-(((x - 0.078 * W) / (0.058 * W)) ** 2) - (((y - 0.105 * T) / (0.068 * T)) ** 2)) + Math.exp(-(((x + 0.078 * W) / (0.058 * W)) ** 2) - (((y - 0.105 * T) / (0.068 * T)) ** 2))) : 0;
+  // `chestSize` 'round' (the M7 shape) or 'full' (2026-11-21, Wyrmroad owner: "feminine … could be even a little more
+  // pronounced" — a 45% deeper, slightly wider and lower curve). Any other value is flat; 'round' builds exactly as before.
+  const bust = rig.v26 && rig.form === 'fem' ? ({ round: [0.019, 0.058, 0.105], full: [0.0275, 0.063, 0.098] }[a.body?.chestSize] || null) : null;
+  const bustShape = !!bust;
+  const bustAt = (x, y) => bustShape ? bust[0] * W * (Math.exp(-(((x - 0.078 * W) / (bust[1] * W)) ** 2) - (((y - bust[2] * T) / (0.068 * T)) ** 2)) + Math.exp(-(((x + 0.078 * W) / (bust[1] * W)) ** 2) - (((y - bust[2] * T) / (0.068 * T)) ** 2))) : 0;
   const chestZ = (x, y, side = 1, lift = 0) => surfaceZ(chestRings, x, y, side, lift) + (side > 0 ? bustAt(x, y) : 0);
   // straps that lie on the body and go over the shoulder in one piece (chibi2-straps.js); handed to the gear too
   const shoulderBalls = ['armL', 'armR'].map(n => { const q = rig.byName[n].position; return [q.x, q.y - 0.005, q.z, 0.092 * Math.pow(W, 0.65) * (rig.armThick || 1) + R * 0.016]; });

@@ -2,6 +2,7 @@
 // anything to see its card next to what you wear (compare always on screen, game-standards §5b), then Buy or Sell.
 // The stock is this chapter's gear for your class, rolled once per chapter you clear (the same visit shows the same
 // wares). Prices: priceOf() — the one place a price comes from (the sell-back price is a share of it).
+import { progressOf } from '../sim/route.js';
 import { rollItem, rollRarity, baseOf, canUse, SLOTS } from '../sim/items.js';
 import { rng } from '../sim/rng.js';
 import { icon } from './icons.js';
@@ -25,7 +26,9 @@ export const sellPrice = (ITEMS, it) => Math.max(2, Math.round(priceOf(ITEMS, it
 export function stockFor(data, h) {
   const turn = h.story.done.length + 1;
   if (h.shop?.turn === turn && h.shop.stock?.length) return h.shop.stock;
-  const ch = h.story.reached, rand = rng((hash(h.id) ^ (turn * 2654435761)) >>> 0);
+  // the gear tier of the place the hero stands on their own road (Acts II/III carry tiers 6–11 in data/acts.json)
+  const P = progressOf(data, h.story), here = data.chapters.chapters.find(c => c.id === P.route[P.reached]);
+  const ch = here?.tier ?? P.reached, rand = rng((hash(h.id) ^ (turn * 2654435761)) >>> 0);
   const stock = [];
   const slots = SLOTS.filter(s => data.items.items.some(b => b.slot === s && b.cls.includes(h.cls) && !b.legendary));
   for (let i = 0; i < PRICE.stock; i++) {

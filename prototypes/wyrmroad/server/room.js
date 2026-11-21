@@ -10,19 +10,25 @@
 // and your hero walks in at the start of the next fight. Host leaves → the next person is host.
 import { cleanHero, cleanName, unpackInput, mergePresses, clearPresses, MAX_SEATS, AWAY_MS, READY_MS, SCENE_MS, RESULTS_MS, SNAP_EVERY } from '../js/net/protocol.js';
 import { createPacker, packEvents } from '../js/net/snap.js';
-import { createBrawl, step as stepBrawl, addHero } from '../js/sim/brawl.js';
+import { createBrawl, step as stepBrawl, addHero, releaseHold } from '../js/sim/brawl.js';
+import { routeFor, choiceAt } from '../js/sim/route.js';
 
-export const TIMES = { EMPTY_MS: 60000, LOAD_MS: 30000 };
+export const TIMES = { EMPTY_MS: 60000, LOAD_MS: 30000, BOSS_SCENE_LINE_MS: 6000, BOSS_SCENE_MIN_MS: 8000, BOSS_SCENE_MAX_MS: 60000 };
+/** How long a pre-boss scene may hold the room before the boss walks in anyway (the host may be gone or idle). */
+export function bossSceneLimit(data, sceneId) {
+  const n = data.story.scenes[sceneId]?.lines?.length || 0;
+  return Math.min(TIMES.BOSS_SCENE_MAX_MS, TIMES.BOSS_SCENE_MIN_MS + n * TIMES.BOSS_SCENE_LINE_MS);
+}
 const QUEUE_MAX = 4;                        // more waiting inputs than this are used together (presses kept)
 const OWED_MAX = 8;                         // a line this late stands in the last input this many steps, then stands still
 
-export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, log = () => {}, clock = () => performance.now() }) {
+export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, log = () => {}, clock = () => performance.now(), testHooks = false }) {
   const seats = [];
   const kicked = new Set();
   const opts = { public: false };
   const CH = data.chapters.chapters;
   let phase = 'lobby', pick = null, until = 0, scene = null, G = null, packer = null, tick = 0, loading = false, loadUntil = 0;
-  let emptySince = null, nextPid = 1, seedN = seed, result = null, lostAt = null, ending = null, evBuf = [];
+  let firstSection = 0, holdUntil = 0, emptySince = null, nextPid = 1, seedN = seed, result = null, lostAt = null, ending = null, evBuf = [];
   const stats = { steps: 0, stepMs: 0, maxStepMs: 0, bytesOut: 0, msgs: 0 };
 
   const send = (seat, obj) => { if (!seat.send || seat.away) return; const d = typeof obj === 'string' ? obj : JSON.stringify(obj); stats.bytesOut += d.length; stats.msgs++; seat.send(d); };
@@ -32,6 +38,9 @@ export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, lo
   const heroOf = s => G?.heroes.find(h => h.pid === s.pid && h.state !== 'gone') || null;
   const chIndex = id => CH.findIndex(c => c.id === id);
   const reachOf = s => s?.hero ? s.hero.reached : 0;
+  // the host's own road (Acts II/III follow the host's choices): what the room can pick, and what comes next
+  const road = () => routeFor(data, hostSeat()?.hero?.choices || {});
+  const roadIndex = id => road().indexOf(id);
 
   function seatView(s) {
     const h = s.hero;
@@ -40,7 +49,7 @@ export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, lo
   }
   function roomMsg(seat) {
     return { t: 'room', code, phase, you: seat.pid, host: hostSeat()?.pid || null, public: opts.public, pick,
-      pickable: CH.slice(0, reachOf(hostSeat()) + 1).map(c => c.id), left: until ? Math.max(0, Math.round((until - now()) / 1000)) : null,
+      pickable: road().slice(0, reachOf(hostSeat()) + 1), road: road(), left: until ? Math.max(0, Math.round((until - now()) / 1000)) : null,
       scene, result, lost: lostAt, seats: seats.map(seatView) };
   }
   const announce = () => { for (const s of seats) send(s, roomMsg(s)); };
@@ -95,8 +104,8 @@ export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, lo
     announce();
   }
   function keepPickValid() {
-    const max = reachOf(hostSeat());
-    if (pick == null || chIndex(pick) > max) pick = CH[Math.min(max, CH.length - 1)].id;
+    const max = reachOf(hostSeat()), R = road();
+    if (pick == null || roadIndex(pick) < 0 || roadIndex(pick) > max) pick = R[Math.min(max, R.length - 1)];
   }
 
   // ---- messages ----------------------------------------------------------------------------------------------
@@ -116,9 +125,10 @@ export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, lo
       case 'opt': if (isHost && msg.key === 'public') { opts.public = msg.value; announce(); } return;
       case 'pick': {
         if (!isHost || phase !== 'lobby') return;
-        const i = chIndex(msg.chapter);
+        const i = roadIndex(msg.chapter);
         if (i < 0 || i > reachOf(seat)) return send(seat, { t: 'err', code: 'pick', msg: 'That chapter is not open for you yet.' });
         pick = msg.chapter; for (const s of seats) s.ready = false;
+        firstSection = testHooks && Number.isInteger(msg.section) ? Math.max(0, msg.section) : 0;   // tests only: start at a later fight
         return announce();
       }
       case 'start': {
@@ -137,6 +147,7 @@ export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, lo
         return;
       }
       case 'ending': return choose(dev, msg.id);
+      case 'release': if (isHost && phase === 'play' && G?.hold) { releaseHold(G); holdUntil = 0; log('room.release', { code, by: 'host' }); } return;   // the host read the pre-boss scene
       case 'loaded': {
         if (phase !== 'play' || seat.loaded) return;
         seat.loaded = true; seat.needFull = true;
@@ -191,7 +202,7 @@ export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, lo
   }
   function afterReady() {
     const ch = CH[chIndex(pick)];
-    if (ch.intro && data.story.scenes[ch.intro]) showScene(ch.intro, 'intro'); else launch(0, false);
+    if (ch.intro && data.story.scenes[ch.intro]) showScene(ch.intro, 'intro'); else launch(firstSection, false);
   }
   function showScene(id, kind) {
     const sc = data.story.scenes[id];
@@ -207,7 +218,7 @@ export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, lo
     if (people.length && people.every(s => s.skip)) afterScene();
   }
   function afterScene() {
-    if (phase === 'intro') return launch(0, false);
+    if (phase === 'intro') return launch(firstSection, false);
     if (scene?.choice) { const opt = scene.choice.options[0]; ending = opt.id; return showScene(opt.scene, 'outro'); }   // nobody chose in time: the first ending
     finish('won');
   }
@@ -246,8 +257,17 @@ export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, lo
   /** The chapter is over: everyone's own share, then the results screen. */
   function finish(outcome) {
     const g = G;
+    // a choice chapter (Crownhollow, Bellwater, the Kiln): the host's pick sets the road for everyone's save
+    const fork = outcome === 'won' ? choiceAt(data, g.ch.id) : null;
+    const hostRoad = { ...(hostSeat()?.hero?.choices || {}) };
+    if (fork && ending) { if (fork.key === 'act1' && hostRoad.act1 !== ending) delete hostRoad.act2; hostRoad[fork.key] = ending; }
+    const R = routeFor(data, hostRoad);
+    // the room's list follows at once (the host's browser sends its saved hero again later; this keeps them in step)
+    const hs = hostSeat()?.hero;
+    if (hs && outcome === 'won') { hs.choices = hostRoad; const at = R.indexOf(g.ch.id); if (at >= 0) hs.reached = Math.max(hs.reached || 0, Math.min(R.length - 1, at + 1)); }
     result = { outcome, chapter: g.ch.id, name: g.ch.name, time: Math.round(g.stats.time), kills: g.stats.kills, ending: outcome === 'won' ? ending : null,
-      next: outcome === 'won' ? (CH[chIndex(g.ch.id) + 1]?.id ?? null) : null,
+      choice: fork && ending ? { key: fork.key, pick: ending } : null, finale: outcome === 'won' ? (g.ch.ending || null) : null,
+      next: outcome === 'won' ? (R[R.indexOf(g.ch.id) + 1] ?? null) : null,
       players: g.heroes.filter(h => !h.left).map(h => ({ pid: h.pid, name: h.name, cls: h.cls, level: h.level, xp: h.xp, xpGained: h.xpGained, gold: h.gold, kills: h.kills, lives: h.lives })) };
     phase = 'results'; until = now() + RESULTS_MS; scene = null;
     log('room.result', { code, outcome, chapter: g.ch.id, time: result.time });
@@ -304,7 +324,9 @@ export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, lo
     stepBrawl(G, inputs);
     tick++; stats.steps++;
     let fight = false;
-    for (const e of G.events) { evBuf.push(e); if (e.type === 'fight') fight = true; }
+    for (const e of G.events) { evBuf.push(e); if (e.type === 'fight') fight = true; if (e.type === 'bossScene') holdUntil = t + bossSceneLimit(data, e.scene); }
+    // a pre-boss scene never freezes the room: past its time the boss walks in without the host
+    if (G.hold && !G.hold.go && holdUntil && t > holdUntil) { releaseHold(G); holdUntil = 0; log('room.release', { code, by: 'time' }); }
     // someone who joined mid-chapter walks in as the fight starts
     if (fight) for (const s of seats) if (s.dropIn && s.hero && !heroOf(s)) {
       const h = addHero(G, heroSpec(s, null), G.heroes.length);
@@ -338,7 +360,7 @@ export function createRoom({ code, now = () => Date.now(), seed = 1, data, T, lo
   function listing() {
     if (!opts.public) return null;
     const ch = pick && CH[chIndex(pick)];
-    return { code, host: hostSeat()?.name || '', players: seats.length, seats: MAX_SEATS, phase, chapter: ch ? ch.name : null, chapterNo: ch ? chIndex(pick) + 1 : null };
+    return { code, host: hostSeat()?.name || '', players: seats.length, seats: MAX_SEATS, phase, chapter: ch ? ch.name : null, chapterNo: ch ? roadIndex(pick) + 1 : null };
   }
   return {
     join, remove, disconnect, message, choose, step, listing, kick,

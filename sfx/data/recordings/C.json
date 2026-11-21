@@ -394,5 +394,13 @@
    "fs/hvf.turn-1.ogg"
   ],
   "note": "big gong hit with ring-out (BOSS MUSIC user, a plain gong recording)"
+ },
+ "crate.break": {
+  "files": [
+   "fs/crate.break-1.ogg",
+   "fs/crate.break-2.ogg",
+   "fs/crate.break-3.ogg"
+  ],
+  "note": "Three light wooden crate/box smashes (kevinkace, gristi, DeltaCode), high-passed at 150 Hz and peaked at -3 dBFS so they never boom or clip (Wyrmroad #100, 2026-11-21)."
  }
 }

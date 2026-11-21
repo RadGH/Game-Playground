@@ -382,9 +382,10 @@
  "death.beast": {
   "files": [
    "fs/death.beast-1.ogg",
-   "fs/death.beast-2.ogg"
+   "fs/death.beast-2.ogg",
+   "fs/death.beast-3.ogg"
   ],
-  "note": "A medium monster death and a monster dying growl."
+  "note": "One animal each: two cuts of a single dog growl (coldvet) and one beast snarl, high-passed at 110 Hz so they never boom. Replaced 2026-11-21 (Wyrmroad #100: the old takes sounded like several creatures calling)."
  },
  "death.construct": {
   "files": [
@@ -511,5 +512,12 @@
    "kenney/interface/error_004.ogg"
   ],
   "note": "Kept Kenney: soft error blips; freesound buzzers are harsh/electronic."
+ },
+ "blade.whirl": {
+  "files": [
+   "fs/blade.whirl-1.ogg",
+   "fs/blade.whirl-2.ogg"
+  ],
+  "note": "Two sword swooshes (qubodup, Danjocross), one per turn of a spinning attack (Wyrmroad Iron Gale, 2026-11-21)."
  }
 }

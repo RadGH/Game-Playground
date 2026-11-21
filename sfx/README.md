@@ -102,6 +102,12 @@ use is fine and credit is optional, but every author is listed on the credits pa
   `node sfx/tools/measure.mjs hybrid` lists any id more than 2 dB off its target (none at 2026-10-29);
   `node sfx/tools/decode-all.mjs` decodes every file in a browser (405 OK).
 
+- 2026-11-21 (Wyrmroad owner reports #100/#108): `death.beast` is now one animal per take (two cuts of a single dog
+  growl + one beast snarl, high-passed at 110 Hz) — the old takes sounded like several creatures calling. New ids:
+  `crate.break` (light wooden box smashes, high-passed at 150 Hz, peaks −3 dBFS — use it instead of `wood.chop` for
+  breaking crates), `blade.whirl` (one sword swoosh per turn of a spinning attack) and `victory.horn` (a short low brass
+  horn for a won level, instead of the cartoon `quest.complete` fanfare).
+
 To change a sound: search, fetch over the old file (same name), `python3 sfx/tools/build-catalog.py`,
 `node sfx/tools/build-credits.mjs`, `node --test sfx/tests/`.
 

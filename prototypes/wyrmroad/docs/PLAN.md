@@ -32,7 +32,7 @@ Owner: "you design everything" — so every choice below is Claude's and is list
 - **Signature:** the Wyrm's spine — a stone ridge that runs along the horizon in every chapter and gets closer (and
   starts to move) as the story goes on.
 
-## Story (6 chapters, 3 twists)
+## Story — Act I (6 chapters, 3 twists). Acts II and III: docs/STORY.md
 
 Kingdom of Halvenmark. The old road east, the **Wyrmroad**, runs along the spine of a stone wyrm that fell asleep
 before anyone remembers. Each village along it keeps a **bell-stone** in its square.
@@ -67,12 +67,15 @@ jump attack, **Dash** (double-tap or Dash key) + dash attack, **Grab** (walk int
 
 | Class | Weapon family | Spells (unlock level) |
 |---|---|---|
-| **Vanguard** — heavy armour, big swings | greatsword / great-axe / maul (two-handed) | Ground Slam (1), War Shout (buff, 4), Iron Skin (8) |
+| **Vanguard** — heavy armour, big swings | greatsword / great-axe / maul (two-handed) | Ground Slam (1), Iron Gale (held spin, 4), Iron Skin (8) |
 | **Duelist** — fast, light armour | twin blades (one-handed ×2) | Shadow Step (1), Blade Fan (4), Hundred Cuts (8) |
 | **Arcanist** — robes, staff | staff (two-handed) | Fire Bolt (1), Frost Ring (4), Meteor (8) |
 | **Warden** — mail, mace + shield | mace/sword (one-handed) + shield (off hand) | Holy Light (heal partners, 1), Smite (4), Sanctuary (8) |
 
-Levels 1–12. Each level: +health, +mana, +power. Spells unlock at 1 / 4 / 8 (two slots: pick which two you carry).
+Levels 1–20. Each level: +health, +mana, +power. Spells unlock at 1 / 4 / 8 (two slots: pick which two you carry).
+Dash and block moves grow by class at levels 3 / 7 / 13 (Arcanist also 9): Vanguard Shoulder Charge, Brace, Landslide
+Charge; Duelist Riposte (timed block strikes back), Slipstream, Storm Riposte; Arcanist Rift Step (dash teleports),
+Mana Ward, Rift Burst, Glass Ward; Warden Shield Rush, Shield Wall, Bell Rush (classes.json `kit`).
 
 ## Gear (the new weapons and armour)
 
@@ -94,5 +97,11 @@ priest (heals others — kill first), zealot (charges, explodes into fire on dea
 - **Round 1 (this one):** everything above — 6 chapters, 4 classes, 12 enemies + 6 bosses, story + twists, gear
   sets, levels, local co-op, online co-op server, all menus, What's new, credits, reports, tuning panel, tests,
   publish.
+- **Round 2 (2026-11-21, owner play-test):** Acts II and III — two choices, four roads, 18 chapters, 19 bosses, four
+  endings (docs/STORY.md); staged cinematics with the cast on screen; harder fights that scale with players; knockdown
+  kinds; Breaker cooldown; regen only between fights; class dash/block moves; Iron Gale; thrown boss hook; turn
+  mid-combo; real two-handed holds; mouse + keys default; co-op bag tabs + Give; 23 live reports fixed.
+  Owner rulings this round: "add act 2 and 3 … entirely different paths, different bosses, different cinematics";
+  masculine = flat, feminine = round, no chest option; keep the temporary ground weapons as they are (#102).
 - **Later (genre sheet "grow it"):** enemy groups whose roles work together beyond lantern priests; bonus stages
   (a cart ride along the Spine); a New Game+ with harder gear; more heroes.

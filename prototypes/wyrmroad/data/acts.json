@@ -1,0 +1,209 @@
+{
+  "_doc": "Acts and routes (docs/STORY.md). Act I's chapters live in chapters.json; Acts II and III here, same chapter shape (sections, waves, crates, banter, tier, level, theme) plus: act (2|3), path (the route key), bossScene (story scene played when the boss section's fight starts, before the boss walks in), sky (Ossmara breathes fire on foes: { who, fire: 'gold'|'green', every: seconds }), ending (the finale's ending id, for the last chapter of each Act III road). routes: act1 = chapter ids; act2[act1 choice] = ids; act3['<act1>.<act2>'] = ids. choices: the scene whose `choice` decides each act's road. endings: id → name + line shown on the map and hero card.",
+  "acts": [
+    { "n": 1, "name": "Act I", "title": "The Wyrmroad" },
+    { "n": 2, "name": "Act II", "title": { "free": "The Undermaw", "hold": "The Lantern Crown" } },
+    { "n": 3, "name": "Act III", "title": { "free.bond": "Wings over Halvenmark", "free.seal": "The Wyrm's Wrath", "hold.crown": "Crown of Lanterns", "hold.break": "Unbound Fire" } }
+  ],
+  "routes": {
+    "act1": ["millbrook", "thornwood", "saltmere", "greyspire", "spine", "crownhollow"],
+    "act2": {
+      "free": ["brokenreach", "underway", "bellwater"],
+      "hold": ["kingsway", "rookhaven", "kiln"]
+    },
+    "act3": {
+      "free.bond": ["halvenhold", "wyrmback", "undermaw"],
+      "free.seal": ["ashfall", "foundry", "belltower"],
+      "hold.crown": ["siege", "homefront", "lanternvoid"],
+      "hold.break": ["wildwyrm", "wraithlight", "burningcrown"]
+    }
+  },
+  "choices": { "act1": "ch6_outro", "act2.free": "bw_outro", "act2.hold": "kiln_outro" },
+  "endings": {
+    "friend": { "name": "The Wyrm's Friend", "line": "The Undermaw burned, and Ossmara flies beside you." },
+    "song": { "name": "The Last Song", "line": "You rang the Great Bell. Ossmara sleeps for good." },
+    "crown": { "name": "The Lantern Crown", "line": "The road is yours. The wyrm waits." },
+    "unbound": { "name": "Unbound", "line": "The lantern is ash, and the sky is open." }
+  },
+  "chapters": [
+    { "id": "brokenreach", "act": 2, "path": "free", "name": "Brokenreach", "sub": "Where the wyrm lay", "theme": "rift", "tier": 6, "length": 180, "level": 12,
+      "intro": "br_intro", "bossScene": "br_boss", "outro": "br_outro", "ally": "grell_ally",
+      "sections": [
+        { "at": 16, "banter": "br_b1", "waves": [["hollowborn", "hollowborn"], ["thug", "hollowborn", "knifer@l"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 46, "waves": [["hollowborn", "rootcaster", "hollowborn@l"], ["bruiser", "hollowborn", "rootcaster"]], "crates": [{ "x": 40, "z": -1.6, "holds": "weapon:chain" }, { "x": 42, "z": 1.8, "holds": "random" }] },
+        { "at": 78, "banter": "br_b2", "waves": [["hollowborn", "hollowborn", "hollowborn", "hollowborn@l"], ["rootcaster", "rootcaster", "bruiser"]], "crates": [{ "x": 72, "z": 0.4, "holds": "food" }] },
+        { "at": 110, "waves": [["hound", "hound", "hollowborn"], ["rootcaster", "bruiser", "hollowborn", "hollowborn@l"]], "crates": [{ "x": 104, "z": -2, "holds": "gold" }, { "x": 105, "z": 1.9, "holds": "random" }] },
+        { "at": 138, "waves": [["hollowborn", "hollowborn", "rootcaster", "knifer@l"], ["bruiser", "bruiser", "rootcaster"]], "crates": [{ "x": 132, "z": 1.4, "holds": "food" }] },
+        { "at": 164, "boss": "marrow", "waves": [["hollowborn", "hollowborn"]], "crates": [{ "x": 156, "z": -1.5, "holds": "food" }, { "x": 158, "z": 1.7, "holds": "food" }] }
+      ] },
+    { "id": "underway", "act": 2, "path": "free", "name": "The Underway", "sub": "Under the road", "theme": "underway", "tier": 7, "length": 185, "level": 13,
+      "intro": "uw_intro", "bossScene": "uw_boss", "outro": "uw_outro", "ally": "grell_ally",
+      "sections": [
+        { "at": 16, "banter": "uw_b1", "waves": [["hollowborn", "rootcaster"], ["hollowborn", "hollowborn", "wingspawn"]], "crates": [{ "x": 12, "z": -1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["wingspawn", "wingspawn", "hollowborn"], ["drowned", "rootcaster", "hollowborn@l"]], "crates": [{ "x": 42, "z": 1.6, "holds": "weapon:scale" }, { "x": 44, "z": -2, "holds": "random" }] },
+        { "at": 80, "banter": "uw_b2", "waves": [["drowned", "drowned", "rootcaster"], ["wingspawn", "wingspawn", "wingspawn@l", "hollowborn"]], "crates": [{ "x": 74, "z": 0.8, "holds": "food" }] },
+        { "at": 112, "waves": [["golem", "rootcaster", "hollowborn"], ["hollowborn", "hollowborn", "hollowborn", "drowned@l"]], "crates": [{ "x": 106, "z": -1.4, "holds": "gold" }, { "x": 107, "z": 1.9, "holds": "random" }] },
+        { "at": 142, "waves": [["drowned", "wingspawn", "rootcaster", "rootcaster@l"], ["golem", "hollowborn", "hollowborn"]], "crates": [{ "x": 136, "z": 0, "holds": "food" }] },
+        { "at": 168, "boss": "aldric_hollow", "waves": [["hollowborn", "rootcaster"]], "crates": [{ "x": 160, "z": 1.5, "holds": "food" }, { "x": 162, "z": -1.8, "holds": "food" }] }
+      ] },
+    { "id": "bellwater", "act": 2, "path": "free", "name": "Bellwater", "sub": "The drowned bells", "theme": "lake", "tier": 8, "length": 185, "level": 14,
+      "intro": "bw_intro", "bossScene": "bw_boss", "outro": "bw_outro", "ally": "grell_ally",
+      "sections": [
+        { "at": 16, "banter": "bw_b1", "waves": [["drowned", "hollowborn"], ["drowned", "drowned", "rootcaster"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["wyrmling", "wyrmling", "hollowborn"], ["wingspawn", "wingspawn", "drowned@l"]], "crates": [{ "x": 42, "z": -1.6, "holds": "weapon:anchor" }, { "x": 44, "z": 1.8, "holds": "random" }] },
+        { "at": 80, "banter": "bw_b2", "waves": [["rootcaster", "rootcaster", "hollowborn", "hollowborn"], ["drowned", "drowned", "wingspawn@l"]], "crates": [{ "x": 74, "z": 0.4, "holds": "food" }] },
+        { "at": 112, "waves": [["golem", "drowned", "rootcaster"], ["hollowborn", "hollowborn", "hollowborn@l", "wingspawn", "wingspawn"]], "crates": [{ "x": 106, "z": -2, "holds": "gold" }] },
+        { "at": 142, "banter": "bw_b3", "waves": [["drowned", "drowned", "rootcaster", "rootcaster@l"], ["golem", "golem", "hollowborn"]], "crates": [{ "x": 136, "z": 1.4, "holds": "food" }, { "x": 137, "z": -1.9, "holds": "random" }] },
+        { "at": 168, "boss": "maw_hand", "waves": [["hollowborn", "hollowborn", "rootcaster"]], "crates": [{ "x": 160, "z": -1.5, "holds": "food" }, { "x": 162, "z": 1.7, "holds": "food" }] }
+      ] },
+
+    { "id": "kingsway", "act": 2, "path": "hold", "name": "Kingsway", "sub": "The new Lamplord", "theme": "kingsway", "tier": 6, "length": 180, "level": 12,
+      "intro": "kw_intro", "bossScene": "kw_boss", "outro": "kw_outro",
+      "sections": [
+        { "at": 16, "banter": "kw_b1", "waves": [["knight", "archer"], ["hunter", "hunter", "knight@l"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 46, "waves": [["knight", "knight", "archer"], ["hound", "hound", "hunter", "archer@l"]], "crates": [{ "x": 40, "z": -1.6, "holds": "weapon:pitchfork" }, { "x": 42, "z": 1.8, "holds": "random" }] },
+        { "at": 78, "banter": "kw_b2", "waves": [["hunter", "hunter", "hunter@l"], ["knight", "knight", "archer", "archer"]], "crates": [{ "x": 72, "z": 0.4, "holds": "food" }] },
+        { "at": 110, "waves": [["knight", "priest", "archer"], ["hound", "hound", "hound@l", "knight"]], "crates": [{ "x": 104, "z": -2, "holds": "gold" }, { "x": 105, "z": 1.9, "holds": "random" }] },
+        { "at": 138, "waves": [["knight", "knight", "knight", "hunter@l"], ["archer", "archer", "priest", "knight"]], "crates": [{ "x": 132, "z": 1.4, "holds": "food" }] },
+        { "at": 164, "boss": "orsolya", "waves": [["knight", "archer"]], "crates": [{ "x": 156, "z": -1.5, "holds": "food" }, { "x": 158, "z": 1.7, "holds": "food" }] }
+      ] },
+    { "id": "rookhaven", "act": 2, "path": "hold", "name": "Rookhaven", "sub": "Grell's last hideout", "theme": "marsh", "tier": 7, "length": 185, "level": 13,
+      "intro": "rh_intro", "bossScene": "rh_boss", "outro": "rh_outro",
+      "sections": [
+        { "at": 16, "banter": "rh_b1", "waves": [["thug", "knifer", "thug"], ["bruiser", "knifer", "knifer@l"]], "crates": [{ "x": 12, "z": -1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["hunter", "thug", "knifer"], ["bruiser", "bruiser", "knifer@l"]], "crates": [{ "x": 42, "z": 1.6, "holds": "weapon:log" }, { "x": 44, "z": -2, "holds": "random" }] },
+        { "at": 80, "banter": "rh_b2", "waves": [["wolf", "wolf", "wolf@l", "thug"], ["sprite", "sprite", "bruiser"]], "crates": [{ "x": 74, "z": 0.8, "holds": "food" }] },
+        { "at": 112, "waves": [["knifer", "knifer", "knifer@l", "hunter"], ["bruiser", "sprite", "thug", "thug"]], "crates": [{ "x": 106, "z": -1.4, "holds": "gold" }, { "x": 107, "z": 1.9, "holds": "random" }] },
+        { "at": 142, "waves": [["bruiser", "bruiser", "hunter", "knifer@l"], ["thug", "thug", "thug", "sprite", "sprite"]], "crates": [{ "x": 136, "z": 0, "holds": "food" }] },
+        { "at": 168, "boss": "grell_free", "waves": [["knifer", "thug"]], "crates": [{ "x": 160, "z": 1.5, "holds": "food" }, { "x": 162, "z": -1.8, "holds": "food" }] }
+      ] },
+    { "id": "kiln", "act": 2, "path": "hold", "name": "The Kiln", "sub": "Where lanterns are made", "theme": "kiln", "tier": 8, "length": 185, "level": 14, "quake": true,
+      "intro": "kiln_intro", "bossScene": "kiln_boss", "outro": "kiln_outro",
+      "sections": [
+        { "at": 16, "banter": "kiln_b1", "waves": [["glassmonk", "zealot"], ["guard", "glassmonk", "zealot"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["zealot", "zealot", "glassmonk@l"], ["golem", "glassmonk", "priest"]], "crates": [{ "x": 42, "z": -1.6, "holds": "weapon:candelabra" }, { "x": 44, "z": 1.8, "holds": "random" }] },
+        { "at": 80, "banter": "kiln_b2", "waves": [["wisp", "wisp", "glassmonk"], ["guard", "guard", "priest", "zealot@l"]], "crates": [{ "x": 74, "z": 0.4, "holds": "food" }] },
+        { "at": 112, "waves": [["glassmonk", "glassmonk", "zealot", "zealot"], ["golem", "wisp", "wisp", "crossbow"]], "crates": [{ "x": 106, "z": -2, "holds": "gold" }] },
+        { "at": 142, "waves": [["zealot", "zealot", "zealot", "glassmonk@l"], ["golem", "golem", "priest"]], "crates": [{ "x": 136, "z": 1.4, "holds": "food" }, { "x": 137, "z": -1.9, "holds": "random" }] },
+        { "at": 168, "boss": "sabel", "waves": [["glassmonk", "zealot"]], "crates": [{ "x": 160, "z": -1.5, "holds": "food" }, { "x": 162, "z": 1.7, "holds": "food" }] }
+      ] },
+
+    { "id": "halvenhold", "act": 3, "path": "free.bond", "name": "Halvenhold", "sub": "The capital at night", "theme": "capital", "tier": 9, "length": 190, "level": 15,
+      "intro": "hh_intro", "bossScene": "hh_boss", "outro": "hh_outro", "sky": { "who": "ossmara", "fire": "gold", "every": 16 },
+      "sections": [
+        { "at": 16, "banter": "hh_b1", "waves": [["hollowborn", "hollowborn", "hollowborn"], ["rootcaster", "hollowborn", "wingspawn"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["knight", "hollowborn", "hollowborn@l"], ["drowned", "rootcaster", "wingspawn", "wingspawn"]], "crates": [{ "x": 42, "z": -1.6, "holds": "weapon:anchor" }, { "x": 44, "z": 1.8, "holds": "random" }] },
+        { "at": 82, "banter": "hh_b2", "waves": [["hollowborn", "hollowborn", "hollowborn", "hollowborn@l"], ["golem", "rootcaster", "rootcaster"]], "crates": [{ "x": 76, "z": 0.4, "holds": "food" }] },
+        { "at": 116, "waves": [["knight", "knight", "rootcaster", "wingspawn@l"], ["drowned", "drowned", "hollowborn", "hollowborn"]], "crates": [{ "x": 110, "z": -2, "holds": "gold" }, { "x": 111, "z": 1.9, "holds": "random" }] },
+        { "at": 146, "waves": [["wingspawn", "wingspawn", "wingspawn", "rootcaster@l"], ["golem", "golem", "knight", "hollowborn"]], "crates": [{ "x": 140, "z": 1.4, "holds": "food" }] },
+        { "at": 172, "boss": "isolde_hollow", "waves": [["hollowborn", "knight"]], "crates": [{ "x": 164, "z": -1.5, "holds": "food" }, { "x": 166, "z": 1.7, "holds": "food" }] }
+      ] },
+    { "id": "wyrmback", "act": 3, "path": "free.bond", "name": "On the Wyrm's Back", "sub": "Above the clouds", "theme": "sky", "tier": 10, "length": 170, "level": 16, "quake": true,
+      "intro": "wb_intro", "bossScene": "wb_boss", "outro": "wb_outro", "sky": { "who": "ossmara", "fire": "gold", "every": 20 },
+      "sections": [
+        { "at": 16, "banter": "wb_b1", "waves": [["wingspawn", "wingspawn", "wingspawn"], ["hollowborn", "hollowborn", "wingspawn@l", "wingspawn"]], "crates": [{ "x": 12, "z": -1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["rootcaster", "wingspawn", "wingspawn", "hollowborn"], ["drowned", "drowned", "wingspawn@l"]], "crates": [{ "x": 42, "z": 1.6, "holds": "weapon:scale" }] },
+        { "at": 80, "banter": "wb_b2", "waves": [["wingspawn", "wingspawn", "wingspawn", "wingspawn@l"], ["golem", "rootcaster", "rootcaster"]], "crates": [{ "x": 74, "z": 0.8, "holds": "food" }, { "x": 75, "z": -1.9, "holds": "random" }] },
+        { "at": 112, "waves": [["hollowborn", "hollowborn", "hollowborn", "rootcaster", "wingspawn"], ["drowned", "golem", "wingspawn@l", "wingspawn"]], "crates": [{ "x": 106, "z": -1.4, "holds": "gold" }] },
+        { "at": 150, "boss": "gloomwing", "waves": [["wingspawn", "wingspawn"]], "crates": [{ "x": 142, "z": 1.5, "holds": "food" }, { "x": 144, "z": -1.8, "holds": "food" }] }
+      ] },
+    { "id": "undermaw", "act": 3, "path": "free.bond", "name": "The Undermaw", "sub": "The bottom of the pit", "theme": "maw", "tier": 11, "length": 170, "level": 17, "quake": true, "ending": "friend",
+      "intro": "um_intro", "bossScene": "um_boss", "outro": "um_outro", "sky": { "who": "ossmara", "fire": "gold", "every": 18 },
+      "sections": [
+        { "at": 16, "banter": "um_b1", "waves": [["hollowborn", "hollowborn", "rootcaster", "rootcaster"], ["drowned", "drowned", "wingspawn", "hollowborn@l"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 50, "waves": [["golem", "rootcaster", "hollowborn", "hollowborn"], ["wingspawn", "wingspawn", "wingspawn@l", "drowned"]], "crates": [{ "x": 44, "z": -1.6, "holds": "weapon:chain" }, { "x": 46, "z": 1.8, "holds": "food" }] },
+        { "at": 84, "banter": "um_b2", "waves": [["hollowborn", "hollowborn", "hollowborn", "hollowborn", "hollowborn@l"], ["golem", "golem", "rootcaster", "rootcaster"]], "crates": [{ "x": 78, "z": 0.4, "holds": "random" }] },
+        { "at": 116, "waves": [["drowned", "drowned", "drowned", "rootcaster@l"], ["wingspawn", "wingspawn", "golem", "hollowborn", "hollowborn"]], "crates": [{ "x": 110, "z": -2, "holds": "food" }, { "x": 112, "z": 2, "holds": "gold" }] },
+        { "at": 150, "boss": "undermaw", "waves": [], "crates": [{ "x": 142, "z": 1.5, "holds": "food" }, { "x": 144, "z": -1.8, "holds": "food" }] }
+      ] },
+
+    { "id": "ashfall", "act": 3, "path": "free.seal", "name": "Ashfall", "sub": "Her brood burns the fields", "theme": "ashfall", "tier": 9, "length": 190, "level": 15,
+      "intro": "af_intro", "bossScene": "af_boss", "outro": "af_outro", "ally": "grell_ally",
+      "sections": [
+        { "at": 16, "banter": "af_b1", "waves": [["wyrmling", "wyrmling", "wyrmling"], ["drake", "wyrmling@l"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["wyrmling", "wyrmling", "thug", "knifer@l"], ["drake", "drake"]], "crates": [{ "x": 42, "z": -1.6, "holds": "weapon:pitchfork" }, { "x": 44, "z": 1.8, "holds": "random" }] },
+        { "at": 82, "banter": "af_b2", "waves": [["wyrmling", "wyrmling", "wyrmling", "wyrmling@l"], ["drake", "zealot", "zealot"]], "crates": [{ "x": 76, "z": 0.4, "holds": "food" }] },
+        { "at": 116, "waves": [["drake", "drake", "wyrmling@l"], ["zealot", "zealot", "wyrmling", "wyrmling", "crossbow"]], "crates": [{ "x": 110, "z": -2, "holds": "gold" }, { "x": 111, "z": 1.9, "holds": "random" }] },
+        { "at": 146, "waves": [["drake", "drake", "drake"], ["wyrmling", "wyrmling", "wyrmling", "wyrmling", "wyrmling@l"]], "crates": [{ "x": 140, "z": 1.4, "holds": "food" }] },
+        { "at": 172, "boss": "brood_mother", "waves": [["wyrmling", "wyrmling"]], "crates": [{ "x": 164, "z": -1.5, "holds": "food" }, { "x": 166, "z": 1.7, "holds": "food" }] }
+      ] },
+    { "id": "foundry", "act": 3, "path": "free.seal", "name": "The Bell Foundry", "sub": "Casting the Great Bell", "theme": "foundry", "tier": 10, "length": 185, "level": 16,
+      "intro": "fd_intro", "bossScene": "fd_boss", "outro": "fd_outro", "ally": "grell_ally",
+      "sections": [
+        { "at": 16, "banter": "fd_b1", "waves": [["zealot", "guard", "crossbow"], ["glassmonk", "zealot", "zealot@l"]], "crates": [{ "x": 12, "z": -1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["drake", "wyrmling", "wyrmling"], ["guard", "guard", "priest", "crossbow@l"]], "crates": [{ "x": 42, "z": 1.6, "holds": "weapon:anchor" }, { "x": 44, "z": -2, "holds": "random" }] },
+        { "at": 80, "banter": "fd_b2", "waves": [["golem", "glassmonk", "zealot"], ["drake", "drake", "wyrmling@l"]], "crates": [{ "x": 74, "z": 0.8, "holds": "food" }] },
+        { "at": 112, "waves": [["zealot", "zealot", "zealot", "priest"], ["golem", "golem", "crossbow", "crossbow"]], "crates": [{ "x": 106, "z": -1.4, "holds": "gold" }, { "x": 107, "z": 1.9, "holds": "random" }] },
+        { "at": 142, "waves": [["drake", "drake", "wyrmling", "wyrmling"], ["guard", "guard", "glassmonk", "glassmonk", "zealot@l"]], "crates": [{ "x": 136, "z": 0, "holds": "food" }] },
+        { "at": 168, "boss": "bronze_warden", "waves": [["zealot", "guard"]], "crates": [{ "x": 160, "z": 1.5, "holds": "food" }, { "x": 162, "z": -1.8, "holds": "food" }] }
+      ] },
+    { "id": "belltower", "act": 3, "path": "free.seal", "name": "The Great Bell Tower", "sub": "She comes for you", "theme": "belltower", "tier": 11, "length": 160, "level": 17, "quake": true, "ending": "song",
+      "intro": "bt_intro", "bossScene": "bt_boss", "outro": "bt_outro",
+      "sections": [
+        { "at": 16, "banter": "bt_b1", "waves": [["wyrmling", "wyrmling", "drake"], ["drake", "drake", "wyrmling@l", "wyrmling"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 50, "waves": [["drake", "wyrmling", "wyrmling", "wyrmling@l"], ["drake", "drake", "drake"]], "crates": [{ "x": 44, "z": -1.6, "holds": "weapon:scale" }, { "x": 46, "z": 1.8, "holds": "food" }] },
+        { "at": 84, "banter": "bt_b2", "waves": [["wyrmling", "wyrmling", "wyrmling", "wyrmling", "wyrmling@l"], ["drake", "drake", "golem"]], "crates": [{ "x": 78, "z": 0.4, "holds": "random" }] },
+        { "at": 114, "waves": [["drake", "drake", "drake", "wyrmling@l"], ["golem", "golem", "wyrmling", "wyrmling"]], "crates": [{ "x": 108, "z": -2, "holds": "food" }, { "x": 110, "z": 2, "holds": "gold" }] },
+        { "at": 142, "boss": "ossmara_wrath", "waves": [], "crates": [{ "x": 134, "z": 1.5, "holds": "food" }, { "x": 136, "z": -1.8, "holds": "food" }] }
+      ] },
+
+    { "id": "siege", "act": 3, "path": "hold.crown", "name": "The Siege of Halvenhold", "sub": "You march on the capital", "theme": "siege", "tier": 9, "length": 190, "level": 15,
+      "intro": "sg_intro", "bossScene": "sg_boss", "outro": "sg_outro", "sky": { "who": "ossmara", "fire": "green", "every": 16 },
+      "sections": [
+        { "at": 16, "banter": "sg_b1", "waves": [["knight", "knight", "archer"], ["hunter", "hunter", "knight@l"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["knight", "knight", "knight"], ["archer", "archer", "archer", "hound@l"]], "crates": [{ "x": 42, "z": -1.6, "holds": "weapon:anchor" }, { "x": 44, "z": 1.8, "holds": "random" }] },
+        { "at": 82, "banter": "sg_b2", "waves": [["hound", "hound", "hound", "knight"], ["knight", "priest", "archer", "archer@l"]], "crates": [{ "x": 76, "z": 0.4, "holds": "food" }] },
+        { "at": 116, "waves": [["knight", "knight", "hunter", "hunter@l"], ["bruiser", "bruiser", "archer", "archer"]], "crates": [{ "x": 110, "z": -2, "holds": "gold" }, { "x": 111, "z": 1.9, "holds": "random" }] },
+        { "at": 146, "waves": [["knight", "knight", "knight", "knight@l"], ["archer", "archer", "priest", "priest", "hunter"]], "crates": [{ "x": 140, "z": 1.4, "holds": "food" }] },
+        { "at": 172, "boss": "isolde", "waves": [["knight", "archer"]], "crates": [{ "x": 164, "z": -1.5, "holds": "food" }, { "x": 166, "z": 1.7, "holds": "food" }] }
+      ] },
+    { "id": "homefront", "act": 3, "path": "hold.crown", "name": "Millbrook Bars the Gate", "sub": "Home, barred against you", "theme": "village_night", "tier": 10, "length": 170, "level": 16,
+      "intro": "ls_intro", "bossScene": "ls_boss", "outro": "ls_outro", "sky": { "who": "ossmara", "fire": "green", "every": 20 },
+      "sections": [
+        { "at": 16, "banter": "ls_b1", "waves": [["thug", "thug", "knifer", "knifer@l"], ["bruiser", "hunter", "thug"]], "crates": [{ "x": 12, "z": -1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["knight", "knight", "thug@l"], ["bruiser", "bruiser", "knifer", "knifer"]], "crates": [{ "x": 42, "z": 1.6, "holds": "weapon:pitchfork" }] },
+        { "at": 80, "banter": "ls_b2", "waves": [["wolf", "wolf", "wolf", "hunter@l"], ["thug", "thug", "thug", "sprite", "sprite"]], "crates": [{ "x": 74, "z": 0.8, "holds": "food" }, { "x": 75, "z": -1.9, "holds": "random" }] },
+        { "at": 112, "waves": [["bruiser", "bruiser", "bruiser"], ["knifer", "knifer", "knifer", "knifer@l", "archer"]], "crates": [{ "x": 106, "z": -1.4, "holds": "gold" }] },
+        { "at": 150, "boss": "grell_last", "waves": [["thug", "knifer"]], "crates": [{ "x": 142, "z": 1.5, "holds": "food" }, { "x": 144, "z": -1.8, "holds": "food" }] }
+      ] },
+    { "id": "lanternvoid", "act": 3, "path": "hold.crown", "name": "Inside the Lantern", "sub": "The glass burns your hand", "theme": "lanternvoid", "tier": 11, "length": 160, "level": 17, "ending": "crown",
+      "intro": "lv_intro", "bossScene": "lv_boss", "outro": "lv_outro",
+      "sections": [
+        { "at": 16, "banter": "lv_b1", "waves": [["wisp", "wisp", "wraith"], ["wraith", "wraith", "wisp@l", "wisp"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 50, "waves": [["zealot", "zealot", "wraith", "glassmonk"], ["golem", "wisp", "wisp", "wraith@l"]], "crates": [{ "x": 44, "z": -1.6, "holds": "weapon:candelabra" }, { "x": 46, "z": 1.8, "holds": "food" }] },
+        { "at": 84, "banter": "lv_b2", "waves": [["wraith", "wraith", "wraith", "wisp@l"], ["glassmonk", "glassmonk", "priest", "golem"]], "crates": [{ "x": 78, "z": 0.4, "holds": "random" }] },
+        { "at": 114, "waves": [["wisp", "wisp", "wisp", "wisp@l", "wraith"], ["golem", "golem", "wraith", "wraith"]], "crates": [{ "x": 108, "z": -2, "holds": "food" }, { "x": 110, "z": 2, "holds": "gold" }] },
+        { "at": 142, "boss": "aldric_eternal", "waves": [], "crates": [{ "x": 134, "z": 1.5, "holds": "food" }, { "x": 136, "z": -1.8, "holds": "food" }] }
+      ] },
+
+    { "id": "wildwyrm", "act": 3, "path": "hold.break", "name": "The Wild Wyrm", "sub": "Half mad from the leash", "theme": "highlands", "tier": 9, "length": 185, "level": 15,
+      "intro": "ww_intro", "bossScene": "ww_boss", "outro": "ww_outro", "ally": "grell_ally",
+      "sections": [
+        { "at": 16, "banter": "ww_b1", "waves": [["wyrmling", "wyrmling", "wisp"], ["drake", "wisp", "wisp@l"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["wolf", "wolf", "wolf", "wyrmling@l"], ["drake", "drake", "wisp"]], "crates": [{ "x": 42, "z": -1.6, "holds": "weapon:log" }, { "x": 44, "z": 1.8, "holds": "random" }] },
+        { "at": 80, "banter": "ww_b2", "waves": [["wisp", "wisp", "wisp", "wyrmling", "wyrmling"], ["drake", "drake", "wolf@l", "wolf"]], "crates": [{ "x": 74, "z": 0.4, "holds": "food" }] },
+        { "at": 112, "waves": [["wyrmling", "wyrmling", "wyrmling", "wyrmling@l"], ["drake", "drake", "drake", "wisp"]], "crates": [{ "x": 106, "z": -2, "holds": "gold" }, { "x": 107, "z": 1.9, "holds": "random" }] },
+        { "at": 140, "waves": [["wisp", "wisp", "wisp", "wisp@l"], ["drake", "drake", "wyrmling", "wyrmling", "wolf"]], "crates": [{ "x": 134, "z": 1.4, "holds": "food" }] },
+        { "at": 166, "boss": "ossmara_mad", "waves": [], "crates": [{ "x": 158, "z": -1.5, "holds": "food" }, { "x": 160, "z": 1.7, "holds": "food" }] }
+      ] },
+    { "id": "wraithlight", "act": 3, "path": "hold.break", "name": "Wraithlight Abbey", "sub": "The dead Order rises", "theme": "abbey_wraith", "tier": 10, "length": 185, "level": 16,
+      "intro": "wl_intro", "bossScene": "wl_boss", "outro": "wl_outro", "ally": "grell_ally", "sky": { "who": "ossmara", "fire": "gold", "every": 22 },
+      "sections": [
+        { "at": 16, "banter": "wl_b1", "waves": [["wraith", "wraith"], ["wraith", "wisp", "wisp", "wraith@l"]], "crates": [{ "x": 12, "z": -1.2, "holds": "food" }] },
+        { "at": 48, "waves": [["wraith", "wraith", "glassmonk"], ["golem", "wisp", "wisp", "wraith@l"]], "crates": [{ "x": 42, "z": 1.6, "holds": "weapon:candelabra" }, { "x": 44, "z": -2, "holds": "random" }] },
+        { "at": 80, "banter": "wl_b2", "waves": [["wraith", "wraith", "wraith", "wraith@l"], ["glassmonk", "glassmonk", "wisp", "wisp"]], "crates": [{ "x": 74, "z": 0.8, "holds": "food" }] },
+        { "at": 112, "waves": [["golem", "wraith", "wraith", "glassmonk"], ["wisp", "wisp", "wisp", "wisp@l", "wraith"]], "crates": [{ "x": 106, "z": -1.4, "holds": "gold" }, { "x": 107, "z": 1.9, "holds": "random" }] },
+        { "at": 142, "waves": [["wraith", "wraith", "wraith", "glassmonk", "glassmonk@l"], ["golem", "golem", "wisp", "wisp"]], "crates": [{ "x": 136, "z": 0, "holds": "food" }] },
+        { "at": 168, "boss": "vessa_wraith", "waves": [["wraith", "wraith"]], "crates": [{ "x": 160, "z": 1.5, "holds": "food" }, { "x": 162, "z": -1.8, "holds": "food" }] }
+      ] },
+    { "id": "burningcrown", "act": 3, "path": "hold.break", "name": "The Burning Crown", "sub": "Crownhollow, on fire", "theme": "crown_burning", "tier": 11, "length": 160, "level": 17, "quake": true, "ending": "unbound",
+      "intro": "bc_intro", "bossScene": "bc_boss", "outro": "bc_outro", "sky": { "who": "ossmara", "fire": "gold", "every": 18 },
+      "sections": [
+        { "at": 16, "banter": "bc_b1", "waves": [["wraith", "wraith", "wisp", "wisp"], ["zealot", "zealot", "wraith", "wraith@l"]], "crates": [{ "x": 12, "z": 1.2, "holds": "food" }] },
+        { "at": 50, "waves": [["golem", "wraith", "wisp", "wisp"], ["wraith", "wraith", "wraith", "glassmonk@l"]], "crates": [{ "x": 44, "z": -1.6, "holds": "weapon:chain" }, { "x": 46, "z": 1.8, "holds": "food" }] },
+        { "at": 84, "banter": "bc_b2", "waves": [["wisp", "wisp", "wisp", "wisp", "wisp@l"], ["golem", "golem", "wraith", "wraith"]], "crates": [{ "x": 78, "z": 0.4, "holds": "random" }] },
+        { "at": 114, "waves": [["zealot", "zealot", "zealot", "wraith@l"], ["glassmonk", "glassmonk", "wraith", "wraith", "golem"]], "crates": [{ "x": 108, "z": -2, "holds": "food" }, { "x": 110, "z": 2, "holds": "gold" }] },
+        { "at": 142, "boss": "lantern_wraith", "waves": [], "crates": [{ "x": 134, "z": 1.5, "holds": "food" }, { "x": 136, "z": -1.8, "holds": "food" }] }
+      ] }
+  ]
+}

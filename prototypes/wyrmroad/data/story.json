@@ -90,22 +90,25 @@
       "choice": {
         "prompt": "The last chain is in your hand.",
         "options": [
-          { "id": "free", "label": "Break the chain", "scene": "end_free" },
-          { "id": "hold", "label": "Take the lantern", "scene": "end_hold" }
+          { "id": "free", "label": "Break the chain", "scene": "end_free", "blurb": "Set the wyrm free. Act II: The Undermaw." },
+          { "id": "hold", "label": "Take the lantern", "scene": "end_hold", "blurb": "Hold the wyrm's leash yourself. Act II: The Lantern Crown." }
         ] } },
     "end_free": { "place": "Above the Wyrmroad", "cast": ["grell", "tamsin"], "lines": [
       ["wyrm", "FREE."],
       ["grell", "It's... flying. The whole mountain is flying."],
       ["tamsin", "The bells are ringing in every village. All by themselves."],
       ["hero", "Then the road's just a road now."],
-      ["grell", "A road with a lot of Rooks on it who could use honest work. Coming?"]
+      ["grell", "A road with a lot of Rooks on it who could use honest work. Coming?"],
+      ["tamsin", "Wait. Where's Aldric? He was right there when she rose."],
+      ["grell", "Fell. Into the dark where her head used to be. Nobody climbs out of that."]
     ] },
     "end_hold": { "place": "Crownhollow", "cast": ["grell"], "lines": [
       ["wyrm", "...ANOTHER HAND ON THE CHAIN."],
       ["grell", "Put it down. Put the lantern down."],
       ["hero", "Someone has to hold it. Better me than him."],
       ["grell", "That's what he said, too."],
-      ["wyrm", "I WILL WAIT. I AM VERY GOOD AT WAITING."]
+      ["wyrm", "I WILL WAIT. I AM VERY GOOD AT WAITING."],
+      ["hero", "Aldric fell. The lantern's warm. Why is it warm?"]
     ] }
   },
   "lines": {

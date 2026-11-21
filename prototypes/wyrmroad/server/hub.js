@@ -9,7 +9,7 @@ import { PROTOCOL, parseFrame, createBuckets, cleanCode, newCode } from '../js/n
 import { createRoom, TIMES } from './room.js';
 
 export const PUBLIC_LIST_MAX = 30;
-export function createHub({ now = () => Date.now(), data, T, build = 'dev', seed = Date.now(), maxRooms = 60, randomToken, log = () => {}, clock }) {
+export function createHub({ now = () => Date.now(), data, T, build = 'dev', seed = Date.now(), maxRooms = 60, randomToken, log = () => {}, clock, testHooks = false }) {
   const rooms = new Map();
   let seedN = seed >>> 0;
   const stats = { sockets: 0, bad: 0, limited: 0, roomsMade: 0 };
@@ -44,7 +44,7 @@ export function createHub({ now = () => Date.now(), data, T, build = 'dev', seed
         case 'create': {
           if (rooms.size >= maxRooms) return send({ t: 'err', code: 'busy', msg: 'Every room is busy right now. Try again in a minute.' });
           let code; do { code = newCode(rand); } while (rooms.has(code));
-          const room = createRoom({ code, now, seed: Math.floor(rand() * 2 ** 31), data, T, log, clock });
+          const room = createRoom({ code, now, seed: Math.floor(rand() * 2 ** 31), data, T, log, clock, testHooks });
           if (msg.public) room.opts.public = true;
           rooms.set(code, room); stats.roomsMade++;
           log('room.create', { code, public: !!msg.public });

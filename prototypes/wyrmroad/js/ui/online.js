@@ -18,9 +18,11 @@ import { Net } from '../net/client.js';
 import { MAX_SEATS, cleanCode, CODE_LENGTH } from '../net/protocol.js';
 import { createNetSession } from '../net/session.js';
 import { dressedLook } from '../sim/items.js';
+import { applyChoice, progressOf } from '../sim/route.js';
+import { chapterCleared } from '../save.js';
 import { qrSvg } from '../../../tumblefair/js/client/qr.js';
 import { icon } from './icons.js';
-import { esc, CLASS_NAMES, timeText } from './text.js';
+import { esc, CLASS_NAMES, timeText, placeShort } from './text.js';
 import { openSheet, note } from './kit.js';
 
 const END_PAUSE_MS = { won: 1900, lost: 1300 };   // the last blow is seen, then the scene / results take over (before the play screen's own local end screens)
@@ -83,6 +85,7 @@ function createOnline(ctx0) {
   const click = () => C().sfx('ui.click');
   const chapters = () => C().data.chapters.chapters;
   const chapterOf = id => chapters().find(c => c.id === id) || null;
+  const atOf = h => { const p = progressOf(C().data, h.story || {}); return p.route[p.reached]; };   // where a hero stands on their own road
   const heroes = () => C().save?.heroes || [];
   const kb = kind => { const d = C().device(); if (d === 'touch') return ''; return kind === 'ok' ? (d === 'pad' ? 'A' : 'Enter') : kind === 'back' ? (d === 'pad' ? 'B' : 'Esc') : kind === 'next' ? (d === 'pad' ? 'A' : 'Space') : ''; };
   const kbd = kind => { const k = kb(kind); return k ? `<kbd>${esc(k)}</kbd>` : ''; };
@@ -132,7 +135,7 @@ function createOnline(ctx0) {
     const D = C().data, Cl = D.classes.classes[h.cls];
     const spells = (h.spells || []).filter(s => s && Cl.spells.includes(s) && D.classes.spells[s].level <= h.level);
     return { name: h.name, cls: h.cls, level: h.level, xp: h.xp, gear: h.gear, spells: spells.length ? spells : Cl.spells.slice(0, 1),
-      look: dressedLook(D.classes, D.items, { cls: h.cls, look: h.look, gear: h.gear }), story: { reached: h.story?.reached || 0 } };
+      look: dressedLook(D.classes, D.items, { cls: h.cls, look: h.look, gear: h.gear }), story: { reached: h.story?.reached || 0, choices: h.story?.choices || {} } };
   }
   function sendMe() { if (S.hero) S.net?.send({ t: 'me', hero: heroSummary(S.hero) }); }
   function lookSpec(h) { const D = C().data; return h ? { look: dressedLook(D.classes, D.items, { cls: h.cls, look: h.look, gear: h.gear }) } : null; }
@@ -156,6 +159,8 @@ function createOnline(ctx0) {
     const session = await createNetSession({ net: S.net, data, T, start: m });
     session.chapter = m.chapter; session.section = m.section; session.code = m.code;
     session.onLeave = () => leaveAll();          // the play screen's ☰ menu asks first
+    session.isHost = () => isHost();               // a pre-boss scene: the host reads it for the room (play.js)
+    session.release = () => S.net?.send({ t: 'release' });
     S.session = session;
     if (C().save && S.hero?.id) C().save.lastHero = S.hero.id;            // the play screen saves loot to the hero you brought
     takeScreen('play');
@@ -181,25 +186,27 @@ function createOnline(ctx0) {
     const h = S.hero, mine = res.players.find(p => p.pid === S.room?.you);
     if (C().onResult) { try { C().onResult(res, mine); } catch (e) { console.error(e); } return; }
     if (!h || res.outcome !== 'won') return;
-    const i = chapters().findIndex(c => c.id === res.chapter);
-    h.story ||= { reached: 0, done: [], ending: null };
-    if (i >= 0 && !h.story.done.includes(res.chapter)) h.story.done.push(res.chapter);
-    if (i >= 0) h.story.reached = Math.max(h.story.reached || 0, Math.min(chapters().length - 1, i + 1));
-    if (res.ending) h.story.ending = res.ending;
+    // the room walked the host's road: your hero's save follows it (chapterCleared puts you on that road), and a
+    // choice made at the end of this chapter is the host's choice for everyone (the results screen says so)
+    chapterCleared(C().data, h, res.chapter, res.time);
+    if (res.choice) { applyChoice(h.story, res.choice.key, res.choice.pick); h.story.reached = progressOf(C().data, h.story).reached; }
+    if (res.finale) { h.story.finale = res.finale; if (!h.story.endings.includes(res.finale)) h.story.endings.push(res.finale); }
     C().saveNow();
+    sendMe();
   }
 
   // ---------------------------------------------------------------- the screen
   /** Take #ui for an online screen (the page's own screens step aside the way app.go does it). */
   function takeScreen(name) {
     const app = C().app;
+    if (name !== 'scene') dropStage();
     if (name === 'play') { S.screen = 'play'; return; }
     if (app && app.screen !== 'online') {
       app.closeAllSheets?.();
       try { app.cleanup?.(); } catch (e) { console.error(e); }
       app.cleanup = null; app.loop = null; app.padBusy = false; app.showcase?.(null); app.viewBox?.(null);
       app.screen = 'online'; app.screenOpts = {}; document.documentElement.dataset.screen = 'online';
-      app.cleanup = () => { if (S.screen !== 'play') S.screen = null; offKeys(); };
+      app.cleanup = () => { if (S.screen !== 'play') S.screen = null; offKeys(); dropStage(); };
     }
     onKeys();
     S.screen = name;
@@ -252,7 +259,7 @@ function createOnline(ctx0) {
   function heroCard(h, { change = true } = {}) {
     if (!h) return `<div class="wo-hero wo-hero-none"><div class="wo-face wo-face-big"><span class="wo-initial">?</span></div><div class="wo-hero-who"><b>No hero yet</b><span>Make one to play online.</span></div><button type="button" class="wr-btn wr-primary" data-act="create" data-primary>${icon('plus')}<span>Make a hero</span>${kbd('ok')}</button></div>`;
     return `<div class="wo-hero"><div class="wo-face wo-face-big" data-face="hero"><span class="wo-initial">${esc(h.name[0] || '?')}</span></div>
-      <div class="wo-hero-who"><b>${esc(h.name)}</b><span>Level ${whole(h.level)} ${esc(CLASS_NAMES[h.cls] || '')}</span><span class="wo-dim">${esc(chapterOf(chapters()[h.story?.reached || 0]?.id)?.name || '')} reached</span></div>
+      <div class="wo-hero-who"><b>${esc(h.name)}</b><span>Level ${whole(h.level)} ${esc(CLASS_NAMES[h.cls] || '')}</span><span class="wo-dim">${esc(chapterOf(atOf(h))?.name || '')} reached</span></div>
       ${change && heroes().length > 1 ? `<button type="button" class="wr-btn wr-small" data-act="pick-hero">${icon('swap')}<span>Change hero</span></button>` : ''}</div>`;
   }
   function face(el, h) {
@@ -262,7 +269,7 @@ function createOnline(ctx0) {
   }
   function entryNote(text) { const p = C().root.querySelector('.wo-entry .wo-note'); if (p) p.textContent = text || ''; }
   function entry(text = '') {
-    takeScreen('entry'); backdrop(chapters()[S.hero?.story?.reached || 0]?.id);
+    takeScreen('entry'); backdrop(S.hero ? atOf(S.hero) : chapters()[0].id);
     const root = C().root;
     root.innerHTML = `<section class="wo-screen wo-entry">${head('Online co-op')}
       <div class="wo-scroll"><div class="wo-wrap">
@@ -461,11 +468,13 @@ function createOnline(ctx0) {
     S.cdTimer = setTimeout(() => { if (S.room?.phase === 'ready' && S.screen === 'room') { S.room.left = Math.max(0, (S.room.left ?? 0) - 1); drawRoom(); } }, 1000);
   }
   function drawChapter(box) {
-    const r = S.room, hostMe = isHost(), ch = chapterOf(r.pick), idx = chapters().indexOf(ch);
-    const pickedHtml = ch ? `<div class="wo-ch-picked"><span class="wo-ch-no">Chapter ${whole(idx + 1)}</span><h2>${esc(ch.name)}</h2><p class="wo-dim">${esc(ch.sub || '')} · ${whole(ch.sections.length)} fights</p></div>` : '<div class="wo-ch-picked"><h2>No chapter yet</h2></div>';
+    const r = S.room, hostMe = isHost(), ch = chapterOf(r.pick);
+    const pickedHtml = ch ? `<div class="wo-ch-picked"><span class="wo-ch-no">${esc(placeShort(C().data, ch.id))}</span><h2>${esc(ch.name)}</h2><p class="wo-dim">${esc(ch.sub || '')} · ${whole(ch.sections.length)} fights</p></div>` : '<div class="wo-ch-picked"><h2>No chapter yet</h2></div>';
     if (!hostMe || r.phase !== 'lobby') { box.innerHTML = `<h2 class="wo-h-small">${icon('map')}Chapter</h2>${pickedHtml}${hostMe ? '' : '<p class="wo-dim">The host picks from their own story.</p>'}`; return; }
     const keep = box.querySelector('.wo-ch-list')?.scrollTop || 0;
-    box.innerHTML = `<h2 class="wo-h-small">${icon('map')}Chapter</h2><ol class="wo-ch-list">${chapters().map((c, i) => {
+    // the host's own road only (Acts II/III follow the host's choices — no other road is named here)
+    const list = (r.road || chapters().map(c => c.id)).map(chapterOf).filter(Boolean);
+    box.innerHTML = `<h2 class="wo-h-small">${icon('map')}Chapter</h2><ol class="wo-ch-list">${list.map((c, i) => {
       const open = r.pickable.includes(c.id);
       return `<li><button type="button" class="wo-ch ${c.id === r.pick ? 'wo-on' : ''}" data-ch="${esc(c.id)}" ${open ? '' : 'disabled'} aria-pressed="${c.id === r.pick}"><span class="wo-ch-no">${whole(i + 1)}</span><span class="wo-ch-name"><b>${esc(c.name)}</b><small>${open ? esc(c.sub || '') : 'Reach it in your own story first'}</small></span>${open ? '' : icon('lock')}</button></li>`;
     }).join('')}</ol>`;
@@ -492,11 +501,42 @@ function createOnline(ctx0) {
     if (sp.look) return { name: sp.name, spec: { look: sp.look } };
     return { name: sp.name, spec: null, voice: true };
   }
+  /** The staged scene (js/render/stage.js — the same director as the local story screen): the party walks on and the
+   *  cast acts each line in the street behind the speech box. The line index stays the room's (every device reads along). */
+  function dropStage() {
+    if (!S.stage) return;
+    const app = C().app;
+    try { S.stage.dispose(); } catch (e) { console.error(e); }
+    if (app && app.loop === S.stageLoop) app.loop = null;
+    S.stage = null; S.stageLoop = null; S.stageLine = -1; S.backdrop = null;
+  }
+  function buildStage(sc, chId) {
+    dropStage();
+    const app = C().app, D = C().data;
+    if (!sc || !app?.render?.createStage || !app.view || app.view.stub) return;
+    const ch = D.chapters.chapters.find(c => c.id === chId);
+    const seats = (S.room?.seats || []).filter(s => s.hero && !s.away).sort((a, b) => (b.host ? 1 : 0) - (a.host ? 1 : 0));
+    const heroes = seats.map(s => ({ id: s.pid, name: s.name, cls: s.hero.cls, look: s.hero.look, gear: s.hero.gear }));
+    try { S.stage = app.render.createStage(app.view, { data: D, scene: sc, chapter: ch, where: ch?.intro === S.scene.id ? 'start' : 'end', heroes }); }
+    catch (e) { console.error(e); S.stage = null; }
+    if (!S.stage) return;
+    S.stageLine = -1;
+    S.stageLoop = dt => { S.stage.reveal(S.shownChars); S.stage.update(dt); };
+    app.loop = S.stageLoop;
+    app.storyStage = S.stage;          // tests read where everyone stands
+  }
+  function stageSafe() {
+    const root = C().root; if (!S.stage || !root) return;
+    const top = root.querySelector('.wo-scene-top')?.getBoundingClientRect(), box = root.querySelector('.wo-scene-box')?.getBoundingClientRect();
+    const H = innerHeight;
+    S.stage.safe({ top: top ? top.bottom + 6 : 56, bottom: box && box.height ? H - box.top + 10 : H * 0.3 });
+  }
   function sceneScreen() {
     const sc = C().data.story.scenes[S.scene.id];
     takeScreen('scene');
     const chId = S.room?.pick || chapters().find(c => c.intro === S.scene.id || c.outro === S.scene.id)?.id;
     backdrop(chId);
+    buildStage(sc, chId);
     const root = C().root;
     root.innerHTML = `<section class="wo-screen wo-scene">
       <header class="wo-scene-top"><p class="wo-scene-place">${esc(sc?.place || '')}</p><div class="wo-grow"></div>
@@ -516,7 +556,7 @@ function createOnline(ctx0) {
       else if (b.dataset.act === 'next') { e.stopPropagation(); nextLine(); }
       else if (b.dataset.act === 'end') { click(); S.net.send({ t: 'ending', id: b.dataset.id }); }
     });
-    drawLine(); drawSceneWait(); drawDot();
+    drawLine(); drawSceneWait(); drawDot(); stageSafe();
     clearInterval(S.sceneTimer);
     S.sceneTimer = setInterval(() => {
       if (S.screen !== 'scene') { clearInterval(S.sceneTimer); return; }
@@ -534,6 +574,8 @@ function createOnline(ctx0) {
     el.querySelector('.wo-scene-box').classList.toggle('wo-voice', !!sp.voice);
     el.querySelector('.wo-scene-count').textContent = `${whole(Math.min(S.line + 1, sc.lines.length))} / ${whole(sc.lines.length)}`;
     const t = el.querySelector('.wo-scene-text'); t.dataset.full = text; if (last) t.textContent = text;
+    const li = Math.min(S.line, sc.lines.length - 1);
+    if (S.stage && S.stageLine !== li) { S.stageLine = li; try { S.stage.line(li); } catch (e) { console.error(e); } }
     const f = el.querySelector('.wo-face-story');
     f.innerHTML = sp.voice ? '<span class="wo-voice-mark"></span>' : `<span class="wo-initial">${esc(sp.name[0] || '?')}</span>`;
     if (sp.spec) C().portrait(sp.spec, 192).then(url => { if (url && f.isConnected && el.querySelector('.wo-scene-name').textContent === sp.name) f.innerHTML = `<img src="${url}" alt="">`; });
@@ -541,7 +583,8 @@ function createOnline(ctx0) {
     const ch = el.querySelector('.wo-scene-choice'), choice = S.room?.scene?.choice;
     const atEnd = S.line >= sc.lines.length - 1;
     ch.hidden = !(choice && atEnd);
-    if (choice && atEnd) ch.innerHTML = `<p class="wo-choice-prompt">${esc(choice.prompt)}</p>${isHost() ? `<div class="wo-row wo-center">${choice.options.map(o => `<button type="button" class="wr-btn wr-big ${o === choice.options[0] ? 'wr-primary' : ''}" data-act="end" data-id="${esc(o.id)}"><span>${esc(o.label)}</span></button>`).join('')}</div>` : '<p class="wo-dim wo-center">The host makes this choice for the party.</p>'}`;
+    if (choice && atEnd) ch.innerHTML = `<p class="wo-choice-prompt">${esc(choice.prompt)}</p>${isHost() ? `<div class="wo-row wo-center">${choice.options.map(o => { const blurb = o.blurb || sc.choice?.options?.find(x => x.id === o.id)?.blurb || ''; return `<button type="button" class="wr-btn wr-big wo-choice-opt ${o === choice.options[0] ? 'wr-primary' : ''}" data-act="end" data-id="${esc(o.id)}"><span>${esc(o.label)}</span>${blurb ? `<small>${esc(blurb)}</small>` : ''}</button>`; }).join('')}</div>` : '<p class="wo-dim wo-center">The host makes this choice for the party.</p>'}`;
+    stageSafe();
   }
   function nextLine() {
     const sc = C().data.story.scenes[S.scene?.id]; if (!sc) return;
@@ -574,6 +617,18 @@ function createOnline(ctx0) {
     setTimeout(() => card.querySelector('[data-primary]')?.focus({ preventScroll: true }), 40);
   }
   function resultsScreen() { takeScreen('results'); backdrop(S.room.pick); C().root.innerHTML = '<section class="wo-screen wo-end wo-results"><div class="wo-scroll"><div class="wo-card"></div></div></section>'; drawResults(); }
+  /** The host's choice at a fork, and an ending found: every save in the room follows the host's road. */
+  function choiceHtml(res) {
+    const D = C().data, out = [];
+    if (res.choice) {
+      const sc = Object.values(D.story.scenes).find(x => x.choice?.options?.some(o => o.id === res.choice.pick));   // option ids are unique across the forks
+      const opt = sc?.choice?.options?.find(o => o.id === res.choice.pick);
+      out.push(`<p class="wo-choice-made">${icon('map')}<span>${isHost() ? 'You chose' : 'The host chose'}: <b>${esc(opt?.label || 'a road')}</b>. Every hero here walks that road now.</span></p>`);
+    }
+    const E = res.finale && D.acts?.endings?.[res.finale];
+    if (E) out.push(`<section class="wr-ending-card"><p class="wr-kicker">Ending found</p><h3>${icon('star')}<span>${esc(E.name)}</span></h3><p class="wr-ending-line">${esc(E.line)}</p></section>`);
+    return out.join('');
+  }
   function drawResults() {
     const card = C().root.querySelector('.wo-results .wo-card'), res = S.result || S.room?.result; if (!card || !res) return;
     const won = res.outcome === 'won', next = res.next && chapterOf(res.next);
@@ -585,6 +640,7 @@ function createOnline(ctx0) {
     }).join('');
     card.innerHTML = `<p class="wo-kicker">${esc(res.name)}</p><h1>${won ? 'Chapter cleared' : 'The party turned back'}</h1>
       <p class="wo-dim">${timeText(res.time)} on the road · ${whole(res.kills)} foes beaten${won && next ? ` · ${esc(next.name)} is open now` : ''}</p>
+      ${choiceHtml(res)}
       <ol class="wo-res-list">${rows}</ol>
       <div class="wo-row wo-center">${isHost() ? `<button type="button" class="wr-btn wr-big wr-primary" data-act="back" data-primary>${icon('people')}<span>Back to the room</span>${kbd('ok')}</button>` : `<p class="wo-wait">Back to the room in ${whole(S.room.left ?? 0)} s, or when the host is ready.</p>`}</div>`;
     card.querySelector('[data-act="back"]')?.addEventListener('click', () => { click(); S.net.send({ t: 'back' }); });

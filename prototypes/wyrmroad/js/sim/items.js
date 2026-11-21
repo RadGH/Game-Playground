@@ -114,6 +114,19 @@ export function starterGear(ITEMS, cls) {
   return g;
 }
 
+/**
+ * What a player who has played up to `chapter` plausibly wears: that chapter's own designed pieces for the class in
+ * every slot, at `rarity`, no bonus lines (bots and balance runs use it; chapter 0 + common = a bit more than starterGear).
+ */
+export function chapterGear(ITEMS, cls, chapter, rarity = 'fine') {
+  const g = {};
+  for (const slot of SLOTS) {
+    const b = ITEMS.items.find(x => x.chapter === chapter && x.slot === slot && x.cls.includes(cls) && !x.legendary);
+    if (b) g[slot] = { uid: `fair_${cls}_${slot}_${chapter}`, base: b.id, rarity, bonus: [] };
+  }
+  return g;
+}
+
 /** The avatar look with gear drawn on it: the class look, then each worn item's parts merged LAST. */
 export function dressedLook(CLASSES, ITEMS, { cls, look = {}, gear = {} }) {
   const C = CLASSES.classes[cls];

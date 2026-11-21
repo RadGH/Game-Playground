@@ -17,7 +17,11 @@ export function createPadNav({ busy = () => false, back = () => false } = {}) {
   function mark(el) {
     if (cur === el) return;
     cur?.classList.remove('pad-focus'); cur = el; curSig = el ? sig(el) : '';
-    if (el) { el.classList.add('pad-focus'); el.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }); if (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) el.focus({ preventScroll: true }); }
+    if (el) {
+      el.classList.add('pad-focus'); el.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+      // real focus: fields take typing, and anything with a tooltip opens it (rule 10 — the bag's stat lines)
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.matches('[data-tip],[data-tip-html],[data-tip-render]')) el.focus({ preventScroll: true });
+    }
   }
   const mid = el => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
   function move(dx, dy) {

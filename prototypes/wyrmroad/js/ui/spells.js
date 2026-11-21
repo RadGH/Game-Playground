@@ -1,10 +1,11 @@
 // Spells: the class's three spells as cards (mana, cooldown, the level it is learned at, what it does with numbers
 // from the hero's own power), and the two slots you carry. Pick a slot, then the spell to put in it. Spell 1 / Spell 2
-// show the key this player presses.
+// show the key this player presses. Below them, Moves: the class's dash and block upgrades and the level each unlocks
+// at, in plain words with numbers (classes.json kit; the sim reads the same entries — brawl.js kitMove).
 import { heroStats } from '../sim/items.js';
 import { hp as n } from '../../../../shared/format.js';
-import { icon } from './icons.js';
-import { esc, spellText, spellCost } from './text.js';
+import { icon, hasIcon } from './icons.js';
+import { esc, spellText, spellCost, kitText } from './text.js';
 import { openSheet } from './kit.js';
 import { keyLabel } from '../input/bindings.js';
 
@@ -31,7 +32,28 @@ export function openSpells(app, h, { live = false } = {}) {
         <footer><span class="${locked ? 'wr-warn' : ''}">${S.level === 1 ? 'Known from the start' : locked ? `Learned at level ${n(S.level)} (you are ${n(h.level)})` : `Learned at level ${n(S.level)}`}</span>
           ${locked ? `<span class="wr-lockmark">${icon('lock')}</span>` : inSlot === slot ? `<span class="wr-good">${icon('check')}In spell ${slot + 1}</span>` : `<button type="button" class="wr-btn wr-small wr-primary" data-put="${id}">Put in spell ${slot + 1}</button>`}</footer>
       </article>`;
-    }).join('')}</div>`;
+    }).join('')}</div>
+    ${movesHtml(s)}`;
+  }
+  /** Moves: every dash / block upgrade, which one is in use now, and what is still to come. */
+  function movesHtml(s) {
+    const K = C.kit || {}, rows = [];
+    for (const slot of ['dash', 'block']) {
+      const list = [...(K[slot] || [])].sort((a, b) => a.level - b.level);
+      const now = list.filter(k => k.level <= h.level).pop();
+      for (const k of list) rows.push({ slot, k, on: k === now, locked: k.level > h.level });
+    }
+    if (!rows.length) return '';
+    rows.sort((a, b) => a.k.level - b.k.level);
+    const what = { dash: 'Dash', block: 'Block' };
+    return `<h3 class="wr-moves-title">Moves</h3>
+    <p class="wr-dim">Your dash and block get better as you level up. Each works by itself, with the same buttons.</p>
+    <div class="wr-spell-cards wr-moves">${rows.map(({ slot, k, on, locked }) => `<article class="wr-spell-card${locked ? ' wr-locked' : ''}${on ? ' wr-in' : ''}">
+        <header>${icon(hasIcon(k.kind) ? k.kind : slot)}<div><h3>${esc(k.name)}</h3><p>${what[slot]} upgrade</p></div></header>
+        <p class="wr-spell-what">${esc(kitText(k, s.power))}</p>
+        <footer><span class="${locked ? 'wr-warn' : ''}">${locked ? `Learned at level ${n(k.level)} (you are ${n(h.level)})` : `Learned at level ${n(k.level)}`}</span>
+          ${locked ? `<span class="wr-lockmark">${icon('lock')}</span>` : on ? `<span class="wr-good">${icon('check')}In use</span>` : '<span class="wr-dim">Replaced by a better one</span>'}</footer>
+      </article>`).join('')}</div>`;
   }
   root.addEventListener('click', e => {
     const s = e.target.closest('[data-slot]'); if (s) { slot = +s.dataset.slot; app.audio.play('ui.tab'); draw(); return; }

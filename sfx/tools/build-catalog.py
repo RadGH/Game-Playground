@@ -717,6 +717,19 @@ def world_sounds():
         tone(0.20, 120, 260, 'sine', gain=0.7), tone(0.18, 150, 300, 'sine', gain=0.5, delay=0.2)]))
     W.append(entry('crowd.cheer', 'sting', 'Village cheer', 2.00, [
         noise(1.90, 800, 2400, 0.8, color='pink', gain=0.6, a=0.15)]))
+    # --- 2026-11-21 (Wyrmroad #100/#108): a light crate break (the axe chop was too boomy for a box), one blade
+    # whirl per turn of a spinning attack, and a short grounded victory horn (the fanfares read as cartoons).
+    W.append(entry('crate.break', 'world', 'Wooden crate breaks', 0.60, [
+        noise(0.05, 3200, 1800, 1.4, gain=0.8, a=0.001),
+        grain(0.40, 12, 1200, 3600, 0.006, 0.02, gain=0.4, noisy=True, delay=0.01),
+        noise(0.30, 1400, 700, 1.2, gain=0.3, delay=0.03)]))
+    W.append(entry('blade.whirl', 'melee', 'Blade whirls round', 0.60, [
+        noise(0.50, 900, 3200, 2.0, gain=0.6, a=0.15, curve='lin'),
+        noise(0.30, 3200, 1200, 2.0, gain=0.4, delay=0.25)]))
+    W.append(entry('victory.horn', 'sting', 'Victory horn', 3.00, [
+        tone(2.60, 196, 196, 'triangle', gain=0.5, a=0.2, vib=(4.5, 0.01)),
+        tone(2.40, 293.66, 293.66, 'triangle', gain=0.35, a=0.3, vib=(4.5, 0.01), delay=0.15),
+        tone(2.00, 392, 392, 'sine', gain=0.2, a=0.4, delay=0.3)]))
     W.append(entry('ambience.night', 'ambience', 'Ambience: night', 3.0, [
         grain(3.0, 40, 4200, 5200, 0.01, 0.03, gain=0.2), drone(3.0, 200, 600, 0.8, 'pink', gain=0.1)], loop=True))
     W.append(entry('ambience.storm', 'ambience', 'Ambience: storm', 3.0, [

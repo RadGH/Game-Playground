@@ -2,7 +2,8 @@
 // how far along the road they are. Play takes them to the chapter map; Delete asks in an in-game dialog first.
 import { ask } from '../../../../shared/dialog.js';
 import { icon } from './icons.js';
-import { esc, CLASS_NAMES } from './text.js';
+import { esc, CLASS_NAMES, chapterPlace, endingOf } from './text.js';
+import { progressOf } from '../sim/route.js';
 import { soloParty } from './party.js';
 import { hp as n } from '../../../../shared/format.js';
 
@@ -15,16 +16,20 @@ export function heroesScreen(app) {
         <button type="button" class="wr-icon-btn" data-act="menu" aria-label="Menu">${icon('menu')}</button></header>
       <div class="wr-hero-grid">
         ${list.map(h => {
-          const ch = data.chapters.chapters[h.story.reached];
-          const done = h.story.done.length, total = data.chapters.chapters.length;
+          // where the hero stands on their own road (Acts II/III follow their choices): act + road + chapter
+          const pr = progressOf(data, h.story), ch = data.chapters.chapters.find(c => c.id === pr.route[pr.reached]);
+          const place = ch ? chapterPlace(data, ch.id) : null, fin = endingOf(data, h.story.finale);
+          const done = pr.route.filter(id => h.story.done.includes(id)).length, total = 12;   // one road: 6 + 3 + 3 chapters
+          const ends = (h.story.endings || []).length;
           return `<article class="wr-hero-card${h.id === save.lastHero ? ' wr-last' : ''}" data-id="${esc(h.id)}">
             <div class="wr-portrait wr-portrait-lg" data-portrait="${esc(h.id)}"><span class="wr-portrait-wait"></span></div>
             <div class="wr-hero-info">
               <h3>${esc(h.name)}</h3>
               <p class="wr-hero-cls">Level ${n(h.level)} ${esc(CLASS_NAMES[h.cls])}</p>
-              <p class="wr-hero-where">${icon('map')}<span>${h.story.ending ? 'The road is walked' : esc(ch?.name || '')}</span></p>
-              <div class="wr-progress" aria-label="${done} of ${total} chapters cleared"><i style="width:${Math.round(done / total * 100)}%"></i></div>
-              <p class="wr-hero-meta">${n(done)} of ${n(total)} chapters · ${n(h.gold)} gold${h.story.ending ? ` · ${h.story.ending === 'free' ? 'Broke the chain' : 'Took the lantern'}` : ''}</p>
+              <p class="wr-hero-act">${esc(place ? `${place.actName} · ${place.road}` : '')}</p>
+              <p class="wr-hero-where">${icon('map')}<span>${fin && done >= total ? `Ending: ${esc(fin.name)}` : esc(ch?.name || '')}</span></p>
+              <div class="wr-progress" aria-label="${n(done)} of ${n(total)} chapters on this road"><i style="width:${Math.round(Math.min(1, done / total) * 100)}%"></i></div>
+              <p class="wr-hero-meta">${n(done)} of ${n(total)} chapters · ${n(h.gold)} gold${ends ? ` · ${n(ends)} ${ends === 1 ? 'ending' : 'endings'} found` : ''}</p>
             </div>
             <div class="wr-hero-acts">
               <button type="button" class="wr-btn wr-primary" data-act="play">${icon('play')}<span>Play</span></button>

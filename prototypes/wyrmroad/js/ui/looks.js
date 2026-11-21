@@ -1,8 +1,9 @@
-// The hero creator's choices (Chibi 2.6 look fields — avatar-3d/CHIBI26.md M7: body.form 'masc' | 'fem', body.chestSize
-// 'flat' | 'round'; face slots from avatar-3d/js/chibi25-options.js) with our own names, plus random names, random looks
+// The hero creator's choices (Chibi 2.6 look fields — avatar-3d/CHIBI26.md M7: body.form 'masc' | 'fem'; face slots from
+// avatar-3d/js/chibi25-options.js) with our own names, plus random names, random looks
 // and the solo companion. A hero's look is merged over its class look and its gear is drawn on top (sim/items.js
 // dressedLook), so the class's build is kept in body. Chibi 2.6 reads the skin colour from body.skin (avatar-3d
-// chibi2-face.js); skin.color is kept beside it for the game's own data shape.
+// chibi2-face.js); skin.color is kept beside it for the game's own data shape. The form alone decides the chest (owner
+// 2026-11-21: masculine flat, feminine round — js/render/actors.js bodyShape); an old save's body.chestSize is ignored.
 import { starterGear, rollItem } from '../sim/items.js';
 import { rng } from '../sim/rng.js';
 
@@ -22,7 +23,6 @@ export const LOOK = {
     ['scar_brow', 'Scar through the brow'], ['beauty_mark', 'Beauty mark'], ['warpaint', 'War paint'], ['star_mark', 'Star mark']],
   facialHair: [['none', 'None'], ['stubble', 'Stubble'], ['short_beard', 'Short beard'], ['full', 'Full beard'], ['goatee', 'Goatee'], ['mustache', 'Moustache'], ['mutton_chops', 'Mutton chops']],
   form: [['masc', 'Masculine'], ['fem', 'Feminine']],
-  chest: [['flat', 'Flat'], ['round', 'Round']],
 };
 
 export const NAMES = ['Ash', 'Bryn', 'Corra', 'Dain', 'Edda', 'Fenn', 'Garrow', 'Hale', 'Ilse', 'Jory', 'Linnet', 'Marek', 'Nell', 'Orrin', 'Pell',
@@ -52,7 +52,7 @@ export function randomLook(CLASSES, cls, rand = Math.random) {
   const p = list => pickOf(rand, list)[0];
   const skin = p(LOOK.skin);
   return {
-    body: { ...(C.look.body || {}), form, chestSize: form === 'fem' && rand() < 0.6 ? 'round' : 'flat', skin },
+    body: { ...(C.look.body || {}), form, skin },
     skin: { color: skin },
     hair: { id: p(LOOK.hair.filter(h => form === 'fem' || !['twin_tails', 'long_braid'].includes(h[0]))), color: p(hairFor(skin)) },
     eyes: { id: p(LOOK.eyes), color: p(LOOK.eyeColor) },
@@ -66,7 +66,7 @@ export function randomLook(CLASSES, cls, rand = Math.random) {
 export function classLook(CLASSES, cls) {
   const C = CLASSES.classes[cls], skin = C.look.skin?.color || LOOK.skin[2][0], want = C.look.hair?.color;
   return {
-    body: { ...(C.look.body || {}), form: 'masc', chestSize: 'flat', skin }, skin: { color: skin },
+    body: { ...(C.look.body || {}), form: 'masc', skin }, skin: { color: skin },
     hair: { id: C.look.hair?.id || 'short', color: want && contrast(want, skin) >= HAIR_CONTRAST ? want : hairFor(skin)[0][0] }, eyes: { id: 'round', color: LOOK.eyeColor[0][0] },
     brows: { id: 'straight' }, extras: { id: 'none' }, facialHair: { id: 'none' },
   };
@@ -79,7 +79,7 @@ export function companionFor(data, lead, chIndex, seed = 7) {
   const cls = order.find(c => c !== lead.cls) || 'warden';
   const gear = starterGear(data.items, cls);
   for (const slot of ['head', 'chest', 'legs', 'feet']) {
-    const it = rollItem(data.items, { chapter: chIndex, cls, rand, slot, upTo: true });
+    const it = rollItem(data.items, { chapter: data.chapters.chapters[chIndex]?.tier ?? chIndex, cls, rand, slot, upTo: true });
     if (it) gear[slot] = { ...it, rarity: 'common', bonus: [] };
   }
   const C = data.classes.classes[cls], unlocked = C.spells.filter(s => data.classes.spells[s].level <= lead.level);

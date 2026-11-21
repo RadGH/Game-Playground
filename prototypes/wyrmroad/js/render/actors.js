@@ -9,8 +9,10 @@ import { createChibi2Character, prepareChibi2 } from '../../../../avatar-3d/js/c
 import { CHIBI2_COMBAT_ALL, CHIBI2_MELEE_ANIMS, CHIBI2_EMOTE_ANIMS, CHIBI2_CLIP_SECONDS } from '../../../../avatar-3d/js/chibi2-motion.js';
 import { createCreature } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
+import { holdFor } from '../../../../avatar-3d/js/chibi2-weapon-ids.js';
 import { dressedLook } from '../sim/items.js';
-import { blobTex, angleMaskTex, glyphAtlas } from './kit.js';
+import { blobTex, angleMaskTex, glyphAtlas, glowTex } from './kit.js';
+import { handsFor, clipFor, twoHandClips } from './hands.js';
 
 /** Every clip a Wyrmroad Chibi is built with (classes.json / enemies.json name only clips from these lists). */
 export const CHIBI_ANIMS = [...new Set([...CHIBI2_COMBAT_ALL, ...CHIBI2_MELEE_ANIMS, ...CHIBI2_EMOTE_ANIMS])];
@@ -20,6 +22,7 @@ export const HERO_HEIGHT = 1.75;
 const THREAT = new THREE.Color('#ff6a3a');
 const FRIEND_TELL = new THREE.Color('#ffd36a');
 const ICE = new THREE.Color('#5aa8ff');
+const HITME = new THREE.Color('#ffe08a'), CALM = new THREE.Color('#fff0c8');
 const breathe = () => new Promise(r => setTimeout(r, 0));
 const TURN = 0.44;   // ~25°: heroes face partly toward the camera so faces read
 
@@ -47,41 +50,110 @@ function cloneMat(m) {
   return c;
 }
 
+// ------------------------------------------------------------------------------------------------ body shape
+/**
+ * The form alone decides the chest (owner 2026-11-21: "Masculine should always be flat and Feminine should always be
+ * round, and could be even a little more pronounced"): 'fem' → Chibi 2.6's fuller 'full' curve, anything else flat. A
+ * saved look's own body.chestSize (round 1 had a separate Chest row) is ignored. Applies to every Chibi we draw.
+ */
+export function bodyShape(look) {
+  if (!look || !look.body) return look;
+  const want = look.body.form === 'fem' ? 'full' : 'flat';
+  return look.body.chestSize === want ? look : { ...look, body: { ...look.body, chestSize: want } };
+}
+
+// ------------------------------------------------------------------------------------------------ outline hull minus the face
+/**
+ * The toon outline is an inverted hull: the body drawn again, a little fatter, back faces only, in ink. On a face that
+ * outlined every small feature — each lip, the nose, the brows, the lids — so a mouth read as 3–4 separate lines (owner
+ * 2026-11-21: "reduce the cell shading effect on facial details"). The hull keeps the body, clothes, hair and the head's
+ * silhouette and leaves out the face's features: every piece riding the eye, pupil, lid, mouth or jaw bones, and every
+ * small piece on the head bone that sits on the front of the face (smaller than about half the head). Pieces are found
+ * as connected parts of the merged mesh. One hull index per geometry (bodies of one look share it).
+ */
+const FACE_BONES = /^(eye|pupil|eyelid|mouth|jaw)/;
+const hullIndexOf = new WeakMap();
+function hullGeometry(mesh, headSize) {
+  const g = mesh.geometry;
+  if (hullIndexOf.has(g)) return hullIndexOf.get(g);
+  const idx = g.index.array, pos = g.attributes.position, si = g.attributes.skinIndex, sw = g.attributes.skinWeight, n = pos.count;
+  const names = mesh.skeleton.bones.map(b => b.name);
+  const head = names.indexOf('head'), headZ = head >= 0 ? new THREE.Vector3().setFromMatrixPosition(mesh.skeleton.boneInverses[head].clone().invert().premultiply(new THREE.Matrix4().copy(mesh.bindMatrixInverse))).z : 0;
+  const parent = new Int32Array(n); for (let i = 0; i < n; i++) parent[i] = i;
+  const find = i => { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
+  for (let t = 0; t < idx.length; t += 3) { const r = find(idx[t]); parent[find(idx[t + 1])] = r; parent[find(idx[t + 2])] = r; }
+  const parts = new Map();
+  for (let i = 0; i < n; i++) {
+    const r = find(i); let P = parts.get(r);
+    if (!P) parts.set(r, P = { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity, z0: Infinity, z1: -Infinity, face: 0, head: 0, n: 0 });
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    if (x < P.x0) P.x0 = x; if (x > P.x1) P.x1 = x; if (y < P.y0) P.y0 = y; if (y > P.y1) P.y1 = y; if (z < P.z0) P.z0 = z; if (z > P.z1) P.z1 = z;
+    const b = names[si.getX(i)] || '', w = sw.getX(i);
+    if (FACE_BONES.test(b)) P.face += w; else if (b === 'head') P.head += w;
+    P.n++;
+  }
+  const drop = new Set();
+  for (const [r, P] of parts) {
+    const size = Math.max(P.x1 - P.x0, P.y1 - P.y0, P.z1 - P.z0);
+    if (P.face > P.n * 0.5) drop.add(r);
+    else if (P.head + P.face > P.n * 0.5 && size < headSize * 0.55 && (P.z0 + P.z1) / 2 > headZ + 0.03) drop.add(r);
+  }
+  let out = g;
+  if (drop.size) {
+    const keep = [];
+    for (let t = 0; t < idx.length; t += 3) if (!drop.has(find(idx[t]))) keep.push(idx[t], idx[t + 1], idx[t + 2]);
+    out = new THREE.BufferGeometry();
+    for (const k of ['position', 'normal', 'skinIndex', 'skinWeight']) if (g.attributes[k]) out.setAttribute(k, g.attributes[k]);
+    out.setIndex(keep); out.boundingSphere = g.boundingSphere; out.boundingBox = g.boundingBox;
+  }
+  hullIndexOf.set(g, out);
+  return out;
+}
+
 // ------------------------------------------------------------------------------------------------ bodies
 /**
  * A body: { obj, kind, h (native height), play(name, { dur, fade, restart }), loop(name, rate), update(dt), mats, dispose() }.
  * Materials are per-actor clones (same shader program) so one actor can flash without flashing every look-alike.
+ * A body that holds a two-hander also gets the two-handed strikes and the left hand's reach (hands.js); a weapon drawn
+ * shorter than its kind is lengthened there too.
  */
 async function buildChibi(look, { low, anims = CHIBI_ANIMS, outline = true } = {}) {
+  look = bodyShape(look);
+  const h0 = holdFor(look), twoKind = h0.right === 'staff' && h0.left === 'none' ? 'staff' : (h0.twoHand ? 'two' : null);
+  if (twoKind && anims.length > 4) anims = [...anims, ...twoHandClips(twoKind)];
   const o = { v25: true, v26: true, anims, park: true, ...(low ? { graphics: 'low' } : {}) };
   try { await prepareChibi2(look, { ...o, slice: breathe, budget: 8 }); } catch { /* the build below reports it */ }
   const c = await createChibi2Character(look, o);
+  const hands = handsFor(c, look);
   const mats = [], outlines = [];
   const skinned = []; c.group.traverse(n => { if (n.isSkinnedMesh) skinned.push(n); });
+  const headSize = c.metrics().headHeight || c.metrics().height * 0.2;
   for (const n of skinned) {
     const m = cloneMat(n.material); m.alphaHash = true; n.material = m; n.castShadow = true; mats.push(m);
     if (outline) {
       const om = outlineBase(true).clone(); om.onBeforeCompile = outlineBase(true).onBeforeCompile; om.customProgramCacheKey = outlineBase(true).customProgramCacheKey;
-      const hull = new THREE.SkinnedMesh(n.geometry, om); hull.castShadow = false; hull.boundingSphere = n.boundingSphere;
+      const hull = new THREE.SkinnedMesh(hullGeometry(n, headSize), om); hull.castShadow = false; hull.boundingSphere = n.boundingSphere; hull.userData.outline = true;
       hull.bind(n.skeleton, n.bindMatrix); n.parent.add(hull); outlines.push(om); mats.push(om);
     }
   }
   const h = c.metrics().height || 1.3;
-  let cur = 'idle';
+  const two = hands?.kind || null;
+  let cur = '', clip = 'idle';           // '' until the first loop/play: the character starts on Chibi's own idle, which a two-hander swaps for w2_idle
+  const pick = name => { const k = clipFor(name, two); return anims.includes(k) ? k : name; };
   return {
-    obj: c.group, kind: 'chibi', h, mats, outlines, chibi: c,
+    obj: c.group, kind: 'chibi', h, mats, outlines, chibi: c, hands,
     get anim() { return cur; },
     play(name, { dur = 0, fade = 0.08, restart = true } = {}) {
       if (!anims.includes(name)) name = fallbackClip(name, anims);
-      c.setAnim(name, fade, restart); cur = name;
-      const len = CHIBI2_CLIP_SECONDS[name] || 0.6;
+      clip = pick(name); c.setAnim(clip, fade, restart); cur = name;
+      const len = CHIBI2_CLIP_SECONDS[clip] || CHIBI2_CLIP_SECONDS[name] || 0.6;
       c.setRate(dur > 0 ? len / dur : 1);
     },
     loop(name, rate = 1, fade = 0.15) {
       if (!anims.includes(name)) name = fallbackClip(name, anims);
-      if (cur !== name) c.setAnim(name, fade, false); cur = name; c.setRate(rate);
+      if (cur !== name) { clip = pick(name); c.setAnim(clip, fade, false); } cur = name; c.setRate(rate);
     },
-    update(dt) { c.update(dt); },
+    update(dt) { hands?.pre(); c.update(dt); hands?.update(dt, clip); },
     dispose() { for (const m of mats) m.dispose(); c.dispose(); },
   };
 }
@@ -92,7 +164,7 @@ function fallbackClip(name, anims) {
 }
 
 const CREATURE_LOOPS = new Set(['idle', 'walk', 'run', 'fly', 'talk']);
-async function buildCreature(spec, { low, outline = true } = {}) {
+async function buildCreature(spec, { low, outline = true, render = null } = {}) {
   const c = await createCreature(spec, { detail: low ? 0.5 : 0.85 });
   compactCreature(c);      // one skinned mesh per material kind instead of one mesh per bead (avatar-3d/js/mesh-merge.js)
   const mats = [];
@@ -117,9 +189,13 @@ async function buildCreature(spec, { low, outline = true } = {}) {
   }
   const box = new THREE.Box3().setFromObject(c.group);
   const h = Math.max(0.2, box.max.y - Math.min(0, box.min.y));
+  // a giant green-flame ghost (Aldric Eternal, the Lantern Wraith): tongues of flame licking up round its body
+  const aura = render?.big === 'flame_ghost' ? flameAura(c.group, box, render.tint || '#7affa0') : null;
   let cur = 'idle', oneT = 0;
   return {
     obj: c.group, kind: 'creature', h, mats, creature: c,
+    /** How far the body reaches in front of its feet when facing the camera (a giant's head and claws). */
+    front: Math.max(box.max.z, 0.5),
     get anim() { return cur; },
     play(name, { dur = 0 } = {}) {
       const n = name === 'dead' ? 'dead' : (name === 'talk' ? 'talk' : (name === 'hit' ? 'talk' : 'attack'));
@@ -131,8 +207,122 @@ async function buildCreature(spec, { low, outline = true } = {}) {
       if (cur !== n) { c.setAnim(n); cur = n; }
       c.setRate(rate);
     },
-    update(dt) { c.update(dt); if (oneT > 0) oneT -= dt; },
-    dispose() { for (const m of mats) m.dispose(); c.dispose(); },
+    update(dt) { c.update(dt); if (oneT > 0) oneT -= dt; aura?.update(dt); },
+    dispose() { for (const m of mats) m.dispose(); aura?.dispose(); c.dispose(); },
+  };
+}
+/**
+ * THE UNDERMAW'S HAND (owner brief: "a giant root hand out of the water"): a forearm of twisted root rising out of the
+ * lake, a palm, four fingers and a thumb of three knuckles each, rootlets hanging, and pale-blue knots at the fingertips
+ * (its weak points glow when it is down to be hit). Made of a few cylinders and spheres with its own little rig: it
+ * sways at rest, curls its fingers when it talks, and slams forward (the whole arm pitches down toward the street).
+ */
+function buildRootHand() {
+  const bark = new THREE.MeshToonMaterial({ color: '#4a3a2e' }), dark = new THREE.MeshToonMaterial({ color: '#2e241c' }), tip = new THREE.MeshToonMaterial({ color: '#9ad8ff', emissive: '#5ab8ff', emissiveIntensity: 0.6 });
+  const mats = [bark, dark, tip];
+  const root = new THREE.Group(), arm = new THREE.Group(); root.add(arm);
+  const seg = (parent, r0, r1, len, m = bark) => { const g = new THREE.Group(); const c = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, len, 7), m); c.position.y = len / 2; c.castShadow = true; g.add(c); parent.add(g); return { g, len }; };
+  const fore = seg(arm, 0.75, 0.55, 5.2); fore.g.position.y = -1.6;
+  for (let i = 0; i < 9; i++) { const k = new THREE.Mesh(new THREE.SphereGeometry(0.22 + Math.random() * 0.15, 6, 4), dark); const a = i * 1.7; k.position.set(Math.cos(a) * 0.6, 0.4 + i * 0.55, Math.sin(a) * 0.6); fore.g.add(k); }
+  const palm = new THREE.Group(); palm.position.y = fore.len; fore.g.add(palm);
+  const pm = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), bark); pm.scale.set(1.15, 0.9, 0.5); pm.position.y = 0.6; pm.castShadow = true; palm.add(pm);
+  const fingers = [];
+  for (let f = 0; f < 5; f++) {
+    const thumb = f === 4, base = new THREE.Group();
+    base.position.set(thumb ? -1.05 : -0.75 + f * 0.5, thumb ? 0.4 : 1.35, 0.05); base.rotation.z = thumb ? 0.9 : (f - 1.5) * -0.12; palm.add(base);
+    let parent = base; const knuckles = [];
+    for (let k = 0; k < 3; k++) { const L = (thumb ? 0.55 : 0.75) * (1 - k * 0.15); const s = seg(parent, 0.22 - k * 0.04, 0.18 - k * 0.04, L); s.g.position.y = k ? parent.userData.len : 0; s.g.userData.len = L; knuckles.push(s.g); parent = s.g; }
+    const t = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), tip); t.position.y = parent.userData.len; parent.add(t);
+    fingers.push(knuckles);
+  }
+  for (let i = 0; i < 7; i++) { const r = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.05, 1 + Math.random(), 4), dark); r.position.set((Math.random() - 0.5) * 1.6, 0.2, (Math.random() - 0.5) * 0.4); r.rotation.z = (Math.random() - 0.5) * 0.5; palm.add(r); }
+  root.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(root);
+  let cur = 'idle', t = 0, slam = 0, slamDur = 0.8;
+  return {
+    obj: root, kind: 'creature', h: box.max.y, mats, front: Math.max(box.max.z, 1.5),
+    get anim() { return cur; },
+    play(name, { dur = 0 } = {}) { cur = name === 'dead' ? 'dead' : name === 'talk' || name === 'hit' ? 'talk' : 'attack'; if (cur === 'attack') { slam = 0.0001; slamDur = dur || 0.8; } },
+    loop(name) { if (cur !== 'attack' || slam <= 0) cur = name === 'dead' ? 'dead' : 'idle'; },
+    update(dt) {
+      t += dt;
+      let pitch = Math.sin(t * 0.7) * 0.06, curl = 0.25 + Math.sin(t * 1.1) * 0.08;
+      if (slam > 0) { slam += dt; const k = Math.min(1, slam / slamDur), u = k < 0.45 ? -0.3 * (k / 0.45) : k < 0.6 ? -0.3 + 1.3 * ((k - 0.45) / 0.15) : 1 - (k - 0.6) / 0.4; pitch = u; curl = k < 0.5 ? 0.1 : 0.7; if (k >= 1) slam = 0; }
+      if (cur === 'talk') curl = 0.3 + Math.abs(Math.sin(t * 5)) * 0.5;
+      if (cur === 'dead') { pitch = Math.min(1.3, (arm.rotation.x || 0) + dt * 0.8); curl = 0.9; }
+      arm.rotation.x = pitch; arm.rotation.z = Math.sin(t * 0.5) * 0.05;
+      fingers.forEach((kn, f) => kn.forEach((g, k) => { g.rotation.x = curl * (k ? 0.9 : 0.5) + Math.sin(t * 1.3 + f) * 0.04; }));
+    },
+    dispose() { for (const m of mats) m.dispose(); root.traverse(o => o.geometry?.dispose()); },
+  };
+}
+/**
+ * THE UNDERMAW (brief: "ring of roots + eye + heart stages"): a ring of huge roots arching up out of the pit behind the
+ * street, an eye in the middle of the ring, a heart under it. Its parts come down to be hit in turn (sim `part`: root →
+ * eye → heart, one per phase): a root slams onto the street (the nearest root lashes forward), the eye drops low and
+ * stares, the heart swells and beats bright. The part being hit is lit (actors.js tint) and its own glow brightens.
+ */
+function buildUndermaw() {
+  const flesh = new THREE.MeshToonMaterial({ color: '#4a2a2e' }), dark = new THREE.MeshToonMaterial({ color: '#2a161a' }), tooth = new THREE.MeshToonMaterial({ color: '#e8dcc0' });
+  const eyeW = new THREE.MeshToonMaterial({ color: '#f0e0c0', emissive: '#ff6a5a', emissiveIntensity: 0.25 }), pupil = new THREE.MeshBasicMaterial({ color: '#1a0406' });
+  const heartM = new THREE.MeshToonMaterial({ color: '#c8303a', emissive: '#ff3a4a', emissiveIntensity: 0.5 });
+  const mats = [flesh, dark, tooth, eyeW, pupil, heartM];
+  const root = new THREE.Group(), roots = [];
+  const tube = (pts, r) => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p))), 16, r, 7, false);
+  for (let i = 0; i < 9; i++) {
+    const a = -1.25 + i * (2.5 / 8), x = Math.sin(a) * 6.5, z = -Math.cos(a) * 2.2, h = 6 + (i % 3) * 1.4;
+    const g = new THREE.Group(); g.position.set(x, 0, z); root.add(g);
+    const m = new THREE.Mesh(tube([[0, -1, 0], [0.4 * Math.sign(-x || 1), h * 0.45, 0.6], [-0.2 * Math.sign(x || 1), h * 0.85, 1.6], [-0.9 * Math.sign(x || 1), h, 2.6]], 0.55 - (i % 2) * 0.12), i % 2 ? dark : flesh);
+    m.castShadow = true; g.add(m);
+    for (let k = 0; k < 4; k++) { const t = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.7, 5), tooth); t.position.set(0, h * (0.3 + k * 0.17), 0.55); t.rotation.x = Math.PI / 2; g.add(t); }
+    roots.push({ g, base: x, i });
+  }
+  const eye = new THREE.Group(); eye.position.set(0, 5.2, 0.2); root.add(eye);
+  const eb = new THREE.Mesh(new THREE.SphereGeometry(1.5, 18, 14), eyeW); eye.add(eb);
+  const pu = new THREE.Mesh(new THREE.SphereGeometry(0.62, 14, 10), pupil); pu.scale.set(0.45, 1, 0.4); pu.position.z = 1.3; eye.add(pu);
+  const lid = new THREE.Mesh(new THREE.SphereGeometry(1.62, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.42), flesh); eye.add(lid);
+  const heart = new THREE.Mesh(new THREE.SphereGeometry(1.3, 16, 12), heartM); heart.position.set(0, 1.6, 0.4); heart.scale.set(1, 1.2, 0.9); root.add(heart);
+  for (let k = 0; k < 6; k++) { const v = new THREE.Mesh(tube([[0, 0, 0], [Math.cos(k) * 1.6, 0.8, Math.sin(k)], [Math.cos(k) * 3, -0.6, Math.sin(k) * 1.5]], 0.14), dark); v.position.copy(heart.position); root.add(v); }
+  root.updateMatrixWorld(true);
+  let cur = 'idle', t = 0, strike = 0, part = null;
+  return {
+    obj: root, kind: 'creature', h: 9, mats, front: 3.5,
+    get anim() { return cur; },
+    /** The part the sim has down (root | eye | heart): it drives which piece comes forward. */
+    setPart(p) { part = p; },
+    play(name, { dur = 0 } = {}) { cur = name === 'dead' ? 'dead' : name === 'talk' || name === 'hit' ? 'talk' : 'attack'; if (cur === 'attack') strike = 0.0001; },
+    loop(name) { if (cur !== 'attack' || strike <= 0) cur = name === 'dead' ? 'dead' : 'idle'; },
+    update(dt) {
+      t += dt;
+      if (strike > 0) { strike += dt; if (strike > 0.9) strike = 0; }
+      const lash = strike > 0 ? Math.sin(Math.min(1, strike / 0.9) * Math.PI) : 0;
+      for (const r of roots) {
+        const near = Math.abs(r.base) < 2.5;
+        r.g.rotation.x = Math.sin(t * 0.8 + r.i) * 0.06 + (near ? lash * 0.9 : lash * 0.15) + (part === 'root' && near ? 0.75 : 0);
+        r.g.rotation.z = Math.sin(t * 0.6 + r.i * 1.3) * 0.05;
+      }
+      const look = cur === 'talk' || part === 'eye';
+      eye.position.y += ((part === 'eye' ? 2.4 : 5.2) - eye.position.y) * Math.min(1, dt * 4);
+      eye.position.z += ((part === 'eye' ? 2.2 : 0.2) - eye.position.z) * Math.min(1, dt * 4);
+      lid.rotation.x = look ? -0.9 : -0.35 + Math.max(0, Math.sin(t * 0.4)) ** 20 * 1.2;
+      pu.position.x = Math.sin(t * 0.7) * 0.35; eyeW.emissiveIntensity = part === 'eye' ? 0.8 : 0.25;
+      const beat = Math.pow(Math.max(0, Math.sin(t * (part === 'heart' ? 5 : 2.6))), 8);
+      const hs = (part === 'heart' ? 1.45 : 1) * (1 + beat * 0.12);
+      heart.scale.set(hs, hs * 1.2, hs * 0.9); heart.position.z += ((part === 'heart' ? 2.4 : 0.4) - heart.position.z) * Math.min(1, dt * 3);
+      heartM.emissiveIntensity = (part === 'heart' ? 1.1 : 0.45) + beat * 0.6;
+      if (cur === 'dead') { root.position.y = Math.max(-9, root.position.y - dt * 1.5); }
+    },
+    dispose() { for (const m of mats) m.dispose(); root.traverse(o => o.geometry?.dispose()); },
+  };
+}
+function flameAura(group, box, color) {
+  const m = new THREE.SpriteMaterial({ map: glowTex(), color, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.6 });
+  const n = 24, list = [], H = box.max.y - box.min.y, Wd = Math.max(box.max.x - box.min.x, 0.5);
+  for (let i = 0; i < n; i++) { const sp = new THREE.Sprite(m); sp.userData = { x: (Math.random() - 0.5) * Wd * 0.7, z: (Math.random() - 0.5) * Wd * 0.4, y0: box.min.y + Math.random() * H * 0.6, p: Math.random() }; group.add(sp); list.push(sp); }
+  let t = 0;
+  return {
+    update(dt) { t += dt; for (const sp of list) { const u = sp.userData, k = (t * 0.6 + u.p) % 1; sp.position.set(u.x * (1 - k * 0.5), u.y0 + k * H * 0.7, u.z); sp.scale.setScalar(H * 0.42 * (1 - k) + 0.05); } },
+    dispose() { m.dispose(); },
   };
 }
 
@@ -143,6 +333,47 @@ function standIn(color, h) {
   const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.28, h - 0.9, 4, 10), m); body.position.y = h / 2 - 0.1; g.add(body);
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 10), m); head.position.y = h - 0.3; g.add(head);
   return { obj: g, kind: 'stand', h, mats: [m], play() {}, loop() {}, update() {}, dispose() { m.dispose(); body.geometry.dispose(); head.geometry.dispose(); } };
+}
+
+// ------------------------------------------------------------------------------------------------ giants and hints
+/**
+ * A giant that lives behind the street's back edge (Ossmara, the Undermaw, the Undermaw's Hand — sim: def.backEdge).
+ * It faces the street, most of it behind the back edge; while hidden it rears there (the sim says it can't be hit).
+ * When a part comes down (`expose`: e.part, not hidden, e.x/e.z where the strike landed) the body lunges forward and
+ * leans down so its front reaches that spot, glows (tint) and a gold ring marks the spot.
+ */
+function placeGiant(a, e, dt) {
+  a.body?.setPart?.(e.hidden ? null : e.part);
+  const front = (a.body?.front || 1.5) * (a.scale || 1), down = e.part && !e.hidden && e.state !== 'dead';
+  // hidden: its head just behind the back edge (head at homeZ + 1.4 ≈ 1 m behind the curb); down: its head on the spot
+  const want = down ? e.z - front * 0.92 : (e.homeZ ?? Math.min(e.z, -3.4)) + 1.4 - front;
+  a.bz = a.bz == null ? want : a.bz + (want - a.bz) * Math.min(1, dt * (down ? 9 : 3));
+  a.group.position.z = a.bz;
+  a.giantLean = (a.giantLean || 0) + ((down ? 0.32 : 0) - (a.giantLean || 0)) * Math.min(1, dt * 8);
+  if (a.hitRing) {
+    a.hitRing.visible = down;
+    if (down) { const k = 1 + 0.12 * Math.sin(performance.now() / 120); a.hitRing.position.set(e.x, 0.05, e.z); a.hitRing.scale.set(1.6 * k, 1, 1.2 * k); }
+  }
+}
+/**
+ * The renderer hints SIM puts on enemies (enemies.json `render`): ghost (see-through), glass (green-glass sheen), veins
+ * (a faint root-green glow), pale (bleached), wet (dark and glossy), tint (a colour cast). Colour and number changes on
+ * the body's own material clones only — no shader is rebuilt (rule 29: alphaHash is already on).
+ */
+function applyHints(body, r) {
+  const tint = r.tint ? new THREE.Color(r.tint) : null, glass = r.glass ? new THREE.Color(r.glass) : null;
+  for (const m of body.mats) {
+    if (m.side === THREE.BackSide) continue;
+    if (r.pale) m.color.lerp(new THREE.Color('#dcdcd2'), 0.42);
+    if (r.wet) { m.color.multiplyScalar(0.78); if (m.roughness != null) m.roughness = Math.min(m.roughness, 0.38); }
+    const flame = r.big === 'flame_ghost';
+    if (tint) { m.color.lerp(tint, r.ghost || flame ? 0.6 : 0.3); if (m.emissive) { m.emissive.copy(tint); m.emissiveIntensity = flame ? 0.65 : r.ghost ? 0.45 : 0.18; } }
+    if (r.veins && m.emissive && !tint) { m.emissive.set(r.veins); m.emissiveIntensity = 0.22; }
+    if (glass && m.emissive) { m.color.lerp(glass, 0.25); m.emissive.copy(glass); m.emissiveIntensity = 0.3; }
+    if (m.emissive) { m.userData.baseEmissive = m.emissive.clone(); m.userData.baseEI = m.emissiveIntensity; }
+    m.userData.baseColor = m.color.clone();
+  }
+  body.alpha = r.ghost ? 0.6 : r.big === 'flame_ghost' ? 0.82 : r.glass ? 0.88 : 1;
 }
 
 // ------------------------------------------------------------------------------------------------ the cast
@@ -168,9 +399,13 @@ export function createActors({ scene, data, quality = 'high' }) {
       const look = heroLook(e);
       return { key: 'h' + lookKey(look), make: () => buildChibi(look, { low, outline: !low }) };
     }
+    // a story-stage person with a look of their own (story.json speakers: Brother Aldric, Tamsin…)
+    if (e.lookDirect) return { key: 'n' + lookKey(e.lookDirect), make: () => buildChibi(e.lookDirect, { low, outline: !low }) };
     const def = data.enemies.foes[e.kind] || data.enemies.bosses[e.kind];
     if (!def) return null;
-    if (def.body === 'creature') return { key: 'c' + lookKey(def.look), make: () => buildCreature(def.look, { low, outline: !low }), height: def.height };
+    if (def.render?.big === 'maw_hand') return { key: 'roothand', make: async () => buildRootHand(), height: def.height };
+    if (def.render?.big === 'undermaw') return { key: 'undermaw', make: async () => buildUndermaw(), height: def.height };
+    if (def.body === 'creature') return { key: 'c' + lookKey(def.look) + (def.render?.big || ''), make: () => buildCreature(def.look, { low, outline: !low, render: def.render }), height: def.height };
     return { key: 'f' + lookKey(def.look), make: () => buildChibi(def.look, { low, outline: !low }), height: def.height };
   }
   function heroLook(e) {
@@ -198,8 +433,8 @@ export function createActors({ scene, data, quality = 'high' }) {
 
   function makeActor(e, G) {
     const hero = e.side === 'hero';
-    const def = hero ? null : (data.enemies.foes[e.kind] || data.enemies.bosses[e.kind]);
-    const height = hero ? HERO_HEIGHT : (def?.height || 1.7);
+    const def = hero || e.lookDirect ? null : (data.enemies.foes[e.kind] || data.enemies.bosses[e.kind]);
+    const height = hero ? HERO_HEIGHT : (e.height || def?.height || 1.7);
     const color = hero ? HERO_COLORS[(G.heroes.indexOf(e)) % 4] : (e.side === 'ally' ? '#c8a060' : '#6a7050');
     const group = new THREE.Group(); group.name = 'actor:' + e.id; root.add(group);
     const yawG = new THREE.Group(); group.add(yawG);            // facing
@@ -221,8 +456,11 @@ export function createActors({ scene, data, quality = 'high' }) {
     { const r = atlas.rects['!'], t = tellMat.map; t.needsUpdate = true; t.repeat.set(r.w / atlas.W, r.h / atlas.H); t.offset.set(r.x / atlas.W, 1 - (r.y + r.h) / atlas.H); }
     const tell = new THREE.Sprite(tellMat); tell.visible = false; tell.renderOrder = 20; tell.scale.set(0.42, 0.63, 1); group.add(tell);
 
+    // a giant at the street's back edge (enemies.json backEdge): a gold ring marks where its part has come down to be hit
+    let hitRing = null;
+    if (def?.backEdge) { hitRing = new THREE.Mesh(reviveGeo, new THREE.MeshBasicMaterial({ color: '#ffe08a', transparent: true, opacity: 0.9, depthWrite: false })); hitRing.visible = false; hitRing.renderOrder = 3; root.add(hitRing); }
     const a = {
-      id: e.id, hero, side: e.side, kind: e.kind, def, height, group, yawG, pivot, holder, blob, ring, revive, clock, tell, color,
+      id: e.id, hero, side: e.side, kind: e.kind, def, height, group, yawG, pivot, holder, blob, ring, revive, clock, tell, color, hitRing, back: !!def?.backEdge, bz: null,
       body: null, spec: null, wantKey: '',
       yaw: (e.dir || 1) > 0 ? Math.PI / 2 : -Math.PI / 2, shotT: 0, shotAnim: null, prevState: e.state, stateT: 0,
       flash: 0, flashColor: new THREE.Color(1, 1, 1), windT: 0, windDur: 0, fade: 1, spin: 0, lean: 0, scale: 1, lastTint: '',
@@ -238,6 +476,7 @@ export function createActors({ scene, data, quality = 'high' }) {
     a.body = body; a.spec = spec; a.holder.add(body.obj);
     a.scale = a.height / body.h; body.obj.scale.setScalar(a.scale);
     if (body.kind === 'creature') body.obj.position.y = 0;   // creature feet are at y=0
+    if (a.def?.render && !body.hinted) { applyHints(body, a.def.render); body.hinted = true; }
     a.lastTint = '';
     // keep the clip the old body was playing
     if (a.shotAnim && a.shotT > 0) body.play(a.shotAnim, { dur: a.shotT });
@@ -259,6 +498,7 @@ export function createActors({ scene, data, quality = 'high' }) {
     if (a.body) { a.holder.remove(a.body.obj); release(a.spec, a.body); a.body = null; }
     a.group.removeFromParent();
     a.tell.material.map.dispose(); a.tell.material.dispose();
+    if (a.hitRing) { root.remove(a.hitRing); a.hitRing.material.dispose(); }
     for (const m of [a.ring, a.revive, a.clock, a.revive?.userData.back]) if (m) m.material.dispose();
   }
 
@@ -272,12 +512,15 @@ export function createActors({ scene, data, quality = 'high' }) {
       case 'grab': return ['ready', 1];
       case 'enter': return ['walk', Math.max(0.7, Math.min(1.8, speed / 2.2))];
       case 'held': return ['hit', 0.6];
+      case 'rise': return [a.body?.kind === 'creature' ? 'idle' : 'jump', 0.5];
+      case 'calm': return ['idle', 0.6];
       default: break;
     }
     const an = e.anim || 'idle';
     if (an === 'walk' || speed > 0.6) return speed > 5.5 ? ['run', Math.max(0.8, Math.min(1.6, speed / 6))] : ['walk', Math.max(0.6, Math.min(2, speed / (a.height * 1.25)))];
     if (an === 'run') return ['run', 1];
     if (an === 'jump' || e.y > 0.05) return [a.body?.kind === 'creature' ? 'idle' : 'jump', 1];
+    if (G.cinematic) return [e.loop || 'idle', 1];           // a story stage: standing at ease, or a held pose it asked for
     return [G.phase === 'fight' || !a.hero ? 'ready' : 'idle', 1];
   }
 
@@ -290,12 +533,16 @@ export function createActors({ scene, data, quality = 'high' }) {
     a.lastX = x; a.lastZ = z;
     a.group.position.set(x, y, z);
     a.drawn = a.group.position;
+    if (a.back) placeGiant(a, e, dt);
+    // climbing out of the ground / fading in (state 'rise', for def.rise seconds)
+    a.riseK = e.state === 'rise' ? Math.min(1, a.stateT / Math.max(0.2, a.def?.rise || 1)) : 1;
+    if (e.state === 'rise' && (a.def?.riseHow || 'ground') === 'ground') a.group.position.y = y - a.height * 0.95 * (1 - a.riseK) ** 1.5;
 
     // rebuild when the look changes (gear, look, a ground weapon picked up or broken)
     if (a.hero) { const k = 'h' + lookKey(heroLook(e)); if (k !== a.wantKey) requestBody(a, e); }
 
     // facing: heroes partly toward the camera; foes a little; creatures side-on
-    const turn = a.hero ? TURN : (a.body?.kind === 'creature' ? 0.12 : 0.28);
+    const turn = a.back ? Math.PI / 2 : e.turn ?? (a.hero ? TURN : (a.body?.kind === 'creature' ? 0.12 : 0.28));   // giants face the street; a story stage sets its own
     const want = (e.dir || 1) > 0 ? Math.PI / 2 - turn : -Math.PI / 2 + turn;
     let d = want - a.yaw; d = Math.atan2(Math.sin(d), Math.cos(d));
     a.yaw += d * Math.min(1, dt * 18);
@@ -330,7 +577,7 @@ export function createActors({ scene, data, quality = 'high' }) {
     if (st === 'held') lean = -0.35;
     if (st === 'hurt') lean = Math.max(0, 0.25 - a.stateT) * -1.2;
     a.lean += (lean - a.lean) * Math.min(1, dt * 14);
-    a.pivot.rotation.x = spin;
+    a.pivot.rotation.x = spin + (a.giantLean || 0);
     a.pivot.rotation.z = 0;
     a.holder.rotation.x = a.lean;
     // crowd throttle: with many Chibis on screen, foes that are only idling or walking animate on alternate frames
@@ -342,7 +589,7 @@ export function createActors({ scene, data, quality = 'high' }) {
     // blob shadow shrinks with height; hero ring
     const hs = Math.max(0.35, 1 - y * 0.35), bw = (a.body?.kind === 'creature' ? 1.1 : 0.8) * Math.max(0.8, a.height / 1.7);
     a.blob.position.y = 0.025 - y; a.blob.scale.set(bw * hs, 1, bw * 0.6 * hs);
-    if (a.ring) { a.ring.position.y = 0.03 - y; a.ring.visible = st !== 'gone' && st !== 'dead'; }
+    if (a.ring) { a.ring.position.y = 0.03 - y; a.ring.visible = st !== 'gone' && st !== 'dead' && !G.cinematic; }
 
     // revive ring + down clock for a hero who is out
     if (a.revive) {
@@ -371,6 +618,8 @@ export function createActors({ scene, data, quality = 'high' }) {
     if (e.invT > 0 && st !== 'out' && st !== 'dead' && st !== 'down') vis = vis && (Math.floor(G.t * 14) % 2 === 0);
     a.group.visible = vis;
     if (st === 'dead') a.fade = Math.max(0, 1 - Math.max(0, a.stateT - 1.1) / 1.2); else a.fade = 1;
+    if (st === 'rise' && a.def?.riseHow === 'fade') a.fade *= a.riseK;
+    a.fade *= a.body?.alpha ?? 1;
     tint(a, e, G, dt);
   }
 
@@ -389,6 +638,8 @@ export function createActors({ scene, data, quality = 'high' }) {
     if (a.flash > 0.01) { em = a.flashColor; ek = a.flash * 0.26; }      // a short, light flash: the body still reads under it
     else if (a.windT > 0) { const k = 1 - Math.max(0, a.windT) / Math.max(0.05, a.windDur); em = e.team === 0 ? FRIEND_TELL : THREAT; ek = 0.12 + 0.3 * k * (0.7 + 0.3 * Math.sin(G.t * 40)); }
     else if (e.burnT > 0) { em = tmpC.setRGB(1, 0.45, 0.1); ek = 0.25 + 0.25 * Math.abs(Math.sin(G.t * 23)); }
+    else if (a.back && e.part && !e.hidden && e.state !== 'dead') { em = HITME; ek = 0.1 + 0.1 * (0.5 + 0.5 * Math.sin(G.t * 9)); }   // a warm pulse that keeps the body readable (the gold ring marks the spot)   // its part is down: hit it now
+    else if (e.state === 'calm') { em = CALM; ek = 0.18; }
     const ice = e.freezeT > 0;
     const key = (em ? em.getHexString() + ek.toFixed(2) : '-') + (ice ? 'i' : '') + a.fade.toFixed(2);
     if (key === a.lastTint) return;

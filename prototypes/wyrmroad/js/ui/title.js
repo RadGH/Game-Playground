@@ -6,13 +6,14 @@ import { esc, CLASS_NAMES } from './text.js';
 import { randomLook } from './looks.js';
 import { rng } from '../sim/rng.js';
 import { starterGear } from '../sim/items.js';
+import { progressOf } from '../sim/route.js';
 import { soloParty } from './party.js';
 import { hp as n } from '../../../../shared/format.js';
 
 export function titleScreen(app) {
   const { save, data } = app;
   const last = app.hero(save.lastHero) || save.heroes[0] || null;
-  const ch = last ? data.chapters.chapters[last.story.reached] : null;
+  const ch = last ? (p => data.chapters.chapters.find(c => c.id === p.route[p.reached]))(progressOf(data, last.story)) : null;
   app.ui.innerHTML = `<section class="wr-title">
     <div class="wr-title-top">
       <div class="wr-acct-slot"></div>

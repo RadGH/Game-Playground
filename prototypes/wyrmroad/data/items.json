@@ -115,6 +115,42 @@
    38,
    28,
    14
+  ],
+  [
+   18,
+   37,
+   30,
+   15
+  ],
+  [
+   16,
+   36,
+   31,
+   17
+  ],
+  [
+   14,
+   35,
+   32,
+   19
+  ],
+  [
+   12,
+   34,
+   33,
+   21
+  ],
+  [
+   10,
+   33,
+   34,
+   23
+  ],
+  [
+   8,
+   32,
+   35,
+   25
   ]
  ],
  "items": [
@@ -2021,7 +2057,7 @@
   },
   {
    "id": "wyrmscale_vanguard_weapon",
-   "name": "Spinebreaker Maul",
+   "name": "Spinebreaker Hammer",
    "slot": "weapon",
    "cls": [
     "vanguard"
@@ -2971,6 +3007,2859 @@
    }
   },
   {
+   "id": "hollow_hunter_vanguard_weapon",
+   "name": "Gravecutter",
+   "slot": "weapon",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "fh_greataxe",
+     "color": "#c8d8e8",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "power": 32
+   }
+  },
+  {
+   "id": "hollow_hunter_vanguard_head",
+   "name": "Lamp-hood Helm",
+   "slot": "head",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "hat": {
+     "id": "great_helm",
+     "color": "#3a4a5a",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 32
+   }
+  },
+  {
+   "id": "hollow_hunter_vanguard_chest",
+   "name": "Rootproof Coat",
+   "slot": "chest",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "top": {
+     "id": "scale_plate",
+     "color": "#3a4a5a",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 21,
+    "hp": 56
+   }
+  },
+  {
+   "id": "hollow_hunter_vanguard_legs",
+   "name": "Trench Greaves",
+   "slot": "legs",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "bottom": {
+     "id": "greaves",
+     "color": "#344351",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 15,
+    "hp": 40
+   }
+  },
+  {
+   "id": "hollow_hunter_vanguard_feet",
+   "name": "Mire Boots",
+   "slot": "feet",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "shoes": {
+     "id": "heavy",
+     "color": "#2c3844",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 9,
+    "hp": 24
+   }
+  },
+  {
+   "id": "hollow_hunter_duelist_weapon",
+   "name": "Rootsnip",
+   "slot": "weapon",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "hand": "one",
+   "look": {
+    "held": {
+     "id": "fh_sabre",
+     "color": "#d8e8f0",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "power": 32
+   }
+  },
+  {
+   "id": "hollow_hunter_duelist_offhand",
+   "name": "Rootsnip Twin",
+   "slot": "offhand",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "hand": "off",
+   "offKind": "blade",
+   "look": {
+    "offhand": {
+     "id": "g5_kris",
+     "color": "#b8c8d8",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "power": 14,
+    "crit": 8
+   }
+  },
+  {
+   "id": "hollow_hunter_duelist_head",
+   "name": "Watch Hood",
+   "slot": "head",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "hat": {
+     "id": "hood_down",
+     "color": "#3a4a5a",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 32
+   }
+  },
+  {
+   "id": "hollow_hunter_duelist_chest",
+   "name": "Hunter's Jerkin",
+   "slot": "chest",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "top": {
+     "id": "g5_leather_brigandine",
+     "color": "#3a4a5a",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 21,
+    "hp": 56
+   }
+  },
+  {
+   "id": "hollow_hunter_duelist_legs",
+   "name": "Trench Chaps",
+   "slot": "legs",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "bottom": {
+     "id": "g5_leather_chaps",
+     "color": "#344351",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 15,
+    "hp": 40
+   }
+  },
+  {
+   "id": "hollow_hunter_duelist_feet",
+   "name": "Quiet Boots",
+   "slot": "feet",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "shoes": {
+     "id": "g5_leather_cuffboots",
+     "color": "#2c3844",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 9,
+    "hp": 24
+   }
+  },
+  {
+   "id": "hollow_hunter_arcanist_weapon",
+   "name": "Bluelamp Staff",
+   "slot": "weapon",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "g5_staff_lens",
+     "color": "#9ad8ff",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "power": 32,
+    "spell": 16
+   }
+  },
+  {
+   "id": "hollow_hunter_arcanist_head",
+   "name": "Mist Hood",
+   "slot": "head",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "hat": {
+     "id": "hood",
+     "color": "#3a4a5a",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 32,
+    "mp": 13
+   }
+  },
+  {
+   "id": "hollow_hunter_arcanist_chest",
+   "name": "Gravewarden Robe",
+   "slot": "chest",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "top": {
+     "id": "high_collar_robe",
+     "color": "#3a4a5a",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 21,
+    "hp": 56,
+    "mp": 22
+   }
+  },
+  {
+   "id": "hollow_hunter_arcanist_legs",
+   "name": "Mist Pleats",
+   "slot": "legs",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "bottom": {
+     "id": "g5_cloth_pleats",
+     "color": "#344351",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 15,
+    "hp": 40,
+    "mp": 16
+   }
+  },
+  {
+   "id": "hollow_hunter_arcanist_feet",
+   "name": "Damp Slippers",
+   "slot": "feet",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "shoes": {
+     "id": "g5_cloth_curltoes",
+     "color": "#2c3844",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 9,
+    "hp": 24,
+    "mp": 10
+   }
+  },
+  {
+   "id": "hollow_hunter_warden_weapon",
+   "name": "Lantern Flail",
+   "slot": "weapon",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "hand": "main",
+   "look": {
+    "held": {
+     "id": "g5_morningstar",
+     "color": "#a8c8e0",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "power": 32
+   }
+  },
+  {
+   "id": "hollow_hunter_warden_offhand",
+   "name": "Grave-door Shield",
+   "slot": "offhand",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "hand": "off",
+   "offKind": "shield",
+   "look": {
+    "offhand": {
+     "id": "g5_pavise",
+     "color": "#3a4a5a",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 18,
+    "block": 10
+   }
+  },
+  {
+   "id": "hollow_hunter_warden_head",
+   "name": "Vigil Coif",
+   "slot": "head",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "hat": {
+     "id": "g5_mail_cap",
+     "color": "#3a4a5a",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 32,
+    "mp": 13
+   }
+  },
+  {
+   "id": "hollow_hunter_warden_chest",
+   "name": "Watchman Hauberk",
+   "slot": "chest",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "top": {
+     "id": "g5_mail_hauberk",
+     "color": "#3a4a5a",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 21,
+    "hp": 56,
+    "mp": 22
+   }
+  },
+  {
+   "id": "hollow_hunter_warden_legs",
+   "name": "Watch Chausses",
+   "slot": "legs",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "bottom": {
+     "id": "g5_mail_chausses",
+     "color": "#344351",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 15,
+    "hp": 40,
+    "mp": 16
+   }
+  },
+  {
+   "id": "hollow_hunter_warden_feet",
+   "name": "Watch Splints",
+   "slot": "feet",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 6,
+   "set": "Hollow-hunter",
+   "look": {
+    "shoes": {
+     "id": "g5_mail_splints",
+     "color": "#2c3844",
+     "color2": "#a8c8e0"
+    }
+   },
+   "stats": {
+    "def": 9,
+    "hp": 24,
+    "mp": 10
+   }
+  },
+  {
+   "id": "silver_outlaw_vanguard_weapon",
+   "name": "Outlaw Headsman",
+   "slot": "weapon",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "g5_headsman",
+     "color": "#e0e8f0",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "power": 34
+   }
+  },
+  {
+   "id": "silver_outlaw_vanguard_head",
+   "name": "Stripped Armet",
+   "slot": "head",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "hat": {
+     "id": "g5_plate_armet",
+     "color": "#b8c0cc",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 13,
+    "hp": 34
+   }
+  },
+  {
+   "id": "silver_outlaw_vanguard_chest",
+   "name": "Defaced Cuirass",
+   "slot": "chest",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "top": {
+     "id": "g5_plate_cuirass",
+     "color": "#b8c0cc",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 22,
+    "hp": 60
+   }
+  },
+  {
+   "id": "silver_outlaw_vanguard_legs",
+   "name": "Silver Cuisses",
+   "slot": "legs",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "bottom": {
+     "id": "g5_plate_cuisses",
+     "color": "#a6adb8",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 43
+   }
+  },
+  {
+   "id": "silver_outlaw_vanguard_feet",
+   "name": "Silver Sabatons",
+   "slot": "feet",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "shoes": {
+     "id": "g5_plate_sabatons",
+     "color": "#8a9099",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 10,
+    "hp": 26
+   }
+  },
+  {
+   "id": "silver_outlaw_duelist_weapon",
+   "name": "Highway Rapier",
+   "slot": "weapon",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "hand": "one",
+   "look": {
+    "held": {
+     "id": "fh_rapier",
+     "color": "#e8f0f8",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "power": 34
+   }
+  },
+  {
+   "id": "silver_outlaw_duelist_offhand",
+   "name": "Purse-cutter",
+   "slot": "offhand",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "hand": "off",
+   "offKind": "blade",
+   "look": {
+    "offhand": {
+     "id": "fh_dagger",
+     "color": "#c0c8d8",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "power": 15,
+    "crit": 9
+   }
+  },
+  {
+   "id": "silver_outlaw_duelist_head",
+   "name": "Outlaw Tricorn",
+   "slot": "head",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "hat": {
+     "id": "tricorn",
+     "color": "#b8c0cc",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 13,
+    "hp": 34
+   }
+  },
+  {
+   "id": "silver_outlaw_duelist_chest",
+   "name": "Stolen Silks",
+   "slot": "chest",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "top": {
+     "id": "silks",
+     "color": "#b8c0cc",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 22,
+    "hp": 60
+   }
+  },
+  {
+   "id": "silver_outlaw_duelist_legs",
+   "name": "Road Leggings",
+   "slot": "legs",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "bottom": {
+     "id": "leggings",
+     "color": "#a6adb8",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 43
+   }
+  },
+  {
+   "id": "silver_outlaw_duelist_feet",
+   "name": "Highway Boots",
+   "slot": "feet",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "shoes": {
+     "id": "knee_boots",
+     "color": "#8a9099",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 10,
+    "hp": 26
+   }
+  },
+  {
+   "id": "silver_outlaw_arcanist_weapon",
+   "name": "Moonsilver Rod",
+   "slot": "weapon",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "g5_staff_halo",
+     "color": "#e0e8ff",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "power": 34,
+    "spell": 17
+   }
+  },
+  {
+   "id": "silver_outlaw_arcanist_head",
+   "name": "Silver Circlet",
+   "slot": "head",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "hat": {
+     "id": "circlet",
+     "color": "#b8c0cc",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 13,
+    "hp": 34,
+    "mp": 14
+   }
+  },
+  {
+   "id": "silver_outlaw_arcanist_chest",
+   "name": "Exile Vestment",
+   "slot": "chest",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "top": {
+     "id": "g5_cloth_vestment",
+     "color": "#b8c0cc",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 22,
+    "hp": 60,
+    "mp": 24
+   }
+  },
+  {
+   "id": "silver_outlaw_arcanist_legs",
+   "name": "Exile Pleats",
+   "slot": "legs",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "bottom": {
+     "id": "g5_cloth_pleats",
+     "color": "#a6adb8",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 43,
+    "mp": 17
+   }
+  },
+  {
+   "id": "silver_outlaw_arcanist_feet",
+   "name": "Exile Curltoes",
+   "slot": "feet",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "shoes": {
+     "id": "g5_cloth_curltoes",
+     "color": "#8a9099",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 10,
+    "hp": 26,
+    "mp": 10
+   }
+  },
+  {
+   "id": "silver_outlaw_warden_weapon",
+   "name": "Kingsway Hammer",
+   "slot": "weapon",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "hand": "main",
+   "look": {
+    "held": {
+     "id": "fh_hammer",
+     "color": "#d0d8e0",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "power": 34
+   }
+  },
+  {
+   "id": "silver_outlaw_warden_offhand",
+   "name": "Torn-crest Shield",
+   "slot": "offhand",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "hand": "off",
+   "offKind": "shield",
+   "look": {
+    "offhand": {
+     "id": "kite_shield",
+     "color": "#2a3a6a",
+     "color2": "#2a3a6a",
+     "emblem": "sun"
+    }
+   },
+   "stats": {
+    "def": 19,
+    "block": 11
+   }
+  },
+  {
+   "id": "silver_outlaw_warden_head",
+   "name": "Silver Plate Helm",
+   "slot": "head",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "hat": {
+     "id": "plate_helm",
+     "color": "#b8c0cc",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 13,
+    "hp": 34,
+    "mp": 14
+   }
+  },
+  {
+   "id": "silver_outlaw_warden_chest",
+   "name": "Outlaw Surcoat",
+   "slot": "chest",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "top": {
+     "id": "surcoat",
+     "color": "#b8c0cc",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 22,
+    "hp": 60,
+    "mp": 24
+   }
+  },
+  {
+   "id": "silver_outlaw_warden_legs",
+   "name": "Silver Chausses",
+   "slot": "legs",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "bottom": {
+     "id": "g5_mail_chausses",
+     "color": "#a6adb8",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 43,
+    "mp": 17
+   }
+  },
+  {
+   "id": "silver_outlaw_warden_feet",
+   "name": "Silver Splints",
+   "slot": "feet",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 7,
+   "set": "Silver Outlaw",
+   "look": {
+    "shoes": {
+     "id": "g5_mail_splints",
+     "color": "#8a9099",
+     "color2": "#2a3a6a"
+    }
+   },
+   "stats": {
+    "def": 10,
+    "hp": 26,
+    "mp": 10
+   }
+  },
+  {
+   "id": "kiln_glass_vanguard_weapon",
+   "name": "Glassfire Flamberge",
+   "slot": "weapon",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "g5_flamberge",
+     "color": "#9affb8",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "power": 37
+   }
+  },
+  {
+   "id": "kiln_glass_vanguard_head",
+   "name": "Kiln Helm",
+   "slot": "head",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "hat": {
+     "id": "war_helm",
+     "color": "#2e4a32",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 14,
+    "hp": 37
+   }
+  },
+  {
+   "id": "kiln_glass_vanguard_chest",
+   "name": "Slag Plate",
+   "slot": "chest",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "top": {
+     "id": "plate",
+     "color": "#2e4a32",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 24,
+    "hp": 64
+   }
+  },
+  {
+   "id": "kiln_glass_vanguard_legs",
+   "name": "Slag Greaves",
+   "slot": "legs",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "bottom": {
+     "id": "greaves",
+     "color": "#29432d",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 17,
+    "hp": 46
+   }
+  },
+  {
+   "id": "kiln_glass_vanguard_feet",
+   "name": "Ashwalk Sabatons",
+   "slot": "feet",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "shoes": {
+     "id": "g5_plate_sabatons",
+     "color": "#233826",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 10,
+    "hp": 28
+   }
+  },
+  {
+   "id": "kiln_glass_duelist_weapon",
+   "name": "Green Shard",
+   "slot": "weapon",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "hand": "one",
+   "look": {
+    "held": {
+     "id": "g5_leafblade",
+     "color": "#9affb8",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "power": 37
+   }
+  },
+  {
+   "id": "kiln_glass_duelist_offhand",
+   "name": "Green Splinter",
+   "slot": "offhand",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "hand": "off",
+   "offKind": "blade",
+   "look": {
+    "offhand": {
+     "id": "g5_kris",
+     "color": "#7ae098",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "power": 17,
+    "crit": 10
+   }
+  },
+  {
+   "id": "kiln_glass_duelist_head",
+   "name": "Glassblower Hood",
+   "slot": "head",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "hat": {
+     "id": "hood_down",
+     "color": "#2e4a32",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 14,
+    "hp": 37
+   }
+  },
+  {
+   "id": "kiln_glass_duelist_chest",
+   "name": "Furnace Harness",
+   "slot": "chest",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "top": {
+     "id": "strapped_leather",
+     "color": "#2e4a32",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 24,
+    "hp": 64
+   }
+  },
+  {
+   "id": "kiln_glass_duelist_legs",
+   "name": "Furnace Leggings",
+   "slot": "legs",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "bottom": {
+     "id": "leggings",
+     "color": "#29432d",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 17,
+    "hp": 46
+   }
+  },
+  {
+   "id": "kiln_glass_duelist_feet",
+   "name": "Ash Boots",
+   "slot": "feet",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "shoes": {
+     "id": "ankle_boots",
+     "color": "#233826",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 10,
+    "hp": 28
+   }
+  },
+  {
+   "id": "kiln_glass_arcanist_weapon",
+   "name": "Kilnheart Staff",
+   "slot": "weapon",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "staff_orb",
+     "color": "#7affa0",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "power": 37,
+    "spell": 19
+   }
+  },
+  {
+   "id": "kiln_glass_arcanist_head",
+   "name": "Glass Crown",
+   "slot": "head",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "hat": {
+     "id": "rune_helm",
+     "color": "#2e4a32",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 14,
+    "hp": 37,
+    "mp": 15
+   }
+  },
+  {
+   "id": "kiln_glass_arcanist_chest",
+   "name": "Kilnkeeper Robe",
+   "slot": "chest",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "top": {
+     "id": "trim_robe",
+     "color": "#2e4a32",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 24,
+    "hp": 64,
+    "mp": 26
+   }
+  },
+  {
+   "id": "kiln_glass_arcanist_legs",
+   "name": "Glass Pleats",
+   "slot": "legs",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "bottom": {
+     "id": "g5_cloth_pleats",
+     "color": "#29432d",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 17,
+    "hp": 46,
+    "mp": 18
+   }
+  },
+  {
+   "id": "kiln_glass_arcanist_feet",
+   "name": "Cinder Slippers",
+   "slot": "feet",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "shoes": {
+     "id": "g5_cloth_curltoes",
+     "color": "#233826",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 10,
+    "hp": 28,
+    "mp": 11
+   }
+  },
+  {
+   "id": "kiln_glass_warden_weapon",
+   "name": "Glass Sceptre",
+   "slot": "weapon",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "hand": "main",
+   "look": {
+    "held": {
+     "id": "g5_crownsceptre",
+     "color": "#9affb8",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "power": 37
+   }
+  },
+  {
+   "id": "kiln_glass_warden_offhand",
+   "name": "Furnace Door",
+   "slot": "offhand",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "hand": "off",
+   "offKind": "shield",
+   "look": {
+    "offhand": {
+     "id": "tower_shield",
+     "color": "#2e4a32",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 21,
+    "block": 12
+   }
+  },
+  {
+   "id": "kiln_glass_warden_head",
+   "name": "Kiln Plate Helm",
+   "slot": "head",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "hat": {
+     "id": "plate_helm",
+     "color": "#2e4a32",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 14,
+    "hp": 37,
+    "mp": 15
+   }
+  },
+  {
+   "id": "kiln_glass_warden_chest",
+   "name": "Kiln Hauberk",
+   "slot": "chest",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "top": {
+     "id": "hauberk",
+     "color": "#2e4a32",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 24,
+    "hp": 64,
+    "mp": 26
+   }
+  },
+  {
+   "id": "kiln_glass_warden_legs",
+   "name": "Kiln Chausses",
+   "slot": "legs",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "bottom": {
+     "id": "g5_mail_chausses",
+     "color": "#29432d",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 17,
+    "hp": 46,
+    "mp": 18
+   }
+  },
+  {
+   "id": "kiln_glass_warden_feet",
+   "name": "Kiln Splints",
+   "slot": "feet",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 8,
+   "set": "Kiln-glass",
+   "look": {
+    "shoes": {
+     "id": "g5_mail_splints",
+     "color": "#233826",
+     "color2": "#7affa0"
+    }
+   },
+   "stats": {
+    "def": 10,
+    "hp": 28,
+    "mp": 11
+   }
+  },
+  {
+   "id": "wyrmfriend_vanguard_weapon",
+   "name": "Wing-bone Greatsword",
+   "slot": "weapon",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "greatsword",
+     "color": "#fff0c8",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "power": 39
+   }
+  },
+  {
+   "id": "wyrmfriend_vanguard_head",
+   "name": "Wyrmfriend Helm",
+   "slot": "head",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "hat": {
+     "id": "dragon_helm",
+     "color": "#6a4a2a",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 15,
+    "hp": 39
+   }
+  },
+  {
+   "id": "wyrmfriend_vanguard_chest",
+   "name": "Gold-scale Plate",
+   "slot": "chest",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "top": {
+     "id": "scale_plate",
+     "color": "#6a4a2a",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 26,
+    "hp": 69
+   }
+  },
+  {
+   "id": "wyrmfriend_vanguard_legs",
+   "name": "Gold-scale Greaves",
+   "slot": "legs",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "bottom": {
+     "id": "greaves",
+     "color": "#5f4326",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 18,
+    "hp": 49
+   }
+  },
+  {
+   "id": "wyrmfriend_vanguard_feet",
+   "name": "Talon Sabatons",
+   "slot": "feet",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "shoes": {
+     "id": "g5_plate_sabatons",
+     "color": "#503820",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 11,
+    "hp": 29
+   }
+  },
+  {
+   "id": "wyrmfriend_duelist_weapon",
+   "name": "Ember-tooth",
+   "slot": "weapon",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "hand": "one",
+   "look": {
+    "held": {
+     "id": "g5_kris",
+     "color": "#ffd080",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "power": 39
+   }
+  },
+  {
+   "id": "wyrmfriend_duelist_offhand",
+   "name": "Ember-tooth Twin",
+   "slot": "offhand",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "hand": "off",
+   "offKind": "blade",
+   "look": {
+    "offhand": {
+     "id": "g5_kris",
+     "color": "#ffc060",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "power": 18,
+    "crit": 11
+   }
+  },
+  {
+   "id": "wyrmfriend_duelist_head",
+   "name": "Wind Mask",
+   "slot": "head",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "hat": {
+     "id": "war_helm",
+     "color": "#6a4a2a",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 15,
+    "hp": 39
+   }
+  },
+  {
+   "id": "wyrmfriend_duelist_chest",
+   "name": "Scale Duster",
+   "slot": "chest",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "top": {
+     "id": "open_coat",
+     "color": "#6a4a2a",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 26,
+    "hp": 69
+   }
+  },
+  {
+   "id": "wyrmfriend_duelist_legs",
+   "name": "Scale Leggings",
+   "slot": "legs",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "bottom": {
+     "id": "leggings",
+     "color": "#5f4326",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 18,
+    "hp": 49
+   }
+  },
+  {
+   "id": "wyrmfriend_duelist_feet",
+   "name": "Rider Boots",
+   "slot": "feet",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "shoes": {
+     "id": "knee_boots",
+     "color": "#503820",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 11,
+    "hp": 29
+   }
+  },
+  {
+   "id": "wyrmfriend_arcanist_weapon",
+   "name": "Horn of the Old Wyrm",
+   "slot": "weapon",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "g5_staff_horn",
+     "color": "#ffe0a0",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "power": 39,
+    "spell": 20
+   }
+  },
+  {
+   "id": "wyrmfriend_arcanist_head",
+   "name": "Sunhorn Circlet",
+   "slot": "head",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "hat": {
+     "id": "circlet",
+     "color": "#6a4a2a",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 15,
+    "hp": 39,
+    "mp": 16
+   }
+  },
+  {
+   "id": "wyrmfriend_arcanist_chest",
+   "name": "Flight Robe",
+   "slot": "chest",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "top": {
+     "id": "sash_robe",
+     "color": "#6a4a2a",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 26,
+    "hp": 69,
+    "mp": 28
+   }
+  },
+  {
+   "id": "wyrmfriend_arcanist_legs",
+   "name": "Flight Pleats",
+   "slot": "legs",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "bottom": {
+     "id": "g5_cloth_pleats",
+     "color": "#5f4326",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 18,
+    "hp": 49,
+    "mp": 20
+   }
+  },
+  {
+   "id": "wyrmfriend_arcanist_feet",
+   "name": "Flight Curltoes",
+   "slot": "feet",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "shoes": {
+     "id": "g5_cloth_curltoes",
+     "color": "#503820",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 11,
+    "hp": 29,
+    "mp": 12
+   }
+  },
+  {
+   "id": "wyrmfriend_warden_weapon",
+   "name": "Sunscale Mallet",
+   "slot": "weapon",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "hand": "main",
+   "look": {
+    "held": {
+     "id": "g5_mallet",
+     "color": "#ffd080",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "power": 39
+   }
+  },
+  {
+   "id": "wyrmfriend_warden_offhand",
+   "name": "Wing-plate Shield",
+   "slot": "offhand",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "hand": "off",
+   "offKind": "shield",
+   "look": {
+    "offhand": {
+     "id": "g5_scutcheon",
+     "color": "#6a4a2a",
+     "color2": "#ffc860",
+     "emblem": "sun"
+    }
+   },
+   "stats": {
+    "def": 22,
+    "block": 13
+   }
+  },
+  {
+   "id": "wyrmfriend_warden_head",
+   "name": "Crested Wyrm Helm",
+   "slot": "head",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "hat": {
+     "id": "horned_helm",
+     "color": "#6a4a2a",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 15,
+    "hp": 39,
+    "mp": 16
+   }
+  },
+  {
+   "id": "wyrmfriend_warden_chest",
+   "name": "Wyrmfriend Hauberk",
+   "slot": "chest",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "top": {
+     "id": "g5_mail_hauberk",
+     "color": "#6a4a2a",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 26,
+    "hp": 69,
+    "mp": 28
+   }
+  },
+  {
+   "id": "wyrmfriend_warden_legs",
+   "name": "Wyrmfriend Chausses",
+   "slot": "legs",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "bottom": {
+     "id": "g5_mail_chausses",
+     "color": "#5f4326",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 18,
+    "hp": 49,
+    "mp": 20
+   }
+  },
+  {
+   "id": "wyrmfriend_warden_feet",
+   "name": "Wyrmfriend Splints",
+   "slot": "feet",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 9,
+   "set": "Wyrmfriend",
+   "look": {
+    "shoes": {
+     "id": "g5_mail_splints",
+     "color": "#503820",
+     "color2": "#ffc860"
+    }
+   },
+   "stats": {
+    "def": 11,
+    "hp": 29,
+    "mp": 12
+   }
+  },
+  {
+   "id": "bellwright_vanguard_weapon",
+   "name": "Clapper Hammer",
+   "slot": "weapon",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "g5_stonemaul",
+     "color": "#d0a060",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "power": 41
+   }
+  },
+  {
+   "id": "bellwright_vanguard_head",
+   "name": "Bell Helm",
+   "slot": "head",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "hat": {
+     "id": "great_helm",
+     "color": "#8a5a2a",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 42
+   }
+  },
+  {
+   "id": "bellwright_vanguard_chest",
+   "name": "Bronze Plate",
+   "slot": "chest",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "top": {
+     "id": "g5_plate_cuirass",
+     "color": "#8a5a2a",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 27,
+    "hp": 73
+   }
+  },
+  {
+   "id": "bellwright_vanguard_legs",
+   "name": "Bronze Cuisses",
+   "slot": "legs",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "bottom": {
+     "id": "g5_plate_cuisses",
+     "color": "#7c5126",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 19,
+    "hp": 52
+   }
+  },
+  {
+   "id": "bellwright_vanguard_feet",
+   "name": "Bronze Sabatons",
+   "slot": "feet",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "shoes": {
+     "id": "g5_plate_sabatons",
+     "color": "#684420",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 31
+   }
+  },
+  {
+   "id": "bellwright_duelist_weapon",
+   "name": "Tuning Blade",
+   "slot": "weapon",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "hand": "one",
+   "look": {
+    "held": {
+     "id": "saber",
+     "color": "#f0d090",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "power": 41
+   }
+  },
+  {
+   "id": "bellwright_duelist_offhand",
+   "name": "Tuning Fork",
+   "slot": "offhand",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "hand": "off",
+   "offKind": "blade",
+   "look": {
+    "offhand": {
+     "id": "fh_dagger",
+     "color": "#d0b070",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "power": 18,
+    "crit": 12
+   }
+  },
+  {
+   "id": "bellwright_duelist_head",
+   "name": "Founder Cap",
+   "slot": "head",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "hat": {
+     "id": "leather_cap",
+     "color": "#8a5a2a",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 42
+   }
+  },
+  {
+   "id": "bellwright_duelist_chest",
+   "name": "Foundry Apron",
+   "slot": "chest",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "top": {
+     "id": "g5_leather_brigandine",
+     "color": "#8a5a2a",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 27,
+    "hp": 73
+   }
+  },
+  {
+   "id": "bellwright_duelist_legs",
+   "name": "Founder Chaps",
+   "slot": "legs",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "bottom": {
+     "id": "g5_leather_chaps",
+     "color": "#7c5126",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 19,
+    "hp": 52
+   }
+  },
+  {
+   "id": "bellwright_duelist_feet",
+   "name": "Founder Boots",
+   "slot": "feet",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "shoes": {
+     "id": "g5_leather_cuffboots",
+     "color": "#684420",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 31
+   }
+  },
+  {
+   "id": "bellwright_arcanist_weapon",
+   "name": "Chime Staff",
+   "slot": "weapon",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "g5_staff_spire",
+     "color": "#f0d090",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "power": 41,
+    "spell": 21
+   }
+  },
+  {
+   "id": "bellwright_arcanist_head",
+   "name": "Chime Hood",
+   "slot": "head",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "hat": {
+     "id": "hood",
+     "color": "#8a5a2a",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 42,
+    "mp": 17
+   }
+  },
+  {
+   "id": "bellwright_arcanist_chest",
+   "name": "Ringer Robe",
+   "slot": "chest",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "top": {
+     "id": "trim_robe",
+     "color": "#8a5a2a",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 27,
+    "hp": 73,
+    "mp": 29
+   }
+  },
+  {
+   "id": "bellwright_arcanist_legs",
+   "name": "Ringer Skirt",
+   "slot": "legs",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "bottom": {
+     "id": "long_skirt",
+     "color": "#7c5126",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 19,
+    "hp": 52,
+    "mp": 21
+   }
+  },
+  {
+   "id": "bellwright_arcanist_feet",
+   "name": "Ringer Sandals",
+   "slot": "feet",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "shoes": {
+     "id": "sandals",
+     "color": "#684420",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 31,
+    "mp": 12
+   }
+  },
+  {
+   "id": "bellwright_warden_weapon",
+   "name": "Bell Mace",
+   "slot": "weapon",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "hand": "main",
+   "look": {
+    "held": {
+     "id": "fh_mace",
+     "color": "#d0a060",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "power": 41
+   }
+  },
+  {
+   "id": "bellwright_warden_offhand",
+   "name": "Bellmouth Shield",
+   "slot": "offhand",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "hand": "off",
+   "offKind": "shield",
+   "look": {
+    "offhand": {
+     "id": "round_shield",
+     "color": "#8a5a2a",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 23,
+    "block": 14
+   }
+  },
+  {
+   "id": "bellwright_warden_head",
+   "name": "Founder Helm",
+   "slot": "head",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "hat": {
+     "id": "helmet",
+     "color": "#8a5a2a",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 42,
+    "mp": 17
+   }
+  },
+  {
+   "id": "bellwright_warden_chest",
+   "name": "Bronze Hauberk",
+   "slot": "chest",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "top": {
+     "id": "hauberk",
+     "color": "#8a5a2a",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 27,
+    "hp": 73,
+    "mp": 29
+   }
+  },
+  {
+   "id": "bellwright_warden_legs",
+   "name": "Bronze Chausses",
+   "slot": "legs",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "bottom": {
+     "id": "g5_mail_chausses",
+     "color": "#7c5126",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 19,
+    "hp": 52,
+    "mp": 21
+   }
+  },
+  {
+   "id": "bellwright_warden_feet",
+   "name": "Bronze Splints",
+   "slot": "feet",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 10,
+   "set": "Bellwright",
+   "look": {
+    "shoes": {
+     "id": "g5_mail_splints",
+     "color": "#684420",
+     "color2": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 31,
+    "mp": 12
+   }
+  },
+  {
+   "id": "unbound_vanguard_weapon",
+   "name": "Chainbreaker",
+   "slot": "weapon",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "fh_greatsword",
+     "color": "#ffb070",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "power": 44
+   }
+  },
+  {
+   "id": "unbound_vanguard_head",
+   "name": "Unbound Helm",
+   "slot": "head",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "hat": {
+     "id": "dragon_helm",
+     "color": "#2a1a3a",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 44
+   }
+  },
+  {
+   "id": "unbound_vanguard_chest",
+   "name": "Unbound Plate",
+   "slot": "chest",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "top": {
+     "id": "plate",
+     "color": "#2a1a3a",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 29,
+    "hp": 77
+   }
+  },
+  {
+   "id": "unbound_vanguard_legs",
+   "name": "Unbound Greaves",
+   "slot": "legs",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "bottom": {
+     "id": "greaves",
+     "color": "#261734",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 21,
+    "hp": 55
+   }
+  },
+  {
+   "id": "unbound_vanguard_feet",
+   "name": "Unbound Sabatons",
+   "slot": "feet",
+   "cls": [
+    "vanguard"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "shoes": {
+     "id": "g5_plate_sabatons",
+     "color": "#20142c",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 33
+   }
+  },
+  {
+   "id": "unbound_duelist_weapon",
+   "name": "Last Light",
+   "slot": "weapon",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "hand": "one",
+   "look": {
+    "held": {
+     "id": "fh_sabre",
+     "color": "#ffd0a0",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "power": 44
+   }
+  },
+  {
+   "id": "unbound_duelist_offhand",
+   "name": "First Light",
+   "slot": "offhand",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "hand": "off",
+   "offKind": "blade",
+   "look": {
+    "offhand": {
+     "id": "tv_scimitar",
+     "color": "#ffb070",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "power": 20,
+    "crit": 13
+   }
+  },
+  {
+   "id": "unbound_duelist_head",
+   "name": "Unbound Circlet",
+   "slot": "head",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "hat": {
+     "id": "circlet",
+     "color": "#2a1a3a",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 44
+   }
+  },
+  {
+   "id": "unbound_duelist_chest",
+   "name": "Unbound Duster",
+   "slot": "chest",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "top": {
+     "id": "silks",
+     "color": "#2a1a3a",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 29,
+    "hp": 77
+   }
+  },
+  {
+   "id": "unbound_duelist_legs",
+   "name": "Unbound Leggings",
+   "slot": "legs",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "bottom": {
+     "id": "leggings",
+     "color": "#261734",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 21,
+    "hp": 55
+   }
+  },
+  {
+   "id": "unbound_duelist_feet",
+   "name": "Unbound Boots",
+   "slot": "feet",
+   "cls": [
+    "duelist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "shoes": {
+     "id": "knee_boots",
+     "color": "#20142c",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 33
+   }
+  },
+  {
+   "id": "unbound_arcanist_weapon",
+   "name": "Open Sky Staff",
+   "slot": "weapon",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "hand": "two",
+   "look": {
+    "held": {
+     "id": "g5_staff_spire",
+     "color": "#ffb070",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "power": 44,
+    "spell": 22
+   }
+  },
+  {
+   "id": "unbound_arcanist_head",
+   "name": "Starlit Crown",
+   "slot": "head",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "hat": {
+     "id": "wizard",
+     "color": "#2a1a3a",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 44,
+    "mp": 18
+   }
+  },
+  {
+   "id": "unbound_arcanist_chest",
+   "name": "Unbound Robe",
+   "slot": "chest",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "top": {
+     "id": "high_collar_robe",
+     "color": "#2a1a3a",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 29,
+    "hp": 77,
+    "mp": 31
+   }
+  },
+  {
+   "id": "unbound_arcanist_legs",
+   "name": "Unbound Pleats",
+   "slot": "legs",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "bottom": {
+     "id": "g5_cloth_pleats",
+     "color": "#261734",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 21,
+    "hp": 55,
+    "mp": 22
+   }
+  },
+  {
+   "id": "unbound_arcanist_feet",
+   "name": "Unbound Curltoes",
+   "slot": "feet",
+   "cls": [
+    "arcanist"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "shoes": {
+     "id": "g5_cloth_curltoes",
+     "color": "#20142c",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 33,
+    "mp": 13
+   }
+  },
+  {
+   "id": "unbound_warden_weapon",
+   "name": "Dawnbreaker",
+   "slot": "weapon",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "hand": "main",
+   "look": {
+    "held": {
+     "id": "g5_morningstar",
+     "color": "#ffd0a0",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "power": 44
+   }
+  },
+  {
+   "id": "unbound_warden_offhand",
+   "name": "Unbound Aegis",
+   "slot": "offhand",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "hand": "off",
+   "offKind": "shield",
+   "look": {
+    "offhand": {
+     "id": "tower_shield",
+     "color": "#2a1a3a",
+     "color2": "#ff8a3a",
+     "emblem": "sun"
+    }
+   },
+   "stats": {
+    "def": 25,
+    "block": 15
+   }
+  },
+  {
+   "id": "unbound_warden_head",
+   "name": "Unbound Plate Helm",
+   "slot": "head",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "hat": {
+     "id": "plate_helm",
+     "color": "#2a1a3a",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 44,
+    "mp": 18
+   }
+  },
+  {
+   "id": "unbound_warden_chest",
+   "name": "Unbound Surcoat",
+   "slot": "chest",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "top": {
+     "id": "surcoat",
+     "color": "#2a1a3a",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 29,
+    "hp": 77,
+    "mp": 31
+   }
+  },
+  {
+   "id": "unbound_warden_legs",
+   "name": "Unbound Chausses",
+   "slot": "legs",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "bottom": {
+     "id": "g5_mail_chausses",
+     "color": "#261734",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 21,
+    "hp": 55,
+    "mp": 22
+   }
+  },
+  {
+   "id": "unbound_warden_feet",
+   "name": "Unbound Splints",
+   "slot": "feet",
+   "cls": [
+    "warden"
+   ],
+   "chapter": 11,
+   "set": "Unbound",
+   "look": {
+    "shoes": {
+     "id": "g5_mail_splints",
+     "color": "#20142c",
+     "color2": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "def": 12,
+    "hp": 33,
+    "mp": 13
+   }
+  },
+  {
    "id": "trinket_bell_copper_pendant",
    "name": "Bell-copper Pendant",
    "slot": "trinket",
@@ -3110,6 +5999,145 @@
    }
   },
   {
+   "id": "trinket_grave_lamp_charm",
+   "name": "Grave-lamp Charm",
+   "slot": "trinket",
+   "cls": [
+    "vanguard",
+    "duelist",
+    "arcanist",
+    "warden"
+   ],
+   "chapter": 6,
+   "set": "Trinket",
+   "look": {
+    "accessory": {
+     "id": "pendant",
+     "color": "#9ad8ff"
+    }
+   },
+   "stats": {
+    "def": 10,
+    "hp": 70
+   }
+  },
+  {
+   "id": "trinket_outlaw_signet",
+   "name": "Outlaw Signet",
+   "slot": "trinket",
+   "cls": [
+    "vanguard",
+    "duelist",
+    "arcanist",
+    "warden"
+   ],
+   "chapter": 7,
+   "set": "Trinket",
+   "look": {
+    "accessory": {
+     "id": "g5_torc",
+     "color": "#d0d8e0"
+    }
+   },
+   "stats": {
+    "crit": 8,
+    "power": 10
+   }
+  },
+  {
+   "id": "trinket_kiln_bead",
+   "name": "Kiln Bead",
+   "slot": "trinket",
+   "cls": [
+    "vanguard",
+    "duelist",
+    "arcanist",
+    "warden"
+   ],
+   "chapter": 8,
+   "set": "Trinket",
+   "look": {
+    "accessory": {
+     "id": "prayer_beads",
+     "color": "#7affa0"
+    }
+   },
+   "stats": {
+    "mp": 60,
+    "mpRegen": 2
+   }
+  },
+  {
+   "id": "trinket_scale_of_the_old_wyrm",
+   "name": "Scale of the Old Wyrm",
+   "slot": "trinket",
+   "cls": [
+    "vanguard",
+    "duelist",
+    "arcanist",
+    "warden"
+   ],
+   "chapter": 9,
+   "set": "Trinket",
+   "look": {
+    "accessory": {
+     "id": "pendant",
+     "color": "#ffc860"
+    }
+   },
+   "stats": {
+    "power": 13,
+    "hp": 90
+   }
+  },
+  {
+   "id": "trinket_little_bell",
+   "name": "Little Bell",
+   "slot": "trinket",
+   "cls": [
+    "vanguard",
+    "duelist",
+    "arcanist",
+    "warden"
+   ],
+   "chapter": 10,
+   "set": "Trinket",
+   "look": {
+    "accessory": {
+     "id": "crescent",
+     "color": "#f0d090"
+    }
+   },
+   "stats": {
+    "def": 16,
+    "hp": 120
+   }
+  },
+  {
+   "id": "trinket_open_sky_torc",
+   "name": "Open Sky Torc",
+   "slot": "trinket",
+   "cls": [
+    "vanguard",
+    "duelist",
+    "arcanist",
+    "warden"
+   ],
+   "chapter": 11,
+   "set": "Trinket",
+   "look": {
+    "accessory": {
+     "id": "g5_torc",
+     "color": "#ff8a3a"
+    }
+   },
+   "stats": {
+    "power": 16,
+    "crit": 8,
+    "hp": 110
+   }
+  },
+  {
    "id": "leg_bellbreaker",
    "name": "Bellbreaker",
    "slot": "weapon",
@@ -3239,6 +6267,114 @@
    },
    "effect": {
     "id": "leech",
+    "amount": 0.05
+   },
+   "set": "Legendary",
+   "legendary": true
+  },
+  {
+   "id": "leg_rootsong",
+   "name": "Rootsong",
+   "slot": "weapon",
+   "cls": [
+    "duelist"
+   ],
+   "hand": "one",
+   "chapter": 8,
+   "look": {
+    "held": {
+     "id": "g5_leafblade",
+     "color": "#9ad8ff"
+    }
+   },
+   "stats": {
+    "power": 45,
+    "crit": 8
+   },
+   "effect": {
+    "id": "echo",
+    "chance": 0.3
+   },
+   "set": "Legendary",
+   "legendary": true
+  },
+  {
+   "id": "leg_wyrmheart",
+   "name": "Wyrmheart Staff",
+   "slot": "weapon",
+   "cls": [
+    "arcanist"
+   ],
+   "hand": "two",
+   "chapter": 10,
+   "look": {
+    "held": {
+     "id": "g5_staff_horn",
+     "color": "#ffb040",
+     "color2": "#ffe8a0"
+    }
+   },
+   "stats": {
+    "power": 47,
+    "spell": 41
+   },
+   "effect": {
+    "id": "splitbolt",
+    "n": 3
+   },
+   "set": "Legendary",
+   "legendary": true
+  },
+  {
+   "id": "leg_great_bell",
+   "name": "Clapper of the Great Bell",
+   "slot": "weapon",
+   "cls": [
+    "vanguard"
+   ],
+   "hand": "two",
+   "chapter": 10,
+   "look": {
+    "held": {
+     "id": "g5_stonemaul",
+     "color": "#f0d090",
+     "color2": "#fff8e0"
+    }
+   },
+   "stats": {
+    "power": 51
+   },
+   "effect": {
+    "id": "shockwave",
+    "r": 3,
+    "dmg": 1
+   },
+   "set": "Legendary",
+   "legendary": true
+  },
+  {
+   "id": "leg_queens_wall",
+   "name": "The Queen's Wall",
+   "slot": "offhand",
+   "cls": [
+    "warden"
+   ],
+   "hand": "off",
+   "offKind": "shield",
+   "chapter": 9,
+   "look": {
+    "offhand": {
+     "id": "tower_shield",
+     "color": "#b8c0cc",
+     "emblem": "sun"
+    }
+   },
+   "stats": {
+    "def": 29,
+    "block": 16
+   },
+   "effect": {
+    "id": "blockheal",
     "amount": 0.05
    },
    "set": "Legendary",

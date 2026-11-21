@@ -15,6 +15,7 @@ import { buildHeld, buildOffhand } from '../../../../avatar-3d/js/chibi2-gear.js
 import { G5_WEAPON_BUILDERS, G5_OFFHAND_BUILDERS } from '../../../../avatar-3d/js/chibi2-gear5.js';
 import { isG5, G5_HELD, G5_OFFHAND } from '../../../../avatar-3d/js/chibi2-gear5-ids.js';
 import { baseOf } from '../sim/items.js';
+import { lengthScale } from './hands.js';
 
 const PX = 128;
 const MANNEQUIN = '#b9b2a6';       // the dummy's one matte colour: dark leather still reads on it, steel still shines
@@ -89,6 +90,12 @@ function pieceModel(part, held) {
   for (const [list, metalish] of [[cloth, false], [metal, true]]) for (const [geo, color] of list) {
     if (!geo.attributes.normal) geo.computeVertexNormals();
     group.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide, emissive: new THREE.Color(color).multiplyScalar(metalish ? 0.18 : 0.04) })));
+  }
+  // a weapon drawn shorter than its kind is lengthened along the blade, exactly as it is in the hand (hands.js)
+  if (held) {
+    _box.setFromObject(group);
+    const k = lengthScale(p.id, _box.max.y - _box.min.y);
+    if (k !== 1) group.traverse(o => { if (o.isMesh) o.geometry.scale(1, k, 1); });
   }
   // weapons lie on the diagonal pointing up-right (hand space runs the blade along -y); a shield faces -x, so a
   // quarter turn shows its face

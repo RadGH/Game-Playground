@@ -6,6 +6,7 @@
 import * as THREE from 'three';
 import { hp as fmtHp } from '../../../../shared/format.js';
 import { glowTex, glyphAtlas, clamp01, mergeGroup } from './kit.js';
+import { createActsFx } from './fx-acts.js';
 
 const SHOT_LOOKS = {
   spark: { color: '#9ff0ff', core: '#ffffff', size: 0.34, trail: '#5ac8ff' },
@@ -16,6 +17,12 @@ const SHOT_LOOKS = {
   bolt: { color: '#e0d0b0', core: '#ffffff', size: 0.16, trail: '#a89070', mesh: 'bolt' },
   lantern: { color: '#c6ff5a', core: '#f4ffd0', size: 0.48, trail: '#8ac020' },
   wyrmfire: { color: '#ff6a20', core: '#ffe080', size: 0.6, trail: '#d83010' },
+  hook: { color: '#c8ccd2', core: '#ffffff', size: 0.2, trail: '#6a6e72', mesh: 'hook', chain: true },   // Grell's thrown hook (sim: shot.pull)
+  // Acts II/III
+  arrow: { color: '#c8b89a', core: '#ffffff', size: 0.14, trail: '#8a7a60', mesh: 'bolt' },
+  net: { color: '#c8b88a', core: '#fff4d8', size: 0.3, trail: '#8a7a5a', mesh: 'net' },
+  glass: { color: '#7affa0', core: '#e8ffe8', size: 0.36, trail: '#3aff7a', mesh: 'shard' },
+  bluelamp: { color: '#6ac8ff', core: '#e8f8ff', size: 0.5, trail: '#3a8aff' },
 };
 const CLASS_ARC = { vanguard: '#ffd27a', duelist: '#8ff0e8', arcanist: '#d4a8ff', warden: '#fff4d0' };
 const TEAM_WARN = ['#ffd36a', '#ff4a2a'];
@@ -100,6 +107,10 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
     }
   }
 
+  // Acts II/III: strips, looks, hazards, rises, giants, the sky fire (fx-acts.js); its pools are made here, at load
+  const actsKit = () => ({ root, pool, take, give, spawn, sparks, flash, ring, column, debris, text, after, low, flat, glow });
+  let acts = null;
+
   // ---------------------------------------------------------------- text (glyph sprites)
   function glyph(o, key) {
     const r = atlas.rects[key]; const t = o.material.map;
@@ -123,6 +134,7 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
       if (oldGain) dropLabel(oldGain); else if (kind === 'gain') return;
     }
     const keys = word ? [str] : [...String(str)].filter(c => atlas.rects[c] || c === ' ');
+    if (word && !atlas.rects[str]) { console.warn('wyrmroad: no glyph for the word', str); return; }   // kit.js WORDS lists every word
     const adv = k => (k === ' ' ? 0.32 : word ? atlas.rects[k].w / atlas.rects[k].h : atlas.rects[k].adv * 0.72) * size0;
     const total = keys.reduce((a, k) => a + adv(k), 0);
     // lift above any live label that is (or will be) within ~40 px on screen
@@ -179,13 +191,29 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
     let body = null;
     if (!L) body = thrownMesh(s.look.slice(7));
     else if (L.mesh) body = shotMesh(L.mesh, L.color);
-    return { core, halo, body, L, lastTrail: 0, x: s.x, y: s.y, z: s.z };
+    return { core, halo, body, L, lastTrail: 0, x: s.x, y: s.y, z: s.z, chain: L?.chain ? chainMesh() : null };
   }
-  const meshCache = { blade: [], thorn: [], bolt: [] }, thrownCache = new Map();
+  const meshCache = { blade: [], thorn: [], bolt: [], hook: [], net: [], shard: [] }, thrownCache = new Map();
+  // a hook's chain: a thin rod from the thrower's hand to the hook, stretched every frame (owner from the 'shot' event)
+  const shotOwner = new Map(), chainCache = [];
+  function chainMesh() {
+    let m = chainCache.pop();
+    if (!m) { m = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1, 5).rotateX(Math.PI / 2).translate(0, 0, 0.5), new THREE.MeshToonMaterial({ color: '#8a8e94', emissive: '#3a3e44', emissiveIntensity: 0.4 })); root.add(m); }
+    m.visible = true; return m;
+  }
+  for (let i = 0; i < 2; i++) { const m = chainMesh(); m.visible = false; chainCache.push(m); }   // made at load (rule 29)
+  function syncChain(v, s, G) {
+    const o = G.foes.find(f => f.id === shotOwner.get(s.id));
+    if (!o) { v.chain.visible = false; return; }
+    const hx = o.x + (o.dir || 1) * 0.45, hy = (o.y || 0) + 1.15, hz = o.z;
+    v.chain.visible = true; v.chain.position.set(hx, hy, hz);
+    const len = Math.max(0.05, Math.hypot(v.x - hx, v.y - hy, v.z - hz));
+    v.chain.scale.set(1, 1, len); v.chain.lookAt(v.x, v.y, v.z);
+  }
   function shotMesh(kind, color) {
     let m = meshCache[kind].pop();
     if (!m) {
-      const g = kind === 'blade' ? new THREE.ConeGeometry(0.07, 0.55, 4).rotateZ(-Math.PI / 2) : kind === 'thorn' ? new THREE.ConeGeometry(0.08, 0.45, 5).rotateZ(-Math.PI / 2) : new THREE.CylinderGeometry(0.02, 0.02, 0.7, 5).rotateZ(Math.PI / 2);
+      const g = kind === 'net' ? new THREE.TorusGeometry(0.3, 0.025, 4, 12).rotateY(Math.PI / 2) : kind === 'shard' ? new THREE.OctahedronGeometry(0.2, 0).scale(1.6, 0.5, 0.5) : kind === 'hook' ? new THREE.TorusGeometry(0.16, 0.035, 5, 10, Math.PI * 1.3).rotateZ(-Math.PI / 2) : kind === 'blade' ? new THREE.ConeGeometry(0.07, 0.55, 4).rotateZ(-Math.PI / 2) : kind === 'thorn' ? new THREE.ConeGeometry(0.08, 0.45, 5).rotateZ(-Math.PI / 2) : new THREE.CylinderGeometry(0.02, 0.02, 0.7, 5).rotateZ(Math.PI / 2);
       m = new THREE.Mesh(g, new THREE.MeshToonMaterial({ color, emissive: color, emissiveIntensity: 0.5 })); m.userData.kind = kind; root.add(m);
     }
     m.visible = true; return m;
@@ -199,6 +227,7 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
   }
   function dropShot(v) {
     give('spark', v.core); give('spark', v.halo);
+    if (v.chain) { v.chain.visible = false; chainCache.push(v.chain); }
     if (v.body) { v.body.visible = false; if (v.body.userData.thrown) thrownCache.get(v.body.userData.thrown).push(v.body); else meshCache[v.body.userData.kind].push(v.body); }
   }
 
@@ -213,6 +242,7 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
       if (Math.abs(s.x - v.x) > 2) { v.x = s.x; v.y = s.y; v.z = s.z; }
       const L = v.L, sz = L ? L.size : 0.4, pulse = 1 + Math.sin(performance.now() / 50 + s.id) * 0.12;
       v.core.position.set(v.x, v.y, v.z); v.core.scale.setScalar(sz * 0.55 * pulse);
+      if (v.chain) syncChain(v, s, G);
       v.halo.position.set(v.x, v.y, v.z); v.halo.scale.setScalar(sz * 1.5 * pulse);
       if (v.body) {
         v.body.position.set(v.x, v.y, v.z);
@@ -226,7 +256,7 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
         spawn('spark', 0.28, (o, k) => { o.scale.setScalar(s0 * (1 - k)); o.material.opacity = 0.7 * (1 - k); }, o => { o.position.set(tx, ty + (Math.random() - 0.5) * 0.06, tz); o.material.color.set(c); });
       }
     }
-    for (const [id, v] of shots) if (!seen.has(id)) { dropShot(v); shots.delete(id); }
+    for (const [id, v] of shots) if (!seen.has(id)) { dropShot(v); shots.delete(id); shotOwner.delete(id); }
   }
 
   function syncZones(G) {
@@ -245,6 +275,7 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
         continue;
       }
       if (!(zn.delay > 0) || zn.t >= zn.delay) continue;
+      if (zn.shape === 'col' || zn.shape === 'row') continue;          // strips: fx-acts.js
       seenW.add(zn.id);
       let w = warns.get(zn.id);
       const c = TEAM_WARN[zn.team === 0 ? 0 : 1];
@@ -300,9 +331,11 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
     const color = CLASS_ARC[e.cls] || '#ffffff', big = ev.kind === 'heavy' || ev.kind === 'dash';
     const delay = ev.wind || 0.1, life = 0.2;
     const o = take('arc'); o.visible = false; o.material.color.set(color);
-    const tilt = (Math.random() - 0.5) * 0.9, dir = e.dir || 1;
+    const tilt = (Math.random() - 0.5) * 0.9;
+    let dir = null;   // read when the blow lands: a hero may turn during the wind-up (owner #109)
     live.push({ o, name: 'arc', t: -delay, life, upd: (o, k, dt, t) => {
       if (t < 0) { o.visible = false; return; }
+      if (dir == null) dir = e.dir || 1;
       o.visible = true; const p = a.group.position;
       o.position.set(p.x + dir * 0.55, p.y + 1.0, p.z + 0.05);
       o.rotation.set(0, dir > 0 ? 0 : Math.PI, tilt + (dir > 0 ? 0 : 0));
@@ -403,6 +436,7 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
         }
         case 'armor': { const a = actors.get(ev.id); if (a) { const p = a.group.position; sparks(p.x, p.y + 1.2, p.z + 0.3, '#d0d8e0', 5, { speed: 3, size: 0.12 }); } break; }
         case 'kill': {
+          acts.handle(ev, G, actors);
           sparks(ev.x, 0.6, ev.z, '#d8c8b0', ev.boss ? 30 : 8, { speed: ev.boss ? 7 : 3, up: 2, size: ev.boss ? 0.5 : 0.35, grav: 1, life: 0.8 });
           if (ev.boss) { ring(ev.x, ev.z, 6, '#ffe8a0', 1.0); column(ev.x, ev.z, 1.6, 9, '#fff0c0', 1.1); }
           break;
@@ -419,8 +453,9 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
         case 'pickup': { const a = actors.get(ev.id); if (a) { const p = a.group.position; sparks(p.x, p.y + 1.0, p.z, '#ffe8a0', 8, { speed: 2, up: 2, size: 0.16 }); } break; }
         case 'pickupBreak': { const a = actors.get(ev.id); if (a) { const p = a.group.position; debris('plank', p.x + (a.yaw > 0 ? 0.5 : -0.5), p.y + 1.1, p.z, 4, data.chapters.pickups[ev.pickup]?.color || '#8a6a44', { speed: 3, up: 3 }); } break; }
         case 'crate': debris('plank', ev.x, 0.5, ev.z, low ? 4 : 7, '#9a6a3a', { speed: 5, up: 5 }); sparks(ev.x, 0.5, ev.z, '#d8c098', 6, { speed: 2, up: 1, grav: 1, size: 0.35, life: 0.5 }); break;
-        case 'shot': { const f = G.foes.find(o => o.id === ev.owner) || G.heroes.find(o => o.id === ev.owner); const L = SHOT_LOOKS[ev.look]; if (f) flash(ev.x, 1.1 + (f.def?.float || 0) * 0.3, ev.z + 0.1, L ? L.color : '#ffd890', 0.9, 0.1); break; }
+        case 'shot': { if (ev.look === 'hook') shotOwner.set(ev.id, ev.owner); const f = G.foes.find(o => o.id === ev.owner) || G.heroes.find(o => o.id === ev.owner); const L = SHOT_LOOKS[ev.look]; if (f) flash(ev.x, 1.1 + (f.def?.float || 0) * 0.3, ev.z + 0.1, L ? L.color : '#ffd890', 0.9, 0.1); break; }
         case 'zoneHit': {
+          if (acts.handle(ev, G, actors)) break;
           const team = ev.team ?? 0, look = ev.look;
           const c = look ? (SHOT_LOOKS[look]?.color || '#ffd890') : (team === 1 ? '#ff7a40' : '#ffe08a');
           ring(ev.x, ev.z, ev.r, c, 0.5); ring(ev.x, ev.z, ev.r * 0.7, '#ffffff', 0.35, { opacity: 0.6 });
@@ -446,8 +481,27 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
           }
           break;
         }
+        // round 2 sim events (SIM helper): knockdown kinds, hook, held spin, riposte, dash/block upgrades
+        case 'stagger': {
+          const a = actors.get(ev.id); if (!a) break; const p = a.group.position;
+          if (ev.what === 'resist' || ev.what === 'stand') { ring(p.x, p.z, 0.9, '#d0d8e0', 0.3, { y: 1.1, vertical: true, face: -(a.yaw > 0 ? 1 : -1), opacity: 0.8 }); sparks(p.x, p.y + 1.2, p.z + 0.3, '#e8eef4', 6, { speed: 3, size: 0.14 }); }
+          else if (ev.what === 'break') { flash(p.x, p.y + 1.2, p.z, '#ffffff', 2.4, 0.2); sparks(p.x, p.y + 1.2, p.z + 0.2, '#ffd36a', 14, { speed: 6, up: 3, size: 0.2 }); text(p.x, p.y + 2.4, p.z + 0.2, 'Broken!', '#ffd36a', 0.36, { word: true, life: 0.8, rise: 0.5, kind: 'word' }); }
+          else if (ev.what === 'limit') { ring(p.x, p.z, 1.3, '#ff9a4a', 0.35, { y: 1.1, vertical: true, face: 1, opacity: 0.9 }); text(p.x, p.y + 2.6, p.z + 0.2, 'Steady', '#ffb070', 0.32, { word: true, life: 0.7, rise: 0.4, kind: 'word' }); }
+          else if (ev.what === 'guard') { ring(p.x, p.z, 1.0, '#a8d0ff', ev.time || 1, { y: 1.0, vertical: true, face: 1, opacity: 0.7 }); }
+          else if (ev.what === 'counter') { flash(p.x, p.y + 1.4, p.z, '#ff6a40', 1.6, 0.25); }
+          else if (ev.what === 'ready') { sparks(p.x, p.y + 1.0, p.z, '#c8d0d8', 4, { speed: 1.5, up: 1.5, size: 0.12 }); }
+          break;
+        }
+        case 'hook': { const a = actors.get(ev.target); if (a && ev.hit) { const p = a.group.position; flash(p.x, p.y + 1.1, p.z + 0.2, '#e0e4ea', 1.2, 0.15); sparks(p.x, p.y + 1.1, p.z, '#c8ccd2', 8, { speed: 3, size: 0.12 }); } break; }
+        case 'channel': { const a = actors.get(ev.id); if (a && ev.on) { const p = a.group.position; ring(p.x, p.z, 2.4, '#ffd27a', 0.4); } break; }
+        case 'riposte': { const a = actors.get(ev.id); if (a) { const p = a.group.position; flash(p.x, p.y + 1.2, p.z + 0.2, '#9ff0e8', 2.2, 0.2); text(p.x, p.y + 2.4, p.z + 0.2, 'Riposte!', '#9ff0e8', 0.4, { word: true, life: 0.8, rise: 0.6, kind: 'word' }); } break; }
+        case 'kit': {
+          if (ev.kind === 'teleport') { for (const x of [ev.from, ev.to]) { flash(x, 1.0, ev.z, '#c78cff', 2.0, 0.25); sparks(x, 1.0, ev.z, '#8a5ad8', 10, { speed: 3, up: 2, size: 0.16 }); } }
+          else { const a = actors.get(ev.id); if (a) { const p = a.group.position; ring(p.x, p.z, 1.0, CLASS_ARC[G.heroes.find(h => h.id === ev.id)?.cls] || '#ffffff', 0.3); } }
+          break;
+        }
         case 'bossPhase': { const a = actors.get(ev.id); if (a) { const p = a.group.position; ring(p.x, p.z, 4, '#c6ff5a', 0.8); flash(p.x, p.y + 1.6, p.z, '#d8ff6a', 3, 0.4); } break; }
-        default: break;
+        default: acts.handle(ev, G, actors); break;
       }
     }
     if (gain) gainText(gain);
@@ -461,16 +515,18 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
 
   // ---------------------------------------------------------------- per frame
   let visible = true;
+  acts = createActsFx(actsKit());
   const api = {
     showDamage: true,
     root,
     handle,
-    sync(G, alpha, dt) { syncShots(G, dt); syncZones(G); },
+    sync(G, alpha, dt) { syncShots(G, dt); syncZones(G); acts.syncZones(G); },
+    get acts() { return acts; },
     /** Whose xp/gold to show (session.localPids); null = one shared label per kill. */
     setLocalPids(pids) { localPids = pids && pids.length ? [...pids] : null; },
     get labelCount() { return labels.length; },
     update(dt) {
-      updateLabels(dt);
+      updateLabels(dt); acts.update(dt);
       for (let i = live.length - 1; i >= 0; i--) {
         const L = live[i]; L.t += dt;
         const k = L.t < 0 ? 0 : Math.min(1, L.t / L.life);
@@ -478,14 +534,14 @@ export function createFx({ scene, data, quality = 'high', camera, size = () => (
         if (L.t >= L.life) { if (L.o) give(L.name, L.o); live.splice(i, 1); }
       }
     },
-    text, sparks, ring, flash,
+    text, sparks, ring, flash, debris, column, after,
     clear() {
       for (const L of live) if (L.o) give(L.name, L.o); live.length = 0;
       while (labels.length) dropLabel(labels[0]);
       for (const v of shots.values()) dropShot(v); shots.clear();
       for (const w of warns.values()) { give('ring', w.ring); give('disc', w.disc); give('disc', w.fill); } warns.clear();
       for (const d of domes.values()) { give('dome', d.dome); give('ring', d.ring); give('disc', d.disc); } domes.clear();
-      beams.clear();
+      beams.clear(); acts.clear();
     },
     /** Show every pooled object for one compile pass (shader warm-up), then hide them again. */
     warm(on) { for (const p of Object.values(pools)) for (const o of p.all) if (p.free.includes(o)) { o.visible = on; if (on) o.position.set(0, -30, 0); } },

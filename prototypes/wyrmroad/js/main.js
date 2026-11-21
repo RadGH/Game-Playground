@@ -12,8 +12,11 @@ import { accountButton, openSignIn } from '../../../shared/rgs-signin.js';
 import { account } from '../../../shared/rgs-account.js';
 import { dressedLook } from './sim/items.js';
 import { createBrawl, step } from './sim/brawl.js';
+import { mergeActs } from './sim/route.js';
 import { loadSave, writeSave, loadSettings, writeSettings, SAVE_KEY, describeSaves } from './save.js';
 import { createInput } from './input/devices.js';
+import { setKeyboardLayout } from './input/bindings.js';
+import { installCursor } from './input/cursor.js';
 import { installPadNav } from './ui/padnav.js';
 import { closeAllSheets, anySheet, note } from './ui/kit.js';
 import * as audio from './audio.js';
@@ -49,8 +52,8 @@ async function boot() {
   installTooltips();
   say('Loading the road…');
   const json = n => fetch(`data/${n}.json`).then(r => { if (!r.ok) throw new Error(`data/${n}.json ${r.status}`); return r.json(); });
-  const [classes, enemies, chapters, items, story] = await Promise.all(['classes', 'enemies', 'chapters', 'items', 'story'].map(json));
-  app.data = { classes, enemies, chapters, items, story };
+  const [classes, enemies, chapters, items, story, acts, storyActs] = await Promise.all(['classes', 'enemies', 'chapters', 'items', 'story', 'acts', 'story-acts'].map(json));
+  app.data = mergeActs({ classes, enemies, chapters, items, story, acts, storyActs });   // Acts II/III join the chapter list + story (js/sim/route.js)
   app.T = await loadTuning('data/tuning.json', { game: 'wyrmroad' });
   tunePanel({ game: 'wyrmroad', tuning: app.T });
   app.save = loadSave(app.data);
@@ -59,6 +62,8 @@ async function boot() {
   app.credits = createCredits({ game: 'wyrmroad', made: 'Wyrmroad is made by Radley Sustaire with Claude.' });
   app.pad = installPadNav({ busy: () => app.screen === 'play' || app.screen === 'join' || app.padBusy });
   audio.setVolume(app.settings.volume);
+  setKeyboardLayout(app.settings.keys);
+  app.cursor = installCursor(app);
   const wake = () => audio.initAudio();
   addEventListener('pointerdown', wake, { capture: true }); addEventListener('keydown', wake, { capture: true });
 
@@ -81,7 +86,7 @@ export function applyViewOptions() {
   app.view.options = { shake: !!app.settings.shake, damageNumbers: !!app.settings.damageNumbers, quality: app.settings.quality };
 }
 app.applyViewOptions = applyViewOptions;
-app.setSetting = (k, v) => { app.settings[k] = v; writeSettings(app.settings); if (k === 'volume') audio.setVolume(v); applyViewOptions(); };
+app.setSetting = (k, v) => { app.settings[k] = v; writeSettings(app.settings); if (k === 'volume') audio.setVolume(v); if (k === 'keys') { setKeyboardLayout(v); app.hud?.keys?.(); } applyViewOptions(); };
 
 function stubView() {
   // only while the 3D view is missing (it is built by another part of the team): screens still work, nothing is drawn

@@ -5,12 +5,20 @@
 import { icon } from './icons.js';
 import { esc, CLASS_NAMES } from './text.js';
 import { hp as n } from '../../../../shared/format.js';
-import { SCHEMES, keyLabel } from '../input/bindings.js';
+import { SCHEMES, keyLabel, schemeFor } from '../input/bindings.js';
 import { COLORS, COLOR_NAMES } from './party.js';
 import { newHero } from '../save.js';
 import { randomLook, randomName } from './looks.js';
 
 const DEVICE_NAME = { kb: 'Keyboard', kbL: 'Keyboard, left keys', kbR: 'Keyboard, right keys', touch: 'Touch' };
+const KEY_DEVICES = ['kb', 'kbL', 'kbR'];
+/** Two keyboard seats can share the keyboard only when no key belongs to both (Esc pauses for everyone). The mouse
+ *  layout (WASD + clicks) leaves the arrows and right-hand keys free, so it sits beside the right-keys player. */
+function clash(a, b) {
+  const codes = d => { const S = SCHEMES[schemeFor(d)]; return new Set([...Object.values(S.move), ...Object.values(S.keys)].flat().filter(c => c !== 'Escape')); };
+  const A = codes(a); for (const c of codes(b)) if (A.has(c)) return true;
+  return false;
+}
 const devName = d => DEVICE_NAME[d] || (d.startsWith('pad:') ? `Controller ${+d.slice(4) + 1}` : d);
 const CLASS_ORDER = ['vanguard', 'duelist', 'arcanist', 'warden'];
 
@@ -29,13 +37,13 @@ export function joinScreen(app) {
   </section>`;
   const root = app.ui.firstElementChild, box = root.querySelector('.wr-seats');
   const taken = d => seats.some(s => s?.device === d);
-  const kbTaken = () => seats.some(s => s && ['kb', 'kbL', 'kbR'].includes(s.device));
+  const blocked = d => seats.some(s => s && KEY_DEVICES.includes(s.device) && (s.device === d || clash(s.device, d)));
+  const kbTaken = () => blocked('kb');
 
   function heroesFree(i) { const used = new Set(seats.filter((s, k) => s && k !== i).map(s => s.heroId)); return app.save.heroes.filter(h => !used.has(h.id)); }
   function join(device) {
     if (taken(device)) return;
-    if (device === 'kb' && seats.some(s => s && (s.device === 'kbL' || s.device === 'kbR'))) return;
-    if ((device === 'kbL' || device === 'kbR') && taken('kb')) return;
+    if (KEY_DEVICES.includes(device) && blocked(device)) return;
     const i = seats.indexOf(null); if (i < 0) return;
     const free = heroesFree(i);
     const pick = i === 0 && free.find(h => h.id === app.save.lastHero) || free[0];
@@ -63,7 +71,7 @@ export function joinScreen(app) {
   }
   function draw() {
     const freeDevices = [
-      !kbTaken() && ['Enter', 'Keyboard'], !taken('kbL') && !taken('kb') && ['F', 'Left keys'], !taken('kbR') && !taken('kb') && ['K', 'Right keys'],
+      !kbTaken() && ['Enter', 'Keyboard'], !blocked('kbL') && ['F', 'Left keys'], !blocked('kbR') && ['K', 'Right keys'],
     ].filter(Boolean);
     box.innerHTML = seats.map((s, i) => {
       if (!s) return `<article class="wr-seat wr-seat-empty" style="--pc:${COLORS[i]}">
@@ -74,7 +82,7 @@ export function joinScreen(app) {
           ${!taken('touch') && (touchy || i === 0) ? `<button type="button" class="wr-btn wr-small" data-join="touch">${icon('touch')}<span>Touch</span></button>` : ''}</div>
       </article>`;
       const h = s.heroId && app.hero(s.heroId), sch = s.device.startsWith('pad:') ? 'pad' : s.device;
-      const k = a => (SCHEMES[sch]?.kind === 'touch' ? '' : keyLabel(sch, a));
+      const k = a => (SCHEMES[sch]?.kind === 'touch' ? '' : a === 'attack' && SCHEMES[schemeFor(sch)]?.mouse ? 'Enter' : keyLabel(sch, a));
       return `<article class="wr-seat${s.ready ? ' wr-seat-ready' : ''}" data-seat="${i}" style="--pc:${COLORS[i]}">
         <p class="wr-seat-num">Player ${i + 1} · <span>${COLOR_NAMES[i]}</span></p>
         <p class="wr-seat-dev">${icon(s.device === 'touch' ? 'touch' : sch === 'pad' ? 'pad' : 'keyboard')}<span>${esc(devName(s.device))}</span></p>
@@ -121,7 +129,7 @@ export function joinScreen(app) {
     if (document.querySelector('.wr-sheet, .modal')) return;
     for (const [i, s] of seats.entries()) {
       if (!s || s.device.startsWith('pad:') || s.device === 'touch') continue;
-      const S = SCHEMES[s.device];
+      const S = SCHEMES[schemeFor(s.device)];
       if (S.move.left.includes(code)) { e.preventDefault(); return cycle(i, -1); }
       if (S.move.right.includes(code)) { e.preventDefault(); return cycle(i, 1); }
       if (S.keys.attack.includes(code) || (s.device === 'kb' && code === 'Enter')) { e.preventDefault(); return ready(i); }

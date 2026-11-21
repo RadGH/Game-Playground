@@ -1,11 +1,12 @@
 // Enemy brains. Each foe picks a target, walks to an attack slot beside it and waits for an attack token (only
 // T.attackTokens foes swing at one hero at once — the rest circle), then winds up a move the player can see coming.
 // Ranged foes keep their distance and line up on your lane first. Bosses unlock moves by phase. Pure.
-import { foesOf, startMove, hittable, viewHalf, DEPTH } from './brawl.js';
+import { foesOf, startMove, hittable, viewHalf, DEPTH, alive, summonFoes } from './brawl.js';
+import { skyPass } from './big.js';
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const sgn = v => (v < 0 ? -1 : 1);
-const RANGED = m => !!(m.shot || m.fan || m.aoe || m.rain || m.beam || m.pull || m.summon || m.healFoes);
+const RANGED = m => !!(m.shot || m.fan || m.aoe || m.rain || m.beam || m.pull || m.summon || m.healFoes || m.cols || m.gust || m.expose);
 
 export function thinkFoe(G, f, dt) {
   const ai = f.ai, T = G.T, D = f.def;
@@ -19,11 +20,7 @@ export function thinkFoe(G, f, dt) {
     t = targets.reduce((b, o) => (score(f, o) < score(f, b) ? o : b), targets[0]);
     ai.target = t.id;
   }
-  // boss phases
-  if (f.boss && D.phases && f.team === 1) {
-    const p = D.phases.filter(th => f.hp / f.max <= th).length;
-    if (p > ai.phase) { ai.phase = p; G.events.push({ type: 'bossPhase', id: f.id, phase: p }); if (D.lines?.phase) G.events.push({ type: 'line', line: D.lines.phase }); }
-  }
+  bossPhaseCheck(G, f);
   const dx = t.x - f.x, adx = Math.abs(dx), dz = t.z - f.z, adz = Math.abs(dz);
   const free = f.boss || f.team === 0;   // bosses and the ally don't queue for a turn
   const moves = D.moves.filter(m => (m.phase || 0) <= ai.phase && (ai.cd[m.id] || 0) <= 0 && !(f.team === 0 && m.summon));
@@ -35,6 +32,7 @@ export function thinkFoe(G, f, dt) {
       if (RANGED(m)) {
         const [lo, hi] = m.range || [0, 99];
         if (adx < lo || adx > hi) return false;
+        if (m.selfDestruct) return adz < 0.8;
         if (m.healFoes) return G.foes.some(o => o.team === f.team && o !== f && o.state !== 'dead' && o.hp < o.max * 0.7 && Math.hypot(o.x - f.x, o.z - f.z) < m.healFoes.r);
         if (m.shot && !m.shot.seek) return adz < 0.45;
         if (m.beam) return adz < 0.5 && adx < m.beam.len;
@@ -75,7 +73,8 @@ export function thinkFoe(G, f, dt) {
       if (G.rand() < 0.01) ai.strafe = -ai.strafe;
       speed *= 0.6;
     }
-    if (D.ai === 'charger' || D.ai === 'lunger') { if (adx < 2.2 && !ai.token && !free) wantX = t.x - sgn(dx) * 4; }
+    // chargers and lungers without a turn back off to where their leap starts (not short of it: they hovered at the edge)
+    if (D.ai === 'charger' || D.ai === 'lunger') { const lo = Math.max(2.2, D.moves.find(m => m.range)?.range[0] || 0); if (adx < lo + 0.2 && !ai.token && !free) wantX = t.x - sgn(dx) * (lo + 1); }
   }
   const mx = wantX - f.x, mz = wantZ - f.z;
   f.vx = Math.abs(mx) > 0.15 ? sgn(mx) * speed : 0;
@@ -86,7 +85,29 @@ export function thinkFoe(G, f, dt) {
   f.anim = Math.abs(f.vx) + Math.abs(f.vz) > 0.01 ? 'walk' : 'idle';
 }
 
+/**
+ * Boss phases: def.phases = health shares where a new phase starts ([0.66, 0.33] = three phases). Emits
+ * { type: 'bossPhase', id, phase } (1, 2…) and the line lines.phase (phase 1) / lines.phase2 (phase 2) once. A pair
+ * (def.partner / def.pairOf) shares one health pool for this, and one set of lines (the lead's).
+ */
+export function bossPhaseCheck(G, f) {
+  const D = f.def, ai = f.ai;
+  if (!f.boss || !D.phases || f.team !== 1) return;
+  const pairId = D.partner || D.pairOf;
+  const pair = pairId ? G.foes.filter(o => o.boss && o.team === 1 && (o === f || o.kind === pairId)) : [f];
+  const frac = pair.reduce((a, o) => a + Math.max(0, o.hp), 0) / pair.reduce((a, o) => a + o.max, 0);
+  const p = D.phases.filter(th => frac <= th).length;
+  if (p <= ai.phase) return;
+  ai.phase = p;
+  G.events.push({ type: 'bossPhase', id: f.id, phase: p });
+  const lines = D.lines || G.data.enemies.bosses[D.pairOf]?.lines || {};
+  const line = lines[p === 1 ? 'phase' : `phase${p}`];
+  if (line && !G.said.has(line)) { G.said.add(line); G.events.push({ type: 'line', line }); }
+  if (D.skyOnPhase?.includes(p) && G.ch.sky && G.T.skyAlly) { const t = G.heroes.find(alive); skyPass(G, t ? t.z : 0); }
+  if (D.summonOnPhase?.[p - 1]) summonFoes(G, D.summonOnPhase[p - 1]);
+}
+
 function score(f, o) { return Math.abs(o.x - f.x) + Math.abs(o.z - f.z) * 0.6 + (o.state === 'out' ? 100 : 0) + (o.id === f.ai.target ? -1.5 : 0); }
 function countTokens(G, t) { return G.foes.filter(f => f.ai?.token && f.ai.target === t.id && f.state !== 'dead').length; }
 function takeToken(G, f, t) { if (countTokens(G, t) < G.T.attackTokens) { f.ai.token = true; return true; } return false; }
-function weighted(G, list) { const tot = list.reduce((a, m) => a + (m.w || 1), 0); let x = G.rand() * tot; for (const m of list) { x -= (m.w || 1); if (x <= 0) return m; } return list[0]; }
+export function weighted(G, list) { const tot = list.reduce((a, m) => a + (m.w || 1), 0); let x = G.rand() * tot; for (const m of list) { x -= (m.w || 1); if (x <= 0) return m; } return list[0]; }

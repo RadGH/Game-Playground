@@ -55,7 +55,17 @@ const P = {
   swap: '<path d="M5 8h13l-3.5-3.5M19 16H6l3.5 3.5"/>',
   // the twelve spells
   ground_slam: '<path d="M4 19h16M12 4v8M8.5 9 12 12.5 15.5 9M5 15.5l2.5-2M19 15.5l-2.5-2M12 15.5V17"/>',
-  war_shout: '<path d="M4 10.5h3l6-4.5v12l-6-4.5H4z"/><path d="M16 8.5c1 .9 1.5 2.1 1.5 3.5s-.5 2.6-1.5 3.5M18.5 6c1.6 1.6 2.5 3.7 2.5 6s-.9 4.4-2.5 6"/>',
+  // Iron Gale (replaced War Shout): a great blade whirling, with its sweep lines
+  iron_gale: '<path d="M12 12 18.5 5.5M12 12 5.5 18.5"/><path d="M17 4.5l2.5 2.5M4.5 17l2.5 2.5"/><path d="M4.5 9.5A8 8 0 0 1 9.5 4.5M19.5 14.5a8 8 0 0 1-5 5"/><circle cx="12" cy="12" r="1.6"/>',
+  // class kit moves (dash / block upgrades by level, classes.json kit — shown on the Spells screen's Moves)
+  charge: '<path d="M4 12h9M10 8l4 4-4 4"/><path d="M15.5 6.5h2.5a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2.5"/>',
+  brace: '<path d="M12 3.5 5 6v5.5c0 4.2 3 7.4 7 9 4-1.6 7-4.8 7-9V6z"/><path d="M9 12h6M12 9v6"/>',
+  parry: '<path d="M5 19 15 9M9 5l10 10M15 5h4v4"/><path d="M5 15v4h4"/>',
+  slip: '<path d="M4 16c4 0 5-8 9-8h7M16.5 4.5 20 8l-3.5 3.5"/><path d="M4 20h5"/>',
+  teleport: '<circle cx="7" cy="12" r="3"/><circle cx="17" cy="12" r="3" stroke-dasharray="2 2"/><path d="M10 12h4"/>',
+  ward: '<circle cx="12" cy="12" r="8"/><path d="M12 7v10M7 12h10" stroke-dasharray="2 2"/>',
+  rush: '<path d="M10 4.5 4.5 7v4.5c0 3.5 2.4 6.2 5.5 7.5 3.1-1.3 5.5-4 5.5-7.5V7z"/><path d="M18 8h3M17.5 12h3.5M18 16h3"/>',
+  wall: '<path d="M4 20V8l8-4 8 4v12"/><path d="M4 12h16M4 16h16M9 8v4M15 8v4M12 12v4M8 16v4M16 16v4"/>',
   iron_skin: '<path d="M12 3.5 5 6v5.5c0 4.2 3 7.4 7 9 4-1.6 7-4.8 7-9V6z"/><path d="M8.5 9.5h7M8.5 13h7M10 16.5h4"/>',
   shadow_step: '<path d="M6 16.5c0-1.6.8-3.5 2-3.5s1.6 1.6 1.6 3c0 1.6-.9 3-2 3S6 18 6 16.5zM14.5 9.5c0-1.6.8-3.5 2-3.5s1.6 1.6 1.6 3c0 1.6-.9 3-2 3s-1.6-1-1.6-2.5z"/><path d="M3 9h5M4 12h3M12 18h6"/>',
   blade_fan: '<path d="M5 19 19 5M5 19l13-6M5 19l6-13M5 19l14 0M5 19V5"/>',

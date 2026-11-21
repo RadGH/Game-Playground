@@ -5641,7 +5641,8 @@
    "library": {
     "files": [
      "fs/death.beast-1.ogg",
-     "fs/death.beast-2.ogg"
+     "fs/death.beast-2.ogg",
+     "fs/death.beast-3.ogg"
     ],
     "pitch": [
      0.95,
@@ -12163,6 +12164,234 @@
     "files": [
      "fs/crowd.cheer-1.ogg",
      "fs/crowd.cheer-2.ogg"
+    ],
+    "pitch": [
+     0.95,
+     1.05
+    ]
+   },
+   "retro": {
+    "pattern": "fanfare",
+    "wave": "square",
+    "dur": 0.7,
+    "loop": false
+   }
+  },
+  {
+   "id": "crate.break",
+   "category": "world",
+   "label": "Wooden crate breaks",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.05,
+      "delay": 0.0,
+      "gain": 0.8,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3200,
+       "f1": 1800,
+       "q": 1.4
+      },
+      "env": {
+       "a": 0.001,
+       "d": 0.05,
+       "curve": "exp"
+      }
+     },
+     {
+      "type": "grain",
+      "dur": 0.4,
+      "delay": 0.01,
+      "gain": 0.4,
+      "n": 12,
+      "freq": [
+       1200,
+       3600
+      ],
+      "gdur": [
+       0.006,
+       0.02
+      ],
+      "wave": "sine",
+      "spread": 1.0,
+      "sweep": 1.0,
+      "noisy": true
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.3,
+      "delay": 0.03,
+      "gain": 0.3,
+      "filter": {
+       "type": "bandpass",
+       "f0": 1400,
+       "f1": 700,
+       "q": 1.2
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "fs/crate.break-1.ogg",
+     "fs/crate.break-2.ogg",
+     "fs/crate.break-3.ogg"
+    ],
+    "pitch": [
+     0.95,
+     1.05
+    ]
+   },
+   "retro": {
+    "pattern": "blip",
+    "wave": "noise",
+    "dur": 0.12,
+    "loop": false
+   }
+  },
+  {
+   "id": "blade.whirl",
+   "category": "melee",
+   "label": "Blade whirls round",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 0.6,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.5,
+      "delay": 0.0,
+      "gain": 0.6,
+      "filter": {
+       "type": "bandpass",
+       "f0": 900,
+       "f1": 3200,
+       "q": 2.0
+      },
+      "env": {
+       "a": 0.15,
+       "d": 0.5,
+       "curve": "lin"
+      }
+     },
+     {
+      "type": "noise",
+      "color": "white",
+      "dur": 0.3,
+      "delay": 0.25,
+      "gain": 0.4,
+      "filter": {
+       "type": "bandpass",
+       "f0": 3200,
+       "f1": 1200,
+       "q": 2.0
+      },
+      "env": {
+       "a": 0.004,
+       "d": 0.3,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "fs/blade.whirl-1.ogg",
+     "fs/blade.whirl-2.ogg"
+    ],
+    "pitch": [
+     0.95,
+     1.05
+    ]
+   },
+   "retro": {
+    "pattern": "hit",
+    "wave": "noise",
+    "dur": 0.16,
+    "loop": false
+   }
+  },
+  {
+   "id": "victory.horn",
+   "category": "sting",
+   "label": "Victory horn",
+   "loop": false,
+   "trim": 0.0,
+   "synth": {
+    "dur": 3.0,
+    "jitter": 0.06,
+    "layers": [
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 2.6,
+      "delay": 0.0,
+      "gain": 0.5,
+      "f0": 196,
+      "f1": 196,
+      "env": {
+       "a": 0.2,
+       "d": 2.6,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 4.5,
+       "depth": 0.01
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "triangle",
+      "dur": 2.4,
+      "delay": 0.15,
+      "gain": 0.35,
+      "f0": 293.66,
+      "f1": 293.66,
+      "env": {
+       "a": 0.3,
+       "d": 2.4,
+       "curve": "exp"
+      },
+      "vib": {
+       "rate": 4.5,
+       "depth": 0.01
+      }
+     },
+     {
+      "type": "tone",
+      "wave": "sine",
+      "dur": 2.0,
+      "delay": 0.3,
+      "gain": 0.2,
+      "f0": 392,
+      "f1": 392,
+      "env": {
+       "a": 0.4,
+       "d": 2.0,
+       "curve": "exp"
+      }
+     }
+    ]
+   },
+   "library": {
+    "files": [
+     "fs/victory.horn-1.ogg"
     ],
     "pitch": [
      0.95,

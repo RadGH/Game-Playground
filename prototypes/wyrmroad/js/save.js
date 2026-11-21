@@ -6,15 +6,20 @@
 //   const save = loadSave(data);   writeSave(save);               // stamp: playedAt = this was play (never "now" for reads)
 //   const h = newHero(data, { name, cls, look });  save.heroes.push(h);
 //   applyEvents(save, data, heroOfPid, events) → [{ kind: 'bagFull', item, gold } …]   (loot / gold / xp / levelUp)
-//   chapterCleared(h, chIndex, secs, chapters)
+//   chapterCleared(data, h, chapterId, secs) → { finale } when this win ended the hero's road (an ending found)
+//   heroStory(data, h) → { route, reached, act, choices, finale, endings }   where the hero is on their road
+// A hero's story (Acts I–III, js/sim/route.js): { reached, done: [ids], ending (= the Act I choice, kept for old
+// readers), choices: { act1, act2 }, finale (the ending of the road walked last), endings: [every ending found] }.
+// `reached` is the index on THE HERO'S OWN ROAD (routeFor), always worked out again from done + choices.
 import { starterGear, levelFor, SLOTS } from './sim/items.js';
+import { normStory, progressOf } from './sim/route.js';
 
 export const SAVE_KEY = 'wyrmroad.save.v1';
 export const SETTINGS_KEY = 'wyrmroad.settings.v1';
 export const SAVE_VERSION = 1;
 export const BAG_SIZE = 36;
 
-export const DEFAULT_SETTINGS = { volume: 0.8, quality: 'high', shake: true, damageNumbers: true, music: true };
+export const DEFAULT_SETTINGS = { volume: 0.8, quality: 'high', shake: true, damageNumbers: true, music: true, keys: 'kbm' };
 
 export function freshSave() { return { v: SAVE_VERSION, playedAt: 0, heroes: [], lastHero: null }; }
 
@@ -27,7 +32,7 @@ export function newHero(data, { name, cls, look = {} }) {
   return {
     id: uid(), name: String(name || C.name).slice(0, 16), cls, look: JSON.parse(JSON.stringify(look)), level: 1, xp: 0, gold: 0,
     gear: starterGear(data.items, cls), bag: [], spells: C.spells.slice(0, 2),
-    story: { reached: 0, done: [], ending: null }, playTime: 0, best: {}, shop: { turn: 0, stock: [] }, created: Date.now(),
+    story: normStory({}), playTime: 0, best: {}, shop: { turn: 0, stock: [] }, created: Date.now(),
   };
 }
 
@@ -39,13 +44,12 @@ export function fixHero(data, h) {
     id: h.id || uid(), name: String(h.name || C.name).slice(0, 16), cls: h.cls, look: h.look && typeof h.look === 'object' ? h.look : {},
     level: 1, xp: Math.max(0, +h.xp || 0), gold: Math.max(0, Math.round(+h.gold || 0)),
     gear: {}, bag: Array.isArray(h.bag) ? h.bag.filter(okItem) : [],
-    spells: Array.isArray(h.spells) && h.spells.length === 2 ? h.spells.map(s => (C.spells.includes(s) ? s : null)) : C.spells.slice(0, 2),
-    story: { reached: Math.max(0, Math.min(5, +h.story?.reached || 0)), done: Array.isArray(h.story?.done) ? [...new Set(h.story.done)] : [],
-      ending: ['free', 'hold'].includes(h.story?.ending) ? h.story.ending : null },
+    spells: Array.isArray(h.spells) && h.spells.length === 2 ? h.spells.map(s => data.classes.renamed?.[s] || s).map(s => (C.spells.includes(s) ? s : null)) : C.spells.slice(0, 2),
+    story: storyOf(data, h.story),
     playTime: Math.max(0, +h.playTime || 0), best: h.best && typeof h.best === 'object' ? { ...h.best } : {},
     shop: { turn: +h.shop?.turn || 0, stock: Array.isArray(h.shop?.stock) ? h.shop.stock.filter(okItem) : [] }, created: +h.created || 0,
   };
-  out.level = Math.max(levelFor(data.classes, out.xp), Math.min(12, +h.level || 1));
+  out.level = Math.max(levelFor(data.classes, out.xp), Math.min(data.classes.levels.length, +h.level || 1));
   for (const s of SLOTS) if (okItem(h.gear?.[s])) out.gear[s] = h.gear[s];
   // heroes made before 2026-11-20's fix kept their skin only in skin.color, which the 3D body never read
   if (out.look.skin?.color && out.look.body && !out.look.body.skin) out.look.body.skin = out.look.skin.color;
@@ -99,11 +103,36 @@ export function applyEvents(save, data, heroOf, events, { salvage = () => 1 } = 
 }
 
 /** A chapter was won: mark it done, open the next place, keep the best time. */
-export function chapterCleared(h, chIndex, secs, chapters) {
-  const ch = chapters[chIndex]; if (!ch) return;
+/** A saved story made whole: old saves (`ending` was the Act I choice) read as choices.act1; reached from the road. */
+function storyOf(data, st) {
+  const story = normStory(st || {});
+  const known = new Set(data.chapters.chapters.map(c => c.id));
+  story.done = story.done.filter(id => known.has(id));
+  const ends = new Set(Object.keys(data.acts?.endings || {}));
+  story.endings = story.endings.filter(e => ends.has(e));
+  if (story.finale && !ends.has(story.finale)) story.finale = null;
+  story.reached = progressOf(data, story).reached;
+  return story;
+}
+export const heroStory = (data, h) => ({ ...progressOf(data, h.story), endings: h.story.endings || [], finale: h.story.finale || null });
+
+/**
+ * A won chapter goes into the hero's story. Playing a chapter of another road (a friend's road in co-op, the host's
+ * online) puts the hero on that road for this run: their choices become that road's (game-standards: say what you
+ * chose — the results screen does). The last chapter of an Act III road records its ending.
+ */
+export function chapterCleared(data, h, chapterId, secs) {
+  const ch = data.chapters.chapters.find(c => c.id === chapterId); if (!ch) return {};
+  h.story = normStory(h.story);
   if (!h.story.done.includes(ch.id)) h.story.done.push(ch.id);
-  h.story.reached = Math.max(h.story.reached, Math.min(chapters.length - 1, chIndex + 1));
+  const [p1, p2] = String(ch.path || '').split('.');
+  if (p1 && h.story.choices.act1 !== p1) { h.story.choices.act1 = p1; h.story.ending = p1; delete h.story.choices.act2; }
+  if (p2) h.story.choices.act2 = p2;
+  let finale = null;
+  if (ch.ending) { finale = ch.ending; h.story.finale = finale; if (!h.story.endings.includes(finale)) h.story.endings.push(finale); }
+  h.story.reached = progressOf(data, h.story).reached;
   if (secs > 0 && (!h.best[ch.id] || secs < h.best[ch.id])) h.best[ch.id] = Math.round(secs);
+  return { finale };
 }
 
 /** Equip an item from the bag into its slot (the old one goes back in the bag). Returns false if it can't go there. */
@@ -128,6 +157,16 @@ export function unequip(h, slot) {
   if (!h.gear[slot] || h.bag.length >= BAG_SIZE) return false;
   h.bag.push(h.gear[slot]); delete h.gear[slot]; return true;
 }
+/** Co-op trading (#111): move one item from a hero's bag — or, with `slot`, take it off and hand it over in one go —
+ *  into another hero's bag. Refused when the other bag is full or it is the same hero. Returns the item or null. */
+export function giveItem(from, to, { uid = null, slot = null } = {}) {
+  if (!from || !to || from === to || from.id === to.id || to.bag.length >= BAG_SIZE) return null;
+  let it = null;
+  if (slot) { it = from.gear[slot]; if (!it) return null; delete from.gear[slot]; }
+  else { const i = from.bag.findIndex(x => x.uid === uid); if (i < 0) return null; it = from.bag.splice(i, 1)[0]; }
+  to.bag.push(it);
+  return it;
+}
 
 /** What a set of saves holds, for the "which save to keep?" choice (shared/rgs-cloudsave.js describe hook). */
 export function describeSaves(values, data = null) {
@@ -135,11 +174,11 @@ export function describeSaves(values, data = null) {
   if (!s || typeof s !== 'object' || !Array.isArray(s.heroes)) return { playedAt: 0, lines: ['No heroes saved'] };
   const n = v => Math.round(+v || 0).toLocaleString('en-US');
   const CLS = { vanguard: 'Vanguard', duelist: 'Duelist', arcanist: 'Arcanist', warden: 'Warden' };
-  const chName = i => data?.chapters?.chapters?.[i]?.name || `chapter ${n(i + 1)}`;
+  const chName = st => { try { const p = data && progressOf(data, st || {}); const c = p && data.chapters.chapters.find(x => x.id === p.route[p.reached]); if (c) return c.name; } catch { /* old or broken story */ } return `chapter ${n((st?.reached || 0) + 1)}`; };
   const heroes = s.heroes.filter(h => h && CLS[h.cls]);
   if (!heroes.length) return { playedAt: Number.isFinite(s.playedAt) ? s.playedAt : 0, lines: ['No heroes saved'] };
   const sorted = [...heroes].sort((a, b) => (b.level || 1) - (a.level || 1));
-  const lines = sorted.slice(0, 3).map(h => `${String(h.name || 'Hero').slice(0, 16)}: level ${n(h.level || 1)} ${CLS[h.cls]}, at ${chName(h.story?.reached || 0)}, ${n(h.gold)} gold`);
+  const lines = sorted.slice(0, 3).map(h => `${String(h.name || 'Hero').slice(0, 16)}: level ${n(h.level || 1)} ${CLS[h.cls]}, at ${chName(h.story)}, ${n(h.gold)} gold`);
   if (sorted.length > 3) lines.push(`and ${n(sorted.length - 3)} more ${sorted.length - 3 === 1 ? 'hero' : 'heroes'}`);
   const mins = heroes.reduce((a, h) => a + (+h.playTime || 0), 0) / 60;
   const done = heroes.reduce((a, h) => a + (h.story?.done?.length || 0), 0);

@@ -136,6 +136,8 @@
 .wo-scene-choice { margin: 0 16px 16px; align-self: center; background: var(--wo-panel); border: 1px solid var(--wo-gold); border-radius: 16px; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
 .wo-scene-choice[hidden] { display: none; }
 .wo-choice-prompt { margin: 0; text-align: center; font: 700 1.2rem 'Alegreya SC', Georgia, serif; }
+.wo-choice-opt { flex-direction: column; gap: 2px; max-width: 22rem; white-space: normal; }
+.wo-choice-opt small { font-size: 0.8rem; opacity: 0.85; font-weight: 400; }
 
 /* lost / results: one card over the street */
 .wo-end .wo-scroll { display: flex; }
@@ -198,3 +200,6 @@
   .wo-bar .wo-dot-text { display: none; }
   .wo-bar .wo-dot { padding: 8px; }
 }
+.wo-choice-made { display: flex; align-items: center; gap: 8px; justify-content: center; margin: 10px 0; color: var(--wo-dim); }
+.wo-choice-made b { color: var(--amber2, #f2c14e); }
+.wo-choice-made .ic { width: 18px; height: 18px; flex: none; }

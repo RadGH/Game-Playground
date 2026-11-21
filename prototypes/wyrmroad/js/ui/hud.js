@@ -1,9 +1,10 @@
-// The play HUD. Rows ABOVE the street, never over the fight (lessons rule 15): one panel per hero across the top
-// (portrait from the 3D model, name, level, lives, health + mana with numbers, both spells with a cooldown sweep, mana
-// cost and this player's key, Breaker with its key), and below it one info row — the speech strip (story lines, queued,
-// never the same line twice at once — rule 42) beside the last enemy hit and the boss bar (name, title, phase marks).
-// On the street itself only small things at its edges: GO →, arrows to heroes and enemies off screen, at most three
-// loot toasts, the level-up banner. Updated in place every frame (no redraws — lessons H3).
+// The play HUD. One row of hero panels ABOVE the street (portrait from the 3D model, name, level, lives, health + mana
+// with numbers, both spells with a cooldown sweep, mana cost and this player's key, Breaker with its key) — fixed
+// height: nothing that comes and goes changes it. Over the top edge of the street (owner #91: the street must never
+// change size when a bar appears) a see-through info row — the speech strip (story lines, queued, never the same line
+// twice at once — rule 42), the last enemy hit and the boss bar (name, title, phase marks) — with the level-up banner
+// stacked under it. Elsewhere on the street only small things at its edges: GO →, arrows to heroes and enemies off
+// screen, at most three loot toasts. Updated in place every frame (no redraws — lessons H3).
 import { icon } from './icons.js';
 import { esc, itemName, rarityName, rarityColor } from './text.js';
 import { hp as n } from '../../../../shared/format.js';
@@ -16,7 +17,7 @@ export function createHud(app, session, partyIn, root) {
   let party = partyIn;
   const { data } = app;
   const G = () => session.G;
-  const top = root.querySelector('.wr-hud-top .wr-panels'), info = root.querySelector('.wr-hud-info'), stage = root.querySelector('.wr-stage');
+  const top = root.querySelector('.wr-hud-top .wr-panels'), info = root.querySelector('.wr-hud-info'), stage = root.querySelector('.wr-stage'), stageTop = root.querySelector('.wr-stage-top');
   const slotOf = pid => party.find(s => s.pid === pid) || { pid, device: 'kb', color: '#ccc' };
   const panels = new Map();
   const touchOn = () => root.classList.contains('wr-touch-on');
@@ -86,7 +87,7 @@ export function createHud(app, session, partyIn, root) {
       if (h.state === 'gone') { note = 'Out of lives'; cls = 'wr-bad'; }
       else if (h.state === 'out') {
         const partner = G().heroes.some(o => o !== h && !['out', 'gone', 'dead'].includes(o.state)) || G().foes.some(f => f.side === 'ally' && f.state !== 'dead');
-        note = h.reviveT > 0.05 ? `Getting up… ${n(Math.round(h.reviveT / app.T.reviveTime * 100))}%` : partner ? `Down! A partner can stand by you to help you up (${n(Math.ceil(Math.max(0, h.downClock)))} s)` : `Down: back in ${n(Math.ceil(Math.max(0, h.downClock)))} s`;
+        note = h.reviveT > 0.05 ? `Getting up… ${n(Math.round(h.reviveT / app.T.reviveTime * 100))}%` : partner ? `Down: stand by them to help up · ${n(Math.ceil(Math.max(0, h.downClock)))} s` : `Down: back in ${n(Math.ceil(Math.max(0, h.downClock)))} s`;
         cls = 'wr-bad';
       } else if (h.pickup) { const pk = data.chapters.pickups[h.pickup.id]; note = `${pk?.name || 'Road weapon'}: ${n(h.pickup.uses)} swings left · Heavy throws it`; }
       set(P, 'note', note + cls, () => { P.note.textContent = note; P.note.className = `wr-hp-note ${cls}`; });
@@ -97,7 +98,7 @@ export function createHud(app, session, partyIn, root) {
   // ---------------------------------------------------------- the info row: speech strip, last enemy, boss
   info.innerHTML = `<div class="wr-speech" hidden><div class="wr-portrait wr-portrait-xs"></div><p><b></b><span></span></p></div>
     <div class="wr-foebar" hidden><p><b></b><span></span></p><div class="wr-meter wr-meter-foe"><i></i></div></div>
-    <div class="wr-bossbar" hidden><p><b></b><span></span></p><div class="wr-meter wr-meter-boss"><i></i><em></em></div></div>`;
+    <div class="wr-bosses" hidden></div>`;
   const sp = { el: info.querySelector('.wr-speech'), face: info.querySelector('.wr-speech .wr-portrait'), who: info.querySelector('.wr-speech b'), text: info.querySelector('.wr-speech span') };
   const queue = [], said = new Set(); let speaking = null, speakT = 0;
   function sayLine(id) {
@@ -121,27 +122,43 @@ export function createHud(app, session, partyIn, root) {
   }
 
   const fb = { el: info.querySelector('.wr-foebar'), name: info.querySelector('.wr-foebar b'), hp: info.querySelector('.wr-foebar span'), bar: info.querySelector('.wr-meter-foe i') };
-  const bb = { el: info.querySelector('.wr-bossbar'), name: info.querySelector('.wr-bossbar b'), title: info.querySelector('.wr-bossbar span'), bar: info.querySelector('.wr-meter-boss i'), marks: info.querySelector('.wr-meter-boss em') };
-  let foeId = null, foeT = 0, bossId = null;
+  // boss bars: one per boss on the street, stacked (a boss pair shows two — owner batch 2); all over the street, so a
+  // second bar never moves anything. A boss that calms down (Ossmara, Maddened) says so on its bar, never "defeated".
+  const bossBox = info.querySelector('.wr-bosses');
+  const bosses = [];                 // { id, el, bar, calm, goneT }
+  function addBoss(e) {
+    if (!e.partnerOf) { bosses.length = 0; bossBox.innerHTML = ''; }
+    if (bosses.some(b => b.id === e.id)) return;
+    const el = document.createElement('div');
+    el.className = 'wr-bossbar';
+    el.innerHTML = `<p><b>${esc(e.name || 'Boss')}</b><span>${esc(e.title || '')}</span></p><div class="wr-meter wr-meter-boss"><i></i><em>${((data.enemies.bosses[e.boss] || {}).phases || []).map(p => `<s style="left:${p * 100}%"></s>`).join('')}</em></div>`;
+    bossBox.append(el);
+    bosses.push({ id: e.id, el, bar: el.querySelector('i'), calm: false, goneT: 0 });
+  }
+  let foeId = null, foeT = 0;
   function updateBars(dt) {
     const g = G();
-    const boss = bossId != null && g.foes.find(f => f.id === bossId);
-    if (boss && boss.state !== 'dead') {
-      bb.el.hidden = false;
-      bb.bar.style.width = `${Math.max(0, boss.hp / boss.max * 100)}%`;
-    } else if (!bb.el.hidden) { bb.el.hidden = true; bossId = null; }
+    for (const B of [...bosses]) {
+      const f = g.foes.find(x => x.id === B.id);
+      if (f && f.state === 'calm' && !B.calm) { B.calm = true; B.el.classList.add('wr-boss-calm'); B.el.querySelector('span').textContent = 'Calm: the fight is over'; B.goneT = 3; }
+      if (f && !B.calm && f.state !== 'dead') B.bar.style.width = `${Math.max(0, f.hp / f.max * 100)}%`;
+      if ((!f || f.state === 'dead') && !B.goneT) B.goneT = 0.6;
+      if (B.goneT) { B.goneT -= dt; if (B.goneT <= 0) { B.el.remove(); bosses.splice(bosses.indexOf(B), 1); } }
+    }
+    bossBox.hidden = !bosses.length;
     foeT -= dt;
     const f = foeId != null && g.foes.find(x => x.id === foeId);
-    if (f && f.id !== bossId && (f.state !== 'dead' || foeT > 1.5) && foeT > 0) {
+    if (f && !bosses.some(B => B.id === f.id) && (f.state !== 'dead' || foeT > 1.5) && foeT > 0) {
       fb.el.hidden = false; fb.name.textContent = f.name; fb.hp.textContent = `${n(Math.max(0, f.hp))} / ${n(f.max)}`;
       fb.bar.style.width = `${Math.max(0, f.hp / f.max * 100)}%`;
     } else fb.el.hidden = true;
-    info.classList.toggle('wr-info-empty', sp.el.hidden && fb.el.hidden && bb.el.hidden);
+    info.classList.toggle('wr-info-empty', sp.el.hidden && fb.el.hidden && bossBox.hidden);   // an overlay: changes no layout
   }
 
   // ---------------------------------------------------------- the stage edges: GO, pointers, toasts, banner
-  stage.insertAdjacentHTML('beforeend', `<div class="wr-go" hidden><b>GO</b>${icon('next')}</div><div class="wr-pointers"></div><div class="wr-toasts" aria-live="polite"></div><div class="wr-banner" hidden></div>`);
-  const goEl = stage.querySelector('.wr-go'), ptrBox = stage.querySelector('.wr-pointers'), toasts = stage.querySelector('.wr-toasts'), banner = stage.querySelector('.wr-banner');
+  stage.insertAdjacentHTML('beforeend', `<div class="wr-go" hidden><b>GO</b>${icon('next')}</div><div class="wr-pointers"></div><div class="wr-toasts" aria-live="polite"></div>`);
+  stageTop.insertAdjacentHTML('beforeend', '<div class="wr-banner" hidden></div>');
+  const goEl = stage.querySelector('.wr-go'), ptrBox = stage.querySelector('.wr-pointers'), toasts = stage.querySelector('.wr-toasts'), banner = stageTop.querySelector('.wr-banner');
   let goT = 0, bannerT = 0;
   const pool = [];
   function updatePointers() {
@@ -179,9 +196,8 @@ export function createHud(app, session, partyIn, root) {
     for (const e of events) {
       switch (e.type) {
         case 'line': sayLine(e.line); break;
-        case 'boss': bossId = e.id; bb.name.textContent = e.name; bb.title.textContent = e.title || '';
-          { const def = data.enemies.bosses[e.boss]; bb.marks.innerHTML = (def?.phases || []).map(p => `<s style="left:${p * 100}%"></s>`).join(''); }
-          break;
+        case 'boss': addBoss(e); break;
+        case 'calm': { const f = G().foes.find(x => x.id === e.id), nm = f?.name || data.enemies.bosses[e.kind]?.name || 'The wyrm'; showBanner(`${nm.split(',')[0]} calms`, 'The fight is over'); break; }
         case 'hit': { const by = heroById(e.by); if (by && G().foes.some(f => f.id === e.id && f.team === 1)) { foeId = e.id; foeT = 4; } break; }
         case 'go': goT = 5; goEl.hidden = false; break;
         case 'fight': goT = 0; goEl.hidden = true; break;
@@ -198,8 +214,15 @@ export function createHud(app, session, partyIn, root) {
         }
         case 'levelUp': {
           const h = heroById(e.id) || G().heroes.find(x => x.pid === e.pid); if (!h) break;
-          const learned = data.classes.classes[h.cls].spells.map(id => data.classes.spells[id]).find(S => S.level === e.level);
-          showBanner(`${h.name} reached level ${n(e.level)}`, learned ? `Learned ${learned.name}${h.spells.includes(Object.keys(data.classes.spells).find(k => data.classes.spells[k] === learned)) ? '' : ': put it in a slot from Spells'}` : `Health ${n(h.max)}, mana ${n(h.mpMax)}`);
+          // what this level brought: a new spell (the sim names it; older events: looked up by level) and a new
+          // dash / block move (round 2 class kit — `learnedMove`)
+          const spell = data.classes.classes[h.cls].spells.map(id => [id, data.classes.spells[id]]).find(([, S]) => S.level === e.level);
+          const spellName = e.learnedSpell || spell?.[1].name || null;
+          const unslotted = spell && !h.spells.includes(spell[0]);
+          const parts = [];
+          if (spellName) parts.push(`Learned ${spellName}${unslotted ? ' (put it in a slot from Spells)' : ''}`);
+          if (e.learnedMove) parts.push(`New move: ${e.learnedMove}`);
+          showBanner(`${h.name} reached level ${n(e.level)}`, parts.join(' · ') || `Health ${n(h.max)}, mana ${n(h.mpMax)}`);
           break;
         }
         case 'pickup': { const pk = data.chapters.pickups[e.pickup]; const h = heroById(e.id); if (pk && h) toast(`${icon('weapon')}<b>${esc(pk.name)}</b> <span>${multi ? esc(h.name) : 'picked up'}</span>`, '#d8c8a0'); break; }

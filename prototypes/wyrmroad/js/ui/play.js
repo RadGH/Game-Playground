@@ -5,6 +5,7 @@
 // fight or back to the map.
 import { createLocalSession } from '../game.js';
 import { applyEvents, chapterCleared } from '../save.js';
+import { placeShort, esc } from './text.js';
 import { readersFor, COLORS } from './party.js';
 import { createHud } from './hud.js';
 import { createTouchControls } from '../input/touch.js';
@@ -12,6 +13,9 @@ import { sellPrice } from './peddler.js';
 import { icon } from './icons.js';
 import { anySheet, openSheet } from './kit.js';
 import { soundEvents } from '../audio.js';
+import { releaseHold } from '../sim/brawl.js';
+import { openBossScene } from './bossscene.js';
+import { hintScheme } from './party.js';
 
 /** Online: the party is the room's heroes — this device's keep their saved hero, the rest are drawn from the room. */
 function onlineParty(session, mine) {
@@ -48,15 +52,23 @@ export function playScreen(app, opts = {}) {
   const touchSlot = party.find(s => s.device === 'touch') || (party.length && party.filter(s => !s.bot).length === 1 && matchMedia('(pointer: coarse)').matches ? party.find(s => s.device === 'solo' && !s.bot) || null : null);
   app.ui.innerHTML = `<section class="wr-play${touchSlot ? ' wr-touch-on' : ''}${party.filter(s => !s.bot).length > 2 ? ' wr-play-many' : ''}">
     <div class="wr-hud-top"><div class="wr-panels"></div><button type="button" class="wr-icon-btn wr-pause-btn" data-act="pause" aria-label="Menu">${icon('menu')}</button></div>
-    <div class="wr-hud-info"></div>
-    <div class="wr-stage" aria-label="${ch.name}"></div>
+    <div class="wr-stage" aria-label="${ch.name}"><div class="wr-stage-top"><div class="wr-hud-info"></div></div>
+      <div class="wr-stage-cover" role="status"><div class="wr-spinner"></div><p><small>${esc(placeShort(data, ch.id))}</small><b>${esc(ch.name)}</b></p></div></div>
     <div class="wr-touch-band"></div>
   </section>`;
   const root = app.ui.firstElementChild, stage = root.querySelector('.wr-stage');
   app.viewBox(stage);
   const ro = new ResizeObserver(() => app.viewBox(stage)); ro.observe(stage); ro.observe(root.querySelector('.wr-hud-top'));
   app.view.scenic(false);
-  Promise.resolve(app.view.setChapter(ch.id)).catch(e => console.warn(e));
+  // the street is built behind a cover and shown only when it is ready (#104: a flash of the last chapter showed
+  // first); the fight does not run while it is covered
+  const cover = root.querySelector('.wr-stage-cover');
+  let ready = false, shownFrames = 0;
+  (async () => {
+    try { await app.view.setChapter(ch.id); } catch (e) { console.warn(e); }
+    for (let i = 0; i < 600 && app.view.loading; i++) await new Promise(r => setTimeout(r, 30));   // a build already under way (the map started it)
+    ready = true;
+  })();
   app.audio.ambience(ch.id);
 
   // online: this device's player always has controls, even while waiting to walk in mid-chapter (session.waiting)
@@ -68,6 +80,7 @@ export function playScreen(app, opts = {}) {
     if (tr) touch = createTouchControls(root.querySelector('.wr-touch-band'), tr);
   }
   const hud = createHud(app, session, party, root);
+  app.hud = hud;
   let menu = null, endT = 0, ended = null, saveClock = 0;
 
   const pan = x => Math.max(-1, Math.min(1, (x - G.camX) / (T.viewWidth / 2)));
@@ -78,6 +91,20 @@ export function playScreen(app, opts = {}) {
   }
   root.querySelector('[data-act="pause"]').addEventListener('click', pause);
 
+  // the story scene before an Act II/III boss: the fight holds (G.hold) until it is read. Locally the reader releases it;
+  // online the host's device does (server/room.js `release`), guests read along and the scene closes as the boss walks in
+  let bscene = null;
+  function bossScene(e) {
+    if (bscene?.open) return;
+    const me = party.find(s => !s.bot && !s.remote), leadHero = me && G.heroes.find(h => h.pid === me.pid);
+    const host = !session.online || session.isHost?.();
+    bscene = openBossScene(app, { host: stage, sceneId: e.scene, lead: leadHero ? { name: leadHero.name, look: leadHero.look } : null, canSkip: host,
+      scheme: me ? hintScheme(me, app.input.last) : 'kb',
+      onDone: () => { if (!session.online) releaseHold(session.G); else if (host) session.release?.(); } });
+    app.bossScene = bscene;
+  }
+  app.testBossScene = id => bossScene({ scene: id || ch.bossScene });   // tests + the screen walk
+
   let heroCount = G.heroes.length;
   app.loop = dt => {
     if (session.closed) { try { app.view.update(G, 1, dt); } catch { /* fine */ } return; }   // the server ended play: online.js takes the screen
@@ -87,8 +114,24 @@ export function playScreen(app, opts = {}) {
     }
     const inputs = {};
     const busy = anySheet();
-    for (const [pid, r] of Object.entries(readers)) { const inp = r.read(); if (inp.pause && !busy) pause(); inputs[pid] = busy ? { mx: 0, mz: 0 } : inp; }
+    for (const [pid, r] of Object.entries(readers)) {
+      const inp = r.read();
+      if (bscene?.open && !busy) {
+        // the scene takes the buttons: Attack / Jump read on, Esc / Start skips (the host's choice online)
+        if (inp.attack || inp.jump) bscene.next(); else if (inp.pause) bscene.skip();
+        inputs[pid] = { mx: 0, mz: 0 }; continue;
+      }
+      if (inp.pause && !busy) pause();
+      inputs[pid] = busy ? { mx: 0, mz: 0 } : inp;
+    }
     if (busy && !session.online && !session.paused) session.pause();
+    app.lastInputs = inputs;           // game-eye + tests: what each player's devices said this frame
+    if (!ready || shownFrames < 2) {
+      // still building: the view draws the new street under the cover for two frames (camera placed, shaders warm)
+      // before it lifts; online the room goes on regardless (its session keeps its own clock)
+      if (ready) { try { app.view.update(G, 1, dt); } catch (e) { console.error(e); } if (++shownFrames >= 2) { cover.classList.add('wr-cover-off'); setTimeout(() => { cover.hidden = true; }, 400); } }
+      if (!session.online) { hud.update(0); return; }
+    }
     const { events, alpha } = session.tick(dt * (app.speed || 1), inputs);   // app.speed: tests run the clock faster
     try { app.view.update(G, alpha, dt); if (events.length) app.view.handle(events); } catch (e) { console.error(e); }
     if (events.length) {
@@ -97,6 +140,10 @@ export function playScreen(app, opts = {}) {
       const notes = applyEvents(app.save, data, heroOfPid, events, { salvage: it => sellPrice(data.items, it) });
       for (const e of events) if (e.type === 'loot' && heroOfPid(e.pid)) (found[e.pid] ||= []).push(e.item);
       hud.handle(events); for (const nt of notes) hud.note(nt);
+      for (const e of events) {
+        if (e.type === 'bossScene') bossScene(e);
+        else if ((e.type === 'boss' || e.type === 'fight') && bscene?.open && session.online && !session.isHost?.()) bscene.close();   // the host let the boss in
+      }
       for (const e of events) {
         // online: online.js shows the closing scene / results / the host's retry and writes the story progress itself
         if (e.type === 'chapterClear' && !ended && !session.online) { ended = 'won'; endT = performance.now() + 2200; }
@@ -114,14 +161,20 @@ export function playScreen(app, opts = {}) {
   function finish(how) {
     app.loop = () => { try { app.view.update(G, 1, 1 / 60); } catch { /* fine */ } };
     if (how === 'won') {
-      for (const s of party) { const h = heroOfPid(s.pid); if (h) chapterCleared(h, chIndex, G.stats.time, chapters); }
+      const roads = {};          // pid → { finale, was } : an ending found, and the road a hero was put on (co-op)
+      for (const s of party) {
+        const h = heroOfPid(s.pid); if (!h) continue;
+        const was = { ...(h.story?.choices || {}) };
+        roads[s.pid] = { ...chapterCleared(data, h, ch.id, G.stats.time), was, now: { ...h.story.choices } };
+      }
       app.saveNow();
       const result = {
         chapter: ch.id, chIndex, time: G.stats.time, kills: G.stats.kills, online: !!session.online,
         rows: party.map(s => {
           const h = s.bot || app.hero(s.heroId), e = G.heroes.find(x => x.pid === s.pid);
           return { pid: s.pid, bot: !!s.bot, heroId: s.heroId, name: h.name, cls: h.cls, color: s.color, damage: G.stats.damage[s.pid] || 0, kills: e?.kills || 0,
-            xp: e?.xpGained || 0, gold: e?.gold || 0, from: start.levels[s.pid], to: s.bot ? e?.level : h.level, items: found[s.pid] || [], lives: e?.lives ?? 0, look: s.bot && !s.remote ? app.heroLook(s.bot) : null, best: start.best[s.pid] || null };
+            xp: e?.xpGained || 0, gold: e?.gold || 0, from: start.levels[s.pid], to: s.bot ? e?.level : h.level, items: found[s.pid] || [], lives: e?.lives ?? 0, look: s.bot && !s.remote ? app.heroLook(s.bot) : null, best: start.best[s.pid] || null,
+            finale: roads[s.pid]?.finale || null, roadChanged: !!roads[s.pid] && roads[s.pid].was.act1 !== roads[s.pid].now.act1 && !!roads[s.pid].was.act1 };
         }),
       };
       app.go('results', { result, leadId: opts.leadId || party.find(s => !s.bot)?.heroId, party });
@@ -153,7 +206,8 @@ export function playScreen(app, opts = {}) {
     ro.disconnect(); hud.destroy(); touch?.destroy();
     for (const r of Object.values(readers)) r.release();
     try { session.leave(); } catch { /* fine */ }
-    app.session = null; app.leaveChapter = null;
+    bscene?.close(); app.bossScene = null; app.testBossScene = null;
+    app.session = null; app.leaveChapter = null; app.hud = null;
     app.saveNow();
     app.audio.ambience(null);
   };

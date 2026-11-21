@@ -22,7 +22,22 @@ function foodMesh(kind) {
   add(new THREE.CylinderGeometry(0.34, 0.3, 0.05, 14), '#e8e0d0', 0, 0.03, 0);      // a plate so food never reads as rubbish
   if (kind === 'bread') { add(new THREE.SphereGeometry(0.22, 10, 8), '#d8a050', 0, 0.16, 0, 1.4, 0.7, 0.9); for (const x of [-0.12, 0, 0.12]) add(new THREE.BoxGeometry(0.03, 0.02, 0.2), '#a86a2a', x, 0.29, 0); }
   else if (kind === 'apple') { add(new THREE.SphereGeometry(0.16, 12, 10), '#d83a2a', -0.08, 0.2, 0); add(new THREE.SphereGeometry(0.14, 12, 10), '#9ac83a', 0.13, 0.18, 0.05); add(new THREE.CylinderGeometry(0.01, 0.01, 0.08, 4), '#5a3a1a', -0.08, 0.38, 0); }
-  else if (kind === 'roast') { add(new THREE.SphereGeometry(0.2, 10, 8), '#a8542a', 0, 0.2, 0, 1.3, 0.85, 1); add(new THREE.CylinderGeometry(0.03, 0.03, 0.3, 5), '#f0e8d8', 0.3, 0.26, 0).rotation.z = 1.2; add(new THREE.SphereGeometry(0.05, 6, 4), '#f0e8d8', 0.43, 0.32, 0); }
+  else if (kind === 'roast') {
+    // A HAM ON THE BONE (owner #106: "the bone is angled and not connected to the meat and tip of the bone properly").
+    // Everything is laid along ONE axis `d` (out to the right and a little up): the round of meat, the narrower shank it
+    // tapers into, the bone shaft coming out of the shank's end, and the bone's knuckle — two round knobs side by side —
+    // capping the shaft's tip.
+    const d = new THREE.Vector3(1, 0.32, 0).normalize(), c0 = new THREE.Vector3(-0.08, 0.19, 0);
+    const at = k => c0.clone().addScaledVector(d, k);
+    const along = o => { o.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), d); return o; };
+    along(add(new THREE.SphereGeometry(0.17, 14, 10), '#a8542a', c0.x, c0.y, c0.z, 1.25, 0.95, 1));         // the round
+    const sh = at(0.2); along(add(new THREE.SphereGeometry(0.1, 12, 8), '#9a4a24', sh.x, sh.y, sh.z, 1.4, 0.9, 0.95));   // the shank
+    const glaze = at(-0.02); along(add(new THREE.SphereGeometry(0.12, 10, 8), '#c06a34', glaze.x, glaze.y + 0.07, glaze.z, 1.3, 0.5, 0.85));   // crisp top
+    const b0 = at(0.27), b1 = at(0.42), mid = b0.clone().add(b1).multiplyScalar(0.5);
+    const shaft = add(new THREE.CylinderGeometry(0.028, 0.034, b0.distanceTo(b1), 8), '#f0e8d8', mid.x, mid.y, mid.z);
+    shaft.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d);
+    for (const s of [-1, 1]) { const k = at(0.44); add(new THREE.SphereGeometry(0.042, 10, 8), '#f4ecdc', k.x, k.y, k.z + s * 0.032); }
+  }
   else { add(new THREE.CylinderGeometry(0.26, 0.24, 0.14, 14), '#d89a50', 0, 0.12, 0); add(new THREE.CylinderGeometry(0.22, 0.24, 0.02, 14), '#8a2a3a', 0, 0.2, 0); for (let i = 0; i < 4; i++) add(new THREE.BoxGeometry(0.44, 0.02, 0.04), '#e8b060', 0, 0.215, -0.15 + i * 0.1); }
   return g;
 }

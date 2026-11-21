@@ -64,8 +64,8 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
     scene.traverse(o => { if (o.material && !Array.isArray(o.material)) o.material.needsUpdate = true; });   // a settings change, not mid-fight
     cam.w = 0; resize();
   }
-  let theme = null, themeId = null, chapterId = null, loading = null, lastG = null;
-  const cam = { x: 8, shake: 0, t: 0, scenic: false, scenicT: 0, w: 1, h: 1, width: 17 };
+  let theme = null, themeId = null, chapterId = null, loading = null, lastG = null, flyer = null;
+  const cam = { x: 8, shake: 0, t: 0, scenic: false, scenicT: 0, w: 1, h: 1, width: 17, shot: null };
   let tun = T || DEFAULT_T;
   const timing = { actors: 0, world: 0, render: 0 };   // smoothed ms per frame: sync, world update, renderer.render
 
@@ -102,6 +102,17 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
   }
 
   function placeCamera(G, dt) {
+    if (cam.shot) {
+      // a directed shot (story stage, review pages): the director owns the camera; the light rig follows its target
+      const s = cam.shot;
+      if (s.fov && Math.abs(camera.fov - s.fov) > 1e-3) { camera.fov = s.fov; camera.updateProjectionMatrix(); }
+      camera.position.set(s.pos[0], s.pos[1], s.pos[2]); camera.lookAt(s.target[0], s.target[1], s.target[2]);
+      cam.x = s.target[0];
+      const sd = theme?.env.sunDir || [-0.5, 0.8, 0.6];
+      sun.position.set(cam.x + sd[0] * 30, sd[1] * 30, sd[2] * 30); sun.target.position.set(cam.x, 0, -1); sun.target.updateMatrixWorld();
+      lamps[0].position.set(cam.x - 5, 2.6, -3.2); lamps[1].position.set(cam.x + 5.5, 2.6, -3.2);
+      return;
+    }
     const V = tun.viewWidth || 17, dist = tun.camDistance || 15, lookY = cam.lookY ?? 1.4;
     const ch = cam.pitch == null ? (tun.camHeight || 3.2) : dist * Math.tan(cam.pitch);   // portrait: steeper, so the street has depth
     let want;
@@ -136,12 +147,22 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
     lamps[0].position.set(cam.x - 5, 2.6, -3.2); lamps[1].position.set(cam.x + 5.5, 2.6, -3.2);
   }
 
+  /** A chapter id, or `stage:<theme>` — a theme's street on its own (story scenes set in a place that is not a chapter). */
+  function chapterFor(id) {
+    const ch = data.chapters.chapters.find(c => c.id === id);
+    if (ch) return ch;
+    if (typeof id === 'string' && id.startsWith('stage:')) {
+      const th = id.slice(6), like = data.chapters.chapters.find(c => c.theme === th);
+      return { id, name: like?.name || th, theme: th, length: like?.length || 160, sections: [], seedOf: like || null };
+    }
+    return data.chapters.chapters[0];
+  }
   async function setChapter(id) {
-    const ch = data.chapters.chapters.find(c => c.id === id) || data.chapters.chapters[0];
+    const ch = chapterFor(id);
     if (chapterId === ch.id && theme) return;
     chapterId = ch.id;
     const job = (async () => {
-      const chIndex = data.chapters.chapters.indexOf(ch);
+      const chIndex = Math.max(0, data.chapters.chapters.indexOf(ch.seedOf || ch));
       const next = await buildTheme(ch.theme, { length: ch.length, chIndex, quality, chapter: ch });   // quality read now: a change applies here
       if (chapterId !== ch.id) { next.dispose(); return; }
       if (theme) { scene.remove(theme.group); theme.dispose(); }
@@ -156,10 +177,17 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
       fx.clear(); props.clear(); actors.clear();
       cam.x = 8; cam.scenicT = 0;
       const warm = await actors.preload(ch, lastG?.heroes || []);
+      // a chapter with sky fire: Ossmara's body for the fly-over, built now so its first pass compiles nothing
+      if (ch.sky && !flyer) {
+        const def = data.enemies.bosses.ossmara_wrath;
+        if (def) try { const b = await buildCreature(def.look, { low: quality === 'low', outline: false }); b.obj.scale.setScalar(7 / b.h); b.loop('fly'); flyer = b; } catch (err) { console.error('wyrmroad: flyer', err); }
+      }
+      fx.acts.setFlyer(ch.sky && flyer ? { obj: flyer.obj, update: dt => flyer.update(dt) } : null);
+      if (ch.sky && flyer) { flyer.obj.visible = true; flyer.obj.position.set(cam.x, 8, -12); }
       // shader warm-up: every pooled effect and one body per foe kind are compiled now, not on their first hit
       fx.warm(true);
       try { await renderer.compileAsync(scene, camera); } catch { /* older drivers: compiled on first draw */ }
-      fx.warm(false); warm?.done();
+      fx.warm(false); warm?.done(); if (flyer) flyer.obj.visible = false;
     })();
     loading = job;
     await job;
@@ -207,6 +235,7 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
     handle(events) {
       if (!events || !events.length || cam.scenic) return;
       actors.handle(events, lastG);
+      if (lastG?.cinematic) return;            // a story stage: gestures only (no swing trails, no shake)
       fx.handle(events, lastG, actors);
       for (const ev of events) {
         if (ev.type === 'hit' && (ev.heavy || ev.crit)) cam.shake = Math.max(cam.shake, ev.heavy ? 0.16 : 0.08);
@@ -215,6 +244,10 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
         else if (ev.type === 'kill' && ev.boss) cam.shake = Math.max(cam.shake, 0.35);
         else if (ev.type === 'zoneHit' && ev.r >= 3) cam.shake = Math.max(cam.shake, 0.14);
         else if (ev.type === 'quake' || ev.type === 'bossPhase') cam.shake = Math.max(cam.shake, 0.3);
+        else if (ev.type === 'zoneHit' && /^skyfire/.test(ev.look || '')) cam.shake = Math.max(cam.shake, 0.32);
+        else if (ev.type === 'zoneHit' && ['handslam', 'quake', 'claw', 'sweep', 'toll'].includes(ev.look)) cam.shake = Math.max(cam.shake, 0.2);
+        else if (ev.type === 'expose' && ev.on) cam.shake = Math.max(cam.shake, 0.3);
+        else if (ev.type === 'gust') cam.shake = Math.max(cam.shake, 0.08);
       }
     },
     project(x, y, z) {
@@ -222,6 +255,23 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
       return { x: (v.x * 0.5 + 0.5) * cam.w, y: (-v.y * 0.5 + 0.5) * cam.h, visible: v.z < 1 && Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1 };
     },
     resize() { cam.w = 0; resize(); },
+    /**
+     * A directed camera: `{ pos: [x, y, z], target: [x, y, z], fov? }` (degrees, vertical), or null to give the camera
+     * back to the game. While set, actors are drawn from whatever G is passed to update (the story stage passes its own).
+     */
+    setShot(shot) {
+      const was = !!cam.shot;
+      cam.shot = shot || null;
+      if (cam.shot) { if (cam.scenic) view.scenic(false); }
+      else if (was) { cam.w = 0; resize(); }      // the game's own fov and framing come back
+    },
+    get shot() { return cam.shot; },
+    /** The canvas size in CSS px (the story director frames its shots to it). */
+    get size() { return { w: cam.w, h: cam.h }; },
+    /** Shake the camera now (story moments: a bell, a roar). */
+    shake(k = 0.2) { cam.shake = Math.max(cam.shake, k); },
+    /** Named spots the street marks for story moments (the Great Bell…): { name: [x, y, z] }. */
+    get marks() { return theme?.marks || {}; },
     scenic(on) {
       cam.scenic = !!on; cam.scenicT = 0;
       actors.setVisible(!on); fx.setVisible(!on); props.setVisible(!on);
@@ -388,3 +438,4 @@ export function portraitSpec(data, id) {
 }
 export { CHIBI_ANIMS };
 export { renderItemIcon, itemIconUrl, itemIconHtml, paintItemIcons } from './item-icons.js';
+export { createStage } from './stage.js';

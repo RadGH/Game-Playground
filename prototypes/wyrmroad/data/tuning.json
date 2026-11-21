@@ -180,6 +180,36 @@
     "unit": "m",
     "note": ""
   },
+  "breakerCooldown": {
+    "value": 1.5,
+    "min": 0,
+    "max": 6,
+    "step": 0.1,
+    "label": "Breaker cooldown",
+    "group": "Combat",
+    "unit": "s",
+    "note": "Wait before the next Breaker"
+  },
+  "breakerRamp": {
+    "value": 0.06,
+    "min": 0,
+    "max": 0.2,
+    "step": 0.01,
+    "label": "Breaker repeat cost",
+    "group": "Combat",
+    "unit": "",
+    "note": "Extra share of max health for each Breaker used recently"
+  },
+  "breakerCool": {
+    "value": 4,
+    "min": 1,
+    "max": 15,
+    "step": 0.5,
+    "label": "Breaker cool-off",
+    "group": "Combat",
+    "unit": "s",
+    "note": "Seconds for one recent Breaker to stop adding to the cost"
+  },
   "manaRegen": {
     "value": 2.5,
     "min": 0,
@@ -211,7 +241,7 @@
     "note": "Per hero: the rest circle and wait their turn"
   },
   "foeDamage": {
-    "value": 1,
+    "value": 1.3,
     "min": 0.3,
     "max": 3,
     "step": 0.05,
@@ -221,7 +251,7 @@
     "note": ""
   },
   "foeHealth": {
-    "value": 1,
+    "value": 1.4,
     "min": 0.3,
     "max": 3,
     "step": 0.05,
@@ -241,14 +271,74 @@
     "note": "How long enemies show an attack before it lands"
   },
   "coopHealth": {
-    "value": 0.6,
+    "value": 0.35,
     "min": 0,
     "max": 1.5,
     "step": 0.05,
     "label": "Co-op enemy health",
     "group": "Enemies",
     "unit": "",
-    "note": "Extra enemy health per hero after the first"
+    "note": "Extra health per hero after the first (normal enemies)"
+  },
+  "coopBossHealth": {
+    "value": 0.7,
+    "min": 0,
+    "max": 2,
+    "step": 0.05,
+    "label": "Co-op boss health",
+    "group": "Enemies",
+    "unit": "",
+    "note": "Extra boss health per hero after the first"
+  },
+  "coopFoes": {
+    "value": 0.6,
+    "min": 0,
+    "max": 1.5,
+    "step": 0.05,
+    "label": "Co-op crowd size",
+    "group": "Enemies",
+    "unit": "",
+    "note": "Extra enemies in each wave per hero after the first, as a share of the wave"
+  },
+  "coopDamage": {
+    "value": 0.15,
+    "min": 0,
+    "max": 0.5,
+    "step": 0.01,
+    "label": "Co-op enemy damage",
+    "group": "Enemies",
+    "unit": "",
+    "note": "Extra enemy damage per hero after the first"
+  },
+  "maxFoes": {
+    "value": 14,
+    "min": 4,
+    "max": 30,
+    "step": 1,
+    "label": "Most enemies at once",
+    "group": "Enemies",
+    "unit": "",
+    "note": "Co-op extras stop at this many on screen"
+  },
+  "riseClear": {
+    "value": 2,
+    "min": 0.5,
+    "max": 5,
+    "step": 0.1,
+    "label": "Rise-up clearance",
+    "group": "Enemies",
+    "unit": "m",
+    "note": "Enemies climbing out of the ground never come up closer than this to a hero"
+  },
+  "pairEnrage": {
+    "value": 0.25,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Pair boss fury",
+    "group": "Enemies",
+    "unit": "",
+    "note": "Extra power for the one left standing when a pair of bosses loses one"
   },
   "lives": {
     "value": 3,
@@ -299,6 +389,16 @@
     "group": "Stakes",
     "unit": "",
     "note": "Share of max health a meal heals"
+  },
+  "regenOutside": {
+    "value": 3,
+    "min": 0,
+    "max": 10,
+    "step": 0.25,
+    "label": "Regen between fights",
+    "group": "Stakes",
+    "unit": "×",
+    "note": "Gear health regen works only between fights, this many times faster"
   },
   "crateFood": {
     "value": 0.45,
@@ -359,5 +459,35 @@
     "group": "Camera",
     "unit": "m",
     "note": ""
+  },
+  "skyAlly": {
+    "value": 1,
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "label": "Wyrm in the sky",
+    "group": "Allies",
+    "unit": "",
+    "note": "1 = Ossmara breathes fire on your foes in chapters where she flies with you; 0 = off"
+  },
+  "skyDamage": {
+    "value": 2.4,
+    "min": 0,
+    "max": 6,
+    "step": 0.1,
+    "label": "Sky fire damage",
+    "group": "Allies",
+    "unit": "×",
+    "note": "Times the heroes’ average power"
+  },
+  "skyDelay": {
+    "value": 1.2,
+    "min": 0.4,
+    "max": 3,
+    "step": 0.1,
+    "label": "Sky fire warning",
+    "group": "Allies",
+    "unit": "s",
+    "note": "Time the warning line shows before her fire lands"
   }
 }

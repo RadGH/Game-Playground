@@ -247,10 +247,25 @@ export function accountButton({ game = 'site', gameName = '', onChange } = {}) {
       h('a.rgs-acct-item', { role: 'menuitem', href: account.accountUrl, target: '_blank', rel: 'noopener', text: 'Your account' }),
       h('button.rgs-acct-item', { type: 'button', role: 'menuitem', 'data-act': 'signout', text: 'Sign out', onclick: async () => { menu.hidden = true; await account.signOut(); } }));
   }
+  // The menu opens toward the side of the button that has room and is then held inside the window (Wyrmroad
+  // 2026-11-21: a button in the top-left corner opened its menu off the left edge). Bottom-edge buttons open upward.
+  function place() {
+    if (menu.hidden) return;
+    const st = menu.style;
+    st.left = ''; st.right = ''; st.top = ''; st.bottom = ''; st.transform = '';
+    const b = btn.getBoundingClientRect(), mw = menu.offsetWidth, mh = menu.offsetHeight, vw = innerWidth, vh = innerHeight, pad = 8;
+    if (b.right - mw < pad && b.left + mw <= vw - pad) { st.left = '0'; st.right = 'auto'; }   // no room to the left: open to the right
+    if (b.bottom + 6 + mh > vh - pad && b.top - 6 - mh >= pad) { st.top = 'auto'; st.bottom = 'calc(100% + 6px)'; }
+    const r = menu.getBoundingClientRect();
+    const dx = r.left < pad ? pad - r.left : r.right > vw - pad ? (vw - pad) - r.right : 0;
+    if (dx) st.transform = `translateX(${Math.round(dx)}px)`;
+  }
+  addEventListener('resize', place);
   btn.addEventListener('click', () => {
     if (!user) { openSignIn({ game, gameName }); return; }
     menu.hidden = !menu.hidden;
     btn.setAttribute('aria-expanded', String(!menu.hidden));
+    place();
   });
   document.addEventListener('click', e => { if (!root.contains(e.target)) { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
   root.addEventListener('keydown', e => { if (e.key === 'Escape' && !menu.hidden) { menu.hidden = true; btn.focus(); } });

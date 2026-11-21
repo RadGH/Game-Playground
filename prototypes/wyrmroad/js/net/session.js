@@ -119,7 +119,7 @@ export async function createNetSession({ net, data, T, start, now = () => perfor
       acc += Math.min(0.25, Math.max(0, dtReal));
       let steps = 0;
       while (acc >= STEP && steps < 8) {
-        const use = paused ? { mx: 0, mz: 0 } : { mx: inp.mx || 0, mz: inp.mz || 0, block: !!inp.block, ...edges };
+        const use = paused ? { mx: 0, mz: 0 } : { mx: inp.mx || 0, mz: inp.mz || 0, block: !!inp.block, spell1Held: !!inp.spell1Held, spell2Held: !!inp.spell2Held, ...edges };
         edges = {};
         const sq = ++seq;
         if (!batch.length) batchS = sq;

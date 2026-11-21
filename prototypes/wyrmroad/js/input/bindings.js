@@ -1,7 +1,12 @@
 // THE one binding table (lessons rule 34: every key has one owner). Every scheme a player can join with, every action
 // it has, the keys/buttons for it and the short label shown on buttons and hints (rule 18: hints follow the device).
 //
-//   SCHEMES.kb   whole keyboard (one player)       SCHEMES.kbL / kbR   left / right half (two people, one keyboard)
+//   SCHEMES.kbm  keyboard + mouse (one player, THE DEFAULT — owner #93): WASD walk, left click attack, right click heavy,
+//                1 / 2 spells, Space jump, Shift (hold) block, Q dash, E grab, R Breaker. Block is Shift, never Ctrl:
+//                Ctrl+W closes the browser tab. These keys never touch the arrows or the right-half keys, so a second
+//                player can share the keyboard on the right half.
+//   SCHEMES.kb   keyboard only, the round-1 layout (J K L U I O H) — still picked in Settings → Controls
+//   SCHEMES.kbL / kbR   left / right half (two people, one keyboard)
 //   SCHEMES.pad  a game controller (standard mapping button numbers)   SCHEMES.touch  on-screen buttons (one player)
 //
 // Moves: `up` is UP the screen (into the street, mz −), `down` toward the camera (mz +). W = up (rule 26).
@@ -18,15 +23,23 @@ export const ACTION_HELP = {
   dash: 'Dash forward (or tap a direction twice); attack while dashing',
   block: 'Hold to block; block just as a hit lands to stagger the attacker',
   grab: 'Pick up a weapon from the ground. Walk into a dazed enemy to grab them',
-  spell1: 'Cast the spell in slot 1', spell2: 'Cast the spell in slot 2',
+  spell1: 'Cast the spell in slot 1; hold it to keep a spinning spell going', spell2: 'Cast the spell in slot 2; hold it to keep a spinning spell going',
   breaker: 'Knock back everyone around you for a share of your health',
   pause: 'Open the menu',
 };
 
 // Keyboard codes (KeyboardEvent.code). Each scheme: move keys + one list of codes per action.
 export const SCHEMES = {
+  kbm: {
+    name: 'Keyboard and mouse', short: 'Keyboard and mouse', kind: 'keyboard', mouse: true,
+    move: { left: ['KeyA'], right: ['KeyD'], up: ['KeyW'], down: ['KeyS'] },
+    keys: { attack: [], heavy: [], jump: ['Space'], dash: ['KeyQ'], block: ['ShiftLeft'], grab: ['KeyE'],
+      spell1: ['Digit1'], spell2: ['Digit2'], breaker: ['KeyR'], pause: ['Escape'] },
+    buttons: { attack: 0, heavy: 2 },      // MouseEvent.button: 0 left, 2 right
+    join: ['Enter'],
+  },
   kb: {
-    name: 'Keyboard', short: 'Keyboard', kind: 'keyboard',
+    name: 'Keyboard only', short: 'Keyboard', kind: 'keyboard',
     move: { left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'], up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'] },
     keys: { attack: ['KeyJ'], heavy: ['KeyK'], jump: ['Space'], dash: ['KeyL'], block: ['ShiftLeft', 'ShiftRight'], grab: ['KeyH'],
       spell1: ['KeyU'], spell2: ['KeyI'], breaker: ['KeyO'], pause: ['Escape'] },
@@ -57,25 +70,35 @@ export const SCHEMES = {
   touch: { name: 'Touch', short: 'Touch', kind: 'touch' },
 };
 
+/** The two whole-keyboard layouts a player can pick in Settings (the default first). The device id 'kb' (one player
+ *  on the whole keyboard) plays with whichever is picked: schemeFor('kb') → 'kbm' | 'kb'. */
+export const KEYBOARD_LAYOUTS = ['kbm', 'kb'];
+let layout = 'kbm';
+export function setKeyboardLayout(id) { layout = KEYBOARD_LAYOUTS.includes(id) ? id : 'kbm'; }
+export const keyboardLayout = () => layout;
+export const schemeFor = device => (device === 'kb' ? layout : device);
+export const MOUSE_LABELS = { 0: 'Left click', 2: 'Right click' };
+export const MOUSE_SHORT = { 0: 'LMB', 2: 'RMB' };
 const PAD_LABELS = { 0: 'A', 1: 'B', 2: 'X', 3: 'Y', 4: 'LB', 5: 'RB', 6: 'LT', 7: 'RT', 8: 'Back', 9: 'Start', 10: 'L3', 11: 'R3' };
-const KEY_LABELS = { Space: 'Space', ShiftLeft: 'Shift', ShiftRight: 'Shift', Escape: 'Esc', Enter: 'Enter', Comma: ',', Period: '.',
+const KEY_LABELS = { Space: 'Space', ShiftLeft: 'Shift', ShiftRight: 'Shift', Digit1: '1', Digit2: '2', Escape: 'Esc', Enter: 'Enter', Comma: ',', Period: '.',
   ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', Slash: '/', Semicolon: ';' };
 export const keyName = code => KEY_LABELS[code] || code.replace(/^Key/, '').replace(/^Digit/, '');
 export const padName = b => PAD_LABELS[b] ?? `Button ${b}`;
 
 /** The label to print on a button / hint for this action on this scheme ('' on touch: the button IS the control). */
 export function keyLabel(scheme, action) {
-  const S = SCHEMES[scheme]; if (!S) return '';
+  const S = SCHEMES[schemeFor(scheme)]; if (!S) return '';
   if (S.kind === 'pad') return (S.buttons[action] || []).map(padName)[0] || '';
   if (S.kind === 'keyboard') {
     if (S.move[action]) return S.move[action].map(keyName)[0];
+    if (S.mouse && S.buttons?.[action] != null) return MOUSE_SHORT[S.buttons[action]];
     return (S.keys[action] || []).map(keyName)[0] || '';
   }
   return '';
 }
 
 /** Every keyboard code → [scheme, action] (for the Controls screen and the one-owner test). */
-export function keyOwners(schemes = ['kb']) {
+export function keyOwners(schemes = ['kbm']) {
   const out = new Map();
   for (const id of schemes) {
     const S = SCHEMES[id];

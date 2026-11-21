@@ -4,6 +4,7 @@
 // exists, the level is 1–12, every item is a real base for that slot and class with a real rarity and bonus lines in
 // the range the loot roller can make, spells belong to the class and are unlocked. Pure: the server, the browser and
 // the tests import it. Modelled on Overdrive Frame's js/net/protocol.js (round 4).
+import { normStory, routeFor } from '../sim/route.js';
 import { SLOTS, baseOf } from '../sim/items.js';
 
 export const PROTOCOL = 1;
@@ -66,8 +67,8 @@ export function cleanItem(ITEMS, item, slot, cls) {
 
 /**
  * The hero a browser brings, made safe — or { error } saying what was wrong (the screen shows it).
- *   { name, cls, level, xp, gear: { slot: item }, spells: [id, id], look, story: { reached } }
- * Returns { name, cls, level, xp, gear, spells, look, reached }. The server works out every number itself (heroStats).
+ *   { name, cls, level, xp, gear: { slot: item }, spells: [id, id], look, story: { reached, choices } }
+ * Returns { name, cls, level, xp, gear, spells, look, reached, choices } (reached = a place on the hero's own road). The server works out every number itself (heroStats).
  */
 export function cleanHero(data, h) {
   if (!h || typeof h !== 'object' || Array.isArray(h)) return { error: 'No hero.' };
@@ -84,24 +85,29 @@ export function cleanHero(data, h) {
     const c = cleanItem(data.items, it, slot, h.cls); if (!c) return { error: 'An item in your gear is not valid.' };
     gear[slot] = c;
   }
-  const spells = Array.isArray(h.spells) ? h.spells : C.spells.slice(0, 2);
+  // a save from before a spell was replaced carries its old id (classes.json renamed: war_shout → iron_gale)
+  const spells = (Array.isArray(h.spells) ? h.spells : C.spells.slice(0, 2)).map(s => (typeof s === 'string' && Object.hasOwn(data.classes.renamed || {}, s) ? data.classes.renamed[s] : s));
   if (spells.length < 1 || spells.length > 2 || new Set(spells).size !== spells.length) return { error: 'Carry one or two different spells.' };
   for (const s of spells) {
     if (typeof s !== 'string' || !C.spells.includes(s)) return { error: 'A spell does not belong to this class.' };
     if (data.classes.spells[s].level > h.level) return { error: 'A spell is not learned yet.' };
   }
-  const chapters = data.chapters.chapters.length;
-  const reached = Number.isInteger(h.story?.reached) ? Math.max(0, Math.min(chapters - 1, h.story.reached)) : 0;
-  return { name: cleanName(h.name) || C.name, cls: h.cls, level: h.level, xp, gear, spells: [...spells], look: cleanLook(h.look), reached };
+  // the hero's road (Acts II/III follow their choices — js/sim/route.js); reached is a place on that road
+  const choices = normStory({ choices: h.story?.choices, ending: h.story?.ending }).choices;
+  const road = routeFor(data, choices);
+  const reached = Number.isInteger(h.story?.reached) ? Math.max(0, Math.min(road.length - 1, h.story.reached)) : 0;
+  return { name: cleanName(h.name) || C.name, cls: h.cls, level: h.level, xp, gear, spells: [...spells], look: cleanLook(h.look), reached, choices };
 }
 
 // ------------------------------------------------------------------------------------------------ inputs
-/** Input packed small: [mx, mz, bits] — move in hundredths, block held + the press edges as bits. */
+/** Input packed small: [mx, mz, bits] — move in hundredths, the held buttons (block, spell1Held / spell2Held for a
+ *  channelled spell) + the press edges as bits. */
 export const EDGES = ['attack', 'heavy', 'jump', 'dash', 'grab', 'spell1', 'spell2', 'breaker'];
-export const BITS = Object.freeze({ block: 1, attack: 2, heavy: 4, jump: 8, dash: 16, grab: 32, spell1: 64, spell2: 128, breaker: 256 });
+export const BITS = Object.freeze({ block: 1, attack: 2, heavy: 4, jump: 8, dash: 16, grab: 32, spell1: 64, spell2: 128, breaker: 256, spell1Held: 512, spell2Held: 1024 });
+export const HELD = ['block', 'spell1Held', 'spell2Held'];
 export function packInput(inp = {}) {
   let b = 0;
-  for (const k of ['block', ...EDGES]) if (inp[k]) b |= BITS[k];
+  for (const k of [...HELD, ...EDGES]) if (inp[k]) b |= BITS[k];
   const r = v => Math.max(-100, Math.min(100, Math.round((v || 0) * 100)));
   return [r(inp.mx), r(inp.mz), b];
 }
@@ -109,7 +115,7 @@ export function unpackInput(a) {
   if (!Array.isArray(a) || a.length !== 3 || !a.every(Number.isInteger)) return null;
   const [mx, mz, b] = a, cl = v => Math.max(-1, Math.min(1, v / 100));
   const out = { mx: cl(mx), mz: cl(mz) };
-  for (const k of ['block', ...EDGES]) out[k] = !!(b & BITS[k]);
+  for (const k of [...HELD, ...EDGES]) out[k] = !!(b & BITS[k]);
   return out;
 }
 /** A press in `from` is kept in `into` (two inputs used as one: a tap in either still counts — never dropped). */
@@ -126,13 +132,14 @@ export const CLIENT_MSGS = Object.freeze({
   rooms:  { fields: {}, rate: 1, burst: 4 },
   me:     { fields: { hero: 'obj' }, rate: 2, burst: 6 },                       // the hero you bring (cleanHero on the server)
   opt:    { fields: { key: 'str:16', value: 'bool' }, rate: 4, burst: 8 },      // host: public on/off
-  pick:   { fields: { chapter: 'str:24' }, rate: 3, burst: 6 },                 // host: a chapter from the host's unlocked list
+  pick:   { fields: { chapter: 'str:24', section: '?int' }, rate: 3, burst: 6 }, // host: a chapter from the host's own road (section: test servers only)
   start:  { fields: {}, rate: 1, burst: 3 },                                    // host: begin the ready check
   ready:  { fields: { on: 'bool' }, rate: 4, burst: 8 },                        // ready check + "skip" in story scenes
   loaded: { fields: {}, rate: 1, burst: 3 },                                    // this device has the chapter drawn
   in:     { fields: { s: 'int', i: 'arr' }, rate: 75, burst: 150 },             // inputs, one step per message (a slow device sends a few at once)
   retry:  { fields: { on: 'bool' }, rate: 1, burst: 3 },                        // host after a loss: true = from the last fight, false = back to the room
-  ending: { fields: { id: 'str:16' }, rate: 1, burst: 3 },                     // host, last chapter: which ending
+  ending: { fields: { id: 'str:16' }, rate: 1, burst: 3 },                     // host, at a fork (Crownhollow, Bellwater, the Kiln): which road
+  release: { fields: {}, rate: 1, burst: 3 },                                   // host: the pre-boss scene is read, the boss walks in
   back:   { fields: {}, rate: 1, burst: 3 },                                    // host: results → room now
   kick:   { fields: { pid: 'str:12' }, rate: 2, burst: 4 },                     // host: remove (stays out)
   vote:   { fields: { pid: 'str:12' }, rate: 2, burst: 4 },                     // everyone else: vote to remove

@@ -29,7 +29,8 @@ const httpsPort = arg('https-port', null) ? +arg('https-port', null) : null;
 const build = arg('build', 'dev');
 
 const log = (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d));
-const hub = createHub({ data: loadData(), T: loadTuning(), build, log, randomToken: () => randomBytes(18).toString('base64url') });
+// --test-hooks: tests only (a picked chapter may start at a later fight); never on the live server
+const hub = createHub({ data: loadData(), T: loadTuning(), build, log, randomToken: () => randomBytes(18).toString('base64url'), testHooks: process.argv.includes('--test-hooks') });
 const started = Date.now(), cpu0 = process.cpuUsage();
 const admin = createAdminFeed({ game: 'wyrmroad', build, hub, started });
 

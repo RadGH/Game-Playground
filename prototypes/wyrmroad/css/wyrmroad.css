@@ -183,9 +183,13 @@ kbd:empty { display: none; }
 .wr-pick { min-height: 48px; border-radius: 10px; border: 1px solid var(--edge2); background: #1b2232; color: var(--ink); font-weight: 700; cursor: pointer; padding: 6px 10px; }
 .wr-pick.on { border-color: var(--amber); background: #2c2a26; }
 @media (max-width: 760px) {
-  .wr-creator { height: 100%; }
-  .wr-creator-body { grid-template-columns: 1fr; grid-template-rows: minmax(220px, 38vh) minmax(0, 1fr); gap: 10px; }
-  .wr-creator-panel { padding: 10px; }
+  /* phones: ONE scroller — the page (#ui). A scroll box inside it does not scroll reliably on iPhone (WebKit), and the
+     Set off button sat at the bottom of that box out of reach (owner report 2026-11-21). The button is pinned instead. */
+  .wr-creator { height: auto; min-height: 100%; }
+  .wr-creator-body { grid-template-columns: 1fr; grid-template-rows: auto auto; gap: 10px; flex: none; }
+  .wr-creator-stage { height: clamp(180px, 30svh, 300px); touch-action: pan-y; }
+  .wr-creator-panel { padding: 10px; overflow: visible; min-height: auto; }
+  .wr-creator-foot { position: sticky; bottom: 0; z-index: 3; margin: 4px -10px -10px; padding: 10px 10px calc(10px + var(--safe-b)); background: rgb(22, 28, 41); box-shadow: 0 -10px 14px -6px rgba(8, 10, 16, .7); border-top: 1px solid var(--edge); border-radius: 0 0 var(--r) var(--r); }
   .wr-row { grid-template-columns: 84px 44px 1fr 44px; }
   .wr-row-swatch, .wr-row:has(.wr-toggle) { grid-template-columns: 84px 1fr; }
   .wr-swatch { width: 34px; height: 34px; }

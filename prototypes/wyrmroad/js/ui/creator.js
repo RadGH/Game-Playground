@@ -38,7 +38,8 @@ export function creatorScreen(app, opts = {}) {
         <label class="wr-name-row"><span>Name</span><input type="text" maxlength="16" autocomplete="off" spellcheck="false" aria-label="Hero name"><button type="button" class="wr-icon-btn" data-act="rname" aria-label="Random name">${icon('dice')}</button></label>
         <div class="wr-tabs" role="tablist">${TABS.map(([id, label]) => `<button type="button" role="tab" class="wr-tab" data-tab="${id}">${label}</button>`).join('')}</div>
         <div class="wr-tab-body"></div>
-        <div class="wr-creator-foot"><button type="button" class="wr-btn wr-big wr-primary" data-act="create">${icon('check')}<span><b>Set off</b><small class="wr-create-sub"></small></span></button></div>
+        <!-- phones: Set off is pinned to the bottom over an opaque bar; rows scroll UNDER it (not an overlap), so the text check skips the bar (2026-11-21) -->
+        <div class="wr-creator-foot" data-lint-skip><button type="button" class="wr-btn wr-big wr-primary" data-act="create">${icon('check')}<span><b>Set off</b><small class="wr-create-sub"></small></span></button></div>
       </div>
     </div>
   </section>`;

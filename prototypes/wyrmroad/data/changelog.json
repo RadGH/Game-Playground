@@ -1,6 +1,14 @@
 {
   "entries": [
     {
+      "id": "2026-11-21-phone-creator",
+      "date": "2026-11-21",
+      "title": "Phone fix: making a hero",
+      "items": [
+        "On phones the Set off button now stays at the bottom of the hero creator, so you can always get past it. The rest of the screen scrolls as one page."
+      ]
+    },
+    {
       "id": "2026-11-20-launch",
       "date": "2026-11-20",
       "title": "Wyrmroad sets off",

@@ -45,8 +45,10 @@ const only = flag('--only');
 const pick = flag('--screens') ? new Set(flag('--screens').split(',')) : null;   // --screens a,b: only these (while working on them; publishing walks all)
 const TRY_STRICT = args.includes('--strict') && !cfg.strict;   // trial run on an older game: report, never fail
 const STRICT = !!cfg.strict || TRY_STRICT;
+// phone = what an iPhone browser leaves for the page with its bars showing (390×664), not the whole 844-tall screen:
+// Wyrmroad's creator passed at 844 and its Set off button was out of reach on Radley's iPhone (2026-11-21).
 // cfg.views: a game the owner ruled desktop-only (Hullforge, 2026-11-14: "It does not need phone support") lists ['desktop']
-const VIEWS = [{ id: 'desktop', w: 1280, h: 800, phone: false }, { id: 'phone', w: 390, h: 844, phone: true }].filter(v => (!only || v.id === only) && (!cfg.views || cfg.views.includes(v.id)));
+const VIEWS = [{ id: 'desktop', w: 1280, h: 800, phone: false }, { id: 'phone', w: 390, h: 664, phone: true }].filter(v => (!only || v.id === only) && (!cfg.views || cfg.views.includes(v.id)));
 
 // one browser per view (2026-11-18): desktop and phone sharing one software-graphics process for a long walk ran it
 // out of room on a big game (Overdrive Frame) — a real device only ever runs one view.

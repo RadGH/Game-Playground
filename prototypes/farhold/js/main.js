@@ -4,6 +4,8 @@
 // frame loop. `window.farhold` is the handle the Playwright specs drive.
 
 import { createNightLights } from './nightlights.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import * as THREE from 'three';
 import { createWorld, makeTerrain, describePlanet, createSystem, chooseLanding, isHabitableStart, landableBodies, M_PER_CELL, setMetresPerCell, M_PER_CELL_DEFAULT } from './planet.js';
 import { createSpace } from './space.js';

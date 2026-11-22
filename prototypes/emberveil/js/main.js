@@ -2,6 +2,8 @@
 // treasure / skill checks / dungeons). Data comes from data/*.json (built from the original game), rules from js/rules.js,
 // loot from js/loot.js, fights from js/combat.js, the world from js/game.js. Bodies: Mii + creatures on the 3D stage.
 import { Lingo, Entity } from '../../../lingo/js/lingo.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { Library } from '../../../library/js/library.js';
 import { loadDeps, makeNpc } from '../../../library/js/make.js';
 import { voiceFor, roleForEnemy } from '../../../shared/voices.js';

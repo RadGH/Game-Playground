@@ -2,6 +2,8 @@
 // Independent project by Radley Sustaire. Plan: docs/PLAN.md. Rules for agents: README.md.
 
 import { loadData } from './game/data.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { createSession, prepareData } from './game/session.js';
 import { newGame, saveGame, loadGame, fillSetup, titleOf, progressOf } from './game/modes.js';
 import { makeTrial, dayKey } from './game/trials.js';

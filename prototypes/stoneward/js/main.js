@@ -4,6 +4,8 @@
 // the worker; nothing in the world changes on this side.
 
 import { createLink } from './client/link.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { createStream } from './client/stream.js';
 import { saves } from './client/saves.js';
 import { createRenderer } from './render/gl.js';

@@ -11,6 +11,8 @@
 // The engine (js/*.js) never learns any of this exists. It gets tick(dt) and public method calls.
 
 import { loadData } from '../data.js';
+import { stopPageZoom } from '../../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { Game } from '../game.js';
 import { invChanged } from '../production.js';
 import { spawnWave } from '../combat.js';

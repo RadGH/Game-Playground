@@ -1,6 +1,8 @@
 // Oddhaven: the page. Loads the world and the baked cars, starts the sim in its Worker, then runs one frame loop:
 // rules (mirror of the sim, Rapier) -> picture (who is drawn where) -> draw.
 import { installAudioWake } from './audio-wake.js';     // first: it has to see every sound context the page makes
+import { stopPageZoom } from '../../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import * as THREE from 'three';
 import RAPIER from '../../../../vendor/rapier/rapier.mjs';
 import { FIRST_MAP } from '../world/first-map.js';

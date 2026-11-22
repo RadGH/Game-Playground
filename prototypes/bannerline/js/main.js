@@ -15,6 +15,8 @@
 // fastForward(ticks), probe() } for Playwright.
 
 import { createRenderer } from './view/renderer.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { createRtsCamera } from './view/camera.js';
 import { buildWorld } from './view/terrain.js';
 import { layoutFromMap } from './view/layout.js';

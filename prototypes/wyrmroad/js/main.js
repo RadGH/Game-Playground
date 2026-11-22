@@ -5,6 +5,8 @@
 //   app.loop = fn(dt)          the active screen's per-frame work (the play screen runs the session here)
 //   window.gameEye.state()      what Claude's game-eye tool reads (screen, chapter, section, heroes, foes, props)
 import { loadTuning, tunePanel } from '../../../shared/tune.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { installTooltips } from '../../../shared/tooltip.js';
 import { createWhatsNew } from '../../../shared/whats-new.js';
 import { createCredits } from '../../../shared/credits.js';

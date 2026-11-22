@@ -102,6 +102,21 @@ export function lintGame(dir, { strict = false } = {}) {
     }
     for (const [cls, at] of where) { const files = [...new Set(at.map(x => x[0]))]; if (files.length > 1) push('css-class-twice', 'css/' + at[1][0], at[1][1], `${cls} also in css/${at[0][0]}:${at[0][1]}`, 'one class styled in two stylesheets: name classes after their screen (lessons rule 52)'); }
   }
+  // game-wide: every game stops iPhone page zoom itself — iOS ignores user-scalable=no, a pinch or double-tap zooms the
+  // game and the player can't get back out (Wyrmroad 2026-11-21, lessons H4; owner: "include that for most games").
+  // shared/no-zoom.js. A game that really wants page zoom puts a `.lint-page-zoom-ok` file in its folder.
+  if (existsSync(join(dir, 'index.html')) && !existsSync(join(dir, '.lint-page-zoom-ok'))) {
+    let stops = false;
+    (function walk(d) {
+      for (const n of readdirSync(d)) {
+        if (stops) return;
+        const p = join(d, n), st = statSync(p);
+        if (st.isDirectory()) { if (!SKIP_DIRS.has(n) && n !== 'server' && n !== 'tests') walk(p); continue; }
+        if (/\.(m?js|html)$/.test(n) && /no-zoom\.js|gesturestart/.test(readFileSync(p, 'utf8'))) stops = true;
+      }
+    })(dir);
+    if (!stops) push('ios-zoom', 'index.html', 0, 'page zoom on', 'every game stops iPhone page zoom: call stopPageZoom() from shared/no-zoom.js at start-up');
+  }
   // game-wide: a What's new button (shared/whats-new.js + data/changelog.json, or the game's own)
   const hasNews = existsSync(join(dir, 'data', 'changelog.json')) || existsSync(join(dir, '.lint-has-whats-new'));
   if (!hasNews) push('no-whats-new', '(game)', 0, basename(dir), "every published game has a What's new button: shared/whats-new.js + data/changelog.json");

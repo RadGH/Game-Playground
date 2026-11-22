@@ -1,6 +1,14 @@
 {
   "entries": [
     {
+      "id": "2026-11-21-no-phone-zoom",
+      "date": "2026-11-21",
+      "title": "No more stuck zoom on phones",
+      "items": [
+        "Pinching the screen or tapping fast between the buttons no longer zooms the whole game in on an iPhone, so the controls stay where they belong."
+      ]
+    },
+    {
       "id": "2026-11-21-acts-two-and-three",
       "date": "2026-11-21",
       "title": "Acts II and III: four roads, four endings",

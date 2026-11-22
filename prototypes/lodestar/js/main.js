@@ -1,6 +1,8 @@
 // Lodestar boot (M2): load the console data, show the bunker hatch, and on start mount the desk round the scope and
 // open the line to the world. The main thread never changes game state — it sends commands and draws frames.
 import { createState } from './console/state.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { createView } from './console/view.js';
 import { loadSettings, saveSettings, volumeOf } from './console/settings.js';
 import { createRoom } from './audio/room.js';

@@ -2,6 +2,8 @@
 // The sim (js/sim) is pure; this file feeds it input and turns its events into pictures, sound and UI.
 
 import { openNav, deckButton, DECK_ICON } from './ui/navmenu.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { createWorld, step, hostile, fireHarpoon, launchDrone, repair, spawnPickup, cargoUsed, GRACE_SECONDS, BOOST_RELOCK, crewText } from './sim/world.js';
 import { generateGalaxy, populate, spawnGroup, SAFE_RADIUS, canWarpTo, warpCore, coreFor, arrivalSpot, secureArrival, ARRIVAL_GRACE } from './sim/galaxy.js';
 import { streamSectors } from './sim/sectors.js';

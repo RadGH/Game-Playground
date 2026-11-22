@@ -2,6 +2,8 @@
 // Sim: fixed 1/30 s steps × game speed; creatures and shots are drawn between the last two steps (lessons H3);
 // effects, weather and the orbital strike run in real time (research-boom-feel.md). See docs/ARCH.md.
 import { loadTuning, tunePanel } from '../../../shared/tune.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { installTooltips, registerTip } from '../../../shared/tooltip.js';
 import { fmt } from '../../../shared/format.js';
 import { bindLive, T, milestones } from './sim/tuning.js';

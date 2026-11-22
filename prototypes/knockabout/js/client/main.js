@@ -6,6 +6,8 @@
 // Menus work with a controller (d-pad / stick moves the ring, A picks, B goes back), the keyboard and the mouse / touch.
 // The match runs in this page (local.js) — the seam an online version plugs into is described there.
 import { createInput, deviceName, buttonsFor } from './input.js';
+import { stopPageZoom } from '../../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { createNav } from './nav.js';
 import { createRenderer } from './render.js';
 import { createHud } from './hud.js';

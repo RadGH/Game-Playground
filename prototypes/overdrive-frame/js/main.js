@@ -1,6 +1,8 @@
 // Overdrive Frame — the page: loads the data, owns the screens (title → missions board → drop → mission → results),
 // the shared bakers, the save, and the menus every game has (☰, What's new, Credits, Report a bug, sign in).
 import { loadTuning, tunePanel } from '../../../shared/tune.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { installTooltips } from '../../../shared/tooltip.js';
 import { createWhatsNew } from '../../../shared/whats-new.js';
 import { createCredits } from '../../../shared/credits.js';

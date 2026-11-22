@@ -2,6 +2,8 @@
 //   Title → Gauntlet (pick a fighter → eight rounds with a boon between) · Duel (you vs one or two of your choice)
 //   · Watch (two or three bots fight while you look).
 import { createFight, step, STEP, alive, specialCd } from './sim/fight.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { createRun, foesFor, boonChoices, boonText, applyBoon, endRound } from './sim/gauntlet.js';
 import { createStage } from './render/stage.js';
 import { createActor, loadModel, cardUrl } from './render/actor.js';

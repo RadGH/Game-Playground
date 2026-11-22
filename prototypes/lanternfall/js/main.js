@@ -3,6 +3,8 @@
 // and respawn. Dev URLs still work: ?room=<id> (straight into a room with a test hero), ?spawn=a,b, ?bench=1,
 // ?debug=1, ?class=<id>.
 import { loadData, loadRoom, readJson, roomUrl } from './core/data.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { createGame, enterRoom, findFloor } from './core/state.js';
 import { tickGame } from './core/tick.js';
 import { createLoop } from './core/loop.js';

@@ -2,6 +2,8 @@
 // The sim (js/sim) is pure; this file feeds it time and taps and turns its events into pictures, sound and words.
 
 import { newGame, save, load, SAVE_KEY, exportText, importText } from './sim/state.js';
+import { stopPageZoom } from '../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { tick, STEP, catchUp, createBattle, newRealm, stewardSpend, cityTitle } from './sim/game.js';
 import { castSpell, canCast, autoTarget, waveName, densest, towerPos, spawnR } from './sim/battle.js';
 import { wallMax, manaMax, slotsOf, bon, spellKnown, isSiege, touch, towerStats, branchDue, crownsFor, PRESTIGE_WAVE } from './sim/rules.js';

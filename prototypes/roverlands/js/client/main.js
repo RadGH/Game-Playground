@@ -6,6 +6,8 @@
 //   onGame(net)    starts a session on that world; onLeave() ends it.
 // window.roverlands / window.gameEye.state() for tests and Claude's game-eye.
 import * as THREE from 'three';
+import { stopPageZoom } from '../../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import RAPIER from '../../../../vendor/rapier/rapier.mjs';
 import { generateWorldAsync } from '../world/world-async.js';
 import { mapFor, mapOfPlace } from '../net/places.js';

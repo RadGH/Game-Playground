@@ -1,6 +1,8 @@
 // Rogueloot page: title -> game. Solo runs the room code in a Worker; online talks to the room server. Either way the
 // page sends inputs and draws snapshots, predicting its own walking with the SAME rule the sim uses (js/sim/move.js).
 import { createScene, buildArea as buildTestArea } from './scene.js';
+import { stopPageZoom } from '../../../../shared/no-zoom.js';
+stopPageZoom();   // iPhone ignores user-scalable=no: no pinch / double-tap page zoom (shared/no-zoom.js)
 import { createActors, handStats } from './actors.js';
 import { createInput } from './input.js';
 import { createTouch, isTouch } from './touch.js';

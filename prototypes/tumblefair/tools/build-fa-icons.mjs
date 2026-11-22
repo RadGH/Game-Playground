@@ -14,6 +14,7 @@ const ODD_SWAP = ['face-smile', 'face-sunglasses', 'star', 'star-half', 'heart',
 export const LISTS = {
   'odd-one-out': [...ODD_BASE.flatMap(n => ['solid/' + n, 'regular/' + n]), ...ODD_SWAP.map(n => 'solid/' + n)],
   'higher-or-lower': ['ticket', 'candy', 'lollipop', 'popcorn', 'ice-cream', 'balloon', 'hotdog', 'teddy-bear', 'dice', 'gift', 'ferris-wheel', 'crown', 'trophy'].map(n => 'duotone/' + n),
+  'copycat-cha-cha': ['hands-clapping', 'person-arrow-up-from-line', 'hand-wave', 'arrows-spin'].map(n => 'duotone/' + n),
   'potion-mixer': ['mushroom', 'bat', 'spider-web', 'candy-corn', 'bone', 'feather', 'moon', 'sparkles', 'frog', 'acorn', 'worm', 'pumpkin', 'cauldron'].map(n => 'duotone/' + n),
 };
 const args = process.argv.slice(2), fi = args.indexOf('--fa');

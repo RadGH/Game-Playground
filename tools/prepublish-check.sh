@@ -41,7 +41,7 @@ if [[ -f "$DIR/tests/walk.mjs" && "${WALK:-1}" != 0 ]]; then
     echo "   (started $STARTED for the walk)"
   fi
   # the walk's time limit catches a hung page; a big game may ask for more in its walk file (`budgetSec: 1500`)
-  BUDGET=$(grep -oE 'budgetSec:[[:space:]]*[0-9]+' "$DIR/tests/walk.mjs" | grep -oE '[0-9]+' | head -1); BUDGET=${BUDGET:-900}
+  BUDGET=$(grep -oE 'budgetSec:[[:space:]]*[0-9]+' "$DIR/tests/walk.mjs" | grep -oE '[0-9]+' | head -1 || true); BUDGET=${BUDGET:-900}   # || true: no budgetSec = no match, which pipefail would turn into a silent exit
   timeout "$BUDGET" node tools/walk-screens.mjs "$GAME" | tail -60 || FAIL=1
   [[ -n "$STARTED" ]] && tools/game-servers.sh stop "$STARTED" >/dev/null && echo "   (stopped $STARTED again)"
 elif [[ ! -f "$DIR/tests/walk.mjs" ]]; then

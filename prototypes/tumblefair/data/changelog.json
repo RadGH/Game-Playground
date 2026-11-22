@@ -2,6 +2,16 @@
  "_doc": "Player-facing changelog for Tumblefair, newest first (shared/whats-new.js reads it). Append one entry at EVERY publish: plain language, what players will notice, no file names. `id` is stable and unique (date, plus a letter for a second publish that day).",
  "entries": [
   {
+   "id": "2026-11-21",
+   "date": "2026-11-21",
+   "title": "Two new minigames: a dance-off and a catapult",
+   "items": [
+    "💃 Copycat Cha-Cha: the Dance Captain dances a routine (Clap, Jump, Wave, Spin) on the beat, then it's your turn to dance it back from memory. Right on the beat scores the most, a whole routine right is Flawless (+3), and the routine gets longer every round.",
+    "🪨 Catapult Crossing: cross a staircase of stone blocks over a bottomless pit while one friend fires the catapult at you. Boulders smash blocks (watch for the red circle), Hop clears a gap, and reaching the bottom scores 5 (+2 if you're first). Everybody gets a turn at the catapult, and the catapult scores 3 for everyone who falls in.",
+    "🎮 On a keyboard or controller, Copycat Cha-Cha's moves are on the arrow keys / d-pad, and the catapult player's buttons say Fire and Big shot."
+   ]
+  },
+  {
    "id": "2026-11-16",
    "date": "2026-11-16",
    "title": "Fairer, clearer, more time",

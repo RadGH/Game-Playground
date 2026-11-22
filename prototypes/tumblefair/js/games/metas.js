@@ -5038,6 +5038,72 @@ export const GAMES = Object.freeze({
    "css": true,
    "rival": true
   }
+ },
+ "copycat-cha-cha": {
+  "meta": {
+   "id": "copycat-cha-cha",
+   "title": "Copycat Cha-Cha",
+   "blurb": "Watch the Dance Captain, then copy the moves on the beat!",
+   "how": [
+    "Watch the Dance Captain dance a routine.",
+    "Then dance it back: one move a beat, from memory.",
+    "Right move on the beat = big points. All right = Flawless!",
+    "Every round the routine gets longer."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 76,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "card": "card-copycat-cha-cha",
+   "css": true
+  }
+ },
+ "catapult-crossing": {
+  "meta": {
+   "id": "catapult-crossing",
+   "title": "Catapult Crossing",
+   "blurb": "Cross the blocks over the pit while a friend fires the catapult!",
+   "how": [
+    "One player fires the catapult; everyone else crosses the blocks.",
+    "Boulders smash blocks — fall in the pit and you are out.",
+    "A hops a gap. Reach the bottom ledge to score!",
+    "Everyone gets a turn at the catapult."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 112,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Hop",
+    "b": "Big shot"
+   },
+   "move": {
+    "speed": 3.2,
+    "accel": 30,
+    "stunDrag": 2.6,
+    "boostMul": 2.3
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 4.8999999999999995,
+    "hd": 10.599999999999998,
+    "wall": true
+   },
+   "pitch": 60,
+   "card": "card-catapult-crossing",
+   "css": true
+  }
  }
 });
 export const gameIds = () => Object.keys(GAMES);

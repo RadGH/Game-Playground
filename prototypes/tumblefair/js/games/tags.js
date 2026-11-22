@@ -52,6 +52,7 @@ export const GAME_KINDS = Object.freeze({
   'tip-the-scales': ['guess'],  // Expansion 1 M5
   'merry-go-guess': ['guess', 'reaction'],  // Expansion 1 M5
   'big-ball-bop': ['brawl'],  // Expansion 1 M5
+  'copycat-cha-cha': ['rhythm', 'memory'], 'catapult-crossing': ['dodge', 'aim'],   // 2026-11-21
 });
 
 export const kindsOf = id => GAME_KINDS[id] || [];

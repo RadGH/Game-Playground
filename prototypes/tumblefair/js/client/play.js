@@ -29,6 +29,7 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
   const players = intro.players.map(p => { const m = memberOf(p.pid); return { pid: p.pid, seat: p.seat, name: m.name || p.name, color: SEATS[p.seat].color, dark: SEATS[p.seat].dark, shape: SEATS[p.seat].shape, portrait: m.look ? portrait(m) : '', look: m.look || null, costume: m.costume, cpu: m.cpu || null }; });   // cpu: Expansion 1 M1 (a computer fairgoer: badge it)
   const playing = me != null && players.some(p => p.pid === me);
   const actors = new Map(), tags = [], tracks = new Map(), npcs = new Set(), clock = createServerClock({ tickMs: TICK_MS });
+  let btnSpec = null;                                      // ctx.buttons(): a game relabels A / B for this player's role
   let live = false, disposed = false, acc = 0, seq = 0, mine = null, pending = [], rx = 0, rz = 0, lastG = null;
 
   if (arena) {
@@ -53,6 +54,8 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
   if (arena) { const A = AR, hw = A.shape === 'circle' ? A.r : A.hw, hd = A.shape === 'circle' ? A.r : A.hd; homeView = { cx: 0, cz: 0, hw: hw + 0.5, hd: hd + 0.5, pitch: (meta.pitch || 54) + (innerHeight > innerWidth * 1.15 ? 12 : 0), tall: 2.2, yaw: 0 }; }
   const ctx = {
     btn: s => btnText(s, meta.controls),          // "press A" -> Space / E on a keyboard, the button's label on a phone (buttons.js)
+    /** Relabel (or hide with '') this player's A / B buttons for their role right now, e.g. { a: 'Fire', b: 'Big shot' }; null = the game's own. */
+    buttons: spec => { btnSpec = spec || null; if (live && arena && playing) controls.set({ stick: true, ...meta.controls, ...btnSpec }); },
     THREE, stage, group, ui, init: intro.init, season: intro.season || null, meta, players, me: playing ? me : null, watching: !playing,
     player: pid => players.find(p => p.pid === pid), actor: pid => actors.get(pid) || null,
     send: (a, d) => net.send({ t: 'act', a, ...(d !== undefined ? { d } : {}) }), sfx, arena: AR,
@@ -72,7 +75,7 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
   const dress = !arena || disposed ? null : ctx.season === 'halloween' && view.halloween !== false ? dressArena(ctx, view.halloween || {})
     : ctx.season === 'winter' && view.winter !== false ? dressWinter(ctx, view.winter || {}) : null;   // M6: snow, snowmen and snowfall (js/client/winter.js)
 
-  function start() { live = true; if (arena && playing) controls.set({ stick: true, ...meta.controls }); view.start?.(); }
+  function start() { live = true; if (arena && playing) controls.set({ stick: true, ...meta.controls, ...btnSpec }); view.start?.(); }
   function snap(msg) {
     if (msg.b && msg.k != null) clock.sample(msg.k, performance.now());
     if (msg.b) for (const [k, row] of Object.entries(msg.b)) {

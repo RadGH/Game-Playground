@@ -94,6 +94,7 @@ export function createView(ctx) { ... return { state(g), event(ev), priv(d), fra
 - `pos(pid)` → where that player's character is drawn now (yours predicted, others interpolated)
 - `view.input(inp)` (optional, arena) — called the moment YOUR phone sends a button press, before the server answers:
   play the punch/throw animation here so your own action never waits for the round trip
+- `buttons({ a, b })` (arena) — relabel this player's A / B buttons for their role right now (`''` hides one, `null` = meta.controls); Catapult Crossing: the catapult player sees Fire / Big shot
 - `send(a, d)` (= `act` on the server), `sfx(name)` ('tap', 'good', 'bad', 'win', 'hit', 'throw', 'splat', 'out', 'pick', 'coins', 'trap')
 
 Shared DOM bits: `js/client/gamehud.js` — `scoreBar(ctx, {unit})` (chips + clock; call `.set(scores, left)`), `chip(p)`, `h()`, `esc()`, `floatText(stage, x, y, z, text, cls)`.

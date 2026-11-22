@@ -1,0 +1,16 @@
+/* Catapult Crossing: the role line under the score bar, the round / home / pit banner, the catapult's reload meter,
+   and a "Catapult" tag on the chip of whoever is firing. */
+.game-catapult-crossing .cx-role { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); pointer-events: none; max-width: 94vw;
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 249, 232, .96); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.25 var(--font); text-align: center; transition: opacity .6s; }
+.cx-role.gone { opacity: 0; }
+.game-catapult-crossing.is-cat .cx-role { background: #ffe2c2; }
+.game-catapult-crossing .cx-banner { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center; width: max-content; max-width: 92vw;
+  font: 900 clamp(24px, 6.5vw, 52px)/1.08 var(--font); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); transition: transform .15s, opacity .15s; }
+.cx-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); } .cx-banner.good { color: var(--sun); } .cx-banner.bad { color: #ff9a9a; }
+.game-catapult-crossing .cx-meter { position: absolute; left: calc(var(--sl) + 12px); bottom: calc(var(--sb) + 14px); pointer-events: none; display: grid; grid-template-columns: auto 120px; gap: 4px 8px; align-items: center;
+  padding: 6px 12px; border-radius: 14px; background: rgba(36, 26, 61, .82); color: #fff; font: 800 13px/1 var(--font); }
+.cx-meter i { display: block; height: 12px; border-radius: 6px; background: rgba(255, 255, 255, .2); overflow: hidden; border: 2px solid var(--ink); }
+.cx-meter b { display: block; height: 100%; width: 0; background: #ff9a5a; }
+.cx-meter.ready i:not(.big) b, .cx-meter.big-ready i.big b { background: #7dff8a; }
+.game-catapult-crossing .chip.cat .nm::after { content: ' · Catapult'; font-size: .78em; color: #b0531a; }
+@media (max-width: 520px) { .game-catapult-crossing .cx-role { font-size: 13px; } .game-catapult-crossing .cx-meter { bottom: auto; top: calc(var(--st) + 92px); left: calc(var(--sl) + 8px); grid-template-columns: auto 70px; } }

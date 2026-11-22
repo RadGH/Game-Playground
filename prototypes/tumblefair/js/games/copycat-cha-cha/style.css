@@ -1,0 +1,63 @@
+/* Copycat Cha-Cha — the 3D stage shows through the top; the routine strip and the four move buttons sit low on a phone. */
+.game-copycat-cha-cha { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 8px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 12px) calc(var(--sl) + 10px);
+  background: linear-gradient(rgba(29, 21, 64, 0) 40%, rgba(29, 21, 64, .5) 62%, rgba(20, 12, 44, .88)); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-copycat-cha-cha > * { flex: none; }
+.cc-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; align-items: center; max-width: 100%; }
+.cc-board .chip { padding-right: 8px; }
+.cc-board .chip.lead { box-shadow: 0 0 0 3px var(--sun), 0 3px 0 var(--ink); }
+.cc-marks { display: inline-flex; gap: 2px; margin-left: 2px; }
+.cc-marks:empty { display: none; }
+.cc-marks i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--ink); background: #ccc; }
+.cc-marks i.mk-P { background: #ffd23f; } .cc-marks i.mk-G { background: #7ddc6a; } .cc-marks i.mk-O { background: #8ec9ff; }
+.cc-marks i.mk-X, .cc-marks i.mk-- { background: #ff7a7a; }
+.cc-medals { display: flex; gap: 6px; }
+.cc-medals span { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px 2px 4px; border-radius: 999px; background: rgba(36, 26, 61, .78); color: #fff; font: 900 15px/1.4 var(--font); }
+.cc-medals span.won { background: #ffd23f; color: var(--ink); }
+.cc-medal { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ink); }
+.cc-medal.m0 { background: #d08a4a; } .cc-medal.m1 { background: #d7dde6; } .cc-medal.m2 { background: #ffd23f; }
+
+.cc-mid { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(100%, 620px); position: relative; }
+.cc-call { display: flex; align-items: center; gap: 10px; padding: 4px 14px 4px 12px; border-radius: 999px; background: rgba(255, 246, 255, .96); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); }
+.cc-round { font: 800 13px/1 var(--font); color: #6a4aa0; text-transform: uppercase; letter-spacing: .5px; }
+.cc-round:empty { display: none; }
+.cc-say { font: 900 20px/1.15 var(--font); color: var(--ink); }
+.cc-say.cue, .cc-say.copy { color: #c0285a; }
+.cc-dot { width: 18px; height: 18px; border-radius: 50%; background: #c49bff; border: 3px solid var(--ink); display: inline-block; }
+.cc-dot.beat { animation: cc-pop .4s ease-out; }
+@keyframes cc-pop { 0% { transform: scale(1.6); background: #ff6ec7; } 100% { transform: scale(1); } }
+
+.cc-strip { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 6px; width: min(100%, calc(var(--n, 3) * 76px)); }
+.cc-card { position: relative; aspect-ratio: 1; max-height: 76px; border-radius: 14px; background: rgba(255, 255, 255, .9); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink);
+  display: grid; place-items: center; transition: transform .12s, background .15s; }
+.cc-card .cc-ico { width: 70%; height: 70%; display: grid; place-items: center; }
+.cc-card .cc-ico svg { width: 100%; height: 100%; }
+.cc-card .cc-ico b { font: 900 30px/1 var(--font); color: #8a7ab0; }
+.cc-card i { position: absolute; left: 4px; top: 1px; font: 800 11px/1.2 var(--font); font-style: normal; color: #6a5a8a; }
+.cc-card.hint .cc-ico { opacity: .3; }
+.cc-card.now { transform: translateY(-5px) scale(1.06); background: #fff6c2; }
+.cc-card.mk-P { background: #ffe680; } .cc-card.mk-G { background: #b8f0a8; } .cc-card.mk-O { background: #c6e3ff; } .cc-card.mk-X, .cc-card.mk-- { background: #ffb3b3; }
+.cc-word { position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%) scale(.7); opacity: 0; pointer-events: none; white-space: nowrap;
+  font: 900 clamp(24px, 7vw, 46px)/1 var(--font); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); transition: transform .1s, opacity .1s; }
+.cc-word.show { opacity: 1; transform: translateX(-50%) scale(1); }
+.cc-word.perfect { color: #ffe066; } .cc-word.good { color: #7dff8a; } .cc-word.off { color: #b8dcff; } .cc-word.bad { color: #ff9a9a; }
+
+.cc-pad { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; width: min(100%, 620px); }
+.cc-mv { height: clamp(78px, 14dvh, 120px); border: 4px solid var(--ink); border-radius: 20px; background: #fff; box-shadow: 0 6px 0 var(--ink); position: relative;
+  display: grid; grid-template-rows: 1fr auto; justify-items: center; align-items: center; padding: 6px 2px 4px; touch-action: none; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+.cc-mv svg { width: auto; height: clamp(30px, 6dvh, 52px); }
+.cc-mv b { font: 900 16px/1 var(--font); color: var(--ink); }
+.cc-mv kbd { position: absolute; top: 4px; right: 6px; font: 800 13px/1 var(--font); color: #7a6a9a; background: none; border: 0; padding: 0; }
+.cc-mv.m0 { background: #ffe3e6; } .cc-mv.m1 { background: #e0ecff; } .cc-mv.m2 { background: #dcf5e3; } .cc-mv.m3 { background: #efe3ff; }
+.cc-mv.hit { animation: cc-press .16s ease-out; }
+@keyframes cc-press { 0% { transform: translateY(5px); box-shadow: 0 1px 0 var(--ink); filter: brightness(1.1); } 100% { transform: none; } }
+.game-copycat-cha-cha.your-turn .cc-mv { border-color: #c0285a; }
+.game-copycat-cha-cha.watching .cc-pad { display: none; }
+.game-copycat-cha-cha[data-phase=end] .cc-pad { opacity: .45; pointer-events: none; }
+
+@media (max-width: 760px) { .cc-board { align-self: stretch; padding-right: 104px; } }   /* room for the 💬 ☰ ! corner buttons (as .scorebar) */
+@media (max-width: 520px) { .cc-board .chip .nm { display: none; } }
+@media (max-width: 420px) { .cc-pad { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cc-mv { height: clamp(64px, 10dvh, 92px); grid-template-columns: auto auto; grid-template-rows: 1fr; gap: 8px; } .cc-say { font-size: 17px; } }
+@media (max-height: 500px) { .cc-mv { height: 64px; } .cc-card { max-height: 54px; } .cc-strip { width: min(100%, calc(var(--n, 3) * 56px)); } }
+/* an upright phone has height to spare under the stage: bigger routine cards and move buttons */
+@media (max-width: 520px) and (min-height: 700px) { .cc-card { max-height: 96px; } .cc-strip { width: min(100%, calc(var(--n, 3) * 96px)); } .cc-mv { height: clamp(84px, 12dvh, 120px); } .cc-say { font-size: 19px; } }

@@ -87,7 +87,7 @@ summed, compare always available.
 
 ## Enemies (genre floor ≥ 3 truly different kinds; we have 12 + 6 bosses)
 
-Rook thug (fists), Rook knifer (fast, low health), Rook bruiser (big, grabs you), wolf (low, lunges), Briar sprite
+Rook thug (fists), Rook knifer (fast, low health), Rook bruiser (big, grabs you), wolf (low, lunges), Briar elemental
 (caster, floats), Order guard (shield: hit from behind or break with Heavy), Order crossbow (keeps distance), lantern
 priest (heals others — kill first), zealot (charges, explodes into fire on death), lantern hound, stone-skin golem
 (armoured: knockdown-immune until broken), Spine wyrmling. Bosses per chapter (above).

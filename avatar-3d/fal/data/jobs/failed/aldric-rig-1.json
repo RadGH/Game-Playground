@@ -1,0 +1,22 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "aldric-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/aldric-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4c5/ddRY7EUbQJuGZvQoUi3Iz_aldric-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "aldric: Meshy rigging",
+ "request_id": "01a20954-f06e-74d1-93cc-2cd0085cd34c",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20954-f06e-74d1-93cc-2cd0085cd34c/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20954-f06e-74d1-93cc-2cd0085cd34c",
+ "submitted": "2026-11-23T16:54:51.282Z"
+}

@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "test-trellis-platechest",
+ "price": 0.25,
+ "input": {
+  "image_url": "@ref/plate-chest.png",
+  "resolution": 512,
+  "decimation_target": 5000,
+  "texture_size": 1024
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab384e0/myMICcfoHOrCv5HhdIWk9_plate-chest.png",
+  "resolution": 512,
+  "decimation_target": 5000,
+  "texture_size": 1024
+ },
+ "note": "gear test: Trellis-2 512p, one item",
+ "request_id": "01a20477-189d-7671-a911-1647c57111e3",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20477-189d-7671-a911-1647c57111e3/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20477-189d-7671-a911-1647c57111e3",
+ "submitted": "2026-11-22T18:14:03.726Z",
+ "logged": true
+}

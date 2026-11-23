@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "sheet-mix3",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-mix3.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3851d/l7v61X31-mL5H9OhKxAE5_sheet-mix3.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "note": "Trellis-2 1024p, several items in one picture (ref/sheet-mix3.png)",
+ "request_id": "01a2047f-f742-7893-bd57-3a226310a920",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a2047f-f742-7893-bd57-3a226310a920/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a2047f-f742-7893-bd57-3a226310a920",
+ "submitted": "2026-11-22T18:23:45.007Z",
+ "logged": true
+}

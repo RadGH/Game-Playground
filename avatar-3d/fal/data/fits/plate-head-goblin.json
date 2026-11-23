@@ -1,0 +1,25 @@
+{
+ "item": "plate-head",
+ "body": "goblin",
+ "anchor": "head",
+ "cover": [
+  "scalp"
+ ],
+ "scale": 2.017,
+ "turn": -40,
+ "offset": [
+  0.0078,
+  0.0069,
+  0.1842
+ ],
+ "inside": 0.8,
+ "region_inside": {
+  "face": 1.0,
+  "scalp": 0.574
+ },
+ "hides": [
+  "face",
+  "scalp"
+ ],
+ "triangles": 1784
+}

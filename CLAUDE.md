@@ -46,6 +46,8 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 | `avatar-2d/` | SVG paper-doll builder; `js/parts/chibi2-parts.js` registers every Chibi 2 part id |
 | `avatar-3d/` | Three.js characters (Chibi 2/2.5 — read `CHIBI2.md`), creatures, spell effects, vehicles + catalog, mounts |
 | `avatar-3d/chibi3`, `chibi4/`, `kestrel/` | Character-system trials (on hold / in trial) — `CHIBI3.md`, `chibi4/README.md`, `kestrel/README.md`. Kestrel's Meshy male/female are NOT for games (owner 2026-11-11) |
+| `avatar-3d/tabard/` | Tabard: WoW-style low-poly painted characters, armour swappable per slot (painted boxes + swap-in pieces + props); free path |
+| `avatar-3d/fal/` | Paid fal.ai test (2026-11-22): Rodin bodies + Meshy rig moved onto the free animation skeleton, Trellis-2 armour/weapon sets fitted and swappable; costs in `data/spend.json` |
 | `namegen/` | Name Forge: per-race languages and names for people, places, artifacts |
 | `items/` | Item Vault: tagged item catalog, materials, loot roller |
 | `library/` | Blueprint library (characters, npcs, items, parties, enemies) + sync to Claude |

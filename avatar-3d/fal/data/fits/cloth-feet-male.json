@@ -1,0 +1,19 @@
+{
+ "item": "cloth-feet",
+ "body": "male",
+ "anchor": "floor",
+ "cover": [
+  "feet"
+ ],
+ "turn_l": -50,
+ "turn_r": 30,
+ "scale": 1.4182,
+ "inside": 0.811,
+ "region_inside": {
+  "feet": 0.793
+ },
+ "hides": [
+  "feet"
+ ],
+ "triangles": 2238
+}

@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "bounty-hunter-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/bounty-hunter-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a47e/BS2dE4RQIb8EbpTyJOjFx_bounty-hunter-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "bounty-hunter: Tripo P1 textured, face_limit 3000",
+ "request_id": "01a2094a-0f4d-7ff1-977b-13d17a177804",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094a-0f4d-7ff1-977b-13d17a177804/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094a-0f4d-7ff1-977b-13d17a177804",
+ "submitted": "2026-11-23T16:42:58.297Z",
+ "logged": true
+}

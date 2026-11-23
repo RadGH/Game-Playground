@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "lantern-guard-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/lantern-guard-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a473/DvlG4HTmT2naL_OILw90h_lantern-guard-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "lantern-guard: Tripo P1 textured, face_limit 3000",
+ "request_id": "01a20948-6163-75b0-a741-8001beed0b55",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20948-6163-75b0-a741-8001beed0b55/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20948-6163-75b0-a741-8001beed0b55",
+ "submitted": "2026-11-23T16:41:08.234Z",
+ "logged": true
+}

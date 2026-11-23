@@ -1,0 +1,487 @@
+{
+ "_doc": "Written by tools/qa.sh. tests/data.test.js checks every entry passed and the hashes match the model files.",
+ "models": {
+  "models/anims.glb": "7521f401205f",
+  "models/female.glb": "63e12a57afb9",
+  "models/female/cloth.webp": "4a05e232ae5f",
+  "models/female/leather.webp": "d5e9e5bde8f6",
+  "models/female/mail.webp": "ebde80f9a643",
+  "models/female/plate.webp": "48c6fa285103",
+  "models/female/sage.webp": "8846078d26cc",
+  "models/female/skin.webp": "c578406404c2",
+  "models/male.glb": "7665a138bb8a",
+  "models/male/cloth.webp": "d9aaef92aaa0",
+  "models/male/leather.webp": "21aa79ac5b4d",
+  "models/male/mail.webp": "242328e97b50",
+  "models/male/plate.webp": "956f7473511f",
+  "models/male/sage.webp": "afe2d98ab907",
+  "models/male/skin.webp": "6d010bc38879",
+  "models/props/cap_leather.glb": "eb9c10a1cc2a",
+  "models/props/cape_crimson.glb": "6403ea03fd95",
+  "models/props/cape_wayfarer.glb": "4d0ee104364e",
+  "models/props/circlet_moon.glb": "212c91c20da5",
+  "models/props/coif_mail.glb": "9b387df90ce3",
+  "models/props/hair_ponytail.glb": "7e1b33049794",
+  "models/props/hat_wizard.glb": "6d19cc7c864a",
+  "models/props/helm_bulwark.glb": "208c5fbbd558",
+  "models/props/helm_bulwark_horned.glb": "f6e9a84bd9dc",
+  "models/props/helm_bulwark_winged.glb": "05102dc98f03",
+  "models/props/helm_kettle.glb": "69afdc160f8d",
+  "models/props/helm_nasal.glb": "b78f3d6673a1",
+  "models/props/helm_visor.glb": "4ede54f47a74",
+  "models/props/hood_wanderer.glb": "9aebc4aa25e4",
+  "models/props/pauldron_bulwark.glb": "123f21fc20a1",
+  "models/props/pauldron_leather.glb": "7df65735e2ec",
+  "models/props/pauldron_spiked.glb": "ac312c03cd15",
+  "models/props/shield_heater.glb": "f71b8c312adf",
+  "models/props/shield_kite.glb": "ba722c99d647",
+  "models/props/shield_round.glb": "544f890c10ee",
+  "models/props/shield_tower.glb": "603d42ea2b53",
+  "models/props/staff_oak.glb": "0cf040eec228",
+  "models/props/sword_arming.glb": "54a8fcdfd677"
+ },
+ "mesh": {
+  "male": {
+   "Body": true,
+   "geo_bootcuff_l": true,
+   "geo_bootcuff_r": true,
+   "geo_glovecuff_l": true,
+   "geo_glovecuff_r": true,
+   "geo_robe": true
+  },
+  "female": {
+   "Body": true,
+   "geo_bootcuff_l": true,
+   "geo_bootcuff_r": true,
+   "geo_glovecuff_l": true,
+   "geo_glovecuff_r": true,
+   "geo_robe": true
+  }
+ },
+ "proportions": {
+  "male": {
+   "height": {
+    "value": 1.853,
+    "target": null,
+    "ok": true
+   },
+   "heads_tall": {
+    "value": 7.329,
+    "target": [
+     6.6,
+     7.6
+    ],
+    "ok": true
+   },
+   "hand_over_head": {
+    "value": 0.831,
+    "target": [
+     0.68,
+     0.86
+    ],
+    "ok": true
+   },
+   "hand_width_over_head": {
+    "value": 0.5,
+    "target": [
+     0.0,
+     0.55
+    ],
+    "ok": true
+   },
+   "shoulders_over_head": {
+    "value": 1.677,
+    "target": [
+     1.35,
+     1.8
+    ],
+    "ok": true
+   },
+   "fingertip_height": {
+    "value": 0.418,
+    "target": [
+     0.34,
+     0.42
+    ],
+    "ok": true
+   },
+   "foot_over_head": {
+    "value": 1.216,
+    "target": [
+     0.9,
+     1.25
+    ],
+    "ok": true
+   }
+  },
+  "female": {
+   "height": {
+    "value": 1.804,
+    "target": null,
+    "ok": true
+   },
+   "heads_tall": {
+    "value": 7.177,
+    "target": [
+     6.6,
+     7.6
+    ],
+    "ok": true
+   },
+   "hand_over_head": {
+    "value": 0.822,
+    "target": [
+     0.68,
+     0.86
+    ],
+    "ok": true
+   },
+   "hand_width_over_head": {
+    "value": 0.516,
+    "target": [
+     0.0,
+     0.55
+    ],
+    "ok": true
+   },
+   "shoulders_over_head": {
+    "value": 1.206,
+    "target": [
+     1.15,
+     1.6
+    ],
+    "ok": true
+   },
+   "fingertip_height": {
+    "value": 0.409,
+    "target": [
+     0.34,
+     0.42
+    ],
+    "ok": true
+   },
+   "foot_over_head": {
+    "value": 1.133,
+    "target": [
+     0.9,
+     1.25
+    ],
+    "ok": true
+   }
+  }
+ },
+ "poke": [
+  {
+   "body": "male",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "idle",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "walk",
+   "worst": 0.03,
+   "worst_i": 13,
+   "worstT": 0.8125,
+   "mean": 0.0119,
+   "limit": 0.05,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "run",
+   "worst": 0.1556,
+   "worst_i": 2,
+   "worstT": 0.125,
+   "mean": 0.0601,
+   "limit": 0.17,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "attack",
+   "worst": 0.1333,
+   "worst_i": 6,
+   "worstT": 0.375,
+   "mean": 0.0428,
+   "limit": 0.14,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "cast",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "talk",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "hit",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "leather",
+   "piece": "geo_bootcuff_l",
+   "clip": "idle",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "leather",
+   "piece": "geo_bootcuff_l",
+   "clip": "walk",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "leather",
+   "piece": "geo_bootcuff_l",
+   "clip": "run",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "plate",
+   "piece": "geo_glovecuff_r",
+   "clip": "idle",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "plate",
+   "piece": "geo_glovecuff_r",
+   "clip": "walk",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "male",
+   "set": "plate",
+   "piece": "geo_glovecuff_r",
+   "clip": "attack",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "idle",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "walk",
+   "worst": 0.0457,
+   "worst_i": 6,
+   "worstT": 0.375,
+   "mean": 0.0164,
+   "limit": 0.05,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "run",
+   "worst": 0.1643,
+   "worst_i": 2,
+   "worstT": 0.125,
+   "mean": 0.078,
+   "limit": 0.17,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "attack",
+   "worst": 0.0831,
+   "worst_i": 6,
+   "worstT": 0.375,
+   "mean": 0.0323,
+   "limit": 0.14,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "cast",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "talk",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "cloth",
+   "piece": "geo_robe",
+   "clip": "hit",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "leather",
+   "piece": "geo_bootcuff_l",
+   "clip": "idle",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "leather",
+   "piece": "geo_bootcuff_l",
+   "clip": "walk",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "leather",
+   "piece": "geo_bootcuff_l",
+   "clip": "run",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "plate",
+   "piece": "geo_glovecuff_r",
+   "clip": "idle",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "plate",
+   "piece": "geo_glovecuff_r",
+   "clip": "walk",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  },
+  {
+   "body": "female",
+   "set": "plate",
+   "piece": "geo_glovecuff_r",
+   "clip": "attack",
+   "worst": 0,
+   "worst_i": 0,
+   "worstT": 0,
+   "mean": 0,
+   "limit": 0.01,
+   "ok": true
+  }
+ ]
+}

@@ -1,0 +1,998 @@
+{
+ "_doc": "How each finished model was made. bodies: the paid jobs behind each body. items: kind wear|held, job = the fal job (often one picture holding several items, so its price is shared), hides = body regions covered while worn, grip = socket name for held items (data/sockets.json). tris = low-poly target for held props (tools/blender/props.py, default 500); length + grip_at = prop size in metres for the 1.8 m man and the grip as a fraction of its height from the bottom (null = shield, held at the middle of its back). Enemy bodies: role (brawler/rogue/soldier/archer/caster/undead/beast/construct/elemental/boss), group (wyrmroad/boss/elemental/extra/goblin), height = real height in metres (models are 1 m tall; scale by it), tris = Tripo face_limit asked, stage false = not on the Enemies stage. squeeze false = keep the handle's thickness (bow: the string would be pulled in; crossbow: a stock, not a pole). grip_at values checked by eye with look.py --mark (Test 3b).",
+ "bodies": {
+  "male": {
+   "name": "Human man",
+   "jobs": [
+    "male-rodin",
+    "male-rig"
+   ]
+  },
+  "female": {
+   "name": "Human woman",
+   "jobs": [
+    "female-rodin",
+    "female-rig"
+   ]
+  },
+  "goblin": {
+   "name": "Goblin",
+   "jobs": [
+    "goblin-rodin",
+    "goblin-rig"
+   ],
+   "note": "The armour was drawn for human bodies. On the goblin it is far too long and the hats far too big: goblin gear needs its own pictures."
+  },
+  "gobw-rodin": {
+   "name": "Goblin warrior",
+   "maker": "Rodin v2",
+   "enemy": true,
+   "weapon": "gob-cleaver",
+   "offhand": "gob-buckler",
+   "jobs": [
+    "gobw-rodin",
+    "gobw-rodin-rig"
+   ],
+   "role": "brawler",
+   "group": "goblin",
+   "height": 1.0,
+   "stage": false,
+   "note": "Kept for history: the owner picked Tripo (2026-11-23); not shown on the Enemies stage."
+  },
+  "gobw-tripo": {
+   "name": "Goblin warrior",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "weapon": "gob-cleaver",
+   "offhand": "gob-buckler",
+   "jobs": [
+    "gobw-tripo",
+    "gobw-tripo-rig"
+   ],
+   "role": "brawler",
+   "group": "goblin",
+   "height": 1.0
+  },
+  "gobr-tripo": {
+   "name": "Goblin rogue",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "weapon": "gob-shiv",
+   "jobs": [
+    "gobr-tripo",
+    "gobr-tripo-rig"
+   ],
+   "role": "rogue",
+   "group": "goblin",
+   "height": 1.0
+  },
+  "gobm-tripo": {
+   "name": "Goblin shaman",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "weapon": "gob-totem",
+   "jobs": [
+    "gobm-tripo",
+    "gobm-tripo-rig"
+   ],
+   "role": "caster",
+   "group": "goblin",
+   "height": 1.0
+  },
+  "thug": {
+   "name": "Street thug",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "brawler",
+   "group": "wyrmroad",
+   "height": 1.8,
+   "tris": 3000,
+   "jobs": [
+    "thug-tripo3000",
+    "thug-rig"
+   ],
+   "weapon": "spiked-club",
+   "note": "Test job thug-tripo (face_limit 8000, then cut down here) is the losing half of the low-poly comparison; it is paid for but not used."
+  },
+  "knifer": {
+   "name": "Cutpurse",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "rogue",
+   "group": "wyrmroad",
+   "height": 1.75,
+   "tris": 3000,
+   "jobs": [
+    "knifer-tripo",
+    "knifer-rig"
+   ],
+   "weapon": "cutpurse-knife"
+  },
+  "bruiser": {
+   "name": "Bruiser",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "brawler",
+   "group": "wyrmroad",
+   "height": 2.2,
+   "tris": 4500,
+   "jobs": [
+    "bruiser-tripo",
+    "bruiser-rig"
+   ]
+  },
+  "lantern-guard": {
+   "name": "Lantern guard",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "soldier",
+   "group": "wyrmroad",
+   "height": 1.85,
+   "tris": 3000,
+   "jobs": [
+    "lantern-guard-tripo",
+    "lantern-guard-rig"
+   ],
+   "weapon": "guard-spear",
+   "offhand": "kite-shield"
+  },
+  "crossbowman": {
+   "name": "Lantern crossbowman",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "archer",
+   "group": "wyrmroad",
+   "height": 1.8,
+   "tris": 3000,
+   "jobs": [
+    "crossbowman-tripo",
+    "crossbowman-rig"
+   ],
+   "weapon": "crossbow"
+  },
+  "lantern-priest": {
+   "name": "Lantern priest",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "caster",
+   "group": "wyrmroad",
+   "height": 1.75,
+   "tris": 3000,
+   "jobs": [
+    "lantern-priest-tripo",
+    "lantern-priest-rig"
+   ],
+   "weapon": "censer"
+  },
+  "zealot": {
+   "name": "Zealot",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "brawler",
+   "group": "wyrmroad",
+   "height": 1.75,
+   "tris": 3000,
+   "jobs": [
+    "zealot-tripo",
+    "zealot-rig"
+   ],
+   "weapon": "zealot-sickle"
+  },
+  "silver-knight": {
+   "name": "Silver knight",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "soldier",
+   "group": "wyrmroad",
+   "height": 1.95,
+   "tris": 3000,
+   "jobs": [
+    "silver-knight-tripo",
+    "silver-knight-rig"
+   ],
+   "weapon": "silver-longsword",
+   "offhand": "kite-shield"
+  },
+  "royal-archer": {
+   "name": "Royal archer",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "archer",
+   "group": "wyrmroad",
+   "height": 1.8,
+   "tris": 3000,
+   "jobs": [
+    "royal-archer-tripo",
+    "royal-archer-rig"
+   ],
+   "weapon": "bow"
+  },
+  "bounty-hunter": {
+   "name": "Bounty hunter",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "rogue",
+   "group": "wyrmroad",
+   "height": 1.85,
+   "tris": 3000,
+   "jobs": [
+    "bounty-hunter-tripo",
+    "bounty-hunter-rig"
+   ],
+   "weapon": "hunter-hatchet",
+   "note": "Meshy refused the long coat on its usual skeleton twice; rigged on Meshy's default skeleton instead and moved over with to_ual.py --meshy-default. The knees sit unevenly (one is low), hidden by the coat."
+  },
+  "kiln-monk": {
+   "name": "Kiln monk",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "caster",
+   "group": "wyrmroad",
+   "height": 1.8,
+   "tris": 3000,
+   "jobs": [
+    "kiln-monk-tripo",
+    "kiln-monk-rig"
+   ],
+   "weapon": "glass-pipe"
+  },
+  "hollowborn": {
+   "name": "Hollowborn",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "undead",
+   "group": "wyrmroad",
+   "height": 1.7,
+   "tris": 3000,
+   "jobs": [
+    "hollowborn-tripo",
+    "hollowborn-rig"
+   ]
+  },
+  "root-caller": {
+   "name": "Root-caller",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "caster",
+   "group": "wyrmroad",
+   "height": 1.85,
+   "tris": 3000,
+   "jobs": [
+    "root-caller-tripo",
+    "root-caller-rig"
+   ],
+   "weapon": "root-staff"
+  },
+  "drowned-brute": {
+   "name": "Drowned brute",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "undead",
+   "group": "wyrmroad",
+   "height": 2.0,
+   "tris": 4500,
+   "jobs": [
+    "drowned-brute-tripo",
+    "drowned-brute-rig"
+   ],
+   "weapon": "bell-maul"
+  },
+  "wraith-knight": {
+   "name": "Wraith knight",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "undead",
+   "group": "wyrmroad",
+   "height": 2.0,
+   "tris": 3000,
+   "jobs": [
+    "wraith-knight-tripo",
+    "wraith-knight-rig"
+   ],
+   "weapon": "wraith-greatsword"
+  },
+  "stone-golem": {
+   "name": "Stone golem",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "construct",
+   "group": "wyrmroad",
+   "height": 2.4,
+   "tris": 4500,
+   "jobs": [
+    "stone-golem-tripo",
+    "stone-golem-rig"
+   ]
+  },
+  "winged-imp": {
+   "name": "Winged imp",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "beast",
+   "group": "wyrmroad",
+   "height": 0.9,
+   "tris": 3000,
+   "jobs": [
+    "winged-imp-tripo",
+    "winged-imp-rig"
+   ]
+  },
+  "thornling": {
+   "name": "Thornling",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "beast",
+   "group": "wyrmroad",
+   "height": 0.9,
+   "tris": 3000,
+   "jobs": [
+    "thornling-tripo",
+    "thornling-rig"
+   ]
+  },
+  "fire-elemental": {
+   "name": "Fire elemental",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "elemental",
+   "group": "wyrmroad",
+   "height": 1.9,
+   "tris": 3000,
+   "jobs": [
+    "fire-elemental-tripo",
+    "fire-elemental-rig"
+   ]
+  },
+  "grell": {
+   "name": "Grell the gang boss",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "boss",
+   "group": "boss",
+   "height": 1.95,
+   "tris": 4500,
+   "jobs": [
+    "grell-tripo",
+    "grell-rig"
+   ],
+   "weapon": "gang-hook"
+  },
+  "vessa": {
+   "name": "Captain Vessa",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "boss",
+   "group": "boss",
+   "height": 1.8,
+   "tris": 4500,
+   "jobs": [
+    "vessa-tripo",
+    "vessa-rig"
+   ],
+   "weapon": "officer-sabre"
+  },
+  "aldric": {
+   "name": "Aldric the Lamplord",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "boss",
+   "group": "boss",
+   "height": 2.3,
+   "tris": 4500,
+   "jobs": [
+    "aldric-tripo",
+    "aldric-rig"
+   ],
+   "weapon": "lamplord-staff"
+  },
+  "isolde": {
+   "name": "Queen Isolde",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "boss",
+   "group": "boss",
+   "height": 1.85,
+   "tris": 4500,
+   "jobs": [
+    "isolde-tripo",
+    "isolde-rig"
+   ],
+   "weapon": "silver-rapier"
+  },
+  "water-elemental": {
+   "name": "Water elemental",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "elemental",
+   "group": "elemental",
+   "height": 2.0,
+   "tris": 3000,
+   "jobs": [
+    "water-elemental-tripo",
+    "water-elemental-rig"
+   ]
+  },
+  "earth-elemental": {
+   "name": "Earth elemental",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "elemental",
+   "group": "elemental",
+   "height": 2.3,
+   "tris": 4500,
+   "jobs": [
+    "earth-elemental-tripo",
+    "earth-elemental-rig"
+   ]
+  },
+  "air-elemental": {
+   "name": "Air elemental",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "elemental",
+   "group": "elemental",
+   "height": 2.0,
+   "tris": 3000,
+   "jobs": [
+    "air-elemental-tripo",
+    "air-elemental-rig"
+   ]
+  },
+  "orc-grunt": {
+   "name": "Orc grunt",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "brawler",
+   "group": "extra",
+   "height": 2.0,
+   "tris": 3000,
+   "jobs": [
+    "orc-grunt-tripo",
+    "orc-grunt-rig"
+   ],
+   "weapon": "orc-axe"
+  },
+  "troll": {
+   "name": "Troll",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "brawler",
+   "group": "extra",
+   "height": 2.3,
+   "tris": 4500,
+   "jobs": [
+    "troll-tripo",
+    "troll-rig"
+   ],
+   "weapon": "bone-club"
+  },
+  "skeleton-warrior": {
+   "name": "Skeleton warrior",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "undead",
+   "group": "extra",
+   "height": 1.8,
+   "tris": 3000,
+   "jobs": [
+    "skeleton-warrior-tripo",
+    "skeleton-warrior-rig"
+   ],
+   "weapon": "sword",
+   "offhand": "gob-buckler"
+  },
+  "minotaur": {
+   "name": "Minotaur",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "brawler",
+   "group": "extra",
+   "height": 2.4,
+   "tris": 4500,
+   "jobs": [
+    "minotaur-tripo",
+    "minotaur-rig"
+   ],
+   "weapon": "minotaur-greataxe"
+  },
+  "wolf": {
+   "name": "Dire wolf",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "beast",
+   "group": "beast",
+   "height": 1.1,
+   "tris": 3000,
+   "skeleton": "quadruped",
+   "jobs": [
+    "wolf-tripo",
+    "wolf-rig"
+   ],
+   "note": "Rigged here (tools/blender/quad_rig.py), not by the paid Tripo rig (wolf-rig gave only two legs); motion from js/beast.js."
+  },
+  "drake": {
+   "name": "Drake",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "beast",
+   "group": "beast",
+   "height": 1.3,
+   "tris": 4500,
+   "skeleton": "quadruped",
+   "jobs": [
+    "drake-tripo",
+    "drake-rig"
+   ],
+   "note": "Rigged here (tools/blender/quad_rig.py --wings), not by the paid Tripo rig (drake-rig lost the back legs); motion from js/beast.js."
+  }
+ },
+ "items": {
+  "cloth-chest": {
+   "kind": "wear",
+   "job": "sheet-cloth",
+   "hides": [
+    "torso",
+    "upperarms",
+    "forearms",
+    "hips"
+   ],
+   "fit": {
+    "anchor": "neck"
+   }
+  },
+  "cloth-legs": {
+   "kind": "wear",
+   "job": "sheet-cloth",
+   "hides": [
+    "hips",
+    "thighs",
+    "shins"
+   ],
+   "fit": {
+    "anchor": "waist"
+   }
+  },
+  "cloth-feet": {
+   "kind": "wear",
+   "job": "sheet-cloth",
+   "hides": [
+    "feet"
+   ],
+   "fit": {
+    "anchor": "floor"
+   }
+  },
+  "cloth-head": {
+   "kind": "wear",
+   "job": "sheet-cloth",
+   "hides": [
+    "scalp"
+   ],
+   "fit": {
+    "anchor": "head"
+   }
+  },
+  "cloth-hands": {
+   "kind": "wear",
+   "job": "sheet-mix1",
+   "hides": [
+    "hands"
+   ],
+   "fit": {
+    "anchor": "hand"
+   }
+  },
+  "leather-chest": {
+   "kind": "wear",
+   "job": "sheet-mix1",
+   "hides": [
+    "torso"
+   ],
+   "fit": {
+    "anchor": "neck"
+   }
+  },
+  "leather-legs": {
+   "kind": "wear",
+   "job": "sheet-mix1",
+   "hides": [
+    "hips",
+    "thighs",
+    "shins"
+   ],
+   "fit": {
+    "anchor": "waist"
+   }
+  },
+  "leather-feet": {
+   "kind": "wear",
+   "job": "sheet-mix1",
+   "hides": [
+    "feet",
+    "shins"
+   ],
+   "fit": {
+    "anchor": "floor"
+   }
+  },
+  "leather-hands": {
+   "kind": "wear",
+   "job": "sheet-mix2",
+   "hides": [
+    "hands"
+   ],
+   "fit": {
+    "anchor": "hand"
+   }
+  },
+  "leather-head": {
+   "kind": "wear",
+   "job": "sheet-mix2",
+   "hides": [
+    "scalp"
+   ],
+   "fit": {
+    "anchor": "head"
+   }
+  },
+  "mail-chest": {
+   "kind": "wear",
+   "job": "sheet-mix2",
+   "hides": [
+    "torso",
+    "upperarms",
+    "hips"
+   ],
+   "fit": {
+    "anchor": "neck"
+   }
+  },
+  "mail-legs": {
+   "kind": "wear",
+   "job": "sheet-mix2",
+   "hides": [
+    "hips",
+    "thighs",
+    "shins"
+   ],
+   "fit": {
+    "anchor": "waist"
+   }
+  },
+  "mail-feet": {
+   "kind": "wear",
+   "job": "sheet-mix3",
+   "hides": [
+    "feet"
+   ],
+   "fit": {
+    "anchor": "floor"
+   }
+  },
+  "mail-hands": {
+   "kind": "wear",
+   "job": "sheet-mix3",
+   "hides": [
+    "hands"
+   ],
+   "fit": {
+    "anchor": "hand"
+   }
+  },
+  "mail-head": {
+   "kind": "wear",
+   "job": "sheet-mix3",
+   "hides": [
+    "scalp"
+   ],
+   "fit": {
+    "anchor": "head"
+   }
+  },
+  "plate-legs": {
+   "kind": "wear",
+   "job": "sheet-mix3",
+   "hides": [
+    "hips",
+    "thighs",
+    "shins"
+   ],
+   "fit": {
+    "anchor": "waist"
+   }
+  },
+  "plate-chest": {
+   "kind": "wear",
+   "job": "test-trellis-plate4",
+   "hides": [
+    "torso",
+    "upperarms",
+    "forearms",
+    "hips"
+   ],
+   "fit": {
+    "anchor": "neck"
+   }
+  },
+  "plate-head": {
+   "kind": "wear",
+   "job": "test-trellis-plate4",
+   "hides": [
+    "scalp",
+    "face"
+   ],
+   "fit": {
+    "anchor": "head"
+   }
+  },
+  "plate-feet": {
+   "kind": "wear",
+   "job": "test-trellis-plate4",
+   "hides": [
+    "feet"
+   ],
+   "fit": {
+    "anchor": "floor"
+   }
+  },
+  "plate-hands": {
+   "kind": "wear",
+   "job": "test-trellis-plate4",
+   "hides": [
+    "hands"
+   ],
+   "fit": {
+    "anchor": "hand"
+   }
+  },
+  "sword": {
+   "kind": "held",
+   "job": "sheet-weapons1",
+   "grip": "palm_r",
+   "length": 0.95,
+   "grip_at": 0.19
+  },
+  "axe": {
+   "kind": "held",
+   "job": "sheet-weapons1",
+   "grip": "palm_r",
+   "length": 0.75,
+   "grip_at": 0.2
+  },
+  "mace": {
+   "kind": "held",
+   "job": "sheet-weapons1",
+   "grip": "palm_r",
+   "length": 0.72,
+   "grip_at": 0.18
+  },
+  "staff": {
+   "kind": "held",
+   "job": "sheet-weapons1",
+   "grip": "palm_r",
+   "tris": 600,
+   "length": 1.75,
+   "grip_at": 0.45
+  },
+  "dagger": {
+   "kind": "held",
+   "job": "sheet-weapons2",
+   "grip": "palm_r",
+   "length": 0.42,
+   "grip_at": 0.2
+  },
+  "bow": {
+   "kind": "held",
+   "job": "sheet-weapons2",
+   "grip": "palm_l",
+   "tris": 600,
+   "length": 1.3,
+   "grip_at": 0.5,
+   "squeeze": false
+  },
+  "shield": {
+   "kind": "held",
+   "job": "sheet-weapons2",
+   "grip": "forearm_l",
+   "tris": 600
+  },
+  "gob-cleaver": {
+   "kind": "held",
+   "job": "sheet-goblin-weapons",
+   "grip": "palm_r",
+   "length": 0.85,
+   "grip_at": 0.2
+  },
+  "gob-shiv": {
+   "kind": "held",
+   "job": "sheet-goblin-weapons",
+   "grip": "palm_r",
+   "length": 0.5,
+   "grip_at": 0.2
+  },
+  "gob-totem": {
+   "kind": "held",
+   "job": "sheet-goblin-weapons",
+   "grip": "palm_r",
+   "tris": 600,
+   "length": 1.8,
+   "grip_at": 0.42
+  },
+  "gob-buckler": {
+   "kind": "held",
+   "job": "sheet-goblin-weapons",
+   "grip": "forearm_l",
+   "tris": 600
+  },
+  "spiked-club": {
+   "kind": "held",
+   "job": "sheet-foes-a",
+   "grip": "palm_r",
+   "length": 0.85,
+   "grip_at": 0.2,
+   "tris": 500
+  },
+  "cutpurse-knife": {
+   "kind": "held",
+   "job": "sheet-foes-a",
+   "grip": "palm_r",
+   "length": 0.42,
+   "grip_at": 0.16,
+   "tris": 500
+  },
+  "guard-spear": {
+   "kind": "held",
+   "job": "sheet-foes-a",
+   "grip": "palm_r",
+   "length": 2.1,
+   "grip_at": 0.4,
+   "tris": 600
+  },
+  "crossbow": {
+   "kind": "held",
+   "job": "sheet-foes-a",
+   "grip": "palm_r",
+   "length": 0.75,
+   "grip_at": 0.22,
+   "tris": 600,
+   "squeeze": false
+  },
+  "censer": {
+   "kind": "held",
+   "job": "sheet-foes-b",
+   "grip": "palm_r",
+   "length": 0.8,
+   "grip_at": 0.1,
+   "tris": 500
+  },
+  "zealot-sickle": {
+   "kind": "held",
+   "job": "sheet-foes-b",
+   "grip": "palm_r",
+   "length": 0.55,
+   "grip_at": 0.2,
+   "tris": 500
+  },
+  "silver-longsword": {
+   "kind": "held",
+   "job": "sheet-foes-b",
+   "grip": "palm_r",
+   "length": 1.15,
+   "grip_at": 0.2,
+   "tris": 500
+  },
+  "kite-shield": {
+   "kind": "held",
+   "job": "sheet-foes-b",
+   "grip": "forearm_l",
+   "length": 0.95,
+   "grip_at": null,
+   "tris": 600
+  },
+  "hunter-hatchet": {
+   "kind": "held",
+   "job": "sheet-foes-c",
+   "grip": "palm_r",
+   "length": 0.55,
+   "grip_at": 0.18,
+   "tris": 500
+  },
+  "glass-pipe": {
+   "kind": "held",
+   "job": "sheet-foes-c",
+   "grip": "palm_r",
+   "length": 1.7,
+   "grip_at": 0.45,
+   "tris": 600
+  },
+  "root-staff": {
+   "kind": "held",
+   "job": "sheet-foes-c",
+   "grip": "palm_r",
+   "length": 1.75,
+   "grip_at": 0.45,
+   "tris": 600
+  },
+  "bell-maul": {
+   "kind": "held",
+   "job": "sheet-foes-c",
+   "grip": "palm_r",
+   "length": 1.25,
+   "grip_at": 0.3,
+   "tris": 600
+  },
+  "wraith-greatsword": {
+   "kind": "held",
+   "job": "sheet-foes-d",
+   "grip": "palm_r",
+   "length": 1.5,
+   "grip_at": 0.18,
+   "tris": 600
+  },
+  "gang-hook": {
+   "kind": "held",
+   "job": "sheet-foes-d",
+   "grip": "palm_r",
+   "length": 0.6,
+   "grip_at": 0.25,
+   "tris": 500
+  },
+  "officer-sabre": {
+   "kind": "held",
+   "job": "sheet-foes-d",
+   "grip": "palm_r",
+   "length": 0.95,
+   "grip_at": 0.18,
+   "tris": 500
+  },
+  "lamplord-staff": {
+   "kind": "held",
+   "job": "sheet-foes-d",
+   "grip": "palm_r",
+   "length": 1.95,
+   "grip_at": 0.45,
+   "tris": 600
+  },
+  "silver-rapier": {
+   "kind": "held",
+   "job": "sheet-foes-e",
+   "grip": "palm_r",
+   "length": 1.05,
+   "grip_at": 0.16,
+   "tris": 500
+  },
+  "orc-axe": {
+   "kind": "held",
+   "job": "sheet-foes-e",
+   "grip": "palm_r",
+   "length": 0.95,
+   "grip_at": 0.2,
+   "tris": 500
+  },
+  "bone-club": {
+   "kind": "held",
+   "job": "sheet-foes-e",
+   "grip": "palm_r",
+   "length": 1.0,
+   "grip_at": 0.2,
+   "tris": 500
+  },
+  "minotaur-greataxe": {
+   "kind": "held",
+   "job": "sheet-foes-e",
+   "grip": "palm_r",
+   "length": 1.6,
+   "grip_at": 0.3,
+   "tris": 600
+  }
+ },
+ "bodyFit": {
+  "goblin": {
+   "head_core": [
+    "scalp"
+   ],
+   "head_goal": 0.8,
+   "_why": "the goblin head is far bigger and rounder than the human heads the helms were drawn for; size head pieces on the scalp only"
+  }
+ }
+}

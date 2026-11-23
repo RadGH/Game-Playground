@@ -1,0 +1,23 @@
+{
+ "item": "mail-head",
+ "body": "female",
+ "anchor": "head",
+ "cover": [
+  "scalp"
+ ],
+ "scale": 0.9063,
+ "turn": -10,
+ "offset": [
+  0.0018,
+  0.0107,
+  1.3352
+ ],
+ "inside": 0.929,
+ "region_inside": {
+  "scalp": 0.957
+ },
+ "hides": [
+  "scalp"
+ ],
+ "triangles": 4017
+}

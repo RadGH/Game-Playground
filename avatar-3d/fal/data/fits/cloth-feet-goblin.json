@@ -1,0 +1,19 @@
+{
+ "item": "cloth-feet",
+ "body": "goblin",
+ "anchor": "floor",
+ "cover": [
+  "feet"
+ ],
+ "turn_l": -10,
+ "turn_r": 40,
+ "scale": 1.204,
+ "inside": 0.741,
+ "region_inside": {
+  "feet": 0.787
+ },
+ "hides": [
+  "feet"
+ ],
+ "triangles": 2238
+}

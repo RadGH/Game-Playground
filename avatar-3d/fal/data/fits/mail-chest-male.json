@@ -1,0 +1,26 @@
+{
+ "item": "mail-chest",
+ "body": "male",
+ "anchor": "neck",
+ "cover": [
+  "torso"
+ ],
+ "scale": 2.1022,
+ "turn": 0,
+ "offset": [
+  0.0036,
+  0.0213,
+  0.5424
+ ],
+ "inside": 0.952,
+ "region_inside": {
+  "upperarms": 0.728,
+  "hips": 1.0,
+  "torso": 1.0
+ },
+ "hides": [
+  "hips",
+  "torso"
+ ],
+ "triangles": 3798
+}

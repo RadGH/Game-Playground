@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "root-caller-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/root-caller-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a48a/tKKT-8oHdNs4RmnizkYxV_root-caller-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "root-caller: Tripo P1 textured, face_limit 3000",
+ "request_id": "01a2094b-f5d1-77e0-923e-48761a210a6f",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094b-f5d1-77e0-923e-48761a210a6f/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094b-f5d1-77e0-923e-48761a210a6f",
+ "submitted": "2026-11-23T16:45:02.851Z",
+ "logged": true
+}

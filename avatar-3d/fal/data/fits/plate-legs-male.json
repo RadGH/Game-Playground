@@ -1,0 +1,32 @@
+{
+ "item": "plate-legs",
+ "body": "male",
+ "anchor": "waist",
+ "cover": [
+  "hips",
+  "thighs"
+ ],
+ "scale": [
+  2.4289,
+  2.4289,
+  2.2694
+ ],
+ "turn": -10,
+ "offset": [
+  0.0271,
+  -0.0337,
+  0.1352
+ ],
+ "inside": 0.924,
+ "region_inside": {
+  "thighs": 0.965,
+  "shins": 0.843,
+  "hips": 0.652
+ },
+ "hides": [
+  "hips",
+  "shins",
+  "thighs"
+ ],
+ "triangles": 1370
+}

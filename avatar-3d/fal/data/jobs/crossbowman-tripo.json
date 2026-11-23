@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "crossbowman-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/crossbowman-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a473/dvYr-6EOZRfwOsB8Eo9eA_crossbowman-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "crossbowman: Tripo P1 textured, face_limit 3000",
+ "request_id": "01a20948-5952-7960-a42a-9ea9f6ce9db8",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20948-5952-7960-a42a-9ea9f6ce9db8/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20948-5952-7960-a42a-9ea9f6ce9db8",
+ "submitted": "2026-11-23T16:41:06.166Z",
+ "logged": true
+}

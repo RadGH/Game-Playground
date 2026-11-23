@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "skeleton-warrior-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/skeleton-warrior-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a4b7/FLyZiFTlFW4Fs9fdVLqIm_skeleton-warrior-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "skeleton-warrior: Tripo P1 textured, face_limit 3000",
+ "request_id": "01a20952-c261-74a0-b897-4b316a00385a",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20952-c261-74a0-b897-4b316a00385a/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20952-c261-74a0-b897-4b316a00385a",
+ "submitted": "2026-11-23T16:52:28.430Z",
+ "logged": true
+}

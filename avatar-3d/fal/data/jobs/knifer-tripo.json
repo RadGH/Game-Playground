@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "knifer-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/knifer-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a473/YgOni1W8OaIju0auYBfY2_knifer-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "knifer: Tripo P1 textured, face_limit 3000",
+ "request_id": "01a20948-3bd3-7be1-a8c0-7d2b50c9debb",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20948-3bd3-7be1-a8c0-7d2b50c9debb/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20948-3bd3-7be1-a8c0-7d2b50c9debb",
+ "submitted": "2026-11-23T16:40:58.630Z",
+ "logged": true
+}

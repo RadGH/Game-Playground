@@ -1,0 +1,23 @@
+{
+ "item": "leather-head",
+ "body": "male",
+ "anchor": "head",
+ "cover": [
+  "scalp"
+ ],
+ "scale": 1.0622,
+ "turn": 10,
+ "offset": [
+  0.0045,
+  0.029,
+  1.4799
+ ],
+ "inside": 0.749,
+ "region_inside": {
+  "scalp": 0.779
+ },
+ "hides": [
+  "scalp"
+ ],
+ "triangles": 2524
+}

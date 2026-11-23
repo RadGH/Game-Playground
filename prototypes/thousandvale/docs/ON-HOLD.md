@@ -14,6 +14,13 @@ The owner paused Thousandvale to build another game. This page is the hand-over:
 it up again, and everything that was deliberately **parked** rather than built. Nothing on the parked list is
 forgotten — bring it up when the game is resumed.
 
+## Owner rulings while on hold
+
+- **2026-11-23 — no more wisps.** "NO MORE WISPS. Make them into elementals." When Thousandvale resumes, replace the
+  vent / marsh / ash wisp enemies (data/vignettes, placements, hooks) and every wisp summon with real elemental
+  models (fire / water / earth / air — `avatar-3d/fal/`, made 2026-11-23 for Wyrmroad first), and drop "wisp" from
+  player-facing names. Rule 72 in `~/claude/docs/lessons-from-games.md`.
+
 ## Where it stands
 
 - **2026-10-20 — round 12 shipped, then wrapped up again.** The to-do list is `public/todo.html` (players) and

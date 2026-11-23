@@ -1,0 +1,27 @@
+{
+ "item": "plate-chest",
+ "body": "female",
+ "anchor": "neck",
+ "cover": [
+  "torso"
+ ],
+ "scale": 1.2016,
+ "turn": -20,
+ "offset": [
+  0.0207,
+  -0.0285,
+  0.8067
+ ],
+ "inside": 0.95,
+ "region_inside": {
+  "forearms": 0.058,
+  "upperarms": 0.708,
+  "torso": 0.986,
+  "hips": 1.0
+ },
+ "hides": [
+  "hips",
+  "torso"
+ ],
+ "triangles": 2903
+}

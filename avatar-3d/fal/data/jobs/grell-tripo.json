@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "grell-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/grell-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a49d/6f280gTQWKwswiksMhKLA_grell-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "note": "grell: Tripo P1 textured, face_limit 4500",
+ "request_id": "01a2094e-c1ee-7343-95f3-9cd4af710a07",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094e-c1ee-7343-95f3-9cd4af710a07/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094e-c1ee-7343-95f3-9cd4af710a07",
+ "submitted": "2026-11-23T16:48:06.162Z",
+ "logged": true
+}

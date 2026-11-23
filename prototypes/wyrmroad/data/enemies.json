@@ -25,8 +25,8 @@
         {"id": "bite", "anim": "attack", "t": [0.35, 0.1, 0.35], "dmg": 0.9, "reach": 1.3, "kb": 1, "stun": 0.3, "cd": 1.2, "w": 2},
         {"id": "pounce", "anim": "attack", "t": [0.55, 0.25, 0.5], "dmg": 1.3, "reach": 1.4, "kb": 5, "down": true, "move": 8, "up": 3, "cd": 3, "w": 2, "range": [3, 6]}
       ] },
-    "sprite": {"name": "Briar Sprite", "body": "creature", "ai": "caster", "hp": 35, "power": 9, "def": 0, "speed": 2.4, "height": 0.9, "float": 1.0, "xp": 14, "gold": [1, 4],
-      "look": {"type": "wisp", "size": 1.1, "colors": {"body": "#6fbf4a", "belly": "#c8f08a", "accent": "#2f5a1e", "eyes": "#fff6a0"}},
+    "sprite": {"name": "Briar Elemental", "body": "creature", "ai": "caster", "hp": 35, "power": 9, "def": 0, "speed": 2.4, "height": 1.3, "float": 1.0, "xp": 14, "gold": [1, 4],
+      "look": {"type": "elemental", "size": 0.85, "colors": {"body": "#7a9a3a", "belly": "#d8e08a", "accent": "#4a3018", "eyes": "#fff6a0"}, "features": {"glow": true, "core": true}},
       "moves": [
         {"id": "thornshot", "anim": "attack", "t": [0.6, 0.05, 0.5], "cd": 2.4, "w": 1, "range": [3, 8], "shot": {"speed": 7, "range": 10, "dmg": 1.0, "kb": 1, "stun": 0.4, "slow": 0.4, "look": "thorn"}}
       ] },
@@ -124,8 +124,8 @@
         {"id": "spit", "anim": "attack", "t": [0.7, 0.05, 0.5], "cd": 2.6, "w": 2, "range": [3, 8], "shot": {"speed": 10, "range": 10, "dmg": 1.2, "kb": 3, "stun": 0.4, "burst": 1.3, "look": "wyrmfire"}},
         {"id": "bite", "anim": "attack", "t": [0.45, 0.1, 0.4], "dmg": 1.2, "reach": 1.5, "kb": 2, "stun": 0.4, "cd": 1.5, "w": 2}
       ] },
-    "wisp": {"name": "Lantern Wisp", "body": "creature", "ai": "lunger", "hp": 32, "power": 12, "speed": 3.2, "height": 0.8, "float": 1.0, "xp": 35, "gold": [1, 4], "def": 0,
-      "look": {"type": "wisp", "size": 1.1, "colors": {"body": "#6aff8a", "belly": "#e0ffe8", "accent": "#1a6a3a", "eyes": "#ffffff"}},
+    "wisp": {"name": "Lantern Elemental", "body": "creature", "ai": "lunger", "hp": 32, "power": 12, "speed": 3.2, "height": 1.3, "float": 1.0, "xp": 35, "gold": [1, 4], "def": 0,
+      "look": {"type": "elemental", "size": 0.85, "colors": {"body": "#6aff8a", "belly": "#e0ffe8", "accent": "#1a6a3a", "eyes": "#ffffff"}, "features": {"glow": true, "core": true}},
       "moves": [
         {"id": "burst", "anim": "attack", "t": [1.0, 0.05, 0.1], "cd": 1, "w": 1, "range": [0, 1.8], "selfDestruct": true, "aoe": {"at": "self", "r": 2.0, "dmg": 1.6, "kb": 6, "up": 3, "down": true, "look": "wispburst"}}
       ] },

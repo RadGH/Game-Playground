@@ -1,0 +1,23 @@
+{
+ "item": "leather-chest",
+ "body": "female",
+ "anchor": "neck",
+ "cover": [
+  "torso"
+ ],
+ "scale": 1.3453,
+ "turn": 0,
+ "offset": [
+  0.0041,
+  -0.0226,
+  0.8065
+ ],
+ "inside": 0.952,
+ "region_inside": {
+  "torso": 0.99
+ },
+ "hides": [
+  "torso"
+ ],
+ "triangles": 3440
+}

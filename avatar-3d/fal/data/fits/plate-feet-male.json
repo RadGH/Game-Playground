@@ -1,0 +1,19 @@
+{
+ "item": "plate-feet",
+ "body": "male",
+ "anchor": "floor",
+ "cover": [
+  "feet"
+ ],
+ "turn_l": -30,
+ "turn_r": 20,
+ "scale": 1.1488,
+ "inside": 0.853,
+ "region_inside": {
+  "feet": 0.989
+ },
+ "hides": [
+  "feet"
+ ],
+ "triangles": 2614
+}

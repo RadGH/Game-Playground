@@ -140,6 +140,44 @@
    ]
   },
   {
+   "id": "fal-characters",
+   "group": "characters",
+   "title": "fal.ai characters",
+   "href": "avatar-3d/fal/",
+   "folder": "avatar-3d",
+   "readme": "avatar-3d/fal/README.md",
+   "summary": "A paid test of the fal.ai picture-to-3D service for low-poly, hand-painted characters: a man, a woman and a goblin made from redrawn reference pictures, rigged and moved onto the free animation skeleton, plus four armour sets (cloth, leather, mail, plate: head, chest, hands, legs, feet) fitted and swappable piece by piece, and seven weapons held in the hand. Shows triangles and the cost of every model; about five dollars in all.",
+   "status": "prototype",
+   "statusNote": "test 1, 2026-11-22",
+   "date": "2026-11-22",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "character",
+    "armour",
+    "fal",
+    "ai-3d"
+   ]
+  },
+  {
+   "id": "tabard",
+   "group": "characters",
+   "title": "Tabard",
+   "href": "avatar-3d/tabard/",
+   "folder": "avatar-3d",
+   "summary": "Low-poly characters in the hand-painted 2000s MMO style, with armour you can swap piece by piece. A free CC0 base body reshaped (softer, about 3,900 triangles), its texture split into fixed boxes per body part; Codex paints each outfit straight onto the 3D body's own picture and the painting is projected back onto it. Three layers like the classic games: painted-on armour boxes, swap-in mesh pieces (robe skirt, boot and gauntlet cuffs) and props on bones (helm, pauldrons, torn see-through cape, sword, staff, shield). Dressing room, a side-by-side with Chibi 2.6 and the original body, and a crowd test.",
+   "status": "prototype",
+   "statusNote": "round 1 (free path) 2026-11-22",
+   "date": "2026-11-22",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "character",
+    "three.js",
+    "armour"
+   ]
+  },
+  {
    "id": "chibi4",
    "group": "characters",
    "title": "Chibi 4",

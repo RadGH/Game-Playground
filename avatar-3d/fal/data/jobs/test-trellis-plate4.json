@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "test-trellis-plate4",
+ "price": 0.25,
+ "input": {
+  "image_url": "@ref/sheet-plate4.png",
+  "resolution": 512,
+  "decimation_target": 10000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab384e0/FBYf53Mds0q7YiFOpYJAv_sheet-plate4.png",
+  "resolution": 512,
+  "decimation_target": 10000,
+  "texture_size": 2048
+ },
+ "note": "gear test: Trellis-2 512p, 4 items in one 2x2 picture",
+ "request_id": "01a20476-d156-7661-8581-445154f2ecba",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20476-d156-7661-8581-445154f2ecba/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20476-d156-7661-8581-445154f2ecba",
+ "submitted": "2026-11-22T18:13:45.477Z",
+ "logged": true
+}

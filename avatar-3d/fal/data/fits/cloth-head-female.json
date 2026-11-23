@@ -1,0 +1,23 @@
+{
+ "item": "cloth-head",
+ "body": "female",
+ "anchor": "head",
+ "cover": [
+  "scalp"
+ ],
+ "scale": 0.7727,
+ "turn": 0,
+ "offset": [
+  0.0001,
+  0.0088,
+  1.4007
+ ],
+ "inside": 0.953,
+ "region_inside": {
+  "scalp": 0.969
+ },
+ "hides": [
+  "scalp"
+ ],
+ "triangles": 2543
+}

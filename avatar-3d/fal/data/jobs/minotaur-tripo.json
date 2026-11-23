@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "minotaur-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/minotaur-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a4b7/tjZxTR4Xudqt3S83FtmbS_minotaur-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "note": "minotaur: Tripo P1 textured, face_limit 4500",
+ "request_id": "01a20952-cfeb-77d1-ba5c-07a120394f3e",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20952-cfeb-77d1-ba5c-07a120394f3e/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20952-cfeb-77d1-ba5c-07a120394f3e",
+ "submitted": "2026-11-23T16:52:31.890Z",
+ "logged": true
+}

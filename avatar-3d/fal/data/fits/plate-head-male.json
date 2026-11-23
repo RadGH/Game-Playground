@@ -1,0 +1,26 @@
+{
+ "item": "plate-head",
+ "body": "male",
+ "anchor": "head",
+ "cover": [
+  "face",
+  "scalp"
+ ],
+ "scale": 1.2011,
+ "turn": 20,
+ "offset": [
+  0.0087,
+  0.0285,
+  1.3408
+ ],
+ "inside": 0.952,
+ "region_inside": {
+  "face": 1.0,
+  "scalp": 0.962
+ },
+ "hides": [
+  "face",
+  "scalp"
+ ],
+ "triangles": 1784
+}

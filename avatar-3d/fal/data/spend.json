@@ -1,0 +1,3621 @@
+{
+ "_doc": "Every paid fal.ai job (tools/fal-job.mjs). price = US$ from the model page at the time.",
+ "total": 32.8,
+ "jobs": [
+  {
+   "id": "male-rodin",
+   "endpoint": "fal-ai/hyper3d/rodin/v2",
+   "request_id": "01a20470-4e04-7a32-a9e4-c08322d44689",
+   "price": 0.4,
+   "input": {
+    "input_image_urls": [
+     "@ref/male-front.png",
+     "@ref/male-left.png",
+     "@ref/male-back.png"
+    ],
+    "quality_mesh_option": "4K Quad",
+    "TAPose": true,
+    "material": "All",
+    "geometry_file_format": "glb"
+   },
+   "note": "comparison: Rodin v2, 4K Quad, A-pose, 3 views",
+   "files": [
+    {
+     "file": "models/male-rodin/model_mesh-base_basic_pbr.glb",
+     "bytes": 6687628
+    },
+    {
+     "file": "models/male-rodin/model_meshes.0-base_basic_shaded.glb",
+     "bytes": 2918108
+    },
+    {
+     "file": "models/male-rodin/textures.0-preview.webp",
+     "bytes": 3160
+    }
+   ],
+   "submitted": "2026-11-22T18:06:38.641Z",
+   "done": "2026-11-22T18:09:02.306Z",
+   "seconds": 155
+  },
+  {
+   "id": "male-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20470-541c-78f2-b187-960f6891a19e",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/male-front.png",
+    "face_limit": 8000,
+    "texture": true
+   },
+   "note": "comparison: Tripo P1, 8000 faces, textured",
+   "files": [
+    {
+     "file": "models/male-tripo/model_mesh-model.glb",
+     "bytes": 3233920
+    },
+    {
+     "file": "models/male-tripo/model_urls.glb-model.glb",
+     "bytes": 3233920
+    },
+    {
+     "file": "models/male-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3233920
+    },
+    {
+     "file": "models/male-tripo/rendered_image-preview.png",
+     "bytes": 80884
+    }
+   ],
+   "submitted": "2026-11-22T18:06:40.214Z",
+   "done": "2026-11-22T18:08:34.953Z",
+   "seconds": 128
+  },
+  {
+   "id": "male-hunyuan",
+   "endpoint": "fal-ai/hunyuan3d-v3/image-to-3d",
+   "request_id": "01a20470-8d23-7961-8657-d18c51c7b17d",
+   "price": 0.6,
+   "input": {
+    "input_image_url": "@ref/male-front.png",
+    "back_image_url": "@ref/male-back.png",
+    "left_image_url": "@ref/male-left.png",
+    "generate_type": "LowPoly",
+    "polygon_type": "triangle"
+   },
+   "note": "comparison: Hunyuan3D v3 LowPoly + multi-view",
+   "files": [
+    {
+     "file": "models/male-hunyuan/model_glb-model.glb",
+     "bytes": 10589200
+    },
+    {
+     "file": "models/male-hunyuan/thumbnail-preview.png",
+     "bytes": 81169
+    },
+    {
+     "file": "models/male-hunyuan/model_urls.glb-model.glb",
+     "bytes": 10589200
+    },
+    {
+     "file": "models/male-hunyuan/model_urls.obj-model.obj",
+     "bytes": 9574336
+    }
+   ],
+   "submitted": "2026-11-22T18:06:54.800Z",
+   "done": "2026-11-22T18:16:21.072Z",
+   "seconds": 594
+  },
+  {
+   "id": "male-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20473-9fe6-73b2-9a02-e10aeff8dfc8",
+   "price": 0.2,
+   "input": {
+    "model_url": "https://v3b.fal.media/files/b/0ab384c5/qNcSOYjDz5K1-Jkr3AOe5_base_basic_shaded.glb",
+    "height_meters": 1.8,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "Meshy rigging, ue5_mannequin skeleton, on Rodin shaded male",
+   "files": [
+    {
+     "file": "models/male-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 3096012
+    },
+    {
+     "file": "models/male-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 3147436
+    },
+    {
+     "file": "models/male-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 3228856
+    },
+    {
+     "file": "models/male-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 3196332
+    },
+    {
+     "file": "models/male-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 51808
+    },
+    {
+     "file": "models/male-rig/basic_animations.running_glb-running.glb",
+     "bytes": 3197588
+    },
+    {
+     "file": "models/male-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 3175644
+    },
+    {
+     "file": "models/male-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40744
+    }
+   ],
+   "submitted": "2026-11-22T18:10:16.217Z",
+   "done": "2026-11-22T18:11:02.130Z",
+   "seconds": 47
+  },
+  {
+   "id": "goblin-rodin",
+   "endpoint": "fal-ai/hyper3d/rodin/v2",
+   "request_id": "01a20474-a0ae-74d1-a8c6-41c2e7774613",
+   "price": 0.4,
+   "input": {
+    "input_image_urls": [
+     "@ref/goblin-front.png",
+     "@ref/goblin-left.png",
+     "@ref/goblin-back.png"
+    ],
+    "quality_mesh_option": "4K Quad",
+    "TAPose": true,
+    "material": "All",
+    "geometry_file_format": "glb"
+   },
+   "note": "Rodin v2, 4K Quad, A-pose, 3 views",
+   "files": [
+    {
+     "file": "models/goblin-rodin/model_mesh-base_basic_pbr.glb",
+     "bytes": 6588748
+    },
+    {
+     "file": "models/goblin-rodin/model_meshes.0-base_basic_shaded.glb",
+     "bytes": 2680080
+    },
+    {
+     "file": "models/goblin-rodin/textures.0-preview.webp",
+     "bytes": 4302
+    }
+   ],
+   "submitted": "2026-11-22T18:11:21.951Z",
+   "done": "2026-11-22T18:14:20.067Z",
+   "seconds": 186
+  },
+  {
+   "id": "female-rodin",
+   "endpoint": "fal-ai/hyper3d/rodin/v2",
+   "request_id": "01a20474-af2f-7f30-bca5-fa58d260a286",
+   "price": 0.4,
+   "input": {
+    "input_image_urls": [
+     "@ref/female-front.png",
+     "@ref/female-left.png",
+     "@ref/female-back.png"
+    ],
+    "quality_mesh_option": "4K Quad",
+    "TAPose": true,
+    "material": "All",
+    "geometry_file_format": "glb"
+   },
+   "note": "Rodin v2, 4K Quad, A-pose, 3 views",
+   "files": [
+    {
+     "file": "models/female-rodin/model_mesh-base_basic_pbr.glb",
+     "bytes": 7241980
+    },
+    {
+     "file": "models/female-rodin/model_meshes.0-base_basic_shaded.glb",
+     "bytes": 3086784
+    },
+    {
+     "file": "models/female-rodin/textures.0-preview.webp",
+     "bytes": 2432
+    }
+   ],
+   "submitted": "2026-11-22T18:11:25.659Z",
+   "done": "2026-11-22T18:14:05.361Z",
+   "seconds": 171
+  },
+  {
+   "id": "test-trellis-plate4",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20476-d156-7661-8581-445154f2ecba",
+   "price": 0.25,
+   "input": {
+    "image_url": "@ref/sheet-plate4.png",
+    "resolution": 512,
+    "decimation_target": 10000,
+    "texture_size": 2048
+   },
+   "note": "gear test: Trellis-2 512p, 4 items in one 2x2 picture",
+   "files": [
+    {
+     "file": "models/test-trellis-plate4/model_glb-trellis2_70be3ba6b5e44c3cb5f613a88bf4b92e.glb",
+     "bytes": 1270712
+    }
+   ],
+   "submitted": "2026-11-22T18:13:45.477Z",
+   "done": "2026-11-22T18:14:04.152Z",
+   "seconds": 45
+  },
+  {
+   "id": "test-trellis-platechest",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20477-189d-7671-a911-1647c57111e3",
+   "price": 0.25,
+   "input": {
+    "image_url": "@ref/plate-chest.png",
+    "resolution": 512,
+    "decimation_target": 5000,
+    "texture_size": 1024
+   },
+   "note": "gear test: Trellis-2 512p, one item",
+   "files": [
+    {
+     "file": "models/test-trellis-platechest/model_glb-trellis2_c14c7a0827054c7fa23ed180b4071ab7.glb",
+     "bytes": 533284
+    }
+   ],
+   "submitted": "2026-11-22T18:14:03.726Z",
+   "done": "2026-11-22T18:14:16.989Z",
+   "seconds": 57
+  },
+  {
+   "id": "female-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20478-7594-7702-a1d8-e570b823ca5d",
+   "price": 0.2,
+   "input": {
+    "model_url": "https://v3b.fal.media/files/b/0ab384e3/jp_eM8yJlanyNOI6P7S8-_base_basic_shaded.glb",
+    "height_meters": 1.7,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "Meshy rigging, ue5_mannequin, on Rodin shaded female",
+   "files": [
+    {
+     "file": "models/female-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 3266680
+    },
+    {
+     "file": "models/female-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 3311452
+    },
+    {
+     "file": "models/female-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 3399640
+    },
+    {
+     "file": "models/female-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 3360364
+    },
+    {
+     "file": "models/female-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52072
+    },
+    {
+     "file": "models/female-rig/basic_animations.running_glb-running.glb",
+     "bytes": 3368388
+    },
+    {
+     "file": "models/female-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 3339676
+    },
+    {
+     "file": "models/female-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41012
+    }
+   ],
+   "submitted": "2026-11-22T18:15:33.065Z",
+   "done": "2026-11-22T18:16:11.996Z",
+   "seconds": 39
+  },
+  {
+   "id": "goblin-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20478-7663-7320-94e4-df7e17494451",
+   "price": 0.2,
+   "input": {
+    "model_url": "https://v3b.fal.media/files/b/0ab384e5/DyPsOIiphlPrXy8ANo-7I_base_basic_shaded.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "Meshy rigging, ue5_mannequin, on Rodin shaded goblin",
+   "files": [
+    {
+     "file": "models/goblin-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 2849384
+    },
+    {
+     "file": "models/goblin-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 2929180
+    },
+    {
+     "file": "models/goblin-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 2982304
+    },
+    {
+     "file": "models/goblin-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 2978076
+    },
+    {
+     "file": "models/goblin-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52076
+    },
+    {
+     "file": "models/goblin-rig/basic_animations.running_glb-running.glb",
+     "bytes": 2951096
+    },
+    {
+     "file": "models/goblin-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 2957388
+    },
+    {
+     "file": "models/goblin-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41016
+    }
+   ],
+   "submitted": "2026-11-22T18:15:33.269Z",
+   "done": "2026-11-22T18:16:08.269Z",
+   "seconds": 36
+  },
+  {
+   "id": "sheet-weapons1",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a2047f-dee4-7242-883a-4c7f0e20a649",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-weapons1.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Trellis-2 1024p, several items in one picture (ref/sheet-weapons1.png)",
+   "files": [
+    {
+     "file": "models/sheet-weapons1/model_glb-trellis2_ba8af4de9549469faadd5af714e4c079.glb",
+     "bytes": 1373532
+    }
+   ],
+   "submitted": "2026-11-22T18:23:38.768Z",
+   "done": "2026-11-22T18:23:57.324Z",
+   "seconds": 28
+  },
+  {
+   "id": "sheet-weapons2",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a2047f-e5d6-79c3-94c1-571899eb996d",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-weapons2.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Trellis-2 1024p, several items in one picture (ref/sheet-weapons2.png)",
+   "files": [
+    {
+     "file": "models/sheet-weapons2/model_glb-trellis2_6225d5aef1ca45a98235869c69ad7f14.glb",
+     "bytes": 1671288
+    }
+   ],
+   "submitted": "2026-11-22T18:23:40.547Z",
+   "done": "2026-11-22T18:24:15.890Z",
+   "seconds": 46
+  },
+  {
+   "id": "sheet-cloth",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a2047f-f27b-77e1-935e-169f6d5f150b",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-cloth.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Trellis-2 1024p, several items in one picture (ref/sheet-cloth.png)",
+   "files": [
+    {
+     "file": "models/sheet-cloth/model_glb-trellis2_37837150e64c44a3bca8a0e20bdb6ce5.glb",
+     "bytes": 1139008
+    }
+   ],
+   "submitted": "2026-11-22T18:23:43.783Z",
+   "done": "2026-11-22T18:24:46.145Z",
+   "seconds": 76
+  },
+  {
+   "id": "sheet-mix1",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a2047f-f286-7403-aa7d-ea334dcfbbeb",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-mix1.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Trellis-2 1024p, several items in one picture (ref/sheet-mix1.png)",
+   "files": [
+    {
+     "file": "models/sheet-mix1/model_glb-trellis2_33c9d9f7c7fe41218a2bdad557784631.glb",
+     "bytes": 1425560
+    }
+   ],
+   "submitted": "2026-11-22T18:23:43.798Z",
+   "done": "2026-11-22T18:24:34.890Z",
+   "seconds": 65
+  },
+  {
+   "id": "sheet-mix2",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a2047f-f39b-7600-a047-b43789c4bfc8",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-mix2.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Trellis-2 1024p, several items in one picture (ref/sheet-mix2.png)",
+   "files": [
+    {
+     "file": "models/sheet-mix2/model_glb-trellis2_d7523268e63a4ac49dd790132baade22.glb",
+     "bytes": 1680440
+    }
+   ],
+   "submitted": "2026-11-22T18:23:44.067Z",
+   "done": "2026-11-22T18:25:02.977Z",
+   "seconds": 93
+  },
+  {
+   "id": "sheet-mix3",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a2047f-f742-7893-bd57-3a226310a920",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-mix3.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Trellis-2 1024p, several items in one picture (ref/sheet-mix3.png)",
+   "files": [
+    {
+     "file": "models/sheet-mix3/model_glb-trellis2_c1464e4fe02846b1862f8dfdc428c1bd.glb",
+     "bytes": 2431820
+    }
+   ],
+   "submitted": "2026-11-22T18:23:45.007Z",
+   "done": "2026-11-22T18:25:15.869Z",
+   "seconds": 106
+  },
+  {
+   "id": "sheet-goblin-weapons",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20637-cb14-7f62-8569-605b4ae91cfd",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-goblin-weapons.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "goblin weapons sheet: cleaver, shiv, totem staff, buckler (trellis-2 1024)",
+   "files": [
+    {
+     "file": "models/sheet-goblin-weapons/model_glb-trellis2_7678f3fd98cd427fa33158e18898961a.glb",
+     "bytes": 1752296
+    }
+   ],
+   "submitted": "2026-11-23T02:24:09.530Z",
+   "done": "2026-11-23T02:24:44.607Z",
+   "seconds": 46
+  },
+  {
+   "id": "gobw-rodin",
+   "endpoint": "fal-ai/hyper3d/rodin/v2",
+   "request_id": "01a20636-c6ae-75b2-9c74-931bde4bfb4c",
+   "price": 0.4,
+   "input": {
+    "input_image_urls": [
+     "@ref/gob-warrior-front.png",
+     "@ref/gob-warrior-left.png",
+     "@ref/gob-warrior-back.png"
+    ],
+    "quality_mesh_option": "4K Quad",
+    "TAPose": true,
+    "material": "All",
+    "geometry_file_format": "glb"
+   },
+   "note": "goblin warrior, complete model: Rodin v2, 4K Quad, A-pose, 3 views",
+   "files": [
+    {
+     "file": "models/gobw-rodin/model_mesh-base_basic_pbr.glb",
+     "bytes": 9752864
+    },
+    {
+     "file": "models/gobw-rodin/model_meshes.0-base_basic_shaded.glb",
+     "bytes": 3907220
+    },
+    {
+     "file": "models/gobw-rodin/textures.0-preview.webp",
+     "bytes": 4198
+    }
+   ],
+   "submitted": "2026-11-23T02:23:02.868Z",
+   "done": "2026-11-23T02:25:32.072Z",
+   "seconds": 163
+  },
+  {
+   "id": "gobr-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20636-bc58-7df3-9147-55b66790a61f",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/gob-rogue-front.png",
+    "face_limit": 8000,
+    "texture": true
+   },
+   "note": "goblin rogue, complete model: Tripo P1, 8000 faces, textured",
+   "files": [
+    {
+     "file": "models/gobr-tripo/model_mesh-model.glb",
+     "bytes": 2718920
+    },
+    {
+     "file": "models/gobr-tripo/model_urls.glb-model.glb",
+     "bytes": 2718920
+    },
+    {
+     "file": "models/gobr-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2718920
+    },
+    {
+     "file": "models/gobr-tripo/rendered_image-preview.png",
+     "bytes": 102116
+    }
+   ],
+   "submitted": "2026-11-23T02:23:00.233Z",
+   "done": "2026-11-23T02:26:31.892Z",
+   "seconds": 223
+  },
+  {
+   "id": "gobw-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20636-c1de-7fa1-9810-b85eaf01aae8",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/gob-warrior-front.png",
+    "face_limit": 8000,
+    "texture": true
+   },
+   "note": "goblin warrior, complete model: Tripo P1, 8000 faces, textured",
+   "files": [
+    {
+     "file": "models/gobw-tripo/model_mesh-model.glb",
+     "bytes": 3687332
+    },
+    {
+     "file": "models/gobw-tripo/model_urls.glb-model.glb",
+     "bytes": 3687332
+    },
+    {
+     "file": "models/gobw-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3687332
+    },
+    {
+     "file": "models/gobw-tripo/rendered_image-preview.png",
+     "bytes": 124202
+    }
+   ],
+   "submitted": "2026-11-23T02:23:01.637Z",
+   "done": "2026-11-23T02:26:44.006Z",
+   "seconds": 235
+  },
+  {
+   "id": "gobm-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20636-cdca-7213-b29c-28331bb90c65",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/gob-mage-front.png",
+    "face_limit": 8000,
+    "texture": true
+   },
+   "note": "goblin mage, complete model: Tripo P1, 8000 faces, textured",
+   "files": [
+    {
+     "file": "models/gobm-tripo/model_mesh-model.glb",
+     "bytes": 3134080
+    },
+    {
+     "file": "models/gobm-tripo/model_urls.glb-model.glb",
+     "bytes": 3134080
+    },
+    {
+     "file": "models/gobm-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3134080
+    },
+    {
+     "file": "models/gobm-tripo/rendered_image-preview.png",
+     "bytes": 101702
+    }
+   ],
+   "submitted": "2026-11-23T02:23:04.688Z",
+   "done": "2026-11-23T02:26:59.044Z",
+   "seconds": 250
+  },
+  {
+   "id": "gobr-tripo-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2063d-b925-7dd3-aaa5-797a779cd51c",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/gobr-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "Meshy rigging, ue5_mannequin, on Tripo goblin rogue (turned to face front)",
+   "files": [
+    {
+     "file": "models/gobr-tripo-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 2883108
+    },
+    {
+     "file": "models/gobr-tripo-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 5236716
+    },
+    {
+     "file": "models/gobr-tripo-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 3015840
+    },
+    {
+     "file": "models/gobr-tripo-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 5285612
+    },
+    {
+     "file": "models/gobr-tripo-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52100
+    },
+    {
+     "file": "models/gobr-tripo-rig/basic_animations.running_glb-running.glb",
+     "bytes": 2984596
+    },
+    {
+     "file": "models/gobr-tripo-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 5264924
+    },
+    {
+     "file": "models/gobr-tripo-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41040
+    }
+   ],
+   "submitted": "2026-11-23T02:30:38.152Z",
+   "done": "2026-11-23T02:31:41.920Z",
+   "seconds": 134
+  },
+  {
+   "id": "gobm-tripo-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2063e-0e7b-7961-bf8e-a329f210a84d",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/gobm-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "Meshy rigging, ue5_mannequin, on Tripo goblin shaman (turned to face front)",
+   "files": [
+    {
+     "file": "models/gobm-tripo-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 3590084
+    },
+    {
+     "file": "models/gobm-tripo-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 5591420
+    },
+    {
+     "file": "models/gobm-tripo-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 3722724
+    },
+    {
+     "file": "models/gobm-tripo-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 5640316
+    },
+    {
+     "file": "models/gobm-tripo-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52084
+    },
+    {
+     "file": "models/gobm-tripo-rig/basic_animations.running_glb-running.glb",
+     "bytes": 3691452
+    },
+    {
+     "file": "models/gobm-tripo-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 5619628
+    },
+    {
+     "file": "models/gobm-tripo-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41024
+    }
+   ],
+   "submitted": "2026-11-23T02:30:59.997Z",
+   "done": "2026-11-23T02:32:09.641Z",
+   "seconds": 161
+  },
+  {
+   "id": "gobw-tripo-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2063e-2295-7a70-bce3-f7a335952119",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/gobw-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "Meshy rigging, ue5_mannequin, on Tripo goblin warrior (turned to face front)",
+   "files": [
+    {
+     "file": "models/gobw-tripo-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 4112348
+    },
+    {
+     "file": "models/gobw-tripo-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 6743564
+    },
+    {
+     "file": "models/gobw-tripo-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 4244680
+    },
+    {
+     "file": "models/gobw-tripo-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 6792460
+    },
+    {
+     "file": "models/gobw-tripo-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52008
+    },
+    {
+     "file": "models/gobw-tripo-rig/basic_animations.running_glb-running.glb",
+     "bytes": 4213440
+    },
+    {
+     "file": "models/gobw-tripo-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 6771772
+    },
+    {
+     "file": "models/gobw-tripo-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40948
+    }
+   ],
+   "submitted": "2026-11-23T02:31:05.157Z",
+   "done": "2026-11-23T02:32:17.294Z",
+   "seconds": 169
+  },
+  {
+   "id": "gobw-rodin-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2063e-4278-7820-8b92-b3f3447c317d",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/gobw-rodin/model_meshes.0-base_basic_shaded.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "Meshy rigging, ue5_mannequin, on Rodin goblin warrior",
+   "files": [
+    {
+     "file": "models/gobw-rodin-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 4106116
+    },
+    {
+     "file": "models/gobw-rodin-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 4149340
+    },
+    {
+     "file": "models/gobw-rodin-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 4238576
+    },
+    {
+     "file": "models/gobw-rodin-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 4198236
+    },
+    {
+     "file": "models/gobw-rodin-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52008
+    },
+    {
+     "file": "models/gobw-rodin-rig/basic_animations.running_glb-running.glb",
+     "bytes": 4207280
+    },
+    {
+     "file": "models/gobw-rodin-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 4177548
+    },
+    {
+     "file": "models/gobw-rodin-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40948
+    }
+   ],
+   "submitted": "2026-11-23T02:31:13.306Z",
+   "done": "2026-11-23T02:32:20.225Z",
+   "seconds": 172
+  },
+  {
+   "id": "thug-tripo3000",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20941-c83d-7531-bb22-4d8b92b34d47",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/thug-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "thug: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/thug-tripo3000/model_mesh-model.glb",
+     "bytes": 2798864
+    },
+    {
+     "file": "models/thug-tripo3000/model_urls.glb-model.glb",
+     "bytes": 2798864
+    },
+    {
+     "file": "models/thug-tripo3000/model_urls.pbr_model-model.glb",
+     "bytes": 2798864
+    },
+    {
+     "file": "models/thug-tripo3000/rendered_image-preview.png",
+     "bytes": 109492
+    }
+   ],
+   "submitted": "2026-11-23T16:33:55.811Z",
+   "done": "2026-11-23T16:35:07.032Z",
+   "seconds": 107
+  },
+  {
+   "id": "thug-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20941-cb79-7431-b0da-db9a03243b90",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/thug-front.png",
+    "face_limit": 8000,
+    "texture": true
+   },
+   "note": "thug: Tripo P1 textured, face_limit 8000",
+   "files": [
+    {
+     "file": "models/thug-tripo/model_mesh-model.glb",
+     "bytes": 3118668
+    },
+    {
+     "file": "models/thug-tripo/model_urls.glb-model.glb",
+     "bytes": 3118668
+    },
+    {
+     "file": "models/thug-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3118668
+    },
+    {
+     "file": "models/thug-tripo/rendered_image-preview.png",
+     "bytes": 110568
+    }
+   ],
+   "submitted": "2026-11-23T16:33:56.651Z",
+   "done": "2026-11-23T16:35:07.530Z",
+   "seconds": 108
+  },
+  {
+   "id": "thug-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20944-9974-7543-884f-68195166175c",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/thug-tripo3000.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "thug: Meshy rigging",
+   "files": [
+    {
+     "file": "models/thug-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1018212
+    },
+    {
+     "file": "models/thug-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1004412
+    },
+    {
+     "file": "models/thug-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1150784
+    },
+    {
+     "file": "models/thug-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1053308
+    },
+    {
+     "file": "models/thug-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 51880
+    },
+    {
+     "file": "models/thug-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1119540
+    },
+    {
+     "file": "models/thug-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1032620
+    },
+    {
+     "file": "models/thug-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40820
+    }
+   ],
+   "submitted": "2026-11-23T16:37:00.448Z",
+   "done": "2026-11-23T16:37:38.070Z",
+   "seconds": 62
+  },
+  {
+   "id": "knifer-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20948-3bd3-7be1-a8c0-7d2b50c9debb",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/knifer-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "knifer: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/knifer-tripo/model_mesh-model.glb",
+     "bytes": 2660532
+    },
+    {
+     "file": "models/knifer-tripo/model_urls.glb-model.glb",
+     "bytes": 2660532
+    },
+    {
+     "file": "models/knifer-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2660532
+    },
+    {
+     "file": "models/knifer-tripo/rendered_image-preview.png",
+     "bytes": 80190
+    }
+   ],
+   "submitted": "2026-11-23T16:40:58.630Z",
+   "done": "2026-11-23T16:42:09.014Z",
+   "seconds": 95
+  },
+  {
+   "id": "lantern-priest-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20948-4dd9-7452-9069-ffc1a34d5e9e",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/lantern-priest-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "lantern-priest: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/lantern-priest-tripo/model_mesh-model.glb",
+     "bytes": 2987624
+    },
+    {
+     "file": "models/lantern-priest-tripo/model_urls.glb-model.glb",
+     "bytes": 2987624
+    },
+    {
+     "file": "models/lantern-priest-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2987624
+    },
+    {
+     "file": "models/lantern-priest-tripo/rendered_image-preview.png",
+     "bytes": 117216
+    }
+   ],
+   "submitted": "2026-11-23T16:41:03.235Z",
+   "done": "2026-11-23T16:42:14.500Z",
+   "seconds": 101
+  },
+  {
+   "id": "crossbowman-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20948-5952-7960-a42a-9ea9f6ce9db8",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/crossbowman-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "crossbowman: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/crossbowman-tripo/model_mesh-model.glb",
+     "bytes": 2873032
+    },
+    {
+     "file": "models/crossbowman-tripo/model_urls.glb-model.glb",
+     "bytes": 2873032
+    },
+    {
+     "file": "models/crossbowman-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2873032
+    },
+    {
+     "file": "models/crossbowman-tripo/rendered_image-preview.png",
+     "bytes": 102224
+    }
+   ],
+   "submitted": "2026-11-23T16:41:06.166Z",
+   "done": "2026-11-23T16:42:16.567Z",
+   "seconds": 103
+  },
+  {
+   "id": "lantern-guard-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20948-6163-75b0-a741-8001beed0b55",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/lantern-guard-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "lantern-guard: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/lantern-guard-tripo/model_mesh-model.glb",
+     "bytes": 3182520
+    },
+    {
+     "file": "models/lantern-guard-tripo/model_urls.glb-model.glb",
+     "bytes": 3182520
+    },
+    {
+     "file": "models/lantern-guard-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3182520
+    },
+    {
+     "file": "models/lantern-guard-tripo/rendered_image-preview.png",
+     "bytes": 91682
+    }
+   ],
+   "submitted": "2026-11-23T16:41:08.234Z",
+   "done": "2026-11-23T16:42:18.809Z",
+   "seconds": 105
+  },
+  {
+   "id": "zealot-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20949-f5a7-7532-88e7-b7422fc524a6",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/zealot-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "zealot: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/zealot-tripo/model_mesh-model.glb",
+     "bytes": 3527616
+    },
+    {
+     "file": "models/zealot-tripo/model_urls.glb-model.glb",
+     "bytes": 3527616
+    },
+    {
+     "file": "models/zealot-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3527616
+    },
+    {
+     "file": "models/zealot-tripo/rendered_image-preview.png",
+     "bytes": 96192
+    }
+   ],
+   "submitted": "2026-11-23T16:42:51.731Z",
+   "done": "2026-11-23T16:44:01.757Z",
+   "seconds": 105
+  },
+  {
+   "id": "bounty-hunter-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094a-0f4d-7ff1-977b-13d17a177804",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/bounty-hunter-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "bounty-hunter: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/bounty-hunter-tripo/model_mesh-model.glb",
+     "bytes": 2407264
+    },
+    {
+     "file": "models/bounty-hunter-tripo/model_urls.glb-model.glb",
+     "bytes": 2407264
+    },
+    {
+     "file": "models/bounty-hunter-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2407264
+    },
+    {
+     "file": "models/bounty-hunter-tripo/rendered_image-preview.png",
+     "bytes": 104912
+    }
+   ],
+   "submitted": "2026-11-23T16:42:58.297Z",
+   "done": "2026-11-23T16:44:14.675Z",
+   "seconds": 110
+  },
+  {
+   "id": "kiln-monk-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094a-1402-7b42-bd44-a8ee6d3faded",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/kiln-monk-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "kiln-monk: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/kiln-monk-tripo/model_mesh-model.glb",
+     "bytes": 2653380
+    },
+    {
+     "file": "models/kiln-monk-tripo/model_urls.glb-model.glb",
+     "bytes": 2653380
+    },
+    {
+     "file": "models/kiln-monk-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2653380
+    },
+    {
+     "file": "models/kiln-monk-tripo/rendered_image-preview.png",
+     "bytes": 112916
+    }
+   ],
+   "submitted": "2026-11-23T16:42:59.498Z",
+   "done": "2026-11-23T16:44:14.978Z",
+   "seconds": 109
+  },
+  {
+   "id": "lantern-priest-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2094a-ddba-7601-86c0-f1597c0434c9",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/lantern-priest-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "lantern-priest: Meshy rigging",
+   "files": [
+    {
+     "file": "models/lantern-priest-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 904640
+    },
+    {
+     "file": "models/lantern-priest-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 989980
+    },
+    {
+     "file": "models/lantern-priest-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1037172
+    },
+    {
+     "file": "models/lantern-priest-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1038876
+    },
+    {
+     "file": "models/lantern-priest-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52004
+    },
+    {
+     "file": "models/lantern-priest-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1005940
+    },
+    {
+     "file": "models/lantern-priest-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1018188
+    },
+    {
+     "file": "models/lantern-priest-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40940
+    }
+   ],
+   "submitted": "2026-11-23T16:43:51.137Z",
+   "done": "2026-11-23T16:44:23.732Z",
+   "seconds": 52
+  },
+  {
+   "id": "knifer-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2094a-e33f-78a0-8367-810137539409",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/knifer-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "knifer: Meshy rigging",
+   "files": [
+    {
+     "file": "models/knifer-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1013804
+    },
+    {
+     "file": "models/knifer-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 998188
+    },
+    {
+     "file": "models/knifer-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1146352
+    },
+    {
+     "file": "models/knifer-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1047084
+    },
+    {
+     "file": "models/knifer-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 51940
+    },
+    {
+     "file": "models/knifer-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1115076
+    },
+    {
+     "file": "models/knifer-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1026396
+    },
+    {
+     "file": "models/knifer-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40880
+    }
+   ],
+   "submitted": "2026-11-23T16:43:52.549Z",
+   "done": "2026-11-23T16:44:39.792Z",
+   "seconds": 68
+  },
+  {
+   "id": "lantern-guard-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2094a-e52a-7af3-80cf-e7c7a3e8e8e1",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/lantern-guard-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "lantern-guard: Meshy rigging",
+   "files": [
+    {
+     "file": "models/lantern-guard-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 908192
+    },
+    {
+     "file": "models/lantern-guard-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 989260
+    },
+    {
+     "file": "models/lantern-guard-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1040624
+    },
+    {
+     "file": "models/lantern-guard-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1038156
+    },
+    {
+     "file": "models/lantern-guard-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52076
+    },
+    {
+     "file": "models/lantern-guard-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1009384
+    },
+    {
+     "file": "models/lantern-guard-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1017468
+    },
+    {
+     "file": "models/lantern-guard-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41012
+    }
+   ],
+   "submitted": "2026-11-23T16:43:53.041Z",
+   "done": "2026-11-23T16:44:50.490Z",
+   "seconds": 79
+  },
+  {
+   "id": "royal-archer-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20949-fcbb-7b13-a324-17cd5d161e30",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/royal-archer-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "royal-archer: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/royal-archer-tripo/model_mesh-model.glb",
+     "bytes": 2943840
+    },
+    {
+     "file": "models/royal-archer-tripo/model_urls.glb-model.glb",
+     "bytes": 2943840
+    },
+    {
+     "file": "models/royal-archer-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2943840
+    },
+    {
+     "file": "models/royal-archer-tripo/rendered_image-preview.png",
+     "bytes": 89390
+    }
+   ],
+   "submitted": "2026-11-23T16:42:53.547Z",
+   "done": "2026-11-23T16:44:55.394Z",
+   "seconds": 154
+  },
+  {
+   "id": "crossbowman-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2094a-f59a-7362-9f97-689d16f33540",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/crossbowman-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "crossbowman: Meshy rigging",
+   "files": [
+    {
+     "file": "models/crossbowman-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1193528
+    },
+    {
+     "file": "models/crossbowman-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1169276
+    },
+    {
+     "file": "models/crossbowman-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1326184
+    },
+    {
+     "file": "models/crossbowman-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1218188
+    },
+    {
+     "file": "models/crossbowman-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52072
+    },
+    {
+     "file": "models/crossbowman-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1294936
+    },
+    {
+     "file": "models/crossbowman-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1197500
+    },
+    {
+     "file": "models/crossbowman-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41012
+    }
+   ],
+   "submitted": "2026-11-23T16:43:57.250Z",
+   "done": "2026-11-23T16:45:00.517Z",
+   "seconds": 89
+  },
+  {
+   "id": "hollowborn-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094b-a051-7083-9694-d6af7691366c",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/hollowborn-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "hollowborn: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/hollowborn-tripo/model_mesh-model.glb",
+     "bytes": 3241848
+    },
+    {
+     "file": "models/hollowborn-tripo/model_urls.glb-model.glb",
+     "bytes": 3241848
+    },
+    {
+     "file": "models/hollowborn-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3241848
+    },
+    {
+     "file": "models/hollowborn-tripo/rendered_image-preview.png",
+     "bytes": 81374
+    }
+   ],
+   "submitted": "2026-11-23T16:44:41.017Z",
+   "done": "2026-11-23T16:45:52.240Z",
+   "seconds": 102
+  },
+  {
+   "id": "wraith-knight-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094b-eaf6-76e3-9321-091d6063e242",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/wraith-knight-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "wraith-knight: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/wraith-knight-tripo/model_mesh-model.glb",
+     "bytes": 3004652
+    },
+    {
+     "file": "models/wraith-knight-tripo/model_urls.glb-model.glb",
+     "bytes": 3004652
+    },
+    {
+     "file": "models/wraith-knight-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3004652
+    },
+    {
+     "file": "models/wraith-knight-tripo/rendered_image-preview.png",
+     "bytes": 102088
+    }
+   ],
+   "submitted": "2026-11-23T16:45:00.075Z",
+   "done": "2026-11-23T16:46:10.306Z",
+   "seconds": 108
+  },
+  {
+   "id": "root-caller-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094b-f5d1-77e0-923e-48761a210a6f",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/root-caller-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "root-caller: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/root-caller-tripo/model_mesh-model.glb",
+     "bytes": 3195528
+    },
+    {
+     "file": "models/root-caller-tripo/model_urls.glb-model.glb",
+     "bytes": 3195528
+    },
+    {
+     "file": "models/root-caller-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3195528
+    },
+    {
+     "file": "models/root-caller-tripo/rendered_image-preview.png",
+     "bytes": 124946
+    }
+   ],
+   "submitted": "2026-11-23T16:45:02.851Z",
+   "done": "2026-11-23T16:46:14.721Z",
+   "seconds": 113
+  },
+  {
+   "id": "stone-golem-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094c-cef5-7ef2-b7cd-cf70781b3cd1",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/stone-golem-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "stone-golem: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/stone-golem-tripo/model_mesh-model.glb",
+     "bytes": 3589552
+    },
+    {
+     "file": "models/stone-golem-tripo/model_urls.glb-model.glb",
+     "bytes": 3589552
+    },
+    {
+     "file": "models/stone-golem-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3589552
+    },
+    {
+     "file": "models/stone-golem-tripo/rendered_image-preview.png",
+     "bytes": 149956
+    }
+   ],
+   "submitted": "2026-11-23T16:45:58.429Z",
+   "done": "2026-11-23T16:47:09.032Z",
+   "seconds": 108
+  },
+  {
+   "id": "winged-imp-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094d-9bba-7e42-a225-a2f72783fc5c",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/winged-imp-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "winged-imp: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/winged-imp-tripo/model_mesh-model.glb",
+     "bytes": 2882264
+    },
+    {
+     "file": "models/winged-imp-tripo/model_urls.glb-model.glb",
+     "bytes": 2882264
+    },
+    {
+     "file": "models/winged-imp-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2882264
+    },
+    {
+     "file": "models/winged-imp-tripo/rendered_image-preview.png",
+     "bytes": 103482
+    }
+   ],
+   "submitted": "2026-11-23T16:46:50.855Z",
+   "done": "2026-11-23T16:48:00.794Z",
+   "seconds": 109
+  },
+  {
+   "id": "thornling-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094d-f0ee-7f70-bc7b-ac570e949865",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/thornling-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "thornling: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/thornling-tripo/model_mesh-model.glb",
+     "bytes": 3339752
+    },
+    {
+     "file": "models/thornling-tripo/model_urls.glb-model.glb",
+     "bytes": 3339752
+    },
+    {
+     "file": "models/thornling-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3339752
+    },
+    {
+     "file": "models/thornling-tripo/rendered_image-preview.png",
+     "bytes": 120496
+    }
+   ],
+   "submitted": "2026-11-23T16:47:12.657Z",
+   "done": "2026-11-23T16:48:22.947Z",
+   "seconds": 109
+  },
+  {
+   "id": "fire-elemental-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094e-0001-7dc3-8517-b35399cfcf49",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/fire-elemental-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "fire-elemental: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/fire-elemental-tripo/model_mesh-model.glb",
+     "bytes": 3123340
+    },
+    {
+     "file": "models/fire-elemental-tripo/model_urls.glb-model.glb",
+     "bytes": 3123340
+    },
+    {
+     "file": "models/fire-elemental-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3123340
+    },
+    {
+     "file": "models/fire-elemental-tripo/rendered_image-preview.png",
+     "bytes": 122496
+    }
+   ],
+   "submitted": "2026-11-23T16:47:16.521Z",
+   "done": "2026-11-23T16:48:28.476Z",
+   "seconds": 109
+  },
+  {
+   "id": "grell-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094e-c1ee-7343-95f3-9cd4af710a07",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/grell-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "grell: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/grell-tripo/model_mesh-model.glb",
+     "bytes": 2982656
+    },
+    {
+     "file": "models/grell-tripo/model_urls.glb-model.glb",
+     "bytes": 2982656
+    },
+    {
+     "file": "models/grell-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2982656
+    },
+    {
+     "file": "models/grell-tripo/rendered_image-preview.png",
+     "bytes": 114788
+    }
+   ],
+   "submitted": "2026-11-23T16:48:06.162Z",
+   "done": "2026-11-23T16:49:16.436Z",
+   "seconds": 102
+  },
+  {
+   "id": "vessa-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094f-4587-79c2-9ef3-37078ddb3f21",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/vessa-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "vessa: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/vessa-tripo/model_mesh-model.glb",
+     "bytes": 3703920
+    },
+    {
+     "file": "models/vessa-tripo/model_urls.glb-model.glb",
+     "bytes": 3703920
+    },
+    {
+     "file": "models/vessa-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3703920
+    },
+    {
+     "file": "models/vessa-tripo/rendered_image-preview.png",
+     "bytes": 96816
+    }
+   ],
+   "submitted": "2026-11-23T16:48:39.854Z",
+   "done": "2026-11-23T16:49:51.159Z",
+   "seconds": 102
+  },
+  {
+   "id": "bruiser-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094f-c24a-7f70-ac97-0973ccc5e3e1",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/bruiser-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "bruiser: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/bruiser-tripo/model_mesh-model.glb",
+     "bytes": 3477200
+    },
+    {
+     "file": "models/bruiser-tripo/model_urls.glb-model.glb",
+     "bytes": 3477200
+    },
+    {
+     "file": "models/bruiser-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3477200
+    },
+    {
+     "file": "models/bruiser-tripo/rendered_image-preview.png",
+     "bytes": 133804
+    }
+   ],
+   "submitted": "2026-11-23T16:49:11.798Z",
+   "done": "2026-11-23T16:50:22.925Z",
+   "seconds": 108
+  },
+  {
+   "id": "silver-knight-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a2094f-ce42-7391-9996-130b50d54bbe",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/silver-knight-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "silver-knight: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/silver-knight-tripo/model_mesh-model.glb",
+     "bytes": 2716256
+    },
+    {
+     "file": "models/silver-knight-tripo/model_urls.glb-model.glb",
+     "bytes": 2716256
+    },
+    {
+     "file": "models/silver-knight-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2716256
+    },
+    {
+     "file": "models/silver-knight-tripo/rendered_image-preview.png",
+     "bytes": 96688
+    }
+   ],
+   "submitted": "2026-11-23T16:49:14.872Z",
+   "done": "2026-11-23T16:50:25.649Z",
+   "seconds": 105
+  },
+  {
+   "id": "water-elemental-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20950-9536-7cd1-93a6-c2d9ba759c2e",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/water-elemental-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "water-elemental: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/water-elemental-tripo/model_mesh-model.glb",
+     "bytes": 2912492
+    },
+    {
+     "file": "models/water-elemental-tripo/model_urls.glb-model.glb",
+     "bytes": 2912492
+    },
+    {
+     "file": "models/water-elemental-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2912492
+    },
+    {
+     "file": "models/water-elemental-tripo/rendered_image-preview.png",
+     "bytes": 120352
+    }
+   ],
+   "submitted": "2026-11-23T16:50:05.788Z",
+   "done": "2026-11-23T16:51:16.434Z",
+   "seconds": 107
+  },
+  {
+   "id": "drake-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20950-cf4f-7941-8526-820784c5a895",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/drake-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "drake: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/drake-tripo/model_mesh-model.glb",
+     "bytes": 2641324
+    },
+    {
+     "file": "models/drake-tripo/model_urls.glb-model.glb",
+     "bytes": 2641324
+    },
+    {
+     "file": "models/drake-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2641324
+    },
+    {
+     "file": "models/drake-tripo/rendered_image-preview.png",
+     "bytes": 148244
+    }
+   ],
+   "submitted": "2026-11-23T16:50:20.659Z",
+   "done": "2026-11-23T16:51:31.018Z",
+   "seconds": 102
+  },
+  {
+   "id": "wolf-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20950-d086-7352-982f-9f76960c7140",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/wolf-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "wolf: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/wolf-tripo/model_mesh-model.glb",
+     "bytes": 2490884
+    },
+    {
+     "file": "models/wolf-tripo/model_urls.glb-model.glb",
+     "bytes": 2490884
+    },
+    {
+     "file": "models/wolf-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2490884
+    },
+    {
+     "file": "models/wolf-tripo/rendered_image-preview.png",
+     "bytes": 117454
+    }
+   ],
+   "submitted": "2026-11-23T16:50:20.969Z",
+   "done": "2026-11-23T16:51:31.554Z",
+   "seconds": 102
+  },
+  {
+   "id": "isolde-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20950-dd8f-7e71-91b1-5d818d6a73b6",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/isolde-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "isolde: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/isolde-tripo/model_mesh-model.glb",
+     "bytes": 3684228
+    },
+    {
+     "file": "models/isolde-tripo/model_urls.glb-model.glb",
+     "bytes": 3684228
+    },
+    {
+     "file": "models/isolde-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3684228
+    },
+    {
+     "file": "models/isolde-tripo/rendered_image-preview.png",
+     "bytes": 116710
+    }
+   ],
+   "submitted": "2026-11-23T16:50:24.310Z",
+   "done": "2026-11-23T16:51:36.157Z",
+   "seconds": 106
+  },
+  {
+   "id": "air-elemental-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20950-e5be-7ad2-9768-6d441af1caf3",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/air-elemental-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "air-elemental: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/air-elemental-tripo/model_mesh-model.glb",
+     "bytes": 2796392
+    },
+    {
+     "file": "models/air-elemental-tripo/model_urls.glb-model.glb",
+     "bytes": 2796392
+    },
+    {
+     "file": "models/air-elemental-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2796392
+    },
+    {
+     "file": "models/air-elemental-tripo/rendered_image-preview.png",
+     "bytes": 105588
+    }
+   ],
+   "submitted": "2026-11-23T16:50:26.409Z",
+   "done": "2026-11-23T16:51:37.676Z",
+   "seconds": 107
+  },
+  {
+   "id": "aldric-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20950-f20d-7851-bbd9-f163b99ab614",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/aldric-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "aldric: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/aldric-tripo/model_mesh-model.glb",
+     "bytes": 3824420
+    },
+    {
+     "file": "models/aldric-tripo/model_urls.glb-model.glb",
+     "bytes": 3824420
+    },
+    {
+     "file": "models/aldric-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3824420
+    },
+    {
+     "file": "models/aldric-tripo/rendered_image-preview.png",
+     "bytes": 147942
+    }
+   ],
+   "submitted": "2026-11-23T16:50:29.558Z",
+   "done": "2026-11-23T16:51:40.434Z",
+   "seconds": 110
+  },
+  {
+   "id": "earth-elemental-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20950-f5b3-75c3-89e4-449c68489c96",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/earth-elemental-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "earth-elemental: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/earth-elemental-tripo/model_mesh-model.glb",
+     "bytes": 3335844
+    },
+    {
+     "file": "models/earth-elemental-tripo/model_urls.glb-model.glb",
+     "bytes": 3335844
+    },
+    {
+     "file": "models/earth-elemental-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3335844
+    },
+    {
+     "file": "models/earth-elemental-tripo/rendered_image-preview.png",
+     "bytes": 149512
+    }
+   ],
+   "submitted": "2026-11-23T16:50:30.498Z",
+   "done": "2026-11-23T16:51:41.618Z",
+   "seconds": 111
+  },
+  {
+   "id": "drowned-brute-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20951-227a-7be0-8c49-ba1d43be317e",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/drowned-brute-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "drowned-brute: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/drowned-brute-tripo/model_mesh-model.glb",
+     "bytes": 3578416
+    },
+    {
+     "file": "models/drowned-brute-tripo/model_urls.glb-model.glb",
+     "bytes": 3578416
+    },
+    {
+     "file": "models/drowned-brute-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3578416
+    },
+    {
+     "file": "models/drowned-brute-tripo/rendered_image-preview.png",
+     "bytes": 124452
+    }
+   ],
+   "submitted": "2026-11-23T16:50:41.954Z",
+   "done": "2026-11-23T16:51:59.732Z",
+   "seconds": 116
+  },
+  {
+   "id": "wolf-rig",
+   "endpoint": "fal-ai/tripo3d/rig",
+   "request_id": "01a20952-84c3-7a30-847e-0a540ebfde8f",
+   "price": 0.3,
+   "input": {
+    "model_url": "@models/upright/wolf-tripo.glb",
+    "model": "v2.5-20260210",
+    "rig_type": "quadruped",
+    "spec": "tripo",
+    "output_format": "glb"
+   },
+   "note": "wolf: Tripo rig, quadruped (v2.5)",
+   "files": [
+    {
+     "file": "models/wolf-rig/model_mesh-model.glb",
+     "bytes": 637964
+    },
+    {
+     "file": "models/wolf-rig/model_urls.glb-model.glb",
+     "bytes": 637964
+    },
+    {
+     "file": "models/wolf-rig/rendered_image-preview.png",
+     "bytes": 116862
+    }
+   ],
+   "submitted": "2026-11-23T16:52:12.653Z",
+   "done": "2026-11-23T16:52:32.415Z",
+   "seconds": 35
+  },
+  {
+   "id": "drake-rig",
+   "endpoint": "fal-ai/tripo3d/rig",
+   "request_id": "01a20952-9833-75a3-bf5b-ba755dc1e847",
+   "price": 0.3,
+   "input": {
+    "model_url": "@models/upright/drake-tripo.glb",
+    "model": "v2.5-20260210",
+    "rig_type": "quadruped",
+    "spec": "tripo",
+    "output_format": "glb"
+   },
+   "note": "drake: Tripo rig, quadruped (v2.5)",
+   "files": [
+    {
+     "file": "models/drake-rig/model_mesh-model.glb",
+     "bytes": 831660
+    },
+    {
+     "file": "models/drake-rig/model_urls.glb-model.glb",
+     "bytes": 831660
+    },
+    {
+     "file": "models/drake-rig/rendered_image-preview.png",
+     "bytes": 130198
+    }
+   ],
+   "submitted": "2026-11-23T16:52:17.632Z",
+   "done": "2026-11-23T16:52:59.746Z",
+   "seconds": 63
+  },
+  {
+   "id": "troll-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20952-8d8b-78b1-95e8-bd1af7d1a0b4",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/troll-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "troll: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/troll-tripo/model_mesh-model.glb",
+     "bytes": 3614280
+    },
+    {
+     "file": "models/troll-tripo/model_urls.glb-model.glb",
+     "bytes": 3614280
+    },
+    {
+     "file": "models/troll-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3614280
+    },
+    {
+     "file": "models/troll-tripo/rendered_image-preview.png",
+     "bytes": 78822
+    }
+   ],
+   "submitted": "2026-11-23T16:52:14.897Z",
+   "done": "2026-11-23T16:53:25.417Z",
+   "seconds": 100
+  },
+  {
+   "id": "orc-grunt-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20952-ac02-7b62-84a7-23c5075ad6ce",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/orc-grunt-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "orc-grunt: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/orc-grunt-tripo/model_mesh-model.glb",
+     "bytes": 3384732
+    },
+    {
+     "file": "models/orc-grunt-tripo/model_urls.glb-model.glb",
+     "bytes": 3384732
+    },
+    {
+     "file": "models/orc-grunt-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3384732
+    },
+    {
+     "file": "models/orc-grunt-tripo/rendered_image-preview.png",
+     "bytes": 114886
+    }
+   ],
+   "submitted": "2026-11-23T16:52:22.697Z",
+   "done": "2026-11-23T16:53:32.762Z",
+   "seconds": 107
+  },
+  {
+   "id": "skeleton-warrior-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20952-c261-74a0-b897-4b316a00385a",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/skeleton-warrior-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "skeleton-warrior: Tripo P1 textured, face_limit 3000",
+   "files": [
+    {
+     "file": "models/skeleton-warrior-tripo/model_mesh-model.glb",
+     "bytes": 3572312
+    },
+    {
+     "file": "models/skeleton-warrior-tripo/model_urls.glb-model.glb",
+     "bytes": 3572312
+    },
+    {
+     "file": "models/skeleton-warrior-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3572312
+    },
+    {
+     "file": "models/skeleton-warrior-tripo/rendered_image-preview.png",
+     "bytes": 102352
+    }
+   ],
+   "submitted": "2026-11-23T16:52:28.430Z",
+   "done": "2026-11-23T16:53:39.266Z",
+   "seconds": 109
+  },
+  {
+   "id": "minotaur-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20952-cfeb-77d1-ba5c-07a120394f3e",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/minotaur-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "minotaur: Tripo P1 textured, face_limit 4500",
+   "files": [
+    {
+     "file": "models/minotaur-tripo/model_mesh-model.glb",
+     "bytes": 2751000
+    },
+    {
+     "file": "models/minotaur-tripo/model_urls.glb-model.glb",
+     "bytes": 2751000
+    },
+    {
+     "file": "models/minotaur-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2751000
+    },
+    {
+     "file": "models/minotaur-tripo/rendered_image-preview.png",
+     "bytes": 124074
+    }
+   ],
+   "submitted": "2026-11-23T16:52:31.890Z",
+   "done": "2026-11-23T16:53:42.674Z",
+   "seconds": 110
+  },
+  {
+   "id": "kiln-monk-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20953-fd83-72d2-99d9-fbf0b72a8d5c",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/kiln-monk-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "kiln-monk: Meshy rigging",
+   "files": [
+    {
+     "file": "models/kiln-monk-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 812332
+    },
+    {
+     "file": "models/kiln-monk-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 895356
+    },
+    {
+     "file": "models/kiln-monk-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 944700
+    },
+    {
+     "file": "models/kiln-monk-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 944252
+    },
+    {
+     "file": "models/kiln-monk-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 51996
+    },
+    {
+     "file": "models/kiln-monk-rig/basic_animations.running_glb-running.glb",
+     "bytes": 913440
+    },
+    {
+     "file": "models/kiln-monk-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 923564
+    },
+    {
+     "file": "models/kiln-monk-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40936
+    }
+   ],
+   "submitted": "2026-11-23T16:53:49.101Z",
+   "done": "2026-11-23T16:54:23.025Z",
+   "seconds": 53
+  },
+  {
+   "id": "zealot-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20954-1d7b-7850-94e0-9b3b58ebc091",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/zealot-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "zealot: Meshy rigging",
+   "files": [
+    {
+     "file": "models/zealot-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1208676
+    },
+    {
+     "file": "models/zealot-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1178396
+    },
+    {
+     "file": "models/zealot-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1341000
+    },
+    {
+     "file": "models/zealot-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1227292
+    },
+    {
+     "file": "models/zealot-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52048
+    },
+    {
+     "file": "models/zealot-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1309704
+    },
+    {
+     "file": "models/zealot-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1206604
+    },
+    {
+     "file": "models/zealot-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40988
+    }
+   ],
+   "submitted": "2026-11-23T16:53:57.280Z",
+   "done": "2026-11-23T16:54:41.858Z",
+   "seconds": 72
+  },
+  {
+   "id": "sheet-foes-d",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20955-2397-7463-9b30-8ca497b07ac0",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-foes-d.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Test 3 foe weapons sheet d (trellis-2 1024)",
+   "files": [
+    {
+     "file": "models/sheet-foes-d/model_glb-trellis2_a982d9d2d51f46dc8f8ed675ed7ad43e.glb",
+     "bytes": 1614620
+    }
+   ],
+   "submitted": "2026-11-23T16:55:04.384Z",
+   "done": "2026-11-23T16:55:23.070Z",
+   "seconds": 25
+  },
+  {
+   "id": "sheet-foes-a",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20955-23f7-7c81-8ac6-696036052cb2",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-foes-a.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Test 3 foe weapons sheet a (trellis-2 1024)",
+   "files": [
+    {
+     "file": "models/sheet-foes-a/model_glb-trellis2_7262dd2b92b34d23bb48ed4cd655cdf1.glb",
+     "bytes": 1336380
+    }
+   ],
+   "submitted": "2026-11-23T16:55:04.474Z",
+   "done": "2026-11-23T16:55:23.112Z",
+   "seconds": 25
+  },
+  {
+   "id": "isolde-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20954-e947-75e1-8c09-59fef64b24d4",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/isolde-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "isolde: Meshy rigging",
+   "files": [
+    {
+     "file": "models/isolde-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1502168
+    },
+    {
+     "file": "models/isolde-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1428828
+    },
+    {
+     "file": "models/isolde-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1634908
+    },
+    {
+     "file": "models/isolde-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1477740
+    },
+    {
+     "file": "models/isolde-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52108
+    },
+    {
+     "file": "models/isolde-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1603660
+    },
+    {
+     "file": "models/isolde-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1457052
+    },
+    {
+     "file": "models/isolde-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41048
+    }
+   ],
+   "submitted": "2026-11-23T16:54:49.453Z",
+   "done": "2026-11-23T16:55:28.501Z",
+   "seconds": 71
+  },
+  {
+   "id": "sheet-foes-c",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20955-25ae-7bd3-ad2a-62f8343c7192",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-foes-c.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Test 3 foe weapons sheet c (trellis-2 1024)",
+   "files": [
+    {
+     "file": "models/sheet-foes-c/model_glb-trellis2_86c59686984846d9be53adaf7cabee28.glb",
+     "bytes": 2025920
+    }
+   ],
+   "submitted": "2026-11-23T16:55:04.922Z",
+   "done": "2026-11-23T16:55:29.252Z",
+   "seconds": 31
+  },
+  {
+   "id": "root-caller-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20955-030e-7a91-ace7-8e2b40d34418",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/root-caller-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "root-caller: Meshy rigging",
+   "files": [
+    {
+     "file": "models/root-caller-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1255824
+    },
+    {
+     "file": "models/root-caller-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1205132
+    },
+    {
+     "file": "models/root-caller-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1388496
+    },
+    {
+     "file": "models/root-caller-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1254028
+    },
+    {
+     "file": "models/root-caller-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52020
+    },
+    {
+     "file": "models/root-caller-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1357256
+    },
+    {
+     "file": "models/root-caller-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1233340
+    },
+    {
+     "file": "models/root-caller-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40956
+    }
+   ],
+   "submitted": "2026-11-23T16:54:56.050Z",
+   "done": "2026-11-23T16:55:35.127Z",
+   "seconds": 67
+  },
+  {
+   "id": "sheet-foes-e",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20955-2aef-7ca3-85bb-4b91b0630d25",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-foes-e.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Test 3 foe weapons sheet e (trellis-2 1024)",
+   "files": [
+    {
+     "file": "models/sheet-foes-e/model_glb-trellis2_3cf7a85db8f040e8b793ccfcd9b0a6cf.glb",
+     "bytes": 1410000
+    }
+   ],
+   "submitted": "2026-11-23T16:55:06.267Z",
+   "done": "2026-11-23T16:55:36.170Z",
+   "seconds": 38
+  },
+  {
+   "id": "sheet-foes-b",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20955-2bdc-7643-bc96-7f0a98c5451f",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-foes-b.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Test 3 foe weapons sheet b (trellis-2 1024)",
+   "files": [
+    {
+     "file": "models/sheet-foes-b/model_glb-trellis2_9217cd62c2e240f98654b00a1dfdf34b.glb",
+     "bytes": 1426236
+    }
+   ],
+   "submitted": "2026-11-23T16:55:06.497Z",
+   "done": "2026-11-23T16:55:41.623Z",
+   "seconds": 43
+  },
+  {
+   "id": "orc-grunt-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20955-7562-7602-8c99-7ac8ea0efcdc",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/orc-grunt-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "orc-grunt: Meshy rigging",
+   "files": [
+    {
+     "file": "models/orc-grunt-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1215004
+    },
+    {
+     "file": "models/orc-grunt-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1195292
+    },
+    {
+     "file": "models/orc-grunt-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1347764
+    },
+    {
+     "file": "models/orc-grunt-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1244188
+    },
+    {
+     "file": "models/orc-grunt-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52100
+    },
+    {
+     "file": "models/orc-grunt-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1316516
+    },
+    {
+     "file": "models/orc-grunt-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1223500
+    },
+    {
+     "file": "models/orc-grunt-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41040
+    }
+   ],
+   "submitted": "2026-11-23T16:55:25.317Z",
+   "done": "2026-11-23T16:56:15.602Z",
+   "seconds": 78
+  },
+  {
+   "id": "skeleton-warrior-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20956-0d6e-7c91-928c-b101ec833cb2",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/skeleton-warrior-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "skeleton-warrior: Meshy rigging",
+   "files": [
+    {
+     "file": "models/skeleton-warrior-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1325184
+    },
+    {
+     "file": "models/skeleton-warrior-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1289980
+    },
+    {
+     "file": "models/skeleton-warrior-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1457496
+    },
+    {
+     "file": "models/skeleton-warrior-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1338876
+    },
+    {
+     "file": "models/skeleton-warrior-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52040
+    },
+    {
+     "file": "models/skeleton-warrior-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1426248
+    },
+    {
+     "file": "models/skeleton-warrior-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1318188
+    },
+    {
+     "file": "models/skeleton-warrior-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40980
+    }
+   ],
+   "submitted": "2026-11-23T16:56:04.252Z",
+   "done": "2026-11-23T16:56:54.947Z",
+   "seconds": 81
+  },
+  {
+   "id": "silver-knight-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20957-05dd-7982-93a3-987086b1610b",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/silver-knight-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "silver-knight: Meshy rigging",
+   "files": [
+    {
+     "file": "models/silver-knight-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1071148
+    },
+    {
+     "file": "models/silver-knight-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1069292
+    },
+    {
+     "file": "models/silver-knight-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1203676
+    },
+    {
+     "file": "models/silver-knight-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1118188
+    },
+    {
+     "file": "models/silver-knight-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52060
+    },
+    {
+     "file": "models/silver-knight-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1172428
+    },
+    {
+     "file": "models/silver-knight-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1097500
+    },
+    {
+     "file": "models/silver-knight-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41000
+    }
+   ],
+   "submitted": "2026-11-23T16:57:07.846Z",
+   "done": "2026-11-23T16:57:46.085Z",
+   "seconds": 62
+  },
+  {
+   "id": "drowned-brute-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20957-441e-7d71-a141-793c01553258",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/drowned-brute-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "drowned-brute: Meshy rigging",
+   "files": [
+    {
+     "file": "models/drowned-brute-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1400860
+    },
+    {
+     "file": "models/drowned-brute-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1294364
+    },
+    {
+     "file": "models/drowned-brute-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1533628
+    },
+    {
+     "file": "models/drowned-brute-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1343260
+    },
+    {
+     "file": "models/drowned-brute-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 51820
+    },
+    {
+     "file": "models/drowned-brute-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1502372
+    },
+    {
+     "file": "models/drowned-brute-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1322572
+    },
+    {
+     "file": "models/drowned-brute-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40756
+    }
+   ],
+   "submitted": "2026-11-23T16:57:23.777Z",
+   "done": "2026-11-23T16:58:03.225Z",
+   "seconds": 70
+  },
+  {
+   "id": "water-elemental-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20957-05c6-7403-a80c-755f88b29f05",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/water-elemental-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "water-elemental: Meshy rigging",
+   "files": [
+    {
+     "file": "models/water-elemental-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 902936
+    },
+    {
+     "file": "models/water-elemental-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 991836
+    },
+    {
+     "file": "models/water-elemental-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1035304
+    },
+    {
+     "file": "models/water-elemental-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1040732
+    },
+    {
+     "file": "models/water-elemental-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 51844
+    },
+    {
+     "file": "models/water-elemental-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1004028
+    },
+    {
+     "file": "models/water-elemental-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1020044
+    },
+    {
+     "file": "models/water-elemental-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40780
+    }
+   ],
+   "submitted": "2026-11-23T16:57:07.827Z",
+   "done": "2026-11-23T16:58:58.037Z",
+   "seconds": 133
+  },
+  {
+   "id": "earth-elemental-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20958-638f-7872-8b6c-22543752039f",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/earth-elemental-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "earth-elemental: Meshy rigging",
+   "files": [
+    {
+     "file": "models/earth-elemental-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1317356
+    },
+    {
+     "file": "models/earth-elemental-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1200828
+    },
+    {
+     "file": "models/earth-elemental-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1449620
+    },
+    {
+     "file": "models/earth-elemental-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1249724
+    },
+    {
+     "file": "models/earth-elemental-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 51872
+    },
+    {
+     "file": "models/earth-elemental-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1418348
+    },
+    {
+     "file": "models/earth-elemental-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1229036
+    },
+    {
+     "file": "models/earth-elemental-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40812
+    }
+   ],
+   "submitted": "2026-11-23T16:58:37.367Z",
+   "done": "2026-11-23T16:59:10.670Z",
+   "seconds": 63
+  },
+  {
+   "id": "air-elemental-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20958-568a-7aa2-9aca-383086aea6f5",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/air-elemental-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "air-elemental: Meshy rigging",
+   "files": [
+    {
+     "file": "models/air-elemental-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1100476
+    },
+    {
+     "file": "models/air-elemental-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1076844
+    },
+    {
+     "file": "models/air-elemental-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1233284
+    },
+    {
+     "file": "models/air-elemental-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1125740
+    },
+    {
+     "file": "models/air-elemental-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52096
+    },
+    {
+     "file": "models/air-elemental-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1202012
+    },
+    {
+     "file": "models/air-elemental-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1105052
+    },
+    {
+     "file": "models/air-elemental-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41036
+    }
+   ],
+   "submitted": "2026-11-23T16:58:34.041Z",
+   "done": "2026-11-23T16:59:12.614Z",
+   "seconds": 65
+  },
+  {
+   "id": "fire-elemental-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20959-6d2a-7761-8d6d-397c8958a902",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/fire-elemental-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "fire-elemental: Meshy rigging",
+   "files": [
+    {
+     "file": "models/fire-elemental-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1206368
+    },
+    {
+     "file": "models/fire-elemental-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1180380
+    },
+    {
+     "file": "models/fire-elemental-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1339280
+    },
+    {
+     "file": "models/fire-elemental-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1229276
+    },
+    {
+     "file": "models/fire-elemental-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52104
+    },
+    {
+     "file": "models/fire-elemental-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1308028
+    },
+    {
+     "file": "models/fire-elemental-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1208588
+    },
+    {
+     "file": "models/fire-elemental-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41040
+    }
+   ],
+   "submitted": "2026-11-23T16:59:45.366Z",
+   "done": "2026-11-23T17:00:13.782Z",
+   "seconds": 57
+  },
+  {
+   "id": "aldric-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20959-7f42-75d3-a9cb-95dacef61b1c",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/aldric-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "aldric: Meshy rigging",
+   "files": [
+    {
+     "file": "models/aldric-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1491140
+    },
+    {
+     "file": "models/aldric-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1386108
+    },
+    {
+     "file": "models/aldric-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1623896
+    },
+    {
+     "file": "models/aldric-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1435004
+    },
+    {
+     "file": "models/aldric-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52084
+    },
+    {
+     "file": "models/aldric-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1592656
+    },
+    {
+     "file": "models/aldric-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1414316
+    },
+    {
+     "file": "models/aldric-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41024
+    }
+   ],
+   "submitted": "2026-11-23T16:59:49.997Z",
+   "done": "2026-11-23T17:00:24.859Z",
+   "seconds": 66
+  },
+  {
+   "id": "stone-golem-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2095a-6033-7343-84fa-02904a417f63",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/stone-golem-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "stone-golem: Meshy rigging",
+   "files": [
+    {
+     "file": "models/stone-golem-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1237564
+    },
+    {
+     "file": "models/stone-golem-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1174204
+    },
+    {
+     "file": "models/stone-golem-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1370256
+    },
+    {
+     "file": "models/stone-golem-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1223100
+    },
+    {
+     "file": "models/stone-golem-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52104
+    },
+    {
+     "file": "models/stone-golem-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1338972
+    },
+    {
+     "file": "models/stone-golem-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1202412
+    },
+    {
+     "file": "models/stone-golem-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41040
+    }
+   ],
+   "submitted": "2026-11-23T17:00:47.581Z",
+   "done": "2026-11-23T17:01:48.624Z",
+   "seconds": 89
+  },
+  {
+   "id": "minotaur-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2095a-7a47-7500-984f-c0c37b437abc",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/minotaur-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "minotaur: Meshy rigging",
+   "files": [
+    {
+     "file": "models/minotaur-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 996416
+    },
+    {
+     "file": "models/minotaur-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1056300
+    },
+    {
+     "file": "models/minotaur-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1128792
+    },
+    {
+     "file": "models/minotaur-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1105196
+    },
+    {
+     "file": "models/minotaur-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52076
+    },
+    {
+     "file": "models/minotaur-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1097488
+    },
+    {
+     "file": "models/minotaur-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1084508
+    },
+    {
+     "file": "models/minotaur-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41012
+    }
+   ],
+   "submitted": "2026-11-23T17:00:54.327Z",
+   "done": "2026-11-23T17:02:00.759Z",
+   "seconds": 89
+  },
+  {
+   "id": "grell-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2095b-c62f-7c72-a009-92e2d146c0e3",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/grell-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "grell: Meshy rigging",
+   "files": [
+    {
+     "file": "models/grell-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1221040
+    },
+    {
+     "file": "models/grell-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1138524
+    },
+    {
+     "file": "models/grell-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1353268
+    },
+    {
+     "file": "models/grell-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1187420
+    },
+    {
+     "file": "models/grell-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 51772
+    },
+    {
+     "file": "models/grell-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1322032
+    },
+    {
+     "file": "models/grell-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1166732
+    },
+    {
+     "file": "models/grell-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40712
+    }
+   ],
+   "submitted": "2026-11-23T17:02:19.225Z",
+   "done": "2026-11-23T17:02:46.402Z",
+   "seconds": 51
+  },
+  {
+   "id": "troll-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2095c-0959-7390-a054-458c1e861758",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/troll-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "troll: Meshy rigging",
+   "files": [
+    {
+     "file": "models/troll-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1365912
+    },
+    {
+     "file": "models/troll-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1254972
+    },
+    {
+     "file": "models/troll-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1498436
+    },
+    {
+     "file": "models/troll-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1303868
+    },
+    {
+     "file": "models/troll-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52092
+    },
+    {
+     "file": "models/troll-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1467160
+    },
+    {
+     "file": "models/troll-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1283180
+    },
+    {
+     "file": "models/troll-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41032
+    }
+   ],
+   "submitted": "2026-11-23T17:02:36.426Z",
+   "done": "2026-11-23T17:03:11.098Z",
+   "seconds": 63
+  },
+  {
+   "id": "vessa-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2095c-d25a-7b50-9c24-0eb5fac045e7",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/vessa-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "vessa: Meshy rigging",
+   "files": [
+    {
+     "file": "models/vessa-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1517956
+    },
+    {
+     "file": "models/vessa-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1410348
+    },
+    {
+     "file": "models/vessa-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1650652
+    },
+    {
+     "file": "models/vessa-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1459244
+    },
+    {
+     "file": "models/vessa-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52048
+    },
+    {
+     "file": "models/vessa-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1619420
+    },
+    {
+     "file": "models/vessa-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1438556
+    },
+    {
+     "file": "models/vessa-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40988
+    }
+   ],
+   "submitted": "2026-11-23T17:03:27.870Z",
+   "done": "2026-11-23T17:04:24.842Z",
+   "seconds": 92
+  },
+  {
+   "id": "royal-archer-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2095d-1876-7bf3-bffa-23e4483a169a",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/royal-archer-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "royal-archer: Meshy rigging",
+   "files": [
+    {
+     "file": "models/royal-archer-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1170452
+    },
+    {
+     "file": "models/royal-archer-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1167404
+    },
+    {
+     "file": "models/royal-archer-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1302800
+    },
+    {
+     "file": "models/royal-archer-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1216300
+    },
+    {
+     "file": "models/royal-archer-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 51832
+    },
+    {
+     "file": "models/royal-archer-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1271592
+    },
+    {
+     "file": "models/royal-archer-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1195612
+    },
+    {
+     "file": "models/royal-archer-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40772
+    }
+   ],
+   "submitted": "2026-11-23T17:03:45.823Z",
+   "done": "2026-11-23T17:05:09.961Z",
+   "seconds": 113
+  },
+  {
+   "id": "bruiser-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2095e-428e-7a31-8ca3-46f2484feedd",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/bruiser-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "bruiser: Meshy rigging",
+   "files": [
+    {
+     "file": "models/bruiser-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1428204
+    },
+    {
+     "file": "models/bruiser-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1324668
+    },
+    {
+     "file": "models/bruiser-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1561112
+    },
+    {
+     "file": "models/bruiser-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1373580
+    },
+    {
+     "file": "models/bruiser-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52072
+    },
+    {
+     "file": "models/bruiser-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1529808
+    },
+    {
+     "file": "models/bruiser-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1352892
+    },
+    {
+     "file": "models/bruiser-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41012
+    }
+   ],
+   "submitted": "2026-11-23T17:05:02.140Z",
+   "done": "2026-11-23T17:06:09.475Z",
+   "seconds": 98
+  },
+  {
+   "id": "thornling-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2095e-ea51-78b1-ad53-412b123e331c",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/thornling-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "thornling: Meshy rigging",
+   "files": [
+    {
+     "file": "models/thornling-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1214144
+    },
+    {
+     "file": "models/thornling-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1171052
+    },
+    {
+     "file": "models/thornling-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1346560
+    },
+    {
+     "file": "models/thornling-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1219948
+    },
+    {
+     "file": "models/thornling-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52072
+    },
+    {
+     "file": "models/thornling-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1315324
+    },
+    {
+     "file": "models/thornling-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1199260
+    },
+    {
+     "file": "models/thornling-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41008
+    }
+   ],
+   "submitted": "2026-11-23T17:05:45.090Z",
+   "done": "2026-11-23T17:06:46.005Z",
+   "seconds": 90
+  },
+  {
+   "id": "hollowborn-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a2095f-c0f2-7480-ae61-04213741741a",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/hollowborn-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "hollowborn: Meshy rigging",
+   "files": [
+    {
+     "file": "models/hollowborn-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1085716
+    },
+    {
+     "file": "models/hollowborn-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1053020
+    },
+    {
+     "file": "models/hollowborn-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1218632
+    },
+    {
+     "file": "models/hollowborn-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1101916
+    },
+    {
+     "file": "models/hollowborn-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52076
+    },
+    {
+     "file": "models/hollowborn-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1187408
+    },
+    {
+     "file": "models/hollowborn-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1081228
+    },
+    {
+     "file": "models/hollowborn-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41012
+    }
+   ],
+   "submitted": "2026-11-23T17:06:40.029Z",
+   "done": "2026-11-23T17:07:14.200Z",
+   "seconds": 58
+  },
+  {
+   "id": "wraith-knight-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20960-536e-75d0-b22c-d3eb214fb2c6",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/wraith-knight-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "wraith-knight: Meshy rigging",
+   "files": [
+    {
+     "file": "models/wraith-knight-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1012268
+    },
+    {
+     "file": "models/wraith-knight-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 990028
+    },
+    {
+     "file": "models/wraith-knight-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1144956
+    },
+    {
+     "file": "models/wraith-knight-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1038924
+    },
+    {
+     "file": "models/wraith-knight-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52060
+    },
+    {
+     "file": "models/wraith-knight-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1113708
+    },
+    {
+     "file": "models/wraith-knight-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1018236
+    },
+    {
+     "file": "models/wraith-knight-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41000
+    }
+   ],
+   "submitted": "2026-11-23T17:07:17.528Z",
+   "done": "2026-11-23T17:07:56.651Z",
+   "seconds": 63
+  },
+  {
+   "id": "winged-imp-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20962-3100-7581-9d8e-45b8857ee43a",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/winged-imp-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "winged-imp: Meshy rigging",
+   "files": [
+    {
+     "file": "models/winged-imp-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 970192
+    },
+    {
+     "file": "models/winged-imp-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 953084
+    },
+    {
+     "file": "models/winged-imp-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1102684
+    },
+    {
+     "file": "models/winged-imp-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1001980
+    },
+    {
+     "file": "models/winged-imp-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52080
+    },
+    {
+     "file": "models/winged-imp-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1071396
+    },
+    {
+     "file": "models/winged-imp-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 981292
+    },
+    {
+     "file": "models/winged-imp-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41016
+    }
+   ],
+   "submitted": "2026-11-23T17:09:19.794Z",
+   "done": "2026-11-23T17:11:04.828Z",
+   "seconds": 128
+  },
+  {
+   "id": "bounty-hunter-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20967-152a-77c0-8497-2bd3cb759717",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/bounty-hunter-tripo.glb",
+    "height_meters": 1,
+    "include_fingers": false
+   },
+   "note": "bounty-hunter: Meshy rigging, default skeleton (ue5_mannequin refused this model)",
+   "files": [
+    {
+     "file": "models/bounty-hunter-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 4488240
+    },
+    {
+     "file": "models/bounty-hunter-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 4591228
+    },
+    {
+     "file": "models/bounty-hunter-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 4501016
+    },
+    {
+     "file": "models/bounty-hunter-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 4616108
+    },
+    {
+     "file": "models/bounty-hunter-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 65340
+    },
+    {
+     "file": "models/bounty-hunter-rig/basic_animations.running_glb-running.glb",
+     "bytes": 4496400
+    },
+    {
+     "file": "models/bounty-hunter-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 4607484
+    },
+    {
+     "file": "models/bounty-hunter-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 60720
+    }
+   ],
+   "submitted": "2026-11-23T17:14:40.346Z",
+   "done": "2026-11-23T17:16:05.998Z",
+   "seconds": 107
+  }
+ ]
+}

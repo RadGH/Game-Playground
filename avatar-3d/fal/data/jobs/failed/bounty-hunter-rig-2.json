@@ -1,0 +1,22 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "bounty-hunter-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/bounty-hunter-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a518/A5H14k0VZer3NJpgxkD4L_bounty-hunter-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "bounty-hunter: Meshy rigging",
+ "request_id": "01a20961-6626-7633-92b9-d691752d910e",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20961-6626-7633-92b9-d691752d910e/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20961-6626-7633-92b9-d691752d910e",
+ "submitted": "2026-11-23T17:08:27.856Z"
+}

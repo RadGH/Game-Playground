@@ -1,0 +1,18 @@
+{
+ "item": "leather-hands",
+ "body": "male",
+ "anchor": "hand",
+ "cover": [
+  "hands"
+ ],
+ "scale_r": 1.1784,
+ "scale_l": 1.0433,
+ "inside": 0.741,
+ "region_inside": {
+  "hands": 0.92
+ },
+ "hides": [
+  "hands"
+ ],
+ "triangles": 3636
+}

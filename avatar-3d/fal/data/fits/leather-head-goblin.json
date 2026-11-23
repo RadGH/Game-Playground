@@ -1,0 +1,23 @@
+{
+ "item": "leather-head",
+ "body": "goblin",
+ "anchor": "head",
+ "cover": [
+  "scalp"
+ ],
+ "scale": 1.6142,
+ "turn": 0,
+ "offset": [
+  0.0013,
+  0.021,
+  0.4753
+ ],
+ "inside": 0.552,
+ "region_inside": {
+  "scalp": 0.371
+ },
+ "hides": [
+  "scalp"
+ ],
+ "triangles": 2524
+}

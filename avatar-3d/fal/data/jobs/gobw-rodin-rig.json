@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "gobw-rodin-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/gobw-rodin/model_meshes.0-base_basic_shaded.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab39080/VcEk0-8y1vReD9XA3EHTF_model_meshes.0-base_basic_shaded.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "Meshy rigging, ue5_mannequin, on Rodin goblin warrior",
+ "request_id": "01a2063e-4278-7820-8b92-b3f3447c317d",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2063e-4278-7820-8b92-b3f3447c317d/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2063e-4278-7820-8b92-b3f3447c317d",
+ "submitted": "2026-11-23T02:31:13.306Z",
+ "logged": true
+}

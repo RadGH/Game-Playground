@@ -1,0 +1,25 @@
+{
+ "item": "mail-chest",
+ "body": "goblin",
+ "anchor": "neck",
+ "cover": [
+  "torso"
+ ],
+ "scale": 1.8329,
+ "turn": 0,
+ "offset": [
+  0.0025,
+  0.0163,
+  -0.1477
+ ],
+ "inside": 0.954,
+ "region_inside": {
+  "upperarms": 0.858,
+  "torso": 1.0
+ },
+ "hides": [
+  "torso",
+  "upperarms"
+ ],
+ "triangles": 3798
+}

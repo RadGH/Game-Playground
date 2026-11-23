@@ -1,0 +1,31 @@
+{
+ "item": "leather-legs",
+ "body": "female",
+ "anchor": "waist",
+ "cover": [
+  "hips",
+  "thighs"
+ ],
+ "scale": [
+  1.7335,
+  1.7335,
+  2.2166
+ ],
+ "turn": 0,
+ "offset": [
+  0.0005,
+  -0.0173,
+  0.1236
+ ],
+ "inside": 0.954,
+ "region_inside": {
+  "thighs": 0.95,
+  "shins": 0.552,
+  "hips": 0.782
+ },
+ "hides": [
+  "hips",
+  "thighs"
+ ],
+ "triangles": 2643
+}

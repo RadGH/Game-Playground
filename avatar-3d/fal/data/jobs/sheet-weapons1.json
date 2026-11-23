@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "sheet-weapons1",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-weapons1.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3851d/TmvU3fJJK94Becyg6y7Vy_sheet-weapons1.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "note": "Trellis-2 1024p, several items in one picture (ref/sheet-weapons1.png)",
+ "request_id": "01a2047f-dee4-7242-883a-4c7f0e20a649",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a2047f-dee4-7242-883a-4c7f0e20a649/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a2047f-dee4-7242-883a-4c7f0e20a649",
+ "submitted": "2026-11-22T18:23:38.768Z",
+ "logged": true
+}

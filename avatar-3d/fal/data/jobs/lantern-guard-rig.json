@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "lantern-guard-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/lantern-guard-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a485/d333vkhZeGwaDFrOS7nmu_lantern-guard-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "lantern-guard: Meshy rigging",
+ "request_id": "01a2094a-e52a-7af3-80cf-e7c7a3e8e8e1",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2094a-e52a-7af3-80cf-e7c7a3e8e8e1/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2094a-e52a-7af3-80cf-e7c7a3e8e8e1",
+ "submitted": "2026-11-23T16:43:53.041Z",
+ "logged": true
+}

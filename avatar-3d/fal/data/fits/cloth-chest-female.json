@@ -1,0 +1,27 @@
+{
+ "item": "cloth-chest",
+ "body": "female",
+ "anchor": "neck",
+ "cover": [
+  "torso"
+ ],
+ "scale": 1.892,
+ "turn": -40,
+ "offset": [
+  0.0083,
+  -0.1059,
+  0.5909
+ ],
+ "inside": 0.95,
+ "region_inside": {
+  "forearms": 0.054,
+  "hips": 1.0,
+  "torso": 0.971,
+  "upperarms": 0.539
+ },
+ "hides": [
+  "hips",
+  "torso"
+ ],
+ "triangles": 4682
+}

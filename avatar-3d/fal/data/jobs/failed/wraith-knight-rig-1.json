@@ -1,0 +1,22 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "wraith-knight-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/wraith-knight-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4c8/wM0pzpanu2DMuvTvfnwsW_wraith-knight-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "wraith-knight: Meshy rigging",
+ "request_id": "01a20955-30c3-7c00-8382-296e8b10aa7d",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20955-30c3-7c00-8382-296e8b10aa7d/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20955-30c3-7c00-8382-296e8b10aa7d",
+ "submitted": "2026-11-23T16:55:07.758Z"
+}

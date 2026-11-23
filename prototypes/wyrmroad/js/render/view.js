@@ -1,6 +1,6 @@
 // Wyrmroad's 3D view (the render contract in docs/ARCH.md):
 //
-//   const view = await createView({ canvas, data, quality: 'high' | 'low', T });
+//   const view = await createView({ canvas, data, quality: 'high' | 'low', T, models: 'legacy' | 'hd' });   // models: js/render/hd.js
 //   await view.setChapter('millbrook');     // builds the street + backdrop and every body the chapter needs
 //   view.update(G, alpha, dtReal);          // every animation frame: actors, props, shots, zones, camera, draw
 //   view.handle(events);                    // fx, one-shot clips, damage numbers for this frame's events
@@ -26,7 +26,7 @@ import { skyTex } from './kit.js';
 export { HERO_COLORS };
 const DEFAULT_T = { viewWidth: 17, camHeight: 3.2, camDistance: 15, reviveTime: 2, downTime: 6 };
 
-export async function createView({ canvas, data, quality = 'high', T = null }) {
+export async function createView({ canvas, data, quality = 'high', T = null, models = 'legacy' }) {
   const low = quality === 'low';
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !low, powerPreference: 'high-performance' });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -50,7 +50,7 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
   let actors, fx, props, partsQuality = null;
   function makeParts(q) {
     if (actors) { actors.clear(); scene.remove(actors.root); fx.dispose(); props.clear(); scene.remove(props.root); }
-    actors = createActors({ scene, data, quality: q });
+    actors = createActors({ scene, data, quality: q, models });
     fx = createFx({ scene, data, quality: q, camera, size: () => ({ w: cam.w, h: cam.h }) });
     props = createProps({ scene, data, quality: q, fx });
     partsQuality = q;
@@ -199,8 +199,8 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
   const view = {
     renderer, scene, camera,
     get actors() { return actors; }, get fx() { return fx; }, get props() { return props; },
-    /** Set by the UI: { shake, damageNumbers, quality }. Read every frame. */
-    options: { shake: true, damageNumbers: true, quality },
+    /** Set by the UI: { shake, damageNumbers, quality, models }. Read every frame (models: 'hd' | 'legacy', switches live). */
+    options: { shake: true, damageNumbers: true, quality, models },
     get chapter() { return chapterId; },
     get loading() { return !!loading; },
     setChapter,
@@ -213,6 +213,7 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
       const op = view.options || {};
       fx.showDamage = op.damageNumbers !== false;
       if (op.quality && op.quality !== quality) applyQuality(op.quality);
+      if (op.models && op.models !== models) { models = op.models; actors.setModels(models); }
       cam.t += dt;
       if (G) { lastG = G; if (G.T && G.T !== tun) { tun = G.T; fitCamera(); } }
       if (G && G.ch && G.ch.id !== chapterId) setChapter(G.ch.id);
@@ -297,7 +298,7 @@ export async function createView({ canvas, data, quality = 'high', T = null }) {
  * `look` is the hero's own look; with `cls` (and `gear`) it is dressed through items.js dressedLook. A look that is
  * already dressed can be passed with no cls. `{ creature: spec }` shows a creature.
  */
-export async function createPreview(canvas, { data = null, quality = 'high', background = null } = {}) {
+export async function createPreview(canvas, { data = null, quality = 'high', background = null, models = 'legacy' } = {}) {
   const low = quality === 'low';
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: !background });
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1;
@@ -347,6 +348,7 @@ export async function createPreview(canvas, { data = null, quality = 'high', bac
       else {
         const dressed = cls && data ? dressedLook(data.classes, data.items, { cls, look: look || {}, gear: gear || {} }) : look;
         spec = { key: 'h' + JSON.stringify(dressed), make: () => buildChibi(dressed, { low, outline: !low }) };
+        if (models === 'hd') spec = (await hdBodySpec(data, dressed, spec)) || spec;     // high detail: the Tabard hero
       }
       if (spec.key === wantKey) return;
       wantKey = spec.key;
@@ -388,13 +390,35 @@ function portraitRig() {
   pr = { canvas, renderer, scene, camera, queue: Promise.resolve() };
   return pr;
 }
-/** A head-and-shoulders portrait from the real 3D model, as a PNG data URL (cached by look). */
-export function renderPortrait(spec, { size = 128, yaw = 0.42 } = {}) {
-  const key = JSON.stringify(spec) + '|' + size + '|' + yaw;
+/**
+ * High detail (js/render/hd.js): the body spec for a look or creature as the old renderer would draw it — a story person,
+ * foe or boss whose look this is gets its own high-detail model (data/hd-models.json), any other look is a hero (Tabard).
+ * null = no high-detail model: draw the old one. `old` (a legacy { make }) is the fallback if the model fails to load.
+ */
+let whoByLook = null;
+async function hdBodySpec(data, look, old = null, creature = null) {
+  try {
+    const hd = await import('./hd.js'), kit = await hd.loadHdKit(); if (!kit) return null;
+    if (data && !whoByLook) {
+      whoByLook = new Map();
+      for (const [k, d] of [...Object.entries(data.enemies.foes), ...Object.entries(data.enemies.bosses)]) if (d.look) whoByLook.set(JSON.stringify(d.look), { side: 'foe', kind: k });
+      for (const [id, sp] of Object.entries(data.story?.speakers || {})) if (sp.look) whoByLook.set(JSON.stringify(sp.look), { side: 'npc', lookDirect: sp.look, speaker: id });
+    }
+    const who = whoByLook?.get(JSON.stringify(creature || look)) || (creature ? null : { side: 'hero' });
+    const s = who && kit.specFor(data, who, look);
+    if (!s) return null;
+    return { key: s.key, hd: true, make: () => hd.buildHd(s, {}).catch(e => { console.warn('[wyrmroad] high-detail model failed:', e?.message); if (old) return old.make(); throw e; }) };
+  } catch (e) { console.warn('[wyrmroad] high-detail models:', e?.message); return null; }
+}
+
+/** A head-and-shoulders portrait from the real 3D model, as a PNG data URL (cached by look). models: 'hd' draws high detail. */
+export function renderPortrait(spec, { size = 128, yaw = 0.42, data = null, models = 'legacy' } = {}) {
+  const key = JSON.stringify(spec) + '|' + size + '|' + yaw + '|' + models;
   if (portraitCache.has(key)) return portraitCache.get(key);
   const R = portraitRig();
   const job = R.queue.then(async () => {
-    const body = spec.creature ? await buildCreature(spec.creature, { outline: false }) : await buildChibi(spec.look || {}, { anims: ['idle', 'ready'], outline: false });
+    const hdSpec = models === 'hd' ? await hdBodySpec(data, spec.look || null, null, spec.creature || null) : null;
+    const body = hdSpec ? await hdSpec.make() : spec.creature ? await buildCreature(spec.creature, { outline: false }) : await buildChibi(spec.look || {}, { anims: ['idle', 'ready'], outline: false });
     const g = new THREE.Group(); g.add(body.obj); R.scene.add(g);
     try {
       body.loop('idle'); body.update(0.01);
@@ -402,7 +426,15 @@ export function renderPortrait(spec, { size = 128, yaw = 0.42 } = {}) {
       g.updateMatrixWorld(true);
       R.renderer.setSize(size, size, false); R.camera.aspect = 1; R.camera.updateProjectionMatrix();
       let cx = 0, cy, cz = 0, span;
-      if (spec.creature) {
+      if (body.hd) {
+        // a high-detail model: its head bone (UAL skeleton 'Head'), else the top of its bounding box
+        body.obj.updateMatrixWorld(true);
+        let head = null; body.obj.traverse(o => { if (!head && o.isBone && /^head$/i.test(o.name)) head = o; });
+        const box = new THREE.Box3().setFromObject(body.obj), H = body.h || (box.max.y - box.min.y);
+        span = Math.max(0.3, H * 0.3);
+        const hp = head ? head.getWorldPosition(new THREE.Vector3()) : new THREE.Vector3(0, H - span * 0.4, 0);
+        cx = hp.x; cy = hp.y - span * 0.08; cz = hp.z;
+      } else if (spec.creature) {
         // a beast: its head end, from the bounding box (creatures have no parked parts)
         const box = new THREE.Box3().setFromObject(body.obj), H = box.max.y - box.min.y;
         const head = body.creature.parts?.head, hp = head ? head.getWorldPosition(new THREE.Vector3()) : null;

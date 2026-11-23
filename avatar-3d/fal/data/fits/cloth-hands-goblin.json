@@ -1,0 +1,18 @@
+{
+ "item": "cloth-hands",
+ "body": "goblin",
+ "anchor": "hand",
+ "cover": [
+  "hands"
+ ],
+ "scale_r": 0.7397,
+ "scale_l": 0.7543,
+ "inside": 0.66,
+ "region_inside": {
+  "hands": 0.686
+ },
+ "hides": [
+  "hands"
+ ],
+ "triangles": 4468
+}

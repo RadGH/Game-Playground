@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "vessa-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/vessa-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4f9/X61_OdNzbQWpx3rG9wnPM_vessa-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "vessa: Meshy rigging",
+ "request_id": "01a2095c-d25a-7b50-9c24-0eb5fac045e7",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2095c-d25a-7b50-9c24-0eb5fac045e7/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2095c-d25a-7b50-9c24-0eb5fac045e7",
+ "submitted": "2026-11-23T17:03:27.870Z",
+ "logged": true
+}

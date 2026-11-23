@@ -1,0 +1,23 @@
+{
+ "item": "mail-head",
+ "body": "goblin",
+ "anchor": "head",
+ "cover": [
+  "scalp"
+ ],
+ "scale": 1.5877,
+ "turn": 20,
+ "offset": [
+  -0.0095,
+  0.0317,
+  0.3174
+ ],
+ "inside": 0.8,
+ "region_inside": {
+  "scalp": 0.523
+ },
+ "hides": [
+  "scalp"
+ ],
+ "triangles": 4017
+}

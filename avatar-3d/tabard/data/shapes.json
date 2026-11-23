@@ -1,0 +1,112 @@
+{
+ "_doc": "Tabard body reshaping (tools/blender/tb_body.py). radial = how far each vertex sits from its bone's line, x factor (1 = unchanged); grow = uniform scale about the bone's head (hands, feet, head). smooth = Taubin passes that iron out muscle grooves on the listed bones (head, hands, feet untouched). tris = decimate target. fit (tools/blender/tb_fit.py, run after tb_geo): size changes made AFTER painting \u2014 moves points only (same triangles, same texture layout), so the existing paintings still fit; scale = per bone, about the bone's head (hand_* also takes its fingers).",
+ "male": {
+  "src": "Superhero_Male_FullBody.gltf",
+  "mesh": "SuperHero_Male",
+  "radial": {
+   "clavicle_l": 1.0,
+   "clavicle_r": 1.0,
+   "upperarm_l": 0.95,
+   "upperarm_r": 0.95,
+   "lowerarm_l": 1.03,
+   "lowerarm_r": 1.03,
+   "spine_03": 1.0,
+   "spine_02": 1.03,
+   "spine_01": 1.05,
+   "pelvis": 1.03,
+   "neck_01": 0.96,
+   "thigh_l": 1.0,
+   "thigh_r": 1.0,
+   "calf_l": 1.0,
+   "calf_r": 1.0
+  },
+  "grow": {
+   "hand_l": 1.25,
+   "hand_r": 1.25,
+   "foot_l": 1.15,
+   "foot_r": 1.15,
+   "Head": 1.1
+  },
+  "smooth": {
+   "passes": 10,
+   "bones": [
+    "clavicle_l",
+    "clavicle_r",
+    "upperarm_l",
+    "upperarm_r",
+    "lowerarm_l",
+    "lowerarm_r",
+    "spine_03",
+    "spine_02",
+    "spine_01",
+    "pelvis",
+    "neck_01",
+    "thigh_l",
+    "thigh_r",
+    "calf_l",
+    "calf_r"
+   ]
+  },
+  "tris": 3000,
+  "fit": {
+   "scale": {
+    "hand_l": 0.75,
+    "hand_r": 0.75
+   }
+  }
+ },
+ "female": {
+  "src": "Superhero_Female_FullBody.gltf",
+  "mesh": "Superhero_Female",
+  "radial": {
+   "clavicle_l": 1.0,
+   "clavicle_r": 1.0,
+   "upperarm_l": 0.98,
+   "upperarm_r": 0.98,
+   "lowerarm_l": 1.0,
+   "lowerarm_r": 1.0,
+   "spine_03": 1.0,
+   "spine_02": 1.02,
+   "spine_01": 1.04,
+   "pelvis": 1.04,
+   "neck_01": 0.98,
+   "thigh_l": 1.02,
+   "thigh_r": 1.02,
+   "calf_l": 1.0,
+   "calf_r": 1.0
+  },
+  "grow": {
+   "hand_l": 1.18,
+   "hand_r": 1.18,
+   "foot_l": 1.1,
+   "foot_r": 1.1,
+   "Head": 1.1
+  },
+  "smooth": {
+   "passes": 8,
+   "bones": [
+    "clavicle_l",
+    "clavicle_r",
+    "upperarm_l",
+    "upperarm_r",
+    "lowerarm_l",
+    "lowerarm_r",
+    "spine_02",
+    "spine_01",
+    "pelvis",
+    "neck_01",
+    "thigh_l",
+    "thigh_r",
+    "calf_l",
+    "calf_r"
+   ]
+  },
+  "tris": 3000,
+  "fit": {
+   "scale": {
+    "hand_l": 0.9,
+    "hand_r": 0.9
+   }
+  }
+ }
+}

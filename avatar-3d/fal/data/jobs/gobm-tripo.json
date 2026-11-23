@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "gobm-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/gob-mage-front.png",
+  "face_limit": 8000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab39058/1t5DmVIvlqqmbswczR4jO_gob-mage-front.png",
+  "face_limit": 8000,
+  "texture": true
+ },
+ "note": "goblin mage, complete model: Tripo P1, 8000 faces, textured",
+ "request_id": "01a20636-cdca-7213-b29c-28331bb90c65",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20636-cdca-7213-b29c-28331bb90c65/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20636-cdca-7213-b29c-28331bb90c65",
+ "submitted": "2026-11-23T02:23:04.688Z",
+ "logged": true
+}

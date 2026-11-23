@@ -114,6 +114,43 @@ kbd:empty { display: none; }
 /* the account pill from shared/rgs-signin.js keeps its own look; just give it room */
 .wr-acct-slot { min-height: 44px; display: flex; align-items: center; }
 
+/* ------------------------------------------------------------------ character models (first start: js/ui/models.js) */
+.wr-models { justify-content: center; align-items: center; }
+.wr-models::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(10, 13, 20, .55), rgba(10, 13, 20, .88) 75%); }
+.wr-models-main { width: min(940px, 100%); display: flex; flex-direction: column; gap: 22px; padding: 18px 0; }
+.wr-models-head { text-align: center; display: flex; flex-direction: column; gap: 8px; }
+.wr-models-head h1 { font: 800 clamp(28px, 4.2vw, 46px)/1.12 var(--head); letter-spacing: .03em; color: #fff0c8; text-shadow: 0 3px 14px rgba(0, 0, 0, .7); }
+.wr-models-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.wr-model-card { position: relative; display: flex; flex-direction: column; gap: 0; padding: 0; border-radius: 18px; overflow: hidden; cursor: pointer; text-align: left; color: var(--ink);
+  background: linear-gradient(180deg, rgba(36, 45, 63, .97), rgba(24, 31, 45, .97)); border: 2px solid var(--edge2); box-shadow: 0 14px 40px rgba(0, 0, 0, .45); transition: border-color .15s, transform .15s; }
+.wr-model-card:hover, .wr-model-card:focus-visible, .wr-model-card.pad-focus { border-color: var(--amber); transform: translateY(-2px); }
+.wr-model-card:focus-visible, .wr-model-card.pad-focus { outline: 3px solid var(--amber2); outline-offset: 3px; }
+.wr-model-card.on { border-color: #8a6a3a; }
+.wr-model-pic { position: relative; display: block; aspect-ratio: 16 / 10; background: #0e131c; border-bottom: 1px solid var(--edge); }
+.wr-model-pic img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; }
+.wr-model-tag { position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 999px; font: 800 13px/1.2 var(--body); font-style: normal; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--amber); color: var(--amber-ink); box-shadow: 0 2px 8px rgba(0, 0, 0, .4); }
+.wr-model-text { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px 6px; }
+.wr-model-text b { font: 700 24px/1.15 var(--head); color: #ffe2a4; }
+.wr-model-text small { font-size: 16px; line-height: 1.4; color: var(--ink2); }
+.wr-model-pick { display: flex; align-items: center; gap: 10px; margin: 10px 18px 18px; min-height: 48px; padding: 8px 16px; border-radius: 12px; font-weight: 800; font-size: 17px;
+  background: linear-gradient(180deg, rgba(43, 53, 73, .96), rgba(30, 38, 54, .96)); border: 1px solid var(--edge2); }
+.wr-model-card:first-child .wr-model-pick { background: linear-gradient(180deg, #f4bd62, #d98f34); border-color: #f6cf85; color: var(--amber-ink); }
+.wr-model-pick .ic { width: 20px; height: 20px; }
+.wr-models-foot { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; color: var(--ink2); font-size: 15px; }
+.wr-models-foot .ic { width: 18px; height: 18px; opacity: .8; }
+@media (max-width: 720px) {
+  .wr-models-main { gap: 14px; padding: 6px 0; }
+  .wr-models-cards { grid-template-columns: 1fr; gap: 12px; }
+  .wr-model-card { display: grid; grid-template-columns: 42% 1fr; grid-template-rows: auto auto; }
+  .wr-model-pic { grid-row: 1 / 3; aspect-ratio: auto; height: 100%; min-height: 150px; border-bottom: 0; border-right: 1px solid var(--edge); }
+  .wr-model-text { padding: 12px 14px 2px; gap: 4px; }
+  .wr-model-text b { font-size: 21px; }
+  .wr-model-text small { font-size: 15px; }
+  .wr-model-pick { margin: 8px 14px 12px; font-size: 15px; min-height: 44px; padding: 6px 12px; }
+  .wr-model-tag { top: 8px; left: 8px; font-size: 12px; }
+}
+
 /* ------------------------------------------------------------------ heroes */
 .wr-hero-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; align-content: start; }
 .wr-hero-card { display: grid; grid-template-columns: auto 1fr; gap: 14px; padding: 16px; border-radius: var(--r); background: linear-gradient(180deg, rgba(34, 43, 60, .94), rgba(24, 31, 45, .94)); border: 1px solid var(--edge); }

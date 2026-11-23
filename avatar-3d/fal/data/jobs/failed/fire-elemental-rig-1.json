@@ -1,0 +1,22 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "fire-elemental-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/fire-elemental-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4ce/BLU8TXZb9L8KRU2qS7XIG_fire-elemental-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "fire-elemental: Meshy rigging",
+ "request_id": "01a20956-29aa-7cb0-84cf-d86701c10d87",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20956-29aa-7cb0-84cf-d86701c10d87/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20956-29aa-7cb0-84cf-d86701c10d87",
+ "submitted": "2026-11-23T16:56:11.473Z"
+}

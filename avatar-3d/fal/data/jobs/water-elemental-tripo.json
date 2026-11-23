@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "water-elemental-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/water-elemental-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a4a8/KvbOldo8DW89OI-q-F4Gc_water-elemental-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "water-elemental: Tripo P1 textured, face_limit 3000",
+ "request_id": "01a20950-9536-7cd1-93a6-c2d9ba759c2e",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20950-9536-7cd1-93a6-c2d9ba759c2e/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20950-9536-7cd1-93a6-c2d9ba759c2e",
+ "submitted": "2026-11-23T16:50:05.788Z",
+ "logged": true
+}

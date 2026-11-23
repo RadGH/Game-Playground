@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "thornling-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/thornling-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a497/8NnSAZN-5DA0QxDCP4qHw_thornling-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "thornling: Tripo P1 textured, face_limit 3000",
+ "request_id": "01a2094d-f0ee-7f70-bc7b-ac570e949865",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094d-f0ee-7f70-bc7b-ac570e949865/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094d-f0ee-7f70-bc7b-ac570e949865",
+ "submitted": "2026-11-23T16:47:12.657Z",
+ "logged": true
+}

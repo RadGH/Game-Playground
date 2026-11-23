@@ -1,0 +1,31 @@
+{
+ "item": "cloth-legs",
+ "body": "male",
+ "anchor": "waist",
+ "cover": [
+  "hips",
+  "thighs"
+ ],
+ "scale": [
+  1.3443,
+  1.3443,
+  2.4145
+ ],
+ "turn": 0,
+ "offset": [
+  0.0015,
+  -0.0082,
+  0.1352
+ ],
+ "inside": 0.951,
+ "region_inside": {
+  "thighs": 0.969,
+  "shins": 0.631,
+  "hips": 0.804
+ },
+ "hides": [
+  "hips",
+  "thighs"
+ ],
+ "triangles": 1945
+}

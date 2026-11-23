@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "crossbowman-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/crossbowman-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a485/3O22fFO4nXqAWiuY9kVNL_crossbowman-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "crossbowman: Meshy rigging",
+ "request_id": "01a2094a-f59a-7362-9f97-689d16f33540",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2094a-f59a-7362-9f97-689d16f33540/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2094a-f59a-7362-9f97-689d16f33540",
+ "submitted": "2026-11-23T16:43:57.250Z",
+ "logged": true
+}

@@ -1,0 +1,11 @@
+Use your image generation tool to EDIT the attached base.png and save the result in the current working directory as painted.png (1536x1024 PNG). Do nothing else (do not write code, do not edit other files).
+base.png is a model sheet: the SAME plain clay 3D model of a hood shown four times — FRONT, LEFT SIDE, BACK, RIGHT SIDE — on a flat light-grey background.
+Task: paint this exact model as a finished game prop texture reference, as if painting directly onto the clay.
+Subject: a deep blue cloth traveller's hood with a broad gold-embroidered trim band around the face opening, soft folds, the inside of the hood dark shadowed blue, a pointed peak hanging at the back, the bottom edge falling onto the neck and shoulders. The face opening is empty (no face).
+Style: hand-painted stylized fantasy MMO character texture style: every surface painted by hand with soft lighting baked in from above, gentle dark occlusion in creases and under overlaps, warm saturated earthy colours, bold readable shapes, thick trims, chunky stitched seams, large rivets and buckles, crisp painted highlights on metal edges; no photographic detail, no noise, no skin pores, no thin wrinkles, no muscle definition; like a classic hand-painted 2000s MMO or a painted tabletop miniature.
+Hard rules (the painting is projected back onto a 3D model, so alignment matters more than anything):
+- Keep the four figures EXACTLY where they are: same pose, same silhouette, same size, same outline, same position on the sheet, same arm angles, same feet, same head size. Do not move, resize, zoom, turn or redraw the bodies; paint on top of them.
+- Paint only on the model: nothing may stick out past its outline; add no other objects.
+- All four views show the same design consistently (front details on the front view, back details on the back view).
+- Even, flat studio lighting; keep the plain flat light-grey background exactly as it is; no floor shadow.
+- No text, no labels, no watermark, no extra figures.

@@ -1,0 +1,19 @@
+{
+ "item": "mail-feet",
+ "body": "male",
+ "anchor": "floor",
+ "cover": [
+  "feet"
+ ],
+ "turn_l": 10,
+ "turn_r": 0,
+ "scale": 1.1889,
+ "inside": 0.753,
+ "region_inside": {
+  "feet": 0.711
+ },
+ "hides": [
+  "feet"
+ ],
+ "triangles": 3329
+}

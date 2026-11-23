@@ -1,0 +1,21 @@
+{
+ "item": "leather-feet",
+ "body": "goblin",
+ "anchor": "floor",
+ "cover": [
+  "feet"
+ ],
+ "turn_l": 0,
+ "turn_r": 10,
+ "scale": 1.0944,
+ "inside": 0.851,
+ "region_inside": {
+  "feet": 0.838,
+  "shins": 0.931
+ },
+ "hides": [
+  "feet",
+  "shins"
+ ],
+ "triangles": 3195
+}

@@ -1,0 +1,27 @@
+{
+ "item": "plate-chest",
+ "body": "male",
+ "anchor": "neck",
+ "cover": [
+  "torso"
+ ],
+ "scale": 1.4686,
+ "turn": -20,
+ "offset": [
+  0.0238,
+  0.0142,
+  0.7344
+ ],
+ "inside": 0.952,
+ "region_inside": {
+  "upperarms": 0.753,
+  "torso": 0.987,
+  "hips": 1.0,
+  "forearms": 0.139
+ },
+ "hides": [
+  "hips",
+  "torso"
+ ],
+ "triangles": 2903
+}

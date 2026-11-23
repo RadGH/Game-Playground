@@ -19,7 +19,8 @@ export const SETTINGS_KEY = 'wyrmroad.settings.v1';
 export const SAVE_VERSION = 1;
 export const BAG_SIZE = 36;
 
-export const DEFAULT_SETTINGS = { volume: 0.8, quality: 'high', shake: true, damageNumbers: true, music: true, keys: 'kbm' };
+// models: 'hd' | 'legacy' | null (not asked yet: the first start asks, js/ui/models.js)
+export const DEFAULT_SETTINGS = { volume: 0.8, quality: 'high', shake: true, damageNumbers: true, music: true, keys: 'kbm', models: null };
 
 export function freshSave() { return { v: SAVE_VERSION, playedAt: 0, heroes: [], lastHero: null }; }
 

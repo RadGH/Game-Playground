@@ -1,7 +1,7 @@
 // Wyrmroad: the page. Loads the data, the save, the 3D view (js/render, render helper), the inputs and the sound, then
 // runs one frame loop and routes between screens (js/ui/*). Every screen is its own module; this file only wires them.
 //
-//   app.go('title' | 'heroes' | 'creator' | 'map' | 'story' | 'join' | 'play' | 'results', opts)
+//   app.go('models' | 'title' | 'heroes' | 'creator' | 'map' | 'story' | 'join' | 'play' | 'results', opts)
 //   app.loop = fn(dt)          the active screen's per-frame work (the play screen runs the session here)
 //   window.gameEye.state()      what Claude's game-eye tool reads (screen, chapter, section, heroes, foes, props)
 import { loadTuning, tunePanel } from '../../../shared/tune.js';
@@ -30,10 +30,11 @@ import { storyScreen } from './ui/story.js';
 import { joinScreen } from './ui/join.js';
 import { playScreen } from './ui/play.js';
 import { resultsScreen } from './ui/results.js';
+import { modelsScreen } from './ui/models.js';
 import { openMenu } from './ui/menu.js';
 
 const BUILD = '2026-11-20';
-const SCREENS = { title: titleScreen, heroes: heroesScreen, creator: creatorScreen, map: mapScreen, story: storyScreen, join: joinScreen, play: playScreen, results: resultsScreen };
+const SCREENS = { models: modelsScreen, title: titleScreen, heroes: heroesScreen, creator: creatorScreen, map: mapScreen, story: storyScreen, join: joinScreen, play: playScreen, results: resultsScreen };
 const ui = document.getElementById('ui');
 const canvas = document.getElementById('view');
 const loading = document.getElementById('loading');
@@ -71,7 +72,7 @@ async function boot() {
 
   say('Setting the stage…');
   app.render = await import('./render/view.js').catch(e => { console.warn('[wyrmroad] the 3D view is not ready', e?.message); return null; });
-  app.view = app.render ? await app.render.createView({ canvas, data: app.data, quality: app.settings.quality, T: app.T }) : stubView();
+  app.view = app.render ? await app.render.createView({ canvas, data: app.data, quality: app.settings.quality, T: app.T, models: modelsOf(app.settings) }) : stubView();
   applyViewOptions();
   addEventListener('resize', () => app.view.resize());
   account.onChange?.(u => { app.user = u || null; document.querySelectorAll('[data-acct-name]').forEach(n => { n.textContent = u ? (u.username || 'Account') : 'Sign in'; }); });
@@ -80,13 +81,16 @@ async function boot() {
   loading?.classList.add('hidden');
   requestAnimationFrame(frame);
   const code = new URLSearchParams(location.search).get('code');
-  if (code) { go('title'); openOnline(); } else go('title');
+  if (!app.settings.models) go('models', { then: code ? 'online' : 'title' });   // asked once: high detail or legacy models
+  else if (code) { go('title'); openOnline(); } else go('title');
 }
 
 /** Graphics/shake/damage-number settings the renderer reads (it owns the drawing; we only say what the player chose). */
 export function applyViewOptions() {
-  app.view.options = { shake: !!app.settings.shake, damageNumbers: !!app.settings.damageNumbers, quality: app.settings.quality };
+  app.view.options = { shake: !!app.settings.shake, damageNumbers: !!app.settings.damageNumbers, quality: app.settings.quality, models: modelsOf(app.settings) };
 }
+/** The character models the view draws ('hd' | 'legacy'); legacy until the player has chosen. */
+function modelsOf(s) { return s.models === 'hd' ? 'hd' : 'legacy'; }
 app.applyViewOptions = applyViewOptions;
 app.setSetting = (k, v) => { app.settings[k] = v; writeSettings(app.settings); if (k === 'volume') audio.setVolume(v); if (k === 'keys') { setKeyboardLayout(v); app.hud?.keys?.(); } applyViewOptions(); };
 
@@ -132,8 +136,8 @@ function heroLook(h) { return dressedLook(app.data.classes, app.data.items, { cl
 const portraits = new Map();
 /** A portrait drawn from the 3D model ({ look } or { creature }); cached by its look. Resolves null when no view yet. */
 function portrait(spec, size = 128) {
-  const key = JSON.stringify([spec, size]);
-  if (!portraits.has(key)) portraits.set(key, app.render?.renderPortrait ? app.render.renderPortrait(spec, { size }).catch(e => { console.warn('[wyrmroad] portrait', e?.message); return null; }) : Promise.resolve(null));
+  const models = modelsOf(app.settings), key = JSON.stringify([spec, size, models]);   // high-detail portraits come from the same models as the street
+  if (!portraits.has(key)) portraits.set(key, app.render?.renderPortrait ? app.render.renderPortrait(spec, { size, data: app.data, models }).catch(e => { console.warn('[wyrmroad] portrait', e?.message); return null; }) : Promise.resolve(null));
   return portraits.get(key);
 }
 

@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "bruiser-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/bruiser-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a4a3/mEP6pA-y3NCK5WhFBMULP_bruiser-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "note": "bruiser: Tripo P1 textured, face_limit 4500",
+ "request_id": "01a2094f-c24a-7f70-ac97-0973ccc5e3e1",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094f-c24a-7f70-ac97-0973ccc5e3e1/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094f-c24a-7f70-ac97-0973ccc5e3e1",
+ "submitted": "2026-11-23T16:49:11.798Z",
+ "logged": true
+}

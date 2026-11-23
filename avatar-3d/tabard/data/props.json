@@ -1,0 +1,318 @@
+{
+ "_doc": "Tabard attached props (tools/blender/tb_prop.py builds each model, Codex paints it like the bodies, the bake makes models/props/<id>.glb). Model space: long axis up (+Z in Blender, +Y in the file), front = -Y, origin = the attach point. place: how the prop sits on each body at rest (tb_prop.py computes models/props/sockets.json from it: one bone-space matrix per socket per body). seeThrough: the painting's background inside the outline becomes transparent (torn cape hems). look: what Codex paints (original designs). place.tilt (weapons): degrees the prop leans from 'out of the fist, forward' toward 'back up the arm' (= up when the arm hangs). fitWidth: line the painting up with the model by width, not height (the painter's plume or crest height varies). place.hang (capes): {min,max} degrees the bottom edge may hang behind straight down; js/tabard.js swings it there every frame. build: the variant table — {shape: which base model in tools/blender/tb_prop.py (default: the prop's own id), parts: extra pieces (helms: plume, wings, horns; caps: point, nasal, brim, earflaps; hood: peak; pauldron: lames, spikes; shield: boss), outline (shield: round, kite, tower)}. A new variant of an existing shape is one entry here, no code.",
+ "props": {
+  "sword_arming": {
+   "name": "Arming Sword",
+   "kind": "sword",
+   "texture": 512,
+   "look": "a sturdy one-handed knight's arming sword in a chunky stylized fantasy MMO style: broad steel blade with a darker fuller groove down the middle and bright painted edge highlights, a heavy brass crossguard with flared ends, a grip wrapped in dark red leather strips, a round brass pommel with a small red gem",
+   "place": {
+    "anchor": "palm_r",
+    "tilt": 18
+   }
+  },
+  "staff_oak": {
+   "name": "Oak Spellstaff",
+   "kind": "staff",
+   "texture": 512,
+   "look": "a mage's spellstaff of gnarled dark oak with lighter worn grain, bound with brass bands and a blue cloth wrap at the grip, the top split into three curling wooden prongs that clasp a glowing pale-blue crystal",
+   "place": {
+    "anchor": "palm_r",
+    "tilt": 65
+   }
+  },
+  "shield_heater": {
+   "name": "Sunburst Heater Shield",
+   "kind": "shield",
+   "texture": 512,
+   "look": "a knight's heater shield: the FRONT painted deep red with a bold golden sunburst emblem in the middle and a thick riveted steel rim; the BACK (the side with the strap) plain dark wood planks with a leather arm strap and iron bands",
+   "place": {
+    "anchor": "forearm_l"
+   }
+  },
+  "helm_bulwark": {
+   "name": "Bulwark Greathelm",
+   "kind": "helm",
+   "texture": 512,
+   "look": "a heavy knight's great helm of polished steel: a flat-fronted face plate with a dark horizontal eye slit and small breathing holes, gold-trimmed edges, a raised ridge running front to back over the crown with a short red plume crest, rivets around the base",
+   "place": {
+    "anchor": "head"
+   },
+   "fitWidth": true
+  },
+  "pauldron_bulwark": {
+   "name": "Bulwark Pauldron",
+   "kind": "pauldron",
+   "texture": 512,
+   "look": "a large layered steel shoulder guard: a rounded domed top plate with a gold-trimmed rolled edge and a red enamel sunburst on its outer face, two overlapping steel lames below it, big brass rivets, a strip of dark leather lining showing at the inner edge",
+   "place": {
+    "anchor": "shoulder",
+    "both": true
+   }
+  },
+  "cape_wayfarer": {
+   "name": "Tattered Wayfarer Cape",
+   "kind": "cape",
+   "texture": 512,
+   "seeThrough": true,
+   "look": "a long travelling cape of deep green wool with a woven gold border along the top, an embroidered pale tree emblem in the middle of the back, the lower half weathered and the bottom edge torn into long ragged strips and holes",
+   "place": {
+    "anchor": "upper_back",
+    "hang": {
+     "min": 9,
+     "max": 18
+    }
+   }
+  },
+  "hair_ponytail": {
+   "name": "Ponytail",
+   "kind": "hair",
+   "texture": 512,
+   "seeThrough": true,
+   "look": "a thick dark-brown braided ponytail of hand-painted stylized hair: chunky strand clumps with warm highlights and dark gaps, a leather tie at the top, the end splitting into loose tapered wisps",
+   "place": {
+    "anchor": "head_back"
+   }
+  },
+  "helm_bulwark_winged": {
+   "name": "Gullwing Greathelm",
+   "kind": "helm",
+   "texture": 512,
+   "build": {
+    "shape": "helm_bulwark",
+    "parts": [
+     "wings"
+    ]
+   },
+   "look": "a heavy knight's great helm of polished steel: a flat-fronted face plate with a dark horizontal eye slit and small breathing holes, gold-trimmed edges and rivets around the base, and on each side a swept-back wing of white feathers with pale grey tips and a gold quill edge, rising up and back from the temples",
+   "place": {
+    "anchor": "head"
+   },
+   "fitWidth": true
+  },
+  "helm_bulwark_horned": {
+   "name": "Ramhorn Greathelm",
+   "kind": "helm",
+   "texture": 512,
+   "build": {
+    "shape": "helm_bulwark",
+    "parts": [
+     "horns"
+    ]
+   },
+   "look": "a brutal great helm of dark blackened iron with bronze-trimmed edges: a flat face plate with a narrow glowing-dark eye slit and rows of breathing holes, heavy rivets, scratched worn metal, and two thick curving horns of ridged ivory bone with darker tips growing out of the sides and curling upward",
+   "place": {
+    "anchor": "head"
+   },
+   "fitWidth": true
+  },
+  "helm_visor": {
+   "name": "Ironjaw Visored Helm",
+   "kind": "helm",
+   "texture": 512,
+   "build": {
+    "shape": "helm_open",
+    "parts": []
+   },
+   "look": "a rounded knight's bascinet of bright steel with a pointed crown, and a hinged visor shut over the face: the visor juts forward into a blunt snout with two dark eye slits across the top and rows of small breathing holes below, brass hinge bolts on each side, a gold-trimmed edge band around the bottom of the helm",
+   "place": {
+    "anchor": "head"
+   },
+   "fitWidth": true
+  },
+  "helm_nasal": {
+   "name": "Northwatch Nasal Helm",
+   "kind": "helm",
+   "texture": 512,
+   "build": {
+    "shape": "cap",
+    "parts": [
+     "point",
+     "nasal"
+    ]
+   },
+   "look": "a pointed iron spangenhelm: a cone-topped steel cap made of riveted plates joined by bronze bands running up to the point, a thick bronze brow band with rivets around the bottom edge, and a straight steel nose guard hanging down the front",
+   "place": {
+    "anchor": "head"
+   }
+  },
+  "helm_kettle": {
+   "name": "Footman's Kettle Helm",
+   "kind": "helm",
+   "texture": 512,
+   "build": {
+    "shape": "cap",
+    "parts": [
+     "brim"
+    ]
+   },
+   "look": "a soldier's kettle hat of dull grey steel: a rounded skull cap with a raised ridge over the crown and a wide sloping brim all around, a rolled edge on the brim, a dark leather band and rivets where the brim meets the cap, a little rust and wear",
+   "place": {
+    "anchor": "head"
+   }
+  },
+  "cap_leather": {
+   "name": "Trailwarden Leather Cap",
+   "kind": "hat",
+   "texture": 512,
+   "build": {
+    "shape": "cap",
+    "parts": [
+     "earflaps"
+    ]
+   },
+   "look": "a ranger's cap of dark brown boiled leather sewn from panels with lighter tan stitched seams, a thick rolled leather brow band, and leather ear flaps on both sides with small bronze studs",
+   "place": {
+    "anchor": "head"
+   }
+  },
+  "hood_wanderer": {
+   "name": "Wanderer's Hood",
+   "kind": "hood",
+   "texture": 512,
+   "build": {
+    "shape": "hood",
+    "parts": [
+     "peak"
+    ]
+   },
+   "look": "a deep blue cloth traveller's hood with a broad gold-embroidered trim band around the face opening, soft folds, the inside of the hood dark shadowed blue, a pointed peak hanging at the back, the bottom edge falling onto the neck and shoulders. The face opening is empty (no face)",
+   "place": {
+    "anchor": "head"
+   }
+  },
+  "coif_mail": {
+   "name": "Ironlink Mail Coif",
+   "kind": "hood",
+   "texture": 512,
+   "build": {
+    "shape": "hood",
+    "parts": []
+   },
+   "look": "a close-fitting chainmail coif: a hood of small grey interlocking steel rings covering the head and neck, open around the face, with a dark blue padded cloth edge around the face opening and a leather lace at the side. The face opening is empty (no face)",
+   "place": {
+    "anchor": "head"
+   }
+  },
+  "circlet_moon": {
+   "name": "Moonsilver Circlet",
+   "kind": "circlet",
+   "texture": 512,
+   "build": {
+    "shape": "circlet",
+    "parts": []
+   },
+   "look": "a slim circlet of bright engraved silver worn around the forehead, with a pointed silver setting at the front holding a glowing pale-blue teardrop gem",
+   "place": {
+    "anchor": "head"
+   },
+   "fitWidth": true
+  },
+  "hat_wizard": {
+   "name": "Starweaver's Hat",
+   "kind": "hat",
+   "texture": 512,
+   "build": {
+    "shape": "hat_wizard",
+    "parts": []
+   },
+   "look": "a tall pointed wizard's hat of deep purple felt with a bent, drooping tip and a wide floppy brim, a band of gold cloth around the base of the cone with a small silver crescent-moon buckle, a scattering of small embroidered silver stars",
+   "place": {
+    "anchor": "head"
+   }
+  },
+  "shield_round": {
+   "name": "Oakring Round Shield",
+   "kind": "shield",
+   "texture": 512,
+   "build": {
+    "shape": "shield",
+    "outline": "round",
+    "parts": [
+     "boss"
+    ]
+   },
+   "look": "a round wooden shield: the FRONT made of painted planks in alternating ochre-yellow and dark green quarters, a thick iron rim with rivets and a domed iron boss in the middle; the BACK plain dark wood planks with a leather arm strap and iron bands",
+   "place": {
+    "anchor": "forearm_l"
+   }
+  },
+  "shield_kite": {
+   "name": "Bluefield Kite Shield",
+   "kind": "shield",
+   "texture": 512,
+   "build": {
+    "shape": "shield",
+    "outline": "kite",
+    "parts": []
+   },
+   "look": "a tall kite shield, rounded at the top and pointed at the bottom: the FRONT painted royal blue with a white stone-tower emblem in the upper middle and a silver-white steel rim with rivets; the BACK plain dark wood with a leather arm strap and iron bands",
+   "place": {
+    "anchor": "forearm_l"
+   }
+  },
+  "shield_tower": {
+   "name": "Bastion Tower Shield",
+   "kind": "shield",
+   "texture": 512,
+   "build": {
+    "shape": "shield",
+    "outline": "tower",
+    "parts": []
+   },
+   "look": "a huge rectangular tower shield curved around the body: the FRONT of dark blued steel plates with a broad bronze border, a bronze cross band and big rivets, a bronze lion-head boss in the middle; the BACK riveted dark wood with leather straps",
+   "place": {
+    "anchor": "forearm_l"
+   }
+  },
+  "pauldron_spiked": {
+   "name": "Ironspike Pauldron",
+   "kind": "pauldron",
+   "texture": 512,
+   "build": {
+    "shape": "pauldron_bulwark",
+    "parts": [
+     "lames",
+     "spikes"
+    ]
+   },
+   "look": "a menacing shoulder guard of blackened scratched iron: a domed top plate with a dull red rim, two overlapping iron lames below it, big iron rivets, and four sharp conical steel spikes with bright worn tips sticking out of the dome",
+   "place": {
+    "anchor": "shoulder",
+    "both": true
+   }
+  },
+  "pauldron_leather": {
+   "name": "Trailwarden Pauldron",
+   "kind": "pauldron",
+   "texture": 512,
+   "build": {
+    "shape": "pauldron_bulwark",
+    "parts": []
+   },
+   "look": "a domed shoulder guard of dark brown boiled leather with a lighter tan stitched border, a big bronze stud in the middle and a small tooled leaf pattern",
+   "place": {
+    "anchor": "shoulder",
+    "both": true
+   }
+  },
+  "cape_crimson": {
+   "name": "Crimson Herald Cape",
+   "kind": "cape",
+   "texture": 512,
+   "seeThrough": true,
+   "build": {
+    "shape": "cape_wayfarer",
+    "parts": []
+   },
+   "look": "a long noble cape of rich crimson wool with a black-and-gold checkered border along the top and sides, a large golden crowned stag emblem in the middle of the back, the bottom edge cut into three long pointed swallow tails with background showing between them",
+   "place": {
+    "anchor": "upper_back",
+    "hang": {
+     "min": 9,
+     "max": 18
+    }
+   }
+  }
+ }
+}

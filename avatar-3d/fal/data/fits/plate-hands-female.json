@@ -1,0 +1,18 @@
+{
+ "item": "plate-hands",
+ "body": "female",
+ "anchor": "hand",
+ "cover": [
+  "hands"
+ ],
+ "scale_r": 0.6088,
+ "scale_l": 0.652,
+ "inside": 0.799,
+ "region_inside": {
+  "hands": 0.969
+ },
+ "hides": [
+  "hands"
+ ],
+ "triangles": 3990
+}

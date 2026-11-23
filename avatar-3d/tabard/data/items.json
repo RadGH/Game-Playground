@@ -1,0 +1,463 @@
+{
+ "_doc": "Tabard equipment. Every item says which LAYERS it uses: paint = the outfit painting whose boxes it paints for its slot (data/outfits.json id; the boxes come from data/regions.json slots); geosets = swap-in mesh pieces it turns on; hides = pieces it forces off (a robe hides boot cuffs); attach = a separate model on a bone (data/props.json id). js/tabard.js reads this file only. Names are what a player sees. hidesHair: a head item that hides whatever the hair slot wears. fal: a fal.ai weapon or shield (avatar-3d/fal/data/catalog.json id) held on the Tabard grips; every held fal item is also offered automatically as 'fal:<id>' (js/tabard.js loadTabardData), so new fal weapons need no entry here.",
+ "slots": {
+  "head": {
+   "name": "Head"
+  },
+  "hair": {
+   "name": "Hair"
+  },
+  "shoulders": {
+   "name": "Shoulders"
+  },
+  "back": {
+   "name": "Back"
+  },
+  "chest": {
+   "name": "Chest"
+  },
+  "hands": {
+   "name": "Hands"
+  },
+  "legs": {
+   "name": "Legs"
+  },
+  "feet": {
+   "name": "Feet"
+  },
+  "mainhand": {
+   "name": "Main hand"
+  },
+  "offhand": {
+   "name": "Off hand"
+  }
+ },
+ "items": {
+  "robe_wanderer": {
+   "slot": "chest",
+   "name": "Wanderer's Robe",
+   "paint": "cloth",
+   "geosets": [
+    "robe"
+   ],
+   "hides": [
+    "bootcuff_l",
+    "bootcuff_r"
+   ]
+  },
+  "tunic_wanderer": {
+   "slot": "chest",
+   "name": "Wanderer's Tunic",
+   "paint": "cloth"
+  },
+  "jerkin_trail": {
+   "slot": "chest",
+   "name": "Trailwarden Jerkin",
+   "paint": "leather"
+  },
+  "cuirass_bulwark": {
+   "slot": "chest",
+   "name": "Bulwark Cuirass",
+   "paint": "plate"
+  },
+  "wraps_wanderer": {
+   "slot": "hands",
+   "name": "Wanderer's Wraps",
+   "paint": "cloth"
+  },
+  "gloves_trail": {
+   "slot": "hands",
+   "name": "Trailwarden Gloves",
+   "paint": "leather"
+  },
+  "gauntlets_bulwark": {
+   "slot": "hands",
+   "name": "Bulwark Gauntlets",
+   "paint": "plate",
+   "geosets": [
+    "glovecuff_l",
+    "glovecuff_r"
+   ]
+  },
+  "leggings_wanderer": {
+   "slot": "legs",
+   "name": "Wanderer's Leggings",
+   "paint": "cloth"
+  },
+  "trousers_trail": {
+   "slot": "legs",
+   "name": "Trailwarden Trousers",
+   "paint": "leather"
+  },
+  "legplates_bulwark": {
+   "slot": "legs",
+   "name": "Bulwark Legplates",
+   "paint": "plate"
+  },
+  "shoes_wanderer": {
+   "slot": "feet",
+   "name": "Wanderer's Shoes",
+   "paint": "cloth"
+  },
+  "boots_trail": {
+   "slot": "feet",
+   "name": "Trailwarden Boots",
+   "paint": "leather",
+   "geosets": [
+    "bootcuff_l",
+    "bootcuff_r"
+   ]
+  },
+  "sabatons_bulwark": {
+   "slot": "feet",
+   "name": "Bulwark Sabatons",
+   "paint": "plate"
+  },
+  "helm_bulwark": {
+   "slot": "head",
+   "name": "Bulwark Greathelm",
+   "attach": "helm_bulwark",
+   "hidesHair": true
+  },
+  "pauldrons_bulwark": {
+   "slot": "shoulders",
+   "name": "Bulwark Pauldrons",
+   "attach": "pauldron_bulwark"
+  },
+  "cape_wanderer": {
+   "slot": "back",
+   "name": "Tattered Wayfarer Cape",
+   "attach": "cape_wayfarer"
+  },
+  "sword_arming": {
+   "slot": "mainhand",
+   "name": "Arming Sword",
+   "attach": "sword_arming"
+  },
+  "staff_oak": {
+   "slot": "mainhand",
+   "name": "Oak Spellstaff",
+   "attach": "staff_oak"
+  },
+  "shield_heater": {
+   "slot": "offhand",
+   "name": "Sunburst Heater Shield",
+   "attach": "shield_heater"
+  },
+  "ponytail": {
+   "slot": "hair",
+   "name": "Braided Ponytail",
+   "attach": "hair_ponytail"
+  },
+  "helm_gullwing": {
+   "slot": "head",
+   "name": "Gullwing Greathelm",
+   "attach": "helm_bulwark_winged",
+   "hidesHair": true
+  },
+  "helm_ramhorn": {
+   "slot": "head",
+   "name": "Ramhorn Greathelm",
+   "attach": "helm_bulwark_horned",
+   "hidesHair": true
+  },
+  "helm_ironjaw": {
+   "slot": "head",
+   "name": "Ironjaw Visored Helm",
+   "attach": "helm_visor",
+   "hidesHair": true
+  },
+  "helm_northwatch": {
+   "slot": "head",
+   "name": "Northwatch Nasal Helm",
+   "attach": "helm_nasal"
+  },
+  "helm_kettle": {
+   "slot": "head",
+   "name": "Footman's Kettle Helm",
+   "attach": "helm_kettle"
+  },
+  "cap_trail": {
+   "slot": "head",
+   "name": "Trailwarden Leather Cap",
+   "attach": "cap_leather"
+  },
+  "hood_wanderer": {
+   "slot": "head",
+   "name": "Wanderer's Hood",
+   "attach": "hood_wanderer",
+   "hidesHair": true
+  },
+  "coif_ironlink": {
+   "slot": "head",
+   "name": "Ironlink Mail Coif",
+   "attach": "coif_mail",
+   "hidesHair": true
+  },
+  "circlet_moon": {
+   "slot": "head",
+   "name": "Moonsilver Circlet",
+   "attach": "circlet_moon"
+  },
+  "hat_starweaver": {
+   "slot": "head",
+   "name": "Starweaver's Hat",
+   "attach": "hat_wizard"
+  },
+  "pauldrons_ironspike": {
+   "slot": "shoulders",
+   "name": "Ironspike Pauldrons",
+   "attach": "pauldron_spiked"
+  },
+  "pauldrons_trail": {
+   "slot": "shoulders",
+   "name": "Trailwarden Pauldrons",
+   "attach": "pauldron_leather"
+  },
+  "cape_herald": {
+   "slot": "back",
+   "name": "Crimson Herald Cape",
+   "attach": "cape_crimson"
+  },
+  "shield_oakring": {
+   "slot": "offhand",
+   "name": "Oakring Round Shield",
+   "attach": "shield_round"
+  },
+  "shield_bluefield": {
+   "slot": "offhand",
+   "name": "Bluefield Kite Shield",
+   "attach": "shield_kite"
+  },
+  "shield_bastion": {
+   "slot": "offhand",
+   "name": "Bastion Tower Shield",
+   "attach": "shield_tower"
+  },
+  "hauberk_ironlink": {
+   "slot": "chest",
+   "name": "Ironlink Hauberk",
+   "paint": "mail"
+  },
+  "mitts_ironlink": {
+   "slot": "hands",
+   "name": "Ironlink Mitts",
+   "paint": "mail"
+  },
+  "chausses_ironlink": {
+   "slot": "legs",
+   "name": "Ironlink Chausses",
+   "paint": "mail"
+  },
+  "boots_ironlink": {
+   "slot": "feet",
+   "name": "Ironlink Boots",
+   "paint": "mail"
+  },
+  "robe_mossgrove": {
+   "slot": "chest",
+   "name": "Mossgrove Robe",
+   "paint": "sage",
+   "geosets": [
+    "robe"
+   ],
+   "hides": [
+    "bootcuff_l",
+    "bootcuff_r"
+   ]
+  },
+  "wraps_mossgrove": {
+   "slot": "hands",
+   "name": "Mossgrove Wraps",
+   "paint": "sage"
+  },
+  "leggings_mossgrove": {
+   "slot": "legs",
+   "name": "Mossgrove Leggings",
+   "paint": "sage"
+  },
+  "sandals_mossgrove": {
+   "slot": "feet",
+   "name": "Mossgrove Sandals",
+   "paint": "sage"
+  },
+  "axe_halfmoon": {
+   "slot": "mainhand",
+   "name": "Halfmoon Axe",
+   "fal": "axe"
+  },
+  "mace_thornhead": {
+   "slot": "mainhand",
+   "name": "Thornhead Morningstar",
+   "fal": "mace"
+  },
+  "bow_horn": {
+   "slot": "mainhand",
+   "name": "Horn Recurve",
+   "fal": "bow"
+  }
+ },
+ "sets": {
+  "bare": {
+   "name": "Bare",
+   "items": []
+  },
+  "cloth": {
+   "name": "Wanderer (cloth)",
+   "items": [
+    "robe_wanderer",
+    "wraps_wanderer",
+    "leggings_wanderer",
+    "shoes_wanderer",
+    "staff_oak",
+    "cape_wanderer"
+   ]
+  },
+  "leather": {
+   "name": "Trailwarden (leather)",
+   "items": [
+    "jerkin_trail",
+    "gloves_trail",
+    "trousers_trail",
+    "boots_trail",
+    "sword_arming"
+   ]
+  },
+  "plate": {
+   "name": "Bulwark (plate)",
+   "items": [
+    "cuirass_bulwark",
+    "gauntlets_bulwark",
+    "legplates_bulwark",
+    "sabatons_bulwark",
+    "helm_bulwark",
+    "pauldrons_bulwark",
+    "sword_arming",
+    "shield_heater"
+   ]
+  },
+  "mail": {
+   "name": "Ironlink (mail)",
+   "items": [
+    "hauberk_ironlink",
+    "mitts_ironlink",
+    "chausses_ironlink",
+    "boots_ironlink",
+    "coif_ironlink",
+    "mace_thornhead",
+    "shield_bluefield"
+   ]
+  },
+  "sage": {
+   "name": "Mossgrove (cloth)",
+   "items": [
+    "robe_mossgrove",
+    "wraps_mossgrove",
+    "leggings_mossgrove",
+    "sandals_mossgrove",
+    "circlet_moon",
+    "staff_oak"
+   ]
+  },
+  "wizard": {
+   "name": "Starweaver (cloth)",
+   "items": [
+    "robe_wanderer",
+    "wraps_wanderer",
+    "leggings_wanderer",
+    "shoes_wanderer",
+    "hat_starweaver",
+    "staff_oak"
+   ]
+  },
+  "ranger": {
+   "name": "Trailwarden scout (leather)",
+   "items": [
+    "jerkin_trail",
+    "gloves_trail",
+    "trousers_trail",
+    "boots_trail",
+    "cap_trail",
+    "pauldrons_trail",
+    "bow_horn",
+    "cape_wanderer"
+   ]
+  },
+  "warlord": {
+   "name": "Ramhorn warlord (plate)",
+   "items": [
+    "cuirass_bulwark",
+    "gauntlets_bulwark",
+    "legplates_bulwark",
+    "sabatons_bulwark",
+    "helm_ramhorn",
+    "pauldrons_ironspike",
+    "axe_halfmoon",
+    "shield_bastion"
+   ]
+  },
+  "herald": {
+   "name": "Gullwing herald (plate)",
+   "items": [
+    "cuirass_bulwark",
+    "gauntlets_bulwark",
+    "legplates_bulwark",
+    "sabatons_bulwark",
+    "helm_gullwing",
+    "pauldrons_bulwark",
+    "cape_herald",
+    "sword_arming",
+    "shield_oakring"
+   ]
+  },
+  "knight": {
+   "name": "Ironjaw knight (mail + plate)",
+   "items": [
+    "hauberk_ironlink",
+    "gauntlets_bulwark",
+    "chausses_ironlink",
+    "sabatons_bulwark",
+    "helm_ironjaw",
+    "pauldrons_bulwark",
+    "sword_arming",
+    "shield_heater"
+   ]
+  },
+  "footman": {
+   "name": "Footman (mail)",
+   "items": [
+    "hauberk_ironlink",
+    "mitts_ironlink",
+    "chausses_ironlink",
+    "boots_ironlink",
+    "helm_kettle",
+    "sword_arming",
+    "shield_oakring"
+   ]
+  },
+  "pilgrim": {
+   "name": "Hooded pilgrim (cloth)",
+   "items": [
+    "robe_wanderer",
+    "wraps_wanderer",
+    "leggings_wanderer",
+    "shoes_wanderer",
+    "hood_wanderer",
+    "staff_oak",
+    "cape_wanderer"
+   ]
+  },
+  "raider": {
+   "name": "Northwatch raider (leather + mail)",
+   "items": [
+    "jerkin_trail",
+    "mitts_ironlink",
+    "trousers_trail",
+    "boots_trail",
+    "helm_northwatch",
+    "axe_halfmoon",
+    "shield_oakring"
+   ]
+  }
+ }
+}

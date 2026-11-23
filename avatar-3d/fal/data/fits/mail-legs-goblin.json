@@ -1,0 +1,28 @@
+{
+ "item": "mail-legs",
+ "body": "goblin",
+ "anchor": "waist",
+ "cover": [
+  "thighs"
+ ],
+ "scale": [
+  1.8607,
+  1.8607,
+  0.8581
+ ],
+ "turn": -30,
+ "offset": [
+  0.0061,
+  0.0364,
+  0.0778
+ ],
+ "inside": 0.927,
+ "region_inside": {
+  "thighs": 0.94,
+  "shins": 0.716
+ },
+ "hides": [
+  "thighs"
+ ],
+ "triangles": 3308
+}

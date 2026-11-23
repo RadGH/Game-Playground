@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "bruiser-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/bruiser-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a503/VRm5xr0UXVvKKT9Xh8WB9_bruiser-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "bruiser: Meshy rigging",
+ "request_id": "01a2095e-428e-7a31-8ca3-46f2484feedd",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2095e-428e-7a31-8ca3-46f2484feedd/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2095e-428e-7a31-8ca3-46f2484feedd",
+ "submitted": "2026-11-23T17:05:02.140Z",
+ "logged": true
+}

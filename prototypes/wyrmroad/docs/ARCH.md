@@ -80,6 +80,22 @@ const url = await renderPortrait({ look } | { creature }, { size: 128 })   // po
 // view.js builds Ossmara's fly-over body with a sky chapter. View state read: foes' hidden, part, homeZ, state rise/calm.
 ```
 
+## High-detail models (2026-11-23)
+
+- `settings.models` ('hd' | 'legacy' | null = ask: `js/ui/models.js` on the first start) → `createView({ models })` and
+  `view.options.models` (read every frame; a change calls `actors.setModels`, every actor rebuilds, the old body stays
+  until the new one is built). `createPreview(canvas, { models })`, `renderPortrait(spec, { data, models })`.
+- `js/render/hd-map.js` (pure, node-tested): `hdIndex(map, falCatalog, tabardData)`, `hdSpecFor(H, data, e, look)` →
+  `{ type: 'fal', body, weapon, offhand, tint, glow } | { type: 'tabard', body, items } | null` (null = legacy body),
+  `tabardFromLook(H, look)`, `pickClip(H, name, has)`. Data: `data/hd-models.json`.
+- `js/render/hd.js`: `loadHdKit()` (the map + `avatar-3d/fal` catalog + `avatar-3d/tabard` data, imported in place),
+  `buildHd(spec, { hull })` → a body with the legacy body's shape (`obj kind h mats anim play loop update dispose`),
+  `kind` 'fal' | 'tabard', `hd: true`. One-shots: `play(name, { dur, wind })` — the model clip's blow (`strike`) meets
+  the sim's `wind`. `actors.js` loads hd.js only when HD is chosen (`import()`), so the legacy path never loads it.
+- Public copy: the page loads `avatar-3d/fal/js/fal.js`, `fal/data/catalog.json`, `fal/models/final/**` and
+  `avatar-3d/tabard/js/tabard.js`, `tabard/data/*`, `tabard/models/**` from the playground snapshot (all committed; none
+  under tools/publish-pages.sh EXCLUDE). New models must be committed to ship.
+
 ## Acts II/III (round 2)
 
 - **Data:** `data/acts.json` (acts, routes, choice scenes, endings, 18 chapters) + `data/story-acts.json` (speakers,

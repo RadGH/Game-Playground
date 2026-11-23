@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "troll-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/troll-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a4b6/y1t7fRDT1Jo8LlfmzMRqm_troll-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "note": "troll: Tripo P1 textured, face_limit 4500",
+ "request_id": "01a20952-8d8b-78b1-95e8-bd1af7d1a0b4",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20952-8d8b-78b1-95e8-bd1af7d1a0b4/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20952-8d8b-78b1-95e8-bd1af7d1a0b4",
+ "submitted": "2026-11-23T16:52:14.897Z",
+ "logged": true
+}

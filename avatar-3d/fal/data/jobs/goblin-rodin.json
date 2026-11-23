@@ -1,0 +1,33 @@
+{
+ "endpoint": "fal-ai/hyper3d/rodin/v2",
+ "name": "goblin-rodin",
+ "price": 0.4,
+ "input": {
+  "input_image_urls": [
+   "@ref/goblin-front.png",
+   "@ref/goblin-left.png",
+   "@ref/goblin-back.png"
+  ],
+  "quality_mesh_option": "4K Quad",
+  "TAPose": true,
+  "material": "All",
+  "geometry_file_format": "glb"
+ },
+ "resolved": {
+  "input_image_urls": [
+   "https://v3b.fal.media/files/b/0ab384d3/JR9aazz9zm85-0ejtNpmV_goblin-front.png",
+   "https://v3b.fal.media/files/b/0ab384d3/1ccb0TtctsyxaOamKCg7K_goblin-left.png",
+   "https://v3b.fal.media/files/b/0ab384d3/8UuwuMhv56uWH5AWBh-17_goblin-back.png"
+  ],
+  "quality_mesh_option": "4K Quad",
+  "TAPose": true,
+  "material": "All",
+  "geometry_file_format": "glb"
+ },
+ "note": "Rodin v2, 4K Quad, A-pose, 3 views",
+ "request_id": "01a20474-a0ae-74d1-a8c6-41c2e7774613",
+ "status_url": "https://queue.fal.run/fal-ai/hyper3d/requests/01a20474-a0ae-74d1-a8c6-41c2e7774613/status",
+ "response_url": "https://queue.fal.run/fal-ai/hyper3d/requests/01a20474-a0ae-74d1-a8c6-41c2e7774613",
+ "submitted": "2026-11-22T18:11:21.951Z",
+ "logged": true
+}

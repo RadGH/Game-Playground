@@ -1,0 +1,18 @@
+{
+ "item": "cloth-hands",
+ "body": "male",
+ "anchor": "hand",
+ "cover": [
+  "hands"
+ ],
+ "scale_r": 0.9004,
+ "scale_l": 0.8596,
+ "inside": 0.735,
+ "region_inside": {
+  "hands": 0.83
+ },
+ "hides": [
+  "hands"
+ ],
+ "triangles": 4468
+}

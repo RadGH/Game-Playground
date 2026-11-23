@@ -1,0 +1,33 @@
+{
+ "endpoint": "fal-ai/hyper3d/rodin/v2",
+ "name": "gobw-rodin",
+ "price": 0.4,
+ "input": {
+  "input_image_urls": [
+   "@ref/gob-warrior-front.png",
+   "@ref/gob-warrior-left.png",
+   "@ref/gob-warrior-back.png"
+  ],
+  "quality_mesh_option": "4K Quad",
+  "TAPose": true,
+  "material": "All",
+  "geometry_file_format": "glb"
+ },
+ "resolved": {
+  "input_image_urls": [
+   "https://v3b.fal.media/files/b/0ab39058/t2iFkug47xxdU0_CDfX1S_gob-warrior-front.png",
+   "https://v3b.fal.media/files/b/0ab39058/AjIvIWU-e0XoExHW6krbN_gob-warrior-left.png",
+   "https://v3b.fal.media/files/b/0ab39058/IP0CWuzGKq2WAMreGPNV4_gob-warrior-back.png"
+  ],
+  "quality_mesh_option": "4K Quad",
+  "TAPose": true,
+  "material": "All",
+  "geometry_file_format": "glb"
+ },
+ "note": "goblin warrior, complete model: Rodin v2, 4K Quad, A-pose, 3 views",
+ "request_id": "01a20636-c6ae-75b2-9c74-931bde4bfb4c",
+ "status_url": "https://queue.fal.run/fal-ai/hyper3d/requests/01a20636-c6ae-75b2-9c74-931bde4bfb4c/status",
+ "response_url": "https://queue.fal.run/fal-ai/hyper3d/requests/01a20636-c6ae-75b2-9c74-931bde4bfb4c",
+ "submitted": "2026-11-23T02:23:02.868Z",
+ "logged": true
+}

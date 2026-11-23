@@ -1,0 +1,20 @@
+{
+ "item": "leather-feet",
+ "body": "male",
+ "anchor": "floor",
+ "cover": [
+  "feet"
+ ],
+ "turn_l": 10,
+ "turn_r": 10,
+ "scale": 1.324,
+ "inside": 0.85,
+ "region_inside": {
+  "feet": 0.9,
+  "shins": 0.699
+ },
+ "hides": [
+  "feet"
+ ],
+ "triangles": 3195
+}

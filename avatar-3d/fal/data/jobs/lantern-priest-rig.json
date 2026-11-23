@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "lantern-priest-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/lantern-priest-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a485/-i2c7JrxUms5jsqHfBJFb_lantern-priest-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "lantern-priest: Meshy rigging",
+ "request_id": "01a2094a-ddba-7601-86c0-f1597c0434c9",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2094a-ddba-7601-86c0-f1597c0434c9/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2094a-ddba-7601-86c0-f1597c0434c9",
+ "submitted": "2026-11-23T16:43:51.137Z",
+ "logged": true
+}

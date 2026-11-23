@@ -1,0 +1,31 @@
+{
+ "item": "leather-legs",
+ "body": "male",
+ "anchor": "waist",
+ "cover": [
+  "hips",
+  "thighs"
+ ],
+ "scale": [
+  1.733,
+  1.733,
+  2.2487
+ ],
+ "turn": 0,
+ "offset": [
+  0.0015,
+  -0.0082,
+  0.1352
+ ],
+ "inside": 0.951,
+ "region_inside": {
+  "hips": 0.783,
+  "shins": 0.525,
+  "thighs": 0.99
+ },
+ "hides": [
+  "hips",
+  "thighs"
+ ],
+ "triangles": 2643
+}

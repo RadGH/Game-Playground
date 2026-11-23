@@ -1,0 +1,6 @@
+Use your image generation tool to create ONE image, square 1024x1024 PNG, and save it in the current working directory as out.png. Do nothing else (do not write code, do not edit other files).
+Layout: ONE object, centred, shown whole, large in the frame with a margin all round, as a 3D modeller's reference. Front three-quarter view, as worn by an INVISIBLE head (hollow inside, face opening empty). Nothing else in the picture: no person, no mannequin, no stand, no hands.
+Subject: wrapped cloth head-wrap turban, muted violet (#7a6a8a) with a small gold (#d8b040) clasp at the front.
+Style: stylized low-poly hand-painted fantasy online-RPG game art: chunky simple readable shapes, slightly exaggerated proportions, large hands and feet, hand-painted colour with soft painted-in highlights and shadows, crisp colour blocks, almost no fine surface noise, matte, NOT photoreal, NOT glossy, NOT a 3D render with realistic materials.
+Lighting/background: even flat lighting, soft shading that describes the forms, no harsh shadows, plain flat light-grey background (#c8c8c8), no floor shadow, no scenery.
+Constraints: no text, no labels, no lettering, no watermark, no extra characters or objects.

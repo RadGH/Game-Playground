@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "earth-elemental-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/earth-elemental-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4dc/XM2k-gPj5k4BYqTb9hIdH_earth-elemental-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "earth-elemental: Meshy rigging",
+ "request_id": "01a20958-638f-7872-8b6c-22543752039f",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20958-638f-7872-8b6c-22543752039f/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20958-638f-7872-8b6c-22543752039f",
+ "submitted": "2026-11-23T16:58:37.367Z",
+ "logged": true
+}

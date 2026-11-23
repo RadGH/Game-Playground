@@ -1,0 +1,23 @@
+{
+ "item": "cloth-head",
+ "body": "goblin",
+ "anchor": "head",
+ "cover": [
+  "scalp"
+ ],
+ "scale": 1.0364,
+ "turn": 0,
+ "offset": [
+  0.0013,
+  0.021,
+  0.5833
+ ],
+ "inside": 0.809,
+ "region_inside": {
+  "scalp": 0.451
+ },
+ "hides": [
+  "scalp"
+ ],
+ "triangles": 2543
+}

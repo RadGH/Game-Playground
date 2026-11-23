@@ -77,7 +77,7 @@ export function createStage(view, { data, scene, chapter, where = 'start', heroe
     const sp = data.story.speakers?.[id], G0 = GIANTS[id];
     if (G0) { if (!G0.on(theme)) return null; const kind = G0.kind(theme), def = data.enemies.bosses[kind]; return def ? { side: 'foe', kind, height: def.height, giant: true, homeZ: -4.2, turn: Math.PI / 2 } : null; }
     if (!sp || sp.voice) return null;
-    if (sp.look) return { side: 'npc', lookDirect: sp.look, height: sp.height || HERO_HEIGHT };
+    if (sp.look) return { side: 'npc', lookDirect: sp.look, speaker: id, height: sp.height || HERO_HEIGHT };   // speaker: its high-detail model (data/hd-models.json speakers)
     const foeId = sp.boss || sp.foe || id, def = data.enemies.bosses[foeId] || data.enemies.foes[foeId];
     return def ? { side: 'foe', kind: foeId, height: def.height } : null;
   }

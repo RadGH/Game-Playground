@@ -1,0 +1,25 @@
+{
+ "endpoint": "fal-ai/tripo3d/rig",
+ "name": "drake-rig",
+ "price": 0.3,
+ "input": {
+  "model_url": "@models/upright/drake-tripo.glb",
+  "model": "v2.5-20260210",
+  "rig_type": "quadruped",
+  "spec": "tripo",
+  "output_format": "glb"
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4b7/QUbRQOPoZ35AN_UqMgazL_drake-tripo.glb",
+  "model": "v2.5-20260210",
+  "rig_type": "quadruped",
+  "spec": "tripo",
+  "output_format": "glb"
+ },
+ "note": "drake: Tripo rig, quadruped (v2.5)",
+ "request_id": "01a20952-9833-75a3-bf5b-ba755dc1e847",
+ "status_url": "https://queue.fal.run/fal-ai/tripo3d/requests/01a20952-9833-75a3-bf5b-ba755dc1e847/status",
+ "response_url": "https://queue.fal.run/fal-ai/tripo3d/requests/01a20952-9833-75a3-bf5b-ba755dc1e847",
+ "submitted": "2026-11-23T16:52:17.632Z",
+ "logged": true
+}

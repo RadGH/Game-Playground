@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "drowned-brute-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/drowned-brute-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4d5/G0xn-LbnUZ8wq6PARjkGG_drowned-brute-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "drowned-brute: Meshy rigging",
+ "request_id": "01a20957-441e-7d71-a141-793c01553258",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20957-441e-7d71-a141-793c01553258/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20957-441e-7d71-a141-793c01553258",
+ "submitted": "2026-11-23T16:57:23.777Z",
+ "logged": true
+}

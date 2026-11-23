@@ -1,0 +1,33 @@
+{
+ "endpoint": "fal-ai/hyper3d/rodin/v2",
+ "name": "female-rodin",
+ "price": 0.4,
+ "input": {
+  "input_image_urls": [
+   "@ref/female-front.png",
+   "@ref/female-left.png",
+   "@ref/female-back.png"
+  ],
+  "quality_mesh_option": "4K Quad",
+  "TAPose": true,
+  "material": "All",
+  "geometry_file_format": "glb"
+ },
+ "resolved": {
+  "input_image_urls": [
+   "https://v3b.fal.media/files/b/0ab384d3/3Q4D-KOO5CJYL0bxiXbJ4_female-front.png",
+   "https://v3b.fal.media/files/b/0ab384d3/1r2WES42B5LNy2Twd1hcb_female-left.png",
+   "https://v3b.fal.media/files/b/0ab384d3/eKsQgqyk225IVv8u8P3MY_female-back.png"
+  ],
+  "quality_mesh_option": "4K Quad",
+  "TAPose": true,
+  "material": "All",
+  "geometry_file_format": "glb"
+ },
+ "note": "Rodin v2, 4K Quad, A-pose, 3 views",
+ "request_id": "01a20474-af2f-7f30-bca5-fa58d260a286",
+ "status_url": "https://queue.fal.run/fal-ai/hyper3d/requests/01a20474-af2f-7f30-bca5-fa58d260a286/status",
+ "response_url": "https://queue.fal.run/fal-ai/hyper3d/requests/01a20474-af2f-7f30-bca5-fa58d260a286",
+ "submitted": "2026-11-22T18:11:25.659Z",
+ "logged": true
+}

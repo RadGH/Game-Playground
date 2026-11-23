@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fal.ai characters — generated bodies, armour and weapons</title>
+<link rel="stylesheet" href="../../shared/style.css">
+<link rel="stylesheet" href="fal.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body class="fl">
+<!-- fal.ai test review page. ?body=male|female|goblin  ?set=bare|cloth|leather|mail|plate  ?clip=walk  ?weapon=sword  ?tab=dress|enemies|makers|costs  ?eclip=attack  ?group=wyrmroad|boss|elemental|extra|beast|goblin  ?enemy=<id>  ?lineup=1
+     window.__fal = { ready, errors, character, stats() } for tests and screenshots (tools/shots.mjs). -->
+<header class="fl-top">
+  <div class="fl-title">
+    <h1>fal.ai characters</h1>
+    <p>Bodies, armour and weapons made from pictures by fal.ai, moved onto the free animation skeleton.</p>
+  </div>
+  <nav class="fl-tabs" role="tablist">
+    <button role="tab" data-tab="dress">Dressing room</button>
+    <button role="tab" data-tab="enemies">Enemies</button>
+    <button role="tab" data-tab="makers">Makers</button>
+    <button role="tab" data-tab="costs">Costs</button>
+  </nav>
+</header>
+
+<main class="fl-main">
+  <section class="fl-stage-wrap">
+    <div id="stage" class="fl-stage"></div>
+    <div id="loading" class="fl-loading">Loading…</div>
+  </section>
+
+  <aside class="fl-side">
+    <div class="fl-pane" data-pane="dress">
+      <section class="fl-card">
+        <h2>Body</h2>
+        <div class="fl-chips" id="d-body"></div>
+      </section>
+      <section class="fl-card">
+        <h2>Whole outfit</h2>
+        <div class="fl-chips" id="d-sets"></div>
+      </section>
+      <section class="fl-card">
+        <h2>Piece by piece</h2>
+        <div id="d-slots" class="fl-slots"></div>
+      </section>
+      <section class="fl-card">
+        <h2>Motion</h2>
+        <div class="fl-chips" id="d-clips"></div>
+        <label class="fl-check"><input type="checkbox" id="d-spin"> Turn slowly</label>
+      </section>
+      <section class="fl-card">
+        <h2>This character</h2>
+        <p class="fl-note" id="d-note" hidden></p>
+        <dl class="fl-stats" id="d-stats"></dl>
+      </section>
+    </div>
+
+    <div class="fl-pane" data-pane="enemies">
+      <section class="fl-card">
+        <h2>Enemies</h2>
+        <p class="fl-note">Each enemy is one model with its clothes made in, from one redrawn picture (Tripo P1, about 3,000 triangles; bosses and big ones about 4,500); only the weapon is separate. Pick a row to see it on the stage.</p>
+        <div class="fl-chips" id="e-groups"></div>
+        <div class="fl-chips fl-gap" id="e-view"></div>
+      </section>
+      <section class="fl-card">
+        <h2>Motion</h2>
+        <div class="fl-chips" id="e-clips"></div>
+      </section>
+      <section class="fl-card">
+        <h2>Roster</h2>
+        <div class="fl-table-wrap"><table class="fl-table fl-roster" id="e-table"></table></div>
+      </section>
+    </div>
+
+    <div class="fl-pane" data-pane="makers">
+      <section class="fl-card">
+        <h2>The same man, three makers</h2>
+        <p class="fl-note">One redrawn picture of the man went to three fal.ai picture-to-3D makers. Left to right as on the stage.</p>
+        <div class="fl-table-wrap"><table class="fl-table" id="m-table"></table></div>
+      </section>
+    </div>
+
+    <div class="fl-pane" data-pane="costs">
+      <section class="fl-card">
+        <h2>Every paid job</h2>
+        <p class="fl-note" id="c-total"></p>
+        <div class="fl-table-wrap"><table class="fl-table" id="c-table"></table></div>
+      </section>
+    </div>
+  </aside>
+</main>
+<script type="module" src="js/page.js"></script>
+</body>
+</html>

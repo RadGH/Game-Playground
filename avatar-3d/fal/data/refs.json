@@ -1,0 +1,765 @@
+{
+ "_doc": "Subjects for tools/refdraw.mjs (Codex redraws) and tools/fal-job.mjs (image-to-3D). Armour and weapons follow the Chibi 2.6 round-5 (g5_*) sets in avatar-3d/data/gear-catalog.json; `chibi` = that catalog id.",
+ "style": "stylized low-poly hand-painted fantasy online-RPG game art: chunky simple readable shapes, slightly exaggerated proportions, large hands and feet, hand-painted colour with soft painted-in highlights and shadows, crisp colour blocks, almost no fine surface noise, matte, NOT photoreal, NOT glossy, NOT a 3D render with realistic materials.",
+ "items": [
+  {
+   "id": "male",
+   "kind": "body",
+   "from": "male-original.jpg",
+   "look": "adult human man, heroic stylized proportions about 6.5 heads tall, broad shoulders and simple painted muscles (not bodybuilder detail), warm tan skin, messy dark-brown hair kept fairly close to the head so helmets fit over it, wearing ONLY plain dark-grey briefs, barefoot"
+  },
+  {
+   "id": "female",
+   "kind": "body",
+   "from": "female-original.jpg",
+   "look": "adult human woman, heroic athletic stylized proportions about 6.5 heads tall, warm tan skin, dark-brown hair tied back in a short high ponytail close to the head so helmets fit over it, teal eyes, wearing ONLY a plain dark-grey sports top and plain dark-grey briefs, barefoot"
+  },
+  {
+   "id": "goblin",
+   "kind": "body",
+   "from": "goblin-original.jpg",
+   "look": "small goblin about 3 heads tall, olive-green skin, very large pointed ears sticking out sideways, big round yellow eyes with black pupils, round head, two small lower fangs, small orange nose, stubby arms and legs, wearing ONLY a plain short brown cloth loincloth so armour can be put over it, barefoot"
+  },
+  {
+   "id": "cloth-chest",
+   "kind": "item",
+   "slot": "chest",
+   "set": "cloth",
+   "chibi": "g5_cloth_vestment",
+   "name": "Layered Vestment",
+   "view": "Front three-quarter view, as worn by an INVISIBLE person standing in an A-pose (arms angled 45 degrees down): the garment alone, hollow openings at neck, sleeve ends and hem.",
+   "look": "mage's layered robe top: long-sleeved deep-purple (#5a4a7a) tunic reaching mid-thigh with a cream (#d8c8a0) under-layer, wide cuffs and a sash at the waist"
+  },
+  {
+   "id": "cloth-legs",
+   "kind": "item",
+   "slot": "legs",
+   "set": "cloth",
+   "chibi": "g5_cloth_pleats",
+   "name": "Pleated Wideleg",
+   "view": "Front three-quarter view, as worn by an INVISIBLE person standing with feet apart: the trousers alone, hollow at waist and ankles.",
+   "look": "wide-legged pleated cloth trousers, dusky purple (#4a3f66) with cream (#d8c8a0) waistband and ankle bands"
+  },
+  {
+   "id": "cloth-feet",
+   "kind": "item",
+   "slot": "feet",
+   "set": "cloth",
+   "chibi": "g5_cloth_curltoes",
+   "name": "Curl-toe Slippers",
+   "view": "Front three-quarter view of a PAIR standing side by side, a hand's width apart, as if worn by an invisible person (hollow at the ankle).",
+   "look": "soft purple (#6a5a8a) cloth slippers with curled-up pointed toes and gold (#d8b040) trim"
+  },
+  {
+   "id": "cloth-hands",
+   "kind": "item",
+   "slot": "hands",
+   "set": "cloth",
+   "chibi": "g5_cloth_handwraps",
+   "name": "Cloth Gloves",
+   "view": "Back-of-hand view of ONE right glove, fingers pointing down, fingers together, hollow at the wrist.",
+   "look": "cream (#cfc9b8) cloth glove with a purple (#5a4a7a) wrist band"
+  },
+  {
+   "id": "cloth-head",
+   "kind": "item",
+   "slot": "head",
+   "set": "cloth",
+   "chibi": "g5_cloth_wrap",
+   "name": "Scholar's Headwrap",
+   "view": "Front three-quarter view, as worn by an INVISIBLE head (hollow inside, face opening empty).",
+   "look": "wrapped cloth head-wrap turban, muted violet (#7a6a8a) with a small gold (#d8b040) clasp at the front"
+  },
+  {
+   "id": "leather-chest",
+   "kind": "item",
+   "slot": "chest",
+   "set": "leather",
+   "chibi": "g5_leather_brigandine",
+   "name": "Studded Brigandine",
+   "view": "Front three-quarter view, as worn by an INVISIBLE person standing in an A-pose (arms angled 45 degrees down): the garment alone, hollow openings at neck, arms and waist.",
+   "look": "brown (#6a4a30) studded leather brigandine vest with short leather shoulder caps, tan (#b8a070) stitching, brass studs, a belt with buckle"
+  },
+  {
+   "id": "leather-legs",
+   "kind": "item",
+   "slot": "legs",
+   "set": "leather",
+   "chibi": "g5_leather_chaps",
+   "name": "Strapped Chaps",
+   "view": "Front three-quarter view, as worn by an INVISIBLE person standing with feet apart: the trousers alone, hollow at waist and ankles.",
+   "look": "dark-brown (#5a4030) leather trousers with tan (#b8a070) straps and buckles around the thighs and padded knee pieces"
+  },
+  {
+   "id": "leather-feet",
+   "kind": "item",
+   "slot": "feet",
+   "set": "leather",
+   "chibi": "g5_leather_cuffboots",
+   "name": "Cuffed Riding Boots",
+   "view": "Front three-quarter view of a PAIR standing side by side, a hand's width apart, as if worn by an invisible person (hollow at the top).",
+   "look": "chunky knee-high brown (#5a3a24) leather boots with wide folded-over tan (#b8a070) cuffs and thick soles"
+  },
+  {
+   "id": "leather-hands",
+   "kind": "item",
+   "slot": "hands",
+   "set": "leather",
+   "chibi": "g5_leather_gloves",
+   "name": "Studded Longgloves",
+   "view": "Back-of-hand view of ONE right glove, fingers pointing down, fingers together, hollow at the cuff.",
+   "look": "brown (#5a3a24) leather gauntlet glove with a long flared cuff to mid-forearm and tan (#b8a070) studs"
+  },
+  {
+   "id": "leather-head",
+   "kind": "item",
+   "slot": "head",
+   "set": "leather",
+   "chibi": "g5_leather_slouch",
+   "name": "Pinned Slouch Hat",
+   "view": "Front three-quarter view, as worn by an INVISIBLE head (hollow inside).",
+   "look": "brown (#6a4a30) leather slouch hat with a wide brim pinned up on one side and a cream (#c8b890) feather"
+  },
+  {
+   "id": "mail-chest",
+   "kind": "item",
+   "slot": "chest",
+   "set": "mail",
+   "chibi": "g5_mail_hauberk",
+   "name": "Yoked Hauberk",
+   "view": "Front three-quarter view, as worn by an INVISIBLE person standing in an A-pose (arms angled 45 degrees down): the garment alone, hollow openings at neck, sleeve ends and hem.",
+   "look": "chainmail hauberk shirt (painted chain pattern, steel grey #7a8088) with elbow-length sleeves, a brown leather (#6a4a30) yoke over the shoulders and a leather belt, hem to mid-thigh"
+  },
+  {
+   "id": "mail-legs",
+   "kind": "item",
+   "slot": "legs",
+   "set": "mail",
+   "chibi": "g5_mail_chausses",
+   "name": "Mail Chausses",
+   "view": "Front three-quarter view, as worn by an INVISIBLE person standing with feet apart: the leggings alone, hollow at waist and ankles.",
+   "look": "chainmail leggings (painted chain pattern, steel grey #7a8088) with brown leather (#6a4a30) knee guards and waist belt"
+  },
+  {
+   "id": "mail-feet",
+   "kind": "item",
+   "slot": "feet",
+   "set": "mail",
+   "chibi": "g5_mail_splints",
+   "name": "Splinted Boots",
+   "view": "Front three-quarter view of a PAIR standing side by side, a hand's width apart, as if worn by an invisible person (hollow at the top).",
+   "look": "dark-brown (#5a5048) leather boots reaching mid-shin with vertical steel (#8a9098) splints strapped on the front"
+  },
+  {
+   "id": "mail-hands",
+   "kind": "item",
+   "slot": "hands",
+   "set": "mail",
+   "chibi": "g5_mail_mitts",
+   "name": "Mail Mittens",
+   "view": "Back-of-hand view of ONE right mitten, fingers pointing down, hollow at the cuff.",
+   "look": "chainmail mitten (painted chain pattern, steel grey #7a8088) with a brown leather (#6a4a30) cuff and palm strap"
+  },
+  {
+   "id": "mail-head",
+   "kind": "item",
+   "slot": "head",
+   "set": "mail",
+   "chibi": "g5_mail_cap",
+   "name": "Banded Cap and Aventail",
+   "view": "Front three-quarter view, as worn by an INVISIBLE head (hollow inside, face opening empty).",
+   "look": "round steel (#8a9098) cap made of riveted bands with a chainmail curtain hanging down around the neck and back, teal-grey (#536a73) cloth lining at the rim"
+  },
+  {
+   "id": "plate-chest",
+   "kind": "item",
+   "slot": "chest",
+   "set": "plate",
+   "chibi": "g5_plate_cuirass",
+   "name": "Fluted Cuirass",
+   "view": "Front three-quarter view, as worn by an INVISIBLE person standing in an A-pose (arms angled 45 degrees down): the armour alone, hollow openings at neck, arms and waist.",
+   "look": "heavy steel (#a0a8b2) fluted breastplate with big rounded layered pauldrons on both shoulders, gold (#d8b040) trim on every edge, a short plated skirt"
+  },
+  {
+   "id": "plate-legs",
+   "kind": "item",
+   "slot": "legs",
+   "set": "plate",
+   "chibi": "g5_plate_cuisses",
+   "name": "Fan-kneed Cuisses",
+   "view": "Front three-quarter view, as worn by an INVISIBLE person standing with feet apart: the leg armour alone, hollow at waist and ankles.",
+   "look": "steel (#a0a8b2) plate leg armour: thigh plates and shin plates with big fan-shaped knee cops, gold (#d8b040) edge trim, over dark cloth"
+  },
+  {
+   "id": "plate-feet",
+   "kind": "item",
+   "slot": "feet",
+   "set": "plate",
+   "chibi": "g5_plate_sabatons",
+   "name": "Pointed Sabatons",
+   "view": "Front three-quarter view of a PAIR standing side by side, a hand's width apart, as if worn by an invisible person (hollow at the top).",
+   "look": "chunky steel (#a0a8b2) plate boots with layered toe plates ending in a point, gold (#d8b040) trim"
+  },
+  {
+   "id": "plate-hands",
+   "kind": "item",
+   "slot": "hands",
+   "set": "plate",
+   "chibi": "g5_plate_gauntlets",
+   "name": "Hourglass Gauntlets",
+   "view": "Back-of-hand view of ONE right gauntlet, fingers pointing down, fingers together, hollow at the cuff.",
+   "look": "steel (#a0a8b2) plate gauntlet with segmented fingers and a flared hourglass-shaped cuff, gold (#d8b040) trim"
+  },
+  {
+   "id": "plate-head",
+   "kind": "item",
+   "slot": "head",
+   "set": "plate",
+   "chibi": "g5_plate_armet",
+   "name": "Houndsnout Armet",
+   "view": "Front three-quarter view, as worn by an INVISIBLE head (hollow inside).",
+   "look": "closed steel (#a0a8b2) knight helmet with a pointed snout-shaped visor with eye slits, gold (#d8b040) trim and a short crest ridge"
+  },
+  {
+   "id": "sword",
+   "kind": "item",
+   "slot": "weapon",
+   "chibi": "g5_leafblade",
+   "name": "Marsh Leafblade",
+   "view": "Flat front view of the whole weapon standing upright, point up, orthographic.",
+   "look": "one-handed sword with a wide leaf-shaped steel blade, simple brass crossguard, leather-wrapped grip and round pommel; chunky and oversized like a game weapon"
+  },
+  {
+   "id": "axe",
+   "kind": "item",
+   "slot": "weapon",
+   "chibi": "g5_moonaxe",
+   "name": "Halfmoon Axe",
+   "view": "Flat side view of the whole weapon standing upright, head up, orthographic.",
+   "look": "one-handed axe with a big half-moon steel blade on one side, wooden haft with leather wrap and an iron cap; chunky and oversized"
+  },
+  {
+   "id": "mace",
+   "kind": "item",
+   "slot": "weapon",
+   "chibi": "g5_morningstar",
+   "name": "Thornhead Morningstar",
+   "view": "Flat front view of the whole weapon standing upright, head up, orthographic.",
+   "look": "one-handed morningstar mace: round iron head with thick conical spikes on a wooden handle with a leather grip"
+  },
+  {
+   "id": "dagger",
+   "kind": "item",
+   "slot": "weapon",
+   "chibi": "g5_kris",
+   "name": "Tidewater Kris",
+   "view": "Flat front view of the whole weapon standing upright, point up, orthographic.",
+   "look": "dagger with a wavy steel kris blade, teal-wrapped grip and small brass guard"
+  },
+  {
+   "id": "staff",
+   "kind": "item",
+   "slot": "weapon",
+   "chibi": "g5_staff_branch",
+   "name": "Stormbranch Staff",
+   "view": "Flat front view of the whole staff standing upright, orthographic, filling the height of the picture.",
+   "look": "tall gnarled wooden mage staff whose top splits into curling branches holding a glowing pale-blue crystal"
+  },
+  {
+   "id": "bow",
+   "kind": "item",
+   "slot": "weapon",
+   "chibi": "g5_recurve",
+   "name": "Horn Recurve",
+   "view": "Flat side view of the whole bow standing upright, string on the right, orthographic.",
+   "look": "recurve bow made of dark horn and wood with curled tips, leather-wrapped grip, taut string"
+  },
+  {
+   "id": "shield",
+   "kind": "item",
+   "slot": "offhand",
+   "chibi": "g5_almond",
+   "name": "Almond Kite",
+   "view": "Front three-quarter view of the shield face, orthographic.",
+   "look": "almond-shaped kite shield, steel-blue painted face (#8d97a3) with a steel rim and boss and a simple painted emblem of a bird"
+  },
+  {
+   "id": "gob-warrior",
+   "kind": "body",
+   "from": "goblin-original.jpg",
+   "fromNote": "The attached source.jpg is the owner's earlier goblin: keep its general species (green skin, big ears, small body) but NOT its friendly cute face — this goblin is a hostile enemy. IGNORE its layout, text and close-ups.",
+   "name": "Goblin warrior",
+   "look": "MEAN and menacing goblin face (NOT cute, NOT friendly): heavy angry brow ridge, narrowed slanted yellow eyes with small pupils, wide mouth with an underbite and two jutting lower tusks, long hooked nose, sneer; slightly hunched shoulders, wiry stubby limbs, very large pointed ears sticking out sideways, olive-green skin with darker green shading, about 3 heads tall, LARGE hands with exactly FIVE fingers each (four fingers and a thumb), hands OPEN and EMPTY; dressed as a scrappy goblin WARRIOR: dented iron half-helm with short horns, mismatched rusty iron plate pauldron on the left shoulder, studded brown leather jerkin, belt with bone trinkets, ragged red cloth loin skirt to mid-thigh, leather bracers, wrapped shins, bare clawed feet with three toes; clothes fit close to the body"
+  },
+  {
+   "id": "gob-rogue",
+   "kind": "body",
+   "from": "goblin-original.jpg",
+   "fromNote": "The attached source.jpg is the owner's earlier goblin: keep its general species (green skin, big ears, small body) but NOT its friendly cute face — this goblin is a hostile enemy. IGNORE its layout, text and close-ups.",
+   "name": "Goblin rogue",
+   "look": "MEAN and menacing goblin face (NOT cute, NOT friendly): heavy angry brow ridge, narrowed slanted yellow eyes with small pupils, wide mouth with an underbite and two jutting lower tusks, long hooked nose, sneer; slightly hunched shoulders, wiry stubby limbs, very large pointed ears sticking out sideways, olive-green skin with darker green shading, about 3 heads tall, LARGE hands with exactly FIVE fingers each (four fingers and a thumb), hands OPEN and EMPTY; dressed as a sneaky goblin ROGUE: dark hooded short cowl with the big ears poking out through slits, ragged dark-grey and purple patched leather vest with many small pouches and straps, cloth face wrap pulled down under the chin, tight dark wrapped trousers, crossed belts with an empty dagger sheath on the hip, bare clawed feet with three toes; clothes fit close to the body"
+  },
+  {
+   "id": "gob-mage",
+   "kind": "body",
+   "from": "goblin-original.jpg",
+   "fromNote": "The attached source.jpg is the owner's earlier goblin: keep its general species (green skin, big ears, small body) but NOT its friendly cute face — this goblin is a hostile enemy. IGNORE its layout, text and close-ups.",
+   "name": "Goblin shaman",
+   "look": "MEAN and menacing goblin face (NOT cute, NOT friendly): heavy angry brow ridge, narrowed slanted yellow eyes with small pupils, wide mouth with an underbite and two jutting lower tusks, long hooked nose, sneer; slightly hunched shoulders, wiry stubby limbs, very large pointed ears sticking out sideways, olive-green skin with darker green shading, about 3 heads tall, LARGE hands with exactly FIVE fingers each (four fingers and a thumb), hands OPEN and EMPTY; dressed as a goblin SHAMAN mage: tall crooked patched hat made of hide with small bones hanging from the brim, ragged mossy-green and brown hide robe to the knees with torn hem and tribal painted markings, necklace of teeth and a small skull, rope belt with herb pouches, glowing teal war-paint stripes on the face and arms, bare clawed feet with three toes; robe fits close to the body, arms bare from the elbow"
+  },
+  {
+   "id": "gob-cleaver",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Rusty Cleaver",
+   "view": "Flat side view of the whole weapon standing upright, blade up, orthographic.",
+   "look": "crude goblin war cleaver: a broad rectangular rusty iron blade with notches and a hooked tip, short wooden haft wrapped in dirty red cloth, iron rivets; chunky and oversized"
+  },
+  {
+   "id": "gob-shiv",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Jagged Shiv",
+   "view": "Flat front view of the whole weapon standing upright, point up, orthographic.",
+   "look": "goblin rogue dagger: a long jagged serrated dark-iron blade with a green poison sheen on the edge, bone grip bound with leather strips, small crossguard made of a bent nail"
+  },
+  {
+   "id": "gob-totem",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Skull Totem Staff",
+   "view": "Flat front view of the whole staff standing upright, orthographic, filling the height of the picture.",
+   "look": "goblin shaman staff: a crooked knobbly dark wooden stick, the top bound with rope to a small horned animal skull with glowing teal eye sockets, feathers and beads hanging below the skull"
+  },
+  {
+   "id": "gob-buckler",
+   "kind": "item",
+   "slot": "offhand",
+   "name": "Scrap Buckler",
+   "view": "Front three-quarter view of the shield face, orthographic.",
+   "look": "small round goblin shield made of rough wooden planks with a rusty iron rim, a sharp iron spike in the middle and a crude red painted goblin skull sign"
+  },
+  {
+   "id": "thug",
+   "kind": "enemy",
+   "name": "Street thug",
+   "height": 1.8,
+   "look": "burly human street thug, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): stubbly heavy jaw, broken nose, scowl, short cropped hair under a flat wool cap; patched brown wool coat to mid-thigh with mismatched patches and rough stitching over a dirty cream shirt, rope belt, patched grey trousers, heavy scuffed boots, fingerless leather gloves; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "knifer",
+   "kind": "enemy",
+   "name": "Cutpurse",
+   "height": 1.75,
+   "look": "lean wiry human cutpurse, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): sharp gaunt face with narrow eyes and a thin sneer visible under the hood; dark green-grey hood up and short ragged hooded capelet, tight dark leather vest with many straps and three empty small knife sheaths across the chest, wrapped forearms, dark tight trousers, soft wrapped boots; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "bruiser",
+   "kind": "enemy",
+   "name": "Bruiser",
+   "height": 2.2,
+   "look": "HUGE hulking human pit brawler, very broad and heavy, massive arms and shoulders, big belly, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): bald scarred head, flattened nose, small angry eyes, thick neck; heavy iron chains wrapped many times around both forearms and the backs of both hands, torn sleeveless brown leather vest, wide studded belt, baggy dark trousers, wrapped boots; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "lantern-guard",
+   "kind": "enemy",
+   "name": "Lantern guard",
+   "height": 1.85,
+   "look": "human soldier of a holy lantern order, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): stern face; open-faced rounded steel helmet with a small brass lantern-shaped crest on top, steel mail shirt, long deep-blue tabard to the knees with a big golden LANTERN emblem on the chest, brown leather belt, steel shoulder plates, steel gauntlets, steel greaves over brown boots; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "crossbowman",
+   "kind": "enemy",
+   "name": "Lantern crossbowman",
+   "height": 1.8,
+   "look": "human crossbowman of a holy lantern order, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): lean stern face with a short beard; wide-brimmed brown leather hat, padded brown leather jerkin with deep-blue sleeves and a small golden lantern badge on the chest, quiver of crossbow bolts hanging on the right hip, belt pouches, leather bracers, tall brown boots; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "lantern-priest",
+   "kind": "enemy",
+   "name": "Lantern priest",
+   "height": 1.75,
+   "look": "stern older human priest-healer of a holy lantern order, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): bald head, hard eyes, grey goatee; long cream and gold robes to the ankles, deep-blue stole with small golden lantern symbols hanging down the front, wide sleeves ending at the wrists, rope belt with prayer beads, sandals; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "zealot",
+   "kind": "enemy",
+   "name": "Zealot",
+   "height": 1.75,
+   "look": "frenzied human fire cultist, gaunt and wiry, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): wild wide eyes, snarling open mouth, shaved head, burn scars on the face, arms and chest; ragged scorched red-and-black robe torn short at the knees with burnt holes, bare scarred arms with dirty bandages, rope belt with charms, ash smeared on the skin, bare feet; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "silver-knight",
+   "kind": "enemy",
+   "name": "Silver knight",
+   "height": 1.95,
+   "look": "armoured royal knight, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly) implied by a narrow eye slit: full polished silver plate armour, closed rounded great helm with a narrow visor slit and a small golden crown sigil on the brow, white surcoat over the plate with a silver crown emblem, reaching mid-thigh, plate pauldrons, plate gauntlets, plate legs and sabatons; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb) in plate gauntlets"
+  },
+  {
+   "id": "royal-archer",
+   "kind": "enemy",
+   "name": "Royal archer",
+   "height": 1.8,
+   "look": "human royal archer, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): lean stern face, short hair; royal livery tunic quartered deep blue and white over a light mail shirt, feathered blue cap, brown leather bracer on the left forearm, leather belt with pouches, quiver of arrows on the back, tall brown boots; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "bounty-hunter",
+   "kind": "enemy",
+   "name": "Bounty hunter",
+   "height": 1.85,
+   "look": "human bounty hunter, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): cold eyes under the hat brim; very wide-brimmed dark brown hat, dark red scarf covering the lower face, long weathered brown leather coat to the shins hanging open, crossed bandolier belts with pouches on the chest, dark gloves, tall dark boots; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "kiln-monk",
+   "kind": "enemy",
+   "name": "Kiln monk",
+   "height": 1.8,
+   "look": "human glassblower monk, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): shaved head; a round brass-and-glass face mask with two big tinted amber lenses covering the face, heavy thick leather heat apron over burnt-orange monk robes to the shins, thick padded heat gloves to the elbows, wrapped sandals; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "hollowborn",
+   "kind": "enemy",
+   "name": "Hollowborn",
+   "height": 1.7,
+   "look": "hollowed undead villager ghoul, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): gaunt grey-green skin stretched over bones, sunken cheeks, glowing pale eyes in dark sockets, lipless grin with sharp teeth, patchy hair; torn filthy peasant shirt and ragged trousers, ribs showing through rips, bare feet; LONG clawed fingers, exactly FIVE fingers each, hands open"
+  },
+  {
+   "id": "root-caller",
+   "kind": "enemy",
+   "name": "Root-caller",
+   "height": 1.85,
+   "look": "dark druid, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly) shown by glowing green eyes behind the mask: a carved dark bark mask with twig antlers, long dark green and brown hooded robe covered in roots and moss, thick roots wrapping both arms like vines, small glowing green fungi, root-like bare feet; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb), bark-skinned"
+  },
+  {
+   "id": "drowned-brute",
+   "kind": "enemy",
+   "name": "Drowned brute",
+   "height": 2.0,
+   "look": "big hulking waterlogged undead bell-ringer, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): bloated pale blue-grey skin, barnacles and clinging seaweed on shoulders and arms, dead white eyes, slack jaw; torn rotten dark-green bell-ringer's tunic, a heavy rusty bell hanging from a chain on the belt, rope wrapped around the waist, bare swollen feet; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "wraith-knight",
+   "kind": "enemy",
+   "name": "Wraith knight",
+   "height": 2.0,
+   "look": "spectral undead armoured knight, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): dark tarnished black-iron plate armour with ghostly glowing teal light leaking from the gaps, a horned closed helm with two glowing teal eyes in the visor slit, a tattered black cloak hanging to the knees behind, torn dark tabard; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb) in iron gauntlets"
+  },
+  {
+   "id": "stone-golem",
+   "kind": "enemy",
+   "name": "Stone golem",
+   "height": 2.4,
+   "look": "huge stone golem made of carved grey stone blocks, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly) shown by a glowing blue rune face: small head sunk between massive shoulders, very big heavy arms with blocky stone hands, short thick legs, moss and small plants on the shoulders, glowing blue carved runes on the chest; FIVE thick stone fingers on each hand"
+  },
+  {
+   "id": "winged-imp",
+   "kind": "enemy",
+   "name": "Winged imp",
+   "height": 0.9,
+   "look": "small bat-winged imp gargoyle, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): grinning fanged mouth, glowing yellow eyes, small curved horns, pointed ears; dark red-grey leathery skin, wiry limbs, two bat wings attached to the back held half-open and pointing UP above the shoulders (NOT covering the arms), a thin pointed tail hanging down between the legs to the floor, clawed feet; small clawed hands with FIVE fingers"
+  },
+  {
+   "id": "thornling",
+   "kind": "enemy",
+   "name": "Thornling",
+   "height": 0.9,
+   "look": "small bramble-and-twig creature, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): round head of tangled thorny brambles with two glowing yellow eyes and a jagged crack of a mouth, a few leaves and a tiny red berry cluster; body, arms and legs of woven twigs and thorny vines; long twig fingers, FIVE on each hand"
+  },
+  {
+   "id": "fire-elemental",
+   "kind": "enemy",
+   "name": "Fire elemental",
+   "height": 1.9,
+   "look": "humanoid fire elemental, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): a body made of living orange and yellow flame with a dark glowing cinder-and-coal core in the chest showing through cracks, a head of flame with two white-hot eyes, flame arms with clear flame hands, two legs of flame ending in burning cinder feet; solid readable silhouette, flames swept upward"
+  },
+  {
+   "id": "grell",
+   "kind": "enemy",
+   "name": "Grell the gang boss",
+   "height": 1.95,
+   "look": "big scarred human gang boss, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): scar across one eye, heavy jaw, slicked back dark hair, gold tooth; heavy dark-red long coat to the shins with a thick fur collar, open over a dark waistcoat with gold buttons and a gold chain, thick leather belt, dark trousers, heavy boots, studded leather gloves; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "vessa",
+   "kind": "enemy",
+   "name": "Captain Vessa",
+   "height": 1.8,
+   "look": "human woman captain of a holy lantern order, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): hard stern face, dark hair in a braid; officer's open helmet with a tall deep-blue plume, polished steel cuirass with gold trim and a gold lantern emblem, deep-blue officer's coat with long tails under the armour, steel pauldrons, gauntlets, tall boots with steel knee guards; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "aldric",
+   "kind": "enemy",
+   "name": "Aldric the Lamplord",
+   "height": 2.3,
+   "look": "tall regal lord of a holy lantern order, very tall and imposing, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): cold proud face, white short beard; a gilded crown shaped like a ring of small lanterns, gilded ornate gold breastplate and pauldrons over long flowing white and gold robes to the floor with a high stiff collar, gold embroidered lantern sigils, gold gauntlets; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb); legs and feet visible below the robe hem"
+  },
+  {
+   "id": "isolde",
+   "kind": "enemy",
+   "name": "Queen Isolde",
+   "height": 1.85,
+   "look": "human queen in silver gown-armour, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): cold beautiful stern face, long pale blonde hair, silver crown with blue gems; a fitted silver plate bodice and pauldrons flowing into an armoured silver-and-blue split skirt that opens at the front over silver plated legs, silver gauntlets; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "water-elemental",
+   "kind": "enemy",
+   "name": "Water elemental",
+   "height": 2.0,
+   "look": "humanoid water elemental, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): body of swirling deep-blue and teal water with white foam crests, a head of water with two glowing pale eyes, strong water arms with clear hands, two legs of rushing water columns down to the floor, a few small floating droplets; solid readable silhouette"
+  },
+  {
+   "id": "earth-elemental",
+   "kind": "enemy",
+   "name": "Earth elemental",
+   "height": 2.3,
+   "look": "big humanoid earth elemental, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): body built from brown and grey boulders and packed earth, purple-and-teal crystal clusters growing out of the shoulders and back, small head with glowing amber eyes, massive boulder arms with blocky rock hands, thick rock legs; FIVE thick rock fingers per hand"
+  },
+  {
+   "id": "air-elemental",
+   "kind": "enemy",
+   "name": "Air elemental",
+   "height": 2.0,
+   "look": "humanoid air elemental, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): body of swirling pale grey-white storm cloud and wind streaks with small crackles of blue lightning inside, a head of cloud with glowing blue eyes, cloud arms with clear hands, two thick swirling whirlwind columns as legs reaching the floor (narrower at the bottom); solid readable silhouette"
+  },
+  {
+   "id": "orc-grunt",
+   "kind": "enemy",
+   "name": "Orc grunt",
+   "height": 2.0,
+   "look": "muscular orc warrior, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): green skin, big lower tusks, heavy brow, black topknot, small angry red eyes; scrap armour: one big spiked iron pauldron on the left shoulder, crossed leather straps on a bare chest, studded leather kilt, fur-trimmed boots, iron bracers; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "troll",
+   "kind": "enemy",
+   "name": "Troll",
+   "height": 2.3,
+   "look": "tall lanky troll, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): blue-grey skin, long pointed ears, big curved lower tusks, long nose, red mohawk, very long arms reaching the knees, thin long legs; bone bead necklace, leather loincloth with a tattered cloth flap, bone bracers, wrapped ankles, bare three-toed feet; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "skeleton-warrior",
+   "kind": "enemy",
+   "name": "Skeleton warrior",
+   "height": 1.8,
+   "look": "undead skeleton warrior, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): old yellowed bones, skull with glowing blue eye-lights, a dented rusty open helmet, scraps of torn rusty mail over the ribcage, a torn dark-red cloth hanging from the belt, a rusty pauldron on one shoulder; bony hands with FIVE finger bones each, open"
+  },
+  {
+   "id": "minotaur",
+   "kind": "enemy",
+   "name": "Minotaur",
+   "height": 2.4,
+   "look": "huge minotaur, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): bull head with long curved horns, a brass ring in the nose, snorting; massive muscular human torso with brown fur, leather straps crossing the chest, leather war kilt with iron studs, legs of a bull with dark fur and cloven hooves; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "wolf",
+   "kind": "beast",
+   "name": "Dire wolf",
+   "look": "big dire wolf, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): snarling but mouth closed with fangs showing at the lips, dark grey and charcoal fur with lighter grey belly and chest, shaggy ruff around the neck, yellow eyes, long bushy tail, big paws"
+  },
+  {
+   "id": "drake",
+   "kind": "beast",
+   "name": "Drake",
+   "look": "small four-legged dragon drake, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): horned reptile head with a short snout and glowing orange eyes, dark red-brown scales with a cream belly, spines down the back, two bat-like wings FOLDED flat along its back, four strong clawed legs, long thick tail"
+  },
+  {
+   "id": "spiked-club",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Spiked club",
+   "view": "Flat side view of the whole weapon standing upright, head up, orthographic.",
+   "look": "heavy wooden club, thick knobbly head studded with iron nails and spikes, the handle wrapped in grubby leather",
+   "length": 0.85,
+   "grip_at": 0.14
+  },
+  {
+   "id": "cutpurse-knife",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Cutpurse knife",
+   "view": "Flat front view of the whole weapon standing upright, point up, orthographic.",
+   "look": "long thin curved knife with a dark steel blade, simple brass crossguard, black leather wrapped grip",
+   "length": 0.42,
+   "grip_at": 0.16
+  },
+  {
+   "id": "guard-spear",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Lantern spear",
+   "view": "Flat front view of the whole spear standing upright, point up, orthographic, filling the height of the picture.",
+   "look": "long spear: dark wooden shaft with blue cloth bindings, a broad leaf-shaped steel spearhead with a small brass lantern-shaped collar under the head",
+   "length": 2.1,
+   "grip_at": 0.4
+  },
+  {
+   "id": "crossbow",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Crossbow",
+   "view": "Flat top-down view of the whole crossbow lying flat, stock pointing DOWN, bow arms left and right at the top, orthographic.",
+   "look": "fantasy game prop for a toy-like stylised RPG: a wooden hunting crossbow, unloaded (no bolt), sturdy wooden stock, curved steel bow arms with a string, brass fittings and a small golden lantern inlay on the stock",
+   "length": 0.75,
+   "grip_at": 0.22
+  },
+  {
+   "id": "censer",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Lantern censer",
+   "view": "Flat front view of the whole thing standing upright, orthographic, filling the height of the picture.",
+   "look": "a priest's censer flail shown UPRIGHT as if held up: a short gold-capped wooden handle at the BOTTOM, a short stiff gold chain going straight up from it, and at the TOP a heavy ornate gold lantern-shaped incense censer with warm glowing light in its little windows",
+   "length": 0.8,
+   "grip_at": 0.12
+  },
+  {
+   "id": "zealot-sickle",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Zealot sickle",
+   "view": "Flat side view of the whole weapon standing upright, blade at the top, orthographic.",
+   "look": "crude curved sickle with a blackened scorched iron blade, wooden handle wrapped in red rags and charms",
+   "length": 0.55,
+   "grip_at": 0.18
+  },
+  {
+   "id": "silver-longsword",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Silver longsword",
+   "view": "Flat front view of the whole sword standing upright, point up, orthographic, filling the height of the picture.",
+   "look": "knightly longsword: long straight polished silver blade, gold crossguard with crown-shaped ends, white leather grip, round gold pommel with a blue gem",
+   "length": 1.15,
+   "grip_at": 0.1
+  },
+  {
+   "id": "kite-shield",
+   "kind": "item",
+   "slot": "offhand",
+   "name": "Kite shield",
+   "view": "Flat front view of the shield face, orthographic.",
+   "look": "tall kite shield, deep blue face with a silver rim and a big golden lantern emblem in the middle, steel studs",
+   "length": 0.95,
+   "grip_at": null
+  },
+  {
+   "id": "hunter-hatchet",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Hunter's hatchet",
+   "view": "Flat side view of the whole weapon standing upright, head up, orthographic.",
+   "look": "bounty hunter's hatchet: dark steel single-bit axe head with a hooked beard, short dark wooden haft wrapped in leather near the end",
+   "length": 0.55,
+   "grip_at": 0.18
+  },
+  {
+   "id": "glass-pipe",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Glassblower's pipe",
+   "view": "Flat front view of the whole thing standing upright, orthographic, filling the height of the picture.",
+   "look": "long iron glassblowing pipe used as a staff: blackened iron rod with brass rings, a big glowing orange molten glass bulb on the top end, leather wrap near the middle",
+   "length": 1.7,
+   "grip_at": 0.45
+  },
+  {
+   "id": "root-staff",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Root staff",
+   "view": "Flat front view of the whole staff standing upright, orthographic, filling the height of the picture.",
+   "look": "dark druid staff of twisted black roots braided together, the top a knot of roots holding a glowing green seed-stone, moss and a few leaves",
+   "length": 1.75,
+   "grip_at": 0.45
+  },
+  {
+   "id": "bell-maul",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Bell maul",
+   "view": "Flat side view of the whole weapon standing upright, head up, orthographic.",
+   "look": "heavy two-handed maul made from a rusty green-bronze church bell clapper and a cracked small bell bound with chains on a long rotten wooden haft, barnacles on the metal",
+   "length": 1.25,
+   "grip_at": 0.2
+  },
+  {
+   "id": "wraith-greatsword",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Wraith greatsword",
+   "view": "Flat front view of the whole sword standing upright, point up, orthographic, filling the height of the picture.",
+   "look": "huge greatsword with a dark black-iron jagged blade and ghostly teal glowing runes along it, spiked crossguard, long grip wrapped in black leather",
+   "length": 1.5,
+   "grip_at": 0.1
+  },
+  {
+   "id": "gang-hook",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Gang hook",
+   "view": "Flat side view of the whole weapon standing upright, hook at the top, orthographic.",
+   "look": "big iron cargo hook weapon: a thick curved sharp iron hook on top of a short wooden handle bound with rope and iron bands",
+   "length": 0.6,
+   "grip_at": 0.18
+  },
+  {
+   "id": "officer-sabre",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Officer sabre",
+   "view": "Flat side view of the whole sword standing upright, point up, orthographic.",
+   "look": "officer's curved sabre with a polished steel blade, a gold basket hand-guard, deep blue grip with gold wire",
+   "length": 0.95,
+   "grip_at": 0.08
+  },
+  {
+   "id": "lamplord-staff",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Lamplord staff",
+   "view": "Flat front view of the whole staff standing upright, orthographic, filling the height of the picture.",
+   "look": "regal tall white-and-gold staff topped with an ornate gold lantern cage holding a glowing warm white flame, gold rings along the shaft",
+   "length": 1.95,
+   "grip_at": 0.45
+  },
+  {
+   "id": "silver-rapier",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Silver rapier",
+   "view": "Flat front view of the whole sword standing upright, point up, orthographic.",
+   "look": "elegant rapier: long thin silver blade, ornate silver swept hilt with blue gems, small round pommel",
+   "length": 1.05,
+   "grip_at": 0.08
+  },
+  {
+   "id": "orc-axe",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Orc axe",
+   "view": "Flat side view of the whole weapon standing upright, head up, orthographic.",
+   "look": "brutal orc war axe: a huge crude jagged iron blade on one side, a thick wooden haft wrapped in hide strips, bone spike on top",
+   "length": 0.95,
+   "grip_at": 0.16
+  },
+  {
+   "id": "bone-club",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Bone club",
+   "view": "Flat side view of the whole weapon standing upright, head up, orthographic.",
+   "look": "troll club made from a huge animal thigh bone, knobbly end at the top bound with leather and teeth",
+   "length": 1.0,
+   "grip_at": 0.14
+  },
+  {
+   "id": "minotaur-greataxe",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Minotaur greataxe",
+   "view": "Flat front view of the whole weapon standing upright, head up, orthographic, filling the height of the picture.",
+   "look": "huge double-bladed bronze greataxe with curved crescent blades and engraved spirals, long dark wooden haft with bronze rings",
+   "length": 1.6,
+   "grip_at": 0.22
+  }
+ ]
+}

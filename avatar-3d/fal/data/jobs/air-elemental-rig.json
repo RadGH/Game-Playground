@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "air-elemental-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/air-elemental-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4dc/VKj2hRrjtuU7-rLID1bIR_air-elemental-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "air-elemental: Meshy rigging",
+ "request_id": "01a20958-568a-7aa2-9aca-383086aea6f5",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20958-568a-7aa2-9aca-383086aea6f5/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20958-568a-7aa2-9aca-383086aea6f5",
+ "submitted": "2026-11-23T16:58:34.041Z",
+ "logged": true
+}

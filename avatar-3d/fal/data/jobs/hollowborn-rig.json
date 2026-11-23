@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "hollowborn-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/hollowborn-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a50d/1XUvHrLDaPnq-ll6ruGC3_hollowborn-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "hollowborn: Meshy rigging",
+ "request_id": "01a2095f-c0f2-7480-ae61-04213741741a",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2095f-c0f2-7480-ae61-04213741741a/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2095f-c0f2-7480-ae61-04213741741a",
+ "submitted": "2026-11-23T17:06:40.029Z",
+ "logged": true
+}

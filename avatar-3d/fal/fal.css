@@ -1,0 +1,61 @@
+/* fal.ai test review page. Phone first: the 3D stage on top, the controls scroll below it; side by side from 900px. */
+.fl { --panel: #1b1f27; --panel2: #232833; --line: #313848; --gold: #e2b45a; --gold2: #f3d38c; --ink: #e8e4da; --ink2: #a9adb7;
+  background: #14171d; color: var(--ink); min-height: 100vh; margin: 0; }
+.fl-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--line); background: linear-gradient(#1a1e26, #161a21); }
+.fl-title h1 { margin: 0; font-size: 22px; letter-spacing: .04em; color: var(--gold2); font-family: Georgia, 'Times New Roman', serif; }
+.fl-title p { margin: 2px 0 0; color: var(--ink2); font-size: 13px; }
+.fl-tabs { display: flex; gap: 4px; background: #11141a; border: 1px solid var(--line); border-radius: 10px; padding: 3px; max-width: 100%; overflow-x: auto; }
+.fl-tabs button { border: 0; background: transparent; color: var(--ink2); padding: 7px 12px; border-radius: 7px; font-size: 13px; min-height: 44px; white-space: nowrap; }
+.fl-tabs button[aria-selected="true"] { background: linear-gradient(#3a3122, #2b2519); color: var(--gold2); box-shadow: inset 0 0 0 1px #6b5630; }
+
+.fl-main { display: grid; grid-template-columns: minmax(0, 1fr); }
+.fl-stage-wrap { position: relative; height: 58vh; min-height: 320px; border-bottom: 1px solid var(--line); }
+.fl-stage { position: absolute; inset: 0; touch-action: none; }
+.fl-stage canvas { display: block; width: 100%; height: 100%; }
+.fl-loading { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 6px 14px; border-radius: 20px;
+  background: #0d0f13cc; color: var(--ink2); font-size: 13px; pointer-events: none; transition: opacity .3s; }
+.fl-loading.done { opacity: 0; }
+.fl-side { padding: 12px 16px 40px; min-width: 0; }
+.fl-pane { display: none; }
+.fl-pane.on { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+
+@media (min-width: 900px) {
+  .fl-main { grid-template-columns: minmax(0, 1fr) 400px; height: calc(100vh - 75px); }
+  .fl-stage-wrap { height: auto; border-bottom: 0; border-right: 1px solid var(--line); }
+  .fl-side { overflow-y: auto; padding: 14px 16px 40px; }
+}
+
+.fl-card { background: linear-gradient(var(--panel), #181c23); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-width: 0; }
+.fl-card h2 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--gold); }
+.fl-note { color: var(--ink2); font-size: 12.5px; margin: 0 0 8px; }
+.fl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.fl-chip { background: var(--panel2); border: 1px solid var(--line); color: var(--ink); border-radius: 8px; padding: 6px 11px; font-size: 13px; min-height: 44px; cursor: pointer; }
+.fl-chip:hover { border-color: #6b5630; }
+.fl-chip.on { background: linear-gradient(#4a3c22, #3a2f1b); border-color: var(--gold); color: #fff3d6; }
+.fl-chip small { display: block; color: var(--ink2); font-size: 11px; }
+.fl-chip.on small { color: #e8d6a8; }
+.fl-slots { display: grid; gap: 10px; }
+.fl-slot { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 8px; align-items: start; }
+.fl-slot > span { color: var(--ink2); font-size: 12.5px; padding-top: 13px; }
+.fl-check { display: inline-flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 13px; color: var(--ink2); min-height: 44px; }
+.fl-check input { width: 20px; height: 20px; }
+.fl-stats { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; font-size: 13px; }
+.fl-stats dt { color: var(--ink2); }
+.fl-stats dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.fl-table-wrap { overflow-x: auto; }
+.fl-table { border-collapse: collapse; font-size: 12.5px; width: 100%; }
+.fl-table th, .fl-table td { border-bottom: 1px solid var(--line); padding: 6px; text-align: right; font-variant-numeric: tabular-nums; }
+.fl-table th:first-child, .fl-table td:first-child { text-align: left; }
+.fl-table td:first-child { white-space: normal; }
+.fl-table th { color: var(--ink2); font-weight: 500; }
+.fl-table tfoot td { color: var(--gold2); font-weight: 600; }
+
+.fl-gap { margin-top: 8px; }
+.fl-roster tbody tr.fl-pick { cursor: pointer; }
+.fl-roster tbody tr.fl-pick:hover td { background: #232833; }
+.fl-roster tbody tr.fl-pick:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.fl-roster tbody tr.fl-pick.on td { background: linear-gradient(#3a3122, #2b2519); color: #fff3d6; }
+.fl-roster td { height: 44px; }
+.fl-roster td small { display: block; color: var(--ink2); font-size: 11px; }
+.fl-roster tbody tr.fl-pick.on td small { color: #e8d6a8; }

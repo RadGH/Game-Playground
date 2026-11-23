@@ -1,6 +1,17 @@
 {
   "entries": [
     {
+      "id": "2026-11-23-high-detail-models",
+      "date": "2026-11-23",
+      "title": "High-detail heroes and monsters",
+      "items": [
+        "A new look for everyone on the road: hand-painted heroes and monsters. The first time you open the game it asks which you want, High detail or the original Legacy look, and you can switch any time in Settings.",
+        "In High detail, your hero wears the armour you find: plate, mail, leather and robes, helms, hoods, shields and weapons all show on the body.",
+        "New high-detail monsters: the Rook Gang, the Lantern Order, the Silver knights, kiln monks, root callers, drowned brutes, wolves, drakes, elementals, Aldric and Queen Isolde, with more on the way.",
+        "The floating green lantern flames are now Lantern Elementals, and the floating thorn creatures are Briar Elementals."
+      ]
+    },
+    {
       "id": "2026-11-21-no-phone-zoom",
       "date": "2026-11-21",
       "title": "No more stuck zoom on phones",

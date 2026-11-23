@@ -49,7 +49,7 @@ export function openInventory(app, h0, { live = false, onChange = null } = {}) {
       </section>
     </div>`, onClose: () => { closed = true; preview?.dispose?.(); } });
   const root = sh.body;
-  if (app.render?.createPreview) app.render.createPreview(root.querySelector('.wr-preview'), { data, quality: app.settings.quality }).then(p => { if (closed) { p.dispose?.(); return; } preview = p; p.setAnim('idle'); p.spin(false); look(); }).catch(e => console.warn(e));
+  if (app.render?.createPreview) app.render.createPreview(root.querySelector('.wr-preview'), { data, quality: app.settings.quality, models: app.settings.models === 'hd' ? 'hd' : 'legacy' }).then(p => { if (closed) { p.dispose?.(); return; } preview = p; p.setAnim('idle'); p.spin(false); look(); }).catch(e => console.warn(e));
   const look = () => { try { preview?.setLook(h.look, h.cls, h.gear); } catch (e) { console.warn(e); } };
 
   const cellHtml = (it, attrs) => {

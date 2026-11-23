@@ -1,0 +1,18 @@
+{
+ "item": "mail-hands",
+ "body": "female",
+ "anchor": "hand",
+ "cover": [
+  "hands"
+ ],
+ "scale_r": 0.7073,
+ "scale_l": 0.6943,
+ "inside": 0.936,
+ "region_inside": {
+  "hands": 0.965
+ },
+ "hides": [
+  "hands"
+ ],
+ "triangles": 5778
+}

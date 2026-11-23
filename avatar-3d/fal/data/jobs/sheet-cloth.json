@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "sheet-cloth",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-cloth.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3851d/trwejXGPT0Lmc2BQvHhfF_sheet-cloth.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "note": "Trellis-2 1024p, several items in one picture (ref/sheet-cloth.png)",
+ "request_id": "01a2047f-f27b-77e1-935e-169f6d5f150b",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a2047f-f27b-77e1-935e-169f6d5f150b/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a2047f-f27b-77e1-935e-169f6d5f150b",
+ "submitted": "2026-11-22T18:23:43.783Z",
+ "logged": true
+}

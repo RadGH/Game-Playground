@@ -1,0 +1,31 @@
+{
+ "model_glb": {
+  "url": "https://v3b.fal.media/files/b/0ab384f1/898-iWwkdX69kYdLsULj-_model.glb",
+  "content_type": "model/gltf-binary",
+  "file_name": "model.glb",
+  "file_size": 10589200
+ },
+ "thumbnail": {
+  "url": "https://v3b.fal.media/files/b/0ab384f1/7VQwYy24hyi6FqsnsyYi2_preview.png",
+  "content_type": "image/png",
+  "file_name": "preview.png",
+  "file_size": 81169
+ },
+ "model_urls": {
+  "glb": {
+   "url": "https://v3b.fal.media/files/b/0ab384f1/898-iWwkdX69kYdLsULj-_model.glb",
+   "content_type": "model/gltf-binary",
+   "file_name": "model.glb",
+   "file_size": 10589200
+  },
+  "fbx": null,
+  "obj": {
+   "url": "https://v3b.fal.media/files/b/0ab384f0/XiP1VHccpQx4xDD4aoRyc_model.obj",
+   "content_type": "model/obj",
+   "file_name": "model.obj",
+   "file_size": 9574336
+  },
+  "usdz": null
+ },
+ "seed": null
+}

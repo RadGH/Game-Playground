@@ -1,0 +1,22 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "royal-archer-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/royal-archer-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4c1/_KG49l11w1OFaigQYmY3D_royal-archer-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "royal-archer: Meshy rigging",
+ "request_id": "01a20954-1983-7d00-91cf-783bd15ee52b",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20954-1983-7d00-91cf-783bd15ee52b/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20954-1983-7d00-91cf-783bd15ee52b",
+ "submitted": "2026-11-23T16:53:56.261Z"
+}

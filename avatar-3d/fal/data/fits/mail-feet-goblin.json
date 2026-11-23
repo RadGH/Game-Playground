@@ -1,0 +1,19 @@
+{
+ "item": "mail-feet",
+ "body": "goblin",
+ "anchor": "floor",
+ "cover": [
+  "feet"
+ ],
+ "turn_l": 20,
+ "turn_r": 0,
+ "scale": 1.0012,
+ "inside": 0.752,
+ "region_inside": {
+  "feet": 0.694
+ },
+ "hides": [
+  "feet"
+ ],
+ "triangles": 3329
+}

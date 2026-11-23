@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "gobm-tripo-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/gobm-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab39080/rMB2rPHTz581iqw6jh_z3_gobm-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "Meshy rigging, ue5_mannequin, on Tripo goblin shaman (turned to face front)",
+ "request_id": "01a2063e-0e7b-7961-bf8e-a329f210a84d",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2063e-0e7b-7961-bf8e-a329f210a84d/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2063e-0e7b-7961-bf8e-a329f210a84d",
+ "submitted": "2026-11-23T02:30:59.997Z",
+ "logged": true
+}

@@ -1,0 +1,22 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "troll-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/troll-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4cc/sz6X70MxwkjZEYBn7eOd2_troll-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "troll: Meshy rigging",
+ "request_id": "01a20955-dc66-7f90-9765-583bc0d14d0e",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20955-dc66-7f90-9765-583bc0d14d0e/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20955-dc66-7f90-9765-583bc0d14d0e",
+ "submitted": "2026-11-23T16:55:51.696Z"
+}

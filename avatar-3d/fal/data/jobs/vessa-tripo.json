@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "vessa-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/vessa-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a4a0/leL-yhUh2ek8QoKMnm921_vessa-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "note": "vessa: Tripo P1 textured, face_limit 4500",
+ "request_id": "01a2094f-4587-79c2-9ef3-37078ddb3f21",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094f-4587-79c2-9ef3-37078ddb3f21/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a2094f-4587-79c2-9ef3-37078ddb3f21",
+ "submitted": "2026-11-23T16:48:39.854Z",
+ "logged": true
+}

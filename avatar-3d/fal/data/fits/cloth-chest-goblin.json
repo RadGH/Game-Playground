@@ -1,0 +1,25 @@
+{
+ "item": "cloth-chest",
+ "body": "goblin",
+ "anchor": "neck",
+ "cover": [
+  "torso"
+ ],
+ "scale": 1.9548,
+ "turn": 40,
+ "offset": [
+  0.094,
+  0.0192,
+  -0.1847
+ ],
+ "inside": 0.962,
+ "region_inside": {
+  "forearms": 0.0,
+  "upperarms": 0.616,
+  "torso": 0.985
+ },
+ "hides": [
+  "torso"
+ ],
+ "triangles": 4682
+}

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabard — hand-painted characters with swappable armour</title>
+<link rel="stylesheet" href="../../shared/style.css">
+<link rel="stylesheet" href="tabard.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body class="tb">
+<!-- Tabard review page. ?tab=dress|compare|crowd  ?body=male|female  ?set=bare|cloth|leather|plate  ?clip=walk
+     window.__tabard = { ready, tab, actors, stats(), errors } for tests (tests/tabard.spec.js). -->
+<header class="tb-top">
+  <div class="tb-title">
+    <h1>Tabard</h1>
+    <p>Low-poly bodies, hand-painted textures, armour you can swap piece by piece.</p>
+  </div>
+  <nav class="tb-tabs" role="tablist">
+    <button role="tab" data-tab="dress">Dressing room</button>
+    <button role="tab" data-tab="compare">Comparison</button>
+    <button role="tab" data-tab="crowd">Crowd test</button>
+  </nav>
+</header>
+
+<main class="tb-main">
+  <section class="tb-stage-wrap">
+    <div id="stage" class="tb-stage"></div>
+    <div id="loading" class="tb-loading">Loading characters…</div>
+  </section>
+
+  <aside class="tb-side">
+    <!-- Dressing room -->
+    <div class="tb-pane" data-pane="dress">
+      <section class="tb-card">
+        <h2>Body</h2>
+        <div class="tb-chips" id="d-body"></div>
+      </section>
+      <section class="tb-card">
+        <h2>Outfit</h2>
+        <div class="tb-chips" id="d-sets"></div>
+      </section>
+      <section class="tb-card">
+        <h2>Equipment</h2>
+        <div id="d-slots" class="tb-slots"></div>
+      </section>
+      <section class="tb-card">
+        <h2>Motion</h2>
+        <div class="tb-chips" id="d-clips"></div>
+        <label class="tb-range">Calmer posture <output id="d-calm-out"></output>
+          <input type="range" id="d-calm" min="0" max="100" step="5"></label>
+        <label class="tb-check"><input type="checkbox" id="d-spin"> Turn slowly</label>
+      </section>
+      <section class="tb-card">
+        <h2>This character</h2>
+        <dl class="tb-stats" id="d-stats"></dl>
+      </section>
+      <section class="tb-card">
+        <h2>Painted texture</h2>
+        <p class="tb-note">The whole body is one 1024 × 1024 picture. Each piece of armour repaints only its own boxes.</p>
+        <div class="tb-atlas" id="d-atlas"></div>
+      </section>
+    </div>
+
+    <!-- Comparison -->
+    <div class="tb-pane" data-pane="compare">
+      <section class="tb-card">
+        <h2>Side by side</h2>
+        <ol class="tb-legend" id="c-legend"></ol>
+      </section>
+      <section class="tb-card">
+        <h2>Outfit on the new bodies</h2>
+        <div class="tb-chips" id="c-sets"></div>
+      </section>
+      <section class="tb-card">
+        <h2>Motion</h2>
+        <div class="tb-chips" id="c-clips"></div>
+      </section>
+      <section class="tb-card">
+        <h2>Numbers</h2>
+        <div class="tb-table-wrap"><table class="tb-table" id="c-table"></table></div>
+      </section>
+    </div>
+
+    <!-- Crowd -->
+    <div class="tb-pane" data-pane="crowd">
+      <section class="tb-card">
+        <h2>Crowd test</h2>
+        <p class="tb-note">Random outfits walking in place, both bodies mixed. Frames per second on this device.</p>
+        <div class="tb-chips" id="r-count"></div>
+        <dl class="tb-stats" id="r-stats"></dl>
+      </section>
+    </div>
+  </aside>
+</main>
+<script type="module" src="js/page.js"></script>
+</body>
+</html>

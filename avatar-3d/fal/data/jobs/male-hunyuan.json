@@ -1,0 +1,25 @@
+{
+ "endpoint": "fal-ai/hunyuan3d-v3/image-to-3d",
+ "name": "male-hunyuan",
+ "price": 0.6,
+ "input": {
+  "input_image_url": "@ref/male-front.png",
+  "back_image_url": "@ref/male-back.png",
+  "left_image_url": "@ref/male-left.png",
+  "generate_type": "LowPoly",
+  "polygon_type": "triangle"
+ },
+ "resolved": {
+  "input_image_url": "https://v3b.fal.media/files/b/0ab384b6/OGqcu0Pgi0xbStbfSfofn_male-front.png",
+  "back_image_url": "https://v3b.fal.media/files/b/0ab384b7/QJMWdNQEUBcmC4qmwWiOu_male-back.png",
+  "left_image_url": "https://v3b.fal.media/files/b/0ab384b8/M8OG36jSYMZkQ2MpBvqWT_male-left.png",
+  "generate_type": "LowPoly",
+  "polygon_type": "triangle"
+ },
+ "note": "comparison: Hunyuan3D v3 LowPoly + multi-view",
+ "request_id": "01a20470-8d23-7961-8657-d18c51c7b17d",
+ "status_url": "https://queue.fal.run/fal-ai/hunyuan3d-v3/requests/01a20470-8d23-7961-8657-d18c51c7b17d/status",
+ "response_url": "https://queue.fal.run/fal-ai/hunyuan3d-v3/requests/01a20470-8d23-7961-8657-d18c51c7b17d",
+ "submitted": "2026-11-22T18:06:54.800Z",
+ "logged": true
+}

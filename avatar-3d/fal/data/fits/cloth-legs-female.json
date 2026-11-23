@@ -1,0 +1,31 @@
+{
+ "item": "cloth-legs",
+ "body": "female",
+ "anchor": "waist",
+ "cover": [
+  "hips",
+  "thighs"
+ ],
+ "scale": [
+  1.5083,
+  1.5083,
+  2.3801
+ ],
+ "turn": 0,
+ "offset": [
+  0.0005,
+  -0.0173,
+  0.1236
+ ],
+ "inside": 0.95,
+ "region_inside": {
+  "thighs": 0.954,
+  "hips": 0.903,
+  "shins": 0.724
+ },
+ "hides": [
+  "hips",
+  "thighs"
+ ],
+ "triangles": 1945
+}

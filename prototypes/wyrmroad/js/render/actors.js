@@ -378,9 +378,11 @@ function applyHints(body, r) {
 
 // ------------------------------------------------------------------------------------------------ the cast
 /**
- * createActors({ scene, data, quality }) → { sync(G, alpha, dt), handle(events, G), get(id), clear(), preload(ch, heroes), setVisible(on) }
+ * createActors({ scene, data, quality, models }) → { sync(G, alpha, dt), handle(events, G), get(id), clear(), preload(ch, heroes), setVisible(on), setModels(m) }
+ * models: 'legacy' (the Chibi 2.6 and creature bodies below) or 'hd' (high-detail models, js/render/hd.js: fal enemies and
+ * Tabard heroes; whatever has no high-detail model keeps its old body). setModels switches live: every actor rebuilds.
  */
-export function createActors({ scene, data, quality = 'high' }) {
+export function createActors({ scene, data, quality = 'high', models = 'legacy' }) {
   const low = quality === 'low';
   const root = new THREE.Group(); root.name = 'actors'; scene.add(root);
   const actors = new Map();           // entity id → actor
@@ -394,7 +396,36 @@ export function createActors({ scene, data, quality = 'high' }) {
   // ring UVs are planar, so the angle mask works; one material per hero (its own fill level)
 
   const lookKey = o => JSON.stringify(o);
+  // ---- high-detail models (hd.js, loaded only when chosen): the spec wins when there is one, else the old body below
+  let hd = null, hdLoad = null;
+  function loadHd() {
+    if (!hdLoad) hdLoad = import('./hd.js').then(async m => { const kit = await m.loadHdKit(); hd = kit ? { kit, build: m.buildHd } : null; if (hd) refresh(); })
+      .catch(err => { console.warn('[wyrmroad] high-detail models are not available', err?.message); hd = null; });
+    return hdLoad;
+  }
+  if (models === 'hd') loadHd();
+  /** The ink outline of a high-detail body (the same program as the old bodies'). */
+  function hull(mesh) {
+    if (low) return null;
+    const base = outlineBase(true), om = base.clone(); om.onBeforeCompile = base.onBeforeCompile; om.customProgramCacheKey = base.customProgramCacheKey;
+    const h = new THREE.SkinnedMesh(mesh.geometry, om); h.castShadow = false; h.frustumCulled = false; h.userData.outline = true;
+    h.bind(mesh.skeleton, mesh.bindMatrix); mesh.parent.add(h);
+    return om;
+  }
   function bodyKeyFor(e) {
+    const old = legacyKeyFor(e);
+    if (models !== 'hd' || !hd) return old;
+    const spec = hd.kit.specFor(data, e, e.side === 'hero' ? heroLook(e) : null);
+    if (!spec) return old;
+    return {
+      key: spec.key, height: old?.height, hd: true,
+      make: async () => {
+        try { return await hd.build(spec, { hull }); }
+        catch (err) { console.warn('[wyrmroad] high-detail model failed, drawing the old one:', spec.body, err?.message); return old ? old.make() : standIn('#6a7050', 1.7); }
+      },
+    };
+  }
+  function legacyKeyFor(e) {
     if (e.side === 'hero') {
       const look = heroLook(e);
       return { key: 'h' + lookKey(look), make: () => buildChibi(look, { low, outline: !low }) };
@@ -465,6 +496,7 @@ export function createActors({ scene, data, quality = 'high' }) {
       yaw: (e.dir || 1) > 0 ? Math.PI / 2 : -Math.PI / 2, shotT: 0, shotAnim: null, prevState: e.state, stateT: 0,
       flash: 0, flashColor: new THREE.Color(1, 1, 1), windT: 0, windDur: 0, fade: 1, spin: 0, lean: 0, scale: 1, lastTint: '',
     };
+    a.e = e;
     setBody(a, standIn(color, height), null);
     requestBody(a, e);
     actors.set(e.id, a);
@@ -492,6 +524,9 @@ export function createActors({ scene, data, quality = 'high' }) {
       setBody(a, body, spec);
     }).catch(err => console.error('wyrmroad: body build failed', e.kind, err));
   }
+
+  /** Ask every actor for its body again (the model choice changed, or the high-detail models finished loading). */
+  function refresh() { for (const a of actors.values()) if (a.e) requestBody(a, a.e); }
 
   function removeActor(a) {
     actors.delete(a.id);
@@ -539,7 +574,8 @@ export function createActors({ scene, data, quality = 'high' }) {
     if (e.state === 'rise' && (a.def?.riseHow || 'ground') === 'ground') a.group.position.y = y - a.height * 0.95 * (1 - a.riseK) ** 1.5;
 
     // rebuild when the look changes (gear, look, a ground weapon picked up or broken)
-    if (a.hero) { const k = 'h' + lookKey(heroLook(e)); if (k !== a.wantKey) requestBody(a, e); }
+    a.e = e;
+    if (a.hero) requestBody(a, e);
 
     // facing: heroes partly toward the camera; foes a little; creatures side-on
     const turn = a.back ? Math.PI / 2 : e.turn ?? (a.hero ? TURN : (a.body?.kind === 'creature' ? 0.12 : 0.28));   // giants face the street; a story stage sets its own
@@ -660,7 +696,7 @@ export function createActors({ scene, data, quality = 'high' }) {
     root, actors,
     sync(G, alpha, dt) {
       frameNo++;
-      let chibis = 0; for (const x of actors.values()) if (x.body?.kind === 'chibi') chibis++;
+      let chibis = 0; for (const x of actors.values()) if (x.body?.kind === 'chibi' || x.body?.kind === 'fal' || x.body?.kind === 'tabard') chibis++;
       crowd = chibis > 8;
       const seen = new Set();
       for (const e of G.heroes) { seen.add(e.id); syncOne(actors.get(e.id) || makeActor(e, G), e, G, alpha, dt); }
@@ -678,7 +714,7 @@ export function createActors({ scene, data, quality = 'high' }) {
           if (ev.anim === 'jump' && !ev.dur) { if (a.body) a.body.play('jump', { dur: 0.8 }); a.shotT = 0.8; a.shotAnim = 'jump'; a.shotKind = 'jump'; continue; }
           const dur = ev.dur || 0.5;
           a.shotT = dur; a.shotAnim = anim; a.shotKind = ev.kind;
-          if (a.body) a.body.play(anim, { dur, fade: 0.06 });
+          if (a.body) a.body.play(anim, { dur, fade: 0.06, wind: ev.wind || 0 });
           if (!a.hero && ev.wind > 0.12) { a.windT = ev.wind; a.windDur = ev.wind; }
         } else if (ev.type === 'hit' || ev.type === 'armor') {
           const a = actors.get(ev.id); if (!a) continue;
@@ -695,6 +731,7 @@ export function createActors({ scene, data, quality = 'high' }) {
     get(id) { return actors.get(id) || null; },
     /** Build every body a chapter needs before its fights (so a spawn never waits on a build). */
     async preload(ch, heroes = []) {
+      if (models === 'hd') await loadHd();
       const kinds = new Set();
       for (const s of ch.sections) { for (const w of s.waves) for (const f of w) kinds.add(f.split('@')[0]); if (s.boss) kinds.add(s.boss); }
       if (ch.ally) kinds.add(data.chapters.allies[ch.ally]?.foe);
@@ -702,9 +739,10 @@ export function createActors({ scene, data, quality = 'high' }) {
       const jobs = [];
       for (const k of kinds) {
         const def = data.enemies.foes[k] || data.enemies.bosses[k]; if (!def) continue;
+        if (bodyKeyFor({ side: 'foe', kind: k })?.hd) continue;          // a high-detail model: nothing of the old body to prepare
         if (def.body !== 'creature') jobs.push(prepareChibi2(def.look, { v25: true, v26: true, anims: CHIBI_ANIMS, ...(low ? { graphics: 'low' } : {}), slice: breathe, budget: 8 }).catch(() => {}));
       }
-      for (const h of heroes) jobs.push(prepareChibi2(heroLook(h), { v25: true, v26: true, anims: CHIBI_ANIMS, ...(low ? { graphics: 'low' } : {}), slice: breathe, budget: 8 }).catch(() => {}));
+      for (const h of heroes) if (!bodyKeyFor({ ...h, side: 'hero' })?.hd) jobs.push(prepareChibi2(heroLook(h), { v25: true, v26: true, anims: CHIBI_ANIMS, ...(low ? { graphics: 'low' } : {}), slice: breathe, budget: 8 }).catch(() => {}));
       await Promise.all(jobs);
       // one ready body per foe kind waits in the pool, so the first spawn of a kind never builds (or compiles) mid-fight
       const warm = [];
@@ -716,6 +754,15 @@ export function createActors({ scene, data, quality = 'high' }) {
       return { warm, done: () => { for (const [spec, b] of warm) { b.obj.position.set(0, 0, 0); release(spec, b); } } };
     },
     clear() { for (const a of [...actors.values()]) removeActor(a); },
+    /** 'legacy' | 'hd': every actor on screen rebuilds in the chosen models (the old body stays until the new one is ready). */
+    setModels(m) {
+      m = m === 'hd' ? 'hd' : 'legacy';
+      if (m === models) return;
+      models = m;
+      if (m === 'hd' && !hd) loadHd();          // the first load rebuilds everyone when it lands
+      else refresh();
+    },
+    get models() { return models; },
     setVisible(on) { root.visible = on; },
     heroLook,
   };

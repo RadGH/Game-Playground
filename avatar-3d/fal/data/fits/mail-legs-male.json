@@ -1,0 +1,31 @@
+{
+ "item": "mail-legs",
+ "body": "male",
+ "anchor": "waist",
+ "cover": [
+  "hips",
+  "thighs"
+ ],
+ "scale": [
+  1.7786,
+  1.7786,
+  2.2819
+ ],
+ "turn": -10,
+ "offset": [
+  0.0067,
+  -0.0082,
+  0.1352
+ ],
+ "inside": 0.951,
+ "region_inside": {
+  "shins": 0.466,
+  "hips": 0.935,
+  "thighs": 0.941
+ },
+ "hides": [
+  "hips",
+  "thighs"
+ ],
+ "triangles": 3308
+}

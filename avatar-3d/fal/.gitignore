@@ -1,0 +1,38 @@
+# Raw fal downloads that nothing reads: FBX copies, PBR duplicates of the shaded bodies, Meshy's own walk/run files.
+models/**/*.fbx
+models/**/*.obj
+models/*/model_mesh-base_basic_pbr.glb
+models/*-rig/basic_animations*
+# Rebuilt from the sheet results in seconds by tools/blender/split_sheet.py
+models/items/
+# Codex job folders and run logs
+ref/jobs/
+data/logs/
+data/.spend.lock
+# Rebuilt in seconds: per-view cut-outs (tools/crop.py) and item sheets (tools/sheet.py) from the redrawn pictures
+ref/*-front.png
+ref/*-left.png
+ref/*-back.png
+ref/sheet-*.png
+# Per-set fit previews (the combined shots/fits-<body>.png are kept) and the raw sheet renders
+shots/fit-*.png
+shots/sheet-*.png
+# Unrigged copies of the woman and goblin (their rigged files hold the same mesh); the man's stays for the Makers tab
+models/female-rodin/*.glb
+models/goblin-rodin/*.glb
+# Codex redraws are kept as WebP copies (ref/<id>.webp, about a tenth of the size); the PNGs stay on this machine
+ref/*.png
+# Tripo's duplicate links to the same model; the turned-to-front copies (tools/blender/face_front.py, seconds);
+# the unrigged goblin enemies (their rigged files hold the same mesh)
+models/*/model_urls.*
+models/upright/
+models/gob*-tripo/model_mesh-model.glb
+models/gobw-rodin/*.glb
+# Test 3: raw Tripo bodies (their rigged files hold the same mesh), except the two animals that quad_rig.py rigs from them;
+# the unused Tripo quadruped rig results; the face-count test; the per-body check pictures (tools/run-body.sh, seconds)
+models/*-tripo*/model_mesh-model.glb
+!models/wolf-tripo/model_mesh-model.glb
+!models/drake-tripo/model_mesh-model.glb
+models/wolf-rig/*.glb
+models/drake-rig/*.glb
+shots/check/

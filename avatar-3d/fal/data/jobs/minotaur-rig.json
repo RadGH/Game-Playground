@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "minotaur-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/minotaur-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4eb/nv7tV58GSFzRIftdd-tly_minotaur-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "minotaur: Meshy rigging",
+ "request_id": "01a2095a-7a47-7500-984f-c0c37b437abc",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2095a-7a47-7500-984f-c0c37b437abc/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2095a-7a47-7500-984f-c0c37b437abc",
+ "submitted": "2026-11-23T17:00:54.327Z",
+ "logged": true
+}

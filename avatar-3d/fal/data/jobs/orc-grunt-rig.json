@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "orc-grunt-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/orc-grunt-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4c9/GZjKp6Av9wVr_0X4PMoV7_orc-grunt-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "orc-grunt: Meshy rigging",
+ "request_id": "01a20955-7562-7602-8c99-7ac8ea0efcdc",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20955-7562-7602-8c99-7ac8ea0efcdc/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20955-7562-7602-8c99-7ac8ea0efcdc",
+ "submitted": "2026-11-23T16:55:25.317Z",
+ "logged": true
+}

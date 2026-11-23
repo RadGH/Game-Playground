@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "female-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "https://v3b.fal.media/files/b/0ab384e3/jp_eM8yJlanyNOI6P7S8-_base_basic_shaded.glb",
+  "height_meters": 1.7,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab384e3/jp_eM8yJlanyNOI6P7S8-_base_basic_shaded.glb",
+  "height_meters": 1.7,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "Meshy rigging, ue5_mannequin, on Rodin shaded female",
+ "request_id": "01a20478-7594-7702-a1d8-e570b823ca5d",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20478-7594-7702-a1d8-e570b823ca5d/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20478-7594-7702-a1d8-e570b823ca5d",
+ "submitted": "2026-11-22T18:15:33.065Z",
+ "logged": true
+}

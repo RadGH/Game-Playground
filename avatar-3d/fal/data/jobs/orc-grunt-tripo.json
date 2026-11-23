@@ -1,0 +1,21 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "orc-grunt-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/orc-grunt-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a4b6/4tULB7NHv5FFKOyLcdIBi_orc-grunt-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "orc-grunt: Tripo P1 textured, face_limit 3000",
+ "request_id": "01a20952-ac02-7b62-84a7-23c5075ad6ce",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20952-ac02-7b62-84a7-23c5075ad6ce/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20952-ac02-7b62-84a7-23c5075ad6ce",
+ "submitted": "2026-11-23T16:52:22.697Z",
+ "logged": true
+}

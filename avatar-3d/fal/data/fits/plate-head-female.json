@@ -1,0 +1,26 @@
+{
+ "item": "plate-head",
+ "body": "female",
+ "anchor": "head",
+ "cover": [
+  "face",
+  "scalp"
+ ],
+ "scale": 0.9907,
+ "turn": 0,
+ "offset": [
+  -0.0069,
+  0.0088,
+  1.3259
+ ],
+ "inside": 0.95,
+ "region_inside": {
+  "scalp": 0.992,
+  "face": 0.959
+ },
+ "hides": [
+  "face",
+  "scalp"
+ ],
+ "triangles": 1784
+}

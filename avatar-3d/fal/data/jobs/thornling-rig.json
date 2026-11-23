@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "thornling-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/thornling-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a507/ZhKnkNMYwsBMZ9ZNjg6Pp_thornling-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "thornling: Meshy rigging",
+ "request_id": "01a2095e-ea51-78b1-ad53-412b123e331c",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2095e-ea51-78b1-ad53-412b123e331c/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2095e-ea51-78b1-ad53-412b123e331c",
+ "submitted": "2026-11-23T17:05:45.090Z",
+ "logged": true
+}

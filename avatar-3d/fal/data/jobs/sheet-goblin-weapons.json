@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "sheet-goblin-weapons",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-goblin-weapons.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3905f/x52bYt336e8pFfmVr4Y7m_sheet-goblin-weapons.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "note": "goblin weapons sheet: cleaver, shiv, totem staff, buckler (trellis-2 1024)",
+ "request_id": "01a20637-cb14-7f62-8569-605b4ae91cfd",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20637-cb14-7f62-8569-605b4ae91cfd/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20637-cb14-7f62-8569-605b4ae91cfd",
+ "submitted": "2026-11-23T02:24:09.530Z",
+ "logged": true
+}

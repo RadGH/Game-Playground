@@ -69,6 +69,8 @@ export function openSettings(app) {
       <div class="wr-range"><input type="range" min="0" max="1" step="0.05" value="${S.volume}" aria-label="Sound volume"><output>${fmt(Math.round(S.volume * 100))}%</output></div></div>
     <div class="wr-set-row"><div><b>Graphics</b><small>Low is lighter on phones and older computers (used the next time the game opens)</small></div>
       <div class="wr-toggle">${['high', 'low'].map(q => `<button type="button" class="${S.quality === q ? 'on' : ''}" data-q="${q}" aria-pressed="${S.quality === q}">${q === 'high' ? 'High' : 'Low'}</button>`).join('')}</div></div>
+    <div class="wr-set-row"><div><b>Characters</b><small data-models-sub>${esc(MODELS_TEXT[S.models === 'hd' ? 'hd' : 'legacy'])}</small></div>
+      <div class="wr-toggle" role="group" aria-label="Character models">${['hd', 'legacy'].map(m => `<button type="button" class="${(S.models === 'hd' ? 'hd' : 'legacy') === m ? 'on' : ''}" data-models="${m}" aria-pressed="${(S.models === 'hd' ? 'hd' : 'legacy') === m}">${m === 'hd' ? 'High detail' : 'Legacy'}</button>`).join('')}</div></div>
     ${layoutRow(S)}
     ${sw('shake', 'Screen shake', 'Big hits and the waking road shake the view')}
     ${sw('damageNumbers', 'Damage numbers', 'Numbers float up from every hit')}
@@ -82,6 +84,8 @@ export function openSettings(app) {
     if (f) { const k = f.dataset.flag; app.setSetting(k, !S[k]); f.classList.toggle('on', S[k]); f.setAttribute('aria-pressed', S[k]); f.querySelector('span').textContent = S[k] ? 'On' : 'Off'; app.audio.play('ui.click'); return; }
     const L = e.target.closest('[data-layout]');
     if (L) { pickLayout(app, sh.body, L.dataset.layout); return; }
+    const md = e.target.closest('[data-models]');
+    if (md) { app.setSetting('models', md.dataset.models); app.audio.play('ui.click'); sh.body.querySelectorAll('[data-models]').forEach(b => { const on = b.dataset.models === md.dataset.models; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); sh.body.querySelector('[data-models-sub]').textContent = MODELS_TEXT[md.dataset.models]; return; }
     const q = e.target.closest('[data-q]');
     if (q) { app.setSetting('quality', q.dataset.q); sh.body.querySelectorAll('[data-q]').forEach(b => { const on = b.dataset.q === S.quality; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); return; }
     if (e.target.closest('[data-act="controls"]')) openControls(app);
@@ -89,6 +93,9 @@ export function openSettings(app) {
   });
   return sh;
 }
+
+/** Character models (js/ui/models.js asks on the first start): switched live, everyone on screen rebuilds. */
+const MODELS_TEXT = { hd: 'Hand-painted heroes and monsters', legacy: 'The original round heroes and monsters' };
 
 /** The keyboard layout choice (owner #93): keyboard and mouse is the default; the round-1 keys-only layout stays. */
 const LAYOUT_TEXT = { kbm: ['Keyboard and mouse', 'WASD to walk, left click attacks, right click is Heavy, 1 and 2 cast'], kb: ['Keyboard only', 'WASD or arrows to walk, J attacks, K is Heavy, U and I cast'] };

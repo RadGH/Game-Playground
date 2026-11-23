@@ -1,0 +1,25 @@
+{
+ "endpoint": "fal-ai/tripo3d/rig",
+ "name": "wolf-rig",
+ "price": 0.3,
+ "input": {
+  "model_url": "@models/upright/wolf-tripo.glb",
+  "model": "v2.5-20260210",
+  "rig_type": "quadruped",
+  "spec": "tripo",
+  "output_format": "glb"
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3a4b7/Gy6hroFw02meh2pJUyj3g_wolf-tripo.glb",
+  "model": "v2.5-20260210",
+  "rig_type": "quadruped",
+  "spec": "tripo",
+  "output_format": "glb"
+ },
+ "note": "wolf: Tripo rig, quadruped (v2.5)",
+ "request_id": "01a20952-84c3-7a30-847e-0a540ebfde8f",
+ "status_url": "https://queue.fal.run/fal-ai/tripo3d/requests/01a20952-84c3-7a30-847e-0a540ebfde8f/status",
+ "response_url": "https://queue.fal.run/fal-ai/tripo3d/requests/01a20952-84c3-7a30-847e-0a540ebfde8f",
+ "submitted": "2026-11-23T16:52:12.653Z",
+ "logged": true
+}

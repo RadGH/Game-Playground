@@ -1,0 +1,4 @@
+build/
+ref/*/job-*/
+ref/*/*.rejected-*.png
+shots/qa/

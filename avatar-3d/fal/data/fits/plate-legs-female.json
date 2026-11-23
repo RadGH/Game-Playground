@@ -1,0 +1,32 @@
+{
+ "item": "plate-legs",
+ "body": "female",
+ "anchor": "waist",
+ "cover": [
+  "hips",
+  "thighs"
+ ],
+ "scale": [
+  2.5474,
+  2.5474,
+  2.2371
+ ],
+ "turn": -10,
+ "offset": [
+  0.0274,
+  -0.044,
+  0.1236
+ ],
+ "inside": 0.865,
+ "region_inside": {
+  "thighs": 0.938,
+  "shins": 0.829,
+  "hips": 0.452
+ },
+ "hides": [
+  "hips",
+  "shins",
+  "thighs"
+ ],
+ "triangles": 1370
+}

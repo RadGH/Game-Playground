@@ -120,9 +120,9 @@ You hold the lantern; the wyrm's leash is in your hand. Aldric's body fell, but 
 | archer | Royal Archer | chibi (silver + blue) | keeps distance, arrow volleys |
 | hunter | Bounty Hunter | chibi (leather, net) | skirmisher; throws a net (slows) |
 | glassmonk | Kiln Monk | chibi (green-glass robe) | throws glass that shatters into a small burning zone |
-| wingspawn | Wingspawn | creature (bat/wisp, dark) | flies in, swoops, floats |
+| wingspawn | Wingspawn | creature (bat, dark) | flies in, swoops, floats |
 | drake | Brood Drake | creature (big wyrmling) | charges, fire spit; heavy |
-| wisp | Lantern Wisp | creature (wisp, green) | floats, explodes near you after a wind-up |
+| wisp | Lantern Elemental | creature (elemental, green lantern fire; high detail: the fire elemental) | floats, explodes near you after a wind-up |
 | wraith | Order Wraith | chibi (ghostly green, translucent) | guard brain, passes through crates, fades in |
 
 ## New bosses

@@ -1,0 +1,26 @@
+{
+ "item": "plate-chest",
+ "body": "goblin",
+ "anchor": "neck",
+ "cover": [
+  "torso"
+ ],
+ "scale": 1.2776,
+ "turn": -30,
+ "offset": [
+  0.0278,
+  0.0168,
+  0.0211
+ ],
+ "inside": 0.954,
+ "region_inside": {
+  "upperarms": 0.939,
+  "torso": 0.985,
+  "forearms": 0.605
+ },
+ "hides": [
+  "torso",
+  "upperarms"
+ ],
+ "triangles": 2903
+}

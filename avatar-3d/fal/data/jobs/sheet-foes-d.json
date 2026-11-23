@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "sheet-foes-d",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-foes-d.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3a4c9/ujjBbOszXsykwYkfq5IHI_sheet-foes-d.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "note": "Test 3 foe weapons sheet d (trellis-2 1024)",
+ "request_id": "01a20955-2397-7463-9b30-8ca497b07ac0",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20955-2397-7463-9b30-8ca497b07ac0/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20955-2397-7463-9b30-8ca497b07ac0",
+ "submitted": "2026-11-23T16:55:04.384Z",
+ "logged": true
+}

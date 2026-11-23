@@ -1,0 +1,33 @@
+{
+ "endpoint": "fal-ai/hyper3d/rodin/v2",
+ "name": "male-rodin",
+ "price": 0.4,
+ "input": {
+  "input_image_urls": [
+   "@ref/male-front.png",
+   "@ref/male-left.png",
+   "@ref/male-back.png"
+  ],
+  "quality_mesh_option": "4K Quad",
+  "TAPose": true,
+  "material": "All",
+  "geometry_file_format": "glb"
+ },
+ "resolved": {
+  "input_image_urls": [
+   "https://v3b.fal.media/files/b/0ab384b6/eS0l6Emrp_HZdHAMsURJx_male-front.png",
+   "https://v3b.fal.media/files/b/0ab384b6/1xFvPaXSsfANevlQW-L_y_male-left.png",
+   "https://v3b.fal.media/files/b/0ab384b6/fkuvoSsXEtev6d7E9DvtH_male-back.png"
+  ],
+  "quality_mesh_option": "4K Quad",
+  "TAPose": true,
+  "material": "All",
+  "geometry_file_format": "glb"
+ },
+ "note": "comparison: Rodin v2, 4K Quad, A-pose, 3 views",
+ "request_id": "01a20470-4e04-7a32-a9e4-c08322d44689",
+ "status_url": "https://queue.fal.run/fal-ai/hyper3d/requests/01a20470-4e04-7a32-a9e4-c08322d44689/status",
+ "response_url": "https://queue.fal.run/fal-ai/hyper3d/requests/01a20470-4e04-7a32-a9e4-c08322d44689",
+ "submitted": "2026-11-22T18:06:38.641Z",
+ "logged": true
+}

@@ -1,0 +1,23 @@
+{
+ "item": "mail-head",
+ "body": "male",
+ "anchor": "head",
+ "cover": [
+  "scalp"
+ ],
+ "scale": 1.1839,
+ "turn": 0,
+ "offset": [
+  0.0028,
+  0.0202,
+  1.3142
+ ],
+ "inside": 0.953,
+ "region_inside": {
+  "scalp": 0.974
+ },
+ "hides": [
+  "scalp"
+ ],
+ "triangles": 4017
+}

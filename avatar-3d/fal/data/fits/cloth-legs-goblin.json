@@ -1,0 +1,29 @@
+{
+ "item": "cloth-legs",
+ "body": "goblin",
+ "anchor": "waist",
+ "cover": [
+  "thighs"
+ ],
+ "scale": [
+  1.386,
+  1.386,
+  0.908
+ ],
+ "turn": 0,
+ "offset": [
+  0.0002,
+  0.0177,
+  0.0778
+ ],
+ "inside": 0.923,
+ "region_inside": {
+  "thighs": 0.94,
+  "shins": 0.802
+ },
+ "hides": [
+  "shins",
+  "thighs"
+ ],
+ "triangles": 1945
+}

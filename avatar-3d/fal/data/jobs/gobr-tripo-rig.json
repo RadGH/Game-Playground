@@ -1,0 +1,23 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "gobr-tripo-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/gobr-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab39080/-_NLi2Rb6iJyFncexjan5_gobr-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "Meshy rigging, ue5_mannequin, on Tripo goblin rogue (turned to face front)",
+ "request_id": "01a2063d-b925-7dd3-aaa5-797a779cd51c",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2063d-b925-7dd3-aaa5-797a779cd51c/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a2063d-b925-7dd3-aaa5-797a779cd51c",
+ "submitted": "2026-11-23T02:30:38.152Z",
+ "logged": true
+}

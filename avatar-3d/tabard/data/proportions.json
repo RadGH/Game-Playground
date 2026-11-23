@@ -1,0 +1,37 @@
+{
+ "_doc": "Proportion targets every Tabard body must meet (tools/blender/tb_measure.py checks the rest pose). Units: head height (crown to jaw) unless noted. Source: the owner's ChatGPT hero/heroine reference sheets (avatar-3d/fal/ref/male-original.jpg, female-original.jpg: ~7-7.5 heads tall, hands about one face long, fists at crotch height), loosened a little toward a chunky game read. fingertip_height = where the fingertips reach with the arm hanging straight, as a share of body height (real people ~0.37-0.40). bodies.<body>: per-body overrides. The woman's shoulder joints sit 1.21 head-heights apart (reference ~1.35+); widening needs the skeleton itself moved \u2014 parked, owner to decide (2026-11-22).",
+ "targets": {
+  "heads_tall": [
+   6.6,
+   7.6
+  ],
+  "hand_over_head": [
+   0.68,
+   0.86
+  ],
+  "hand_width_over_head": [
+   0.0,
+   0.55
+  ],
+  "shoulders_over_head": [
+   1.35,
+   1.8
+  ],
+  "fingertip_height": [
+   0.34,
+   0.42
+  ],
+  "foot_over_head": [
+   0.9,
+   1.25
+  ]
+ },
+ "bodies": {
+  "female": {
+   "shoulders_over_head": [
+    1.15,
+    1.6
+   ]
+  }
+ }
+}

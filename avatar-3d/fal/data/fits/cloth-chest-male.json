@@ -1,0 +1,27 @@
+{
+ "item": "cloth-chest",
+ "body": "male",
+ "anchor": "neck",
+ "cover": [
+  "torso"
+ ],
+ "scale": 2.4466,
+ "turn": -40,
+ "offset": [
+  0.0089,
+  -0.0863,
+  0.4147
+ ],
+ "inside": 0.952,
+ "region_inside": {
+  "torso": 0.985,
+  "forearms": 0.164,
+  "hips": 1.0,
+  "upperarms": 0.617
+ },
+ "hides": [
+  "hips",
+  "torso"
+ ],
+ "triangles": 4682
+}

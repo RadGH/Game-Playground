@@ -1,0 +1,31 @@
+{
+ "_doc": "What Codex paints over each body's clay sheet (tools/paint.mjs). skin = the bare body (face, hair painted on the scalp, plain underclothes) — every other outfit only supplies its armour slots (chest, legs, hands, feet; data/regions.json) and is painted with skin.png attached so bare skin matches. Original designs only.",
+ "style": "hand-painted stylized fantasy MMO character texture style: every surface painted by hand with soft lighting baked in from above, gentle dark occlusion in creases and under overlaps, warm saturated earthy colours, bold readable shapes, thick trims, chunky stitched seams, large rivets and buckles, crisp painted highlights on metal edges; no photographic detail, no noise, no skin pores, no thin wrinkles, no muscle definition; like a classic hand-painted 2000s MMO or a painted tabletop miniature",
+ "outfits": {
+  "skin": {
+   "name": "Bare (skin)",
+   "male": "a sturdy adult human man, warm tan skin, short dark-brown hair cropped close and painted onto the scalp, short trimmed dark beard painted on the jaw, thick brows, friendly calm face with clear painted eyes, wearing only plain knee-length undyed linen shorts tied with a cord. Build: a soft, ordinary everyday body — NOT muscular, NOT athletic: no visible abs, no six-pack, no pectoral or shoulder muscle definition, no veins; smooth simple painted forms with only gentle shading, like a friendly villager",
+   "female": "a sturdy adult human woman, warm tan skin, dark-brown hair pulled tightly back and painted onto the scalp, thick brows, friendly calm face with clear painted eyes, wearing only a plain undyed linen wrap top and knee-length linen shorts. Build: a soft, ordinary everyday body — NOT muscular, NOT athletic: no visible abs, no six-pack, no pectoral or shoulder muscle definition, no veins; smooth simple painted forms with only gentle shading, like a friendly villager"
+  },
+  "cloth": {
+   "name": "Wanderer's robe (cloth)",
+   "all": "a scholar-mage outfit: a deep blue cloth robe with gold-embroidered trim bands at the collar, cuffs and hem, a broad dark red sash at the waist with a brass clasp, long sleeves to the wrist, the robe's lower half painted down both legs to the ankles as if the cloth were skin-tight, soft brown cloth wraps on the hands leaving fingers bare, simple soft brown leather shoes"
+  },
+  "leather": {
+   "name": "Trailwarden leathers (leather)",
+   "all": "a ranger-scout outfit: a dark brown leather jerkin with lighter tan stitched panels and crossed straps over a moss-green linen shirt with sleeves to the elbows, bare forearms, fingerless brown leather gloves with wrist wraps, a thick belt with a big bronze buckle and small pouches, dark green-grey trousers with leather knee patches, tall brown leather boots to the knee with fold-down cuffs and buckles"
+  },
+  "plate": {
+   "name": "Bulwark plate (plate)",
+   "all": "a heavy knight outfit: polished steel plate cuirass with gold-trimmed edges and a red heraldic sunburst painted on the chest, steel plate on the upper arms and a mail collar, steel vambraces and articulated steel gauntlets, a red cloth tabard strip hanging front and back from a wide leather belt with a gold buckle, steel plate thigh guards over dark mail, steel knee cops, steel greaves and armoured steel sabatons"
+  },
+  "mail": {
+   "name": "Ironlink mail (mail)",
+   "all": "a man-at-arms outfit: a long-sleeved shirt of grey interlocking steel chainmail rings to mid-thigh with a dark blue padded cloth collar showing at the neck, a broad brown leather belt with an iron buckle, a short dark blue surcoat strip down the front with a white tower emblem, chainmail mittens over brown leather gloves with leather cuffs, chainmail leggings over the thighs and shins with dark leather knee straps, sturdy dark brown leather ankle boots with iron toe caps"
+  },
+  "sage": {
+   "name": "Mossgrove robe (cloth)",
+   "all": "a healer-druid outfit: a moss-green cloth robe with cream-white trim bands embroidered with small brown leaf patterns at the collar, cuffs and hem, a tan rope belt with a hanging wooden bead, long sleeves to the wrist, the robe's lower half painted down both legs to the ankles as if the cloth were skin-tight, cream cloth wraps on the hands leaving fingers bare, simple soft tan leather sandals with ankle straps"
+  }
+ }
+}

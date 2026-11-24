@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spell Lab — layered spell visuals</title>
+<link rel="stylesheet" href="../../shared/style.css">
+<link rel="stylesheet" href="lab.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body class="sl">
+<!-- Spell Lab: the Spell Kit (js/spellkit.js) on a Tabard caster. ?spell=<visual id> ?quality=low ?bare=1 (no
+     character model, for tests). window.__lab = { ready, kit, cast(), advance(), storm(), stats() } (tests/). -->
+<header class="sl-top">
+  <a class="sl-back" href="../../">← Playground</a>
+  <div class="sl-title">
+    <h1>Spell Lab</h1>
+    <p>Spells in layers: hands that light up, a targeting ring, the missile, the impact and the ground it leaves behind.</p>
+  </div>
+</header>
+
+<main class="sl-main">
+  <section class="sl-stage-wrap">
+    <div id="stage" class="sl-stage" aria-label="Spell stage"></div>
+    <div id="loading" class="sl-loading">Loading the caster and the spell textures…</div>
+    <div class="sl-phase" id="phase-now" aria-live="polite"></div>
+    <div class="sl-hud" id="hud"></div>
+  </section>
+
+  <aside class="sl-side">
+    <section class="sl-card">
+      <h2>Spell</h2>
+      <div id="spell-groups"></div>
+      <label class="sl-field">
+        <span>Or an Oathwild spell</span>
+        <select id="game-spell"></select>
+      </label>
+      <p class="sl-picked" id="picked"></p>
+    </section>
+
+    <section class="sl-card">
+      <h2>Play</h2>
+      <div class="sl-play">
+        <button type="button" class="primary sl-big" id="play-all">Cast it <kbd>Space</kbd></button>
+      </div>
+      <div class="sl-phases" id="phases" role="group" aria-label="Phases one at a time"></div>
+      <div class="sl-row">
+        <span class="sl-lbl">Speed</span>
+        <div class="sl-seg" id="speed" role="radiogroup" aria-label="Speed">
+          <button type="button" data-v="0.25">0.25×</button><button type="button" data-v="0.5">0.5×</button><button type="button" data-v="1">1×</button>
+        </div>
+      </div>
+      <div class="sl-row">
+        <span class="sl-lbl">Repeat</span>
+        <div class="sl-seg" id="loop" role="radiogroup" aria-label="Repeat">
+          <button type="button" data-v="0">Once</button><button type="button" data-v="1">Loop</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="sl-card">
+      <h2>Quality and load</h2>
+      <div class="sl-row">
+        <span class="sl-lbl">Quality</span>
+        <div class="sl-seg" id="quality" role="radiogroup" aria-label="Quality">
+          <button type="button" data-v="high">High</button><button type="button" data-v="low">Phone</button>
+        </div>
+      </div>
+      <div class="sl-row">
+        <button type="button" id="storm">Spell storm: 10 casters for 10 s</button>
+        <button type="button" id="clear">Clear</button>
+      </div>
+      <dl class="sl-stats" id="stats"></dl>
+    </section>
+  </aside>
+</main>
+<script type="module" src="js/lab.js"></script>
+</body>
+</html>

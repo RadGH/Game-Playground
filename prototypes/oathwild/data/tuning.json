@@ -1,0 +1,13 @@
+{
+  "_doc": "Oathwild feel numbers (game-standards §12): read through loadTuning() every time they are used; the ` key (or ?tune) opens the panel. The rules' own balance lives in data/combat.json etc.",
+  "cameraHeight": { "value": 1.65, "min": 1, "max": 3, "step": 0.05, "label": "Camera height above the hero", "group": "Camera", "unit": "m" },
+  "cameraSide": { "value": 0.75, "min": 0, "max": 2, "step": 0.05, "label": "Over-the-shoulder offset", "group": "Camera", "unit": "m" },
+  "cameraLag": { "value": 14, "min": 2, "max": 40, "step": 1, "label": "Camera follow sharpness", "group": "Camera", "unit": "" },
+  "mouseSpeed": { "value": 0.0024, "min": 0.0008, "max": 0.006, "step": 0.0001, "label": "Mouse turn speed", "group": "Camera", "unit": "rad/px" },
+  "padSpeed": { "value": 0.0028, "min": 0.001, "max": 0.008, "step": 0.0001, "label": "Controller turn speed", "group": "Camera", "unit": "" },
+  "aimAssistDeg": { "value": 9, "min": 0, "max": 25, "step": 1, "label": "Aim assist (controller and touch)", "group": "Aim", "unit": "°" },
+  "interpDelay": { "value": 0.1, "min": 0.05, "max": 0.3, "step": 0.01, "label": "Other players drawn behind the server", "group": "Network", "unit": "s" },
+  "correctionFade": { "value": 14, "min": 4, "max": 30, "step": 1, "label": "How fast a server correction fades", "group": "Network", "unit": "/s" },
+  "nameplateMetres": { "value": 38, "min": 10, "max": 80, "step": 1, "label": "Name tags shown within", "group": "Interface", "unit": "m" },
+  "interactMetres": { "value": 4.5, "min": 2, "max": 8, "step": 0.5, "label": "Interact reach", "group": "Interface", "unit": "m" }
+}

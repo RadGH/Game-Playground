@@ -593,9 +593,9 @@
    "regions": [
     "brightwater"
    ],
-   "weapon": "chief-axe",
-   "offhand": "chief-buckler",
-   "note": "Body made; rig not paid yet (fal balance ran out)."
+   "weapon": "orc-axe",
+   "offhand": "shield",
+   "note": "Rigged 2026-11-23 (Meshy, round 2). Holds existing roster weapons until his own chief-axe/chief-buckler (drawn) can be paid for."
   },
   "field-scarecrow": {
    "name": "Field scarecrow",
@@ -612,8 +612,8 @@
    "regions": [
     "brightwater"
    ],
-   "weapon": "rusty-pitchfork",
-   "note": "Body made; rig not paid yet (fal balance ran out)."
+   "weapon": "zealot-sickle",
+   "note": "Rigged 2026-11-23 (Meshy, round 2). Holds the zealot sickle until his own rusty-pitchfork (drawn) can be paid for."
   },
   "riding-horse": {
    "name": "Riding horse",

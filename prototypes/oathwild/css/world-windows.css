@@ -1,0 +1,173 @@
+/* Oathwild — world windows: talk, shop, services + shrine, quests, map, menu, settings, report, rate.
+   Base kit and tokens: css/oathwild.css. Every class here is named after its window (ow-talk-, ow-shop-, ow-svc-,
+   ow-q-, ow-map-, ow-menu-, ow-set-, ow-rep-, ow-rate-) so nothing collides with another stylesheet. */
+
+/* ---- item cells (shop, repair, enchanting) ---- */
+.ow-shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.ow-wcell { position: relative; display: grid; grid-template-columns: 34px 1fr; grid-template-rows: auto auto; gap: 2px 8px; align-items: center; min-height: 58px; padding: 8px 10px; text-align: left; border-radius: 8px; border: 1px solid var(--edge-soft); background: linear-gradient(#2f271d, #251f17); cursor: pointer; color: var(--ink); }
+.ow-wcell:hover, .ow-wcell.pad-focus { border-color: var(--gold); background: linear-gradient(#3a3024, #2b241a); }
+.ow-wcell-off { opacity: .62; }
+.ow-wcell-ico { grid-row: span 2; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 7px; background: rgba(0, 0, 0, .3); border: 1px solid currentColor; }
+.ow-wcell-name { font-weight: 700; font-size: 14px; line-height: 1.15; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ow-wcell-price { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--gold); }
+.ow-wcell-price.ow-bad { color: var(--bad); }
+.ow-wcell-why { grid-column: 2; font-size: 12px; color: var(--bad); }
+.ow-wcell-act { position: absolute; top: 6px; right: 8px; font-size: 12px; font-weight: 800; color: var(--ink-dim); }
+.ow-wcell .ow-wcell-name { color: inherit; }
+.ow-wcell.rar-normal .ow-wcell-name { color: var(--common); }
+
+/* ---- talk ---- */
+.ow-talk .ow-win-body { display: flex; flex-direction: column; gap: 14px; }
+.ow-talk-lines { display: flex; flex-direction: column; gap: 8px; }
+.ow-talk-say { margin: 0; padding: 12px 14px; border-radius: 4px 12px 12px 12px; background: rgba(232, 193, 112, .07); border: 1px solid var(--edge-soft); font-size: 17px; line-height: 1.45; }
+.ow-talk-reward { display: flex; gap: 8px; align-items: center; margin: 0; padding: 10px 12px; border-radius: 8px; border: 1px solid #6a9a4a; color: #dff5c8; background: rgba(110, 160, 80, .12); font-weight: 700; }
+.ow-talk-opts, .ow-talk-pick { display: flex; flex-direction: column; gap: 8px; }
+.ow-talk-pick h3 { font-size: 15px; }
+.ow-btn.ow-talk-opt { justify-content: flex-start; text-align: left; min-height: 48px; padding: 8px 14px; font-weight: 700; line-height: 1.25; }
+.ow-btn.ow-talk-quest { border-color: var(--gold-deep); color: var(--gold); }
+.ow-btn.ow-talk-choice { border-color: #8a7aa8; color: #e4d8ff; }
+.ow-btn.ow-talk-service { color: var(--ink); }
+.ow-btn.ow-talk-bye { background: transparent; border-color: var(--edge-soft); color: var(--ink-dim); }
+
+/* ---- shop ---- */
+.ow-shop-cols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; }
+.ow-shop-col h3 { display: flex; align-items: center; gap: 6px; font-size: 15px; margin-bottom: 10px; }
+.ow-shop-col + .ow-shop-col { border-left: 1px solid var(--edge-soft); padding-left: 18px; }
+
+/* ---- services ---- */
+.ow-svc-gold { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; color: var(--gold); }
+.ow-svc-goldrow { margin: 14px 0 0; }
+.ow-svc-short { font-size: 14px; font-weight: 700; }
+.ow-svc-list { display: flex; flex-direction: column; gap: 12px; }
+.ow-svc-class h3 { font-size: 18px; flex: 1; }
+.ow-svc-class p { margin: 6px 0; }
+.ow-svc-tag { font-size: 13px; font-weight: 700; }
+.ow-svc-rows { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 8px 0; font-size: 14px; }
+.ow-svc-rows dt { color: var(--ink-dim); } .ow-svc-rows dd { margin: 0; }
+.ow-svc-need { color: var(--bad); }
+.ow-svc-need b { color: var(--ink); }
+.ow-svc-horse, .ow-svc-lock, .ow-svc-rest { display: flex; gap: 16px; align-items: flex-start; }
+.ow-svc-horse p, .ow-svc-lock p, .ow-svc-rest p { margin: 6px 0; }
+.ow-svc-horse-ico { flex: none; width: 76px; height: 76px; display: grid; place-items: center; border-radius: 12px; background: rgba(0, 0, 0, .25); border: 1px solid var(--edge-soft); color: var(--gold); }
+.ow-svc-respec h3 { font-size: 17px; }
+.ow-svc-respec p { margin: 6px 0 10px; color: var(--ink-dim); }
+.ow-svc-shrines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.ow-svc-shrine { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 9px; border: 1px solid var(--edge-soft); background: rgba(0, 0, 0, .18); min-height: 56px; }
+.ow-svc-unfound { opacity: .55; }
+.ow-svc-shrine-ico { color: var(--gold); display: grid; place-items: center; }
+.ow-svc-shrine-text { flex: 1; display: flex; flex-direction: column; }
+.ow-svc-shrine-text small { color: var(--ink-dim); font-size: 13px; }
+.ow-svc-known { display: flex; flex-wrap: wrap; gap: 6px; }
+.ow-svc-chip { display: inline-block; padding: 3px 10px; border-radius: 12px; border: 1px solid var(--edge); background: rgba(232, 193, 112, .08); font-size: 13px; font-weight: 700; color: var(--ink); }
+.ow-svc-enchant { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.ow-svc-erow { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 8px 10px; border-radius: 8px; background: rgba(0, 0, 0, .18); border: 1px solid var(--edge-soft); }
+.ow-svc-erow small { display: block; font-size: 12px; }
+
+/* ---- quests ---- */
+.ow-q-cols { display: grid; grid-template-columns: minmax(220px, 0.9fr) 1.4fr; gap: 16px; align-items: start; }
+.ow-q-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.ow-q-item { width: 100%; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 10px; border-radius: 8px; border: 1px solid transparent; background: rgba(0, 0, 0, .15); color: var(--ink); text-align: left; cursor: pointer; }
+.ow-q-item:hover, .ow-q-item.pad-focus { border-color: var(--edge); }
+.ow-q-sel { border-color: var(--gold-deep); background: rgba(232, 193, 112, .09); }
+.ow-q-lvl { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--edge); font-weight: 800; color: var(--gold); font-size: 14px; }
+.ow-q-name { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.ow-q-name small { color: var(--ink-dim); font-size: 13px; }
+.ow-q-trk { color: var(--ink-dim); display: grid; }
+.ow-q-detail h3 { font-size: 19px; }
+.ow-q-detail p { margin: 6px 0; }
+.ow-q-steps { list-style: none; margin: 10px 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.ow-q-steps li { display: flex; gap: 8px; align-items: flex-start; color: var(--ink-faint); }
+.ow-q-steps li.ow-q-now { color: var(--ink); font-weight: 700; }
+.ow-q-steps li.ow-q-done { color: var(--ink-dim); text-decoration: line-through; text-decoration-color: rgba(201, 184, 146, .45); }
+.ow-q-rewards { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0; }
+.ow-q-acts { margin-top: 10px; flex-wrap: wrap; }
+
+/* ---- map ---- */
+.ow-map.ow-win { height: min(820px, 100%); }
+.ow-map .ow-win-body { padding: 0; overflow: hidden; display: flex; }
+.ow-map-wrap { flex: 1; display: grid; grid-template-columns: 1fr 260px; min-height: 0; width: 100%; }
+.ow-map-view { position: relative; overflow: hidden; background: #2a2419; touch-action: none; cursor: grab; min-height: 300px; }
+.ow-map-stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; --inv: 1; }
+.ow-map-paint canvas { display: block; width: 100%; height: 100%; image-rendering: auto; }
+.ow-map-paint { position: absolute; inset: 0; }
+.ow-map-mark { position: absolute; transform: translate(-50%, -50%) scale(var(--inv)); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; min-width: 44px; min-height: 44px; justify-content: center; }
+.ow-map-pin { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #2a2218; border: 2px solid #e8dcc0; color: #f3e7cf; box-shadow: 0 2px 6px rgba(0, 0, 0, .5); }
+.ow-map-label { font-size: 13px; font-weight: 800; color: #fff6e2; background: rgba(26, 21, 15, .82); padding: 1px 6px; border-radius: 5px; white-space: nowrap; }
+.ow-map-unfound .ow-map-pin { opacity: .5; border-style: dashed; }
+.ow-map-town .ow-map-pin { border-color: #f0d08a; }
+.ow-map-camp .ow-map-pin { border-color: #f08a6c; color: #ffd2c4; }
+.ow-map-shrine .ow-map-pin { border-color: #8fdcff; color: #cfefff; background: #1d2a34; }
+.ow-map-quest .ow-map-pin { border-color: var(--quest); color: var(--quest); background: #352a10; }
+.ow-map-me .ow-map-pin { border-color: #fff; background: #b98a3a; color: #241a0d; width: 30px; height: 30px; }
+.ow-map-party .ow-map-pin { border-color: #9af0a0; color: #dff5c8; background: #1f3320; }
+.ow-map-on .ow-map-pin, .ow-map-mark.pad-focus .ow-map-pin { box-shadow: 0 0 0 3px var(--gold), 0 2px 6px rgba(0, 0, 0, .5); }
+.ow-map-zoom { position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
+.ow-map-zoom .ow-btn { width: 44px; padding: 0; }
+.ow-map-north { position: absolute; left: 12px; top: 10px; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: rgba(26, 21, 15, .8); border: 1px solid var(--edge); font-family: var(--font-head); font-weight: 800; color: var(--gold); }
+.ow-map-side { border-left: 1px solid var(--edge-soft); padding: 14px; overflow-y: auto; background: rgba(0, 0, 0, .12); }
+.ow-map-det h3 { font-size: 18px; }
+.ow-map-det p { margin: 6px 0; }
+.ow-map-det .ow-btn { margin-top: 10px; width: 100%; }
+.ow-map-key { list-style: none; padding: 0; margin: 10px 0; display: flex; flex-direction: column; gap: 8px; }
+.ow-map-key li { display: flex; align-items: center; gap: 10px; }
+.ow-map-key .ow-map-pin { width: 22px; height: 22px; }
+
+/* ---- the ☰ menu ---- */
+.ow-menu .ow-win-body { display: flex; flex-direction: column; gap: 14px; }
+.ow-btn.ow-menu-resume { width: 100%; min-height: 50px; font-size: 17px; }
+.ow-menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.ow-menu-tile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 76px; padding: 8px 4px; border-radius: 9px; border: 1px solid var(--edge-soft); background: rgba(0, 0, 0, .2); color: var(--ink); font-weight: 700; font-size: 14px; cursor: pointer; }
+.ow-menu-tile:hover, .ow-menu-tile.pad-focus { border-color: var(--gold); }
+.ow-menu-tile .ow-key { font-size: 12px; font-weight: 800; padding: 0 6px; border-radius: 4px; background: rgba(0, 0, 0, .35); color: var(--gold); border: 1px solid var(--edge-soft); }
+.ow-menu-list { display: flex; flex-direction: column; border-top: 1px solid var(--edge-soft); }
+.ow-menu-row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 50px; padding: 0 6px; border: 0; border-bottom: 1px solid var(--edge-soft); background: none; color: var(--ink); font-weight: 700; font-size: 16px; text-align: left; cursor: pointer; }
+.ow-menu-row:hover, .ow-menu-row.pad-focus { color: var(--gold); background: rgba(232, 193, 112, .05); }
+.ow-menu-dot { position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+.ow-menu-row .ow-menu-dot { position: static; margin-left: auto; }
+
+/* ---- settings ---- */
+.ow-set-row { display: flex; align-items: center; gap: 14px; justify-content: space-between; min-height: 52px; padding: 6px 0; border-bottom: 1px solid rgba(107, 83, 50, .35); }
+.ow-set-row > span { display: flex; flex-direction: column; }
+.ow-set-row small { color: var(--ink-dim); font-size: 13px; font-weight: 400; }
+.ow-set-row.ow-check { justify-content: flex-start; }
+.ow-set-slide { flex-wrap: wrap; }
+.ow-set-slide .ow-range { flex: 1 1 220px; max-width: 360px; }
+.ow-set-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.ow-set-choice { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; text-align: left; min-height: 80px; padding: 12px; border-radius: 9px; border: 1px solid var(--edge-soft); background: rgba(0, 0, 0, .2); color: var(--ink); cursor: pointer; }
+.ow-set-choice b { font-size: 16px; }
+.ow-set-choice small { color: var(--ink-dim); font-size: 13px; }
+.ow-set-on { border-color: var(--gold); background: rgba(232, 193, 112, .1); }
+.ow-set-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.ow-set-table th { text-align: left; font-size: 13px; color: var(--ink-dim); font-weight: 700; padding: 4px 6px; }
+.ow-set-table td { padding: 4px 6px; border-top: 1px solid rgba(107, 83, 50, .35); }
+.ow-set-key { min-height: 40px; min-width: 110px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--edge); background: #17130e; color: var(--gold); font-weight: 800; cursor: pointer; }
+.ow-set-key:hover, .ow-set-key.pad-focus { border-color: var(--gold); }
+.ow-set-wait { color: var(--ink); border-style: dashed; }
+.ow-set-fixed { color: var(--ink-dim); font-weight: 700; }
+
+/* ---- report and rate ---- */
+.ow-rep-label, .ow-rate-h { display: block; font-weight: 800; margin: 0 0 8px; color: var(--gold); font-size: 15px; font-family: var(--font); }
+.ow-rep-text, .ow-rate-text { min-height: 120px; padding: 10px 12px; resize: vertical; }
+.ow-rate-text { min-height: 80px; }
+.ow-rep-note { font-size: 14px; }
+.ow-rep-msg, .ow-rate-msg { min-height: 1.3em; font-weight: 700; color: var(--gold); margin: 8px 0 0; }
+.ow-rate-thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.ow-rate-thumb { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 96px; justify-content: center; border-radius: 10px; border: 1px solid var(--edge-soft); background: rgba(0, 0, 0, .2); color: var(--ink); font-weight: 800; cursor: pointer; }
+.ow-rate-thumb:hover, .ow-rate-thumb.pad-focus { border-color: var(--gold); }
+.ow-rate-why { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.ow-rate-chip { min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--edge); background: rgba(0, 0, 0, .2); color: var(--ink); font-weight: 700; cursor: pointer; }
+.ow-rate-on { border-color: var(--gold); background: rgba(232, 193, 112, .14); color: var(--gold); }
+
+/* ---- phones ---- */
+@media (max-width: 720px) {
+  .ow-shop-cols, .ow-q-cols { grid-template-columns: 1fr; }
+  .ow-shop-col + .ow-shop-col { border-left: 0; padding-left: 0; border-top: 1px solid var(--edge-soft); padding-top: 14px; }
+  .ow-shop-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .ow-map-wrap { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  .ow-map-side { border-left: 0; border-top: 1px solid var(--edge-soft); max-height: 34vh; }
+  .ow-menu-grid { grid-template-columns: repeat(4, 1fr); }
+  .ow-menu-tile { min-height: 64px; font-size: 13px; }
+  .ow-set-choices { grid-template-columns: 1fr; }
+  .ow-set-table th:nth-child(3), .ow-set-table td:nth-child(3) { display: none; }
+  .ow-svc-horse-ico { width: 56px; height: 56px; }
+}

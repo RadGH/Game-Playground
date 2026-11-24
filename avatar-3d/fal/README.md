@@ -1,8 +1,8 @@
 # fal.ai characters — a paid picture-to-3D test
 
-**Status:** Oathwild art 2026-11-23 — **stopped early: the fal.ai balance ran out** ("User is locked. Exhausted balance") after US$3.40 of the US$25 meant for this job. Made: 3 real animals on four legs (brown bear, bristleback boar, mountain lion; all six clips), 7 scenery props (4 houses, barrel, sacks, weapon rack), the scenery pipeline + Scenery tab. Every remaining drawing is ready (10 enemies + horse, 8 weapons, 24 scenery sheets = 96 props): `tools/oathwild-resume.sh` finishes them once credit is back. Before that: test 3 creature roster (35 enemies, US$32.80).
+**Status:** Oathwild art 2026-11-23 — **fal balance ran out twice**: round 1 after US$3.40 (of a planned US$25), round 2 after US$0.40 (of the owner's new US$8.80: only the two rigs went through, the horse was refused). Made: brown bear, bristleback boar, mountain lion (four legs, all six clips), bandit chief + field scarecrow (rigged), 7 scenery props, the scenery pipeline + Scenery tab. **Everything else is placeholder art** in `prototypes/oathwild/data/art.json` (`tools/oathwild-art.mjs`): monsters + the horse draw an existing fal body tinted (`fallback`), props draw a coloured shape (`placeholder`). All drawings are ready; `tools/oathwild-resume.sh` makes them in the owner's priority order when there is credit. Before that: test 3 creature roster (35 enemies, US$32.80).
 **Play:** `avatar-3d/fal/index.html` on the dev server (8401) or stable (8400): Enemies (group Oathwild), Scenery, Dressing room, Makers, Costs.
-**Next:** top up fal → `tools/oathwild-resume.sh --dry` then without `--dry` (≈US$20: horse first, then bosses/monsters, weapons, 24 scenery sheets); redraw the crate as a solid box. Older: imp wings, bell maul, bounty hunter knees.
+**Next:** when fal has credit: `tools/oathwild-resume.sh --dry`, then without (horse, three bosses + their weapons, 12 scenery sheets, hill ogre ≈ US$7.60 under the US$8.50 cap); watch the clips of bandit chief + scarecrow on the page (checked only in Blender so far: the browser was busy); redraw the crate as a solid box. Older: imp wings, bell maul, bounty hunter knees.
 **Parked:** dragon (owner: not yet); goblin-shaped armour; capes; finger bones; the remaining Chibi 2.6 catalog.
 
 ## Who uses these files
@@ -255,6 +255,25 @@ marsh-hag, barrow-king (bosses), shrine-cultist, bog-lurker, barrow-ghoul, hill-
 `chief-buckler`, already in gear.json); 24 scenery sheets (96 props). The two Codex beasts `thornback-bear` and
 `mire-toad` were replaced by real animals (owner: druid forms are real animals) and are not used.
 
+### Round 2 (owner 2026-11-23: "The new budget is 8.80 for fal … use placeholder art for the rest")
+Priority: horse → rig bandit chief + scarecrow → 3 bosses → 12 scenery sheets → one monster. Tags `oathwild2-*`,
+cap `oathwild2:8.50` (US$0.30 margin). The two rigs (US$0.40) went through; the horse was refused at submit
+("Exhausted balance") and work stopped there. **Round 2 spent: US$0.40** (total US$36.60).
+
+| id | What | Notes |
+|---|---|---|
+| bandit-chief | Bandit chief, boss, 1.95 m, 4,371 triangles | holds the existing `orc-axe` + `shield` until his drawn `chief-axe` / `chief-buckler` are made |
+| field-scarecrow | Field scarecrow, 1.9 m, 2,943 triangles | holds `zealot-sickle` until his drawn `rusty-pitchfork` is made |
+
+**Placeholders** (`tools/oathwild-art.mjs` → `prototypes/oathwild/data/art.json`, re-run after every new model; a
+made model replaces its placeholder by itself). Monsters: `fallback: { body, height, tint }` — horse → wolf (1.75 m,
+chestnut; seat `[0, 0.875, 0.5]` m on `spine_2`, measured on the wolf), goblin-warchief → gobw-tripo, marsh-hag →
+root-caller, barrow-king → wraith-knight, shrine-cultist → zealot, bog-lurker → drowned-brute, barrow-ghoul →
+hollowborn, hill-ogre → bruiser, fen-harpy → winged-imp; summons `imp` → winged-imp (ready), `shade-double` →
+hollowborn dark, `turret` → a cylinder. Props (97): `placeholder: { shape: box|cylinder|cone|house|rock|tree, size:
+[wide, tall, deep] m, colour }`, colour = the drawing's mean colour, size from the planned height/length and the
+drawing's proportions. Every `art` id in `prototypes/oathwild/data/*.json` resolves to a model or a placeholder.
+
 ### Four-legged animals (free rig)
 `quad_rig.py` as for the wolf, plus `--straighten`: a three-quarter drawing can come back turned (the lion ~20°, both
 front feet on one side of the middle line, so the feet were paired wrongly); the body is turned so its long axis runs
@@ -292,8 +311,9 @@ along Y first. `--tail-floor` ignores ground points in the last 20 % (a tail tip
 - **A turned animal pairs its feet wrongly** (lion). → `quad_rig.py --straighten`.
 - **One exported env var tags every child job** (the first scenery sheet ran with the enemies tag). → set `FAL_TAG` per
   command, never `export` it for a mixed batch.
-- **The budget you are given is not the balance you have.** → stop at the first "Exhausted balance" and report; every
-  drawing is made before paying so nothing free waits on money.
+- **The budget you are given is not the balance you have** (twice: US$3.40 of 25, then US$0.40 of 8.80). → stop at the
+  first "Exhausted balance" and report; draw everything before paying so nothing free waits on money; ship placeholders
+  for the rest so the game never waits on art.
 
 ## How it works (all scripts are in `tools/`; Blender runs headless at `~/opt/blender/blender`)
 

@@ -1,0 +1,144 @@
+{
+  "_doc": "Oathwild's round-1 map, hand-shaped (world builder 2026-11-23). js/world/terrain.js is the one reader: it turns this into heights, water, biomes, roads, bridges and level bands (same seed + this file = the same ground, always). Units are metres. x runs east, z runs SOUTH (three.js: north is -z, the top of tools/map-preview.mjs's picture). Heights are absolute metres above the map's datum. Points are [x, z]. Rivers and roads are smoothed through their points (Catmull-Rom) and sampled every `sampleStep` metres; every road/river crossing must be listed in `crossings` (tests/world/map.test.mjs checks). `areas` give the monster level band of a place (the smallest area containing a point wins, else the region's `levels`). Guessed size (owner may resize): 1.2 x 0.8 km for both regions.",
+  "version": 1,
+  "seed": 2311,
+  "bounds": { "minX": -600, "maxX": 600, "minZ": -400, "maxZ": 400, "margin": 40 },
+  "grid": { "cell": 2, "biomeCell": 4, "sampleStep": 2 },
+  "spawn": { "at": [-252, -16], "shrine": "vale_village" },
+  "limits": { "_doc": "Walkable = inside bounds minus margin, ground slope under maxSlope degrees, water shallower than wadeDepth (or on a bridge deck).", "maxSlope": 38, "wadeDepth": 0.7, "roadMaxGrade": 0.14 },
+
+  "regions": {
+    "brightwater_vale": { "name": "Brightwater Vale", "levels": [1, 5], "base": 8, "amp": 5, "ground": "meadow", "forest": 0.3 },
+    "thornmere_wilds": { "name": "Thornmere Wilds", "levels": [5, 10], "base": 12, "amp": 7, "ground": "wildgrass", "forest": 0.62 }
+  },
+  "border": {
+    "_doc": "The line between the regions, north to south: west of it is Brightwater Vale. It follows the Thornback Ridge; the gap in the ridge is the Thornmere Gate.",
+    "west": "brightwater_vale", "east": "thornmere_wilds",
+    "points": [[60, -400], [75, -250], [55, -120], [62, 0], [70, 55], [85, 170], [60, 300], [70, 400]],
+    "blend": 50
+  },
+
+  "frame": { "_doc": "Mountains round the edge: rise over `width` metres from the edge to `height`.", "width": 80, "height": 46 },
+  "ridges": [
+    { "id": "thornback_north", "name": "Thornback Ridge", "height": 34, "width": 55, "points": [[60, -420], [75, -250], [55, -120], [65, -58]] },
+    { "id": "thornback_south", "name": "Thornback Ridge", "height": 34, "width": 55, "points": [[70, 58], [85, 170], [60, 300], [70, 420]] }
+  ],
+  "hills": [
+    { "id": "goblin_hills", "name": "Gobbet Hills", "at": [-418, -250], "radius": 130, "height": 20 },
+    { "id": "shrine_hill", "name": "Old Hill", "at": [-445, 232], "radius": 88, "height": 24 },
+    { "id": "north_downs", "name": "Hartwood Downs", "at": [-120, -305], "radius": 110, "height": 12 },
+    { "id": "watch_knoll", "name": "Watch Knoll", "at": [-12, 74], "radius": 48, "height": 6 },
+    { "id": "south_rise", "name": "Bramble Rise", "at": [-300, 300], "radius": 110, "height": 10 },
+    { "id": "barrow_downs", "name": "Barrow Downs", "at": [482, -255], "radius": 130, "height": 16 },
+    { "id": "ogre_hill", "name": "Ogre Hill", "at": [524, 40], "radius": 72, "height": 22 },
+    { "id": "wilds_heights", "name": "Greenhollow Heights", "at": [200, -335], "radius": 90, "height": 14 }
+  ],
+  "rivers": [
+    { "id": "brightwater", "name": "the Brightwater", "width": 12, "depth": 2.2, "drop": 1.4,
+      "points": [[-250, -420], [-238, -330], [-205, -240], [-198, -150], [-186, -70], [-180, 0], [-162, 80], [-132, 160], [-122, 220], [-102, 300], [-84, 420]] },
+    { "id": "mirewater", "name": "the Mirewater", "width": 10, "depth": 2, "drop": 1.2, "intoMarsh": "thornmere_mire",
+      "points": [[330, -420], [322, -320], [333, -225], [344, -130], [350, -30], [358, 60], [378, 140], [402, 190]] }
+  ],
+  "marshes": [
+    { "id": "thornmere_mire", "name": "Thornmere Mire", "at": [470, 240], "radius": [170, 130], "edge": 40, "below": 0.8, "pools": 0.55, "deepPools": 0.78 }
+  ],
+  "fields": [
+    { "id": "west_fields", "name": "Larkford West Fields", "at": [-342, -38], "size": [70, 50], "angle": 0.1 },
+    { "id": "south_fields", "name": "Larkford South Fields", "at": [-330, 42], "size": [60, 60], "angle": -0.05 },
+    { "id": "tansy_field", "name": "Tansy's Field", "at": [-205, 104], "size": [52, 38], "angle": 0.3 },
+    { "id": "north_fields", "name": "North Fields", "at": [-318, -112], "size": [50, 40], "angle": -0.2 }
+  ],
+  "forests": [
+    { "id": "hartwood", "name": "the Hartwood", "at": [-105, -205], "radius": 95, "density": 0.85 },
+    { "id": "north_copse", "name": "Gobbet Copse", "at": [-310, -300], "radius": 85, "density": 0.65 },
+    { "id": "south_woods", "name": "Bramble Woods", "at": [-20, 285], "radius": 110, "density": 0.7 },
+    { "id": "ridge_pines", "name": "Ridge Pines", "at": [0, -220], "radius": 80, "density": 0.55 }
+  ],
+
+  "roads": [
+    { "id": "lark_road", "name": "the Lark Road", "class": "road", "width": 6,
+      "points": [[-265, -5], [-222, -3], [-180, 0], [-140, 3], [-90, 8], [-30, 10], [20, 6], [62, 0], [105, -6], [150, -28], [210, -34], [280, -30], [350, -30], [410, -22], [460, 0], [492, 20]] },
+    { "id": "north_track", "name": "North Track", "class": "trail", "width": 4,
+      "points": [[-265, -5], [-282, -70], [-305, -140], [-345, -195], [-386, -224]] },
+    { "id": "south_road", "name": "Ford Road", "class": "road", "width": 5,
+      "points": [[-265, -5], [-258, 60], [-232, 130], [-185, 182], [-125, 195], [-90, 205]] },
+    { "id": "ford_loop", "name": "Watch Lane", "class": "trail", "width": 4,
+      "points": [[-90, 205], [-50, 170], [-22, 112], [-8, 62], [-30, 10]] },
+    { "id": "shrine_trail", "name": "Old Hill Path", "class": "trail", "width": 4,
+      "points": [[-258, 60], [-310, 118], [-358, 168], [-390, 192], [-422, 214]] },
+    { "id": "fold_lane", "name": "Fold Lane", "class": "trail", "width": 3,
+      "points": [[-140, 3], [-139, -55], [-136, -98], [-118, -150]] },
+    { "id": "hideout_trail", "name": "Poacher's Path", "class": "trail", "width": 3,
+      "points": [[-90, 8], [-80, -45], [-64, -78]] },
+    { "id": "grove_trail", "name": "Grove Trail", "class": "trail", "width": 4,
+      "points": [[150, -28], [175, -100], [215, -170], [250, -226]] },
+    { "id": "barrow_road", "name": "Barrow Road", "class": "trail", "width": 4,
+      "points": [[250, -226], [290, -245], [331, -250], [380, -255], [430, -256], [452, -254]] },
+    { "id": "south_wilds", "name": "Bearwood Trail", "class": "trail", "width": 4,
+      "points": [[210, -34], [235, 40], [225, 120], [240, 190], [280, 250], [298, 274]] },
+    { "id": "mire_way", "name": "the Mire Way", "class": "boardwalk", "width": 3,
+      "points": [[410, -22], [425, 60], [440, 140], [462, 210], [482, 240]] },
+    { "id": "redtusk_trail", "name": "Redtusk Trail", "class": "trail", "width": 3,
+      "points": [[410, -22], [416, -70], [422, -98]] }
+  ],
+  "crossings": [
+    { "id": "lark_bridge", "name": "Lark Bridge", "road": "lark_road", "river": "brightwater", "kind": "bridge", "art": "bridge-wood" },
+    { "id": "bandit_ford", "name": "the Bandit Ford", "road": "south_road", "river": "brightwater", "kind": "ford" },
+    { "id": "troll_bridge", "name": "the Troll Bridge", "road": "lark_road", "river": "mirewater", "kind": "bridge", "art": "bridge-stone" },
+    { "id": "old_stone_bridge", "name": "Old Stone Bridge", "road": "barrow_road", "river": "mirewater", "kind": "bridge", "art": "bridge-stone" }
+  ],
+
+  "places": {
+    "_doc": "Every named place. `flat` = radius of ground levelled for it (`lift` raises it above marsh water). `kind`: town, landmark, camp, shrine, pass, lair. Camps and shrines share ids with data/regions.json.",
+    "larkford": { "name": "Larkford", "kind": "town", "region": "brightwater_vale", "at": [-265, -5], "radius": 55, "flat": 62 },
+    "larkford_mill": { "name": "Larkford Mill", "kind": "landmark", "region": "brightwater_vale", "at": [-212, -44], "radius": 12, "flat": 12 },
+    "ada_fold": { "name": "Fenn's Fold", "kind": "landmark", "region": "brightwater_vale", "at": [-140, -108], "radius": 18, "flat": 18 },
+    "hartwood": { "name": "the Hartwood", "kind": "landmark", "region": "brightwater_vale", "at": [-108, -200], "radius": 60 },
+    "tansy_field": { "name": "Tansy's Field", "kind": "landmark", "region": "brightwater_vale", "at": [-205, 104], "radius": 28 },
+    "watchtower": { "name": "Watch Knoll Tower", "kind": "landmark", "region": "brightwater_vale", "at": [-12, 74], "radius": 12, "flat": 14 },
+    "riverbank": { "name": "Lantern Reach", "kind": "landmark", "region": "brightwater_vale", "at": [-176, 128], "radius": 30 },
+    "goblin_warren": { "name": "Goblin Warren", "kind": "camp", "region": "brightwater_vale", "at": [-405, -240], "radius": 26, "flat": 24 },
+    "bandit_camp": { "name": "Bandit Camp by the Ford", "kind": "camp", "region": "brightwater_vale", "at": [-78, 214], "radius": 24, "flat": 22 },
+    "rook_hideout": { "name": "Rook's Hideout", "kind": "camp", "region": "brightwater_vale", "at": [-58, -92], "radius": 16, "flat": 16 },
+    "old_shrine_cult": { "name": "the Old Hill Shrine", "kind": "camp", "region": "brightwater_vale", "at": [-448, 234], "radius": 24, "flat": 22 },
+    "vale_village": { "name": "Brightwater Shrine", "kind": "shrine", "region": "brightwater_vale", "at": [-252, -22], "radius": 6 },
+    "old_shrine": { "name": "Old Hill Waystone", "kind": "shrine", "region": "brightwater_vale", "at": [-374, 198], "radius": 6, "flat": 12 },
+    "watch_shrine": { "name": "Watch Knoll Shrine", "kind": "shrine", "region": "brightwater_vale", "at": [-30, 52], "radius": 6, "flat": 8 },
+    "thornmere_gate": { "name": "Thornmere Gate Shrine", "kind": "shrine", "region": "thornmere_wilds", "at": [108, -14], "radius": 6, "flat": 14 },
+    "gate_pass": { "name": "the Thornmere Gate", "kind": "pass", "region": "thornmere_wilds", "at": [68, 0], "radius": 30 },
+    "thornwatch": { "name": "Thornwatch", "kind": "town", "region": "thornmere_wilds", "at": [168, -48], "radius": 36, "flat": 42 },
+    "druid_circle": { "name": "the Druid Circle", "kind": "shrine", "region": "thornmere_wilds", "at": [256, -246], "radius": 22, "flat": 28 },
+    "blighted_grove": { "name": "the Blighted Grove", "kind": "camp", "region": "thornmere_wilds", "at": [196, -188], "radius": 20, "flat": 18 },
+    "troll_bridge": { "name": "Troll Bridge", "kind": "camp", "region": "thornmere_wilds", "at": [370, -36], "radius": 18 },
+    "scarback_den": { "name": "Scarback's Den", "kind": "camp", "region": "thornmere_wilds", "at": [188, 168], "radius": 16, "flat": 16 },
+    "redtusk_camp": { "name": "Redtusk Camp", "kind": "camp", "region": "thornmere_wilds", "at": [426, -112], "radius": 20, "flat": 20 },
+    "black_stone": { "name": "the Black Stone", "kind": "landmark", "region": "thornmere_wilds", "at": [306, 290], "radius": 12, "flat": 14, "lift": 0.6 },
+    "herb_hollow": { "name": "Herb Hollow", "kind": "landmark", "region": "thornmere_wilds", "at": [394, 112], "radius": 14, "flat": 14, "lift": 0.6 },
+    "mire_shrine": { "name": "Mire Shrine", "kind": "shrine", "region": "thornmere_wilds", "at": [436, 30], "radius": 6, "flat": 10 },
+    "ogre_hill": { "name": "Ogre Hill", "kind": "camp", "region": "thornmere_wilds", "at": [524, 40], "radius": 22, "flat": 22 },
+    "barrow_watch": { "name": "Barrow Watch Shrine", "kind": "shrine", "region": "thornmere_wilds", "at": [400, -250], "radius": 6, "flat": 10 },
+    "barrow": { "name": "The Undead Barrow", "kind": "camp", "region": "thornmere_wilds", "at": [480, -262], "radius": 26, "flat": 26 },
+    "ruins": { "name": "Drowned Ruins", "kind": "camp", "region": "thornmere_wilds", "at": [496, 258], "radius": 26, "flat": 28, "lift": 0.7 }
+  },
+
+  "areas": [
+    { "id": "larkford_safe", "name": "Larkford", "at": [-250, -10], "radius": 130, "levels": [1, 2] },
+    { "id": "hartwood", "name": "the Hartwood", "at": [-105, -200], "radius": 110, "levels": [1, 3] },
+    { "id": "vale_south", "name": "the southern vale", "at": [-180, 150], "radius": 110, "levels": [2, 3] },
+    { "id": "warren", "name": "the Gobbet Hills", "at": [-405, -240], "radius": 95, "levels": [2, 5] },
+    { "id": "rook", "name": "Rook's Hideout", "at": [-58, -92], "radius": 50, "levels": [3, 3] },
+    { "id": "ford", "name": "the Ford", "at": [-78, 214], "radius": 80, "levels": [3, 4] },
+    { "id": "east_vale", "name": "the east vale", "at": [-20, 40], "radius": 85, "levels": [3, 5] },
+    { "id": "old_hill", "name": "the Old Hill", "at": [-440, 232], "radius": 90, "levels": [4, 5] },
+    { "id": "gate", "name": "the Thornmere Gate", "at": [150, -30], "radius": 80, "levels": [5, 6] },
+    { "id": "grove", "name": "the Greenhollow", "at": [230, -220], "radius": 100, "levels": [6, 7] },
+    { "id": "troll", "name": "the Troll Bridge", "at": [360, -30], "radius": 70, "levels": [6, 7] },
+    { "id": "bearwood", "name": "the Bearwood", "at": [215, 150], "radius": 110, "levels": [6, 7] },
+    { "id": "redtusk", "name": "Redtusk Camp", "at": [426, -112], "radius": 60, "levels": [7, 8] },
+    { "id": "mire", "name": "Thornmere Mire", "at": [420, 220], "radius": 150, "levels": [7, 9] },
+    { "id": "mire_road", "name": "the Mire Way", "at": [430, 50], "radius": 75, "levels": [7, 8] },
+    { "id": "ogre", "name": "Ogre Hill", "at": [524, 40], "radius": 80, "levels": [8, 9] },
+    { "id": "barrow", "name": "the Barrow Downs", "at": [480, -262], "radius": 110, "levels": [7, 9] },
+    { "id": "ruins", "name": "the Drowned Ruins", "at": [496, 258], "radius": 70, "levels": [8, 10] }
+  ]
+}

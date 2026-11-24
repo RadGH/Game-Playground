@@ -1,0 +1,13 @@
+Use your image generation tool to create ONE new picture and save it in the current working directory as painted.png (1536x1024 PNG, landscape). Do nothing else (do not write code, do not edit other files).
+It is a game texture sheet of spell-effect textures.
+The picture is 4 horizontal strips, each 1536 wide x 256 tall, stacked top to bottom. Draw one band per strip, filling the strip's full width; keep at least 12 pixels of pure black between strips. Each band must tile: its left edge must continue seamlessly into its right edge.
+Items:
+1. FIRST (top) row: a horizontal band of rising light streaks: vertical rays of uneven length rising from the bottom edge and fading upward, brighter at the bottom; must repeat seamlessly left to right.
+2. SECOND row: a horizontal band of a wall of flame: many flame tongues rising from the bottom edge, fading upward; must repeat seamlessly left to right.
+3. THIRD row: a horizontal band of glowing runic letters in a single row in the middle between two thin bright lines; must repeat seamlessly left to right.
+4. FOURTH (bottom) row: a horizontal band of soft swirling mist streaks drifting sideways, wavy flowing strands; must repeat seamlessly left to right.
+Style: hand-painted stylised fantasy MMO spell-effect texture, like the painted VFX textures of a classic 2004 fantasy MMO: soft painterly brush strokes, glowing cores fading to soft edges, readable shapes, no photo realism.
+Hard rules:
+- Background is PURE BLACK (#000000) everywhere outside the painted shapes. No vignette, no border, no frame, no grid lines.
+- Paint every item ONLY in white and shades of grey (no colour at all): the game tints them per magic school and treats brightness as glow.
+- No text, no labels, no numbers, no watermark.

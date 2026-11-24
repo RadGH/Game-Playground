@@ -1,0 +1,15 @@
+Use your image generation tool to create ONE new picture and save it in the current working directory as painted.png (1536x1024 PNG, landscape). Do nothing else (do not write code, do not edit other files).
+It is a game texture sheet of spell-effect textures.
+The picture is an invisible grid of 3 columns x 2 rows of equal 512x512 squares. Draw exactly ONE item per square, centred in its square, filling about 85% of it, never touching or crossing into a neighbour square (keep a black gap of at least 24 pixels from every square edge).
+Items:
+1. TOP-LEFT: a magic rune circle for LIGHTNING magic: zig-zag bolt glyphs around a double ring, a forked star at the centre, crackling branch lines.
+2. TOP-MIDDLE: a magic rune circle for POISON magic: dripping bubbling ring, inner ring of droplet and skull-less fang runes, a bubbling spiral at the centre.
+3. TOP-RIGHT: a large SUMMONING circle: a pentagon star inside three rings, rows of small runes between the rings, five small circles at the star points.
+4. BOTTOM-LEFT: a SHOCKWAVE RING: a single thick bright ring of energy, sharp bright inner edge fading softly outward, a few streaks breaking off it, hollow black centre.
+5. BOTTOM-MIDDLE: a TARGETING RETICLE ring for a ground spell: one clean bright outer rim with small evenly spaced tick marks and four arrow notches pointing inward, empty black inside.
+6. BOTTOM-RIGHT: an IMPACT FLASH: a bright starburst explosion with eight uneven sharp rays and a soft round glow core, rays fading to points.
+Style: hand-painted stylised fantasy MMO spell-effect texture, like the painted VFX textures of a classic 2004 fantasy MMO: soft painterly brush strokes, glowing cores fading to soft edges, readable shapes, no photo realism.
+Hard rules:
+- Background is PURE BLACK (#000000) everywhere outside the painted shapes. No vignette, no border, no frame, no grid lines.
+- Paint every item ONLY in white and shades of grey (no colour at all): the game tints them per magic school and treats brightness as glow.
+- No text, no labels, no numbers, no watermark.

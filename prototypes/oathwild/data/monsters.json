@@ -28,10 +28,14 @@
     "water_elemental": { "name": "Water Elemental", "base": "glass_shard", "art": "water-elemental", "scale": { "hp": 0.45, "dmg": 0.45, "xp": 0.5 }, "set": { "ranged": { "range": 24, "element": "ice" } } },
     "earth_elemental": { "name": "Earth Elemental", "base": "stone_sentinel", "art": "earth-elemental", "scale": { "hp": 0.25, "dmg": 0.4, "xp": 0.4 } },
     "bridge_troll": { "name": "Bridge Troll", "art": "troll", "family": "giant", "kind": "giant", "role": "brute", "hp": 95, "dmg": [9, 14], "armor": 6, "speed": 3.2, "reach": 3, "aggroRange": 20, "attackEvery": 2, "xp": 45, "gold": 25 },
-    "barrow_king": { "name": "The Barrow King", "base": "cursed_knight", "art": "barrow-king", "scale": { "hp": 0.3, "dmg": 0.35, "xp": 0.4 } },
+    "barrow_king": { "name": "The Barrow King", "base": "cursed_knight", "art": "barrow-king", "scale": { "hp": 0.3, "dmg": 0.35, "xp": 0.4 }, "set": { "armor": 4 } },
     "marsh_hag": { "name": "Marsh Hag", "base": "hollow_wraith", "art": "marsh-hag", "scale": { "hp": 0.3, "dmg": 0.35, "xp": 0.4 }, "set": { "family": "humanoid", "ranged": { "range": 24, "element": "poison" } } },
     "barrow_ghoul": { "name": "Barrow Ghoul", "base": "barrow_hound", "art": "barrow-ghoul", "scale": { "hp": 0.5, "dmg": 0.5, "xp": 0.5 } },
-    "hill_ogre": { "name": "Hill Ogre", "base": "stone_sentinel", "art": "hill-ogre", "scale": { "hp": 0.3, "dmg": 0.45, "xp": 0.45 }, "set": { "family": "giant", "kind": "giant" } }
+    "hill_ogre": { "name": "Hill Ogre", "base": "stone_sentinel", "art": "hill-ogre", "scale": { "hp": 0.3, "dmg": 0.45, "xp": 0.45 }, "set": { "family": "giant", "kind": "giant" } },
+    "choir_speaker": { "name": "Hollow Choir Speaker", "base": "sky_cultist", "art": "shrine-cultist", "scale": { "hp": 0.55, "dmg": 0.45, "xp": 1.4, "gold": 2 } },
+    "rook_varrow": { "name": "Rook Varrow", "base": "road_brigand", "art": "knifer", "scale": { "hp": 0.9, "dmg": 0.8, "xp": 2, "gold": 3 } },
+    "scarback": { "name": "Old Scarback", "base": "thicket_boar", "art": "brown-bear", "scale": { "hp": 1.1, "dmg": 0.9, "xp": 2.5 } },
+    "redtusk": { "name": "Redtusk", "base": "cult_zealot", "art": "orc-grunt", "scale": { "hp": 0.8, "dmg": 0.6, "xp": 1.6, "gold": 2 } }
   },
   "companions": {
     "grove_wolf": { "name": "Grove Wolf", "base": "grove_wolf", "art": "wolf", "scale": { "hp": 0.8, "dmg": 0.8 } },

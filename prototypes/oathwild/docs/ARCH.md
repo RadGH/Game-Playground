@@ -28,15 +28,19 @@ prototypes/oathwild/
     sheet.js          the character sheet (attributes + classes + passives + talents + gear → every number)
     inventory.js      carry weight, durability, enchanting, the horse
     world-state.js    shared persistent world: quest flags, cleared camps, chest timers, discovered shrines
+  js/world/           PURE world content (docs/WORLD.md): terrain.js (ground, water, roads, bridges, biomes, bands,
+                      walkable; mesh index = walked surface), scatter.js (trees + decor), encounters.js (camps / roam
+                      zones on combat.js, bosses sized by heroes), quests.js (quest engine, talk, escorts, services,
+                      quest log model), boot.js (loads map/placements/quests/npcs)
   data/               Oathwild's own JSON (classes.json trees + ranks, attributes.json, skills-use.json,
-                      talents.json, proficiency.json, regions.json, quests.json, npcs.json, loot-tables.json,
+                      talents.json, proficiency.json, regions.json, map.json, placements.json, quests.json, npcs.json, loot-tables.json,
                       spell-visuals.json, art.json (fal props + enemies per region — art helper writes it))
   js/client/          three.js: terrain, props, actors (Tabard heroes, fal enemies), camera + aim, indicators,
                       spells (spellkit), HUD, windows (loot, character, class tree, talents, inventory, map)
   js/net/             client socket, snapshot apply, prediction (adapt T predict.js / snapshot.js, sized for 10)
   server/             Node + ws: one process hosts several worlds; 20 Hz sim; world saves (JSON on disk);
                       ports 8660 stable / 8661 dev, wss 8662 / 8663 (unit names oathwild / oathwild-dev)
-  tests/              node --test for rules (tests/rules/*.test.mjs), browser checks, walk.mjs
+  tests/              node --test for rules (tests/rules/*.test.mjs) and world (tests/world/*.test.mjs), browser checks, walk.mjs
 ```
 
 ## Contracts
@@ -75,11 +79,21 @@ prototypes/oathwild/
   number via `shared/format.js`. Standard layout: title · kind/rank line · cost / cast / cooldown / range row · body
   lines with live numbers · auras explained · "How it's worked out" (formula with the hero's numbers) · compare
   (items: green/red against what's worn).
-- **Spell visuals**: `avatar-3d/spellkit/` (new reusable experiment) — `createSpellKit({ scene, camera, textures })`
-  → `kit.windup(caster, spellVisualId)`, `kit.indicator(shape, opts)`, `kit.release(...)`, `kit.impact(at, id)`,
-  `kit.ground(at, id, seconds)`, `kit.update(dt)`; data `data/spell-visuals.json` (layers per phase, PLAN §0).
+- **Spell visuals**: `avatar-3d/spellkit/` (README has the full API) — `await createSpellKit({ THREE, scene, camera,
+  renderer, visuals, heightAt, quality })` → `kit.windup(caster, id, { hands })` → handle, `kit.indicator(shape, opts)`
+  → `{ set, stop }`, `kit.release(handle)`, `kit.missile(from, to, id)` → Promise, `kit.impact(at, id)`, `kit.ground(at,
+  id, { radius, seconds })`, `kit.aura(target, id)`, `kit.beam(from, points, id)`, `kit.trail(weapon, id)`,
+  `kit.visualFor(spellId, { kind, element })`, `kit.update(dt)`, `kit.warm()`; data `data/spell-visuals.json`
+  (`visuals` with layers per phase, `spells` id → visual for all spells, `fallback` by kind:element; PLAN §0).
 - **Art**: `data/art.json` (written by the art helper): enemy body ids per region, prop ids + kinds + sizes; models
   load through avatar-3d/fal (enemies: `createFalCharacter`; props: the props loader it documents).
+
+- **World** (`js/world/`, docs/WORLD.md): `bootWorld({ regions })` → `{ data, terrain, book }`. Server: pass combat
+  `death` events and talk / reach / take / use to `quests.notify`; `escortTick` each tick; spawn with
+  `encounters.spawnCampFor(world, placements, campId, { heroes, flags })` and `spawnZone`. Client: ground from
+  `terrain.grid` + `meshIndex`, roads from `terrain.roads`, bridges from `terrain.bridges`, trees from `scatter`,
+  the quest log from `questLog`, markers from `markerOf`, NPC spots from `npcAt`. Camp / chest / shrine positions live
+  in data/regions.json and match data/map.json places (a test checks).
 
 ## Guards (lessons)
 - Importing Farhold by path: copy Thousandvale's drift guard (`T/tests/C/drift.test.mjs` idea) — a test pins the

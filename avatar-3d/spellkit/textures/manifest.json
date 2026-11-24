@@ -1,0 +1,318 @@
+{
+ "_doc": "Spell Kit textures: white-on-black greyscale (brightness = see-through + glow). source codex = painted by Codex (tools/codex-sheets.mjs + cut-sheets.py), procedural = tools/procedural.py.",
+ "textures": {
+  "fx_flame": {
+   "file": "fx_flame.webp",
+   "w": 1024,
+   "h": 512,
+   "kind": "flipbook",
+   "source": "codex",
+   "frames": 8,
+   "cols": 4,
+   "rows": 2,
+   "note": "frames warped from the Codex painting flame_5"
+  },
+  "fx_smoke": {
+   "file": "fx_smoke.webp",
+   "w": 1024,
+   "h": 512,
+   "kind": "flipbook",
+   "source": "codex",
+   "frames": 8,
+   "cols": 4,
+   "rows": 2,
+   "note": "frames warped from the Codex painting smoke_3"
+  },
+  "fx_burst": {
+   "file": "fx_burst.webp",
+   "w": 1024,
+   "h": 512,
+   "kind": "flipbook",
+   "source": "codex",
+   "frames": 8,
+   "cols": 4,
+   "rows": 2,
+   "note": "frames warped from the Codex painting burst_star"
+  },
+  "dot_soft": {
+   "file": "dot_soft.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "mote_star": {
+   "file": "mote_star.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "spark_streak": {
+   "file": "spark_streak.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "leaf": {
+   "file": "leaf.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "shard_ice": {
+   "file": "shard_ice.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "bolt_fork": {
+   "file": "bolt_fork.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "flame_1": {
+   "file": "flame_1.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "flame_2": {
+   "file": "flame_2.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "flame_3": {
+   "file": "flame_3.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "flame_4": {
+   "file": "flame_4.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "flame_5": {
+   "file": "flame_5.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "flame_6": {
+   "file": "flame_6.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "smoke_1": {
+   "file": "smoke_1.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "smoke_2": {
+   "file": "smoke_2.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "smoke_3": {
+   "file": "smoke_3.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "smoke_4": {
+   "file": "smoke_4.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "cloud_poison": {
+   "file": "cloud_poison.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "dust_1": {
+   "file": "dust_1.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "burst_star": {
+   "file": "burst_star.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "ring_shock": {
+   "file": "ring_shock.webp",
+   "w": 256,
+   "h": 256,
+   "kind": "particle",
+   "source": "codex"
+  },
+  "rune_fire": {
+   "file": "rune_fire.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "rune",
+   "source": "codex"
+  },
+  "rune_frost": {
+   "file": "rune_frost.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "rune",
+   "source": "codex"
+  },
+  "rune_holy": {
+   "file": "rune_holy.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "rune",
+   "source": "codex"
+  },
+  "rune_nature": {
+   "file": "rune_nature.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "rune",
+   "source": "codex"
+  },
+  "rune_arcane": {
+   "file": "rune_arcane.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "rune",
+   "source": "codex"
+  },
+  "rune_shadow": {
+   "file": "rune_shadow.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "rune",
+   "source": "codex"
+  },
+  "rune_lightning": {
+   "file": "rune_lightning.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "rune",
+   "source": "codex"
+  },
+  "rune_poison": {
+   "file": "rune_poison.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "rune",
+   "source": "codex"
+  },
+  "rune_summon": {
+   "file": "rune_summon.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "rune",
+   "source": "codex"
+  },
+  "ring_reticle": {
+   "file": "ring_reticle.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "rune",
+   "source": "codex"
+  },
+  "scorch": {
+   "file": "scorch.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "decal",
+   "source": "codex"
+  },
+  "frost_patch": {
+   "file": "frost_patch.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "decal",
+   "source": "codex"
+  },
+  "crack_ground": {
+   "file": "crack_ground.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "decal",
+   "source": "codex"
+  },
+  "splat_poison": {
+   "file": "splat_poison.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "decal",
+   "source": "codex"
+  },
+  "stain_shadow": {
+   "file": "stain_shadow.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "decal",
+   "source": "codex"
+  },
+  "glow_holy": {
+   "file": "glow_holy.webp",
+   "w": 512,
+   "h": 512,
+   "kind": "decal",
+   "source": "codex"
+  },
+  "band_light": {
+   "file": "band_light.webp",
+   "w": 1024,
+   "h": 256,
+   "kind": "band",
+   "source": "codex"
+  },
+  "band_flame": {
+   "file": "band_flame.webp",
+   "w": 1024,
+   "h": 256,
+   "kind": "band",
+   "source": "codex"
+  },
+  "band_runes": {
+   "file": "band_runes.webp",
+   "w": 1024,
+   "h": 256,
+   "kind": "band",
+   "source": "codex"
+  },
+  "band_mist": {
+   "file": "band_mist.webp",
+   "w": 1024,
+   "h": 256,
+   "kind": "band",
+   "source": "codex"
+  }
+ }
+}

@@ -7,8 +7,8 @@
    "items": [
     { "title": "Jersey 10", "author": "Sarah Cadigan-Fried (The Soft Type Project)", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Jersey+10", "games": ["kindlewild"] },
     { "title": "Alegreya SC", "author": "Juan Pablo del Peral (Huerta Tipográfica)", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Alegreya+SC", "games": ["bannerline", "thousandvale", "wyrmroad"] },
-    { "title": "Alegreya Sans", "author": "Juan Pablo del Peral (Huerta Tipográfica)", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Alegreya+Sans", "games": ["wyrmroad"] },
-    { "title": "Cinzel", "author": "Natanael Gama", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Cinzel", "games": ["emberveil", "lanternfall", "thousandvale", "spirehold", "grimring"] },
+    { "title": "Alegreya Sans", "author": "Juan Pablo del Peral (Huerta Tipográfica)", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Alegreya+Sans", "games": ["wyrmroad", "oathwild"] },
+    { "title": "Cinzel", "author": "Natanael Gama", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Cinzel", "games": ["emberveil", "lanternfall", "thousandvale", "spirehold", "grimring", "oathwild"] },
     { "title": "Spectral", "author": "Production Type", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Spectral", "games": ["emberveil", "spirehold", "grimring"] },
     { "title": "Chakra Petch", "author": "Cadson Demak", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Chakra+Petch", "games": ["frontier-foundry", "voidwright", "overdrive-frame"] },
     { "title": "Rajdhani", "author": "Indian Type Foundry", "license": "SIL Open Font License 1.1", "licenseUrl": "https://openfontlicense.org", "url": "https://fonts.google.com/specimen/Rajdhani", "games": ["voidwright"] },
@@ -23,7 +23,7 @@
    "id": "code",
    "title": "Code libraries",
    "items": [
-    { "title": "three.js", "author": "three.js authors", "license": "MIT", "licenseUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE", "url": "https://threejs.org", "games": ["arcline", "overdrive-frame", "wyrmroad", "bannerline", "emberveil", "farhold", "frontier-foundry", "grimring", "hullforge", "knockabout", "oddhaven", "roverlands", "rogueloot", "thousandvale", "tumblefair"] },
+    { "title": "three.js", "author": "three.js authors", "license": "MIT", "licenseUrl": "https://github.com/mrdoob/three.js/blob/dev/LICENSE", "url": "https://threejs.org", "games": ["arcline", "overdrive-frame", "wyrmroad", "bannerline", "emberveil", "farhold", "frontier-foundry", "grimring", "hullforge", "knockabout", "oddhaven", "roverlands", "rogueloot", "thousandvale", "tumblefair", "oathwild"] },
     { "title": "cannon-es", "author": "Stefan Hedman and the pmndrs contributors", "license": "MIT", "licenseUrl": "https://github.com/pmndrs/cannon-es/blob/master/LICENSE", "url": "https://github.com/pmndrs/cannon-es", "games": ["knockabout"] },
     { "title": "Rapier", "author": "Dimforge", "license": "Apache 2.0", "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0", "url": "https://rapier.rs", "games": ["oddhaven", "roverlands"] },
     { "title": "meshoptimizer decoder", "author": "Arseny Kapoulkine", "license": "MIT", "licenseUrl": "https://github.com/zeux/meshoptimizer/blob/master/LICENSE.md", "url": "https://github.com/zeux/meshoptimizer", "games": ["thousandvale"] },
@@ -32,6 +32,13 @@
     { "title": "pluralize", "author": "Blake Embrey", "license": "MIT", "licenseUrl": "https://github.com/plurals/pluralize/blob/master/LICENSE", "url": "https://github.com/plurals/pluralize", "games": ["emberveil"] },
     { "title": "meSpeak.js (eSpeak)", "author": "Norbert Landsteiner; eSpeak by Jonathan Duddington", "license": "GPL 3.0", "licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.html", "url": "https://www.masswerk.at/mespeak/", "games": ["voice-lab"] },
     { "title": "The CMU Pronouncing Dictionary", "author": "Carnegie Mellon University", "license": "BSD 2-Clause", "licenseUrl": "https://github.com/cmusphinx/cmudict/blob/master/LICENSE", "url": "https://github.com/cmusphinx/cmudict", "games": ["oddhaven", "emberveil", "voice-lab"] }
+   ]
+  },
+  {
+   "id": "art",
+   "title": "Art and animation",
+   "items": [
+    { "title": "Universal Animation Library", "author": "Quaternius", "license": "CC0 1.0", "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/", "url": "https://quaternius.com", "games": ["oathwild"] }
    ]
   }
  ]

@@ -1,5 +1,5 @@
 {
- "_doc": "Round 1's two regions as RULES (levels, who lives there, camps, chests, shrines). Positions `at` are [x, z] in metres, placeholders until the world builder lays the map out (they move them; the ids stay). A camp respawns `respawnMinutes` after it is cleared (world-state.js). A chest refills per player (`refillMinutes`, loot.js). Monster levels are rolled inside the camp's `levels` (or the region's). Monster ids are data/monsters.json rows (each names its art body). A camp with `chest: null` has none.",
+ "_doc": "Round 1's two regions as RULES (levels, who lives there, camps, chests, shrines). Positions `at` are [x, z] in metres on data/map.json's map (world builder 2026-11-23; js/world/terrain.js; tests/world check every spot is walkable). A camp respawns `respawnMinutes` after it is cleared (world-state.js). A chest refills per player (`refillMinutes`, loot.js). Monster levels are rolled inside the camp's `levels` (or the region's). Monster ids are data/monsters.json rows (each names its art body). A camp with `chest: null` has none.",
  "regions": {
   "brightwater_vale": {
    "name": "Brightwater Vale",
@@ -53,8 +53,8 @@
     "bandit_camp": {
      "name": "Bandit Camp by the Ford",
      "at": [
-      140,
-      -60
+      -78,
+      214
      ],
      "levels": [
       3,
@@ -85,8 +85,8 @@
     "goblin_warren": {
      "name": "Goblin Warren",
      "at": [
-      -120,
-      90
+      -405,
+      -240
      ],
      "levels": [
       2,
@@ -117,15 +117,15 @@
     "old_shrine_cult": {
      "name": "Cult at the Old Shrine",
      "at": [
-      -70,
-      -150
+      -448,
+      234
      ],
      "levels": [
       4,
       5
      ],
      "respawnMinutes": 25,
-     "chest": null,
+     "chest": "hill_reliquary",
      "spawns": [
       {
        "id": "shrine_cultist",
@@ -134,6 +134,35 @@
       {
        "id": "bounty_hunter",
        "count": 1
+      },
+      {
+       "id": "choir_speaker",
+       "count": 1,
+       "rank": "boss"
+      }
+     ]
+    },
+    "rook_hideout": {
+     "name": "Rook's Hideout",
+     "at": [
+      -58,
+      -92
+     ],
+     "levels": [
+      3,
+      3
+     ],
+     "respawnMinutes": 20,
+     "chest": null,
+     "spawns": [
+      {
+       "id": "cutpurse",
+       "count": 2
+      },
+      {
+       "id": "rook_varrow",
+       "count": 1,
+       "rank": "boss"
       }
      ]
     }
@@ -142,8 +171,8 @@
     "bandit_strongbox": {
      "name": "Bandit Strongbox",
      "at": [
-      146,
-      -64
+      -66,
+      222
      ],
      "table": "chest_camp",
      "level": 4,
@@ -153,8 +182,8 @@
     "warren_hoard": {
      "name": "Goblin Hoard",
      "at": [
-      -126,
-      96
+      -418,
+      -252
      ],
      "table": "chest_camp",
      "level": 5,
@@ -164,8 +193,8 @@
     "mill_cellar": {
      "name": "Old Mill Cellar",
      "at": [
-      40,
-      30
+      -216,
+      -36
      ],
      "table": "chest_common",
      "level": 2,
@@ -175,28 +204,46 @@
     "riverbank_cache": {
      "name": "Riverbank Cache",
      "at": [
-      -30,
-      -90
+      -170,
+      122
      ],
      "table": "chest_common",
      "level": 3,
      "refillMinutes": 20,
      "lock": null
+    },
+    "hill_reliquary": {
+     "name": "Hill Shrine Reliquary",
+     "at": [
+      -458,
+      244
+     ],
+     "table": "chest_camp",
+     "level": 5,
+     "refillMinutes": 30,
+     "lock": "apprentice"
     }
    },
    "shrines": {
     "vale_village": {
      "name": "Brightwater Shrine",
      "at": [
-      0,
-      0
+      -252,
+      -22
      ]
     },
     "old_shrine": {
-     "name": "Old Hill Shrine",
+     "name": "Old Hill Waystone",
      "at": [
-      -60,
-      -140
+      -374,
+      198
+     ]
+    },
+    "watch_shrine": {
+     "name": "Watch Knoll Shrine",
+     "at": [
+      -30,
+      52
      ]
     }
    }
@@ -261,8 +308,8 @@
     "barrow": {
      "name": "The Undead Barrow",
      "at": [
-      420,
-      200
+      480,
+      -262
      ],
      "levels": [
       7,
@@ -297,8 +344,8 @@
     "troll_bridge": {
      "name": "Troll Bridge",
      "at": [
-      330,
-      40
+      370,
+      -36
      ],
      "levels": [
       6,
@@ -321,8 +368,8 @@
     "ruins": {
      "name": "Drowned Ruins",
      "at": [
-      480,
-      -80
+      496,
+      258
      ],
      "levels": [
       8,
@@ -353,8 +400,8 @@
     "ogre_hill": {
      "name": "Ogre Hill",
      "at": [
-      260,
-      170
+      524,
+      40
      ],
      "levels": [
       8,
@@ -373,14 +420,81 @@
        "count": 3
       }
      ]
+    },
+    "blighted_grove": {
+     "name": "The Blighted Grove",
+     "at": [
+      196,
+      -188
+     ],
+     "levels": [
+      6,
+      7
+     ],
+     "respawnMinutes": 20,
+     "chest": null,
+     "spawns": [
+      {
+       "id": "thornling",
+       "count": 3
+      },
+      {
+       "id": "root_caller",
+       "count": 2
+      }
+     ]
+    },
+    "scarback_den": {
+     "name": "Scarback's Den",
+     "at": [
+      188,
+      168
+     ],
+     "levels": [
+      7,
+      7
+     ],
+     "respawnMinutes": 30,
+     "chest": null,
+     "spawns": [
+      {
+       "id": "scarback",
+       "count": 1,
+       "rank": "boss"
+      }
+     ]
+    },
+    "redtusk_camp": {
+     "name": "Redtusk Camp",
+     "at": [
+      426,
+      -112
+     ],
+     "levels": [
+      7,
+      8
+     ],
+     "respawnMinutes": 25,
+     "chest": "redtusk_stash",
+     "spawns": [
+      {
+       "id": "orc_grunt",
+       "count": 3
+      },
+      {
+       "id": "redtusk",
+       "count": 1,
+       "rank": "boss"
+      }
+     ]
     }
    },
    "chests": {
     "barrow_tomb": {
      "name": "Barrow Tomb",
      "at": [
-      424,
-      210
+      492,
+      -272
      ],
      "table": "chest_boss",
      "level": 9,
@@ -390,8 +504,8 @@
     "troll_pile": {
      "name": "Troll's Pile",
      "at": [
-      334,
-      44
+      376,
+      -44
      ],
      "table": "chest_camp",
      "level": 7,
@@ -401,8 +515,8 @@
     "ruin_coffer": {
      "name": "Drowned Coffer",
      "at": [
-      484,
-      -84
+      506,
+      266
      ],
      "table": "chest_camp",
      "level": 10,
@@ -412,28 +526,53 @@
     "druid_offering": {
      "name": "Druid Circle Offering",
      "at": [
-      380,
-      -160
+      268,
+      -252
      ],
      "table": "chest_common",
      "level": 7,
      "refillMinutes": 30,
      "lock": null
+    },
+    "redtusk_stash": {
+     "name": "Redtusk Stash",
+     "at": [
+      436,
+      -120
+     ],
+     "table": "chest_camp",
+     "level": 8,
+     "refillMinutes": 30,
+     "lock": "apprentice"
     }
    },
    "shrines": {
     "thornmere_gate": {
      "name": "Thornmere Gate Shrine",
      "at": [
-      300,
-      0
+      108,
+      -14
      ]
     },
     "druid_circle": {
      "name": "Druid Circle",
      "at": [
-      380,
-      -150
+      256,
+      -246
+     ]
+    },
+    "mire_shrine": {
+     "name": "Mire Shrine",
+     "at": [
+      436,
+      30
+     ]
+    },
+    "barrow_watch": {
+     "name": "Barrow Watch Shrine",
+     "at": [
+      400,
+      -250
      ]
     }
    }

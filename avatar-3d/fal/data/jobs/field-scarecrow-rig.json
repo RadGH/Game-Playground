@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "field-scarecrow-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/field-scarecrow-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3b007/7Uz29P0xMTbY_Y-Q0Q6fz_field-scarecrow-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "field-scarecrow: Meshy rigging",
+ "tag": "oathwild2-enemies",
+ "request_id": "01a20b0c-8a3e-7da2-89d7-4c04bb315bc6",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20b0c-8a3e-7da2-89d7-4c04bb315bc6/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20b0c-8a3e-7da2-89d7-4c04bb315bc6",
+ "submitted": "2026-11-24T00:55:00.974Z",
+ "logged": true
+}

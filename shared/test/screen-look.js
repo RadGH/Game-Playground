@@ -39,6 +39,18 @@ export function screenLookProblems(opts = {}) {
   };
   const scrollableUp = el => { for (let e = el.parentElement; e; e = e.parentElement) { const s = getComputedStyle(e); if (/(auto|scroll)/.test(s.overflowY + s.overflowX) && (e.scrollHeight > e.clientHeight + 2 || e.scrollWidth > e.clientWidth + 2)) return true; } return document.documentElement.scrollHeight > H + 2; };
   const name = t => t.replace(/\s+/g, ' ').slice(0, 50);
+  const clipTo = (el, r) => {
+    let L = r.left, T = r.top, R = r.right, B = r.bottom;
+    for (let e = el; e && e !== document.body; e = e.parentElement) {            // the text's own box clips too (an ellipsis)
+      const s = getComputedStyle(e);
+      if (s.overflowX === 'visible' && s.overflowY === 'visible') continue;
+      const c = e.getBoundingClientRect();
+      if (s.overflowX !== 'visible') { L = Math.max(L, c.left); R = Math.min(R, c.right); }
+      if (s.overflowY !== 'visible') { T = Math.max(T, c.top); B = Math.min(B, c.bottom); }
+      if (R - L < 1 || B - T < 1) return null;
+    }
+    return { left: L, top: T, right: R, bottom: B, width: R - L, height: B - T };
+  };
 
   const boxes = [];
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -57,7 +69,10 @@ export function screenLookProblems(opts = {}) {
       // clipped by an ancestor with overflow hidden? then what shows is what the designer meant — skip off-screen
       if ((r.right > W + 1 || r.bottom > H + 1 || r.left < -1 || r.top < -1) && !scrollableUp(el)) { add('text off screen', `"${name(t)}"`); break; }
     }
-    boxes.push({ el, t, rects });
+    // for overlaps, only the part the player can see counts: cut each box to every clipping ancestor (a scrolled
+    // list hides the rows under its edge — those rows do not overlap the panel below it)
+    const seen = rects.map(r => clipTo(el, r)).filter(Boolean);
+    if (seen.length) boxes.push({ el, t, rects: seen });
   }
   // overlap between two texts that are not the same element (and neither holds the other)
   const area = r => Math.max(0, r.width) * Math.max(0, r.height);

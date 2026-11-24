@@ -576,6 +576,24 @@
    ]
   },
   {
+   "id": "spellkit",
+   "group": "systems",
+   "title": "Spell Lab",
+   "href": "avatar-3d/spellkit/",
+   "folder": "avatar-3d/spellkit",
+   "summary": "Layered spell visuals in the style of a classic fantasy MMO: hands that light up while you aim, targeting rings that hug the ground, missiles with trails, impacts with flash, shockwave and scorch, and lingering ground spells with a turning rune, a rising wall of light and many painted particle layers. Data-driven, pooled, one particle draw for everything.",
+   "status": "playable",
+   "statusNote": "first used by Oathwild",
+   "date": "2026-11-23",
+   "tags": [
+    "3d",
+    "particles",
+    "combat",
+    "codex-art"
+   ],
+   "isNew": true
+  },
+  {
    "id": "combined",
    "group": "systems",
    "title": "Combined demo",
@@ -987,6 +1005,24 @@
     "iso",
     "2d",
     "sci-fi"
+   ]
+  },
+  {
+   "id": "oathwild",
+   "group": "prototypes",
+   "title": "Oathwild",
+   "href": "prototypes/oathwild/",
+   "folder": "prototypes/oathwild",
+   "summary": "A third-person fantasy RPG for one to ten players in one shared, saved world: pick a class every level from 27 (as many as you like per hero), aim weapons and spells over the shoulder with ground markers, loot corpses and chests, and quest through Brightwater Vale and the Thornmere Wilds.",
+   "status": "prototype",
+   "statusNote": "Round 1",
+   "date": "2026-11-23",
+   "isNew": true,
+   "tags": [
+    "rpg",
+    "3d",
+    "co-op",
+    "open world"
    ]
   }
  ]

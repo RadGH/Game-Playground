@@ -1,6 +1,6 @@
 {
  "_doc": "Every paid fal.ai job (tools/fal-job.mjs). price = US$ from the model page at the time.",
- "total": 36.2,
+ "total": 36.6,
  "jobs": [
   {
    "id": "male-rodin",
@@ -3855,6 +3855,108 @@
    "submitted": "2026-11-24T00:01:16.371Z",
    "done": "2026-11-24T00:02:32.010Z",
    "seconds": 114
+  },
+  {
+   "id": "bandit-chief-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20b0c-4561-7661-b71d-62087a23ed62",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/bandit-chief-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "bandit-chief: Meshy rigging",
+   "tag": "oathwild2-enemies",
+   "files": [
+    {
+     "file": "models/bandit-chief-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1423128
+    },
+    {
+     "file": "models/bandit-chief-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1320044
+    },
+    {
+     "file": "models/bandit-chief-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1555604
+    },
+    {
+     "file": "models/bandit-chief-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1368956
+    },
+    {
+     "file": "models/bandit-chief-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52064
+    },
+    {
+     "file": "models/bandit-chief-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1524304
+    },
+    {
+     "file": "models/bandit-chief-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1348268
+    },
+    {
+     "file": "models/bandit-chief-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41004
+    }
+   ],
+   "submitted": "2026-11-24T00:54:43.351Z",
+   "done": "2026-11-24T00:55:29.089Z",
+   "seconds": 75
+  },
+  {
+   "id": "field-scarecrow-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20b0c-8a3e-7da2-89d7-4c04bb315bc6",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/field-scarecrow-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "field-scarecrow: Meshy rigging",
+   "tag": "oathwild2-enemies",
+   "files": [
+    {
+     "file": "models/field-scarecrow-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1171516
+    },
+    {
+     "file": "models/field-scarecrow-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1150140
+    },
+    {
+     "file": "models/field-scarecrow-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1304244
+    },
+    {
+     "file": "models/field-scarecrow-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1199036
+    },
+    {
+     "file": "models/field-scarecrow-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52028
+    },
+    {
+     "file": "models/field-scarecrow-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1273016
+    },
+    {
+     "file": "models/field-scarecrow-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1178348
+    },
+    {
+     "file": "models/field-scarecrow-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40968
+    }
+   ],
+   "submitted": "2026-11-24T00:55:00.974Z",
+   "done": "2026-11-24T00:56:35.289Z",
+   "seconds": 121
   }
  ]
 }

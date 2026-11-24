@@ -1,0 +1,1052 @@
+{
+  "_doc": "Oathwild spell visuals for the Spell Kit (avatar-3d/spellkit/README.md has every field). visuals: id -> { label, kind (missile|ground|nova|beam|cone|melee|self|shift|summon|aura), school (palette + {school} in texture names), phases: windup / release / travel {speed, arc, count, every, from, layers} / impact / linger {seconds, radius, layers} / aura / beam {seconds, layers} / sweep }. Colours: hot | mid | deep | smoke | white | black (from the school palette) or '#rrggbb'. spells: Oathwild spell id -> visual id or { visual, school, scale } (written by avatar-3d/spellkit/tools/map-spells.mjs; hand changes go in its table). fallback: '<targetKind>:<element>' -> visual for spells added later.",
+  "visuals": {
+    "fire_bolt": {
+      "label": "Fire bolt",
+      "kind": "missile",
+      "school": "fire",
+      "windupTime": 0.9,
+      "aim": {"shape": "none"},
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "texs": ["flame_1", "flame_2", "flame_3", "flame_4", "flame_6"], "rate": 34, "max": 40, "life": [0.3, 0.55], "size": [0.16, 0.26], "sizeCurve": [0.5, 1, 0.3], "color": ["hot", "mid", "deep"], "edge": "deep", "dir": "up", "speed": [0.3, 0.8], "spread": 0.35, "radius": 0.06, "shape": "sphere", "rot": 0},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "fx_flame", "rate": 7, "max": 6, "life": [0.45, 0.6], "size": [0.3, 0.38], "color": ["hot", "mid", "deep"], "alpha": [0, 0.9, 0], "dir": "up", "speed": [0.2, 0.4], "rot": 0},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 16, "max": 16, "life": [0.35, 0.6], "size": [0.05, 0.09], "color": ["white", "hot", "mid"], "shape": "sphere", "radius": 0.5, "converge": true, "alpha": [0, 1, 0.6]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 12, "max": 8, "life": [0.2, 0.3], "size": [0.32, 0.42], "color": ["hot", "mid", "mid"], "alpha": [0, 0.55, 0]},
+        {"type": "emitter", "at": "hands", "tex": "spark_streak", "rate": 8, "max": 10, "life": [0.3, 0.5], "size": [0.04, 0.06], "stretch": 0.15, "dir": "up", "speed": [1, 2], "spread": 0.5, "drag": 1.5, "color": ["white", "hot", "mid"]},
+        {"type": "light", "at": "hand_r", "intensity": 6, "range": 3.5, "flicker": 0.3, "y": 0}
+      ],
+      "release": [
+        {"type": "flipbook", "at": "hand_r", "tex": "fx_burst", "size": 0.9, "life": 0.25, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hand_r", "tex": "spark_streak", "burst": 14, "life": [0.25, 0.4], "size": [0.04, 0.07], "stretch": 0.1, "dir": "random", "speed": [2, 4], "gravity": 4, "color": ["white", "hot", "mid"]},
+        {"type": "light", "at": "hand_r", "intensity": 14, "range": 4, "life": 0.2, "y": 0}
+      ],
+      "travel": {
+        "speed": 17,
+        "arc": 0.04,
+        "layers": [
+          {"type": "mesh", "kind": "core", "at": "missile", "size": 0.3, "color": "hot", "edge": "mid", "pulse": [0.15, 9]},
+          {"type": "emitter", "at": "missile", "texs": ["flame_1", "flame_2", "flame_4", "flame_5"], "rate": 90, "max": 60, "life": [0.18, 0.35], "size": [0.3, 0.45], "sizeCurve": [1, 0.7, 0.2], "dir": "random", "speed": [0.2, 0.6], "color": ["hot", "mid", "deep"], "spin": [1, 3]},
+          {"type": "emitter", "at": "missile", "tex": "fx_flame", "rate": 30, "max": 16, "life": [0.3, 0.4], "size": [0.45, 0.6], "color": ["hot", "mid", "deep"], "dir": "up", "speed": [0.3, 0.6]},
+          {"type": "emitter", "at": "missile", "blend": "normal", "texs": ["smoke_1", "smoke_3"], "rate": 18, "max": 20, "life": [0.5, 0.9], "size": [0.25, 0.4], "sizeCurve": [0.5, 1, 1.5], "color": ["#3a2a22", "#2a201c", "#1a1412"], "edge": "#120c0a", "alpha": [0, 0.5, 0], "dir": "up", "speed": [0.2, 0.5]},
+          {"type": "emitter", "at": "missile", "tex": "spark_streak", "rate": 28, "max": 24, "life": [0.2, 0.4], "size": [0.04, 0.06], "stretch": 0.08, "dir": "random", "speed": [0.6, 1.6], "gravity": 3, "color": ["white", "hot", "mid"]},
+          {"type": "ribbon", "at": "missile", "width": 0.34, "seconds": 0.2, "color": "hot", "edge": "deep", "tex": "band_flame", "texMix": 0.5},
+          {"type": "light", "at": "missile", "intensity": 8, "range": 5, "flicker": 0.2, "y": 0}
+        ]
+      },
+      "impact": [
+        {"type": "flipbook", "tex": "fx_burst", "size": 3.2, "life": 0.5, "color": ["white", "hot", "mid"], "edge": "deep"},
+        {"type": "emitter", "tex": "fx_flame", "burst": 14, "shape": "sphere", "radius": 0.45, "life": [0.5, 0.85], "size": [0.8, 1.4], "dir": "up", "speed": [0.5, 1.4], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "tex": "spark_streak", "burst": 40, "dir": "outUp", "speed": [4, 8], "spread": 0.45, "gravity": 9, "drag": 0.5, "life": [0.4, 0.8], "size": [0.05, 0.08], "stretch": 0.06, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "blend": "normal", "texs": ["smoke_1", "smoke_3", "dust_1"], "burst": 12, "shape": "sphere", "radius": 0.5, "life": [1, 1.8], "size": [0.6, 1], "sizeCurve": [0.5, 1, 1.6], "dir": "up", "speed": [0.4, 1], "alpha": [0, 0.5, 0], "color": ["#3a2a22", "#2a201c", "#1a1412"], "edge": "#120c0a", "delay": 0.08},
+        {"type": "decal", "tex": "ring_shock", "size": 5, "grow": [0.1, 1, 0.35], "life": 0.45, "fadeIn": 0, "fadeOut": 0.3, "color": "hot", "edge": "mid"},
+        {"type": "decal", "tex": "scorch", "blend": "normal", "size": 2.6, "life": 6, "fadeIn": 0.1, "fadeOut": 2.5, "opacity": 0.85, "color": "#100806", "edge": "#2a1a10", "layer": 1},
+        {"type": "decal", "tex": "scorch", "size": 2.2, "life": 1.6, "fadeOut": 1.3, "opacity": 0.9, "color": "mid", "edge": "deep", "layer": 2},
+        {"type": "light", "intensity": 30, "range": 8, "life": 0.5, "y": 0.8},
+        {"type": "shake", "strength": 0.25}
+      ]
+    },
+    "frost_bolt": {
+      "label": "Frost shard",
+      "kind": "missile",
+      "school": "ice",
+      "windupTime": 0.8,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "shard_ice", "rate": 12, "max": 10, "life": [0.4, 0.6], "size": [0.1, 0.16], "shape": "sphere", "radius": 0.45, "converge": true, "color": ["white", "hot", "mid"], "spin": [1, 3]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 20, "max": 16, "life": [0.35, 0.6], "size": [0.05, 0.08], "shape": "sphere", "radius": 0.4, "converge": true, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "blend": "normal", "tex": "smoke_2", "rate": 6, "max": 6, "life": [0.6, 0.9], "size": [0.25, 0.35], "color": ["smoke"], "edge": "mid", "alpha": [0, 0.35, 0], "dir": "down", "speed": [0.1, 0.3]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 12, "max": 8, "life": [0.2, 0.3], "size": [0.3, 0.4], "color": ["hot", "mid", "mid"], "alpha": [0, 0.5, 0]},
+        {"type": "light", "at": "hand_r", "intensity": 5, "range": 3, "y": 0}
+      ],
+      "release": [
+        {"type": "emitter", "at": "hand_r", "tex": "mote_star", "burst": 16, "life": [0.25, 0.4], "size": [0.06, 0.1], "dir": "random", "speed": [1.5, 3], "drag": 3, "color": ["white", "hot", "mid"]}
+      ],
+      "travel": {
+        "speed": 20,
+        "arc": 0.03,
+        "layers": [
+          {"type": "mesh", "kind": "shard", "at": "missile", "size": 0.55, "color": "white", "edge": "mid", "spin": [0, 0, 12]},
+          {"type": "emitter", "at": "missile", "tex": "mote_star", "rate": 60, "max": 40, "life": [0.3, 0.6], "size": [0.05, 0.09], "dir": "random", "speed": [0.2, 0.6], "color": ["white", "hot", "mid"]},
+          {"type": "emitter", "at": "missile", "blend": "normal", "tex": "smoke_2", "rate": 18, "max": 14, "life": [0.4, 0.7], "size": [0.25, 0.4], "color": ["smoke"], "edge": "hot", "alpha": [0, 0.4, 0]},
+          {"type": "ribbon", "at": "missile", "width": 0.26, "seconds": 0.22, "color": "hot", "edge": "deep", "tex": "band_mist", "texMix": 0.6},
+          {"type": "light", "at": "missile", "intensity": 5, "range": 4, "y": 0}
+        ]
+      },
+      "impact": [
+        {"type": "emitter", "tex": "shard_ice", "burst": 22, "dir": "random", "speed": [3, 6], "drag": 2.5, "gravity": 6, "life": [0.5, 0.8], "size": [0.14, 0.24], "stretch": 0.05, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "tex": "burst_star", "burst": 1, "life": 0.22, "size": [1.4, 1.4], "rot": 0, "alpha": [1, 0.8, 0], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "blend": "normal", "texs": ["smoke_1", "smoke_2"], "burst": 8, "shape": "sphere", "radius": 0.4, "life": [0.8, 1.3], "size": [0.5, 0.8], "sizeCurve": [0.6, 1, 1.4], "dir": "random", "speed": [0.3, 0.8], "alpha": [0, 0.35, 0], "color": ["smoke"], "edge": "hot"},
+        {"type": "decal", "tex": "frost_patch", "size": 2.2, "life": 5, "fadeOut": 2, "opacity": 0.45, "color": "mid", "edge": "deep"},
+        {"type": "light", "intensity": 14, "range": 6, "life": 0.4, "y": 0.8}
+      ]
+    },
+    "arcane_missile": {
+      "label": "Arcane missiles",
+      "kind": "missile",
+      "school": "arcane",
+      "windupTime": 0.8,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 26, "max": 20, "life": [0.6, 0.9], "size": [0.05, 0.09], "shape": "ring", "radius": 0.28, "swirl": 6, "dir": "up", "speed": [0.05, 0.15], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "rune_arcane", "rate": 2.2, "max": 2, "life": [0.7, 0.9], "size": [0.42, 0.42], "spin": [2, 3], "color": ["hot", "mid", "deep"], "alpha": [0, 0.9, 0]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 12, "max": 8, "life": [0.2, 0.3], "size": [0.3, 0.4], "color": ["hot", "mid", "mid"], "alpha": [0, 0.55, 0]},
+        {"type": "light", "at": "hand_r", "intensity": 5, "range": 3, "y": 0}
+      ],
+      "release": [
+        {"type": "emitter", "at": "hand_r", "tex": "ring_shock", "burst": 1, "life": 0.25, "size": [0.6, 0.6], "sizeCurve": [0.3, 1, 1.4], "rot": 0, "color": ["white", "hot", "mid"]}
+      ],
+      "travel": {
+        "speed": 21,
+        "arc": 0.18,
+        "count": 3,
+        "every": 0.16,
+        "layers": [
+          {"type": "mesh", "kind": "shard", "at": "missile", "size": 0.36, "stretch": 1.3, "color": "white", "edge": "mid", "spin": [0, 0, 14]},
+          {"type": "emitter", "at": "missile", "tex": "mote_star", "rate": 50, "max": 30, "life": [0.25, 0.45], "size": [0.06, 0.1], "dir": "random", "speed": [0.2, 0.5], "color": ["white", "hot", "mid"]},
+          {"type": "emitter", "at": "missile", "tex": "dot_soft", "rate": 30, "max": 14, "life": [0.12, 0.2], "size": [0.4, 0.5], "alpha": [0, 0.5, 0], "color": ["hot", "mid", "deep"]},
+          {"type": "ribbon", "at": "missile", "width": 0.22, "seconds": 0.3, "color": "hot", "edge": "deep"}
+        ]
+      },
+      "impact": [
+        {"type": "flipbook", "tex": "fx_burst", "size": 1.4, "life": 0.35, "color": ["white", "hot", "mid"], "edge": "deep"},
+        {"type": "emitter", "tex": "ring_shock", "burst": 1, "life": 0.3, "size": [1.6, 1.6], "sizeCurve": [0.3, 1, 1.3], "rot": 0, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "tex": "mote_star", "burst": 22, "dir": "random", "speed": [2, 4], "drag": 3, "life": [0.4, 0.7], "size": [0.06, 0.11], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "tex": "rune_arcane", "burst": 1, "life": 0.5, "size": [0.9, 0.9], "sizeCurve": [0.6, 1, 1.2], "spin": [3, 3], "alpha": [1, 0.7, 0], "color": ["hot", "mid", "deep"]},
+        {"type": "light", "intensity": 10, "range": 5, "life": 0.3, "y": 0.4}
+      ]
+    },
+    "shadow_bolt": {
+      "label": "Shadow bolt",
+      "kind": "missile",
+      "school": "shadow",
+      "windupTime": 0.9,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "blend": "normal", "texs": ["smoke_2", "smoke_4"], "rate": 18, "max": 18, "life": [0.5, 0.8], "size": [0.22, 0.34], "sizeCurve": [0.5, 1, 1.2], "dir": "up", "speed": [0.2, 0.5], "color": ["smoke"], "edge": "#000000", "alpha": [0, 0.7, 0]},
+        {"type": "emitter", "at": "hands", "follow": true, "texs": ["flame_2", "flame_4", "flame_6"], "rate": 22, "max": 22, "life": [0.3, 0.5], "size": [0.16, 0.24], "sizeCurve": [0.5, 1, 0.3], "dir": "up", "speed": [0.3, 0.7], "color": ["hot", "mid", "deep"], "rot": 0},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 14, "max": 14, "life": [0.35, 0.6], "size": [0.05, 0.08], "shape": "sphere", "radius": 0.5, "converge": true, "color": ["hot", "mid", "deep"]},
+        {"type": "light", "at": "hand_r", "intensity": 4, "range": 3, "y": 0}
+      ],
+      "release": [
+        {"type": "emitter", "at": "hand_r", "blend": "normal", "tex": "smoke_1", "burst": 5, "life": [0.4, 0.6], "size": [0.4, 0.6], "dir": "random", "speed": [0.5, 1], "color": ["smoke"], "edge": "#000000", "alpha": [0, 0.7, 0]}
+      ],
+      "travel": {
+        "speed": 14,
+        "arc": 0.12,
+        "layers": [
+          {"type": "mesh", "kind": "core", "at": "missile", "size": 0.3, "color": "hot", "edge": "deep", "pulse": [0.2, 6]},
+          {"type": "emitter", "at": "missile", "blend": "normal", "texs": ["smoke_1", "smoke_2", "smoke_3"], "rate": 55, "max": 50, "life": [0.4, 0.7], "size": [0.35, 0.55], "sizeCurve": [0.7, 1, 1.4], "dir": "random", "speed": [0.1, 0.4], "color": ["smoke"], "edge": "#000000", "alpha": [0, 0.75, 0], "spin": [0.5, 2]},
+          {"type": "emitter", "at": "missile", "texs": ["flame_1", "flame_4"], "rate": 50, "max": 34, "life": [0.2, 0.35], "size": [0.3, 0.42], "sizeCurve": [1, 0.7, 0.2], "dir": "random", "speed": [0.2, 0.5], "color": ["hot", "mid", "deep"]},
+          {"type": "ribbon", "at": "missile", "width": 0.3, "seconds": 0.25, "color": "mid", "edge": "deep", "tex": "band_mist", "texMix": 0.7},
+          {"type": "light", "at": "missile", "intensity": 5, "range": 4, "y": 0}
+        ]
+      },
+      "impact": [
+        {"type": "flipbook", "tex": "fx_burst", "size": 2, "life": 0.4, "color": ["hot", "mid", "deep"], "edge": "deep"},
+        {"type": "emitter", "blend": "normal", "texs": ["smoke_1", "smoke_3"], "burst": 16, "shape": "sphere", "radius": 0.4, "life": [0.9, 1.5], "size": [0.6, 1], "sizeCurve": [0.5, 1, 1.5], "dir": "random", "speed": [0.6, 1.4], "drag": 1.5, "color": ["smoke"], "edge": "#000000", "alpha": [0, 0.75, 0]},
+        {"type": "emitter", "tex": "spark_streak", "burst": 20, "dir": "random", "speed": [3, 6], "drag": 2, "life": [0.3, 0.5], "size": [0.05, 0.08], "stretch": 0.08, "color": ["hot", "mid", "deep"]},
+        {"type": "decal", "tex": "stain_shadow", "blend": "normal", "size": 2.6, "life": 5, "fadeOut": 2, "opacity": 0.85, "color": "#05020a", "edge": "#1a0a2a"},
+        {"type": "decal", "tex": "rune_shadow", "size": 2.2, "life": 0.9, "grow": [0.4, 1, 0.3], "spin": 1.2, "fadeOut": 0.6, "color": "hot", "edge": "deep", "layer": 1},
+        {"type": "light", "intensity": 12, "range": 6, "life": 0.4, "y": 0.6},
+        {"type": "shake", "strength": 0.15}
+      ]
+    },
+    "bolt_generic": {
+      "label": "Bolt (any school)",
+      "kind": "missile",
+      "school": "arcane",
+      "windupTime": 0.7,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 18, "max": 16, "life": [0.35, 0.6], "size": [0.05, 0.09], "shape": "sphere", "radius": 0.45, "converge": true, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 12, "max": 8, "life": [0.2, 0.3], "size": [0.3, 0.4], "color": ["hot", "mid", "mid"], "alpha": [0, 0.55, 0]},
+        {"type": "emitter", "at": "hands", "follow": true, "texs": ["flame_1", "flame_4"], "rate": 14, "max": 12, "life": [0.3, 0.5], "size": [0.12, 0.2], "sizeCurve": [0.5, 1, 0.3], "dir": "up", "speed": [0.3, 0.6], "color": ["hot", "mid", "deep"], "rot": 0},
+        {"type": "light", "at": "hand_r", "intensity": 4, "range": 3, "y": 0}
+      ],
+      "release": [
+        {"type": "emitter", "at": "hand_r", "tex": "burst_star", "burst": 1, "life": 0.18, "size": [0.7, 0.7], "rot": 0, "alpha": [1, 0.7, 0], "color": ["white", "hot", "mid"]}
+      ],
+      "travel": {
+        "speed": 18,
+        "arc": 0.1,
+        "layers": [
+          {"type": "mesh", "kind": "core", "at": "missile", "size": 0.26, "color": "hot", "edge": "mid", "pulse": [0.15, 8]},
+          {"type": "emitter", "at": "missile", "tex": "mote_star", "rate": 45, "max": 30, "life": [0.25, 0.45], "size": [0.05, 0.09], "dir": "random", "speed": [0.2, 0.5], "color": ["white", "hot", "mid"]},
+          {"type": "emitter", "at": "missile", "texs": ["smoke_2", "smoke_4"], "rate": 20, "max": 16, "life": [0.3, 0.5], "size": [0.3, 0.45], "dir": "random", "speed": [0.1, 0.3], "alpha": [0, 0.45, 0], "color": ["mid", "deep", "deep"]},
+          {"type": "ribbon", "at": "missile", "width": 0.24, "seconds": 0.22, "color": "hot", "edge": "deep"},
+          {"type": "light", "at": "missile", "intensity": 4, "range": 4, "y": 0}
+        ]
+      },
+      "impact": [
+        {"type": "flipbook", "tex": "fx_burst", "size": 1.5, "life": 0.35, "color": ["white", "hot", "mid"], "edge": "deep"},
+        {"type": "emitter", "tex": "mote_star", "burst": 20, "dir": "random", "speed": [2, 4], "drag": 3, "life": [0.4, 0.7], "size": [0.06, 0.1], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "tex": "spark_streak", "burst": 14, "dir": "outUp", "speed": [3, 5], "gravity": 6, "life": [0.3, 0.5], "size": [0.04, 0.07], "stretch": 0.07, "color": ["white", "hot", "mid"]},
+        {"type": "decal", "tex": "rune_{school}", "size": 1.8, "life": 0.8, "grow": [0.4, 1, 0.25], "spin": 1.5, "fadeOut": 0.5, "color": "hot", "edge": "deep"},
+        {"type": "light", "intensity": 10, "range": 5, "life": 0.3, "y": 0.5}
+      ]
+    },
+    "nature_bolt": {
+      "label": "Thorn bolt",
+      "kind": "missile",
+      "school": "nature",
+      "windupTime": 0.7,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "leaf", "rate": 10, "max": 10, "life": [0.5, 0.8], "size": [0.08, 0.12], "shape": "ring", "radius": 0.3, "swirl": 5, "dir": "up", "speed": [0.1, 0.3], "spin": [2, 5], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 14, "max": 12, "life": [0.35, 0.6], "size": [0.05, 0.08], "shape": "sphere", "radius": 0.4, "converge": true, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 10, "max": 8, "life": [0.2, 0.3], "size": [0.28, 0.36], "color": ["hot", "mid", "mid"], "alpha": [0, 0.5, 0]}
+      ],
+      "travel": {
+        "speed": 18,
+        "arc": 0.12,
+        "layers": [
+          {"type": "mesh", "kind": "spike", "at": "missile", "size": 0.3, "stretch": 2.2, "color": "hot", "edge": "deep"},
+          {"type": "emitter", "at": "missile", "tex": "leaf", "rate": 30, "max": 24, "life": [0.4, 0.7], "size": [0.1, 0.15], "dir": "random", "speed": [0.3, 0.8], "spin": [3, 6], "gravity": 1.5, "color": ["hot", "mid", "deep"]},
+          {"type": "emitter", "at": "missile", "tex": "mote_star", "rate": 30, "max": 20, "life": [0.25, 0.4], "size": [0.05, 0.08], "dir": "random", "speed": [0.2, 0.4], "color": ["white", "hot", "mid"]},
+          {"type": "ribbon", "at": "missile", "width": 0.18, "seconds": 0.22, "color": "hot", "edge": "deep"}
+        ]
+      },
+      "impact": [
+        {"type": "emitter", "tex": "leaf", "burst": 18, "dir": "outUp", "speed": [2, 4], "gravity": 4, "drag": 1, "life": [0.6, 1], "size": [0.1, 0.16], "spin": [3, 7], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "tex": "burst_star", "burst": 1, "life": 0.2, "size": [1.1, 1.1], "rot": 0, "alpha": [1, 0.7, 0], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "blend": "normal", "tex": "dust_1", "burst": 4, "life": [0.6, 1], "size": [0.5, 0.8], "dir": "out", "speed": [0.5, 1], "alpha": [0, 0.4, 0], "color": ["#5a4a30"], "edge": "#2a2010"},
+        {"type": "decal", "tex": "rune_nature", "size": 1.6, "life": 0.8, "grow": [0.4, 1, 0.25], "spin": 1.2, "fadeOut": 0.5, "color": "hot", "edge": "deep"}
+      ]
+    },
+    "arrow": {
+      "label": "Arrow",
+      "kind": "missile",
+      "school": "physical",
+      "release": [
+        {"type": "emitter", "at": "hand_r", "tex": "spark_streak", "burst": 4, "life": [0.15, 0.25], "size": [0.04, 0.05], "stretch": 0.2, "dir": "random", "speed": [1, 2], "color": ["white", "hot", "mid"]}
+      ],
+      "travel": {
+        "speed": 34,
+        "arc": 0.05,
+        "layers": [
+          {"type": "mesh", "kind": "arrow", "at": "missile", "size": 0.9, "color": "hot", "edge": "mid"},
+          {"type": "ribbon", "at": "missile", "width": 0.07, "seconds": 0.12, "color": "hot", "edge": "deep", "opacity": 0.7},
+          {"type": "emitter", "at": "missile", "tex": "mote_star", "rate": 25, "max": 10, "life": [0.15, 0.25], "size": [0.04, 0.06], "color": ["white", "hot", "mid"], "quality": "high"}
+        ]
+      },
+      "impact": [
+        {"type": "emitter", "tex": "burst_star", "burst": 1, "life": 0.12, "size": [0.7, 0.7], "rot": 0, "alpha": [1, 0.6, 0], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "tex": "spark_streak", "burst": 10, "dir": "outUp", "speed": [2, 4], "gravity": 8, "life": [0.2, 0.35], "size": [0.03, 0.05], "stretch": 0.06, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "blend": "normal", "tex": "dust_1", "burst": 2, "life": [0.4, 0.6], "size": [0.3, 0.5], "dir": "up", "speed": [0.2, 0.5], "alpha": [0, 0.35, 0], "color": ["#7a6a50"], "edge": "#3a3020"}
+      ]
+    },
+    "flask_throw": {
+      "label": "Thrown flask",
+      "kind": "ground",
+      "school": "fire",
+      "travel": {
+        "speed": 13,
+        "arc": 0.3,
+        "from": "hand",
+        "layers": [
+          {"type": "mesh", "kind": "core", "at": "missile", "size": 0.18, "color": "hot", "edge": "mid"},
+          {"type": "emitter", "at": "missile", "tex": "spark_streak", "rate": 20, "max": 10, "life": [0.2, 0.3], "size": [0.03, 0.05], "stretch": 0.08, "speed": [0.2, 0.5], "color": ["white", "hot", "mid"]},
+          {"type": "ribbon", "at": "missile", "width": 0.1, "seconds": 0.15, "color": "hot", "edge": "deep"}
+        ]
+      },
+      "impact": [
+        {"type": "flipbook", "tex": "fx_burst", "size": 3, "life": 0.45, "color": ["white", "hot", "mid"], "edge": "deep"},
+        {"type": "emitter", "tex": "fx_flame", "burst": 12, "shape": "disc", "rad": 0.6, "onGround": true, "life": [0.5, 0.9], "size": [0.7, 1.1], "dir": "up", "speed": [0.5, 1.2], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "tex": "spark_streak", "burst": 36, "dir": "outUp", "speed": [4, 8], "gravity": 9, "life": [0.4, 0.7], "size": [0.04, 0.07], "stretch": 0.06, "color": ["white", "hot", "mid"]},
+        {"type": "decal", "tex": "ring_shock", "rad": 1.2, "grow": [0.1, 1, 0.35], "life": 0.45, "fadeIn": 0, "fadeOut": 0.3, "color": "hot", "edge": "mid"},
+        {"type": "decal", "tex": "scorch", "blend": "normal", "rad": 0.9, "life": 6, "fadeOut": 2.5, "opacity": 0.85, "color": "#100806", "edge": "#2a1a10", "layer": 1},
+        {"type": "light", "intensity": 26, "range": 8, "life": 0.5, "y": 0.8},
+        {"type": "shake", "strength": 0.25}
+      ]
+    },
+    "meteor": {
+      "label": "Falling stone",
+      "kind": "ground",
+      "school": "fire",
+      "travel": {
+        "speed": 22,
+        "arc": 0,
+        "from": "sky",
+        "layers": [
+          {"type": "mesh", "kind": "core", "at": "missile", "size": 0.9, "color": "hot", "edge": "deep", "pulse": [0.1, 6]},
+          {"type": "emitter", "at": "missile", "tex": "fx_flame", "rate": 70, "max": 50, "life": [0.3, 0.5], "size": [0.9, 1.4], "shape": "sphere", "radius": 0.3, "dir": "random", "speed": [0.3, 0.8], "color": ["hot", "mid", "deep"]},
+          {"type": "emitter", "at": "missile", "blend": "normal", "texs": ["smoke_1", "smoke_3"], "rate": 30, "max": 40, "life": [0.8, 1.4], "size": [0.8, 1.3], "sizeCurve": [0.6, 1, 1.6], "dir": "up", "speed": [0.2, 0.5], "color": ["#3a2a22", "#2a201c", "#1a1412"], "edge": "#120c0a", "alpha": [0, 0.6, 0]},
+          {"type": "ribbon", "at": "missile", "width": 1, "seconds": 0.35, "color": "hot", "edge": "deep", "tex": "band_flame", "texMix": 0.6},
+          {"type": "light", "at": "missile", "intensity": 18, "range": 10, "flicker": 0.2, "y": 0}
+        ]
+      },
+      "impact": [
+        {"type": "flipbook", "tex": "fx_burst", "size": 6, "life": 0.6, "color": ["white", "hot", "mid"], "edge": "deep"},
+        {"type": "emitter", "tex": "fx_flame", "burst": 22, "shape": "disc", "rad": 0.8, "onGround": true, "life": [0.6, 1.1], "size": [1, 1.8], "dir": "up", "speed": [1, 2.5], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "tex": "spark_streak", "burst": 70, "dir": "outUp", "speed": [6, 12], "gravity": 10, "life": [0.6, 1.1], "size": [0.06, 0.1], "stretch": 0.05, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "blend": "normal", "texs": ["dust_1", "smoke_1", "smoke_3"], "burst": 26, "shape": "ring", "rad": 0.5, "onGround": true, "life": [1.4, 2.4], "size": [1.2, 2], "sizeCurve": [0.5, 1, 1.5], "dir": "out", "speed": [2, 5], "drag": 1.6, "alpha": [0, 0.6, 0], "color": ["#4a3a2a", "#3a2a22", "#2a2018"], "edge": "#140c08"},
+        {"type": "shell", "shape": "cylinder", "tex": "band_flame", "rad": 0.4, "grow": [0.2, 1.6, 0.5], "height": 2.2, "life": 0.8, "fadeOut": 0.5, "opacity": 0.9, "scroll": [0.05, -0.6], "color": "hot", "edge": "deep"},
+        {"type": "decal", "tex": "ring_shock", "rad": 2.2, "grow": [0.1, 1, 0.5], "life": 0.6, "fadeIn": 0, "fadeOut": 0.4, "color": "hot", "edge": "mid"},
+        {"type": "decal", "tex": "crack_ground", "blend": "normal", "rad": 0.9, "life": 8, "fadeOut": 3, "opacity": 0.9, "color": "#0c0604", "edge": "#2a1a10", "layer": 1},
+        {"type": "decal", "tex": "crack_ground", "rad": 0.8, "life": 3, "fadeOut": 2.5, "opacity": 1, "color": "mid", "edge": "deep", "layer": 2},
+        {"type": "light", "intensity": 60, "range": 14, "life": 0.8, "y": 1.2},
+        {"type": "shake", "strength": 0.7}
+      ],
+      "linger": {
+        "seconds": 4,
+        "radius": 3,
+        "layers": [
+          {"type": "emitter", "texs": ["flame_1", "flame_3", "flame_5"], "rate": 30, "shape": "disc", "rad": 0.7, "onGround": true, "life": [0.5, 0.9], "size": [0.4, 0.8], "dir": "up", "speed": [0.3, 0.8], "color": ["hot", "mid", "deep"], "rot": 0},
+          {"type": "emitter", "blend": "normal", "texs": ["smoke_2", "smoke_4"], "rate": 8, "shape": "disc", "rad": 0.6, "onGround": true, "life": [1.5, 2.5], "size": [0.8, 1.3], "dir": "up", "speed": [0.4, 0.8], "color": ["#3a2a22", "#2a201c", "#1a1412"], "edge": "#120c0a", "alpha": [0, 0.4, 0]},
+          {"type": "light", "intensity": 8, "range": 7, "flicker": 0.3, "y": 0.6}
+        ]
+      }
+    },
+    "ring_of_dawn": {
+      "label": "Hallowed ground",
+      "kind": "ground",
+      "school": "holy",
+      "windupTime": 1,
+      "aim": {"shape": "circle", "kind": "friendly"},
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 22, "max": 20, "life": [0.5, 0.9], "size": [0.06, 0.1], "shape": "ring", "radius": 0.25, "swirl": 4, "dir": "up", "speed": [0.2, 0.5], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "rune_holy", "rate": 1.6, "max": 2, "life": [0.9, 1.1], "size": [0.45, 0.45], "spin": [1.5, 2], "color": ["hot", "mid", "deep"], "alpha": [0, 0.9, 0]},
+        {"type": "emitter", "at": "hands", "follow": true, "texs": ["flame_1", "flame_4"], "rate": 16, "max": 14, "life": [0.3, 0.5], "size": [0.14, 0.22], "sizeCurve": [0.5, 1, 0.3], "dir": "up", "speed": [0.3, 0.6], "color": ["white", "hot", "deep"], "rot": 0},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 12, "max": 8, "life": [0.2, 0.3], "size": [0.36, 0.46], "color": ["hot", "mid", "mid"], "alpha": [0, 0.55, 0]},
+        {"type": "light", "at": "hand_r", "intensity": 6, "range": 4, "y": 0}
+      ],
+      "release": [
+        {"type": "emitter", "at": "hand_r", "tex": "burst_star", "burst": 1, "life": 0.25, "size": [1.1, 1.1], "rot": 0, "alpha": [1, 0.7, 0], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "tex": "mote_star", "burst": 14, "life": [0.5, 0.8], "size": [0.06, 0.1], "dir": "up", "speed": [1, 2], "spread": 0.6, "color": ["white", "hot", "mid"]}
+      ],
+      "impact": [
+        {"type": "shell", "shape": "cylinder", "tex": "band_light", "rad": 0.32, "height": 12, "life": 0.7, "fadeIn": 0.03, "fadeOut": 0.55, "opacity": 1, "fade": 0.6, "scroll": [0, -1.4], "repeat": [3, 1], "color": "white", "edge": "mid"},
+        {"type": "decal", "tex": "ring_shock", "rad": 1.25, "grow": [0.1, 1, 0.4], "life": 0.55, "fadeIn": 0, "fadeOut": 0.35, "color": "white", "edge": "mid"},
+        {"type": "emitter", "tex": "mote_star", "burst": 40, "shape": "disc", "rad": 0.3, "onGround": true, "dir": "outUp", "speed": [2, 5], "drag": 2, "life": [0.6, 1.1], "size": [0.08, 0.14], "color": ["white", "hot", "mid"]},
+        {"type": "light", "intensity": 30, "range": 10, "life": 0.6, "y": 2}
+      ],
+      "linger": {
+        "seconds": 8,
+        "radius": 4.5,
+        "layers": [
+          {"type": "decal", "tex": "rune_holy", "rad": 1, "spin": 0.22, "pulse": [0.22, 0.6], "grow": [0.25, 1, 0.7], "opacity": 0.62, "fadeIn": 0.3, "fadeOut": 1.2, "color": "hot", "edge": "deep"},
+          {"type": "decal", "tex": "glow_holy", "rad": 1.15, "spin": -0.08, "opacity": 0.22, "fadeIn": 0.6, "fadeOut": 1.2, "color": "mid", "edge": "deep", "layer": 1},
+          {"type": "decal", "tex": "rune_holy", "rad": 0.42, "spin": -0.6, "opacity": 0.45, "grow": [0.2, 1, 1], "fadeIn": 0.5, "fadeOut": 1, "color": "white", "edge": "mid", "layer": 2},
+          {"type": "shell", "shape": "cylinder", "tex": "band_light", "rad": 1, "height": 2.8, "grow": [0.5, 1, 0.8], "heightGrow": [0.05, 1, 0.9], "scroll": [0.04, -0.35], "repeat": [5, 1], "opacity": 1, "fade": 1, "fadeIn": 0.3, "fadeOut": 1, "color": "hot", "edge": "deep"},
+          {"type": "shell", "shape": "cylinder", "tex": "band_runes", "rad": 0.99, "height": 0.9, "y": 0.05, "spin": 0.25, "scroll": [0, 0], "repeat": [7, 1], "opacity": 0.95, "fade": 0.6, "fadeIn": 0.6, "fadeOut": 1, "color": "white", "edge": "mid", "delay": 0.4},
+          {"type": "emitter", "tex": "mote_star", "rate": 38, "max": 120, "shape": "disc", "rad": 0.95, "onGround": true, "dir": "up", "speed": [0.6, 1.4], "spread": 0.1, "life": [1.4, 2.4], "size": [0.07, 0.13], "color": ["white", "hot", "mid"], "alpha": [0, 1, 0]},
+          {"type": "emitter", "tex": "spark_streak", "rate": 16, "max": 40, "shape": "ring", "rad": 1, "onGround": true, "dir": "up", "speed": [2, 3.5], "spread": 0.05, "stretch": 0.14, "life": [0.5, 0.9], "size": [0.05, 0.08], "color": ["white", "hot", "mid"]},
+          {"type": "emitter", "texs": ["flame_1", "flame_2", "flame_4", "flame_6"], "rate": 26, "max": 60, "shape": "ring", "rad": 0.98, "jitter": 0.05, "onGround": true, "dir": "up", "speed": [0.3, 0.7], "spread": 0.05, "life": [0.5, 0.9], "size": [0.35, 0.6], "sizeCurve": [0.5, 1, 0.4], "rot": 0, "color": ["white", "hot", "deep"], "alpha": [0, 0.8, 0]},
+          {"type": "emitter", "blend": "normal", "texs": ["smoke_2", "smoke_4"], "rate": 5, "max": 14, "shape": "disc", "rad": 0.8, "onGround": true, "dir": "up", "speed": [0.1, 0.3], "life": [2, 3], "size": [1.2, 2], "color": ["#fff2c8"], "edge": "#d8b070", "alpha": [0, 0.16, 0]},
+          {"type": "emitter", "tex": "rune_holy", "rate": 1.5, "max": 4, "shape": "disc", "rad": 0.7, "offset": [0, 0.4, 0], "dir": "up", "speed": [0.3, 0.5], "life": [1.8, 2.4], "size": [0.35, 0.5], "spin": [0.6, 1.2], "color": ["hot", "mid", "deep"], "alpha": [0, 0.7, 0]},
+          {"type": "light", "intensity": 10, "range": 8, "flicker": 0.04, "y": 1.2}
+        ]
+      }
+    },
+    "ground_generic": {
+      "label": "Ground zone (any school)",
+      "kind": "ground",
+      "school": "arcane",
+      "windupTime": 0.8,
+      "aim": {"shape": "circle"},
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 18, "max": 16, "life": [0.5, 0.8], "size": [0.06, 0.1], "shape": "ring", "radius": 0.25, "swirl": 4, "dir": "up", "speed": [0.2, 0.4], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 12, "max": 8, "life": [0.2, 0.3], "size": [0.3, 0.4], "color": ["hot", "mid", "mid"], "alpha": [0, 0.55, 0]},
+        {"type": "light", "at": "hand_r", "intensity": 4, "range": 3, "y": 0}
+      ],
+      "impact": [
+        {"type": "decal", "tex": "ring_shock", "rad": 1.2, "grow": [0.1, 1, 0.4], "life": 0.5, "fadeIn": 0, "fadeOut": 0.35, "color": "hot", "edge": "mid"},
+        {"type": "emitter", "tex": "mote_star", "burst": 30, "shape": "disc", "rad": 0.5, "onGround": true, "dir": "outUp", "speed": [2, 4], "drag": 2, "life": [0.5, 0.9], "size": [0.07, 0.12], "color": ["white", "hot", "mid"]},
+        {"type": "light", "intensity": 16, "range": 8, "life": 0.5, "y": 1}
+      ],
+      "linger": {
+        "seconds": 6,
+        "radius": 4,
+        "layers": [
+          {"type": "decal", "tex": "rune_{school}", "rad": 1, "spin": 0.3, "pulse": [0.25, 0.7], "grow": [0.3, 1, 0.5], "fadeOut": 1, "color": "hot", "edge": "deep"},
+          {"type": "shell", "shape": "cylinder", "tex": "band_mist", "rad": 1, "height": 1.6, "heightGrow": [0.1, 1, 0.6], "scroll": [0.12, 0], "repeat": [4, 1], "opacity": 0.45, "fade": 1.1, "fadeOut": 0.8, "color": "hot", "edge": "deep"},
+          {"type": "emitter", "tex": "mote_star", "rate": 26, "max": 80, "shape": "disc", "rad": 0.95, "onGround": true, "dir": "up", "speed": [0.5, 1.2], "life": [1.2, 2], "size": [0.06, 0.11], "color": ["white", "hot", "mid"]},
+          {"type": "emitter", "texs": ["smoke_2", "smoke_4"], "rate": 8, "max": 24, "shape": "disc", "rad": 0.8, "onGround": true, "dir": "up", "speed": [0.2, 0.5], "life": [1.2, 2], "size": [0.7, 1.1], "alpha": [0, 0.3, 0], "color": ["mid", "deep", "deep"]},
+          {"type": "emitter", "tex": "spark_streak", "rate": 10, "max": 24, "shape": "ring", "rad": 1, "onGround": true, "dir": "up", "speed": [1.5, 3], "stretch": 0.12, "life": [0.4, 0.7], "size": [0.04, 0.07], "color": ["white", "hot", "mid"]},
+          {"type": "light", "intensity": 6, "range": 7, "y": 1}
+        ]
+      }
+    },
+    "poison_cloud": {
+      "label": "Poison cloud",
+      "kind": "ground",
+      "school": "poison",
+      "windupTime": 0.8,
+      "aim": {"shape": "circle", "kind": "hostile"},
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 16, "max": 14, "life": [0.5, 0.8], "size": [0.05, 0.09], "shape": "sphere", "radius": 0.12, "dir": "up", "speed": [0.2, 0.5], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "hands", "tex": "dot_soft", "rate": 6, "max": 6, "life": [0.5, 0.7], "size": [0.04, 0.06], "dir": "down", "speed": [0.1, 0.2], "gravity": 6, "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "hands", "follow": true, "blend": "normal", "tex": "cloud_poison", "rate": 6, "max": 6, "life": [0.6, 0.9], "size": [0.25, 0.35], "color": ["mid"], "edge": "smoke", "alpha": [0, 0.55, 0], "dir": "up", "speed": [0.1, 0.2]}
+      ],
+      "travel": {
+        "speed": 13,
+        "arc": 0.32,
+        "from": "hand",
+        "layers": [
+          {"type": "mesh", "kind": "core", "at": "missile", "size": 0.22, "color": "hot", "edge": "deep"},
+          {"type": "emitter", "at": "missile", "tex": "dot_soft", "rate": 30, "max": 20, "life": [0.3, 0.5], "size": [0.06, 0.1], "speed": [0.2, 0.5], "gravity": 3, "color": ["hot", "mid", "deep"]},
+          {"type": "ribbon", "at": "missile", "width": 0.14, "seconds": 0.2, "color": "mid", "edge": "deep"}
+        ]
+      },
+      "impact": [
+        {"type": "emitter", "blend": "normal", "tex": "cloud_poison", "burst": 14, "shape": "disc", "rad": 0.3, "onGround": true, "dir": "out", "speed": [2, 4], "drag": 2, "life": [0.9, 1.4], "size": [0.9, 1.4], "color": ["mid"], "edge": "smoke", "alpha": [0, 0.6, 0]},
+        {"type": "emitter", "tex": "dot_soft", "burst": 30, "dir": "outUp", "speed": [2, 4], "gravity": 6, "life": [0.4, 0.8], "size": [0.06, 0.1], "color": ["hot", "mid", "deep"]},
+        {"type": "decal", "tex": "splat_poison", "rad": 0.7, "grow": [0.3, 1, 0.3], "life": 1.2, "fadeOut": 0.8, "opacity": 0.9, "color": "hot", "edge": "deep"}
+      ],
+      "linger": {
+        "seconds": 8,
+        "radius": 4,
+        "layers": [
+          {"type": "decal", "tex": "splat_poison", "rad": 1, "spin": 0.03, "opacity": 0.55, "fadeIn": 0.4, "fadeOut": 1.4, "color": "mid", "edge": "deep"},
+          {"type": "decal", "tex": "rune_poison", "rad": 0.85, "spin": 0.15, "pulse": [0.35, 0.4], "opacity": 0.5, "fadeOut": 1.2, "color": "hot", "edge": "deep", "layer": 1},
+          {"type": "emitter", "blend": "normal", "texs": ["cloud_poison", "smoke_1", "smoke_3"], "rate": 18, "max": 70, "shape": "disc", "rad": 0.9, "onGround": true, "offset": [0, 0.3, 0], "dir": "random", "speed": [0.1, 0.35], "swirl": 0.25, "life": [2.2, 3.4], "size": [1.4, 2.2], "sizeCurve": [0.5, 1, 1.15], "spin": [0.1, 0.4], "color": ["mid", "mid", "deep"], "edge": "smoke", "alpha": [0, 0.42, 0]},
+          {"type": "emitter", "tex": "cloud_poison", "rate": 6, "max": 20, "shape": "disc", "rad": 0.8, "onGround": true, "offset": [0, 0.4, 0], "dir": "up", "speed": [0.05, 0.2], "life": [2, 3], "size": [1.4, 2], "color": ["hot", "mid", "deep"], "alpha": [0, 0.22, 0]},
+          {"type": "emitter", "tex": "dot_soft", "rate": 22, "max": 60, "shape": "disc", "rad": 0.9, "onGround": true, "dir": "up", "speed": [0.3, 0.8], "life": [0.8, 1.4], "size": [0.06, 0.12], "color": ["hot", "mid", "deep"]},
+          {"type": "shell", "shape": "cylinder", "tex": "band_mist", "rad": 1, "height": 1.1, "scroll": [0.06, 0], "repeat": [3, 1], "opacity": 0.32, "fade": 0.9, "fadeIn": 0.5, "fadeOut": 1.2, "color": "hot", "edge": "deep"}
+        ]
+      }
+    },
+    "blizzard": {
+      "label": "Whiteout",
+      "kind": "ground",
+      "school": "ice",
+      "windupTime": 0.9,
+      "aim": {"shape": "circle", "kind": "hostile"},
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 20, "max": 16, "life": [0.4, 0.7], "size": [0.05, 0.08], "shape": "sphere", "radius": 0.45, "converge": true, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "shard_ice", "rate": 6, "max": 6, "life": [0.5, 0.7], "size": [0.1, 0.14], "shape": "ring", "radius": 0.25, "swirl": 5, "spin": [1, 2], "color": ["white", "hot", "mid"]}
+      ],
+      "linger": {
+        "seconds": 7,
+        "radius": 4.5,
+        "layers": [
+          {"type": "decal", "tex": "frost_patch", "rad": 1.05, "grow": [0.3, 1, 1.5], "opacity": 0.45, "fadeIn": 0.6, "fadeOut": 2, "color": "hot", "edge": "deep"},
+          {"type": "decal", "tex": "rune_frost", "rad": 0.9, "spin": 0.2, "opacity": 0.5, "fadeOut": 1, "color": "white", "edge": "mid", "layer": 1},
+          {"type": "emitter", "tex": "shard_ice", "rate": 30, "max": 70, "shape": "disc", "rad": 0.95, "offset": [0, 9, 0], "dir": "down", "speed": [10, 13], "spread": 0.08, "stretch": 0.05, "life": [0.7, 0.9], "size": [0.18, 0.28], "color": ["white", "hot", "mid"]},
+          {"type": "emitter", "tex": "mote_star", "rate": 60, "max": 200, "shape": "disc", "rad": 1, "offset": [0, 5, 0], "dir": "down", "speed": [1.5, 3], "swirl": 0.6, "life": [1.8, 2.6], "size": [0.05, 0.09], "color": ["white", "hot", "mid"]},
+          {"type": "emitter", "blend": "normal", "texs": ["smoke_2", "smoke_4"], "rate": 10, "max": 40, "shape": "disc", "rad": 0.9, "onGround": true, "offset": [0, 0.5, 0], "dir": "random", "speed": [0.5, 1.2], "swirl": 0.8, "life": [1.5, 2.5], "size": [1.2, 2], "color": ["smoke"], "edge": "mid", "alpha": [0, 0.3, 0]},
+          {"type": "shell", "shape": "cylinder", "tex": "band_mist", "rad": 1, "height": 3.5, "scroll": [0.25, 0], "repeat": [3, 1], "opacity": 0.35, "fade": 1.2, "fadeOut": 1, "color": "white", "edge": "mid"},
+          {"type": "light", "intensity": 5, "range": 8, "y": 2}
+        ]
+      }
+    },
+    "fire_wall": {
+      "label": "Burning line",
+      "kind": "line",
+      "school": "fire",
+      "windupTime": 0.8,
+      "aim": {"shape": "line", "width": 1.6},
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "texs": ["flame_1", "flame_2", "flame_4"], "rate": 30, "max": 30, "life": [0.3, 0.5], "size": [0.16, 0.24], "sizeCurve": [0.5, 1, 0.3], "dir": "up", "speed": [0.3, 0.7], "color": ["hot", "mid", "deep"], "rot": 0},
+        {"type": "light", "at": "hand_r", "intensity": 5, "range": 3, "flicker": 0.3, "y": 0}
+      ],
+      "linger": {
+        "seconds": 6,
+        "length": 8,
+        "layers": [
+          {"type": "emitter", "texs": ["flame_1", "flame_2", "flame_3", "flame_4", "flame_5"], "rate": 70, "max": 150, "shape": "line", "width": 0.6, "onGround": true, "offset": [0, 0.35, 0], "dir": "up", "speed": [0.4, 1], "spread": 0.08, "life": [0.5, 0.9], "size": [0.6, 1.1], "sizeCurve": [0.5, 1, 0.4], "rot": 0, "color": ["hot", "mid", "deep"]},
+          {"type": "emitter", "tex": "fx_flame", "rate": 20, "max": 40, "shape": "line", "width": 0.4, "onGround": true, "offset": [0, 0.5, 0], "dir": "up", "speed": [0.5, 1], "life": [0.5, 0.7], "size": [1, 1.4], "color": ["hot", "mid", "deep"]},
+          {"type": "emitter", "blend": "normal", "texs": ["smoke_2", "smoke_4"], "rate": 12, "max": 40, "shape": "line", "width": 0.5, "onGround": true, "offset": [0, 1.6, 0], "dir": "up", "speed": [0.5, 1], "life": [1.2, 2], "size": [0.8, 1.3], "color": ["#3a2a22", "#2a201c", "#1a1412"], "edge": "#120c0a", "alpha": [0, 0.45, 0]},
+          {"type": "emitter", "tex": "spark_streak", "rate": 22, "max": 40, "shape": "line", "width": 0.6, "onGround": true, "dir": "up", "speed": [2, 4], "spread": 0.3, "stretch": 0.1, "life": [0.5, 0.9], "size": [0.04, 0.06], "color": ["white", "hot", "mid"]},
+          {"type": "light", "intensity": 10, "range": 9, "flicker": 0.25, "y": 1, "offset": [0, 0, 4]}
+        ]
+      }
+    },
+    "arrow_rain": {
+      "label": "Arrow storm",
+      "kind": "ground",
+      "school": "physical",
+      "aim": {"shape": "circle", "kind": "hostile"},
+      "linger": {
+        "seconds": 3,
+        "radius": 4,
+        "layers": [
+          {"type": "emitter", "tex": "spark_streak", "rate": 60, "max": 100, "shape": "disc", "rad": 0.95, "offset": [0, 12, 0], "dir": "down", "speed": [22, 26], "spread": 0.04, "stretch": 0.35, "life": [0.5, 0.55], "size": [0.09, 0.12], "color": ["white", "hot", "mid"]},
+          {"type": "emitter", "blend": "normal", "tex": "dust_1", "rate": 26, "max": 60, "shape": "disc", "rad": 0.95, "onGround": true, "dir": "up", "speed": [0.3, 0.8], "life": [0.5, 0.9], "size": [0.4, 0.7], "alpha": [0, 0.45, 0], "color": ["#8a7a60"], "edge": "#3a3020", "delay": 0.5},
+          {"type": "emitter", "tex": "burst_star", "rate": 18, "max": 30, "shape": "disc", "rad": 0.95, "onGround": true, "offset": [0, 0.1, 0], "life": [0.1, 0.15], "size": [0.4, 0.6], "rot": 0, "alpha": [1, 0.6, 0], "color": ["white", "hot", "mid"], "delay": 0.5},
+          {"type": "decal", "tex": "ring_reticle", "rad": 1, "opacity": 0.35, "spin": 0.4, "fadeOut": 0.5, "color": "hot", "edge": "mid"}
+        ]
+      }
+    },
+    "frost_nova": {
+      "label": "Frost nova",
+      "kind": "nova",
+      "school": "ice",
+      "windupTime": 0.5,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 20, "max": 16, "life": [0.35, 0.55], "size": [0.05, 0.08], "shape": "sphere", "radius": 0.45, "converge": true, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "caster", "tex": "shard_ice", "rate": 18, "max": 14, "shape": "ring", "radius": 1, "onGround": true, "life": [0.4, 0.6], "size": [0.12, 0.2], "dir": "in", "speed": [1, 2], "color": ["white", "hot", "mid"]},
+        {"type": "light", "at": "hand_r", "intensity": 5, "range": 3, "y": 0}
+      ],
+      "impact": [
+        {"type": "decal", "tex": "rune_frost", "rad": 0.6, "grow": [0.3, 1, 0.22], "spin": 0.7, "life": 1.4, "fadeOut": 0.8, "color": "hot", "edge": "mid"},
+        {"type": "decal", "tex": "ring_shock", "rad": 1.15, "grow": [0.08, 1, 0.45], "life": 0.55, "fadeIn": 0, "fadeOut": 0.3, "color": "white", "edge": "mid", "layer": 1},
+        {"type": "decal", "tex": "frost_patch", "rad": 1.05, "grow": [0.1, 1, 0.45], "life": 5, "fadeOut": 2, "opacity": 0.42, "color": "mid", "edge": "deep", "layer": 2},
+        {"type": "shell", "shape": "cylinder", "tex": "band_mist", "rad": 0.12, "grow": [0.5, 8.5, 0.45], "height": 0.9, "life": 0.6, "fadeIn": 0, "fadeOut": 0.35, "opacity": 0.8, "fade": 1.2, "scroll": [0.3, 0], "repeat": [5, 1], "color": "white", "edge": "mid"},
+        {"type": "emitter", "tex": "shard_ice", "burst": 44, "shape": "ring", "radius": 0.5, "onGround": true, "offset": [0, 0.3, 0], "dir": "out", "speed": [7, 10], "spread": 0.12, "drag": 2.8, "life": [0.5, 0.8], "size": [0.24, 0.38], "stretch": 0.05, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "blend": "normal", "texs": ["smoke_1", "smoke_2", "smoke_3"], "burst": 24, "shape": "ring", "radius": 0.8, "onGround": true, "offset": [0, 0.35, 0], "dir": "out", "speed": [3, 5.5], "drag": 2, "life": [1, 1.6], "size": [0.8, 1.3], "sizeCurve": [0.6, 1, 1.4], "alpha": [0, 0.4, 0], "color": ["smoke"], "edge": "mid"},
+        {"type": "emitter", "tex": "mote_star", "burst": 50, "shape": "disc", "rad": 1, "onGround": true, "dir": "up", "speed": [0.2, 0.8], "life": [1, 2], "size": [0.05, 0.1], "color": ["white", "hot", "mid"]},
+        {"type": "light", "intensity": 22, "range": 9, "life": 0.6, "y": 1},
+        {"type": "shake", "strength": 0.2}
+      ]
+    },
+    "nova_generic": {
+      "label": "Burst round the caster (any school)",
+      "kind": "nova",
+      "school": "holy",
+      "windupTime": 0.5,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 18, "max": 16, "life": [0.35, 0.55], "size": [0.05, 0.08], "shape": "sphere", "radius": 0.45, "converge": true, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 12, "max": 8, "life": [0.2, 0.3], "size": [0.3, 0.4], "color": ["hot", "mid", "mid"], "alpha": [0, 0.55, 0]}
+      ],
+      "impact": [
+        {"type": "decal", "tex": "rune_{school}", "rad": 0.6, "grow": [0.3, 1, 0.22], "spin": 0.9, "life": 1.2, "fadeOut": 0.7, "color": "hot", "edge": "mid"},
+        {"type": "decal", "tex": "ring_shock", "rad": 1.15, "grow": [0.08, 1, 0.4], "life": 0.5, "fadeIn": 0, "fadeOut": 0.3, "color": "white", "edge": "mid", "layer": 1},
+        {"type": "shell", "shape": "cylinder", "tex": "band_light", "rad": 0.12, "grow": [0.5, 8, 0.4], "height": 1.2, "life": 0.55, "fadeIn": 0, "fadeOut": 0.35, "opacity": 0.8, "fade": 1.2, "scroll": [0, -0.6], "repeat": [6, 1], "color": "hot", "edge": "mid"},
+        {"type": "emitter", "tex": "spark_streak", "burst": 40, "shape": "ring", "radius": 0.4, "onGround": true, "offset": [0, 0.4, 0], "dir": "out", "speed": [6, 9], "drag": 2.5, "life": [0.4, 0.6], "size": [0.06, 0.09], "stretch": 0.1, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "tex": "mote_star", "burst": 40, "shape": "disc", "rad": 0.9, "onGround": true, "dir": "up", "speed": [0.5, 1.5], "life": [0.8, 1.4], "size": [0.06, 0.1], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "texs": ["smoke_1", "smoke_3"], "burst": 14, "shape": "ring", "radius": 0.6, "onGround": true, "offset": [0, 0.4, 0], "dir": "out", "speed": [3, 5], "drag": 2, "life": [0.7, 1.1], "size": [0.8, 1.2], "alpha": [0, 0.35, 0], "color": ["mid", "deep", "deep"]},
+        {"type": "light", "intensity": 18, "range": 8, "life": 0.5, "y": 1}
+      ]
+    },
+    "whirl_slash": {
+      "label": "Spinning strike",
+      "kind": "nova",
+      "school": "physical",
+      "impact": [
+        {"type": "decal", "tex": "ring_shock", "rad": 1, "grow": [0.3, 1, 0.25], "life": 0.4, "fadeIn": 0, "fadeOut": 0.25, "color": "white", "edge": "mid", "spin": 6},
+        {"type": "shell", "shape": "cylinder", "tex": "band_mist", "rad": 0.9, "height": 0.6, "y": 0.6, "spin": 14, "life": 0.4, "fadeIn": 0, "fadeOut": 0.3, "opacity": 0.8, "fade": 0.5, "scroll": [1.5, 0], "repeat": [2, 1], "color": "white", "edge": "mid"},
+        {"type": "emitter", "tex": "spark_streak", "burst": 24, "shape": "ring", "rad": 0.8, "offset": [0, 0.9, 0], "dir": "out", "speed": [3, 5], "drag": 2, "life": [0.25, 0.4], "size": [0.05, 0.08], "stretch": 0.12, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "blend": "normal", "tex": "dust_1", "burst": 8, "shape": "ring", "rad": 0.6, "onGround": true, "dir": "out", "speed": [1, 2], "drag": 2, "life": [0.5, 0.8], "size": [0.5, 0.8], "alpha": [0, 0.4, 0], "color": ["#8a7a60"], "edge": "#3a3020"},
+        {"type": "shake", "strength": 0.1}
+      ]
+    },
+    "chain_lightning": {
+      "label": "Chain lightning",
+      "kind": "beam",
+      "school": "lightning",
+      "windupTime": 0.7,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "bolt_fork", "rate": 14, "max": 6, "life": [0.06, 0.12], "size": [0.3, 0.45], "color": ["white", "hot", "mid"], "alpha": [1, 1, 0]},
+        {"type": "emitter", "at": "hands", "tex": "spark_streak", "rate": 20, "max": 16, "life": [0.15, 0.3], "size": [0.03, 0.05], "stretch": 0.2, "dir": "random", "speed": [1.5, 3], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 14, "max": 8, "life": [0.15, 0.25], "size": [0.3, 0.42], "color": ["hot", "mid", "deep"], "alpha": [0, 0.6, 0]},
+        {"type": "light", "at": "hand_r", "intensity": 6, "range": 3.5, "flicker": 0.6, "y": 0}
+      ],
+      "beam": {
+        "seconds": 0.55,
+        "layers": [
+          {"type": "arc", "width": 0.26, "jitter": 0.4, "every": 0.045, "fork": 1, "color": "white", "edge": "mid"},
+          {"type": "arc", "width": 0.9, "jitter": 0.15, "every": 0.09, "color": "mid", "edge": "deep"}
+        ]
+      },
+      "impact": [
+        {"type": "flipbook", "tex": "fx_burst", "size": 1.3, "life": 0.25, "color": ["white", "hot", "mid"], "edge": "deep"},
+        {"type": "emitter", "tex": "bolt_fork", "burst": 3, "life": [0.08, 0.14], "size": [0.9, 1.3], "color": ["white", "hot", "mid"], "alpha": [1, 1, 0]},
+        {"type": "emitter", "tex": "spark_streak", "burst": 22, "dir": "random", "speed": [3, 6], "drag": 2, "gravity": 3, "life": [0.25, 0.45], "size": [0.04, 0.06], "stretch": 0.1, "color": ["white", "hot", "mid"]},
+        {"type": "decal", "tex": "scorch", "blend": "normal", "size": 1.2, "life": 3, "fadeOut": 1.5, "opacity": 0.7, "color": "#0a0a10", "edge": "#202030"},
+        {"type": "light", "intensity": 20, "range": 6, "life": 0.18, "y": 0.6}
+      ]
+    },
+    "beam_generic": {
+      "label": "Beam / lance (any school)",
+      "kind": "beam",
+      "school": "holy",
+      "windupTime": 0.6,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 18, "max": 16, "life": [0.35, 0.55], "size": [0.05, 0.08], "shape": "sphere", "radius": 0.45, "converge": true, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 12, "max": 8, "life": [0.2, 0.3], "size": [0.3, 0.4], "color": ["hot", "mid", "mid"], "alpha": [0, 0.55, 0]},
+        {"type": "light", "at": "hand_r", "intensity": 4, "range": 3, "y": 0}
+      ],
+      "beam": {
+        "seconds": 0.7,
+        "layers": [
+          {"type": "arc", "width": 0.22, "jitter": 0.05, "every": 0.06, "color": "white", "edge": "hot"},
+          {"type": "arc", "width": 0.7, "jitter": 0.08, "every": 0.08, "color": "mid", "edge": "deep"}
+        ]
+      },
+      "impact": [
+        {"type": "emitter", "tex": "burst_star", "burst": 1, "life": 0.25, "size": [1.2, 1.2], "rot": 0, "alpha": [1, 0.7, 0], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "tex": "mote_star", "burst": 18, "dir": "random", "speed": [2, 4], "drag": 3, "life": [0.4, 0.7], "size": [0.06, 0.1], "color": ["white", "hot", "mid"]},
+        {"type": "light", "intensity": 12, "range": 5, "life": 0.3, "y": 0.4}
+      ]
+    },
+    "breath_cone": {
+      "label": "Breath / spray cone",
+      "kind": "cone",
+      "school": "fire",
+      "windupTime": 0.4,
+      "aim": {"shape": "cone", "angle": 1.2, "length": 6},
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "texs": ["flame_1", "flame_4"], "rate": 22, "max": 20, "life": [0.3, 0.5], "size": [0.14, 0.22], "dir": "up", "speed": [0.3, 0.6], "color": ["hot", "mid", "deep"], "rot": 0}
+      ],
+      "impact": [
+        {"type": "emitter", "at": "point", "tex": "fx_flame", "rate": 90, "duration": 0.7, "max": 90, "dir": "forward", "spread": 0.28, "speed": [8, 11], "drag": 1.5, "life": [0.45, 0.65], "size": [0.4, 0.7], "sizeCurve": [0.4, 1.4, 2.2], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "point", "texs": ["flame_1", "flame_2", "flame_5"], "rate": 70, "duration": 0.7, "max": 70, "dir": "forward", "spread": 0.3, "speed": [7, 10], "drag": 1.2, "life": [0.4, 0.6], "size": [0.3, 0.5], "sizeCurve": [0.5, 1.4, 2], "spin": [1, 3], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "point", "blend": "normal", "texs": ["smoke_1", "smoke_3"], "rate": 20, "duration": 0.7, "max": 30, "delay": 0.15, "dir": "forward", "spread": 0.3, "speed": [5, 7], "drag": 1.5, "life": [0.8, 1.2], "size": [0.6, 1], "sizeCurve": [0.5, 1.5, 2.2], "color": ["#3a2a22", "#2a201c", "#1a1412"], "edge": "#120c0a", "alpha": [0, 0.5, 0]},
+        {"type": "light", "at": "point", "intensity": 14, "range": 6, "life": 0.8, "flicker": 0.3, "y": 0}
+      ]
+    },
+    "melee_slash": {
+      "label": "Weapon strike",
+      "kind": "melee",
+      "school": "physical",
+      "hitDelay": 0.22,
+      "sweepTime": 0.35,
+      "sweep": [{"type": "sweep", "seconds": 0.26, "color": "white", "edge": "mid", "opacity": 1, "tex": "band_mist"}],
+      "impact": [
+        {"type": "emitter", "tex": "burst_star", "burst": 1, "life": 0.14, "size": [0.95, 0.95], "rot": 0, "alpha": [1, 0.7, 0], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "tex": "spark_streak", "burst": 18, "dir": "random", "speed": [3, 6], "gravity": 8, "drag": 0.8, "life": [0.25, 0.45], "size": [0.04, 0.06], "stretch": 0.07, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "tex": "ring_shock", "burst": 1, "life": 0.18, "size": [0.9, 0.9], "sizeCurve": [0.3, 1, 1.3], "rot": 0, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "blend": "normal", "tex": "dust_1", "burst": 3, "life": [0.4, 0.6], "size": [0.4, 0.6], "dir": "up", "speed": [0.2, 0.5], "alpha": [0, 0.3, 0], "color": ["#8a7a60"], "edge": "#3a3020"},
+        {"type": "shake", "strength": 0.08}
+      ]
+    },
+    "elemental_slash": {
+      "label": "Weapon strike with an element",
+      "kind": "melee",
+      "school": "fire",
+      "hitDelay": 0.22,
+      "sweepTime": 0.35,
+      "sweep": [{"type": "sweep", "seconds": 0.26, "color": "hot", "edge": "deep", "opacity": 1, "tex": "band_flame"}],
+      "impact": [
+        {"type": "flipbook", "tex": "fx_burst", "size": 1.6, "life": 0.35, "color": ["white", "hot", "mid"], "edge": "deep"},
+        {"type": "emitter", "tex": "spark_streak", "burst": 20, "dir": "random", "speed": [3, 6], "gravity": 6, "life": [0.3, 0.5], "size": [0.04, 0.07], "stretch": 0.08, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "texs": ["flame_1", "flame_3", "smoke_2"], "burst": 8, "shape": "sphere", "radius": 0.2, "life": [0.3, 0.5], "size": [0.3, 0.5], "dir": "up", "speed": [0.5, 1], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "tex": "rune_{school}", "burst": 1, "life": 0.4, "size": [0.8, 0.8], "sizeCurve": [0.5, 1, 1.3], "spin": [3, 3], "alpha": [1, 0.7, 0], "color": ["hot", "mid", "deep"]},
+        {"type": "light", "intensity": 10, "range": 4, "life": 0.25, "y": 0.2},
+        {"type": "shake", "strength": 0.1}
+      ]
+    },
+    "dash_generic": {
+      "label": "Dash / leap",
+      "kind": "self",
+      "school": "physical",
+      "impact": [
+        {"type": "decal", "tex": "ring_shock", "rad": 1, "grow": [0.2, 1, 0.3], "life": 0.4, "fadeIn": 0, "fadeOut": 0.3, "color": "white", "edge": "mid"},
+        {"type": "emitter", "blend": "normal", "tex": "dust_1", "burst": 10, "shape": "ring", "rad": 0.5, "onGround": true, "dir": "out", "speed": [1.5, 3], "drag": 2, "life": [0.5, 0.8], "size": [0.6, 0.9], "alpha": [0, 0.45, 0], "color": ["#8a7a60"], "edge": "#3a3020"},
+        {"type": "emitter", "tex": "spark_streak", "burst": 16, "dir": "outUp", "speed": [2, 4], "life": [0.3, 0.5], "size": [0.05, 0.07], "stretch": 0.15, "color": ["white", "hot", "mid"]}
+      ],
+      "aura": [
+        {"type": "emitter", "at": "body", "tex": "spark_streak", "rate": 40, "shape": "cylinder", "radius": 0.35, "height": 1.2, "offset": [0, -0.6, 0], "dir": "back", "speed": [2, 4], "stretch": 0.3, "life": [0.15, 0.3], "size": [0.04, 0.07], "color": ["white", "hot", "mid"]}
+      ],
+      "auraTime": 0.5
+    },
+    "buff_generic": {
+      "label": "Self buff (any school)",
+      "kind": "self",
+      "school": "holy",
+      "windupTime": 0.5,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 18, "max": 16, "life": [0.35, 0.55], "size": [0.05, 0.08], "shape": "sphere", "radius": 0.45, "converge": true, "color": ["white", "hot", "mid"]}
+      ],
+      "impact": [
+        {"type": "decal", "tex": "rune_{school}", "size": 2.4, "grow": [0.4, 1, 0.3], "spin": 1.2, "life": 1.3, "fadeOut": 0.8, "color": "hot", "edge": "deep"},
+        {"type": "shell", "shape": "cylinder", "tex": "band_light", "radius": 0.65, "height": 2.4, "heightGrow": [0.1, 1, 0.35], "life": 1, "fadeOut": 0.6, "opacity": 0.7, "scroll": [0, -0.8], "repeat": [4, 1], "color": "hot", "edge": "mid"},
+        {"type": "emitter", "tex": "mote_star", "burst": 30, "shape": "ring", "radius": 0.6, "onGround": true, "dir": "up", "speed": [1, 2.5], "swirl": 3, "life": [0.7, 1.1], "size": [0.06, 0.1], "color": ["white", "hot", "mid"]},
+        {"type": "light", "intensity": 12, "range": 5, "life": 0.6, "y": 1}
+      ],
+      "aura": [
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "mote_star", "rate": 8, "shape": "ring", "radius": 0.55, "dir": "up", "speed": [0.4, 0.9], "swirl": 1.5, "life": [1, 1.6], "size": [0.05, 0.08], "color": ["white", "hot", "mid"]}
+      ],
+      "auraTime": 4
+    },
+    "battle_shout": {
+      "label": "War cry / rally",
+      "kind": "self",
+      "school": "blood",
+      "impact": [
+        {"type": "decal", "tex": "ring_shock", "size": 9, "grow": [0.1, 1, 0.5], "life": 0.6, "fadeIn": 0, "fadeOut": 0.35, "color": "hot", "edge": "mid"},
+        {"type": "decal", "tex": "crack_ground", "size": 2.2, "life": 1.5, "fadeOut": 1, "opacity": 0.6, "color": "mid", "edge": "deep", "layer": 1},
+        {"type": "shell", "shape": "dome", "tex": "band_mist", "radius": 0.4, "grow": [1, 9, 0.5], "height": 1.6, "life": 0.6, "fadeIn": 0, "fadeOut": 0.4, "opacity": 0.45, "fade": 1, "scroll": [0.5, 0], "color": "hot", "edge": "deep"},
+        {"type": "emitter", "tex": "spark_streak", "burst": 30, "shape": "ring", "radius": 0.5, "offset": [0, 1.4, 0], "dir": "out", "speed": [5, 8], "drag": 2, "life": [0.4, 0.6], "size": [0.05, 0.08], "stretch": 0.12, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "blend": "normal", "tex": "dust_1", "burst": 14, "shape": "ring", "radius": 0.6, "onGround": true, "dir": "out", "speed": [2, 4], "drag": 2, "life": [0.6, 1], "size": [0.6, 1], "alpha": [0, 0.45, 0], "color": ["#8a7a60"], "edge": "#3a3020"},
+        {"type": "shake", "strength": 0.2}
+      ],
+      "aura": [
+        {"type": "emitter", "at": "body", "follow": true, "texs": ["flame_1", "flame_4"], "rate": 10, "shape": "cylinder", "radius": 0.35, "height": 1.2, "offset": [0, -0.6, 0], "dir": "up", "speed": [0.5, 1], "life": [0.4, 0.7], "size": [0.15, 0.25], "rot": 0, "color": ["hot", "mid", "deep"], "alpha": [0, 0.7, 0]}
+      ],
+      "auraTime": 3
+    },
+    "nature_heal": {
+      "label": "Nature heal",
+      "kind": "self",
+      "school": "nature",
+      "windupTime": 0.7,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "leaf", "rate": 10, "max": 10, "life": [0.6, 0.9], "size": [0.08, 0.12], "shape": "ring", "radius": 0.3, "swirl": 5, "dir": "up", "speed": [0.1, 0.3], "spin": [2, 5], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 16, "max": 14, "life": [0.35, 0.6], "size": [0.05, 0.08], "shape": "sphere", "radius": 0.45, "converge": true, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 10, "max": 8, "life": [0.2, 0.3], "size": [0.3, 0.38], "color": ["hot", "mid", "mid"], "alpha": [0, 0.5, 0]},
+        {"type": "light", "at": "hand_r", "intensity": 4, "range": 3, "y": 0}
+      ],
+      "impact": [
+        {"type": "decal", "tex": "rune_nature", "size": 2.6, "grow": [0.4, 1, 0.3], "spin": 0.8, "life": 1.8, "fadeOut": 1, "color": "hot", "edge": "deep"},
+        {"type": "shell", "shape": "cylinder", "tex": "band_light", "radius": 0.7, "height": 2.4, "heightGrow": [0.1, 1, 0.45], "life": 1.2, "fadeOut": 0.7, "opacity": 0.5, "scroll": [0.05, -0.6], "repeat": [4, 1], "color": "hot", "edge": "mid"},
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "leaf", "burst": 26, "shape": "ring", "radius": 0.7, "dir": "up", "speed": [1, 2], "swirl": 3, "life": [1, 1.5], "size": [0.12, 0.2], "spin": [2, 5], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "mote_star", "burst": 36, "shape": "ring", "radius": 0.5, "dir": "up", "speed": [0.8, 2], "swirl": 2, "life": [0.8, 1.4], "size": [0.06, 0.1], "color": ["white", "hot", "mid"]},
+        {"type": "light", "intensity": 12, "range": 5, "life": 0.8, "y": 1}
+      ],
+      "aura": [
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "leaf", "rate": 5, "shape": "ring", "radius": 0.5, "dir": "up", "speed": [0.4, 0.8], "swirl": 2, "life": [1.2, 1.8], "size": [0.08, 0.12], "spin": [2, 4], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "mote_star", "rate": 8, "shape": "ring", "radius": 0.45, "dir": "up", "speed": [0.4, 0.9], "swirl": 1.5, "life": [1, 1.6], "size": [0.05, 0.08], "color": ["white", "hot", "mid"]},
+        {"type": "decal", "at": "feet", "follow": true, "tex": "rune_nature", "size": 1.5, "spin": 0.4, "opacity": 0.45, "fadeOut": 0.6, "color": "hot", "edge": "deep"}
+      ],
+      "auraTime": 4
+    },
+    "heal_generic": {
+      "label": "Heal (any school)",
+      "kind": "self",
+      "school": "holy",
+      "windupTime": 0.6,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 18, "max": 16, "life": [0.5, 0.8], "size": [0.06, 0.1], "shape": "ring", "radius": 0.25, "swirl": 4, "dir": "up", "speed": [0.2, 0.4], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "dot_soft", "rate": 12, "max": 8, "life": [0.2, 0.3], "size": [0.32, 0.42], "color": ["hot", "mid", "mid"], "alpha": [0, 0.55, 0]}
+      ],
+      "impact": [
+        {"type": "decal", "tex": "rune_{school}", "size": 2.4, "grow": [0.4, 1, 0.3], "spin": 0.8, "life": 1.5, "fadeOut": 0.9, "color": "hot", "edge": "deep"},
+        {"type": "shell", "shape": "cylinder", "tex": "band_light", "radius": 0.6, "height": 3, "heightGrow": [0.1, 1, 0.4], "life": 1.1, "fadeOut": 0.7, "opacity": 0.6, "scroll": [0.03, -0.7], "repeat": [4, 1], "color": "white", "edge": "mid"},
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "mote_star", "burst": 40, "shape": "ring", "radius": 0.5, "dir": "up", "speed": [1, 2.4], "swirl": 2, "life": [0.8, 1.4], "size": [0.06, 0.11], "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "feet", "follow": true, "texs": ["flame_1", "flame_4"], "burst": 12, "shape": "ring", "radius": 0.55, "dir": "up", "speed": [0.4, 0.8], "life": [0.5, 0.8], "size": [0.3, 0.45], "rot": 0, "color": ["white", "hot", "deep"], "alpha": [0, 0.7, 0]},
+        {"type": "light", "intensity": 12, "range": 5, "life": 0.7, "y": 1}
+      ]
+    },
+    "shapeshift_puff": {
+      "label": "Shape change",
+      "kind": "shift",
+      "school": "nature",
+      "impact": [
+        {"type": "flipbook", "at": "point", "blend": "normal", "tex": "fx_smoke", "count": 3, "shape": "sphere", "radius": 0.4, "offset": [0, 0.9, 0], "life": 0.9, "size": 2.2, "color": ["#e8e0d0", "#b8b0a0", "#807870"], "edge": "#605848", "alpha": [0.9, 0.8, 0]},
+        {"type": "emitter", "blend": "normal", "texs": ["smoke_1", "smoke_3"], "burst": 22, "shape": "sphere", "radius": 0.7, "offset": [0, 0.9, 0], "dir": "random", "speed": [1, 2.5], "drag": 2.5, "life": [0.8, 1.3], "size": [0.6, 1], "sizeCurve": [0.5, 1, 1.3], "alpha": [0, 0.75, 0], "color": ["#e8e0d0", "#c0b8a8"], "edge": "#787060"},
+        {"type": "emitter", "tex": "leaf", "burst": 30, "shape": "sphere", "radius": 0.5, "offset": [0, 0.9, 0], "dir": "outUp", "speed": [2, 4], "gravity": 2.5, "drag": 1, "life": [0.9, 1.4], "size": [0.12, 0.2], "spin": [3, 7], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "tex": "mote_star", "burst": 30, "shape": "sphere", "radius": 0.6, "offset": [0, 0.9, 0], "dir": "random", "speed": [1.5, 3], "drag": 2, "life": [0.6, 1], "size": [0.06, 0.1], "color": ["white", "hot", "mid"]},
+        {"type": "decal", "tex": "ring_shock", "size": 3.2, "grow": [0.2, 1, 0.35], "life": 0.45, "fadeIn": 0, "fadeOut": 0.3, "color": "hot", "edge": "mid"},
+        {"type": "decal", "tex": "rune_{school}", "size": 2.2, "spin": 1.5, "grow": [0.5, 1, 0.3], "life": 0.9, "fadeOut": 0.6, "color": "hot", "edge": "deep", "layer": 1},
+        {"type": "light", "intensity": 10, "range": 5, "life": 0.5, "y": 1}
+      ]
+    },
+    "summon_circle": {
+      "label": "Summoning circle",
+      "kind": "summon",
+      "school": "shadow",
+      "windupTime": 0.8,
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "mote_star", "rate": 18, "max": 16, "life": [0.35, 0.6], "size": [0.05, 0.08], "shape": "sphere", "radius": 0.45, "converge": true, "color": ["white", "hot", "mid"]},
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "rune_summon", "rate": 1.5, "max": 2, "life": [0.8, 1], "size": [0.45, 0.45], "spin": [1.5, 2], "color": ["hot", "mid", "deep"], "alpha": [0, 0.9, 0]}
+      ],
+      "linger": {
+        "seconds": 3.2,
+        "radius": 1.7,
+        "layers": [
+          {"type": "decal", "tex": "rune_summon", "rad": 1, "spin": 0.5, "grow": [0.1, 1, 0.6], "pulse": [0.2, 1.2], "fadeOut": 0.8, "color": "hot", "edge": "deep"},
+          {"type": "decal", "tex": "rune_{school}", "rad": 0.55, "spin": -0.9, "grow": [0.1, 1, 0.9], "opacity": 0.8, "fadeOut": 0.8, "color": "white", "edge": "mid", "layer": 1},
+          {"type": "shell", "shape": "cylinder", "tex": "band_runes", "rad": 1, "height": 1.4, "heightGrow": [0, 1, 0.7], "spin": 0.6, "repeat": [5, 1], "scroll": [0, 0], "opacity": 0.75, "fade": 0.8, "fadeOut": 0.6, "color": "hot", "edge": "deep"},
+          {"type": "shell", "shape": "cylinder", "tex": "band_light", "rad": 0.7, "height": 5, "delay": 1.6, "life": 1, "fadeIn": 0.05, "fadeOut": 0.7, "opacity": 0.9, "fade": 0.8, "scroll": [0, -1.5], "repeat": [4, 1], "color": "white", "edge": "mid"},
+          {"type": "emitter", "tex": "mote_star", "rate": 40, "max": 80, "shape": "ring", "rad": 0.95, "onGround": true, "dir": "up", "speed": [0.8, 1.8], "swirl": 1.2, "life": [0.9, 1.4], "size": [0.06, 0.1], "color": ["white", "hot", "mid"]},
+          {"type": "emitter", "blend": "normal", "texs": ["smoke_2", "smoke_4"], "rate": 10, "max": 26, "shape": "disc", "rad": 0.7, "onGround": true, "dir": "up", "speed": [0.3, 0.7], "life": [1.2, 1.8], "size": [0.8, 1.2], "color": ["smoke"], "edge": "#000000", "alpha": [0, 0.5, 0]},
+          {"type": "emitter", "tex": "fx_burst", "burst": 1, "delay": 1.6, "offset": [0, 1, 0], "life": 0.5, "size": [3, 3], "rot": 0, "color": ["white", "hot", "mid"], "alpha": [1, 0.8, 0]},
+          {"type": "light", "intensity": 10, "range": 6, "y": 1.2, "flicker": 0.1},
+          {"type": "shake", "strength": 0.2, "delay": 1.6}
+        ]
+      }
+    },
+    "thunder_strike": {
+      "label": "Lightning from the sky",
+      "kind": "ground",
+      "school": "lightning",
+      "windupTime": 0.6,
+      "aim": {"shape": "circle", "kind": "hostile"},
+      "windup": [
+        {"type": "emitter", "at": "hands", "follow": true, "tex": "bolt_fork", "rate": 12, "max": 6, "life": [0.06, 0.12], "size": [0.3, 0.45], "color": ["white", "hot", "mid"], "alpha": [1, 1, 0]},
+        {"type": "emitter", "at": "hands", "tex": "spark_streak", "rate": 20, "max": 16, "life": [0.15, 0.3], "size": [0.03, 0.05], "stretch": 0.2, "dir": "random", "speed": [1.5, 3], "color": ["white", "hot", "mid"]}
+      ],
+      "impact": [
+        {"type": "emitter", "tex": "bolt_fork", "burst": 3, "offset": [0, 4, 0], "life": [0.12, 0.2], "size": [8, 9], "rot": 0, "color": ["white", "hot", "mid"], "alpha": [1, 1, 0]},
+        {"type": "shell", "shape": "cylinder", "tex": "band_light", "radius": 0.35, "height": 14, "life": 0.3, "fadeIn": 0, "fadeOut": 0.25, "opacity": 1, "fade": 0.5, "scroll": [0, -3], "color": "white", "edge": "mid"},
+        {"type": "flipbook", "tex": "fx_burst", "size": 3, "life": 0.35, "offset": [0, 0.5, 0], "color": ["white", "hot", "mid"], "edge": "deep"},
+        {"type": "emitter", "tex": "spark_streak", "burst": 50, "dir": "outUp", "speed": [5, 10], "gravity": 8, "life": [0.4, 0.7], "size": [0.05, 0.08], "stretch": 0.08, "color": ["white", "hot", "mid"]},
+        {"type": "decal", "tex": "ring_shock", "rad": 1.1, "grow": [0.1, 1, 0.35], "life": 0.45, "fadeIn": 0, "fadeOut": 0.3, "color": "white", "edge": "mid"},
+        {"type": "decal", "tex": "scorch", "blend": "normal", "rad": 0.6, "life": 5, "fadeOut": 2, "opacity": 0.8, "color": "#0a0a10", "edge": "#202030", "layer": 1},
+        {"type": "light", "intensity": 70, "range": 14, "life": 0.3, "y": 2, "flicker": 0.5},
+        {"type": "shake", "strength": 0.45}
+      ],
+      "linger": {
+        "seconds": 4,
+        "radius": 4,
+        "layers": [
+          {"type": "decal", "tex": "rune_lightning", "rad": 1, "spin": 0.4, "pulse": [0.4, 3], "fadeOut": 1, "color": "hot", "edge": "deep"},
+          {"type": "emitter", "tex": "bolt_fork", "rate": 6, "max": 6, "shape": "disc", "rad": 0.8, "offset": [0, 3.5, 0], "life": [0.08, 0.14], "size": [6, 7], "rot": 0, "color": ["white", "hot", "mid"], "alpha": [1, 1, 0]},
+          {"type": "emitter", "tex": "spark_streak", "rate": 30, "max": 60, "shape": "disc", "rad": 0.95, "onGround": true, "dir": "outUp", "speed": [2, 5], "gravity": 6, "stretch": 0.1, "life": [0.3, 0.6], "size": [0.04, 0.07], "color": ["white", "hot", "mid"]},
+          {"type": "light", "intensity": 8, "range": 8, "flicker": 0.7, "y": 1.5}
+        ]
+      }
+    },
+    "aura_burning": {
+      "label": "Burning",
+      "kind": "aura",
+      "school": "fire",
+      "aura": [
+        {"type": "emitter", "at": "feet", "follow": true, "texs": ["flame_1", "flame_2", "flame_4", "flame_6"], "rate": 46, "max": 60, "shape": "cylinder", "radius": 0.32, "height": 1.5, "dir": "up", "speed": [0.6, 1.2], "spread": 0.1, "life": [0.35, 0.6], "size": [0.3, 0.5], "sizeCurve": [0.5, 1, 0.3], "rot": 0, "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "feet", "follow": true, "blend": "normal", "texs": ["smoke_2", "smoke_4"], "rate": 6, "max": 10, "shape": "cylinder", "radius": 0.2, "height": 1, "offset": [0, 1, 0], "dir": "up", "speed": [0.6, 1], "life": [0.9, 1.4], "size": [0.4, 0.7], "color": ["#3a2a22", "#2a201c", "#1a1412"], "edge": "#120c0a", "alpha": [0, 0.4, 0]},
+        {"type": "emitter", "at": "feet", "tex": "spark_streak", "rate": 10, "max": 14, "shape": "cylinder", "radius": 0.3, "height": 1.6, "dir": "up", "speed": [1, 2], "spread": 0.4, "stretch": 0.12, "life": [0.3, 0.6], "size": [0.03, 0.05], "color": ["white", "hot", "mid"]},
+        {"type": "light", "at": "body", "intensity": 4, "range": 3.5, "flicker": 0.4, "y": 0},
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "fx_flame", "rate": 10, "max": 12, "shape": "cylinder", "radius": 0.22, "height": 1.3, "dir": "up", "speed": [0.4, 0.8], "life": [0.45, 0.6], "size": [0.55, 0.75], "color": ["hot", "mid", "deep"]}
+      ]
+    },
+    "aura_frozen": {
+      "label": "Frozen",
+      "kind": "aura",
+      "school": "ice",
+      "aura": [
+        {"type": "shell", "at": "feet", "shape": "cylinder", "tex": "band_mist", "radius": 0.5, "height": 2, "y": -0.05, "scroll": [0.03, 0], "repeat": [3, 1], "opacity": 0.45, "fade": 0.5, "color": "white", "edge": "mid"},
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "shard_ice", "rate": 7, "max": 14, "shape": "cylinder", "radius": 0.4, "height": 1.7, "life": [1.6, 2.2], "size": [0.2, 0.32], "rot": 0, "color": ["white", "hot", "mid"], "alpha": [0, 0.9, 0]},
+        {"type": "emitter", "at": "feet", "follow": true, "blend": "normal", "tex": "smoke_2", "rate": 4, "max": 8, "shape": "ring", "radius": 0.4, "dir": "out", "speed": [0.1, 0.3], "life": [1.4, 2], "size": [0.6, 0.9], "color": ["smoke"], "edge": "mid", "alpha": [0, 0.3, 0]},
+        {"type": "decal", "at": "feet", "follow": true, "tex": "frost_patch", "size": 1.8, "opacity": 0.7, "fadeOut": 0.5, "color": "hot", "edge": "deep"}
+      ]
+    },
+    "aura_blessed": {
+      "label": "Blessed",
+      "kind": "aura",
+      "school": "holy",
+      "aura": [
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "mote_star", "rate": 12, "max": 24, "shape": "ring", "radius": 0.5, "offset": [0, 0.2, 0], "dir": "up", "speed": [0.3, 0.6], "swirl": 2.2, "life": [1.4, 2], "size": [0.06, 0.1], "color": ["white", "hot", "mid"]},
+        {"type": "decal", "at": "feet", "follow": true, "tex": "rune_holy", "size": 1.6, "spin": 0.35, "opacity": 0.6, "pulse": [0.3, 0.5], "fadeOut": 0.5, "color": "hot", "edge": "deep"},
+        {"type": "mesh", "at": "head", "kind": "ring", "size": 0.5, "offset": [0, 0.18, 0], "spin": [0, 1.2, 0], "align": false, "color": "white", "edge": "mid", "opacity": 0.9}
+      ]
+    },
+    "aura_poisoned": {
+      "label": "Poisoned",
+      "kind": "aura",
+      "school": "poison",
+      "aura": [
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "dot_soft", "rate": 22, "max": 30, "shape": "cylinder", "radius": 0.3, "height": 1.5, "dir": "up", "speed": [0.3, 0.6], "life": [0.6, 1], "size": [0.07, 0.13], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "feet", "tex": "dot_soft", "rate": 5, "max": 8, "shape": "cylinder", "radius": 0.3, "height": 1.2, "offset": [0, 0.4, 0], "dir": "down", "speed": [0, 0.1], "gravity": 6, "life": [0.4, 0.6], "size": [0.04, 0.06], "color": ["hot", "mid", "deep"]},
+        {"type": "emitter", "at": "feet", "follow": true, "blend": "normal", "tex": "cloud_poison", "rate": 6, "max": 10, "shape": "ring", "radius": 0.35, "offset": [0, 0.4, 0], "dir": "up", "speed": [0.1, 0.3], "life": [1.2, 1.8], "size": [0.7, 1.1], "color": ["mid"], "edge": "smoke", "alpha": [0, 0.6, 0]},
+        {"type": "decal", "at": "feet", "follow": true, "tex": "splat_poison", "size": 1.5, "opacity": 0.55, "fadeOut": 0.5, "color": "mid", "edge": "deep"}
+      ]
+    },
+    "aura_haste": {
+      "label": "Hasted",
+      "kind": "aura",
+      "school": "haste",
+      "aura": [
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "spark_streak", "rate": 40, "max": 50, "shape": "cylinder", "radius": 0.42, "height": 1.5, "dir": "up", "speed": [3, 5], "spread": 0.02, "stretch": 0.22, "life": [0.2, 0.35], "size": [0.06, 0.09], "color": ["white", "hot", "mid"]},
+        {"type": "decal", "at": "feet", "follow": true, "tex": "ring_shock", "size": 1.4, "spin": 4, "opacity": 0.8, "pulse": [0.5, 2], "fadeOut": 0.4, "color": "hot", "edge": "mid"},
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "mote_star", "rate": 8, "max": 12, "shape": "ring", "radius": 0.5, "offset": [0, 0.15, 0], "swirl": 6, "dir": "up", "speed": [0.2, 0.4], "life": [0.5, 0.8], "size": [0.05, 0.08], "color": ["white", "hot", "mid"]},
+        {"type": "shell", "at": "feet", "shape": "cylinder", "tex": "band_mist", "radius": 0.55, "height": 1.6, "scroll": [2.2, 0], "repeat": [2, 1], "opacity": 0.5, "fade": 1.2, "color": "hot", "edge": "deep"}
+      ]
+    },
+    "aura_warded": {
+      "label": "Warded (barrier)",
+      "kind": "aura",
+      "school": "arcane",
+      "aura": [
+        {"type": "shell", "at": "feet", "shape": "sphere", "tex": "band_runes", "radius": 0.95, "height": 1, "y": 0.95, "spin": 0.4, "repeat": [6, 2], "scroll": [0, 0], "opacity": 0.6, "fade": 0.01, "pulse": [0.25, 0.6], "color": "hot", "edge": "deep"},
+        {"type": "emitter", "at": "body", "follow": true, "tex": "mote_star", "rate": 6, "max": 10, "shape": "sphere", "radius": 0.9, "life": [0.6, 1], "size": [0.05, 0.08], "color": ["white", "hot", "mid"]}
+      ]
+    },
+    "aura_cursed": {
+      "label": "Cursed",
+      "kind": "aura",
+      "school": "shadow",
+      "aura": [
+        {"type": "emitter", "at": "feet", "follow": true, "blend": "normal", "texs": ["smoke_2", "smoke_4"], "rate": 10, "max": 16, "shape": "ring", "radius": 0.4, "dir": "up", "speed": [0.2, 0.5], "swirl": 1, "life": [1, 1.5], "size": [0.5, 0.8], "color": ["smoke"], "edge": "#000000", "alpha": [0, 0.75, 0]},
+        {"type": "emitter", "at": "feet", "follow": true, "tex": "mote_star", "rate": 14, "max": 20, "shape": "ring", "radius": 0.45, "dir": "up", "speed": [0.3, 0.7], "swirl": -2, "life": [1, 1.5], "size": [0.06, 0.1], "color": ["hot", "mid", "deep"]},
+        {"type": "decal", "at": "feet", "follow": true, "tex": "rune_shadow", "size": 1.5, "spin": -0.3, "opacity": 0.8, "fadeOut": 0.5, "color": "hot", "edge": "deep"}
+      ]
+    },
+    "generic": {"label": "Anything else", "kind": "missile", "school": "arcane", "ref": "bolt_generic"}
+  },
+  "spells": {
+    "abyss_gate": {"visual": "summon_circle", "scale": 2.2},
+    "aimed_shot": "arrow",
+    "ancestors_ward": "buff_generic",
+    "anthem_of_heroes": "buff_generic",
+    "arc_edge": {"visual": "elemental_slash", "school": "arcane"},
+    "arcane_burst": "ground_generic",
+    "arrow_of_ruin": {"visual": "bolt_generic", "school": "shadow"},
+    "avatar_of_dawn": "heal_generic",
+    "ballad_of_valour": "buff_generic",
+    "bear_shape": "shapeshift_puff",
+    "bind_imp": "summon_circle",
+    "blizzard": "blizzard",
+    "blood_price": {"visual": "buff_generic", "school": "shadow"},
+    "bolt_step": {"visual": "dash_generic", "school": "lightning"},
+    "bone_armour": {"visual": "buff_generic", "school": "shadow"},
+    "breaching_shove": "melee_slash",
+    "buried_march": {"visual": "summon_circle", "scale": 1.4},
+    "call_bear": {"visual": "summon_circle", "school": "nature", "scale": 1.3},
+    "call_spirit": {"visual": "summon_circle", "school": "holy"},
+    "call_wolf": {"visual": "summon_circle", "school": "nature"},
+    "called_star": {"visual": "meteor", "school": "arcane"},
+    "caltrop_scatter": {"visual": "ground_generic", "school": "physical", "scale": 0.5},
+    "cat_shape": "shapeshift_puff",
+    "chain_bolt": "chain_lightning",
+    "chain_hook": {"visual": "whirl_slash", "scale": 0.8},
+    "challenge": "battle_shout",
+    "charge": "dash_generic",
+    "charged_arrow": "bolt_generic",
+    "cleave": "whirl_slash",
+    "clockwork_bolt": "arrow",
+    "comet_rush": {"visual": "dash_generic", "school": "arcane"},
+    "consecrate": {"visual": "ring_of_dawn", "scale": 0.7},
+    "corpse_pyre": {"visual": "summon_circle", "school": "fire"},
+    "curse": {"visual": "shadow_bolt", "scale": 0.9},
+    "cutting_waltz": {"visual": "nova_generic", "school": "shadow"},
+    "dawn_prayer": "nova_generic",
+    "dawnfall": {"visual": "ring_of_dawn", "school": "dawn"},
+    "daybreak_descent": {"visual": "dash_generic", "school": "holy"},
+    "deadeye_shot": "arrow",
+    "death_mark": {"visual": "bolt_generic", "school": "shadow"},
+    "deploy_sentry": {"visual": "summon_circle", "school": "physical", "scale": 0.8},
+    "discord_note": {"visual": "arcane_missile", "scale": 0.8},
+    "dragonscale": {"visual": "buff_generic", "school": "fire"},
+    "drain": {"visual": "beam_generic", "school": "shadow"},
+    "drowse": "ground_generic",
+    "elder_grove": {"visual": "summon_circle", "school": "nature"},
+    "ember_stride": {"visual": "buff_generic", "school": "fire"},
+    "entropy_field": "ground_generic",
+    "eviscerate": "melee_slash",
+    "execute": {"visual": "elemental_slash", "school": "shadow"},
+    "final_word": {"visual": "elemental_slash", "school": "shadow"},
+    "fire_wall": "fire_wall",
+    "firebolt": "fire_bolt",
+    "flame_bound": {"visual": "buff_generic", "school": "fire"},
+    "flamethrower": "breath_cone",
+    "flashover": {"visual": "ground_generic", "school": "fire"},
+    "flask_grenade": "flask_throw",
+    "flourish": "melee_slash",
+    "flung_edge": "arcane_missile",
+    "frost_fletch": {"visual": "arrow", "school": "ice"},
+    "frost_nova": "frost_nova",
+    "frost_shard": "frost_bolt",
+    "gnawing_dark": "shadow_bolt",
+    "grand_finale": {"visual": "nova_generic", "school": "arcane"},
+    "grave_mark": {"visual": "shadow_bolt", "scale": 0.8},
+    "grave_tide": {"visual": "nova_generic", "school": "shadow"},
+    "great_anvil": "ground_generic",
+    "great_post": {"visual": "ring_of_dawn", "scale": 0.8},
+    "groundbreaker": {"visual": "whirl_slash", "scale": 0.8},
+    "hallowed_ground": "ring_of_dawn",
+    "hex_bolt": "shadow_bolt",
+    "host_of_shades": {"visual": "summon_circle", "scale": 1.2},
+    "hundred_cuts": "whirl_slash",
+    "hundred_steps": "whirl_slash",
+    "hunters_snare": {"visual": "ground_generic", "school": "nature", "scale": 0.5},
+    "ice_lance": {"visual": "beam_generic", "school": "ice"},
+    "inner_stillness": {"visual": "heal_generic", "school": "physical"},
+    "iron_net": "arrow",
+    "iron_resolve": "battle_shout",
+    "judgement": {"visual": "thunder_strike", "school": "holy"},
+    "junk_toss": "arrow",
+    "kind_omen": {"visual": "heal_generic", "school": "arcane"},
+    "kindly_light": {"visual": "bolt_generic", "school": "holy"},
+    "knife_storm": "whirl_slash",
+    "lethargy": "ground_generic",
+    "lift_the_fallen": "buff_generic",
+    "lunge": "dash_generic",
+    "mana_rend": {"visual": "beam_generic", "school": "arcane"},
+    "mana_shield": {"visual": "buff_generic", "school": "arcane"},
+    "mark_the_killer": {"visual": "shadow_bolt", "scale": 0.8},
+    "marrow_lance": "shadow_bolt",
+    "martyrs_vow": "buff_generic",
+    "masters_flurry": "whirl_slash",
+    "matadors_turn": "whirl_slash",
+    "measured_cut": "melee_slash",
+    "mending_post": {"visual": "ground_generic", "school": "nature", "scale": 0.6},
+    "mending_rain": {"visual": "ground_generic", "school": "nature"},
+    "mending_verse": "heal_generic",
+    "mercy_touch": "heal_generic",
+    "meteor": "meteor",
+    "mountain_fist": {"visual": "whirl_slash", "scale": 0.8},
+    "multi_shot": "arrow",
+    "ninefold_staff": "whirl_slash",
+    "null_circle": {"visual": "ground_generic", "school": "holy"},
+    "omen_bolt": "arcane_missile",
+    "open_palm": "melee_slash",
+    "overchannel": {"visual": "buff_generic", "school": "arcane"},
+    "pinning_shot": "arrow",
+    "pinning_thrust": {"visual": "whirl_slash", "scale": 0.8},
+    "poison_dart": {"visual": "bolt_generic", "school": "poison", "scale": 0.7},
+    "power_strike": "melee_slash",
+    "prophecy": "ground_generic",
+    "purging_rite": "nova_generic",
+    "quicken": {"visual": "buff_generic", "school": "haste"},
+    "rain_of_arrows": "arrow_rain",
+    "raise_thrall": "summon_circle",
+    "rally": {"visual": "battle_shout", "school": "holy"},
+    "rampage": "whirl_slash",
+    "red_haze": "battle_shout",
+    "renew": "nature_heal",
+    "riftstep": {"visual": "dash_generic", "school": "arcane"},
+    "riposte_stance": "battle_shout",
+    "rootgrasp": {"visual": "ground_generic", "school": "nature"},
+    "rune_hammer": {"visual": "elemental_slash", "school": "arcane"},
+    "sanctified_blade": {"visual": "elemental_slash", "school": "holy"},
+    "sanctuary": {"visual": "ring_of_dawn", "scale": 0.9},
+    "savage_leap": "dash_generic",
+    "scale_rend": "elemental_slash",
+    "scorch": "elemental_slash",
+    "second_hand": "arcane_missile",
+    "seeking_volley": "arcane_missile",
+    "shade_cut": {"visual": "elemental_slash", "school": "shadow"},
+    "shadow_lance": "shadow_bolt",
+    "shadowstep": {"visual": "dash_generic", "school": "shadow"},
+    "shield_bash": "melee_slash",
+    "shield_of_dawn": "buff_generic",
+    "silver_edge": "melee_slash",
+    "silver_moonlight": {"visual": "beam_generic", "school": "moon"},
+    "skybreaker": "thunder_strike",
+    "smoke": {"visual": "poison_cloud", "school": "shadow", "scale": 0.7},
+    "song_of_ruin": {"visual": "nova_generic", "school": "shadow"},
+    "spellstorm_blade": {"visual": "nova_generic", "school": "arcane"},
+    "spirit_bolt": {"visual": "bolt_generic", "school": "lightning"},
+    "star_dart": "arcane_missile",
+    "starcut": {"visual": "elemental_slash", "school": "arcane"},
+    "starfall_arrow": {"visual": "meteor", "school": "arcane", "scale": 0.7},
+    "stasis_lock": "bolt_generic",
+    "static_lash": {"visual": "chain_lightning", "scale": 0.7},
+    "stillfrost": {"visual": "ground_generic", "school": "ice"},
+    "stoneskin": "battle_shout",
+    "storm_beam": "chain_lightning",
+    "sucker_punch": "melee_slash",
+    "sunder": "melee_slash",
+    "sunlance": "beam_generic",
+    "sweeping_guard": "melee_slash",
+    "sweeping_heel": "whirl_slash",
+    "tempest_eye": {"visual": "thunder_strike", "scale": 1.2},
+    "thornlash": "nature_bolt",
+    "thunderclap": {"visual": "nova_generic", "school": "lightning"},
+    "toxic_cloud": "poison_cloud",
+    "trackers_leap": "dash_generic",
+    "twinlight": {"visual": "nova_generic", "school": "shadow"},
+    "venom_edge": {"visual": "elemental_slash", "school": "poison"},
+    "void_rift": {"visual": "summon_circle", "scale": 1.6},
+    "warcry": "battle_shout",
+    "whirlwind": "whirl_slash",
+    "wild_bolt": "arcane_missile",
+    "wind_step": "dash_generic",
+    "wolf_shape": "shapeshift_puff",
+    "world_breaker": {"visual": "whirl_slash", "scale": 0.8},
+    "writ_of_guilt": {"visual": "bolt_generic", "school": "holy"},
+    "wyrmfall": {"visual": "dash_generic", "school": "fire"}
+  },
+  "fallback": {
+    "bolt:fire": "fire_bolt",
+    "bolt:ice": "frost_bolt",
+    "bolt:arcane": "arcane_missile",
+    "bolt:shadow": "shadow_bolt",
+    "bolt:nature": "nature_bolt",
+    "bolt:physical": "arrow",
+    "bolt": "bolt_generic",
+    "ground:holy": "ring_of_dawn",
+    "ground:poison": "poison_cloud",
+    "ground:ice": "blizzard",
+    "ground:lightning": "thunder_strike",
+    "ground:physical": "arrow_rain",
+    "ground": "ground_generic",
+    "cone:physical": "melee_slash",
+    "cone:fire": "breath_cone",
+    "cone": "elemental_slash",
+    "line:lightning": "chain_lightning",
+    "line:physical": "whirl_slash",
+    "line": "beam_generic",
+    "beam": "beam_generic",
+    "self:ice": "frost_nova",
+    "self:physical": "battle_shout",
+    "self": "buff_generic"
+  }
+}

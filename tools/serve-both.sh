@@ -20,8 +20,23 @@ DEV_DIR="$PWD"
 STABLE_DIR="$HOME/claude/playground-stable"
 IP="$(hostname -I | awk '{print $1}')"
 
+# Each server runs as its own little systemd job (playground-serve-<port>), not as a child of the terminal that
+# started it: a plain `nohup ... &` stays inside the tmux pane's group, so when that pane is closed or killed
+# (2026-11-24: an out-of-memory kill of a test browser took the whole pane) the page servers died with it.
+launch() {  # launch <port> <dir> <log> [extra serve.py args]
+  local port="$1" dir="$2" log="$3"; shift 3
+  if command -v systemd-run >/dev/null && systemctl --user show-environment >/dev/null 2>&1; then
+    systemctl --user reset-failed "playground-serve-$port" 2>/dev/null || true
+    systemd-run --user --quiet --collect --unit="playground-serve-$port" -p WorkingDirectory="$dir" \
+      bash -c "exec python3 tools/serve.py $port $* >> '$log' 2>&1"
+  else
+    ( cd "$dir" && nohup python3 tools/serve.py "$port" "$@" > "$log" 2>&1 & )
+  fi
+}
+
 stop_port() {
   local port="$1"
+  systemctl --user stop "playground-serve-$port" 2>/dev/null || true
   # match the serve.py invocation for that port, not every python on the box
   pkill -f "tools/serve.py $port" 2>/dev/null || true
   # and the older plain-http.server form, if one is still about from before this script existed
@@ -38,19 +53,19 @@ stop_port 8400; stop_port 8401; stop_port 8441; stop_port 8442
 sleep 0.4
 
 if [ -d "$STABLE_DIR" ]; then
-  nohup python3 "$STABLE_DIR/tools/serve.py" 8400 > /tmp/playground-stable.log 2>&1 &
+  launch 8400 "$STABLE_DIR" /tmp/playground-stable.log
   STABLE_AT="$(git -C "$STABLE_DIR" log -1 --format='%h %s' 2>/dev/null || echo '?')"
 else
   STABLE_AT="(no worktree — run: git worktree add $STABLE_DIR stable)"
 fi
-nohup python3 "$DEV_DIR/tools/serve.py" 8401 > /tmp/playground-dev.log 2>&1 &
+launch 8401 "$DEV_DIR" /tmp/playground-dev.log
 
 HTTPS_NOTE="(no cert — run tools/make-dev-cert.sh for gamepad-friendly https)"
 if [ -f "$DEV_DIR/tools/certs/dev.crt" ]; then
-  ( cd "$DEV_DIR" && nohup python3 tools/serve.py 8441 --https > /tmp/playground-dev-https.log 2>&1 & )
+  launch 8441 "$DEV_DIR" /tmp/playground-dev-https.log --https
   if [ -d "$STABLE_DIR" ]; then
     [ -e "$STABLE_DIR/tools/certs" ] || ln -s "$DEV_DIR/tools/certs" "$STABLE_DIR/tools/certs"
-    ( cd "$STABLE_DIR" && nohup python3 tools/serve.py 8442 --https > /tmp/playground-stable-https.log 2>&1 & )
+    launch 8442 "$STABLE_DIR" /tmp/playground-stable-https.log --https
   fi
   HTTPS_NOTE="https://$IP:8442/ (stable)   https://$IP:8441/ (dev)   — for gamepads"
 fi

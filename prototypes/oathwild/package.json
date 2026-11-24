@@ -1,0 +1,16 @@
+{
+  "name": "oathwild",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Oathwild: third-person open-world co-op RPG. The page is served by the playground; this package is the world server (authoritative Node + WebSocket, runs js/rules + js/world).",
+  "author": "Radley Sustaire",
+  "scripts": {
+    "start": "node server/main.mjs",
+    "test": "node --test tests/rules/*.test.mjs tests/world/*.test.mjs tests/net/*.test.mjs",
+    "test:net": "node --test tests/net/*.test.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

@@ -1,0 +1,15 @@
+Use your image generation tool to create ONE new picture and save it in the current working directory as painted.png (1536x1024 PNG, landscape). Do nothing else (do not write code, do not edit other files).
+It is a game texture sheet of spell-effect textures.
+The picture is an invisible grid of 3 columns x 2 rows of equal 512x512 squares. Draw exactly ONE item per square, centred in its square, filling about 85% of it, never touching or crossing into a neighbour square (keep a black gap of at least 24 pixels from every square edge).
+Items:
+1. TOP-LEFT: a single soft round puff of smoke, billowing lumpy outline, painted with soft brush, darker grey inside lighter rim, fades to black at the edges.
+2. TOP-MIDDLE: a single wispy curling smoke plume, swirls and tendrils, fades to black at the edges.
+3. TOP-RIGHT: a single dense cloud of smoke made of three overlapping puffs, fades to black at the edges.
+4. BOTTOM-LEFT: a single thin swirl of mist, an S curve of vapour, fades to black at the edges.
+5. BOTTOM-MIDDLE: a single heavy bubbling cloud, round billows with a few bubbles at the edge, fades to black at the edges.
+6. BOTTOM-RIGHT: a single burst of dust and grit spreading sideways along the bottom, small specks, fades to black at the edges.
+Style: hand-painted stylised fantasy MMO spell-effect texture, like the painted VFX textures of a classic 2004 fantasy MMO: soft painterly brush strokes, glowing cores fading to soft edges, readable shapes, no photo realism.
+Hard rules:
+- Background is PURE BLACK (#000000) everywhere outside the painted shapes. No vignette, no border, no frame, no grid lines.
+- Paint every item ONLY in white and shades of grey (no colour at all): the game tints them per magic school and treats brightness as glow.
+- No text, no labels, no numbers, no watermark.

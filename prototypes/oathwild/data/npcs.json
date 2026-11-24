@@ -1,0 +1,142 @@
+{
+  "_doc": "Oathwild's people (world builder 2026-11-23). js/world/quests.js reads it (talkTo / servicesOf / npcPresent / npcAt). `at` = [x, z] on data/map.json's map (tests/world check walkable ground). `body`: a Tabard hero look hint (the client builds the person; `fallback` = an avatar-3d/fal roster body while Tabard NPCs are not wired) or `{ kind: 'object', art }` for a voice in a thing. `lines`: what they say when spoken to — the first row whose `flag` is set in the world wins, else the row without a flag. `services`: shop (`sells` = loot-table kinds, `levels`), trainer (`classes` they teach; `focus` = a path they specialise in), stable (the horse, data/inventory.json `mount`; `discountFlag` makes it cheaper), respec (data/levels.json `respec`), pact. `appears` / `leaves` = world flags that bring or take them; `moves` = a flag that moves them to `at`.",
+  "npcs": {
+    "elder_maren": { "name": "Maren Holloway", "title": "Elder of Larkford", "place": "larkford", "at": [-273, -19], "body": { "kind": "tabard", "sex": "female", "age": "old", "outfit": "robe", "colour": "#6b8f5e", "fallback": "female" },
+      "lines": [
+        { "flag": "hook_frostreach", "say": ["The crown you brought back hums at night. It wants to go north.", "Rest a while, hero. The vale owes you more than bread."] },
+        { "flag": "choir_broken", "say": ["The hill shrine burns again. I slept the whole night through for the first time this year."] },
+        { "say": ["Welcome to Larkford. Mind the geese, they bite.", "If you have a strong arm and a little patience, I have work."] }
+      ] },
+    "brother_tobin": { "name": "Brother Tobin", "title": "Keeper of the Brightwater Shrine", "place": "larkford", "at": [-246, -28], "body": { "kind": "tabard", "sex": "male", "age": "middle", "outfit": "robe", "colour": "#e8d9a8", "fallback": "male" },
+      "lines": [
+        { "flag": "choir_broken", "say": ["The bell rings true again. Listen!"] },
+        { "say": ["The Light keeps the road, friend. The shrine will remember you if you fall."] }
+      ],
+      "services": [
+        { "kind": "trainer", "classes": ["cleric"] },
+        { "kind": "respec", "text": "Help me choose a new path (respec)." }
+      ] },
+    "captain_edda": { "name": "Captain Edda Brandt", "title": "Captain of the Larkford Watch", "place": "larkford", "at": [-240, 10], "body": { "kind": "tabard", "sex": "female", "age": "middle", "outfit": "mail", "colour": "#3c5f8c", "fallback": "female" },
+      "lines": [
+        { "flag": "bandits_broken", "say": ["The Ford Road is quiet. Quiet makes me nervous, but I will take it."] },
+        { "say": ["Four guards, one tower and a wanted board. That is the whole watch. Can you help?"] }
+      ] },
+    "sergeant_holt": { "name": "Sergeant Holt Bracken", "title": "Weapons master", "place": "larkford", "at": [-234, 18], "body": { "kind": "tabard", "sex": "male", "age": "old", "outfit": "plate", "colour": "#8c3c3c", "fallback": "male" },
+      "lines": [{ "say": ["Feet apart. Shield up. Again.", "Strength wins fights, but footwork wins wars."] }],
+      "services": [{ "kind": "trainer", "classes": ["warrior", "bladesworn"] }] },
+    "wren_ashby": { "name": "Wren Ashby", "title": "Huntress", "place": "larkford", "at": [-292, -22], "body": { "kind": "tabard", "sex": "female", "age": "young", "outfit": "leather", "colour": "#5e7a3c", "fallback": "female" },
+      "lines": [{ "say": ["Wind from the west. Good day for a long shot."] }],
+      "services": [{ "kind": "trainer", "classes": ["ranger", "spellfletcher"] }] },
+    "nim_tallow": { "name": "Nim Tallow", "title": "Locksmith (mostly)", "place": "larkford", "at": [-286, 26], "body": { "kind": "tabard", "sex": "male", "age": "young", "outfit": "leather", "colour": "#3a3a46", "fallback": "male" },
+      "lines": [{ "say": ["I fix locks. Sometimes I fix them open. Want lessons?"] }],
+      "services": [{ "kind": "trainer", "classes": ["rogue", "shadowdancer"] }] },
+    "magister_oriel": { "name": "Magister Oriel Venn", "title": "Mage of the Lark Tower", "place": "larkford", "at": [-298, 4], "body": { "kind": "tabard", "sex": "male", "age": "old", "outfit": "robe", "colour": "#4a3c8c", "fallback": "male" },
+      "lines": [{ "say": ["Magic is mostly reading, and a little shouting.", "Fire, frost, the blade-song between them: I teach all three."] }],
+      "services": [{ "kind": "trainer", "classes": ["mage", "spellblade", "pyromancer"] }] },
+    "hedge_druid_moss": { "name": "Old Moss", "title": "Hedge druid", "place": "larkford", "at": [-206, -20], "body": { "kind": "tabard", "sex": "male", "age": "old", "outfit": "robe", "colour": "#5e6b3c", "fallback": "male" },
+      "lines": [{ "say": ["The river talks if you sit long enough. Today it says rain."] }],
+      "services": [{ "kind": "trainer", "classes": ["druid"] }] },
+    "lark_minstrel": { "name": "Lark", "title": "Minstrel of the Fiddler's Rest", "place": "larkford", "at": [-276, 20], "body": { "kind": "tabard", "sex": "female", "age": "young", "outfit": "cloth", "colour": "#b5523b", "fallback": "female" },
+      "lines": [{ "say": ["Every hero needs a song. Every song needs a hero. Shall we help each other?"] }],
+      "services": [{ "kind": "trainer", "classes": ["bard"] }] },
+    "grandmother_isk": { "name": "Grandmother Isk", "title": "Spirit-talker", "place": "larkford", "at": [-302, -30], "body": { "kind": "tabard", "sex": "female", "age": "old", "outfit": "leather", "colour": "#7a5a3c", "fallback": "female" },
+      "lines": [{ "say": ["The spirits of stone and storm are old friends. They might like you, too."] }],
+      "services": [{ "kind": "trainer", "classes": ["shaman"] }] },
+    "smith_ulla": { "name": "Ulla Graves", "title": "Smith", "place": "larkford", "at": [-250, -40], "body": { "kind": "tabard", "sex": "female", "age": "middle", "outfit": "cloth", "colour": "#5a4a3a", "fallback": "female" },
+      "lines": [{ "say": ["Blades, mail, buckles. If it is iron, I made it or I can mend it."] }],
+      "services": [{ "kind": "shop", "sells": ["weapon", "armour"], "levels": [1, 5] }, { "kind": "repair", "text": "Mend my gear." }] },
+    "merchant_pell": { "name": "Pell Dunmore", "title": "General goods", "place": "larkford", "at": [-262, -32], "body": { "kind": "tabard", "sex": "male", "age": "middle", "outfit": "cloth", "colour": "#8c7a3c", "fallback": "male" },
+      "lines": [{ "say": ["Rope, rings, rare trinkets. Mostly rope."] }],
+      "services": [{ "kind": "shop", "sells": ["jewellery", "armour"], "levels": [1, 5] }] },
+    "innkeeper_josse": { "name": "Josse Amberley", "title": "Keeper of the Fiddler's Rest", "place": "larkford", "at": [-282, 16], "body": { "kind": "tabard", "sex": "male", "age": "middle", "outfit": "cloth", "colour": "#a0643c", "fallback": "male" },
+      "lines": [
+        { "flag": "josse_reported", "say": ["The captain fined me half my cellar. Fair, I suppose. Mostly fair."] },
+        { "say": ["Hot stew, cold cider, and no questions. Well, few questions."] }
+      ] },
+    "ser_dario": { "name": "Ser Dario Fell", "title": "Fencing master", "place": "larkford", "at": [-290, 30], "body": { "kind": "tabard", "sex": "male", "age": "middle", "outfit": "leather", "colour": "#6b2a4a", "fallback": "male" },
+      "lines": [{ "say": ["A blade in each hand and a smile on your face. That is the whole art."] }],
+      "services": [{ "kind": "trainer", "classes": ["duelist"] }] },
+    "miller_hobb": { "name": "Hobb Tansy", "title": "Miller", "place": "larkford_mill", "at": [-218, -50], "body": { "kind": "tabard", "sex": "male", "age": "old", "outfit": "cloth", "colour": "#d9c9a0", "fallback": "male" },
+      "lines": [{ "say": ["Flour in my hair, flour in my beard, flour in my dreams."] }] },
+    "widow_perrin": { "name": "Widow Perrin", "title": "Weaver", "place": "larkford", "at": [-226, 40], "body": { "kind": "tabard", "sex": "female", "age": "old", "outfit": "cloth", "colour": "#6b5e8c", "fallback": "female" },
+      "lines": [
+        { "flag": "perrin_fed", "say": ["Bless you. The little ones ate well this week."] },
+        { "say": ["Three grandchildren and a loom. I manage."] }
+      ] },
+    "stable_corwin": { "name": "Corwin Hale", "title": "Stable master", "place": "larkford", "at": [-226, -22], "body": { "kind": "tabard", "sex": "male", "age": "young", "outfit": "leather", "colour": "#7a4a2a", "fallback": "male" },
+      "lines": [
+        { "flag": "stable_friend", "say": ["Chestnut is home and happy. For you, the friend price, always."] },
+        { "say": ["Best horses in the vale. Well, the only horses in the vale."] }
+      ],
+      "services": [{ "kind": "stable", "mount": "horse", "discountFlag": "stable_friend", "discount": 0.75 }] },
+    "farmer_della": { "name": "Della Rowe", "title": "Farmer", "place": "larkford", "at": [-298, 58], "body": { "kind": "tabard", "sex": "female", "age": "middle", "outfit": "cloth", "colour": "#9a7a3c", "fallback": "female" },
+      "lines": [
+        { "flag": "pip_home", "say": ["Pip is grounded until the harvest. Thank you, truly."] },
+        { "say": ["Have you seen a small boy with big ideas? He went to look at wolves."] }
+      ] },
+    "fisher_wynn": { "name": "Wynn Pike", "title": "Fisher", "place": "larkford", "at": [-198, 12], "body": { "kind": "tabard", "sex": "male", "age": "old", "outfit": "cloth", "colour": "#3c6b7a", "fallback": "male" },
+      "lines": [{ "say": ["Fish are biting. Something else is too, at night, down by Lantern Reach."] }] },
+    "shepherd_ada": { "name": "Ada Fenn", "title": "Shepherd", "place": "ada_fold", "at": [-130, -100], "body": { "kind": "tabard", "sex": "female", "age": "young", "outfit": "cloth", "colour": "#c9b88c", "fallback": "female" },
+      "lines": [
+        { "flag": "fold_safe", "say": ["Not one lamb lost this week. You are welcome at my fire any night."] },
+        { "say": ["The wolves come down from the Hartwood at dusk. I count my lambs twice now."] }
+      ] },
+    "pip_rowe": { "name": "Pip Rowe", "title": "Della's boy", "place": "hartwood", "at": [-112, -158], "body": { "kind": "tabard", "sex": "male", "age": "child", "outfit": "cloth", "colour": "#9a7a3c", "fallback": "male", "scale": 0.7 },
+      "lines": [{ "say": ["I was only LOOKING at the wolves. From very far away. Mostly."] }],
+      "leaves": { "flag": "pip_home" } },
+
+    "ranger_captain_fen": { "name": "Ranger-Captain Fen Asher", "title": "Warden of Thornwatch", "place": "thornwatch", "at": [172, -60], "body": { "kind": "tabard", "sex": "male", "age": "middle", "outfit": "leather", "colour": "#3c5a3c", "fallback": "male" },
+      "lines": [
+        { "flag": "hook_frostreach", "say": ["North, then. I will have the passes scouted before the snow."] },
+        { "say": ["Thornwatch stands between the Wilds and your vale. Some days it barely stands."] }
+      ] },
+    "quartermaster_bree": { "name": "Quartermaster Bree", "title": "Thornwatch stores", "place": "thornwatch", "at": [158, -66], "body": { "kind": "tabard", "sex": "female", "age": "middle", "outfit": "leather", "colour": "#6b5a3c", "fallback": "female" },
+      "lines": [{ "say": ["Arrows, bandages, boots. Sign here. No, here."] }],
+      "services": [{ "kind": "shop", "sells": ["weapon", "armour", "jewellery"], "levels": [5, 10] }, { "kind": "repair", "text": "Mend my gear." }] },
+    "dame_alys": { "name": "Dame Alys Corbin", "title": "Paladin of the Dawn Road", "place": "thornwatch", "at": [184, -64], "body": { "kind": "tabard", "sex": "female", "age": "middle", "outfit": "plate", "colour": "#d9c060", "fallback": "female" },
+      "lines": [{ "say": ["Steel for the body, light for the soul. I can teach you to carry both."] }],
+      "services": [{ "kind": "trainer", "classes": ["paladin"] }] },
+    "scholar_ilsabet": { "name": "Ilsabet Crane", "title": "Scholar of old things", "place": "thornwatch", "at": [148, -52], "body": { "kind": "tabard", "sex": "female", "age": "young", "outfit": "robe", "colour": "#3c3c5a", "fallback": "female" },
+      "lines": [
+        { "flag": "tome_found", "say": ["Page forty-one is about you, I think. Never mind. Shall we study?"] },
+        { "say": ["My teacher went into the barrow with a book and came out without either."] }
+      ],
+      "services": [{ "kind": "trainer", "classes": ["necromancer"] }] },
+    "sable": { "name": "Sable", "title": "A hooded stranger", "place": "thornwatch", "at": [194, -48], "body": { "kind": "tabard", "sex": "female", "age": "young", "outfit": "leather", "colour": "#1e1e26", "fallback": "female" },
+      "lines": [{ "say": ["Quiet work pays well. Loud work pays in scars."] }],
+      "services": [{ "kind": "trainer", "classes": ["gravecutter"] }] },
+    "brannoc": { "name": "Brannoc the Unbowed", "title": "Wild fighter", "place": "thornwatch", "at": [178, -76], "body": { "kind": "tabard", "sex": "male", "age": "middle", "outfit": "leather", "colour": "#8c4a2a", "fallback": "male" },
+      "lines": [{ "say": ["Anger is a fire. I teach you to cook with it, not burn the house down."] }],
+      "services": [{ "kind": "trainer", "classes": ["wrathborn"] }] },
+    "hunter_sorrel": { "name": "Sorrel Vane", "title": "Witch hunter", "place": "thornwatch", "at": [154, -70], "body": { "kind": "tabard", "sex": "male", "age": "middle", "outfit": "leather", "colour": "#5a3c2a", "fallback": "male" },
+      "lines": [{ "say": ["Hexes, hags and things in the dark. Somebody has to hunt them."] }],
+      "services": [{ "kind": "trainer", "classes": ["witch_hunter"] }] },
+    "rowan_thistle": { "name": "Rowan Thistle", "title": "Wayfarer", "place": "thornwatch", "at": [190, -70], "body": { "kind": "tabard", "sex": "female", "age": "young", "outfit": "leather", "colour": "#4a7a5a", "fallback": "female" },
+      "lines": [{ "say": ["Every path is mine. I just borrow them for a while."] }],
+      "services": [{ "kind": "trainer", "classes": ["wayfarer"] }] },
+    "stormcaller_oda": { "name": "Oda Greycloud", "title": "Stormcaller", "place": "thornwatch", "at": [164, -78], "body": { "kind": "tabard", "sex": "female", "age": "old", "outfit": "robe", "colour": "#5a6b8c", "fallback": "female" },
+      "lines": [{ "say": ["Feel that? The air before thunder. I can teach you to pull it down."] }],
+      "services": [{ "kind": "trainer", "classes": ["stormcaller"] }] },
+    "archdruid_teodor": { "name": "Archdruid Teodor", "title": "Keeper of the Circle", "place": "druid_circle", "at": [248, -236], "body": { "kind": "tabard", "sex": "male", "age": "old", "outfit": "robe", "colour": "#3c6b3c", "fallback": "male" },
+      "lines": [
+        { "flag": "grove_trial", "say": ["The grove knows your name now. Warden Ysolde will teach you the old friendships."] },
+        { "say": ["Walk softly. Everything here is listening."] }
+      ] },
+    "warden_ysolde": { "name": "Warden Ysolde", "title": "Friend of beasts", "place": "druid_circle", "at": [266, -238], "body": { "kind": "tabard", "sex": "female", "age": "middle", "outfit": "leather", "colour": "#6b8c4a", "fallback": "female" },
+      "appears": { "flag": "grove_trial" },
+      "lines": [{ "say": ["The wolf and the bear walk with those the grove trusts. You are trusted."] }],
+      "services": [{ "kind": "trainer", "classes": ["druid"], "focus": "summoner", "text": "Teach me to call the wolf and the bear." }] },
+    "mother_sallow": { "name": "Mother Sallow", "title": "The voice in the Black Stone", "place": "black_stone", "at": [300, 284], "body": { "kind": "object", "art": "standing-stone-b" },
+      "lines": [{ "say": ["Closer, little candle. I only want to talk. And trade. Mostly trade."] }],
+      "services": [
+        { "kind": "pact", "flag": "pact_offered", "text": "Seal a pact with the stone.", "personalFlag": "pact_sealed" },
+        { "kind": "trainer", "classes": ["warlock"] }
+      ] },
+    "herbalist_tamsin": { "name": "Tamsin Reed", "title": "Herbalist", "place": "herb_hollow", "at": [398, 116], "body": { "kind": "tabard", "sex": "female", "age": "young", "outfit": "cloth", "colour": "#7a8c4a", "fallback": "female" },
+      "moves": { "flag": "tamsin_safe", "at": [444, 38] },
+      "lines": [
+        { "flag": "tamsin_safe", "say": ["Mire-mint, bog-lily, and one very angry frog. Good haul!"] },
+        { "say": ["My lantern went out and every path looks the same. Please, which way is dry?"] }
+      ] }
+  }
+}

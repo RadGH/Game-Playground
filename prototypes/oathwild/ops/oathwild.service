@@ -1,0 +1,13 @@
+# Oathwild world server (stable) on :8660 (+ wss 8662). User unit, LAN only. OFF by default (owner 2026-11-16): start it while
+# working on the game with playground/tools/game-servers.sh start oathwild. The public game's rooms run on the
+# games.radgh.com droplet (wss://games.radgh.com/ws/oathwild) once it is published.
+[Unit]
+Description=Oathwild world server (stable) on :8660
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/oathwild/ops/start.sh stable
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=default.target

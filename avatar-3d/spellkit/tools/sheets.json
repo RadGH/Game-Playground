@@ -1,0 +1,81 @@
+{
+  "_doc": "Codex texture sheets for the Spell Kit. Each sheet is one 1536x1024 picture: grid 'cells' (3 columns x 2 rows of 512x512) or 'bands' (4 rows of 1536x256). Everything is painted in WHITE and greys on PURE BLACK so the kit can tint it per school and use brightness as see-through. tools/codex-sheets.mjs paints them, tools/cut-sheets.py cuts them into textures/.",
+  "style": "hand-painted stylised fantasy MMO spell-effect texture, like the painted VFX textures of a classic 2004 fantasy MMO: soft painterly brush strokes, glowing cores fading to soft edges, readable shapes, no photo realism",
+  "sheets": {
+    "runes1": {
+      "layout": "cells",
+      "items": [
+        ["rune_fire", "a magic rune circle for FIRE magic: an outer ring of flame-tongue glyphs, an inner ring with sun-like triangular runes, a small burning star in the centre"],
+        ["rune_frost", "a magic rune circle for FROST magic: six-fold snowflake geometry, sharp crystal spikes inside a double ring, angular ice runes around the rim"],
+        ["rune_holy", "a magic rune circle for HOLY light magic: a radiant sun with many thin rays inside two concentric rings, elegant curved runes between the rings, a cross-like four-point star at the centre"],
+        ["rune_nature", "a magic rune circle for NATURE magic: a ring of twisting vines and leaves, inner ring of leaf-shaped runes, a seed spiral at the centre"],
+        ["rune_arcane", "a magic rune circle for ARCANE magic: precise geometric sigil, two overlapping squares making an eight-point star inside three thin rings, small dots and arcane letters around the rim"],
+        ["rune_shadow", "a magic rune circle for SHADOW magic: a jagged broken ring with thorn spikes pointing inward, crescent moons, hooked runes, an eye-like hollow at the centre"]
+      ]
+    },
+    "runes2": {
+      "layout": "cells",
+      "items": [
+        ["rune_lightning", "a magic rune circle for LIGHTNING magic: zig-zag bolt glyphs around a double ring, a forked star at the centre, crackling branch lines"],
+        ["rune_poison", "a magic rune circle for POISON magic: dripping bubbling ring, inner ring of droplet and skull-less fang runes, a bubbling spiral at the centre"],
+        ["rune_summon", "a large SUMMONING circle: a pentagon star inside three rings, rows of small runes between the rings, five small circles at the star points"],
+        ["ring_shock", "a SHOCKWAVE RING: a single thick bright ring of energy, sharp bright inner edge fading softly outward, a few streaks breaking off it, hollow black centre"],
+        ["ring_reticle", "a TARGETING RETICLE ring for a ground spell: one clean bright outer rim with small evenly spaced tick marks and four arrow notches pointing inward, empty black inside"],
+        ["burst_star", "an IMPACT FLASH: a bright starburst explosion with eight uneven sharp rays and a soft round glow core, rays fading to points"]
+      ]
+    },
+    "flames": {
+      "layout": "cells",
+      "items": [
+        ["flame_1", "a single tall flame tongue, licking upward, bright white core, wispy curling tip, base at the bottom of the cell"],
+        ["flame_2", "a single flame tongue leaning slightly left with a split forked tip, base at the bottom of the cell"],
+        ["flame_3", "a single small round flame puff, a burst of fire just beginning, base at the bottom of the cell"],
+        ["flame_4", "a single flame tongue leaning slightly right, tall and thin with a curl, base at the bottom of the cell"],
+        ["flame_5", "a single wide flickering flame with three tips, base at the bottom of the cell"],
+        ["flame_6", "a single dying flame breaking into small fiery fragments at the top, base at the bottom of the cell"]
+      ]
+    },
+    "smoke": {
+      "layout": "cells",
+      "items": [
+        ["smoke_1", "a single soft round puff of smoke, billowing lumpy outline, painted with soft brush, darker grey inside lighter rim, fades to black at the edges"],
+        ["smoke_2", "a single wispy curling smoke plume, swirls and tendrils, fades to black at the edges"],
+        ["smoke_3", "a single dense cloud of smoke made of three overlapping puffs, fades to black at the edges"],
+        ["smoke_4", "a single thin swirl of mist, an S curve of vapour, fades to black at the edges"],
+        ["cloud_poison", "a single heavy bubbling cloud, round billows with a few bubbles at the edge, fades to black at the edges"],
+        ["dust_1", "a single burst of dust and grit spreading sideways along the bottom, small specks, fades to black at the edges"]
+      ]
+    },
+    "decals": {
+      "layout": "cells",
+      "items": [
+        ["scorch", "a SCORCH MARK seen from straight above: a burnt black-and-grey blast stain on the ground with radiating soot streaks and a darker cracked centre; painted in greys where white means darkest soot"],
+        ["frost_patch", "a FROST PATCH seen from straight above: ice spreading over the ground, crystal feathers growing outward from the centre, cracked ice plates"],
+        ["crack_ground", "GROUND CRACKS seen from straight above: a crater of jagged cracks radiating from an impact point, broken stone edges"],
+        ["splat_poison", "a POISON SPLAT seen from straight above: a puddle splash with drips and droplets around it, bubbles on its surface"],
+        ["stain_shadow", "a SHADOW STAIN seen from straight above: an inky blot with tendrils reaching outward like roots, soft edges"],
+        ["glow_holy", "a HOLY BLESSED GROUND glow seen from straight above: a soft round pool of light with fine radiating rays and a few small four-point sparkles"]
+      ]
+    },
+    "sparks": {
+      "layout": "cells",
+      "items": [
+        ["spark_streak", "a single SPARK STREAK: a thin bright needle of light, long horizontal, brightest at the right end, tapering left"],
+        ["mote_star", "a single small FOUR-POINT STAR mote: a soft glow with four thin cross rays, centred"],
+        ["dot_soft", "a single soft round glowing DOT: bright core, smooth glow falling off to black, centred, perfectly round"],
+        ["leaf", "a single small painted LEAF, simple pointed oval with a central vein, centred"],
+        ["shard_ice", "a single sharp ICE SHARD crystal, a long faceted splinter with a bright edge highlight, centred"],
+        ["bolt_fork", "a single LIGHTNING BOLT: a jagged forked lightning strike from the top of the cell to the bottom, bright core with a soft glow"]
+      ]
+    },
+    "bands": {
+      "layout": "bands",
+      "items": [
+        ["band_light", "a horizontal band of rising light streaks: vertical rays of uneven length rising from the bottom edge and fading upward, brighter at the bottom; must repeat seamlessly left to right"],
+        ["band_flame", "a horizontal band of a wall of flame: many flame tongues rising from the bottom edge, fading upward; must repeat seamlessly left to right"],
+        ["band_runes", "a horizontal band of glowing runic letters in a single row in the middle between two thin bright lines; must repeat seamlessly left to right"],
+        ["band_mist", "a horizontal band of soft swirling mist streaks drifting sideways, wavy flowing strands; must repeat seamlessly left to right"]
+      ]
+    }
+  }
+}

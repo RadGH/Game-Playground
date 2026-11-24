@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-clutter-d5000",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-clutter.png",
+  "resolution": 1024,
+  "decimation_target": 5000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3aea7/5MRJ9nvJqOT59swB2ImBe_sheet-sc-clutter.png",
+  "resolution": 1024,
+  "decimation_target": 5000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery: Trellis' own low-poly test (decimation_target 5000 = its minimum, for 4 props)",
+ "tag": "oathwild-props",
+ "request_id": "01a20ad6-bc59-7700-a9d4-c1c7705a90a5",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ad6-bc59-7700-a9d4-c1c7705a90a5/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ad6-bc59-7700-a9d4-c1c7705a90a5",
+ "submitted": "2026-11-23T23:56:14.854Z",
+ "logged": true
+}

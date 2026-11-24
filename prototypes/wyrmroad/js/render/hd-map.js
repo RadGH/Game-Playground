@@ -4,7 +4,8 @@
 //   const H = hdIndex(map, falCatalog, tabardData)        // data/hd-models.json + avatar-3d/fal catalog + Tabard items
 //   hdSpecFor(H, data, e, look) → null (draw the old model) | { key, type: 'fal', body, weapon, offhand, tint, tintK, glow }
 //                                                        | { key, type: 'tabard', body, items: [tabard item ids] }
-//   tabardFromLook(H, look) → { body, items }             // a Chibi look (dressed from gear) → Tabard parts
+//   tabardFromLook(H, look) → { body, items, look }       // a Chibi look (dressed from gear) → Tabard parts + its face/hair
+//                                                        // (the Chibi 2.6 face + hair fields go to Tabard as they are)
 //   pickClip(H, name, has) → a model clip key            // has(key) says whether the model has that clip
 // Rules: anything without a mapping, or mapped to a model that is not in the catalog, returns null and keeps its old
 // model (never an error). The catalogs are read live, so a model fixed or added in avatar-3d reaches the game as is.
@@ -53,7 +54,7 @@ export function tabardFromLook(H, look = {}) {
   if (sh) out.push(sh);
   const head = look.hat?.id ? first(T.heads?.[look.hat.id], has) : null;
   if (head) out.push(head);
-  if (!head || !items[head]?.hidesHair) { const hair = first(T.hair?.[look.hair?.id], has); if (hair) out.push(hair); }
+  // hair: Tabard's hair layer draws every Chibi 2.6 style from the look itself (and picks its own version under a helm)
   const held = look.held?.id ? first(T.held?.[look.held.id], has) : null;
   if (held) out.push(held);
   const off = look.offhand?.id ? first(T.offhand?.[look.offhand.id], id => has(id) && items[id].slot === 'offhand') : null;
@@ -62,7 +63,15 @@ export function tabardFromLook(H, look = {}) {
   if (cape) out.push(cape);
   // one item per slot (the last listed wins, as Tabard would)
   const bySlot = new Map(); for (const id of out) bySlot.set(items[id].slot, id);
-  return { body, items: [...bySlot.values()] };
+  return { body, items: [...bySlot.values()], look: faceLook(look) };
+}
+
+/** The look fields Tabard's face and hair layers read (Chibi 2.6 shape), nothing else — so gear changes don't touch it. */
+export function faceLook(look = {}) {
+  const o = {};
+  for (const k of ['skin', 'hair', 'eyes', 'brows', 'extras', 'facialHair']) if (look[k]) o[k] = { ...look[k] };
+  if (!o.skin && look.body?.skin) o.skin = { color: look.body.skin };
+  return o;
 }
 
 /** entry.body may list several bodies: the first that is in the catalog wins (a planned model takes over when it lands). */
@@ -98,6 +107,8 @@ export function hdSpecFor(H, data, e, look = null) {
   }
   if (!spec) return null;
   spec.key = 'hd:' + JSON.stringify(spec);
+  // the same model in another face / hair: a preview can restyle it in place instead of rebuilding (creator)
+  spec.baseKey = 'hd:' + JSON.stringify({ ...spec, key: undefined, look: undefined });
   return spec;
 }
 

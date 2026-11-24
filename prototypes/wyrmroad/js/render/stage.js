@@ -358,7 +358,12 @@ export function createStage(view, { data, scene, chapter, where = 'start', heroe
     }
   }
   const MOUTH = { a: 'ah', o: 'o', u: 'o', e: 'ee', i: 'ee', y: 'ee', m: 'm', b: 'b', p: 'm', f: 'f', v: 'v' };
+  let closed = false;
   function update(dt) {
+    // closed: never take the camera back. The story screen reads the controller inside its frame loop, so a pad press
+    // that ended the scene (and closed this stage) used to run one more update in the same pass, which set the shot
+    // again — and nothing released it: the chapter played with the camera frozen on the intro shot (reports #123/#124).
+    if (closed) return;
     dt = Math.min(0.1, Math.max(0, dt));
     G.t += dt; G.events = [];
     if (!readyFlag) {
@@ -425,6 +430,7 @@ export function createStage(view, { data, scene, chapter, where = 'start', heroe
     /** Who is on stage, where, facing which way, playing what (tests and the review page read this). */
     cast() { return [...who.values()].filter(a => !a.offstage).map(a => ({ id: a.id, giant: !!a.giant, x: a.e.x, z: a.e.z, dir: a.e.dir, anim: view.actors?.get(a.e.id)?.body?.anim || null, state: a.e.state, built: bodyReady(a) })); },
     dispose() {
+      closed = true;
       view.setShot(null);
       if (lantern) { view.scene.remove(lantern.g); lantern.mats.forEach(m => m.dispose()); lantern.geos.forEach(g => g.dispose()); }
       if (dawn) { view.scene.remove(dawn); dawn.material.dispose(); }

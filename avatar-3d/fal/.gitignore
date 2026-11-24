@@ -36,3 +36,5 @@ models/*-tripo*/model_mesh-model.glb
 models/wolf-rig/*.glb
 models/drake-rig/*.glb
 shots/check/
+# Oathwild scenery: per-object cut-outs of the sheet results (tools/blender/split_sheet.py, seconds)
+models/scenery-raw/

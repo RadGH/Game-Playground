@@ -1,0 +1,1647 @@
+{
+ "_doc": "Oathwild art manifest (avatar-3d/fal helper, 2026-11-23). Bodies load with createFalCharacter(id) from avatar-3d/fal/js/fal.js (catalog: avatar-3d/fal/data/catalog.json; height = real metres, scale the group by it). Scenery props: GLB at avatar-3d/fal/<file>, origin = middle of the footprint on the ground, real size in metres, front faces -Z in three.js (+Y up); size = [wide x, tall y, deep z]. status \"ready\" = in the catalog now; \"drawn\" = reference picture ready, the model waits for fal credit (tools/run-body.sh / tools/scenery.sh, see avatar-3d/fal/README.md \"Oathwild\").",
+ "regions": {
+  "brightwater": {
+   "name": "Brightwater Vale",
+   "levels": [
+    1,
+    5
+   ],
+   "enemies": {
+    "ready": [
+     {
+      "id": "bristleback",
+      "name": "Bristleback boar",
+      "role": "beast",
+      "height": 1,
+      "skeleton": "quadruped",
+      "triangles": 2999,
+      "weapon": null,
+      "offhand": null
+     },
+     {
+      "id": "wolf",
+      "name": "Dire wolf",
+      "role": "beast",
+      "height": 1.1,
+      "skeleton": "quadruped",
+      "triangles": 3000,
+      "weapon": null,
+      "offhand": null
+     },
+     {
+      "id": "thug",
+      "name": "Street thug",
+      "role": "brawler",
+      "height": 1.8,
+      "skeleton": "biped",
+      "triangles": 2990,
+      "weapon": "spiked-club",
+      "offhand": null
+     },
+     {
+      "id": "knifer",
+      "name": "Cutpurse",
+      "role": "rogue",
+      "height": 1.75,
+      "skeleton": "biped",
+      "triangles": 2995,
+      "weapon": "cutpurse-knife",
+      "offhand": null
+     },
+     {
+      "id": "crossbowman",
+      "name": "Lantern crossbowman",
+      "role": "archer",
+      "height": 1.8,
+      "skeleton": "biped",
+      "triangles": 3000,
+      "weapon": "crossbow",
+      "offhand": null
+     },
+     {
+      "id": "bounty-hunter",
+      "name": "Bounty hunter",
+      "role": "rogue",
+      "height": 1.85,
+      "skeleton": "biped",
+      "triangles": 2984,
+      "weapon": "hunter-hatchet",
+      "offhand": null
+     },
+     {
+      "id": "gobw-tripo",
+      "name": "Goblin warrior",
+      "role": "brawler",
+      "height": 1,
+      "skeleton": "biped",
+      "triangles": 2999,
+      "weapon": "gob-cleaver",
+      "offhand": "gob-buckler"
+     },
+     {
+      "id": "gobr-tripo",
+      "name": "Goblin rogue",
+      "role": "rogue",
+      "height": 1,
+      "skeleton": "biped",
+      "triangles": 3000,
+      "weapon": "gob-shiv",
+      "offhand": null
+     },
+     {
+      "id": "gobm-tripo",
+      "name": "Goblin shaman",
+      "role": "caster",
+      "height": 1,
+      "skeleton": "biped",
+      "triangles": 2994,
+      "weapon": "gob-totem",
+      "offhand": null
+     }
+    ],
+    "waiting": [
+     {
+      "id": "bandit-chief",
+      "status": "body made, rig waits for credit ($0.20)",
+      "role": "boss"
+     },
+     {
+      "id": "field-scarecrow",
+      "status": "body made, rig waits for credit ($0.20)",
+      "role": "brawler"
+     },
+     {
+      "id": "goblin-warchief",
+      "status": "drawn",
+      "role": "boss"
+     },
+     {
+      "id": "shrine-cultist",
+      "status": "drawn",
+      "role": "caster"
+     }
+    ]
+   }
+  },
+  "thornmere": {
+   "name": "Thornmere Wilds",
+   "levels": [
+    5,
+    10
+   ],
+   "enemies": {
+    "ready": [
+     {
+      "id": "brown-bear",
+      "name": "Brown bear",
+      "role": "beast",
+      "height": 1.35,
+      "skeleton": "quadruped",
+      "triangles": 4498,
+      "weapon": null,
+      "offhand": null
+     },
+     {
+      "id": "mountain-lion",
+      "name": "Mountain lion",
+      "role": "beast",
+      "height": 0.85,
+      "skeleton": "quadruped",
+      "triangles": 2869,
+      "weapon": null,
+      "offhand": null
+     },
+     {
+      "id": "wolf",
+      "name": "Dire wolf",
+      "role": "beast",
+      "height": 1.1,
+      "skeleton": "quadruped",
+      "triangles": 3000,
+      "weapon": null,
+      "offhand": null
+     },
+     {
+      "id": "troll",
+      "name": "Troll",
+      "role": "brawler",
+      "height": 2.3,
+      "skeleton": "biped",
+      "triangles": 4394,
+      "weapon": "bone-club",
+      "offhand": null
+     },
+     {
+      "id": "orc-grunt",
+      "name": "Orc grunt",
+      "role": "brawler",
+      "height": 2,
+      "skeleton": "biped",
+      "triangles": 2902,
+      "weapon": "orc-axe",
+      "offhand": null
+     },
+     {
+      "id": "skeleton-warrior",
+      "name": "Skeleton warrior",
+      "role": "undead",
+      "height": 1.8,
+      "skeleton": "biped",
+      "triangles": 2819,
+      "weapon": "sword",
+      "offhand": "gob-buckler"
+     },
+     {
+      "id": "hollowborn",
+      "name": "Hollowborn",
+      "role": "undead",
+      "height": 1.7,
+      "skeleton": "biped",
+      "triangles": 2980,
+      "weapon": null,
+      "offhand": null
+     },
+     {
+      "id": "wraith-knight",
+      "name": "Wraith knight",
+      "role": "undead",
+      "height": 2,
+      "skeleton": "biped",
+      "triangles": 2858,
+      "weapon": "wraith-greatsword",
+      "offhand": null
+     },
+     {
+      "id": "root-caller",
+      "name": "Root-caller",
+      "role": "caster",
+      "height": 1.85,
+      "skeleton": "biped",
+      "triangles": 2999,
+      "weapon": "root-staff",
+      "offhand": null
+     },
+     {
+      "id": "thornling",
+      "name": "Thornling",
+      "role": "beast",
+      "height": 0.9,
+      "skeleton": "biped",
+      "triangles": 3000,
+      "weapon": null,
+      "offhand": null
+     },
+     {
+      "id": "drowned-brute",
+      "name": "Drowned brute",
+      "role": "undead",
+      "height": 2,
+      "skeleton": "biped",
+      "triangles": 3999,
+      "weapon": "bell-maul",
+      "offhand": null
+     },
+     {
+      "id": "water-elemental",
+      "name": "Water elemental",
+      "role": "elemental",
+      "height": 2,
+      "skeleton": "biped",
+      "triangles": 2999,
+      "weapon": null,
+      "offhand": null
+     },
+     {
+      "id": "earth-elemental",
+      "name": "Earth elemental",
+      "role": "elemental",
+      "height": 2.3,
+      "skeleton": "biped",
+      "triangles": 4320,
+      "weapon": null,
+      "offhand": null
+     }
+    ],
+    "waiting": [
+     {
+      "id": "marsh-hag",
+      "status": "drawn",
+      "role": "boss"
+     },
+     {
+      "id": "barrow-king",
+      "status": "drawn",
+      "role": "boss"
+     },
+     {
+      "id": "bog-lurker",
+      "status": "drawn",
+      "role": "brawler"
+     },
+     {
+      "id": "barrow-ghoul",
+      "status": "drawn",
+      "role": "undead"
+     },
+     {
+      "id": "fen-harpy",
+      "status": "drawn",
+      "role": "beast"
+     },
+     {
+      "id": "hill-ogre",
+      "status": "drawn",
+      "role": "brawler"
+     }
+    ]
+   }
+  }
+ },
+ "druidForms": [
+  {
+   "id": "wolf",
+   "druidForm": true,
+   "form": "wolf",
+   "status": "ready"
+  },
+  {
+   "id": "brown-bear",
+   "druidForm": true,
+   "form": "bear",
+   "status": "ready"
+  },
+  {
+   "id": "mountain-lion",
+   "druidForm": true,
+   "form": "cat",
+   "status": "ready"
+  }
+ ],
+ "mounts": [
+  {
+   "id": "riding-horse",
+   "status": "drawn (saddled chestnut horse); model waits for credit ($0.50 Tripo, rigged free with quad_rig.py)",
+   "mount": {
+    "seat": null,
+    "bone": "spine_2",
+    "note": "seat = top of spine_2 at the saddle; measured from the model once made"
+   }
+  }
+ ],
+ "scenery": [
+  {
+   "id": "cottage-thatch",
+   "name": "Thatched cottage",
+   "kind": "building",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "ready",
+   "file": "avatar-3d/fal/models/final/scenery/cottage-thatch.glb",
+   "size": [
+    6.37,
+    5.97,
+    5.67
+   ],
+   "triangles": 2975
+  },
+  {
+   "id": "cottage-stone",
+   "name": "Stone cottage",
+   "kind": "building",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "ready",
+   "file": "avatar-3d/fal/models/final/scenery/cottage-stone.glb",
+   "size": [
+    5.52,
+    6.18,
+    8.06
+   ],
+   "triangles": 2980
+  },
+  {
+   "id": "cottage-log",
+   "name": "Log cabin",
+   "kind": "building",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "ready",
+   "file": "avatar-3d/fal/models/final/scenery/cottage-log.glb",
+   "size": [
+    5.62,
+    5.46,
+    5.99
+   ],
+   "triangles": 2916
+  },
+  {
+   "id": "inn",
+   "name": "Village inn",
+   "kind": "building",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "ready",
+   "file": "avatar-3d/fal/models/final/scenery/inn.glb",
+   "size": [
+    9.86,
+    9.07,
+    6.86
+   ],
+   "triangles": 2966
+  },
+  {
+   "id": "smithy",
+   "name": "Smithy",
+   "kind": "building",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 6
+   }
+  },
+  {
+   "id": "watermill",
+   "name": "Watermill",
+   "kind": "building",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 8
+   }
+  },
+  {
+   "id": "watchtower",
+   "name": "Watchtower",
+   "kind": "building",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 10
+   }
+  },
+  {
+   "id": "well",
+   "name": "Village well",
+   "kind": "prop",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2.8
+   }
+  },
+  {
+   "id": "palisade-wall",
+   "name": "Palisade wall",
+   "kind": "wall",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 4
+   }
+  },
+  {
+   "id": "palisade-corner",
+   "name": "Palisade corner",
+   "kind": "wall",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 4
+   }
+  },
+  {
+   "id": "palisade-gate",
+   "name": "Palisade gate",
+   "kind": "wall",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 5
+   }
+  },
+  {
+   "id": "fence-rail",
+   "name": "Rail fence",
+   "kind": "wall",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 3
+   }
+  },
+  {
+   "id": "market-stall",
+   "name": "Market stall",
+   "kind": "prop",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2.8
+   }
+  },
+  {
+   "id": "cart",
+   "name": "Hand cart",
+   "kind": "prop",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 3
+   }
+  },
+  {
+   "id": "haystack",
+   "name": "Haystack",
+   "kind": "prop",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2.4
+   }
+  },
+  {
+   "id": "signpost",
+   "name": "Signpost",
+   "kind": "prop",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2.6
+   }
+  },
+  {
+   "id": "lamp-post",
+   "name": "Lamp post",
+   "kind": "prop",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3.2
+   }
+  },
+  {
+   "id": "anvil",
+   "name": "Anvil",
+   "kind": "prop",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.9
+   }
+  },
+  {
+   "id": "stone-wall-low",
+   "name": "Low stone wall",
+   "kind": "wall",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 3
+   }
+  },
+  {
+   "id": "woodpile",
+   "name": "Wood pile",
+   "kind": "clutter",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2
+   }
+  },
+  {
+   "id": "barrel",
+   "name": "Barrel",
+   "kind": "clutter",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "ready",
+   "file": "avatar-3d/fal/models/final/scenery/barrel.glb",
+   "size": [
+    0.9,
+    1.01,
+    0.91
+   ],
+   "triangles": 278
+  },
+  {
+   "id": "crate",
+   "name": "Crate",
+   "kind": "clutter",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "redo",
+   "plannedSize": {
+    "tall": 0.8
+   }
+  },
+  {
+   "id": "sacks",
+   "name": "Grain sacks",
+   "kind": "clutter",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "ready",
+   "file": "avatar-3d/fal/models/final/scenery/sacks.glb",
+   "size": [
+    1.46,
+    0.91,
+    1.85
+   ],
+   "triangles": 604
+  },
+  {
+   "id": "weapon-rack",
+   "name": "Weapon rack",
+   "kind": "clutter",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "ready",
+   "file": "avatar-3d/fal/models/final/scenery/weapon-rack.glb",
+   "size": [
+    1.71,
+    1.8,
+    1.2
+   ],
+   "triangles": 1205
+  },
+  {
+   "id": "bedroll",
+   "name": "Bedroll",
+   "kind": "camp",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 1.9
+   }
+  },
+  {
+   "id": "campfire",
+   "name": "Campfire",
+   "kind": "camp",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.6
+   }
+  },
+  {
+   "id": "tent-small",
+   "name": "Small tent",
+   "kind": "camp",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1.6
+   }
+  },
+  {
+   "id": "tent-large",
+   "name": "Chief's tent",
+   "kind": "camp",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3.4
+   }
+  },
+  {
+   "id": "banner-bandit",
+   "name": "Bandit banner",
+   "kind": "camp",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3.2
+   }
+  },
+  {
+   "id": "banner-village",
+   "name": "Village banner",
+   "kind": "camp",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3.2
+   }
+  },
+  {
+   "id": "chest-common",
+   "name": "Wooden chest",
+   "kind": "loot",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.7
+   }
+  },
+  {
+   "id": "chest-rare",
+   "name": "Iron-bound chest",
+   "kind": "loot",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.8
+   }
+  },
+  {
+   "id": "chest-epic",
+   "name": "Gilded chest",
+   "kind": "loot",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.9
+   }
+  },
+  {
+   "id": "loot-sack",
+   "name": "Loot bag",
+   "kind": "loot",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.6
+   }
+  },
+  {
+   "id": "crate-stack",
+   "name": "Crate stack",
+   "kind": "clutter",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1.6
+   }
+  },
+  {
+   "id": "barrel-open",
+   "name": "Water barrel",
+   "kind": "clutter",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1
+   }
+  },
+  {
+   "id": "bridge-wood",
+   "name": "Wooden bridge",
+   "kind": "travel",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 8
+   }
+  },
+  {
+   "id": "bridge-stone",
+   "name": "Stone bridge",
+   "kind": "travel",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 12
+   }
+  },
+  {
+   "id": "road-marker",
+   "name": "Road marker",
+   "kind": "travel",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1.2
+   }
+  },
+  {
+   "id": "waystone",
+   "name": "Waystone",
+   "kind": "shrine",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3.2
+   }
+  },
+  {
+   "id": "shrine-respawn",
+   "name": "Shrine of return",
+   "kind": "shrine",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3.5
+   }
+  },
+  {
+   "id": "standing-stone-a",
+   "name": "Standing stone",
+   "kind": "shrine",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3
+   }
+  },
+  {
+   "id": "standing-stone-b",
+   "name": "Capped stones",
+   "kind": "shrine",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3.2
+   }
+  },
+  {
+   "id": "druid-stone",
+   "name": "Carved circle stone",
+   "kind": "shrine",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3.4
+   }
+  },
+  {
+   "id": "ruin-wall",
+   "name": "Broken wall",
+   "kind": "ruin",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 5
+   }
+  },
+  {
+   "id": "ruin-arch",
+   "name": "Ruined arch",
+   "kind": "ruin",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 5
+   }
+  },
+  {
+   "id": "ruin-pillar",
+   "name": "Broken pillar",
+   "kind": "ruin",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3
+   }
+  },
+  {
+   "id": "ruin-tower",
+   "name": "Tower stump",
+   "kind": "ruin",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 6
+   }
+  },
+  {
+   "id": "barrow-entrance",
+   "name": "Barrow entrance",
+   "kind": "barrow",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 4.5
+   }
+  },
+  {
+   "id": "sarcophagus",
+   "name": "Sarcophagus",
+   "kind": "barrow",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2.4
+   }
+  },
+  {
+   "id": "gravestone-a",
+   "name": "Old gravestone",
+   "kind": "barrow",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1.2
+   }
+  },
+  {
+   "id": "gravestone-b",
+   "name": "Ringed grave marker",
+   "kind": "barrow",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1.5
+   }
+  },
+  {
+   "id": "gravestone-c",
+   "name": "Sunken slab",
+   "kind": "barrow",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.9
+   }
+  },
+  {
+   "id": "grave-fence",
+   "name": "Grave railing",
+   "kind": "barrow",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2
+   }
+  },
+  {
+   "id": "statue-broken",
+   "name": "Broken statue",
+   "kind": "ruin",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2.6
+   }
+  },
+  {
+   "id": "rubble",
+   "name": "Rubble pile",
+   "kind": "ruin",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2.5
+   }
+  },
+  {
+   "id": "rock-small",
+   "name": "Small rock",
+   "kind": "rock",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.5
+   }
+  },
+  {
+   "id": "rock-medium",
+   "name": "Medium rock",
+   "kind": "rock",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1
+   }
+  },
+  {
+   "id": "rock-large",
+   "name": "Large rock",
+   "kind": "rock",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2
+   }
+  },
+  {
+   "id": "boulder",
+   "name": "Boulder",
+   "kind": "rock",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2.5
+   }
+  },
+  {
+   "id": "rock-cluster",
+   "name": "Rock cluster",
+   "kind": "rock",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 1.5
+   }
+  },
+  {
+   "id": "rock-slab",
+   "name": "Flat slab",
+   "kind": "rock",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2.5
+   }
+  },
+  {
+   "id": "cliff-chunk",
+   "name": "Cliff chunk",
+   "kind": "rock",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 6
+   }
+  },
+  {
+   "id": "boulder-mossy",
+   "name": "Mossy boulder",
+   "kind": "rock",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2
+   }
+  },
+  {
+   "id": "oak-a",
+   "name": "Oak",
+   "kind": "tree",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 9
+   }
+  },
+  {
+   "id": "oak-b",
+   "name": "Old oak",
+   "kind": "tree",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 10
+   }
+  },
+  {
+   "id": "pine-a",
+   "name": "Pine",
+   "kind": "tree",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 11
+   }
+  },
+  {
+   "id": "pine-b",
+   "name": "Spruce",
+   "kind": "tree",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 9
+   }
+  },
+  {
+   "id": "birch",
+   "name": "Birch",
+   "kind": "tree",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 9
+   }
+  },
+  {
+   "id": "willow",
+   "name": "Willow",
+   "kind": "tree",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 8
+   }
+  },
+  {
+   "id": "marsh-tree",
+   "name": "Marsh tree",
+   "kind": "tree",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 8
+   }
+  },
+  {
+   "id": "dead-tree",
+   "name": "Dead tree",
+   "kind": "tree",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 7
+   }
+  },
+  {
+   "id": "stump-a",
+   "name": "Tree stump",
+   "kind": "plant",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.7
+   }
+  },
+  {
+   "id": "stump-b",
+   "name": "Broken stump",
+   "kind": "plant",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1.4
+   }
+  },
+  {
+   "id": "log",
+   "name": "Fallen log",
+   "kind": "plant",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 4
+   }
+  },
+  {
+   "id": "log-hollow",
+   "name": "Hollow log",
+   "kind": "plant",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 3.5
+   }
+  },
+  {
+   "id": "mushrooms",
+   "name": "Mushroom clump",
+   "kind": "plant",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.5
+   }
+  },
+  {
+   "id": "mushroom-giant",
+   "name": "Giant toadstool",
+   "kind": "plant",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2.5
+   }
+  },
+  {
+   "id": "reeds",
+   "name": "Reeds",
+   "kind": "plant",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1.6
+   }
+  },
+  {
+   "id": "bog-plant",
+   "name": "Bog lilies",
+   "kind": "plant",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.8
+   }
+  },
+  {
+   "id": "bush-a",
+   "name": "Round bush",
+   "kind": "plant",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1.2
+   }
+  },
+  {
+   "id": "bush-b",
+   "name": "Berry bush",
+   "kind": "plant",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1.1
+   }
+  },
+  {
+   "id": "bush-c",
+   "name": "Bramble",
+   "kind": "plant",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 1
+   }
+  },
+  {
+   "id": "fern",
+   "name": "Fern",
+   "kind": "plant",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 0.9
+   }
+  },
+  {
+   "id": "goblin-hut",
+   "name": "Goblin hut",
+   "kind": "building",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3.5
+   }
+  },
+  {
+   "id": "goblin-totem",
+   "name": "Goblin totem",
+   "kind": "camp",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3
+   }
+  },
+  {
+   "id": "spike-barricade",
+   "name": "Spike barricade",
+   "kind": "wall",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 3
+   }
+  },
+  {
+   "id": "junk-pile",
+   "name": "Scrap heap",
+   "kind": "clutter",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2
+   }
+  },
+  {
+   "id": "wheelbarrow",
+   "name": "Wheelbarrow",
+   "kind": "prop",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 1.5
+   }
+  },
+  {
+   "id": "trough",
+   "name": "Water trough",
+   "kind": "prop",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2
+   }
+  },
+  {
+   "id": "pumpkins",
+   "name": "Pumpkin patch",
+   "kind": "plant",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 1.6
+   }
+  },
+  {
+   "id": "scarecrow-post",
+   "name": "Scarecrow",
+   "kind": "prop",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2.2
+   }
+  },
+  {
+   "id": "hag-hut",
+   "name": "Stilt hut",
+   "kind": "building",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 6
+   }
+  },
+  {
+   "id": "boardwalk",
+   "name": "Boardwalk",
+   "kind": "travel",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 4
+   }
+  },
+  {
+   "id": "rowboat",
+   "name": "Rowboat",
+   "kind": "travel",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 3.5
+   }
+  },
+  {
+   "id": "fish-rack",
+   "name": "Drying rack",
+   "kind": "camp",
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2
+   }
+  },
+  {
+   "id": "lookout",
+   "name": "Lookout platform",
+   "kind": "building",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 5
+   }
+  },
+  {
+   "id": "cage",
+   "name": "Prisoner cage",
+   "kind": "camp",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2.2
+   }
+  },
+  {
+   "id": "stolen-goods",
+   "name": "Stolen goods",
+   "kind": "loot",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2
+   }
+  },
+  {
+   "id": "wanted-board",
+   "name": "Notice board",
+   "kind": "prop",
+   "regions": [
+    "brightwater"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 1.8
+   }
+  },
+  {
+   "id": "druid-altar",
+   "name": "Circle altar",
+   "kind": "shrine",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2.2
+   }
+  },
+  {
+   "id": "antler-totem",
+   "name": "Antler totem",
+   "kind": "shrine",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 3
+   }
+  },
+  {
+   "id": "wicker-effigy",
+   "name": "Wicker stag",
+   "kind": "shrine",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "tall": 2.5
+   }
+  },
+  {
+   "id": "spirit-pool",
+   "name": "Moon pool",
+   "kind": "shrine",
+   "regions": [
+    "thornmere"
+   ],
+   "status": "drawn",
+   "plannedSize": {
+    "long": 2.5
+   }
+  }
+ ]
+}

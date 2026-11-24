@@ -53,7 +53,8 @@ export function creatorScreen(app, opts = {}) {
   const gearOf = cls => starterGear(data.items, cls);
   const refresh = () => { try { preview?.setLook(st.look, st.cls, gearOf(st.cls)); } catch (e) { console.warn(e); } root.querySelector('.wr-stage-cls').textContent = `${CLASS_NAMES[st.cls]}`; };
   if (app.render?.createPreview) {
-    app.render.createPreview(canvas, { data, quality: app.settings.quality }).then(p => {
+    // High detail (settings.models 'hd'): the Tabard hero, with its own face and hair layers (every row below changes it)
+    app.render.createPreview(canvas, { data, quality: app.settings.quality, models: app.settings.models === 'hd' ? 'hd' : 'legacy' }).then(p => {
       if (disposed) { p.dispose?.(); return; }
       preview = p; p.setAnim('idle'); refresh(); frame();
     }).catch(e => console.warn('[wyrmroad] preview', e?.message));

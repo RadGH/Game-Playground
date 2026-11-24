@@ -351,6 +351,8 @@ export async function createPreview(canvas, { data = null, quality = 'high', bac
         if (models === 'hd') spec = (await hdBodySpec(data, dressed, spec)) || spec;     // high detail: the Tabard hero
       }
       if (spec.key === wantKey) return;
+      // high detail, same body and gear, another face or hair (the creator's rows): restyle in place, no rebuild
+      if (spec.baseKey && body?.setLook && body.baseKey === spec.baseKey) { wantKey = spec.key; await body.setLook(spec.look); return; }
       wantKey = spec.key;
       const b = await spec.make();
       if (disposed || wantKey !== spec.key) { b.dispose(); return; }
@@ -407,7 +409,7 @@ async function hdBodySpec(data, look, old = null, creature = null) {
     const who = whoByLook?.get(JSON.stringify(creature || look)) || (creature ? null : { side: 'hero' });
     const s = who && kit.specFor(data, who, look);
     if (!s) return null;
-    return { key: s.key, hd: true, make: () => hd.buildHd(s, {}).catch(e => { console.warn('[wyrmroad] high-detail model failed:', e?.message); if (old) return old.make(); throw e; }) };
+    return { key: s.key, baseKey: s.baseKey, look: s.look, hd: true, make: () => hd.buildHd(s, {}).catch(e => { console.warn('[wyrmroad] high-detail model failed:', e?.message); if (old) return old.make(); throw e; }) };
   } catch (e) { console.warn('[wyrmroad] high-detail models:', e?.message); return null; }
 }
 

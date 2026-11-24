@@ -5,7 +5,7 @@
 The pieces sit in the same grid as the picture (left to right, top to bottom). Loose parts are grouped by the widest
 empty gaps across X (columns) and Z (rows). Each item is saved as <out-dir>/<id>.glb with its texture (1024 px WebP),
 centred on X/Y with its lowest point at Z = 0, front still facing -Y. --flip: the result came back mirrored
-(left-right): the order AND each item are mirrored back (Test 3: sheet b; render with look.py and compare with the drawing). Prints "SPLIT {...}" with triangles per item.
+(left-right): the order AND each item are mirrored back (Test 3: sheet b; render with look.py and compare with the drawing). --tex N keeps the texture at up to N px (default 1024). Prints "SPLIT {...}" with triangles per item.
 """
 import bpy, bmesh, sys, json, os
 from mathutils import Vector
@@ -13,6 +13,8 @@ from mathutils import Vector
 argv = sys.argv[sys.argv.index('--') + 1:]
 flip = '--flip' in argv
 argv = [a for a in argv if a != '--flip']
+TEX = 1024   # --tex N: keep the shared texture at up to N px (scenery keeps 2048: tools/blender/scenery.py bakes from it)
+if '--tex' in argv: i = argv.index('--tex'); TEX = int(argv[i + 1]); del argv[i:i + 2]
 src, cols, out_dir, ids = argv[0], int(argv[1]), argv[2], argv[3:]
 rows = (len(ids) + cols - 1) // cols
 os.makedirs(out_dir, exist_ok=True)
@@ -29,7 +31,7 @@ for o in list(bpy.data.objects):
     if o is not mesh: bpy.data.objects.remove(o, do_unlink=True)
 # shrink the shared texture so every item file stays small
 for im in bpy.data.images:
-    if im.size[0] > 1024: im.scale(1024, 1024)
+    if im.size[0] > TEX: im.scale(TEX, TEX)
 
 bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT')
 bpy.ops.mesh.separate(type='LOOSE'); bpy.ops.object.mode_set(mode='OBJECT')

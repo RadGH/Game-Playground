@@ -1,0 +1,22 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "field-scarecrow-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/field-scarecrow-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3aec3/6Q03Lyfdse_CPOTEtVGPy_field-scarecrow-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "field-scarecrow: Tripo P1 textured, face_limit 3000",
+ "tag": "oathwild-enemies",
+ "request_id": "01a20adb-5621-7a81-9b8a-b67065cb1b9d",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20adb-5621-7a81-9b8a-b67065cb1b9d/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20adb-5621-7a81-9b8a-b67065cb1b9d",
+ "submitted": "2026-11-24T00:01:16.371Z",
+ "logged": true
+}

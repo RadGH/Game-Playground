@@ -1,0 +1,26 @@
+{
+  "_doc": "Buffs and debuffs ride on Farhold's statuses (farhold/data/skills.json `statuses`, applied with skills.js applyStatus). This file adds what Oathwild needs on top: the stacking rule, which kinds of cure remove what (`dispel`), the icon id the client draws, and a few Oathwild-only rows. Rows here are laid over Farhold's in memory (js/rules/engine.js). js/rules/auras.js is the one reader. Default dispel by element: poison -> poison, shadow -> curse, physical -> none (bleeds stop on their own or with a bandage), anything else -> magic. Default icon: `aura_<id>`.",
+  "stacking": {
+    "_doc": "One of each status per body (Farhold keys statuses by kind). A second caster's copy: the stronger one stays and the timer takes the longer of the two; statuses with a stack limit (poison from a dart, frostbite) add a stack instead. Buffs from your own spells never stack with themselves.",
+    "rule": "strongerWins"
+  },
+  "dispelKinds": {
+    "magic": "Magic",
+    "poison": "Poison",
+    "curse": "Curse",
+    "none": "Cannot be removed"
+  },
+  "statuses": {
+    "bleed": { "dispel": "none" },
+    "stoneskin": { "dispel": "magic" },
+    "sleep": { "dispel": "magic" },
+    "fear": { "dispel": "magic" },
+    "downed": { "dispel": "none" },
+    "stasis": { "dispel": "none" },
+    "barrier": { "name": "Barrier", "kind": "buff", "element": "arcane", "seconds": 10, "dispel": "none" },
+    "form": { "name": "Shape", "kind": "form", "element": "nature", "seconds": 3600, "dispel": "none" },
+    "stagger": { "name": "Staggered", "kind": "control", "element": "physical", "seconds": 1, "dispel": "none" },
+    "mounted": { "name": "Riding", "kind": "buff", "element": "physical", "seconds": 3600, "dispel": "none" },
+    "well_rested": { "name": "Well Fed", "kind": "buff", "element": "nature", "seconds": 1800, "dispel": "none", "healPerSecond": 0.002 }
+  }
+}

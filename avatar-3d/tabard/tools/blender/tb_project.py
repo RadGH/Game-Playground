@@ -37,9 +37,16 @@ class View:
         return self.px[min(self.H - 1, max(0, int(y))), min(self.w - 1, max(0, int(x)))]
 
 
-def project_bake(obj, bvh, meta, pics, out_png, size=1024, proxy=None, alpha=False, spread=0.015, label="", occl=None, occl_for=None):
+def project_bake(obj, bvh, meta, pics, out_png, size=1024, proxy=None, alpha=False, spread=0.015, label="", occl=None, occl_for=None,
+                 grazing=None, smooth_normals=0):
     """occl (optional): extra things that hide spots from the cameras but are not baked (the painted, pre-fit hands);
-    occl_for(p) says whether a spot is tested against it."""
+    occl_for(p) says whether a spot is tested against it.
+    grazing (optional, (lo, hi)): spots that NO view faces better than `hi` (cosine) are painted from their well-seen
+    neighbours instead (fully below `lo`): every view sees them edge-on, so their own samples are streaks dragged
+    along the camera direction (the woman's shoulder tops, 2026-11-23).
+    smooth_normals (passes): judge "how squarely a view sees this spot" from normals averaged over the neighbourhood.
+    A decimated body is lumpy: next-door points can face 60° apart, so the best view flipped point to point and two
+    slightly misaligned paintings interleaved in stripes (the same shoulder)."""
     views = {k: View(k, meta, p) for k, p in pics.items()}
     me = obj.data; mw = obj.matrix_world
     bm = bmesh.new(); bm.from_mesh(me); bm.verts.ensure_lookup_table(); bm.normal_update()
@@ -49,12 +56,17 @@ def project_bake(obj, bvh, meta, pics, out_png, size=1024, proxy=None, alpha=Fal
         p = mw @ v.co; n = (mw.to_3x3() @ v.normal).normalized()
         if proxy: p, n = proxy(v.index, p, n)
         ppos[v.index] = p; pnrm[v.index] = n
-    Wt = {k: [0.0] * N for k in views}; col = [None] * N; seen = 0
+    fnrm = pnrm
+    if smooth_normals:
+        nb0 = [[e.other_vert(v).index for e in v.link_edges] for v in bm.verts]
+        for _ in range(smooth_normals):
+            fnrm = [(fnrm[i_] + sum((fnrm[j] for j in nb0[i_]), Vector())).normalized() for i_ in range(N)]
+    Wt = {k: [0.0] * N for k in views}; col = [None] * N; seen = 0; q = [0.0] * N
     for v in bm.verts:
         p = ppos[v.index]; n = pnrm[v.index]; best, bw = None, 0
         for k, vw in views.items():
-            f = n.dot(vw.dir)
-            if f <= 0.15: continue
+            f = fnrm[v.index].dot(vw.dir)
+            if f <= 0.15 or n.dot(vw.dir) <= 0.0: continue
             # five rays (centre + a little either way in the picture plane): a spot right beside something in front
             # of it counts as hidden too, because the painted outline of that thing is a little wider than the mesh
             hz = Vector((1, 0, 0)) if vw.axis == "x" else Vector((0, 1, 0))
@@ -68,20 +80,47 @@ def project_bake(obj, bvh, meta, pics, out_png, size=1024, proxy=None, alpha=Fal
             if c[3] < 0.5 and not alpha: continue
             Wt[k][v.index] = f ** 4
             if c[3] >= 0.5 and f > bw: best, bw = c[:3].copy(), f
+        q[v.index] = bw
         if best is not None: col[v.index] = best; seen += 1
-    for _ in range(300):
-        nxt = list(col); changed = 0
-        for v in bm.verts:
-            if col[v.index] is not None: continue
-            cs = [col[e.other_vert(v).index] for e in v.link_edges if col[e.other_vert(v).index] is not None]
-            if cs: nxt[v.index] = sum(cs) / len(cs); changed += 1
-        col = nxt
-        if not changed: break
+    fillw = [0.0] * N
+    if grazing:
+        lo, hi = grazing
+        for i_ in range(N):
+            if col[i_] is not None and q[i_] < hi:
+                t_ = min(1.0, max(0.0, (hi - q[i_]) / (hi - lo))); fillw[i_] = t_ * t_ * (3 - 2 * t_)
+        seed = [col[i_] is not None and q[i_] >= hi for i_ in range(N)]
+        col = [c if s_ else None for c, s_ in zip(col, seed)]
+    # spread paint into the spots no view sees well — first only from the side or below (a shoulder top takes the
+    # sleeve's paint, not the bare neck above it: mail and robes showed skin patches there, 2026-11-23), then from anywhere
+    zz = [p_.z for p_ in ppos]
+    for level in (0.004, None):
+        for _ in range(300):
+            nxt = list(col); changed = 0
+            for v in bm.verts:
+                if col[v.index] is not None: continue
+                cs = [col[j] for j in (e.other_vert(v).index for e in v.link_edges)
+                      if col[j] is not None and (level is None or zz[j] <= zz[v.index] + level)]
+                if cs: nxt[v.index] = sum(cs) / len(cs); changed += 1
+            col = nxt
+            if not changed: break
     col = [c if c is not None else np.array([0.5, 0.4, 0.35]) for c in col]
+    if grazing:      # smooth the filled colours (well-seen ones stay put), so the fill is a soft blend, not rings
+        nb = [[e.other_vert(v).index for e in v.link_edges] for v in bm.verts]
+        free = [i_ for i_ in range(N) if not seed[i_]]
+        for _ in range(40):
+            nxt = list(col)
+            for i_ in free:
+                if nb[i_]:
+                    ws = [1.0 if zz[j] <= zz[i_] + 0.004 else 0.1 for j in nb[i_]]
+                    nxt[i_] = sum(col[j] * w_ for j, w_ in zip(nb[i_], ws)) / sum(ws)
+            col = nxt
+        if os.environ.get("TB_DEBUG_FILL"): col = [c if seed[i_] else np.array([1.0, 0.0, 1.0]) for i_, c in enumerate(col)]
+        print(f"RES {label}: {sum(1 for w in fillw if w > 0.5)} vertices seen only edge-on, painted from their neighbours")
     bm.free()
     print(f"RES {label}: {seen}/{N} vertices seen by a view ({100 * seen / max(1, N):.0f}%)")
     for k in views:
         a_ = me.attributes.new("w_" + k, "FLOAT", "POINT"); a_.data.foreach_set("value", Wt[k])
+    a_ = me.attributes.new("fillw", "FLOAT", "POINT"); a_.data.foreach_set("value", fillw)
     pp = me.attributes.new("ppos", "FLOAT_VECTOR", "POINT")
     inv = mw.inverted()
     pp.data.foreach_set("vector", [c for q in ppos for c in (inv @ q)])
@@ -126,17 +165,19 @@ def project_bake(obj, bvh, meta, pics, out_png, size=1024, proxy=None, alpha=Fal
                 w = m("MULTIPLY", attr("w_" + k), key.outputs[0])
                 terms.append((tex.outputs["Color"], w))
             wsum = w if wsum is None else m("ADD", wsum, w)
-        if alpha_pass:
-            norm = m("ADD", wsum, 1e-6)
-        else:
-            wfill = m("MAXIMUM", m("SUBTRACT", 0.003, wsum), 0.0)       # fill only where no view really sees
-            terms.append((attr("fill", "Color"), wfill)); norm = m("ADD", wsum, wfill)
+        norm = m("ADD", wsum, 1e-6)
         acc = None
         for c_, w in terms:
             sc = nt.nodes.new("ShaderNodeVectorMath"); sc.operation = "SCALE"; Lk(c_, sc.inputs[0]); Lk(m("DIVIDE", w, norm), sc.inputs["Scale"])
             if acc is None: acc = sc.outputs[0]
             else:
                 ad = nt.nodes.new("ShaderNodeVectorMath"); ad.operation = "ADD"; Lk(acc, ad.inputs[0]); Lk(sc.outputs[0], ad.inputs[1]); acc = ad.outputs[0]
+        if not alpha_pass:
+            # the neighbours' colour where no view really sees (wsum ~ 0) or every view sees edge-on (fillw)
+            fac = m("MAXIMUM", attr("fillw"), m("MINIMUM", m("DIVIDE", m("MAXIMUM", m("SUBTRACT", 0.003, wsum), 0.0), 0.003), 1.0))
+            d_ = nt.nodes.new("ShaderNodeVectorMath"); d_.operation = "SUBTRACT"; Lk(attr("fill", "Color"), d_.inputs[0]); Lk(acc, d_.inputs[1])
+            s2 = nt.nodes.new("ShaderNodeVectorMath"); s2.operation = "SCALE"; Lk(d_.outputs[0], s2.inputs[0]); Lk(fac, s2.inputs["Scale"])
+            a2 = nt.nodes.new("ShaderNodeVectorMath"); a2.operation = "ADD"; Lk(acc, a2.inputs[0]); Lk(s2.outputs[0], a2.inputs[1]); acc = a2.outputs[0]
         em = nt.nodes.new("ShaderNodeEmission"); Lk(acc, em.inputs[0]); Lk(em.outputs[0], out.inputs[0])
         img = bpy.data.images.new("bake_a" if alpha_pass else "bake_c", size, size)
         if alpha_pass: img.colorspace_settings.name = "Non-Color"

@@ -1,0 +1,122 @@
+{
+ "_doc": "Tabard hair styles (js/hair.js). Same ids as Chibi 2.6 (avatar-3d/js/chibi25-options.js). Angles in degrees: theta from straight up (0 = crown, 90 = ear height, 180 = under the chin), phi round the head from the face (0) toward the character's left (+90) to the back (180 / -180). Lengths in metres on a 20 cm wide head (scaled to the real head). Pieces: cap (shell + hairline knots [front, temple, sideburn, ear, behind ear, nape], lift [crown, front, side, back]), locks, spikes, knot, fins, tail (swings), sheet (swings). hat: 'drop' = gone under a hat, 'only' = only under a hat. See js/hair.js header.",
+ "aliases": {"buns": "bun", "pixie": "short", "slicked": "undercut", "hood_hair": "long", "tonsure": "buzz", "horns_hair": "spiky", "pompadour": "undercut", "mullet": "wolf_cut", "side_swept": "side_part", "crown_braid": "long_braid", "side_shave": "undercut", "half_up": "long", "ribbon_loops": "twin_tails", "cornrows": "warrior_braids", "feathered": "wolf_cut", "puff": "afro", "rolled_tail": "ponytail", "bowl": "bob", "court_cut": "bob"},
+ "styles": {
+  "short": { "name": "Short", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "lift": [0.013, 0.01, 0.005, 0.007]},
+   {"kind": "locks", "row": {"from": -55, "to": 35, "count": 5, "theta": 44}, "length": 0.07, "width": 0.055, "lift": 0.009, "swing": [55, 40], "hang": 0.15, "jitter": 0.5, "segs": 4}
+  ]},
+  "side_part": { "name": "Side part", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "lift": [0.014, 0.011, 0.006, 0.008], "part": 38},
+   {"kind": "locks", "row": {"from": 30, "to": -45, "count": 5, "theta": [30, 40]}, "length": 0.1, "width": 0.06, "lift": 0.011, "swing": [-75, -60], "hang": 0.15, "jitter": 0.3, "segs": 5},
+   {"kind": "locks", "row": {"from": 60, "to": 95, "count": 2, "theta": 45}, "length": 0.07, "width": 0.05, "lift": 0.008, "swing": 15, "hang": 0.3, "segs": 4}
+  ]},
+  "bangs": { "name": "Bangs", "pieces": [
+   {"kind": "cap", "line": [52, 60, 100, 96, 116, 134], "lift": [0.013, 0.01, 0.008, 0.009]},
+   {"kind": "fringe", "span": [-62, 62], "top": [50, 40], "length": 0.07, "lift": 0.01, "cols": 9, "rows": 3, "hang": 0.1},
+   {"kind": "sheet", "span": [62, 298], "top": 70, "length": 0.14, "lift": 0.009, "cols": 11, "rows": 5, "pinTheta": 96, "hang": 0.5, "flare": -0.3, "pull": [0.3, 0.04]}
+  ]},
+  "bob": { "name": "Bob", "pieces": [
+   {"kind": "cap", "line": [52, 60, 100, 96, 116, 134], "lift": [0.015, 0.011, 0.01, 0.012], "part": 22},
+   {"kind": "sheet", "span": [42, 318], "top": 64, "length": 0.16, "lift": 0.01, "cols": 13, "rows": 5, "pinTheta": 96, "hang": 0.5, "flare": -0.3, "taper": 0.2, "pull": [0.3, 0.04], "under": {"flare": -0.5, "length": 0.13}},
+   {"kind": "fringe", "span": [40, -50], "top": [44, 34], "length": 0.08, "lift": 0.011, "cols": 7, "rows": 3, "swing": -35, "hang": 0.15}
+  ]},
+  "long": { "name": "Long", "pieces": [
+   {"kind": "cap", "line": [54, 62, 100, 96, 116, 134], "lift": [0.013, 0.009, 0.008, 0.01], "part": 0},
+   {"kind": "sheet", "span": [45, 315], "top": 66, "length": 0.38, "lift": 0.011, "cols": 13, "rows": 8, "pinTheta": 96, "taper": 0.25, "under": {"span": [75, 285], "cols": 11}}
+  ]},
+  "wavy": { "name": "Wavy", "pieces": [
+   {"kind": "cap", "line": [54, 62, 100, 96, 116, 134], "lift": [0.016, 0.012, 0.011, 0.013], "part": -25, "noise": 0.004},
+   {"kind": "sheet", "span": [45, 315], "top": 66, "length": 0.34, "lift": 0.014, "cols": 13, "rows": 8, "pinTheta": 96, "taper": 0.25, "wave": 0.012, "flare": 0.1, "under": {"span": [75, 285], "cols": 11, "flare": 0}},
+   {"kind": "locks", "row": {"from": -20, "to": 40, "count": 3, "theta": 40}, "length": 0.11, "width": 0.06, "lift": 0.013, "swing": [40, 70], "hang": 0.3, "tex": "wave", "segs": 5, "hat": "drop"}
+  ]},
+  "ponytail": { "name": "Ponytail", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "edge": "soft", "flow": "back", "lift": [0.006, 0.006, 0.004, 0.005]},
+   {"kind": "tail", "at": [[104, 180]], "length": 0.32, "width": 0.085, "segs": 8, "lift": 0.012, "droop": 0.3, "under": {"pull": [0.03, 0.003], "droop": 0.8, "dir": [0, -1, -0.1]}}
+  ]},
+  "bun": { "name": "Bun", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "edge": "soft", "flow": "back", "lift": [0.006, 0.006, 0.004, 0.005]},
+   {"kind": "knot", "at": [62, 180], "size": [0.05, 0.04, 0.05], "hat": "drop"},
+   {"kind": "knot", "at": [112, 180], "size": [0.04, 0.032, 0.04], "hat": "only"}
+  ]},
+  "braids": { "name": "Braids", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "edge": "soft", "flow": "back", "lift": [0.006, 0.006, 0.004, 0.005], "part": 0},
+   {"kind": "tail", "style": "braid", "at": [[100, 100], [100, -100]], "mirror": true, "dir": [0.25, -1, 0.35], "length": 0.3, "width": 0.05, "segs": 8, "lift": 0.01, "droop": 0.4, "under": {"at": [[108, 135], [108, -135]], "dir": [0.2, -1, -0.1]}}
+  ]},
+  "spiky": { "name": "Spiky", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "lift": [0.008, 0.007, 0.005, 0.006]},
+   {"kind": "spikes", "row": {"from": -180, "to": 135, "count": 7, "theta": 38}, "length": 0.065, "width": 0.07, "up": 0.45, "tilt": 0.25, "hat": "drop"},
+   {"kind": "spikes", "row": {"from": -160, "to": 160, "count": 4, "theta": 14}, "length": 0.07, "width": 0.07, "up": 0.6, "tilt": 0.1, "hat": "drop"},
+   {"kind": "spikes", "row": {"from": -60, "to": 60, "count": 4, "theta": 52}, "length": 0.05, "width": 0.045, "up": 0.2, "tilt": -0.1, "droop": 0.01}
+  ]},
+  "curly": { "name": "Curly", "pieces": [
+   {"kind": "cap", "tex": "curl", "line": [52, 60, 98, 96, 112, 126], "lift": [0.03, 0.022, 0.022, 0.025], "noise": 0.012, "outer": true, "rep": 4},
+   {"kind": "fins", "rings": [18, 42, 66, 88], "count": 16, "height": 0.02, "width": 0.05, "lift": 0.024, "outer": true, "line": [52, 60, 98, 96, 112, 126]}
+  ]},
+  "afro": { "name": "Afro", "pieces": [
+   {"kind": "cap", "tex": "curl", "line": [50, 58, 90, 88, 110, 124], "lift": [0.075, 0.035, 0.06, 0.06], "noise": 0.015, "outer": false, "rep": 5, "cols": 30, "rows": 9},
+   {"kind": "fins", "rings": [12, 34, 56, 76, 96], "count": 20, "height": 0.026, "width": 0.065, "lift": 0.06, "hat": "drop", "line": [50, 58, 90, 88, 110, 124]}
+  ]},
+  "mohawk": { "name": "Mohawk", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "tex": "buzz", "lift": [0.001, 0.001, 0.001, 0.001], "rep": 2, "fringe": 5},
+   {"kind": "spikes", "at": [[44, 0], [30, 0], [16, 0], [3, 0], [12, 180], [26, 180], [42, 180], [58, 180], [74, 180]], "length": 0.085, "width": 0.07, "up": 0.75, "tilt": 0.35, "jitter": 0.25, "hat": "drop"},
+   {"kind": "locks", "at": [[96, 180]], "length": 0.06, "width": 0.05, "lift": 0.004, "hang": 0.6, "segs": 3, "hat": "drop"}
+  ]},
+  "undercut": { "name": "Undercut", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "tex": "buzz", "lift": [0.001, 0.001, 0.001, 0.001], "rep": 2, "fringe": 5},
+   {"kind": "cap", "line": [52, 46, 44, 44, 46, 52], "lift": [0.018, 0.016, 0.01, 0.012], "fringe": 7, "flow": "back", "edge": "tips"},
+   {"kind": "locks", "row": {"from": -40, "to": 40, "count": 4, "theta": 46}, "length": 0.11, "width": 0.06, "lift": 0.016, "swing": [180, 180], "hang": 0.0, "hug": true, "segs": 5, "hat": "drop"}
+  ]},
+  "topknot": { "name": "Top knot", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "edge": "soft", "flow": "back", "lift": [0.006, 0.006, 0.004, 0.005]},
+   {"kind": "knot", "at": [22, 180], "size": [0.04, 0.035, 0.04], "hat": "drop"},
+   {"kind": "knot", "at": [110, 180], "size": [0.034, 0.028, 0.034], "hat": "only"}
+  ]},
+  "high_ponytail": { "name": "High ponytail", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "edge": "soft", "flow": "back", "lift": [0.006, 0.006, 0.004, 0.005]},
+   {"kind": "tail", "at": [[42, 180]], "dir": [0, 0.35, -1], "length": 0.36, "width": 0.08, "segs": 9, "lift": 0.014, "droop": 0.32, "hat": "drop"},
+   {"kind": "tail", "at": [[108, 180]], "length": 0.3, "width": 0.08, "segs": 8, "lift": 0.012, "droop": 0.3, "hat": "only", "under": {"pull": [0.03, 0.003], "droop": 0.8, "dir": [0, -1, -0.1]}}
+  ]},
+  "twin_tails": { "name": "Twin tails", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "edge": "soft", "flow": "back", "lift": [0.006, 0.006, 0.004, 0.005], "part": 0},
+   {"kind": "tail", "at": [[72, 112], [72, -112]], "mirror": true, "dir": [0.8, -0.2, -0.4], "length": 0.3, "width": 0.07, "segs": 8, "lift": 0.012, "droop": 0.35, "hat": "drop"},
+   {"kind": "tail", "at": [[112, 145], [112, -145]], "mirror": true, "dir": [0.4, -1, -0.2], "length": 0.28, "width": 0.065, "segs": 8, "lift": 0.012, "droop": 0.35, "hat": "only"}
+  ]},
+  "messy": { "name": "Messy", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "lift": [0.018, 0.012, 0.01, 0.012], "noise": 0.008, "fringe": 11},
+   {"kind": "locks", "row": {"from": -70, "to": 60, "count": 6, "theta": 40}, "length": 0.07, "width": 0.05, "lift": 0.013, "swing": [40, -30], "hang": 0.25, "jitter": 1.2, "tex": "tuft", "segs": 3},
+   {"kind": "spikes", "row": {"from": -150, "to": 150, "count": 7, "theta": 30}, "length": 0.045, "width": 0.045, "up": 0.15, "tilt": 0.8, "jitter": 0.9, "lift": 0.012, "hat": "drop"},
+   {"kind": "locks", "row": {"from": 110, "to": 250, "count": 5, "theta": 112}, "length": 0.06, "width": 0.05, "lift": 0.01, "swing": 0, "hang": 0.5, "jitter": 1, "tex": "tuft", "segs": 3}
+  ]},
+  "locs": { "name": "Locs", "pieces": [
+   {"kind": "cap", "line": [54, 62, 100, 96, 116, 134], "lift": [0.012, 0.01, 0.01, 0.011], "part": 0, "edge": "soft", "under": {"line": [54, 62, 100, 96, 110, 124], "fringe": 5}},
+   {"kind": "tail", "style": "loc", "at": [[70, 40], [70, -40], [80, 70], [80, -70], [88, 100], [88, -100], [96, 130], [96, -130], [102, 158], [102, -158], [104, 180]], "length": 0.28, "width": 0.03, "segs": 6, "lift": 0.012, "droop": 0.55, "tie": false, "pull": [0.01, 0.0005], "under": {"droop": 0.9, "dir": [0, -1, -0.15]}},
+   {"kind": "tail", "style": "loc", "at": [[60, 150], [60, -150]], "length": 0.26, "width": 0.03, "segs": 6, "lift": 0.012, "droop": 0.55, "tie": false, "pull": [0.01, 0.0005], "hat": "drop"}
+  ]},
+  "long_braid": { "name": "Long braid", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "edge": "soft", "flow": "back", "lift": [0.006, 0.006, 0.004, 0.005]},
+   {"kind": "tail", "style": "braid", "at": [[110, 180]], "length": 0.46, "width": 0.065, "segs": 10, "lift": 0.012, "droop": 0.45, "under": {"pull": [0.03, 0.003], "droop": 0.8, "dir": [0, -1, -0.1]}}
+  ]},
+  "wolf_cut": { "name": "Wolf cut", "pieces": [
+   {"kind": "cap", "line": [52, 60, 98, 94, 116, 134], "lift": [0.022, 0.014, 0.014, 0.016], "noise": 0.006, "fringe": 12, "under": {"line": [52, 60, 98, 94, 110, 124], "fringe": 5}},
+   {"kind": "fringe", "span": [-55, 55], "top": [48, 38], "length": 0.075, "lift": 0.014, "cols": 9, "rows": 3, "hang": 0.1, "jag": 0.4},
+   {"kind": "sheet", "span": [70, 290], "top": 80, "length": 0.15, "lift": 0.013, "cols": 11, "rows": 5, "pinTheta": 100, "flare": 0.35, "pull": [0.3, 0.04], "under": {"flare": -0.2, "hang": 0.5}},
+   {"kind": "locks", "row": {"from": 115, "to": 245, "count": 6, "theta": 95}, "length": 0.09, "width": 0.05, "lift": 0.016, "swing": 0, "hang": 0.6, "jitter": 1, "tex": "tuft", "segs": 3, "hat": "drop"}
+  ]},
+  "curly_bob": { "name": "Curly bob", "pieces": [
+   {"kind": "cap", "tex": "curl", "line": [52, 60, 106, 104, 114, 128], "lift": [0.032, 0.022, 0.03, 0.03], "noise": 0.012, "outer": true, "rep": 4, "under": {"outer": false, "line": [52, 60, 98, 90, 110, 124]}},
+   {"kind": "fins", "rings": [24, 50, 74, 96, 112], "count": 16, "height": 0.022, "width": 0.05, "lift": 0.028, "outer": true, "line": [52, 60, 106, 104, 114, 128], "hat": "drop"}
+  ]},
+  "warrior_braids": { "name": "Warrior braids", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "tex": "buzz", "lift": [0.001, 0.001, 0.001, 0.001], "rep": 2, "fringe": 5},
+   {"kind": "cap", "line": [50, 46, 46, 50, 70, 96], "lift": [0.012, 0.012, 0.008, 0.01], "fringe": 6, "flow": "back", "edge": "soft"},
+   {"kind": "tail", "style": "braid", "at": [[90, 82], [90, -82]], "mirror": true, "dir": [0.2, -1, 0.15], "length": 0.17, "width": 0.036, "segs": 5, "lift": 0.006, "droop": 0.5, "hat": "drop"},
+   {"kind": "tail", "style": "braid", "at": [[100, 180]], "length": 0.3, "width": 0.055, "segs": 7, "lift": 0.012, "droop": 0.45, "under": {"pull": [0.03, 0.003], "droop": 0.8, "dir": [0, -1, -0.1]}}
+  ]},
+  "buzz": { "name": "Buzz", "pieces": [
+   {"kind": "cap", "line": [54, 66, 98, 84, 114, 134], "tex": "buzz", "lift": [0.001, 0.001, 0.001, 0.001], "rep": 2, "fringe": 5}
+  ]},
+  "bald": { "name": "Bald", "pieces": [
+  ]}
+ }
+}

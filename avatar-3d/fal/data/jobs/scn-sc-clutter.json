@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-clutter",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-clutter.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3ae80/U-LPiMupM1sj-FBmT29HW_sheet-sc-clutter.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-clutter (trellis-2 1024): barrel crate sacks weapon-rack",
+ "tag": "oathwild-props",
+ "request_id": "01a20ad0-b9b5-7762-8518-5cb60f7ba931",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ad0-b9b5-7762-8518-5cb60f7ba931/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ad0-b9b5-7762-8518-5cb60f7ba931",
+ "submitted": "2026-11-23T23:49:40.962Z",
+ "logged": true
+}

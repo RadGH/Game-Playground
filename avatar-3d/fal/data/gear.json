@@ -35,7 +35,7 @@
    ],
    "role": "brawler",
    "group": "goblin",
-   "height": 1.0,
+   "height": 1,
    "stage": false,
    "note": "Kept for history: the owner picked Tripo (2026-11-23); not shown on the Enemies stage."
   },
@@ -51,7 +51,7 @@
    ],
    "role": "brawler",
    "group": "goblin",
-   "height": 1.0
+   "height": 1
   },
   "gobr-tripo": {
    "name": "Goblin rogue",
@@ -64,7 +64,7 @@
    ],
    "role": "rogue",
    "group": "goblin",
-   "height": 1.0
+   "height": 1
   },
   "gobm-tripo": {
    "name": "Goblin shaman",
@@ -77,7 +77,7 @@
    ],
    "role": "caster",
    "group": "goblin",
-   "height": 1.0
+   "height": 1
   },
   "thug": {
    "name": "Street thug",
@@ -269,7 +269,7 @@
    "enemy": true,
    "role": "undead",
    "group": "wyrmroad",
-   "height": 2.0,
+   "height": 2,
    "tris": 4500,
    "jobs": [
     "drowned-brute-tripo",
@@ -283,7 +283,7 @@
    "enemy": true,
    "role": "undead",
    "group": "wyrmroad",
-   "height": 2.0,
+   "height": 2,
    "tris": 3000,
    "jobs": [
     "wraith-knight-tripo",
@@ -405,7 +405,7 @@
    "enemy": true,
    "role": "elemental",
    "group": "elemental",
-   "height": 2.0,
+   "height": 2,
    "tris": 3000,
    "jobs": [
     "water-elemental-tripo",
@@ -431,7 +431,7 @@
    "enemy": true,
    "role": "elemental",
    "group": "elemental",
-   "height": 2.0,
+   "height": 2,
    "tris": 3000,
    "jobs": [
     "air-elemental-tripo",
@@ -444,7 +444,7 @@
    "enemy": true,
    "role": "brawler",
    "group": "extra",
-   "height": 2.0,
+   "height": 2,
    "tris": 3000,
    "jobs": [
     "orc-grunt-tripo",
@@ -524,6 +524,118 @@
     "drake-rig"
    ],
    "note": "Rigged here (tools/blender/quad_rig.py --wings), not by the paid Tripo rig (drake-rig lost the back legs); motion from js/beast.js."
+  },
+  "brown-bear": {
+   "name": "Brown bear",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "beast",
+   "group": "oathwild",
+   "height": 1.35,
+   "tris": 4500,
+   "skeleton": "quadruped",
+   "jobs": [
+    "brown-bear-tripo"
+   ],
+   "regions": [
+    "thornmere"
+   ],
+   "druidForm": true,
+   "note": "Rigged here (tools/blender/quad_rig.py --straighten), motion from js/beast.js; no paid rig. A real bear (owner 2026-11-23): also the druid's bear form."
+  },
+  "bristleback": {
+   "name": "Bristleback boar",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "beast",
+   "group": "oathwild",
+   "height": 1,
+   "tris": 3000,
+   "skeleton": "quadruped",
+   "jobs": [
+    "bristleback-tripo"
+   ],
+   "regions": [
+    "brightwater"
+   ],
+   "note": "Rigged here (tools/blender/quad_rig.py --straighten), motion from js/beast.js; no paid rig."
+  },
+  "mountain-lion": {
+   "name": "Mountain lion",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "beast",
+   "group": "oathwild",
+   "height": 0.85,
+   "tris": 3000,
+   "skeleton": "quadruped",
+   "jobs": [
+    "mountain-lion-tripo"
+   ],
+   "regions": [
+    "thornmere"
+   ],
+   "druidForm": true,
+   "note": "Rigged here (tools/blender/quad_rig.py --straighten), motion from js/beast.js; no paid rig. A real big cat (owner 2026-11-23): a druid cat-form candidate. Came back turned ~20°: straightened."
+  },
+  "bandit-chief": {
+   "name": "Bandit chief",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "boss",
+   "group": "oathwild",
+   "height": 1.95,
+   "tris": 4500,
+   "jobs": [
+    "bandit-chief-tripo",
+    "bandit-chief-rig"
+   ],
+   "regions": [
+    "brightwater"
+   ],
+   "weapon": "chief-axe",
+   "offhand": "chief-buckler",
+   "note": "Body made; rig not paid yet (fal balance ran out)."
+  },
+  "field-scarecrow": {
+   "name": "Field scarecrow",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "brawler",
+   "group": "oathwild",
+   "height": 1.9,
+   "tris": 3000,
+   "jobs": [
+    "field-scarecrow-tripo",
+    "field-scarecrow-rig"
+   ],
+   "regions": [
+    "brightwater"
+   ],
+   "weapon": "rusty-pitchfork",
+   "note": "Body made; rig not paid yet (fal balance ran out)."
+  },
+  "riding-horse": {
+   "name": "Riding horse",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "mount",
+   "group": "oathwild",
+   "height": 1.75,
+   "tris": 4000,
+   "skeleton": "quadruped",
+   "jobs": [
+    "riding-horse-tripo"
+   ],
+   "regions": [
+    "brightwater",
+    "thornmere"
+   ],
+   "mount": {
+    "bone": "spine_2",
+    "seat": null
+   },
+   "note": "Mount (owner 2026-11-23), listed with the creatures (enemy:true only puts it on the Enemies stage). Drawn; waits for fal credit."
   }
  },
  "items": {
@@ -973,7 +1085,7 @@
    "kind": "held",
    "job": "sheet-foes-e",
    "grip": "palm_r",
-   "length": 1.0,
+   "length": 1,
    "grip_at": 0.2,
    "tris": 500
   },
@@ -983,6 +1095,70 @@
    "grip": "palm_r",
    "length": 1.6,
    "grip_at": 0.3,
+   "tris": 600
+  },
+  "rusty-pitchfork": {
+   "kind": "held",
+   "job": "sheet-ow-weapons-a",
+   "grip": "palm_r",
+   "length": 1.7,
+   "grip_at": 0.4,
+   "tris": 600
+  },
+  "chief-axe": {
+   "kind": "held",
+   "job": "sheet-ow-weapons-a",
+   "grip": "palm_r",
+   "length": 0.95,
+   "grip_at": 0.18,
+   "tris": 500
+  },
+  "warchief-cleaver": {
+   "kind": "held",
+   "job": "sheet-ow-weapons-a",
+   "grip": "palm_r",
+   "length": 1.1,
+   "grip_at": 0.13,
+   "tris": 500
+  },
+  "cultist-knife": {
+   "kind": "held",
+   "job": "sheet-ow-weapons-a",
+   "grip": "palm_r",
+   "length": 0.45,
+   "grip_at": 0.15,
+   "tris": 500
+  },
+  "hag-staff": {
+   "kind": "held",
+   "job": "sheet-ow-weapons-b",
+   "grip": "palm_r",
+   "length": 1.7,
+   "grip_at": 0.5,
+   "tris": 600
+  },
+  "barrow-blade": {
+   "kind": "held",
+   "job": "sheet-ow-weapons-b",
+   "grip": "palm_r",
+   "length": 1.5,
+   "grip_at": 0.13,
+   "tris": 600
+  },
+  "ogre-club": {
+   "kind": "held",
+   "job": "sheet-ow-weapons-b",
+   "grip": "palm_r",
+   "length": 1.5,
+   "grip_at": 0.12,
+   "tris": 600
+  },
+  "chief-buckler": {
+   "kind": "held",
+   "job": "sheet-ow-weapons-b",
+   "grip": "forearm_l",
+   "length": 0.6,
+   "grip_at": null,
    "tris": 600
   }
  },

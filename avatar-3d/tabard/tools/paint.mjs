@@ -19,6 +19,10 @@ if (isProp) {
   const pr = PROPS[outfit];
   if (!pr) { console.error('unknown prop ' + outfit); process.exit(2); }
   o = { all: pr.look, prop: pr }; body = 'prop_' + outfit; outfit = 'paint';
+} else if (outfit === 'head') {
+  // not an outfit: the skin painting with a clean head (bald, clean-shaven, no brows) for tools/head_clean.py —
+  // hair, brows and beards are separate layers now (round 4, 2026-11-23)
+  o = { all: 'the same character', intro: 'head' };
 } else {
   o = O.outfits[outfit];
   if (!o || !['male', 'female'].includes(body)) { console.error('usage: paint.mjs <male|female> <outfit> | prop <id>'); process.exit(2); }
@@ -30,11 +34,18 @@ mkdirSync(job, { recursive: true });
 rmSync(join(job, 'painted.png'), { force: true });   // a stale picture from an earlier run must never pass for a new one
 // skin: paint over the clay sheet. Every other outfit EDITS the painted skin sheet (one picture in): with two pictures
 // Codex tends to draw a fresh figure at a new size, which no longer lines up with the 3D body (2026-11-22).
-const src = (isProp || outfit === 'skin') ? 'base.png' : 'skin.png';
+const src = (isProp || outfit === 'skin') ? 'base.png' : 'skin.png';   // 'head' edits the skin painting too
 copyFileSync(join(dir, src), join(job, 'base.png'));
 const imgs = ['base.png'];
 const subject = o[body] || o.all;
-const intro = isProp
+const intro = o.intro === 'head'
+  ? `base.png is a finished model sheet of ONE character shown four times — FRONT, LEFT SIDE, BACK, RIGHT SIDE — on a flat light-grey background.
+Task: change ONLY the head, in place on these exact figures:
+- make the head completely BALD: smooth bare scalp skin all over the top, sides and back of the head, the same warm skin tone as the face with the same soft painted light and shade — no hair, no stubble, no hairline, no shaved shadow;
+- remove any beard and moustache completely: clean-shaven smooth skin on the jaw, chin, cheeks and upper lip;
+- remove the eyebrows: smooth bare skin on the brow ridge;
+- keep the eyes, nose, mouth, lips and ears exactly as they are; keep the clothes, body, pose and every outline pixel-for-pixel where they are. This is an in-place edit of this picture, not a new drawing.`
+  : isProp
   ? `base.png is a model sheet: the SAME plain clay 3D model of a ${o.prop.kind} shown four times — FRONT, LEFT SIDE, BACK, RIGHT SIDE — on a flat light-grey background.
 Task: paint this exact model as a finished game prop texture reference, as if painting directly onto the clay.${o.prop.seeThrough ? ' Where the cloth is torn away (ragged hem, holes), leave the flat light-grey background showing through: those parts become see-through.' : ''}`
   : outfit === 'skin'

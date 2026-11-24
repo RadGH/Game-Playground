@@ -5,6 +5,7 @@
 #        (Test 3: much cleaner than 8000 + our decimate, which smeared faces) → turned to face front → shots/check/<id>.png (LOOK AT IT before rigging: facing front? arms free? one piece?)
 #   avatar-3d/fal/tools/run-body.sh rig <id>      Meshy rigging ($0.20, ue5_mannequin, 1 m) → to_ual.py → models/final/<id>.glb
 #
+# FAL_TAG / FAL_CAPS are passed to fal-job.mjs (per-job budget, e.g. FAL_TAG=oathwild-enemies FAL_CAPS=oathwild:25,oathwild-enemies:15).
 # Paid steps refuse to start when data/spend.json would pass the round's cap (FAL_CAP, default 33.20 US$).
 # Safe to run again: fal-job.mjs resumes a submitted job instead of paying twice; finished steps are skipped.
 set -euo pipefail

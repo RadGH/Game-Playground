@@ -1,0 +1,6 @@
+Use your image generation tool to create ONE image, square 1024x1024 PNG, and save it in the current working directory as out.png. Do nothing else (do not write code, do not edit other files).
+Layout: ONE object, centred, shown whole, large in the frame with a margin all round, as a 3D modeller's reference. Flat front view of the whole tool standing upright, tines up, orthographic, filling the height of the picture. Nothing else in the picture: no person, no mannequin, no stand, no hands.
+Subject: farm pitchfork with three long rusty iron tines on a long grey weathered wooden shaft wrapped with old rope near the bottom.
+Style: stylized low-poly hand-painted fantasy online-RPG game art: chunky simple readable shapes, slightly exaggerated proportions, large hands and feet, hand-painted colour with soft painted-in highlights and shadows, crisp colour blocks, almost no fine surface noise, matte, NOT photoreal, NOT glossy, NOT a 3D render with realistic materials.
+Lighting/background: even flat lighting, soft shading that describes the forms, no harsh shadows, plain flat light-grey background (#c8c8c8), no floor shadow, no scenery.
+Constraints: no text, no labels, no lettering, no watermark, no extra characters or objects.

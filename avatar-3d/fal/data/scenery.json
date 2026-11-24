@@ -1,0 +1,1477 @@
+{
+ "_doc": "Scenery props (Oathwild 2026-11-23): static, unrigged, one painted texture each. Each sheet = one Codex 2x2 drawing (tools/refdraw.mjs <sheet id>) = one Trellis-2 job (tools/scenery.sh). Per object: kind, regions, real size in metres (h = height, or w = longest ground side when the object is long and low), tris = triangle target, tex = its own texture size in px, align = turn the footprint square to the axes (false for round things), yaw = extra turn in degrees after looking. Built files: models/final/scenery/<id>.glb; measured triangles and sizes go to data/catalog.json (scenery).",
+ "sheets": [
+  {
+   "id": "sc-cottages",
+   "objects": [
+    {
+     "id": "cottage-thatch",
+     "name": "Thatched cottage",
+     "kind": "building",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 6,
+     "tris": 3000,
+     "tex": 1024,
+     "look": "small one-storey farm cottage: white plaster walls with dark oak timber framing, thick golden thatched roof with rounded edges, a stone chimney, one wooden plank door on the front, two small shuttered windows, a low stone footing"
+    },
+    {
+     "id": "cottage-stone",
+     "name": "Stone cottage",
+     "kind": "building",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 6,
+     "tris": 3000,
+     "tex": 1024,
+     "look": "small one-storey cottage of rough grey fieldstone with a steep blue-grey slate roof, a chunky stone chimney at one end, a green-painted wooden door with an iron ring, one small window with a flower box"
+    },
+    {
+     "id": "cottage-log",
+     "name": "Log cabin",
+     "kind": "building",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 5.5,
+     "tris": 3000,
+     "tex": 1024,
+     "look": "woodsman's log cabin of thick round brown logs with crossed log ends at the corners, a mossy wooden shingle roof, a small covered porch with two posts over the front door, a stone chimney on the side"
+    },
+    {
+     "id": "inn",
+     "name": "Village inn",
+     "kind": "building",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 9,
+     "tris": 3000,
+     "tex": 1024,
+     "look": "two-storey village inn and longhouse: stone ground floor, timber-framed cream plaster upper floor that juts out a little, long red-brown tiled roof, a big double door in the middle of the long front, a hanging painted wooden sign on an iron bracket showing a golden goose, warm yellow windows"
+    }
+   ]
+  },
+  {
+   "id": "sc-village",
+   "objects": [
+    {
+     "id": "smithy",
+     "name": "Smithy",
+     "kind": "building",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 6,
+     "tris": 3000,
+     "tex": 1024,
+     "look": "village smithy: an open-sided timber workshop with a sloping wooden shingle roof on thick posts, a big stone forge with a tall brick chimney at the back, a glowing orange coal bed, a water barrel and hanging tongs and horseshoes on the back wall"
+    },
+    {
+     "id": "watermill",
+     "name": "Watermill",
+     "kind": "building",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 8,
+     "tris": 3000,
+     "tex": 1024,
+     "look": "village watermill: a tall stone-and-timber mill house with a thatched roof and a big wooden waterwheel with paddles fixed to one side wall, a small wooden sluice trough above the wheel"
+    },
+    {
+     "id": "watchtower",
+     "name": "Watchtower",
+     "kind": "building",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 10,
+     "tris": 2000,
+     "tex": 1024,
+     "look": "tall square wooden watchtower on four thick log legs with cross bracing, a ladder up the front, a railed lookout platform at the top under a small pointed shingle roof, a red pennant on top"
+    },
+    {
+     "id": "well",
+     "name": "Village well",
+     "kind": "prop",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 2.8,
+     "tris": 1200,
+     "tex": 512,
+     "look": "round village well: a ring of grey stones, two wooden posts holding a small pointed shingle roof, a winch handle and a rope with a wooden bucket"
+    }
+   ]
+  },
+  {
+   "id": "sc-palisade",
+   "objects": [
+    {
+     "id": "palisade-wall",
+     "name": "Palisade wall",
+     "kind": "wall",
+     "regions": [
+      "brightwater"
+     ],
+     "w": 4,
+     "tris": 600,
+     "tex": 512,
+     "look": "one straight section of a wooden palisade wall: a row of seven sharpened upright logs of the same height, bound with two horizontal rope-tied cross beams, seen from the front-left",
+     "align": true
+    },
+    {
+     "id": "palisade-corner",
+     "name": "Palisade corner",
+     "kind": "wall",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 4,
+     "tris": 600,
+     "tex": 512,
+     "look": "a palisade corner post: a thick round log tower post, taller than the wall, with a sharpened top and iron bands, and two short stubs of sharpened-log wall leaving it at a right angle"
+    },
+    {
+     "id": "palisade-gate",
+     "name": "Palisade gate",
+     "kind": "wall",
+     "regions": [
+      "brightwater"
+     ],
+     "w": 5,
+     "tris": 1200,
+     "tex": 512,
+     "look": "a palisade gate: two tall log gate towers joined by a log beam overhead, a pair of closed heavy plank gate doors with iron studs between them, sharpened log tips on top"
+    },
+    {
+     "id": "fence-rail",
+     "name": "Rail fence",
+     "kind": "wall",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "w": 3,
+     "tris": 300,
+     "tex": 256,
+     "look": "one straight section of a rustic split-rail farm fence: three rough wooden posts and two long split rails between them"
+    }
+   ]
+  },
+  {
+   "id": "sc-market",
+   "objects": [
+    {
+     "id": "market-stall",
+     "name": "Market stall",
+     "kind": "prop",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 2.8,
+     "tris": 1200,
+     "tex": 512,
+     "look": "village market stall: a wooden counter table with a red-and-cream striped cloth awning on four posts, baskets of apples, cabbages and loaves on the counter"
+    },
+    {
+     "id": "cart",
+     "name": "Hand cart",
+     "kind": "prop",
+     "regions": [
+      "brightwater"
+     ],
+     "w": 3,
+     "tris": 1000,
+     "tex": 512,
+     "look": "a two-wheeled wooden farm cart with big spoked wheels, plank sides and two long handles resting on the ground at the front, a few sacks inside"
+    },
+    {
+     "id": "haystack",
+     "name": "Haystack",
+     "kind": "prop",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 2.4,
+     "tris": 500,
+     "tex": 512,
+     "look": "a round dome haystack of golden straw with a rope net over it",
+     "align": false
+    },
+    {
+     "id": "signpost",
+     "name": "Signpost",
+     "kind": "prop",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 2.6,
+     "tris": 400,
+     "tex": 256,
+     "look": "a wooden crossroads signpost: one tall post with three blank painted arrow-shaped plank signs pointing different ways, a small pointed cap on top, no writing"
+    }
+   ]
+  },
+  {
+   "id": "sc-workshop",
+   "objects": [
+    {
+     "id": "lamp-post",
+     "name": "Lamp post",
+     "kind": "prop",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 3.2,
+     "tris": 500,
+     "tex": 256,
+     "look": "a village lamp post: a dark wooden post with a curled iron arm at the top holding a hanging square iron lantern with warm yellow glass"
+    },
+    {
+     "id": "anvil",
+     "name": "Anvil",
+     "kind": "prop",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 0.9,
+     "tris": 400,
+     "tex": 256,
+     "look": "a dark iron blacksmith anvil with a pointed horn, sitting on a thick tree-stump block bound with an iron hoop, a hammer resting on top"
+    },
+    {
+     "id": "stone-wall-low",
+     "name": "Low stone wall",
+     "kind": "wall",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "w": 3,
+     "tris": 500,
+     "tex": 512,
+     "look": "one straight section of a low dry-stone field wall made of stacked rounded grey stones with a few tufts of moss, knee to waist high"
+    },
+    {
+     "id": "woodpile",
+     "name": "Wood pile",
+     "kind": "clutter",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "w": 2,
+     "tris": 600,
+     "tex": 512,
+     "look": "a neat stack of split firewood logs, round ends showing pale wood rings, with an axe stuck in a chopping block beside it"
+    }
+   ]
+  },
+  {
+   "id": "sc-clutter",
+   "objects": [
+    {
+     "id": "barrel",
+     "name": "Barrel",
+     "kind": "clutter",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 1,
+     "tris": 300,
+     "tex": 256,
+     "look": "a single closed wooden barrel with two dark iron hoops, warm brown staves",
+     "align": false
+    },
+    {
+     "id": "crate",
+     "name": "Crate",
+     "kind": "clutter",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 0.8,
+     "tris": 200,
+     "tex": 256,
+     "look": "a single closed wooden shipping crate of light planks with darker cross braces and nailed corners, a cube",
+     "stage": false,
+     "note": "Trellis built it as an open lattice (no plank panels): redraw as a solid box when credit is back."
+    },
+    {
+     "id": "sacks",
+     "name": "Grain sacks",
+     "kind": "clutter",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 0.9,
+     "tris": 700,
+     "tex": 256,
+     "look": "a pile of three plump tied burlap grain sacks leaning on each other",
+     "align": false,
+     "src": "sacks-d5",
+     "vox": 0.004,
+     "note": "Made from the decimation_target 5000 test job (scn-sc-clutter-d5000): closed sacks with their tied necks.",
+     "job": "scn-sc-clutter-d5000"
+    },
+    {
+     "id": "weapon-rack",
+     "name": "Weapon rack",
+     "kind": "clutter",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 1.8,
+     "tris": 1300,
+     "tex": 512,
+     "look": "a wooden weapon rack holding two spears, a sword and a round wooden shield leaning against it",
+     "src": "weapon-rack-d5",
+     "job": "scn-sc-clutter-d5000",
+     "remesh": false,
+     "note": "Thin poles: kept on the maker's own 5000-target surface (no remesh)."
+    }
+   ]
+  },
+  {
+   "id": "sc-camp",
+   "objects": [
+    {
+     "id": "bedroll",
+     "name": "Bedroll",
+     "kind": "camp",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "w": 1.9,
+     "tris": 300,
+     "tex": 256,
+     "look": "an unrolled sleeping bedroll lying flat: a brown wool blanket on a fur, with a rolled-up end as a pillow, seen from above-front"
+    },
+    {
+     "id": "campfire",
+     "name": "Campfire",
+     "kind": "camp",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 0.6,
+     "tris": 600,
+     "tex": 256,
+     "look": "a campfire: a ring of grey stones around crossed half-burnt logs with a few bright orange coals and short stylized orange flames",
+     "align": false
+    },
+    {
+     "id": "tent-small",
+     "name": "Small tent",
+     "kind": "camp",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 1.6,
+     "tris": 600,
+     "tex": 512,
+     "look": "a small A-frame canvas tent of patched tan cloth over a wooden ridge pole, guy ropes to wooden pegs, front flap open"
+    },
+    {
+     "id": "tent-large",
+     "name": "Chief's tent",
+     "kind": "camp",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 3.4,
+     "tris": 1200,
+     "tex": 1024,
+     "look": "a large round bandit chief's tent of dark red and brown patched canvas on a central pole, wooden poles sticking out of the top, animal furs draped at the open entrance, a small skull charm hanging by the door",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-banners-chests",
+   "objects": [
+    {
+     "id": "banner-bandit",
+     "name": "Bandit banner",
+     "kind": "camp",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 3.2,
+     "tris": 400,
+     "tex": 256,
+     "look": "a crude tall banner on a wooden pole with a crossbar: a ragged black cloth painted with a red slashed circle emblem, torn at the bottom"
+    },
+    {
+     "id": "banner-village",
+     "name": "Village banner",
+     "kind": "camp",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 3.2,
+     "tris": 400,
+     "tex": 256,
+     "look": "a tall banner on a wooden pole with a crossbar: a clean sky-blue cloth with a white wavy river emblem and a golden fringed bottom edge"
+    },
+    {
+     "id": "chest-common",
+     "name": "Wooden chest",
+     "kind": "loot",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 0.7,
+     "tris": 500,
+     "tex": 512,
+     "look": "a plain closed wooden treasure chest with a rounded lid, brown planks and simple dark iron bands and a small iron lock plate"
+    },
+    {
+     "id": "chest-rare",
+     "name": "Iron-bound chest",
+     "kind": "loot",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 0.8,
+     "tris": 600,
+     "tex": 512,
+     "look": "a sturdy closed treasure chest of dark stained wood heavily bound with riveted steel bands and corner plates, a big round steel lock, a blue cloth tassel hanging from the lock"
+    }
+   ]
+  },
+  {
+   "id": "sc-loot",
+   "objects": [
+    {
+     "id": "chest-epic",
+     "name": "Gilded chest",
+     "kind": "loot",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 0.9,
+     "tris": 700,
+     "tex": 512,
+     "look": "an ornate closed royal treasure chest: deep purple painted wood, polished gold corner pieces, gold filigree bands and a large gold lock with a red gem, little gold feet"
+    },
+    {
+     "id": "loot-sack",
+     "name": "Loot bag",
+     "kind": "loot",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 0.6,
+     "tris": 300,
+     "tex": 256,
+     "look": "a plump leather loot bag tied at the neck with a cord, a few gold coins spilling from a fold at its base",
+     "align": false
+    },
+    {
+     "id": "crate-stack",
+     "name": "Crate stack",
+     "kind": "clutter",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 1.6,
+     "tris": 400,
+     "tex": 512,
+     "look": "a stack of three wooden crates: two side by side at the bottom and one on top, slightly turned"
+    },
+    {
+     "id": "barrel-open",
+     "name": "Water barrel",
+     "kind": "clutter",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 1,
+     "tris": 400,
+     "tex": 256,
+     "look": "an open-topped wooden rain barrel full to the top with blue water, iron hoops, a wooden ladle hooked over the rim",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-travel",
+   "objects": [
+    {
+     "id": "bridge-wood",
+     "name": "Wooden bridge",
+     "kind": "travel",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "w": 8,
+     "tris": 1500,
+     "tex": 1024,
+     "look": "a straight wooden footbridge seen from the front-left along its length: a gently arched plank deck on log trestle legs at both ends and the middle, simple log handrails on both sides"
+    },
+    {
+     "id": "bridge-stone",
+     "name": "Stone bridge",
+     "kind": "travel",
+     "regions": [
+      "thornmere"
+     ],
+     "w": 12,
+     "tris": 2500,
+     "tex": 1024,
+     "look": "a sturdy old grey stone bridge with one big round arch underneath, low stone parapet walls on both sides, moss on the stones, seen from the front-left along its length"
+    },
+    {
+     "id": "road-marker",
+     "name": "Road marker",
+     "kind": "travel",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 1.2,
+     "tris": 300,
+     "tex": 256,
+     "look": "a short square milestone of grey stone with a rounded top and a carved arrow and three notches on its face, moss at its foot"
+    },
+    {
+     "id": "waystone",
+     "name": "Waystone",
+     "kind": "shrine",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 3.2,
+     "tris": 900,
+     "tex": 512,
+     "look": "a fast-travel waystone: a tall upright slab of dark blue-grey stone on a round two-step stone base, a big carved spiral rune on its face glowing bright cyan-blue, small cyan crystals set in the top",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-shrines",
+   "objects": [
+    {
+     "id": "shrine-respawn",
+     "name": "Shrine of return",
+     "kind": "shrine",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 3.5,
+     "tris": 1500,
+     "tex": 1024,
+     "look": "a small open roadside shrine where heroes return to life: four white stone pillars holding a little domed roof with a golden sun finial, a round white stone floor with three steps, a golden bowl on a pedestal in the centre holding a bright white-gold flame"
+    },
+    {
+     "id": "standing-stone-a",
+     "name": "Standing stone",
+     "kind": "shrine",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 3,
+     "tris": 300,
+     "tex": 256,
+     "look": "a single tall rough standing stone, grey with lichen patches, slightly leaning and tapering to the top",
+     "align": false
+    },
+    {
+     "id": "standing-stone-b",
+     "name": "Capped stones",
+     "kind": "shrine",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 3.2,
+     "tris": 400,
+     "tex": 512,
+     "look": "two rough grey standing stones side by side with a third long flat stone laid across their tops like a doorway, moss on the top"
+    },
+    {
+     "id": "druid-stone",
+     "name": "Carved circle stone",
+     "kind": "shrine",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 3.4,
+     "tris": 400,
+     "tex": 512,
+     "look": "a tall standing stone carved with a green-painted leafy vine and spiral pattern on its face, ivy growing up one side, a garland of leaves hanging over the top",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-ruins",
+   "objects": [
+    {
+     "id": "ruin-wall",
+     "name": "Broken wall",
+     "kind": "ruin",
+     "regions": [
+      "thornmere"
+     ],
+     "w": 5,
+     "tris": 800,
+     "tex": 512,
+     "look": "a ruined section of old pale stone castle wall, broken jagged top higher at one end, a few stones fallen at its foot, moss and ivy, an empty arched window hole"
+    },
+    {
+     "id": "ruin-arch",
+     "name": "Ruined arch",
+     "kind": "ruin",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 5,
+     "tris": 800,
+     "tex": 512,
+     "look": "a free-standing ruined stone archway of pale carved blocks, two square pillars and a pointed arch with one block missing, ivy hanging from it"
+    },
+    {
+     "id": "ruin-pillar",
+     "name": "Broken pillar",
+     "kind": "ruin",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 3,
+     "tris": 500,
+     "tex": 512,
+     "look": "a broken round fluted stone column on a square base, its top snapped off at an angle, cracks and moss",
+     "align": false
+    },
+    {
+     "id": "ruin-tower",
+     "name": "Tower stump",
+     "kind": "ruin",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 6,
+     "tris": 1500,
+     "tex": 1024,
+     "look": "the round lower part of a ruined stone watchtower: a thick circular wall with a broken jagged top, an arched doorway, a few arrow slits, grass and ivy growing on the stones",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-barrow",
+   "objects": [
+    {
+     "id": "barrow-entrance",
+     "name": "Barrow entrance",
+     "kind": "barrow",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 4.5,
+     "tris": 1500,
+     "tex": 1024,
+     "look": "the entrance of an ancient burial mound: a grassy earth mound with a doorway framed by three huge rough stones (two uprights and a lintel), a dark opening, carved spirals on the lintel, a few small stones around"
+    },
+    {
+     "id": "sarcophagus",
+     "name": "Sarcophagus",
+     "kind": "barrow",
+     "regions": [
+      "thornmere"
+     ],
+     "w": 2.4,
+     "tris": 700,
+     "tex": 512,
+     "look": "a long grey stone coffin with a heavy lid carved as a sleeping armoured king with a sword on his chest, cracked corner, cobwebs"
+    },
+    {
+     "id": "gravestone-a",
+     "name": "Old gravestone",
+     "kind": "barrow",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 1.2,
+     "tris": 200,
+     "tex": 256,
+     "look": "an old upright gravestone of grey stone with a rounded top, tilted a little, worn blank face, moss on top"
+    },
+    {
+     "id": "gravestone-b",
+     "name": "Ringed grave marker",
+     "kind": "barrow",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 1.5,
+     "tris": 300,
+     "tex": 256,
+     "look": "a tall old stone grave marker shaped as an upright post with a stone ring around its top, weathered and cracked"
+    }
+   ]
+  },
+  {
+   "id": "sc-graves",
+   "objects": [
+    {
+     "id": "gravestone-c",
+     "name": "Sunken slab",
+     "kind": "barrow",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 0.9,
+     "tris": 200,
+     "tex": 256,
+     "look": "a thick square grave slab leaning crooked, half sunk, with a broken corner and lichen"
+    },
+    {
+     "id": "grave-fence",
+     "name": "Grave railing",
+     "kind": "barrow",
+     "regions": [
+      "thornmere"
+     ],
+     "w": 2,
+     "tris": 400,
+     "tex": 256,
+     "look": "one straight section of rusty black wrought-iron graveyard railing with spear-tipped bars and two square posts"
+    },
+    {
+     "id": "statue-broken",
+     "name": "Broken statue",
+     "kind": "ruin",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 2.6,
+     "tris": 800,
+     "tex": 512,
+     "look": "a weathered stone statue of a robed figure holding a lantern, its head broken off, standing on a cracked square plinth, moss on the shoulders"
+    },
+    {
+     "id": "rubble",
+     "name": "Rubble pile",
+     "kind": "ruin",
+     "regions": [
+      "thornmere"
+     ],
+     "w": 2.5,
+     "tris": 500,
+     "tex": 512,
+     "look": "a low pile of broken pale stone blocks and fallen masonry chunks with weeds",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-rocks-a",
+   "objects": [
+    {
+     "id": "rock-small",
+     "name": "Small rock",
+     "kind": "rock",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 0.5,
+     "tris": 150,
+     "tex": 256,
+     "look": "a small chunky grey rock with flat painted facets",
+     "align": false
+    },
+    {
+     "id": "rock-medium",
+     "name": "Medium rock",
+     "kind": "rock",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 1,
+     "tris": 250,
+     "tex": 256,
+     "look": "a medium angular grey rock with a mossy green top",
+     "align": false
+    },
+    {
+     "id": "rock-large",
+     "name": "Large rock",
+     "kind": "rock",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 2,
+     "tris": 400,
+     "tex": 512,
+     "look": "a large blocky grey rock with sharp flat faces and a little moss",
+     "align": false
+    },
+    {
+     "id": "boulder",
+     "name": "Boulder",
+     "kind": "rock",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 2.5,
+     "tris": 400,
+     "tex": 512,
+     "look": "a big round weathered boulder, warm grey-brown, smooth with a few cracks",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-rocks-b",
+   "objects": [
+    {
+     "id": "rock-cluster",
+     "name": "Rock cluster",
+     "kind": "rock",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "w": 1.5,
+     "tris": 300,
+     "tex": 256,
+     "look": "a cluster of five small grey pebbles and stones grouped together",
+     "align": false
+    },
+    {
+     "id": "rock-slab",
+     "name": "Flat slab",
+     "kind": "rock",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "w": 2.5,
+     "tris": 200,
+     "tex": 256,
+     "look": "a wide flat low grey rock slab, like a stepping table, with cracks",
+     "align": false
+    },
+    {
+     "id": "cliff-chunk",
+     "name": "Cliff chunk",
+     "kind": "rock",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 6,
+     "tris": 1000,
+     "tex": 1024,
+     "look": "a tall chunk of cliff face: layered grey-brown rock strata in big stepped blocks, a grassy green top edge, flat back",
+     "align": true
+    },
+    {
+     "id": "boulder-mossy",
+     "name": "Mossy boulder",
+     "kind": "rock",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 2,
+     "tris": 400,
+     "tex": 512,
+     "look": "a rounded boulder almost covered by thick bright green moss with a few small ferns growing from it",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-trees-a",
+   "objects": [
+    {
+     "id": "oak-a",
+     "name": "Oak",
+     "kind": "tree",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 9,
+     "tris": 1500,
+     "tex": 1024,
+     "look": "a stylized broad oak tree: a thick short twisted brown trunk splitting into a few branches, a big round puffy crown of chunky clumped green leaf masses",
+     "align": false
+    },
+    {
+     "id": "oak-b",
+     "name": "Old oak",
+     "kind": "tree",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 10,
+     "tris": 1500,
+     "tex": 1024,
+     "look": "a stylized old wide oak tree with a gnarled trunk, visible roots at the base, and a broad flat-topped crown made of three big chunky leaf clumps in two greens",
+     "align": false
+    },
+    {
+     "id": "pine-a",
+     "name": "Pine",
+     "kind": "tree",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 11,
+     "tris": 800,
+     "tex": 512,
+     "look": "a stylized tall pine tree: a straight brown trunk and four stacked chunky cone-shaped tiers of dark green needles getting smaller to a point",
+     "align": false
+    },
+    {
+     "id": "pine-b",
+     "name": "Spruce",
+     "kind": "tree",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 9,
+     "tris": 800,
+     "tex": 512,
+     "look": "a stylized squat bushy spruce tree with drooping layered blue-green needle tiers and a little trunk showing at the bottom",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-trees-b",
+   "objects": [
+    {
+     "id": "birch",
+     "name": "Birch",
+     "kind": "tree",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 9,
+     "tris": 1200,
+     "tex": 1024,
+     "look": "a stylized slim birch tree: a thin white trunk with black bark marks, and a tall oval crown of chunky light yellow-green leaf clumps",
+     "align": false
+    },
+    {
+     "id": "willow",
+     "name": "Willow",
+     "kind": "tree",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 8,
+     "tris": 1500,
+     "tex": 1024,
+     "look": "a stylized weeping willow: a thick leaning trunk and a dome crown whose long chunky curtains of green leaves hang down almost to the ground",
+     "align": false
+    },
+    {
+     "id": "marsh-tree",
+     "name": "Marsh tree",
+     "kind": "tree",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 8,
+     "tris": 1500,
+     "tex": 1024,
+     "look": "a stylized twisted swamp tree standing on tall arching roots like stilts, a crooked dark grey-brown trunk, a sparse flat crown of murky olive-green leaf clumps and hanging grey moss strands",
+     "align": false
+    },
+    {
+     "id": "dead-tree",
+     "name": "Dead tree",
+     "kind": "tree",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 7,
+     "tris": 800,
+     "tex": 512,
+     "look": "a stylized dead leafless tree: a pale grey twisted trunk with a few thick crooked bare branches reaching up, a split at the top",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-wood",
+   "objects": [
+    {
+     "id": "stump-a",
+     "name": "Tree stump",
+     "kind": "plant",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 0.7,
+     "tris": 300,
+     "tex": 256,
+     "look": "a wide sawn-off tree stump with pale rings on the flat top and roots spreading at the base",
+     "align": false
+    },
+    {
+     "id": "stump-b",
+     "name": "Broken stump",
+     "kind": "plant",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 1.4,
+     "tris": 400,
+     "tex": 256,
+     "look": "a tall broken tree stump with a jagged splintered top, mossy bark, a small mushroom on its side",
+     "align": false
+    },
+    {
+     "id": "log",
+     "name": "Fallen log",
+     "kind": "plant",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "w": 4,
+     "tris": 400,
+     "tex": 512,
+     "look": "a long fallen tree log lying on its side, brown bark with a few branch stubs and moss patches, pale cut ends"
+    },
+    {
+     "id": "log-hollow",
+     "name": "Hollow log",
+     "kind": "plant",
+     "regions": [
+      "thornmere"
+     ],
+     "w": 3.5,
+     "tris": 500,
+     "tex": 512,
+     "look": "a thick hollow fallen log lying on its side, open dark hollow end facing the viewer, moss and small mushrooms on top"
+    }
+   ]
+  },
+  {
+   "id": "sc-plants-a",
+   "objects": [
+    {
+     "id": "mushrooms",
+     "name": "Mushroom clump",
+     "kind": "plant",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 0.5,
+     "tris": 300,
+     "tex": 256,
+     "look": "a clump of five chunky red-capped mushrooms with white spots of different sizes",
+     "align": false
+    },
+    {
+     "id": "mushroom-giant",
+     "name": "Giant toadstool",
+     "kind": "plant",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 2.5,
+     "tris": 400,
+     "tex": 512,
+     "look": "a giant toadstool as tall as a person: a thick pale stalk and a broad flat purple-blue cap with pale spots",
+     "align": false
+    },
+    {
+     "id": "reeds",
+     "name": "Reeds",
+     "kind": "plant",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 1.6,
+     "tris": 500,
+     "tex": 256,
+     "look": "a dense clump of tall green marsh reeds and cattails with brown velvet heads, chunky flat blades",
+     "align": false
+    },
+    {
+     "id": "bog-plant",
+     "name": "Bog lilies",
+     "kind": "plant",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 0.8,
+     "tris": 400,
+     "tex": 256,
+     "look": "a clump of wide drooping swamp leaves with a few tall stalks topped by pale yellow bell flowers",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-bushes",
+   "objects": [
+    {
+     "id": "bush-a",
+     "name": "Round bush",
+     "kind": "plant",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "h": 1.2,
+     "tris": 400,
+     "tex": 256,
+     "look": "a round chunky green shrub made of a few clumped leaf masses",
+     "align": false
+    },
+    {
+     "id": "bush-b",
+     "name": "Berry bush",
+     "kind": "plant",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 1.1,
+     "tris": 400,
+     "tex": 256,
+     "look": "a round dark green bush dotted with clusters of red berries",
+     "align": false
+    },
+    {
+     "id": "bush-c",
+     "name": "Bramble",
+     "kind": "plant",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 1,
+     "tris": 500,
+     "tex": 256,
+     "look": "a wide low tangle of thorny brown bramble stems with sparse dark leaves",
+     "align": false
+    },
+    {
+     "id": "fern",
+     "name": "Fern",
+     "kind": "plant",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 0.9,
+     "tris": 400,
+     "tex": 256,
+     "look": "a big leafy fern clump with broad arching green fronds spreading out from the middle",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-goblins",
+   "objects": [
+    {
+     "id": "goblin-hut",
+     "name": "Goblin hut",
+     "kind": "building",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 3.5,
+     "tris": 1500,
+     "tex": 1024,
+     "look": "a crooked goblin hut: a lopsided dome frame of bent sticks covered with patched hides and mud, a big animal skull over the low doorway, a crooked smoke pipe",
+     "align": false
+    },
+    {
+     "id": "goblin-totem",
+     "name": "Goblin totem",
+     "kind": "camp",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 3,
+     "tris": 600,
+     "tex": 512,
+     "look": "a crude goblin totem pole: a carved wooden post with a grinning painted face, a horned animal skull on top, feathers and bones hanging from strings",
+     "align": false
+    },
+    {
+     "id": "spike-barricade",
+     "name": "Spike barricade",
+     "kind": "wall",
+     "regions": [
+      "brightwater"
+     ],
+     "w": 3,
+     "tris": 500,
+     "tex": 512,
+     "look": "a barricade of crossed sharpened wooden stakes tied with rope in an X pattern along a log, pointing outward"
+    },
+    {
+     "id": "junk-pile",
+     "name": "Scrap heap",
+     "kind": "clutter",
+     "regions": [
+      "brightwater"
+     ],
+     "w": 2,
+     "tris": 600,
+     "tex": 512,
+     "look": "a goblin junk heap: broken barrel staves, a dented pot, bent spears, scrap metal and bones piled up",
+     "align": false
+    }
+   ]
+  },
+  {
+   "id": "sc-farm",
+   "objects": [
+    {
+     "id": "wheelbarrow",
+     "name": "Wheelbarrow",
+     "kind": "prop",
+     "regions": [
+      "brightwater"
+     ],
+     "w": 1.5,
+     "tris": 500,
+     "tex": 256,
+     "look": "a wooden wheelbarrow with one spoked wheel at the front, plank tray holding a few turnips"
+    },
+    {
+     "id": "trough",
+     "name": "Water trough",
+     "kind": "prop",
+     "regions": [
+      "brightwater"
+     ],
+     "w": 2,
+     "tris": 300,
+     "tex": 256,
+     "look": "a long wooden animal water trough on short legs, filled with blue water"
+    },
+    {
+     "id": "pumpkins",
+     "name": "Pumpkin patch",
+     "kind": "plant",
+     "regions": [
+      "brightwater"
+     ],
+     "w": 1.6,
+     "tris": 500,
+     "tex": 256,
+     "look": "three big orange pumpkins of different sizes with green curly vines and leaves between them",
+     "align": false
+    },
+    {
+     "id": "scarecrow-post",
+     "name": "Scarecrow",
+     "kind": "prop",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 2.2,
+     "tris": 500,
+     "tex": 256,
+     "look": "a harmless field scarecrow on a wooden cross post: a burlap sack head with a stitched smile and a floppy straw hat, a patched blue shirt on the crossbar arms, straw sticking out"
+    }
+   ]
+  },
+  {
+   "id": "sc-marsh",
+   "objects": [
+    {
+     "id": "hag-hut",
+     "name": "Stilt hut",
+     "kind": "building",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 6,
+     "tris": 2500,
+     "tex": 1024,
+     "look": "a crooked swamp hut on tall wooden stilts: a small leaning plank house with a sagging mossy thatched roof, a rickety ladder up to the door, hanging bones, bottles and dried herbs, a crooked chimney"
+    },
+    {
+     "id": "boardwalk",
+     "name": "Boardwalk",
+     "kind": "travel",
+     "regions": [
+      "thornmere"
+     ],
+     "w": 4,
+     "tris": 500,
+     "tex": 512,
+     "look": "one straight section of a marsh boardwalk: rough planks across two log beams on short wooden stilt posts, a rope rail on one side"
+    },
+    {
+     "id": "rowboat",
+     "name": "Rowboat",
+     "kind": "travel",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "w": 3.5,
+     "tris": 700,
+     "tex": 512,
+     "look": "a small wooden rowboat with two oars resting inside, weathered blue-green paint on the planks"
+    },
+    {
+     "id": "fish-rack",
+     "name": "Drying rack",
+     "kind": "camp",
+     "regions": [
+      "brightwater",
+      "thornmere"
+     ],
+     "w": 2,
+     "tris": 500,
+     "tex": 256,
+     "look": "a wooden A-frame drying rack with silver fish and herbs hanging from its crossbar"
+    }
+   ]
+  },
+  {
+   "id": "sc-bandits",
+   "objects": [
+    {
+     "id": "lookout",
+     "name": "Lookout platform",
+     "kind": "building",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 5,
+     "tris": 1200,
+     "tex": 1024,
+     "look": "a crude bandit lookout platform: a small square plank deck on four rough log legs with diagonal braces, a ladder, a low rail of sticks and a ragged cloth sunshade"
+    },
+    {
+     "id": "cage",
+     "name": "Prisoner cage",
+     "kind": "camp",
+     "regions": [
+      "brightwater"
+     ],
+     "h": 2.2,
+     "tris": 600,
+     "tex": 512,
+     "look": "an empty square wooden prisoner cage of lashed vertical poles with a plank roof and a rope-tied door"
+    },
+    {
+     "id": "stolen-goods",
+     "name": "Stolen goods",
+     "kind": "loot",
+     "regions": [
+      "brightwater"
+     ],
+     "w": 2,
+     "tris": 700,
+     "tex": 512,
+     "look": "a heap of stolen goods: an open small chest with gold coins, a rolled rug, two sacks, a silver candlestick and a jug",
+     "align": false
+    },
+    {
+     "id": "wanted-board",
+     "name": "Notice board",
+     "kind": "prop",
+     "regions": [
+      "brightwater"
+     ],
+     "w": 1.8,
+     "tris": 400,
+     "tex": 512,
+     "look": "a village notice board: a small plank board on two posts with a little pointed roof, several blank paper notes pinned on it, no writing"
+    }
+   ]
+  },
+  {
+   "id": "sc-druid",
+   "objects": [
+    {
+     "id": "druid-altar",
+     "name": "Circle altar",
+     "kind": "shrine",
+     "regions": [
+      "thornmere"
+     ],
+     "w": 2.2,
+     "tris": 500,
+     "tex": 512,
+     "look": "a low flat stone altar table on two thick stone legs, a green leaf garland and a wooden bowl of berries on top, carved spirals on the front"
+    },
+    {
+     "id": "antler-totem",
+     "name": "Antler totem",
+     "kind": "shrine",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 3,
+     "tris": 600,
+     "tex": 512,
+     "look": "a druid's antler totem: a tall twisted wooden staff planted upright, a big pair of stag antlers on top tied with green ribbons and hanging wooden charms",
+     "align": false
+    },
+    {
+     "id": "wicker-effigy",
+     "name": "Wicker stag",
+     "kind": "shrine",
+     "regions": [
+      "thornmere"
+     ],
+     "h": 2.5,
+     "tris": 1000,
+     "tex": 512,
+     "look": "a large woven wicker statue of a standing stag made of bundled pale willow branches"
+    },
+    {
+     "id": "spirit-pool",
+     "name": "Moon pool",
+     "kind": "shrine",
+     "regions": [
+      "thornmere"
+     ],
+     "w": 2.5,
+     "tris": 600,
+     "tex": 512,
+     "look": "a small round pool ringed by mossy flat stones, its water a calm pale blue-silver, a few lily pads",
+     "align": false
+    }
+   ]
+  }
+ ]
+}

@@ -50,6 +50,7 @@ for o in bpy.data.objects:
 for k, v in out.items():
     if k == "Body": v["ok"] = v["boundary_edges"] == 0 and v["nonmanifold"] == 0 and v["flipped_faces"] == 0 and len(v["islands"]) == 1
     elif k.startswith("geo_"): v["ok"] = v["nonmanifold"] == 0 and len(v["islands"]) == 1
+    elif k == "face_layer": v["ok"] = v["nonmanifold"] == 0 and len(v["islands"]) == 1   # an open sheet over the face
     else: v["ok"] = False; v["why"] = "stray object in the body file"
     print(f"QACHECK {body} {'PASS' if v['ok'] else 'FAIL'} {k}")
 p = os.path.join(L.TABARD, "build", f"qa_{body}.json"); json.dump(out, open(p, "w"), indent=1)

@@ -1,8 +1,8 @@
 # fal.ai characters — a paid picture-to-3D test
 
-**Status:** test 3 done 2026-11-23: **the creature roster** — 35 complete enemies on the Enemies tab (19 Wyrmroad foes, 4 bosses, 3 elementals, 4 extras, wolf + drake on four legs, the 3 Tripo goblins), all low poly (~3,000 triangles, big ones ~4,500; weapons ~500), 20 new weapons, heads no longer stare at the floor, two-sided clothes. US$32.80 spent in all (US$24.60 this round, cap US$33.20). Tests 1–2 (2026-11-22): human bodies + swappable armour, then complete goblins (see below).
-**Play:** `avatar-3d/fal/index.html` on the dev server (8401) or stable (8400): Enemies (picker, one at a time or a line-up at real sizes), Dressing room, Makers, Costs.
-**Next:** Wyrmroad high-detail mode uses these (Helper C); owner review by eye (hands and shields fixed in Test 3b); remaining weak spots under Test 3 (imp wings follow the arm, bell maul lost its bell, bounty hunter's uneven knees).
+**Status:** Oathwild art 2026-11-23 — **stopped early: the fal.ai balance ran out** ("User is locked. Exhausted balance") after US$3.40 of the US$25 meant for this job. Made: 3 real animals on four legs (brown bear, bristleback boar, mountain lion; all six clips), 7 scenery props (4 houses, barrel, sacks, weapon rack), the scenery pipeline + Scenery tab. Every remaining drawing is ready (10 enemies + horse, 8 weapons, 24 scenery sheets = 96 props): `tools/oathwild-resume.sh` finishes them once credit is back. Before that: test 3 creature roster (35 enemies, US$32.80).
+**Play:** `avatar-3d/fal/index.html` on the dev server (8401) or stable (8400): Enemies (group Oathwild), Scenery, Dressing room, Makers, Costs.
+**Next:** top up fal → `tools/oathwild-resume.sh --dry` then without `--dry` (≈US$20: horse first, then bosses/monsters, weapons, 24 scenery sheets); redraw the crate as a solid box. Older: imp wings, bell maul, bounty hunter knees.
 **Parked:** dragon (owner: not yet); goblin-shaped armour; capes; finger bones; the remaining Chibi 2.6 catalog.
 
 ## Who uses these files
@@ -12,7 +12,9 @@ flow into the game. Never rename a body or item id, or change `createFalCharacte
 update(dt), equip(slot, id), stats(), def }` or the clip keys (`idle walk run ready attack cast punch dance hit death`)
 without updating Wyrmroad in the same change. Catalog body fields a game can read: `role`, `group`, `height` (real
 metres; every model file is 1 m tall, scale the group by it), `weapon`, `offhand`, `skeleton` (`biped`|`quadruped`),
-`triangles`, `stage` (false = kept for history only).
+`triangles`, `stage` (false = kept for history only), and for Oathwild bodies `regions` (`brightwater`|`thornmere`),
+`druidForm` (a real animal the druid can turn into) and `mount` (`{ bone, seat }`). Catalog `scenery` = static props
+(see "Oathwild" below); Oathwild reads them through `prototypes/oathwild/data/art.json`.
 
 ## What this tests
 
@@ -219,6 +221,80 @@ close), `shots/props-grips.png` (every weapon with its grip point as a red ball)
   side bulges more is turned round; the arm point is the middle of the back (not the rim, which left the shield
   floating), pressed onto the forearm (`sockets.py`). Kite shields were already right.
 
+## Oathwild (owner 2026-11-23): animals, region monsters, scenery props
+
+Budget: US$25 for this job (~$12 props / ~$13 enemies). Every paid call carries a tag (`oathwild-props` /
+`oathwild-enemies`) in `data/spend.json`, and `tools/fal-job.mjs --tag/--cap` (or `FAL_TAG` / `FAL_CAPS`) refuses to
+submit a job that would pass the cap, counting jobs already submitted but not logged (parallel runs). **The fal balance
+ran out after US$3.40** (US$0.90 props, US$2.50 enemies; the account had far less than the US$25 the plan expected) —
+two jobs were refused at upload, one was refused after submit (not charged, its job file removed).
+
+| Spent | What | US$ |
+|---|---|---|
+| props | `scn-sc-cottages`, `scn-sc-clutter` (Trellis-2 1024, 4 props each), `scn-sc-clutter-d5000` (Trellis' own low-poly test) | 0.90 |
+| enemies | Tripo P1 bodies: brown bear, bristleback boar, mountain lion, bandit chief, field scarecrow | 2.50 |
+| **This job** | | **3.40** (total 36.20) |
+
+**Made and checked by eye** (`shots/oathwild-beast-clips.png`: idle, walk, run, attack, hit, death from the side;
+`shots/scenery/closeups.png`: every prop front and back beside a 1.8 m post; `shots/page-scenery-desktop.png`,
+`shots/page-oathwild-desktop.png`):
+
+| id | What | Triangles | Notes |
+|---|---|---|---|
+| brown-bear | Brown bear, 1.35 m, Thornmere | 4,498 | real bear (owner: druid bear form) — `druidForm` |
+| mountain-lion | Mountain lion, 0.85 m, Thornmere | 2,869 | real big cat, druid cat-form candidate — `druidForm`; came back turned ~20°, straightened |
+| bristleback | Bristleback boar, 1.0 m, Brightwater | 2,999 | |
+| cottage-thatch / cottage-stone / cottage-log / inn | houses 6–9 m | ~2,950 each | 1024 texture each, 0.5 MB |
+| barrel / sacks / weapon-rack | clutter | 278 / 604 / 1,205 | 256–512 texture |
+
+Paid but not finished: **bandit-chief** and **field-scarecrow** bodies (`shots/check/*-tripo.png`, both clean) wait for
+their US$0.20 rigs. **Redo:** `crate` — Trellis built an open lattice (no plank panels); `stage: false`, redraw it as a
+solid closed box. Drawn and waiting for credit: riding-horse (saddled; mount seat on `spine_2`), goblin-warchief,
+marsh-hag, barrow-king (bosses), shrine-cultist, bog-lurker, barrow-ghoul, hill-ogre, fen-harpy; 8 weapons
+(`rusty-pitchfork`, `chief-axe`, `warchief-cleaver`, `cultist-knife`, `hag-staff`, `barrow-blade`, `ogre-club`,
+`chief-buckler`, already in gear.json); 24 scenery sheets (96 props). The two Codex beasts `thornback-bear` and
+`mire-toad` were replaced by real animals (owner: druid forms are real animals) and are not used.
+
+### Four-legged animals (free rig)
+`quad_rig.py` as for the wolf, plus `--straighten`: a three-quarter drawing can come back turned (the lion ~20°, both
+front feet on one side of the middle line, so the feet were paired wrongly); the body is turned so its long axis runs
+along Y first. `--tail-floor` ignores ground points in the last 20 % (a tail tip resting on the ground off the middle).
+
+### Scenery pipeline (`tools/scenery.sh <sheet>`; data in `data/scenery.json`)
+1. `refdraw.mjs <sheet>` — Codex draws FOUR objects on a 2×2 sheet (kind `scenery4`): three-quarter view from the
+   front-left and a little above, chunky low-poly painted style, no ground (free).
+2. `tools/scenery-sheet.py <sheet>` — finds the gutters, trims and re-centres each object in its quarter, flattens the
+   background, records each object's mean colour (`ref/sheet-<sheet>.colors.json`); refuses a sheet whose objects cross.
+3. Trellis-2 1024, `decimation_target` 20000 (5000 is its minimum), texture 2048 → `models/scn-<sheet>/` (US$0.30).
+4. `split_sheet.py --tex 2048` → `models/scenery-raw/<id>.glb` (git-ignored).
+5. `tools/blender/scenery.py <ids>`: drop loose specks; square the footprint to the axes (`align`, `yaw`); real size
+   (`h` tall or `w` long, metres); origin = middle of the footprint on the ground; **outside skin only → thicken →
+   voxel remesh → collapse to `tris`** (see lessons); its **own texture**: new UVs, colour baked from the full-detail
+   original (selected to active), lifted toward the drawing's colour; matte; WebP → `models/final/scenery/<id>.glb`.
+   Per-object options: `vox` (remesh voxel size share, default 0.006), `remesh: false` (thin poles), `src` (another raw
+   file), `job` (which paid job made it), `stage: false` (not used).
+6. Look: `tools/blender/scenery_look.py <dir> [--back] <glbs>` (three-quarter close-ups with a 1.8 m post) +
+   `tools/scenery-contact.py <dir> <out.png>` (labelled sheet: name, triangles, size).
+7. `build-catalog.mjs` → catalog `scenery: [{ id, name, kind, regions, file, triangles, size: [wide, tall, deep] m, tex,
+   kb, job, cost }]`; the page's **Scenery** tab (`js/scenery-page.js`) shows them one at a time or as a real-size
+   line-up beside the 1.8 m man, with kinds/regions filters and a table.
+
+### Lessons (what failed → the rule now)
+- **Trellis makes hollow double walls** (a barrel = outside and inside wall a few mm apart): a straight cut-down folded
+  them through each other (black flaps, holes, a lumpy barrel at 400 triangles). → cut down a rebuilt closed surface,
+  never the raw shell; bake the colour from the untouched original.
+- **UV seams stop the collapse** (crate stuck at 1,071 of 200). → throw the UVs away before cutting down; make new ones
+  after and bake.
+- **Thin poles vanish in a remesh** (weapon rack). → `remesh: false` for slatted/poled things; use the maker's own lower
+  count (Trellis `decimation_target` ≥ 5000 per sheet) instead.
+- **Trellis paints darker than the drawing** (about 70 %). → lift each baked texture toward the drawing's mean colour.
+- **Open lattice objects come back as lattices** (crate). → draw boxes as solid panels with painted planks.
+- **A turned animal pairs its feet wrongly** (lion). → `quad_rig.py --straighten`.
+- **One exported env var tags every child job** (the first scenery sheet ran with the enemies tag). → set `FAL_TAG` per
+  command, never `export` it for a mixed batch.
+- **The budget you are given is not the balance you have.** → stop at the first "Exhausted balance" and report; every
+  drawing is made before paying so nothing free waits on money.
+
 ## How it works (all scripts are in `tools/`; Blender runs headless at `~/opt/blender/blender`)
 
 1. **Redraw the references** (`tools/refdraw.mjs <id>`, Codex, free). The owner's three ChatGPT sheets had titles,
@@ -284,4 +360,4 @@ close), `shots/props-grips.png` (every weapon with its grip point as a red ball)
 Meshy's own walk/run files are git-ignored) · `models/final/` bodies, `anims.glb`, `gear/<item>-<body>.glb`,
 `props/<item>.glb` · `data/` refs.json (subjects), gear.json (how each item was made + fit settings), spend.json,
 jobs/ (request ids), fits/, sockets.json, catalog.json (generated) · `shots/` previews and page screenshots; `shots/check/` the front + side check of every Tripo body before rigging.
-Test 3 tools: `tools/run-body.sh` (whole body pipeline), `tools/blender/lowpoly.py`, `quad_rig.py`, `look.py` (quick renders).
+Oathwild: `data/scenery.json`, `tools/scenery.sh`, `tools/scenery-sheet.py`, `tools/blender/scenery.py`, `tools/blender/scenery_look.py`, `tools/scenery-contact.py`, `tools/oathwild-resume.sh`, `js/scenery-page.js`, `models/final/scenery/`, `shots/scenery/`. Test 3 tools: `tools/run-body.sh` (whole body pipeline), `tools/blender/lowpoly.py`, `quad_rig.py`, `look.py` (quick renders).

@@ -1,6 +1,6 @@
 # Tabard step 4 — export what the browser loads.
 #
-#   blender -b --python tb_export.py -- <male|female>     -> models/<body>.glb (skeleton + body + swap-in pieces,
+#   blender -b --python tb_export.py -- <male|female>     -> models/<body>.glb (skeleton + body + swap-in pieces + face_layer,
 #                                                            no textures: the page paints them), models/<body>_asis.glb
 #   blender -b --python tb_export.py -- anims              -> models/anims.glb (the CC0 Universal Animation Library
 #                                                            clips on the same 65-bone skeleton, no mesh)
@@ -29,7 +29,7 @@ if what == "anims":
 else:
     bpy.ops.wm.open_mainfile(filepath=L.final_blend(what))
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
-    keep = [arm] + [o for o in bpy.data.objects if o.type == "MESH" and (o.name == "Body" or o.name.startswith("geo_"))]
+    keep = [arm] + [o for o in bpy.data.objects if o.type == "MESH" and (o.name in ("Body", "face_layer") or o.name.startswith("geo_"))]
     for o in bpy.data.objects:
         if o not in keep: bpy.data.objects.remove(o)
     for o in keep:

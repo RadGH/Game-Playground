@@ -1,0 +1,11 @@
+{
+  "_doc": "Round 1 heroes are human (owner 2026-11-23); a background is a look-and-story choice with a small bonus. js/rules/levels.js createCharacter reads `attrs` (added on top of the point buy), `skills` (use-skill head start), `gold` and `mods` (sheet numbers, the class-passive vocabulary).",
+  "backgrounds": {
+    "farmhand": { "name": "Farmhand", "blurb": "Grew up hauling sacks in the vale.", "attrs": { "con": 1 }, "skills": {}, "gold": 10, "mods": { "carry": 15 } },
+    "scholar": { "name": "Scholar", "blurb": "Read every book in the chapel library.", "attrs": { "int": 1 }, "skills": { "enchanting": 10 }, "gold": 15, "mods": {} },
+    "street_kid": { "name": "Street Kid", "blurb": "Raised on market-day pockets.", "attrs": { "dex": 1 }, "skills": { "lockpicking": 10, "pickpocket": 5 }, "gold": 5, "mods": {} },
+    "woodsfolk": { "name": "Woodsfolk", "blurb": "Knows the quiet paths through the trees.", "attrs": { "wis": 1 }, "skills": { "sneak": 10 }, "gold": 10, "mods": {} },
+    "merchants_child": { "name": "Merchant's Child", "blurb": "Learned to haggle before learning to read.", "attrs": { "cha": 1 }, "skills": { "speech": 10 }, "gold": 40, "mods": {} },
+    "militia": { "name": "Militia", "blurb": "Drilled with the village watch.", "attrs": { "str": 1 }, "skills": {}, "gold": 10, "mods": { "maxStaminaPct": 5 } }
+  }
+}

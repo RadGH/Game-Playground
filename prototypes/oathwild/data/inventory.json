@@ -1,0 +1,37 @@
+{
+  "_doc": "Carry weight, item weights, durability, the mount and enchanting (owner 2026-11-23: carry-weight limit from Strength/Constitution, over it you walk slowly, no bag slots; round-1 extras: enchanting and a rideable horse). js/rules/inventory.js is the one reader.",
+  "carry": { "_doc": "The limit comes from attributes.json (base + Str + Con). Over it: move speed x overloadMove and no sprinting.", "overloadMove": 0.5 },
+  "weights": {
+    "_doc": "Kilograms. Weapons by subtype, armour by Oathwild tier and slot share, jewellery flat.",
+    "weapon": { "dagger": 1, "mace": 3, "spear": 3, "javelin": 1.5, "staff": 2.5, "sword": 3, "axe": 3.5, "hammer": 4, "sword2h": 7, "axe2h": 8, "polearm": 7, "bow": 1.5, "crossbow": 4, "wand": 0.5, "scepter": 1.5, "orb": 1, "tome": 1.5 },
+    "armourTier": { "cloth": 1, "leather": 3, "mail": 6, "plate": 10 },
+    "armourSlot": { "chest": 2, "legs": 1.2, "head": 0.6, "hands": 0.4, "feet": 0.6 },
+    "shield": 5,
+    "offhandMagic": 1,
+    "quiver": 0.5,
+    "jewellery": 0.1,
+    "default": 1
+  },
+  "durability": {
+    "_doc": "Every weapon and armour piece starts at `max`. Dying and respawning at a shrine costs `respawnLoss` of each worn piece (owner: 'small durability + gold cost'). At 0 a piece is Broken: it stays on you but gives nothing until repaired. Repair price = repairPerPoint x missing points x item level.",
+    "max": 100,
+    "respawnLoss": 10,
+    "repairPerPoint": 0.12
+  },
+  "mount": {
+    "_doc": "A rideable horse. Calling it takes `summonSeconds` standing still; riding multiplies move speed; taking damage or attacking throws you off; you cannot call it within `combatLock` seconds of a fight.",
+    "id": "riding_horse",
+    "name": "Riding Horse",
+    "speedMult": 1.9,
+    "summonSeconds": 2,
+    "combatLock": 6,
+    "price": 120
+  },
+  "enchanting": {
+    "_doc": "Break (disenchant) a magic or better item to learn one of its enchantments (the item is destroyed). Put a learned enchantment on your own weapon or armour at a shrine's enchanting stone: its value = a fresh roll for the item's level x (base + Enchanting x perPoint, skills-use.json) and costs gold. Each item takes `slots` of your enchantments (more from the Enchanting perks and the Runic Hand talent).",
+    "learnFrom": ["magic", "rare", "legendary"],
+    "base": 0.6,
+    "slots": 1,
+    "goldPerItemLevel": 6
+  }
+}

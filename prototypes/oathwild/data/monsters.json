@@ -1,0 +1,47 @@
+{
+  "_doc": "Oathwild's monsters and summoned companions. `art` = the body id in data/art.json (the art helper's fal.ai roster; `ready` bodies exist now, `waiting` ones are drawn and wait for fal credit). A row with `base` reuses a Farhold enemy/pet row (farhold/data/enemies.json `enemies` or `pets`) for its numbers, with `scale` multipliers on health/damage/xp/gold (Farhold's rows are level-1 numbers for monsters met deeper in its world, so Oathwild scales them to its two regions) and `set` fields laid over it. A row with `hp` is Oathwild's own. Levels come from the region and camp (regions.json); rpg.makeEnemy grows them per level (curves in combat.json `farholdEnemies`, then x combat.json `monsterScale`). No wisps (lessons rule 72).",
+  "monsters": {
+    "vale_wolf": { "name": "Vale Wolf", "base": "moor_hound", "art": "wolf", "scale": { "hp": 1, "dmg": 0.9 } },
+    "bristleback": { "name": "Bristleback Boar", "base": "thicket_boar", "art": "bristleback", "scale": { "hp": 0.7, "dmg": 0.7 } },
+    "field_scarecrow": { "name": "Field Scarecrow", "base": "bog_slime", "art": "field-scarecrow", "scale": { "hp": 0.6, "dmg": 0.7, "xp": 0.8 }, "set": { "family": "construct", "kind": "construct" } },
+    "road_thug": { "name": "Road Thug", "base": "road_brigand", "art": "thug", "scale": { "hp": 0.7, "dmg": 0.6, "xp": 0.8 } },
+    "cutpurse": { "name": "Cutpurse", "base": "road_brigand", "art": "knifer", "scale": { "hp": 0.55, "dmg": 0.55, "xp": 0.7 }, "set": { "speed": 4.6, "attackEvery": 1.1 } },
+    "bandit_crossbow": { "name": "Bandit Crossbowman", "base": "brigand_archer", "art": "crossbowman", "scale": { "hp": 0.6, "dmg": 0.55, "xp": 0.8 } },
+    "bounty_hunter": { "name": "Bounty Hunter", "base": "road_brigand", "art": "bounty-hunter", "scale": { "hp": 0.8, "dmg": 0.65 } },
+    "bandit_chief": { "name": "Bandit Chief", "base": "brigand_captain", "art": "bandit-chief", "scale": { "hp": 0.7, "dmg": 0.6 } },
+    "goblin_warrior": { "name": "Goblin Warrior", "base": "road_brigand", "art": "gobw-tripo", "scale": { "hp": 0.55, "dmg": 0.55, "xp": 0.6, "gold": 0.5 } },
+    "goblin_sneak": { "name": "Goblin Sneak", "base": "road_brigand", "art": "gobr-tripo", "scale": { "hp": 0.45, "dmg": 0.5, "xp": 0.6, "gold": 0.5 }, "set": { "speed": 4.8 } },
+    "goblin_shaman": { "name": "Goblin Shaman", "base": "sky_cultist", "art": "gobm-tripo", "scale": { "hp": 0.35, "dmg": 0.35, "xp": 0.4, "gold": 0.3 }, "set": { "ranged": { "range": 24, "element": "nature" }, "family": "humanoid" } },
+    "goblin_warchief": { "name": "Goblin Warchief", "base": "brigand_captain", "art": "goblin-warchief", "scale": { "hp": 0.65, "dmg": 0.55 } },
+    "shrine_cultist": { "name": "Shrine Cultist", "base": "sky_cultist", "art": "shrine-cultist", "scale": { "hp": 0.4, "dmg": 0.35, "xp": 0.5 } },
+
+    "brown_bear": { "name": "Brown Bear", "base": "thicket_boar", "art": "brown-bear", "scale": { "hp": 0.8, "dmg": 0.8, "xp": 1.2 } },
+    "mountain_lion": { "name": "Mountain Lion", "base": "crag_hyena", "art": "mountain-lion", "scale": { "hp": 0.5, "dmg": 0.55, "xp": 0.6 } },
+    "thornmere_wolf": { "name": "Thornmere Wolf", "base": "moor_hound", "art": "wolf", "scale": { "hp": 1, "dmg": 1 } },
+    "thornling": { "name": "Thornling", "base": "sporecap_walker", "art": "thornling", "scale": { "hp": 0.4, "dmg": 0.45, "xp": 0.5 }, "set": { "family": "beast" } },
+    "root_caller": { "name": "Root Caller", "base": "sky_cultist", "art": "root-caller", "scale": { "hp": 0.4, "dmg": 0.4, "xp": 0.5 }, "set": { "ranged": { "range": 26, "element": "nature" } } },
+    "orc_grunt": { "name": "Orc Grunt", "base": "cult_zealot", "art": "orc-grunt", "scale": { "hp": 0.4, "dmg": 0.45, "xp": 0.5 } },
+    "skeleton_warrior": { "name": "Skeleton Warrior", "base": "barrow_hound", "art": "skeleton-warrior", "scale": { "hp": 0.5, "dmg": 0.5, "xp": 0.5 }, "set": { "family": "undead", "kind": "humanoid", "speed": 3.6 } },
+    "hollowborn": { "name": "Hollowborn", "base": "ossuary_crawler", "art": "hollowborn", "scale": { "hp": 0.35, "dmg": 0.4, "xp": 0.45 } },
+    "wraith_knight": { "name": "Wraith Knight", "base": "cursed_knight", "art": "wraith-knight", "scale": { "hp": 0.16, "dmg": 0.32, "xp": 0.3 } },
+    "drowned_brute": { "name": "Drowned Brute", "base": "silt_lurker", "art": "drowned-brute", "scale": { "hp": 0.35, "dmg": 0.4, "xp": 0.45 }, "set": { "family": "undead" } },
+    "water_elemental": { "name": "Water Elemental", "base": "glass_shard", "art": "water-elemental", "scale": { "hp": 0.45, "dmg": 0.45, "xp": 0.5 }, "set": { "ranged": { "range": 24, "element": "ice" } } },
+    "earth_elemental": { "name": "Earth Elemental", "base": "stone_sentinel", "art": "earth-elemental", "scale": { "hp": 0.25, "dmg": 0.4, "xp": 0.4 } },
+    "bridge_troll": { "name": "Bridge Troll", "art": "troll", "family": "giant", "kind": "giant", "role": "brute", "hp": 95, "dmg": [9, 14], "armor": 6, "speed": 3.2, "reach": 3, "aggroRange": 20, "attackEvery": 2, "xp": 45, "gold": 25 },
+    "barrow_king": { "name": "The Barrow King", "base": "cursed_knight", "art": "barrow-king", "scale": { "hp": 0.3, "dmg": 0.35, "xp": 0.4 } },
+    "marsh_hag": { "name": "Marsh Hag", "base": "hollow_wraith", "art": "marsh-hag", "scale": { "hp": 0.3, "dmg": 0.35, "xp": 0.4 }, "set": { "family": "humanoid", "ranged": { "range": 24, "element": "poison" } } },
+    "barrow_ghoul": { "name": "Barrow Ghoul", "base": "barrow_hound", "art": "barrow-ghoul", "scale": { "hp": 0.5, "dmg": 0.5, "xp": 0.5 } },
+    "hill_ogre": { "name": "Hill Ogre", "base": "stone_sentinel", "art": "hill-ogre", "scale": { "hp": 0.3, "dmg": 0.45, "xp": 0.45 }, "set": { "family": "giant", "kind": "giant" } }
+  },
+  "companions": {
+    "grove_wolf": { "name": "Grove Wolf", "base": "grove_wolf", "art": "wolf", "scale": { "hp": 0.8, "dmg": 0.8 } },
+    "grove_bear": { "name": "Great Bear", "art": "brown-bear", "family": "beast", "kind": "beast", "role": "brute", "hp": 80, "dmg": [7, 11], "armor": 6, "speed": 4.4, "reach": 2.8, "attackEvery": 1.7 },
+    "spirit_bear": { "name": "Spirit Bear", "base": "spirit_bear", "art": "brown-bear", "scale": { "hp": 0.7, "dmg": 0.8 } },
+    "bound_imp": { "name": "Bound Imp", "base": "bound_imp", "art": "imp", "scale": { "hp": 0.8, "dmg": 0.8 } },
+    "bone_thrall": { "name": "Bone Thrall", "base": "bone_thrall", "art": "skeleton-warrior", "scale": { "hp": 1, "dmg": 1 } },
+    "buried_thrall": { "name": "Buried Thrall", "base": "bone_thrall", "art": "skeleton-warrior", "scale": { "hp": 0.8, "dmg": 0.8 } },
+    "shade": { "name": "Shade", "base": "hunting_cat", "art": "shade-double", "scale": { "hp": 0.6, "dmg": 0.6 }, "set": { "family": "undead" } },
+    "clockwork_sentry": { "name": "Field Turret", "base": "clockwork_sentry", "art": "turret", "scale": { "hp": 0.8, "dmg": 0.8 } },
+    "holy_wisp": { "name": "Guardian Light", "base": "spirit_bear", "art": "brown-bear", "scale": { "hp": 0.5, "dmg": 0.4 }, "_note": "Not used by any Oathwild spell (rule 72: no wisps); kept so a borrowed row that names it resolves to a real body." }
+  }
+}

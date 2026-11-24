@@ -5,6 +5,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { createScene } from '../../js/scene.js';
 import { createTabard, loadTabardData, CLIPS, CLIP_NAMES } from './tabard.js';
+import { FACE_OPTIONS, defaultLook } from './face.js';
 import { fmt } from '../../../shared/format.js';
 
 const q = new URLSearchParams(location.search);
@@ -24,7 +25,7 @@ const floor = new THREE.Mesh(new THREE.CircleGeometry(9, 64), new THREE.MeshLamb
 floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; view.scene.add(floor);
 const BODY_NAMES = { male: 'Man', female: 'Woman' };
 const DRESS_CLIPS = ['idle', 'walk', 'run', 'ready', 'attack', 'cast', 'channel', 'talk', 'dance', 'hit', 'death', 'sit'];
-const SLOT_ORDER = ['head', 'hair', 'shoulders', 'back', 'chest', 'hands', 'legs', 'feet', 'mainhand', 'offhand'];
+const SLOT_ORDER = ['head', 'hair', 'shoulders', 'back', 'chest', 'tabard', 'hands', 'legs', 'feet', 'mainhand', 'offhand'];
 
 function chip(label, on, onClick) {
   const b = document.createElement('button'); b.className = 'tb-chip' + (on ? ' on' : ''); b.textContent = label;
@@ -43,14 +44,19 @@ function clearStage() {
 }
 const loading = (on, text = 'Loading characters…') => { $('#loading').textContent = text; $('#loading').classList.toggle('done', !on); };
 let tick = null;
-view.addTicker(dt => { for (const a of T.actors) a.update(dt); tick?.(dt); });
+view.addTicker(dt => { if (T.__freeze) return; for (const a of T.actors) a.update(dt); tick?.(dt); });   // __freeze: tests/look.mjs holds a pose
 
 // ------------------------------------------------------------------ dressing room
-const dress = { body: q.get('body') || 'male', set: q.get('set') || 'plate', clip: q.get('clip') || 'idle', calm: 60, spin: false, actor: null };
+// hair colours offered on the page (any colour works: the layer tints one shared picture)
+const HAIR_COLORS = [['Black', '#1d1714'], ['Dark brown', '#3b2618'], ['Brown', '#5a3a22'], ['Chestnut', '#7a4a2a'], ['Auburn', '#8a3a20'],
+  ['Ginger', '#b4602c'], ['Honey', '#b8894a'], ['Blonde', '#d8b878'], ['Ash', '#9a8f80'], ['Grey', '#8a8a8a'], ['White', '#e8e4dc'],
+  ['Teal', '#2f7f7a'], ['Violet', '#6a3f8f'], ['Rose', '#b04a6a']];
+const dress = { hair: q.get('hair') ? { id: q.get('hair'), color: q.get('hairColor') || '#3b2618' } : null, body: q.get('body') || 'male', set: q.get('set') || 'plate', clip: q.get('clip') || 'idle', calm: 60, spin: false, actor: null };
 async function showDress() {
   clearStage(); loading(true);
   const set = D.items.sets[dress.set];
   const a = await createTabard({ body: dress.body, items: set ? set.items : [], clip: dress.clip, calm: dress.calm / 100 });
+  if (dress.hair) await a.setLook({ ...(a.look || defaultLook(a.body)), hair: dress.hair });
   view.scene.add(a.group); T.actors = [a]; dress.actor = a;
   view.controls.target.set(0, 1.0, 0); view.camera.position.set(0.9, 1.5, 3.6); view.controls.update();
   tick = dt => { if (dress.spin) a.group.rotation.y += dt * 0.5; };
@@ -71,8 +77,62 @@ function drawDress() {
     for (const [id, label] of options) chips.append(chip(label, (worn[slot] || null) === id, async () => { dress.set = null; await a.equip(slot, id); drawDress(); }));
     row.append(name, chips); return row;
   }));
+  drawHair(a); drawFace(a);
   chipsInto($('#d-clips'), DRESS_CLIPS.map(c => [c, CLIP_NAMES[c]]), id => id === dress.clip, id => { dress.clip = id; a.play(id); });
   $('#d-calm').value = dress.calm; $('#d-calm-out').textContent = `${fmt(dress.calm, { decimals: 0 })}%`;
+  const s = a.stats();
+  statsInto($('#d-stats'), [['Triangles', fmt(s.triangles, { decimals: 0 })], ['Draw calls', fmt(s.draws, { decimals: 0 })],
+    ['Bones', fmt(s.bones, { decimals: 0 })], ['Body texture', s.texture + ' px']]);
+}
+/** Hair: 25 style chips + colour swatches, driving the look's hair (api.setLook keeps the rest of the look). */
+function drawHair(a) {
+  const H = a.layers.hair; if (!H) return;
+  const cur = () => dress.hair || a.look?.hair || { id: H.id || 'bald', color: '#3b2618' };
+  const pick = async h => {
+    dress.hair = h; await a.setLook({ ...(a.look || defaultLook(a.body)), hair: h });
+    const u = new URL(location.href); u.searchParams.set('hair', h.id); u.searchParams.set('hairColor', h.color); history.replaceState(null, '', u);
+    drawHair(a); drawDressStats(a);
+  };
+  chipsInto($('#d-hair'), Object.entries(H.styles).map(([id, st]) => [id, st.name]), id => id === (H.id || 'bald'), id => pick({ ...cur(), id }));
+  $('#d-hair-color').replaceChildren(...HAIR_COLORS.map(([name, hex]) => {
+    const b = document.createElement('button'); b.className = 'tb-swatch' + (cur().color === hex ? ' on' : '');
+    b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(cur().color === hex));
+    const sw = document.createElement('i'); sw.style.background = hex;   // dynamic colour: inline on purpose
+    const label = document.createElement('span'); label.textContent = name;
+    b.append(sw, label); b.addEventListener('click', () => pick({ ...cur(), color: hex })); return b;
+  }));
+}
+/** Face: skin, eye shape + colour, brows, face marks, beard — each a row of chips (colours as swatches). */
+const FACE_ROWS = [['skin', 'Skin', 'color', true], ['eyes', 'Eyes', 'id'], ['eyeColor', 'Eye colour', null, true], ['brows', 'Brows', 'id'],
+  ['extras', 'Face marks', 'id'], ['facialHair', 'Beard', 'id']];
+function drawFace(a) {
+  const look = () => a.look || defaultLook(a.body);
+  const get = key => key === 'eyeColor' ? look().eyes?.color : key === 'skin' ? look().skin?.color : look()[key]?.id;
+  const set = async (key, v) => {
+    const L = structuredClone(look());
+    if (key === 'eyeColor') L.eyes = { ...(L.eyes || {}), color: v };
+    else if (key === 'skin') L.skin = { color: v };
+    else if (key === 'eyes') L.eyes = { ...(L.eyes || {}), id: v };
+    else L[key] = { id: v };
+    await a.setLook(L); drawFace(a);
+  };
+  $('#d-face').replaceChildren(...FACE_ROWS.map(([key, label, , swatch]) => {
+    const row = document.createElement('div'); row.className = 'tb-slot';
+    const name = document.createElement('span'); name.textContent = label;
+    const box = document.createElement('div'); box.className = swatch ? 'tb-swatches' : 'tb-chips';
+    for (const [v, n] of FACE_OPTIONS[key]) {
+      if (swatch) {
+        const b = document.createElement('button'); b.className = 'tb-swatch' + (get(key) === v ? ' on' : '');
+        b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(get(key) === v));
+        const sw = document.createElement('i'); sw.style.background = v;   // dynamic colour: inline on purpose
+        const t = document.createElement('span'); t.textContent = n; b.append(sw, t);
+        b.addEventListener('click', () => set(key, v)); box.append(b);
+      } else box.append(chip(n, get(key) === v, () => set(key, v)));
+    }
+    row.append(name, box); return row;
+  }));
+}
+function drawDressStats(a) {
   const s = a.stats();
   statsInto($('#d-stats'), [['Triangles', fmt(s.triangles, { decimals: 0 })], ['Draw calls', fmt(s.draws, { decimals: 0 })],
     ['Bones', fmt(s.bones, { decimals: 0 })], ['Body texture', s.texture + ' px']]);

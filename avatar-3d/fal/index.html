@@ -9,7 +9,7 @@
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
 </head>
 <body class="fl">
-<!-- fal.ai test review page. ?body=male|female|goblin  ?set=bare|cloth|leather|mail|plate  ?clip=walk  ?weapon=sword  ?tab=dress|enemies|makers|costs  ?eclip=attack  ?group=wyrmroad|boss|elemental|extra|beast|goblin  ?enemy=<id>  ?lineup=1
+<!-- fal.ai test review page. ?body=male|female|goblin  ?set=bare|cloth|leather|mail|plate  ?clip=walk  ?weapon=sword  ?tab=dress|enemies|scenery|makers|costs  ?kind=building ?region=brightwater ?prop=<id> ?plineup=1  ?eclip=attack  ?group=wyrmroad|oathwild|boss|elemental|extra|beast|goblin  ?enemy=<id>  ?lineup=1
      window.__fal = { ready, errors, character, stats() } for tests and screenshots (tools/shots.mjs). -->
 <header class="fl-top">
   <div class="fl-title">
@@ -19,6 +19,7 @@
   <nav class="fl-tabs" role="tablist">
     <button role="tab" data-tab="dress">Dressing room</button>
     <button role="tab" data-tab="enemies">Enemies</button>
+    <button role="tab" data-tab="scenery">Scenery</button>
     <button role="tab" data-tab="makers">Makers</button>
     <button role="tab" data-tab="costs">Costs</button>
   </nav>
@@ -70,6 +71,20 @@
       <section class="fl-card">
         <h2>Roster</h2>
         <div class="fl-table-wrap"><table class="fl-table fl-roster" id="e-table"></table></div>
+      </section>
+    </div>
+
+    <div class="fl-pane" data-pane="scenery">
+      <section class="fl-card">
+        <h2>Scenery</h2>
+        <p class="fl-note">Static props for Oathwild: four per redrawn picture (Trellis-2), rebuilt as one closed low-poly shape with its own painted texture, at real size in metres. The man is 1.8 m.</p>
+        <div class="fl-chips" id="p-kinds"></div>
+        <div class="fl-chips fl-gap" id="p-regions"></div>
+        <div class="fl-chips fl-gap" id="p-view"></div>
+      </section>
+      <section class="fl-card">
+        <h2>Props</h2>
+        <div class="fl-table-wrap"><table class="fl-table fl-roster" id="p-table"></table></div>
       </section>
     </div>
 

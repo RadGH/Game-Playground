@@ -8,7 +8,8 @@
   "scripts": {
     "start": "node server/main.mjs",
     "test": "node --test tests/sim/*.test.mjs tests/net/*.test.mjs",
-    "test:net": "node --test tests/net/*.test.mjs"
+    "test:net": "node --test tests/net/*.test.mjs",
+    "test:pad": "node tests/story-pad.mjs"
   },
   "dependencies": {
     "ws": "^8.18.0"

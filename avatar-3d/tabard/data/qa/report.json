@@ -2,20 +2,22 @@
  "_doc": "Written by tools/qa.sh. tests/data.test.js checks every entry passed and the hashes match the model files.",
  "models": {
   "models/anims.glb": "7521f401205f",
-  "models/female.glb": "63e12a57afb9",
-  "models/female/cloth.webp": "4a05e232ae5f",
-  "models/female/leather.webp": "d5e9e5bde8f6",
-  "models/female/mail.webp": "ebde80f9a643",
-  "models/female/plate.webp": "48c6fa285103",
-  "models/female/sage.webp": "8846078d26cc",
-  "models/female/skin.webp": "c578406404c2",
-  "models/male.glb": "7665a138bb8a",
-  "models/male/cloth.webp": "d9aaef92aaa0",
-  "models/male/leather.webp": "21aa79ac5b4d",
-  "models/male/mail.webp": "242328e97b50",
-  "models/male/plate.webp": "956f7473511f",
-  "models/male/sage.webp": "afe2d98ab907",
-  "models/male/skin.webp": "6d010bc38879",
+  "models/female.glb": "7a565cd2f7b8",
+  "models/female/cloth.webp": "10f79ca946ac",
+  "models/female/face.webp": "e8294b317737",
+  "models/female/leather.webp": "7e52a7551269",
+  "models/female/mail.webp": "26a6b06f34b1",
+  "models/female/plate.webp": "b32a5d1df88b",
+  "models/female/sage.webp": "63c5ead595ca",
+  "models/female/skin.webp": "541d490723d0",
+  "models/male.glb": "d8d6f5878c5a",
+  "models/male/cloth.webp": "c285ac921b26",
+  "models/male/face.webp": "aeeeb59e3589",
+  "models/male/leather.webp": "78ea2fe956eb",
+  "models/male/mail.webp": "5166bdd6dcd4",
+  "models/male/plate.webp": "8ce70902f469",
+  "models/male/sage.webp": "284c3191f40c",
+  "models/male/skin.webp": "4fbf9bf47d55",
   "models/props/cap_leather.glb": "eb9c10a1cc2a",
   "models/props/cape_crimson.glb": "6403ea03fd95",
   "models/props/cape_wayfarer.glb": "4d0ee104364e",
@@ -38,11 +40,16 @@
   "models/props/shield_round.glb": "544f890c10ee",
   "models/props/shield_tower.glb": "603d42ea2b53",
   "models/props/staff_oak.glb": "0cf040eec228",
-  "models/props/sword_arming.glb": "54a8fcdfd677"
+  "models/props/sword_arming.glb": "54a8fcdfd677",
+  "models/props/tabard_flaps_stag.glb": "22f2934ce4a1",
+  "models/props/tabard_flaps_tower.glb": "e400e1773b30",
+  "models/props/tabard_top_stag.glb": "31d759dd7f7d",
+  "models/props/tabard_top_tower.glb": "70a9cc68f29f"
  },
  "mesh": {
   "male": {
    "Body": true,
+   "face_layer": true,
    "geo_bootcuff_l": true,
    "geo_bootcuff_r": true,
    "geo_glovecuff_l": true,
@@ -51,6 +58,7 @@
   },
   "female": {
    "Body": true,
+   "face_layer": true,
    "geo_bootcuff_l": true,
    "geo_bootcuff_r": true,
    "geo_glovecuff_l": true,
@@ -188,11 +196,11 @@
    "set": "cloth",
    "piece": "geo_robe",
    "clip": "walk",
-   "worst": 0.03,
+   "worst": 0.0373,
    "worst_i": 13,
    "worstT": 0.8125,
-   "mean": 0.0119,
-   "limit": 0.05,
+   "mean": 0.0152,
+   "limit": 0.07,
    "ok": true
   },
   {
@@ -200,11 +208,11 @@
    "set": "cloth",
    "piece": "geo_robe",
    "clip": "run",
-   "worst": 0.1556,
-   "worst_i": 2,
-   "worstT": 0.125,
-   "mean": 0.0601,
-   "limit": 0.17,
+   "worst": 0.1548,
+   "worst_i": 3,
+   "worstT": 0.1875,
+   "mean": 0.0769,
+   "limit": 0.18,
    "ok": true
   },
   {
@@ -212,11 +220,11 @@
    "set": "cloth",
    "piece": "geo_robe",
    "clip": "attack",
-   "worst": 0.1333,
+   "worst": 0.1786,
    "worst_i": 6,
    "worstT": 0.375,
-   "mean": 0.0428,
-   "limit": 0.14,
+   "mean": 0.0565,
+   "limit": 0.19,
    "ok": true
   },
   {
@@ -344,11 +352,11 @@
    "set": "cloth",
    "piece": "geo_robe",
    "clip": "walk",
-   "worst": 0.0457,
+   "worst": 0.0654,
    "worst_i": 6,
    "worstT": 0.375,
-   "mean": 0.0164,
-   "limit": 0.05,
+   "mean": 0.0224,
+   "limit": 0.07,
    "ok": true
   },
   {
@@ -356,11 +364,11 @@
    "set": "cloth",
    "piece": "geo_robe",
    "clip": "run",
-   "worst": 0.1643,
+   "worst": 0.1751,
    "worst_i": 2,
    "worstT": 0.125,
-   "mean": 0.078,
-   "limit": 0.17,
+   "mean": 0.1053,
+   "limit": 0.18,
    "ok": true
   },
   {
@@ -368,11 +376,11 @@
    "set": "cloth",
    "piece": "geo_robe",
    "clip": "attack",
-   "worst": 0.0831,
+   "worst": 0.1103,
    "worst_i": 6,
    "worstT": 0.375,
-   "mean": 0.0323,
-   "limit": 0.14,
+   "mean": 0.0444,
+   "limit": 0.19,
    "ok": true
   },
   {
@@ -483,5 +491,11 @@
    "limit": 0.01,
    "ok": true
   }
- ]
+ ],
+ "anim": {
+  "male": true,
+  "female": true
+ },
+ "hairHats": true,
+ "hairPhysics": true
 }

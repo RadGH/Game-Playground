@@ -434,14 +434,14 @@
    "id": "drowned-brute",
    "kind": "enemy",
    "name": "Drowned brute",
-   "height": 2.0,
+   "height": 2,
    "look": "big hulking waterlogged undead bell-ringer, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): bloated pale blue-grey skin, barnacles and clinging seaweed on shoulders and arms, dead white eyes, slack jaw; torn rotten dark-green bell-ringer's tunic, a heavy rusty bell hanging from a chain on the belt, rope wrapped around the waist, bare swollen feet; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
   },
   {
    "id": "wraith-knight",
    "kind": "enemy",
    "name": "Wraith knight",
-   "height": 2.0,
+   "height": 2,
    "look": "spectral undead armoured knight, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): dark tarnished black-iron plate armour with ghostly glowing teal light leaking from the gaps, a horned closed helm with two glowing teal eyes in the visor slit, a tattered black cloak hanging to the knees behind, torn dark tabard; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb) in iron gauntlets"
   },
   {
@@ -504,7 +504,7 @@
    "id": "water-elemental",
    "kind": "enemy",
    "name": "Water elemental",
-   "height": 2.0,
+   "height": 2,
    "look": "humanoid water elemental, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): body of swirling deep-blue and teal water with white foam crests, a head of water with two glowing pale eyes, strong water arms with clear hands, two legs of rushing water columns down to the floor, a few small floating droplets; solid readable silhouette"
   },
   {
@@ -518,14 +518,14 @@
    "id": "air-elemental",
    "kind": "enemy",
    "name": "Air elemental",
-   "height": 2.0,
+   "height": 2,
    "look": "humanoid air elemental, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): body of swirling pale grey-white storm cloud and wind streaks with small crackles of blue lightning inside, a head of cloud with glowing blue eyes, cloud arms with clear hands, two thick swirling whirlwind columns as legs reaching the floor (narrower at the bottom); solid readable silhouette"
   },
   {
    "id": "orc-grunt",
    "kind": "enemy",
    "name": "Orc grunt",
-   "height": 2.0,
+   "height": 2,
    "look": "muscular orc warrior, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): green skin, big lower tusks, heavy brow, black topknot, small angry red eyes; scrap armour: one big spiked iron pauldron on the left shoulder, crossed leather straps on a bare chest, studded leather kilt, fur-trimmed boots, iron bracers; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
   },
   {
@@ -748,7 +748,7 @@
    "name": "Bone club",
    "view": "Flat side view of the whole weapon standing upright, head up, orthographic.",
    "look": "troll club made from a huge animal thigh bone, knobbly end at the top bound with leather and teeth",
-   "length": 1.0,
+   "length": 1,
    "grip_at": 0.14
   },
   {
@@ -760,6 +760,192 @@
    "look": "huge double-bladed bronze greataxe with curved crescent blades and engraved spirals, long dark wooden haft with bronze rings",
    "length": 1.6,
    "grip_at": 0.22
+  },
+  {
+   "id": "bristleback",
+   "kind": "beast",
+   "name": "Bristleback boar",
+   "look": "big wild boar, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): dark brown coarse bristly hide, a tall ridge of stiff black bristles along the spine, long curved yellowed tusks, small angry red eyes, mud-caked legs and hooves, short tufted tail"
+  },
+  {
+   "id": "thornback-bear",
+   "kind": "beast",
+   "name": "Thornback bear",
+   "look": "huge brown bear, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): shaggy dark brown fur, patches of green moss and a row of curved bramble thorns growing out of its back and shoulders, old scars on the snout, mouth closed with fangs showing at the lips, big claws"
+  },
+  {
+   "id": "mire-toad",
+   "kind": "beast",
+   "name": "Mire toad",
+   "look": "giant swamp toad the size of a pony, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): warty mottled olive-green and ochre skin with a pale belly, big golden eyes with slit pupils on top of a wide flat head, wide closed mouth, thick front legs and big folded back legs standing up off the ground, webbed feet"
+  },
+  {
+   "id": "field-scarecrow",
+   "kind": "enemy",
+   "name": "Field scarecrow",
+   "height": 1.9,
+   "look": "living animated scarecrow, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): a burlap sack head with an angry stitched mouth and two ragged eye holes with faint orange light inside, a battered wide straw hat, a patched brown farmer coat over a stuffed body, rope belt, straw bursting out at the wrists, neck and ankles, thin legs in torn trousers, straw-stuffed burlap hands; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "bandit-chief",
+   "kind": "enemy",
+   "name": "Bandit chief",
+   "height": 1.95,
+   "look": "burly human bandit chieftain, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): broad-shouldered middle-aged man, black braided beard, shaved head with a red cloth band, scar across one eye, heavy brown studded leather coat with a thick wolf-fur collar, one battered iron pauldron on the right shoulder, many belts with pouches and a gold chain, dark trousers, heavy boots; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "goblin-warchief",
+   "kind": "enemy",
+   "name": "Goblin warchief",
+   "height": 1.35,
+   "look": "big burly goblin war leader, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): green skin, long pointed ears with iron rings, jutting underbite fangs, red war paint stripes, a horned iron helmet with a bone crest, mismatched scrap iron chest plate over a fur vest, a cape of stitched rat pelts, spiked leather bracers, bare clawed feet; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "shrine-cultist",
+   "kind": "enemy",
+   "name": "Hooded cultist",
+   "height": 1.8,
+   "look": "human cultist, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): deep crimson hooded robe with black trim, face half-hidden under the hood with a pale bone half-mask over the eyes, a black sash hung with bone charms and a small iron bell, rope belt, bare dirty feet; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "marsh-hag",
+   "kind": "enemy",
+   "name": "Marsh hag",
+   "height": 1.8,
+   "look": "old swamp witch, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): grey-green warty skin, long hooked nose, long stringy black hair tangled with weeds, a ragged shawl of moss and old fishing net over a tattered dark green dress, necklaces of bones and small bottles, long clawed fingers, bare feet; standing straight, not hunched; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "bog-lurker",
+   "kind": "enemy",
+   "name": "Bog lurker",
+   "height": 2.1,
+   "look": "hulking swamp creature, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): a heavy body of dark peat and mud with tangled roots and moss growing over it, tufts of reeds on the shoulders, a wide frog-like mouth, small sunken yellow eyes, very long thick arms, stumpy legs; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "barrow-king",
+   "kind": "enemy",
+   "name": "Barrow king",
+   "height": 2.1,
+   "look": "undead skeletal king, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): a grey-brown skull with cold pale-blue light in the eye sockets, a corroded bronze crown fused to the skull, ancient green-patina bronze armour: breastplate, round pauldrons and a skirt of bronze plates, a tattered dark purple royal cloak, gold burial torc around the neck, bony arms and legs between the armour; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "barrow-ghoul",
+   "kind": "enemy",
+   "name": "Barrow ghoul",
+   "height": 1.75,
+   "look": "gaunt corpse-eating ghoul, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): grey-green leathery skin stretched over ribs, long lank black hair, sunken glowing yellow eyes, a wide mouth of jagged teeth, ragged grey burial wrappings around the hips and one arm, long thin arms with long dark claws, bare feet; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "fen-harpy",
+   "kind": "enemy",
+   "name": "Fen harpy",
+   "height": 1.7,
+   "look": "harpy, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): a wild woman's face and upper body with grey-blue skin, a mane of dark feathers instead of hair, big feathered wings growing along the arms ending in clawed hands, brown and slate feathers over the body, bird legs below the knee with big black talons, a short tail of feathers; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "hill-ogre",
+   "kind": "enemy",
+   "name": "Hill ogre",
+   "height": 2.6,
+   "look": "huge fat hill ogre, hostile enemy with a mean, menacing expression (NOT cute, NOT friendly): tan-grey warty skin, a big belly, tiny eyes under a heavy brow, one snaggle tooth, a few greasy hairs, a crude leather loincloth with a bone belt, a single fur strap over one shoulder, thick legs, wrapped feet; LARGE readable hands with exactly FIVE fingers each (four fingers and a thumb)"
+  },
+  {
+   "id": "rusty-pitchfork",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Rusty pitchfork",
+   "view": "Flat front view of the whole tool standing upright, tines up, orthographic, filling the height of the picture.",
+   "look": "farm pitchfork with three long rusty iron tines on a long grey weathered wooden shaft wrapped with old rope near the bottom",
+   "length": 1.7,
+   "grip_at": 0.4
+  },
+  {
+   "id": "chief-axe",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Chieftain's axe",
+   "view": "Flat side view of the whole weapon standing upright, head up, orthographic.",
+   "look": "big bearded war axe with a wide crescent iron blade notched from use, a spike on the back, dark wooden haft with red leather grip and a fur tuft tied under the head",
+   "length": 0.95,
+   "grip_at": 0.18
+  },
+  {
+   "id": "warchief-cleaver",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Warchief's cleaver",
+   "view": "Flat side view of the whole weapon standing upright, blade up, orthographic.",
+   "look": "huge jagged goblin cleaver sword: a wide crude slab of rusty iron with saw teeth on the back edge, a bone handle wrapped in leather, a small skull on the pommel",
+   "length": 1.1,
+   "grip_at": 0.13
+  },
+  {
+   "id": "cultist-knife",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Ritual knife",
+   "view": "Flat side view of the whole knife standing upright, blade up, orthographic, filling the height of the picture.",
+   "look": "curved ritual dagger with a wavy dark steel blade, a crimson-wrapped handle and a small bone crossguard",
+   "length": 0.45,
+   "grip_at": 0.15
+  },
+  {
+   "id": "hag-staff",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Hag's driftwood staff",
+   "view": "Flat front view of the whole staff standing upright, orthographic, filling the height of the picture.",
+   "look": "crooked grey driftwood staff with a twisted hooked top holding a bird skull, little bottles, feathers and bones hanging on strings from the hook",
+   "length": 1.7,
+   "grip_at": 0.5
+  },
+  {
+   "id": "barrow-blade",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Barrow blade",
+   "view": "Flat front view of the whole sword standing upright, blade up, orthographic, filling the height of the picture.",
+   "look": "ancient two-handed bronze greatsword with a broad leaf-shaped blade covered in green patina, a gold-wrapped long grip and a round pommel set with a pale blue stone",
+   "length": 1.5,
+   "grip_at": 0.13
+  },
+  {
+   "id": "ogre-club",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Ogre club",
+   "view": "Flat side view of the whole club standing upright, thick end up, orthographic.",
+   "look": "massive ogre club made from a short tree trunk, thick knobbly end studded with iron spikes and bound with an iron band, thinner rough handle",
+   "length": 1.5,
+   "grip_at": 0.12
+  },
+  {
+   "id": "chief-buckler",
+   "kind": "item",
+   "slot": "offhand",
+   "name": "Chieftain's buckler",
+   "view": "Flat front view of the round shield face, orthographic.",
+   "look": "small round iron-rimmed wooden buckler painted dark red with a black slashed circle emblem and a central iron boss",
+   "length": 0.6,
+   "grip_at": null
+  },
+  {
+   "id": "brown-bear",
+   "kind": "beast",
+   "name": "Brown bear",
+   "look": "a real big brown grizzly bear (a natural animal, no fantasy parts), powerful and wild with an alert, fierce look: thick shaggy brown fur, lighter golden-brown tips on the shoulder hump, a darker muzzle, small round ears, mouth closed, big curved claws on heavy paws, short tail"
+  },
+  {
+   "id": "mountain-lion",
+   "kind": "beast",
+   "name": "Mountain lion",
+   "look": "a real big mountain lion cougar (a natural animal, no fantasy parts), lean and powerful with a fierce alert look: tawny golden-brown short fur, pale cream belly, chin and muzzle, dark marks at the sides of the muzzle and the backs of the ears, mouth closed, long thick tail with a dark tip"
+  },
+  {
+   "id": "riding-horse",
+   "kind": "beast",
+   "name": "Riding horse",
+   "look": "a real sturdy riding horse (a natural animal) in warm colourful high-fantasy game style, calm and noble: glossy chestnut-brown coat, a long flowing cream-blond mane and tail, white socks on the lower legs, a white blaze down the face, dark hooves; a brown leather saddle with a raised front and back on a red-and-gold patterned saddle blanket, stirrups hanging at the sides, a simple leather bridle with reins resting on the neck; mouth closed"
   }
  ]
 }

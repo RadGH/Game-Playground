@@ -178,7 +178,8 @@ export function storyScreen(app, opts = {}) {
   app.loop = dt => {
     const full = textEl.dataset.full || '';
     if (shown < full.length) { shown = Math.min(full.length, Math.floor((performance.now() - t0) / 1000 * CPS)); textEl.textContent = full.slice(0, shown); }
-    if (!document.querySelector('.wr-sheet, .modal') && !choosing) for (const p of pads) { const r = p.read(); if (r.attack) next(); else if (r.jump) root.querySelector('[data-act="skip"]').click(); }
+    if (!document.querySelector('.wr-sheet, .modal') && !choosing) for (const p of pads) { const r = p.read(); if (r.attack) next(); else if (r.jump) root.querySelector('[data-act="skip"]').click(); if (done) break; }
+    if (done) return;            // a pad press just ended the scene: the next screen owns the view now (#123/#124)
     if (stage) { stage.reveal(shown); stage.update(dt); }
     else app.view.update(app.sceneG(chapterId), 1, dt);
   };

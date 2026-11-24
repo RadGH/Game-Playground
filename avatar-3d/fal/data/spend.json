@@ -1,6 +1,6 @@
 {
  "_doc": "Every paid fal.ai job (tools/fal-job.mjs). price = US$ from the model page at the time.",
- "total": 32.8,
+ "total": 36.2,
  "jobs": [
   {
    "id": "male-rodin",
@@ -3616,6 +3616,245 @@
    "submitted": "2026-11-23T17:14:40.346Z",
    "done": "2026-11-23T17:16:05.998Z",
    "seconds": 107
+  },
+  {
+   "id": "scn-sc-cottages",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20acf-82b8-7593-b2b1-cdb6785aefc0",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-cottages.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-cottages (trellis-2 1024): cottage-thatch cottage-stone cottage-log inn",
+   "tag": "oathwild-props",
+   "files": [
+    {
+     "file": "models/scn-sc-cottages/model_glb-trellis2_f02d3625d644495fbd9208786191de37.glb",
+     "bytes": 2609588
+    }
+   ],
+   "submitted": "2026-11-23T23:48:21.346Z",
+   "done": "2026-11-23T23:49:02.973Z",
+   "seconds": 62
+  },
+  {
+   "id": "bandit-chief-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20acf-bec3-7071-9117-8d61811fefc1",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/bandit-chief-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "bandit-chief: Tripo P1 textured, face_limit 4500",
+   "tag": "oathwild-enemies",
+   "files": [
+    {
+     "file": "models/bandit-chief-tripo/model_mesh-model.glb",
+     "bytes": 3085152
+    },
+    {
+     "file": "models/bandit-chief-tripo/model_urls.glb-model.glb",
+     "bytes": 3085152
+    },
+    {
+     "file": "models/bandit-chief-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3085152
+    },
+    {
+     "file": "models/bandit-chief-tripo/rendered_image-preview.png",
+     "bytes": 127522
+    }
+   ],
+   "submitted": "2026-11-23T23:48:36.718Z",
+   "done": "2026-11-23T23:49:46.795Z",
+   "seconds": 107
+  },
+  {
+   "id": "scn-sc-clutter",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ad0-b9b5-7762-8518-5cb60f7ba931",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-clutter.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-clutter (trellis-2 1024): barrel crate sacks weapon-rack",
+   "tag": "oathwild-props",
+   "files": [
+    {
+     "file": "models/scn-sc-clutter/model_glb-trellis2_c07b026b98294b42b70582f9b7416791.glb",
+     "bytes": 1890980
+    }
+   ],
+   "submitted": "2026-11-23T23:49:40.962Z",
+   "done": "2026-11-23T23:50:10.186Z",
+   "seconds": 49
+  },
+  {
+   "id": "scn-sc-clutter-d5000",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ad6-bc59-7700-a9d4-c1c7705a90a5",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-clutter.png",
+    "resolution": 1024,
+    "decimation_target": 5000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery: Trellis' own low-poly test (decimation_target 5000 = its minimum, for 4 props)",
+   "tag": "oathwild-props",
+   "files": [
+    {
+     "file": "models/scn-sc-clutter-d5000/model_glb-trellis2_cf79f282e63f4ce1b5e5dcebf14e8649.glb",
+     "bytes": 2055708
+    }
+   ],
+   "submitted": "2026-11-23T23:56:14.854Z",
+   "done": "2026-11-23T23:56:56.263Z",
+   "seconds": 59
+  },
+  {
+   "id": "brown-bear-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20adb-4283-7ab3-bb61-a36879deb672",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/brown-bear-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "brown-bear: Tripo P1 textured, face_limit 4500",
+   "tag": "oathwild-enemies",
+   "files": [
+    {
+     "file": "models/brown-bear-tripo/model_mesh-model.glb",
+     "bytes": 2849740
+    },
+    {
+     "file": "models/brown-bear-tripo/model_urls.glb-model.glb",
+     "bytes": 2849740
+    },
+    {
+     "file": "models/brown-bear-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2849740
+    },
+    {
+     "file": "models/brown-bear-tripo/rendered_image-preview.png",
+     "bytes": 164262
+    }
+   ],
+   "submitted": "2026-11-24T00:01:11.342Z",
+   "done": "2026-11-24T00:02:28.838Z",
+   "seconds": 111
+  },
+  {
+   "id": "bristleback-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20adb-4540-75a1-a459-0e1e3bb519b0",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/bristleback-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "bristleback: Tripo P1 textured, face_limit 3000",
+   "tag": "oathwild-enemies",
+   "files": [
+    {
+     "file": "models/bristleback-tripo/model_mesh-model.glb",
+     "bytes": 2352436
+    },
+    {
+     "file": "models/bristleback-tripo/model_urls.glb-model.glb",
+     "bytes": 2352436
+    },
+    {
+     "file": "models/bristleback-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2352436
+    },
+    {
+     "file": "models/bristleback-tripo/rendered_image-preview.png",
+     "bytes": 146770
+    }
+   ],
+   "submitted": "2026-11-24T00:01:12.043Z",
+   "done": "2026-11-24T00:02:29.168Z",
+   "seconds": 111
+  },
+  {
+   "id": "mountain-lion-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20adb-4ca9-7293-ad74-ae5bd157de29",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/mountain-lion-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "mountain-lion: Tripo P1 textured, face_limit 3000",
+   "tag": "oathwild-enemies",
+   "files": [
+    {
+     "file": "models/mountain-lion-tripo/model_mesh-model.glb",
+     "bytes": 2860052
+    },
+    {
+     "file": "models/mountain-lion-tripo/model_urls.glb-model.glb",
+     "bytes": 2860052
+    },
+    {
+     "file": "models/mountain-lion-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2860052
+    },
+    {
+     "file": "models/mountain-lion-tripo/rendered_image-preview.png",
+     "bytes": 150766
+    }
+   ],
+   "submitted": "2026-11-24T00:01:13.940Z",
+   "done": "2026-11-24T00:02:29.680Z",
+   "seconds": 111
+  },
+  {
+   "id": "field-scarecrow-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20adb-5621-7a81-9b8a-b67065cb1b9d",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/field-scarecrow-front.png",
+    "face_limit": 3000,
+    "texture": true
+   },
+   "note": "field-scarecrow: Tripo P1 textured, face_limit 3000",
+   "tag": "oathwild-enemies",
+   "files": [
+    {
+     "file": "models/field-scarecrow-tripo/model_mesh-model.glb",
+     "bytes": 2927152
+    },
+    {
+     "file": "models/field-scarecrow-tripo/model_urls.glb-model.glb",
+     "bytes": 2927152
+    },
+    {
+     "file": "models/field-scarecrow-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2927152
+    },
+    {
+     "file": "models/field-scarecrow-tripo/rendered_image-preview.png",
+     "bytes": 104002
+    }
+   ],
+   "submitted": "2026-11-24T00:01:16.371Z",
+   "done": "2026-11-24T00:02:32.010Z",
+   "seconds": 114
   }
  ]
 }

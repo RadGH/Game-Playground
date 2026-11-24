@@ -44,13 +44,32 @@ def past(c, bone):
     h, t = B[bone]; return (c - h).dot((t - h).normalized()) > 0
 
 
+# the neck: below the Head bone only points within the neck's own width belong to the head box. The neck plane tilts
+# forward, so without this the tops of the shoulders beside the neck fell into the head box — which is always painted
+# from the bare skin, so every outfit showed a skin patch there (2026-11-23, mail and robes).
+_nh, _nt = B["neck_01"]; _hz = B["Head"][0].z
+_gi = {g.index: g.name for g in mesh.vertex_groups}
+
+
+def _neck_dist(c):
+    ax = (_nt - _nh).normalized(); q = c - _nh; return (q - ax * q.dot(ax)).length
+
+
+_nd = sorted(_neck_dist(v.co) for v in me.vertices
+             if v.groups and _gi.get(max(v.groups, key=lambda g: g.weight).group) == "neck_01")
+_zf = _nh.z + 0.5 * (_hz - _nh.z)      # the front of the neck below this belongs to the chest box (collars, coifs paint it)
+NECK_R = 1.3 * _nd[len(_nd) // 4] if _nd else 0.07     # (the neck bone also pulls on the shoulder slope: use the inner quarter)
+print("RES neck radius for the head box", round(NECK_R, 4), [round(_nd[int(len(_nd) * q)], 3) for q in (0.1, 0.25, 0.5, 0.75, 0.9)])
+
+
 def classify(c):
     side = "_l" if c.x > 0 else "_r"
     if c.z > B["spine_03"][0].z and past(c, "upperarm" + side):
         if past(c, "hand" + side): return "hand" + side
         if past(c, "lowerarm" + side): return "arm_lower" + side
         return "arm_upper" + side
-    if past(c, "neck_01") and abs(c.x) < abs(B["upperarm" + side][0].x): return "head"
+    if past(c, "neck_01") and abs(c.x) < abs(B["upperarm" + side][0].x) and (c.z >= _hz or abs(c.x) < NECK_R) \
+            and not (c.y < _nh.y and c.z < _zf): return "head"
     if past(c, "thigh" + side):
         if past(c, "foot" + side): return "foot" + side
         if past(c, "calf" + side): return "leg_lower" + side
@@ -73,6 +92,19 @@ for bone, ra, rb in CUTS:
     h, t = B[bone]
     geom = list(set(fs) | {e for f in fs for e in f.edges} | {v for f in fs for v in f.verts})
     bmesh.ops.bisect_plane(bm, geom=geom, dist=0.0005, plane_co=h, plane_no=(t - h).normalized())
+# the sides of the neck: upright cuts at x = ±NECK_R between the neck's base and the Head bone, so the head box ends
+# in a clean line along each shoulder top instead of a zigzag of whole faces
+for sg_ in (1, -1):
+    bm.faces.ensure_lookup_table()
+    fs = [f for f in bm.faces if classify(f.calc_center_median()) in ("head", "torso_upper")
+          and _nh.z - 0.04 < f.calc_center_median().z < _hz + 0.01 and f.calc_center_median().x * sg_ > 0]
+    geom = list(set(fs) | {e for f in fs for e in f.edges} | {v for f in fs for v in f.verts})
+    bmesh.ops.bisect_plane(bm, geom=geom, dist=0.0005, plane_co=(sg_ * NECK_R, 0, 0), plane_no=(1, 0, 0))
+bm.faces.ensure_lookup_table()
+fs = [f for f in bm.faces if classify(f.calc_center_median()) in ("head", "torso_upper") and f.calc_center_median().y < _nh.y
+      and abs(f.calc_center_median().x) < NECK_R + 0.01 and abs(f.calc_center_median().z - _zf) < 0.04]
+geom = list(set(fs) | {e for f in fs for e in f.edges} | {v for f in fs for v in f.verts})
+bmesh.ops.bisect_plane(bm, geom=geom, dist=0.0005, plane_co=(0, 0, _zf), plane_no=(0, 0, 1))
 # the waist ring (horizontal) through the torso only
 bm.faces.ensure_lookup_table()
 fs = [f for f in bm.faces if classify(f.calc_center_median()).startswith("torso")]
@@ -131,6 +163,13 @@ def bone_pt(spec):
     b = ARM.bones[n]; return A @ (b.tail_local if end == "tail" else b.head_local)
 
 
+# Flat tops on a wrapped box: unrolled round an upright axis, a nearly flat surface (the shoulder tops either side of
+# the neck) changes height by only a few cm, so it got a thin band of rows and every painting smeared into streaks
+# across it (owner 2026-11-23, the woman's left shoulder). LIFT: from this share of the axis up, points further out to
+# the side than r0 (m) move down the box by that extra distance — the shoulder top gets rows for its real width.
+LIFT = {"torso_upper": (0.45, 0.07)}
+
+
 def wrap_region(r, d):
     """Unroll the region round its axis: u = angle from the seam, v = distance along the axis; fills the box."""
     from mathutils import Vector
@@ -139,13 +178,19 @@ def wrap_region(r, d):
     s = Vector(wr["seam"]); s = (s - ax * s.dot(ax)).normalized(); t = ax.cross(s)
     fs = [f for f in bm.faces if face_reg[f.index] == r]
     per = []
+    axl = (a1 - a0).length
+    lift = LIFT.get(r)
     for f in fs:
         pts = []
         for l in f.loops:
             q = l.vert.co - a0
             ang = math.atan2(q.dot(t), q.dot(s))            # 0 at the seam
             u = (ang % (2 * math.pi)) / (2 * math.pi)
-            pts.append([u, q.dot(ax)])
+            h_ = q.dot(ax)
+            if lift:      # shoulder tops: walking out from the neck along the flat top goes DOWN the box
+                st_, r0 = lift; k = max(0.0, min(1.0, (h_ / axl - st_) / (1 - st_))); k = k * k * (3 - 2 * k)
+                h_ -= max(0.0, abs(q.dot(Vector((1, 0, 0)))) - r0) * k
+            pts.append([u, h_])
         us = [p[0] for p in pts]
         if max(us) - min(us) > 0.5:                          # face straddles the cut: keep it on the far side
             for p in pts:

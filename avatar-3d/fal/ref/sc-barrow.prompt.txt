@@ -1,0 +1,13 @@
+Use your image generation tool to create ONE image, square 1024x1024 PNG, and save it in the current working directory as out.png. Do nothing else (do not write code, do not edit other files).
+Layout: a 2 x 2 grid of FOUR separate objects for a 3D modeller, one object centred in each quarter of the picture, each object whole and large in its quarter (about 75% of the quarter's width or height) with WIDE empty background between the four objects; no object crosses into another quarter; nothing touching the picture edge. All four drawn at a similar size in the picture (do NOT keep their real-world scale relative to each other).
+View: each object seen in a three-quarter view from the front-left and slightly above (about 20 degrees down), orthographic, no perspective, so its front and one side and a little of its top are visible.
+Each object stands alone on nothing: no ground patch, no grass base, no floor, no shadow, no stand, no people, no animals.
+Top-left: the entrance of an ancient burial mound: a grassy earth mound with a doorway framed by three huge rough stones (two uprights and a lintel), a dark opening, carved spirals on the lintel, a few small stones around.
+Top-right: a long grey stone coffin with a heavy lid carved as a sleeping armoured king with a sword on his chest, cracked corner, cobwebs.
+Bottom-left: an old upright gravestone of grey stone with a rounded top, tilted a little, worn blank face, moss on top.
+Bottom-right: a tall old stone grave marker shaped as an upright post with a stone ring around its top, weathered and cracked.
+Make it game-ready low-poly: big flat facets and simple chunky silhouettes, details PAINTED into the colours rather than modelled.
+
+Style: stylized low-poly hand-painted fantasy online-RPG game art: chunky simple readable shapes, slightly exaggerated proportions, large hands and feet, hand-painted colour with soft painted-in highlights and shadows, crisp colour blocks, almost no fine surface noise, matte, NOT photoreal, NOT glossy, NOT a 3D render with realistic materials.
+Lighting/background: even flat lighting, soft shading that describes the forms, no harsh shadows, plain flat light-grey background (#c8c8c8), no floor shadow, no scenery.
+Constraints: no text, no labels, no lettering, no watermark, no extra characters or objects.

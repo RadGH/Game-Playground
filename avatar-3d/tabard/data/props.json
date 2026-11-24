@@ -18,7 +18,7 @@
    "look": "a mage's spellstaff of gnarled dark oak with lighter worn grain, bound with brass bands and a blue cloth wrap at the grip, the top split into three curling wooden prongs that clasp a glowing pale-blue crystal",
    "place": {
     "anchor": "palm_r",
-    "tilt": 65
+    "tilt": 0
    }
   },
   "shield_heater": {
@@ -36,7 +36,8 @@
    "texture": 512,
    "look": "a heavy knight's great helm of polished steel: a flat-fronted face plate with a dark horizontal eye slit and small breathing holes, gold-trimmed edges, a raised ridge running front to back over the crown with a short red plume crest, rivets around the base",
    "place": {
-    "anchor": "head"
+    "anchor": "head",
+    "coversFace": true
    },
    "fitWidth": true
   },
@@ -61,6 +62,12 @@
     "hang": {
      "min": 9,
      "max": 18
+    },
+    "cloth": {
+     "pin": "top",
+     "pinRows": 1,
+     "cols": 7,
+     "rows": 9
     }
    }
   },
@@ -86,7 +93,8 @@
    },
    "look": "a heavy knight's great helm of polished steel: a flat-fronted face plate with a dark horizontal eye slit and small breathing holes, gold-trimmed edges and rivets around the base, and on each side a swept-back wing of white feathers with pale grey tips and a gold quill edge, rising up and back from the temples",
    "place": {
-    "anchor": "head"
+    "anchor": "head",
+    "coversFace": true
    },
    "fitWidth": true
   },
@@ -102,7 +110,8 @@
    },
    "look": "a brutal great helm of dark blackened iron with bronze-trimmed edges: a flat face plate with a narrow glowing-dark eye slit and rows of breathing holes, heavy rivets, scratched worn metal, and two thick curving horns of ridged ivory bone with darker tips growing out of the sides and curling upward",
    "place": {
-    "anchor": "head"
+    "anchor": "head",
+    "coversFace": true
    },
    "fitWidth": true
   },
@@ -116,7 +125,8 @@
    },
    "look": "a rounded knight's bascinet of bright steel with a pointed crown, and a hinged visor shut over the face: the visor juts forward into a blunt snout with two dark eye slits across the top and rows of small breathing holes below, brass hinge bolts on each side, a gold-trimmed edge band around the bottom of the helm",
    "place": {
-    "anchor": "head"
+    "anchor": "head",
+    "coversFace": true
    },
    "fitWidth": true
   },
@@ -148,7 +158,9 @@
    },
    "look": "a soldier's kettle hat of dull grey steel: a rounded skull cap with a raised ridge over the crown and a wide sloping brim all around, a rolled edge on the brim, a dark leather band and rivets where the brim meets the cap, a little rust and wear",
    "place": {
-    "anchor": "head"
+    "anchor": "head",
+    "turn": 18,
+    "lift": 0.01
    }
   },
   "cap_leather": {
@@ -218,7 +230,9 @@
    },
    "look": "a tall pointed wizard's hat of deep purple felt with a bent, drooping tip and a wide floppy brim, a band of gold cloth around the base of the cone with a small silver crescent-moon buckle, a scattering of small embroidered silver stars",
    "place": {
-    "anchor": "head"
+    "anchor": "head",
+    "turn": 18,
+    "lift": 0.02
    }
   },
   "shield_round": {
@@ -311,7 +325,95 @@
     "hang": {
      "min": 9,
      "max": 18
+    },
+    "cloth": {
+     "pin": "top",
+     "pinRows": 1,
+     "cols": 7,
+     "rows": 9
     }
+   }
+  },
+  "tabard_flaps_tower": {
+   "name": "Tower Tabard Flaps",
+   "kind": "tabard",
+   "texture": 512,
+   "build": {
+    "shape": "tabard_flap",
+    "parts": [
+     "front",
+     "back"
+    ]
+   },
+   "look": "two hanging cloth tabard flaps (a front one and a back one) of deep royal-blue wool cloth with a woven silver-white border down both sides and along the bottom hem, soft painted folds; the FRONT flap carries a large white stone castle-tower emblem with three square battlements and a dark arched gate in its upper middle; the BACK flap is plain blue with the same border",
+   "place": {
+    "anchor": "belt",
+    "hang": {
+     "min": 0,
+     "max": 75,
+     "clear": [
+      "thigh_l",
+      "calf_l",
+      "foot_l",
+      "thigh_r",
+      "calf_r",
+      "foot_r"
+     ]
+    }
+   }
+  },
+  "tabard_top_tower": {
+   "name": "Tower Tabard",
+   "kind": "tabard",
+   "texture": 512,
+   "build": {
+    "shape": "tabard_top",
+    "parts": []
+   },
+   "look": "the upper part of a herald's tabard: a front and a back cloth panel of deep royal-blue wool cloth with a woven silver-white border down both sides and across the top edge, soft painted folds; the FRONT panel carries a large white stone castle-tower emblem with three square battlements and a dark arched gate in the middle of the chest; the BACK panel is plain blue with the same border and a small white tower near the top",
+   "place": {
+    "anchor": "chest"
+   }
+  },
+  "tabard_flaps_stag": {
+   "name": "Stag Tabard Flaps",
+   "kind": "tabard",
+   "texture": 512,
+   "build": {
+    "shape": "tabard_flap",
+    "parts": [
+     "front",
+     "back"
+    ]
+   },
+   "look": "two hanging cloth tabard flaps (a front one and a back one) of rich crimson wool cloth with a black-and-gold checkered border down both sides and along the bottom hem, soft painted folds; the FRONT flap carries a golden leaping stag with tall branching antlers in its upper middle; the BACK flap is plain crimson with the same border",
+   "place": {
+    "anchor": "belt",
+    "hang": {
+     "min": 0,
+     "max": 75,
+     "clear": [
+      "thigh_l",
+      "calf_l",
+      "foot_l",
+      "thigh_r",
+      "calf_r",
+      "foot_r"
+     ]
+    }
+   }
+  },
+  "tabard_top_stag": {
+   "name": "Stag Tabard",
+   "kind": "tabard",
+   "texture": 512,
+   "build": {
+    "shape": "tabard_top",
+    "parts": []
+   },
+   "look": "the upper part of a herald's tabard: a front and a back cloth panel of rich crimson wool cloth with a black-and-gold checkered border down both sides and across the top edge, soft painted folds; the FRONT panel carries a large golden crowned stag head with tall branching antlers in the middle of the chest; the BACK panel is plain crimson with the same border and a small golden crown near the top",
+   "place": {
+    "anchor": "chest"
    }
   }
  }

@@ -7,6 +7,7 @@
 // beast = one three-quarter view of a four-legged animal, landscape.
 // `from` is the owner's original picture (ref/*-original.jpg), attached as the style + likeness source; `fromNote`
 // replaces the default "keep its likeness" line (complete goblin enemies keep the species, not the friendly face).
+// scenery4 = a 2×2 sheet of four scenery props (data/scenery.json), square — one Trellis-2 job makes all four.
 // One Codex job per folder (two jobs in one folder swap each other's pictures) — pattern from model-library/tools/sheet.mjs.
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
@@ -17,7 +18,10 @@ import { spawnSync } from 'node:child_process';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const cat = JSON.parse(readFileSync(join(ROOT, 'data', 'refs.json'), 'utf8'));
 const id = process.argv[2];
-const m = cat.items.find(x => x.id === id);
+// scenery sheets (Oathwild 2026-11-23): data/scenery.json sheets [{ id, objects: [4 × { id, look }] }] → kind 'scenery4'
+const scen = existsSync(join(ROOT, 'data', 'scenery.json')) ? JSON.parse(readFileSync(join(ROOT, 'data', 'scenery.json'), 'utf8')) : { sheets: [] };
+const sh = scen.sheets.find(x => x.id === id);
+const m = sh ? { id, kind: 'scenery4', look: '', objects: sh.objects, view: sh.view } : cat.items.find(x => x.id === id);
 if (!m) { console.error('unknown id ' + id); process.exit(2); }
 const out = join(ROOT, 'ref', id + '.png');
 if (existsSync(out) && !process.argv.includes('--again')) { console.log(id + ': already drawn (use --again)'); process.exit(0); }
@@ -37,9 +41,17 @@ const beast = `Layout: ONE full-body view of ONE four-legged creature, three-qua
 Pose: standing still on all four legs, legs straight and clearly apart from each other (gaps between the legs), head level looking ahead, mouth closed, tail straight out behind and slightly down, wings (if any) folded flat along the back.
 Projection: orthographic, no perspective. Whole creature visible; nothing cropped.`;
 const item = `Layout: ONE object, centred, shown whole, large in the frame with a margin all round, as a 3D modeller's reference. ${m.view || 'Front view, straight on, orthographic, no perspective.'} Nothing else in the picture: no person, no mannequin, no stand, no hands.`;
+const scenery4 = m.kind === 'scenery4' ? `Layout: a 2 x 2 grid of FOUR separate objects for a 3D modeller, one object centred in each quarter of the picture, each object whole and large in its quarter (about 75% of the quarter's width or height) with WIDE empty background between the four objects; no object crosses into another quarter; nothing touching the picture edge. All four drawn at a similar size in the picture (do NOT keep their real-world scale relative to each other).
+View: ${m.view || 'each object seen in a three-quarter view from the front-left and slightly above (about 20 degrees down), orthographic, no perspective, so its front and one side and a little of its top are visible'}.
+Each object stands alone on nothing: no ground patch, no grass base, no floor, no shadow, no stand, no people, no animals.
+Top-left: ${m.objects[0].look}.
+Top-right: ${m.objects[1].look}.
+Bottom-left: ${m.objects[2].look}.
+Bottom-right: ${m.objects[3].look}.
+Make it game-ready low-poly: big flat facets and simple chunky silhouettes, details PAINTED into the colours rather than modelled.` : '';
 const prompt = `Use your image generation tool to create ONE image, ${m.kind === 'body' || m.kind === 'beast' ? 'landscape 1536x1024' : m.kind === 'enemy' ? 'portrait 1024x1536' : 'square 1024x1024'} PNG, and save it in the current working directory as out.png. Do nothing else (do not write code, do not edit other files).
-${m.from ? (m.fromNote || 'The attached source.jpg is the owner\'s concept sheet: keep the character\'s likeness, hair, skin tone and proportions from it, but IGNORE its layout, text, close-ups and fists.') + '\n' : ''}${m.kind === 'body' ? body : m.kind === 'enemy' ? enemy : m.kind === 'beast' ? beast : item}
-Subject: ${m.look}.
+${m.from ? (m.fromNote || 'The attached source.jpg is the owner\'s concept sheet: keep the character\'s likeness, hair, skin tone and proportions from it, but IGNORE its layout, text, close-ups and fists.') + '\n' : ''}${m.kind === 'body' ? body : m.kind === 'enemy' ? enemy : m.kind === 'beast' ? beast : m.kind === 'scenery4' ? scenery4 : item}
+${m.kind === 'scenery4' ? '' : 'Subject: ' + m.look + '.'}
 Style: ${cat.style}
 Lighting/background: even flat lighting, soft shading that describes the forms, no harsh shadows, plain flat light-grey background (#c8c8c8), no floor shadow, no scenery.
 Constraints: no text, no labels, no lettering, no watermark, no extra characters or objects.

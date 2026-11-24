@@ -1,78 +1,91 @@
 {
-  "entries": [
-    {
-      "id": "2026-11-23-high-detail-models",
-      "date": "2026-11-23",
-      "title": "High-detail heroes and monsters",
-      "items": [
-        "A new look for everyone on the road: hand-painted heroes and monsters. The first time you open the game it asks which you want, High detail or the original Legacy look, and you can switch any time in Settings.",
-        "In High detail, your hero wears the armour you find: plate, mail, leather and robes, helms, hoods, shields and weapons all show on the body.",
-        "New high-detail monsters: the Rook Gang, the Lantern Order, the Silver knights, kiln monks, root callers, drowned brutes, wolves, drakes, elementals, Aldric and Queen Isolde, with more on the way.",
-        "The floating green lantern flames are now Lantern Elementals, and the floating thorn creatures are Briar Elementals."
-      ]
-    },
-    {
-      "id": "2026-11-21-no-phone-zoom",
-      "date": "2026-11-21",
-      "title": "No more stuck zoom on phones",
-      "items": [
-        "Pinching the screen or tapping fast between the buttons no longer zooms the whole game in on an iPhone, so the controls stay where they belong."
-      ]
-    },
-    {
-      "id": "2026-11-21-acts-two-and-three",
-      "date": "2026-11-21",
-      "title": "Acts II and III: four roads, four endings",
-      "items": [
-        "The story goes on after the wyrm's crown. Whether you broke the chain or took the lantern sends you down a different Act II, with its own places, bosses and scenes.",
-        "Act II ends in a second choice, and Act III splits four ways. Each road has its own three chapters, its own final boss and its own ending. The wyrm, Ossmara, can be your friend, your weapon, or your last fight.",
-        "The map now shows the acts and the roads. Roads you have walked stay on it, roads you haven't are a dotted line of question marks, and stars mark the endings you have found.",
-        "Story scenes now put the characters in the street, moving and talking. A short scene plays before every Act II and III boss.",
-        "Giant bosses fight from the back of the street. Watch where their strikes land, then hit the part they leave on the road.",
-        "Every class has new moves on its dash and block. The Duelist can counter with a well-timed block, and the Arcanist can teleport. The Vanguard's War Shout is now Iron Gale, a spin you can hold.",
-        "Harder fights: more enemies with two or more players, tougher foes, health that only comes back between fights, and a cooldown on Breaker. Some enemies get knocked back instead of down, and bosses can't be knocked down over and over.",
-        "The Vanguard holds two-handed weapons in both hands. Masculine bodies are flat and feminine bodies are rounder (the separate chest option is gone), and faces have softer lines.",
-        "Rooftops sit properly on their houses, boats look like boats, the flamberge is taller and the ham bone sits in the meat.",
-        "Fixes: you can turn round mid-combo, the boss's long grab is now a thrown hook you can dodge, and enemies can hit you again after Breaker leaves you at 1 health.",
-        "Levels now go to 20, with gear for every new chapter."
-      ]
-    },
-    {
-      "id": "2026-11-21-controls-and-bags",
-      "date": "2026-11-21",
-      "title": "Mouse controls, co-op bags and cleaner sound",
-      "items": [
-        "Keyboard and mouse is the new way to play on a computer: WASD to walk, left click to attack, right click for Heavy, 1 and 2 for spells, Space to jump, hold Shift to block, Q to dash, E to grab and R for Breaker. The old keys-only layout is still in Settings.",
-        "The mouse pointer hides while you fight with keys or a controller and comes back as soon as you move the mouse.",
-        "Enemy and boss health bars and story lines now sit over the top of the street, so the fight never jumps in size when one appears.",
-        "In co-op, the bag has a tab for each hero, and you can give items to each other.",
-        "Your hero's numbers in the bag are shorter: point at one, or tap it, to see what it does.",
-        "The chapter map's places now line up with what you pick, on every window size.",
-        "A new chapter loads behind a cover, so you never see a flash of the last one.",
-        "New sounds: wolves and hounds sound like one animal, crates break with a light crack, spells sound like magic (no more bow twang for the Arcanist), and a won chapter ends on a low horn instead of a cartoon fanfare.",
-        "The account menu on the title screen no longer opens off the edge of the screen."
-      ]
-    },
-    {
-      "id": "2026-11-21-phone-creator",
-      "date": "2026-11-21",
-      "title": "Phone fix: making a hero",
-      "items": [
-        "On phones the Set off button now stays at the bottom of the hero creator, so you can always get past it. The rest of the screen scrolls as one page."
-      ]
-    },
-    {
-      "id": "2026-11-20-launch",
-      "date": "2026-11-20",
-      "title": "Wyrmroad sets off",
-      "items": [
-        "A side-scrolling brawl along an old road that runs over a sleeping stone wyrm: six chapters, from the village of Millbrook to the wyrm's crown.",
-        "Four heroes to make your own: the Vanguard with a great two-handed blade, the quick Duelist with two blades, the Arcanist with fire and frost, and the Warden with mace, shield and healing light.",
-        "Punchy combos, heavy blows, jumps, dashes, grabs and throws, blocks (a well-timed one staggers the attacker), two spells each and a Breaker for when you are surrounded.",
-        "A story told between chapters, with a few surprises along the way and a choice at the end.",
-        "New weapons and armour from every chapter, shown on your hero, and a Peddler who buys and sells.",
-        "Play alone, with a computer companion, with up to four people on one screen (two can share a keyboard), or online."
-      ]
-    }
-  ]
+ "entries": [
+  {
+   "id": "2026-11-23-faces-hair",
+   "date": "2026-11-23",
+   "title": "Faces, hair and smoother moves",
+   "items": [
+    "High detail: the hero creator now shows your high-detail hero, and every choice changes it — 25 hairstyles in any colour, eye shapes and colours, brows, beards, face marks and skin tones.",
+    "High-detail heroes have real eyes that blink, and their hair is its own piece: long hair, ponytails and braids swing as you move, and hair tucks neatly under hats and helms.",
+    "Capes now move like cloth.",
+    "Fixed: knocked-down heroes no longer spin their arms in circles, and characters no longer flash into a stiff pose for a moment between moves.",
+    "Fixed: with a controller, the camera could stay stuck after a story scene so you walked off the screen. It now follows you as it should.",
+    "Better armour and weapons on high-detail heroes: staffs and big weapons are held upright, bows face the right way, helmets and hats no longer cover the eyes, maces are less oversized, and robes sit snugly at the waist."
+   ]
+  },
+  {
+   "id": "2026-11-23-high-detail-models",
+   "date": "2026-11-23",
+   "title": "High-detail heroes and monsters",
+   "items": [
+    "A new look for everyone on the road: hand-painted heroes and monsters. The first time you open the game it asks which you want, High detail or the original Legacy look, and you can switch any time in Settings.",
+    "In High detail, your hero wears the armour you find: plate, mail, leather and robes, helms, hoods, shields and weapons all show on the body.",
+    "New high-detail monsters: the Rook Gang, the Lantern Order, the Silver knights, kiln monks, root callers, drowned brutes, wolves, drakes, elementals, Aldric and Queen Isolde, with more on the way.",
+    "The floating green lantern flames are now Lantern Elementals, and the floating thorn creatures are Briar Elementals."
+   ]
+  },
+  {
+   "id": "2026-11-21-no-phone-zoom",
+   "date": "2026-11-21",
+   "title": "No more stuck zoom on phones",
+   "items": [
+    "Pinching the screen or tapping fast between the buttons no longer zooms the whole game in on an iPhone, so the controls stay where they belong."
+   ]
+  },
+  {
+   "id": "2026-11-21-acts-two-and-three",
+   "date": "2026-11-21",
+   "title": "Acts II and III: four roads, four endings",
+   "items": [
+    "The story goes on after the wyrm's crown. Whether you broke the chain or took the lantern sends you down a different Act II, with its own places, bosses and scenes.",
+    "Act II ends in a second choice, and Act III splits four ways. Each road has its own three chapters, its own final boss and its own ending. The wyrm, Ossmara, can be your friend, your weapon, or your last fight.",
+    "The map now shows the acts and the roads. Roads you have walked stay on it, roads you haven't are a dotted line of question marks, and stars mark the endings you have found.",
+    "Story scenes now put the characters in the street, moving and talking. A short scene plays before every Act II and III boss.",
+    "Giant bosses fight from the back of the street. Watch where their strikes land, then hit the part they leave on the road.",
+    "Every class has new moves on its dash and block. The Duelist can counter with a well-timed block, and the Arcanist can teleport. The Vanguard's War Shout is now Iron Gale, a spin you can hold.",
+    "Harder fights: more enemies with two or more players, tougher foes, health that only comes back between fights, and a cooldown on Breaker. Some enemies get knocked back instead of down, and bosses can't be knocked down over and over.",
+    "The Vanguard holds two-handed weapons in both hands. Masculine bodies are flat and feminine bodies are rounder (the separate chest option is gone), and faces have softer lines.",
+    "Rooftops sit properly on their houses, boats look like boats, the flamberge is taller and the ham bone sits in the meat.",
+    "Fixes: you can turn round mid-combo, the boss's long grab is now a thrown hook you can dodge, and enemies can hit you again after Breaker leaves you at 1 health.",
+    "Levels now go to 20, with gear for every new chapter."
+   ]
+  },
+  {
+   "id": "2026-11-21-controls-and-bags",
+   "date": "2026-11-21",
+   "title": "Mouse controls, co-op bags and cleaner sound",
+   "items": [
+    "Keyboard and mouse is the new way to play on a computer: WASD to walk, left click to attack, right click for Heavy, 1 and 2 for spells, Space to jump, hold Shift to block, Q to dash, E to grab and R for Breaker. The old keys-only layout is still in Settings.",
+    "The mouse pointer hides while you fight with keys or a controller and comes back as soon as you move the mouse.",
+    "Enemy and boss health bars and story lines now sit over the top of the street, so the fight never jumps in size when one appears.",
+    "In co-op, the bag has a tab for each hero, and you can give items to each other.",
+    "Your hero's numbers in the bag are shorter: point at one, or tap it, to see what it does.",
+    "The chapter map's places now line up with what you pick, on every window size.",
+    "A new chapter loads behind a cover, so you never see a flash of the last one.",
+    "New sounds: wolves and hounds sound like one animal, crates break with a light crack, spells sound like magic (no more bow twang for the Arcanist), and a won chapter ends on a low horn instead of a cartoon fanfare.",
+    "The account menu on the title screen no longer opens off the edge of the screen."
+   ]
+  },
+  {
+   "id": "2026-11-21-phone-creator",
+   "date": "2026-11-21",
+   "title": "Phone fix: making a hero",
+   "items": [
+    "On phones the Set off button now stays at the bottom of the hero creator, so you can always get past it. The rest of the screen scrolls as one page."
+   ]
+  },
+  {
+   "id": "2026-11-20-launch",
+   "date": "2026-11-20",
+   "title": "Wyrmroad sets off",
+   "items": [
+    "A side-scrolling brawl along an old road that runs over a sleeping stone wyrm: six chapters, from the village of Millbrook to the wyrm's crown.",
+    "Four heroes to make your own: the Vanguard with a great two-handed blade, the quick Duelist with two blades, the Arcanist with fire and frost, and the Warden with mace, shield and healing light.",
+    "Punchy combos, heavy blows, jumps, dashes, grabs and throws, blocks (a well-timed one staggers the attacker), two spells each and a Breaker for when you are surrounded.",
+    "A story told between chapters, with a few surprises along the way and a choice at the end.",
+    "New weapons and armour from every chapter, shown on your hero, and a Peddler who buys and sells.",
+    "Play alone, with a computer companion, with up to four people on one screen (two can share a keyboard), or online."
+   ]
+  }
+ ]
 }

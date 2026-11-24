@@ -1,0 +1,92 @@
+{
+  "_doc": "Use-skills (owner 2026-11-23: NON-COMBAT ONLY — combat power comes from classes, attributes, gear and talents). Each rises 0-100 by doing it (Skyrim-like); js/rules/skills-use.js is the one reader. `gain` = XP per use (by kind of use); `perPoint` = what each point is worth (read by the function named in `reader`); `milestones` give a talent point each (talents.json) and the named perk at that value. `round: 2` skills exist in data but nothing raises them until their benches arrive.",
+  "max": 100,
+  "start": 0,
+  "curve": { "_doc": "XP to go from v to v+1 = base + v * perPoint.", "base": 6, "perPoint": 0.9 },
+  "milestones": [25, 50, 75, 100],
+  "skills": {
+    "sneak": {
+      "name": "Sneak", "round": 1,
+      "blurb": "Moving unseen. Enemies notice you from closer in.",
+      "reader": "noticeRange",
+      "sneaking": 0.45,
+      "_sneakingDoc": "Sneaking at all multiplies how far away an enemy notices you by this; every Sneak point then cuts it by perPoint.noticeCut more (up to 60%).",
+      "perPoint": { "noticeCut": 0.005 },
+      "gain": { "unseenSecond": 0.5, "sneakAttack": 8, "passedEnemy": 3 },
+      "perks": {
+        "25": { "id": "soft_soles", "name": "Soft Soles", "text": "Sneaking no longer slows you below {pct} of your walking speed.", "value": 0.75 },
+        "50": { "id": "shadowed", "name": "Shadowed", "text": "Enemies take {pct} longer to notice you.", "value": 0.3 },
+        "75": { "id": "opening_cut", "name": "Opening Cut", "text": "Your first hit on an enemy that has not noticed you deals {pct} more damage.", "value": 0.5 },
+        "100": { "id": "ghost", "name": "Ghost", "text": "Enemies you have not hit cannot notice you while you sneak unless they touch you.", "value": 1 }
+      }
+    },
+    "lockpicking": {
+      "name": "Lockpicking", "round": 1,
+      "blurb": "Opening locked chests and doors.",
+      "reader": "lockpickChance",
+      "perPoint": { "chance": 0.008 },
+      "gain": { "pickNovice": 4, "pickApprentice": 7, "pickAdept": 11, "pickExpert": 16, "pickMaster": 22 },
+      "perks": {
+        "25": { "id": "light_touch", "name": "Light Touch", "text": "A failed pick costs {n} lockpick less often.", "value": 0.5 },
+        "50": { "id": "deep_pockets", "name": "Deep Chests", "text": "Locked chests you open hold {pct} more gold.", "value": 0.25 },
+        "75": { "id": "master_hands", "name": "Master Hands", "text": "Expert locks are as easy as Adept ones.", "value": 1 },
+        "100": { "id": "unlocked", "name": "Nothing Stays Shut", "text": "Master locks open on the first try.", "value": 1 }
+      }
+    },
+    "pickpocket": {
+      "name": "Pickpocket", "round": 1,
+      "blurb": "Lifting purses and keys unnoticed.",
+      "reader": "pickpocketChance",
+      "perPoint": { "chance": 0.006 },
+      "gain": { "lift": 6, "liftItem": 10 },
+      "perks": {
+        "25": { "id": "nimble", "name": "Nimble", "text": "{pct} better odds on purses.", "value": 0.1 },
+        "50": { "id": "keyfinder", "name": "Keyfinder", "text": "Keys are always found.", "value": 1 },
+        "75": { "id": "heavy_purse", "name": "Heavy Purse", "text": "Lifted purses hold {pct} more gold.", "value": 0.5 },
+        "100": { "id": "untouchable", "name": "Untouchable", "text": "A failed lift is never noticed.", "value": 1 }
+      }
+    },
+    "speech": {
+      "name": "Speech", "round": 1,
+      "blurb": "Better prices, and talking your way through.",
+      "reader": "priceMult",
+      "perPoint": { "priceCut": 0.002, "persuade": 0.006 },
+      "gain": { "tradeGoldPer10": 1, "persuade": 12 },
+      "perks": {
+        "25": { "id": "haggler", "name": "Haggler", "text": "You sell for {pct} more.", "value": 0.1 },
+        "50": { "id": "trusted", "name": "Trusted Face", "text": "Quest givers pay {pct} more gold.", "value": 0.15 },
+        "75": { "id": "persuasive", "name": "Persuasive", "text": "Persuasion succeeds {pct} more often.", "value": 0.2 },
+        "100": { "id": "golden_tongue", "name": "Golden Tongue", "text": "Shops buy anything, at {pct} of its price.", "value": 0.5 }
+      }
+    },
+    "enchanting": {
+      "name": "Enchanting", "round": 1,
+      "blurb": "Breaking magic items to learn their enchantments, and putting those on your own gear.",
+      "reader": "enchantPower",
+      "perPoint": { "power": 0.005 },
+      "gain": { "disenchant": 8, "enchant": 14 },
+      "perks": {
+        "25": { "id": "keen_reader", "name": "Keen Reader", "text": "Breaking a rare or better item can teach {n} enchantments.", "value": 2 },
+        "50": { "id": "second_rune", "name": "Second Rune", "text": "Each item takes {n} of your enchantments.", "value": 2 },
+        "75": { "id": "deep_runes", "name": "Deep Runes", "text": "Your enchantments are {pct} stronger.", "value": 0.15 },
+        "100": { "id": "third_rune", "name": "Third Rune", "text": "Each item takes {n} of your enchantments.", "value": 3 }
+      }
+    },
+    "smithing": {
+      "name": "Smithing", "round": 2,
+      "blurb": "Making and improving weapons and armour at a forge. (Opens with the forge, a later round.)",
+      "reader": "later",
+      "perPoint": { "quality": 0.005 },
+      "gain": { "craft": 10, "improve": 6 },
+      "perks": {}
+    },
+    "alchemy": {
+      "name": "Alchemy", "round": 2,
+      "blurb": "Brewing potions. (Opens with the alchemy table, a later round.)",
+      "reader": "later",
+      "perPoint": { "potency": 0.005 },
+      "gain": { "brew": 10 },
+      "perks": {}
+    }
+  }
+}

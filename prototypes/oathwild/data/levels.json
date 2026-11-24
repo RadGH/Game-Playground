@@ -1,0 +1,13 @@
+{
+  "_doc": "Character levels (round 1 cap 10; the game's cap later is 30). `xpToReach[n]` = total XP a character needs to be level n+1 (index 0 = level 1). Kill XP: the monster's own XP (Farhold's curve through rpg.makeEnemy) x `killXpMult` x a level-gap factor, and every player who helped gets their share (`groupShare`). js/rules/levels.js is the one reader.",
+  "cap": 10,
+  "xpToReach": [0, 150, 400, 750, 1200, 1800, 2550, 3450, 4500, 5800],
+  "killXpMult": 1.6,
+  "levelGap": { "_doc": "x per level the monster is above you (or below, negative), clamped.", "perLevel": 0.12, "min": 0.15, "max": 1.6, "greyBelow": 5 },
+  "groupShare": { "_doc": "With n helpers each gets this share of the full kill XP (co-op friendly: a group levels a little faster in total).", "minus": 0.1, "floor": 0.6 },
+  "respec": {
+    "_doc": "Paid at a shrine (owner 2026-11-23), gold rising with level. `points`: refund every class point and talent point (classes and attributes stay). `full`: also re-pick which classes your levels went into and where attribute points went. Price = perLevelSq x level x level.",
+    "points": { "perLevelSq": 6, "min": 10 },
+    "full": { "perLevelSq": 30, "min": 50 }
+  }
+}

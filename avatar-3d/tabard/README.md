@@ -10,7 +10,7 @@
 > characters, fal.ai for monsters. **How to make the next model: `WORKFLOW.md`.**
 > **Play:** LAN `http://<LAN IP>:8400/avatar-3d/tabard/` (stable) · dev 8401 · tabs: Dressing room / Comparison / Crowd test
 > **Next:** owner look at the new gear (Dressing room sets: mail, Mossgrove, Starweaver, scout, warlord, herald,
-> knight, footman, pilgrim, raider); Wyrmroad high-detail mode wires items to these; then: feedback button on the page (owner to pick: unlisted on games.radgh.com, or home only); known limits in
+> knight, footman, pilgrim, raider, Tower banneret, Stag herald); Wyrmroad high-detail mode wires items to these; then: feedback button on the page (owner to pick: unlisted on games.radgh.com, or home only); known limits in
 > `WORKFLOW.md`; then a fal.ai version is being tried in parallel (`avatar-3d/fal/`); then more outfits,
 > the goblin and other races, and a Chibi 2.6 drop-in adapter for the games — only if the owner picks this path.
 > **Parked:** a body Claude builds from scratch (not asked for; offered as an option); merging swap-in pieces into one
@@ -39,14 +39,34 @@ and Codex pictures (the owner's ChatGPT plan). No paid 3D service.
    little further down the limb, where the painted boot top or glove is; the robe hem from higher up the shin).
 3. **Props on bones** (built from a variant table — `WORKFLOW.md` §2b): greathelm (plain / winged / horned), visored
    bascinet, nasal helm, kettle helm, leather cap, hood, mail coif, circlet, wizard hat, pauldrons (plate / spiked /
-   leather), capes, round / kite / tower / heater shields, plus every fal.ai weapon (`fal:<id>`, §2c). The first ones:
+   leather), capes, round / kite / tower / heater shields, tabards (slot `tabard`: a front flap only — the footman's
+   "bottom tabard" over pure mail legs —, front + back flaps, or a full WoW-style tabard: chest + back panels on the
+   chest bone plus the belt flaps; Tower (blue, white tower) and Stag (crimson, golden stag) designs; the flaps swing
+   out of the legs' way), plus every fal.ai weapon (`fal:<id>`, §2c; staffs / spears / two-handers held at a right
+   angle to the forearm with the elbow bent to carry them, oversized heads shrunk above the fist). The first ones:
    greathelm, pauldrons (one model, mirrored), a cape with a torn see-through hem, a braided
-   ponytail of crossed see-through cards (Hair slot; a helm with `hidesHair` hides it), arming sword, oak spellstaff,
+   ponytail of crossed cards (round 1; replaced in round 4 by the hair layer, 4. below), arming sword, oak spellstaff,
    heater shield. Weapons lean back up the arm by `place.tilt` so they stand up when the arm hangs. `models/props/sockets.json` holds each prop's place in its bone's own frame, per
    body, computed in Blender from the rest pose (bone frames are identical in Blender and three.js; the prop file is
    turned +90° about X inside its holder to undo the file's Y-up conversion).
 
-Body + swap-in pieces share one material; each prop adds one draw call.
+4. **Hair layer** (`js/hair.js`, round 4): its own mesh on the Head bone, separate from the face layer so each can be
+   tuned alone. All 25 Chibi 2.6 hair ids (`data/hair.json`, one line of knobs per piece), any colour. Built for THIS
+   body's head: rays from inside the skull measure the scalp, so every strand hugs the man's and the woman's head.
+   Pieces: a scalp shell with a ragged or fuzzy hairline (it covers the bald scalp itself), painted strand cards,
+   spikes, buns, curl fins, and SWINGING tails (ponytails, braids, locs, twin tails) and curtains (long hair) — small
+   point-and-stick simulations that collide with the head, neck, shoulders and back. One shared 1024² strand picture
+   painted in code (`js/hair-paint.js`, see-through tips, light/shade only — the material turns it into any colour).
+   Cost: 0–1,420 triangles and one draw call per hairdo. Under headwear each head item's `hair` rule applies
+   (`hide` | `under` | `keep`): `under` tucks the hair 4 mm inside the hat's real inner surface, drops buns and
+   spikes, moves tails and curtains to start below the rim. The old Hair-slot `ponytail` item now picks the ponytail
+   style (`hairStyle`). `createTabard` shows the look's hair (`js/face.js defaultLook` until a look is given).
+5. **Cloth** (`js/cloth.js`): any prop with `place.cloth` in props.json (both capes today; the tabard flaps use
+   `place.hang` with leg clearing — see WORKFLOW §2d) hangs as cloth —
+   a coarse grid of points over the sheet, the top edge sewn to its bone, sliding over capsules fitted to the body
+   (torso, hips, thighs, shins, arms) so legs never push through. Options in `WORKFLOW.md` §2d.
+
+Body + swap-in pieces share one material; each prop adds one draw call; the hair adds one.
 
 ## Painting: Codex paints the 3D body's own picture ("projected textures")
 
@@ -99,9 +119,16 @@ neutral, opens the hands, and brings the upper arms in.
 | `data/props.json` | props: look, how they attach |
 | `data/shapes.json` | body reshaping knobs |
 | `models/` | `male.glb`, `female.glb` (+ `_asis` originals for the comparison), `anims.glb`, `<body>/<outfit>.webp`, `props/` |
+| `models/<body>_face.json`, `models/<body>/face.webp` | face layer data (round 4, `tools/blender/tb_face.py`): eyeballs (centre, radius, forward, lid lines, socket opening) in the Head bone's frame + face landmarks in the face texture (u right = character's left, v DOWN) and in the Head frame; the clean painted face (no brows/beard/eyes) in the `face_layer` mesh's own layout |
+| `tools/blender/tb_face.py` | builds `face_layer` (copy of the face, ear to ear, eye openings left open, same bone weights, 0.4 mm out, own longitude/latitude layout) into `build/<body>_fit.blend`, measures the eyes + landmarks; `TB_FACE_SHOTS=1` renders them as balls → `shots/<body>_face_*.png` |
+| `tools/head_clean.py` | bald, clean-shaven, browless head box in every body painting (from the Codex bald repaint `paint.mjs <body> head`, eyes and leftovers filled), and `models/<body>/face.webp`; `--debug` shows what it replaced |
 | `ref/` | clay sheets and Codex paintings (`job-*` folders are ignored by git) |
 | `tools/` | the pipeline (below) |
 | `assets/quaternius/` | the CC0 Universal Base Characters (free Standard pack: Superhero male + female) |
+| `js/hair.js`, `data/hair.json` | the hair layer: `createHair(ctx)` → `{ set({id, color} \| null), setHead(headItemId \| null), update(dt), settle(), stats(), dispose(), id, styles, ready }`; the 25 styles (+ aliases for the other Chibi ids) |
+| `js/hair-paint.js` | the shared hair picture, painted in code (cap strands, locks, wavy lock, tuft, braid, loc, curls, stubble, curl fringe, leather tie) |
+| `js/cloth.js` | `Verlet` (fixed 1/120 s steps, teleport reset), `bodyColliders()` (capsules fitted per body), `createCloth({ holder, bodyMesh, bones, opts })` → `{ update(dt), reset(), dispose() }` |
+| `tests/qa-hair.mjs` | hair sheets (`shots/qa/hair_<body>.png`), hair through headwear (`build/qa_hair_hats.json`), hair + cloth stability (`build/qa_hair_physics.json`) — part of `tools/qa.sh` |
 | `tests/qa-props.mjs` | close-ups of every attached item per slot per body (part of `tools/qa.sh`) |
 | `tests/data.test.js`, `tests/tabard.spec.js` | data rules; page tests (slot repaints only its boxes, robe/cuffs, props, tabs, phone) |
 
@@ -111,11 +138,14 @@ neutral, opens the hands, and brings the upper arms in.
 B=~/opt/blender/blender; cd avatar-3d/tabard/tools/blender
 for b in male female; do $B -b --python tb_body.py -- $b; $B -b --python tb_uv.py -- $b; $B -b --python tb_geo.py -- $b; $B -b --python tb_sheet.py -- $b; (cd ../.. && python3 tools/sheet.py $b); done
 node ../paint.mjs male skin; node ../paint.mjs male cloth   # … each body × skin, cloth, leather, plate (skin first)
-for b in male female; do for o in skin cloth leather plate; do $B -b --python tb_bake.py -- $b $o; done; $B -b --python tb_export.py -- $b; done
+node ../paint.mjs male head; node ../paint.mjs female head   # the skin painting made bald + clean-shaven (head_clean.py)
+for b in male female; do $B -b --python tb_face.py -- $b; for o in skin cloth leather plate mail sage head clay; do $B -b --python tb_bake.py -- $b $o; done; (cd ../.. && python3 tools/head_clean.py $b); $B -b --python tb_export.py -- $b; done
 $B -b --python tb_export.py -- anims; (cd ../.. && python3 tools/publish.py)
 for p in $(python3 -c "import json; print(' '.join(json.load(open('../../data/props.json'))['props']))"); do $B -b --python tb_prop.py -- build $p; (cd ../.. && python3 tools/sheet.py prop_$p); node ../paint.mjs prop $p; $B -b --python tb_prop.py -- bake $p; done
 $B -b --python tb_prop.py -- sockets
 ```
+Day to day after the paintings exist: `tools/rebuild-body.sh male female` (`UV=1` after a texture layout change)
+does geo → fit → face layer → align + bake every painting (+ `head`, `clay`) → head_clean → export → sockets → publish.
 Check renders: `tb_regions_look.py <body>` (boxes coloured on the body), `tb_look.py <body> <outfit>` (TB_GEO=robe,…),
 `python3 tools/uv_picture.py <body>` (texture layout). Page shots: `node tests/shoot.mjs "<query>" out.png [w h wait]`.
 

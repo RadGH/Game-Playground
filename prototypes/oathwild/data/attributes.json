@@ -1,0 +1,142 @@
+{
+  "_doc": "Oathwild attributes (PLAN \u00a70 Guessed: the D&D six). js/rules/attributes.js is the ONE reader: it turns these into the character sheet. 10 is average; every point above or below 10 moves the numbers in `perPoint`. Point buy at creation (D&D 5e costs), +1 point at every even character level, and a class adds its own growth (classes.json `growth`). `farholdPlayer` is laid over Farhold's balance.player in memory so Farhold's own attribute weights are switched off (each multiplier is applied in exactly one place \u2014 lessons rule 33): Oathwild applies Strength/Dexterity/Constitution/Intelligence here instead.",
+  "keys": [
+    "str",
+    "dex",
+    "con",
+    "int",
+    "wis",
+    "cha"
+  ],
+  "names": {
+    "str": "Strength",
+    "dex": "Dexterity",
+    "con": "Constitution",
+    "int": "Intelligence",
+    "wis": "Wisdom",
+    "cha": "Charisma"
+  },
+  "short": {
+    "str": "Str",
+    "dex": "Dex",
+    "con": "Con",
+    "int": "Int",
+    "wis": "Wis",
+    "cha": "Cha"
+  },
+  "blurbs": {
+    "str": "Heavy weapons hit harder, you carry more, and mail and plate need it.",
+    "dex": "Light weapons and bows hit harder, more critical hits and dodges, more stamina.",
+    "con": "More health and stamina, growing with every level; you carry a little more.",
+    "int": "Arcane, fire, frost, storm and shadow spells hit harder; more mana.",
+    "wis": "Holy and nature spells and every heal are stronger; mana comes back faster; resist magic.",
+    "cha": "Songs and summons are stronger, shops are cheaper, and companions hit harder."
+  },
+  "average": 10,
+  "max": 20,
+  "pointBuy": {
+    "_doc": "D&D 5e point buy: every attribute starts at 8 and 27 points raise them, up to 15 before class or level bonuses.",
+    "start": 8,
+    "min": 8,
+    "max": 15,
+    "points": 27,
+    "cost": {
+      "8": 0,
+      "9": 1,
+      "10": 2,
+      "11": 3,
+      "12": 4,
+      "13": 5,
+      "14": 7,
+      "15": 9
+    }
+  },
+  "levelPoints": {
+    "_doc": "+1 attribute point at every even character level (2, 4, 6, 8, 10).",
+    "every": 2,
+    "amount": 1
+  },
+  "perPoint": {
+    "_doc": "What one point above 10 is worth (a point below 10 takes the same off). Shares are fractions: 0.035 = +3.5%.",
+    "str": {
+      "heavyShare": 0.035,
+      "carry": 6
+    },
+    "dex": {
+      "lightShare": 0.035,
+      "rangedShare": 0.035,
+      "critChance": 0.3,
+      "dodge": 0.3,
+      "stamina": 2
+    },
+    "con": {
+      "hpFlat": 4,
+      "hpPerLevel": 1,
+      "stamina": 3,
+      "carry": 2
+    },
+    "int": {
+      "spellShare": 0.04,
+      "mp": 3
+    },
+    "wis": {
+      "spellShare": 0.04,
+      "healShare": 0.04,
+      "mpRegen": 0.06,
+      "magicResist": 1.5
+    },
+    "cha": {
+      "spellShare": 0.04,
+      "petShare": 0.04,
+      "priceCut": 0.015
+    }
+  },
+  "base": {
+    "_doc": "The numbers every character starts from before attributes, classes and gear.",
+    "hp": 46,
+    "mp": 20,
+    "mpRegen": 1.2,
+    "hpRegen": 0.6,
+    "critChance": 5,
+    "critDamage": 50,
+    "carry": 70,
+    "spellPower": [
+      7,
+      11
+    ],
+    "spellPerLevel": 0.11,
+    "magicWeaponShare": 0.5,
+    "moveSpeed": 5.4,
+    "stamina": 80,
+    "staminaRegen": 14
+  },
+  "schoolAttr": {
+    "_doc": "Which attribute powers a spell, by its element. `weapon` spells use the weapon in your hands instead (melee or ranged power).",
+    "fire": "int",
+    "ice": "int",
+    "lightning": "int",
+    "arcane": "int",
+    "shadow": "int",
+    "poison": "int",
+    "holy": "wis",
+    "nature": "wis",
+    "song": "cha"
+  },
+  "farholdPlayer": {
+    "_doc": "Laid over farhold/data/balance.json player in memory. Zeroes Farhold's own attribute weights and per-level health/mana (Oathwild's classes give those).",
+    "hpPerCon": 0,
+    "mpPerInt": 0,
+    "damagePerAttr": 0,
+    "hpPerLevel": 0,
+    "mpPerLevel": 0,
+    "str": 0,
+    "dex": 0,
+    "int": 0,
+    "con": 0
+  },
+  "_farholdDexDoc": "Farhold's derive adds Dexterity x0.2 critical chance and x0.3 dodge in code (not in balance), so attributes.js takes exactly that back off for gear Dexterity and applies Oathwild's own perPoint.dex once.",
+  "farholdDex": {
+    "critChance": 0.2,
+    "dodge": 0.3
+  }
+}

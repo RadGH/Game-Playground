@@ -1,0 +1,13 @@
+Use your image generation tool to create ONE image, square 1024x1024 PNG, and save it in the current working directory as out.png. Do nothing else (do not write code, do not edit other files).
+Layout: a 2 x 2 grid of FOUR separate objects for a 3D modeller, one object centred in each quarter of the picture, each object whole and large in its quarter (about 75% of the quarter's width or height) with WIDE empty background between the four objects; no object crosses into another quarter; nothing touching the picture edge. All four drawn at a similar size in the picture (do NOT keep their real-world scale relative to each other).
+View: each object seen in a three-quarter view from the front-left and slightly above (about 20 degrees down), orthographic, no perspective, so its front and one side and a little of its top are visible.
+Each object stands alone on nothing: no ground patch, no grass base, no floor, no shadow, no stand, no people, no animals.
+Top-left: small one-storey farm cottage: white plaster walls with dark oak timber framing, thick golden thatched roof with rounded edges, a stone chimney, one wooden plank door on the front, two small shuttered windows, a low stone footing.
+Top-right: small one-storey cottage of rough grey fieldstone with a steep blue-grey slate roof, a chunky stone chimney at one end, a green-painted wooden door with an iron ring, one small window with a flower box.
+Bottom-left: woodsman's log cabin of thick round brown logs with crossed log ends at the corners, a mossy wooden shingle roof, a small covered porch with two posts over the front door, a stone chimney on the side.
+Bottom-right: two-storey village inn and longhouse: stone ground floor, timber-framed cream plaster upper floor that juts out a little, long red-brown tiled roof, a big double door in the middle of the long front, a hanging painted wooden sign on an iron bracket showing a golden goose, warm yellow windows.
+Make it game-ready low-poly: big flat facets and simple chunky silhouettes, details PAINTED into the colours rather than modelled.
+
+Style: stylized low-poly hand-painted fantasy online-RPG game art: chunky simple readable shapes, slightly exaggerated proportions, large hands and feet, hand-painted colour with soft painted-in highlights and shadows, crisp colour blocks, almost no fine surface noise, matte, NOT photoreal, NOT glossy, NOT a 3D render with realistic materials.
+Lighting/background: even flat lighting, soft shading that describes the forms, no harsh shadows, plain flat light-grey background (#c8c8c8), no floor shadow, no scenery.
+Constraints: no text, no labels, no lettering, no watermark, no extra characters or objects.

@@ -33,6 +33,7 @@ ONLY = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 report = {}
 for iid, (length, grip) in GRIP.items():
     if ONLY and iid not in ONLY: continue
+    if not os.path.exists(os.path.join(SRC, iid + '.glb')): continue   # listed in gear.json but not made yet (Oathwild weapons waiting for credit)
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=os.path.join(SRC, iid + '.glb'))
     o = next(x for x in bpy.data.objects if x.type == 'MESH')

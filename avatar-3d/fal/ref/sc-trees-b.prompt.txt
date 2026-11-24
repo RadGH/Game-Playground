@@ -1,0 +1,13 @@
+Use your image generation tool to create ONE image, square 1024x1024 PNG, and save it in the current working directory as out.png. Do nothing else (do not write code, do not edit other files).
+Layout: a 2 x 2 grid of FOUR separate objects for a 3D modeller, one object centred in each quarter of the picture, each object whole and large in its quarter (about 75% of the quarter's width or height) with WIDE empty background between the four objects; no object crosses into another quarter; nothing touching the picture edge. All four drawn at a similar size in the picture (do NOT keep their real-world scale relative to each other).
+View: each object seen in a three-quarter view from the front-left and slightly above (about 20 degrees down), orthographic, no perspective, so its front and one side and a little of its top are visible.
+Each object stands alone on nothing: no ground patch, no grass base, no floor, no shadow, no stand, no people, no animals.
+Top-left: a stylized slim birch tree: a thin white trunk with black bark marks, and a tall oval crown of chunky light yellow-green leaf clumps.
+Top-right: a stylized weeping willow: a thick leaning trunk and a dome crown whose long chunky curtains of green leaves hang down almost to the ground.
+Bottom-left: a stylized twisted swamp tree standing on tall arching roots like stilts, a crooked dark grey-brown trunk, a sparse flat crown of murky olive-green leaf clumps and hanging grey moss strands.
+Bottom-right: a stylized dead leafless tree: a pale grey twisted trunk with a few thick crooked bare branches reaching up, a split at the top.
+Make it game-ready low-poly: big flat facets and simple chunky silhouettes, details PAINTED into the colours rather than modelled.
+
+Style: stylized low-poly hand-painted fantasy online-RPG game art: chunky simple readable shapes, slightly exaggerated proportions, large hands and feet, hand-painted colour with soft painted-in highlights and shadows, crisp colour blocks, almost no fine surface noise, matte, NOT photoreal, NOT glossy, NOT a 3D render with realistic materials.
+Lighting/background: even flat lighting, soft shading that describes the forms, no harsh shadows, plain flat light-grey background (#c8c8c8), no floor shadow, no scenery.
+Constraints: no text, no labels, no lettering, no watermark, no extra characters or objects.

@@ -1,0 +1,82 @@
+{
+  "_doc": "Oathwild's own combat knobs (js/rules/combat.js is the one reader). Damage maths is Farhold's (rpg.strike); these are the world sim's timings, ranges, stamina costs and death rules.",
+  "tickHz": 20,
+  "projectile": {
+    "_doc": "Metres a second.",
+    "bolt": 32,
+    "arrow": 44,
+    "radius": 0.6
+  },
+  "aimAssist": {
+    "_doc": "How far off the aim line (degrees) a target-an-ally or beam spell still finds someone.",
+    "degrees": 8
+  },
+  "stamina": {
+    "_doc": "Stamina pays for sprint (per second), a dodge roll, a power attack (a held swing) and every hit you block.",
+    "sprintPerSecond": 12,
+    "sprintMult": 1.55,
+    "dodge": 25,
+    "dodgeMetres": 4,
+    "dodgeSafeSeconds": 0.35,
+    "powerAttack": 20,
+    "powerHold": 0.6,
+    "powerMult": 1.8,
+    "blockHit": 10,
+    "blockShield": 0.6,
+    "blockWeapon": 0.3,
+    "regenDelay": 1
+  },
+  "combatState": {
+    "_doc": "A body is 'in combat' while a monster has it on its threat list or it hit or was hit in the last `seconds`.",
+    "seconds": 6
+  },
+  "regen": {
+    "_doc": "Out of combat, share of maximum health and mana back per second (in combat only the sheet's own regen).",
+    "outOfCombat": 0.04
+  },
+  "monsters": {
+    "leashMetres": 45,
+    "noticeDefault": 18,
+    "thinkRadius": 90,
+    "corpseSeconds": 300,
+    "rangedKeep": 0.8
+  },
+  "death": {
+    "_doc": "A player at 0 health is downed for `downedSeconds` (an ally can revive them by holding Interact for `reviveSeconds` within `reviveRange`, back at `reviveShare` health); after that, or by choice, they respawn at their last shrine paying `goldShare` of their gold (at most goldCapPerLevel x level) and inventory.json durability.respawnLoss.",
+    "downedSeconds": 30,
+    "reviveSeconds": 3,
+    "reviveRange": 3,
+    "reviveShare": 0.3,
+    "goldShare": 0.05,
+    "goldCapPerLevel": 15
+  },
+  "xpRange": {
+    "_doc": "Players further than this from a kill get no XP or loot from it (they did not help, or wandered off).",
+    "metres": 80
+  },
+  "pets": {
+    "_doc": "Summoned companions: their health/damage come from their monster row at the caster's level, x the summon's power and the caster's petPct.",
+    "followMetres": 4,
+    "leashMetres": 30
+  },
+  "monsterScale": {
+    "_doc": "Oathwild's monsters live longer than Farhold's (owner: WoW-like fights). x on every monster's health and damage at spawn (companions are not scaled).",
+    "hp": 3,
+    "dmg": 1.7
+  },
+  "farholdEnemies": {
+    "_doc": "Laid over farhold/data/balance.json `enemies` in memory (js/rules/engine.js): how fast a monster's health and damage grow per level. Oathwild's characters grow faster per level than Farhold's (class points, ranks, class depth), so its monsters do too.",
+    "perLevel": 1.3,
+    "dmgPerLevel": 1.1
+  },
+  "magicWeapon": {
+    "_doc": "A magic weapon (wand, staff, sceptre, orb) shoots a bolt of spell power instead of swinging (as in Thousandvale).",
+    "mult": 0.8,
+    "element": "arcane",
+    "range": 32
+  },
+  "formSwing": {
+    "_doc": "Seconds between a shape's basic attacks (a wolf's bite, a bear's swipe) before haste; each attack lands the shape's `hits`.",
+    "every": 1.1
+  }
+}

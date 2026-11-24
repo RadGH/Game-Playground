@@ -1,0 +1,44 @@
+{
+  "_doc": "What a character may wear and wield. js/rules/proficiency.js is the one reader. A character has a proficiency from: `always`, a class node (classes.json kind prof), a talent (talents.json grants.prof), or an item enchantment (`affixes` below) on the item itself or on anything else worn. Armour also needs Strength (`armour.<tier>.str`); so do the heaviest shields and two-handed heavy weapons. Emberveil's armour tiers map onto Oathwild's four (`tierOf`).",
+  "always": ["cloth", "simple"],
+  "names": {
+    "cloth": "Cloth", "leather": "Leather armour", "mail": "Mail armour", "plate": "Plate armour", "shield": "Shields",
+    "simple": "Simple weapons", "martial": "Martial weapons", "bows": "Bows and crossbows", "arcane": "Arcane implements", "dualWield": "Two weapons at once"
+  },
+  "armour": {
+    "cloth": { "str": 0 },
+    "leather": { "str": 0 },
+    "mail": { "str": 12 },
+    "plate": { "str": 15 }
+  },
+  "tierOf": { "cloth": "cloth", "light": "leather", "medium": "mail", "heavy": "plate" },
+  "shields": {
+    "_doc": "By base key. A magic shield (focus, orb-ward) is an arcane implement.",
+    "buckler": { "prof": "shield", "str": 0 },
+    "shield": { "prof": "shield", "str": 11 },
+    "kite_shield": { "prof": "shield", "str": 12 },
+    "tower_shield": { "prof": "shield", "str": 14 },
+    "aegis_shield": { "prof": "shield", "str": 15 },
+    "quiver": { "prof": "bows", "str": 0 },
+    "magic": { "prof": "arcane", "str": 0 }
+  },
+  "weapons": {
+    "_doc": "By subtype (Emberveil items.json). `twoHandedStr`: Strength a two-handed weapon of that category needs.",
+    "bySubtype": {
+      "dagger": "simple", "mace": "simple", "spear": "simple", "javelin": "simple", "staff": "simple",
+      "sword": "martial", "axe": "martial", "hammer": "martial", "sword2h": "martial", "axe2h": "martial", "polearm": "martial",
+      "bow": "bows", "crossbow": "bows",
+      "wand": "arcane", "scepter": "arcane", "orb": "arcane", "tome": "arcane"
+    },
+    "twoHandedStr": { "heavy": 13, "light": 0, "magic": 0 }
+  },
+  "affixes": [
+    { "id": "of_the_bulwark", "name": "of the Bulwark", "grants": "plate", "minRarity": "magic", "weight": 3 },
+    { "id": "of_the_hauberk", "name": "of the Hauberk", "grants": "mail", "minRarity": "magic", "weight": 4 },
+    { "id": "of_the_armsman", "name": "of the Armsman", "grants": "martial", "minRarity": "magic", "weight": 4 },
+    { "id": "of_the_bowyer", "name": "of the Bowyer", "grants": "bows", "minRarity": "magic", "weight": 4 },
+    { "id": "of_the_adept", "name": "of the Adept", "grants": "arcane", "minRarity": "magic", "weight": 4 },
+    { "id": "of_the_shieldbearer", "name": "of the Shieldbearer", "grants": "shield", "minRarity": "magic", "weight": 4 }
+  ],
+  "strengthNote": "An affix grants the training, never the Strength: plate of the Bulwark still needs 15 Strength."
+}

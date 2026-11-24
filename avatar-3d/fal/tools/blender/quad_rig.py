@@ -2,7 +2,7 @@
 named skeleton there, and let Blender work out the skin weights (automatic weights, "bone heat"; when that finds no
 solution, as on the drake, each point follows its nearest bones by distance).
 
-    ~/opt/blender/blender -b -P avatar-3d/fal/tools/blender/quad_rig.py -- <upright.glb> <out.glb> [--wings] [--shot <png>]
+    ~/opt/blender/blender -b -P avatar-3d/fal/tools/blender/quad_rig.py -- <upright.glb> <out.glb> [--wings] [--tail-floor] [--straighten] [--shot <png>]
 
 Why: fal's Tripo rig ($0.30, rig_type quadruped, v2.5) returned a wolf with only two legs and a drake with its back legs
 missing (Test 3). The input is the turned-to-front, low-poly model (front = -Y, up = +Z, feet on Z = 0).
@@ -37,6 +37,23 @@ bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 # weld the points the maker split along texture seams (UVs live on the corners, so they survive): split points get
 # different weights and open cracks when the body bends; bone heat also fails less on a closed surface
 bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.mesh.remove_doubles(threshold=0.0005); bpy.ops.object.mode_set(mode='OBJECT')
+if '--straighten' in argv:
+    # a three-quarter drawing can come back turned a little (Oathwild mountain lion: ~23°, front feet both left of the
+    # middle line): turn the body so its long axis (principal axis of the footprint) runs along Y, centred on X = 0
+    import math as _m
+    from mathutils import Matrix as _M
+    P = [v.co for v in body.data.vertices]; mx = sum(p.x for p in P) / len(P); my = sum(p.y for p in P) / len(P)
+    sxx = sum((p.x - mx) ** 2 for p in P); syy = sum((p.y - my) ** 2 for p in P); sxy = sum((p.x - mx) * (p.y - my) for p in P)
+    ang = 0.5 * _m.atan2(2 * sxy, sxx - syy)          # angle of the long axis from +X
+    turn = _m.pi / 2 - ang
+    if turn > _m.pi / 2: turn -= _m.pi
+    if turn < -_m.pi / 2: turn += _m.pi
+    body.data.transform(_M.Translation((-mx, -my, 0)))
+    body.data.transform(_M.Rotation(turn, 4, 'Z'))
+    P = [v.co for v in body.data.vertices]
+    body.data.transform(_M.Translation((-(min(p.x for p in P) + max(p.x for p in P)) / 2, 0, 0)))
+    body.data.update()
+    print('STRAIGHTEN', round(_m.degrees(turn), 1))
 V = [v.co.copy() for v in body.data.vertices]
 zmax = max(v.z for v in V); ymin = min(v.y for v in V); ymax = max(v.y for v in V); L = ymax - ymin
 H = zmax
@@ -45,6 +62,8 @@ H = zmax
 low = [v for v in V if v.z < H * 0.08]
 xr = max(abs(v.x) for v in low)
 low = [v for v in low if abs(v.x) > xr * 0.3]   # feet stand apart; a tail lying on the ground runs down the middle
+if '--tail-floor' in argv:   # a long tail whose tip rests on the ground off the middle line (mountain lion): no foot in the last 20 %
+    low = [v for v in low if v.y < ymax - 0.2 * L]
 def gap_split(vals):
     """two groups along one axis (2-means, started at the ends): robust to stray claw points between the feet"""
     a, b = min(vals), max(vals)

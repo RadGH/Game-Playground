@@ -14,9 +14,14 @@
 // Safe to run again: the request id is saved in data/jobs/<name>.json right after submit, and a second run resumes
 // polling that request instead of submitting (and paying) again. Delete that file to really submit again.
 //
+// Budget guard (Oathwild 2026-11-23): --tag <name> stores a tag on the spend row; --cap "<prefix>:<US$>,..." refuses to
+// SUBMIT when the rows whose tag starts with <prefix> (plus jobs already submitted with such a tag but not logged yet,
+// so parallel runs count) plus this price would pass that amount. Resuming a submitted job is never refused.
+// FAL_TAG / FAL_CAPS in the environment do the same (tools/run-body.sh passes them through).
+//
 // The key comes from FALAI_API_KEY (or FAL_KEY) in the environment, else from ~/claude/secrets/.env. It is never
 // printed, logged or written anywhere.
-import { readFileSync, writeFileSync, mkdirSync, rmdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmdirSync, existsSync, readdirSync } from 'node:fs';
 import { join, dirname, basename, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
@@ -77,7 +82,22 @@ function files(o, path = [], out = []) {
 	return out;
 }
 
-export async function runJob({ endpoint, name, price, input, note }) {
+export function capCheck(price, caps, ROOTDIR = ROOT) {
+	if (!caps) return;
+	const spendFile = join(ROOTDIR, 'data', 'spend.json');
+	const spend = existsSync(spendFile) ? JSON.parse(readFileSync(spendFile, 'utf8')) : { jobs: [] };
+	const logged = new Set(spend.jobs.map(j => j.id));
+	const jobsDir = join(ROOTDIR, 'data', 'jobs');
+	const pending = existsSync(jobsDir) ? readdirSync(jobsDir).filter(f => f.endsWith('.json')).map(f => JSON.parse(readFileSync(join(jobsDir, f), 'utf8'))).filter(j => !j.logged && !logged.has(j.name) && j.tag) : [];
+	for (const pair of String(caps).split(',')) {
+		const [prefix, amt] = pair.split(':'); const cap = parseFloat(amt);
+		const used = spend.jobs.filter(j => (j.tag || '').startsWith(prefix)).reduce((a, j) => a + j.price, 0)
+			+ pending.filter(j => j.tag.startsWith(prefix)).reduce((a, j) => a + j.price, 0);
+		if (used + price > cap + 1e-9) throw new Error(`BUDGET: ${prefix} has US$${used.toFixed(2)} spent or running; +${price} would pass US$${cap}`);
+	}
+}
+
+export async function runJob({ endpoint, name, price, input, note, tag, caps }) {
 	const key = falKey();
 	const auth = { Authorization: 'Key ' + key };
 	const jobsDir = join(ROOT, 'data', 'jobs'); mkdirSync(jobsDir, { recursive: true });
@@ -85,12 +105,13 @@ export async function runJob({ endpoint, name, price, input, note }) {
 	let job = existsSync(jobFile) ? JSON.parse(readFileSync(jobFile, 'utf8')) : null;
 	const t0 = Date.now();
 	if (!job) {
+		capCheck(price, caps);
 		const resolved = await resolveInputs(input, key);
 		const r = await fetch('https://queue.fal.run/' + endpoint, { method: 'POST', headers: { ...auth, 'Content-Type': 'application/json' }, body: JSON.stringify(resolved) });
 		const text = await r.text();
 		if (!r.ok) throw new Error('submit ' + r.status + ' ' + text);
 		const q = JSON.parse(text);
-		job = { endpoint, name, price, input, resolved, note, request_id: q.request_id, status_url: checkOrigin(q.status_url), response_url: checkOrigin(q.response_url), submitted: new Date().toISOString() };
+		job = { endpoint, name, price, input, resolved, note, tag, request_id: q.request_id, status_url: checkOrigin(q.status_url), response_url: checkOrigin(q.response_url), submitted: new Date().toISOString() };
 		writeFileSync(jobFile, JSON.stringify(job, null, 1));
 		console.log(name + ': submitted ' + job.request_id);
 	} else console.log(name + ': resuming ' + job.request_id);
@@ -120,7 +141,7 @@ export async function runJob({ endpoint, name, price, input, note }) {
 		try {
 		const spendFile = join(ROOT, 'data', 'spend.json');
 		const spend = existsSync(spendFile) ? JSON.parse(readFileSync(spendFile, 'utf8')) : { _doc: 'Every paid fal.ai job (tools/fal-job.mjs). price = US$ from the model page at the time.', total: 0, jobs: [] };
-		spend.jobs.push({ id: name, endpoint, request_id: job.request_id, price, input, note, files: saved, submitted: job.submitted, done: new Date().toISOString(), seconds: Math.round((Date.now() - t0) / 1000) });
+		spend.jobs.push({ id: name, endpoint, request_id: job.request_id, price, input, note, ...(job.tag ? { tag: job.tag } : {}), files: saved, submitted: job.submitted, done: new Date().toISOString(), seconds: Math.round((Date.now() - t0) / 1000) });
 		spend.total = Math.round(spend.jobs.reduce((a, j) => a + j.price, 0) * 100) / 100;
 		writeFileSync(spendFile, JSON.stringify(spend, null, 1));
 		job.logged = true; writeFileSync(jobFile, JSON.stringify(job, null, 1));
@@ -134,5 +155,5 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
 	const [endpoint, name] = process.argv.slice(2);
 	const price = parseFloat(arg('price'));
 	if (!endpoint || !name || !(price >= 0) || !arg('input')) { console.error('usage: fal-job.mjs <endpoint> <name> --price <US$> --input <json> [--note text]'); process.exit(2); }
-	runJob({ endpoint, name, price, input: JSON.parse(arg('input')), note: arg('note') }).catch(e => { console.error(name + ': ' + e.message); process.exit(1); });
+	runJob({ endpoint, name, price, input: JSON.parse(arg('input')), note: arg('note'), tag: arg('tag') || process.env.FAL_TAG, caps: arg('cap') || process.env.FAL_CAPS }).catch(e => { console.error(name + ': ' + e.message); process.exit(1); });
 }

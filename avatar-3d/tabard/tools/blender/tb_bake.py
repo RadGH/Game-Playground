@@ -109,6 +109,15 @@ def proxy(i, p, n):
     return p, n
 
 
-pics = {k: os.path.join(BUILD, f"{body}_{outfit}_{k}.png") for k in TP.VIEWS}
-TP.project_bake(posed, bvh, meta, pics, os.path.join(BUILD, f"{body}_{outfit}_atlas.png"), 1024, proxy=proxy, label=f"{body}/{outfit}",
-                occl=occl, occl_for=occl_for)
+# outfit "clay": the plain clay renders the painter painted over (tb_sheet.py), baked the same way -> the light and
+# shade every painting follows, for tools/head_clean.py (bald scalp, shaved face). Not an outfit: not published.
+if outfit == "clay":
+    pics = {k: os.path.join(BUILD, f"{body}_view_{k}.png") for k in TP.VIEWS}; out_png = os.path.join(BUILD, f"{body}_clay_shade.png")
+else:   # outfit "head" (tools/paint.mjs <body> head: the skin painting made bald and clean-shaven) is not published
+    pics = {k: os.path.join(BUILD, f"{body}_{outfit}_{k}.png") for k in TP.VIEWS}
+    out_png = os.path.join(BUILD, f"{body}_headpaint.png" if outfit == "head" else f"{body}_{outfit}_atlas.png")
+# GRAZING: spots that every view sees edge-on (no view faces them better than 0.4; fully below 0.2) take their
+# well-seen neighbours' paint — their own samples are streaks (shoulder tops, 2026-11-23); facing is judged on
+# normals averaged over the neighbourhood (6 passes ≈ 3 cm), so the best view does not flip point to point
+TP.project_bake(posed, bvh, meta, pics, out_png, 1024, proxy=proxy, label=f"{body}/{outfit}",
+                occl=occl, occl_for=occl_for, grazing=(0.2, 0.4), smooth_normals=6)

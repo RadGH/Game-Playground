@@ -1,5 +1,5 @@
 {
- "_doc": "Tabard equipment. Every item says which LAYERS it uses: paint = the outfit painting whose boxes it paints for its slot (data/outfits.json id; the boxes come from data/regions.json slots); geosets = swap-in mesh pieces it turns on; hides = pieces it forces off (a robe hides boot cuffs); attach = a separate model on a bone (data/props.json id). js/tabard.js reads this file only. Names are what a player sees. hidesHair: a head item that hides whatever the hair slot wears. fal: a fal.ai weapon or shield (avatar-3d/fal/data/catalog.json id) held on the Tabard grips; every held fal item is also offered automatically as 'fal:<id>' (js/tabard.js loadTabardData), so new fal weapons need no entry here.",
+ "_doc": "Tabard equipment. Every item says which LAYERS it uses: paint = the outfit painting whose boxes it paints for its slot (data/outfits.json id; the boxes come from data/regions.json slots); geosets = swap-in mesh pieces it turns on; hides = pieces it forces off (a robe hides boot cuffs); attach = a separate model on a bone (data/props.json id). js/tabard.js reads this file only. Names are what a player sees. hair: a head item's rule for the hair layer (js/hair.js) — 'hide' (no hair shows: closed helms, hoods), 'under' (the hair's tucked version: crown pressed under the hat, buns/spikes dropped, hair below the rim kept), 'keep' (untouched), or one per body { male, female }; the old hidesHair: true still means 'hide'. hairStyle: a Hair-slot item that just picks a hair style (data/hair.json id) in the look's colour. fal: a fal.ai weapon or shield (avatar-3d/fal/data/catalog.json id) held on the Tabard grips; every held fal item is also offered automatically as 'fal:<id>' (js/tabard.js loadTabardData), so new fal weapons need no entry here. attach may be a list of props (the full tabard: chest panels + belt flaps). only: the named parts of a prop to wear (tabard flaps: 'front', 'back'). hold: 'pole' = a staff, spear or two-hander: held on the pole grip (shaft through the fist at a right angle to the forearm) with the elbow bent forward in idle/walk so it stands up; long fal weapons get it by themselves. shrinkAbove: {k, from} = the part of a weapon more than `from` metres above the fist is shrunk by k (shaft + head), the handle in the fist keeps its size. turn: degrees a held item is turned about its own long axis (the bow: string toward the archer). An entry keyed 'fal:<id>' keeps the automatic id (games map to it) while adding options (shrinkAbove on the oversized clubs).",
  "slots": {
   "head": {
    "name": "Head"
@@ -15,6 +15,9 @@
   },
   "chest": {
    "name": "Chest"
+  },
+  "tabard": {
+   "name": "Tabard"
   },
   "hands": {
    "name": "Hands"
@@ -117,7 +120,7 @@
    "slot": "head",
    "name": "Bulwark Greathelm",
    "attach": "helm_bulwark",
-   "hidesHair": true
+   "hair": "hide"
   },
   "pauldrons_bulwark": {
    "slot": "shoulders",
@@ -137,7 +140,8 @@
   "staff_oak": {
    "slot": "mainhand",
    "name": "Oak Spellstaff",
-   "attach": "staff_oak"
+   "attach": "staff_oak",
+   "hold": "pole"
   },
   "shield_heater": {
    "slot": "offhand",
@@ -146,63 +150,69 @@
   },
   "ponytail": {
    "slot": "hair",
-   "name": "Braided Ponytail",
-   "attach": "hair_ponytail"
+   "name": "Ponytail",
+   "hairStyle": "ponytail"
   },
   "helm_gullwing": {
    "slot": "head",
    "name": "Gullwing Greathelm",
    "attach": "helm_bulwark_winged",
-   "hidesHair": true
+   "hair": "hide"
   },
   "helm_ramhorn": {
    "slot": "head",
    "name": "Ramhorn Greathelm",
    "attach": "helm_bulwark_horned",
-   "hidesHair": true
+   "hair": "hide"
   },
   "helm_ironjaw": {
    "slot": "head",
    "name": "Ironjaw Visored Helm",
    "attach": "helm_visor",
-   "hidesHair": true
+   "hair": "hide"
   },
   "helm_northwatch": {
    "slot": "head",
    "name": "Northwatch Nasal Helm",
-   "attach": "helm_nasal"
+   "attach": "helm_nasal",
+   "hair": "under"
   },
   "helm_kettle": {
    "slot": "head",
    "name": "Footman's Kettle Helm",
-   "attach": "helm_kettle"
+   "attach": "helm_kettle",
+   "hair": "hide",
+   "hairNote": "hides until the back brim clears the nape: tipped back 18° (2026-11-23) it sits 0-4 cm off the neck, so a bun, tie or tail has no way out under it (tests/qa-hair.mjs hats); set 'under' again after reseating"
   },
   "cap_trail": {
    "slot": "head",
    "name": "Trailwarden Leather Cap",
-   "attach": "cap_leather"
+   "attach": "cap_leather",
+   "hair": "under"
   },
   "hood_wanderer": {
    "slot": "head",
    "name": "Wanderer's Hood",
    "attach": "hood_wanderer",
-   "hidesHair": true
+   "hair": "hide"
   },
   "coif_ironlink": {
    "slot": "head",
    "name": "Ironlink Mail Coif",
    "attach": "coif_mail",
-   "hidesHair": true
+   "hair": "hide"
   },
   "circlet_moon": {
    "slot": "head",
    "name": "Moonsilver Circlet",
-   "attach": "circlet_moon"
+   "attach": "circlet_moon",
+   "hair": "under"
   },
   "hat_starweaver": {
    "slot": "head",
    "name": "Starweaver's Hat",
-   "attach": "hat_wizard"
+   "attach": "hat_wizard",
+   "hair": "under"
   },
   "pauldrons_ironspike": {
    "slot": "shoulders",
@@ -284,17 +294,86 @@
   "axe_halfmoon": {
    "slot": "mainhand",
    "name": "Halfmoon Axe",
-   "fal": "axe"
+   "fal": "axe",
+   "hold": "pole"
   },
   "mace_thornhead": {
    "slot": "mainhand",
    "name": "Thornhead Morningstar",
-   "fal": "mace"
+   "fal": "mace",
+   "shrinkAbove": {
+    "k": 0.65,
+    "from": 0.05
+   }
   },
   "bow_horn": {
    "slot": "mainhand",
    "name": "Horn Recurve",
    "fal": "bow"
+  },
+  "tabard_tower_flap": {
+   "slot": "tabard",
+   "name": "Footman's Tower Flap",
+   "attach": "tabard_flaps_tower",
+   "only": [
+    "front"
+   ]
+  },
+  "tabard_tower_pair": {
+   "slot": "tabard",
+   "name": "Tower Tabard Flaps",
+   "attach": "tabard_flaps_tower"
+  },
+  "tabard_tower": {
+   "slot": "tabard",
+   "name": "Tower Tabard",
+   "attach": [
+    "tabard_top_tower",
+    "tabard_flaps_tower"
+   ]
+  },
+  "tabard_stag_flap": {
+   "slot": "tabard",
+   "name": "Stag Tabard Flap",
+   "attach": "tabard_flaps_stag",
+   "only": [
+    "front"
+   ]
+  },
+  "tabard_stag": {
+   "slot": "tabard",
+   "name": "Stag Tabard",
+   "attach": [
+    "tabard_top_stag",
+    "tabard_flaps_stag"
+   ]
+  },
+  "fal:spiked-club": {
+   "slot": "mainhand",
+   "name": "Spiked Club",
+   "fal": "spiked-club",
+   "shrinkAbove": {
+    "k": 0.75,
+    "from": 0.05
+   }
+  },
+  "fal:bone-club": {
+   "slot": "mainhand",
+   "name": "Bone Club",
+   "fal": "bone-club",
+   "shrinkAbove": {
+    "k": 0.7,
+    "from": 0.05
+   }
+  },
+  "fal:gob-cleaver": {
+   "slot": "mainhand",
+   "name": "Rusty Cleaver",
+   "fal": "gob-cleaver",
+   "shrinkAbove": {
+    "k": 0.8,
+    "from": 0.05
+   }
   }
  },
  "sets": {
@@ -432,7 +511,8 @@
     "boots_ironlink",
     "helm_kettle",
     "sword_arming",
-    "shield_oakring"
+    "shield_oakring",
+    "tabard_tower_flap"
    ]
   },
   "pilgrim": {
@@ -457,6 +537,33 @@
     "helm_northwatch",
     "axe_halfmoon",
     "shield_oakring"
+   ]
+  },
+  "banneret": {
+   "name": "Tower banneret (mail + tabard)",
+   "items": [
+    "hauberk_ironlink",
+    "gauntlets_bulwark",
+    "chausses_ironlink",
+    "sabatons_bulwark",
+    "helm_northwatch",
+    "pauldrons_bulwark",
+    "tabard_tower",
+    "sword_arming",
+    "shield_bluefield"
+   ]
+  },
+  "stagherald": {
+   "name": "Stag herald (plate + tabard)",
+   "items": [
+    "cuirass_bulwark",
+    "gauntlets_bulwark",
+    "legplates_bulwark",
+    "sabatons_bulwark",
+    "helm_gullwing",
+    "tabard_stag",
+    "cape_herald",
+    "sword_arming"
    ]
   }
  }

@@ -1,0 +1,22 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "bristleback-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/bristleback-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3aec3/9YMNz3CQ2hwqA1jP8of--_bristleback-front.png",
+  "face_limit": 3000,
+  "texture": true
+ },
+ "note": "bristleback: Tripo P1 textured, face_limit 3000",
+ "tag": "oathwild-enemies",
+ "request_id": "01a20adb-4540-75a1-a459-0e1e3bb519b0",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20adb-4540-75a1-a459-0e1e3bb519b0/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20adb-4540-75a1-a459-0e1e3bb519b0",
+ "submitted": "2026-11-24T00:01:12.043Z",
+ "logged": true
+}

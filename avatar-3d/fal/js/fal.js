@@ -14,6 +14,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { blendTo } from '../../js/anim-blend.js';
 import { createBeastMotion } from './beast.js';
 
 const ROOT = new URL('../', import.meta.url);
@@ -147,8 +148,7 @@ export async function createFalCharacter(bodyId) {
     const c = clips[key]; if (!c) return;
     const next = mixer.clipAction(c);
     const once = key === 'death' || key === 'attack' || key === 'cast' || key === 'punch' || key === 'hit';
-    next.reset(); next.setLoop(once ? THREE.LoopOnce : THREE.LoopRepeat, Infinity); next.clampWhenFinished = once;
-    if (action && action !== next) { next.play(); action.crossFadeTo(next, fade, false); } else next.play();
+    blendTo(mixer, next, fade, once);              // weights always sum to 1: no T-pose flashes between clips
     action = next; clipKey = key;
   }
 
@@ -213,6 +213,7 @@ export async function createFalCharacter(bodyId) {
   }
 
   play('idle', 0);
+  mixer.update(0);                                  // posed now: never drawn in the bind (T) pose for a frame
   return {
     group, bones, regions, def, worn, play, equip, stats,
     get clip() { return clipKey; },

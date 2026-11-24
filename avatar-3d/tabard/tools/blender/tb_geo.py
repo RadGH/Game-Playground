@@ -82,7 +82,11 @@ def build(name, rings, n, rect, weights, uv_seam=0.0):
 
 back = Vector((0, 1, 0))
 # knobs (data/geosets.json would be nicer; kept here next to the code that uses them)
-ROBE_TOP_GAP = 0.016   # waist clearance (m)
+ROBE_TOP_GAP = 0.016   # waist clearance (m) the skirt's cone is shaped from (room for the legs lower down)
+ROBE_WAIST_GAP = 0.010 # ... but the top ring itself sits this close: 0.016 stood off the body as a ledge you could see into
+ROBE_TUCK = (0.035, 0.008)   # a ring this far ABOVE the waist ring and this far INSIDE the body: the top edge is tucked
+                             # into the torso, so the skirt grows out of the waist with no gap (owner 2026-11-23)
+ROBE_BODY_W = 0.03     # over this drop below the waist the skirt hands over from the body's own bone weights
 ROBE_GAP = 0.05        # clearance everywhere below
 ROBE_BLEND = 0.12      # width (m) over which the skirt hands over from the left leg to the right
 ROBE_LEG_RISE = 2.2    # how fast the legs take over from the pelvis going down (1 = only at the hem)
@@ -114,9 +118,41 @@ for k, (c, s, u, br) in enumerate(body_r):
 for _ in range(2):    # smooth top to bottom so a calf bulge never makes a step
     for k in range(1, 8):
         rings[k][3] = [(a + 2 * b + c) / 4 for a, b, c in zip(rings[k - 1][3], rings[k][3], rings[k + 1][3])]
+rings[0][3] = [r_ + ROBE_WAIST_GAP for r_ in body_r[0][3]]
+# the tuck ring on top: inside the torso, so the skirt's top edge never shows
+_zt = zt + ROBE_TUCK[0]
+_band = [p for p in V if abs(p.z - _zt) < 0.03 and abs(p.x) < 0.34]
+_c = Vector((0, rings[0][0].y, _zt)); _ax = Vector((0, 0, -1)); _u = _ax.cross(back)
+rings.insert(0, [_c, back, _u, [max(0.01, r_ - ROBE_TUCK[1]) for r_ in ring_radii(_c, _ax, back, _u, _band, N, 0.0)]])
+
+
+from mathutils.kdtree import KDTree
+_kd = KDTree(len(V))
+for _i, _p in enumerate(V): _kd.insert(_p, _i)
+_kd.balance()
+_gn = {g.index: g.name for g in mesh.vertex_groups}
+
+
+def body_w(co):
+    """The bone weights of the body points nearest co (distance-weighted), so the waist edge moves exactly with the
+    waist when the spine bends."""
+    acc = {}; tot = 0.0
+    for p_, i_, d_ in _kd.find_n(co, 4):
+        w_ = 1.0 / (d_ + 1e-4); tot += w_
+        for g in mesh.data.vertices[i_].groups: acc[_gn[g.group]] = acc.get(_gn[g.group], 0.0) + g.weight * w_
+    return {k: v / tot for k, v in acc.items()}
 
 
 def robe_w(co):
+    b = max(0.0, min(1.0, (co.z - (zt - ROBE_BODY_W)) / ROBE_BODY_W)); b = b * b * (3 - 2 * b)
+    own = robe_w_skirt(co)
+    if b <= 0: return own
+    bw = body_w(co); out = {}
+    for k in set(own) | set(bw): out[k] = own.get(k, 0.0) * (1 - b) + bw.get(k, 0.0) * b
+    return out
+
+
+def robe_w_skirt(co):
     """Robe skinning (checked by tests/qa-poke.mjs). Each side of the skirt follows its own leg firmly (a narrow
     blend in the middle, not a 50/50 split across the whole width), the lower half also bends a little with the knee,
     so a running stride or a lunge carries the cloth with the leg instead of the leg pushing through it."""

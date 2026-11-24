@@ -52,6 +52,8 @@ def head_size(body="male"):
     hv = [o.matrix_world @ v.co for v in o.data.vertices if (o.matrix_world @ v.co).z > nz + 0.03]
     _HEAD[body] = (hb, max(abs(v.x) for v in hv), min(v.y for v in hv), max(v.y for v in hv), max(v.z for v in hv),
                    [v - hb for v in hv])
+    _EYES[body] = find_eyes(body, o, hb)                               # for eye_check (while the body file is open)
+    print("EYES", body, _EYES[body][1], [[round(c, 3) for c in e] for e in _EYES[body][0]])
     return _HEAD[body]
 
 
@@ -65,6 +67,140 @@ def head_fit():
         f = _HEAD["female"]; both += [p / (f[1] / 0.098) for p in f[5]]
     return {"hx": hx, "y0": y0 - hb.y, "y1": y1 - hb.y, "cy": (y0 + y1) / 2 - hb.y, "top": ztop - hb.z, "pts": both,
             "brow": 0.55 * (ztop - hb.z)}   # just above the painted eyebrows (0.5 put the leather cap over the eyes)
+
+
+def head_pivot(H):
+    """The point a head prop's place.turn swings it about: the middle of the man's head (prop space)."""
+    return Vector((0, H["cy"], 0.5 * H["top"]))
+
+
+def place_matrix(pr, pivot):
+    """A head prop's extra seat on the head, in prop space (data/props.json place): turn = degrees it tips back about
+    the side-to-side axis through the head's middle (front edge up, back edge down — a hat pushed back off the
+    eyes), lift = metres up. A rigid move, so the painting still fits (no repaint). Used by the sockets AND the checks."""
+    t = math.radians(pr.get("place", {}).get("turn", 0)); lift = pr.get("place", {}).get("lift", 0)
+    return (Matrix.Translation(Vector((0, 0, lift))) @ Matrix.Translation(pivot) @ Matrix.Rotation(-t, 4, "X")   # +X turn would tip the front DOWN
+            @ Matrix.Translation(-pivot))
+
+
+# ------------------------------------------------------------------ eyes (the eye-clearance check)
+_EYES = {}
+def find_eyes(body, o, hb):
+    """Both eye centres of a body, relative to its Head bone (Blender world axes), on the face's surface.
+    models/<body>_face.json (the face layer's landmarks) wins when present: `eyes` = [[x,y,z], [x,y,z]] in world
+    metres, or {l:[..], r:[..]}. Otherwise the pupils are found on the painted skin's front view
+    (build/<body>_skin_front.png: the darkest spot each side of the face between nose and brow) and dropped onto the
+    face with a ray from the front."""
+    fj = os.path.join(L.TABARD, "models", f"{body}_face.json")
+    if os.path.exists(fj):
+        # the face layer's landmarks (tools/blender/tb_face.py): eyes.l/r = {centre, radius, forward} in the Head bone's
+        # own frame; the check starts from the front of the eyeball (centre + forward x radius)
+        d = json.load(open(fj)); e = d.get("eyes") or {}
+        a = next(x for x in bpy.data.objects if x.type == "ARMATURE"); Mh = a.matrix_world @ a.data.bones["Head"].matrix_local
+        pts = []
+        for side in ("l", "r"):
+            q = e.get(side) or {}
+            if "centre" in q:
+                c = Vector(q["centre"]) + Vector(q.get("forward", (0, 0, 1))) * q.get("radius", 0.0)
+                pts.append(Mh @ c - hb)
+        if len(pts) == 2: return pts, "face.json"
+    import numpy as np
+    meta = json.load(open(os.path.join(BUILD, f"{body}_views.json")))
+    img = bpy.data.images.load(os.path.join(BUILD, f"{body}_skin_front.png"))
+    W, Hh = img.size; a_ = np.array(img.pixels[:], dtype=np.float32).reshape(Hh, W, 4)[::-1]   # row 0 = top
+    lum = a_[..., 0] * 0.3 + a_[..., 1] * 0.59 + a_[..., 2] * 0.11 + (1 - a_[..., 3])           # outside = bright
+    lum = sum(np.roll(np.roll(lum, dy, 0), dx, 1) for dy in (-1, 0, 1) for dx in (-1, 0, 1)) / 9  # 3x3 blur
+    # a pupil is dark with the light eye-white beside it (a brow or lash line is dark beside itself too), and the two
+    # eyes mirror each other: search the pair together (one side alone picked the man's brow, 2026-11-23)
+    sc = lum - 0.4 * (np.roll(lum, 4, 1) + np.roll(lum, -4, 1))
+    ppm = meta["h_px"] / meta["height_m"]
+    bvh = BVHTree.FromObject(o, bpy.context.evaluated_depsgraph_get())
+    best = None
+    for zz in range(int((hb.z + 0.07 - meta["centre_z"]) * ppm), int((hb.z + 0.15 - meta["centre_z"]) * ppm)):
+        for xx in range(int(0.015 * ppm), int(0.06 * ppm)):
+            v = sc[Hh // 2 - zz, W // 2 + xx] + sc[Hh // 2 - zz, W // 2 - xx]
+            if best is None or v < best[0]: best = (v, xx / ppm, meta["centre_z"] + zz / ppm)
+    out = []
+    for sgn in (1, -1):
+        x, z = sgn * best[1], best[2]
+        hit = bvh.ray_cast(Vector((x, -2.0, z)), Vector((0, 1, 0)), 4.0)[0]
+        out.append((hit if hit is not None else Vector((x, hb.y - 0.1, z))) - hb)
+    return out, "skin painting"
+
+
+def eye_check(o, pr):
+    """Can each eye see straight out? Rays from both eye centres of BOTH bodies (each body's head scaled the way its
+    socket scales the prop, then the prop's place.turn/lift undone): straight ahead, 15° to either side, 8° and 15° up.
+    Any ray that meets the prop = that eye is covered from the front at eye level (kettle-helm brim, wizard-hat brim
+    2026-11-23). Closed helms (place.coversFace) report but never fail."""
+    bvh = BVHTree.FromPolygons([v.co.copy() for v in o.data.vertices], [tuple(p.vertices) for p in o.data.polygons])
+    Pinv = place_matrix(pr, head_pivot(head_fit())).inverted(); R = Pinv.to_3x3()
+    # the up rays: the library's idle / walk hold the head 12-18° down (tests: Head bone pitch), so a camera at eye
+    # level sees the face from that far above the head's own forward — 8° and 15° up must be clear too
+    fan = [Vector((0, -1, 0)), Vector((math.sin(0.26), -math.cos(0.26), 0)), Vector((-math.sin(0.26), -math.cos(0.26), 0)),
+           Vector((0, -math.cos(0.14), math.sin(0.14))), Vector((0, -math.cos(0.26), math.sin(0.26)))]
+    res = {}
+    for body in ("male", "female"):
+        k = head_size(body)[1] / 0.098; eyes, src = _EYES[body]
+        blocked = []
+        for e in eyes:
+            q = Pinv @ (e / k + Vector((0, -0.004, 0)))           # 4 mm in front of the painted eye
+            for d in fan:
+                hit = bvh.ray_cast(q, (R @ d).normalized(), 0.6)
+                if hit[0] is not None: blocked.append([round(c, 3) for c in hit[0]])
+        res[body] = {"blocked": len(blocked), "rays": len(eyes) * len(fan), "eyes_from": src,
+                     "eyes": [[round(c, 3) for c in e] for e in eyes], "first_hit": blocked[0] if blocked else None}
+    res["coversFace"] = bool(pr.get("place", {}).get("coversFace"))
+    return res
+
+
+# ------------------------------------------------------------------ torso fit (tabards)
+_TORSO = {}
+def torso_fit(bone):
+    """Both torsos in a prop's frame anchored at `bone`'s head (pelvis: the belt flaps; spine_03: the chest panels):
+    for a grid of (x, z) the front-most and back-most body surface (rays from the front / back), each body scaled by
+    its torso length against the man's (the socket's scale). Returns {"front": {(xi, zi): y}, "back": …, "land": {…}}
+    with x, z in cm steps; the woman's chest and the man's belly both count (worst case)."""
+    if bone in _TORSO: return _TORSO[bone]
+    fr, bk = {}, {}; land = {}; male_len = None
+    for body in ("male", "female"):
+        bpy.ops.wm.open_mainfile(filepath=L.final_blend(body))
+        o = bpy.data.objects["Body"]; a = next(x for x in bpy.data.objects if x.type == "ARMATURE")
+        hw = lambda n: a.matrix_world @ a.data.bones[n].head_local
+        tl = hw("neck_01").z - hw("pelvis").z; male_len = male_len or tl; s = tl / male_len
+        A = hw(bone); bvh = BVHTree.FromObject(o, bpy.context.evaluated_depsgraph_get())
+        if body == "male":
+            land = {"belt": hw("pelvis").z + 0.145 - A.z, "collar": hw("neck_01").z - 0.075 - A.z, "knee": hw("calf_l").z + 0.05 - A.z}
+        for xi in range(-20, 21):
+            for zi in range(-70, 45):
+                p = A + Vector((xi / 100, 0, zi / 100)) * s
+                h1 = bvh.ray_cast(Vector((p.x, A.y - 1.5, p.z)), Vector((0, 1, 0)), 3.0)[0]
+                h2 = bvh.ray_cast(Vector((p.x, A.y + 1.5, p.z)), Vector((0, -1, 0)), 3.0)[0]
+                if h1 is not None: fr[(xi, zi)] = min(fr.get((xi, zi), 9), (h1.y - A.y) / s)
+                if h2 is not None: bk[(xi, zi)] = max(bk.get((xi, zi), -9), (h2.y - A.y) / s)
+    _TORSO[bone] = {"front": fr, "back": bk, "land": land}
+    return _TORSO[bone]
+
+
+def drape(fit, side, x, z_from, z_to, pad):
+    """Cloth hanging from z_from down to z_to over column x: never inside the body, and never back in under a bulge
+    above it (it falls straight down from the chest, like cloth). side: 'front' (y smaller = further out) or 'back'."""
+    g = fit[side]; sg = -1 if side == "front" else 1; xi = round(x * 100)
+    ys = []; cur = None
+    for zi in range(round(z_from * 100), round(z_to * 100) - 1, -1):
+        cands = [g[(xx, zi)] for xx in range(max(-20, xi - 2), min(20, xi + 2) + 1) if (xx, zi) in g]
+        y = (min(cands) if sg < 0 else max(cands)) + sg * pad if cands else None
+        if y is not None: cur = y if cur is None else (min(cur, y) if sg < 0 else max(cur, y))
+        ys.append((zi / 100, cur))
+    return ys
+
+
+def sheet(bm, cols, rows):
+    """Quads over a grid of points rows[r][c] (a flat cloth sheet; inner points so the paint projection has them)."""
+    vs = [[bm.verts.new(p) for p in r] for r in rows]
+    for r in range(len(vs) - 1):
+        for c in range(len(vs[r]) - 1): bm.faces.new((vs[r][c], vs[r + 1][c], vs[r + 1][c + 1], vs[r][c + 1]))
+    return vs
 
 
 HEAD_SHAPES = ("helm_bulwark", "helm_open", "cap", "hood", "circlet", "hat_wizard")
@@ -437,6 +573,59 @@ def build_mesh(pid):
             vs.append(row)
         for r in range(rows):
             for c in range(cols): bm.faces.new((vs[r][c], vs[r + 1][c], vs[r + 1][c + 1], vs[r][c + 1]))
+    elif shape == "tabard_flap":
+        # WoW-style tabard flaps hanging from the belt (anchor "belt" = the pelvis bone): build.parts front / back, each
+        # one flat cloth sheet (straight across, sides bent a little toward the body), hung straight down from the belt
+        # in front of (behind) whatever bulges below it on either body. js/tabard.js swings each one about its top
+        # edge so a lifted thigh or heel never comes through (props.json place.hang.clear).
+        F = torso_fit("pelvis"); top = spec.get("top", F["land"]["belt"]); bot = top - spec.get("length", 0.5)
+        w0, w1 = spec.get("width", [0.115, 0.105]); cols, rows = 6, 10
+        want = {"front": "front" in parts, "back": "back" in parts}
+        for side in ("front", "back"):
+            if not want[side]: continue
+            sg = -1 if side == "front" else 1; out = min if sg < 0 else max
+            cols_prof = [dict(drape(F, side, -w0 + 2 * w0 * c / cols, top, bot, 0.015)) for c in range(cols + 1)]
+            pts = []
+            for r in range(rows + 1):
+                t = r / rows; z = round((top + (bot - top) * t) * 100) / 100
+                ys = [p.get(z) for p in cols_prof if p.get(z) is not None]
+                base = out(ys) + sg * 0.006 * t if ys else (0.15 * sg)
+                w = w0 + (w1 - w0) * t; row = []
+                for c in range(cols + 1):
+                    u = -1 + 2 * c / cols; y = base - sg * 0.022 * u * u
+                    own = cols_prof[c].get(z)
+                    if own is not None: y = out(y, own)
+                    row.append(Vector((w * u, y, top + (bot - top) * t)))
+                pts.append(row)
+            sheet(bm, cols, pts)
+    elif shape == "tabard_top":
+        # the full tabard's upper part (anchor "chest" = spine_03): a front and a back panel from just under the collar
+        # to the belt, falling straight from the chest / shoulder blades like cloth, cinched in to the body at the belt
+        # where the flaps (tabard_flap) carry on
+        F = torso_fit("spine_03"); top = spec.get("top", F["land"]["collar"]); bot = F["land"]["belt"]
+        w0, w1 = spec.get("width", [0.13, 0.12]); cols, rows = 8, 12
+        for side in ("front", "back"):
+            sg = -1 if side == "front" else 1; out = min if sg < 0 else max
+            # cloth spans straight across the chest (it does not dip between the pecs or the bust, first try 2026-11-23):
+            # each row sits at its most outward column, the sides bent back a little, never inside the body
+            pts = []
+            for r in range(rows + 1):
+                t = r / rows; z = round((top + (bot - top) * t) * 100) / 100
+                w = w0 + (w1 - w0) * t; us = [-1 + 2 * c / cols for c in range(cols + 1)]
+                hang = [dict(drape(F, side, w * u, top, bot, 0.018)).get(z) for u in us]
+                raw = [drape(F, side, w * u, z, z, 0.018)[0][1] for u in us]
+                belt = [drape(F, side, w * u, bot, bot, 0.018)[0][1] for u in us]
+                k = max(0.0, min(1.0, (bot + 0.09 - z) / 0.09)); k = k * k * (3 - 2 * k)   # cinch over the last 9 cm
+                hv = [h for h in hang if h is not None]; bv = [h for h in belt if h is not None]
+                base = out(hv) if hv else sg * 0.15
+                if bv: base = base + (out(bv) - base) * k
+                row = []
+                for u, rw in zip(us, raw):
+                    y = base - sg * 0.025 * u * u
+                    if rw is not None: y = out(y, rw)
+                    row.append(Vector((w * u, y, z)))
+                pts.append(row)
+            sheet(bm, cols, pts)
     if shape in HEAD_SHAPES or shape == "shield": bmesh.ops.remove_doubles(bm, verts=list(bm.verts), dist=0.0003)
     me = bpy.data.meshes.new(pid); bm.normal_update(); bm.to_mesh(me); bm.free()
     o = bpy.data.objects.new(pid, me); bpy.context.scene.collection.objects.link(o)
@@ -461,6 +650,12 @@ def unwrap(o):
     # inside painting everywhere and cut its strap notch out as a hole (both capes until 2026-11-23)
     if PROPS[o.name]["place"]["anchor"] == "upper_back" and sum(p.normal.y * p.area for p in me.polygons) < 0:
         me.flip_normals()
+    # tabard sheets: each panel / flap faces away from the body (front ones -Y, back ones +Y), face by face
+    if PROPS[o.name]["place"]["anchor"] in ("belt", "chest"):
+        bm = bmesh.new(); bm.from_mesh(me); bm.normal_update()
+        bad = [f for f in bm.faces if f.normal.y * f.calc_center_median().y < 0]
+        if bad: bmesh.ops.reverse_faces(bm, faces=bad)
+        bm.to_mesh(me); bm.free(); me.update()
 
 
 def views(pid, o):
@@ -496,6 +691,7 @@ def head_poke(o):
     """Head points outside a head prop's shell, per body (the woman's head scaled the way her socket scales the prop):
     a point is through when a short ray toward the head's middle meets the prop and the ray outward does not."""
     bvh = BVHTree.FromPolygons([v.co.copy() for v in o.data.vertices], [tuple(p.vertices) for p in o.data.polygons])
+    Pinv = place_matrix(PROPS[o.name], head_pivot(head_fit())).inverted(); R = Pinv.to_3x3()   # the prop's own seat
     res = {}
     for body in ("male", "female"):
         hb, hx, y0, y1, ztop, pts = head_size(body); k = hx / 0.098; mk = head_size("male")[1] / 0.098
@@ -503,8 +699,8 @@ def head_poke(o):
         through, worst, tight, at = 0, 0.0, 0, None
         for p in pts:
             d = (p - c).normalized()
-            q = p / k                                                  # this body's head point in the prop's frame (socket scale = k)
-            dq = d
+            q = Pinv @ (p / k)                                         # this body's head point in the prop's frame (socket scale = k)
+            dq = (R @ d).normalized()
             out = bvh.ray_cast(q + dq * 1e-4, dq, 0.4)
             inn = bvh.ray_cast(q - dq * 1e-4, -dq, 0.035)
             if inn[0] is not None and out[0] is None:
@@ -515,10 +711,22 @@ def head_poke(o):
     return res
 
 
+def head_checks(pid, o):
+    """Both head checks for a head prop: build/prop_<id>_poke.json (head through it) + build/prop_<id>_eyes.json."""
+    pk = head_poke(o); print("POKE", pid, pk)
+    json.dump(pk, open(os.path.join(BUILD, f"prop_{pid}_poke.json"), "w"))
+    ey = eye_check(o, PROPS[pid])
+    print("EYES", pid, "closed helm" if ey["coversFace"] else "", {b: f'{ey[b]["blocked"]}/{ey[b]["rays"]} rays blocked' for b in ("male", "female")})
+    json.dump(ey, open(os.path.join(BUILD, f"prop_{pid}_eyes.json"), "w"))
+    return pk, ey
+
+
 if cmd == "build":
     pid = args[1]
     if PROPS[pid]["place"]["anchor"] in ("head", "head_back"):
         head_size("female"); head_size("male")                         # measure first: opening a body file wipes the scene
+    if PROPS[pid]["place"]["anchor"] in ("belt", "chest"):
+        torso_fit({"belt": "pelvis", "chest": "spine_03"}[PROPS[pid]["place"]["anchor"]])
     L.reset()
     o = build_mesh(pid)
     bpy.ops.object.select_all(action="DESELECT")
@@ -527,10 +735,22 @@ if cmd == "build":
     unwrap(o)
     print("RES", pid, "tris", sum(len(p.vertices) - 2 for p in o.data.polygons))
     if PROPS[pid]["place"]["anchor"] == "head":
-        pk = head_poke(o); print("POKE", pid, pk)
-        json.dump(pk, open(os.path.join(BUILD, f"prop_{pid}_poke.json"), "w"))
+        head_checks(pid, o)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BUILD, f"prop_{pid}.blend"))
     views(pid, o)
+
+elif cmd == "check":
+    # the head checks again on the props as built (no rebuild, so the paintings stay valid): poke-through of either
+    # head and eye clearance. tb_prop.py -- check [id …] (default: every head prop)
+    ids = args[1:] or [k for k, v in PROPS.items() if v["place"]["anchor"] == "head"]
+    head_size("female"); head_size("male")
+    bad = []
+    for pid in ids:
+        bpy.ops.wm.open_mainfile(filepath=os.path.join(BUILD, f"prop_{pid}.blend"))
+        pk, ey = head_checks(pid, bpy.data.objects[pid])
+        if any(pk[b]["worst_mm"] > 5 for b in ("male", "female")) or (not ey["coversFace"] and any(ey[b]["blocked"] for b in ("male", "female"))):
+            bad.append(pid)
+    print("RES check", "all clear" if not bad else "PROBLEMS: " + ", ".join(bad))
 
 elif cmd == "bake":
     import tb_project as TP
@@ -558,13 +778,22 @@ elif cmd == "bake":
         except Exception: pass
     o.data.materials.clear(); o.data.materials.append(m)
     bpy.ops.object.select_all(action="DESELECT"); o.select_set(True)
+    if PROPS[pid]["place"]["anchor"] == "belt":
+        # tabard flaps: one node per flap ('front', 'back'), so an item can wear only the front one and js/tabard.js
+        # swings each about its own top edge
+        bpy.context.view_layer.objects.active = o
+        bpy.ops.object.mode_set(mode="EDIT"); bpy.ops.mesh.select_all(action="SELECT")
+        bpy.ops.mesh.separate(type="LOOSE"); bpy.ops.object.mode_set(mode="OBJECT")
+        for ob in [x for x in bpy.data.objects if x.type == "MESH"]:
+            cy = sum(v.co.y for v in ob.data.vertices) / len(ob.data.vertices)
+            ob.name = "front" if cy < 0 else "back"; ob.select_set(True)
     bpy.ops.export_scene.gltf(filepath=os.path.join(OUT, f"{pid}.glb"), use_selection=True, export_image_format="WEBP",
                               export_image_quality=85)
     print("RES exported", pid)
 
 elif cmd == "sockets":
     # Where each prop sits on each body at rest, as a matrix in its bone's own space (what three.js parents it to).
-    res = {}
+    res = {}; male_torso = None; pivot = None
     for body in ("male", "female"):
         bpy.ops.wm.open_mainfile(filepath=L.final_blend(body))
         arm = next(x for x in bpy.data.objects if x.type == "ARMATURE"); bodyo = bpy.data.objects["Body"]
@@ -576,6 +805,9 @@ elif cmd == "sockets":
         hv = [bodyo.matrix_world @ v.co for v in bodyo.data.vertices if (bodyo.matrix_world @ v.co).z > nz + 0.03]
         head_scale = max(abs(v.x) for v in hv)                      # compared with the male's below
         res[body] = {"_head_halfwidth": head_scale}
+        if pivot is None:   # the man's head middle in prop space (place.turn swings head props about it; see place_matrix)
+            hbm = hw("Head"); pivot = Vector((0, (min(v.y for v in hv) + max(v.y for v in hv)) / 2 - hbm.y, 0.5 * (max(v.z for v in hv) - hbm.z)))
+        torso = hw("neck_01").z - hw("pelvis").z; male_torso = male_torso or torso   # tabards: scaled by torso length
 
         def M(loc, xcol, ycol, zcol, s=1.0):
             m = Matrix((xcol, ycol, zcol)).transposed().to_4x4()
@@ -610,7 +842,10 @@ elif cmd == "sockets":
                 socks.append(("lowerarm_l", M(fore, (0, 1, 0), (0, 0, -1), (-fa_dir.x, -fa_dir.y, -fa_dir.z))))
             elif a == "head":
                 s = head_scale / 0.098
-                socks.append(("Head", M(hw("Head"), (1, 0, 0), (0, 1, 0), (0, 0, 1), s)))
+                socks.append(("Head", M(hw("Head"), (1, 0, 0), (0, 1, 0), (0, 0, 1), s) @ place_matrix(pr, pivot)))
+            elif a in ("belt", "chest"):   # tabard flaps on the pelvis, the full tabard's panels on the chest
+                bn = "pelvis" if a == "belt" else "spine_03"
+                socks.append((bn, M(hw(bn), (1, 0, 0), (0, 1, 0), (0, 0, 1), torso / male_torso)))
             elif a == "shoulder":
                 for sd, sg in (("_l", 1), ("_r", -1)):
                     loc = hw("upperarm" + sd) + Vector((0.0, 0.0, 0.035))
@@ -638,6 +873,12 @@ elif cmd == "sockets":
             z = (Vector((0, -1, 0)) * math.cos(t40) + (-hd) * math.sin(t40)).normalized()
             y = (Vector((0, 0, 1)) - z * z.z).normalized(); x = y.cross(z)
             grips["palm_" + side] = [{"bone": f"hand_{side}", "matrix": [round(v_, 5) for v_ in mlist(bone_space(f"hand_{side}", M(pp, tuple(x), tuple(y), tuple(z), k)))]}]
+            if side == "r":
+                # pole_r: staffs, spears and two-handers — the shaft straight through the fist at a right angle to the
+                # forearm (tilt 0). At 18° (or the old staff's 65°) a long shaft lay along the upper arm (owner
+                # 2026-11-23). js/tabard.js bends the elbow forward while such a weapon is held, so it stands up.
+                z = Vector((0, -1, 0)); y = (Vector((0, 0, 1)) - z * z.z).normalized(); x = y.cross(z)
+                grips["pole_r"] = [{"bone": "hand_r", "matrix": [round(v_, 5) for v_ in mlist(bone_space("hand_r", M(pp, tuple(x), tuple(y), tuple(z), k)))]}]
         la, ha = hw("lowerarm_l"), hw("hand_l"); fd = (ha - la).normalized()
         fo = la.lerp(ha, 0.5) + Vector((0, 0, 0.065 * k))
         grips["forearm_l"] = [{"bone": "lowerarm_l", "matrix": [round(v_, 5) for v_ in mlist(bone_space("lowerarm_l", M(fo, (0, 1, 0), (0, 0, -1), tuple(-fd), k)))]}]

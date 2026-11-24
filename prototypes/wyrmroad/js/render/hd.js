@@ -143,7 +143,7 @@ async function buildFal(kit, spec, { hull = null } = {}) {
 
 // ------------------------------------------------------------------------------------------------ Tabard people
 async function buildTabard(kit, spec, { hull = null } = {}) {
-  const t = await createTabard({ body: spec.body, items: spec.items, clip: 'idle', calm: 0.35 });
+  const t = await createTabard({ body: spec.body, items: spec.items, clip: 'idle', calm: 0.35, look: spec.look || null });
   const m0 = measure('tabard:' + spec.body, t.group);
   const obj = new THREE.Group(); obj.name = 'hd:tabard-' + spec.body; obj.add(t.group);
   t.group.position.y = -m0.minY;
@@ -158,7 +158,9 @@ async function buildTabard(kit, spec, { hull = null } = {}) {
     update: dt => t.update(dt),
   }, kit.H.map.strike);
   return {
-    obj, kind: 'tabard', h: m0.h, mats, tabard: t, hd: true,
+    obj, kind: 'tabard', h: m0.h, mats, tabard: t, hd: true, baseKey: spec.baseKey,
+    /** Restyle face + hair in place (same body and gear). New layer materials are made fade-able like the rest. */
+    async setLook(look) { await t.setLook(look); for (const m of prepMats(obj)) if (!mats.includes(m)) mats.push(m); },
     get anim() { return d.anim; }, play: d.play, loop: d.loop, update: d.update,
     dispose() { for (const m of mats) m.dispose(); t.dispose(); },
   };

@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { createScene } from '../../js/scene.js';
 import { createFalCharacter, loadCatalog, glb, CLIPS } from './fal.js';
+import { createSceneryTab } from './scenery-page.js';
 
 const state = window.__fal = { ready: false, errors: [], character: null, enemies: null, stats: () => state.character?.stats() };
 window.addEventListener('error', e => state.errors.push(String(e.message || e)));
@@ -137,7 +138,7 @@ async function showMakers(spend) {
 // real sizes (models are made 1 m tall; catalog `height` is the real size in metres)
 const enemies = state.enemies = [];          // characters on the stage now
 const loaded = new Map();                    // id -> Promise<character>, made once
-const GROUPS = [['all', 'All'], ['wyrmroad', 'Road foes'], ['boss', 'Bosses'], ['elemental', 'Elementals'], ['extra', 'Extras'], ['beast', 'Beasts'], ['goblin', 'Goblins']];
+const GROUPS = [['all', 'All'], ['wyrmroad', 'Road foes'], ['oathwild', 'Oathwild'], ['boss', 'Bosses'], ['elemental', 'Elementals'], ['extra', 'Extras'], ['beast', 'Beasts'], ['goblin', 'Goblins']];
 const ROLE = { brawler: 'Brawler', rogue: 'Rogue', soldier: 'Soldier', archer: 'Archer', caster: 'Caster', undead: 'Undead', beast: 'Beast', construct: 'Construct', elemental: 'Elemental', boss: 'Boss' };
 const epick = { group: q.get('group') || 'all', id: q.get('enemy') || null, lineup: q.get('lineup') === '1', clip: q.get('eclip') || 'idle' };
 const ORDER = GROUPS.map(g => g[0]);
@@ -255,13 +256,18 @@ function renderCosts(spend) {
   const f = t.createTFoot().insertRow(); f.insertCell().textContent = 'Total'; f.insertCell(); f.insertCell().textContent = money(spend.total);
 }
 
+let scenery = null;
 async function setTab(t, spend) {
+  if (tab === 'scenery' && t !== 'scenery') scenery?.leave();
   tab = t;
   for (const b of document.querySelectorAll('.fl-tabs button')) b.setAttribute('aria-selected', String(b.dataset.tab === t));
   for (const p of document.querySelectorAll('.fl-pane')) p.classList.toggle('on', p.dataset.pane === t);
   makersGroup.visible = t === 'makers'; enemyGroup.visible = t === 'enemies';
-  if (char) char.group.visible = t !== 'makers' && t !== 'enemies';
-  if (t === 'makers') await showMakers(spend);
+  if (char) char.group.visible = t !== 'makers' && t !== 'enemies' && t !== 'scenery';
+  if (t === 'scenery') {
+    scenery ||= state.scenery = createSceneryTab({ view, cat, $, chip, loading, q, money, num });
+    await scenery.enter();
+  } else if (t === 'makers') await showMakers(spend);
   else if (t === 'enemies') await showEnemies();
   else if (char) { const h = char.def.id === 'goblin' ? 1.05 : 1.8; view.controls.target.set(0, h * 0.52, 0); view.camera.position.set(0, h * 0.72, h * 2.1); view.controls.update(); }
 }
